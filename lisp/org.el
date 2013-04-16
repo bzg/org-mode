@@ -7032,7 +7032,7 @@ Otherwise make it visible."
 	     "^[ \t]*:END:"
 	     (save-excursion (outline-next-heading) (point)) t)
 	    (outline-flag-region b (point-at-eol) flag)
-	  (error ":END: line missing at position %s" b))))))
+	  (user-error ":END: line missing at position %s" b))))))
 
 (defun org-subtree-end-visible-p ()
   "Is the end of the current subtree visible?"
@@ -7164,7 +7164,7 @@ Optional arguments START and END can be used to limit the range."
                          'org-hide-block)
                  (delete-overlay ov))))
             (push ov org-hide-block-overlays)))
-      (error "Not looking at a source block"))))
+      (user-error "Not looking at a source block"))))
 
 ;; org-tab-after-check-for-cycling-hook
 (add-hook 'org-tab-first-hook 'org-hide-block-toggle-maybe)
@@ -7357,7 +7357,7 @@ or nil."
 	(setq org-goto-selected-point (point)
 	      org-goto-exit-command 'left)
 	(throw 'exit nil))
-    (error "Not on a heading")))
+    (user-error "Not on a heading")))
 
 (defun org-goto-right ()
   "Finish `org-goto' by going to the new location."
@@ -7367,7 +7367,7 @@ or nil."
 	(setq org-goto-selected-point (point)
 	      org-goto-exit-command 'right)
 	(throw 'exit nil))
-    (error "Not on a heading")))
+    (user-error "Not on a heading")))
 
 (defun org-goto-quit ()
   "Finish `org-goto' without cursor motion."
@@ -7904,7 +7904,7 @@ in the region."
 		org-allow-promoting-top-level-subtree)
 	   (replace-match "# " nil t))
 	  ((= level 1)
-	   (error "Cannot promote to level 0.  UNDO to recover if necessary"))
+	   (user-error "Cannot promote to level 0.  UNDO to recover if necessary"))
 	  (t (replace-match up-head nil t)))
     ;; Fixup tag positioning
     (unless (= level 1)
@@ -8221,7 +8221,7 @@ the inserted text when done."
   (interactive "P")
   (setq tree (or tree (and kill-ring (current-kill 0))))
   (unless (org-kill-is-subtree-p tree)
-    (error "%s"
+    (user-error "%s"
 	   (substitute-command-keys
 	    "The kill is not a (set of) tree(s) - please use \\[yank] to yank anyway")))
   (org-with-limited-levels
@@ -8382,7 +8382,7 @@ If yes, remember the marker and the distance to BEG."
 					"^[ \t]*#\\+end_.*")))
     (if blockp
 	(narrow-to-region (car blockp) (cdr blockp))
-      (error "Not in a block"))))
+      (user-error "Not in a block"))))
 
 (eval-when-compile
   (defvar org-property-drawer-re))
@@ -8610,7 +8610,7 @@ links."
       (show-all)))
 
     (setq beg (point))
-    (if (>= beg end) (error "Nothing to sort"))
+    (if (>= beg end) (user-error "Nothing to sort"))
 
     (looking-at "\\(\\*+\\)")
     (setq stars (match-string 1)
@@ -8619,7 +8619,7 @@ links."
 	  txt (buffer-substring beg end))
     (if (not (equal (substring txt -1) "\n")) (setq txt (concat txt "\n")))
     (if (and (not (equal stars "*")) (string-match re2 txt))
-	(error "Region to sort contains a level above the first entry"))
+	(user-error "Region to sort contains a level above the first entry"))
 
     (unless sorting-type
       (message
@@ -9932,7 +9932,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 		   'tmphist
 		   (caar org-stored-links)))
 	    (if (not (string-match "\\S-" link))
-		(error "No link selected"))
+		(user-error "No link selected"))
 	    (mapc (lambda(l)
 		    (when (equal link (cadr l)) (setq link (car l) auto-desc t)))
 		  org-stored-links)
@@ -10547,7 +10547,7 @@ there is one, return it."
 	      (setq nth (- c ?0))
 	      (if have-zero (setq nth (1+ nth)))
 	      (unless (and (integerp nth) (>= (length links) nth))
-		(error "Invalid link selection"))
+		(user-error "Invalid link selection"))
 	      (setq link (nth (1- nth) links)))))
 	  (cons link end))))))
 
@@ -10989,7 +10989,7 @@ If the file does not exist, an error is thrown."
     (if (and (not (eq cmd 'emacs)) ; Emacs has no problems with non-ex files
 	     (not (file-exists-p file))
 	     (not org-open-non-existing-files))
-	(error "No such file: %s" file))
+	(user-error "No such file: %s" file))
     (cond
      ((and (stringp cmd) (not (string-match "^\\s-*$" cmd)))
       ;; Remove quotes around the file name - we'll use shell-quote-argument.
@@ -11451,7 +11451,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 		     (buffer-substring region-start region-end))
 		    (prog1 org-refile-active-region-within-subtree
 		      (org-toggle-heading)))
-	  (error "The region is not a (sequence of) subtree(s)")))
+	  (user-error "The region is not a (sequence of) subtree(s)")))
       (if (equal goto '(16))
 	  (org-refile-goto-last-stored)
 	(when (or
@@ -11585,7 +11585,7 @@ this is used for the GOTO interface."
     (setq org-refile-target-table
 	  (org-refile-get-targets default-buffer excluded-entries)))
   (unless org-refile-target-table
-    (error "No refile targets"))
+    (user-error "No refile targets"))
   (let* ((cbuf (current-buffer))
 	 (partial-completion-mode nil)
 	 (cfn (buffer-file-name (buffer-base-buffer cbuf)))
@@ -11643,7 +11643,7 @@ this is used for the GOTO interface."
 				(y-or-n-p (format "Create new node \"%s\"? "
 						  child)))))
 	      (org-refile-new-child parent-target child)))
-	(error "Invalid target location")))))
+	(user-error "Invalid target location")))))
 
 (declare-function org-string-nw-p "org-macs" (s))
 (defun org-refile-check-position (refile-pointer)
@@ -11653,7 +11653,7 @@ this is used for the GOTO interface."
 	 (pos (nth 3 refile-pointer))
 	 buffer)
     (if (and (not (markerp pos)) (not file))
-	(error "Please save the buffer to a file before refiling")
+	(user-error "Please save the buffer to a file before refiling")
       (when (org-string-nw-p re)
 	(setq buffer (if (markerp pos)
 			 (marker-buffer pos)
@@ -11666,7 +11666,7 @@ this is used for the GOTO interface."
 	      (goto-char pos)
 	      (beginning-of-line 1)
 	      (unless (org-looking-at-p re)
-		(error "Invalid refile position, please clear the cache with `C-0 C-c C-w' before refiling")))))))))
+		(user-error "Invalid refile position, please clear the cache with `C-0 C-c C-w' before refiling")))))))))
 
 (defun org-refile-new-child (parent-target child)
   "Use refile target PARENT-TARGET to add new CHILD below it."
@@ -11767,7 +11767,7 @@ PLIST must contain a :name entry which is used as name of the block."
 This empties the block, puts the cursor at the insert position and returns
 the property list including an extra property :name with the block name."
   (unless (looking-at org-dblock-start-re)
-    (error "Not at a dynamic block"))
+    (user-error "Not at a dynamic block"))
   (let* ((begdel (1+ (match-end 0)))
 	 (name (org-no-properties (match-string 1)))
 	 (params (append (list :name name)
@@ -12158,7 +12158,7 @@ For calling through lisp, arg is also interpreted in the following way:
 				      (car org-todo-heads))))
 			       ((car (member arg org-todo-keywords-1)))
 			       ((stringp arg)
-				(error "State `%s' not valid in this file" arg))
+				(user-error "State `%s' not valid in this file" arg))
 			       ((nth (1- (prefix-numeric-value arg))
 				     org-todo-keywords-1))))
 			     ((null member) (or head (car org-todo-keywords-1)))
@@ -12776,7 +12776,7 @@ This function is run automatically after each state change to a DONE state."
 		what (match-string 3 ts))
 	  (if (equal what "w") (setq n (* n 7) what "d"))
 	  (if (and (equal what "h") (not (string-match "[0-9]\\{1,2\\}:[0-9]\\{2\\}" ts)))
-	      (error "Cannot repeat in Repeat in %d hour(s) because no hour has been set" n))
+	      (user-error "Cannot repeat in Repeat in %d hour(s) because no hour has been set" n))
 	  ;; Preparation, see if we need to modify the start date for the change
 	  (when (match-end 1)
 	    (setq time (save-match-data (org-time-string-to-time ts)))
@@ -12828,7 +12828,7 @@ of `org-todo-keywords-1'."
 	       ((<= (prefix-numeric-value arg) (length org-todo-keywords-1))
 		(regexp-quote (nth (1- (prefix-numeric-value arg))
 				   org-todo-keywords-1)))
-	       (t (error "Invalid prefix argument: %s" arg)))))
+	       (t (user-error "Invalid prefix argument: %s" arg)))))
     (message "%d TODO entries found"
 	     (org-occur (concat "^" org-outline-regexp " *" kwd-re )))))
 
@@ -13403,7 +13403,7 @@ D      Show deadlines and scheduled items between a date range."
       (org-match-sparse-tree arg (concat kwd "=" value)))
      ((member ans '(?r ?R ?/))
       (call-interactively 'org-occur))
-     (t (error "No such sparse tree command \"%c\"" ans)))))
+     (t (user-error "No such sparse tree command \"%c\"" ans)))))
 
 (defvar org-occur-highlights nil
   "List of overlays used for occur matches.")
@@ -13432,7 +13432,7 @@ If CALLBACK is non-nil, it is a function which is called to confirm
 that the match should indeed be shown."
   (interactive "sRegexp: \nP")
   (when (equal regexp "")
-    (error "Regexp cannot be empty"))
+    (user-error "Regexp cannot be empty"))
   (unless keep-previous
     (org-remove-occur-highlights nil nil t))
   (push (cons regexp callback) org-occur-parameters)
@@ -13589,7 +13589,7 @@ ACTION can be `set', `up', `down', or a character."
   (if (equal action '(4))
       (org-show-priority)
   (unless org-enable-priority-commands
-    (error "Priority commands are disabled"))
+    (user-error "Priority commands are disabled"))
   (setq action (or action 'set))
   (let (current new news have remove)
     (save-excursion
@@ -13613,7 +13613,7 @@ ACTION can be `set', `up', `down', or a character."
 	    (setq new (upcase new)))
 	(cond ((equal new ?\ ) (setq remove t))
 	      ((or (< (upcase new) org-highest-priority) (> (upcase new) org-lowest-priority))
-	       (error "Priority must be between `%c' and `%c'"
+	       (user-error "Priority must be between `%c' and `%c'"
 		      org-highest-priority org-lowest-priority))))
        ((eq action 'up)
 	(setq new (if have
@@ -13635,7 +13635,7 @@ ACTION can be `set', `up', `down', or a character."
 		      (if org-priority-start-cycle-with-default
 			  org-default-priority
 			(1+ org-default-priority))))))
-       (t (error "Invalid action")))
+       (t (user-error "Invalid action")))
       (if (or (< (upcase new) org-highest-priority)
 	      (> (upcase new) org-lowest-priority))
 	  (if (and (memq action '(up down))
@@ -13652,7 +13652,7 @@ ACTION can be `set', `up', `down', or a character."
 	      (replace-match "" t t nil 1)
 	    (replace-match news t t nil 2))
 	(if remove
-	    (error "No priority cookie found in line")
+	    (user-error "No priority cookie found in line")
 	  (let ((case-fold-search nil))
 	    (looking-at org-todo-line-regexp))
 	  (if (match-end 2)
@@ -13846,7 +13846,7 @@ headlines matching this string."
 	      (save-excursion
 		(setq rtn1 (funcall action))
 		(push rtn1 rtn)))
-	     (t (error "Invalid action")))
+	     (t (user-error "Invalid action")))
 
 	    ;; if we are to skip sublevels, jump to end of subtree
 	    (unless org-tags-match-list-sublevels
@@ -14759,7 +14759,7 @@ Returns the new tags string, or nil to not change the current settings."
 (defun org-get-tags-string ()
   "Get the TAGS string in the current headline."
   (unless (org-at-heading-p t)
-    (error "Not on a heading"))
+    (user-error "Not on a heading"))
   (save-excursion
     (beginning-of-line 1)
     (if (looking-at (org-re ".*[ \t]\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"))
@@ -14988,7 +14988,7 @@ value for the property."
       (call-interactively 'org-delete-property-globally))
      ((equal c ?c)
       (call-interactively 'org-compute-property-at-point))
-     (t (error "No such property action %c" c)))))
+     (t (user-error "No such property action %c" c)))))
 
 (defun org-inc-effort ()
   "Increment the value of the effort property in the current entry."
@@ -15019,7 +15019,7 @@ When INCREMENT is non-nil, set the property to the next allowed value."
 		    (car (org-last allowed))))
 	       ((and allowed increment)
 		(or (caadr (member (list cur) allowed))
-		    (error "Allowed effort values are not set")))
+		    (user-error "Allowed effort values are not set")))
 	       (allowed
 		(message "Select 1-9,0, [RET%s]: %s"
 			 (if cur (concat "=" cur) "")
@@ -15385,7 +15385,7 @@ and the new value.")
        ((equal property "TODO")
 	(when (and (stringp value) (string-match "\\S-" value)
 		   (not (member value org-todo-keywords-1)))
-	  (error "\"%s\" is not a valid TODO state" value))
+	  (user-error "\"%s\" is not a valid TODO state" value))
 	(if (or (not value)
 		(not (string-match "\\S-" value)))
 	    (setq value 'none))
@@ -15583,7 +15583,7 @@ Point is left between drawer's boundaries."
 	      (beginning-of-line)
 	      (when (save-excursion
 		      (re-search-forward org-outline-regexp-bol rend t))
-		(error "Drawers cannot contain headlines"))
+		(user-error "Drawers cannot contain headlines"))
 	      ;; Position point at the beginning of the first
 	      ;; non-blank line in region.  Insert drawer's opening
 	      ;; there, then indent it.
@@ -15744,11 +15744,11 @@ This looks for an enclosing column format, extracts the operator and
 then applies it to the property in the column format's scope."
   (interactive)
   (unless (org-at-property-p)
-    (error "Not at a property"))
+    (user-error "Not at a property"))
   (let ((prop (org-match-string-no-properties 2)))
     (org-columns-get-format-and-top-level)
     (unless (nth 3 (assoc prop org-columns-current-fmt-compiled))
-      (error "No operator defined for property %s" prop))
+      (user-error "No operator defined for property %s" prop))
     (org-columns-compute prop)))
 
 (defvar org-property-allowed-value-functions nil
@@ -15801,7 +15801,7 @@ completion."
   "Switch to the next allowed value for this property."
   (interactive)
   (unless (org-at-property-p)
-    (error "Not at a property"))
+    (user-error "Not at a property"))
   (let* ((prop (car (save-match-data (org-split-string (match-string 1) ":"))))
 	 (key (match-string 2))
 	 (value (match-string 3))
@@ -15811,13 +15811,13 @@ completion."
 	 (heading (save-match-data (nth 4 (org-heading-components))))
 	 nval)
     (unless allowed
-      (error "Allowed values for this property have not been defined"))
+      (user-error "Allowed values for this property have not been defined"))
     (if previous (setq allowed (reverse allowed)))
     (if (member value allowed)
 	(setq nval (car (cdr (member value allowed)))))
     (setq nval (or nval (car allowed)))
     (if (equal nval value)
-	(error "Only one allowed value for this property"))
+	(user-error "Only one allowed value for this property"))
     (org-at-property-p)
     (replace-match (concat " :" key ": " nval) t t)
     (org-indent-line)
@@ -16842,7 +16842,7 @@ days in order to avoid rounding problems."
        (goto-char (point-at-bol))
        (re-search-forward org-tr-regexp-both (point-at-eol) t))
      (if (not (org-at-date-range-p t))
-	 (error "Not at a time-stamp range, and none found in current line")))
+	 (user-error "Not at a time-stamp range, and none found in current line")))
    (let* ((ts1 (match-string 1))
 	  (ts2 (match-string 2))
 	  (havetime (or (> (length ts1) 15) (> (length ts2) 15)))
@@ -17046,7 +17046,7 @@ When SHOW-ALL is nil, only return the current occurrence of a time stamp."
       (if (string-match "\\(\\+[0-9]+\\)\\([hdwmy]\\)" change)
 	  (setq dn (string-to-number (match-string 1 change))
 		dw (cdr (assoc (match-string 2 change) a1)))
-	(error "Invalid change specifier: %s" change))
+	(user-error "Invalid change specifier: %s" change))
       (if (eq dw 'week) (setq dw 'day dn (* 7 dn)))
       (cond
        ((eq dw 'hour)
@@ -17228,7 +17228,7 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like \"--2d\"."
 	extra rem
 	ts time time0 fixnext clrgx)
     (if (not (org-at-timestamp-p t))
-	(error "Not at a timestamp"))
+	(user-error "Not at a timestamp"))
     (if (and (not what) (eq org-ts-what 'bracket))
 	(org-toggle-timestamp-type)
       ;; Point isn't on brackets.  Remember the part of the time-stamp
@@ -17646,7 +17646,7 @@ changes from another.  I believe the procedure must be like this:
 3. M-x org-revert-all-org-buffers"
   (interactive)
   (unless (yes-or-no-p "Revert all Org buffers from their files? ")
-    (error "Abort"))
+    (user-error "Abort"))
   (save-excursion
     (save-window-excursion
       (mapc
@@ -17836,7 +17836,7 @@ If the current buffer does not, find the first agenda file."
 	 (files (append fs (list (car fs))))
 	 (tcf (if buffer-file-name (file-truename buffer-file-name)))
 	 file)
-    (unless files (error "No agenda files"))
+    (unless files (user-error "No agenda files"))
     (catch 'exit
       (while (setq file (pop files))
 	(if (equal (file-truename file) tcf)
@@ -17858,7 +17858,7 @@ end of the list."
 			    (org-agenda-files t)))
 	(ctf (file-truename
 	      (or buffer-file-name
-		  (error "Please save the current buffer to a file"))))
+		  (user-error "Please save the current buffer to a file"))))
 	x had)
     (setq x (assoc ctf file-alist) had x)
 
@@ -17878,7 +17878,7 @@ Optional argument FILE means use this file instead of the current."
   (interactive)
   (let* ((org-agenda-skip-unavailable-files nil)
 	 (file (or file buffer-file-name
-		   (error "Current buffer does not visit a file")))
+		   (user-error "Current buffer does not visit a file")))
 	 (true-file (file-truename file))
 	 (afile (abbreviate-file-name file))
 	 (files (delq nil (mapcar
@@ -18166,7 +18166,7 @@ display all fragments in the buffer.
 The images can be removed again with \\[org-ctrl-c-ctrl-c]."
   (interactive "P")
   (unless buffer-file-name
-    (error "Can't preview LaTeX fragment in a non-file buffer"))
+    (user-error "Can't preview LaTeX fragment in a non-file buffer"))
   (org-remove-latex-fragment-image-overlays)
   (save-excursion
     (save-restriction
@@ -18305,7 +18305,7 @@ Some of the options can be changed using the variable
 	     ((eq processing-type 'mathml)
 	      ;; Process to MathML
 	      (unless (save-match-data (org-format-latex-mathml-available-p))
-		(error "LaTeX to MathML converter not configured"))
+		(user-error "LaTeX to MathML converter not configured"))
 	      (setq txt (match-string n)
 		    beg (match-beginning n) end (match-end n)
 		    cnt (1+ cnt))
@@ -18315,7 +18315,7 @@ Some of the options can be changed using the variable
 	      (insert (org-format-latex-as-mathml
 		       txt block-type prefix dir)))
 	     (t
-	      (error "Unknown conversion type %s for latex fragments"
+	      (error "Unknown conversion type %s for LaTeX fragments"
 		     processing-type)))))))))
 
 (defun org-create-math-formula (latex-frag &optional mathml-file)
@@ -18331,7 +18331,7 @@ inspection."
 				   (buffer-substring-no-properties
 				    (region-beginning) (region-end)))))
 		       (read-string "LaTeX Fragment: " frag nil frag))))
-  (unless latex-frag (error "Invalid latex-frag"))
+  (unless latex-frag (error "Invalid LaTeX fragment"))
   (let* ((tmp-in-file (file-relative-name
 		       (make-temp-name (expand-file-name "ltxmathml-in"))))
 	 (ignore (write-region latex-frag nil tmp-in-file))
@@ -18346,7 +18346,7 @@ inspection."
 	 mathml shell-command-output)
     (when (org-called-interactively-p 'any)
       (unless (org-format-latex-mathml-available-p)
-	(error "LaTeX to MathML converter not configured")))
+	(user-error "LaTeX to MathML converter not configured")))
     (message "Running %s" cmd)
     (setq shell-command-output (shell-command-to-string cmd))
     (setq mathml
@@ -18427,7 +18427,7 @@ share a good deal of logic."
        "convert" "you need to install imagemagick")
       #'org-create-formula-image-with-imagemagick)
      (t (error
-         "invalid value of `org-latex-create-formula-image-program'")))
+         "Invalid value of `org-latex-create-formula-image-program'")))
    string tofile options buffer))
 
 (declare-function org-export--get-global-options "ox" (&optional backend))
@@ -19131,7 +19131,7 @@ BEG and END default to the buffer boundaries."
   "Show the available speed commands."
   (interactive)
   (if (not org-use-speed-commands)
-      (error "Speed commands are not activated, customize `org-use-speed-commands'")
+      (user-error "Speed commands are not activated, customize `org-use-speed-commands'")
     (with-output-to-temp-buffer "*Help*"
       (princ "User-defined Speed commands\n===========================\n")
       (mapc 'org-print-speed-command org-speed-commands-user)
@@ -19279,7 +19279,7 @@ The detailed reaction depends on the user option `org-catch-invisible-edits'."
 	(when (or (memq invisible-at-point '(outline org-hide-block t))
 		  (memq invisible-before-point '(outline org-hide-block t)))
 	  (if (eq org-catch-invisible-edits 'error)
-	      (error "Editing in invisible areas is prohibited - make visible first"))
+	      (user-error "Editing in invisible areas is prohibited, make them visible first"))
 	  (if (and org-custom-properties-overlays
 		   (y-or-n-p "Display invisible properties in this buffer? "))
 	      (org-toggle-custom-properties-visibility)
@@ -19300,7 +19300,7 @@ The detailed reaction depends on the user option `org-catch-invisible-edits'."
 	      (message "Unfolding invisible region around point before editing"))
 	     (t
 	      ;; Don't do the edit, make the user repeat it in full visibility
-	      (error "Edit in invisible region aborted, repeat to confirm with text visible"))))))))
+	      (user-error "Edit in invisible region aborted, repeat to confirm with text visible"))))))))
 
 (defun org-fix-tags-on-the-fly ()
   (when (and (equal (char-after (point-at-bol)) ?*)
@@ -19527,13 +19527,13 @@ See `org-ctrl-c-ctrl-c-hook' for more information.")
 
 (defun org-modifier-cursor-error ()
   "Throw an error, a modified cursor command was applied in wrong context."
-  (error "This command is active in special context like tables, headlines or items"))
+  (user-error "This command is active in special context like tables, headlines or items"))
 
 (defun org-shiftselect-error ()
   "Throw an error because Shift-Cursor command was applied in wrong context."
   (if (and (boundp 'shift-select-mode) shift-select-mode)
-      (error "To use shift-selection with Org-mode, customize `org-support-shift-select'")
-    (error "This command works only in special context like headlines or timestamps")))
+      (user-error "To use shift-selection with Org-mode, customize `org-support-shift-select'")
+    (user-error "This command works only in special context like headlines or timestamps")))
 
 (defun org-call-for-shift-select (cmd)
   (let ((this-command-keys-shift-translated t))
@@ -19618,7 +19618,7 @@ See the individual commands for more information."
    (t (call-interactively 'org-drag-line-forward))))
 
 (defsubst org-hidden-tree-error ()
-  (error
+  (user-error
    "Hidden subtree, open with TAB or use subtree command M-S-<left>/<right>"))
 
 (defun org-metaleft (&optional arg)
@@ -21814,7 +21814,7 @@ hierarchy of headlines by UP levels before marking the subtree."
   (interactive "P")
   (org-with-limited-levels
    (cond ((org-at-heading-p) (beginning-of-line))
-	 ((org-before-first-heading-p) (error "Not in a subtree"))
+	 ((org-before-first-heading-p) (user-error "Not in a subtree"))
 	 (t (outline-previous-visible-heading 1))))
   (when up (while (and (> up 0) (org-up-heading-safe)) (decf up)))
   (if (org-called-interactively-p 'any)
@@ -22641,7 +22641,7 @@ depending on context."
 	     org-ctrl-k-protect-subtree)
 	(if (or (eq org-ctrl-k-protect-subtree 'error)
 		(not (y-or-n-p "Kill hidden subtree along with headline? ")))
-	    (error "C-k aborted - would kill hidden subtree")))
+	    (user-error "C-k aborted as it would kill a hidden subtree")))
     (call-interactively
      (if (org-bound-and-true-p visual-line-mode) 'kill-visual-line 'kill-line)))
    ((looking-at (org-re ".*?\\S-\\([ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)[ \t]*$"))
@@ -22860,7 +22860,7 @@ make a significant difference in outlines with very many siblings."
   (let ((re org-outline-regexp-bol)
 	level l)
     (unless (org-at-heading-p t)
-      (error "Not at a heading"))
+      (user-error "Not at a heading"))
     (setq level (funcall outline-level))
     (save-excursion
       (if (not (re-search-backward re nil t))
@@ -23130,12 +23130,12 @@ Move to the previous element at the same level, when possible."
   "Move to upper element."
   (interactive)
   (if (org-with-limited-levels (org-at-heading-p))
-      (unless (org-up-heading-safe) (error "No surrounding element"))
+      (unless (org-up-heading-safe) (user-error "No surrounding element"))
     (let* ((elem (org-element-at-point))
 	   (parent (org-element-property :parent elem)))
       (if parent (goto-char (org-element-property :begin parent))
 	(if (org-with-limited-levels (org-before-first-heading-p))
-	    (error "No surrounding element")
+	    (user-error "No surrounding element")
 	  (org-with-limited-levels (org-back-to-heading)))))))
 
 (defvar org-element-greater-elements)
@@ -23151,8 +23151,8 @@ Move to the previous element at the same level, when possible."
       ;; If contents are hidden, first disclose them.
       (when (org-element-property :hiddenp element) (org-cycle))
       (goto-char (or (org-element-property :contents-begin element)
-		     (error "No content for this element"))))
-     (t (error "No inner element")))))
+		     (user-error "No content for this element"))))
+     (t (user-error "No inner element")))))
 
 (defun org-drag-element-backward ()
   "Move backward element at point."
@@ -23164,7 +23164,7 @@ Move to the previous element at the same level, when possible."
       ;; Error out if no previous element or previous element is
       ;; a parent of the current one.
       (if (or (not prev-elem) (org-element-nested-p elem prev-elem))
-	  (error "Cannot drag element backward")
+	  (user-error "Cannot drag element backward")
 	(let ((pos (point)))
 	  (org-element-swap-A-B prev-elem elem)
 	  (goto-char (+ (org-element-property :begin prev-elem)
@@ -23176,14 +23176,14 @@ Move to the previous element at the same level, when possible."
   (let* ((pos (point))
 	 (elem (org-element-at-point)))
     (when (= (point-max) (org-element-property :end elem))
-      (error "Cannot drag element forward"))
+      (user-error "Cannot drag element forward"))
     (goto-char (org-element-property :end elem))
     (let ((next-elem (org-element-at-point)))
       (when (or (org-element-nested-p elem next-elem)
 		(and (eq (org-element-type next-elem) 'headline)
 		     (not (eq (org-element-type elem) 'headline))))
 	(goto-char pos)
-	(error "Cannot drag element forward"))
+	(user-error "Cannot drag element forward"))
       ;; Compute new position of point: it's shifted by NEXT-ELEM
       ;; body's length (without final blanks) and by the length of
       ;; blanks between ELEM and NEXT-ELEM.
@@ -23276,7 +23276,7 @@ Relative indentation (between items, inside blocks, etc.) isn't
 modified."
   (interactive)
   (unless (eq major-mode 'org-mode)
-    (error "Cannot un-indent a buffer not in Org mode"))
+    (user-error "Cannot un-indent a buffer not in Org mode"))
   (let* ((parse-tree (org-element-parse-buffer 'greater-element))
 	 unindent-tree			; For byte-compiler.
 	 (unindent-tree
@@ -23464,9 +23464,9 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 			    (let ((default-directory dir))
 			      (expand-file-name txt)))
 	(unless (derived-mode-p 'org-mode)
-	  (error "Cannot restrict to non-Org-mode file"))
+	  (user-error "Cannot restrict to non-Org-mode file"))
 	(org-agenda-set-restriction-lock 'file)))
-     (t (error "Don't know how to restrict Org-mode's agenda")))
+     (t (user-error "Don't know how to restrict Org-mode's agenda")))
     (move-overlay org-speedbar-restriction-lock-overlay
 		  (point-at-bol) (point-at-eol))
     (setq current-prefix-arg nil)
