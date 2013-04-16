@@ -9252,7 +9252,9 @@ property to set."
 	  (cond
 	   ((symbolp rpl) (funcall rpl tag))
 	   ((string-match "%(\\([^)]+\\))" rpl)
-	    (replace-match (funcall (intern-soft (match-string 1 rpl)) tag) t t rpl))
+	    (replace-match
+	     (save-match-data
+	       (funcall (intern-soft (match-string 1 rpl)) tag)) t t rpl))
 	   ((string-match "%s" rpl) (replace-match (or tag "") t t rpl))
 	   ((string-match "%h" rpl)
 	    (replace-match (url-hexify-string (or tag "")) t t rpl))
