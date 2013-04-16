@@ -191,8 +191,7 @@
 		   (:latex-header-extra "LATEX_HEADER_EXTRA" nil nil newline)
 		   (:latex-hyperref-p nil "texht" org-latex-with-hyperref t)
 		   ;; Redefine regular options.
-		   (:date "DATE" nil "\\today" t)
-		   (:with-smart-quotes nil "'" t)))
+		   (:date "DATE" nil "\\today" t)))
 
 
 
