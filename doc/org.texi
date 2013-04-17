@@ -10961,26 +10961,15 @@ language, but with additional support for tables.
 @node HTML Export commands, HTML preamble and postamble, HTML export, HTML export
 @subsection HTML export commands
 
-@cindex region, active
-@cindex active region
-@cindex transient-mark-mode
 @table @kbd
 @orgcmd{C-c C-e h h,org-html-export-to-html}
-@cindex property, EXPORT_FILE_NAME
 Export as a HTML file.  For an Org file @file{myfile.org},
 the HTML file will be @file{myfile.html}.  The file will be overwritten
-without warning.  If there is an active region@footnote{This requires
-@var{transient-mark-mode} be turned on.}, only the region will be
-exported.  If the selected region is a single tree@footnote{To select the
-current subtree, use @kbd{C-c @@}.}, the tree head will become the document
-title.  If the tree head entry has, or inherits, an @code{EXPORT_FILE_NAME}
-property, that name will be used for the export.
+without warning.
 @kbd{C-c C-e h o}
 Export as a HTML file and immediately open it with a browser.
 @orgcmd{C-c C-e h H,org-html-export-as-html}
 Export to a temporary buffer.  Do not create a file.
-@item C-c C-e C-v h H/h h/h o
-Export only the visible part of the document.
 @end table
 
 @c FIXME Exporting sublevels
@@ -11170,7 +11159,7 @@ method requires that the @file{dvipng} program is available on your system.
 You can still get this processing with
 
 @example
-#+OPTIONS: LaTeX:dvipng
+#+OPTIONS: tex:dvipng
 @end example
 
 @node Text areas in HTML export, CSS support, Math formatting in HTML export, HTML export
@@ -11179,15 +11168,16 @@ You can still get this processing with
 @cindex text areas, in HTML
 An alternative way to publish literal code examples in HTML is to use text
 areas, where the example can even be edited before pasting it into an
-application.  It is triggered by a @code{-t} switch at an @code{example} or
-@code{src} block.  Using this switch disables any options for syntax and
-label highlighting, and line numbering, which may be present.  You may also
-use @code{-h} and @code{-w} switches to specify the height and width of the
-text area, which default to the number of lines in the example, and 80,
-respectively.  For example
+application.  It is triggered by @code{:textarea} attribute at an
+@code{example} or @code{src} block.
+
+You may also use @code{:height} and @code{:width} attributes to specify the
+height and width of the text area, which default to the number of lines in
+the example, and 80, respectively.  For example
 
 @example
-#+BEGIN_EXAMPLE -t -w 40
+#+ATTR_HTML: :textarea t :width 40
+#+BEGIN_EXAMPLE
   (defun org-xor (a b)
      "Exclusive or."
      (if a (not b) b))
