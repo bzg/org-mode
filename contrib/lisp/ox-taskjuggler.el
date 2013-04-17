@@ -317,7 +317,8 @@ This hook is run with the name of the file as argument.")
 
 (defun org-taskjuggler-assign-task-ids (tasks info)
   "Assign a unique ID to each task in TASKS.
-TASKS is a list of headlines.  Return value is an alist between
+TASKS is a list of headlines.  INFO is a plist used as a
+communication channel.  Return value is an alist between
 headlines and their associated ID.  IDs are hierarchical, which
 means they only need to be unique among the task siblings."
   (let* (alist
@@ -335,8 +336,9 @@ means they only need to be unique among the task siblings."
 
 (defun org-taskjuggler-assign-resource-ids (resources info)
   "Assign a unique ID to each resource within RESOURCES.
-RESOURCES is a list of headlines.  Return value is an alist
-between headlines and their associated ID."
+RESOURCES is a list of headlines.  INFO is a plist used as a
+communication channel.  Return value is an alist between
+headlines and their associated ID."
   (let (ids)
     (org-element-map resources 'headline
       (lambda (resource)
@@ -365,7 +367,8 @@ If there is no headline at all, return nil."
 
 (defun org-taskjuggler-get-id (item info)
   "Return id for task or resource ITEM.
-ITEM is a headline.  Return value is a string."
+ITEM is a headline.  INFO is a plist used as a communication
+channel.  Return value is a string."
   (cdr (assq item (plist-get info :taskjuggler-unique-ids))))
 
 (defun org-taskjuggler-get-name (item)
@@ -527,7 +530,7 @@ doesn't include leading \"depends\"."
 
 (defun org-taskjuggler-project-plan (contents info)
   "Build TaskJuggler project plan.
-CONTENTS is ignored. INFO is a plist holding export options.
+CONTENTS is ignored.  INFO is a plist holding export options.
 Return complete project plan as a string in TaskJuggler syntax."
   (let* ((tree (plist-get info :parse-tree))
          (project (or (org-taskjuggler-get-project info)
