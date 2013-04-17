@@ -101,9 +101,9 @@ specifying a var of the same value."
         %s
     };
     open my $BOH, qq(>%s) or die qq(Perl: Could not open output file.$/);
-    select $BOH;
     my $rv = &$babel_sub();
     my $rt = ref $rv;
+    select $BOH;
     if (qq(ARRAY) eq $rt) {
         local $\\=$/;
         local $,=qq(\t);
@@ -131,19 +131,25 @@ If RESULT-TYPE equals 'output then return a list of the outputs
 of the statements in BODY, if RESULT-TYPE equals 'value then
 return the value of the last statement in BODY, as elisp."
   (when session (error "Sessions are not supported for Perl"))
-  (let ((body (concat org-babel-perl-preface ibody)))
-    (case result-type
-      (output (org-babel-eval org-babel-perl-command body))
-      (value (let ((tmp-file (org-babel-temp-file "perl-")))
-	       (org-babel-eval
-		org-babel-perl-command
-		(format org-babel-perl-wrapper-method body
-			(org-babel-process-file-name tmp-file 'noquote)))
-	       	(org-babel-result-cond result-params
-		  (with-temp-buffer
-		    (insert-file-contents tmp-file)
-		    (buffer-string))
-		  (org-babel-import-elisp-from-file tmp-file '(16))))))))
+  (let* ((body (concat org-babel-perl-preface ibody))
+	 (tmp-file (org-babel-temp-file "perl-"))
+	 (tmp-babel-file (org-babel-process-file-name
+			  tmp-file 'noquote)))
+    ((lambda (results)
+       (when results
+	 (org-babel-result-cond result-params
+	   (org-babel-eval-read-file tmp-file)
+	   (org-babel-import-elisp-from-file tmp-file '(16)))))
+     (case result-type
+       (output
+	(with-temp-file tmp-file
+	  (insert
+	   (org-babel-eval org-babel-perl-command body))
+	  (buffer-string)))
+       (value
+	(org-babel-eval org-babel-perl-command
+			(format org-babel-perl-wrapper-method
+				body tmp-babel-file)))))))
 
 (provide 'ob-perl)
 
