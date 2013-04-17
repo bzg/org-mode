@@ -8915,21 +8915,29 @@ the default behavior of @code{org-capture}.
 
 @tsubheading{Bulk remote editing selected entries}
 @cindex remote editing, bulk, from agenda
-@vindex org-agenda-bulk-persistent-marks
 @vindex org-agenda-bulk-custom-functions
 
 @orgcmd{m,org-agenda-bulk-mark}
-Mark the entry at point for bulk action.  With prefix arg, mark that many
-successive entries.
+Mark the entry at point for bulk action.  With numeric prefix argument, mark
+that many successive entries.
 @c
-@orgcmd{%,org-agenda-bulk-mark-regexp}
-Mark entries matching a regular expression for bulk action.
+@orgcmd{*,org-agenda-bulk-mark-all}
+Mark all visible agenda entries for bulk action.
 @c
 @orgcmd{u,org-agenda-bulk-unmark}
-Unmark entry for bulk action.
+Unmark entry at point for bulk action.
 @c
 @orgcmd{U,org-agenda-bulk-remove-all-marks}
 Unmark all marked entries for bulk action.
+@c
+@orgcmd{M-m,org-agenda-bulk-toggle}
+Toggle mark of the entry at point for bulk action.
+@c
+@orgcmd{M-*,org-agenda-bulk-toggle-all}
+Toggle marks of all visible entries for bulk action.
+@c
+@orgcmd{%,org-agenda-bulk-mark-regexp}
+Mark entries matching a regular expression for bulk action.
 @c
 @orgcmd{B,org-agenda-bulk-action}
 Bulk action: act on all marked entries in the agenda.  This will prompt for
