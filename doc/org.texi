@@ -10470,14 +10470,18 @@ A date or a time-stamp@footnote{The variable
 exported.}.
 
 @item DESCRIPTION
-The page description, e.g., for the XHTML meta tag.
+The document description.  Back-ends handle it as they see fit (e.g., for the
+XHTML meta tag), if at all.  You can use several such keywords for long
+descriptions.
 
 @item EMAIL
 @vindex user-mail-address
 The email address (@var{user-mail-address}).
 
 @item KEYWORDS
-The keywords defining the contents, e.g., for the XHTML meta tag.
+The keywords defining the contents of the document.  Back-ends handle it as
+they see fit (e.g., for the XHTML meta tag), if at all.  You can use several
+such keywords if the list is long.
 
 @item LANGUAGE
 @vindex org-export-default-language
@@ -10500,7 +10504,8 @@ tag will be unconditionally excluded from the export, even if they have an
 @code{:export:} tag.
 
 @item TITLE
-The title to be shown (otherwise derived from buffer's name).
+The title to be shown (otherwise derived from buffer's name).  You can use
+several such keywords for long titles.
 @end table
 
 The @code{#+OPTIONS} keyword is a compact@footnote{If you want to configure
@@ -10581,7 +10586,8 @@ Toggle the inclusion of footnotes (@var{org-export-with-footnotes}).
 @item H:
 @vindex org-export-headline-levels
 Set the number of headline levels for export
-(@var{org-export-headline-levels}).
+(@var{org-export-headline-levels}).  Below that level, headlines are treated
+differently.  In most back-ends, they become list items.
 
 @item inline:
 @vindex org-export-with-inlinetasks
@@ -10589,7 +10595,9 @@ Toggle inclusion of inlinetasks (@var{org-export-with-inlinetasks}).
 
 @item num:
 @vindex org-export-with-section-numbers
-Toggle section-numbers (@var{org-export-with-section-numbers}).
+Toggle section-numbers (@var{org-export-with-section-numbers}).  It can also
+be set to a number @samp{n}, so only headlines at that level or above will be
+numbered.
 
 @item p:
 @vindex org-export-with-planning
@@ -10599,7 +10607,7 @@ Toggle export of planning information (@var{org-export-with-planning}).
 
 @item pri:
 @vindex org-export-with-priority
-Toggle priority cookies (@var{org-export-with-priority}).
+Toggle inclusion of priority cookies (@var{org-export-with-priority}).
 
 @item stat:
 @vindex org-export-with-statistics-cookies
@@ -10642,21 +10650,22 @@ Toggle inclusion of TODO keywords into exported text
 Toggle inclusion of tables (@var{org-export-with-tables}).
 @end table
 
-@cindex #+BIND
-A more general mechanism is also provided.  Indeed, Emacs variables can
-become buffer-local during export by using the BIND keyword.  Its syntax is
-@samp{#+BIND: variable value}.  This is particularly useful for in-buffer
-settings that cannot be changed using specific keywords.
+@cindex property, EXPORT_FILE_NAME
+When exporting only a subtree, each of the previous keywords@footnote{With
+the exception of @samp{SETUPFILE}.} can be overriden locally by special node
+properties.  These begin with @samp{EXPORT_}, followed by the name of the
+keyword they supplant.  For example, @samp{DATE} and @samp{OPTIONS} keywords
+become, respectively, @samp{EXPORT_DATE} and @samp{EXPORT_OPTIONS}
+properties.  Subtree export also supports the self-explicit
+@samp{EXPORT_FILE_NAME} property@footnote{There is no buffer-wide equivalent
+for this property.  The file name in this case is derived from the file
+associated to the buffer, if possible, or asked to the user otherwise.}.
 
-These settings affect all buffer's export processes.  Though, it is possible
-to override them locally when exporting only a subtree.  This is done by
-adding a headline property named after the keyword with the @samp{EXPORT_}
-prefix.  For example, @samp{DATE} and @samp{OPTIONS} keywords become,
-respectively @samp{EXPORT_DATE} and @samp{EXPORT_OPTIONS} properties.
-Subtree export also supports the self-explicit @samp{EXPORT_FILE_NAME}
-property@footnote{There is no buffer-wide equivalent for this property.  The
-file name in this case is derived from the file associated to the buffer, if
-possible, or asked to the user otherwise.}.
+@cindex #+BIND
+Eventually, Emacs variables can become buffer-local during export by using
+the BIND keyword.  Its syntax is @samp{#+BIND: variable value}.  This is
+particularly useful for in-buffer settings that cannot be changed using
+specific keywords.
 
 @node ASCII/Latin-1/UTF-8 export, Beamer export, Export settings, Exporting
 @section ASCII/Latin-1/UTF-8 export
