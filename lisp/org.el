@@ -7504,7 +7504,7 @@ This is important for non-interactive uses of the command."
      (if (org-in-src-block-p) ",* " "* "))
     (run-hooks 'org-insert-heading-hook))
    ((or arg
-	org-insert-heading-respect-content
+	(and (not (org-in-item-p)) org-insert-heading-respect-content)
 	(not (org-insert-item
 	      (save-excursion
 		(beginning-of-line)
