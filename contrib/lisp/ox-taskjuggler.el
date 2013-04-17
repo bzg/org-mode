@@ -666,7 +666,7 @@ neither is defined a unique id will be associated to it."
    ;; Closing resource.
    "}\n"))
 
-(defun org-taskjuggler--build-report (report)
+(defun org-taskjuggler--build-report (report info)
   "Return a report declaration.
 REPORT is a headline.  INFO is a plist used as a communication
 channel."
@@ -736,7 +736,7 @@ a unique id will be associated to it."
                   (if (>= org-taskjuggler-target-version 3.0) "allocate"
                     "allocations")
                   allocate))
-     (and complete (format "  complete %s\n" comptete))
+     (and complete (format "  complete %s\n" complete))
      (and effort
           (format "  effort %s\n"
                   (let* ((minutes (org-duration-string-to-minutes effort))
