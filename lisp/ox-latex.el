@@ -2205,7 +2205,17 @@ holding contextual information."
   "Transcode a subscript or superscript object.
 OBJECT is an Org object.  INFO is a plist used as a communication
 channel."
-  (let ((output ""))
+  (let ((in-script-p
+	 ;; Non-nil if object is already in a sub/superscript.
+	 (let ((parent object))
+	   (catch 'exit
+	     (while (setq parent (org-export-get-parent parent))
+	       (let ((type (org-element-type parent)))
+		 (cond ((memq type '(subscript superscript))
+			(throw 'exit t))
+		       ((memq type org-element-all-elements)
+			(throw 'exit nil))))))))
+	(output ""))
     (org-element-map (org-element-contents object)
 	(cons 'plain-text org-element-all-objects)
       (lambda (obj)
@@ -2235,10 +2245,15 @@ channel."
 			 (let ((blank (org-element-property :post-blank obj)))
 			   (and blank (> blank 0) "\\ ")))))))
       info nil org-element-recursive-objects)
-    ;; Result.
-    (format (if (= (length output) 1) "$%s%s$" "$%s{%s}$")
+    ;; Result.  Do not wrap into math mode if already in a subscript
+    ;; or superscript.  Do not wrap into curly brackets if OUTPUT is
+    ;; a single character.
+    (concat (and (not in-script-p) "$")
 	    (if (eq (org-element-type object) 'subscript) "_" "^")
-	    output)))
+	    (and (> (length output) 1) "{")
+	    output
+	    (and (> (length output) 1) "}")
+	    (and (not in-script-p) "$"))))
 
 (defun org-latex-subscript (subscript contents info)
   "Transcode a SUBSCRIPT object from Org to LaTeX.
