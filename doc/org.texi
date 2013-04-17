@@ -8917,8 +8917,10 @@ the default behavior of @code{org-capture}.
 @cindex dragging, agenda lines
 
 @orgcmd{M-<up>,org-agenda-drag-line-backward}
-Drag the line at point backward one line.  With a numeric prefix argument,
-drag backward by that many lines.
+Drag the line at point backward one line@footnote{Moving agenda lines does
+not persist after an agenda refresh and does not modify the contributing
+@file{.org} files}.  With a numeric prefix argument, drag backward by that
+many lines.
 
 @orgcmd{M-<down>,org-agenda-drag-line-forward}
 Drag the line at point forward one line.  With a numeric prefix argument,
