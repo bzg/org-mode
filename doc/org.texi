@@ -8913,6 +8913,17 @@ the default behavior of @code{org-capture}.
 @cindex capturing, from agenda
 @vindex org-capture-use-agenda-date
 
+@tsubheading{Dragging agenda lines forward/backward}
+@cindex dragging, agenda lines
+
+@orgcmd{M-<up>,org-agenda-drag-line-backward}
+Drag the line at point backward one line.  With a numeric prefix argument,
+drag backward by that many lines.
+
+@orgcmd{M-<down>,org-agenda-drag-line-forward}
+Drag the line at point forward one line.  With a numeric prefix argument,
+drag forward by that many lines.
+
 @tsubheading{Bulk remote editing selected entries}
 @cindex remote editing, bulk, from agenda
 @vindex org-agenda-bulk-custom-functions
