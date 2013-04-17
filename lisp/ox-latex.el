@@ -2232,12 +2232,7 @@ channel."
 			     (and blank (> blank 0) "\\ "))))))
 	  (plain-text
 	   (setq output
-		 (format "%s\\mathrm{%s}"
-			 output
-			 ;; \mathrm command doesn't handle spaces, so
-			 ;; we have to enforce them.
-			 (replace-regexp-in-string
-			  " " "\\\\ " (org-export-data obj info)))))
+		 (format "%s\\text{%s}" output (org-export-data obj info))))
 	  (otherwise
 	   (setq output
 		 (concat output
