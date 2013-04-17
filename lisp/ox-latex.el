@@ -2215,6 +2215,7 @@ channel."
 			(throw 'exit t))
 		       ((memq type org-element-all-elements)
 			(throw 'exit nil))))))))
+	(type (org-element-type object))
 	(output ""))
     (org-element-map (org-element-contents object)
 	(cons 'plain-text org-element-all-objects)
@@ -2242,13 +2243,29 @@ channel."
       info nil org-element-recursive-objects)
     ;; Result.  Do not wrap into math mode if already in a subscript
     ;; or superscript.  Do not wrap into curly brackets if OUTPUT is
-    ;; a single character.
-    (concat (and (not in-script-p) "$")
+    ;; a single character.  Also merge consecutive subscript and
+    ;; superscript into the same math snippet.
+    (concat (and (not in-script-p)
+		 (let ((prev (org-export-get-previous-element object info)))
+		   (or (not prev)
+		       (not (eq (org-element-type prev)
+				(if (eq type 'subscript) 'superscript
+				  'subscript)))
+		       (let ((blank (org-element-property :post-blank prev)))
+			 (and blank (> blank 0)))))
+		 "$")
 	    (if (eq (org-element-type object) 'subscript) "_" "^")
 	    (and (> (length output) 1) "{")
 	    output
 	    (and (> (length output) 1) "}")
-	    (and (not in-script-p) "$"))))
+	    (and (not in-script-p)
+		 (or (let ((blank (org-element-property :post-blank object)))
+		       (and blank (> blank 0)))
+		     (not (eq (org-element-type
+			       (org-export-get-next-element object info))
+			      (if (eq type 'subscript) 'superscript
+				'subscript))))
+		 "$"))))
 
 (defun org-latex-subscript (subscript contents info)
   "Transcode a SUBSCRIPT object from Org to LaTeX.
