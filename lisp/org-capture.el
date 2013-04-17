@@ -503,7 +503,7 @@ to avoid duplicates.)"
 
 (defcustom org-capture-use-agenda-date nil
   "Non-nil means use the date at point when capturing from agendas.
-When nil, you can still capturing using the date at point with \\[org-agenda-capture]]."
+When nil, you can still capture using the date at point with \\[org-agenda-capture]."
   :group 'org-capture
   :version "24.3"
   :type 'boolean)
