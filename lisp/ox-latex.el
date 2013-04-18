@@ -2201,35 +2201,77 @@ holding contextual information."
 
 ;;;; Subscript
 
+(defun org-latex--script-size (object info)
+  "Transcode a subscript or superscript object.
+OBJECT is an Org object.  INFO is a plist used as a communication
+channel."
+  (let ((in-script-p
+	 ;; Non-nil if object is already in a sub/superscript.
+	 (let ((parent object))
+	   (catch 'exit
+	     (while (setq parent (org-export-get-parent parent))
+	       (let ((type (org-element-type parent)))
+		 (cond ((memq type '(subscript superscript))
+			(throw 'exit t))
+		       ((memq type org-element-all-elements)
+			(throw 'exit nil))))))))
+	(type (org-element-type object))
+	(output ""))
+    (org-element-map (org-element-contents object)
+	(cons 'plain-text org-element-all-objects)
+      (lambda (obj)
+	(case (org-element-type obj)
+	  ((entity latex-fragment)
+	   (let ((data (org-trim (org-export-data obj info))))
+	     (string-match
+	      "\\`\\(?:\\\\[([]\\|\\$+\\)?\\(.*?\\)\\(?:\\\\[])]\\|\\$+\\)?\\'"
+	      data)
+	     (setq output
+		   (concat output
+			   (match-string 1 data)
+			   (let ((blank (org-element-property :post-blank obj)))
+			     (and blank (> blank 0) "\\ "))))))
+	  (plain-text
+	   (setq output
+		 (format "%s\\text{%s}" output (org-export-data obj info))))
+	  (otherwise
+	   (setq output
+		 (concat output
+			 (org-export-data obj info)
+			 (let ((blank (org-element-property :post-blank obj)))
+			   (and blank (> blank 0) "\\ ")))))))
+      info nil org-element-recursive-objects)
+    ;; Result.  Do not wrap into math mode if already in a subscript
+    ;; or superscript.  Do not wrap into curly brackets if OUTPUT is
+    ;; a single character.  Also merge consecutive subscript and
+    ;; superscript into the same math snippet.
+    (concat (and (not in-script-p)
+		 (let ((prev (org-export-get-previous-element object info)))
+		   (or (not prev)
+		       (not (eq (org-element-type prev)
+				(if (eq type 'subscript) 'superscript
+				  'subscript)))
+		       (let ((blank (org-element-property :post-blank prev)))
+			 (and blank (> blank 0)))))
+		 "$")
+	    (if (eq (org-element-type object) 'subscript) "_" "^")
+	    (and (> (length output) 1) "{")
+	    output
+	    (and (> (length output) 1) "}")
+	    (and (not in-script-p)
+		 (or (let ((blank (org-element-property :post-blank object)))
+		       (and blank (> blank 0)))
+		     (not (eq (org-element-type
+			       (org-export-get-next-element object info))
+			      (if (eq type 'subscript) 'superscript
+				'subscript))))
+		 "$"))))
+
 (defun org-latex-subscript (subscript contents info)
   "Transcode a SUBSCRIPT object from Org to LaTeX.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
-  (if (= (length contents) 1) (format "$_%s$" contents)
-    ;; Handle multiple objects in SUBSCRIPT by creating a subscript
-    ;; command for each of them.
-    (let ((prev-blanks 0))
-      (mapconcat
-       (lambda (obj)
-	 (case (org-element-type obj)
-	   ((entity latex-fragment)
-	    (setq prev-blanks (org-element-property :post-blank obj))
-	    (let ((data (org-trim (org-export-data obj info))))
-	      (string-match
-	       "\\`\\(?:\\\\[([]\\|\\$+\\)?\\(.*?\\)\\(?:\\\\[])]\\|\\$+\\)?\\'"
-	       data)
-	      (format "$_{%s}$" (match-string 1 data))))
-	   (plain-text
-	    (format "$_\\mathrm{%s}$"
-		    (concat (make-string prev-blanks ? )
-			    ;; mathrm command doesn't handle spaces,
-			    ;; so we have to enforce them.
-			    (replace-regexp-in-string
-			     " " "\\\\ " (org-export-data obj info)))))
-	   (otherwise
-	    (setq prev-blanks (org-element-property :post-blank obj))
-	    (format "$_{%s}$" (org-export-data obj info)))))
-       (org-element-contents subscript) ""))))
+  (org-latex--script-size subscript info))
 
 
 ;;;; Superscript
@@ -2238,31 +2280,7 @@ contextual information."
   "Transcode a SUPERSCRIPT object from Org to LaTeX.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
-  (if (= (length contents) 1) (format "$^%s$" contents)
-    ;; Handle multiple objects in SUPERSCRIPT by creating
-    ;; a superscript command for each of them.
-    (let ((prev-blanks 0))
-      (mapconcat
-       (lambda (obj)
-	 (case (org-element-type obj)
-	   ((entity latex-fragment)
-	    (setq prev-blanks (org-element-property :post-blank obj))
-	    (let ((data (org-trim (org-export-data obj info))))
-	      (string-match
-	       "\\`\\(?:\\\\[([]\\|\\$+\\)?\\(.*?\\)\\(?:\\\\[])]\\|\\$+\\)?\\'"
-	       data)
-	      (format "$^{%s}$" (match-string 1 data))))
-	   (plain-text
-	    (format "$^\\mathrm{%s}$"
-		    (concat (make-string prev-blanks ? )
-			    ;; mathrm command doesn't handle spaces,
-			    ;; so we have to enforce them.
-			    (replace-regexp-in-string
-			     " " "\\\\ " (org-export-data obj info)))))
-	   (otherwise
-	    (setq prev-blanks (org-element-property :post-blank obj))
-	    (format "$^{%s}$" (org-export-data obj info)))))
-       (org-element-contents superscript) ""))))
+  (org-latex--script-size superscript info))
 
 
 ;;;; Table

@@ -608,7 +608,7 @@ HTML export
 
 @LaTeX{} and PDF export
 
-* @LaTeX{}/PDF export commands::
+* @LaTeX{} export commands::    How to export to LaTeX and PDF
 * Header and sectioning::       Setting up the export file structure
 * Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
 * @LaTeX{} specific attributes::  Controlling @LaTeX{} output
@@ -8913,6 +8913,19 @@ the default behavior of @code{org-capture}.
 @cindex capturing, from agenda
 @vindex org-capture-use-agenda-date
 
+@tsubheading{Dragging agenda lines forward/backward}
+@cindex dragging, agenda lines
+
+@orgcmd{M-<up>,org-agenda-drag-line-backward}
+Drag the line at point backward one line@footnote{Moving agenda lines does
+not persist after an agenda refresh and does not modify the contributing
+@file{.org} files}.  With a numeric prefix argument, drag backward by that
+many lines.
+
+@orgcmd{M-<down>,org-agenda-drag-line-forward}
+Drag the line at point forward one line.  With a numeric prefix argument,
+drag forward by that many lines.
+
 @tsubheading{Bulk remote editing selected entries}
 @cindex remote editing, bulk, from agenda
 @vindex org-agenda-bulk-custom-functions
@@ -10457,14 +10470,18 @@ A date or a time-stamp@footnote{The variable
 exported.}.
 
 @item DESCRIPTION
-The page description, e.g., for the XHTML meta tag.
+The document description.  Back-ends handle it as they see fit (e.g., for the
+XHTML meta tag), if at all.  You can use several such keywords for long
+descriptions.
 
 @item EMAIL
 @vindex user-mail-address
 The email address (@var{user-mail-address}).
 
 @item KEYWORDS
-The keywords defining the contents, e.g., for the XHTML meta tag.
+The keywords defining the contents of the document.  Back-ends handle it as
+they see fit (e.g., for the XHTML meta tag), if at all.  You can use several
+such keywords if the list is long.
 
 @item LANGUAGE
 @vindex org-export-default-language
@@ -10487,7 +10504,8 @@ tag will be unconditionally excluded from the export, even if they have an
 @code{:export:} tag.
 
 @item TITLE
-The title to be shown (otherwise derived from buffer's name).
+The title to be shown (otherwise derived from buffer's name).  You can use
+several such keywords for long titles.
 @end table
 
 The @code{#+OPTIONS} keyword is a compact@footnote{If you want to configure
@@ -10568,7 +10586,8 @@ Toggle the inclusion of footnotes (@var{org-export-with-footnotes}).
 @item H:
 @vindex org-export-headline-levels
 Set the number of headline levels for export
-(@var{org-export-headline-levels}).
+(@var{org-export-headline-levels}).  Below that level, headlines are treated
+differently.  In most back-ends, they become list items.
 
 @item inline:
 @vindex org-export-with-inlinetasks
@@ -10576,7 +10595,9 @@ Toggle inclusion of inlinetasks (@var{org-export-with-inlinetasks}).
 
 @item num:
 @vindex org-export-with-section-numbers
-Toggle section-numbers (@var{org-export-with-section-numbers}).
+Toggle section-numbers (@var{org-export-with-section-numbers}).  It can also
+be set to a number @samp{n}, so only headlines at that level or above will be
+numbered.
 
 @item p:
 @vindex org-export-with-planning
@@ -10586,7 +10607,7 @@ Toggle export of planning information (@var{org-export-with-planning}).
 
 @item pri:
 @vindex org-export-with-priority
-Toggle priority cookies (@var{org-export-with-priority}).
+Toggle inclusion of priority cookies (@var{org-export-with-priority}).
 
 @item stat:
 @vindex org-export-with-statistics-cookies
@@ -10629,21 +10650,22 @@ Toggle inclusion of TODO keywords into exported text
 Toggle inclusion of tables (@var{org-export-with-tables}).
 @end table
 
-@cindex #+BIND
-A more general mechanism is also provided.  Indeed, Emacs variables can
-become buffer-local during export by using the BIND keyword.  Its syntax is
-@samp{#+BIND: variable value}.  This is particularly useful for in-buffer
-settings that cannot be changed using specific keywords.
+@cindex property, EXPORT_FILE_NAME
+When exporting only a subtree, each of the previous keywords@footnote{With
+the exception of @samp{SETUPFILE}.} can be overriden locally by special node
+properties.  These begin with @samp{EXPORT_}, followed by the name of the
+keyword they supplant.  For example, @samp{DATE} and @samp{OPTIONS} keywords
+become, respectively, @samp{EXPORT_DATE} and @samp{EXPORT_OPTIONS}
+properties.  Subtree export also supports the self-explicit
+@samp{EXPORT_FILE_NAME} property@footnote{There is no buffer-wide equivalent
+for this property.  The file name in this case is derived from the file
+associated to the buffer, if possible, or asked to the user otherwise.}.
 
-These settings affect all buffer's export processes.  Though, it is possible
-to override them locally when exporting only a subtree.  This is done by
-adding a headline property named after the keyword with the @samp{EXPORT_}
-prefix.  For example, @samp{DATE} and @samp{OPTIONS} keywords become,
-respectively @samp{EXPORT_DATE} and @samp{EXPORT_OPTIONS} properties.
-Subtree export also supports the self-explicit @samp{EXPORT_FILE_NAME}
-property@footnote{There is no buffer-wide equivalent for this property.  The
-file name in this case is derived from the file associated to the buffer, if
-possible, or asked to the user otherwise.}.
+@cindex #+BIND
+Eventually, Emacs variables can become buffer-local during export by using
+the BIND keyword.  Its syntax is @samp{#+BIND: variable value}.  This is
+particularly useful for in-buffer settings that cannot be changed using
+specific keywords.
 
 @node ASCII/Latin-1/UTF-8 export, Beamer export, Export settings, Exporting
 @section ASCII/Latin-1/UTF-8 export
@@ -10812,9 +10834,9 @@ Beamer export introduces a number of keywords to insert code in the
 document's header.  Four control appearance of the presentantion:
 @code{#+BEAMER_THEME}, @code{#+BEAMER_COLOR_THEME},
 @code{#+BEAMER_FONT_THEME}, @code{#+BEAMER_INNER_THEME} and
-@code{#+BEAMER_OUTER_THEME}.  All of them accept optional arguments within
-square brackets.  The last one, @code{#+BEAMER_HEADER}, is more generic and
-allows to append any line of code in the header.
+@code{#+BEAMER_OUTER_THEME}.  All of them accept optional arguments
+within square brackets.  The last one, @code{#+BEAMER_HEADER}, is more
+generic and allows you to append any line of code in the header.
 
 @example
 #+BEAMER_THEME: Rochester [height=20pt]
@@ -10855,10 +10877,10 @@ A *@@@@beamer:<2->@@@@useful* feature
 
 @cindex #+ATTR_BEAMER
 Eventually, every plain list has support for @code{:environment},
-@code{:overlay} and @code{:options} attributes through @code{ATTR_BEAMER}
-affiliated keyword.  The first one allows to use a different environment, the
-second sets overlay specifications and the last one inserts optional
-arguments in current list environment.
+@code{:overlay} and @code{:options} attributes through
+@code{ATTR_BEAMER} affiliated keyword.  The first one allows the use
+of a different environment, the second sets overlay specifications and
+the last one inserts optional arguments in current list environment.
 
 @example
 #+ATTR_BEAMER: :overlay +-
@@ -10948,26 +10970,15 @@ language, but with additional support for tables.
 @node HTML Export commands, HTML preamble and postamble, HTML export, HTML export
 @subsection HTML export commands
 
-@cindex region, active
-@cindex active region
-@cindex transient-mark-mode
 @table @kbd
 @orgcmd{C-c C-e h h,org-html-export-to-html}
-@cindex property, EXPORT_FILE_NAME
 Export as a HTML file.  For an Org file @file{myfile.org},
 the HTML file will be @file{myfile.html}.  The file will be overwritten
-without warning.  If there is an active region@footnote{This requires
-@var{transient-mark-mode} be turned on.}, only the region will be
-exported.  If the selected region is a single tree@footnote{To select the
-current subtree, use @kbd{C-c @@}.}, the tree head will become the document
-title.  If the tree head entry has, or inherits, an @code{EXPORT_FILE_NAME}
-property, that name will be used for the export.
+without warning.
 @kbd{C-c C-e h o}
 Export as a HTML file and immediately open it with a browser.
 @orgcmd{C-c C-e h H,org-html-export-as-html}
 Export to a temporary buffer.  Do not create a file.
-@item C-c C-e C-v h H/h h/h o
-Export only the visible part of the document.
 @end table
 
 @c FIXME Exporting sublevels
@@ -11157,7 +11168,7 @@ method requires that the @file{dvipng} program is available on your system.
 You can still get this processing with
 
 @example
-#+OPTIONS: LaTeX:dvipng
+#+OPTIONS: tex:dvipng
 @end example
 
 @node Text areas in HTML export, CSS support, Math formatting in HTML export, HTML export
@@ -11166,15 +11177,16 @@ You can still get this processing with
 @cindex text areas, in HTML
 An alternative way to publish literal code examples in HTML is to use text
 areas, where the example can even be edited before pasting it into an
-application.  It is triggered by a @code{-t} switch at an @code{example} or
-@code{src} block.  Using this switch disables any options for syntax and
-label highlighting, and line numbering, which may be present.  You may also
-use @code{-h} and @code{-w} switches to specify the height and width of the
-text area, which default to the number of lines in the example, and 80,
-respectively.  For example
+application.  It is triggered by @code{:textarea} attribute at an
+@code{example} or @code{src} block.
+
+You may also use @code{:height} and @code{:width} attributes to specify the
+height and width of the text area, which default to the number of lines in
+the example, and 80, respectively.  For example
 
 @example
-#+BEGIN_EXAMPLE -t -w 40
+#+ATTR_HTML: :textarea t :width 40
+#+BEGIN_EXAMPLE
   (defun org-xor (a b)
      "Exclusive or."
      (if a (not b) b))
@@ -11329,30 +11341,34 @@ pages, configure the variable @var{org-html-use-infojs}.
 @cindex @LaTeX{} export
 @cindex PDF export
 
-Org mode contains a @LaTeX{} exporter.  With further processing@footnote{The
+@LaTeX{} export can produce an arbitrarily complex LaTeX document of any
+standard or custom document class.  With further processing@footnote{The
 default @LaTeX{} output is designed for processing with @code{pdftex} or
 @LaTeX{}.  It includes packages that are not compatible with @code{xetex} and
-possibly @code{luatex}.  See the variables
-@var{org-latex-default-packages-alist} and
-@var{org-latex-packages-alist}.}, this back-end is also used to produce PDF
-output.  Since the @LaTeX{} output uses @file{hyperref} to implement links
-and cross references, the PDF output file will be fully linked.
+possibly @code{luatex}.  The @LaTeX{} exporter can be configured to support
+alternative TeX engines, see the options
+@var{org-latex-default-packages-alist} and @var{org-latex-packages-alist}.},
+which the @LaTeX{} exporter is able to control, this back-end is able to
+produce PDF output.  Because the @LaTeX{} exporter can be configured to use
+the @code{hyperref} package, the default setup produces fully-linked PDF
+output.
 
-As is @LaTeX{}, blank lines are meaningful for this back-end: a paragraph
+As in @LaTeX{}, blank lines are meaningful for this back-end: a paragraph
 will not be started if two contiguous syntactical elements are not separated
 by an empty line.
 
 This back-end also offers enhanced support for footnotes.  Thus, it handles
-nested footnotes, footnotes in tables and footnotes in items' description.
+nested footnotes, footnotes in tables and footnotes in a list item's
+description.
 
 @menu
-* @LaTeX{}/PDF export commands::
+* @LaTeX{} export commands::    How to export to LaTeX and PDF
 * Header and sectioning::       Setting up the export file structure
 * Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
 * @LaTeX{} specific attributes::  Controlling @LaTeX{} output
 @end menu
 
-@node @LaTeX{}/PDF export commands, Header and sectioning, @LaTeX{} and PDF export, @LaTeX{} and PDF export
+@node @LaTeX{} export commands, Header and sectioning, @LaTeX{} and PDF export, @LaTeX{} and PDF export
 @subsection @LaTeX{} export commands
 
 @table @kbd
@@ -11368,7 +11384,7 @@ Export as @LaTeX{} and then process to PDF.
 Export as @LaTeX{} and then process to PDF, then open the resulting PDF file.
 @end table
 
-@node Header and sectioning, Quoting @LaTeX{} code, @LaTeX{}/PDF export commands, @LaTeX{} and PDF export
+@node Header and sectioning, Quoting @LaTeX{} code, @LaTeX{} export commands, @LaTeX{} and PDF export
 @subsection Header and sectioning structure
 @cindex @LaTeX{} class
 @cindex @LaTeX{} sectioning structure
@@ -11376,10 +11392,10 @@ Export as @LaTeX{} and then process to PDF, then open the resulting PDF file.
 @cindex header, for @LaTeX{} files
 @cindex sectioning structure, for @LaTeX{} export
 
-The first three outline levels become headlines, defining a general document
-structure.  Additional levels are exported as @code{itemize} or
-@code{enumerate} lists.  The transition can also occur at a different level
-(@pxref{Export settings}).
+By default, the first three outline levels become headlines, defining a
+general document structure.  Additional levels are exported as @code{itemize}
+or @code{enumerate} lists.  The transition can also occur at a different
+level (@pxref{Export settings}).
 
 By default, the @LaTeX{} output uses the class @code{article}.
 
@@ -11402,14 +11418,14 @@ class.  You can also define your own classes there.
 @cindex #+LATEX_CLASS_OPTIONS
 @cindex property, EXPORT_LATEX_CLASS
 @cindex property, EXPORT_LATEX_CLASS_OPTIONS
-@code{LATEX_CLASS_OPTIONS} keyword or @code{EXPORT_LATEX_CLASS_OPTIONS}
+The @code{LATEX_CLASS_OPTIONS} keyword or @code{EXPORT_LATEX_CLASS_OPTIONS}
 property can specify the options for the @code{\documentclass} macro.  These
 options have to be provided, as expected by @LaTeX{}, within square brackets.
 
 @cindex #+LATEX_HEADER
 @cindex #+LATEX_HEADER_EXTRA
-You can also use @code{LATEX_HEADER} and
-@code{LATEX_HEADER_EXTRA}@footnote{Unlike to @code{LATEX_HEADER}, contents
+You can also use the @code{LATEX_HEADER} and
+@code{LATEX_HEADER_EXTRA}@footnote{Unlike @code{LATEX_HEADER}, contents
 from @code{LATEX_HEADER_EXTRA} keywords will not be loaded when previewing
 @LaTeX{} snippets (@pxref{Previewing @LaTeX{} fragments}).} keywords in order
 to add lines to the header.  See the docstring of @var{org-latex-classes} for
@@ -11457,7 +11473,7 @@ affect tables, images, plain lists, special blocks and source blocks.
 
 For @LaTeX{} export of a table, you can specify a label and a caption
 (@pxref{Images and tables}).  You can also use attributes to control table
-layout and contents.  Valid properties are:
+layout and contents.  Valid @LaTeX{} attributes include:
 
 @table @code
 @item :mode
@@ -11471,7 +11487,7 @@ environment.  Default mode is determined in
 @var{org-latex-default-table-mode}.
 @item :environment
 @vindex org-latex-default-table-environment
-Environment used for the table.  It can be to any @LaTeX{} table
+Environment used for the table.  It can be set to any @LaTeX{} table
 environment, like @code{tabularx}, @code{longtable}, @code{array},
 @code{tabu}, @code{bmatrix}@enddots{}  It defaults to
 @var{org-latex-default-table-environment} value.
@@ -11483,7 +11499,7 @@ can specify the positioning of the float.
 @item :align
 @itemx :font
 @itemx :width
-set, respectively, the alignment string of the table, its font size and its
+Set, respectively, the alignment string of the table, its font size and its
 width.  They only apply on regular tables.
 @item :spread
 Boolean specific to the @code{tabu} and @code{longtabu} environments, and
@@ -11498,16 +11514,16 @@ value of @code{:width}.
 They toggle, respectively, @code{booktabs} usage (assuming the package is
 properly loaded), table centering and removal of every horizontal rule but
 the first one (in a "table.el" table only).  In particular,
-@var{org-latex-tables-booktabs} (resp.@: @var{org-latex-tables-centered})
-activates the first (resp.@: second) attribute globally.
+@var{org-latex-tables-booktabs} (respectively @var{org-latex-tables-centered})
+activates the first (respectively second) attribute globally.
 @item :math-prefix
 @itemx :math-suffix
 @itemx :math-arguments
-string which will be inserted, respectively, before the table within the math
-environment, after the table within the math environment, and between the
-macro name and the contents of the table.  The latter attribute is necessary
-to matrix macros that require more than one argument (e.g.,
-@code{qbordermatrix}).
+A string that will be inserted, respectively, before the table within the
+math environment, after the table within the math environment, and between
+the macro name and the contents of the table.  The @code{:math-arguments}
+attribute is used for matrix macros that require more than one argument
+(e.g., @code{qbordermatrix}).
 @end table
 
 Thus, attributes can be used in a wide array of situations, like writing
@@ -11570,16 +11586,17 @@ To modify the placement option of any floating environment, set the
 [[./img/hst.png]]
 @end example
 
-Eventually, in the @code{:comment-include} attributes has a non-@code{nil} value,
-the code actually including the image will be commented out.
+If the @code{:comment-include} attribute is set to a non-@code{nil} value,
+the @LaTeX{} @code{\includegraphics} macro will be commented out.
 
 @subsubheading Plain lists in @LaTeX{} export
 @cindex plain lists, in @LaTeX{} export
 
 Plain lists accept two optional attributes: @code{:environment} and
-@code{:options}.  The first one allows to use a non-standard environment
-(e.g., @samp{inparaenum}).  The second one allows to specify optional
-arguments for that environment (square brackets may be omitted).
+@code{:options}.  The first one allows the use of a non-standard
+environment (e.g., @samp{inparaenum}).  The second one specifies
+optional arguments for that environment (square brackets may be
+omitted).
 
 @example
 #+ATTR_LATEX: :environment compactitem :options $\circ$
@@ -11589,9 +11606,10 @@ arguments for that environment (square brackets may be omitted).
 @subsubheading Source blocks in @LaTeX{} export
 @cindex source blocks, in @LaTeX{} export
 
-In addition to syntax defined in @ref{Literal examples}, names and captions
-(@pxref{Images and tables}), source blocks also accept @code{:long-listing}
-attribute, which prevents the block to become a float when non-@code{nil}.
+In addition to syntax defined in @ref{Literal examples}, names and
+captions (@pxref{Images and tables}), source blocks also accept a
+@code{:long-listing} attribute, which prevents the block from floating
+when non-@code{nil}.
 
 @example
 #+ATTR_LATEX: :long-listing t
@@ -13570,7 +13588,12 @@ Setting the @var{org-export-babel-evaluate} variable to @code{nil} will
 ensure that no code blocks are evaluated as part of the export process.  This
 can be useful in situations where potentially untrusted Org mode files are
 exported in an automated fashion, for example when Org mode is used as the
-markup language for a wiki.
+markup language for a wiki.  It is also possible to set this variable to
+@code{‘inline-only}.  In that case, only inline code blocks will be
+evaluated, in order to insert their results.  Non-inline code blocks are
+assumed to have their results already inserted in the buffer by manual
+evaluation.  This setting is useful to avoid expensive recalculations during
+export, not to provide security.
 
 @comment  node-name,  next,  previous,  up
 @comment  Extracting source code, Evaluating code blocks, Exporting code blocks, Working With Source Code

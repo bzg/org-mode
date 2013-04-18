@@ -3810,6 +3810,7 @@ header, or they will be appended."
     (""     "wasysym"   t)
     (""     "latexsym"  t)
     (""     "amssymb"   t)
+    (""     "amstext"   nil)
     (""     "hyperref"  nil)
     "\\tolerance=1000")
   "Alist of default packages to be inserted in the header.
@@ -3821,6 +3822,7 @@ The packages in this list are needed by one part or another of
 Org mode to function properly:
 
 - inputenc, fontenc:  for basic font and character selection
+- amstext: for subscript and superscript
 - textcomp, marvosymb, wasysym, latexsym, amssym: for various
   symbols used for interpreting the entities in `org-entities'.
   You can skip some of these packages if you don't use any of the

@@ -2148,10 +2148,10 @@ The following commands are available:
   (org-add-hook 'post-command-hook 'org-agenda-update-agenda-type nil 'local)
   (org-add-hook 'pre-command-hook 'org-unhighlight nil 'local)
   ;; Make sure properties are removed when copying text
-  (make-local-variable 'filter-buffer-substring-functions)
-  (add-hook 'filter-buffer-substring-functions
-	    (lambda (fun start end delete)
-	      (substring-no-properties (funcall fun start end delete))))
+  (org-add-hook 'filter-buffer-substring-functions
+		(lambda (fun start end delete)
+		  (substring-no-properties (funcall fun start end delete)))
+		nil t)
   (unless org-agenda-keep-modes
     (setq org-agenda-follow-mode org-agenda-start-with-follow-mode
 	  org-agenda-entry-text-mode org-agenda-start-with-entry-text-mode
@@ -2182,6 +2182,8 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\C-m"     'org-agenda-switch-to)
 (org-defkey org-agenda-mode-map "\C-k"     'org-agenda-kill)
 (org-defkey org-agenda-mode-map "\C-c\C-w" 'org-agenda-refile)
+(org-defkey org-agenda-mode-map [(meta down)] 'org-agenda-drag-line-forward)
+(org-defkey org-agenda-mode-map [(meta up)] 'org-agenda-drag-line-backward)
 (org-defkey org-agenda-mode-map "m"        'org-agenda-bulk-mark)
 (org-defkey org-agenda-mode-map "\M-m"     'org-agenda-bulk-toggle)
 (org-defkey org-agenda-mode-map "*"        'org-agenda-bulk-mark-all)
@@ -9879,6 +9881,32 @@ current HH:MM time."
     (let ((org-overriding-default-time
 	   (org-get-cursor-date (equal with-time 1))))
       (call-interactively 'org-capture))))
+
+;;; Dragging agenda lines forward/backward
+
+(defun org-agenda-drag-line-forward (arg)
+  "Drag an agenda line forward by ARG lines."
+  (interactive "p")
+  (let ((inhibit-read-only t) lst)
+    (if (save-excursion
+	  (dotimes (n arg)
+	    (beginning-of-line 2)
+	    (push (not (get-text-property (point) 'txt)) lst))
+	  (delq nil lst))
+	(message "Cannot move line forward")
+      (org-drag-line-forward arg))))
+
+(defun org-agenda-drag-line-backward (arg)
+  "Drag an agenda line backward by ARG lines."
+  (interactive "p")
+  (let ((inhibit-read-only t) lst)
+    (if (save-excursion
+	  (dotimes (n arg)
+	    (beginning-of-line 0)
+	    (push (not (get-text-property (point) 'txt)) lst))
+	  (delq nil lst))
+	(message "Cannot move line backward")
+      (org-drag-line-backward arg))))
 
 ;;; Flagging notes
 
