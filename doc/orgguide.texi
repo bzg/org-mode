@@ -1143,7 +1143,7 @@ changes in the line.}:
 #+FILETAGS: :Peter:Boss:Secret:
 @end smallexample
 
-@node Setting tags, Tag searches, Tag inheritance, Tags
+@node Setting tags, Tag groups, Tag inheritance, Tags
 @section Setting tags
 
 Tags can simply be typed into the buffer at the end of a headline.
@@ -1194,7 +1194,7 @@ can instead set the TAGS option line as:
 #+TAGS: @@work(w)  @@home(h)  @@tennisclub(t)  laptop(l)  pc(p)
 @end smallexample
 
-@node Tag searches, Tag searches, Setting tags, Tags
+@node Tag groups, Tag searches, Setting tags, Tags
 @section Tag groups
 
 @cindex group tags
@@ -1233,7 +1233,7 @@ If you want to ignore group tags temporarily, toggle group tags support
 with @command{org-toggle-tags-groups}, bound to @kbd{C-c C-x q}.  If you
 want to disable tag groups completely, set @var{org-group-tags} to nil.
 
-@node Tag searches,  , Tag searches, Tags
+@node Tag searches,  , Tag groups, Tags
 @section Tag searches
 
 Once a system of tags has been set up, it can be used to collect related
