@@ -16,12 +16,12 @@
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
-;; GNU Emacs is free software: you can redistribute it and/or modify
+;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or
 ;; (at your option) any later version.
 
-;; GNU Emacs is distributed in the hope that it will be useful,
+;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
@@ -69,10 +69,9 @@ unpack it into that directory (i.e. a subdirectory
 sources.
 All you'll have to do is call `M-x org-track-update' from
 time to time."
-  :version "22.1"
   :group 'org)
 
-(defcustom org-track-directory "~/.emacs.d/org/lisp"
+(defcustom org-track-directory (concat user-emacs-directory "org/lisp")
   "Directory where your org-mode/ directory lives.
 If that directory does not exist, it will be created."
   :type 'directory)

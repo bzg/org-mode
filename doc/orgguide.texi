@@ -13,9 +13,9 @@
 @c Version and Contact Info
 @set MAINTAINERSITE @uref{http://orgmode.org,maintainers webpage}
 @set AUTHOR Carsten Dominik
-@set MAINTAINER Carsten Dominik
-@set MAINTAINEREMAIL @email{carsten at orgmode dot org}
-@set MAINTAINERCONTACT @uref{mailto:carsten at orgmode dot org,contact the maintainer}
+@set MAINTAINER Bastien Guerry
+@set MAINTAINEREMAIL @email{bzg at gnu dot org}
+@set MAINTAINERCONTACT @uref{mailto:bzg at gnu dot org,contact the maintainer}
 @c %**end of header
 @finalout
 
@@ -98,7 +98,7 @@ modify this GNU manual.''
 * Working With Source Code::	Source code snippets embedded in Org
 * Miscellaneous::		All the rest which did not fit elsewhere
 
-* GNU Free Documentation License:: This manual license.
+* GNU Free Documentation License::  This manual license.
 
 @detailmenu
  --- The Detailed Node Listing ---
@@ -148,6 +148,7 @@ Tags
 * Tag inheritance::		Tags use the tree structure of the outline
 * Setting tags::		How to assign tags to a headline
 * Tag searches::		Searching for combinations of tags
+* Tag searches::		Searching for combinations of tags
 
 Dates and Times
 
@@ -158,8 +159,8 @@ Dates and Times
 
 Capture - Refile - Archive
 
-* Capture::
-* Refiling notes::		Moving a tree from one place to another
+* Capture::			Capturing new stuff
+* Refile and copy::		Moving a tree from one place to another
 * Archiving::			What to do with finished projects
 
 Capture
@@ -427,7 +428,7 @@ Promote/demote the current subtree by one level.
 Move subtree up/down (swap with previous/next subtree of same
 level).
 @item C-c C-w
-Refile entry or region to a different location.  @xref{Refiling notes}.
+Refile entry or region to a different location.  @xref{Refile and copy}.
 @item C-x n s/w
 Narrow buffer to current subtree / widen it again
 @end table
@@ -728,6 +729,9 @@ current file.  The most important case is a link like
 Links such as @samp{[[My Target]]} or @samp{[[My Target][Find my target]]}
 lead to a text search in the current file for the corresponding target which
 looks like @samp{<<My Target>>}.
+
+Internal links will be used to reference their destination, through links or
+numbers, when possible.
 
 @node External links, Handling links, Internal links, Hyperlinks
 @section External links
@@ -1110,6 +1114,7 @@ Tags will by default be in bold face with the same color as the headline.
 * Tag inheritance::		Tags use the tree structure of the outline
 * Setting tags::		How to assign tags to a headline
 * Tag searches::		Searching for combinations of tags
+* Tag searches::		Searching for combinations of tags
 @end menu
 
 @node Tag inheritance, Setting tags, Tags, Tags
@@ -1189,7 +1194,46 @@ can instead set the TAGS option line as:
 #+TAGS: @@work(w)  @@home(h)  @@tennisclub(t)  laptop(l)  pc(p)
 @end smallexample
 
-@node Tag searches,  , Setting tags, Tags
+@node Tag searches, Tag searches, Setting tags, Tags
+@section Tag groups
+
+@cindex group tags
+@cindex tags, groups
+In a set of mutually exclusive tags, the first tag can be defined as a
+@emph{group tag}.  When you search for a group tag, it will return matches
+for all members in the group.  In an agenda view, filtering by a group tag
+will display headlines tagged with at least one of the members of the
+group.  This makes tag searches and filters even more flexible.
+
+You can set group tags by inserting a colon between the group tag and other
+tags, like this:
+
+@example
+#+TAGS: @{ @@read : @@read_book  @@read_ebook @}
+@end example
+
+In this example, @samp{@@read} is a @emph{group tag} for a set of three
+tags: @samp{@@read}, @samp{@@read_book} and @samp{@@read_ebook}.
+
+You can also use the @code{:grouptags} keyword directly when setting
+@var{org-tag-alist}:
+
+@lisp
+(setq org-tag-alist '((:startgroup . nil) 
+                      ("@@read" . nil)
+                      (:grouptags . nil)
+                      ("@@read_book" . nil)
+                      ("@@read_ebook" . nil)
+                      (:endgroup . nil)))
+@end lisp
+
+@kindex C-c C-x q
+@vindex org-group-tags
+If you want to ignore group tags temporarily, toggle group tags support
+with @command{org-toggle-tags-groups}, bound to @kbd{C-c C-x q}.  If you
+want to disable tag groups completely, set @var{org-group-tags} to nil.
+
+@node Tag searches,  , Tag searches, Tags
 @section Tag searches
 
 Once a system of tags has been set up, it can be used to collect related
@@ -1518,17 +1562,17 @@ projects need to be moved around.  Moving completed project trees to an
 archive file keeps the system compact and fast.
 
 @menu
-* Capture::
-* Refiling notes::		Moving a tree from one place to another
+* Capture::			Capturing new stuff
+* Refile and copy::		Moving a tree from one place to another
 * Archiving::			What to do with finished projects
 @end menu
 
-@node Capture, Refiling notes, Capture - Refile - Archive, Capture - Refile - Archive
+@node Capture, Refile and copy, Capture - Refile - Archive, Capture - Refile - Archive
 @section Capture
 
 Org's method for capturing new items is heavily inspired by John Wiegley
-excellent remember package.  It lets you store quick notes with little
-interruption of your work flow.  Org lets you define templates for new
+excellent @file{remember.el} package.  It lets you store quick notes with
+little interruption of your work flow.  Org lets you define templates for new
 entries and associate them with different targets for storing notes.
 
 @menu
@@ -1563,7 +1607,7 @@ Once you are done entering information into the capture buffer,
 @kbd{C-c C-c} will return you to the window configuration before the capture
 process, so that you can resume your work without further distraction.
 @item C-c C-w
-Finalize by moving the entry to a refile location (@pxref{Refiling notes}).
+Finalize by moving the entry to a refile location (@pxref{Refile and copy}).
 @item C-c C-k
 Abort the capture process and return to the previous state.
 @end table
@@ -1605,21 +1649,24 @@ allow dynamic insertion of content.  Here is a small selection of the
 possibilities, consult the manual for more.
 @smallexample
 %a          @r{annotation, normally the link created with @code{org-store-link}}
-%i          @r{initial content, the region when remember is called with C-u.}
+%i          @r{initial content, the region when capture is called with C-u.}
 %t          @r{timestamp, date only}
 %T          @r{timestamp with date and time}
 %u, %U      @r{like the above, but inactive timestamps}
 @end smallexample
 
-@node Refiling notes, Archiving, Capture, Capture - Refile - Archive
-@section Refiling notes
+@node Refile and copy, Archiving, Capture, Capture - Refile - Archive
+@section Refile and copy
 
-When reviewing the captured data, you may want to refile some of the entries
-into a different list, for example into a project.  Cutting, finding the
-right location, and then pasting the note is cumbersome.  To simplify this
-process, you can use the following special command:
+When reviewing the captured data, you may want to refile or copy some of the
+entries into a different list, for example into a project.  Cutting, finding
+the right location, and then pasting the note is cumbersome.  To simplify
+this process, you can use the following special command:
 
 @table @kbd
+@item C-c M-x
+Copy the entry or region at point.  This command behaves like
+@code{org-refile}, except that the original note will not be deleted.
 @item C-c C-w
 Refile the entry or region at point.  This command offers possible locations
 for refiling the entry and lets you select one with completion.  The item (or
@@ -1633,7 +1680,7 @@ Use the refile interface to jump to a heading.
 Jump to the location where @code{org-refile} last moved a tree to.
 @end table
 
-@node Archiving,  , Refiling notes, Capture - Refile - Archive
+@node Archiving,  , Refile and copy, Capture - Refile - Archive
 @section Archiving
 
 When a project represented by a (sub)tree is finished, you may want
@@ -1666,8 +1713,6 @@ setting this variable, for example
 @seealso{
 @uref{http://orgmode.org/manual/Capture-_002d-Refile-_002d-Archive.html#Capture-_002d-Refile-_002d-Archive,
 Chapter 9 of the manual}@*
-@uref{http://members.optusnet.com.au/~charles57/GTD/remember.html, Charles
-Cave's remember tutorial}@*
 @uref{http://orgmode.org/worg/org-tutorials/org-protocol-custom-handler.php,
 Sebastian Rose's tutorial for capturing from a web browser}}@uref{}@*
 
@@ -2045,7 +2090,7 @@ summarizes the markup rules used in an Org-mode buffer.
 
 @menu
 * Structural markup elements::	The basic structure as seen by the exporter
-* Images and tables::		Tables and Images will be included
+* Images and tables::		Images, tables and caption mechanism
 * Literal examples::		Source code examples with special formatting
 * Include files::		Include additional files into a document
 * Embedded @LaTeX{}::		@LaTeX{} can be freely used inside Org documents
@@ -2166,32 +2211,30 @@ Toggle the COMMENT keyword at the beginning of an entry.
 For Org mode tables, the lines before the first horizontal separator line
 will become table header lines.  You can use the following lines somewhere
 before the table to assign a caption and a label for cross references, and in
-the text you can refer to the object with @code{\ref@{tab:basic-data@}}:
+the text you can refer to the object with @code{[[tab:basic-data]]}:
 
 @smallexample
 #+CAPTION: This is the caption for the next table (or link)
-#+LABEL:   tbl:basic-data
+#+NAME:   tbl:basic-data
    | ... | ...|
    |-----|----|
 @end smallexample
 
-Some backends (HTML, @LaTeX{}, and DocBook) allow you to directly include
-images into the exported document.  Org does this, if a link to an image
-files does not have a description part, for example @code{[[./img/a.jpg]]}.
-If you wish to define a caption for the image and maybe a label for internal
-cross references, you sure that the link is on a line by itself precede it
-with:
+Some backends allow you to directly include images into the exported
+document.  Org does this, if a link to an image files does not have
+a description part, for example @code{[[./img/a.jpg]]}.  If you wish to
+define a caption for the image and maybe a label for internal cross
+references, you sure that the link is on a line by itself precede it with:
 
 @smallexample
 #+CAPTION: This is the caption for the next figure link (or table)
-#+LABEL:   fig:SED-HR4049
+#+NAME:   fig:SED-HR4049
 [[./img/a.jpg]]
 @end smallexample
 
-You may also define additional attributes for the figure.  As this is
-backend-specific, see the sections about the individual backends for more
-information.
-
+The same caption mechanism applies to other structures than images and tables
+(e.g., @LaTeX{} equations, source code blocks), provided the chosen export
+back-end supports them.
 
 @node Literal examples, Include files, Images and tables, Markup
 @section Literal examples
@@ -2251,7 +2294,7 @@ processed normally. @kbd{C-c '} will visit the included file.
 
 For scientific notes which need to be able to contain mathematical symbols
 and the occasional formula, Org-mode supports embedding @LaTeX{} code into
-its files.  You can directly use TeX-like macros for special symbols, enter
+its files.  You can directly use TeX-like syntax for special symbols, enter
 formulas and entire @LaTeX{} environments.
 
 @smallexample
@@ -2311,8 +2354,6 @@ Insert template with export options, see example below.
 #+DESCRIPTION: the page description, e.g.@: for the XHTML meta tag
 #+KEYWORDS:    the page keywords, e.g.@: for the XHTML meta tag
 #+LANGUAGE:    language for HTML, e.g.@: @samp{en} (@code{org-export-default-language})
-#+TEXT:        Some descriptive text to be inserted at the beginning.
-#+TEXT:        Several lines may be given.
 #+OPTIONS:     H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
 #+LINK_UP:     the ``up'' link of an exported page
 #+LINK_HOME:   the ``home'' link of an exported page
@@ -2386,7 +2427,7 @@ Export as @LaTeX{} and then process to PDF, then open the resulting PDF file.
 
 By default, the @LaTeX{} output uses the class @code{article}.  You can
 change this by adding an option like @code{#+LaTeX_CLASS: myclass} in your
-file.  The class must be listed in @code{org-export-latex-classes}.
+file.  The class must be listed in @code{org-latex-classes}.
 
 Embedded @LaTeX{} as described in @ref{Embedded @LaTeX{}}, will be correctly
 inserted into the @LaTeX{} file.  Similarly to the HTML exporter, you can use

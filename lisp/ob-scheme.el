@@ -38,9 +38,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-ref)
-(require 'ob-comint)
-(require 'ob-eval)
 (eval-when-compile (require 'cl))
 
 (declare-function run-scheme "ext:cmuscheme" (cmd))
@@ -75,29 +72,31 @@ This function is called by `org-babel-execute-src-block'"
   (let* ((result-type (cdr (assoc :result-type params)))
 	 (org-babel-scheme-cmd (or (cdr (assoc :scheme params))
 				   org-babel-scheme-cmd))
-         (full-body (org-babel-expand-body:scheme body params)))
-    (read
-     (if (not (string= (cdr (assoc :session params)) "none"))
-         ;; session evaluation
-	 (let ((session (org-babel-prep-session:scheme
-			 (cdr (assoc :session params)) params)))
-	   (org-babel-comint-with-output
-	       (session (format "%S" org-babel-scheme-eoe) t body)
-	     (mapc
-	      (lambda (line)
-		(insert (org-babel-chomp line)) (comint-send-input nil t))
-	      (list body (format "%S" org-babel-scheme-eoe)))))
-       ;; external evaluation
-       (let ((script-file (org-babel-temp-file "scheme-script-")))
-         (with-temp-file script-file
-           (insert
-            ;; return the value or the output
-            (if (string= result-type "value")
-                (format "(display %s)" full-body)
-              full-body)))
-         (org-babel-eval
-	  (format "%s %s" org-babel-scheme-cmd
-		  (org-babel-process-file-name script-file)) ""))))))
+         (full-body (org-babel-expand-body:scheme body params))
+	 (result (if (not (string= (cdr (assoc :session params)) "none"))
+		     ;; session evaluation
+		     (let ((session (org-babel-prep-session:scheme
+				     (cdr (assoc :session params)) params)))
+		       (org-babel-comint-with-output
+			   (session (format "%S" org-babel-scheme-eoe) t body)
+			 (mapc
+			  (lambda (line)
+			    (insert (org-babel-chomp line))
+			    (comint-send-input nil t))
+			  (list body (format "%S" org-babel-scheme-eoe)))))
+		   ;; external evaluation
+		   (let ((script-file (org-babel-temp-file "scheme-script-")))
+		     (with-temp-file script-file
+		       (insert
+			;; return the value or the output
+			(if (string= result-type "value")
+			    (format "(display %s)" full-body)
+			  full-body)))
+		     (org-babel-eval
+		      (format "%s %s" org-babel-scheme-cmd
+			      (org-babel-process-file-name script-file)) "")))))
+    (org-babel-result-cond (cdr (assoc :result-params params))
+      result (read result))))
 
 (defun org-babel-prep-session:scheme (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

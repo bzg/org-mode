@@ -44,18 +44,17 @@
     (org-babel-next-src-block)
     (should (= 15 (org-babel-execute-src-block)))))
 
-(ert-deftest ob-fortran/preprosessor-var ()
+(ert-deftest ob-fortran/preprocessor-var ()
   "Test preprocessed fortran"
   (org-test-at-id "d8d1dfd3-5f0c-48fe-b55d-777997e02242"
     (org-babel-next-src-block 2)
     (should (= 42 (org-babel-execute-src-block)))))
 
-;; ;; TODO: test fails
-;; (ert-deftest ob-fortran/character-var ()
-;;   "Test string input"
-;;   (org-test-at-id "d8d1dfd3-5f0c-48fe-b55d-777997e02242"
-;;     (org-babel-next-src-block 3)
-;;     (should (equal "word" (org-babel-execute-src-block)))))
+(ert-deftest ob-fortran/character-var ()
+  "Test string input"
+  (org-test-at-id "d8d1dfd3-5f0c-48fe-b55d-777997e02242"
+    (org-babel-next-src-block 3)
+    (should (equal "word" (org-babel-execute-src-block)))))
 
 (ert-deftest ob-fortran/list-var ()
   "Test real array input"

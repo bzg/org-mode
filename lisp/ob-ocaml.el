@@ -36,11 +36,11 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-comint)
 (require 'comint)
 (eval-when-compile (require 'cl))
 
 (declare-function tuareg-run-caml "ext:tuareg" ())
+(declare-function tuareg-run-ocaml "ext:tuareg" ())
 (declare-function tuareg-interactive-send-input "ext:tuareg" ())
 
 (defvar org-babel-tangle-lang-exts)
@@ -74,7 +74,11 @@
 					 (progn (setq out t) nil))))
 				   (mapcar #'org-babel-trim (reverse raw))))))))
     (org-babel-reassemble-table
-     (org-babel-ocaml-parse-output (org-babel-trim clean))
+     (let ((raw (org-babel-trim clean)))
+       (org-babel-result-cond (cdr (assoc :result-params params))
+	 ;; strip type information from output
+	 (if (string-match "= \\(.+\\)$" raw) (match-string 1 raw) raw)
+	 (org-babel-ocaml-parse-output raw)))
      (org-babel-pick-name
       (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
      (org-babel-pick-name
@@ -89,8 +93,9 @@
                                                  (stringp session))
                                             session
                                           tuareg-interactive-buffer-name)))
-    (save-window-excursion (tuareg-run-caml)
-                           (get-buffer tuareg-interactive-buffer-name))))
+    (save-window-excursion
+      (if (fboundp 'tuareg-run-caml) (tuareg-run-caml) (tuareg-run-ocaml))
+      (get-buffer tuareg-interactive-buffer-name))))
 
 (defun org-babel-variable-assignments:ocaml (params)
   "Return list of ocaml statements assigning the block's variables."

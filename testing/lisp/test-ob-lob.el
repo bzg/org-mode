@@ -24,15 +24,13 @@
  (expand-file-name
   "library-of-babel.org"
   (expand-file-name
-   "babel"
-   (expand-file-name
-    "contrib"
+   "doc"
     (expand-file-name
      ".."
      (expand-file-name
       ".."
       (file-name-directory
-       (or load-file-name buffer-file-name))))))))
+       (or load-file-name buffer-file-name)))))))
 
 (ert-deftest test-ob-lob/ingest ()
   "Test the ingestion of an org-mode file."
@@ -80,37 +78,31 @@
   "Test the export of a variety of library babel call lines."
   (org-test-at-id "72ddeed3-2d17-4c7f-8192-a575d535d3fc"
     (org-narrow-to-subtree)
-    (let ((html (org-export-as-html nil nil 'string 'body-only)))
-      ;; check the location of each exported number
+    (let ((buf (current-buffer))
+	  (string (buffer-string)))
       (with-temp-buffer
-	(insert html) (goto-char (point-min))
-	;; 0 should be on a line by itself
-	(should (re-search-forward "0" nil t))
-	(should (string= "0" (buffer-substring (point-at-bol) (point-at-eol))))
-	;; 2 should be in <code> tags
-	(should (re-search-forward "2" nil t))
-	(should (re-search-forward (regexp-quote "</code>") (point-at-eol) t))
-	(should (re-search-backward (regexp-quote "<code>") (point-at-bol) t))
-	;; 4 should not be exported
-	(should (not (re-search-forward "4" nil t)))
-	;; 6 should also be inline
-	(should (re-search-forward "6" nil t))
-	(should (re-search-forward (regexp-quote "</code>") (point-at-eol) t))
-	(should (re-search-backward (regexp-quote "<code>") (point-at-bol) t))
-	;; 8 should not be quoted
-	(should (re-search-forward "8" nil t))
-	(should (not (= ?= (char-after (point)))))
-	(should (not (= ?= (char-before (- (point) 1)))))
-	;; 10 should export
-	(should (re-search-forward "10" nil t))))))
+	(org-mode)
+	(insert string)
+	(let ((org-current-export-file buf))
+	  (org-babel-exp-process-buffer))
+	(message (buffer-string))
+	(should (re-search-forward "^: 0" nil t))
+	(should (re-search-forward "call =2= stuck" nil t))
+	(should (re-search-forward
+		 "exported =call_double(it=2)= because" nil t))
+	(should (re-search-forward "^=6= because" nil t))
+	(should (re-search-forward "results 8 should" nil t))
+	(should (re-search-forward "following 2\\*5==10= should" nil t))))))
 
 (ert-deftest test-ob-lob/do-not-eval-lob-lines-in-example-blocks-on-export ()
+  (require 'ox)
   (org-test-with-temp-text-in-file "
 for export
 #+begin_example
 #+call: rubbish()
 #+end_example"
-    (org-export-as-html nil)))
+    (should (progn (org-export-execute-babel-code) t))))
+
 
 (provide 'test-ob-lob)
 

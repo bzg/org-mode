@@ -35,7 +35,6 @@
 (require 'pcomplete)
 
 (declare-function org-split-string "org" (string &optional separators))
-(declare-function org-get-current-options "org-exp" ())
 (declare-function org-make-org-heading-search-string "org"
 		  (&optional string heading))
 (declare-function org-get-buffer-tags "org" ())
@@ -109,11 +108,11 @@ When completing for #+STARTUP, for example, this function returns
   (let ((thing (org-thing-at-point)))
     (cond
      ((string= "file-option" (car thing))
-      (concat (car thing) "/" (downcase (cdr thing))))
+      (concat (car thing)
+	      (and (cdr thing) (concat "/" (downcase (cdr thing))))))
      ((string= "block-option" (car thing))
       (concat (car thing) "/" (downcase (cdr thing))))
-     (t
-      (car thing)))))
+     (t (car thing)))))
 
 (defun org-parse-arguments ()
   "Parse whitespace separated arguments in the current region."
@@ -140,20 +139,82 @@ When completing for #+STARTUP, for example, this function returns
 		 (car (org-thing-at-point)))
 		pcomplete-default-completion-function))))
 
-(defvar org-options-keywords)                ; From org.el
-(defvar org-additional-option-like-keywords) ; From org.el
+(defvar org-options-keywords)		 ; From org.el
+(defvar org-element-block-name-alist)	 ; From org-element.el
+(defvar org-element-affiliated-keywords) ; From org-element.el
+(declare-function org-get-export-keywords "org" ())
 (defun pcomplete/org-mode/file-option ()
   "Complete against all valid file options."
-  (require 'org-exp)
+  (require 'org-element)
   (pcomplete-here
    (org-pcomplete-case-double
-    (mapcar (lambda (x)
-	      (if (= ?: (aref x (1- (length x))))
-		  (concat x " ")
-		x))
-	    (append org-options-keywords
-		    org-additional-option-like-keywords)))
+    (append (mapcar (lambda (keyword) (concat keyword " "))
+		    org-options-keywords)
+	    (mapcar (lambda (keyword) (concat keyword ": "))
+		    org-element-affiliated-keywords)
+	    (let (block-names)
+	      (mapc (lambda (block-name)
+		      (let ((name (car block-name)))
+			(push (format "END_%s: " name) block-names)
+			(push (format "BEGIN_%s: " name) block-names)
+			(push (format "ATTR_%s: " name) block-names)))
+		    org-element-block-name-alist)
+	      block-names)
+	    (mapcar (lambda (keyword) (concat keyword ": "))
+		    (org-get-export-keywords))))
    (substring pcomplete-stub 2)))
+
+(defun pcomplete/org-mode/file-option/author ()
+  "Complete arguments for the #+AUTHOR file option."
+  (pcomplete-here (list user-full-name)))
+
+(defvar org-time-stamp-formats)
+(defun pcomplete/org-mode/file-option/date ()
+  "Complete arguments for the #+DATE file option."
+  (pcomplete-here (list (format-time-string (car org-time-stamp-formats)))))
+
+(defun pcomplete/org-mode/file-option/email ()
+  "Complete arguments for the #+EMAIL file option."
+  (pcomplete-here (list user-mail-address)))
+
+(defvar org-export-exclude-tags)
+(defun pcomplete/org-mode/file-option/exclude_tags ()
+  "Complete arguments for the #+EXCLUDE_TAGS file option."
+  (require 'ox)
+  (pcomplete-here
+   (and org-export-exclude-tags
+	(list (mapconcat 'identity org-export-exclude-tags " ")))))
+
+(defvar org-file-tags)
+(defun pcomplete/org-mode/file-option/filetags ()
+  "Complete arguments for the #+FILETAGS file option."
+  (pcomplete-here (and org-file-tags (mapconcat 'identity org-file-tags " "))))
+
+(defvar org-export-default-language)
+(defun pcomplete/org-mode/file-option/language ()
+  "Complete arguments for the #+LANGUAGE file option."
+  (require 'ox)
+  (pcomplete-here
+   (pcomplete-uniqify-list
+    (list org-export-default-language "en"))))
+
+(defvar org-default-priority)
+(defvar org-highest-priority)
+(defvar org-lowest-priority)
+(defun pcomplete/org-mode/file-option/priorities ()
+  "Complete arguments for the #+PRIORITIES file option."
+  (pcomplete-here (list (format "%c %c %c"
+				org-highest-priority
+				org-lowest-priority
+				org-default-priority))))
+
+(defvar org-export-select-tags)
+(defun pcomplete/org-mode/file-option/select_tags ()
+  "Complete arguments for the #+SELECT_TAGS file option."
+  (require 'ox)
+  (pcomplete-here
+   (and org-export-select-tags
+	(list (mapconcat 'identity org-export-select-tags " ")))))
 
 (defvar org-startup-options)
 (defun pcomplete/org-mode/file-option/startup ()
@@ -169,37 +230,55 @@ When completing for #+STARTUP, for example, this function returns
 		(setq opts (delete "showstars" opts)))))
 	    opts))))
 
-(defmacro pcomplete/org-mode/file-option/x (option)
-  "Complete arguments for OPTION."
-  `(while
-       (pcomplete-here
-	(pcomplete-uniqify-list
-	 (delq nil
-	       (mapcar (lambda(o)
-			 (when (string-match (concat "^[ \t]*#\\+"
-						     ,option ":[ \t]+\\(.*\\)[ \t]*$") o)
-			   (match-string 1 o)))
-		       (split-string (org-get-current-options) "\n")))))))
-
-(defun pcomplete/org-mode/file-option/options ()
-  "Complete arguments for the #+OPTIONS file option."
-  (pcomplete/org-mode/file-option/x "OPTIONS"))
+(defvar org-tag-alist)
+(defun pcomplete/org-mode/file-option/tags ()
+  "Complete arguments for the #+TAGS file option."
+  (pcomplete-here
+   (list
+    (mapconcat (lambda (x)
+		 (cond
+		  ((eq :startgroup (car x)) "{")
+		  ((eq :endgroup (car x)) "}")
+		  ((eq :grouptags (car x)) ":")
+		  ((eq :newline (car x)) "\\n")
+		  ((cdr x) (format "%s(%c)" (car x) (cdr x)))
+		  (t (car x))))
+	       org-tag-alist " "))))
 
 (defun pcomplete/org-mode/file-option/title ()
   "Complete arguments for the #+TITLE file option."
-  (pcomplete/org-mode/file-option/x "TITLE"))
+  (pcomplete-here
+   (let ((visited-file (buffer-file-name (buffer-base-buffer))))
+     (list (or (and visited-file
+		    (file-name-sans-extension
+		     (file-name-nondirectory visited-file)))
+	       (buffer-name (buffer-base-buffer)))))))
 
-(defun pcomplete/org-mode/file-option/author ()
-  "Complete arguments for the #+AUTHOR file option."
-  (pcomplete/org-mode/file-option/x "AUTHOR"))
+(defun pcomplete/org-mode/file-option/options ()
+  "Complete arguments for the #+OPTIONS file option."
+  (while (pcomplete-here
+	  (pcomplete-uniqify-list
+	   (append
+	    ;; Hard-coded OPTION items always available.
+	    '("H:" "\\n:" "num:" "timestamp:" "arch:" "author:" "c:"
+	      "creator:" "date:" "d:" "email:" "*:" "e:" "::" "f:"
+	      "inline:" "tex:" "p:" "pri:" "':" "-:" "stat:" "^:" "toc:"
+	      "|:" "tags:" "tasks:" "<:" "todo:")
+	    ;; OPTION items from registered back-ends.
+	    (let (items)
+	      (dolist (back-end (org-bound-and-true-p
+				 org-export-registered-backends))
+		(dolist (option (plist-get (cdr back-end) :options-alist))
+		  (let ((item (nth 2 option)))
+		    (when item (push (concat item ":") items)))))
+	      items))))))
 
-(defun pcomplete/org-mode/file-option/email ()
-  "Complete arguments for the #+EMAIL file option."
-  (pcomplete/org-mode/file-option/x "EMAIL"))
-
-(defun pcomplete/org-mode/file-option/date ()
-  "Complete arguments for the #+DATE file option."
-  (pcomplete/org-mode/file-option/x "DATE"))
+(defun pcomplete/org-mode/file-option/infojs_opt ()
+  "Complete arguments for the #+INFOJS_OPT file option."
+  (while (pcomplete-here
+	  (pcomplete-uniqify-list
+	   (mapcar (lambda (item) (format "%s:" (car item)))
+		   (org-bound-and-true-p org-html-infojs-opts-table))))))
 
 (defun pcomplete/org-mode/file-option/bind ()
   "Complete arguments for the #+BIND file option, which are variable names."
@@ -290,7 +369,7 @@ This needs more work, to handle headings with lots of spaces in them."
 	(cpllist (mapcar (lambda (x) (concat x ": ")) org-drawers)))
     (pcomplete-here cpllist
 		    (substring pcomplete-stub 1)
-		    (unless (or (not (delete
+		    (unless (or (not (delq
 				      nil
 				      (mapcar (lambda(x)
 						(string-match (substring pcomplete-stub 1) x))
@@ -316,12 +395,12 @@ Complete a language in the first field, the header arguments and switches."
 
 (defun pcomplete/org-mode/block-option/clocktable ()
   "Complete keywords in a clocktable line."
-  (while (pcomplete-here '(":maxlevel" ":scope"
+  (while (pcomplete-here '(":maxlevel" ":scope" ":lang"
 			   ":tstart" ":tend" ":block" ":step"
 			   ":stepskip0" ":fileskip0"
 			   ":emphasize" ":link" ":narrow" ":indent"
 			   ":tcolumns" ":level" ":compact" ":timestamp"
-			   ":formula" ":formatter"))))
+			   ":formula" ":formatter" ":wstart" ":mstart"))))
 
 (defun org-pcomplete-case-double (list)
   "Return list with both upcase and downcase version of all strings in LIST."

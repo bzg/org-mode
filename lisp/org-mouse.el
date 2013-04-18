@@ -1056,7 +1056,7 @@ This means, between the beginning of line and the point."
 	  ["Convert" org-agenda-convert-date
 	   (org-agenda-check-type nil 'agenda 'timeline)]
 	  "--"
-	  ["Create iCalendar file" org-export-icalendar-combine-agenda-files t])
+	  ["Create iCalendar file" org-icalendar-combine-agenda-files t])
 	 "--"
 	 ["Day View" org-agenda-day-view
 	  :active (org-agenda-check-type nil 'agenda)

@@ -19,6 +19,58 @@
 
 ;;; Code:
 
+(ert-deftest test-org-footnote/delete ()
+  "Test `org-footnote-delete' specifications."
+  ;; Regular test.
+  (should
+   (equal "Paragraph"
+	  (org-test-with-temp-text "Paragraph[1]\n\n[1] Definition"
+	    (search-forward "[")
+	    (org-footnote-delete)
+	    (org-trim (buffer-string)))))
+  ;; Remove multiple definitions and references.
+  (should
+   (equal "Paragraph and another"
+	  (org-test-with-temp-text
+	      "Paragraph[1] and another[1]\n\n[1] def\n\n[1] def"
+	    (search-forward "[")
+	    (org-footnote-delete)
+	    (org-trim (buffer-string)))))
+  ;; Delete inline footnotes and all references.
+  (should
+   (equal "Para and"
+	  (org-test-with-temp-text "Para[fn:label:def] and[fn:label]"
+	    (search-forward "[")
+	    (org-footnote-delete)
+	    (org-trim (buffer-string)))))
+  ;; Delete anonymous footnotes.
+  (should
+   (equal "Para"
+	  (org-test-with-temp-text "Para[fn::def]"
+	    (search-forward "[")
+	    (org-footnote-delete)
+	    (org-trim (buffer-string)))))
+  ;; With an argument, delete footnote with specified label.
+  (should
+   (equal "Paragraph[1] and another\n\n[1] def"
+	  (let ((org-footnote-section nil))
+	    (org-test-with-temp-text
+		"Paragraph[1] and another[2]\n\n[1] def\n\n[2] def2"
+	      (org-footnote-delete "2")
+	      (org-trim (buffer-string))))))
+  ;; Error when no argument is specified at point is not at a footnote
+  ;; reference.
+  (should-error
+   (org-test-with-temp-text "Para[1]\n\n[1] Def"
+     (org-footnote-delete)))
+  ;; Correctly delete footnotes with multiple paragraphs.
+  (should
+   (equal "Para\n\n\nOutside footnote."
+	  (org-test-with-temp-text
+	      "Para[1]\n\n[1] para1\n\npara2\n\n\nOutside footnote."
+	    (org-footnote-delete "1")
+	    (org-trim (buffer-string))))))
+
 (ert-deftest test-org-footnote/normalize-in-org ()
   "Test specifications for `org-footnote-normalize' in an Org buffer."
   ;; 1. With a non-nil `org-footnote-section'.
@@ -138,21 +190,10 @@ Text[2]
   "Test `org-footnote-normalize' specifications for buffers not in Org mode."
   ;; 1. In a non-Org buffer, footnotes definitions are always put at
   ;;    its end.
-  (let ((org-footnote-tag-for-non-org-mode-files nil))
-    (with-temp-buffer
-      (insert "Paragraph[fn:1][fn:label][1][fn:inline:Inline][fn::Anonymous]
+  (should
+   (equal
+    "Paragraph[1][2][3][4][5]
 
-\[fn:1] Standard
-
-\[fn:label] Labelled
-
-\[1] Numbered
-
-Some additional text.")
-      (org-footnote-normalize)
-      (should
-       (equal (buffer-string)
-	      "Paragraph[1][2][3][4][5]
 
 Some additional text.
 
@@ -164,7 +205,21 @@ Some additional text.
 
 \[4] Inline
 
-\[5] Anonymous"))))
+\[5] Anonymous"
+    (let ((org-footnote-tag-for-non-org-mode-files nil))
+      (with-temp-buffer
+	(insert "Paragraph[fn:1][fn:label][1][fn:inline:Inline][fn::Anonymous]
+
+\[fn:1] Standard
+
+\[fn:label] Labelled
+
+\[1] Numbered
+
+
+Some additional text.")
+	(org-footnote-normalize)
+	(buffer-string)))))
   ;; 2. With a special tag.
   (let ((org-footnote-tag-for-non-org-mode-files "Footnotes:"))
     ;; 2.1. The tag must be inserted before the footnotes, separated
@@ -174,11 +229,13 @@ Some additional text.
 
 \[fn:1] Standard
 
+
 Some additional text.")
       (org-footnote-normalize)
       (should
        (equal (buffer-string)
 	      "Paragraph[1][2]
+
 
 Some additional text.
 

@@ -22,9 +22,7 @@
 ;; GNU General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -56,6 +54,9 @@
 
 ;;; Code:
 (require 'cl)
+
+(declare-function org-export-string-as "ox"
+		  (string backend &optional body-only ext-plist))
 
 (defcustom org-mime-use-property-inheritance nil
   "Non-nil means al MAIL_ properties apply also for sublevels."
@@ -195,6 +196,8 @@ and images in a multipart/related part."
 html using `org-mode'.  If called with an active region only
 export that region, otherwise export the entire body."
   (interactive "P")
+  (require 'ox-org)
+  (require 'ox-html)
   (let* ((region-p (org-region-active-p))
          (html-start (or (and region-p (region-beginning))
                          (save-excursion
@@ -204,10 +207,11 @@ export that region, otherwise export the entire body."
          (html-end (or (and region-p (region-end))
                        ;; TODO: should catch signature...
                        (point-max)))
-         (raw-body (buffer-substring html-start html-end))
+         (raw-body (concat org-mime-default-header
+			   (buffer-substring html-start html-end)))
          (tmp-file (make-temp-name (expand-file-name
 				    "mail" temporary-file-directory)))
-         (body (org-export-string raw-body 'org (file-name-directory tmp-file)))
+         (body (org-export-string-as raw-body 'org t))
          ;; because we probably don't want to skip part of our mail
          (org-export-skip-text-before-1st-heading nil)
          ;; because we probably don't want to export a huge style file
@@ -219,8 +223,7 @@ export that region, otherwise export the entire body."
          ;; to hold attachments for inline html images
          (html-and-images
           (org-mime-replace-images
-           (org-export-string raw-body 'html (file-name-directory tmp-file))
-           tmp-file))
+	   (org-export-string-as raw-body 'html t) tmp-file))
          (html-images (unless arg (cdr html-and-images)))
          (html (org-mime-apply-html-hook
                 (if arg
@@ -295,26 +298,29 @@ export that region, otherwise export the entire body."
     (let ((fmt (if (symbolp fmt) fmt (intern fmt))))
       (cond
        ((eq fmt 'org)
-	(insert (org-export-string (org-babel-trim (bhook body 'org)) 'org)))
+	(require 'ox-org)
+	(insert (org-export-string-as
+		 (org-babel-trim (bhook body 'org)) 'org t)))
        ((eq fmt 'ascii)
-	(insert (org-export-string
-		 (concat "#+Title:\n" (bhook body 'ascii)) 'ascii)))
+	(require 'ox-ascii)
+	(insert (org-export-string-as
+		 (concat "#+Title:\n" (bhook body 'ascii)) 'ascii t)))
        ((or (eq fmt 'html) (eq fmt 'html-ascii))
+	(require 'ox-ascii)
+	(require 'ox-org)
 	(let* ((org-link-file-path-type 'absolute)
 	       ;; we probably don't want to export a huge style file
 	       (org-export-htmlize-output-type 'inline-css)
-	       (html-and-images (org-mime-replace-images
-				 (org-export-string
-				  (bhook body 'html)
-				  'html (file-name-nondirectory file))
-				 file))
+	       (html-and-images
+		(org-mime-replace-images
+		 (org-export-string-as (bhook body 'html) 'html t) file))
 	       (images (cdr html-and-images))
 	       (html (org-mime-apply-html-hook (car html-and-images))))
 	  (insert (org-mime-multipart
-		   (org-export-string
+		   (org-export-string-as
 		    (org-babel-trim
 		     (bhook body (if (eq fmt 'html) 'org 'ascii)))
-		    (if (eq fmt 'html) 'org 'ascii))
+		    (if (eq fmt 'html) 'org 'ascii) t)
 		   html)
 		  (mapconcat 'identity images "\n"))))))))
 

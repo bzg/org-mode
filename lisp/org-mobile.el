@@ -76,6 +76,13 @@ org-agenda-text-search-extra-files
   :group 'org-mobile
   :type 'directory)
 
+(defcustom org-mobile-allpriorities "A B C"
+  "Default set of priority cookies for the index file."
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'string
+  :group 'org-mobile)
+
 (defcustom org-mobile-use-encryption nil
   "Non-nil means keep only encrypted files on the WebDAV server.
 Encryption uses AES-256, with a password given in
@@ -276,7 +283,7 @@ Also exclude files matching `org-mobile-files-exclude-regexp'."
 		      (list f))
 		     (t nil)))
 		  org-mobile-files)))
-	 (files (delete
+	 (files (delq
 		 nil
 		 (mapcar (lambda (f)
 			   (unless (and (not (string= org-mobile-files-exclude-regexp ""))
@@ -299,8 +306,6 @@ Also exclude files matching `org-mobile-files-exclude-regexp'."
 	  (setq link-name (file-name-nondirectory uname)))
 	(push (cons file link-name) rtn)))
     (nreverse rtn)))
-
-(defvar org-agenda-filter)
 
 ;;;###autoload
 (defun org-mobile-push ()
@@ -463,7 +468,7 @@ agenda view showing the flagged items."
       (setq tags (append def-tags tags nil))
       (insert "#+TAGS: " (mapconcat 'identity tags " ") "\n")
       (insert "#+DRAWERS: " (mapconcat 'identity drawers " ") "\n")
-      (insert "#+ALLPRIORITIES: A B C" "\n")
+      (insert "#+ALLPRIORITIES: " org-mobile-allpriorities "\n")
       (when (file-exists-p (expand-file-name
 			    org-mobile-directory "agendas.org"))
 	(insert "* [[file:agendas.org][Agenda Views]]\n"))
@@ -1061,13 +1066,13 @@ be returned that indicates what went wrong."
 	 (t (error "Heading changed in MobileOrg and on the computer")))))
 
      ((eq what 'addheading)
-      (if (org-on-heading-p) ; if false we are in top-level of file
+      (if (org-at-heading-p) ; if false we are in top-level of file
 	  (progn
 	    ;; Workaround a `org-insert-heading-respect-content' bug
 	    ;; which prevents correct insertion when point is invisible
 	    (org-show-subtree)
 	    (end-of-line 1)
-	    (org-insert-heading-respect-content t)
+	    (org-insert-heading-respect-content '(16) t)
 	    (org-demote))
 	(beginning-of-line)
 	(insert "* "))
@@ -1076,7 +1081,7 @@ be returned that indicates what went wrong."
      ((eq what 'refile)
       (org-copy-subtree)
       (org-with-point-at (org-mobile-locate-entry new)
-	(if (org-on-heading-p) ; if false we are in top-level of file
+	(if (org-at-heading-p) ; if false we are in top-level of file
 	    (progn
 	      (setq level (org-get-valid-level (funcall outline-level) 1))
 	      (org-end-of-subtree t t)

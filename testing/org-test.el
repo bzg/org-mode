@@ -30,7 +30,14 @@
 
 
 ;;;; Code:
-(require 'org-test-ob-consts)
+
+;;; Ob constants
+
+(defconst org-test-file-ob-anchor
+  "94839181-184f-4ff4-a72f-94214df6f5ba")
+
+(defconst org-test-link-in-heading-file-ob-anchor
+  "a8b1d111-eca8-49f0-8930-56d4f0875155")
 
 (let* ((org-test-dir (expand-file-name
 		      (file-name-directory
@@ -42,7 +49,8 @@
     (setq load-path (cons org-lisp-dir load-path))
     (require 'org)
     (require 'org-id)
-     (org-babel-do-load-languages
+    (require 'ox)
+    (org-babel-do-load-languages
      'org-babel-load-languages '((sh . t) (org . t))))
 
   (let* ((load-path (cons
@@ -136,18 +144,19 @@ currently executed.")
 	  (id-file (car id-location))
 	  (visited-p (get-file-buffer id-file))
 	  to-be-removed)
-     (save-window-excursion
-       (save-match-data
-	 (org-id-goto ,id)
-	 (setq to-be-removed (current-buffer))
-	 (condition-case nil
-	     (progn
-	       (org-show-subtree)
-	       (org-show-block-all))
-	   (error nil))
-	 (save-restriction ,@body)))
-     (unless visited-p
-       (kill-buffer to-be-removed))))
+     (unwind-protect
+	 (save-window-excursion
+	   (save-match-data
+	     (org-id-goto ,id)
+	     (setq to-be-removed (current-buffer))
+	     (condition-case nil
+		 (progn
+		   (org-show-subtree)
+		   (org-show-block-all))
+	       (error nil))
+	     (save-restriction ,@body)))
+       (unless (or visited-p (not to-be-removed))
+	 (kill-buffer to-be-removed)))))
 (def-edebug-spec org-test-at-id (form body))
 
 (defmacro org-test-in-example-file (file &rest body)
@@ -214,11 +223,63 @@ otherwise place the point at the beginning of the inserted text."
        (with-temp-file ,file (insert ,inside-text))
        (find-file ,file)
        (org-mode)
-       (setq ,results ,@body)
+       (setq ,results (progn ,@body))
        (save-buffer) (kill-buffer (current-buffer))
        (delete-file ,file)
        ,results)))
 (def-edebug-spec org-test-with-temp-text-in-file (form body))
+
+(defun org-test-table-target-expect (target &optional expect laps
+&rest tblfm)
+  "For all TBLFM: Apply the formula to TARGET, compare EXPECT with result.
+Either LAPS and TBLFM are nil and the table will only be aligned
+or LAPS is the count of recalculations that should be made on
+each TBLFM.  To save ERT run time keep LAPS as low as possible to
+get the table stable.  Anyhow, if LAPS is 'iterate then iterate,
+but this will run one recalculation longer.  When EXPECT is nil
+it will be set to TARGET.
+
+If running a test interactively in ERT is not enough and you need
+to examine the target table with e. g. the Org formula debugger
+or an Emacs Lisp debugger (e. g. with point in a data field and
+calling the instrumented `org-table-eval-formula') then copy and
+paste the table with formula from the ERT results buffer or
+temporarily substitute the `org-test-with-temp-text' of this
+function with `org-test-with-temp-text-in-file'.
+
+Consider setting `pp-escape-newlines' to nil manually."
+  (require 'pp)
+  (let ((back pp-escape-newlines) (current-tblfm))
+    (unless tblfm
+      (should-not laps)
+      (push "" tblfm))  ; Dummy formula.
+    (unless expect (setq expect target))
+    (while (setq current-tblfm (pop tblfm))
+      (org-test-with-temp-text (concat target current-tblfm)
+	;; Search table, stop ERT at end of buffer if not found.
+	(while (not (org-at-table-p))
+	  (should (eq 0 (forward-line))))
+	(when laps
+	  (if (and (symbolp laps) (eq laps 'iterate))
+	      (should (org-table-recalculate 'iterate t))
+	    (should (integerp laps))
+	    (should (< 0 laps))
+	    (let ((cnt laps))
+	      (while (< 0 cnt)
+		(should (org-table-recalculate 'all t))
+		(setq cnt (1- cnt))))))
+	(org-table-align)
+	(setq pp-escape-newlines nil)
+	;; Declutter the ERT results buffer by giving only variables
+	;; and not directly the forms to `should'.
+	(let ((expect (concat expect current-tblfm))
+	      (result (buffer-substring-no-properties
+		       (point-min) (point-max))))
+	  (should (equal expect result)))
+	;; If `should' passed then set back `pp-escape-newlines' here,
+	;; else leave it nil as a side effect to see the failed table
+	;; on multiple lines in the ERT results buffer.
+	(setq pp-escape-newlines back)))))
 
 
 ;;; Navigation Functions
@@ -250,8 +311,7 @@ otherwise place the point at the beginning of the inserted text."
 	 "			\"..\" (file-name-directory\n"
 	 "			      (or load-file-name buffer-file-name)))\n"
 	 "		       load-path)))\n"
-	 "  (require 'org-test)\n"
-	 "  (require 'org-test-ob-consts))\n\n"
+	 "  (require 'org-test)\n\n"
 	 "\n"
 	 ";;; Tests\n"
 	 "(ert-deftest " name "/example-test ()\n"
@@ -300,7 +360,7 @@ otherwise place the point at the beginning of the inserted text."
 		     (rld path)
 		   (condition-case err
 		       (when (string-match "^[A-Za-z].*\\.el$"
-					 (file-name-nondirectory path))
+					   (file-name-nondirectory path))
 			 (load-file path))
 		     (missing-test-dependency
 		      (let ((name (intern

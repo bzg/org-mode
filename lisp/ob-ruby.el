@@ -37,9 +37,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-ref)
-(require 'ob-comint)
-(require 'ob-eval)
 (eval-when-compile (require 'cl))
 
 (declare-function run-ruby "ext:inf-ruby" (&optional command name))
@@ -71,7 +68,9 @@ This function is called by `org-babel-execute-src-block'."
 		   (org-babel-ruby-evaluate
 		    session full-body result-type result-params))))
     (org-babel-reassemble-table
-     result
+     (org-babel-result-cond result-params
+       result
+       (org-babel-ruby-table-or-string result))
      (org-babel-pick-name (cdr (assoc :colname-names params))
 			  (cdr (assoc :colnames params)))
      (org-babel-pick-name (cdr (assoc :rowname-names params))
@@ -206,31 +205,27 @@ return the value of the last statement in BODY, as elisp."
 	      (comint-send-input nil t)) 2)
 	   "\n") "[\r\n]")) "\n"))
       (value
-       ((lambda (results)
-	  (if (or (member "code" result-params) (member "pp" result-params))
-	      results
-	    (org-babel-ruby-table-or-string results)))
-	(let* ((tmp-file (org-babel-temp-file "ruby-"))
-	       (ppp (or (member "code" result-params)
-			(member "pp" result-params))))
-	  (org-babel-comint-with-output
-	      (buffer org-babel-ruby-eoe-indicator t body)
-	    (when ppp (insert "require 'pp';") (comint-send-input nil t))
-	    (mapc
-	     (lambda (line)
-	       (insert (org-babel-chomp line)) (comint-send-input nil t))
-	     (append
-	      (list body)
-	      (if (not ppp)
-		  (list (format org-babel-ruby-f-write
-				(org-babel-process-file-name tmp-file 'noquote)))
-		(list
-		 "results=_" "require 'pp'" "orig_out = $stdout"
-		 (format org-babel-ruby-pp-f-write
-			 (org-babel-process-file-name tmp-file 'noquote))))
-	      (list org-babel-ruby-eoe-indicator)))
-	    (comint-send-input nil t))
-	  (org-babel-eval-read-file tmp-file)))))))
+       (let* ((tmp-file (org-babel-temp-file "ruby-"))
+	      (ppp (or (member "code" result-params)
+		       (member "pp" result-params))))
+	 (org-babel-comint-with-output
+	     (buffer org-babel-ruby-eoe-indicator t body)
+	   (when ppp (insert "require 'pp';") (comint-send-input nil t))
+	   (mapc
+	    (lambda (line)
+	      (insert (org-babel-chomp line)) (comint-send-input nil t))
+	    (append
+	     (list body)
+	     (if (not ppp)
+		 (list (format org-babel-ruby-f-write
+			       (org-babel-process-file-name tmp-file 'noquote)))
+	       (list
+		"results=_" "require 'pp'" "orig_out = $stdout"
+		(format org-babel-ruby-pp-f-write
+			(org-babel-process-file-name tmp-file 'noquote))))
+	     (list org-babel-ruby-eoe-indicator)))
+	   (comint-send-input nil t))
+	 (org-babel-eval-read-file tmp-file))))))
 
 (defun org-babel-ruby-read-string (string)
   "Strip \\\"s from around a ruby string."

@@ -186,7 +186,7 @@ the link."
   :type 'boolean)
 
 (defcustom org-id-locations-file (convert-standard-filename
-				  "~/.emacs.d/.org-id-locations")
+				  (concat user-emacs-directory ".org-id-locations"))
   "The file for remembering in which file an ID was defined.
 This variable is only relevant when `org-id-track-globally' is set."
   :group 'org-id
@@ -343,7 +343,7 @@ So a typical ID could look like \"Org:4nd91V40HI\"."
       (unless (org-uuidgen-p unique)
 	(setq unique (org-id-uuid))))
      ((eq org-id-method 'org)
-      (let* ((etime (org-id-reverse-string (org-id-time-to-b36)))
+      (let* ((etime (org-reverse-string (org-id-time-to-b36)))
 	     (postfix (if org-id-include-domain
 			  (progn
 			    (require 'message)
@@ -375,9 +375,6 @@ So a typical ID could look like \"Org:4nd91V40HI\"."
 		       (substring rnd 16 18) 16))))
 	    (substring rnd 18 20)
 	    (substring rnd 20 32))))
-
-(defun org-id-reverse-string (s)
-  (mapconcat 'char-to-string (nreverse (string-to-list s)) ""))
 
 (defun org-id-int-to-b36-one-digit (i)
   "Turn an integer between 0 and 61 into a single character 0..9, A..Z, a..z."
@@ -432,7 +429,7 @@ and time is the usual three-integer representation of time."
     (if (= 2 (length parts))
 	(setq prefix (car parts) time (nth 1 parts))
       (setq prefix nil time (nth 0 parts)))
-    (setq time (org-id-reverse-string time))
+    (setq time (org-reverse-string time))
     (setq time (list (org-id-b36-to-int (substring time 0 4))
 		     (org-id-b36-to-int (substring time 4 8))
 		     (org-id-b36-to-int (substring time 8 12))))
