@@ -608,7 +608,7 @@ HTML export
 
 @LaTeX{} and PDF export
 
-* @LaTeX{}/PDF export commands::
+* @LaTeX{} export commands::    How to export to LaTeX and PDF
 * Header and sectioning::       Setting up the export file structure
 * Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
 * @LaTeX{} specific attributes::  Controlling @LaTeX{} output
@@ -10834,9 +10834,9 @@ Beamer export introduces a number of keywords to insert code in the
 document's header.  Four control appearance of the presentantion:
 @code{#+BEAMER_THEME}, @code{#+BEAMER_COLOR_THEME},
 @code{#+BEAMER_FONT_THEME}, @code{#+BEAMER_INNER_THEME} and
-@code{#+BEAMER_OUTER_THEME}.  All of them accept optional arguments within
-square brackets.  The last one, @code{#+BEAMER_HEADER}, is more generic and
-allows to append any line of code in the header.
+@code{#+BEAMER_OUTER_THEME}.  All of them accept optional arguments
+within square brackets.  The last one, @code{#+BEAMER_HEADER}, is more
+generic and allows you to append any line of code in the header.
 
 @example
 #+BEAMER_THEME: Rochester [height=20pt]
@@ -10877,10 +10877,10 @@ A *@@@@beamer:<2->@@@@useful* feature
 
 @cindex #+ATTR_BEAMER
 Eventually, every plain list has support for @code{:environment},
-@code{:overlay} and @code{:options} attributes through @code{ATTR_BEAMER}
-affiliated keyword.  The first one allows to use a different environment, the
-second sets overlay specifications and the last one inserts optional
-arguments in current list environment.
+@code{:overlay} and @code{:options} attributes through
+@code{ATTR_BEAMER} affiliated keyword.  The first one allows the use
+of a different environment, the second sets overlay specifications and
+the last one inserts optional arguments in current list environment.
 
 @example
 #+ATTR_BEAMER: :overlay +-
@@ -11341,30 +11341,34 @@ pages, configure the variable @var{org-html-use-infojs}.
 @cindex @LaTeX{} export
 @cindex PDF export
 
-Org mode contains a @LaTeX{} exporter.  With further processing@footnote{The
+@LaTeX{} export can produce an arbitrarily complex LaTeX document of any
+standard or custom document class.  With further processing@footnote{The
 default @LaTeX{} output is designed for processing with @code{pdftex} or
 @LaTeX{}.  It includes packages that are not compatible with @code{xetex} and
-possibly @code{luatex}.  See the variables
-@var{org-latex-default-packages-alist} and
-@var{org-latex-packages-alist}.}, this back-end is also used to produce PDF
-output.  Since the @LaTeX{} output uses @file{hyperref} to implement links
-and cross references, the PDF output file will be fully linked.
+possibly @code{luatex}.  The @LaTeX{} exporter can be configured to support
+alternative TeX engines, see the options
+@var{org-latex-default-packages-alist} and @var{org-latex-packages-alist}.},
+which the @LaTeX{} exporter is able to control, this back-end is able to
+produce PDF output.  Because the @LaTeX{} exporter can be configured to use
+the @code{hyperref} package, the default setup produces fully-linked PDF
+output.
 
-As is @LaTeX{}, blank lines are meaningful for this back-end: a paragraph
+As in @LaTeX{}, blank lines are meaningful for this back-end: a paragraph
 will not be started if two contiguous syntactical elements are not separated
 by an empty line.
 
 This back-end also offers enhanced support for footnotes.  Thus, it handles
-nested footnotes, footnotes in tables and footnotes in items' description.
+nested footnotes, footnotes in tables and footnotes in a list item's
+description.
 
 @menu
-* @LaTeX{}/PDF export commands::
+* @LaTeX{} export commands::    How to export to LaTeX and PDF
 * Header and sectioning::       Setting up the export file structure
 * Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
 * @LaTeX{} specific attributes::  Controlling @LaTeX{} output
 @end menu
 
-@node @LaTeX{}/PDF export commands, Header and sectioning, @LaTeX{} and PDF export, @LaTeX{} and PDF export
+@node @LaTeX{} export commands, Header and sectioning, @LaTeX{} and PDF export, @LaTeX{} and PDF export
 @subsection @LaTeX{} export commands
 
 @table @kbd
@@ -11380,7 +11384,7 @@ Export as @LaTeX{} and then process to PDF.
 Export as @LaTeX{} and then process to PDF, then open the resulting PDF file.
 @end table
 
-@node Header and sectioning, Quoting @LaTeX{} code, @LaTeX{}/PDF export commands, @LaTeX{} and PDF export
+@node Header and sectioning, Quoting @LaTeX{} code, @LaTeX{} export commands, @LaTeX{} and PDF export
 @subsection Header and sectioning structure
 @cindex @LaTeX{} class
 @cindex @LaTeX{} sectioning structure
@@ -11388,10 +11392,10 @@ Export as @LaTeX{} and then process to PDF, then open the resulting PDF file.
 @cindex header, for @LaTeX{} files
 @cindex sectioning structure, for @LaTeX{} export
 
-The first three outline levels become headlines, defining a general document
-structure.  Additional levels are exported as @code{itemize} or
-@code{enumerate} lists.  The transition can also occur at a different level
-(@pxref{Export settings}).
+By default, the first three outline levels become headlines, defining a
+general document structure.  Additional levels are exported as @code{itemize}
+or @code{enumerate} lists.  The transition can also occur at a different
+level (@pxref{Export settings}).
 
 By default, the @LaTeX{} output uses the class @code{article}.
 
@@ -11414,14 +11418,14 @@ class.  You can also define your own classes there.
 @cindex #+LATEX_CLASS_OPTIONS
 @cindex property, EXPORT_LATEX_CLASS
 @cindex property, EXPORT_LATEX_CLASS_OPTIONS
-@code{LATEX_CLASS_OPTIONS} keyword or @code{EXPORT_LATEX_CLASS_OPTIONS}
+The @code{LATEX_CLASS_OPTIONS} keyword or @code{EXPORT_LATEX_CLASS_OPTIONS}
 property can specify the options for the @code{\documentclass} macro.  These
 options have to be provided, as expected by @LaTeX{}, within square brackets.
 
 @cindex #+LATEX_HEADER
 @cindex #+LATEX_HEADER_EXTRA
-You can also use @code{LATEX_HEADER} and
-@code{LATEX_HEADER_EXTRA}@footnote{Unlike to @code{LATEX_HEADER}, contents
+You can also use the @code{LATEX_HEADER} and
+@code{LATEX_HEADER_EXTRA}@footnote{Unlike @code{LATEX_HEADER}, contents
 from @code{LATEX_HEADER_EXTRA} keywords will not be loaded when previewing
 @LaTeX{} snippets (@pxref{Previewing @LaTeX{} fragments}).} keywords in order
 to add lines to the header.  See the docstring of @var{org-latex-classes} for
@@ -11469,7 +11473,7 @@ affect tables, images, plain lists, special blocks and source blocks.
 
 For @LaTeX{} export of a table, you can specify a label and a caption
 (@pxref{Images and tables}).  You can also use attributes to control table
-layout and contents.  Valid properties are:
+layout and contents.  Valid @LaTeX{} attributes include:
 
 @table @code
 @item :mode
@@ -11483,7 +11487,7 @@ environment.  Default mode is determined in
 @var{org-latex-default-table-mode}.
 @item :environment
 @vindex org-latex-default-table-environment
-Environment used for the table.  It can be to any @LaTeX{} table
+Environment used for the table.  It can be set to any @LaTeX{} table
 environment, like @code{tabularx}, @code{longtable}, @code{array},
 @code{tabu}, @code{bmatrix}@enddots{}  It defaults to
 @var{org-latex-default-table-environment} value.
@@ -11495,7 +11499,7 @@ can specify the positioning of the float.
 @item :align
 @itemx :font
 @itemx :width
-set, respectively, the alignment string of the table, its font size and its
+Set, respectively, the alignment string of the table, its font size and its
 width.  They only apply on regular tables.
 @item :spread
 Boolean specific to the @code{tabu} and @code{longtabu} environments, and
@@ -11510,16 +11514,16 @@ value of @code{:width}.
 They toggle, respectively, @code{booktabs} usage (assuming the package is
 properly loaded), table centering and removal of every horizontal rule but
 the first one (in a "table.el" table only).  In particular,
-@var{org-latex-tables-booktabs} (resp.@: @var{org-latex-tables-centered})
-activates the first (resp.@: second) attribute globally.
+@var{org-latex-tables-booktabs} (respectively @var{org-latex-tables-centered})
+activates the first (respectively second) attribute globally.
 @item :math-prefix
 @itemx :math-suffix
 @itemx :math-arguments
-string which will be inserted, respectively, before the table within the math
-environment, after the table within the math environment, and between the
-macro name and the contents of the table.  The latter attribute is necessary
-to matrix macros that require more than one argument (e.g.,
-@code{qbordermatrix}).
+A string that will be inserted, respectively, before the table within the
+math environment, after the table within the math environment, and between
+the macro name and the contents of the table.  The @code{:math-arguments}
+attribute is used for matrix macros that require more than one argument
+(e.g., @code{qbordermatrix}).
 @end table
 
 Thus, attributes can be used in a wide array of situations, like writing
@@ -11582,16 +11586,17 @@ To modify the placement option of any floating environment, set the
 [[./img/hst.png]]
 @end example
 
-Eventually, in the @code{:comment-include} attributes has a non-@code{nil} value,
-the code actually including the image will be commented out.
+If the @code{:comment-include} attribute is set to a non-@code{nil} value,
+the @LaTeX{} @code{\includegraphics} macro will be commented out.
 
 @subsubheading Plain lists in @LaTeX{} export
 @cindex plain lists, in @LaTeX{} export
 
 Plain lists accept two optional attributes: @code{:environment} and
-@code{:options}.  The first one allows to use a non-standard environment
-(e.g., @samp{inparaenum}).  The second one allows to specify optional
-arguments for that environment (square brackets may be omitted).
+@code{:options}.  The first one allows the use of a non-standard
+environment (e.g., @samp{inparaenum}).  The second one specifies
+optional arguments for that environment (square brackets may be
+omitted).
 
 @example
 #+ATTR_LATEX: :environment compactitem :options $\circ$
@@ -11601,9 +11606,10 @@ arguments for that environment (square brackets may be omitted).
 @subsubheading Source blocks in @LaTeX{} export
 @cindex source blocks, in @LaTeX{} export
 
-In addition to syntax defined in @ref{Literal examples}, names and captions
-(@pxref{Images and tables}), source blocks also accept @code{:long-listing}
-attribute, which prevents the block to become a float when non-@code{nil}.
+In addition to syntax defined in @ref{Literal examples}, names and
+captions (@pxref{Images and tables}), source blocks also accept a
+@code{:long-listing} attribute, which prevents the block from floating
+when non-@code{nil}.
 
 @example
 #+ATTR_LATEX: :long-listing t
