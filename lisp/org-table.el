@@ -4975,7 +4975,7 @@ FORM is a field or range descriptor like \"@2$3\" or \"B3\" or
 \"@I$2..@II$2\".  All the references must be absolute, not relative.
 
 The return value is either a single string for a single field, or a
-list of the fields in the rectangle ."
+list of the fields in the rectangle."
   (save-match-data
     (let ((case-fold-search t) (id-loc nil)
 	  ;; Protect a bunch of variables from being overwritten
