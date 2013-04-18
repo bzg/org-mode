@@ -417,10 +417,10 @@ then run `org-babel-load-in-session'."
 (defun org-babel-pop-to-session-maybe ()
   "Conditionally pop to a session.
 Detect if this is context for a org-babel src-block and if so
-then run `org-babel-pop-to-session'."
+then run `org-babel-switch-to-session'."
   (interactive)
   (let ((info (org-babel-get-src-block-info)))
-    (if info (progn (org-babel-pop-to-session current-prefix-arg info) t) nil)))
+    (if info (progn (org-babel-switch-to-session current-prefix-arg info) t) nil)))
 
 (add-hook 'org-metadown-hook 'org-babel-pop-to-session-maybe)
 
