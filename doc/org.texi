@@ -17539,8 +17539,8 @@ would not be complete without adding a few more acknowledgements and thanks
 to Carsten's ones above.
 
 I am first grateful to Carsten for his trust while handing me over the
-maintainership of Org.  His support as been great since day one of this new
-adventure, and it helped a lot.
+maintainership of Org.  His unremitting support is what really helped me
+getting more confident over time, with both the community and the code.
 
 When I took over maintainership, I knew I would have to make Org more
 collaborative than ever, as I would have to rely on people that are more
