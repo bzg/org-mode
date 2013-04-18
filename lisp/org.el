@@ -9466,8 +9466,8 @@ active region."
 	((and (buffer-file-name (buffer-base-buffer)) (derived-mode-p 'org-mode))
 	 (setq custom-id (org-entry-get nil "CUSTOM_ID"))
 	 (cond
-	  ;; Store a link using the radio target at point
-	  ((org-in-regexp "<<\\(.*?\\)>>")
+	  ;; Store a link using the target at point
+	  ((org-in-regexp "[^<]<<\\([^<>]+\\)>>[^>]" 1)
 	   (setq cpltxt
 		 (concat "file:"
 			 (abbreviate-file-name
@@ -10329,7 +10329,10 @@ application the system uses for this file type."
 			(or (previous-single-property-change pos 'org-linked-text)
 			    (point-min))
 			(or (next-single-property-change pos 'org-linked-text)
-			    (point-max))))
+			    (point-max)))
+		  ;; Ensure we will search for a <<<radio>>> link, not
+		  ;; a simple reference like <<ref>>
+		  path (concat "<" path))
 	    (throw 'match t))
 
 	  (save-excursion
