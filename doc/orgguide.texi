@@ -147,7 +147,7 @@ Tags
 
 * Tag inheritance::		Tags use the tree structure of the outline
 * Setting tags::		How to assign tags to a headline
-* Tag searches::		Searching for combinations of tags
+* Tag groups::			Use one tag to search for several tags
 * Tag searches::		Searching for combinations of tags
 
 Dates and Times
@@ -188,7 +188,7 @@ The built-in agenda views
 Markup for rich export
 
 * Structural markup elements::	The basic structure as seen by the exporter
-* Images and tables::		Tables and Images will be included
+* Images and tables::		Images, tables and caption mechanism
 * Literal examples::		Source code examples with special formatting
 * Include files::		Include additional files into a document
 * Embedded @LaTeX{}::		@LaTeX{} can be freely used inside Org documents
@@ -1113,7 +1113,7 @@ Tags will by default be in bold face with the same color as the headline.
 @menu
 * Tag inheritance::		Tags use the tree structure of the outline
 * Setting tags::		How to assign tags to a headline
-* Tag searches::		Searching for combinations of tags
+* Tag groups::			Use one tag to search for several tags
 * Tag searches::		Searching for combinations of tags
 @end menu
 
