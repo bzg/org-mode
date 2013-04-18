@@ -7026,7 +7026,10 @@ For non-unique headings, the full path is safer.
 Use a regular expression to position the cursor.
 
 @item (file+datetree "path/to/file")
-Will create a heading in a date tree for today's date.
+Will create a heading in a date tree for today's date@footnote{Datetree
+headlines for years accept tags, so if you use both @code{* 2013 :noexport:}
+and @code{* 2013} in your file, the capture will refile the note to the first
+one matched.}.
 
 @item (file+datetree+prompt "path/to/file")
 Will create a heading in a date tree, but will prompt for the date.
