@@ -351,15 +351,25 @@ of potentially harmful code."
   (or (org-babel-execute-src-block-maybe)
       (org-babel-lob-execute-maybe)))
 
+(defmacro org-babel-when-in-src-block (&rest body)
+  "Execute BODY if point is in a source block and return t.
+
+Otherwise do nothing and return nil."
+  `(if (or (org-babel-where-is-src-block-head)
+           (org-babel-get-inline-src-block-matches))
+       (progn
+	 ,@body
+	 t)
+     nil))
+
 (defun org-babel-execute-src-block-maybe ()
   "Conditionally execute a source block.
 Detect if this is context for a Babel src-block and if so
 then run `org-babel-execute-src-block'."
   (interactive)
-  (let ((info (org-babel-get-src-block-info)))
-    (if info
-	(progn (org-babel-eval-wipe-error-buffer)
-	       (org-babel-execute-src-block current-prefix-arg info) t) nil)))
+  (org-babel-when-in-src-block
+   (org-babel-eval-wipe-error-buffer)
+   (org-babel-execute-src-block current-prefix-arg)))
 
 ;;;###autoload
 (defun org-babel-view-src-block-info ()
@@ -395,10 +405,8 @@ a window into the `org-babel-get-src-block-info' function."
 Detect if this is context for a org-babel src-block and if so
 then run `org-babel-expand-src-block'."
   (interactive)
-  (let ((info (org-babel-get-src-block-info)))
-    (if info
-	(progn (org-babel-expand-src-block current-prefix-arg info) t)
-      nil)))
+  (org-babel-when-in-src-block
+   (org-babel-expand-src-block current-prefix-arg)))
 
 ;;;###autoload
 (defun org-babel-load-in-session-maybe ()
@@ -406,10 +414,8 @@ then run `org-babel-expand-src-block'."
 Detect if this is context for a org-babel src-block and if so
 then run `org-babel-load-in-session'."
   (interactive)
-  (let ((info (org-babel-get-src-block-info)))
-    (if info
-	(progn (org-babel-load-in-session current-prefix-arg info) t)
-      nil)))
+  (org-babel-when-in-src-block
+   (org-babel-load-in-session current-prefix-arg)))
 
 (add-hook 'org-metaup-hook 'org-babel-load-in-session-maybe)
 
@@ -419,8 +425,8 @@ then run `org-babel-load-in-session'."
 Detect if this is context for a org-babel src-block and if so
 then run `org-babel-switch-to-session'."
   (interactive)
-  (let ((info (org-babel-get-src-block-info)))
-    (if info (progn (org-babel-switch-to-session current-prefix-arg info) t) nil)))
+  (org-babel-when-in-src-block
+   (org-babel-switch-to-session current-prefix-arg)))
 
 (add-hook 'org-metadown-hook 'org-babel-pop-to-session-maybe)
 
