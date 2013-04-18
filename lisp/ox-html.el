@@ -2,7 +2,8 @@
 
 ;; Copyright (C) 2011-2013  Free Software Foundation, Inc.
 
-;; Author: Jambunathan K <kjambunathan at gmail dot com>
+;; Author: Carsten Dominik <carsten at orgmode dot org>
+;;      Jambunathan K <kjambunathan at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp
 
 ;; GNU Emacs is free software: you can redistribute it and/or modify
@@ -24,7 +25,7 @@
 
 ;; To test it, run:
 ;;
-;;   M-x org-export-as-html
+;;   M-x org-html-export-as-html
 ;;
 ;; in an Org mode buffer.  See ox.el for more details on how this
 ;; exporter works.
