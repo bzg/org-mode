@@ -2205,7 +2205,18 @@ holding contextual information."
   "Transcode a subscript or superscript object.
 OBJECT is an Org object.  INFO is a plist used as a communication
 channel."
-  (let ((output ""))
+  (let ((in-script-p
+	 ;; Non-nil if object is already in a sub/superscript.
+	 (let ((parent object))
+	   (catch 'exit
+	     (while (setq parent (org-export-get-parent parent))
+	       (let ((type (org-element-type parent)))
+		 (cond ((memq type '(subscript superscript))
+			(throw 'exit t))
+		       ((memq type org-element-all-elements)
+			(throw 'exit nil))))))))
+	(type (org-element-type object))
+	(output ""))
     (org-element-map (org-element-contents object)
 	(cons 'plain-text org-element-all-objects)
       (lambda (obj)
@@ -2222,12 +2233,7 @@ channel."
 			     (and blank (> blank 0) "\\ "))))))
 	  (plain-text
 	   (setq output
-		 (format "%s\\mathrm{%s}"
-			 output
-			 ;; \mathrm command doesn't handle spaces, so
-			 ;; we have to enforce them.
-			 (replace-regexp-in-string
-			  " " "\\\\ " (org-export-data obj info)))))
+		 (format "%s\\text{%s}" output (org-export-data obj info))))
 	  (otherwise
 	   (setq output
 		 (concat output
@@ -2235,10 +2241,31 @@ channel."
 			 (let ((blank (org-element-property :post-blank obj)))
 			   (and blank (> blank 0) "\\ ")))))))
       info nil org-element-recursive-objects)
-    ;; Result.
-    (format (if (= (length output) 1) "$%s%s$" "$%s{%s}$")
+    ;; Result.  Do not wrap into math mode if already in a subscript
+    ;; or superscript.  Do not wrap into curly brackets if OUTPUT is
+    ;; a single character.  Also merge consecutive subscript and
+    ;; superscript into the same math snippet.
+    (concat (and (not in-script-p)
+		 (let ((prev (org-export-get-previous-element object info)))
+		   (or (not prev)
+		       (not (eq (org-element-type prev)
+				(if (eq type 'subscript) 'superscript
+				  'subscript)))
+		       (let ((blank (org-element-property :post-blank prev)))
+			 (and blank (> blank 0)))))
+		 "$")
 	    (if (eq (org-element-type object) 'subscript) "_" "^")
-	    output)))
+	    (and (> (length output) 1) "{")
+	    output
+	    (and (> (length output) 1) "}")
+	    (and (not in-script-p)
+		 (or (let ((blank (org-element-property :post-blank object)))
+		       (and blank (> blank 0)))
+		     (not (eq (org-element-type
+			       (org-export-get-next-element object info))
+			      (if (eq type 'subscript) 'superscript
+				'subscript))))
+		 "$"))))
 
 (defun org-latex-subscript (subscript contents info)
   "Transcode a SUBSCRIPT object from Org to LaTeX.

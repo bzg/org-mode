@@ -117,13 +117,13 @@ setting of `org-html-htmlize-output-type' is 'css."
 		(org-open-file (org-org-export-to-org nil s v b))))))))
 
 (defun org-org-identity (blob contents info)
-  "Transcode BLOB element or object back into Org syntax."
-  (funcall
-   (intern (format "org-element-%s-interpreter" (org-element-type blob)))
-   blob contents))
+  "Transcode BLOB element or object back into Org syntax.
+CONTENTS is its contents, as a string or nil.  INFO is ignored."
+  (org-export-expand blob contents))
 
 (defun org-org-headline (headline contents info)
-  "Transcode HEADLINE element back into Org syntax."
+  "Transcode HEADLINE element back into Org syntax.
+CONTENTS is its contents, as a string or nil.  INFO is ignored."
   (unless (plist-get info :with-todo-keywords)
     (org-element-put-property headline :todo-keyword nil))
   (unless (plist-get info :with-tags)
@@ -134,7 +134,8 @@ setting of `org-html-htmlize-output-type' is 'css."
 
 (defun org-org-keyword (keyword contents info)
   "Transcode KEYWORD element back into Org syntax.
-Ignore keywords targeted at other export back-ends."
+CONTENTS is nil.  INFO is ignored.  This function ignores
+keywords targeted at other export back-ends."
   (unless (member (org-element-property :key keyword)
 		  (mapcar
 		   (lambda (block-cons)
