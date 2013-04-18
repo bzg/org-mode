@@ -541,7 +541,9 @@ Optionally supply a value for PARAMS which will be merged with
 the header arguments specified at the front of the source code
 block."
   (interactive)
-  (let* ((info (or info (org-babel-get-src-block-info)))
+  (let* ((info (if info
+		   (copy-tree info)
+		 (org-babel-get-src-block-info)))
 	 (merged-params (org-babel-merge-params (nth 2 info) params)))
     (when (org-babel-check-evaluate
 	   (let ((i info)) (setf (nth 2 i) merged-params) i))
