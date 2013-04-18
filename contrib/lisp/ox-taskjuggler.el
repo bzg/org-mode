@@ -211,21 +211,66 @@ marked with `org-taskjuggler-project-tag'"
   :type 'integer)
 
 (defcustom org-taskjuggler-default-reports
-  '("taskreport \"Gantt Chart\" {
+  '("textreport report \"Plan\" {
+  formats html
+  header '== <-query attribute=\"name\"-> =='
+
+  center -8<-
+    [#Plan Plan] | [#Resource_Allocation Resource Allocation]
+    ----
+    === Plan ===
+    <[report id=\"plan\"]>
+    ----
+    === Resource Allocation ===
+    <[report id=\"resourceGraph\"]>
+  ->8-
+}
+
+# A traditional Gantt chart with a project overview.
+taskreport plan \"\" {
+  headline \"Project Plan\"
+  columns bsi, name, start, end, effort, chart
+  loadunit shortauto
+  hideresource 1
+}
+
+# A graph showing resource allocation. It identifies whether each
+# resource is under- or over-allocated for.
+resourcereport resourceGraph \"\" {
+  headline \"Resource Allocation Graph\"
+  columns no, name, effort, weekly
+  loadunit shortauto
+  hidetask ~(isleaf() & isleaf_())
+  sorttasks plan.start.up
+}")
+  "Default reports for the project.
+These are sensible default reports to give a good out-of-the-box
+result when exporting without defining any reports.  If you want
+to define your own reports you can change them here or simply
+define the default reports so that they include an external
+report definition as follows:
+
+include reports.tji
+
+These default are made to work with tj3.  If you are targeting
+TaskJuggler 2.4 (see `org-taskjuggler-target-version') please
+change these defaults to something like the following:
+
+taskreport \"Gantt Chart\" {
   headline \"Project Gantt Chart\"
   columns hierarchindex, name, start, end, effort, duration, completed, chart
   timeformat \"%Y-%m-%d\"
   hideresource 1
   loadunit shortauto
-}"
-    "resourcereport \"Resource Graph\" {
+}
+
+resourcereport \"Resource Graph\" {
   headline \"Resource Allocation Graph\"
   columns no, name, utilization, freeload, chart
   loadunit shortauto
   sorttasks startup
   hidetask ~isleaf()
-}")
-  "Default reports for the project."
+}"
   :group 'org-export-taskjuggler
   :type '(repeat (string :tag "Report")))
 
