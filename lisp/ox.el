@@ -5557,7 +5557,7 @@ files or buffers, only the display.
 	header-line-format
 	'(:eval
 	  (format "  %-12s | %6s | %s" "Back-End" "Age" "Source")))
-  (add-hook 'post-command-hook 'org-export-stack-refresh nil t)
+  (org-add-hook 'post-command-hook 'org-export-stack-refresh nil t)
   (set (make-local-variable 'revert-buffer-function)
        'org-export-stack-refresh))
 
