@@ -2045,7 +2045,7 @@ code ---- the results are extracted in the syntax of the source
 		     (cons 'unordered
 			   (mapcar
 			    (lambda (el) (list nil (if (stringp el) el (format "%S" el))))
-			    (if (listp result) result (list result))))
+			    (if (listp result) result (split-string result "\n" t))))
 		     '(:splicep nil :istart "- " :iend "\n")))
 		   "\n"))
 		 ;; assume the result is a table if it's not a string
