@@ -544,7 +544,7 @@ doesn't include leading \"depends\"."
         (get-path
          (lambda (dep)
            ;; Return path to DEP relatively to TASK.
-           (let ((parent (org-export-get-parent dep))
+           (let ((parent (org-export-get-parent task))
                  (exclamations 1)
                  (option
                   (let ((id (org-element-property :TASK_ID dep)))
@@ -555,7 +555,7 @@ doesn't include leading \"depends\"."
              ;; Compute number of exclamation marks by looking for the
 	     ;; common ancestor between TASK and DEP.
              (while (not (org-element-map parent 'headline
-                           (lambda (hl) (eq hl task))))
+                           (lambda (hl) (eq hl dep))))
                (incf exclamations)
                (setq parent (org-export-get-parent parent)))
              ;; Build path from DEP to PARENT.
