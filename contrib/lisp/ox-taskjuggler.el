@@ -790,7 +790,7 @@ a unique id will be associated to it."
                   (let* ((minutes (org-duration-string-to-minutes effort))
                          (hours (/ minutes 60.0)))
                     (format "%.1fh" hours))))
-     (and priority (format "  priority %s\n" complete))
+     (and priority (format "  priority %s\n" priority))
      (and milestone "  milestone\n")
      ;; Add other valid attributes.
      (org-taskjuggler--indent-string
