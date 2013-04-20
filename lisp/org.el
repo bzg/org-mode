@@ -8395,10 +8395,10 @@ If yes, remember the marker and the distance to BEG."
 The clones will be inserted as siblings.
 
 In interactive use, the user will be prompted for the number of
-clones to be produced.  When called with a universal prefix argument
-and if the entry has a timestamp, the user will also be prompted for
-a time shift, which may be a repeater as used in time stamps, for
-example `+3d'.
+clones to be produced.  If the entry has a timestamp, the user
+will also be prompted for a time shift, which may be a repeater
+as used in time stamps, for example `+3d'.  To disable this,
+you can call the function with a universal prefix argument.
 
 When a valid repeater is given and the entry contains any time
 stamps, the clones will become a sequence in time, with time
@@ -8420,7 +8420,7 @@ and still retain the repeater to cover future instances of the task."
   (interactive "nNumber of clones to produce: ")
   (let ((shift
 	 (or shift
-	     (if (and (equal current-prefix-arg '(4))
+	     (if (and (not (equal current-prefix-arg '(4)))
 		      (save-excursion
 			(re-search-forward org-ts-regexp-both
 					   (save-excursion
