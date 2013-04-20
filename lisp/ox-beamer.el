@@ -421,19 +421,19 @@ INFO is a plist used as a communication channel."
    (catch 'exit
      (mapc (lambda (parent)
 	     (let ((env (org-element-property :BEAMER_ENV parent)))
-	       (when (and env (member (downcase env) '("frame" "fullframe")))
+	       (when (and env (member-ignore-case env '("frame" "fullframe")))
 		 (throw 'exit (org-export-get-relative-level parent info)))))
 	   (nreverse (org-export-get-genealogy headline)))
      nil)
    ;; 2. Look for "frame" environment in HEADLINE.
    (let ((env (org-element-property :BEAMER_ENV headline)))
-     (and env (member (downcase env) '("frame" "fullframe"))
+     (and env (member-ignore-case env '("frame" "fullframe"))
 	  (org-export-get-relative-level headline info)))
    ;; 3. Look for "frame" environment in sub-tree.
    (org-element-map headline 'headline
      (lambda (hl)
        (let ((env (org-element-property :BEAMER_ENV hl)))
-	 (when (and env (member (downcase env) '("frame" "fullframe")))
+	 (when (and env (member-ignore-case env '("frame" "fullframe")))
 	   (org-export-get-relative-level hl info))))
      info 'first-match)
    ;; 4. No "frame" environment in tree: use default value.
@@ -537,7 +537,7 @@ used as a communication channel."
 			 ;; "column" only.
 			 ((not env) "column")
 			 ;; Use specified environment.
-			 (t (downcase env)))))
+			 (t env))))
 	 (env-format (unless (member environment '("column" "columns"))
 		       (assoc environment
 			      (append org-beamer-environments-special
@@ -625,7 +625,7 @@ as a communication channel."
     (let ((level (org-export-get-relative-level headline info))
 	  (frame-level (org-beamer--frame-level headline info))
 	  (environment (let ((env (org-element-property :BEAMER_ENV headline)))
-			 (if (stringp env) (downcase env) "block"))))
+			 (or (org-string-nw-p env) "block"))))
       (cond
        ;; Case 1: Resume frame specified by "BEAMER_ref" property.
        ((equal environment "againframe")
