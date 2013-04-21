@@ -13,9 +13,9 @@
 @c Version and Contact Info
 @set MAINTAINERSITE @uref{http://orgmode.org,maintainers webpage}
 @set AUTHOR Carsten Dominik
-@set MAINTAINER Bastien Guerry
-@set MAINTAINEREMAIL @email{bzg at gnu dot org}
-@set MAINTAINERCONTACT @uref{mailto:bzg at gnu dot org,contact the maintainer}
+@set MAINTAINER Carsten Dominik
+@set MAINTAINEREMAIL @email{carsten at orgmode dot org}
+@set MAINTAINERCONTACT @uref{mailto:carsten at orgmode dot org,contact the maintainer}
 @c %**end of header
 @finalout
 
