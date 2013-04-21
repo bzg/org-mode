@@ -260,7 +260,12 @@ holding export options."
 	 (signature (plist-get info :signature)))
      (concat
       ;; Letter Class Option File
-      (when lco (format "\\LoadLetterOption{%s}\n" lco))
+      (when lco 
+	(let ((lco-files (split-string lco " "))
+	      (lco-def ""))
+	  (dolist (lco-file lco-files lco-def)
+	    (setq lco-def (format "%s\\LoadLetterOption{%s}\n" lco-def lco-file)))
+	  lco-def))
       ;; Define "From" data.
       (when sender (format "\\setkomavar{fromname}{%s}\n" sender))
       (when from-address (format "\\setkomavar{fromaddress}{%s}\n" from-address))
