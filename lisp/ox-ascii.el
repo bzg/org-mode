@@ -68,7 +68,6 @@
     (export-block . org-ascii-export-block)
     (export-snippet . org-ascii-export-snippet)
     (fixed-width . org-ascii-fixed-width)
-    (footnote-definition . org-ascii-footnote-definition)
     (footnote-reference . org-ascii-footnote-reference)
     (headline . org-ascii-headline)
     (horizontal-rule . org-ascii-horizontal-rule)
@@ -1147,7 +1146,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 ;;;; Footnote Definition
 
 ;; Footnote Definitions are ignored.  They are compiled at the end of
-;; the document, by `org-ascii-template'.
+;; the document, by `org-ascii-inner-template'.
 
 
 ;;;; Footnote Reference
