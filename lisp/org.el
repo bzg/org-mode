@@ -20171,6 +20171,12 @@ This command does many different things, depending on context:
 	    (when (and (eq (org-element-type parent) 'item)
 		       (= (point-at-bol) (org-element-property :begin parent)))
 	      (setq context parent type 'item))))
+	;; When heading text is a link, treat the heading, not the link,
+	;; as the current element
+	(when (eq type 'link)
+	  (let ((parent (org-element-property :parent context)))
+	    (when (and (eq (org-element-type parent) 'headline))
+	      (setq context parent type 'headline))))
 	;; Act according to type of element or object at point.
 	(case type
 	  (clock (org-clock-update-time-maybe))
