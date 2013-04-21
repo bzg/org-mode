@@ -80,22 +80,22 @@
   :group 'org-export-koma-letter
   :type 'string)
 
-(defcustom org-koma-letter-closing "See you soon,"
+(defcustom org-koma-letter-closing "Sincerely yours,"
   "Koma-Letter's closing, as a string."
   :group 'org-export-koma-letter
   :type 'string)
 
-(defcustom org-koma-letter-from-address "Somewhere \\ Over the rainbow."
+(defcustom org-koma-letter-from-address nil
   "Sender's address, as a string."
   :group 'org-export-koma-letter
   :type 'string)
 
-(defcustom org-koma-letter-opening "Dear Sir,"
+(defcustom org-koma-letter-opening "Dear Madam or Sir,"
   "Letter's opening, as a string."
   :group 'org-export-koma-letter
   :type 'string)
 
-(defcustom org-koma-letter-phone-number "00-00-00-00"
+(defcustom org-koma-letter-phone-number nil
   "Sender's phone number, as a string."
   :group 'org-export-koma-letter
   :type 'string)
@@ -105,18 +105,30 @@
   :group 'org-export-koma-letter
   :type 'string)
 
+(defcustom org-koma-letter-sender nil
+  "Sender's name, as a string."
+  :group 'org-export-koma-letter
+  :type 'string)
+
+(defcustom org-koma-letter-email nil
+  "Sender's email, as a string."
+  :group 'org-export-koma-letter
+  :type 'string)
+
 
 ;;; Define Back-End
 
 (org-export-define-derived-backend 'koma-letter 'latex
   :options-alist
-  '((:closing "CLOSING" nil org-koma-letter-closing)
+  '((:lco "LCO" nil org-koma-letter-class-option-file)
+    (:sender "SENDER" nil org-koma-letter-sender newline)
     (:from-address "FROM_ADDRESS" nil org-koma-letter-from-address newline)
-    (:lco "LCO" nil org-koma-letter-class-option-file)
-    (:opening "OPENING" nil org-koma-letter-opening)
     (:phone-number "PHONE_NUMBER" nil org-koma-letter-phone-number)
-    (:signature "SIGNATURE" nil nil newline)
-    (:to-address "TO_ADDRESS" nil nil newline))
+    (:email "EMAIL" nil org-koma-letter-email)
+    (:to-address "TO_ADDRESS" nil nil newline)
+    (:opening "OPENING" nil org-koma-letter-opening)
+    (:closing "CLOSING" nil org-koma-letter-closing)
+    (:signature "SIGNATURE" nil org-koma-letter-signature newline))
   :translate-alist '((export-block . org-koma-letter-export-block)
 		     (export-snippet . org-koma-letter-export-snippet)
 		     (keyword . org-koma-letter-keyword)
@@ -197,18 +209,23 @@ holding export options."
 	     (concat (plist-get info :latex-header)
 		     (plist-get info :latex-header-extra))))
            info)))))
-   ;; Define "From" data.
-   (format "\\setkomavar{fromname}{%s}\n"
-           (org-export-data (plist-get info :author) info))
-   (format "\\setkomavar{fromaddress}{%s}\n" (plist-get info :from-address))
-   (format "\\setkomavar{signature}{%s}\n" (plist-get info :signature))
-   (format "\\setkomavar{fromemail}{%s}\n"
-           (org-export-data (plist-get info :email) info))
-   (format "\\setkomavar{fromphone}{%s}\n" (plist-get info :phone-number))
+   (let ((lco (plist-get info :lco))
+	 (sender (plist-get info :sender))
+	 (from-address (plist-get info :from-address))
+	 (phone-number (plist-get info :phone-number))
+	 (email (plist-get info :email))
+	 (signature (plist-get info :signature)))
+     (concat
+      ;; Letter Class Option File
+      (when lco (format "\\LoadLetterOption{%s}\n" lco))
+      ;; Define "From" data.
+      (when sender (format "\\setkomavar{fromname}{%s}\n" sender))
+      (when from-address (format "\\setkomavar{fromaddress}{%s}\n" from-address))
+      (when phone-number (format "\\setkomavar{fromphone}{%s}\n" phone-number))
+      (when email (format "\\setkomavar{fromemail}{%s}\n" email))
+      (when signature (format "\\setkomavar{signature}{%s}\n" signature))))
    ;; Date.
    (format "\\date{%s}\n" (org-export-data (org-export-get-date info) info))
-   ;; Letter Class Option File
-   (format "\\LoadLetterOption{%s}\n" (plist-get info :lco))
    ;; Letter start.
    "\\begin{document}\n\n"
    (format "\\setkomavar{subject}{%s}\n\n"
