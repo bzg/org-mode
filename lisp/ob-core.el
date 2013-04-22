@@ -610,7 +610,8 @@ block."
 		  (if (member "none" result-params)
 		      (progn
 			(funcall cmd body params)
-			(message "result silenced"))
+			(message "result silenced")
+			(setq result nil))
 		    (setq result
 			  ((lambda (result)
 			     (if (and (eq (cdr (assoc :result-type params))
@@ -643,9 +644,9 @@ block."
 			  (setq result-params
 				(remove "file" result-params)))))
 		    (org-babel-insert-result
-		     result result-params info new-hash indent lang)
-		    (run-hooks 'org-babel-after-execute-hook)
-		    result))
+		     result result-params info new-hash indent lang))
+                  (run-hooks 'org-babel-after-execute-hook)
+		  result)
 	      (setq call-process-region
 		    'org-babel-call-process-region-original)))))))))
 
