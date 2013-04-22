@@ -610,7 +610,8 @@ block."
 		  (if (member "none" result-params)
 		      (progn
 			(funcall cmd body params)
-			(message "result silenced"))
+			(message "result silenced")
+			(setq result nil))
 		    (setq result
 			  ((lambda (result)
 			     (if (and (eq (cdr (assoc :result-type params))
@@ -643,9 +644,9 @@ block."
 			  (setq result-params
 				(remove "file" result-params)))))
 		    (org-babel-insert-result
-		     result result-params info new-hash indent lang)
-		    (run-hooks 'org-babel-after-execute-hook)
-		    result))
+		     result result-params info new-hash indent lang))
+                  (run-hooks 'org-babel-after-execute-hook)
+		  result)
 	      (setq call-process-region
 		    'org-babel-call-process-region-original)))))))))
 
@@ -918,7 +919,7 @@ source code block, otherwise return nil.  With optional prefix
 argument RE-RUN the source-code block is evaluated even if
 results already exist."
   (interactive "P")
-  (let ((info (org-babel-get-src-block-info)))
+  (let ((info (org-babel-get-src-block-info 'light)))
     (when info
       (save-excursion
 	;; go to the results, if there aren't any then run the block
@@ -2364,7 +2365,7 @@ would set the value of argument \"a\" equal to \"9\".  Note that
 these arguments are not evaluated in the current source-code
 block but are passed literally to the \"example-block\"."
   (let* ((parent-buffer (or parent-buffer (current-buffer)))
-         (info (or info (org-babel-get-src-block-info)))
+         (info (or info (org-babel-get-src-block-info 'light)))
          (lang (nth 0 info))
          (body (nth 1 info))
 	 (ob-nww-start org-babel-noweb-wrap-start)

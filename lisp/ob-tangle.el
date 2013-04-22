@@ -185,7 +185,7 @@ used to limit the exported source code blocks by language."
 	       org-babel-default-header-args))
 	    (tangle-file
 	     (when (equal arg '(16))
-	       (or (cdr (assoc :tangle (nth 2 (org-babel-get-src-block-info))))
+	       (or (cdr (assoc :tangle (nth 2 (org-babel-get-src-block-info 'light))))
 		   (user-error "Point is not in a source code block"))))
 	    path-collector)
 	(mapc ;; map over all languages

@@ -7509,7 +7509,7 @@ This is important for non-interactive uses of the command."
 	(and (not (org-in-item-p)) org-insert-heading-respect-content)
 	(not (org-insert-item
 	      (save-excursion
-		(beginning-of-line)
+		(org-beginning-of-item)
 		(looking-at org-list-full-item-re)
 		(match-string 3)))))
     (let (begn endn)
