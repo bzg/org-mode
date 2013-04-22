@@ -1994,6 +1994,8 @@ a tree with a select tag."
 		  (if (eq (car with-drawers-p) 'not)
 		      (member-ignore-case name (cdr with-drawers-p))
 		    (not (member-ignore-case name with-drawers-p))))))))
+    ((footnote-definition footnote-reference)
+     (not (plist-get options :with-footnotes)))
     ((headline inlinetask)
      (let ((with-tasks (plist-get options :with-tasks))
 	   (todo (org-element-property :todo-keyword blob))
@@ -2230,9 +2232,6 @@ according to export options INFO, stored as a plist."
      (plist-get info :with-emphasize))
     ;; ... fixed-width areas.
     (fixed-width (plist-get info :with-fixed-width))
-    ;; ... footnotes...
-    ((footnote-definition footnote-reference)
-     (plist-get info :with-footnotes))
     ;; ... LaTeX environments and fragments...
     ((latex-environment latex-fragment)
      (let ((with-latex-p (plist-get info :with-latex)))

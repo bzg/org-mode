@@ -2836,7 +2836,7 @@ ignores hidden links."
 			 ((= dcst ?t) '<)))
 	     (next-record (lambda ()
 			    (skip-chars-forward " \r\t\n")
-			    (beginning-of-line)))
+			    (or (eobp) (beginning-of-line))))
 	     (end-record (lambda ()
 			   (goto-char (org-list-get-item-end-before-blank
 				       (point) struct))))

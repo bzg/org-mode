@@ -361,6 +361,21 @@ Paragraph"
 	(should
 	 (equal (org-export-as 'test nil nil nil '(:with-drawers (not "BAR")))
 		":FOO:\nkeep\n:END:\n")))))
+  ;; Footnotes.
+  (should
+   (equal "Footnote?"
+	  (let ((org-footnote-section nil))
+	    (org-test-with-temp-text "Footnote?[fn:1]\n\n[fn:1] Def"
+	      (org-test-with-backend test
+		(org-trim
+		 (org-export-as 'test nil nil nil '(:with-footnotes nil))))))))
+  (should
+   (equal "Footnote?[fn:1]\n\n[fn:1] Def"
+	  (let ((org-footnote-section nil))
+	    (org-test-with-temp-text "Footnote?[fn:1]\n\n[fn:1] Def"
+	      (org-test-with-backend test
+		(org-trim
+		 (org-export-as 'test nil nil nil '(:with-footnotes t))))))))
   ;; Inlinetasks.
   (when (featurep 'org-inlinetask)
     (should

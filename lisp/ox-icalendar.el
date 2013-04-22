@@ -257,10 +257,13 @@ re-read the iCalendar file.")
 
 (org-export-define-derived-backend 'icalendar 'ascii
   :translate-alist '((clock . ignore)
+		     (footnote-definition . ignore)
+		     (footnote-reference . ignore)
 		     (headline . org-icalendar-entry)
 		     (inlinetask . ignore)
 		     (planning . ignore)
 		     (section . ignore)
+		     (inner-template . (lambda (c i) c))
 		     (template . org-icalendar-template))
   :options-alist
   '((:exclude-tags
@@ -945,9 +948,8 @@ files to build the calendar from."
 	    ;; Owner.
 	    user-full-name
 	    ;; Timezone.
-	    (if (org-string-nw-p org-icalendar-timezone)
-		org-icalendar-timezone
-	      (cadr (current-time-zone)))
+	    (or (org-string-nw-p org-icalendar-timezone)
+		(cadr (current-time-zone)))
 	    ;; Description.
 	    org-icalendar-combined-description
 	    ;; Contents.
@@ -958,7 +960,8 @@ files to build the calendar from."
 		(catch 'nextfile
 		  (org-check-agenda-file file)
 		  (with-current-buffer (org-get-agenda-file-buffer file)
-		    (let ((marks (cdr (assoc (expand-file-name file) restriction))))
+		    (let ((marks (cdr (assoc (expand-file-name file)
+					     restriction))))
 		      ;; Create ID if necessary.
 		      (when org-icalendar-store-UID
 			(org-icalendar-create-uid file t marks))
