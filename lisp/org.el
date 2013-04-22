@@ -7509,9 +7509,10 @@ This is important for non-interactive uses of the command."
 	(and (not (org-in-item-p)) org-insert-heading-respect-content)
 	(not (org-insert-item
 	      (save-excursion
-		(org-beginning-of-item)
-		(looking-at org-list-full-item-re)
-		(match-string 3)))))
+		(and (org-in-item-p)
+		     (org-beginning-of-item)
+		     (looking-at org-list-full-item-re)
+		     (match-string 3))))))
     (let (begn endn)
       (when (org-buffer-narrowed-p)
 	(setq begn (point-min) endn (point-max))
