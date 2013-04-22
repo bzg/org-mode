@@ -527,7 +527,9 @@ When CHECK is given, prepare detailed information about duplicate IDs."
 		   (org-id-hash-to-alist org-id-locations)
 		 org-id-locations)))
       (with-temp-file org-id-locations-file
-	(print out (current-buffer))))))
+	(let ((print-level nil)
+	      (print-length nil))
+	  (print out (current-buffer)))))))
 
 (defun org-id-locations-load ()
   "Read the data from `org-id-locations-file'."
