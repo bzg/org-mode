@@ -324,6 +324,31 @@ If one of these appears as a property for a headline, it will be
 exported with the corresponding report."
   :group 'org-export-taskjuggler)
 
+(defcustom org-taskjuggler-process-command
+  "tj3 --silent --no-color --output-dir %o %f"
+  "Command to process a Taskjuggler file.
+The command will be given to the shell as a command to process a
+Taskjuggler file.  %f in the command will be replaced by the full
+file name, %o by the reports directory (see
+`org-taskjuggler-reports-directory').
+
+If you are targeting Taskjuggler 2.4 (see
+`org-taskjuggler-target-version') this setting is ignored."
+  :group 'org-export-taskjuggler)
+
+(defcustom org-taskjuggler-reports-directory "reports"
+  "Default directory to generate the Taskjuggler reports in.
+The command `org-taskjuggler-process-command' generates the
+reports and associated files such as CSS inside this directory.
+
+If the directory is not an absolute path it is relative to the
+directory of the exported file.  The directory is created if it
+doesn't exist.
+
+If you are targeting Taskjuggler 2.4 (see
+`org-taskjuggler-target-version') this setting is ignored."
+  :group 'org-export-taskjuggler)
+
 (defcustom org-taskjuggler-keep-project-as-task t
   "Non-nil keeps the project headline as an umbrella task for all tasks.
 Setting this to nil will allow maintaining completely separated
@@ -348,10 +373,14 @@ This hook is run with the name of the file as argument.")
   :menu-entry
   '(?J "Export to TaskJuggler"
        ((?j "As TJP file" (lambda (a s v b) (org-taskjuggler-export a s v)))
-	(?o "As TJP file and open"
+	(?p "As TJP file and process"
 	    (lambda (a s v b)
 	      (if a (org-taskjuggler-export a s v)
-		(org-taskjuggler-export-and-open s v))))))
+		(org-taskjuggler-export-and-process s v))))
+	(?o "As TJP file, process and open"
+	    (lambda (a s v b)
+	      (if a (org-taskjuggler-export a s v)
+		(org-taskjuggler-export-process-and-open s v))))))
   ;; This property will be used to store unique ids in communication
   ;; channel.  Ids will be retrieved with `org-taskjuggler-get-id'.
   :options-alist '((:taskjuggler-unique-ids nil nil nil)))
@@ -859,8 +888,8 @@ Return output file's name."
       outfile)))
 
 ;;;###autoload
-(defun org-taskjuggler-export-and-open (&optional subtreep visible-only)
-  "Export current buffer to a TaskJuggler file and open it.
+(defun org-taskjuggler-export-and-process (&optional subtreep visible-only)
+  "Export current buffer to a TaskJuggler file and process it.
 
 The exporter looks for a tree with tag that matches
 `org-taskjuggler-project-tag' and takes this as the tasks for
@@ -887,12 +916,78 @@ first.
 When optional argument VISIBLE-ONLY is non-nil, don't export
 contents of hidden elements.
 
-Open file with the TaskJuggler GUI."
+Return a list of reports."
   (interactive)
-  (let* ((file (org-taskjuggler-export nil subtreep visible-only))
-	 (process-name "TaskJugglerUI")
-	 (command (concat process-name " " file)))
-    (start-process-shell-command process-name nil command)))
+  (let ((file (org-taskjuggler-export nil subtreep visible-only)))
+    (org-taskjuggler-compile file)))
+
+;;;###autoload
+(defun org-taskjuggler-export-process-and-open (&optional subtreep visible-only)
+  "Export current buffer to a TaskJuggler file, process and open it.
+
+Export and process the file using
+`org-taskjuggler-export-and-process' and open the generated
+reports with a browser.
+
+If you are targeting TaskJuggler 2.4 (see
+`org-taskjuggler-target-version') the processing and display of
+the reports is done using the TaskJuggler GUI."
+  (interactive)
+  (if (< org-taskjuggler-target-version 3.0)
+      (let* ((process-name "TaskJugglerUI")
+	     (command
+	      (concat process-name " "
+		      (org-taskjuggler-export nil subtreep visible-only))))
+	(start-process-shell-command process-name nil command))
+    (dolist (report (org-taskjuggler-export-and-process subtreep visible-only))
+      (org-open-file report))))
+
+(defun org-taskjuggler-compile (file)
+  "Compile a TaskJuggler file.
+
+FILE is the name of the file being compiled.  Processing is done
+through the command given in `org-taskjuggler-process-command'.
+
+Return a list of reports."
+  (let* ((full-name (file-truename file))
+	 (out-dir
+	  (expand-file-name
+	   org-taskjuggler-reports-directory (file-name-directory file)))
+	 errors)
+    (message (format "Processing TaskJuggler file %s..." file))
+    (save-window-excursion
+      (let ((outbuf (get-buffer-create "*Org Taskjuggler Output*")))
+	(unless (file-directory-p out-dir)
+	  (make-directory out-dir t))
+	(with-current-buffer outbuf (erase-buffer))
+	(shell-command
+	 (replace-regexp-in-string
+	  "%f" (shell-quote-argument full-name)
+	  (replace-regexp-in-string
+	   "%o" (shell-quote-argument out-dir)
+	   org-taskjuggler-process-command t t) t t) outbuf)
+	;; Collect standard errors from output buffer.
+	(setq errors (org-taskjuggler--collect-errors outbuf)))
+      (if (not errors)
+	  (message "Process completed.")
+	(error (format "TaskJuggler failed with errors: %s" errors))))
+    (file-expand-wildcards (format "%s/*.html" out-dir))))
+
+(defun org-taskjuggler--collect-errors (buffer)
+  "Collect some kind of errors from \"tj3\" command output.
+
+BUFFER is the buffer containing output.
+
+Return collected error types as a string, or nil if there was
+none."
+  (with-current-buffer buffer
+    (save-excursion
+      (goto-char (point-min))
+      (let ((case-fold-search t)
+	    (errors ""))
+	(while (re-search-forward "^.+:[0-9]+: \\(.*\\)$" nil t)
+	  (setq errors (concat errors " " (match-string 1))))
+	(and (org-string-nw-p errors) (org-trim errors))))))
 
 
 (provide 'ox-taskjuggler)
