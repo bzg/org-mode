@@ -149,7 +149,9 @@
   :type '(string :tag "Export Filename"))
 
 (defcustom org-texinfo-coding-system nil
-  "Default document encoding for Texinfo output."
+  "Default document encoding for Texinfo output.
+
+If `nil' it will default to `buffer-file-coding-system'."
   :group 'org-export-texinfo
   :type 'coding-system)
 
@@ -693,7 +695,9 @@ holding export options."
 	 ;; `.' in text.
 	 (dirspacing (- 29 (length dirtitle)))
 	 (menu (org-texinfo-make-menu info 'main))
-	 (detail-menu (org-texinfo-make-menu info 'detailed)))
+	 (detail-menu (org-texinfo-make-menu info 'detailed))
+	 (coding-system (or org-texinfo-coding-system
+			    buffer-file-coding-system)))
     (concat
      ;; Header
      header "\n"
@@ -701,9 +705,8 @@ holding export options."
      ;; Filename and Title
      "@setfilename " info-filename "\n"
      "@settitle " title "\n"
-     (if org-texinfo-coding-system
-       (format "@documentencoding %s\n"
-	       (upcase (symbol-name org-texinfo-coding-system))) "\n")
+     (format "@documentencoding %s\n"
+	     (upcase (symbol-name coding-system))) "\n"
      (format "@documentlanguage %s\n" lang)
      "\n\n"
      "@c Version and Contact Info\n"
