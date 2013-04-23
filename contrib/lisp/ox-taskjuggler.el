@@ -141,6 +141,7 @@
 ;;     org-global-properties-fixed
 ;;   - What about property inheritance and org-property-inherit-p?
 ;;   - Use TYPE_TODO as an way to assign resources
+;;   - Add support for org-export-with-planning
 ;;
 ;;; Code:
 
