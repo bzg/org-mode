@@ -1199,13 +1199,8 @@ make this the default behavior.)"
 	    (goto-char target-pos)
 	    (org-back-to-heading t)
 	    (or interrupting (move-marker org-clock-interrupted-task nil))
-	    (save-excursion
-	      (forward-char) ;; make sure the marker is not at the
-	      ;; beginning of the heading, since the
-	      ;; user is liking to insert stuff here
-	      ;; manually
-	      (run-hooks 'org-clock-in-prepare-hook)
-	      (org-clock-history-push))
+	    (run-hooks 'org-clock-in-prepare-hook)
+	    (org-clock-history-push)
 	    (setq org-clock-current-task (nth 4 (org-heading-components)))
 	    (cond ((functionp org-clock-in-switch-to-state)
 		   (looking-at org-complex-heading-regexp)
