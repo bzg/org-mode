@@ -16074,7 +16074,9 @@ So these are more for recording a certain time/date."
     (set-keymap-parent map minibuffer-local-map)
     (org-defkey map (kbd ".")
                 (lambda () (interactive)
-                  (org-eval-in-calendar '(calendar-goto-today))))
+		  (if (= (char-before) 32)
+		      (org-eval-in-calendar '(calendar-goto-today))
+		    (insert "."))))
     (org-defkey map [(meta shift left)]
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-backward-month 1))))
