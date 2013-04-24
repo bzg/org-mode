@@ -7495,6 +7495,7 @@ and create a new headline with the text in the current line after point
 When INVISIBLE-OK is set, stop at invisible headlines when going back.
 This is important for non-interactive uses of the command."
   (interactive "P")
+  (if (org-called-interactively-p 'any) (org-reveal))
   (cond
    ((or (= (buffer-size) 0)
 	(and (not (save-excursion
@@ -7551,7 +7552,7 @@ This is important for non-interactive uses of the command."
 	     (blank-a (cdr (assq 'heading org-blank-before-new-entry)))
 	     (blank (if (eq blank-a 'auto) empty-line-p blank-a))
 	     pos hide-previous previous-pos)
-	(if ;; At the beginning of a heading, open a new line for insertiong
+	(if ;; At the beginning of a heading, open a new line for insertion
 	    (and (bolp) (org-at-heading-p)
 		 (not eops)
 		 (or (bobp)
@@ -7580,7 +7581,10 @@ This is important for non-interactive uses of the command."
 	     ((and (not arg) (not on-heading) (not on-empty-line)
 		   (not (save-excursion
 			  (beginning-of-line 1)
-			  (looking-at org-list-full-item-re))))
+			  (or (looking-at org-list-full-item-re)
+			      ;; Don't convert :end: lines to headline
+			      (looking-at "^\\s-*:end:")
+			      (looking-at "^\\s-*#\\+end_?")))))
 	      (beginning-of-line 1))
 	     (org-insert-heading-respect-content
 	      (if (not eops)
@@ -16071,7 +16075,9 @@ So these are more for recording a certain time/date."
     (set-keymap-parent map minibuffer-local-map)
     (org-defkey map (kbd ".")
                 (lambda () (interactive)
-                  (org-eval-in-calendar '(calendar-goto-today))))
+		  (if (= (char-before) 32)
+		      (org-eval-in-calendar '(calendar-goto-today))
+		    (insert "."))))
     (org-defkey map [(meta shift left)]
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-backward-month 1))))
@@ -20576,9 +20582,10 @@ number of stars to add."
 Calls `org-insert-heading' or `org-table-wrap-region', depending on context.
 See the individual commands for more information."
   (interactive "P")
+  (org-check-before-invisible-edit 'insert)
   (cond
    ((run-hook-with-args-until-success 'org-metareturn-hook))
-   ((or (org-at-drawer-p) (org-at-property-p))
+   ((or (org-at-drawer-p) (org-in-drawer-p) (org-at-property-p))
     (newline-and-indent))
    ((org-at-table-p)
     (call-interactively 'org-table-wrap-region))
@@ -21541,6 +21548,17 @@ block from point."
 		    (throw 'exit n))))
 	      names))
       nil)))
+
+(defun org-in-drawer-p ()
+  "Is point within a drawer?"
+  (save-match-data
+    (let ((case-fold-search t)
+	  (lim-up (save-excursion (outline-previous-heading)))
+	  (lim-down (save-excursion (outline-next-heading))))
+      (org-between-regexps-p
+       (concat "^[ \t]*:" (regexp-opt org-drawers) ":")
+       "^[ \t]*:end:.*$"
+       lim-up lim-down))))
 
 (defun org-occur-in-agenda-files (regexp &optional nlines)
   "Call `multi-occur' with buffers for all agenda files."
