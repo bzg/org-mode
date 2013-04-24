@@ -17985,8 +17985,8 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	    (setq org-drawers-for-agenda
 		  (append org-drawers-for-agenda org-drawers))
 	    (setq org-tag-alist-for-agenda
-		  (org-uniquify 
-		   (append org-tag-alist-for-agenda 
+		  (org-uniquify
+		   (append org-tag-alist-for-agenda
 			   org-tag-alist
 			   org-tag-persistent-alist)))
 	    (if org-group-tags
