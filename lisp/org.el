@@ -16075,9 +16075,13 @@ So these are more for recording a certain time/date."
     (set-keymap-parent map minibuffer-local-map)
     (org-defkey map (kbd ".")
                 (lambda () (interactive)
-		  (if (= (char-before) 32)
+		  ;; Are we at the beginning of the prompt?
+		  (if (looking-back "^[^:]+: ")
 		      (org-eval-in-calendar '(calendar-goto-today))
 		    (insert "."))))
+    (org-defkey map (kbd "C-.")
+                (lambda () (interactive)
+		  (org-eval-in-calendar '(calendar-goto-today))))
     (org-defkey map [(meta shift left)]
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-backward-month 1))))
