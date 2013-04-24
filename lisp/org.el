@@ -17985,9 +17985,8 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		  (append org-todo-keyword-alist-for-agenda org-todo-key-alist))
 	    (setq org-drawers-for-agenda
 		  (append org-drawers-for-agenda org-drawers))
-	    (unless (equal org-tag-alist-for-agenda org-tag-alist)
-	      (setq org-tag-alist-for-agenda
-		    (append org-tag-alist-for-agenda org-tag-alist)))
+	    (setq org-tag-alist-for-agenda
+		  (org-uniquify (append org-tag-alist-for-agenda org-tag-alist)))
 	    (if org-group-tags
 		(setq org-tag-groups-alist-for-agenda
 		      (org-uniquify-alist
