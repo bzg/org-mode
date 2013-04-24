@@ -2521,7 +2521,7 @@ INFO is a plist holding contextual information.  See
 	 (type (org-element-property :type link))
 	 (raw-path (org-element-property :path link))
 	 ;; Ensure DESC really exists, or set it to nil.
-	 (desc (and (not (string= desc "")) desc))
+	 (desc (org-string-nw-p desc))
 	 (path
 	  (cond
 	   ((member type '("http" "https" "ftp" "mailto"))
@@ -2625,12 +2625,9 @@ INFO is a plist holding contextual information.  See
 		 ;; What description to use?
 		 (desc
 		  ;; Case 1: Headline is numbered and LINK has no
-		  ;; description or LINK's description matches
-		  ;; headline's title.  Display section number.
+		  ;; description.  Display section number.
 		  (if (and (org-export-numbered-headline-p destination info)
-			   (or (not desc)
-			       (string= desc (org-element-property
-					      :raw-value destination))))
+			   (not desc))
 		      (mapconcat 'number-to-string
 				 (org-export-get-headline-number
 				  destination info) ".")
