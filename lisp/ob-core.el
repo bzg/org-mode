@@ -680,7 +680,7 @@ arguments and pop open the results in a preview buffer."
 	    (org-babel-expand-body:generic
 	     body params (and (fboundp assignments-cmd)
 			      (funcall assignments-cmd params))))))
-    (if (called-interactively-p 'any)
+    (if (org-called-interactively-p 'any)
 	(org-edit-src-code
 	 nil expanded
 	 (concat "*Org-Babel Preview " (buffer-name) "[ " lang " ]*"))
