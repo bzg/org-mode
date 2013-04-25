@@ -1106,6 +1106,38 @@ Paragraph"
     (widen)
     (should (should (re-search-forward "^: 3" nil t)))))
 
+(ert-deftest test-ob/specific-colnames ()
+  "Test passing specific column names."
+  (should
+   (equal "#+name: input-table
+| id | var1 |
+|----+------|
+|  1 | bar  |
+|  2 | baz  |
+
+#+begin_src sh :var data=input-table :exports results :colnames '(Rev Author)
+echo \"$data\"
+#+end_src
+
+#+results:
+| Rev | Author |
+|-----+--------|
+|   1 | bar    |
+|   2 | baz    |
+
+"
+	  (org-test-with-temp-text "#+name: input-table
+| id | var1 |
+|----+------|
+|  1 | bar  |
+|  2 | baz  |
+
+#+begin_src sh :var data=input-table :exports results :colnames '(Rev Author)
+echo \"$data\"
+#+end_src
+"
+				   (org-babel-execute-src-block)
+				   (buffer-string)))))
 
 (provide 'test-ob)
 
