@@ -2246,13 +2246,19 @@ according to export options INFO, stored as a plist."
     (table (plist-get info :with-tables))
     (otherwise t)))
 
-(defun org-export-expand (blob contents)
+(defun org-export-expand (blob contents &optional with-affiliated)
   "Expand a parsed element or object to its original state.
+
 BLOB is either an element or an object.  CONTENTS is its
-contents, as a string or nil."
-  (funcall
-   (intern (format "org-element-%s-interpreter" (org-element-type blob)))
-   blob contents))
+contents, as a string or nil.
+
+When optional argument WITH-AFFILIATED is non-nil, add affiliated
+keywords before output."
+  (let ((type (org-element-type blob)))
+    (concat (and with-affiliated (memq type org-element-all-elements)
+		 (org-element--interpret-affiliated-keywords blob))
+	    (funcall (intern (format "org-element-%s-interpreter" type))
+		     blob contents))))
 
 (defun org-export-ignore-element (element info)
   "Add ELEMENT to `:ignore-list' in INFO.
