@@ -119,7 +119,7 @@ setting of `org-html-htmlize-output-type' is 'css."
 (defun org-org-identity (blob contents info)
   "Transcode BLOB element or object back into Org syntax.
 CONTENTS is its contents, as a string or nil.  INFO is ignored."
-  (org-export-expand blob contents))
+  (org-export-expand blob contents t))
 
 (defun org-org-headline (headline contents info)
   "Transcode HEADLINE element back into Org syntax.
