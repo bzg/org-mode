@@ -2185,7 +2185,25 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))
   (should (equal (org-test-parse-and-interpret ": Test") ": Test\n"))
   ;; Preserve indentation.
   (should (equal (org-test-parse-and-interpret ":  2 blanks\n: 1 blank")
-		 ":  2 blanks\n: 1 blank\n")))
+		 ":  2 blanks\n: 1 blank\n"))
+  ;; Remove last newline character
+  (should
+   (equal (org-element-fixed-width-interpreter
+	   '(fixed-width (:value "Test\n")) nil)
+	  ": Test"))
+  (should
+   (equal (org-element-fixed-width-interpreter
+	   '(fixed-width (:value "Test")) nil)
+	  ": Test"))
+  ;; Handle empty string.
+  (should
+   (equal (org-element-fixed-width-interpreter
+	   '(fixed-width (:value "")) nil)
+	  ""))
+  ;; Handle nil value.
+  (should-not
+   (org-element-fixed-width-interpreter
+    '(fixed-width (:value nil)) nil)))
 
 (ert-deftest test-org-element/horizontal-rule-interpreter ()
   "Test horizontal rule interpreter."
