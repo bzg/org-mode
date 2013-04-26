@@ -221,12 +221,23 @@ Valid values are ?. and ?\).  To get both terminators, use t."
   'org-list-allow-alphabetical "24.4") ; Since 8.0
 (defcustom org-list-allow-alphabetical nil
   "Non-nil means single character alphabetical bullets are allowed.
+
 Both uppercase and lowercase are handled.  Lists with more than
 26 items will fallback to standard numbering.  Alphabetical
-counters like \"[@c]\" will be recognized."
+counters like \"[@c]\" will be recognized.
+
+This variable needs to be set before org.el is loaded.  If you
+need to make a change while Emacs is running, use the customize
+interface or run the following code, where VALUE stands for the
+new value of the variable, after updating it:
+
+  \(when (featurep 'org-element) (load \"org-element\" t t))"
   :group 'org-plain-lists
   :version "24.1"
-  :type 'boolean)
+  :type 'boolean
+  :set (lambda (var val)
+	 (when (featurep 'org-element) (load "org-element" t t))
+	 (set var val)))
 
 (defcustom org-list-two-spaces-after-bullet-regexp nil
   "A regular expression matching bullets that should have 2 spaces after them.
