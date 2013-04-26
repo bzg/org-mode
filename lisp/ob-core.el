@@ -152,6 +152,12 @@ See also `org-babel-noweb-wrap-start'."
   :group 'org-babel
   :type 'string)
 
+(defcustom org-babel-inline-result-wrap "=%s="
+  "Format string used to wrap inline results.
+This string must include a \"%s\" which will be replaced by the results."
+  :group 'org-babel
+  :type 'string)
+
 (defun org-babel-noweb-wrap (&optional regexp)
   (concat org-babel-noweb-wrap-start
 	  (or regexp "\\([^ \t\n].+?[^ \t]\\|[^ \t\n]\\)")
@@ -2169,8 +2175,9 @@ file's directory then expand relative links."
 	    (funcall chars-between end (save-excursion (goto-char end) (point-at-eol))))
 	(save-excursion
 	  (goto-char beg)
-	  (insert (format "=%s=" (prog1 (buffer-substring beg end)
-				   (delete-region beg end)))))
+	  (insert (format org-babel-inline-result-wrap
+			  (prog1 (buffer-substring beg end)
+			    (delete-region beg end)))))
       (let ((size (count-lines beg end)))
 	(save-excursion
 	  (cond ((= size 0))	      ; do nothing for an empty result
