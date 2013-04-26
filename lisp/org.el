@@ -22189,7 +22189,9 @@ a footnote definition, try to fill the first paragraph within."
 	  (table-row (org-table-align) t)
 	  (table
 	   (when (eq (org-element-property :type element) 'org)
-	     (org-table-align))
+	     (save-excursion
+	       (goto-char (org-element-property :post-affiliated element))
+	       (org-table-align)))
 	   t)
 	  (paragraph
 	   ;; Paragraphs may contain `line-break' type objects.
