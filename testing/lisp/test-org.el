@@ -124,9 +124,16 @@
 (ert-deftest test-org/fill-paragraph ()
   "Test `org-fill-paragraph' specifications."
   ;; At an Org table, align it.
-  (org-test-with-temp-text "|a|"
-    (org-fill-paragraph)
-    (should (equal (buffer-string) "| a |\n")))
+  (should
+   (equal "| a |\n"
+	  (org-test-with-temp-text "|a|"
+	    (org-fill-paragraph)
+	    (buffer-string))))
+  (should
+   (equal "#+name: table\n| a |\n"
+	  (org-test-with-temp-text "#+name: table\n| a |"
+	    (org-fill-paragraph)
+	    (buffer-string))))
   ;; At a paragraph, preserve line breaks.
   (org-test-with-temp-text "some \\\\\nlong\ntext"
     (let ((fill-column 20))
