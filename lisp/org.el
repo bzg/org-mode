@@ -7524,6 +7524,12 @@ This is important for non-interactive uses of the command."
 	      (or (not (null arg)) org-insert-heading-respect-content))
 	     (level nil)
 	     (on-heading (org-at-heading-p))
+	     ;; Get a level to fall back on
+	     (fix-level
+	      (save-excursion
+		(org-back-to-heading t)
+		(looking-at org-outline-regexp)
+		(make-string (1- (length (match-string 0))) ?*)))
 	     (on-empty-line
 	      (save-excursion (beginning-of-line 1) (looking-at "^\\s-*$")))
 	     (head (save-excursion
@@ -7548,7 +7554,7 @@ This is important for non-interactive uses of the command."
 					(not (org-previous-line-empty-p t)))
 			     (setq empty-line-p (org-previous-line-empty-p)))
 			   (match-string 0))
-		       (error "* "))))
+		       (error (or fix-level "* ")))))
 	     (blank-a (cdr (assq 'heading org-blank-before-new-entry)))
 	     (blank (if (eq blank-a 'auto) empty-line-p blank-a))
 	     pos hide-previous previous-pos)
