@@ -330,8 +330,8 @@ exported with the corresponding report."
   "tj3 --silent --no-color --output-dir %o %f"
   "Command to process a Taskjuggler file.
 The command will be given to the shell as a command to process a
-Taskjuggler file.  %f in the command will be replaced by the full
-file name, %o by the reports directory (see
+Taskjuggler file.  \"%f\" in the command will be replaced by the
+full file name, \"%o\" by the reports directory (see
 `org-taskjuggler-reports-directory').
 
 If you are targeting Taskjuggler 2.4 (see
