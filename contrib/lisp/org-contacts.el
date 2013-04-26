@@ -174,6 +174,11 @@ This overrides `org-email-link-description-format' if set."
 (declare-function std11-narrow-to-header "ext:std11")
 (declare-function std11-fetch-field "ext:std11")
 
+(defconst org-contacts-property-values-separators "[,; \f\t\n\r\v]+"
+  "The default value of separators for `org-contacts-split-property'.
+
+A regexp matching strings of whitespace, `,' and `;'.")
+
 (defvar org-contacts-keymap
   (let ((map (make-sparse-keymap)))
     (define-key map "M" 'org-contacts-view-send-email)
@@ -850,7 +855,7 @@ to do our best."
 	 (head (format "BEGIN:VCARD\nVERSION:3.0\nN:%s\nFN:%s\n" n name)))
     (concat head
 	    (when email (progn
-			  (setq emails-list (org-contacts-split-property email "[,; ]+"))
+			  (setq emails-list (org-contacts-split-property email))
 			  (setq result "")
 			  (while emails-list
 			    (setq result (concat result  "EMAIL:" (org-contacts-strip-link (car emails-list)) "\n"))
@@ -859,7 +864,7 @@ to do our best."
 	    (when addr
 	      (format "ADR:;;%s\n" (replace-regexp-in-string "\\, ?" ";" addr)))
 	    (when tel (progn
-			(setq phones-list (org-contacts-split-property tel "[,; ]+"))
+			(setq phones-list (org-contacts-split-property tel))
 			(setq result "")
 			(while phones-list
 			  (setq result (concat result  "TEL:" (org-contacts-strip-link (car phones-list)) "\n"))
@@ -912,7 +917,8 @@ Requires google-maps-el."
     collect (cons (list addr) (list :label (string-to-char (car contact)))))))
 
 (defun org-contacts-strip-link (link)
-  "Remove brackets, description, link type and colon from an org link string and return the pure link target."
+  "Remove brackets, description, link type and colon from an org
+link string and return the pure link target."
    (let (startpos colonpos endpos)
      (setq startpos (string-match (regexp-opt '("[[tel:" "[[mailto:")) link))
      (if startpos
@@ -935,16 +941,16 @@ splitting points.  The substrings matching SEPARATORS are removed, and
 the substrings between the splitting points are collected as a list,
 which is returned.
 
-If SEPARATORS is non-nil, it should be a regular expression matching text
-which separates, but is not part of, the substrings.  If nil it defaults to
-`split-string-default-separators', normally \"[ \\f\\t\\n\\r\\v]+\", and
-OMIT-NULLS is forced to t.
+If SEPARATORS is non-nil, it should be a regular expression
+matching text which separates, but is not part of, the
+substrings.  If nil it defaults to `org-contacts-property-values-separators',
+normally \"[,; \f\t\n\r\v]+\", and OMIT-NULLS is forced to t.
 
 If OMIT-NULLS is t, zero-length substrings are omitted from the list \(so
 that for the default value of SEPARATORS leading and trailing whitespace
 are effectively trimmed).  If nil, all zero-length substrings are retained."
 (let* ((keep-nulls (or nil omit-nulls))
-         (rexp (or separators split-string-default-separators))
+         (rexp (or separators org-contacts-property-values-separators))
          (inputlist (split-string string rexp keep-nulls))
          (linkstring "")
          (bufferstring "")
