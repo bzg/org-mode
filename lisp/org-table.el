@@ -4996,7 +4996,8 @@ list of the fields in the rectangle."
 	  (save-excursion
 	    (goto-char (point-min))
 	    (if (re-search-forward
-		 (concat "^[ \t]*#\\+tblname:[ \t]*" (regexp-quote name-or-id) "[ \t]*$")
+		 (concat "^[ \t]*#\\+\\(tbl\\)?name:[ \t]*"
+			 (regexp-quote name-or-id) "[ \t]*$")
 		 nil t)
 		(setq buffer (current-buffer) loc (match-beginning 0))
 	      (setq id-loc (org-id-find name-or-id 'marker))
