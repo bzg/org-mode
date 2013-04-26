@@ -548,7 +548,8 @@ channel."
         (setq depends
               (org-element-map tasks 'headline
                 (lambda (task)
-                  (let ((task-id (org-element-property :TASK_ID task)))
+                  (let ((task-id (or (org-element-property :TASK_ID task)
+				     (org-element-property :ID task))))
                     (and task-id (member task-id deps-ids) task)))
                 info)))
       ;; Check BLOCKER and DEPENDS properties.  If "previous-sibling"
