@@ -239,15 +239,14 @@ get the table stable.  Anyhow, if LAPS is 'iterate then iterate,
 but this will run one recalculation longer.  When EXPECT is nil
 it will be set to TARGET.
 
-If running a test interactively in ERT is not enough and you need
-to examine the target table with e. g. the Org formula debugger
-or an Emacs Lisp debugger (e. g. with point in a data field and
-calling the instrumented `org-table-eval-formula') then copy and
-paste the table with formula from the ERT results buffer or
-temporarily substitute the `org-test-with-temp-text' of this
-function with `org-test-with-temp-text-in-file'.
-
-Consider setting `pp-escape-newlines' to nil manually."
+When running a test interactively in ERT is not enough and you
+need to examine the target table with e. g. the Org formula
+debugger or an Emacs Lisp debugger (e. g. with point in a data
+field and calling the instrumented `org-table-eval-formula') then
+copy and paste the table with formula from the ERT results buffer
+or temporarily substitute the `org-test-with-temp-text' of this
+function with `org-test-with-temp-text-in-file'.  Also consider
+setting `pp-escape-newlines' to nil manually."
   (require 'pp)
   (let ((back pp-escape-newlines) (current-tblfm))
     (unless tblfm
@@ -256,9 +255,11 @@ Consider setting `pp-escape-newlines' to nil manually."
     (unless expect (setq expect target))
     (while (setq current-tblfm (pop tblfm))
       (org-test-with-temp-text (concat target current-tblfm)
-	;; Search table, stop ERT at end of buffer if not found.
+	;; Search the last of possibly several tables, let the ERT
+	;; test fail if not found.
+	(goto-char (point-max))
 	(while (not (org-at-table-p))
-	  (should (eq 0 (forward-line))))
+	  (should (eq 0 (forward-line -1))))
 	(when laps
 	  (if (and (symbolp laps) (eq laps 'iterate))
 	      (should (org-table-recalculate 'iterate t))

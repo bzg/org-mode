@@ -770,6 +770,24 @@ reference (with row).  Mode string N."
 ;;   "Remote reference."
 ;;   (should
 ;;    (string= "$3 = remote(FOO, @@#$2)" (org-table-convert-refs-to-rc "C& = remote(FOO, @@#B&)"))))
+
+(ert-deftest test-org-table/remote-reference-access ()
+  "Access to remote reference."
+  (org-test-table-target-expect
+   "
+#+NAME: table
+|   | 42 |
+
+| replace |   |
+"
+   "
+#+NAME: table
+|   | 42 |
+
+| 42 |   |
+"
+   1 "#+TBLFM: $1 = remote(table, @1$2)"))
+
 (ert-deftest test-org-table/org-at-TBLFM-p ()
   (org-test-with-temp-text-in-file
       "
