@@ -225,7 +225,7 @@ This overrides `org-email-link-description-format' if set."
     org-contacts-db))
 
 (defun org-contacts-filter (&optional name-match tags-match)
-  "Search for a contact maching NAME-MATCH and TAGS-MATCH.
+  "Search for a contact matching NAME-MATCH and TAGS-MATCH.
 If both match values are nil, return all contacts."
   (if (and (null name-match)
 	   (null tags-match))
@@ -433,7 +433,7 @@ A group FOO is composed of contacts with the tag FOO."
 				    (or (cdr (assoc-string "ALLTAGS" (caddr contact))) "") ":")))))))
 	(list start end
 	      (if (= (length completion-list) 1)
-		  ;; We've foudn the correct group, returns the address
+		  ;; We've found the correct group, returns the address
 		  (lexical-let ((tag (get-text-property 0 'org-contacts-group
 							(car completion-list))))
 		    (lambda (string pred &optional to-ignore)
