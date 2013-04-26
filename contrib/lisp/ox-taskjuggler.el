@@ -214,7 +214,7 @@ marked with `org-taskjuggler-project-tag'"
 (defcustom org-taskjuggler-default-reports
   '("textreport report \"Plan\" {
   formats html
-  header '== <-query attribute=\"name\"-> =='
+  header '== %title =='
 
   center -8<-
     [#Plan Plan] | [#Resource_Allocation Resource Allocation]
@@ -246,10 +246,11 @@ resourcereport resourceGraph \"\" {
 }")
   "Default reports for the project.
 These are sensible default reports to give a good out-of-the-box
-result when exporting without defining any reports.  If you want
-to define your own reports you can change them here or simply
-define the default reports so that they include an external
-report definition as follows:
+result when exporting without defining any reports.  \"%title\"
+anywhere in the reports will be replaced with the document title.
+If you want to define your own reports you can change them here
+or simply define the default reports so that they include an
+external report definition as follows:
 
 include reports.tji
 
@@ -692,8 +693,15 @@ Return complete project plan as a string in TaskJuggler syntax."
               (mapconcat
                (lambda (report) (org-taskjuggler--build-report report info))
                main-reports "")
-            (mapconcat 'org-element-normalize-string
-                       org-taskjuggler-default-reports ""))))))))
+	    ;; insert title in default reports
+	    (let ((title (org-export-data (plist-get info :title) info)))
+	      (mapconcat
+	       'org-element-normalize-string
+	       (mapcar
+		(function
+		 (lambda (report)
+		   (replace-regexp-in-string "%title" title report t t)))
+		org-taskjuggler-default-reports) "")))))))))
 
 (defun org-taskjuggler--build-project (project info)
   "Return a project declaration.
