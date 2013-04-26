@@ -445,11 +445,11 @@ A group FOO is composed of contacts with the tag FOO."
 				       ;; returned by `org-contacts-filter'.
 				       for contact-name = (car contact)
 				       ;; Grab the first email of the contact
-				       for email = (car (split-string
+				       for email = (org-contacts-strip-link (car (org-contacts-split-property
 							 (or
 							  (cdr (assoc-string org-contacts-email-property
 									     (caddr contact)))
-							  "")))
+							  ""))))
 				       ;; If the user has an email address, append USER <EMAIL>.
 				       if email collect (org-contacts-format-email contact-name email))
 				 ", ")))
@@ -466,14 +466,14 @@ A group FOO is composed of contacts with the tag FOO."
 		;; returned by `org-contacts-filter'.
 		for contact-name = (car contact)
 		;; Build the list of the user email addresses.
-		for email-list = (split-string (or
+		for email-list = (org-contacts-split-property (or
 						(cdr (assoc-string org-contacts-email-property
 								   (caddr contact))) ""))
 		;; If the user has email addresses…
 		if email-list
 		;; … append a list of USER <EMAIL>.
 		nconc (loop for email in email-list
-			    collect (org-contacts-format-email contact-name email))))
+			    collect (org-contacts-format-email contact-name (org-contacts-strip-link email)))))
 	 (completion-list (org-contacts-all-completions-prefix
 			   string
 			   (org-uniquify completion-list))))
@@ -738,11 +738,12 @@ address."
     (org-with-point-at marker
       (let ((emails (org-entry-get (point) org-contacts-email-property)))
         (if emails
-            (let ((email-list (split-string emails)))
+            (let ((email-list (org-contacts-split-property emails)))
               (if (and (= (length email-list) 1) (not ask))
                   (compose-mail (org-contacts-format-email
                                  (org-get-heading t) emails))
                 (let ((email (completing-read "Send mail to which address: " email-list)))
+		  (setq email (org-contacts-strip-link email))
                   (org-contacts-check-mail-address email)
                   (compose-mail (org-contacts-format-email (org-get-heading t) email)))))
           (error (format "This contact has no mail address set (no %s property)."
@@ -766,8 +767,8 @@ address."
              (email-list (org-entry-get pom org-contacts-email-property))
              (gravatar
               (when email-list
-                (loop for email in (split-string email-list)
-                      for gravatar = (gravatar-retrieve-synchronously email)
+                (loop for email in (org-contacts-split-property email-list)
+                      for gravatar = (gravatar-retrieve-synchronously (org-contacts-strip-link email))
                       if (and gravatar
                               (not (eq gravatar 'error)))
                       return gravatar))))
@@ -849,19 +850,19 @@ to do our best."
 	 (head (format "BEGIN:VCARD\nVERSION:3.0\nN:%s\nFN:%s\n" n name)))
     (concat head
 	    (when email (progn
-			  (setq emails-list (split-string email "[,;: ]+"))
+			  (setq emails-list (org-contacts-split-property email "[,; ]+"))
 			  (setq result "")
 			  (while emails-list
-			    (setq result (concat result  "EMAIL:" (car emails-list) "\n"))
+			    (setq result (concat result  "EMAIL:" (org-contacts-strip-link (car emails-list)) "\n"))
 			    (setq emails-list (cdr emails-list)))
 			  result))
 	    (when addr
 	      (format "ADR:;;%s\n" (replace-regexp-in-string "\\, ?" ";" addr)))
 	    (when tel (progn
-			(setq phones-list (split-string tel "[,;: ]+"))
+			(setq phones-list (org-contacts-split-property tel "[,; ]+"))
 			(setq result "")
 			(while phones-list
-			  (setq result (concat result  "TEL:" (car phones-list) "\n"))
+			  (setq result (concat result  "TEL:" (org-contacts-strip-link (car phones-list)) "\n"))
 			  (setq phones-list (cdr phones-list)))
 			result))
 	    (when bday
@@ -910,7 +911,55 @@ Requires google-maps-el."
     if addr
     collect (cons (list addr) (list :label (string-to-char (car contact)))))))
 
-(provide 'org-contacts)
+(defun org-contacts-strip-link (link)
+  "Remove brackets, description, link type and colon from an org link string and return the pure link target."
+   (let (startpos colonpos endpos)
+     (setq startpos (string-match (regexp-opt '("[[tel:" "[[mailto:")) link))
+     (if startpos
+         (progn
+            (setq colonpos (string-match ":" link))
+            (setq endpos (string-match "\\]" link))
+            (if endpos (substring link (1+ colonpos) endpos) link))
+         (progn
+            (setq startpos (string-match "mailto:" link))
+            (setq colonpos (string-match ":" link))
+            (if startpos (substring link (1+ colonpos)) link)))))
+
+(defun org-contacts-split-property (string &optional separators omit-nulls)
+  "Custom version of `split-string'.
+Split a property STRING into sub-strings bounded by matches
+for SEPARATORS but keep Org links intact.
+
+The beginning and end of STRING, and each match for SEPARATORS, are
+splitting points.  The substrings matching SEPARATORS are removed, and
+the substrings between the splitting points are collected as a list,
+which is returned.
+
+If SEPARATORS is non-nil, it should be a regular expression matching text
+which separates, but is not part of, the substrings.  If nil it defaults to
+`split-string-default-separators', normally \"[ \\f\\t\\n\\r\\v]+\", and
+OMIT-NULLS is forced to t.
+
+If OMIT-NULLS is t, zero-length substrings are omitted from the list \(so
+that for the default value of SEPARATORS leading and trailing whitespace
+are effectively trimmed).  If nil, all zero-length substrings are retained."
+(let* ((keep-nulls (or nil omit-nulls))
+         (rexp (or separators split-string-default-separators))
+         (inputlist (split-string string rexp keep-nulls))
+         (linkstring "")
+         (bufferstring "")
+         (proplist (list "")))
+    (while inputlist
+      (setq bufferstring (pop inputlist))
+      (if (string-match "\\[\\[" bufferstring)
+          (progn
+            (setq linkstring (concat bufferstring " "))
+            (while (not (string-match "\\]\\]" bufferstring))
+              (setq bufferstring (pop inputlist))
+              (setq linkstring (concat  linkstring bufferstring " ")))
+            (setq proplist (cons (org-trim linkstring) proplist)))
+        (setq proplist (cons bufferstring proplist))))
+    (cdr (reverse proplist))))
 
 (provide 'org-contacts)
 
