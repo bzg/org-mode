@@ -53,7 +53,7 @@ maint then merged in master.
 When doing a major and a minor release, after all necessary merging is
 done, tag the _maint_ branch for the release with:
 
-  git tag -a "Adding release tag" release_7.9.1
+  git tag -a release_7.9.1 -m "Adding release tag"
 
 and push tags with
 
@@ -61,7 +61,7 @@ and push tags with
 
 We also encourage you to sign release tags like this:
 
-  git tag -a "Adding release tag" -s release_7.9.1
+  git tag -s release_7.9.1 -m "Adding release tag"
 
 ** Uploading the release files from the orgmode.org server
 
