@@ -1119,14 +1119,15 @@ Paragraph"
 echo \"$data\"
 #+end_src
 
-#+results:
+#+RESULTS:
 | Rev | Author |
 |-----+--------|
 |   1 | bar    |
 |   2 | baz    |
 
 "
-	  (org-test-with-temp-text "#+name: input-table
+	  (org-test-with-temp-text
+	      "#+name: input-table
 | id | var1 |
 |----+------|
 |  1 | bar  |
@@ -1136,8 +1137,12 @@ echo \"$data\"
 echo \"$data\"
 #+end_src
 "
-				   (org-babel-execute-src-block)
-				   (buffer-string)))))
+	    ;; we should find a code block
+	    (should (re-search-forward org-babel-src-block-regexp nil t))
+	    (goto-char (match-beginning 0))
+	    ;; now that we've located the code block, it may be evaluated
+	    (org-babel-execute-src-block)
+	    (buffer-string)))))
 
 (provide 'test-ob)
 
