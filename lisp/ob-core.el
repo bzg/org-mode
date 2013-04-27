@@ -1,6 +1,6 @@
 ;;; ob-core.el --- working with code blocks in org-mode
 
-;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2009-2013  Free Software Foundation, Inc.
 
 ;; Authors: Eric Schulte
 ;;	Dan Davison
@@ -1329,8 +1329,8 @@ may be specified in the properties of the current outline entry."
               (buffer-string)))
 	  (org-babel-merge-params
 	   org-babel-default-header-args
-           (org-babel-params-from-properties lang)
 	   (if (boundp lang-headers) (eval lang-headers) nil)
+           (org-babel-params-from-properties lang)
 	   (org-babel-parse-header-arguments
             (org-no-properties (or (match-string 4) ""))))
 	  switches
