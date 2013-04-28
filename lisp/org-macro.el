@@ -144,7 +144,7 @@ default value.  Return nil if no template was found."
                                (org-element-property :args macro))
                           ;; No argument: remove place-holder.
                           ""))
-                    template)))
+                    template nil 'literal)))
         ;; VALUE starts with "(eval": it is a s-exp, `eval' it.
         (when (string-match "\\`(eval\\>" value)
           (setq value (eval (read value))))
