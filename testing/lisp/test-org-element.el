@@ -1117,8 +1117,7 @@ Paragraph"
   "Test `latex-environment' parser."
   (should
    (org-test-with-temp-text "\\begin{equation}\ne^{i\\pi}+1=0\n\\end{equation}"
-     (org-element-map
-      (org-element-parse-buffer) 'latex-environment 'identity)))
+     (org-element-map (org-element-parse-buffer) 'latex-environment 'identity)))
   ;; Allow nested environments.
   (should
    (equal
@@ -1136,7 +1135,13 @@ e^{i\\pi}+1=0
       (org-element-property
        :value
        (org-element-map
-	(org-element-parse-buffer) 'latex-environment 'identity nil t))))))
+	   (org-element-parse-buffer) 'latex-environment 'identity nil t)))))
+  ;; Allow environments with options.
+  (should
+   (eq 'latex-environment
+       (org-test-with-temp-text
+	   "\\begin{theorem}[Euler]\ne^{i\\pi}+1=0\n\\end{theorem}"
+	 (org-element-type (org-element-at-point))))))
 
 
 ;;;; Latex Fragment
@@ -2218,7 +2223,10 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))
   "Test latex environment interpreter."
   (should (equal (org-test-parse-and-interpret
 		  "\\begin{equation}\n1+1=2\n\\end{equation}")
-		 "\\begin{equation}\n1+1=2\n\\end{equation}\n")))
+		 "\\begin{equation}\n1+1=2\n\\end{equation}\n"))
+  (should (equal (org-test-parse-and-interpret
+		  "\\begin{theorem}[me]\n1+1=2\n\\end{theorem}")
+		 "\\begin{theorem}[me]\n1+1=2\n\\end{theorem}\n")))
 
 (ert-deftest test-org-element/planning-interpreter ()
   "Test planning interpreter."
