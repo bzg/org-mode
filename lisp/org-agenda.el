@@ -2737,12 +2737,12 @@ Pressing `<' twice means to restrict to the current subtree or region
 	(put 'org-agenda-files 'org-restrict (list bfn))
 	(cond
 	 ((eq restriction 'region)
-	  (setq org-agenda-restrict t)
+	  (setq org-agenda-restrict (current-buffer))
 	  (move-marker org-agenda-restrict-begin (region-beginning))
 	  (move-marker org-agenda-restrict-end (region-end)))
 	 ((eq restriction 'subtree)
 	  (save-excursion
-	    (setq org-agenda-restrict t)
+	    (setq org-agenda-restrict (current-buffer))
 	    (org-back-to-heading t)
 	    (move-marker org-agenda-restrict-begin (point))
 	    (move-marker org-agenda-restrict-end
@@ -4557,7 +4557,7 @@ in `org-agenda-text-search-extra-files'."
 	      (let ((case-fold-search t))
 		(save-excursion
 		  (save-restriction
-		    (if org-agenda-restrict
+		    (if (eq buffer org-agenda-restrict)
 			(narrow-to-region org-agenda-restrict-begin
 					  org-agenda-restrict-end)
 		      (widen))
@@ -4813,7 +4813,7 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
 		(error "Agenda file %s is not in `org-mode'" file))
 	      (save-excursion
 		(save-restriction
-		  (if org-agenda-restrict
+		  (if (eq buffer org-agenda-restrict)
 		      (narrow-to-region org-agenda-restrict-begin
 					org-agenda-restrict-end)
 		    (widen))
@@ -5281,7 +5281,7 @@ the documentation of `org-diary'."
 	(let ((case-fold-search nil))
 	  (save-excursion
 	    (save-restriction
-	      (if org-agenda-restrict
+	      (if (eq buffer org-agenda-restrict)
 		  (narrow-to-region org-agenda-restrict-begin
 				    org-agenda-restrict-end)
 		(widen))
@@ -7085,7 +7085,7 @@ in the file.  Otherwise, restriction will be to the current subtree."
 	      (t 'file)))
   (if (eq type 'subtree)
       (progn
-	(setq org-agenda-restrict t)
+	(setq org-agenda-restrict (current-buffer))
 	(setq org-agenda-overriding-restriction 'subtree)
 	(put 'org-agenda-files 'org-restrict
 	     (list (buffer-file-name (buffer-base-buffer))))
