@@ -3584,14 +3584,14 @@ regular expression will be included."
 
 (defcustom org-agenda-text-search-extra-files nil
   "List of extra files to be searched by text search commands.
-These files will be search in addition to the agenda files by the
+These files will be searched in addition to the agenda files by the
 commands `org-search-view' (`C-c a s') and `org-occur-in-agenda-files'.
 Note that these files will only be searched for text search commands,
 not for the other agenda views like todo lists, tag searches or the weekly
 agenda.  This variable is intended to list notes and possibly archive files
 that should also be searched by these two commands.
 In fact, if the first element in the list is the symbol `agenda-archives',
-than all archive files of all agenda files will be added to the search
+then all archive files of all agenda files will be added to the search
 scope."
   :group 'org-agenda
   :type '(set :greedy t
