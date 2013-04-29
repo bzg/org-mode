@@ -10665,10 +10665,12 @@ for this property.  The file name in this case is derived from the file
 associated to the buffer, if possible, or asked to the user otherwise.}.
 
 @cindex #+BIND
+@vindex org-export-allow-bind-keywords
 Eventually, Emacs variables can become buffer-local during export by using
 the BIND keyword.  Its syntax is @samp{#+BIND: variable value}.  This is
 particularly useful for in-buffer settings that cannot be changed using
-specific keywords.
+specific keywords.  You need to set @code{org-export-allow-bind-keywords} to
+non-@code{nil} to allow @samp{#+BIND} keywords during export.
 
 @node ASCII/Latin-1/UTF-8 export, Beamer export, Export settings, Exporting
 @section ASCII/Latin-1/UTF-8 export
