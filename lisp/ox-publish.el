@@ -829,7 +829,10 @@ modification time.  Return time in `current-time' format."
     (cond ((eq (org-element-type date) 'timestamp)
 	   (org-time-string-to-time (org-element-interpret-data date)))
 	  ((let ((ts (and (consp date) (assq 'timestamp date))))
-	     (and ts (org-string-nw-p (org-element-interpret-data ts)))))
+	     (and ts
+		  (let ((value (org-element-interpret-data ts)))
+		    (and (org-string-nw-p value)
+			 (org-time-string-to-time value))))))
 	  ((file-exists-p file) (nth 5 (file-attributes file)))
 	  (t (error "No such file: \"%s\"" file)))))
 
