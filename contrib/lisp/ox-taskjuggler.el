@@ -457,17 +457,17 @@ ITEM is a headline.  Return value is a string."
 (defun org-taskjuggler-get-start (item)
   "Return start date for task or resource ITEM.
 ITEM is a headline.  Return value is a string or nil if ITEM
-doesn't have any start date defined.."
+doesn't have any start date defined."
   (let ((scheduled (org-element-property :scheduled item)))
     (or
      (and scheduled (org-timestamp-format scheduled "%Y-%02m-%02d"))
-     (and (member 'start org-taskjuggler-valid-resource-attributes)
+     (and (memq 'start org-taskjuggler-valid-task-attributes)
 	  (org-element-property :START item)))))
 
 (defun org-taskjuggler-get-end (item)
   "Return end date for task or resource ITEM.
 ITEM is a headline.  Return value is a string or nil if ITEM
-doesn't have any end date defined.."
+doesn't have any end date defined."
   (let ((deadline (org-element-property :deadline item)))
     (and deadline (org-timestamp-format deadline "%Y-%02m-%02d"))))
 
