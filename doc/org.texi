@@ -3729,7 +3729,7 @@ be inlined during export.  When called with a prefix argument, also display
 images that do have a link description.  You can ask for inline images to be
 displayed at startup by configuring the variable
 @code{org-startup-with-inline-images}@footnote{with corresponding
-@code{#+STARTUP} keywords @code{inlineimages} and @code{inlineimages}}.
+@code{#+STARTUP} keywords @code{inlineimages} and @code{noinlineimages}}.
 @orgcmd{C-c %,org-mark-ring-push}
 @cindex mark ring
 Push the current position onto the mark ring, to be able to return
