@@ -18195,37 +18195,38 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
   (interactive "P")
   (unless buffer-file-name
     (user-error "Can't preview LaTeX fragment in a non-file buffer"))
-  (org-remove-latex-fragment-image-overlays)
-  (save-excursion
-    (save-restriction
-      (let (beg end at msg)
-	(cond
-	 ((or (equal subtree '(16))
-	      (not (save-excursion
-		     (re-search-backward org-outline-regexp-bol nil t))))
-	  (setq beg (point-min) end (point-max)
-		msg "Creating images for buffer...%s"))
-	 ((equal subtree '(4))
-	  (org-back-to-heading)
-	  (setq beg (point) end (org-end-of-subtree t)
-		msg "Creating images for subtree...%s"))
-	 (t
-	  (if (setq at (org-inside-LaTeX-fragment-p))
-	      (goto-char (max (point-min) (- (cdr at) 2)))
-	    (org-back-to-heading))
-	  (setq beg (point) end (progn (outline-next-heading) (point))
-		msg (if at "Creating image...%s"
-		      "Creating images for entry...%s"))))
-	(message msg "")
-	(narrow-to-region beg end)
-	(goto-char beg)
-	(org-format-latex
-	 (concat org-latex-preview-ltxpng-directory (file-name-sans-extension
-						     (file-name-nondirectory
-						      buffer-file-name)))
-	 default-directory 'overlays msg at 'forbuffer
-	 org-latex-create-formula-image-program)
-	(message msg "done.  Use `C-c C-c' to remove images.")))))
+  (when (display-graphic-p)
+    (org-remove-latex-fragment-image-overlays)
+    (save-excursion
+      (save-restriction
+	(let (beg end at msg)
+	  (cond
+	   ((or (equal subtree '(16))
+		(not (save-excursion
+		       (re-search-backward org-outline-regexp-bol nil t))))
+	    (setq beg (point-min) end (point-max)
+		  msg "Creating images for buffer...%s"))
+	   ((equal subtree '(4))
+	    (org-back-to-heading)
+	    (setq beg (point) end (org-end-of-subtree t)
+		  msg "Creating images for subtree...%s"))
+	   (t
+	    (if (setq at (org-inside-LaTeX-fragment-p))
+		(goto-char (max (point-min) (- (cdr at) 2)))
+	      (org-back-to-heading))
+	    (setq beg (point) end (progn (outline-next-heading) (point))
+		  msg (if at "Creating image...%s"
+			"Creating images for entry...%s"))))
+	  (message msg "")
+	  (narrow-to-region beg end)
+	  (goto-char beg)
+	  (org-format-latex
+	   (concat org-latex-preview-ltxpng-directory (file-name-sans-extension
+						       (file-name-nondirectory
+							buffer-file-name)))
+	   default-directory 'overlays msg at 'forbuffer
+	   org-latex-create-formula-image-program)
+	  (message msg "done.  Use `C-c C-c' to remove images."))))))
 
 (defun org-format-latex (prefix &optional dir overlays msg at
 				forbuffer processing-type)
@@ -18747,53 +18748,54 @@ When REFRESH is set, refresh existing images between BEG and END.
 This will create new image displays only if necessary.
 BEG and END default to the buffer boundaries."
   (interactive "P")
-  (unless refresh
-    (org-remove-inline-images)
-    (if (fboundp 'clear-image-cache) (clear-image-cache)))
-  (save-excursion
-    (save-restriction
-      (widen)
-      (setq beg (or beg (point-min)) end (or end (point-max)))
-      (goto-char beg)
-      (let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([^]\n]+?"
-			(substring (org-image-file-name-regexp) 0 -2)
-			"\\)\\]" (if include-linked "" "\\]")))
-	    (case-fold-search t)
-	    old file ov img type attrwidth width)
-	(while (re-search-forward re end t)
-	  (setq old (get-char-property-and-overlay (match-beginning 1)
-						   'org-image-overlay)
-		file (expand-file-name
-		      (concat (or (match-string 3) "") (match-string 4))))
-	  (when (image-type-available-p 'imagemagick)
-	    (setq attrwidth (if (or (listp org-image-actual-width)
-				    (null org-image-actual-width))
-				(save-excursion
-				  (save-match-data
-				    (when (re-search-backward
-					   "#\\+attr.*:width[ \t]+\\([^ ]+\\)"
-					   (save-excursion
-					     (re-search-backward "^[ \t]*$\\|\\`" nil t)) t)
-				      (string-to-number (match-string 1))))))
-		  width (cond ((eq org-image-actual-width t) nil)
-			      ((null org-image-actual-width) attrwidth)
-			      ((numberp org-image-actual-width)
-			       org-image-actual-width)
-			      ((listp org-image-actual-width)
-			       (or attrwidth (car org-image-actual-width))))
-		  type (if width 'imagemagick)))
-	  (when (file-exists-p file)
-	    (if (and (car-safe old) refresh)
-		(image-refresh (overlay-get (cdr old) 'display))
-	      (setq img (save-match-data (create-image file type nil :width width)))
-	      (when img
-		(setq ov (make-overlay (match-beginning 0) (match-end 0)))
-		(overlay-put ov 'display img)
-		(overlay-put ov 'face 'default)
-		(overlay-put ov 'org-image-overlay t)
-		(overlay-put ov 'modification-hooks
-			     (list 'org-display-inline-remove-overlay))
-		(push ov org-inline-image-overlays)))))))))
+  (when (display-graphic-p)
+    (unless refresh
+      (org-remove-inline-images)
+      (if (fboundp 'clear-image-cache) (clear-image-cache)))
+    (save-excursion
+      (save-restriction
+	(widen)
+	(setq beg (or beg (point-min)) end (or end (point-max)))
+	(goto-char beg)
+	(let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([^]\n]+?"
+			  (substring (org-image-file-name-regexp) 0 -2)
+			  "\\)\\]" (if include-linked "" "\\]")))
+	      (case-fold-search t)
+	      old file ov img type attrwidth width)
+	  (while (re-search-forward re end t)
+	    (setq old (get-char-property-and-overlay (match-beginning 1)
+						     'org-image-overlay)
+		  file (expand-file-name
+			(concat (or (match-string 3) "") (match-string 4))))
+	    (when (image-type-available-p 'imagemagick)
+	      (setq attrwidth (if (or (listp org-image-actual-width)
+				      (null org-image-actual-width))
+				  (save-excursion
+				    (save-match-data
+				      (when (re-search-backward
+					     "#\\+attr.*:width[ \t]+\\([^ ]+\\)"
+					     (save-excursion
+					       (re-search-backward "^[ \t]*$\\|\\`" nil t)) t)
+					(string-to-number (match-string 1))))))
+		    width (cond ((eq org-image-actual-width t) nil)
+				((null org-image-actual-width) attrwidth)
+				((numberp org-image-actual-width)
+				 org-image-actual-width)
+				((listp org-image-actual-width)
+				 (or attrwidth (car org-image-actual-width))))
+		    type (if width 'imagemagick)))
+	    (when (file-exists-p file)
+	      (if (and (car-safe old) refresh)
+		  (image-refresh (overlay-get (cdr old) 'display))
+		(setq img (save-match-data (create-image file type nil :width width)))
+		(when img
+		  (setq ov (make-overlay (match-beginning 0) (match-end 0)))
+		  (overlay-put ov 'display img)
+		  (overlay-put ov 'face 'default)
+		  (overlay-put ov 'org-image-overlay t)
+		  (overlay-put ov 'modification-hooks
+			       (list 'org-display-inline-remove-overlay))
+		  (push ov org-inline-image-overlays))))))))))
 
 (define-obsolete-function-alias
   'org-display-inline-modification-hook 'org-display-inline-remove-overlay "24.3")
