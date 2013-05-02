@@ -51,6 +51,13 @@
 (defvar org-babel-ocaml-eoe-indicator "\"org-babel-ocaml-eoe\";;")
 (defvar org-babel-ocaml-eoe-output "org-babel-ocaml-eoe")
 
+(defcustom org-babel-ocaml-command "ocaml"
+  "Name of the command for executing Ocaml code."
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :group 'org-babel
+  :type 'string)
+
 (defun org-babel-execute:ocaml (body params)
   "Execute a block of Ocaml code with Babel."
   (let* ((vars (mapcar #'cdr (org-babel-get-header params :var)))
@@ -96,9 +103,10 @@
                                                  (stringp session))
                                             session
                                           tuareg-interactive-buffer-name)))
-    (save-window-excursion
-      (if (fboundp 'tuareg-run-caml) (tuareg-run-caml) (tuareg-run-ocaml))
-      (get-buffer tuareg-interactive-buffer-name))))
+    (if (fboundp 'tuareg-run-process-if-needed)
+        (tuareg-run-process-if-needed org-babel-ocaml-command)
+      (tuareg-run-caml))
+    (get-buffer tuareg-interactive-buffer-name)))
 
 (defun org-babel-variable-assignments:ocaml (params)
   "Return list of ocaml statements assigning the block's variables."
