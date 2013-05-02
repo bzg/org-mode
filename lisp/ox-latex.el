@@ -1435,7 +1435,8 @@ holding contextual information."
 	       (format "\n\\\\end{%s}" (if numberedp 'enumerate 'itemize))
 	       low-level-body)))
 	;; This is a standard headline.  Export it as a section.  Add
-	;; an alternative heading when possible.
+	;; an alternative heading when possible, and when this is not
+	;; identical to the usual heading.
 	(let ((opt-title
 	       (funcall org-latex-format-headline-function
 			todo todo-type priority
@@ -1443,6 +1444,7 @@ holding contextual information."
 			 (org-export-get-alt-title headline info) info)
 			(and (eq (plist-get info :with-tags) t) tags))))
 	  (if (and numberedp opt-title
+		   (not (equal opt-title full-text))
 		   (string-match "\\`\\\\\\(.*?[^*]\\){" section-fmt))
 	      (format (replace-match "\\1[%s]" nil nil section-fmt 1)
 		      ;; Replace square brackets with parenthesis
