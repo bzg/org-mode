@@ -9607,21 +9607,30 @@ per-file basis with a line
 @cindex #+TOC
 @vindex org-export-with-toc
 The table of contents is normally inserted directly before the first headline
-of the file.  If you would like to get it to a different location, insert
-@code{#+TOC: headlines} at the desired location.  The depth of the table of
-contents is by default the same as the number of headline levels, but you can
-choose a smaller number, or turn off the table of contents entirely, by
-configuring the variable @code{org-export-with-toc}, or on a per-file basis
-with a line like
+of the file.  The depth of the table is by default the same as the number of
+headline levels, but you can choose a smaller number, or turn off the table
+of contents entirely, by configuring the variable @code{org-export-with-toc},
+or on a per-file basis with a line like
 
 @example
 #+OPTIONS: toc:2          (only to two levels in TOC)
-#+TOC: headlines 2        (the same, at a specific location)
-#+OPTIONS: toc:nil        (no TOC at all)
+#+OPTIONS: toc:nil        (no default TOC at all)
 @end example
 
-The same @code{TOC} keyword can also generate a list of all tables (resp.@:
-all listings) with a caption in the buffer.
+If you would like to move the table of contents to a different location, you
+should turn off the detault table using @code{org-export-with-toc} or
+@code{#+OPTIONS} and insert @code{#+TOC: headlines N} at the desired
+location(s).
+
+@example
+#+OPTIONS: toc:nil        (no default TOC)
+...
+#+TOC: headlines 2        (insert TOC here, with two headline levels)
+@end example
+
+Multiple @code{#+TOC: headline} lines are allowed.  The same @code{TOC}
+keyword can also generate a list of all tables (resp.@: all listings) with a
+caption in the buffer.
 
 @example
 #+TOC: listings           (build a list of listings)
