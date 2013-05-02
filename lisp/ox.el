@@ -3976,27 +3976,43 @@ significant."
 	 ;; Split PATH at white spaces so matches are space
 	 ;; insensitive.
 	 (path (org-split-string
-		(if match-title-p (substring raw-path 1) raw-path))))
+		(if match-title-p (substring raw-path 1) raw-path)))
+	 ;; Cache for locations of fuzzy links that are not position dependent
+	 (link-cache
+	  (or (plist-get info :fuzzy-link-cache)
+	      (plist-get (setq info (plist-put info :fuzzy-link-cache
+					       (make-hash-table :test 'equal)))
+			 :fuzzy-link-cache)))
+	 (found-in-cache (gethash path link-cache 'fuzzy-link-not-found)))
     (cond
      ;; First try to find a matching "<<path>>" unless user specified
      ;; he was looking for a headline (path starts with a "*"
      ;; character).
      ((and (not match-title-p)
-	   (org-element-map (plist-get info :parse-tree) 'target
-	     (lambda (blob)
-	       (and (equal (org-split-string (org-element-property :value blob))
-			   path)
-		    blob))
-	     info t)))
+	   (or (not (eq found-in-cache 'fuzzy-link-not-found))
+	       (puthash path
+			(org-element-map (plist-get info :parse-tree) 'target
+			  (lambda (blob)
+			    (and (equal (org-split-string
+					 (org-element-property :value blob))
+					path)
+				 blob))
+			  info t)
+			link-cache))))
      ;; Then try to find an element with a matching "#+NAME: path"
      ;; affiliated keyword.
      ((and (not match-title-p)
-	   (org-element-map (plist-get info :parse-tree)
-	       org-element-all-elements
-	     (lambda (el)
-	       (let ((name (org-element-property :name el)))
-		 (when (and name (equal (org-split-string name) path)) el)))
-	     info 'first-match)))
+	   (or (not (eq found-in-cache 'fuzzy-link-not-found))
+	       (puthash path
+			(org-element-map (plist-get info :parse-tree)
+			    org-element-all-elements
+			  (lambda (el)
+			    (let ((name (org-element-property :name el)))
+			      (when (and name
+					 (equal (org-split-string name) path))
+				el)))
+			  info 'first-match)
+			link-cache))))
      ;; Last case: link either points to a headline or to nothingness.
      ;; Try to find the source, with priority given to headlines with
      ;; the closest common ancestor.  If such candidate is found,
