@@ -596,6 +596,7 @@ Exporting
 HTML export
 
 * HTML Export commands::        How to invoke HTML export
+* HTML doctypes::               Org can export to various (X)HTML flavors
 * HTML preamble and postamble::  How to insert a preamble and a postamble
 * Quoting HTML tags::           Using direct HTML in Org mode
 * Links in HTML export::        How links will be interpreted and formatted
@@ -10969,6 +10970,7 @@ language, but with additional support for tables.
 
 @menu
 * HTML Export commands::        How to invoke HTML export
+* HTML doctypes::               Org can export to various (X)HTML flavors
 * HTML preamble and postamble::  How to insert a preamble and a postamble
 * Quoting HTML tags::           Using direct HTML in Org mode
 * Links in HTML export::        How links will be interpreted and formatted
@@ -10980,7 +10982,7 @@ language, but with additional support for tables.
 * JavaScript support::          Info and Folding in a web browser
 @end menu
 
-@node HTML Export commands, HTML preamble and postamble, HTML export, HTML export
+@node HTML Export commands, HTML doctypes, HTML export, HTML export
 @subsection HTML export commands
 
 @table @kbd
@@ -11008,7 +11010,98 @@ Export to a temporary buffer.  Do not create a file.
 @c @noindent
 @c creates two levels of headings and does the rest as items.
 
-@node HTML preamble and postamble, Quoting HTML tags, HTML Export commands, HTML export
+@node HTML doctypes, HTML preamble and postamble, HTML Export commands, HTML export
+@subsection HTML doctypes
+@vindex org-html-doctype
+@vindex org-html-doctype-alist
+
+Org can export to various (X)HTML flavors.
+
+Setting the variable @code{org-html-doctype} allows you to export to different
+(X)HTML variants.  The exported HTML will be adjusted according to the sytax
+requirements of that variant.  You can either set this variable to a doctype
+string directly, in which case the exporter will try to adjust the syntax
+automatically, or you can use a ready-made doctype.  The ready-made options
+are:
+
+@itemize
+@item
+``html4-strict''
+@item
+``html4-transitional''
+@item
+``html4-frameset''
+@item
+``xhtml-strict''
+@item
+``xhtml-transitional''
+@item
+``xhtml-frameset''
+@item
+``xhtml-11''
+@item
+``html5''
+@item
+``xhtml5''
+@end itemize
+
+See the variable @code{org-html-doctype-alist} for details.  The default is
+``xhtml-strict''.
+
+@subsubheading Fancy HTML5 export
+@vindex org-html-html5-fancy
+@vindex org-html-html5-elements
+
+HTML5 introduces several new element types.  By default, Org will not make
+use of these element types, but you can set @code{org-html-html5-fancy} to
+@code{t} (or use the corresponding @code{HTML_HTML5_FANCY} export option), to
+enable a few new block-level elements.  These are created using arbitrary
+#+BEGIN and #+END blocks. For instance:
+
+@example
+#+BEGIN_ASIDE
+Lorem ipsum
+#+END_ASIDE
+@end example
+
+Will export to:
+
+@example
+<aside>
+  <p>Lorem ipsum</p>
+</aside>
+@end example
+
+While this:
+
+@example
+#+ATTR_HTML: :controls controls :width 350
+#+BEGIN_VIDEO
+#+HTML: <source src="movie.mp4" type="video/mp4">
+#+HTML: <source src="movie.ogg" type="video/ogg">
+Your browser does not support the video tag.
+#+END_VIDEO
+@end example
+
+Becomes:
+
+@example
+<video controls="controls" width="350">
+  <source src="movie.mp4" type="video/mp4">
+  <source src="movie.ogg" type="video/ogg">
+  <p>Your browser does not support the video tag.</p>
+</video>
+@end example
+
+Special blocks that do not correspond to HTML5 elements (see
+@code{org-html-html5-elements}) will revert to the usual behavior,
+i.e. #+BEGIN_LEDERHOSEN will still export to <div class=''lederhosen''>.
+
+Headlines cannot appear within special blocks.  To wrap a headline and its
+contents in e.g. <section> or <article> tags, set the @code{HTML_CONTAINER}
+property on the headline itself.
+
+@node HTML preamble and postamble, Quoting HTML tags, HTML doctypes, HTML export
 @subsection HTML preamble and postamble
 @vindex org-html-preamble
 @vindex org-html-postamble
