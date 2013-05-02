@@ -63,7 +63,7 @@
 		  (session org-babel-ocaml-eoe-output t full-body)
 		(insert
 		 (concat
-		  (org-babel-chomp full-body)"\n"org-babel-ocaml-eoe-indicator))
+		  (org-babel-chomp full-body)";;\n"org-babel-ocaml-eoe-indicator))
 		(tuareg-interactive-send-input)))
 	 (clean
 	  (car (let ((re (regexp-quote org-babel-ocaml-eoe-output)) out)
@@ -74,10 +74,13 @@
 					 (progn (setq out t) nil))))
 				   (mapcar #'org-babel-trim (reverse raw))))))))
     (org-babel-reassemble-table
-     (let ((raw (org-babel-trim clean)))
-       (org-babel-result-cond (cdr (assoc :result-params params))
-	 ;; strip type information from output
-	 (if (string-match "= \\(.+\\)$" raw) (match-string 1 raw) raw)
+     (let ((raw (org-babel-trim clean))
+	   (result-params (cdr (assoc :result-params params))))
+       (org-babel-result-cond result-params
+	 ;; strip type information from output unless verbatim is specified
+	 (if (and (not (member "verbatim" result-params))
+		  (string-match "= \\(.+\\)$" raw))
+	     (match-string 1 raw) raw)
 	 (org-babel-ocaml-parse-output raw)))
      (org-babel-pick-name
       (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
@@ -113,7 +116,7 @@
 (defun org-babel-ocaml-parse-output (output)
   "Parse OUTPUT.
 OUTPUT is string output from an ocaml process."
-  (let ((regexp "%s = \\(.+\\)$"))
+  (let ((regexp "[^:]+ : %s = \\(.+\\)$"))
     (cond
      ((string-match (format regexp "string") output)
       (org-babel-read (match-string 1 output)))
