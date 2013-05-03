@@ -695,13 +695,16 @@ Return complete project plan as a string in TaskJuggler syntax."
                (lambda (report) (org-taskjuggler--build-report report info))
                main-reports "")
 	    ;; insert title in default reports
-	    (let ((title (org-export-data (plist-get info :title) info)))
+	    (let* ((title (org-export-data (plist-get info :title) info))
+		   (report-title (if (string= title "")
+				     (org-taskjuggler-get-name project)
+				   title)))
 	      (mapconcat
 	       'org-element-normalize-string
 	       (mapcar
 		(function
 		 (lambda (report)
-		   (replace-regexp-in-string "%title" title report t t)))
+		   (replace-regexp-in-string "%title" report-title  report t t)))
 		org-taskjuggler-default-reports) "")))))))))
 
 (defun org-taskjuggler--build-project (project info)
