@@ -3977,42 +3977,40 @@ significant."
 	 ;; insensitive.
 	 (path (org-split-string
 		(if match-title-p (substring raw-path 1) raw-path)))
-	 ;; Cache for locations of fuzzy links that are not position dependent
+	 ;; Cache for destinations that are not position dependent.
 	 (link-cache
 	  (or (plist-get info :fuzzy-link-cache)
 	      (plist-get (setq info (plist-put info :fuzzy-link-cache
 					       (make-hash-table :test 'equal)))
 			 :fuzzy-link-cache)))
-	 (found-in-cache (gethash path link-cache 'fuzzy-link-not-found)))
+	 (cached (gethash path link-cache 'not-found)))
     (cond
+     ;; Destination is not position dependent: use cached value.
+     ((and (not match-title-p) (not (eq cached 'not-found))) cached)
      ;; First try to find a matching "<<path>>" unless user specified
      ;; he was looking for a headline (path starts with a "*"
      ;; character).
      ((and (not match-title-p)
-	   (or (not (eq found-in-cache 'fuzzy-link-not-found))
-	       (puthash path
-			(org-element-map (plist-get info :parse-tree) 'target
+	   (let ((match (org-element-map (plist-get info :parse-tree) 'target
 			  (lambda (blob)
 			    (and (equal (org-split-string
 					 (org-element-property :value blob))
 					path)
 				 blob))
-			  info t)
-			link-cache))))
+			  info 'first-match)))
+	     (and match (puthash path match link-cache)))))
      ;; Then try to find an element with a matching "#+NAME: path"
      ;; affiliated keyword.
      ((and (not match-title-p)
-	   (or (not (eq found-in-cache 'fuzzy-link-not-found))
-	       (puthash path
-			(org-element-map (plist-get info :parse-tree)
+	   (let ((match (org-element-map (plist-get info :parse-tree)
 			    org-element-all-elements
 			  (lambda (el)
 			    (let ((name (org-element-property :name el)))
 			      (when (and name
 					 (equal (org-split-string name) path))
 				el)))
-			  info 'first-match)
-			link-cache))))
+			  info 'first-match)))
+	     (and match (puthash path match link-cache)))))
      ;; Last case: link either points to a headline or to nothingness.
      ;; Try to find the source, with priority given to headlines with
      ;; the closest common ancestor.  If such candidate is found,
@@ -4035,15 +4033,15 @@ significant."
 		  info 'first-match)))))
 	;; Search among headlines sharing an ancestor with link, from
 	;; closest to farthest.
-	(or (catch 'exit
-	      (mapc
-	       (lambda (parent)
-		 (when (eq (org-element-type parent) 'headline)
-		   (let ((foundp (funcall find-headline path parent)))
-		     (when foundp (throw 'exit foundp)))))
-	       (org-export-get-genealogy link)) nil)
-	    ;; No match with a common ancestor: try full parse-tree.
-	    (funcall find-headline path (plist-get info :parse-tree))))))))
+	(catch 'exit
+	  (mapc
+	   (lambda (parent)
+	     (let ((foundp (funcall find-headline path parent)))
+	       (when foundp (throw 'exit foundp))))
+	   (let ((parent-hl (org-export-get-parent-headline link)))
+	     (cons parent-hl (org-export-get-genealogy parent-hl))))
+	  ;; No destination found: return nil.
+	  (and (not match-title-p) (puthash path nil link-cache))))))))
 
 (defun org-export-resolve-id-link (link info)
   "Return headline referenced as LINK destination.
