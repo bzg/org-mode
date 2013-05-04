@@ -233,10 +233,15 @@ A regexp matching strings of whitespace, `,' and `;'.")
       (progress-reporter-done progress-reporter)))
     org-contacts-db))
 
-(defun org-contacts-filter (&optional name-match tags-match)
-  "Search for a contact matching NAME-MATCH and TAGS-MATCH.
-If both match values are nil, return all contacts."
+(defun org-contacts-filter (&optional name-match tags-match prop-match)
+  "Search for a contact matching any of NAME-MATCH, TAGS-MATCH, PROP-MATCH.
+If all match values are nil, return all contacts.
+
+The optional PROP-MATCH argument is a single (PROP . VALUE) cons
+cell corresponding to the contact properties.
+"
   (if (and (null name-match)
+	   (null prop-match)
 	   (null tags-match))
       (org-contacts-db)
     (loop for contact in (org-contacts-db)
@@ -244,6 +249,11 @@ If both match values are nil, return all contacts."
 	      (and name-match
 		   (org-string-match-p name-match
 				       (first contact)))
+	      (and prop-match
+		   (org-find-if (lambda (prop)
+				  (and (string= (car prop-match) (car prop))
+				       (org-string-match-p (cdr prop-match) (cdr prop))))
+				(caddr contact)))
 	      (and tags-match
 		   (org-find-if (lambda (tag)
 				  (org-string-match-p tags-match tag))
@@ -523,7 +533,8 @@ A group FOO is composed of contacts with the tag FOO."
          (email (cadr address)))
     (cadar (or (org-contacts-filter
                 nil
-                (concat org-contacts-email-property "={\\b" (regexp-quote email) "\\b}"))
+		nil
+                (cons org-contacts-email-property (concat "\\b" (regexp-quote email) "\\b")))
                (when name
                  (org-contacts-filter
                   (concat "^" name "$")))))))
