@@ -211,22 +211,26 @@ A regexp matching strings of whitespace, `,' and `;'.")
 	  (cdr (org-make-tags-matcher org-contacts-matcher)))
 	 markers result)
     (when (org-contacts-db-need-update-p)
-      (message "Update Org Contacts Database")
-      (dolist (file (org-contacts-files))
-	(org-check-agenda-file file)
-	(with-current-buffer (org-get-agenda-file-buffer file)
-	  (unless (eq major-mode 'org-mode)
-	    (error "File %s is no in `org-mode'" file))
-	  (org-scan-tags
-	   '(add-to-list 'markers (set-marker (make-marker) (point)))
-	   contacts-matcher
-	   todo-only)))
-      (dolist (marker markers result)
-	(org-with-point-at marker
-	  (add-to-list 'result
-		       (list (org-get-heading t) marker (org-entry-properties marker 'all)))))
-      (setf org-contacts-db result
-	    org-contacts-last-update (current-time)))
+      (let ((progress-reporter
+	     (make-progress-reporter "Updating Org Contacts Database..." 0 (length org-contacts-files)))
+	    (i 0))
+	(dolist (file (org-contacts-files))
+	  (org-check-agenda-file file)
+	  (with-current-buffer (org-get-agenda-file-buffer file)
+	    (unless (eq major-mode 'org-mode)
+	      (error "File %s is no in `org-mode'" file))
+	    (org-scan-tags
+	     '(add-to-list 'markers (set-marker (make-marker) (point)))
+	     contacts-matcher
+	     todo-only))
+	  (progress-reporter-update progress-reporter (setq i (1+ i))))
+	(dolist (marker markers result)
+	  (org-with-point-at marker
+	    (add-to-list 'result
+			 (list (org-get-heading t) marker (org-entry-properties marker 'all)))))
+	(setf org-contacts-db result
+	      org-contacts-last-update (current-time))
+      (progress-reporter-done progress-reporter)))
     org-contacts-db))
 
 (defun org-contacts-filter (&optional name-match tags-match)
