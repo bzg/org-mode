@@ -105,12 +105,12 @@
   :group 'org-export-koma-letter
   :type 'string)
 
-(defcustom org-koma-letter-opening "Dear Madam or Sir,"
+(defcustom org-koma-letter-opening nil
   "Letter's opening, as a string."
   :group 'org-export-koma-letter
   :type 'string)
 
-(defcustom org-koma-letter-closing "Sincerely yours,"
+(defcustom org-koma-letter-closing nil
   "Koma-Letter's closing, as a string."
   :group 'org-export-koma-letter
   :type 'string)
