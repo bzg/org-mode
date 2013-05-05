@@ -130,10 +130,15 @@
   :group 'org-export-koma-letter
   :type 'boolean)
 
-(defcustom org-koma-letter-use-foldmarks t
-  "Print foldmarks."
+(defcustom org-koma-letter-use-foldmarks "true"
+  "Configure appearence of fold marks.
+
+Accepts any valid value for the KOMA-Script `foldmarks' option.
+
+Use `foldmarks:true' to activate default fold marks or
+`foldmarks:nil' to deactivate fold marks."
   :group 'org-export-koma-letter
-  :type 'boolean)
+  :type 'string)
 
 (defcustom org-koma-letter-use-phone t
   "Print sender's phone number."
@@ -286,7 +291,7 @@ holding export options."
 	 (with-email (plist-get info :with-email)))
      (concat
       (format "\\KOMAoption{backaddress}{%s}\n" (if with-backaddress "true" "false"))
-      (format "\\KOMAoption{foldmarks}{%s}\n" (if with-foldmarks "true" "false"))
+      (format "\\KOMAoption{foldmarks}{%s}\n" (if with-foldmarks with-foldmarks "false"))
       (format "\\KOMAoption{fromphone}{%s}\n" (if with-phone "true" "false"))
       (format "\\KOMAoption{fromemail}{%s}\n" (if with-email "true" "false"))))
    ;; Document start
