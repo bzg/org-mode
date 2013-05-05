@@ -395,15 +395,25 @@
   (should
    (string=
     "àâçèéêîôùû"
-        (decode-coding-string (org-link-unescape "%E0%E2%E7%E8%E9%EA%EE%F4%F9%FB") 'latin-1))))
+        (decode-coding-string
+	 (org-link-unescape "%E0%E2%E7%E8%E9%EA%EE%F4%F9%FB") 'latin-1))))
 
 (ert-deftest test-org/org-link-escape-url-with-escaped-char ()
-  "Escape and unscape a URL that includes an escaped char.
+  "Escape and unescape a URL that includes an escaped char.
 http://article.gmane.org/gmane.emacs.orgmode/21459/"
   (should
    (string=
     "http://some.host.com/form?&id=blah%2Bblah25"
-    (org-link-unescape (org-link-escape "http://some.host.com/form?&id=blah%2Bblah25")))))
+    (org-link-unescape
+     (org-link-escape "http://some.host.com/form?&id=blah%2Bblah25")))))
+
+(ert-deftest test-org/org-link-escape-chars-browser ()
+  "Escape a URL to pass to `browse-url'."
+  (should
+   (string=
+    "http://some.host.com/search?q=%22Org%20mode%22"
+    (org-link-escape "http://some.host.com/search?q=\"Org mode\""
+		     org-link-escape-chars-browser))))
 
 
 

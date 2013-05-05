@@ -9693,7 +9693,7 @@ according to FMT (default from `org-email-link-description-format')."
 This is the list that is used for internal purposes.")
 
 (defconst org-link-escape-chars-browser
-  '(?\ )
+  '(?\  ?\")
   "List of escapes for characters that are problematic in links.
 This is the list that is used before handing over to the browser.")
 
@@ -10423,16 +10423,24 @@ application the system uses for this file type."
 	      (apply cmd (nreverse args1))))
 
 	   ((member type '("http" "https" "ftp" "news"))
-	    (browse-url (concat type ":" (if (org-string-match-p "[[:nonascii:] ]" path)
-					     (org-link-escape
-					      path org-link-escape-chars-browser)
-					   path))))
+	    (browse-url
+	     (concat type ":"
+		     (if (org-string-match-p
+			  (concat "[[:nonascii:]"
+				  org-link-escape-chars-browser "]")
+			  path)
+			 (org-link-escape path org-link-escape-chars-browser)
+		       path))))
 
 	   ((string= type "doi")
-	    (browse-url (concat org-doi-server-url (if (org-string-match-p "[[:nonascii:] ]" path)
-						       (org-link-escape
-							path org-link-escape-chars-browser)
-						     path))))
+	    (browse-url
+	     (concat org-doi-server-url
+		     (if (org-string-match-p
+			  (concat "[[:nonascii:]"
+				  org-link-escape-chars-browser "]")
+			  path)
+			 (org-link-escape path org-link-escape-chars-browser)
+		       path))))
 
 	   ((member type '("message"))
 	    (browse-url (concat type ":" path)))
