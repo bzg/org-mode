@@ -9008,7 +9008,10 @@ if `orgstruct-heading-prefix-regexp' is non-nil."
 		      (not
 		       (let* ,bindings
 			 (org-context-p 'headline 'item
-					,(when (memq fun '(org-insert-heading))
+					,(when (memq fun
+						     '(org-insert-heading
+						       org-insert-heading-respect-content
+						       org-meta-return))
 					   '(when orgstruct-is-++
 					      'item-body))))))))
 	    (if fallback
