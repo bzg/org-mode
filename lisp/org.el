@@ -11338,7 +11338,12 @@ avoiding backtracing.  Refile target collection makes use of that."
 	  (widen)
 	  (while (org-up-heading-safe)
 	    (when (looking-at org-complex-heading-regexp)
-	      (push (org-match-string-no-properties 4) rtn)))
+	      (push (org-trim
+		     (replace-regexp-in-string
+		      ;; Remove statistical/checkboxes cookies
+		      "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
+		      (org-match-string-no-properties 4)))
+		    rtn)))
 	  rtn)))))
 
 (defun org-format-outline-path (path &optional width prefix separator)
