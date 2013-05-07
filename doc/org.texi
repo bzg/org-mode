@@ -1121,7 +1121,7 @@ and @i{environment keywords} (like @code{#+BEGIN_HTML} to start a @code{HTML}
 environment).  They are written in uppercase in the manual to enhance its
 readability, but you can use lowercase in your Org files@footnote{Easy
 templates insert lowercase keywords and Babel dynamically inserts
-@code{#+results}.}
+@code{#+results}.}.
 
 @subsubheading Keybindings and commands
 @kindex C-c a
