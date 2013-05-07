@@ -103,9 +103,9 @@
                                                  (stringp session))
                                             session
                                           tuareg-interactive-buffer-name)))
-    (if (fboundp 'tuareg-run-process-if-needed)
-        (tuareg-run-process-if-needed org-babel-ocaml-command)
-      (tuareg-run-caml))
+    (save-window-excursion (if (fboundp 'tuareg-run-process-if-needed)
+	 (tuareg-run-process-if-needed org-babel-ocaml-command)
+       (tuareg-run-caml)))
     (get-buffer tuareg-interactive-buffer-name)))
 
 (defun org-babel-variable-assignments:ocaml (params)
