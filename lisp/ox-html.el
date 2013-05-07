@@ -1301,7 +1301,7 @@ CSS classes, then this prefix can be very useful."
 	(member dt '("html5" "xhtml5" "<!doctype html>"))))
 
 (defun org-html-close-tag (tag attr info)
-  (concat "<" tag (or attr "")
+  (concat "<" tag " " attr
 	  (if (org-html-xhtml-p info) " />" ">")))
 
 (defun org-html--make-attribute-string (attributes)
