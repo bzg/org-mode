@@ -2613,6 +2613,20 @@ Paragraph \\alpha."
 
 
 
+;;; Test Visible Only Parsing
+
+(ert-deftest test-org-element/parse-buffer-visible ()
+  "Test `org-element-parse-buffer' with visible only argument."
+  (should
+   (equal '("H1" "H3" "H5")
+      (org-test-with-temp-text
+	  "* H1\n** H2\n** H3 :visible:\n** H4\n** H5 :visible:"
+	(org-occur ":visible:")
+	(org-element-map (org-element-parse-buffer nil t) 'headline
+	  (lambda (hl) (org-element-property :raw-value hl)))))))
+
+
+
 ;;; Test `:parent' Property
 
 (ert-deftest test-org-element/parent-property ()
