@@ -873,7 +873,8 @@ to do our best."
 	 (bday (org-contacts-vcard-escape (cdr (assoc-string org-contacts-birthday-property properties))))
 	 (addr (cdr (assoc-string org-contacts-address-property properties)))
 	 (nick (org-contacts-vcard-escape (cdr (assoc-string org-contacts-nickname-property properties))))
-	 (head (format "BEGIN:VCARD\nVERSION:3.0\nN:%s\nFN:%s\n" n name)))
+	 (head (format "BEGIN:VCARD\nVERSION:3.0\nN:%s\nFN:%s\n" n name))
+	 emails-list result phones-list)
     (concat head
 	    (when email (progn
 			  (setq emails-list (org-contacts-split-property email))
