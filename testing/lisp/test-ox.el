@@ -268,6 +268,56 @@ Paragraph"
 	    (progn (forward-line 2)
 		   (plist-get (org-export-get-environment nil t) :title))))))
 
+(ert-deftest test-org-export/set-title ()
+  "Test title setting."
+  ;; If no title if specified, use file name.
+  (should
+   (apply
+    'equal
+    (org-test-with-temp-text-in-file "Test"
+      (org-mode)
+      (let (org-export-registered-backends)
+	(org-export-define-backend 'test
+	  '((template . (lambda (text info)
+			  (org-export-data (plist-get info :title) info)))))
+	(list (org-export-as 'test)
+	      (file-name-nondirectory
+	       (file-name-sans-extension (buffer-file-name))))))))
+  ;; If no title is specified, and no file is associated to the
+  ;; buffer, use buffer's name.
+  (should
+   (apply
+    'equal
+    (org-test-with-temp-text "Test"
+      (org-mode)
+      (let (org-export-registered-backends)
+	(org-export-define-backend 'test
+	  '((template . (lambda (text info)
+			  (org-export-data (plist-get info :title) info)))))
+	(list (org-export-as 'test) (buffer-name))))))
+  ;; If a title is specified, use it.
+  (should
+   (equal
+    "Title"
+    (org-test-with-temp-text-in-file "#+TITLE: Title\nTest"
+      (org-mode)
+      (let (org-export-registered-backends)
+	(org-export-define-backend 'test
+	  '((template . (lambda (text info)
+			  (org-export-data (plist-get info :title) info)))))
+	(org-export-as 'test)))))
+  ;; If an empty title is specified, do not set it.
+  (should
+   (equal
+    ""
+    (org-test-with-temp-text-in-file "#+TITLE:\nTest"
+      (org-mode)
+      (let (org-export-registered-backends)
+	(org-export-define-backend 'test
+	  '((template . (lambda (text info)
+			  (org-export-data (plist-get info :title) info)))))
+	(org-export-as 'test))))))
+
 (ert-deftest test-org-export/handle-options ()
   "Test if export options have an impact on output."
   ;; Test exclude tags for headlines and inlinetasks.

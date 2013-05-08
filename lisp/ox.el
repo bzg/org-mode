@@ -1731,20 +1731,24 @@ process."
      (lambda (cell)
        (let ((prop (car cell)))
 	 (unless (plist-member plist prop)
-	   (setq plist
-		 (plist-put
-		  plist
-		  prop
-		  ;; Eval default value provided.  If keyword is a member
-		  ;; of `org-element-document-properties', parse it as
-		  ;; a secondary string before storing it.
-		  (let ((value (eval (nth 3 cell))))
-		    (if (not (stringp value)) value
-		      (let ((keyword (nth 1 cell)))
-			(if (not (member keyword org-element-document-properties))
-			    value
-			  (org-element-parse-secondary-string
-			   value (org-element-restriction 'keyword)))))))))))
+	   (let ((value (eval (nth 3 cell))))
+	     ;; Only set property if default value is non-nil.
+	     (when value
+	       (setq plist
+		     (plist-put
+		      plist
+		      prop
+		      ;; If keyword belongs to
+		      ;; `org-element-document-properties', parse
+		      ;; default value as a secondary string before
+		      ;; storing it.
+		      (if (not (stringp value)) value
+			(let ((keyword (nth 1 cell)))
+			  (if (not (member keyword
+					   org-element-document-properties))
+			      value
+			    (org-element-parse-secondary-string
+			     value (org-element-restriction 'keyword))))))))))))
      all)
     ;; Return value.
     plist))
