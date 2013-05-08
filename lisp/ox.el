@@ -3267,15 +3267,13 @@ paths."
 	  ;; Extract arguments from keyword's value.
 	  (let* ((value (org-element-property :value element))
 		 (ind (org-get-indentation))
-		 (file (let ((f (if (eq (aref value 0) ?\") (read value)
-				  (and (string-match "^\\S-+" value)
-				       (match-string 0 value)))))
-			 (setq value
-			       (progn
-				 (string-match (format "^\"?%s\"?[ \t]*" f)
-					       value)
-				 (replace-match "" nil nil value)))
-			 (expand-file-name f dir)))
+		 (file (and (string-match
+			     "^\\(\".+?\"\\|\\S-+\\)\\(?:\\s-+\\|$\\)" value)
+			    (prog1 (expand-file-name
+				    (org-remove-double-quotes
+				     (match-string 1 value))
+				    dir)
+			      (setq value (replace-match "" nil nil value)))))
 		 (lines
 		  (and (string-match
 			":lines +\"\\(\\(?:[0-9]+\\)?-\\(?:[0-9]+\\)?\\)\""
