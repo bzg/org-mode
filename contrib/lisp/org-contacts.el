@@ -702,12 +702,18 @@ This adds `org-contacts-gnus-check-mail-address' and
   (add-hook 'gnus-article-prepare-hook 'org-contacts-gnus-check-mail-address)
   (add-hook 'gnus-article-prepare-hook 'org-contacts-gnus-store-last-mail))
 
+(defun org-contacts-setup-completion-at-point ()
+  "Add `org-contacts-message-complete-function' as a new function
+to complete the thing at point."
+  (add-to-list 'completion-at-point-functions
+	       'org-contacts-message-complete-function))
+
+(defun org-contacts-unload-hook ()
+  (remove-hook 'message-mode-hook 'org-contacts-setup-completion-at-point))
+
 (when (and org-contacts-enable-completion
 	   (boundp 'completion-at-point-functions))
-  (add-hook 'message-mode-hook
-	    (lambda ()
-	      (add-to-list 'completion-at-point-functions
-			   'org-contacts-message-complete-function))))
+  (add-hook 'message-mode-hook 'org-contacts-setup-completion-at-point))
 
 (defun org-contacts-wl-get-from-header-content ()
   "Retrieve the content of the `From' header of an email.
