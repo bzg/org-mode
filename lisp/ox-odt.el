@@ -454,7 +454,8 @@ The exporter embeds the exported content just before
 
 If unspecified, the file named \"OrgOdtContentTemplate.xml\"
 under `org-odt-styles-dir' is used."
-  :type 'file
+  :type '(choice (const nil)
+		 (file))
   :group 'org-export-odt
   :version "24.1")
 

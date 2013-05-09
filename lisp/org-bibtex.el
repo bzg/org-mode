@@ -224,7 +224,9 @@
 For example setting to 'BIB_' would allow interoperability with fireforg."
   :group 'org-bibtex
   :version "24.1"
-  :type  'string)
+  :type  '(choice
+	   (const nil)
+	   (string)))
 
 (defcustom org-bibtex-treat-headline-as-title t
   "Treat headline text as title if title property is absent.

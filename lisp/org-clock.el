@@ -159,7 +159,7 @@ state to switch it to."
 This is the string shown in the mode line when a clock is running.
 The function is called with point at the beginning of the headline."
   :group 'org-clock
-  :type 'function)
+  :type '(choice (const nil) (function)))
 
 (defcustom org-clock-string-limit 0
   "Maximum length of clock strings in the mode line.  0 means no limit."
@@ -263,6 +263,7 @@ The function or program will be called with the notification
 string as argument."
   :group 'org-clock
   :type '(choice
+	  (const nil)
 	  (string :tag "Program")
 	  (function :tag "Function")))
 
