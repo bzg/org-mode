@@ -6127,8 +6127,15 @@ Use `org-reduced-level' to remove the effect of `org-odd-levels'."
 
 (defvar org-font-lock-keywords nil)
 
-(defconst org-property-re (org-re "^[ \t]*\\(:\\([-[:alnum:]_]+\\+?\\):\\)[ \t]*\\([^ \t\r\n].*\\)")
-  "Regular expression matching a property line.")
+(defconst org-property-re
+  "^\\(?4:[ \t]*\\)\\(?1::\\(?2:.*?\\):\\)[ \t]+\\(?3:[^ \t\r\n].*?\\)\\(?5:[ \t]*\\)$"
+  "Regular expression matching a property line.
+There are four matching groups:
+1: :PROPKEY: including the leading and trailing colon,
+2: PROPKEY without the leading and trailing colon,
+3: PROPVAL without leading or trailing spaces,
+4: the indentation of the current line,
+5: trailing whitespace.")
 
 (defvar org-font-lock-hook nil
   "Functions to be called for special font lock stuff.")
@@ -15110,13 +15117,9 @@ When INCREMENT is non-nil, set the property to the next allowed value."
 (defun org-at-property-p ()
   "Is cursor inside a property drawer?"
   (save-excursion
-    (beginning-of-line 1)
-    (when (looking-at (org-re "^[ \t]*\\(:\\([[:alpha:]][[:alnum:]_-]*\\):\\)[ \t]*\\(.*\\)"))
-      (save-match-data ;; Used by calling procedures
-	(let ((p (point))
-	      (range (unless (org-before-first-heading-p)
-		       (org-get-property-block))))
-	  (and range (<= (car range) p) (< p (cdr range))))))))
+    (when (equal 'node-property (car (org-element-at-point)))
+      (beginning-of-line 1)
+      (looking-at org-property-re))))
 
 (defun org-get-property-block (&optional beg end force)
   "Return the (beg . end) range of the body of the property drawer.
@@ -15241,11 +15244,10 @@ things up because then unnecessary parsing is avoided."
 	    (setq range (org-get-property-block beg end))
 	    (when range
 	      (goto-char (car range))
-	      (while (re-search-forward
-		      (org-re "^[ \t]*:\\([[:alpha:]][[:alnum:]_-]*\\):[ \t]*\\(\\S-.*\\)?")
+	      (while (re-search-forward org-property-re
 		      (cdr range) t)
-		(setq key (org-match-string-no-properties 1)
-		      value (org-trim (or (org-match-string-no-properties 2) "")))
+		(setq key (org-match-string-no-properties 2)
+		      value (org-trim (or (org-match-string-no-properties 3) "")))
 		(unless (member key excluded)
 		  (push (cons key (or value "")) props)))))
 	  (if clocksum
@@ -15514,10 +15516,9 @@ formats in the current buffer."
 	(while (re-search-forward org-property-start-re nil t)
 	  (setq range (org-get-property-block))
 	  (goto-char (car range))
-	  (while (re-search-forward
-		  (org-re "^[ \t]*:\\([-[:alnum:]_]+\\):")
+	  (while (re-search-forward org-property-re
 		  (cdr range) t)
-	    (add-to-list 'rtn (org-match-string-no-properties 1)))
+	    (add-to-list 'rtn (org-match-string-no-properties 2)))
 	  (outline-next-heading))))
 
     (when include-specials
@@ -22034,11 +22035,10 @@ hierarchy of headlines by UP levels before marking the subtree."
       ;; Special polishing for properties, see `org-property-format'
       (setq column (current-column))
       (beginning-of-line 1)
-      (if (looking-at
-	   "\\([ \t]*\\)\\(:[-_0-9a-zA-Z]+:\\)[ \t]*\\(\\S-.*\\(\\S-\\|$\\)\\)")
-	  (replace-match (concat (match-string 1)
+      (if (looking-at org-property-re)
+	  (replace-match (concat (match-string 4)
 				 (format org-property-format
-					 (match-string 2) (match-string 3)))
+					 (match-string 1) (match-string 3)))
 			 t t))
       (org-move-to-column column))))
 

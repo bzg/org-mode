@@ -2093,11 +2093,11 @@ Return a list whose CAR is `node-property' and CDR is a plist
 containing `:key', `:value', `:begin', `:end' and `:post-blank'
 keywords."
   (save-excursion
+    (looking-at org-property-re)
     (let ((case-fold-search t)
 	  (begin (point))
-	  (key (progn (looking-at "[ \t]*:\\(.*?\\):[ \t]+\\(.*?\\)[ \t]*$")
-		      (org-match-string-no-properties 1)))
-	  (value (org-match-string-no-properties 2))
+	  (key   (org-match-string-no-properties 2))
+	  (value (org-match-string-no-properties 3))
 	  (pos-before-blank (progn (forward-line) (point)))
 	  (end (progn (skip-chars-forward " \r\t\n" limit)
 		      (if (eobp) (point) (point-at-bol)))))
