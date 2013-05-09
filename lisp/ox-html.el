@@ -1511,7 +1511,8 @@ INFO is a plist used as a communication channel."
 	(keywords (plist-get info :keywords))
 	(charset (or (and org-html-coding-system
 			  (fboundp 'coding-system-get)
-			  (coding-system-get org-html-coding-system 'mime-charset))
+			  (coding-system-get org-html-coding-system
+					     'mime-charset))
 		     "iso-8859-1")))
     (concat
      (format "<title>%s</title>\n" title)
@@ -1523,20 +1524,28 @@ INFO is a plist used as a communication channel."
       (if (org-html-html5-p info)
 	  (org-html-close-tag "meta" " charset=\"%s\"" info)
 	(org-html-close-tag
-	 "meta" " http-equiv=\"Content-Type\" content=\"text/html;charset=%s\"" info))
+	 "meta" " http-equiv=\"Content-Type\" content=\"text/html;charset=%s\""
+	 info))
       charset) "\n"
-     (org-html-close-tag "meta" " name=\"generator\" content=\"Org-mode\"" info) "\n"
+     (org-html-close-tag "meta" " name=\"generator\" content=\"Org-mode\"" info)
+     "\n"
      (and (org-string-nw-p author)
-	  (org-html-close-tag "meta" (format " name=\"author\" content=\"%s\""
-					     (funcall protect-string author)) info)
+	  (org-html-close-tag "meta"
+			      (format " name=\"author\" content=\"%s\""
+				      (funcall protect-string author))
+			      info)
 	  "\n")
      (and (org-string-nw-p description)
-	  (org-html-close-tag "meta" (format " name=\"description\" content=\"%s\"%s\n"
-					     (funcall protect-string description)) info)
+	  (org-html-close-tag "meta"
+			      (format " name=\"description\" content=\"%s\"\n"
+				      (funcall protect-string description))
+			      info)
 	  "\n")
      (and (org-string-nw-p keywords)
-	  (org-html-close-tag "meta" (format " name=\"keywords\" content=\"%s\""
-					     (funcall protect-string keywords)) info)
+	  (org-html-close-tag "meta"
+			      (format " name=\"keywords\" content=\"%s\""
+				      (funcall protect-string keywords))
+			      info)
 	  "\n"))))
 
 (defun org-html--build-head (info)
