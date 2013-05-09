@@ -166,6 +166,7 @@ The main values of this variable can be set with in-buffer options:
 #+STARTUP: nofnadjust"
   :group 'org-footnote
   :type '(choice
+	  (const :tag "No adjustment" nil)
 	  (const :tag "Renumber" renumber)
 	  (const :tag "Sort" sort)
 	  (const :tag "Renumber and Sort" t)))

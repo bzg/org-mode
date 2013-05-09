@@ -35,7 +35,7 @@
 This is an association list.  Populate the library by adding
 files to `org-babel-lob-files'.")
 
-(defcustom org-babel-lob-files '()
+(defcustom org-babel-lob-files nil
   "Files used to populate the `org-babel-library-of-babel'.
 To add files to this list use the `org-babel-lob-ingest' command."
   :group 'org-babel

@@ -67,7 +67,7 @@ googlegroups otherwise."
 
 (defcustom org-wl-namazu-default-index nil
   "Default namazu search index."
-  :type 'directory
+  :type '(choice (const nil) (directory))
   :group 'org-wl)
 
 ;; Declare external functions and variables

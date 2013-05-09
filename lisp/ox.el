@@ -333,7 +333,7 @@ e.g. \"arch:nil\"."
   :group 'org-export-general
   :type '(choice
 	  (const :tag "Not at all" nil)
-	  (const :tag "Headline only" 'headline)
+	  (const :tag "Headline only" headline)
 	  (const :tag "Entirely" t)))
 
 (defcustom org-export-with-author t
@@ -797,8 +797,8 @@ HTML code while every other back-end will ignore it."
 This variable can be either set to `buffer' or `subtree'."
   :group 'org-export-general
   :type '(choice
-	  (const :tag "Export current buffer" 'buffer)
-	  (const :tag "Export current subtree" 'subtree)))
+	  (const :tag "Export current buffer" buffer)
+	  (const :tag "Export current subtree" subtree)))
 
 (defcustom org-export-show-temporary-export-buffer t
   "Non-nil means show buffer after exporting to temp buffer.

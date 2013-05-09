@@ -1078,7 +1078,7 @@ Setting :html-postamble in publishing projects will take
 precedence over this variable."
   :group 'org-export-html
   :type '(choice (const :tag "No postamble" nil)
-		 (const :tag "Auto postamble" 'auto)
+		 (const :tag "Auto postamble" auto)
 		 (const :tag "Default formatting string" t)
 		 (string :tag "Custom formatting string")
 		 (function :tag "Function (must return a string)")))
@@ -1108,8 +1108,9 @@ postamble itself.  This format string can contain these elements:
 If you need to use a \"%\" character, you need to escape it
 like that: \"%%\"."
   :group 'org-export-html
-  :type '(alist :key-type (string :tag "Language")
-		:value-type (string :tag "Format string")))
+  :type '(repeat
+	  (list (string :tag "Language")
+		(string :tag "Format string"))))
 
 (defcustom org-html-validation-link
   "<a href=\"http://validator.w3.org/check?uri=referer\">Validate</a>"
@@ -1172,8 +1173,9 @@ like that: \"%%\".
 See the default value of `org-html-postamble-format' for an
 example."
   :group 'org-export-html
-  :type '(alist :key-type (string :tag "Language")
-		:value-type (string :tag "Format string")))
+  :type '(repeat
+	  (list (string :tag "Language")
+		(string :tag "Format string"))))
 
 (defcustom org-html-link-up ""
   "Where should the \"UP\" link of exported HTML pages lead?"
