@@ -22636,7 +22636,10 @@ beyond the end of the headline."
 	      (when (and (= (point) pos) (eq last-command this-command))
 		(goto-char after-bullet))))))))
     (org-no-warnings
-     (and (featurep 'xemacs) (setq zmacs-region-stays t)))))
+     (and (featurep 'xemacs) (setq zmacs-region-stays t))))
+  (setq disable-point-adjustment
+        (or (not (invisible-p (point)))
+            (not (invisible-p (max (point-min) (1- (point))))))))
 
 (defun org-end-of-line (&optional arg)
   "Go to the end of the line.
@@ -22673,7 +22676,10 @@ the cursor is already beyond the end of the headline."
 	  ;; after it.  Use `end-of-line' to stay on current line.
 	  (call-interactively 'end-of-line))
 	 (t (call-interactively move-fun)))))
-    (org-no-warnings (and (featurep 'xemacs) (setq zmacs-region-stays t)))))
+    (org-no-warnings (and (featurep 'xemacs) (setq zmacs-region-stays t))))
+  (setq disable-point-adjustment
+        (or (not (invisible-p (point)))
+            (not (invisible-p (max (point-min) (1- (point))))))))
 
 (define-key org-mode-map "\C-a" 'org-beginning-of-line)
 (define-key org-mode-map "\C-e" 'org-end-of-line)
