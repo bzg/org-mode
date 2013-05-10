@@ -1443,7 +1443,7 @@ split, customize the variable @code{org-M-RET-may-split-line}.}.  If
 the command is used at the @emph{beginning} of a headline, the new
 headline is created before the current line.  If the command is used
 at the @emph{end} of a folded subtree (i.e., behind the ellipses at
-the end of a headline), then a headline like the current one will be
+the end of a headline), then a headline will be
 inserted after the end of the subtree.  Calling this command with
 @kbd{C-u C-u} will unconditionally respect the headline's content and
 create a new item at the end of the parent subtree.
