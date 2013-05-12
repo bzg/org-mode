@@ -1917,11 +1917,15 @@ TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
   (let ((specialp (plist-get info :with-special-strings))
 	(output text))
-    ;; Protect %, #, &, $, ^, _,  { and }.
-    (while (string-match "\\([^\\]\\|^\\)\\([%$#&{}^_]\\)" output)
+    ;; Protect %, #, &, $, _, { and }.
+    (while (string-match "\\([^\\]\\|^\\)\\([%$#&{}_]\\)" output)
       (setq output
 	    (replace-match
 	     (format "\\%s" (match-string 2 output)) nil t output 2)))
+    ;; Protect ^.
+    (setq output
+	  (replace-regexp-in-string
+	   "\\([^\\]\\|^\\)\\(\\^\\)" "\\\\^{}" output nil nil 2))
     ;; Protect \.  If special strings are used, be careful not to
     ;; protect "\" in "\-" constructs.
     (let ((symbols (if specialp "-%$#&{}^_\\" "%$#&{}^_\\")))
