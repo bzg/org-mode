@@ -1363,26 +1363,6 @@ ELEMENT is either a src block or an example block."
 	    (or (plist-get attr :height) (org-count-lines code))
 	    code)))
 
-;;;; Bibliography
-
-(defun org-html-bibliography ()
-  "Find bibliography, cut it out and return it."
-  (catch 'exit
-    (let (beg end (cnt 1) bib)
-      (save-excursion
-	(goto-char (point-min))
-	(when (re-search-forward
-	       "^[ \t]*<div \\(id\\|class\\)=\"bibliography\"" nil t)
-	  (setq beg (match-beginning 0))
-	  (while (re-search-forward "</?div\\>" nil t)
-	    (setq cnt (+ cnt (if (string= (match-string 0) "<div") +1 -1)))
-	    (when (= cnt 0)
-	      (and (looking-at ">") (forward-char 1))
-	      (setq bib (buffer-substring beg (point)))
-	      (delete-region beg (point))
-	    (throw 'exit bib))))
-	nil))))
-
 ;;;; Table
 
 (defun org-html-htmlize-region-for-paste (beg end)
@@ -1694,9 +1674,7 @@ holding export options."
    ;; Document contents.
    contents
    ;; Footnotes section.
-   (org-html-footnote-section info)
-   ;; Bibliography.
-   (org-html-bibliography)))
+   (org-html-footnote-section info)))
 
 (defun org-html-template (contents info)
   "Return complete document string after HTML conversion.
