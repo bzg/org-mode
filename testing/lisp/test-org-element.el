@@ -1136,11 +1136,19 @@ e^{i\\pi}+1=0
        :value
        (org-element-map
 	   (org-element-parse-buffer) 'latex-environment 'identity nil t)))))
-  ;; Allow environments with options.
+  ;; Allow environments with options and arguments.
   (should
    (eq 'latex-environment
        (org-test-with-temp-text
 	   "\\begin{theorem}[Euler]\ne^{i\\pi}+1=0\n\\end{theorem}"
+	 (org-element-type (org-element-at-point)))))
+  (should
+   (eq 'latex-environment
+       (org-test-with-temp-text "\\begin{env}{arg}\nvalue\n\\end{env}"
+	 (org-element-type (org-element-at-point)))))
+  (should-not
+   (eq 'latex-environment
+       (org-test-with-temp-text "\\begin{env}{arg} something\nvalue\n\\end{env}"
 	 (org-element-type (org-element-at-point))))))
 
 
