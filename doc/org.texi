@@ -17433,10 +17433,10 @@ The following example counts the number of entries with TODO keyword
 @i{MobileOrg} is the name of the mobile companion app for Org mode, currently
 available for iOS and for Android.  @i{MobileOrg} offers offline viewing and
 capture support for an Org mode system rooted on a ``real'' computer.  It
-does also allow you to record changes to existing entries.
-The @uref{http://mobileorg.ncogni.to/, iOS implementation} for the
-@i{iPhone/iPod Touch/iPad} series of devices, was developed by Richard
-Moreland.  Android users should check out
+does also allow you to record changes to existing entries.  The
+@uref{https://github.com/MobileOrg/, iOS implementation} for the
+@i{iPhone/iPod Touch/iPad} series of devices, was started by Richard Moreland
+and is now in the hands Sean Escriva.  Android users should check out
 @uref{http://wiki.github.com/matburt/mobileorg-android/, MobileOrg Android}
 by Matt Jones.  The two implementations are not identical but offer similar
 features.
@@ -17747,6 +17747,8 @@ the agenda, patched CSS formatting into the HTML exporter, and wrote
 @item
 @i{David Emery} provided a patch for custom CSS support in exported
 HTML agendas.
+@item
+@i{Sean Escriva} took over MobileOrg development on the iPhone platform.
 @item
 @i{Nic Ferrier} contributed mailcap and XOXO support.
 @item
