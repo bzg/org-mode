@@ -4292,7 +4292,6 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 	(looking-at org-table-hline-regexp))
     nil))
 
-(defvar org-table-clean-did-remove-column nil)
 (defun org-table-map-tables (function &optional quietly)
   "Apply FUNCTION to the start of all tables in the buffer."
   (save-excursion
