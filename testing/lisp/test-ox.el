@@ -1719,7 +1719,15 @@ Another text. (ref:text)
 		(lambda (link)
 		  (org-element-property
 		   :value (org-export-resolve-radio-link link info)))
-		info))))))
+		info)))))
+  ;; Radio target is whitespace insensitive.
+  (should
+   (org-test-with-temp-text "<<<a radio>>> a\n  radio"
+     (org-update-radio-target-regexp)
+     (let* ((tree (org-element-parse-buffer))
+	    (info `(:parse-tree ,tree)))
+       (org-element-map tree 'link
+	 (lambda (link) (org-export-resolve-radio-link link info)) info t)))))
 
 
 
