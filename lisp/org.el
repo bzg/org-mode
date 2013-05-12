@@ -8877,6 +8877,8 @@ buffer.  It will also recognize item context in multiline items."
 		   org-fb-vars))
     (orgstruct-mode 1)
     (setq org-fb-vars nil)
+    (unless org-local-vars
+      (setq org-local-vars (org-get-local-variables)))
     (let (var val)
       (mapc
        (lambda (x)
