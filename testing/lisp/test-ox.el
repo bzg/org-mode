@@ -1707,7 +1707,19 @@ Another text. (ref:text)
 	    (info `(:parse-tree ,tree)))
        (org-export-resolve-radio-link
 	(org-element-map tree 'link 'identity info t)
-	info)))))
+	info))))
+  ;; Multiple radio targets.
+  (should
+   (equal '("radio1" "radio2")
+	  (org-test-with-temp-text "<<<radio1>>> <<<radio2>>> radio1 radio2"
+	    (org-update-radio-target-regexp)
+	    (let* ((tree (org-element-parse-buffer))
+		   (info `(:parse-tree ,tree)))
+	      (org-element-map tree 'link
+		(lambda (link)
+		  (org-element-property
+		   :value (org-export-resolve-radio-link link info)))
+		info))))))
 
 
 
