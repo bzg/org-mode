@@ -128,7 +128,9 @@ applications and inserting them in org documents"
   :group 'org-mac-link-grabber
   :type 'boolean)
 
-(defcustom org-mac-grab-Skim-app-p t
+(defcustom org-mac-grab-Skim-app-p
+  (< 0 (length (shell-command-to-string
+		"mdfind kMDItemCFBundleIdentifier == 'net.sourceforge.skim-app.skim'")))
   "Enable menu option [S]kim to grab page links from Skim.app"
   :tag "Grab Skim.app page links"
   :group 'org-mac-link-grabber
@@ -472,7 +474,7 @@ applications and inserting them in org documents"
 ;;
 ;; Handle links from Skim.app
 ;;
-;; A rewriting of some code originally by Christopher Suckling from org-mac-protocol
+;; Original code & idea by Christopher Suckling (org-mac-protocol)
 
 (org-add-link-type "skim" 'org-mac-skim-open)
 
@@ -486,7 +488,7 @@ applications and inserting them in org documents"
       "tell application \"Skim\"\n"
          "activate\n"
 	 "set theDoc to \"" document "\"\n"
-		     "set thePage to " page "\n"
+	 "set thePage to " page "\n"
 	 "open theDoc\n"
 	 "go document 1 to page thePage of document 1\n"
       "end tell"))))
@@ -503,7 +505,7 @@ applications and inserting them in org documents"
        "set theSelection to selection of theDoc\n"
        "set theContent to contents of (get text for theSelection)\n"
        "if theContent is missing value then\n"
-          "set theContent to theTitle & \", p. \" & thePage\n"
+       "    set theContent to theTitle & \", p. \" & thePage\n"
        "end if\n"
        "set theLink to \"skim://\" & thePath & \"::\" & thePage & "
        "\"::split::\" & theContent\n"
@@ -513,13 +515,13 @@ applications and inserting them in org documents"
 (defun org-mac-skim-get-page ()
   (interactive)
   (message "Applescript: Getting Skim page link...")
-  (let* ((url-and-title (as-get-skim-page-link))
-         (split-link (split-string url-and-title "::split::"))
-         (URL (car split-link))
+  (let* ((link-and-descr (as-get-skim-page-link))
+         (split-link (split-string link-and-descr "::split::"))
+         (link (car split-link))
          (description (cadr split-link))
          (org-link))
-    (when (not (string= URL ""))
-      (setq org-link (org-make-link-string URL description)))
+    (when (not (string= link ""))
+      (setq org-link (org-make-link-string link description)))
     (kill-new org-link)
     org-link))
 
