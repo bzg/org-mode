@@ -136,6 +136,12 @@ applications and inserting them in org documents"
   :group 'org-mac-link-grabber
   :type 'boolean)
 
+(defcustom org-mac-Skim-highlight-selection-p nil
+  "Highlight (using notes) the selection (if present) when grabbing the a link from Skim.app"
+  :tag "Highlight selection in Skim.app"
+  :group 'org-mac-link-grabber
+  :type 'boolean)
+
 
 (defun omlg-grab-link ()
   "Prompt the user for an application to grab a link from, then go grab the link, and insert it at point"
@@ -506,6 +512,13 @@ applications and inserting them in org documents"
        "set theContent to contents of (get text for theSelection)\n"
        "if theContent is missing value then\n"
        "    set theContent to theTitle & \", p. \" & thePage\n"
+       (when org-mac-Skim-highlight-selection-p
+	 (concat
+	  "else\n"
+          "    tell theDoc\n"
+          "        set theNote to make note with properties {type:highlight note, selection:theSelection}\n"
+          "         set text of theNote to (get text for theSelection)\n"
+          "    end tell\n"))
        "end if\n"
        "set theLink to \"skim://\" & thePath & \"::\" & thePage & "
        "\"::split::\" & theContent\n"
