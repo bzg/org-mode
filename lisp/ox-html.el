@@ -2343,15 +2343,17 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 ;;;; Latex Environment
 
 (defun org-html-format-latex (latex-frag processing-type)
-  "Format the LaTeX fragment LATEX-FRAG into HTML."
-  (let ((cache-relpath "") (cache-dir "") bfn)
+  "Format a LaTeX fragment LATEX-FRAG into HTML."
+  (let ((cache-relpath "") (cache-dir ""))
     (unless (eq processing-type 'mathjax)
-      (setq bfn (buffer-file-name)
-	    cache-relpath
-	    (concat "ltxpng/"
-		    (file-name-sans-extension
-		     (file-name-nondirectory bfn)))
-	    cache-dir (file-name-directory bfn)))
+      (let ((bfn (or (buffer-file-name)
+		     (make-temp-name
+		      (expand-file-name "latex" temporary-file-directory)))))
+	(setq cache-relpath
+	      (concat "ltxpng/"
+		      (file-name-sans-extension
+		       (file-name-nondirectory bfn)))
+	      cache-dir (file-name-directory bfn))))
     (with-temp-buffer
       (insert latex-frag)
       (org-format-latex cache-relpath cache-dir nil "Creating LaTeX Image..."
