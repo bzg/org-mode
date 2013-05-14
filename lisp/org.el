@@ -9243,7 +9243,7 @@ property to set."
 	   (save-excursion
 	     (org-back-to-heading t)
 	     (put-text-property
-	      (point-at-bol) (point-at-eol) tprop p))))))))
+	      (point-at-bol) (org-end-of-subtree t t) tprop p))))))))
 
 
 ;;;; Link Stuff
