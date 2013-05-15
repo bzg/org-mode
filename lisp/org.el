@@ -20240,7 +20240,9 @@ This command does many different things, depending on context:
 		       (and (eq type 'table-row)
 			    (= (point) (org-element-property :end context))))
 		   (save-excursion
-		     (if (org-at-TBLFM-p) (org-calc-current-TBLFM)
+		     (if (org-at-TBLFM-p)
+			 (progn (require 'org-table)
+				(org-table-calc-current-TBLFM))
 		       (goto-char (org-element-property :contents-begin context))
 		       (org-call-with-arg 'org-table-recalculate (or arg t))
 		       (orgtbl-send-table 'maybe)))
