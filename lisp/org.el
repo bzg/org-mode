@@ -126,6 +126,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-table-edit-field "org-table" (arg))
 (declare-function org-table-justify-field-maybe "org-table" (&optional new))
 (declare-function org-table-set-constants "org-table" ())
+(declare-function org-table-calc-current-TBLFM "org-table" (&optional arg))
 (declare-function org-id-get-create "org-id" (&optional force))
 (declare-function org-id-find-id-file "org-id" (id))
 (declare-function org-tags-view "org-agenda" (&optional todo-only match))
@@ -5101,7 +5102,7 @@ Support for group tags is controlled by the option
 	    (concat "\\<" org-deadline-string " *<\\([^>]+\\)>")
 	    org-deadline-time-hour-regexp
 	    (concat "\\<" org-deadline-string
-		    " *<\\(.+[0-9]\\{1,2\\}:[0-9]\\{2\\}[^>]*\\)>")
+		    " *<\\([^>]+[0-9]\\{1,2\\}:[0-9]\\{2\\}[0-9-+:hdwmy \t.]*\\)>")
 	    org-deadline-line-regexp
 	    (concat "\\<\\(" org-deadline-string "\\).*")
 	    org-scheduled-regexp
@@ -5110,7 +5111,7 @@ Support for group tags is controlled by the option
 	    (concat "\\<" org-scheduled-string " *<\\([^>]+\\)>")
 	    org-scheduled-time-hour-regexp
 	    (concat "\\<" org-scheduled-string
-		    " *<\\(.+[0-9]\\{1,2\\}:[0-9]\\{2\\}[^>]*\\)>")
+		    " *<\\([^>]+[0-9]\\{1,2\\}:[0-9]\\{2\\}[0-9-+:hdwmy \t.]*\\)>")
 	    org-closed-time-regexp
 	    (concat "\\<" org-closed-string " *\\[\\([^]]+\\)\\]")
 	    org-keyword-time-regexp
