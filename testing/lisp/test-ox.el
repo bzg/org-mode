@@ -279,7 +279,8 @@ Paragraph"
       (let (org-export-registered-backends)
 	(org-export-define-backend 'test
 	  '((template . (lambda (text info)
-			  (org-export-data (plist-get info :title) info)))))
+			  (org-element-interpret-data
+			   (plist-get info :title) info)))))
 	(list (org-export-as 'test)
 	      (file-name-nondirectory
 	       (file-name-sans-extension (buffer-file-name))))))))
@@ -293,7 +294,8 @@ Paragraph"
       (let (org-export-registered-backends)
 	(org-export-define-backend 'test
 	  '((template . (lambda (text info)
-			  (org-export-data (plist-get info :title) info)))))
+			  (org-element-interpret-data
+			   (plist-get info :title) info)))))
 	(list (org-export-as 'test) (buffer-name))))))
   ;; If a title is specified, use it.
   (should
@@ -304,7 +306,8 @@ Paragraph"
       (let (org-export-registered-backends)
 	(org-export-define-backend 'test
 	  '((template . (lambda (text info)
-			  (org-export-data (plist-get info :title) info)))))
+			  (org-element-interpret-data
+			   (plist-get info :title) info)))))
 	(org-export-as 'test)))))
   ;; If an empty title is specified, do not set it.
   (should
@@ -315,7 +318,8 @@ Paragraph"
       (let (org-export-registered-backends)
 	(org-export-define-backend 'test
 	  '((template . (lambda (text info)
-			  (org-export-data (plist-get info :title) info)))))
+			  (org-element-interpret-data
+			   (plist-get info :title) info)))))
 	(org-export-as 'test))))))
 
 (ert-deftest test-org-export/handle-options ()
