@@ -808,7 +808,7 @@ reference (with row).  Mode string N."
     (forward-line 4)
     (should (equal (org-at-TBLFM-p) nil))))
 
-(ert-deftest test-org-table/org-TBLFM-begin ()
+(ert-deftest test-org-table/org-table-TBLFM-begin ()
   (org-test-with-temp-text-in-file
       "
 | 1 |
@@ -817,27 +817,27 @@ reference (with row).  Mode string N."
 
 "
     (goto-char (point-min))
-    (should (equal (org-TBLFM-begin)
+    (should (equal (org-table-TBLFM-begin)
 		   nil))
 
     (goto-char (point-min))
     (forward-line 1)
-    (should (equal (org-TBLFM-begin)
+    (should (equal (org-table-TBLFM-begin)
 		   nil))
 
     (goto-char (point-min))
     (forward-line 3)
-    (should (= (org-TBLFM-begin)
+    (should (= (org-table-TBLFM-begin)
 		   14))
 
     (goto-char (point-min))
     (forward-line 4)
-    (should (= (org-TBLFM-begin)
+    (should (= (org-table-TBLFM-begin)
 		   14))
 
     ))
 
-(ert-deftest test-org-table/org-TBLFM-begin-for-multiple-TBLFM-lines ()
+(ert-deftest test-org-table/org-table-TBLFM-begin-for-multiple-TBLFM-lines ()
   "For multiple #+TBLFM lines."
   (org-test-with-temp-text-in-file
       "
@@ -848,32 +848,32 @@ reference (with row).  Mode string N."
 
 "
     (goto-char (point-min))
-    (should (equal (org-TBLFM-begin)
+    (should (equal (org-table-TBLFM-begin)
 		   nil))
 
     (goto-char (point-min))
     (forward-line 1)
-    (should (equal (org-TBLFM-begin)
+    (should (equal (org-table-TBLFM-begin)
 		   nil))
 
     (goto-char (point-min))
     (forward-line 3)
-    (should (= (org-TBLFM-begin)
+    (should (= (org-table-TBLFM-begin)
 		   14))
 
     (goto-char (point-min))
     (forward-line 4)
-    (should (= (org-TBLFM-begin)
+    (should (= (org-table-TBLFM-begin)
 		   14))
 
     (goto-char (point-min))
     (forward-line 5)
-    (should (= (org-TBLFM-begin)
+    (should (= (org-table-TBLFM-begin)
 		   14))
 
     ))
 
-(ert-deftest test-org-table/org-TBLFM-begin-for-pultiple-TBLFM-lines-blocks ()
+(ert-deftest test-org-table/org-table-TBLFM-begin-for-pultiple-TBLFM-lines-blocks ()
   (org-test-with-temp-text-in-file
       "
 | 1 |
@@ -888,50 +888,50 @@ reference (with row).  Mode string N."
 
 "
     (goto-char (point-min))
-    (should (equal (org-TBLFM-begin)
+    (should (equal (org-table-TBLFM-begin)
 		   nil))
 
     (goto-char (point-min))
     (forward-line 1)
-    (should (equal (org-TBLFM-begin)
+    (should (equal (org-table-TBLFM-begin)
 		   nil))
 
     (goto-char (point-min))
     (forward-line 3)
-    (should (= (org-TBLFM-begin)
+    (should (= (org-table-TBLFM-begin)
 		   14))
 
     (goto-char (point-min))
     (forward-line 4)
-    (should (= (org-TBLFM-begin)
+    (should (= (org-table-TBLFM-begin)
 		   14))
 
     (goto-char (point-min))
     (forward-line 5)
-    (should (= (org-TBLFM-begin)
+    (should (= (org-table-TBLFM-begin)
 		   14))
 
     (goto-char (point-min))
     (forward-line 6)
-    (should (= (org-TBLFM-begin)
+    (should (= (org-table-TBLFM-begin)
 		   14))
 
     (goto-char (point-min))
     (forward-line 8)
-    (should (= (org-TBLFM-begin)
+    (should (= (org-table-TBLFM-begin)
 		   61))
 
     (goto-char (point-min))
     (forward-line 9)
-    (should (= (org-TBLFM-begin)
+    (should (= (org-table-TBLFM-begin)
 		   61))
 
     (goto-char (point-min))
     (forward-line 10)
-    (should (= (org-TBLFM-begin)
+    (should (= (org-table-TBLFM-begin)
 		   61))))
 
-(ert-deftest test-org-table/org-calc-current-TBLFM ()
+(ert-deftest test-org-table/org-table-calc-current-TBLFM ()
     (org-test-with-temp-text-in-file
       "
 | 1 |   |
@@ -942,7 +942,7 @@ reference (with row).  Mode string N."
 "
     (let ((got (progn (goto-char (point-min))
 		      (forward-line 3)
-		      (org-calc-current-TBLFM)
+		      (org-table-calc-current-TBLFM)
 		      (buffer-string)))
 	  (expect "
 | 1 | 1 |
@@ -956,7 +956,7 @@ reference (with row).  Mode string N."
 
     (let ((got (progn (goto-char (point-min))
 		      (forward-line 4)
-		      (org-calc-current-TBLFM)
+		      (org-table-calc-current-TBLFM)
 		      (buffer-string)))
 	  (expect "
 | 1 | 2 |
@@ -968,8 +968,8 @@ reference (with row).  Mode string N."
       (should (string= got
 		       expect)))))
 
-(ert-deftest test-org-table/org-calc-current-TBLFM-when-stop-because-of-error ()
-  "org-calc-current-TBLFM should preserve the input as it was."
+(ert-deftest test-org-table/org-table-calc-current-TBLFM-when-stop-because-of-error ()
+  "org-table-calc-current-TBLFM should preserve the input as it was."
   (org-test-with-temp-text-in-file
       "
 | 1 | 1 |
@@ -987,7 +987,7 @@ reference (with row).  Mode string N."
 "))
       (goto-char (point-min))
       (forward-line 4)
-      (should-error (org-calc-current-TBLFM))
+      (should-error (org-table-calc-current-TBLFM))
       (setq got (buffer-string))
       (message "%s" got)
       (should (string= got
