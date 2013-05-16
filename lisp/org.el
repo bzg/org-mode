@@ -4865,7 +4865,9 @@ Support for group tags is controlled by the option
 	  (while (setq e (pop tgs))
 	    (or (and (stringp (car e))
 		     (assoc (car e) org-tag-alist))
-		(push e org-tag-alist))))))))
+		(push e org-tag-alist)))
+	  ;; Return a list with tag variables
+	  (list org-file-tags org-tag-alist org-tag-groups-alist))))))
 
 (defun org-set-regexps-and-options ()
   "Precompute regular expressions used in the current buffer."
@@ -4893,22 +4895,25 @@ Support for group tags is controlled by the option
 	(save-restriction
 	  (widen)
 	  (goto-char (point-min))
-	  (while (or (and ext-setup-or-nil
-		     	  (let (ret)
-		     	    (with-temp-buffer
-		     	      (insert ext-setup-or-nil)
-		     	      (let ((major-mode 'org-mode))
-				(org-set-regexps-and-options-for-tags)
-				(setq ret (list org-file-tags org-tag-alist
-						org-tag-groups-alist))))
-		     	    (setq org-file-tags (nth 0 ret)
-		     		  org-tag-alist (nth 1 ret)
-		     		  org-tag-groups-alist (nth 2 ret))))
-		     (and ext-setup-or-nil
-			  (string-match re ext-setup-or-nil start)
-			  (setq start (match-end 0)))
-		     (and (setq ext-setup-or-nil nil start 0)
-			  (re-search-forward re nil t)))
+	  (while
+	      (or (and
+		   ext-setup-or-nil
+		   (let (ret)
+		     (with-temp-buffer
+		       (insert ext-setup-or-nil)
+		       (let ((major-mode 'org-mode))
+			 (setq ret (save-match-data
+				     (org-set-regexps-and-options-for-tags)))))
+		     ;; Append setupfile tags to existing tags
+		     (setq org-file-tags (append org-file-tags (nth 0 ret))
+			   org-tag-alist (append org-tag-alist (nth 1 ret))
+			   org-tag-groups-alist
+			   (append org-tag-groups-alist (nth 2 ret)))))
+		  (and ext-setup-or-nil
+		       (string-match re ext-setup-or-nil start)
+		       (setq start (match-end 0)))
+		  (and (setq ext-setup-or-nil nil start 0)
+		       (re-search-forward re nil t)))
 	    (setq key (upcase (match-string 1 ext-setup-or-nil))
 		  value (org-match-string-no-properties 2 ext-setup-or-nil))
 	    (if (stringp value) (setq value (org-trim value)))
@@ -17985,6 +17990,13 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	      (set-buffer (org-get-agenda-file-buffer file)))
 	    (widen)
 	    (org-set-regexps-and-options-for-tags)
+	    (goto-char (point-min))
+	    (let ((case-fold-search t))
+	      (when (search-forward "#+setupfile" nil t)
+		;; Don't set all regexps and options systematically as
+		;; this is only run for setting agenda tags from setup
+		;; file
+		(org-set-regexps-and-options)))
 	    (org-refresh-category-properties)
 	    (org-refresh-properties org-effort-property 'org-effort)
 	    (org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime)
