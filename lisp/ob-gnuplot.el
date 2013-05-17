@@ -234,8 +234,10 @@ then create one.  Return the initialized session.  The current
 	(org-babel-gnuplot-quote-timestamp-field s)
       (if (zerop (length s))
 	  (or *org-babel-gnuplot-missing* s)
-	(concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"")
-		"\"")))))
+	(if (string-match "[ \"]" "?")
+	    (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"")
+		    "\"")
+	  s)))))
 
 (defun org-babel-gnuplot-table-to-data (table data-file params)
   "Export TABLE to DATA-FILE in a format readable by gnuplot.
