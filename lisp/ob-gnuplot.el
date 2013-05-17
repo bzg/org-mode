@@ -232,8 +232,8 @@ then create one.  Return the initialized session.  The current
   (if (string-match org-table-number-regexp s) s
     (if (string-match org-ts-regexp3 s)
 	(org-babel-gnuplot-quote-timestamp-field s)
-      (if (and *org-babel-gnuplot-missing* (zerop (length s)))
-	  *org-babel-gnuplot-missing*
+      (if (zerop (length s))
+	  (or *org-babel-gnuplot-missing* s)
 	(concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"")
 		"\"")))))
 
