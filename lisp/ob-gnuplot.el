@@ -52,22 +52,29 @@
   '((:results . "file") (:exports . "results") (:session . nil))
   "Default arguments to use when evaluating a gnuplot source block.")
 
+(defvar org-babel-header-args:gnuplot
+  '((missing . :any))
+  "Gnuplot specific header args.")
+
 (defvar org-babel-gnuplot-timestamp-fmt nil)
+
+(defvar *org-babel-gnuplot-missing* nil)
 
 (defun org-babel-gnuplot-process-vars (params)
   "Extract variables from PARAMS and process the variables.
 Dumps all vectors into files and returns an association list
 of variable names and the related value to be used in the gnuplot
 code."
-  (mapcar
-   (lambda (pair)
-     (cons
-      (car pair) ;; variable name
-      (if (listp (cdr pair)) ;; variable value
-          (org-babel-gnuplot-table-to-data
-           (cdr pair) (org-babel-temp-file "gnuplot-") params)
-        (cdr pair))))
-   (mapcar #'cdr (org-babel-get-header params :var))))
+  (let ((*org-babel-gnuplot-missing* (cdr (assoc :missing params))))
+    (mapcar
+     (lambda (pair)
+       (cons
+	(car pair) ;; variable name
+	(if (listp (cdr pair)) ;; variable value
+	    (org-babel-gnuplot-table-to-data
+	     (cdr pair) (org-babel-temp-file "gnuplot-") params)
+	  (cdr pair))))
+     (mapcar #'cdr (org-babel-get-header params :var)))))
 
 (defun org-babel-expand-body:gnuplot (body params)
   "Expand BODY according to PARAMS, return the expanded body."
@@ -85,6 +92,7 @@ code."
            (timefmt (plist-get params :timefmt))
            (time-ind (or (plist-get params :timeind)
                          (when timefmt 1)))
+	   (missing (cdr (assoc :missing params)))
 	   (add-to-body (lambda (text) (setq body (concat text "\n" body))))
            output)
       ;; append header argument settings to body
@@ -210,7 +218,10 @@ then create one.  Return the initialized session.  The current
   (if (string-match org-table-number-regexp s) s
     (if (string-match org-ts-regexp3 s)
 	(org-babel-gnuplot-quote-timestamp-field s)
-      (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"") "\""))))
+      (if (and *org-babel-gnuplot-missing* (zerop (length s)))
+	  *org-babel-gnuplot-missing*
+	(concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"")
+		"\"")))))
 
 (defun org-babel-gnuplot-table-to-data (table data-file params)
   "Export TABLE to DATA-FILE in a format readable by gnuplot.
