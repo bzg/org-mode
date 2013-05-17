@@ -52,7 +52,7 @@ This can be used to add additional functionality after the table is sent
 to the receiver position, otherwise, if table is not sent, the functions
 are not run.")
 
-(defvar org-TBLFM-begin-regexp "|\n[ \t]*#\\+TBLFM: ")
+(defvar org-table-TBLFM-begin-regexp "|\n[ \t]*#\\+TBLFM: ")
 
 (defcustom orgtbl-optimized (eq org-enable-table-editor 'optimized)
   "Non-nil means use the optimized table editor version for `orgtbl-mode'.
@@ -3144,8 +3144,8 @@ with the prefix ARG."
 	      (setq checksum c1)))
 	  (user-error "No convergence after %d iterations" imax))))))
 
-(defun org-calc-current-TBLFM (&optional arg)
-  "Apply the #+TBLFM in the line to the table."
+(defun org-table-calc-current-TBLFM (&optional arg)
+  "Apply the #+TBLFM in the line at point to the table."
   (interactive "P")
   (unless (org-at-TBLFM-p) (user-error "Not at a #+TBLFM line"))
   (let ((formula (buffer-substring
@@ -3154,32 +3154,28 @@ with the prefix ARG."
 	s e)
     (save-excursion
       ;; Insert a temporary formula at right after the table
-      (goto-char (org-TBLFM-begin))
+      (goto-char (org-table-TBLFM-begin))
       (setq s (set-marker (make-marker) (point)))
       (insert (concat formula "\n"))
       (setq e (set-marker (make-marker) (point)))
-
       ;; Recalculate the table
       (beginning-of-line 0)		; move to the inserted line
       (skip-chars-backward " \r\n\t")
       (if (org-at-table-p)
 	  (unwind-protect
 	      (org-call-with-arg 'org-table-recalculate (or arg t))
-
 	    ;; delete the formula inserted temporarily
 	    (delete-region s e))))))
 
-(defun org-TBLFM-begin ()
+(defun org-table-TBLFM-begin ()
   "Find the beginning of the TBLFM lines and return its position.
 Return nil when the beginning of TBLFM line was not found."
   (save-excursion
     (when (progn (forward-line 1)
 	      (re-search-backward
-	       org-TBLFM-begin-regexp
+	       org-table-TBLFM-begin-regexp
 	       nil t))
 	  (point-at-bol 2))))
-
-
 
 (defun org-table-expand-lhs-ranges (equations)
   "Expand list of formulas.

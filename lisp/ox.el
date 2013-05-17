@@ -117,7 +117,7 @@
     (:section-numbers nil "num" org-export-with-section-numbers)
     (:select-tags "SELECT_TAGS" nil org-export-select-tags split)
     (:time-stamp-file nil "timestamp" org-export-time-stamp-file)
-    (:title "TITLE" nil nil space)
+    (:title "TITLE" nil org-export--default-title space)
     (:with-archived-trees nil "arch" org-export-with-archived-trees)
     (:with-author nil "author" org-export-with-author)
     (:with-clocks nil "c" org-export-with-clocks)
@@ -1707,51 +1707,47 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 
 (defun org-export--get-buffer-attributes ()
   "Return properties related to buffer attributes, as a plist."
-  (let ((visited-file (buffer-file-name (buffer-base-buffer))))
-    (list
-     ;; Store full path of input file name, or nil.  For internal use.
-     :input-file visited-file
-     :title (or (and visited-file
-		     (file-name-sans-extension
-		      (file-name-nondirectory visited-file)))
-		(buffer-name (buffer-base-buffer))))))
+  ;; Store full path of input file name, or nil.  For internal use.
+  (list :input-file (buffer-file-name (buffer-base-buffer))))
+
+(defvar org-export--default-title)	; Dynamically scoped.
+(defun org-export-store-default-title ()
+  "Return default title for current document, as a string.
+Title is extracted from associated file name, if any, or buffer's
+name."
+  (setq org-export--default-title
+	(or (let ((visited-file (buffer-file-name (buffer-base-buffer))))
+	      (and visited-file
+		   (file-name-sans-extension
+		    (file-name-nondirectory visited-file))))
+	    (buffer-name (buffer-base-buffer)))))
 
 (defun org-export--get-global-options (&optional backend)
   "Return global export options as a plist.
-
 Optional argument BACKEND, if non-nil, is a symbol specifying
 which back-end specific export options should also be read in the
 process."
-  (let ((all
-	 ;; Priority is given to back-end specific options.
-	 (append (and backend (org-export-backend-options backend))
-		 org-export-options-alist))
-	plist)
-    (mapc
-     (lambda (cell)
-       (let ((prop (car cell)))
-	 (unless (plist-member plist prop)
-	   (let ((value (eval (nth 3 cell))))
-	     ;; Only set property if default value is non-nil.
-	     (when value
-	       (setq plist
-		     (plist-put
-		      plist
-		      prop
-		      ;; If keyword belongs to
-		      ;; `org-element-document-properties', parse
-		      ;; default value as a secondary string before
-		      ;; storing it.
-		      (if (not (stringp value)) value
-			(let ((keyword (nth 1 cell)))
-			  (if (not (member keyword
-					   org-element-document-properties))
-			      value
-			    (org-element-parse-secondary-string
-			     value (org-element-restriction 'keyword))))))))))))
-     all)
-    ;; Return value.
-    plist))
+  (let (plist
+	;; Priority is given to back-end specific options.
+	(all (append (and backend (org-export-backend-options backend))
+		     org-export-options-alist)))
+    (dolist (cell all plist)
+      (let ((prop (car cell)))
+	(unless (plist-member plist prop)
+	  (setq plist
+		(plist-put
+		 plist
+		 prop
+		 ;; Eval default value provided.  If keyword is
+		 ;; a member of `org-element-document-properties',
+		 ;; parse it as a secondary string before storing it.
+		 (let ((value (eval (nth 3 cell))))
+		   (if (not (stringp value)) value
+		     (let ((keyword (nth 1 cell)))
+		       (if (member keyword org-element-document-properties)
+			   (org-element-parse-secondary-string
+			    value (org-element-restriction 'keyword))
+			 value)))))))))))
 
 (defun org-export--list-bound-variables ()
   "Return variables bound from BIND keywords in current buffer.
@@ -2929,14 +2925,18 @@ Return code as a string."
 	     (narrow-to-region (point) (point-max))))
       ;; Initialize communication channel with original buffer
       ;; attributes, unavailable in its copy.
-      (let ((info (org-combine-plists
-		   (list :export-options
-			 (delq nil
-			       (list (and subtreep 'subtree)
-				     (and visible-only 'visible-only)
-				     (and body-only 'body-only))))
-		   (org-export--get-buffer-attributes)))
-	    tree)
+      (let* ((info (org-combine-plists
+		    (list :export-options
+			  (delq nil
+				(list (and subtreep 'subtree)
+				      (and visible-only 'visible-only)
+				      (and body-only 'body-only))))
+		    (org-export--get-buffer-attributes)))
+	     tree)
+	;; Store default title in `org-export--default-title' so that
+	;; `org-export-get-environment' can access it from buffer's
+	;; copy and then add it properly to communication channel.
+	(org-export-store-default-title)
 	;; Update communication channel and get parse tree.  Buffer
 	;; isn't parsed directly.  Instead, a temporary copy is
 	;; created, where include keywords, macros are expanded and

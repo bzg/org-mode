@@ -126,6 +126,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-table-edit-field "org-table" (arg))
 (declare-function org-table-justify-field-maybe "org-table" (&optional new))
 (declare-function org-table-set-constants "org-table" ())
+(declare-function org-table-calc-current-TBLFM "org-table" (&optional arg))
 (declare-function org-id-get-create "org-id" (&optional force))
 (declare-function org-id-find-id-file "org-id" (id))
 (declare-function org-tags-view "org-agenda" (&optional todo-only match))
@@ -4872,7 +4873,9 @@ Support for group tags is controlled by the option
 	  (while (setq e (pop tgs))
 	    (or (and (stringp (car e))
 		     (assoc (car e) org-tag-alist))
-		(push e org-tag-alist))))))))
+		(push e org-tag-alist)))
+	  ;; Return a list with tag variables
+	  (list org-file-tags org-tag-alist org-tag-groups-alist))))))
 
 (defun org-set-regexps-and-options ()
   "Precompute regular expressions used in the current buffer."
@@ -4900,22 +4903,27 @@ Support for group tags is controlled by the option
 	(save-restriction
 	  (widen)
 	  (goto-char (point-min))
-	  (while (or (and ext-setup-or-nil
-		     	  (let (ret)
-		     	    (with-temp-buffer
-		     	      (insert ext-setup-or-nil)
-		     	      (let ((major-mode 'org-mode))
-				(org-set-regexps-and-options-for-tags)
-				(setq ret (list org-file-tags org-tag-alist
-						org-tag-groups-alist))))
-		     	    (setq org-file-tags (nth 0 ret)
-		     		  org-tag-alist (nth 1 ret)
-		     		  org-tag-groups-alist (nth 2 ret))))
-		     (and ext-setup-or-nil
-			  (string-match re ext-setup-or-nil start)
-			  (setq start (match-end 0)))
-		     (and (setq ext-setup-or-nil nil start 0)
-			  (re-search-forward re nil t)))
+	  (while
+	      (or (and
+		   ext-setup-or-nil
+		   (let (ret)
+		     (with-temp-buffer
+		       (insert ext-setup-or-nil)
+		       (let ((major-mode 'org-mode))
+			 (setq ret (save-match-data
+				     (org-set-regexps-and-options-for-tags)))))
+		     ;; Append setupfile tags to existing tags
+		     (setq org-file-tags
+			   (delq nil (append org-file-tags (nth 0 ret)))
+			   org-tag-alist
+			   (delq nil (append org-tag-alist (nth 1 ret)))
+			   org-tag-groups-alist
+			   (delq nil (append org-tag-groups-alist (nth 2 ret))))))
+		  (and ext-setup-or-nil
+		       (string-match re ext-setup-or-nil start)
+		       (setq start (match-end 0)))
+		  (and (setq ext-setup-or-nil nil start 0)
+		       (re-search-forward re nil t)))
 	    (setq key (upcase (match-string 1 ext-setup-or-nil))
 		  value (org-match-string-no-properties 2 ext-setup-or-nil))
 	    (if (stringp value) (setq value (org-trim value)))
@@ -5109,7 +5117,7 @@ Support for group tags is controlled by the option
 	    (concat "\\<" org-deadline-string " *<\\([^>]+\\)>")
 	    org-deadline-time-hour-regexp
 	    (concat "\\<" org-deadline-string
-		    " *<\\(.+[0-9]\\{1,2\\}:[0-9]\\{2\\}[^>]*\\)>")
+		    " *<\\([^>]+[0-9]\\{1,2\\}:[0-9]\\{2\\}[0-9-+:hdwmy \t.]*\\)>")
 	    org-deadline-line-regexp
 	    (concat "\\<\\(" org-deadline-string "\\).*")
 	    org-scheduled-regexp
@@ -5118,7 +5126,7 @@ Support for group tags is controlled by the option
 	    (concat "\\<" org-scheduled-string " *<\\([^>]+\\)>")
 	    org-scheduled-time-hour-regexp
 	    (concat "\\<" org-scheduled-string
-		    " *<\\(.+[0-9]\\{1,2\\}:[0-9]\\{2\\}[^>]*\\)>")
+		    " *<\\([^>]+[0-9]\\{1,2\\}:[0-9]\\{2\\}[0-9-+:hdwmy \t.]*\\)>")
 	    org-closed-time-regexp
 	    (concat "\\<" org-closed-string " *\\[\\([^]]+\\)\\]")
 	    org-keyword-time-regexp
@@ -9258,7 +9266,7 @@ property to set."
 	   (save-excursion
 	     (org-back-to-heading t)
 	     (put-text-property
-	      (point-at-bol) (point-at-eol) tprop p))))))))
+	      (point-at-bol) (org-end-of-subtree t t) tprop p))))))))
 
 
 ;;;; Link Stuff
@@ -18007,6 +18015,13 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	      (set-buffer (org-get-agenda-file-buffer file)))
 	    (widen)
 	    (org-set-regexps-and-options-for-tags)
+	    (goto-char (point-min))
+	    (let ((case-fold-search t))
+	      (when (search-forward "#+setupfile" nil t)
+		;; Don't set all regexps and options systematically as
+		;; this is only run for setting agenda tags from setup
+		;; file
+		(org-set-regexps-and-options)))
 	    (org-refresh-category-properties)
 	    (org-refresh-properties org-effort-property 'org-effort)
 	    (org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime)
@@ -20265,7 +20280,9 @@ This command does many different things, depending on context:
 		       (and (eq type 'table-row)
 			    (= (point) (org-element-property :end context))))
 		   (save-excursion
-		     (if (org-at-TBLFM-p) (org-calc-current-TBLFM)
+		     (if (org-at-TBLFM-p)
+			 (progn (require 'org-table)
+				(org-table-calc-current-TBLFM))
 		       (goto-char (org-element-property :contents-begin context))
 		       (org-call-with-arg 'org-table-recalculate (or arg t))
 		       (orgtbl-send-table 'maybe)))
