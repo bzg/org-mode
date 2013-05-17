@@ -83,7 +83,6 @@
 
 (defgroup org-screenshot nil
   "Options for taking and managing screen-shots"
-  :tag "Org Startup"
   :group 'org-link)
 
 (defcustom org-screenshot-image-directory "./images/"
