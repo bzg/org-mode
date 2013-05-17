@@ -103,35 +103,41 @@ code."
 	   (add-to-body (lambda (text) (setq body (concat text "\n" body))))
            output)
       ;; append header argument settings to body
-      (when title (funcall add-to-body (format "set title '%s'" title))) ;; title
-      (when lines (mapc (lambda (el) (funcall add-to-body el)) lines)) ;; line
+      (when title (funcall add-to-body (format "set title '%s'" title)))
+      (when lines (mapc (lambda (el) (funcall add-to-body el)) lines))
+      (when missing
+	(funcall add-to-body (format "set datafile missing '%s'" missing)))
       (when sets
 	(mapc (lambda (el) (funcall add-to-body (format "set %s" el))) sets))
       (when x-labels
 	(funcall add-to-body
 		 (format "set xtics (%s)"
 			 (mapconcat (lambda (pair)
-				      (format "\"%s\" %d" (cdr pair) (car pair)))
+				      (format "\"%s\" %d"
+					      (cdr pair) (car pair)))
 				    x-labels ", "))))
       (when y-labels
 	(funcall add-to-body
 		 (format "set ytics (%s)"
 			 (mapconcat (lambda (pair)
-				      (format "\"%s\" %d" (cdr pair) (car pair)))
+				      (format "\"%s\" %d"
+					      (cdr pair) (car pair)))
 				    y-labels ", "))))
       (when time-ind
 	(funcall add-to-body "set xdata time")
 	(funcall add-to-body (concat "set timefmt \""
 				     (or timefmt
 					 "%Y-%m-%d-%H:%M:%S") "\"")))
-      (when out-file (funcall add-to-body (format "set output \"%s\"" out-file)))
+      (when out-file (funcall add-to-body (format "set output \"%s\""
+						  out-file)))
       (when term (funcall add-to-body (format "set term %s" term)))
       ;; insert variables into code body: this should happen last
       ;; placing the variables at the *top* of the code in case their
       ;; values are used later
-      (funcall add-to-body (mapconcat #'identity
-				      (org-babel-variable-assignments:gnuplot params)
-				      "\n"))
+      (funcall add-to-body
+	       (mapconcat #'identity
+			  (org-babel-variable-assignments:gnuplot params)
+			  "\n"))
       ;; replace any variable names preceded by '$' with the actual
       ;; value of the variable
       (mapc (lambda (pair)
@@ -214,7 +220,8 @@ then create one.  Return the initialized session.  The current
 
 (defun org-babel-gnuplot-quote-timestamp-field (s)
   "Convert S from timestamp to Unix time and export to gnuplot."
-  (format-time-string org-babel-gnuplot-timestamp-fmt (org-time-string-to-time s)))
+  (format-time-string org-babel-gnuplot-timestamp-fmt
+		      (org-time-string-to-time s)))
 
 (defvar org-table-number-regexp)
 (defvar org-ts-regexp3)
