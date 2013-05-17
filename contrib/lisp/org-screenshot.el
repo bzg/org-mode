@@ -320,7 +320,7 @@ screenshot is done, any more `C-u' after that increases delay by
        org-screenshot-process
        `(lambda (process event)
           (org-screenshot-process-done
-           process event ,file ,(current-buffer) ,delay ,last-input-event))))))
+           process event ,file ,(current-buffer) ,delay ',last-input-event))))))
 
 (defvar org-screenshot-file-list nil
   "List of files in `org-screenshot-image-directory' used by
