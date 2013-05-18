@@ -2015,36 +2015,41 @@ Another text. (ref:text)
 (ert-deftest test-org-export/table-row-group ()
   "Test `org-export-table-row-group' specifications."
   ;; 1. A rule creates a new group.
-  (org-test-with-parsed-data "
+  (should
+   (equal '(1 rule 2)
+	  (org-test-with-parsed-data "
 | a | b |
 |---+---|
 | 1 | 2 |"
-    (should
-     (equal
-      '(1 nil 2)
-      (mapcar (lambda (row) (org-export-table-row-group row info))
-	      (org-element-map tree 'table-row 'identity)))))
+	    (org-element-map tree 'table-row
+	      (lambda (row)
+		(if (eq (org-element-property :type row) 'rule) 'rule
+		  (org-export-table-row-group row info)))))))
   ;; 2. Special rows are ignored in count.
-  (org-test-with-parsed-data "
+  (should
+   (equal
+    '(rule 1)
+    (org-test-with-parsed-data "
 | / | < | > |
 |---|---+---|
 |   | 1 | 2 |"
-    (should
-     (equal
-      '(nil nil 1)
-      (mapcar (lambda (row) (org-export-table-row-group row info))
-	      (org-element-map tree 'table-row 'identity)))))
+      (org-element-map tree 'table-row
+	(lambda (row)
+	  (if (eq (org-element-property :type row) 'rule) 'rule
+	    (org-export-table-row-group row info)))
+	info))))
   ;; 3. Double rules also are ignored in count.
-  (org-test-with-parsed-data "
+  (should
+   (equal '(1 rule rule 2)
+	  (org-test-with-parsed-data "
 | a | b |
 |---+---|
 |---+---|
 | 1 | 2 |"
-    (should
-     (equal
-      '(1 nil nil 2)
-      (mapcar (lambda (row) (org-export-table-row-group row info))
-	      (org-element-map tree 'table-row 'identity))))))
+	    (org-element-map tree 'table-row
+	      (lambda (row)
+		(if (eq (org-element-property :type row) 'rule) 'rule
+		  (org-export-table-row-group row info))))))))
 
 (ert-deftest test-org-export/table-row-number ()
   "Test `org-export-table-row-number' specifications."
