@@ -124,8 +124,8 @@ Assume point is at the beginning of block's starting line."
 		  (org-babel-process-params
 		   (org-babel-merge-params
 		    org-babel-default-header-args
-		    (org-babel-params-from-properties lang)
 		    (if (boundp lang-headers) (eval lang-headers) nil)
+		    (org-babel-params-from-properties lang)
 		    raw-params))))
 	  (setf hash (org-babel-sha1-hash info)))
 	(org-babel-exp-do-export info 'block hash)))))

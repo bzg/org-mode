@@ -1344,8 +1344,8 @@ may be specified in the properties of the current outline entry."
           (org-unescape-code-in-string (org-no-properties (match-string 5)))
           (org-babel-merge-params
            org-babel-default-inline-header-args
-           (org-babel-params-from-properties lang)
            (if (boundp lang-headers) (eval lang-headers) nil)
+           (org-babel-params-from-properties lang)
            (org-babel-parse-header-arguments
             (org-no-properties (or (match-string 4) "")))))))
 
