@@ -3989,10 +3989,10 @@ significant."
 		(if match-title-p (substring raw-path 1) raw-path)))
 	 ;; Cache for destinations that are not position dependent.
 	 (link-cache
-	  (or (plist-get info :fuzzy-link-cache)
-	      (plist-get (setq info (plist-put info :fuzzy-link-cache
+	  (or (plist-get info :resolve-fuzzy-link-cache)
+	      (plist-get (setq info (plist-put info :resolve-fuzzy-link-cache
 					       (make-hash-table :test 'equal)))
-			 :fuzzy-link-cache)))
+			 :resolve-fuzzy-link-cache)))
 	 (cached (gethash path link-cache 'not-found)))
     (cond
      ;; Destination is not position dependent: use cached value.
@@ -4384,16 +4384,26 @@ All special columns will be ignored during export."
 INFO is a plist used as a communication channel.
 
 A table has a header when it contains at least two row groups."
-  (let ((rowgroup 1) row-flag)
-    (org-element-map table 'table-row
-      (lambda (row)
-	(cond
-	 ((> rowgroup 1) t)
-	 ((and row-flag (eq (org-element-property :type row) 'rule))
-	  (incf rowgroup) (setq row-flag nil))
-	 ((and (not row-flag) (eq (org-element-property :type row) 'standard))
-	  (setq row-flag t) nil)))
-      info)))
+  (let ((cache (or (plist-get info :table-header-cache)
+		   (plist-get (setq info
+				    (plist-put info :table-header-cache
+					       (make-hash-table :test 'eq)))
+			      :table-header-cache))))
+    (or (gethash table cache)
+	(let ((rowgroup 1) row-flag)
+	  (puthash
+	   table
+	   (org-element-map table 'table-row
+	     (lambda (row)
+	       (cond
+		((> rowgroup 1) t)
+		((and row-flag (eq (org-element-property :type row) 'rule))
+		 (incf rowgroup) (setq row-flag nil))
+		((and (not row-flag) (eq (org-element-property :type row)
+					 'standard))
+		 (setq row-flag t) nil)))
+	     info 'first-match)
+	   cache)))))
 
 (defun org-export-table-row-is-special-p (table-row info)
   "Non-nil if TABLE-ROW is considered special.
@@ -4432,26 +4442,28 @@ All special rows will be ignored during export."
 	   (eq special-row-p 'cookie)))))))
 
 (defun org-export-table-row-group (table-row info)
-  "Return TABLE-ROW's group.
+  "Return TABLE-ROW's group number, as an integer.
 
 INFO is a plist used as the communication channel.
 
 Return value is the group number, as an integer, or nil for
-special rows and table rules.  Group 1 is also table's header."
-  (unless (or (eq (org-element-property :type table-row) 'rule)
-	      (org-export-table-row-is-special-p table-row info))
-    (let ((group 0) row-flag)
-      (catch 'found
-	(mapc
-	 (lambda (row)
-	   (cond
-	    ((and (eq (org-element-property :type row) 'standard)
-		  (not (org-export-table-row-is-special-p row info)))
-	     (unless row-flag (incf group) (setq row-flag t)))
-	    ((eq (org-element-property :type row) 'rule)
-	     (setq row-flag nil)))
-	   (when (eq table-row row) (throw 'found group)))
-	 (org-element-contents (org-export-get-parent table-row)))))))
+special rows and rows separators.  First group is also table's
+header."
+  (let ((cache (or (plist-get info :table-row-group-cache)
+		   (plist-get (setq info
+				    (plist-put info :table-row-group-cache
+					       (make-hash-table :test 'eq)))
+			      :table-row-group-cache))))
+    (cond ((gethash table-row cache))
+	  ((eq (org-element-property :type table-row) 'rule) nil)
+	  (t (let ((group 0) row-flag)
+	       (org-element-map (org-export-get-parent table-row) 'table-row
+		 (lambda (row)
+		   (if (eq (org-element-property :type row) 'rule)
+		       (setq row-flag nil)
+		     (unless row-flag (incf group) (setq row-flag t)))
+		   (when (eq table-row row) (puthash table-row group cache)))
+		 info 'first-match))))))
 
 (defun org-export-table-cell-width (table-cell info)
   "Return TABLE-CELL contents width.
@@ -4461,31 +4473,34 @@ INFO is a plist used as the communication channel.
 Return value is the width given by the last width cookie in the
 same column as TABLE-CELL, or nil."
   (let* ((row (org-export-get-parent table-cell))
+	 (table (org-export-get-parent row))
 	 (column (let ((cells (org-element-contents row)))
 		   (- (length cells) (length (memq table-cell cells)))))
-	 (table (org-export-get-parent-table table-cell))
-	 cookie-width)
-    (mapc
-     (lambda (row)
-       (cond
-	;; In a special row, try to find a width cookie at COLUMN.
-	((org-export-table-row-is-special-p row info)
-	 (let ((value (org-element-contents
-		       (elt (org-element-contents row) column))))
-	   ;; The following checks avoid expanding unnecessarily the
-	   ;; cell with `org-export-data'
-	   (when (and value
-		      (not (cdr value))
-		      (stringp (car value))
-		      (string-match "\\`<[lrc]?\\([0-9]+\\)?>\\'" (car value))
-		      (match-string 1 (car value)))
-	     (setq cookie-width
-		   (string-to-number (match-string 1 (car value)))))))
-	;; Ignore table rules.
-	((eq (org-element-property :type row) 'rule))))
-     (org-element-contents table))
-    ;; Return value.
-    cookie-width))
+	 (cache (or (plist-get info :table-cell-width-cache)
+		    (plist-get (setq info
+				     (plist-put info :table-cell-width-cache
+						(make-hash-table :test 'equal)))
+			       :table-cell-width-cache)))
+	 (key (cons table column)))
+    (or (let ((cached (gethash key cache 'no-result)))
+	  (and (not (eq cached 'no-result)) cached))
+	(let (cookie-width)
+	  (dolist (row (org-element-contents table)
+		       (puthash key cookie-width cache))
+	    (when (org-export-table-row-is-special-p row info)
+	      ;; In a special row, try to find a width cookie at COLUMN.
+	      (let* ((value (org-element-contents
+			     (elt (org-element-contents row) column)))
+		     (cookie (car value)))
+		;; The following checks avoid expanding unnecessarily the
+		;; cell with `org-export-data'
+		(when (and value
+			   (not (cdr value))
+			   (stringp cookie)
+			   (string-match "\\`<[lrc]?\\([0-9]+\\)?>\\'" cookie)
+			   (match-string 1 cookie))
+		  (setq cookie-width
+			(string-to-number (match-string 1 cookie)))))))))))
 
 (defun org-export-table-cell-alignment (table-cell info)
   "Return TABLE-CELL contents alignment.
@@ -4498,57 +4513,66 @@ alignment value will be deduced from fraction of numbers in the
 column (see `org-table-number-fraction' for more information).
 Possible values are `left', `right' and `center'."
   (let* ((row (org-export-get-parent table-cell))
+	 (table (org-export-get-parent row))
 	 (column (let ((cells (org-element-contents row)))
 		   (- (length cells) (length (memq table-cell cells)))))
-	 (table (org-export-get-parent-table table-cell))
-	 (number-cells 0)
-	 (total-cells 0)
-	 cookie-align
-	 previous-cell-number-p)
-    (mapc
-     (lambda (row)
-       (cond
-	;; In a special row, try to find an alignment cookie at
-	;; COLUMN.
-	((org-export-table-row-is-special-p row info)
-	 (let ((value (org-element-contents
-		       (elt (org-element-contents row) column))))
-	   ;; Since VALUE is a secondary string, the following checks
-	   ;; avoid useless expansion through `org-export-data'.
-	   (when (and value
-		      (not (cdr value))
-		      (stringp (car value))
-		      (string-match "\\`<\\([lrc]\\)?\\([0-9]+\\)?>\\'"
-				    (car value))
-		      (match-string 1 (car value)))
-	     (setq cookie-align (match-string 1 (car value))))))
-	;; Ignore table rules.
-	((eq (org-element-property :type row) 'rule))
-	;; In a standard row, check if cell's contents are expressing
-	;; some kind of number.  Increase NUMBER-CELLS accordingly.
-	;; Though, don't bother if an alignment cookie has already
-	;; defined cell's alignment.
-	((not cookie-align)
-	 (let ((value (org-export-data
-		       (org-element-contents
-			(elt (org-element-contents row) column))
-		       info)))
-	   (incf total-cells)
-	   ;; Treat an empty cell as a number if it follows a number
-	   (if (not (or (string-match org-table-number-regexp value)
-			(and (string= value "") previous-cell-number-p)))
-	       (setq previous-cell-number-p nil)
-	     (setq previous-cell-number-p t)
-	     (incf number-cells))))))
-     (org-element-contents table))
-    ;; Return value.  Alignment specified by cookies has precedence
-    ;; over alignment deduced from cells contents.
-    (cond ((equal cookie-align "l") 'left)
-	  ((equal cookie-align "r") 'right)
-	  ((equal cookie-align "c") 'center)
-	  ((>= (/ (float number-cells) total-cells) org-table-number-fraction)
-	   'right)
-	  (t 'left))))
+	 (cache (or (plist-get info :table-cell-alignment-cache)
+		    (plist-get (setq info
+				     (plist-put info :table-cell-alignment-cache
+						(make-hash-table :test 'equal)))
+			       :table-cell-alignment-cache))))
+    (or (gethash (cons table column) cache)
+	(let ((number-cells 0)
+	      (total-cells 0)
+	      cookie-align
+	      previous-cell-number-p)
+	  (dolist (row (org-element-contents (org-export-get-parent row)))
+	    (cond
+	     ;; In a special row, try to find an alignment cookie at
+	     ;; COLUMN.
+	     ((org-export-table-row-is-special-p row info)
+	      (let ((value (org-element-contents
+			    (elt (org-element-contents row) column))))
+		;; Since VALUE is a secondary string, the following
+		;; checks avoid useless expansion through
+		;; `org-export-data'.
+		(when (and value
+			   (not (cdr value))
+			   (stringp (car value))
+			   (string-match "\\`<\\([lrc]\\)?\\([0-9]+\\)?>\\'"
+					 (car value))
+			   (match-string 1 (car value)))
+		  (setq cookie-align (match-string 1 (car value))))))
+	     ;; Ignore table rules.
+	     ((eq (org-element-property :type row) 'rule))
+	     ;; In a standard row, check if cell's contents are
+	     ;; expressing some kind of number.  Increase NUMBER-CELLS
+	     ;; accordingly.  Though, don't bother if an alignment
+	     ;; cookie has already defined cell's alignment.
+	     ((not cookie-align)
+	      (let ((value (org-export-data
+			    (org-element-contents
+			     (elt (org-element-contents row) column))
+			    info)))
+		(incf total-cells)
+		;; Treat an empty cell as a number if it follows
+		;; a number.
+		(if (not (or (string-match org-table-number-regexp value)
+			     (and (string= value "") previous-cell-number-p)))
+		    (setq previous-cell-number-p nil)
+		  (setq previous-cell-number-p t)
+		  (incf number-cells))))))
+	  ;; Return value.  Alignment specified by cookies has
+	  ;; precedence over alignment deduced from cell's contents.
+	  (puthash (cons table column)
+		   (cond ((equal cookie-align "l") 'left)
+			 ((equal cookie-align "r") 'right)
+			 ((equal cookie-align "c") 'center)
+			 ((>= (/ (float number-cells) total-cells)
+			      org-table-number-fraction)
+			  'right)
+			 (t 'left))
+		   cache)))))
 
 (defun org-export-table-cell-borders (table-cell info)
   "Return TABLE-CELL borders.
@@ -4739,20 +4763,14 @@ Address is a CONS cell (ROW . COLUMN), where ROW and COLUMN are
 zero-based index.  Only exportable cells are considered.  The
 function returns nil for other cells."
   (let* ((table-row (org-export-get-parent table-cell))
-	 (table (org-export-get-parent-table table-cell)))
-    ;; Ignore cells in special rows or in special column.
-    (unless (or (org-export-table-row-is-special-p table-row info)
-		(and (org-export-table-has-special-column-p table)
-		     (eq (car (org-element-contents table-row)) table-cell)))
-      (cons
-       ;; Row number.
-       (org-export-table-row-number (org-export-get-parent table-cell) info)
-       ;; Column number.
-       (let ((col-count 0))
-	 (org-element-map table-row 'table-cell
-	   (lambda (cell)
-	     (if (eq cell table-cell) col-count (incf col-count) nil))
-	   info 'first-match))))))
+	 (row-number (org-export-table-row-number table-row info)))
+    (when row-number
+      (cons row-number
+	    (let ((col-count 0))
+	      (org-element-map table-row 'table-cell
+		(lambda (cell)
+		  (if (eq cell table-cell) col-count (incf col-count) nil))
+		info 'first-match))))))
 
 (defun org-export-get-table-cell-at (address table info)
   "Return regular table-cell object at ADDRESS in TABLE.
@@ -5078,7 +5096,7 @@ Return the new string."
 ;; `org-export-get-genealogy' returns the full genealogy of a given
 ;; element or object, from closest parent to full parse tree.
 
-(defun org-export-get-parent (blob)
+(defsubst org-export-get-parent (blob)
   "Return BLOB parent or nil.
 BLOB is the element or object considered."
   (org-element-property :parent blob))
