@@ -11632,7 +11632,7 @@ environment's opening string.  For example:
 #+ATTR_LATEX: :options [Proof of important theorem]
 #+BEGIN_PROOF
 ...
-Therefore, any natural number above 4 is the sum of two primes.
+Therefore, any even number greater than 2 is the sum of two primes.
 #+END_PROOF
 @end example
 
@@ -11642,7 +11642,7 @@ becomes
 @example
 \begin@{proof@}[Proof of important theorem]
 ...
-Therefore, any natural number above 4 is the sum of two primes.
+Therefore, any even number greater than 2 is the sum of two primes.
 \end@{proof@}
 @end example
 
