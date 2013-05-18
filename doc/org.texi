@@ -11133,11 +11133,10 @@ to @code{nil} will not insert any postamble.
 @subsection Quoting HTML tags
 
 Plain @samp{<} and @samp{>} are always transformed to @samp{&lt;} and
-@samp{&gt;} in HTML export.  If you want to include simple HTML tags
-which should be interpreted as such, mark them with @samp{@@} as in
-@samp{@@<b>bold text@@</b>}.  Note that this really works only for
-simple tags.  For more extensive HTML that should be copied verbatim to
-the exported file use either
+@samp{&gt;} in HTML export.  If you want to include raw HTML code, which
+should only appear in HTML export, mark it with @samp{@@@@html:} as in
+@samp{@@@@html:<b>@@@@bold text@@@@html:</b>@@@@}.  For more extensive HTML
+that should be copied verbatim to the exported file use either
 
 @cindex #+HTML
 @cindex #+BEGIN_HTML
@@ -11735,7 +11734,7 @@ environment's opening string.  For example:
 #+ATTR_LATEX: :options [Proof of important theorem]
 #+BEGIN_PROOF
 ...
-Therefore, any natural number above 4 is the sum of two primes.
+Therefore, any even number greater than 2 is the sum of two primes.
 #+END_PROOF
 @end example
 
@@ -11745,7 +11744,7 @@ becomes
 @example
 \begin@{proof@}[Proof of important theorem]
 ...
-Therefore, any natural number above 4 is the sum of two primes.
+Therefore, any even number greater than 2 is the sum of two primes.
 \end@{proof@}
 @end example
 
