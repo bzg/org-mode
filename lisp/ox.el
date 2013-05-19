@@ -1710,7 +1710,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
   ;; Store full path of input file name, or nil.  For internal use.
   (list :input-file (buffer-file-name (buffer-base-buffer))))
 
-(defvar org-export--default-title)	; Dynamically scoped.
+(defvar org-export--default-title nil)	; Dynamically scoped.
 (defun org-export-store-default-title ()
   "Return default title for current document, as a string.
 Title is extracted from associated file name, if any, or buffer's
