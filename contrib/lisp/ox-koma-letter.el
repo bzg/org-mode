@@ -80,10 +80,6 @@
   :group 'org-export-koma-letter
   :type 'string)
 
-(defcustom org-koma-letter-sender nil
-  "Sender's name, as a string."
-  :group 'org-export-koma-letter
-  :type 'string)
 
 (defcustom org-koma-letter-from-address nil
   "Sender's address, as a string."
@@ -95,10 +91,6 @@
   :group 'org-export-koma-letter
   :type 'string)
 
-(defcustom org-koma-letter-email nil
-  "Sender's email, as a string."
-  :group 'org-export-koma-letter
-  :type 'string)
 
 (defcustom org-koma-letter-place nil
   "Place from which the letter is sent."
@@ -161,10 +153,10 @@ Use `foldmarks:true' to activate default fold marks or
 (org-export-define-derived-backend 'koma-letter 'latex
   :options-alist
   '((:lco "LCO" nil org-koma-letter-class-option-file)
-    (:sender "SENDER" nil org-koma-letter-sender newline)
+    (:sender "AUTHOR" nil user-full-name t)
     (:from-address "FROM_ADDRESS" nil org-koma-letter-from-address newline)
     (:phone-number "PHONE_NUMBER" nil org-koma-letter-phone-number)
-    (:email "EMAIL" nil org-koma-letter-email)
+    (:email "EMAIL" nil user-mail-address t)
     (:to-address "TO_ADDRESS" nil nil newline)
     (:place "PLACE" nil org-koma-letter-place)
     (:opening "OPENING" nil org-koma-letter-opening)
@@ -272,7 +264,8 @@ holding export options."
 	    (setq lco-def (format "%s\\LoadLetterOption{%s}\n" lco-def lco-file)))
 	  lco-def))
       ;; Define "From" data.
-      (when sender (format "\\setkomavar{fromname}{%s}\n" sender))
+      (when sender (format "\\setkomavar{fromname}{%s}\n"
+			   (org-export-data sender info)))
       (when from-address (format "\\setkomavar{fromaddress}{%s}\n" from-address))
       (when phone-number (format "\\setkomavar{fromphone}{%s}\n" phone-number))
       (when email (format "\\setkomavar{fromemail}{%s}\n" email))
