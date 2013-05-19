@@ -4,6 +4,8 @@
 
 ;; Author: Nicolas Goaziou <n.goaziou AT gmail DOT com>
 ;;         Alan Schmitt <alan.schmitt AT polytechnique DOT org>
+;;         Viktor Rosenfeld <listuser36 AT gmail DOT com>
+;;         Rasmus Pank Roulund <emacs AT pank DOT eu>
 ;; Keywords: org, wp, tex
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -135,10 +137,36 @@ function may be given.  Functions must return a string."
   :group 'org-export-koma-letter
   :type 'string)
 
-(defcustom org-koma-letter-use-subject "untitled"
-  "Use the title as the letter's subject."
-  :group 'org-export-koma-letter
-  :type 'string)
+(defcustom org-koma-letter-subject-format t
+  "Use the title as the subject of the letter.  At the time of
+writing the following values are allowed:
+
+ - afteropening: subject after opening
+ - beforeopening: subject before opening
+ - centered: subject centered
+ - left:subject left-justified
+ - right: subject right-justified
+ - titled: add title/description to subject
+ - underlined: set subject underlined (see note in text please)
+ - untitled: do not add title/description to subject.
+ - No-export: do no insert a subject even if present.
+
+Please refer to the KOMA-script manual (Table 4.16. in the
+English manual of 2012-07-22)"
+  :type '(set   (const  "afteropening")
+		(const  "beforeopening")
+		(const  "centered")
+		(const  "left")
+		(const  "right")
+		(const  "underlined")
+		(const  "titled")
+		(const  "untitled")
+		(const :tag "No export" nil)
+		(const :tag "Default options" t)
+		(string))
+  :group 'org-export-koma-letter)
+
+
 
 (defcustom org-koma-letter-use-backaddress t
   "Print return address in small line above to address."
@@ -208,7 +236,7 @@ content temporarily.")
     (:with-phone nil "phone" org-koma-letter-use-phone)
     (:with-email nil "email" org-koma-letter-use-email)
     (:with-place nil "place" org-koma-letter-use-place)
-    (:with-subject nil "subject" org-koma-letter-use-subject))
+    (:with-subject nil "subject" org-koma-letter-subject-format))
   :translate-alist '((export-block . org-koma-letter-export-block)
 		     (export-snippet . org-koma-letter-export-snippet)
 		     (headline . org-koma-letter-headline)
@@ -411,12 +439,25 @@ holding export options."
    ;; Document start
    "\\begin{document}\n\n"
    ;; Subject
-   (let ((with-subject (plist-get info :with-subject)))
-     (when with-subject
-       (concat
-	(format "\\KOMAoption{subject}{%s}\n" with-subject)
-	(format "\\setkomavar{subject}{%s}\n\n"
-		(org-export-data (plist-get info :title) info)))))
+   (let* ((with-subject (plist-get info :with-subject))
+	  (subject-format (cond ((member with-subject '("true" "t" t)) nil)
+				((stringp with-subject) (list with-subject))
+				((symbolp with-subject)
+				 (list (symbol-name with-subject)))
+				(t with-subject)))
+	  (subject (org-export-data (plist-get info :title) info))
+	  (l (length subject-format))
+	  (y ""))
+     (concat
+      (when (and with-subject subject-format)
+	(concat
+	 "\\KOMAoption{subject}{"
+	 (apply 'format
+		(dotimes (x l y)
+		  (setq y (concat (if (> x 0) "%s," "%s") y)))
+		subject-format) "}\n"))
+     (when (and subject with-subject)
+       (format "\\setkomavar{subject}{%s}\n\n" subject))))
    ;; Letter start
    (format "\\begin{letter}{%%\n%s}\n\n"
 	   (or (plist-get info :to-address) "no address given"))
