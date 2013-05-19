@@ -108,26 +108,30 @@ This function is called by `org-babel-execute-src-block'."
 
 (defun org-babel-variable-assignments:sh (params)
   "Return list of shell statements assigning the block's variables."
-  (let ((sep (cdr (assoc :separator params))))
+  (let ((sep (cdr (assoc :separator params)))
+	(hline (when (string= "yes" (cdr (assoc :hlines params)))
+		 (or (cdr (assoc :hline-string params))
+		     "hline"))))
     (mapcar
      (lambda (pair)
        (format "%s=%s"
 	       (car pair)
-	       (org-babel-sh-var-to-sh (cdr pair) sep)))
+	       (org-babel-sh-var-to-sh (cdr pair) sep hline)))
      (mapcar #'cdr (org-babel-get-header params :var)))))
 
-(defun org-babel-sh-var-to-sh (var &optional sep)
+(defun org-babel-sh-var-to-sh (var &optional sep hline)
   "Convert an elisp value to a shell variable.
 Convert an elisp var into a string of shell commands specifying a
 var of the same value."
-  (format org-babel-sh-var-quote-fmt (org-babel-sh-var-to-string var sep)))
+  (format org-babel-sh-var-quote-fmt (org-babel-sh-var-to-string var sep hline)))
 
-(defun org-babel-sh-var-to-string (var &optional sep)
+(defun org-babel-sh-var-to-string (var &optional sep hline)
   "Convert an elisp value to a string."
   (let ((echo-var (lambda (v) (if (stringp v) v (format "%S" v)))))
     (cond
      ((and (listp var) (or (listp (car var)) (equal (car var) 'hline)))
-      (orgtbl-to-generic var  (list :sep (or sep "\t") :fmt echo-var)))
+      (orgtbl-to-generic var  (list :sep (or sep "\t") :fmt echo-var
+				    :hline hline)))
      ((listp var)
       (mapconcat echo-var var "\n"))
      (t (funcall echo-var var)))))
