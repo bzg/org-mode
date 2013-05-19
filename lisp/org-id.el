@@ -437,6 +437,7 @@ and time is the usual three-integer representation of time."
 
 ;; Storing ID locations (files)
 
+;;;###autoload
 (defun org-id-update-id-locations (&optional files silent)
   "Scan relevant files for IDs.
 Store the relation between files and corresponding IDs.
