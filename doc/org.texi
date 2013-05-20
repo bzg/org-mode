@@ -11597,10 +11597,11 @@ environment, like @code{tabularx}, @code{longtable}, @code{array},
 @code{tabu}, @code{bmatrix}@enddots{}  It defaults to
 @code{org-latex-default-table-environment} value.
 @item :float
+@itemx :placement
 Float environment for the table.  Possible values are @code{sidewaystable},
-@code{multicolumn} and @code{table}.  If unspecified, a table with a caption
-will have a @code{table} environment.  Moreover, @code{:placement} attribute
-can specify the positioning of the float.
+@code{multicolumn}, @code{t} and @code{nil}.  When unspecified, a table with
+a caption will have a @code{table} environment.  Moreover, @code{:placement}
+attribute can specify the positioning of the float.
 @item :align
 @itemx :font
 @itemx :width
@@ -11675,12 +11676,18 @@ without specifying caption by setting the @code{:float} attribute.  You may
 also set it to:
 @itemize @minus
 @item
-@code{wrap}: if you would like to let text flow around the image.  It will
-make the figure occupy the left half of the page.
+@code{t}: if you want to use the standard @samp{figure} environment.  It is
+used by default if you provide a caption to the image.
 @item
 @code{multicolumn}: if you wish to include an image which spans multiple
 columns in a page.  This will export the image wrapped in a @code{figure*}
 environment.
+@item
+@code{wrap}: if you would like to let text flow around the image.  It will
+make the figure occupy the left half of the page.
+@item
+@code{nil}: if you need to avoid any floating environment, even when
+a caption is provided.
 @end itemize
 @noindent
 To modify the placement option of any floating environment, set the
@@ -11711,13 +11718,23 @@ omitted).
 @subsubheading Source blocks in @LaTeX{} export
 @cindex source blocks, in @LaTeX{} export
 
-In addition to syntax defined in @ref{Literal examples}, names and
-captions (@pxref{Images and tables}), source blocks also accept a
-@code{:long-listing} attribute, which prevents the block from floating
-when non-@code{nil}.
+In addition to syntax defined in @ref{Literal examples}, names and captions
+(@pxref{Images and tables}), source blocks also accept a @code{:float}
+attribute.  You may set it to:
+@itemize @minus
+@item
+@code{t}: if you want to make the source block a float.  It is the default
+value when a caption is provided.
+@item
+@code{mulicolumn}: if you wish to include a source block which spans multiple
+colums in a page.
+@item
+@code{nil}: if you need to avoid any floating evironment, even when a caption
+is provided.  It is useful for source code that may not fit in a single page.
+@end itemize
 
 @example
-#+ATTR_LATEX: :long-listing t
+#+ATTR_LATEX: :float nil
 #+BEGIN_SRC emacs-lisp
 Code that may not fit in a single page.
 #+END_SRC
