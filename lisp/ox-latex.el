@@ -420,7 +420,7 @@ environment."
   :type 'string)
 
 (defcustom org-latex-inline-image-rules
-  '(("file" . "\\.\\(pdf\\|jpeg\\|jpg\\|png\\|ps\\|eps\\|tikz\\)\\'"))
+  '(("file" . "\\.\\(pdf\\|jpeg\\|jpg\\|png\\|ps\\|eps\\|tikz\\|pgf\\)\\'"))
   "Rules characterizing image files that can be inlined into LaTeX.
 
 A rule consists in an association whose key is the type of link
@@ -1739,7 +1739,7 @@ used as a communication channel."
 		    (if (not (string-match "\\`\\[\\(.*\\)\\]\\'" opt)) opt
 		      (match-string 1 opt))))
 	 image-code)
-    (if (equal filetype "tikz")
+    (if (member filetype '("tikz" "pgf"))
 	;; For tikz images:
 	;; - use \input to read in image file.
 	;; - if options are present, wrap in a tikzpicture environment.
