@@ -3178,7 +3178,9 @@ contextual information."
        (format "<table%s>\n%s\n%s\n%s</table>"
 	       (if (equal attributes "") "" (concat " " attributes))
 	       (if (not caption) ""
-		 (format "<caption>%s</caption>"
+		 (format (if org-html-table-caption-above
+			     "<caption align=\"above\">%s</caption>"
+			   "<caption align=\"bottom\">%s</caption>")
 			 (org-export-data caption info)))
 	       (funcall table-column-specs table info)
 	       contents)))))
@@ -3387,7 +3389,6 @@ Return output file name."
 ;;;; org-format-table-table-html
 ;;;; org-table-number-fraction
 ;;;; org-table-number-regexp
-;;;; org-html-table-caption-above
 ;;;; org-html-inline-image-extensions
 ;;;; org-export-preferred-target-alist
 ;;;; class for anchors
