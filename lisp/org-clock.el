@@ -665,7 +665,10 @@ previous clocking intervals."
   "Add to or set the effort estimate of the item currently being clocked.
 VALUE can be a number of minutes, or a string with format hh:mm or mm.
 When the string starts with a + or a - sign, the current value of the effort
-property will be changed by that amount.
+property will be changed by that amount.  When doing so, Org assumes the
+value to modify is either hh:mm or mm, not an effort duration as specified
+in `org-effort-durations' (e.g. \"3h\").
+
 This will update the \"Effort\" property of currently clocked item, and
 the mode line."
   (interactive)
