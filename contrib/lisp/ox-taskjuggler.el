@@ -145,9 +145,7 @@
 ;;
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl)
-  (defvar build-id))
+(eval-when-compile (require 'cl))
 
 (require 'ox)
 
@@ -400,6 +398,7 @@ communication channel.  Return value is an alist between
 headlines and their associated ID.  IDs are hierarchical, which
 means they only need to be unique among the task siblings."
   (let* (alist
+	 build-id			; For byte-compiler.
          (build-id
           (lambda (tasks local-ids)
             (org-element-map tasks 'headline
