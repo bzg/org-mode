@@ -656,11 +656,11 @@ This means, between the beginning of line and the point."
 	 ["All Clear" (org-mouse-for-each-item
 		       (lambda ()
 			 (when (save-excursion (org-at-item-checkbox-p))
-			   (replace-match "[ ]"))))]
+			   (replace-match "[ ] "))))]
 	 ["All Set" (org-mouse-for-each-item
 		     (lambda ()
 		       (when (save-excursion (org-at-item-checkbox-p))
-			 (replace-match "[X]"))))]
+			 (replace-match "[X] "))))]
 	 ["All Toggle" (org-mouse-for-each-item 'org-toggle-checkbox) t]
 	 ["All Remove" (org-mouse-for-each-item
 			(lambda ()
