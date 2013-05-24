@@ -145,7 +145,9 @@
 ;;
 ;;; Code:
 
-(eval-when-compile (require 'cl))
+(eval-when-compile
+  (require 'cl)
+  (defvar build-id))
 
 (require 'ox)
 
@@ -433,13 +435,14 @@ INFO is a plist used as a communication channel.  First headline
 in buffer with `org-taskjuggler-project-tag' defines the project.
 If no such task is defined, pick the first headline in buffer.
 If there is no headline at all, return nil."
-  (or (org-element-map (plist-get info :parse-tree) 'headline
-        (lambda (hl)
-          (and (member org-taskjuggler-project-tag
-                       (org-export-get-tags hl info))
-               hl))
-        info t)
-      (org-element-map tree 'headline 'identity info t)))
+  (let ((tree (plist-get info :parse-tree)))
+    (or (org-element-map tree 'headline
+	  (lambda (hl)
+	    (and (member org-taskjuggler-project-tag
+			 (org-export-get-tags hl info))
+		 hl))
+	  info t)
+	(org-element-map tree 'headline 'identity info t))))
 
 (defun org-taskjuggler-get-id (item info)
   "Return id for task or resource ITEM.
@@ -573,34 +576,34 @@ DEPENDENCIES is list of dependencies for TASK, as returned by
 `org-taskjuggler-resolve-depedencies'.  TASK is a headline.
 INFO is a plist used as a communication channel.  Return value
 doesn't include leading \"depends\"."
-  (let ((dep-str (concat (org-element-property :BLOCKER task)
-                         " "
-                         (org-element-property :DEPENDS task)))
-        (get-path
-         (lambda (dep)
-           ;; Return path to DEP relatively to TASK.
-           (let ((parent (org-export-get-parent task))
-                 (exclamations 1)
-                 (option
-                  (let ((id (org-element-property :TASK_ID dep)))
-                    (and id
-                         (string-match (concat id " +\\({.*?}\\)") dep-str)
-                         (org-match-string-no-properties 1))))
-                 path)
-             ;; Compute number of exclamation marks by looking for the
-	     ;; common ancestor between TASK and DEP.
-             (while (not (org-element-map parent 'headline
-                           (lambda (hl) (eq hl dep))))
-               (incf exclamations)
-               (setq parent (org-export-get-parent parent)))
-             ;; Build path from DEP to PARENT.
-             (while (not (eq parent dep))
-               (push (org-taskjuggler-get-id dep info) path)
-               (setq dep (org-export-get-parent dep)))
-             ;; Return full path.  Add dependency options, if any.
-             (concat (make-string exclamations ?!)
-                     (mapconcat 'identity path ".")
-                     (and option (concat " " option)))))))
+  (let* ((dep-str (concat (org-element-property :BLOCKER task)
+			  " "
+			  (org-element-property :DEPENDS task)))
+	 (get-path
+	  (lambda (dep)
+	    ;; Return path to DEP relatively to TASK.
+	    (let ((parent (org-export-get-parent task))
+		  (exclamations 1)
+		  (option
+		   (let ((id (org-element-property :TASK_ID dep)))
+		     (and id
+			  (string-match (concat id " +\\({.*?}\\)") dep-str)
+			  (org-match-string-no-properties 1))))
+		  path)
+	      ;; Compute number of exclamation marks by looking for the
+	      ;; common ancestor between TASK and DEP.
+	      (while (not (org-element-map parent 'headline
+			    (lambda (hl) (eq hl dep))))
+		(incf exclamations)
+		(setq parent (org-export-get-parent parent)))
+	      ;; Build path from DEP to PARENT.
+	      (while (not (eq parent dep))
+		(push (org-taskjuggler-get-id dep info) path)
+		(setq dep (org-export-get-parent dep)))
+	      ;; Return full path.  Add dependency options, if any.
+	      (concat (make-string exclamations ?!)
+		      (mapconcat 'identity path ".")
+		      (and option (concat " " option)))))))
     ;; Return dependencies string, without the leading "depends".
     (mapconcat (lambda (dep) (funcall get-path dep)) dependencies ", ")))
 
