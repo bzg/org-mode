@@ -1660,22 +1660,22 @@ function doesn't call `untabify' on S."
       (goto-char (point-min))
       ;; Find maximum common indentation, if not specified.
       (setq n (or n
-                  (catch 'min-ind
-                    (let ((min-ind (point-max)))
-                      (save-excursion
-                        (while (re-search-forward "^[ \t]*\\S-" nil t)
-                          (let ((ind (1- (current-column))))
-                            (if (zerop ind) (throw 'min-ind 0)
-                              (setq min-ind (min min-ind ind))))))
-                      min-ind))))
-      ;; Remove exactly N indentation, but give up if not possible.
-      (while (not (eobp))
-        (let ((ind (progn (skip-chars-forward " \t") (current-column))))
-          (cond ((eolp) (delete-region (line-beginning-position) (point)))
-                ((< ind n) (throw 'exit s))
-                (t (org-indent-line-to (- ind n))))
-          (forward-line)))
-      (buffer-string))))
+                  (let ((min-ind (point-max)))
+		    (save-excursion
+		      (while (re-search-forward "^[ \t]*\\S-" nil t)
+			(let ((ind (1- (current-column))))
+			  (if (zerop ind) (throw 'exit s)
+			    (setq min-ind (min min-ind ind))))))
+		    min-ind)))
+      (if (zerop n) s
+	;; Remove exactly N indentation, but give up if not possible.
+	(while (not (eobp))
+	  (let ((ind (progn (skip-chars-forward " \t") (current-column))))
+	    (cond ((eolp) (delete-region (line-beginning-position) (point)))
+		  ((< ind n) (throw 'exit s))
+		  (t (org-indent-line-to (- ind n))))
+	    (forward-line)))
+	(buffer-string)))))
 
 (defun org-element-example-block-parser (limit affiliated)
   "Parse an example block.
