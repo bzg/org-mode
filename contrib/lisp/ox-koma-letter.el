@@ -130,7 +130,7 @@ function may be given.  Functions must return a string."
   :group 'org-export-koma-letter
   :type 'string)
 
-(defcustom org-koma-letter-signature "\\usekomavar{fromname}"
+(defcustom org-koma-letter-signature nil
   "String used as the signature."
   :group 'org-export-koma-letter
   :type 'string)
