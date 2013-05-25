@@ -4218,16 +4218,11 @@ line (string)."
   (let* ((line 0) refs
 	 ;; Get code and clean it.  Remove blank lines at its
 	 ;; beginning and end.
-	 (code (let ((c (replace-regexp-in-string
-			 "\\`\\([ \t]*\n\\)+" ""
-			 (replace-regexp-in-string
-			  "\\([ \t]*\n\\)*[ \t]*\\'" "\n"
-			  (org-element-property :value element)))))
-		 ;; If appropriate, remove global indentation.
-		 (if (or org-src-preserve-indentation
-			 (org-element-property :preserve-indent element))
-		     c
-		   (org-remove-indentation c))))
+	 (code (replace-regexp-in-string
+		"\\`\\([ \t]*\n\\)+" ""
+		(replace-regexp-in-string
+		 "\\([ \t]*\n\\)*[ \t]*\\'" "\n"
+		 (org-element-property :value element))))
 	 ;; Get format used for references.
 	 (label-fmt (regexp-quote
 		     (or (org-element-property :label-fmt element)
