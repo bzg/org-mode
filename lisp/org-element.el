@@ -1648,6 +1648,35 @@ CONTENTS is nil."
 
 ;;;; Example Block
 
+(defun org-element--remove-indentation (s &optional n)
+  "Remove maximum common indentation in string S and return it.
+When N is a positive integer, remove exactly that indentation,
+possible, or return S as-is otherwise.  Unlike to
+`org-remove-indentation', this function doesn't call `untabify'
+on S first."
+  (catch 'exit
+    (with-temp-buffer
+      (insert s)
+      (goto-char (point-min))
+      ;; Find maximum common indentation, if not specified.
+      (setq n (or n
+                  (catch 'min-ind
+                    (let ((min-ind (point-max)))
+                      (save-excursion
+                        (while (re-search-forward "^[ \t]*\\S-" nil t)
+                          (let ((ind (1- (current-column))))
+                            (if (zerop ind) (throw 'min-ind 0)
+                              (setq min-ind (min min-ind ind))))))
+                      min-ind))))
+      ;; Remove exactly N indentation, but give up if not possible.
+      (while (not (eobp))
+        (let ((ind (progn (skip-chars-forward " \t") (current-column))))
+          (cond ((eolp) (delete-region (line-beginning-position) (point)))
+                ((< ind n) (throw 'exit s))
+                (t (org-indent-line-to (- ind n))))
+          (forward-line)))
+      (buffer-string))))
+
 (defun org-element-example-block-parser (limit affiliated)
   "Parse an example block.
 
@@ -1669,13 +1698,17 @@ keywords."
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
 	  (let* ((switches
-		  (progn (looking-at "^[ \t]*#\\+BEGIN_EXAMPLE\\(?: +\\(.*\\)\\)?")
-			 (org-match-string-no-properties 1)))
+		  (progn
+		    (looking-at "^[ \t]*#\\+BEGIN_EXAMPLE\\(?: +\\(.*\\)\\)?")
+		    (org-match-string-no-properties 1)))
 		 ;; Switches analysis
-		 (number-lines (cond ((not switches) nil)
-				     ((string-match "-n\\>" switches) 'new)
-				     ((string-match "+n\\>" switches) 'continued)))
-		 (preserve-indent (and switches (string-match "-i\\>" switches)))
+		 (number-lines
+		  (cond ((not switches) nil)
+			((string-match "-n\\>" switches) 'new)
+			((string-match "+n\\>" switches) 'continued)))
+		 (preserve-indent
+		  (or org-src-preserve-indentation
+		      (and switches (string-match "-i\\>" switches))))
 		 ;; Should labels be retained in (or stripped from) example
 		 ;; blocks?
 		 (retain-labels
@@ -1686,18 +1719,23 @@ keywords."
 		 ;; line-numbers?
 		 (use-labels
 		  (or (not switches)
-		      (and retain-labels (not (string-match "-k\\>" switches)))))
-		 (label-fmt (and switches
-				 (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
-				 (match-string 1 switches)))
+		      (and retain-labels
+			   (not (string-match "-k\\>" switches)))))
+		 (label-fmt
+		  (and switches
+		       (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
+		       (match-string 1 switches)))
 		 ;; Standard block parsing.
 		 (begin (car affiliated))
 		 (post-affiliated (point))
+		 (block-ind (progn (skip-chars-forward " \t") (current-column)))
 		 (contents-begin (progn (forward-line) (point)))
 		 (hidden (org-invisible-p2))
-		 (value (org-unescape-code-in-string
-			 (buffer-substring-no-properties
-			  contents-begin contents-end)))
+		 (value (org-element--remove-indentation
+			 (org-unescape-code-in-string
+			  (buffer-substring-no-properties
+			   contents-begin contents-end))
+			 (and preserve-indent block-ind)))
 		 (pos-before-blank (progn (goto-char contents-end)
 					  (forward-line)
 					  (point)))
@@ -1725,9 +1763,8 @@ keywords."
 CONTENTS is nil."
   (let ((switches (org-element-property :switches example-block)))
     (concat "#+BEGIN_EXAMPLE" (and switches (concat " " switches)) "\n"
-	    (org-remove-indentation
-	     (org-escape-code-in-string
-	      (org-element-property :value example-block)))
+	    (org-escape-code-in-string
+	     (org-element-property :value example-block))
 	    "#+END_EXAMPLE")))
 
 
@@ -2224,13 +2261,17 @@ Assume point is at the beginning of the block."
 		 ;; Get parameters.
 		 (parameters (org-match-string-no-properties 3))
 		 ;; Switches analysis
-		 (number-lines (cond ((not switches) nil)
-				     ((string-match "-n\\>" switches) 'new)
-				     ((string-match "+n\\>" switches) 'continued)))
-		 (preserve-indent (and switches (string-match "-i\\>" switches)))
-		 (label-fmt (and switches
-				 (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
-				 (match-string 1 switches)))
+		 (number-lines
+		  (cond ((not switches) nil)
+			((string-match "-n\\>" switches) 'new)
+			((string-match "+n\\>" switches) 'continued)))
+		 (preserve-indent (or org-src-preserve-indentation
+				      (and switches
+					   (string-match "-i\\>" switches))))
+		 (label-fmt
+		  (and switches
+		       (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
+		       (match-string 1 switches)))
 		 ;; Should labels be retained in (or stripped from)
 		 ;; src blocks?
 		 (retain-labels
@@ -2241,12 +2282,18 @@ Assume point is at the beginning of the block."
 		 ;; line-numbers?
 		 (use-labels
 		  (or (not switches)
-		      (and retain-labels (not (string-match "-k\\>" switches)))))
+		      (and retain-labels
+			   (not (string-match "-k\\>" switches)))))
+		 ;; Indentation.
+		 (block-ind (progn (skip-chars-forward " \t") (current-column)))
 		 ;; Get visibility status.
 		 (hidden (progn (forward-line) (org-invisible-p2)))
 		 ;; Retrieve code.
-		 (value (org-unescape-code-in-string
-			 (buffer-substring-no-properties (point) contents-end)))
+		 (value (org-element--remove-indentation
+			 (org-unescape-code-in-string
+			  (buffer-substring-no-properties
+			   (point) contents-end))
+			 (and preserve-indent block-ind)))
 		 (pos-before-blank (progn (goto-char contents-end)
 					  (forward-line)
 					  (point)))
@@ -2282,15 +2329,13 @@ CONTENTS is nil."
 	(params (org-element-property :parameters src-block))
 	(value (let ((val (org-element-property :value src-block)))
 		 (cond
-		  (org-src-preserve-indentation val)
-		  ((zerop org-edit-src-content-indentation)
-		   (org-remove-indentation val))
+		  ((org-element-property :preserve-indent src-block) val)
+		  ((zerop org-edit-src-content-indentation) val)
 		  (t
 		   (let ((ind (make-string
 			       org-edit-src-content-indentation 32)))
 		     (replace-regexp-in-string
-		      "\\(^\\)[ \t]*\\S-" ind
-		      (org-remove-indentation val) nil nil 1)))))))
+		      "\\(^\\)[ \t]*\\S-" ind val nil nil 1)))))))
     (concat (format "#+BEGIN_SRC%s\n"
 		    (concat (and lang (concat " " lang))
 			    (and switches (concat " " switches))
