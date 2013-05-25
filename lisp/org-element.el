@@ -1650,10 +1650,10 @@ CONTENTS is nil."
 
 (defun org-element--remove-indentation (s &optional n)
   "Remove maximum common indentation in string S and return it.
-When N is a positive integer, remove exactly that indentation,
-possible, or return S as-is otherwise.  Unlike to
-`org-remove-indentation', this function doesn't call `untabify'
-on S first."
+When optional argument N is a positive integer, remove exactly
+that much characters from indentation, if possible, or return
+S as-is otherwise.  Unlike to `org-remove-indentation', this
+function doesn't call `untabify' on S."
   (catch 'exit
     (with-temp-buffer
       (insert s)
