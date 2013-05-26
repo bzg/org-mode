@@ -8960,26 +8960,30 @@ buffer.  It will also recognize item context in multiline items."
     (let ((f (or (car-safe cell) cell))
 	  (disable-when-heading-prefix (cdr-safe cell)))
       (when (fboundp f)
-	(dolist (binding (nconc (where-is-internal f org-mode-map)
-				(where-is-internal f outline-mode-map)))
-	  ;; TODO use local-function-key-map
-	  (dolist (rep '(("<tab>" . "TAB")
-			 ("<return>" . "RET")
-			 ("<escape>" . "ESC")
-			 ("<delete>" . "DEL")))
-	    (setq binding (read-kbd-macro
-			   (let ((case-fold-search))
-			     (replace-regexp-in-string
-			      (regexp-quote (cdr rep))
-			      (car rep)
-			      (key-description binding))))))
-	  (let ((key (lookup-key orgstruct-mode-map binding)))
-	    (when (or (not key) (numberp key))
-	      (condition-case nil
-		  (org-defkey orgstruct-mode-map
-			      binding
-			      (orgstruct-make-binding f binding disable-when-heading-prefix))
-		(error nil))))))))
+	(let ((new-bindings))
+	  (dolist (binding (nconc (where-is-internal f org-mode-map)
+				  (where-is-internal f outline-mode-map)))
+	    (push binding new-bindings)
+	    ;; TODO use local-function-key-map
+	    (dolist (rep '(("<tab>" . "TAB")
+			   ("<return>" . "RET")
+			   ("<escape>" . "ESC")
+			   ("<delete>" . "DEL")))
+	      (setq binding (read-kbd-macro
+			     (let ((case-fold-search))
+			       (replace-regexp-in-string
+				(regexp-quote (cdr rep))
+				(car rep)
+				(key-description binding)))))
+	      (pushnew binding new-bindings :test 'equal)))
+	  (dolist (binding new-bindings)
+	    (let ((key (lookup-key orgstruct-mode-map binding)))
+	      (when (or (not key) (numberp key))
+		(condition-case nil
+		    (org-defkey orgstruct-mode-map
+				binding
+				(orgstruct-make-binding f binding disable-when-heading-prefix))
+		  (error nil)))))))))
   (run-hooks 'orgstruct-setup-hook))
 
 (defun orgstruct-make-binding (fun key disable-when-heading-prefix)
