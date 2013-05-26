@@ -298,7 +298,7 @@ and have the id \"title-slide\"."
          (cons
           (if (and class (string-match-p "\\<slide\\>" class))
               (format
-               "<a href='#outline-container-%s'>%s</a>"
+               "<a href='#outline-container-sec-%s'>%s</a>"
                (or (org-element-property :CUSTOM_ID headline)
                    (mapconcat
                     'number-to-string
