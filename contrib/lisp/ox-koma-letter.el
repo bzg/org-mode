@@ -115,7 +115,6 @@ function may be given.  Functions must return a string."
   :group 'org-export-koma-letter
   :type 'string)
 
-
 (defcustom org-koma-letter-place nil
   "Place from which the letter is sent."
   :group 'org-export-koma-letter
@@ -171,6 +170,17 @@ Use `foldmarks:true' to activate default fold marks or
   :group 'org-export-koma-letter
   :type 'boolean)
 
+(defconst org-koma-letter-special-tags-after-closing
+  '("ps" "encl" "cc")
+  "Header tags to be inserted after closing")
+
+(defconst org-koma-letter-special-tags-after-letter '("after_letter")
+  "Header tags to be inserted after closing")
+
+(defvar org-koma-letter-special-contents nil "holds special
+content temporarily.")
+
+
 
 ;;; Define Back-End
 
@@ -186,7 +196,13 @@ Use `foldmarks:true' to activate default fold marks or
     (:opening "OPENING" nil org-koma-letter-opening)
     (:closing "CLOSING" nil org-koma-letter-closing)
     (:signature "SIGNATURE" nil org-koma-letter-signature newline)
-
+    (:special-tags nil nil
+		   (append org-koma-letter-special-tags-after-closing
+			   org-koma-letter-special-tags-after-letter))
+    (:with-after-closing nil "after-closing-order"
+			 org-koma-letter-special-tags-after-closing)
+    (:with-after-letter nil "after-letter-order"
+			org-koma-letter-special-tags-after-letter)
     (:with-backaddress nil "backaddress" org-koma-letter-use-backaddress)
     (:with-foldmarks nil "foldmarks" org-koma-letter-use-foldmarks)
     (:with-phone nil "phone" org-koma-letter-use-phone)
@@ -195,6 +211,7 @@ Use `foldmarks:true' to activate default fold marks or
     (:with-subject nil "subject" org-koma-letter-use-subject))
   :translate-alist '((export-block . org-koma-letter-export-block)
 		     (export-snippet . org-koma-letter-export-snippet)
+		     (headline . org-koma-letter-headline)
 		     (keyword . org-koma-letter-keyword)
 		     (template . org-koma-letter-template))
   :menu-entry
@@ -214,6 +231,12 @@ Use `foldmarks:true' to activate default fold marks or
   "Return the current `user-mail-address'"
   user-mail-address)
 
+;; The following is taken from/inspired by ox-grof.el
+;; Thanks, Luis!
+
+(defun org-koma-letter--get-tagged-contents (tag)
+  "Get tagged content from `org-koma-letter-special-contents'"
+  (cdr (assoc tag org-koma-letter-special-contents)))
 
 (defun org-koma-letter--get-custom (value)
   "Determines whether a value is nil, a string or a
@@ -223,6 +246,37 @@ function (a symobl).  If it is a function it it evaluates it."
 	  ((functionp value) (funcall value))
 	  ((symbolp value) (symbol-name value)))))
 
+
+(defun org-koma-letter--prepare-special-contents-as-macro (a-list &optional keep-newlines no-tag)
+  "Finds all the components of `org-koma-letter-special-contents'
+corresponding to members of the `a-list' and return them as a
+string to be formatted.  The function is used for inserting
+content of speciall headings such as PS.
+
+If keep-newlines is t newlines will not be removed.  If no-tag is
+is t the content in `org-koma-letter-special-contents' will not
+be wrapped in a macro named whatever the members of a-list are called.
+"
+  (let (output)
+    (dolist (ac a-list output)
+      (let
+	  ((x (org-koma-letter--get-tagged-contents ac))
+	   (regexp (if keep-newlines "" "\\`\n+\\|\n*\\'")))
+	(when x
+	  (setq output
+		(concat
+		 output "\n"
+		 ;; sometimes LaTeX complains about newlines
+		 ;; at the end or beginning of macros.  Remove them.
+		 (org-koma-letter--format-string-as-macro
+		  (format "%s" (replace-regexp-in-string regexp "" x))
+		  (unless no-tag  ac)))))))))
+
+(defun org-koma-letter--format-string-as-macro (string &optional macro)
+  "If a macro is given format as string as  \"\\macro{string}\" else as \"string\""
+  (if macro
+      (format "\\%s{%s}" macro string)
+    (format "%s" string)))
 
 ;;; Transcode Functions
 
@@ -257,12 +311,39 @@ channel."
     (if (equal key "KOMA-LETTER") value
       (org-export-with-backend 'latex keyword contents info))))
 
+
+;; Headline
+
+(defun org-koma-letter-headline (headline contents info)
+  "Transcode a HEADLINE element from Org to LaTeX.
+CONTENTS holds the contents of the headline.  INFO is a plist
+holding contextual information.
+
+Note that if a headline is tagged with a tag from
+`org-koma-letter-special-tags' it will not be exported, but
+stored in `org-koma-letter-special-contents' and included at the
+appropriate place."
+  (let*
+      ((tags (and (plist-get info :with-tags)
+		 (org-export-get-tags headline info)))
+       (tag (downcase (car tags))))
+    (if (member tag (plist-get info :special-tags))
+	(progn
+	  (push (cons tag contents)
+		org-koma-letter-special-contents)
+	  nil)
+      contents)))
+
+
 ;;;; Template
 
 (defun org-koma-letter-template (contents info)
   "Return complete document string after KOMA Scrlttr2 conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
+  ;; FIXME: instead of setq'ing org-koma-letter-special-contents and
+  ;; callying varioues stuff it might be nice to put a big let* around the templace
+  ;; as in org-groff...
   (concat
    ;; Time-stamp.
    (and (plist-get info :time-stamp-file)
@@ -297,7 +378,7 @@ holding export options."
 	 (signature (plist-get info :signature)))
      (concat
       ;; Letter Class Option File
-      (when lco 
+      (when lco
 	(let ((lco-files (split-string lco " "))
 	      (lco-def ""))
 	  (dolist (lco-file lco-files lco-def)
@@ -344,10 +425,16 @@ holding export options."
    ;; Letter body.
    contents
    ;; Closing.
-   (format "\n\\closing{%s}\n\n" (plist-get info :closing))
+   (format "\n\\closing{%s}\n" (plist-get info :closing))
+   (org-koma-letter--prepare-special-contents-as-macro
+    (plist-get info :with-after-closing))
    ;; Letter end.
-   "\\end{letter}\n\\end{document}"))
-
+   "\n\\end{letter}\n"
+   (org-koma-letter--prepare-special-contents-as-macro
+    (plist-get info :with-after-letter) t t)
+   ;; Document end.
+   "\n\\end{document}"
+   ))
 
 
 ;;; Commands
@@ -376,7 +463,7 @@ contents of hidden elements.
 When optional argument BODY-ONLY is non-nil, only write code
 between \"\\begin{letter}\" and \"\\end{letter}\".
 
-EXT-PLIST, when provided, is a property list with external
+EXT-PLIST, when provided, is a proeprty list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
@@ -384,6 +471,7 @@ Export is done in a buffer named \"*Org KOMA-LETTER Export*\".  It
 will be displayed if `org-export-show-temporary-export-buffer' is
 non-nil."
   (interactive)
+  (let (org-koma-letter-special-contents)
   (if async
       (org-export-async-start
 	  (lambda (output)
@@ -400,7 +488,7 @@ non-nil."
 		   subtreep visible-only body-only ext-plist)))
       (with-current-buffer outbuf (LaTeX-mode))
       (when org-export-show-temporary-export-buffer
-	(switch-to-buffer-other-window outbuf)))))
+	(switch-to-buffer-other-window outbuf))))))
 
 ;;;###autoload
 (defun org-koma-letter-export-to-latex
