@@ -80,6 +80,30 @@
   :group 'org-export-koma-letter
   :type 'string)
 
+(defcustom org-koma-letter-author 'user-full-name
+  "The sender's name.
+
+This variable defaults to calling the function `user-full-name'
+which just returns the current `user-full-name'.  Alternatively a
+string, nil or a function may be given. Functions must return a
+string."
+  :group 'org-export-koma-letter
+  :type '(radio (function-item user-full-name)
+		(string)
+		(function)
+		(const nil)))
+
+(defcustom org-koma-letter-email 'org-koma-letter-email
+  "The sender's email address.
+
+This variable defaults to the value `org-koma-letter-email' which
+returns `user-mail-address'.  Alternatively a string, nil or a
+function may be given.  Functions must return a string."
+  :group 'org-export-koma-letter
+  :type '(radio (function-item org-koma-letter-email)
+		(string)
+		(function)
+		(const nil)))
 
 (defcustom org-koma-letter-from-address nil
   "Sender's address, as a string."
@@ -153,10 +177,10 @@ Use `foldmarks:true' to activate default fold marks or
 (org-export-define-derived-backend 'koma-letter 'latex
   :options-alist
   '((:lco "LCO" nil org-koma-letter-class-option-file)
-    (:sender "AUTHOR" nil user-full-name t)
+    (:author "AUTHOR" nil (org-koma-letter--get-custom org-koma-letter-author) t)
     (:from-address "FROM_ADDRESS" nil org-koma-letter-from-address newline)
     (:phone-number "PHONE_NUMBER" nil org-koma-letter-phone-number)
-    (:email "EMAIL" nil user-mail-address t)
+    (:email "EMAIL" nil (org-koma-letter--get-custom org-koma-letter-email) t)
     (:to-address "TO_ADDRESS" nil nil newline)
     (:place "PLACE" nil org-koma-letter-place)
     (:opening "OPENING" nil org-koma-letter-opening)
@@ -184,6 +208,22 @@ Use `foldmarks:true' to activate default fold marks or
 		(org-open-file (org-koma-letter-export-to-pdf nil s v b))))))))
 
 
+;;; Helper functions
+
+(defun org-koma-letter-email ()
+  "Return the current `user-mail-address'"
+  user-mail-address)
+
+
+(defun org-koma-letter--get-custom (value)
+  "Determines whether a value is nil, a string or a
+function (a symobl).  If it is a function it it evaluates it."
+  (when value
+    (cond ((stringp value) value)
+	  ((functionp value) (funcall value))
+	  ((symbolp value) (symbol-name value)))))
+
+
 ;;; Transcode Functions
 
 ;;;; Export Block
@@ -250,7 +290,7 @@ holding export options."
 		     (plist-get info :latex-header-extra))))
            info)))))
    (let ((lco (plist-get info :lco))
-	 (sender (plist-get info :sender))
+	 (author (plist-get info :author))
 	 (from-address (plist-get info :from-address))
 	 (phone-number (plist-get info :phone-number))
 	 (email (plist-get info :email))
@@ -264,8 +304,8 @@ holding export options."
 	    (setq lco-def (format "%s\\LoadLetterOption{%s}\n" lco-def lco-file)))
 	  lco-def))
       ;; Define "From" data.
-      (when sender (format "\\setkomavar{fromname}{%s}\n"
-			   (org-export-data sender info)))
+      (when author (format "\\setkomavar{fromname}{%s}\n"
+			   (org-export-data author info)))
       (when from-address (format "\\setkomavar{fromaddress}{%s}\n" from-address))
       (when phone-number (format "\\setkomavar{fromphone}{%s}\n" phone-number))
       (when email (format "\\setkomavar{fromemail}{%s}\n" email))
