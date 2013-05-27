@@ -33,12 +33,43 @@
 ;;
 ;; On top of buffer keywords supported by `latex' back-end (see
 ;; `org-latex-options-alist'), this back-end introduces the following
-;; keywords: "CLOSING" (see `org-koma-letter-closing'), "FROM_ADDRESS"
-;; (see `org-koma-letter-from-address'), "LCO" (see
-;; `org-koma-letter-class-option-file'), "OPENING" (see
-;; `org-koma-letter-opening'), "PHONE_NUMBER" (see
-;; `org-koma-letter-phone-number'), "SIGNATURE" (see
-;; `org-koma-letter-signature') and "TO_ADDRESS".
+;; keywords:
+;;   - "CLOSING" (see `org-koma-letter-closing'),
+;;   - "FROM_ADDRESS" (see `org-koma-letter-from-address'),
+;;   - "LCO" (see `org-koma-letter-class-option-file'),
+;;   - "OPENING" (see `org-koma-letter-opening'),
+;;   - "PHONE_NUMBER" (see `org-koma-letter-phone-number'),
+;;   - "SIGNATURE" (see `org-koma-letter-signature')
+;;   - "PLACE" (see `org-koma-letter-place')
+;;   - and "TO_ADDRESS".
+;;
+;; A number of OPTIONS settings can be set to change which contents is
+;; exported.
+;;   - backaddress (see `org-koma-letter-use-backaddress')
+;;   - foldmarks (see `org-koma-letter-use-foldmarks')
+;;   - phone (see `org-koma-letter-use-phone')
+;;   - email (see `org-koma-letter-use-email')
+;;   - place (see `org-koma-letter-use-place')
+;;   - subject, a list of format options
+;;     (see `org-koma-letter-subject-format')
+;;   - after-closing-order, a list of the ordering of headings with
+;;     special tags after closing (see
+;;     `org-koma-letter-special-tags-after-closing') -
+;;     after-letter-order, as above, but after the end of the letter
+;;     (see `org-koma-letter-special-tags-after-letter').
+;;
+;; The following variables works differently from the main LaTeX class
+;;   - "AUTHOR": default to user-full-name but may be disabled.  (see org-koma-letter-author),
+;;   - "EMAIL": same as AUTHOR, (see org-koma-letter-email),
+;;
+;; Headlines are in general ignored.  However, headlines with special
+;; tags can be used for specified contents like postscript (ps),
+;; carbon copy (cc), enclosures (encl) and code to be inserted after
+;; \end{letter} (after_letter).  Specials tags are defined in
+;; `org-koma-letter-special-tags-after-closing' and
+;; `org-koma-letter-special-tags-after-letter'.  Currently members of
+;; `org-koma-letter-special-tags-after-closing' used as macros and the
+;; content of the headline is the argument.
 ;;
 ;; You will need to add an appropriate association in
 ;; `org-latex-classes' in order to use the KOMA Scrlttr2 class.  For
@@ -93,7 +124,7 @@ string."
   :type '(radio (function-item user-full-name)
 		(string)
 		(function)
-		(const nil)))
+		(const :tag "Do not export author" nil)))
 
 (defcustom org-koma-letter-email 'org-koma-letter-email
   "The sender's email address.
@@ -105,7 +136,7 @@ function may be given.  Functions must return a string."
   :type '(radio (function-item org-koma-letter-email)
 		(string)
 		(function)
-		(const nil)))
+		(const :tag "Do not export email" nil)))
 
 (defcustom org-koma-letter-from-address nil
   "Sender's address, as a string."
@@ -153,17 +184,19 @@ writing the following values are allowed:
 
 Please refer to the KOMA-script manual (Table 4.16. in the
 English manual of 2012-07-22)"
-  :type '(set   (const  "afteropening")
-		(const  "beforeopening")
-		(const  "centered")
-		(const  "left")
-		(const  "right")
-		(const  "underlined")
-		(const  "titled")
-		(const  "untitled")
-		(const :tag "No export" nil)
-		(const :tag "Default options" t)
-		(string))
+  :type '(radio
+	  (const :tag "No export" nil)
+	  (const :tag "Default options" t)
+	  (set :tag "selection"
+	   (const  'afteropening)
+	   (const  'beforeopening)
+	   (const  'centered)
+	   (const  'left)
+	   (const  'right)
+	   (const  'underlined)
+	   (const  'titled)
+	   (const  'untitled))
+	  (string))
   :group 'org-export-koma-letter)
 
 
@@ -198,15 +231,16 @@ Use `foldmarks:true' to activate default fold marks or
   :group 'org-export-koma-letter
   :type 'boolean)
 
-(defconst org-koma-letter-special-tags-after-closing
-  '("ps" "encl" "cc")
+
+
+(defconst org-koma-letter-special-tags-after-closing '(ps encl cc)
   "Header tags to be inserted after closing")
 
-(defconst org-koma-letter-special-tags-after-letter '("after_letter")
+(defconst org-koma-letter-special-tags-after-letter '(after_letter)
   "Header tags to be inserted after closing")
 
-(defvar org-koma-letter-special-contents nil "holds special
-content temporarily.")
+(defvar org-koma-letter-special-contents nil
+  "holds special content temporarily.")
 
 
 
@@ -262,9 +296,10 @@ content temporarily.")
 ;; The following is taken from/inspired by ox-grof.el
 ;; Thanks, Luis!
 
-(defun org-koma-letter--get-tagged-contents (tag)
+(defun org-koma-letter--get-tagged-contents (key)
   "Get tagged content from `org-koma-letter-special-contents'"
-  (cdr (assoc tag org-koma-letter-special-contents)))
+  (cdr (assoc (org-koma-letter--get-custom key)
+	      org-koma-letter-special-contents)))
 
 (defun org-koma-letter--get-custom (value)
   "Determines whether a value is nil, a string or a
@@ -272,7 +307,8 @@ function (a symobl).  If it is a function it it evaluates it."
   (when value
     (cond ((stringp value) value)
 	  ((functionp value) (funcall value))
-	  ((symbolp value) (symbol-name value)))))
+	  ((symbolp value) (symbol-name value))
+	  (t value))))
 
 
 (defun org-koma-letter--prepare-special-contents-as-macro (a-list &optional keep-newlines no-tag)
@@ -286,10 +322,10 @@ is t the content in `org-koma-letter-special-contents' will not
 be wrapped in a macro named whatever the members of a-list are called.
 "
   (let (output)
-    (dolist (ac a-list output)
-      (let
-	  ((x (org-koma-letter--get-tagged-contents ac))
-	   (regexp (if keep-newlines "" "\\`\n+\\|\n*\\'")))
+    (dolist (ac* a-list output)
+      (let*
+	  ((ac (org-koma-letter--get-custom ac*))
+	   (x (org-koma-letter--get-tagged-contents ac)))
 	(when x
 	  (setq output
 		(concat
@@ -297,7 +333,7 @@ be wrapped in a macro named whatever the members of a-list are called.
 		 ;; sometimes LaTeX complains about newlines
 		 ;; at the end or beginning of macros.  Remove them.
 		 (org-koma-letter--format-string-as-macro
-		  (format "%s" (replace-regexp-in-string regexp "" x))
+		  (if keep-newlines x (org-koma-letter--remove-offending-new-lines x))
 		  (unless no-tag  ac)))))))))
 
 (defun org-koma-letter--format-string-as-macro (string &optional macro)
@@ -305,6 +341,10 @@ be wrapped in a macro named whatever the members of a-list are called.
   (if macro
       (format "\\%s{%s}" macro string)
     (format "%s" string)))
+
+(defun org-koma-letter--remove-offending-new-lines (string)
+  "Remove new lines in the begging and end of `string'"
+  (replace-regexp-in-string "\\`[ \n\t]+\\|[\n\t ]*\\'" "" string))
 
 ;;; Transcode Functions
 
@@ -352,10 +392,13 @@ Note that if a headline is tagged with a tag from
 stored in `org-koma-letter-special-contents' and included at the
 appropriate place."
   (let*
-      ((tags (and (plist-get info :with-tags)
-		 (org-export-get-tags headline info)))
-       (tag (downcase (car tags))))
-    (if (member tag (plist-get info :special-tags))
+      ((tags (org-export-get-tags headline info))
+       (tag* (car tags))
+       (tag  (when tag*
+	       (car (member-ignore-case
+		     tag*
+		     (mapcar 'symbol-name (plist-get info :special-tags)))))))
+    (if tag
 	(progn
 	  (push (cons tag contents)
 		org-koma-letter-special-contents)
@@ -564,7 +607,8 @@ directory.
 
 Return output file's name."
   (interactive)
-  (let ((outfile (org-export-output-file-name ".tex" subtreep)))
+  (let ((outfile (org-export-output-file-name ".tex" subtreep))
+	org-koma-letter-special-contents)
     (if async
 	(org-export-async-start
 	    (lambda (f) (org-export-add-to-stack f 'koma-letter))
