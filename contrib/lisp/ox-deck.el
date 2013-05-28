@@ -68,6 +68,7 @@
   '((headline . org-deck-headline)
     (inner-template . org-deck-inner-template)
     (item . org-deck-item)
+    (link . org-deck-link)
     (template . org-deck-template)))
 
 (defgroup org-export-deck nil
@@ -300,9 +301,11 @@ and have the id \"title-slide\"."
               (format
                "<a href='#outline-container-%s'>%s</a>"
                (or (org-element-property :CUSTOM_ID headline)
-                   (mapconcat
-                    'number-to-string
-                    (org-export-get-headline-number headline info) "-"))
+		   (concat
+		    "sec-"
+		    (mapconcat
+		     'number-to-string
+		     (org-export-get-headline-number headline info) "-")))
                title)
             title)
           (org-export-get-relative-level headline info))))
@@ -373,6 +376,10 @@ the \"slide\" class will be added to the to the list element,
         (replace-regexp-in-string "^<li>" "<li class='slide'>" text)
       text)))
 
+(defun org-deck-link (link desc info)
+  (replace-regexp-in-string "href=\"#" "href=\"#outline-container-"
+			    (org-html-link link desc info)))
+
 (defun org-deck-template (contents info)
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
@@ -385,7 +392,11 @@ holding export options."
     (mapconcat
      'identity
      (list
-      (plist-get info :html-doctype)
+      (let* ((dt (plist-get info :html-doctype))
+	     (dt-cons (assoc dt org-html-doctype-alist)))
+	(if dt-cons
+	    (cdr dt-cons)
+	  dt))
       (let ((lang (plist-get info :language)))
         (mapconcat
          (lambda (x)
