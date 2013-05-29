@@ -392,11 +392,7 @@ holding export options."
     (mapconcat
      'identity
      (list
-      (let* ((dt (plist-get info :html-doctype))
-	     (dt-cons (assoc dt org-html-doctype-alist)))
-	(if dt-cons
-	    (cdr dt-cons)
-	  dt))
+      (org-html-doctype info)
       (let ((lang (plist-get info :language)))
         (mapconcat
          (lambda (x)

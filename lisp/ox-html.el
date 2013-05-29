@@ -1306,6 +1306,14 @@ CSS classes, then this prefix can be very useful."
   (concat "<" tag " " attr
 	  (if (org-html-xhtml-p info) " />" ">")))
 
+(defun org-html-doctype (info)
+  "Return correct html doctype tag from `org-html-doctype-alist',
+or the literal value of :html-doctype from INFO if :html-doctype
+is not found in the alist.
+INFO is a plist used as a communication channel."
+  (let ((dt (plist-get info :html-doctype)))
+    (or (cdr (assoc dt org-html-doctype-alist)) dt)))
+
 (defun org-html--make-attribute-string (attributes)
   "Return a list of attributes, as a string.
 ATTRIBUTES is a plist where values are either strings or nil. An
@@ -1696,11 +1704,7 @@ holding export options."
 			   (fboundp 'coding-system-get)
 			   (coding-system-get org-html-coding-system 'mime-charset))
 		      "iso-8859-1"))))))
-   (let* ((dt (plist-get info :html-doctype))
-	  (dt-cons (assoc dt org-html-doctype-alist)))
-     (if dt-cons
-	 (cdr dt-cons)
-       dt))
+   (org-html-doctype info)
    "\n"
    (concat "<html"
 	   (when (org-html-xhtml-p info)
