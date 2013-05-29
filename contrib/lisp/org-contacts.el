@@ -86,6 +86,11 @@ When set to nil, all your Org files will be used."
   :type 'string
   :group 'org-contacts)
 
+(defcustom org-contacts-ignore-property "IGNORE"
+  "Name of the property,  which values will be ignored when complete or export to vcard."
+  :type 'string
+  :group 'org-contacts)
+
 
 (defcustom org-contacts-birthday-format "Birthday: %l (%Y)"
   "Format of the anniversary agenda entry.
@@ -476,6 +481,16 @@ A group FOO is composed of contacts with the tag FOO."
 		(completion-table-case-fold completion-list
 					    (not org-contacts-completion-ignore-case))))))))
 
+
+(defun org-contacts-remove-ignored-property-values (ignore-list list)
+  "Remove all ignore-list's elements from list and you can use
+   regular expressions in the ignore list."
+    (remove-if (lambda (el)
+               (find-if (lambda (x)
+                          (string-match-p x el))
+                        ignore-list))
+             list))
+
 (defun org-contacts-complete-name (start end string)
   "Complete text at START with a user name and email."
   (let* ((completion-ignore-case org-contacts-completion-ignore-case)
@@ -484,10 +499,17 @@ A group FOO is composed of contacts with the tag FOO."
 		;; The contact name is always the car of the assoc-list
 		;; returned by `org-contacts-filter'.
 		for contact-name = (car contact)
+
+		;; Build the list of the email addresses which has
+		;; been expired
+		for ignore-list = (org-contacts-split-property (or
+								(cdr (assoc-string org-contacts-ignore-property
+										   (caddr contact))) ""))
 		;; Build the list of the user email addresses.
-		for email-list = (org-contacts-split-property (or
-						(cdr (assoc-string org-contacts-email-property
-								   (caddr contact))) ""))
+		for email-list = (org-contacts-remove-ignored-property-values ignore-list
+									      (org-contacts-split-property (or
+													    (cdr (assoc-string org-contacts-email-property
+															       (caddr contact))) "")))
 		;; If the user has email addresses…
 		if email-list
 		;; … append a list of USER <EMAIL>.
@@ -869,15 +891,17 @@ to do our best."
 	 (n (org-contacts-vcard-encode-name name))
 	 (email (cdr (assoc-string org-contacts-email-property properties)))
 	 (tel  (cdr (assoc-string org-contacts-tel-property properties)))
+	 (ignore  (cdr (assoc-string org-contacts-ignore-property properties)))
 	 (note (cdr (assoc-string org-contacts-note-property properties)))
 	 (bday (org-contacts-vcard-escape (cdr (assoc-string org-contacts-birthday-property properties))))
 	 (addr (cdr (assoc-string org-contacts-address-property properties)))
 	 (nick (org-contacts-vcard-escape (cdr (assoc-string org-contacts-nickname-property properties))))
 	 (head (format "BEGIN:VCARD\nVERSION:3.0\nN:%s\nFN:%s\n" n name))
+	 (ignore-list (when ignore (setq ignore-list (org-contacts-split-property ignore))))
 	 emails-list result phones-list)
     (concat head
 	    (when email (progn
-			  (setq emails-list (org-contacts-split-property email))
+			  (setq emails-list (org-contacts-remove-ignored-property-values ignore-list (org-contacts-split-property email)))
 			  (setq result "")
 			  (while emails-list
 			    (setq result (concat result  "EMAIL:" (org-contacts-strip-link (car emails-list)) "\n"))
@@ -886,7 +910,7 @@ to do our best."
 	    (when addr
 	      (format "ADR:;;%s\n" (replace-regexp-in-string "\\, ?" ";" addr)))
 	    (when tel (progn
-			(setq phones-list (org-contacts-split-property tel))
+			(setq phones-list (org-contacts-remove-ignored-property-values ignore-list (org-contacts-split-property tel)))
 			(setq result "")
 			(while phones-list
 			  (setq result (concat result  "TEL:" (org-contacts-strip-link (car phones-list)) "\n"))
