@@ -87,7 +87,8 @@ When set to nil, all your Org files will be used."
   :group 'org-contacts)
 
 (defcustom org-contacts-ignore-property "IGNORE"
-  "Name of the property,  which values will be ignored when complete or export to vcard."
+  "Name of the property, which values will be ignored when
+completing or exporting to vcard."
   :type 'string
   :group 'org-contacts)
 
@@ -502,14 +503,15 @@ A group FOO is composed of contacts with the tag FOO."
 
 		;; Build the list of the email addresses which has
 		;; been expired
-		for ignore-list = (org-contacts-split-property (or
-								(cdr (assoc-string org-contacts-ignore-property
-										   (caddr contact))) ""))
+		for ignore-list = (org-contacts-split-property
+				   (or (cdr (assoc-string org-contacts-ignore-property
+							  (caddr contact))) ""))
 		;; Build the list of the user email addresses.
-		for email-list = (org-contacts-remove-ignored-property-values ignore-list
-									      (org-contacts-split-property (or
-													    (cdr (assoc-string org-contacts-email-property
-															       (caddr contact))) "")))
+		for email-list = (org-contacts-remove-ignored-property-values
+				  ignore-list
+				  (org-contacts-split-property
+				   (or (cdr (assoc-string org-contacts-email-property
+							  (caddr contact))) "")))
 		;; If the user has email addresses…
 		if email-list
 		;; … append a list of USER <EMAIL>.
@@ -890,14 +892,15 @@ to do our best."
 	 (name (org-contacts-vcard-escape (car contact)))
 	 (n (org-contacts-vcard-encode-name name))
 	 (email (cdr (assoc-string org-contacts-email-property properties)))
-	 (tel  (cdr (assoc-string org-contacts-tel-property properties)))
-	 (ignore  (cdr (assoc-string org-contacts-ignore-property properties)))
+	 (tel (cdr (assoc-string org-contacts-tel-property properties)))
+	 (ignore-list (cdr (assoc-string org-contacts-ignore-property properties)))
+	 (ignore-list (when ignore-list
+			(org-contacts-split-property ignore-list)))
 	 (note (cdr (assoc-string org-contacts-note-property properties)))
 	 (bday (org-contacts-vcard-escape (cdr (assoc-string org-contacts-birthday-property properties))))
 	 (addr (cdr (assoc-string org-contacts-address-property properties)))
 	 (nick (org-contacts-vcard-escape (cdr (assoc-string org-contacts-nickname-property properties))))
 	 (head (format "BEGIN:VCARD\nVERSION:3.0\nN:%s\nFN:%s\n" n name))
-	 (ignore-list (when ignore (setq ignore-list (org-contacts-split-property ignore))))
 	 emails-list result phones-list)
     (concat head
 	    (when email (progn
@@ -995,12 +998,12 @@ normally \"[,; \f\t\n\r\v]+\", and OMIT-NULLS is forced to t.
 If OMIT-NULLS is t, zero-length substrings are omitted from the list \(so
 that for the default value of SEPARATORS leading and trailing whitespace
 are effectively trimmed).  If nil, all zero-length substrings are retained."
-(let* ((keep-nulls (or nil omit-nulls))
-         (rexp (or separators org-contacts-property-values-separators))
-         (inputlist (split-string string rexp keep-nulls))
-         (linkstring "")
-         (bufferstring "")
-         (proplist (list "")))
+  (let* ((omit-nulls (if separators omit-nulls t))
+	 (rexp (or separators org-contacts-property-values-separators))
+	 (inputlist (split-string string rexp omit-nulls))
+	 (linkstring "")
+	 (bufferstring "")
+	 (proplist (list "")))
     (while inputlist
       (setq bufferstring (pop inputlist))
       (if (string-match "\\[\\[" bufferstring)
