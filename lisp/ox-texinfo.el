@@ -1798,9 +1798,10 @@ Return INFO file name or an error if it couldn't be produced."
   (let* ((base-name (file-name-sans-extension (file-name-nondirectory file)))
 	 (full-name (file-truename file))
 	 (out-dir (file-name-directory file))
-	 ;; Make sure `default-directory' is set to FILE directory,
-	 ;; not to whatever value the current buffer may have.
-	 (default-directory (file-name-directory full-name))
+	 ;; Properly set working directory for compilation.
+	 (default-directory (if (file-name-absolute-p texfile)
+				(file-name-directory full-name)
+			      default-directory))
 	 errors)
     (message (format "Processing Texinfo file %s..." file))
     (save-window-excursion
