@@ -1420,10 +1420,9 @@ INFO is a plist used as a communication channel."
 	(keywords (plist-get info :keywords)))
     (concat
      (format "<title>%s</title>\n" title)
-     (format
-      (when :time-stamp-file
-	(format-time-string
-	 (concat "<!-- " org-html-metadata-timestamp-format " -->\n"))))
+     (when (plist-get info :time-stamp-file)
+       (format-time-string
+	 (concat "<!-- " org-html-metadata-timestamp-format " -->\n")))
      (format
       "<meta http-equiv=\"Content-Type\" content=\"text/html;charset=%s\"/>\n"
       (or (and org-html-coding-system
