@@ -1920,7 +1920,7 @@ Return PDF file name or an error if it couldn't be produced."
 	 (full-name (file-truename file))
 	 (out-dir (file-name-directory file))
 	 ;; Properly set working directory for compilation.
-	 (default-directory (if (file-name-absolute-p texfile)
+	 (default-directory (if (file-name-absolute-p file)
 				(file-name-directory full-name)
 			      default-directory))
          errors)
