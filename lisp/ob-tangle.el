@@ -493,13 +493,15 @@ which enable the original code blocks to be found."
   "Jump from a tangled code file to the related Org-mode file."
   (interactive)
   (let ((mid (point))
-	start end done
+	start body-start end done
         target-buffer target-char link path block-name body)
     (save-window-excursion
       (save-excursion
 	(while (and (re-search-backward org-bracket-link-analytic-regexp nil t)
 		    (not ; ever wider searches until matching block comments
 		     (and (setq start (point-at-eol))
+			  (setq body-start (save-excursion
+					     (forward-line 2) (point-at-bol)))
 			  (setq link (match-string 0))
 			  (setq path (match-string 3))
 			  (setq block-name (match-string 5))
@@ -520,6 +522,17 @@ which enable the original code blocks to be found."
           (org-babel-next-src-block
            (string-to-number (match-string 1 block-name)))
         (org-babel-goto-named-src-block block-name))
+      ;; position at the beginning of the code block body
+      (goto-char (org-babel-where-is-src-block-head))
+      (forward-line 1)
+      ;; Use org-edit-special to isolate the code.
+      (org-edit-special)
+      ;; Then move forward the correct number of characters in the
+      ;; code buffer.
+      (forward-char (- mid body-start))
+      ;; And return to the Org-mode buffer with the point in the right
+      ;; place.
+      (org-edit-src-exit)
       (setq target-char (point)))
     (pop-to-buffer target-buffer)
     (prog1 body (goto-char target-char))))
