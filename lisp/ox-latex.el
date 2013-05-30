@@ -2862,9 +2862,10 @@ Return PDF file name or an error if it couldn't be produced."
   (let* ((base-name (file-name-sans-extension (file-name-nondirectory texfile)))
 	 (full-name (file-truename texfile))
 	 (out-dir (file-name-directory texfile))
-	 ;; Make sure `default-directory' is set to TEXFILE directory,
-	 ;; not to whatever value the current buffer may have.
-	 (default-directory (file-name-directory full-name))
+	 ;; Properly set working directory for compilation.
+	 (default-directory (if (file-name-absolute-p texfile)
+				(file-name-directory full-name)
+			      default-directory))
 	 errors)
     (unless snippet (message (format "Processing LaTeX file %s..." texfile)))
     (save-window-excursion
@@ -2892,7 +2893,7 @@ Return PDF file name or an error if it couldn't be produced."
 	  ;; Collect standard errors from output buffer.
 	  (setq errors (and (not snippet) (org-latex--collect-errors outbuf)))))
        (t (error "No valid command to process to PDF")))
-      (let ((pdffile (concat (file-name-sans-extension full-name) ".pdf")))
+      (let ((pdffile (concat out-dir base-name ".pdf")))
 	;; Check for process failure.  Provide collected errors if
 	;; possible.
 	(if (not (file-exists-p pdffile))
