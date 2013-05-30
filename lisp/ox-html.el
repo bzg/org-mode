@@ -1506,10 +1506,9 @@ INFO is a plist used as a communication channel."
 		     "iso-8859-1")))
     (concat
      (format "<title>%s</title>\n" title)
-     (format
-      (when :time-stamp-file
-	(format-time-string
-	 (concat "<!-- " org-html-metadata-timestamp-format " -->\n"))))
+     (when (plist-get info :time-stamp-file)
+       (format-time-string
+	 (concat "<!-- " org-html-metadata-timestamp-format " -->\n")))
      (format
       (if (org-html-html5-p info)
 	  (org-html-close-tag "meta" " charset=\"%s\"" info)
