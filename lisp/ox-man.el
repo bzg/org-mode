@@ -1233,7 +1233,7 @@ Return PDF file name or an error if it couldn't be produced."
 	  ;; Collect standard errors from output buffer.
 	  (setq errors (org-man-collect-errors outbuf))))
        (t (error "No valid command to process to PDF")))
-      (let ((pdffile (concat out-dir base-name ".pdf")))
+      (let ((pdffile (concat (file-name-sans-extension full-name) ".pdf")))
 	;; Check for process failure.  Provide collected errors if
 	;; possible.
 	(if (not (file-exists-p pdffile))

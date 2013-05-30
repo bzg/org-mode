@@ -385,10 +385,10 @@ the \"slide\" class will be added to the to the list element,
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   (let ((pkg-info (org-deck--get-packages info))
-         (org-html--pre/postamble-class "deck-status")
-         (info (plist-put
-                (plist-put info :html-preamble (plist-get info :deck-preamble))
-                :html-postamble (plist-get info :deck-postamble))))
+	(org-html--pre/postamble-class "deck-status")
+	(info (plist-put
+	       (plist-put info :html-preamble (plist-get info :deck-preamble))
+	       :html-postamble (plist-get info :deck-postamble))))
     (mapconcat
      'identity
      (list

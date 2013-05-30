@@ -1830,7 +1830,7 @@ Return INFO file name or an error if it couldn't be produced."
 	  ;; Collect standard errors from output buffer.
 	  (setq errors (org-texinfo-collect-errors outbuf))))
        (t (error "No valid command to process to Info")))
-      (let ((infofile (concat out-dir base-name ".info")))
+      (let ((infofile (concat (file-name-sans-extension full-name) ".info")))
 	;; Check for process failure.  Provide collected errors if
 	;; possible.
 	(if (not (file-exists-p infofile))
