@@ -1928,9 +1928,13 @@ contents as a string, or nil if it is empty."
 	 (mapcar (lambda (headline)
 		   (cons (org-html--format-toc-headline headline info)
 			 (org-export-get-relative-level headline info)))
-		 (org-export-collect-headlines info depth))))
+		 (org-export-collect-headlines info depth)))
+	(outer-tag (if (and (org-html-html5-p info)
+			    (plist-get info :html-html5-fancy))
+		       "nav"
+		     "div")))
     (when toc-entries
-      (concat "<div id=\"table-of-contents\">\n"
+      (concat (format "<%s id=\"table-of-contents\">\n" outer-tag)
 	      (format "<h%d>%s</h%d>\n"
 		      org-html-toplevel-hlevel
 		      (org-html--translate "Table of Contents" info)
@@ -1938,7 +1942,7 @@ contents as a string, or nil if it is empty."
 	      "<div id=\"text-table-of-contents\">"
 	      (org-html--toc-text toc-entries)
 	      "</div>\n"
-	      "</div>\n"))))
+	      (format "</%s>\n" outer-tag)))))
 
 (defun org-html--toc-text (toc-entries)
   "Return innards of a table of contents, as a string.
