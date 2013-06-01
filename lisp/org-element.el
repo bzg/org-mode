@@ -1147,9 +1147,10 @@ CONTENTS is the contents of the element."
 ;;;; Plain List
 
 (defun org-element--list-struct (limit)
-;; Return structure of list at point.  Internal function.  See
-;; `org-list-struct' for details.
+  ;; Return structure of list at point.  Internal function.  See
+  ;; `org-list-struct' for details.
   (let ((case-fold-search t)
+	(top-ind limit)
 	(item-re (org-item-re))
 	(drawers-re (concat ":\\("
 			    (mapconcat 'regexp-quote org-drawers "\\|")
@@ -1178,6 +1179,7 @@ CONTENTS is the contents of the element."
 	   ((looking-at item-re)
 	    (let ((ind (save-excursion (skip-chars-forward " \t")
 				       (current-column))))
+	      (setq top-ind (min top-ind ind))
 	      (while (and items (<= ind (nth 1 (car items))))
 		(let ((item (pop items)))
 		  (setcar (nthcdr 6 item) (point))
@@ -1209,13 +1211,12 @@ CONTENTS is the contents of the element."
 	   ;; At some text line.  Check if it ends any previous item.
 	   (t
 	    (let ((ind (progn (skip-chars-forward " \t") (current-column))))
+	      (when (<= ind top-ind)
+		(skip-chars-backward " \r\t\n")
+		(forward-line))
 	      (while (<= ind (nth 1 (car items)))
 		(let ((item (pop items)))
-		  (setcar (nthcdr 6 item)
-			  (if items (line-beginning-position)
-			    (skip-chars-backward " \r\t\n")
-			    (forward-line)
-			    (point)))
+		  (setcar (nthcdr 6 item) (line-beginning-position))
 		  (push item struct)
 		  (unless items
 		    (throw 'exit (sort struct 'car-less-than-car))))))

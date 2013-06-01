@@ -1494,24 +1494,24 @@ e^{i\\pi}+1=0
 
 (ert-deftest test-org-element/plain-list-parser ()
   "Test `plain-list' parser."
-  (should
-   (org-test-with-temp-text "- item"
-     (org-element-map (org-element-parse-buffer) 'plain-list 'identity)))
+  (org-test-with-temp-text "- item"
+    (should (org-element-map (org-element-parse-buffer) 'plain-list 'identity)))
   ;; Blank lines after the list only belong to outer plain list.
-  (org-test-with-temp-text "
+  (should
+   (equal
+    '(t t)
+    (org-test-with-temp-text "
 - outer
   - inner
 
 Outside list"
-    (let ((endings (org-element-map
-		    (org-element-parse-buffer) 'plain-list
-		    (lambda (pl) (org-element-property :end pl)))))
-      ;; Move to ending of outer list.
-      (goto-char (car endings))
-      (should (looking-at "Outside list"))
-      ;; Move to ending of inner list.
-      (goto-char (nth 1 endings))
-      (should (looking-at "^$")))))
+      (let ((endings (org-element-map (org-element-parse-buffer) 'plain-list
+		       (lambda (pl) (org-element-property :end pl)))))
+	(list
+	 ;; Move to ending of outer list.
+	 (progn (goto-char (car endings)) (looking-at "Outside list"))
+	 ;; Move to ending of inner list.
+	 (progn (goto-char (nth 1 endings)) (looking-at "^$"))))))))
 
 
 ;;;; Planning
