@@ -41,7 +41,15 @@
 ;;   - "PHONE_NUMBER" (see `org-koma-letter-phone-number'),
 ;;   - "SIGNATURE" (see `org-koma-letter-signature')
 ;;   - "PLACE" (see `org-koma-letter-place')
-;;   - and "TO_ADDRESS".
+;;   - and "TO_ADDRESS".  If unspecified this is set to "\mbox{}".
+;;
+;; TO_ADDRESS and FROM_ADDRESS can also be specified using heading
+;; with the special tags specified in
+;; `org-koma-letter-special-tags-in-letter', namely "to" and "from".
+;; LaTeX line breaks are not necessary if using these headings.  If
+;; both a headline and a keyword specify a to or from address the
+;; value is determined in accordance with
+;; `org-koma-letter-prefer-special-headings'.
 ;;
 ;; A number of OPTIONS settings can be set to change which contents is
 ;; exported.
@@ -163,6 +171,12 @@ function may be given.  Functions must return a string."
   :group 'org-export-koma-letter
   :type 'string)
 
+(defcustom org-koma-letter-prefer-special-headings nil
+  "If both a TO or FROM is specified two places should the
+  heading version be preferred?"
+  :group 'org-export-koma-letter
+  :type 'boolean)
+
 (defcustom org-koma-letter-signature nil
   "String used as the signature."
   :group 'org-export-koma-letter
@@ -231,7 +245,8 @@ Use `foldmarks:true' to activate default fold marks or
   :group 'org-export-koma-letter
   :type 'boolean)
 
-
+(defconst org-koma-letter-special-tags-in-letter '(to from)
+  "header tags related to the letter itself")
 
 (defconst org-koma-letter-special-tags-after-closing '(ps encl cc)
   "Header tags to be inserted after closing")
@@ -250,7 +265,7 @@ Use `foldmarks:true' to activate default fold marks or
   :options-alist
   '((:lco "LCO" nil org-koma-letter-class-option-file)
     (:author "AUTHOR" nil (org-koma-letter--get-custom org-koma-letter-author) t)
-    (:from-address "FROM_ADDRESS" nil org-koma-letter-from-address newline)
+    (:from-address "FROM_ADDRESS" nil nil newline)
     (:phone-number "PHONE_NUMBER" nil org-koma-letter-phone-number)
     (:email "EMAIL" nil (org-koma-letter--get-custom org-koma-letter-email) t)
     (:to-address "TO_ADDRESS" nil nil newline)
@@ -258,9 +273,12 @@ Use `foldmarks:true' to activate default fold marks or
     (:opening "OPENING" nil org-koma-letter-opening)
     (:closing "CLOSING" nil org-koma-letter-closing)
     (:signature "SIGNATURE" nil org-koma-letter-signature newline)
-    (:special-tags nil nil
-		   (append org-koma-letter-special-tags-after-closing
-			   org-koma-letter-special-tags-after-letter))
+    (:special-tags nil nil (append
+			    org-koma-letter-special-tags-in-letter
+			    org-koma-letter-special-tags-after-closing
+			    org-koma-letter-special-tags-after-letter))
+    (:special-headings nil "special-headings"
+		       org-koma-letter-prefer-special-headings)
     (:with-after-closing nil "after-closing-order"
 			 org-koma-letter-special-tags-after-closing)
     (:with-after-letter nil "after-letter-order"
@@ -346,6 +364,32 @@ be wrapped in a macro named whatever the members of a-list are called.
   "Remove new lines in the begging and end of `string'"
   (replace-regexp-in-string "\\`[ \n\t]+\\|[\n\t ]*\\'" "" string))
 
+(defun org-koma-letter--determine-special-value (info key)
+  "Determine who the letter is to and whom it is from.
+  oxkoma-letter allows two ways to specify these things.  If both
+  are present return the preferred one as determined by
+ `org-koma-letter-prefer-special-headings'."
+  (let* ((plist-alist '((from . :from-address)
+		       (to . :to-address)))
+	 (default-alist  `((from  ,org-koma-letter-from-address)
+			   (to  "\\mbox{}")))
+	 (option-value (plist-get info (cdr-safe (assoc key plist-alist))))
+	 (head-value (org-koma-letter--get-tagged-contents key))
+	 (order (append
+		 (funcall
+		  (if (plist-get info :special-headings)
+		      'reverse 'identity)
+		  `(,option-value ,head-value))
+		 (cdr-safe (assoc key default-alist))))
+	 tmp
+	 (adr (dolist (x order tmp)
+		(when (and (not tmp) x)
+		  (setq tmp x)))))
+  (when adr
+    (replace-regexp-in-string
+     "\n" "\\\\\\\\\n"
+     (org-koma-letter--remove-offending-new-lines adr)))))
+
 ;;; Transcode Functions
 
 ;;;; Export Block
@@ -373,7 +417,7 @@ channel."
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (let ((key (org-element-property :key keyword))
-        (value (org-element-property :value keyword)))
+	(value (org-element-property :value keyword)))
     ;; Handle specifically BEAMER and TOC (headlines only) keywords.
     ;; Otherwise, fallback to `latex' back-end.
     (if (equal key "KOMA-LETTER") value
@@ -443,7 +487,7 @@ holding export options."
            info)))))
    (let ((lco (plist-get info :lco))
 	 (author (plist-get info :author))
-	 (from-address (plist-get info :from-address))
+	 (from-address (org-koma-letter--determine-special-value info 'from))
 	 (phone-number (plist-get info :phone-number))
 	 (email (plist-get info :email))
 	 (signature (plist-get info :signature)))
@@ -503,7 +547,7 @@ holding export options."
        (format "\\setkomavar{subject}{%s}\n\n" subject))))
    ;; Letter start
    (format "\\begin{letter}{%%\n%s}\n\n"
-	   (or (plist-get info :to-address) "no address given"))
+	   (org-koma-letter--determine-special-value info 'to))
    ;; Opening.
    (format "\\opening{%s}\n\n" (plist-get info :opening))
    ;; Letter body.
