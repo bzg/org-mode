@@ -1550,7 +1550,7 @@ a communication channel."
 		      (nth count item))) counts)
     (mapconcat (lambda (size)
 		 (make-string size ?a)) (mapcar (lambda (ref)
-						  (apply 'max `,@ref)) (car counts))
+						  (apply 'max `(,@ref))) (car counts))
 		 "} {")))
 
 (defun org-texinfo-table--org-table (table contents info)

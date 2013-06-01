@@ -27,7 +27,7 @@
 
 (eval-when-compile
   (require 'cl)
-  (require 'table))
+  (require 'table nil 'noerror))
 (require 'format-spec)
 (require 'ox)
 (require 'org-compat)

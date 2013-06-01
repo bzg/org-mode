@@ -37,7 +37,7 @@
 (require 'ox)
 (require 'ox-publish)
 (require 'format-spec)
-(eval-when-compile (require 'cl) (require 'table))
+(eval-when-compile (require 'cl) (require 'table nil 'noerror))
 
 
 ;;; Function Declarations

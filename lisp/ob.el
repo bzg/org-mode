@@ -22,6 +22,8 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Code:
+(require 'org-macs)
+(require 'org-compat)
 (require 'ob-eval)
 (require 'ob-core)
 (require 'ob-comint)
