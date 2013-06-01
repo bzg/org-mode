@@ -23600,7 +23600,8 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 	 (not (member-ignore-case word (org-get-export-keywords)))
 	 (not (member-ignore-case
 	       word (mapcar 'car org-element-block-name-alist)))
-	 (not (member-ignore-case word '("BEGIN" "END" "ATTR"))))))
+	 (not (member-ignore-case word '("BEGIN" "END" "ATTR")))
+	 (not (org-in-src-block-p)))))
 
 (defun org-remove-flyspell-overlays-in (beg end)
   "Remove flyspell overlays in region."
