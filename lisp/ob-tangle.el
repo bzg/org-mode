@@ -30,6 +30,7 @@
 (eval-when-compile
   (require 'cl))
 
+(declare-function org-edit-special "org" (&optional arg))
 (declare-function org-link-escape "org" (text &optional table))
 (declare-function org-heading-components "org" ())
 (declare-function org-back-to-heading "org" (invisible-ok))
