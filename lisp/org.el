@@ -22116,18 +22116,18 @@ hierarchy of headlines by UP levels before marking the subtree."
 
 (defvar org-element-paragraph-separate) ; org-element.el
 (defun org-fill-paragraph-separate-nobreak-p ()
-  "Non-nil when a line break at point would insert a new item."
+  "Non-nil when a new line at point would end current paragraph."
   (looking-at (substring org-element-paragraph-separate 1)))
 
 (defun org-fill-line-break-nobreak-p ()
-  "Non-nil when a line break at point would create an Org line break."
+  "Non-nil when a new line at point would create an Org line break."
   (save-excursion
     (skip-chars-backward "[ \t]")
     (skip-chars-backward "\\\\")
     (looking-at "\\\\\\\\\\($\\|[^\\\\]\\)")))
 
 (defun org-fill-paragraph-with-timestamp-nobreak-p ()
-  "Non-nil when a line break at point would insert a new item."
+  "Non-nil when a new line at point would split a timestamp."
   (and (org-at-timestamp-p t)
        (not (looking-at org-ts-regexp-both))))
 
