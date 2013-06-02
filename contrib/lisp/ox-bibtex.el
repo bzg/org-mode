@@ -145,8 +145,8 @@ Fallback to `latex' back-end for other keywords."
 
 ;;; HTML Part
 
-(defvar org-bibtex-html-entries-alist)  ; Dynamically scoped.
-(defvar org-bibtex-html-keywords-alist) ; Dynamically scoped.
+(defvar org-bibtex-html-entries-alist nil)  ; Dynamically scoped.
+(defvar org-bibtex-html-keywords-alist nil) ; Dynamically scoped.
 
 
 ;;;; Advices
