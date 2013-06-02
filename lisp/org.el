@@ -5317,8 +5317,6 @@ The following commands are available:
   (org-set-local 'outline-regexp org-outline-regexp)
   (org-set-local 'outline-level 'org-outline-level)
   (setq bidi-paragraph-direction 'left-to-right)
-  ;; FIXME Circumvent a bug in outline.el (Emacs <24.4)
-  (set (make-local-variable 'paragraph-start) "\\|[ \t]*$\\|\\*+ ")
   (when (and org-ellipsis
              (fboundp 'set-display-table-slot) (boundp 'buffer-display-table)
 	     (fboundp 'make-glyph-code))
@@ -22105,27 +22103,25 @@ hierarchy of headlines by UP levels before marking the subtree."
 ;; `org-setup-filling' installs filling and auto-filling related
 ;; variables during `org-mode' initialization.
 
+(defvar org-element-paragraph-separate) ; org-element.el
 (defun org-setup-filling ()
-  (interactive)
+  (require 'org-element)
   ;; Prevent auto-fill from inserting unwanted new items.
   (when (boundp 'fill-nobreak-predicate)
     (org-set-local
      'fill-nobreak-predicate
      (org-uniquify
       (append fill-nobreak-predicate
-	      '(org-fill-paragraph-separate-nobreak-p
-		org-fill-line-break-nobreak-p
+	      '(org-fill-line-break-nobreak-p
 		org-fill-paragraph-with-timestamp-nobreak-p)))))
+  (let ((paragraph-ending (substring org-element-paragraph-separate 1)))
+    (org-set-local 'paragraph-start paragraph-ending)
+    (org-set-local 'paragraph-separate paragraph-ending))
   (org-set-local 'fill-paragraph-function 'org-fill-paragraph)
   (org-set-local 'auto-fill-inhibit-regexp nil)
   (org-set-local 'adaptive-fill-function 'org-adaptive-fill-function)
   (org-set-local 'normal-auto-fill-function 'org-auto-fill-function)
   (org-set-local 'comment-line-break-function 'org-comment-line-break-function))
-
-(defvar org-element-paragraph-separate) ; org-element.el
-(defun org-fill-paragraph-separate-nobreak-p ()
-  "Non-nil when a new line at point would end current paragraph."
-  (looking-at (substring org-element-paragraph-separate 1)))
 
 (defun org-fill-line-break-nobreak-p ()
   "Non-nil when a new line at point would create an Org line break."
