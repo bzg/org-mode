@@ -79,9 +79,21 @@
 ;; `org-koma-letter-special-tags-after-closing' used as macros and the
 ;; content of the headline is the argument.
 ;;
+;; Headlines with two and from may also be used rather than the
+;; keyword approach described above.  If both a keyword and a headline
+;; with information is present precedence is determined by
+;; `org-koma-letter-prefer-special-headings'.
+;;
 ;; You will need to add an appropriate association in
-;; `org-latex-classes' in order to use the KOMA Scrlttr2 class.  For
-;; example, you can use the following code:
+;; `org-latex-classes' in order to use the KOMA Scrlttr2 class.
+;; The easiest way to do this is by adding
+;;
+;;   (eval-after-load "ox-koma-letter"
+;;   '(org-koma-letter-plug-into-ox))
+;;
+;; to your init file. This will add a very sparse scrlttr2 class and
+;; set it as the default `org-koma-latex-default-class'.  You can also
+;; add you own letter class.  For instace:
 ;;
 ;;   (add-to-list 'org-latex-classes
 ;;                '("my-letter"
@@ -102,7 +114,8 @@
 ;; with :
 ;;
 ;;    #+LATEX_CLASS: my-letter
-
+;;
+;; Or by setting `org-koma-letter-default-class'.
 
 ;;; Code:
 
@@ -245,6 +258,12 @@ Use `foldmarks:true' to activate default fold marks or
   :group 'org-export-koma-letter
   :type 'boolean)
 
+(defcustom org-koma-letter-default-class nil
+  "Default class for `org-koma-letter'.  Must be a member of
+  `org-latex-classes'"
+  :group 'org-export-koma-letter
+  :type 'string)
+
 (defconst org-koma-letter-special-tags-in-letter '(to from)
   "header tags related to the letter itself")
 
@@ -264,6 +283,9 @@ Use `foldmarks:true' to activate default fold marks or
 (org-export-define-derived-backend 'koma-letter 'latex
   :options-alist
   '((:lco "LCO" nil org-koma-letter-class-option-file)
+    (:latex-class "LATEX_CLASS" nil (if org-koma-letter-default-class
+					org-koma-letter-default-class
+					org-latex-default-class) t)
     (:author "AUTHOR" nil (org-koma-letter--get-custom org-koma-letter-author) t)
     (:from-address "FROM_ADDRESS" nil nil newline)
     (:phone-number "PHONE_NUMBER" nil org-koma-letter-phone-number)
@@ -305,6 +327,19 @@ Use `foldmarks:true' to activate default fold marks or
 		(org-open-file (org-koma-letter-export-to-pdf nil s v b))))))))
 
 
+;;; Initialize class function
+
+(defun org-koma-letter-plug-into-ox ()
+  "Add a sparse `default-koma-letter' to `org-latex-classes' and set
+`org-koma-letter-default-class' to `default-koma-letter'"
+  (let ((class "default-koma-letter"))
+    (eval-after-load "ox-latex"
+      '(unless (member ,class 'org-latex-classes)
+	 (add-to-list 'org-latex-classes
+		      `(,class
+			"\\documentclass[11pt]{scrlttr2}") ())
+	 (setq org-koma-letter-default-class class)))))
+
 ;;; Helper functions
 
 (defun org-koma-letter-email ()
