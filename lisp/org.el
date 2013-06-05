@@ -22575,7 +22575,7 @@ to work in this buffer and calls `reftex-citation'  to insert a citation
 into the buffer.
 
 Export of such citations to both LaTeX and HTML is handled by the contributed
-package org-exp-bibtex by Taru Karttunen."
+package ox-bibtex by Taru Karttunen."
   (interactive)
   (let ((reftex-docstruct-symbol 'rds)
 	(reftex-cite-format "\\cite{%l}")
