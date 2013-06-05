@@ -3460,10 +3460,11 @@ double quotes will be read as-is, which means that \"\" value
 will become the empty string."
   (let* ((prepare-value
 	  (lambda (str)
-	    (cond ((member str '(nil "" "nil")) nil)
-		  ((string-match "^\"\\(\"+\\)?\"$" str)
-		   (or (match-string 1 str) ""))
-		  (t str))))
+	    (save-match-data
+	      (cond ((member str '(nil "" "nil")) nil)
+		    ((string-match "^\"\\(\"+\\)?\"$" str)
+		     (or (match-string 1 str) ""))
+		    (t str)))))
 	 (attributes
 	  (let ((value (org-element-property attribute element)))
 	    (when value
