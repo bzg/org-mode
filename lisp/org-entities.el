@@ -366,6 +366,7 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
     ("rfloor" "\\rfloor" t "&rfloor;" "[right floor]" "[right floor]" "⌋")
     ("lang" "\\langle" t "&lang;" "<" "<" "⟨")
     ("rang" "\\rangle" t "&rang;" ">" ">" "⟩")
+    ("hbar" "\\hbar" t "&#8463;" "hbar" "hbar" "ℏ")
 
     "** Arrows"
     ("larr" "\\leftarrow" t "&larr;" "<-" "<-" "←")
