@@ -144,7 +144,7 @@ of the same value."
       (format "character(len=%d), parameter ::  %S = '%s'\n"
               (length val) var val))
      ;; val is a matrix
-     ((and (listp val) (listp (car val)))
+     ((and (listp val) (org-every #'listp val))
       (format "real, parameter :: %S(%d,%d) = transpose( reshape( %s , (/ %d, %d /) ) )\n"
 	      var (length val) (length (car val)) 
 	      (org-babel-fortran-transform-list val)
