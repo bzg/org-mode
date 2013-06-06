@@ -564,7 +564,8 @@ block."
       (let* ((params (if params
 			 (org-babel-process-params merged-params)
 		       (nth 2 info)))
-	     (org-babel-current-exec-src-block-head (nth 6 info))
+	     (org-babel-current-exec-src-block-head
+	      (or org-babel-current-exec-src-block-head (nth 6 info)))
 	     (cachep (and (not arg) (cdr (assoc :cache params))
 			   (string= "yes" (cdr (assoc :cache params)))))
 	     (new-hash (when cachep (org-babel-sha1-hash info)))
