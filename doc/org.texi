@@ -13765,6 +13765,21 @@ Example applications could include post-processing, compilation or evaluation
 of tangled code files.
 @end table
 
+@subheading Jumping between code and Org
+
+When tangling code from an Org-mode buffer to a source code file, you'll
+frequently find yourself viewing the file of tangled source code (e.g., many
+debuggers point to lines of the source code file).  It is useful to be able
+to navigate from the tangled source to the Org-mode buffer from which the
+code originated.
+
+The @code{org-babel-tangle-jump-to-org} function provides this jumping from
+code to Org-mode functionality.  Two header arguments are required for
+jumping to work, first the @xref{padline} option must be set to true (the
+default setting), second the @xref{comments} header argument must be set to
+@code{links}, which will insert comments into the source code buffer which
+point back to the original Org-mode file.
+
 @node Evaluating code blocks, Library of Babel, Extracting source code, Working With Source Code
 @section Evaluating code blocks
 @cindex code block, evaluating
