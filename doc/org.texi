@@ -13765,7 +13765,7 @@ Example applications could include post-processing, compilation or evaluation
 of tangled code files.
 @end table
 
-@subheading Jumping between code and Org
+@subsubheading Jumping between code and Org
 
 When tangling code from an Org-mode buffer to a source code file, you'll
 frequently find yourself viewing the file of tangled source code (e.g., many
