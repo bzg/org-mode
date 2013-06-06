@@ -537,7 +537,7 @@ which enable the original code blocks to be found."
       ;; place.
       (org-edit-src-exit)
       (setq target-char (point)))
-    (pop-to-buffer target-buffer)
+    (org-src-switch-to-buffer target-buffer t)
     (prog1 body (goto-char target-char))))
 
 (provide 'ob-tangle)
