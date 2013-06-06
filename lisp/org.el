@@ -21760,6 +21760,13 @@ Adapted from `every' in cl.el."
     (mapc (lambda (e) (unless (funcall pred e) (throw 'org-every nil))) seq)
     t))
 
+(defun org-some (pred seq)
+  "Return true if PREDICATE is true of any element of SEQ.
+Adapted from `some' in cl.el."
+  (catch 'org-some
+    (mapc (lambda (e) (when (funcall pred e) (throw 'org-some t))) seq)
+    nil))
+
 (defun org-back-over-empty-lines ()
   "Move backwards over whitespace, to the beginning of the first empty line.
 Returns the number of empty lines passed."
