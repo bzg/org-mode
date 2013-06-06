@@ -251,14 +251,14 @@ references; a process which could likely result in the execution
 of other code blocks.
 
 Returns a list
- (language body header-arguments-alist switches name indent)."
+ (language body header-arguments-alist switches name indent block-head)."
   (let ((case-fold-search t) head info name indent)
     ;; full code block
     (if (setq head (org-babel-where-is-src-block-head))
 	(save-excursion
 	  (goto-char head)
 	  (setq info (org-babel-parse-src-block-match))
-	  (setq indent (car (last info)))
+	  (setq indent (nth 5 info))
 	  (setq info (butlast info))
 	  (while (and (forward-line -1)
 		      (looking-at org-babel-multi-line-header-regexp))
@@ -274,7 +274,7 @@ Returns a list
     ;; resolve variable references and add summary parameters
     (when (and info (not light))
       (setf (nth 2 info) (org-babel-process-params (nth 2 info))))
-    (when info (append info (list name indent)))))
+    (when info (append info (list name indent head)))))
 
 (defvar org-current-export-file) ; dynamically bound
 (defmacro org-babel-check-confirm-evaluate (info &rest body)
@@ -535,6 +535,8 @@ can not be resolved.")
 
 ;;; functions
 (defvar call-process-region)
+(defvar org-babel-current-exec-src-block-head nil
+  "Marker to the currently processed src block.")
 
 ;;;###autoload
 (defun org-babel-execute-src-block (&optional arg info params)
@@ -562,6 +564,7 @@ block."
       (let* ((params (if params
 			 (org-babel-process-params merged-params)
 		       (nth 2 info)))
+	     (org-babel-current-exec-src-block-head (nth 6 info))
 	     (cachep (and (not arg) (cdr (assoc :cache params))
 			   (string= "yes" (cdr (assoc :cache params)))))
 	     (new-hash (when cachep (org-babel-sha1-hash info)))
@@ -592,7 +595,7 @@ block."
 		  (or (org-bound-and-true-p
 		       org-babel-call-process-region-original)
 		      (symbol-function 'call-process-region)))
-		 (indent (car (last info)))
+		 (indent (nth 5 info))
 		 result cmd)
 	    (unwind-protect
 		(let ((call-process-region
@@ -1592,7 +1595,7 @@ If the point is not on a source block then return nil."
         (< top initial) (< initial bottom)
         (progn (goto-char top) (beginning-of-line 1)
 	       (looking-at org-babel-src-block-regexp))
-        (point))))))
+        (point-marker))))))
 
 ;;;###autoload
 (defun org-babel-goto-src-block-head ()
