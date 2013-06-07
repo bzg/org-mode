@@ -114,7 +114,7 @@ result.  The default value is `org-babel-trim'."
 (defun org-babel-find-file-noselect-refresh (file)
   "Find file ensuring that the latest changes on disk are
 represented in the file."
-  (find-file-noselect file)
+  (find-file-noselect file 'nowarn)
   (with-current-buffer (get-file-buffer file)
     (revert-buffer t t t)))
 
