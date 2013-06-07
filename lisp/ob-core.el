@@ -766,7 +766,7 @@ arguments and pop open the results in a preview buffer."
 	 (lang-headers (intern (concat "org-babel-header-args:" lang)))
 	 (headers (org-babel-combine-header-arg-lists
 		   org-babel-common-header-args-w-values
-		   (if (boundp lang-headers) (eval lang-headers) nil)))
+		   (when (boundp lang-headers) (eval lang-headers))))
 	 (arg (org-icompleting-read
 	       "Header Arg: "
 	       (mapcar
@@ -1294,23 +1294,35 @@ portions of results lines."
 Return an association list of any source block params which
 may be specified in the properties of the current outline entry."
   (save-match-data
-    (let (val sym)
-      (org-babel-parse-multiple-vars
-       (delq nil
-	     (mapcar
-	      (lambda (header-arg)
-		(and (setq val (org-entry-get (point) header-arg t))
-		     (cons (intern (concat ":" header-arg))
-			   (org-babel-read val))))
-	      (mapcar
-	       #'symbol-name
-	       (mapcar
-		#'car
-		(org-babel-combine-header-arg-lists
-		 org-babel-common-header-args-w-values
-		 (progn
-		   (setq sym (intern (concat "org-babel-header-args:" lang)))
-		   (and (boundp sym) (eval sym))))))))))))
+    (let* ((lang-props
+	    (save-match-data
+	      (org-babel-parse-header-arguments
+	       (org-entry-get (point) (concat "header-args:" lang)
+			      'inherit))))
+	   (default-props
+	     (save-match-data
+	       (org-babel-parse-header-arguments
+		(org-entry-get (point) "header-args"
+			       'inherit))))
+	   (props
+	    (let (val sym)
+	      (org-babel-parse-multiple-vars
+	       (delq nil
+		     (mapcar
+		      (lambda (header-arg)
+			(and (setq val (org-entry-get (point) header-arg t))
+			     (cons (intern (concat ":" header-arg))
+				   (org-babel-read val))))
+		      (mapcar
+		       #'symbol-name
+		       (mapcar
+			#'car
+			(org-babel-combine-header-arg-lists
+			 org-babel-common-header-args-w-values
+			 (progn
+			   (setq sym (intern (concat "org-babel-header-args:" lang)))
+			   (and (boundp sym) (eval sym))))))))))))
+      (org-babel-merge-params props default-props lang-props))))
 
 (defvar org-src-preserve-indentation)
 (defun org-babel-parse-src-block-match ()
@@ -1338,7 +1350,7 @@ may be specified in the properties of the current outline entry."
               (buffer-string)))
 	  (org-babel-merge-params
 	   org-babel-default-header-args
-	   (if (boundp lang-headers) (eval lang-headers) nil)
+	   (when (boundp lang-headers) (eval lang-headers))
            (org-babel-params-from-properties lang)
 	   (org-babel-parse-header-arguments
             (org-no-properties (or (match-string 4) ""))))
