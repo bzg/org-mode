@@ -224,7 +224,7 @@ src_sh{echo 3} Here is one at the beginning of a line.
   :noweb-sep: ""
   :END:
 
-#+begin_src sh :tangle yes :noweb yes :shebang #!/bin/sh
+#+begin_src sh :tangle yes :noweb yes :shebang "#!/bin/sh"
   <<fullest-disk>>
 #+end_src
 
