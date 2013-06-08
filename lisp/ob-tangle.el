@@ -210,6 +210,7 @@ used to limit the exported source code blocks by language."
 		  (let* ((tangle (funcall get-spec :tangle))
 			 (she-bang ((lambda (sheb) (when (> (length sheb) 0) sheb))
 				    (funcall get-spec :shebang)))
+			 (tangle-mode (funcall get-spec :tangle-mode))
 			 (base-name (cond
 				     ((string= "yes" tangle)
 				      (file-name-sans-extension
@@ -244,8 +245,11 @@ used to limit the exported source code blocks by language."
 			    (goto-char (point-max))
 			    (insert content)
 			    (write-region nil nil file-name))))
-		      ;; if files contain she-bangs, then make the executable
-		      (when she-bang (set-file-modes file-name #o755))
+		      ;; set permissions on the tangled file
+		      (if tangle-mode
+			  (set-file-modes file-name tangle-mode)
+			;; if files contain she-bangs, then make the executable
+			(when she-bang (set-file-modes file-name #o755)))
 		      ;; update counter
 		      (setq block-counter (+ 1 block-counter))
 		      (add-to-list 'path-collector file-name)))))

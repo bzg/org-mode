@@ -722,6 +722,7 @@ Specific header arguments
 * colnames::                    Handle column names in tables
 * rownames::                    Handle row names in tables
 * shebang::                     Make tangled files executable
+* tangle-mode::                 Set permission of tangled files
 * eval::                        Limit evaluation of specific code blocks
 * wrap::                        Mark source block evaluation results
 * post::                        Post processing of code block results
@@ -14167,6 +14168,7 @@ argument in lowercase letters.  The following header arguments are defined:
 * colnames::                    Handle column names in tables
 * rownames::                    Handle row names in tables
 * shebang::                     Make tangled files executable
+* tangle-mode::                 Set permission of tangled files
 * eval::                        Limit evaluation of specific code blocks
 * wrap::                        Mark source block evaluation results
 * post::                        Post processing of code block results
@@ -15061,7 +15063,7 @@ variable indexing @xref{var, Indexable variable values}.
 
 @end itemize
 
-@node shebang, eval, rownames, Specific header arguments
+@node shebang, tangle-mode, rownames, Specific header arguments
 @subsubsection @code{:shebang}
 
 Setting the @code{:shebang} header argument to a string value
@@ -15069,7 +15071,21 @@ Setting the @code{:shebang} header argument to a string value
 first line of any tangled file holding the code block, and the file
 permissions of the tangled file are set to make it executable.
 
-@node eval, wrap, shebang, Specific header arguments
+
+@node tangle-mode, eval, shebang, Specific header arguments
+@subsubsection @code{:tangle-mode}
+
+The @code{tangle-mode} header argument controls the permission set on tangled
+files.  The value of this header argument will be passed to
+@code{set-file-modes}.  For example, to set a tangled file as read only use
+@code{:tangle-mode #o444}, or to set a tangled file as executable use
+@code{:tangle-mode #o755}.  Files with @ref{shebang} header arguments will
+automatically be made executable unless the @code{tangle-mode} header
+argument is also used.  The behavior is undefined if multiple code blocks
+with different values for the @code{tangle-mode} header argument are tangled
+to the same file.
+
+@node eval, wrap, tangle-mode, Specific header arguments
 @subsubsection @code{:eval}
 The @code{:eval} header argument can be used to limit the evaluation of
 specific code blocks.  The @code{:eval} header argument can be useful for

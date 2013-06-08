@@ -391,7 +391,7 @@ Complete a language in the first field, the header arguments and switches."
 	  '("-n" "-r" "-l"
 	    ":cache" ":colnames" ":comments" ":dir" ":eval" ":exports"
 	    ":file" ":hlines" ":no-expand" ":noweb" ":results" ":rownames"
-	    ":session" ":shebang" ":tangle" ":var"))))
+	    ":session" ":shebang" ":tangle" ":tangle-mode" ":var"))))
 
 (defun pcomplete/org-mode/block-option/clocktable ()
   "Complete keywords in a clocktable line."
