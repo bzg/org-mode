@@ -387,7 +387,8 @@ inhibit insertion of results into the buffer."
 		    (org-babel-expand-noweb-references
 		     info (org-babel-exp-get-export-buffer))
 		  (nth 1 info)))
-	  (info (copy-sequence info)))
+	  (info (copy-sequence info))
+	  (org-babel-current-exec-src-block-head (point-marker)))
       ;; skip code blocks which we can't evaluate
       (when (fboundp (intern (concat "org-babel-execute:" lang)))
 	(org-babel-eval-wipe-error-buffer)
