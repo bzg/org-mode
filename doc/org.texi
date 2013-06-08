@@ -13776,10 +13776,10 @@ code originated.
 
 The @code{org-babel-tangle-jump-to-org} function provides this jumping from
 code to Org-mode functionality.  Two header arguments are required for
-jumping to work, first the @xref{padline} option must be set to true (the
-default setting), second the @xref{comments} header argument must be set to
-@code{links}, which will insert comments into the source code buffer which
-point back to the original Org-mode file.
+jumping to work, first the @code{padline} (@ref{padline}) option must be set
+to true (the default setting), second the @code{comments} (@ref{comments})
+header argument must be set to @code{links}, which will insert comments into
+the source code buffer which point back to the original Org-mode file.
 
 @node Evaluating code blocks, Library of Babel, Extracting source code, Working With Source Code
 @section Evaluating code blocks
@@ -15079,11 +15079,11 @@ The @code{tangle-mode} header argument controls the permission set on tangled
 files.  The value of this header argument will be passed to
 @code{set-file-modes}.  For example, to set a tangled file as read only use
 @code{:tangle-mode #o444}, or to set a tangled file as executable use
-@code{:tangle-mode #o755}.  Files with @ref{shebang} header arguments will
-automatically be made executable unless the @code{tangle-mode} header
-argument is also used.  The behavior is undefined if multiple code blocks
-with different values for the @code{tangle-mode} header argument are tangled
-to the same file.
+@code{:tangle-mode #o755}.  Blocks with @code{shebang} (@ref{shebang}) header
+arguments will automatically be made executable unless the @code{tangle-mode}
+header argument is also used.  The behavior is undefined if multiple code
+blocks with different values for the @code{tangle-mode} header argument are
+tangled to the same file.
 
 @node eval, wrap, tangle-mode, Specific header arguments
 @subsubsection @code{:eval}
