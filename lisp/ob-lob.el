@@ -133,7 +133,7 @@ if so then run the appropriate source block from the Library."
 		       (string= "yes" (cdr (assoc :cache pre-params)))))
 	 (new-hash (when cache-p (org-babel-sha1-hash pre-info)))
 	 (old-hash (when cache-p (org-babel-current-result-hash)))
-	 (org-babel-current-exec-src-block-head (point-marker)))
+	 (org-babel-current-src-block-location (point-marker)))
     (if (and cache-p (equal new-hash old-hash))
 	(save-excursion (goto-char (org-babel-where-is-src-block-result))
 			(forward-line 1)

@@ -536,8 +536,12 @@ can not be resolved.")
 
 ;;; functions
 (defvar call-process-region)
-(defvar org-babel-current-exec-src-block-head nil
-  "Marker to the currently processed src block.")
+(defvar org-babel-current-src-block-location nil
+  "Marker pointing to the src block currently being executed.
+This may also point to a call line or an inline code block.  If
+multiple blocks are being executed (e.g., in chained execution
+through use of the :var header argument) this marker points to
+the outer-most code block.")
 
 ;;;###autoload
 (defun org-babel-execute-src-block (&optional arg info params)
@@ -565,8 +569,8 @@ block."
       (let* ((params (if params
 			 (org-babel-process-params merged-params)
 		       (nth 2 info)))
-	     (org-babel-current-exec-src-block-head
-	      (or org-babel-current-exec-src-block-head (nth 6 info)))
+	     (org-babel-current-src-block-location
+	      (or org-babel-current-src-block-location (nth 6 info)))
 	     (cachep (and (not arg) (cdr (assoc :cache params))
 			   (string= "yes" (cdr (assoc :cache params)))))
 	     (new-hash (when cachep (org-babel-sha1-hash info)))
