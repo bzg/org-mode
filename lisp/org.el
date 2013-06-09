@@ -3837,6 +3837,7 @@ Org mode to function properly:
   symbols used for interpreting the entities in `org-entities'.
   You can skip some of these packages if you don't use any of the
   symbols in it.
+- soul: for underline and strike-through
 - graphicx: for including images
 - float, wrapfig: for figure placement
 - longtable: for long tables
