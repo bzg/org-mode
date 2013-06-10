@@ -245,14 +245,15 @@ used to limit the exported source code blocks by language."
 			    (goto-char (point-max))
 			    (insert content)
 			    (write-region nil nil file-name))))
-		      ;; set permissions on the tangled file
-		      (if tangle-mode
-			  (set-file-modes file-name tangle-mode)
-			;; if files contain she-bangs, then make the executable
-			(when she-bang (set-file-modes file-name #o755)))
+		      ;; if files contain she-bangs, then make the executable
+		      (when she-bang
+			(unless tangle-mode (setq tangle-mode #o755)))
 		      ;; update counter
 		      (setq block-counter (+ 1 block-counter))
-		      (add-to-list 'path-collector file-name)))))
+		      (add-to-list 'path-collector
+				   (cons file-name tangle-mode)
+				   nil
+				   (lambda (a b) (equal (car a) (car b))))))))
 	      specs)))
 	 (if (equal arg '(4))
 	     (org-babel-tangle-single-block 1 t)
@@ -260,15 +261,20 @@ used to limit the exported source code blocks by language."
 	(message "Tangled %d code block%s from %s" block-counter
 		 (if (= block-counter 1) "" "s")
 		 (file-name-nondirectory
-		  (buffer-file-name (or (buffer-base-buffer) (current-buffer)))))
+		  (buffer-file-name
+		   (or (buffer-base-buffer) (current-buffer)))))
 	;; run `org-babel-post-tangle-hook' in all tangled files
 	(when org-babel-post-tangle-hook
 	  (mapc
 	   (lambda (file)
 	     (org-babel-with-temp-filebuffer file
 	       (run-hooks 'org-babel-post-tangle-hook)))
-	   path-collector))
-	path-collector))))
+	   (mapcar #'car path-collector)))
+	;; set permissions on tangled files
+	(mapc (lambda (pair)
+		(when (cdr pair) (set-file-modes (car pair) (cdr pair))))
+	      path-collector)
+	(mapcar #'car path-collector)))))
 
 (defun org-babel-tangle-clean ()
   "Remove comments inserted by `org-babel-tangle'.
