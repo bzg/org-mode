@@ -138,12 +138,14 @@ Don't do the aliasing when `defvaralias' is not bound."
 	      (obsolete-name current-name &optional docstring)
 	      activate preactivate)
       "Declare arguments defined in later versions of Emacs."
+      (setcdr (cdr (ad-get-args 0)) nil)
       ad-do-it)
     (defadvice define-obsolete-function-alias
       (around org-define-obsolete-function-alias
 	      (obsolete-name current-name when &optional docstring)
 	      activate preactivate)
       "Declare arguments defined in later versions of Emacs."
+      (setcdr (cdr (ad-get-args 0)) nil)
       ad-do-it)
     (defvar customize-package-emacs-version-alist nil)
     (defvar temporary-file-directory (temp-directory)))
