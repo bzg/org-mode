@@ -127,22 +127,20 @@ Don't do the aliasing when `defvaralias' is not bound."
 
   (when (featurep 'xemacs)
     (defadvice custom-handle-keyword
-      (around org-custom-handle-keyword (symbol keyword value type)
+      (around org-custom-handle-keyword
 	      activate preactivate)
       "Remove custom keywords not recognized to avoid producing an error."
       (cond
-       ((eq keyword :package-version))
+       ((eq (ad-get-arg 1) :package-version))
        (t ad-do-it)))
     (defadvice define-obsolete-variable-alias
       (around org-define-obsolete-variable-alias
-	      (obsolete-name current-name &optional docstring)
 	      activate preactivate)
       "Declare arguments defined in later versions of Emacs."
       (setcdr (cdr (ad-get-args 0)) nil)
       ad-do-it)
     (defadvice define-obsolete-function-alias
       (around org-define-obsolete-function-alias
-	      (obsolete-name current-name when &optional docstring)
 	      activate preactivate)
       "Declare arguments defined in later versions of Emacs."
       (setcdr (cdr (ad-get-args 0)) nil)
