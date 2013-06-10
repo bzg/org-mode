@@ -452,7 +452,8 @@ prefixes rather than just the beginning of the string."
 
 (defun org-contacts-metadata-prefix (string collection predicate)
   '(metadata .
-	     ((display-sort-function . org-contacts-display-sort-function))))
+	     ((cycle-sort-function . org-contacts-display-sort-function)
+	      (display-sort-function . org-contacts-display-sort-function))))
 
 (defun org-contacts-complete-group (start end string)
   "Complete text at START from a group.
