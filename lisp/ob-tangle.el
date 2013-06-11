@@ -228,7 +228,7 @@ used to limit the exported source code blocks by language."
 			(make-directory (file-name-directory file-name) 'parents))
 		      ;; delete any old versions of file
 		      (when (and (file-exists-p file-name)
-				 (not (member file-name path-collector)))
+				 (not (member file-name (mapcar #'car path-collector))))
 			(delete-file file-name))
 		      ;; drop source-block to file
 		      (with-temp-buffer
