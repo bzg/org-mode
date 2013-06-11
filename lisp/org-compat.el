@@ -125,28 +125,28 @@ Don't do the aliasing when `defvaralias' is not bound."
 	     (boundp 'user-init-directory))
     (org-defvaralias 'user-emacs-directory 'user-init-directory)))
 
-  (when (featurep 'xemacs)
-    (defadvice custom-handle-keyword
-      (around org-custom-handle-keyword
-	      activate preactivate)
-      "Remove custom keywords not recognized to avoid producing an error."
-      (cond
-       ((eq (ad-get-arg 1) :package-version))
-       (t ad-do-it)))
-    (defadvice define-obsolete-variable-alias
-      (around org-define-obsolete-variable-alias
-	      (obsolete-name current-name &optional when docstring)
-	      activate preactivate)
-      "Declare arguments defined in later versions of Emacs."
-      ad-do-it)
-    (defadvice define-obsolete-function-alias
-      (around org-define-obsolete-function-alias
-	      (obsolete-name current-name &optional when docstring)
-	      activate preactivate)
-      "Declare arguments defined in later versions of Emacs."
-      ad-do-it)
-    (defvar customize-package-emacs-version-alist nil)
-    (defvar temporary-file-directory (temp-directory)))
+(when (featurep 'xemacs)
+  (defadvice custom-handle-keyword
+    (around org-custom-handle-keyword
+	    activate preactivate)
+    "Remove custom keywords not recognized to avoid producing an error."
+    (cond
+     ((eq (ad-get-arg 1) :package-version))
+     (t ad-do-it)))
+  (defadvice define-obsolete-variable-alias
+    (around org-define-obsolete-variable-alias
+	    (obsolete-name current-name &optional when docstring)
+	    activate preactivate)
+    "Declare arguments defined in later versions of Emacs."
+    ad-do-it)
+  (defadvice define-obsolete-function-alias
+    (around org-define-obsolete-function-alias
+	    (obsolete-name current-name &optional when docstring)
+	    activate preactivate)
+    "Declare arguments defined in later versions of Emacs."
+    ad-do-it)
+  (defvar customize-package-emacs-version-alist nil)
+  (defvar temporary-file-directory (temp-directory)))
 
 ;; Keys
 (defconst org-xemacs-key-equivalents
@@ -413,11 +413,11 @@ TIME defaults to the current time."
   "Suppress popup windows.
 Let-bind some variables to nil around BODY to achieve the desired
 effect, which variables to use depends on the Emacs version."
-    (if (org-version-check "24.2.50" "" :predicate)
-	`(let (pop-up-frames display-buffer-alist)
-	   ,@body)
-      `(let (pop-up-frames special-display-buffer-names special-display-regexps special-display-function)
-	 ,@body)))
+  (if (org-version-check "24.2.50" "" :predicate)
+      `(let (pop-up-frames display-buffer-alist)
+	 ,@body)
+    `(let (pop-up-frames special-display-buffer-names special-display-regexps special-display-function)
+       ,@body)))
 
 (if (fboundp 'string-match-p)
     (defalias 'org-string-match-p 'string-match-p)
