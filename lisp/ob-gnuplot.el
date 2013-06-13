@@ -60,7 +60,8 @@
     (y-labels	. :any)
     (timefmt	. :any)
     (time-ind	. :any)
-    (missing	. :any))
+    (missing	. :any)
+    (term       . :any))
   "Gnuplot specific header args.")
 
 (defvar org-babel-gnuplot-timestamp-fmt nil)
