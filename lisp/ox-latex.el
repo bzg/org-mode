@@ -524,8 +524,8 @@ When nil, no transformation is made."
 (defcustom org-latex-text-markup-alist '((bold . "\\textbf{%s}")
 					 (code . verb)
 					 (italic . "\\emph{%s}")
-					 (strike-through . "\\st{%s}")
-					 (underline . "\\ul{%s}")
+					 (strike-through . "\\sout{%s}")
+					 (underline . "\\uline{%s}")
 					 (verbatim . protectedtexttt))
   "Alist of LaTeX expressions to convert text markup.
 

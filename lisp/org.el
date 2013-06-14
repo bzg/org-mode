@@ -3805,7 +3805,7 @@ header, or they will be appended."
     (""     "longtable" nil)
     (""     "float"     nil)
     (""     "wrapfig"   nil)
-    (""     "soul"      t)
+    ("normalem" "ulem"  t)
     (""     "textcomp"  t)
     (""     "marvosym"  t)
     (""     "wasysym"   t)
@@ -3828,7 +3828,7 @@ Org mode to function properly:
   symbols used for interpreting the entities in `org-entities'.
   You can skip some of these packages if you don't use any of the
   symbols in it.
-- soul: for underline and strike-through
+- ulem: for underline and strike-through
 - graphicx: for including images
 - float, wrapfig: for figure placement
 - longtable: for long tables
