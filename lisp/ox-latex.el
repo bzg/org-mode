@@ -820,7 +820,7 @@ file name as its single argument."
 		  "xelatex -interaction nonstopmode -output-directory %o %f"
 		  "xelatex -interaction nonstopmode -output-directory %o %f"))
 	  (const :tag "texi2dvi"
-		 ("texi2dvi -p -b -c -V %f"))
+		 ("texi2dvi -p -b -V %f"))
 	  (const :tag "rubber"
 		 ("rubber -d --into %o %f"))
 	  (function)))
