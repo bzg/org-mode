@@ -1648,25 +1648,33 @@ Outside list"
 (ert-deftest test-org-element/special-block-parser ()
   "Test `special-block' parser."
   ;; Standard test.
-  (let ((special-block
-	 (org-test-with-temp-text "#+BEGIN_SPECIAL\nText\n#+END_SPECIAL"
-	   (org-element-map
-	    (org-element-parse-buffer) 'special-block 'identity nil t))))
-    (should (equal (org-element-property :type special-block) "SPECIAL"))
-    (should (org-element-map special-block 'paragraph 'identity)))
+  (should
+   (equal "SPECIAL"
+	  (org-test-with-temp-text "#+BEGIN_SPECIAL\nText\n#+END_SPECIAL"
+	    (org-element-property :type (org-element-at-point)))))
+  ;; Special blocks can contain paragraphs.
+  (should
+   (eq 'paragraph
+       (org-test-with-temp-text "#+BEGIN_SPECIAL\nText\n#+END_SPECIAL"
+	 (forward-line)
+	 (org-element-type (org-element-at-point)))))
   ;; Test folded block.
-  (org-test-with-temp-text "#+BEGIN_SPECIAL\nText\n#+END_SPECIAL"
-    (org-cycle)
-    (should
-     (org-element-property
-      :hiddenp
-      (org-element-map
-       (org-element-parse-buffer) 'special-block 'identity nil t))))
+  (should
+   (org-test-with-temp-text "#+BEGIN_SPECIAL\nText\n#+END_SPECIAL"
+     (org-cycle)
+     (org-element-property :hiddenp (org-element-at-point))))
   ;; Ignore incomplete block.
   (should-not
-   (org-test-with-temp-text "#+BEGIN_SPECIAL"
-     (org-element-map
-      (org-element-parse-buffer) 'special-block 'identity nil t))))
+   (eq 'special-block
+       (org-test-with-temp-text "#+BEGIN_SPECIAL"
+	 (org-element-type (org-element-at-point)))))
+  ;; Allow special characters in type.
+  (should
+   (equal '(special-block "SPECIAL*")
+	  (org-test-with-temp-text "#+BEGIN_SPECIAL*\nContents\n#+END_SPECIAL*"
+	    (let ((element (org-element-at-point)))
+	      (list (org-element-type element)
+		    (org-element-property :type element)))))))
 
 
 ;;;; Src Block
