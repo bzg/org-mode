@@ -1642,7 +1642,14 @@ Another text. (ref:text)
   (should-not
    (org-test-with-parsed-data "[[target]]"
      (org-export-resolve-fuzzy-link
-      (org-element-map tree 'link 'identity info t) info))))
+      (org-element-map tree 'link 'identity info t) info)))
+  ;; Match fuzzy link even when before first headline.
+  (should
+   (eq 'headline
+       (org-test-with-parsed-data "[[hl]]\n* hl"
+	 (org-element-type
+	  (org-export-resolve-fuzzy-link
+	   (org-element-map tree 'link 'identity info t) info))))))
 
 (ert-deftest test-org-export/resolve-id-link ()
   "Test `org-export-resolve-id-link' specifications."
