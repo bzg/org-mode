@@ -4050,7 +4050,8 @@ significant."
 	     (let ((foundp (funcall find-headline path parent)))
 	       (when foundp (throw 'exit foundp))))
 	   (let ((parent-hl (org-export-get-parent-headline link)))
-	     (cons parent-hl (org-export-get-genealogy parent-hl))))
+	     (if (not parent-hl) (list (plist-get info :parse-tree))
+	       (cons parent-hl (org-export-get-genealogy parent-hl)))))
 	  ;; No destination found: return nil.
 	  (and (not match-title-p) (puthash path nil link-cache))))))))
 
