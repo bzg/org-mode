@@ -4313,12 +4313,6 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 	(re-search-forward org-table-any-border-regexp nil 1))))
   (unless quietly (message "Mapping tables: done")))
 
-;; Declare and autoload functions from ox.el and al.
-
-(declare-function org-export-get-environment "ox"
-		  (&optional backend subtreep ext-plist))
-(declare-function org-latex-guess-inputenc "ox-latex" (header))
-
 ;; Declare and autoload functions from org-agenda.el
 
 (eval-and-compile
@@ -18508,18 +18502,20 @@ share a good deal of logic."
 
 (declare-function org-export--get-global-options "ox" (&optional backend))
 (declare-function org-export--get-inbuffer-options "ox" (&optional backend))
+(declare-function org-latex-guess-inputenc "ox-latex" (header))
+(declare-function org-latex-guess-babel-language "ox-latex" (header info))
 (defun org-create-formula--latex-header ()
   "Return LaTeX header appropriate for previewing a LaTeX snippet."
-  (org-latex-guess-inputenc
-   (org-splice-latex-header
-    org-format-latex-header
-    org-latex-default-packages-alist
-    org-latex-packages-alist t
-    (plist-get
-     (org-combine-plists
-      (org-export--get-global-options 'latex)
-      (org-export--get-inbuffer-options 'latex))
-     :latex-header))))
+  (let ((info (org-combine-plists (org-export--get-global-options 'latex)
+				  (org-export--get-inbuffer-options 'latex))))
+    (org-latex-guess-babel-language
+     (org-latex-guess-inputenc
+      (org-splice-latex-header
+       org-format-latex-header
+       org-latex-default-packages-alist
+       org-latex-packages-alist t
+       (plist-get info :latex-header)))
+     info)))
 
 ;; This function borrows from Ganesh Swami's latex2png.el
 (defun org-create-formula-image-with-dvipng (string tofile options buffer)
