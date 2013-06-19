@@ -216,6 +216,48 @@ Here is one at the end of a line. =2=
       (should-not (string-match (regexp-quote "<<strip-export-1>>") result))
       (should-not (string-match (regexp-quote "i=\"10\"") result)))))
 
+(ert-deftest ob-exp/use-case-of-reading-entry-properties ()
+  (org-test-at-id "cc5fbc20-bca5-437a-a7b8-2b4d7a03f820"
+    (org-narrow-to-subtree)
+    (let* ((case-fold-search nil)
+	   (result (org-test-with-expanded-babel-code (buffer-string)))
+	   (sect "a:1, b:0, c:3, d:0, e:0")
+	   (sub0 "a:1, b:2, c:4, d:0, e:0")
+	   (sub1 "a:1, b:2, c:5, d:0, e:6")
+	   (func sub0))
+      ;; entry "section"
+      (should (string-match (concat "\"sect call\".*)\n: shell " sect "\n")
+			    result))
+      (should (string-match (concat "sect call\\](.*)\n: elisp " sect "\n")
+			    result))
+      (should (string-match (concat "\n- sect inline =shell " sect "=\n")
+			    result))
+      (should (string-match (concat "\n- sect inline =elisp " sect "=\n")
+			    result))
+      ;; entry "subsection", call without arguments
+      (should (string-match (concat "\"sub0 call\".*)\n: shell " sub0 "\n")
+			    result))
+      (should (string-match (concat "sub0 call\\](.*)\n: elisp " sub0 "\n")
+			    result))
+      (should (string-match (concat "\n- sub0 inline =shell " sub0 "=\n")
+			    result))
+      (should (string-match (concat "\n- sub0 inline =elisp " sub0 "=\n")
+			    result))
+      ;; entry "subsection", call with arguments
+      (should (string-match (concat "\"sub1 call\".*)\n: shell " sub1 "\n")
+			    result))
+      (should (string-match (concat "sub1 call\\](.*)\n: elisp " sub1 "\n")
+			    result))
+      (should (string-match (concat "\n- sub1 inline =shell " sub1 "=\n")
+			    result))
+      (should (string-match (concat "\n- sub1 inline =elisp " sub1 "=\n")
+			    result))
+      ;; entry "function definition"
+      (should (string-match (concat "_location_shell\n: shell " func "\n")
+			    result))
+      (should (string-match (concat "_location_elisp\n: elisp " func "\n")
+			    result)))))
+
 (ert-deftest ob-exp/export-from-a-temp-buffer ()
   :expected-result :failed
   (org-test-with-temp-text
