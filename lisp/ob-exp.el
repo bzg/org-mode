@@ -122,11 +122,11 @@ Assume point is at the beginning of block's starting line."
 	  (org-babel-exp-in-export-file lang
 	    (setf (nth 2 info)
 		  (org-babel-process-params
-		   (org-babel-merge-params
-		    org-babel-default-header-args
-		    (if (boundp lang-headers) (eval lang-headers) nil)
-		    (org-babel-params-from-properties lang)
-		    raw-params))))
+		   (apply #'org-babel-merge-params
+			  org-babel-default-header-args
+			  (if (boundp lang-headers) (eval lang-headers) nil)
+			  (append (org-babel-params-from-properties lang)
+				  (list raw-params))))))
 	  (setf hash (org-babel-sha1-hash info)))
 	(org-babel-exp-do-export info 'block hash)))))
 
@@ -206,16 +206,19 @@ this template."
 			  (results
 			   (org-babel-exp-do-export
 			    (list "emacs-lisp" "results"
-				  (org-babel-merge-params
-				   org-babel-default-header-args
-				   org-babel-default-lob-header-args
-				   (org-babel-params-from-properties)
-				   (org-babel-parse-header-arguments
-				    (org-no-properties
-				     (concat ":var results="
-					     (mapconcat 'identity
-							(butlast lob-info)
-							" ")))))
+				  (apply #'org-babel-merge-params
+					 org-babel-default-header-args
+					 org-babel-default-lob-header-args
+					 (append
+					  (org-babel-params-from-properties)
+					  (list
+					   (org-babel-parse-header-arguments
+					    (org-no-properties
+					     (concat
+					      ":var results="
+					      (mapconcat 'identity
+							 (butlast lob-info)
+							 " ")))))))
 				  "" nil (car (last lob-info)))
 			    'lob))
 			  (rep (org-fill-template

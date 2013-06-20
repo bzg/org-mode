@@ -1291,38 +1291,38 @@ portions of results lines."
 (defvar org-file-properties)
 (defun org-babel-params-from-properties (&optional lang)
   "Retrieve parameters specified as properties.
-Return an association list of any source block params which
-may be specified in the properties of the current outline entry."
+Return a list of association lists of source block params
+specified in the properties of the current outline entry."
   (save-match-data
-    (let* ((lang-props
-	    (save-match-data
-	      (org-babel-parse-header-arguments
-	       (org-entry-get (point) (concat "header-args:" lang)
-			      'inherit))))
-	   (default-props
-	     (save-match-data
-	       (org-babel-parse-header-arguments
-		(org-entry-get (point) "header-args"
-			       'inherit))))
-	   (props
-	    (let (val sym)
-	      (org-babel-parse-multiple-vars
-	       (delq nil
-		     (mapcar
-		      (lambda (header-arg)
-			(and (setq val (org-entry-get (point) header-arg t))
-			     (cons (intern (concat ":" header-arg))
-				   (org-babel-read val))))
-		      (mapcar
-		       #'symbol-name
-		       (mapcar
-			#'car
-			(org-babel-combine-header-arg-lists
-			 org-babel-common-header-args-w-values
-			 (progn
-			   (setq sym (intern (concat "org-babel-header-args:" lang)))
-			   (and (boundp sym) (eval sym))))))))))))
-      (org-babel-merge-params props default-props lang-props))))
+    (list
+     ;; header arguments specified as separate property
+     (let (val sym)
+       (org-babel-parse-multiple-vars
+	(delq nil
+	      (mapcar
+	       (lambda (header-arg)
+		 (and (setq val (org-entry-get (point) header-arg t))
+		      (cons (intern (concat ":" header-arg))
+			    (org-babel-read val))))
+	       (mapcar
+		#'symbol-name
+		(mapcar
+		 #'car
+		 (org-babel-combine-header-arg-lists
+		  org-babel-common-header-args-w-values
+		  (progn
+		    (setq sym (intern (concat "org-babel-header-args:" lang)))
+		    (and (boundp sym) (eval sym))))))))))
+     ;; header arguments specified with the header-args property
+     (save-match-data
+       (org-babel-parse-header-arguments
+	(org-entry-get (point) "header-args"
+		       'inherit)))
+     ;; language-specific header arguments
+     (save-match-data
+       (org-babel-parse-header-arguments
+	(org-entry-get (point) (concat "header-args:" lang)
+		       'inherit))))))
 
 (defvar org-src-preserve-indentation)
 (defun org-babel-parse-src-block-match ()
@@ -1348,12 +1348,13 @@ may be specified in the properties of the current outline entry."
               (insert (org-unescape-code-in-string body))
 	      (unless preserve-indentation (org-do-remove-indentation))
               (buffer-string)))
-	  (org-babel-merge-params
-	   org-babel-default-header-args
-	   (when (boundp lang-headers) (eval lang-headers))
-           (org-babel-params-from-properties lang)
-	   (org-babel-parse-header-arguments
-            (org-no-properties (or (match-string 4) ""))))
+	  (apply #'org-babel-merge-params
+		 org-babel-default-header-args
+		 (when (boundp lang-headers) (eval lang-headers))
+		 (append
+		  (org-babel-params-from-properties lang)
+		  (list (org-babel-parse-header-arguments
+			 (org-no-properties (or (match-string 4) ""))))))
 	  switches
 	  block-indentation)))
 
@@ -1363,12 +1364,13 @@ may be specified in the properties of the current outline entry."
          (lang-headers (intern (concat "org-babel-default-header-args:" lang))))
     (list lang
           (org-unescape-code-in-string (org-no-properties (match-string 5)))
-          (org-babel-merge-params
-           org-babel-default-inline-header-args
-           (if (boundp lang-headers) (eval lang-headers) nil)
-           (org-babel-params-from-properties lang)
-           (org-babel-parse-header-arguments
-            (org-no-properties (or (match-string 4) "")))))))
+          (apply #'org-babel-merge-params
+		 org-babel-default-inline-header-args
+		 (if (boundp lang-headers) (eval lang-headers) nil)
+		 (append
+		  (org-babel-params-from-properties lang)
+		  (list (org-babel-parse-header-arguments
+			 (org-no-properties (or (match-string 4) "")))))))))
 
 (defun org-babel-balanced-split (string alts)
   "Split STRING on instances of ALTS.
