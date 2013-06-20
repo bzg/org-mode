@@ -2043,7 +2043,7 @@ line of an item.
 You can also use Org structure editing to fold and unfold headlines in
 @emph{any} file, provided you defined @code{orgstruct-heading-prefix-regexp}:
 the regular expression must match the local prefix to use before Org's
-headlines.  For example, if you set this variable to @code{"^;; "} in Emacs
+headlines.  For example, if you set this variable to @code{";; "} in Emacs
 Lisp files, you will be able to fold and unfold headlines in Emacs Lisp
 commented lines.  Some commands like @code{org-demote} are disabled when the
 prefix is set, but folding/unfolding will work correctly.
