@@ -116,7 +116,7 @@
     (:html-link-org-as-html nil nil org-html-link-org-files-as-html)
     (:html-doctype "HTML_DOCTYPE" nil org-html-doctype)
     (:html-container "HTML_CONTAINER" nil org-html-container-element)
-    (:html-html5-fancy "HTML_HTML5_FANCY" nil org-html-html5-fancy)
+    (:html-html5-fancy nil "html5-fancy" org-html-html5-fancy)
     (:html-link-home "HTML_LINK_HOME" nil org-html-link-home)
     (:html-link-up "HTML_LINK_UP" nil org-html-link-up)
     (:html-mathjax "HTML_MATHJAX" nil "" space)
@@ -124,8 +124,8 @@
     (:html-preamble nil "html-preamble" org-html-preamble)
     (:html-head "HTML_HEAD" nil org-html-head newline)
     (:html-head-extra "HTML_HEAD_EXTRA" nil org-html-head-extra newline)
-    (:html-head-include-default-style "HTML_INCLUDE_STYLE" nil org-html-head-include-default-style newline)
-    (:html-head-include-scripts "HTML_INCLUDE_SCRIPTS" nil org-html-head-include-scripts newline)
+    (:html-head-include-default-style nil "html-style" org-html-head-include-default-style)
+    (:html-head-include-scripts nil "html-scripts" org-html-head-include-scripts)
     (:html-table-attributes nil nil org-html-table-default-attributes)
     (:html-table-row-tags nil nil org-html-table-row-tags)
     (:html-xml-declaration nil nil org-html-xml-declaration)
@@ -919,9 +919,8 @@ publishing, with :html-doctype."
   :type 'string)
 
 (defcustom org-html-html5-fancy nil
-  "When exporting to HTML5, set this to t to use new HTML5
-  elements. This variable is ignored for anything other than
-  HTML5.
+  "Non-nil means using new HTML5 elements.
+This variable is ignored for anything other than HTML5 export.
 
 For compatibility with Internet Explorer, it's probably a good
 idea to download some form of the html5shiv (for instance

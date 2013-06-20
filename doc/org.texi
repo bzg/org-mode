@@ -11055,7 +11055,7 @@ See the variable @code{org-html-doctype-alist} for details.  The default is
 
 HTML5 introduces several new element types.  By default, Org will not make
 use of these element types, but you can set @code{org-html-html5-fancy} to
-@code{t} (or use the corresponding @code{HTML_HTML5_FANCY} export option), to
+@code{t} (or set @code{html5-fancy} item in an @code{OPTIONS} line), to
 enable a few new block-level elements.  These are created using arbitrary
 #+BEGIN and #+END blocks. For instance:
 
@@ -11352,9 +11352,9 @@ Each exported file contains a compact default style that defines these
 classes in a basic way@footnote{This style is defined in the constant
 @code{org-html-style-default}, which you should not modify.  To turn
 inclusion of these defaults off, customize
-@code{org-html-head-include-default-style} or set @code{#+HTML_INCLUDE_STYLE}
-to @code{nil} on a per-file basis.}.  You may overwrite these settings, or add to
-them by using the variables @code{org-html-head} and
+@code{org-html-head-include-default-style} or set @code{html-style} to
+@code{nil} in an @code{OPTIONS} line.}.  You may overwrite these settings, or
+add to them by using the variables @code{org-html-head} and
 @code{org-html-head-extra}.  You can override the global values of these
 variables for each file by using these keywords:
 
