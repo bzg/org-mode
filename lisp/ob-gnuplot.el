@@ -75,6 +75,13 @@ blocks."
   :group 'org-babel
   :type 'string)
 
+(defcustom *org-babel-gnuplot-terms*
+  '((eps . "postscript eps"))
+  "List of file extensions and the associated gnuplot terminal."
+  :group 'org-babel
+  :type '(repeat (cons (symbol :tag "File extension")
+		       (string :tag "Gnuplot terminal"))))
+
 (defun org-babel-gnuplot-process-vars (params)
   "Extract variables from PARAMS and process the variables.
 Dumps all vectors into files and returns an association list
@@ -97,7 +104,11 @@ code."
     (let* ((vars (org-babel-gnuplot-process-vars params))
            (out-file (cdr (assoc :file params)))
            (term (or (cdr (assoc :term params))
-                     (when out-file (file-name-extension out-file))))
+                     (when out-file
+		       (let ((ext (file-name-extension out-file)))
+			 (or (cdr (assoc (intern (downcase ext))
+					 *org-babel-gnuplot-terms*))
+			     ext)))))
            (cmdline (cdr (assoc :cmdline params)))
            (title (cdr (assoc :title params)))
            (lines (cdr (assoc :line params)))
