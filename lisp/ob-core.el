@@ -1472,22 +1472,18 @@ names."
 (defun org-babel-get-rownames (table)
   "Return the row names of TABLE.
 Return a cons cell, the `car' of which contains the TABLE less
-colnames, and the `cdr' of which contains a list of the column
-names.  Note: this function removes any hlines in TABLE."
-  (let* ((trans (lambda (table) (apply #'mapcar* #'list table)))
-	 (width (apply 'max
-		       (mapcar (lambda (el) (if (listp el) (length el) 0)) table)))
-	 (table (funcall trans (mapcar (lambda (row)
-					 (if (not (equal row 'hline))
-					     row
-					   (setq row '())
-					   (dotimes (n width)
-					     (setq row (cons 'hline row)))
-					   row))
-				       table))))
-    (cons (mapcar (lambda (row) (if (equal (car row) 'hline) 'hline row))
-		  (funcall trans (cdr table)))
-	  (remove 'hline (car table)))))
+rownames, and the `cdr' of which contains a list of the rownames.
+Note: this function removes any hlines in TABLE."
+  (let* ((table (org-babel-del-hlines table))
+	 (rownames (funcall (lambda ()
+			      (let ((tp table))
+				(mapcar
+				 (lambda (row)
+				   (prog1
+				       (pop (car tp))
+				     (setq tp (cdr tp))))
+				 table))))))
+    (cons table rownames)))
 
 (defun org-babel-put-colnames (table colnames)
   "Add COLNAMES to TABLE if they exist."
