@@ -1894,14 +1894,14 @@ following the source block."
      ((org-at-item-p) (org-babel-read-list))
      ((looking-at org-bracket-link-regexp) (org-babel-read-link))
      ((looking-at org-block-regexp) (org-babel-trim (match-string 4)))
-     ((looking-at "^[ \t]*: ")
+     ((or (looking-at "^[ \t]*: ") (looking-at "^[ \t]*:$"))
       (setq result-string
 	    (org-babel-trim
 	     (mapconcat (lambda (line)
-                          (if (and (> (length line) 1)
-                                   (string-match "^[ \t]*: \\(.+\\)" line))
-                              (match-string 1 line)
-                            line))
+                          (or (and (> (length line) 1)
+				   (string-match "^[ \t]*: ?\\(.+\\)" line)
+				   (match-string 1 line))
+			      ""))
 			(split-string
 			 (buffer-substring
                           (point) (org-babel-result-end)) "[\r\n]+")
@@ -2165,7 +2165,7 @@ code ---- the results are extracted in the syntax of the source
 	    (progn (re-search-forward (concat "[ \t]*#\\+end_" (match-string 1))
 				      nil t)
 		   (forward-char 1))
-	  (while (looking-at "[ \t]*\\(: \\|\\[\\[\\)")
+	  (while (looking-at "[ \t]*\\(: \\|:$\\|\\[\\[\\)")
 	    (forward-line 1))))
       (point)))))
 
