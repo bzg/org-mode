@@ -68,6 +68,13 @@
 
 (defvar *org-babel-gnuplot-missing* nil)
 
+(defcustom *org-babel-gnuplot-prefix* nil
+  "Optional prefix to send to gnuplot before the body of every code block.
+For example \"reset\" may be used to reset gnuplot between
+blocks."
+  :group 'org-babel
+  :type 'string)
+
 (defun org-babel-gnuplot-process-vars (params)
   "Extract variables from PARAMS and process the variables.
 Dumps all vectors into files and returns an association list
@@ -144,7 +151,9 @@ code."
       (mapc (lambda (pair)
 	      (setq body (replace-regexp-in-string
 			  (format "\\$%s" (car pair)) (cdr pair) body)))
-	    vars))
+	    vars)
+      (when *org-babel-gnuplot-prefix*
+	(funcall add-to-body *org-babel-gnuplot-prefix*)))
     body))
 
 (defun org-babel-execute:gnuplot (body params)
