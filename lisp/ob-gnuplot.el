@@ -147,8 +147,11 @@ code."
 	(funcall add-to-body (concat "set timefmt \""
 				     (or timefmt
 					 "%Y-%m-%d-%H:%M:%S") "\"")))
-      (when out-file (funcall add-to-body (format "set output \"%s\""
-						  out-file)))
+      (when out-file
+	;; set the terminal at the top of the block
+	(funcall add-to-body (format "set output \"%s\"" out-file))
+	;; and close the terminal at the bottom of the block
+	(setq body (concat body "\nset output\n")))
       (when term (funcall add-to-body (format "set term %s" term)))
       ;; insert variables into code body: this should happen last
       ;; placing the variables at the *top* of the code in case their
