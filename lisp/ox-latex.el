@@ -784,8 +784,12 @@ the infamous egrep/locale bug:
 
      http://lists.gnu.org/archive/html/bug-texinfo/2010-03/msg00031.html
 
-then `texi2dvi' is the superior choice.  Org does offer it as one
-of the customize options.
+then `texi2dvi' is the superior choice as it automates the LaTeX
+build process by calling the \"correct\" combinations of
+auxiliary programs.  Org does offer `texi2dvi' as one of the
+customize options.  Alternatively, `rubber' and `latexmk' also
+provide similar functionality.  The latter supports `biber' out
+of the box.
 
 Alternatively, this may be a Lisp function that does the
 processing, so you could use this to apply the machinery of
@@ -823,6 +827,8 @@ file name as its single argument."
 		 ("texi2dvi -p -b -V %f"))
 	  (const :tag "rubber"
 		 ("rubber -d --into %o %f"))
+	  (const :tag "latexmk"
+		 ("latexmk -g -pdf %f"))
 	  (function)))
 
 (defcustom org-latex-logfiles-extensions
