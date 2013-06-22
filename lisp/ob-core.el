@@ -444,6 +444,7 @@ then run `org-babel-switch-to-session'."
     (dir	. :any)
     (eval	. ((never query)))
     (exports	. ((code results both none)))
+    (epilogue   . :any)
     (file	. :any)
     (file-desc  . :any)
     (hlines	. ((no yes)))
@@ -455,6 +456,7 @@ then run `org-babel-switch-to-session'."
     (noweb-sep  . :any)
     (padline	. ((yes no)))
     (post       . :any)
+    (prologue   . :any)
     (results	. ((file list vector table scalar verbatim)
 		   (raw html latex org code pp drawer)
 		   (replace silent none append prepend)
@@ -671,7 +673,14 @@ Expand a block of code with org-babel according to its header
 arguments.  This generic implementation of body expansion is
 called for languages which have not defined their own specific
 org-babel-expand-body:lang function."
-  (mapconcat #'identity (append var-lines (list body)) "\n"))
+  (let ((pro (cdr (assoc :prologue params)))
+	(epi (cdr (assoc :epilogue params))))
+    (mapconcat #'identity
+	       (append (when pro (list pro))
+		       var-lines
+		       (list body)
+		       (when epi (list epi)))
+	       "\n")))
 
 ;;;###autoload
 (defun org-babel-expand-src-block (&optional arg info params)

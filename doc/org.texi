@@ -726,6 +726,8 @@ Specific header arguments
 * eval::                        Limit evaluation of specific code blocks
 * wrap::                        Mark source block evaluation results
 * post::                        Post processing of code block results
+* prologue::                    Text to prepend to code block body
+* epilogue::                    Text to append to code block body
 
 Miscellaneous
 
@@ -14172,6 +14174,8 @@ argument in lowercase letters.  The following header arguments are defined:
 * eval::                        Limit evaluation of specific code blocks
 * wrap::                        Mark source block evaluation results
 * post::                        Post processing of code block results
+* prologue::                    Text to prepend to code block body
+* epilogue::                    Text to append to code block body
 @end menu
 
 Additional header arguments are defined on a language-specific basis, see
@@ -15118,7 +15122,7 @@ to @code{#+BEGIN_} and @code{#+END_}, which will then be used to wrap the
 results.  If not string is specified then the results will be wrapped in a
 @code{#+BEGIN/END_RESULTS} block.
 
-@node post,  , wrap, Specific header arguments
+@node post, prologue, wrap, Specific header arguments
 @subsubsection @code{:post}
 The @code{:post} header argument is used to post-process the results of a
 code block execution.  When a post argument is given, the results of the code
@@ -15152,6 +15156,24 @@ argument.
 [[file:/tmp/it.png]]
 :END:
 @end example
+
+@node prologue, epilogue, post, Specific header arguments
+
+The value of the @code{prologue} header argument will be prepended to the
+code block body before execution.  For example, @code{:prologue "reset"} may
+be used to reset a gnuplot session before execution of a particular code
+block, or the following configuration may be used to do this for all gnuplot
+code blocks.  Also see @ref{epilogue}.
+
+@lisp
+(add-to-list 'org-babel-default-header-args:gnuplot
+             '((:prologue . "reset")))
+@end lisp
+
+@node epilogue, , prologue, Specific header arguments
+
+The value of the @code{epilogue} header argument will be appended to the code
+block body before execution.  Also see @ref{prologue}.
 
 @node Results of evaluation, Noweb reference syntax, Header arguments, Working With Source Code
 @section Results of evaluation

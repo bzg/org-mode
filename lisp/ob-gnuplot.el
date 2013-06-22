@@ -68,13 +68,6 @@
 
 (defvar *org-babel-gnuplot-missing* nil)
 
-(defcustom *org-babel-gnuplot-prefix* nil
-  "Optional prefix to send to gnuplot before the body of every code block.
-For example \"reset\" may be used to reset gnuplot between
-blocks."
-  :group 'org-babel
-  :type 'string)
-
 (defcustom *org-babel-gnuplot-terms*
   '((eps . "postscript eps"))
   "List of file extensions and the associated gnuplot terminal."
@@ -103,7 +96,9 @@ code."
   (save-window-excursion
     (let* ((vars (org-babel-gnuplot-process-vars params))
            (out-file (cdr (assoc :file params)))
-           (term (or (cdr (assoc :term params))
+	   (prologue (cdr (assoc :prologue params)))
+	   (epilogue (cdr (assoc :epilogue params)))
+	   (term (or (cdr (assoc :term params))
                      (when out-file
 		       (let ((ext (file-name-extension out-file)))
 			 (or (cdr (assoc (intern (downcase ext))
@@ -166,8 +161,8 @@ code."
 	      (setq body (replace-regexp-in-string
 			  (format "\\$%s" (car pair)) (cdr pair) body)))
 	    vars)
-      (when *org-babel-gnuplot-prefix*
-	(funcall add-to-body *org-babel-gnuplot-prefix*)))
+      (when prologue (funcall add-to-body prologue))
+      (when epilogue (setq body (concat body "\n" epilogue))))
     body))
 
 (defun org-babel-execute:gnuplot (body params)
