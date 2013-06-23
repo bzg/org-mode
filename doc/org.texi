@@ -688,8 +688,8 @@ Using header arguments
 
 * System-wide header arguments::  Set global default values
 * Language-specific header arguments::  Set default values by language
-* Buffer-wide header arguments::  Set default values for a specific buffer
 * Header arguments in Org mode properties::  Set default values for a buffer or heading
+* Language-specific header arguments in Org mode properties::  Set langugage-specific default values for a buffer or heading
 * Code block specific header arguments::  The most common way to set values
 * Header arguments in function calls::  The most specific level
 
@@ -13965,13 +13965,16 @@ describes each header argument in detail.
 @node Using header arguments, Specific header arguments, Header arguments, Header arguments
 @subsection Using header arguments
 
-The values of header arguments can be set in six different ways, each more
-specific (and having higher priority) than the last.
+The values of header arguments can be set in several way.  When the header
+arguments in each layer have been determined, they are combined in order from
+the first, least specific (having the lowest priority) up to the last, most
+specific (having the highest priority).  A header argument with a higher
+priority replaces the same header argument specified at lower priority.
 @menu
 * System-wide header arguments::  Set global default values
 * Language-specific header arguments::  Set default values by language
-* Buffer-wide header arguments::  Set default values for a specific buffer
 * Header arguments in Org mode properties::  Set default values for a buffer or heading
+* Language-specific header arguments in Org mode properties::  Set language-specific default values for a buffer or heading
 * Code block specific header arguments::  The most common way to set values
 * Header arguments in function calls::  The most specific level
 @end menu
@@ -14002,61 +14005,85 @@ blocks.
             (assq-delete-all :noweb org-babel-default-header-args)))
 @end lisp
 
-@node Language-specific header arguments, Buffer-wide header arguments, System-wide header arguments, Using header arguments
+@node Language-specific header arguments, Header arguments in Org mode properties, System-wide header arguments, Using header arguments
 @subsubheading Language-specific header arguments
-Each language can define its own set of default header arguments.  See the
-language-specific documentation available online at
+Each language can define its own set of default header arguments in variable
+@code{org-babel-default-header-args:<lang>}, where @code{<lang>} is the name
+of the language.  See the language-specific documentation available online at
 @uref{http://orgmode.org/worg/org-contrib/babel}.
 
-@node Buffer-wide header arguments, Header arguments in Org mode properties, Language-specific header arguments, Using header arguments
-@subsubheading Buffer-wide header arguments
+@node Header arguments in Org mode properties, Language-specific header arguments in Org mode properties, Language-specific header arguments, Using header arguments
+@subsubheading Header arguments in Org mode properties
+
 Buffer-wide header arguments may be specified as properties through the use
 of @code{#+PROPERTY:} lines placed anywhere in an Org mode file (see
 @ref{Property syntax}).
 
-For example the following would set @code{session} to @code{*R*}, and
-@code{results} to @code{silent} for every code block in the buffer, ensuring
-that all execution took place in the same session, and no results would be
-inserted into the buffer.
+For example the following would set @code{session} to @code{*R*} (only for R
+code blocks), and @code{results} to @code{silent} for every code block in the
+buffer, ensuring that all execution took place in the same session, and no
+results would be inserted into the buffer.
 
 @example
-#+PROPERTY: session *R*
-#+PROPERTY: results silent
+#+PROPERTY: header-args:R  :session *R*
+#+PROPERTY: header-args    :results silent
 @end example
 
-@node Header arguments in Org mode properties, Code block specific header arguments, Buffer-wide header arguments, Using header arguments
-@subsubheading Header arguments in Org mode properties
-
-Header arguments are also read from Org mode properties (see @ref{Property
-syntax}), which can be set on a buffer-wide or per-heading basis.  An example
-of setting a header argument for all code blocks in a buffer is
-
-@example
-#+PROPERTY: tangle yes
-@end example
-
+Header arguments read from Org mode properties can also be set on a
+per-subtree basis using property drawers (see @ref{Property syntax}).
 @vindex org-use-property-inheritance
-When properties are used to set default header arguments, they are looked up
-with inheritance, regardless of the value of
-@code{org-use-property-inheritance}.  In the following example the value of
+When properties are used to set default header arguments, they are always
+looked up with inheritance, regardless of the value of
+@code{org-use-property-inheritance}.  Properties are evaluated as seen by the
+outermost call or source block.@footnote{The deprecated syntax for default
+header argument properties, using the name of the header argument as a
+property name directly, evaluates the property as seen by the corresponding
+source block definition.  This behaviour has been kept for backwards
+compatibility.}
+
+In the following example the value of
 the @code{:cache} header argument will default to @code{yes} in all code
 blocks in the subtree rooted at the following heading:
 
 @example
 * outline header
   :PROPERTIES:
-  :cache:    yes
+  :header-args:    :cache yes
   :END:
 @end example
 
 @kindex C-c C-x p
 @vindex org-babel-default-header-args
 Properties defined in this way override the properties set in
-@code{org-babel-default-header-args}.  It is convenient to use the
-@code{org-set-property} function bound to @kbd{C-c C-x p} to set properties
-in Org mode documents.
+@code{org-babel-default-header-args} and are applied for all activated
+languages.  It is convenient to use the @code{org-set-property} function
+bound to @kbd{C-c C-x p} to set properties in Org mode documents.
 
-@node Code block specific header arguments, Header arguments in function calls, Header arguments in Org mode properties, Using header arguments
+@node Language-specific header arguments in Org mode properties, Code block specific header arguments, Header arguments in Org mode properties, Using header arguments
+@subsubheading Language-specific header arguments in Org mode properties
+
+Language-specific header arguments are also read from properties
+@code{header-args:<lang>} where @code{<lang>} is the name of the language
+targeted.  As an example
+
+@example
+* Heading
+  :PROPERTIES:
+  :header-args:clojure:    :session *clojure-1*
+  :header-args:R:          :session *R*
+  :END:
+** Subheading
+  :PROPERTIES:
+  :header-args:clojure:    :session *clojure-2*
+  :END:
+@end example
+
+would independently set a default session header argument for R and clojure
+for calls and source blocks under subtree ``Heading'' and change to a
+different clojure setting for evaluations under subtree ``Subheading'', while
+the R session is inherited from ``Heading'' and therefore unchanged.
+
+@node Code block specific header arguments, Header arguments in function calls, Language-specific header arguments in Org mode properties, Using header arguments
 @subsubheading Code block specific header arguments
 
 The most common way to assign values to header arguments is at the
