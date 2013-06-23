@@ -6122,8 +6122,15 @@ Use `org-reduced-level' to remove the effect of `org-odd-levels'."
 
 (defvar org-font-lock-keywords nil)
 
+(defsubst org-re-property (property &optional literal)
+  "Return a regexp matching a PROPERTY line.
+Match group 3 will be set to the value if it exists."
+  (concat "^\\(?4:[ \t]*\\)\\(?1::\\(?2:"
+	  (if literal property (regexp-quote property))
+	  "\\):\\)[ \t]+\\(?3:[^ \t\r\n].*?\\)\\(?5:[ \t]*\\)$"))
+
 (defconst org-property-re
-  "^\\(?4:[ \t]*\\)\\(?1::\\(?2:.*?\\):\\)[ \t]+\\(?3:[^ \t\r\n].*?\\)\\(?5:[ \t]*\\)$"
+  (org-re-property ".*?" 'literal)
   "Regular expression matching a property line.
 There are four matching groups:
 1: :PROPKEY: including the leading and trailing colon,
@@ -15022,16 +15029,6 @@ Being in this list makes sure that they are offered for completion.")
 	  org-property-end-re "\\)\n?")
   "Matches an entire clock drawer.")
 
-(defsubst org-re-property (property)
-  "Return a regexp matching a PROPERTY line.
-Match group 1 will be set to the value."
-  (concat "^[ \t]*:" (regexp-quote property) ":[ \t]*\\(\\S-.*\\)"))
-
-(defsubst org-re-property-keyword (property)
-  "Return a regexp matching a PROPERTY line, possibly with no
-value for the property."
-  (concat "^[ \t]*:" (regexp-quote property) ":[ \t]*\\(\\S-.*\\)?"))
-
 (defun org-property-action ()
   "Do an action on properties."
   (interactive)
@@ -15291,8 +15288,8 @@ when a \"nil\" value can supersede a non-nil value higher up the hierarchy."
 			   (setq props
 				 (org-update-property-plist
 				  key
-				  (if (match-end 1)
-				      (org-match-string-no-properties 1) "")
+				  (if (match-end 3)
+				      (org-match-string-no-properties 3) "")
 				  props)))))
 		   val)
 	      (goto-char (car range))
@@ -15481,7 +15478,7 @@ and the new value.")
 	  (setq range (org-get-property-block beg end 'force))
 	  (goto-char (car range))
 	  (if (re-search-forward
-	       (org-re-property-keyword property) (cdr range) t)
+	       (org-re-property property) (cdr range) t)
 	      (progn
 		(delete-region (match-beginning 0) (match-end 0))
 		(goto-char (match-beginning 0)))
@@ -15551,7 +15548,7 @@ formats in the current buffer."
       (let ((re (org-re-property key))
 	    values)
 	(while (re-search-forward re nil t)
-	  (add-to-list 'values (org-trim (match-string 1))))
+	  (add-to-list 'values (org-trim (match-string 3))))
 	(delete "" values)))))
 
 (defun org-insert-property-drawer ()
