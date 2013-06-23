@@ -1304,7 +1304,8 @@ Return a list of association lists of source block params
 specified in the properties of the current outline entry."
   (save-match-data
     (list
-     ;; header arguments specified as separate property
+     ;; DEPRECATED header arguments specified as separate property at
+     ;; point of definition
      (let (val sym)
        (org-babel-parse-multiple-vars
 	(delq nil
@@ -1322,16 +1323,15 @@ specified in the properties of the current outline entry."
 		  (progn
 		    (setq sym (intern (concat "org-babel-header-args:" lang)))
 		    (and (boundp sym) (eval sym))))))))))
-     ;; header arguments specified with the header-args property
-     (save-match-data
-       (org-babel-parse-header-arguments
-	(org-entry-get (point) "header-args"
-		       'inherit)))
-     ;; language-specific header arguments
-     (save-match-data
-       (org-babel-parse-header-arguments
-	(org-entry-get (point) (concat "header-args:" lang)
-		       'inherit))))))
+     ;; header arguments specified with the header-args property at
+     ;; point of call
+     (org-babel-parse-header-arguments
+      (org-entry-get org-babel-current-src-block-location
+		     "header-args" 'inherit))
+     (when lang ;; language-specific header arguments at point of call
+	 (org-babel-parse-header-arguments
+	  (org-entry-get org-babel-current-src-block-location
+			 (concat "header-args:" lang) 'inherit))))))
 
 (defvar org-src-preserve-indentation)
 (defun org-babel-parse-src-block-match ()
