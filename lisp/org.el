@@ -436,8 +436,9 @@ For export specific modules, see also `org-export-backends'."
 	(const :tag "C  wl:                Links to Wanderlust folders/messages" org-wl)
 	(repeat :tag "External packages" :inline t (symbol :tag "Package"))))
 
-(defvar org-export-registered-backends)	; From ox.el
+(defvar org-export--registered-backends) ; From ox.el.
 (declare-function org-export-derived-backend-p "ox" (backend &rest backends))
+(declare-function org-export-backend-name "ox" (backend))
 (defcustom org-export-backends '(ascii html icalendar latex)
   "List of export back-ends that should be always available.
 
@@ -451,30 +452,29 @@ needed.
 
 This variable needs to be set before org.el is loaded.  If you
 need to make a change while Emacs is running, use the customize
-interface or run the following code, where VALUE stands for the
-new value of the variable, after updating it:
+interface or run the following code, where VAL stands for the new
+value of the variable, after updating it:
 
   \(progn
-    \(setq org-export-registered-backends
+    \(setq org-export--registered-backends
           \(org-remove-if-not
            \(lambda (backend)
-             \(or (memq backend val)
-                 \(catch 'parentp
-                   \(mapc
-                    \(lambda (b)
-                      \(and (org-export-derived-backend-p b (car backend))
-                           \(throw 'parentp t)))
-                    val)
-                   nil)))
-           org-export-registered-backends))
-    \(let ((new-list (mapcar 'car org-export-registered-backends)))
+             \(let ((name (org-export-backend-name backend)))
+               \(or (memq name val)
+                   \(catch 'parentp
+                     \(dolist (b val)
+                       \(and (org-export-derived-backend-p b name)
+                            \(throw 'parentp t)))))))
+           org-export--registered-backends))
+    \(let ((new-list (mapcar 'org-export-backend-name
+                            org-export--registered-backends)))
       \(dolist (backend val)
         \(cond
          \((not (load (format \"ox-%s\" backend) t t))
           \(message \"Problems while trying to load export back-end `%s'\"
                    backend))
          \((not (memq backend new-list)) (push backend new-list))))
-      \(set-default var new-list)))
+      \(set-default 'org-export-backends new-list)))
 
 Adding a back-end to this list will also pull the back-end it
 depends on, if any."
@@ -488,21 +488,20 @@ depends on, if any."
 	   ;; Any back-end not required anymore (not present in VAL and not
 	   ;; a parent of any back-end in the new value) is removed from the
 	   ;; list of registered back-ends.
-	   (setq org-export-registered-backends
+	   (setq org-export--registered-backends
 		 (org-remove-if-not
 		  (lambda (backend)
-		    (or (memq backend val)
-			(catch 'parentp
-			  (mapc
-			   (lambda (b)
-			     (and (org-export-derived-backend-p b (car backend))
-				  (throw 'parentp t)))
-			   val)
-			  nil)))
-		  org-export-registered-backends))
+		    (let ((name (org-export-backend-name backend)))
+		      (or (memq name val)
+			  (catch 'parentp
+			    (dolist (b val)
+			      (and (org-export-derived-backend-p b name)
+				   (throw 'parentp t)))))))
+		  org-export--registered-backends))
 	   ;; Now build NEW-LIST of both new back-ends and required
 	   ;; parents.
-	   (let ((new-list (mapcar 'car org-export-registered-backends)))
+	   (let ((new-list (mapcar 'org-export-backend-name
+				   org-export--registered-backends)))
 	     (dolist (backend val)
 	       (cond
 		((not (load (format "ox-%s" backend) t t))
@@ -18494,14 +18493,17 @@ share a good deal of logic."
          "Invalid value of `org-latex-create-formula-image-program'")))
    string tofile options buffer))
 
+(declare-function org-export-get-backend "ox" (name))
 (declare-function org-export--get-global-options "ox" (&optional backend))
 (declare-function org-export--get-inbuffer-options "ox" (&optional backend))
 (declare-function org-latex-guess-inputenc "ox-latex" (header))
 (declare-function org-latex-guess-babel-language "ox-latex" (header info))
 (defun org-create-formula--latex-header ()
   "Return LaTeX header appropriate for previewing a LaTeX snippet."
-  (let ((info (org-combine-plists (org-export--get-global-options 'latex)
-				  (org-export--get-inbuffer-options 'latex))))
+  (let ((info (org-combine-plists (org-export--get-global-options
+				   (org-export-get-backend 'latex))
+				  (org-export--get-inbuffer-options
+				   (org-export-get-backend 'latex)))))
     (org-latex-guess-babel-language
      (org-latex-guess-inputenc
       (org-splice-latex-header

@@ -47,15 +47,10 @@
 ;; The core function is `org-export-as'.  It returns the transcoded
 ;; buffer as a string.
 ;;
-;; An export back-end is defined with `org-export-define-backend',
-;; which defines one mandatory information: his translation table.
-;; Its value is an alist whose keys are elements and objects types and
-;; values translator functions.  See function's docstring for more
-;; information about translators.
-;;
-;; Optionally, `org-export-define-backend' can also support specific
-;; buffer keywords, OPTION keyword's items and filters.  Also refer to
-;; function documentation for more information.
+;; An export back-end is defined with `org-export-define-backend'.
+;; This function can also support specific buffer keywords, OPTION
+;; keyword's items and filters.  Refer to function's documentation for
+;; more information.
 ;;
 ;; If the new back-end shares most properties with another one,
 ;; `org-export-define-derived-backend' can be used to simplify the
@@ -280,14 +275,8 @@ containing the back-end used, as a symbol, and either a process
 or the time at which it finished.  It is used to build the menu
 from `org-export-stack'.")
 
-(defvar org-export-registered-backends nil
+(defvar org-export--registered-backends nil
   "List of backends currently available in the exporter.
-
-A backend is stored as a list where CAR is its name, as a symbol,
-and CDR is a plist with the following properties:
-`:filters-alist', `:menu-entry', `:options-alist' and
-`:translate-alist'.
-
 This variable is set with `org-export-define-backend' and
 `org-export-define-derived-backend' functions.")
 
@@ -830,20 +819,6 @@ process faster and the export more portable."
   :package-version '(Org . "8.0")
   :type '(file :must-match t))
 
-(defcustom org-export-invisible-backends nil
-  "List of back-ends that shouldn't appear in the dispatcher.
-
-Any back-end belonging to this list or derived from a back-end
-belonging to it will not appear in the dispatcher menu.
-
-Indeed, Org may require some export back-ends without notice.  If
-these modules are never to be used interactively, adding them
-here will avoid cluttering the dispatcher menu."
-  :group 'org-export-general
-  :version "24.4"
-  :package-version '(Org . "8.0")
-  :type '(repeat (symbol :tag "Back-End")))
-
 (defcustom org-export-dispatch-use-expert-ui nil
   "Non-nil means using a non-intrusive `org-export-dispatch'.
 In that case, no help buffer is displayed.  Though, an indicator
@@ -863,25 +838,147 @@ mode."
 
 ;;; Defining Back-ends
 ;;
-;; `org-export-define-backend' is the standard way to define an export
-;; back-end.  It allows to specify translators, filters, buffer
-;; options and a menu entry.  If the new back-end shares translators
-;; with another back-end, `org-export-define-derived-backend' may be
-;; used instead.
+;; An export back-end is a structure with `org-export-backend' type
+;; and `name', `parent', `transcoders', `options', `filters', `blocks'
+;; and `menu' slots.
 ;;
-;; Internally, a back-end is stored as a list, of which CAR is the
-;; name of the back-end, as a symbol, and CDR a plist.  Accessors to
-;; properties of a given back-end are: `org-export-backend-filters',
-;; `org-export-backend-menu', `org-export-backend-options' and
-;; `org-export-backend-translate-table'.
+;; At the lowest level, a back-end is created with
+;; `org-export-create-backend' function.
+;;
+;; A named back-end can be registered with
+;; `org-export-register-backend' function.  A registered back-end can
+;; later be referred to by its name, with `org-export-get-backend'
+;; function.  Also, such a back-end can become the parent of a derived
+;; back-end from which slot values will be inherited by default.
+;; `org-export-derived-backend-p' can check if a given back-end is
+;; derived from a list of back-end names.
+;;
+;; `org-export-get-all-transcoders', `org-export-get-all-options' and
+;; `org-export-get-all-filters' return the full alist of transcoders,
+;; options and filters, including those inherited from ancestors.
+;;
+;; At a higher level, `org-export-define-backend' is the standard way
+;; to define an export back-end.  If the new back-end is similar to
+;; a registered back-end, `org-export-define-derived-backend' may be
+;; used instead.
 ;;
 ;; Eventually `org-export-barf-if-invalid-backend' returns an error
 ;; when a given back-end hasn't been registered yet.
 
-(defun org-export-define-backend (backend translators &rest body)
+(defstruct (org-export-backend (:constructor org-export-create-backend)
+			       (:copier nil))
+  name parent transcoders options filters blocks menu)
+
+(defun org-export-get-backend (name)
+  "Return export back-end named after NAME.
+NAME is a symbol.  Return nil if no such back-end is found."
+  (catch 'found
+    (dolist (b org-export--registered-backends)
+      (when (eq (org-export-backend-name b) name)
+	(throw 'found b)))))
+
+(defun org-export-register-backend (backend)
+  "Register BACKEND as a known export back-end.
+BACKEND is a structure with `org-export-backend' type."
+  ;; Refuse to register an unnamed back-end.
+  (unless (org-export-backend-name backend)
+    (error "Cannot register a unnamed export back-end"))
+  ;; Refuse to register a back-end with an unknown parent.
+  (let ((parent (org-export-backend-parent backend)))
+    (when (and parent (not (org-export-get-backend parent)))
+      (error "Cannot use unknown \"%s\" back-end as a parent" parent)))
+  ;; Register dedicated export blocks in the parser.
+  (dolist (name (org-export-backend-blocks backend))
+    (add-to-list 'org-element-block-name-alist
+		 (cons name 'org-element-export-block-parser)))
+  ;; If a back-end with the same name as BACKEND is already
+  ;; registered, replace it with BACKEND.  Otherwise, simply add
+  ;; BACKEND to the list of registered back-ends.
+  (let ((old (org-export-get-backend (org-export-backend-name backend))))
+    (if old (setcar (memq old org-export--registered-backends) backend)
+      (push backend org-export--registered-backends))))
+
+(defun org-export-barf-if-invalid-backend (backend)
+  "Signal an error if BACKEND isn't defined."
+  (unless (org-export-backend-p backend)
+    (error "Unknown \"%s\" back-end: Aborting export" backend)))
+
+(defun org-export-derived-backend-p (backend &rest backends)
+  "Non-nil if BACKEND is derived from one of BACKENDS.
+BACKEND is an export back-end, as returned by, e.g.,
+`org-export-create-backend', or a symbol referring to
+a registered back-end.  BACKENDS is constituted of symbols."
+  (when (symbolp backend) (setq backend (org-export-get-backend backend)))
+  (when backend
+    (catch 'exit
+      (while (org-export-backend-parent backend)
+	(when (memq (org-export-backend-name backend) backends)
+	  (throw 'exit t))
+	(setq backend
+	      (org-export-get-backend (org-export-backend-parent backend))))
+      (memq (org-export-backend-name backend) backends))))
+
+(defun org-export-get-all-transcoders (backend)
+  "Return full translation table for BACKEND.
+
+BACKEND is an export back-end, as return by, e.g,,
+`org-export-create-backend'.  Return value is an alist where
+keys are element or object types, as symbols, and values are
+transcoders.
+
+Unlike to `org-export-backend-transcoders', this function
+also returns transcoders inherited from parent back-ends,
+if any."
+  (when (symbolp backend) (setq backend (org-export-get-backend backend)))
+  (when backend
+    (let ((transcoders (org-export-backend-transcoders backend))
+	  parent)
+      (while (setq parent (org-export-backend-parent backend))
+	(setq backend (org-export-get-backend parent))
+	(setq transcoders
+	      (append transcoders (org-export-backend-transcoders backend))))
+      transcoders)))
+
+(defun org-export-get-all-options (backend)
+  "Return export options for BACKEND.
+
+BACKEND is an export back-end, as return by, e.g,,
+`org-export-create-backend'.  See `org-export-options-alist'
+for the shape of the return value.
+
+Unlike to `org-export-backend-options', this function also
+returns options inherited from parent back-ends, if any."
+  (when (symbolp backend) (setq backend (org-export-get-backend backend)))
+  (when backend
+    (let ((options (org-export-backend-options backend))
+	  parent)
+      (while (setq parent (org-export-backend-parent backend))
+	(setq backend (org-export-get-backend parent))
+	(setq options (append options (org-export-backend-options backend))))
+      options)))
+
+(defun org-export-get-all-filters (backend)
+  "Return complete list of filters for BACKEND.
+
+BACKEND is an export back-end, as return by, e.g,,
+`org-export-create-backend'.  Return value is an alist where
+keys are symbols and values lists of functions.
+
+Unlike to `org-export-backend-filters', this function also
+returns filters inherited from parent back-ends, if any."
+  (when (symbolp backend) (setq backend (org-export-get-backend backend)))
+  (when backend
+    (let ((filters (org-export-backend-filters backend))
+	  parent)
+      (while (setq parent (org-export-backend-parent backend))
+	(setq backend (org-export-get-backend parent))
+	(setq filters (append filters (org-export-backend-filters backend))))
+      filters)))
+
+(defun org-export-define-backend (backend transcoders &rest body)
   "Define a new back-end BACKEND.
 
-TRANSLATORS is an alist between object or element types and
+TRANSCODERS is an alist between object or element types and
 functions handling them.
 
 These functions should return a string without any trailing
@@ -997,32 +1094,23 @@ keywords are understood:
     `org-export-options-alist' for more information about
     structure of the values."
   (declare (indent 1))
-  (let (export-block filters menu-entry options contents)
+  (let (blocks filters menu-entry options contents)
     (while (keywordp (car body))
       (case (pop body)
         (:export-block (let ((names (pop body)))
-			 (setq export-block
-			       (if (consp names) (mapcar 'upcase names)
-				 (list (upcase names))))))
+			 (setq blocks (if (consp names) (mapcar 'upcase names)
+					(list (upcase names))))))
 	(:filters-alist (setq filters (pop body)))
 	(:menu-entry (setq menu-entry (pop body)))
         (:options-alist (setq options (pop body)))
         (t (pop body))))
-    (setq contents (append (list :translate-alist translators)
-			   (and filters (list :filters-alist filters))
-			   (and options (list :options-alist options))
-			   (and menu-entry (list :menu-entry menu-entry))))
-    ;; Register back-end.
-    (let ((registeredp (assq backend org-export-registered-backends)))
-      (if registeredp (setcdr registeredp contents)
-	(push (cons backend contents) org-export-registered-backends)))
-    ;; Tell parser to not parse EXPORT-BLOCK blocks.
-    (when export-block
-      (mapc
-       (lambda (name)
-	 (add-to-list 'org-element-block-name-alist
-		      `(,name . org-element-export-block-parser)))
-       export-block))))
+    (org-export-register-backend
+     (org-export-create-backend :name backend
+				:transcoders transcoders
+				:options options
+				:filters filters
+				:blocks blocks
+				:menu menu-entry))))
 
 (defun org-export-define-derived-backend (child parent &rest body)
   "Create a new back-end as a variant of an existing one.
@@ -1077,75 +1165,25 @@ The back-end could then be called with, for example:
 
   \(org-export-to-buffer 'my-latex \"*Test my-latex*\")"
   (declare (indent 2))
-  (let (export-block filters menu-entry options translators contents)
+  (let (blocks filters menu-entry options transcoders contents)
     (while (keywordp (car body))
       (case (pop body)
 	(:export-block (let ((names (pop body)))
-			 (setq export-block
-			       (if (consp names) (mapcar 'upcase names)
-				 (list (upcase names))))))
+			 (setq blocks (if (consp names) (mapcar 'upcase names)
+					(list (upcase names))))))
         (:filters-alist (setq filters (pop body)))
 	(:menu-entry (setq menu-entry (pop body)))
         (:options-alist (setq options (pop body)))
-        (:translate-alist (setq translators (pop body)))
+        (:translate-alist (setq transcoders (pop body)))
         (t (pop body))))
-    (setq contents (append
-		    (list :parent parent)
-		    (let ((p-table (org-export-backend-translate-table parent)))
-		      (list :translate-alist (append translators p-table)))
-		    (let ((p-filters (org-export-backend-filters parent)))
-		      (list :filters-alist (append filters p-filters)))
-		    (let ((p-options (org-export-backend-options parent)))
-		      (list :options-alist (append options p-options)))
-		    (and menu-entry (list :menu-entry menu-entry))))
-    (org-export-barf-if-invalid-backend parent)
-    ;; Register back-end.
-    (let ((registeredp (assq child org-export-registered-backends)))
-      (if registeredp (setcdr registeredp contents)
-	(push (cons child contents) org-export-registered-backends)))
-    ;; Tell parser to not parse EXPORT-BLOCK blocks.
-    (when export-block
-      (mapc
-       (lambda (name)
-	 (add-to-list 'org-element-block-name-alist
-		      `(,name . org-element-export-block-parser)))
-       export-block))))
-
-(defun org-export-backend-parent (backend)
-  "Return back-end from which BACKEND is derived, or nil."
-  (plist-get (cdr (assq backend org-export-registered-backends)) :parent))
-
-(defun org-export-backend-filters (backend)
-  "Return filters for BACKEND."
-  (plist-get (cdr (assq backend org-export-registered-backends))
-	     :filters-alist))
-
-(defun org-export-backend-menu (backend)
-  "Return menu entry for BACKEND."
-  (plist-get (cdr (assq backend org-export-registered-backends))
-	     :menu-entry))
-
-(defun org-export-backend-options (backend)
-  "Return export options for BACKEND."
-  (plist-get (cdr (assq backend org-export-registered-backends))
-	     :options-alist))
-
-(defun org-export-backend-translate-table (backend)
-  "Return translate table for BACKEND."
-  (plist-get (cdr (assq backend org-export-registered-backends))
-	     :translate-alist))
-
-(defun org-export-barf-if-invalid-backend (backend)
-  "Signal an error if BACKEND isn't defined."
-  (unless (org-export-backend-translate-table backend)
-    (error "Unknown \"%s\" back-end: Aborting export" backend)))
-
-(defun org-export-derived-backend-p (backend &rest backends)
-  "Non-nil if BACKEND is derived from one of BACKENDS."
-  (let ((parent backend))
-    (while (and (not (memq parent backends))
-		(setq parent (org-export-backend-parent parent))))
-    parent))
+    (org-export-register-backend
+     (org-export-create-backend :name child
+				:parent parent
+				:transcoders transcoders
+				:options options
+				:filters filters
+				:blocks blocks
+				:menu menu-entry))))
 
 
 
@@ -1448,14 +1486,15 @@ The back-end could then be called with, for example:
 ;;  `org-export--get-subtree-options' and
 ;;  `org-export--get-inbuffer-options'
 ;;
-;; Also, `org-export--install-letbind-maybe' takes care of the part
-;; relative to "#+BIND:" keywords.
+;; Also, `org-export--list-bound-variables' collects bound variables
+;; along with their value in order to set them as buffer local
+;; variables later in the process.
 
 (defun org-export-get-environment (&optional backend subtreep ext-plist)
   "Collect export options from the current buffer.
 
-Optional argument BACKEND is a symbol specifying which back-end
-specific options to read, if any.
+Optional argument BACKEND is an export back-end, as returned by
+`org-export-create-backend'.
 
 When optional argument SUBTREEP is non-nil, assume the export is
 done against the current sub-tree.
@@ -1481,8 +1520,7 @@ inferior to file-local settings."
    (list
     :back-end
     backend
-    :translate-alist
-    (org-export-backend-translate-table backend)
+    :translate-alist (org-export-get-all-transcoders backend)
     :footnote-definition-alist
     ;; Footnotes definitions must be collected in the original
     ;; buffer, as there's no insurance that they will still be in
@@ -1518,11 +1556,12 @@ inferior to file-local settings."
 
 (defun org-export--parse-option-keyword (options &optional backend)
   "Parse an OPTIONS line and return values as a plist.
-Optional argument BACKEND is a symbol specifying which back-end
+Optional argument BACKEND is an export back-end, as returned by,
+e.g., `org-export-create-backend'.  It specifies which back-end
 specific items to read, if any."
   (let* ((all
 	  ;; Priority is given to back-end specific options.
-	  (append (and backend (org-export-backend-options backend))
+	  (append (and backend (org-export-get-all-options backend))
 		  org-export-options-alist))
 	 plist)
     (dolist (option all)
@@ -1542,7 +1581,8 @@ specific items to read, if any."
 
 (defun org-export--get-subtree-options (&optional backend)
   "Get export options in subtree at point.
-Optional argument BACKEND is a symbol specifying back-end used
+Optional argument BACKEND is an export back-end, as returned by,
+e.g., `org-export-create-backend'.  It specifies back-end used
 for export.  Return options as a plist."
   ;; For each buffer keyword, create a headline property setting the
   ;; same property in communication channel. The name for the property
@@ -1594,7 +1634,7 @@ for export.  Return options as a plist."
 			  (t value)))))))))
 	;; Look for both general keywords and back-end specific
 	;; options, with priority given to the latter.
-	(append (and backend (org-export-backend-options backend))
+	(append (and backend (org-export-get-all-options backend))
 		org-export-options-alist)))
      ;; Return value.
      plist)))
@@ -1602,7 +1642,8 @@ for export.  Return options as a plist."
 (defun org-export--get-inbuffer-options (&optional backend)
   "Return current buffer export options, as a plist.
 
-Optional argument BACKEND, when non-nil, is a symbol specifying
+Optional argument BACKEND, when non-nil, is an export back-end,
+as returned by, e.g., `org-export-create-backend'.  It specifies
 which back-end specific options should also be read in the
 process.
 
@@ -1612,7 +1653,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 	 (case-fold-search t)
 	 (options (append
 		   ;; Priority is given to back-end specific options.
-		   (and backend (org-export-backend-options backend))
+		   (and backend (org-export-get-all-options backend))
 		   org-export-options-alist))
 	 (regexp (format "^[ \t]*#\\+%s:"
 			 (regexp-opt (nconc (delq nil (mapcar 'cadr options))
@@ -1725,12 +1766,13 @@ name."
 
 (defun org-export--get-global-options (&optional backend)
   "Return global export options as a plist.
-Optional argument BACKEND, if non-nil, is a symbol specifying
+Optional argument BACKEND, if non-nil, is an export back-end, as
+returned by, e.g., `org-export-create-backend'.  It specifies
 which back-end specific export options should also be read in the
 process."
   (let (plist
 	;; Priority is given to back-end specific options.
-	(all (append (and backend (org-export-backend-options backend))
+	(all (append (and backend (org-export-get-all-options backend))
 		     org-export-options-alist)))
     (dolist (cell all plist)
       (let ((prop (car cell)))
@@ -2058,11 +2100,10 @@ a tree with a select tag."
 ;; back-end output.  It takes care of filtering out elements or
 ;; objects according to export options and organizing the output blank
 ;; lines and white space are preserved.  The function memoizes its
-;; results, so it is cheap to call it within translators.
+;; results, so it is cheap to call it within transcoders.
 ;;
 ;; It is possible to modify locally the back-end used by
 ;; `org-export-data' or even use a temporary back-end by using
-;; `org-export-data-with-translations' and
 ;; `org-export-data-with-backend'.
 ;;
 ;; Internally, three functions handle the filtering of objects and
@@ -2190,24 +2231,6 @@ Return transcoded string."
 	     results)))
 	 (plist-get info :exported-data))))))
 
-(defun org-export-data-with-translations (data translations info)
-  "Convert DATA into another format using a given translation table.
-DATA is an element, an object, a secondary string or a string.
-TRANSLATIONS is an alist between element or object types and
-a functions handling them.  See `org-export-define-backend' for
-more information.  INFO is a plist used as a communication
-channel."
-  (org-export-data
-   data
-   ;; Set-up a new communication channel with TRANSLATIONS as the
-   ;; translate table and a new hash table for memoization.
-   (org-combine-plists
-    info
-    (list :translate-alist translations
-	  ;; Size of the hash table is reduced since this function
-	  ;; will probably be used on short trees.
-	  :exported-data (make-hash-table :test 'eq :size 401)))))
-
 (defun org-export-data-with-backend (data backend info)
   "Convert DATA into BACKEND format.
 
@@ -2217,9 +2240,18 @@ channel.
 
 Unlike to `org-export-with-backend', this function will
 recursively convert DATA using BACKEND translation table."
-  (org-export-barf-if-invalid-backend backend)
-  (org-export-data-with-translations
-   data (org-export-backend-translate-table backend) info))
+  (when (symbolp backend) (setq backend (org-export-get-backend backend)))
+  (org-export-data
+   data
+   ;; Set-up a new communication channel with translations defined in
+   ;; BACKEND as the translate table and a new hash table for
+   ;; memoization.
+   (org-combine-plists
+    info
+    (list :translate-alist (org-export-get-all-transcoders backend)
+	  ;; Size of the hash table is reduced since this function
+	  ;; will probably be used on short trees.
+	  :exported-data (make-hash-table :test 'eq :size 401)))))
 
 (defun org-export--interpret-p (blob info)
   "Non-nil if element or object BLOB should be interpreted during export.
@@ -2713,18 +2745,19 @@ channel, as a plist.  It must return a string or nil.")
   "Call every function in FILTERS.
 
 Functions are called with arguments VALUE, current export
-back-end and INFO.  A function returning a nil value will be
-skipped.  If it returns the empty string, the process ends and
+back-end's name and INFO.  A function returning a nil value will
+be skipped.  If it returns the empty string, the process ends and
 VALUE is ignored.
 
 Call is done in a LIFO fashion, to be sure that developer
 specified filters, if any, are called first."
   (catch 'exit
-    (dolist (filter filters value)
-      (let ((result (funcall filter value (plist-get info :back-end) info)))
-	(cond ((not result) value)
-	      ((equal value "") (throw 'exit nil))
-	      (t (setq value result)))))))
+    (let ((backend-name (plist-get info :back-end)))
+      (dolist (filter filters value)
+	(let ((result (funcall filter value backend-name info)))
+	  (cond ((not result) value)
+		((equal value "") (throw 'exit nil))
+		(t (setq value result))))))))
 
 (defun org-export-install-filters (info)
   "Install filters properties in communication channel.
@@ -2755,7 +2788,7 @@ Return the updated communication channel."
 		       plist key
 		       (if (atom value) (cons value (plist-get plist key))
 			 (append value (plist-get plist key))))))))
-	  (org-export-backend-filters (plist-get info :back-end)))
+	  (org-export-get-all-filters (plist-get info :back-end)))
     ;; Return new communication channel.
     (org-combine-plists info plist)))
 
@@ -2891,6 +2924,10 @@ The function assumes BUFFER's major mode is `org-mode'."
   (backend &optional subtreep visible-only body-only ext-plist)
   "Transcode current Org buffer into BACKEND code.
 
+BACKEND is either an export back-end, as returned by, e.g.,
+`org-export-create-backend', or a symbol referring to
+a registered back-end.
+
 If narrowing is active in the current buffer, only transcode its
 narrowed part.
 
@@ -2911,6 +2948,7 @@ with external parameters overriding Org default settings, but
 still inferior to file-local settings.
 
 Return code as a string."
+  (when (symbolp backend) (setq backend (org-export-get-backend backend)))
   (org-export-barf-if-invalid-backend backend)
   (save-excursion
     (save-restriction
@@ -2943,8 +2981,9 @@ Return code as a string."
 	;; created, where include keywords, macros are expanded and
 	;; code blocks are evaluated.
 	(org-export-with-buffer-copy
-	 ;; Run first hook with current back-end as argument.
-	 (run-hook-with-args 'org-export-before-processing-hook backend)
+	 ;; Run first hook with current back-end's name as argument.
+	 (run-hook-with-args 'org-export-before-processing-hook
+			     (org-export-backend-name backend))
 	 (org-export-expand-include-keyword)
 	 ;; Update macro templates since #+INCLUDE keywords might have
 	 ;; added some new ones.
@@ -2954,10 +2993,11 @@ Return code as a string."
 	 ;; Update radio targets since keyword inclusion might have
 	 ;; added some more.
 	 (org-update-radio-target-regexp)
-	 ;; Run last hook with current back-end as argument.
+	 ;; Run last hook with current back-end's name as argument.
 	 (goto-char (point-min))
 	 (save-excursion
-	   (run-hook-with-args 'org-export-before-parsing-hook backend))
+	   (run-hook-with-args 'org-export-before-parsing-hook
+			       (org-export-backend-name backend)))
 	 ;; Update communication channel with environment.  Also
 	 ;; install user's and developer's filters.
 	 (setq info
@@ -2980,9 +3020,10 @@ Return code as a string."
 	 ;; Call options filters and update export options.  We do not
 	 ;; use `org-export-filter-apply-functions' here since the
 	 ;; arity of such filters is different.
-	 (dolist (filter (plist-get info :filter-options))
-	   (let ((result (funcall filter info backend)))
-	     (when result (setq info result))))
+	 (let ((backend-name (org-export-backend-name backend)))
+	   (dolist (filter (plist-get info :filter-options))
+	     (let ((result (funcall filter info backend-name)))
+	       (when result (setq info result)))))
 	 ;; Parse buffer and call parse-tree filter on it.
 	 (setq tree
 	       (org-export-filter-apply-functions
@@ -3018,7 +3059,9 @@ Return code as a string."
   (backend buffer &optional subtreep visible-only body-only ext-plist)
   "Call `org-export-as' with output to a specified buffer.
 
-BACKEND is the back-end used for transcoding, as a symbol.
+BACKEND is either an export back-end, as returned by, e.g.,
+`org-export-create-backend', or a symbol referring to
+a registered back-end.
 
 BUFFER is the output buffer.  If it already exists, it will be
 erased first, otherwise, it will be created.
@@ -3046,8 +3089,10 @@ to kill ring.  Return buffer."
   (backend file &optional subtreep visible-only body-only ext-plist)
   "Call `org-export-as' with output to a specified file.
 
-BACKEND is the back-end used for transcoding, as a symbol.  FILE
-is the name of the output file, as a string.
+BACKEND is either an export back-end, as returned by, e.g.,
+`org-export-create-backend', or a symbol referring to
+a registered back-end.  FILE is the name of the output file, as
+a string.
 
 Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and
 EXT-PLIST are similar to those used in `org-export-as', which
@@ -3074,6 +3119,10 @@ to kill ring.  Return output file's name."
 (defun org-export-string-as (string backend &optional body-only ext-plist)
   "Transcode STRING into BACKEND code.
 
+BACKEND is either an export back-end, as returned by, e.g.,
+`org-export-create-backend', or a symbol referring to
+a registered back-end.
+
 When optional argument BODY-ONLY is non-nil, only return body
 code, without preamble nor postamble.
 
@@ -3089,7 +3138,10 @@ Return code as a string."
 
 ;;;###autoload
 (defun org-export-replace-region-by (backend)
-  "Replace the active region by its export to BACKEND."
+  "Replace the active region by its export to BACKEND.
+BACKEND is either an export back-end, as returned by, e.g.,
+`org-export-create-backend', or a symbol referring to
+a registered back-end."
   (if (not (org-region-active-p))
       (user-error "No active region to replace")
     (let* ((beg (region-beginning))
@@ -3103,10 +3155,10 @@ Return code as a string."
 (defun org-export-insert-default-template (&optional backend subtreep)
   "Insert all export keywords with default values at beginning of line.
 
-BACKEND is a symbol representing the export back-end for which
-specific export options should be added to the template, or
-`default' for default template.  When it is nil, the user will be
-prompted for a category.
+BACKEND is a symbol referring to the name of a registered export
+back-end, for which specific export options should be added to
+the template, or `default' for default template.  When it is nil,
+the user will be prompted for a category.
 
 If SUBTREEP is non-nil, export configuration will be set up
 locally for the subtree through node properties."
@@ -3115,17 +3167,22 @@ locally for the subtree through node properties."
   (when (and subtreep (org-before-first-heading-p))
     (user-error "No subtree to set export options for"))
   (let ((node (and subtreep (save-excursion (org-back-to-heading t) (point))))
-	(backend (or backend
-                     (intern
-                      (org-completing-read
-                       "Options category: "
-                       (cons "default"
-                             (mapcar (lambda (b) (symbol-name (car b)))
-                                     org-export-registered-backends))))))
+	(backend
+	 (or backend
+	     (intern
+	      (org-completing-read
+	       "Options category: "
+	       (cons "default"
+		     (mapcar (lambda (b)
+			       (symbol-name (org-export-backend-name b)))
+			     org-export--registered-backends))))))
 	options keywords)
     ;; Populate OPTIONS and KEYWORDS.
-    (dolist (entry (if (eq backend 'default) org-export-options-alist
-		     (org-export-backend-options backend)))
+    (dolist (entry (cond ((eq backend 'default) org-export-options-alist)
+			 ((org-export-backend-p backend)
+			  (org-export-get-all-options backend))
+			 (t (org-export-get-all-options
+			     (org-export-backend-name backend)))))
       (let ((keyword (nth 1 entry))
             (option (nth 2 entry)))
         (cond
@@ -3502,16 +3559,20 @@ Caption lines are separated by a white space."
 ;; back-end, it may be used as a fall-back function once all specific
 ;; cases have been treated.
 
-(defun org-export-with-backend (back-end data &optional contents info)
-  "Call a transcoder from BACK-END on DATA.
-CONTENTS, when non-nil, is the transcoded contents of DATA
-element, as a string.  INFO, when non-nil, is the communication
-channel used for export, as a plist.."
-  (org-export-barf-if-invalid-backend back-end)
+(defun org-export-with-backend (backend data &optional contents info)
+  "Call a transcoder from BACKEND on DATA.
+BACKEND is an export back-end, as returned by, e.g.,
+`org-export-create-backend', or a symbol referring to
+a registered back-end.  DATA is an Org element, object, secondary
+string or string.  CONTENTS, when non-nil, is the transcoded
+contents of DATA element, as a string.  INFO, when non-nil, is
+the communication channel used for export, as a plist."
+  (when (symbolp backend) (setq backend (org-export-get-backend backend)))
+  (org-export-barf-if-invalid-backend backend)
   (let ((type (org-element-type data)))
     (if (memq type '(nil org-data)) (error "No foreign transcoder available")
       (let ((transcoder
-	     (cdr (assq type (org-export-backend-translate-table back-end)))))
+	     (cdr (assq type (org-export-get-all-transcoders backend)))))
 	(if (functionp transcoder) (funcall transcoder data contents info)
 	  (error "No foreign transcoder available"))))))
 
@@ -5849,43 +5910,31 @@ back to standard interface."
 	  (lambda (value)
 	    ;; Fontify VALUE string.
 	    (org-propertize value 'face 'font-lock-variable-name-face)))
-	 ;; Prepare menu entries by extracting them from
-	 ;; `org-export-registered-backends', and sorting them by
-	 ;; access key and by ordinal, if any.
-	 (backends
-	  (sort
-	   (sort
-	    (delq nil
-		  (mapcar
-		   (lambda (b)
-		     (let ((name (car b)))
-		       (catch 'ignored
-			 ;; Ignore any back-end belonging to
-			 ;; `org-export-invisible-backends' or derived
-			 ;; from one of them.
-			 (dolist (ignored org-export-invisible-backends)
-			   (when (org-export-derived-backend-p name ignored)
-			     (throw 'ignored nil)))
-			 (org-export-backend-menu name))))
-		   org-export-registered-backends))
-	    (lambda (a b)
-	      (let ((key-a (nth 1 a))
-		    (key-b (nth 1 b)))
-		(cond ((and (numberp key-a) (numberp key-b))
-		       (< key-a key-b))
-		      ((numberp key-b) t)))))
-	   (lambda (a b) (< (car a) (car b)))))
+	 ;; Prepare menu entries by extracting them from registered
+	 ;; back-ends and sorting them by access key and by ordinal,
+	 ;; if any.
+	 (entries
+	  (sort (sort (delq nil
+			    (mapcar 'org-export-backend-menu
+				    org-export--registered-backends))
+		      (lambda (a b)
+			(let ((key-a (nth 1 a))
+			      (key-b (nth 1 b)))
+			  (cond ((and (numberp key-a) (numberp key-b))
+				 (< key-a key-b))
+				((numberp key-b) t)))))
+		'car-less-than-car))
 	 ;; Compute a list of allowed keys based on the first key
 	 ;; pressed, if any.  Some keys
 	 ;; (?^B, ?^V, ?^S, ?^F, ?^A, ?&, ?# and ?q) are always
 	 ;; available.
 	 (allowed-keys
 	  (nconc (list 2 22 19 6 1)
-		 (if (not first-key) (org-uniquify (mapcar 'car backends))
+		 (if (not first-key) (org-uniquify (mapcar 'car entries))
 		   (let (sub-menu)
-		     (dolist (backend backends (sort (mapcar 'car sub-menu) '<))
-		       (when (eq (car backend) first-key)
-			 (setq sub-menu (append (nth 2 backend) sub-menu))))))
+		     (dolist (entry entries (sort (mapcar 'car sub-menu) '<))
+		       (when (eq (car entry) first-key)
+			 (setq sub-menu (append (nth 2 entry) sub-menu))))))
 		 (cond ((eq first-key ?P) (list ?f ?p ?x ?a))
 		       ((not first-key) (list ?P)))
 		 (list ?& ?#)
@@ -5944,7 +5993,7 @@ back to standard interface."
 				(nth 1 sub-entry)))
 			     sub-menu "")
 			    (when (zerop (mod index 2)) "\n"))))))))
-		backends ""))
+		entries ""))
 	     ;; Publishing menu is hard-coded.
 	     (format "\n[%s] Publish
     [%s] Current file              [%s] Current project
@@ -5979,7 +6028,7 @@ back to standard interface."
     ;; UI, display an intrusive help buffer.
     (if expertp
 	(org-export--dispatch-action
-	 expert-prompt allowed-keys backends options first-key expertp)
+	 expert-prompt allowed-keys entries options first-key expertp)
       ;; At first call, create frame layout in order to display menu.
       (unless (get-buffer "*Org Export Dispatcher*")
 	(delete-other-windows)
@@ -6002,15 +6051,15 @@ back to standard interface."
 	  (set-window-start nil pos)))
       (org-fit-window-to-buffer)
       (org-export--dispatch-action
-       standard-prompt allowed-keys backends options first-key expertp))))
+       standard-prompt allowed-keys entries options first-key expertp))))
 
 (defun org-export--dispatch-action
-  (prompt allowed-keys backends options first-key expertp)
+  (prompt allowed-keys entries options first-key expertp)
   "Read a character from command input and act accordingly.
 
 PROMPT is the displayed prompt, as a string.  ALLOWED-KEYS is
 a list of characters available at a given step in the process.
-BACKENDS is a list of menu entries.  OPTIONS, FIRST-KEY and
+ENTRIES is a list of menu entries.  OPTIONS, FIRST-KEY and
 EXPERTP are the same as defined in `org-export--dispatch-ui',
 which see.
 
@@ -6067,9 +6116,9 @@ options as CDR."
        first-key expertp))
      ;; Action selected: Send key and options back to
      ;; `org-export-dispatch'.
-     ((or first-key (functionp (nth 2 (assq key backends))))
+     ((or first-key (functionp (nth 2 (assq key entries))))
       (cons (cond
-	     ((not first-key) (nth 2 (assq key backends)))
+	     ((not first-key) (nth 2 (assq key entries)))
 	     ;; Publishing actions are hard-coded.  Send a special
 	     ;; signal to `org-export-dispatch'.
 	     ((eq first-key ?P)
@@ -6082,10 +6131,10 @@ options as CDR."
 	     ;; path. Indeed, derived backends can share the same
 	     ;; FIRST-KEY.
 	     (t (catch 'found
-		  (mapc (lambda (backend)
-			  (let ((match (assq key (nth 2 backend))))
+		  (mapc (lambda (entry)
+			  (let ((match (assq key (nth 2 entry))))
 			    (when match (throw 'found (nth 2 match)))))
-			(member (assq first-key backends) backends)))))
+			(member (assq first-key entries) entries)))))
 	    options))
      ;; Otherwise, enter sub-menu.
      (t (org-export--dispatch-ui options key expertp)))))
