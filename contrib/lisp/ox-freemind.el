@@ -316,12 +316,11 @@ will result in following node:
 	 (element-contents (org-element-contents element))
 	 (section (assoc 'section element-contents))
 	 (section-contents
-	  (let* ((translations
-		  (nconc (list (cons 'section
-				     (lambda (section contents info)
-				       contents)))
-			 (plist-get info :translate-alist))))
-	    (org-export-data-with-translations section translations info)))
+	  (let ((backend (org-export-create-backend
+			  :parent (org-export-backend-name
+				   (plist-get info :back-end))
+			  :translations '(section . (lambda (e c i) c)))))
+	    (org-export-data-with-backend section backend info)))
 	 (itemized-contents-p (let ((first-child-headline
 				     (org-element-map element-contents
 					 'headline 'identity info t)))

@@ -1983,16 +1983,17 @@ INFO is a plist used as a communication channel."
 					   headline-number "-"))))
 	    ;; Body.
 	    (concat section-number
-		    (org-export-data-with-translations
+		    (org-export-data-with-backend
 		     (org-export-get-alt-title headline info)
-		     ;; Ignore any footnote-reference, link,
-		     ;; radio-target and target in table of contents.
-		     (append
-		      '((footnote-reference . ignore)
-			(link . (lambda (link desc i) desc))
-			(radio-target . (lambda (radio desc i) desc))
-			(target . ignore))
-		      (org-export-backend-translate-table 'html))
+		     ;; Create an anonymous back-end that will ignore
+		     ;; any footnote-reference, link, radio-target and
+		     ;; target in table of contents.
+		     (org-export-create-backend
+		      :parent 'html
+		      :transcoders '((footnote-reference . ignore)
+				     (link . (lambda (object c i) c))
+				     (radio-target . (lambda (object c i) c))
+				     (target . ignore)))
 		     info)
 		    (and tags "&#xa0;&#xa0;&#xa0;") (org-html--tags tags)))))
 

@@ -1152,20 +1152,19 @@ See `org-odt--build-date-styles' for implementation details."
   (let* ((title (org-export-translate "Table of Contents" :utf-8 info))
 	 (headlines (org-export-collect-headlines
 		     info (and (wholenump depth) depth)))
-	 (translations (nconc (mapcar
-			       (lambda (type)
-				 (cons type (lambda (data contents info)
-					      contents)))
-			       (list 'radio-target))
-			      (plist-get info :translate-alist))))
+	 (backend (org-export-create-backend
+		   :parent (org-export-backend-name
+			    (plist-get info :back-end))
+		   :transcoders (mapcar
+				 (lambda (type) (cons type (lambda (d c i) c)))
+				 (list 'radio-target)))))
     (when headlines
       (concat
        (org-odt-begin-toc title depth)
        (mapconcat
 	(lambda (headline)
 	  (let* ((entry (org-odt-format-headline--wrap
-			 headline translations info
-			 'org-odt-format-toc-headline))
+			 headline backend info 'org-odt-format-toc-headline))
 		 (level (org-export-get-relative-level headline info))
 		 (style (format "Contents_20_%d" level)))
 	    (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
@@ -1731,18 +1730,22 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	(t
 	 (let* ((raw (org-export-get-footnote-definition
 		      footnote-reference info))
-		(translations
-		 (cons (cons 'paragraph
-			     (lambda (p c i)
-			       (org-odt--format-paragraph
-				p c "Footnote" "OrgFootnoteCenter"
-				"OrgFootnoteQuotations")))
-		       (org-export-backend-translate-table 'odt)))
-		(def (let ((def (org-trim (org-export-data-with-translations
-					   raw translations info))))
-		       (if (eq (org-element-type raw) 'org-data) def
-			 (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
-				 "Footnote" def)))))
+		(def
+		 (let ((def (org-trim
+			     (org-export-data-with-backend
+			      raw
+			      (org-export-create-backend
+			       :parent 'odt
+			       :transcoders
+			       '((paragraph . (lambda (p c i)
+						(org-odt--format-paragraph
+						 p c "Footnote"
+						 "OrgFootnoteCenter"
+						 "OrgFootnoteQuotations")))))
+			      info))))
+		   (if (eq (org-element-type raw) 'org-data) def
+		     (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+			     "Footnote" def)))))
 	   (funcall --format-footnote-definition n def))))))))
 
 
@@ -1775,13 +1778,12 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 			    "<text:span text:style-name=\"%s\">%s</text:span>"
 			    "OrgTag" tag)) tags " : "))))))
 
-(defun org-odt-format-headline--wrap (headline translations info
-						 &optional format-function
-						 &rest extra-keys)
-  "Transcode a HEADLINE element from Org to ODT.
-CONTENTS holds the contents of the headline.  INFO is a plist
-holding contextual information."
-  (setq translations (or translations (plist-get info :translate-alist)))
+(defun org-odt-format-headline--wrap (headline backend info
+					       &optional format-function
+					       &rest extra-keys)
+  "Transcode a HEADLINE element using BACKEND.
+INFO is a plist holding contextual information."
+  (setq backend (or backend (plist-get info :back-end)))
   (let* ((level (+ (org-export-get-relative-level headline info)))
 	 (headline-number (org-export-get-headline-number headline info))
 	 (section-number (and (org-export-numbered-headline-p headline info)
@@ -1789,13 +1791,13 @@ holding contextual information."
 					 headline-number ".")))
 	 (todo (and (plist-get info :with-todo-keywords)
 		    (let ((todo (org-element-property :todo-keyword headline)))
-		      (and todo (org-export-data-with-translations
-				 todo translations info)))))
+		      (and todo
+			   (org-export-data-with-backend todo backend info)))))
 	 (todo-type (and todo (org-element-property :todo-type headline)))
 	 (priority (and (plist-get info :with-priority)
 			(org-element-property :priority headline)))
-	 (text (org-export-data-with-translations
-		(org-element-property :title headline) translations info))
+	 (text (org-export-data-with-backend
+		(org-element-property :title headline) backend info))
 	 (tags (and (plist-get info :with-tags)
 		    (org-export-get-tags headline info)))
 	 (headline-label (concat "sec-" (mapconcat 'number-to-string
@@ -1805,7 +1807,7 @@ holding contextual information."
 			   ((functionp org-odt-format-headline-function)
 			    (function*
 			     (lambda (todo todo-type priority text tags
-					   &allow-other-keys)
+				      &allow-other-keys)
 			       (funcall org-odt-format-headline-function
 					todo todo-type priority text tags))))
 			   (t 'org-odt-format-headline))))
@@ -1934,7 +1936,7 @@ holding contextual information."
     (let ((format-function
 	   (function*
 	    (lambda (todo todo-type priority text tags
-			  &key contents &allow-other-keys)
+		     &key contents &allow-other-keys)
 	      (funcall org-odt-format-inlinetask-function
 		       todo todo-type priority text tags contents)))))
       (org-odt-format-headline--wrap
@@ -2149,15 +2151,14 @@ SHORT-CAPTION are strings."
 	 ;; will do.
 	 (short-caption
 	  (let ((short-caption (or short-caption caption))
-		(translations (nconc (mapcar
-				      (lambda (type)
-					(cons type (lambda (data contents info)
-						     contents)))
-				      org-element-all-objects)
-				     (plist-get info :translate-alist))))
+		(backend (org-export-create-backend
+			  :parent (org-export-backend-name
+				   (plist-get info :back-end))
+			  :transcoders
+			  (mapcar (lambda (type) (cons type (lambda (o c i) c)))
+				  org-element-all-objects))))
 	    (when short-caption
-	      (org-export-data-with-translations short-caption
-						 translations info)))))
+	      (org-export-data-with-backend short-caption backend info)))))
     (when (or label caption)
       (let* ((default-category
 	       (case (org-element-type element)
