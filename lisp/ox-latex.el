@@ -1266,55 +1266,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 
 ;;;; Footnote Reference
-;;
-;; Footnote reference export is handled by
-;; `org-latex-footnote-reference'.
-;;
-;; Internally, `org-latex--get-footnote-counter' is used to restore
-;; the value of the LaTeX "footnote" counter after a jump due to
-;; a reference to an already defined footnote.  It is only needed in
-;; item tags since the optional argument to \footnotemark is not
-;; allowed there.
-
-(defun org-latex--get-footnote-counter (footnote-reference info)
-  "Return \"footnote\" counter before FOOTNOTE-REFERENCE is encountered.
-INFO is a plist used as a communication channel."
-  ;; Find original counter value by counting number of footnote
-  ;; references appearing for the first time before the current
-  ;; footnote reference.
-  (let* ((label (org-element-property :label footnote-reference))
-	 seen-refs
-	 search-ref			; For byte-compiler.
-	 (search-ref
-	  (function
-	   (lambda (data)
-	     ;; Search footnote references through DATA, filling
-	     ;; SEEN-REFS along the way.
-	     (org-element-map data 'footnote-reference
-	       (lambda (fn)
-		 (let ((fn-lbl (org-element-property :label fn)))
-		   (cond
-		    ;; Anonymous footnote match: return number.
-		    ((eq fn footnote-reference) (length seen-refs))
-		    ;; Anonymous footnote: it's always a new one.
-		    ;; Also, be sure to return nil from the `cond' so
-		    ;; `first-match' doesn't get us out of the loop.
-		    ((not fn-lbl) (push 'inline seen-refs) nil)
-		    ;; Label not seen so far: add it so SEEN-REFS.
-		    ;;
-		    ;; Also search for subsequent references in
-		    ;; footnote definition so numbering follows
-		    ;; reading logic.  Note that we don't care about
-		    ;; inline definitions, since `org-element-map'
-		    ;; already traverses them at the right time.
-		    ((not (member fn-lbl seen-refs))
-		     (push fn-lbl seen-refs)
-		     (funcall search-ref
-			      (org-export-get-footnote-definition fn info))))))
-	       ;; Don't enter footnote definitions since it will
-	       ;; happen when their first reference is found.
-	       info 'first-match 'footnote-definition)))))
-    (funcall search-ref (plist-get info :parse-tree))))
 
 (defun org-latex-footnote-reference (footnote-reference contents info)
   "Transcode a FOOTNOTE-REFERENCE element from Org to LaTeX.
