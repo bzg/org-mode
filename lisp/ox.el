@@ -5304,10 +5304,6 @@ them."
      ("fr"
       :ascii "Programme %d :" :default "Programme nº %d :"
       :latin1 "Programme %d :"))
-    ("Listing %d: %s"
-     ("fr"
-      :ascii "Programme %d : %s" :default "Programme nº %d : %s"
-      :latin1 "Programme %d : %s"))
     ("See section %s"
      ("de" :default "siehe Abschnitt %s")
      ("es" :default "vea seccion %s")
@@ -5317,12 +5313,6 @@ them."
      ("es" :default "Tabla %d")
      ("fr"
       :ascii "Tableau %d :" :default "Tableau nº %d :" :latin1 "Tableau %d :"))
-    ("Table %d: %s"
-     ("de" :default "Tabelle %d: %s")
-     ("es" :default "Tabla %d: %s")
-     ("fr"
-      :ascii "Tableau %d : %s" :default "Tableau nº %d : %s"
-      :latin1 "Tableau %d : %s"))
     ("Table of Contents"
      ("ca" :html "&Iacute;ndex")
      ("cs" :default "Obsah")
