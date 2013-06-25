@@ -308,11 +308,11 @@ specifiers - %e and %n.  %e is replaced with the CATEGORY-NAME.
 `org-odt-format-label-reference'.")
 
 (defvar org-odt-category-map-alist
-  '(("__Table__" "Table" "value" "Table" org-odt--enumerable-p)
+  '(("__Table__" "Table" "value" "Table %d:" org-odt--enumerable-p)
     ("__Figure__" "Illustration" "value" "Figure" org-odt--enumerable-image-p)
     ("__MathFormula__" "Text" "math-formula" "Equation" org-odt--enumerable-formula-p)
     ("__DvipngImage__" "Equation" "value" "Equation" org-odt--enumerable-latex-image-p)
-    ("__Listing__" "Listing" "value" "Listing" org-odt--enumerable-p)
+    ("__Listing__" "Listing" "value" "Listing %d:" org-odt--enumerable-p)
     ;; ("__Table__" "Table" "category-and-value")
     ;; ("__Figure__" "Figure" "category-and-value")
     ;; ("__DvipngImage__" "Equation" "category-and-value")
@@ -2786,63 +2786,58 @@ INFO is a plist holding contextual information.  See
      ;; Links pointing to a headline: Find destination and build
      ;; appropriate referencing command.
      ((member type '("custom-id" "fuzzy" "id"))
-      (let* ((destination (if (string= type "fuzzy")
-			      (org-export-resolve-fuzzy-link link info)
-			    (org-export-resolve-id-link link info))))
-	(or
-	 ;; Case 1: Fuzzy link points nowhere.
-	 (when (null (org-element-type destination))
+      (let ((destination (if (string= type "fuzzy")
+			     (org-export-resolve-fuzzy-link link info)
+			   (org-export-resolve-id-link link info))))
+	(case (org-element-type destination)
+	  ;; Case 1: Fuzzy link points nowhere.
+	  ('nil
 	   (format "<text:span text:style-name=\"%s\">%s</text:span>"
-		   "Emphasis" (or desc (org-export-data
-					(org-element-property
-					 :raw-link link) info))))
-	 ;; Case 2: Fuzzy link points to an invisible target.  Strip it.
-	 (when (eq (org-element-type destination) 'keyword) "")
-	 ;; Case 3: LINK points to a headline.
-	 (when (eq (org-element-type destination) 'headline)
-	   ;; Case 3.1: LINK has a custom description that is
-	   ;; different from headline's title.  Create a hyperlink.
-	   (when (and desc
-		      (let ((link-desc (org-element-contents link)))
-			(not (string= (org-element-interpret-data link-desc)
-				      (org-element-property :raw-value
-							    destination)))))
-	     (let* ((headline-no (org-export-get-headline-number
-				  destination info))
-		    (label (format "sec-%s" (mapconcat 'number-to-string
-						       headline-no "-"))))
-	       (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
-		       label desc))))
-	 ;; Case 4: LINK points to an Inline image, Math formula or a Table.
-	 (let ((label-reference (ignore-errors (org-odt-format-label
-						destination info 'reference))))
-	   (when label-reference
-	     (cond
-	      ;; Case 4.1: LINK has no description. Create a
-	      ;; cross-reference showing entity's sequence number.
-	      ((not desc) label-reference)
-	      ;; Case 4.2: LINK has description.  Insert a hyperlink
-	      ;; with user-provided description.
-	      (t (let* ((caption-from (case (org-element-type destination)
-					(link (org-export-get-parent-element
-					       destination))
-					(t destination)))
-			;; Get label and caption.
-			(label (org-element-property :name caption-from)))
-		   (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
-			   (org-export-solidify-link-text label) desc))))))
-	 ;; Case 5: Fuzzy link points to a TARGET.
-	 (when (eq (org-element-type destination) 'target)
-	   ;; Case 5.1: LINK has description.  Create a hyperlink.
-	   (when desc
+		   "Emphasis"
+		   (or desc
+		       (org-export-data (org-element-property :raw-link link)
+					info))))
+	  ;; Case 2: Fuzzy link points to a headline.
+	  (headline
+	   ;; If there's a description, create a hyperlink.
+	   ;; Otherwise, try to provide a meaningful description.
+	   (if (not desc) (org-odt-link--infer-description destination info)
+	     (let* ((headline-no
+		     (org-export-get-headline-number destination info))
+		    (label
+		     (format "sec-%s"
+			     (mapconcat 'number-to-string headline-no "-"))))
+	       (format
+		"<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
+		label desc))))
+	  ;; Case 3: Fuzzy link points to a target.
+	  (target
+	   ;; If there's a description, create a hyperlink.
+	   ;; Otherwise, try to provide a meaningful description.
+	   (if (not desc) (org-odt-link--infer-description destination info)
 	     (let ((label (org-element-property :value destination)))
 	       (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
-		       (org-export-solidify-link-text label) desc))))
-	 ;; LINK has no description. It points to either a HEADLINE or
-	 ;; an ELEMENT with a #+NAME: LABEL attached to it.  LINK to
-	 ;; DESTINATION, but make a best effort to provide
-	 ;; a *meaningful* description.
-	 (org-odt-link--infer-description destination info))))
+		       (org-export-solidify-link-text label)
+		       desc))))
+	  ;; Case 4: Fuzzy link points to some element (e.g., an
+	  ;; inline image, a math formula or a table).
+	  (otherwise
+	   (let ((label-reference
+		  (ignore-errors (org-odt-format-label
+				  destination info 'reference))))
+	     (cond ((not label-reference)
+		    (org-odt-link--infer-description destination info))
+		   ;; LINK has no description.  Create
+		   ;; a cross-reference showing entity's sequence
+		   ;; number.
+		   ((not desc) label-reference)
+		   ;; LINK has description.  Insert a hyperlink with
+		   ;; user-provided description.
+		   (t
+		    (let ((label (org-element-property :name destination)))
+		      (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
+			      (org-export-solidify-link-text label)
+			      desc)))))))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
@@ -2967,7 +2962,8 @@ contextual information."
     (setq output (org-odt--encode-plain-text output t))
     ;; Handle smart quotes.  Be sure to provide original string since
     ;; OUTPUT may have been modified.
-    (setq output (org-export-activate-smart-quotes output :utf-8 info text))
+    (when (plist-get info :with-smart-quotes)
+      (setq output (org-export-activate-smart-quotes output :utf-8 info text)))
     ;; Convert special strings.
     (when (plist-get info :with-special-strings)
       (mapc

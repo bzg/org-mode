@@ -5260,15 +5260,19 @@ them."
      ("zh-CN" :html "&#26085;&#26399;" :utf-8 "日期")
      ("zh-TW" :html "&#26085;&#26399;" :utf-8 "日期"))
     ("Equation"
+     ("de" :default "Gleichung")
+     ("es" :html "Ecuaci&oacute;n" :default "Ecuación")
      ("fr" :ascii "Equation" :default "Équation"))
-    ("Figure")
+    ("Figure"
+     ("de" :default "Abbildung")
+     ("es" :default "Figura"))
     ("Footnotes"
      ("ca" :html "Peus de p&agrave;gina")
      ("cs" :default "Pozn\xe1mky pod carou")
      ("da" :default "Fodnoter")
-     ("de" :html "Fu&szlig;noten")
+     ("de" :html "Fu&szlig;noten" :default "Fußnoten")
      ("eo" :default "Piednotoj")
-     ("es" :html "Pies de p&aacute;gina")
+     ("es" :html "Nota al pie de p&aacute;gina" :default "Nota al pie de página")
      ("fi" :default "Alaviitteet")
      ("fr" :default "Notes de bas de page")
      ("hu" :html "L&aacute;bjegyzet")
@@ -5287,26 +5291,28 @@ them."
      ("zh-CN" :html "&#33050;&#27880;" :utf-8 "脚注")
      ("zh-TW" :html "&#33139;&#35387;" :utf-8 "腳註"))
     ("List of Listings"
+     ("de" :default "Programmauflistungsverzeichnis")
+     ("es" :default "Indice de Listados de programas")
      ("fr" :default "Liste des programmes"))
     ("List of Tables"
+     ("de" :default "Tabellenverzeichnis")
+     ("es" :default "Indice de tablas")
      ("fr" :default "Liste des tableaux"))
     ("Listing %d:"
+     ("de" :default "Programmlisting %d")
+     ("es" :default "Listado de programa %d")
      ("fr"
       :ascii "Programme %d :" :default "Programme nº %d :"
       :latin1 "Programme %d :"))
-    ("Listing %d: %s"
-     ("fr"
-      :ascii "Programme %d : %s" :default "Programme nº %d : %s"
-      :latin1 "Programme %d : %s"))
     ("See section %s"
+     ("de" :default "siehe Abschnitt %s")
+     ("es" :default "vea seccion %s")
      ("fr" :default "cf. section %s"))
     ("Table %d:"
+     ("de" :default "Tabelle %d")
+     ("es" :default "Tabla %d")
      ("fr"
       :ascii "Tableau %d :" :default "Tableau nº %d :" :latin1 "Tableau %d :"))
-    ("Table %d: %s"
-     ("fr"
-      :ascii "Tableau %d : %s" :default "Tableau nº %d : %s"
-      :latin1 "Tableau %d : %s"))
     ("Table of Contents"
      ("ca" :html "&Iacute;ndex")
      ("cs" :default "Obsah")
@@ -5332,6 +5338,8 @@ them."
      ("zh-CN" :html "&#30446;&#24405;" :utf-8 "目录")
      ("zh-TW" :html "&#30446;&#37636;" :utf-8 "目錄"))
     ("Unknown reference"
+     ("de" :default "Unbekannter Verweis")
+     ("es" :default "referencia desconocida")
      ("fr" :ascii "Destination inconnue" :default "Référence inconnue")))
   "Dictionary for export engine.
 
