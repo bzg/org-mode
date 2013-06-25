@@ -3900,7 +3900,7 @@ element it has to parse."
 	    (cond
 	     ;; Jumping over affiliated keywords put point off-limits.
 	     ;; Parse them as regular keywords.
-	     ((>= (point) limit)
+	     ((and (cdr affiliated) (>= (point) limit))
 	      (goto-char (car affiliated))
 	      (org-element-keyword-parser limit nil))
 	     ;; LaTeX Environment.

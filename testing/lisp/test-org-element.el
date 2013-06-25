@@ -2848,7 +2848,12 @@ Paragraph \\alpha."
 	   "- outer\n  #+begin_center\n  - inner\n  #+end_center"
 	 (search-forward "inner")
 	 (beginning-of-line)
-	 (org-element-type (org-element-at-point))))))
+	 (org-element-type (org-element-at-point)))))
+  ;; Do not error at eob on an empty line.
+  (should
+   (org-test-with-temp-text "* H\n"
+     (forward-line)
+     (or (org-element-at-point) t))))
 
 (ert-deftest test-org-element/context ()
   "Test `org-element-context' specifications."
