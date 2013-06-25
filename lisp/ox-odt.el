@@ -308,11 +308,11 @@ specifiers - %e and %n.  %e is replaced with the CATEGORY-NAME.
 `org-odt-format-label-reference'.")
 
 (defvar org-odt-category-map-alist
-  '(("__Table__" "Table" "value" "Table" org-odt--enumerable-p)
+  '(("__Table__" "Table" "value" "Table %d:" org-odt--enumerable-p)
     ("__Figure__" "Illustration" "value" "Figure" org-odt--enumerable-image-p)
     ("__MathFormula__" "Text" "math-formula" "Equation" org-odt--enumerable-formula-p)
     ("__DvipngImage__" "Equation" "value" "Equation" org-odt--enumerable-latex-image-p)
-    ("__Listing__" "Listing" "value" "Listing" org-odt--enumerable-p)
+    ("__Listing__" "Listing" "value" "Listing %d:" org-odt--enumerable-p)
     ;; ("__Table__" "Table" "category-and-value")
     ;; ("__Figure__" "Figure" "category-and-value")
     ;; ("__DvipngImage__" "Equation" "category-and-value")
