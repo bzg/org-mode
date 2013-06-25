@@ -2966,7 +2966,8 @@ contextual information."
     (setq output (org-odt--encode-plain-text output t))
     ;; Handle smart quotes.  Be sure to provide original string since
     ;; OUTPUT may have been modified.
-    (setq output (org-export-activate-smart-quotes output :utf-8 info text))
+    (when (plist-get info :with-smart-quotes)
+      (setq output (org-export-activate-smart-quotes output :utf-8 info text)))
     ;; Convert special strings.
     (when (plist-get info :with-special-strings)
       (mapc
