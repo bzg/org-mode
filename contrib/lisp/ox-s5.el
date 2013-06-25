@@ -306,7 +306,7 @@ holding export options."
     (mapconcat
      'identity
      (list
-      (plist-get info :html-doctype)
+      (org-html-doctype info)
       (format "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"%s\" xml:lang=\"%s\">"
 	      (plist-get info :language) (plist-get info :language))
       "<head>"

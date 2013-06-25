@@ -1,6 +1,6 @@
 # -*- mode:org -*-
 
-#+TITLE: Maintainer tasks
+#+TITLE: Org maintainer tasks
 #+STARTUP: noindent
 
 This document describes the tasks the Org-mode maintainer has to do
@@ -37,7 +37,7 @@ branch back into maint to synchronize the two.
 
 ** Minor release
 
-The release number for minor releases look like this:  =7.13.01=
+The release number for minor releases look like this:  =7.13.1=
 
 Minor releases are small amends to main releases.  Usually they fix
 critical bugs discovered in a main release.  Minor bugs are usually
@@ -50,14 +50,18 @@ maint then merged in master.
 
 ** Tagging the release
 
-When doing a major and a minor release, after all necessary merging
-is done, tag the _maint_ branch for the release with:
+When doing a major and a minor release, after all necessary merging is
+done, tag the _maint_ branch for the release with:
 
-  git tag -a "Adding release tag" release_7.9.1
+  git tag -a release_7.9.1 -m "Adding release tag"
 
 and push tags with
 
   git push --tags
+
+We also encourage you to sign release tags like this:
+
+  git tag -s release_7.9.1 -m "Adding release tag"
 
 ** Uploading the release files from the orgmode.org server
 
@@ -71,92 +75,6 @@ From there do
 
 to create the .tar.gz and .zip files, the documentation, and to
 upload everything at the right place.
-
-* Working with patchwork
-
-John Wiegley is running a patchwork server that looks at the
-emacs-orgmode mailing list and extracts patches.  The maintainer and
-his helpers should work through such patches, give feedback on them
-and apply the ones which are good and done.  A task for the maintainer
-is to every now and then try to get old stuff out of that list, by
-asking some helpers to investigate the patch, by rejecting or
-accepting it.
-
-I have found that the best workflow for this is using the pw script by
-Nate Case, with the modifications for Org-mode made by John Wiegley
-and Carsten Dominik.  The correct version of this script that should
-be used with Org mode is distributed in the =mk/= directory of the Org
-mode distribution.  Here is the basic workflow for this.
-
-** Access to the patchwork server
-
-If you want to work on patchwork patches, you need write access at the
-patchwork server.  You need to contact John Wiegley to get this
-access.
-
-There is a web interface to look at the patches and to change the
-status of patches.  This interface is self-explanatory.  There is also
-a command line script which can be very convenient to use.
-
-** Testing patches
-
-To start testing a patch, first assign it to yourself
-
-: pw update -s "Under Review" -d DELEGATE-NAME NNN
-
-where =NNN= is a patch number and =DELEGATE-NAME= is your user name on
-the patchwork server.
-
-The get the patch into a branch:
-
-: pw branch NNN
-
-This will create a local topic branch in your git repository with the
-name =t/patchNNN=.  You will also be switched to the branch so that
-you can immediately start testing it.  Quite often small amends need
-to be made, or documentation has to be added.  Also, many contributors
-do not yet provide the proper ChangeLog-like entries in the commit
-message for the patch.  As a maintainer, you have two options here.
-Either ask the contributor to make the changes and resubmit the patch,
-or fix it yourself.  In principle, asking to contributor to change the
-patch until it is complete is the best route, because it will educate
-the contributor and minimize the work for the maintainer.  However,
-sometimes it can be less hassle to fix things directly and commit the
-changes to the same branch =t/patchNNN=.
-
-If you ask the contributor to make the changes, the patch should be
-marked on the patchwork server as "changes requested".
-
-: pw update -s "Changes Requested" -m "What to change" NNN
-
-This will send an email to the contributor and the mailing list with a
-request for changes.  The =-m= message should not be more than one
-sentence and describe the requested changes.  If you need to explain
-in more detail, write a separate email to the contributor.
-
-When a new version of the patch arrives, you mark the old one as
-superseded
-
-: pw update -s "Superseded" NNN
-
-and start working at the new one.
-
-** Merging a final patch
-
-Once the patch has been iterated and is final (including the
-ChangeLog-like entries in the commit message), it should be merged.
-The assumption here is that the final version of the patch is given by
-the HEAD state in the branch =t/patchNNN=.  To merge, do this:
-
-: pw merge -m "maintainer comment" NNN
-
-This will merge the patch into master, switch back to master and send
-an email to both contributor and mailing list stating that this change
-has been accepted, along with the comment given in the =-m= message.
-
-At some point you might then want to remove the topic branch
-
-: git branch -d t/patchNNN
 
 * Synchonization with Emacs
 
@@ -253,16 +171,19 @@ So the way I have been doing things with Emacs is this:
 
 * Copyright assignments
 
-  The maintainer needs to keep track of copyright assignments.  Even
-  better, find a volunteer to do this.
+  The maintainer needs to keep track of copyright assignments.
+  Even better, find a volunteer to do this.
+
+  The assignment form is included in the repository as a file that
+  you can send to contributors: =request-assign-future.txt=
 
   The list of all contributors from who we have the papers is kept on
-  Worg at http://orgmode.org/worg/org-contribute.php, so that
+  Worg at http://orgmode.org/worg/org-contribute.html, so that
   committers can check if a patch can go into the core.
 
   The assignment process does not allways go smoothly, and it has
   happened several times that it gets stuck or forgotten at the FSF.
-  The contact at the FSF for this is: copyright-clerk@fsf.org
+  The contact at the FSF for this is: mailto:copyright-clerk@fsf.org
 
   Emails from the paper submitter have been ignored in the past, but
   an email from me (Carsten) as the maintainer of Org mode has usually

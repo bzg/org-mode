@@ -7,7 +7,7 @@
 
 ;; Keywords: outlines, hypermedia, calendar, wp
 
-;; This file is part of GNU Emacs.
+;; This file is not part of GNU Emacs.
 
 ;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -23,9 +23,10 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; This file implements links to Apple Mail.app messages from within Org-mode.
-;; Org-mode does not load this module by default - if you would actually like
-;; this to happen then configure the variable `org-modules'.
+;; This file implements links to Apple Mail.app messages from within
+;; Org-mode.  Org-mode does not load this module by default - if you
+;; would actually like this to happen then configure the variable
+;; `org-modules' and add Org's contrib/ directory to your `load-path'.
 
 ;; If you would like to create links to all flagged messages in an
 ;; Apple Mail.app account, please customize the variable

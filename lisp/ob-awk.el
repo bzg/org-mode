@@ -44,7 +44,7 @@
 (defvar org-babel-awk-command "awk"
   "Name of the awk executable command.")
 
-(defun org-babel-expand-body:awk (body params &optional processed-params)
+(defun org-babel-expand-body:awk (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (dolist (pair (mapcar #'cdr (org-babel-get-header params :var)))
     (setf body (replace-regexp-in-string

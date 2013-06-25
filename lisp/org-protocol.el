@@ -265,7 +265,7 @@ Here is an example:
 This is usually a single character string but can also be a
 string with two characters."
   :group 'org-protocol
-  :type 'string)
+  :type '(choice (const nil) (string)))
 
 (defcustom org-protocol-data-separator "/+\\|\\?"
   "The default data separator to use.

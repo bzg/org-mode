@@ -132,10 +132,11 @@
       (list (expand-file-name ".git" dir) relpath))))
 
 
-(if (featurep 'xemacs)
-    (defalias 'org-git-gitrepos-p 'org-git-find-gitdir)
-  (defalias 'org-git-gitrepos-p 'org-git-find-gitdir
-  "Return non-nil if path is in git repository"))
+(eval-and-compile
+  (if (featurep 'xemacs)
+      (defalias 'org-git-gitrepos-p 'org-git-find-gitdir)
+    (defalias 'org-git-gitrepos-p 'org-git-find-gitdir
+      "Return non-nil if path is in git repository")))
 
 ;; splitting the link string
 
@@ -196,8 +197,7 @@
   (unless
       (zerop (call-process org-git-program nil buffer nil
                            "--no-pager" (concat "--git-dir=" gitdir) "show" object))
-    (error "git error: %s " (save-excursion (set-buffer buffer)
-                                            (buffer-string)))))
+    (error "git error: %s " (with-current-buffer buffer (buffer-string)))))
 
 (defun org-git-blob-sha (gitdir object)
   "Return sha of the referenced object"

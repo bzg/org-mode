@@ -47,30 +47,30 @@
   (org-test-with-temp-text "#+name: eg
 | col1 | col2 |
 |------+------|
-| a    | c    |
-| b    | d    |
+| a    | 1    |
+| b    | 2.0  |
 
 #+header: :colnames nil
 #+header: :var x = eg
 #+begin_src perl
 #+end_src"
     (org-babel-next-src-block)
-    (should (equal '(("col1" "col2") hline ("a" "c") ("b" "d"))
+    (should (equal '(("col1" "col2") hline ("a" 1) ("b" 2.0))
 		   (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob-perl/table-passthrough-colnames-no ()
   (org-test-with-temp-text "#+name: eg
 | col1 | col2 |
 |------+------|
-| a    | c    |
-| b    | d    |
+| a    | 1    |
+| b    | 2.0  |
 
 #+header: :colnames no
 #+header: :var x = eg
 #+begin_src perl
 #+end_src"
     (org-babel-next-src-block)
-    (should (equal '(("col1" "col2") ("a" "c") ("b" "d"))
+    (should (equal '(("col1" "col2") ("a" 1) ("b" 2.0))
 		   (org-babel-execute-src-block)))))
 
 (provide 'test-ob-perl)

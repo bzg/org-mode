@@ -124,9 +124,16 @@
 (ert-deftest test-org/fill-paragraph ()
   "Test `org-fill-paragraph' specifications."
   ;; At an Org table, align it.
-  (org-test-with-temp-text "|a|"
-    (org-fill-paragraph)
-    (should (equal (buffer-string) "| a |\n")))
+  (should
+   (equal "| a |\n"
+	  (org-test-with-temp-text "|a|"
+	    (org-fill-paragraph)
+	    (buffer-string))))
+  (should
+   (equal "#+name: table\n| a |\n"
+	  (org-test-with-temp-text "#+name: table\n| a |"
+	    (org-fill-paragraph)
+	    (buffer-string))))
   ;; At a paragraph, preserve line breaks.
   (org-test-with-temp-text "some \\\\\nlong\ntext"
     (let ((fill-column 20))
@@ -295,38 +302,34 @@
 ;;;; Fuzzy Links
 
 ;; Fuzzy links [[text]] encompass links to a target (<<text>>), to
-;; a target keyword (aka an invisible target: #+TARGET: text), to
 ;; a named element (#+name: text) and to headlines (* Text).
 
 (ert-deftest test-org/fuzzy-links ()
   "Test fuzzy links specifications."
   ;; 1. Fuzzy link goes in priority to a matching target.
-  (org-test-with-temp-text
-      "#+TARGET: Test\n#+NAME: Test\n|a|b|\n<<Test>>\n* Test\n[[Test]]"
-    (goto-line 6)
-    (org-open-at-point)
-    (should (looking-at "<<Test>>")))
-  ;; 2. Fuzzy link should then go to a matching target keyword.
-  (org-test-with-temp-text
-      "#+NAME: Test\n|a|b|\n#+TARGET: Test\n* Test\n[[Test]]"
-    (goto-line 5)
-    (org-open-at-point)
-    (should (looking-at "#\\+TARGET: Test")))
-  ;; 3. Then fuzzy link points to an element with a given name.
-  (org-test-with-temp-text "Test\n#+NAME: Test\n|a|b|\n* Test\n[[Test]]"
-    (goto-line 5)
-    (org-open-at-point)
-    (should (looking-at "#\\+NAME: Test")))
-  ;; 4. A target still lead to a matching headline otherwise.
-  (org-test-with-temp-text "* Head1\n* Head2\n*Head3\n[[Head2]]"
-    (goto-line 4)
-    (org-open-at-point)
-    (should (looking-at "\\* Head2")))
-  ;; 5. With a leading star in link, enforce heading match.
-  (org-test-with-temp-text "#+TARGET: Test\n* Test\n<<Test>>\n[[*Test]]"
-    (goto-line 4)
-    (org-open-at-point)
-    (should (looking-at "\\* Test"))))
+  (should
+   (org-test-with-temp-text "#+NAME: Test\n|a|b|\n<<Test>>\n* Test\n[[Test]]"
+     (goto-line 5)
+     (org-open-at-point)
+     (looking-at "<<Test>>")))
+  ;; 2. Then fuzzy link points to an element with a given name.
+  (should
+   (org-test-with-temp-text "Test\n#+NAME: Test\n|a|b|\n* Test\n[[Test]]"
+     (goto-line 5)
+     (org-open-at-point)
+     (looking-at "#\\+NAME: Test")))
+  ;; 3. A target still lead to a matching headline otherwise.
+  (should
+   (org-test-with-temp-text "* Head1\n* Head2\n*Head3\n[[Head2]]"
+     (goto-line 4)
+     (org-open-at-point)
+     (looking-at "\\* Head2")))
+  ;; 4. With a leading star in link, enforce heading match.
+  (should
+   (org-test-with-temp-text "* Test\n<<Test>>\n[[*Test]]"
+     (goto-line 3)
+     (org-open-at-point)
+     (looking-at "\\* Test"))))
 
 
 ;;;; Link Escaping
@@ -392,15 +395,25 @@
   (should
    (string=
     "àâçèéêîôùû"
-        (decode-coding-string (org-link-unescape "%E0%E2%E7%E8%E9%EA%EE%F4%F9%FB") 'latin-1))))
+        (decode-coding-string
+	 (org-link-unescape "%E0%E2%E7%E8%E9%EA%EE%F4%F9%FB") 'latin-1))))
 
 (ert-deftest test-org/org-link-escape-url-with-escaped-char ()
-  "Escape and unscape a URL that includes an escaped char.
+  "Escape and unescape a URL that includes an escaped char.
 http://article.gmane.org/gmane.emacs.orgmode/21459/"
   (should
    (string=
     "http://some.host.com/form?&id=blah%2Bblah25"
-    (org-link-unescape (org-link-escape "http://some.host.com/form?&id=blah%2Bblah25")))))
+    (org-link-unescape
+     (org-link-escape "http://some.host.com/form?&id=blah%2Bblah25")))))
+
+(ert-deftest test-org/org-link-escape-chars-browser ()
+  "Escape a URL to pass to `browse-url'."
+  (should
+   (string=
+    "http://some.host.com/search?q=%22Org%20mode%22"
+    (org-link-escape "http://some.host.com/search?q=\"Org mode\""
+		     org-link-escape-chars-browser))))
 
 
 

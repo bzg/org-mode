@@ -20,9 +20,13 @@
 
 ;;; Commentary:
 
-;; This library implements an Org back-end for Org exporter.  Since
-;; its usage is mainly internal, it doesn't provide any interactive
-;; function.
+;; This library implements an Org back-end for Org exporter.
+;;
+;; It introduces two interactive functions, `org-org-export-as-org'
+;; and `org-org-export-to-org', which export, respectively, to
+;; a temporary buffer and to a file.
+;;
+;; A publishing function is also provided: `org-org-publish-to-org'.
 
 ;;; Code:
 (require 'ox)
@@ -102,16 +106,24 @@ setting of `org-html-htmlize-output-type' is 'css."
     (timestamp . org-org-identity)
     (underline . org-org-identity)
     (verbatim . org-org-identity)
-    (verse-block . org-org-identity)))
+    (verse-block . org-org-identity))
+  :menu-entry
+  '(?O "Export to Org"
+       ((?O "As Org buffer" org-org-export-as-org)
+	(?o "As Org file" org-org-export-to-org)
+	(?v "As Org file and open"
+	    (lambda (a s v b)
+	      (if a (org-org-export-to-org t s v b)
+		(org-open-file (org-org-export-to-org nil s v b))))))))
 
 (defun org-org-identity (blob contents info)
-  "Transcode BLOB element or object back into Org syntax."
-  (funcall
-   (intern (format "org-element-%s-interpreter" (org-element-type blob)))
-   blob contents))
+  "Transcode BLOB element or object back into Org syntax.
+CONTENTS is its contents, as a string or nil.  INFO is ignored."
+  (org-export-expand blob contents t))
 
 (defun org-org-headline (headline contents info)
-  "Transcode HEADLINE element back into Org syntax."
+  "Transcode HEADLINE element back into Org syntax.
+CONTENTS is its contents, as a string or nil.  INFO is ignored."
   (unless (plist-get info :with-todo-keywords)
     (org-element-put-property headline :todo-keyword nil))
   (unless (plist-get info :with-tags)
@@ -122,7 +134,8 @@ setting of `org-html-htmlize-output-type' is 'css."
 
 (defun org-org-keyword (keyword contents info)
   "Transcode KEYWORD element back into Org syntax.
-Ignore keywords targeted at other export back-ends."
+CONTENTS is nil.  INFO is ignored.  This function ignores
+keywords targeted at other export back-ends."
   (unless (member (org-element-property :key keyword)
 		  (mapcar
 		   (lambda (block-cons)
@@ -130,6 +143,86 @@ Ignore keywords targeted at other export back-ends."
 			  (car block-cons)))
 		   org-element-block-name-alist))
     (org-element-keyword-interpreter keyword nil)))
+
+;;;###autoload
+(defun org-org-export-as-org (&optional async subtreep visible-only ext-plist)
+  "Export current buffer to an Org buffer.
+
+If narrowing is active in the current buffer, only export its
+narrowed part.
+
+If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting buffer should be accessible
+through the `org-export-stack' interface.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+EXT-PLIST, when provided, is a property list with external
+parameters overriding Org default settings, but still inferior to
+file-local settings.
+
+Export is done in a buffer named \"*Org ORG Export*\", which will
+be displayed when `org-export-show-temporary-export-buffer' is
+non-nil."
+  (interactive)
+  (if async
+      (org-export-async-start
+	  (lambda (output)
+	    (with-current-buffer (get-buffer-create "*Org ORG Export*")
+	      (erase-buffer)
+	      (insert output)
+	      (goto-char (point-min))
+	      (org-mode)
+	      (org-export-add-to-stack (current-buffer) 'org)))
+	`(org-export-as 'org ,subtreep ,visible-only nil ',ext-plist))
+    (let ((outbuf
+	   (org-export-to-buffer
+	    'org "*Org ORG Export*" subtreep visible-only nil ext-plist)))
+      (with-current-buffer outbuf (org-mode))
+      (when org-export-show-temporary-export-buffer
+	(switch-to-buffer-other-window outbuf)))))
+
+;;;###autoload
+(defun org-org-export-to-org (&optional async subtreep visible-only ext-plist)
+  "Export current buffer to an org file.
+
+If narrowing is active in the current buffer, only export its
+narrowed part.
+
+If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+EXT-PLIST, when provided, is a property list with external
+parameters overriding Org default settings, but still inferior to
+file-local settings.
+
+Return output file name."
+  (interactive)
+  (let ((outfile (org-export-output-file-name ".org" subtreep)))
+    (if async
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'org))
+	  `(expand-file-name
+	    (org-export-to-file
+	     'org ,outfile ,subtreep ,visible-only nil ',ext-plist)))
+      (org-export-to-file 'org outfile subtreep visible-only nil ext-plist))))
 
 ;;;###autoload
 (defun org-org-publish-to-org (plist filename pub-dir)
@@ -146,6 +239,8 @@ Return output file name."
     (require 'ox-html)
     (let* ((org-inhibit-startup t)
 	   (htmlize-output-type 'css)
+	   (html-ext (concat "." (or (plist-get plist :html-extension)
+				     org-html-extension "html")))
 	   (visitingp (find-buffer-visiting filename))
 	   (work-buffer (or visitingp (find-file filename)))
 	   newbuf)
@@ -160,10 +255,11 @@ Return output file name."
 		(format
 		 "<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\">"
 		 org-org-htmlized-css-url) t t)))
-	(write-file (concat pub-dir (file-name-nondirectory filename) ".html")))
+	(write-file (concat pub-dir (file-name-nondirectory filename) html-ext)))
       (kill-buffer newbuf)
       (unless visitingp (kill-buffer work-buffer)))
     (set-buffer-modified-p nil)))
+
 
 (provide 'ox-org)
 

@@ -31,7 +31,7 @@ SERVERMK ?= true # or just any value at all, really
 
 #----------------------------------------------------------------------
 
-ORGFULL   = README COPYING AUTHORS lisp/ \
+ORGFULL   = README COPYING lisp/ \
 		Makefile request-assign-future.txt \
 		mk/default.mk mk/targets.mk mk/version.mk \
 		mk/org-fixup.el \
@@ -80,7 +80,7 @@ archive-contents:
 	echo "   (org-plus-contrib . [($(PKG_TAG)) ($(PKG_REQ)) \"$(PKG_DOC)\" tar]))" >> $@
 
 elpaplus:		cleanall info card elpaplus-dirty
-elpaplus-dirty elpaplus-up:	ORG_ADD_CONTRIB=org-*
+elpaplus-dirty elpaplus-up:	ORG_ADD_CONTRIB=org-* ob-* ox-*
 elpaplus-dirty elpaplus-up:	ORGDIR=org-plus-contrib-$(PKG_TAG)
 elpaplus-dirty:
 	@$(MAKE) GITVERSION=$(GITVERSION:release_%=%)-elpaplus version autoloads
@@ -117,9 +117,11 @@ cleanrel:
 
 doc-up:	info pdf card html
 	$(MAKE) -C doc manual guide
-	$(CP) doc/org.html $(SERVROOT)
-	$(CP) doc/manual/* $(SERVROOT)/manual
-	$(CP) doc/guide/*  $(SERVROOT)/guide
+	$(CP) doc/org.html     $(SERVROOT)
+	$(CP) doc/org.pdf      $(SERVROOT)
+	$(CP) doc/orgguide.pdf $(SERVROOT)
+	$(CP) doc/manual/*     $(SERVROOT)/manual
+	$(CP) doc/guide/*      $(SERVROOT)/guide
 
 upload:			cleanall rel-up doc-up elpa-up elpaplus-up
 upload-elpa:		cleanall elpa-up

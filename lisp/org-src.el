@@ -64,10 +64,25 @@ there are kept outside the narrowed region."
 		   (const :tag "from `lang' element")
 		   (const :tag "from `style' element")))))
 
+(defcustom org-edit-src-turn-on-auto-save nil
+  "Non-nil means turn `auto-save-mode' on when editing a source block.
+This will save the content of the source code editing buffer into
+a newly created file, not the base buffer for this source block.
+
+If you want to regularily save the base buffer instead of the source
+code editing buffer, see `org-edit-src-auto-save-idle-delay' instead."
+  :group 'org-edit-structure
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'boolean)
+
 (defcustom org-edit-src-auto-save-idle-delay 0
-  "Delay of idle time before auto-saving src code buffers.
+  "Delay before saving a source code buffer back into its base buffer.
 When a positive integer N, save after N seconds of idle time.
-When 0 (the default), don't auto-save."
+When 0 (the default), don't auto-save.
+
+If you want to save the source code buffer itself, don't use this.
+Check `org-edit-src-turn-on-auto-save' instead."
   :group 'org-edit-structure
   :version "24.4"
   :package-version '(Org . "8.0")
@@ -350,10 +365,11 @@ the display of windows containing the Org buffer and the code buffer."
 	 (if org-src-preserve-indentation col (max 0 (- col total-nindent))))
 	(org-src-mode)
 	(set-buffer-modified-p nil)
-	(setq buffer-file-name nil
-	      buffer-auto-save-file-name
-	      (concat (make-temp-name "org-src-")
-		      (format-time-string "-%Y-%d-%m") ".txt"))
+	(setq buffer-file-name nil)
+	(when org-edit-src-turn-on-auto-save
+	  (setq buffer-auto-save-file-name
+		(concat (make-temp-name "org-src-")
+			(format-time-string "-%Y-%d-%m") ".txt")))
 	(and org-edit-src-persistent-message
 	     (org-set-local 'header-line-format msg))
 	(let ((edit-prep-func (intern (concat "org-babel-edit-prep:" lang))))
@@ -877,9 +893,9 @@ issued in the language major mode buffer."
 
 (defun org-src-native-tab-command-maybe ()
   "Perform language-specific TAB action.
-Alter code block according to effect of TAB in the language major
-mode."
+Alter code block according to what TAB does in the language major mode."
   (and org-src-tab-acts-natively
+       (org-in-src-block-p)
        (not (equal this-command 'org-shifttab))
        (let ((org-src-strip-leading-and-trailing-blank-lines nil))
 	 (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB")))))

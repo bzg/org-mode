@@ -27,7 +27,7 @@
 
 (eval-when-compile
   (require 'cl)
-  (require 'table))
+  (require 'table nil 'noerror))
 (require 'format-spec)
 (require 'ox)
 (require 'org-compat)
@@ -454,7 +454,8 @@ The exporter embeds the exported content just before
 
 If unspecified, the file named \"OrgOdtContentTemplate.xml\"
 under `org-odt-styles-dir' is used."
-  :type 'file
+  :type '(choice (const nil)
+		 (file))
   :group 'org-export-odt
   :version "24.1")
 
@@ -1750,9 +1751,17 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	;; Inline definitions are secondary strings.
 	;; Non-inline footnotes definitions are full Org data.
 	(t
-	 (let* ((raw (org-export-get-footnote-definition footnote-reference
-							 info))
-		(def (let ((def (org-trim (org-export-data raw info))))
+	 (let* ((raw (org-export-get-footnote-definition
+		      footnote-reference info))
+		(translations
+		 (cons (cons 'paragraph
+			     (lambda (p c i)
+			       (org-odt--format-paragraph
+				p c "Footnote" "OrgFootnoteCenter"
+				"OrgFootnoteQuotations")))
+		       (org-export-backend-translate-table 'odt)))
+		(def (let ((def (org-trim (org-export-data-with-translations
+					   raw translations info))))
 		       (if (eq (org-element-type raw) 'org-data) def
 			 (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
 				 "Footnote" def)))))
@@ -2014,7 +2023,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      ((string= key "INDEX")
       ;; FIXME
       (ignore))
-     ((string= key "TARGET") nil)
      ((string= key "TOC")
       (let ((value (downcase value)))
 	(cond
@@ -2232,7 +2240,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	 (target-file
 	  (format "%s%04d.%s" target-dir
 		  (incf org-odt-embedded-images-count) image-type)))
-    (message "Embedding %s as %s ..."
+    (message "Embedding %s as %s..."
 	     (substring-no-properties path) target-file)
 
     (when (= 1 org-odt-embedded-images-count)
@@ -2440,7 +2448,7 @@ used as a communication channel."
      "application/vnd.oasis.opendocument.formula" target-dir "1.2")
     ;; Copy over the formula file from user directory to zip
     ;; directory.
-    (message "Embedding %s as %s ..." src-file target-file)
+    (message "Embedding %s as %s..." src-file target-file)
     (let ((case-fold-search nil))
       (cond
        ;; Case 1: Mathml.
@@ -2753,6 +2761,8 @@ INFO is a plist holding contextual information.  See
 		     (concat "file://" (expand-file-name raw-path))
 		   (concat "file://" raw-path)))
 		(t raw-path)))
+	 ;; Convert & to &amp; for correct XML representation
+	 (path (replace-regexp-in-string "&" "&amp;" path))
 	 protocol)
     (cond
      ;; Image file.
@@ -2828,10 +2838,10 @@ INFO is a plist holding contextual information.  See
 	     (let ((label (org-element-property :value destination)))
 	       (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
 		       (org-export-solidify-link-text label) desc))))
-	 ;; LINK has no description. It points to either a HEADLINE, a
-	 ;; TARGET or an ELEMENT with a #+NAME: LABEL attached to it.
-	 ;; LINK to DESTINATION, but make a best effort to provide a
-	 ;; *meaningful* description.
+	 ;; LINK has no description. It points to either a HEADLINE or
+	 ;; an ELEMENT with a #+NAME: LABEL attached to it.  LINK to
+	 ;; DESTINATION, but make a best effort to provide
+	 ;; a *meaningful* description.
 	 (org-odt-link--infer-description destination info))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
@@ -2872,26 +2882,36 @@ INFO is a plist holding contextual information.  See
 
 ;;;; Paragraph
 
-(defun org-odt-paragraph (paragraph contents info)
-  "Transcode a PARAGRAPH element from Org to ODT.
-CONTENTS is the contents of the paragraph, as a string.  INFO is
-the plist used as a communication channel."
+(defun org-odt--format-paragraph (paragraph contents default center quote)
+  "Format paragraph according to given styles.
+PARAGRAPH is a paragraph type element.  CONTENTS is the
+transcoded contents of that paragraph, as a string.  DEFAULT,
+CENTER and QUOTE are, respectively, style to use when paragraph
+belongs to no special environment, a center block, or a quote
+block."
   (let* ((parent (org-export-get-parent paragraph))
 	 (parent-type (org-element-type parent))
 	 (style (case parent-type
-		  (quote-block "Quotations")
-		  (center-block "OrgCenter")
-		  (footnote-definition "Footnote")
-		  (t (or (org-element-property :style paragraph)
-			 "Text_20_body")))))
+		  (quote-block quote)
+		  (center-block center)
+		  (t default))))
     ;; If this paragraph is a leading paragraph in an item and the
     ;; item has a checkbox, splice the checkbox and paragraph contents
     ;; together.
     (when (and (eq (org-element-type parent) 'item)
-    	       (eq paragraph (car (org-element-contents parent))))
+	       (eq paragraph (car (org-element-contents parent))))
       (setq contents (concat (org-odt--checkbox parent) contents)))
-    (assert style)
     (format "\n<text:p text:style-name=\"%s\">%s</text:p>" style contents)))
+
+(defun org-odt-paragraph (paragraph contents info)
+  "Transcode a PARAGRAPH element from Org to ODT.
+CONTENTS is the contents of the paragraph, as a string.  INFO is
+the plist used as a communication channel."
+  (org-odt--format-paragraph
+   paragraph contents
+   (or (org-element-property :style paragraph) "Text_20_body")
+   "OrgCenter"
+   "Quotations"))
 
 
 ;;;; Plain List
@@ -3066,9 +3086,7 @@ holding contextual information."
 	     (date (or (plist-get attributes :date)
 		       ;; FIXME: Is `car' right thing to do below?
 		       (car (plist-get info :date)))))
-
-	(format "\n<text:p text:style-name=\"%s\">%s</text:p>"
-		"Text_20_body"
+	(format "\n<text:p>%s</text:p>"
 		(format "<office:annotation>\n%s\n</office:annotation>"
 			(concat
 			 (and author

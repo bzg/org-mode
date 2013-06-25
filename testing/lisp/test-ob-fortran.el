@@ -44,18 +44,17 @@
     (org-babel-next-src-block)
     (should (= 15 (org-babel-execute-src-block)))))
 
-(ert-deftest ob-fortran/preprosessor-var ()
+(ert-deftest ob-fortran/preprocessor-var ()
   "Test preprocessed fortran"
   (org-test-at-id "d8d1dfd3-5f0c-48fe-b55d-777997e02242"
     (org-babel-next-src-block 2)
     (should (= 42 (org-babel-execute-src-block)))))
 
-;; ;; TODO: test fails
-;; (ert-deftest ob-fortran/character-var ()
-;;   "Test string input"
-;;   (org-test-at-id "d8d1dfd3-5f0c-48fe-b55d-777997e02242"
-;;     (org-babel-next-src-block 3)
-;;     (should (equal "word" (org-babel-execute-src-block)))))
+(ert-deftest ob-fortran/character-var ()
+  "Test string input"
+  (org-test-at-id "d8d1dfd3-5f0c-48fe-b55d-777997e02242"
+    (org-babel-next-src-block 3)
+    (should (equal "word" (org-babel-execute-src-block)))))
 
 (ert-deftest ob-fortran/list-var ()
   "Test real array input"
@@ -68,6 +67,18 @@
   (org-test-at-id "c28569d9-04ce-4cad-ab81-1ea29f691465"
     (org-babel-next-src-block 2)
     (should (equal "1.00 2.00" (org-babel-execute-src-block)))))
+
+(ert-deftest ob-fortran/list-matrix-from-table1 ()
+  "Test real matrix from a table"
+  (org-test-at-id "3f73ab19-d25a-428d-8c26-e8c6aa933976"
+    (org-babel-next-src-block 1)
+    (should (= 42 (org-babel-execute-src-block)))))
+
+(ert-deftest ob-fortran/list-matrix-from-table2 ()
+  "Test real matrix from a table"
+  (org-test-at-id "3f73ab19-d25a-428d-8c26-e8c6aa933976"
+    (org-babel-next-src-block 2)
+    (should (= 42 (org-babel-execute-src-block)))))
 
 (ert-deftest ob-fortran/no-variables-with-main ()
   "Test :var with explicit 'program'"

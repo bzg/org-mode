@@ -33,7 +33,9 @@
 
 (eval-and-compile
   (unless (fboundp 'declare-function)
-    (defmacro declare-function (fn file &optional arglist fileonly)))
+    (defmacro declare-function (fn file &optional arglist fileonly)
+      `(autoload ',fn ,file)))
+
   (if (>= emacs-major-version 23)
       (defsubst org-char-to-string(c)
 	"Defsubst to decode UTF-8 character values in emacs 23 and beyond."
@@ -162,18 +164,17 @@ We use a macro so that the test can happen at compilation time."
   (cons (if (fboundp 'with-no-warnings) 'with-no-warnings 'progn) body))
 (def-edebug-spec org-no-warnings (body))
 
-;; FIXME: Normalize argument names
-(defmacro org-with-remote-undo (_buffer &rest _body)
+(defmacro org-with-remote-undo (buffer &rest body)
   "Execute BODY while recording undo information in two buffers."
   (org-with-gensyms (cline cmd buf1 buf2 undo1 undo2 c1 c2)
     `(let ((,cline (org-current-line))
 	   (,cmd this-command)
 	   (,buf1 (current-buffer))
-	   (,buf2 ,_buffer)
+	   (,buf2 ,buffer)
 	   (,undo1 buffer-undo-list)
-	   (,undo2 (with-current-buffer ,_buffer buffer-undo-list))
+	   (,undo2 (with-current-buffer ,buffer buffer-undo-list))
 	   ,c1 ,c2)
-       ,@_body
+       ,@body
        (when org-agenda-allow-remote-undo
 	 (setq ,c1 (org-verify-change-for-undo
 		    ,undo1 (with-current-buffer ,buf1 buffer-undo-list))

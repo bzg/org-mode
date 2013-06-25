@@ -151,11 +151,25 @@ Emacs-lisp table, otherwise return the results as a string."
        res))
    (org-babel-script-escape results)))
 
-(defvar org-babel-python-buffers '((:default . nil)))
+(defvar org-babel-python-buffers '((:default . "*Python*")))
 
 (defun org-babel-python-session-buffer (session)
   "Return the buffer associated with SESSION."
   (cdr (assoc session org-babel-python-buffers)))
+
+(defun org-babel-python-with-earmufs (session)
+  (let ((name (if (stringp session) session (format "%s" session))))
+    (if (and (string= "*" (substring name 0 1))
+	     (string= "*" (substring name (- (length name) 1))))
+	name
+      (format "*%s*" name))))
+
+(defun org-babel-python-without-earmufs (session)
+  (let ((name (if (stringp session) session (format "%s" session))))
+    (if (and (string= "*" (substring name 0 1))
+	     (string= "*" (substring name (- (length name) 1))))
+	(substring name 1 (- (length name) 1))
+      name)))
 
 (defvar py-default-interpreter)
 (defun org-babel-python-initiate-session-by-key (&optional session)
@@ -170,7 +184,15 @@ then create.  Return the initialized session."
        ((and (eq 'python org-babel-python-mode)
 	     (fboundp 'run-python)) ; python.el
 	(if (version< "24.1" emacs-version)
-	    (run-python org-babel-python-command)
+	    (progn
+	      (unless python-buffer
+		(setq python-buffer (org-babel-python-with-earmufs session)))
+	      (let ((python-shell-buffer-name
+		     (org-babel-python-without-earmufs python-buffer)))
+		(run-python
+		 (if (member system-type '(cygwin windows-nt ms-dos))
+		     (concat org-babel-python-command " -i")
+		   org-babel-python-command))))
 	  (run-python)))
        ((and (eq 'python-mode org-babel-python-mode)
 	     (fboundp 'py-shell)) ; python-mode.el
@@ -186,7 +208,7 @@ then create.  Return the initialized session."
 			  (concat "Python-" (symbol-name session))))
 	       (py-which-bufname bufname))
 	  (py-shell)
-	  (setq python-buffer (concat "*" bufname "*"))))
+	  (setq python-buffer (org-babel-python-with-earmufs bufname))))
        (t
 	(error "No function available for running an inferior Python")))
       (setq org-babel-python-buffers

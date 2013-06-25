@@ -622,8 +622,8 @@ See `org-groff-text-markup-alist' for details."
 
    ;; 5. Date.
    (when (plist-get info :with-date)
-     (let ((date (org-export-data (plist-get info :date) info)))
-       (and date (format ".ND \"%s\"\n" date))))
+     (let ((date (org-export-data (org-export-get-date info) info)))
+       (and (org-string-nw-p date) (format ".ND \"%s\"\n" date))))
 
    ;;
    ;; If Abstract, then Populate Abstract
@@ -1293,12 +1293,9 @@ INFO is a plist holding contextual information.  See
                    (or desc
                        (org-export-data
                         (org-element-property :raw-link link) info))))
-          ;; Fuzzy link points to an invisible target.
-          (keyword nil)
-          ;; LINK points to a headline.  If headlines are numbered
-          ;; and the link has no description, display headline's
-          ;; number.  Otherwise, display description or headline's
-          ;; title.
+          ;; LINK points to a headline.  If headlines are numbered and
+          ;; the link has no description, display headline's number.
+          ;; Otherwise, display description or headline's title.
           (headline
            (let ((label ""))
              (if (and (plist-get info :section-numbers) (not desc))
@@ -1922,9 +1919,10 @@ Return PDF file name or an error if it couldn't be produced."
   (let* ((base-name (file-name-sans-extension (file-name-nondirectory file)))
 	 (full-name (file-truename file))
 	 (out-dir (file-name-directory file))
-	 ;; Make sure `default-directory' is set to FILE directory,
-	 ;; not to whatever value the current buffer may have.
-	 (default-directory (file-name-directory full-name))
+	 ;; Properly set working directory for compilation.
+	 (default-directory (if (file-name-absolute-p file)
+				(file-name-directory full-name)
+			      default-directory))
          errors)
     (message (format "Processing Groff file %s ..." file))
     (save-window-excursion

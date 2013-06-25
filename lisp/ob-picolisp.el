@@ -78,7 +78,7 @@
   :version "24.1"
   :type 'string)
 
-(defun org-babel-expand-body:picolisp (body params &optional processed-params)
+(defun org-babel-expand-body:picolisp (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let ((vars (mapcar #'cdr (org-babel-get-header params :var)))
         (result-params (cdr (assoc :result-params params)))

@@ -37,12 +37,14 @@
 ;; {{{email}}} and {{{title}}} macros.
 
 ;;; Code:
+(require 'org-macs)
 
 (declare-function org-element-at-point "org-element" (&optional keep-trail))
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-remove-double-quotes "org" (s))
+(declare-function org-mode "org" ())
 (declare-function org-file-contents "org" (file &optional noerror))
 (declare-function org-with-wide-buffer "org-macs" (&rest body))
 
@@ -61,37 +63,44 @@ directly, use instead:
 
 ;;; Functions
 
-(defun org-macro--collect-macros (files)
+(defun org-macro--collect-macros ()
   "Collect macro definitions in current buffer and setup files.
-FILES is a list of setup files names read so far, used to avoid
-circular dependencies.  Return an alist containing all macro
-templates found."
-  (let ((case-fold-search t) templates)
-    ;; Install buffer-local macros.  Also enter SETUPFILE keywords.
-    (org-with-wide-buffer
-     (goto-char (point-min))
-     (while (re-search-forward "^[ \t]*#\\+\\(MACRO\\|SETUPFILE\\):" nil t)
-       (let ((element (org-element-at-point)))
-	 (when (eq (org-element-type element) 'keyword)
-	   (let ((val (org-element-property :value element)))
-	     (if (equal (org-element-property :key element) "SETUPFILE")
-		 ;; Enter setup file.
-		 (let ((file (expand-file-name (org-remove-double-quotes val))))
-		   (unless (member file files)
-		     (with-temp-buffer
-		       (org-mode)
-		       (insert (org-file-contents file 'noerror))
-		       (setq templates
-			     (org-macro--collect-macros (cons file files))))))
-	       ;; Install macro in TEMPLATES.
-	       (when (string-match "^\\(.*?\\)\\(?:\\s-+\\(.*\\)\\)?\\s-*$" val)
-		 (let* ((name (match-string 1 val))
-			(template (or (match-string 2 val) ""))
-			(old-cell (assoc name templates)))
-		   (if old-cell (setcdr old-cell template)
-		     (push (cons name template) templates))))))))))
-    ;; Return value.
-    templates))
+Return an alist containing all macro templates found."
+  (let* (collect-macros			; For byte-compiler.
+	 (collect-macros
+	  (lambda (files templates)
+	    ;; Return an alist of macro templates.  FILES is a list of
+	    ;; setup files names read so far, used to avoid circular
+	    ;; dependencies.  TEMPLATES is the alist collected so far.
+	    (let ((case-fold-search t))
+	      (org-with-wide-buffer
+	       (goto-char (point-min))
+	       (while (re-search-forward
+		       "^[ \t]*#\\+\\(MACRO\\|SETUPFILE\\):" nil t)
+		 (let ((element (org-element-at-point)))
+		   (when (eq (org-element-type element) 'keyword)
+		     (let ((val (org-element-property :value element)))
+		       (if (equal (org-element-property :key element) "MACRO")
+			   ;; Install macro in TEMPLATES.
+			   (when (string-match
+				  "^\\(.*?\\)\\(?:\\s-+\\(.*\\)\\)?\\s-*$" val)
+			     (let* ((name (match-string 1 val))
+				    (template (or (match-string 2 val) ""))
+				    (old-cell (assoc name templates)))
+			       (if old-cell (setcdr old-cell template)
+				 (push (cons name template) templates))))
+			 ;; Enter setup file.
+			 (let ((file (expand-file-name
+				      (org-remove-double-quotes val))))
+			   (unless (member file files)
+			     (with-temp-buffer
+			       (org-mode)
+			       (insert (org-file-contents file 'noerror))
+			       (setq templates
+				     (funcall collect-macros (cons file files)
+					      templates)))))))))))
+	      templates))))
+    (funcall collect-macros nil nil)))
 
 (defun org-macro-initialize-templates ()
   "Collect macro templates defined in current buffer.
@@ -100,7 +109,7 @@ Templates are stored in buffer-local variable
 function installs the following ones: \"property\",
 \"time\". and, if the buffer is associated to a file,
 \"input-file\" and \"modification-time\"."
-  (let* ((templates (org-macro--collect-macros nil))
+  (let* ((templates (org-macro--collect-macros))
 	 (update-templates
 	  (lambda (cell)
 	    (let ((old-template (assoc (car cell) templates)))
@@ -137,7 +146,7 @@ default value.  Return nil if no template was found."
                                (org-element-property :args macro))
                           ;; No argument: remove place-holder.
                           ""))
-                    template)))
+                    template nil 'literal)))
         ;; VALUE starts with "(eval": it is a s-exp, `eval' it.
         (when (string-match "\\`(eval\\>" value)
           (setq value (eval (read value))))

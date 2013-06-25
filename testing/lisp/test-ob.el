@@ -486,7 +486,7 @@ echo \"[[file:./cv.cls]]\"
       (should
        (equal
 	'(error
-	  "variable \"x\" in block \"carre\" must be assigned a default value")
+	  "Variable \"x\" must be assigned a default value")
 	err)))))
 
 (ert-deftest test-org-babel/just-one-results-block ()
@@ -1106,6 +1106,43 @@ Paragraph"
     (widen)
     (should (should (re-search-forward "^: 3" nil t)))))
 
+(ert-deftest test-ob/specific-colnames ()
+  "Test passing specific column names."
+  (should
+   (equal "#+name: input-table
+| id | var1 |
+|----+------|
+|  1 | bar  |
+|  2 | baz  |
+
+#+begin_src sh :var data=input-table :exports results :colnames '(Rev Author)
+echo \"$data\"
+#+end_src
+
+#+RESULTS:
+| Rev | Author |
+|-----+--------|
+|   1 | bar    |
+|   2 | baz    |
+
+"
+	  (org-test-with-temp-text
+	      "#+name: input-table
+| id | var1 |
+|----+------|
+|  1 | bar  |
+|  2 | baz  |
+
+#+begin_src sh :var data=input-table :exports results :colnames '(Rev Author)
+echo \"$data\"
+#+end_src
+"
+	    ;; we should find a code block
+	    (should (re-search-forward org-babel-src-block-regexp nil t))
+	    (goto-char (match-beginning 0))
+	    ;; now that we've located the code block, it may be evaluated
+	    (org-babel-execute-src-block)
+	    (buffer-string)))))
 
 (provide 'test-ob)
 

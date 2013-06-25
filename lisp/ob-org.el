@@ -43,8 +43,9 @@
 (defun org-babel-expand-body:org (body params)
   (dolist (var (mapcar #'cdr (org-babel-get-header params :var)))
     (setq body (replace-regexp-in-string
-		(regexp-quote (format "$%s" (car var)))  (cdr var) body
-		nil 'literal)))
+		(regexp-quote (format "$%s" (car var)))
+		(format "%s" (cdr var))
+		body nil 'literal)))
   body)
 
 (defun org-babel-execute:org (body params)

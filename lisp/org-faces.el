@@ -693,10 +693,10 @@ month and 365.24 days for a year)."
 
 (defface org-agenda-restriction-lock
   (org-compatible-face nil
-    '((((class color) (min-colors 88) (background light)) (:background "yellow1"))
-      (((class color) (min-colors 88) (background dark))  (:background "skyblue4"))
-      (((class color) (min-colors 16) (background light)) (:background "yellow1"))
-      (((class color) (min-colors 16) (background dark))  (:background "skyblue4"))
+    '((((class color) (min-colors 88) (background light)) (:background "#eeeeee"))
+      (((class color) (min-colors 88) (background dark))  (:background "#1C1C1C"))
+      (((class color) (min-colors 16) (background light)) (:background "#eeeeee"))
+      (((class color) (min-colors 16) (background dark))  (:background "#1C1C1C"))
       (((class color) (min-colors 8)) (:background "cyan" :foreground "black"))
       (t (:inverse-video t))))
   "Face for showing the agenda restriction lock."
@@ -786,6 +786,13 @@ level org-n-level-faces"
 (defface org-macro
   (org-compatible-face 'org-latex-and-related nil)
   "Face for macros."
+  :group 'org-faces
+  :version "24.4"
+  :package-version '(Org . "8.0"))
+
+(defface org-tag-group
+  (org-compatible-face 'org-tag nil)
+  "Face for group tags."
   :group 'org-faces
   :version "24.4"
   :package-version '(Org . "8.0"))

@@ -184,10 +184,10 @@
 "
   "Special numbers for Calc formula.")
 
-(ert-deftest test-org-table/references/format-specifier-EL ()
+(ert-deftest test-org-table/references/mode-string-EL ()
   "Basic: Assign field reference, sum of field references, sum
 and len of simple range reference (no row) and complex range
-reference (with row).  Format specifier EL."
+reference (with row).  Mode string EL."
   ;; Empty fields are kept during parsing field but lost as list
   ;; elements within Lisp formula syntactically when used literally
   ;; and not enclosed with " within fields, see last columns with len.
@@ -227,10 +227,10 @@ reference (with row).  Format specifier EL."
       "$5 = '(+ $1..$2); EL :: $6 = '(+ @0$1..@0$2); EL :: "
       "$7 = '(length '($1..$2)); EL :: $8 = '(length '(@0$1..@0$2)); EL")))
 
-(ert-deftest test-org-table/references/format-specifier-E ()
+(ert-deftest test-org-table/references/mode-string-E ()
   "Basic: Assign field reference, sum of field references, sum
 and len of simple range reference (no row) and complex range
-reference (with row).  Format specifier E."
+reference (with row).  Mode string E."
   (let ((lisp
 	 (concat
 	  "#+TBLFM: $3 = '(identity $1); E :: $4 = '(+ $1 $2); E :: "
@@ -270,10 +270,10 @@ reference (with row).  Format specifier E."
 "
      1 calc)))
 
-(ert-deftest test-org-table/references/format-specifier-EN ()
+(ert-deftest test-org-table/references/mode-string-EN ()
   "Basic: Assign field reference, sum of field references, sum
 and len of simple range reference (no row) and complex range
-reference (with row).  Format specifier EN."
+reference (with row).  Mode string EN."
   (let ((lisp (concat
 	       "#+TBLFM: $3 = '(identity $1); EN :: $4 = '(+ $1 $2); EN :: "
 	       "$5 = '(+ $1..$2); EN :: $6 = '(+ @0$1..@0$2); EN :: "
@@ -302,10 +302,10 @@ reference (with row).  Format specifier EN."
 "
      1 calc)))
 
-(ert-deftest test-org-table/references/format-specifier-L ()
+(ert-deftest test-org-table/references/mode-string-L ()
   "Basic: Assign field reference, sum of field references, sum
 and len of simple range reference (no row) and complex range
-reference (with row).  Format specifier L."
+reference (with row).  Mode string L."
   (org-test-table-target-expect
    references/target-normal
    ;; All the #ERROR show that for Lisp calculations N has to be used.
@@ -320,10 +320,10 @@ reference (with row).  Format specifier L."
       "$5 = '(+ $1..$2); L :: $6 = '(+ @0$1..@0$2); L :: "
       "$7 = '(length '($1..$2)); L :: $8 = '(length '(@0$1..@0$2)); L")))
 
-(ert-deftest test-org-table/references/format-specifier-none ()
+(ert-deftest test-org-table/references/mode-string-none ()
   "Basic: Assign field reference, sum of field references, sum
 and len of simple range reference (no row) and complex range
-reference (with row).  No format specifier."
+reference (with row).  No mode string."
   (let ((lisp (concat
 	       "#+TBLFM: $3 = '(identity $1) :: $4 = '(+ $1 $2) :: "
 	       "$5 = '(+ $1..$2) :: $6 = '(+ @0$1..@0$2) :: "
@@ -339,7 +339,7 @@ reference (with row).  No format specifier."
 | 0 | 1 | 0 | #ERROR | #ERROR | #ERROR | 2 | 2 |
 | z | 1 | z | #ERROR | #ERROR | #ERROR | 2 | 2 |
 |   | 1 |   | #ERROR | #ERROR | #ERROR | 1 | 1 |
-|   |   |   | #ERROR | #ERROR | #ERROR | 1 | 1 |
+|   |   |   | #ERROR | 0      | 0      | 0 | 0 |
 "
      1 lisp)
     (org-test-table-target-expect
@@ -348,7 +348,7 @@ reference (with row).  No format specifier."
 | 0 | 1 | 0 |     1 |     1 |     1 | 2 | 2 |
 | z | 1 | z | z + 1 | z + 1 | z + 1 | 2 | 2 |
 |   | 1 | 0 |     1 |     1 |     1 | 1 | 1 |
-|   |   | 0 |     0 |     0 |     0 | 1 | 1 |
+|   |   | 0 |     0 |     0 |     0 | 0 | 0 |
 "
      1 calc)
     (org-test-table-target-expect
@@ -361,10 +361,10 @@ reference (with row).  No format specifier."
 "
      1 calc)))
 
-(ert-deftest test-org-table/references/format-specifier-N ()
+(ert-deftest test-org-table/references/mode-string-N ()
   "Basic: Assign field reference, sum of field references, sum
 and len of simple range reference (no row) and complex range
-reference (with row).  Format specifier N."
+reference (with row).  Mode string N."
   (let ((lisp
 	 (concat
 	  "#+TBLFM: $3 = '(identity $1); N :: $4 = '(+ $1 $2); N :: "
@@ -381,7 +381,7 @@ reference (with row).  Format specifier N."
 | 0 | 1 | 0 | 1 | 1 | 1 | 2 | 2 |
 | z | 1 | 0 | 1 | 1 | 1 | 2 | 2 |
 |   | 1 | 0 | 1 | 1 | 1 | 1 | 1 |
-|   |   | 0 | 0 | 0 | 0 | 1 | 1 |
+|   |   | 0 | 0 | 0 | 0 | 0 | 0 |
 "
      1 lisp calc)
     (org-test-table-target-expect
@@ -421,16 +421,16 @@ reference (with row).  Format specifier N."
 "
    1
    ;; Compare field reference ($1) with field reference (@1)
-   "#+TBLFM: @I$<<..@>$> = if(\"$1\" = \"@1\", x, string(\"\")); E"
+   "#+TBLFM: @I$<<..@>$> = if(\"$1\" == \"@1\", x, string(\"\")); E"
    ;; Compare field reference ($1) with absolute term
    (concat "#+TBLFM: "
-	   "$2 = if(\"$1\" = \"(0)\"   , x, string(\"\")); E :: "
-	   "$3 = if(\"$1\" = \"(z)\"   , x, string(\"\")); E :: "
-	   "$4 = if(\"$1\" = \"nan\"   , x, string(\"\")); E :: "
-	   "$5 = if(\"$1\" = \"(nan)\" , x, string(\"\")); E :: "
-	   "$6 = if(\"$1\" = \"(uinf)\", x, string(\"\")); E :: "
-	   "$7 = if(\"$1\" = \"(-inf)\", x, string(\"\")); E :: "
-	   "$8 = if(\"$1\" = \"(inf)\" , x, string(\"\")); E"))
+	   "$2 = if(\"$1\" == \"(0)\"   , x, string(\"\")); E :: "
+	   "$3 = if(\"$1\" == \"(z)\"   , x, string(\"\")); E :: "
+	   "$4 = if(\"$1\" == \"nan\"   , x, string(\"\")); E :: "
+	   "$5 = if(\"$1\" == \"(nan)\" , x, string(\"\")); E :: "
+	   "$6 = if(\"$1\" == \"(uinf)\", x, string(\"\")); E :: "
+	   "$7 = if(\"$1\" == \"(-inf)\", x, string(\"\")); E :: "
+	   "$8 = if(\"$1\" == \"(inf)\" , x, string(\"\")); E"))
 
   ;; Check field reference converted from an empty field: Despite this
   ;; field reference will not end up in a result, Calc evaluates it.
@@ -448,28 +448,10 @@ reference (with row).  Format specifier N."
 |     |       |
 | nan |   nan |
 "
-   1 "#+TBLFM: $2 = if(\"$1\" = \"nan\", string(\"\"), $1 + 1); E"))
+   1 "#+TBLFM: $2 = if(\"$1\" == \"nan\", string(\"\"), $1 + 1); E"))
 
 (ert-deftest test-org-table/empty-field ()
   "Examples how to deal with empty fields."
-  ;; Empty fields in simple and complex range reference: Suppress them
-  ;; ($5 and $6) or keep them and use 0 ($7 and $8)
-
-  (org-test-table-target-expect
-   "\n|   |   | 5 | 7 | replace | replace | replace | replace |\n"
-   "\n|   |   | 5 | 7 | 6 | 6 | 3 | 3 |\n"
-   1
-   ;; Calc formula
-   (concat "#+TBLFM: "
-	   "$5 = vmean($1..$4)     :: $6 = vmean(@0$1..@0$4) :: "
-	   "$7 = vmean($1..$4); EN :: $8 = vmean(@0$1..@0$4); EN")
-   ;; Lisp formula
-   (concat "#+TBLFM: "
-	   "$5 = '(/ (+   $1..$4  ) (length '(  $1..$4  )));  N :: "
-	   "$6 = '(/ (+ @0$1..@0$4) (length '(@0$1..@0$4)));  N :: "
-	   "$7 = '(/ (+   $1..$4  ) (length '(  $1..$4  ))); EN :: "
-	   "$8 = '(/ (+ @0$1..@0$4) (length '(@0$1..@0$4))); EN"))
-
   ;; Test if one field is empty, else do a calculation
   (org-test-table-target-expect
    "
@@ -484,7 +466,7 @@ reference (with row).  Format specifier N."
 "
    1
    ;; Calc formula
-   "#+TBLFM: $2 = if(\"$1\" = \"nan\", string(\"\"), $1 + 1); E"
+   "#+TBLFM: $2 = if(\"$1\" == \"nan\", string(\"\"), $1 + 1); E"
    ;; Lisp formula
    "#+TBLFM: $2 = '(if (eq \"$1\" \"\") \"\" (1+ $1)); L")
 
@@ -504,7 +486,7 @@ reference (with row).  Format specifier N."
 "
    1
    ;; Calc formula
-   (concat "#+TBLFM: $3 = if(\"$1\" = \"nan\" || \"$2\" = \"nan\", "
+   (concat "#+TBLFM: $3 = if(\"$1\" == \"nan\" || \"$2\" == \"nan\", "
 	   "string(\"\"), $1 + $2); E")
    ;; Lisp formula
    (concat "#+TBLFM: $3 = '(if (or (eq \"$1\" \"\") (eq \"$2\" \"\")) "
@@ -526,10 +508,49 @@ reference (with row).  Format specifier N."
 "
    1
    ;; Calc formula
-   (concat "#+TBLFM: $2 = if(\"$1\" = \"nan\", "
-	   "if(\"$2\" = \"nan\", string(\"\"), $2 +.0), $1 + 0.5); E f-1")
+   (concat "#+TBLFM: $2 = if(\"$1\" == \"nan\", "
+	   "if(\"$2\" == \"nan\", string(\"\"), $2 +.0), $1 + 0.5); E f-1")
    ;; Lisp formula not implemented yet
-   ))
+   )
+
+  ;; Empty fields in simple and complex range reference
+  (org-test-table-target-expect
+   "
+|   |   |   |   | repl | repl | repl | repl | repl | repl |
+|   |   | 5 | 7 | repl | repl | repl | repl | repl | repl |
+| 1 | 3 | 5 | 7 | repl | repl | repl | repl | repl | repl |
+"
+   "
+|   |   |   |   |   |   |   |   | 0 | 0 |
+|   |   | 5 | 7 |   |   | 6 | 6 | 3 | 3 |
+| 1 | 3 | 5 | 7 | 4 | 4 | 4 | 4 | 4 | 4 |
+"
+   1
+   ;; Calc formula
+   (concat
+    "#+TBLFM: "
+    "$5 = if(typeof(vmean($1..$4)) == 12, "
+    "string(\"\"), vmean($1..$4)); E :: "
+    "$6 = if(typeof(vmean(@0$1..@0$4)) == 12, "
+    "string(\"\"), vmean(@0$1..@0$4)); E :: "
+    "$7 = if(\"$1..$4\" == \"[]\", string(\"\"), vmean($1..$4)) :: "
+    "$8 = if(\"@0$1..@0$4\" == \"[]\", string(\"\"), vmean(@0$1..@0$4)) :: "
+    "$9 = vmean($1..$4); EN :: "
+    "$10 = vmean(@0$1..@0$4); EN")
+   ;; Lisp formula
+   (concat
+    "#+TBLFM: "
+    "$5 = '(let ((l '($1..$4))) (if (member \"\" l) \"\" "
+    "(/ (apply '+ (mapcar 'string-to-number l)) (length l)))); E :: "
+    "$6 = '(let ((l '(@0$1..@0$4))) (if (member \"\" l) \"\" "
+    "(/ (apply '+ (mapcar 'string-to-number l)) (length l)))); E :: "
+    "$7 = '(let ((l '($1..$4))) "
+    "(if l (/ (apply '+ l) (length l)) \"\")); N :: "
+    "$8 = '(let ((l '(@0$1..@0$4))) "
+    "(if l (/ (apply '+ l) (length l)) \"\")); N :: "
+    "$9 = '(/ (+ $1..$4) (length '($1..$4))); EN :: "
+    "$10 = '(/ (+ @0$1..@0$4) (length '(@0$1..@0$4))); EN")
+))
 
 (ert-deftest test-org-table/copy-field ()
   "Experiments on how to copy one field into another field."
@@ -566,7 +587,7 @@ reference (with row).  Format specifier N."
 | 2012-12          | 2012-12          |
 | [2012-12-31 Mon] | <2012-12-31 Mon> |
 "
-     1 (concat "#+TBLFM: $2 = if(\"$1\" = \"nan\", "
+     1 (concat "#+TBLFM: $2 = if(\"$1\" == \"nan\", "
 	       "string(\"\"), string(subvec(\"$1\", 2, vlen(\"$1\")))); E"))
 
     ;; Calc formula simple
@@ -580,11 +601,11 @@ reference (with row).  Format specifier N."
 | 2012-12          | 2000             |
 | [2012-12-31 Mon] | <2012-12-31 Mon> |
 "
-     1 "#+TBLFM: $2 = if(\"$1\" = \"nan\", string(\"\"), $1); E")))
+     1 "#+TBLFM: $2 = if(\"$1\" == \"nan\", string(\"\"), $1); E")))
 
 ;; End of table examples and beginning of internal tests.
 
-(ert-deftest test-org-table/org-table-make-reference/format-specifier-EL ()
+(ert-deftest test-org-table/org-table-make-reference/mode-string-EL ()
   (fset 'f 'org-table-make-reference)
   ;; For Lisp formula only
   (should (equal "0"   (f   "0"      t nil 'literal)))
@@ -595,7 +616,7 @@ reference (with row).  Format specifier N."
   (should (equal  " 1" (f '(""  "1") t nil 'literal)))
   (should (equal  " "  (f '(""  "" ) t nil 'literal))))
 
-(ert-deftest test-org-table/org-table-make-reference/format-specifier-E ()
+(ert-deftest test-org-table/org-table-make-reference/mode-string-E ()
   (fset 'f 'org-table-make-reference)
   ;; For Lisp formula
   (should (equal "\"0\""       (f   "0"         t nil t)))
@@ -623,7 +644,7 @@ reference (with row).  Format specifier N."
   (should (equal "[-inf,1]"    (f '("-inf" "1") t nil nil)))
   (should (equal  "[inf,1]"    (f '( "inf" "1") t nil nil))))
 
-(ert-deftest test-org-table/org-table-make-reference/format-specifier-EN ()
+(ert-deftest test-org-table/org-table-make-reference/mode-string-EN ()
   (fset 'f 'org-table-make-reference)
   ;; For Lisp formula
   (should (equal  "0"    (f   "0"         t t t)))
@@ -651,7 +672,7 @@ reference (with row).  Format specifier N."
   (should (equal "[0,1]" (f '("-inf" "1") t t nil)))
   (should (equal "[0,1]" (f '( "inf" "1") t t nil))))
 
-(ert-deftest test-org-table/org-table-make-reference/format-specifier-L ()
+(ert-deftest test-org-table/org-table-make-reference/mode-string-L ()
   (fset 'f 'org-table-make-reference)
   ;; For Lisp formula only
   (should (equal "0"   (f   "0"      nil nil 'literal)))
@@ -662,16 +683,16 @@ reference (with row).  Format specifier N."
   (should (equal   "1" (f '(""  "1") nil nil 'literal)))
   (should (equal  ""   (f '(""  "" ) nil nil 'literal))))
 
-(ert-deftest test-org-table/org-table-make-reference/format-specifier-none ()
+(ert-deftest test-org-table/org-table-make-reference/mode-string-none ()
   (fset 'f 'org-table-make-reference)
   ;; For Lisp formula
   (should (equal "\"0\""       (f   "0"         nil nil t)))
   (should (equal "\"z\""       (f   "z"         nil nil t)))
-  (should (equal  "\"\""       (f   ""          nil nil t)))
+  (should (equal   ""          (f   ""          nil nil t)))
   (should (equal "\"0\" \"1\"" (f '("0"    "1") nil nil t)))
   (should (equal "\"z\" \"1\"" (f '("z"    "1") nil nil t)))
   (should (equal       "\"1\"" (f '(""     "1") nil nil t)))
-  (should (equal    "\"\""     (f '(""     "" ) nil nil t)))
+  (should (equal      ""       (f '(""     "" ) nil nil t)))
   ;; For Calc formula
   (should (equal  "(0)"        (f   "0"         nil nil nil)))
   (should (equal  "(z)"        (f   "z"         nil nil nil)))
@@ -679,7 +700,7 @@ reference (with row).  Format specifier N."
   (should (equal  "[0,1]"      (f '("0"    "1") nil nil nil)))
   (should (equal  "[z,1]"      (f '("z"    "1") nil nil nil)))
   (should (equal    "[1]"      (f '(""     "1") nil nil nil)))
-  (should (equal   "[0]"       (f '(""     "" ) nil nil nil)))
+  (should (equal   "[]"        (f '(""     "" ) nil nil nil)))
   ;; For Calc formula, special numbers
   (should (equal  "(nan)"      (f    "nan"      nil nil nil)))
   (should (equal "(uinf)"      (f   "uinf"      nil nil nil)))
@@ -690,16 +711,16 @@ reference (with row).  Format specifier N."
   (should (equal "[-inf,1]"    (f '("-inf" "1") nil nil nil)))
   (should (equal  "[inf,1]"    (f '( "inf" "1") nil nil nil))))
 
-(ert-deftest test-org-table/org-table-make-reference/format-specifier-N ()
+(ert-deftest test-org-table/org-table-make-reference/mode-string-N ()
   (fset 'f 'org-table-make-reference)
   ;; For Lisp formula
   (should (equal  "0"    (f   "0"         nil t t)))
   (should (equal  "0"    (f   "z"         nil t t)))
-  (should (equal  "0"    (f   ""          nil t t)))
+  (should (equal  ""     (f   ""          nil t t)))
   (should (equal  "0 1"  (f '("0"    "1") nil t t)))
   (should (equal  "0 1"  (f '("z"    "1") nil t t)))
   (should (equal    "1"  (f '(""     "1") nil t t)))
-  (should (equal   "0"   (f '(""     "" ) nil t t)))
+  (should (equal   ""    (f '(""     "" ) nil t t)))
   ;; For Calc formula
   (should (equal "(0)"   (f   "0"         nil t nil)))
   (should (equal "(0)"   (f   "z"         nil t nil)))
@@ -707,7 +728,7 @@ reference (with row).  Format specifier N."
   (should (equal "[0,1]" (f '("0"    "1") nil t nil)))
   (should (equal "[0,1]" (f '("z"    "1") nil t nil)))
   (should (equal   "[1]" (f '(""     "1") nil t nil)))
-  (should (equal  "[0]"  (f '(""     "" ) nil t nil)))
+  (should (equal  "[]"   (f '(""     "" ) nil t nil)))
   ;; For Calc formula, special numbers
   (should (equal "(0)"   (f    "nan"      nil t nil)))
   (should (equal "(0)"   (f   "uinf"      nil t nil)))
@@ -749,6 +770,228 @@ reference (with row).  Format specifier N."
 ;;   "Remote reference."
 ;;   (should
 ;;    (string= "$3 = remote(FOO, @@#$2)" (org-table-convert-refs-to-rc "C& = remote(FOO, @@#B&)"))))
+
+(ert-deftest test-org-table/remote-reference-access ()
+  "Access to remote reference."
+  (org-test-table-target-expect
+   "
+#+NAME: table
+|   | 42 |
+
+| replace |   |
+"
+   "
+#+NAME: table
+|   | 42 |
+
+| 42 |   |
+"
+   1 "#+TBLFM: $1 = remote(table, @1$2)"))
+
+(ert-deftest test-org-table/org-at-TBLFM-p ()
+  (org-test-with-temp-text-in-file
+      "
+| 1 |
+| 2 |
+#+TBLFM: $2=$1*2
+
+"
+    (goto-char (point-min))
+    (forward-line 2)
+    (should (equal (org-at-TBLFM-p) nil))
+
+    (goto-char (point-min))
+    (forward-line 3)
+    (should (equal (org-at-TBLFM-p) t))
+
+    (goto-char (point-min))
+    (forward-line 4)
+    (should (equal (org-at-TBLFM-p) nil))))
+
+(ert-deftest test-org-table/org-table-TBLFM-begin ()
+  (org-test-with-temp-text-in-file
+      "
+| 1 |
+| 2 |
+#+TBLFM: $2=$1*2
+
+"
+    (goto-char (point-min))
+    (should (equal (org-table-TBLFM-begin)
+		   nil))
+
+    (goto-char (point-min))
+    (forward-line 1)
+    (should (equal (org-table-TBLFM-begin)
+		   nil))
+
+    (goto-char (point-min))
+    (forward-line 3)
+    (should (= (org-table-TBLFM-begin)
+		   14))
+
+    (goto-char (point-min))
+    (forward-line 4)
+    (should (= (org-table-TBLFM-begin)
+		   14))
+
+    ))
+
+(ert-deftest test-org-table/org-table-TBLFM-begin-for-multiple-TBLFM-lines ()
+  "For multiple #+TBLFM lines."
+  (org-test-with-temp-text-in-file
+      "
+| 1 |
+| 2 |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2
+
+"
+    (goto-char (point-min))
+    (should (equal (org-table-TBLFM-begin)
+		   nil))
+
+    (goto-char (point-min))
+    (forward-line 1)
+    (should (equal (org-table-TBLFM-begin)
+		   nil))
+
+    (goto-char (point-min))
+    (forward-line 3)
+    (should (= (org-table-TBLFM-begin)
+		   14))
+
+    (goto-char (point-min))
+    (forward-line 4)
+    (should (= (org-table-TBLFM-begin)
+		   14))
+
+    (goto-char (point-min))
+    (forward-line 5)
+    (should (= (org-table-TBLFM-begin)
+		   14))
+
+    ))
+
+(ert-deftest test-org-table/org-table-TBLFM-begin-for-pultiple-TBLFM-lines-blocks ()
+  (org-test-with-temp-text-in-file
+      "
+| 1 |
+| 2 |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2
+
+| 6 |
+| 7 |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2
+
+"
+    (goto-char (point-min))
+    (should (equal (org-table-TBLFM-begin)
+		   nil))
+
+    (goto-char (point-min))
+    (forward-line 1)
+    (should (equal (org-table-TBLFM-begin)
+		   nil))
+
+    (goto-char (point-min))
+    (forward-line 3)
+    (should (= (org-table-TBLFM-begin)
+		   14))
+
+    (goto-char (point-min))
+    (forward-line 4)
+    (should (= (org-table-TBLFM-begin)
+		   14))
+
+    (goto-char (point-min))
+    (forward-line 5)
+    (should (= (org-table-TBLFM-begin)
+		   14))
+
+    (goto-char (point-min))
+    (forward-line 6)
+    (should (= (org-table-TBLFM-begin)
+		   14))
+
+    (goto-char (point-min))
+    (forward-line 8)
+    (should (= (org-table-TBLFM-begin)
+		   61))
+
+    (goto-char (point-min))
+    (forward-line 9)
+    (should (= (org-table-TBLFM-begin)
+		   61))
+
+    (goto-char (point-min))
+    (forward-line 10)
+    (should (= (org-table-TBLFM-begin)
+		   61))))
+
+(ert-deftest test-org-table/org-table-calc-current-TBLFM ()
+    (org-test-with-temp-text-in-file
+      "
+| 1 |   |
+| 2 |   |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2
+#+TBLFM: $2=$1*3
+"
+    (let ((got (progn (goto-char (point-min))
+		      (forward-line 3)
+		      (org-table-calc-current-TBLFM)
+		      (buffer-string)))
+	  (expect "
+| 1 | 1 |
+| 2 | 2 |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2
+#+TBLFM: $2=$1*3
+"))
+      (should (string= got
+		       expect)))
+
+    (let ((got (progn (goto-char (point-min))
+		      (forward-line 4)
+		      (org-table-calc-current-TBLFM)
+		      (buffer-string)))
+	  (expect "
+| 1 | 2 |
+| 2 | 4 |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2
+#+TBLFM: $2=$1*3
+"))
+      (should (string= got
+		       expect)))))
+
+(ert-deftest test-org-table/org-table-calc-current-TBLFM-when-stop-because-of-error ()
+  "org-table-calc-current-TBLFM should preserve the input as it was."
+  (org-test-with-temp-text-in-file
+      "
+| 1 | 1 |
+| 2 | 2 |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2::$2=$1*2
+#+TBLFM: $2=$1*3
+"
+    (let ((expect "
+| 1 | 1 |
+| 2 | 2 |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2::$2=$1*2
+#+TBLFM: $2=$1*3
+"))
+      (goto-char (point-min))
+      (forward-line 4)
+      (should-error (org-table-calc-current-TBLFM))
+      (setq got (buffer-string))
+      (message "%s" got)
+      (should (string= got
+		       expect)))))
 
 (provide 'test-org-table)
 

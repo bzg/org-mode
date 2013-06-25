@@ -68,6 +68,7 @@
   '((headline . org-deck-headline)
     (inner-template . org-deck-inner-template)
     (item . org-deck-item)
+    (link . org-deck-link)
     (template . org-deck-template)))
 
 (defgroup org-export-deck nil
@@ -300,9 +301,11 @@ and have the id \"title-slide\"."
               (format
                "<a href='#outline-container-%s'>%s</a>"
                (or (org-element-property :CUSTOM_ID headline)
-                   (mapconcat
-                    'number-to-string
-                    (org-export-get-headline-number headline info) "-"))
+		   (concat
+		    "sec-"
+		    (mapconcat
+		     'number-to-string
+		     (org-export-get-headline-number headline info) "-")))
                title)
             title)
           (org-export-get-relative-level headline info))))
@@ -373,19 +376,23 @@ the \"slide\" class will be added to the to the list element,
         (replace-regexp-in-string "^<li>" "<li class='slide'>" text)
       text)))
 
+(defun org-deck-link (link desc info)
+  (replace-regexp-in-string "href=\"#" "href=\"#outline-container-"
+			    (org-html-link link desc info)))
+
 (defun org-deck-template (contents info)
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   (let ((pkg-info (org-deck--get-packages info))
-         (org-html--pre/postamble-class "deck-status")
-         (info (plist-put
-                (plist-put info :html-preamble (plist-get info :deck-preamble))
-                :html-postamble (plist-get info :deck-postamble))))
+	(org-html--pre/postamble-class "deck-status")
+	(info (plist-put
+	       (plist-put info :html-preamble (plist-get info :deck-preamble))
+	       :html-postamble (plist-get info :deck-postamble))))
     (mapconcat
      'identity
      (list
-      (plist-get info :html-doctype)
+      (org-html-doctype info)
       (let ((lang (plist-get info :language)))
         (mapconcat
          (lambda (x)
@@ -463,7 +470,7 @@ INFO is a plist used as a communication channel."
                       (let ((auth (plist-get info :author)))
                         (and auth (org-export-data auth info)))))
          (date (and (plist-get info :with-date)
-                    (let ((date (plist-get info :date)))
+                    (let ((date (org-export-get-date info)))
                       (and date (org-export-data date info)))))
          (description (plist-get info :description))
          (keywords (plist-get info :keywords)))

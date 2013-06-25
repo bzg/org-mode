@@ -28,12 +28,11 @@
 ;;; Commentary:
 ;;
 ;; This library implements a TaskJuggler exporter for Org mode.
-;; TaskJuggler uses a text format to define projects, tasks and
-;; resources, so it is a natural fit for Org mode.  It can produce all
-;; sorts of reports for tasks or resources in either HTML, CSV or PDF.
-;; The current version of TaskJuggler requires KDE but the next
-;; version is implemented in Ruby and should therefore run on any
-;; platform.
+;; TaskJuggler is a project planing tool that uses a text format to
+;; define projects, tasks and resources, so it is a natural fit for
+;; Org mode.  It can produce all sorts of reports for tasks or
+;; resources in either HTML, CSV or PDF.  TaskJuggler is implemented
+;; in Ruby and should therefore run on any platform.
 ;;
 ;; The exporter does not export all the nodes of a document or
 ;; strictly follow the order of the nodes in the document.
@@ -142,6 +141,7 @@
 ;;     org-global-properties-fixed
 ;;   - What about property inheritance and org-property-inherit-p?
 ;;   - Use TYPE_TODO as an way to assign resources
+;;   - Add support for org-export-with-planning
 ;;
 ;;; Code:
 
@@ -185,7 +185,14 @@ the project."
   :type 'string)
 
 (defcustom org-taskjuggler-target-version 3.0
-  "Which version of TaskJuggler the exporter is targeting."
+  "Which version of TaskJuggler the exporter is targeting.
+By default a project plan is exported which conforms to version
+3.x of TaskJuggler.  For a project plan that is compatible with
+versions of TaskJuggler older than 3.0 set this to 2.4.
+
+If you change this variable be sure to also change
+`org-taskjuggler-default-reports' as the format of reports has
+changed considerably between version 2.x and 3.x of TaskJuggler"
   :group 'org-export-taskjuggler
   :type 'number)
 
@@ -205,21 +212,67 @@ marked with `org-taskjuggler-project-tag'"
   :type 'integer)
 
 (defcustom org-taskjuggler-default-reports
-  '("taskreport \"Gantt Chart\" {
+  '("textreport report \"Plan\" {
+  formats html
+  header '== %title =='
+
+  center -8<-
+    [#Plan Plan] | [#Resource_Allocation Resource Allocation]
+    ----
+    === Plan ===
+    <[report id=\"plan\"]>
+    ----
+    === Resource Allocation ===
+    <[report id=\"resourceGraph\"]>
+  ->8-
+}
+
+# A traditional Gantt chart with a project overview.
+taskreport plan \"\" {
+  headline \"Project Plan\"
+  columns bsi, name, start, end, effort, chart
+  loadunit shortauto
+  hideresource 1
+}
+
+# A graph showing resource allocation. It identifies whether each
+# resource is under- or over-allocated for.
+resourcereport resourceGraph \"\" {
+  headline \"Resource Allocation Graph\"
+  columns no, name, effort, weekly
+  loadunit shortauto
+  hidetask ~(isleaf() & isleaf_())
+  sorttasks plan.start.up
+}")
+  "Default reports for the project.
+These are sensible default reports to give a good out-of-the-box
+result when exporting without defining any reports.  \"%title\"
+anywhere in the reports will be replaced with the document title.
+If you want to define your own reports you can change them here
+or simply define the default reports so that they include an
+external report definition as follows:
+
+include reports.tji
+
+These default are made to work with tj3.  If you are targeting
+TaskJuggler 2.4 (see `org-taskjuggler-target-version') please
+change these defaults to something like the following:
+
+taskreport \"Gantt Chart\" {
   headline \"Project Gantt Chart\"
   columns hierarchindex, name, start, end, effort, duration, completed, chart
   timeformat \"%Y-%m-%d\"
   hideresource 1
   loadunit shortauto
-}"
-    "resourcereport \"Resource Graph\" {
+}
+
+resourcereport \"Resource Graph\" {
   headline \"Resource Allocation Graph\"
   columns no, name, utilization, freeload, chart
   loadunit shortauto
   sorttasks startup
   hidetask ~isleaf()
-}")
-  "Default reports for the project."
+}"
   :group 'org-export-taskjuggler
   :type '(repeat (string :tag "Report")))
 
@@ -273,6 +326,31 @@ If one of these appears as a property for a headline, it will be
 exported with the corresponding report."
   :group 'org-export-taskjuggler)
 
+(defcustom org-taskjuggler-process-command
+  "tj3 --silent --no-color --output-dir %o %f"
+  "Command to process a Taskjuggler file.
+The command will be given to the shell as a command to process a
+Taskjuggler file.  \"%f\" in the command will be replaced by the
+full file name, \"%o\" by the reports directory (see
+`org-taskjuggler-reports-directory').
+
+If you are targeting Taskjuggler 2.4 (see
+`org-taskjuggler-target-version') this setting is ignored."
+  :group 'org-export-taskjuggler)
+
+(defcustom org-taskjuggler-reports-directory "reports"
+  "Default directory to generate the Taskjuggler reports in.
+The command `org-taskjuggler-process-command' generates the
+reports and associated files such as CSS inside this directory.
+
+If the directory is not an absolute path it is relative to the
+directory of the exported file.  The directory is created if it
+doesn't exist.
+
+If you are targeting Taskjuggler 2.4 (see
+`org-taskjuggler-target-version') this setting is ignored."
+  :group 'org-export-taskjuggler)
+
 (defcustom org-taskjuggler-keep-project-as-task t
   "Non-nil keeps the project headline as an umbrella task for all tasks.
 Setting this to nil will allow maintaining completely separated
@@ -297,10 +375,14 @@ This hook is run with the name of the file as argument.")
   :menu-entry
   '(?J "Export to TaskJuggler"
        ((?j "As TJP file" (lambda (a s v b) (org-taskjuggler-export a s v)))
-	(?o "As TJP file and open"
+	(?p "As TJP file and process"
 	    (lambda (a s v b)
 	      (if a (org-taskjuggler-export a s v)
-		(org-taskjuggler-export-and-open s v))))))
+		(org-taskjuggler-export-and-process s v))))
+	(?o "As TJP file, process and open"
+	    (lambda (a s v b)
+	      (if a (org-taskjuggler-export a s v)
+		(org-taskjuggler-export-process-and-open s v))))))
   ;; This property will be used to store unique ids in communication
   ;; channel.  Ids will be retrieved with `org-taskjuggler-get-id'.
   :options-alist '((:taskjuggler-unique-ids nil nil nil)))
@@ -311,10 +393,12 @@ This hook is run with the name of the file as argument.")
 
 (defun org-taskjuggler-assign-task-ids (tasks info)
   "Assign a unique ID to each task in TASKS.
-TASKS is a list of headlines.  Return value is an alist between
+TASKS is a list of headlines.  INFO is a plist used as a
+communication channel.  Return value is an alist between
 headlines and their associated ID.  IDs are hierarchical, which
 means they only need to be unique among the task siblings."
   (let* (alist
+	 build-id			; For byte-compiler.
          (build-id
           (lambda (tasks local-ids)
             (org-element-map tasks 'headline
@@ -329,8 +413,9 @@ means they only need to be unique among the task siblings."
 
 (defun org-taskjuggler-assign-resource-ids (resources info)
   "Assign a unique ID to each resource within RESOURCES.
-RESOURCES is a list of headlines.  Return value is an alist
-between headlines and their associated ID."
+RESOURCES is a list of headlines.  INFO is a plist used as a
+communication channel.  Return value is an alist between
+headlines and their associated ID."
   (let (ids)
     (org-element-map resources 'headline
       (lambda (resource)
@@ -349,17 +434,19 @@ INFO is a plist used as a communication channel.  First headline
 in buffer with `org-taskjuggler-project-tag' defines the project.
 If no such task is defined, pick the first headline in buffer.
 If there is no headline at all, return nil."
-  (or (org-element-map (plist-get info :parse-tree) 'headline
-        (lambda (hl)
-          (and (member org-taskjuggler-project-tag
-                       (org-export-get-tags hl info))
-               hl))
-        info t)
-      (org-element-map tree 'headline 'identity info t)))
+  (let ((tree (plist-get info :parse-tree)))
+    (or (org-element-map tree 'headline
+	  (lambda (hl)
+	    (and (member org-taskjuggler-project-tag
+			 (org-export-get-tags hl info))
+		 hl))
+	  info t)
+	(org-element-map tree 'headline 'identity info t))))
 
 (defun org-taskjuggler-get-id (item info)
   "Return id for task or resource ITEM.
-ITEM is a headline.  Return value is a string."
+ITEM is a headline.  INFO is a plist used as a communication
+channel.  Return value is a string."
   (cdr (assq item (plist-get info :taskjuggler-unique-ids))))
 
 (defun org-taskjuggler-get-name (item)
@@ -372,14 +459,17 @@ ITEM is a headline.  Return value is a string."
 (defun org-taskjuggler-get-start (item)
   "Return start date for task or resource ITEM.
 ITEM is a headline.  Return value is a string or nil if ITEM
-doesn't have any start date defined.."
+doesn't have any start date defined."
   (let ((scheduled (org-element-property :scheduled item)))
-    (and scheduled (org-timestamp-format scheduled "%Y-%02m-%02d"))))
+    (or
+     (and scheduled (org-timestamp-format scheduled "%Y-%02m-%02d"))
+     (and (memq 'start org-taskjuggler-valid-task-attributes)
+	  (org-element-property :START item)))))
 
 (defun org-taskjuggler-get-end (item)
   "Return end date for task or resource ITEM.
 ITEM is a headline.  Return value is a string or nil if ITEM
-doesn't have any end date defined.."
+doesn't have any end date defined."
   (let ((deadline (org-element-property :deadline item)))
     (and deadline (org-timestamp-format deadline "%Y-%02m-%02d"))))
 
@@ -411,16 +501,19 @@ resource.  Its id is derived from its name and made unique
 against UNIQUE-IDS.  If the (downcased) first token of the
 headline is not unique try to add more (downcased) tokens of the
 headline or finally add more underscore characters (\"_\")."
-  (let* ((parts (org-split-string (org-element-property :raw-value item)))
-	 (id (org-taskjuggler--clean-id (downcase (pop parts)))))
-    ;; Try to add more parts of the headline to make it unique.
-    (while (and (car parts) (member id unique-ids))
-      (setq id (concat id "_"
-                       (org-taskjuggler--clean-id (downcase (pop parts))))))
-    ;; If it's still not unique, add "_".
-    (while (member id unique-ids)
-      (setq id (concat id "_")))
-    id))
+  (let ((id (org-string-nw-p (org-element-property :TASK_ID item))))
+    ;; If an id is specified, use it, as long as it's unique.
+    (if (and id (not (member id unique-ids))) id
+      (let* ((parts (org-split-string (org-element-property :raw-value item)))
+	     (id (org-taskjuggler--clean-id (downcase (pop parts)))))
+	;; Try to add more parts of the headline to make it unique.
+	(while (and (car parts) (member id unique-ids))
+	  (setq id (concat id "_"
+			   (org-taskjuggler--clean-id (downcase (pop parts))))))
+	;; If it's still not unique, add "_".
+	(while (member id unique-ids)
+	  (setq id (concat id "_")))
+	id))))
 
 (defun org-taskjuggler--clean-id (id)
   "Clean and return ID to make it acceptable for TaskJuggler.
@@ -457,7 +550,8 @@ channel."
         (setq depends
               (org-element-map tasks 'headline
                 (lambda (task)
-                  (let ((task-id (org-element-property :TASK_ID task)))
+                  (let ((task-id (or (org-element-property :TASK_ID task)
+				     (org-element-property :ID task))))
                     (and task-id (member task-id deps-ids) task)))
                 info)))
       ;; Check BLOCKER and DEPENDS properties.  If "previous-sibling"
@@ -481,33 +575,34 @@ DEPENDENCIES is list of dependencies for TASK, as returned by
 `org-taskjuggler-resolve-depedencies'.  TASK is a headline.
 INFO is a plist used as a communication channel.  Return value
 doesn't include leading \"depends\"."
-  (let ((dep-str (concat (org-element-property :BLOCKER task)
-                         " "
-                         (org-element-property :DEPENDS task)))
-        (get-path
-         (lambda (dep)
-           ;; Return path to DEP relatively to TASK.
-           (let ((parent (org-export-get-parent dep))
-                 (exclamations 1)
-                 (option
-                  (let ((id (org-element-property :TASK_ID dep)))
-                    (and id
-                         (string-match (concat id " +\\({.*?}\\)") dep-str)
-                         (org-match-string-no-properties 1))))
-                 path)
-             ;; Compute number of exclamation marks.
-             (while (not (org-element-map parent 'headline
-                           (lambda (task) (eq task dep))))
-               (incf exclamations)
-               (setq parent (org-export-get-parent parent)))
-             ;; Build path from DEP to PARENT.
-             (while (not (eq parent dep))
-               (push (org-taskjuggler-get-id dep info) path)
-               (setq dep (org-export-get-parent dep)))
-             ;; Return full path.  Add dependency options, if any.
-             (concat (make-string exclamations ?!)
-                     (mapconcat 'identity path ".")
-                     (and option (concat " " option)))))))
+  (let* ((dep-str (concat (org-element-property :BLOCKER task)
+			  " "
+			  (org-element-property :DEPENDS task)))
+	 (get-path
+	  (lambda (dep)
+	    ;; Return path to DEP relatively to TASK.
+	    (let ((parent (org-export-get-parent task))
+		  (exclamations 1)
+		  (option
+		   (let ((id (org-element-property :TASK_ID dep)))
+		     (and id
+			  (string-match (concat id " +\\({.*?}\\)") dep-str)
+			  (org-match-string-no-properties 1))))
+		  path)
+	      ;; Compute number of exclamation marks by looking for the
+	      ;; common ancestor between TASK and DEP.
+	      (while (not (org-element-map parent 'headline
+			    (lambda (hl) (eq hl dep))))
+		(incf exclamations)
+		(setq parent (org-export-get-parent parent)))
+	      ;; Build path from DEP to PARENT.
+	      (while (not (eq parent dep))
+		(push (org-taskjuggler-get-id dep info) path)
+		(setq dep (org-export-get-parent dep)))
+	      ;; Return full path.  Add dependency options, if any.
+	      (concat (make-string exclamations ?!)
+		      (mapconcat 'identity path ".")
+		      (and option (concat " " option)))))))
     ;; Return dependencies string, without the leading "depends".
     (mapconcat (lambda (dep) (funcall get-path dep)) dependencies ", ")))
 
@@ -517,7 +612,7 @@ doesn't include leading \"depends\"."
 
 (defun org-taskjuggler-project-plan (contents info)
   "Build TaskJuggler project plan.
-CONTENTS is ignored. INFO is a plist holding export options.
+CONTENTS is ignored.  INFO is a plist holding export options.
 Return complete project plan as a string in TaskJuggler syntax."
   (let* ((tree (plist-get info :parse-tree))
          (project (or (org-taskjuggler-get-project info)
@@ -601,8 +696,18 @@ Return complete project plan as a string in TaskJuggler syntax."
               (mapconcat
                (lambda (report) (org-taskjuggler--build-report report info))
                main-reports "")
-            (mapconcat 'org-element-normalize-string
-                       org-taskjuggler-default-reports ""))))))))
+	    ;; insert title in default reports
+	    (let* ((title (org-export-data (plist-get info :title) info))
+		   (report-title (if (string= title "")
+				     (org-taskjuggler-get-name project)
+				   title)))
+	      (mapconcat
+	       'org-element-normalize-string
+	       (mapcar
+		(function
+		 (lambda (report)
+		   (replace-regexp-in-string "%title" report-title  report t t)))
+		org-taskjuggler-default-reports) "")))))))))
 
 (defun org-taskjuggler--build-project (project info)
   "Return a project declaration.
@@ -656,7 +761,7 @@ neither is defined a unique id will be associated to it."
    ;; Closing resource.
    "}\n"))
 
-(defun org-taskjuggler--build-report (report)
+(defun org-taskjuggler--build-report (report info)
   "Return a report declaration.
 REPORT is a headline.  INFO is a plist used as a communication
 channel."
@@ -726,13 +831,13 @@ a unique id will be associated to it."
                   (if (>= org-taskjuggler-target-version 3.0) "allocate"
                     "allocations")
                   allocate))
-     (and complete (format "  complete %s\n" comptete))
+     (and complete (format "  complete %s\n" complete))
      (and effort
           (format "  effort %s\n"
                   (let* ((minutes (org-duration-string-to-minutes effort))
                          (hours (/ minutes 60.0)))
                     (format "%.1fh" hours))))
-     (and priority (format "  priority %s\n" complete))
+     (and priority (format "  priority %s\n" priority))
      (and milestone "  milestone\n")
      ;; Add other valid attributes.
      (org-taskjuggler--indent-string
@@ -801,8 +906,8 @@ Return output file's name."
       outfile)))
 
 ;;;###autoload
-(defun org-taskjuggler-export-and-open (&optional subtreep visible-only)
-  "Export current buffer to a TaskJuggler file and open it.
+(defun org-taskjuggler-export-and-process (&optional subtreep visible-only)
+  "Export current buffer to a TaskJuggler file and process it.
 
 The exporter looks for a tree with tag that matches
 `org-taskjuggler-project-tag' and takes this as the tasks for
@@ -829,12 +934,78 @@ first.
 When optional argument VISIBLE-ONLY is non-nil, don't export
 contents of hidden elements.
 
-Open file with the TaskJuggler GUI."
+Return a list of reports."
   (interactive)
-  (let* ((file (org-taskjuggler-export nil subtreep visible-only))
-	 (process-name "TaskJugglerUI")
-	 (command (concat process-name " " file)))
-    (start-process-shell-command process-name nil command)))
+  (let ((file (org-taskjuggler-export nil subtreep visible-only)))
+    (org-taskjuggler-compile file)))
+
+;;;###autoload
+(defun org-taskjuggler-export-process-and-open (&optional subtreep visible-only)
+  "Export current buffer to a TaskJuggler file, process and open it.
+
+Export and process the file using
+`org-taskjuggler-export-and-process' and open the generated
+reports with a browser.
+
+If you are targeting TaskJuggler 2.4 (see
+`org-taskjuggler-target-version') the processing and display of
+the reports is done using the TaskJuggler GUI."
+  (interactive)
+  (if (< org-taskjuggler-target-version 3.0)
+      (let* ((process-name "TaskJugglerUI")
+	     (command
+	      (concat process-name " "
+		      (org-taskjuggler-export nil subtreep visible-only))))
+	(start-process-shell-command process-name nil command))
+    (dolist (report (org-taskjuggler-export-and-process subtreep visible-only))
+      (org-open-file report))))
+
+(defun org-taskjuggler-compile (file)
+  "Compile a TaskJuggler file.
+
+FILE is the name of the file being compiled.  Processing is done
+through the command given in `org-taskjuggler-process-command'.
+
+Return a list of reports."
+  (let* ((full-name (file-truename file))
+	 (out-dir
+	  (expand-file-name
+	   org-taskjuggler-reports-directory (file-name-directory file)))
+	 errors)
+    (message (format "Processing TaskJuggler file %s..." file))
+    (save-window-excursion
+      (let ((outbuf (get-buffer-create "*Org Taskjuggler Output*")))
+	(unless (file-directory-p out-dir)
+	  (make-directory out-dir t))
+	(with-current-buffer outbuf (erase-buffer))
+	(shell-command
+	 (replace-regexp-in-string
+	  "%f" (shell-quote-argument full-name)
+	  (replace-regexp-in-string
+	   "%o" (shell-quote-argument out-dir)
+	   org-taskjuggler-process-command t t) t t) outbuf)
+	;; Collect standard errors from output buffer.
+	(setq errors (org-taskjuggler--collect-errors outbuf)))
+      (if (not errors)
+	  (message "Process completed.")
+	(error (format "TaskJuggler failed with errors: %s" errors))))
+    (file-expand-wildcards (format "%s/*.html" out-dir))))
+
+(defun org-taskjuggler--collect-errors (buffer)
+  "Collect some kind of errors from \"tj3\" command output.
+
+BUFFER is the buffer containing output.
+
+Return collected error types as a string, or nil if there was
+none."
+  (with-current-buffer buffer
+    (save-excursion
+      (goto-char (point-min))
+      (let ((case-fold-search t)
+	    (errors ""))
+	(while (re-search-forward "^.+:[0-9]+: \\(.*\\)$" nil t)
+	  (setq errors (concat errors " " (match-string 1))))
+	(and (org-string-nw-p errors) (org-trim errors))))))
 
 
 (provide 'ox-taskjuggler)

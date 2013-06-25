@@ -59,7 +59,7 @@
 (defun org-confluence-bold (bold contents info)
   (format "*%s*" contents))
 
-(defun org-confluence-empty (empy contents info)
+(defun org-confluence-empty (empty contents info)
   "")
 
 (defun org-confluence-example-block (example-block contents info)

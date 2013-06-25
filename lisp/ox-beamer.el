@@ -116,6 +116,18 @@
 (eval-when-compile (require 'cl))
 (require 'ox-latex)
 
+;; Install a default set-up for Beamer export.
+(unless (assoc "beamer" org-latex-classes)
+  (add-to-list 'org-latex-classes
+	       '("beamer"
+		 "\\documentclass[presentation]{beamer}
+     \[DEFAULT-PACKAGES]
+     \[PACKAGES]
+     \[EXTRA]"
+		 ("\\section{%s}" . "\\section*{%s}")
+		 ("\\subsection{%s}" . "\\subsection*{%s}")
+		 ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
+
 
 
 ;;; User-Configurable Variables
@@ -311,7 +323,9 @@ Return overlay specification, as a string, or nil."
     (:beamer-inner-theme "BEAMER_INNER_THEME" nil nil t)
     (:beamer-outer-theme "BEAMER_OUTER_THEME" nil nil t)
     (:beamer-header-extra "BEAMER_HEADER" nil nil newline)
-    (:headline-levels nil "H" org-beamer-frame-level))
+    ;; Modify existing properties.
+    (:headline-levels nil "H" org-beamer-frame-level)
+    (:latex-class "LATEX_CLASS" nil "beamer" t))
   :translate-alist '((bold . org-beamer-bold)
 		     (export-block . org-beamer-export-block)
 		     (export-snippet . org-beamer-export-snippet)
@@ -407,19 +421,19 @@ INFO is a plist used as a communication channel."
    (catch 'exit
      (mapc (lambda (parent)
 	     (let ((env (org-element-property :BEAMER_ENV parent)))
-	       (when (and env (member (downcase env) '("frame" "fullframe")))
+	       (when (and env (member-ignore-case env '("frame" "fullframe")))
 		 (throw 'exit (org-export-get-relative-level parent info)))))
 	   (nreverse (org-export-get-genealogy headline)))
      nil)
    ;; 2. Look for "frame" environment in HEADLINE.
    (let ((env (org-element-property :BEAMER_ENV headline)))
-     (and env (member (downcase env) '("frame" "fullframe"))
+     (and env (member-ignore-case env '("frame" "fullframe"))
 	  (org-export-get-relative-level headline info)))
    ;; 3. Look for "frame" environment in sub-tree.
    (org-element-map headline 'headline
      (lambda (hl)
        (let ((env (org-element-property :BEAMER_ENV hl)))
-	 (when (and env (member (downcase env) '("frame" "fullframe")))
+	 (when (and env (member-ignore-case env '("frame" "fullframe")))
 	   (org-export-get-relative-level hl info))))
      info 'first-match)
    ;; 4. No "frame" environment in tree: use default value.
@@ -504,7 +518,7 @@ used as a communication channel."
 	    ;; remove the first word from the contents in the PDF
 	    ;; output.
 	    (if (not fragilep) contents
-	      (replace-regexp-in-string "\\`\n*" "\\& " contents))
+	      (replace-regexp-in-string "\\`\n*" "\\& " (or contents "")))
 	    "\\end{frame}")))
 
 (defun org-beamer--format-block (headline contents info)
@@ -523,7 +537,7 @@ used as a communication channel."
 			 ;; "column" only.
 			 ((not env) "column")
 			 ;; Use specified environment.
-			 (t (downcase env)))))
+			 (t env))))
 	 (env-format (unless (member environment '("column" "columns"))
 		       (assoc environment
 			      (append org-beamer-environments-special
@@ -611,7 +625,7 @@ as a communication channel."
     (let ((level (org-export-get-relative-level headline info))
 	  (frame-level (org-beamer--frame-level headline info))
 	  (environment (let ((env (org-element-property :BEAMER_ENV headline)))
-			 (if (stringp env) (downcase env) "block"))))
+			 (or (org-string-nw-p env) "block"))))
       (cond
        ;; Case 1: Resume frame specified by "BEAMER_ref" property.
        ((equal environment "againframe")
@@ -899,17 +913,8 @@ holding export options."
 	     (author (format "\\author{%s}\n" author))
 	     (t "\\author{}\n")))
      ;; 6. Date.
-     (let ((date (and (plist-get info :with-date) (plist-get info :date))))
-       (format "\\date{%s}\n"
-	       (cond ((not date) "")
-		     ;; If `:date' consists in a single timestamp and
-		     ;; `:date-format' is provided, apply it.
-		     ((and (plist-get info :date-format)
-			   (not (cdr date))
-			   (eq (org-element-type (car date)) 'timestamp))
-		      (org-timestamp-format
-		       (car date) (plist-get info :date-format)))
-		     (t (org-export-data date info)))))
+     (let ((date (and (plist-get info :with-date) (org-export-get-date info))))
+       (format "\\date{%s}\n" (org-export-data date info)))
      ;; 7. Title
      (format "\\title{%s}\n" title)
      ;; 8. Hyperref options.

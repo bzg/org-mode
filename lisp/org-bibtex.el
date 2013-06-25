@@ -2,7 +2,7 @@
 ;;
 ;; Copyright (C) 2007-2013 Free Software Foundation, Inc.
 ;;
-;; Authors: Bastien Guerry <bzg at altern dot org>
+;; Authors: Bastien Guerry <bzg at gnu dot org>
 ;;       Carsten Dominik <carsten dot dominik at gmail dot com>
 ;;       Eric Schulte <schulte dot eric at gmail dot com>
 ;; Keywords: org, wp, capture
@@ -224,7 +224,9 @@
 For example setting to 'BIB_' would allow interoperability with fireforg."
   :group 'org-bibtex
   :version "24.1"
-  :type  'string)
+  :type  '(choice
+	   (const nil)
+	   (string)))
 
 (defcustom org-bibtex-treat-headline-as-title t
   "Treat headline text as title if title property is absent.

@@ -32,6 +32,7 @@
 
 (declare-function org-entry-get "org"
 		  (pom property &optional inherit literal-nil))
+(declare-function org-every "org" (pred seq))
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("fortran" . "F90"))
@@ -143,6 +144,12 @@ of the same value."
      ((stringp val)
       (format "character(len=%d), parameter ::  %S = '%s'\n"
               (length val) var val))
+     ;; val is a matrix
+     ((and (listp val) (org-every #'listp val))
+      (format "real, parameter :: %S(%d,%d) = transpose( reshape( %s , (/ %d, %d /) ) )\n"
+	      var (length val) (length (car val)) 
+	      (org-babel-fortran-transform-list val)
+	      (length (car val)) (length val)))
      ((listp val)
       (format "real, parameter :: %S(%d) = %s\n"
 	      var (length val) (org-babel-fortran-transform-list val)))

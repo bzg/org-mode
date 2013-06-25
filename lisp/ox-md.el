@@ -69,7 +69,6 @@ This variable can be set to either `atx' or `setext'."
 		(org-open-file (org-md-export-to-markdown nil s v)))))))
   :translate-alist '((bold . org-md-bold)
 		     (code . org-md-verbatim)
-		     (underline . org-md-verbatim)
 		     (comment . (lambda (&rest args) ""))
 		     (comment-block . (lambda (&rest args) ""))
 		     (example-block . org-md-example-block)
@@ -310,14 +309,12 @@ a communication channel."
 	     (org-export-data (org-element-contents destination) info)))
 	  ((equal type "fuzzy")
 	   (let ((destination (org-export-resolve-fuzzy-link link info)))
-	     ;; Ignore invisible "#+TARGET: path".
-	     (unless (eq (org-element-type destination) 'keyword)
-	       (if (org-string-nw-p contents) contents
-		 (when destination
-		   (let ((number (org-export-get-ordinal destination info)))
-		     (when number
-		       (if (atom number) (number-to-string number)
-			 (mapconcat 'number-to-string number ".")))))))))
+	     (if (org-string-nw-p contents) contents
+	       (when destination
+		 (let ((number (org-export-get-ordinal destination info)))
+		   (when number
+		     (if (atom number) (number-to-string number)
+		       (mapconcat 'number-to-string number "."))))))))
 	  (t (let* ((raw-path (org-element-property :path link))
 		    (path (cond
 			   ((member type '("http" "https" "ftp"))
@@ -456,6 +453,15 @@ non-nil."
       (with-current-buffer outbuf (text-mode))
       (when org-export-show-temporary-export-buffer
 	(switch-to-buffer-other-window outbuf)))))
+
+;;;###autoload
+(defun org-md-convert-region-to-md ()
+  "Assume the current region has org-mode syntax, and convert it to Markdown.
+This can be used in any buffer.  For example, you can write an
+itemized list in org-mode syntax in a Markdown buffer and use
+this command to convert it."
+  (interactive)
+  (org-export-replace-region-by 'md))
 
 
 ;;;###autoload

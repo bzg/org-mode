@@ -160,7 +160,7 @@
           ;; Lists.
           (let ((term (case org-plain-list-ordered-item-terminator
                         (?\) ")") (?. "\\.") (otherwise "[.)]")))
-                (alpha (and org-alphabetical-lists "\\|[A-Za-z]")))
+                (alpha (and org-list-allow-alphabetical "\\|[A-Za-z]")))
             (concat "\\(?:[-+*]\\|\\(?:[0-9]+" alpha "\\)" term "\\)"
                     "\\(?:[ \t]\\|$\\)"))
           "\\)\\)")
@@ -1146,6 +1146,90 @@ CONTENTS is the contents of the element."
 
 ;;;; Plain List
 
+(defun org-element--list-struct (limit)
+  ;; Return structure of list at point.  Internal function.  See
+  ;; `org-list-struct' for details.
+  (let ((case-fold-search t)
+	(top-ind limit)
+	(item-re (org-item-re))
+	(drawers-re (concat ":\\("
+			    (mapconcat 'regexp-quote org-drawers "\\|")
+			    "\\):[ \t]*$"))
+	(inlinetask-re (and (featurep 'org-inlinetask) "^\\*+ "))
+	items struct)
+    (save-excursion
+      (catch 'exit
+	(while t
+	  (cond
+	   ;; At limit: end all items.
+	   ((>= (point) limit)
+	    (throw 'exit
+		   (let ((end (progn (skip-chars-backward " \r\t\n")
+				     (forward-line)
+				     (point))))
+		     (dolist (item items (sort (nconc items struct)
+					       'car-less-than-car))
+		       (setcar (nthcdr 6 item) end)))))
+	   ;; At list end: end all items.
+	   ((looking-at org-list-end-re)
+	    (throw 'exit (dolist (item items (sort (nconc items struct)
+						   'car-less-than-car))
+			   (setcar (nthcdr 6 item) (point)))))
+	   ;; At a new item: end previous sibling.
+	   ((looking-at item-re)
+	    (let ((ind (save-excursion (skip-chars-forward " \t")
+				       (current-column))))
+	      (setq top-ind (min top-ind ind))
+	      (while (and items (<= ind (nth 1 (car items))))
+		(let ((item (pop items)))
+		  (setcar (nthcdr 6 item) (point))
+		  (push item struct)))
+	      (push (progn (looking-at org-list-full-item-re)
+			   (let ((bullet (match-string-no-properties 1)))
+			     (list (point)
+				   ind
+				   bullet
+				   (match-string-no-properties 2) ; counter
+				   (match-string-no-properties 3) ; checkbox
+				   ;; Description tag.
+				   (and (save-match-data
+					  (string-match "[-+*]" bullet))
+					(match-string-no-properties 4))
+				   ;; Ending position, unknown so far.
+				   nil)))
+		    items))
+	    (forward-line 1))
+	   ;; Skip empty lines.
+	   ((looking-at "^[ \t]*$") (forward-line))
+	   ;; Skip inline tasks and blank lines along the way.
+	   ((and inlinetask-re (looking-at inlinetask-re))
+	    (forward-line)
+	    (let ((origin (point)))
+	      (when (re-search-forward inlinetask-re limit t)
+		(if (looking-at "^\\*+ END[ \t]*$") (forward-line)
+		  (goto-char origin)))))
+	   ;; At some text line.  Check if it ends any previous item.
+	   (t
+	    (let ((ind (progn (skip-chars-forward " \t") (current-column))))
+	      (when (<= ind top-ind)
+		(skip-chars-backward " \r\t\n")
+		(forward-line))
+	      (while (<= ind (nth 1 (car items)))
+		(let ((item (pop items)))
+		  (setcar (nthcdr 6 item) (line-beginning-position))
+		  (push item struct)
+		  (unless items
+		    (throw 'exit (sort struct 'car-less-than-car))))))
+	    ;; Skip blocks (any type) and drawers contents.
+	    (cond
+	     ((and (looking-at "#\\+BEGIN\\(:[ \t]*$\\|_\\S-\\)+")
+		   (re-search-forward
+		    (format "^[ \t]*#\\+END%s[ \t]*$" (match-string 1))
+		    limit t)))
+	     ((and (looking-at drawers-re)
+		   (re-search-forward "^[ \t]*:END:[ \t]*$" limit t))))
+	    (forward-line))))))))
+
 (defun org-element-plain-list-parser (limit affiliated structure)
   "Parse a plain list.
 
@@ -1162,9 +1246,8 @@ containing `:type', `:begin', `:end', `:contents-begin' and
 
 Assume point is at the beginning of the list."
   (save-excursion
-    (let* ((struct (or structure (org-list-struct)))
+    (let* ((struct (or structure (org-element--list-struct limit)))
 	   (prevs (org-list-prevs-alist struct))
-	   (parents (org-list-parents-alist struct))
 	   (type (org-list-get-list-type (point) struct prevs))
 	   (contents-begin (point))
 	   (begin (car affiliated))
@@ -1353,11 +1436,12 @@ containing `:type', `:begin', `:end', `:hiddenp',
 
 Assume point is at the beginning of the block."
   (let* ((case-fold-search t)
-	 (type (progn (looking-at "[ \t]*#\\+BEGIN_\\(S-+\\)")
+	 (type (progn (looking-at "[ \t]*#\\+BEGIN_\\(\\S-+\\)")
 		      (upcase (match-string-no-properties 1)))))
     (if (not (save-excursion
 	       (re-search-forward
-		(format "^[ \t]*#\\+END_%s[ \t]*$" type) limit t)))
+		(format "^[ \t]*#\\+END_%s[ \t]*$" (regexp-quote type))
+		limit t)))
 	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit affiliated)
       (let ((block-end-line (match-beginning 0)))
@@ -1648,6 +1732,35 @@ CONTENTS is nil."
 
 ;;;; Example Block
 
+(defun org-element--remove-indentation (s &optional n)
+  "Remove maximum common indentation in string S and return it.
+When optional argument N is a positive integer, remove exactly
+that much characters from indentation, if possible, or return
+S as-is otherwise.  Unlike to `org-remove-indentation', this
+function doesn't call `untabify' on S."
+  (catch 'exit
+    (with-temp-buffer
+      (insert s)
+      (goto-char (point-min))
+      ;; Find maximum common indentation, if not specified.
+      (setq n (or n
+                  (let ((min-ind (point-max)))
+		    (save-excursion
+		      (while (re-search-forward "^[ \t]*\\S-" nil t)
+			(let ((ind (1- (current-column))))
+			  (if (zerop ind) (throw 'exit s)
+			    (setq min-ind (min min-ind ind))))))
+		    min-ind)))
+      (if (zerop n) s
+	;; Remove exactly N indentation, but give up if not possible.
+	(while (not (eobp))
+	  (let ((ind (progn (skip-chars-forward " \t") (current-column))))
+	    (cond ((eolp) (delete-region (line-beginning-position) (point)))
+		  ((< ind n) (throw 'exit s))
+		  (t (org-indent-line-to (- ind n))))
+	    (forward-line)))
+	(buffer-string)))))
+
 (defun org-element-example-block-parser (limit affiliated)
   "Parse an example block.
 
@@ -1669,13 +1782,17 @@ keywords."
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
 	  (let* ((switches
-		  (progn (looking-at "^[ \t]*#\\+BEGIN_EXAMPLE\\(?: +\\(.*\\)\\)?")
-			 (org-match-string-no-properties 1)))
+		  (progn
+		    (looking-at "^[ \t]*#\\+BEGIN_EXAMPLE\\(?: +\\(.*\\)\\)?")
+		    (org-match-string-no-properties 1)))
 		 ;; Switches analysis
-		 (number-lines (cond ((not switches) nil)
-				     ((string-match "-n\\>" switches) 'new)
-				     ((string-match "+n\\>" switches) 'continued)))
-		 (preserve-indent (and switches (string-match "-i\\>" switches)))
+		 (number-lines
+		  (cond ((not switches) nil)
+			((string-match "-n\\>" switches) 'new)
+			((string-match "+n\\>" switches) 'continued)))
+		 (preserve-indent
+		  (or org-src-preserve-indentation
+		      (and switches (string-match "-i\\>" switches))))
 		 ;; Should labels be retained in (or stripped from) example
 		 ;; blocks?
 		 (retain-labels
@@ -1686,18 +1803,23 @@ keywords."
 		 ;; line-numbers?
 		 (use-labels
 		  (or (not switches)
-		      (and retain-labels (not (string-match "-k\\>" switches)))))
-		 (label-fmt (and switches
-				 (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
-				 (match-string 1 switches)))
+		      (and retain-labels
+			   (not (string-match "-k\\>" switches)))))
+		 (label-fmt
+		  (and switches
+		       (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
+		       (match-string 1 switches)))
 		 ;; Standard block parsing.
 		 (begin (car affiliated))
 		 (post-affiliated (point))
+		 (block-ind (progn (skip-chars-forward " \t") (current-column)))
 		 (contents-begin (progn (forward-line) (point)))
 		 (hidden (org-invisible-p2))
-		 (value (org-unescape-code-in-string
-			 (buffer-substring-no-properties
-			  contents-begin contents-end)))
+		 (value (org-element--remove-indentation
+			 (org-unescape-code-in-string
+			  (buffer-substring-no-properties
+			   contents-begin contents-end))
+			 (and preserve-indent block-ind)))
 		 (pos-before-blank (progn (goto-char contents-end)
 					  (forward-line)
 					  (point)))
@@ -1725,9 +1847,8 @@ keywords."
 CONTENTS is nil."
   (let ((switches (org-element-property :switches example-block)))
     (concat "#+BEGIN_EXAMPLE" (and switches (concat " " switches)) "\n"
-	    (org-remove-indentation
-	     (org-escape-code-in-string
-	      (org-element-property :value example-block)))
+	    (org-escape-code-in-string
+	     (org-element-property :value example-block))
 	    "#+END_EXAMPLE")))
 
 
@@ -1834,8 +1955,11 @@ Assume point is at the beginning of the fixed-width area."
 (defun org-element-fixed-width-interpreter (fixed-width contents)
   "Interpret FIXED-WIDTH element as Org syntax.
 CONTENTS is nil."
-  (replace-regexp-in-string
-   "^" ": " (substring (org-element-property :value fixed-width) 0 -1)))
+  (let ((value (org-element-property :value fixed-width)))
+    (and value
+	 (replace-regexp-in-string
+	  "^" ": "
+	  (if (string-match "\n\\'" value) (substring value 0 -1) value)))))
 
 
 ;;;; Horizontal Rule
@@ -1970,11 +2094,11 @@ Return a list whose CAR is `node-property' and CDR is a plist
 containing `:key', `:value', `:begin', `:end' and `:post-blank'
 keywords."
   (save-excursion
+    (looking-at org-property-re)
     (let ((case-fold-search t)
 	  (begin (point))
-	  (key (progn (looking-at "[ \t]*:\\(.*?\\):[ \t]+\\(.*?\\)[ \t]*$")
-		      (org-match-string-no-properties 1)))
-	  (value (org-match-string-no-properties 2))
+	  (key   (org-match-string-no-properties 2))
+	  (value (org-match-string-no-properties 3))
 	  (pos-before-blank (progn (forward-line) (point)))
 	  (end (progn (skip-chars-forward " \r\t\n" limit)
 		      (if (eobp) (point) (point-at-bol)))))
@@ -2221,13 +2345,17 @@ Assume point is at the beginning of the block."
 		 ;; Get parameters.
 		 (parameters (org-match-string-no-properties 3))
 		 ;; Switches analysis
-		 (number-lines (cond ((not switches) nil)
-				     ((string-match "-n\\>" switches) 'new)
-				     ((string-match "+n\\>" switches) 'continued)))
-		 (preserve-indent (and switches (string-match "-i\\>" switches)))
-		 (label-fmt (and switches
-				 (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
-				 (match-string 1 switches)))
+		 (number-lines
+		  (cond ((not switches) nil)
+			((string-match "-n\\>" switches) 'new)
+			((string-match "+n\\>" switches) 'continued)))
+		 (preserve-indent (or org-src-preserve-indentation
+				      (and switches
+					   (string-match "-i\\>" switches))))
+		 (label-fmt
+		  (and switches
+		       (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
+		       (match-string 1 switches)))
 		 ;; Should labels be retained in (or stripped from)
 		 ;; src blocks?
 		 (retain-labels
@@ -2238,12 +2366,18 @@ Assume point is at the beginning of the block."
 		 ;; line-numbers?
 		 (use-labels
 		  (or (not switches)
-		      (and retain-labels (not (string-match "-k\\>" switches)))))
+		      (and retain-labels
+			   (not (string-match "-k\\>" switches)))))
+		 ;; Indentation.
+		 (block-ind (progn (skip-chars-forward " \t") (current-column)))
 		 ;; Get visibility status.
 		 (hidden (progn (forward-line) (org-invisible-p2)))
 		 ;; Retrieve code.
-		 (value (org-unescape-code-in-string
-			 (buffer-substring-no-properties (point) contents-end)))
+		 (value (org-element--remove-indentation
+			 (org-unescape-code-in-string
+			  (buffer-substring-no-properties
+			   (point) contents-end))
+			 (and preserve-indent block-ind)))
 		 (pos-before-blank (progn (goto-char contents-end)
 					  (forward-line)
 					  (point)))
@@ -2279,15 +2413,13 @@ CONTENTS is nil."
 	(params (org-element-property :parameters src-block))
 	(value (let ((val (org-element-property :value src-block)))
 		 (cond
-		  (org-src-preserve-indentation val)
-		  ((zerop org-edit-src-content-indentation)
-		   (org-remove-indentation val))
+		  ((org-element-property :preserve-indent src-block) val)
+		  ((zerop org-edit-src-content-indentation) val)
 		  (t
 		   (let ((ind (make-string
 			       org-edit-src-content-indentation 32)))
 		     (replace-regexp-in-string
-		      "\\(^\\)[ \t]*\\S-" ind
-		      (org-remove-indentation val) nil nil 1)))))))
+		      "\\(^\\)[ \t]*\\S-" ind val nil nil 1)))))))
     (concat (format "#+BEGIN_SRC%s\n"
 		    (concat (and lang (concat " " lang))
 			    (and switches (concat " " switches))
@@ -3117,20 +3249,19 @@ Assume point is at the macro."
 	  (post-blank (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")))
 	  (end (point))
-	  (args (let ((args (org-match-string-no-properties 3)) args2)
+	  (args (let ((args (org-match-string-no-properties 3)))
 		  (when args
 		    ;; Do not use `org-split-string' since empty
 		    ;; strings are meaningful here.
-		    (setq args (split-string args ","))
-		    (while args
-		      (while (string-match "\\\\\\'" (car args))
-			;; Repair bad splits, when comma is protected,
-                        ;; and thus not a real separator.
-			(setcar (cdr args) (concat (substring (car args) 0 -1)
-						   "," (nth 1 args)))
-			(pop args))
-		      (push (pop args) args2))
-		    (mapcar 'org-trim (nreverse args2))))))
+		    (split-string
+		     (replace-regexp-in-string
+		      "\\(\\\\*\\)\\(,\\)"
+		      (lambda (str)
+			(let ((len (length (match-string 1 str))))
+			  (concat (make-string (/ len 2) ?\\)
+				  (if (zerop (mod len 2)) "\000" ","))))
+		      args nil t)
+		     "\000")))))
       (list 'macro
 	    (list :key key
 		  :value value
@@ -3394,7 +3525,7 @@ LIMIT bounds the search.
 
 Return value is a cons cell whose CAR is `table-cell' and CDR is
 beginning position."
-  (when (looking-at "[ \t]*.*?[ \t]+|") (cons 'table-cell (point))))
+  (when (looking-at "[ \t]*.*?[ \t]*|") (cons 'table-cell (point))))
 
 
 ;;;; Target
@@ -3773,7 +3904,8 @@ element it has to parse."
 	      (goto-char (car affiliated))
 	      (org-element-keyword-parser limit nil))
 	     ;; LaTeX Environment.
-	     ((looking-at "[ \t]*\\\\begin{\\([A-Za-z0-9*]+\\)}[ \t]*$")
+	     ((looking-at
+	       "[ \t]*\\\\begin{[A-Za-z0-9*]+}\\(\\[.*?\\]\\|{.*?}\\)*[ \t]*$")
 	      (org-element-latex-environment-parser limit affiliated))
 	     ;; Drawer and Property Drawer.
 	     ((looking-at org-drawer-regexp)
@@ -3822,7 +3954,8 @@ element it has to parse."
 	     ;; List.
 	     ((looking-at (org-item-re))
 	      (org-element-plain-list-parser
-	       limit affiliated (or structure (org-list-struct))))
+	       limit affiliated
+	       (or structure (org-element--list-struct limit))))
 	     ;; Default element: Paragraph.
 	     (t (org-element-paragraph-parser limit affiliated)))))))))
 
@@ -4197,6 +4330,10 @@ elements.
 Elements are accumulated into ACC."
   (save-excursion
     (goto-char beg)
+    ;; Visible only: skip invisible parts at the beginning of the
+    ;; element.
+    (when (and visible-only (org-invisible-p2))
+      (goto-char (min (1+ (org-find-visible)) end)))
     ;; When parsing only headlines, skip any text before first one.
     (when (and (eq granularity 'headline) (not (org-at-heading-p)))
       (org-with-limited-levels (outline-next-heading)))
@@ -4209,12 +4346,13 @@ Elements are accumulated into ACC."
 	     (type (org-element-type element))
 	     (cbeg (org-element-property :contents-begin element)))
 	(goto-char (org-element-property :end element))
+	;; Visible only: skip invisible parts between siblings.
+	(when (and visible-only (org-invisible-p2))
+	  (goto-char (min (1+ (org-find-visible)) end)))
 	;; Fill ELEMENT contents by side-effect.
 	(cond
-	 ;; If VISIBLE-ONLY is true and element is hidden or if it has
-	 ;; no contents, don't modify it.
-	 ((or (and visible-only (org-element-property :hiddenp element))
-	      (not cbeg)))
+	 ;; If element has no contents, don't modify it.
+	 ((not cbeg))
 	 ;; Greater element: parse it between `contents-begin' and
 	 ;; `contents-end'.  Make sure GRANULARITY allows the
 	 ;; recursion, or ELEMENT is a headline, in which case going

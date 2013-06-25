@@ -78,11 +78,12 @@
                    (cdr (member org-babel-haskell-eoe
                                 (reverse (mapcar #'org-babel-trim raw)))))))
     (org-babel-reassemble-table
-     (cond
-      ((equal result-type 'output)
-       (mapconcat #'identity (reverse (cdr results)) "\n"))
-      ((equal result-type 'value)
-       (org-babel-haskell-table-or-string (car results))))
+     ((lambda (result)
+	(org-babel-result-cond (cdr (assoc :result-params params))
+	  result (org-babel-haskell-table-or-string result)))
+      (case result-type
+	('output (mapconcat #'identity (reverse (cdr results)) "\n"))
+	('value (car results))))
      (org-babel-pick-name (cdr (assoc :colname-names params))
 			  (cdr (assoc :colname-names params)))
      (org-babel-pick-name (cdr (assoc :rowname-names params))

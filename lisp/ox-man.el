@@ -618,8 +618,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (cond
      ((string= key "MAN") value)
      ((string= key "INDEX") nil)
-     ;; Invisible targets.
-     ((string= key "TARGET") nil)
      ((string= key "TOC"   ) nil))))
 
 
@@ -1206,11 +1204,12 @@ Return PDF file name or an error if it couldn't be produced."
   (let* ((base-name (file-name-sans-extension (file-name-nondirectory file)))
 	 (full-name (file-truename file))
 	 (out-dir (file-name-directory file))
-	 ;; Make sure `default-directory' is set to FILE directory,
-	 ;; not to whatever value the current buffer may have.
-	 (default-directory (file-name-directory full-name))
+	 ;; Properly set working directory for compilation.
+	 (default-directory (if (file-name-absolute-p file)
+				(file-name-directory full-name)
+			      default-directory))
          errors)
-    (message (format "Processing Groff file %s ..." file))
+    (message (format "Processing Groff file %s..." file))
     (save-window-excursion
       (cond
        ;; A function is provided: Apply it.

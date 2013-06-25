@@ -66,11 +66,12 @@
   ;; Macros in setup file.
   (should
    (string-match
-    "success\\'"
+    "success success\\'"
     (org-test-with-temp-text
-	(format
-	 "#+SETUPFILE: \"%sexamples/macro-templates.org\"\n{{{included-macro}}}"
-	 org-test-dir)
+	(format "#+MACRO: other-macro success
+#+SETUPFILE: \"%sexamples/macro-templates.org\"
+{{{included-macro}}} {{{other-macro}}}"
+		org-test-dir)
       (org-macro-initialize-templates)
       (org-macro-replace-all org-macro-templates)
       (buffer-string)))))

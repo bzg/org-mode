@@ -217,15 +217,27 @@ Valid values are ?. and ?\).  To get both terminators, use t."
 		 (const :tag "paren like in \"2)\"" ?\))
 		 (const :tag "both" t)))
 
-(org-defvaralias 'org-alphabetical-lists 'org-list-allow-alphabetical) ;; Since 8.0
+(define-obsolete-variable-alias 'org-alphabetical-lists
+  'org-list-allow-alphabetical "24.4") ; Since 8.0
 (defcustom org-list-allow-alphabetical nil
   "Non-nil means single character alphabetical bullets are allowed.
+
 Both uppercase and lowercase are handled.  Lists with more than
 26 items will fallback to standard numbering.  Alphabetical
-counters like \"[@c]\" will be recognized."
+counters like \"[@c]\" will be recognized.
+
+This variable needs to be set before org.el is loaded.  If you
+need to make a change while Emacs is running, use the customize
+interface or run the following code, where VALUE stands for the
+new value of the variable, after updating it:
+
+  \(when (featurep 'org-element) (load \"org-element\" t t))"
   :group 'org-plain-lists
   :version "24.1"
-  :type 'boolean)
+  :type 'boolean
+  :set (lambda (var val)
+	 (when (featurep 'org-element) (load "org-element" t t))
+	 (set var val)))
 
 (defcustom org-list-two-spaces-after-bullet-regexp nil
   "A regular expression matching bullets that should have 2 spaces after them.
@@ -239,8 +251,8 @@ spaces instead of one after the bullet in each item of the list."
 	  (const :tag "never" nil)
 	  (regexp)))
 
-(org-defvaralias 'org-empty-line-terminates-plain-lists
-  'org-list-empty-line-terminates-plain-lists) ;; Since 8.0
+(define-obsolete-variable-alias 'org-empty-line-terminates-plain-lists
+  'org-list-empty-line-terminates-plain-lists "24.4") ;; Since 8.0
 (defcustom org-list-empty-line-terminates-plain-lists nil
   "Non-nil means an empty line ends all plain list levels.
 Otherwise, two of them will be necessary."
@@ -293,8 +305,8 @@ This hook runs even if checkbox rule in
 implement alternative ways of collecting statistics
 information.")
 
-(org-defvaralias 'org-hierarchical-checkbox-statistics
-  'org-checkbox-hierarchical-statistics) ;; Since 8.0
+(define-obsolete-variable-alias 'org-hierarchical-checkbox-statistics
+  'org-checkbox-hierarchical-statistics "24.4") ;; Since 8.0
 (defcustom org-checkbox-hierarchical-statistics t
   "Non-nil means checkbox statistics counts only the state of direct children.
 When nil, all boxes below the cookie are counted.
@@ -363,10 +375,10 @@ specifically, type `block' is determined by the variable
 
 ;;; Predicates and regexps
 
-(defconst org-list-end-re (if org-empty-line-terminates-plain-lists "^[ \t]*\n"
+(defconst org-list-end-re (if org-list-empty-line-terminates-plain-lists "^[ \t]*\n"
 			    "^[ \t]*\n[ \t]*\n")
   "Regex corresponding to the end of a list.
-It depends on `org-empty-line-terminates-plain-lists'.")
+It depends on `org-list-empty-line-terminates-plain-lists'.")
 
 (defconst org-list-full-item-re
   (concat "^[ \t]*\\(\\(?:[-+*]\\|\\(?:[0-9]+\\|[A-Za-z]\\)[.)]\\)\\(?:[ \t]+\\|$\\)\\)"
@@ -386,7 +398,7 @@ group 4: description tag")
 	       ((= org-plain-list-ordered-item-terminator ?\)) ")")
 	       ((= org-plain-list-ordered-item-terminator ?.) "\\.")
 	       (t "[.)]")))
-	(alpha (if org-alphabetical-lists "\\|[A-Za-z]" "")))
+	(alpha (if org-list-allow-alphabetical "\\|[A-Za-z]" "")))
     (concat "\\([ \t]*\\([-+]\\|\\(\\([0-9]+" alpha "\\)" term
 	    "\\)\\)\\|[ \t]+\\*\\)\\([ \t]+\\|$\\)")))
 
@@ -400,7 +412,7 @@ group 4: description tag")
        (save-excursion
 	 (goto-char (match-end 0))
 	 (let ((counter-re (concat "\\(?:\\[@\\(?:start:\\)?"
-				   (if org-alphabetical-lists
+				   (if org-list-allow-alphabetical
 				       "\\([0-9]+\\|[A-Za-z]\\)"
 				     "[0-9]+")
 				   "\\][ \t]*\\)")))
@@ -1208,7 +1220,7 @@ some heuristics to guess the result."
 				    (point))))))))
       (cond
        ;; Trivial cases where there should be none.
-       ((or org-empty-line-terminates-plain-lists (not insert-blank-p)) 0)
+       ((or org-list-empty-line-terminates-plain-lists (not insert-blank-p)) 0)
        ;; When `org-blank-before-new-entry' says so, it is 1.
        ((eq insert-blank-p t) 1)
        ;; `plain-list-item' is 'auto.  Count blank lines separating
@@ -1613,7 +1625,7 @@ bullets between START and END."
 
 STRUCT is list structure.  PREVS is the alist of previous items,
 as returned by `org-list-prevs-alist'."
-  (and org-alphabetical-lists
+  (and org-list-allow-alphabetical
        (catch 'exit
 	 (let ((item first) (ascii 64) (case-fold-search nil))
 	   ;; Pretend that bullets are uppercase and check if alphabet
@@ -2429,7 +2441,7 @@ With optional prefix argument ALL, do this for the whole buffer."
     (let ((cookie-re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
 	  (box-re "^[ \t]*\\([-+*]\\|\\([0-9]+\\|[A-Za-z]\\)[.)]\\)[ \t]+\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Za-z]\\)\\][ \t]*\\)?\\(\\[[- X]\\]\\)")
 	  (recursivep
-	   (or (not org-hierarchical-checkbox-statistics)
+	   (or (not org-checkbox-hierarchical-statistics)
 	       (string-match "\\<recursive\\>"
 			     (or (org-entry-get nil "COOKIE_DATA") ""))))
 	  (bounds (if all
@@ -2835,7 +2847,7 @@ ignores hidden links."
 			 ((= dcst ?t) '<)))
 	     (next-record (lambda ()
 			    (skip-chars-forward " \r\t\n")
-			    (beginning-of-line)))
+			    (or (eobp) (beginning-of-line))))
 	     (end-record (lambda ()
 			   (goto-char (org-list-get-item-end-before-blank
 				       (point) struct))))
@@ -2857,9 +2869,10 @@ ignores hidden links."
 		     ;; If it is a timer list, convert timer to seconds
 		     ((org-at-item-timer-p)
 		      (org-timer-hms-to-secs (match-string 1)))
-		     ((or (re-search-forward org-ts-regexp (point-at-eol) t)
-			  (re-search-forward org-ts-regexp-both
-					     (point-at-eol) t))
+		     ((or (save-excursion
+			    (re-search-forward org-ts-regexp (point-at-eol) t))
+			  (save-excursion (re-search-forward org-ts-regexp-both
+							     (point-at-eol) t)))
 		      (org-time-string-to-seconds (match-string 0)))
 		     (t (org-float-time now))))
 		   ((= dcst ?f)

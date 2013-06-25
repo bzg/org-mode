@@ -149,7 +149,9 @@
   :type '(string :tag "Export Filename"))
 
 (defcustom org-texinfo-coding-system nil
-  "Default document encoding for Texinfo output."
+  "Default document encoding for Texinfo output.
+
+If `nil' it will default to `buffer-file-coding-system'."
   :group 'org-export-texinfo
   :type 'coding-system)
 
@@ -693,7 +695,9 @@ holding export options."
 	 ;; `.' in text.
 	 (dirspacing (- 29 (length dirtitle)))
 	 (menu (org-texinfo-make-menu info 'main))
-	 (detail-menu (org-texinfo-make-menu info 'detailed)))
+	 (detail-menu (org-texinfo-make-menu info 'detailed))
+	 (coding-system (or org-texinfo-coding-system
+			    buffer-file-coding-system)))
     (concat
      ;; Header
      header "\n"
@@ -701,9 +705,8 @@ holding export options."
      ;; Filename and Title
      "@setfilename " info-filename "\n"
      "@settitle " title "\n"
-     (if org-texinfo-coding-system
-       (format "@documentencoding %s\n"
-	       (upcase (symbol-name org-texinfo-coding-system))) "\n")
+     (format "@documentencoding %s\n"
+	     (upcase (symbol-name coding-system))) "\n"
      (format "@documentlanguage %s\n" lang)
      "\n\n"
      "@c Version and Contact Info\n"
@@ -1547,7 +1550,7 @@ a communication channel."
 		      (nth count item))) counts)
     (mapconcat (lambda (size)
 		 (make-string size ?a)) (mapcar (lambda (ref)
-						  (apply 'max `,@ref)) (car counts))
+						  (apply 'max `(,@ref))) (car counts))
 		 "} {")))
 
 (defun org-texinfo-table--org-table (table contents info)
@@ -1779,6 +1782,15 @@ publishing directory.
 Return output file name."
   (org-publish-org-to 'texinfo filename ".texi" plist pub-dir))
 
+;;;###autoload
+(defun org-texinfo-convert-region-to-texinfo ()
+  "Assume the current region has org-mode syntax, and convert it to Texinfo.
+This can be used in any buffer.  For example, you can write an
+itemized list in org-mode syntax in an Texinfo buffer and use
+this command to convert it."
+  (interactive)
+  (org-export-replace-region-by 'texinfo))
+
 (defun org-texinfo-compile (file)
   "Compile a texinfo file.
 
@@ -1789,11 +1801,12 @@ Return INFO file name or an error if it couldn't be produced."
   (let* ((base-name (file-name-sans-extension (file-name-nondirectory file)))
 	 (full-name (file-truename file))
 	 (out-dir (file-name-directory file))
-	 ;; Make sure `default-directory' is set to FILE directory,
-	 ;; not to whatever value the current buffer may have.
-	 (default-directory (file-name-directory full-name))
+	 ;; Properly set working directory for compilation.
+	 (default-directory (if (file-name-absolute-p file)
+				(file-name-directory full-name)
+			      default-directory))
 	 errors)
-    (message (format "Processing Texinfo file %s ..." file))
+    (message (format "Processing Texinfo file %s..." file))
     (save-window-excursion
       (cond
        ;; A function is provided: Apply it.

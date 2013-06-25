@@ -257,10 +257,13 @@ re-read the iCalendar file.")
 
 (org-export-define-derived-backend 'icalendar 'ascii
   :translate-alist '((clock . ignore)
+		     (footnote-definition . ignore)
+		     (footnote-reference . ignore)
 		     (headline . org-icalendar-entry)
 		     (inlinetask . ignore)
 		     (planning . ignore)
 		     (section . ignore)
+		     (inner-template . (lambda (c i) c))
 		     (template . org-icalendar-template))
   :options-alist
   '((:exclude-tags
@@ -360,8 +363,7 @@ or the day by one (if it does not contain a time) when no
 explicit ending time is specified.
 
 When optional argument UTC is non-nil, time will be expressed in
-Universal Time, ignoring `org-icalendar-date-time-format'.
-This is mandatory for \"DTSTAMP\" property."
+Universal Time, ignoring `org-icalendar-date-time-format'."
   (let* ((year-start (org-element-property :year-start timestamp))
 	 (year-end (org-element-property :year-end timestamp))
 	 (month-start (org-element-property :month-start timestamp))
@@ -405,6 +407,10 @@ This is mandatory for \"DTSTAMP\" property."
       ;; `format-time-string' and fix any mistake (i.e. MI >= 60).
       (encode-time 0 mi h d m y)
       (or utc (and with-time-p (org-icalendar-use-UTC-date-time-p)))))))
+
+(defun org-icalendar-dtstamp ()
+  "Return DTSTAMP property, as a string."
+  (format-time-string "DTSTAMP:%Y%m%dT%H%M%SZ" nil t))
 
 (defun org-icalendar-get-categories (entry info)
   "Return categories according to `org-icalendar-categories'.
@@ -644,7 +650,7 @@ Return VEVENT component as a string."
        (org-icalendar-transcode-diary-sexp
 	(org-element-property :raw-value timestamp) uid summary)
      (concat "BEGIN:VEVENT\n"
-	     (org-icalendar-convert-timestamp timestamp "DTSTAMP" nil t) "\n"
+	     (org-icalendar-dtstamp) "\n"
 	     "UID:" uid "\n"
 	     (org-icalendar-convert-timestamp timestamp "DTSTART") "\n"
 	     (org-icalendar-convert-timestamp timestamp "DTEND" t) "\n"
@@ -690,7 +696,7 @@ Return VTODO component as a string."
     (org-icalendar-fold-string
      (concat "BEGIN:VTODO\n"
 	     "UID:TODO-" uid "\n"
-	     (org-icalendar-convert-timestamp start "DTSTAMP" nil t) "\n"
+	     (org-icalendar-dtstamp) "\n"
 	     (org-icalendar-convert-timestamp start "DTSTART") "\n"
 	     (and (memq 'todo-due org-icalendar-use-deadline)
 		  (org-element-property :deadline entry)
@@ -894,7 +900,8 @@ The file is stored under the name chosen in
   "Export current agenda view to an iCalendar FILE.
 This function assumes major mode for current buffer is
 `org-agenda-mode'."
-  (let ((org-icalendar-combined-agenda-file file)
+  (let (org-export-babel-evaluate ; Don't evaluate Babel block
+	(org-icalendar-combined-agenda-file file)
 	(marker-list
 	 ;; Collect the markers pointing to entries in the current
 	 ;; agenda buffer.
@@ -941,9 +948,8 @@ files to build the calendar from."
 	    ;; Owner.
 	    user-full-name
 	    ;; Timezone.
-	    (if (org-string-nw-p org-icalendar-timezone)
-		org-icalendar-timezone
-	      (cadr (current-time-zone)))
+	    (or (org-string-nw-p org-icalendar-timezone)
+		(cadr (current-time-zone)))
 	    ;; Description.
 	    org-icalendar-combined-description
 	    ;; Contents.
@@ -954,7 +960,8 @@ files to build the calendar from."
 		(catch 'nextfile
 		  (org-check-agenda-file file)
 		  (with-current-buffer (org-get-agenda-file-buffer file)
-		    (let ((marks (cdr (assoc (expand-file-name file) restriction))))
+		    (let ((marks (cdr (assoc (expand-file-name file)
+					     restriction))))
 		      ;; Create ID if necessary.
 		      (when org-icalendar-store-UID
 			(org-icalendar-create-uid file t marks))
@@ -968,7 +975,7 @@ files to build the calendar from."
 				      (lambda (m-list dummy)
 					(mapc (lambda (m)
 						(org-entry-put
-						 m "ICALENDAR_MARK" "t"))
+						 m "ICALENDAR-MARK" "t"))
 					      m-list))
 				      (sort marks '>))
 				     org-export-before-processing-hook)))

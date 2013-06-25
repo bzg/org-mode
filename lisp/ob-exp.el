@@ -52,10 +52,13 @@
 (defcustom org-export-babel-evaluate t
   "Switch controlling code evaluation during export.
 When set to nil no code will be evaluated as part of the export
-process."
+process.  When set to 'inline-only, only inline code blocks will
+be executed."
   :group 'org-babel
   :version "24.1"
-  :type 'boolean)
+  :type '(choice (const :tag "Never" nil)
+		 (const :tag "Only inline code" inline-only)
+		 (const :tag "Always" t)))
 (put 'org-export-babel-evaluate 'safe-local-variable (lambda (x) (eq x nil)))
 
 (defun org-babel-exp-get-export-buffer ()
@@ -92,8 +95,8 @@ process."
 
 (defun org-babel-exp-src-block (&rest headers)
   "Process source block for export.
-Depending on the 'export' headers argument in replace the source
-code block with...
+Depending on the 'export' headers argument, replace the source
+code block like this:
 
 both ---- display the code and the results
 
@@ -103,7 +106,7 @@ code ---- the default, display the code inside the block but do
 results - just like none only the block is run on export ensuring
           that it's results are present in the org-mode buffer
 
-none ----- do not display either code or results upon export
+none ---- do not display either code or results upon export
 
 Assume point is at the beginning of block's starting line."
   (interactive)
@@ -119,11 +122,11 @@ Assume point is at the beginning of block's starting line."
 	  (org-babel-exp-in-export-file lang
 	    (setf (nth 2 info)
 		  (org-babel-process-params
-		   (org-babel-merge-params
-		    org-babel-default-header-args
-		    (org-babel-params-from-properties lang)
-		    (if (boundp lang-headers) (eval lang-headers) nil)
-		    raw-params))))
+		   (apply #'org-babel-merge-params
+			  org-babel-default-header-args
+			  (if (boundp lang-headers) (eval lang-headers) nil)
+			  (append (org-babel-params-from-properties lang)
+				  (list raw-params))))))
 	  (setf hash (org-babel-sha1-hash info)))
 	(org-babel-exp-do-export info 'block hash)))))
 
@@ -203,16 +206,19 @@ this template."
 			  (results
 			   (org-babel-exp-do-export
 			    (list "emacs-lisp" "results"
-				  (org-babel-merge-params
-				   org-babel-default-header-args
-				   org-babel-default-lob-header-args
-				   (org-babel-params-from-properties)
-				   (org-babel-parse-header-arguments
-				    (org-no-properties
-				     (concat ":var results="
-					     (mapconcat 'identity
-							(butlast lob-info)
-							" ")))))
+				  (apply #'org-babel-merge-params
+					 org-babel-default-header-args
+					 org-babel-default-lob-header-args
+					 (append
+					  (org-babel-params-from-properties)
+					  (list
+					   (org-babel-parse-header-arguments
+					    (org-no-properties
+					     (concat
+					      ":var results="
+					      (mapconcat 'identity
+							 (butlast lob-info)
+							 " ")))))))
 				  "" nil (car (last lob-info)))
 			    'lob))
 			  (rep (org-fill-template
@@ -264,10 +270,7 @@ this template."
 		    (cons
 		     (org-element-property :language element)
 		     (let ((params (org-element-property :parameters element)))
-		       (and params (org-split-string params "[ \t]+")))))
-                   (preserve-indent
-		    (or org-src-preserve-indentation
-			(org-element-property :preserve-indent element))))
+		       (and params (org-split-string params "[ \t]+"))))))
               ;; Execute all non-block elements between POS and
               ;; current block.
               (org-babel-exp-non-block-elements pos begin)
@@ -288,7 +291,7 @@ this template."
 		       (goto-char match-start)
 		       (delete-region (point) block-end)
 		       (insert replacement)
-		       (if preserve-indent
+		       (if (org-element-property :preserve-indent element)
 			   ;; Indent only the code block markers.
 			   (save-excursion (skip-chars-backward " \r\t\n")
 					   (indent-line-to ind)
@@ -378,14 +381,17 @@ Results are prepared in a manner suitable for export by org-mode.
 This function is called by `org-babel-exp-do-export'.  The code
 block will be evaluated.  Optional argument SILENT can be used to
 inhibit insertion of results into the buffer."
-  (when (and org-export-babel-evaluate
+  (when (and (or (eq org-export-babel-evaluate t)
+		 (and (eq type 'inline)
+		      (eq org-export-babel-evaluate 'inline-only)))
 	     (not (and hash (equal hash (org-babel-current-result-hash)))))
     (let ((lang (nth 0 info))
 	  (body (if (org-babel-noweb-p (nth 2 info) :eval)
 		    (org-babel-expand-noweb-references
 		     info (org-babel-exp-get-export-buffer))
 		  (nth 1 info)))
-	  (info (copy-sequence info)))
+	  (info (copy-sequence info))
+	  (org-babel-current-src-block-location (point-marker)))
       ;; skip code blocks which we can't evaluate
       (when (fboundp (intern (concat "org-babel-execute:" lang)))
 	(org-babel-eval-wipe-error-buffer)
@@ -411,7 +417,8 @@ inhibit insertion of results into the buffer."
 	   ((equal type 'lob)
 	    (save-excursion
 	      (re-search-backward org-babel-lob-one-liner-regexp nil t)
-	      (org-babel-execute-src-block nil info)))))))))
+	      (let (org-confirm-babel-evaluate)
+		(org-babel-execute-src-block nil info))))))))))
 
 
 (provide 'ob-exp)

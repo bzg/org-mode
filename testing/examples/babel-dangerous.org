@@ -9,9 +9,7 @@
 There is no default value assigned to =x= variable. This is not permitted
 anymore.
 
-#+name: carre(x)
-#+begin_src python
+#+name: carre
+#+begin_src python :var x
   return x*x
 #+end_src
-
-#+name: carre

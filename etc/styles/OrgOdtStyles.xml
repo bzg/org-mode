@@ -256,6 +256,9 @@
   <style:style style:name="Quotations" style:family="paragraph" style:parent-style-name="Standard" style:class="html">
    <style:paragraph-properties fo:margin-left="1cm" fo:margin-right="1cm" fo:margin-top="0cm" fo:margin-bottom="0.499cm" fo:text-indent="0cm" style:auto-text-indent="false"/>
   </style:style>
+  <style:style style:name="OrgFootnoteQuotations" style:family="paragraph" style:parent-style-name="Footnote" style:class="html">
+   <style:paragraph-properties fo:margin-left="1cm" fo:margin-right="1cm" fo:margin-top="0cm" fo:margin-bottom="0.499cm" fo:text-indent="0cm" style:auto-text-indent="false"/>
+  </style:style>
   <style:style style:name="Preformatted_20_Text" style:display-name="Preformatted Text" style:family="paragraph" style:parent-style-name="Standard" style:class="html">
    <style:paragraph-properties fo:margin-top="0cm" fo:margin-bottom="0cm"/>
    <style:text-properties style:font-name="Courier New" fo:font-size="10pt" style:font-name-asian="NSimSun" style:font-size-asian="10pt" style:font-name-complex="Courier New" style:font-size-complex="10pt"/>
@@ -296,6 +299,9 @@
   </style:style>
 
   <style:style style:name="OrgCenter" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:paragraph-properties fo:text-align="center" style:justify-single-word="false"/>
+  </style:style>
+  <style:style style:name="OrgFootnoteCenter" style:family="paragraph" style:parent-style-name="Footnote">
    <style:paragraph-properties fo:text-align="center" style:justify-single-word="false"/>
   </style:style>
   <style:style style:name="OrgTableContents" style:family="paragraph" style:parent-style-name="Text_20_body"/>

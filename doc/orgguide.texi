@@ -13,9 +13,9 @@
 @c Version and Contact Info
 @set MAINTAINERSITE @uref{http://orgmode.org,maintainers webpage}
 @set AUTHOR Carsten Dominik
-@set MAINTAINER Bastien Guerry
-@set MAINTAINEREMAIL @email{bzg at gnu dot org}
-@set MAINTAINERCONTACT @uref{mailto:bzg at gnu dot org,contact the maintainer}
+@set MAINTAINER Carsten Dominik
+@set MAINTAINEREMAIL @email{carsten at orgmode dot org}
+@set MAINTAINERCONTACT @uref{mailto:carsten at orgmode dot org,contact the maintainer}
 @c %**end of header
 @finalout
 
@@ -98,7 +98,7 @@ modify this GNU manual.''
 * Working With Source Code::	Source code snippets embedded in Org
 * Miscellaneous::		All the rest which did not fit elsewhere
 
-* GNU Free Documentation License:: This manual license.
+* GNU Free Documentation License::  This manual license.
 
 @detailmenu
  --- The Detailed Node Listing ---
@@ -147,6 +147,7 @@ Tags
 
 * Tag inheritance::		Tags use the tree structure of the outline
 * Setting tags::		How to assign tags to a headline
+* Tag groups::			Use one tag to search for several tags
 * Tag searches::		Searching for combinations of tags
 
 Dates and Times
@@ -158,7 +159,7 @@ Dates and Times
 
 Capture - Refile - Archive
 
-* Capture::			
+* Capture::			Capturing new stuff
 * Refile and copy::		Moving a tree from one place to another
 * Archiving::			What to do with finished projects
 
@@ -187,7 +188,7 @@ The built-in agenda views
 Markup for rich export
 
 * Structural markup elements::	The basic structure as seen by the exporter
-* Images and tables::		Tables and Images will be included
+* Images and tables::		Images, tables and caption mechanism
 * Literal examples::		Source code examples with special formatting
 * Include files::		Include additional files into a document
 * Embedded @LaTeX{}::		@LaTeX{} can be freely used inside Org documents
@@ -729,6 +730,9 @@ Links such as @samp{[[My Target]]} or @samp{[[My Target][Find my target]]}
 lead to a text search in the current file for the corresponding target which
 looks like @samp{<<My Target>>}.
 
+Internal links will be used to reference their destination, through links or
+numbers, when possible.
+
 @node External links, Handling links, Internal links, Hyperlinks
 @section External links
 
@@ -1109,6 +1113,7 @@ Tags will by default be in bold face with the same color as the headline.
 @menu
 * Tag inheritance::		Tags use the tree structure of the outline
 * Setting tags::		How to assign tags to a headline
+* Tag groups::			Use one tag to search for several tags
 * Tag searches::		Searching for combinations of tags
 @end menu
 
@@ -1138,7 +1143,7 @@ changes in the line.}:
 #+FILETAGS: :Peter:Boss:Secret:
 @end smallexample
 
-@node Setting tags, Tag searches, Tag inheritance, Tags
+@node Setting tags, Tag groups, Tag inheritance, Tags
 @section Setting tags
 
 Tags can simply be typed into the buffer at the end of a headline.
@@ -1189,7 +1194,46 @@ can instead set the TAGS option line as:
 #+TAGS: @@work(w)  @@home(h)  @@tennisclub(t)  laptop(l)  pc(p)
 @end smallexample
 
-@node Tag searches,  , Setting tags, Tags
+@node Tag groups, Tag searches, Setting tags, Tags
+@section Tag groups
+
+@cindex group tags
+@cindex tags, groups
+In a set of mutually exclusive tags, the first tag can be defined as a
+@emph{group tag}.  When you search for a group tag, it will return matches
+for all members in the group.  In an agenda view, filtering by a group tag
+will display headlines tagged with at least one of the members of the
+group.  This makes tag searches and filters even more flexible.
+
+You can set group tags by inserting a colon between the group tag and other
+tags, like this:
+
+@example
+#+TAGS: @{ @@read : @@read_book  @@read_ebook @}
+@end example
+
+In this example, @samp{@@read} is a @emph{group tag} for a set of three
+tags: @samp{@@read}, @samp{@@read_book} and @samp{@@read_ebook}.
+
+You can also use the @code{:grouptags} keyword directly when setting
+@var{org-tag-alist}:
+
+@lisp
+(setq org-tag-alist '((:startgroup . nil) 
+                      ("@@read" . nil)
+                      (:grouptags . nil)
+                      ("@@read_book" . nil)
+                      ("@@read_ebook" . nil)
+                      (:endgroup . nil)))
+@end lisp
+
+@kindex C-c C-x q
+@vindex org-group-tags
+If you want to ignore group tags temporarily, toggle group tags support
+with @command{org-toggle-tags-groups}, bound to @kbd{C-c C-x q}.  If you
+want to disable tag groups completely, set @var{org-group-tags} to nil.
+
+@node Tag searches,  , Tag groups, Tags
 @section Tag searches
 
 Once a system of tags has been set up, it can be used to collect related
@@ -1518,8 +1562,8 @@ projects need to be moved around.  Moving completed project trees to an
 archive file keeps the system compact and fast.
 
 @menu
-* Capture::
-* Refiling notes::		Moving a tree from one place to another
+* Capture::			Capturing new stuff
+* Refile and copy::		Moving a tree from one place to another
 * Archiving::			What to do with finished projects
 @end menu
 
@@ -2046,7 +2090,7 @@ summarizes the markup rules used in an Org-mode buffer.
 
 @menu
 * Structural markup elements::	The basic structure as seen by the exporter
-* Images and tables::		Tables and Images will be included
+* Images and tables::		Images, tables and caption mechanism
 * Literal examples::		Source code examples with special formatting
 * Include files::		Include additional files into a document
 * Embedded @LaTeX{}::		@LaTeX{} can be freely used inside Org documents
@@ -2167,32 +2211,30 @@ Toggle the COMMENT keyword at the beginning of an entry.
 For Org mode tables, the lines before the first horizontal separator line
 will become table header lines.  You can use the following lines somewhere
 before the table to assign a caption and a label for cross references, and in
-the text you can refer to the object with @code{\ref@{tab:basic-data@}}:
+the text you can refer to the object with @code{[[tab:basic-data]]}:
 
 @smallexample
 #+CAPTION: This is the caption for the next table (or link)
-#+LABEL:   tbl:basic-data
+#+NAME:   tbl:basic-data
    | ... | ...|
    |-----|----|
 @end smallexample
 
-Some backends (HTML, @LaTeX{}, and DocBook) allow you to directly include
-images into the exported document.  Org does this, if a link to an image
-files does not have a description part, for example @code{[[./img/a.jpg]]}.
-If you wish to define a caption for the image and maybe a label for internal
-cross references, you sure that the link is on a line by itself precede it
-with:
+Some backends allow you to directly include images into the exported
+document.  Org does this, if a link to an image files does not have
+a description part, for example @code{[[./img/a.jpg]]}.  If you wish to
+define a caption for the image and maybe a label for internal cross
+references, you sure that the link is on a line by itself precede it with:
 
 @smallexample
 #+CAPTION: This is the caption for the next figure link (or table)
-#+LABEL:   fig:SED-HR4049
+#+NAME:   fig:SED-HR4049
 [[./img/a.jpg]]
 @end smallexample
 
-You may also define additional attributes for the figure.  As this is
-backend-specific, see the sections about the individual backends for more
-information.
-
+The same caption mechanism applies to other structures than images and tables
+(e.g., @LaTeX{} equations, source code blocks), provided the chosen export
+back-end supports them.
 
 @node Literal examples, Include files, Images and tables, Markup
 @section Literal examples
@@ -2252,7 +2294,7 @@ processed normally. @kbd{C-c '} will visit the included file.
 
 For scientific notes which need to be able to contain mathematical symbols
 and the occasional formula, Org-mode supports embedding @LaTeX{} code into
-its files.  You can directly use TeX-like macros for special symbols, enter
+its files.  You can directly use TeX-like syntax for special symbols, enter
 formulas and entire @LaTeX{} environments.
 
 @smallexample

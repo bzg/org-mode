@@ -128,21 +128,36 @@ applications and inserting them in org documents"
   :group 'org-mac-link-grabber
   :type 'boolean)
 
+(defcustom org-mac-grab-Skim-app-p
+  (< 0 (length (shell-command-to-string
+		"mdfind kMDItemCFBundleIdentifier == 'net.sourceforge.skim-app.skim'")))
+  "Enable menu option [S]kim to grab page links from Skim.app"
+  :tag "Grab Skim.app page links"
+  :group 'org-mac-link-grabber
+  :type 'boolean)
+
+(defcustom org-mac-Skim-highlight-selection-p nil
+  "Highlight (using notes) the selection (if present) when grabbing the a link from Skim.app"
+  :tag "Highlight selection in Skim.app"
+  :group 'org-mac-link-grabber
+  :type 'boolean)
+
 
 (defun omlg-grab-link ()
   "Prompt the user for an application to grab a link from, then go grab the link, and insert it at point"
   (interactive)
   (let* ((descriptors `(("F" "inder" org-mac-finder-insert-selected ,org-mac-grab-Finder-app-p)
-						("m" "ail" org-mac-message-insert-selected ,org-mac-grab-Mail-app-p)
-						("a" "ddressbook" org-mac-addressbook-insert-selected ,org-mac-grab-Addressbook-app-p)
-						("s" "afari" org-mac-safari-insert-frontmost-url ,org-mac-grab-Safari-app-p)
-						("f" "irefox" org-mac-firefox-insert-frontmost-url ,org-mac-grab-Firefox-app-p)
-						("v" "imperator" org-mac-vimperator-insert-frontmost-url ,org-mac-grab-Firefox+Vimperator-p)
-						("c" "hrome" org-mac-chrome-insert-frontmost-url ,org-mac-grab-Chrome-app-p)
-						("t" "ogether" org-mac-together-insert-selected ,org-mac-grab-Together-app-p)))
+			("m" "ail" org-mac-message-insert-selected ,org-mac-grab-Mail-app-p)
+			("a" "ddressbook" org-mac-addressbook-insert-selected ,org-mac-grab-Addressbook-app-p)
+			("s" "afari" org-mac-safari-insert-frontmost-url ,org-mac-grab-Safari-app-p)
+			("f" "irefox" org-mac-firefox-insert-frontmost-url ,org-mac-grab-Firefox-app-p)
+			("v" "imperator" org-mac-vimperator-insert-frontmost-url ,org-mac-grab-Firefox+Vimperator-p)
+			("c" "hrome" org-mac-chrome-insert-frontmost-url ,org-mac-grab-Chrome-app-p)
+			("t" "ogether" org-mac-together-insert-selected ,org-mac-grab-Together-app-p)
+			("S" "kim" org-mac-skim-insert-page ,org-mac-grab-Skim-app-p)))
 		 (menu-string (make-string 0 ?x))
 		 input)
-
+    
 	;; Create the menu string for the keymap
 	(mapc '(lambda (descriptor)
 			(when (elt descriptor 3)
@@ -209,8 +224,9 @@ applications and inserting them in org documents"
 					 "	activate\n"
 					 "	delay 0.15\n"
 					 "	tell application \"System Events\"\n"
-					 "		keystroke \"l\" using command down\n"
-					 "		keystroke \"c\" using command down\n"
+					 "		keystroke \"l\" using {command down}\n"
+					 "		keystroke \"a\" using {command down}\n"
+					 "		keystroke \"c\" using {command down}\n"
 					 "	end tell\n"
 					 "	delay 0.15\n"
 					 "	set theUrl to the clipboard\n"
@@ -459,6 +475,73 @@ applications and inserting them in org documents"
 (defun org-mac-addressbook-insert-selected ()
   (interactive)
   (insert (org-mac-addressbook-item-get-selected)))
+
+;;
+;;
+;; Handle links from Skim.app
+;;
+;; Original code & idea by Christopher Suckling (org-mac-protocol)
+
+(org-add-link-type "skim" 'org-mac-skim-open)
+
+(defun org-mac-skim-open (uri)
+  "Visit page of pdf in Skim"
+  (let* ((page (when (string-match "::\\(.+\\)\\'" uri)
+		 (match-string 1 uri)))
+	 (document (substring uri 0 (match-beginning 0))))
+    (do-applescript
+     (concat
+      "tell application \"Skim\"\n"
+         "activate\n"
+	 "set theDoc to \"" document "\"\n"
+	 "set thePage to " page "\n"
+	 "open theDoc\n"
+	 "go document 1 to page thePage of document 1\n"
+      "end tell"))))
+
+
+(defun as-get-skim-page-link ()
+  (do-applescript
+   (concat
+    "tell application \"Skim\"\n"
+       "set theDoc to front document\n"
+       "set theTitle to (name of theDoc)\n"
+       "set thePath to (path of theDoc)\n"
+       "set thePage to (get index for current page of theDoc)\n"
+       "set theSelection to selection of theDoc\n"
+       "set theContent to contents of (get text for theSelection)\n"
+       "if theContent is missing value then\n"
+       "    set theContent to theTitle & \", p. \" & thePage\n"
+       (when org-mac-Skim-highlight-selection-p
+	 (concat
+	  "else\n"
+          "    tell theDoc\n"
+          "        set theNote to make note with properties {type:highlight note, selection:theSelection}\n"
+          "         set text of theNote to (get text for theSelection)\n"
+          "    end tell\n"))
+       "end if\n"
+       "set theLink to \"skim://\" & thePath & \"::\" & thePage & "
+       "\"::split::\" & theContent\n"
+    "end tell\n"
+    "return theLink as string\n")))
+
+(defun org-mac-skim-get-page ()
+  (interactive)
+  (message "Applescript: Getting Skim page link...")
+  (let* ((link-and-descr (as-get-skim-page-link))
+         (split-link (split-string link-and-descr "::split::"))
+         (link (car split-link))
+         (description (cadr split-link))
+         (org-link))
+    (when (not (string= link ""))
+      (setq org-link (org-make-link-string link description)))
+    (kill-new org-link)
+    org-link))
+
+(defun org-mac-skim-insert-page ()
+  (interactive)
+  (insert (org-mac-skim-get-page)))
+
 
 
 (provide 'org-mac-link-grabber)

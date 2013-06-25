@@ -117,7 +117,7 @@ or user `keyboard-quit' during execution of body."
 		   string-buffer))
 	     (setq raw (substring string-buffer (match-end 0))))
 	 (split-string string-buffer comint-prompt-regexp)))))
-(def-edebug-spec org-babel-comint-with-output (form body))
+(def-edebug-spec org-babel-comint-with-output (sexp body))
 
 (defun org-babel-comint-input-command (buffer cmd)
   "Pass CMD to BUFFER.

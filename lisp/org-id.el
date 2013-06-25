@@ -437,6 +437,7 @@ and time is the usual three-integer representation of time."
 
 ;; Storing ID locations (files)
 
+;;;###autoload
 (defun org-id-update-id-locations (&optional files silent)
   "Scan relevant files for IDs.
 Store the relation between files and corresponding IDs.
@@ -527,7 +528,9 @@ When CHECK is given, prepare detailed information about duplicate IDs."
 		   (org-id-hash-to-alist org-id-locations)
 		 org-id-locations)))
       (with-temp-file org-id-locations-file
-	(print out (current-buffer))))))
+	(let ((print-level nil)
+	      (print-length nil))
+	  (print out (current-buffer)))))))
 
 (defun org-id-locations-load ()
   "Read the data from `org-id-locations-file'."

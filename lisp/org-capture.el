@@ -181,6 +181,8 @@ properties are:
                      template only needs information that can be added
                      automatically.
 
+ :jump-to-captured   When set, jump to the captured entry when finished.
+
  :empty-lines        Set this to the number of lines the should be inserted
                      before and after the new item.  Default 0, only common
                      other value is 1.
@@ -339,11 +341,15 @@ calendar                |  %:type %:date"
 			 ;; Give the most common options as checkboxes
 			 :options (((const :format "%v " :prepend) (const t))
 				   ((const :format "%v " :immediate-finish) (const t))
+				   ((const :format "%v " :jump-to-captured) (const t))
 				   ((const :format "%v " :empty-lines) (const 1))
+				   ((const :format "%v " :empty-lines-before) (const 1))
+				   ((const :format "%v " :empty-lines-after) (const 1))
 				   ((const :format "%v " :clock-in) (const t))
 				   ((const :format "%v " :clock-keep) (const t))
 				   ((const :format "%v " :clock-resume) (const t))
 				   ((const :format "%v " :unnarrowed) (const t))
+				   ((const :format "%v " :table-line-pos) (const t))
 				   ((const :format "%v " :kill-buffer) (const t))))))))
 
 (defcustom org-capture-before-finalize-hook nil
@@ -497,7 +503,7 @@ to avoid duplicates.)"
 
 (defcustom org-capture-use-agenda-date nil
   "Non-nil means use the date at point when capturing from agendas.
-When nil, you can still capturing using the date at point with \\[org-agenda-capture]]."
+When nil, you can still capture using the date at point with \\[org-agenda-capture]."
   :group 'org-capture
   :version "24.3"
   :type 'boolean)
@@ -633,6 +639,8 @@ of the day at point (if any) or the current HH:MM time."
 With prefix argument STAY-WITH-CAPTURE, jump to the location of the
 captured item after finalizing."
   (interactive "P")
+  (when (org-capture-get :jump-to-captured)
+    (setq stay-with-capture t))
   (unless (and org-capture-mode
 	       (buffer-base-buffer (current-buffer)))
     (error "This does not seem to be a capture buffer for Org-mode"))
@@ -1410,7 +1418,8 @@ only the bare key is returned."
 	  (insert title "\n\n")
 	  (setq tbl table
 		des-keys nil
-		allowed-keys nil)
+		allowed-keys nil
+		cursor-type nil)
 	  (setq prefix (if current (concat current " ") ""))
 	  (while tbl
 	    (cond
@@ -1423,7 +1432,8 @@ only the bare key is returned."
 	      (insert prefix "[" dkey "]" "..." "  " ddesc "..." "\n")
 	      ;; Skip keys which are below this prefix
 	      (setq re (concat "\\`" (regexp-quote dkey)))
-	      (while (and tbl (string-match re (caar tbl))) (pop tbl)))
+	      (let (case-fold-search)
+		(while (and tbl (string-match re (caar tbl))) (pop tbl))))
 	     ((= 2 (length (car tbl)))
 	      ;; Not yet a usable description, skip it
 	      )
@@ -1778,7 +1788,7 @@ Such keywords are prefixed with \"%:\".  See
 		   (position (or (nth 4 entry) org-remember-default-headline))
 		   (type 'entry)
 		   (prepend org-reverse-note-order)
-		   immediate target)
+		   immediate target jump-to-captured)
 	       (cond
 		((member position '(top bottom))
 		 (setq target (list 'file file)
@@ -1792,9 +1802,13 @@ Such keywords are prefixed with \"%:\".  See
 		 (setq template (replace-match "" t t template)
 		       immediate t))
 
+	       (when (string-match "%&" template)
+		 (setq jump-to-captured t))
+
 	       (append (list key desc type target template)
 		       (if prepend '(:prepend t))
-		       (if immediate '(:immediate-finish t)))))
+		       (if immediate '(:immediate-finish t))
+		       (if jump-to-captured '(:jump-to-captured t)))))
 
 	   org-remember-templates))))
 
