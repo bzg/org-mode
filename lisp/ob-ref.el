@@ -83,7 +83,10 @@ the variable."
     (let ((var (match-string 1 assignment))
 	  (ref (match-string 2 assignment)))
       (cons (intern var)
-	    (let ((out (org-babel-read ref)))
+	    (let ((out (save-excursion
+			 (when org-babel-current-src-block-location
+			   (goto-char org-babel-current-src-block-location))
+			 (org-babel-read ref))))
 	      (if (equal out ref)
 		  (if (string-match "^\".*\"$" ref)
 		      (read ref)
