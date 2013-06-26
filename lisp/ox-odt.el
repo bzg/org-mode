@@ -1045,20 +1045,6 @@ See `org-odt--build-date-styles' for implementation details."
 	      (error "Extraction failed"))))
 	members))
 
-(defun org-odt--suppress-some-translators (info types)
-  ;; See comments in `org-odt-format-label' and `org-odt-toc'.
-  (org-combine-plists
-   info (list
-	 ;; Override translators.
-	 :translate-alist
-	 (nconc (mapcar (lambda (type) (cons type (lambda (data contents info)
-						    contents))) types)
-		(plist-get info :translate-alist))
-	 ;; Reset data translation cache.  FIXME.
-	 ;; :exported-data nil
-	 )))
-
-
 ;;;; Target
 
 (defun org-odt--target (text id)
