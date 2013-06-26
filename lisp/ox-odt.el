@@ -288,38 +288,37 @@ according to the default face identified by the `htmlfontify'.")
     ("category-and-value" "%e %n: %c" "category-and-value" "%e %n")
     ("value" "%e %n: %c" "value" "%n"))
   "Specify how labels are applied and referenced.
-This is an alist where each element is of the
-form (LABEL-STYLE-NAME LABEL-ATTACH-FMT LABEL-REF-MODE
-LABEL-REF-FMT).
 
-LABEL-ATTACH-FMT controls how labels and captions are attached to
-an entity.  It may contain following specifiers - %e, %n and %c.
-%e is replaced with the CATEGORY-NAME.  %n is replaced with
+This is an alist where each element is of the form:
+
+  \(STYLE-NAME ATTACH-FMT REF-MODE REF-FMT)
+
+ATTACH-FMT controls how labels and captions are attached to an
+entity.  It may contain following specifiers - %e and %c.  %e is
+replaced with the CATEGORY-NAME.  %n is replaced with
 \"<text:sequence ...> SEQNO </text:sequence>\".  %c is replaced
-with CAPTION. See `org-odt-format-label-definition'.
+with CAPTION.
 
-LABEL-REF-MODE and LABEL-REF-FMT controls how label references
-are generated.  The following XML is generated for a label
-reference - \"<text:sequence-ref
-text:reference-format=\"LABEL-REF-MODE\" ...> LABEL-REF-FMT
-</text:sequence-ref>\".  LABEL-REF-FMT may contain following
+REF-MODE and REF-FMT controls how label references are generated.
+The following XML is generated for a label reference -
+\"<text:sequence-ref text:reference-format=\"REF-MODE\" ...>
+REF-FMT </text:sequence-ref>\".  REF-FMT may contain following
 specifiers - %e and %n.  %e is replaced with the CATEGORY-NAME.
-%n is replaced with SEQNO. See
-`org-odt-format-label-reference'.")
+%n is replaced with SEQNO.
+
+See also `org-odt-format-label'.")
 
 (defvar org-odt-category-map-alist
   '(("__Table__" "Table" "value" "Table" org-odt--enumerable-p)
     ("__Figure__" "Illustration" "value" "Figure" org-odt--enumerable-image-p)
     ("__MathFormula__" "Text" "math-formula" "Equation" org-odt--enumerable-formula-p)
     ("__DvipngImage__" "Equation" "value" "Equation" org-odt--enumerable-latex-image-p)
-    ("__Listing__" "Listing" "value" "Listing" org-odt--enumerable-p)
-    ;; ("__Table__" "Table" "category-and-value")
-    ;; ("__Figure__" "Figure" "category-and-value")
-    ;; ("__DvipngImage__" "Equation" "category-and-value")
-    )
+    ("__Listing__" "Listing" "value" "Listing" org-odt--enumerable-p))
   "Map a CATEGORY-HANDLE to OD-VARIABLE and LABEL-STYLE.
-This is a list where each entry is of the form \\(CATEGORY-HANDLE
-OD-VARIABLE LABEL-STYLE CATEGORY-NAME ENUMERATOR-PREDICATE\\).
+
+This is a list where each entry is of the form:
+
+  \(CATEGORY-HANDLE OD-VARIABLE LABEL-STYLE CATEGORY-NAME ENUMERATOR-PREDICATE)
 
 CATEGORY_HANDLE identifies the captionable entity in question.
 
@@ -331,15 +330,7 @@ the entity.  These counters are declared within
 LABEL-STYLE is a key into `org-odt-label-styles' and specifies
 how a given entity should be captioned and referenced.
 
-CATEGORY-NAME is used for qualifying captions on export.  You can
-modify the CATEGORY-NAME used in the exported document by
-modifying `org-export-dictionary'.  For example, an embedded
-image in an English document is captioned as \"Figure 1: Orgmode
-Logo\", by default.  If you want the image to be captioned as
-\"Illustration 1: Orgmode Logo\" instead, install an entry in
-`org-export-dictionary' which translates \"Figure\" to
-\"Illustration\" when the language is \"en\" and encoding is
-`:utf-8'.
+CATEGORY-NAME is used for qualifying captions on export.
 
 ENUMERATOR-PREDICATE is used for assigning a sequence number to
 the entity.  See `org-odt--enumerate'.")
@@ -2108,6 +2099,16 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     tag))
 
 (defun org-odt-format-label (element info op)
+  "Return a label for ELEMENT.
+
+ELEMENT is a `link', `table', `src-block' or `paragraph' type
+element.  INFO is a plist used as a communication channel.  OP is
+either `definition' or `reference', depending on the purpose of
+the generated string.
+
+Return value is a string if OP is set to `reference' or a cons
+cell like CAPTION . SHORT-CAPTION) where CAPTION and
+SHORT-CAPTION are strings."
   (assert (memq (org-element-type element) '(link table src-block paragraph)))
   (let* ((caption-from
 	  (case (org-element-type element)
@@ -2185,8 +2186,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	    ;; Case 1: Handle Label definition.
 	    (definition
 	      ;; Assign an internal label, if user has not provided one
-	      (setq label (or label (format  "%s-%s" default-category seqno)))
-	      (setq label (org-export-solidify-link-text label))
+	      (setq label (org-export-solidify-link-text
+			   (or label (format  "%s-%s" default-category seqno))))
 	      (cons
 	       (concat
 		;; Sneak in a bookmark.  The bookmark is used when the
@@ -2195,8 +2196,11 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		(format "\n<text:bookmark text:name=\"%s\"/>" label)
 		;; Label definition: Typically formatted as below:
 		;;     CATEGORY SEQ-NO: LONG CAPTION
+		;; with translation for correct punctuation.
 		(format-spec
-		 (cadr (assoc-string label-style org-odt-label-styles t))
+		 (org-export-translate
+		  (cadr (assoc-string label-style org-odt-label-styles t))
+		  :utf-8 info)
 		 `((?e . ,category)
 		   (?n . ,(format
 			   "<text:sequence text:ref-name=\"%s\" text:name=\"%s\" text:formula=\"ooow:%s+1\" style:num-format=\"1\">%s</text:sequence>"

@@ -5214,7 +5214,10 @@ them."
 ;; the dictionary used for the translation.
 
 (defconst org-export-dictionary
-  '(("Author"
+  '(("%e %n: %c"
+     ("fr" :default "%e %n : %c" :html "%e %n&nbsp;: %c"
+      :texinfo "%e %n@tie{}: %c"))
+    ("Author"
      ("ca" :default "Autor")
      ("cs" :default "Autor")
      ("da" :default "Ophavsmand")
