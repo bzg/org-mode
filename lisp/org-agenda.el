@@ -7308,12 +7308,15 @@ The category is that of the current line."
 	   org-agenda-category-filter)
       (org-agenda-filter-show-all-cat)
     (let ((cat (org-no-properties (get-text-property (point) 'org-category))))
-      (if (and cat (not (string= "" cat)))
-	  (org-agenda-filter-apply
-	   (setq org-agenda-category-filter
-		 (list (concat (if strip "-" "+") cat)))
-	   'category)
-	(error "No category at point")))))
+      (cond
+       ((and cat strip)
+        (org-agenda-filter-apply
+         (push (concat "-" cat) org-agenda-category-filter) 'category))
+       ((and cat)
+        (org-agenda-filter-apply
+         (setq org-agenda-category-filter
+	       (list (concat "+" cat))) 'category))
+       ((error "No category at point"))))))
 
 (defun org-find-top-headline (&optional pos)
   "Find the topmost parent headline and return it."
