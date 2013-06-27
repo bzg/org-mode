@@ -304,7 +304,7 @@ as a communication channel."
 (defun org-rss-build-channel-info (info)
   "Build the RSS channel information."
   (let* ((system-time-locale "C")
-	 (title (org-export-data (plist-get info :title) info))
+	 (title (plist-get info :title))
 	 (email (org-export-data (plist-get info :email) info))
 	 (author (and (plist-get info :with-author)
 		      (let ((auth (plist-get info :author)))
