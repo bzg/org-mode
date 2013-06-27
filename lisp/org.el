@@ -13812,7 +13812,6 @@ headlines matching this string."
 			      (abbreviate-file-name
 			       (or (buffer-file-name (buffer-base-buffer))
 				   (buffer-name (buffer-base-buffer)))))))
-	 (case-fold-search nil)
 	 (org-map-continue-from nil)
          lspos tags tags-list
 	 (tags-alist (list (cons 0 org-file-tags)))
@@ -13825,7 +13824,8 @@ headlines matching this string."
       (when (eq action 'sparse-tree)
 	(org-overview)
 	(org-remove-occur-highlights))
-      (while (re-search-forward re nil t)
+      (while (let (case-fold-search)
+	       (re-search-forward re nil t))
 	(setq org-map-continue-from nil)
 	(catch :skip
 	  (setq todo (if (match-end 1) (org-match-string-no-properties 2))

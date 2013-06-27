@@ -3879,7 +3879,7 @@ continue from there."
       (throw :skip t))))
 
 (defun org-agenda-skip-eval (form)
-  "If FORM is a function or a list, call (or eval) is and return result.
+  "If FORM is a function or a list, call (or eval) it and return the result.
 `save-excursion' and `save-match-data' are wrapped around the call, so point
 and match data are returned to the previous state no matter what these
 functions do."
