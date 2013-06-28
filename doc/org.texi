@@ -13260,8 +13260,8 @@ string of these options for details.
 @vindex org-html-preamble
 @vindex org-html-postamble
 @vindex org-html-table-default-attributes
-@vindex org-html-style-include-default
-@vindex org-html-style-include-scripts
+@vindex org-html-head-include-default-style
+@vindex org-html-head-include-scripts
 @multitable @columnfractions 0.32 0.68
 @item @code{:html-doctype}          @tab @code{org-html-doctype}
 @item @code{:html-xml-declaration}  @tab @code{org-html-xml-declaration}
@@ -13275,8 +13275,8 @@ string of these options for details.
 @item @code{:html-preamble}         @tab @code{org-html-preamble}
 @item @code{:html-postamble}        @tab @code{org-html-postamble}
 @item @code{:html-table-attributes}        @tab @code{org-html-table-default-attributes}
-@item @code{:html-head-include-default-style} @tab @code{org-html-style-include-default}
-@item @code{:html-head-include-scripts} @tab @code{org-html-style-include-scripts}
+@item @code{:html-head-include-default-style} @tab @code{org-html-head-include-default-style}
+@item @code{:html-head-include-scripts} @tab @code{org-html-head-include-scripts}
 @end multitable
 
 Most of the @code{org-export-with-*} variables have the same effect in each

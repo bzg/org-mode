@@ -1829,11 +1829,16 @@ will be transposed as
 
 Note that horizontal lines disappeared."
   (interactive)
-  (let ((contents
-         (apply #'mapcar* #'list
-                ;; remove 'hline from list
-		(delq nil (mapcar (lambda (x) (when (listp x) x))
-				  (org-table-to-lisp))))))
+  (let* ((table (delete 'hline (org-table-to-lisp)))
+	 (contents (mapcar (lambda (p)
+			     (let ((tp table))
+			       (mapcar
+				(lambda (rown)
+				  (prog1
+				      (pop (car tp))
+				    (setq tp (cdr tp))))
+				table)))
+			   (car table))))
     (delete-region (org-table-begin) (org-table-end))
     (insert (mapconcat (lambda(x) (concat "| " (mapconcat 'identity x " | " ) "  |\n" ))
                        contents ""))
