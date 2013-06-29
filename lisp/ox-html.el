@@ -2702,8 +2702,6 @@ INFO is a plist holding contextual information.  See
 		   (or desc
 		       (org-export-data
 			(org-element-property :raw-link link) info))))
-	  ;; Fuzzy link points to an invisible target.
-	  (keyword nil)
 	  ;; Link points to a headline.
 	  (headline
 	   (let ((href
@@ -2737,23 +2735,24 @@ INFO is a plist holding contextual information.  See
 					       :title destination) info)))))
 	     (format "<a href=\"#%s\"%s>%s</a>"
 		     (org-export-solidify-link-text href) attributes desc)))
-	  ;; Fuzzy link points to a target.  Do as above.
+	  ;; Fuzzy link points to a target or an element.
 	  (t
-	   (let ((path (org-export-solidify-link-text path)) number
-		 (org-html-standalone-image-predicate 'org-html--has-caption-p))
-	     (unless desc
-	       (setq number (cond
-			     ((org-html-standalone-image-p destination info)
-			      (org-export-get-ordinal
-			       (assoc 'link (org-element-contents destination))
-			       info 'link 'org-html-standalone-image-p))
-			     (t (org-export-get-ordinal
-				 destination info nil 'org-html--has-caption-p))))
-	       (setq desc (when number
-			    (if (atom number) (number-to-string number)
-			      (mapconcat 'number-to-string number ".")))))
-	     (format "<a href=\"#%s\"%s>%s</a>"
-		     path attributes (or desc "No description for this link")))))))
+	   (let* ((path (org-export-solidify-link-text path)) number
+		  (org-html-standalone-image-predicate 'org-html--has-caption-p)
+		  (number (cond
+			   (desc nil)
+			   ((org-html-standalone-image-p destination info)
+			    (org-export-get-ordinal
+			     (org-element-map destination 'link
+			       'identity info t)
+			     info 'link 'org-html-standalone-image-p))
+			   (t (org-export-get-ordinal
+			       destination info nil 'org-html--has-caption-p))))
+		  (desc (cond (desc)
+			      ((not number) "No description for this link")
+			      ((numberp number) (number-to-string number))
+			      (t (mapconcat 'number-to-string number ".")))))
+	     (format "<a href=\"#%s\"%s>%s</a>" path attributes desc))))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
