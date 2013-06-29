@@ -3163,12 +3163,12 @@ contextual information."
 	    (number (org-export-get-ordinal
 		     table info nil 'org-html--has-caption-p))
 	    (attributes
-	     (if (org-html-html5-p info) ""
-	       (org-html--make-attribute-string
-		(org-combine-plists
-		 (and label (list :id (org-export-solidify-link-text label)))
-		 (plist-get info :html-table-attributes)
-		 (org-export-read-attribute :attr_html table)))))
+	     (org-html--make-attribute-string
+	      (org-combine-plists
+	       (and label (list :id (org-export-solidify-link-text label)))
+	       (and (not (org-html-html5-p info))
+		    (plist-get info :html-table-attributes))
+	       (org-export-read-attribute :attr_html table))))
 	    (alignspec
 	     (if (and (boundp 'org-html-format-table-no-css)
 		      org-html-format-table-no-css)
