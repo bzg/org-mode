@@ -2737,7 +2737,7 @@ INFO is a plist holding contextual information.  See
 		     (org-export-solidify-link-text href) attributes desc)))
 	  ;; Fuzzy link points to a target or an element.
 	  (t
-	   (let* ((path (org-export-solidify-link-text path)) number
+	   (let* ((path (org-export-solidify-link-text path))
 		  (org-html-standalone-image-predicate 'org-html--has-caption-p)
 		  (number (cond
 			   (desc nil)
