@@ -5266,6 +5266,9 @@ them."
     ("Figure"
      ("de" :default "Abbildung")
      ("es" :default "Figura"))
+    ("Figure %d:"
+     ("de" :default "Abbildung %d:")
+     ("es" :default "Figura %d:"))
     ("Footnotes"
      ("ca" :html "Peus de p&agrave;gina")
      ("cs" :default "Pozn\xe1mky pod carou")
