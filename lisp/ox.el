@@ -5265,10 +5265,12 @@ them."
      ("fr" :ascii "Equation" :default "Équation"))
     ("Figure"
      ("de" :default "Abbildung")
-     ("es" :default "Figura"))
+     ("es" :default "Figura")
+     ("ja" :html "&#22259;" :utf-8 "図"))
     ("Figure %d:"
      ("de" :default "Abbildung %d:")
-     ("es" :default "Figura %d:"))
+     ("es" :default "Figura %d:")
+     ("ja" :html "&#22259;%d:" :utf-8 "図%d:"))
     ("Footnotes"
      ("ca" :html "Peus de p&agrave;gina")
      ("cs" :default "Pozn\xe1mky pod carou")
@@ -5315,7 +5317,8 @@ them."
      ("de" :default "Tabelle %d")
      ("es" :default "Tabla %d")
      ("fr"
-      :ascii "Tableau %d :" :default "Tableau nº %d :" :latin1 "Tableau %d :"))
+      :ascii "Tableau %d :" :default "Tableau nº %d :" :latin1 "Tableau %d :")
+     ("ja" :html "&#34920;%d:" :utf-8 "表%d:"))
     ("Table of Contents"
      ("ca" :html "&Iacute;ndex")
      ("cs" :default "Obsah")
