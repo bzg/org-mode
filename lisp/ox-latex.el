@@ -881,8 +881,11 @@ For non-floats, see `org-latex--wrap-label'."
 		      (format "\\label{%s}"
 			      (org-export-solidify-link-text label))))
 	 (main (org-export-get-caption element))
-	 (short (org-export-get-caption element t)))
+	 (short (org-export-get-caption element t))
+	 (caption-from-attr-latex (org-export-read-attribute :attr_latex element :caption)))
     (cond
+     ((org-string-nw-p caption-from-attr-latex)
+      (concat caption-from-attr-latex "\n"))
      ((and (not main) (equal label-str "")) "")
      ((not main) (concat label-str "\n"))
      ;; Option caption format with short name.
@@ -1655,7 +1658,9 @@ used as a communication channel."
 		  (cond ((and (not float) (plist-member attr :float)) nil)
 			((string= float "wrap") 'wrap)
 			((string= float "multicolumn") 'multicolumn)
-			((or float (org-element-property :caption parent))
+			((or float
+			     (org-element-property :caption parent)
+			     (org-string-nw-p (plist-get attr :caption)))
 			 'figure))))
 	 (placement
 	  (let ((place (plist-get attr :placement)))
@@ -2333,7 +2338,9 @@ This function assumes TABLE has `org' as its `:type' property and
 			 ((and (not float) (plist-member attr :float)) nil)
 			 ((string= float "sidewaystable") "sidewaystable")
 			 ((string= float "multicolumn") "table*")
-			 ((or float (org-element-property :caption table))
+			 ((or float
+			      (org-element-property :caption table)
+			      (org-string-nw-p (plist-get attr :caption)))
 			  "table")))))
 	 ;; Extract others display options.
 	 (fontsize (let ((font (plist-get attr :font)))

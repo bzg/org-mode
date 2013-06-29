@@ -11599,6 +11599,11 @@ Environment used for the table.  It can be set to any @LaTeX{} table
 environment, like @code{tabularx}, @code{longtable}, @code{array},
 @code{tabu}, @code{bmatrix}@enddots{}  It defaults to
 @code{org-latex-default-table-environment} value.
+@item :caption
+@code{#+CAPTION} keyword is the simplest way to set a caption for a table
+(@pxref{Images and tables}).  If you need more advanced commands for that
+task, you can use @code{:caption} attribute instead.  Its value should be raw
+@LaTeX{} code.  It has precedence over @code{#+CAPTION}.
 @item :float
 @itemx :placement
 Float environment for the table.  Possible values are @code{sidewaystable},
@@ -11651,6 +11656,16 @@ a table that will span over multiple pages, or a matrix product:
 | 3 | 4 |
 @end example
 
+In the example below, @LaTeX{} command
+@code{\bicaption@{HeadingA@}@{HeadingB@}} will set the caption.
+
+@example
+#+ATTR_LATEX: :caption \bicaption@{HeadingA@}@{HeadingB@}
+| ..... | ..... |
+| ..... | ..... |
+@end example
+
+
 @subsubheading Images in @LaTeX{} export
 @cindex images, inline in @LaTeX{}
 @cindex inlining images in @LaTeX{}
@@ -11669,6 +11684,14 @@ example:
 
 @example
 #+ATTR_LATEX: :width 5cm :options angle=90
+[[./img/sed-hr4049.pdf]]
+@end example
+
+If you need a specific command for the caption, use @code{:caption}
+attribute.  It will override standard @code{#+CAPTION} value, if any.
+
+@example
+#+ATTR_LATEX: :caption \bicaption@{HeadingA@}@{HeadingB@}
 [[./img/sed-hr4049.pdf]]
 @end example
 
@@ -11766,6 +11789,17 @@ becomes
 ...
 Therefore, any even number greater than 2 is the sum of two primes.
 \end@{proof@}
+@end example
+
+If you need to insert a specific caption command, use @code{:caption}
+attribute.  It will override standard @code{#+CAPTION} value, if any.  For
+example:
+
+@example
+#+ATTR_LATEX: :caption \MyCaption@{HeadingA@}
+#+BEGIN_PROOF
+...
+#+END_PROOF
 @end example
 
 @subsubheading Horizontal rules
