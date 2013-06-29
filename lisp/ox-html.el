@@ -1370,6 +1370,13 @@ ELEMENT is either a src block or an example block."
 	    (or (plist-get attr :height) (org-count-lines code))
 	    code)))
 
+(defun org-html--has-caption-p (element &optional info)
+  "Non-nil when ELEMENT has a caption affiliated keyword.
+INFO is a plist used as a communication channel.  This function
+is meant to be used as a predicate for `org-export-get-ordinal' or
+a value to `org-html-standalone-image-predicate'."
+  (org-element-property :caption element))
+
 ;;;; Table
 
 (defun org-html-htmlize-region-for-paste (beg end)
@@ -2532,7 +2539,14 @@ Inline images can have these attributes:
 		      (expand-file-name raw-path))
 		     (t raw-path)))
 	 (parent (org-export-get-parent-element link))
-	 (caption (org-export-data (org-export-get-caption parent) info))
+	 (caption
+	  (let ((raw (org-export-data (org-export-get-caption parent) info))
+		(org-html-standalone-image-predicate 'org-html--has-caption-p))
+	    (if (not (org-string-nw-p raw)) raw
+	      (concat (format (org-html--translate "Figure %d:" info)
+			      (org-export-get-ordinal
+			       link info nil 'org-html-standalone-image-p))
+		      " " raw))))
 	 (label (org-element-property :name parent)))
     ;; Return proper string, depending on DISPOSITION.
     (org-html-format-inline-image
@@ -2725,14 +2739,16 @@ INFO is a plist holding contextual information.  See
 		     (org-export-solidify-link-text href) attributes desc)))
 	  ;; Fuzzy link points to a target.  Do as above.
 	  (t
-	   (let ((path (org-export-solidify-link-text path)) number)
+	   (let ((path (org-export-solidify-link-text path)) number
+		 (org-html-standalone-image-predicate 'org-html--has-caption-p))
 	     (unless desc
 	       (setq number (cond
 			     ((org-html-standalone-image-p destination info)
 			      (org-export-get-ordinal
 			       (assoc 'link (org-element-contents destination))
 			       info 'link 'org-html-standalone-image-p))
-			     (t (org-export-get-ordinal destination info))))
+			     (t (org-export-get-ordinal
+				 destination info nil 'org-html--has-caption-p))))
 	       (setq desc (when number
 			    (if (atom number) (number-to-string number)
 			      (mapconcat 'number-to-string number ".")))))
@@ -3145,6 +3161,8 @@ contextual information."
     (t
      (let* ((label (org-element-property :name table))
 	    (caption (org-export-get-caption table))
+	    (number (org-export-get-ordinal
+		     table info nil 'org-html--has-caption-p))
 	    (attributes
 	     (if (org-html-html5-p info) ""
 	       (org-html--make-attribute-string
@@ -3183,7 +3201,9 @@ contextual information."
 		 (format (if org-html-table-caption-above
 			     "<caption align=\"above\">%s</caption>"
 			   "<caption align=\"bottom\">%s</caption>")
-			 (org-export-data caption info)))
+			 (concat
+			  (format (org-html--translate "Table %d:" info) number)
+			  " " (org-export-data caption info))))
 	       (funcall table-column-specs table info)
 	       contents)))))
 
