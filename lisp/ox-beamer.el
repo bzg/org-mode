@@ -194,12 +194,13 @@ open    The opening template for the environment, with the following escapes
         %A   the default action/overlay specification
         %o   the options argument of the template
         %h   the headline text
-        %H   if there is headline text, that text in {} braces
-        %U   if there is headline text, that text in [] brackets
+        %r   the raw headline text (i.e. without any processing)
+        %H   if there is headline text, that raw text in {} braces
+        %U   if there is headline text, that raw text in [] brackets
 close   The closing string of the environment."
   :group 'org-export-beamer
   :version "24.4"
-  :package-version '(Org . "8.0")
+  :package-version '(Org . "8.1")
   :type '(repeat
 	  (list
 	   (string :tag "Environment")
@@ -543,6 +544,7 @@ used as a communication channel."
 			      (append org-beamer-environments-special
 				      org-beamer-environments-extra
 				      org-beamer-environments-default))))
+	 (raw-title (org-element-property :raw-value headline))
 	 (title (org-export-data (org-element-property :title headline) info))
 	 (options (let ((options (org-element-property :BEAMER_OPT headline)))
 		    (if (not options) ""
@@ -608,8 +610,11 @@ used as a communication channel."
 		    (cons "A" "")))))
 	  (list (cons "o" options)
 		(cons "h" title)
-		(cons "H" (if (equal title "") "" (format "{%s}" title)))
-		(cons "U" (if (equal title "") "" (format "[%s]" title))))))
+		(cons "r" raw-title)
+		(cons "H" (if (equal raw-title "") ""
+			    (format "{%s}" raw-title)))
+		(cons "U" (if (equal raw-title "") ""
+			    (format "[%s]" raw-title))))))
 	"\n"))
      contents
      ;; Block's closing string.
