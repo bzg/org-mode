@@ -5215,8 +5215,7 @@ them."
 
 (defconst org-export-dictionary
   '(("%e %n: %c"
-     ("fr" :default "%e %n : %c" :html "%e %n&nbsp;: %c"
-      :texinfo "%e %n@tie{}: %c"))
+     ("fr" :default "%e %n : %c" :html "%e&nbsp;%n&nbsp;: %c"))
     ("Author"
      ("ca" :default "Autor")
      ("cs" :default "Autor")
@@ -5273,6 +5272,7 @@ them."
     ("Figure %d:"
      ("de" :default "Abbildung %d:")
      ("es" :default "Figura %d:")
+     ("fr" :default "Figure %d :" :html "Figure&nbsp;%d&nbsp;:")
      ("ja" :html "&#22259;%d:" :utf-8 "図%d:"))
     ("Footnotes"
      ("ca" :html "Peus de p&agrave;gina")
@@ -5309,18 +5309,20 @@ them."
     ("Listing %d:"
      ("de" :default "Programmlisting %d")
      ("es" :default "Listado de programa %d")
-     ("fr"
-      :ascii "Programme %d :" :default "Programme nº %d :"
-      :latin1 "Programme %d :"))
+     ("fr" :default "Programme %d :" :html "Programme&nbsp;%d&nbsp;:"))
     ("See section %s"
      ("de" :default "siehe Abschnitt %s")
      ("es" :default "vea seccion %s")
      ("fr" :default "cf. section %s"))
+    ("Table"
+     ("de" :default "Tabelle")
+     ("es" :default "Tabla")
+     ("fr" :default "Tableau")
+     ("ja" :html "&#34920;" :utf-8 "表"))
     ("Table %d:"
      ("de" :default "Tabelle %d")
      ("es" :default "Tabla %d")
-     ("fr"
-      :ascii "Tableau %d :" :default "Tableau nº %d :" :latin1 "Tableau %d :")
+     ("fr" :default "Tableau %d :")
      ("ja" :html "&#34920;%d:" :utf-8 "表%d:"))
     ("Table of Contents"
      ("ca" :html "&Iacute;ndex")
