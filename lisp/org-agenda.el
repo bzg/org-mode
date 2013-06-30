@@ -3129,11 +3129,12 @@ longer string it is used as a tags/todo match string.
 Parameters are alternating variable names and values that will be bound
 before running the agenda command."
   (org-eval-in-environment (org-make-parameter-alist parameters)
-    (if (> (length cmd-key) 2)
-	(org-tags-view nil cmd-key)
-      (org-agenda nil cmd-key)))
-  (set-buffer org-agenda-buffer-name)
-  (princ (buffer-string)))
+    (let (org-agenda-sticky)
+      (if (> (length cmd-key) 2)
+	  (org-tags-view nil cmd-key)
+	(org-agenda nil cmd-key)))
+    (set-buffer org-agenda-buffer-name)
+    (princ (buffer-string))))
 
 (defvar org-agenda-info nil)
 
