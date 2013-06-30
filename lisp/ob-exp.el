@@ -217,7 +217,7 @@ this template."
 					     (concat
 					      ":var results="
 					      (mapconcat 'identity
-							 (butlast lob-info)
+							 (butlast lob-info 2)
 							 " ")))))))
 				  "" nil (car (last lob-info)))
 			    'lob))

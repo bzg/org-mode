@@ -1717,7 +1717,8 @@ buffer or nil if no such result exists."
 	  (when (and (string= "name" (downcase (match-string 1)))
 		     (or (beginning-of-line 1)
 			 (looking-at org-babel-src-block-regexp)
-			 (looking-at org-babel-multi-line-header-regexp)))
+			 (looking-at org-babel-multi-line-header-regexp)
+			 (looking-at org-babel-lob-one-liner-regexp)))
 	    (throw 'is-a-code-block (org-babel-find-named-result name (point))))
 	  (beginning-of-line 0) (point))))))
 
@@ -1822,10 +1823,7 @@ following the source block."
 			  (looking-at org-babel-lob-one-liner-regexp)))
 	   (inlinep (when (org-babel-get-inline-src-block-matches)
 		      (match-end 0)))
-	   (name (if on-lob-line
-		     (mapconcat #'identity (butlast (org-babel-lob-get-info))
-				"")
-		   (nth 4 (or info (org-babel-get-src-block-info 'light)))))
+	   (name (nth 4 (or info (org-babel-get-src-block-info 'light))))
 	   (head (unless on-lob-line (org-babel-where-is-src-block-head)))
 	   found beg end)
       (when head (goto-char head))
