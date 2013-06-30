@@ -19049,6 +19049,8 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-k" 'org-kill-note-or-show-branches)
 (org-defkey org-mode-map "\C-c#"    'org-update-statistics-cookies)
 (org-defkey org-mode-map [remap open-line] 'org-open-line)
+(org-defkey org-mode-map [remap forward-paragraph] 'org-forward-element)
+(org-defkey org-mode-map [remap backward-paragraph] 'org-backward-element)
 (org-defkey org-mode-map "\C-m"     'org-return)
 (org-defkey org-mode-map "\C-j"     'org-return-indent)
 (org-defkey org-mode-map "\C-c?"    'org-table-field-info)
