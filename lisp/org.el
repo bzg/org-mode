@@ -8180,8 +8180,8 @@ This is a short-hand for marking the subtree and then cutting it."
   (org-copy-subtree n 'cut))
 
 (defun org-copy-subtree (&optional n cut force-store-markers nosubtrees)
-  "Cut the current subtree into the clipboard.
-With prefix arg N, cut this many sequential subtrees.
+  "Copy the current subtree it in the clipboard.
+With prefix arg N, copy this many sequential subtrees.
 This is a short-hand for marking the subtree and then copying it.
 If CUT is non-nil, actually cut the subtree.
 If FORCE-STORE-MARKERS is non-nil, store the relative locations
