@@ -11584,7 +11584,9 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 	    (unless org-refile-keep
 	      (if regionp
 		  (delete-region (point) (+ (point) region-length))
-		(org-cut-subtree)))
+		(delete-region
+		 (point-at-bol)
+		 (min (buffer-size) (1+ (org-end-of-subtree t))))))
 	    (when (featurep 'org-inlinetask)
 	      (org-inlinetask-remove-END-maybe))
 	    (setq org-markers-to-move nil)
