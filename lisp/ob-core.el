@@ -1169,9 +1169,12 @@ the current subtree."
 (defun org-babel-set-current-result-hash (hash)
   "Set the current in-buffer hash to HASH."
   (org-babel-where-is-src-block-result)
-  (save-excursion (goto-char (match-beginning 3))
-		  ;; (mapc #'delete-overlay (overlays-at (point)))
-		  (replace-match hash nil nil nil 3)
+  (save-excursion (goto-char (match-beginning 5))
+		  (mapc #'delete-overlay (overlays-at (point)))
+		  (forward-char org-babel-hash-show)
+		  (mapc #'delete-overlay (overlays-at (point)))
+		  (replace-match hash nil nil nil 5)
+		  (goto-char (point-at-bol))
 		  (org-babel-hide-hash)))
 
 (defun org-babel-hide-hash ()
