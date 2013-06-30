@@ -11504,7 +11504,6 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 	   (regionp (org-region-active-p))
 	   (region-start (and regionp (region-beginning)))
 	   (region-end (and regionp (region-end)))
-	   (region-length (and regionp (- region-end region-start)))
 	   (filename (buffer-file-name (buffer-base-buffer cbuf)))
 	   pos it nbuf file re level reversed)
       (setq last-command nil)
@@ -11515,7 +11514,9 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 	(unless (or (org-kill-is-subtree-p
 		     (buffer-substring region-start region-end))
 		    (prog1 org-refile-active-region-within-subtree
-		      (org-toggle-heading)))
+		      (let ((s (point-at-eol)))
+			(org-toggle-heading)
+			(setq region-end (+ (- (point-at-eol) s) region-end)))))
 	  (user-error "The region is not a (sequence of) subtree(s)")))
       (if (equal goto '(16))
 	  (org-refile-goto-last-stored)
@@ -11597,8 +11598,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 		  (if (not (bolp)) (newline))
 		  (org-paste-subtree level)
 		  (when org-log-refile
-		    (org-add-log-setup 'refile nil nil 'findpos
-				       org-log-refile)
+		    (org-add-log-setup 'refile nil nil 'findpos org-log-refile)
 		    (unless (eq org-log-refile 'note)
 		      (save-excursion (org-add-log-note))))
 		  (and org-auto-align-tags
@@ -11616,7 +11616,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 		  (run-hooks 'org-after-refile-insert-hook))))
 	    (unless org-refile-keep
 	      (if regionp
-		  (delete-region (point) (+ (point) region-length))
+		  (delete-region (point) (+ (point) (- region-end region-start)))
 		(delete-region
 		 (point-at-bol)
 		 (min (buffer-size) (1+ (org-end-of-subtree t))))))
