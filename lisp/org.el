@@ -8196,8 +8196,8 @@ This is a short-hand for marking the subtree and then cutting it."
   (org-copy-subtree n 'cut))
 
 (defun org-copy-subtree (&optional n cut force-store-markers nosubtrees)
-  "Cut the current subtree into the clipboard.
-With prefix arg N, cut this many sequential subtrees.
+  "Copy the current subtree it in the clipboard.
+With prefix arg N, copy this many sequential subtrees.
 This is a short-hand for marking the subtree and then copying it.
 If CUT is non-nil, actually cut the subtree.
 If FORCE-STORE-MARKERS is non-nil, store the relative locations
@@ -11617,7 +11617,9 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 	    (unless org-refile-keep
 	      (if regionp
 		  (delete-region (point) (+ (point) region-length))
-		(org-cut-subtree)))
+		(delete-region
+		 (point-at-bol)
+		 (min (buffer-size) (1+ (org-end-of-subtree t))))))
 	    (when (featurep 'org-inlinetask)
 	      (org-inlinetask-remove-END-maybe))
 	    (setq org-markers-to-move nil)
