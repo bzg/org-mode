@@ -217,7 +217,6 @@ Here is one at the end of a line. =2=
       (should-not (string-match (regexp-quote "i=\"10\"") result)))))
 
 (ert-deftest ob-exp/use-case-of-reading-entry-properties ()
-  :expected-result :failed ;; TODO: update for new call line result insertion
   (org-test-at-id "cc5fbc20-bca5-437a-a7b8-2b4d7a03f820"
     (org-narrow-to-subtree)
     (let* ((case-fold-search nil)
@@ -227,27 +226,27 @@ Here is one at the end of a line. =2=
 	   (sub1 "a:1, b:2, c:5, d:0, e:6")
 	   (func sub0))
       ;; entry "section"
-      (should (string-match (concat "\"sect call\".*)\n: shell " sect "\n")
+      (should (string-match (concat "_shell sect call\n: shell " sect "\n")
 			    result))
-      (should (string-match (concat "sect call\\](.*)\n: elisp " sect "\n")
+      (should (string-match (concat "_elisp sect call\n: elisp " sect "\n")
 			    result))
       (should (string-match (concat "\n- sect inline =shell " sect "=\n")
 			    result))
       (should (string-match (concat "\n- sect inline =elisp " sect "=\n")
 			    result))
       ;; entry "subsection", call without arguments
-      (should (string-match (concat "\"sub0 call\".*)\n: shell " sub0 "\n")
+      (should (string-match (concat "_shell sub0 call\n: shell " sub0 "\n")
 			    result))
-      (should (string-match (concat "sub0 call\\](.*)\n: elisp " sub0 "\n")
+      (should (string-match (concat "_elisp sub0 call\n: elisp " sub0 "\n")
 			    result))
       (should (string-match (concat "\n- sub0 inline =shell " sub0 "=\n")
 			    result))
       (should (string-match (concat "\n- sub0 inline =elisp " sub0 "=\n")
 			    result))
       ;; entry "subsection", call with arguments
-      (should (string-match (concat "\"sub1 call\".*)\n: shell " sub1 "\n")
+      (should (string-match (concat "_shell sub1 call\n: shell " sub1 "\n")
 			    result))
-      (should (string-match (concat "sub1 call\\](.*)\n: elisp " sub1 "\n")
+      (should (string-match (concat "_elisp sub1 call\n: elisp " sub1 "\n")
 			    result))
       (should (string-match (concat "\n- sub1 inline =shell " sub1 "=\n")
 			    result))
