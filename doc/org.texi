@@ -10006,7 +10006,7 @@ Conversely, backslash characters before a comma, and only them, need to be
 escaped with another backslash character.}.  In addition to defined macros,
 @code{@{@{@{title@}@}@}}, @code{@{@{@{author@}@}@}}, etc., will reference
 information set by the @code{#+TITLE:}, @code{#+AUTHOR:}, and similar lines.
-Also, @code{@{@{@{date(@var{FORMAT})@}@}@}} and
+Also, @code{@{@{@{time(@var{FORMAT})@}@}@}} and
 @code{@{@{@{modification-time(@var{FORMAT})@}@}@}} refer to current date time
 and to the modification time of the file being exported, respectively.
 @var{FORMAT} should be a format string understood by
