@@ -366,6 +366,7 @@ visually."
 
 ;;;; Document schema
 
+(require 'rng-loc)
 (defcustom org-odt-schema-dir
   (let* ((schema-dir
 	  (catch 'schema-dir
