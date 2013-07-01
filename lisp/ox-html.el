@@ -2679,12 +2679,16 @@ the plist used as a communication channel."
 
 ;;;; Plain List
 
-(defun org-html-begin-plain-list (type ordered-num)
+;; FIXME Maybe arg1 is not needed because <li value="20"> already sets
+;; the correct value for the item counter
+(defun org-html-begin-plain-list (type &optional arg1)
   "Insert the beginning of the HTML list depending on TYPE.
-If ORDERED-NUM is nil, the list order is alphabetical."
+When ARG1 is a string, use it as the start parameter for ordered
+lists."
   (case type
-    (ordered (format "<ol class=\"org-ol\"%s>"
-		     (if ordered-num "" " type=\"a\"")))
+    (ordered
+     (format "<ol class=\"org-ol\"%s>"
+	     (if arg1 (format " start=\"%d\"" arg1) "")))
     (unordered "<ul class=\"org-ul\">")
     (descriptive "<dl class=\"org-dl\">")))
 
@@ -2699,14 +2703,10 @@ If ORDERED-NUM is nil, the list order is alphabetical."
   "Transcode a PLAIN-LIST element from Org to HTML.
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
-  (let* ((ordered-num
-	  (org-element-map plain-list 'item
-	    (lambda (i)
-	      (null (string-to-number (org-element-property :bullet i))))
-	    info 'first-match))
+  (let* (arg1 ;; (assoc :counter (org-element-map plain-list 'item
 	 (type (org-element-property :type plain-list)))
     (format "%s\n%s%s"
-	    (org-html-begin-plain-list type ordered-num)
+	    (org-html-begin-plain-list type)
 	    contents (org-html-end-plain-list type))))
 
 ;;;; Plain Text
