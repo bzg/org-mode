@@ -365,7 +365,10 @@ Here is a call line with more than just the results exported.
   :ID:       cc5fbc20-bca5-437a-a7b8-2b4d7a03f820
   :END:
 
-If overriden by caller then use :var from header else use entry property.
+Use case checked and documented with this test: During their
+evaluation the source blocks read values from properties from the
+entry where the call has been made unless the value is overridden with
+the optional argument of the caller.
 
 ** section
    :PROPERTIES:
@@ -375,10 +378,14 @@ If overriden by caller then use :var from header else use entry property.
 
 Note: Just export of a property can be done with a macro: {{{property(a)}}}.
 
-#+CALL: src_block_location_shell(dummy_name="sect call")
-#+CALL: src_block_location_elisp[:session sect call]()
-- sect inline call_src_block_location_shell(dummy_name="sect inline")
-- sect inline call_src_block_location_elisp[:session sect inline]()
+#+NAME: src_block_location_shell sect call
+#+CALL: src_block_location_shell()
+
+#+NAME: src_block_location_elisp sect call
+#+CALL: src_block_location_elisp()
+
+- sect inline call_src_block_location_shell()
+- sect inline call_src_block_location_elisp()
 
 *** subsection
     :PROPERTIES:
@@ -386,20 +393,27 @@ Note: Just export of a property can be done with a macro: {{{property(a)}}}.
     :c:        4
     :END:
 
-#+CALL: src_block_location_shell(dummy_name="sub0 call")
-#+CALL: src_block_location_elisp[:session sub0 call]()
-- sub0 inline call_src_block_location_shell(dummy_name="sub0 inline")
-- sub0 inline call_src_block_location_elisp[:session sub0 inline]()
+#+NAME: src_block_location_shell sub0 call
+#+CALL: src_block_location_shell()
 
-#+CALL: src_block_location_shell(dummy_name="sub1 call", c=5, e=6)
-#+CALL: src_block_location_elisp[:session sub1 call](c=5, e=6)
-- sub1 inline call_src_block_location_shell(dummy_name="sub1 inline", c=5, e=6)
-- sub1 inline call_src_block_location_elisp[:session sub1 inline](c=5, e=6)
+#+NAME: src_block_location_elisp sub0 call
+#+CALL: src_block_location_elisp()
+
+- sub0 inline call_src_block_location_shell()
+- sub0 inline call_src_block_location_elisp()
+
+#+NAME: src_block_location_shell sub1 call
+#+CALL: src_block_location_shell(c=5, e=6)
+
+#+NAME: src_block_location_elisp sub1 call
+#+CALL: src_block_location_elisp(c=5, e=6)
+
+- sub1 inline call_src_block_location_shell(c=5, e=6)
+- sub1 inline call_src_block_location_elisp(c=5, e=6)
 
 **** function definition
 
 #+NAME: src_block_location_shell
-#+HEADER: :var dummy_name="workaround to get different result blocks"
 #+HEADER: :var a=(or (org-entry-get org-babel-current-src-block-location "a" t) "0")
 #+HEADER: :var b=(or (org-entry-get org-babel-current-src-block-location "b" t) "0")
 #+HEADER: :var c=(or (org-entry-get org-babel-current-src-block-location "c" t) "0")
