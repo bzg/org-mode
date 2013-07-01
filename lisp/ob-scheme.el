@@ -38,7 +38,16 @@
 
 ;;; Code:
 (require 'ob)
-(load-library "geiser-impl")
+(require 'geiser nil t)
+(defvar geiser-repl--repl)             ; Defined in geiser-repl.el
+(defvar geiser-impl--implementation)   ; Defined in geiser-impl.el
+(defvar geiser-default-implementation) ; Defined in geiser-impl.el
+(defvar geiser-active-implementations) ; Defined in geiser-impl.el
+
+(declare-function run-geiser "geiser-repl" (impl))
+(declare-function geiser-mode "geiser-mode" ())
+(declare-function geiser-eval-region "geiser-mode" (start end &optional and-go raw nomsg))
+(declare-function geiser-repl-exit "geiser-repl" (&optional arg))
 
 (defvar org-babel-default-header-args:scheme '()
   "Default header arguments for scheme code blocks.")
@@ -126,7 +135,7 @@ is true; otherwise returns the last value."
 			   (org-babel-scheme-get-repl impl repl))))
 	(when (not (eq impl (org-babel-scheme-get-buffer-impl
 			     (current-buffer))))
-	  (message "Implementation mismatch: %s (%s) %s (s)" impl (symbolp impl)
+	  (message "Implementation mismatch: %s (%s) %s (%s)" impl (symbolp impl)
 		   (org-babel-scheme-get-buffer-impl (current-buffer))
 		   (symbolp (org-babel-scheme-get-buffer-impl
 			     (current-buffer)))))
