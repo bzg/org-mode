@@ -295,10 +295,10 @@ name of the code block."
 	    (noeval          (or ,eval-no ,eval-no-export))
 	    (query           (or (equal ,eval "query")
 				 (and ,export (equal ,eval "query-export"))
-				 (when (functionp org-confirm-babel-evaluate)
-				   (funcall org-confirm-babel-evaluate
-					    ,lang ,block-body))
-				 org-confirm-babel-evaluate))
+				 (if (functionp org-confirm-babel-evaluate)
+				     (funcall org-confirm-babel-evaluate
+					      ,lang ,block-body)
+				   org-confirm-babel-evaluate)))
 	    (code-block      (if ,info (format  " %s "  ,lang) " "))
 	    (block-name      (if ,name (format " (%s) " ,name) " ")))
        ,@body)))
