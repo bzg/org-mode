@@ -83,14 +83,14 @@
 (defun org-babel-scheme-get-repl (impl name)
   "Switch to a scheme REPL, creating it if it doesn't exist:"
   (let ((buffer (org-babel-scheme-get-session-buffer name)))
-    (or buffer 
-    (progn
-      (run-geiser impl)
-      (if name
-	  (progn 
-	    (rename-buffer name t)
-	    (org-babel-scheme-set-session-buffer name (current-buffer))))
-      (current-buffer)))))
+    (or buffer
+	(progn
+	  (run-geiser impl)
+	  (if name
+	      (progn
+		(rename-buffer name t)
+		(org-babel-scheme-set-session-buffer name (current-buffer))))
+	  (current-buffer)))))
 
 (defun org-babel-scheme-make-session-name (buffer name impl)
   "Generate a name for the session buffer.
@@ -101,7 +101,7 @@ If the session is unnamed (nil), generate a name.
 
 If the session is 'none', use nil for the session name, and
 org-babel-scheme-execute-with-geiser will use a temporary session."
-  (let ((result 
+  (let ((result
 	 (cond ((not name)
 		(concat buffer " " (symbol-name impl) " REPL"))
 	       ((string= name "none") nil)
@@ -122,11 +122,14 @@ is true; otherwise returns the last value."
 		  (format "(with-output-to-string (lambda () %s))" code)
 		code))
       (geiser-mode)
-      (let ((repl-buffer (save-current-buffer (org-babel-scheme-get-repl impl repl))))
-	(when (not (eq impl (org-babel-scheme-get-buffer-impl (current-buffer))))
+      (let ((repl-buffer (save-current-buffer
+			   (org-babel-scheme-get-repl impl repl))))
+	(when (not (eq impl (org-babel-scheme-get-buffer-impl
+			     (current-buffer))))
 	  (message "Implementation mismatch: %s (%s) %s (s)" impl (symbolp impl)
 		   (org-babel-scheme-get-buffer-impl (current-buffer))
-		   (symbolp (org-babel-scheme-get-buffer-impl (current-buffer)))))
+		   (symbolp (org-babel-scheme-get-buffer-impl
+			     (current-buffer)))))
 	(setq geiser-repl--repl repl-buffer)
 	(setq geiser-impl--implementation nil)
 	(geiser-eval-region (point-min) (point-max))
@@ -150,7 +153,8 @@ is true; otherwise returns the last value."
 This function is called by `org-babel-execute-src-block'"
   (let* ((source-buffer (current-buffer))
 	 (source-buffer-name (replace-regexp-in-string ;; zap surrounding *
-	  "^ ?\\*\\([^*]+\\)\\*" "\\1" (buffer-name source-buffer))))
+			      "^ ?\\*\\([^*]+\\)\\*" "\\1"
+			      (buffer-name source-buffer))))
     (save-excursion
       (org-babel-reassemble-table
        (let* ((result-type (cdr (assoc :result-type params)))
@@ -158,18 +162,18 @@ This function is called by `org-babel-execute-src-block'"
 			  (intern (cdr (assoc :scheme params))))
 			geiser-default-implementation
 			(car geiser-active-implementations)))
-	      (session (org-babel-scheme-make-session-name source-buffer-name (cdr (assoc :session params)) impl))
-	    (full-body (org-babel-expand-body:scheme body params)))
-       (org-babel-scheme-execute-with-geiser full-body           ; code
-					     (string= result-type "output")	; output?
-					     impl ; implementation
-					     (and (not (string= session "none")) session)); session
-       )
-     (org-babel-pick-name (cdr (assoc :colname-names params))
-			  (cdr (assoc :colnames params)))
-    (org-babel-pick-name (cdr (assoc :rowname-names params))
-			 (cdr (assoc :rownames params)))))))
-  
+	      (session (org-babel-scheme-make-session-name
+			source-buffer-name (cdr (assoc :session params)) impl))
+	      (full-body (org-babel-expand-body:scheme body params)))
+	 (org-babel-scheme-execute-with-geiser
+	  full-body			 ; code
+	  (string= result-type "output") ; output?
+	  impl				 ; implementation
+	  (and (not (string= session "none")) session))) ; session
+       (org-babel-pick-name (cdr (assoc :colname-names params))
+			    (cdr (assoc :colnames params)))
+       (org-babel-pick-name (cdr (assoc :rowname-names params))
+			    (cdr (assoc :rownames params)))))))
 
 (provide 'ob-scheme)
 
