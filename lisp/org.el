@@ -23537,6 +23537,8 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
     (setq current-prefix-arg nil)
     (org-agenda-maybe-redo)))
 
+(defvar speedbar-file-key-map)
+(declare-function speedbar-add-supported-extension "speedbar" (extension))
 (eval-after-load "speedbar"
   '(progn
      (speedbar-add-supported-extension ".org")
@@ -23609,6 +23611,7 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
        (org-show-context 'bookmark-jump)))
 
 ;; Make session.el ignore our circular variable
+(defvar session-globals-exclude)
 (eval-after-load "session"
   '(add-to-list 'session-globals-exclude 'org-mark-ring))
 
