@@ -3132,9 +3132,9 @@ before running the agenda command."
     (let (org-agenda-sticky)
       (if (> (length cmd-key) 2)
 	  (org-tags-view nil cmd-key)
-	(org-agenda nil cmd-key)))
-    (set-buffer org-agenda-buffer-name)
-    (princ (buffer-string))))
+	(org-agenda nil cmd-key))))
+  (set-buffer org-agenda-buffer-name)
+  (princ (buffer-string)))
 
 (defvar org-agenda-info nil)
 
