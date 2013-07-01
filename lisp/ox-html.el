@@ -117,6 +117,7 @@
     (:html-doctype "HTML_DOCTYPE" nil org-html-doctype)
     (:html-container "HTML_CONTAINER" nil org-html-container-element)
     (:html-html5-fancy nil "html5-fancy" org-html-html5-fancy)
+    (:html-link-use-abs-url nil "html-link-use-abs-url" org-html-link-use-abs-url)
     (:html-link-home "HTML_LINK_HOME" nil org-html-link-home)
     (:html-link-up "HTML_LINK_UP" nil org-html-link-up)
     (:html-mathjax "HTML_MATHJAX" nil "" space)
@@ -1185,6 +1186,13 @@ example."
   "Where should the \"HOME\" link of exported HTML pages lead?"
   :group 'org-export-html
   :type '(string :tag "File or URL"))
+
+(defcustom org-html-link-use-abs-url nil
+  "Should we prepend relative links with HTML_LINK_HOME?"
+  :group 'org-export-html
+  :version "24.4"
+  :package-version '(Org . "8.1")
+  :type 'boolean)
 
 (defcustom org-html-home/up-format
   "<div id=\"org-div-home-and-up\">
@@ -2605,7 +2613,9 @@ standalone images, do the following.
 DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
-  (let* ((link-org-files-as-html-maybe
+  (let* ((home (org-trim (plist-get info :html-link-home)))
+	 (use-abs-url (plist-get info :html-link-use-abs-url))
+	 (link-org-files-as-html-maybe
 	  (function
 	   (lambda (raw-path info)
 	     "Treat links to `file.org' as links to `file.html', if needed.
@@ -2631,9 +2641,12 @@ INFO is a plist holding contextual information.  See
 		  (funcall link-org-files-as-html-maybe raw-path info))
 	    ;; If file path is absolute, prepend it with protocol
 	    ;; component - "file://".
-	    (when (file-name-absolute-p raw-path)
-	      (setq raw-path
-		    (concat "file://" (expand-file-name raw-path))))
+	    (cond ((file-name-absolute-p raw-path)
+		   (setq raw-path
+			 (concat "file://" (expand-file-name
+					    raw-path))))
+		  ((and home use-abs-url)
+		   (setq raw-path (concat (file-name-as-directory home) raw-path))))
 	    ;; Add search option, if any.  A search option can be
 	    ;; relative to a custom-id or a headline title.  Any other
 	    ;; option is ignored.
