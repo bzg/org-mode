@@ -11585,8 +11585,8 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 	      (if regionp
 		  (delete-region (point) (+ (point) (- region-end region-start)))
 		(delete-region
-		 (point-at-bol)
-		 (min (buffer-size) (1+ (org-end-of-subtree t))))))
+		 (and (org-back-to-heading t) (point))
+		 (min (buffer-size) (org-end-of-subtree t t) (point)))))
 	    (when (featurep 'org-inlinetask)
 	      (org-inlinetask-remove-END-maybe))
 	    (setq org-markers-to-move nil)
