@@ -5264,16 +5264,19 @@ them."
     ("Equation"
      ("de" :default "Gleichung")
      ("es" :html "Ecuaci&oacute;n" :default "Ecuación")
-     ("fr" :ascii "Equation" :default "Équation"))
+     ("fr" :ascii "Equation" :default "Équation")
+     ("zh-CN" :html "&#26041;&#31243;" :utf-8 "方程"))
     ("Figure"
      ("de" :default "Abbildung")
      ("es" :default "Figura")
-     ("ja" :html "&#22259;" :utf-8 "図"))
+     ("ja" :html "&#22259;" :utf-8 "図")
+     ("zh-CN" :html "&#22270;" :utf-8 "图"))
     ("Figure %d:"
      ("de" :default "Abbildung %d:")
      ("es" :default "Figura %d:")
      ("fr" :default "Figure %d :" :html "Figure&nbsp;%d&nbsp;:")
-     ("ja" :html "&#22259;%d:" :utf-8 "図%d:"))
+     ("ja" :html "&#22259;%d: " :utf-8 "図%d: ")
+     ("zh-CN" :html "&#22270;%d&nbsp;" :utf-8 "图%d "))
     ("Footnotes"
      ("ca" :html "Peus de p&agrave;gina")
      ("cs" :default "Pozn\xe1mky pod carou")
@@ -5301,29 +5304,35 @@ them."
     ("List of Listings"
      ("de" :default "Programmauflistungsverzeichnis")
      ("es" :default "Indice de Listados de programas")
-     ("fr" :default "Liste des programmes"))
+     ("fr" :default "Liste des programmes")
+     ("zh-CN" :html "&#20195;&#30721;&#30446;&#24405;" :utf-8 "代码目录"))
     ("List of Tables"
      ("de" :default "Tabellenverzeichnis")
      ("es" :default "Indice de tablas")
-     ("fr" :default "Liste des tableaux"))
+     ("fr" :default "Liste des tableaux")
+     ("zh-CN" :html "&#34920;&#26684;&#30446;&#24405;" :utf-8 "表格目录"))
     ("Listing %d:"
      ("de" :default "Programmlisting %d")
      ("es" :default "Listado de programa %d")
-     ("fr" :default "Programme %d :" :html "Programme&nbsp;%d&nbsp;:"))
+     ("fr" :default "Programme %d :" :html "Programme&nbsp;%d&nbsp;:")
+     ("zh-CN" :html "&#20195;&#30721;%d&nbsp;" :utf-8 "代码%d "))
     ("See section %s"
      ("de" :default "siehe Abschnitt %s")
      ("es" :default "vea seccion %s")
-     ("fr" :default "cf. section %s"))
+     ("fr" :default "cf. section %s")
+     ("zh-CN" :html "&#21442;&#35265;&#31532;%d&#33410;" :utf-8 "参见第%s节"))
     ("Table"
      ("de" :default "Tabelle")
      ("es" :default "Tabla")
      ("fr" :default "Tableau")
-     ("ja" :html "&#34920;" :utf-8 "表"))
+     ("ja" :html "&#34920;" :utf-8 "表")
+     ("zh-CN" :html "&#34920;" :utf-8 "表"))
     ("Table %d:"
      ("de" :default "Tabelle %d")
      ("es" :default "Tabla %d")
      ("fr" :default "Tableau %d :")
-     ("ja" :html "&#34920;%d:" :utf-8 "表%d:"))
+     ("ja" :html "&#34920;%d:" :utf-8 "表%d:")
+     ("zh-CN" :html "&#34920;%d&nbsp;" :utf-8 "表%d "))
     ("Table of Contents"
      ("ca" :html "&Iacute;ndex")
      ("cs" :default "Obsah")
@@ -5351,7 +5360,8 @@ them."
     ("Unknown reference"
      ("de" :default "Unbekannter Verweis")
      ("es" :default "referencia desconocida")
-     ("fr" :ascii "Destination inconnue" :default "Référence inconnue")))
+     ("fr" :ascii "Destination inconnue" :default "Référence inconnue")
+     ("zh-CN" :html "&#26410;&#30693;&#24341;&#29992;" :utf-8 "未知引用")))
   "Dictionary for export engine.
 
 Alist whose CAR is the string to translate and CDR is an alist
