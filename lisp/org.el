@@ -4802,7 +4802,7 @@ Support for group tags is controlled by the option
 	   (if org-group-tags "on" "off")))
 
 (defun org-set-regexps-and-options-for-tags ()
-  "Precompute regular expressions used for tags in the current buffer."
+  "Precompute variables used for tags."
   (when (derived-mode-p 'org-mode)
     (org-set-local 'org-file-tags nil)
     (let ((re (org-make-options-regexp '("FILETAGS" "TAGS")))
@@ -4870,6 +4870,7 @@ Support for group tags is controlled by the option
 	  ;; Return a list with tag variables
 	  (list org-file-tags org-tag-alist org-tag-groups-alist))))))
 
+(defvar org-ota nil)
 (defun org-set-regexps-and-options ()
   "Precompute regular expressions used in the current buffer."
   (when (derived-mode-p 'org-mode)
@@ -4899,10 +4900,11 @@ Support for group tags is controlled by the option
 	  (while
 	      (or (and
 		   ext-setup-or-nil
+		   (not org-ota)
 		   (let (ret)
 		     (with-temp-buffer
 		       (insert ext-setup-or-nil)
-		       (let ((major-mode 'org-mode))
+		       (let ((major-mode 'org-mode) org-ota)
 			 (setq ret (save-match-data
 				     (org-set-regexps-and-options-for-tags)))))
 		     ;; Append setupfile tags to existing tags
@@ -4911,7 +4913,8 @@ Support for group tags is controlled by the option
 			   org-tag-alist
 			   (delq nil (append org-tag-alist (nth 1 ret)))
 			   org-tag-groups-alist
-			   (delq nil (append org-tag-groups-alist (nth 2 ret))))))
+			   (delq nil (append org-tag-groups-alist (nth 2 ret)))
+			   org-ota t)))
 		  (and ext-setup-or-nil
 		       (string-match re ext-setup-or-nil start)
 		       (setq start (match-end 0)))
@@ -5144,6 +5147,7 @@ Support for group tags is controlled by the option
 	    (mapcar (lambda (w) (substring w 0 -1))
 		    (list org-scheduled-string org-deadline-string
 			  org-clock-string org-closed-string)))
+      (setq org-ota nil)
       (org-compute-latex-and-related-regexp))))
 
 (defun org-file-contents (file &optional noerror)
