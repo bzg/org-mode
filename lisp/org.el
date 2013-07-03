@@ -11929,30 +11929,21 @@ keywords relative to each registered export back-end."
     "TITLE:" "TODO:" "TYP_TODO:" "SELECT_TAGS:" "EXCLUDE_TAGS:"))
 
 (defcustom org-structure-template-alist
-  '(("s" "#+BEGIN_SRC ?\n\n#+END_SRC"
-     "<src lang=\"?\">\n\n</src>")
-    ("e" "#+BEGIN_EXAMPLE\n?\n#+END_EXAMPLE"
-     "<example>\n?\n</example>")
-    ("q" "#+BEGIN_QUOTE\n?\n#+END_QUOTE"
-     "<quote>\n?\n</quote>")
-    ("v" "#+BEGIN_VERSE\n?\n#+END_VERSE"
-     "<verse>\n?\n</verse>")
-    ("V" "#+BEGIN_VERBATIM\n?\n#+END_VERBATIM"
-     "<verbatim>\n?\n</verbatim>")
-    ("c" "#+BEGIN_CENTER\n?\n#+END_CENTER"
-     "<center>\n?\n</center>")
+  '(("s" "#+BEGIN_SRC ?\n\n#+END_SRC" "<src lang=\"?\">\n\n</src>")
+    ("e" "#+BEGIN_EXAMPLE\n?\n#+END_EXAMPLE" "<example>\n?\n</example>")
+    ("q" "#+BEGIN_QUOTE\n?\n#+END_QUOTE" "<quote>\n?\n</quote>")
+    ("v" "#+BEGIN_VERSE\n?\n#+END_VERSE" "<verse>\n?\n</verse>")
+    ("V" "#+BEGIN_VERBATIM\n?\n#+END_VERBATIM" "<verbatim>\n?\n</verbatim>")
+    ("c" "#+BEGIN_CENTER\n?\n#+END_CENTER" "<center>\n?\n</center>")
     ("l" "#+BEGIN_LaTeX\n?\n#+END_LaTeX"
      "<literal style=\"latex\">\n?\n</literal>")
-    ("L" "#+LaTeX: "
-     "<literal style=\"latex\">?</literal>")
+    ("L" "#+LaTeX: " "<literal style=\"latex\">?</literal>")
     ("h" "#+BEGIN_HTML\n?\n#+END_HTML"
      "<literal style=\"html\">\n?\n</literal>")
-    ("H" "#+HTML: "
-     "<literal style=\"html\">?</literal>")
-    ("a" "#+BEGIN_ASCII\n?\n#+END_ASCII")
-    ("A" "#+ASCII: ")
-    ("i" "#+INDEX: ?"
-     "#+INDEX: ?")
+    ("H" "#+HTML: " "<literal style=\"html\">?</literal>")
+    ("a" "#+BEGIN_ASCII\n?\n#+END_ASCII" "")
+    ("A" "#+ASCII: " "")
+    ("i" "#+INDEX: ?" "#+INDEX: ?")
     ("I" "#+INCLUDE: %file ?"
      "<include file=%file markup=\"?\">"))
   "Structure completion elements.
@@ -11967,9 +11958,10 @@ the default when the /org-mtags.el/ module has been loaded.  See also the
 variable `org-mtags-prefer-muse-templates'."
   :group 'org-completion
   :type '(repeat
-	  (string :tag "Key")
-	  (string :tag "Template")
-	  (string :tag "Muse Template")))
+	  (list
+	   (string :tag "Key")
+	   (string :tag "Template")
+	   (string :tag "Muse Template"))))
 
 (defun org-try-structure-completion ()
   "Try to complete a structure template before point.
