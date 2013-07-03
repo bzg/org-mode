@@ -2069,7 +2069,7 @@ If NLAST is a number, only the NLAST fields will actually be summed."
 			   h (floor (/ diff 3600)) diff (mod diff 3600)
 			   m (floor (/ diff 60)) diff (mod diff 60)
 			   s diff)
-		     (format "%d:%02d:%02d" h m s))))
+		     (format "%.0f:%02.0f:%02.0f" h m s))))
 	(kill-new sres)
 	(if (org-called-interactively-p 'interactive)
 	    (message "%s"
