@@ -11936,22 +11936,21 @@ This function can be used in a hook."
 
 ;;;; Completion
 
+(declare-function org-export-backend-name "org-export" (cl-x))
+(declare-function org-export-backend-options "org-export" (cl-x))
 (defun org-get-export-keywords ()
   "Return a list of all currently understood export keywords.
 Export keywords include options, block names, attributes and
 keywords relative to each registered export back-end."
-  (delq nil
-	(let (keywords)
-	  (mapc
-	   (lambda (back-end)
-	     (let ((props (cdr back-end)))
-	       ;; Back-end name (for keywords, like #+LATEX:)
-	       (push (upcase (symbol-name (car back-end))) keywords)
-	       ;; Back-end options.
-	       (mapc (lambda (option) (push (cadr option) keywords))
-		     (plist-get (cdr back-end) :options-alist))))
-	   (org-bound-and-true-p org-export-registered-backends))
-	  keywords)))
+  (let (keywords)
+    (dolist (backend
+	     (org-bound-and-true-p org-export--registered-backends)
+	     (delq nil keywords))
+      ;; Back-end name (for keywords, like #+LATEX:)
+      (push (upcase (symbol-name (org-export-backend-name backend))) keywords)
+      (dolist (option-entry (org-export-backend-options backend))
+	;; Back-end options.
+	(push (nth 1 option-entry) keywords)))))
 
 (defconst org-options-keywords
   '("ARCHIVE:" "AUTHOR:" "BIND:" "CATEGORY:" "COLUMNS:" "CREATOR:" "DATE:"

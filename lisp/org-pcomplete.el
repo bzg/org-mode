@@ -254,6 +254,8 @@ When completing for #+STARTUP, for example, this function returns
 		     (file-name-nondirectory visited-file)))
 	       (buffer-name (buffer-base-buffer)))))))
 
+
+(declare-function org-export-backend-options "org-export" (cl-x))
 (defun pcomplete/org-mode/file-option/options ()
   "Complete arguments for the #+OPTIONS file option."
   (while (pcomplete-here
@@ -266,9 +268,9 @@ When completing for #+STARTUP, for example, this function returns
 	      "|:" "tags:" "tasks:" "<:" "todo:")
 	    ;; OPTION items from registered back-ends.
 	    (let (items)
-	      (dolist (back-end (org-bound-and-true-p
-				 org-export-registered-backends))
-		(dolist (option (plist-get (cdr back-end) :options-alist))
+	      (dolist (backend (org-bound-and-true-p
+				org-export--registered-backends))
+		(dolist (option (org-export-backend-options backend))
 		  (let ((item (nth 2 option)))
 		    (when item (push (concat item ":") items)))))
 	      items))))))
