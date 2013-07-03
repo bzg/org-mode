@@ -2799,14 +2799,14 @@ optional argument WITH-CASE, the sorting considers case as well.
 
 The command prompts for the sorting type unless it has been given
 to the function through the SORTING-TYPE argument, which needs to
-be a character, \(?n ?N ?a ?A ?t ?T ?f ?F ?c ?C).  Here is the
+be a character, \(?n ?N ?a ?A ?t ?T ?f ?F ?x ?X).  Here is the
 detailed meaning of each character:
 
 n   Numerically, by converting the beginning of the item to a number.
 a   Alphabetically.  Only the first line of item is checked.
 t   By date/time, either the first active time stamp in the entry, if
     any, or by the first inactive one.  In a timer list, sort the timers.
-c   By \"checked\" status of a check list.
+x   By \"checked\" status of a check list.
 
 Capital letters will reverse the sort order.
 
@@ -2828,7 +2828,7 @@ ignores hidden links."
 	  (or sorting-type
 	      (progn
 		(message
-		 "Sort plain list: [a]lpha  [n]umeric  [t]ime  [f]unc  [c]hecked  A/N/T/F/C means reversed:")
+		 "Sort plain list: [a]lpha  [n]umeric  [t]ime  [f]unc  [x]checked  A/N/T/F/X means reversed:")
 		(read-char-exclusive))))
 	 (getkey-func
 	  (or getkey-func
@@ -2846,7 +2846,7 @@ ignores hidden links."
 			 ((= dcst ?a) 'string<)
 			 ((= dcst ?f) compare-func)
 			 ((= dcst ?t) '<)
-			 ((= dcst ?c) 'string<)))
+			 ((= dcst ?x) 'string<)))
 	     (next-record (lambda ()
 			    (skip-chars-forward " \r\t\n")
 			    (or (eobp) (beginning-of-line))))
@@ -2877,7 +2877,7 @@ ignores hidden links."
 							     (point-at-eol) t)))
 		      (org-time-string-to-seconds (match-string 0)))
 		     (t (org-float-time now))))
-		   ((= dcst ?c) (or (and (stringp (match-string 1))
+		   ((= dcst ?x) (or (and (stringp (match-string 1))
 					 (match-string 1))
 				    ""))
 		   ((= dcst ?f)
