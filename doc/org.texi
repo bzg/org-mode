@@ -5052,7 +5052,7 @@ tags---beware that all whitespaces are mandatory so that Org can parse this
 line correctly:
 
 @example
-#+TAGS: @{ @@read : @@read_book  @@read_ebook @}
+#+TAGS: @{ @@read : @@read_book @@read_ebook @}
 @end example
 
 In this example, @samp{@@read} is a @emph{group tag} for a set of three
