@@ -1832,9 +1832,11 @@ This command also cycles bullet styles when the cursor in on the bullet or
 anywhere in an item line, details depending on
 @code{org-support-shift-select}.
 @kindex C-c ^
+@cindex sorting, of plain list
 @item C-c ^
 Sort the plain list.  You will be prompted for the sorting method:
-numerically, alphabetically, by time, or by custom function.
+numerically, alphabetically, by time, by checked status for check lists,
+or by a custom function.
 @end table
 
 @node Drawers, Blocks, Plain lists, Document Structure
