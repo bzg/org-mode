@@ -2010,7 +2010,8 @@ of listings as a string, or nil if it is empty."
 		      org-html-toplevel-hlevel)
 	      "<div id=\"text-list-of-listings\">\n<ul>\n"
 	      (let ((count 0)
-		    (initial-fmt (org-html--translate "Listing %d:" info)))
+		    (initial-fmt (format "<span class=\"listing-number\">%s</span>"
+					 (org-html--translate "Listing %d:" info))))
 		(mapconcat
 		 (lambda (entry)
 		   (let ((label (org-element-property :name entry))
@@ -2044,7 +2045,8 @@ of tables as a string, or nil if it is empty."
 		      org-html-toplevel-hlevel)
 	      "<div id=\"text-list-of-tables\">\n<ul>\n"
 	      (let ((count 0)
-		    (initial-fmt (org-html--translate "Table %d:" info)))
+		    (initial-fmt (format "<span class=\"table-number\">%s</span>"
+					 (org-html--translate "Table %d:" info))))
 		(mapconcat
 		 (lambda (entry)
 		   (let ((label (org-element-property :name entry))
@@ -2789,12 +2791,13 @@ the plist used as a communication channel."
 		    'org-html--has-caption-p))
 	       (if (not (org-string-nw-p raw)) raw
 		 (concat
+                  "<span class=\"figure-number\">"
 		  (format (org-html--translate "Figure %d:" info)
 			  (org-export-get-ordinal
 			   (org-element-map paragraph 'link
 			     'identity info t)
 			   info nil 'org-html-standalone-image-p))
-		  " " raw))))
+		  "</span> " raw))))
 	    (label (org-element-property :name paragraph)))
 	(org-html--wrap-image contents info caption label)))
      ;; Regular paragraph.
@@ -3203,8 +3206,9 @@ contextual information."
 			     "<caption align=\"above\">%s</caption>"
 			   "<caption align=\"bottom\">%s</caption>")
 			 (concat
-			  (format (org-html--translate "Table %d:" info) number)
-			  " " (org-export-data caption info))))
+			  "<span class=\"table-number\">"
+                          (format (org-html--translate "Table %d:" info) number)
+			  "</span> " (org-export-data caption info))))
 	       (funcall table-column-specs table info)
 	       contents)))))
 

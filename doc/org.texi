@@ -11345,6 +11345,9 @@ p.creator           @r{creator info, about org mode version}
 div.outline-N       @r{div for outline level N (headline plus text))}
 div.outline-text-N  @r{extra div for text at outline level N}
 .section-number-N   @r{section number in headlines, different for each level}
+.figure-number      @r{label like "Figure 1:"}
+.table-number       @r{label like "Table 1:"}
+.listing-number     @r{label like "Listing 1:"}
 div.figure          @r{how to format an inlined image}
 pre.src             @r{formatted source code}
 pre.example         @r{normal example}
