@@ -14147,9 +14147,10 @@ When DOWNCASE is non-nil, expand downcased TAGS."
 	(modify-syntax-entry ?@ "w" stable)
 	(modify-syntax-entry ?_ "w" stable)
 	(while (and tml
-		    (string-match
-		     (concat "\\(?1:[+-]?\\)\\(?2:\\<"
-			     (regexp-opt tml) "\\>\\)") rtnmatch))
+		    (with-syntax-table stable
+		      (string-match
+		       (concat "\\(?1:[+-]?\\)\\(?2:\\<"
+			       (regexp-opt tml) "\\>\\)") rtnmatch)))
 	  (let* ((dir (match-string 1 rtnmatch))
 		 (tag (match-string 2 rtnmatch))
 		 (tag (if downcased (downcase tag) tag)))
