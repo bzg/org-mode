@@ -501,8 +501,9 @@ e.g. \"H:2\"."
 (defcustom org-export-default-language "en"
   "The default language for export and clocktable translations, as a string.
 This may have an association in
-`org-clock-clocktable-language-setup'.  This option can also be
-set with the LANGUAGE keyword."
+`org-clock-clocktable-language-setup',
+`org-export-smart-quotes-alist' and `org-export-dictionary'.
+This option can also be set with the LANGUAGE keyword."
   :group 'org-export-general
   :type '(string :tag "Language"))
 
