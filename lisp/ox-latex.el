@@ -143,7 +143,9 @@
     ("la" . "latin")
     ("ms" . "malay")
     ("nl" . "dutch")
-    ("no-no" . "nynorsk")
+    ("nb" . "norsk")
+    ("nn" . "nynorsk")
+    ("no" . "norsk")
     ("pl" . "polish")
     ("pt" . "portuguese")
     ("ro" . "romanian")
@@ -341,7 +343,6 @@ the toc:nil option, not to those generated with #+TOC keyword."
   "Toggle insertion of \\hypersetup{...} in the preamble."
   :group 'org-export-latex
   :type 'boolean)
-
 
 ;;;; Headline
 
