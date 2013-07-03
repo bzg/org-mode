@@ -213,6 +213,14 @@ is the property list for the given project.  PUB-DIR is the
 publishing directory.
 
 Return output file name."
+  (let ((bf (get-file-buffer filename)))
+    (if bf
+	(with-current-buffer bf
+	  (org-rss-add-pubdate-property)
+	  (write-file filename))
+      (find-file filename)
+      (org-rss-add-pubdate-property)
+      (write-file) (kill-buffer)))
   (org-publish-org-to
    'rss filename (concat "." org-rss-extension) plist pub-dir))
 
