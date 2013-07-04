@@ -220,7 +220,7 @@ Return output file name."
 	  (write-file filename))
       (find-file filename)
       (org-rss-add-pubdate-property)
-      (write-file) (kill-buffer)))
+      (write-file filename) (kill-buffer)))
   (org-publish-org-to
    'rss filename (concat "." org-rss-extension) plist pub-dir))
 
