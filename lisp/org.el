@@ -4340,8 +4340,8 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 (defvar org-clock-heading ""
   "The heading of the current clock entry.")
 (defun org-clock-is-active ()
-  "Return non-nil if clock is currently running.
-The return value is actually the clock marker."
+  "Return the buffer where the clock is currently running.
+Return nil if no clock is running."
   (marker-buffer org-clock-marker))
 
 (eval-and-compile
