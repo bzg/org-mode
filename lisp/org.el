@@ -4909,13 +4909,13 @@ Support for group tags is controlled by the option
 			 (setq ret (save-match-data
 				     (org-set-regexps-and-options-for-tags)))))
 		     ;; Append setupfile tags to existing tags
+		     (setq org-ota t)
 		     (setq org-file-tags
 			   (delq nil (append org-file-tags (nth 0 ret)))
 			   org-tag-alist
 			   (delq nil (append org-tag-alist (nth 1 ret)))
 			   org-tag-groups-alist
-			   (delq nil (append org-tag-groups-alist (nth 2 ret)))
-			   org-ota t)))
+			   (delq nil (append org-tag-groups-alist (nth 2 ret))))))
 		  (and ext-setup-or-nil
 		       (string-match re ext-setup-or-nil start)
 		       (setq start (match-end 0)))
