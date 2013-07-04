@@ -93,8 +93,13 @@
 	     inside
 	     (list "dev.off()"))
 	  inside))
-      (append (org-babel-variable-assignments:R params)
-	      (list body))) "\n")))
+      (append
+       (when (cdr (assoc :prologue params))
+	 (list (cdr (assoc :prologue params))))
+       (org-babel-variable-assignments:R params)
+       (list body)
+       (when (cdr (assoc :epilogue params))
+	 (list (cdr (assoc :epilogue params)))))) "\n")))
 
 (defun org-babel-execute:R (body params)
   "Execute a block of R code.
