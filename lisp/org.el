@@ -11493,7 +11493,13 @@ and not actually move anything.
 
 With a double prefix arg \\[universal-argument] \\[universal-argument], \
 go to the location where the last refiling operation has put the subtree.
-With a prefix argument of `2', refile to the running clock.
+
+With a numeric prefix argument of `2', refile to the running clock.
+
+With a numeric prefix argument of `3', emulate `org-refile-keep'
+being set to `t' and copy to the target location, don't move it.
+Beware that keeping refiled entries may result in duplicated ID
+properties.
 
 RFLOC can be a refile location obtained in a different way.
 
@@ -11516,6 +11522,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 	   (region-start (and regionp (region-beginning)))
 	   (region-end (and regionp (region-end)))
 	   (filename (buffer-file-name (buffer-base-buffer cbuf)))
+	   (org-refile-keep (if (equal goto 3) t org-refile-keep))
 	   pos it nbuf file re level reversed)
       (setq last-command nil)
       (when regionp
@@ -11574,7 +11581,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 
 	  (setq nbuf (or (find-buffer-visiting file)
 			 (find-file-noselect file)))
-	  (if goto
+	  (if (and goto (not (equal goto 3)))
 	      (progn
 		(org-pop-to-buffer-same-window nbuf)
 		(goto-char pos)

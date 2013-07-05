@@ -7383,6 +7383,7 @@ Copying works like refiling, except that the original note is not deleted.
 @vindex org-refile-allow-creating-parent-nodes
 @vindex org-log-refile
 @vindex org-refile-use-cache
+@vindex org-refile-keep
 Refile the entry or region at point.  This command offers possible locations
 for refiling the entry and lets you select one with completion.  The item (or
 all items in the region) is filed below the target heading as a subitem.
@@ -7406,6 +7407,10 @@ Use the refile interface to jump to a heading.
 Jump to the location where @code{org-refile} last moved a tree to.
 @item C-2 C-c C-w
 Refile as the child of the item currently being clocked.
+@item C-3 C-c C-w
+Refile and keep the entry in place.  Also see @code{org-refile-keep} to make
+this the default behavior, and beware that this may result in duplicated
+@code{ID} properties.
 @orgcmdtkc{C-0 C-c C-w @ @r{or} @ C-u C-u C-u C-c C-w,C-0 C-c C-w,org-refile-cache-clear}
 Clear the target cache.  Caching of refile targets can be turned on by
 setting @code{org-refile-use-cache}.  To make the command see new possible
