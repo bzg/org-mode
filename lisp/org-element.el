@@ -1142,10 +1142,11 @@ CONTENTS is the contents of the element."
        (off "[ ] ")
        (trans "[-] "))
      (and tag (format "%s :: " tag))
-     (let ((contents (replace-regexp-in-string
-		      "\\(^\\)[ \t]*\\S-" ind contents nil nil 1)))
-       (if item-starts-with-par-p (org-trim contents)
-	 (concat "\n" contents))))))
+     (when contents
+       (let ((contents (replace-regexp-in-string
+			"\\(^\\)[ \t]*\\S-" ind contents nil nil 1)))
+	 (if item-starts-with-par-p (org-trim contents)
+	   (concat "\n" contents)))))))
 
 
 ;;;; Plain List
