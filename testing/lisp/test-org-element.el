@@ -2168,7 +2168,9 @@ Outside list"
      (equal (org-test-parse-and-interpret "-\n  | a | b |")
 	    "- \n  | a | b |\n"))
     ;; Special case: correctly handle "*" bullets.
-    (should (org-test-parse-and-interpret " * item"))))
+    (should (org-test-parse-and-interpret " * item"))
+    ;; Special case: correctly handle empty items.
+    (should (org-test-parse-and-interpret "-"))))
 
 (ert-deftest test-org-element/quote-block-interpreter ()
   "Test quote block interpreter."
