@@ -619,6 +619,7 @@ in order to mimic default behaviour:
 
 (defcustom org-latex-listings nil
   "Non-nil means export source code using the listings package.
+
 This package will fontify source code, possibly even with color.
 If you want to use this, you also need to make LaTeX use the
 listings package, and if you want to have color, the color
@@ -626,8 +627,8 @@ package.  Just add these to `org-latex-packages-alist', for
 example using customize, or with something like:
 
   \(require 'ox-latex)
-  \(add-to-list 'org-latex-packages-alist '\(\"\" \"listings\"))
-  \(add-to-list 'org-latex-packages-alist '\(\"\" \"color\"))
+  \(add-to-list 'org-latex-packages-alist '(\"\" \"listings\"))
+  \(add-to-list 'org-latex-packages-alist '(\"\" \"color\"))
 
 Alternatively,
 
@@ -639,12 +640,18 @@ the minted package to `org-latex-packages-alist', for example
 using customize, or with
 
   \(require 'ox-latex)
-  \(add-to-list 'org-latex-packages-alist '\(\"\" \"minted\"))
+  \(add-to-list 'org-latex-packages-alist '(\"\" \"minted\"))
 
 In addition, it is necessary to install pygments
 \(http://pygments.org), and to configure the variable
 `org-latex-pdf-process' so that the -shell-escape option is
-passed to pdflatex."
+passed to pdflatex.
+
+The minted choice has possible repercussions on the preview of
+latex fragments (see `org-preview-latex-fragment').  If you run
+into previewing problems, please consult
+
+  http://orgmode.org/worg/org-tutorials/org-latex-preview.html"
   :group 'org-export-latex
   :type '(choice
 	  (const :tag "Use listings" t)
