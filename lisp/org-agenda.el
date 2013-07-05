@@ -8379,7 +8379,7 @@ Point is in the buffer where the item originated.")
 	    (if (and confirm
 		     (not (y-or-n-p "Archive this subtree or entry? ")))
 		(error "Abort")
-	      (save-excursion
+	      (save-window-excursion
 		(goto-char pos)
 		(let ((org-agenda-buffer-name bufname-orig))
 		  (org-remove-subtree-entries-from-agenda))
