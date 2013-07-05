@@ -2139,30 +2139,36 @@ Outside list"
 (ert-deftest test-org-element/plain-list-interpreter ()
   "Test plain-list and item interpreters."
   (let ((org-list-two-spaces-after-bullet-regexp nil))
-    ;; 1. Unordered list.
+    ;; Unordered list.
     (should (equal (org-test-parse-and-interpret "- item 1") "- item 1\n"))
-    ;; 2. Description list.
+    ;; Description list.
     (should
      (equal (org-test-parse-and-interpret "- tag :: desc") "- tag :: desc\n"))
-    ;; 3. Ordered list.
+    ;; Ordered list.
     (should
      (equal (let ((org-plain-list-ordered-item-terminator t))
 	      (org-test-parse-and-interpret "1. Item"))
 	    "1. Item\n"))
-    ;; 4. Ordered list with counter.
+    (should
+     (equal (let ((org-plain-list-ordered-item-terminator ?\)))
+	      (org-test-parse-and-interpret "1) Item"))
+	    "1) Item\n"))
+    ;; Ordered list with counter.
     (should
      (equal (let ((org-plain-list-ordered-item-terminator t))
 	      (org-test-parse-and-interpret "1. [@5] Item"))
 	    "5. [@5] Item\n"))
-    ;; 5. List with check-boxes.
+    ;; List with check-boxes.
     (should
      (equal (org-test-parse-and-interpret
 	     "- [-] Item 1\n  - [X] Item 2\n  - [ ] Item 3")
 	    "- [-] Item 1\n  - [X] Item 2\n  - [ ] Item 3\n"))
-    ;; 6. Item not starting with a paragraph.
+    ;; Item not starting with a paragraph.
     (should
      (equal (org-test-parse-and-interpret "-\n  | a | b |")
-	    "- \n  | a | b |\n"))))
+	    "- \n  | a | b |\n"))
+    ;; Special case: correctly handle "*" bullets.
+    (should (org-test-parse-and-interpret " * item"))))
 
 (ert-deftest test-org-element/quote-block-interpreter ()
   "Test quote block interpreter."
