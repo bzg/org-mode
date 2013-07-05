@@ -1119,7 +1119,11 @@ Assume point is at the beginning of the item."
 (defun org-element-item-interpreter (item contents)
   "Interpret ITEM element as Org syntax.
 CONTENTS is the contents of the element."
-  (let* ((bullet (org-list-bullet-string (org-element-property :bullet item)))
+  (let* ((bullet (let ((bullet (org-element-property :bullet item)))
+		   (org-list-bullet-string
+		    (cond ((not (string-match "[0-9a-zA-Z]" bullet)) "- ")
+			  ((eq org-plain-list-ordered-item-terminator ?\)) "1)")
+			  (t "1.")))))
 	 (checkbox (org-element-property :checkbox item))
 	 (counter (org-element-property :counter item))
 	 (tag (let ((tag (org-element-property :tag item)))
