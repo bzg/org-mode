@@ -4834,41 +4834,49 @@ Support for group tags is controlled by the option
 				(mapcar 'org-add-prop-inherited ftags)))
       (org-set-local 'org-tag-groups-alist nil)
       ;; Process the tags.
-      ;; FIXME
-      (when tags
-	(let (e tgs g)
-	  (while (setq e (pop tags))
-	    (cond
-	     ((equal e "{")
-	      (progn (push '(:startgroup) tgs)
-		     (when (equal (nth 1 tags) ":")
-		       (push (list (replace-regexp-in-string
-				    "(.+)$" "" (nth 0 tags)))
-			     org-tag-groups-alist)
-		       (setq g 0))))
-	     ((equal e ":") (push '(:grouptags) tgs))
-	     ((equal e "}") (push '(:endgroup) tgs) (if g (setq g nil)))
-	     ((equal e "\\n") (push '(:newline) tgs))
-	     ((string-match (org-re "^\\([[:alnum:]_@#%]+\\)(\\(.\\))$") e)
-	      (push (cons (match-string 1 e)
-			  (string-to-char (match-string 2 e))) tgs)
+      (when (and (not tags) org-tag-alist)
+	(setq tags
+	      (mapcar 
+	       (lambda (tg) (cond ((eq (car tg) :startgroup) "{")
+				  ((eq (car tg) :endgroup) "}")
+				  ((eq (car tg) :grouptags) ":")
+				  (t (concat (car tg)
+					     (if (characterp (cdr tg))
+						 (format "(%s)" (char-to-string (cdr tg))) "")))))
+	       org-tag-alist)))
+      (let (e tgs g)
+	(while (setq e (pop tags))
+	  (cond
+	   ((equal e "{")
+	    (progn (push '(:startgroup) tgs)
+		   (when (equal (nth 1 tags) ":")
+		     (push (list (replace-regexp-in-string
+				  "(.+)$" "" (nth 0 tags)))
+			   org-tag-groups-alist)
+		     (setq g 0))))
+	   ((equal e ":") (push '(:grouptags) tgs))
+	   ((equal e "}") (push '(:endgroup) tgs) (if g (setq g nil)))
+	   ((equal e "\\n") (push '(:newline) tgs))
+	   ((string-match (org-re "^\\([[:alnum:]_@#%]+\\)(\\(.\\))$") e)
+	    (push (cons (match-string 1 e)
+			(string-to-char (match-string 2 e))) tgs)
+	    (if (and g (> g 0))
+		(setcar org-tag-groups-alist
+			(append (car org-tag-groups-alist)
+				(list (match-string 1 e)))))
+	    (if g (setq g (1+ g))))
+	   (t (push (list e) tgs)
 	      (if (and g (> g 0))
 		  (setcar org-tag-groups-alist
-			  (append (car org-tag-groups-alist)
-				  (list (match-string 1 e)))))
-	      (if g (setq g (1+ g))))
-	     (t (push (list e) tgs)
-		(if (and g (> g 0))
-		    (setcar org-tag-groups-alist
-			    (append (car org-tag-groups-alist) (list e))))
-		(if g (setq g (1+ g))))))
-	  (org-set-local 'org-tag-alist nil)
-	  (while (setq e (pop tgs))
-	    (or (and (stringp (car e))
-		     (assoc (car e) org-tag-alist))
-		(push e org-tag-alist)))
-	  ;; Return a list with tag variables
-	  (list org-file-tags org-tag-alist org-tag-groups-alist))))))
+			  (append (car org-tag-groups-alist) (list e))))
+	      (if g (setq g (1+ g))))))
+	(org-set-local 'org-tag-alist nil)
+	(while (setq e (pop tgs))
+	  (or (and (stringp (car e))
+		   (assoc (car e) org-tag-alist))
+	      (push e org-tag-alist)))
+	;; Return a list with tag variables
+	(list org-file-tags org-tag-alist org-tag-groups-alist)))))
 
 (defvar org-ota nil)
 (defun org-set-regexps-and-options ()
