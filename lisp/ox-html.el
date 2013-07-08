@@ -2231,15 +2231,13 @@ holding contextual information."
 	 (headline-label (or (org-element-property :CUSTOM_ID headline)
 			     (concat "sec-" (mapconcat 'number-to-string
 						       headline-number "-"))))
-	 (format-function (cond
-			   ((functionp format-function) format-function)
-			   ((functionp org-html-format-headline-function)
-			    (function*
-			     (lambda (todo todo-type priority text tags
-					   &allow-other-keys)
-			       (funcall org-html-format-headline-function
-					todo todo-type priority text tags))))
-			   (t 'org-html-format-headline))))
+	 (format-function
+	  (cond ((functionp format-function) format-function)
+		((functionp org-html-format-headline-function)
+		 (lambda (todo todo-type priority text tags &rest ignore)
+		   (funcall org-html-format-headline-function
+			    todo todo-type priority text tags)))
+		(t 'org-html-format-headline))))
     (apply format-function
 	   todo todo-type  priority text tags
 	   :headline-label headline-label :level level
