@@ -15224,7 +15224,7 @@ argument.
 @end example
 
 @node prologue, epilogue, post, Specific header arguments
-
+@subsubsection @code{:prologue}
 The value of the @code{prologue} header argument will be prepended to the
 code block body before execution.  For example, @code{:prologue "reset"} may
 be used to reset a gnuplot session before execution of a particular code
@@ -15237,7 +15237,7 @@ code blocks.  Also see @ref{epilogue}.
 @end lisp
 
 @node epilogue, , prologue, Specific header arguments
-
+@subsubsection @code{:epilogue}
 The value of the @code{epilogue} header argument will be appended to the code
 block body before execution.  Also see @ref{prologue}.
 
