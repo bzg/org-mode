@@ -199,6 +199,13 @@
 	    (let ((fill-column 20))
 	      (org-fill-paragraph)
 	      (buffer-string)))))
+  ;; Do not mix consecutive comments when filling one of them.
+  (should
+   (equal "# A B\n\n# C"
+	  (org-test-with-temp-text "# A\n# B\n\n# C"
+	    (let ((fill-column 20))
+	      (org-fill-paragraph)
+	      (buffer-string)))))
   ;; Do nothing at affiliated keywords.
   (org-test-with-temp-text "#+NAME: para\nSome\ntext."
     (let ((fill-column 20))
