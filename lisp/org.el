@@ -22329,7 +22329,21 @@ a footnote definition, try to fill the first paragraph within."
 		justify)))
 	   t)
 	  ;; Fill comments.
-	  (comment (fill-comment-paragraph justify))
+	  (comment
+	   (let ((begin (org-element-property :post-affiliated element))
+		 (end (save-excursion
+			(goto-char (org-element-property :end element))
+			(skip-chars-backward " \r\t\n")
+			(line-end-position))))
+	     ;; Do not fill comments when at a blank line or at
+	     ;; affiliated keywords.
+	     (when (and (>= (point) begin) (<= (point) end))
+	       (let ((fill-prefix (save-excursion
+				    (beginning-of-line)
+				    (looking-at "[ \t]*#")
+				    (concat (match-string 0) " "))))
+		 (save-excursion
+		   (fill-region-as-paragraph begin end justify))))))
 	  ;; Ignore every other element.
 	  (otherwise t))))))
 
