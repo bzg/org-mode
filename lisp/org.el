@@ -22274,34 +22274,41 @@ a footnote definition, try to fill the first paragraph within."
 			 (goto-char (org-element-property :end element))
 			 (re-search-backward "^[ \t]*#\\+end_comment" nil t)
 			 (line-beginning-position))))
-	     (when (and (>= (point) beg) (< (point) end))
+	     (if (or (< (point) beg) (> (point) end)) t
 	       (fill-region-as-paragraph
-		(save-excursion
-		  (end-of-line)
-		  (re-search-backward "^[ \t]*$" beg 'move)
-		  (line-beginning-position))
-		(save-excursion
-		  (beginning-of-line)
-		  (re-search-forward "^[ \t]*$" end 'move)
-		  (line-beginning-position))
-		justify)))
-	   t)
+		(save-excursion (end-of-line)
+				(re-search-backward "^[ \t]*$" beg 'move)
+				(line-beginning-position))
+		(save-excursion (beginning-of-line)
+				(re-search-forward "^[ \t]*$" end 'move)
+				(line-beginning-position))
+		justify))))
 	  ;; Fill comments.
 	  (comment
 	   (let ((begin (org-element-property :post-affiliated element))
-		 (end (save-excursion
-			(goto-char (org-element-property :end element))
-			(skip-chars-backward " \r\t\n")
-			(line-end-position))))
-	     ;; Do not fill comments when at a blank line or at
-	     ;; affiliated keywords.
+		 (end (org-element-property :end element)))
 	     (when (and (>= (point) begin) (<= (point) end))
-	       (let ((fill-prefix (save-excursion
-				    (beginning-of-line)
-				    (looking-at "[ \t]*#")
-				    (concat (match-string 0) " "))))
-		 (save-excursion
-		   (fill-region-as-paragraph begin end justify))))))
+	       (let ((begin (save-excursion
+			      (end-of-line)
+			      (if (re-search-backward "^[ \t]*#[ \t]*$" begin t)
+				  (progn (forward-line) (point))
+				begin)))
+		     (end (save-excursion
+			    (end-of-line)
+			    (if (re-search-forward "^[ \t]*#[ \t]*$" end 'move)
+				(1- (line-beginning-position))
+			      (skip-chars-backward " \r\t\n")
+			      (line-end-position)))))
+		 ;; Do not fill comments when at a blank line or at
+		 ;; affiliated keywords.
+		 (let ((fill-prefix (save-excursion
+				      (beginning-of-line)
+				      (looking-at "[ \t]*#")
+				      (concat (match-string 0) " "))))
+		   (when (> end begin)
+		     (save-excursion
+		       (fill-region-as-paragraph begin end justify))))))
+	     t))
 	  ;; Ignore every other element.
 	  (otherwise t))))))
 
