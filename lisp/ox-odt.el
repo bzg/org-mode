@@ -768,13 +768,14 @@ link's path."
   :type '(alist :key-type (string :tag "Type")
 		:value-type (regexp :tag "Path")))
 
-(defcustom org-odt-pixels-per-inch display-pixels-per-inch
+(defcustom org-odt-pixels-per-inch 96.0
   "Scaling factor for converting images pixels to inches.
 Use this for sizing of embedded images.  See Info node `(org)
 Images in ODT export' for more information."
   :type 'float
   :group 'org-export-odt
-  :version "24.1")
+  :version "24.4"
+  :package-version '(Org . "8.1"))
 
 
 ;;;; Src Block
