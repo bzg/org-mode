@@ -2651,14 +2651,22 @@ INFO is a plist holding contextual information.  See
 							numbers "-"))))))
 		    (t raw-path))))
 	   (t raw-path)))
-	 ;; Extract attributes from parent's paragraph. HACK: Only do
-	 ;; this for the first link in parent.  This is needed as long
-	 ;; as attributes cannot be set on a per link basis.
+	 ;; Extract attributes from parent's paragraph.  HACK: Only do
+	 ;; this for the first link in parent (inner image link for
+	 ;; inline images).  This is needed as long as attributes
+	 ;; cannot be set on a per link basis.
 	 (attributes-plist
-	  (let ((parent (org-export-get-parent-element link)))
+	  (let* ((parent (org-export-get-parent-element link))
+		 (link (let ((container (org-export-get-parent link)))
+			 (if (and (eq (org-element-type container) 'link)
+				  (org-html-inline-image-p link info))
+			     container
+			   link))))
 	    (and (eq (org-element-map parent 'link 'identity info t) link)
 		 (org-export-read-attribute :attr_html parent))))
-	 (attributes (org-html--make-attribute-string attributes-plist))
+	 (attributes
+	  (let ((attr (org-html--make-attribute-string attributes-plist)))
+	    (if (org-string-nw-p attr) (concat " " attr) "")))
 	 protocol)
     (cond
      ;; Image file.
