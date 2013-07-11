@@ -4841,6 +4841,7 @@ Support for group tags is controlled by the option
 	       (lambda (tg) (cond ((eq (car tg) :startgroup) "{")
 				  ((eq (car tg) :endgroup) "}")
 				  ((eq (car tg) :grouptags) ":")
+				  ((eq (car tg) :newline) "\n")
 				  (t (concat (car tg)
 					     (if (characterp (cdr tg))
 						 (format "(%s)" (char-to-string (cdr tg))) "")))))
