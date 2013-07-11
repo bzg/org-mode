@@ -50,6 +50,17 @@
   '((:results . "latex") (:exports . "results"))
   "Default arguments to use when evaluating a LaTeX source block.")
 
+(defcustom org-babel-latex-htlatex nil
+  "The htlatex command to enable conversion of latex to SVG or HTML."
+  :group 'org-babel
+  :type 'string)
+
+(defcustom org-babel-latex-htlatex-packages
+  '("[usenames]{color}" "{tikz}" "{color}" "{listings}" "{amsmath}")
+  "Packages to use for htlatex export."
+  :group 'org-babel
+  :type '(list string))
+
 (defun org-babel-expand-body:latex (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (mapc (lambda (pair) ;; replace variables
@@ -124,6 +135,39 @@ This function is called by `org-babel-execute-src-block'."
 	       transient-pdf-file out-file im-in-options im-out-options)
 	      (when (file-exists-p transient-pdf-file)
 		(delete-file transient-pdf-file))))))
+	 ((and (or (string-match "\\.svg$" out-file)
+		   (string-match "\\.html$" out-file))
+	       org-babel-latex-htlatex)
+	  (with-temp-file tex-file
+	    (insert (concat
+		     "\\documentclass[preview]{standalone}
+\\def\\pgfsysdriver{pgfsys-tex4ht.def}
+"
+		     (mapconcat (lambda (pkg)
+				  (concat "\\usepackage" pkg))
+				org-babel-latex-htlatex-packages
+				"\n")
+		     "\\begin{document}"
+		     body
+		     "\\end{document}")))
+	  (when (file-exists-p out-file) (delete-file out-file))
+	  (let ((default-directory (file-name-directory tex-file)))
+	    (shell-command (format "%s %s" org-babel-latex-htlatex tex-file)))
+	  (cond
+	   ((file-exists-p (concat (file-name-sans-extension tex-file) "-1.svg"))
+	    (if (string-match "\\.svg$" out-file)
+		(progn
+		  (shell-command "pwd")
+		  (shell-command (format "mv %s %s"
+					 (concat (file-name-sans-extension tex-file) "-1.svg")
+					 out-file)))
+	      (error "SVG file produced but HTML file requested.")))
+	   ((file-exists-p (concat (file-name-sans-extension tex-file) ".html"))
+	    (if (string-match "\\.html$" out-file)
+		(shell-command "mv %s %s"
+			       (concat (file-name-base tex-file) ".html")
+			       out-file)
+	      (error "HTML file produced but SVG file requested.")))))
          ((string-match "\\.\\([^\\.]+\\)$" out-file)
           (error "Can not create %s files, please specify a .png or .pdf file or try the :imagemagick header argument"
 		 (match-string 1 out-file))))
