@@ -224,7 +224,20 @@ A regexp matching strings of whitespace, `,' and `;'.")
       (org-find-if (lambda (file)
 		     (or (time-less-p org-contacts-last-update
 				      (elt (file-attributes file) 5))))
-		   (org-contacts-files))))
+		   (org-contacts-files))
+      (org-contacts-db-has-dead-markers-p org-contacts-db)))
+
+(defun org-contacts-db-has-dead-markers-p (org-contacts-db)
+  "Returns t if at least one dead marker is found in
+ORG-CONTACTS-DB. A dead marker in this case is a marker pointing
+to dead or no buffer."
+    ;; Scan contacts list looking for dead markers, and return t at first found.
+    (catch 'dead-marker-found
+      (while org-contacts-db
+        (unless (marker-buffer (nth 1 (car org-contacts-db)))
+          (throw 'dead-marker-found t))
+        (setq org-contacts-db (cdr org-contacts-db)))
+      nil))
 
 (defun org-contacts-db ()
   "Return the latest Org Contacts Database."
