@@ -121,9 +121,9 @@
   (add-to-list 'org-latex-classes
 	       '("beamer"
 		 "\\documentclass[presentation]{beamer}
-     \[DEFAULT-PACKAGES]
-     \[PACKAGES]
-     \[EXTRA]"
+\[DEFAULT-PACKAGES]
+\[PACKAGES]
+\[EXTRA]"
 		 ("\\section{%s}" . "\\section*{%s}")
 		 ("\\subsection{%s}" . "\\subsection*{%s}")
 		 ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
