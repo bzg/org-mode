@@ -7527,37 +7527,42 @@ the current headline.  If point is not at the beginning, split the line
 and create a new headline with the text in the current line after point
 \(see `org-M-RET-may-split-line' on how to modify this behavior).
 
+If point is at the beginning of a normal line, turn this line into
+a heading.
+
 When INVISIBLE-OK is set, stop at invisible headlines when going back.
 This is important for non-interactive uses of the command."
   (interactive "P")
   (if (org-called-interactively-p 'any) (org-reveal))
-  (let ((itemp (org-in-item-p)))
+  (let ((itemp (org-in-item-p))
+	(may-split (org-get-alist-option org-M-RET-may-split-line 'headline))
+	(respect-content (or org-insert-heading-respect-content
+			     (equal arg '(16))))
+	(initial-content "")
+	(adjust-empty-lines t))
+
     (cond
+
      ((or (= (buffer-size) 0)
 	  (and (not (save-excursion
 		      (and (ignore-errors (org-back-to-heading invisible-ok))
 			   (org-at-heading-p))))
 	       (or arg (not itemp))))
+      ;; At beginning of buffer or so hight up that only a heading makes sense.
       (insert
        (if (org-previous-line-empty-p) "" "\n")
        (if (org-in-src-block-p) ",* " "* "))
       (run-hooks 'org-insert-heading-hook))
-     ((or arg
-	  (and (not itemp) org-insert-heading-respect-content)
-	  (not (org-insert-item
-		(save-excursion
-		  (and itemp
-		       (goto-char itemp)
-		       (looking-at org-list-full-item-re)
-		       (match-string 3))))))
-      (let (begn endn)
-	(when (org-buffer-narrowed-p)
-	  (setq begn (point-min) endn (point-max))
-	  (widen))
+
+     ((and itemp (not (equal arg '(4))))
+      ;; Insert an item
+      (org-insert-item))
+
+     (t
+      ;; Insert a heading
+      (save-restriction
+	(widen)
 	(let* ((empty-line-p nil)
-	       (eops (equal arg '(16))) ; insert at end of parent subtree
-	       (org-insert-heading-respect-content
-		(or (not (null arg)) org-insert-heading-respect-content))
 	       (level nil)
 	       (on-heading (org-at-heading-p))
 	       ;; Get a level to fall back on
@@ -7566,131 +7571,92 @@ This is important for non-interactive uses of the command."
 		  (org-back-to-heading t)
 		  (looking-at org-outline-regexp)
 		  (make-string (1- (length (match-string 0))) ?*)))
-	       (on-empty-line
-		(save-excursion (beginning-of-line 1) (looking-at "^\\s-*$")))
-	       (head (save-excursion
-		       (condition-case nil
-			   (progn
-			     (org-back-to-heading invisible-ok)
-			     (when (and (not on-heading)
-					(featurep 'org-inlinetask)
-					(integerp org-inlinetask-min-level)
-					(>= (length (match-string 0))
-					    org-inlinetask-min-level))
-			       ;; Find a heading level before the inline task
-			       (while (and (setq level (org-up-heading-safe))
-					   (>= level org-inlinetask-min-level)))
-			       (if (org-at-heading-p)
-				   (org-back-to-heading invisible-ok)
-				 (error "This should not happen")))
-			     (unless (and (save-excursion
-					    (save-match-data
-					      (org-backward-heading-same-level 1 invisible-ok))
-					    (= (point) (match-beginning 0)))
-					  (not (org-previous-line-empty-p t)))
-			       (setq empty-line-p (org-previous-line-empty-p)))
-			     (match-string 0))
-			 (error (or fix-level "* ")))))
+	       (stars
+		(save-excursion
+		  (condition-case nil
+		      (progn
+			(org-back-to-heading invisible-ok)
+			(when (and (not on-heading)
+				   (featurep 'org-inlinetask)
+				   (integerp org-inlinetask-min-level)
+				   (>= (length (match-string 0))
+				       org-inlinetask-min-level))
+			  ;; Find a heading level before the inline task
+			  (while (and (setq level (org-up-heading-safe))
+				      (>= level org-inlinetask-min-level)))
+			  (if (org-at-heading-p)
+			      (org-back-to-heading invisible-ok)
+			    (error "This should not happen")))
+			(unless (and (save-excursion
+				       (save-match-data
+					 (org-backward-heading-same-level 1 invisible-ok))
+				       (= (point) (match-beginning 0)))
+				     (not (org-previous-line-empty-p t)))
+			  (setq empty-line-p (org-previous-line-empty-p)))
+			(match-string 0))
+		    (error (or fix-level "* ")))))
 	       (blank-a (cdr (assq 'heading org-blank-before-new-entry)))
 	       (blank (if (eq blank-a 'auto) empty-line-p blank-a))
 	       pos hide-previous previous-pos)
-	  (if ;; At the beginning of a heading, open a new line for insertion
-	      (and (bolp) (org-at-heading-p)
-		   (not eops)
-		   (or (bobp)
-		       (save-excursion (backward-char 1) (not (outline-invisible-p)))))
-	      (open-line (if blank 2 1))
-	    (save-excursion
-	      (setq previous-pos (point-at-bol))
-	      (end-of-line)
-	      (setq hide-previous (outline-invisible-p)))
-	    (and org-insert-heading-respect-content
-		 (save-excursion
-		   (while (outline-invisible-p)
-		     (org-show-subtree)
-		     (org-up-heading-safe))))
-	    (let ((split
-		   (and (org-get-alist-option org-M-RET-may-split-line 'headline)
-			(save-excursion
-			  (let ((p (point)))
-			    (goto-char (point-at-bol))
-			    (and (looking-at org-complex-heading-regexp)
-				 (match-beginning 4)
-				 (> p (match-beginning 4)))))))
-		  tags pos)
-	      (cond
-	       ;; Insert a new line, possibly at end of parent subtree
-	       ((and (not arg) (not on-heading) (not on-empty-line)
-		     (not (save-excursion
-			    (beginning-of-line 1)
-			    (or (looking-at org-list-full-item-re)
-				;; Don't convert :end: lines to headline
-				(looking-at "^\\s-*:end:")
-				(looking-at "^\\s-*#\\+end_?")))))
-		(beginning-of-line 1))
-	       (org-insert-heading-respect-content
-		(if (not eops)
-		    (progn
-		      (org-end-of-subtree nil t)
-		      (and (looking-at "^\\*") (backward-char 1))
-		      (while (and (not (bobp))
-				  ;; Don't delete spaces in empty headlines
-				  (not (looking-back org-outline-regexp))
-				  (member (char-before) '(?\ ?\t ?\n)))
-			(backward-delete-char 1)))
-		  (let ((p (point)))
-		    (org-up-heading-safe)
-		    (if (= p (point))
-			(goto-char (point-max))
-		      (org-end-of-subtree nil t))))
-		(when (featurep 'org-inlinetask)
-		  (while (and (not (eobp))
-			      (looking-at "\\(\\*+\\)[ \t]+")
-			      (>= (length (match-string 1))
-				  org-inlinetask-min-level))
-		    (org-end-of-subtree nil t)))
-		(or (bolp) (newline))
-		(or (org-previous-line-empty-p)
-		    (and blank (newline)))
-		(if (or empty-line-p eops) (open-line 1)))
-	       ;; Insert a headling containing text after point
-	       ((org-at-heading-p)
-		(when hide-previous
-		  (show-children)
-		  (org-show-entry))
-		(looking-at ".*?\\([ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)?[ \t]*$")
-		(setq tags (and (match-end 2) (match-string 2)))
-		(and (match-end 1)
-		     (delete-region (match-beginning 1) (match-end 1)))
-		(setq pos (point-at-bol))
-		(or split (end-of-line 1))
-		(delete-horizontal-space)
-		(if (string-match "\\`\\*+\\'"
-				  (buffer-substring (point-at-bol) (point)))
-		    (insert " "))
-		(newline (if blank 2 1))
-		(when tags
-		  (save-excursion
+
+	  ;; If we insert after content, move there and clean up whitespace
+	  (when respect-content
+	    (org-end-of-subtree nil t)
+	    (when (looking-at "^\\*")
+	      (backward-char 1)
+	      (insert "\n")))
+
+	  ;; If we are splitting, grab the text that should be moved to the new headline
+	  (when may-split
+	    (if (org-on-heading-p)
+		;; This is a heading, we split intelligently (keeping tags)
+		(let ((pos (point)))
+		  (goto-char (point-at-bol))
+		  (unless (looking-at org-complex-heading-regexp)
+		    (error "This should not happen"))
+		  (when (and (match-beginning 4)
+			     (> pos (match-beginning 4))
+			     (< pos (match-end 4)))
+		    (setq initial-content (buffer-substring pos (match-end 4)))
 		    (goto-char pos)
-		    (end-of-line 1)
-		    (insert " " tags)
-		    (org-set-tags nil 'align))))
-	       (t
-		(or split (end-of-line 1))
-		(newline (cond ((and blank (not on-empty-line)) 2)
-			       (blank 1)
-			       (on-empty-line 0) (t 1)))))))
-	  (insert head) (just-one-space)
-	  (setq pos (point))
-	  (end-of-line 1)
-	  (unless (= (point) pos) (just-one-space) (backward-delete-char 1))
-	  (when (and org-insert-heading-respect-content hide-previous)
-	    (save-excursion
-	      (goto-char previous-pos)
-	      (hide-subtree)))
-	  (when (and begn endn)
-	    (narrow-to-region (min (point) begn) (max (point) endn)))
+		    (delete-region (point) (match-end 4))
+		    (if (looking-at "[ \t]*$")
+			(replace-match "")
+		      (insert (make-string (length initial-content) ?\ )))
+		    (setq initial-content (org-trim initial-content)))
+		  (goto-char pos))
+	      ;; a normal line
+	      (setq initial-content (buffer-substring (point) (point-at-eol)))
+	      (delete-region (point) (point-at-eol))
+	      (setq initial-content (org-trim initial-content))))
+
+	  ;; If we are at the beginning of the line, insert before it.  Else after
+	  (cond
+	   ((and (bolp) (looking-at "[ \t]*$")))
+	   ((and (bolp) (not (looking-at "[ \t]*$")))
+	    (open-line 1))
+	   (t
+	    (goto-char (point-at-eol))
+	    (insert "\n")))
+	  
+	  ;; Insert the new heading
+	  (insert stars)
+	  (just-one-space)
+	  (insert initial-content)
+	  (if adjust-empty-lines (org-N-empty-lines-before-current (if empty-line-p 1 0)))
 	  (run-hooks 'org-insert-heading-hook)))))))
+
+(defun org-N-empty-lines-before-current (N)
+  "Make the number of empty lines before current exactly N.
+So this will delete or add empty lines."
+  (save-excursion
+    (goto-char (point-at-bol))
+    (if (looking-back "\\s-+" nil 'greedy)
+	(replace-match ""))
+    (or (bobp) (insert "\n"))
+    (while (> N 0)
+      (insert "\n")
+      (setq N (1- N)))))
 
 (defun org-get-heading (&optional no-tags no-todo)
   "Return the heading of the current entry, without the stars.
@@ -7763,7 +7729,7 @@ This is a list with the following elements:
   "Insert heading with `org-insert-heading-respect-content' set to t."
   (interactive "P")
   (let ((org-insert-heading-respect-content t))
-    (org-insert-heading arg invisible-ok)))
+    (org-insert-heading '(4) invisible-ok)))
 
 (defun org-insert-todo-heading-respect-content (&optional force-state)
   "Insert TODO heading with `org-insert-heading-respect-content' set to t."
