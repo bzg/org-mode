@@ -449,10 +449,16 @@ matching the regexp SKIP-DIR when recursing through BASE-DIR."
 			  (not (string-match match fnd)))
 
 		(pushnew f org-publish-temp-files)))))
-	(if org-sitemap-requested
-	    (sort (directory-files base-dir t (unless recurse match))
-		  'org-publish-compare-directory-files)
-	  (directory-files base-dir t (unless recurse match)))))
+	(let ((all-files (if (not recurse) (directory-files base-dir t match)
+			   ;; If RECURSE is non-nil, we want all files
+			   ;; matching MATCH and sub-directories.
+			   (org-remove-if-not
+			    (lambda (file)
+			      (or (file-directory-p file)
+				  (and match (string-match match file))))
+			    (directory-files base-dir t)))))
+	  (if (not org-sitemap-requested) all-files
+	    (sort all-files 'org-publish-compare-directory-files)))))
 
 (defun org-publish-get-base-files (project &optional exclude-regexp)
   "Return a list of all files in PROJECT.
@@ -811,30 +817,32 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
 
 (defun org-publish-find-date (file)
   "Find the date of FILE in project.
-If FILE provides a DATE keyword use it else use the file system's
-modification time.  Return time in `current-time' format."
-  (let* ((org-inhibit-startup t)
-	 (visiting (find-buffer-visiting file))
-	 (file-buf (or visiting (find-file-noselect file nil)))
-	 (date (plist-get
-		(with-current-buffer file-buf
-		  (org-mode)
-		  (org-export-get-environment))
-		:date)))
-    (unless visiting (kill-buffer file-buf))
-    ;; DATE is either a timestamp object or a secondary string.  If it
-    ;; is a timestamp or if the secondary string contains a timestamp,
-    ;; convert it to internal format.  Otherwise, use FILE
-    ;; modification time.
-    (cond ((eq (org-element-type date) 'timestamp)
-	   (org-time-string-to-time (org-element-interpret-data date)))
-	  ((let ((ts (and (consp date) (assq 'timestamp date))))
-	     (and ts
-		  (let ((value (org-element-interpret-data ts)))
-		    (and (org-string-nw-p value)
-			 (org-time-string-to-time value))))))
-	  ((file-exists-p file) (nth 5 (file-attributes file)))
-	  (t (error "No such file: \"%s\"" file)))))
+This function assumes FILE is either a directory or an Org file.
+If FILE is an Org file and provides a DATE keyword use it.  In
+any other case use the file system's modification time.  Return
+time in `current-time' format."
+  (if (file-directory-p file) (nth 5 (file-attributes file))
+    (let* ((visiting (find-buffer-visiting file))
+	   (file-buf (or visiting (find-file-noselect file nil)))
+	   (date (plist-get
+		  (with-current-buffer file-buf
+		    (let ((org-inhibit-startup t)) (org-mode))
+		    (org-export-get-environment))
+		  :date)))
+      (unless visiting (kill-buffer file-buf))
+      ;; DATE is either a timestamp object or a secondary string.  If it
+      ;; is a timestamp or if the secondary string contains a timestamp,
+      ;; convert it to internal format.  Otherwise, use FILE
+      ;; modification time.
+      (cond ((eq (org-element-type date) 'timestamp)
+	     (org-time-string-to-time (org-element-interpret-data date)))
+	    ((let ((ts (and (consp date) (assq 'timestamp date))))
+	       (and ts
+		    (let ((value (org-element-interpret-data ts)))
+		      (and (org-string-nw-p value)
+			   (org-time-string-to-time value))))))
+	    ((file-exists-p file) (nth 5 (file-attributes file)))
+	    (t (error "No such file: \"%s\"" file))))))
 
 
 
