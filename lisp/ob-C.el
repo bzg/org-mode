@@ -39,6 +39,8 @@
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("C++" . "cpp"))
+(let ((x (member '(C . t) org-babel-load-languages)))
+  (setcdr x  (cons '(C++ . t) (subseq x 1))))
 
 (defvar org-babel-default-header-args:C '())
 
