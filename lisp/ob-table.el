@@ -97,9 +97,11 @@ as shown in the example below.
 				(lambda (el)
 				  (if (eq '$ el)
 				      (prog1 nil (setq quote t))
-				    (prog1 (if quote
-					       (format "\"%s\"" el)
-					     (org-no-properties el))
+				    (prog1
+					(cond
+					 (quote (format "\"%s\"" el))
+					 ((stringp el) (org-no-properties el))
+					 (t el))
 				      (setq quote nil))))
 				(cdr var)))))
 	     variables)))
