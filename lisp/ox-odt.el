@@ -3772,9 +3772,10 @@ contextual information."
 	   (setq processing-type 'mathml)
 	 (message "LaTeX to MathML converter not available.")
 	 (setq processing-type 'verbatim)))
-      (dvipng
+      ((dvipng imagemagick)
        (unless (and (org-check-external-command "latex" "" t)
-		    (org-check-external-command "dvipng" "" t))
+		    (org-check-external-command
+		     (if (eq processing-type 'dvipng) "dvipng" "convert") "" t))
 	 (message "LaTeX to PNG converter not available.")
 	 (setq processing-type 'verbatim)))
       (otherwise
@@ -3787,7 +3788,7 @@ contextual information."
     (message "Formatting LaTeX using %s" processing-type)
 
     ;; Convert `latex-fragment's and `latex-environment's.
-    (when (memq processing-type '(mathml dvipng))
+    (when (memq processing-type '(mathml dvipng imagemagick))
       (org-element-map tree '(latex-fragment latex-environment)
 	(lambda (latex-*)
 	  (incf count)
@@ -3796,13 +3797,13 @@ contextual information."
 		 (cache-dir (file-name-directory input-file))
 		 (cache-subdir (concat
 				(case processing-type
-				  (dvipng "ltxpng/")
+				  ((dvipng imagemagick) "ltxpng/")
 				  (mathml "ltxmathml/"))
 				(file-name-sans-extension
 				 (file-name-nondirectory input-file))))
 		 (display-msg
 		  (case processing-type
-		    (dvipng (format "Creating LaTeX Image %d..." count))
+		    ((dvipng imagemagick) (format "Creating LaTeX Image %d..." count))
 		    (mathml (format "Creating MathML snippet %d..." count))))
 		 ;; Get an Org-style link to PNG image or the MathML
 		 ;; file.

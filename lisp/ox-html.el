@@ -2497,7 +2497,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (case processing-type
       ((t mathjax)
        (org-html-format-latex latex-frag 'mathjax))
-      (dvipng
+      ((dvipng imagemagick)
        (let ((formula-link (org-html-format-latex latex-frag processing-type)))
 	 (when (and formula-link (string-match "file:\\([^]]*\\)" formula-link))
 	   ;; Do not provide a caption or a name to be consistent with
@@ -2517,7 +2517,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (case processing-type
       ((t mathjax)
        (org-html-format-latex latex-frag 'mathjax))
-      (dvipng
+      ((dvipng imagemagick)
        (let ((formula-link (org-html-format-latex latex-frag processing-type)))
 	 (when (and formula-link (string-match "file:\\([^]]*\\)" formula-link))
 	   (org-html--format-image (match-string 1 formula-link) nil info))))

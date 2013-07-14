@@ -10156,10 +10156,10 @@ snippets will be identified as @LaTeX{} source code:
 @item
 Environments of any kind@footnote{When @file{MathJax} is used, only the
 environments recognized by @file{MathJax} will be processed.  When
-@file{dvipng} is used to create images, any @LaTeX{} environment will be
-handled.}.  The only requirement is that the @code{\begin} and @code{\end}
-statements appear on a new line, at the beginning of the line or after
-whitespaces only.
+@file{dvipng} program or @file{imagemagick} suite is used to create images,
+any @LaTeX{} environment will be handled.}.  The only requirement is that the
+@code{\begin} and @code{\end} statements appear on a new line, at the
+beginning of the line or after whitespaces only.
 @item
 Text within the usual @LaTeX{} math delimiters.  To avoid conflicts with
 currency specifications, single @samp{$} characters are only recognized as
@@ -10197,7 +10197,6 @@ lines:
 
 @example
 #+OPTIONS: tex:t          @r{Do the right thing automatically (MathJax)}
-#+OPTIONS: tex:dvipng     @r{Force using dvipng images}
 #+OPTIONS: tex:nil        @r{Do not process @LaTeX{} fragments at all}
 #+OPTIONS: tex:verbatim   @r{Verbatim export, for jsMath or so}
 @end example
@@ -11257,6 +11256,7 @@ You could use @code{http} addresses just as well.
 @subsection Math formatting in HTML export
 @cindex MathJax
 @cindex dvipng
+@cindex imagemagick
 
 @LaTeX{} math snippets (@pxref{@LaTeX{} fragments}) can be displayed in two
 different ways on HTML pages.  The default is to use the
@@ -11282,11 +11282,17 @@ this line.
 If you prefer, you can also request that @LaTeX{} fragments are processed
 into small images that will be inserted into the browser page.  Before the
 availability of MathJax, this was the default method for Org files.  This
-method requires that the @file{dvipng} program is available on your system.
-You can still get this processing with
+method requires that the @file{dvipng} program or @file{imagemagick} suite is
+available on your system.  You can still get this processing with
 
 @example
 #+OPTIONS: tex:dvipng
+@end example
+
+or:
+
+@example
+#+OPTIONS: tex:imagemagick
 @end example
 
 @node Text areas in HTML export, CSS support, Math formatting in HTML export, HTML export
@@ -12265,17 +12271,25 @@ and open the formula file with the system-registered application.
 @end table
 
 @cindex dvipng
+@cindex imagemagick
 @item PNG images
 
 This option is activated on a per-file basis with
 
 @example
-#+OPTIONS: LaTeX:dvipng
+#+OPTIONS: tex:dvipng
+@end example
+
+or:
+
+@example
+#+OPTIONS: tex:imagemagick
 @end example
 
 With this option, @LaTeX{} fragments are processed into PNG images and the
 resulting images are embedded in the exported document.  This method requires
-that the @file{dvipng} program be available on your system.
+that the @file{dvipng} program or @file{imagemagick} suite be available on
+your system.
 @end enumerate
 
 @node Working with MathML or OpenDocument formula files,  , Working with @LaTeX{} math snippets, Math formatting in ODT export
