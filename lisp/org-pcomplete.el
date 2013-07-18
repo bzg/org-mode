@@ -153,13 +153,16 @@ When completing for #+STARTUP, for example, this function returns
 	    (mapcar (lambda (keyword) (concat keyword ": "))
 		    org-element-affiliated-keywords)
 	    (let (block-names)
-	      (mapc (lambda (block-name)
-		      (let ((name (car block-name)))
-			(push (format "END_%s " name) block-names)
-			(push (format "BEGIN_%s " name) block-names)
-			(push (format "ATTR_%s: " name) block-names)))
-		    org-element-block-name-alist)
-	      block-names)
+	      (dolist (block-info org-element-block-name-alist block-names)
+		(let ((name (car block-info)))
+		  (push (format "END_%s" name) block-names)
+		  (push (concat "BEGIN_"
+				name
+				;; Since language is compulsory in
+				;; source blocks, add a space.
+				(and (equal name "SRC") " "))
+			block-names)
+		  (push (format "ATTR_%s: " name) block-names))))
 	    (mapcar (lambda (keyword) (concat keyword ": "))
 		    (org-get-export-keywords))))
    (substring pcomplete-stub 2)))
