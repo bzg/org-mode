@@ -314,12 +314,12 @@ will result in following node:
 		   (plist-get info :title))
 		  (t (error "Shouldn't come here."))))
 	 (element-contents (org-element-contents element))
-	 (section (assoc 'section element-contents))
+	 (section (assq 'section element-contents))
 	 (section-contents
 	  (let ((backend (org-export-create-backend
 			  :parent (org-export-backend-name
 				   (plist-get info :back-end))
-			  :translations '(section . (lambda (e c i) c)))))
+			  :transcoders '((section . (lambda (e c i) c))))))
 	    (org-export-data-with-backend section backend info)))
 	 (itemized-contents-p (let ((first-child-headline
 				     (org-element-map element-contents
