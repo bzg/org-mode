@@ -3052,42 +3052,42 @@ Assume point is at the beginning of the link."
 	      ;; abbreviation in it.
 	      raw-link (org-translate-link
 			(org-link-expand-abbrev
-			 (org-match-string-no-properties 1)))
-	      link (org-link-unescape raw-link))
+			 (org-match-string-no-properties 1))))
 	;; Determine TYPE of link and set PATH accordingly.
 	(cond
 	 ;; File type.
-	 ((or (file-name-absolute-p link) (string-match "^\\.\\.?/" link))
-	  (setq type "file" path link))
+	 ((or (file-name-absolute-p raw-link)
+	      (string-match "^\\.\\.?/" raw-link))
+	  (setq type "file" path raw-link))
 	 ;; Explicit type (http, irc, bbdb...).  See `org-link-types'.
-	 ((string-match org-link-re-with-space3 link)
-	  (setq type (match-string 1 link) path (match-string 2 link)))
+	 ((string-match org-link-re-with-space3 raw-link)
+	  (setq type (match-string 1 raw-link) path (match-string 2 raw-link)))
 	 ;; Id type: PATH is the id.
-	 ((string-match "^id:\\([-a-f0-9]+\\)" link)
-	  (setq type "id" path (match-string 1 link)))
+	 ((string-match "^id:\\([-a-f0-9]+\\)" raw-link)
+	  (setq type "id" path (match-string 1 raw-link)))
 	 ;; Code-ref type: PATH is the name of the reference.
-	 ((string-match "^(\\(.*\\))$" link)
-	  (setq type "coderef" path (match-string 1 link)))
+	 ((string-match "^(\\(.*\\))$" raw-link)
+	  (setq type "coderef" path (match-string 1 raw-link)))
 	 ;; Custom-id type: PATH is the name of the custom id.
-	 ((= (aref link 0) ?#)
-	  (setq type "custom-id" path (substring link 1)))
+	 ((= (aref raw-link 0) ?#)
+	  (setq type "custom-id" path (substring raw-link 1)))
 	 ;; Fuzzy type: Internal link either matches a target, an
 	 ;; headline name or nothing.  PATH is the target or
 	 ;; headline's name.
-	 (t (setq type "fuzzy" path link))))
+	 (t (setq type "fuzzy" path raw-link))))
        ;; Type 3: Plain link, i.e. http://orgmode.org
        ((looking-at org-plain-link-re)
 	(setq raw-link (org-match-string-no-properties 0)
 	      type (org-match-string-no-properties 1)
-	      path (org-match-string-no-properties 2)
-	      link-end (match-end 0)))
+	      link-end (match-end 0)
+	      path (org-match-string-no-properties 2)))
        ;; Type 4: Angular link, i.e. <http://orgmode.org>
        ((looking-at org-angle-link-re)
 	(setq raw-link (buffer-substring-no-properties
 			(match-beginning 1) (match-end 2))
 	      type (org-match-string-no-properties 1)
-	      path (org-match-string-no-properties 2)
-	      link-end (match-end 0))))
+	      link-end (match-end 0)
+	      path (org-match-string-no-properties 2))))
       ;; In any case, deduce end point after trailing white space from
       ;; LINK-END variable.
       (setq post-blank (progn (goto-char link-end) (skip-chars-forward " \t"))
@@ -3104,7 +3104,7 @@ Assume point is at the beginning of the link."
 	(when (string-match "::\\(.*\\)$" path)
 	  (setq search-option (match-string 1 path)
 		path (replace-match "" nil nil path)))
-	;; Make sure TYPE always report "file".
+	;; Make sure TYPE always reports "file".
 	(setq type "file"))
       (list 'link
 	    (list :type type
