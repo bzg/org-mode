@@ -1261,8 +1261,7 @@ Assume point is at the beginning of the list."
 		   (unless (bolp) (forward-line))
 		   (point)))
 	   (end (progn (skip-chars-forward " \r\t\n" limit)
-		       (skip-chars-backward " \t")
-		       (if (bolp) (point) (line-end-position)))))
+		       (if (= (point) limit) limit (line-beginning-position)))))
       ;; Return value.
       (list 'plain-list
 	    (nconc

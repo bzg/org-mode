@@ -1511,7 +1511,12 @@ Outside list"
 	 ;; Move to ending of outer list.
 	 (progn (goto-char (car endings)) (looking-at "Outside list"))
 	 ;; Move to ending of inner list.
-	 (progn (goto-char (nth 1 endings)) (looking-at "^$"))))))))
+	 (progn (goto-char (nth 1 endings)) (looking-at "^$")))))))
+  ;; Correctly compute end of list if it doesn't end at a line
+  ;; beginning.
+  (should
+   (org-test-with-temp-text "- list\n   \n   "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Planning
