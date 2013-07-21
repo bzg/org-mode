@@ -1503,15 +1503,19 @@ e^{i\\pi}+1=0
   - inner
 
 Outside list"
-    (let ((endings (org-element-map
-		    (org-element-parse-buffer) 'plain-list
-		    (lambda (pl) (org-element-property :end pl)))))
+    (let ((endings (org-element-map (org-element-parse-buffer) 'plain-list
+		     (lambda (pl) (org-element-property :end pl)))))
       ;; Move to ending of outer list.
       (goto-char (car endings))
       (should (looking-at "Outside list"))
       ;; Move to ending of inner list.
       (goto-char (nth 1 endings))
-      (should (looking-at "^$")))))
+      (should (looking-at "^$"))))
+  ;; Correctly compute end of list if it doesn't end at a line
+  ;; beginning.
+  (should
+   (org-test-with-temp-text "- list\n   \n   "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Planning
