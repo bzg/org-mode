@@ -183,7 +183,15 @@ already filled in `info'."
 		org-test-dir)
       (org-export--get-inbuffer-options))
     '(:description "l1\nl2\nl3":language "fr" :select-tags ("a" "b" "c")
-		   :title ("a b c")))))
+		   :title ("a b c"))))
+  ;; More than one property can refer to the same buffer keyword.
+  (should
+   (equal '(:k2 "value" :k1 "value")
+	  (let ((backend (org-export-create-backend
+			  :options '((:k1 "KEYWORD")
+				     (:k2 "KEYWORD")))))
+	    (org-test-with-temp-text "#+KEYWORD: value"
+	      (org-export--get-inbuffer-options backend))))))
 
 (ert-deftest test-org-export/get-subtree-options ()
   "Test setting options from headline's properties."

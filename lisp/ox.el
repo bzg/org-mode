@@ -1658,14 +1658,13 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 	 (regexp (format "^[ \t]*#\\+%s:"
 			 (regexp-opt (nconc (delq nil (mapcar 'cadr options))
 					    org-export-special-keywords))))
-	 (find-opt
+	 (find-properties
 	  (lambda (keyword)
-	    ;; Return property name associated to KEYWORD.
-	    (catch 'exit
-	      (mapc (lambda (option)
-		      (when (equal (nth 1 option) keyword)
-			(throw 'exit (car option))))
-		    options))))
+	    ;; Return all properties associated to KEYWORD.
+	    (let (properties)
+	      (dolist (option options properties)
+		(when (equal (nth 1 option) keyword)
+		  (push (car option) properties))))))
 	 (get-options
 	  (lambda (&optional files plist)
 	    ;; Recursively read keywords in buffer.  FILES is a list
@@ -1705,47 +1704,45 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 					     (plist-get plist :filetags)))))))
 		      (t
 		       ;; Options in `org-export-options-alist'.
-		       (let* ((prop (funcall find-opt key))
-			      (behaviour (nth 4 (assq prop options))))
-			 (setq plist
-			       (plist-put
-				plist prop
-				;; Handle value depending on specified
-				;; BEHAVIOUR.
-				(case behaviour
-				  (space
-				   (if (not (plist-get plist prop))
-				       (org-trim val)
-				     (concat (plist-get plist prop)
-					     " "
-					     (org-trim val))))
-				  (newline
-				   (org-trim (concat (plist-get plist prop)
-						     "\n"
-						     (org-trim val))))
-				  (split `(,@(plist-get plist prop)
-					   ,@(org-split-string val)))
-				  ('t val)
-				  (otherwise
-				   (if (not (plist-member plist prop)) val
-				     (plist-get plist prop)))))))))))))
+		       (dolist (property (funcall find-properties key))
+			 (let ((behaviour (nth 4 (assq property options))))
+			   (setq plist
+				 (plist-put
+				  plist property
+				  ;; Handle value depending on specified
+				  ;; BEHAVIOUR.
+				  (case behaviour
+				    (space
+				     (if (not (plist-get plist property))
+					 (org-trim val)
+				       (concat (plist-get plist property)
+					       " "
+					       (org-trim val))))
+				    (newline
+				     (org-trim
+				      (concat (plist-get plist property)
+					      "\n"
+					      (org-trim val))))
+				    (split `(,@(plist-get plist property)
+					     ,@(org-split-string val)))
+				    ('t val)
+				    (otherwise
+				     (if (not (plist-member plist property)) val
+				       (plist-get plist property))))))))))))))
 	     ;; Return final value.
 	     plist))))
     ;; Read options in the current buffer.
     (setq plist (funcall get-options buffer-file-name nil))
-    ;; Parse keywords specified in `org-element-document-properties'.
-    (mapc (lambda (keyword)
-	    ;; Find the property associated to the keyword.
-	    (let* ((prop (funcall find-opt keyword))
-		   (value (and prop (plist-get plist prop))))
-	      (when (stringp value)
-		(setq plist
-		      (plist-put plist prop
-				 (org-element-parse-secondary-string
-				  value (org-element-restriction 'keyword)))))))
-	  org-element-document-properties)
-    ;; Return value.
-    plist))
+    ;; Parse keywords specified in `org-element-document-properties'
+    ;; and return PLIST.
+    (dolist (keyword org-element-document-properties plist)
+      (dolist (property (funcall find-properties keyword))
+	(let ((value (plist-get plist property)))
+	  (when (stringp value)
+	    (setq plist
+		  (plist-put plist property
+			     (org-element-parse-secondary-string
+			      value (org-element-restriction 'keyword))))))))))
 
 (defun org-export--get-buffer-attributes ()
   "Return properties related to buffer attributes, as a plist."
