@@ -1664,7 +1664,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 	    (let (properties)
 	      (dolist (option options properties)
 		(when (equal (nth 1 option) keyword)
-		  (push (car option) properties))))))
+		  (pushnew (car option) properties))))))
 	 (get-options
 	  (lambda (&optional files plist)
 	    ;; Recursively read keywords in buffer.  FILES is a list
