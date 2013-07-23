@@ -60,6 +60,10 @@
 ;;    :table-of-contents nil))
 ;;
 ;; ... then rsync /home/guerry/public_html/ with your server.
+;;
+;; By default, the permalink for a blog entry points to the headline.
+;; You can specify a different one by using the :RSS_PERMALINK:
+;; property within an entry.
 
 ;;; Code:
 
@@ -229,6 +233,8 @@ communication channel."
 	      (> (org-export-get-relative-level headline info) 1))
     (let* ((htmlext (plist-get info :html-extension))
 	   (hl-number (org-export-get-headline-number headline info))
+	   (hl-home (file-name-as-directory (plist-get info :html-link-home)))
+	   (hl-pdir (plist-get info :publishing-directory))
 	   (anchor
 	    (org-export-solidify-link-text
 	     (or (org-element-property :CUSTOM_ID headline)
@@ -244,13 +250,14 @@ communication channel."
 		    (error "Missing PUBDATE property"))))))
 	   (title (org-element-property :raw-value headline))
 	   (publink
-	    (concat
-	     (file-name-as-directory
-	      (or (plist-get info :html-link-home)
-		  (plist-get info :publishing-directory)))
-	     (file-name-nondirectory
-	      (file-name-sans-extension
-	       (buffer-file-name))) "." htmlext "#" anchor))
+	    (or (concat
+		 (or hl-home hl-pdir)
+		 (org-element-property :RSS_PERMALINK headline))
+		(concat
+		 (or hl-home hl-pdir)
+		 (file-name-nondirectory
+		  (file-name-sans-extension
+		   (buffer-file-name))) "." htmlext "#" anchor)))
 	   (guid (if org-rss-use-entry-url-as-guid
 		     publink
 		   (org-rss-plain-text
