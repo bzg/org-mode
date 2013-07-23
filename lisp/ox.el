@@ -5208,9 +5208,8 @@ them."
 
 ;;;; Translation
 ;;
-;; `org-export-translate' translates a string according to language
-;; specified by LANGUAGE keyword or `org-export-language-setup'
-;; variable and a specified charset.  `org-export-dictionary' contains
+;; `org-export-translate' translates a string according to the language
+;; specified by the LANGUAGE keyword.  `org-export-dictionary' contains
 ;; the dictionary used for the translation.
 
 (defconst org-export-dictionary
