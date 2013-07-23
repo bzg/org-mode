@@ -12838,7 +12838,7 @@ the Org buffer and get them translated into @LaTeX{} without using the
 @end group
 @end lisp
 
-Three arguments must be provided to a fiter: the code being changed, the
+Three arguments must be provided to a filter: the code being changed, the
 back-end used, and some information about the export process.  You can safely
 ignore the third argument for most purposes.  Note the use of
 @code{org-export-derived-backend-p}, which ensures that the filter will only
