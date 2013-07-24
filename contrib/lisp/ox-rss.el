@@ -235,6 +235,7 @@ communication channel."
 	   (hl-number (org-export-get-headline-number headline info))
 	   (hl-home (file-name-as-directory (plist-get info :html-link-home)))
 	   (hl-pdir (plist-get info :publishing-directory))
+	   (hl-perm (org-element-property :RSS_PERMALINK headline))
 	   (anchor
 	    (org-export-solidify-link-text
 	     (or (org-element-property :CUSTOM_ID headline)
@@ -250,14 +251,12 @@ communication channel."
 		    (error "Missing PUBDATE property"))))))
 	   (title (org-element-property :raw-value headline))
 	   (publink
-	    (or (concat
-		 (or hl-home hl-pdir)
-		 (org-element-property :RSS_PERMALINK headline))
+	    (or (and hl-perm (concat (or hl-home hl-pdir) hl-perm))
 		(concat
 		 (or hl-home hl-pdir)
 		 (file-name-nondirectory
 		  (file-name-sans-extension
-		   (buffer-file-name))) "." htmlext "#" anchor)))
+		   (plist-get info :input-file))) "." htmlext "#" anchor)))
 	   (guid (if org-rss-use-entry-url-as-guid
 		     publink
 		   (org-rss-plain-text
@@ -326,10 +325,11 @@ as a communication channel."
 	 (blogurl (or (plist-get info :html-link-home)
 		      (plist-get info :publishing-directory)))
 	 (image (url-encode-url (plist-get info :rss-image-url)))
+	 (ifile (plist-get info :input-file))
 	 (publink
 	  (concat (file-name-as-directory blogurl)
 		   (file-name-nondirectory
-		    (file-name-sans-extension (buffer-file-name)))
+		    (file-name-sans-extension ifile))
 		  "." rssext)))
     (format
      "\n<title>%s</title>
