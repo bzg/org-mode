@@ -21974,12 +21974,9 @@ hierarchy of headlines by UP levels before marking the subtree."
 	  (beginning-of-line 0))
 	(cond
 	 ;; There was a list item above.
-	 ((save-excursion
-	    (and (ignore-errors (goto-char (org-in-item-p)))
-		 (goto-char
-		  (org-list-get-top-point (org-list-struct)))))
-	  (looking-at org-list-full-item-re)
-	  (setq column (length (match-string 0))))
+	 ((ignore-errors (goto-char (org-in-item-p)))
+	  (goto-char (org-list-get-top-point (org-list-struct)))
+	  (setq column (org-get-indentation)))
 	 ;; There was an heading above.
 	 ((looking-at "\\*+[ \t]+")
 	  (if (not org-adapt-indentation)
