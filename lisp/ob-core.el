@@ -301,10 +301,10 @@ name of the code block."
 	    (noeval          (or ,eval-no ,eval-no-export))
 	    (query           (or (equal ,eval "query")
 				 (and ,export (equal ,eval "query-export"))
-				 (when (functionp org-confirm-babel-evaluate)
-				   (funcall org-confirm-babel-evaluate
-					    ,lang ,block-body))
-				 org-confirm-babel-evaluate))
+				 (if (functionp org-confirm-babel-evaluate)
+				     (funcall org-confirm-babel-evaluate
+					      ,lang ,block-body)
+				   org-confirm-babel-evaluate)))
 	    (code-block      (if ,info (format  " %s "  ,lang) " "))
 	    (block-name      (if ,name (format " (%s) " ,name) " ")))
        ,@body)))
@@ -562,7 +562,11 @@ Optionally supply a value for PARAMS which will be merged with
 the header arguments specified at the front of the source code
 block."
   (interactive)
-  (let* ((info (if info
+  (let* ((org-babel-current-src-block-location
+	  (or org-babel-current-src-block-location
+	      (nth 6 info)
+	      (org-babel-where-is-src-block-head)))
+	 (info (if info
 		   (copy-tree info)
 		 (org-babel-get-src-block-info)))
 	 (merged-params (org-babel-merge-params (nth 2 info) params)))
@@ -571,8 +575,6 @@ block."
       (let* ((params (if params
 			 (org-babel-process-params merged-params)
 		       (nth 2 info)))
-	     (org-babel-current-src-block-location
-	      (or org-babel-current-src-block-location (nth 6 info)))
 	     (cachep (and (not arg) (cdr (assoc :cache params))
 			   (string= "yes" (cdr (assoc :cache params)))))
 	     (new-hash (when cachep (org-babel-sha1-hash info)))
@@ -1167,9 +1169,12 @@ the current subtree."
 (defun org-babel-set-current-result-hash (hash)
   "Set the current in-buffer hash to HASH."
   (org-babel-where-is-src-block-result)
-  (save-excursion (goto-char (match-beginning 3))
-		  ;; (mapc #'delete-overlay (overlays-at (point)))
-		  (replace-match hash nil nil nil 3)
+  (save-excursion (goto-char (match-beginning 5))
+		  (mapc #'delete-overlay (overlays-at (point)))
+		  (forward-char org-babel-hash-show)
+		  (mapc #'delete-overlay (overlays-at (point)))
+		  (replace-match hash nil nil nil 5)
+		  (goto-char (point-at-bol))
 		  (org-babel-hide-hash)))
 
 (defun org-babel-hide-hash ()
@@ -1511,22 +1516,18 @@ names."
 (defun org-babel-get-rownames (table)
   "Return the row names of TABLE.
 Return a cons cell, the `car' of which contains the TABLE less
-colnames, and the `cdr' of which contains a list of the column
-names.  Note: this function removes any hlines in TABLE."
-  (let* ((trans (lambda (table) (apply #'mapcar* #'list table)))
-	 (width (apply 'max
-		       (mapcar (lambda (el) (if (listp el) (length el) 0)) table)))
-	 (table (funcall trans (mapcar (lambda (row)
-					 (if (not (equal row 'hline))
-					     row
-					   (setq row '())
-					   (dotimes (n width)
-					     (setq row (cons 'hline row)))
-					   row))
-				       table))))
-    (cons (mapcar (lambda (row) (if (equal (car row) 'hline) 'hline row))
-		  (funcall trans (cdr table)))
-	  (remove 'hline (car table)))))
+rownames, and the `cdr' of which contains a list of the rownames.
+Note: this function removes any hlines in TABLE."
+  (let* ((table (org-babel-del-hlines table))
+	 (rownames (funcall (lambda ()
+			      (let ((tp table))
+				(mapcar
+				 (lambda (row)
+				   (prog1
+				       (pop (car tp))
+				     (setq tp (cdr tp))))
+				 table))))))
+    (cons table rownames)))
 
 (defun org-babel-put-colnames (table colnames)
   "Add COLNAMES to TABLE if they exist."
@@ -1719,7 +1720,8 @@ buffer or nil if no such result exists."
 	  (when (and (string= "name" (downcase (match-string 1)))
 		     (or (beginning-of-line 1)
 			 (looking-at org-babel-src-block-regexp)
-			 (looking-at org-babel-multi-line-header-regexp)))
+			 (looking-at org-babel-multi-line-header-regexp)
+			 (looking-at org-babel-lob-one-liner-regexp)))
 	    (throw 'is-a-code-block (org-babel-find-named-result name (point))))
 	  (beginning-of-line 0) (point))))))
 
@@ -1796,9 +1798,13 @@ region is not active then the point is demarcated."
 	   (move-end-of-line 2))
          (sort (if (org-region-active-p) (list (mark) (point)) (list (point))) #'>))
       (let ((start (point))
-	    (lang (org-icompleting-read "Lang: "
-					(mapcar (lambda (el) (symbol-name (car el)))
-						org-babel-load-languages)))
+	    (lang (org-icompleting-read
+		   "Lang: "
+		   (mapcar #'symbol-name
+			   (delete-dups
+			    (append (mapcar #'car org-babel-load-languages)
+				    (mapcar (lambda (el) (intern (car el)))
+					    org-src-lang-modes))))))
 	    (body (delete-and-extract-region
 		   (if (org-region-active-p) (mark) (point)) (point))))
 	(insert (concat (if (looking-at "^") "" "\n")
@@ -1824,10 +1830,7 @@ following the source block."
 			  (looking-at org-babel-lob-one-liner-regexp)))
 	   (inlinep (when (org-babel-get-inline-src-block-matches)
 		      (match-end 0)))
-	   (name (if on-lob-line
-		     (mapconcat #'identity (butlast (org-babel-lob-get-info))
-				"")
-		   (nth 4 (or info (org-babel-get-src-block-info 'light)))))
+	   (name (nth 4 (or info (org-babel-get-src-block-info 'light))))
 	   (head (unless on-lob-line (org-babel-where-is-src-block-head)))
 	   found beg end)
       (when head (goto-char head))

@@ -909,7 +909,8 @@ Store them in the capture property list."
 				(current-time))))
 	      (org-capture-put
 	       :default-time
-	       (cond ((and (not org-time-was-given)
+	       (cond ((and (or (not (boundp 'org-time-was-given))
+			       (not org-time-was-given))
 			   (not (= (time-to-days prompt-time) (org-today))))
 		      ;; Use 00:00 when no time is given for another date than today?
 		      (apply 'encode-time (append '(0 0 0) (cdddr (decode-time prompt-time)))))

@@ -69,7 +69,8 @@
 	      (goto-char (point-max))
 	      (call-interactively 'comment-dwim)
 	      (buffer-string)))))
-  ;; Region selected without comments: comment all non-blank lines.
+  ;; Region selected without comments: comment all lines if
+  ;; `comment-empty-lines' is non-nil, only non-blank lines otherwise.
   (should
    (equal "# Comment 1\n\n# Comment 2"
 	  (org-test-with-temp-text "Comment 1\n\nComment 2"
@@ -77,7 +78,18 @@
 	      (transient-mark-mode 1)
 	      (push-mark (point) t t)
 	      (goto-char (point-max))
-	      (call-interactively 'comment-dwim)
+	      (let ((comment-empty-lines nil))
+		(call-interactively 'comment-dwim))
+	      (buffer-string)))))
+  (should
+   (equal "# Comment 1\n# \n# Comment 2"
+	  (org-test-with-temp-text "Comment 1\n\nComment 2"
+	    (progn
+	      (transient-mark-mode 1)
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (let ((comment-empty-lines t))
+		(call-interactively 'comment-dwim))
 	      (buffer-string)))))
   ;; In front of a keyword without region, insert a new comment.
   (should
@@ -196,6 +208,20 @@
   (should
    (equal "  # A B"
 	  (org-test-with-temp-text "  # A\n  # B"
+	    (let ((fill-column 20))
+	      (org-fill-paragraph)
+	      (buffer-string)))))
+  ;; Do not mix consecutive comments when filling one of them.
+  (should
+   (equal "# A B\n\n# C"
+	  (org-test-with-temp-text "# A\n# B\n\n# C"
+	    (let ((fill-column 20))
+	      (org-fill-paragraph)
+	      (buffer-string)))))
+  ;; Use commented empty lines as separators when filling comments.
+  (should
+   (equal "# A B\n#\n# C"
+	  (org-test-with-temp-text "# A\n# B\n#\n# C"
 	    (let ((fill-column 20))
 	      (org-fill-paragraph)
 	      (buffer-string)))))

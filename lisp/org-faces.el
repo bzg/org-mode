@@ -217,12 +217,6 @@ column view defines special faces for each outline level.  See the file
   "Face for column display of entry properties."
   :group 'org-faces)
 
-(when (fboundp 'set-face-attribute)
-  ;; Make sure that a fixed-width face is used when we have a column table.
-  (set-face-attribute 'org-column nil
-		      :height (face-attribute 'default :height)
-		      :family (face-attribute 'default :family)))
-
 (defface org-agenda-column-dateline
   (org-compatible-face 'org-column
     '((t nil)))

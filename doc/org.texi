@@ -1832,9 +1832,11 @@ This command also cycles bullet styles when the cursor in on the bullet or
 anywhere in an item line, details depending on
 @code{org-support-shift-select}.
 @kindex C-c ^
+@cindex sorting, of plain list
 @item C-c ^
 Sort the plain list.  You will be prompted for the sorting method:
-numerically, alphabetically, by time, or by custom function.
+numerically, alphabetically, by time, by checked status for check lists,
+or by a custom function.
 @end table
 
 @node Drawers, Blocks, Plain lists, Document Structure
@@ -5056,7 +5058,7 @@ tags---beware that all whitespaces are mandatory so that Org can parse this
 line correctly:
 
 @example
-#+TAGS: @{ @@read : @@read_book  @@read_ebook @}
+#+TAGS: @{ @@read : @@read_book @@read_ebook @}
 @end example
 
 In this example, @samp{@@read} is a @emph{group tag} for a set of three
@@ -7381,6 +7383,7 @@ Copying works like refiling, except that the original note is not deleted.
 @vindex org-refile-allow-creating-parent-nodes
 @vindex org-log-refile
 @vindex org-refile-use-cache
+@vindex org-refile-keep
 Refile the entry or region at point.  This command offers possible locations
 for refiling the entry and lets you select one with completion.  The item (or
 all items in the region) is filed below the target heading as a subitem.
@@ -7404,6 +7407,10 @@ Use the refile interface to jump to a heading.
 Jump to the location where @code{org-refile} last moved a tree to.
 @item C-2 C-c C-w
 Refile as the child of the item currently being clocked.
+@item C-3 C-c C-w
+Refile and keep the entry in place.  Also see @code{org-refile-keep} to make
+this the default behavior, and beware that this may result in duplicated
+@code{ID} properties.
 @orgcmdtkc{C-0 C-c C-w @ @r{or} @ C-u C-u C-u C-c C-w,C-0 C-c C-w,org-refile-cache-clear}
 Clear the target cache.  Caching of refile targets can be turned on by
 setting @code{org-refile-use-cache}.  To make the command see new possible
@@ -8049,14 +8056,17 @@ You may also test for properties (@pxref{Properties and Columns}) at the same
 time as matching tags.  The properties may be real properties, or special
 properties that represent other metadata (@pxref{Special properties}).  For
 example, the ``property'' @code{TODO} represents the TODO keyword of the
-entry.  Or, the ``property'' @code{LEVEL} represents the level of an entry.
-So a search @samp{+LEVEL=3+boss-TODO="DONE"} lists all level three headlines
-that have the tag @samp{boss} and are @emph{not} marked with the TODO keyword
-DONE@.  In buffers with @code{org-odd-levels-only} set, @samp{LEVEL} does not
-count the number of stars, but @samp{LEVEL=2} will correspond to 3 stars etc.
-The ITEM special property cannot currently be used in tags/property
+entry and the ``propety'' @code{PRIORITY} represents the PRIORITY keyword of
+the entry.  The ITEM special property cannot currently be used in tags/property
 searches@footnote{But @pxref{x-agenda-skip-entry-regexp,
 ,skipping entries based on regexp}.}.
+
+Except the @pxref{Special properties}, one other ``property'' can also be
+used. @code{LEVEL} represents the level of an entry.  So a search
+@samp{+LEVEL=3+boss-TODO="DONE"} lists all level three headlines that have
+the tag @samp{boss} and are @emph{not} marked with the TODO keyword DONE@.
+In buffers with @code{org-odd-levels-only} set, @samp{LEVEL} does not count
+the number of stars, but @samp{LEVEL=2} will correspond to 3 stars etc.
 
 Here are more examples:
 
@@ -10006,7 +10016,7 @@ Conversely, backslash characters before a comma, and only them, need to be
 escaped with another backslash character.}.  In addition to defined macros,
 @code{@{@{@{title@}@}@}}, @code{@{@{@{author@}@}@}}, etc., will reference
 information set by the @code{#+TITLE:}, @code{#+AUTHOR:}, and similar lines.
-Also, @code{@{@{@{date(@var{FORMAT})@}@}@}} and
+Also, @code{@{@{@{time(@var{FORMAT})@}@}@}} and
 @code{@{@{@{modification-time(@var{FORMAT})@}@}@}} refer to current date time
 and to the modification time of the file being exported, respectively.
 @var{FORMAT} should be a format string understood by
@@ -10146,10 +10156,10 @@ snippets will be identified as @LaTeX{} source code:
 @item
 Environments of any kind@footnote{When @file{MathJax} is used, only the
 environments recognized by @file{MathJax} will be processed.  When
-@file{dvipng} is used to create images, any @LaTeX{} environment will be
-handled.}.  The only requirement is that the @code{\begin} and @code{\end}
-statements appear on a new line, at the beginning of the line or after
-whitespaces only.
+@file{dvipng} program or @file{imagemagick} suite is used to create images,
+any @LaTeX{} environment will be handled.}.  The only requirement is that the
+@code{\begin} and @code{\end} statements appear on a new line, at the
+beginning of the line or after whitespaces only.
 @item
 Text within the usual @LaTeX{} math delimiters.  To avoid conflicts with
 currency specifications, single @samp{$} characters are only recognized as
@@ -10187,7 +10197,6 @@ lines:
 
 @example
 #+OPTIONS: tex:t          @r{Do the right thing automatically (MathJax)}
-#+OPTIONS: tex:dvipng     @r{Force using dvipng images}
 #+OPTIONS: tex:nil        @r{Do not process @LaTeX{} fragments at all}
 #+OPTIONS: tex:verbatim   @r{Verbatim export, for jsMath or so}
 @end example
@@ -11247,6 +11256,7 @@ You could use @code{http} addresses just as well.
 @subsection Math formatting in HTML export
 @cindex MathJax
 @cindex dvipng
+@cindex imagemagick
 
 @LaTeX{} math snippets (@pxref{@LaTeX{} fragments}) can be displayed in two
 different ways on HTML pages.  The default is to use the
@@ -11272,11 +11282,17 @@ this line.
 If you prefer, you can also request that @LaTeX{} fragments are processed
 into small images that will be inserted into the browser page.  Before the
 availability of MathJax, this was the default method for Org files.  This
-method requires that the @file{dvipng} program is available on your system.
-You can still get this processing with
+method requires that the @file{dvipng} program or @file{imagemagick} suite is
+available on your system.  You can still get this processing with
 
 @example
 #+OPTIONS: tex:dvipng
+@end example
+
+or:
+
+@example
+#+OPTIONS: tex:imagemagick
 @end example
 
 @node Text areas in HTML export, CSS support, Math formatting in HTML export, HTML export
@@ -11335,6 +11351,9 @@ p.creator           @r{creator info, about org mode version}
 div.outline-N       @r{div for outline level N (headline plus text))}
 div.outline-text-N  @r{extra div for text at outline level N}
 .section-number-N   @r{section number in headlines, different for each level}
+.figure-number      @r{label like "Figure 1:"}
+.table-number       @r{label like "Table 1:"}
+.listing-number     @r{label like "Listing 1:"}
 div.figure          @r{how to format an inlined image}
 pre.src             @r{formatted source code}
 pre.example         @r{normal example}
@@ -11599,6 +11618,11 @@ Environment used for the table.  It can be set to any @LaTeX{} table
 environment, like @code{tabularx}, @code{longtable}, @code{array},
 @code{tabu}, @code{bmatrix}@enddots{}  It defaults to
 @code{org-latex-default-table-environment} value.
+@item :caption
+@code{#+CAPTION} keyword is the simplest way to set a caption for a table
+(@pxref{Images and tables}).  If you need more advanced commands for that
+task, you can use @code{:caption} attribute instead.  Its value should be raw
+@LaTeX{} code.  It has precedence over @code{#+CAPTION}.
 @item :float
 @itemx :placement
 Float environment for the table.  Possible values are @code{sidewaystable},
@@ -11651,6 +11675,16 @@ a table that will span over multiple pages, or a matrix product:
 | 3 | 4 |
 @end example
 
+In the example below, @LaTeX{} command
+@code{\bicaption@{HeadingA@}@{HeadingB@}} will set the caption.
+
+@example
+#+ATTR_LATEX: :caption \bicaption@{HeadingA@}@{HeadingB@}
+| ..... | ..... |
+| ..... | ..... |
+@end example
+
+
 @subsubheading Images in @LaTeX{} export
 @cindex images, inline in @LaTeX{}
 @cindex inlining images in @LaTeX{}
@@ -11669,6 +11703,14 @@ example:
 
 @example
 #+ATTR_LATEX: :width 5cm :options angle=90
+[[./img/sed-hr4049.pdf]]
+@end example
+
+If you need a specific command for the caption, use @code{:caption}
+attribute.  It will override standard @code{#+CAPTION} value, if any.
+
+@example
+#+ATTR_LATEX: :caption \bicaption@{HeadingA@}@{HeadingB@}
 [[./img/sed-hr4049.pdf]]
 @end example
 
@@ -11766,6 +11808,17 @@ becomes
 ...
 Therefore, any even number greater than 2 is the sum of two primes.
 \end@{proof@}
+@end example
+
+If you need to insert a specific caption command, use @code{:caption}
+attribute.  It will override standard @code{#+CAPTION} value, if any.  For
+example:
+
+@example
+#+ATTR_LATEX: :caption \MyCaption@{HeadingA@}
+#+BEGIN_PROOF
+...
+#+END_PROOF
 @end example
 
 @subsubheading Horizontal rules
@@ -12218,17 +12271,25 @@ and open the formula file with the system-registered application.
 @end table
 
 @cindex dvipng
+@cindex imagemagick
 @item PNG images
 
 This option is activated on a per-file basis with
 
 @example
-#+OPTIONS: LaTeX:dvipng
+#+OPTIONS: tex:dvipng
+@end example
+
+or:
+
+@example
+#+OPTIONS: tex:imagemagick
 @end example
 
 With this option, @LaTeX{} fragments are processed into PNG images and the
 resulting images are embedded in the exported document.  This method requires
-that the @file{dvipng} program be available on your system.
+that the @file{dvipng} program or @file{imagemagick} suite be available on
+your system.
 @end enumerate
 
 @node Working with MathML or OpenDocument formula files,  , Working with @LaTeX{} math snippets, Math formatting in ODT export
@@ -12957,7 +13018,7 @@ the Org buffer and get them translated into @LaTeX{} without using the
 @end group
 @end lisp
 
-Three arguments must be provided to a fiter: the code being changed, the
+Three arguments must be provided to a filter: the code being changed, the
 back-end used, and some information about the export process.  You can safely
 ignore the third argument for most purposes.  Note the use of
 @code{org-export-derived-backend-p}, which ensures that the filter will only
@@ -13260,8 +13321,8 @@ string of these options for details.
 @vindex org-html-preamble
 @vindex org-html-postamble
 @vindex org-html-table-default-attributes
-@vindex org-html-style-include-default
-@vindex org-html-style-include-scripts
+@vindex org-html-head-include-default-style
+@vindex org-html-head-include-scripts
 @multitable @columnfractions 0.32 0.68
 @item @code{:html-doctype}          @tab @code{org-html-doctype}
 @item @code{:html-xml-declaration}  @tab @code{org-html-xml-declaration}
@@ -13275,8 +13336,8 @@ string of these options for details.
 @item @code{:html-preamble}         @tab @code{org-html-preamble}
 @item @code{:html-postamble}        @tab @code{org-html-postamble}
 @item @code{:html-table-attributes}        @tab @code{org-html-table-default-attributes}
-@item @code{:html-head-include-default-style} @tab @code{org-html-style-include-default}
-@item @code{:html-head-include-scripts} @tab @code{org-html-style-include-scripts}
+@item @code{:html-head-include-default-style} @tab @code{org-html-head-include-default-style}
+@item @code{:html-head-include-scripts} @tab @code{org-html-head-include-scripts}
 @end multitable
 
 Most of the @code{org-export-with-*} variables have the same effect in each
@@ -14809,7 +14870,7 @@ references will not be expanded when the code block is exported.
 @item @code{strip-export}
 ``Noweb'' syntax references in the body of the code block will be expanded
 before the block is evaluated or tangled.  However, ``noweb'' syntax
-references will not be removed when the code block is exported.
+references will be removed when the code block is exported.
 @item @code{eval}
 ``Noweb'' syntax references in the body of the code block will only be
 expanded before the block is evaluated.
@@ -15185,7 +15246,7 @@ argument.
 @end example
 
 @node prologue, epilogue, post, Specific header arguments
-
+@subsubsection @code{:prologue}
 The value of the @code{prologue} header argument will be prepended to the
 code block body before execution.  For example, @code{:prologue "reset"} may
 be used to reset a gnuplot session before execution of a particular code
@@ -15198,7 +15259,7 @@ code blocks.  Also see @ref{epilogue}.
 @end lisp
 
 @node epilogue, , prologue, Specific header arguments
-
+@subsubsection @code{:epilogue}
 The value of the @code{epilogue} header argument will be appended to the code
 block body before execution.  Also see @ref{prologue}.
 

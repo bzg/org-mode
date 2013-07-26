@@ -25,6 +25,8 @@
 ;; This library implements a RSS 2.0 back-end for Org exporter, based on
 ;; the `html' back-end.
 ;;
+;; It requires Emacs 24.1 at least.
+;;
 ;; It provides two commands for export, depending on the desired output:
 ;; `org-rss-export-as-rss' (temporary buffer) and `org-rss-export-to-rss'
 ;; (as a ".xml" file).
@@ -48,7 +50,7 @@
 ;;    :base-directory "~/myhomepage/"
 ;;    :base-extension "org"
 ;;    :rss-image-url "http://lumiere.ens.fr/~guerry/images/faces/15.png"
-;;    :home-link-home "http://lumiere.ens.fr/~guerry/"
+;;    :html-link-home "http://lumiere.ens.fr/~guerry/"
 ;;    :rss-extension "xml"
 ;;    :publishing-directory "/home/guerry/public_html/"
 ;;    :publishing-function (org-rss-publish-to-rss)
@@ -58,6 +60,10 @@
 ;;    :table-of-contents nil))
 ;;
 ;; ... then rsync /home/guerry/public_html/ with your server.
+;;
+;; By default, the permalink for a blog entry points to the headline.
+;; You can specify a different one by using the :RSS_PERMALINK:
+;; property within an entry.
 
 ;;; Code:
 
@@ -213,6 +219,14 @@ is the property list for the given project.  PUB-DIR is the
 publishing directory.
 
 Return output file name."
+  (let ((bf (get-file-buffer filename)))
+    (if bf
+	(with-current-buffer bf
+	  (org-rss-add-pubdate-property)
+	  (write-file filename))
+      (find-file filename)
+      (org-rss-add-pubdate-property)
+      (write-file filename) (kill-buffer)))
   (org-publish-org-to
    'rss filename (concat "." org-rss-extension) plist pub-dir))
 
@@ -227,6 +241,9 @@ communication channel."
 	      (> (org-export-get-relative-level headline info) 1))
     (let* ((htmlext (plist-get info :html-extension))
 	   (hl-number (org-export-get-headline-number headline info))
+	   (hl-home (file-name-as-directory (plist-get info :html-link-home)))
+	   (hl-pdir (plist-get info :publishing-directory))
+	   (hl-perm (org-element-property :RSS_PERMALINK headline))
 	   (anchor
 	    (org-export-solidify-link-text
 	     (or (org-element-property :CUSTOM_ID headline)
@@ -236,20 +253,18 @@ communication channel."
 	   (pubdate
 	    (let ((system-time-locale "C"))
 	      (format-time-string
-	       "%a, %d %h %Y %H:%M:%S %Z"
+	       "%a, %d %h %Y %H:%M:%S %z"
 	       (org-time-string-to-time
 		(or (org-element-property :PUBDATE headline)
 		    (error "Missing PUBDATE property"))))))
-	   (title (org-rss-plain-text
-		   (org-element-property :raw-value headline) info))
+	   (title (org-element-property :raw-value headline))
 	   (publink
-	    (concat
-	     (file-name-as-directory
-	      (or (plist-get info :html-link-home)
-		  (plist-get info :publishing-directory)))
-	     (file-name-nondirectory
-	      (file-name-sans-extension
-	       (buffer-file-name))) "." htmlext "#" anchor))
+	    (or (and hl-perm (concat (or hl-home hl-pdir) hl-perm))
+		(concat
+		 (or hl-home hl-pdir)
+		 (file-name-nondirectory
+		  (file-name-sans-extension
+		   (plist-get info :input-file))) "." htmlext "#" anchor)))
 	   (guid (if org-rss-use-entry-url-as-guid
 		     publink
 		   (org-rss-plain-text
@@ -305,12 +320,12 @@ as a communication channel."
 (defun org-rss-build-channel-info (info)
   "Build the RSS channel information."
   (let* ((system-time-locale "C")
-	 (title (org-export-data (plist-get info :title) info))
+	 (title (plist-get info :title))
 	 (email (org-export-data (plist-get info :email) info))
 	 (author (and (plist-get info :with-author)
 		      (let ((auth (plist-get info :author)))
 			(and auth (org-export-data auth info)))))
-	 (date (format-time-string "%a, %d %h %Y %H:%M:%S %Z")) ;; RFC 882
+	 (date (format-time-string "%a, %d %h %Y %H:%M:%S %z")) ;; RFC 882
 	 (description (org-export-data (plist-get info :description) info))
 	 (lang (plist-get info :language))
 	 (keywords (plist-get info :keywords))
@@ -318,10 +333,11 @@ as a communication channel."
 	 (blogurl (or (plist-get info :html-link-home)
 		      (plist-get info :publishing-directory)))
 	 (image (url-encode-url (plist-get info :rss-image-url)))
+	 (ifile (plist-get info :input-file))
 	 (publink
 	  (concat (file-name-as-directory blogurl)
 		   (file-name-nondirectory
-		    (file-name-sans-extension (buffer-file-name)))
+		    (file-name-sans-extension ifile))
 		  "." rssext)))
     (format
      "\n<title>%s</title>
@@ -332,7 +348,7 @@ as a communication channel."
 <pubDate>%s</pubDate>
 <lastBuildDate>%s</lastBuildDate>
 <generator>%s</generator>
-<webMaster>%s</webMaster>
+<webMaster>%s (%s)</webMaster>
 <image>
 <url>%s</url>
 <title>%s</title>
@@ -344,7 +360,7 @@ as a communication channel."
 		     emacs-major-version
 		     emacs-minor-version)
 	     " Org-mode " (org-version))
-     email image title blogurl)))
+     email author image title blogurl)))
 
 (defun org-rss-section (section contents info)
   "Transcode SECTION element into RSS format.

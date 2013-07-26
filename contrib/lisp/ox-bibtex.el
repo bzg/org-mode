@@ -28,6 +28,8 @@
 ;;
 ;;   http://www.lri.fr/~filliatr/bibtex2html/
 ;;
+;; It also introduces "cite" syntax for Org links.
+;;
 ;; The usage is as follows:
 ;;
 ;;   #+BIBLIOGRAPHY: bibfilebasename stylename optional-options
@@ -64,9 +66,18 @@
 ;; into the TeX file when exporting.
 ;;
 ;; For HTML export it:
-;; 1) converts all \cite{foo} to links to the bibliography,
+;; 1) converts all \cite{foo} and [[cite:foo]] to links to the
+;;    bibliography,
 ;; 2) creates a foo.html and foo_bib.html,
 ;; 3) includes the contents of foo.html in the exported HTML file.
+;;
+;; For LaTeX export it:
+;; 1) converts all [[cite:foo]] to \cite{foo}.
+
+;; Initialization
+
+(eval-when-compile (require 'cl))
+(org-add-link-type "cite" 'ebib)
 
 
 ;;; Internal Functions
@@ -109,18 +120,22 @@ contains a list of strings to be passed as options ot
                       (setq limit (not (equal "nil" value))))
                      ((equal "option" key) (push value options)))))))))
 
-(defun org-bibtex-citation-p (fragment)
-  "Non-nil when a LaTeX macro is a citation.
-FRAGMENT is a `latex-fragment' type object."
-  (string-match "\\`\\\\cite{" (org-element-property :value fragment)))
+(defun org-bibtex-citation-p (object)
+  "Non-nil when OBJECT is a citation."
+  (case (org-element-type object)
+    (link (equal (org-element-property :type object) "cite"))
+    (latex-fragment
+     (string-match "\\`\\\\cite{" (org-element-property :value object)))))
 
 (defun org-bibtex-get-citation-key (citation)
   "Return key for a given citation, as a string.
-CITATION is a `latex-fragment' type object satisfying to
-`org-bibtex-citation-p' predicate."
-  (let ((value (org-element-property :value citation)))
-    (and (string-match "\\`\\\\cite{" value)
-         (substring value (match-end 0) -1))))
+CITATION is a `latex-fragment' or `link' type object satisfying
+to `org-bibtex-citation-p' predicate."
+  (if (eq (org-element-type citation) 'link)
+      (org-element-property :path citation)
+    (let ((value (org-element-property :value citation)))
+      (and (string-match "\\`\\\\cite{" value)
+	   (substring value (match-end 0) -1)))))
 
 
 
@@ -139,7 +154,16 @@ Fallback to `latex' back-end for other keywords."
                 (concat (and style (format "\\bibliographystyle{%s}\n" style))
                         (format "\\bibliography{%s}" file))))))))
 
+(defadvice org-latex-link (around bibtex-link)
+  "Translate \"cite\" type links into LaTeX syntax.
+Fallback to `latex' back-end for other keywords."
+  (let ((link (ad-get-arg 0)))
+    (if (not (org-bibtex-citation-p link)) ad-do-it
+      (setq ad-return-value
+	    (format "\\cite{%s}" (org-bibtex-get-citation-key link))))))
+
 (ad-activate 'org-latex-keyword)
+(ad-activate 'org-latex-link)
 
 
 
@@ -176,8 +200,25 @@ Fallback to `html' back-end for other keywords."
              (org-split-string (org-bibtex-get-citation-key fragment) ",")
              "")))))
 
+(defadvice org-html-link (around bibtex-link)
+  "Translate \"cite:\" type links into HTML syntax.
+Fallback to `html' back-end for other types."
+  (let ((link (ad-get-arg 0)))
+    (if (not (org-bibtex-citation-p link)) ad-do-it
+      (setq ad-return-value
+	    (mapconcat
+	     (lambda (key)
+	       (format "[<a href=\"#%s\">%s</a>]"
+		       key
+		       (or (cdr (assoc key org-bibtex-html-entries-alist))
+			   key)))
+	     (org-split-string (org-bibtex-get-citation-key link)
+			       "[ \t]*,[ \t]*")
+	     "")))))
+
 (ad-activate 'org-html-keyword)
 (ad-activate 'org-html-latex-fragment)
+(ad-activate 'org-html-link)
 
 
 ;;;; Filter
@@ -202,10 +243,10 @@ Return new parse tree.  This function assumes current back-end is HTML."
           ;; argument.
           (when (plist-get arguments :limit)
             (let ((citations
-                   (org-element-map tree 'latex-fragment
-                     (lambda (fragment)
-                       (and (org-bibtex-citation-p fragment)
-                            (org-bibtex-get-citation-key fragment))))))
+                   (org-element-map tree '(latex-fragment link)
+                     (lambda (object)
+                       (and (org-bibtex-citation-p object)
+			    (org-bibtex-get-citation-key object))))))
               (with-temp-file (setq temp-file (make-temp-file "ox-bibtex"))
                 (insert (mapconcat 'identity citations "\n")))
               (setq arguments

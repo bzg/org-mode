@@ -117,6 +117,7 @@
     (:html-doctype "HTML_DOCTYPE" nil org-html-doctype)
     (:html-container "HTML_CONTAINER" nil org-html-container-element)
     (:html-html5-fancy nil "html5-fancy" org-html-html5-fancy)
+    (:html-link-use-abs-url nil "html-link-use-abs-url" org-html-link-use-abs-url)
     (:html-link-home "HTML_LINK_HOME" nil org-html-link-home)
     (:html-link-up "HTML_LINK_UP" nil org-html-link-up)
     (:html-mathjax "HTML_MATHJAX" nil "" space)
@@ -713,16 +714,14 @@ When nil, the links still point to the plain `.org' file."
 
 ;;;; Links :: Inline images
 
-(defcustom org-html-inline-images 'maybe
+(defcustom org-html-inline-images t
   "Non-nil means inline images into exported HTML pages.
 This is done using an <img> tag.  When nil, an anchor with href is used to
-link to the image.  If this option is `maybe', then images in links with
-an empty description will be inlined, while images with a description will
-be linked only."
+link to the image."
   :group 'org-export-html
-  :type '(choice (const :tag "Never" nil)
-		 (const :tag "Always" t)
-		 (const :tag "When there is no description" maybe)))
+  :version "24.4"
+  :package-version '(Org . "8.1")
+  :type 'boolean)
 
 (defcustom org-html-inline-image-rules
   '(("file" . "\\.\\(jpeg\\|jpg\\|png\\|gif\\|svg\\)\\'")
@@ -1186,6 +1185,13 @@ example."
   :group 'org-export-html
   :type '(string :tag "File or URL"))
 
+(defcustom org-html-link-use-abs-url nil
+  "Should we prepend relative links with HTML_LINK_HOME?"
+  :group 'org-export-html
+  :version "24.4"
+  :package-version '(Org . "8.1")
+  :type 'boolean)
+
 (defcustom org-html-home/up-format
   "<div id=\"org-div-home-and-up\">
  <a accesskey=\"h\" href=\"%s\"> UP </a>
@@ -1326,39 +1332,43 @@ attributes with a nil value will be omitted from the result."
                              "\"" "&quot;" (org-html-encode-plain-text item))))
                  (setcar output (format "%s=\"%s\"" key value))))))))
 
-(defun org-html-format-inline-image (src info &optional
-					 caption label attr standalone-p)
-  "Format an inline image from SRC.
-CAPTION, LABEL and ATTR are optional arguments providing the
-caption, the label and the attribute of the image.
-When STANDALONE-P is t, wrap the <img.../> into a <div>...</div>."
-  (let* ((id (if (not label) ""
-	       (format " id=\"%s\"" (org-export-solidify-link-text label))))
-	 (attr (concat attr
-		       (format " src=\"%s\"" src)
-		       (cond
-			((string-match "\\<alt=" (or attr "")) "")
-			((string-match "^ltxpng/" src)
-			 (format " alt=\"%s\""
-				 (org-html-encode-plain-text
-				  (org-find-text-property-in-string
-				   'org-latex-src src))))
-			(t (format " alt=\"%s\""
-				   (file-name-nondirectory src))))))
-	 (html5-fancy (and (org-html-html5-p info)
-			   (plist-get info :html-html5-fancy))))
-    (cond
-     (standalone-p
-      (let ((img (org-html-close-tag "img" attr info)))
-	(format (if html5-fancy
-		    "\n<figure%s>%s%s\n</figure>"
-		  "\n<div%s class=\"figure\">%s%s\n</div>")
-		id (format "\n<p>%s</p>" img)
-		(if (and caption (not (string= caption "")))
-		    (format (if html5-fancy
-				"\n<figcaption>%s</figcaption>"
-			      "\n<p>%s</p>") caption) ""))))
-     (t (org-html-close-tag "img" (concat attr id) info)))))
+(defun org-html--wrap-image (contents info &optional caption label)
+  "Wrap CONTENTS string within an appropriate environment for images.
+INFO is a plist used as a communication channel.  When optional
+arguments CAPTION and LABEL are given, use them for caption and
+\"id\" attribute."
+  (let ((html5-fancy (and (org-html-html5-p info)
+			  (plist-get info :html-html5-fancy))))
+    (format (if html5-fancy "\n<figure%s>%s%s\n</figure>"
+	      "\n<div%s class=\"figure\">%s%s\n</div>")
+	    ;; ID.
+	    (if (not (org-string-nw-p label)) ""
+	      (format " id=\"%s\"" (org-export-solidify-link-text label)))
+	    ;; Contents.
+	    (format "\n<p>%s</p>" contents)
+	    ;; Caption.
+	    (if (not (org-string-nw-p caption)) ""
+	      (format (if html5-fancy "\n<figcaption>%s</figcaption>"
+			"\n<p>%s</p>")
+		      caption)))))
+
+(defun org-html--format-image (source attributes info)
+  "Return \"img\" tag with given SOURCE and ATTRIBUTES.
+SOURCE is a string specifying the location of the image.
+ATTRIBUTES is a plist, as returned by
+`org-export-read-attribute'.  INFO is a plist used as
+a communication channel."
+  (org-html-close-tag
+   "img"
+   (org-html--make-attribute-string
+    (org-combine-plists
+     (list :src source
+	   :alt (if (string-match-p "^ltxpng/" source)
+		    (org-html-encode-plain-text
+		     (org-find-text-property-in-string 'org-latex-src source))
+		  (file-name-nondirectory source)))
+     attributes))
+   info))
 
 (defun org-html--textarea-block (element)
   "Transcode ELEMENT into a textarea block.
@@ -1369,6 +1379,13 @@ ELEMENT is either a src block or an example block."
 	    (or (plist-get attr :width) 80)
 	    (or (plist-get attr :height) (org-count-lines code))
 	    code)))
+
+(defun org-html--has-caption-p (element &optional info)
+  "Non-nil when ELEMENT has a caption affiliated keyword.
+INFO is a plist used as a communication channel.  This function
+is meant to be used as a predicate for `org-export-get-ordinal' or
+a value to `org-html-standalone-image-predicate'."
+  (org-element-property :caption element))
 
 ;;;; Table
 
@@ -1911,9 +1928,13 @@ contents as a string, or nil if it is empty."
 	 (mapcar (lambda (headline)
 		   (cons (org-html--format-toc-headline headline info)
 			 (org-export-get-relative-level headline info)))
-		 (org-export-collect-headlines info depth))))
+		 (org-export-collect-headlines info depth)))
+	(outer-tag (if (and (org-html-html5-p info)
+			    (plist-get info :html-html5-fancy))
+		       "nav"
+		     "div")))
     (when toc-entries
-      (concat "<div id=\"table-of-contents\">\n"
+      (concat (format "<%s id=\"table-of-contents\">\n" outer-tag)
 	      (format "<h%d>%s</h%d>\n"
 		      org-html-toplevel-hlevel
 		      (org-html--translate "Table of Contents" info)
@@ -1921,7 +1942,7 @@ contents as a string, or nil if it is empty."
 	      "<div id=\"text-table-of-contents\">"
 	      (org-html--toc-text toc-entries)
 	      "</div>\n"
-	      "</div>\n"))))
+	      (format "</%s>\n" outer-tag)))))
 
 (defun org-html--toc-text (toc-entries)
   "Return innards of a table of contents, as a string.
@@ -1966,16 +1987,17 @@ INFO is a plist used as a communication channel."
 					   headline-number "-"))))
 	    ;; Body.
 	    (concat section-number
-		    (org-export-data-with-translations
+		    (org-export-data-with-backend
 		     (org-export-get-alt-title headline info)
-		     ;; Ignore any footnote-reference, link,
-		     ;; radio-target and target in table of contents.
-		     (append
-		      '((footnote-reference . ignore)
-			(link . (lambda (link desc i) desc))
-			(radio-target . (lambda (radio desc i) desc))
-			(target . ignore))
-		      (org-export-backend-translate-table 'html))
+		     ;; Create an anonymous back-end that will ignore
+		     ;; any footnote-reference, link, radio-target and
+		     ;; target in table of contents.
+		     (org-export-create-backend
+		      :parent 'html
+		      :transcoders '((footnote-reference . ignore)
+				     (link . (lambda (object c i) c))
+				     (radio-target . (lambda (object c i) c))
+				     (target . ignore)))
 		     info)
 		    (and tags "&#xa0;&#xa0;&#xa0;") (org-html--tags tags)))))
 
@@ -1992,7 +2014,8 @@ of listings as a string, or nil if it is empty."
 		      org-html-toplevel-hlevel)
 	      "<div id=\"text-list-of-listings\">\n<ul>\n"
 	      (let ((count 0)
-		    (initial-fmt (org-html--translate "Listing %d:" info)))
+		    (initial-fmt (format "<span class=\"listing-number\">%s</span>"
+					 (org-html--translate "Listing %d:" info))))
 		(mapconcat
 		 (lambda (entry)
 		   (let ((label (org-element-property :name entry))
@@ -2026,7 +2049,8 @@ of tables as a string, or nil if it is empty."
 		      org-html-toplevel-hlevel)
 	      "<div id=\"text-list-of-tables\">\n<ul>\n"
 	      (let ((count 0)
-		    (initial-fmt (org-html--translate "Table %d:" info)))
+		    (initial-fmt (format "<span class=\"table-number\">%s</span>"
+					 (org-html--translate "Table %d:" info))))
 		(mapconcat
 		 (lambda (entry)
 		   (let ((label (org-element-property :name entry))
@@ -2213,15 +2237,13 @@ holding contextual information."
 	 (headline-label (or (org-element-property :CUSTOM_ID headline)
 			     (concat "sec-" (mapconcat 'number-to-string
 						       headline-number "-"))))
-	 (format-function (cond
-			   ((functionp format-function) format-function)
-			   ((functionp org-html-format-headline-function)
-			    (function*
-			     (lambda (todo todo-type priority text tags
-					   &allow-other-keys)
-			       (funcall org-html-format-headline-function
-					todo todo-type priority text tags))))
-			   (t 'org-html-format-headline))))
+	 (format-function
+	  (cond ((functionp format-function) format-function)
+		((functionp org-html-format-headline-function)
+		 (lambda (todo todo-type priority text tags &rest ignore)
+		   (funcall org-html-format-headline-function
+			    todo todo-type priority text tags)))
+		(t 'org-html-format-headline))))
     (apply format-function
 	   todo todo-type  priority text tags
 	   :headline-label headline-label :level level
@@ -2471,21 +2493,19 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((processing-type (plist-get info :with-latex))
 	(latex-frag (org-remove-indentation
 		     (org-element-property :value latex-environment)))
-	(caption (org-export-data
-		  (org-export-get-caption latex-environment) info))
-	(attr nil)			; FIXME
-	(label (org-element-property :name latex-environment)))
-    (cond
-     ((memq processing-type '(t mathjax))
-      (org-html-format-latex latex-frag 'mathjax))
-     ((eq processing-type 'dvipng)
-      (let* ((formula-link (org-html-format-latex
-			    latex-frag processing-type)))
-	(when (and formula-link
-		   (string-match "file:\\([^]]*\\)" formula-link))
-	  (org-html-format-inline-image
-	   (match-string 1 formula-link) info caption label attr t))))
-     (t latex-frag))))
+	(attributes (org-export-read-attribute :attr_html latex-environment)))
+    (case processing-type
+      ((t mathjax)
+       (org-html-format-latex latex-frag 'mathjax))
+      ((dvipng imagemagick)
+       (let ((formula-link (org-html-format-latex latex-frag processing-type)))
+	 (when (and formula-link (string-match "file:\\([^]]*\\)" formula-link))
+	   ;; Do not provide a caption or a name to be consistent with
+	   ;; `mathjax' handling.
+	   (org-html--wrap-image
+	    (org-html--format-image
+	     (match-string 1 formula-link) attributes info) info))))
+      (t latex-frag))))
 
 ;;;; Latex Fragment
 
@@ -2497,13 +2517,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (case processing-type
       ((t mathjax)
        (org-html-format-latex latex-frag 'mathjax))
-      (dvipng
-       (let* ((formula-link (org-html-format-latex
-			     latex-frag processing-type)))
-	 (when (and formula-link
-		    (string-match "file:\\([^]]*\\)" formula-link))
-	   (org-html-format-inline-image
-	    (match-string 1 formula-link) info))))
+      ((dvipng imagemagick)
+       (let ((formula-link (org-html-format-latex latex-frag processing-type)))
+	 (when (and formula-link (string-match "file:\\([^]]*\\)" formula-link))
+	   (org-html--format-image (match-string 1 formula-link) nil info))))
       (t latex-frag))))
 
 ;;;; Line Break
@@ -2515,75 +2532,65 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Link
 
-(defun org-html-link--inline-image (link desc info)
-  "Return HTML code for an inline image.
-
-LINK is the link pointing to the inline image.  INFO is a plist
-used as a communication channel.
-
-Inline images can have these attributes:
-
-#+ATTR_HTML: :width 100px :height 100px :alt \"Alt description\"."
-  (let* ((type (org-element-property :type link))
-	 (raw-path (org-element-property :path link))
-	 (path (cond ((member type '("http" "https"))
-		      (concat type ":" raw-path))
-		     ((file-name-absolute-p raw-path)
-		      (expand-file-name raw-path))
-		     (t raw-path)))
-	 (parent (org-export-get-parent-element link))
-	 (caption (org-export-data (org-export-get-caption parent) info))
-	 (label (org-element-property :name parent)))
-    ;; Return proper string, depending on DISPOSITION.
-    (org-html-format-inline-image
-     path info caption label
-     (org-html--make-attribute-string
-      (org-export-read-attribute :attr_html parent))
-     (org-html-standalone-image-p link info))))
+(defun org-html-inline-image-p (link info)
+  "Non-nil when LINK is meant to appear as an image.
+INFO is a plist used as a communication channel.  LINK is an
+inline image when it has no description and targets an image
+file (see `org-html-inline-image-rules' for more information), or
+if its description is a single link targeting an image file."
+  (if (not (org-element-contents link))
+      (org-export-inline-image-p link org-html-inline-image-rules)
+    (not
+     (let ((link-count 0))
+       (org-element-map (org-element-contents link)
+	   (cons 'plain-text org-element-all-objects)
+	 (lambda (obj)
+	   (case (org-element-type obj)
+	     (plain-text (org-string-nw-p obj))
+	     (link (if (= link-count 1) t
+		     (incf link-count)
+		     (not (org-export-inline-image-p
+			   obj org-html-inline-image-rules))))
+	     (otherwise t)))
+         info t)))))
 
 (defvar org-html-standalone-image-predicate)
-(defun org-html-standalone-image-p (element info &optional predicate)
-  "Test if ELEMENT is a standalone image for the purpose HTML export.
+(defun org-html-standalone-image-p (element info)
+  "Test if ELEMENT is a standalone image.
+
 INFO is a plist holding contextual information.
 
-Return non-nil, if ELEMENT is of type paragraph and it's sole
-content, save for whitespaces, is a link that qualifies as an
+Return non-nil, if ELEMENT is of type paragraph and its sole
+content, save for white spaces, is a link that qualifies as an
 inline image.
 
-Return non-nil, if ELEMENT is of type link and it's containing
-paragraph has no other content save for leading and trailing
-whitespaces.
+Return non-nil, if ELEMENT is of type link and its containing
+paragraph has no other content save white spaces.
 
 Return nil, otherwise.
 
-Bind `org-html-standalone-image-predicate' to constrain
-paragraph further.  For example, to check for only captioned
-standalone images, do the following.
+Bind `org-html-standalone-image-predicate' to constrain paragraph
+further.  For example, to check for only captioned standalone
+images, set it to:
 
-  \(setq org-html-standalone-image-predicate
-	\(lambda \(paragraph\)
-	  \(org-element-property :caption paragraph\)\)\)"
+  \(lambda (paragraph) (org-element-property :caption paragraph))"
   (let ((paragraph (case (org-element-type element)
 		     (paragraph element)
-		     (link (and (org-export-inline-image-p
-				 element org-html-inline-image-rules)
-				(org-export-get-parent element)))
-		     (t nil))))
-    (when (eq (org-element-type paragraph) 'paragraph)
-      (when (or (not (and (boundp 'org-html-standalone-image-predicate)
-			  (functionp org-html-standalone-image-predicate)))
-		(funcall org-html-standalone-image-predicate paragraph))
-	(let ((contents (org-element-contents paragraph)))
-	  (loop for x in contents
-		with inline-image-count = 0
-		always (cond
-			((eq (org-element-type x) 'plain-text)
-			 (not (org-string-nw-p x)))
-			((eq (org-element-type x) 'link)
-			 (when (org-export-inline-image-p
-				x org-html-inline-image-rules)
-			   (= (incf inline-image-count) 1)))
-			(t nil))))))))
+		     (link (org-export-get-parent element)))))
+    (and (eq (org-element-type paragraph) 'paragraph)
+	 (or (not (and (boundp 'org-html-standalone-image-predicate)
+		       (functionp org-html-standalone-image-predicate)))
+	     (funcall org-html-standalone-image-predicate paragraph))
+	 (not (let ((link-count 0))
+		(org-element-map (org-element-contents paragraph)
+		    (cons 'plain-text org-element-all-objects)
+		  (lambda (obj) (case (org-element-type obj)
+			     (plain-text (org-string-nw-p obj))
+			     (link
+			      (or (> (incf link-count) 1)
+				  (not (org-html-inline-image-p obj info))))
+			     (otherwise t)))
+		  info 'first-match 'link))))))
 
 (defun org-html-link (link desc info)
   "Transcode a LINK object from Org to HTML.
@@ -2591,7 +2598,9 @@ standalone images, do the following.
 DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
-  (let* ((link-org-files-as-html-maybe
+  (let* ((home (org-trim (plist-get info :html-link-home)))
+	 (use-abs-url (plist-get info :html-link-use-abs-url))
+	 (link-org-files-as-html-maybe
 	  (function
 	   (lambda (raw-path info)
 	     "Treat links to `file.org' as links to `file.html', if needed.
@@ -2617,9 +2626,12 @@ INFO is a plist holding contextual information.  See
 		  (funcall link-org-files-as-html-maybe raw-path info))
 	    ;; If file path is absolute, prepend it with protocol
 	    ;; component - "file://".
-	    (when (file-name-absolute-p raw-path)
-	      (setq raw-path
-		    (concat "file://" (expand-file-name raw-path))))
+	    (cond ((file-name-absolute-p raw-path)
+		   (setq raw-path
+			 (concat "file://" (expand-file-name
+					    raw-path))))
+		  ((and home use-abs-url)
+		   (setq raw-path (concat (file-name-as-directory home) raw-path))))
 	    ;; Add search option, if any.  A search option can be
 	    ;; relative to a custom-id or a headline title.  Any other
 	    ;; option is ignored.
@@ -2639,25 +2651,28 @@ INFO is a plist holding contextual information.  See
 							numbers "-"))))))
 		    (t raw-path))))
 	   (t raw-path)))
-	 ;; Extract attributes from parent's paragraph. HACK: Only do
-	 ;; this for the first link in parent.  This is needed as long
-	 ;; as attributes cannot be set on a per link basis.
+	 ;; Extract attributes from parent's paragraph.  HACK: Only do
+	 ;; this for the first link in parent (inner image link for
+	 ;; inline images).  This is needed as long as attributes
+	 ;; cannot be set on a per link basis.
+	 (attributes-plist
+	  (let* ((parent (org-export-get-parent-element link))
+		 (link (let ((container (org-export-get-parent link)))
+			 (if (and (eq (org-element-type container) 'link)
+				  (org-html-inline-image-p link info))
+			     container
+			   link))))
+	    (and (eq (org-element-map parent 'link 'identity info t) link)
+		 (org-export-read-attribute :attr_html parent))))
 	 (attributes
-	  (let ((parent (org-export-get-parent-element link)))
-	    (if (not (eq (org-element-map parent 'link 'identity info t) link))
-		""
-	      (let ((att (org-html--make-attribute-string
-			  (org-export-read-attribute :attr_html parent))))
-		(cond ((not (org-string-nw-p att)) "")
-		      ((and desc (string-match (regexp-quote att) desc)) "")
-		      (t (concat " " att)))))))
+	  (let ((attr (org-html--make-attribute-string attributes-plist)))
+	    (if (org-string-nw-p attr) (concat " " attr) "")))
 	 protocol)
     (cond
      ;; Image file.
-     ((and (or (eq t org-html-inline-images)
-	       (and org-html-inline-images (not desc)))
+     ((and org-html-inline-images
 	   (org-export-inline-image-p link org-html-inline-image-rules))
-      (org-html-link--inline-image link desc info))
+      (org-html--format-image path attributes-plist info))
      ;; Radio target: Transcode target's contents and use them as
      ;; link's description.
      ((string= type "radio")
@@ -2688,8 +2703,6 @@ INFO is a plist holding contextual information.  See
 		   (or desc
 		       (org-export-data
 			(org-element-property :raw-link link) info))))
-	  ;; Fuzzy link points to an invisible target.
-	  (keyword nil)
 	  ;; Link points to a headline.
 	  (headline
 	   (let ((href
@@ -2723,21 +2736,24 @@ INFO is a plist holding contextual information.  See
 					       :title destination) info)))))
 	     (format "<a href=\"#%s\"%s>%s</a>"
 		     (org-export-solidify-link-text href) attributes desc)))
-	  ;; Fuzzy link points to a target.  Do as above.
+	  ;; Fuzzy link points to a target or an element.
 	  (t
-	   (let ((path (org-export-solidify-link-text path)) number)
-	     (unless desc
-	       (setq number (cond
-			     ((org-html-standalone-image-p destination info)
-			      (org-export-get-ordinal
-			       (assoc 'link (org-element-contents destination))
-			       info 'link 'org-html-standalone-image-p))
-			     (t (org-export-get-ordinal destination info))))
-	       (setq desc (when number
-			    (if (atom number) (number-to-string number)
-			      (mapconcat 'number-to-string number ".")))))
-	     (format "<a href=\"#%s\"%s>%s</a>"
-		     path attributes (or desc "No description for this link")))))))
+	   (let* ((path (org-export-solidify-link-text path))
+		  (org-html-standalone-image-predicate 'org-html--has-caption-p)
+		  (number (cond
+			   (desc nil)
+			   ((org-html-standalone-image-p destination info)
+			    (org-export-get-ordinal
+			     (org-element-map destination 'link
+			       'identity info t)
+			     info 'link 'org-html-standalone-image-p))
+			   (t (org-export-get-ordinal
+			       destination info nil 'org-html--has-caption-p))))
+		  (desc (cond (desc)
+			      ((not number) "No description for this link")
+			      ((numberp number) (number-to-string number))
+			      (t (mapconcat 'number-to-string number ".")))))
+	     (format "<a href=\"#%s\"%s>%s</a>" path attributes desc))))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
@@ -2776,11 +2792,27 @@ the plist used as a communication channel."
      ((and (eq (org-element-type parent) 'item)
 	   (= (org-element-property :begin paragraph)
 	      (org-element-property :contents-begin parent)))
-      ;; leading paragraph in a list item have no tags
+      ;; Leading paragraph in a list item have no tags.
       contents)
      ((org-html-standalone-image-p paragraph info)
-      ;; standalone image
-      contents)
+      ;; Standalone image.
+      (let ((caption
+	     (let ((raw (org-export-data
+			 (org-export-get-caption paragraph) info))
+		   (org-html-standalone-image-predicate
+		    'org-html--has-caption-p))
+	       (if (not (org-string-nw-p raw)) raw
+		 (concat
+                  "<span class=\"figure-number\">"
+		  (format (org-html--translate "Figure %d:" info)
+			  (org-export-get-ordinal
+			   (org-element-map paragraph 'link
+			     'identity info t)
+			   info nil 'org-html-standalone-image-p))
+		  "</span> " raw))))
+	    (label (org-element-property :name paragraph)))
+	(org-html--wrap-image contents info caption label)))
+     ;; Regular paragraph.
      (t (format "<p%s>\n%s</p>" extra contents)))))
 
 ;;;; Plain List
@@ -3145,13 +3177,15 @@ contextual information."
     (t
      (let* ((label (org-element-property :name table))
 	    (caption (org-export-get-caption table))
+	    (number (org-export-get-ordinal
+		     table info nil 'org-html--has-caption-p))
 	    (attributes
-	     (if (org-html-html5-p info) ""
-	       (org-html--make-attribute-string
-		(org-combine-plists
-		 (and label (list :id (org-export-solidify-link-text label)))
-		 (plist-get info :html-table-attributes)
-		 (org-export-read-attribute :attr_html table)))))
+	     (org-html--make-attribute-string
+	      (org-combine-plists
+	       (and label (list :id (org-export-solidify-link-text label)))
+	       (and (not (org-html-html5-p info))
+		    (plist-get info :html-table-attributes))
+	       (org-export-read-attribute :attr_html table))))
 	    (alignspec
 	     (if (and (boundp 'org-html-format-table-no-css)
 		      org-html-format-table-no-css)
@@ -3183,7 +3217,10 @@ contextual information."
 		 (format (if org-html-table-caption-above
 			     "<caption align=\"above\">%s</caption>"
 			   "<caption align=\"bottom\">%s</caption>")
-			 (org-export-data caption info)))
+			 (concat
+			  "<span class=\"table-number\">"
+                          (format (org-html--translate "Table %d:" info) number)
+			  "</span> " (org-export-data caption info))))
 	       (funcall table-column-specs table info)
 	       contents)))))
 

@@ -121,9 +121,9 @@
   (add-to-list 'org-latex-classes
 	       '("beamer"
 		 "\\documentclass[presentation]{beamer}
-     \[DEFAULT-PACKAGES]
-     \[PACKAGES]
-     \[EXTRA]"
+\[DEFAULT-PACKAGES]
+\[PACKAGES]
+\[EXTRA]"
 		 ("\\section{%s}" . "\\section*{%s}")
 		 ("\\subsection{%s}" . "\\subsection*{%s}")
 		 ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
@@ -194,12 +194,13 @@ open    The opening template for the environment, with the following escapes
         %A   the default action/overlay specification
         %o   the options argument of the template
         %h   the headline text
-        %H   if there is headline text, that text in {} braces
-        %U   if there is headline text, that text in [] brackets
+        %r   the raw headline text (i.e. without any processing)
+        %H   if there is headline text, that raw text in {} braces
+        %U   if there is headline text, that raw text in [] brackets
 close   The closing string of the environment."
   :group 'org-export-beamer
   :version "24.4"
-  :package-version '(Org . "8.0")
+  :package-version '(Org . "8.1")
   :type '(repeat
 	  (list
 	   (string :tag "Environment")
@@ -543,6 +544,7 @@ used as a communication channel."
 			      (append org-beamer-environments-special
 				      org-beamer-environments-extra
 				      org-beamer-environments-default))))
+	 (raw-title (org-element-property :raw-value headline))
 	 (title (org-export-data (org-element-property :title headline) info))
 	 (options (let ((options (org-element-property :BEAMER_OPT headline)))
 		    (if (not options) ""
@@ -608,8 +610,11 @@ used as a communication channel."
 		    (cons "A" "")))))
 	  (list (cons "o" options)
 		(cons "h" title)
-		(cons "H" (if (equal title "") "" (format "{%s}" title)))
-		(cons "U" (if (equal title "") "" (format "[%s]" title))))))
+		(cons "r" raw-title)
+		(cons "H" (if (equal raw-title "") ""
+			    (format "{%s}" raw-title)))
+		(cons "U" (if (equal raw-title "") ""
+			    (format "[%s]" raw-title))))))
 	"\n"))
      contents
      ;; Block's closing string.
@@ -856,28 +861,30 @@ holding export options."
      (and (plist-get info :time-stamp-file)
 	  (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
      ;; 2. Document class and packages.
-     (let ((class (plist-get info :latex-class))
-	   (class-options (plist-get info :latex-class-options)))
-       (org-element-normalize-string
-	(let* ((header (nth 1 (assoc class org-latex-classes)))
-	       (document-class-string
-		(and (stringp header)
-		     (if (not class-options) header
-		       (replace-regexp-in-string
-			"^[ \t]*\\\\documentclass\\(\\(\\[[^]]*\\]\\)?\\)"
-			class-options header t nil 1)))))
-	  (if (not document-class-string)
-	      (user-error "Unknown LaTeX class `%s'" class)
-	    (org-latex-guess-babel-language
-	     (org-latex-guess-inputenc
-	      (org-splice-latex-header
-	       document-class-string
-	       org-latex-default-packages-alist
-	       org-latex-packages-alist nil
-	       (concat (plist-get info :latex-header)
-		       (plist-get info :latex-header-extra)
-		       (plist-get info :beamer-header-extra))))
-	     info)))))
+     (let* ((class (plist-get info :latex-class))
+	    (class-options (plist-get info :latex-class-options))
+	    (header (nth 1 (assoc class org-latex-classes)))
+	    (document-class-string
+	     (and (stringp header)
+		  (if (not class-options) header
+		    (replace-regexp-in-string
+		     "^[ \t]*\\\\documentclass\\(\\(\\[[^]]*\\]\\)?\\)"
+		     class-options header t nil 1)))))
+       (if (not document-class-string)
+	   (user-error "Unknown LaTeX class `%s'" class)
+	 (org-latex-guess-babel-language
+	  (org-latex-guess-inputenc
+	   (org-element-normalize-string
+	    (org-splice-latex-header
+	     document-class-string
+	     org-latex-default-packages-alist
+	     org-latex-packages-alist nil
+	     (concat (org-element-normalize-string
+		      (plist-get info :latex-header))
+		     (org-element-normalize-string
+		      (plist-get info :latex-header-extra))
+		     (plist-get info :beamer-header-extra)))))
+	  info)))
      ;; 3. Insert themes.
      (let ((format-theme
 	    (function

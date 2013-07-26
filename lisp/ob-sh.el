@@ -106,7 +106,7 @@ var of the same value."
   "Convert an elisp value to a string."
   (let ((echo-var (lambda (v) (if (stringp v) v (format "%S" v)))))
     (cond
-     ((and (listp var) (or (listp (car var)) 'hline))
+     ((and (listp var) (or (listp (car var)) (equal (car var) 'hline)))
       (orgtbl-to-generic var  (list :sep (or sep "\t") :fmt echo-var)))
      ((listp var)
       (mapconcat echo-var var "\n"))

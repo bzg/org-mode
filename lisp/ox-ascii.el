@@ -665,11 +665,13 @@ caption keyword."
 	      element info nil 'org-ascii--has-caption-p))
 	    (title-fmt (org-ascii--translate
 			(case (org-element-type element)
-			  (table "Table %d: %s")
-			  (src-block "Listing %d: %s"))
+			  (table "Table %d:")
+			  (src-block "Listing %d:"))
 			info)))
 	(org-ascii--fill-string
-	 (format title-fmt reference (org-export-data caption info))
+	 (concat (format title-fmt reference)
+		 " "
+		 (org-export-data caption info))
 	 (org-ascii--current-text-width element info) info)))))
 
 (defun org-ascii--build-toc (info &optional n keyword)

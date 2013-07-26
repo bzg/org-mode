@@ -114,12 +114,20 @@ if so then run the appropriate source block from the Library."
 			  (or (funcall nonempty 8 19) ""))
 		  (funcall nonempty 9 18)))
 	 (list (length (if (= (length (match-string 12)) 0)
-			   (match-string 2) (match-string 11)))))))))
+			   (match-string 2) (match-string 11)))
+	       (save-excursion
+		 (forward-line -1)
+		 (and (looking-at (concat org-babel-src-name-regexp
+					  "\\([^\n]*\\)$"))
+		      (org-no-properties (match-string 1))))))))))
 
 (defvar org-babel-default-header-args:emacs-lisp) ; Defined in ob-emacs-lisp.el
 (defun org-babel-lob-execute (info)
   "Execute the lob call specified by INFO."
-  (let* ((mkinfo (lambda (p) (list "emacs-lisp" "results" p nil nil (nth 2 info))))
+  (let* ((mkinfo (lambda (p)
+		   (list "emacs-lisp" "results" p nil
+			 (nth 3 info) ;; name
+			 (nth 2 info))))
 	 (pre-params (apply #'org-babel-merge-params
 			    org-babel-default-header-args
 			    org-babel-default-header-args:emacs-lisp
@@ -130,7 +138,7 @@ if so then run the appropriate source block from the Library."
 			       (org-no-properties
 				(concat
 				 ":var results="
-				 (mapconcat #'identity (butlast info)
+				 (mapconcat #'identity (butlast info 2)
 					    " "))))))))
 	 (pre-info (funcall mkinfo pre-params))
 	 (cache-p (and (cdr (assoc :cache pre-params))

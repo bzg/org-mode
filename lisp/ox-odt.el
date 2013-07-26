@@ -288,38 +288,37 @@ according to the default face identified by the `htmlfontify'.")
     ("category-and-value" "%e %n: %c" "category-and-value" "%e %n")
     ("value" "%e %n: %c" "value" "%n"))
   "Specify how labels are applied and referenced.
-This is an alist where each element is of the
-form (LABEL-STYLE-NAME LABEL-ATTACH-FMT LABEL-REF-MODE
-LABEL-REF-FMT).
 
-LABEL-ATTACH-FMT controls how labels and captions are attached to
-an entity.  It may contain following specifiers - %e, %n and %c.
-%e is replaced with the CATEGORY-NAME.  %n is replaced with
+This is an alist where each element is of the form:
+
+  \(STYLE-NAME ATTACH-FMT REF-MODE REF-FMT)
+
+ATTACH-FMT controls how labels and captions are attached to an
+entity.  It may contain following specifiers - %e and %c.  %e is
+replaced with the CATEGORY-NAME.  %n is replaced with
 \"<text:sequence ...> SEQNO </text:sequence>\".  %c is replaced
-with CAPTION. See `org-odt-format-label-definition'.
+with CAPTION.
 
-LABEL-REF-MODE and LABEL-REF-FMT controls how label references
-are generated.  The following XML is generated for a label
-reference - \"<text:sequence-ref
-text:reference-format=\"LABEL-REF-MODE\" ...> LABEL-REF-FMT
-</text:sequence-ref>\".  LABEL-REF-FMT may contain following
+REF-MODE and REF-FMT controls how label references are generated.
+The following XML is generated for a label reference -
+\"<text:sequence-ref text:reference-format=\"REF-MODE\" ...>
+REF-FMT </text:sequence-ref>\".  REF-FMT may contain following
 specifiers - %e and %n.  %e is replaced with the CATEGORY-NAME.
-%n is replaced with SEQNO. See
-`org-odt-format-label-reference'.")
+%n is replaced with SEQNO.
+
+See also `org-odt-format-label'.")
 
 (defvar org-odt-category-map-alist
   '(("__Table__" "Table" "value" "Table" org-odt--enumerable-p)
     ("__Figure__" "Illustration" "value" "Figure" org-odt--enumerable-image-p)
     ("__MathFormula__" "Text" "math-formula" "Equation" org-odt--enumerable-formula-p)
     ("__DvipngImage__" "Equation" "value" "Equation" org-odt--enumerable-latex-image-p)
-    ("__Listing__" "Listing" "value" "Listing" org-odt--enumerable-p)
-    ;; ("__Table__" "Table" "category-and-value")
-    ;; ("__Figure__" "Figure" "category-and-value")
-    ;; ("__DvipngImage__" "Equation" "category-and-value")
-    )
+    ("__Listing__" "Listing" "value" "Listing" org-odt--enumerable-p))
   "Map a CATEGORY-HANDLE to OD-VARIABLE and LABEL-STYLE.
-This is a list where each entry is of the form \\(CATEGORY-HANDLE
-OD-VARIABLE LABEL-STYLE CATEGORY-NAME ENUMERATOR-PREDICATE\\).
+
+This is a list where each entry is of the form:
+
+  \(CATEGORY-HANDLE OD-VARIABLE LABEL-STYLE CATEGORY-NAME ENUMERATOR-PREDICATE)
 
 CATEGORY_HANDLE identifies the captionable entity in question.
 
@@ -331,15 +330,7 @@ the entity.  These counters are declared within
 LABEL-STYLE is a key into `org-odt-label-styles' and specifies
 how a given entity should be captioned and referenced.
 
-CATEGORY-NAME is used for qualifying captions on export.  You can
-modify the CATEGORY-NAME used in the exported document by
-modifying `org-export-dictionary'.  For example, an embedded
-image in an English document is captioned as \"Figure 1: Orgmode
-Logo\", by default.  If you want the image to be captioned as
-\"Illustration 1: Orgmode Logo\" instead, install an entry in
-`org-export-dictionary' which translates \"Figure\" to
-\"Illustration\" when the language is \"en\" and encoding is
-`:utf-8'.
+CATEGORY-NAME is used for qualifying captions on export.
 
 ENUMERATOR-PREDICATE is used for assigning a sequence number to
 the entity.  See `org-odt--enumerate'.")
@@ -375,6 +366,7 @@ visually."
 
 ;;;; Document schema
 
+(require 'rng-loc)
 (defcustom org-odt-schema-dir
   (let* ((schema-dir
 	  (catch 'schema-dir
@@ -768,13 +760,14 @@ link's path."
   :type '(alist :key-type (string :tag "Type")
 		:value-type (regexp :tag "Path")))
 
-(defcustom org-odt-pixels-per-inch display-pixels-per-inch
+(defcustom org-odt-pixels-per-inch 96.0
   "Scaling factor for converting images pixels to inches.
 Use this for sizing of embedded images.  See Info node `(org)
 Images in ODT export' for more information."
   :type 'float
   :group 'org-export-odt
-  :version "24.1")
+  :version "24.4"
+  :package-version '(Org . "8.1"))
 
 
 ;;;; Src Block
@@ -1045,20 +1038,6 @@ See `org-odt--build-date-styles' for implementation details."
 	      (error "Extraction failed"))))
 	members))
 
-(defun org-odt--suppress-some-translators (info types)
-  ;; See comments in `org-odt-format-label' and `org-odt-toc'.
-  (org-combine-plists
-   info (list
-	 ;; Override translators.
-	 :translate-alist
-	 (nconc (mapcar (lambda (type) (cons type (lambda (data contents info)
-						    contents))) types)
-		(plist-get info :translate-alist))
-	 ;; Reset data translation cache.  FIXME.
-	 ;; :exported-data nil
-	 )))
-
-
 ;;;; Target
 
 (defun org-odt--target (text id)
@@ -1174,20 +1153,19 @@ See `org-odt--build-date-styles' for implementation details."
   (let* ((title (org-export-translate "Table of Contents" :utf-8 info))
 	 (headlines (org-export-collect-headlines
 		     info (and (wholenump depth) depth)))
-	 (translations (nconc (mapcar
-			       (lambda (type)
-				 (cons type (lambda (data contents info)
-					      contents)))
-			       (list 'radio-target))
-			      (plist-get info :translate-alist))))
+	 (backend (org-export-create-backend
+		   :parent (org-export-backend-name
+			    (plist-get info :back-end))
+		   :transcoders (mapcar
+				 (lambda (type) (cons type (lambda (d c i) c)))
+				 (list 'radio-target)))))
     (when headlines
       (concat
        (org-odt-begin-toc title depth)
        (mapconcat
 	(lambda (headline)
 	  (let* ((entry (org-odt-format-headline--wrap
-			 headline translations info
-			 'org-odt-format-toc-headline))
+			 headline backend info 'org-odt-format-toc-headline))
 		 (level (org-export-get-relative-level headline info))
 		 (style (format "Contents_20_%d" level)))
 	    (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
@@ -1753,18 +1731,22 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	(t
 	 (let* ((raw (org-export-get-footnote-definition
 		      footnote-reference info))
-		(translations
-		 (cons (cons 'paragraph
-			     (lambda (p c i)
-			       (org-odt--format-paragraph
-				p c "Footnote" "OrgFootnoteCenter"
-				"OrgFootnoteQuotations")))
-		       (org-export-backend-translate-table 'odt)))
-		(def (let ((def (org-trim (org-export-data-with-translations
-					   raw translations info))))
-		       (if (eq (org-element-type raw) 'org-data) def
-			 (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
-				 "Footnote" def)))))
+		(def
+		 (let ((def (org-trim
+			     (org-export-data-with-backend
+			      raw
+			      (org-export-create-backend
+			       :parent 'odt
+			       :transcoders
+			       '((paragraph . (lambda (p c i)
+						(org-odt--format-paragraph
+						 p c "Footnote"
+						 "OrgFootnoteCenter"
+						 "OrgFootnoteQuotations")))))
+			      info))))
+		   (if (eq (org-element-type raw) 'org-data) def
+		     (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+			     "Footnote" def)))))
 	   (funcall --format-footnote-definition n def))))))))
 
 
@@ -1797,13 +1779,12 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 			    "<text:span text:style-name=\"%s\">%s</text:span>"
 			    "OrgTag" tag)) tags " : "))))))
 
-(defun org-odt-format-headline--wrap (headline translations info
-						 &optional format-function
-						 &rest extra-keys)
-  "Transcode a HEADLINE element from Org to ODT.
-CONTENTS holds the contents of the headline.  INFO is a plist
-holding contextual information."
-  (setq translations (or translations (plist-get info :translate-alist)))
+(defun org-odt-format-headline--wrap (headline backend info
+					       &optional format-function
+					       &rest extra-keys)
+  "Transcode a HEADLINE element using BACKEND.
+INFO is a plist holding contextual information."
+  (setq backend (or backend (plist-get info :back-end)))
   (let* ((level (+ (org-export-get-relative-level headline info)))
 	 (headline-number (org-export-get-headline-number headline info))
 	 (section-number (and (org-export-numbered-headline-p headline info)
@@ -1811,13 +1792,13 @@ holding contextual information."
 					 headline-number ".")))
 	 (todo (and (plist-get info :with-todo-keywords)
 		    (let ((todo (org-element-property :todo-keyword headline)))
-		      (and todo (org-export-data-with-translations
-				 todo translations info)))))
+		      (and todo
+			   (org-export-data-with-backend todo backend info)))))
 	 (todo-type (and todo (org-element-property :todo-type headline)))
 	 (priority (and (plist-get info :with-priority)
 			(org-element-property :priority headline)))
-	 (text (org-export-data-with-translations
-		(org-element-property :title headline) translations info))
+	 (text (org-export-data-with-backend
+		(org-element-property :title headline) backend info))
 	 (tags (and (plist-get info :with-tags)
 		    (org-export-get-tags headline info)))
 	 (headline-label (concat "sec-" (mapconcat 'number-to-string
@@ -1827,7 +1808,7 @@ holding contextual information."
 			   ((functionp org-odt-format-headline-function)
 			    (function*
 			     (lambda (todo todo-type priority text tags
-					   &allow-other-keys)
+				      &allow-other-keys)
 			       (funcall org-odt-format-headline-function
 					todo todo-type priority text tags))))
 			   (t 'org-odt-format-headline))))
@@ -1956,7 +1937,7 @@ holding contextual information."
     (let ((format-function
 	   (function*
 	    (lambda (todo todo-type priority text tags
-			  &key contents &allow-other-keys)
+		     &key contents &allow-other-keys)
 	      (funcall org-odt-format-inlinetask-function
 		       todo todo-type priority text tags contents)))))
       (org-odt-format-headline--wrap
@@ -2122,6 +2103,16 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     tag))
 
 (defun org-odt-format-label (element info op)
+  "Return a label for ELEMENT.
+
+ELEMENT is a `link', `table', `src-block' or `paragraph' type
+element.  INFO is a plist used as a communication channel.  OP is
+either `definition' or `reference', depending on the purpose of
+the generated string.
+
+Return value is a string if OP is set to `reference' or a cons
+cell like CAPTION . SHORT-CAPTION) where CAPTION and
+SHORT-CAPTION are strings."
   (assert (memq (org-element-type element) '(link table src-block paragraph)))
   (let* ((caption-from
 	  (case (org-element-type element)
@@ -2161,15 +2152,14 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	 ;; will do.
 	 (short-caption
 	  (let ((short-caption (or short-caption caption))
-		(translations (nconc (mapcar
-				      (lambda (type)
-					(cons type (lambda (data contents info)
-						     contents)))
-				      org-element-all-objects)
-				     (plist-get info :translate-alist))))
+		(backend (org-export-create-backend
+			  :parent (org-export-backend-name
+				   (plist-get info :back-end))
+			  :transcoders
+			  (mapcar (lambda (type) (cons type (lambda (o c i) c)))
+				  org-element-all-objects))))
 	    (when short-caption
-	      (org-export-data-with-translations short-caption
-						 translations info)))))
+	      (org-export-data-with-backend short-caption backend info)))))
     (when (or label caption)
       (let* ((default-category
 	       (case (org-element-type element)
@@ -2199,8 +2189,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	    ;; Case 1: Handle Label definition.
 	    (definition
 	      ;; Assign an internal label, if user has not provided one
-	      (setq label (or label (format  "%s-%s" default-category seqno)))
-	      (setq label (org-export-solidify-link-text label))
+	      (setq label (org-export-solidify-link-text
+			   (or label (format  "%s-%s" default-category seqno))))
 	      (cons
 	       (concat
 		;; Sneak in a bookmark.  The bookmark is used when the
@@ -2209,8 +2199,11 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		(format "\n<text:bookmark text:name=\"%s\"/>" label)
 		;; Label definition: Typically formatted as below:
 		;;     CATEGORY SEQ-NO: LONG CAPTION
+		;; with translation for correct punctuation.
 		(format-spec
-		 (cadr (assoc-string label-style org-odt-label-styles t))
+		 (org-export-translate
+		  (cadr (assoc-string label-style org-odt-label-styles t))
+		  :utf-8 info)
 		 `((?e . ,category)
 		   (?n . ,(format
 			   "<text:sequence text:ref-name=\"%s\" text:name=\"%s\" text:formula=\"ooow:%s+1\" style:num-format=\"1\">%s</text:sequence>"
@@ -2786,63 +2779,58 @@ INFO is a plist holding contextual information.  See
      ;; Links pointing to a headline: Find destination and build
      ;; appropriate referencing command.
      ((member type '("custom-id" "fuzzy" "id"))
-      (let* ((destination (if (string= type "fuzzy")
-			      (org-export-resolve-fuzzy-link link info)
-			    (org-export-resolve-id-link link info))))
-	(or
-	 ;; Case 1: Fuzzy link points nowhere.
-	 (when (null (org-element-type destination))
+      (let ((destination (if (string= type "fuzzy")
+			     (org-export-resolve-fuzzy-link link info)
+			   (org-export-resolve-id-link link info))))
+	(case (org-element-type destination)
+	  ;; Case 1: Fuzzy link points nowhere.
+	  ('nil
 	   (format "<text:span text:style-name=\"%s\">%s</text:span>"
-		   "Emphasis" (or desc (org-export-data
-					(org-element-property
-					 :raw-link link) info))))
-	 ;; Case 2: Fuzzy link points to an invisible target.  Strip it.
-	 (when (eq (org-element-type destination) 'keyword) "")
-	 ;; Case 3: LINK points to a headline.
-	 (when (eq (org-element-type destination) 'headline)
-	   ;; Case 3.1: LINK has a custom description that is
-	   ;; different from headline's title.  Create a hyperlink.
-	   (when (and desc
-		      (let ((link-desc (org-element-contents link)))
-			(not (string= (org-element-interpret-data link-desc)
-				      (org-element-property :raw-value
-							    destination)))))
-	     (let* ((headline-no (org-export-get-headline-number
-				  destination info))
-		    (label (format "sec-%s" (mapconcat 'number-to-string
-						       headline-no "-"))))
-	       (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
-		       label desc))))
-	 ;; Case 4: LINK points to an Inline image, Math formula or a Table.
-	 (let ((label-reference (ignore-errors (org-odt-format-label
-						destination info 'reference))))
-	   (when label-reference
-	     (cond
-	      ;; Case 4.1: LINK has no description. Create a
-	      ;; cross-reference showing entity's sequence number.
-	      ((not desc) label-reference)
-	      ;; Case 4.2: LINK has description.  Insert a hyperlink
-	      ;; with user-provided description.
-	      (t (let* ((caption-from (case (org-element-type destination)
-					(link (org-export-get-parent-element
-					       destination))
-					(t destination)))
-			;; Get label and caption.
-			(label (org-element-property :name caption-from)))
-		   (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
-			   (org-export-solidify-link-text label) desc))))))
-	 ;; Case 5: Fuzzy link points to a TARGET.
-	 (when (eq (org-element-type destination) 'target)
-	   ;; Case 5.1: LINK has description.  Create a hyperlink.
-	   (when desc
+		   "Emphasis"
+		   (or desc
+		       (org-export-data (org-element-property :raw-link link)
+					info))))
+	  ;; Case 2: Fuzzy link points to a headline.
+	  (headline
+	   ;; If there's a description, create a hyperlink.
+	   ;; Otherwise, try to provide a meaningful description.
+	   (if (not desc) (org-odt-link--infer-description destination info)
+	     (let* ((headline-no
+		     (org-export-get-headline-number destination info))
+		    (label
+		     (format "sec-%s"
+			     (mapconcat 'number-to-string headline-no "-"))))
+	       (format
+		"<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
+		label desc))))
+	  ;; Case 3: Fuzzy link points to a target.
+	  (target
+	   ;; If there's a description, create a hyperlink.
+	   ;; Otherwise, try to provide a meaningful description.
+	   (if (not desc) (org-odt-link--infer-description destination info)
 	     (let ((label (org-element-property :value destination)))
 	       (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
-		       (org-export-solidify-link-text label) desc))))
-	 ;; LINK has no description. It points to either a HEADLINE or
-	 ;; an ELEMENT with a #+NAME: LABEL attached to it.  LINK to
-	 ;; DESTINATION, but make a best effort to provide
-	 ;; a *meaningful* description.
-	 (org-odt-link--infer-description destination info))))
+		       (org-export-solidify-link-text label)
+		       desc))))
+	  ;; Case 4: Fuzzy link points to some element (e.g., an
+	  ;; inline image, a math formula or a table).
+	  (otherwise
+	   (let ((label-reference
+		  (ignore-errors (org-odt-format-label
+				  destination info 'reference))))
+	     (cond ((not label-reference)
+		    (org-odt-link--infer-description destination info))
+		   ;; LINK has no description.  Create
+		   ;; a cross-reference showing entity's sequence
+		   ;; number.
+		   ((not desc) label-reference)
+		   ;; LINK has description.  Insert a hyperlink with
+		   ;; user-provided description.
+		   (t
+		    (let ((label (org-element-property :name destination)))
+		      (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
+			      (org-export-solidify-link-text label)
+			      desc)))))))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
@@ -2967,7 +2955,8 @@ contextual information."
     (setq output (org-odt--encode-plain-text output t))
     ;; Handle smart quotes.  Be sure to provide original string since
     ;; OUTPUT may have been modified.
-    (setq output (org-export-activate-smart-quotes output :utf-8 info text))
+    (when (plist-get info :with-smart-quotes)
+      (setq output (org-export-activate-smart-quotes output :utf-8 info text)))
     ;; Convert special strings.
     (when (plist-get info :with-special-strings)
       (mapc
@@ -3783,9 +3772,10 @@ contextual information."
 	   (setq processing-type 'mathml)
 	 (message "LaTeX to MathML converter not available.")
 	 (setq processing-type 'verbatim)))
-      (dvipng
+      ((dvipng imagemagick)
        (unless (and (org-check-external-command "latex" "" t)
-		    (org-check-external-command "dvipng" "" t))
+		    (org-check-external-command
+		     (if (eq processing-type 'dvipng) "dvipng" "convert") "" t))
 	 (message "LaTeX to PNG converter not available.")
 	 (setq processing-type 'verbatim)))
       (otherwise
@@ -3798,7 +3788,7 @@ contextual information."
     (message "Formatting LaTeX using %s" processing-type)
 
     ;; Convert `latex-fragment's and `latex-environment's.
-    (when (memq processing-type '(mathml dvipng))
+    (when (memq processing-type '(mathml dvipng imagemagick))
       (org-element-map tree '(latex-fragment latex-environment)
 	(lambda (latex-*)
 	  (incf count)
@@ -3807,13 +3797,13 @@ contextual information."
 		 (cache-dir (file-name-directory input-file))
 		 (cache-subdir (concat
 				(case processing-type
-				  (dvipng "ltxpng/")
+				  ((dvipng imagemagick) "ltxpng/")
 				  (mathml "ltxmathml/"))
 				(file-name-sans-extension
 				 (file-name-nondirectory input-file))))
 		 (display-msg
 		  (case processing-type
-		    (dvipng (format "Creating LaTeX Image %d..." count))
+		    ((dvipng imagemagick) (format "Creating LaTeX Image %d..." count))
 		    (mathml (format "Creating MathML snippet %d..." count))))
 		 ;; Get an Org-style link to PNG image or the MathML
 		 ;; file.

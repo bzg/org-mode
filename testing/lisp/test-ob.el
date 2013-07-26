@@ -1144,6 +1144,29 @@ echo \"$data\"
 	    (org-babel-execute-src-block)
 	    (buffer-string)))))
 
+(ert-deftest test-ob/location-of-header-arg-eval ()
+  "Test location of header argument evaluation."
+  (org-test-with-temp-text "
+#+name: top-block
+#+begin_src emacs-lisp :var pt=(point)
+  pt
+#+end_src
+
+#+name: bottom-block
+#+begin_src emacs-lisp :var pt=top-block()
+  pt
+#+end_src
+"
+    ;; the value of the second block should be greater than the first
+    (should
+     (< (progn (re-search-forward org-babel-src-block-regexp nil t)
+	       (goto-char (match-beginning 0))
+	       (prog1 (save-match-data (org-babel-execute-src-block))
+		 (goto-char (match-end 0))))
+	(progn (re-search-forward org-babel-src-block-regexp nil t)
+	       (goto-char (match-beginning 0))
+	       (org-babel-execute-src-block))))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here

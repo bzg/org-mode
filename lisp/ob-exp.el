@@ -217,9 +217,9 @@ this template."
 					     (concat
 					      ":var results="
 					      (mapconcat 'identity
-							 (butlast lob-info)
+							 (butlast lob-info 2)
 							 " ")))))))
-				  "" nil (car (last lob-info)))
+				  "" (nth 3 lob-info) (nth 2 lob-info))
 			    'lob))
 			  (rep (org-fill-template
 				org-babel-exp-call-line-template
