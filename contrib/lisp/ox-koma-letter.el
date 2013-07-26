@@ -334,7 +334,7 @@ Use `foldmarks:true' to activate default fold marks or
 `org-koma-letter-default-class' to `default-koma-letter'"
   (let ((class "default-koma-letter"))
     (eval-after-load "ox-latex"
-      '(unless (member ,class 'org-latex-classes)
+      `(unless (member ,class 'org-latex-classes)
 	 (add-to-list 'org-latex-classes
 		      `(,class
 			"\\documentclass[11pt]{scrlttr2}") ())
