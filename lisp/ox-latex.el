@@ -426,7 +426,7 @@ environment."
   :type 'string)
 
 (defcustom org-latex-inline-image-rules
-  '(("file" . "\\.\\(pdf\\|jpeg\\|jpg\\|png\\|ps\\|eps\\|tikz\\|pgf\\)\\'"))
+  '(("file" . "\\.\\(pdf\\|jpeg\\|jpg\\|png\\|ps\\|eps\\|tikz\\|pgf\\|svg\\)\\'"))
   "Rules characterizing image files that can be inlined into LaTeX.
 
 A rule consists in an association whose key is the type of link
@@ -1725,7 +1725,16 @@ used as a communication channel."
 			  ((= (aref options 0) ?,)
 			   (format "[%s]"(substring options 1)))
 			  (t (format "[%s]" options)))
-		    path)))
+		    path))
+      (when (equal filetype "svg")
+	(setq image-code (replace-regexp-in-string "^\\\\includegraphics"
+						   "\\includesvg"
+						   image-code
+						   nil t))
+	(setq image-code (replace-regexp-in-string "\\.svg}"
+						   "}"
+						   image-code
+						   nil t))))
     ;; Return proper string, depending on FLOAT.
     (case float
       (wrap (format "\\begin{wrapfigure}%s
