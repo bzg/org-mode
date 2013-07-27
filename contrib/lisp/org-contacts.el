@@ -516,11 +516,11 @@ A group FOO is composed of contacts with the tag FOO."
 (defun org-contacts-remove-ignored-property-values (ignore-list list)
   "Remove all ignore-list's elements from list and you can use
    regular expressions in the ignore list."
-    (remove-if (lambda (el)
-               (find-if (lambda (x)
-                          (string-match-p x el))
-                        ignore-list))
-             list))
+    (org-remove-if (lambda (el)
+		     (org-find-if (lambda (x)
+				    (string-match-p x el))
+				  ignore-list))
+		   list))
 
 (defun org-contacts-complete-name (start end string)
   "Complete text at START with a user name and email."
