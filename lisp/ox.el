@@ -6070,11 +6070,11 @@ options as CDR."
 		(memq key '(14 16 ?\s ?\d)))
       (case key
 	(14 (if (not (pos-visible-in-window-p (point-max)))
-		(ignore-errors (scroll-up-line))
+		(ignore-errors (scroll-up 1))
 	      (message "End of buffer")
 	      (sit-for 1)))
 	(16 (if (not (pos-visible-in-window-p (point-min)))
-		(ignore-errors (scroll-down-line))
+		(ignore-errors (scroll-down 1))
 	      (message "Beginning of buffer")
 	      (sit-for 1)))
 	(?\s (if (not (pos-visible-in-window-p (point-max)))
