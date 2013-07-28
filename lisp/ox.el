@@ -5584,7 +5584,7 @@ within Emacs."
 	  ((bufferp source) (org-switch-to-buffer-other-window source))
 	  (t (org-open-file source in-emacs)))))
 
-(defconst org-export-stack-mode-map
+(defvar org-export-stack-mode-map
   (let ((km (make-sparse-keymap)))
     (define-key km " " 'next-line)
     (define-key km "n" 'next-line)
