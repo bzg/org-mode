@@ -22155,7 +22155,8 @@ hierarchy of headlines by UP levels before marking the subtree."
 (defun org-adaptive-fill-function ()
   "Compute a fill prefix for the current line.
 Return fill prefix, as a string, or nil if current line isn't
-meant to be filled."
+meant to be filled.  For convenience, if `adaptive-fill-regexp'
+matches in paragraphs or comments, use it."
   (let (prefix)
     (catch 'exit
       (when (derived-mode-p 'message-mode)
@@ -22179,7 +22180,15 @@ meant to be filled."
 	      (post-affiliated (org-element-property :post-affiliated element)))
 	 (unless (and post-affiliated (< p post-affiliated))
 	   (case type
-	     (comment (looking-at "[ \t]*# ?") (match-string 0))
+	     (comment
+	      (save-excursion
+		(beginning-of-line)
+		(looking-at "[ \t]*#")
+		(goto-char (match-end 0))
+		(let ((comment-prefix (match-string 0)))
+		  (if (looking-at adaptive-fill-regexp)
+		      (concat comment-prefix (match-string 0))
+		    comment-prefix))))
 	     (footnote-definition "")
 	     ((item plain-list)
 	      (make-string (org-list-item-body-column
@@ -22188,15 +22197,17 @@ meant to be filled."
 			   ? ))
 	     (paragraph
 	      ;; Fill prefix is usually the same as the current line,
-	      ;; except if the paragraph is at the beginning of an item.
+	      ;; unless the paragraph is at the beginning of an item.
 	      (let ((parent (org-element-property :parent element)))
-		(cond ((eq (org-element-type parent) 'item)
-		       (make-string (org-list-item-body-column
-				     (org-element-property :begin parent))
-				    ? ))
-		      ((save-excursion (beginning-of-line) (looking-at "[ \t]+"))
-		       (match-string 0))
-		      (t  ""))))
+		(save-excursion
+		  (beginning-of-line)
+		  (cond ((eq (org-element-type parent) 'item)
+			 (make-string (org-list-item-body-column
+				       (org-element-property :begin parent))
+				      ? ))
+			((looking-at adaptive-fill-regexp) (match-string 0))
+			((looking-at "[ \t]+") (match-string 0))
+			(t  "")))))
 	     (comment-block
 	      ;; Only fill contents if P is within block boundaries.
 	      (let* ((cbeg (save-excursion (goto-char post-affiliated)
@@ -22339,13 +22350,17 @@ a footnote definition, try to fill the first paragraph within."
 				(1- (line-beginning-position))
 			      (skip-chars-backward " \r\t\n")
 			      (line-end-position)))))
-		 ;; Do not fill comments when at a blank line or at
-		 ;; affiliated keywords.
-		 (let ((fill-prefix (save-excursion
-				      (beginning-of-line)
-				      (looking-at "[ \t]*#")
-				      (concat (match-string 0) " "))))
-		   (when (> end begin)
+		 ;; Do not fill comments when at a blank line.
+		 (when (> end begin)
+		   (let ((fill-prefix
+			  (save-excursion
+			    (beginning-of-line)
+			    (looking-at "[ \t]*#")
+			    (let ((comment-prefix (match-string 0)))
+			      (goto-char (match-end 0))
+			      (if (looking-at adaptive-fill-regexp)
+				  (concat comment-prefix (match-string 0))
+				(concat comment-prefix " "))))))
 		     (save-excursion
 		       (fill-region-as-paragraph begin end justify))))))
 	     t))

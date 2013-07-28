@@ -176,6 +176,14 @@
 	      (narrow-to-region 1 8)
 	      (org-fill-paragraph)
 	      (buffer-string)))))
+  ;; Handle `adaptive-fill-regexp' in paragraphs.
+  (should
+   (equal "> a b"
+	  (org-test-with-temp-text "> a\n> b"
+	    (let ((fill-column 5)
+		  (adaptive-fill-regexp "[ \t]*>+[ \t]*"))
+	      (org-fill-paragraph)
+	      (buffer-string)))))
   ;; Special case: Fill first paragraph when point is at an item or
   ;; a plain-list or a footnote reference.
   (should
@@ -225,6 +233,14 @@
 	    (let ((fill-column 20))
 	      (org-fill-paragraph)
 	      (buffer-string)))))
+  ;; Handle `adaptive-fill-regexp' in comments.
+  (should
+   (equal "# > a b"
+	  (org-test-with-temp-text "# > a\n# > b"
+	    (let ((fill-column 20)
+		  (adaptive-fill-regexp "[ \t]*>+[ \t]*"))
+	      (org-fill-paragraph)
+	      (buffer-string)))))
   ;; Do nothing at affiliated keywords.
   (org-test-with-temp-text "#+NAME: para\nSome\ntext."
     (let ((fill-column 20))
@@ -255,11 +271,29 @@
 	      (end-of-line)
 	      (org-auto-fill-function)
 	      (buffer-string)))))
+  ;; Auto fill paragraph when `adaptive-fill-regexp' matches.
+  (should
+   (equal "> 12345\n> 7890"
+	  (org-test-with-temp-text "> 12345 7890"
+	    (let ((fill-column 5)
+		  (adaptive-fill-regexp "[ \t]*>+[ \t]*"))
+	      (end-of-line)
+	      (org-auto-fill-function)
+	      (buffer-string)))))
   ;; Auto fill comments.
   (should
    (equal "  # 12345\n  # 7890"
 	  (org-test-with-temp-text "  # 12345 7890"
 	    (let ((fill-column 10))
+	      (end-of-line)
+	      (org-auto-fill-function)
+	      (buffer-string)))))
+  ;; Auto fill comments when `adaptive-fill-regexp' matches.
+  (should
+   (equal "  # > 12345\n  # > 7890"
+	  (org-test-with-temp-text "  # > 12345 7890"
+	    (let ((fill-column 10)
+		  (adaptive-fill-regexp "[ \t]*>+[ \t]*"))
 	      (end-of-line)
 	      (org-auto-fill-function)
 	      (buffer-string)))))
