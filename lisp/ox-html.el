@@ -2598,7 +2598,8 @@ images, set it to:
 DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
-  (let* ((home (org-trim (plist-get info :html-link-home)))
+  (let* ((home (when (plist-get info :html-link-home)
+		 (org-trim (plist-get info :html-link-home))))
 	 (use-abs-url (plist-get info :html-link-use-abs-url))
 	 (link-org-files-as-html-maybe
 	  (function
