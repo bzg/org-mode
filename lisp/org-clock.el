@@ -718,7 +718,7 @@ Notification is shown only once."
 	    (setq org-clock-notification-was-shown t)
 	    (org-notify
 	     (format "Task '%s' should be finished by now. (%s)"
-		     org-clock-heading org-clock-effort) t))
+		     org-clock-heading org-clock-effort) org-clock-sound))
 	(setq org-clock-notification-was-shown nil)))))
 
 (defun org-notify (notification &optional play-sound)
