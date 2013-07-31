@@ -3058,10 +3058,11 @@ to kill ring.  Return output file's name."
   ;; we'd rather avoid needless transcoding of parse tree.
   (unless (file-writable-p file) (error "Output file not writable"))
   ;; Insert contents to a temporary buffer and write it to FILE.
-  (let ((out (org-export-as backend subtreep visible-only body-only ext-plist)))
+  (let ((coding buffer-file-coding-system)
+	(out (org-export-as backend subtreep visible-only body-only ext-plist)))
     (with-temp-buffer
       (insert out)
-      (let ((coding-system-for-write org-export-coding-system))
+      (let ((coding-system-for-write (or org-export-coding-system coding)))
 	(write-file file)))
     ;; Maybe add file contents to kill ring.
     (when (and (org-export--copy-to-kill-ring-p) (org-string-nw-p out))
