@@ -1657,8 +1657,7 @@ contextual information."
 	      (buffer-substring (point-min) (point))))
 	   (t (org-remove-indentation (org-element-property :value table))))
      ;; Possible add a caption string below.
-     (when (and caption (not org-ascii-caption-above))
-       (concat "\n" caption)))))
+     (and (not org-ascii-caption-above) caption))))
 
 
 ;;;; Table Cell
