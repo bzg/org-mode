@@ -2972,7 +2972,7 @@ Return code as a string."
 	     (narrow-to-region (point) (point-max))))
       ;; Initialize communication channel with original buffer
       ;; attributes, unavailable in its copy.
-      (let* ((org-export-current-backend backend)
+      (let* ((org-export-current-backend (org-export-backend-name backend))
 	     (info (org-combine-plists
 		    (list :export-options
 			  (delq nil
