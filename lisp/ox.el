@@ -290,6 +290,17 @@ and its CDR is a list of export options.")
 This marker will be used with `C-u C-c C-e' to make sure export repetition
 uses the same subtree if the previous command was restricted to a subtree.")
 
+;; For compatibility with Org < 8
+(defvar org-export-current-backend nil
+  "Name, if any, of the back-end used during an export process.
+
+Its value is a symbol such as `html', `latex', `ascii', or nil if
+the back-end is anonymous (see `org-export-create-backend') or if
+there is no export process in progress.
+
+It can be used to teach Babel blocks how to act differently
+according to the back-end used.")
+
 
 ;;; User-configurable Variables
 ;;
@@ -2961,7 +2972,8 @@ Return code as a string."
 	     (narrow-to-region (point) (point-max))))
       ;; Initialize communication channel with original buffer
       ;; attributes, unavailable in its copy.
-      (let* ((info (org-combine-plists
+      (let* ((org-export-current-backend backend)
+	     (info (org-combine-plists
 		    (list :export-options
 			  (delq nil
 				(list (and subtreep 'subtree)
