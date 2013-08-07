@@ -894,16 +894,10 @@ Return output file's name."
   (interactive)
   (let ((outfile
          (org-export-output-file-name org-taskjuggler-extension subtreep)))
-    (if async
-        (org-export-async-start
-            (lambda (f)
-              (org-export-add-to-stack f 'taskjuggler)
-              (run-hook-with-args 'org-taskjuggler-final-hook f))
-          `(expand-file-name
-            (org-export-to-file 'taskjuggler ,outfile ,subtreep ,visible-only)))
-      (org-export-to-file 'taskjuggler outfile subtreep visible-only)
-      (run-hook-with-args 'org-taskjuggler-final-hook outfile)
-      outfile)))
+    (org-export-to-file 'taskjuggler outfile
+      async subtreep visible-only nil nil
+      (lambda (file)
+	(run-hook-with-args 'org-taskjuggler-final-hook file) nil))))
 
 ;;;###autoload
 (defun org-taskjuggler-export-and-process (&optional subtreep visible-only)

@@ -160,21 +160,8 @@ non-nil."
   (let ((file (buffer-file-name (buffer-base-buffer))))
     (org-icalendar-create-uid file 'warn-user)
     (org-rss-add-pubdate-property))
-  (if async
-      (org-export-async-start
-	  (lambda (output)
-	    (with-current-buffer (get-buffer-create "*Org RSS Export*")
-	      (erase-buffer)
-	      (insert output)
-	      (goto-char (point-min))
-	      (text-mode)
-	      (org-export-add-to-stack (current-buffer) 'rss)))
-	`(org-export-as 'rss ,subtreep ,visible-only))
-    (let ((outbuf (org-export-to-buffer
-		   'rss "*Org RSS Export*" subtreep visible-only)))
-      (with-current-buffer outbuf (text-mode))
-      (when org-export-show-temporary-export-buffer
-	(switch-to-buffer-other-window outbuf)))))
+  (org-export-to-buffer 'rss "*Org RSS Export*"
+    async subtreep visible-only nil nil (lambda () (text-mode))))
 
 ;;;###autoload
 (defun org-rss-export-to-rss (&optional async subtreep visible-only)
@@ -203,12 +190,7 @@ Return output file's name."
     (org-rss-add-pubdate-property))
   (let ((outfile (org-export-output-file-name
 		  (concat "." org-rss-extension) subtreep)))
-    (if async
-	(org-export-async-start
-	    (lambda (f) (org-export-add-to-stack f 'rss))
-	  `(expand-file-name
-	    (org-export-to-file 'rss ,outfile ,subtreep ,visible-only)))
-      (org-export-to-file 'rss outfile subtreep visible-only))))
+    (org-export-to-file 'rss outfile async subtreep visible-only)))
 
 ;;;###autoload
 (defun org-rss-publish-to-rss (plist filename pub-dir)

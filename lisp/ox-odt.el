@@ -4255,9 +4255,12 @@ Return output file's name."
 			(require 'nxml-mode)
 			(let ((nxml-auto-insert-xml-declaration-flag nil))
 			  (find-file-noselect
-			   (concat org-odt-zip-dir "content.xml") t)))))
-		 (org-export-to-buffer
-		  'odt out-buf ,subtreep ,visible-only nil ',ext-plist))))))
+			   (concat org-odt-zip-dir "content.xml") t))))
+		     (output (org-export-as
+			      'odt ,subtreep ,visible-only nil ,ext-plist)))
+		 (with-current-buffer out-buf
+		   (erase-buffer)
+		   (insert output)))))))
       (org-odt--export-wrap
        outfile
        (let* ((org-odt-embedded-images-count 0)
@@ -4268,13 +4271,13 @@ Return output file's name."
 	      ;; styles.
 	      (hfy-user-sheet-assoc nil))
 	 ;; Initialize content.xml and kick-off the export process.
-	 (let ((out-buf (progn
+	 (let ((output (org-export-as 'odt subtreep visible-only nil ext-plist))
+	       (out-buf (progn
 			  (require 'nxml-mode)
 			  (let ((nxml-auto-insert-xml-declaration-flag nil))
 			    (find-file-noselect
 			     (concat org-odt-zip-dir "content.xml") t)))))
-	   (org-export-to-buffer
-	    'odt out-buf subtreep visible-only nil ext-plist)))))))
+	   (with-current-buffer out-buf (erase-buffer) (insert output))))))))
 
 
 ;;;; Convert between OpenDocument and other formats

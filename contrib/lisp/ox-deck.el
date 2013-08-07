@@ -524,23 +524,8 @@ Export is done in a buffer named \"*Org deck.js Export*\", which
 will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
   (interactive)
-  (if async
-      (org-export-async-start
-          (lambda (output)
-            (with-current-buffer (get-buffer-create "*Org deck.js Export*")
-              (erase-buffer)
-              (insert output)
-              (goto-char (point-min))
-              (nxml-mode)
-              (org-export-add-to-stack (current-buffer) 'deck)))
-        `(org-export-as 'deck ,subtreep ,visible-only ,body-only ',ext-plist))
-    (let ((outbuf (org-export-to-buffer
-                   'deck "*Org deck.js Export*"
-                   subtreep visible-only body-only ext-plist)))
-      ;; Set major mode.
-      (with-current-buffer outbuf (nxml-mode))
-      (when org-export-show-temporary-export-buffer
-        (switch-to-buffer-other-window outbuf)))))
+  (org-export-to-buffer 'deck "*Org deck.js Export*"
+    async subtreep visible-only body-only ext-plist (lambda () (nxml-mode))))
 
 (defun org-deck-export-to-html
   (&optional async subtreep visible-only body-only ext-plist)
@@ -573,17 +558,9 @@ Return output file's name."
   (interactive)
   (let* ((extension (concat "." org-html-extension))
          (file (org-export-output-file-name extension subtreep))
-         (org-export-coding-system org-html-coding-system))
-    (if async
-        (org-export-async-start
-            (lambda (f) (org-export-add-to-stack f 'deck))
-          (let ((org-export-coding-system org-html-coding-system))
-            `(expand-file-name
-              (org-export-to-file
-               'deck ,file ,subtreep ,visible-only ,body-only ',ext-plist))))
-      (let ((org-export-coding-system org-html-coding-system))
-        (org-export-to-file
-         'deck file subtreep visible-only body-only ext-plist)))))
+	 (org-export-coding-system org-html-coding-system))
+    (org-export-to-file 'deck file
+      async subtreep visible-only body-only ext-plist)))
 
 (defun org-deck-publish-to-html (plist filename pub-dir)
   "Publish an org file to deck.js HTML Presentation.

@@ -1144,14 +1144,8 @@ file-local settings.
 Return output file's name."
   (interactive)
   (let ((outfile (org-export-output-file-name ".man" subtreep)))
-    (if async
-	(org-export-async-start
-	    (lambda (f) (org-export-add-to-stack f 'man))
-	  `(expand-file-name
-	    (org-export-to-file
-	     'man ,outfile ,subtreep ,visible-only ,body-only ',ext-plist)))
-      (org-export-to-file
-       'man outfile subtreep visible-only body-only ext-plist))))
+    (org-export-to-file 'man outfile
+      async subtreep visible-only body-only ext-plist)))
 
 (defun org-man-export-to-pdf
   (&optional async subtreep visible-only body-only ext-plist)
@@ -1182,17 +1176,10 @@ file-local settings.
 
 Return PDF file's name."
   (interactive)
-  (if async
-      (let ((outfile (org-export-output-file-name ".man" subtreep)))
-	(org-export-async-start
-	    (lambda (f) (org-export-add-to-stack f 'man))
-	  `(expand-file-name
-	    (org-man-compile
-	     (org-export-to-file
-	      'man ,outfile ,subtreep ,visible-only ,body-only
-	      ',ext-plist)))))
-    (org-man-compile
-     (org-man-export-to-man nil subtreep visible-only body-only ext-plist))))
+  (let ((outfile (org-export-output-file-name ".man" subtreep)))
+    (org-export-to-file 'man outfile
+      async subtreep visible-only body-only ext-plist
+      (lambda (file) (org-latex-compile file)))))
 
 (defun org-man-compile (file)
   "Compile a Groff file.

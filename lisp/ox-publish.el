@@ -572,19 +572,19 @@ Return output file name."
 	     (let ((output-file
 		    (org-export-output-file-name extension nil pub-dir))
 		   (body-p (plist-get plist :body-only)))
-	       (org-export-to-file
-		backend output-file nil nil body-p
-		;; Add `org-publish-collect-numbering' and
-		;; `org-publish-collect-index' to final output
-		;; filters.  The latter isn't dependent on
-		;; `:makeindex', since we want to keep it up-to-date
-		;; in cache anyway.
-		(org-combine-plists
-		 plist
-		 `(:filter-final-output
-		   ,(cons 'org-publish-collect-numbering
-			  (cons 'org-publish-collect-index
-				(plist-get plist :filter-final-output))))))))
+	       (org-export-to-file backend output-file
+		 nil nil nil body-p
+		 ;; Add `org-publish-collect-numbering' and
+		 ;; `org-publish-collect-index' to final output
+		 ;; filters.  The latter isn't dependent on
+		 ;; `:makeindex', since we want to keep it up-to-date
+		 ;; in cache anyway.
+		 (org-combine-plists
+		  plist
+		  `(:filter-final-output
+		    ,(cons 'org-publish-collect-numbering
+			   (cons 'org-publish-collect-index
+				 (plist-get plist :filter-final-output))))))))
       ;; Remove opened buffer in the process.
       (unless visitingp (kill-buffer work-buffer)))))
 

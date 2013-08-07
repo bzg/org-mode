@@ -518,17 +518,10 @@ file-local settings.
 Return output file's name."
   (interactive)
   (let* ((extension (concat ".mm" ))
-	 (file (org-export-output-file-name extension subtreep)))
-    (if async
-	(org-export-async-start
-	    (lambda (f) (org-export-add-to-stack f 'freemind))
-	  (let ((org-export-coding-system 'utf-8))
-	    `(expand-file-name
-	      (org-export-to-file
-	       'freemind ,file ,subtreep ,visible-only ,body-only ',ext-plist))))
-      (let ((org-export-coding-system 'utf-8))
-	(org-export-to-file
-	 'freemind file subtreep visible-only body-only ext-plist)))))
+	 (file (org-export-output-file-name extension subtreep))
+	 (org-export-coding-system 'utf-8))
+    (org-export-to-file 'freemind ,file
+      async subtreep visible-only body-only ext-plist)))
 
 (provide 'ox-freemind)
 

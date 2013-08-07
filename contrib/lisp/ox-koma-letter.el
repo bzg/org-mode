@@ -635,23 +635,9 @@ will be displayed if `org-export-show-temporary-export-buffer' is
 non-nil."
   (interactive)
   (let (org-koma-letter-special-contents)
-  (if async
-      (org-export-async-start
-	  (lambda (output)
-	    (with-current-buffer (get-buffer-create "*Org KOMA-LETTER Export*")
-	      (erase-buffer)
-	      (insert output)
-	      (goto-char (point-min))
-	      (LaTeX-mode)
-	      (org-export-add-to-stack (current-buffer) 'koma-letter)))
-	`(org-export-as 'koma-letter ,subtreep ,visible-only ,body-only
-			',ext-plist))
-    (let ((outbuf (org-export-to-buffer
-		   'koma-letter "*Org KOMA-LETTER Export*"
-		   subtreep visible-only body-only ext-plist)))
-      (with-current-buffer outbuf (LaTeX-mode))
-      (when org-export-show-temporary-export-buffer
-	(switch-to-buffer-other-window outbuf))))))
+    (org-export-to-buffer 'koma-letter "*Org KOMA-LETTER Export*"
+      async subtreep visible-only body-only ext-plist
+      (lambda () (LaTeX-mode)))))
 
 ;;;###autoload
 (defun org-koma-letter-export-to-latex
@@ -687,16 +673,9 @@ directory.
 Return output file's name."
   (interactive)
   (let ((outfile (org-export-output-file-name ".tex" subtreep))
-	org-koma-letter-special-contents)
-    (if async
-	(org-export-async-start
-	    (lambda (f) (org-export-add-to-stack f 'koma-letter))
-	  `(expand-file-name
-	    (org-export-to-file
-	     'koma-letter ,outfile ,subtreep ,visible-only ,body-only
-	     ',ext-plist)))
-      (org-export-to-file
-       'koma-letter outfile subtreep visible-only body-only ext-plist))))
+	(org-koma-letter-special-contents))
+    (org-export-to-file 'koma-letter outfile
+      async subtreep visible-only body-only ext-plist)))
 
 ;;;###autoload
 (defun org-koma-letter-export-to-pdf
@@ -728,18 +707,11 @@ file-local settings.
 
 Return PDF file's name."
   (interactive)
-  (if async
-      (let ((outfile (org-export-output-file-name ".tex" subtreep)))
-	(org-export-async-start
-	    (lambda (f) (org-export-add-to-stack f 'koma-letter))
-	  `(expand-file-name
-	    (org-latex-compile
-	     (org-export-to-file
-	      'koma-letter ,outfile ,subtreep ,visible-only ,body-only
-	      ',ext-plist)))))
-    (org-latex-compile
-     (org-koma-letter-export-to-latex
-      nil subtreep visible-only body-only ext-plist))))
+  (let ((file (org-export-output-file-name ".tex" subtreep))
+	(org-koma-letter-special-contents))
+    (org-export-to-file 'koma-letter file
+      async subtreep visible-only body-only ext-plist
+      (lambda (file) (org-latex-compile file)))))
 
 
 (provide 'ox-koma-letter)

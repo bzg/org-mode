@@ -1710,18 +1710,9 @@ file-local settings.
 Return output file's name."
   (interactive)
   (let ((outfile (org-export-output-file-name ".texi" subtreep))
-	(org-export-coding-system org-texinfo-coding-system))
-    (if async
-	(org-export-async-start
-	    (lambda (f) (org-export-add-to-stack f 'texinfo))
-	  (let ((org-export-coding-system org-texinfo-coding-system))
-	    `(expand-file-name
-	      (org-export-to-file
-	       'texinfo ,outfile ,subtreep ,visible-only ,body-only
-	       ',ext-plist))))
-      (let ((org-export-coding-system org-texinfo-coding-system))
-	(org-export-to-file
-	 'texinfo outfile subtreep visible-only body-only ext-plist)))))
+	(org-export-coding-system ',org-texinfo-coding-system))
+    (org-export-to-file 'texinfo outfile
+      async subtreep visible-only body-only ext-plist)))
 
 (defun org-texinfo-export-to-info
   (&optional async subtreep visible-only body-only ext-plist)
@@ -1755,21 +1746,11 @@ directory.
 
 Return INFO file's name."
   (interactive)
-  (if async
-      (let ((outfile (org-export-output-file-name ".texi" subtreep))
-	    (org-export-coding-system org-texinfo-coding-system))
-	(org-export-async-start
-	    (lambda (f) (org-export-add-to-stack f 'texinfo))
-	  (let ((org-export-coding-system org-texinfo-coding-system))
-	    `(expand-file-name
-	      (org-texinfo-compile
-	       (org-export-to-file
-		'texinfo ,outfile ,subtreep ,visible-only ,body-only
-		',ext-plist))))))
-    (org-texinfo-compile
-     (let ((org-export-coding-system org-texinfo-coding-system))
-       (org-texinfo-export-to-texinfo
-	nil subtreep visible-only body-only ext-plist)))))
+  (let ((outfile (org-export-output-file-name ".texi" subtreep))
+	(org-export-coding-system ',org-texinfo-coding-system))
+    (org-export-to-file 'texinfo outfile
+      async subtreep visible-only body-only ext-plist
+      (lambda (file) (org-texinfo-compile file)))))
 
 ;;;###autoload
 (defun org-texinfo-publish-to-texinfo (plist filename pub-dir)
