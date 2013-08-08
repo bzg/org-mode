@@ -362,13 +362,13 @@ play with them."
   "Format string for the total time cells."
   :group 'org-clock
   :version "24.1"
-  :type 'boolean)
+  :type 'string)
 
 (defcustom org-clock-file-time-cell-format "*%s*"
   "Format string for the file time cells."
   :group 'org-clock
   :version "24.1"
-  :type 'boolean)
+  :type 'string)
 
 (defcustom org-clock-clocked-in-display 'mode-line
   "When clocked in for a task, org-mode can display the current
