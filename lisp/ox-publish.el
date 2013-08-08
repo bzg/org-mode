@@ -805,17 +805,16 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
    (and (not reset) (org-publish-cache-get-file-property file :title nil t))
    (let* ((org-inhibit-startup t)
 	  (visiting (find-buffer-visiting file))
-	  (buffer (or visiting (find-file-noselect file)))
-	  title)
+	  (buffer (or visiting (find-file-noselect file))))
      (with-current-buffer buffer
        (org-mode)
-       (setq title
-	     (or (org-element-interpret-data
-		  (plist-get (org-export-get-environment) :title))
-		 (file-name-nondirectory (file-name-sans-extension file)))))
-     (unless visiting (kill-buffer buffer))
-     (org-publish-cache-set-file-property file :title title)
-     title)))
+       (let ((title
+	      (let ((property (plist-get (org-export-get-environment) :title)))
+		(if property (org-element-interpret-data property)
+		  (file-name-nondirectory (file-name-sans-extension file))))))
+	 (unless visiting (kill-buffer buffer))
+	 (org-publish-cache-set-file-property file :title title)
+	 title)))))
 
 (defun org-publish-find-date (file)
   "Find the date of FILE in project.

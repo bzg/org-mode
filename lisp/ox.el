@@ -117,7 +117,7 @@
     (:section-numbers nil "num" org-export-with-section-numbers)
     (:select-tags "SELECT_TAGS" nil org-export-select-tags split)
     (:time-stamp-file nil "timestamp" org-export-time-stamp-file)
-    (:title "TITLE" nil org-export--default-title space)
+    (:title "TITLE" nil nil space)
     (:with-archived-trees nil "arch" org-export-with-archived-trees)
     (:with-author nil "author" org-export-with-author)
     (:with-clocks nil "c" org-export-with-clocks)
@@ -1701,7 +1701,9 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 	     ;; Return final value.
 	     plist))))
     ;; Read options in the current buffer.
-    (setq plist (funcall get-options buffer-file-name nil))
+    (setq plist
+	  (funcall get-options
+		   (and buffer-file-name (list buffer-file-name)) nil))
     ;; Parse keywords specified in `org-element-document-properties'.
     (mapc (lambda (keyword)
 	    ;; Find the property associated to the keyword.
@@ -1719,19 +1721,11 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 (defun org-export--get-buffer-attributes ()
   "Return properties related to buffer attributes, as a plist."
   ;; Store full path of input file name, or nil.  For internal use.
-  (list :input-file (buffer-file-name (buffer-base-buffer))))
-
-(defvar org-export--default-title nil)	; Dynamically scoped.
-(defun org-export-store-default-title ()
-  "Return default title for current document, as a string.
-Title is extracted from associated file name, if any, or buffer's
-name."
-  (setq org-export--default-title
-	(or (let ((visited-file (buffer-file-name (buffer-base-buffer))))
-	      (and visited-file
+  (let ((visited-file (buffer-file-name (buffer-base-buffer))))
+    (list :input-file visited-file
+	  :title (if (not visited-file) (buffer-name (buffer-base-buffer))
 		   (file-name-sans-extension
-		    (file-name-nondirectory visited-file))))
-	    (buffer-name (buffer-base-buffer)))))
+		    (file-name-nondirectory visited-file))))))
 
 (defun org-export--get-global-options (&optional backend)
   "Return global export options as a plist.
@@ -1743,8 +1737,9 @@ process."
 	(all (append (and backend (org-export-backend-options backend))
 		     org-export-options-alist)))
     (dolist (cell all plist)
-      (let ((prop (car cell)))
-	(unless (plist-member plist prop)
+      (let ((prop (car cell))
+	    (default-value (nth 3 cell)))
+	(unless (or (not default-value) (plist-member plist prop))
 	  (setq plist
 		(plist-put
 		 plist
@@ -2945,10 +2940,6 @@ Return code as a string."
 				      (and body-only 'body-only))))
 		    (org-export--get-buffer-attributes)))
 	     tree)
-	;; Store default title in `org-export--default-title' so that
-	;; `org-export-get-environment' can access it from buffer's
-	;; copy and then add it properly to communication channel.
-	(org-export-store-default-title)
 	;; Update communication channel and get parse tree.  Buffer
 	;; isn't parsed directly.  Instead, a temporary copy is
 	;; created, where include keywords, macros are expanded and
