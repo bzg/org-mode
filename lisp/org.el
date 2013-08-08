@@ -1032,6 +1032,21 @@ commands in the Help buffer using the `?' speed command."
 				(function)
 				(sexp))))))
 
+(defcustom org-bookmark-names-plist
+   '(:last-capture "org-capture-last-stored"
+     :last-refile "org-refile-last-stored"
+     :last-capture-marker "org-capture-last-stored-marker")
+   "Names for bookmarks automatically set by some Org commands.
+This can provide strings as names for a number of bookmakrs Org sets
+automatically.  The following keys are currently implemented:
+  :last-capture
+  :last-capture-marker
+  :last-refile
+When a key does not show up in the property list, the corresponding bookmark
+is not set."
+   :group 'org-structure
+   :type 'plist)
+
 (defgroup org-cycle nil
   "Options concerning visibility cycling in Org-mode."
   :tag "Org Cycle"
@@ -4837,7 +4852,7 @@ Support for group tags is controlled by the option
       ;; Process the tags.
       (when (and (not tags) org-tag-alist)
 	(setq tags
-	      (mapcar 
+	      (mapcar
 	       (lambda (tg) (cond ((eq (car tg) :startgroup) "{")
 				  ((eq (car tg) :endgroup) "}")
 				  ((eq (car tg) :grouptags) ":")
@@ -11589,13 +11604,19 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 		  (and org-auto-align-tags
 		       (let ((org-loop-over-headlines-in-active-region nil))
 			 (org-set-tags nil t)))
-		  (with-demoted-errors
-		    (bookmark-set "org-refile-last-stored"))
+		  (let ((bookmark-name (plist-get org-bookmark-names-plist
+						  :last-refile)))
+		    (when bookmark-name
+		      (with-demoted-errors
+			(bookmark-set bookmark-name))))
 		  ;; If we are refiling for capture, make sure that the
 		  ;; last-capture pointers point here
 		  (when (org-bound-and-true-p org-refile-for-capture)
-		    (with-demoted-errors
-		      (bookmark-set "org-capture-last-stored-marker"))
+		    (let ((bookmark-name (plist-get org-bookmark-names-plist
+						    :last-capture-marker)))
+		      (when bookmark-name
+			(with-demoted-errors
+			  (bookmark-set bookmark-name))))
 		    (move-marker org-capture-last-stored-marker (point)))
 		  (if (fboundp 'deactivate-mark) (deactivate-mark))
 		  (run-hooks 'org-after-refile-insert-hook))))
