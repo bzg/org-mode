@@ -16077,7 +16077,7 @@ with the current time without prompting the user."
 	(setq dh (- h2 h1) dm (- m2 m1))
 	(if (< dm 0) (setq dm (+ dm 60) dh (1- dh)))
 	(concat t1 "+" (number-to-string dh)
-		(if (/= 0 dm) (concat ":" (number-to-string dm))))))))
+		(and (/= 0 dm) (format ":%02d" dm)))))))
 
 (defun org-time-stamp-inactive (&optional arg)
   "Insert an inactive time stamp.
