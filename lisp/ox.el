@@ -2754,7 +2754,7 @@ VALUE is ignored.
 Call is done in a LIFO fashion, to be sure that developer
 specified filters, if any, are called first."
   (catch 'exit
-    (let ((backend-name (plist-get info :back-end)))
+    (let ((backend-name (org-export-backend-name (plist-get info :back-end))))
       (dolist (filter filters value)
 	(let ((result (funcall filter value backend-name info)))
 	  (cond ((not result) value)
