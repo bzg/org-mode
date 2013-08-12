@@ -2250,9 +2250,10 @@ recursively convert DATA using BACKEND translation table."
    ;; memoization.
    (org-combine-plists
     info
-    (list :translate-alist (org-export-get-all-transcoders backend)
+    (list :back-end backend
+	  :translate-alist (org-export-get-all-transcoders backend)
 	  ;; Size of the hash table is reduced since this function
-	  ;; will probably be used on short trees.
+	  ;; will probably be used on small trees.
 	  :exported-data (make-hash-table :test 'eq :size 401)))))
 
 (defun org-export--interpret-p (blob info)
@@ -2754,7 +2755,8 @@ VALUE is ignored.
 Call is done in a LIFO fashion, to be sure that developer
 specified filters, if any, are called first."
   (catch 'exit
-    (let ((backend-name (org-export-backend-name (plist-get info :back-end))))
+    (let* ((backend (plist-get info :back-end))
+	   (backend-name (and backend (org-export-backend-name backend))))
       (dolist (filter filters value)
 	(let ((result (funcall filter value backend-name info)))
 	  (cond ((not result) value)

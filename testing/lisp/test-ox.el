@@ -2246,51 +2246,48 @@ Another text. (ref:text)
 
 (ert-deftest test-org-export/table-cell-alignment ()
   "Test `org-export-table-cell-alignment' specifications."
-  (let ((org-table-number-fraction 0.5)
-	(org-table-number-regexp "^[0-9]+$"))
-    ;; 1. Alignment is primarily determined by alignment cookies.
-    (org-test-with-temp-text "| <l> | <c> | <r> |"
-      (let* ((tree (org-element-parse-buffer))
-	     (info `(:parse-tree ,tree)))
-	(should
-	 (equal
-	  '(left center right)
-	  (mapcar (lambda (cell) (org-export-table-cell-alignment cell info))
-		  (org-element-map tree 'table-cell 'identity))))))
-    ;; 2. The last alignment cookie has precedence.
-    (org-test-with-parsed-data "
+  ;; 1. Alignment is primarily determined by alignment cookies.
+  (should
+   (equal '(left center right)
+	  (let ((org-table-number-fraction 0.5)
+		(org-table-number-regexp "^[0-9]+$"))
+	    (org-test-with-parsed-data "| <l> | <c> | <r> |"
+	      (mapcar (lambda (cell)
+			(org-export-table-cell-alignment cell info))
+		      (org-element-map tree 'table-cell 'identity))))))
+  ;; 2. The last alignment cookie has precedence.
+  (should
+   (equal '(right right right)
+	  (org-test-with-parsed-data "
 | <l8> |
 | cell |
 | <r9> |"
-      (should
-       (equal
-	'(right right right)
-	(mapcar (lambda (cell) (org-export-table-cell-alignment cell info))
-		(org-element-map tree 'table-cell 'identity)))))
-    ;; 3. If there's no cookie, cell's contents determine alignment.
-    ;;    A column mostly made of cells containing numbers will align
-    ;;    its cells to the right.
-    (org-test-with-parsed-data "
+	    (mapcar (lambda (cell) (org-export-table-cell-alignment cell info))
+		    (org-element-map tree 'table-cell 'identity)))))
+  ;; 3. If there's no cookie, cell's contents determine alignment.
+  ;;    A column mostly made of cells containing numbers will align
+  ;;    its cells to the right.
+  (should
+   (equal '(right right right)
+	  (let ((org-table-number-fraction 0.5)
+		(org-table-number-regexp "^[0-9]+$"))
+	    (org-test-with-parsed-data "
 | 123       |
 | some text |
 | 12345     |"
-      (should
-       (equal
-	'(right right right)
-	(mapcar (lambda (cell)
-		  (org-export-table-cell-alignment cell info))
-		(org-element-map tree 'table-cell 'identity)))))
-    ;; 4. Otherwise, they will be aligned to the left.
-    (org-test-with-parsed-data "
+	      (mapcar (lambda (cell)
+			(org-export-table-cell-alignment cell info))
+		      (org-element-map tree 'table-cell 'identity))))))
+  ;; 4. Otherwise, they will be aligned to the left.
+  (should
+   (equal '(left left left)
+	  (org-test-with-parsed-data "
 | text      |
 | some text |
 | \alpha    |"
-      (should
-       (equal
-	'(left left left)
-	(mapcar (lambda (cell)
-		  (org-export-table-cell-alignment cell info))
-		(org-element-map tree 'table-cell 'identity)))))))
+	    (mapcar (lambda (cell)
+		      (org-export-table-cell-alignment cell info))
+		    (org-element-map tree 'table-cell 'identity info))))))
 
 (ert-deftest test-org-export/table-cell-borders ()
   "Test `org-export-table-cell-borders' specifications."
