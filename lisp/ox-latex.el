@@ -2046,11 +2046,11 @@ contextual information."
 	       (float-env
 		(cond ((and (not float) (plist-member attributes :float)) "%s")
 		      ((string= "multicolumn" float)
-		       (format "\\begin{figure*}[%s]\n%s%%s\n\\end{figure*}"
+		       (format "\\begin{figure*}[%s]\n%%s%s\n\\end{figure*}"
 			       org-latex-default-figure-position
 			       caption-str))
 		      ((or caption float)
-		       (format "\\begin{figure}[H]\n%s%%s\n\\end{figure}"
+		       (format "\\begin{figure}[H]\n%%s%s\n\\end{figure}"
 			       caption-str))
 		      (t "%s"))))
 	  (format
