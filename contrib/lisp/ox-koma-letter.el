@@ -175,7 +175,11 @@ function may be given.  Functions must return a string."
   :type 'string)
 
 (defcustom org-koma-letter-opening nil
-  "Letter's opening, as a string."
+  "Letter's opening, as a string.
+
+If (1) this value is nil; (2) the letter is started with a
+headline; and (3) `org-koma-letter-headline-is-opening-maybe' is
+t the value opening will be implicit set as the headline title."
   :group 'org-export-koma-letter
   :type 'string)
 
@@ -263,6 +267,13 @@ Use `foldmarks:true' to activate default fold marks or
   `org-latex-classes'"
   :group 'org-export-koma-letter
   :type 'string)
+
+(defcustom org-koma-letter-headline-is-opening-maybe t
+  "Whether a headline may be used as an opening.
+A headline is only used if #+OPENING is not set.  See also
+`org-koma-letter-opening'."
+  :group 'org-export-koma-letter
+  :type 'boolean)
 
 (defconst org-koma-letter-special-tags-in-letter '(to from)
   "header tags related to the letter itself")
@@ -482,6 +493,10 @@ appropriate place."
 	  (push (cons tag contents)
 		org-koma-letter-special-contents)
 	  nil)
+      (unless (or (plist-get info :opening)
+		  (not org-koma-letter-headline-is-opening-maybe))
+	(plist-put info :opening
+		   (org-export-data (org-element-property :title headline) info)))
       contents)))
 
 
@@ -584,11 +599,11 @@ holding export options."
    (format "\\begin{letter}{%%\n%s}\n\n"
 	   (org-koma-letter--determine-special-value info 'to))
    ;; Opening.
-   (format "\\opening{%s}\n\n" (plist-get info :opening))
+   (format "\\opening{%s}\n\n" (or (plist-get info :opening) ""))
    ;; Letter body.
    contents
    ;; Closing.
-   (format "\n\\closing{%s}\n" (plist-get info :closing))
+   (format "\n\\closing{%s}\n" (or (plist-get info :closing) ""))
    (org-koma-letter--prepare-special-contents-as-macro
     (plist-get info :with-after-closing))
    ;; Letter end.
