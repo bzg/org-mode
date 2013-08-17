@@ -62,8 +62,8 @@
 ;;     (see `org-koma-letter-subject-format')
 ;;   - after-closing-order, a list of the ordering of headings with
 ;;     special tags after closing (see
-;;     `org-koma-letter-special-tags-after-closing') -
-;;     after-letter-order, as above, but after the end of the letter
+;;     `org-koma-letter-special-tags-after-closing')
+;;   - after-letter-order, as above, but after the end of the letter
 ;;     (see `org-koma-letter-special-tags-after-letter').
 ;;
 ;; The following variables works differently from the main LaTeX class
@@ -91,7 +91,7 @@
 ;;   (eval-after-load "ox-koma-letter"
 ;;   '(org-koma-letter-plug-into-ox))
 ;;
-;; to your init file. This will add a very sparse scrlttr2 class and
+;; to your init file.  This will add a sparse scrlttr2 class and
 ;; set it as the default `org-koma-latex-default-class'.  You can also
 ;; add you own letter class.  For instace:
 ;;
@@ -138,8 +138,8 @@
   "The sender's name.
 
 This variable defaults to calling the function `user-full-name'
-which just returns the current `user-full-name'.  Alternatively a
-string, nil or a function may be given. Functions must return a
+which just returns the current function `user-full-name'.  Alternatively a
+string, nil or a function may be given.  Functions must return a
 string."
   :group 'org-export-koma-letter
   :type '(radio (function-item user-full-name)
@@ -189,8 +189,7 @@ t the value opening will be implicit set as the headline title."
   :type 'string)
 
 (defcustom org-koma-letter-prefer-special-headings nil
-  "If both a TO or FROM is specified two places should the
-  heading version be preferred?"
+  "If TO and/or FROM is specified using both a heading and a keyword the heading value will be preferred if the variable is t."
   :group 'org-export-koma-letter
   :type 'boolean)
 
@@ -200,21 +199,22 @@ t the value opening will be implicit set as the headline title."
   :type 'string)
 
 (defcustom org-koma-letter-subject-format t
-  "Use the title as the subject of the letter.  At the time of
-writing the following values are allowed:
+  "Use the title as the subject of the letter.
 
- - afteropening: subject after opening
- - beforeopening: subject before opening
- - centered: subject centered
- - left:subject left-justified
- - right: subject right-justified
- - titled: add title/description to subject
- - underlined: set subject underlined (see note in text please)
+At this time the following values are allowed:
+
+ - afteropening: subject after opening.
+ - beforeopening: subject before opening.
+ - centered: subject centered.
+ - left:subject left-justified.
+ - right: subject right-justified.
+ - titled: add title/description to subject.
+ - underlined: set subject underlined.
  - untitled: do not add title/description to subject.
  - No-export: do no insert a subject even if present.
 
 Please refer to the KOMA-script manual (Table 4.16. in the
-English manual of 2012-07-22)"
+English manual of 2012-07-22)."
   :type '(radio
 	  (const :tag "No export" nil)
 	  (const :tag "Default options" t)
@@ -263,8 +263,9 @@ Use `foldmarks:true' to activate default fold marks or
   :type 'boolean)
 
 (defcustom org-koma-letter-default-class nil
-  "Default class for `org-koma-letter'.  Must be a member of
-  `org-latex-classes'"
+  "Default class for `org-koma-letter'.
+
+The value must be a member of `org-latex-classes'."
   :group 'org-export-koma-letter
   :type 'string)
 
@@ -276,16 +277,16 @@ A headline is only used if #+OPENING is not set.  See also
   :type 'boolean)
 
 (defconst org-koma-letter-special-tags-in-letter '(to from)
-  "header tags related to the letter itself")
+  "Header tags related to the letter itself.")
 
 (defconst org-koma-letter-special-tags-after-closing '(ps encl cc)
-  "Header tags to be inserted after closing")
+  "Header tags to be inserted after closing.")
 
 (defconst org-koma-letter-special-tags-after-letter '(after_letter)
-  "Header tags to be inserted after closing")
+  "Header tags to be inserted after closing.")
 
 (defvar org-koma-letter-special-contents nil
-  "holds special content temporarily.")
+  "Holds special content temporarily.")
 
 
 
@@ -297,10 +298,10 @@ A headline is only used if #+OPENING is not set.  See also
     (:latex-class "LATEX_CLASS" nil (if org-koma-letter-default-class
 					org-koma-letter-default-class
 					org-latex-default-class) t)
-    (:author "AUTHOR" nil (org-koma-letter--get-custom org-koma-letter-author) t)
+    (:author "AUTHOR" nil (org-koma-letter--get-value org-koma-letter-author) t)
     (:from-address "FROM_ADDRESS" nil nil newline)
     (:phone-number "PHONE_NUMBER" nil org-koma-letter-phone-number)
-    (:email "EMAIL" nil (org-koma-letter--get-custom org-koma-letter-email) t)
+    (:email "EMAIL" nil (org-koma-letter--get-value org-koma-letter-email) t)
     (:to-address "TO_ADDRESS" nil nil newline)
     (:place "PLACE" nil org-koma-letter-place)
     (:opening "OPENING" nil org-koma-letter-opening)
@@ -341,8 +342,7 @@ A headline is only used if #+OPENING is not set.  See also
 ;;; Initialize class function
 
 (defun org-koma-letter-plug-into-ox ()
-  "Add a sparse `default-koma-letter' to `org-latex-classes' and set
-`org-koma-letter-default-class' to `default-koma-letter'"
+  "Add a sparse `default-koma-letter' to `org-latex-classes' and set `org-koma-letter-default-class' to `default-koma-letter'."
   (let ((class "default-koma-letter"))
     (eval-after-load "ox-latex"
       `(unless (member ,class 'org-latex-classes)
@@ -354,20 +354,20 @@ A headline is only used if #+OPENING is not set.  See also
 ;;; Helper functions
 
 (defun org-koma-letter-email ()
-  "Return the current `user-mail-address'"
+  "Return the current `user-mail-address'."
   user-mail-address)
 
 ;; The following is taken from/inspired by ox-grof.el
 ;; Thanks, Luis!
 
 (defun org-koma-letter--get-tagged-contents (key)
-  "Get tagged content from `org-koma-letter-special-contents'"
-  (cdr (assoc (org-koma-letter--get-custom key)
+  "Get contents from a headline tagged with KEY.
+Technically, the contents is stored in `org-koma-letter-special-contents'."
+  (cdr (assoc (org-koma-letter--get-value key)
 	      org-koma-letter-special-contents)))
 
-(defun org-koma-letter--get-custom (value)
-  "Determines whether a value is nil, a string or a
-function (a symobl).  If it is a function it it evaluates it."
+(defun org-koma-letter--get-value (value)
+  "Determines if VALUE is nil, a string, a function or a symbol and return a string or nil."
   (when value
     (cond ((stringp value) value)
 	  ((functionp value) (funcall value))
@@ -375,20 +375,21 @@ function (a symobl).  If it is a function it it evaluates it."
 	  (t value))))
 
 
-(defun org-koma-letter--prepare-special-contents-as-macro (a-list &optional keep-newlines no-tag)
-  "Finds all the components of `org-koma-letter-special-contents'
-corresponding to members of the `a-list' and return them as a
-string to be formatted.  The function is used for inserting
-content of speciall headings such as PS.
+(defun org-koma-letter--special-contents-as-macro (a-list &optional keep-newlines no-tag)
+  "Find members of `org-koma-letter-special-contents' corresponding to A-LIST.
+Return them as a string to be formatted.
 
-If keep-newlines is t newlines will not be removed.  If no-tag is
+The function is used for inserting content of speciall headings
+such as PS.
+
+If KEEP-NEWLINES is t newlines will not be removed.  If NO-TAG is
 is t the content in `org-koma-letter-special-contents' will not
-be wrapped in a macro named whatever the members of a-list are called.
-"
+be wrapped in a macro named whatever the members of A-LIST are
+called."
   (let (output)
     (dolist (ac* a-list output)
       (let*
-	  ((ac (org-koma-letter--get-custom ac*))
+	  ((ac (org-koma-letter--get-value ac*))
 	   (x (org-koma-letter--get-tagged-contents ac)))
 	(when x
 	  (setq output
@@ -397,24 +398,26 @@ be wrapped in a macro named whatever the members of a-list are called.
 		 ;; sometimes LaTeX complains about newlines
 		 ;; at the end or beginning of macros.  Remove them.
 		 (org-koma-letter--format-string-as-macro
-		  (if keep-newlines x (org-koma-letter--remove-offending-new-lines x))
+		  (if keep-newlines x (org-koma-letter--normalize-string x))
 		  (unless no-tag  ac)))))))))
 
 (defun org-koma-letter--format-string-as-macro (string &optional macro)
-  "If a macro is given format as string as  \"\\macro{string}\" else as \"string\""
+  "Format STRING as  \"\\macro{string}\" if MACRO is given else as \"string\"."
   (if macro
       (format "\\%s{%s}" macro string)
     (format "%s" string)))
 
-(defun org-koma-letter--remove-offending-new-lines (string)
-  "Remove new lines in the begging and end of `string'"
+(defun org-koma-letter--normalize-string (string)
+  "Remove new lines in the beginning and end of `STRING'."
   (replace-regexp-in-string "\\`[ \n\t]+\\|[\n\t ]*\\'" "" string))
 
-(defun org-koma-letter--determine-special-value (info key)
-  "Determine who the letter is to and whom it is from.
-  oxkoma-letter allows two ways to specify these things.  If both
-  are present return the preferred one as determined by
- `org-koma-letter-prefer-special-headings'."
+(defun org-koma-letter--determine-to-and-from (info key)
+  "Given INFO determine KEY for the letter.
+KEY should be `to' or `from'.
+
+`ox-koma-letter' allows two ways to specify to and from.  If both
+are present return the preferred one as determined by
+`org-koma-letter-prefer-special-headings'."
   (let* ((plist-alist '((from . :from-address)
 		       (to . :to-address)))
 	 (default-alist  `((from  ,org-koma-letter-from-address)
@@ -434,7 +437,7 @@ be wrapped in a macro named whatever the members of a-list are called.
   (when adr
     (replace-regexp-in-string
      "\n" "\\\\\\\\\n"
-     (org-koma-letter--remove-offending-new-lines adr)))))
+     (org-koma-letter--normalize-string adr)))))
 
 ;;; Transcode Functions
 
@@ -537,7 +540,7 @@ holding export options."
 	info)))
    (let ((lco (plist-get info :lco))
 	 (author (plist-get info :author))
-	 (from-address (org-koma-letter--determine-special-value info 'from))
+	 (from-address (org-koma-letter--determine-to-and-from info 'from))
 	 (phone-number (plist-get info :phone-number))
 	 (email (plist-get info :email))
 	 (signature (plist-get info :signature)))
@@ -597,18 +600,18 @@ holding export options."
 	(format "\\setkomavar{subject}{%s}\n\n" subject))))
    ;; Letter start
    (format "\\begin{letter}{%%\n%s}\n\n"
-	   (org-koma-letter--determine-special-value info 'to))
+	   (org-koma-letter--determine-to-and-from info 'to))
    ;; Opening.
    (format "\\opening{%s}\n\n" (or (plist-get info :opening) ""))
    ;; Letter body.
    contents
    ;; Closing.
    (format "\n\\closing{%s}\n" (or (plist-get info :closing) ""))
-   (org-koma-letter--prepare-special-contents-as-macro
+   (org-koma-letter--special-contents-as-macro
     (plist-get info :with-after-closing))
    ;; Letter end.
    "\n\\end{letter}\n"
-   (org-koma-letter--prepare-special-contents-as-macro
+   (org-koma-letter--special-contents-as-macro
     (plist-get info :with-after-letter) t t)
    ;; Document end.
    "\n\\end{document}"
