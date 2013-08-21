@@ -1167,6 +1167,20 @@ echo \"$data\"
 	       (goto-char (match-beginning 0))
 	       (org-babel-execute-src-block))))))
 
+(ert-deftest test-ob/preserve-results-indentation ()
+  "Preserve indentation when executing a src block."
+  (should
+   (equal '(2 2)
+	  (org-test-with-temp-text
+	      "  #+begin_src emacs-lisp\n  (+ 1 1)\n  #+end_src"
+	    (org-babel-execute-src-block)
+	    (buffer-string)
+	    (let ((case-fold-search t)) (search-forward "#+results:"))
+	    ;; Check if both #+RESULTS: keyword and actual results are
+	    ;; indented by 2 columns.
+	    (list (org-get-indentation)
+		  (progn (forward-line) (org-get-indentation)))))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
