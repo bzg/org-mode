@@ -173,7 +173,7 @@ be displayed when `org-export-show-temporary-export-buffer' is
 non-nil."
   (interactive)
   (org-export-to-buffer 'org "*Org ORG Export*"
-    async subtreep visible-only ext-plist (lambda () (org-mode))))
+    async subtreep visible-only nil ext-plist (lambda () (org-mode))))
 
 ;;;###autoload
 (defun org-org-export-to-org (&optional async subtreep visible-only ext-plist)
