@@ -54,6 +54,12 @@
   "This will cache timestamps and titles for files in publishing projects.
 Blocks could hash sha1 values here.")
 
+(defvar org-publish-after-publishing-hook nil
+  "Hook run each time a file is published.
+Every function in this hook will be called with two arguments:
+the name of the original file and the name of the file
+produced.")
+
 (defgroup org-publish nil
   "Options for publishing a set of Org-mode and related files."
   :tag "Org Publishing"
@@ -600,11 +606,12 @@ publishing directory.
 Return output file name."
   (unless (file-directory-p pub-dir)
     (make-directory pub-dir t))
-  (or (equal (expand-file-name (file-name-directory filename))
-	     (file-name-as-directory (expand-file-name pub-dir)))
-      (copy-file filename
-		 (expand-file-name (file-name-nondirectory filename) pub-dir)
-		 t)))
+  (let ((output (expand-file-name (file-name-nondirectory filename) pub-dir)))
+    (or (equal (expand-file-name (file-name-directory filename))
+	       (file-name-as-directory (expand-file-name pub-dir)))
+	(copy-file filename output t))
+    ;; Return file name.
+    output))
 
 
 
@@ -625,8 +632,10 @@ See `org-publish-projects'."
 	 (project-plist (cdr project))
 	 (ftname (expand-file-name filename))
 	 (publishing-function
-	  (or (plist-get project-plist :publishing-function)
-	      (error "No publishing function chosen")))
+	  (let ((fun (plist-get project-plist :publishing-function)))
+	    (cond ((null fun) (error "No publishing function chosen"))
+		  ((listp fun) fun)
+		  (t (list fun)))))
 	 (base-dir
 	  (file-name-as-directory
 	   (expand-file-name
@@ -648,19 +657,14 @@ See `org-publish-projects'."
 	   (concat pub-dir
 		   (and (string-match (regexp-quote base-dir) ftname)
 			(substring ftname (match-end 0))))))
-    (if (listp publishing-function)
-	;; allow chain of publishing functions
-	(mapc (lambda (f)
-		(when (org-publish-needed-p
-		       filename pub-dir f tmp-pub-dir base-dir)
-		  (funcall f project-plist filename tmp-pub-dir)
-		  (org-publish-update-timestamp filename pub-dir f base-dir)))
-	      publishing-function)
-      (when (org-publish-needed-p
-	     filename pub-dir publishing-function tmp-pub-dir base-dir)
-	(funcall publishing-function project-plist filename tmp-pub-dir)
-	(org-publish-update-timestamp
-	 filename pub-dir publishing-function base-dir)))
+    ;; Allow chain of publishing functions.
+    (dolist (f publishing-function)
+      (when (org-publish-needed-p filename pub-dir f tmp-pub-dir base-dir)
+	(let ((output (funcall f project-plist filename tmp-pub-dir)))
+	  (org-publish-update-timestamp filename pub-dir f base-dir)
+	  (run-hook-with-args 'org-publish-after-publishing-hook
+			      filename
+			      output))))
     (unless no-cache (org-publish-write-cache-file))))
 
 (defun org-publish-projects (projects)
