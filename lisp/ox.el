@@ -5544,9 +5544,9 @@ EXT-PLIST are similar to those used in `org-export-as', which
 see.
 
 Optional argument POST-PROCESS is a function which should accept
-no argument.  It is called within the current process, from
-BUFFER, with point at its beginning.  Export back-ends can use it
-to set a major mode there, e.g,
+no argument.  It is always called within the current process,
+from BUFFER, with point at its beginning.  Export back-ends can
+use it to set a major mode there, e.g,
 
   \(defun org-latex-export-as-latex
     \(&optional async subtreep visible-only body-only ext-plist)
@@ -5604,9 +5604,9 @@ EXT-PLIST are similar to those used in `org-export-as', which
 see.
 
 Optional argument POST-PROCESS is called with FILE as its
-argument, in the asynchronous process.  It has to return a file
-name, or nil.  Export back-ends can use this to send the output
-file through additional processing, e.g,
+argument and happens asynchronously when ASYNC is non-nil.  It
+has to return a file name, or nil.  Export back-ends can use this
+to send the output file through additional processing, e.g,
 
   \(defun org-latex-export-to-latex
     \(&optional async subtreep visible-only body-only ext-plist)
