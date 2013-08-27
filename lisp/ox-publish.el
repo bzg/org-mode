@@ -589,8 +589,6 @@ Return output file name."
       ;; Remove opened buffer in the process.
       (unless visitingp (kill-buffer work-buffer)))))
 
-(defvar project-plist)
-
 (defun org-publish-attachment (plist filename pub-dir)
   "Publish a file with no transformation of any kind.
 
