@@ -753,14 +753,14 @@ with \",*\", \",#+\", \",,*\" and \",,#+\"."
       (kill-buffer buffer))
     (goto-char beg)
     (when allow-write-back-p
-      (let ((buffer-undo-list t))
-	(delete-region beg (max beg end))
-	(unless (string-match "\\`[ \t]*\\'" code)
-	  (insert code))
-	;; Make sure the overlay stays in place
+      (undo-boundary)
+      (delete-region beg (max beg end))
+      (unless (string-match "\\`[ \t]*\\'" code)
+	(insert code))
+      	;; Make sure the overlay stays in place
 	(when (eq context 'save) (move-overlay ovl beg (point)))
-	(goto-char beg)
-	(if single (just-one-space))))
+      (goto-char beg)
+      (if single (just-one-space)))
     (if (memq t (mapcar (lambda (overlay)
 			  (eq (overlay-get overlay 'invisible)
 			      'org-hide-block))
