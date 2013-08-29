@@ -4454,14 +4454,17 @@ column (see `org-table-number-fraction' for more information).
 Possible values are `left', `right' and `center'."
   (let* ((row (org-export-get-parent table-cell))
 	 (table (org-export-get-parent row))
-	 (column (let ((cells (org-element-contents row)))
-		   (- (length cells) (length (memq table-cell cells)))))
+	 (cells (org-element-contents row))
+	 (columns (length cells))
+	 (column (- columns (length (memq table-cell cells))))
 	 (cache (or (plist-get info :table-cell-alignment-cache)
 		    (plist-get (setq info
 				     (plist-put info :table-cell-alignment-cache
 						(make-hash-table :test 'equal)))
-			       :table-cell-alignment-cache))))
-    (or (gethash (cons table column) cache)
+			       :table-cell-alignment-cache)))
+	 (align-vector (or (gethash table cache)
+			   (puthash table (make-vector columns nil) cache))))
+    (or (aref align-vector column)
 	(let ((number-cells 0)
 	      (total-cells 0)
 	      cookie-align
@@ -4504,15 +4507,15 @@ Possible values are `left', `right' and `center'."
 		  (incf number-cells))))))
 	  ;; Return value.  Alignment specified by cookies has
 	  ;; precedence over alignment deduced from cell's contents.
-	  (puthash (cons table column)
-		   (cond ((equal cookie-align "l") 'left)
-			 ((equal cookie-align "r") 'right)
-			 ((equal cookie-align "c") 'center)
-			 ((>= (/ (float number-cells) total-cells)
-			      org-table-number-fraction)
-			  'right)
-			 (t 'left))
-		   cache)))))
+	  (aset align-vector
+		column
+		(cond ((equal cookie-align "l") 'left)
+		      ((equal cookie-align "r") 'right)
+		      ((equal cookie-align "c") 'center)
+		      ((>= (/ (float number-cells) total-cells)
+			   org-table-number-fraction)
+		       'right)
+		      (t 'left)))))))
 
 (defun org-export-table-cell-borders (table-cell info)
   "Return TABLE-CELL borders.
