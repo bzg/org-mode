@@ -4412,19 +4412,21 @@ Return value is the width given by the last width cookie in the
 same column as TABLE-CELL, or nil."
   (let* ((row (org-export-get-parent table-cell))
 	 (table (org-export-get-parent row))
-	 (column (let ((cells (org-element-contents row)))
-		   (- (length cells) (length (memq table-cell cells)))))
+	 (cells (org-element-contents row))
+	 (columns (length cells))
+	 (column (- columns (length (memq table-cell cells))))
 	 (cache (or (plist-get info :table-cell-width-cache)
 		    (plist-get (setq info
 				     (plist-put info :table-cell-width-cache
-						(make-hash-table :test 'equal)))
+						(make-hash-table :test 'eq)))
 			       :table-cell-width-cache)))
-	 (key (cons table column))
-	 (value (gethash key cache 'no-result)))
-    (if (not (eq value 'no-result)) value
+	 (width-vector (or (gethash table cache)
+			   (puthash table (make-vector columns 'empty) cache)))
+	 (value (aref width-vector column)))
+    (if (not (eq value 'empty)) value
       (let (cookie-width)
 	(dolist (row (org-element-contents table)
-		     (puthash key cookie-width cache))
+		     (aset width-vector column cookie-width))
 	  (when (org-export-table-row-is-special-p row info)
 	    ;; In a special row, try to find a width cookie at COLUMN.
 	    (let* ((value (org-element-contents
