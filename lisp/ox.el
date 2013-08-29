@@ -4515,6 +4515,8 @@ same column as TABLE-CELL.  If no such cookie is found, a default
 alignment value will be deduced from fraction of numbers in the
 column (see `org-table-number-fraction' for more information).
 Possible values are `left', `right' and `center'."
+  ;; Load `org-table-number-fraction' and `org-table-number-regexp'.
+  (require 'org-table)
   (let* ((row (org-export-get-parent table-cell))
 	 (table (org-export-get-parent row))
 	 (cells (org-element-contents row))
