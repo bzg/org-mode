@@ -4818,11 +4818,11 @@ Providing it allows for quicker computation."
             (type (org-element-type element))
             context)
        ;; Check if point is inside an element containing objects or at
-       ;; a secondary string.  In that case, move to beginning of the
-       ;; element or secondary string and set END to the other side.
+       ;; a secondary string.  In that case, narrow buffer to the
+       ;; containing area.  Otherwise, return ELEMENT.
        (cond
 	;; At a parsed affiliated keyword, check if we're inside main
-	;; or dual value and limit parsing to that area.
+	;; or dual value.
 	((let ((post (org-element-property :post-affiliated element)))
 	   (and post (< origin post)))
 	 (beginning-of-line)
