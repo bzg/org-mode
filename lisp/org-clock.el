@@ -1691,7 +1691,7 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
     (org-show-entry)
     (org-back-to-heading t)
     (org-cycle-hide-drawers 'children)
-    (recenter)
+    (recenter 2)
     (org-reveal)
     (if recent
 	(message "No running clock, this is the most recently clocked task"))
