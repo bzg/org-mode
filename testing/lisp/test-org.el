@@ -273,11 +273,28 @@
 	      (buffer-string)))))
   ;; Auto fill paragraph when `adaptive-fill-regexp' matches.
   (should
-   (equal "> 12345\n> 7890"
+   (equal "> 12345\n  7890"
 	  (org-test-with-temp-text "> 12345 7890"
-	    (let ((fill-column 5)
-		  (adaptive-fill-regexp "[ \t]*>+[ \t]*"))
+	    (let ((fill-column 10)
+		  (adaptive-fill-regexp "[ \t]*>+[ \t]*")
+		  (adaptive-fill-first-line-regexp "\\`[ 	]*\\'"))
 	      (end-of-line)
+	      (org-auto-fill-function)
+	      (buffer-string)))))
+  (should
+   (equal "> 12345\n> 12345\n> 7890"
+	  (org-test-with-temp-text "> 12345\n> 12345 7890"
+	    (let ((fill-column 10)
+		  (adaptive-fill-regexp "[ \t]*>+[ \t]*"))
+	      (goto-char (point-max))
+	      (org-auto-fill-function)
+	      (buffer-string)))))
+  (should-not
+   (equal " 12345\n *12345\n *12345"
+	  (org-test-with-temp-text " 12345\n *12345 12345"
+	    (let ((fill-column 10)
+		  (adaptive-fill-regexp "[ \t]*>+[ \t]*"))
+	      (goto-char (point-max))
 	      (org-auto-fill-function)
 	      (buffer-string)))))
   ;; Auto fill comments.

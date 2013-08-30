@@ -258,7 +258,7 @@ Returns a list
 	(save-excursion
 	  (goto-char head)
 	  (setq info (org-babel-parse-src-block-match))
-	  (setq indent (nth 5 info))
+	  (setq indent (car (last info)))
 	  (setq info (butlast info))
 	  (while (and (forward-line -1)
 		      (looking-at org-babel-multi-line-header-regexp))

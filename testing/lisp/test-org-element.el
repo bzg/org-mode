@@ -501,7 +501,13 @@ Some other text
 	    '(("test" "test" nil "test" "test" "test" "test"))))
        (org-test-with-temp-text "\\test"
 	 (org-element-map (org-element-parse-buffer) 'entity 'identity nil t))))
-    "test")))
+    "test"))
+  ;; Special case: entity at the end of a container.
+  (should
+   (eq 'entity
+       (org-test-with-temp-text "*\\alpha \\beta*"
+	 (search-forward "be")
+	 (org-element-type (org-element-context))))))
 
 
 ;;;; Example Block
@@ -1351,7 +1357,7 @@ e^{i\\pi}+1=0
 	  (org-test-with-temp-text
 	      "#+LINK: orgmode http://www.orgmode.org/\n[[orgmode:#docs]]"
 	    (progn (org-mode-restart)
-		   (goto-char (point-max))
+		   (goto-char (1- (point-max)))
 		   (org-element-property :type (org-element-context))))))
   ;; Link abbreviation in a secondary string.
   (should

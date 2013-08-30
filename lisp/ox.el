@@ -112,7 +112,7 @@
     (:section-numbers nil "num" org-export-with-section-numbers)
     (:select-tags "SELECT_TAGS" nil org-export-select-tags split)
     (:time-stamp-file nil "timestamp" org-export-time-stamp-file)
-    (:title "TITLE" nil org-export--default-title space)
+    (:title "TITLE" nil nil space)
     (:with-archived-trees nil "arch" org-export-with-archived-trees)
     (:with-author nil "author" org-export-with-author)
     (:with-clocks nil "c" org-export-with-clocks)
@@ -1743,7 +1743,8 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 	     ;; Return final value.
 	     plist))))
     ;; Read options in the current buffer.
-    (setq plist (funcall get-options buffer-file-name nil))
+    (setq plist (funcall get-options
+			 (and buffer-file-name (list buffer-file-name)) nil))
     ;; Parse keywords specified in `org-element-document-properties'
     ;; and return PLIST.
     (dolist (keyword org-element-document-properties plist)
@@ -1758,19 +1759,11 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 (defun org-export--get-buffer-attributes ()
   "Return properties related to buffer attributes, as a plist."
   ;; Store full path of input file name, or nil.  For internal use.
-  (list :input-file (buffer-file-name (buffer-base-buffer))))
-
-(defvar org-export--default-title nil)	; Dynamically scoped.
-(defun org-export-store-default-title ()
-  "Return default title for current document, as a string.
-Title is extracted from associated file name, if any, or buffer's
-name."
-  (setq org-export--default-title
-	(or (let ((visited-file (buffer-file-name (buffer-base-buffer))))
-	      (and visited-file
+  (let ((visited-file (buffer-file-name (buffer-base-buffer))))
+    (list :input-file visited-file
+	  :title (if (not visited-file) (buffer-name (buffer-base-buffer))
 		   (file-name-sans-extension
-		    (file-name-nondirectory visited-file))))
-	    (buffer-name (buffer-base-buffer)))))
+		    (file-name-nondirectory visited-file))))))
 
 (defun org-export--get-global-options (&optional backend)
   "Return global export options as a plist.
@@ -1783,8 +1776,9 @@ process."
 	(all (append (and backend (org-export-get-all-options backend))
 		     org-export-options-alist)))
     (dolist (cell all plist)
-      (let ((prop (car cell)))
-	(unless (plist-member plist prop)
+      (let ((prop (car cell))
+	    (default-value (nth 3 cell)))
+	(unless (or (not default-value) (plist-member plist prop))
 	  (setq plist
 		(plist-put
 		 plist
@@ -2256,9 +2250,10 @@ recursively convert DATA using BACKEND translation table."
    ;; memoization.
    (org-combine-plists
     info
-    (list :translate-alist (org-export-get-all-transcoders backend)
+    (list :back-end backend
+	  :translate-alist (org-export-get-all-transcoders backend)
 	  ;; Size of the hash table is reduced since this function
-	  ;; will probably be used on short trees.
+	  ;; will probably be used on small trees.
 	  :exported-data (make-hash-table :test 'eq :size 401)))))
 
 (defun org-export--interpret-p (blob info)
@@ -2760,7 +2755,8 @@ VALUE is ignored.
 Call is done in a LIFO fashion, to be sure that developer
 specified filters, if any, are called first."
   (catch 'exit
-    (let ((backend-name (plist-get info :back-end)))
+    (let* ((backend (plist-get info :back-end))
+	   (backend-name (and backend (org-export-backend-name backend))))
       (dolist (filter filters value)
 	(let ((result (funcall filter value backend-name info)))
 	  (cond ((not result) value)
@@ -2975,10 +2971,6 @@ Return code as a string."
 				      (and body-only 'body-only))))
 		    (org-export--get-buffer-attributes)))
 	     tree)
-	;; Store default title in `org-export--default-title' so that
-	;; `org-export-get-environment' can access it from buffer's
-	;; copy and then add it properly to communication channel.
-	(org-export-store-default-title)
 	;; Update communication channel and get parse tree.  Buffer
 	;; isn't parsed directly.  Instead, a temporary copy is
 	;; created, where include keywords, macros are expanded and
@@ -4420,19 +4412,21 @@ Return value is the width given by the last width cookie in the
 same column as TABLE-CELL, or nil."
   (let* ((row (org-export-get-parent table-cell))
 	 (table (org-export-get-parent row))
-	 (column (let ((cells (org-element-contents row)))
-		   (- (length cells) (length (memq table-cell cells)))))
+	 (cells (org-element-contents row))
+	 (columns (length cells))
+	 (column (- columns (length (memq table-cell cells))))
 	 (cache (or (plist-get info :table-cell-width-cache)
 		    (plist-get (setq info
 				     (plist-put info :table-cell-width-cache
-						(make-hash-table :test 'equal)))
+						(make-hash-table :test 'eq)))
 			       :table-cell-width-cache)))
-	 (key (cons table column))
-	 (value (gethash key cache 'no-result)))
-    (if (not (eq value 'no-result)) value
+	 (width-vector (or (gethash table cache)
+			   (puthash table (make-vector columns 'empty) cache)))
+	 (value (aref width-vector column)))
+    (if (not (eq value 'empty)) value
       (let (cookie-width)
 	(dolist (row (org-element-contents table)
-		     (puthash key cookie-width cache))
+		     (aset width-vector column cookie-width))
 	  (when (org-export-table-row-is-special-p row info)
 	    ;; In a special row, try to find a width cookie at COLUMN.
 	    (let* ((value (org-element-contents
@@ -4458,16 +4452,21 @@ same column as TABLE-CELL.  If no such cookie is found, a default
 alignment value will be deduced from fraction of numbers in the
 column (see `org-table-number-fraction' for more information).
 Possible values are `left', `right' and `center'."
+  ;; Load `org-table-number-fraction' and `org-table-number-regexp'.
+  (require 'org-table)
   (let* ((row (org-export-get-parent table-cell))
 	 (table (org-export-get-parent row))
-	 (column (let ((cells (org-element-contents row)))
-		   (- (length cells) (length (memq table-cell cells)))))
+	 (cells (org-element-contents row))
+	 (columns (length cells))
+	 (column (- columns (length (memq table-cell cells))))
 	 (cache (or (plist-get info :table-cell-alignment-cache)
 		    (plist-get (setq info
 				     (plist-put info :table-cell-alignment-cache
-						(make-hash-table :test 'equal)))
-			       :table-cell-alignment-cache))))
-    (or (gethash (cons table column) cache)
+						(make-hash-table :test 'eq)))
+			       :table-cell-alignment-cache)))
+	 (align-vector (or (gethash table cache)
+			   (puthash table (make-vector columns nil) cache))))
+    (or (aref align-vector column)
 	(let ((number-cells 0)
 	      (total-cells 0)
 	      cookie-align
@@ -4510,15 +4509,15 @@ Possible values are `left', `right' and `center'."
 		  (incf number-cells))))))
 	  ;; Return value.  Alignment specified by cookies has
 	  ;; precedence over alignment deduced from cell's contents.
-	  (puthash (cons table column)
-		   (cond ((equal cookie-align "l") 'left)
-			 ((equal cookie-align "r") 'right)
-			 ((equal cookie-align "c") 'center)
-			 ((>= (/ (float number-cells) total-cells)
-			      org-table-number-fraction)
-			  'right)
-			 (t 'left))
-		   cache)))))
+	  (aset align-vector
+		column
+		(cond ((equal cookie-align "l") 'left)
+		      ((equal cookie-align "r") 'right)
+		      ((equal cookie-align "c") 'center)
+		      ((>= (/ (float number-cells) total-cells)
+			   org-table-number-fraction)
+		       'right)
+		      (t 'left)))))))
 
 (defun org-export-table-cell-borders (table-cell info)
   "Return TABLE-CELL borders.
@@ -5552,9 +5551,9 @@ EXT-PLIST are similar to those used in `org-export-as', which
 see.
 
 Optional argument POST-PROCESS is a function which should accept
-no argument.  It is called within the current process, from
-BUFFER, with point at its beginning.  Export back-ends can use it
-to set a major mode there, e.g,
+no argument.  It is always called within the current process,
+from BUFFER, with point at its beginning.  Export back-ends can
+use it to set a major mode there, e.g,
 
   \(defun org-latex-export-as-latex
     \(&optional async subtreep visible-only body-only ext-plist)
@@ -5612,9 +5611,9 @@ EXT-PLIST are similar to those used in `org-export-as', which
 see.
 
 Optional argument POST-PROCESS is called with FILE as its
-argument, in the asynchronous process.  It has to return a file
-name, or nil.  Export back-ends can use this to send the output
-file through additional processing, e.g,
+argument and happens asynchronously when ASYNC is non-nil.  It
+has to return a file name, or nil.  Export back-ends can use this
+to send the output file through additional processing, e.g,
 
   \(defun org-latex-export-to-latex
     \(&optional async subtreep visible-only body-only ext-plist)
