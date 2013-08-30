@@ -16782,9 +16782,10 @@ can use Org's facilities to edit and structure lists by turning
 @cindex radio tables
 
 To define the location of the target table, you first need to create two
-lines that are comments in the current mode, but contain magic words for
-Orgtbl mode to find.  Orgtbl mode will insert the translated table
-between these lines, replacing whatever was there before.  For example:
+lines that are comments in the current mode, but contain magic words
+@code{BEGIN/END RECEIVE ORGTBL} for Orgtbl mode to find.  Orgtbl mode will
+insert the translated table between these lines, replacing whatever was there
+before.  For example in C mode where comments are between @code{/* ... */}:
 
 @example
 /* BEGIN RECEIVE ORGTBL table_name */
@@ -16858,7 +16859,7 @@ The best way to wrap the source table in @LaTeX{} is to use the
 activated by placing @code{\usepackage@{comment@}} into the document
 header.  Orgtbl mode can insert a radio table skeleton@footnote{By
 default this works only for @LaTeX{}, HTML, and Texinfo.  Configure the
-variable @code{orgtbl-radio-tables} to install templates for other
+variable @code{orgtbl-radio-table-templates} to install templates for other
 modes.}  with the command @kbd{M-x orgtbl-insert-radio-table RET}.  You will
 be prompted for a table name, let's say we use @samp{salesfigures}.  You
 will then get the following template:
