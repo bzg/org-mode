@@ -11436,7 +11436,8 @@ If JUST-RETURN-STRING is non-nil, return a string, don't display a message."
 	   separator))
     (if just-return-string
 	(org-no-properties res)
-      (message "%s" res))))
+      (let ((message-log-max nil))
+	(message "%s" res)))))
 
 (defvar org-refile-history nil
   "History for refiling operations.")
