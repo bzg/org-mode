@@ -3831,7 +3831,6 @@ header, or they will be appended."
     (""     "textcomp"  t)
     (""     "marvosym"  t)
     (""     "wasysym"   t)
-    (""     "latexsym"  t)
     (""     "amssymb"   t)
     (""     "amstext"   nil)
     (""     "hyperref"  nil)
@@ -3846,10 +3845,9 @@ Org mode to function properly:
 
 - inputenc, fontenc:  for basic font and character selection
 - amstext: for subscript and superscript
-- textcomp, marvosymb, wasysym, latexsym, amssym: for various
-  symbols used for interpreting the entities in `org-entities'.
-  You can skip some of these packages if you don't use any of the
-  symbols in it.
+- textcomp, marvosymb, wasysym, amssymb: for various symbols used
+  for interpreting the entities in `org-entities'.  You can skip
+  some of these packages if you don't use any of their symbols.
 - ulem: for underline and strike-through
 - graphicx: for including images
 - float, wrapfig: for figure placement
@@ -7652,7 +7650,7 @@ This is important for non-interactive uses of the command."
 	   (t
 	    (goto-char (point-at-eol))
 	    (insert "\n")))
-	  
+
 	  ;; Insert the new heading
 	  (insert stars)
 	  (just-one-space)

@@ -1561,7 +1561,7 @@ contextual information."
 			 (1- count)))))
 	 (checkbox (case (org-element-property :checkbox item)
 		     (on "$\\boxtimes$ ")
-		     (off "$\\Box$ ")
+		     (off "$\\square$ ")
 		     (trans "$\\boxminus$ ")))
 	 (tag (let ((tag (org-element-property :tag item)))
 		;; Check-boxes must belong to the tag.
