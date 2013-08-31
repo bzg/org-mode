@@ -2603,6 +2603,36 @@ Another text. (ref:text)
 
 
 
+;;; Tables of Contents
+
+(ert-deftest test-org-export/collect-headlines ()
+  "Test `org-export-collect-headlines' specifications."
+  ;; Standard test.
+  (should
+   (= 2
+      (length
+       (org-test-with-parsed-data "* H1\n** H2"
+	 (org-export-collect-headlines info)))))
+  ;; Do not collect headlines below optional argument.
+  (should
+   (= 1
+      (length
+       (org-test-with-parsed-data "* H1\n** H2"
+	 (org-export-collect-headlines info 1)))))
+  ;; Never collect headlines below maximum headline level.
+  (should
+   (= 1
+      (length
+       (org-test-with-parsed-data "#+OPTIONS: H:1\n* H1\n** H2"
+	 (org-export-collect-headlines info)))))
+  (should
+   (= 1
+      (length
+       (org-test-with-parsed-data "#+OPTIONS: H:1\n* H1\n** H2"
+	 (org-export-collect-headlines info 2))))))
+
+
+
 ;;; Templates
 
 (ert-deftest test-org-export/inner-template ()
