@@ -741,7 +741,7 @@ Miscellaneous
 * Clean view::                  Getting rid of leading stars in the outline
 * TTY keys::                    Using Org on a tty
 * Interaction::                 Other Emacs packages
-* org-crypt.el::                Encrypting Org files
+* org-crypt::                   Encrypting Org files
 
 Interaction with other packages
 
@@ -15552,7 +15552,7 @@ emacs -Q --batch \
 * Clean view::                  Getting rid of leading stars in the outline
 * TTY keys::                    Using Org on a tty
 * Interaction::                 Other Emacs packages
-* org-crypt.el::                Encrypting Org files
+* org-crypt::                   Encrypting Org files
 @end menu
 
 
@@ -16268,7 +16268,7 @@ tty you would rather use @kbd{C-c .} to re-insert the timestamp.
 @end multitable
 
 
-@node Interaction, org-crypt.el, TTY keys, Miscellaneous
+@node Interaction, org-crypt, TTY keys, Miscellaneous
 @section Interaction with other packages
 @cindex packages, interaction with other
 Org lives in the world of GNU Emacs and interacts in various ways
@@ -16489,7 +16489,7 @@ another key for this command, or override the key in
 
 @end table
 
-@node org-crypt.el,  , Interaction, Miscellaneous
+@node org-crypt,  , Interaction, Miscellaneous
 @section org-crypt.el
 @cindex @file{org-crypt.el}
 @cindex @code{org-decrypt-entry}
