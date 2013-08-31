@@ -17656,6 +17656,21 @@ is not set, the tables are not re-aligned, etc."
   :version "24.3"
   :group 'org-agenda)
 
+(defcustom org-agenda-ignore-drawer-properties nil
+  "Avoid updating text properties when building the agenda.
+Properties are used to prepare buffers for effort estimates, appointments,
+and subtree-local categories.
+If you don't use these in the agenda, you can add them to this list and
+agenda building will be a bit faster.
+The value is a list, with zero or more of the symbols `effort', `appt',
+or `category'."
+  :type '(set :greedy t
+	      (const effort)
+	      (const appt)
+	      (const category))
+  :version "24.3"
+  :group 'org-agenda)
+
 (defun org-duration-string-to-minutes (s &optional output-to-string)
   "Convert a duration string S to minutes.
 
@@ -18017,9 +18032,12 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		;; this is only run for setting agenda tags from setup
 		;; file
 		(org-set-regexps-and-options)))
-	    (org-refresh-category-properties)
-	    (org-refresh-properties org-effort-property 'org-effort)
-	    (org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime)
+	    (or (memq 'category org-agenda-ignore-drawer-properties)
+		(org-refresh-category-properties))
+	    (or (memq 'effort org-agenda-ignore-drawer-properties)
+		(org-refresh-properties org-effort-property 'org-effort))
+	    (or (memq 'appt org-agenda-ignore-drawer-properties)
+		(org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime))
 	    (setq org-todo-keywords-for-agenda
 		  (append org-todo-keywords-for-agenda org-todo-keywords-1))
 	    (setq org-done-keywords-for-agenda
