@@ -4829,14 +4829,14 @@ information.
 
 Return a list of all exportable headlines as parsed elements.
 Footnote sections, if any, will be ignored."
-  (unless (wholenump n) (setq n (plist-get info :headline-levels)))
-  (org-element-map (plist-get info :parse-tree) 'headline
-    (lambda (headline)
-      (unless (org-element-property :footnote-section-p headline)
-	;; Strip contents from HEADLINE.
-	(let ((relative-level (org-export-get-relative-level headline info)))
-	  (unless (> relative-level n) headline))))
-    info))
+  (let ((limit (plist-get info :headline-levels)))
+    (setq n (if (wholenump n) (min n limit) limit))
+    (org-element-map (plist-get info :parse-tree) 'headline
+      #'(lambda (headline)
+	  (unless (org-element-property :footnote-section-p headline)
+	    (let ((level (org-export-get-relative-level headline info)))
+	      (and (<= level n) headline))))
+      info)))
 
 (defun org-export-collect-elements (type info &optional predicate)
   "Collect referenceable elements of a determined type.
