@@ -1737,11 +1737,15 @@ The template may still contain \"%?\" for cursor positioning."
       (goto-char (match-beginning 0))
       (let ((template-start (point)))
 	(forward-char 1)
-	(let ((result (org-eval
-		       (org-capture--expand-keyword-in-embedded-elisp
-			(read (current-buffer))))))
+	(let* ((sexp (read (current-buffer)))
+	       (result (org-eval
+			(org-capture--expand-keyword-in-embedded-elisp sexp))))
 	  (delete-region template-start (point))
-	  (insert result))))))
+	  (when result
+	    (if (stringp result)
+		(insert result)
+	      (error "Capture template sexp `%s' must evaluate to string or nil"
+		     sexp))))))))
 
 (defun org-capture--expand-keyword-in-embedded-elisp (attr)
   "Recursively replace capture link keywords in ATTR sexp.
