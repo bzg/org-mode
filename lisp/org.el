@@ -7564,7 +7564,7 @@ This is important for non-interactive uses of the command."
 	       (or arg (not itemp))))
       ;; At beginning of buffer or so hight up that only a heading makes sense.
       (insert
-       (if (org-previous-line-empty-p) "" "\n")
+       (if (or (bobp) (org-previous-line-empty-p)) "" "\n")
        (if (org-in-src-block-p) ",* " "* "))
       (run-hooks 'org-insert-heading-hook))
 
@@ -7576,13 +7576,17 @@ This is important for non-interactive uses of the command."
       ;; Insert a heading
       (save-restriction
 	(widen)
-	(let* ((empty-line-p nil)
-	       (level nil)
+	(let* ((level nil)
 	       (on-heading (org-at-heading-p))
-	       ;; Get a level to fall back on
+	       (empty-line-p (if on-heading
+				 (org-previous-line-empty-p)
+			       ;; We will decide later
+			       nil))
+	       ;; Get a level string to fall back on
 	       (fix-level
 		(save-excursion
 		  (org-back-to-heading t)
+		  (if (org-previous-line-empty-p) (setq empty-line-p t))
 		  (looking-at org-outline-regexp)
 		  (make-string (1- (length (match-string 0))) ?*)))
 	       (stars
@@ -7603,10 +7607,12 @@ This is important for non-interactive uses of the command."
 			    (error "This should not happen")))
 			(unless (and (save-excursion
 				       (save-match-data
-					 (org-backward-heading-same-level 1 invisible-ok))
+					 (org-backward-heading-same-level
+					  1 invisible-ok))
 				       (= (point) (match-beginning 0)))
 				     (not (org-previous-line-empty-p t)))
-			  (setq empty-line-p (org-previous-line-empty-p)))
+			  (setq empty-line-p (or empty-line-p
+						 (org-previous-line-empty-p))))
 			(match-string 0))
 		    (error (or fix-level "* ")))))
 	       (blank-a (cdr (assq 'heading org-blank-before-new-entry)))
@@ -7640,9 +7646,10 @@ This is important for non-interactive uses of the command."
 		    (setq initial-content (org-trim initial-content)))
 		  (goto-char pos))
 	      ;; a normal line
-	      (setq initial-content (buffer-substring (point) (point-at-eol)))
-	      (delete-region (point) (point-at-eol))
-	      (setq initial-content (org-trim initial-content))))
+	      (unless (bolp)
+		(setq initial-content (buffer-substring (point) (point-at-eol)))
+		(delete-region (point) (point-at-eol))
+		(setq initial-content (org-trim initial-content)))))
 
 	  ;; If we are at the beginning of the line, insert before it.  Else after
 	  (cond
@@ -7657,7 +7664,9 @@ This is important for non-interactive uses of the command."
 	  (insert stars)
 	  (just-one-space)
 	  (insert initial-content)
-	  (if adjust-empty-lines (org-N-empty-lines-before-current (if empty-line-p 1 0)))
+	  (if adjust-empty-lines
+	      (if (and blank (not (org-previous-line-empty-p)))
+		  (org-N-empty-lines-before-current (if blank 1 0))))
 	  (run-hooks 'org-insert-heading-hook)))))))
 
 (defun org-N-empty-lines-before-current (N)
