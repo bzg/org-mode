@@ -6511,7 +6511,7 @@ and subscripts."
 (defvar org-inlinetask-min-level)
 
 (defun org-unlogged-message (&rest args)
-  "Display a message, but avoid loggin it in the *Messages* buffer."
+  "Display a message, but avoid logging it in the *Messages* buffer."
   (let ((message-log-max nil))
     (apply 'message args)))
 
