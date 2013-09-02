@@ -50,6 +50,22 @@
 (defvar org-babel-ruby-command "ruby"
   "Name of command to use for executing ruby code.")
 
+(defcustom org-babel-ruby-hline-to "nil"
+  "Replace hlines in incoming tables with this when translating to ruby."
+  :group 'org-babel
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'string)
+
+(defcustom org-babel-ruby-nil-to 'hline
+  "Replace 'nil' in ruby tables with this before returning."
+  :group 'org-babel
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'string)
+
+
+
 (defun org-babel-execute:ruby (body params)
   "Execute a block of Ruby code with Babel.
 This function is called by `org-babel-execute-src-block'."
@@ -115,13 +131,21 @@ Convert an elisp value into a string of ruby source code
 specifying a variable of the same value."
   (if (listp var)
       (concat "[" (mapconcat #'org-babel-ruby-var-to-ruby var ", ") "]")
-    (format "%S" var)))
+    (if (equal var 'hline)
+	org-babel-ruby-hline-to
+      (format "%S" var))))
 
 (defun org-babel-ruby-table-or-string (results)
   "Convert RESULTS into an appropriate elisp value.
 If RESULTS look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
-  (org-babel-script-escape results))
+  ((lambda (res)
+     (if (listp res)
+	 (mapcar (lambda (el) (if (equal el 'nil)
+				  org-babel-ruby-nil-to el))
+		 res)
+       res))
+   (org-babel-script-escape results)))
 
 (defun org-babel-ruby-initiate-session (&optional session params)
   "Initiate a ruby session.
