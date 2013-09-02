@@ -60,6 +60,10 @@
 ;;    :table-of-contents nil))
 ;;
 ;; ... then rsync /home/guerry/public_html/ with your server.
+;;
+;; By default, the permalink for a blog entry points to the headline.
+;; You can specify a different one by using the :RSS_PERMALINK:
+;; property within an entry.
 
 ;;; Code:
 
@@ -156,21 +160,8 @@ non-nil."
   (let ((file (buffer-file-name (buffer-base-buffer))))
     (org-icalendar-create-uid file 'warn-user)
     (org-rss-add-pubdate-property))
-  (if async
-      (org-export-async-start
-	  (lambda (output)
-	    (with-current-buffer (get-buffer-create "*Org RSS Export*")
-	      (erase-buffer)
-	      (insert output)
-	      (goto-char (point-min))
-	      (text-mode)
-	      (org-export-add-to-stack (current-buffer) 'rss)))
-	`(org-export-as 'rss ,subtreep ,visible-only))
-    (let ((outbuf (org-export-to-buffer
-		   'rss "*Org RSS Export*" subtreep visible-only)))
-      (with-current-buffer outbuf (text-mode))
-      (when org-export-show-temporary-export-buffer
-	(switch-to-buffer-other-window outbuf)))))
+  (org-export-to-buffer 'rss "*Org RSS Export*"
+    async subtreep visible-only nil nil (lambda () (text-mode))))
 
 ;;;###autoload
 (defun org-rss-export-to-rss (&optional async subtreep visible-only)
@@ -199,12 +190,7 @@ Return output file's name."
     (org-rss-add-pubdate-property))
   (let ((outfile (org-export-output-file-name
 		  (concat "." org-rss-extension) subtreep)))
-    (if async
-	(org-export-async-start
-	    (lambda (f) (org-export-add-to-stack f 'rss))
-	  `(expand-file-name
-	    (org-export-to-file 'rss ,outfile ,subtreep ,visible-only)))
-      (org-export-to-file 'rss outfile subtreep visible-only))))
+    (org-export-to-file 'rss outfile async subtreep visible-only)))
 
 ;;;###autoload
 (defun org-rss-publish-to-rss (plist filename pub-dir)
@@ -237,6 +223,9 @@ communication channel."
 	      (> (org-export-get-relative-level headline info) 1))
     (let* ((htmlext (plist-get info :html-extension))
 	   (hl-number (org-export-get-headline-number headline info))
+	   (hl-home (file-name-as-directory (plist-get info :html-link-home)))
+	   (hl-pdir (plist-get info :publishing-directory))
+	   (hl-perm (org-element-property :RSS_PERMALINK headline))
 	   (anchor
 	    (org-export-solidify-link-text
 	     (or (org-element-property :CUSTOM_ID headline)
@@ -252,13 +241,12 @@ communication channel."
 		    (error "Missing PUBDATE property"))))))
 	   (title (org-element-property :raw-value headline))
 	   (publink
-	    (concat
-	     (file-name-as-directory
-	      (or (plist-get info :html-link-home)
-		  (plist-get info :publishing-directory)))
-	     (file-name-nondirectory
-	      (file-name-sans-extension
-	       (buffer-file-name))) "." htmlext "#" anchor))
+	    (or (and hl-perm (concat (or hl-home hl-pdir) hl-perm))
+		(concat
+		 (or hl-home hl-pdir)
+		 (file-name-nondirectory
+		  (file-name-sans-extension
+		   (plist-get info :input-file))) "." htmlext "#" anchor)))
 	   (guid (if org-rss-use-entry-url-as-guid
 		     publink
 		   (org-rss-plain-text
@@ -327,10 +315,11 @@ as a communication channel."
 	 (blogurl (or (plist-get info :html-link-home)
 		      (plist-get info :publishing-directory)))
 	 (image (url-encode-url (plist-get info :rss-image-url)))
+	 (ifile (plist-get info :input-file))
 	 (publink
 	  (concat (file-name-as-directory blogurl)
 		   (file-name-nondirectory
-		    (file-name-sans-extension (buffer-file-name)))
+		    (file-name-sans-extension ifile))
 		  "." rssext)))
     (format
      "\n<title>%s</title>

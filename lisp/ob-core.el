@@ -258,7 +258,7 @@ Returns a list
 	(save-excursion
 	  (goto-char head)
 	  (setq info (org-babel-parse-src-block-match))
-	  (setq indent (nth 5 info))
+	  (setq indent (car (last info)))
 	  (setq info (butlast info))
 	  (while (and (forward-line -1)
 		      (looking-at org-babel-multi-line-header-regexp))
@@ -1798,9 +1798,13 @@ region is not active then the point is demarcated."
 	   (move-end-of-line 2))
          (sort (if (org-region-active-p) (list (mark) (point)) (list (point))) #'>))
       (let ((start (point))
-	    (lang (org-icompleting-read "Lang: "
-					(mapcar (lambda (el) (symbol-name (car el)))
-						org-babel-load-languages)))
+	    (lang (org-icompleting-read
+		   "Lang: "
+		   (mapcar #'symbol-name
+			   (delete-dups
+			    (append (mapcar #'car org-babel-load-languages)
+				    (mapcar (lambda (el) (intern (car el)))
+					    org-src-lang-modes))))))
 	    (body (delete-and-extract-region
 		   (if (org-region-active-p) (mark) (point)) (point))))
 	(insert (concat (if (looking-at "^") "" "\n")
@@ -2265,7 +2269,8 @@ parameters when merging lists."
 				    new-params))
 			    result-params)
 		      output)))
-	 params results exports tangle noweb cache vars shebang comments padline)
+	 params results exports tangle noweb cache vars shebang comments padline
+	 clearnames)
 
     (mapc
      (lambda (plist)
@@ -2282,21 +2287,25 @@ parameters when merging lists."
 		   (setq vars
 			 (append
 			  (if (member name (mapcar #'car vars))
-			      (delq nil
-				    (mapcar
-				     (lambda (p)
-				       (unless (equal (car p) name) p))
-				     vars))
+			      (progn
+				(push name clearnames)
+				(delq nil
+				      (mapcar
+				       (lambda (p)
+					 (unless (equal (car p) name) p))
+				       vars)))
 			    vars)
 			  (list (cons name pair))))
 		 ;; if no name is given and we already have named variables
 		 ;; then assign to named variables in order
 		 (if (and vars (nth variable-index vars))
-		     (prog1 (setf (cddr (nth variable-index vars))
-				  (concat (symbol-name
-					   (car (nth variable-index vars)))
-					  "=" (cdr pair)))
-		       (incf variable-index))
+		     (let ((name (car (nth variable-index vars))))
+		       (push name clearnames) ; clear out colnames
+					      ; and rownames
+					      ; for replace vars
+		       (prog1 (setf (cddr (nth variable-index vars))
+				    (concat (symbol-name name) "=" (cdr pair)))
+			 (incf variable-index)))
 		   (error "Variable \"%s\" must be assigned a default value"
 			  (cdr pair))))))
 	    (:results
@@ -2343,6 +2352,20 @@ parameters when merging lists."
      plists)
     (setq vars (reverse vars))
     (while vars (setq params (cons (cons :var (cddr (pop vars))) params)))
+    ;; clear out col-names and row-names for replaced variables
+    (mapc
+     (lambda (name)
+       (mapc
+	(lambda (param)
+	  (when (assoc param params)
+	    (setf (cdr (assoc param params))
+		  (org-remove-if (lambda (pair) (equal (car pair) name))
+				 (cdr (assoc param params))))
+	    (setf params (org-remove-if (lambda (pair) (and (equal (car pair) param)
+						       (null (cdr pair))))
+					params))))
+	(list :colname-names :rowname-names)))
+     clearnames)
     (mapc
      (lambda (hd)
        (let ((key (intern (concat ":" (symbol-name hd))))

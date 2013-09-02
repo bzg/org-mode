@@ -95,7 +95,11 @@ This function is called by `org-babel-execute-src-block'."
          ((and (string-match "\\.png$" out-file) (not imagemagick))
           (org-create-formula-image
            body out-file org-format-latex-options in-buffer))
-         ((or (string-match "\\.pdf$" out-file) imagemagick)
+         ((string-match "\\.tikz$" out-file)
+	  (when (file-exists-p out-file) (delete-file out-file))
+	  (with-temp-file out-file
+	    (insert body)))
+	 ((or (string-match "\\.pdf$" out-file) imagemagick)
 	  (with-temp-file tex-file
 	    (require 'ox-latex)
 	    (insert

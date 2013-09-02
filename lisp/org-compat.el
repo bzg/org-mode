@@ -336,9 +336,12 @@ Works on both Emacs and XEmacs."
     (indent-line-to column)))
 
 (defun org-move-to-column (column &optional force buffer)
-  (if (featurep 'xemacs)
-      (org-xemacs-without-invisibility (move-to-column column force buffer))
-    (move-to-column column force)))
+  ;; set buffer-invisibility-spec to nil so that move-to-column
+  ;; does the right thing despite the presence of invisible text.
+  (let ((buffer-invisibility-spec nil))
+    (if (featurep 'xemacs)
+	(org-xemacs-without-invisibility (move-to-column column force buffer))
+      (move-to-column column force))))
 
 (defun org-get-x-clipboard-compat (value)
   "Get the clipboard value on XEmacs or Emacs 21."

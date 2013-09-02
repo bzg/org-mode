@@ -183,7 +183,15 @@ already filled in `info'."
 		org-test-dir)
       (org-export--get-inbuffer-options))
     '(:description "l1\nl2\nl3":language "fr" :select-tags ("a" "b" "c")
-		   :title ("a b c")))))
+		   :title ("a b c"))))
+  ;; More than one property can refer to the same buffer keyword.
+  (should
+   (equal '(:k2 "value" :k1 "value")
+	  (let ((backend (org-export-create-backend
+			  :options '((:k1 "KEYWORD")
+				     (:k2 "KEYWORD")))))
+	    (org-test-with-temp-text "#+KEYWORD: value"
+	      (org-export--get-inbuffer-options backend))))))
 
 (ert-deftest test-org-export/get-subtree-options ()
   "Test setting options from headline's properties."
@@ -2238,51 +2246,48 @@ Another text. (ref:text)
 
 (ert-deftest test-org-export/table-cell-alignment ()
   "Test `org-export-table-cell-alignment' specifications."
-  (let ((org-table-number-fraction 0.5)
-	(org-table-number-regexp "^[0-9]+$"))
-    ;; 1. Alignment is primarily determined by alignment cookies.
-    (org-test-with-temp-text "| <l> | <c> | <r> |"
-      (let* ((tree (org-element-parse-buffer))
-	     (info `(:parse-tree ,tree)))
-	(should
-	 (equal
-	  '(left center right)
-	  (mapcar (lambda (cell) (org-export-table-cell-alignment cell info))
-		  (org-element-map tree 'table-cell 'identity))))))
-    ;; 2. The last alignment cookie has precedence.
-    (org-test-with-parsed-data "
+  ;; 1. Alignment is primarily determined by alignment cookies.
+  (should
+   (equal '(left center right)
+	  (let ((org-table-number-fraction 0.5)
+		(org-table-number-regexp "^[0-9]+$"))
+	    (org-test-with-parsed-data "| <l> | <c> | <r> |"
+	      (mapcar (lambda (cell)
+			(org-export-table-cell-alignment cell info))
+		      (org-element-map tree 'table-cell 'identity))))))
+  ;; 2. The last alignment cookie has precedence.
+  (should
+   (equal '(right right right)
+	  (org-test-with-parsed-data "
 | <l8> |
 | cell |
 | <r9> |"
-      (should
-       (equal
-	'(right right right)
-	(mapcar (lambda (cell) (org-export-table-cell-alignment cell info))
-		(org-element-map tree 'table-cell 'identity)))))
-    ;; 3. If there's no cookie, cell's contents determine alignment.
-    ;;    A column mostly made of cells containing numbers will align
-    ;;    its cells to the right.
-    (org-test-with-parsed-data "
+	    (mapcar (lambda (cell) (org-export-table-cell-alignment cell info))
+		    (org-element-map tree 'table-cell 'identity)))))
+  ;; 3. If there's no cookie, cell's contents determine alignment.
+  ;;    A column mostly made of cells containing numbers will align
+  ;;    its cells to the right.
+  (should
+   (equal '(right right right)
+	  (let ((org-table-number-fraction 0.5)
+		(org-table-number-regexp "^[0-9]+$"))
+	    (org-test-with-parsed-data "
 | 123       |
 | some text |
 | 12345     |"
-      (should
-       (equal
-	'(right right right)
-	(mapcar (lambda (cell)
-		  (org-export-table-cell-alignment cell info))
-		(org-element-map tree 'table-cell 'identity)))))
-    ;; 4. Otherwise, they will be aligned to the left.
-    (org-test-with-parsed-data "
+	      (mapcar (lambda (cell)
+			(org-export-table-cell-alignment cell info))
+		      (org-element-map tree 'table-cell 'identity))))))
+  ;; 4. Otherwise, they will be aligned to the left.
+  (should
+   (equal '(left left left)
+	  (org-test-with-parsed-data "
 | text      |
 | some text |
 | \alpha    |"
-      (should
-       (equal
-	'(left left left)
-	(mapcar (lambda (cell)
-		  (org-export-table-cell-alignment cell info))
-		(org-element-map tree 'table-cell 'identity)))))))
+	    (mapcar (lambda (cell)
+		      (org-export-table-cell-alignment cell info))
+		    (org-element-map tree 'table-cell 'identity info))))))
 
 (ert-deftest test-org-export/table-cell-borders ()
   "Test `org-export-table-cell-borders' specifications."
@@ -2595,6 +2600,36 @@ Another text. (ref:text)
      (org-export-table-row-ends-header-p
       (org-element-map tree 'table-row 'identity info 'first-match)
       info))))
+
+
+
+;;; Tables of Contents
+
+(ert-deftest test-org-export/collect-headlines ()
+  "Test `org-export-collect-headlines' specifications."
+  ;; Standard test.
+  (should
+   (= 2
+      (length
+       (org-test-with-parsed-data "* H1\n** H2"
+	 (org-export-collect-headlines info)))))
+  ;; Do not collect headlines below optional argument.
+  (should
+   (= 1
+      (length
+       (org-test-with-parsed-data "* H1\n** H2"
+	 (org-export-collect-headlines info 1)))))
+  ;; Never collect headlines below maximum headline level.
+  (should
+   (= 1
+      (length
+       (org-test-with-parsed-data "#+OPTIONS: H:1\n* H1\n** H2"
+	 (org-export-collect-headlines info)))))
+  (should
+   (= 1
+      (length
+       (org-test-with-parsed-data "#+OPTIONS: H:1\n* H1\n** H2"
+	 (org-export-collect-headlines info 2))))))
 
 
 

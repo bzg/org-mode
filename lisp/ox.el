@@ -112,7 +112,7 @@
     (:section-numbers nil "num" org-export-with-section-numbers)
     (:select-tags "SELECT_TAGS" nil org-export-select-tags split)
     (:time-stamp-file nil "timestamp" org-export-time-stamp-file)
-    (:title "TITLE" nil org-export--default-title space)
+    (:title "TITLE" nil nil space)
     (:with-archived-trees nil "arch" org-export-with-archived-trees)
     (:with-author nil "author" org-export-with-author)
     (:with-clocks nil "c" org-export-with-clocks)
@@ -289,6 +289,17 @@ and its CDR is a list of export options.")
   "The position where the last export command was created using the dispatcher.
 This marker will be used with `C-u C-c C-e' to make sure export repetition
 uses the same subtree if the previous command was restricted to a subtree.")
+
+;; For compatibility with Org < 8
+(defvar org-export-current-backend nil
+  "Name, if any, of the back-end used during an export process.
+
+Its value is a symbol such as `html', `latex', `ascii', or nil if
+the back-end is anonymous (see `org-export-create-backend') or if
+there is no export process in progress.
+
+It can be used to teach Babel blocks how to act differently
+according to the back-end used.")
 
 
 ;;; User-configurable Variables
@@ -1658,14 +1669,13 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 	 (regexp (format "^[ \t]*#\\+%s:"
 			 (regexp-opt (nconc (delq nil (mapcar 'cadr options))
 					    org-export-special-keywords))))
-	 (find-opt
+	 (find-properties
 	  (lambda (keyword)
-	    ;; Return property name associated to KEYWORD.
-	    (catch 'exit
-	      (mapc (lambda (option)
-		      (when (equal (nth 1 option) keyword)
-			(throw 'exit (car option))))
-		    options))))
+	    ;; Return all properties associated to KEYWORD.
+	    (let (properties)
+	      (dolist (option options properties)
+		(when (equal (nth 1 option) keyword)
+		  (pushnew (car option) properties))))))
 	 (get-options
 	  (lambda (&optional files plist)
 	    ;; Recursively read keywords in buffer.  FILES is a list
@@ -1705,64 +1715,55 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 					     (plist-get plist :filetags)))))))
 		      (t
 		       ;; Options in `org-export-options-alist'.
-		       (let* ((prop (funcall find-opt key))
-			      (behaviour (nth 4 (assq prop options))))
-			 (setq plist
-			       (plist-put
-				plist prop
-				;; Handle value depending on specified
-				;; BEHAVIOUR.
-				(case behaviour
-				  (space
-				   (if (not (plist-get plist prop))
-				       (org-trim val)
-				     (concat (plist-get plist prop)
-					     " "
-					     (org-trim val))))
-				  (newline
-				   (org-trim (concat (plist-get plist prop)
-						     "\n"
-						     (org-trim val))))
-				  (split `(,@(plist-get plist prop)
-					   ,@(org-split-string val)))
-				  ('t val)
-				  (otherwise
-				   (if (not (plist-member plist prop)) val
-				     (plist-get plist prop)))))))))))))
+		       (dolist (property (funcall find-properties key))
+			 (let ((behaviour (nth 4 (assq property options))))
+			   (setq plist
+				 (plist-put
+				  plist property
+				  ;; Handle value depending on specified
+				  ;; BEHAVIOUR.
+				  (case behaviour
+				    (space
+				     (if (not (plist-get plist property))
+					 (org-trim val)
+				       (concat (plist-get plist property)
+					       " "
+					       (org-trim val))))
+				    (newline
+				     (org-trim
+				      (concat (plist-get plist property)
+					      "\n"
+					      (org-trim val))))
+				    (split `(,@(plist-get plist property)
+					     ,@(org-split-string val)))
+				    ('t val)
+				    (otherwise
+				     (if (not (plist-member plist property)) val
+				       (plist-get plist property))))))))))))))
 	     ;; Return final value.
 	     plist))))
     ;; Read options in the current buffer.
-    (setq plist (funcall get-options buffer-file-name nil))
-    ;; Parse keywords specified in `org-element-document-properties'.
-    (mapc (lambda (keyword)
-	    ;; Find the property associated to the keyword.
-	    (let* ((prop (funcall find-opt keyword))
-		   (value (and prop (plist-get plist prop))))
-	      (when (stringp value)
-		(setq plist
-		      (plist-put plist prop
-				 (org-element-parse-secondary-string
-				  value (org-element-restriction 'keyword)))))))
-	  org-element-document-properties)
-    ;; Return value.
-    plist))
+    (setq plist (funcall get-options
+			 (and buffer-file-name (list buffer-file-name)) nil))
+    ;; Parse keywords specified in `org-element-document-properties'
+    ;; and return PLIST.
+    (dolist (keyword org-element-document-properties plist)
+      (dolist (property (funcall find-properties keyword))
+	(let ((value (plist-get plist property)))
+	  (when (stringp value)
+	    (setq plist
+		  (plist-put plist property
+			     (org-element-parse-secondary-string
+			      value (org-element-restriction 'keyword))))))))))
 
 (defun org-export--get-buffer-attributes ()
   "Return properties related to buffer attributes, as a plist."
   ;; Store full path of input file name, or nil.  For internal use.
-  (list :input-file (buffer-file-name (buffer-base-buffer))))
-
-(defvar org-export--default-title nil)	; Dynamically scoped.
-(defun org-export-store-default-title ()
-  "Return default title for current document, as a string.
-Title is extracted from associated file name, if any, or buffer's
-name."
-  (setq org-export--default-title
-	(or (let ((visited-file (buffer-file-name (buffer-base-buffer))))
-	      (and visited-file
+  (let ((visited-file (buffer-file-name (buffer-base-buffer))))
+    (list :input-file visited-file
+	  :title (if (not visited-file) (buffer-name (buffer-base-buffer))
 		   (file-name-sans-extension
-		    (file-name-nondirectory visited-file))))
-	    (buffer-name (buffer-base-buffer)))))
+		    (file-name-nondirectory visited-file))))))
 
 (defun org-export--get-global-options (&optional backend)
   "Return global export options as a plist.
@@ -1775,8 +1776,9 @@ process."
 	(all (append (and backend (org-export-get-all-options backend))
 		     org-export-options-alist)))
     (dolist (cell all plist)
-      (let ((prop (car cell)))
-	(unless (plist-member plist prop)
+      (let ((prop (car cell))
+	    (default-value (nth 3 cell)))
+	(unless (or (not default-value) (plist-member plist prop))
 	  (setq plist
 		(plist-put
 		 plist
@@ -2248,9 +2250,10 @@ recursively convert DATA using BACKEND translation table."
    ;; memoization.
    (org-combine-plists
     info
-    (list :translate-alist (org-export-get-all-transcoders backend)
+    (list :back-end backend
+	  :translate-alist (org-export-get-all-transcoders backend)
 	  ;; Size of the hash table is reduced since this function
-	  ;; will probably be used on short trees.
+	  ;; will probably be used on small trees.
 	  :exported-data (make-hash-table :test 'eq :size 401)))))
 
 (defun org-export--interpret-p (blob info)
@@ -2752,7 +2755,8 @@ VALUE is ignored.
 Call is done in a LIFO fashion, to be sure that developer
 specified filters, if any, are called first."
   (catch 'exit
-    (let ((backend-name (plist-get info :back-end)))
+    (let* ((backend (plist-get info :back-end))
+	   (backend-name (and backend (org-export-backend-name backend))))
       (dolist (filter filters value)
 	(let ((result (funcall filter value backend-name info)))
 	  (cond ((not result) value)
@@ -2797,15 +2801,9 @@ Return the updated communication channel."
 ;;; Core functions
 ;;
 ;; This is the room for the main function, `org-export-as', along with
-;; its derivatives, `org-export-to-buffer', `org-export-to-file' and
-;; `org-export-string-as'.  They differ either by the way they output
-;; the resulting code (for the first two) or by the input type (for
-;; the latter).  `org-export--copy-to-kill-ring-p' determines if
-;; output of these function should be added to kill ring.
-;;
-;; `org-export-output-file-name' is an auxiliary function meant to be
-;; used with `org-export-to-file'.  With a given extension, it tries
-;; to provide a canonical file name to write export output to.
+;; its derivative, `org-export-string-as'.
+;; `org-export--copy-to-kill-ring-p' determines if output of these
+;; function should be added to kill ring.
 ;;
 ;; Note that `org-export-as' doesn't really parse the current buffer,
 ;; but a copy of it (with the same buffer-local variables and
@@ -2964,7 +2962,8 @@ Return code as a string."
 	     (narrow-to-region (point) (point-max))))
       ;; Initialize communication channel with original buffer
       ;; attributes, unavailable in its copy.
-      (let* ((info (org-combine-plists
+      (let* ((org-export-current-backend (org-export-backend-name backend))
+	     (info (org-combine-plists
 		    (list :export-options
 			  (delq nil
 				(list (and subtreep 'subtree)
@@ -2972,10 +2971,6 @@ Return code as a string."
 				      (and body-only 'body-only))))
 		    (org-export--get-buffer-attributes)))
 	     tree)
-	;; Store default title in `org-export--default-title' so that
-	;; `org-export-get-environment' can access it from buffer's
-	;; copy and then add it properly to communication channel.
-	(org-export-store-default-title)
 	;; Update communication channel and get parse tree.  Buffer
 	;; isn't parsed directly.  Instead, a temporary copy is
 	;; created, where include keywords, macros are expanded and
@@ -3053,67 +3048,6 @@ Return code as a string."
 	     (if (or (not (functionp template)) body-only) full-body
 	       (funcall template full-body info))
 	     info))))))))
-
-;;;###autoload
-(defun org-export-to-buffer
-  (backend buffer &optional subtreep visible-only body-only ext-plist)
-  "Call `org-export-as' with output to a specified buffer.
-
-BACKEND is either an export back-end, as returned by, e.g.,
-`org-export-create-backend', or a symbol referring to
-a registered back-end.
-
-BUFFER is the output buffer.  If it already exists, it will be
-erased first, otherwise, it will be created.
-
-Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and
-EXT-PLIST are similar to those used in `org-export-as', which
-see.
-
-Depending on `org-export-copy-to-kill-ring', add buffer contents
-to kill ring.  Return buffer."
-  (let ((out (org-export-as backend subtreep visible-only body-only ext-plist))
-	(buffer (get-buffer-create buffer)))
-    (with-current-buffer buffer
-      (erase-buffer)
-      (insert out)
-      (goto-char (point-min)))
-    ;; Maybe add buffer contents to kill ring.
-    (when (and (org-export--copy-to-kill-ring-p) (org-string-nw-p out))
-      (org-kill-new out))
-    ;; Return buffer.
-    buffer))
-
-;;;###autoload
-(defun org-export-to-file
-  (backend file &optional subtreep visible-only body-only ext-plist)
-  "Call `org-export-as' with output to a specified file.
-
-BACKEND is either an export back-end, as returned by, e.g.,
-`org-export-create-backend', or a symbol referring to
-a registered back-end.  FILE is the name of the output file, as
-a string.
-
-Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and
-EXT-PLIST are similar to those used in `org-export-as', which
-see.
-
-Depending on `org-export-copy-to-kill-ring', add file contents
-to kill ring.  Return output file's name."
-  ;; Checks for FILE permissions.  `write-file' would do the same, but
-  ;; we'd rather avoid needless transcoding of parse tree.
-  (unless (file-writable-p file) (error "Output file not writable"))
-  ;; Insert contents to a temporary buffer and write it to FILE.
-  (let ((out (org-export-as backend subtreep visible-only body-only ext-plist)))
-    (with-temp-buffer
-      (insert out)
-      (let ((coding-system-for-write org-export-coding-system))
-	(write-file file)))
-    ;; Maybe add file contents to kill ring.
-    (when (and (org-export--copy-to-kill-ring-p) (org-string-nw-p out))
-      (org-kill-new out)))
-  ;; Return full path.
-  file)
 
 ;;;###autoload
 (defun org-export-string-as (string backend &optional body-only ext-plist)
@@ -3253,61 +3187,6 @@ locally for the subtree through node properties."
              (format "#+%s:%s\n"
                      (car key)
                      (if (org-string-nw-p val) (format " %s" val) "")))))))))
-
-(defun org-export-output-file-name (extension &optional subtreep pub-dir)
-  "Return output file's name according to buffer specifications.
-
-EXTENSION is a string representing the output file extension,
-with the leading dot.
-
-With a non-nil optional argument SUBTREEP, try to determine
-output file's name by looking for \"EXPORT_FILE_NAME\" property
-of subtree at point.
-
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
-When optional argument VISIBLE-ONLY is non-nil, don't export
-contents of hidden elements.
-
-Return file name as a string."
-  (let* ((visited-file (buffer-file-name (buffer-base-buffer)))
-	 (base-name
-	  ;; File name may come from EXPORT_FILE_NAME subtree
-	  ;; property, assuming point is at beginning of said
-	  ;; sub-tree.
-	  (file-name-sans-extension
-	   (or (and subtreep
-		    (org-entry-get
-		     (save-excursion
-		       (ignore-errors (org-back-to-heading) (point)))
-		     "EXPORT_FILE_NAME" t))
-	       ;; File name may be extracted from buffer's associated
-	       ;; file, if any.
-	       (and visited-file (file-name-nondirectory visited-file))
-	       ;; Can't determine file name on our own: Ask user.
-	       (let ((read-file-name-function
-		      (and org-completion-use-ido 'ido-read-file-name)))
-		 (read-file-name
-		  "Output file: " pub-dir nil nil nil
-		  (lambda (name)
-		    (string= (file-name-extension name t) extension)))))))
-	 (output-file
-	  ;; Build file name.  Enforce EXTENSION over whatever user
-	  ;; may have come up with.  PUB-DIR, if defined, always has
-	  ;; precedence over any provided path.
-	  (cond
-	   (pub-dir
-	    (concat (file-name-as-directory pub-dir)
-		    (file-name-nondirectory base-name)
-		    extension))
-	   ((file-name-absolute-p base-name) (concat base-name extension))
-	   (t (concat (file-name-as-directory ".") base-name extension)))))
-    ;; If writing to OUTPUT-FILE would overwrite original file, append
-    ;; EXTENSION another time to final name.
-    (if (and visited-file (org-file-equal-p visited-file output-file))
-	(concat output-file extension)
-      output-file)))
 
 (defun org-export-expand-include-keyword (&optional included dir)
   "Expand every include keyword in buffer.
@@ -4533,19 +4412,21 @@ Return value is the width given by the last width cookie in the
 same column as TABLE-CELL, or nil."
   (let* ((row (org-export-get-parent table-cell))
 	 (table (org-export-get-parent row))
-	 (column (let ((cells (org-element-contents row)))
-		   (- (length cells) (length (memq table-cell cells)))))
+	 (cells (org-element-contents row))
+	 (columns (length cells))
+	 (column (- columns (length (memq table-cell cells))))
 	 (cache (or (plist-get info :table-cell-width-cache)
 		    (plist-get (setq info
 				     (plist-put info :table-cell-width-cache
-						(make-hash-table :test 'equal)))
+						(make-hash-table :test 'eq)))
 			       :table-cell-width-cache)))
-	 (key (cons table column))
-	 (value (gethash key cache 'no-result)))
-    (if (not (eq value 'no-result)) value
+	 (width-vector (or (gethash table cache)
+			   (puthash table (make-vector columns 'empty) cache)))
+	 (value (aref width-vector column)))
+    (if (not (eq value 'empty)) value
       (let (cookie-width)
 	(dolist (row (org-element-contents table)
-		     (puthash key cookie-width cache))
+		     (aset width-vector column cookie-width))
 	  (when (org-export-table-row-is-special-p row info)
 	    ;; In a special row, try to find a width cookie at COLUMN.
 	    (let* ((value (org-element-contents
@@ -4571,16 +4452,21 @@ same column as TABLE-CELL.  If no such cookie is found, a default
 alignment value will be deduced from fraction of numbers in the
 column (see `org-table-number-fraction' for more information).
 Possible values are `left', `right' and `center'."
+  ;; Load `org-table-number-fraction' and `org-table-number-regexp'.
+  (require 'org-table)
   (let* ((row (org-export-get-parent table-cell))
 	 (table (org-export-get-parent row))
-	 (column (let ((cells (org-element-contents row)))
-		   (- (length cells) (length (memq table-cell cells)))))
+	 (cells (org-element-contents row))
+	 (columns (length cells))
+	 (column (- columns (length (memq table-cell cells))))
 	 (cache (or (plist-get info :table-cell-alignment-cache)
 		    (plist-get (setq info
 				     (plist-put info :table-cell-alignment-cache
-						(make-hash-table :test 'equal)))
-			       :table-cell-alignment-cache))))
-    (or (gethash (cons table column) cache)
+						(make-hash-table :test 'eq)))
+			       :table-cell-alignment-cache)))
+	 (align-vector (or (gethash table cache)
+			   (puthash table (make-vector columns nil) cache))))
+    (or (aref align-vector column)
 	(let ((number-cells 0)
 	      (total-cells 0)
 	      cookie-align
@@ -4623,15 +4509,15 @@ Possible values are `left', `right' and `center'."
 		  (incf number-cells))))))
 	  ;; Return value.  Alignment specified by cookies has
 	  ;; precedence over alignment deduced from cell's contents.
-	  (puthash (cons table column)
-		   (cond ((equal cookie-align "l") 'left)
-			 ((equal cookie-align "r") 'right)
-			 ((equal cookie-align "c") 'center)
-			 ((>= (/ (float number-cells) total-cells)
-			      org-table-number-fraction)
-			  'right)
-			 (t 'left))
-		   cache)))))
+	  (aset align-vector
+		column
+		(cond ((equal cookie-align "l") 'left)
+		      ((equal cookie-align "r") 'right)
+		      ((equal cookie-align "c") 'center)
+		      ((>= (/ (float number-cells) total-cells)
+			   org-table-number-fraction)
+		       'right)
+		      (t 'left)))))))
 
 (defun org-export-table-cell-borders (table-cell info)
   "Return TABLE-CELL borders.
@@ -4880,14 +4766,14 @@ information.
 
 Return a list of all exportable headlines as parsed elements.
 Footnote sections, if any, will be ignored."
-  (unless (wholenump n) (setq n (plist-get info :headline-levels)))
-  (org-element-map (plist-get info :parse-tree) 'headline
-    (lambda (headline)
-      (unless (org-element-property :footnote-section-p headline)
-	;; Strip contents from HEADLINE.
-	(let ((relative-level (org-export-get-relative-level headline info)))
-	  (unless (> relative-level n) headline))))
-    info))
+  (let ((limit (plist-get info :headline-levels)))
+    (setq n (if (wholenump n) (min n limit) limit))
+    (org-element-map (plist-get info :parse-tree) 'headline
+      #'(lambda (headline)
+	  (unless (org-element-property :footnote-section-p headline)
+	    (let ((level (org-export-get-relative-level headline info)))
+	      (and (<= level n) headline))))
+      info)))
 
 (defun org-export-collect-elements (type info &optional predicate)
   "Collect referenceable elements of a determined type.
@@ -5318,9 +5204,8 @@ them."
 
 ;;;; Translation
 ;;
-;; `org-export-translate' translates a string according to language
-;; specified by LANGUAGE keyword or `org-export-language-setup'
-;; variable and a specified charset.  `org-export-dictionary' contains
+;; `org-export-translate' translates a string according to the language
+;; specified by the LANGUAGE keyword.  `org-export-dictionary' contains
 ;; the dictionary used for the translation.
 
 (defconst org-export-dictionary
@@ -5542,6 +5427,13 @@ to `:default' encoding. If it fails, return S."
 ;; evaluates a command there.  It then applies a function on the
 ;; returned results in the current process.
 ;;
+;; At a higher level, `org-export-to-buffer' and `org-export-to-file'
+;; allow to export to a buffer or a file, asynchronously or not.
+;;
+;; `org-export-output-file-name' is an auxiliary function meant to be
+;; used with `org-export-to-file'.  With a given extension, it tries
+;; to provide a canonical file name to write export output to.
+;;
 ;; Asynchronously generated results are never displayed directly.
 ;; Instead, they are stored in `org-export-stack-contents'.  They can
 ;; then be retrieved by calling `org-export-stack'.
@@ -5552,7 +5444,7 @@ to `:default' encoding. If it fails, return S."
 ;;`org-export-stack-clear'.
 ;;
 ;; For back-ends, `org-export-add-to-stack' add a new source to stack.
-;; It should used whenever `org-export-async-start' is called.
+;; It should be used whenever `org-export-async-start' is called.
 
 (defmacro org-export-async-start  (fun &rest body)
   "Call function FUN on the results returned by BODY evaluation.
@@ -5561,93 +5453,260 @@ BODY evaluation happens in an asynchronous process, from a buffer
 which is an exact copy of the current one.
 
 Use `org-export-add-to-stack' in FUN in order to register results
-in the stack.  Examples for, respectively a temporary buffer and
-a file are:
+in the stack.
 
-  \(org-export-async-start
-      \(lambda (output)
-        \(with-current-buffer (get-buffer-create \"*Org BACKEND Export*\")
-        \(erase-buffer)
-        \(insert output)
-        \(goto-char (point-min))
-        \(org-export-add-to-stack (current-buffer) 'backend)))
-    `(org-export-as 'backend ,subtreep ,visible-only ,body-only ',ext-plist))
-
-and
-
-  \(org-export-async-start
-      \(lambda (f) (org-export-add-to-stack f 'backend))
-    `(expand-file-name
-      \(org-export-to-file
-       'backend ,outfile ,subtreep ,visible-only ,body-only ',ext-plist)))"
+This is a low level function.  See also `org-export-to-buffer'
+and `org-export-to-file' for more specialized functions."
   (declare (indent 1) (debug t))
-  (org-with-gensyms (process temp-file copy-fun proc-buffer handler coding)
+  (org-with-gensyms (process temp-file copy-fun proc-buffer coding)
     ;; Write the full sexp evaluating BODY in a copy of the current
     ;; buffer to a temporary file, as it may be too long for program
     ;; args in `start-process'.
     `(with-temp-message "Initializing asynchronous export process"
        (let ((,copy-fun (org-export--generate-copy-script (current-buffer)))
-	     (,temp-file (make-temp-file "org-export-process"))
-	     (,coding buffer-file-coding-system))
-	 (with-temp-file ,temp-file
-	   (insert
-	    ;; Null characters (from variable values) are inserted
-	    ;; within the file.  As a consequence, coding system for
-	    ;; buffer contents will not be recognized properly.  So,
-	    ;; we make sure it is the same as the one used to display
-	    ;; the original buffer.
-	    (format ";; -*- coding: %s; -*-\n%S"
-		    ,coding
-		    `(with-temp-buffer
-		       ,(when org-export-async-debug '(setq debug-on-error t))
-		       ;; Ignore `kill-emacs-hook' and code evaluation
-		       ;; queries from Babel as we need a truly
-		       ;; non-interactive process.
-		       (setq kill-emacs-hook nil
-			     org-babel-confirm-evaluate-answer-no t)
-		       ;; Initialize export framework.
-		       (require 'ox)
-		       ;; Re-create current buffer there.
-		       (funcall ,,copy-fun)
-		       (restore-buffer-modified-p nil)
-		       ;; Sexp to evaluate in the buffer.
-		       (print (progn ,,@body))))))
-	 ;; Start external process.
-	 (let* ((process-connection-type nil)
-		(,proc-buffer (generate-new-buffer-name "*Org Export Process*"))
-		(,process
-		 (start-process
-		  "org-export-process" ,proc-buffer
-		  (expand-file-name invocation-name invocation-directory)
-		  "-Q" "--batch"
-		  "-l" org-export-async-init-file
-		  "-l" ,temp-file)))
-	   ;; Register running process in stack.
-	   (org-export-add-to-stack (get-buffer ,proc-buffer) nil ,process)
-	   ;; Set-up sentinel in order to catch results.
-	   (set-process-sentinel
-	    ,process
-	    (let ((handler ',fun))
-	      `(lambda (p status)
-		 (let ((proc-buffer (process-buffer p)))
-		   (when (eq (process-status p) 'exit)
-		     (unwind-protect
-			 (if (zerop (process-exit-status p))
-			     (unwind-protect
-				 (let ((results
-					(with-current-buffer proc-buffer
-					  (goto-char (point-max))
-					  (backward-sexp)
-					  (read (current-buffer)))))
-				   (funcall ,handler results))
-			       (unless org-export-async-debug
-				 (and (get-buffer proc-buffer)
-				      (kill-buffer proc-buffer))))
-			   (org-export-add-to-stack proc-buffer nil p)
-			   (ding)
-			   (message "Process '%s' exited abnormally" p))
-		       (unless org-export-async-debug
-			 (delete-file ,,temp-file)))))))))))))
+             (,temp-file (make-temp-file "org-export-process"))
+             (,coding buffer-file-coding-system))
+         (with-temp-file ,temp-file
+           (insert
+            ;; Null characters (from variable values) are inserted
+            ;; within the file.  As a consequence, coding system for
+            ;; buffer contents will not be recognized properly.  So,
+            ;; we make sure it is the same as the one used to display
+            ;; the original buffer.
+            (format ";; -*- coding: %s; -*-\n%S"
+                    ,coding
+                    `(with-temp-buffer
+                       (when org-export-async-debug '(setq debug-on-error t))
+                       ;; Ignore `kill-emacs-hook' and code evaluation
+                       ;; queries from Babel as we need a truly
+                       ;; non-interactive process.
+                       (setq kill-emacs-hook nil
+                             org-babel-confirm-evaluate-answer-no t)
+                       ;; Initialize export framework.
+                       (require 'ox)
+                       ;; Re-create current buffer there.
+                       (funcall ,,copy-fun)
+                       (restore-buffer-modified-p nil)
+                       ;; Sexp to evaluate in the buffer.
+                       (print (progn ,,@body))))))
+         ;; Start external process.
+         (let* ((process-connection-type nil)
+                (,proc-buffer (generate-new-buffer-name "*Org Export Process*"))
+                (,process
+                 (start-process
+                  "org-export-process" ,proc-buffer
+                  (expand-file-name invocation-name invocation-directory)
+                  "-Q" "--batch"
+                  "-l" org-export-async-init-file
+                  "-l" ,temp-file)))
+           ;; Register running process in stack.
+           (org-export-add-to-stack (get-buffer ,proc-buffer) nil ,process)
+           ;; Set-up sentinel in order to catch results.
+           (let ((handler ,fun))
+             (set-process-sentinel
+              ,process
+              `(lambda (p status)
+                 (let ((proc-buffer (process-buffer p)))
+                   (when (eq (process-status p) 'exit)
+                     (unwind-protect
+                         (if (zerop (process-exit-status p))
+                             (unwind-protect
+                                 (let ((results
+                                        (with-current-buffer proc-buffer
+                                          (goto-char (point-max))
+                                          (backward-sexp)
+                                          (read (current-buffer)))))
+                                   (funcall ,handler results))
+                               (unless org-export-async-debug
+                                 (and (get-buffer proc-buffer)
+                                      (kill-buffer proc-buffer))))
+                           (org-export-add-to-stack proc-buffer nil p)
+                           (ding)
+                           (message "Process '%s' exited abnormally" p))
+                       (unless org-export-async-debug
+                         (delete-file ,,temp-file)))))))))))))
+
+;;;###autoload
+(defun org-export-to-buffer
+  (backend buffer
+	   &optional async subtreep visible-only body-only ext-plist
+	   post-process)
+  "Call `org-export-as' with output to a specified buffer.
+
+BACKEND is either an export back-end, as returned by, e.g.,
+`org-export-create-backend', or a symbol referring to
+a registered back-end.
+
+BUFFER is the name of the output buffer.  If it already exists,
+it will be erased first, otherwise, it will be created.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting buffer should then be accessible
+through the `org-export-stack' interface.  When ASYNC is nil, the
+buffer is displayed if `org-export-show-temporary-export-buffer'
+is non-nil.
+
+Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and
+EXT-PLIST are similar to those used in `org-export-as', which
+see.
+
+Optional argument POST-PROCESS is a function which should accept
+no argument.  It is always called within the current process,
+from BUFFER, with point at its beginning.  Export back-ends can
+use it to set a major mode there, e.g,
+
+  \(defun org-latex-export-as-latex
+    \(&optional async subtreep visible-only body-only ext-plist)
+    \(interactive)
+    \(org-export-to-buffer 'latex \"*Org LATEX Export*\"
+      async subtreep visible-only body-only ext-plist (lambda () (LaTeX-mode))))
+
+This function returns BUFFER."
+  (declare (indent 2))
+  (if async
+      (org-export-async-start
+	  `(lambda (output)
+	     (with-current-buffer (get-buffer-create ,buffer)
+	       (erase-buffer)
+	       (setq buffer-file-coding-system ',buffer-file-coding-system)
+	       (insert output)
+	       (goto-char (point-min))
+	       (org-export-add-to-stack (current-buffer) ',backend)
+	       (ignore-errors (funcall ,post-process))))
+	`(org-export-as
+	  ',backend ,subtreep ,visible-only ,body-only ',ext-plist))
+    (let ((output
+	   (org-export-as backend subtreep visible-only body-only ext-plist))
+	  (buffer (get-buffer-create buffer))
+	  (encoding buffer-file-coding-system))
+      (when (and (org-string-nw-p output) (org-export--copy-to-kill-ring-p))
+	(org-kill-new output))
+      (with-current-buffer buffer
+	(erase-buffer)
+	(setq buffer-file-coding-system encoding)
+	(insert output)
+	(goto-char (point-min))
+	(and (functionp post-process) (funcall post-process)))
+      (when org-export-show-temporary-export-buffer
+	(switch-to-buffer-other-window buffer))
+      buffer)))
+
+;;;###autoload
+(defun org-export-to-file
+  (backend file &optional async subtreep visible-only body-only ext-plist
+	   post-process)
+  "Call `org-export-as' with output to a specified file.
+
+BACKEND is either an export back-end, as returned by, e.g.,
+`org-export-create-backend', or a symbol referring to
+a registered back-end.  FILE is the name of the output file, as
+a string.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting buffer file then be accessible
+through the `org-export-stack' interface.
+
+Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and
+EXT-PLIST are similar to those used in `org-export-as', which
+see.
+
+Optional argument POST-PROCESS is called with FILE as its
+argument and happens asynchronously when ASYNC is non-nil.  It
+has to return a file name, or nil.  Export back-ends can use this
+to send the output file through additional processing, e.g,
+
+  \(defun org-latex-export-to-latex
+    \(&optional async subtreep visible-only body-only ext-plist)
+    \(interactive)
+    \(let ((outfile (org-export-output-file-name \".tex\" subtreep)))
+      \(org-export-to-file 'latex outfile
+        async subtreep visible-only body-only ext-plist
+        \(lambda (file) (org-latex-compile file)))
+
+The function returns either a file name returned by POST-PROCESS,
+or FILE."
+  (declare (indent 2))
+  (if (not (file-writable-p file)) (error "Output file not writable")
+    (let ((encoding (or org-export-coding-system buffer-file-coding-system)))
+      (if async
+          (org-export-async-start
+	      `(lambda (file)
+		 (org-export-add-to-stack (expand-file-name file) ',backend))
+	    `(let ((output
+		    (org-export-as
+		     ',backend ,subtreep ,visible-only ,body-only
+		     ',ext-plist)))
+	       (with-temp-buffer
+		 (insert output)
+		 (let ((coding-system-for-write ',encoding))
+		   (write-file ,file)))
+	       (or (ignore-errors (funcall ',post-process ,file)) ,file)))
+        (let ((output (org-export-as
+                       backend subtreep visible-only body-only ext-plist)))
+          (with-temp-buffer
+            (insert output)
+            (let ((coding-system-for-write encoding))
+	      (write-file file)))
+          (when (and (org-export--copy-to-kill-ring-p) (org-string-nw-p output))
+            (org-kill-new output))
+          ;; Get proper return value.
+          (or (and (functionp post-process) (funcall post-process file))
+	      file))))))
+
+(defun org-export-output-file-name (extension &optional subtreep pub-dir)
+  "Return output file's name according to buffer specifications.
+
+EXTENSION is a string representing the output file extension,
+with the leading dot.
+
+With a non-nil optional argument SUBTREEP, try to determine
+output file's name by looking for \"EXPORT_FILE_NAME\" property
+of subtree at point.
+
+When optional argument PUB-DIR is set, use it as the publishing
+directory.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+Return file name as a string."
+  (let* ((visited-file (buffer-file-name (buffer-base-buffer)))
+	 (base-name
+	  ;; File name may come from EXPORT_FILE_NAME subtree
+	  ;; property, assuming point is at beginning of said
+	  ;; sub-tree.
+	  (file-name-sans-extension
+	   (or (and subtreep
+		    (org-entry-get
+		     (save-excursion
+		       (ignore-errors (org-back-to-heading) (point)))
+		     "EXPORT_FILE_NAME" t))
+	       ;; File name may be extracted from buffer's associated
+	       ;; file, if any.
+	       (and visited-file (file-name-nondirectory visited-file))
+	       ;; Can't determine file name on our own: Ask user.
+	       (let ((read-file-name-function
+		      (and org-completion-use-ido 'ido-read-file-name)))
+		 (read-file-name
+		  "Output file: " pub-dir nil nil nil
+		  (lambda (name)
+		    (string= (file-name-extension name t) extension)))))))
+	 (output-file
+	  ;; Build file name.  Enforce EXTENSION over whatever user
+	  ;; may have come up with.  PUB-DIR, if defined, always has
+	  ;; precedence over any provided path.
+	  (cond
+	   (pub-dir
+	    (concat (file-name-as-directory pub-dir)
+		    (file-name-nondirectory base-name)
+		    extension))
+	   ((file-name-absolute-p base-name) (concat base-name extension))
+	   (t (concat (file-name-as-directory ".") base-name extension)))))
+    ;; If writing to OUTPUT-FILE would overwrite original file, append
+    ;; EXTENSION another time to final name.
+    (if (and visited-file (org-file-equal-p visited-file output-file))
+	(concat output-file extension)
+      output-file)))
 
 (defun org-export-add-to-stack (source backend &optional process)
   "Add a new result to export stack if not present already.
@@ -5749,7 +5808,7 @@ within Emacs."
 	  ((bufferp source) (org-switch-to-buffer-other-window source))
 	  (t (org-open-file source in-emacs)))))
 
-(defconst org-export-stack-mode-map
+(defvar org-export-stack-mode-map
   (let ((km (make-sparse-keymap)))
     (define-key km " " 'next-line)
     (define-key km "n" 'next-line)
@@ -6074,11 +6133,11 @@ options as CDR."
 		(memq key '(14 16 ?\s ?\d)))
       (case key
 	(14 (if (not (pos-visible-in-window-p (point-max)))
-		(ignore-errors (scroll-up-line))
+		(ignore-errors (scroll-up 1))
 	      (message "End of buffer")
 	      (sit-for 1)))
 	(16 (if (not (pos-visible-in-window-p (point-min)))
-		(ignore-errors (scroll-down-line))
+		(ignore-errors (scroll-down 1))
 	      (message "Beginning of buffer")
 	      (sit-for 1)))
 	(?\s (if (not (pos-visible-in-window-p (point-max)))

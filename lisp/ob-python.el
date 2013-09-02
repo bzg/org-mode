@@ -33,7 +33,7 @@
 (declare-function org-remove-indentation "org" )
 (declare-function py-shell "ext:python-mode" (&optional argprompt))
 (declare-function py-toggle-shells "ext:python-mode" (arg))
-(declare-function run-python "ext:python" (&optional cmd noshow new))
+(declare-function run-python "ext:python" (cmd &optional dedicated show))
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("python" . "py"))
@@ -179,21 +179,20 @@ then create.  Return the initialized session."
   (require org-babel-python-mode)
   (save-window-excursion
     (let* ((session (if session (intern session) :default))
-           (python-buffer (org-babel-python-session-buffer session)))
+           (python-buffer (org-babel-python-session-buffer session))
+	   (cmd (if (member system-type '(cygwin windows-nt ms-dos))
+		    (concat org-babel-python-command " -i")
+		  org-babel-python-command)))
       (cond
        ((and (eq 'python org-babel-python-mode)
 	     (fboundp 'run-python)) ; python.el
-	(if (version< "24.1" emacs-version)
-	    (progn
-	      (unless python-buffer
-		(setq python-buffer (org-babel-python-with-earmufs session)))
-	      (let ((python-shell-buffer-name
-		     (org-babel-python-without-earmufs python-buffer)))
-		(run-python
-		 (if (member system-type '(cygwin windows-nt ms-dos))
-		     (concat org-babel-python-command " -i")
-		   org-babel-python-command))))
-	  (run-python)))
+	(if (not (version< "24.1" emacs-version))
+	    (run-python cmd)
+	  (unless python-buffer
+	    (setq python-buffer (org-babel-python-with-earmufs session)))
+	  (let ((python-shell-buffer-name
+		 (org-babel-python-without-earmufs python-buffer)))
+	    (run-python cmd))))
        ((and (eq 'python-mode org-babel-python-mode)
 	     (fboundp 'py-shell)) ; python-mode.el
 	;; Make sure that py-which-bufname is initialized, as otherwise

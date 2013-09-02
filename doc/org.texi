@@ -741,7 +741,7 @@ Miscellaneous
 * Clean view::                  Getting rid of leading stars in the outline
 * TTY keys::                    Using Org on a tty
 * Interaction::                 Other Emacs packages
-* org-crypt.el::                Encrypting Org files
+* org-crypt::                   Encrypting Org files
 
 Interaction with other packages
 
@@ -10156,10 +10156,10 @@ snippets will be identified as @LaTeX{} source code:
 @item
 Environments of any kind@footnote{When @file{MathJax} is used, only the
 environments recognized by @file{MathJax} will be processed.  When
-@file{dvipng} is used to create images, any @LaTeX{} environment will be
-handled.}.  The only requirement is that the @code{\begin} and @code{\end}
-statements appear on a new line, at the beginning of the line or after
-whitespaces only.
+@file{dvipng} program or @file{imagemagick} suite is used to create images,
+any @LaTeX{} environment will be handled.}.  The only requirement is that the
+@code{\begin} and @code{\end} statements appear on a new line, at the
+beginning of the line or after whitespaces only.
 @item
 Text within the usual @LaTeX{} math delimiters.  To avoid conflicts with
 currency specifications, single @samp{$} characters are only recognized as
@@ -10197,7 +10197,6 @@ lines:
 
 @example
 #+OPTIONS: tex:t          @r{Do the right thing automatically (MathJax)}
-#+OPTIONS: tex:dvipng     @r{Force using dvipng images}
 #+OPTIONS: tex:nil        @r{Do not process @LaTeX{} fragments at all}
 #+OPTIONS: tex:verbatim   @r{Verbatim export, for jsMath or so}
 @end example
@@ -11257,6 +11256,7 @@ You could use @code{http} addresses just as well.
 @subsection Math formatting in HTML export
 @cindex MathJax
 @cindex dvipng
+@cindex imagemagick
 
 @LaTeX{} math snippets (@pxref{@LaTeX{} fragments}) can be displayed in two
 different ways on HTML pages.  The default is to use the
@@ -11282,11 +11282,17 @@ this line.
 If you prefer, you can also request that @LaTeX{} fragments are processed
 into small images that will be inserted into the browser page.  Before the
 availability of MathJax, this was the default method for Org files.  This
-method requires that the @file{dvipng} program is available on your system.
-You can still get this processing with
+method requires that the @file{dvipng} program or @file{imagemagick} suite is
+available on your system.  You can still get this processing with
 
 @example
 #+OPTIONS: tex:dvipng
+@end example
+
+or:
+
+@example
+#+OPTIONS: tex:imagemagick
 @end example
 
 @node Text areas in HTML export, CSS support, Math formatting in HTML export, HTML export
@@ -12265,17 +12271,25 @@ and open the formula file with the system-registered application.
 @end table
 
 @cindex dvipng
+@cindex imagemagick
 @item PNG images
 
 This option is activated on a per-file basis with
 
 @example
-#+OPTIONS: LaTeX:dvipng
+#+OPTIONS: tex:dvipng
+@end example
+
+or:
+
+@example
+#+OPTIONS: tex:imagemagick
 @end example
 
 With this option, @LaTeX{} fragments are processed into PNG images and the
 resulting images are embedded in the exported document.  This method requires
-that the @file{dvipng} program be available on your system.
+that the @file{dvipng} program or @file{imagemagick} suite be available on
+your system.
 @end enumerate
 
 @node Working with MathML or OpenDocument formula files,  , Working with @LaTeX{} math snippets, Math formatting in ODT export
@@ -13004,7 +13018,7 @@ the Org buffer and get them translated into @LaTeX{} without using the
 @end group
 @end lisp
 
-Three arguments must be provided to a fiter: the code being changed, the
+Three arguments must be provided to a filter: the code being changed, the
 back-end used, and some information about the export process.  You can safely
 ignore the third argument for most purposes.  Note the use of
 @code{org-export-derived-backend-p}, which ensures that the filter will only
@@ -15538,7 +15552,7 @@ emacs -Q --batch \
 * Clean view::                  Getting rid of leading stars in the outline
 * TTY keys::                    Using Org on a tty
 * Interaction::                 Other Emacs packages
-* org-crypt.el::                Encrypting Org files
+* org-crypt::                   Encrypting Org files
 @end menu
 
 
@@ -16254,7 +16268,7 @@ tty you would rather use @kbd{C-c .} to re-insert the timestamp.
 @end multitable
 
 
-@node Interaction, org-crypt.el, TTY keys, Miscellaneous
+@node Interaction, org-crypt, TTY keys, Miscellaneous
 @section Interaction with other packages
 @cindex packages, interaction with other
 Org lives in the world of GNU Emacs and interacts in various ways
@@ -16489,7 +16503,7 @@ another key for this command, or override the key in
 
 @end table
 
-@node org-crypt.el,  , Interaction, Miscellaneous
+@node org-crypt,  , Interaction, Miscellaneous
 @section org-crypt.el
 @cindex @file{org-crypt.el}
 @cindex @code{org-decrypt-entry}
@@ -16782,9 +16796,10 @@ can use Org's facilities to edit and structure lists by turning
 @cindex radio tables
 
 To define the location of the target table, you first need to create two
-lines that are comments in the current mode, but contain magic words for
-Orgtbl mode to find.  Orgtbl mode will insert the translated table
-between these lines, replacing whatever was there before.  For example:
+lines that are comments in the current mode, but contain magic words
+@code{BEGIN/END RECEIVE ORGTBL} for Orgtbl mode to find.  Orgtbl mode will
+insert the translated table between these lines, replacing whatever was there
+before.  For example in C mode where comments are between @code{/* ... */}:
 
 @example
 /* BEGIN RECEIVE ORGTBL table_name */
@@ -16858,7 +16873,7 @@ The best way to wrap the source table in @LaTeX{} is to use the
 activated by placing @code{\usepackage@{comment@}} into the document
 header.  Orgtbl mode can insert a radio table skeleton@footnote{By
 default this works only for @LaTeX{}, HTML, and Texinfo.  Configure the
-variable @code{orgtbl-radio-tables} to install templates for other
+variable @code{orgtbl-radio-table-templates} to install templates for other
 modes.}  with the command @kbd{M-x orgtbl-insert-radio-table RET}.  You will
 be prompted for a table name, let's say we use @samp{salesfigures}.  You
 will then get the following template:
@@ -17894,6 +17909,10 @@ them.
 inspired some of the early development, including HTML export.  He also
 asked for a way to narrow wide table columns.
 @item
+@i{Jason Dunsmore} has been maintaining the Org-Mode server at Rackspace for
+severl years now.  He also sponsered the hosting costs unto Rackspace started
+to hos us for free.
+@item
 @i{Thomas S. Dye} contributed documentation on Worg and helped integrating
 the Org-Babel documentation into the manual.
 @item
@@ -18006,6 +18025,8 @@ generation.
 @item
 @i{Martin Pohlack} provided the code snippet to bundle character insertion
 into bundles of 20 for undo.
+@item
+@i{Rackspace.com} is hosting our website for free.  Thank you Rackspace!
 @item
 @i{T.V. Raman} reported bugs and suggested improvements.
 @item

@@ -261,14 +261,15 @@ the ATTACH_DIR property) their own attachment directory."
 (defun org-attach-commit ()
   "Commit changes to git if `org-attach-directory' is properly initialized.
 This checks for the existence of a \".git\" directory in that directory."
-  (let ((dir (expand-file-name org-attach-directory))
-	(changes 0))
-    (when (file-exists-p (expand-file-name ".git" dir))
+  (let* ((dir (expand-file-name org-attach-directory))
+	 (git-dir (vc-git-root dir))
+	 (changes 0))
+    (when git-dir
       (with-temp-buffer
 	(cd dir)
 	(let ((have-annex
 	       (and org-attach-git-annex-cutoff
-		    (file-exists-p (expand-file-name ".git/annex" dir)))))
+		    (file-exists-p (expand-file-name "annex" git-dir)))))
 	  (dolist (new-or-modified
 		   (split-string
 		    (shell-command-to-string

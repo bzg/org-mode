@@ -1657,8 +1657,7 @@ contextual information."
 	      (buffer-substring (point-min) (point))))
 	   (t (org-remove-indentation (org-element-property :value table))))
      ;; Possible add a caption string below.
-     (when (and caption (not org-ascii-caption-above))
-       (concat "\n" caption)))))
+     (and (not org-ascii-caption-above) caption))))
 
 
 ;;;; Table Cell
@@ -1902,23 +1901,8 @@ Export is done in a buffer named \"*Org ASCII Export*\", which
 will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
   (interactive)
-  (if async
-      (org-export-async-start
-       (lambda (output)
-	 (with-current-buffer (get-buffer-create "*Org ASCII Export*")
-	   (erase-buffer)
-	   (insert output)
-	   (goto-char (point-min))
-	   (text-mode)
-	   (org-export-add-to-stack (current-buffer) 'ascii)))
-       `(org-export-as 'ascii ,subtreep ,visible-only ,body-only
-		       ',ext-plist))
-    (let ((outbuf (org-export-to-buffer
-		   'ascii "*Org ASCII Export*"
-		   subtreep visible-only body-only ext-plist)))
-      (with-current-buffer outbuf (text-mode))
-      (when org-export-show-temporary-export-buffer
-	(switch-to-buffer-other-window outbuf)))))
+  (org-export-to-buffer 'ascii "*Org ASCII Export*"
+    async subtreep visible-only body-only ext-plist (lambda () (text-mode))))
 
 ;;;###autoload
 (defun org-ascii-export-to-ascii
@@ -1950,15 +1934,9 @@ file-local settings.
 
 Return output file's name."
   (interactive)
-  (let ((outfile (org-export-output-file-name ".txt" subtreep)))
-    (if async
-	(org-export-async-start
-	 (lambda (f) (org-export-add-to-stack f 'ascii))
-	 `(expand-file-name
-	   (org-export-to-file
-	    'ascii ,outfile ,subtreep ,visible-only ,body-only ',ext-plist)))
-      (org-export-to-file
-       'ascii outfile subtreep visible-only body-only ext-plist))))
+  (let ((file (org-export-output-file-name ".txt" subtreep)))
+    (org-export-to-file 'ascii file
+      async subtreep visible-only body-only ext-plist)))
 
 ;;;###autoload
 (defun org-ascii-publish-to-ascii (plist filename pub-dir)

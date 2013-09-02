@@ -362,13 +362,13 @@ play with them."
   "Format string for the total time cells."
   :group 'org-clock
   :version "24.1"
-  :type 'boolean)
+  :type 'string)
 
 (defcustom org-clock-file-time-cell-format "*%s*"
   "Format string for the file time cells."
   :group 'org-clock
   :version "24.1"
-  :type 'boolean)
+  :type 'string)
 
 (defcustom org-clock-clocked-in-display 'mode-line
   "When clocked in for a task, org-mode can display the current
@@ -718,7 +718,7 @@ Notification is shown only once."
 	    (setq org-clock-notification-was-shown t)
 	    (org-notify
 	     (format "Task '%s' should be finished by now. (%s)"
-		     org-clock-heading org-clock-effort) t))
+		     org-clock-heading org-clock-effort) org-clock-sound))
 	(setq org-clock-notification-was-shown nil)))))
 
 (defun org-notify (notification &optional play-sound)
@@ -1691,7 +1691,7 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
     (org-show-entry)
     (org-back-to-heading t)
     (org-cycle-hide-drawers 'children)
-    (recenter)
+    (recenter 2)
     (org-reveal)
     (if recent
 	(message "No running clock, this is the most recently clocked task"))

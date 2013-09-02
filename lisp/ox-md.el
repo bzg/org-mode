@@ -438,21 +438,8 @@ Export is done in a buffer named \"*Org MD Export*\", which will
 be displayed when `org-export-show-temporary-export-buffer' is
 non-nil."
   (interactive)
-  (if async
-      (org-export-async-start
-	  (lambda (output)
-	    (with-current-buffer (get-buffer-create "*Org MD Export*")
-	      (erase-buffer)
-	      (insert output)
-	      (goto-char (point-min))
-	      (text-mode)
-	      (org-export-add-to-stack (current-buffer) 'md)))
-	`(org-export-as 'md ,subtreep ,visible-only))
-    (let ((outbuf (org-export-to-buffer
-		   'md "*Org MD Export*" subtreep visible-only)))
-      (with-current-buffer outbuf (text-mode))
-      (when org-export-show-temporary-export-buffer
-	(switch-to-buffer-other-window outbuf)))))
+  (org-export-to-buffer 'md "*Org MD Export*"
+    async subtreep visible-only nil nil (lambda () (text-mode))))
 
 ;;;###autoload
 (defun org-md-convert-region-to-md ()
@@ -487,12 +474,7 @@ contents of hidden elements.
 Return output file's name."
   (interactive)
   (let ((outfile (org-export-output-file-name ".md" subtreep)))
-    (if async
-	(org-export-async-start
-	    (lambda (f) (org-export-add-to-stack f 'md))
-	  `(expand-file-name
-	    (org-export-to-file 'md ,outfile ,subtreep ,visible-only)))
-      (org-export-to-file 'md outfile subtreep visible-only))))
+    (org-export-to-file 'md outfile async subtreep visible-only)))
 
 
 (provide 'ox-md)

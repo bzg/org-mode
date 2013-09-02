@@ -4399,14 +4399,14 @@ a radio table."
   (save-excursion
     (goto-char (point-min))
     (unless (re-search-forward
-	     (concat "BEGIN RECEIVE ORGTBL +" name "\\([ \t]\\|$\\)") nil t)
+	     (concat "BEGIN +RECEIVE +ORGTBL +" name "\\([ \t]\\|$\\)") nil t)
       (user-error "Don't know where to insert translated table"))
     (goto-char (match-beginning 0))
     (beginning-of-line 2)
     (save-excursion
       (let ((beg (point)))
 	(unless (re-search-forward
-		 (concat "END RECEIVE ORGTBL +" name) nil t)
+		 (concat "END +RECEIVE +ORGTBL +" name) nil t)
 	  (user-error "Cannot find end of insertion region"))
 	(beginning-of-line 1)
 	(delete-region beg (point))))

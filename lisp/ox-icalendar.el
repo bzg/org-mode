@@ -826,21 +826,10 @@ Return ICS file name."
   ;; Export part.  Since this back-end is backed up by `ascii', ensure
   ;; links will not be collected at the end of sections.
   (let ((outfile (org-export-output-file-name ".ics" subtreep)))
-    (if async
-	(org-export-async-start
-	    (lambda (f)
-	      (org-export-add-to-stack f 'icalendar)
-	      (run-hook-with-args 'org-icalendar-after-save-hook f))
-	  `(let ((org-ascii-links-to-notes nil))
-	     (expand-file-name
-	      (org-export-to-file
-	       'icalendar ,outfile ,subtreep ,visible-only ,body-only
-	       '(:ascii-charset utf-8)))))
-      (let ((org-ascii-links-to-notes nil))
-	(org-export-to-file 'icalendar outfile subtreep visible-only body-only
-			    '(:ascii-charset utf-8)))
-      (run-hook-with-args 'org-icalendar-after-save-hook outfile)
-      outfile)))
+    (org-export-to-file 'icalendar outfile
+      async subtreep visible-only body-only '(:ascii-charset utf-8)
+      (lambda (file)
+	(run-hook-with-args 'org-icalendar-after-save-hook file) nil))))
 
 ;;;###autoload
 (defun org-icalendar-export-agenda-files (&optional async)

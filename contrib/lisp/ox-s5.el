@@ -369,23 +369,8 @@ Export is done in a buffer named \"*Org S5 Export*\", which
 will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
   (interactive)
-  (if async
-      (org-export-async-start
-          (lambda (output)
-            (with-current-buffer (get-buffer-create "*Org S5 Export*")
-              (erase-buffer)
-              (insert output)
-              (goto-char (point-min))
-              (nxml-mode)
-              (org-export-add-to-stack (current-buffer) 's5)))
-        `(org-export-as 's5 ,subtreep ,visible-only ,body-only ',ext-plist))
-    (let ((outbuf (org-export-to-buffer
-                   's5 "*Org S5 Export*"
-                   subtreep visible-only body-only ext-plist)))
-      ;; Set major mode.
-      (with-current-buffer outbuf (nxml-mode))
-      (when org-export-show-temporary-export-buffer
-        (switch-to-buffer-other-window outbuf)))))
+  (org-export-to-buffer 's5 "*Org S5 Export*"
+    async subtreep visible-only body-only ext-plist (lambda () (nxml-mode))))
 
 (defun org-s5-export-to-html
   (&optional async subtreep visible-only body-only ext-plist)
@@ -419,16 +404,8 @@ Return output file's name."
   (let* ((extension (concat "." org-html-extension))
          (file (org-export-output-file-name extension subtreep))
          (org-export-coding-system org-html-coding-system))
-    (if async
-        (org-export-async-start
-            (lambda (f) (org-export-add-to-stack f 's5))
-          (let ((org-export-coding-system org-html-coding-system))
-            `(expand-file-name
-              (org-export-to-file
-               's5 ,file ,subtreep ,visible-only ,body-only ',ext-plist))))
-      (let ((org-export-coding-system org-html-coding-system))
-        (org-export-to-file
-         's5 file subtreep visible-only body-only ext-plist)))))
+    (org-export-to-file 's5 file
+      async subtreep visible-only body-only ext-plist)))
 
 (defun org-s5-publish-to-html (plist filename pub-dir)
   "Publish an org file to S5 HTML Presentation.

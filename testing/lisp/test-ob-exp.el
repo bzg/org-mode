@@ -57,7 +57,7 @@ Current buffer is a copy of the original buffer."
   (require 'ox-html)
   (let ((name (generate-new-buffer-name "*Org HTML Export*")))
     (org-test-in-example-file nil
-      (org-export-to-buffer 'html name nil nil t))
+      (org-export-to-buffer 'html name nil nil nil t))
     ;; Should create a HTML buffer.
     (should (buffer-live-p (get-buffer name)))
     ;; Should contain the content of the buffer.
