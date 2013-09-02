@@ -76,6 +76,17 @@ From there do
 to create the .tar.gz and .zip files, the documentation, and to
 upload everything at the right place.
 
+* Available Org's builds on the server
+
+There are two cron tasks on the server: one that builds the ELPA
+packages and one that builds org-latest.tar.gz and org-latest.zip.
+
+ELPA packages are built from the *maint* branch.  One ELPA package
+contains Org's core, another one called "org-plus-contrib" contains
+Org and contributed libraries.
+
+org-latest* snapshots are built from the *master* branch.
+
 * Synchonization with Emacs
 
 This is still a significant headache.  Some hand work is needed here.
