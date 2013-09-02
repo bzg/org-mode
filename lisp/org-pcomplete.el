@@ -36,7 +36,7 @@
 
 (declare-function org-split-string "org" (string &optional separators))
 (declare-function org-make-org-heading-search-string "org"
-		  (&optional string heading))
+		  (&optional string))
 (declare-function org-get-buffer-tags "org" ())
 (declare-function org-get-tags "org" ())
 (declare-function org-buffer-property-keys "org"
@@ -326,7 +326,7 @@ This needs more work, to handle headings with lots of spaces in them."
 	 (let (tbl)
 	   (while (re-search-forward org-todo-line-regexp nil t)
 	     (push (org-make-org-heading-search-string
-		    (match-string-no-properties 3) t)
+		    (match-string-no-properties 3))
 		   tbl))
 	   (pcomplete-uniqify-list tbl)))
        (substring pcomplete-stub 1))))
