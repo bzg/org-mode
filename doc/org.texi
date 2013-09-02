@@ -16400,6 +16400,18 @@ Yes, these are unfortunately more difficult to remember.  If you want
 to have other replacement keys, look at the variable
 @code{org-disputed-keys}.
 
+@item @file{ecomplete.el} by Lars Magne Ingebrigtsen @email{larsi@@gnus.org}
+@cindex @file{ecomplete.el}
+
+Ecomplete provides ``electric'' address completion in address header
+lines in message buffers.  Sadly Orgtbl mode cuts ecompletes power
+supply: No completion happens when Orgtbl mode is enabled in message
+buffers while entering text in address header lines.  If one wants to
+use ecomplete one should @emph{not} follow the advice to automagically
+turn on Orgtbl mode in message buffers (see @ref{Orgtbl mode}), but
+instead---after filling in the message headers---turn on Orgtbl mode
+manually when needed in the messages body.
+
 @item @file{filladapt.el} by Kyle Jones
 @cindex @file{filladapt.el}
 
@@ -16472,6 +16484,8 @@ another key for this command, or override the key in
 @lisp
 (define-key viper-vi-global-user-map "C-c /" 'org-sparse-tree)
 @end lisp
+
+
 
 @end table
 
