@@ -42,6 +42,8 @@
 (require 'org-id)
 (require 'org)
 
+(declare-function vc-git-root "vc-git" (file))
+
 (defgroup org-attach nil
   "Options concerning entry attachments in Org-mode."
   :tag "Org Attach"

@@ -36,6 +36,7 @@
 (require 'ob)
 
 (declare-function shen-eval-defun "ext:inf-shen" (&optional and-go))
+(declare-function org-babel-ruby-var-to-ruby "ob-ruby" (var))
 
 (defvar org-babel-default-header-args:shen '()
   "Default header arguments for shen code blocks.")
