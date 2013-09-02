@@ -94,6 +94,22 @@ this variable requires a restart of Emacs to become effective."
 | | |
 "))
   "Templates for radio tables in different major modes.
+Each template must define lines that will be treated as a comment and that
+must contain the \"BEGIN RECEIVE ORGTBL %n\" and \"END RECEIVE ORGTBL\"
+lines where \"%n\" will be replaced with the name of the table during
+insertion of the tempate.  The transformet table will later be inserted
+between these lines.
+
+The template should also contain a minimal table in a multiline comment.
+If multiline comments are not possible in the buffer language, 
+you can pack it into a string that will not be used when the code
+is compiled or executed.  Above the table will you need a line with
+the fixed string \"#+ORGTBL: SEND\", followed by instruction on how to
+convert the table into a data structure useful in the
+language of the buffer.  Check the manual for the section on
+\"Translator functions\", and more generally check out
+http://orgmode.org/manual/Tables-in-arbitrary-syntax.html#Tables-in-arbitrary-syntax
+
 All occurrences of %n in a template will be replaced with the name of the
 table, obtained by prompting the user."
   :group 'org-table
