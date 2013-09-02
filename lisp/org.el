@@ -6506,6 +6506,11 @@ and subscripts."
 
 (defvar org-inlinetask-min-level)
 
+(defun org-unlogged-message (&rest args)
+  "Display a message, but avoid loggin it in the *Messages* buffer."
+  (let ((message-log-max nil))
+    (apply 'message args)))
+
 ;;;###autoload
 (defun org-cycle (&optional arg)
   "TAB-action and visibility cycling for Org-mode.
@@ -6560,8 +6565,7 @@ in special contexts.
 	      (and org-cycle-level-after-item/entry-creation
 		   (or (org-cycle-level)
 		       (org-cycle-item-indentation))))
-    (let* (message-log-max ; Don't populate the *Messages* buffer
-	   (limit-level
+    (let* ((limit-level
 	    (or org-cycle-max-level
 		(and (boundp 'org-inlinetask-min-level)
 		     org-inlinetask-min-level
@@ -6592,11 +6596,11 @@ in special contexts.
        ((equal arg '(16))
 	(setq last-command 'dummy)
 	(org-set-startup-visibility)
-	(message "Startup visibility, plus VISIBILITY properties"))
+	(org-unlogged-message "Startup visibility, plus VISIBILITY properties"))
 
        ((equal arg '(64))
 	(show-all)
-	(message "Entire buffer visible, including drawers"))
+	(org-unlogged-message "Entire buffer visible, including drawers"))
 
        ;; Table: enter it or move to the next field.
        ((org-at-table-p 'any)
@@ -6676,17 +6680,16 @@ in special contexts.
 (defun org-cycle-internal-global ()
   "Do the global cycling action."
   ;; Hack to avoid display of messages for .org  attachments in Gnus
-  (let (message-log-max ; Don't populate the *Messages* buffer
-	(ga (string-match "\\*fontification" (buffer-name))))
+  (let ((ga (string-match "\\*fontification" (buffer-name))))
     (cond
      ((and (eq last-command this-command)
 	   (eq org-cycle-global-status 'overview))
       ;; We just created the overview - now do table of contents
       ;; This can be slow in very large buffers, so indicate action
       (run-hook-with-args 'org-pre-cycle-hook 'contents)
-      (unless ga (message "CONTENTS..."))
+      (unless ga (org-unlogged-message "CONTENTS..."))
       (org-content)
-      (unless ga (message "CONTENTS...done"))
+      (unless ga (org-unlogged-message "CONTENTS...done"))
       (setq org-cycle-global-status 'contents)
       (run-hook-with-args 'org-cycle-hook 'contents))
 
@@ -6695,7 +6698,7 @@ in special contexts.
       ;; We just showed the table of contents - now show everything
       (run-hook-with-args 'org-pre-cycle-hook 'all)
       (show-all)
-      (unless ga (message "SHOW ALL"))
+      (unless ga (org-unlogged-message "SHOW ALL"))
       (setq org-cycle-global-status 'all)
       (run-hook-with-args 'org-cycle-hook 'all))
 
@@ -6703,14 +6706,13 @@ in special contexts.
       ;; Default action: go to overview
       (run-hook-with-args 'org-pre-cycle-hook 'overview)
       (org-overview)
-      (unless ga (message "OVERVIEW"))
+      (unless ga (org-unlogged-message "OVERVIEW"))
       (setq org-cycle-global-status 'overview)
       (run-hook-with-args 'org-cycle-hook 'overview)))))
 
 (defun org-cycle-internal-local ()
   "Do the local cycling action."
-  (let (message-log-max ; Don't populate the *Messages* buffer
-	(goal-column 0) eoh eol eos has-children children-skipped struct)
+  (let ((goal-column 0) eoh eol eos has-children children-skipped struct)
     ;; First, determine end of headline (EOH), end of subtree or item
     ;; (EOS), and if item or heading has children (HAS-CHILDREN).
     (save-excursion
@@ -6750,7 +6752,7 @@ in special contexts.
       ;; Nothing is hidden behind this heading
       (unless (org-before-first-heading-p)
 	(run-hook-with-args 'org-pre-cycle-hook 'empty))
-      (message "EMPTY ENTRY")
+      (org-unlogged-message "EMPTY ENTRY")
       (setq org-cycle-subtree-status nil)
       (save-excursion
 	(goto-char eos)
@@ -6785,7 +6787,7 @@ in special contexts.
 		(mapc (lambda (e) (org-list-set-item-visibility e struct 'folded))
 		      (org-list-get-all-items (point) struct prevs))
 		(goto-char (if (< end eos) end eos)))))))
-      (message "CHILDREN")
+      (org-unlogged-message "CHILDREN")
       (save-excursion
 	(goto-char eos)
 	(outline-next-heading)
@@ -6801,7 +6803,8 @@ in special contexts.
       (unless (org-before-first-heading-p)
 	(run-hook-with-args 'org-pre-cycle-hook 'subtree))
       (outline-flag-region eoh eos nil)
-      (message (if children-skipped "SUBTREE (NO CHILDREN)" "SUBTREE"))
+      (org-unlogged-message
+       (if children-skipped "SUBTREE (NO CHILDREN)" "SUBTREE"))
       (setq org-cycle-subtree-status 'subtree)
       (unless (org-before-first-heading-p)
 	(run-hook-with-args 'org-cycle-hook 'subtree)))
@@ -6809,7 +6812,7 @@ in special contexts.
       ;; Default action: hide the subtree.
       (run-hook-with-args 'org-pre-cycle-hook 'folded)
       (outline-flag-region eoh eos t)
-      (message "FOLDED")
+      (org-unlogged-message "FOLDED")
       (setq org-cycle-subtree-status 'folded)
       (unless (org-before-first-heading-p)
 	(run-hook-with-args 'org-cycle-hook 'folded))))))
@@ -6829,7 +6832,7 @@ With a numeric prefix, show all headlines up to that level."
       (setq org-cycle-global-status 'contents))
      ((equal arg '(4))
       (org-set-startup-visibility)
-      (message "Startup visibility, plus VISIBILITY properties."))
+      (org-unlogged-message "Startup visibility, plus VISIBILITY properties."))
      (t
       (org-cycle '(4))))))
 
@@ -11425,7 +11428,6 @@ the different parts of the path and defaults to \"/\".
 If JUST-RETURN-STRING is non-nil, return a string, don't display a message."
   (interactive "P")
   (let* (case-fold-search
-	 message-log-max ; Don't populate the *Messages* buffer
 	 (bfn (buffer-file-name (buffer-base-buffer)))
 	 (path (and (derived-mode-p 'org-mode) (org-get-outline-path)))
 	 res)
@@ -11442,8 +11444,7 @@ If JUST-RETURN-STRING is non-nil, return a string, don't display a message."
 	   separator))
     (if just-return-string
 	(org-no-properties res)
-      (let ((message-log-max nil))
-	(message "%s" res)))))
+      (org-unlogged-message "%s" res))))
 
 (defvar org-refile-history nil
   "History for refiling operations.")
