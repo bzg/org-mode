@@ -16274,6 +16274,7 @@ user."
 					  (calendar-current-date))))
 		(org-eval-in-calendar nil t)
 		(let* ((old-map (current-local-map))
+		       (org-replace-disputed-keys nil)
 		       (map (copy-keymap calendar-mode-map))
 		       (minibuffer-local-map
 			(copy-keymap org-read-date-minibuffer-local-map)))
