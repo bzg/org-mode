@@ -97,7 +97,7 @@ this variable requires a restart of Emacs to become effective."
 Each template must define lines that will be treated as a comment and that
 must contain the \"BEGIN RECEIVE ORGTBL %n\" and \"END RECEIVE ORGTBL\"
 lines where \"%n\" will be replaced with the name of the table during
-insertion of the tempate.  The transformet table will later be inserted
+insertion of the tempate.  The transformed table will later be inserted
 between these lines.
 
 The template should also contain a minimal table in a multiline comment.
