@@ -1894,9 +1894,13 @@ single keystroke rather than having to type \"yes\"."
   :type 'regexp)
 
 (defconst org-file-apps-defaults-gnu
-  '((remote . emacs)
-    (system . mailcap)
-    (t . mailcap))
+  (append
+   '((remote . emacs))
+   (if (executable-find "xdg-open")
+       '((system . "xdg-open %s")
+	 (t . "xdg-open %s"))
+     '((system . mailcap)
+       (t . mailcap))))
   "Default file applications on a UNIX or GNU/Linux system.
 See `org-file-apps'.")
 
