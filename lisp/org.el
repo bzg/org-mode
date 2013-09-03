@@ -7669,9 +7669,10 @@ This is important for non-interactive uses of the command."
 	  (insert stars)
 	  (just-one-space)
 	  (insert initial-content)
-	  (if adjust-empty-lines
-	      (if (and blank (not (org-previous-line-empty-p)))
-		  (org-N-empty-lines-before-current (if blank 1 0))))
+	  (when adjust-empty-lines
+	    (if (or (not blank)
+		    (and blank (not (org-previous-line-empty-p))))
+		(org-N-empty-lines-before-current (if blank 1 0))))
 	  (run-hooks 'org-insert-heading-hook)))))))
 
 (defun org-N-empty-lines-before-current (N)
