@@ -1535,23 +1535,26 @@ INFO is a plist used as a communication channel."
      (org-html-close-tag "meta" " name=\"generator\" content=\"Org-mode\"" info)
      "\n"
      (and (org-string-nw-p author)
-	  (org-html-close-tag "meta"
-			      (format " name=\"author\" content=\"%s\""
-				      (funcall protect-string author))
-			      info)
-	  "\n")
+	  (concat
+	   (org-html-close-tag "meta"
+			       (format " name=\"author\" content=\"%s\""
+				       (funcall protect-string author))
+			       info)
+	   "\n"))
      (and (org-string-nw-p description)
-	  (org-html-close-tag "meta"
-			      (format " name=\"description\" content=\"%s\"\n"
-				      (funcall protect-string description))
-			      info)
-	  "\n")
+	  (concat
+	   (org-html-close-tag "meta"
+			       (format " name=\"description\" content=\"%s\"\n"
+				       (funcall protect-string description))
+			       info)
+	   "\n"))
      (and (org-string-nw-p keywords)
-	  (org-html-close-tag "meta"
-			      (format " name=\"keywords\" content=\"%s\""
-				      (funcall protect-string keywords))
-			      info)
-	  "\n"))))
+	  (concat
+	   (org-html-close-tag "meta"
+			       (format " name=\"keywords\" content=\"%s\""
+				       (funcall protect-string keywords))
+			       info)
+	   "\n")))))
 
 (defun org-html--build-head (info)
   "Return information for the <head>..</head> of the HTML output.

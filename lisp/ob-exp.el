@@ -183,27 +183,24 @@ this template."
 				info (org-babel-exp-get-export-buffer))
 			     (nth 1 info)))
 		     (goto-char beg-el)
-		     (unless (save-excursion (goto-char (point-at-bol))
-					     (looking-at "^#\\+"))
-		       (let ((replacement (org-babel-exp-do-export
-					   info 'inline)))
-			 (if (equal replacement "")
-			     ;; Replacement code is empty: completely
-			     ;; remove inline src block, including extra
-			     ;; white space that might have been created
-			     ;; when inserting results.
-			     (delete-region beg-el
-					    (progn (goto-char end-el)
-						   (skip-chars-forward " \t")
-						   (point)))
-			   ;; Otherwise: remove inline src block but
-			   ;; preserve following white spaces.  Then
-			   ;; insert value.
+		     (let ((replacement (org-babel-exp-do-export info 'inline)))
+		       (if (equal replacement "")
+			   ;; Replacement code is empty: completely
+			   ;; remove inline src block, including extra
+			   ;; white space that might have been created
+			   ;; when inserting results.
 			   (delete-region beg-el
 					  (progn (goto-char end-el)
-						 (skip-chars-backward " \t")
+						 (skip-chars-forward " \t")
 						 (point)))
-			   (insert replacement))))))
+			 ;; Otherwise: remove inline src block but
+			 ;; preserve following white spaces.  Then
+			 ;; insert value.
+			 (delete-region beg-el
+					(progn (goto-char end-el)
+					       (skip-chars-backward " \t")
+					       (point)))
+			 (insert replacement)))))
 		  ((babel-call inline-babel-call)
 		   (let* ((lob-info (org-babel-lob-get-info))
 			  (results
