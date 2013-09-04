@@ -1863,9 +1863,10 @@ Initial position of cursor is restored after the changes."
 	 (item-re (org-item-re))
 	 (shift-body-ind
 	  (function
-	   ;; Shift the indentation between END and BEG by DELTA.
-	   ;; Start from the line before END.
-	   (lambda (end beg delta)
+	   ;; Shift the indentation between END and BEG by DELTA.  If
+	   ;; MAX-IND is non-nil, ensure that no line will be indented
+	   ;; more than that number.  Start from the line before END.
+	   (lambda (end beg delta max-ind)
 	     (goto-char end)
 	     (skip-chars-backward " \r\t\n")
 	     (beginning-of-line)
@@ -1879,7 +1880,8 @@ Initial position of cursor is restored after the changes."
 		;; Shift only non-empty lines.
 		((org-looking-at-p "^[ \t]*\\S-")
 		 (let ((i (org-get-indentation)))
-		   (org-indent-line-to (+ i delta)))))
+		   (org-indent-line-to
+		    (if max-ind (min (+ i delta) max-ind) (+ i delta))))))
 	       (forward-line -1)))))
          (modify-item
           (function
@@ -1915,53 +1917,60 @@ Initial position of cursor is restored after the changes."
 		 (indent-to new-ind)))))))
     ;; 1. First get list of items and position endings.  We maintain
     ;;    two alists: ITM-SHIFT, determining indentation shift needed
-    ;;    at item, and END-POS, a pseudo-alist where key is ending
+    ;;    at item, and END-LIST, a pseudo-alist where key is ending
     ;;    position and value point.
     (let (end-list acc-end itm-shift all-ends sliced-struct)
-      (mapc (lambda (e)
-	      (let* ((pos (car e))
-		     (ind-pos (org-list-get-ind pos struct))
-		     (ind-old (org-list-get-ind pos old-struct))
-		     (bul-pos (org-list-get-bullet pos struct))
-		     (bul-old (org-list-get-bullet pos old-struct))
-		     (ind-shift (- (+ ind-pos (length bul-pos))
-				   (+ ind-old (length bul-old))))
-		     (end-pos (org-list-get-item-end pos old-struct)))
-		(push (cons pos ind-shift) itm-shift)
-		(unless (assq end-pos old-struct)
-		  ;; To determine real ind of an ending position that
-		  ;; is not at an item, we have to find the item it
-		  ;; belongs to: it is the last item (ITEM-UP), whose
-		  ;; ending is further than the position we're
-		  ;; interested in.
-		  (let ((item-up (assoc-default end-pos acc-end '>)))
-		    (push (cons end-pos item-up) end-list)))
-		(push (cons end-pos pos) acc-end)))
-	    old-struct)
+      (dolist (e old-struct)
+	(let* ((pos (car e))
+	       (ind-pos (org-list-get-ind pos struct))
+	       (ind-old (org-list-get-ind pos old-struct))
+	       (bul-pos (org-list-get-bullet pos struct))
+	       (bul-old (org-list-get-bullet pos old-struct))
+	       (ind-shift (- (+ ind-pos (length bul-pos))
+			     (+ ind-old (length bul-old))))
+	       (end-pos (org-list-get-item-end pos old-struct)))
+	  (push (cons pos ind-shift) itm-shift)
+	  (unless (assq end-pos old-struct)
+	    ;; To determine real ind of an ending position that
+	    ;; is not at an item, we have to find the item it
+	    ;; belongs to: it is the last item (ITEM-UP), whose
+	    ;; ending is further than the position we're
+	    ;; interested in.
+	    (let ((item-up (assoc-default end-pos acc-end '>)))
+	      (push (cons end-pos item-up) end-list)))
+	  (push (cons end-pos pos) acc-end)))
       ;; 2. Slice the items into parts that should be shifted by the
-      ;;    same amount of indentation.  The slices are returned in
-      ;;    reverse order so changes modifying buffer do not change
-      ;;    positions they refer to.
+      ;;    same amount of indentation.  Each slice follow the pattern
+      ;;    (END BEG DELTA MAX-IND-OR-NIL).  Slices are returned in
+      ;;    reverse order.
       (setq all-ends (sort (append (mapcar 'car itm-shift)
 				   (org-uniquify (mapcar 'car end-list)))
 			   '<))
       (while (cdr all-ends)
 	(let* ((up (pop all-ends))
 	       (down (car all-ends))
-	       (ind (if (assq up struct)
-			(cdr (assq up itm-shift))
-		      (cdr (assq (cdr (assq up end-list)) itm-shift)))))
-	  (push (list down up ind) sliced-struct)))
+	       (itemp (assq up struct))
+	       (item (if itemp up (cdr (assq up end-list))))
+	       (ind (cdr (assq item itm-shift)))
+	       ;; If we're not at an item, there's a child of the item
+	       ;; point belongs to above.  Make sure this slice isn't
+	       ;; moved within that child by specifying a maximum
+	       ;; indentation.
+	       (max-ind (and (not itemp)
+			     (+ (org-list-get-ind item struct)
+				(length (org-list-get-bullet item struct))
+				org-list-indent-offset))))
+	  (push (list down up ind max-ind) sliced-struct)))
       ;; 3. Shift each slice in buffer, provided delta isn't 0, from
       ;;    end to beginning.  Take a special action when beginning is
       ;;    at item bullet.
-      (mapc (lambda (e)
-	      (unless (zerop (nth 2 e)) (apply shift-body-ind e))
-	      (let* ((beg (nth 1 e))
-		     (cell (assq beg struct)))
-		(unless (or (not cell) (equal cell (assq beg old-struct)))
-		  (funcall modify-item beg))))
-	    sliced-struct))
+      (dolist (e sliced-struct)
+	(unless (and (zerop (nth 2 e)) (not (nth 3 e)))
+	  (apply shift-body-ind e))
+	(let* ((beg (nth 1 e))
+	       (cell (assq beg struct)))
+	  (unless (or (not cell) (equal cell (assq beg old-struct)))
+	    (funcall modify-item beg)))))
     ;; 4. Go back to initial position and clean marker.
     (goto-char origin)
     (move-marker origin nil)))
