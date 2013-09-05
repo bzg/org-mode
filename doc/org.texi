@@ -9592,9 +9592,9 @@ If this line does not exist, the title will be the name of the file
 associated to buffer, without extension, or the buffer name.
 
 @cindex property, EXPORT_TITLE
-If you are exporting only a subtree by marking is as the region, the heading
-of the subtree will become the title of the document.  If the subtree has a
-property @code{EXPORT_TITLE}, that will take precedence.
+If you are exporting only a subtree, its heading will become the title of the
+document.  If the subtree has a property @code{EXPORT_TITLE}, that will take
+precedence.
 
 @node Headings and sections, Table of contents, Document title, Structural markup elements
 @subheading Headings and sections
@@ -9746,7 +9746,7 @@ may need to restart Emacs.
 @subheading  Horizontal rules
 @cindex horizontal rules, markup rules
 A line consisting of only dashes, and at least 5 of them, will be exported as
-a horizontal line (@samp{<hr/>} in HTML and @code{\hrule} in @LaTeX{}).
+a horizontal line.
 
 @node Comment lines,  , Horizontal rules, Structural markup elements
 @subheading Comment lines
