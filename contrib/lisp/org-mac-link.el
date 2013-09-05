@@ -81,58 +81,58 @@
 (require 'org)
 (require 'org-mac-message)
 
-(defgroup org-mac-link-grabber nil
+(defgroup org-mac-link nil
   "Options concerning grabbing links from external Mac
 applications and inserting them in org documents"
-  :tag "Org Mac link grabber"
+  :tag "Org Mac link"
   :group 'org-link)
 
 (defcustom org-mac-grab-Finder-app-p t
   "Enable menu option [F]inder to grab links from the Finder"
   :tag "Grab Finder.app links"
-  :group 'org-mac-link-grabber
+  :group 'org-mac-link
   :type 'boolean)
 
 (defcustom org-mac-grab-Mail-app-p t
   "Enable menu option [m]ail to grab links from Mail.app"
   :tag "Grab Mail.app links"
-  :group 'org-mac-link-grabber
+  :group 'org-mac-link
   :type 'boolean)
 
 (defcustom org-mac-grab-Addressbook-app-p t
   "Enable menu option [a]ddressbook to grab links from AddressBook.app"
   :tag "Grab AddressBook.app links"
-  :group 'org-mac-link-grabber
+  :group 'org-mac-link
   :type 'boolean)
 
 (defcustom org-mac-grab-Safari-app-p t
   "Enable menu option [s]afari to grab links from Safari.app"
   :tag "Grab Safari.app links"
-  :group 'org-mac-link-grabber
+  :group 'org-mac-link
   :type 'boolean)
 
 (defcustom org-mac-grab-Firefox-app-p t
   "Enable menu option [f]irefox to grab links from Firefox.app"
   :tag "Grab Firefox.app links"
-  :group 'org-mac-link-grabber
+  :group 'org-mac-link
   :type 'boolean)
 
 (defcustom org-mac-grab-Firefox+Vimperator-p nil
   "Enable menu option [v]imperator to grab links from Firefox.app running the Vimperator plugin"
   :tag "Grab Vimperator/Firefox.app links"
-  :group 'org-mac-link-grabber
+  :group 'org-mac-link
   :type 'boolean)
 
 (defcustom org-mac-grab-Chrome-app-p t
   "Enable menu option [f]irefox to grab links from Google Chrome.app"
   :tag "Grab Google Chrome.app links"
-  :group 'org-mac-link-grabber
+  :group 'org-mac-link
   :type 'boolean)
 
 (defcustom org-mac-grab-Together-app-p nil
   "Enable menu option [t]ogether to grab links from Together.app"
   :tag "Grab Together.app links"
-  :group 'org-mac-link-grabber
+  :group 'org-mac-link
   :type 'boolean)
 
 (defcustom org-mac-grab-Skim-app-p
@@ -140,13 +140,13 @@ applications and inserting them in org documents"
                 "mdfind kMDItemCFBundleIdentifier == 'net.sourceforge.skim-app.skim'")))
   "Enable menu option [S]kim to grab page links from Skim.app"
   :tag "Grab Skim.app page links"
-  :group 'org-mac-link-grabber
+  :group 'org-mac-link
   :type 'boolean)
 
 (defcustom org-mac-Skim-highlight-selection-p nil
   "Highlight (using notes) the selection (if present) when grabbing the a link from Skim.app"
   :tag "Highlight selection in Skim.app"
-  :group 'org-mac-link-grabber
+  :group 'org-mac-link
   :type 'boolean)
 
 (defgroup org-mac-flagged-mail nil
