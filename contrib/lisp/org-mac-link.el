@@ -79,7 +79,6 @@
 ;;; Code:
 
 (require 'org)
-(require 'org-mac-message)
 
 (defgroup org-mac-link nil
   "Options concerning grabbing links from external Mac
