@@ -30,7 +30,7 @@ So you need to replace
 
 by 
 
-#+OPTIONS: :html-include-style t
+: #+OPTIONS: :html-include-style t
 
 Options affected by this change: =HTML5_FANCY=, =HTML_INCLUDE_SCRIPTS=
 and =HTML_INCLUDE_STYLE=.
