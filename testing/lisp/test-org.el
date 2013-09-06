@@ -305,15 +305,6 @@
 	      (end-of-line)
 	      (org-auto-fill-function)
 	      (buffer-string)))))
-  ;; Auto fill comments when `adaptive-fill-regexp' matches.
-  (should
-   (equal "  # > 12345\n  # > 7890"
-	  (org-test-with-temp-text "  # > 12345 7890"
-	    (let ((fill-column 10)
-		  (adaptive-fill-regexp "[ \t]*>+[ \t]*"))
-	      (end-of-line)
-	      (org-auto-fill-function)
-	      (buffer-string)))))
   ;; A hash within a line isn't a comment.
   (should-not
    (equal "12345 # 7890\n# 1"

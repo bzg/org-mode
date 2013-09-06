@@ -429,7 +429,7 @@ replace any running timer."
 		    (run-with-timer
 		     secs nil `(lambda ()
 				 (setq org-timer-current-timer nil)
-				 (org-notify ,(format "%s: time out" hl) t)
+				 (org-notify ,(format "%s: time out" hl) ,org-clock-sound)
 				 (setq org-timer-timer-is-countdown nil)
 				 (org-timer-set-mode-line 'off)
 				 (run-hooks 'org-timer-done-hook))))

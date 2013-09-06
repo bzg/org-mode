@@ -87,7 +87,19 @@ Org and contributed libraries.
 
 org-latest* snapshots are built from the *master* branch.
 
-* Synchonization with Emacs
+* Synchronization with Emacs
+
+** Updating etc/ORG-NEWS
+
+Latest changes in Emacs are described in Emacs =etc/NEWS=, and latest
+changes in major Emacs packages are described in =etc/ORG-NEWS=. 
+
+If a major release is meant to be merged with the Emacs trunk (as it
+always should), you need to update Org's =etc/ORG-NEWS= file so that
+you can merge it with that of Emacs.  There is one top-level section
+for each release that is merged with Emacs.
+
+** Merging with Emacs trunk branch
 
 This is still a significant headache.  Some hand work is needed here.
 
