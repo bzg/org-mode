@@ -18,7 +18,16 @@ Please remove calls to =(require 'org-mac-message)= and =(require
 'org-mac-link-grabber)= in your =.emacs= initialization file.  All you
 need now is =(require 'org-mac-link)=.
 
-*** HTML export: Replace "HTML_HTML5_FANCY" by :html-html5-fancy (...)
+Additionally, replace any calls to =ogml-grab-link= to
+=org-mac-grab-link=.  For example, replace this line:
+
+: (define-key org-mode-map (kbd "C-c g") 'omgl-grab-link)
+
+with this:
+
+: (define-key org-mode-map (kbd "C-c g") 'org-mac-grab-link)
+
+*** HTML export: Replace =HTML_HTML5_FANCY= by =:html-html5-fancy= (...)
 
 Some of the HTML specific export options in Org <8.1 are either nil or
 t, like =#+HTML_INCLUDE_STYLE=.  We replaced these binary options with
