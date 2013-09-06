@@ -35,7 +35,7 @@
 ;; hyperlinks into the current org-mode document at point.
 ;;
 ;; This code is heavily based on, and indeed incorporates,
-;; org-mac-message.el written by John Weigley and Christopher
+;; org-mac-message.el written by John Wiegley and Christopher
 ;; Suckling.
 ;;
 ;; Detailed comments for each application interface are inlined with
