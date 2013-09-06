@@ -8,6 +8,119 @@ See the end of the file for license conditions.
 
 Please send Org bug reports to emacs-orgmode@gnu.org.
 
+* Version 8.1
+
+** Incompatible changes
+
+*** Combine org-mac-message.el and org-mac-link-grabber into org-mac-link.el
+
+Please remove calls to =(require 'org-mac-message)= and =(require
+'org-mac-link-grabber)= in your =.emacs= initialization file.  All you
+need now is =(require 'org-mac-link)=.
+
+*** HTML export: Replace "HTML_HTML5_FANCY" by :html-html5-fancy (...)
+
+Some of the HTML specific export options in Org <8.1 are either nil or
+t, like =#+HTML_INCLUDE_STYLE=.  We replaced these binary options with
+option keywords like :html-include-style.
+
+So you need to replace
+
+: #+HTML_INCLUDE_STYLE: t
+
+by 
+
+#+OPTIONS: :html-include-style t
+
+Options affected by this change: =HTML5_FANCY=, =HTML_INCLUDE_SCRIPTS=
+and =HTML_INCLUDE_STYLE=.
+
+** Important bugfixes
+
+*** [[doc:org-insert-heading][org-insert-heading]] has been rewritten and bugs are now fixed
+*** The replacement of disputed keys is now turned of when reading a date
+
+** New features
+
+*** You can now use =xdg-open= to control how to open files
+*** =C-c ^ x= will now sort checklist items by their checked status
+
+See [[doc:org-sort-list][org-sort-list]]: hitting =C-c ^ x= will put checked items at the end
+of the list.
+*** Various LaTeX export enhancements
+
+- support SVG images
+- Support for pgf files
+- LaTeX Babel blocks can now be exported as =.tikz= files
+- Allow =latexmk= as an option for [[doc:org-latex-pdf-process][org-latex-pdf-process]]
+
+Also, the dependency on the =latexsym= LaTeX package has been removed,
+We now use =amssymb= symbols by default instead.
+
+*** Remapping =forward-paragraph= and =backward-paragraph=
+
+=forward-paragraph= and =backward-paragraph= are now remapped to
+[[doc:org-forward-element][org-forward-element]] and [[doc:org-backward-element][org-backward-element]] respectively.
+E.g. hitting =C-<down>= on a headline will move to the next headline.
+
+*** New entities in =org-entities.el=
+    
+Add support for ell, imath, jmath, varphi, varpi, aleph, gimel, beth,
+dalet, cdots, S (§), dag, ddag, colon, therefore, because, triangleq,
+leq, geq, lessgtr, lesseqgtr, ll, lll, gg, ggg, prec, preceq,
+preccurleyeq, succ, succeq, succurleyeq, setminus, nexist(s), mho,
+check, frown, diamond.  Changes loz, vert, checkmark, smile and tilde.
+
+** New options
+
+*** New option [[doc:org-bookmark-names-plist][org-bookmark-names-plist]]
+
+This allows to specify the names of automatic bookmarks.
+*** New option [[doc:org-agenda-ignore-drawer-properties][org-agenda-ignore-drawer-properties]]
+
+This allows more flexibility when optimizing the agenda generation.
+See http://orgmode.org/worg/agenda-optimization.html for details.
+*** New option: [[doc:org-html-link-use-abs-url][org-html-link-use-abs-url]] to force using absolute URLs
+
+This is an export/publishing option, and should be used either within
+the =#+OPTIONS= line(s) or within a [[doc:org-publish-project-alist][org-publish-project-alist]].
+
+Setting this option to =t= is needed when the HTML output does not
+allow relative URLs.  For example, the =contrib/lisp/ox-rss.el=
+library produces a RSS feed, and RSS feeds need to use absolute URLs,
+so a combination of =:html-link-home "..." and :html-link-use-abs-url
+t= is required---see the configuration example in the comment section
+of =ox-rss.el=.
+
+*** New option [[doc:org-babel-ditaa-java-cmd][org-babel-ditaa-java-cmd]]
+
+This makes java executable configurable for ditaa blocks.
+
+*** New options [[doc:org-babel-latex-htlatex][org-babel-latex-htlatex]] and [[doc:org-babel-latex-htlatex-packages][org-babel-latex-htlatex-packages]]
+
+This enables SVG generation from latex code blocks.
+
+*** New option: [[doc:org-habit-show-done-alwyays-green][org-habit-show-done-alwyays-green]]
+
+See [[http://lists.gnu.org/archive/html/emacs-orgmode/2013-05/msg00214.html][this message]] from Max Mikhanosha.
+
+*** New option: [[doc:org-babel-inline-result-wrap][org-babel-inline-result-wrap]]
+
+If you set this to the following
+
+: (setq org-babel-inline-result-wrap "$%s$")
+
+then inline code snippets will be wrapped into the formatting string.
+
+** New contributed packages
+
+- =ox-bibtex.el= by Nicolas Goaziou :: an utility to handle BibTeX
+     export to both LaTeX and HTML exports.  It uses the [[http://www.lri.fr/~filliatr/bibtex2html/][bibtex2html]]
+     software.
+
+- =org-screenshot.el= by Max Mikhanosha :: an utility to handle
+     screenshots easily from Org, using the external tool [[http://freecode.com/projects/scrot][scrot]].
+
 * Version 8.0.1
 
 ** Installation
