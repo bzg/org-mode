@@ -58,13 +58,14 @@ See [[doc:org-sort-list][org-sort-list]]: hitting =C-c ^ x= will put checked ite
 of the list.
 *** Various LaTeX export enhancements
 
-- support SVG images
-- Support for pgf files
+- Support SVG images
+- Support for .pgf files
 - LaTeX Babel blocks can now be exported as =.tikz= files
 - Allow =latexmk= as an option for [[doc:org-latex-pdf-process][org-latex-pdf-process]]
-
-Also, the dependency on the =latexsym= LaTeX package has been removed,
-We now use =amssymb= symbols by default instead.
+- When using =\usepackage[AUTO]{inputenc}=, AUTO will automatically be
+  replaced with a coding system derived from =buffer-file-coding-system=.
+- The dependency on the =latexsym= LaTeX package has been removed, we
+  now use =amssymb= symbols by default instead.
 
 *** Remapping =forward-paragraph= and =backward-paragraph=
 
