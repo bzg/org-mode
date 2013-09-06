@@ -51,6 +51,7 @@
 ;;    :base-extension "org"
 ;;    :rss-image-url "http://lumiere.ens.fr/~guerry/images/faces/15.png"
 ;;    :html-link-home "http://lumiere.ens.fr/~guerry/"
+;;    :html-link-use-abs-url t
 ;;    :rss-extension "xml"
 ;;    :publishing-directory "/home/guerry/public_html/"
 ;;    :publishing-function (org-rss-publish-to-rss)
