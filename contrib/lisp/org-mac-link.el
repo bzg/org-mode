@@ -13,6 +13,11 @@
 ;; Version: 1.1
 ;; Keywords: org, mac, hyperlink
 ;;
+;; Version: 1.2
+;; Keywords: outlook
+;; Author: Mike McLean <mike.mclean@pobox.com>
+;; Add support for Microsoft Outlook for Mac as Org mode links
+;;
 ;; This file is not part of GNU Emacs.
 ;;
 ;; This program is free software; you can redistribute it and/or modify
@@ -51,6 +56,7 @@
 ;; Google Chrome.app - Grab the url of the frontmost tab in the frontmost window
 ;; Together.app - Grab links to the selected items in the library list
 ;; Skim.app - Grab a link to the selected page in the topmost pdf document
+;; Microsoft Outlook.app - Grab a link to the selected message in the message list
 ;;
 ;;
 ;; Installation:
@@ -94,6 +100,12 @@ applications and inserting them in org documents"
 (defcustom org-mac-grab-Mail-app-p t
   "Enable menu option [m]ail to grab links from Mail.app"
   :tag "Grab Mail.app links"
+  :group 'org-mac-link
+  :type 'boolean)
+
+(defcustom org-mac-grab-Outlook-app-p t
+  "Enable menu option [o]utlook to grab links from Microsoft Outlook.app"
+  :tag "Grab Microsoft Outlook.app links"
   :group 'org-mac-link
   :type 'boolean)
 
@@ -179,6 +191,7 @@ applications and inserting them in org documents"
   (interactive)
   (let* ((descriptors `(("F" "inder" org-mac-finder-insert-selected ,org-mac-grab-Finder-app-p)
                         ("m" "ail" org-mac-message-insert-selected ,org-mac-grab-Mail-app-p)
+                        ("o" "utlook" org-mac-outlook-message-insert-selected ,org-mac-grab-Outlook-app-p)
                         ("a" "ddressbook" org-mac-addressbook-insert-selected ,org-mac-grab-Addressbook-app-p)
                         ("s" "afari" org-mac-safari-insert-frontmost-url ,org-mac-grab-Safari-app-p)
                         ("f" "irefox" org-mac-firefox-insert-frontmost-url ,org-mac-grab-Firefox-app-p)
@@ -569,6 +582,133 @@ applications and inserting them in org documents"
 (defun org-mac-skim-insert-page ()
   (interactive)
   (insert (org-mac-skim-get-page)))
+
+
+
+;;
+;;
+;; Handle links from Microsoft Outlook.app
+;;
+
+(org-add-link-type "mac-outlook" 'org-mac-outlook-message-open)
+
+(defun org-mac-outlook-message-open (msgid)
+  "Open a message in outlook"
+  (let* ((record-id-string (format "mdfind com_microsoft_outlook_recordID==%s" msgid))
+	(found-message (replace-regexp-in-string "\n$" ""
+              (shell-command-to-string record-id-string))))
+    (if (string= found-message "")
+      (message "org-mac-link: error could not find Outlook message %s" 	(substring-no-properties msgid))
+      (shell-command (format "open \"`mdfind com_microsoft_outlook_recordID==%s`\"" msgid)))))
+
+(defun org-as-get-selected-outlook-mail ()
+  "AppleScript to create links to selected messages in Microsoft Outlook.app."
+  (do-applescript
+   (concat
+    "tell application \"Microsoft Outlook\"\n"
+    "set msgCount to count current messages\n"
+    "if (msgCount < 1) then\n"
+    "return\n"
+    "end if\n"
+    "set theLinkList to {}\n"
+    "set theSelection to (get current messages)\n"
+    "repeat with theMessage in theSelection\n"
+    "set theID to id of theMessage as string\n"
+    "set theURL to \"mac-outlook:\" & theID\n"
+    "set theSubject to subject of theMessage\n"
+    "set theLink to theURL & \"::split::\" & theSubject & \"\n\"\n"
+    "copy theLink to end of theLinkList\n"
+    "end repeat\n"
+    "return theLinkList as string\n"
+    "end tell")))
+
+(defun org-sh-get-flagged-outlook-mail ()
+  "Shell commands to create links to flagged messages in Microsoft Outlook.app."
+  (mapconcat
+   (lambda (x) ""
+     (concat
+      "mac-outlook:"
+      (mapconcat
+       (lambda (y) "" y)
+       (split-string
+	(shell-command-to-string
+	 (format "mdls -raw -name com_microsoft_outlook_recordID -name kMDItemDisplayName \"%s\"" x))
+	"\000")
+       "::split::")
+      "\n"))
+   (with-temp-buffer
+     (let ((coding-system-for-read (or file-name-coding-system 'utf-8))
+	   (coding-system-for-write 'utf-8))
+       (shell-command
+	"mdfind com_microsoft_outlook_flagged==1"
+	(current-buffer)))
+     (split-string
+      (buffer-string) "\n" t))
+   ""))
+
+(defun org-mac-outlook-message-get-links (&optional select-or-flag)
+  "Create links to the messages currently selected or flagged in Microsoft Outlook.app.
+This will use AppleScript to get the message-id and the subject of the
+messages in Microsoft Outlook.app and make a link out of it.
+When SELECT-OR-FLAG is \"s\", get the selected messages (this is also
+the default).  When SELECT-OR-FLAG is \"f\", get the flagged messages.
+The Org-syntax text will be pushed to the kill ring, and also returned."
+  (interactive "sLink to (s)elected or (f)lagged messages: ")
+  (setq select-or-flag (or select-or-flag "s"))
+  (message "Org Mac Outlook: searching mailboxes...")
+  (let* ((as-link-list
+          (if (string= select-or-flag "s")
+              (org-as-get-selected-outlook-mail)
+	    (if (string= select-or-flag "f")
+		(org-sh-get-flagged-outlook-mail)
+	      (error "Please select \"s\" or \"f\""))))
+         (link-list
+          (mapcar
+           (lambda (x) (if (string-match "\\`\"\\(.*\\)\"\\'" x) (setq x (match-string 1 x))) x)
+           (split-string as-link-list "[\r\n]+")))
+         split-link URL description orglink orglink-insert rtn orglink-list)
+    (while link-list
+      (setq split-link (split-string (pop link-list) "::split::"))
+      (setq URL (car split-link))
+      (setq description (cadr split-link))
+      (when (not (string= URL ""))
+        (setq orglink (org-make-link-string URL description))
+        (push orglink orglink-list)))
+    (setq rtn (mapconcat 'identity orglink-list "\n"))
+    (kill-new rtn)
+    rtn))
+
+(defun org-mac-outlook-message-insert-selected ()
+  "Insert a link to the messages currently selected in Microsoft Outlook.app.
+This will use AppleScript to get the message-id and the subject of the
+active mail in Microsoft Outlook.app and make a link out of it."
+  (interactive)
+  (insert (org-mac-outlook-message-get-links "s")))
+
+(defun org-mac-outlook-message-insert-flagged (org-buffer org-heading)
+  "Asks for an org buffer and a heading within it, and replace message links.
+If heading exists, delete all mac-outlook:// links within heading's first
+level.  If heading doesn't exist, create it at point-max.  Insert
+list of mac-outlook:// links to flagged mail after heading."
+  (interactive "bBuffer in which to insert links: \nsHeading after which to insert links: ")
+  (with-current-buffer org-buffer
+    (goto-char (point-min))
+    (let ((isearch-forward t)
+          (message-re "\\[\\[\\(mac-outlook:\\)\\([^]]+\\)\\]\\(\\[\\([^]]+\\)\\]\\)?\\]"))
+      (if (org-goto-local-search-headings org-heading nil t)
+          (if (not (eobp))
+              (progn
+                (save-excursion
+                  (while (re-search-forward
+                          message-re (save-excursion (outline-next-heading)) t)
+                    (delete-region (match-beginning 0) (match-end 0)))
+                  (insert "\n" (org-mac-outlook-message-get-links "f")))
+                (flush-lines "^$" (point) (outline-next-heading)))
+	    (insert "\n" (org-mac-outlook-message-get-links "f")))
+	(goto-char (point-max))
+	(insert "\n")
+	(org-insert-heading nil t)
+	(insert org-heading "\n" (org-mac-outlook-message-get-links "f"))))))
 
 
 
