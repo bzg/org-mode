@@ -2736,7 +2736,7 @@ $xyz->  %s
 @r$c->  %s
 $1->    %s\n" orig formula form0 form))
 	    (if (listp ev)
-		(princ (format "       %s^\nError:  %s"
+		(princ (format "        %s^\nError:  %s"
 			       (make-string (car ev) ?\-) (nth 1 ev)))
 	      (princ (format "Result: %s\nFormat: %s\nFinal:  %s"
 			     ev (or fmt "NONE")
