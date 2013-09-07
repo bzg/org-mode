@@ -44,6 +44,24 @@ by
 Options affected by this change: =HTML5_FANCY=, =HTML_INCLUDE_SCRIPTS=
 and =HTML_INCLUDE_STYLE=.
 
+*** Add an argument to ~org-export-to-file~ and ~org-export-to-buffer~
+
+~org-export-to-file~ and ~org-export-to-file~ can run in a different
+process when provided a non-nil =ASYNC= optional argument, without
+relying on ~org-export-async-start~ macro.
+
+Since =ASYNC= is the first of optional arguments, you have to shift
+the other optional arguments accordingly.
+
+*** Export back-ends are now structures
+
+Export back-ends are now structures, and stored as such in the
+communication channel during an export process.  In other words, from
+now on, ~(plist-get info :back-end)~ will return a structure instead
+of a symbol.
+
+Arguments in hooks and in filters are still symbols, though.
+
 ** Important bugfixes
 
 *** [[doc:org-insert-heading][org-insert-heading]] has been rewritten and bugs are now fixed
@@ -62,8 +80,9 @@ of the list.
 - Support for .pgf files
 - LaTeX Babel blocks can now be exported as =.tikz= files
 - Allow =latexmk= as an option for [[doc:org-latex-pdf-process][org-latex-pdf-process]]
-- When using =\usepackage[AUTO]{inputenc}=, AUTO will automatically be
-  replaced with a coding system derived from =buffer-file-coding-system=.
+- When using =\usepackage[AUTO]{babel}=, AUTO will automatically be
+  replaced with a value compatible with ~org-export-default-language~
+  or ~LANGUAGE~ keyword.
 - The dependency on the =latexsym= LaTeX package has been removed, we
   now use =amssymb= symbols by default instead.
 
@@ -80,6 +99,15 @@ dalet, cdots, S (§), dag, ddag, colon, therefore, because, triangleq,
 leq, geq, lessgtr, lesseqgtr, ll, lll, gg, ggg, prec, preceq,
 preccurleyeq, succ, succeq, succurleyeq, setminus, nexist(s), mho,
 check, frown, diamond.  Changes loz, vert, checkmark, smile and tilde.
+
+*** Anonymous export back-ends
+
+~org-export-create-backend~ can create anonymous export back-ends,
+which can then be passed to export functions like
+~org-export-to-file~, ~org-export-to-buffer~ or ~org-export-as~.
+
+It allows for quick translation of Org syntax without the overhead of
+registering a new back-end.
 
 ** New options
 
