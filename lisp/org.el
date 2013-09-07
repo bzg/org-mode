@@ -10535,8 +10535,14 @@ application the system uses for this file type."
 		(error "Abort"))))
 
 	   ((and (string= type "thisfile")
-		 (run-hook-with-args-until-success
-		  'org-open-link-functions path)))
+		 (or (run-hook-with-args-until-success
+		      'org-open-link-functions path)
+		     (and (string-match "^id:" link)
+			  (or (featurep 'org-id) (require 'org-id))
+			  (progn
+			    (funcall (nth 1 (assoc "id" org-link-protocols))
+				     (substring path 3))
+			    t)))))
 
 	   ((string= type "thisfile")
 	    (if arg
