@@ -2172,20 +2172,21 @@ Assume point is at the beginning of the paragraph."
 				(re-search-forward
 				 "^[ \t]*#\\+END:?[ \t]*$" limit t)))
 			 ;; Stop at valid blocks.
-			 (and (looking-at
-			       "[ \t]*#\\+BEGIN_\\(\\S-+\\)")
+			 (and (looking-at "[ \t]*#\\+BEGIN_\\(\\S-+\\)")
 			      (save-excursion
 				(re-search-forward
 				 (format "^[ \t]*#\\+END_%s[ \t]*$"
-					 (match-string 1))
+					 (regexp-quote
+					  (match-string-no-properties 1)))
 				 limit t)))
 			 ;; Stop at valid latex environments.
 			 (and (looking-at
-			       "^[ \t]*\\\\begin{\\([A-Za-z0-9]+\\*?\\)}[ \t]*$")
+			       "[ \t]*\\\\begin{\\([A-Za-z0-9]+\\*?\\)}")
 			      (save-excursion
 				(re-search-forward
 				 (format "^[ \t]*\\\\end{%s}[ \t]*$"
-					 (match-string 1))
+					 (regexp-quote
+					  (match-string-no-properties 1)))
 				 limit t)))
 			 ;; Stop at valid keywords.
 			 (looking-at "[ \t]*#\\+\\S-+:")
