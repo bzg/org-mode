@@ -6897,7 +6897,7 @@ of the first headline in the buffer.  This is important, because if the
 first headline is not level one, then (hide-sublevels 1) gives confusing
 results."
   (interactive)
-  (let ((l (org-current-line))
+  (let ((pos (point))
 	(level (save-excursion
 		 (goto-char (point-min))
 		 (if (re-search-forward (concat "^" outline-regexp) nil t)
@@ -6906,7 +6906,7 @@ results."
 		       (funcall outline-level))))))
     (and level (hide-sublevels level))
     (recenter '(4))
-    (org-goto-line l)))
+    (goto-char pos)))
 
 (defun org-content (&optional arg)
   "Show all headlines in the buffer, like a table of contents.
