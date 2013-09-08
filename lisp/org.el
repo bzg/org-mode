@@ -14050,10 +14050,19 @@ See also `org-scan-tags'.
 	minus tag mm
 	tagsmatch todomatch tagsmatcher todomatcher kwd matcher
 	orterms term orlist re-p str-p level-p level-op time-p
-	prop-p pn pv po gv rest)
+	prop-p pn pv po gv rest (start 0) (ss 0))
     ;; Expand group tags
     (setq match (org-tags-expand match))
-    (if (string-match "/+" match)
+
+    ;; Check if there is a TODO part of this match, which would be the
+    ;; part after a "/".  TO make sure that this slash is not part of
+    ;; a property value to be matched against, we also check that there
+    ;; is no " after that slash.
+    ;; First, find the last slash
+    (while (string-match "/+" match ss)
+      (setq start (match-beginning 0) ss (match-end 0)))
+    (if (and (string-match "/+" match start)
+	     (not (save-match-data (string-match "\"" match start))))
 	;; match contains also a todo-matching request
 	(progn
 	  (setq tagsmatch (substring match 0 (match-beginning 0))
