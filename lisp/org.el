@@ -16120,7 +16120,8 @@ So these are more for recording a certain time/date."
 (defvar org-read-date-inactive)
 
 (defvar org-read-date-minibuffer-local-map
-  (let ((map (make-sparse-keymap)))
+  (let* ((org-replace-disputed-keys nil)
+	 ((map (make-sparse-keymap))))
     (set-keymap-parent map minibuffer-local-map)
     (org-defkey map (kbd ".")
                 (lambda () (interactive)
@@ -16280,7 +16281,6 @@ user."
 					  (calendar-current-date))))
 		(org-eval-in-calendar nil t)
 		(let* ((old-map (current-local-map))
-		       (org-replace-disputed-keys nil)
 		       (map (copy-keymap calendar-mode-map))
 		       (minibuffer-local-map
 			(copy-keymap org-read-date-minibuffer-local-map)))
