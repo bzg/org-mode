@@ -2177,7 +2177,7 @@ Assume point is at the beginning of the paragraph."
 				(re-search-forward
 				 (format "^[ \t]*#\\+END_%s[ \t]*$"
 					 (regexp-quote
-					  (match-string-no-properties 1)))
+					  (org-match-string-no-properties 1)))
 				 limit t)))
 			 ;; Stop at valid latex environments.
 			 (and (looking-at
@@ -2186,7 +2186,7 @@ Assume point is at the beginning of the paragraph."
 				(re-search-forward
 				 (format "^[ \t]*\\\\end{%s}[ \t]*$"
 					 (regexp-quote
-					  (match-string-no-properties 1)))
+					  (org-match-string-no-properties 1)))
 				 limit t)))
 			 ;; Stop at valid keywords.
 			 (looking-at "[ \t]*#\\+\\S-+:")
