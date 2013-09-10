@@ -1668,6 +1668,12 @@ Optional argument N tells to change by that many units."
   (message "Clock canceled")
   (run-hooks 'org-clock-cancel-hook))
 
+(defcustom org-clock-goto-before-context 2
+  "Number of lines of context to display before currently clocked-in entry.
+This applies when using `org-clock-goto'."
+  :group 'org-clock
+  :type 'integer)
+
 ;;;###autoload
 (defun org-clock-goto (&optional select)
   "Go to the currently clocked-in entry, or to the most recently clocked one.
@@ -1691,7 +1697,7 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
     (org-show-entry)
     (org-back-to-heading t)
     (org-cycle-hide-drawers 'children)
-    (recenter 2)
+    (recenter org-clock-goto-before-context)
     (org-reveal)
     (if recent
 	(message "No running clock, this is the most recently clocked task"))
