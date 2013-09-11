@@ -2819,6 +2819,12 @@ Paragraph \\alpha."
 	 (progn (search-forward "A")
 		(org-element-type
 		 (org-element-property :parent (org-element-at-point)))))))
+  ;; Special case: at a blank line just below a headline, return that
+  ;; headline.
+  (should
+   (equal "H1" (org-test-with-temp-text "* H1\n  \n* H2\n"
+		 (forward-line)
+		 (org-element-property :title (org-element-at-point)))))
   ;; Special case: at the very beginning of a table, return `table'
   ;; object instead of `table-row'.
   (should
