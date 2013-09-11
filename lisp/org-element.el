@@ -4740,6 +4740,7 @@ first element of current section."
 	      ;; belongs to the headline.
 	      (throw 'exit
 		     (progn (skip-chars-backward " \r\t\n")
+			    (beginning-of-line)
 			    (if (not keep-trail)
 				(org-element-headline-parser (point-max) t)
 			      (list (org-element-headline-parser
