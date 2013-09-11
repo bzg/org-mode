@@ -4736,7 +4736,7 @@ first element of current section."
 	      ;; In blank lines just after the headline, point still
 	      ;; belongs to the headline.
 	      (throw 'exit
-		     (progn (org-back-to-heading)
+		     (progn (skip-chars-backward " \r\t\n")
 			    (if (not keep-trail)
 				(org-element-headline-parser (point-max) t)
 			      (list (org-element-headline-parser
