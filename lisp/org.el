@@ -3780,7 +3780,6 @@ images at the same place."
 
 (defcustom org-format-latex-header "\\documentclass{article}
 \\usepackage[usenames]{color}
-\\usepackage[mathscr]{eucal}
 \[PACKAGES]
 \[DEFAULT-PACKAGES]
 \\pagestyle{empty}             % do not remove
