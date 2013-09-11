@@ -3780,7 +3780,6 @@ images at the same place."
 
 (defcustom org-format-latex-header "\\documentclass{article}
 \\usepackage[usenames]{color}
-\\usepackage{amsmath}
 \\usepackage[mathscr]{eucal}
 \[PACKAGES]
 \[DEFAULT-PACKAGES]
@@ -3832,11 +3831,11 @@ header, or they will be appended."
     (""     "float"     nil)
     (""     "wrapfig"   nil)
     ("normalem" "ulem"  t)
+    (""     "amsmath"   t)
     (""     "textcomp"  t)
     (""     "marvosym"  t)
     (""     "wasysym"   t)
     (""     "amssymb"   t)
-    (""     "amstext"   nil)
     (""     "hyperref"  nil)
     "\\tolerance=1000")
   "Alist of default packages to be inserted in the header.
@@ -3848,7 +3847,7 @@ The packages in this list are needed by one part or another of
 Org mode to function properly:
 
 - inputenc, fontenc:  for basic font and character selection
-- amstext: for subscript and superscript
+- amsmath: for subscript and superscript and math environments
 - textcomp, marvosymb, wasysym, amssymb: for various symbols used
   for interpreting the entities in `org-entities'.  You can skip
   some of these packages if you don't use any of their symbols.
