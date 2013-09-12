@@ -171,6 +171,6 @@ will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
   (interactive)
   (org-export-to-buffer 'confluence "*org CONFLUENCE Export*"
-    async subtreep visible-only body-only external (lambda () (text-mode))))
+    async subtreep visible-only body-only ext-plist (lambda () (text-mode))))
 
 (provide 'ox-confluence)
