@@ -20690,17 +20690,22 @@ number of stars to add."
 
 (defun org-meta-return (&optional arg)
   "Insert a new heading or wrap a region in a table.
-Calls `org-insert-heading' or `org-table-wrap-region', depending on context.
-See the individual commands for more information."
+Calls `org-insert-heading' or `org-table-wrap-region', depending
+on context.  See the individual commands for more information."
   (interactive "P")
   (org-check-before-invisible-edit 'insert)
-  (cond
-   ((run-hook-with-args-until-success 'org-metareturn-hook))
-   ((or (org-at-drawer-p) (org-in-drawer-p) (org-at-property-p))
-    (newline-and-indent))
-   ((org-at-table-p)
-    (call-interactively 'org-table-wrap-region))
-   (t (call-interactively 'org-insert-heading))))
+  (or (run-hook-with-args-until-success 'org-metareturn-hook)
+      (let* ((element (org-element-at-point))
+             (type (org-element-type element)))
+        (when (eq type 'table-row)
+          (setq element (org-element-property :parent element))
+          (setq type 'table))
+        (if (and (eq type 'table)
+                 (eq (org-element-property :type element) 'org)
+                 (>= (point) (org-element-property :contents-begin element))
+                 (< (point) (org-element-property :contents-end element)))
+            (call-interactively 'org-table-wrap-region)
+          (call-interactively 'org-insert-heading)))))
 
 ;;; Menu entries
 
