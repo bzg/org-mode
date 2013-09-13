@@ -1291,6 +1291,11 @@ OK to kill that hidden subtree.  When nil, kill without remorse."
 	  (const :tag "Protect hidden subtrees with a security query" t)
 	  (const :tag "Never kill a hidden subtree with C-k" error)))
 
+(defcustom org-special-ctrl-o t
+  "Non-nil means, make `C-o' insert a row in tables."
+  :group 'org-edit-structure
+  :type 'boolean)
+
 (defcustom org-catch-invisible-edits nil
   "Check if in invisible region before inserting or deleting a character.
 Valid values are:
@@ -20369,11 +20374,16 @@ Also updates the keyword regular expressions."
       (funcall org-finish-function))))
 
 (defun org-open-line (n)
-  "Insert a new row in tables, call `open-line' elsewhere."
+  "Insert a new row in tables, call `open-line' elsewhere.
+If `org-special-ctrl-o' is nil, just call `open-line' everywhere."
   (interactive "*p")
-  (if (org-at-table-p)
-      (org-table-insert-row)
-    (open-line n)))
+  (cond
+   ((not org-special-ctrl-o)
+    (open-line n))
+   ((org-at-table-p)
+    (org-table-insert-row))
+   (t    
+    (open-line n))))
 
 (defun org-return (&optional indent)
   "Goto next table row or insert a newline.
