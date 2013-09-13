@@ -8642,6 +8642,7 @@ Delete other windows.
 @c
 @orgcmdkskc{v d,d,org-agenda-day-view}
 @xorgcmdkskc{v w,w,org-agenda-week-view}
+@xorgcmd{v t,org-agenda-fortnight-view}
 @xorgcmd{v m,org-agenda-month-view}
 @xorgcmd{v y,org-agenda-year-view}
 @xorgcmd{v SPC,org-agenda-reset-view}
