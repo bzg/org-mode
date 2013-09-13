@@ -188,7 +188,7 @@ This string must include a \"%s\" which will be replaced by the results."
    ;; (4) header arguments
    "\\([^\n]*\\)\n"
    ;; (5) body
-   "\\([^\000]*?\n\\)?[ \t]*#\\+end_src")
+   "\\([^\000]*?\n\\)??[ \t]*#\\+end_src")
   "Regexp used to identify code blocks.")
 
 (defvar org-babel-inline-src-block-regexp
