@@ -23302,7 +23302,8 @@ item, etc.  It also provides some special moves for convenience:
   - On a verse or source block, stop after blank lines."
   (interactive)
   (when (eobp) (user-error "Cannot move further down"))
-  (let* ((element (org-element-at-point))
+  (let* ((deactivate-mark nil)
+	 (element (org-element-at-point))
          (type (org-element-type element))
          (post-affiliated (org-element-property :post-affiliated element))
          (contents-begin (org-element-property :contents-begin element))
@@ -23383,7 +23384,8 @@ convenience:
   - On a verse or source block, stop before blank lines."
   (interactive)
   (when (bobp) (user-error "Cannot move further up"))
-  (let* ((element (org-element-at-point))
+  (let* ((deactivate-mark nil)
+	 (element (org-element-at-point))
          (type (org-element-type element))
          (contents-begin (org-element-property :contents-begin element))
          (contents-end (org-element-property :contents-end element))
