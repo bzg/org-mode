@@ -8,6 +8,33 @@ See the end of the file for license conditions.
 
 Please send Org bug reports to emacs-orgmode@gnu.org.
 
+* Version 8.2
+** Incompatible changes
+
+** Important bugfixes
+
+** New features
+
+*** org-id.el with be loaded automatically when needed to follow a link
+
+Thanks to Oleh for the patch
+
+*** Global cycling preserves point strictly
+
+*** New agenda view fortnight, covering 14 days
+
+Thanks to Michael Gauland for the patch.
+
+*** New functions for paragraph-like motion
+
+`org-forward-paragraph' and `org-backward-paragraph' use knowledge
+about elements to provide good paragraph motion in Org files.  These
+cammands are bound to `C-down' and `C-up'.
+
+Thanks to Nicolas Goaziou for the implementation.
+
+** New options
+
 * Version 8.1
 
 ** Incompatible changes
