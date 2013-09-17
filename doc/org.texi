@@ -11326,13 +11326,13 @@ the example, and 80, respectively.  For example
 
 @vindex org-html-todo-kwd-class-prefix
 @vindex org-html-tag-class-prefix
-You can also give style information for the exported file.  The HTML exporter
-assigns the following special CSS classes@footnote{If the classes on TODO
-keywords and tags lead to conflicts, use the variables
-@code{org-html-todo-kwd-class-prefix} and
-@code{org-html-tag-class-prefix} to make them unique.} to appropriate
-parts of the document---your style specifications may change these, in
-addition to any of the standard classes like for headlines, tables, etc.
+You can modify the CSS style definitions for the exported file.  The HTML
+exporter assigns the following special CSS classes@footnote{If the classes on
+TODO keywords and tags lead to conflicts, use the variables
+@code{org-html-todo-kwd-class-prefix} and @code{org-html-tag-class-prefix} to
+make them unique.} to appropriate parts of the document---your style
+specifications may change these, in addition to any of the standard classes
+like for headlines, tables, etc.
 @example
 p.author            @r{author information, including email}
 p.date              @r{publishing date}
