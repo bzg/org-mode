@@ -1601,7 +1601,6 @@ Jump to the next sparse tree match in this buffer.
 Jump to the previous sparse tree match in this buffer.
 @end table
 
-
 @noindent
 @vindex org-agenda-custom-commands
 For frequently used sparse trees of specific search strings, you can
@@ -5094,11 +5093,12 @@ information into special lists.
 
 @table @kbd
 @orgcmdkkc{C-c / m,C-c \\,org-match-sparse-tree}
-Create a sparse tree with all headlines matching a tags search.  With a
-@kbd{C-u} prefix argument, ignore headlines that are not a TODO line.
-@orgcmd{C-c a m,org-tags-view}
-Create a global list of tag matches from all agenda files.
+Create a sparse tree with all headlines matching a tags/property/TODO search.
+With a @kbd{C-u} prefix argument, ignore headlines that are not a TODO line.
 @xref{Matching tags and properties}.
+@orgcmd{C-c a m,org-tags-view}
+Create a global list of tag matches from all agenda files.  @xref{Matching
+tags and properties}.
 @orgcmd{C-c a M,org-tags-view}
 @vindex org-tags-match-list-sublevels
 Create a global list of tag matches from all agenda files, but check
