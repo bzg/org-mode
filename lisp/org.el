@@ -3834,6 +3834,7 @@ header, or they will be appended."
     (""     "longtable" nil)
     (""     "float"     nil)
     (""     "wrapfig"   nil)
+    (""     "rotating"  nil)
     ("normalem" "ulem"  t)
     (""     "amsmath"   t)
     (""     "textcomp"  t)
@@ -3851,14 +3852,16 @@ The packages in this list are needed by one part or another of
 Org mode to function properly:
 
 - inputenc, fontenc:  for basic font and character selection
+- fixltx2e: Important patches of LaTeX itself
+- graphicx: for including images
+- longtable: For multipage tables
+- float, wrapfig: for figure placement
+- rotating: for sideways figures and tables
+- ulem: for underline and strike-through
 - amsmath: for subscript and superscript and math environments
 - textcomp, marvosymb, wasysym, amssymb: for various symbols used
   for interpreting the entities in `org-entities'.  You can skip
   some of these packages if you don't use any of their symbols.
-- ulem: for underline and strike-through
-- graphicx: for including images
-- float, wrapfig: for figure placement
-- longtable: for long tables
 - hyperref: for cross references
 
 Therefore you should not modify this variable unless you know

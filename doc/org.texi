@@ -11616,8 +11616,11 @@ environment.  Default mode is determined in
 @item :environment
 @vindex org-latex-default-table-environment
 Environment used for the table.  It can be set to any @LaTeX{} table
-environment, like @code{tabularx}, @code{longtable}, @code{array},
-@code{tabu}, @code{bmatrix}@enddots{}  It defaults to
+environment, like @code{tabularx}@footnote{Requires adding the
+@code{tabularx} package to @code{org-latex-packages-alist}.},
+@code{longtable}, @code{array}, @code{tabu}@footnote{Requires adding the
+@code{tabu} package to @code{org-latex-packages-alist}.},
+@code{bmatrix}@enddots{} It defaults to
 @code{org-latex-default-table-environment} value.
 @item :caption
 @code{#+CAPTION} keyword is the simplest way to set a caption for a table
