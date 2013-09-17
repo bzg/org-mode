@@ -4735,7 +4735,7 @@ first element of current section."
 	    (org-back-to-heading)
 	    (forward-line)
 	    (org-skip-whitespace)
-	    (when (> (line-beginning-position) origin)
+	    (when (or (eobp) (> (line-beginning-position) origin))
 	      ;; In blank lines just after the headline, point still
 	      ;; belongs to the headline.
 	      (throw 'exit
