@@ -2865,6 +2865,13 @@ Paragraph \\alpha."
        (org-test-with-temp-text "- Para1\n- Para2\n\nPara3"
 	 (progn (forward-line 2)
 		(org-element-type (org-element-at-point))))))
+  ;; Special case: when a list ends at the end of buffer and there's
+  ;; no final newline, return last element in last item.
+  (should
+   (eq 'paragraph
+       (org-test-with-temp-text "- a"
+	 (end-of-line)
+	 (org-element-type (org-element-at-point)))))
   ;; With an optional argument, return trail.
   (should
    (equal '(paragraph center-block)
