@@ -4781,11 +4781,18 @@ first element of current section."
 		       ;; into elements with an explicit ending, but
 		       ;; return that element instead.
 		       (and (= cend origin)
-			    (memq type
-				  '(center-block
-				    drawer dynamic-block inlinetask item
-				    plain-list property-drawer quote-block
-				    special-block))))
+			    (or (memq type
+				      '(center-block
+					drawer dynamic-block inlinetask
+					property-drawer quote-block
+					special-block))
+				;; Corner case: if a list ends at the
+				;; end of a buffer without a final new
+				;; line, return last element in last
+				;; item instead.
+				(and (memq type '(item plain-list))
+				     (progn (goto-char cend)
+					    (or (bolp) (not (eobp))))))))
 		   (throw 'exit (if keep-trail trail element))
 		 (setq parent element)
 		 (case type
