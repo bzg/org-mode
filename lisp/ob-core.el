@@ -95,6 +95,7 @@
 (declare-function org-unescape-code-in-string "org-src" (s))
 (declare-function org-table-to-lisp "org-table" (&optional txt))
 (declare-function org-reverse-string "org" (string))
+(declare-function org-element-context "org-element" (&optional ELEMENT))
 
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
