@@ -7629,6 +7629,9 @@ This is important for non-interactive uses of the command."
 	  ;; If we insert after content, move there and clean up whitespace
 	  (when respect-content
 	    (org-end-of-subtree nil t)
+	    (skip-chars-backward " \r\n")
+	    (and (looking-at "[ \t]+") (replace-match ""))
+	    (forward-char 1)
 	    (when (looking-at "^\\*")
 	      (backward-char 1)
 	      (insert "\n")))
