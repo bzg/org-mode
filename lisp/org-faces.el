@@ -258,7 +258,7 @@ column view defines special faces for each outline level.  See the file
   '((((class color) (background light)) (:foreground "Purple" :underline t))
     (((class color) (background dark)) (:foreground "Cyan" :underline t))
     (t (:underline t)))
-  "Face for links."
+  "Face for footnotes."
   :group 'org-faces)
 
 (defface org-ellipsis
