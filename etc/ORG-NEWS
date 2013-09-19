@@ -9,33 +9,6 @@ See the end of the file for license conditions.
 Please send Org bug reports to emacs-orgmode@gnu.org.
 
 * Version 8.2
-** Incompatible changes
-
-** Important bugfixes
-
-** New features
-
-*** org-id.el with be loaded automatically when needed to follow a link
-
-Thanks to Oleh for the patch
-
-*** Global cycling preserves point strictly
-
-*** New agenda view fortnight, covering 14 days
-
-Thanks to Michael Gauland for the patch.
-
-*** New functions for paragraph-like motion
-
-`org-forward-paragraph' and `org-backward-paragraph' use knowledge
-about elements to provide good paragraph motion in Org files.  These
-cammands are bound to `C-down' and `C-up'.
-
-Thanks to Nicolas Goaziou for the implementation.
-
-** New options
-
-* Version 8.1
 
 ** Incompatible changes
 
@@ -94,9 +67,13 @@ Arguments in hooks and in filters are still symbols, though.
 *** [[doc:org-insert-heading][org-insert-heading]] has been rewritten and bugs are now fixed
 *** The replacement of disputed keys is now turned of when reading a date
 
+*** Match string for sparse trees can now contain a slash in a property value
+
+    You can now have searches like SOMEPROP="aaa/bbb".  Until now,
+    this would break because the slash would be interpreted as the
+    separator starting a TOTO match string.
 ** New features
 
-*** You can now use =xdg-open= to control how to open files
 *** =C-c ^ x= will now sort checklist items by their checked status
 
 See [[doc:org-sort-list][org-sort-list]]: hitting =C-c ^ x= will put checked items at the end
@@ -113,11 +90,11 @@ of the list.
 - The dependency on the =latexsym= LaTeX package has been removed, we
   now use =amssymb= symbols by default instead.
 
-*** Remapping =forward-paragraph= and =backward-paragraph=
-
-=forward-paragraph= and =backward-paragraph= are now remapped to
-[[doc:org-forward-element][org-forward-element]] and [[doc:org-backward-element][org-backward-element]] respectively.
-E.g. hitting =C-<down>= on a headline will move to the next headline.
+*** New functions for paragraph motion
+    
+    The commands =C-down= and =C-up= now invoke special commands
+    that use knowledge from the org-elements parser to move the cursor
+    in a paragraph-like way.
 
 *** New entities in =org-entities.el=
     
@@ -136,6 +113,10 @@ which can then be passed to export functions like
 It allows for quick translation of Org syntax without the overhead of
 registering a new back-end.
 
+*** New agenda fortnight view
+
+    The agenda has not, in addition to day, week, month, and year
+    views, also a fortnight view covering 14 days.
 ** New options
 
 *** New option [[doc:org-bookmark-names-plist][org-bookmark-names-plist]]
@@ -177,6 +158,10 @@ If you set this to the following
 
 then inline code snippets will be wrapped into the formatting string.
 
+*** New option: [[doc:org-special-ctrl-o][org-special-ctrl-o]]
+
+    This variable can be used to turn off the special behavior of
+    =C-o= in tables.
 ** New contributed packages
 
 - =ox-bibtex.el= by Nicolas Goaziou :: an utility to handle BibTeX
