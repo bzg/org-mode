@@ -169,7 +169,8 @@ This function is called by `org-babel-execute-src-block'."
 	   ((file-exists-p (concat (file-name-sans-extension tex-file) ".html"))
 	    (if (string-match "\\.html$" out-file)
 		(shell-command "mv %s %s"
-			       (concat (file-name-base tex-file) ".html")
+			       (concat (file-name-sans-extension tex-file)
+				       ".html")
 			       out-file)
 	      (error "HTML file produced but SVG file requested.")))))
          ((string-match "\\.\\([^\\.]+\\)$" out-file)
