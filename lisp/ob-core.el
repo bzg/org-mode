@@ -2159,15 +2159,17 @@ code ---- the results are extracted in the syntax of the source
 	  (set-marker visible-beg nil)
 	  (set-marker visible-end nil))))))
 
-(defun org-babel-remove-result (&optional info)
+(defun org-babel-remove-result (&optional info keep-keyword)
   "Remove the result of the current source block."
   (interactive)
-  (let ((location (org-babel-where-is-src-block-result nil info)) start)
+  (let ((location (org-babel-where-is-src-block-result nil info)))
     (when location
-      (setq start (- location 1))
       (save-excursion
-        (goto-char location) (forward-line 1)
-        (delete-region start (org-babel-result-end))))))
+        (goto-char location)
+	(when (looking-at org-babel-result-regexp)
+	  (delete-region
+	   (if keep-keyword (1+ (match-end 0)) (match-beginning 0))
+	   (progn (forward-line 1) (org-babel-result-end))))))))
 
 (defun org-babel-result-end ()
   "Return the point at the end of the current set of results."
