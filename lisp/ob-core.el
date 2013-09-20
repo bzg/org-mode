@@ -2166,7 +2166,7 @@ code ---- the results are extracted in the syntax of the source
     (when location
       (save-excursion
         (goto-char location)
-	(when (looking-at org-babel-result-regexp)
+	(when (looking-at (concat org-babel-result-regexp ".*$"))
 	  (delete-region
 	   (if keep-keyword (1+ (match-end 0)) (match-beginning 0))
 	   (progn (forward-line 1) (org-babel-result-end))))))))
