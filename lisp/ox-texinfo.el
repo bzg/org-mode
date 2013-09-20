@@ -1747,7 +1747,7 @@ directory.
 Return INFO file's name."
   (interactive)
   (let ((outfile (org-export-output-file-name ".texi" subtreep))
-	(org-export-coding-system `,org-texinfo-coding-system))
+	(org-export-coding-system org-texinfo-coding-system))
     (org-export-to-file 'texinfo outfile
       async subtreep visible-only body-only ext-plist
       (lambda (file) (org-texinfo-compile file)))))
