@@ -12941,7 +12941,7 @@ object or element into another language, all functions within a given filter
 type are called in turn on the string produced.  The string returned by the
 last function will be the one used in the final output.
 
-There are filters sets for each type of element or object, for plain text,
+There are filter sets for each type of element or object, for plain text,
 for the parse tree, for the export options and for the final output.  They
 are all named after the same scheme: @code{org-export-filter-TYPE-functions},
 where @code{TYPE} is the type targeted by the filter.  Valid types are:
@@ -13029,6 +13029,27 @@ ignore the third argument for most purposes.  Note the use of
 be applied when using @code{latex} back-end or any other back-end derived
 from it (e.g., @code{beamer}).
 
+@subheading Defining filters for individual files
+
+You can modify the export for just a specific file by inserting a source code
+block that will be evaluated at export time and that will install filters
+just for this file.  The following example modifies the timestamp formatting
+to remove the angular brackets during export.  It defines a filter function,
+makes a filter variable local to the current buffer and adds the new filter
+to the filter variable.
+
+@example
+#+begin_src emacs-lisp :exports results :results none
+ (defun my-org-export-filter-timestamp-function (timestamp backend info)
+   "removes relevant brackets from a timestamp"
+   (when (org-export-derived-backend-p backend 'html)
+     (replace-regexp-in-string "&[gl]t;\\|[][]" "" timestamp)))
+ (make-local-variable 'org-export-filter-timestamp-functions)
+ (add-to-list 'org-export-filter-timestamp-functions
+              'my-org-export-filter-timestamp-function)
+#+end_src
+@end example
+
 @subheading Extending an existing back-end
 
 This is obviously the most powerful customization, since the changes happen
@@ -13084,6 +13105,7 @@ back-end is calling the following from an Org buffer:
 
 It is obviously possible to write an interactive function for this, install
 it in the export dispatcher menu, and so on.
+
 
 @node Publishing, Working With Source Code, Exporting, Top
 @chapter Publishing
@@ -13762,11 +13784,11 @@ behavior:
 The default in most languages.  The body of the code block is exported, as
 described in @ref{Literal examples}.
 @item :exports results
-The code block will be evaluated and the results will be placed in the
-Org mode buffer for export, either updating previous results of the code
-block located anywhere in the buffer or, if no previous results exist,
-placing the results immediately after the code block.  The body of the code
-block will not be exported.
+The code block will be evaluated each time to buffer is exported, and the
+results will be placed in the Org mode buffer for export, either updating
+previous results of the code block located anywhere in the buffer or, if no
+previous results exist, placing the results immediately after the code block.
+The body of the code block will not be exported.
 @item :exports both
 Both the code block and its results will be exported.
 @item :exports none
