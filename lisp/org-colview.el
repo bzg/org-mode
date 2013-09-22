@@ -1306,10 +1306,10 @@ PARAMS is a property list of parameters:
 			    (if (eq 'hline x) x (cons "" x)))
 			  tbl))
 	(setq tbl (append tbl (list (cons "/" (make-list nfields "<>"))))))
-      (setq pos (point))
       (when content-lines
 	(while (string-match "^#" (car content-lines))
 	  (insert (pop content-lines) "\n")))
+      (setq pos (point))
       (insert (org-listtable-to-string tbl))
       (when (plist-get params :width)
 	(insert "\n|" (mapconcat (lambda (x) (format "<%d>" (max 3 x)))
