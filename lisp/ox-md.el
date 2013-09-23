@@ -31,7 +31,7 @@
 
 (eval-when-compile (require 'cl))
 (require 'ox-html)
-
+(require 'ox-publish)
 
 
 ;;; User-Configurable Variables
@@ -476,6 +476,17 @@ Return output file's name."
   (let ((outfile (org-export-output-file-name ".md" subtreep)))
     (org-export-to-file 'md outfile async subtreep visible-only)))
 
+
+;;;###autoload
+(defun org-md-publish-to-md (plist filename pub-dir)
+  "Publish an org file to Markdown.
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  (org-publish-org-to 'md filename ".md" plist pub-dir))
 
 (provide 'ox-md)
 
