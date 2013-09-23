@@ -13031,22 +13031,20 @@ from it (e.g., @code{beamer}).
 
 @subheading Defining filters for individual files
 
-You can modify the export for just a specific file by inserting a source code
-block that will be evaluated at export time and that will install filters
-just for this file.  The following example modifies the timestamp formatting
-to remove the angular brackets during export.  It defines a filter function,
-makes a filter variable local to the current buffer and adds the new filter
-to the filter variable.
+You can customize the export for just a specific file by binding export
+filter variables using @code{#+BIND}.  Here is an example where we introduce
+two filters, one to remove brackets from time stamps, and one to entirely
+remove any strike-through text.  The functions doing the filtering are
+defined in an src block that allows the filter function definitions to exist
+in the file itself and ensures that the functions will be there when needed.
 
 @example
+#+BIND: org-export-filter-timestamp-functions (tmp-f-timestamp)
+#+BIND: org-export-filter-strike-through-functions (tmp-f-strike-through)
 #+begin_src emacs-lisp :exports results :results none
- (defun my-org-export-filter-timestamp-function (timestamp backend info)
-   "removes relevant brackets from a timestamp"
-   (when (org-export-derived-backend-p backend 'html)
-     (replace-regexp-in-string "&[gl]t;\\|[][]" "" timestamp)))
- (make-local-variable 'org-export-filter-timestamp-functions)
- (add-to-list 'org-export-filter-timestamp-functions
-              'my-org-export-filter-timestamp-function)
+  (defun tmp-f-timestamp (s backend info)
+    (replace-regexp-in-string "&[lg]t;\\|[][]" "" s))
+  (defun tmp-f-strike-through (s backend info) "")
 #+end_src
 @end example
 
