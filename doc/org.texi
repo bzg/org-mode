@@ -11969,7 +11969,7 @@ also use your own favorite converter or tweak the default settings of the
 @file{LibreOffice} and @samp{unoconv} converters.  @xref{Configuring a
 document converter}.
 
-@subsubsection Automatically exporting to other formats
+@subsubheading Automatically exporting to other formats
 @anchor{x-export-to-other-formats}
 
 @vindex org-odt-preferred-output-format
@@ -11981,7 +11981,7 @@ preferred output format by customizing the variable
 (@pxref{x-export-to-odt,,Exporting to ODT}) can be extended to export to a
 format that is of immediate interest to you.
 
-@subsubsection Converting between document formats
+@subsubheading Converting between document formats
 @anchor{x-convert-to-other-formats}
 
 There are many document converters in the wild which support conversion to
@@ -12011,7 +12011,7 @@ files directly, or generate the required styles using an application like
 LibreOffice.  The latter method is suitable for expert and non-expert
 users alike, and is described here.
 
-@subsubsection Applying custom styles: the easy way
+@subsubheading Applying custom styles: the easy way
 
 @enumerate
 @item
@@ -12050,7 +12050,7 @@ or
 
 @end enumerate
 
-@subsubsection Using third-party styles and templates
+@subsubheading Using third-party styles and templates
 
 You can use third-party styles and templates for customizing your output.
 This will produce the desired output only if the template provides all
@@ -12231,7 +12231,7 @@ The ODT exporter has special support for handling math.
 @end menu
 
 @node Working with @LaTeX{} math snippets
-@subsubsection Working with @LaTeX{} math snippets
+@subsubheading Working with @LaTeX{} math snippets
 
 @LaTeX{} math snippets (@pxref{@LaTeX{} fragments}) can be embedded in the ODT
 document in one of the following ways:
@@ -12304,7 +12304,7 @@ your system.
 @end enumerate
 
 @node Working with MathML or OpenDocument formula files
-@subsubsection Working with MathML or OpenDocument formula files
+@subsubheading Working with MathML or OpenDocument formula files
 
 For various reasons, you may find embedding @LaTeX{} math snippets in an
 ODT document less than reliable.  In that case, you can embed a
@@ -12401,7 +12401,7 @@ that would be of interest to power users.
 @end menu
 
 @node Configuring a document converter
-@subsubsection Configuring a document converter
+@subsubheading Configuring a document converter
 @cindex convert
 @cindex doc, docx, rtf
 @cindex converter
@@ -12438,7 +12438,7 @@ option @code{org-odt-convert-process}.
 @end enumerate
 
 @node Working with OpenDocument style files
-@subsubsection Working with OpenDocument style files
+@subsubheading Working with OpenDocument style files
 @cindex styles, custom
 @cindex template, custom
 
@@ -12448,7 +12448,7 @@ interested in exploring the automatic and custom OpenDocument styles used by
 the exporter.
 
 @anchor{x-factory-styles}
-@subsubheading Factory styles
+@subsubheading a) Factory styles
 
 The ODT exporter relies on two files for generating its output.
 These files are bundled with the distribution under the directory pointed to
@@ -12495,7 +12495,7 @@ etc.---are numbered.
 @end itemize
 
 @anchor{x-overriding-factory-styles}
-@subsubheading Overriding factory styles
+@subsubheading b) Overriding factory styles
 The following two variables control the location from which the ODT
 exporter picks up the custom styles and content template files.  You can
 customize these variables to override the factory styles used by the
@@ -12542,7 +12542,7 @@ in the final output.
 @end itemize
 
 @node Creating one-off styles
-@subsubsection Creating one-off styles
+@subsubheading Creating one-off styles
 
 There are times when you would want one-off formatting in the exported
 document.  You can achieve this by embedding raw OpenDocument XML in the Org
@@ -12609,7 +12609,7 @@ This paragraph is specially formatted and uses bold text.
 @end enumerate
 
 @node Customizing tables in ODT export
-@subsubsection Customizing tables in ODT export
+@subsubheading Customizing tables in ODT export
 @cindex tables, in ODT export
 
 @cindex #+ATTR_ODT
@@ -12621,8 +12621,6 @@ This feature closely mimics the way table templates are defined in the
 OpenDocument-v1.2
 specification.@footnote{@url{http://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html,
 OpenDocument-v1.2 Specification}}
-
-@subsubheading Custom table styles: an illustration
 
 @vindex org-odt-table-styles
 To have a quick preview of this feature, install the below setting and
@@ -12655,7 +12653,6 @@ Table Template} in @file{OrgOdtContentTemplate.xml}
 (@pxref{x-orgodtcontenttemplate-xml,,Factory styles}).  If you need
 additional templates you have to define these styles yourselves.
 
-@subsubheading Custom table styles: the nitty-gritty
 To use this feature proceed as follows:
 
 @enumerate
@@ -12775,7 +12772,7 @@ the @code{ATTR_ODT} line as shown below.
 @end enumerate
 
 @node Validating OpenDocument XML
-@subsubsection Validating OpenDocument XML
+@subsubheading Validating OpenDocument XML
 
 Occasionally, you will discover that the document created by the
 ODT exporter cannot be opened by your favorite application.  One of
