@@ -13626,8 +13626,6 @@ above, or by customizing the variable @code{org-publish-use-timestamps-flag}.
 This may be necessary in particular if files include other files via
 @code{#+SETUPFILE:} or @code{#+INCLUDE:}.
 
-@comment  node-name,  next,  previous,  up
-@comment Working With Source Code, Miscellaneous, Publishing, Top
 
 @node Working with source code
 @chapter Working with source code
@@ -13670,8 +13668,6 @@ The following sections describe Org mode's code block handling facilities.
 * Batch execution::             Call functions from the command line
 @end menu
 
-@comment  node-name,  next,  previous,  up
-@comment  Structure of code blocks, Editing source code, Working With Source Code, Working With Source Code
 
 @node Structure of code blocks
 @section Structure of code blocks
@@ -13735,8 +13731,6 @@ basis using properties.
 Source code in the specified language.
 @end table
 
-@comment  node-name,  next,  previous,  up
-@comment  Editing source code, Exporting code blocks, Structure of code blocks, Working With Source Code
 
 @node Editing source code
 @section Editing source code
@@ -13778,8 +13772,6 @@ variable to @code{nil} to switch without asking.
 To turn on native code fontification in the @emph{Org} buffer, configure the
 variable @code{org-src-fontify-natively}.
 
-@comment  node-name,  next,  previous,  up
-@comment  Exporting code blocks, Extracting source code, Editing source code, Working With Source Code
 
 @node Exporting code blocks
 @section Exporting code blocks
@@ -13826,8 +13818,7 @@ assumed to have their results already inserted in the buffer by manual
 evaluation.  This setting is useful to avoid expensive recalculations during
 export, not to provide security.
 
-@comment  node-name,  next,  previous,  up
-@comment  Extracting source code, Evaluating code blocks, Exporting code blocks, Working With Source Code
+
 @node Extracting source code
 @section Extracting source code
 @cindex tangling
@@ -14248,7 +14239,6 @@ Multi-line header arguments on a named code block:
 @end example
 
 @node Header arguments in function calls
-@comment  node-name,  next,  previous,  up
 @subsubheading Header arguments in function calls
 
 At the most specific level, header arguments for ``Library of Babel'' or
