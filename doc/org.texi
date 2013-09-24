@@ -779,7 +779,7 @@ MobileOrg
 @end detailmenu
 @end menu
 
-@node Introduction, Document Structure, Top, Top
+@node Introduction
 @chapter Introduction
 @cindex introduction
 
@@ -791,7 +791,7 @@ MobileOrg
 * Conventions::                 Typesetting conventions in the manual
 @end menu
 
-@node Summary, Installation, Introduction, Introduction
+@node Summary
 @section Summary
 @cindex summary
 
@@ -860,7 +860,7 @@ Theory Ltd.}
 @page
 
 
-@node Installation, Activation, Summary, Introduction
+@node Installation
 @section Installation
 @cindex installation
 @cindex XEmacs
@@ -933,7 +933,7 @@ For more detailed explanations on Org's build system, please check the Org
 Build System page on @uref{http://orgmode.org/worg/dev/org-build-system.html,
 Worg}.
 
-@node Activation, Feedback, Installation, Introduction
+@node Activation
 @section Activation
 @cindex activation
 @cindex autoload
@@ -997,7 +997,7 @@ in Emacs 22 you need to do this yourself with
 active region by using the mouse to select a region, or pressing
 @kbd{C-@key{SPC}} twice before moving the cursor.
 
-@node Feedback, Conventions, Activation, Introduction
+@node Feedback
 @section Feedback
 @cindex feedback
 @cindex bug reports
@@ -1096,7 +1096,7 @@ screen.  Save this buffer to a file (for example using @kbd{C-x C-w}) and
 attach it to your bug report.
 @end enumerate
 
-@node Conventions,  , Feedback, Introduction
+@node Conventions
 @section Typesetting conventions used in this manual
 
 @subsubheading TODO keywords, tags, properties, etc.
@@ -1147,7 +1147,7 @@ will be listed to call @code{org-table-move-column-right}.  If you prefer,
 you can compile the manual without the command names by unsetting the flag
 @code{cmdnames} in @file{org.texi}.
 
-@node Document Structure, Tables, Introduction, Top
+@node Document Structure
 @chapter Document structure
 @cindex document structure
 @cindex structure of document
@@ -1170,7 +1170,7 @@ edit the structure of the document.
 * Org syntax::                  Formal description of Org's syntax
 @end menu
 
-@node Outlines, Headlines, Document Structure, Document Structure
+@node Outlines
 @section Outlines
 @cindex outlines
 @cindex Outline mode
@@ -1184,7 +1184,7 @@ currently being worked on.  Org greatly simplifies the use of
 outlines by compressing the entire show/hide functionality into a single
 command, @command{org-cycle}, which is bound to the @key{TAB} key.
 
-@node Headlines, Visibility cycling, Outlines, Document Structure
+@node Headlines
 @section Headlines
 @cindex headlines
 @cindex outline tree
@@ -1221,7 +1221,7 @@ least two empty lines, one empty line will remain visible after folding
 the subtree, in order to structure the collapsed view.  See the
 variable @code{org-cycle-separator-lines} to modify this behavior.
 
-@node Visibility cycling, Motion, Headlines, Document Structure
+@node Visibility cycling
 @section Visibility cycling
 @cindex cycling, visibility
 @cindex visibility cycling
@@ -1235,7 +1235,7 @@ variable @code{org-cycle-separator-lines} to modify this behavior.
 * Catching invisible edits::    Preventing mistakes when editing invisible parts
 @end menu
 
-@node Global and local cycling, Initial visibility, Visibility cycling, Visibility cycling
+@node Global and local cycling
 @subsection Global and local cycling
 
 Outlines make it possible to hide parts of the text in the buffer.
@@ -1325,7 +1325,7 @@ Copy the @i{visible} text in the region into the kill ring.
 * Catching invisible edits::    Preventing mistakes when editing invisible parts
 @end menu
 
-@node Initial visibility, Catching invisible edits, Global and local cycling, Visibility cycling
+@node Initial visibility
 @subsection Initial visibility
 
 @cindex visibility, initialize
@@ -1369,7 +1369,7 @@ requested by startup options and @samp{VISIBILITY} properties in individual
 entries.
 @end table
 
-@node Catching invisible edits,  , Initial visibility, Visibility cycling
+@node Catching invisible edits
 @subsection Catching invisible edits
 
 @vindex org-catch-invisible-edits
@@ -1380,7 +1380,7 @@ confused on what as been edited and how to undo the mistake.  Setting
 docstring of this option on how Org should catch invisible edits and process
 them.
 
-@node Motion, Structure editing, Visibility cycling, Document Structure
+@node Motion
 @section Motion
 @cindex motion, between headlines
 @cindex jumping, to headlines
@@ -1420,7 +1420,7 @@ q            @r{Quit}
 See also the option @code{org-goto-interface}.
 @end table
 
-@node Structure editing, Sparse trees, Motion, Document Structure
+@node Structure editing
 @section Structure editing
 @cindex structure editing
 @cindex headline, promotion and demotion
@@ -1557,7 +1557,7 @@ inside a table (@pxref{Tables}), the Meta-Cursor keys have different
 functionality.
 
 
-@node Sparse trees, Plain lists, Structure editing, Document Structure
+@node Sparse trees
 @section Sparse trees
 @cindex sparse trees
 @cindex trees, sparse
@@ -1630,7 +1630,7 @@ XEmacs uses selective display for outlining, not text properties.}.
 Or you can use @kbd{C-c C-e C-v} to export only the visible part of
 the document and print the resulting file.
 
-@node Plain lists, Drawers, Sparse trees, Document Structure
+@node Plain lists
 @section Plain lists
 @cindex plain lists
 @cindex lists, plain
@@ -1838,7 +1838,7 @@ numerically, alphabetically, by time, by checked status for check lists,
 or by a custom function.
 @end table
 
-@node Drawers, Blocks, Plain lists, Document Structure
+@node Drawers
 @section Drawers
 @cindex drawers
 @cindex #+DRAWERS
@@ -1893,7 +1893,7 @@ You can select the name of the drawers which should be exported with
 export output.  Property drawers are not affected by this variable: configure
 @code{org-export-with-properties} instead.
 
-@node Blocks, Footnotes, Drawers, Document Structure
+@node Blocks
 @section Blocks
 
 @vindex org-hide-block-startup
@@ -1912,7 +1912,7 @@ or on a per-file basis by using
 #+STARTUP: nohideblocks
 @end example
 
-@node Footnotes, Orgstruct mode, Blocks, Document Structure
+@node Footnotes
 @section Footnotes
 @cindex footnotes
 
@@ -2019,7 +2019,7 @@ Footnote labels are also links to the corresponding definition/reference, and
 you can use the usual commands to follow these links.
 @end table
 
-@node Orgstruct mode, Org syntax, Footnotes, Document Structure
+@node Orgstruct mode
 @section The Orgstruct minor mode
 @cindex Orgstruct mode
 @cindex minor mode for structure editing
@@ -2054,7 +2054,7 @@ Lisp files, you will be able to fold and unfold headlines in Emacs Lisp
 commented lines.  Some commands like @code{org-demote} are disabled when the
 prefix is set, but folding/unfolding will work correctly.
 
-@node Org syntax,  , Orgstruct mode, Document Structure
+@node Org syntax
 @section Org syntax
 @cindex Org syntax
 
@@ -2076,7 +2076,7 @@ abstract structure.  The export engine relies on the information stored in
 this list.  Most interactive commands (e.g., for structure editing) also
 rely on the syntactic meaning of the surrounding context.
 
-@node Tables, Hyperlinks, Document Structure, Top
+@node Tables
 @chapter Tables
 @cindex tables
 @cindex editing tables
@@ -2094,7 +2094,7 @@ calculations are supported using the Emacs @file{calc} package
 * Org-Plot::                    Plotting from org tables
 @end menu
 
-@node Built-in table editor, Column width and alignment, Tables, Tables
+@node Built-in table editor
 @section The built-in table editor
 @cindex table editor, built-in
 
@@ -2310,7 +2310,7 @@ it off with
 @noindent Then the only table command that still works is
 @kbd{C-c C-c} to do a manual re-align.
 
-@node Column width and alignment, Column groups, Built-in table editor, Tables
+@node Column width and alignment
 @section Column width and alignment
 @cindex narrow columns in tables
 @cindex alignment in tables
@@ -2370,7 +2370,7 @@ also combine alignment and field width like this: @samp{<r10>}.
 Lines which only contain these formatting cookies will be removed
 automatically when exporting the document.
 
-@node Column groups, Orgtbl mode, Column width and alignment, Tables
+@node Column groups
 @section Column groups
 @cindex grouping columns in tables
 
@@ -2406,7 +2406,7 @@ every vertical line you would like to have:
 | /  | <   |     |     | <       |            |
 @end example
 
-@node Orgtbl mode, The spreadsheet, Column groups, Tables
+@node Orgtbl mode
 @section The Orgtbl minor mode
 @cindex Orgtbl mode
 @cindex minor mode for tables
@@ -2427,7 +2427,7 @@ construct @LaTeX{} tables with the underlying ease and power of
 Orgtbl mode, including spreadsheet capabilities.  For details, see
 @ref{Tables in arbitrary syntax}.
 
-@node The spreadsheet, Org-Plot, Orgtbl mode, Tables
+@node The spreadsheet
 @section The spreadsheet
 @cindex calculations, in tables
 @cindex spreadsheet capabilities
@@ -2456,7 +2456,7 @@ formula, moving these references by arrow keys
 * Advanced features::           Field and column names, parameters and automatic recalc
 @end menu
 
-@node References, Formula syntax for Calc, The spreadsheet, The spreadsheet
+@node References
 @subsection References
 @cindex references
 
@@ -2635,7 +2635,7 @@ table in that entry.  REF is an absolute field or range reference as
 described above for example @code{@@3$3} or @code{$somename}, valid in the
 referenced table.
 
-@node Formula syntax for Calc, Formula syntax for Lisp, References, The spreadsheet
+@node Formula syntax for Calc
 @subsection Formula syntax for Calc
 @cindex formula syntax, Calc
 @cindex syntax, of formulas
@@ -2748,7 +2748,7 @@ should be padded with 0 to the full size.
 You can add your own Calc functions defined in Emacs Lisp with @code{defmath}
 and use them in formula syntax for Calc.
 
-@node Formula syntax for Lisp, Durations and time values, Formula syntax for Calc, The spreadsheet
+@node Formula syntax for Lisp
 @subsection Emacs Lisp forms as formulas
 @cindex Lisp forms, as table formulas
 
@@ -2784,7 +2784,7 @@ Add columns 1 and 2, equivalent to Calc's @code{$1+$2}.
 Compute the sum of columns 1 to 4, like Calc's @code{vsum($1..$4)}.
 @end table
 
-@node Durations and time values, Field and range formulas, Formula syntax for Lisp, The spreadsheet
+@node Durations and time values
 @subsection Durations and time values
 @cindex Duration, computing
 @cindex Time, computing
@@ -2814,7 +2814,7 @@ example above).
 Negative duration values can be manipulated as well, and integers will be
 considered as seconds in addition and subtraction.
 
-@node Field and range formulas, Column formulas, Durations and time values, The spreadsheet
+@node Field and range formulas
 @subsection Field and range formulas
 @cindex field formula
 @cindex range formula
@@ -2870,7 +2870,7 @@ can also be used to assign a formula to some but not all fields in a row.
 Named field, see @ref{Advanced features}.
 @end table
 
-@node Column formulas, Lookup functions, Field and range formulas, The spreadsheet
+@node Column formulas
 @subsection Column formulas
 @cindex column formula
 @cindex formula, for table column
@@ -2909,7 +2909,7 @@ stores it.  With a numeric prefix argument(e.g., @kbd{C-5 C-c =}) the command
 will apply it to that many consecutive fields in the current column.
 @end table
 
-@node Lookup functions, Editing and debugging formulas, Column formulas, The spreadsheet
+@node Lookup functions
 @subsection Lookup functions
 @cindex lookup functions in tables
 @cindex table lookup functions
@@ -2953,7 +2953,7 @@ matching cells, rank results, group data etc.  For practical examples
 see @uref{http://orgmode.org/worg/org-tutorials/org-lookups.html, this
 tutorial on Worg}.
 
-@node Editing and debugging formulas, Updating the table, Lookup functions, The spreadsheet
+@node Editing and debugging formulas
 @subsection Editing and debugging formulas
 @cindex formula editing
 @cindex editing, of table formulas
@@ -3104,7 +3104,7 @@ turn on formula debugging in the @code{Tbl} menu and repeat the
 calculation, for example by pressing @kbd{C-u C-u C-c = @key{RET}} in a
 field.  Detailed information will be displayed.
 
-@node Updating the table, Advanced features, Editing and debugging formulas, The spreadsheet
+@node Updating the table
 @subsection Updating the table
 @cindex recomputing table fields
 @cindex updating, table
@@ -3141,7 +3141,7 @@ Iterate all tables in the current buffer, in order to converge table-to-table
 dependencies.
 @end table
 
-@node Advanced features,  , Updating the table, The spreadsheet
+@node Advanced features
 @subsection Advanced features
 
 If you want the recalculation of fields to happen automatically, or if you
@@ -3246,7 +3246,7 @@ functions.
 @end group
 @end example
 
-@node Org-Plot,  , The spreadsheet, Tables
+@node Org-Plot
 @section Org-Plot
 @cindex graph, in tables
 @cindex plot tables using Gnuplot
@@ -3331,7 +3331,7 @@ may still want to specify the plot type, as that can impact the content of
 the data file.
 @end table
 
-@node Hyperlinks, TODO Items, Tables, Top
+@node Hyperlinks
 @chapter Hyperlinks
 @cindex hyperlinks
 
@@ -3349,7 +3349,7 @@ other files, Usenet articles, emails, and much more.
 * Custom searches::             When the default search is not enough
 @end menu
 
-@node Link format, Internal links, Hyperlinks, Hyperlinks
+@node Link format
 @section Link format
 @cindex link format
 @cindex format, of links
@@ -3380,7 +3380,7 @@ missing bracket hides the link internals again.  To show the
 internal structure of all links, use the menu entry
 @code{Org->Hyperlinks->Literal links}.
 
-@node Internal links, External links, Link format, Hyperlinks
+@node Internal links
 @section Internal links
 @cindex internal links
 @cindex links, internal
@@ -3451,7 +3451,7 @@ earlier.
 * Radio targets::               Make targets trigger links in plain text
 @end menu
 
-@node Radio targets,  , Internal links, Internal links
+@node Radio targets
 @subsection Radio targets
 @cindex radio targets
 @cindex targets, radio
@@ -3467,7 +3467,7 @@ for radio targets only when the file is first loaded into Emacs.  To
 update the target list during editing, press @kbd{C-c C-c} with the
 cursor on or at a target.
 
-@node External links, Handling links, Internal links, Hyperlinks
+@node External links
 @section External links
 @cindex links, external
 @cindex external links
@@ -3568,7 +3568,7 @@ as links.  If spaces must be part of the link (for example in
 @samp{bbdb:Richard Stallman}), or if you need to remove ambiguities
 about the end of the link, enclose them in square brackets.
 
-@node Handling links, Using links outside Org, External links, Hyperlinks
+@node Handling links
 @section Handling links
 @cindex links, handling
 
@@ -3764,7 +3764,7 @@ to @kbd{C-n} and @kbd{C-p}
 @end lisp
 @end table
 
-@node Using links outside Org, Link abbreviations, Handling links, Hyperlinks
+@node Using links outside Org
 @section Using links outside Org
 
 You can insert and follow links that have Org syntax not only in
@@ -3777,7 +3777,7 @@ yourself):
 (global-set-key "\C-c o" 'org-open-at-point-global)
 @end lisp
 
-@node Link abbreviations, Search options, Using links outside Org, Hyperlinks
+@node Link abbreviations
 @section Link abbreviations
 @cindex link abbreviations
 @cindex abbreviation, links
@@ -3846,7 +3846,7 @@ complete link abbreviations.  You may also define a function
 support for inserting such a link with @kbd{C-c C-l}.  Such a function should
 not accept any arguments, and return the full link with prefix.
 
-@node Search options, Custom searches, Link abbreviations, Hyperlinks
+@node Search options
 @section Search options in file links
 @cindex search option in file links
 @cindex file links, searching
@@ -3898,7 +3898,7 @@ to search the current file.  For example, @code{[[file:::find me]]} does
 a search for @samp{find me} in the current file, just as
 @samp{[[find me]]} would.
 
-@node Custom searches,  , Search options, Hyperlinks
+@node Custom searches
 @section Custom Searches
 @cindex custom search strings
 @cindex search strings, custom
@@ -3922,7 +3922,7 @@ variables for more information.  Org actually uses this mechanism
 for Bib@TeX{} database files, and you can use the corresponding code as
 an implementation example.  See the file @file{org-bibtex.el}.
 
-@node TODO Items, Tags, Hyperlinks, Top
+@node TODO Items
 @chapter TODO items
 @cindex TODO items
 
@@ -3947,7 +3947,7 @@ methods to give you an overview of all the things that you have to do.
 * Checkboxes::                  Tick-off lists
 @end menu
 
-@node TODO basics, TODO extensions, TODO Items, TODO Items
+@node TODO basics
 @section Basic TODO functionality
 
 Any headline becomes a TODO item when it starts with the word
@@ -4021,7 +4021,7 @@ Insert a new TODO entry below the current one.
 Changing a TODO state can also trigger tag changes.  See the docstring of the
 option @code{org-todo-state-tags-triggers} for details.
 
-@node TODO extensions, Progress logging, TODO basics, TODO Items
+@node TODO extensions
 @section Extended use of TODO keywords
 @cindex extended TODO keywords
 
@@ -4045,7 +4045,7 @@ TODO items in particular (@pxref{Tags}).
 * TODO dependencies::           When one task needs to wait for others
 @end menu
 
-@node Workflow states, TODO types, TODO extensions, TODO extensions
+@node Workflow states
 @subsection TODO keywords as workflow states
 @cindex TODO workflow
 @cindex workflow states as TODO keywords
@@ -4076,7 +4076,7 @@ define many keywords, you can use in-buffer completion
 buffer.  Changing a TODO state can be logged with a timestamp, see
 @ref{Tracking TODO state changes}, for more information.
 
-@node TODO types, Multiple sets in one file, Workflow states, TODO extensions
+@node TODO types
 @subsection TODO keywords as types
 @cindex TODO types
 @cindex names as TODO keywords
@@ -4108,7 +4108,7 @@ Lucy has to do, you would use @kbd{C-3 C-c / t}.  To collect Lucy's items
 from all agenda files into a single buffer, you would use the numeric prefix
 argument as well when creating the global TODO list: @kbd{C-3 C-c a t}.
 
-@node Multiple sets in one file, Fast access to TODO states, TODO types, TODO extensions
+@node Multiple sets in one file
 @subsection Multiple keyword sets in one file
 @cindex TODO keyword sets
 
@@ -4157,7 +4157,7 @@ from @code{DONE} to @code{REPORT} in the example above.  See also
 @code{shift-selection-mode}.
 @end table
 
-@node Fast access to TODO states, Per-file keywords, Multiple sets in one file, TODO extensions
+@node Fast access to TODO states
 @subsection Fast access to TODO states
 
 If you would like to quickly change an entry to an arbitrary TODO state
@@ -4182,7 +4182,7 @@ state through the tags interface (@pxref{Setting tags}), in case you like to
 mingle the two concepts.  Note that this means you need to come up with
 unique keys across both sets of keywords.}
 
-@node Per-file keywords, Faces for TODO keywords, Fast access to TODO states, TODO extensions
+@node Per-file keywords
 @subsection Setting up keywords for individual files
 @cindex keyword options
 @cindex per-file keywords
@@ -4229,7 +4229,7 @@ Org mode is activated after visiting a file.  @kbd{C-c C-c} with the
 cursor in a line starting with @samp{#+} is simply restarting Org mode
 for the current buffer.}.
 
-@node Faces for TODO keywords, TODO dependencies, Per-file keywords, TODO extensions
+@node Faces for TODO keywords
 @subsection Faces for TODO keywords
 @cindex faces, for TODO keywords
 
@@ -4257,7 +4257,7 @@ special face and use that.  A string is interpreted as a color.  The option
 @code{org-faces-easy-properties} determines if that color is interpreted as a
 foreground or a background color.
 
-@node TODO dependencies,  , Faces for TODO keywords, TODO extensions
+@node TODO dependencies
 @subsection TODO dependencies
 @cindex TODO dependencies
 @cindex dependencies, of TODO states
@@ -4319,7 +4319,7 @@ between entries in different trees or files, check out the contributed
 module @file{org-depend.el}.
 
 @page
-@node Progress logging, Priorities, TODO extensions, TODO Items
+@node Progress logging
 @section Progress logging
 @cindex progress logging
 @cindex logging, of progress
@@ -4337,7 +4337,7 @@ work time}.
 * Tracking your habits::        How consistent have you been?
 @end menu
 
-@node Closing items, Tracking TODO state changes, Progress logging, Progress logging
+@node Closing items
 @subsection Closing items
 
 The most basic logging is to keep track of @emph{when} a certain TODO
@@ -4373,7 +4373,7 @@ In the timeline (@pxref{Timeline}) and in the agenda
 display the TODO items with a @samp{CLOSED} timestamp on each day,
 giving you an overview of what has been done.
 
-@node Tracking TODO state changes, Tracking your habits, Closing items, Progress logging
+@node Tracking TODO state changes
 @subsection Tracking TODO state changes
 @cindex drawer, for state change recording
 
@@ -4456,7 +4456,7 @@ settings like @code{TODO(!)}.  For example
   :END:
 @end example
 
-@node Tracking your habits,  , Tracking TODO state changes, Progress logging
+@node Tracking your habits
 @subsection Tracking your habits
 @cindex habits
 
@@ -4556,7 +4556,7 @@ temporarily be disabled and they won't appear at all.  Press @kbd{K} again to
 bring them back.  They are also subject to tag filtering, if you have habits
 which should only be done in certain contexts, for example.
 
-@node Priorities, Breaking down tasks, Progress logging, TODO Items
+@node Priorities
 @section Priorities
 @cindex priorities
 
@@ -4614,7 +4614,7 @@ priority):
 #+PRIORITIES: A C B
 @end example
 
-@node Breaking down tasks, Checkboxes, Priorities, TODO Items
+@node Breaking down tasks
 @section Breaking tasks down into subtasks
 @cindex tasks, breaking down
 @cindex statistics, for TODO items
@@ -4675,7 +4675,7 @@ Another possibility is the use of checkboxes to identify (a hierarchy of) a
 large number of subtasks (@pxref{Checkboxes}).
 
 
-@node Checkboxes,  , Breaking down tasks, TODO Items
+@node Checkboxes
 @section Checkboxes
 @cindex checkboxes
 
@@ -4781,7 +4781,7 @@ changing TODO states.  If you delete boxes/entries or add/change them by
 hand, use this command to get things back into sync.
 @end table
 
-@node Tags, Properties and Columns, TODO Items, Top
+@node Tags
 @chapter Tags
 @cindex tags
 @cindex headline tagging
@@ -4809,7 +4809,7 @@ You may specify special faces for specific tags using the option
 * Tag searches::                Searching for combinations of tags
 @end menu
 
-@node Tag inheritance, Setting tags, Tags, Tags
+@node Tag inheritance
 @section Tag inheritance
 @cindex tag inheritance
 @cindex inheritance, of tags
@@ -4863,7 +4863,7 @@ with inherited tags.  Set @code{org-agenda-use-tag-inheritance} to control
 this: the default value includes all agenda types, but setting this to @code{nil}
 can really speed up agenda generation.
 
-@node Setting tags, Tag groups, Tag inheritance, Tags
+@node Setting tags
 @section Setting tags
 @cindex setting tags
 @cindex tags, setting
@@ -5044,7 +5044,7 @@ instead of @kbd{C-c C-c}).  If you set the variable to the value
 @code{expert}, the special window is not even shown for single-key tag
 selection, it comes up only when you press an extra @kbd{C-c}.
 
-@node Tag groups, Tag searches, Setting tags, Tags
+@node Tag groups
 @section Tag groups
 
 @cindex group tags
@@ -5086,7 +5086,7 @@ If you want to ignore group tags temporarily, toggle group tags support
 with @command{org-toggle-tags-groups}, bound to @kbd{C-c C-x q}.  If you
 want to disable tag groups completely, set @code{org-group-tags} to @code{nil}.
 
-@node Tag searches,  , Tag groups, Tags
+@node Tag searches
 @section Tag searches
 @cindex tag searches
 @cindex searching for tags
@@ -5118,7 +5118,7 @@ and properties.  For a complete description with many examples, see
 @ref{Matching tags and properties}.
 
 
-@node Properties and Columns, Dates and Times, Tags, Top
+@node Properties and Columns
 @chapter Properties and columns
 @cindex properties
 
@@ -5148,7 +5148,7 @@ Properties can be conveniently edited and viewed in column view
 * Property API::                Properties for Lisp programmers
 @end menu
 
-@node Property syntax, Special properties, Properties and Columns, Properties and Columns
+@node Property syntax
 @section Property syntax
 @cindex property syntax
 @cindex drawer, for properties
@@ -5270,7 +5270,7 @@ Compute the property at point, using the operator and scope from the
 nearest column format definition.
 @end table
 
-@node Special properties, Property searches, Property syntax, Properties and Columns
+@node Special properties
 @section Special properties
 @cindex properties, special
 
@@ -5321,7 +5321,7 @@ ITEM         @r{The headline of the entry.}
 FILE         @r{The filename the entry is located in.}
 @end example
 
-@node Property searches, Property inheritance, Special properties, Properties and Columns
+@node Property searches
 @section Property searches
 @cindex properties, searching
 @cindex searching, of properties
@@ -5358,7 +5358,7 @@ value.  If you enclose the value in curly braces, it is interpreted as
 a regular expression and matched against the property values.
 @end table
 
-@node Property inheritance, Column view, Property searches, Properties and Columns
+@node Property inheritance
 @section Property Inheritance
 @cindex properties, inheritance
 @cindex inheritance, of properties
@@ -5402,7 +5402,7 @@ The LOGGING property may define logging settings for an entry or a
 subtree (@pxref{Tracking TODO state changes}).
 @end table
 
-@node Column view, Property API, Property inheritance, Properties and Columns
+@node Column view
 @section Column view
 
 A great way to view and edit properties in an outline tree is
@@ -5425,7 +5425,7 @@ queries have collected selected items, possibly from a number of files.
 * Capturing column view::       A dynamic block for column view
 @end menu
 
-@node Defining columns, Using column view, Column view, Column view
+@node Defining columns
 @subsection Defining columns
 @cindex column view, for properties
 @cindex properties, column view
@@ -5438,7 +5438,7 @@ done by defining a column format line.
 * Column attributes::           Appearance and content of a column
 @end menu
 
-@node Scope of column definitions, Column attributes, Defining columns, Defining columns
+@node Scope of column definitions
 @subsubsection Scope of column definitions
 
 To define a column format for an entire file, use a line like
@@ -5465,7 +5465,7 @@ you can define columns on level 1 that are general enough for all
 sublevels, and more specific columns further down, when you edit a
 deeper part of the tree.
 
-@node Column attributes,  , Scope of column definitions, Defining columns
+@node Column attributes
 @subsubsection Column attributes
 A column definition sets the attributes of a column.  The general
 definition looks like this:
@@ -5557,7 +5557,7 @@ an @samp{[X]} status if all children have been checked.  The
 sums of CLOCK intervals in the subtree, either for all clocks or just for
 today.
 
-@node Using column view, Capturing column view, Defining columns, Column view
+@node Using column view
 @subsection Using column view
 
 @table @kbd
@@ -5615,7 +5615,7 @@ Insert a new column, to the left of the current column.
 Delete the current column.
 @end table
 
-@node Capturing column view,  , Using column view, Column view
+@node Capturing column view
 @subsection Capturing column view
 
 Since column view is just an overlay over a buffer, it cannot be
@@ -5692,7 +5692,7 @@ distributed with the main distribution of Org (visit
 properties from entries in a certain scope, and arbitrary Lisp expressions to
 process these values before inserting them into a table or a dynamic block.
 
-@node Property API,  , Column view, Properties and Columns
+@node Property API
 @section The Property API
 @cindex properties, API
 @cindex API, for properties
@@ -5702,7 +5702,7 @@ be used by Emacs Lisp programs to work with properties and to implement
 features based on them.  For more information see @ref{Using the
 property API}.
 
-@node Dates and Times, Capture - Refile - Archive, Properties and Columns, Top
+@node Dates and Times
 @chapter Dates and times
 @cindex dates
 @cindex times
@@ -5727,7 +5727,7 @@ is used in a much wider sense.
 @end menu
 
 
-@node Timestamps, Creating timestamps, Dates and Times, Dates and Times
+@node Timestamps
 @section Timestamps, deadlines, and scheduling
 @cindex timestamps
 @cindex ranges, time
@@ -5821,7 +5821,7 @@ angular ones.  These timestamps are inactive in the sense that they do
 
 @end table
 
-@node Creating timestamps, Deadlines and scheduling, Timestamps, Dates and Times
+@node Creating timestamps
 @section Creating timestamps
 @cindex creating timestamps
 @cindex timestamps, creating
@@ -5892,7 +5892,7 @@ the following column).
 * Custom time format::          Making dates look different
 @end menu
 
-@node The date/time prompt, Custom time format, Creating timestamps, Creating timestamps
+@node The date/time prompt
 @subsection The date/time prompt
 @cindex date, reading in minibuffer
 @cindex time, reading in minibuffer
@@ -6018,7 +6018,7 @@ on, the current interpretation of your input will be displayed live in the
 minibuffer@footnote{If you find this distracting, turn the display off with
 @code{org-read-date-display-live}.}.
 
-@node Custom time format,  , The date/time prompt, Creating timestamps
+@node Custom time format
 @subsection Custom time format
 @cindex custom date/time format
 @cindex time format, custom
@@ -6066,7 +6066,7 @@ format is shorter, things do work as expected.
 @end itemize
 
 
-@node Deadlines and scheduling, Clocking work time, Creating timestamps, Dates and Times
+@node Deadlines and scheduling
 @section Deadlines and scheduling
 
 A timestamp may be preceded by special keywords to facilitate planning:
@@ -6155,7 +6155,7 @@ sexp entry matches.
 * Repeated tasks::              Items that show up again and again
 @end menu
 
-@node Inserting deadline/schedule, Repeated tasks, Deadlines and scheduling, Deadlines and scheduling
+@node Inserting deadline/schedule
 @subsection Inserting deadlines or schedules
 
 The following commands allow you to quickly insert@footnote{The @samp{SCHEDULED} and
@@ -6213,7 +6213,7 @@ setting the date by indicating a relative time: e.g., +1d will set
 the date to the next day after today, and --1w will set the date
 to the previous week before any current timestamp.
 
-@node Repeated tasks,  , Inserting deadline/schedule, Deadlines and scheduling
+@node Repeated tasks
 @subsection Repeated tasks
 @cindex tasks, repeated
 @cindex repeated tasks
@@ -6302,7 +6302,7 @@ subtree, with dates shifted in each copy.  The command @kbd{C-c C-x c} was
 created for this purpose, it is described in @ref{Structure editing}.
 
 
-@node Clocking work time, Effort estimates, Deadlines and scheduling, Dates and Times
+@node Clocking work time
 @section Clocking work time
 @cindex clocking time
 @cindex time clocking
@@ -6334,7 +6334,7 @@ what to do with it.
 * Resolving idle time::         Resolving time when you've been idle
 @end menu
 
-@node Clocking commands, The clock table, Clocking work time, Clocking work time
+@node Clocking commands
 @subsection Clocking commands
 
 @table @kbd
@@ -6434,7 +6434,7 @@ worked on or closed during a day.
 @code{org-clock-in-last} can have a global keybinding and will not
 modify the window disposition.
 
-@node The clock table, Resolving idle time, Clocking commands, Clocking work time
+@node The clock table
 @subsection The clock table
 @cindex clocktable, dynamic block
 @cindex report, of clocked time
@@ -6582,7 +6582,7 @@ would be
 #+END: clocktable
 @end example
 
-@node Resolving idle time,  , The clock table, Clocking work time
+@node Resolving idle time
 @subsection Resolving idle time and continuous clocking
 
 @subsubheading Resolving idle time
@@ -6667,7 +6667,7 @@ last clocked entry for this session, and start the new clock from there.
 If you only want this from time to time, use three universal prefix arguments
 with @code{org-clock-in} and two @kbd{C-u C-u} with @code{org-clock-in-last}.
 
-@node Effort estimates, Relative timer, Clocking work time, Dates and Times
+@node Effort estimates
 @section Effort estimates
 @cindex effort estimates
 
@@ -6730,7 +6730,7 @@ with the @kbd{/} key in the agenda (@pxref{Agenda commands}).  If you have
 these estimates defined consistently, two or three key presses will narrow
 down the list to stuff that fits into an available time slot.
 
-@node Relative timer, Countdown timer, Effort estimates, Dates and Times
+@node Relative timer
 @section Taking notes with a relative timer
 @cindex relative timer
 
@@ -6770,7 +6770,7 @@ by a certain amount.  This can be used to fix timer strings if the timer was
 not started at exactly the right moment.
 @end table
 
-@node Countdown timer,  , Relative timer, Dates and Times
+@node Countdown timer
 @section Countdown timer
 @cindex Countdown timer
 @kindex C-c C-x ;
@@ -6784,7 +6784,7 @@ countdown timer in the modeline.  @code{org-timer-default-timer} sets the
 default countdown value.  Giving a prefix numeric argument overrides this
 default value.
 
-@node Capture - Refile - Archive, Agenda Views, Dates and Times, Top
+@node Capture - Refile - Archive
 @chapter Capture - Refile - Archive
 @cindex capture
 
@@ -6804,7 +6804,7 @@ trees to an archive file keeps the system compact and fast.
 * Archiving::                   What to do with finished projects
 @end menu
 
-@node Capture, Attachments, Capture - Refile - Archive, Capture - Refile - Archive
+@node Capture
 @section Capture
 @cindex capture
 
@@ -6831,7 +6831,7 @@ customization.
 * Capture templates::           Define the outline of different note types
 @end menu
 
-@node Setting up capture, Using capture, Capture, Capture
+@node Setting up capture
 @subsection Setting up capture
 
 The following customization sets a default target file for notes, and defines
@@ -6846,7 +6846,7 @@ suggestion.}  for capturing new material.
 @end group
 @end smalllisp
 
-@node Using capture, Capture templates, Setting up capture, Capture
+@node Using capture
 @subsection Using capture
 
 @table @kbd
@@ -6903,7 +6903,7 @@ automatically be created unless you set @code{org-capture-bookmark} to
 To insert the capture at point in an Org buffer, call @code{org-capture} with
 a @code{C-0} prefix argument.
 
-@node Capture templates,  , Using capture, Capture
+@node Capture templates
 @subsection Capture templates
 @cindex templates, for Capture
 
@@ -6962,7 +6962,7 @@ like this:
 * Templates in contexts::       Only show a template in a specific context
 @end menu
 
-@node Template elements, Template expansion, Capture templates, Capture templates
+@node Template elements
 @subsubsection Template elements
 
 Now lets look at the elements of a template definition.  Each entry in
@@ -7109,7 +7109,7 @@ buffer again after capture is completed.
 @end table
 @end table
 
-@node Template expansion, Templates in contexts, Template elements, Capture templates
+@node Template expansion
 @subsubsection Template expansion
 
 In the template itself, special @kbd{%}-escapes@footnote{If you need one of
@@ -7189,7 +7189,7 @@ To place the cursor after template expansion use:
 %?          @r{After completing the template, position cursor here.}
 @end smallexample
 
-@node Templates in contexts,  , Template expansion, Capture templates
+@node Templates in contexts
 @subsubsection Templates in contexts
 
 @vindex org-capture-templates-contexts
@@ -7213,7 +7213,7 @@ template.  In that case, add this command key like this:
 
 See the docstring of the variable for more information.
 
-@node Attachments, RSS Feeds, Capture, Capture - Refile - Archive
+@node Attachments
 @section Attachments
 @cindex attachments
 
@@ -7301,7 +7301,7 @@ same directory for attachments as the parent does.
 @end table
 @end table
 
-@node RSS Feeds, Protocols, Attachments, Capture - Refile - Archive
+@node RSS Feeds
 @section RSS feeds
 @cindex RSS feeds
 @cindex Atom feeds
@@ -7349,7 +7349,7 @@ list of drawers in that file:
 For more information, including how to read atom feeds, see
 @file{org-feed.el} and the docstring of @code{org-feed-alist}.
 
-@node Protocols, Refile and copy, RSS Feeds, Capture - Refile - Archive
+@node Protocols
 @section Protocols for external access
 @cindex protocols, for external access
 @cindex emacsserver
@@ -7363,7 +7363,7 @@ a remote website you are looking at with the browser.  See
 @uref{http://orgmode.org/worg/org-contrib/org-protocol.php} for detailed
 documentation and setup instructions.
 
-@node Refile and copy, Archiving, Protocols, Capture - Refile - Archive
+@node Refile and copy
 @section Refile and copy
 @cindex refiling notes
 @cindex copying notes
@@ -7420,7 +7420,7 @@ setting @code{org-refile-use-cache}.  To make the command see new possible
 targets, you have to clear the cache with this command.
 @end table
 
-@node Archiving,  , Refile and copy, Capture - Refile - Archive
+@node Archiving
 @section Archiving
 @cindex archiving
 
@@ -7441,7 +7441,7 @@ Archive the current entry using the command specified in the variable
 * Internal archiving::          Switch off a tree but keep it in the file
 @end menu
 
-@node Moving subtrees, Internal archiving, Archiving, Archiving
+@node Moving subtrees
 @subsection Moving a tree to the archive file
 @cindex external archiving
 
@@ -7498,7 +7498,7 @@ outline path the archiving time etc.  Configure the variable
 added.
 
 
-@node Internal archiving,  , Moving subtrees, Archiving
+@node Internal archiving
 @subsection Internal archiving
 
 If you want to just switch off (for agenda views) certain subtrees without
@@ -7561,7 +7561,7 @@ outline.
 @end table
 
 
-@node Agenda Views, Markup, Capture - Refile - Archive, Top
+@node Agenda Views
 @chapter Agenda views
 @cindex agenda views
 
@@ -7622,7 +7622,7 @@ window configuration is restored when the agenda exits:
 * Agenda column view::          Using column view for collected entries
 @end menu
 
-@node Agenda files, Agenda dispatcher, Agenda Views, Agenda Views
+@node Agenda files
 @section Agenda files
 @cindex agenda files
 @cindex files for agenda
@@ -7699,7 +7699,7 @@ effect immediately.
 Lift the restriction.
 @end table
 
-@node Agenda dispatcher, Built-in agenda views, Agenda files, Agenda Views
+@node Agenda dispatcher
 @section The agenda dispatcher
 @cindex agenda dispatcher
 @cindex dispatching agenda commands
@@ -7762,7 +7762,7 @@ possibility to create extended agenda buffers that contain several
 blocks together, for example the weekly agenda, the global TODO list and
 a number of special tags matches.  @xref{Custom agenda views}.
 
-@node Built-in agenda views, Presentation and sorting, Agenda dispatcher, Agenda Views
+@node Built-in agenda views
 @section The built-in agenda views
 
 In this section we describe the built-in views.
@@ -7776,7 +7776,7 @@ In this section we describe the built-in views.
 * Stuck projects::              Find projects you need to review
 @end menu
 
-@node Weekly/daily agenda, Global TODO list, Built-in agenda views, Built-in agenda views
+@node Weekly/daily agenda
 @subsection The weekly/daily agenda
 @cindex agenda
 @cindex weekly agenda
@@ -7915,7 +7915,7 @@ It also reads a @code{APPT_WARNTIME} property which will then override the
 value of @code{appt-message-warning-time} for this appointment.  See the
 docstring for details.
 
-@node Global TODO list, Matching tags and properties, Weekly/daily agenda, Built-in agenda views
+@node Global TODO list
 @subsection The global TODO list
 @cindex global TODO list
 @cindex TODO list, global
@@ -7976,7 +7976,7 @@ and omit the sublevels from the global list.  Configure the variable
 @code{org-agenda-todo-list-sublevels} to get this behavior.
 @end itemize
 
-@node Matching tags and properties, Timeline, Global TODO list, Built-in agenda views
+@node Matching tags and properties
 @subsection Matching tags and properties
 @cindex matching, of tags
 @cindex matching, of properties
@@ -8156,7 +8156,7 @@ Select @samp{:work:}-tagged TODO lines that are either @samp{WAITING} or
 @samp{NEXT}.
 @end table
 
-@node Timeline, Search view, Matching tags and properties, Built-in agenda views
+@node Timeline
 @subsection Timeline for a single file
 @cindex timeline, single file
 @cindex time-sorted view
@@ -8176,7 +8176,7 @@ When called with a @kbd{C-u} prefix, all unfinished TODO entries
 The commands available in the timeline buffer are listed in
 @ref{Agenda commands}.
 
-@node Search view, Stuck projects, Timeline, Built-in agenda views
+@node Search view
 @subsection Search view
 @cindex search view
 @cindex text search
@@ -8206,7 +8206,7 @@ the docstring of the command @code{org-search-view}.
 Note that in addition to the agenda files, this command will also search
 the files listed in @code{org-agenda-text-search-extra-files}.
 
-@node Stuck projects,  , Search view, Built-in agenda views
+@node Stuck projects
 @subsection Stuck projects
 @pindex GTD, Getting Things Done
 
@@ -8254,7 +8254,7 @@ correct customization for this is
 Note that if a project is identified as non-stuck, the subtree of this entry
 will still be searched for stuck projects.
 
-@node Presentation and sorting, Agenda commands, Built-in agenda views, Agenda Views
+@node Presentation and sorting
 @section Presentation and sorting
 @cindex presentation, of agenda items
 
@@ -8276,7 +8276,7 @@ associated with the item.
 * Filtering/limiting agenda items::  Dynamically narrow the agenda
 @end menu
 
-@node Categories, Time-of-day specifications, Presentation and sorting, Presentation and sorting
+@node Categories
 @subsection Categories
 
 @cindex category
@@ -8310,7 +8310,7 @@ longer than 10 characters.
 You can set up icons for category by customizing the
 @code{org-agenda-category-icon-alist} variable.
 
-@node Time-of-day specifications, Sorting agenda items, Categories, Presentation and sorting
+@node Time-of-day specifications
 @subsection Time-of-day specifications
 @cindex time-of-day specification
 
@@ -8361,7 +8361,7 @@ The time grid can be turned on and off with the variable
 @code{org-agenda-use-time-grid}, and can be configured with
 @code{org-agenda-time-grid}.
 
-@node Sorting agenda items, Filtering/limiting agenda items, Time-of-day specifications, Presentation and sorting
+@node Sorting agenda items
 @subsection Sorting agenda items
 @cindex sorting, of agenda items
 @cindex priorities, of agenda items
@@ -8395,7 +8395,7 @@ Sorting can be customized using the variable
 @code{org-agenda-sorting-strategy}, and may also include criteria based on
 the estimated effort of an entry (@pxref{Effort estimates}).
 
-@node Filtering/limiting agenda items,  , Sorting agenda items, Presentation and sorting
+@node Filtering/limiting agenda items
 @subsection Filtering/limiting agenda items
 
 Agenda built-in or customized commands are statically defined.  Agenda
@@ -8578,7 +8578,7 @@ are lost when rebuilding the agenda.}:
 This prompts for the type of limit to apply and its value.
 @end table
 
-@node Agenda commands, Custom agenda views, Presentation and sorting, Agenda Views
+@node Agenda commands
 @section Commands in the agenda buffer
 @cindex commands, in agenda buffer
 
@@ -9106,7 +9106,7 @@ visit Org files will not be removed.
 @end table
 
 
-@node Custom agenda views, Exporting Agenda Views, Agenda commands, Agenda Views
+@node Custom agenda views
 @section Custom agenda views
 @cindex custom agenda views
 @cindex agenda views, custom
@@ -9122,7 +9122,7 @@ dispatcher (@pxref{Agenda dispatcher}), just like the default commands.
 * Setting Options::             Changing the rules
 @end menu
 
-@node Storing searches, Block agenda, Custom agenda views, Custom agenda views
+@node Storing searches
 @subsection Storing searches
 
 The first application of custom searches is the definition of keyboard
@@ -9214,7 +9214,7 @@ Peter, or Kim) as additional tag to match.
 Note that the @code{*-tree} agenda views need to be called from an
 Org buffer as they operate on the current buffer only.
 
-@node Block agenda, Setting Options, Storing searches, Custom agenda views
+@node Block agenda
 @subsection Block agenda
 @cindex block agenda
 @cindex agenda, with block views
@@ -9248,7 +9248,7 @@ your agenda for the current week, all TODO items that carry the tag
 @samp{home}, and also all lines tagged with @samp{garden}.  Finally the
 command @kbd{C-c a o} provides a similar view for office tasks.
 
-@node Setting Options,  , Block agenda, Custom agenda views
+@node Setting Options
 @subsection Setting options for custom commands
 @cindex options, for custom agenda views
 
@@ -9341,7 +9341,7 @@ command key @code{"r"}.  In that case, add this command key like this:
 
 See the docstring of the variable for more information.
 
-@node Exporting Agenda Views, Agenda column view, Custom agenda views, Agenda Views
+@node Exporting Agenda Views
 @section Exporting Agenda Views
 @cindex agenda views, exporting
 
@@ -9480,7 +9480,7 @@ processing by other programs.  See @ref{Extracting agenda information}, for
 more information.
 
 
-@node Agenda column view,  , Exporting Agenda Views, Agenda Views
+@node Agenda column view
 @section Using column view in the agenda
 @cindex column view, in agenda
 @cindex agenda, column view
@@ -9544,7 +9544,7 @@ spent (via @code{CLOCKSUM}) and with the planned total effort for it.
 @end enumerate
 
 
-@node Markup, Exporting, Agenda Views, Top
+@node Markup
 @chapter Markup for rich export
 
 When exporting Org mode documents, the exporter tries to reflect the
@@ -9564,7 +9564,7 @@ markup rules used in an Org mode buffer.
 * Special blocks::              Containers targeted at export back-ends
 @end menu
 
-@node Structural markup elements, Images and tables, Markup, Markup
+@node Structural markup elements
 @section Structural markup elements
 
 @menu
@@ -9579,7 +9579,7 @@ markup rules used in an Org mode buffer.
 * Comment lines::               What will *not* be exported
 @end menu
 
-@node Document title, Headings and sections, Structural markup elements, Structural markup elements
+@node Document title
 @subheading Document title
 @cindex document title, markup rules
 
@@ -9600,7 +9600,7 @@ If you are exporting only a subtree, its heading will become the title of the
 document.  If the subtree has a property @code{EXPORT_TITLE}, that will take
 precedence.
 
-@node Headings and sections, Table of contents, Document title, Structural markup elements
+@node Headings and sections
 @subheading Headings and sections
 @cindex headings and sections, markup rules
 
@@ -9618,7 +9618,7 @@ per-file basis with a line
 #+OPTIONS: H:4
 @end example
 
-@node Table of contents, Lists, Headings and sections, Structural markup elements
+@node Table of contents
 @subheading Table of contents
 @cindex table of contents, markup rules
 
@@ -9661,7 +9661,7 @@ contents.  However, it is possible to specify an alternative title by
 setting @code{ALT_TITLE} property accordingly.  It will then be used when
 building the table.
 
-@node Lists, Paragraphs, Table of contents, Structural markup elements
+@node Lists
 @subheading Lists
 @cindex lists, markup rules
 
@@ -9669,7 +9669,7 @@ Plain lists as described in @ref{Plain lists}, are translated to the back-end's
 syntax for such lists.  Most back-ends support unordered, ordered, and
 description lists.
 
-@node Paragraphs, Footnote markup, Lists, Structural markup elements
+@node Paragraphs
 @subheading Paragraphs, line breaks, and quoting
 @cindex paragraphs, markup rules
 
@@ -9712,7 +9712,7 @@ but not any simpler
 @end example
 
 
-@node Footnote markup, Emphasis and monospace, Paragraphs, Structural markup elements
+@node Footnote markup
 @subheading Footnote markup
 @cindex footnotes, markup rules
 @cindex @file{footnote.el}
@@ -9721,7 +9721,7 @@ Footnotes defined in the way described in @ref{Footnotes}, will be exported
 by all back-ends.  Org allows multiple references to the same note, and
 multiple footnotes side by side.
 
-@node Emphasis and monospace, Horizontal rules, Footnote markup, Structural markup elements
+@node Emphasis and monospace
 @subheading Emphasis and monospace
 
 @cindex underlined text, markup rules
@@ -9746,13 +9746,13 @@ can tweak @code{org-emphasis-regexp-components}.  Beware that changing one of
 the above variables will no take effect until you reload Org, for which you
 may need to restart Emacs.
 
-@node Horizontal rules, Comment lines, Emphasis and monospace, Structural markup elements
+@node Horizontal rules
 @subheading  Horizontal rules
 @cindex horizontal rules, markup rules
 A line consisting of only dashes, and at least 5 of them, will be exported as
 a horizontal line.
 
-@node Comment lines,  , Horizontal rules, Structural markup elements
+@node Comment lines
 @subheading Comment lines
 @cindex comment lines
 @cindex exporting, not
@@ -9771,7 +9771,7 @@ Toggle the COMMENT keyword at the beginning of an entry.
 @end table
 
 
-@node Images and tables, Literal examples, Structural markup elements, Markup
+@node Images and tables
 @section Images and Tables
 
 @cindex tables, markup rules
@@ -9819,7 +9819,7 @@ the same caption mechanism can apply to many others (e.g., @LaTeX{}
 equations, source code blocks).  Depending on the export back-end, those may
 or may not be handled.
 
-@node Literal examples, Include files, Images and tables, Markup
+@node Literal examples
 @section Literal examples
 @cindex literal examples, markup rules
 @cindex code line references, markup rules
@@ -9935,7 +9935,7 @@ label is stored as a link @samp{(label)}, for retrieval with @kbd{C-c C-l}.
 @end table
 
 
-@node Include files, Index entries, Literal examples, Markup
+@node Include files
 @section Include files
 @cindex include files, markup rules
 
@@ -9983,7 +9983,7 @@ obvious defaults.
 Visit the include file at point.
 @end table
 
-@node Index entries, Macro replacement, Include files, Markup
+@node Index entries
 @section Index entries
 @cindex index entries, for publishing
 
@@ -10001,7 +10001,7 @@ an index} for more information.
 
 
 
-@node Macro replacement, Embedded @LaTeX{}, Index entries, Markup
+@node Macro replacement
 @section Macro replacement
 @cindex macro replacement, during export
 @cindex #+MACRO
@@ -10029,7 +10029,7 @@ and to the modification time of the file being exported, respectively.
 Macro expansion takes place during export.
 
 
-@node Embedded @LaTeX{}, Special blocks, Macro replacement, Markup
+@node Embedded @LaTeX{}
 @section Embedded @LaTeX{}
 @cindex @TeX{} interpretation
 @cindex @LaTeX{} interpretation
@@ -10052,7 +10052,7 @@ readily processed to produce pretty output for a number of export back-ends.
 * CDLaTeX mode::                Speed up entering of formulas
 @end menu
 
-@node Special symbols, Subscripts and superscripts, Embedded @LaTeX{}, Embedded @LaTeX{}
+@node Special symbols
 @subsection Special symbols
 @cindex math symbols
 @cindex special symbols
@@ -10100,7 +10100,7 @@ buffer content which remains plain ASCII, but it overlays the UTF-8 character
 for display purposes only.
 @end table
 
-@node Subscripts and superscripts, @LaTeX{} fragments, Special symbols, Embedded @LaTeX{}
+@node Subscripts and superscripts
 @subsection Subscripts and superscripts
 @cindex subscript
 @cindex superscript
@@ -10132,7 +10132,7 @@ In addition to showing entities as UTF-8 characters, this command will also
 format sub- and superscripts in a WYSIWYM way.
 @end table
 
-@node @LaTeX{} fragments, Previewing @LaTeX{} fragments, Subscripts and superscripts, Embedded @LaTeX{}
+@node @LaTeX{} fragments
 @subsection @LaTeX{} fragments
 @cindex @LaTeX{} fragments
 
@@ -10205,7 +10205,7 @@ lines:
 #+OPTIONS: tex:verbatim   @r{Verbatim export, for jsMath or so}
 @end example
 
-@node Previewing @LaTeX{} fragments, CDLaTeX mode, @LaTeX{} fragments, Embedded @LaTeX{}
+@node Previewing @LaTeX{} fragments
 @subsection Previewing @LaTeX{} fragments
 @cindex @LaTeX{} fragments, preview
 
@@ -10249,7 +10249,7 @@ To disable it, simply use
 #+STARTUP: nolatexpreview
 @end example
 
-@node CDLaTeX mode,  , Previewing @LaTeX{} fragments, Embedded @LaTeX{}
+@node CDLaTeX mode
 @subsection Using CD@LaTeX{} to enter math
 @cindex CD@LaTeX{}
 
@@ -10310,7 +10310,7 @@ modification will work only inside @LaTeX{} fragments; outside the quote
 is normal.
 @end itemize
 
-@node Special blocks,  , Embedded @LaTeX{}, Markup
+@node Special blocks
 @section Special blocks
 @cindex Special blocks
 
@@ -10325,7 +10325,7 @@ exporting a @samp{#+BEGIN_TEST} block, HTML back-end wraps its contents
 within @samp{<div name="test">} tag.  Refer to back-end specific
 documentation for more information.
 
-@node Exporting, Publishing, Markup, Top
+@node Exporting
 @chapter Exporting
 @cindex exporting
 
@@ -10361,7 +10361,7 @@ in the iCalendar format.
 * Advanced configuration::      Fine-tuning the export output
 @end menu
 
-@node The Export Dispatcher, Export back-ends, Exporting, Exporting
+@node The Export Dispatcher
 @section The Export Dispatcher
 @vindex org-export-dispatch-use-expert-ui
 @cindex Export, dispatcher
@@ -10430,7 +10430,7 @@ With the exception of asynchronous export, a successful export process writes
 its output to the kill-ring. You can configure this behavior by altering the
 option @code{org-export-copy-to-kill-ring}.
 
-@node Export back-ends, Export settings, The Export Dispatcher, Exporting
+@node Export back-ends
 @section Export back-ends
 @cindex Export, back-ends
 
@@ -10460,7 +10460,7 @@ Built-in back-ends include:
 Other back-ends might be found in the @code{contrib/} directory
 (@pxref{Installation}).
 
-@node Export settings, ASCII/Latin-1/UTF-8 export, Export back-ends, Exporting
+@node Export settings
 @section Export settings
 @cindex Export, settings
 
@@ -10714,7 +10714,7 @@ can become buffer-local during export by using the BIND keyword.  Its syntax
 is @samp{#+BIND: variable value}.  This is particularly useful for in-buffer
 settings that cannot be changed using specific keywords.
 
-@node ASCII/Latin-1/UTF-8 export, Beamer export, Export settings, Exporting
+@node ASCII/Latin-1/UTF-8 export
 @section ASCII/Latin-1/UTF-8 export
 @cindex ASCII export
 @cindex Latin-1 export
@@ -10778,7 +10778,7 @@ specified using an @code{ATTR_ASCII} line, directly preceding the rule.
 -----
 @end example
 
-@node Beamer export, HTML export, ASCII/Latin-1/UTF-8 export, Exporting
+@node Beamer export
 @section Beamer export
 @cindex Beamer export
 
@@ -10993,7 +10993,7 @@ Here is a simple example Org document that is intended for Beamer export.
     Please test this stuff!
 @end smallexample
 
-@node HTML export, @LaTeX{} and PDF export, Beamer export, Exporting
+@node HTML export
 @section HTML export
 @cindex HTML export
 
@@ -11015,7 +11015,7 @@ language, but with additional support for tables.
 * JavaScript support::          Info and Folding in a web browser
 @end menu
 
-@node HTML Export commands, HTML doctypes, HTML export, HTML export
+@node HTML Export commands
 @subsection HTML export commands
 
 @table @kbd
@@ -11043,7 +11043,7 @@ Export to a temporary buffer.  Do not create a file.
 @c @noindent
 @c creates two levels of headings and does the rest as items.
 
-@node HTML doctypes, HTML preamble and postamble, HTML Export commands, HTML export
+@node HTML doctypes
 @subsection HTML doctypes
 @vindex org-html-doctype
 @vindex org-html-doctype-alist
@@ -11134,7 +11134,7 @@ Headlines cannot appear within special blocks.  To wrap a headline and its
 contents in e.g. <section> or <article> tags, set the @code{HTML_CONTAINER}
 property on the headline itself.
 
-@node HTML preamble and postamble, Quoting HTML tags, HTML doctypes, HTML export
+@node HTML preamble and postamble
 @subsection HTML preamble and postamble
 @vindex org-html-preamble
 @vindex org-html-postamble
@@ -11162,7 +11162,7 @@ the creator and the date, and build the postamble from these values.  Setting
 relevant format string found in @code{org-html-postamble-format}.  Setting it
 to @code{nil} will not insert any postamble.
 
-@node Quoting HTML tags, Links in HTML export, HTML preamble and postamble, HTML export
+@node Quoting HTML tags
 @subsection Quoting HTML tags
 
 Plain @samp{<} and @samp{>} are always transformed to @samp{&lt;} and
@@ -11187,7 +11187,7 @@ All lines between these markers are exported literally
 @end example
 
 
-@node Links in HTML export, Tables in HTML export, Quoting HTML tags, HTML export
+@node Links in HTML export
 @subsection Links in HTML export
 
 @cindex links, in HTML export
@@ -11214,7 +11214,7 @@ and @code{style} attributes for a link:
 [[http://orgmode.org]]
 @end example
 
-@node Tables in HTML export, Images in HTML export, Links in HTML export, HTML export
+@node Tables in HTML export
 @subsection Tables
 @cindex tables, in HTML
 @vindex org-html-table-default-attributes
@@ -11236,7 +11236,7 @@ You can also modify the default tags used for each row by setting
 @code{org-html-table-row-tags}.  See the docstring for an example on
 how to use this option.
 
-@node Images in HTML export, Math formatting in HTML export, Tables in HTML export, HTML export
+@node Images in HTML export
 @subsection Images in HTML export
 
 @cindex images, inline in HTML
@@ -11273,7 +11273,7 @@ support text viewers and accessibility, and align it to the right.
 @noindent
 You could use @code{http} addresses just as well.
 
-@node Math formatting in HTML export, Text areas in HTML export, Images in HTML export, HTML export
+@node Math formatting in HTML export
 @subsection Math formatting in HTML export
 @cindex MathJax
 @cindex dvipng
@@ -11316,7 +11316,7 @@ or:
 #+OPTIONS: tex:imagemagick
 @end example
 
-@node Text areas in HTML export, CSS support, Math formatting in HTML export, HTML export
+@node Text areas in HTML export
 @subsection Text areas in HTML export
 
 @cindex text areas, in HTML
@@ -11339,7 +11339,7 @@ the example, and 80, respectively.  For example
 @end example
 
 
-@node CSS support, JavaScript support, Text areas in HTML export, HTML export
+@node CSS support
 @subsection CSS support
 @cindex CSS, for HTML export
 @cindex HTML export, CSS
@@ -11420,7 +11420,7 @@ property.
 @c FIXME: More about header and footer styles
 @c FIXME: Talk about links and targets.
 
-@node JavaScript support,  , CSS support, HTML export
+@node JavaScript support
 @subsection JavaScript supported display of web pages
 
 @cindex Rose, Sebastian
@@ -11484,7 +11484,7 @@ You can choose default values for these options by customizing the variable
 @code{org-html-infojs-options}.  If you always want to apply the script to your
 pages, configure the variable @code{org-html-use-infojs}.
 
-@node @LaTeX{} and PDF export, Markdown export, HTML export, Exporting
+@node @LaTeX{} and PDF export
 @section @LaTeX{} and PDF export
 @cindex @LaTeX{} export
 @cindex PDF export
@@ -11516,7 +11516,7 @@ description.
 * @LaTeX{} specific attributes::  Controlling @LaTeX{} output
 @end menu
 
-@node @LaTeX{} export commands, Header and sectioning, @LaTeX{} and PDF export, @LaTeX{} and PDF export
+@node @LaTeX{} export commands
 @subsection @LaTeX{} export commands
 
 @table @kbd
@@ -11532,7 +11532,7 @@ Export as @LaTeX{} and then process to PDF.
 Export as @LaTeX{} and then process to PDF, then open the resulting PDF file.
 @end table
 
-@node Header and sectioning, Quoting @LaTeX{} code, @LaTeX{} export commands, @LaTeX{} and PDF export
+@node Header and sectioning
 @subsection Header and sectioning structure
 @cindex @LaTeX{} class
 @cindex @LaTeX{} sectioning structure
@@ -11590,7 +11590,7 @@ An example is shown below.
   some text
 @end example
 
-@node Quoting @LaTeX{} code, @LaTeX{} specific attributes, Header and sectioning, @LaTeX{} and PDF export
+@node Quoting @LaTeX{} code
 @subsection Quoting @LaTeX{} code
 
 Embedded @LaTeX{} as described in @ref{Embedded @LaTeX{}}, will be correctly
@@ -11609,7 +11609,7 @@ All lines between these markers are exported literally
 #+END_LATEX
 @end example
 
-@node @LaTeX{} specific attributes,  , Quoting @LaTeX{} code, @LaTeX{} and PDF export
+@node @LaTeX{} specific attributes
 @subsection @LaTeX{} specific attributes
 @cindex #+ATTR_LATEX
 
@@ -11856,7 +11856,7 @@ respectively, @code{:width} and @code{:thickness} attributes:
 -----
 @end example
 
-@node Markdown export, OpenDocument Text export, @LaTeX{} and PDF export, Exporting
+@node Markdown export
 @section Markdown export
 @cindex Markdown export
 
@@ -11892,7 +11892,7 @@ that one (@pxref{Export settings}).
 
 @c begin opendocument
 
-@node OpenDocument Text export, iCalendar export, Markdown export, Exporting
+@node OpenDocument Text export
 @section OpenDocument Text export
 @cindex ODT
 @cindex OpenDocument
@@ -11920,13 +11920,13 @@ are compatible with LibreOffice 3.4.
 * Advanced topics in ODT export::  Read this if you are a power user
 @end menu
 
-@node Pre-requisites for ODT export, ODT export commands, OpenDocument Text export, OpenDocument Text export
+@node Pre-requisites for ODT export
 @subsection Pre-requisites for ODT export
 @cindex zip
 The ODT exporter relies on the @file{zip} program to create the final
 output.  Check the availability of this program before proceeding further.
 
-@node ODT export commands, Extending ODT export, Pre-requisites for ODT export, OpenDocument Text export
+@node ODT export commands
 @subsection ODT export commands
 
 @subsubheading Exporting to ODT
@@ -11964,7 +11964,7 @@ file instead.  @xref{x-export-to-other-formats, , Automatically exporting to
 other formats}.
 @end table
 
-@node Extending ODT export, Applying custom styles, ODT export commands, OpenDocument Text export
+@node Extending ODT export
 @subsection Extending ODT export
 
 The ODT exporter can interface with a variety of document
@@ -12011,7 +12011,7 @@ Convert an existing document from one format to another.  With a prefix
 argument, also open the newly produced file.
 @end table
 
-@node Applying custom styles, Links in ODT export, Extending ODT export, OpenDocument Text export
+@node Applying custom styles
 @subsection Applying custom styles
 @cindex styles, custom
 @cindex template, custom
@@ -12072,7 +12072,7 @@ met, the output is going to be less than satisfactory.  So it is highly
 recommended that you only work with templates that are directly derived from
 the factory settings.
 
-@node Links in ODT export, Tables in ODT export, Applying custom styles, OpenDocument Text export
+@node Links in ODT export
 @subsection Links in ODT export
 @cindex links, in ODT export
 
@@ -12086,7 +12086,7 @@ A @samp{\ref@{label@}}-style reference to an image, table etc. is replaced
 with a cross-reference and sequence number of the labeled entity.
 @xref{Labels and captions in ODT export}.
 
-@node Tables in ODT export, Images in ODT export, Links in ODT export, OpenDocument Text export
+@node Tables in ODT export
 @subsection Tables in ODT export
 @cindex tables, in ODT export
 
@@ -12132,7 +12132,7 @@ If you are not satisfied with the above formatting options, you can create
 custom table styles and associate them with a table using the
 @code{#+ATTR_ODT} line.  @xref{Customizing tables in ODT export}.
 
-@node Images in ODT export, Math formatting in ODT export, Tables in ODT export, OpenDocument Text export
+@node Images in ODT export
 @subsection Images in ODT export
 @cindex images, embedding in ODT
 @cindex embedding images in ODT
@@ -12233,7 +12233,7 @@ To create an image that is anchored to a page, do the following:
 [[./img.png]]
 @end example
 
-@node Math formatting in ODT export, Labels and captions in ODT export, Images in ODT export, OpenDocument Text export
+@node Math formatting in ODT export
 @subsection Math formatting in ODT export
 
 The ODT exporter has special support for handling math.
@@ -12243,7 +12243,7 @@ The ODT exporter has special support for handling math.
 * Working with MathML or OpenDocument formula files::  How to embed equations in native format
 @end menu
 
-@node Working with @LaTeX{} math snippets, Working with MathML or OpenDocument formula files, Math formatting in ODT export, Math formatting in ODT export
+@node Working with @LaTeX{} math snippets
 @subsubsection Working with @LaTeX{} math snippets
 
 @LaTeX{} math snippets (@pxref{@LaTeX{} fragments}) can be embedded in the ODT
@@ -12316,7 +12316,7 @@ that the @file{dvipng} program or @file{imagemagick} suite be available on
 your system.
 @end enumerate
 
-@node Working with MathML or OpenDocument formula files,  , Working with @LaTeX{} math snippets, Math formatting in ODT export
+@node Working with MathML or OpenDocument formula files
 @subsubsection Working with MathML or OpenDocument formula files
 
 For various reasons, you may find embedding @LaTeX{} math snippets in an
@@ -12334,7 +12334,7 @@ or
 [[./equation.odf]]
 @end example
 
-@node Labels and captions in ODT export, Literal examples in ODT export, Math formatting in ODT export, OpenDocument Text export
+@node Labels and captions in ODT export
 @subsection Labels and captions in ODT export
 
 You can label and caption various category of objects---an inline image, a
@@ -12378,7 +12378,7 @@ document.
 Illustration 2: Bell curve
 @end example
 
-@node Literal examples in ODT export, Advanced topics in ODT export, Labels and captions in ODT export, OpenDocument Text export
+@node Literal examples in ODT export
 @subsection Literal examples in ODT export
 
 Export of literal examples (@pxref{Literal examples}) with full fontification
@@ -12398,7 +12398,7 @@ so by customizing the option
 You can turn off fontification of literal examples by customizing the
 option @code{org-odt-fontify-srcblocks}.
 
-@node Advanced topics in ODT export,  , Literal examples in ODT export, OpenDocument Text export
+@node Advanced topics in ODT export
 @subsection Advanced topics in ODT export
 
 If you rely heavily on ODT export, you may want to exploit the full
@@ -12413,7 +12413,7 @@ that would be of interest to power users.
 * Validating OpenDocument XML::  How to debug corrupt OpenDocument files
 @end menu
 
-@node Configuring a document converter, Working with OpenDocument style files, Advanced topics in ODT export, Advanced topics in ODT export
+@node Configuring a document converter
 @subsubsection Configuring a document converter
 @cindex convert
 @cindex doc, docx, rtf
@@ -12450,7 +12450,7 @@ Select the newly added converter as the preferred one by customizing the
 option @code{org-odt-convert-process}.
 @end enumerate
 
-@node Working with OpenDocument style files, Creating one-off styles, Configuring a document converter, Advanced topics in ODT export
+@node Working with OpenDocument style files
 @subsubsection Working with OpenDocument style files
 @cindex styles, custom
 @cindex template, custom
@@ -12554,7 +12554,7 @@ Use this variable to specify the blank @file{content.xml} that will be used
 in the final output.
 @end itemize
 
-@node Creating one-off styles, Customizing tables in ODT export, Working with OpenDocument style files, Advanced topics in ODT export
+@node Creating one-off styles
 @subsubsection Creating one-off styles
 
 There are times when you would want one-off formatting in the exported
@@ -12621,7 +12621,7 @@ This paragraph is specially formatted and uses bold text.
 
 @end enumerate
 
-@node Customizing tables in ODT export, Validating OpenDocument XML, Creating one-off styles, Advanced topics in ODT export
+@node Customizing tables in ODT export
 @subsubsection Customizing tables in ODT export
 @cindex tables, in ODT export
 
@@ -12787,7 +12787,7 @@ the @code{ATTR_ODT} line as shown below.
 @end example
 @end enumerate
 
-@node Validating OpenDocument XML,  , Customizing tables in ODT export, Advanced topics in ODT export
+@node Validating OpenDocument XML
 @subsubsection Validating OpenDocument XML
 
 Occasionally, you will discover that the document created by the
@@ -12809,7 +12809,7 @@ will take care of updating the @code{rng-schema-locating-files} for you.
 
 @c end opendocument
 
-@node iCalendar export, Other built-in back-ends, OpenDocument Text export, Exporting
+@node iCalendar export
 @section iCalendar export
 @cindex iCalendar export
 
@@ -12878,7 +12878,7 @@ and the description from the body (limited to
 How this calendar is best read and updated, depends on the application
 you are using.  The FAQ covers this issue.
 
-@node Other built-in back-ends, Export in foreign buffers, iCalendar export, Exporting
+@node Other built-in back-ends
 @section Other built-in back-ends
 @cindex export back-ends, built-in
 @vindex org-export-backends
@@ -12898,7 +12898,7 @@ new keys in the export dispatcher (@pxref{The Export Dispatcher}).
 See the comment section of these files for more information on how to use
 them.
 
-@node Export in foreign buffers, Advanced configuration, Other built-in back-ends, Exporting
+@node Export in foreign buffers
 @section Export in foreign buffers
 
 Most built-in back-ends come with a command to convert the selected region
@@ -12921,7 +12921,7 @@ buffers.  E.g., in a HTML buffer, you can turn on @code{orgstruct-mode}, then
 use Org commands for editing a list, and finally select and convert the list
 with @code{M-x org-html-convert-region-to-html RET}.
 
-@node Advanced configuration,  , Export in foreign buffers, Exporting
+@node Advanced configuration
 @section Advanced configuration
 
 @subheading Hooks
@@ -13125,7 +13125,7 @@ It is obviously possible to write an interactive function for this, install
 it in the export dispatcher menu, and so on.
 
 
-@node Publishing, Working With Source Code, Exporting, Top
+@node Publishing
 @chapter Publishing
 @cindex publishing
 
@@ -13147,7 +13147,7 @@ Publishing has been contributed to Org by David O'Toole.
 * Triggering publication::      Publication commands
 @end menu
 
-@node Configuration, Uploading files, Publishing, Publishing
+@node Configuration
 @section Configuration
 
 Publishing needs significant configuration to specify files, destination
@@ -13164,7 +13164,7 @@ and many other properties of a project.
 * Generating an index::         An index that reaches across pages
 @end menu
 
-@node Project alist, Sources and destinations, Configuration, Configuration
+@node Project alist
 @subsection The variable @code{org-publish-project-alist}
 @cindex org-publish-project-alist
 @cindex projects, for publishing
@@ -13191,7 +13191,7 @@ together files requiring different publishing options.  When you publish such
 a ``meta-project'', all the components will also be published, in the
 sequence given.
 
-@node Sources and destinations, Selecting files, Project alist, Configuration
+@node Sources and destinations
 @subsection Sources and destinations for files
 @cindex directories, for publishing
 
@@ -13220,7 +13220,7 @@ project property list is scoped into this call as the variable
 @end multitable
 @noindent
 
-@node Selecting files, Publishing action, Sources and destinations, Configuration
+@node Selecting files
 @subsection Selecting files
 @cindex files, selecting for publishing
 
@@ -13246,7 +13246,7 @@ and @code{:exclude}.
 @tab non-@code{nil} means, check base-directory recursively for files to publish.
 @end multitable
 
-@node Publishing action, Publishing options, Selecting files, Configuration
+@node Publishing action
 @subsection Publishing action
 @cindex action, for publishing
 
@@ -13285,7 +13285,7 @@ and the path to the publishing directory of the output file.  It should take
 the specified file, make the necessary transformation (if any) and place the
 result into the destination folder.
 
-@node Publishing options, Publishing links, Publishing action, Configuration
+@node Publishing options
 @subsection Options for the exporters
 @cindex options, for publishing
 
@@ -13394,7 +13394,7 @@ setting overrides the value of the corresponding user variable (if any)
 during publishing.  Options set within a file (@pxref{Export settings}),
 however, override everything.
 
-@node Publishing links, Sitemap, Publishing options, Configuration
+@node Publishing links
 @subsection Links between published files
 @cindex links, publishing
 
@@ -13412,7 +13412,7 @@ with relative file names, and provided you have also configured Org to upload
 the related files, these links will work too.  See @ref{Complex example}, for
 an example of this usage.
 
-@node Sitemap, Generating an index, Publishing links, Configuration
+@node Sitemap
 @subsection Generating a sitemap
 @cindex sitemap, of published pages
 
@@ -13472,7 +13472,7 @@ Defaults to @code{nil}.
 
 @end multitable
 
-@node Generating an index,  , Sitemap, Configuration
+@node Generating an index
 @subsection Generating an index
 @cindex index, in a publishing project
 
@@ -13489,7 +13489,7 @@ The file will be created when first publishing a project with the
 "theindex.inc"}.  You can then build around this include statement by adding
 a title, style information, etc.
 
-@node Uploading files, Sample configuration, Configuration, Publishing
+@node Uploading files
 @section Uploading files
 @cindex rsync
 @cindex unison
@@ -13522,7 +13522,7 @@ benefit of re-including any changed external files such as source example
 files you might include with @code{#+INCLUDE:}.  The timestamp mechanism in
 Org is not smart enough to detect if included files have been modified.
 
-@node Sample configuration, Triggering publication, Uploading files, Publishing
+@node Sample configuration
 @section Sample configuration
 
 Below we provide two example configurations.  The first one is a simple
@@ -13534,7 +13534,7 @@ more complex, with a multi-component project.
 * Complex example::             A multi-component publishing example
 @end menu
 
-@node Simple example, Complex example, Sample configuration, Sample configuration
+@node Simple example
 @subsection Example: simple publishing configuration
 
 This example publishes a set of Org files to the @file{public_html}
@@ -13552,7 +13552,7 @@ directory on the local machine.
                     type=\"text/css\"/>")))
 @end lisp
 
-@node Complex example,  , Simple example, Sample configuration
+@node Complex example
 @subsection Example: complex publishing configuration
 
 This more complicated example publishes an entire website, including
@@ -13602,7 +13602,7 @@ right place on the web server, and publishing images to it.
          ("website" :components ("orgfiles" "images" "other"))))
 @end lisp
 
-@node Triggering publication,  , Sample configuration, Publishing
+@node Triggering publication
 @section Triggering publication
 
 Once properly configured, Org can publish with the following commands:
@@ -13629,7 +13629,7 @@ This may be necessary in particular if files include other files via
 @comment  node-name,  next,  previous,  up
 @comment Working With Source Code, Miscellaneous, Publishing, Top
 
-@node Working With Source Code, Miscellaneous, Publishing, Top
+@node Working With Source Code
 @chapter Working with source code
 @cindex Schulte, Eric
 @cindex Davison, Dan
@@ -13673,7 +13673,7 @@ The following sections describe Org mode's code block handling facilities.
 @comment  node-name,  next,  previous,  up
 @comment  Structure of code blocks, Editing source code, Working With Source Code, Working With Source Code
 
-@node Structure of code blocks, Editing source code, Working With Source Code, Working With Source Code
+@node Structure of code blocks
 @section Structure of code blocks
 @cindex code block, structure
 @cindex source code, block structure
@@ -13738,7 +13738,7 @@ Source code in the specified language.
 @comment  node-name,  next,  previous,  up
 @comment  Editing source code, Exporting code blocks, Structure of code blocks, Working With Source Code
 
-@node Editing source code, Exporting code blocks, Structure of code blocks, Working With Source Code
+@node Editing source code
 @section Editing source code
 @cindex code block, editing
 @cindex source code, editing
@@ -13781,7 +13781,7 @@ variable @code{org-src-fontify-natively}.
 @comment  node-name,  next,  previous,  up
 @comment  Exporting code blocks, Extracting source code, Editing source code, Working With Source Code
 
-@node Exporting code blocks, Extracting source code, Editing source code, Working With Source Code
+@node Exporting code blocks
 @section Exporting code blocks
 @cindex code block, exporting
 @cindex source code, exporting
@@ -13828,7 +13828,7 @@ export, not to provide security.
 
 @comment  node-name,  next,  previous,  up
 @comment  Extracting source code, Evaluating code blocks, Exporting code blocks, Working With Source Code
-@node Extracting source code, Evaluating code blocks, Exporting code blocks, Working With Source Code
+@node Extracting source code
 @section Extracting source code
 @cindex tangling
 @cindex source code, extracting
@@ -13889,7 +13889,7 @@ to true (the default setting), second the @code{comments} (@ref{comments})
 header argument must be set to @code{links}, which will insert comments into
 the source code buffer which point back to the original Org-mode file.
 
-@node Evaluating code blocks, Library of Babel, Extracting source code, Working With Source Code
+@node Evaluating code blocks
 @section Evaluating code blocks
 @cindex code block, evaluating
 @cindex source code, evaluating
@@ -13967,7 +13967,7 @@ For more examples of passing header arguments to @code{#+CALL:} lines see
 @ref{Header arguments in function calls}.
 @end table
 
-@node Library of Babel, Languages, Evaluating code blocks, Working With Source Code
+@node Library of Babel
 @section Library of Babel
 @cindex babel, library of
 @cindex source code, library
@@ -13992,7 +13992,7 @@ Code blocks located in any Org mode file can be loaded into the ``Library of
 Babel'' with the @code{org-babel-lob-ingest} function, bound to @kbd{C-c C-v
 i}.
 
-@node Languages, Header arguments, Library of Babel, Working With Source Code
+@node Languages
 @section Languages
 @cindex babel, languages
 @cindex source code, languages
@@ -14054,7 +14054,7 @@ The following adds support for evaluating @code{clojure} code blocks.
 (require 'ob-clojure)
 @end lisp
 
-@node Header arguments, Results of evaluation, Languages, Working With Source Code
+@node Header arguments
 @section Header arguments
 @cindex code block, header arguments
 @cindex source code, block header arguments
@@ -14068,7 +14068,7 @@ describes each header argument in detail.
 * Specific header arguments::   List of header arguments
 @end menu
 
-@node Using header arguments, Specific header arguments, Header arguments, Header arguments
+@node Using header arguments
 @subsection Using header arguments
 
 The values of header arguments can be set in several way.  When the header
@@ -14086,7 +14086,7 @@ priority replaces the same header argument specified at lower priority.
 @end menu
 
 
-@node System-wide header arguments, Language-specific header arguments, Using header arguments, Using header arguments
+@node System-wide header arguments
 @subsubheading System-wide header arguments
 @vindex org-babel-default-header-args
 System-wide values of header arguments can be specified by adapting the
@@ -14111,14 +14111,14 @@ blocks.
             (assq-delete-all :noweb org-babel-default-header-args)))
 @end lisp
 
-@node Language-specific header arguments, Header arguments in Org mode properties, System-wide header arguments, Using header arguments
+@node Language-specific header arguments
 @subsubheading Language-specific header arguments
 Each language can define its own set of default header arguments in variable
 @code{org-babel-default-header-args:<lang>}, where @code{<lang>} is the name
 of the language.  See the language-specific documentation available online at
 @uref{http://orgmode.org/worg/org-contrib/babel}.
 
-@node Header arguments in Org mode properties, Language-specific header arguments in Org mode properties, Language-specific header arguments, Using header arguments
+@node Header arguments in Org mode properties
 @subsubheading Header arguments in Org mode properties
 
 Buffer-wide header arguments may be specified as properties through the use
@@ -14165,7 +14165,7 @@ Properties defined in this way override the properties set in
 languages.  It is convenient to use the @code{org-set-property} function
 bound to @kbd{C-c C-x p} to set properties in Org mode documents.
 
-@node Language-specific header arguments in Org mode properties, Code block specific header arguments, Header arguments in Org mode properties, Using header arguments
+@node Language-specific header arguments in Org mode properties
 @subsubheading Language-specific header arguments in Org mode properties
 
 Language-specific header arguments are also read from properties
@@ -14189,7 +14189,7 @@ for calls and source blocks under subtree ``Heading'' and change to a
 different clojure setting for evaluations under subtree ``Subheading'', while
 the R session is inherited from ``Heading'' and therefore unchanged.
 
-@node Code block specific header arguments, Header arguments in function calls, Language-specific header arguments in Org mode properties, Using header arguments
+@node Code block specific header arguments
 @subsubheading Code block specific header arguments
 
 The most common way to assign values to header arguments is at the
@@ -14247,7 +14247,7 @@ Multi-line header arguments on a named code block:
    : data:2
 @end example
 
-@node Header arguments in function calls,  , Code block specific header arguments, Using header arguments
+@node Header arguments in function calls
 @comment  node-name,  next,  previous,  up
 @subsubheading Header arguments in function calls
 
@@ -14270,7 +14270,7 @@ evaluation of the @code{factorial} code block.
 #+CALL: factorial[:session special](n=5)
 @end example
 
-@node Specific header arguments,  , Using header arguments, Header arguments
+@node Specific header arguments
 @subsection Specific header arguments
 Header arguments consist of an initial colon followed by the name of the
 argument in lowercase letters.  The following header arguments are defined:
@@ -14314,7 +14314,7 @@ argument in lowercase letters.  The following header arguments are defined:
 Additional header arguments are defined on a language-specific basis, see
 @ref{Languages}.
 
-@node var, results, Specific header arguments, Specific header arguments
+@node var
 @subsubsection @code{:var}
 The @code{:var} header argument is used to pass arguments to code blocks.
 The specifics of how arguments are included in a code block vary by language;
@@ -14568,7 +14568,7 @@ Emacs Lisp, as shown in the following example.
 : (a b c)
 @end example
 
-@node results, file, var, Specific header arguments
+@node results
 @subsubsection @code{:results}
 
 There are four classes of @code{:results} header argument.  Only one option
@@ -14687,7 +14687,7 @@ be prepended to the existing results.  Otherwise the new results will be
 inserted as with @code{replace}.
 @end itemize
 
-@node file, file-desc, results, Specific header arguments
+@node file
 @subsubsection @code{:file}
 
 The header argument @code{:file} is used to specify an external file in which
@@ -14703,7 +14703,7 @@ The argument to @code{:file} should be either a string specifying the path to
 a file, or a list of two strings in which case the first element of the list
 should be the path to a file and the second a description for the link.
 
-@node file-desc, dir, file, Specific header arguments
+@node file-desc
 @subsubsection @code{:file-desc}
 
 The value of the @code{:file-desc} header argument is used to provide a
@@ -14712,7 +14712,7 @@ description for file code block results which are inserted as Org mode links
 with no value the link path will be placed in both the ``link'' and the
 ``description'' portion of the Org mode link.
 
-@node dir, exports, file-desc, Specific header arguments
+@node dir
 @subsubsection @code{:dir} and remote execution
 
 While the @code{:file} header argument can be used to specify the path to the
@@ -14780,7 +14780,7 @@ directory}.  Therefore, if @code{default-directory} is altered using
 which the link does not point.
 @end itemize
 
-@node exports, tangle, dir, Specific header arguments
+@node exports
 @subsubsection @code{:exports}
 
 The @code{:exports} header argument specifies what should be included in HTML
@@ -14800,7 +14800,7 @@ Both the code and results are included in the exported file.  E.g.,
 Nothing is included in the exported file.  E.g., @code{:exports none}.
 @end itemize
 
-@node tangle, mkdirp, exports, Specific header arguments
+@node tangle
 @subsubsection @code{:tangle}
 
 The @code{:tangle} header argument specifies whether or not the code
@@ -14820,14 +14820,14 @@ as a path (directory and file name relative to the directory of the Org mode
 file) to which the block will be exported.  E.g., @code{:tangle path}.
 @end itemize
 
-@node mkdirp, comments, tangle, Specific header arguments
+@node mkdirp
 @subsubsection @code{:mkdirp}
 
 The @code{:mkdirp} header argument can be used to create parent directories
 of tangled files when missing.  This can be set to @code{yes} to enable
 directory creation or to @code{no} to inhibit directory creation.
 
-@node comments, padline, mkdirp, Specific header arguments
+@node comments
 @subsubsection @code{:comments}
 By default code blocks are tangled to source-code files without any insertion
 of comments beyond those which may already exist in the body of the code
@@ -14853,7 +14853,7 @@ Turns on the ``link'' comment option, and additionally wraps expanded noweb
 references in the code block body in link comments.
 @end itemize
 
-@node padline, no-expand, comments, Specific header arguments
+@node padline
 @subsubsection @code{:padline}
 Control in insertion of padding lines around code block bodies in tangled
 code files.  The default value is @code{yes} which results in insertion of
@@ -14867,7 +14867,7 @@ Insert newlines before and after each code block body in tangled code files.
 Do not insert any newline padding in tangled output.
 @end itemize
 
-@node no-expand, session, padline, Specific header arguments
+@node no-expand
 @subsubsection @code{:no-expand}
 
 By default, code blocks are expanded with @code{org-babel-expand-src-block}
@@ -14876,7 +14876,7 @@ specified with @code{:var} (see @ref{var}), and of replacing ``noweb''
 references (see @ref{Noweb reference syntax}) with their targets.  The
 @code{:no-expand} header argument can be used to turn off this behavior.
 
-@node session, noweb, no-expand, Specific header arguments
+@node session
 @subsubsection @code{:session}
 
 The @code{:session} header argument starts a session for an interpreted
@@ -14888,7 +14888,7 @@ A string passed to the @code{:session} header argument will give the session
 a name.  This makes it possible to run concurrent sessions for each
 interpreted language.
 
-@node noweb, noweb-ref, session, Specific header arguments
+@node noweb
 @subsubsection @code{:noweb}
 
 The @code{:noweb} header argument controls expansion of ``noweb'' syntax
@@ -14945,7 +14945,7 @@ Note that noweb replacement text that does not contain any newlines will not
 be affected by this change, so it is still possible to use inline noweb
 references.
 
-@node noweb-ref, noweb-sep, noweb, Specific header arguments
+@node noweb-ref
 @subsubsection @code{:noweb-ref}
 When expanding ``noweb'' style references the bodies of all code block with
 @emph{either} a block name matching the reference name @emph{or} a
@@ -14993,14 +14993,14 @@ The @code{:noweb-sep} (see @ref{noweb-sep}) header argument holds the string
 used to separate accumulate noweb references like those above.  By default a
 newline is used.
 
-@node noweb-sep, cache, noweb-ref, Specific header arguments
+@node noweb-sep
 @subsubsection @code{:noweb-sep}
 
 The @code{:noweb-sep} header argument holds the string used to separate
 accumulate noweb references (see @ref{noweb-ref}).  By default a newline is
 used.
 
-@node cache, sep, noweb-sep, Specific header arguments
+@node cache
 @subsubsection @code{:cache}
 
 The @code{:cache} header argument controls the use of in-buffer caching of
@@ -15047,7 +15047,7 @@ changed since it was last run.
  0.254227238707244
 @end example
 
-@node sep, hlines, cache, Specific header arguments
+@node sep
 @subsubsection @code{:sep}
 
 The @code{:sep} header argument can be used to control the delimiter used
@@ -15060,7 +15060,7 @@ header argument.
 By default, when @code{:sep} is not specified output tables are tab
 delimited.
 
-@node hlines, colnames, sep, Specific header arguments
+@node hlines
 @subsubsection @code{:hlines}
 
 Tables are frequently represented with one or more horizontal lines, or
@@ -15118,7 +15118,7 @@ Leaves hlines in the table.  Setting @code{:hlines yes} has this effect.
 @end example
 @end itemize
 
-@node colnames, rownames, hlines, Specific header arguments
+@node colnames
 @subsubsection @code{:colnames}
 
 The @code{:colnames} header argument accepts the values @code{yes},
@@ -15164,7 +15164,7 @@ does not ``look like'' it has column names (i.e., the second row is not an
 hline)
 @end itemize
 
-@node rownames, shebang, colnames, Specific header arguments
+@node rownames
 @subsubsection @code{:rownames}
 
 The @code{:rownames} header argument can take on the values @code{yes} or
@@ -15200,7 +15200,7 @@ variable indexing @xref{var, Indexable variable values}.
 
 @end itemize
 
-@node shebang, tangle-mode, rownames, Specific header arguments
+@node shebang
 @subsubsection @code{:shebang}
 
 Setting the @code{:shebang} header argument to a string value
@@ -15209,7 +15209,7 @@ first line of any tangled file holding the code block, and the file
 permissions of the tangled file are set to make it executable.
 
 
-@node tangle-mode, eval, shebang, Specific header arguments
+@node tangle-mode
 @subsubsection @code{:tangle-mode}
 
 The @code{tangle-mode} header argument controls the permission set on tangled
@@ -15222,7 +15222,7 @@ the @code{tangle-mode} header argument is also used.  The behavior is
 undefined if multiple code blocks with different values for the
 @code{tangle-mode} header argument are tangled to the same file.
 
-@node eval, wrap, tangle-mode, Specific header arguments
+@node eval
 @subsubsection @code{:eval}
 The @code{:eval} header argument can be used to limit the evaluation of
 specific code blocks.  The @code{:eval} header argument can be useful for
@@ -15247,7 +15247,7 @@ If this header argument is not set then evaluation is determined by the value
 of the @code{org-confirm-babel-evaluate} variable see @ref{Code evaluation
 security}.
 
-@node wrap, post, eval, Specific header arguments
+@node wrap
 @subsubsection @code{:wrap}
 The @code{:wrap} header argument is used to mark the results of source block
 evaluation.  The header argument can be passed a string that will be appended
@@ -15255,7 +15255,7 @@ to @code{#+BEGIN_} and @code{#+END_}, which will then be used to wrap the
 results.  If not string is specified then the results will be wrapped in a
 @code{#+BEGIN/END_RESULTS} block.
 
-@node post, prologue, wrap, Specific header arguments
+@node post
 @subsubsection @code{:post}
 The @code{:post} header argument is used to post-process the results of a
 code block execution.  When a post argument is given, the results of the code
@@ -15290,7 +15290,7 @@ argument.
 :END:
 @end example
 
-@node prologue, epilogue, post, Specific header arguments
+@node prologue
 @subsubsection @code{:prologue}
 The value of the @code{prologue} header argument will be prepended to the
 code block body before execution.  For example, @code{:prologue "reset"} may
@@ -15303,12 +15303,12 @@ code blocks.  Also see @ref{epilogue}.
              '((:prologue . "reset")))
 @end lisp
 
-@node epilogue, , prologue, Specific header arguments
+@node epilogue
 @subsubsection @code{:epilogue}
 The value of the @code{epilogue} header argument will be appended to the code
 block body before execution.  Also see @ref{prologue}.
 
-@node Results of evaluation, Noweb reference syntax, Header arguments, Working With Source Code
+@node Results of evaluation
 @section Results of evaluation
 @cindex code block, results of evaluation
 @cindex source code, results of evaluation
@@ -15401,7 +15401,7 @@ But in @code{:session} mode, the interactive interpreter receives input `2'
 and prints out its value, `2'.  (Indeed, the other print statements are
 unnecessary here).
 
-@node Noweb reference syntax, Key bindings and useful functions, Results of evaluation, Working With Source Code
+@node Noweb reference syntax
 @section Noweb reference syntax
 @cindex code block, noweb reference
 @cindex syntax, noweb
@@ -15442,7 +15442,7 @@ This will result in faster noweb reference resolution at the expense of not
 correctly resolving inherited values of the @code{:noweb-ref} header
 argument.
 
-@node Key bindings and useful functions, Batch execution, Noweb reference syntax, Working With Source Code
+@node Key bindings and useful functions
 @section Key bindings and useful functions
 @cindex code block, key bindings
 
@@ -15548,7 +15548,7 @@ In an Org mode buffer, the following key bindings are active:
 @c @item @kbd{C-c C-v C-z} @tab @code{org-babel-switch-to-session}
 @c @end multitable
 
-@node Batch execution,  , Key bindings and useful functions, Working With Source Code
+@node Batch execution
 @section Batch execution
 @cindex code block, batch execution
 @cindex source code, batch execution
@@ -15583,7 +15583,7 @@ emacs -Q --batch \
        (kill-buffer)) '($FILES)))" 2>&1 |grep tangled
 @end example
 
-@node Miscellaneous, Hacking, Working With Source Code, Top
+@node Miscellaneous
 @chapter Miscellaneous
 
 @menu
@@ -15601,7 +15601,7 @@ emacs -Q --batch \
 @end menu
 
 
-@node Completion, Easy Templates, Miscellaneous, Miscellaneous
+@node Completion
 @section Completion
 @cindex completion, of @TeX{} symbols
 @cindex completion, of TODO keywords
@@ -15663,7 +15663,7 @@ Elsewhere, complete dictionary words using Ispell.
 @end itemize
 @end table
 
-@node Easy Templates, Speed keys, Completion, Miscellaneous
+@node Easy Templates
 @section Easy Templates
 @cindex template insertion
 @cindex insertion, of templates
@@ -15703,7 +15703,7 @@ You can install additional templates by customizing the variable
 @code{org-structure-template-alist}.  See the docstring of the variable for
 additional details.
 
-@node Speed keys, Code evaluation security, Easy Templates, Miscellaneous
+@node Speed keys
 @section Speed keys
 @cindex speed keys
 @vindex org-use-speed-commands
@@ -15721,7 +15721,7 @@ or on a small mobile device with a limited keyboard.
 To see which commands are available, activate the feature and press @kbd{?}
 with the cursor at the beginning of a headline.
 
-@node Code evaluation security, Customization, Speed keys, Miscellaneous
+@node Code evaluation security
 @section Code evaluation and security issues
 
 Org provides tools to work with the code snippets, including evaluating them.
@@ -15782,7 +15782,7 @@ Formulas in tables (@pxref{The spreadsheet}) are code that is evaluated
 either by the @i{calc} interpreter, or by the @i{Emacs Lisp} interpreter.
 @end table
 
-@node Customization, In-buffer settings, Code evaluation security, Miscellaneous
+@node Customization
 @section Customization
 @cindex customization
 @cindex options, for customization
@@ -15796,7 +15796,7 @@ variables is available with @kbd{M-x org-customize RET}.  Or select
 settings can also be activated on a per-file basis, by putting special
 lines into the buffer (@pxref{In-buffer settings}).
 
-@node In-buffer settings, The very busy C-c C-c key, Customization, Miscellaneous
+@node In-buffer settings
 @section Summary of in-buffer settings
 @cindex in-buffer settings
 @cindex special keywords
@@ -16096,7 +16096,7 @@ These lines set the TODO keywords and their interpretation in the
 current file.  The corresponding variable is @code{org-todo-keywords}.
 @end table
 
-@node The very busy C-c C-c key, Clean view, In-buffer settings, Miscellaneous
+@node The very busy C-c C-c key
 @section The very busy C-c C-c key
 @kindex C-c C-c
 @cindex C-c C-c, overview
@@ -16150,7 +16150,7 @@ block is updated.
 If the cursor is at a timestamp, fix the day name in the timestamp.
 @end itemize
 
-@node Clean view, TTY keys, The very busy C-c C-c key, Miscellaneous
+@node Clean view
 @section A cleaner outline view
 @cindex hiding leading stars
 @cindex dynamic indentation
@@ -16274,7 +16274,7 @@ RET} in that file.  The reverse operation is @kbd{M-x
 org-convert-to-oddeven-levels}.
 @end enumerate
 
-@node TTY keys, Interaction, Clean view, Miscellaneous
+@node TTY keys
 @section Using Org on a tty
 @cindex tty key bindings
 
@@ -16313,7 +16313,7 @@ tty you would rather use @kbd{C-c .} to re-insert the timestamp.
 @end multitable
 
 
-@node Interaction, org-crypt, TTY keys, Miscellaneous
+@node Interaction
 @section Interaction with other packages
 @cindex packages, interaction with other
 Org lives in the world of GNU Emacs and interacts in various ways
@@ -16324,7 +16324,7 @@ with other code out there.
 * Conflicts::                   Packages that lead to conflicts
 @end menu
 
-@node Cooperation, Conflicts, Interaction, Interaction
+@node Cooperation
 @subsection Packages that Org cooperates with
 
 @table @asis
@@ -16416,7 +16416,7 @@ However, Org mode also has its own footnote support (@pxref{Footnotes}),
 which makes using @file{footnote.el} unnecessary.
 @end table
 
-@node Conflicts,  , Cooperation, Interaction
+@node Conflicts
 @subsection Packages that lead to conflicts with Org mode
 
 @table @asis
@@ -16548,7 +16548,7 @@ another key for this command, or override the key in
 
 @end table
 
-@node org-crypt,  , Interaction, Miscellaneous
+@node org-crypt
 @section org-crypt.el
 @cindex @file{org-crypt.el}
 @cindex @code{org-decrypt-entry}
@@ -16587,7 +16587,7 @@ To use org-crypt it is suggested that you have the following in your
 Excluding the crypt tag from inheritance prevents already encrypted text
 being encrypted again.
 
-@node Hacking, MobileOrg, Miscellaneous, Top
+@node Hacking
 @appendix Hacking
 @cindex hacking
 
@@ -16609,7 +16609,7 @@ Org.
 * Using the mapping API::       Mapping over all or selected entries
 @end menu
 
-@node Hooks, Add-on packages, Hacking, Hacking
+@node Hooks
 @section Hooks
 @cindex hooks
 
@@ -16619,7 +16619,7 @@ use of some of them.  A complete list of all hooks with documentation is
 maintained by the Worg project and can be found at
 @uref{http://orgmode.org/worg/org-configs/org-hooks.php}.
 
-@node Add-on packages, Adding hyperlink types, Hooks, Hacking
+@node Add-on packages
 @section Add-on packages
 @cindex add-on packages
 
@@ -16631,7 +16631,7 @@ See the @file{contrib/README} file in the source code directory for a list of
 contributed files.  You may also find some more information on the Worg page:
 @uref{http://orgmode.org/worg/org-contrib/}.
 
-@node Adding hyperlink types, Adding export back-ends, Add-on packages, Hacking
+@node Adding hyperlink types
 @section Adding hyperlink types
 @cindex hyperlinks, adding new types
 
@@ -16734,7 +16734,7 @@ When it makes sense for your new link type, you may also define a function
 support for inserting such a link with @kbd{C-c C-l}.  Such a function should
 not accept any arguments, and return the full link with prefix.
 
-@node Adding export back-ends, Context-sensitive commands, Adding hyperlink types, Hacking
+@node Adding export back-ends
 @section Adding export back-ends
 @cindex Export, writing back-ends
 
@@ -16764,7 +16764,7 @@ For a complete reference documentation, see
 @url{http://orgmode.org/worg/dev/org-export-reference.html, the Org Export
 Reference on Worg}.
 
-@node Context-sensitive commands, Tables in arbitrary syntax, Adding export back-ends, Hacking
+@node Context-sensitive commands
 @section Context-sensitive commands
 @cindex context-sensitive commands, hooks
 @cindex add-ons, context-sensitive commands
@@ -16803,7 +16803,7 @@ contexts.  If the function finds it should do nothing locally, it returns
 @code{nil} so that other, similar functions can have a try.
 
 
-@node Tables in arbitrary syntax, Dynamic blocks, Context-sensitive commands, Hacking
+@node Tables in arbitrary syntax
 @section Tables and lists in arbitrary syntax
 @cindex tables, in other modes
 @cindex lists, in other modes
@@ -16836,7 +16836,7 @@ can use Org's facilities to edit and structure lists by turning
 * Radio lists::                 Sending and receiving lists
 @end menu
 
-@node Radio tables, A @LaTeX{} example, Tables in arbitrary syntax, Tables in arbitrary syntax
+@node Radio tables
 @subsection Radio tables
 @cindex radio tables
 
@@ -16909,7 +16909,7 @@ makes this comment-toggling very easy, in particular if you bind it to a
 key.
 @end itemize
 
-@node A @LaTeX{} example, Translator functions, Radio tables, Tables in arbitrary syntax
+@node A @LaTeX{} example
 @subsection A @LaTeX{} example of radio tables
 @cindex @LaTeX{}, and Orgtbl mode
 
@@ -17019,7 +17019,7 @@ applied.  Similar to @code{fmt}, functions of two arguments can be
 supplied instead of strings.
 @end table
 
-@node Translator functions, Radio lists, A @LaTeX{} example, Tables in arbitrary syntax
+@node Translator functions
 @subsection Translator functions
 @cindex HTML, and Orgtbl mode
 @cindex translator function
@@ -17092,7 +17092,7 @@ containing the formatted table.  If you write a generally useful
 translator, please post it on @email{emacs-orgmode@@gnu.org} so that
 others can benefit from your work.
 
-@node Radio lists,  , Translator functions, Tables in arbitrary syntax
+@node Radio lists
 @subsection Radio lists
 @cindex radio lists
 @cindex org-list-insert-radio-list
@@ -17136,7 +17136,7 @@ Here is a @LaTeX{} example.  Let's say that you have this in your
 Pressing @kbd{C-c C-c} on @code{a new house} and will insert the converted
 @LaTeX{} list between the two marker lines.
 
-@node Dynamic blocks, Special agenda views, Tables in arbitrary syntax, Hacking
+@node Dynamic blocks
 @section Dynamic blocks
 @cindex dynamic blocks
 
@@ -17202,7 +17202,7 @@ written in a way such that it does nothing in buffers that are not in
 You can narrow the current buffer to the current dynamic block (like any
 other block) with @code{org-narrow-to-block}.
 
-@node Special agenda views, Speeding up your agendas, Dynamic blocks, Hacking
+@node Special agenda views
 @section Special agenda views
 @cindex agenda views, user-defined
 
@@ -17307,7 +17307,7 @@ like this, even without defining a special function:
     (org-agenda-overriding-header "Projects waiting for something: "))))
 @end lisp
 
-@node Speeding up your agendas, Extracting agenda information, Special agenda views, Hacking
+@node Speeding up your agendas
 @section Speeding up your agendas
 @cindex agenda views, optimization
 
@@ -17348,7 +17348,7 @@ of these variables for details on why they affect the agenda generation, and
 this @uref{http://orgmode.org/worg/agenda-optimization.html, dedicated Worg
 page} for further explanations.
 
-@node Extracting agenda information, Using the property API, Speeding up your agendas, Hacking
+@node Extracting agenda information
 @section Extracting agenda information
 @cindex agenda, pipe
 @cindex Scripts, for agenda processing
@@ -17451,7 +17451,7 @@ foreach $line (split(/\n/,$agenda)) @{
 @}
 @end example
 
-@node Using the property API, Using the mapping API, Extracting agenda information, Hacking
+@node Using the property API
 @section Using the property API
 @cindex API, for properties
 @cindex properties, API
@@ -17531,7 +17531,7 @@ to be entered.  The functions must return @code{nil} if they are not
 responsible for this property.
 @end defopt
 
-@node Using the mapping API,  , Using the property API, Hacking
+@node Using the mapping API
 @section Using the mapping API
 @cindex API, for mapping
 @cindex mapping entries, API
@@ -17642,7 +17642,7 @@ The following example counts the number of entries with TODO keyword
 (length (org-map-entries t "/+WAITING" 'agenda))
 @end lisp
 
-@node MobileOrg, History and Acknowledgments, Hacking, Top
+@node MobileOrg
 @appendix MobileOrg
 @cindex iPhone
 @cindex MobileOrg
@@ -17676,7 +17676,7 @@ in-buffer settings, but it will understand the logistics of TODO state
 * Pulling from MobileOrg::      Integrating captured and flagged items
 @end menu
 
-@node Setting up the staging area, Pushing to MobileOrg, MobileOrg, MobileOrg
+@node Setting up the staging area
 @section Setting up the staging area
 
 MobileOrg needs to interact with Emacs through a directory on a server.  If you
@@ -17707,7 +17707,7 @@ Emacs about it:
 Org mode has commands to put files for @i{MobileOrg} into that directory,
 and to read captured notes from there.
 
-@node Pushing to MobileOrg, Pulling from MobileOrg, Setting up the staging area, MobileOrg
+@node Pushing to MobileOrg
 @section Pushing to MobileOrg
 
 This operation copies all files currently listed in @code{org-mobile-files}
@@ -17733,7 +17733,7 @@ downloads all agendas and Org files listed in it.  To speed up the download,
 MobileOrg will only read files whose checksums@footnote{Checksums are stored
 automatically in the file @file{checksums.dat}} have changed.
 
-@node Pulling from MobileOrg,  , Pushing to MobileOrg, MobileOrg
+@node Pulling from MobileOrg
 @section Pulling from MobileOrg
 
 When @i{MobileOrg} synchronizes with the server, it not only pulls the Org
@@ -17787,7 +17787,7 @@ This might include a file that is not currently in your list of agenda files.
 If you later use @kbd{C-c a ?} to regenerate the view, only the current
 agenda files will be searched.} using @kbd{C-c a ?}.
 
-@node History and Acknowledgments, GNU Free Documentation License, MobileOrg, Top
+@node History and Acknowledgments
 @appendix History and acknowledgments
 @cindex acknowledgments
 @cindex history
@@ -18160,27 +18160,27 @@ and contributed various ideas and code snippets.
 @end itemize
 
 
-@node GNU Free Documentation License, Main Index, History and Acknowledgments, Top
+@node GNU Free Documentation License
 @appendix GNU Free Documentation License
 @include doclicense.texi
 
 
-@node Main Index, Key Index, GNU Free Documentation License, Top
+@node Main Index
 @unnumbered Concept index
 
 @printindex cp
 
-@node Key Index, Command and Function Index, Main Index, Top
+@node Key Index
 @unnumbered Key index
 
 @printindex ky
 
-@node Command and Function Index, Variable Index, Key Index, Top
+@node Command and Function Index
 @unnumbered Command and function index
 
 @printindex fn
 
-@node Variable Index,  , Command and Function Index, Top
+@node Variable Index
 @unnumbered Variable index
 
 This is not a complete index of variables and faces, only the ones that are
