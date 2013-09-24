@@ -16450,14 +16450,14 @@ cursor moves across a special context.
 @cindex Storm, Kim. F.
 @vindex org-replace-disputed-keys
 Key bindings in Org conflict with the @kbd{S-<cursor>} keys used by CUA mode
-(as well as @code{pc-select-mode} and @code{s-region-mode}) to select and extend the
-region.  In fact, Emacs 23 has this built-in in the form of
+(as well as @code{pc-select-mode} and @code{s-region-mode}) to select and
+extend the region.  In fact, Emacs 23 has this built-in in the form of
 @code{shift-selection-mode}, see previous paragraph.  If you are using Emacs
-23, you probably don't want to use another package for this purpose.  However,
-if you prefer to leave these keys to a different package while working in
-Org mode, configure the variable @code{org-replace-disputed-keys}.  When set,
-Org will move the following key bindings in Org files, and in the agenda
-buffer (but not during date selection).
+23, you probably don't want to use another package for this purpose.
+However, if you prefer to leave these keys to a different package while
+working in Org mode, configure the variable @code{org-replace-disputed-keys}.
+When set, Org will move the following key bindings in Org files, and in the
+agenda buffer (but not during date selection).
 
 @example
 S-UP      @result{}  M-p             S-DOWN     @result{}  M-n
