@@ -13775,6 +13775,7 @@ behavior:
 @subsubheading Header arguments:
 
 @table @code
+@cindex @code{:exports}, src header argument
 @item :exports code
 The default in most languages.  The body of the code block is exported, as
 described in @ref{Literal examples}.
@@ -13818,6 +13819,7 @@ using @code{org-babel-expand-src-block} which can expand both variable and
 @subsubheading Header arguments
 
 @table @code
+@cindex @code{:tangle}, src header argument
 @item :tangle no
 The default.  The code block is not included in the tangled output.
 @item :tangle yes
@@ -14067,6 +14069,11 @@ priority replaces the same header argument specified at lower priority.
 System-wide values of header arguments can be specified by adapting the
 @code{org-babel-default-header-args} variable:
 
+@cindex @code{:session}, src header argument
+@cindex @code{:results}, src header argument
+@cindex @code{:exports}, src header argument
+@cindex @code{:cache}, src header argument
+@cindex @code{:noweb}, src header argument
 @example
 :session    => "none"
 :results    => "replace"
@@ -14290,6 +14297,7 @@ Additional header arguments are defined on a language-specific basis, see
 
 @node var
 @subsubsection @code{:var}
+@cindex @code{:var}, src header argument
 The @code{:var} header argument is used to pass arguments to code blocks.
 The specifics of how arguments are included in a code block vary by language;
 these are addressed in the language-specific documentation.  However, the
@@ -14544,6 +14552,7 @@ Emacs Lisp, as shown in the following example.
 
 @node Results
 @subsubsection @code{:results}
+@cindex @code{:results}, src header argument
 
 There are four classes of @code{:results} header argument.  Only one option
 per class may be supplied per code block.
@@ -14663,6 +14672,7 @@ inserted as with @code{replace}.
 
 @node file
 @subsubsection @code{:file}
+@cindex @code{:file}, src header argument
 
 The header argument @code{:file} is used to specify an external file in which
 to save code block results.  After code block evaluation an Org mode style
@@ -14688,6 +14698,7 @@ with no value the link path will be placed in both the ``link'' and the
 
 @node dir
 @subsubsection @code{:dir} and remote execution
+@cindex @code{:dir}, src header argument
 
 While the @code{:file} header argument can be used to specify the path to the
 output file, @code{:dir} specifies the default directory during code block
@@ -14756,6 +14767,7 @@ which the link does not point.
 
 @node exports
 @subsubsection @code{:exports}
+@cindex @code{:exports}, src header argument
 
 The @code{:exports} header argument specifies what should be included in HTML
 or @LaTeX{} exports of the Org mode file.
@@ -14776,6 +14788,7 @@ Nothing is included in the exported file.  E.g., @code{:exports none}.
 
 @node tangle
 @subsubsection @code{:tangle}
+@cindex @code{:tangle}, src header argument
 
 The @code{:tangle} header argument specifies whether or not the code
 block should be included in tangled extraction of source code files.
@@ -14796,6 +14809,7 @@ file) to which the block will be exported.  E.g., @code{:tangle path}.
 
 @node mkdirp
 @subsubsection @code{:mkdirp}
+@cindex @code{:mkdirp}, src header argument
 
 The @code{:mkdirp} header argument can be used to create parent directories
 of tangled files when missing.  This can be set to @code{yes} to enable
@@ -14803,6 +14817,7 @@ directory creation or to @code{no} to inhibit directory creation.
 
 @node comments
 @subsubsection @code{:comments}
+@cindex @code{:comments}, src header argument
 By default code blocks are tangled to source-code files without any insertion
 of comments beyond those which may already exist in the body of the code
 block.  The @code{:comments} header argument can be set as follows to control
@@ -14829,6 +14844,7 @@ references in the code block body in link comments.
 
 @node padline
 @subsubsection @code{:padline}
+@cindex @code{:padline}, src header argument
 Control in insertion of padding lines around code block bodies in tangled
 code files.  The default value is @code{yes} which results in insertion of
 newlines before and after each tangled code block.  The following arguments
@@ -14843,6 +14859,7 @@ Do not insert any newline padding in tangled output.
 
 @node no-expand
 @subsubsection @code{:no-expand}
+@cindex @code{:no-expand}, src header argument
 
 By default, code blocks are expanded with @code{org-babel-expand-src-block}
 during tangling.  This has the effect of assigning values to variables
@@ -14852,6 +14869,7 @@ references (see @ref{Noweb reference syntax}) with their targets.  The
 
 @node session
 @subsubsection @code{:session}
+@cindex @code{:session}, src header argument
 
 The @code{:session} header argument starts a session for an interpreted
 language where state is preserved.
@@ -14864,6 +14882,7 @@ interpreted language.
 
 @node noweb
 @subsubsection @code{:noweb}
+@cindex @code{:noweb}, src header argument
 
 The @code{:noweb} header argument controls expansion of ``noweb'' syntax
 references (see @ref{Noweb reference syntax}) when the code block is
@@ -14921,6 +14940,7 @@ references.
 
 @node noweb-ref
 @subsubsection @code{:noweb-ref}
+@cindex @code{:noweb-ref}, src header argument
 When expanding ``noweb'' style references the bodies of all code block with
 @emph{either} a block name matching the reference name @emph{or} a
 @code{:noweb-ref} header argument matching the reference name will be
@@ -14969,6 +14989,7 @@ newline is used.
 
 @node noweb-sep
 @subsubsection @code{:noweb-sep}
+@cindex @code{:noweb-sep}, src header argument
 
 The @code{:noweb-sep} header argument holds the string used to separate
 accumulate noweb references (see @ref{noweb-ref}).  By default a newline is
@@ -14976,6 +14997,7 @@ used.
 
 @node cache
 @subsubsection @code{:cache}
+@cindex @code{:cache}, src header argument
 
 The @code{:cache} header argument controls the use of in-buffer caching of
 the results of evaluating code blocks.  It can be used to avoid re-evaluating
@@ -15023,6 +15045,7 @@ changed since it was last run.
 
 @node sep
 @subsubsection @code{:sep}
+@cindex @code{:sep}, src header argument
 
 The @code{:sep} header argument can be used to control the delimiter used
 when writing tabular results out to files external to Org mode.  This is used
@@ -15036,6 +15059,7 @@ delimited.
 
 @node hlines
 @subsubsection @code{:hlines}
+@cindex @code{:hlines}, src header argument
 
 Tables are frequently represented with one or more horizontal lines, or
 hlines.  The @code{:hlines} argument to a code block accepts the
@@ -15094,6 +15118,7 @@ Leaves hlines in the table.  Setting @code{:hlines yes} has this effect.
 
 @node colnames
 @subsubsection @code{:colnames}
+@cindex @code{:colnames}, src header argument
 
 The @code{:colnames} header argument accepts the values @code{yes},
 @code{no}, or @code{nil} for unassigned.  The default value is @code{nil}.
@@ -15140,6 +15165,7 @@ hline)
 
 @node rownames
 @subsubsection @code{:rownames}
+@cindex @code{:rownames}, src header argument
 
 The @code{:rownames} header argument can take on the values @code{yes} or
 @code{no}, with a default value of @code{no}.  Note that Emacs Lisp code
@@ -15176,6 +15202,7 @@ variable indexing @xref{var, Indexable variable values}.
 
 @node shebang
 @subsubsection @code{:shebang}
+@cindex @code{:shebang}, src header argument
 
 Setting the @code{:shebang} header argument to a string value
 (e.g., @code{:shebang "#!/bin/bash"}) causes the string to be inserted as the
@@ -15185,6 +15212,7 @@ permissions of the tangled file are set to make it executable.
 
 @node tangle-mode
 @subsubsection @code{:tangle-mode}
+@cindex @code{:tangle-mode}, src header argument
 
 The @code{tangle-mode} header argument controls the permission set on tangled
 files.  The value of this header argument will be passed to
@@ -15198,6 +15226,7 @@ undefined if multiple code blocks with different values for the
 
 @node eval
 @subsubsection @code{:eval}
+@cindex @code{:eval}, src header argument
 The @code{:eval} header argument can be used to limit the evaluation of
 specific code blocks.  The @code{:eval} header argument can be useful for
 protecting against the evaluation of dangerous code blocks or to ensure that
@@ -15223,6 +15252,7 @@ security}.
 
 @node wrap
 @subsubsection @code{:wrap}
+@cindex @code{:wrap}, src header argument
 The @code{:wrap} header argument is used to mark the results of source block
 evaluation.  The header argument can be passed a string that will be appended
 to @code{#+BEGIN_} and @code{#+END_}, which will then be used to wrap the
@@ -15231,6 +15261,7 @@ results.  If not string is specified then the results will be wrapped in a
 
 @node post
 @subsubsection @code{:post}
+@cindex @code{:post}, src header argument
 The @code{:post} header argument is used to post-process the results of a
 code block execution.  When a post argument is given, the results of the code
 block will temporarily be bound to the @code{*this*} variable.  This variable
@@ -15266,6 +15297,7 @@ argument.
 
 @node prologue
 @subsubsection @code{:prologue}
+@cindex @code{:prologue}, src header argument
 The value of the @code{prologue} header argument will be prepended to the
 code block body before execution.  For example, @code{:prologue "reset"} may
 be used to reset a gnuplot session before execution of a particular code
@@ -15279,6 +15311,7 @@ code blocks.  Also see @ref{epilogue}.
 
 @node epilogue
 @subsubsection @code{:epilogue}
+@cindex @code{:epilogue}, src header argument
 The value of the @code{epilogue} header argument will be appended to the code
 block body before execution.  Also see @ref{prologue}.
 
@@ -15304,6 +15337,7 @@ vector of strings or numbers) when appropriate.
 
 @subsection Non-session
 @subsubsection @code{:results value}
+@cindex @code{:results}, src header argument
 This is the default.  Internally, the value is obtained by wrapping the code
 in a function definition in the external language, and evaluating that
 function.  Therefore, code should be written as if it were the body of such a
@@ -15315,6 +15349,7 @@ This is the only one of the four evaluation contexts in which the code is
 automatically wrapped in a function definition.
 
 @subsubsection @code{:results output}
+@cindex @code{:results}, src header argument
 The code is passed to the interpreter as an external process, and the
 contents of the standard output stream are returned as text.  (In certain
 languages this also contains the error output stream; this is an area for
@@ -15322,6 +15357,7 @@ future work.)
 
 @subsection Session
 @subsubsection @code{:results value}
+@cindex @code{:results}, src header argument
 The code is passed to an interpreter running as an interactive Emacs inferior
 process.  Only languages which provide tools for interactive evaluation of
 code have session support, so some language (e.g., C and ditaa) do not
@@ -15337,6 +15373,7 @@ the variable @code{_} in Python and Ruby, and the value of @code{.Last.value}
 in R).
 
 @subsubsection @code{:results output}
+@cindex @code{:results}, src header argument
 The code is passed to the interpreter running as an interactive Emacs
 inferior process.  The result returned is the concatenation of the sequence of
 (text) output from the interactive interpreter.  Notice that this is not
