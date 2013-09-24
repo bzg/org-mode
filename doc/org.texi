@@ -288,8 +288,8 @@ modify this GNU manual.''
 
 @subtitle Release @value{VERSION}
 @author by Carsten Dominik
-with contributions by David O'Toole, Bastien Guerry, Philip Rooke, Dan
-Davison, Eric Schulte, Thomas Dye, Jambunathan K and Nicolas Goaziou.
+with contributions by Bastien Guerry, Nicolas Goaziou, Eric Schulte,
+Jambunathan K, Dan Davison, Thomas Dye, David O'Toole, and Philip Rooke.
 
 @c The following two commands start the copyright page.
 @page
