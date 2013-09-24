@@ -795,63 +795,50 @@ MobileOrg
 @section Summary
 @cindex summary
 
-Org is a mode for keeping notes, maintaining TODO lists, and doing
-project planning with a fast and effective plain-text system.
+Org is a mode for keeping notes, maintaining TODO lists, and doing project
+planning with a fast and effective plain-text system.  It also is an
+authoring system with unique support for literal programming and reproducible
+research.
 
-Org develops organizational tasks around NOTES files that contain
-lists or information about projects as plain text.  Org is
-implemented on top of Outline mode, which makes it possible to keep the
-content of large files well structured.  Visibility cycling and
-structure editing help to work with the tree.  Tables are easily created
-with a built-in table editor.  Org supports TODO items, deadlines,
-timestamps, and scheduling.  It dynamically compiles entries into an
-agenda that utilizes and smoothly integrates much of the Emacs calendar
-and diary.  Plain text URL-like links connect to websites, emails,
-Usenet messages, BBDB entries, and any files related to the projects.
-For printing and sharing notes, an Org file can be exported as a
-structured ASCII file, as HTML, or (TODO and agenda items only) as an
-iCalendar file.  It can also serve as a publishing tool for a set of
-linked web pages.
+Org is implemented on top of Outline mode, which makes it possible to keep
+the content of large files well structured.  Visibility cycling and structure
+editing help to work with the tree.  Tables are easily created with a
+built-in table editor.  Plain text URL-like links connect to websites,
+emails, Usenet messages, BBDB entries, and any files related to the projects.
 
-As a project planning environment, Org works by adding metadata to outline
-nodes.  Based on this data, specific entries can be extracted in queries and
-create dynamic @i{agenda views}.
+Org develops organizational tasks around notes files that contain lists or
+information about projects as plain text.  As a project planning environment,
+Org works by adding metadata to outline nodes.  Based on this data, specific
+entries can be extracted in queries and create dynamic @i{agenda views} that
+also utilize and smoothly integrate much of the Emacs calendar and diary.
+Org can be used to implement many different project planning schemes, such
+as David Allen's GTD system.
 
-Org mode contains the Org Babel environment which allows you to work with
-embedded source code blocks in a file, to facilitate code evaluation,
-documentation, and literate programming techniques.
+Org files can serve as a single source authoring system with export to many
+different formats such as HTML, @LaTeX{}, Open Document, and Markdown.  New
+export backends be derived from existing ones, or defined from scratch.
 
-Org's automatic, context-sensitive table editor with spreadsheet
-capabilities can be integrated into any major mode by activating the
-minor Orgtbl mode.  Using a translation step, it can be used to maintain
-tables in arbitrary file types, for example in @LaTeX{}.  The structure
-editing and list creation capabilities can be used outside Org with
-the minor Orgstruct mode.
+Org mode supports working with embedded source code blocks in a file, which
+makes it uniquely suited for authoring technical documents with code
+examples.  It facilitates code evaluation, embedding of code output into the
+document, documentation, and literate programming techniques.
 
-Org keeps simple things simple.  When first fired up, it should
-feel like a straightforward, easy to use outliner.  Complexity is not
-imposed, but a large amount of functionality is available when you need
-it.  Org is a toolbox and can be used in different ways and for different
-ends, for example:
+Org keeps simple things simple.  When first fired up, it should feel like a
+straightforward, easy to use outliner.  Complexity is not imposed, but a
+large amount of functionality is available when you need it.  Org is a
+toolbox.  Many users usilize only a (very personal) fraction of Org's
+capabilities, and know that there is more whenever they need it.
 
-@example
-@r{@bullet{} an outline extension with visibility cycling and structure editing}
-@r{@bullet{} an ASCII system and table editor for taking structured notes}
-@r{@bullet{} a TODO list editor}
-@r{@bullet{} a full agenda and planner with deadlines and work scheduling}
-@pindex GTD, Getting Things Done
-@r{@bullet{} an environment in which to implement David Allen's GTD system}
-@r{@bullet{} a simple hypertext system, with HTML and @LaTeX{} export}
-@r{@bullet{} a publishing tool to create a set of interlinked web pages}
-@r{@bullet{} an environment for literate programming}
-@end example
+All of this is achieved with strictly plain text files, the most portable and
+future-proof file format.  Org runs in Emacs.  Emacs is one of the most
+widely ported programs, so that Org mode is available on every major
+platform.
 
 @cindex FAQ
 There is a website for Org which provides links to the newest
 version of Org, as well as additional information, frequently asked
 questions (FAQ), links to tutorials, etc.  This page is located at
 @uref{http://orgmode.org}.
-
 @cindex print edition
 The version 7.3 of this manual is available as a
 @uref{http://www.network-theory.co.uk/org/manual/, paperback book from Network
