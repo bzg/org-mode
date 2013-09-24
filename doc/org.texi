@@ -312,23 +312,23 @@ Jambunathan K, Dan Davison, Thomas Dye, David O'Toole, and Philip Rooke.
 
 @menu
 * Introduction::                Getting started
-* Document Structure::          A tree works like your brain
+* Document structure::          A tree works like your brain
 * Tables::                      Pure magic for quick formatting
 * Hyperlinks::                  Notes in context
-* TODO Items::                  Every tree branch can be a TODO item
+* TODO items::                  Every tree branch can be a TODO item
 * Tags::                        Tagging headlines and matching sets of tags
-* Properties and Columns::      Storing information about an entry
-* Dates and Times::             Making items useful for planning
+* Properties and columns::      Storing information about an entry
+* Dates and times::             Making items useful for planning
 * Capture - Refile - Archive::  The ins and outs for projects
-* Agenda Views::                Collecting information into views
+* Agenda views::                Collecting information into views
 * Markup::                      Prepare text for rich export
 * Exporting::                   Sharing and publishing notes
 * Publishing::                  Create a web site of linked Org files
-* Working With Source Code::    Export, evaluate, and tangle code blocks
+* Working with source code::    Export, evaluate, and tangle code blocks
 * Miscellaneous::               All the rest which did not fit elsewhere
 * Hacking::                     How to hack your way around
 * MobileOrg::                   Viewing and capture on a mobile device
-* History and Acknowledgments::  How Org came into being
+* History and acknowledgments::  How Org came into being
 * GNU Free Documentation License::  The license for this documentation.
 * Main Index::                  An index of Org's concepts and features
 * Key Index::                   Key bindings and where they are described
@@ -491,7 +491,7 @@ Capture - Refile - Archive
 
 * Capture::                     Capturing new stuff
 * Attachments::                 Add files to tasks
-* RSS Feeds::                   Getting input from RSS feeds
+* RSS feeds::                   Getting input from RSS feeds
 * Protocols::                   External (e.g., Browser) access to Emacs and Org
 * Refile and copy::             Moving/copying a tree from one place to another
 * Archiving::                   What to do with finished projects
@@ -521,7 +521,7 @@ Agenda views
 * Presentation and sorting::    How agenda items are prepared for display
 * Agenda commands::             Remote editing of Org trees
 * Custom agenda views::         Defining special searches and views
-* Exporting Agenda Views::      Writing a view to a file
+* Exporting agenda views::      Writing a view to a file
 * Agenda column view::          Using column view for collected entries
 
 The built-in agenda views
@@ -544,7 +544,7 @@ Custom agenda views
 
 * Storing searches::            Type once, use often
 * Block agenda::                All the stuff you need in a single buffer
-* Setting Options::             Changing the rules
+* Setting options::             Changing the rules
 
 Markup for rich export
 
@@ -579,7 +579,7 @@ Embedded @LaTeX{}
 
 Exporting
 
-* The Export Dispatcher::       The main exporter interface
+* The export dispatcher::       The main exporter interface
 * Export back-ends::            Built-in export formats
 * Export settings::             Generic export settings
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
@@ -587,7 +587,7 @@ Exporting
 * HTML export::                 Exporting to HTML
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
 * Markdown export::             Exporting to Markdown
-* OpenDocument Text export::    Exporting to OpenDocument Text
+* OpenDocument text export::    Exporting to OpenDocument Text
 * iCalendar export::            Exporting to iCalendar
 * Other built-in back-ends::    Exporting to @code{Texinfo}, a man page, or Org
 * Export in foreign buffers::   Author tables in lists in Org syntax
@@ -614,7 +614,7 @@ HTML export
 * Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
 * @LaTeX{} specific attributes::  Controlling @LaTeX{} output
 
-OpenDocument Text export
+OpenDocument text export
 
 * Pre-requisites for ODT export::  What packages ODT exporter relies on
 * ODT export commands::         How to invoke ODT export
@@ -689,14 +689,14 @@ Using header arguments
 * System-wide header arguments::  Set global default values
 * Language-specific header arguments::  Set default values by language
 * Header arguments in Org mode properties::  Set default values for a buffer or heading
-* Language-specific header arguments in Org mode properties::  Set langugage-specific default values for a buffer or heading
+* Language-specific header arguments in Org mode properties::  Set language-specific default values for a buffer or heading
 * Code block specific header arguments::  The most common way to set values
 * Header arguments in function calls::  The most specific level
 
 Specific header arguments
 
 * var::                         Pass arguments to code blocks
-* results::                     Specify the type of results and how they will
+* Results::                     Specify the type of results and how they will
                                 be collected and handled
 * file::                        Specify a path for file output
 * file-desc::                   Specify a description for file results
@@ -732,7 +732,7 @@ Specific header arguments
 Miscellaneous
 
 * Completion::                  M-TAB knows what you need
-* Easy Templates::              Quick insertion of structural elements
+* Easy templates::              Quick insertion of structural elements
 * Speed keys::                  Electric commands at the beginning of a headline
 * Code evaluation security::    Org mode files evaluate inline code
 * Customization::               Adapting Org to your taste
@@ -1147,7 +1147,7 @@ will be listed to call @code{org-table-move-column-right}.  If you prefer,
 you can compile the manual without the command names by unsetting the flag
 @code{cmdnames} in @file{org.texi}.
 
-@node Document Structure
+@node Document structure
 @chapter Document structure
 @cindex document structure
 @cindex structure of document
@@ -1358,7 +1358,7 @@ the startup visibility, set @code{org-agenda-inhibit-startup} to @code{nil}.
 @cindex property, VISIBILITY
 @noindent
 Furthermore, any entries with a @samp{VISIBILITY} property (@pxref{Properties
-and Columns}) will get their visibility adapted accordingly.  Allowed values
+and columns}) will get their visibility adapted accordingly.  Allowed values
 for this property are @code{folded}, @code{children}, @code{content}, and
 @code{all}.
 
@@ -1874,7 +1874,7 @@ Visibility cycling (@pxref{Visibility cycling}) on the headline will hide and
 show the entry, but keep the drawer collapsed to a single line.  In order to
 look inside the drawer, you need to move the cursor to the drawer line and
 press @key{TAB} there.  Org mode uses the @code{PROPERTIES} drawer for
-storing properties (@pxref{Properties and Columns}), and you can also arrange
+storing properties (@pxref{Properties and columns}), and you can also arrange
 for state change notes (@pxref{Tracking TODO state changes}) and clock times
 (@pxref{Clocking work time}) to be stored in a drawer @code{LOGBOOK}.  If you
 want to store a quick note in the LOGBOOK drawer, in a similar way to state
@@ -2596,7 +2596,7 @@ line like
 @noindent
 @vindex constants-unit-system
 @pindex constants.el
-Also properties (@pxref{Properties and Columns}) can be used as
+Also properties (@pxref{Properties and columns}) can be used as
 constants in table formulas: for a property @samp{:Xyz:} use the name
 @samp{$PROP_Xyz}, and the property will be searched in the current
 outline entry and in the hierarchy above it.  If you have the
@@ -3922,7 +3922,7 @@ variables for more information.  Org actually uses this mechanism
 for Bib@TeX{} database files, and you can use the corresponding code as
 an implementation example.  See the file @file{org-bibtex.el}.
 
-@node TODO Items
+@node TODO items
 @chapter TODO items
 @cindex TODO items
 
@@ -4008,7 +4008,7 @@ N, show the tree for the Nth keyword in the option @code{org-todo-keywords}.
 With two prefix arguments, find all TODO states, both un-done and done.
 @orgcmd{C-c a t,org-todo-list}
 Show the global TODO list.  Collects the TODO items (with not-DONE states)
-from all agenda files (@pxref{Agenda Views}) into a single buffer.  The new
+from all agenda files (@pxref{Agenda views}) into a single buffer.  The new
 buffer will be in @code{agenda-mode}, which provides commands to examine and
 manipulate the TODO entries from the new buffer (@pxref{Agenda commands}).
 @xref{Global TODO list}, for more information.
@@ -4305,7 +4305,7 @@ Change TODO state, circumventing any state blocking.
 @vindex org-agenda-dim-blocked-tasks
 If you set the option @code{org-agenda-dim-blocked-tasks}, TODO entries
 that cannot be closed because of such dependencies will be shown in a dimmed
-font or even made invisible in agenda views (@pxref{Agenda Views}).
+font or even made invisible in agenda views (@pxref{Agenda views}).
 
 @cindex checkboxes and TODO dependencies
 @vindex org-enforce-todo-dependencies
@@ -4684,7 +4684,7 @@ Every item in a plain list@footnote{With the exception of description
 lists.  But you can allow it by modifying @code{org-list-automatic-rules}
 accordingly.} (@pxref{Plain lists}) can be made into a checkbox by starting
 it with the string @samp{[ ]}.  This feature is similar to TODO items
-(@pxref{TODO Items}), but is more lightweight.  Checkboxes are not included
+(@pxref{TODO items}), but is more lightweight.  Checkboxes are not included
 in the global TODO list, so they are often great to split a task into a
 number of simple steps.  Or you can use them in a shopping list.  To toggle a
 checkbox, use @kbd{C-c C-c}, or use the mouse (thanks to Piotr Zielinski's
@@ -5118,7 +5118,7 @@ and properties.  For a complete description with many examples, see
 @ref{Matching tags and properties}.
 
 
-@node Properties and Columns
+@node Properties and columns
 @chapter Properties and columns
 @cindex properties
 
@@ -5416,7 +5416,7 @@ view (@kbd{S-@key{TAB} S-@key{TAB}}, or simply @kbd{c} while column view
 is active), but you can still open, read, and edit the entry below each
 headline.  Or, you can switch to column view after executing a sparse
 tree command and in this way get a table only for the selected items.
-Column view also works in agenda buffers (@pxref{Agenda Views}) where
+Column view also works in agenda buffers (@pxref{Agenda views}) where
 queries have collected selected items, possibly from a number of files.
 
 @menu
@@ -5702,7 +5702,7 @@ be used by Emacs Lisp programs to work with properties and to implement
 features based on them.  For more information see @ref{Using the
 property API}.
 
-@node Dates and Times
+@node Dates and times
 @chapter Dates and times
 @cindex dates
 @cindex times
@@ -6798,7 +6798,7 @@ trees to an archive file keeps the system compact and fast.
 @menu
 * Capture::                     Capturing new stuff
 * Attachments::                 Add files to tasks
-* RSS Feeds::                   Getting input from RSS feeds
+* RSS feeds::                   Getting input from RSS feeds
 * Protocols::                   External (e.g., Browser) access to Emacs and Org
 * Refile and copy::             Moving/copying a tree from one place to another
 * Archiving::                   What to do with finished projects
@@ -7301,7 +7301,7 @@ same directory for attachments as the parent does.
 @end table
 @end table
 
-@node RSS Feeds
+@node RSS feeds
 @section RSS feeds
 @cindex RSS feeds
 @cindex Atom feeds
@@ -7488,7 +7488,7 @@ archive locations in a buffer is using properties.}:
 @noindent
 If you would like to have a special ARCHIVE location for a single entry
 or a (sub)tree, give the entry an @code{:ARCHIVE:} property with the
-location as the value (@pxref{Properties and Columns}).
+location as the value (@pxref{Properties and columns}).
 
 @vindex org-archive-save-context-info
 When a subtree is moved, it receives a number of special properties that
@@ -7521,7 +7521,7 @@ archived subtrees are not exposed, unless you configure the option
 @code{org-sparse-tree-open-archived-trees}.
 @item
 @vindex org-agenda-skip-archived-trees
-During agenda view construction (@pxref{Agenda Views}), the content of
+During agenda view construction (@pxref{Agenda views}), the content of
 archived trees is ignored unless you configure the option
 @code{org-agenda-skip-archived-trees}, in which case these trees will always
 be included.  In the agenda you can press @kbd{v a} to get archives
@@ -7561,7 +7561,7 @@ outline.
 @end table
 
 
-@node Agenda Views
+@node Agenda views
 @chapter Agenda views
 @cindex agenda views
 
@@ -7618,7 +7618,7 @@ window configuration is restored when the agenda exits:
 * Presentation and sorting::    How agenda items are prepared for display
 * Agenda commands::             Remote editing of Org trees
 * Custom agenda views::         Defining special searches and views
-* Exporting Agenda Views::      Writing a view to a file
+* Exporting agenda views::      Writing a view to a file
 * Agenda column view::          Using column view for collected entries
 @end menu
 
@@ -7926,7 +7926,7 @@ collected into a single place.
 @table @kbd
 @orgcmd{C-c a t,org-todo-list}
 Show the global TODO list.  This collects the TODO items from all agenda
-files (@pxref{Agenda Views}) into a single buffer.  By default, this lists
+files (@pxref{Agenda views}) into a single buffer.  By default, this lists
 items with a state the is not a DONE state.  The buffer is in
 @code{agenda-mode}, so there are commands to examine and manipulate the TODO
 entries directly from that buffer (@pxref{Agenda commands}).
@@ -7984,7 +7984,7 @@ and omit the sublevels from the global list.  Configure the variable
 @cindex match view
 
 If headlines in the agenda files are marked with @emph{tags} (@pxref{Tags}),
-or have properties (@pxref{Properties and Columns}), you can select headlines
+or have properties (@pxref{Properties and columns}), you can select headlines
 based on this metadata and collect them into an agenda buffer.  The match
 syntax described here also applies when creating sparse trees with @kbd{C-c /
 m}.
@@ -8055,7 +8055,7 @@ one of the tag in the group (i.e., @samp{-@{\(?:work\|lab\|conf\)@}}).
 @cindex level, require for tags/property match
 @cindex category, require for tags/property match
 @vindex org-odd-levels-only
-You may also test for properties (@pxref{Properties and Columns}) at the same
+You may also test for properties (@pxref{Properties and columns}) at the same
 time as matching tags.  The properties may be real properties, or special
 properties that represent other metadata (@pxref{Special properties}).  For
 example, the ``property'' @code{TODO} represents the TODO keyword of the
@@ -9119,7 +9119,7 @@ dispatcher (@pxref{Agenda dispatcher}), just like the default commands.
 @menu
 * Storing searches::            Type once, use often
 * Block agenda::                All the stuff you need in a single buffer
-* Setting Options::             Changing the rules
+* Setting options::             Changing the rules
 @end menu
 
 @node Storing searches
@@ -9248,7 +9248,7 @@ your agenda for the current week, all TODO items that carry the tag
 @samp{home}, and also all lines tagged with @samp{garden}.  Finally the
 command @kbd{C-c a o} provides a similar view for office tasks.
 
-@node Setting Options
+@node Setting options
 @subsection Setting options for custom commands
 @cindex options, for custom agenda views
 
@@ -9341,8 +9341,8 @@ command key @code{"r"}.  In that case, add this command key like this:
 
 See the docstring of the variable for more information.
 
-@node Exporting Agenda Views
-@section Exporting Agenda Views
+@node Exporting agenda views
+@section Exporting agenda views
 @cindex agenda views, exporting
 
 If you are away from your computer, it can be very useful to have a printed
@@ -9606,7 +9606,7 @@ precedence.
 
 @vindex org-export-headline-levels
 The outline structure of the document as described in @ref{Document
-Structure}, forms the basis for defining sections of the exported document.
+structure}, forms the basis for defining sections of the exported document.
 However, since the outline structure is also used for (for example) lists of
 tasks, only the first three outline levels will be used as headings.  Deeper
 levels will become itemized lists.  You can change the location of this
@@ -9858,8 +9858,8 @@ achieved using either the listings or the
 with the @samp{src} block, where you also need to specify the name of the
 major mode that should be used to fontify the example@footnote{Code in
 @samp{src} blocks may also be evaluated either interactively or on export.
-See @pxref{Working With Source Code} for more information on evaluating code
-blocks.}, see @ref{Easy Templates} for shortcuts to easily insert code
+See @pxref{Working with source code} for more information on evaluating code
+blocks.}, see @ref{Easy templates} for shortcuts to easily insert code
 blocks.
 @cindex #+BEGIN_SRC
 
@@ -9907,8 +9907,8 @@ HTML export also allows examples to be published as text areas (@pxref{Text
 areas in HTML export}).
 
 Because the @code{#+BEGIN_...} and @code{#+END_...} patterns need to be added
-so often, shortcuts are provided using the Easy Templates facility
-(@pxref{Easy Templates}).
+so often, shortcuts are provided using the Easy templates facility
+(@pxref{Easy templates}).
 
 @table @kbd
 @kindex C-c '
@@ -10346,7 +10346,7 @@ export can extract entries with deadlines or appointments to produce a file
 in the iCalendar format.
 
 @menu
-* The Export Dispatcher::       The main exporter interface
+* The export dispatcher::       The main exporter interface
 * Export back-ends::            Built-in export formats
 * Export settings::             Generic export settings
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
@@ -10354,15 +10354,15 @@ in the iCalendar format.
 * HTML export::                 Exporting to HTML
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
 * Markdown export::             Exporting to Markdown
-* OpenDocument Text export::    Exporting to OpenDocument Text
+* OpenDocument text export::    Exporting to OpenDocument Text
 * iCalendar export::            Exporting to iCalendar
 * Other built-in back-ends::    Exporting to @code{Texinfo}, a man page, or Org
 * Export in foreign buffers::   Author tables in lists in Org syntax
 * Advanced configuration::      Fine-tuning the export output
 @end menu
 
-@node The Export Dispatcher
-@section The Export Dispatcher
+@node The export dispatcher
+@section The export dispatcher
 @vindex org-export-dispatch-use-expert-ui
 @cindex Export, dispatcher
 
@@ -10469,14 +10469,14 @@ Export options can be set: globally with variables; for an individual file by
 making variables buffer-local with in-buffer settings (@pxref{In-buffer
 settings}), by setting individual keywords, or by specifying them in a
 compact form with the @code{#+OPTIONS} keyword; or for a tree by setting
-properties (@pxref{Properties and Columns}).  Options set at a specific level
+properties (@pxref{Properties and columns}).  Options set at a specific level
 override options set at a more general level.
 
 @cindex #+SETUPFILE
 In-buffer settings may appear anywhere in the file, either directly or
 indirectly through a file included using @samp{#+SETUPFILE: filename} syntax.
 Option keyword sets tailored to a particular back-end can be inserted from
-the export dispatcher (@pxref{The Export Dispatcher}) using the @code{Insert
+the export dispatcher (@pxref{The export dispatcher}) using the @code{Insert
 template} command by pressing @key{#}.  To insert keywords individually,
 a good way to make sure the keyword is correct is to type @code{#+} and then
 to use @kbd{M-<TAB>} for completion.
@@ -11892,8 +11892,8 @@ that one (@pxref{Export settings}).
 
 @c begin opendocument
 
-@node OpenDocument Text export
-@section OpenDocument Text export
+@node OpenDocument text export
+@section OpenDocument text export
 @cindex ODT
 @cindex OpenDocument
 @cindex export, OpenDocument
@@ -12893,7 +12893,7 @@ On top of the aforemetioned back-ends, Org comes with other built-in ones:
 
 To activate these export back-end, customize @code{org-export-backends} or
 load them directly with e.g., @code{(require 'ox-texinfo)}.  This will add
-new keys in the export dispatcher (@pxref{The Export Dispatcher}).
+new keys in the export dispatcher (@pxref{The export dispatcher}).
 
 See the comment section of these files for more information on how to use
 them.
@@ -13629,7 +13629,7 @@ This may be necessary in particular if files include other files via
 @comment  node-name,  next,  previous,  up
 @comment Working With Source Code, Miscellaneous, Publishing, Top
 
-@node Working With Source Code
+@node Working with source code
 @chapter Working with source code
 @cindex Schulte, Eric
 @cindex Davison, Dan
@@ -13682,7 +13682,7 @@ The following sections describe Org mode's code block handling facilities.
 
 Live code blocks can be specified with a @samp{src} block or
 inline.@footnote{Note that @samp{src} blocks may be inserted using Org mode's
-@ref{Easy Templates} system}  The structure of a @samp{src} block is
+@ref{Easy templates} system}  The structure of a @samp{src} block is
 
 @example
 #+NAME: <name>
@@ -14277,7 +14277,7 @@ argument in lowercase letters.  The following header arguments are defined:
 
 @menu
 * var::                         Pass arguments to code blocks
-* results::                     Specify the type of results and how they will
+* Results::                     Specify the type of results and how they will
                                 be collected and handled
 * file::                        Specify a path for file output
 * file-desc::                   Specify a description for file results
@@ -14568,7 +14568,7 @@ Emacs Lisp, as shown in the following example.
 : (a b c)
 @end example
 
-@node results
+@node Results
 @subsubsection @code{:results}
 
 There are four classes of @code{:results} header argument.  Only one option
@@ -15316,7 +15316,7 @@ block body before execution.  Also see @ref{prologue}.
 The way in which results are handled depends on whether a session is invoked,
 as well as on whether @code{:results value} or @code{:results output} is
 used.  The following table shows the table possibilities.  For a full listing
-of the possible results header arguments see @ref{results}.
+of the possible results header arguments see @ref{Results}.
 
 @multitable @columnfractions 0.26 0.33 0.41
 @item @tab @b{Non-session} @tab @b{Session}
@@ -15588,7 +15588,7 @@ emacs -Q --batch \
 
 @menu
 * Completion::                  M-TAB knows what you need
-* Easy Templates::              Quick insertion of structural elements
+* Easy templates::              Quick insertion of structural elements
 * Speed keys::                  Electric commands at the beginning of a headline
 * Code evaluation security::    Org mode files evaluate inline code
 * Customization::               Adapting Org to your taste
@@ -15663,8 +15663,8 @@ Elsewhere, complete dictionary words using Ispell.
 @end itemize
 @end table
 
-@node Easy Templates
-@section Easy Templates
+@node Easy templates
+@section Easy templates
 @cindex template insertion
 @cindex insertion, of templates
 
@@ -16779,7 +16779,7 @@ special context for that add-on and executes functionality appropriate for
 the context.  Here is an example from Dan Davison's @file{org-R.el} which
 allows you to evaluate commands based on the @file{R} programming language
 @footnote{@file{org-R.el} has been replaced by the Org mode functionality
-described in @ref{Working With Source Code} and is now obsolete.}.  For this
+described in @ref{Working with source code} and is now obsolete.}.  For this
 package, special contexts are lines that start with @code{#+R:} or
 @code{#+RR:}.
 
@@ -17787,7 +17787,7 @@ This might include a file that is not currently in your list of agenda files.
 If you later use @kbd{C-c a ?} to regenerate the view, only the current
 agenda files will be searched.} using @kbd{C-c a ?}.
 
-@node History and Acknowledgments
+@node History and acknowledgments
 @appendix History and acknowledgments
 @cindex acknowledgments
 @cindex history
