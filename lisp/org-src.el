@@ -757,6 +757,8 @@ with \",*\", \",#+\", \",,*\" and \",,#+\"."
 	(delete-region beg (max beg end))
 	(unless (string-match "\\`[ \t]*\\'" code)
 	  (insert code))
+	;; Make sure the overlay stays in place
+	(when (eq context 'save) (move-overlay ovl beg (point)))
 	(goto-char beg)
 	(if single (just-one-space))))
     (if (memq t (mapcar (lambda (overlay)
