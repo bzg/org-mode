@@ -76,11 +76,12 @@
     (keyword . org-man-keyword)
     (line-break . org-man-line-break)
     (link . org-man-link)
+    (node-property . org-man-node-property)
     (paragraph . org-man-paragraph)
     (plain-list . org-man-plain-list)
     (plain-text . org-man-plain-text)
     (planning . org-man-planning)
-    (property-drawer . (lambda (&rest args) ""))
+    (property-drawer . org-man-property-drawer)
     (quote-block . org-man-quote-block)
     (quote-section . org-man-quote-section)
     (radio-target . org-man-radio-target)
@@ -663,6 +664,16 @@ INFO is a plist holding contextual information.  See
      ;; No path, only description.  Try to do something useful.
      (t (format "\\fI%s\\fP" desc)))))
 
+;;;; Node Property
+
+(defun org-man-node-property (node-property contents info)
+  "Transcode a NODE-PROPERTY element from Org to Man.
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (format "%s:%s"
+          (org-element-property :key node-property)
+          (let ((value (org-element-property :value node-property)))
+            (if value (concat " " value) ""))))
 
 ;;; Paragraph
 
@@ -722,6 +733,12 @@ contextual information."
 
 ;;; Property Drawer
 
+(defun org-man-property-drawer (property-drawer contents info)
+  "Transcode a PROPERTY-DRAWER element from Org to Man.
+CONTENTS holds the contents of the drawer.  INFO is a plist
+holding contextual information."
+  (and (org-string-nw-p contents)
+       (format ".RS\n.nf\n%s\n.fi\n.RE" contents)))
 
 ;;; Quote Block
 

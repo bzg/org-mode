@@ -479,6 +479,25 @@ Paragraph"
 	    (org-test-with-temp-text "CLOSED: [2012-04-29 sun. 10:45]"
 	      (org-export-as (org-test-default-backend)
 			     nil nil nil '(:with-planning nil))))))
+  ;; Property Drawers.
+  (should
+   (equal "* H1\n"
+	  (org-test-with-temp-text
+	      "* H1\n  :PROPERTIES:\n  :PROP: value\n  :END:"
+	    (org-export-as (org-test-default-backend)
+			   nil nil nil '(:with-properties nil)))))
+  (should
+   (equal "* H1\n:PROPERTIES:\n:PROP:     value\n:END:\n"
+	  (org-test-with-temp-text
+	      "* H1\n  :PROPERTIES:\n  :PROP: value\n  :END:"
+	    (org-export-as (org-test-default-backend)
+			   nil nil nil '(:with-properties t)))))
+  (should
+   (equal "* H1\n:PROPERTIES:\n:B:        2\n:END:\n"
+	  (org-test-with-temp-text
+	      "* H1\n  :PROPERTIES:\n  :A: 1\n  :B: 2\n:END:"
+	    (org-export-as (org-test-default-backend)
+			   nil nil nil '(:with-properties ("B"))))))
   ;; Statistics cookies.
   (should
    (equal ""

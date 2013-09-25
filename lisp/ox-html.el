@@ -76,6 +76,7 @@
     (latex-fragment . org-html-latex-fragment)
     (line-break . org-html-line-break)
     (link . org-html-link)
+    (node-property . org-html-node-property)
     (paragraph . org-html-paragraph)
     (plain-list . org-html-plain-list)
     (plain-text . org-html-plain-text)
@@ -2782,6 +2783,17 @@ INFO is a plist holding contextual information.  See
      ;; No path, only description.  Try to do something useful.
      (t (format "<i>%s</i>" desc)))))
 
+;;;; Node Property
+
+(defun org-html-node-property (node-property contents info)
+  "Transcode a NODE-PROPERTY element from Org to HTML.
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (format "%s:%s"
+          (org-element-property :key node-property)
+          (let ((value (org-element-property :value node-property)))
+            (if value (concat " " value) ""))))
+
 ;;;; Paragraph
 
 (defun org-html-paragraph (paragraph contents info)
@@ -2930,11 +2942,10 @@ channel."
 
 (defun org-html-property-drawer (property-drawer contents info)
   "Transcode a PROPERTY-DRAWER element from Org to HTML.
-CONTENTS is nil.  INFO is a plist holding contextual
-information."
-  ;; The property drawer isn't exported but we want separating blank
-  ;; lines nonetheless.
-  "")
+CONTENTS holds the contents of the drawer.  INFO is a plist
+holding contextual information."
+  (and (org-string-nw-p contents)
+       (format "<pre class=\"example\">\n%s</pre>" contents)))
 
 ;;;; Quote Block
 

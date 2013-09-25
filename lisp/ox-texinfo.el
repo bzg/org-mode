@@ -89,6 +89,7 @@
     (keyword . org-texinfo-keyword)
     (line-break . org-texinfo-line-break)
     (link . org-texinfo-link)
+    (node-property . org-texinfo-node-property)
     (paragraph . org-texinfo-paragraph)
     (plain-list . org-texinfo-plain-list)
     (plain-text . org-texinfo-plain-text)
@@ -1294,6 +1295,17 @@ are generated directly."
       ;;(org-texinfo--build-detailed-menu parse top info)
       (org-texinfo--build-menu parse 1 info 'detailed)))))
 
+;;;; Node Property
+
+(defun org-texinfo-node-property (node-property contents info)
+  "Transcode a NODE-PROPERTY element from Org to Texinfo.
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (format "%s:%s"
+          (org-element-property :key node-property)
+          (let ((value (org-element-property :value node-property)))
+            (if value (concat " " value) ""))))
+
 ;;; Paragraph
 
 (defun org-texinfo-paragraph (paragraph contents info)
@@ -1398,11 +1410,10 @@ information."
 
 (defun org-texinfo-property-drawer (property-drawer contents info)
   "Transcode a PROPERTY-DRAWER element from Org to Texinfo.
-CONTENTS is nil.  INFO is a plist holding contextual
-information."
-  ;; The property drawer isn't exported but we want separating blank
-  ;; lines nonetheless.
-  "")
+CONTENTS holds the contents of the drawer.  INFO is a plist
+holding contextual information."
+  (and (org-string-nw-p contents)
+       (format "@verbatim\n%s@end verbatim" contents)))
 
 ;;; Quote Block
 

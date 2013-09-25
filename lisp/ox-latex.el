@@ -63,11 +63,12 @@
     (latex-fragment . org-latex-latex-fragment)
     (line-break . org-latex-line-break)
     (link . org-latex-link)
+    (node-property . org-latex-node-property)
     (paragraph . org-latex-paragraph)
     (plain-list . org-latex-plain-list)
     (plain-text . org-latex-plain-text)
     (planning . org-latex-planning)
-    (property-drawer . (lambda (&rest args) ""))
+    (property-drawer . org-latex-property-drawer)
     (quote-block . org-latex-quote-block)
     (quote-section . org-latex-quote-section)
     (radio-target . org-latex-radio-target)
@@ -1837,6 +1838,18 @@ INFO is a plist holding contextual information.  See
      (t (format org-latex-link-with-unknown-path-format desc)))))
 
 
+;;;; Node Property
+
+(defun org-latex-node-property (node-property contents info)
+  "Transcode a NODE-PROPERTY element from Org to LaTeX.
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (format "%s:%s"
+          (org-element-property :key node-property)
+          (let ((value (org-element-property :value node-property)))
+            (if value (concat " " value) ""))))
+
+
 ;;;; Paragraph
 
 (defun org-latex-paragraph (paragraph contents info)
@@ -1959,6 +1972,16 @@ information."
 			 (org-element-property :raw-value scheduled))))))))
     " ")
    "\\\\"))
+
+
+;;;; Property Drawer
+
+(defun org-latex-property-drawer (property-drawer contents info)
+  "Transcode a PROPERTY-DRAWER element from Org to LaTeX.
+CONTENTS holds the contents of the drawer.  INFO is a plist
+holding contextual information."
+  (and (org-string-nw-p contents)
+       (format "\\begin{verbatim}\n%s\\end{verbatim}" contents)))
 
 
 ;;;; Quote Block

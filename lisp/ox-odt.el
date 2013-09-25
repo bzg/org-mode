@@ -59,6 +59,7 @@
     (latex-fragment . org-odt-latex-fragment)
     (line-break . org-odt-line-break)
     (link . org-odt-link)
+    (node-property . org-odt-node-property)
     (paragraph . org-odt-paragraph)
     (plain-list . org-odt-plain-list)
     (plain-text . org-odt-plain-text)
@@ -2868,6 +2869,18 @@ INFO is a plist holding contextual information.  See
 		"Emphasis" desc)))))
 
 
+;;;; Node Property
+
+(defun org-odt-node-property (node-property contents info)
+  "Transcode a NODE-PROPERTY element from Org to ODT.
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (org-odt--encode-plain-text
+   (format "%s:%s"
+	   (org-element-property :key node-property)
+	   (let ((value (org-element-property :value node-property)))
+	     (if value (concat " " value) "")))))
+
 ;;;; Paragraph
 
 (defun org-odt--format-paragraph (paragraph contents default center quote)
@@ -3005,11 +3018,11 @@ channel."
 
 (defun org-odt-property-drawer (property-drawer contents info)
   "Transcode a PROPERTY-DRAWER element from Org to ODT.
-CONTENTS is nil.  INFO is a plist holding contextual
-information."
-  ;; The property drawer isn't exported but we want separating blank
-  ;; lines nonetheless.
-  "")
+CONTENTS holds the contents of the drawer.  INFO is a plist
+holding contextual information."
+  (and (org-string-nw-p contents)
+       (format "<text:p text:style-name=\"OrgFixedWidthBlock\">%s</text:p>"
+	       contents)))
 
 
 ;;;; Quote Block

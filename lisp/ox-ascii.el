@@ -81,10 +81,12 @@
     (latex-fragment . org-ascii-latex-fragment)
     (line-break . org-ascii-line-break)
     (link . org-ascii-link)
+    (node-property . org-ascii-node-property)
     (paragraph . org-ascii-paragraph)
     (plain-list . org-ascii-plain-list)
     (plain-text . org-ascii-plain-text)
     (planning . org-ascii-planning)
+    (property-drawer . org-ascii-property-drawer)
     (quote-block . org-ascii-quote-block)
     (quote-section . org-ascii-quote-section)
     (radio-target . org-ascii-radio-target)
@@ -1440,6 +1442,18 @@ INFO is a plist holding contextual information."
 	 (unless org-ascii-links-to-notes (format " (%s)" raw-link))))))))
 
 
+;;;; Node Properties
+
+(defun org-ascii-node-property (node-property contents info)
+  "Transcode a NODE-PROPERTY element from Org to ASCII.
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (format "%s:%s"
+          (org-element-property :key node-property)
+          (let ((value (org-element-property :value node-property)))
+            (if value (concat " " value) ""))))
+
+
 ;;;; Paragraph
 
 (defun org-ascii-paragraph (paragraph contents info)
@@ -1507,6 +1521,15 @@ channel."
 			   (org-translate-time
 			    (org-element-property :raw-value scheduled)))))))
    " "))
+
+
+;;;; Property Drawer
+
+(defun org-ascii-property-drawer (property-drawer contents info)
+  "Transcode a PROPERTY-DRAWER element from Org to ASCII.
+CONTENTS holds the contents of the drawer.  INFO is a plist
+holding contextual information."
+  (org-string-nw-p contents))
 
 
 ;;;; Quote Block

@@ -82,9 +82,11 @@ This variable can be set to either `atx' or `setext'."
 		     (item . org-md-item)
 		     (line-break . org-md-line-break)
 		     (link . org-md-link)
+		     (node-property . org-md-node-property)
 		     (paragraph . org-md-paragraph)
 		     (plain-list . org-md-plain-list)
 		     (plain-text . org-md-plain-text)
+		     (property-drawer . org-md-property-drawer)
 		     (quote-block . org-md-quote-block)
 		     (quote-section . org-md-example-block)
 		     (section . org-md-section)
@@ -334,6 +336,18 @@ a communication channel."
 		 (format "[%s](%s)" contents path)))))))
 
 
+;;;; Node Property
+
+(defun org-md-node-property (node-property contents info)
+  "Transcode a NODE-PROPERTY element into Markdown syntax.
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (format "%s:%s"
+          (org-element-property :key node-property)
+          (let ((value (org-element-property :value node-property)))
+            (if value (concat " " value) ""))))
+
+
 ;;;; Paragraph
 
 (defun org-md-paragraph (paragraph contents info)
@@ -380,6 +394,16 @@ contextual information."
     (setq text (replace-regexp-in-string "[ \t]*\n" "  \n" text)))
   ;; Return value.
   text)
+
+
+;;;; Property Drawer
+
+(defun org-md-property-drawer (property-drawer contents info)
+  "Transcode a PROPERTY-DRAWER element into Markdown format.
+CONTENTS holds the contents of the drawer.  INFO is a plist
+holding contextual information."
+  (and (org-string-nw-p contents)
+       (replace-regexp-in-string "^" "    " contents)))
 
 
 ;;;; Quote Block

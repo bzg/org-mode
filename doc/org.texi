@@ -10461,6 +10461,7 @@ Other back-ends might be found in the @code{contrib/} directory
 @section Export settings
 @cindex Export, settings
 
+@cindex #+OPTIONS
 Export options can be set: globally with variables; for an individual file by
 making variables buffer-local with in-buffer settings (@pxref{In-buffer
 settings}), by setting individual keywords, or by specifying them in a
@@ -10482,34 +10483,41 @@ variables, include:
 
 @table @samp
 @item AUTHOR
+@cindex #+AUTHOR
 @vindex user-full-name
 The document author (@code{user-full-name}).
 
 @item CREATOR
+@cindex #+CREATOR
 @vindex org-export-creator-string
 Entity responsible for output generation (@code{org-export-creator-string}).
 
 @item DATE
+@cindex #+DATE
 @vindex org-export-date-timestamp-format
 A date or a time-stamp@footnote{The variable
 @code{org-export-date-timestamp-format} defines how this time-stamp will be
 exported.}.
 
 @item DESCRIPTION
+@cindex #+DESCRIPTION
 The document description.  Back-ends handle it as they see fit (e.g., for the
 XHTML meta tag), if at all.  You can use several such keywords for long
 descriptions.
 
 @item EMAIL
+@cindex #+EMAIL
 @vindex user-mail-address
 The email address (@code{user-mail-address}).
 
 @item KEYWORDS
+@cindex #+KEYWORDS
 The keywords defining the contents of the document.  Back-ends handle it as
 they see fit (e.g., for the XHTML meta tag), if at all.  You can use several
 such keywords if the list is long.
 
 @item LANGUAGE
+@cindex #+LANGUAGE
 @vindex org-export-default-language
 The language used for translating some strings
 (@code{org-export-default-language}).  E.g., @samp{#+LANGUAGE: fr} will tell
@@ -10517,6 +10525,7 @@ Org to translate @emph{File} (english) into @emph{Fichier} (french) in the
 clocktable.
 
 @item SELECT_TAGS
+@cindex #+SELECT_TAGS
 @vindex org-export-select-tags
 The tags that select a tree for export (@code{org-export-select-tags}).  The
 default value is @code{:export:}.  Within a subtree tagged with
@@ -10524,12 +10533,15 @@ default value is @code{:export:}.  Within a subtree tagged with
 below).
 
 @item EXCLUDE_TAGS
+@cindex #+EXCLUDE_TAGS
+@vindex org-export-exclude-tags
 The tags that exclude a tree from export (@code{org-export-exclude-tags}).
 The default value is @code{:noexport:}.  Entries with the @code{:noexport:}
 tag will be unconditionally excluded from the export, even if they have an
 @code{:export:} tag.
 
 @item TITLE
+@cindex #+TITLE
 The title to be shown (otherwise derived from buffer's name).  You can use
 several such keywords for long titles.
 @end table
@@ -10634,6 +10646,11 @@ Toggle export of planning information (@code{org-export-with-planning}).
 @item pri:
 @vindex org-export-with-priority
 Toggle inclusion of priority cookies (@code{org-export-with-priority}).
+
+@item prop:
+@vindex org-export-with-properties
+Toggle inclusion of property drawers, or list properties to include
+(@code{org-export-with-properties}).
 
 @item stat:
 @vindex org-export-with-statistics-cookies
@@ -13293,6 +13310,7 @@ string of these options for details.
 @vindex org-export-with-latex
 @vindex org-export-with-planning
 @vindex org-export-with-priority
+@vindex org-export-with-properties
 @vindex org-export-with-section-numbers
 @vindex org-export-with-special-strings
 @vindex org-export-with-sub-superscripts
@@ -13303,7 +13321,6 @@ string of these options for details.
 @vindex org-export-with-toc
 @vindex org-export-with-todo-keywords
 @vindex user-mail-address
-
 @multitable @columnfractions 0.32 0.68
 @item @code{:archived-trees}        @tab @code{org-export-with-archived-trees}
 @item @code{:exclude-tags}          @tab @code{org-export-exclude-tags}
@@ -13323,6 +13340,7 @@ string of these options for details.
 @item @code{:with-latex}            @tab @code{org-export-with-latex}
 @item @code{:with-planning}         @tab @code{org-export-with-planning}
 @item @code{:with-priority}         @tab @code{org-export-with-priority}
+@item @code{:with-properties}       @tab @code{org-export-with-properties}
 @item @code{:with-special-strings}  @tab @code{org-export-with-special-strings}
 @item @code{:with-sub-superscript}  @tab @code{org-export-with-sub-superscripts}
 @item @code{:with-tables}           @tab @code{org-export-with-tables}

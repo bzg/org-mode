@@ -128,6 +128,7 @@
     (:with-latex nil "tex" org-export-with-latex)
     (:with-planning nil "p" org-export-with-planning)
     (:with-priority nil "pri" org-export-with-priority)
+    (:with-properties nil "prop" org-export-with-properties)
     (:with-smart-quotes nil "'" org-export-with-smart-quotes)
     (:with-special-strings nil "-" org-export-with-special-strings)
     (:with-statistics-cookies nil "stat" org-export-with-statistics-cookies)
@@ -396,10 +397,11 @@ This option can also be set on with the CREATOR keyword."
   "Non-nil means export contents of standard drawers.
 
 When t, all drawers are exported.  This may also be a list of
-drawer names to export.  If that list starts with `not', only
-drawers with such names will be ignored.
+drawer names to export, as strings.  If that list starts with
+`not', only drawers with such names will be ignored.
 
-This variable doesn't apply to properties drawers.
+This variable doesn't apply to properties drawers.  See
+`org-export-with-properties' instead.
 
 This option can also be set with the OPTIONS keyword,
 e.g. \"d:nil\"."
@@ -556,6 +558,23 @@ This option can also be set with the OPTIONS keyword,
 e.g. \"pri:t\"."
   :group 'org-export-general
   :type 'boolean)
+
+(defcustom org-export-with-properties nil
+  "Non-nil means export contents of properties drawers.
+
+When t, all properties are exported.  This may also be a list of
+properties to export, as strings.
+
+This option can also be set with the OPTIONS keyword,
+e.g. \"prop:t\"."
+  :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.3")
+  :type '(choice
+	  (const :tag "All properties" t)
+	  (const :tag "None" nil)
+	  (repeat :tag "Selected properties"
+		  (string :tag "Property name"))))
 
 (defcustom org-export-with-section-numbers t
   "Non-nil means add section numbers to headlines when exporting.
@@ -2072,7 +2091,14 @@ a tree with a select tag."
 		      (not (eq todo-type with-tasks)))
 		 (and (consp with-tasks) (not (member todo with-tasks))))))))
     ((latex-environment latex-fragment) (not (plist-get options :with-latex)))
+    (node-property
+     (let ((properties-set (plist-get options :with-properties)))
+       (cond ((null properties-set) t)
+	     ((consp properties-set)
+	      (not (member-ignore-case (org-element-property :key blob)
+				       properties-set))))))
     (planning (not (plist-get options :with-planning)))
+    (property-drawer (not (plist-get options :with-properties)))
     (statistics-cookie (not (plist-get options :with-statistics-cookies)))
     (table-cell
      (and (org-export-table-has-special-column-p
