@@ -3060,10 +3060,13 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
   "Fit the window to the buffer size."
   (and (memq org-agenda-window-setup '(reorganize-frame))
        (fboundp 'fit-window-to-buffer)
-       (org-fit-window-to-buffer
-	nil
-	(floor (* (frame-height) (cdr org-agenda-window-frame-fractions)))
-	(floor (* (frame-height) (car org-agenda-window-frame-fractions))))))
+       (if (and (= (cdr org-agenda-window-frame-fractions) 1.0)
+		(= (car org-agenda-window-frame-fractions) 1.0))
+	   (delete-other-windows)
+	 (org-fit-window-to-buffer
+	  nil
+	  (floor (* (frame-height) (cdr org-agenda-window-frame-fractions)))
+	  (floor (* (frame-height) (car org-agenda-window-frame-fractions)))))))
 
 (defvar org-cmd nil)
 (defvar org-agenda-overriding-cmd nil)
