@@ -113,14 +113,11 @@ code."
            (timefmt (cdr (assoc :timefmt params)))
            (time-ind (or (cdr (assoc :timeind params))
                          (when timefmt 1)))
-	   (missing (cdr (assoc :missing params)))
 	   (add-to-body (lambda (text) (setq body (concat text "\n" body))))
            output)
       ;; append header argument settings to body
       (when title (funcall add-to-body (format "set title '%s'" title)))
       (when lines (mapc (lambda (el) (funcall add-to-body el)) lines))
-      (when missing
-	(funcall add-to-body (format "set datafile missing '%s'" missing)))
       (when sets
 	(mapc (lambda (el) (funcall add-to-body (format "set %s" el))) sets))
       (when x-labels
