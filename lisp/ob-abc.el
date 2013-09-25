@@ -64,16 +64,23 @@
 	 (out-file ((lambda (el)
 		      (or el
 			  (error "abc code block requires :file header argument")))
-		    ;;; For SVG or EPS output, abcm2ps will add a number for a particular page
-		    ;;; automatically. This needs to be specified in the :file argument and stripped
-		    ;;; stripped out here. There is likely a better way to do this.
-		    (replace-regexp-in-string "001" "" (cdr (assoc :file params)))))
+		    (replace-regexp-in-string "\.pdf$" ".ps" (cdr (assoc :file params)))))
 	 (in-file (org-babel-temp-file "abc-"))
-	 (cmd (concat "abcm2ps" " " cmdline
+	 (render (concat "abcm2ps" " " cmdline
 		      " -O " (org-babel-process-file-name out-file)
 		      " " (org-babel-process-file-name in-file))))
     (with-temp-file in-file (insert (org-babel-expand-body:abc body params)))
-    (org-babel-eval cmd "")
+    (org-babel-eval render "")
+    ;;; handle where abcm2ps changes the file name (to support multiple files
+    (when (or (string= (file-name-extension out-file) "eps")
+	      (string= (file-name-extension out-file) "svg"))
+      (rename-file (concat
+		    (file-name-sans-extension out-file) "001."
+		    (file-name-extension out-file))
+		   out-file t))
+    ;;; if we were asked for a pdf...
+    (when (string= (file-name-extension (cdr (assoc :file params))) "pdf")
+      (org-babel-eval (concat "ps2pdf" " " out-file " " (cdr (assoc :file params))) ""))
     ;;; indicate that the file has been written
     nil))
 
