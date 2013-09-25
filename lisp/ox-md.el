@@ -487,17 +487,6 @@ publishing directory.
 Return output file name."
   (org-publish-org-to 'md filename ".md" plist pub-dir))
 
-;;;###autoload
-(defun org-md-publish-to-md (plist filename pub-dir)
-  "Publish an org file to Markdown.
-
-FILENAME is the filename of the Org file to be published.  PLIST
-is the property list for the given project.  PUB-DIR is the
-publishing directory.
-
-Return output file name."
-  (org-publish-org-to 'md filename ".md" plist pub-dir))
-
 (provide 'ox-md)
 
 ;; Local variables:
