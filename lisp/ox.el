@@ -1955,10 +1955,15 @@ for a footnotes section."
   "Return list of elements and objects to ignore during export.
 DATA is the parse tree to traverse.  OPTIONS is the plist holding
 export options."
-  (let* (ignore
-	 walk-data
+  (let* (walk-data
 	 ;; First find trees containing a select tag, if any.
 	 (selected (org-export--selected-trees data options))
+	 ;; If a select tag is active, also ignore the section before
+	 ;; the first headline, if any.
+	 (ignore (and selected
+		      (let ((first-element (car (org-element-contents data))))
+			(and (eq (org-element-type first-element) 'section)
+			     first-element))))
 	 (walk-data
 	  (lambda (data)
 	    ;; Collect ignored elements or objects into IGNORE-LIST.
@@ -1969,8 +1974,8 @@ export options."
 			 (org-element-property :archivedp data))
 		    ;; If headline is archived but tree below has
 		    ;; to be skipped, add it to ignore list.
-		    (mapc (lambda (e) (push e ignore))
-			  (org-element-contents data))
+		    (dolist (element (org-element-contents data))
+		      (push element ignore))
 		  ;; Move into secondary string, if any.
 		  (let ((sec-prop
 			 (cdr (assq type org-element-secondary-value-alist))))

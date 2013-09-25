@@ -338,6 +338,20 @@ Paragraph"
 	    (let ((org-tags-column 0))
 	      (org-export-as (org-test-default-backend)
 			     nil nil nil '(:select-tags ("exp")))))))
+  ;; If there is an include tag, ignore the section before the first
+  ;; headline, if any.
+  (should
+   (equal "* H1 :exp:\nBody\n"
+	  (org-test-with-temp-text "First section\n* H1 :exp:\nBody"
+	    (let ((org-tags-column 0))
+	      (org-export-as (org-test-default-backend)
+			     nil nil nil '(:select-tags ("exp")))))))
+  (should-not
+   (equal "* H1 :exp:\n"
+	  (org-test-with-temp-text "* H1 :exp:\nBody"
+	    (let ((org-tags-column 0))
+	      (org-export-as (org-test-default-backend)
+			     nil nil nil '(:select-tags ("exp")))))))
   ;; Test mixing include tags and exclude tags.
   (should
    (string-match
