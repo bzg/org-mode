@@ -46,6 +46,7 @@
 		     (headline . org-confluence-headline)
 		     (italic . org-confluence-italic)
 		     (link . org-confluence-link)
+		     (property-drawer . org-confluence-property-drawer)
 		     (section . org-confluence-section)
 		     (src-block . org-confluence-src-block)
 		     (strike-through . org-confluence-strike-through)
@@ -93,6 +94,11 @@
              (t
               raw-link))
             "]")))
+
+(defun org-confluence-property-drawer (property-drawer contents info)
+  (and (org-string-nw-p contents)
+       (format "\{\{%s\}\}" contents)))
+
 (defun org-confluence-section (section contents info)
   contents)
 
