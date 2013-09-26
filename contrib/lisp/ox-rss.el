@@ -222,7 +222,10 @@ communication channel."
   (unless (or (org-element-property :footnote-section-p headline)
 	      ;; Only consider first-level headlines
 	      (> (org-export-get-relative-level headline info) 1))
-    (let* ((htmlext (plist-get info :html-extension))
+    (let* ((author (and (plist-get info :with-author)
+			(let ((auth (plist-get info :author)))
+			  (and auth (org-export-data auth info)))))
+	   (htmlext (plist-get info :html-extension))
 	   (hl-number (org-export-get-headline-number headline info))
 	   (hl-home (file-name-as-directory (plist-get info :html-link-home)))
 	   (hl-pdir (plist-get info :publishing-directory))
@@ -260,12 +263,13 @@ communication channel."
 	"<item>\n"
 	"<title>%s</title>\n"
 	"<link>%s</link>\n"
+	"<author>%s</author>\n"
 	"<guid isPermaLink=\"false\">%s</guid>\n"
 	"<pubDate>%s</pubDate>\n"
 	(org-rss-build-categories headline info) "\n"
 	"<description><![CDATA[%s]]></description>\n"
 	"</item>\n")
-       title publink guid pubdate contents))))
+       title publink author guid pubdate contents))))
 
 (defun org-rss-build-categories (headline info)
   "Build categories for the RSS item."
