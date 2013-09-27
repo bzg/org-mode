@@ -2680,11 +2680,7 @@ Fixes a bug in `tramp-handle-call-process-region'."
 
 (defun org-babel-local-file-name (file)
   "Return the local name component of FILE."
-  (if (file-remote-p file)
-      (let (localname)
-	(with-parsed-tramp-file-name file nil
-				     localname))
-    file))
+  (or (file-remote-p file 'localname) file))
 
 (defun org-babel-process-file-name (name &optional no-quote-p)
   "Prepare NAME to be used in an external process.
@@ -2694,7 +2690,10 @@ remotely.  The file name is then processed by `expand-file-name'.
 Unless second argument NO-QUOTE-P is non-nil, the file name is
 additionally processed by `shell-quote-argument'"
   ((lambda (f) (if no-quote-p f (shell-quote-argument f)))
-   (expand-file-name (org-babel-local-file-name name))))
+   ;; We must apply `expand-file-name' on the whole filename.  If we
+   ;; would apply it on the local filename only, undesired effects
+   ;; like prepending a drive letter on MS Windows could happen.
+   (org-babel-local-file-name (expand-file-name name))))
 
 (defvar org-babel-temporary-directory)
 (unless (or noninteractive (boundp 'org-babel-temporary-directory))
@@ -2706,6 +2705,11 @@ additionally processed by `shell-quote-argument'"
     "Directory to hold temporary files created to execute code blocks.
 Used by `org-babel-temp-file'.  This directory will be removed on
 Emacs shutdown."))
+
+(defcustom org-babel-remote-temporary-directory "/tmp/"
+  "Directory to hold temporary files on remote hosts."
+  :group 'org-babel
+  :type 'string)
 
 (defmacro org-babel-result-cond (result-params scalar-form &rest table-forms)
   "Call the code to parse raw string results according to RESULT-PARAMS."
@@ -2736,7 +2740,8 @@ of `org-babel-temporary-directory'."
   (if (file-remote-p default-directory)
       (let ((prefix
              (concat (file-remote-p default-directory)
-                     (expand-file-name prefix temporary-file-directory))))
+                     (expand-file-name
+		      prefix org-babel-remote-temporary-directory))))
         (make-temp-file prefix nil suffix))
     (let ((temporary-file-directory
 	   (or (and (boundp 'org-babel-temporary-directory)
