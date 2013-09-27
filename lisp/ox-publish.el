@@ -170,6 +170,7 @@ included.  See the back-end documentation for more information.
   :with-inlinetasks         `org-export-with-inlinetasks'
   :with-latex               `org-export-with-latex'
   :with-priority            `org-export-with-priority'
+  :with-properties          `org-export-with-properties'
   :with-smart-quotes        `org-export-with-smart-quotes'
   :with-special-strings     `org-export-with-special-strings'
   :with-statistics-cookies' `org-export-with-statistics-cookies'
