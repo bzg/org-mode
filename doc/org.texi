@@ -808,11 +808,11 @@ emails, Usenet messages, BBDB entries, and any files related to the projects.
 
 Org develops organizational tasks around notes files that contain lists or
 information about projects as plain text.  As a project planning environment,
-Org works by adding metadata to outline nodes.  Based on this data, specific
-entries can be extracted in queries and create dynamic @i{agenda views} that
-also utilize and smoothly integrate much of the Emacs calendar and diary.
-Org can be used to implement many different project planning schemes, such
-as David Allen's GTD system.
+Org works by adding metadata (as plain text) to outline nodes.  Based on this
+data, specific entries can be extracted in queries and create dynamic
+@i{agenda views} that also utilize and smoothly integrate much of the Emacs
+calendar and diary.  Org can be used to implement many different project
+planning schemes, such as David Allen's GTD system.
 
 Org files can serve as a single source authoring system with export to many
 different formats such as HTML, @LaTeX{}, Open Document, and Markdown.  New
@@ -820,7 +820,7 @@ export backends be derived from existing ones, or defined from scratch.
 
 Org mode supports working with embedded source code blocks in a file, which
 makes it uniquely suited for authoring technical documents with code
-examples.  It facilitates code evaluation, embedding of code output into the
+examples.  It facilitates code evaluation, capturing code output into the
 document, documentation, and literate programming techniques.
 
 Org keeps simple things simple.  When first fired up, it should feel like a
