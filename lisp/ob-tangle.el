@@ -243,6 +243,10 @@ used to limit the exported source code blocks by language."
 			    (if (file-exists-p file-name)
 				(insert-file-contents file-name))
 			    (goto-char (point-max))
+			    ;; Handle :padlines unless first line in file
+			    (unless (or (string= "no" (cdr (assoc :padline (nth 4 spec))))
+					(= (point) (point-min)))
+			      (insert "\n"))
 			    (insert content)
 			    (write-region nil nil file-name))))
 		      ;; if files contain she-bangs, then make the executable
@@ -307,7 +311,6 @@ that the appropriate major-mode is set.  SPEC has the form:
 	 (body (nth 5 spec))
 	 (comment (nth 6 spec))
 	 (comments (cdr (assoc :comments (nth 4 spec))))
-	 (padline (not (string= "no" (cdr (assoc :padline (nth 4 spec))))))
 	 (link-p (or (string= comments "both") (string= comments "link")
 		     (string= comments "yes") (string= comments "noweb")))
 	 (link-data (mapcar (lambda (el)
@@ -327,7 +330,6 @@ that the appropriate major-mode is set.  SPEC has the form:
       (funcall
        insert-comment
        (org-fill-template org-babel-tangle-comment-format-beg link-data)))
-    (when (and padline (not (= (point) (point-min)))) (insert "\n"))
     (insert
      (format
       "%s\n"
