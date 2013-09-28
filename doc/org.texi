@@ -826,6 +826,11 @@ makes it uniquely suited for authoring technical documents with code
 examples.  It facilitates code evaluation, capturing code output into the
 document, documentation, and literate programming techniques.
 
+Org has its roots in the practical desire of a scientist to organize his life
+and work.  Over the past ten years it has been shaped by a community of
+truely excellent people who have expanded and deepened its applications and
+clarified its implementation.
+
 Org keeps simple things simple.  When first fired up, it should feel like a
 straightforward, easy to use outliner.  Complexity is not imposed, but a
 large amount of functionality is available when you need it.  Org is a
