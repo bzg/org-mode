@@ -327,7 +327,7 @@ that the appropriate major-mode is set.  SPEC has the form:
       (funcall
        insert-comment
        (org-fill-template org-babel-tangle-comment-format-beg link-data)))
-    (when (and padline (not (= (point) (point-min)))) (insert "\n"))
+    (when padline (insert "\n"))
     (insert
      (format
       "%s\n"
