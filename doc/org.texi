@@ -297,6 +297,9 @@ Jambunathan K, Dan Davison, Thomas Dye, David O'Toole, and Philip Rooke.
 @insertcopying
 @end titlepage
 
+@c Output the short table of contents at the beginning.
+@shortcontents
+
 @c Output the table of contents at the beginning.
 @contents
 
