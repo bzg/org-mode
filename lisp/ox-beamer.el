@@ -539,12 +539,14 @@ used as a communication channel."
 			 ((not env) "column")
 			 ;; Use specified environment.
 			 (t env))))
-	 (env-format (unless (member environment '("column" "columns"))
-		       (assoc environment
-			      (append org-beamer-environments-special
-				      org-beamer-environments-extra
-				      org-beamer-environments-default))))
 	 (raw-title (org-element-property :raw-value headline))
+	 (env-format
+	  (cond ((member environment '("column" "columns")) nil)
+		((assoc environment
+			(append org-beamer-environments-extra
+				org-beamer-environments-default)))
+		(t (user-error "Wrong block type at a headline named \"%s\""
+			       raw-title))))
 	 (title (org-export-data (org-element-property :title headline) info))
 	 (options (let ((options (org-element-property :BEAMER_OPT headline)))
 		    (if (not options) ""
@@ -589,7 +591,7 @@ used as a communication channel."
 	       (if (equal environment "column") options "")
 	       (format "%s\\textwidth" column-width)))
      ;; Block's opening string.
-     (when env-format
+     (when (nth 2 env-format)
        (concat
 	(org-fill-template
 	 (nth 2 env-format)
@@ -617,8 +619,8 @@ used as a communication channel."
 			    (format "[%s]" raw-title))))))
 	"\n"))
      contents
-     ;; Block's closing string.
-     (when environment (concat (nth 3 env-format) "\n"))
+     ;; Block's closing string, if any.
+     (and (nth 3 env-format) (concat (nth 3 env-format) "\n"))
      (when column-width "\\end{column}\n")
      (when end-columns-p "\\end{columns}"))))
 
