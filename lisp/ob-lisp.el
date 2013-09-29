@@ -89,10 +89,9 @@ current directory string."
 			     ,(let ((dir (if (assoc :dir params)
 					     (cdr (assoc :dir params))
 					   default-directory)))
-				(format
-				 (if dir (format org-babel-lisp-dir-fmt dir) "(progn %s)")
-				 (buffer-substring-no-properties
-				  (point-min) (point-max)))))
+				(format (format org-babel-lisp-dir-fmt dir)
+					(buffer-substring-no-properties
+					 (point-min) (point-max)))))
 			   (cdr (assoc :package params))))))
    (org-babel-pick-name (cdr (assoc :colname-names params))
 			(cdr (assoc :colnames params)))
