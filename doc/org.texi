@@ -2143,7 +2143,8 @@ TAB character, the function assumes that the material is tab separated.
 If every line contains a comma, comma-separated values (CSV) are assumed.
 If not, lines are split at whitespace into fields.  You can use a prefix
 argument to force a specific separator: @kbd{C-u} forces CSV, @kbd{C-u
-C-u} forces TAB, and a numeric argument N indicates that at least N
+C-u} forces TAB, @kbd{C-u C-u C-u} will prompt for a regular expression to
+match the separator, and a numeric argument N indicates that at least N
 consecutive spaces, or alternatively a TAB will be the separator.
 @*
 If there is no active region, this command creates an empty Org

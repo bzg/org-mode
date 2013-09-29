@@ -547,7 +547,9 @@ following values:
 
 '(4)     Use the comma as a field separator
 '(16)    Use a TAB as field separator
+'(64)    Prompt for a regular expression as field separator
 integer  When a number, use that many spaces as field separator
+regexp   When a regular expression, use it to match the separator
 nil      When nil, the command tries to be smart and figure out the
          separator in the following way:
          - when each line contains a TAB, assume TAB-separated material
@@ -557,6 +559,8 @@ nil      When nil, the command tries to be smart and figure out the
   (let* ((beg (min beg0 end0))
 	 (end (max beg0 end0))
 	 re)
+    (if (equal separator '(64))
+	(setq separator (read-regexp "Regexp for field separator")))
     (goto-char beg)
     (beginning-of-line 1)
     (setq beg (point-marker))
@@ -591,6 +595,8 @@ nil      When nil, the command tries to be smart and figure out the
 		 (if (< separator 1)
 		     (user-error "Number of spaces in separator must be >= 1")
 		   (format "^ *\\| *\t *\\| \\{%d,\\}" separator)))
+		((stringp separator)
+		 (format "^ *\\|%s" separator))
 		(t (error "This should not happen"))))
       (while (re-search-forward re end t)
 	(replace-match "| " t t)))
