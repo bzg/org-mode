@@ -962,9 +962,8 @@ liking.
 @end lisp
 
 @cindex Org mode, turning on
-With this setup, all files with extension @samp{.org} will be put
-into Org mode.  As an alternative, make the first line of a file look
-like this:
+To turn on Org mode in a file that does not have the extension @file{.org},
+make the first line of a file look like this:
 
 @example
 MY PROJECTS    -*- mode: org; -*-
@@ -1124,7 +1123,7 @@ templates insert lowercase keywords and Babel dynamically inserts
 The manual suggests a few global keybindings, in particular @kbd{C-c a} for
 @code{org-agenda} and @kbd{C-c c} for @code{org-capture}.  These are only
 suggestions, but the rest of the manual assumes that these keybindings are in
-place.
+place in order to list commands by key access.
 
 Also, the manual lists both the keys and the corresponding commands for
 accessing a functionality.  Org mode often uses the same key for different
