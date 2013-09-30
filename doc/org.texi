@@ -810,12 +810,12 @@ built-in table editor.  Plain text URL-like links connect to websites,
 emails, Usenet messages, BBDB entries, and any files related to the projects.
 
 Org develops organizational tasks around notes files that contain lists or
-information about projects as plain text.  As a project planning environment,
-Org works by adding metadata (as plain text) to outline nodes.  Based on this
-data, specific entries can be extracted in queries and create dynamic
-@i{agenda views} that also utilize and smoothly integrate much of the Emacs
-calendar and diary.  Org can be used to implement many different project
-planning schemes, such as David Allen's GTD system.
+information about projects as plain text.  Project planning and task
+management makes use of metadata which is part of an outline node.  Based on
+this data, specific entries can be extracted in queries and create dynamic
+@i{agenda views} that also integrate the Emacs calendar and diary.  Org can
+be used to implement many different project planning schemes, such as David
+Allen's GTD system.
 
 Org files can serve as a single source authoring system with export to many
 different formats such as HTML, @LaTeX{}, Open Document, and Markdown.  New
@@ -828,9 +828,9 @@ document, documentation, and literate programming techniques.
 
 Org keeps simple things simple.  When first fired up, it should feel like a
 straightforward, easy to use outliner.  Complexity is not imposed, but a
-large amount of functionality is available when you need it.  Org is a
-toolbox.  Many users usilize only a (very personal) fraction of Org's
-capabilities, and know that there is more whenever they need it.
+large amount of functionality is available when needed.  Org is a toolbox.
+Many users usilize only a (very personal) fraction of Org's capabilities, and
+know that there is more whenever they need it.
 
 All of this is achieved with strictly plain text files, the most portable and
 future-proof file format.  Org runs in Emacs.  Emacs is one of the most
@@ -843,11 +843,12 @@ version of Org, as well as additional information, frequently asked
 questions (FAQ), links to tutorials, etc.  This page is located at
 @uref{http://orgmode.org}.
 @cindex print edition
-The version 7.3 of this manual is available as a
-@uref{http://www.network-theory.co.uk/org/manual/, paperback book from Network
-Theory Ltd.}
 
+An earlier version (7.3) of this manual is available as a
+@uref{http://www.network-theory.co.uk/org/manual/, paperback book from
+Network Theory Ltd.}
 
+@page
 
 @node Installation
 @section Installation
@@ -956,8 +957,8 @@ suggested bindings for these keys, please modify the keys to your own
 liking.
 @lisp
 (global-set-key "\C-cl" 'org-store-link)
-(global-set-key "\C-cc" 'org-capture)
 (global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cc" 'org-capture)
 (global-set-key "\C-cb" 'org-iswitchb)
 @end lisp
 
