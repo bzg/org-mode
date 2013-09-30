@@ -103,7 +103,7 @@ ELC	= $(BATCHL) \
 	  --eval '(batch-byte-compile)'
 
 # How to make a pdf file from a texinfo file
-TEXI2PDF = texi2pdf --batch --clean
+TEXI2PDF = texi2pdf --batch --clean --expand
 
 # How to make a pdf file from a tex file
 PDFTEX = pdftex
