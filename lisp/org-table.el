@@ -1834,7 +1834,7 @@ blindly applies a recipe that works for simple tables."
 	  (goto-char beg)))))
 
 (defun org-table-transpose-table-at-point ()
-  "Transpose orgmode table at point and eliminate hlines.
+  "Transpose Org table at point and eliminate hlines.
 So a table like
 
 | 1 | 2 | 4 | 5 |
@@ -1849,9 +1849,11 @@ will be transposed as
 | 4 | c | g |
 | 5 | d | h |
 
-Note that horizontal lines disappeared."
+Note that horizontal lines disappear."
   (interactive)
   (let* ((table (delete 'hline (org-table-to-lisp)))
+	 (dline_old (org-table-current-line))
+	 (col_old (org-table-current-column))
 	 (contents (mapcar (lambda (p)
 			     (let ((tp table))
 			       (mapcar
@@ -1861,10 +1863,17 @@ Note that horizontal lines disappeared."
 				    (setq tp (cdr tp))))
 				table)))
 			   (car table))))
-    (delete-region (org-table-begin) (org-table-end))
-    (insert (mapconcat (lambda(x) (concat "| " (mapconcat 'identity x " | " ) "  |\n" ))
-                       contents ""))
-    (org-table-align)))
+    (goto-char (org-table-begin))
+    (re-search-forward "|")
+    (backward-char)
+    (delete-region (point) (org-table-end))
+    (insert (mapconcat
+	     (lambda(x)
+	       (concat "| " (mapconcat 'identity x " | " ) "  |\n" ))
+	     contents ""))
+    (org-table-goto-line col_old)
+    (org-table-goto-column dline_old))
+  (org-table-align))
 
 ;;;###autoload
 (defun org-table-wrap-region (arg)
