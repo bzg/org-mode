@@ -11205,7 +11205,7 @@ and @code{style} attributes for a link:
 @end example
 
 @node Tables in HTML export
-@subsection Tables
+@subsection Tables in HTML export
 @cindex tables, in HTML
 @vindex org-html-table-default-attributes
 
@@ -17839,15 +17839,17 @@ Before I get to this list, a few special mentions are in order:
 @table @i
 @item Bastien Guerry
 Bastien has written a large number of extensions to Org (most of them
-integrated into the core by now), including the @LaTeX{} exporter and the plain
-list parser.  His support during the early days, when he basically acted as
-co-maintainer, was central to the success of this project.  Bastien also
-invented Worg, helped establishing the Web presence of Org, and sponsored
-hosting costs for the orgmode.org website.
+integrated into the core by now), including the @LaTeX{} exporter and the
+plain list parser.  His support during the early days was central to the
+success of this project.  Bastien also invented Worg, helped establishing the
+Web presence of Org, and sponsored hosting costs for the orgmode.org website.
+Bastien stepped in as maintainer of Org between 2011 and 2013, at a time when
+I desparately needed a break.
 @item Eric Schulte and Dan Davison
 Eric and Dan are jointly responsible for the Org-babel system, which turns
 Org into a multi-language environment for evaluating code and doing literate
-programming and reproducible research.
+programming and reproducible research.  This has become one of Org's killer
+features that define what Org is today.
 @item John Wiegley
 John has contributed a number of great ideas and patches directly to Org,
 including the attachment system (@file{org-attach.el}), integration with
@@ -17868,9 +17870,8 @@ let me know what I am missing here!
 
 @section From Bastien
 
-I (Bastien) have been maintaining Org since January 2011.  This appendix
-would not be complete without adding a few more acknowledgements and thanks
-to Carsten's ones above.
+I (Bastien) have been maintaining Org between 2011 and 2013.  This appendix
+would not be complete without adding a few more acknowledgements and thanks.
 
 I am first grateful to Carsten for his trust while handing me over the
 maintainership of Org.  His unremitting support is what really helped me
@@ -17888,13 +17889,13 @@ Eric is maintaining the Babel parts of Org.  His reactivity here kept me away
 from worrying about possible bugs here and let me focus on other parts.
 
 @item Nicolas Goaziou
-Nicolas is maintaining the consistency of the deepest parts of Org.  His
-work on @file{org-element.el} and @file{ox.el} has been outstanding, and
-opened the doors for many new ideas and features.  He rewrote many of the
-old exporters to use the new export engine, and helped with documenting
-this major change.  More importantly (if that's possible), he has been more
-than reliable during all the work done for Org 8.0, and always very
-reactive on the mailing list.
+Nicolas is maintaining the consistency of the deepest parts of Org.  His work
+on @file{org-element.el} and @file{ox.el} has been outstanding, and it opened
+the doors for many new ideas and features.  He rewrote many of the old
+exporters to use the new export engine, and helped with documenting this
+major change.  More importantly (if that's possible), he has been more than
+reliable during all the work done for Org 8.0, and always very reactive on
+the mailing list.
 
 @item Achim Gratz
 Achim rewrote the building process of Org, turning some @emph{ad hoc} tools
@@ -17950,13 +17951,14 @@ specified time.
 calculations and improved XEmacs compatibility, in particular by porting
 @file{nouline.el} to XEmacs.
 @item
-@i{Sacha Chua} suggested copying some linking code from Planner.
+@i{Sacha Chua} suggested copying some linking code from Planner, and helped
+make Org pupular through her blog.
 @item
 @i{Toby S. Cubitt} contributed to the code for clock formats.
 @item
-@i{Baoqiu Cui} contributed the DocBook exporter.  It has been deleted from
-Org 8.0: you can now export to Texinfo and export the @file{.texi} file to
-DocBook using @code{makeinfo}.
+@i{Baoqiu Cui} contributed the first DocBook exporter.  In Org 8.0, we go a
+different route: you can now export to Texinfo and export the @file{.texi}
+file to DocBook using @code{makeinfo}.
 @item
 @i{Eddward DeVilla} proposed and tested checkbox statistics.  He also
 came up with the idea of properties, and that there should be an API for
