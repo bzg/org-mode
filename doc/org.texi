@@ -17972,8 +17972,8 @@ inspired some of the early development, including HTML export.  He also
 asked for a way to narrow wide table columns.
 @item
 @i{Jason Dunsmore} has been maintaining the Org-Mode server at Rackspace for
-severl years now.  He also sponsered the hosting costs unto Rackspace started
-to hos us for free.
+several years now.  He also sponsered the hosting costs until Rackspace
+started to host us for free.
 @item
 @i{Thomas S. Dye} contributed documentation on Worg and helped integrating
 the Org-Babel documentation into the manual.
