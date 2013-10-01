@@ -322,7 +322,6 @@ that the appropriate major-mode is set.  SPEC has the form:
 	 (insert-comment (lambda (text)
 			   (when (and comments (not (string= comments "no"))
 				      (> (length text) 0))
-			     (when padline (insert "\n"))
 			     (comment-region (point) (progn (insert text) (point)))
 			     (end-of-line nil) (insert "\n")))))
     (when comment (funcall insert-comment comment))
