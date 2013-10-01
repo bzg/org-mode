@@ -15051,12 +15051,12 @@ Being in this list makes sure that they are offered for completion.")
   "Regular expression matching the first line of a property drawer.")
 
 (defconst org-property-drawer-re
-  (concat "\\(" org-property-start-re "\\)[^\000]*\\("
+  (concat "\\(" org-property-start-re "\\)[^\000]*?\\("
 	  org-property-end-re "\\)\n?")
   "Matches an entire property drawer.")
 
 (defconst org-clock-drawer-re
-  (concat "\\(" org-clock-drawer-start-re "\\)[^\000]*\\("
+  (concat "\\(" org-clock-drawer-start-re "\\)[^\000]*?\\("
 	  org-property-end-re "\\)\n?")
   "Matches an entire clock drawer.")
 
