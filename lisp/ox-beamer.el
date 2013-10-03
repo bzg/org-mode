@@ -444,13 +444,31 @@ INFO is a plist used as a communication channel."
   "Format HEADLINE as a sectioning part.
 CONTENTS holds the contents of the headline.  INFO is a plist
 used as a communication channel."
-  ;; Use `latex' back-end output, inserting overlay specifications
-  ;; if possible.
-  (let ((latex-headline (org-export-with-backend 'latex headline contents info))
+  (let ((latex-headline
+	 (org-export-data-with-backend
+	  headline
+	  ;; We create a temporary export back-end which behaves the
+	  ;; same as current one, but adds "\protect" in front of the
+	  ;; output of some objects.
+	  (org-export-create-backend
+	   :parent 'latex
+	   :transcoders
+	   (let ((protected-output
+		  (function
+		   (lambda (object contents info)
+		     (let ((code (org-export-with-backend
+				  'beamer object contents info)))
+		       (if (org-string-nw-p code) (concat "\\protect" code)
+			 code))))))
+	     (mapcar #'(lambda (type) (cons type protected-output))
+		     '(bold footnote-reference italic strike-through
+			    timestamp underline))))
+	  info))
 	(mode-specs (org-element-property :BEAMER_ACT headline)))
     (if (and mode-specs
 	     (string-match "\\`\\\\\\(.*?\\)\\(?:\\*\\|\\[.*\\]\\)?{"
 			   latex-headline))
+	;; Insert overlay specifications.
 	(replace-match (concat (match-string 1 latex-headline)
 			       (format "<%s>" mode-specs))
 		       nil nil latex-headline 1)
