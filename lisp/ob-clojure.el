@@ -2,8 +2,8 @@
 
 ;; Copyright (C) 2009-2013 Free Software Foundation, Inc.
 
-;; Author: Joel Boehland
-;;	Eric Schulte
+;; Author: Joel Boehland, Eric Schulte, Oleh Krehel
+;;
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 
@@ -24,20 +24,26 @@
 
 ;;; Commentary:
 
-;;; support for evaluating clojure code, relies on slime for all eval
+;;; support for evaluating clojure code, relies either on slime or
+;;; on nrepl for all eval
 
 ;;; Requirements:
 
 ;;; - clojure (at least 1.2.0)
 ;;; - clojure-mode
-;;; - slime
+;;; - either slime or nrepl
 
-;;; By far, the best way to install these components is by following
-;;; the directions as set out by Phil Hagelberg (Technomancy) on the
-;;; web page: http://technomancy.us/126
+;;; For SLIME-way, the best way to install these components is by
+;;; following the directions as set out by Phil Hagelberg (Technomancy)
+;;; on the web page: http://technomancy.us/126
+
+;;; For nREPL-way:
+;;; get clojure is with https://github.com/technomancy/leiningen
+;;; get nrepl from MELPA (clojure-mode is a dependency).
 
 ;;; Code:
 (require 'ob)
+(require 'ob-tangle)
 
 (declare-function slime-eval "ext:slime" (sexp &optional package))
 
@@ -72,7 +78,7 @@
 	   (format "(clojure.core/with-out-str %s)" body))
 	  (t body))))
 
-(defun org-babel-execute:clojure (body params)
+(defun org-babel--execute-clojure-slime (body params)
   "Execute a block of Clojure code with Babel."
   (require 'slime)
   (with-temp-buffer
@@ -87,6 +93,18 @@
       `(swank:eval-and-grab-output
      	,(buffer-substring-no-properties (point-min) (point-max)))
       (cdr (assoc :package params))))))
+
+(defun org-babel--execute-clojure-nrepl (body params)
+  "Execute a block of Clojure code with Babel and nREPL."
+  (require 'nrepl)
+  (if (nrepl-current-connection-buffer)
+      (let* ((result (nrepl-eval body))
+             (s (plist-get result :stdout))
+             (r (plist-get result :value)))
+        (if s (concat s "\n" r) r))
+    (error "nREPL not connected! Use M-x nrepl-jack-in.")))
+
+(defalias 'org-babel-execute:clojure 'org-babel--execute-clojure-nrepl)
 
 (provide 'ob-clojure)
 
