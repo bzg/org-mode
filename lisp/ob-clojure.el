@@ -43,15 +43,21 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-tangle)
 
 (declare-function slime-eval "ext:slime" (sexp &optional package))
+(declare-function nrepl-current-connection-buffer "ext:nrepl" ())
+(declare-function nrepl-eval "ext:nrepl" (body))
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("clojure" . "clj"))
 
 (defvar org-babel-default-header-args:clojure '())
 (defvar org-babel-header-args:clojure '((package . :any)))
+
+(defcustom org-babel-clojure-backend 'nrepl
+  "Backend used to evaluate Clojure code blocks."
+  :group 'org-babel
+  :type 'symbol)
 
 (defun org-babel-expand-body:clojure (body params)
   "Expand BODY according to PARAMS, return the expanded body."
@@ -78,33 +84,32 @@
 	   (format "(clojure.core/with-out-str %s)" body))
 	  (t body))))
 
-(defun org-babel--execute-clojure-slime (body params)
+(defun org-babel-execute:clojure (body params)
   "Execute a block of Clojure code with Babel."
-  (require 'slime)
-  (with-temp-buffer
-    (insert (org-babel-expand-body:clojure body params))
-    ((lambda (result)
-       (let ((result-params (cdr (assoc :result-params params))))
-	 (org-babel-result-cond result-params
-	   result
-	   (condition-case nil (org-babel-script-escape result)
-	     (error result)))))
-     (slime-eval
-      `(swank:eval-and-grab-output
-     	,(buffer-substring-no-properties (point-min) (point-max)))
-      (cdr (assoc :package params))))))
-
-(defun org-babel--execute-clojure-nrepl (body params)
-  "Execute a block of Clojure code with Babel and nREPL."
-  (require 'nrepl)
-  (if (nrepl-current-connection-buffer)
-      (let* ((result (nrepl-eval body))
-             (s (plist-get result :stdout))
-             (r (plist-get result :value)))
-        (if s (concat s "\n" r) r))
-    (error "nREPL not connected! Use M-x nrepl-jack-in.")))
-
-(defalias 'org-babel-execute:clojure 'org-babel--execute-clojure-nrepl)
+  (let ((expanded (org-babel-expand-body:clojure body params)))
+    (case org-babel-clojure-backend
+      (slime
+       (require 'slime)
+       (with-temp-buffer
+	 (insert expanded)
+	 ((lambda (result)
+	    (let ((result-params (cdr (assoc :result-params params))))
+	      (org-babel-result-cond result-params
+		result
+		(condition-case nil (org-babel-script-escape result)
+		  (error result)))))
+	  (slime-eval
+	   `(swank:eval-and-grab-output
+	     ,(buffer-substring-no-properties (point-min) (point-max)))
+	   (cdr (assoc :package params))))))
+      (nrepl
+       (require 'nrepl)
+       (if (nrepl-current-connection-buffer)
+	   (let* ((result (nrepl-eval expanded))
+		  (s (plist-get result :stdout))
+		  (r (plist-get result :value)))
+	     (if s (concat s "\n" r) r))
+	 (error "nREPL not connected! Use M-x nrepl-jack-in."))))))
 
 (provide 'ob-clojure)
 
