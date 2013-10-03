@@ -493,8 +493,8 @@ keyword and CDR is a plist of affiliated keywords along with
 their value.
 
 Return a list whose CAR is `center-block' and CDR is a plist
-containing `:begin', `:end', `:hiddenp', `:contents-begin',
-`:contents-end', `:post-blank' and `:post-affiliated' keywords.
+containing `:begin', `:end', `:contents-begin', `:contents-end',
+`:post-blank' and `:post-affiliated' keywords.
 
 Assume point is at the beginning of the block."
   (let ((case-fold-search t))
@@ -510,7 +510,6 @@ Assume point is at the beginning of the block."
 				      (and (< (point) block-end-line)
 					   (point))))
 	       (contents-end (and contents-begin block-end-line))
-	       (hidden (org-invisible-p2))
 	       (pos-before-blank (progn (goto-char block-end-line)
 					(forward-line)
 					(point)))
@@ -521,7 +520,6 @@ Assume point is at the beginning of the block."
 		(nconc
 		 (list :begin begin
 		       :end end
-		       :hiddenp hidden
 		       :contents-begin contents-begin
 		       :contents-end contents-end
 		       :post-blank (count-lines pos-before-blank end)
@@ -545,7 +543,7 @@ keyword and CDR is a plist of affiliated keywords along with
 their value.
 
 Return a list whose CAR is `drawer' and CDR is a plist containing
-`:drawer-name', `:begin', `:end', `:hiddenp', `:contents-begin',
+`:drawer-name', `:begin', `:end', `:contents-begin',
 `:contents-end', `:post-blank' and `:post-affiliated' keywords.
 
 Assume point is at beginning of drawer."
@@ -564,7 +562,6 @@ Assume point is at beginning of drawer."
 				      (and (< (point) drawer-end-line)
 					   (point))))
 	       (contents-end (and contents-begin drawer-end-line))
-	       (hidden (org-invisible-p2))
 	       (pos-before-blank (progn (goto-char drawer-end-line)
 					(forward-line)
 					(point)))
@@ -576,7 +573,6 @@ Assume point is at beginning of drawer."
 		 (list :begin begin
 		       :end end
 		       :drawer-name name
-		       :hiddenp hidden
 		       :contents-begin contents-begin
 		       :contents-end contents-end
 		       :post-blank (count-lines pos-before-blank end)
@@ -602,9 +598,9 @@ keyword and CDR is a plist of affiliated keywords along with
 their value.
 
 Return a list whose CAR is `dynamic-block' and CDR is a plist
-containing `:block-name', `:begin', `:end', `:hiddenp',
-`:contents-begin', `:contents-end', `:arguments', `:post-blank'
-and `:post-affiliated' keywords.
+containing `:block-name', `:begin', `:end', `:contents-begin',
+`:contents-end', `:arguments', `:post-blank' and
+`:post-affiliated' keywords.
 
 Assume point is at beginning of dynamic block."
   (let ((case-fold-search t))
@@ -624,7 +620,6 @@ Assume point is at beginning of dynamic block."
 					(and (< (point) block-end-line)
 					     (point))))
 		 (contents-end (and contents-begin block-end-line))
-		 (hidden (org-invisible-p2))
 		 (pos-before-blank (progn (goto-char block-end-line)
 					  (forward-line)
 					  (point)))
@@ -637,7 +632,6 @@ Assume point is at beginning of dynamic block."
 			 :end end
 			 :block-name name
 			 :arguments arguments
-			 :hiddenp hidden
 			 :contents-begin contents-begin
 			 :contents-end contents-end
 			 :post-blank (count-lines pos-before-blank end)
@@ -720,11 +714,10 @@ CONTENTS is the contents of the footnote-definition."
 
 Return a list whose CAR is `headline' and CDR is a plist
 containing `:raw-value', `:title', `:alt-title', `:begin',
-`:end', `:pre-blank', `:hiddenp', `:contents-begin' and
-`:contents-end', `:level', `:priority', `:tags',
-`:todo-keyword',`:todo-type', `:scheduled', `:deadline',
-`:closed', `:quotedp', `:archivedp', `:commentedp' and
-`:footnote-section-p' keywords.
+`:end', `:pre-blank', `:contents-begin' and `:contents-end',
+`:level', `:priority', `:tags', `:todo-keyword',`:todo-type',
+`:scheduled', `:deadline', `:closed', `:quotedp', `:archivedp',
+`:commentedp' and `:footnote-section-p' keywords.
 
 The plist also contains any property set in the property drawer,
 with its name in upper cases and colons added at the
@@ -791,7 +784,6 @@ Assume point is at beginning of the headline."
 	   (contents-begin (save-excursion
 			     (skip-chars-forward " \r\t\n" end)
 			     (and (/= (point) end) (line-beginning-position))))
-	   (hidden (org-invisible-p2))
 	   (contents-end (and contents-begin
 			      (progn (goto-char end)
 				     (skip-chars-backward " \r\t\n")
@@ -818,7 +810,6 @@ Assume point is at beginning of the headline."
 			  :pre-blank
 			  (if (not contents-begin) 0
 			    (count-lines pos-after-head contents-begin))
-			  :hiddenp hidden
 			  :contents-begin contents-begin
 			  :contents-end contents-end
 			  :level level
@@ -904,10 +895,10 @@ CONTENTS is the contents of the element."
   "Parse an inline task.
 
 Return a list whose CAR is `inlinetask' and CDR is a plist
-containing `:title', `:begin', `:end', `:hiddenp',
-`:contents-begin' and `:contents-end', `:level', `:priority',
-`:raw-value', `:tags', `:todo-keyword', `:todo-type',
-`:scheduled', `:deadline', `:closed' and `:post-blank' keywords.
+containing `:title', `:begin', `:end', `:contents-begin' and
+`:contents-end', `:level', `:priority', `:raw-value', `:tags',
+`:todo-keyword', `:todo-type', `:scheduled', `:deadline',
+`:closed' and `:post-blank' keywords.
 
 The plist also contains any property set in the property drawer,
 with its name in upper cases and colons added at the
@@ -965,7 +956,6 @@ Assume point is at beginning of the inline task."
 			    (match-beginning 0))))
 	   (contents-begin (progn (forward-line)
 				  (and task-end (< (point) task-end) (point))))
-	   (hidden (and contents-begin (org-invisible-p2)))
 	   (contents-end (and contents-begin task-end))
 	   (before-blank (if (not task-end) (point)
 			   (goto-char task-end)
@@ -980,7 +970,6 @@ Assume point is at beginning of the inline task."
 		   (list :raw-value raw-value
 			 :begin begin
 			 :end end
-			 :hiddenp hidden
 			 :contents-begin contents-begin
 			 :contents-end contents-end
 			 :level (nth 1 components)
@@ -1047,8 +1036,8 @@ STRUCT is the structure of the plain list.
 
 Return a list whose CAR is `item' and CDR is a plist containing
 `:bullet', `:begin', `:end', `:contents-begin', `:contents-end',
-`:checkbox', `:counter', `:tag', `:structure', `:hiddenp' and
-`:post-blank' keywords.
+`:checkbox', `:counter', `:tag', `:structure' and `:post-blank'
+keywords.
 
 When optional argument RAW-SECONDARY-P is non-nil, item's tag, if
 any, will not be parsed as a secondary string, but as a plain
@@ -1088,8 +1077,6 @@ Assume point is at the beginning of the item."
 		   ;; If first line isn't empty, contents really start
 		   ;; at the text after item's meta-data.
 		   (if (= (point-at-bol) begin) (point) (point-at-bol))))
-	   (hidden (progn (forward-line)
-			  (and (not (= (point) end)) (org-invisible-p2))))
 	   (contents-end (progn (goto-char end)
 				(skip-chars-backward " \r\t\n")
 				(forward-line)
@@ -1108,7 +1095,6 @@ Assume point is at the beginning of the item."
 			:contents-end (max contents-begin contents-end)
 			:checkbox checkbox
 			:counter counter
-			:hiddenp hidden
 			:structure struct
 			:post-blank (count-lines contents-end end)))))
       (org-element-put-property
@@ -1300,8 +1286,8 @@ keyword and CDR is a plist of affiliated keywords along with
 their value.
 
 Return a list whose CAR is `property-drawer' and CDR is a plist
-containing `:begin', `:end', `:hiddenp', `:contents-begin',
-`:contents-end', `:post-blank' and `:post-affiliated' keywords.
+containing `:begin', `:end', `:contents-begin', `:contents-end',
+`:post-blank' and `:post-affiliated' keywords.
 
 Assume point is at the beginning of the property drawer."
   (save-excursion
@@ -1318,7 +1304,6 @@ Assume point is at the beginning of the property drawer."
 					(and (< (point) drawer-end-line)
 					     (point))))
 		 (contents-end (and contents-begin drawer-end-line))
-		 (hidden (org-invisible-p2))
 		 (pos-before-blank (progn (goto-char drawer-end-line)
 					  (forward-line)
 					  (point)))
@@ -1329,7 +1314,6 @@ Assume point is at the beginning of the property drawer."
 		  (nconc
 		   (list :begin begin
 			 :end end
-			 :hiddenp hidden
 			 :contents-begin contents-begin
 			 :contents-end contents-end
 			 :post-blank (count-lines pos-before-blank end)
@@ -1353,8 +1337,8 @@ keyword and CDR is a plist of affiliated keywords along with
 their value.
 
 Return a list whose CAR is `quote-block' and CDR is a plist
-containing `:begin', `:end', `:hiddenp', `:contents-begin',
-`:contents-end', `:post-blank' and `:post-affiliated' keywords.
+containing `:begin', `:end', `:contents-begin', `:contents-end',
+`:post-blank' and `:post-affiliated' keywords.
 
 Assume point is at the beginning of the block."
   (let ((case-fold-search t))
@@ -1371,7 +1355,6 @@ Assume point is at the beginning of the block."
 					(and (< (point) block-end-line)
 					     (point))))
 		 (contents-end (and contents-begin block-end-line))
-		 (hidden (org-invisible-p2))
 		 (pos-before-blank (progn (goto-char block-end-line)
 					  (forward-line)
 					  (point)))
@@ -1382,7 +1365,6 @@ Assume point is at the beginning of the block."
 		  (nconc
 		   (list :begin begin
 			 :end end
-			 :hiddenp hidden
 			 :contents-begin contents-begin
 			 :contents-end contents-end
 			 :post-blank (count-lines pos-before-blank end)
@@ -1438,9 +1420,8 @@ keyword and CDR is a plist of affiliated keywords along with
 their value.
 
 Return a list whose CAR is `special-block' and CDR is a plist
-containing `:type', `:begin', `:end', `:hiddenp',
-`:contents-begin', `:contents-end', `:post-blank' and
-`:post-affiliated' keywords.
+containing `:type', `:begin', `:end', `:contents-begin',
+`:contents-end', `:post-blank' and `:post-affiliated' keywords.
 
 Assume point is at the beginning of the block."
   (let* ((case-fold-search t)
@@ -1461,7 +1442,6 @@ Assume point is at the beginning of the block."
 					(and (< (point) block-end-line)
 					     (point))))
 		 (contents-end (and contents-begin block-end-line))
-		 (hidden (org-invisible-p2))
 		 (pos-before-blank (progn (goto-char block-end-line)
 					  (forward-line)
 					  (point)))
@@ -1473,7 +1453,6 @@ Assume point is at the beginning of the block."
 		   (list :type type
 			 :begin begin
 			 :end end
-			 :hiddenp hidden
 			 :contents-begin contents-begin
 			 :contents-end contents-end
 			 :post-blank (count-lines pos-before-blank end)
@@ -1661,8 +1640,8 @@ keyword and CDR is a plist of affiliated keywords along with
 their value.
 
 Return a list whose CAR is `comment-block' and CDR is a plist
-containing `:begin', `:end', `:hiddenp', `:value', `:post-blank'
-and `:post-affiliated' keywords.
+containing `:begin', `:end', `:value', `:post-blank' and
+`:post-affiliated' keywords.
 
 Assume point is at comment block beginning."
   (let ((case-fold-search t))
@@ -1675,7 +1654,6 @@ Assume point is at comment block beginning."
 	  (let* ((begin (car affiliated))
 		 (post-affiliated (point))
 		 (contents-begin (progn (forward-line) (point)))
-		 (hidden (org-invisible-p2))
 		 (pos-before-blank (progn (goto-char contents-end)
 					  (forward-line)
 					  (point)))
@@ -1689,7 +1667,6 @@ Assume point is at comment block beginning."
 		   (list :begin begin
 			 :end end
 			 :value value
-			 :hiddenp hidden
 			 :post-blank (count-lines pos-before-blank end)
 			 :post-affiliated post-affiliated)
 		   (cdr affiliated)))))))))
@@ -1779,9 +1756,8 @@ their value.
 
 Return a list whose CAR is `example-block' and CDR is a plist
 containing `:begin', `:end', `:number-lines', `:preserve-indent',
-`:retain-labels', `:use-labels', `:label-fmt', `:hiddenp',
-`:switches', `:value', `:post-blank' and `:post-affiliated'
-keywords."
+`:retain-labels', `:use-labels', `:label-fmt', `:switches',
+`:value', `:post-blank' and `:post-affiliated' keywords."
   (let ((case-fold-search t))
     (if (not (save-excursion
 	       (re-search-forward "^[ \t]*#\\+END_EXAMPLE[ \t]*$" limit t)))
@@ -1822,7 +1798,6 @@ keywords."
 		 (post-affiliated (point))
 		 (block-ind (progn (skip-chars-forward " \t") (current-column)))
 		 (contents-begin (progn (forward-line) (point)))
-		 (hidden (org-invisible-p2))
 		 (value (org-element--remove-indentation
 			 (org-unescape-code-in-string
 			  (buffer-substring-no-properties
@@ -1845,7 +1820,6 @@ keywords."
 			 :retain-labels retain-labels
 			 :use-labels use-labels
 			 :label-fmt label-fmt
-			 :hiddenp hidden
 			 :post-blank (count-lines pos-before-blank end)
 			 :post-affiliated post-affiliated)
 		   (cdr affiliated)))))))))
@@ -1871,8 +1845,8 @@ keyword and CDR is a plist of affiliated keywords along with
 their value.
 
 Return a list whose CAR is `export-block' and CDR is a plist
-containing `:begin', `:end', `:type', `:hiddenp', `:value',
-`:post-blank' and `:post-affiliated' keywords.
+containing `:begin', `:end', `:type', `:value', `:post-blank' and
+`:post-affiliated' keywords.
 
 Assume point is at export-block beginning."
   (let* ((case-fold-search t)
@@ -1888,7 +1862,6 @@ Assume point is at export-block beginning."
 	  (let* ((begin (car affiliated))
 		 (post-affiliated (point))
 		 (contents-begin (progn (forward-line) (point)))
-		 (hidden (org-invisible-p2))
 		 (pos-before-blank (progn (goto-char contents-end)
 					  (forward-line)
 					  (point)))
@@ -1903,7 +1876,6 @@ Assume point is at export-block beginning."
 			 :end end
 			 :type type
 			 :value value
-			 :hiddenp hidden
 			 :post-blank (count-lines pos-before-blank end)
 			 :post-affiliated post-affiliated)
 		   (cdr affiliated)))))))))
@@ -2326,9 +2298,9 @@ their value.
 
 Return a list whose CAR is `src-block' and CDR is a plist
 containing `:language', `:switches', `:parameters', `:begin',
-`:end', `:hiddenp', `:number-lines', `:retain-labels',
-`:use-labels', `:label-fmt', `:preserve-indent', `:value',
-`:post-blank' and `:post-affiliated' keywords.
+`:end', `:number-lines', `:retain-labels', `:use-labels',
+`:label-fmt', `:preserve-indent', `:value', `:post-blank' and
+`:post-affiliated' keywords.
 
 Assume point is at the beginning of the block."
   (let ((case-fold-search t))
@@ -2379,13 +2351,11 @@ Assume point is at the beginning of the block."
 			   (not (string-match "-k\\>" switches)))))
 		 ;; Indentation.
 		 (block-ind (progn (skip-chars-forward " \t") (current-column)))
-		 ;; Get visibility status.
-		 (hidden (progn (forward-line) (org-invisible-p2)))
 		 ;; Retrieve code.
 		 (value (org-element--remove-indentation
 			 (org-unescape-code-in-string
 			  (buffer-substring-no-properties
-			   (point) contents-end))
+			   (progn (forward-line) (point)) contents-end))
 			 (and preserve-indent block-ind)))
 		 (pos-before-blank (progn (goto-char contents-end)
 					  (forward-line)
@@ -2408,7 +2378,6 @@ Assume point is at the beginning of the block."
 			 :retain-labels retain-labels
 			 :use-labels use-labels
 			 :label-fmt label-fmt
-			 :hiddenp hidden
 			 :value value
 			 :post-blank (count-lines pos-before-blank end)
 			 :post-affiliated post-affiliated)
@@ -2553,7 +2522,7 @@ their value.
 
 Return a list whose CAR is `verse-block' and CDR is a plist
 containing `:begin', `:end', `:contents-begin', `:contents-end',
-`:hiddenp', `:post-blank' and `:post-affiliated' keywords.
+`:post-blank' and `:post-affiliated' keywords.
 
 Assume point is at beginning of the block."
   (let ((case-fold-search t))
@@ -2565,8 +2534,7 @@ Assume point is at beginning of the block."
 	(save-excursion
 	  (let* ((begin (car affiliated))
 		 (post-affiliated (point))
-		 (hidden (progn (forward-line) (org-invisible-p2)))
-		 (contents-begin (point))
+		 (contents-begin (progn (forward-line) (point)))
 		 (pos-before-blank (progn (goto-char contents-end)
 					  (forward-line)
 					  (point)))
@@ -2579,7 +2547,6 @@ Assume point is at beginning of the block."
 			 :end end
 			 :contents-begin contents-begin
 			 :contents-end contents-end
-			 :hiddenp hidden
 			 :post-blank (count-lines pos-before-blank end)
 			 :post-affiliated post-affiliated)
 		   (cdr affiliated)))))))))

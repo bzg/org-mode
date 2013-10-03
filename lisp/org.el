@@ -22806,7 +22806,7 @@ the cursor is already beyond the end of the headline."
 		      (goto-char (match-end 0))
 		    (goto-char (match-beginning 1))))
 	      (call-interactively move-fun))))
-	 ((org-element-property :hiddenp element)
+	 ((outline-invisible-p (line-end-position))
 	  ;; If element is hidden, `move-end-of-line' would put point
 	  ;; after it.  Use `end-of-line' to stay on current line.
 	  (call-interactively 'end-of-line))
@@ -23507,7 +23507,7 @@ Move to the previous element at the same level, when possible."
       (forward-char))
      ((memq (org-element-type element) org-element-greater-elements)
       ;; If contents are hidden, first disclose them.
-      (when (org-element-property :hiddenp element) (org-cycle))
+      (when (outline-invisible-p (line-end-position)) (org-cycle))
       (goto-char (or (org-element-property :contents-begin element)
 		     (user-error "No content for this element"))))
      (t (user-error "No inner element")))))

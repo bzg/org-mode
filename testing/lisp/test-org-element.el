@@ -273,14 +273,6 @@ Some other text
   (should
    (org-test-with-temp-text "#+begin_center\nText\n#+end_center"
      (org-element-map (org-element-parse-buffer) 'center-block 'identity)))
-  ;; Test folded block.
-  (org-test-with-temp-text "#+BEGIN_CENTER\nText\n#+END_CENTER"
-    (org-cycle)
-    (should
-     (org-element-property
-      :hiddenp
-      (org-element-map
-       (org-element-parse-buffer) 'center-block 'identity nil t))))
   ;; Ignore incomplete block.
   (should-not
    (org-test-with-temp-text "#+BEGIN_CENTER"
@@ -393,14 +385,6 @@ Some other text
    (org-test-with-temp-text "#+begin_comment\nText\n#+end_comment"
      (org-element-map
       (org-element-parse-buffer) 'comment-block 'identity)))
-  ;; Test folded block.
-  (org-test-with-temp-text "#+BEGIN_COMMENT\nText\n#+END_COMMENT"
-    (org-cycle)
-    (should
-     (org-element-property
-      :hiddenp
-      (org-element-map
-       (org-element-parse-buffer) 'comment-block 'identity nil t))))
   ;; Ignore incomplete block.
   (should-not
    (org-test-with-temp-text "#+BEGIN_COMMENT"
@@ -457,15 +441,6 @@ Some other text
    (org-test-with-temp-text
        "#+BEGIN: myblock :param1 val1 :param2 val2\nText\n#+END:"
      (org-element-map (org-element-parse-buffer) 'dynamic-block 'identity)))
-  ;; Folded view
-  (org-test-with-temp-text
-      "#+BEGIN: myblock :param1 val1 :param2 val2\nText\n#+END:"
-    (org-cycle)
-    (should
-     (org-element-property
-      :hiddenp
-      (org-element-map
-       (org-element-parse-buffer) 'dynamic-block 'identity nil t))))
   ;; Ignore case.
   (should
    (org-test-with-temp-text
@@ -518,11 +493,6 @@ Some other text
   (should
    (org-test-with-temp-text "#+BEGIN_EXAMPLE\nText\n#+END_EXAMPLE"
      (org-element-map (org-element-parse-buffer) 'example-block 'identity)))
-  ;; Test folded block.
-  (should
-   (org-test-with-temp-text "#+BEGIN_EXAMPLE\nText\n#+END_EXAMPLE"
-     (org-cycle)
-     (org-element-property :hiddenp (org-element-at-point))))
   ;; Ignore incomplete block.
   (should-not
    (eq 'example-block
@@ -682,17 +652,6 @@ Some other text
 	     '(("LATEX" . org-element-export-block-parser))))
 	(org-element-parse-buffer))
       'export-block 'identity)))
-  ;; Test folded block.
-  (org-test-with-temp-text "#+BEGIN_LATEX\nText\n#+END_LATEX"
-    (org-cycle)
-    (should
-     (org-element-property
-      :hiddenp
-      (org-element-map
-       (let ((org-element-block-name-alist
-	      '(("LATEX" . org-element-export-block-parser))))
-	 (org-element-parse-buffer))
-       'export-block 'identity nil t))))
   ;; Ignore case.
   (should
    (org-test-with-temp-text "#+begin_latex\nText\n#+end_latex"
@@ -1111,17 +1070,6 @@ DEADLINE: <2012-03-29 thu.>"
       (org-element-map
        (org-element-parse-buffer) 'item
        (lambda (item) (org-element-property :checkbox item))))))
-  ;; Folded state.
-  (org-test-with-temp-text "* Headline
-- item
-
-  paragraph below"
-    (forward-line)
-    (let ((org-cycle-include-plain-lists t)) (org-cycle))
-    (should
-     (org-element-property
-      :hiddenp
-      (org-element-map (org-element-parse-buffer) 'item 'identity nil t))))
   ;; Item starting with special syntax.
   (should
    (equal '(("- item"))
@@ -1598,14 +1546,6 @@ Outside list"
   (should
    (org-test-with-temp-text "#+BEGIN_QUOTE\nText\n#+END_QUOTE"
      (org-element-map (org-element-parse-buffer) 'quote-block 'identity)))
-  ;; Test folded block.
-  (org-test-with-temp-text "#+BEGIN_QUOTE\nText\n#+END_QUOTE"
-    (org-cycle)
-    (should
-     (org-element-property
-      :hiddenp
-      (org-element-map
-       (org-element-parse-buffer) 'quote-block 'identity nil t))))
   ;; Ignore incomplete block.
   (should-not
    (org-test-with-temp-text "#+BEGIN_QUOTE"
@@ -1680,11 +1620,6 @@ Outside list"
        (org-test-with-temp-text "#+BEGIN_SPECIAL\nText\n#+END_SPECIAL"
 	 (forward-line)
 	 (org-element-type (org-element-at-point)))))
-  ;; Test folded block.
-  (should
-   (org-test-with-temp-text "#+BEGIN_SPECIAL\nText\n#+END_SPECIAL"
-     (org-cycle)
-     (org-element-property :hiddenp (org-element-at-point))))
   ;; Ignore incomplete block.
   (should-not
    (eq 'special-block
@@ -1707,11 +1642,6 @@ Outside list"
   (should
    (org-test-with-temp-text "#+BEGIN_SRC org\nText\n#+END_SRC"
      (org-element-map (org-element-parse-buffer) 'src-block 'identity)))
-  ;; Test folded block.
-  (should
-   (org-test-with-temp-text "#+BEGIN_SRC org\nText\n#+END_SRC"
-     (org-cycle)
-     (org-element-property :hiddenp (org-element-at-point))))
   ;; Ignore incomplete block.
   (should-not
    (org-test-with-temp-text "#+BEGIN_SRC"
@@ -1994,29 +1924,22 @@ Outside list"
 (ert-deftest test-org-element/verse-block-parser ()
   "Test `verse-block' parser."
   ;; Standard test.
-  (org-test-with-temp-text "#+BEGIN_VERSE\nVerse block\n#+END_VERSE"
-    (should
+  (should
+   (org-test-with-temp-text "#+BEGIN_VERSE\nVerse block\n#+END_VERSE"
      (org-element-map (org-element-parse-buffer) 'verse-block 'identity)))
   ;; Ignore case.
-  (org-test-with-temp-text "#+begin_verse\nVerse block\n#+end_verse"
-    (should
+  (should
+   (org-test-with-temp-text "#+begin_verse\nVerse block\n#+end_verse"
      (org-element-map (org-element-parse-buffer) 'verse-block 'identity)))
-  ;; Parse folding.
-  (org-test-with-temp-text "#+BEGIN_VERSE\nVerse block\n#+END_VERSE"
-    (org-hide-block-all)
-    (should
-     (org-element-property
-      :hiddenp
-      (org-element-map
-       (org-element-parse-buffer) 'verse-block 'identity nil t))))
   ;; Parse objects in verse blocks.
-  (org-test-with-temp-text "#+BEGIN_VERSE\nVerse \\alpha\n#+END_VERSE"
-    (should (org-element-map (org-element-parse-buffer) 'entity 'identity)))
+  (should
+   (org-test-with-temp-text "#+BEGIN_VERSE\nVerse \\alpha\n#+END_VERSE"
+     (org-element-map (org-element-parse-buffer) 'entity 'identity)))
   ;; Ignore incomplete verse block.
   (should-not
    (org-test-with-temp-text "#+BEGIN_VERSE"
      (org-element-map
-      (org-element-parse-buffer) 'verse-block 'identity nil t))))
+	 (org-element-parse-buffer) 'verse-block 'identity nil t))))
 
 
 
