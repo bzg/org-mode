@@ -524,9 +524,11 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
   "Escape a URL to pass to `browse-url'."
   (should
    (string=
-    "http://some.host.com/search?q=%22Org%20mode%22"
-    (org-link-escape "http://some.host.com/search?q=\"Org mode\""
-		     org-link-escape-chars-browser))))
+    (concat "http://lists.gnu.org/archive/cgi-bin/namazu.cgi?query="
+	    "%22Release%208.2%22&idxname=emacs-orgmode")
+    (org-link-escape-browser
+     (concat "http://lists.gnu.org/archive/cgi-bin/namazu.cgi?query="
+	     "\"Release 8.2\"&idxname=emacs-orgmode")))))
 
 
 

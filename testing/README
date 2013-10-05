@@ -64,9 +64,9 @@ load and run the test suite with the following commands.
    Use this as a demo example of a failing test
    #+BEGIN_SRC emacs-lisp
      (ert-deftest test-org/org-link-escape-ascii-character-demo-of-fail ()
-       (should (string= "%5B"  ;; expected is right
+       (should (string= "%5B"  ;; expecting %5B is right
                         (org-link-escape "[")))
-       (should (string= "%5C"  ;; expected is wrong, "%5D" would be right
+       (should (string= "%5C"  ;; expecting %5C is wrong, %5D right
                         (org-link-escape "]"))))
    #+END_SRC
    or evaluate the ert-deftest form of the test you want to run.  Then

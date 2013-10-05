@@ -9732,11 +9732,13 @@ according to FMT (default from `org-email-link-description-format')."
 	  "]"))
 
 (defconst org-link-escape-chars
-  '(?\ ?\[ ?\] ?\; ?\= ?\+)
+  ;;%20 %2B %3B %3D %5B %5D
+  '(?\  ?\+ ?\; ?\= ?\[ ?\])
   "List of characters that should be escaped in link.
 This is the list that is used for internal purposes.")
 
 (defconst org-link-escape-chars-browser
+  ;;%20 %22
   '(?\  ?\")
   "List of escapes for characters that are problematic in links.
 This is the list that is used before handing over to the browser.")
@@ -9758,7 +9760,7 @@ If optional argument MERGE is set, merge TABLE into
   (mapconcat
    (lambda (char)
      (if (or (member char table)
-	     (and (or (< char 32) (= char 37) (> char 126))
+	     (and (or (< char 32) (= char ?\%) (> char 126))
 		  org-url-hexify-p))
 	 (mapconcat (lambda (sequence-element)
 		      (format "%%%.2X" sequence-element))
@@ -9766,6 +9768,13 @@ If optional argument MERGE is set, merge TABLE into
 			(error "Unable to percent escape character: %s"
 			       (char-to-string char))) "")
        (char-to-string char))) text ""))
+
+(defun org-link-escape-browser (text)
+  (if (org-string-match-p
+       (concat "[[:nonascii:]" org-link-escape-chars-browser "]")
+       text)
+      (org-link-escape text org-link-escape-chars-browser)
+    text))
 
 (defun org-link-unescape (str)
   "Unhex hexified Unicode strings as returned from the JavaScript function
@@ -10467,24 +10476,11 @@ application the system uses for this file type."
 	      (apply cmd (nreverse args1))))
 
 	   ((member type '("http" "https" "ftp" "news"))
-	    (browse-url
-	     (concat type ":"
-		     (if (org-string-match-p
-			  (concat "[[:nonascii:]"
-				  org-link-escape-chars-browser "]")
-			  path)
-			 (org-link-escape path org-link-escape-chars-browser)
-		       path))))
+	    (browse-url (concat type ":" (org-link-escape-browser path))))
 
 	   ((string= type "doi")
-	    (browse-url
-	     (concat org-doi-server-url
-		     (if (org-string-match-p
-			  (concat "[[:nonascii:]"
-				  org-link-escape-chars-browser "]")
-			  path)
-			 (org-link-escape path org-link-escape-chars-browser)
-		       path))))
+	    (browse-url (concat org-doi-server-url
+				(org-link-escape-browser path))))
 
 	   ((member type '("message"))
 	    (browse-url (concat type ":" path)))
