@@ -770,37 +770,43 @@ arguments and pop open the results in a preview buffer."
     (message "No suspicious header arguments found.")))
 
 ;;;###autoload
-(defun org-babel-insert-header-arg ()
+(defun org-babel-insert-header-arg (&optional header-arg value)
   "Insert a header argument selecting from lists of common args and values."
   (interactive)
-  (let* ((lang (car (org-babel-get-src-block-info 'light)))
+  (let* ((info (org-babel-get-src-block-info 'light))
+	 (lang (car info))
+	 (begin (nth 6 info))
 	 (lang-headers (intern (concat "org-babel-header-args:" lang)))
 	 (headers (org-babel-combine-header-arg-lists
 		   org-babel-common-header-args-w-values
 		   (when (boundp lang-headers) (eval lang-headers))))
-	 (arg (org-icompleting-read
-	       "Header Arg: "
-	       (mapcar
-		(lambda (header-spec) (symbol-name (car header-spec)))
-		headers))))
-    (insert ":" arg)
-    (let ((vals (cdr (assoc (intern arg) headers))))
-      (when vals
-	(insert
-	 " "
-	 (cond
-	  ((eq vals :any)
-	   (read-from-minibuffer "value: "))
-	  ((listp vals)
-	   (mapconcat
-	    (lambda (group)
-	      (let ((arg (org-icompleting-read
-			  "value: "
-			  (cons "default" (mapcar #'symbol-name group)))))
-		(if (and arg (not (string= "default" arg)))
-		    (concat arg " ")
-		  "")))
-	    vals ""))))))))
+	 (header-arg (or header-arg
+			 (org-icompleting-read
+			  "Header Arg: "
+			  (mapcar
+			   (lambda (header-spec) (symbol-name (car header-spec)))
+			   headers))))
+	 (vals (cdr (assoc (intern header-arg) headers)))
+	 (value (or value
+		    (cond
+		     ((eq vals :any)
+		      (read-from-minibuffer "value: "))
+		     ((listp vals)
+		      (mapconcat
+		       (lambda (group)
+			 (let ((arg (org-icompleting-read
+				     "value: "
+				     (cons "default"
+					   (mapcar #'symbol-name group)))))
+			   (if (and arg (not (string= "default" arg)))
+			       (concat arg " ")
+			     "")))
+		       vals ""))))))
+    (save-excursion
+      (goto-char begin)
+      (goto-char (point-at-eol))
+      (unless (= (char-before (point)) ?\ ) (insert " "))
+      (insert ":" header-arg) (when value (insert " " value)))))
 
 ;; Add support for completing-read insertion of header arguments after ":"
 (defun org-babel-header-arg-expand ()
