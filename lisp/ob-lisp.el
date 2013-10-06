@@ -79,7 +79,13 @@ current directory string."
       (org-babel-result-cond (cdr (assoc :result-params params))
 	result
 	(condition-case nil
-	    (read (org-babel-lisp-vector-to-list result))
+	    (if (member "output" (cdr (assoc :result-params params)))
+		;; read printed output using normal org table parsing
+		(let ((tmp-file (org-babel-temp-file "lisp-output-")))
+		  (with-temp-file tmp-file (insert result))
+		  (org-babel-import-elisp-from-file tmp-file))
+	      ;; read valued output as lisp
+	      (read (org-babel-lisp-vector-to-list result)))
 	  (error result))))
     (funcall (if (member "output" (cdr (assoc :result-params params)))
 		 #'car #'cadr)
