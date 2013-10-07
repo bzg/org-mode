@@ -445,8 +445,7 @@ INFO is a plist used as a communication channel."
 CONTENTS holds the contents of the headline.  INFO is a plist
 used as a communication channel."
   (let ((latex-headline
-	 (org-export-data-with-backend
-	  headline
+	 (org-export-with-backend
 	  ;; We create a temporary export back-end which behaves the
 	  ;; same as current one, but adds "\protect" in front of the
 	  ;; output of some objects.
@@ -461,8 +460,10 @@ used as a communication channel."
 		       (if (org-string-nw-p code) (concat "\\protect" code)
 			 code))))))
 	     (mapcar #'(lambda (type) (cons type protected-output))
-		     '(bold footnote-reference italic strike-through
-			    timestamp underline))))
+		     '(bold footnote-reference italic strike-through timestamp
+			    underline))))
+	  headline
+	  contents
 	  info))
 	(mode-specs (org-element-property :BEAMER_ACT headline)))
     (if (and mode-specs
