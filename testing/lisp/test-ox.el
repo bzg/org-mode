@@ -1082,7 +1082,18 @@ body\n")))
 	      '((plain-text . (lambda (text contents info) "Failure"))))
 	    (org-export-define-backend 'test2
 	      '((plain-text . (lambda (text contents info) "Success"))))
-	    (org-export-with-backend 'test2 "Test")))))
+	    (org-export-with-backend 'test2 "Test"))))
+  ;; Provide correct back-end if transcoder needs to use recursive
+  ;; calls anyway.
+  (should
+   (equal "Success"
+	  (let (org-export--registered-backends)
+	    (org-export-define-backend 'test
+	      '((plain-text . (lambda (bold contents info) "Success"))
+		(headline . (lambda (headline contents info)
+			      (org-export-data
+			       (org-element-property :title headline))))))
+	    (org-export-with-backend 'test "* Test")))))
 
 (ert-deftest test-org-export/data-with-backend ()
   "Test `org-export-data-with-backend' specifications."

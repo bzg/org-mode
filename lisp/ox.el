@@ -3450,10 +3450,16 @@ the communication channel used for export, as a plist."
   (org-export-barf-if-invalid-backend backend)
   (let ((type (org-element-type data)))
     (if (memq type '(nil org-data)) (error "No foreign transcoder available")
-      (let ((transcoder
-	     (cdr (assq type (org-export-get-all-transcoders backend)))))
-	(if (functionp transcoder) (funcall transcoder data contents info)
-	  (error "No foreign transcoder available"))))))
+      (let* ((all-transcoders (org-export-get-all-transcoders backend))
+	     (transcoder (cdr (assq type all-transcoders))))
+	(if (not (functionp transcoder))
+	    (error "No foreign transcoder available")
+	  (funcall
+	   transcoder data contents
+	   (org-combine-plists
+	    info (list :back-end backend
+		       :translate-alist all-transcoders
+		       :exported-data (make-hash-table :test 'eq :size 401)))))))))
 
 
 ;;;; For Export Snippets
