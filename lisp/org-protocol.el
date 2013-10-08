@@ -2,7 +2,7 @@
 ;;
 ;; Copyright (C) 2008-2013 Free Software Foundation, Inc.
 ;;
-;; Authors: Bastien Guerry <bzg AT gnu DOT org>
+;; Authors: Bastien Guerry <bzg@gnu.org>
 ;;       Daniel M German <dmg AT uvic DOT org>
 ;;       Sebastian Rose <sebastian_rose AT gmx DOT de>
 ;;       Ross Patterson <me AT rpatterson DOT net>

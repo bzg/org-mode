@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009-2013
 ;;   Free Software Foundation, Inc.
 ;;
-;; Author: Bastien Guerry <bzg at altern dot org>
+;; Author: Bastien Guerry <bzg@gnu.org>
 ;;         Eric S Fraga   <e.fraga at ucl.ac dot uk>
 ;;         Sebastian Rose <sebastian_rose at gmx dot de>
 ;;         The Worg people http://orgmode.org/worg/

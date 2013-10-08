@@ -3,7 +3,7 @@
 ;; Copyright (C) 2004-2013 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
-;;	   Bastien Guerry <bzg AT gnu DOT org>
+;;	   Bastien Guerry <bzg@gnu.org>
 ;;         Dan Davison <davison at stats dot ox dot ac dot uk>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
