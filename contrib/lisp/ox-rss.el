@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2013  Bastien Guerry
 
-;; Author: Bastien Guerry <bzg at gnu dot org>
+;; Author: Bastien Guerry <bzg@gnu.org>
 ;; Keywords: org, wp, blog, feed, rss
 
 ;; This file is not yet part of GNU Emacs.
