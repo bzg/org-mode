@@ -54,6 +54,11 @@ then the name of the language is used."
 	   (string "Language name")
 	   (string "File Extension"))))
 
+(defcustom org-babel-tangle-use-relative-file-links t
+  "Use relative path names in links from tangled source back the Org-mode file."
+  :group 'org-babel-tangle
+  :type 'boolean)
+
 (defcustom org-babel-post-tangle-hook nil
   "Hook run in code files tangled by `org-babel-tangle'."
   :group 'org-babel
@@ -305,8 +310,19 @@ that the appropriate major-mode is set.  SPEC has the form:
 
   \(start-line file link source-name params body comment)"
   (let* ((start-line (nth 0 spec))
-	 (file (nth 1 spec))
-	 (link (nth 2 spec))
+	 (file (if org-babel-tangle-use-relative-file-links
+		   (file-relative-name (nth 1 spec))
+		 (nth 1 spec)))
+	 (link (let ((link (nth 2 spec)))
+		 (if org-babel-tangle-use-relative-file-links
+		     (when (string-match "^\\(file:\\|docview:\\)\\(.*\\)" link)
+		       (let* ((type (match-string 1 link))
+			      (path (match-string 2 link))
+			      (origpath path)
+			      (case-fold-search nil))
+			 (setq path (file-relative-name path))
+			 (concat type path)))
+		   link)))
 	 (source-name (nth 3 spec))
 	 (body (nth 5 spec))
 	 (comment (nth 6 spec))
