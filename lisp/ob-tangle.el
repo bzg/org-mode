@@ -365,17 +365,17 @@ source code blocks by language.  Optional argument TANGLE-FILE
 can be used to limit the collected code blocks by target file."
   (let ((block-counter 1) (current-heading "") blocks by-lang)
     (org-babel-map-src-blocks (buffer-file-name)
-      (lambda (new-heading)
-	(if (not (string= new-heading current-heading))
-	    (progn
-	      (setq block-counter 1)
-	      (setq current-heading new-heading))
-	  (setq block-counter (+ 1 block-counter))))
-      (replace-regexp-in-string "[ \t]" "-"
-				(condition-case nil
-				    (or (nth 4 (org-heading-components))
-					"(dummy for heading without text)")
-				  (error (buffer-file-name))))
+      ((lambda (new-heading)
+	 (if (not (string= new-heading current-heading))
+	     (progn
+	       (setq block-counter 1)
+	       (setq current-heading new-heading))
+	   (setq block-counter (+ 1 block-counter))))
+       (replace-regexp-in-string "[ \t]" "-"
+				 (condition-case nil
+				     (or (nth 4 (org-heading-components))
+					 "(dummy for heading without text)")
+				   (error (buffer-file-name)))))
       (let* ((info (org-babel-get-src-block-info 'light))
 	     (src-lang (nth 0 info))
 	     (src-tfile (cdr (assoc :tangle (nth 2 info)))))
