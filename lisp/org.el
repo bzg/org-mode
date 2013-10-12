@@ -14543,7 +14543,7 @@ With prefix ARG, realign all tags in headings in the current buffer."
 		       0)
 		  p0 (if (equal (char-before) ?*) (1+ (point)) (point))
 		  tc (+ org-tags-column (if (> org-tags-column 0) (- di) di))
-		  c1 (max (1+ c0) (if (> tc 0) tc (- (- tc) (length tags))))
+		  c1 (max (1+ c0) (if (> tc 0) tc (- (- tc) (string-width tags))))
 		  rpl (concat (make-string (max 0 (- c1 c0)) ?\ ) tags)))
 	  (replace-match rpl t t)
 	  (and (not (featurep 'xemacs)) c0 indent-tabs-mode (tabify p0 (point)))
@@ -20403,7 +20403,7 @@ If `org-special-ctrl-o' is nil, just call `open-line' everywhere."
     (open-line n))
    ((org-at-table-p)
     (org-table-insert-row))
-   (t    
+   (t
     (open-line n))))
 
 (defun org-return (&optional indent)
