@@ -1921,11 +1921,21 @@ Outside list"
      (let ((timestamp (org-element-context)))
        (or (org-element-property :hour-end timestamp)
 	   (org-element-property :minute-end timestamp)))))
-  ;; With repeater.
+  ;; With repeater, warning delay and both.
   (should
    (eq 'catch-up
        (org-test-with-temp-text "<2012-03-29 Thu ++1y>"
 	 (org-element-property :repeater-type (org-element-context)))))
+  (should
+   (eq 'first
+       (org-test-with-temp-text "<2012-03-29 Thu --1y>"
+	 (org-element-property :warning-type (org-element-context)))))
+  (should
+   (equal '(cumulate all)
+	  (org-test-with-temp-text "<2012-03-29 Thu +1y -1y>"
+	    (let ((ts (org-element-context)))
+	      (list (org-element-property :repeater-type ts)
+		    (org-element-property :warning-type ts))))))
   ;; Timestamps are not planning elements.
   (should-not
    (org-test-with-temp-text "SCHEDULED: <2012-03-29 Thu 16:40>"
