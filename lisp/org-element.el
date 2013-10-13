@@ -3549,7 +3549,12 @@ beginning position."
   "Parse time stamp at point.
 
 Return a list whose CAR is `timestamp', and CDR a plist with
-`:type', `:begin', `:end', `:value' and `:post-blank' keywords.
+`:type', `:raw-value', `:year-start', `:month-start',
+`:day-start', `:hour-start', `:minute-start', `:year-end',
+`:month-end', `:day-end', `:hour-end', `:minute-end',
+`:repeater-type', `:repeater-value', `:repeater-unit',
+`:warning-type', `:warning-value', `:warning-unit', `:begin',
+`:end', `:value' and `:post-blank' keywords.
 
 Assume point is at the beginning of the timestamp."
   (save-excursion
@@ -3579,7 +3584,7 @@ Assume point is at the beginning of the timestamp."
 		       (t 'inactive)))
 	   (repeater-props
 	    (and (not diaryp)
-		 (string-match "\\([.+]?\\+\\)\\([0-9]+\\)\\([hdwmy]\\)>"
+		 (string-match "\\([.+]?\\+\\)\\([0-9]+\\)\\([hdwmy]\\)"
 			       raw-value)
 		 (list
 		  :repeater-type
@@ -3589,6 +3594,15 @@ Assume point is at the beginning of the timestamp."
 			  (t 'cumulate)))
 		  :repeater-value (string-to-number (match-string 2 raw-value))
 		  :repeater-unit
+		  (case (string-to-char (match-string 3 raw-value))
+		    (?h 'hour) (?d 'day) (?w 'week) (?m 'month) (t 'year)))))
+	   (warning-props
+	    (and (not diaryp)
+		 (string-match "\\(-\\)?-\\([0-9]+\\)\\([hdwmy]\\)" raw-value)
+		 (list
+		  :warning-type (if (match-string 1 raw-value) 'first 'all)
+		  :warning-value (string-to-number (match-string 2 raw-value))
+		  :warning-unit
 		  (case (string-to-char (match-string 3 raw-value))
 		    (?h 'hour) (?d 'day) (?w 'week) (?m 'month) (t 'year)))))
 	   year-start month-start day-start hour-start minute-start year-end
@@ -3627,7 +3641,8 @@ Assume point is at the beginning of the timestamp."
 			 :begin begin
 			 :end end
 			 :post-blank post-blank)
-		   repeater-props)))))
+		   repeater-props
+		   warning-props)))))
 
 (defun org-element-timestamp-interpreter (timestamp contents)
   "Interpret TIMESTAMP object as Org syntax.
@@ -3642,6 +3657,15 @@ CONTENTS is nil."
 	       (let ((val (org-element-property :repeater-value timestamp)))
 		 (and val (number-to-string val)))
 	       (case (org-element-property :repeater-unit timestamp)
+		 (hour "h") (day "d") (week "w") (month "m") (year "y"))))
+	     (warning-string
+	      (concat
+	       (and (eq (org-element-property :warninger-type timestamp) 'first)
+		    "-")
+	       "-"
+	       (let ((val (org-element-property :warninger-value timestamp)))
+		 (and val (number-to-string val)))
+	       (case (org-element-property :warninger-unit timestamp)
 		 (hour "h") (day "d") (week "w") (month "m") (year "y"))))
 	     (build-ts-string
 	      ;; Build an Org timestamp string from TIME.  ACTIVEP is
