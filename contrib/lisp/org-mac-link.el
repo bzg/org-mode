@@ -593,13 +593,13 @@ applications and inserting them in org documents"
 (org-add-link-type "mac-outlook" 'org-mac-outlook-message-open)
 
 (defun org-mac-outlook-message-open (msgid)
-  "Open a message in outlook"
-  (let* ((record-id-string (format "mdfind com_microsoft_outlook_recordID==%s" msgid))
-	(found-message (replace-regexp-in-string "\n$" ""
-              (shell-command-to-string record-id-string))))
-    (if (string= found-message "")
-      (message "org-mac-link: error could not find Outlook message %s" 	(substring-no-properties msgid))
-      (shell-command (format "open \"`mdfind com_microsoft_outlook_recordID==%s`\"" msgid)))))
+  "Open a message in Outlook"
+  (do-applescript
+   (concat
+    "tell application \"Microsoft Outlook\"\n"
+     (format "open message id %s\n" (substring-no-properties msgid))
+     "activate\n"
+     "end tell")))
 
 (defun org-as-get-selected-outlook-mail ()
   "AppleScript to create links to selected messages in Microsoft Outlook.app."
