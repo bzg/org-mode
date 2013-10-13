@@ -893,10 +893,11 @@ in another process."
   (interactive "P")
   (if async
       (org-export-async-start 'ignore
-	`(when ',force (org-publish-remove-all-timestamps))
-	`(let ((org-publish-use-timestamps-flag
-		(if ',force nil ,org-publish-use-timestamps-flag)))
-	   (org-publish-projects ',org-publish-project-alist)))
+	`(progn
+	   (when ',force (org-publish-remove-all-timestamps))
+	   (let ((org-publish-use-timestamps-flag
+		  (if ',force nil ,org-publish-use-timestamps-flag)))
+	     (org-publish-projects ',org-publish-project-alist))))
     (when force (org-publish-remove-all-timestamps))
     (save-window-excursion
       (let ((org-publish-use-timestamps-flag
