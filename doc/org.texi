@@ -1755,7 +1755,7 @@ one.
 
 @table @kbd
 @kindex M-S-@key{RET}
-@item M-S-RET
+@item M-S-@key{RET}
 Insert a new item with a checkbox (@pxref{Checkboxes}).
 @kindex S-@key{down}
 @item S-up
@@ -1784,8 +1784,8 @@ is automatic.
 Decrease/increase the indentation of an item, leaving children alone.
 @kindex M-S-@key{left}
 @kindex M-S-@key{right}
-@item M-S-left
-@itemx M-S-right
+@item M-S-@key{left}
+@itemx M-S-@key{right}
 Decrease/increase the indentation of the item, including subitems.
 Initially, the item tree is selected based on current indentation.  When
 these commands are executed several times in direct succession, the initially
