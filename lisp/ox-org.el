@@ -226,6 +226,8 @@ Return output file name."
 	   (work-buffer (or visitingp (find-file filename)))
 	   newbuf)
       (font-lock-fontify-buffer)
+      (show-all)
+      (org-show-block-all)
       (setq newbuf (htmlize-buffer))
       (with-current-buffer newbuf
 	(when org-org-htmlized-css-url
