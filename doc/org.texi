@@ -1011,7 +1011,7 @@ version information of Emacs (@kbd{M-x emacs-version @key{RET}}) and Org
 @kbd{M-x org-submit-bug-report RET}
 @end example
 @noindent which will put all this information into an Emacs mail buffer so
-that you only need to add your description.  If you re not sending the Email
+that you only need to add your description.  If you are not sending the Email
 from within Emacs, please copy and paste the content into your Email program.
 
 Sometimes you might face a problem due to an error in your Emacs or Org mode
@@ -1426,7 +1426,7 @@ See also the option @code{org-goto-interface}.
 @table @asis
 @orgcmd{M-@key{RET},org-insert-heading}
 @vindex org-M-RET-may-split-line
-Insert a new heading/item with the same level than the one at point.
+Insert a new heading/item with the same level as the one at point.
 If the cursor is in a plain list item, a new item is created
 (@pxref{Plain lists}).  To prevent this behavior in lists, call the
 command with a prefix argument.  When this command is used in the
@@ -1567,7 +1567,7 @@ variables @code{org-show-hierarchy-above}, @code{org-show-following-heading},
 control on how much context is shown around each match.}.  Just try it out
 and you will see immediately how it works.
 
-Org mode contains several commands creating such trees, all these
+Org mode contains several commands for creating such trees, all these
 commands can be accessed through a dispatcher:
 
 @table @asis
@@ -1707,7 +1707,7 @@ blocks can be indented to signal that they belong to a particular item.
 If you find that using a different bullet for a sub-list (than that used for
 the current list-level) improves readability, customize the variable
 @code{org-list-demote-modify-bullet}.  To get a greater difference of
-indentation between items and theirs sub-items, customize
+indentation between items and their sub-items, customize
 @code{org-list-indent-offset}.
 
 @vindex org-list-automatic-rules
@@ -2133,7 +2133,7 @@ unpredictable for you, configure the options
 @table @kbd
 @tsubheading{Creation and conversion}
 @orgcmd{C-c |,org-table-create-or-convert-from-region}
-Convert the active region to table.  If every line contains at least one
+Convert the active region to a table.  If every line contains at least one
 TAB character, the function assumes that the material is tab separated.
 If every line contains a comma, comma-separated values (CSV) are assumed.
 If not, lines are split at whitespace into fields.  You can use a prefix
@@ -2533,7 +2533,7 @@ format at least for the first field (i.e the reference must start with
 @example
 $1..$3        @r{first three fields in the current row}
 $P..$Q        @r{range, using column names (see under Advanced)}
-$<<<..$>>     @r{start in third column, continue to the one but last}
+$<<<..$>>     @r{start in third column, continue to the last but one}
 @@2$1..@@4$3    @r{6 fields between these two fields (same as @code{A2..C4})}
 @@-1$-2..@@-1   @r{3 fields in the row above, starting from 2 columns on the left}
 @@I..II        @r{between first and second hline, short for @code{@@I..@@II}}
@@ -2794,7 +2794,7 @@ formulas or Elisp formulas:
 @end group
 @end example
 
-Input duration values must be of the form @code{[HH:MM[:SS]}, where seconds
+Input duration values must be of the form @code{HH:MM[:SS]}, where seconds
 are optional.  With the @code{T} flag, computed durations will be displayed
 as @code{HH:MM:SS} (see the first formula above).  With the @code{t} flag,
 computed durations will be displayed according to the value of the option
@@ -2822,13 +2822,13 @@ current field will be replaced with the result.
 Formulas are stored in a special line starting with @samp{#+TBLFM:} directly
 below the table.  If you type the equation in the 4th field of the 3rd data
 line in the table, the formula will look like @samp{@@3$4=$1+$2}.  When
-inserting/deleting/swapping column and rows with the appropriate commands,
+inserting/deleting/swapping columns and rows with the appropriate commands,
 @i{absolute references} (but not relative ones) in stored formulas are
-modified in order to still reference the same field.  To avoid this from
-happening, in particular in range references, anchor ranges at the table
-borders (using @code{@@<}, @code{@@>}, @code{$<}, @code{$>}), or at hlines
-using the @code{@@I} notation.  Automatic adaptation of field references does
-of course not happen if you edit the table structure with normal editing
+modified in order to still reference the same field.  To avoid this, in
+particular in range references, anchor ranges at the table borders (using
+@code{@@<}, @code{@@>}, @code{$<}, @code{$>}), or at hlines using the
+@code{@@I} notation.  Automatic adaptation of field references does of course
+not happen if you edit the table structure with normal editing
 commands---then you must fix the equations yourself.
 
 Instead of typing an equation into the field, you may also use the following
@@ -2885,7 +2885,7 @@ and the current field replaced with the result.  If the field contains only
 @samp{=}, the previously stored formula for this column is used.  For each
 column, Org will only remember the most recently used formula.  In the
 @samp{#+TBLFM:} line, column formulas will look like @samp{$4=$1+$2}.  The
-left-hand side of a column formula can not be the name of column, it must be
+left-hand side of a column formula cannot be the name of column, it must be
 the numeric column reference or @code{$>}.
 
 Instead of typing an equation into the field, you may also use the
@@ -3396,8 +3396,8 @@ a @i{dedicated target}: the same string in double angular brackets, like
 @cindex #+NAME
 If no dedicated target exists, the link will then try to match the exact name
 of an element within the buffer.  Naming is done with the @code{#+NAME}
-keyword, which has to be put the line before the element it refers to, as in
-the following example
+keyword, which has to be put in the line before the element it refers to, as
+in the following example
 
 @example
 #+NAME: My Target
@@ -3633,7 +3633,7 @@ entry referenced by the current line.
 @cindex completion, of links
 @cindex inserting links
 @vindex org-keep-stored-link-after-insertion
-Insert a link@footnote{ Note that you don't have to use this command to
+Insert a link@footnote{Note that you don't have to use this command to
 insert a link.  Links in Org are plain text, and you can type or paste them
 straight into the buffer.  By using this command, the links are automatically
 enclosed in double brackets, and you will be asked for the optional
@@ -3807,7 +3807,7 @@ url-encode the tag (see the example above, where we need to encode
 the URL parameter.)  Using @samp{%(my-function)} will pass the tag
 to a custom function, and replace it by the resulting string.
 
-If the replacement text don't contain any specifier, it will simply
+If the replacement text doesn't contain any specifier, it will simply
 be appended to the string in order to create the link.
 
 Instead of a string, you may also specify a function that will be
@@ -4141,8 +4141,8 @@ These keys jump from one TODO subset to the next.  In the above example,
 @kindex S-@key{left}
 @item S-@key{right}
 @itemx S-@key{left}
-@kbd{S-@key{<left>}} and @kbd{S-@key{<right>}} and walk through @emph{all}
-keywords from all sets, so for example @kbd{S-@key{<right>}} would switch
+@kbd{S-@key{left}} and @kbd{S-@key{right}} and walk through @emph{all}
+keywords from all sets, so for example @kbd{S-@key{right}} would switch
 from @code{DONE} to @code{REPORT} in the example above.  See also
 @ref{Conflicts}, for a discussion of the interaction with
 @code{shift-selection-mode}.
@@ -4401,7 +4401,7 @@ To record a timestamp without a note for TODO keywords configured with
 
 @noindent
 @vindex org-log-done
-you not only define global TODO keywords and fast access keys, but also
+You not only define global TODO keywords and fast access keys, but also
 request that a time is recorded when the entry is set to
 DONE@footnote{It is possible that Org mode will record two timestamps
 when you are using both @code{org-log-done} and state change logging.
@@ -5192,7 +5192,7 @@ file, use a line like
 @end example
 
 Contrary to properties set from a special drawer, you have to refresh the
-buffer with @kbd{C-c C-c} to activate this changes.
+buffer with @kbd{C-c C-c} to activate this change.
 
 If you want to add to the value of an existing property, append a @code{+} to
 the property name.  The following results in the property @code{var} having
@@ -5594,7 +5594,7 @@ View the full value of this property.  This is useful if the width of
 the column is smaller than that of the value.
 @orgcmd{a,org-columns-edit-allowed}
 Edit the list of allowed values for this property.  If the list is found
-in the hierarchy, the modified values is stored there.  If no list is
+in the hierarchy, the modified value is stored there.  If no list is
 found, the new value is stored in the first entry that is part of the
 current column view.
 @tsubheading{Modifying the table structure}
@@ -5703,7 +5703,7 @@ property API}.
 To assist project planning, TODO items can be labeled with a date and/or
 a time.  The specially formatted string carrying the date and time
 information is called a @emph{timestamp} in Org mode.  This may be a
-little confusing because timestamp is often used as indicating when
+little confusing because timestamp is often used to indicate when
 something was created or last changed.  However, in Org mode this term
 is used in a much wider sense.
 
@@ -5769,7 +5769,7 @@ following will show up in the agenda every Wednesday:
 For more complex date specifications, Org mode supports using the special
 sexp diary entries implemented in the Emacs calendar/diary
 package@footnote{When working with the standard diary sexp functions, you
-need to be very careful with the order of the arguments.  That order depend
+need to be very careful with the order of the arguments.  That order depends
 evilly on the variable @code{calendar-date-style} (or, for older Emacs
 versions, @code{european-calendar-style}).  For example, to specify a date
 December 12, 2005, the call might look like @code{(diary-date 12 1 2005)} or
@@ -6084,9 +6084,9 @@ until the entry is marked DONE@.  An example:
 @end example
 
 You can specify a different lead time for warnings for a specific
-deadlines using the following syntax.  Here is an example with a warning
+deadline using the following syntax.  Here is an example with a warning
 period of 5 days @code{DEADLINE: <2004-02-29 Sun -5d>}.  This warning is
-deactivated if the task get scheduled and you set
+deactivated if the task gets scheduled and you set
 @code{org-agenda-skip-deadline-prewarning-if-scheduled} to @code{t}.
 
 @item SCHEDULED
@@ -6305,7 +6305,7 @@ stopped and the corresponding time interval is recorded.  It also computes
 the total time spent on each subtree@footnote{Clocking only works if all
 headings are indented with less than 30 stars.  This is a hardcoded
 limitation of `lmax' in `org-clock-sum'.} of a project.  And it remembers a
-history or tasks recently clocked, to that you can jump quickly between a
+history or tasks recently clocked, so that you can jump quickly between a
 number of tasks absorbing your time.
 
 To save the clock history across Emacs sessions, use
@@ -6370,7 +6370,7 @@ mode line entry will pop up a menu with clocking options.
 @vindex org-log-note-clock-out
 Stop the clock (clock-out).  This inserts another timestamp at the same
 location where the clock was last started.  It also directly computes
-the resulting time in inserts it after the time range as @samp{=>
+the resulting time and inserts it after the time range as @samp{=>
 HH:MM}.  See the variable @code{org-log-note-clock-out} for the
 possibility to record an additional note together with the clock-out
 timestamp@footnote{The corresponding in-buffer setting is:
@@ -6465,7 +6465,7 @@ buffer with the @kbd{C-c C-x C-r} command:
 @end example
 @noindent
 @vindex org-clocktable-defaults
-The @samp{BEGIN} line and specify a number of options to define the scope,
+The @samp{BEGIN} line specifies a number of options to define the scope,
 structure, and formatting of the report.  Defaults for all these options can
 be configured in the variable @code{org-clocktable-defaults}.
 
@@ -6485,7 +6485,7 @@ be selected:
              file-with-archives    @r{current file and its archives}
              agenda-with-archives  @r{all agenda files, including archives}
 :block       @r{The time block to consider.  This block is specified either}
-             @r{absolute, or relative to the current time and may be any of}
+             @r{absolutely, or relative to the current time and may be any of}
              @r{these formats:}
              2007-12-31    @r{New year eve 2007}
              2007-12       @r{December 2007}
@@ -6514,7 +6514,7 @@ be selected:
              @r{@ref{Matching tags and properties} for the match syntax.}
 @end example
 
-Then there are options which determine the formatting of the table.  There
+Then there are options which determine the formatting of the table.  These
 options are interpreted by the function @code{org-clocktable-write-default},
 but you can specify your own function using the @code{:formatter} parameter.
 @example
@@ -8040,7 +8040,7 @@ Group tags (@pxref{Tag groups}) are expanded as regular expressions.  E.g.,
 if @samp{:work:} is a group tag for the group @samp{:work:lab:conf:}, then
 searching for @samp{work} will search for @samp{@{\(?:work\|lab\|conf\)@}}
 and searching for @samp{-work} will search for all headlines but those with
-one of the tag in the group (i.e., @samp{-@{\(?:work\|lab\|conf\)@}}).
+one of the tags in the group (i.e., @samp{-@{\(?:work\|lab\|conf\)@}}).
 
 @cindex TODO keyword matching, with tags search
 @cindex level, require for tags/property match
@@ -8055,8 +8055,8 @@ the entry.  The ITEM special property cannot currently be used in tags/property
 searches@footnote{But @pxref{x-agenda-skip-entry-regexp,
 ,skipping entries based on regexp}.}.
 
-Except the @pxref{Special properties}, one other ``property'' can also be
-used. @code{LEVEL} represents the level of an entry.  So a search
+In addition to the @pxref{Special properties}, one other ``property'' can
+also be used. @code{LEVEL} represents the level of an entry.  So a search
 @samp{+LEVEL=3+boss-TODO="DONE"} lists all level three headlines that have
 the tag @samp{boss} and are @emph{not} marked with the TODO keyword DONE@.
 In buffers with @code{org-odd-levels-only} set, @samp{LEVEL} does not count
@@ -8391,9 +8391,9 @@ the estimated effort of an entry (@pxref{Effort estimates}).
 
 Agenda built-in or customized commands are statically defined.  Agenda
 filters and limits provide two ways of dynamically narrowing down the list of
-agenda entries: @emph{fitlers} and @emph{limits}.  Filters only act on the
+agenda entries: @emph{filters} and @emph{limits}.  Filters only act on the
 display of the items, while limits take effect before the list of agenda
-entries is built.  Filter are more often used interactively, while limits are
+entries is built.  Filters are more often used interactively, while limits are
 mostly useful when defined as local variables within custom agenda commands.
 
 @subsubheading Filtering in the agenda
@@ -8542,8 +8542,8 @@ Limit the number of tagged entries.
 @end table
 
 When set to a positive integer, each option will exclude entries from other
-catogories: for example, @code{(setq org-agenda-max-effort 100)} will limit
-the agenda to 100 minutes of effort and exclude any entry that as no effort
+categories: for example, @code{(setq org-agenda-max-effort 100)} will limit
+the agenda to 100 minutes of effort and exclude any entry that has no effort
 property.  If you want to include entries with no effort property, use a
 negative value for @code{org-agenda-max-effort}.
 
@@ -9313,7 +9313,7 @@ yourself.
 @vindex org-agenda-custom-commands-contexts
 To control whether an agenda command should be accessible from a specific
 context, you can customize @code{org-agenda-custom-commands-contexts}.  Let's
-say for example that you have an agenda commands @code{"o"} displaying a view
+say for example that you have an agenda command @code{"o"} displaying a view
 that you only need when reading emails.  Then you would configure this option
 like this:
 
@@ -9540,7 +9540,7 @@ spent (via @code{CLOCKSUM}) and with the planned total effort for it.
 
 When exporting Org mode documents, the exporter tries to reflect the
 structure of the document as accurately as possible in the back-end.  Since
-export targets like HTML, @LaTeX{} allow much richer formatting, Org mode has
+export targets like HTML and @LaTeX{} allow much richer formatting, Org mode has
 rules on how to prepare text for rich export.  This section summarizes the
 markup rules used in an Org mode buffer.
 
@@ -9584,7 +9584,7 @@ The title of the exported document is taken from the special line
 
 @noindent
 If this line does not exist, the title will be the name of the file
-associated to buffer, without extension, or the buffer name.
+associated with the buffer, without extension, or the buffer name.
 
 @cindex property, EXPORT_TITLE
 If you are exporting only a subtree, its heading will become the title of the
@@ -10307,7 +10307,7 @@ is normal.
 
 Org syntax includes pre-defined blocks (@pxref{Paragraphs} and @ref{Literal
 examples}).  It is also possible to create blocks containing raw code
-targeted at a specific back-ends (e.g., @samp{#+BEGIN_LATEX}).
+targeted at a specific back-end (e.g., @samp{#+BEGIN_LATEX}).
 
 Any other block is a @emph{special block}.  Each export back-end decides if
 they should be exported, and how.  When the block is ignored, its contents
@@ -12879,7 +12879,7 @@ On top of the aforemetioned back-ends, Org comes with other built-in ones:
 @item @file{ox-org.el}: export to an Org document.
 @end itemize
 
-To activate these export back-end, customize @code{org-export-backends} or
+To activate these export back-ends, customize @code{org-export-backends} or
 load them directly with e.g., @code{(require 'ox-texinfo)}.  This will add
 new keys in the export dispatcher (@pxref{The export dispatcher}).
 
@@ -15728,7 +15728,7 @@ Single keys can be made to execute commands when the cursor is at the
 beginning of a headline, i.e., before the first star.  Configure the variable
 @code{org-use-speed-commands} to activate this feature.  There is a
 pre-defined list of commands, and you can add more such commands using the
-variable @code{org-speed-commands-user}.  Speed keys do not only speed up
+variable @code{org-speed-commands-user}.  Speed keys not only speed up
 navigation and other commands, but they also provide an alternative way to
 execute commands bound to keys that are not or not easily available on a TTY,
 or on a small mobile device with a limited keyboard.
@@ -15739,7 +15739,7 @@ with the cursor at the beginning of a headline.
 @node Code evaluation security
 @section Code evaluation and security issues
 
-Org provides tools to work with the code snippets, including evaluating them.
+Org provides tools to work with code snippets, including evaluating them.
 
 Running code on your machine always comes with a security risk.  Badly
 written or malicious code can be executed on purpose or by accident.  Org has
@@ -15821,7 +15821,7 @@ per-file basis.  These lines start with a @samp{#+} followed by a
 keyword, a colon, and then individual words defining a setting.  Several
 setting words can be in the same line, but you can also have multiple
 lines for the keyword.  While these settings are described throughout
-the manual, here is a summary.  After changing any of those lines in the
+the manual, here is a summary.  After changing any of these lines in the
 buffer, press @kbd{C-c C-c} with the cursor still in the line to
 activate the changes immediately.  Otherwise they become effective only
 when the file is visited again in a new Emacs session.
@@ -16606,7 +16606,7 @@ being encrypted again.
 @appendix Hacking
 @cindex hacking
 
-This appendix covers some aspects where users can extend the functionality of
+This appendix covers some areas where users can extend the functionality of
 Org.
 
 @menu
@@ -16754,7 +16754,7 @@ not accept any arguments, and return the full link with prefix.
 @cindex Export, writing back-ends
 
 Org 8.0 comes with a completely rewritten export engine which makes it easy
-to write new export back-ends, either from scratch, or from deriving them
+to write new export back-ends, either from scratch, or by deriving them
 from existing ones.
 
 Your two entry points are respectively @code{org-export-define-backend} and
@@ -17225,7 +17225,7 @@ other block) with @code{org-narrow-to-block}.
 @vindex org-agenda-skip-function-global
 Org provides a special hook that can be used to narrow down the selection
 made by these agenda views: @code{agenda}, @code{agenda*}@footnote{The
-@code{agenda*} view is the same than @code{agenda} except that it only
+@code{agenda*} view is the same as @code{agenda} except that it only
 considers @emph{appointments}, i.e., scheduled and deadline items that have a
 time specification @code{[h]h:mm} in their time-stamps.}, @code{todo},
 @code{alltodo}, @code{tags}, @code{tags-todo}, @code{tags-tree}.  You may
@@ -17331,8 +17331,8 @@ to become slow.  Below are some tips on how to speed up the agenda commands.
 
 @enumerate
 @item
-Reduce the number of Org agenda files: this will reduce the slowliness caused
-by accessing to a hard drive.
+Reduce the number of Org agenda files: this will reduce the slowdown caused
+by accessing a hard drive.
 @item
 Reduce the number of DONE and archived headlines: this way the agenda does
 not need to skip them.
@@ -17665,7 +17665,7 @@ The following example counts the number of entries with TODO keyword
 @i{MobileOrg} is the name of the mobile companion app for Org mode, currently
 available for iOS and for Android.  @i{MobileOrg} offers offline viewing and
 capture support for an Org mode system rooted on a ``real'' computer.  It
-does also allow you to record changes to existing entries.  The
+also allows you to record changes to existing entries.  The
 @uref{https://github.com/MobileOrg/, iOS implementation} for the
 @i{iPhone/iPod Touch/iPad} series of devices, was started by Richard Moreland
 and is now in the hands Sean Escriva.  Android users should check out
@@ -17694,9 +17694,9 @@ in-buffer settings, but it will understand the logistics of TODO state
 @node Setting up the staging area
 @section Setting up the staging area
 
-MobileOrg needs to interact with Emacs through a directory on a server.  If you
-are using a public server, you should consider to encrypt the files that are
-uploaded to the server.  This can be done with Org mode 7.02 and with
+MobileOrg needs to interact with Emacs through a directory on a server.  If
+you are using a public server, you should consider encrypting the files that
+are uploaded to the server.  This can be done with Org mode 7.02 and with
 @i{MobileOrg 1.5} (iPhone version), and you need an @file{openssl}
 installation on your system.  To turn on encryption, set a password in
 @i{MobileOrg} and, on the Emacs side, configure the variable
@@ -17731,7 +17731,7 @@ all agenda files (as listed in @code{org-agenda-files}), but additional files
 can be included by customizing @code{org-mobile-files}.  File names will be
 staged with paths relative to @code{org-directory}, so all files should be
 inside this directory@footnote{Symbolic links in @code{org-directory} need to
-have the same name than their targets.}.
+have the same name as their targets.}.
 
 The push operation also creates a special Org file @file{agendas.org} with
 all custom agenda view defined by the user@footnote{While creating the
