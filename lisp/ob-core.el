@@ -287,11 +287,12 @@ hold the language of the code block, and BLOCK-NAME will hold the
 name of the code block."
   (declare (indent defun))
   (org-with-gensyms
-      (lang block-body headers name eval eval-no export eval-no-export)
+      (lang block-body headers name head eval eval-no export eval-no-export)
     `(let* ((,lang           (nth 0 ,info))
 	    (,block-body     (nth 1 ,info))
 	    (,headers        (nth 2 ,info))
 	    (,name           (nth 4 ,info))
+	    (,head           (nth 6 ,info))
 	    (,eval           (or (cdr  (assoc :eval   ,headers))
 				 (when (assoc :noeval ,headers) "no")))
 	    (,eval-no        (or (equal ,eval "no")
@@ -303,8 +304,10 @@ name of the code block."
 	    (query           (or (equal ,eval "query")
 				 (and ,export (equal ,eval "query-export"))
 				 (if (functionp org-confirm-babel-evaluate)
-				     (funcall org-confirm-babel-evaluate
-					      ,lang ,block-body)
+				     (save-excursion
+				       (goto-char ,head)
+				       (funcall org-confirm-babel-evaluate
+						,lang ,block-body))
 				   org-confirm-babel-evaluate)))
 	    (code-block      (if ,info (format  " %s "  ,lang) " "))
 	    (block-name      (if ,name (format " (%s) " ,name) " ")))
