@@ -1127,7 +1127,13 @@ DEADLINE: <2012-03-29 thu.>"
    (equal '(("- item"))
 	  (org-test-with-temp-text "- - item"
 	    (org-element-map
-	     (org-element-parse-buffer) 'paragraph 'org-element-contents)))))
+	     (org-element-parse-buffer) 'paragraph 'org-element-contents))))
+  ;; Block in an item: ignore indentation within the block.
+  (should
+   (org-test-with-temp-text "- item\n  #+begin_src emacs-lisp\n(+ 1 1)\n  #+end_src"
+     (forward-char)
+     (goto-char (org-element-property :end (org-element-at-point)))
+     (eobp))))
 
 
 ;;;; Keyword
