@@ -1233,7 +1233,7 @@ CONTENTS is the contents of the element."
 	     ((and (looking-at "#\\+BEGIN\\(:\\|_\\S-+\\)")
 		   (re-search-forward
 		    (format "^[ \t]*#\\+END%s[ \t]*$"
-			    (match-string-no-properties 1))
+			    (org-match-string-no-properties 1))
 		    limit t)))
 	     ((and (looking-at drawers-re)
 		   (re-search-forward "^[ \t]*:END:[ \t]*$" limit t))))
