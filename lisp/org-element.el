@@ -1230,9 +1230,10 @@ CONTENTS is the contents of the element."
 		    (throw 'exit (sort struct 'car-less-than-car))))))
 	    ;; Skip blocks (any type) and drawers contents.
 	    (cond
-	     ((and (looking-at "#\\+BEGIN\\(:[ \t]*$\\|_\\S-\\)+")
+	     ((and (looking-at "#\\+BEGIN\\(:\\|_\\S-+\\)")
 		   (re-search-forward
-		    (format "^[ \t]*#\\+END%s[ \t]*$" (match-string 1))
+		    (format "^[ \t]*#\\+END%s[ \t]*$"
+			    (match-string-no-properties 1))
 		    limit t)))
 	     ((and (looking-at drawers-re)
 		   (re-search-forward "^[ \t]*:END:[ \t]*$" limit t))))
