@@ -355,6 +355,15 @@ that the appropriate major-mode is set.  SPEC has the form:
        insert-comment
        (org-fill-template org-babel-tangle-comment-format-end link-data)))))
 
+(defun org-babel-under-commented-heading-p ()
+  "Return t if currently under a commented heading."
+  (if (string-match (concat "^" org-comment-string)
+		    (nth 4 (org-heading-components)))
+      t
+    (save-excursion
+      (and (org-up-heading-safe)
+	   (org-babel-under-commented-headline-p)))))
+
 (defvar org-comment-string) ;; Defined in org.el
 (defun org-babel-tangle-collect-blocks (&optional language tangle-file)
   "Collect source blocks in the current Org-mode file.
@@ -379,7 +388,7 @@ can be used to limit the collected code blocks by target file."
       (let* ((info (org-babel-get-src-block-info 'light))
 	     (src-lang (nth 0 info))
 	     (src-tfile (cdr (assoc :tangle (nth 2 info)))))
-        (unless (or (string-match (concat "^" org-comment-string) current-heading)
+        (unless (or (org-babel-under-commented-heading-p)
 		    (string= (cdr (assoc :tangle (nth 2 info))) "no")
 		    (and tangle-file (not (equal tangle-file src-tfile))))
           (unless (and language (not (string= language src-lang)))
