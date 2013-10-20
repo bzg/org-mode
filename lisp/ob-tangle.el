@@ -362,7 +362,7 @@ that the appropriate major-mode is set.  SPEC has the form:
       t
     (save-excursion
       (and (org-up-heading-safe)
-	   (org-babel-under-commented-headline-p)))))
+	   (org-babel-under-commented-heading-p)))))
 
 (defvar org-comment-string) ;; Defined in org.el
 (defun org-babel-tangle-collect-blocks (&optional language tangle-file)
