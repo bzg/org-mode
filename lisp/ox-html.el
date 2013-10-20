@@ -22,13 +22,7 @@
 ;;; Commentary:
 
 ;; This library implements a HTML back-end for Org generic exporter.
-
-;; To test it, run:
-;;
-;;   M-x org-html-export-as-html
-;;
-;; in an Org mode buffer.  See ox.el for more details on how this
-;; exporter works.
+;; See Org manual for more information.
 
 ;;; Code:
 

@@ -21,11 +21,8 @@
 ;;; Commentary:
 
 ;; This library implements a Markdown back-end (vanilla flavour) for
-;; Org exporter, based on `html' back-end.
-;;
-;; It provides two commands for export, depending on the desired
-;; output: `org-md-export-as-markdown' (temporary buffer) and
-;; `org-md-export-to-markdown' ("md" file).
+;; Org exporter, based on `html' back-end.  See Org manual for more
+;; information.
 
 ;;; Code:
 
