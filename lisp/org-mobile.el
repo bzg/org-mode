@@ -425,7 +425,7 @@ agenda view showing the flagged items."
 	(def-tags (default-value 'org-tag-alist))
 	(target-file (expand-file-name org-mobile-index-file
 				       org-mobile-directory))
-	file link-name todo-kwds done-kwds tags drawers entry kwds dwds twds)
+	file link-name todo-kwds done-kwds tags entry kwds dwds twds)
     (when (stringp (car def-todo))
       (setq def-todo (list (cons 'sequence def-todo))))
     (org-agenda-prepare-buffers (mapcar 'car files-alist))
@@ -433,7 +433,6 @@ agenda view showing the flagged items."
     (setq todo-kwds (org-delete-all
 		     done-kwds
 		     (org-uniquify org-todo-keywords-for-agenda)))
-    (setq drawers (org-uniquify org-drawers-for-agenda))
     (setq tags (mapcar 'car (org-global-tags-completion-table
 			     (mapcar 'car files-alist))))
     (with-temp-file
@@ -468,7 +467,6 @@ agenda view showing the flagged items."
       (setq tags (sort tags (lambda (a b) (string< (downcase a) (downcase b)))))
       (setq tags (append def-tags tags nil))
       (insert "#+TAGS: " (mapconcat 'identity tags " ") "\n")
-      (insert "#+DRAWERS: " (mapconcat 'identity drawers " ") "\n")
       (insert "#+ALLPRIORITIES: " org-mobile-allpriorities "\n")
       (when (file-exists-p (expand-file-name
 			    org-mobile-directory "agendas.org"))

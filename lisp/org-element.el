@@ -1146,9 +1146,6 @@ CONTENTS is the contents of the element."
   (let ((case-fold-search t)
 	(top-ind limit)
 	(item-re (org-item-re))
-	(drawers-re (concat ":\\("
-			    (mapconcat 'regexp-quote org-drawers "\\|")
-			    "\\):[ \t]*$"))
 	(inlinetask-re (and (featurep 'org-inlinetask) "^\\*+ "))
 	items struct)
     (save-excursion
@@ -1221,7 +1218,7 @@ CONTENTS is the contents of the element."
 		    (format "^[ \t]*#\\+END%s[ \t]*$"
 			    (org-match-string-no-properties 1))
 		    limit t)))
-	     ((and (looking-at drawers-re)
+	     ((and (looking-at org-drawer-regexp)
 		   (re-search-forward "^[ \t]*:END:[ \t]*$" limit t))))
 	    (forward-line))))))))
 

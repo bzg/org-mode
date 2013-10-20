@@ -1589,7 +1589,7 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	(while (and (< (point) end)
 		    (search-forward clock-drawer end t))
 	  (goto-char (match-beginning 0))
-	  (org-remove-empty-drawer-at clock-drawer (point))
+	  (org-remove-empty-drawer-at (point))
 	  (forward-line 1))))))
 
 (defun org-clock-timestamps-up (&optional n)
@@ -1653,12 +1653,12 @@ Optional argument N tells to change by that many units."
     (setq frame-title-format org-frame-title-format-backup)
     (force-mode-line-update)
     (error "No active clock"))
-  (save-excursion ; Do not replace this with `with-current-buffer'.
+  (save-excursion    ; Do not replace this with `with-current-buffer'.
     (org-no-warnings (set-buffer (org-clocking-buffer)))
     (goto-char org-clock-marker)
     (if (org-looking-back (concat "^[ \t]*" org-clock-string ".*"))
 	(progn (delete-region (1- (point-at-bol)) (point-at-eol))
-	       (org-remove-empty-drawer-at "LOGBOOK" (point)))
+	       (org-remove-empty-drawer-at (point)))
       (message "Clock gone, cancel the timer anyway")
       (sit-for 2)))
   (move-marker org-clock-marker nil)

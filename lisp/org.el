@@ -884,6 +884,10 @@ An entry can be toggled between QUOTE and normal with
   :group 'org-keywords
   :type 'string)
 
+(defconst org-drawer-regexp "^[ \t]*:\\(\\(?:\\w\\|[-_]\\)+\\):[ \t]*$"
+  "Matches first line of a hidden block.
+Group 1 contains drawer's name.")
+
 (defconst org-repeat-re
   "<[0-9]\\{4\\}-[0-9][0-9]-[0-9][0-9] [^>\n]*?\\([.+]?\\+[0-9]+[hdwmy]\\(/[0-9]+[hdwmy]\\)?\\)"
   "Regular expression for specifying repeated events.
@@ -1071,23 +1075,6 @@ than its value."
   :type '(choice
 	  (const :tag "No limit" nil)
 	  (integer :tag "Maximum level")))
-
-(defcustom org-drawers '("PROPERTIES" "CLOCK" "LOGBOOK" "RESULTS")
-  "Names of drawers.  Drawers are not opened by cycling on the headline above.
-Drawers only open with a TAB on the drawer line itself.  A drawer looks like
-this:
-   :DRAWERNAME:
-   .....
-   :END:
-The drawer \"PROPERTIES\" is special for capturing properties through
-the property API.
-
-Drawers can be defined on the per-file basis with a line like:
-
-#+DRAWERS: HIDDEN STATE PROPERTIES"
-  :group 'org-structure
-  :group 'org-cycle
-  :type '(repeat (string :tag "Drawer Name")))
 
 (defcustom org-hide-block-startup nil
   "Non-nil means entering Org-mode will fold all blocks.
@@ -2346,7 +2333,6 @@ taken from the (otherwise obsolete) variable `org-todo-interpretation'."
 (make-variable-buffer-local 'org-todo-keywords-1)
 (defvar org-todo-keywords-for-agenda nil)
 (defvar org-done-keywords-for-agenda nil)
-(defvar org-drawers-for-agenda nil)
 (defvar org-todo-keyword-alist-for-agenda nil)
 (defvar org-tag-alist-for-agenda nil
   "Alist of all tags from all agenda files.")
@@ -4596,9 +4582,6 @@ Otherwise, these types are allowed:
 
 ;;; Variables for pre-computed regular expressions, all buffer local
 
-(defvar org-drawer-regexp "^[ \t]*:PROPERTIES:[ \t]*$"
-  "Matches first line of a hidden block.")
-(make-variable-buffer-local 'org-drawer-regexp)
 (defvar org-todo-regexp nil
   "Matches any of the TODO state keywords.")
 (make-variable-buffer-local 'org-todo-regexp)
@@ -4977,8 +4960,6 @@ Support for group tags is controlled by the option
 		(setq props (org-update-property-plist (match-string 1 value)
 						       (match-string 2 value)
 						       props))))
-	     ((equal key "DRAWERS")
-	      (setq drawers (delete-dups (append org-drawers (org-split-string value splitre)))))
 	     ((equal key "CONSTANTS")
 	      (org-table-set-constants))
 	     ((equal key "STARTUP")
@@ -5034,7 +5015,6 @@ Support for group tags is controlled by the option
 	(org-set-local 'org-lowest-priority  (nth 1 prio))
 	(org-set-local 'org-default-priority (nth 2 prio)))
       (and props (org-set-local 'org-file-properties (nreverse props)))
-      (and drawers (org-set-local 'org-drawers drawers))
       (and arch (org-set-local 'org-archive-location arch))
       (and links (setq org-link-abbrev-alist-local (nreverse links)))
       ;; Process the TODO keywords
@@ -5094,10 +5074,6 @@ Support for group tags is controlled by the option
 					    (length org-scheduled-string)
 					    (length org-clock-string)
 					    (length org-closed-string)))
-	    org-drawer-regexp
-	    (concat "^[ \t]*:\\("
-		    (mapconcat 'regexp-quote org-drawers "\\|")
-		    "\\):[ \t]*$")
 	    org-not-done-keywords
 	    (org-delete-all org-done-keywords (copy-sequence org-todo-keywords-1))
 	    org-todo-regexp
@@ -6624,11 +6600,10 @@ in special contexts.
        ((eq arg t) (org-cycle-internal-global))
 
        ;; Drawers: delegate to `org-flag-drawer'.
-       ((and org-drawers org-drawer-regexp
-	     (save-excursion
-	       (beginning-of-line 1)
-	       (looking-at org-drawer-regexp)))
-	(org-flag-drawer ; toggle block visibility
+       ((save-excursion
+	  (beginning-of-line 1)
+	  (looking-at org-drawer-regexp))
+	(org-flag-drawer		; toggle block visibility
 	 (not (get-char-property (match-end 0) 'invisible))))
 
        ;; Show-subtree, ARG levels up from here.
@@ -7058,8 +7033,10 @@ open and agenda-wise Org files."
   "Return the end position of the current entry."
   (save-excursion (outline-next-heading) (point)))
 
-(defun org-cycle-hide-drawers (state)
-  "Re-hide all drawers after a visibility state change."
+(defun org-cycle-hide-drawers (state &optional exceptions)
+  "Re-hide all drawers after a visibility state change.
+When non-nil, optional argument EXCEPTIONS is a list of strings
+specifying which drawers should not be hidden."
   (when (and (derived-mode-p 'org-mode)
 	     (not (memq state '(overview folded contents))))
     (save-excursion
@@ -7071,7 +7048,8 @@ open and agenda-wise Org files."
 		      (org-end-of-subtree t)))))
 	(goto-char beg)
 	(while (re-search-forward org-drawer-regexp end t)
-	  (org-flag-drawer t))))))
+	  (unless (member-ignore-case (match-string 1) exceptions)
+	    (org-flag-drawer t)))))))
 
 (defun org-cycle-hide-inline-tasks (state)
   "Re-hide inline task when switching to 'contents visibility state."
@@ -8523,8 +8501,7 @@ and still retain the repeater to cover future instances of the task."
 		(kill-whole-line))
 	      (goto-char (point-min))
 	      (while (re-search-forward drawer-re nil t)
-		(mapc (lambda (d)
-			(org-remove-empty-drawer-at d (point))) org-drawers)))
+		(org-remove-empty-drawer-at (point))))
 	    (goto-char (point-min))
 	    (when doshift
 	      (while (re-search-forward org-ts-regexp-both nil t)
@@ -12454,7 +12431,7 @@ See variable `org-track-ordered-property-with-tag'."
       (org-back-to-heading)
       (if (org-entry-get nil "ORDERED")
 	  (progn
-	    (org-delete-property "ORDERED" "PROPERTIES")
+	    (org-delete-property "ORDERED")
 	    (and tag (org-toggle-tag tag 'off))
 	    (message "Subtasks can be completed in arbitrary order"))
 	(org-entry-put nil "ORDERED" "t")
@@ -13371,9 +13348,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
       (push note lines))
     (when (or current-prefix-arg org-note-abort)
       (when org-log-into-drawer
-	(org-remove-empty-drawer-at
-	 (if (stringp org-log-into-drawer) org-log-into-drawer "LOGBOOK")
-	 org-log-note-marker))
+	(org-remove-empty-drawer-at org-log-note-marker))
       (setq lines nil))
     (when lines
       (with-current-buffer (marker-buffer org-log-note-marker)
@@ -13418,17 +13393,20 @@ EXTRA is additional text that will be inserted into the notes buffer."
     (move-marker org-log-note-return-to nil)
     (and org-log-post-message (message "%s" org-log-post-message))))
 
-(defun org-remove-empty-drawer-at (drawer pos)
-  "Remove an empty drawer DRAWER at position POS.
+(defun org-remove-empty-drawer-at (pos)
+  "Remove an empty drawer at position POS.
 POS may also be a marker."
   (with-current-buffer (if (markerp pos) (marker-buffer pos) (current-buffer))
-    (save-excursion
-      (save-restriction
-	(widen)
-	(goto-char pos)
-	(if (org-in-regexp
-	     (concat "^[ \t]*:" drawer ":[ \t]*\n[ \t]*:END:[ \t]*\n?") 2)
-	    (replace-match ""))))))
+    (org-with-wide-buffer
+     (goto-char pos)
+     (let ((drawer (org-element-at-point)))
+       (when (and (memq (org-element-type drawer) '(drawer property-drawer))
+		  (not (org-element-property :contents-begin drawer)))
+	 (delete-region (org-element-property :begin drawer)
+			(progn (goto-char (org-element-property :end drawer))
+			       (skip-chars-backward " \r\t\n")
+			       (forward-line)
+			       (point))))))))
 
 (defvar org-ts-type nil)
 (defun org-sparse-tree (&optional arg type)
@@ -14954,7 +14932,6 @@ a *different* entry, you cannot use these techniques."
 	   org-todo-keywords-for-agenda
 	   org-done-keywords-for-agenda
 	   org-todo-keyword-alist-for-agenda
-	   org-drawers-for-agenda
 	   org-tag-alist-for-agenda
 	   todo-only)
 
@@ -15336,13 +15313,10 @@ If yes, return this value.  If not, return the current value of the variable."
 	(read prop)
       (symbol-value var))))
 
-(defun org-entry-delete (pom property &optional delete-empty-drawer)
-  "Delete the property PROPERTY from entry at point-or-marker POM.
-When optional argument DELETE-EMPTY-DRAWER is a string, it defines
-an empty drawer to delete."
-  (org-with-point-at pom
-    (if (member property org-special-properties)
-	nil ; cannot delete these properties.
+(defun org-entry-delete (pom property)
+  "Delete the property PROPERTY from entry at point-or-marker POM."
+  (unless (member property org-special-properties)
+    (org-with-point-at pom
       (let ((range (org-get-property-block)))
 	(if (and range
 		 (goto-char (car range))
@@ -15351,9 +15325,7 @@ an empty drawer to delete."
 		  (cdr range) t))
 	    (progn
 	      (delete-region (match-beginning 0) (1+ (point-at-eol)))
-	      (and delete-empty-drawer
-		   (org-remove-empty-drawer-at
-		    delete-empty-drawer (car range)))
+	      (org-remove-empty-drawer-at (car range))
 	      t)
 	  nil)))))
 
@@ -15632,23 +15604,14 @@ instead.
 
 Point is left between drawer's boundaries."
   (interactive "P")
-  (let* ((logbook (if (stringp org-log-into-drawer) org-log-into-drawer
-		    "LOGBOOK"))
-	 ;; SYSTEM-DRAWERS is a list of drawer names that are used
-	 ;; internally by Org.  They are meant to be inserted
-	 ;; automatically.
-	 (system-drawers `("CLOCK" ,logbook "PROPERTIES"))
-	 ;; Remove system drawers from list.  Note: For some reason,
-	 ;; `org-completing-read' ignores the predicate while
-	 ;; `completing-read' handles it fine.
-	 (drawer (if arg "PROPERTIES"
-		   (or drawer
-		       (completing-read
-			"Drawer: " org-drawers
-			(lambda (d) (not (member d system-drawers))))))))
+  (let* ((drawer (if arg "PROPERTIES"
+		   (or drawer (read-from-minibuffer "Drawer: ")))))
     (cond
      ;; With C-u, fall back on `org-insert-property-drawer'
      (arg (org-insert-property-drawer))
+     ;;
+     ((not (org-string-match-p org-drawer-regexp (format ":%s:" drawer)))
+      (user-error "Invalid drawer name"))
      ;; With an active region, insert a drawer at point.
      ((not (org-region-active-p))
       (progn
@@ -15784,17 +15747,15 @@ in the current file."
     (unless (equal (org-entry-get nil property) value)
       (org-entry-put nil property value))))
 
-(defun org-delete-property (property &optional delete-empty-drawer)
-  "In the current entry, delete PROPERTY.
-When optional argument DELETE-EMPTY-DRAWER is a string, it defines
-an empty drawer to delete."
+(defun org-delete-property (property)
+  "In the current entry, delete PROPERTY."
   (interactive
    (let* ((completion-ignore-case t)
 	  (prop (org-icompleting-read "Property: "
 				      (org-entry-properties nil 'standard))))
      (list prop)))
   (message "Property %s %s" property
-	   (if (org-entry-delete nil property delete-empty-drawer)
+	   (if (org-entry-delete nil property)
 	       "deleted"
 	     "was not present in the entry")))
 
@@ -18081,8 +18042,6 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		  (append org-done-keywords-for-agenda org-done-keywords))
 	    (setq org-todo-keyword-alist-for-agenda
 		  (append org-todo-keyword-alist-for-agenda org-todo-key-alist))
-	    (setq org-drawers-for-agenda
-		  (append org-drawers-for-agenda org-drawers))
 	    (setq org-tag-alist-for-agenda
 		  (org-uniquify
 		   (append org-tag-alist-for-agenda
@@ -21679,15 +21638,13 @@ block from point."
       nil)))
 
 (defun org-in-drawer-p ()
-  "Is point within a drawer?"
-  (save-match-data
-    (let ((case-fold-search t)
-	  (lim-up (save-excursion (outline-previous-heading)))
-	  (lim-down (save-excursion (outline-next-heading))))
-      (org-between-regexps-p
-       (concat "^[ \t]*:" (regexp-opt org-drawers) ":")
-       "^[ \t]*:end:.*$"
-       lim-up lim-down))))
+  "Non-nil if point is within a drawer.
+If point is within a drawer, return it, as parsed data."
+  (let ((element (save-match-data (org-element-at-point))))
+    (while (and element (not (memq (org-element-type element)
+				   '(drawer property-drawer))))
+      (setq element (org-element-property :parent element)))
+    element))
 
 (defun org-occur-in-agenda-files (regexp &optional nlines)
   "Call `multi-occur' with buffers for all agenda files."

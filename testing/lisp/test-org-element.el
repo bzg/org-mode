@@ -415,21 +415,18 @@ Some other text
   "Test `drawer' parser."
   ;; Standard test.
   (should
-   (let ((org-drawers '("TEST")))
-     (org-test-with-temp-text ":TEST:\nText\n:END:"
-       (org-element-map (org-element-parse-buffer) 'drawer 'identity))))
+   (org-test-with-temp-text ":TEST:\nText\n:END:"
+     (org-element-map (org-element-parse-buffer) 'drawer 'identity)))
   ;; Do not mix regular drawers and property drawers.
   (should-not
-   (let ((org-drawers '("PROPERTIES")))
-     (org-test-with-temp-text ":PROPERTIES:\n:prop: value\n:END:"
-       (org-element-map
-	(org-element-parse-buffer) 'drawer 'identity nil t))))
+   (org-test-with-temp-text ":PROPERTIES:\n:prop: value\n:END:"
+     (org-element-map
+	 (org-element-parse-buffer) 'drawer 'identity nil t)))
   ;; Ignore incomplete drawer.
   (should-not
-   (let ((org-drawers '("TEST")))
-     (org-test-with-temp-text ":TEST:"
-       (org-element-map
-	(org-element-parse-buffer) 'drawer 'identity nil t)))))
+   (org-test-with-temp-text ":TEST:"
+     (org-element-map
+	 (org-element-parse-buffer) 'drawer 'identity nil t))))
 
 
 ;;;; Dynamic Block
@@ -1403,16 +1400,10 @@ e^{i\\pi}+1=0
      (org-element-map (org-element-parse-buffer) 'paragraph 'identity)))
   ;; Include incomplete-drawers.
   (should
-   (let ((org-drawers '("TEST")))
-     (org-test-with-temp-text ":TEST:\nParagraph"
-       (let ((elem (org-element-at-point)))
-	 (and (eq (org-element-type elem) 'paragraph)
-	      (= (point-max) (org-element-property :end elem)))))))
-  ;; Include non-existent drawers.
-  (should
-   (let ((org-drawers '("TEST")))
-     (org-test-with-temp-text ":NONAME:"
-       (org-element-map (org-element-parse-buffer) 'paragraph 'identity))))
+   (org-test-with-temp-text ":TEST:\nParagraph"
+     (let ((elem (org-element-at-point)))
+       (and (eq (org-element-type elem) 'paragraph)
+	    (= (point-max) (org-element-property :end elem))))))
   ;; Include incomplete blocks.
   (should
    (org-test-with-temp-text "#+BEGIN_CENTER\nParagraph"
@@ -1505,22 +1496,19 @@ Outside list"
   "Test `property-drawer' parser."
   ;; Standard test.
   (should
-   (let ((org-drawers '("PROPERTIES")))
-     (org-test-with-temp-text ":PROPERTIES:\n:prop: value\n:END:"
-       (org-element-map
-	(org-element-parse-buffer) 'property-drawer 'identity nil t))))
+   (org-test-with-temp-text ":PROPERTIES:\n:prop: value\n:END:"
+     (org-element-map
+	 (org-element-parse-buffer) 'property-drawer 'identity nil t)))
   ;; Do not mix property drawers and regular drawers.
   (should-not
-   (let ((org-drawers '("TEST")))
-     (org-test-with-temp-text ":TEST:\n:prop: value\n:END:"
-       (org-element-map
-	(org-element-parse-buffer) 'property-drawer 'identity nil t))))
+   (org-test-with-temp-text ":TEST:\n:prop: value\n:END:"
+     (org-element-map
+	 (org-element-parse-buffer) 'property-drawer 'identity nil t)))
   ;; Ignore incomplete drawer.
   (should-not
-   (let ((org-drawers '("PROPERTIES")))
-     (org-test-with-temp-text ":PROPERTIES:\n:prop: value"
-       (org-element-map
-	(org-element-parse-buffer) 'property-drawer 'identity nil t)))))
+   (org-test-with-temp-text ":PROPERTIES:\n:prop: value"
+     (org-element-map
+	 (org-element-parse-buffer) 'property-drawer 'identity nil t))))
 
 
 ;;;; Quote Block
@@ -1965,8 +1953,7 @@ Outside list"
 (ert-deftest test-org-element/drawer-interpreter ()
   "Test drawer interpreter."
   (should
-   (equal (let ((org-drawers '("TEST")))
-	    (org-test-parse-and-interpret ":TEST:\nTest\n:END:"))
+   (equal (org-test-parse-and-interpret ":TEST:\nTest\n:END:")
 	  ":TEST:\nTest\n:END:\n")))
 
 (ert-deftest test-org-element/dynamic-block-interpreter ()

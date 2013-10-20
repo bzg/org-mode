@@ -3642,7 +3642,6 @@ generating a new one."
 	(or org-agenda-multi (org-agenda-fit-window-to-buffer))
 	(throw 'exit "Sticky Agenda buffer, use `r' to refresh"))
     (setq org-todo-keywords-for-agenda nil)
-    (setq org-drawers-for-agenda nil)
     (unless org-agenda-persistent-filter
       (setq org-agenda-tag-filter nil
 	    org-agenda-category-filter nil
@@ -3682,7 +3681,6 @@ generating a new one."
 	    (org-uniquify org-todo-keywords-for-agenda))
       (setq org-done-keywords-for-agenda
 	    (org-uniquify org-done-keywords-for-agenda))
-      (setq org-drawers-for-agenda (org-uniquify org-drawers-for-agenda))
       (setq org-agenda-last-prefix-arg current-prefix-arg)
       (setq org-agenda-this-buffer-name org-agenda-buffer-name)
       (and name (not org-agenda-name)
@@ -8627,15 +8625,10 @@ if it was hidden in the outline."
 	(run-hook-with-args 'org-cycle-hook 'subtree))
       (message "Remote: SUBTREE"))
      ((= more 4)
-      (let* ((org-drawers (delete "LOGBOOK" (copy-sequence org-drawers)))
-	     (org-drawer-regexp
-	      (concat "^[ \t]*:\\("
-		      (mapconcat 'regexp-quote org-drawers "\\|")
-		      "\\):[ \t]*$")))
-	(show-subtree)
-	(save-excursion
-	  (org-back-to-heading)
-	  (org-cycle-hide-drawers 'subtree)))
+      (show-subtree)
+      (save-excursion
+	(org-back-to-heading)
+	(org-cycle-hide-drawers 'subtree '("LOGBOOK")))
       (message "Remote: SUBTREE AND LOGBOOK"))
      ((> more 4)
       (show-subtree)

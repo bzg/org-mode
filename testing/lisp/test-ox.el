@@ -414,28 +414,24 @@ Paragraph"
   ;; Drawers.
   (should
    (equal ""
-	  (let ((org-drawers '("TEST")))
-	    (org-test-with-temp-text ":TEST:\ncontents\n:END:"
-	      (org-export-as (org-test-default-backend)
-			     nil nil nil '(:with-drawers nil))))))
+	  (org-test-with-temp-text ":TEST:\ncontents\n:END:"
+	    (org-export-as (org-test-default-backend)
+			   nil nil nil '(:with-drawers nil)))))
   (should
    (equal ":TEST:\ncontents\n:END:\n"
-	  (let ((org-drawers '("TEST")))
-	    (org-test-with-temp-text ":TEST:\ncontents\n:END:"
-	      (org-export-as (org-test-default-backend)
-			     nil nil nil '(:with-drawers t))))))
+	  (org-test-with-temp-text ":TEST:\ncontents\n:END:"
+	    (org-export-as (org-test-default-backend)
+			   nil nil nil '(:with-drawers t)))))
   (should
    (equal ":FOO:\nkeep\n:END:\n"
-	  (let ((org-drawers '("FOO" "BAR")))
-	    (org-test-with-temp-text ":FOO:\nkeep\n:END:\n:BAR:\nremove\n:END:"
-	      (org-export-as (org-test-default-backend)
-			     nil nil nil '(:with-drawers ("FOO")))))))
+	  (org-test-with-temp-text ":FOO:\nkeep\n:END:\n:BAR:\nremove\n:END:"
+	    (org-export-as (org-test-default-backend)
+			   nil nil nil '(:with-drawers ("FOO"))))))
   (should
    (equal ":FOO:\nkeep\n:END:\n"
-	  (let ((org-drawers '("FOO" "BAR")))
-	    (org-test-with-temp-text ":FOO:\nkeep\n:END:\n:BAR:\nremove\n:END:"
-	      (org-export-as (org-test-default-backend)
-			     nil nil nil '(:with-drawers (not "BAR")))))))
+	  (org-test-with-temp-text ":FOO:\nkeep\n:END:\n:BAR:\nremove\n:END:"
+	    (org-export-as (org-test-default-backend)
+			   nil nil nil '(:with-drawers (not "BAR"))))))
   ;; Footnotes.
   (should
    (equal "Footnote?"

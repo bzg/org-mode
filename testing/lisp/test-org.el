@@ -392,20 +392,18 @@
      (looking-at "- $")))
   ;; In a drawer and paragraph insert an empty line, in this case above.
   (should
-   (let ((org-drawers '("MYDRAWER")))
-     (org-test-with-temp-text ":MYDRAWER:\na\n:END:"
-       (forward-line)
-       (org-meta-return)
-       (forward-line -1)
-       (looking-at "$"))))
+   (org-test-with-temp-text ":MYDRAWER:\na\n:END:"
+     (forward-line)
+     (org-meta-return)
+     (forward-line -1)
+     (looking-at "$")))
   ;; In a drawer and item insert an item, in this case above.
   (should
-   (let ((org-drawers '("MYDRAWER")))
-     (org-test-with-temp-text ":MYDRAWER:\n- a\n:END:"
-       (forward-line)
-       (org-meta-return)
-       (beginning-of-line)
-       (looking-at "- $")))))
+   (org-test-with-temp-text ":MYDRAWER:\n- a\n:END:"
+     (forward-line)
+     (org-meta-return)
+     (beginning-of-line)
+     (looking-at "- $"))))
 
 (ert-deftest test-org/insert-todo-heading-respect-content ()
   "Test `org-insert-todo-heading-respect-content' specifications."
