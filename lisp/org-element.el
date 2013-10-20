@@ -1492,14 +1492,15 @@ keyword and CDR is a plist of affiliated keywords along with
 their value.
 
 Return a list whose CAR is `babel-call' and CDR is a plist
-containing `:begin', `:end', `:info', `:post-blank' and
+containing `:begin', `:end', `:value', `:post-blank' and
 `:post-affiliated' as keywords."
   (save-excursion
-    (let ((case-fold-search t)
-	  (info (progn (looking-at org-babel-block-lob-one-liner-regexp)
-		       (org-babel-lob-get-info)))
-	  (begin (car affiliated))
+    (let ((begin (car affiliated))
 	  (post-affiliated (point))
+	  (value (progn (let ((case-fold-search t))
+			  (re-search-forward "call:[ \t]*" nil t))
+			(buffer-substring-no-properties (point)
+							(line-end-position))))
 	  (pos-before-blank (progn (forward-line) (point)))
 	  (end (progn (skip-chars-forward " \r\t\n" limit)
 		      (skip-chars-backward " \t")
@@ -1508,7 +1509,7 @@ containing `:begin', `:end', `:info', `:post-blank' and
 	    (nconc
 	     (list :begin begin
 		   :end end
-		   :info info
+		   :value value
 		   :post-blank (count-lines pos-before-blank end)
 		   :post-affiliated post-affiliated)
 	     (cdr affiliated))))))
@@ -1516,14 +1517,7 @@ containing `:begin', `:end', `:info', `:post-blank' and
 (defun org-element-babel-call-interpreter (babel-call contents)
   "Interpret BABEL-CALL element as Org syntax.
 CONTENTS is nil."
-  (let* ((babel-info (org-element-property :info babel-call))
-	 (main (car babel-info))
-	 (post-options (nth 1 babel-info)))
-    (concat "#+CALL: "
-	    (if (not (string-match "\\[\\(\\[.*?\\]\\)\\]" main)) main
-	      ;; Remove redundant square brackets.
-	      (replace-match (match-string 1 main) nil nil main))
-	    (and post-options (format "[%s]" post-options)))))
+  (concat "#+CALL: " (org-element-property :value babel-call)))
 
 
 ;;;; Clock
@@ -2862,36 +2856,28 @@ CDR is beginning position."
   "Parse inline babel call at point.
 
 Return a list whose CAR is `inline-babel-call' and CDR a plist
-with `:begin', `:end', `:info' and `:post-blank' as keywords.
+with `:begin', `:end', `:value' and `:post-blank' as keywords.
 
 Assume point is at the beginning of the babel call."
   (save-excursion
     (unless (bolp) (backward-char))
-    (looking-at org-babel-inline-lob-one-liner-regexp)
-    (let ((info (save-match-data (org-babel-lob-get-info)))
-	  (begin (match-end 1))
+    (let ((case-fold-search t))
+      (looking-at org-babel-inline-lob-one-liner-regexp))
+    (let ((begin (match-end 1))
+	  (value (buffer-substring-no-properties (match-end 1) (match-end 0)))
 	  (post-blank (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
       (list 'inline-babel-call
 	    (list :begin begin
 		  :end end
-		  :info info
+		  :value value
 		  :post-blank post-blank)))))
 
 (defun org-element-inline-babel-call-interpreter (inline-babel-call contents)
   "Interpret INLINE-BABEL-CALL object as Org syntax.
 CONTENTS is nil."
-  (let* ((babel-info (org-element-property :info inline-babel-call))
-	 (main-source (car babel-info))
-	 (post-options (nth 1 babel-info)))
-    (concat "call_"
-	    (if (string-match "\\[\\(\\[.*?\\]\\)\\]" main-source)
-		;; Remove redundant square brackets.
-		(replace-match
-		 (match-string 1 main-source) nil nil main-source)
-	      main-source)
-	    (and post-options (format "[%s]" post-options)))))
+  (org-element-property :value inline-babel-call))
 
 (defun org-element-inline-babel-call-successor ()
   "Search for the next inline-babel-call object.
