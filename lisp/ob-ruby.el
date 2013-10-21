@@ -225,7 +225,7 @@ return the value of the last statement in BODY, as elisp."
 	      (mapc
 	       (lambda (line)
 		 (insert (org-babel-chomp line)) (comint-send-input nil t))
-	       (list body org-babel-ruby-eoe-indicator))
+	       (list "conf.echo=false" body "conf.echo=true" org-babel-ruby-eoe-indicator))
 	      (comint-send-input nil t)) 2)
 	   "\n") "[\r\n]")) "\n"))
       (value
