@@ -2058,7 +2058,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-odt-line-break (line-break contents info)
   "Transcode a LINE-BREAK object from Org to ODT.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  "<text:line-break/>\n")
+  "<text:line-break/>")
 
 
 ;;;; Link
@@ -2967,7 +2967,7 @@ contextual information."
     ;; Handle break preservation if required.
     (when (plist-get info :preserve-breaks)
       (setq output (replace-regexp-in-string
-		    "\\(\\\\\\\\\\)?[ \t]*\n" "<text:line-break/>\n" output t)))
+		    "\\(\\\\\\\\\\)?[ \t]*\n" "<text:line-break/>" output t)))
     ;; Return value.
     output))
 
