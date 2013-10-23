@@ -800,7 +800,9 @@ a unique id will be associated to it."
           (if (eq (org-element-property :todo-type task) 'done) "100"
             (org-element-property :COMPLETE task)))
          (depends (org-taskjuggler-resolve-dependencies task info))
-         (effort (org-element-property :EFFORT task))
+         (effort (let ((property
+			(intern (concat ":" (upcase org-effort-property)))))
+		   (org-element-property property task)))
          (milestone
           (or (org-element-property :MILESTONE task)
               (not (or (org-element-map (org-element-contents task) 'headline
