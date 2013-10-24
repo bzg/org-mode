@@ -10114,13 +10114,11 @@ the sun is R_@{sun@} = 6.96 x 10^8 m.
 @end example
 
 @vindex org-use-sub-superscripts
-To avoid interpretation as raised or lowered text, you can quote @samp{^} and
-@samp{_} with a backslash: @samp{\^} and @samp{\_}.  If you write a text
-where the underscore is often used in a different context, Org's convention
-to always interpret these as subscripts can get in your way.  Configure the
-variable @code{org-use-sub-superscripts} to change this convention.  For
-example, when setting this variable to @code{@{@}}, @samp{a_b} will not be
-interpreted as a subscript, but @samp{a_@{b@}} will.
+If you write a text where the underscore is often used in a different
+context, Org's convention to always interpret these as subscripts can get in
+your way.  Configure the variable @code{org-use-sub-superscripts} to change
+this convention.  For example, when setting this variable to @code{@{@}},
+@samp{a_b} will not be interpreted as a subscript, but @samp{a_@{b@}} will.
 
 @table @kbd
 @kindex C-c C-x \
