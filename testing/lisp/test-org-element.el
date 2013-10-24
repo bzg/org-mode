@@ -1155,32 +1155,25 @@ e^{i\\pi}+1=0
 
 (ert-deftest test-org-element/latex-fragment-parser ()
   "Test `latex-fragment' parser."
-  (let ((org-latex-regexps
-	 '(("begin" "^[ 	]*\\(\\\\begin{\\([a-zA-Z0-9\\*]+\\)[^ ]+?\\\\end{\\2}\\)" 1 t)
-	   ("$1" "\\([^$]\\|^\\)\\(\\$[^ 	\n,;.$]\\$\\)\\([- 	.,?;:'\") ]\\|$\\)" 2 nil)
-	   ("$" "\\([^$]\\|^\\)\\(\\(\\$\\([^ 	\n,;.$][^$\n]*?\\(\n[^$\n]*?\\)\\{0,2\\}[^ 	\n,.$]\\)\\$\\)\\)\\([- 	.,?;:'\") ]\\|$\\)" 2 nil)
-	   ("\\(" "\\\\([^ ]*?\\\\)" 0 nil)
-	   ("\\[" "\\\\\\[[^ ]*?\\\\\\]" 0 nil)
-	   ("$$" "\\$\\$[^ ]*?\\$\\$" 0 nil))))
-    (should
-     (org-test-with-temp-text "$a$"
-       (org-element-map (org-element-parse-buffer) 'latex-fragment 'identity)))
-    (should
-     (org-test-with-temp-text "$$a$$"
-       (org-element-map (org-element-parse-buffer) 'latex-fragment 'identity)))
-    (should
-     (org-test-with-temp-text "\\(a\\)"
-       (org-element-map (org-element-parse-buffer) 'latex-fragment 'identity)))
-    (should
-     (org-test-with-temp-text "\\[a\\]"
-       (org-element-map
-	(org-element-parse-buffer) 'latex-fragment 'identity)))
-    ;; Test fragment at the beginning of an item.
-    (should
-     (eq 'latex-fragment
-	 (org-test-with-temp-text "- $x$"
-	   (progn (search-forward "$")
-		  (org-element-type (org-element-context))))))))
+  (should
+   (org-test-with-temp-text "$a$"
+     (org-element-map (org-element-parse-buffer) 'latex-fragment 'identity)))
+  (should
+   (org-test-with-temp-text "$$a$$"
+     (org-element-map (org-element-parse-buffer) 'latex-fragment 'identity)))
+  (should
+   (org-test-with-temp-text "\\(a\\)"
+     (org-element-map (org-element-parse-buffer) 'latex-fragment 'identity)))
+  (should
+   (org-test-with-temp-text "\\[a\\]"
+     (org-element-map
+	 (org-element-parse-buffer) 'latex-fragment 'identity)))
+  ;; Test fragment at the beginning of an item.
+  (should
+   (eq 'latex-fragment
+       (org-test-with-temp-text "- $x$"
+	 (progn (search-forward "$")
+		(org-element-type (org-element-context)))))))
 
 
 ;;;; Line Break
