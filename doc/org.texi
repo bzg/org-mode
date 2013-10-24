@@ -10829,9 +10829,10 @@ data between frames, or to properly close a @code{column} environment.
 Headlines also support @code{BEAMER_ACT} and @code{BEAMER_OPT} properties.
 The former is translated as an overlay/action specification, or a default
 overlay specification when enclosed within square brackets.  The latter
-specifies options for the current frame.  Though, @code{fragile} option is
-added automatically if it contains source code that uses any verbatim
-environment.
+specifies options@footnote{The @code{fragile} option is added automatically
+if it contains code that requires a verbatim environment, though.} for the
+current frame or block.  The export back-end will automatically wrap
+properties within angular or square brackets when appropriate.
 
 @cindex property, BEAMER_COL
 Moreover, headlines handle the @code{BEAMER_COL} property.  Its value should
