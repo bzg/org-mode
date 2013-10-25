@@ -22155,7 +22155,7 @@ hierarchy of headlines by UP levels before marking the subtree."
     (let ((line-end (org-current-line end)))
       (goto-char start)
       (while (< (org-current-line) line-end)
-	(cond ((org-in-src-block-p) (org-src-native-tab-command-maybe))
+	(cond ((org-in-src-block-p t) (org-src-native-tab-command-maybe))
 	      (t (call-interactively 'org-indent-line)))
 	(move-beginning-of-line 2)))))
 
