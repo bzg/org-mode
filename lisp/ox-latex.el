@@ -2621,13 +2621,26 @@ a communication channel."
 	     ((and (memq 'top borders) (memq 'above borders)) "\\hline\n"))
        contents "\\\\\n"
        (cond
-	;; Special case for long tables. Define header and footers.
+	;; Special case for long tables.  Define header and footers.
 	((and longtablep (org-export-table-row-ends-header-p table-row info))
 	 (format "%s
+\\endfirsthead
+\\multicolumn{%d}{l}{Continued from previous page} \\\\
+%s
+%s \\\\\n
+%s
 \\endhead
 %s\\multicolumn{%d}{r}{Continued on next page} \\\\
 \\endfoot
 \\endlastfoot"
+		 (if booktabsp "\\midrule" "\\hline")
+		 (cdr (org-export-table-dimensions
+		       (org-export-get-parent-table table-row) info))
+		 (cond ((and booktabsp (memq 'top borders)) "\\toprule\n")
+		       ((and (memq 'top borders)
+			     (memq 'above borders)) "\\hline\n")
+		       (t ""))
+		 contents
 		 (if booktabsp "\\midrule" "\\hline")
 		 (if booktabsp "\\midrule" "\\hline")
 		 ;; Number of columns.
