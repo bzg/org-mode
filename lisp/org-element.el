@@ -2706,16 +2706,12 @@ Return value is a cons cell whose CAR is `entity' or
 `latex-fragment' and CDR is beginning position."
   (save-excursion
     (unless (bolp) (backward-char))
-    (let ((matchers
-	   (remove "begin" (plist-get org-format-latex-options :matchers)))
+    (let ((matchers (cdr org-latex-regexps))
 	  ;; ENTITY-RE matches both LaTeX commands and Org entities.
 	  (entity-re
 	   "\\\\\\(there4\\|sup[123]\\|frac[13][24]\\|[a-zA-Z]+\\)\\($\\|{}\\|[^[:alpha:]]\\)"))
       (when (re-search-forward
-	     (concat (mapconcat (lambda (e) (nth 1 (assoc e org-latex-regexps)))
-				matchers "\\|")
-		     "\\|" entity-re)
-	     nil t)
+	     (concat (mapconcat #'cadr matchers "\\|") "\\|" entity-re) nil t)
 	(goto-char (match-beginning 0))
 	(if (looking-at entity-re)
 	    ;; Determine if it's a real entity or a LaTeX command.
@@ -2725,12 +2721,9 @@ Return value is a cons cell whose CAR is `entity' or
 	  ;; Determine its type to get the correct beginning position.
 	  (cons 'latex-fragment
 		(catch 'return
-		  (mapc (lambda (e)
-			  (when (looking-at (nth 1 (assoc e org-latex-regexps)))
-			    (throw 'return
-				   (match-beginning
-				    (nth 2 (assoc e org-latex-regexps))))))
-			matchers)
+		  (dolist (e matchers)
+		    (when (looking-at (nth 1 e))
+		      (throw 'return (match-beginning (nth 2 e)))))
 		  (point))))))))
 
 
@@ -2977,29 +2970,28 @@ CONTENTS is the contents of the object."
 ;;;; Latex Fragment
 
 (defun org-element-latex-fragment-parser ()
-  "Parse latex fragment at point.
+  "Parse LaTeX fragment at point.
 
 Return a list whose CAR is `latex-fragment' and CDR a plist with
 `:value', `:begin', `:end', and `:post-blank' as keywords.
 
-Assume point is at the beginning of the latex fragment."
+Assume point is at the beginning of the LaTeX fragment."
   (save-excursion
     (let* ((begin (point))
 	   (substring-match
 	    (catch 'exit
-	      (mapc (lambda (e)
-		      (let ((latex-regexp (nth 1 (assoc e org-latex-regexps))))
-			(when (or (looking-at latex-regexp)
-				  (and (not (bobp))
-				       (save-excursion
-					 (backward-char)
-					 (looking-at latex-regexp))))
-			  (throw 'exit (nth 2 (assoc e org-latex-regexps))))))
-		    (plist-get org-format-latex-options :matchers))
+	      (dolist (e (cdr org-latex-regexps))
+		(let ((latex-regexp (nth 1 e)))
+		  (when (or (looking-at latex-regexp)
+			    (and (not (bobp))
+				 (save-excursion
+				   (backward-char)
+				   (looking-at latex-regexp))))
+		    (throw 'exit (nth 2 e)))))
 	      ;; None found: it's a macro.
 	      (looking-at "\\\\[a-zA-Z]+\\*?\\(\\(\\[[^][\n{}]*\\]\\)\\|\\({[^{}\n]*}\\)\\)*")
 	      0))
-	   (value (match-string-no-properties substring-match))
+	   (value (org-match-string-no-properties substring-match))
 	   (post-blank (progn (goto-char (match-end substring-match))
 			      (skip-chars-forward " \t")))
 	   (end (point)))

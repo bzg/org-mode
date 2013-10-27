@@ -262,7 +262,8 @@ requirements) is loaded."
 		 (const :tag "Shell Script" sh)
 		 (const :tag "Shen" shen)
 		 (const :tag "Sql" sql)
-		 (const :tag "Sqlite" sqlite))
+		 (const :tag "Sqlite" sqlite)
+		 (const :tag "ebnf2ps" ebnf2ps))
 		:value-type (boolean :tag "Activate" :value t)))
 
 ;;;; Customization variables

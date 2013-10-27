@@ -525,6 +525,19 @@ When nil, no transformation is made."
 	  (string :tag "Format string")
 	  (const :tag "No formatting")))
 
+(defcustom org-latex-longtable-continued-on "Continued on next page"
+  "String to indicate table continued on next page."
+  :group 'org-export-latex
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'string)
+
+(defcustom org-latex-longtable-continued-from "Continued from previous page"
+  "String to indicate table continued from previous page."
+  :group 'org-export-latex
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'string)
 
 ;;;; Text markup
 
@@ -691,8 +704,8 @@ a list containing two strings: the name of the option, and the
 value.  For example,
 
   (setq org-latex-listings-options
-    '((\"basicstyle\" \"\\small\")
-      (\"keywordstyle\" \"\\color{black}\\bfseries\\underbar\")))
+    '((\"basicstyle\" \"\\\\small\")
+      (\"keywordstyle\" \"\\\\color{black}\\\\bfseries\\\\underbar\")))
 
 will typeset the code in a small size font with underlined, bold
 black keywords.
@@ -2621,18 +2634,33 @@ a communication channel."
 	     ((and (memq 'top borders) (memq 'above borders)) "\\hline\n"))
        contents "\\\\\n"
        (cond
-	;; Special case for long tables. Define header and footers.
+	;; Special case for long tables.  Define header and footers.
 	((and longtablep (org-export-table-row-ends-header-p table-row info))
 	 (format "%s
+\\endfirsthead
+\\multicolumn{%d}{l}{%s} \\\\
+%s
+%s \\\\\n
+%s
 \\endhead
-%s\\multicolumn{%d}{r}{Continued on next page} \\\\
+%s\\multicolumn{%d}{r}{%s} \\\\
 \\endfoot
 \\endlastfoot"
+		 (if booktabsp "\\midrule" "\\hline")
+		 (cdr (org-export-table-dimensions
+		       (org-export-get-parent-table table-row) info))
+		 org-latex-longtable-continued-from
+		 (cond ((and booktabsp (memq 'top borders)) "\\toprule\n")
+		       ((and (memq 'top borders)
+			     (memq 'above borders)) "\\hline\n")
+		       (t ""))
+		 contents
 		 (if booktabsp "\\midrule" "\\hline")
 		 (if booktabsp "\\midrule" "\\hline")
 		 ;; Number of columns.
 		 (cdr (org-export-table-dimensions
-		       (org-export-get-parent-table table-row) info))))
+		       (org-export-get-parent-table table-row) info))
+		 org-latex-longtable-continued-on))
 	;; When BOOKTABS are activated enforce bottom rule even when
 	;; no hline was specifically marked.
 	((and booktabsp (memq 'bottom borders)) "\\bottomrule")
