@@ -38,6 +38,7 @@
 (declare-function org-back-to-heading "org" (invisible-ok))
 (declare-function org-fill-template "org" (template alist))
 (declare-function org-babel-update-block-body "org" (new-body))
+(declare-function org-up-heading-safe "org" ())
 (declare-function make-directory "files" (dir &optional parents))
 
 (defcustom org-babel-tangle-lang-exts
@@ -355,6 +356,7 @@ that the appropriate major-mode is set.  SPEC has the form:
        insert-comment
        (org-fill-template org-babel-tangle-comment-format-end link-data)))))
 
+(defvar org-comment-string) ;; Defined in org.el
 (defun org-babel-under-commented-heading-p ()
   "Return t if currently under a commented heading."
   (if (string-match (concat "^" org-comment-string)
@@ -364,7 +366,6 @@ that the appropriate major-mode is set.  SPEC has the form:
       (and (org-up-heading-safe)
 	   (org-babel-under-commented-heading-p)))))
 
-(defvar org-comment-string) ;; Defined in org.el
 (defun org-babel-tangle-collect-blocks (&optional language tangle-file)
   "Collect source blocks in the current Org-mode file.
 Return an association list of source-code block specifications of
