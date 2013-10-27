@@ -4192,17 +4192,21 @@ ELEMENT is excluded from count."
 ELEMENT has either a `src-block' an `example-block' type.
 
 Return a cons cell whose CAR is the source code, cleaned from any
-reference and protective comma and CDR is an alist between
-relative line number (integer) and name of code reference on that
-line (string)."
+reference, protective commas and spurious indentation, and CDR is
+an alist between relative line number (integer) and name of code
+reference on that line (string)."
   (let* ((line 0) refs
+	 (value (org-element-property :value element))
 	 ;; Get code and clean it.  Remove blank lines at its
 	 ;; beginning and end.
 	 (code (replace-regexp-in-string
 		"\\`\\([ \t]*\n\\)+" ""
 		(replace-regexp-in-string
 		 "\\([ \t]*\n\\)*[ \t]*\\'" "\n"
-		 (org-element-property :value element))))
+		 (if (or org-src-preserve-indentation
+			 (org-element-property :preserve-indent element))
+		     value
+		   (org-element-remove-indentation value)))))
 	 ;; Get format used for references.
 	 (label-fmt (regexp-quote
 		     (or (org-element-property :label-fmt element)

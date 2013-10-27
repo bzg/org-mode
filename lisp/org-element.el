@@ -1711,35 +1711,6 @@ CONTENTS is nil."
 
 ;;;; Example Block
 
-(defun org-element--remove-indentation (s &optional n)
-  "Remove maximum common indentation in string S and return it.
-When optional argument N is a positive integer, remove exactly
-that much characters from indentation, if possible, or return
-S as-is otherwise.  Unlike to `org-remove-indentation', this
-function doesn't call `untabify' on S."
-  (catch 'exit
-    (with-temp-buffer
-      (insert s)
-      (goto-char (point-min))
-      ;; Find maximum common indentation, if not specified.
-      (setq n (or n
-                  (let ((min-ind (point-max)))
-		    (save-excursion
-		      (while (re-search-forward "^[ \t]*\\S-" nil t)
-			(let ((ind (1- (current-column))))
-			  (if (zerop ind) (throw 'exit s)
-			    (setq min-ind (min min-ind ind))))))
-		    min-ind)))
-      (if (zerop n) s
-	;; Remove exactly N indentation, but give up if not possible.
-	(while (not (eobp))
-	  (let ((ind (progn (skip-chars-forward " \t") (current-column))))
-	    (cond ((eolp) (delete-region (line-beginning-position) (point)))
-		  ((< ind n) (throw 'exit s))
-		  (t (org-indent-line-to (- ind n))))
-	    (forward-line)))
-	(buffer-string)))))
-
 (defun org-element-example-block-parser (limit affiliated)
   "Parse an example block.
 
@@ -1769,8 +1740,7 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
 			((string-match "-n\\>" switches) 'new)
 			((string-match "+n\\>" switches) 'continued)))
 		 (preserve-indent
-		  (or org-src-preserve-indentation
-		      (and switches (string-match "-i\\>" switches))))
+		  (and switches (string-match "-i\\>" switches)))
 		 ;; Should labels be retained in (or stripped from) example
 		 ;; blocks?
 		 (retain-labels
@@ -1792,11 +1762,11 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
 		 (post-affiliated (point))
 		 (block-ind (progn (skip-chars-forward " \t") (current-column)))
 		 (contents-begin (progn (forward-line) (point)))
-		 (value (org-element--remove-indentation
+		 (value (org-element-remove-indentation
 			 (org-unescape-code-in-string
 			  (buffer-substring-no-properties
 			   contents-begin contents-end))
-			 (and preserve-indent block-ind)))
+			 block-ind))
 		 (pos-before-blank (progn (goto-char contents-end)
 					  (forward-line)
 					  (point)))
@@ -1821,10 +1791,14 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
 (defun org-element-example-block-interpreter (example-block contents)
   "Interpret EXAMPLE-BLOCK element as Org syntax.
 CONTENTS is nil."
-  (let ((switches (org-element-property :switches example-block)))
+  (let ((switches (org-element-property :switches example-block))
+	(value (org-element-property :value example-block)))
     (concat "#+BEGIN_EXAMPLE" (and switches (concat " " switches)) "\n"
 	    (org-escape-code-in-string
-	     (org-element-property :value example-block))
+	     (if (or org-src-preserve-indentation
+		     (org-element-property :preserve-indent example-block))
+		 value
+	       (org-element-remove-indentation value)))
 	    "#+END_EXAMPLE")))
 
 
@@ -2324,9 +2298,8 @@ Assume point is at the beginning of the block."
 		  (cond ((not switches) nil)
 			((string-match "-n\\>" switches) 'new)
 			((string-match "+n\\>" switches) 'continued)))
-		 (preserve-indent (or org-src-preserve-indentation
-				      (and switches
-					   (string-match "-i\\>" switches))))
+		 (preserve-indent (and switches
+				       (string-match "-i\\>" switches)))
 		 (label-fmt
 		  (and switches
 		       (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
@@ -2346,11 +2319,11 @@ Assume point is at the beginning of the block."
 		 ;; Indentation.
 		 (block-ind (progn (skip-chars-forward " \t") (current-column)))
 		 ;; Retrieve code.
-		 (value (org-element--remove-indentation
+		 (value (org-element-remove-indentation
 			 (org-unescape-code-in-string
 			  (buffer-substring-no-properties
 			   (progn (forward-line) (point)) contents-end))
-			 (and preserve-indent block-ind)))
+			 block-ind))
 		 (pos-before-blank (progn (goto-char contents-end)
 					  (forward-line)
 					  (point)))
@@ -2383,15 +2356,17 @@ CONTENTS is nil."
   (let ((lang (org-element-property :language src-block))
 	(switches (org-element-property :switches src-block))
 	(params (org-element-property :parameters src-block))
-	(value (let ((val (org-element-property :value src-block)))
-		 (cond
-		  ((org-element-property :preserve-indent src-block) val)
-		  ((zerop org-edit-src-content-indentation) val)
-		  (t
-		   (let ((ind (make-string
-			       org-edit-src-content-indentation 32)))
-		     (replace-regexp-in-string
-		      "\\(^\\)[ \t]*\\S-" ind val nil nil 1)))))))
+	(value
+	 (let ((val (org-element-property :value src-block)))
+	   (cond
+	    ((or org-src-preserve-indentation
+		 (org-element-property :preserve-indent src-block))
+	     val)
+	    ((zerop org-edit-src-content-indentation) val)
+	    (t
+	     (let ((ind (make-string org-edit-src-content-indentation ?\s)))
+	       (replace-regexp-in-string
+		"\\(^\\)[ \t]*\\S-" ind val nil nil 1)))))))
     (concat (format "#+BEGIN_SRC%s\n"
 		    (concat (and lang (concat " " lang))
 			    (and switches (concat " " switches))
@@ -4971,6 +4946,36 @@ end of ELEM-A."
 		 (car ov) (- (nth 1 ov) offset) (- (nth 2 ov) offset)))
 	      (cdr overlays)))
       (goto-char (org-element-property :end elem-B)))))
+
+(defun org-element-remove-indentation (s &optional n)
+  "Remove maximum common indentation in string S and return it.
+When optional argument N is a positive integer, remove exactly
+that much characters from indentation, if possible, or return
+S as-is otherwise.  Unlike to `org-remove-indentation', this
+function doesn't call `untabify' on S."
+  (catch 'exit
+    (with-temp-buffer
+      (insert s)
+      (goto-char (point-min))
+      ;; Find maximum common indentation, if not specified.
+      (setq n (or n
+                  (let ((min-ind (point-max)))
+		    (save-excursion
+		      (while (re-search-forward "^[ \t]*\\S-" nil t)
+			(let ((ind (1- (current-column))))
+			  (if (zerop ind) (throw 'exit s)
+			    (setq min-ind (min min-ind ind))))))
+		    min-ind)))
+      (if (zerop n) s
+	;; Remove exactly N indentation, but give up if not possible.
+	(while (not (eobp))
+	  (let ((ind (progn (skip-chars-forward " \t") (current-column))))
+	    (cond ((eolp) (delete-region (line-beginning-position) (point)))
+		  ((< ind n) (throw 'exit s))
+		  (t (org-indent-line-to (- ind n))))
+	    (forward-line)))
+	(buffer-string)))))
+
 
 (provide 'org-element)
 

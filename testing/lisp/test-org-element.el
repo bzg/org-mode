@@ -504,16 +504,8 @@ Some other text
 	  (org-test-with-temp-text
 	      "#+BEGIN_EXAMPLE\n,* Headline\n ,#+keyword\nText\n#+END_EXAMPLE"
 	    (org-element-property :value (org-element-at-point)))))
-  ;; Nil `org-src-preserve-indentation': Remove maximum common
-  ;; indentation.
-  (should
-   (equal " L1\nL2\n"
-	  (org-test-with-temp-text "#+BEGIN_EXAMPLE\n  L1\n L2\n#+END_EXAMPLE"
-	    (let ((org-src-preserve-indentation nil))
-	      (org-element-property :value (org-element-at-point))))))
-  ;; Non-nil `org-src-preserve-indentation': Remove block indentation
-  ;; only, unless block contents are less indented than block
-  ;; boundaries.
+  ;; Remove block indentation according to block boundaries, unless
+  ;; block contents are less indented than block boundaries.
   (should
    (equal " L1\nL2\n"
 	  (org-test-with-temp-text " #+BEGIN_EXAMPLE\n  L1\n L2\n #+END_EXAMPLE"
@@ -1645,16 +1637,8 @@ Outside list"
 	  (org-test-with-temp-text
 	      "#+BEGIN_SRC org\n,* Headline\n ,#+keyword\nText\n#+END_SRC"
 	    (org-element-property :value (org-element-at-point)))))
-  ;; Nil `org-src-preserve-indentation': Remove maximum common
-  ;; indentation.
-  (should
-   (equal " L1\nL2\n"
-	  (org-test-with-temp-text "#+BEGIN_SRC org\n  L1\n L2\n#+END_SRC"
-	    (let ((org-src-preserve-indentation nil))
-	      (org-element-property :value (org-element-at-point))))))
-  ;; Non-nil `org-src-preserve-indentation': Remove block indentation
-  ;; only, unless block contents are less indented than block
-  ;; boundaries.
+  ;; Remove block indentation according to block boundaries, unless
+  ;; block contents are less indented than block boundaries.
   (should
    (equal " L1\nL2\n"
 	  (org-test-with-temp-text " #+BEGIN_SRC org\n  L1\n L2\n #+END_SRC"
