@@ -847,25 +847,29 @@ Some other text
 (ert-deftest test-org-element/headline-archive-tag ()
   "Test ARCHIVE tag recognition."
   ;; Reference test.
-  (org-test-with-temp-text "* Headline"
-    (let ((org-archive-tag "ARCHIVE"))
-      (should-not (org-element-property :archivedp (org-element-at-point)))))
+  (should-not
+   (org-test-with-temp-text "* Headline"
+     (let ((org-archive-tag "ARCHIVE"))
+       (org-element-property :archivedp (org-element-at-point)))))
   ;; Single tag.
   (org-test-with-temp-text "* Headline :ARCHIVE:"
     (let ((org-archive-tag "ARCHIVE"))
       (let ((headline (org-element-at-point)))
 	(should (org-element-property :archivedp headline))
 	;; Test tag removal.
-	(should-not (org-element-property :tags headline))))
-    (let ((org-archive-tag "Archive"))
-      (should-not (org-element-property :archivedp (org-element-at-point)))))
+	(should-not (org-element-property :tags headline)))))
   ;; Multiple tags.
   (org-test-with-temp-text "* Headline :test:ARCHIVE:"
     (let ((org-archive-tag "ARCHIVE"))
       (let ((headline (org-element-at-point)))
 	(should (org-element-property :archivedp headline))
 	;; Test tag removal.
-	(should (equal (org-element-property :tags headline) '("test")))))))
+	(should (equal (org-element-property :tags headline) '("test"))))))
+  ;; Tag is case-sensitive.
+  (should-not
+   (org-test-with-temp-text "* Headline :ARCHIVE:"
+     (let ((org-archive-tag "Archive"))
+       (org-element-property :archivedp (org-element-at-point))))))
 
 (ert-deftest test-org-element/headline-properties ()
   "Test properties from property drawer."

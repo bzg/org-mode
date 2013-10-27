@@ -140,6 +140,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-element--parse-objects "org-element"
 		  (beg end acc restriction))
 (declare-function org-element-at-point "org-element" (&optional keep-trail))
+(declare-function org-element-cache-reset "org-element" (&optional all))
 (declare-function org-element-contents "org-element" (element))
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-interpret-data "org-element"
@@ -357,7 +358,8 @@ When MESSAGE is non-nil, display a message with the version."
   "Set VAR to VALUE and call `org-load-modules-maybe' with the force flag."
   (set var value)
   (when (featurep 'org)
-    (org-load-modules-maybe 'force)))
+    (org-load-modules-maybe 'force)
+    (org-element-cache-reset 'all)))
 
 (defcustom org-modules '(org-w3m org-bbdb org-bibtex org-docview org-gnus org-info org-irc org-mhe org-rmail)
   "Modules that should always be loaded together with org.el.
@@ -5367,6 +5369,8 @@ The following commands are available:
   (org-setup-filling)
   ;; Comments.
   (org-setup-comments-handling)
+  ;; Initialize cache.
+  (org-element-cache-reset)
   ;; Beginning/end of defun
   (org-set-local 'beginning-of-defun-function 'org-backward-element)
   (org-set-local 'end-of-defun-function 'org-forward-element)
