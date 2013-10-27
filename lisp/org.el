@@ -7769,7 +7769,7 @@ This is a list with the following elements:
   "Insert TODO heading with `org-insert-heading-respect-content' set to t."
   (interactive "P")
   (let ((org-insert-heading-respect-content t))
-    (org-insert-todo-heading force-state t)))
+    (org-insert-todo-heading force-state '(4))))
 
 (defun org-insert-todo-heading (arg &optional force-heading)
   "Insert a new heading with the same level and TODO state as current heading.
