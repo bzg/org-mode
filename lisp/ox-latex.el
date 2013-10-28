@@ -343,7 +343,8 @@ the toc:nil option, not to those generated with #+TOC keyword."
 (defcustom org-latex-with-hyperref t
   "Toggle insertion of \\hypersetup{...} in the preamble."
   :group 'org-export-latex
-  :type 'boolean)
+  :type 'boolean
+  :safe #'booleanp)
 
 ;;;; Headline
 
@@ -488,12 +489,14 @@ When modifying this variable, it may be useful to change
   :type '(choice (const :tag "Table" table)
 		 (const :tag "Matrix" math)
 		 (const :tag "Inline matrix" inline-math)
-		 (const :tag "Verbatim" verbatim)))
+		 (const :tag "Verbatim" verbatim))
+  :safe (lambda (s) (memq s '(table math inline-math verbatim))))
 
 (defcustom org-latex-tables-centered t
   "When non-nil, tables are exported in a center environment."
   :group 'org-export-latex
-  :type 'boolean)
+  :type 'boolean
+  :safe #'booleanp)
 
 (defcustom org-latex-tables-booktabs nil
   "When non-nil, display tables in a formal \"booktabs\" style.
@@ -504,13 +507,15 @@ attributes."
   :group 'org-export-latex
   :version "24.4"
   :package-version '(Org . "8.0")
-  :type 'boolean)
+  :type 'boolean
+  :safe #'booleanp)
 
 (defcustom org-latex-table-caption-above t
   "When non-nil, place caption string at the beginning of the table.
 Otherwise, place it near the end."
   :group 'org-export-latex
-  :type 'boolean)
+  :type 'boolean
+  :safe #'booleanp)
 
 (defcustom org-latex-table-scientific-notation "%s\\,(%s)"
   "Format string to display numbers in scientific notation.
@@ -656,7 +661,8 @@ into previewing problems, please consult
   :type '(choice
 	  (const :tag "Use listings" t)
 	  (const :tag "Use minted" minted)
-	  (const :tag "Export verbatim" nil)))
+	  (const :tag "Export verbatim" nil))
+  :safe (lambda (s) (memq s '(t nil minted))))
 
 (defcustom org-latex-listings-langs
   '((emacs-lisp "Lisp") (lisp "Lisp") (clojure "Lisp")
