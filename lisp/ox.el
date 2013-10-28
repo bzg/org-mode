@@ -839,15 +839,23 @@ automatically.  But you can retrieve them with \\[org-export-stack]."
   :package-version '(Org . "8.0")
   :type 'boolean)
 
-(defcustom org-export-async-init-file user-init-file
+(defcustom org-export-async-init-file nil
   "File used to initialize external export process.
-Value must be an absolute file name.  It defaults to user's
-initialization file.  Though, a specific configuration makes the
-process faster and the export more portable."
+
+Value must be either nil or an absolute file name.  When nil, the
+external process is launched like a regular Emacs session,
+loading user's initialization file and any site specific
+configuration.  If a file is provided, it, and only it, is loaded
+at start-up.
+
+Therefore, using a specific configuration makes the process to
+load faster and the export more portable."
   :group 'org-export-general
   :version "24.4"
-  :package-version '(Org . "8.0")
-  :type '(file :must-match t))
+  :package-version '(Org . "8.3")
+  :type '(choice
+	  (const :tag "Regular startup" nil)
+	  (file :tag "Specific start-up file" :must-match t)))
 
 (defcustom org-export-dispatch-use-expert-ui nil
   "Non-nil means using a non-intrusive `org-export-dispatch'.
@@ -5564,12 +5572,17 @@ and `org-export-to-file' for more specialized functions."
          (let* ((process-connection-type nil)
                 (,proc-buffer (generate-new-buffer-name "*Org Export Process*"))
                 (,process
-                 (start-process
-                  "org-export-process" ,proc-buffer
-                  (expand-file-name invocation-name invocation-directory)
-                  "-Q" "--batch"
-                  "-l" org-export-async-init-file
-                  "-l" ,temp-file)))
+		 (apply
+		  #'start-process
+		  (append
+		   (list "org-export-process"
+			 ,proc-buffer
+			 (expand-file-name invocation-name invocation-directory)
+			 "--batch")
+		   (if org-export-async-init-file
+		       (list "-Q" "-l" org-export-async-init-file)
+		     (list "-l" user-init-file))
+		   (list "-l" ,temp-file)))))
            ;; Register running process in stack.
            (org-export-add-to-stack (get-buffer ,proc-buffer) nil ,process)
            ;; Set-up sentinel in order to catch results.
