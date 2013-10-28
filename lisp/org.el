@@ -22495,64 +22495,86 @@ non-nil."
 (defun org-insert-comment ()
   "Insert an empty comment above current line.
 If the line is empty, insert comment at its beginning."
-  (beginning-of-line)
-  (if (looking-at "\\s-*$") (replace-match "") (open-line 1))
-  (org-indent-line)
-  (insert "# "))
+  (if (org-in-src-block-p t)
+      (progn
+	(require 'ob-core)
+	(org-babel-do-in-edit-buffer
+	 (call-interactively #'comment-dwim)))
+    (beginning-of-line)
+    (if (looking-at "\\s-*$")
+	(delete-region (point) (point-at-eol))
+      (open-line 1))
+    (org-indent-line)
+    (insert "# ")))
 
 (defvar comment-empty-lines)		; From newcomment.el.
 (defun org-comment-or-uncomment-region (beg end &rest ignore)
   "Comment or uncomment each non-blank line in the region.
 Uncomment each non-blank line between BEG and END if it only
 contains commented lines.  Otherwise, comment them."
-  (save-restriction
-    ;; Restrict region
-    (narrow-to-region (save-excursion (goto-char beg)
-				      (skip-chars-forward " \r\t\n" end)
-				      (line-beginning-position))
-		      (save-excursion (goto-char end)
-				      (skip-chars-backward " \r\t\n" beg)
-				      (line-end-position)))
-    (let ((uncommentp
-	   ;; UNCOMMENTP is non-nil when every non blank line between
-	   ;; BEG and END is a comment.
-	   (save-excursion
-	     (goto-char (point-min))
-	     (while (and (not (eobp))
-			 (let ((element (org-element-at-point)))
-			   (and (eq (org-element-type element) 'comment)
-				(goto-char (min (point-max)
-						(org-element-property
-						 :end element)))))))
-	     (eobp))))
-      (if uncommentp
-	  ;; Only blank lines and comments in region: uncomment it.
-	  (save-excursion
-	    (goto-char (point-min))
-	    (while (not (eobp))
-	      (when (looking-at "[ \t]*\\(#\\(?: \\|$\\)\\)")
-		(replace-match "" nil nil nil 1))
-	      (forward-line)))
-	;; Comment each line in region.
-	(let ((min-indent (point-max)))
-	  ;; First find the minimum indentation across all lines.
-	  (save-excursion
-	    (goto-char (point-min))
-	    (while (and (not (eobp)) (not (zerop min-indent)))
-	      (unless (looking-at "[ \t]*$")
-		(setq min-indent (min min-indent (current-indentation))))
-	      (forward-line)))
-	  ;; Then loop over all lines.
-	  (save-excursion
-	    (goto-char (point-min))
-	    (while (not (eobp))
-	      (unless (and (not comment-empty-lines) (looking-at "[ \t]*$"))
-		;; Don't get fooled by invisible text (e.g. link path)
-		;; when moving to column MIN-INDENT.
-		(let ((buffer-invisibility-spec nil))
-		  (org-move-to-column min-indent t))
-		(insert comment-start))
-	      (forward-line))))))))
+  (let* ((pt (point-marker))
+	 (head (and (org-in-src-block-p t)
+		    (require 'ob-core)
+		    (org-babel-where-is-src-block-head)))
+	 (foot (and head
+		    (save-excursion
+		      (goto-char head)
+		      (looking-at org-babel-src-block-regexp)
+		      (goto-char (match-end 0))
+		      (point-at-bol)))))
+    (if (and head foot
+	     (> beg head)
+	     (< end foot))
+	(org-babel-do-in-edit-buffer
+	 (call-interactively #'comment-dwim))
+      (save-restriction
+	;; Restrict region
+	(narrow-to-region (save-excursion (goto-char beg)
+					  (skip-chars-forward " \r\t\n" end)
+					  (line-beginning-position))
+			  (save-excursion (goto-char end)
+					  (skip-chars-backward " \r\t\n" beg)
+					  (line-end-position)))
+	(let ((uncommentp
+	       ;; UNCOMMENTP is non-nil when every non blank line between
+	       ;; BEG and END is a comment.
+	       (save-excursion
+		 (goto-char (point-min))
+		 (while (and (not (eobp))
+			     (let ((element (org-element-at-point)))
+			       (and (eq (org-element-type element) 'comment)
+				    (goto-char (min (point-max)
+						    (org-element-property
+						     :end element)))))))
+		 (eobp))))
+	  (if uncommentp
+	      ;; Only blank lines and comments in region: uncomment it.
+	      (save-excursion
+		(goto-char (point-min))
+		(while (not (eobp))
+		  (when (looking-at "[ \t]*\\(#\\(?: \\|$\\)\\)")
+		    (replace-match "" nil nil nil 1))
+		  (forward-line)))
+	    ;; Comment each line in region.
+	    (let ((min-indent (point-max)))
+	      ;; First find the minimum indentation across all lines.
+	      (save-excursion
+		(goto-char (point-min))
+		(while (and (not (eobp)) (not (zerop min-indent)))
+		  (unless (looking-at "[ \t]*$")
+		    (setq min-indent (min min-indent (current-indentation))))
+		  (forward-line)))
+	      ;; Then loop over all lines.
+	      (save-excursion
+		(goto-char (point-min))
+		(while (not (eobp))
+		  (unless (and (not comment-empty-lines) (looking-at "[ \t]*$"))
+		    ;; Don't get fooled by invisible text (e.g. link path)
+		    ;; when moving to column MIN-INDENT.
+		    (let ((buffer-invisibility-spec nil))
+		      (org-move-to-column min-indent t))
+		    (insert comment-start))
+		  (forward-line))))))))))
 
 
 ;;; Planning
