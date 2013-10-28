@@ -1181,6 +1181,27 @@ echo \"$data\"
 	    (list (org-get-indentation)
 		  (progn (forward-line) (org-get-indentation)))))))
 
+(ert-deftest test-ob/safe-header-args ()
+  "Detect safe and unsafe header args."
+  (let ((safe-args '((:cache . "foo")
+		     (:results . "output")
+		     (:eval . "never")
+		     (:eval . "query")))
+	(unsafe-args '((:eval . "yes")
+		       (:results . "output file")
+		       (:foo . "bar")))
+	(malformed-args '((bar . "foo")
+			  ("foo" . "bar")
+			  :foo))
+	(safe-p (org-babel-header-args-safe-fn org-babel-safe-header-args)))
+    (dolist (arg safe-args)
+      (should (org-babel-one-header-arg-safe-p arg org-babel-safe-header-args)))
+    (dolist (arg unsafe-args)
+      (should (not (org-babel-one-header-arg-safe-p arg org-babel-safe-header-args))))
+    (dolist (arg malformed-args)
+      (should (not (org-babel-one-header-arg-safe-p arg org-babel-safe-header-args))))
+    (should (not (funcall safe-p (append safe-args unsafe-args))))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here

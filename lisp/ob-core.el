@@ -158,6 +158,11 @@ See also `org-babel-noweb-wrap-start'."
 This string must include a \"%s\" which will be replaced by the results."
   :group 'org-babel
   :type 'string)
+(put 'org-babel-inline-result-wrap
+     'safe-local-variable
+     (lambda (value)
+       (and (stringp value)
+	    (string-match-p "%s" value))))
 
 (defun org-babel-noweb-wrap (&optional regexp)
   (concat org-babel-noweb-wrap-start
@@ -484,10 +489,14 @@ specific header arguments as well.")
   '((:session . "none") (:results . "replace") (:exports . "code")
     (:cache . "no") (:noweb . "no") (:hlines . "no") (:tangle . "no"))
   "Default arguments to use when evaluating a source block.")
+(put 'org-babel-default-header-args 'safe-local-variable
+     (org-babel-header-args-safe-fn org-babel-safe-header-args))
 
 (defvar org-babel-default-inline-header-args
   '((:session . "none") (:results . "replace") (:exports . "results"))
   "Default arguments to use when evaluating an inline source block.")
+(put 'org-babel-default-inline-header-args 'safe-local-variable
+     (org-babel-header-args-safe-fn org-babel-safe-header-args))
 
 (defvar org-babel-data-names '("tblname" "results" "name"))
 
@@ -2784,6 +2793,60 @@ of `org-babel-temporary-directory'."
 		  "[directory not defined]"))))))
 
 (add-hook 'kill-emacs-hook 'org-babel-remove-temporary-directory)
+
+(defconst org-babel-safe-header-args
+  '(:cache :colnames :comments :exports :epilogue :hlines :noeval
+	   :noweb :noweb-ref :noweb-sep :padline :prologue :rownames
+	   :sep :session :tangle :wrap
+	   (:eval . ("never" "query"))
+	   (:results . (lambda (str) (not (string-match "file" str)))))
+  "A list of safe header arguments for babel source blocks.
+
+The list can have entries of the following forms:
+- :ARG                     -> :ARG is always a safe header arg
+- (:ARG . (VAL1 VAL2 ...)) -> :ARG is safe as a header arg if it is
+                              `equal' to one of the VALs.
+- (:ARG . FN)              -> :ARG is safe as a header arg if the function FN
+                              returns non-nil.  FN is passed one
+                              argument, the value of the header arg
+                              (as a string).")
+
+(defun org-babel-one-header-arg-safe-p (pair safe-list)
+  "Determine if the PAIR is a safe babel header arg according to SAFE-LIST.
+
+For the format of SAFE-LIST, see `org-babel-safe-header-args'."
+  (and (consp pair)
+       (keywordp (car pair))
+       (stringp (cdr pair))
+       (or
+	(memq (car pair) safe-list)
+	(let ((entry (assq (car pair) safe-list)))
+	  (and entry
+	       (consp entry)
+	       (cond ((functionp (cdr entry))
+		       (funcall (cdr entry) (cdr pair)))
+		     ((listp (cdr entry))
+		      (member (cdr pair) (cdr entry)))
+		     (t nil)))))))
+
+(defmacro org-babel-header-args-safe-fn (safe-list)
+  "Return a function that determines whether a list of header args are safe.
+
+Intended usage is:
+\(put 'org-babel-default-header-args 'safe-local-variable
+ (org-babel-header-args-safe-p org-babel-safe-header-args)
+
+This allows org-babel languages to extend the list of safe values for
+their `org-babel-default-header-args:foo' variable.
+
+For the format of SAFE-LIST, see `org-babel-safe-header-args'."
+  `(lambda (value)
+     (and (listp value)
+	  (org-every
+	   (lambda (pair)
+	     (and (consp pair)
+		  (org-babel-one-header-arg-safe-p pair ,safe-list)))
+	   value))))
 
 (provide 'ob-core)
 
