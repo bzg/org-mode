@@ -293,9 +293,8 @@ Some other text
 (ert-deftest test-org-element/clock-parser ()
   "Test `clock' parser."
   ;; Running clock.
-  (let* ((org-clock-string "CLOCK:")
-	 (clock (org-test-with-temp-text "CLOCK: [2012-01-01 sun. 00:01]"
-		  (org-element-at-point))))
+  (let ((clock (org-test-with-temp-text "CLOCK: [2012-01-01 sun. 00:01]"
+		 (org-element-at-point))))
     (should (eq (org-element-property :status clock) 'running))
     (should
      (equal (org-element-property :raw-value
@@ -303,11 +302,10 @@ Some other text
 	    "[2012-01-01 sun. 00:01]"))
     (should-not (org-element-property :duration clock)))
   ;; Closed clock.
-  (let* ((org-clock-string "CLOCK:")
-	 (clock
-	  (org-test-with-temp-text
-	      "CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
-	    (org-element-at-point))))
+  (let ((clock
+	 (org-test-with-temp-text
+	     "CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
+	   (org-element-at-point))))
     (should (eq (org-element-property :status clock) 'closed))
     (should (equal (org-element-property :raw-value
 					 (org-element-property :value clock))
@@ -2213,15 +2211,13 @@ Outside list"
   (should
    (string-match
     "CLOCK: \\[2012-01-01 .* 00:01\\]"
-    (let ((org-clock-string "CLOCK:"))
-      (org-test-parse-and-interpret "CLOCK: [2012-01-01 sun. 00:01]"))))
+    (org-test-parse-and-interpret "CLOCK: [2012-01-01 sun. 00:01]")))
   ;; Closed clock.
   (should
    (string-match
     "CLOCK: \\[2012-01-01 .* 00:01\\]--\\[2012-01-01 .* 00:02\\] =>  0:01"
-    (let ((org-clock-string "CLOCK:"))
-      (org-test-parse-and-interpret "
-CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01")))))
+    (org-test-parse-and-interpret "
+CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))))
 
 (ert-deftest test-org-element/comment-interpreter ()
   "Test comment interpreter."
@@ -2317,16 +2313,13 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01")))))
 
 (ert-deftest test-org-element/planning-interpreter ()
   "Test planning interpreter."
-  (let ((org-closed-string "CLOSED:")
-	(org-deadline-string "DEADLINE:")
-	(org-scheduled-string "SCHEDULED:"))
-    (should
-     (string-match
-      "\\* Headline
+  (should
+   (string-match
+    "\\* Headline
 DEADLINE: <2012-03-29 .*?> SCHEDULED: <2012-03-29 .*?> CLOSED: \\[2012-03-29 .*?\\]"
-      (org-test-parse-and-interpret
-       "* Headline
-DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu.]")))))
+    (org-test-parse-and-interpret
+     "* Headline
+DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu.]"))))
 
 (ert-deftest test-org-element/property-drawer-interpreter ()
   "Test property drawer interpreter."
@@ -2561,20 +2554,12 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
 
 (ert-deftest test-org-element/latex-fragment-interpreter ()
   "Test latex fragment interpreter."
-  (let ((org-latex-regexps
-	 '(("begin" "^[ 	]*\\(\\\\begin{\\([a-zA-Z0-9\\*]+\\)[^ ]+?\\\\end{\\2}\\)" 1 t)
-	   ("$1" "\\([^$]\\|^\\)\\(\\$[^ 	\n,;.$]\\$\\)\\([- 	.,?;:'\") ]\\|$\\)" 2 nil)
-	   ("$" "\\([^$]\\|^\\)\\(\\(\\$\\([^ 	\n,;.$][^$\n]*?\\(\n[^$\n]*?\\)\\{0,2\\}[^ 	\n,.$]\\)\\$\\)\\)\\([- 	.,?;:'\") ]\\|$\\)" 2 nil)
-	   ("\\(" "\\\\([^ ]*?\\\\)" 0 nil)
-	   ("\\[" "\\\\\\[[^ ]*?\\\\\\]" 0 nil)
-	   ("$$" "\\$\\$[^ ]*?\\$\\$" 0 nil))))
-    (should (equal (org-test-parse-and-interpret "\\command{}")
-		   "\\command{}\n"))
-    (should (equal (org-test-parse-and-interpret "$x$") "$x$\n"))
-    (should (equal (org-test-parse-and-interpret "$x+y$") "$x+y$\n"))
-    (should (equal (org-test-parse-and-interpret "$$x+y$$") "$$x+y$$\n"))
-    (should (equal (org-test-parse-and-interpret "\\(x+y\\)") "\\(x+y\\)\n"))
-    (should (equal (org-test-parse-and-interpret "\\[x+y\\]") "\\[x+y\\]\n"))))
+  (should (equal (org-test-parse-and-interpret "\\command{}") "\\command{}\n"))
+  (should (equal (org-test-parse-and-interpret "$x$") "$x$\n"))
+  (should (equal (org-test-parse-and-interpret "$x+y$") "$x+y$\n"))
+  (should (equal (org-test-parse-and-interpret "$$x+y$$") "$$x+y$$\n"))
+  (should (equal (org-test-parse-and-interpret "\\(x+y\\)") "\\(x+y\\)\n"))
+  (should (equal (org-test-parse-and-interpret "\\[x+y\\]") "\\[x+y\\]\n")))
 
 (ert-deftest test-org-element/line-break-interpreter ()
   "Test line break interpreter."
