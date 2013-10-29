@@ -5276,6 +5276,10 @@ them."
      ("uk" :html "&#1040;&#1074;&#1090;&#1086;&#1088;" :utf-8 "Автор")
      ("zh-CN" :html "&#20316;&#32773;" :utf-8 "作者")
      ("zh-TW" :html "&#20316;&#32773;" :utf-8 "作者"))
+    ("Continued from previous page"
+     ("fr" :default "Suite de la page précédente"))
+    ("Continued on next page"
+     ("fr" :default "Suite page suivante"))
     ("Date"
      ("ca" :default "Data")
      ("cs" :default "Datum")
@@ -5384,8 +5388,8 @@ them."
      ("es" :default "Listado de programa %d")
      ("et" :default "Loend %d")
      ("fr" :default "Programme %d :" :html "Programme&nbsp;%d&nbsp;:")
-     ("no" :default "Dataprogram")
-     ("nb" :default "Dataprogram")
+     ("no" :default "Dataprogram %d")
+     ("nb" :default "Dataprogram %d")
      ("zh-CN" :html "&#20195;&#30721;%d&nbsp;" :utf-8 "代码%d "))
     ("See section %s"
      ("da" :default "jævnfør afsnit %s")
@@ -5393,7 +5397,7 @@ them."
      ("es" :default "vea seccion %s")
      ("et" :html "Vaata peat&#252;kki %s" :utf-8 "Vaata peatükki %s")
      ("fr" :default "cf. section %s")
-     ("zh-CN" :html "&#21442;&#35265;&#31532;%d&#33410;" :utf-8 "参见第%s节"))
+     ("zh-CN" :html "&#21442;&#35265;&#31532;%s&#33410;" :utf-8 "参见第%s节"))
     ("Table"
      ("de" :default "Tabelle")
      ("es" :default "Tabla")

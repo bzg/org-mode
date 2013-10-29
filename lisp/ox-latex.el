@@ -525,20 +525,6 @@ When nil, no transformation is made."
 	  (string :tag "Format string")
 	  (const :tag "No formatting")))
 
-(defcustom org-latex-longtable-continued-on "Continued on next page"
-  "String to indicate table continued on next page."
-  :group 'org-export-latex
-  :version "24.4"
-  :package-version '(Org . "8.0")
-  :type 'string)
-
-(defcustom org-latex-longtable-continued-from "Continued from previous page"
-  "String to indicate table continued from previous page."
-  :group 'org-export-latex
-  :version "24.4"
-  :package-version '(Org . "8.0")
-  :type 'string)
-
 ;;;; Text markup
 
 (defcustom org-latex-text-markup-alist '((bold . "\\textbf{%s}")
@@ -1076,6 +1062,11 @@ just outside of it."
 	      (reverse all-refs)))))
      (funcall search-refs element))
    ""))
+
+(defun org-latex--translate (s info)
+  "Translate string S according to specified language.
+INFO is a plist used as a communication channel."
+  (org-export-translate s :latex info))
 
 
 
@@ -2649,7 +2640,7 @@ a communication channel."
 		 (if booktabsp "\\midrule" "\\hline")
 		 (cdr (org-export-table-dimensions
 		       (org-export-get-parent-table table-row) info))
-		 org-latex-longtable-continued-from
+		 (org-latex--translate "Continued from previous page" info)
 		 (cond ((and booktabsp (memq 'top borders)) "\\toprule\n")
 		       ((and (memq 'top borders)
 			     (memq 'above borders)) "\\hline\n")
@@ -2660,7 +2651,7 @@ a communication channel."
 		 ;; Number of columns.
 		 (cdr (org-export-table-dimensions
 		       (org-export-get-parent-table table-row) info))
-		 org-latex-longtable-continued-on))
+		 (org-latex--translate "Continued on next page" info)))
 	;; When BOOKTABS are activated enforce bottom rule even when
 	;; no hline was specifically marked.
 	((and booktabsp (memq 'bottom borders)) "\\bottomrule")
