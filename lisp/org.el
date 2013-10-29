@@ -7570,7 +7570,8 @@ This is important for non-interactive uses of the command."
 		      (and (ignore-errors (org-back-to-heading invisible-ok))
 			   (org-at-heading-p))))
 	       (or arg (not itemp))))
-      ;; At beginning of buffer or so hight up that only a heading makes sense.
+      ;; At beginning of buffer or so high up that only a heading
+      ;; makes sense.
       (insert
        (if (or (bobp) (org-previous-line-empty-p)) "" "\n")
        (if (org-in-src-block-p) ",* " "* "))
@@ -7632,9 +7633,9 @@ This is important for non-interactive uses of the command."
 	    (org-end-of-subtree nil t)
 	    (skip-chars-backward " \r\n")
 	    (and (looking-at "[ \t]+") (replace-match ""))
-	    (forward-char 1)
+	    (unless (eobp) (forward-char 1))
 	    (when (looking-at "^\\*")
-	      (backward-char 1)
+	      (unless (bobp) (backward-char 1))
 	      (insert "\n")))
 
 	  ;; If we are splitting, grab the text that should be moved to the new headline
@@ -7770,7 +7771,7 @@ This is a list with the following elements:
   "Insert TODO heading with `org-insert-heading-respect-content' set to t."
   (interactive "P")
   (let ((org-insert-heading-respect-content t))
-    (org-insert-todo-heading force-state t)))
+    (org-insert-todo-heading force-state '(4))))
 
 (defun org-insert-todo-heading (arg &optional force-heading)
   "Insert a new heading with the same level and TODO state as current heading.

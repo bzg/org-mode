@@ -407,6 +407,28 @@
        (beginning-of-line)
        (looking-at "- $")))))
 
+(ert-deftest test-org/insert-todo-heading-respect-content ()
+  "Test `org-insert-todo-heading-respect-content' specifications."
+  ;; Create a TODO heading.
+  (should
+   (org-test-with-temp-text "* H1\n Body"
+     (org-insert-todo-heading-respect-content)
+     (nth 2 (org-heading-components))))
+  ;; Add headline after body of current subtree.
+  (should
+   (org-test-with-temp-text "* H1\nBody"
+     (org-insert-todo-heading-respect-content)
+     (eobp)))
+  (should
+   (org-test-with-temp-text "* H1\n** H2\nBody"
+     (org-insert-todo-heading-respect-content)
+     (eobp)))
+  ;; In a list, do not create a new item.
+  (should
+   (org-test-with-temp-text "* H\n- an item\n- another one"
+     (search-forward "an ")
+     (org-insert-todo-heading-respect-content)
+     (and (eobp) (org-at-heading-p)))))
 
 
 
