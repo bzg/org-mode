@@ -655,7 +655,7 @@ into previewing problems, please consult
   :group 'org-export-latex
   :type '(choice
 	  (const :tag "Use listings" t)
-	  (const :tag "Use minted" 'minted)
+	  (const :tag "Use minted" minted)
 	  (const :tag "Export verbatim" nil)))
 
 (defcustom org-latex-listings-langs
