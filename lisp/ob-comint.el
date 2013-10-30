@@ -75,11 +75,11 @@ or user `keyboard-quit' during execution of body."
 	(remove-echo (nth 2 meta))
 	(full-body (nth 3 meta)))
     `(org-babel-comint-in-buffer ,buffer
-       (let ((string-buffer "")
-	     (comint-output-filter-functions
-	      (cons (lambda (text) (setq string-buffer (concat string-buffer text)))
-		    comint-output-filter-functions))
-	     dangling-text raw)
+       (let* ((string-buffer "")
+	      (comint-output-filter-functions
+	       (cons (lambda (text) (setq string-buffer (concat string-buffer text)))
+		     comint-output-filter-functions))
+	      dangling-text raw)
 	 ;; got located, and save dangling text
 	 (goto-char (process-mark (get-buffer-process (current-buffer))))
 	 (let ((start (point))
