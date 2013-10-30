@@ -5277,9 +5277,21 @@ them."
      ("zh-CN" :html "&#20316;&#32773;" :utf-8 "作者")
      ("zh-TW" :html "&#20316;&#32773;" :utf-8 "作者"))
     ("Continued from previous page"
-     ("fr" :default "Suite de la page précédente"))
+     ("de" :default "Fortsetzung von vorheriger Seite")
+     ("es" :default "Continúa de la página anterior")
+     ("fr" :default "Suite de la page précédente")
+     ("it" :default "Continua da pagina precedente")
+     ("ja" :utf-8 "前ページから続く")
+     ("nl" :default "Vervolg van vorige pagina")
+     ("pt" :default "Continuação da página anterior"))
     ("Continued on next page"
-     ("fr" :default "Suite page suivante"))
+     ("de" :default "Fortsetzung nächste Seite")
+     ("es" :default "Continúa en la siguiente página")
+     ("fr" :default "Suite page suivante")
+     ("it" :default "Continua alla pagina successiva")
+     ("ja" :utf-8 "次ページに続く")
+     ("nl" :default "Vervolg op volgende pagina")
+     ("pt" :default "Continua na página seguinte"))
     ("Date"
      ("ca" :default "Data")
      ("cs" :default "Datum")
