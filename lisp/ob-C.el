@@ -106,7 +106,7 @@ or `org-babel-execute:C++'."
     ((lambda (results)
        (org-babel-reassemble-table
 	(org-babel-result-cond (cdr (assoc :result-params params))
-	  (org-babel-read results)
+	  (org-babel-read results t)
 	  (let ((tmp-file (org-babel-temp-file "c-")))
 	    (with-temp-file tmp-file (insert results))
 	    (org-babel-import-elisp-from-file tmp-file)))
