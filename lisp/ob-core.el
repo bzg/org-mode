@@ -96,6 +96,7 @@
 (declare-function org-table-to-lisp "org-table" (&optional txt))
 (declare-function org-reverse-string "org" (string))
 (declare-function org-element-context "org-element" (&optional ELEMENT))
+(declare-function org-every "org" (pred seq))
 
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
@@ -484,6 +485,42 @@ then run `org-babel-switch-to-session'."
   "Common header arguments used by org-babel.
 Note that individual languages may define their own language
 specific header arguments as well.")
+
+(defconst org-babel-safe-header-args
+  '(:cache :colnames :comments :exports :epilogue :hlines :noeval
+	   :noweb :noweb-ref :noweb-sep :padline :prologue :rownames
+	   :sep :session :tangle :wrap
+	   (:eval . ("never" "query"))
+	   (:results . (lambda (str) (not (string-match "file" str)))))
+  "A list of safe header arguments for babel source blocks.
+
+The list can have entries of the following forms:
+- :ARG                     -> :ARG is always a safe header arg
+- (:ARG . (VAL1 VAL2 ...)) -> :ARG is safe as a header arg if it is
+                              `equal' to one of the VALs.
+- (:ARG . FN)              -> :ARG is safe as a header arg if the function FN
+                              returns non-nil.  FN is passed one
+                              argument, the value of the header arg
+                              (as a string).")
+
+(defmacro org-babel-header-args-safe-fn (safe-list)
+  "Return a function that determines whether a list of header args are safe.
+
+Intended usage is:
+\(put 'org-babel-default-header-args 'safe-local-variable
+ (org-babel-header-args-safe-p org-babel-safe-header-args)
+
+This allows org-babel languages to extend the list of safe values for
+their `org-babel-default-header-args:foo' variable.
+
+For the format of SAFE-LIST, see `org-babel-safe-header-args'."
+  `(lambda (value)
+     (and (listp value)
+	  (org-every
+	   (lambda (pair)
+	     (and (consp pair)
+		  (org-babel-one-header-arg-safe-p pair ,safe-list)))
+	   value))))
 
 (defvar org-babel-default-header-args
   '((:session . "none") (:results . "replace") (:exports . "code")
@@ -2794,23 +2831,6 @@ of `org-babel-temporary-directory'."
 
 (add-hook 'kill-emacs-hook 'org-babel-remove-temporary-directory)
 
-(defconst org-babel-safe-header-args
-  '(:cache :colnames :comments :exports :epilogue :hlines :noeval
-	   :noweb :noweb-ref :noweb-sep :padline :prologue :rownames
-	   :sep :session :tangle :wrap
-	   (:eval . ("never" "query"))
-	   (:results . (lambda (str) (not (string-match "file" str)))))
-  "A list of safe header arguments for babel source blocks.
-
-The list can have entries of the following forms:
-- :ARG                     -> :ARG is always a safe header arg
-- (:ARG . (VAL1 VAL2 ...)) -> :ARG is safe as a header arg if it is
-                              `equal' to one of the VALs.
-- (:ARG . FN)              -> :ARG is safe as a header arg if the function FN
-                              returns non-nil.  FN is passed one
-                              argument, the value of the header arg
-                              (as a string).")
-
 (defun org-babel-one-header-arg-safe-p (pair safe-list)
   "Determine if the PAIR is a safe babel header arg according to SAFE-LIST.
 
@@ -2828,25 +2848,6 @@ For the format of SAFE-LIST, see `org-babel-safe-header-args'."
 		     ((listp (cdr entry))
 		      (member (cdr pair) (cdr entry)))
 		     (t nil)))))))
-
-(defmacro org-babel-header-args-safe-fn (safe-list)
-  "Return a function that determines whether a list of header args are safe.
-
-Intended usage is:
-\(put 'org-babel-default-header-args 'safe-local-variable
- (org-babel-header-args-safe-p org-babel-safe-header-args)
-
-This allows org-babel languages to extend the list of safe values for
-their `org-babel-default-header-args:foo' variable.
-
-For the format of SAFE-LIST, see `org-babel-safe-header-args'."
-  `(lambda (value)
-     (and (listp value)
-	  (org-every
-	   (lambda (pair)
-	     (and (consp pair)
-		  (org-babel-one-header-arg-safe-p pair ,safe-list)))
-	   value))))
 
 (provide 'ob-core)
 
