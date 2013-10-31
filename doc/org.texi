@@ -1831,18 +1831,14 @@ or by a custom function.
 @node Drawers
 @section Drawers
 @cindex drawers
-@cindex #+DRAWERS
 @cindex visibility cycling, drawers
 
-@vindex org-drawers
 @cindex org-insert-drawer
 @kindex C-c C-x d
 Sometimes you want to keep information associated with an entry, but you
-normally don't want to see it.  For this, Org mode has @emph{drawers}.
-Drawers need to be configured with the option @code{org-drawers}@footnote{You
-can define additional drawers on a per-file basis with a line like
-@code{#+DRAWERS: HIDDEN STATE}}.  They can contain anything but a headline
-and another drawer.  Drawers look like this:
+normally don't want to see it.  For this, Org mode has @emph{drawers}.  They
+can contain anything but a headline and another drawer.  Drawers look like
+this:
 
 @example
 ** This is a headline
@@ -7330,12 +7326,7 @@ Prompt for a feed name and go to the inbox configured for this feed.
 
 Under the same headline, Org will create a drawer @samp{FEEDSTATUS} in which
 it will store information about the status of items in the feed, to avoid
-adding the same item several times.  You should add @samp{FEEDSTATUS} to the
-list of drawers in that file:
-
-@example
-#+DRAWERS: LOGBOOK PROPERTIES FEEDSTATUS
-@end example
+adding the same item several times.
 
 For more information, including how to read atom feeds, see
 @file{org-feed.el} and the docstring of @code{org-feed-alist}.
@@ -15851,10 +15842,6 @@ The global version of this variable is
 @item #+FILETAGS: :tag1:tag2:tag3:
 Set tags that can be inherited by any entry in the file, including the
 top-level entries.
-@item #+DRAWERS: NAME1 .....
-@vindex org-drawers
-Set the file-local set of additional drawers.  The corresponding global
-variable is @code{org-drawers}.
 @item #+LINK:  linkword replace
 @vindex org-link-abbrev-alist
 These lines (several are allowed) specify link abbreviations.
