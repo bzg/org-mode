@@ -18794,11 +18794,16 @@ INCLUDE-LINKED is passed to `org-display-inline-images'."
 
 (defun org-display-inline-images (&optional include-linked refresh beg end)
   "Display inline images.
-Normally only links without a description part are inlined, because this
-is how it will work for export.  When INCLUDE-LINKED is set, also links
-with a description part will be inlined.  This can be nice for a quick
-look at those images, but it does not reflect what exported files will look
-like.
+Normally only links without a description part, or with an image
+file name in the description, are inlined, because this is how it
+will work for export.  When INCLUDE-LINKED is set, also links
+with a text description part will be inlined.  This can be nice
+for a quick look at those images, but it does not reflect what
+exported files will look like. Note that in latex and html
+exports, images specified in the description will only be treated
+as graphic if they begin with the 'file:' protocol.  Images
+specified in the description without a protocol will be displayed
+inline in the buffer, but shown as text in the export.
 When REFRESH is set, refresh existing images between BEG and END.
 This will create new image displays only if necessary.
 BEG and END default to the buffer boundaries."
@@ -18812,7 +18817,7 @@ BEG and END default to the buffer boundaries."
 	(widen)
 	(setq beg (or beg (point-min)) end (or end (point-max)))
 	(goto-char beg)
-	(let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([^]\n]+?"
+	(let ((re (concat "\\[.*\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([^]\n]+?"
 			  (substring (org-image-file-name-regexp) 0 -2)
 			  "\\)\\]" (if include-linked "" "\\]")))
 	      (case-fold-search t)
