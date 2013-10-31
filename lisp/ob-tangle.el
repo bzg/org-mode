@@ -180,12 +180,12 @@ used to limit the exported source code blocks by language."
   (run-hooks 'org-babel-pre-tangle-hook)
   ;; Possibly Restrict the buffer to the current code block
   (save-restriction
-    (when (equal arg '(4))
-      (let ((head (org-babel-where-is-src-block-head)))
+    (save-excursion
+      (when (equal arg '(4))
+	(let ((head (org-babel-where-is-src-block-head)))
 	  (if head
 	      (goto-char head)
 	    (user-error "Point is not in a source code block"))))
-    (save-excursion
       (let ((block-counter 0)
 	    (org-babel-default-header-args
 	     (if target-file
