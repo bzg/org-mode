@@ -4650,7 +4650,7 @@ Returned borders ignore special rows."
     borders))
 
 (defun org-export-table-cell-starts-colgroup-p (table-cell info)
-  "Non-nil when TABLE-CELL is at the beginning of a row group.
+  "Non-nil when TABLE-CELL is at the beginning of a column group.
 INFO is a plist used as a communication channel."
   ;; A cell starts a column group either when it is at the beginning
   ;; of a row (or after the special column, if any) or when it has
@@ -4661,7 +4661,7 @@ INFO is a plist used as a communication channel."
       (memq 'left (org-export-table-cell-borders table-cell info))))
 
 (defun org-export-table-cell-ends-colgroup-p (table-cell info)
-  "Non-nil when TABLE-CELL is at the end of a row group.
+  "Non-nil when TABLE-CELL is at the end of a column group.
 INFO is a plist used as a communication channel."
   ;; A cell ends a column group either when it is at the end of a row
   ;; or when it has a right border.
@@ -4671,7 +4671,7 @@ INFO is a plist used as a communication channel."
       (memq 'right (org-export-table-cell-borders table-cell info))))
 
 (defun org-export-table-row-starts-rowgroup-p (table-row info)
-  "Non-nil when TABLE-ROW is at the beginning of a column group.
+  "Non-nil when TABLE-ROW is at the beginning of a row group.
 INFO is a plist used as a communication channel."
   (unless (or (eq (org-element-property :type table-row) 'rule)
 	      (org-export-table-row-is-special-p table-row info))
@@ -4680,7 +4680,7 @@ INFO is a plist used as a communication channel."
       (or (memq 'top borders) (memq 'above borders)))))
 
 (defun org-export-table-row-ends-rowgroup-p (table-row info)
-  "Non-nil when TABLE-ROW is at the end of a column group.
+  "Non-nil when TABLE-ROW is at the end of a row group.
 INFO is a plist used as a communication channel."
   (unless (or (eq (org-element-property :type table-row) 'rule)
 	      (org-export-table-row-is-special-p table-row info))
