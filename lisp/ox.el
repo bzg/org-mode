@@ -1250,7 +1250,7 @@ The back-end could then be called with, for example:
 ;;
 ;; + `:back-end' :: Current back-end used for transcoding.
 ;;   - category :: tree
-;;   - type :: symbol
+;;   - type :: structure
 ;;
 ;; + `:creator' :: String to write as creation information.
 ;;   - category :: option
