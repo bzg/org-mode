@@ -18794,68 +18794,113 @@ INCLUDE-LINKED is passed to `org-display-inline-images'."
 
 (defun org-display-inline-images (&optional include-linked refresh beg end)
   "Display inline images.
-Normally only links without a description part, or with an image
-file name in the description, are inlined, because this is how it
-will work for export.  When INCLUDE-LINKED is set, also links
-with a text description part will be inlined.  This can be nice
-for a quick look at those images, but it does not reflect what
-exported files will look like. Note that in latex and html
-exports, images specified in the description will only be treated
-as graphic if they begin with the 'file:' protocol.  Images
-specified in the description without a protocol will be displayed
-inline in the buffer, but shown as text in the export.
-When REFRESH is set, refresh existing images between BEG and END.
-This will create new image displays only if necessary.
-BEG and END default to the buffer boundaries."
+
+An inline image is a link which follows either of these
+conventions:
+
+  1. Its path is a file with an extension matching return value
+     from `image-file-name-regexp' and it has no contents.
+
+  2. Its description consists in a single link of the previous
+     type.
+
+When optional argument INCLUDE-LINKED is non-nil, also links with
+a text description part will be inlined.  This can be nice for
+a quick look at those images, but it does not reflect what
+exported files will look like.
+
+When optional argument REFRESH is non-nil, refresh existing
+images between BEG and END.  This will create new image displays
+only if necessary.  BEG and END default to the buffer
+boundaries."
   (interactive "P")
   (when (display-graphic-p)
     (unless refresh
       (org-remove-inline-images)
-      (if (fboundp 'clear-image-cache) (clear-image-cache)))
-    (save-excursion
-      (save-restriction
-	(widen)
-	(setq beg (or beg (point-min)) end (or end (point-max)))
-	(goto-char beg)
-	(let ((re (concat "\\[.*\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([^]\n]+?"
-			  (substring (org-image-file-name-regexp) 0 -2)
-			  "\\)\\]" (if include-linked "" "\\]")))
-	      (case-fold-search t)
-	      old file ov img type attrwidth width)
-	  (while (re-search-forward re end t)
-	    (setq old (get-char-property-and-overlay (match-beginning 1)
-						     'org-image-overlay)
-		  file (expand-file-name
-			(concat (or (match-string 3) "") (match-string 4))))
-	    (when (image-type-available-p 'imagemagick)
-	      (setq attrwidth (if (or (listp org-image-actual-width)
-				      (null org-image-actual-width))
-				  (save-excursion
-				    (save-match-data
-				      (when (re-search-backward
-					     "#\\+attr.*:width[ \t]+\\([^ ]+\\)"
-					     (save-excursion
-					       (re-search-backward "^[ \t]*$\\|\\`" nil t)) t)
-					(string-to-number (match-string 1))))))
-		    width (cond ((eq org-image-actual-width t) nil)
-				((null org-image-actual-width) attrwidth)
-				((numberp org-image-actual-width)
-				 org-image-actual-width)
-				((listp org-image-actual-width)
-				 (or attrwidth (car org-image-actual-width))))
-		    type (if width 'imagemagick)))
-	    (when (file-exists-p file)
-	      (if (and (car-safe old) refresh)
-		  (image-refresh (overlay-get (cdr old) 'display))
-		(setq img (save-match-data (create-image file type nil :width width)))
-		(when img
-		  (setq ov (make-overlay (match-beginning 0) (match-end 0)))
-		  (overlay-put ov 'display img)
-		  (overlay-put ov 'face 'default)
-		  (overlay-put ov 'org-image-overlay t)
-		  (overlay-put ov 'modification-hooks
-			       (list 'org-display-inline-remove-overlay))
-		  (push ov org-inline-image-overlays))))))))))
+      (when (fboundp 'clear-image-cache) (clear-image-cache)))
+    (org-with-wide-buffer
+     (goto-char (or beg (point-min)))
+     (let ((case-fold-search t)
+	   (file-extension-re (org-image-file-name-regexp)))
+       (while (re-search-forward "[][]\\[\\(?:file\\|[./~]\\)" end t)
+	 (let ((link (save-match-data (org-element-context))))
+	   ;; Check if we're at an inline image.
+	   (when (and (equal (org-element-property :type link) "file")
+		      (or include-linked
+			  (not (org-element-property :contents-begin link)))
+		      (let ((parent (org-element-property :parent link)))
+			(or (not (eq (org-element-type parent) 'link))
+			    (not (cdr (org-element-contents parent)))))
+		      (org-string-match-p file-extension-re
+					  (org-element-property :path link)))
+	     (let ((file (expand-file-name (org-element-property :path link))))
+	       (when (file-exists-p file)
+		 (let ((width
+			;; Apply `org-image-actual-width' specifications.
+			(cond
+			 ((not (image-type-available-p 'imagemagick)) nil)
+			 ((eq org-image-actual-width t) nil)
+			 ((listp org-image-actual-width)
+			  (or
+			   ;; First try to find a width among
+			   ;; attributes associated to the paragraph
+			   ;; containing link.
+			   (let ((paragraph
+				  (let ((e link))
+				    (while (and (setq e (org-element-property
+							 :parent e))
+						(eq (org-element-type e)
+						    'paragraph)))
+				    e)))
+			     (when paragraph
+			       (save-excursion
+				 (goto-char (org-element-property :begin paragraph))
+				 (when (save-match-data
+					 (re-search-forward
+					  "^[ \t]*#\\+attr_.*?: +.*?:width +\\(\\S-+\\)"
+					  (org-element-property
+					   :post-affiliated paragraph)
+					  t))
+				   (string-to-number (match-string 1))))))
+			   ;; Otherwise, fall-back to provided number.
+			   (car org-image-actual-width)))
+			 ((numberp org-image-actual-width)
+			  org-image-actual-width)))
+		       (old (get-char-property-and-overlay
+			     (org-element-property :begin link)
+			     'org-image-overlay)))
+		   (if (and (car-safe old) refresh)
+		       (image-refresh (overlay-get (cdr old) 'display))
+		     (let ((image (save-match-data
+				    (create-image file
+						  (and width 'imagemagick)
+						  nil
+						  :width width))))
+		       (when image
+			 (let* ((link
+				 ;; If inline image is the description
+				 ;; of another link, be sure to
+				 ;; consider the latter as the one to
+				 ;; apply the overlay on.
+				 (let ((parent
+					(org-element-property :parent link)))
+				   (if (eq (org-element-type parent) 'link)
+				       parent
+				     link)))
+				(ov (make-overlay
+				     (org-element-property :begin link)
+				     (progn
+				       (goto-char
+					(org-element-property :end link))
+				       (skip-chars-backward " \t")
+				       (point)))))
+			   (overlay-put ov 'display image)
+			   (overlay-put ov 'face 'default)
+			   (overlay-put ov 'org-image-overlay t)
+			   (overlay-put
+			    ov 'modification-hooks
+			    (list 'org-display-inline-remove-overlay))
+			   (push ov org-inline-image-overlays)))))))))))))))
 
 (define-obsolete-function-alias
   'org-display-inline-modification-hook 'org-display-inline-remove-overlay "24.3")
