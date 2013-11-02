@@ -18852,8 +18852,8 @@ boundaries."
 				  (let ((e link))
 				    (while (and (setq e (org-element-property
 							 :parent e))
-						(eq (org-element-type e)
-						    'paragraph)))
+						(not (eq (org-element-type e)
+							 'paragraph))))
 				    e)))
 			     (when paragraph
 			       (save-excursion
