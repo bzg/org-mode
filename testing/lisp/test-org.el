@@ -1294,6 +1294,49 @@ Text.
 	  (org-test-with-temp-text "<<target>> <<<radio-target>>>"
 	    (org-all-targets t)))))
 
+
+;;; Visibility
+
+(ert-deftest test-org/flag-drawer ()
+  "Test `org-flag-drawer' specifications."
+  ;; Hide drawer.
+  (should
+   (org-test-with-temp-text ":DRAWER:\ncontents\n:END:"
+     (org-flag-drawer t)
+     (get-char-property (line-end-position) 'invisible)))
+  ;; Show drawer.
+  (should-not
+   (org-test-with-temp-text ":DRAWER:\ncontents\n:END:"
+     (org-flag-drawer t)
+     (org-flag-drawer nil)
+     (get-char-property (line-end-position) 'invisible)))
+  ;; Test optional argument.
+  (should
+   (org-test-with-temp-text ":D1:\nc1\n:END:\n\n:D2:\nc2\n:END:"
+     (let ((drawer (save-excursion (search-forward ":D2")
+				   (org-element-at-point))))
+       (org-flag-drawer t drawer)
+       (get-char-property (progn (search-forward ":D2") (line-end-position))
+			  'invisible))))
+  (should-not
+   (org-test-with-temp-text ":D1:\nc1\n:END:\n\n:D2:\nc2\n:END:"
+     (let ((drawer (save-excursion (search-forward ":D2")
+				   (org-element-at-point))))
+       (org-flag-drawer t drawer)
+       (get-char-property (line-end-position) 'invisible))))
+  ;; Do not hide fake drawers.
+  (should-not
+   (org-test-with-temp-text "#+begin_example\n:D:\nc\n:END:\n#+end_example"
+     (forward-line 1)
+     (org-flag-drawer t)
+     (get-char-property (line-end-position) 'invisible)))
+  ;; Do not hide incomplete drawers.
+  (should-not
+   (org-test-with-temp-text ":D:\nparagraph"
+     (forward-line 1)
+     (org-flag-drawer t)
+     (get-char-property (line-end-position) 'invisible))))
+
 
 (provide 'test-org)
 

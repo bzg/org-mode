@@ -7058,18 +7058,21 @@ specifying which drawers should not be hidden."
 	     org-inlinetask-min-level)
     (hide-sublevels (1- org-inlinetask-min-level))))
 
-(defun org-flag-drawer (flag)
-  "When FLAG is non-nil, hide the drawer we are within.
-Otherwise make it visible."
-  (save-excursion
-    (beginning-of-line 1)
-    (when (looking-at "^[ \t]*:[a-zA-Z][a-zA-Z0-9]*:")
-      (let ((b (match-end 0)))
-	(if (re-search-forward
-	     "^[ \t]*:END:"
-	     (save-excursion (outline-next-heading) (point)) t)
-	    (outline-flag-region b (point-at-eol) flag)
-	  (user-error ":END: line missing at position %s" b))))))
+(defun org-flag-drawer (flag &optional element)
+  "When FLAG is non-nil, hide the drawer we are at.
+Otherwise make it visible.  When optional argument ELEMENT is
+a parsed drawer, as returned by `org-element-at-point', hide or
+show that drawer instead."
+  (let ((drawer (or element (org-element-at-point))))
+    (when (memq (org-element-type drawer) '(drawer property-drawer))
+      (save-excursion
+	(goto-char (org-element-property :post-affiliated drawer))
+	(outline-flag-region
+	 (line-end-position)
+	 (progn (goto-char (org-element-property :end drawer))
+		(skip-chars-backward " \r\t\n")
+		(line-end-position))
+	 flag)))))
 
 (defun org-subtree-end-visible-p ()
   "Is the end of the current subtree visible?"
