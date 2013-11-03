@@ -5218,9 +5218,10 @@ Providing it allows for quicker computation."
 	((let ((post (org-element-property :post-affiliated element)))
 	   (and post (< origin post)))
 	 (beginning-of-line)
-	 (looking-at org-element--affiliated-re)
+	 (let ((case-fold-search t)) (looking-at org-element--affiliated-re))
 	 (cond
-	  ((not (member (upcase (match-string 1)) org-element-parsed-keywords))
+	  ((not (member-ignore-case (match-string 1)
+				    org-element-parsed-keywords))
 	   (throw 'objects-forbidden element))
 	  ((< (match-end 0) origin)
 	   (narrow-to-region (match-end 0) (line-end-position)))
