@@ -10520,7 +10520,8 @@ application the system uses for this file type."
 	   ((and (string= type "thisfile")
 		 (or (run-hook-with-args-until-success
 		      'org-open-link-functions path)
-		     (and (string-match "^id:" link)
+		     (and link
+			  (string-match "^id:" link)
 			  (or (featurep 'org-id) (require 'org-id))
 			  (progn
 			    (funcall (nth 1 (assoc "id" org-link-protocols))
