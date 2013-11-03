@@ -2961,6 +2961,11 @@ Paragraph \\alpha."
        (org-test-with-temp-text "#+CAPTION: {{{macro}}}\n| a | b |."
 	 (progn (search-forward "{")
 		(org-element-type (org-element-context))))))
+  (should
+   (eq 'bold
+       (org-test-with-temp-text "#+caption: *bold*\nParagraph"
+	 (progn (search-forward "*")
+		(org-element-type (org-element-context))))))
   ;; Correctly set `:parent' property.
   (should
    (eq 'paragraph
