@@ -5685,7 +5685,7 @@ The time stamps may be either active or inactive.")
 	    (font-lock-prepend-text-property (match-beginning 2) (match-end 2)
 					     'face
 					     (nth 1 a))
-	    (and (nth 4 a)
+	    (and (nth 2 a)
 		 (org-remove-flyspell-overlays-in
 		  (match-beginning 0) (match-end 0)))
 	    (add-text-properties (match-beginning 2) (match-end 2)
