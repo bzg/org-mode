@@ -1063,9 +1063,9 @@ Assume point is at the beginning of the item."
 			     64))
 			 ((string-match "[0-9]+" c)
 			  (string-to-number (match-string 0 c)))))))
-	   (end (save-excursion (goto-char (org-list-get-item-end begin struct))
-				(unless (bolp) (forward-line))
-				(point)))
+	   (end (progn (goto-char (nth 6 (assq (point) struct)))
+		       (unless (bolp) (forward-line))
+		       (point)))
 	   (contents-begin
 	    (progn (goto-char
 		    ;; Ignore tags in un-ordered lists: they are just
@@ -1240,15 +1240,20 @@ containing `:type', `:begin', `:end', `:contents-begin' and
 Assume point is at the beginning of the list."
   (save-excursion
     (let* ((struct (or structure (org-element--list-struct limit)))
-	   (prevs (org-list-prevs-alist struct))
-	   (type (org-list-get-list-type (point) struct prevs))
+	   (type (cond ((org-looking-at-p "[ \t]*[A-Za-z0-9]") 'ordered)
+		       ((nth 5 (assq (point) struct)) 'descriptive)
+		       (t 'unordered)))
 	   (contents-begin (point))
 	   (begin (car affiliated))
-	   (contents-end
-	    (progn (goto-char (org-list-get-list-end (point) struct prevs))
-		   (unless (bolp) (forward-line))
-		   (point)))
-	   (end (progn (skip-chars-forward " \r\t\n" limit)
+	   (contents-end (let* ((item (assq contents-begin struct))
+				(ind (nth 1 item))
+				(pos (nth 6 item)))
+			   (while (and (setq item (assq pos struct))
+				       (= (nth 1 item) ind))
+			     (setq pos (nth 6 item)))
+			   pos))
+	   (end (progn (goto-char contents-end)
+		       (skip-chars-forward " \r\t\n" limit)
 		       (if (= (point) limit) limit (line-beginning-position)))))
       ;; Return value.
       (list 'plain-list
