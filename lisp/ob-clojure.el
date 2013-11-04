@@ -24,29 +24,36 @@
 
 ;;; Commentary:
 
-;;; support for evaluating clojure code, relies either on slime or
-;;; on nrepl for all eval
+;; Support for evaluating clojure code, relies either on Slime or
+;; on Nrepl.el for all eval.
 
-;;; Requirements:
+;; Requirements:
 
-;;; - clojure (at least 1.2.0)
-;;; - clojure-mode
-;;; - either slime or nrepl
+;; - clojure (at least 1.2.0)
+;; - clojure-mode
+;; - either cider or nrepl.el or SLIME
 
-;;; For SLIME-way, the best way to install these components is by
-;;; following the directions as set out by Phil Hagelberg (Technomancy)
-;;; on the web page: http://technomancy.us/126
+;; For cider, see https://github.com/clojure-emacs/cider
 
-;;; For nREPL-way:
-;;; get clojure is with https://github.com/technomancy/leiningen
-;;; get nrepl from MELPA (clojure-mode is a dependency).
+;; For SLIME, the best way to install these components is by following
+;; the directions as set out by Phil Hagelberg (Technomancy) on the
+;; web page: http://technomancy.us/126
+
+;; For nREPL:
+;; get clojure with https://github.com/technomancy/leiningen
+;; get nrepl from MELPA (clojure-mode is a dependency).
 
 ;;; Code:
 (require 'ob)
 
-(declare-function slime-eval "ext:slime" (sexp &optional package))
+(declare-function cider-current-ns "ext:cider-interaction" ())
+(declare-function nrepl-send-string-sync "ext:nrepl-client" (input &optional ns session))
+(declare-function nrepl-current-tooling-session "ext:nrepl-client" ())
+
 (declare-function nrepl-current-connection-buffer "ext:nrepl" ())
 (declare-function nrepl-eval "ext:nrepl" (body))
+
+(declare-function slime-eval "ext:slime" (sexp &optional package))
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("clojure" . "clj"))
@@ -57,7 +64,10 @@
 (defcustom org-babel-clojure-backend 'nrepl
   "Backend used to evaluate Clojure code blocks."
   :group 'org-babel
-  :type 'symbol)
+  :type '(choice
+	  (const :tag "cider" cider)
+	  (const :tag "nrepl" nrepl)
+	  (const :tag "SLIME" slime)))
 
 (defun org-babel-expand-body:clojure (body params)
   "Expand BODY according to PARAMS, return the expanded body."
@@ -88,31 +98,36 @@
   "Execute a block of Clojure code with Babel."
   (let ((expanded (org-babel-expand-body:clojure body params)))
     (case org-babel-clojure-backend
-      (slime
-       (require 'slime)
-       (with-temp-buffer
-	 (insert expanded)
-	 ((lambda (result)
-	    (let ((result-params (cdr (assoc :result-params params))))
-	      (org-babel-result-cond result-params
-		result
-		(condition-case nil (org-babel-script-escape result)
-		  (error result)))))
-	  (slime-eval
-	   `(swank:eval-and-grab-output
-	     ,(buffer-substring-no-properties (point-min) (point-max)))
-	   (cdr (assoc :package params))))))
+      (cider
+       (require 'cider)
+       (or (nth 1 (nrepl-send-string-sync
+		   (format "(clojure.pprint/pprint %s)" expanded)
+		   (cider-current-ns)
+		   (nrepl-current-tooling-session)))
+	   (error "nREPL not connected!  Use M-x cider-jack-in RET")))
       (nrepl
        (require 'nrepl)
        (if (nrepl-current-connection-buffer)
-	   (let* ((result (nrepl-eval expanded))
-		  (s (plist-get result :stdout))
-		  (r (plist-get result :value)))
-	     (if s (concat s "\n" r) r))
-	 (error "nREPL not connected! Use M-x nrepl-jack-in."))))))
+    	   (let* ((result (nrepl-eval expanded))
+    		  (s (plist-get result :stdout))
+    		  (r (plist-get result :value)))
+    	     (if s (concat s "\n" r) r))
+    	 (error "nREPL not connected!  Use M-x nrepl-jack-in RET")))
+      (slime
+       (require 'slime)
+       (with-temp-buffer
+    	 (insert expanded)
+    	 ((lambda (result)
+    	    (let ((result-params (cdr (assoc :result-params params))))
+    	      (org-babel-result-cond result-params
+    		result
+    		(condition-case nil (org-babel-script-escape result)
+    		  (error result)))))
+	  (slime-eval
+	   `(swank:eval-and-grab-output
+	     ,(buffer-substring-no-properties (point-min) (point-max)))
+	   (cdr (assoc :package params)))))))))
 
 (provide 'ob-clojure)
-
-
 
 ;;; ob-clojure.el ends here
