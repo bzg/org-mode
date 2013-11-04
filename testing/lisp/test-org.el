@@ -96,7 +96,25 @@
    (equal "# \n#+KEYWORD: value"
 	  (org-test-with-temp-text "#+KEYWORD: value"
 	    (progn (call-interactively 'comment-dwim)
-		   (buffer-string))))))
+		   (buffer-string)))))
+  ;; In a source block, use appropriate syntax.
+  (should
+   (equal "  ;; "
+	  (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n\n#+END_SRC"
+	    (forward-line)
+	    (let ((org-edit-src-content-indentation 2))
+	      (call-interactively 'comment-dwim))
+	    (buffer-substring-no-properties (line-beginning-position) (point)))))
+  (should
+   (equal "#+BEGIN_SRC emacs-lisp\n  ;; a\n  ;; b\n#+END_SRC"
+	  (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\na\nb\n#+END_SRC"
+	    (forward-line)
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (forward-line 2)
+	    (let ((org-edit-src-content-indentation 2))
+	      (call-interactively 'comment-dwim))
+	    (buffer-string)))))
 
 
 
