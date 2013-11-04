@@ -8595,7 +8595,9 @@ Comparing entries ignores case by default.  However, with an optional argument
 WITH-CASE, the sorting considers case as well.
 
 Sorting is done against the visible part of the headlines, it ignores hidden
-links."
+links.
+
+When sorting is done, call `org-after-sorting-entries-or-items-hook'."
   (interactive "P")
   (let ((case-func (if with-case 'identity 'downcase))
 	(cmstr
