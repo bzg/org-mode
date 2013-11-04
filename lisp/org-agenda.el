@@ -9909,11 +9909,12 @@ current HH:MM time."
   "Drag an agenda line forward by ARG lines."
   (interactive "p")
   (let ((inhibit-read-only t) lst)
-    (if (save-excursion
-	  (dotimes (n arg)
-	    (beginning-of-line 2)
-	    (push (not (get-text-property (point) 'txt)) lst))
-	  (delq nil lst))
+    (if (or (not (get-text-property (point) 'txt))
+	    (save-excursion
+	      (dotimes (n arg)
+		(move-beginning-of-line 2)
+		(push (not (get-text-property (point) 'txt)) lst))
+	      (delq nil lst)))
 	(message "Cannot move line forward")
       (org-drag-line-forward arg))))
 
@@ -9921,11 +9922,12 @@ current HH:MM time."
   "Drag an agenda line backward by ARG lines."
   (interactive "p")
   (let ((inhibit-read-only t) lst)
-    (if (save-excursion
-	  (dotimes (n arg)
-	    (beginning-of-line 0)
-	    (push (not (get-text-property (point) 'txt)) lst))
-	  (delq nil lst))
+    (if (or (not (get-text-property (point) 'txt))
+	    (save-excursion
+	      (dotimes (n arg)
+		(move-beginning-of-line 0)
+		(push (not (get-text-property (point) 'txt)) lst))
+	      (delq nil lst)))
 	(message "Cannot move line backward")
       (org-drag-line-backward arg))))
 
