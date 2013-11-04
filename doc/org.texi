@@ -1365,7 +1365,7 @@ entries.
 @vindex org-catch-invisible-edits
 @cindex edits, catching invisible
 Sometimes you may inadvertently edit an invisible part of the buffer and be
-confused on what as been edited and how to undo the mistake.  Setting
+confused on what has been edited and how to undo the mistake.  Setting
 @code{org-catch-invisible-edits} to non-@code{nil} will help prevent this.  See the
 docstring of this option on how Org should catch invisible edits and process
 them.
