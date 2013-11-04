@@ -144,16 +144,18 @@ evaluating BODY."
 Source code blocks are extracted with `org-babel-tangle'.
 Optional argument TARGET-FILE can be used to specify a default
 export file for all source blocks.  Optional argument LANG can be
-used to limit the exported source code blocks by language."
+used to limit the exported source code blocks by language.
+Return a list whose CAR is the tangled file name."
   (interactive "fFile to tangle: \nP")
   (let ((visited-p (get-file-buffer (expand-file-name file)))
 	to-be-removed)
-    (save-window-excursion
-      (find-file file)
-      (setq to-be-removed (current-buffer))
-      (org-babel-tangle nil target-file lang))
-    (unless visited-p
-      (kill-buffer to-be-removed))))
+    (prog1
+	(save-window-excursion
+	  (find-file file)
+	  (setq to-be-removed (current-buffer))
+	  (org-babel-tangle nil target-file lang))
+      (unless visited-p
+	(kill-buffer to-be-removed)))))
 
 (defun org-babel-tangle-publish (_ filename pub-dir)
   "Tangle FILENAME and place the results in PUB-DIR."

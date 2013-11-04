@@ -198,7 +198,8 @@ file to byte-code before it is loaded."
     ;; tangle if the org-mode file is newer than the elisp file
     (unless (and (file-exists-p exported-file)
 		 (> (funcall age file) (funcall age exported-file)))
-      (org-babel-tangle-file file exported-file "emacs-lisp"))
+      (setq exported-file
+	    (car (org-babel-tangle-file file exported-file "emacs-lisp"))))
     (message "%s %s"
 	     (if compile
 		 (progn (byte-compile-file exported-file 'load)
