@@ -2044,16 +2044,14 @@ following situations:
    note buffer with `C-1 C-c C-c'.  The user is prompted for an org file,
    with `org-directory' as the default path."
   :group 'org-refile
-  :group 'org-remember
   :group 'org-capture
   :type 'directory)
 
 (defcustom org-default-notes-file (convert-standard-filename "~/.notes")
   "Default target for storing notes.
-Used as a fall back file for org-remember.el and org-capture.el, for
-templates that do not specify a target file."
+Used as a fall back file for org-capture.el, for templates that
+do not specify a target file."
   :group 'org-refile
-  :group 'org-remember
   :group 'org-capture
   :type '(choice
 	  (const :tag "Default from remember-data-file" nil)
@@ -2083,7 +2081,6 @@ outline-path-completion  Headlines in the current buffer are offered via
 When nil, new notes will be filed to the end of a file or entry.
 This can also be a list with cons cells of regular expressions that
 are matched against file names, and values."
-  :group 'org-remember
   :group 'org-capture
   :group 'org-refile
   :type '(choice
@@ -21099,7 +21096,7 @@ Your bug report will be posted to the Org-mode mailing list.
   (interactive)
   (mapc 'require
 	'(org-agenda org-archive org-attach org-clock org-colview org-id
-		     org-remember org-table org-timer)))
+		     org-table org-timer)))
 
 ;;;###autoload
 (defun org-reload (&optional uncompiled)
