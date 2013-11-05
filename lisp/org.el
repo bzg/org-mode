@@ -1010,7 +1010,13 @@ new-frame        Make a new frame each time.  Note that in this case
 (defcustom org-use-speed-commands nil
   "Non-nil means activate single letter commands at beginning of a headline.
 This may also be a function to test for appropriate locations where speed
-commands should be active."
+commands should be active.
+
+For example, to activate speed commands when the point is on any
+star at the beginning of the headline, you can do this:
+
+  (setq org-use-speed-commands
+      (lambda () (and (looking-at org-outline-regexp) (looking-back \"^\\**\"))))"
   :group 'org-structure
   :type '(choice
 	  (const :tag "Never" nil)
