@@ -7529,9 +7529,11 @@ to switch to narrowing."
 		 (if notgroup
 		     (push (cons 'and nf0) f)
 		   (push (cons (or op 'or) nf0) f)))))
-	  (if (equal nfilter filter)
-	      (funcall ffunc f1 f filter t nil)
-	    (funcall ffunc nf1 nf nfilter nil nil)))))
+	  (cond ((equal filter '("+"))
+		 (setq f (list (list 'not 'tags))))
+		((equal nfilter filter)
+		 (funcall ffunc f1 f filter t nil))
+		(t (funcall ffunc nf1 nf nfilter nil nil))))))
      ;; Category filter
      ((eq type 'category)
       (setq filter
