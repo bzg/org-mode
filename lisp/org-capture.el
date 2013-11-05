@@ -24,14 +24,14 @@
 ;;
 ;;; Commentary:
 
-;; This file contains an alternative implementation of the same functionality
-;; that is also provided by org-remember.el.  The implementation is more
+;; This file contains an alternative implementation of the functionality
+;; that used to be provided by org-remember.el.  The implementation is more
 ;; streamlined, can produce more target types (e.g. plain list items or
 ;; table lines).  Also, it does not use a temporary buffer for editing
 ;; the captured entry - instead it uses an indirect buffer that visits
 ;; the new entry already in the target buffer (this was an idea by Samuel
-;; Wales).  John Wiegley's excellent `remember.el' is not needed for this
-;; implementation, even though we borrow heavily from its ideas.
+;; Wales).  John Wiegley's excellent `remember.el' is not needed anymore
+;; for this implementation, even though we borrow heavily from its ideas.
 
 ;; This implementation heavily draws on ideas by James TD Smith and
 ;; Samuel Wales, and, of cause, uses John Wiegley's remember.el as inspiration.
