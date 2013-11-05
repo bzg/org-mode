@@ -10013,7 +10013,8 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 	(setq org-stored-links (delq (assoc link org-stored-links)
 				     org-stored-links)))
 
-    (if (string-match org-plain-link-re link)
+    (if (and (string-match org-plain-link-re link)
+	     (not (string-match org-ts-regexp link)))
 	;; URL-like link, normalize the use of angular brackets.
 	(setq link (org-remove-angle-brackets link)))
 
