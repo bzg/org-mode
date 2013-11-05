@@ -3016,6 +3016,8 @@ known that the table will be realigned a little later anyway."
       ;; Insert constants in all formulas
       (setq eqlist
 	    (mapcar (lambda (x)
+		      (if (string-match "^@-?I+" (car x))
+			  (user-error "Can't assign to hline relative reference"))
 		      (when (string-match "\\`$[<>]" (car x))
 			(setq lhs1 (car x))
 			(setq x (cons (substring
