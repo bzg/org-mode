@@ -60,7 +60,8 @@ BTEST	= $(BATCH) \
 	  -l testing/org-test.el \
 	  $(foreach ob-lang,$(BTEST_OB_LANGUAGES),$(req-ob-lang)) \
 	  $(foreach req,$(BTEST_EXTRA),$(req-extra)) \
-	  --eval '(setq org-confirm-babel-evaluate nil)'
+	  --eval '(setq org-confirm-babel-evaluate nil)' \
+	  -f org-test-run-batch-tests
 
 # Using emacs in batch mode.
 # BATCH = $(EMACS) -batch -vanilla # XEmacs

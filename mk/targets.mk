@@ -94,15 +94,10 @@ compile compile-dirty::
 all clean-install::
 	$(foreach dir, $(SUBDIRS), $(MAKE) -C $(dir) $@;)
 
-check test single-test::	compile
+check test::	compile
 check test test-dirty::
 	-$(MKDIR) $(testdir)
-	TMPDIR=$(testdir) $(BTEST) -f org-test-run-batch-tests
-
-single-test single-test-dirty::
-	-$(MKDIR) $(testdir)
-	TMPDIR=$(testdir) $(BTEST) --eval "(org-test-load)" --eval "(ert '$(TEST))"
-
+	TMPDIR=$(testdir) $(BTEST)
 ifeq ($(TEST_NO_AUTOCLEAN),) # define this variable to leave $(testdir) around for inspection
 	$(MAKE) cleantest
 endif
