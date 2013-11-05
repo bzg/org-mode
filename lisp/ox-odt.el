@@ -223,7 +223,7 @@ standard Emacs.")
 (defconst org-odt-table-style-format
   "
 <style:style style:name=\"%s\" style:family=\"table\">
-  <style:table-properties style:rel-width=\"%d%%\" fo:margin-top=\"0cm\" fo:margin-bottom=\"0.20cm\" table:align=\"center\"/>
+  <style:table-properties style:rel-width=\"%s%%\" fo:margin-top=\"0cm\" fo:margin-bottom=\"0.20cm\" table:align=\"center\"/>
 </style:style>
 "
   "Template for auto-generated Table styles.")
@@ -1456,7 +1456,7 @@ original parsed data.  INFO is a plist holding export options."
       ;; - Dump automatic table styles.
       (loop for (style-name props) in
 	    (plist-get org-odt-automatic-styles 'Table) do
-	    (when (setq props (or (plist-get props :rel-width) 96))
+	    (when (setq props (or (plist-get props :rel-width) "96"))
 	      (insert (format org-odt-table-style-format style-name props))))
       ;; - Dump date-styles.
       (when org-odt-use-date-fields
