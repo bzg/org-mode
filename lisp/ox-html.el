@@ -1970,34 +1970,40 @@ and value is its relative level, as an integer."
 (defun org-html--format-toc-headline (headline info)
   "Return an appropriate table of contents entry for HEADLINE.
 INFO is a plist used as a communication channel."
-  (let* ((headline-number (org-export-get-headline-number headline info))
-	 (section-number
-	  (and (not (org-export-low-level-p headline info))
-	       (org-export-numbered-headline-p headline info)
-	       (concat (mapconcat 'number-to-string headline-number ".") ". ")))
+  (let* ((todo (and (plist-get info :with-todo-keywords)
+		    (let ((todo (org-element-property :todo-keyword headline)))
+		      (and todo (org-export-data todo info)))))
+	 (todo-type (and todo (org-element-property :todo-type headline)))
+	 (priority (and (plist-get info :with-priority)
+			(org-element-property :priority headline)))
+	 (text (org-export-data-with-backend
+		(org-export-get-alt-title headline info)
+		;; Create an anonymous back-end that will ignore any
+		;; footnote-reference, link, radio-target and target
+		;; in table of contents.
+		(org-export-create-backend
+		 :parent 'html
+		 :transcoders '((footnote-reference . ignore)
+				(link . (lambda (object c i) c))
+				(radio-target . (lambda (object c i) c))
+				(target . ignore)))
+		info))
 	 (tags (and (eq (plist-get info :with-tags) t)
 		    (org-export-get-tags headline info))))
     (format "<a href=\"#%s\">%s</a>"
-	    ;; Label.
 	    (org-export-solidify-link-text
 	     (or (org-element-property :CUSTOM_ID headline)
-		 (concat "sec-" (mapconcat 'number-to-string
-					   headline-number "-"))))
-	    ;; Body.
-	    (concat section-number
-		    (org-export-data-with-backend
-		     (org-export-get-alt-title headline info)
-		     ;; Create an anonymous back-end that will ignore
-		     ;; any footnote-reference, link, radio-target and
-		     ;; target in table of contents.
-		     (org-export-create-backend
-		      :parent 'html
-		      :transcoders '((footnote-reference . ignore)
-				     (link . (lambda (object c i) c))
-				     (radio-target . (lambda (object c i) c))
-				     (target . ignore)))
-		     info)
-		    (and tags "&#xa0;&#xa0;&#xa0;") (org-html--tags tags)))))
+		 (concat "sec-"
+			 (mapconcat
+			  #'number-to-string
+			  (org-export-get-headline-number headline info)
+			  "-"))))
+	    (apply (if (functionp org-html-format-headline-function)
+		       (lambda (todo todo-type priority text tags &rest ignore)
+			 (funcall org-html-format-headline-function
+				  todo todo-type priority text tags))
+		     #'org-html-format-headline)
+		   todo todo-type priority text tags :section-number nil))))
 
 (defun org-html-list-of-listings (info)
   "Build a list of listings.
