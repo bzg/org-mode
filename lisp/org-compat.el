@@ -335,10 +335,8 @@ Works on both Emacs and XEmacs."
       (org-xemacs-without-invisibility (indent-line-to column))
     (indent-line-to column)))
 
-(defun org-move-to-column (column &optional force buffer)
-  ;; set buffer-invisibility-spec to nil so that move-to-column
-  ;; does the right thing despite the presence of invisible text.
-  (let ((buffer-invisibility-spec nil))
+(defun org-move-to-column (column &optional force buffer ignore-invisible)
+  (let ((buffer-invisibility-spec ignore-invisible))
     (if (featurep 'xemacs)
 	(org-xemacs-without-invisibility (move-to-column column force buffer))
       (move-to-column column force))))
