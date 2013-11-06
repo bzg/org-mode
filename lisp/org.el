@@ -7060,11 +7060,19 @@ specifying which drawers should not be hidden."
 	    (org-flag-drawer t)))))))
 
 (defun org-cycle-hide-inline-tasks (state)
-  "Re-hide inline task when switching to 'contents visibility state."
-  (when (and (eq state 'contents)
-	     (boundp 'org-inlinetask-min-level)
-	     org-inlinetask-min-level)
-    (hide-sublevels (1- org-inlinetask-min-level))))
+  "Re-hide inline tasks when switching to 'contents or 'children
+visibility state."
+  (case state
+    (contents
+     (when (org-bound-and-true-p org-inlinetask-min-level)
+       (hide-sublevels (1- org-inlinetask-min-level))))
+    (children
+     (when (featurep 'org-inlinetask)
+       (save-excursion
+	 (while (and (outline-next-heading)
+		     (org-inlinetask-at-task-p))
+	   (org-inlinetask-toggle-visibility)
+	   (org-inlinetask-goto-end)))))))
 
 (defun org-flag-drawer (flag &optional element)
   "When FLAG is non-nil, hide the drawer we are at.
