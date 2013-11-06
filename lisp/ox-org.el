@@ -130,6 +130,8 @@ CONTENTS is its contents, as a string or nil.  INFO is ignored."
     (org-element-put-property headline :tags nil))
   (unless (plist-get info :with-priority)
     (org-element-put-property headline :priority nil))
+  (org-element-put-property headline :level
+			    (org-export-get-relative-level headline info))
   (org-element-headline-interpreter headline contents))
 
 (defun org-org-keyword (keyword contents info)
