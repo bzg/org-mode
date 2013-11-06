@@ -789,14 +789,14 @@ already gone.  Any prefix argument will be passed to the refile command."
   (let ((pos (point))
 	(base (buffer-base-buffer (current-buffer)))
 	(org-refile-for-capture t))
-    (org-capture-finalize)
     (save-window-excursion
       (with-current-buffer (or base (current-buffer))
 	(save-excursion
 	  (save-restriction
 	    (widen)
 	    (goto-char pos)
-	    (call-interactively 'org-refile)))))))
+	    (call-interactively 'org-refile)))))
+    (org-capture-finalize)))
 
 (defun org-capture-kill ()
   "Abort the current capture process."
