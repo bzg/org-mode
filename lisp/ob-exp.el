@@ -110,12 +110,14 @@ none ---- do not display either code or results upon export
 
 Assume point is at the beginning of block's starting line."
   (interactive)
-  (unless noninteractive (message "org-babel-exp processing..."))
   (save-excursion
     (let* ((info (org-babel-get-src-block-info 'light))
+	   (line (org-current-line))
 	   (lang (nth 0 info))
 	   (raw-params (nth 2 info)) hash)
       ;; bail if we couldn't get any info from the block
+      (unless noninteractive
+	(message "Processing %s code block at line %d..." lang line))
       (when info
 	;; if we're actually going to need the parameters
 	(when (member (cdr (assoc :exports (nth 2 info))) '("both" "results"))
