@@ -421,7 +421,7 @@ reference (with row).  Mode string N."
 "
    1
    ;; Compare field reference ($1) with field reference (@1)
-   "#+TBLFM: @I$<<..@>$> = if(\"$1\" == \"@1\", x, string(\"\")); E"
+   "#+TBLFM: @<<$<<..@>$> = if(\"$1\" == \"@1\", x, string(\"\")); E"
    ;; Compare field reference ($1) with absolute term
    (concat "#+TBLFM: "
 	   "$2 = if(\"$1\" == \"(0)\"   , x, string(\"\")); E :: "
