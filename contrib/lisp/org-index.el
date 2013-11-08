@@ -2,11 +2,10 @@
 
 ;; Copyright (C) 2011-2013 Free Software Foundation, Inc.
 
-;; Author: Marc Ihm <org-index@ferntreffer.de>
-;; Keywords: hypermedia, matching
+;; Author: Marc Ihm <org-index@2484.de>
+;; Keywords: outlines, hypermedia, matching
 ;; Requires: org
-;; Download: http://orgmode.org/worg/code/elisp/org-index.el
-;; Version: 2.3.2
+;; Version: 2.3.2.1
 
 ;; This file is not part of GNU Emacs.
 
@@ -32,8 +31,8 @@
 ;;  Mark and find your favorite org-locations and other points of interest
 ;;  easily; create and update a lookup table of references and links. When
 ;;  searching, frequently used entries appear at the the top and entering
-;;  some keywords narrows down to matching entries only; so the right one
-;;  can be spotted easily.
+;;  some keywords narrows down to matching entries only, so that the
+;;  right one can be spotted easily.
 ;;
 ;;  References are essentially small numbers (e.g. "R237" or "-455-"),
 ;;  which are created by this package; they are well suited to be used
