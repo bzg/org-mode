@@ -14416,7 +14416,7 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
 	  (insert (make-string (- ncol (current-column)) ?\ ))
 	  (setq ncol (current-column))
 	  (when indent-tabs-mode (tabify p (point-at-eol)))
-	  (org-move-to-column (min ncol col) t))
+	  (org-move-to-column (min ncol col) t nil t))
       (goto-char pos))))
 
 (defun org-set-tags-command (&optional arg just-align)
