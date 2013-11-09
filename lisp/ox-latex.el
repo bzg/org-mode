@@ -89,7 +89,9 @@
     (timestamp . org-latex-timestamp)
     (underline . org-latex-underline)
     (verbatim . org-latex-verbatim)
-    (verse-block . org-latex-verse-block))
+    (verse-block . org-latex-verse-block)
+    ;; Pseudo objects.
+    (latex-math-block . org-latex-math-block))
   :export-block '("LATEX" "TEX")
   :menu-entry
   '(?l "Export to LaTeX"
@@ -106,7 +108,8 @@
 		   (:latex-header-extra "LATEX_HEADER_EXTRA" nil nil newline)
 		   (:latex-hyperref-p nil "texht" org-latex-with-hyperref t)
 		   ;; Redefine regular options.
-		   (:date "DATE" nil "\\today" t)))
+		   (:date "DATE" nil "\\today" t))
+  :filters-alist '((:filter-parse-tree . org-latex--wrap-latex-math-block)))
 
 
 
@@ -169,6 +172,9 @@
 					    ("qbordermatrix" . "\\cr")
 					    ("kbordermatrix" . "\\\\"))
   "Alist between matrix macros and their row ending.")
+
+(defconst org-latex-pseudo-objects '(latex-math-block)
+  "List of pseudo-object types introduced in the back-end.")
 
 
 
@@ -1241,8 +1247,7 @@ holding contextual information.  See `org-export-data'."
   "Transcode an ENTITY object from Org to LaTeX.
 CONTENTS are the definition itself.  INFO is a plist holding
 contextual information."
-  (let ((ent (org-element-property :latex entity)))
-    (if (org-element-property :latex-math-p entity) (format "$%s$" ent) ent)))
+  (org-element-property :latex entity))
 
 
 ;;;; Example Block
@@ -1644,8 +1649,14 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-latex-latex-fragment (latex-fragment contents info)
   "Transcode a LATEX-FRAGMENT object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (when (plist-get info :with-latex)
-    (org-element-property :value latex-fragment)))
+  (let ((value (org-element-property :value latex-fragment)))
+    ;; Trim math markers since the fragment is enclosed within
+    ;; a latex-math-block object anyway.
+    (cond ((string-match "\\`\\(\\$\\{1,2\\}\\)\\([^\000]*\\)\\1\\'" value)
+	   (match-string 2 value))
+	  ((string-match "\\`\\\\(\\([^\000]*\\)\\\\)\\'" value)
+	   (match-string 1 value))
+	  (t value))))
 
 
 ;;;; Line Break
@@ -1990,6 +2001,61 @@ holding contextual information."
        (format "\\begin{verbatim}\n%s\\end{verbatim}" contents)))
 
 
+;;;; Pseudo Object: LaTeX Math Block
+
+(defun org-latex--wrap-latex-math-block (tree backend info)
+  "Merge contiguous math objects in a pseudo-object container.
+TREE is the parse tree.  BACKEND is the export back-end used.
+INFO is a plist used as a communication channel.  Return parse
+tree."
+  (let ((valid-object-p
+	 (function
+	  ;; Non-nil when OBJ can be added to the latex math block.
+	  (lambda (obj)
+	    (case (org-element-type obj)
+	      (entity (org-element-property :latex-math-p obj))
+	      (latex-fragment
+	       (let ((value (org-element-property :value obj)))
+		 (or (org-string-match-p "\\`\\\\([^\000]*\\\\)\\'" value)
+		     (org-string-match-p "\\`\\$[^\000]*\\$\\'" value))))
+	      ((subscript superscript) t))))))
+    (org-element-map tree '(entity latex-fragment subscript superscript)
+      (lambda (object)
+	;; Skip objects already wrapped.
+	(when (and (not (eq (org-element-type
+			     (org-element-property :parent object))
+			    'latex-math-block))
+		   (funcall valid-object-p object))
+	  (let ((math-block (list 'latex-math-block nil))
+		(next-objects (org-export-get-next-element object info t)))
+	    ;; Insert empty MATH-BLOCK in parse tree.
+	    (org-element-insert-before math-block object)
+	    ;; MATH-BLOCK swallows consecutive math objects.
+	    (while (and (let ((blank (org-element-property :post-blank object)))
+			  (or (null blank) (zerop blank)))
+			next-objects
+			(funcall valid-object-p (setq next (pop next-objects))))
+	      (org-element-adopt-elements math-block
+					  (org-element-extract-element object))
+	      ;; Eschew the following case: \alpha$x$ -> \(\alphax\).
+	      (unless (memq (org-element-type next) '(subscript subscript))
+		(org-element-put-property object :post-blank 1))
+	      (setq object next))
+	    (org-element-put-property
+	     math-block :post-blank (org-element-property :post-blank object))
+	    (org-element-adopt-elements math-block
+					(org-element-extract-element object)))))
+      info nil '(subscript superscript latex-math-block) t)
+    ;; Return updated parse tree.
+    tree))
+
+(defun org-latex-math-block (math-block contents info)
+  "Transcode a MATH-BLOCK object from Org to LaTeX.
+CONTENTS is a string.  INFO is a plist used as a communication
+channel."
+  (when (org-string-nw-p contents)
+    (format "\\(%s\\)" (org-trim contents))))
+
 ;;;; Quote Block
 
 (defun org-latex-quote-block (quote-block contents info)
@@ -2219,17 +2285,7 @@ holding contextual information."
   "Transcode a subscript or superscript object.
 OBJECT is an Org object.  INFO is a plist used as a communication
 channel."
-  (let ((in-script-p
-	 ;; Non-nil if object is already in a sub/superscript.
-	 (let ((parent object))
-	   (catch 'exit
-	     (while (setq parent (org-export-get-parent parent))
-	       (let ((type (org-element-type parent)))
-		 (cond ((memq type '(subscript superscript))
-			(throw 'exit t))
-		       ((memq type org-element-all-elements)
-			(throw 'exit nil))))))))
-	(type (org-element-type object))
+  (let ((type (org-element-type object))
 	(output ""))
     (org-element-map (org-element-contents object)
 	(cons 'plain-text org-element-all-objects)
@@ -2255,31 +2311,12 @@ channel."
 			 (let ((blank (org-element-property :post-blank obj)))
 			   (and blank (> blank 0) "\\ ")))))))
       info nil org-element-recursive-objects)
-    ;; Result.  Do not wrap into math mode if already in a subscript
-    ;; or superscript.  Do not wrap into curly brackets if OUTPUT is
-    ;; a single character.  Also merge consecutive subscript and
-    ;; superscript into the same math snippet.
-    (concat (and (not in-script-p)
-		 (let ((prev (org-export-get-previous-element object info)))
-		   (or (not prev)
-		       (not (eq (org-element-type prev)
-				(if (eq type 'subscript) 'superscript
-				  'subscript)))
-		       (let ((blank (org-element-property :post-blank prev)))
-			 (and blank (> blank 0)))))
-		 "$")
-	    (if (eq (org-element-type object) 'subscript) "_" "^")
+    ;; Result.  Do not wrap into curly brackets if OUTPUT is a single
+    ;; character.
+    (concat (if (eq (org-element-type object) 'subscript) "_" "^")
 	    (and (> (length output) 1) "{")
 	    output
-	    (and (> (length output) 1) "}")
-	    (and (not in-script-p)
-		 (or (let ((blank (org-element-property :post-blank object)))
-		       (and blank (> blank 0)))
-		     (not (eq (org-element-type
-			       (org-export-get-next-element object info))
-			      (if (eq type 'subscript) 'superscript
-				'subscript))))
-		 "$"))))
+	    (and (> (length output) 1) "}"))))
 
 (defun org-latex-subscript (subscript contents info)
   "Transcode a SUBSCRIPT object from Org to LaTeX.
@@ -2323,7 +2360,8 @@ contextual information."
 	(format "\\begin{verbatim}\n%s\n\\end{verbatim}"
 		;; Re-create table, without affiliated keywords.
 		(org-trim (org-element-interpret-data
-			   `(table nil ,@(org-element-contents table))))))
+			   `(table nil ,@(org-element-contents table))
+			   org-latex-pseudo-objects))))
        ;; Case 2: Matrix.
        ((or (string= type "math") (string= type "inline-math"))
 	(org-latex--math-table table info))
@@ -2518,7 +2556,9 @@ This function assumes TABLE has `org' as its `:type' property and
 	       (concat
 		(mapconcat
 		 (lambda (cell)
-		   (substring (org-element-interpret-data cell) 0 -1))
+		   (substring
+		    (org-element-interpret-data cell org-latex-pseudo-objects)
+		    0 -1))
 		 (org-element-map row 'table-cell 'identity info) "&")
 		(or (cdr (assoc env org-latex-table-matrix-macros)) "\\\\")
 		"\n")))
