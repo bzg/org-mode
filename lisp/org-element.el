@@ -514,9 +514,9 @@ Assume point is at the beginning of the block."
 	       (pos-before-blank (progn (goto-char block-end-line)
 					(forward-line)
 					(point)))
-	       (end (save-excursion (skip-chars-forward " \r\t\n" limit)
-				    (skip-chars-backward " \t")
-				    (if (bolp) (point) (line-end-position)))))
+	       (end (save-excursion
+		      (skip-chars-forward " \r\t\n" limit)
+		      (if (eobp) (point) (line-beginning-position)))))
 	  (list 'center-block
 		(nconc
 		 (list :begin begin
@@ -569,8 +569,7 @@ Assume point is at beginning of drawer."
 					(forward-line)
 					(point)))
 	       (end (progn (skip-chars-forward " \r\t\n" limit)
-			   (skip-chars-backward " \t")
-			   (if (bolp) (point) (line-end-position)))))
+			   (if (eobp) (point) (line-beginning-position)))))
 	  (list 'drawer
 		(nconc
 		 (list :begin begin
@@ -629,8 +628,7 @@ Assume point is at beginning of dynamic block."
 					  (forward-line)
 					  (point)))
 		 (end (progn (skip-chars-forward " \r\t\n" limit)
-			     (skip-chars-backward " \t")
-			     (if (bolp) (point) (line-end-position)))))
+			     (if (eobp) (point) (line-beginning-position)))))
 	    (list 'dynamic-block
 		  (nconc
 		   (list :begin begin
@@ -692,8 +690,7 @@ Assume point is at the beginning of the footnote definition."
 	   (contents-end (and contents-begin ending))
 	   (end (progn (goto-char ending)
 		       (skip-chars-forward " \r\t\n" limit)
-		       (skip-chars-backward " \t")
-		       (if (bolp) (point) (line-end-position)))))
+		       (if (eobp) (point) (line-beginning-position)))))
       (list 'footnote-definition
 	    (nconc
 	     (list :label label
@@ -972,8 +969,7 @@ Assume point is at beginning of the inline task."
 			   (forward-line)
 			   (point)))
 	   (end (progn (skip-chars-forward " \r\t\n" limit)
-		       (skip-chars-backward " \t")
-		       (if (bolp) (point) (line-end-position))))
+		       (if (eobp) (point) (line-beginning-position))))
 	   (inlinetask
 	    (list 'inlinetask
 		  (nconc
@@ -1323,8 +1319,7 @@ Assume point is at the beginning of the property drawer."
 					  (forward-line)
 					  (point)))
 		 (end (progn (skip-chars-forward " \r\t\n" limit)
-			     (skip-chars-backward " \t")
-			     (if (bolp) (point) (line-end-position)))))
+			     (if (eobp) (point) (line-beginning-position)))))
 	    (list 'property-drawer
 		  (nconc
 		   (list :begin begin
@@ -1376,8 +1371,7 @@ Assume point is at the beginning of the block."
 					  (forward-line)
 					  (point)))
 		 (end (progn (skip-chars-forward " \r\t\n" limit)
-			     (skip-chars-backward " \t")
-			     (if (bolp) (point) (line-end-position)))))
+			     (if (eobp) (point) (line-beginning-position)))))
 	    (list 'quote-block
 		  (nconc
 		   (list :begin begin
@@ -1466,8 +1460,7 @@ Assume point is at the beginning of the block."
 					  (forward-line)
 					  (point)))
 		 (end (progn (skip-chars-forward " \r\t\n" limit)
-			     (skip-chars-backward " \t")
-			     (if (bolp) (point) (line-end-position)))))
+			     (if (eobp) (point) (line-beginning-position)))))
 	    (list 'special-block
 		  (nconc
 		   (list :type type
@@ -1523,8 +1516,7 @@ containing `:begin', `:end', `:info', `:post-blank' and
 	  (post-affiliated (point))
 	  (pos-before-blank (progn (forward-line) (point)))
 	  (end (progn (skip-chars-forward " \r\t\n" limit)
-		      (skip-chars-backward " \t")
-		      (if (bolp) (point) (line-end-position)))))
+		      (if (eobp) (point) (line-beginning-position)))))
       (list 'babel-call
 	    (nconc
 	     (list :begin begin
@@ -1679,8 +1671,7 @@ Assume point is at comment block beginning."
 					  (forward-line)
 					  (point)))
 		 (end (progn (skip-chars-forward " \r\t\n" limit)
-			     (skip-chars-backward " \t")
-			     (if (bolp) (point) (line-end-position))))
+			     (if (eobp) (point) (line-beginning-position))))
 		 (value (buffer-substring-no-properties
 			 contents-begin contents-end)))
 	    (list 'comment-block
@@ -1720,8 +1711,7 @@ containing `:begin', `:end', `:value', `:post-blank' and
 			(org-match-string-no-properties 1)))
 	  (pos-before-blank (progn (forward-line) (point)))
 	  (end (progn (skip-chars-forward " \r\t\n" limit)
-		      (skip-chars-backward " \t")
-		      (if (bolp) (point) (line-end-position)))))
+		      (if (eobp) (point) (line-beginning-position)))))
       (list 'diary-sexp
 	    (nconc
 	     (list :value value
@@ -1831,8 +1821,7 @@ keywords."
 					  (forward-line)
 					  (point)))
 		 (end (progn (skip-chars-forward " \r\t\n" limit)
-			     (skip-chars-backward " \t")
-			     (if (bolp) (point) (line-end-position)))))
+			     (if (eobp) (point) (line-beginning-position)))))
 	    (list 'example-block
 		  (nconc
 		   (list :begin begin
@@ -1892,8 +1881,7 @@ Assume point is at export-block beginning."
 					  (forward-line)
 					  (point)))
 		 (end (progn (skip-chars-forward " \r\t\n" limit)
-			     (skip-chars-backward " \t")
-			     (if (bolp) (point) (line-end-position))))
+			     (if (eobp) (point) (line-beginning-position))))
 		 (value (buffer-substring-no-properties contents-begin
 							contents-end)))
 	    (list 'export-block
@@ -1948,8 +1936,7 @@ Assume point is at the beginning of the fixed-width area."
 		(forward-line))
 	      (point)))
 	   (end (progn (skip-chars-forward " \r\t\n" limit)
-		       (skip-chars-backward " \t")
-		       (if (bolp) (point) (line-end-position)))))
+		       (if (eobp) (point) (line-beginning-position)))))
       (list 'fixed-width
 	    (nconc
 	     (list :begin begin
@@ -1987,8 +1974,7 @@ keywords."
 	  (post-affiliated (point))
 	  (post-hr (progn (forward-line) (point)))
 	  (end (progn (skip-chars-forward " \r\t\n" limit)
-		       (skip-chars-backward " \t")
-		       (if (bolp) (point) (line-end-position)))))
+		      (if (eobp) (point) (line-beginning-position)))))
       (list 'horizontal-rule
 	    (nconc
 	     (list :begin begin
@@ -2025,8 +2011,7 @@ containing `:key', `:value', `:begin', `:end', `:post-blank' and
 			    (match-end 0) (point-at-eol))))
 	  (pos-before-blank (progn (forward-line) (point)))
 	  (end (progn (skip-chars-forward " \r\t\n" limit)
-		      (skip-chars-backward " \t")
-		      (if (bolp) (point) (line-end-position)))))
+		      (if (eobp) (point) (line-beginning-position)))))
       (list 'keyword
 	    (nconc
 	     (list :key key
@@ -2073,8 +2058,7 @@ Assume point is at the beginning of the latex environment."
 	       (begin (car affiliated))
 	       (value (buffer-substring-no-properties code-begin code-end))
 	       (end (progn (skip-chars-forward " \r\t\n" limit)
-			   (skip-chars-backward " \t")
-			   (if (bolp) (point) (line-end-position)))))
+			   (if (eobp) (point) (line-beginning-position)))))
 	  (list 'latex-environment
 		(nconc
 		 (list :begin begin
@@ -2206,8 +2190,7 @@ Assume point is at the beginning of the paragraph."
 				(forward-line)
 				(point)))
 	   (end (progn (skip-chars-forward " \r\t\n" limit)
-		       (skip-chars-backward " \t")
-		       (if (bolp) (point) (line-end-position)))))
+		       (if (eobp) (point) (line-beginning-position)))))
       (list 'paragraph
 	    (nconc
 	     (list :begin begin
@@ -2391,8 +2374,7 @@ Assume point is at the beginning of the block."
 					  (point)))
 		 ;; Get position after ending blank lines.
 		 (end (progn (skip-chars-forward " \r\t\n" limit)
-			     (skip-chars-backward " \t")
-			     (if (bolp) (point) (line-end-position)))))
+			     (if (eobp) (point) (line-beginning-position)))))
 	    (list 'src-block
 		  (nconc
 		   (list :language language
@@ -2468,8 +2450,7 @@ Assume point is at the beginning of the table."
 		    acc))
 	   (pos-before-blank (point))
 	   (end (progn (skip-chars-forward " \r\t\n" limit)
-		       (skip-chars-backward " \t")
-		       (if (bolp) (point) (line-end-position)))))
+		       (if (eobp) (point) (line-beginning-position)))))
       (list 'table
 	    (nconc
 	     (list :begin begin
@@ -2570,8 +2551,7 @@ Assume point is at beginning of the block."
 					  (forward-line)
 					  (point)))
 		 (end (progn (skip-chars-forward " \r\t\n" limit)
-			     (skip-chars-backward " \t")
-			     (if (bolp) (point) (line-end-position)))))
+			     (if (eobp) (point) (line-beginning-position)))))
 	    (list 'verse-block
 		  (nconc
 		   (list :begin begin

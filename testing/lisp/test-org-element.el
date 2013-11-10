@@ -239,7 +239,11 @@ Some other text
   ;; Ignore case.
   (should
    (org-test-with-temp-text "#+call: test()"
-     (org-element-map (org-element-parse-buffer) 'babel-call 'identity))))
+     (org-element-map (org-element-parse-buffer) 'babel-call 'identity)))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text "#+CALL: test()\n "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Bold
@@ -279,13 +283,17 @@ Some other text
     (should
      (org-element-property
       :hiddenp
-      (org-element-map
-       (org-element-parse-buffer) 'center-block 'identity nil t))))
+      (org-element-map (org-element-parse-buffer) 'center-block
+	'identity nil t))))
   ;; Ignore incomplete block.
   (should-not
    (org-test-with-temp-text "#+BEGIN_CENTER"
-     (org-element-map
-      (org-element-parse-buffer) 'center-block 'identity nil t))))
+     (org-element-map (org-element-parse-buffer) 'center-block
+       'identity nil t)))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text "#+BEGIN_CENTER\nC\n#+END_CENTER\n "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Clock
@@ -379,9 +387,8 @@ Some other text
 	       'identity nil t)))))
   ;; Correctly handle non-empty blank lines at the end of buffer.
   (should
-   (org-test-with-temp-text "# A\n  "
-     (goto-char (org-element-property :end (org-element-at-point)))
-     (eobp))))
+   (org-test-with-temp-text "# A\n "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Comment Block
@@ -391,26 +398,28 @@ Some other text
   ;; Standard test.
   (should
    (org-test-with-temp-text "#+BEGIN_COMMENT\nText\n#+END_COMMENT"
-     (org-element-map
-      (org-element-parse-buffer) 'comment-block 'identity)))
+     (org-element-map (org-element-parse-buffer) 'comment-block 'identity)))
   ;; Ignore case.
   (should
    (org-test-with-temp-text "#+begin_comment\nText\n#+end_comment"
-     (org-element-map
-      (org-element-parse-buffer) 'comment-block 'identity)))
+     (org-element-map (org-element-parse-buffer) 'comment-block 'identity)))
   ;; Test folded block.
   (org-test-with-temp-text "#+BEGIN_COMMENT\nText\n#+END_COMMENT"
     (org-cycle)
     (should
      (org-element-property
       :hiddenp
-      (org-element-map
-       (org-element-parse-buffer) 'comment-block 'identity nil t))))
+      (org-element-map (org-element-parse-buffer) 'comment-block
+	'identity nil t))))
   ;; Ignore incomplete block.
   (should-not
    (org-test-with-temp-text "#+BEGIN_COMMENT"
-     (org-element-map
-      (org-element-parse-buffer) 'comment-block 'identity nil t))))
+     (org-element-map (org-element-parse-buffer) 'comment-block
+       'identity nil t)))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text "#+BEGIN_COMMENT\nC\n#+END_COMMENT\n "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Diary Sexp
@@ -427,7 +436,11 @@ Some other text
   (should-not
    (eq 'diary-sexp
        (org-test-with-temp-text " %%(org-bbdb-anniversaries)"
-	 (org-element-type (org-element-at-point))))))
+	 (org-element-type (org-element-at-point)))))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text "%%(org-bbdb-anniversaries)\n "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Drawer
@@ -443,14 +456,16 @@ Some other text
   (should-not
    (let ((org-drawers '("PROPERTIES")))
      (org-test-with-temp-text ":PROPERTIES:\n:prop: value\n:END:"
-       (org-element-map
-	(org-element-parse-buffer) 'drawer 'identity nil t))))
+       (org-element-map (org-element-parse-buffer) 'drawer 'identity nil t))))
   ;; Ignore incomplete drawer.
   (should-not
    (let ((org-drawers '("TEST")))
      (org-test-with-temp-text ":TEST:"
-       (org-element-map
-	(org-element-parse-buffer) 'drawer 'identity nil t)))))
+       (org-element-map (org-element-parse-buffer) 'drawer 'identity nil t))))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text ":TEST:\nC\n:END:\n "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Dynamic Block
@@ -469,8 +484,8 @@ Some other text
     (should
      (org-element-property
       :hiddenp
-      (org-element-map
-       (org-element-parse-buffer) 'dynamic-block 'identity nil t))))
+      (org-element-map (org-element-parse-buffer) 'dynamic-block
+	'identity nil t))))
   ;; Ignore case.
   (should
    (org-test-with-temp-text
@@ -479,8 +494,12 @@ Some other text
   ;; Ignore incomplete block.
   (should-not
    (org-test-with-temp-text "#+BEGIN: myblock :param1 val1 :param2 val2"
-     (org-element-map
-      (org-element-parse-buffer) 'dynamic-block 'identity nil t))))
+     (org-element-map (org-element-parse-buffer) 'dynamic-block
+       'identity nil t)))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text "#+BEGIN: myblock :param val1\nC\n#+END:\n  "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Entity
@@ -559,7 +578,11 @@ Some other text
     "  L1\n L2\n"
     (org-test-with-temp-text "  #+BEGIN_EXAMPLE\n  L1\n L2\n  #+END_EXAMPLE"
       (let ((org-src-preserve-indentation t))
-	(org-element-property :value (org-element-at-point)))))))
+	(org-element-property :value (org-element-at-point))))))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text "#+BEGIN_EXAMPLE\nC\n#+END_EXAMPLE\n "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 (ert-deftest test-org-element/block-switches ()
   "Test `example-block' and `src-block' switches parsing."
@@ -681,12 +704,10 @@ Some other text
   "Test `export-block' parser."
   ;; Standard test.
   (should
-   (org-test-with-temp-text "#+BEGIN_LATEX\nText\n#+END_LATEX"
-     (org-element-map
-      (let ((org-element-block-name-alist
-	     '(("LATEX" . org-element-export-block-parser))))
-	(org-element-parse-buffer))
-      'export-block 'identity)))
+   (let ((org-element-block-name-alist
+	  '(("LATEX" . org-element-export-block-parser))))
+     (org-test-with-temp-text "#+BEGIN_LATEX\nText\n#+END_LATEX"
+       (org-element-map (org-element-parse-buffer) 'export-block 'identity))))
   ;; Test folded block.
   (org-test-with-temp-text "#+BEGIN_LATEX\nText\n#+END_LATEX"
     (org-cycle)
@@ -694,26 +715,29 @@ Some other text
      (org-element-property
       :hiddenp
       (org-element-map
-       (let ((org-element-block-name-alist
-	      '(("LATEX" . org-element-export-block-parser))))
-	 (org-element-parse-buffer))
-       'export-block 'identity nil t))))
+	  (let ((org-element-block-name-alist
+		 '(("LATEX" . org-element-export-block-parser))))
+	    (org-element-parse-buffer))
+	  'export-block 'identity nil t))))
   ;; Ignore case.
   (should
-   (org-test-with-temp-text "#+begin_latex\nText\n#+end_latex"
-     (org-element-map
-      (let ((org-element-block-name-alist
-	     '(("LATEX" . org-element-export-block-parser))))
-	(org-element-parse-buffer))
-      'export-block 'identity)))
+   (let ((org-element-block-name-alist
+	  '(("LATEX" . org-element-export-block-parser))))
+     (org-test-with-temp-text "#+begin_latex\nText\n#+end_latex"
+       (org-element-map (org-element-parse-buffer) 'export-block 'identity))))
   ;; Ignore incomplete block.
   (should-not
-   (org-test-with-temp-text "#+BEGIN_LATEX"
-     (org-element-map
-      (let ((org-element-block-name-alist
-	     '(("LATEX" . org-element-export-block-parser))))
-	(org-element-parse-buffer))
-      'export-block 'identity nil t))))
+   (let ((org-element-block-name-alist
+	  '(("LATEX" . org-element-export-block-parser))))
+     (org-test-with-temp-text "#+BEGIN_LATEX"
+       (org-element-map (org-element-parse-buffer) 'export-block
+	 'identity nil t))))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (let ((org-element-block-name-alist
+	  '(("LATEX" . org-element-export-block-parser))))
+     (org-test-with-temp-text "#+BEGIN_LATEX\nC\n#+END_LATEX\n "
+       (= (org-element-property :end (org-element-at-point)) (point-max))))))
 
 
 ;;;; Export Snippet
@@ -733,7 +757,7 @@ Some other text
 
 ;;;; Fixed Width
 
-(ert-deftest test-org-element/fixed-width ()
+(ert-deftest test-org-element/fixed-width-parser ()
   "Test fixed-width area parsing."
   ;; Preserve indentation.
   (should
@@ -755,8 +779,11 @@ Some other text
 - Item
   : fixed-width inside
 : fixed-width outside"
-	 (org-element-map
-	  (org-element-parse-buffer) 'fixed-width 'identity))))))
+	 (org-element-map (org-element-parse-buffer) 'fixed-width 'identity)))))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text ": A\n "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Footnote Definition
@@ -783,8 +810,11 @@ Some other text
   (should
    (= 9
       (org-test-with-temp-text "[fn:1]\n\n  Body"
-	(org-element-property :contents-begin
-			      (org-element-at-point))))))
+	(org-element-property :contents-begin (org-element-at-point)))))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text "[fn:1] Definition\n "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Footnotes Reference.
@@ -955,7 +985,11 @@ Some other text
   ;; 4 hyphens is too small.
   (should-not
    (org-test-with-temp-text "----"
-     (org-element-map (org-element-parse-buffer) 'horizontal-rule 'identity))))
+     (org-element-map (org-element-parse-buffer) 'horizontal-rule 'identity)))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text "-----\n "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Inline Babel Call
@@ -1054,7 +1088,11 @@ DEADLINE: <2012-03-29 thu.>"
 :END:
 *************** END"
 	 (forward-line)
-	 (org-element-property :foo (org-element-at-point)))))))
+	 (org-element-property :foo (org-element-at-point))))
+      ;; Handle non-empty blank line at the end of buffer.
+      (should
+       (org-test-with-temp-text "*************** Task\n*************** END\n "
+	 (= (org-element-property :end (org-element-at-point)) (point-max)))))))
 
 
 ;;;; Italic
@@ -1113,9 +1151,8 @@ DEADLINE: <2012-03-29 thu.>"
 - [-] item 1
   - [X] item 1.1
   - [ ] item 1.2"
-      (org-element-map
-       (org-element-parse-buffer) 'item
-       (lambda (item) (org-element-property :checkbox item))))))
+      (org-element-map (org-element-parse-buffer) 'item
+	(lambda (item) (org-element-property :checkbox item))))))
   ;; Folded state.
   (org-test-with-temp-text "* Headline
 - item
@@ -1131,14 +1168,13 @@ DEADLINE: <2012-03-29 thu.>"
   (should
    (equal '(("- item"))
 	  (org-test-with-temp-text "- - item"
-	    (org-element-map
-	     (org-element-parse-buffer) 'paragraph 'org-element-contents))))
+	    (org-element-map (org-element-parse-buffer) 'paragraph
+	      'org-element-contents))))
   ;; Block in an item: ignore indentation within the block.
   (should
    (org-test-with-temp-text "- item\n  #+begin_src emacs-lisp\n(+ 1 1)\n  #+end_src"
      (forward-char)
-     (goto-char (org-element-property :end (org-element-at-point)))
-     (eobp))))
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Keyword
@@ -1164,7 +1200,11 @@ Paragraph"
      (org-element-map (org-element-parse-buffer) 'keyword 'identity)))
   (should-not
    (org-test-with-temp-text "#+BEGIN: my-fun\nBody\n#+END:"
-     (org-element-map (org-element-parse-buffer) 'keyword 'identity))))
+     (org-element-map (org-element-parse-buffer) 'keyword 'identity)))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text "#+KEYWORD: value\n "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Latex Environment
@@ -1205,7 +1245,11 @@ e^{i\\pi}+1=0
   (should-not
    (eq 'latex-environment
        (org-test-with-temp-text "\\begin{env}{arg} something\nvalue\n\\end{env}"
-	 (org-element-type (org-element-at-point))))))
+	 (org-element-type (org-element-at-point)))))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text "\\begin{env}\n\\end{env}\n "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Latex Fragment
@@ -1458,10 +1502,9 @@ e^{i\\pi}+1=0
   (should
    (eq ?#
        (org-test-with-temp-text "Paragraph\n# Comment"
-	 (org-element-map
-	  (org-element-parse-buffer) 'paragraph
-	  (lambda (p) (char-after (org-element-property :end p)))
-	  nil t))))
+	 (org-element-map (org-element-parse-buffer) 'paragraph
+	   (lambda (p) (char-after (org-element-property :end p)))
+	   nil t))))
   ;; Include ill-formed Keywords.
   (should
    (org-test-with-temp-text "#+wrong_keyword something"
@@ -1502,7 +1545,11 @@ e^{i\\pi}+1=0
      (let ((elem (progn (search-forward "item") (org-element-at-point))))
        (and (eq (org-element-type elem) 'paragraph)
 	    (not (org-element-property :attr_latex elem))
-	    (/= (org-element-property :begin elem) 1))))))
+	    (/= (org-element-property :begin elem) 1)))))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text "#+BEGIN_CENTER\nC\n#+END_CENTER\n  "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Plain List
@@ -1566,26 +1613,30 @@ Outside list"
 
 ;;;; Property Drawer
 
-(ert-deftest test-org-element/property-drawer ()
+(ert-deftest test-org-element/property-drawer-parser ()
   "Test `property-drawer' parser."
   ;; Standard test.
   (should
    (let ((org-drawers '("PROPERTIES")))
      (org-test-with-temp-text ":PROPERTIES:\n:prop: value\n:END:"
-       (org-element-map
-	(org-element-parse-buffer) 'property-drawer 'identity nil t))))
+       (org-element-map (org-element-parse-buffer) 'property-drawer
+	 'identity nil t))))
   ;; Do not mix property drawers and regular drawers.
   (should-not
    (let ((org-drawers '("TEST")))
      (org-test-with-temp-text ":TEST:\n:prop: value\n:END:"
-       (org-element-map
-	(org-element-parse-buffer) 'property-drawer 'identity nil t))))
+       (org-element-map (org-element-parse-buffer) 'property-drawer
+	 'identity nil t))))
   ;; Ignore incomplete drawer.
   (should-not
    (let ((org-drawers '("PROPERTIES")))
      (org-test-with-temp-text ":PROPERTIES:\n:prop: value"
-       (org-element-map
-	(org-element-parse-buffer) 'property-drawer 'identity nil t)))))
+       (org-element-map (org-element-parse-buffer) 'property-drawer
+	 'identity nil t))))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text ":PROPERTIES:\n:END:\n "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Quote Block
@@ -1602,13 +1653,16 @@ Outside list"
     (should
      (org-element-property
       :hiddenp
-      (org-element-map
-       (org-element-parse-buffer) 'quote-block 'identity nil t))))
+      (org-element-map (org-element-parse-buffer) 'quote-block
+	'identity nil t))))
   ;; Ignore incomplete block.
   (should-not
    (org-test-with-temp-text "#+BEGIN_QUOTE"
-     (org-element-map
-      (org-element-parse-buffer) 'quote-block 'identity nil t))))
+     (org-element-map (org-element-parse-buffer) 'quote-block 'identity nil t)))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text "#+BEGIN_QUOTE\nC\n#+END_QUOTE\n  "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Quote Section
@@ -1694,7 +1748,11 @@ Outside list"
 	  (org-test-with-temp-text "#+BEGIN_SPECIAL*\nContents\n#+END_SPECIAL*"
 	    (let ((element (org-element-at-point)))
 	      (list (org-element-type element)
-		    (org-element-property :type element)))))))
+		    (org-element-property :type element))))))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text "#+BEGIN_SPECIAL\nC\n#+END_SPECIAL\n "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Src Block
@@ -1740,7 +1798,11 @@ Outside list"
     "  L1\n L2\n"
     (org-test-with-temp-text "  #+BEGIN_SRC org\n  L1\n L2\n  #+END_SRC"
       (let ((org-src-preserve-indentation t))
-	(org-element-property :value (org-element-at-point)))))))
+	(org-element-property :value (org-element-at-point))))))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\nC\n#+END_SRC\n "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Statistics Cookie
@@ -1839,9 +1901,11 @@ Outside list"
 	(length (org-element-property
 		 :tblfm
 		 (org-element-map
-		  (org-element-parse-buffer) 'table 'identity nil t))))))
-  ;; Do not error when parsing a table with trailing white spaces.
-  (should (org-test-with-temp-text "| a |\n  " (org-element-parse-buffer))))
+		     (org-element-parse-buffer) 'table 'identity nil t))))))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text "| a |\n "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 ;;;; Table Cell
@@ -2005,16 +2069,19 @@ Outside list"
     (should
      (org-element-property
       :hiddenp
-      (org-element-map
-       (org-element-parse-buffer) 'verse-block 'identity nil t))))
+      (org-element-map (org-element-parse-buffer) 'verse-block
+	'identity nil t))))
   ;; Parse objects in verse blocks.
   (org-test-with-temp-text "#+BEGIN_VERSE\nVerse \\alpha\n#+END_VERSE"
     (should (org-element-map (org-element-parse-buffer) 'entity 'identity)))
   ;; Ignore incomplete verse block.
   (should-not
    (org-test-with-temp-text "#+BEGIN_VERSE"
-     (org-element-map
-      (org-element-parse-buffer) 'verse-block 'identity nil t))))
+     (org-element-map (org-element-parse-buffer) 'verse-block 'identity nil t)))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text "#+BEGIN_VERSE\nC\n#+END_VERSE\n "
+     (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
 
