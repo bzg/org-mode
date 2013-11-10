@@ -360,15 +360,20 @@ Some other text
   (should
    (eq 1
        (org-test-with-temp-text "#+keyword: value\n# comment\n#+keyword: value"
-	 (length (org-element-map
-		  (org-element-parse-buffer) 'comment 'identity)))))
+	 (length (org-element-map (org-element-parse-buffer) 'comment
+		   'identity)))))
   (should
    (equal "comment"
 	  (org-test-with-temp-text "#+keyword: value\n# comment\n#+keyword: value"
 	    (org-element-property
 	     :value
-	     (org-element-map
-	      (org-element-parse-buffer) 'comment 'identity nil t))))))
+	     (org-element-map (org-element-parse-buffer) 'comment
+	       'identity nil t)))))
+  ;; Correctly handle non-empty blank lines at the end of buffer.
+  (should
+   (org-test-with-temp-text "# A\n  "
+     (goto-char (org-element-property :end (org-element-at-point)))
+     (eobp))))
 
 
 ;;;; Comment Block
