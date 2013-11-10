@@ -1633,8 +1633,7 @@ Assume point is at comment beginning."
 	      (point)))
 	   (end (progn (goto-char com-end)
 		       (skip-chars-forward " \r\t\n" limit)
-		       (skip-chars-backward " \t")
-		       (if (bolp) (point) (line-end-position)))))
+		       (if (eobp) (point) (line-beginning-position)))))
       (list 'comment
 	    (nconc
 	     (list :begin begin
