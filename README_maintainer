@@ -136,10 +136,8 @@ So the way I have been doing things with Emacs is this:
    version in Emacs starts diverging from my own.
 
    Careful: Copy /org.texi/ and /orgcard.tex/ into the right places,
-   and also copy the lisp files with *two exceptions*: Do *not* copy
-   /org-colview-xemacs.el/ and /org-loaddefs.el/.  The former does not
-   belong in Emacs.  And the latter would actually be harmful because
-   Emacs generates its own autoloads.
+   and also copy the lisp files with *one exception*: Do *not* copy
+   /org-loaddefs.el/, Emacs generates its own autoloads.
 
 4. Generate the ChangeLog entries
 
