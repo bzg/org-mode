@@ -12960,6 +12960,7 @@ can either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 	(message "Item no longer has a deadline."))
        ((equal arg '(16))
 	(save-excursion
+	  (org-back-to-heading t)
 	  (if (re-search-forward
 	       org-deadline-time-regexp
 	       (save-excursion (outline-next-heading) (point)) t)
@@ -13030,6 +13031,7 @@ either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 	  (message "Item is no longer scheduled.")))
        ((equal arg '(16))
 	(save-excursion
+	  (org-back-to-heading t)
 	  (if (re-search-forward
 	       org-scheduled-time-regexp
 	       (save-excursion (outline-next-heading) (point)) t)
