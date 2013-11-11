@@ -411,6 +411,13 @@ set `org-texinfo-logfiles-extensions'."
   this depth Texinfo will not recognize the nodes and will cause
   errors.  Left as a constant in case this value ever changes.")
 
+(defconst org-texinfo-supported-coding-systems
+  '("US-ASCII" "UTF-8" "ISO-8859-15" "ISO-8859-1" "ISO-8859-2" "koi8-r" "koi8-u")
+  "List of coding systems supported by Texinfo, as strings.
+Specified coding system will be matched against these strings.
+If two strings share the same prefix (e.g. \"ISO-8859-1\" and
+\"ISO-8859-15\"), the most specific one has to be listed first.")
+
 
 ;;; Internal Functions
 
@@ -696,9 +703,7 @@ holding export options."
 	 ;; `.' in text.
 	 (dirspacing (- 29 (length dirtitle)))
 	 (menu (org-texinfo-make-menu info 'main))
-	 (detail-menu (org-texinfo-make-menu info 'detailed))
-	 (coding-system (or org-texinfo-coding-system
-			    buffer-file-coding-system)))
+	 (detail-menu (org-texinfo-make-menu info 'detailed)))
     (concat
      ;; Header
      header "\n"
@@ -706,8 +711,17 @@ holding export options."
      ;; Filename and Title
      "@setfilename " info-filename "\n"
      "@settitle " title "\n"
-     (format "@documentencoding %s\n"
-	     (upcase (symbol-name coding-system))) "\n"
+     ;; Coding system.
+     (format
+      "@documentencoding %s\n"
+      (catch 'coding-system
+	(let ((case-fold-search t)
+	      (name (symbol-name (or org-texinfo-coding-system
+				     buffer-file-coding-system))))
+	  (dolist (system org-texinfo-supported-coding-systems "UTF-8")
+	    (when (org-string-match-p (regexp-quote system) name)
+	      (throw 'coding-system system))))))
+     "\n"
      (format "@documentlanguage %s\n" lang)
      "\n\n"
      "@c Version and Contact Info\n"
