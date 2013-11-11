@@ -2723,6 +2723,12 @@ Another text. (ref:text)
 	 (org-element-type
 	  (org-export-get-next-element
 	   (org-element-map tree 'plain-text 'identity info t) info)))))
+  (should
+   (eq 'verbatim
+       (org-test-with-parsed-data "* /italic/ =verb="
+	 (org-element-type
+	  (org-export-get-next-element
+	   (org-element-map tree 'italic 'identity info t) info)))))
   ;; Find next element in document keywords.
   (should
    (eq 'verbatim
@@ -2783,6 +2789,12 @@ Another text. (ref:text)
 	 (org-element-type
 	  (org-export-get-previous-element
 	   (org-element-map tree 'plain-text 'identity info t) info)))))
+  (should
+   (eq 'verbatim
+       (org-test-with-parsed-data "* =verb= /italic/"
+	 (org-element-type
+	  (org-export-get-previous-element
+	   (org-element-map tree 'italic 'identity info t) info)))))
   ;; Find previous element in document keywords.
   (should
    (eq 'verbatim

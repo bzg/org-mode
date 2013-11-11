@@ -5151,14 +5151,11 @@ all of them."
 	 ;; to a secondary string.  We check the latter option
 	 ;; first.
 	 (let ((parent (org-export-get-parent blob)))
-	   (or (and (not (memq (org-element-type blob)
-			       org-element-all-elements))
-		    (let ((sec-value
-			   (org-element-property
-			    (cdr (assq (org-element-type parent)
-				       org-element-secondary-value-alist))
-			    parent)))
-		      (and (memq blob sec-value) sec-value)))
+	   (or (let ((sec-value (org-element-property
+				 (cdr (assq (org-element-type parent)
+					    org-element-secondary-value-alist))
+				 parent)))
+		 (and (memq blob sec-value) sec-value))
 	       (org-element-contents parent))))
 	prev)
     (catch 'exit
@@ -5186,14 +5183,11 @@ them."
 	 ;; An object can belong to the contents of its parent or to
 	 ;; a secondary string.  We check the latter option first.
 	 (let ((parent (org-export-get-parent blob)))
-	   (or (and (not (memq (org-element-type blob)
-			       org-element-all-objects))
-		    (let ((sec-value
-			   (org-element-property
-			    (cdr (assq (org-element-type parent)
-				       org-element-secondary-value-alist))
-			    parent)))
-		      (cdr (memq blob sec-value))))
+	   (or (let ((sec-value (org-element-property
+				 (cdr (assq (org-element-type parent)
+					    org-element-secondary-value-alist))
+				 parent)))
+		 (cdr (memq blob sec-value)))
 	       (cdr (memq blob (org-element-contents parent))))))
 	next)
     (catch 'exit
