@@ -4387,71 +4387,91 @@ beginning position."
 ;; `org-element--interpret-affiliated-keywords'.
 
 ;;;###autoload
-(defun org-element-interpret-data (data &optional parent)
+(defun org-element-interpret-data (data &optional pseudo-objects)
   "Interpret DATA as Org syntax.
 
 DATA is a parse tree, an element, an object or a secondary string
 to interpret.
 
-Optional argument PARENT is used for recursive calls.  It contains
-the element or object containing data, or nil.
+Optional argument PSEUDO-OBJECTS is a list of symbols defining
+new types that should be treated as objects.  An unknown type not
+belonging to this list is seen as a pseudo-element instead.  Both
+pseudo-objects and pseudo-elements are transparent entities, i.e.
+only their contents are interpreted.
+
+Return Org syntax as a string."
+  (org-element--interpret-data-1 data nil pseudo-objects))
+
+(defun org-element--interpret-data-1 (data parent pseudo-objects)
+  "Interpret DATA as Org syntax.
+
+DATA is a parse tree, an element, an object or a secondary string
+to interpret.  PARENT is used for recursive calls.  It contains
+the element or object containing data, or nil.  PSEUDO-OBJECTS
+are list of symbols defining new element or object types.
+Unknown types that don't belong to this list are treated as
+pseudo-elements instead.
 
 Return Org syntax as a string."
   (let* ((type (org-element-type data))
+	 ;; Find interpreter for current object or element.  If it
+	 ;; doesn't exist (e.g. this is a pseudo object or element),
+	 ;; return contents, if any.
+	 (interpret
+	  (let ((fun (intern (format "org-element-%s-interpreter" type))))
+	    (if (fboundp fun) fun (lambda (data contents) contents))))
 	 (results
 	  (cond
 	   ;; Secondary string.
 	   ((not type)
 	    (mapconcat
-	     (lambda (obj) (org-element-interpret-data obj parent))
+	     (lambda (obj)
+	       (org-element--interpret-data-1 obj parent pseudo-objects))
 	     data ""))
 	   ;; Full Org document.
 	   ((eq type 'org-data)
 	    (mapconcat
-	     (lambda (obj) (org-element-interpret-data obj parent))
+	     (lambda (obj)
+	       (org-element--interpret-data-1 obj parent pseudo-objects))
 	     (org-element-contents data) ""))
 	   ;; Plain text: remove `:parent' text property from output.
 	   ((stringp data) (org-no-properties data))
-	   ;; Element/Object without contents.
-	   ((not (org-element-contents data))
-	    (funcall (intern (format "org-element-%s-interpreter" type))
-		     data nil))
-	   ;; Element/Object with contents.
+	   ;; Element or object without contents.
+	   ((not (org-element-contents data)) (funcall interpret data nil))
+	   ;; Element or object with contents.
 	   (t
-	    (let* ((greaterp (memq type org-element-greater-elements))
-		   (objectp (and (not greaterp)
-				 (memq type org-element-recursive-objects)))
-		   (contents
-		    (mapconcat
-		     (lambda (obj) (org-element-interpret-data obj data))
-		     (org-element-contents
-		      (if (or greaterp objectp) data
-			;; Elements directly containing objects must
-			;; have their indentation normalized first.
-			(org-element-normalize-contents
-			 data
-			 ;; When normalizing first paragraph of an
-			 ;; item or a footnote-definition, ignore
-			 ;; first line's indentation.
-			 (and (eq type 'paragraph)
-			      (equal data (car (org-element-contents parent)))
-			      (memq (org-element-type parent)
-				    '(footnote-definition item))))))
-		     "")))
-	      (funcall (intern (format "org-element-%s-interpreter" type))
-		       data
-		       (if greaterp (org-element-normalize-contents contents)
-			 contents)))))))
+	    (funcall interpret data
+		     ;; Recursively interpret contents.
+		     (mapconcat
+		      (lambda (obj)
+			(org-element--interpret-data-1 obj data pseudo-objects))
+		      (org-element-contents
+		       (if (not (memq type '(paragraph verse-block)))
+			   data
+			 ;; Fix indentation of elements containing
+			 ;; objects.  We ignore `table-row' elements
+			 ;; as they are one line long anyway.
+			 (org-element-normalize-contents
+			  data
+			  ;; When normalizing first paragraph of an
+			  ;; item or a footnote-definition, ignore
+			  ;; first line's indentation.
+			  (and (eq type 'paragraph)
+			       (equal data (car (org-element-contents parent)))
+			       (memq (org-element-type parent)
+				     '(footnote-definition item))))))
+		      ""))))))
     (if (memq type '(org-data plain-text nil)) results
       ;; Build white spaces.  If no `:post-blank' property is
       ;; specified, assume its value is 0.
       (let ((post-blank (or (org-element-property :post-blank data) 0)))
-	(if (memq type org-element-all-objects)
-	    (concat results (make-string post-blank 32))
+	(if (or (memq type org-element-all-objects)
+		(memq type pseudo-objects))
+	    (concat results (make-string post-blank ?\s))
 	  (concat
 	   (org-element--interpret-affiliated-keywords data)
 	   (org-element-normalize-string results)
-	   (make-string post-blank 10)))))))
+	   (make-string post-blank ?\n)))))))
 
 (defun org-element--interpret-affiliated-keywords (element)
   "Return ELEMENT's affiliated keywords as Org syntax.

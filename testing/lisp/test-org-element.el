@@ -1989,27 +1989,27 @@ Outside list"
 
 ;;; Test Interpreters.
 
-(ert-deftest test-org-element/affiliated-keywords-interpreter ()
-  "Test if affiliated keywords are correctly interpreted."
-  ;; Interpret simple keywords.
+(ert-deftest test-org-element/interpret-data ()
+  "Test `org-element-interpret-data' specifications."
+  ;; Interpret simple affiliated keywords.
   (should
    (equal
     (org-element-interpret-data
      '(org-data nil (paragraph (:name "para") "Paragraph")))
     "#+NAME: para\nParagraph\n"))
-  ;; Interpret multiple keywords.
+  ;; Interpret multiple affiliated keywords.
   (should
    (equal
     (org-element-interpret-data
      '(org-data nil (paragraph (:attr_ascii ("line2" "line1")) "Paragraph")))
     "#+ATTR_ASCII: line1\n#+ATTR_ASCII: line2\nParagraph\n"))
-  ;; Interpret parsed keywords.
+  ;; Interpret parsed affiliated keywords.
   (should
    (equal
     (org-element-interpret-data
      '(org-data nil (paragraph (:caption (("caption"))) "Paragraph")))
     "#+CAPTION: caption\nParagraph\n"))
-  ;; Interpret dual keywords.
+  ;; Interpret dual affiliated keywords.
   (should
    (equal
     (org-element-interpret-data
@@ -2021,7 +2021,19 @@ Outside list"
     (org-element-interpret-data
      '(org-data nil (paragraph
 		     (:caption ((("l2") "s2") (("l1") "s1"))) "Paragraph")))
-    "#+CAPTION[s1]: l1\n#+CAPTION[s2]: l2\nParagraph\n")))
+    "#+CAPTION[s1]: l1\n#+CAPTION[s2]: l2\nParagraph\n"))
+  ;; Pseudo objects and elements are transparent.
+  (should
+   (equal "A B\n"
+	  (org-element-interpret-data
+	   '(paragraph nil (pseudo-object (:post-blank 1) "A") "B")
+	   '(pseudo-object))))
+  (should
+   (equal "A\n\nB\n"
+	  (org-element-interpret-data
+	   '(center nil
+		    (pseudo-element (:post-blank 1) (paragraph nil "A"))
+		    (paragraph nil "B"))))))
 
 (ert-deftest test-org-element/center-block-interpreter ()
   "Test center block interpreter."

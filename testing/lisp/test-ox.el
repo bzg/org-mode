@@ -281,7 +281,7 @@ Paragraph"
 	      :transcoders
 	      '((template . (lambda (text info)
 			      (org-element-interpret-data
-			       (plist-get info :title) info))))))
+			       (plist-get info :title)))))))
 	    (file-name-nondirectory
 	     (file-name-sans-extension (buffer-file-name)))))))
   ;; If no title is specified, and no file is associated to the
@@ -296,7 +296,7 @@ Paragraph"
 	      :transcoders
 	      '((template . (lambda (text info)
 			      (org-element-interpret-data
-			       (plist-get info :title) info))))))
+			       (plist-get info :title)))))))
 	    (buffer-name)))))
   ;; If a title is specified, use it.
   (should
@@ -309,7 +309,7 @@ Paragraph"
 	:transcoders
 	'((template . (lambda (text info)
 			(org-element-interpret-data
-			 (plist-get info :title) info)))))))))
+			 (plist-get info :title))))))))))
   ;; If an empty title is specified, do not set it.
   (should
    (equal
@@ -321,7 +321,7 @@ Paragraph"
 	:transcoders
 	'((template . (lambda (text info)
 			(org-element-interpret-data
-			 (plist-get info :title) info))))))))))
+			 (plist-get info :title)))))))))))
 
 (ert-deftest test-org-export/handle-options ()
   "Test if export options have an impact on output."
