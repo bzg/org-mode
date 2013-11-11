@@ -117,7 +117,7 @@ Assume point is at the beginning of block's starting line."
 	   (raw-params (nth 2 info)) hash)
       ;; bail if we couldn't get any info from the block
       (unless noninteractive
-	(message "Processing %s code block at line %d..." lang line))
+	(message "org-babel-exp process %s at line %d..." lang line))
       (when info
 	;; if we're actually going to need the parameters
 	(when (member (cdr (assoc :exports (nth 2 info))) '("both" "results"))
