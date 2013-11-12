@@ -24,13 +24,18 @@
 
 ;;; Commentary:
 
+<<<<<<< HEAD
 ;; Support for evaluating clojure code, relies either on Slime or
 ;; on Nrepl.el for all eval.
+=======
+;; Support for evaluating clojure code, relies on slime for all eval.
+>>>>>>> maint
 
 ;; Requirements:
 
 ;; - clojure (at least 1.2.0)
 ;; - clojure-mode
+<<<<<<< HEAD
 ;; - either cider or nrepl.el or SLIME
 
 ;; For cider, see https://github.com/clojure-emacs/cider
@@ -42,6 +47,13 @@
 ;; For nREPL:
 ;; get clojure with https://github.com/technomancy/leiningen
 ;; get nrepl from MELPA (clojure-mode is a dependency).
+=======
+;; - slime
+
+;; By far, the best way to install these components is by following
+;; the directions as set out by Phil Hagelberg (Technomancy) on the
+;; web page: http://technomancy.us/126
+>>>>>>> maint
 
 ;;; Code:
 (require 'ob)
@@ -96,6 +108,7 @@
 
 (defun org-babel-execute:clojure (body params)
   "Execute a block of Clojure code with Babel."
+<<<<<<< HEAD
   (let ((expanded (org-babel-expand-body:clojure body params)))
     (case org-babel-clojure-backend
       (cider
@@ -127,6 +140,21 @@
 	   `(swank:eval-and-grab-output
 	     ,(buffer-substring-no-properties (point-min) (point-max)))
 	   (cdr (assoc :package params)))))))))
+=======
+  (require 'slime)
+  (with-temp-buffer
+    (insert (org-babel-expand-body:clojure body params))
+    (let ((result
+           (slime-eval
+            `(swank:eval-and-grab-output
+              ,(buffer-substring-no-properties (point-min) (point-max)))
+            (cdr (assoc :package params)))))
+      (let ((result-params (cdr (assoc :result-params params))))
+        (org-babel-result-cond result-params
+          result
+          (condition-case nil (org-babel-script-escape result)
+            (error result)))))))
+>>>>>>> maint
 
 (provide 'ob-clojure)
 

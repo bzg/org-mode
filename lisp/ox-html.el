@@ -1,10 +1,12 @@
 ;;; ox-html.el --- HTML Back-End for Org Export Engine
 
-;; Copyright (C) 2011-2013  Free Software Foundation, Inc.
+;; Copyright (C) 2011-2013 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;;      Jambunathan K <kjambunathan at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp
+
+;; This file is part of GNU Emacs.
 
 ;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -185,7 +187,7 @@ the headline itself.")
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012  Free Software Foundation, Inc.
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -382,7 +384,7 @@ means to use the maximum value consistent with other options."
  * @licstart  The following is the entire license notice for the
  *  JavaScript code in %SCRIPT_PATH.
  *
- * Copyright (C) 2012-2013  Sebastian Rose
+ * Copyright (C) 2012-2013 Free Software Foundation, Inc.
  *
  *
  * The JavaScript code in this tag is free software: you can

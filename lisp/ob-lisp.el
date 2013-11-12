@@ -75,6 +75,7 @@ current directory string."
   "Execute a block of Common Lisp code with Babel."
   (require 'slime)
   (org-babel-reassemble-table
+<<<<<<< HEAD
    ((lambda (result)
       (org-babel-result-cond (cdr (assoc :result-params params))
 	result
@@ -99,6 +100,26 @@ current directory string."
 					(buffer-substring-no-properties
 					 (point-min) (point-max)))))
 			   (cdr (assoc :package params))))))
+=======
+   (let ((result
+          (with-temp-buffer
+            (insert (org-babel-expand-body:lisp body params))
+            (slime-eval `(swank:eval-and-grab-output
+                          ,(let ((dir (if (assoc :dir params)
+                                          (cdr (assoc :dir params))
+                                        default-directory)))
+                             (format
+                              (if dir (format org-babel-lisp-dir-fmt dir)
+                                "(progn %s)")
+                              (buffer-substring-no-properties
+                               (point-min) (point-max)))))
+                        (cdr (assoc :package params))))))
+     (org-babel-result-cond (cdr (assoc :result-params params))
+       (car result)
+       (condition-case nil
+           (read (org-babel-lisp-vector-to-list (cadr result)))
+         (error (cadr result)))))
+>>>>>>> maint
    (org-babel-pick-name (cdr (assoc :colname-names params))
 			(cdr (assoc :colnames params)))
    (org-babel-pick-name (cdr (assoc :rowname-names params))
