@@ -1367,21 +1367,13 @@ decides which time to use."
       (setq org--msg-extra "showing time in current clock instance")
       (current-time))
      ((equal cmt "today")
-<<<<<<< HEAD
-      (setq msg-extra "showing today's task time.")
+      (setq org--msg-extra "showing today's task time.")
       (let* ((dt (decode-time (current-time)))
 	     (hour (nth 2 dt))
 	     (day (nth 3 dt)))
 	(if (< hour org-extend-today-until) (setf (nth 3 dt) (1- day)))
 	(setf (nth 2 dt) org-extend-today-until)
 	(setq dt (append (list 0 0) (nthcdr 2 dt)))
-=======
-      (setq org--msg-extra "showing today's task time.")
-      (let* ((dt (decode-time (current-time))))
-	(setq dt (append (list 0 0 0) (nthcdr 3 dt)))
-	(if org-extend-today-until
-	    (setf (nth 2 dt) org-extend-today-until))
->>>>>>> maint
 	(apply 'encode-time dt)))
      ((or (equal cmt "all")
 	  (and (or (not cmt) (equal cmt "auto"))

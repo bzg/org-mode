@@ -2740,16 +2740,8 @@ name is removed, since in that case the process will be executing
 remotely.  The file name is then processed by `expand-file-name'.
 Unless second argument NO-QUOTE-P is non-nil, the file name is
 additionally processed by `shell-quote-argument'"
-<<<<<<< HEAD
-  ((lambda (f) (if no-quote-p f (shell-quote-argument f)))
-   ;; We must apply `expand-file-name' on the whole filename.  If we
-   ;; would apply it on the local filename only, undesired effects
-   ;; like prepending a drive letter on MS Windows could happen.
-   (org-babel-local-file-name (expand-file-name name))))
-=======
-  (let ((f (expand-file-name (org-babel-local-file-name name))))
+  (let ((f (org-babel-local-file-name (expand-file-name name))))
     (if no-quote-p f (shell-quote-argument f))))
->>>>>>> maint
 
 (defvar org-babel-temporary-directory)
 (unless (or noninteractive (boundp 'org-babel-temporary-directory))
