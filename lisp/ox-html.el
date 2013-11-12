@@ -545,6 +545,8 @@ a formatting string to wrap fontified text with.
 If no association can be found for a given markup, text will be
 returned as-is."
   :group 'org-export-html
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(alist :key-type (symbol :tag "Markup type")
 		:value-type (string :tag "Format string"))
   :options '(bold code italic strike-through underline verbatim))
