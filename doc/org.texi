@@ -6241,6 +6241,9 @@ switch the date like this:
    DEADLINE: <2005-11-01 Tue +1m>
 @end example
 
+To mark a task with a repeater as @code{DONE}, use @kbd{C-- 1 C-c C-t}
+(i.e., @code{org-todo} with a numeric prefix argument of -1.)
+
 @vindex org-log-repeat
 A timestamp@footnote{You can change this using the option
 @code{org-log-repeat}, or the @code{#+STARTUP} options @code{logrepeat},
