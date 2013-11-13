@@ -12125,6 +12125,21 @@ nil or a string to be used for the todo mark." )
 (defvar org-block-entry-blocking ""
   "First entry preventing the TODO state change.")
 
+(defun org-cancel-repeater ()
+  "Cancel a repeater by setting its numeric value to zero."
+  (interactive)
+  (save-excursion
+    (org-back-to-heading t)
+    (let ((bound1 (point))
+	  (bound0 (save-excursion (outline-next-heading) (point))))
+      (when (re-search-forward
+	     (concat "\\(" org-scheduled-time-regexp "\\)\\|\\("
+		     org-deadline-time-regexp "\\)\\|\\("
+		     org-ts-regexp "\\)")
+	     bound0 t)
+	(if (re-search-backward "[ \t]+\\(?:[.+]\\)?\\+\\([0-9]+\\)[hdwmy]" bound1 t)
+	    (replace-match "0" t nil nil 1))))))
+
 (defun org-todo (&optional arg)
   "Change the TODO state of an item.
 The state of an item is given by a keyword at the start of the heading,
@@ -12145,6 +12160,7 @@ With a double \\[universal-argument] prefix, switch to the next set of TODO \
 keywords (nextset).
 With a triple \\[universal-argument] prefix, circumvent any state blocking.
 With a numeric prefix arg of 0, inhibit note taking for the change.
+With a numeric prefix arg of -1, cancel repeater to allow marking as DONE.
 
 When called through ELisp, arg is also interpreted in the following way:
 'none             -> empty state
@@ -12164,6 +12180,7 @@ When called through ELisp, arg is also interpreted in the following way:
 	 org-loop-over-headlines-in-active-region
 	 cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
     (if (equal arg '(16)) (setq arg 'nextset))
+    (when (equal arg -1) (org-cancel-repeater) (setq arg nil))
     (let ((org-blocker-hook org-blocker-hook)
 	  commentp
 	  case-fold-search)
@@ -12829,7 +12846,7 @@ This function is run automatically after each state change to a DONE state."
 	 (org-log-done nil)
 	 (org-todo-log-states nil)
 	 re type n what ts time to-state)
-    (when repeat
+    (when (and repeat (not (zerop (string-to-number repeat))))
       (if (eq org-log-repeat t) (setq org-log-repeat 'state))
       (setq to-state (or (org-entry-get nil "REPEAT_TO_STATE")
 			 org-todo-repeat-to-state))
