@@ -584,7 +584,7 @@ in order to mimic default behaviour:
   \"Format a drawer element for HTML export.\"
   contents\)"
   :group 'org-export-html
-  :version "8.0"
+  :version "24.4"
   :package-version '(Org . "8.0")
   :type 'function)
 
@@ -639,7 +639,7 @@ TAGS      the tags (string or nil).
 
 The function result will be used in the section format string."
   :group 'org-export-html
-  :version "8.0"
+  :version "24.4"
   :package-version '(Org . "8.0")
   :type 'function)
 
@@ -669,7 +669,7 @@ The function must accept six parameters:
 
 The function should return the string to be exported."
   :group 'org-export-html
-  :version "8.0"
+  :version "24.4"
   :package-version '(Org . "8.0")
   :type 'function)
 
