@@ -186,6 +186,11 @@ the variable."
 		   (or (looking-at org-babel-src-block-regexp)
 		       (looking-at org-babel-multi-line-header-regexp))))
 	    (setq type 'source-block))
+	   ((and (looking-at org-babel-src-name-regexp)
+		 (save-excursion
+		   (forward-line 1)
+		   (looking-at org-babel-lob-one-liner-regexp)))
+	    (setq type 'call-line))
 	   (t (while (not (setq type (org-babel-ref-at-ref-p)))
 		(forward-line 1)
 		(beginning-of-line)
@@ -201,6 +206,10 @@ the variable."
 		    (source-block (org-babel-execute-src-block
 				   nil nil (if org-babel-update-intermediate
 					       nil params)))
+		    (call-line (save-excursion
+				 (forward-line 1)
+				 (org-babel-lob-execute
+				  (org-babel-lob-get-info))))
 		    (lob          (org-babel-execute-src-block
 				   nil lob-info params))
 		    (id           (org-babel-ref-headline-body)))))
