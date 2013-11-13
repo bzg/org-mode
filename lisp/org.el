@@ -7477,7 +7477,7 @@ frame is not changed."
 	     (not (eq org-indirect-buffer-display 'new-frame))
 	     (not arg))
 	(kill-buffer org-last-indirect-buffer))
-    (setq ibuf (org-get-indirect-buffer cbuf)
+    (setq ibuf (org-get-indirect-buffer cbuf heading)
 	  org-last-indirect-buffer ibuf)
     (cond
      ((or (eq org-indirect-buffer-display 'new-frame)
@@ -7508,11 +7508,15 @@ frame is not changed."
     (run-hook-with-args 'org-cycle-hook 'all)
     (and (window-live-p cwin) (select-window cwin))))
 
-(defun org-get-indirect-buffer (&optional buffer)
+(defun org-get-indirect-buffer (&optional buffer heading)
   (setq buffer (or buffer (current-buffer)))
   (let ((n 1) (base (buffer-name buffer)) bname)
     (while (buffer-live-p
-	    (get-buffer (setq bname (concat base "-" (number-to-string n)))))
+	    (get-buffer
+	     (setq bname
+		   (concat base "-"
+			   (if heading (concat heading "-" (number-to-string n))
+			     (number-to-string n))))))
       (setq n (1+ n)))
     (condition-case nil
         (make-indirect-buffer buffer bname 'clone)
