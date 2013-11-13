@@ -20,10 +20,9 @@
 
 ;;;; Comments:
 
-;; Template test file for Org-mode tests.  First the tests that are
-;; also a howto example collection as a user documentation, more or
-;; less all those using `org-test-table-target-expect'.  Then the
-;; internal and more abstract tests.  See also the doc string of
+;; Template test file for Org-mode tests.  Many tests are also a howto
+;; example collection as a user documentation, more or less all those
+;; using `org-test-table-target-expect'.  See also the doc string of
 ;; `org-test-table-target-expect'.
 
 ;;; Code:
@@ -553,7 +552,8 @@ reference (with row).  Mode string N."
 ))
 
 (ert-deftest test-org-table/copy-field ()
-  "Experiments on how to copy one field into another field."
+  "Experiments on how to copy one field into another field.
+See also `test-org-table/remote-reference-access'."
   (let ((target
 	 "
 | 0                | replace |
@@ -772,21 +772,26 @@ reference (with row).  Mode string N."
 ;;    (string= "$3 = remote(FOO, @@#$2)" (org-table-convert-refs-to-rc "C& = remote(FOO, @@#B&)"))))
 
 (ert-deftest test-org-table/remote-reference-access ()
-  "Access to remote reference."
+  "Access to remote reference.
+See also `test-org-table/copy-field'."
   (org-test-table-target-expect
    "
 #+NAME: table
-|   | 42 |
+|   | x   42 |   |
 
-| replace |   |
+| replace | replace |
 "
    "
 #+NAME: table
-|   | 42 |
+|   | x   42 |   |
 
-| 42 |   |
+| x   42 | 84 x |
 "
-   1 "#+TBLFM: $1 = remote(table, @1$2)"))
+   1 (concat "#+TBLFM: "
+	     ;; Copy text without calculation: Use Lisp formula
+	     "$1 = '(identity remote(table, @1$2)) :: "
+	     ;; Do a calculation: Use Calc (or Lisp ) formula
+	     "$2 = 2 * remote(table, @1$2)")))
 
 (ert-deftest test-org-table/org-at-TBLFM-p ()
   (org-test-with-temp-text-in-file
