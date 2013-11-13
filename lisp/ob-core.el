@@ -530,7 +530,8 @@ For the format of SAFE-LIST, see `org-babel-safe-header-args'."
      (org-babel-header-args-safe-fn org-babel-safe-header-args))
 
 (defvar org-babel-default-inline-header-args
-  '((:session . "none") (:results . "replace") (:exports . "results"))
+  '((:session . "none") (:results . "replace")
+    (:exports . "results") (:hlines . "yes"))
   "Default arguments to use when evaluating an inline source block.")
 (put 'org-babel-default-inline-header-args 'safe-local-variable
      (org-babel-header-args-safe-fn org-babel-safe-header-args))
