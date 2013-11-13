@@ -1929,7 +1929,10 @@ following the source block."
 			    (cond
 			     ((looking-at (concat org-babel-result-regexp "\n"))
 			      (throw 'non-comment t))
-			     ((looking-at "^[ \t]*#") (end-of-line 1))
+			     ((and (looking-at "^[ \t]*#")
+				   (not (looking-at
+					 org-babel-lob-one-liner-regexp)))
+			      (end-of-line 1))
 			     (t (throw 'non-comment nil))))))
 		      (let ((this-hash (match-string 5)))
 			(prog1 (point)
