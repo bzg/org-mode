@@ -63,6 +63,8 @@
 (declare-function org-show-context "org" (&optional key))
 (declare-function org-pop-to-buffer-same-window
 		  "org-compat" (&optional buffer-or-name norecord label))
+(declare-function org-babel-lob-execute "ob-lob" (info))
+(declare-function org-babel-lob-get-info "ob-lob" nil)
 
 (defvar org-babel-ref-split-regexp
   "[ \f\t\n\r\v]*\\(.+?\\)[ \f\t\n\r\v]*=[ \f\t\n\r\v]*\\(.+\\)[ \f\t\n\r\v]*")
@@ -122,6 +124,7 @@ the variable."
 		     (point))
      (point-max))))
 
+(defvar org-babel-lob-one-liner-regexp)
 (defvar org-babel-library-of-babel)
 (defun org-babel-ref-resolve (ref)
   "Resolve the reference REF and return its value."

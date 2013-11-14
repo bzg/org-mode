@@ -92,6 +92,7 @@
 (defvar org-scheduled-string)
 (defvar org-ts-regexp)
 (defvar org-ts-regexp-both)
+(defvar org-drawer-regexp)
 
 (declare-function outline-invisible-p "outline" (&optional pos))
 (declare-function outline-flag-region "outline" (from to flag))
