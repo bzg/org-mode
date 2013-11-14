@@ -85,7 +85,9 @@ the variable."
       (cons (intern var)
 	    (let ((out (save-excursion
 			 (when org-babel-current-src-block-location
-			   (goto-char org-babel-current-src-block-location))
+			   (goto-char (if (markerp org-babel-current-src-block-location)
+					  (marker-position org-babel-current-src-block-location)
+					org-babel-current-src-block-location)))
 			 (org-babel-read ref))))
 	      (if (equal out ref)
 		  (if (string-match "^\".*\"$" ref)
@@ -184,6 +186,11 @@ the variable."
 		   (or (looking-at org-babel-src-block-regexp)
 		       (looking-at org-babel-multi-line-header-regexp))))
 	    (setq type 'source-block))
+	   ((and (looking-at org-babel-src-name-regexp)
+		 (save-excursion
+		   (forward-line 1)
+		   (looking-at org-babel-lob-one-liner-regexp)))
+	    (setq type 'call-line))
 	   (t (while (not (setq type (org-babel-ref-at-ref-p)))
 		(forward-line 1)
 		(beginning-of-line)
@@ -199,6 +206,10 @@ the variable."
 		    (source-block (org-babel-execute-src-block
 				   nil nil (if org-babel-update-intermediate
 					       nil params)))
+		    (call-line (save-excursion
+				 (forward-line 1)
+				 (org-babel-lob-execute
+				  (org-babel-lob-get-info))))
 		    (lob          (org-babel-execute-src-block
 				   nil lob-info params))
 		    (id           (org-babel-ref-headline-body)))))

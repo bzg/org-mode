@@ -2547,21 +2547,28 @@ for Calc}.
 @cindex row, of field coordinates
 @cindex column, of field coordinates
 
-For Calc formulas and Lisp formulas @code{@@#} and @code{$#} can be used to
-get the row or column number of the field where the formula result goes.
-The traditional Lisp formula equivalents are @code{org-table-current-dline}
-and @code{org-table-current-column}.  Examples:
+One of the very first actions during evaluation of Calc formulas and Lisp
+formulas is to substitute @code{@@#} and @code{$#} in the formula with the
+row or column number of the field where the current result will go to.  The
+traditional Lisp formula equivalents are @code{org-table-current-dline} and
+@code{org-table-current-column}.  Examples:
 
-@example
-if(@@# % 2, $#, string(""))   @r{column number on odd lines only}
-$3 = remote(FOO, @@@@#$2)      @r{copy column 2 from table FOO into}
-                             @r{column 3 of the current table}
-@end example
+@table @code
+@item if(@@# % 2, $#, string(""))
+Insert column number on odd rows, set field to empty on even rows.
+@item $2 = '(identity remote(FOO, @@@@#$1))
+Copy text or values of each row of column 1 of the table named @code{FOO}
+into column 2 of the current table.
+@item @@3 = 2 * remote(FOO, @@1$$#)
+Insert the doubled value of each column of row 1 of the table named
+@code{FOO} into row 3 of the current table.
+@end table
 
-@noindent For the second example, table FOO must have at least as many rows
-as the current table.  Note that this is inefficient@footnote{The computation time scales as
-O(N^2) because table FOO is parsed for each field to be copied.} for large
-number of rows.
+@noindent For the second/third example, the table named @code{FOO} must have
+at least as many rows/columns as the current table.  Note that this is
+inefficient@footnote{The computation time scales as O(N^2) because the table
+named @code{FOO} is parsed for each field to be read.} for large number of
+rows/columns.
 
 @subsubheading Named references
 @cindex named references

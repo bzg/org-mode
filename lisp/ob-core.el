@@ -530,7 +530,8 @@ For the format of SAFE-LIST, see `org-babel-safe-header-args'."
      (org-babel-header-args-safe-fn org-babel-safe-header-args))
 
 (defvar org-babel-default-inline-header-args
-  '((:session . "none") (:results . "replace") (:exports . "results"))
+  '((:session . "none") (:results . "replace")
+    (:exports . "results") (:hlines . "yes"))
   "Default arguments to use when evaluating an inline source block.")
 (put 'org-babel-default-inline-header-args 'safe-local-variable
      (org-babel-header-args-safe-fn org-babel-safe-header-args))
@@ -1928,7 +1929,10 @@ following the source block."
 			    (cond
 			     ((looking-at (concat org-babel-result-regexp "\n"))
 			      (throw 'non-comment t))
-			     ((looking-at "^[ \t]*#") (end-of-line 1))
+			     ((and (looking-at "^[ \t]*#")
+				   (not (looking-at
+					 org-babel-lob-one-liner-regexp)))
+			      (end-of-line 1))
 			     (t (throw 'non-comment nil))))))
 		      (let ((this-hash (match-string 5)))
 			(prog1 (point)
