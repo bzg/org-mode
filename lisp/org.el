@@ -309,7 +309,7 @@ When MESSAGE is non-nil, display a message with the version."
 	(if here
 	    (insert version)
 	  (message version))
-      (if message (message _version))
+      (if message (message version1))
       version1)))
 
 (defconst org-version (org-version))
