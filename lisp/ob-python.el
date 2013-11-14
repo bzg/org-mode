@@ -47,14 +47,16 @@
   :group 'org-babel
   :type 'string)
 
-(defcustom org-babel-python-mode
-  (if (or (featurep 'xemacs) (featurep 'python-mode)) 'python-mode 'python)
+(defcustom org-babel-python-mode 'python
   "Preferred python mode for use in running python interactively.
 This will typically be either 'python or 'python-mode."
   :group 'org-babel
   :version "24.4"
   :package-version '(Org . "8.0")
-  :type 'function)
+  :set (lambda (var val)
+	 (set-default var (if (or (featurep 'xemacs) (featurep 'python-mode))
+			      'python-mode 'python)))
+  :type 'symbol)
 
 (defvar org-src-preserve-indentation)
 
@@ -70,7 +72,7 @@ This will typically be either 'python or 'python-mode."
   :group 'org-babel
   :version "24.4"
   :package-version '(Org . "8.0")
-  :type 'string)
+  :type 'symbol)
 
 (defun org-babel-execute:python (body params)
   "Execute a block of Python code with Babel.

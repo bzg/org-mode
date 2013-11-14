@@ -854,7 +854,7 @@ Therefore, using a specific configuration makes the process to
 load faster and the export more portable."
   :group 'org-export-general
   :version "24.4"
-  :package-version '(Org . "8.3")
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "Regular startup" nil)
 	  (file :tag "Specific start-up file" :must-match t)))
