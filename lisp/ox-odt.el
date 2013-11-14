@@ -498,7 +498,8 @@ a per-file basis.  For example,
 (defcustom org-odt-display-outline-level 2
   "Outline levels considered for enumerating captioned entities."
   :group 'org-export-odt
-  :version "24.2"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'integer)
 
 ;;;; Document conversion
