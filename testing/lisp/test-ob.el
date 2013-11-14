@@ -99,7 +99,10 @@
 
 (ert-deftest test-org-babel/default-inline-header-args ()
   (should(equal
-	  '((:session . "none") (:results . "replace") (:exports . "results"))
+	  '((:session . "none")
+	    (:results . "replace")
+	    (:exports . "results")
+	    (:hlines  . "yes"))
 	  org-babel-default-inline-header-args)))
 
 (ert-deftest ob-test/org-babel-combine-header-arg-lists ()
