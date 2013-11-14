@@ -567,7 +567,8 @@ Warning: non-nil may break indentation of source code blocks."
 
 ;;;; Drawers
 
-(defcustom org-html-format-drawer-function nil
+(defcustom org-html-format-drawer-function
+  (lambda (name contents) contents)
   "Function called to format a drawer in HTML code.
 
 The function must accept two parameters:
@@ -579,9 +580,7 @@ The function should return the string to be exported.
 For example, the variable could be set to the following function
 in order to mimic default behaviour:
 
-\(defun org-html-format-drawer-default \(name contents\)
-  \"Format a drawer element for HTML export.\"
-  contents\)"
+The default value simply returns the value of CONTENTS."
   :group 'org-export-html
   :version "24.4"
   :package-version '(Org . "8.0")
@@ -626,7 +625,7 @@ document title."
   :group 'org-export-html
   :type 'integer)
 
-(defcustom org-html-format-headline-function nil
+(defcustom org-html-format-headline-function 'ignore
   "Function to format headline text.
 
 This function will be called with 5 arguments:
@@ -655,7 +654,7 @@ attributes, when appropriate."
 
 ;;;; Inlinetasks
 
-(defcustom org-html-format-inlinetask-function nil
+(defcustom org-html-format-inlinetask-function 'ignore
   "Function called to format an inlinetask in HTML code.
 
 The function must accept six parameters:
@@ -674,7 +673,7 @@ The function should return the string to be exported."
 
 ;;;; LaTeX
 
-(defcustom org-html-with-latex org-export-with-latex
+(defcustom org-html-with-latex t
   "Non-nil means process LaTeX math snippets.
 
 When set, the exporter will process LaTeX environments and
@@ -695,6 +694,7 @@ t              Synonym for `mathjax'."
   :group 'org-export-html
   :version "24.4"
   :package-version '(Org . "8.0")
+  :set (lambda (var val) (set-default var org-export-with-latex))
   :type '(choice
 	  (const :tag "Do not process math in any way" nil)
 	  (const :tag "Use dvipng to make images" dvipng)
@@ -2009,7 +2009,7 @@ INFO is a plist used as a communication channel."
 			  #'number-to-string
 			  (org-export-get-headline-number headline info)
 			  "-"))))
-	    (apply (if (functionp org-html-format-headline-function)
+	    (apply (if (not (eq org-html-format-headline-function 'ignore))
 		       (lambda (todo todo-type priority text tags &rest ignore)
 			 (funcall org-html-format-headline-function
 				  todo todo-type priority text tags))
@@ -2254,7 +2254,7 @@ holding contextual information."
 						       headline-number "-"))))
 	 (format-function
 	  (cond ((functionp format-function) format-function)
-		((functionp org-html-format-headline-function)
+		((not (eq org-html-format-headline-function 'ignore))
 		 (lambda (todo todo-type priority text tags &rest ignore)
 		   (funcall org-html-format-headline-function
 			    todo todo-type priority text tags)))
@@ -2381,9 +2381,9 @@ contextual information."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (cond
-   ;; If `org-html-format-inlinetask-function' is provided, call it
+   ;; If `org-html-format-inlinetask-function' is not 'ignore, call it
    ;; with appropriate arguments.
-   ((functionp org-html-format-inlinetask-function)
+   ((not (eq org-html-format-inlinetask-function 'ignore))
     (let ((format-function
 	   (function*
 	    (lambda (todo todo-type priority text tags

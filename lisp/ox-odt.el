@@ -646,7 +646,8 @@ values.  See Info node `(emacs) File Variables'."
 
 ;;;; Drawers
 
-(defcustom org-odt-format-drawer-function nil
+(defcustom org-odt-format-drawer-function
+  (lambda (name contents) contents)
   "Function called to format a drawer in ODT code.
 
 The function must accept two parameters:
@@ -655,21 +656,16 @@ The function must accept two parameters:
 
 The function should return the string to be exported.
 
-For example, the variable could be set to the following function
-in order to mimic default behaviour:
-
-\(defun org-odt-format-drawer-default \(name contents\)
-  \"Format a drawer element for ODT export.\"
-  contents\)"
+The default value simply returns the value of CONTENTS."
   :group 'org-export-odt
   :version "24.4"
-  :package-version '(Org . "8.0")
+  :package-version '(Org . "8.3")
   :type 'function)
 
 
 ;;;; Headline
 
-(defcustom org-odt-format-headline-function nil
+(defcustom org-odt-format-headline-function 'ignore
   "Function to format headline text.
 
 This function will be called with 5 arguments:
@@ -688,7 +684,7 @@ The function result will be used as headline text."
 
 ;;;; Inlinetasks
 
-(defcustom org-odt-format-inlinetask-function nil
+(defcustom org-odt-format-inlinetask-function 'ignore
   "Function called to format an inlinetask in ODT code.
 
 The function must accept six parameters:
@@ -708,7 +704,7 @@ The function should return the string to be exported."
 
 ;;;; LaTeX
 
-(defcustom org-odt-with-latex org-export-with-latex
+(defcustom org-odt-with-latex t
   "Non-nil means process LaTeX math snippets.
 
 When set, the exporter will process LaTeX environments and
@@ -729,6 +725,7 @@ t              Synonym for `mathjax'."
   :group 'org-export-odt
   :version "24.4"
   :package-version '(Org . "8.0")
+  :set (lambda (var val) (set-default var org-export-with-latex))
   :type '(choice
 	  (const :tag "Do not process math in any way" nil)
 	  (const :tag "Use dvipng to make images" dvipng)
@@ -1626,12 +1623,8 @@ channel."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (let* ((name (org-element-property :drawer-name drawer))
-	 (output (if (functionp org-odt-format-drawer-function)
-		     (funcall org-odt-format-drawer-function
-			      name contents)
-		   ;; If there's no user defined function: simply
-		   ;; display contents of the drawer.
-		   contents)))
+	 (output (funcall org-odt-format-drawer-function
+			  name contents)))
     output))
 
 
@@ -1812,10 +1805,10 @@ INFO is a plist holding contextual information."
 						   headline-number "-")))
 	 (format-function (cond
 			   ((functionp format-function) format-function)
-			   ((functionp org-odt-format-headline-function)
+			   ((not (eq org-odt-format-headline-function 'ignore))
 			    (function*
 			     (lambda (todo todo-type priority text tags
-				      &allow-other-keys)
+					   &allow-other-keys)
 			       (funcall org-odt-format-headline-function
 					todo todo-type priority text tags))))
 			   (t 'org-odt-format-headline))))
@@ -1938,9 +1931,9 @@ contextual information."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (cond
-   ;; If `org-odt-format-inlinetask-function' is provided, call it
+   ;; If `org-odt-format-inlinetask-function' is not 'ignore, call it
    ;; with appropriate arguments.
-   ((functionp org-odt-format-inlinetask-function)
+   ((not (eq org-odt-format-inlinetask-function 'ignore))
     (let ((format-function
 	   (function*
 	    (lambda (todo todo-type priority text tags

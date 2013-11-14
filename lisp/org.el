@@ -1725,13 +1725,20 @@ In tables, the special behavior of RET has precedence."
   :group 'org-link-follow
   :type 'boolean)
 
-(defcustom org-mouse-1-follows-link
-  (if (boundp 'mouse-1-click-follows-link) mouse-1-click-follows-link t)
+(defcustom org-mouse-1-follows-link 450
   "Non-nil means mouse-1 on a link will follow the link.
 A longer mouse click will still set point.  Does not work on XEmacs.
 Needs to be set before org.el is loaded."
   :group 'org-link-follow
-  :type 'boolean)
+  :version "24.4"
+  :package-version '(Org . "8.3")
+  :set (lambda (var val)
+	 (set-default var (if (boundp 'mouse-1-click-follows-link)
+			      mouse-1-click-follows-link t)))
+  :type '(choice 
+	  (const :tag "A double click follows the link" 'double)
+	  (const :tag "Unconditionally follow the link with mouse-1" t)
+	  (integer :tag "mouse-1 click does not follow the link if longer than N ms" 450)))
 
 (defcustom org-mark-ring-length 4
   "Number of different positions to be recorded in the ring.
@@ -2663,12 +2670,12 @@ agenda log mode depends on the format of these entries."
 			    "Heading when changing todo state (todo sequence only)"
 			    state) string)
 	       (cons (const :tag "Heading when just taking a note" note) string)
-	       (cons (const :tag "Heading when clocking out" clock-out) string)
-	       (cons (const :tag "Heading when an item is no longer scheduled" delschedule) string)
 	       (cons (const :tag "Heading when rescheduling" reschedule) string)
+	       (cons (const :tag "Heading when an item is no longer scheduled" delschedule) string)
 	       (cons (const :tag "Heading when changing deadline"  redeadline) string)
 	       (cons (const :tag "Heading when deleting a deadline" deldeadline) string)
-	       (cons (const :tag "Heading when refiling" refile) string)))
+	       (cons (const :tag "Heading when refiling" refile) string)
+	       (cons (const :tag "Heading when clocking out" clock-out) string)))
 
 (unless (assq 'note org-log-note-headings)
   (push '(note . "%t") org-log-note-headings))
@@ -8850,13 +8857,13 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
 ;; command.  There might be problems if any of the keys is otherwise
 ;; used as a prefix key.
 
-(defcustom orgstruct-heading-prefix-regexp nil
+(defcustom orgstruct-heading-prefix-regexp ""
   "Regexp that matches the custom prefix of Org headlines in
 orgstruct(++)-mode."
   :group 'org
   :version "24.4"
-  :package-version '(Org . "8.0")
-  :type 'string)
+  :package-version '(Org . "8.3")
+  :type 'regexp)
 ;;;###autoload(put 'orgstruct-heading-prefix-regexp 'safe-local-variable 'stringp)
 
 (defcustom orgstruct-setup-hook nil
@@ -9017,8 +9024,8 @@ buffer.  It will also recognize item context in multiline items."
   "Create a function for binding in the structure minor mode.
 FUN is the command to call inside a table.  KEY is the key that
 should be checked in for a command to execute outside of tables.
-Non-nil DISABLE-WHEN-HEADING-PREFIX means to disable the command
-if `orgstruct-heading-prefix-regexp' is non-nil."
+Non-nil `disable-when-heading-prefix' means to disable the command
+if `orgstruct-heading-prefix-regexp' is not empty."
   (let ((name (concat "orgstruct-hijacker-" (symbol-name fun))))
     (let ((nname name)
 	  (i 0))
@@ -9044,14 +9051,13 @@ if `orgstruct-heading-prefix-regexp' is non-nil."
 		   (key-description key) "'."
 		   (when disable-when-heading-prefix
 		     (concat
-		      "\nIf `orgstruct-heading-prefix-regexp' is non-nil, this command will always fall\n"
+		      "\nIf `orgstruct-heading-prefix-regexp' is not empty, this command will always fall\n"
 		      "back to the default binding due to limitations of Org's implementation of\n"
 		      "`" (symbol-name fun) "'.")))
 	  (interactive "p")
 	  (let* ((disable
-		  ,(when disable-when-heading-prefix
-		     '(and orgstruct-heading-prefix-regexp
-			   (not (string= orgstruct-heading-prefix-regexp "")))))
+		  ,(and disable-when-heading-prefix
+			'(not (string= orgstruct-heading-prefix-regexp ""))))
 		 (fallback
 		  (or disable
 		      (not

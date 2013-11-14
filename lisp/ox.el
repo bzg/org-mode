@@ -822,7 +822,7 @@ automatically.  But you can retrieve them with \\[org-export-stack]."
   :package-version '(Org . "8.0")
   :type 'boolean)
 
-(defcustom org-export-async-init-file user-init-file
+(defcustom org-export-async-init-file "~/.emacs.el"
   "File used to initialize external export process.
 Value must be an absolute file name.  It defaults to user's
 initialization file.  Though, a specific configuration makes the
@@ -830,6 +830,7 @@ process faster and the export more portable."
   :group 'org-export-general
   :version "24.4"
   :package-version '(Org . "8.0")
+  :set (lambda (var val) (set-default var user-init-file))
   :type '(file :must-match t))
 
 (defcustom org-export-dispatch-use-expert-ui nil
