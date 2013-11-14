@@ -450,7 +450,7 @@ under `org-odt-styles-dir' is used."
   :type '(choice (const nil)
 		 (file))
   :group 'org-export-odt
-  :version "24.1")
+  :version "24.3")
 
 (defcustom org-odt-styles-file nil
   "Default styles file for use with ODT export.
