@@ -5038,22 +5038,21 @@ removed from the cache."
 		;; Preserve any element ending before BEG.  If it
 		;; overlaps the BEG-END area, remove it.
 		(t
-		 (when (let ((element (car value)))
-			 (or (>= (org-element-property :end element) beg)
-			     ;; Special case: footnote definitions and
-			     ;; plain lists can end with blank lines.
-			     ;; Modifying those can also alter last
-			     ;; element inside.  We must therefore
-			     ;; remove these elements from cache.
-			     (let ((parent
-				    (org-element-property :parent element)))
-			       (and (memq (org-element-type parent)
-					  '(footnote-definition plain-list))
-				    (>= (org-element-property :end parent) beg)
-				    (= (org-element-property :contents-end
-							     parent)
-				       (org-element-property :end element))))))
-		   (remhash key org-element--cache)))))
+		 (let ((element (car value)))
+		   (if (>= (org-element-property :end element) beg)
+		       (remhash key org-element--cache)
+		     ;; Special case: footnote definitions and plain
+		     ;; lists can end with blank lines.  Modifying
+		     ;; those can also alter last element inside.  We
+		     ;; must therefore remove them from cache.
+		     (let ((parent (org-element-property :parent element)))
+		       (when (and parent (eq (org-element-type parent) 'item))
+			 (setq parent (org-element-property :parent parent)))
+		       (when (and parent
+				  (>= (org-element-property :end parent) beg)
+				  (= (org-element-property :contents-end parent)
+				     (org-element-property :end element)))
+			 (remhash key org-element--cache))))))))
 	   org-element--cache)
 	  ;; Signal cache as up-to-date.
 	  (org-element--cache-cancel-changes))))))
