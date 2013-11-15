@@ -5048,7 +5048,8 @@ removed from the cache."
 		     (let ((parent (org-element-property :parent element)))
 		       (when (and parent (eq (org-element-type parent) 'item))
 			 (setq parent (org-element-property :parent parent)))
-		       (when (and parent
+		       (when (and (memq (org-element-type parent)
+					'(footnote-definition plain-list))
 				  (>= (org-element-property :end parent) beg)
 				  (= (org-element-property :contents-end parent)
 				     (org-element-property :end element)))
