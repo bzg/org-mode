@@ -654,11 +654,15 @@ the following lines anywhere in the buffer:
 
 (defcustom org-use-sub-superscripts t
   "Non-nil means interpret \"_\" and \"^\" for display.
-When this option is turned on, you can use TeX-like syntax for sub- and
-superscripts.  Several characters after \"_\" or \"^\" will be
-considered as a single item - so grouping with {} is normally not
-needed.  For example, the following things will be parsed as single
-sub- or superscripts.
+
+If you want to control how Org exports those characters,
+see `org-export-with-sub-superscripts'.
+
+When this option is turned on, you can use TeX-like syntax for
+sub- and superscripts within the buffer.  Several characters after
+\"_\" or \"^\" will be considered as a single item - so grouping
+with {} is normally not needed.  For example, the following things
+will be parsed as single sub- or superscripts:
 
  10^24   or   10^tau     several digits will be considered 1 item.
  10^-12  or   10^-tau    a leading sign with digits or a word
@@ -666,11 +670,11 @@ sub- or superscripts.
 			 terminated by almost any nonword/nondigit char.
  x_{i^2} or   x^(2-i)    braces or parenthesis do grouping.
 
-Still, ambiguity is possible - so when in doubt use {} to enclose
-the sub/superscript.  If you set this variable to the symbol
-`{}', the braces are *required* in order to trigger
-interpretations as sub/superscript.  This can be helpful in
-documents that need \"_\" frequently in plain text."
+Still, ambiguity is possible.  So when in doubt, use {} to enclose
+the sub/superscript.  If you set this variable to the symbol `{}',
+the braces are *required* in order to trigger interpretations as
+sub/superscript.  This can be helpful in documents that need \"_\"
+frequently in plain text."
   :group 'org-startup
   :version "24.1"
   :type '(choice
