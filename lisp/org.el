@@ -115,24 +115,33 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 (declare-function org-inlinetask-toggle-visibility "org-inlinetask" ())
 (declare-function org-pop-to-buffer-same-window "org-compat" (&optional buffer-or-name norecord label))
+(declare-function org-clocktable-shift "org-clock" (dir n))
 (declare-function org-clock-get-last-clock-out-time "org-clock" ())
+(declare-function org-clock-update-time-maybe "org-clock" ())
+(declare-function org-clock-remove-overlays "org-clock" (&optional beg end noremove))
 (declare-function org-clock-timestamps-up "org-clock" (&optional n))
 (declare-function org-clock-timestamps-down "org-clock" (&optional n))
 (declare-function org-clock-sum-current-item "org-clock" (&optional tstart))
 
+(declare-function org-babel-tangle-file "ob-tangle" (file &optional target-file lang))
 (declare-function orgtbl-mode "org-table" (&optional arg))
 (declare-function org-clock-out "org-clock" (&optional switch-to-state fail-quietly at-time))
 (declare-function org-beamer-mode "ox-beamer" ())
+(declare-function org-table-blank-field "org-table" ())
 (declare-function org-table-edit-field "org-table" (arg))
+(declare-function org-table-insert-row "org-table" (&optional arg))
 (declare-function org-table-justify-field-maybe "org-table" (&optional new))
 (declare-function org-table-set-constants "org-table" ())
 (declare-function org-table-calc-current-TBLFM "org-table" (&optional arg))
 (declare-function org-id-get-create "org-id" (&optional force))
+(declare-function org-add-archive-files "org-archive" (files))
 (declare-function org-id-find-id-file "org-id" (id))
 (declare-function org-tags-view "org-agenda" (&optional todo-only match))
 (declare-function org-agenda-list "org-agenda" (&optional arg start-day span))
 (declare-function org-agenda-redo "org-agenda" (&optional all))
 (declare-function org-table-align "org-table" ())
+(declare-function org-table-begin "org-table" (&optional table-type))
+(declare-function org-table-end "org-table" (&optional table-type))
 (declare-function org-table-paste-rectangle "org-table" ())
 (declare-function org-table-maybe-eval-formula "org-table" ())
 (declare-function org-table-maybe-recalculate-line "org-table" ())
@@ -160,6 +169,10 @@ Stars are put in group 1 and the trimmed body in group 2.")
 		  (&optional granularity visible-only))
 (declare-function org-element-restriction "org-element" (element))
 (declare-function org-element-type "org-element" (element))
+
+(defsubst org-uniquify (list)
+  "Non-destructively remove duplicate elements from LIST."
+  (let ((res (copy-sequence list))) (delete-dups res)))
 
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
@@ -21781,10 +21794,6 @@ for the search purpose."
 (defun org-reverse-string (string)
   "Return the reverse of STRING."
   (apply 'string (reverse (string-to-list string))))
-
-(defsubst org-uniquify (list)
-  "Non-destructively remove duplicate elements from LIST."
-  (let ((res (copy-sequence list))) (delete-dups res)))
 
 (defun org-uniquify-alist (alist)
   "Merge elements of ALIST with the same key.

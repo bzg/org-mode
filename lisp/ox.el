@@ -90,6 +90,11 @@
 (defvar org-table-number-regexp)
 
 
+(defsubst org-export-get-parent (blob)
+  "Return BLOB parent or nil.
+BLOB is the element or object considered."
+  (org-element-property :parent blob))
+
 
 ;;; Internal Variables
 ;;
@@ -5155,11 +5160,6 @@ Return the new string."
 ;;
 ;; `org-export-get-genealogy' returns the full genealogy of a given
 ;; element or object, from closest parent to full parse tree.
-
-(defsubst org-export-get-parent (blob)
-  "Return BLOB parent or nil.
-BLOB is the element or object considered."
-  (org-element-property :parent blob))
 
 (defun org-export-get-genealogy (blob)
   "Return full genealogy relative to a given element or object.
