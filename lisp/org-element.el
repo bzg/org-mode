@@ -4819,12 +4819,12 @@ modified by side-effect.  Return modified element."
     ;; Shift :structure property for the first plain list only: it is
     ;; the only one that really matters and it prevents from shifting
     ;; it more than once.
-    (when (eq (car element) 'plain-list)
-      (let ((structure (plist-get properties :structure)))
-	(when (<= (plist-get properties :begin) (caar structure))
-	  (dolist (item structure)
-	    (incf (car item) offset)
-	    (incf (nth 6 item) offset)))))
+    (when (and (eq (org-element-type element) 'plain-list)
+	       (not (eq (org-element-type (plist-get properties :parent))
+			'item)))
+      (dolist (item (plist-get properties :structure))
+	(incf (car item) offset)
+	(incf (nth 6 item) offset)))
     (plist-put properties :begin (+ (plist-get properties :begin) offset))
     (plist-put properties :end (+ (plist-get properties :end) offset))
     (dolist (key '(:contents-begin :contents-end :post-affiliated))
