@@ -704,7 +704,7 @@ The function should return the string to be exported."
 
 ;;;; LaTeX
 
-(defcustom org-odt-with-latex t
+(defcustom org-odt-with-latex org-export-with-latex
   "Non-nil means process LaTeX math snippets.
 
 When set, the exporter will process LaTeX environments and
@@ -725,7 +725,6 @@ t              Synonym for `mathjax'."
   :group 'org-export-odt
   :version "24.4"
   :package-version '(Org . "8.0")
-  :set (lambda (var val) (set-default var org-export-with-latex))
   :type '(choice
 	  (const :tag "Do not process math in any way" nil)
 	  (const :tag "Use dvipng to make images" dvipng)
