@@ -1721,17 +1721,15 @@ In tables, the special behavior of RET has precedence."
   :group 'org-link-follow
   :type 'boolean)
 
-(defcustom org-mouse-1-follows-link 450
+(defcustom org-mouse-1-follows-link
+  (if (boundp 'mouse-1-click-follows-link) mouse-1-click-follows-link t)
   "Non-nil means mouse-1 on a link will follow the link.
 A longer mouse click will still set point.  Does not work on XEmacs.
 Needs to be set before org.el is loaded."
   :group 'org-link-follow
   :version "24.4"
   :package-version '(Org . "8.3")
-  :set (lambda (var val)
-	 (set-default var (if (boundp 'mouse-1-click-follows-link)
-			      mouse-1-click-follows-link t)))
-  :type '(choice 
+  :type '(choice
 	  (const :tag "A double click follows the link" 'double)
 	  (const :tag "Unconditionally follow the link with mouse-1" t)
 	  (integer :tag "mouse-1 click does not follow the link if longer than N ms" 450)))
