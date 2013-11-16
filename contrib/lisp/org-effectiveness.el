@@ -59,7 +59,7 @@
   (interactive)
   (save-excursion
     (goto-char (point-min))
-    (message "Number of Canceled: %d" (count-matches "* CANCELED"))))
+    (message "Number of Canceled: %d" (count-matches "* CANCEL+ED"))))
 
 (defun org-effectiveness()
   "Returns the effectiveness in the current org buffer"
@@ -67,7 +67,7 @@
   (save-excursion
     (goto-char (point-min))
     (let ((done (float (count-matches "* DONE.*\n.*")))
-	  (canc (float (count-matches "* CANCELED.*\n.*"))))
+	  (canc (float (count-matches "* CANCEL+ED.*\n.*"))))
       (if (and (= done canc) (zerop done))
 	  (setq effectiveness 0)
 	(setq effectiveness (* 100 (/ done (+ done canc)))))
@@ -90,7 +90,7 @@
 
 (defun org-canceled-in-date(date)
    (interactive "sGive me a date: " date)
-   (setq count (count-matches (concat "TODO.*\n.*" date)))
+   (setq count (count-matches (concat "CANCEL+ED.*\n.*" date)))
    (message "CANCELEDS: %d" count))
 
 (defun org-effectiveness-in-date(date &optional notmessage)
@@ -98,7 +98,7 @@
   (save-excursion
     (goto-char (point-min))
     (let ((done (float (count-matches (concat "* DONE.*\n.*" date))))
-	  (canc (float (count-matches (concat "* CANCELED.*\n.*" date)))))
+	  (canc (float (count-matches (concat "* CANCEL+ED.*\n.*" date)))))
       (if (and (= done canc) (zerop done))
 	  (setq effectiveness 0)
 	(setq effectiveness (* 100 (/ done (+ done canc)))))
