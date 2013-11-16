@@ -400,11 +400,11 @@ Paragraph"
 		       nil nil nil '(:with-archived-trees t))))))
   ;; Clocks.
   (should
-   (equal "CLOCK: [2012-04-29 sun. 10:45]\n"
-	  (let ((org-clock-string "CLOCK:"))
-	    (org-test-with-temp-text "CLOCK: [2012-04-29 sun. 10:45]"
-	      (org-export-as (org-test-default-backend)
-			     nil nil nil '(:with-clocks t))))))
+   (string-match "CLOCK: \\[2012-04-29 .* 10:45\\]"
+		 (let ((org-clock-string "CLOCK:"))
+		   (org-test-with-temp-text "CLOCK: [2012-04-29 sun. 10:45]"
+		     (org-export-as (org-test-default-backend)
+				    nil nil nil '(:with-clocks t))))))
   (should
    (equal ""
 	  (let ((org-clock-string "CLOCK:"))
@@ -464,11 +464,12 @@ Paragraph"
 			 nil nil nil '(:with-inlinetasks nil)))))))
   ;; Plannings.
   (should
-   (equal "CLOSED: [2012-04-29 sun. 10:45]\n"
-	  (let ((org-closed-string "CLOSED:"))
-	    (org-test-with-temp-text "CLOSED: [2012-04-29 sun. 10:45]"
-	      (org-export-as (org-test-default-backend)
-			     nil nil nil '(:with-planning t))))))
+   (string-match
+    "CLOSED: \\[2012-04-29 .* 10:45\\]"
+    (let ((org-closed-string "CLOSED:"))
+      (org-test-with-temp-text "CLOSED: [2012-04-29 sun. 10:45]"
+	(org-export-as (org-test-default-backend)
+		       nil nil nil '(:with-planning t))))))
   (should
    (equal ""
 	  (let ((org-closed-string "CLOSED:"))
@@ -505,8 +506,8 @@ Paragraph"
   "Test `org-export-with-timestamps' specifications."
   ;; t value.
   (should
-   (equal
-    "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>\n"
+   (string-match
+    "\\[2012-04-29 .*? 10:45\\]<2012-04-29 .*? 10:45>"
     (org-test-with-temp-text "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>"
       (org-export-as (org-test-default-backend)
 		     nil nil nil '(:with-timestamps t)))))
@@ -519,24 +520,24 @@ Paragraph"
 		     nil nil nil '(:with-timestamps nil)))))
   ;; `active' value.
   (should
-   (equal
-    "<2012-03-29 Thu>\n\nParagraph <2012-03-29 Thu>[2012-03-29 Thu]"
+   (string-match
+    "<2012-03-29 .*?>\n\nParagraph <2012-03-29 .*?>\\[2012-03-29 .*?\\]"
     (org-test-with-temp-text
 	"<2012-03-29 Thu>[2012-03-29 Thu]
 
 Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
-      (org-trim (org-export-as (org-test-default-backend)
-			       nil nil nil '(:with-timestamps active))))))
+      (org-export-as (org-test-default-backend)
+		     nil nil nil '(:with-timestamps active)))))
   ;; `inactive' value.
   (should
-   (equal
-    "[2012-03-29 Thu]\n\nParagraph <2012-03-29 Thu>[2012-03-29 Thu]"
+   (string-match
+    "\\[2012-03-29 .*?\\]\n\nParagraph <2012-03-29 .*?>\\[2012-03-29 .*?\\]"
     (org-test-with-temp-text
 	"<2012-03-29 Thu>[2012-03-29 Thu]
 
 Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
-      (org-trim (org-export-as (org-test-default-backend)
-			       nil nil nil '(:with-timestamps inactive)))))))
+      (org-export-as (org-test-default-backend)
+		     nil nil nil '(:with-timestamps inactive))))))
 
 (ert-deftest test-org-export/comment-tree ()
   "Test if export process ignores commented trees."
