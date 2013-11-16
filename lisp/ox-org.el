@@ -253,7 +253,7 @@ Return output file name."
   (interactive)
   (let ((outfile (org-export-output-file-name ".org" subtreep)))
     (org-export-to-file 'org outfile
-      async subtreep visible-only nil ext-plist)))
+      async subtreep visible-only body-only ext-plist)))
 
 ;;;###autoload
 (defun org-org-publish-to-org (plist filename pub-dir)
