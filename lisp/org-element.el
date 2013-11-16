@@ -4810,7 +4810,7 @@ the value to store.  Nothing will be stored if
     (unless org-element--cache (org-element-cache-reset))
     (puthash pos data org-element--cache)))
 
-(defsubst org-element--shift-positions (element offset)
+(defsubst org-element--cache-shift-positions (element offset)
   "Shift ELEMENT properties relative to buffer positions by OFFSET.
 Properties containing buffer positions are `:begin', `:end',
 `:contents-begin', `:contents-end' and `:structure'.  They are
@@ -4996,14 +4996,14 @@ removed from the cache."
 		   (let* ((conflictp (consp (caar value)))
 			  (value-to-shift (if conflictp (cdr value) value)))
 		     ;; Shift element part.
-		     (org-element--shift-positions (car value-to-shift) offset)
+		     (org-element--cache-shift-positions (car value-to-shift) offset)
 		     ;; Shift objects part.
 		     (dolist (object-data (cdr value-to-shift))
 		       (incf (car object-data) offset)
 		       (dolist (successor (nth 1 object-data))
 			 (incf (cdr successor) offset))
 		       (dolist (object (cddr object-data))
-			 (org-element--shift-positions object offset)))
+			 (org-element--cache-shift-positions object offset)))
 		     ;; Shift key-value pair.
 		     (let* ((new-key (+ key offset))
 			    (new-value (gethash new-key org-element--cache)))
