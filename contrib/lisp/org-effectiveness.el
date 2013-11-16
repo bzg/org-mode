@@ -73,22 +73,22 @@
 	(setq effectiveness (* 100 (/ done (+ done canc)))))
       (message "Effectiveness: %f" effectiveness))))
 
-(defun org-keywords-in-date(keyword date)
+(defun org-effectiveness-keywords-in-date(keyword date)
   (interactive "sKeyword: \nsDate: " keyword date)
   (setq count (count-matches (concat keyword ".*\n.*" date)))
   (message (concat "%sS: %d" keyword count)))
 
-(defun org-dones-in-date(date)
+(defun org-effectiveness-dones-in-date(date)
    (interactive "sGive me a date: " date)
    (setq count (count-matches (concat "DONE.*\n.*" date)))
    (message "DONES: %d" count))
 
-(defun org-todos-in-date(date)
+(defun org-effectivenes-todos-in-date(date)
    (interactive "sGive me a date: " date)
    (setq count (count-matches (concat "TODO.*\n.*" date)))
    (message "TODOS: %d" count))
 
-(defun org-canceled-in-date(date)
+(defun org-effectiveness-canceled-in-date(date)
    (interactive "sGive me a date: " date)
    (setq count (count-matches (concat "CANCEL+ED.*\n.*" date)))
    (message "CANCELEDS: %d" count))
