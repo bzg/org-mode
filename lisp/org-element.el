@@ -3550,100 +3550,97 @@ Assume point is at the beginning of the timestamp."
 (defun org-element-timestamp-interpreter (timestamp contents)
   "Interpret TIMESTAMP object as Org syntax.
 CONTENTS is nil."
-  ;; Use `:raw-value' if specified.
-  (or (org-element-property :raw-value timestamp)
-      ;; Otherwise, build timestamp string.
-      (let* ((repeat-string
-	      (concat
-	       (case (org-element-property :repeater-type timestamp)
-		 (cumulate "+") (catch-up "++") (restart ".+"))
-	       (let ((val (org-element-property :repeater-value timestamp)))
-		 (and val (number-to-string val)))
-	       (case (org-element-property :repeater-unit timestamp)
-		 (hour "h") (day "d") (week "w") (month "m") (year "y"))))
-	     (warning-string
-	      (concat
-	       (case (org-element-property :warning-type timestamp)
-		 (first "--")
-		 (all "-"))
-	       (let ((val (org-element-property :warning-value timestamp)))
-		 (and val (number-to-string val)))
-	       (case (org-element-property :warning-unit timestamp)
-		 (hour "h") (day "d") (week "w") (month "m") (year "y"))))
-	     (build-ts-string
-	      ;; Build an Org timestamp string from TIME.  ACTIVEP is
-	      ;; non-nil when time stamp is active.  If WITH-TIME-P is
-	      ;; non-nil, add a time part.  HOUR-END and MINUTE-END
-	      ;; specify a time range in the timestamp.  REPEAT-STRING
-	      ;; is the repeater string, if any.
-	      (lambda (time activep &optional with-time-p hour-end minute-end)
-		(let ((ts (format-time-string
-			   (funcall (if with-time-p 'cdr 'car)
-				    org-time-stamp-formats)
-			   time)))
-		  (when (and hour-end minute-end)
-		    (string-match "[012]?[0-9]:[0-5][0-9]" ts)
-		    (setq ts
-			  (replace-match
-			   (format "\\&-%02d:%02d" hour-end minute-end)
-			   nil nil ts)))
-		  (unless activep (setq ts (format "[%s]" (substring ts 1 -1))))
-		  (dolist (s (list repeat-string warning-string))
-		    (when (org-string-nw-p s)
-		      (setq ts (concat (substring ts 0 -1)
-				       " "
-				       s
-				       (substring ts -1)))))
-		  ;; Return value.
-		  ts)))
-	     (type (org-element-property :type timestamp)))
-	(case type
-	  ((active inactive)
-	   (let* ((minute-start (org-element-property :minute-start timestamp))
-		  (minute-end (org-element-property :minute-end timestamp))
-		  (hour-start (org-element-property :hour-start timestamp))
-		  (hour-end (org-element-property :hour-end timestamp))
-		  (time-range-p (and hour-start hour-end minute-start minute-end
-				     (or (/= hour-start hour-end)
-					 (/= minute-start minute-end)))))
-	     (funcall
-	      build-ts-string
-	      (encode-time 0
-			   (or minute-start 0)
-			   (or hour-start 0)
-			   (org-element-property :day-start timestamp)
-			   (org-element-property :month-start timestamp)
-			   (org-element-property :year-start timestamp))
-	      (eq type 'active)
-	      (and hour-start minute-start)
-	      (and time-range-p hour-end)
-	      (and time-range-p minute-end))))
-	  ((active-range inactive-range)
-	   (let ((minute-start (org-element-property :minute-start timestamp))
-		 (minute-end (org-element-property :minute-end timestamp))
-		 (hour-start (org-element-property :hour-start timestamp))
-		 (hour-end (org-element-property :hour-end timestamp)))
-	     (concat
-	      (funcall
-	       build-ts-string (encode-time
-				0
-				(or minute-start 0)
-				(or hour-start 0)
-				(org-element-property :day-start timestamp)
-				(org-element-property :month-start timestamp)
-				(org-element-property :year-start timestamp))
-	       (eq type 'active-range)
-	       (and hour-start minute-start))
-	      "--"
-	      (funcall build-ts-string
-		       (encode-time 0
-				    (or minute-end 0)
-				    (or hour-end 0)
-				    (org-element-property :day-end timestamp)
-				    (org-element-property :month-end timestamp)
-				    (org-element-property :year-end timestamp))
-		       (eq type 'active-range)
-		       (and hour-end minute-end)))))))))
+  (let* ((repeat-string
+	  (concat
+	   (case (org-element-property :repeater-type timestamp)
+	     (cumulate "+") (catch-up "++") (restart ".+"))
+	   (let ((val (org-element-property :repeater-value timestamp)))
+	     (and val (number-to-string val)))
+	   (case (org-element-property :repeater-unit timestamp)
+	     (hour "h") (day "d") (week "w") (month "m") (year "y"))))
+	 (warning-string
+	  (concat
+	   (case (org-element-property :warning-type timestamp)
+	     (first "--")
+	     (all "-"))
+	   (let ((val (org-element-property :warning-value timestamp)))
+	     (and val (number-to-string val)))
+	   (case (org-element-property :warning-unit timestamp)
+	     (hour "h") (day "d") (week "w") (month "m") (year "y"))))
+	 (build-ts-string
+	  ;; Build an Org timestamp string from TIME.  ACTIVEP is
+	  ;; non-nil when time stamp is active.  If WITH-TIME-P is
+	  ;; non-nil, add a time part.  HOUR-END and MINUTE-END
+	  ;; specify a time range in the timestamp.  REPEAT-STRING is
+	  ;; the repeater string, if any.
+	  (lambda (time activep &optional with-time-p hour-end minute-end)
+	    (let ((ts (format-time-string
+		       (funcall (if with-time-p 'cdr 'car)
+				org-time-stamp-formats)
+		       time)))
+	      (when (and hour-end minute-end)
+		(string-match "[012]?[0-9]:[0-5][0-9]" ts)
+		(setq ts
+		      (replace-match
+		       (format "\\&-%02d:%02d" hour-end minute-end)
+		       nil nil ts)))
+	      (unless activep (setq ts (format "[%s]" (substring ts 1 -1))))
+	      (dolist (s (list repeat-string warning-string))
+		(when (org-string-nw-p s)
+		  (setq ts (concat (substring ts 0 -1)
+				   " "
+				   s
+				   (substring ts -1)))))
+	      ;; Return value.
+	      ts)))
+	 (type (org-element-property :type timestamp)))
+    (case type
+      ((active inactive)
+       (let* ((minute-start (org-element-property :minute-start timestamp))
+	      (minute-end (org-element-property :minute-end timestamp))
+	      (hour-start (org-element-property :hour-start timestamp))
+	      (hour-end (org-element-property :hour-end timestamp))
+	      (time-range-p (and hour-start hour-end minute-start minute-end
+				 (or (/= hour-start hour-end)
+				     (/= minute-start minute-end)))))
+	 (funcall
+	  build-ts-string
+	  (encode-time 0
+		       (or minute-start 0)
+		       (or hour-start 0)
+		       (org-element-property :day-start timestamp)
+		       (org-element-property :month-start timestamp)
+		       (org-element-property :year-start timestamp))
+	  (eq type 'active)
+	  (and hour-start minute-start)
+	  (and time-range-p hour-end)
+	  (and time-range-p minute-end))))
+      ((active-range inactive-range)
+       (let ((minute-start (org-element-property :minute-start timestamp))
+	     (minute-end (org-element-property :minute-end timestamp))
+	     (hour-start (org-element-property :hour-start timestamp))
+	     (hour-end (org-element-property :hour-end timestamp)))
+	 (concat
+	  (funcall
+	   build-ts-string (encode-time
+			    0
+			    (or minute-start 0)
+			    (or hour-start 0)
+			    (org-element-property :day-start timestamp)
+			    (org-element-property :month-start timestamp)
+			    (org-element-property :year-start timestamp))
+	   (eq type 'active-range)
+	   (and hour-start minute-start))
+	  "--"
+	  (funcall build-ts-string
+		   (encode-time 0
+				(or minute-end 0)
+				(or hour-end 0)
+				(org-element-property :day-end timestamp)
+				(org-element-property :month-end timestamp)
+				(org-element-property :year-end timestamp))
+		   (eq type 'active-range)
+		   (and hour-end minute-end))))))))
 
 (defun org-element-timestamp-successor ()
   "Search for the next timestamp object.
@@ -4810,7 +4807,7 @@ the value to store.  Nothing will be stored if
     (unless org-element--cache (org-element-cache-reset))
     (puthash pos data org-element--cache)))
 
-(defsubst org-element--shift-positions (element offset)
+(defsubst org-element--cache-shift-positions (element offset)
   "Shift ELEMENT properties relative to buffer positions by OFFSET.
 Properties containing buffer positions are `:begin', `:end',
 `:contents-begin', `:contents-end' and `:structure'.  They are
@@ -4819,12 +4816,12 @@ modified by side-effect.  Return modified element."
     ;; Shift :structure property for the first plain list only: it is
     ;; the only one that really matters and it prevents from shifting
     ;; it more than once.
-    (when (eq (car element) 'plain-list)
-      (let ((structure (plist-get properties :structure)))
-	(when (<= (plist-get properties :begin) (caar structure))
-	  (dolist (item structure)
-	    (incf (car item) offset)
-	    (incf (nth 6 item) offset)))))
+    (when (and (eq (org-element-type element) 'plain-list)
+	       (not (eq (org-element-type (plist-get properties :parent))
+			'item)))
+      (dolist (item (plist-get properties :structure))
+	(incf (car item) offset)
+	(incf (nth 6 item) offset)))
     (plist-put properties :begin (+ (plist-get properties :begin) offset))
     (plist-put properties :end (+ (plist-get properties :end) offset))
     (dolist (key '(:contents-begin :contents-end :post-affiliated))
@@ -4996,14 +4993,14 @@ removed from the cache."
 		   (let* ((conflictp (consp (caar value)))
 			  (value-to-shift (if conflictp (cdr value) value)))
 		     ;; Shift element part.
-		     (org-element--shift-positions (car value-to-shift) offset)
+		     (org-element--cache-shift-positions (car value-to-shift) offset)
 		     ;; Shift objects part.
 		     (dolist (object-data (cdr value-to-shift))
 		       (incf (car object-data) offset)
 		       (dolist (successor (nth 1 object-data))
 			 (incf (cdr successor) offset))
 		       (dolist (object (cddr object-data))
-			 (org-element--shift-positions object offset)))
+			 (org-element--cache-shift-positions object offset)))
 		     ;; Shift key-value pair.
 		     (let* ((new-key (+ key offset))
 			    (new-value (gethash new-key org-element--cache)))
@@ -5038,22 +5035,22 @@ removed from the cache."
 		;; Preserve any element ending before BEG.  If it
 		;; overlaps the BEG-END area, remove it.
 		(t
-		 (when (let ((element (car value)))
-			 (or (>= (org-element-property :end element) beg)
-			     ;; Special case: footnote definitions and
-			     ;; plain lists can end with blank lines.
-			     ;; Modifying those can also alter last
-			     ;; element inside.  We must therefore
-			     ;; remove these elements from cache.
-			     (let ((parent
-				    (org-element-property :parent element)))
-			       (and (memq (org-element-type parent)
-					  '(footnote-definition plain-list))
-				    (>= (org-element-property :end parent) beg)
-				    (= (org-element-property :contents-end
-							     parent)
-				       (org-element-property :end element))))))
-		   (remhash key org-element--cache)))))
+		 (let ((element (car value)))
+		   (if (>= (org-element-property :end element) beg)
+		       (remhash key org-element--cache)
+		     ;; Special case: footnote definitions and plain
+		     ;; lists can end with blank lines.  Modifying
+		     ;; those can also alter last element inside.  We
+		     ;; must therefore remove them from cache.
+		     (let ((parent (org-element-property :parent element)))
+		       (when (and parent (eq (org-element-type parent) 'item))
+			 (setq parent (org-element-property :parent parent)))
+		       (when (and (memq (org-element-type parent)
+					'(footnote-definition plain-list))
+				  (>= (org-element-property :end parent) beg)
+				  (= (org-element-property :contents-end parent)
+				     (org-element-property :end element)))
+			 (remhash key org-element--cache))))))))
 	   org-element--cache)
 	  ;; Signal cache as up-to-date.
 	  (org-element--cache-cancel-changes))))))

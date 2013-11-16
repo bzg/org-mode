@@ -45,6 +45,8 @@
 
 ;;; Code:
 (require 'ob)
+(eval-when-compile
+  (require 'cl))
 
 (declare-function cider-current-ns "ext:cider-interaction" ())
 (declare-function nrepl-send-string-sync "ext:nrepl-client" (input &optional ns session))

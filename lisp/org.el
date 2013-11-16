@@ -115,24 +115,33 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 (declare-function org-inlinetask-toggle-visibility "org-inlinetask" ())
 (declare-function org-pop-to-buffer-same-window "org-compat" (&optional buffer-or-name norecord label))
+(declare-function org-clocktable-shift "org-clock" (dir n))
 (declare-function org-clock-get-last-clock-out-time "org-clock" ())
+(declare-function org-clock-update-time-maybe "org-clock" ())
+(declare-function org-clock-remove-overlays "org-clock" (&optional beg end noremove))
 (declare-function org-clock-timestamps-up "org-clock" (&optional n))
 (declare-function org-clock-timestamps-down "org-clock" (&optional n))
 (declare-function org-clock-sum-current-item "org-clock" (&optional tstart))
 
+(declare-function org-babel-tangle-file "ob-tangle" (file &optional target-file lang))
 (declare-function orgtbl-mode "org-table" (&optional arg))
 (declare-function org-clock-out "org-clock" (&optional switch-to-state fail-quietly at-time))
 (declare-function org-beamer-mode "ox-beamer" ())
+(declare-function org-table-blank-field "org-table" ())
 (declare-function org-table-edit-field "org-table" (arg))
+(declare-function org-table-insert-row "org-table" (&optional arg))
 (declare-function org-table-justify-field-maybe "org-table" (&optional new))
 (declare-function org-table-set-constants "org-table" ())
 (declare-function org-table-calc-current-TBLFM "org-table" (&optional arg))
 (declare-function org-id-get-create "org-id" (&optional force))
+(declare-function org-add-archive-files "org-archive" (files))
 (declare-function org-id-find-id-file "org-id" (id))
 (declare-function org-tags-view "org-agenda" (&optional todo-only match))
 (declare-function org-agenda-list "org-agenda" (&optional arg start-day span))
 (declare-function org-agenda-redo "org-agenda" (&optional all))
 (declare-function org-table-align "org-table" ())
+(declare-function org-table-begin "org-table" (&optional table-type))
+(declare-function org-table-end "org-table" (&optional table-type))
 (declare-function org-table-paste-rectangle "org-table" ())
 (declare-function org-table-maybe-eval-formula "org-table" ())
 (declare-function org-table-maybe-recalculate-line "org-table" ())
@@ -160,6 +169,10 @@ Stars are put in group 1 and the trimmed body in group 2.")
 		  (&optional granularity visible-only))
 (declare-function org-element-restriction "org-element" (element))
 (declare-function org-element-type "org-element" (element))
+
+(defsubst org-uniquify (list)
+  "Non-destructively remove duplicate elements from LIST."
+  (let ((res (copy-sequence list))) (delete-dups res)))
 
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
@@ -1721,17 +1734,15 @@ In tables, the special behavior of RET has precedence."
   :group 'org-link-follow
   :type 'boolean)
 
-(defcustom org-mouse-1-follows-link 450
+(defcustom org-mouse-1-follows-link
+  (if (boundp 'mouse-1-click-follows-link) mouse-1-click-follows-link t)
   "Non-nil means mouse-1 on a link will follow the link.
 A longer mouse click will still set point.  Does not work on XEmacs.
 Needs to be set before org.el is loaded."
   :group 'org-link-follow
   :version "24.4"
   :package-version '(Org . "8.3")
-  :set (lambda (var val)
-	 (set-default var (if (boundp 'mouse-1-click-follows-link)
-			      mouse-1-click-follows-link t)))
-  :type '(choice 
+  :type '(choice
 	  (const :tag "A double click follows the link" 'double)
 	  (const :tag "Unconditionally follow the link with mouse-1" t)
 	  (integer :tag "mouse-1 click does not follow the link if longer than N ms" 450)))
@@ -4244,12 +4255,6 @@ Normal means, no org-mode-specific context."
   "Detect the first line outside a table when searching from within it.
 This works for both table types.")
 
-;; Autoload the functions in org-table.el that are needed by functions here.
-
-(eval-and-compile
-  (org-autoload "org-table"
-		'(org-table-begin org-table-blank-field org-table-end)))
-
 (defconst org-TBLFM-regexp "^[ \t]*#\\+TBLFM: "
   "Detect a #+TBLFM line.")
 
@@ -4330,12 +4335,6 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 	(re-search-forward org-table-any-border-regexp nil 1))))
   (unless quietly (message "Mapping tables: done")))
 
-;; Declare and autoload functions from org-agenda.el
-
-(eval-and-compile
-  (org-autoload "org-agenda"
-		'(org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item)))
-
 (declare-function org-clock-save-markers-for-cut-and-paste "org-clock" (beg end))
 (declare-function org-clock-update-mode-line "org-clock" ())
 (declare-function org-resolve-clocks "org-clock"
@@ -4360,11 +4359,6 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
   "Return the buffer where the clock is currently running.
 Return nil if no clock is running."
   (marker-buffer org-clock-marker))
-
-(eval-and-compile
-  (org-autoload "org-clock" '(org-clock-remove-overlays
-			      org-clock-update-time-maybe
-			      org-clocktable-shift)))
 
 (defun org-check-running-clock ()
   "Check if the current buffer contains the running clock.
@@ -4565,33 +4559,18 @@ Otherwise, these types are allowed:
 
 (defalias 'org-advertized-archive-subtree 'org-archive-subtree)
 
-(eval-and-compile
-  (org-autoload "org-archive"
-		'(org-add-archive-files)))
-
-;; Autoload Column View Code
+;; Declare Column View Code
 
 (declare-function org-columns-number-to-string "org-colview" (n fmt &optional printf))
 (declare-function org-columns-get-format-and-top-level "org-colview" ())
 (declare-function org-columns-compute "org-colview" (property))
 
-(org-autoload (if (featurep 'xemacs) "org-colview-xemacs" "org-colview")
-	      '(org-columns-number-to-string
-		org-columns-get-format-and-top-level
-		org-columns-compute
-		org-columns-remove-overlays))
-
-;; Autoload ID code
+;; Declare ID code
 
 (declare-function org-id-store-link "org-id")
 (declare-function org-id-locations-load "org-id")
 (declare-function org-id-locations-save "org-id")
 (defvar org-id-track-globally)
-(org-autoload "org-id"
-	      '(org-id-new
-		org-id-copy
-		org-id-get-with-outline-path-completion
-		org-id-get-with-outline-drilling))
 
 ;;; Variables for pre-computed regular expressions, all buffer local
 
@@ -12858,7 +12837,7 @@ This function is run automatically after each state change to a DONE state."
 	 (org-log-done nil)
 	 (org-todo-log-states nil)
 	 re type n what ts time to-state)
-    (when (and repeat (not (zerop (string-to-number repeat))))
+    (when (and repeat (not (zerop (string-to-number (substring repeat 1)))))
       (if (eq org-log-repeat t) (setq org-log-repeat 'state))
       (setq to-state (or (org-entry-get nil "REPEAT_TO_STATE")
 			 org-todo-repeat-to-state))
@@ -21815,10 +21794,6 @@ for the search purpose."
 (defun org-reverse-string (string)
   "Return the reverse of STRING."
   (apply 'string (reverse (string-to-list string))))
-
-(defsubst org-uniquify (list)
-  "Non-destructively remove duplicate elements from LIST."
-  (let ((res (copy-sequence list))) (delete-dups res)))
 
 (defun org-uniquify-alist (alist)
   "Merge elements of ALIST with the same key.

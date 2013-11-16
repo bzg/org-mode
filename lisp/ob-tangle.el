@@ -27,8 +27,6 @@
 
 ;;; Code:
 (require 'org-src)
-(eval-when-compile
-  (require 'cl))
 
 (declare-function org-edit-special "org" (&optional arg))
 (declare-function org-link-escape "org" (text &optional table))

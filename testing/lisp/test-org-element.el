@@ -2211,16 +2211,17 @@ Outside list"
   "Test clock interpreter."
   ;; Running clock.
   (should
-   (equal (let ((org-clock-string "CLOCK:"))
-	    (org-test-parse-and-interpret "CLOCK: [2012-01-01 sun. 00:01]"))
-	  "CLOCK: [2012-01-01 sun. 00:01]\n"))
+   (string-match
+    "CLOCK: \\[2012-01-01 .* 00:01\\]"
+    (let ((org-clock-string "CLOCK:"))
+      (org-test-parse-and-interpret "CLOCK: [2012-01-01 sun. 00:01]"))))
   ;; Closed clock.
   (should
-   (equal
+   (string-match
+    "CLOCK: \\[2012-01-01 .* 00:01\\]--\\[2012-01-01 .* 00:02\\] =>  0:01"
     (let ((org-clock-string "CLOCK:"))
       (org-test-parse-and-interpret "
-CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))
-    "CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01\n")))
+CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01")))))
 
 (ert-deftest test-org-element/comment-interpreter ()
   "Test comment interpreter."
@@ -2320,12 +2321,12 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))
 	(org-deadline-string "DEADLINE:")
 	(org-scheduled-string "SCHEDULED:"))
     (should
-     (equal
+     (string-match
+      "\\* Headline
+DEADLINE: <2012-03-29 .*?> SCHEDULED: <2012-03-29 .*?> CLOSED: \\[2012-03-29 .*?\\]"
       (org-test-parse-and-interpret
        "* Headline
-DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01> CLOSED: [2012-01-01]")
-      "* Headline
-DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01> CLOSED: [2012-01-01]\n"))))
+DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu.]")))))
 
 (ert-deftest test-org-element/property-drawer-interpreter ()
   "Test property drawer interpreter."
@@ -2395,8 +2396,9 @@ DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01> CLOSED: [2012-01-01]\n"))))
 (ert-deftest test-org-element/timestamp-interpreter ()
   "Test timestamp interpreter."
   ;; Active.
-  (should (equal (org-test-parse-and-interpret "<2012-03-29 thu. 16:40>")
-		 "<2012-03-29 thu. 16:40>\n"))
+  (should
+   (string-match "<2012-03-29 .* 16:40>"
+		 (org-test-parse-and-interpret "<2012-03-29 thu. 16:40>")))
   (should
    (string-match "<2012-03-29 .* 16:40>"
 		 (org-element-timestamp-interpreter
@@ -2404,8 +2406,9 @@ DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01> CLOSED: [2012-01-01]\n"))))
 		    (:type active :year-start 2012 :month-start 3 :day-start 29
 			   :hour-start 16 :minute-start 40)) nil)))
   ;; Inactive.
-  (should (equal (org-test-parse-and-interpret "[2012-03-29 thu. 16:40]")
-		 "[2012-03-29 thu. 16:40]\n"))
+  (should
+   (string-match "\\[2012-03-29 .* 16:40\\]"
+		 (org-test-parse-and-interpret "[2012-03-29 thu. 16:40]")))
   (should
    (string-match
     "\\[2012-03-29 .* 16:40\\]"
@@ -2414,9 +2417,10 @@ DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01> CLOSED: [2012-01-01]\n"))))
        (:type inactive :year-start 2012 :month-start 3 :day-start 29
 	      :hour-start 16 :minute-start 40)) nil)))
   ;; Active range.
-  (should (equal (org-test-parse-and-interpret
-		  "<2012-03-29 thu. 16:40>--<2012-03-29 thu. 16:41>")
-		 "<2012-03-29 thu. 16:40>--<2012-03-29 thu. 16:41>\n"))
+  (should
+   (string-match "<2012-03-29 .* 16:40>--<2012-03-29 .* 16:41>"
+		 (org-test-parse-and-interpret
+		  "<2012-03-29 thu. 16:40>--<2012-03-29 thu. 16:41>")))
   (should
    (string-match
     "<2012-03-29 .* 16:40>--<2012-03-29 .* 16:41>"
@@ -2426,9 +2430,10 @@ DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01> CLOSED: [2012-01-01]\n"))))
 	      :hour-start 16 :minute-start 40 :year-end 2012 :month-end 3
 	      :day-end 29 :hour-end 16 :minute-end 41)) nil)))
   ;; Inactive range.
-  (should (equal (org-test-parse-and-interpret
-		  "[2012-03-29 thu. 16:40]--[2012-03-29 thu. 16:41]")
-		 "[2012-03-29 thu. 16:40]--[2012-03-29 thu. 16:41]\n"))
+  (should
+   (string-match "\\[2012-03-29 .* 16:40\\]--\\[2012-03-29 .* 16:41\\]"
+		 (org-test-parse-and-interpret
+		  "[2012-03-29 thu. 16:40]--[2012-03-29 thu. 16:41]")))
   (should
    (string-match
     "\\[2012-03-29 .* 16:40\\]--\\[2012-03-29 .* 16:41\\]"
@@ -2441,8 +2446,9 @@ DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01> CLOSED: [2012-01-01]\n"))))
   (should (equal (org-test-parse-and-interpret "<%%diary-float t 4 2>")
 		 "<%%diary-float t 4 2>\n"))
   ;; Timestamp with repeater interval, with delay, with both.
-  (should (equal (org-test-parse-and-interpret "<2012-03-29 thu. +1y>")
-		 "<2012-03-29 thu. +1y>\n"))
+  (should
+   (string-match "<2012-03-29 .* \\+1y>"
+		 (org-test-parse-and-interpret "<2012-03-29 thu. +1y>")))
   (should
    (string-match
     "<2012-03-29 .* \\+1y>"
@@ -2469,9 +2475,10 @@ DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01> CLOSED: [2012-01-01]\n"))))
 	      :repeater-type cumulate :repeater-value 1 :repeater-unit year))
      nil)))
   ;; Timestamp range with repeater interval
-  (should (equal (org-test-parse-and-interpret
-		  "<2012-03-29 Thu +1y>--<2012-03-30 Thu +1y>")
-		 "<2012-03-29 Thu +1y>--<2012-03-30 Thu +1y>\n"))
+  (should
+   (string-match "<2012-03-29 .* \\+1y>--<2012-03-30 .* \\+1y>"
+		 (org-test-parse-and-interpret
+		  "<2012-03-29 Thu +1y>--<2012-03-30 Thu +1y>")))
   (should
    (string-match
     "<2012-03-29 .* \\+1y>--<2012-03-30 .* \\+1y>"

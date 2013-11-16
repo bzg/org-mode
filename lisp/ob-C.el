@@ -32,6 +32,8 @@
 ;;; Code:
 (require 'ob)
 (require 'cc-mode)
+(eval-when-compile
+  (require 'cl))
 
 (declare-function org-entry-get "org"
 		  (pom property &optional inherit literal-nil))
