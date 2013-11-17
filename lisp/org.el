@@ -10520,11 +10520,29 @@ application the system uses for this file type."
 	      (apply cmd (nreverse args1))))
 
 	   ((member type '("http" "https" "ftp" "news"))
-	    (browse-url (concat type ":" (org-link-escape-browser path))))
+	    ;; In the example of the http Org link
+	    ;; [[http://lists.gnu.org/archive/cgi-bin/namazu.cgi?idxname=emacs-orgmode&query=%252Bsubject:"Release+8.2"]]
+	    ;; to open a browser with +subject:"Release 8.2" in the
+	    ;; query field the variable `path' contains
+	    ;; [...]=%2Bsubject:"Release+8.2", `url-encode-url'
+	    ;; converts correct to [...]=%2Bsubject:%22Release+8.2%22
+	    ;; and `org-link-escape-browser' converts wrong to
+	    ;; [...]=%252Bsubject:%22Release+8.2%22.
+	    ;;
+	    ;; `url-encode-url' is available since Emacs 24.3.1 and
+	    ;; `org-link-escape-browser' can be removed altogether
+	    ;; once Org drops support for Emacs 24.1 and 24.2.
+	    (browse-url (funcall (if (fboundp 'url-encode-url)
+				     #'url-encode-url
+				   #'org-link-escape-browser)
+				 (concat type ":" path))))
 
 	   ((string= type "doi")
-	    (browse-url (concat org-doi-server-url
-				(org-link-escape-browser path))))
+	    ;; See comments for type http above
+	    (browse-url (funcall (if (fboundp 'url-encode-url)
+				     #'url-encode-url
+				   #'org-link-escape-browser)
+				 (concat org-doi-server-url path))))
 
 	   ((member type '("message"))
 	    (browse-url (concat type ":" path)))
