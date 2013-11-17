@@ -655,8 +655,10 @@ the following lines anywhere in the buffer:
 (defcustom org-use-sub-superscripts t
   "Non-nil means interpret \"_\" and \"^\" for display.
 
-If you want to control how Org exports those characters,
-see `org-export-with-sub-superscripts'.
+If you want to control how Org exports those characters, see
+`org-export-with-sub-superscripts'.  `org-use-sub-superscripts'
+used to be an alias for `org-export-with-sub-superscripts' in
+Org <8.0, it is not anymore.
 
 When this option is turned on, you can use TeX-like syntax for
 sub- and superscripts within the buffer.  Several characters after
@@ -676,7 +678,8 @@ the braces are *required* in order to trigger interpretations as
 sub/superscript.  This can be helpful in documents that need \"_\"
 frequently in plain text."
   :group 'org-startup
-  :version "24.1"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "Always interpret" t)
 	  (const :tag "Only with braces" {})

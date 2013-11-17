@@ -626,8 +626,10 @@ e.g. \"stat:nil\""
 (defcustom org-export-with-sub-superscripts t
   "Non-nil means interpret \"_\" and \"^\" for export.
 
-If you want to control how Org displays those characters,
-see `org-use-sub-superscripts'.
+If you want to control how Org displays those characters, see
+`org-use-sub-superscripts'.  `org-export-with-sub-superscripts'
+used to be an alias for `org-use-sub-superscripts' in Org <8.0,
+it is not anymore.
 
 When this option is turned on, you can use TeX-like syntax for
 sub- and superscripts and see them exported correctly.
@@ -651,6 +653,8 @@ the braces are *required* in order to trigger interpretations as
 sub/superscript.  This can be helpful in documents that need \"_\"
 frequently in plain text."
   :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "Interpret them" t)
 	  (const :tag "Curly brackets only" {})
