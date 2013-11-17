@@ -1021,9 +1021,9 @@ may have been stored before."
 	 (target-entry-p (org-capture-get :target-entry-p))
 	 level beg end file)
 
+    (and (org-capture-get :exact-position)
+	 (goto-char (org-capture-get :exact-position)))
     (cond
-     ((org-capture-get :exact-position)
-      (goto-char (org-capture-get :exact-position)))
      ((not target-entry-p)
       ;; Insert as top-level entry, either at beginning or at end of file
       (setq level 1)
