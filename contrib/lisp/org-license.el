@@ -39,24 +39,6 @@
 
 (defvar org-license-images-directory "")
 
-(defun my-org-switch-language ()
-"Switch language if a `#+LANGUAGE:' Org meta-tag is on top 8 lines."
-(save-excursion
-  (let (lang
-	(license-alist '(("br" . "brazilian")
-			 ("ca" . "catalan")
-			 ("de" . "deutsch")
-			 ("en" . "american")
-			 ("eo" . "esperanto")
-			 ("eu" . "euskera")
-			 ("es" . "spanish"))))
-    (when (re-search-backward "#\\+LANGUAGE: +\\([[:alpha:]_]*\\)" 1 t)
-      (setq lang (match-string 1))
-;;      (message lang)
-      (ispell-change-dictionary (cdr (assoc lang dico-alist)))))))
-
-(add-hook 'org-mode-hook 'my-org-switch-language)
-
 (defun org-license-cc-by (language)
   (interactive "MLanguage ( br | ca | de | en | es | eo | eu | fi | fr | gl | it | jp | nl | pt ): " language)
   (cond ((equal language "br")
@@ -521,3 +503,5 @@ Copyright (C)  2013 " user-full-name
   (org-license-cc-by-nc-nd "nl")
   (org-license-cc-by-nc-nd "pt")
 )
+
+
