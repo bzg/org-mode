@@ -650,11 +650,20 @@ e.g. \"stat:nil\""
 (defcustom org-export-with-sub-superscripts t
   "Non-nil means interpret \"_\" and \"^\" for export.
 
+If you want to control how Org displays those characters, see
+`org-use-sub-superscripts'.  `org-export-with-sub-superscripts'
+used to be an alias for `org-use-sub-superscripts' in Org <8.0,
+it is not anymore.
+
 When this option is turned on, you can use TeX-like syntax for
-sub- and superscripts.  Several characters after \"_\" or \"^\"
-will be considered as a single item - so grouping with {} is
-normally not needed.  For example, the following things will be
-parsed as single sub- or superscripts.
+sub- and superscripts and see them exported correctly.
+
+You can also set the option with #+OPTIONS: ^:t
+
+Several characters after \"_\" or \"^\" will be considered as a
+single item - so grouping with {} is normally not needed.  For
+example, the following things will be parsed as single sub- or
+superscripts:
 
  10^24   or   10^tau     several digits will be considered 1 item.
  10^-12  or   10^-tau    a leading sign with digits or a word
@@ -662,15 +671,14 @@ parsed as single sub- or superscripts.
 			 terminated by almost any nonword/nondigit char.
  x_{i^2} or   x^(2-i)    braces or parenthesis do grouping.
 
-Still, ambiguity is possible - so when in doubt use {} to enclose
-the sub/superscript.  If you set this variable to the symbol
-`{}', the braces are *required* in order to trigger
-interpretations as sub/superscript.  This can be helpful in
-documents that need \"_\" frequently in plain text.
-
-This option can also be set with the OPTIONS keyword,
-e.g. \"^:nil\"."
+Still, ambiguity is possible.  So when in doubt, use {} to enclose
+the sub/superscript.  If you set this variable to the symbol `{}',
+the braces are *required* in order to trigger interpretations as
+sub/superscript.  This can be helpful in documents that need \"_\"
+frequently in plain text."
   :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "Interpret them" t)
 	  (const :tag "Curly brackets only" {})
@@ -2911,7 +2919,7 @@ The copy will preserve local variables, visibility, contents and
 narrowing of the original buffer.  If a region was active in
 BUFFER, contents will be narrowed to that region instead.
 
-The resulting function can be evaled at a later time, from
+The resulting function can be evaluated at a later time, from
 another buffer, effectively cloning the original buffer there.
 
 The function assumes BUFFER's major mode is `org-mode'."
@@ -4727,7 +4735,7 @@ INFO is a plist used as a communication channel."
   "Return TABLE-ROW number.
 INFO is a plist used as a communication channel.  Return value is
 zero-based and ignores separators.  The function returns nil for
-special colums and separators."
+special columns and separators."
   (when (and (eq (org-element-property :type table-row) 'standard)
 	     (not (org-export-table-row-is-special-p table-row info)))
     (let ((number 0))
@@ -5961,7 +5969,7 @@ files or buffers, only the display.
   "Export dispatcher for Org mode.
 
 It provides an access to common export related tasks in a buffer.
-Its interface comes in two flavours: standard and expert.
+Its interface comes in two flavors: standard and expert.
 
 While both share the same set of bindings, only the former
 displays the valid keys associations in a dedicated buffer.
@@ -5969,7 +5977,7 @@ Scrolling (resp. line-wise motion) in this buffer is done with
 SPC and DEL (resp. C-n and C-p) keys.
 
 Set variable `org-export-dispatch-use-expert-ui' to switch to one
-flavour or the other.
+flavor or the other.
 
 When ARG is \\[universal-argument], repeat the last export action, with the same set
 of options used back then, on the current buffer.

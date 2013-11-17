@@ -113,7 +113,7 @@ you will need to run the following command after the change:
 
   \\[universal-argument] \\[org-element-cache-reset]"
   :group 'org-footnote
-  :initialize 'custom-initialize-set
+  :initialize 'custom-initialize-default
   :set (lambda (var val)
 	 (set var val)
 	 (when (fboundp 'org-element-cache-reset)
