@@ -15183,103 +15183,102 @@ is a string only get exactly this property.  SPECIFIC can be a string, the
 specific property we are interested in.  Specifying it can speed
 things up because then unnecessary parsing is avoided."
   (setq which (or which 'all))
-  (org-with-point-at pom
-    (let ((clockstr (substring org-clock-string 0 -1))
-	  (excluded '("TODO" "TAGS" "ALLTAGS" "PRIORITY" "BLOCKED"))
-	  (case-fold-search nil)
-	  beg end range props sum-props key key1 value string clocksum clocksumt)
-      (save-excursion
-	(when (condition-case nil
-		  (and (derived-mode-p 'org-mode) (org-back-to-heading t))
-		(error nil))
-	  (setq beg (point))
-	  (setq sum-props (get-text-property (point) 'org-summaries))
-	  (setq clocksum (get-text-property (point) :org-clock-minutes)
-		clocksumt (get-text-property (point) :org-clock-minutes-today))
-	  (outline-next-heading)
-	  (setq end (point))
-	  (when (memq which '(all special))
-	    ;; Get the special properties, like TODO and tags
-	    (goto-char beg)
-	    (when (and (or (not specific) (string= specific "TODO"))
-		       (looking-at org-todo-line-regexp) (match-end 2))
-	      (push (cons "TODO" (org-match-string-no-properties 2)) props))
-	    (when (and (or (not specific) (string= specific "PRIORITY"))
-		       (looking-at org-priority-regexp))
-	      (push (cons "PRIORITY" (org-match-string-no-properties 2)) props))
-	    (when (or (not specific) (string= specific "FILE"))
-	      (push (cons "FILE" buffer-file-name) props))
-	    (when (and (or (not specific) (string= specific "TAGS"))
-		       (setq value (org-get-tags-string))
-		       (string-match "\\S-" value))
-	      (push (cons "TAGS" value) props))
-	    (when (and (or (not specific) (string= specific "ALLTAGS"))
-		       (setq value (org-get-tags-at)))
-	      (push (cons "ALLTAGS" (concat ":" (mapconcat 'identity value ":")
-					    ":"))
-		    props))
-	    (when (or (not specific) (string= specific "BLOCKED"))
-	      (push (cons "BLOCKED" (if (org-entry-blocked-p) "t" "")) props))
-	    (when (or (not specific)
-		      (member specific
-			      '("SCHEDULED" "DEADLINE" "CLOCK" "CLOSED"
-				"TIMESTAMP" "TIMESTAMP_IA")))
-	      (catch 'match
-		(while (re-search-forward org-maybe-keyword-time-regexp end t)
-		  (setq key (if (match-end 1)
-				(substring (org-match-string-no-properties 1)
-					   0 -1))
-			string (if (equal key clockstr)
-				   (org-trim
-				    (buffer-substring-no-properties
-				     (match-beginning 3) (goto-char
-							  (point-at-eol))))
-				 (substring (org-match-string-no-properties 3)
-					    1 -1)))
-		  ;; Get the correct property name from the key.  This is
-		  ;; necessary if the user has configured time keywords.
-		  (setq key1 (concat key ":"))
-		  (cond
-		   ((not key)
-		    (setq key
-			  (if (= (char-after (match-beginning 3)) ?\[)
-			      "TIMESTAMP_IA" "TIMESTAMP")))
-		   ((equal key1 org-scheduled-string) (setq key "SCHEDULED"))
-		   ((equal key1 org-deadline-string)  (setq key "DEADLINE"))
-		   ((equal key1 org-closed-string)    (setq key "CLOSED"))
-		   ((equal key1 org-clock-string)     (setq key "CLOCK")))
-		  (if (and specific (equal key specific) (not (equal key "CLOCK")))
-		      (progn
-			(push (cons key string) props)
-			;; no need to search further if match is found
-			(throw 'match t))
-		    (when (or (equal key "CLOCK") (not (assoc key props)))
-		      (push (cons key string) props)))))))
+  (org-with-wide-buffer
+   (org-with-point-at pom
+     (let ((clockstr (substring org-clock-string 0 -1))
+	   (excluded '("TODO" "TAGS" "ALLTAGS" "PRIORITY" "BLOCKED"))
+	   (case-fold-search nil)
+	   beg end range props sum-props key key1 value string clocksum clocksumt)
+       (when (and (derived-mode-p 'org-mode)
+		  (ignore-errors (org-back-to-heading t)))
+	 (setq beg (point))
+	 (setq sum-props (get-text-property (point) 'org-summaries))
+	 (setq clocksum (get-text-property (point) :org-clock-minutes)
+	       clocksumt (get-text-property (point) :org-clock-minutes-today))
+	 (outline-next-heading)
+	 (setq end (point))
+	 (when (memq which '(all special))
+	   ;; Get the special properties, like TODO and tags
+	   (goto-char beg)
+	   (when (and (or (not specific) (string= specific "TODO"))
+		      (looking-at org-todo-line-regexp) (match-end 2))
+	     (push (cons "TODO" (org-match-string-no-properties 2)) props))
+	   (when (and (or (not specific) (string= specific "PRIORITY"))
+		      (looking-at org-priority-regexp))
+	     (push (cons "PRIORITY" (org-match-string-no-properties 2)) props))
+	   (when (or (not specific) (string= specific "FILE"))
+	     (push (cons "FILE" buffer-file-name) props))
+	   (when (and (or (not specific) (string= specific "TAGS"))
+		      (setq value (org-get-tags-string))
+		      (string-match "\\S-" value))
+	     (push (cons "TAGS" value) props))
+	   (when (and (or (not specific) (string= specific "ALLTAGS"))
+		      (setq value (org-get-tags-at)))
+	     (push (cons "ALLTAGS" (concat ":" (mapconcat 'identity value ":")
+					   ":"))
+		   props))
+	   (when (or (not specific) (string= specific "BLOCKED"))
+	     (push (cons "BLOCKED" (if (org-entry-blocked-p) "t" "")) props))
+	   (when (or (not specific)
+		     (member specific
+			     '("SCHEDULED" "DEADLINE" "CLOCK" "CLOSED"
+			       "TIMESTAMP" "TIMESTAMP_IA")))
+	     (catch 'match
+	       (while (re-search-forward org-maybe-keyword-time-regexp end t)
+		 (setq key (if (match-end 1)
+			       (substring (org-match-string-no-properties 1)
+					  0 -1))
+		       string (if (equal key clockstr)
+				  (org-trim
+				   (buffer-substring-no-properties
+				    (match-beginning 3) (goto-char
+							 (point-at-eol))))
+				(substring (org-match-string-no-properties 3)
+					   1 -1)))
+		 ;; Get the correct property name from the key.  This is
+		 ;; necessary if the user has configured time keywords.
+		 (setq key1 (concat key ":"))
+		 (cond
+		  ((not key)
+		   (setq key
+			 (if (= (char-after (match-beginning 3)) ?\[)
+			     "TIMESTAMP_IA" "TIMESTAMP")))
+		  ((equal key1 org-scheduled-string) (setq key "SCHEDULED"))
+		  ((equal key1 org-deadline-string)  (setq key "DEADLINE"))
+		  ((equal key1 org-closed-string)    (setq key "CLOSED"))
+		  ((equal key1 org-clock-string)     (setq key "CLOCK")))
+		 (if (and specific (equal key specific) (not (equal key "CLOCK")))
+		     (progn
+		       (push (cons key string) props)
+		       ;; no need to search further if match is found
+		       (throw 'match t))
+		   (when (or (equal key "CLOCK") (not (assoc key props)))
+		     (push (cons key string) props)))))))
 
-	  (when (memq which '(all standard))
-	    ;; Get the standard properties, like :PROP: ...
-	    (setq range (org-get-property-block beg end))
-	    (when range
-	      (goto-char (car range))
-	      (while (re-search-forward org-property-re
-		      (cdr range) t)
-		(setq key (org-match-string-no-properties 2)
-		      value (org-trim (or (org-match-string-no-properties 3) "")))
-		(unless (member key excluded)
-		  (push (cons key (or value "")) props)))))
-	  (if clocksum
-	      (push (cons "CLOCKSUM"
-			  (org-columns-number-to-string (/ (float clocksum) 60.)
-							'add_times))
-		    props))
-	  (if clocksumt
-	      (push (cons "CLOCKSUM_T"
-			  (org-columns-number-to-string (/ (float clocksumt) 60.)
-							'add_times))
-		    props))
-	  (unless (assoc "CATEGORY" props)
-	    (push (cons "CATEGORY" (org-get-category)) props))
-	  (append sum-props (nreverse props)))))))
+	 (when (memq which '(all standard))
+	   ;; Get the standard properties, like :PROP: ...
+	   (setq range (org-get-property-block beg end))
+	   (when range
+	     (goto-char (car range))
+	     (while (re-search-forward org-property-re
+				       (cdr range) t)
+	       (setq key (org-match-string-no-properties 2)
+		     value (org-trim (or (org-match-string-no-properties 3) "")))
+	       (unless (member key excluded)
+		 (push (cons key (or value "")) props)))))
+	 (if clocksum
+	     (push (cons "CLOCKSUM"
+			 (org-columns-number-to-string (/ (float clocksum) 60.)
+						       'add_times))
+		   props))
+	 (if clocksumt
+	     (push (cons "CLOCKSUM_T"
+			 (org-columns-number-to-string (/ (float clocksumt) 60.)
+						       'add_times))
+		   props))
+	 (unless (assoc "CATEGORY" props)
+	   (push (cons "CATEGORY" (org-get-category)) props))
+	 (append sum-props (nreverse props)))))))
 
 (defun org-entry-get (pom property &optional inherit literal-nil)
   "Get value of PROPERTY for entry or content at point-or-marker POM.
