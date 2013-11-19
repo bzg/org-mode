@@ -91,10 +91,10 @@ current directory string."
 					(point-min) (point-max)))))
 				 (cdr (assoc :package params)))))))
      (org-babel-result-cond (cdr (assoc :result-params params))
-       (car result)
+       result
        (condition-case nil
-           (read (org-babel-lisp-vector-to-list (cadr result)))
-         (error (cadr result)))))
+           (read (org-babel-lisp-vector-to-list result))
+         (error result))))
    (org-babel-pick-name (cdr (assoc :colname-names params))
 			(cdr (assoc :colnames params)))
    (org-babel-pick-name (cdr (assoc :rowname-names params))
