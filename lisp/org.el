@@ -5534,8 +5534,6 @@ The following commands are available:
   (abbrev-table-put org-mode-abbrev-table
 		    :parents (list text-mode-abbrev-table)))
 
-(put 'org-mode 'flyspell-mode-predicate 'org-mode-flyspell-verify)
-
 (defsubst org-fix-ellipsis-at-bol ()
   (save-excursion (goto-char (window-start)) (recenter 0)))
 
@@ -5878,14 +5876,16 @@ by a #."
 		    end1 (min (point-max) (1- (match-beginning 0))))
 	      (setq block-end (match-beginning 0))
 	      (when quoting
+		(org-remove-flyspell-overlays-in beg1 end1)
 		(remove-text-properties beg end
 					'(display t invisible t intangible t)))
 	      (add-text-properties
-	       beg end
-	       '(font-lock-fontified t font-lock-multiline t))
+	       beg end '(font-lock-fontified t font-lock-multiline t))
 	      (add-text-properties beg beg1 '(face org-meta-line))
-	      (add-text-properties end1 (min (point-max) (1+ end))
-				   '(face org-meta-line)) ; for end_src
+	      (org-remove-flyspell-overlays-in beg beg1)
+	      (add-text-properties	; For end_src
+	       end1 (min (point-max) (1+ end)) '(face org-meta-line))
+	      (org-remove-flyspell-overlays-in end1 end)
 	      (cond
 	       ((and lang (not (string= lang "")) org-src-fontify-natively)
 		(org-src-font-lock-fontify-block lang block-start block-end)
@@ -5897,7 +5897,7 @@ by a #."
 		;; add a background overlay
 		(setq ovl (make-overlay beg1 block-end))
                 (overlay-put ovl 'face 'org-block-background)
-                (overlay-put ovl 'evaporate t))  ;; make it go away when empty
+                (overlay-put ovl 'evaporate t)) ; make it go away when empty
 	       (quoting
 		(add-text-properties beg1 (min (point-max) (1+ end1))
 				     '(face org-block))) ; end of source block
@@ -5906,11 +5906,14 @@ by a #."
 		(add-text-properties beg1 (min (point-max) (1+ end1)) '(face org-quote)))
 	       ((string= block-type "verse")
 		(add-text-properties beg1 (min (point-max) (1+ end1)) '(face org-verse))))
-      	      (add-text-properties beg beg1 '(face org-block-begin-line))
-      	      (add-text-properties (min (point-max) (1+ end)) (min (point-max) (1+ end1))
+	      (add-text-properties beg beg1 '(face org-block-begin-line))
+	      (add-text-properties (min (point-max) (1+ end)) (min (point-max) (1+ end1))
 				   '(face org-block-end-line))
 	      t))
 	   ((member dc1 '("+title:" "+author:" "+email:" "+date:"))
+	    (org-remove-flyspell-overlays-in
+	     (match-beginning 0)
+	     (if (equal "+title:" dc1) (match-end 2) (match-end 0)))
 	    (add-text-properties
 	     beg (match-end 3)
 	     (if (member (intern (substring dc1 0 -1)) org-hidden-keywords)
@@ -5919,28 +5922,42 @@ by a #."
 	    (add-text-properties
 	     (match-beginning 6) (min (point-max) (1+ (match-end 6)))
 	     (if (string-equal dc1 "+title:")
-	    	 '(font-lock-fontified t face org-document-title)
+		 '(font-lock-fontified t face org-document-title)
 	       '(font-lock-fontified t face org-document-info))))
 	   ((or (equal dc1 "+results")
 		(member dc1 '("+begin:" "+end:" "+caption:" "+label:"
 			      "+orgtbl:" "+tblfm:" "+tblname:" "+results:"
 			      "+call:" "+header:" "+headers:" "+name:"))
 		(and (match-end 4) (equal dc3 "+attr")))
+	    (org-remove-flyspell-overlays-in
+	     (match-beginning 0)
+	     (if (equal "+caption:" dc1) (match-end 2) (match-end 0)))
 	    (add-text-properties
 	     beg (match-end 0)
 	     '(font-lock-fontified t face org-meta-line))
 	    t)
 	   ((member dc3 '(" " ""))
+	    (org-remove-flyspell-overlays-in beg (match-end 0))
 	    (add-text-properties
 	     beg (match-end 0)
 	     '(font-lock-fontified t face font-lock-comment-face)))
 	   ((not (member (char-after beg) '(?\  ?\t)))
 	    ;; just any other in-buffer setting, but not indented
+	    (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	    (add-text-properties
 	     beg (match-end 0)
 	     '(font-lock-fontified t face org-meta-line))
 	    t)
 	   (t nil))))))
+
+(defun org-fontify-drawers (limit)
+  "Fontify drawers."
+  (when (re-search-forward org-drawer-regexp limit t)
+    (add-text-properties
+     (match-beginning 0) (match-end 0)
+     '(font-lock-fontified t face org-special-keyword))
+    (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
+    t))
 
 (defun org-activate-angle-links (limit)
   "Run through the buffer and add overlays to links."
@@ -5958,15 +5975,21 @@ by a #."
   "Run through the buffer and add overlays to footnotes."
   (let ((fn (org-footnote-next-reference-or-definition limit)))
     (when fn
-      (let ((beg (nth 1 fn)) (end (nth 2 fn)))
-	(org-remove-flyspell-overlays-in beg end)
+      (let* ((beg (nth 1 fn))
+	     (end (nth 2 fn))
+	     (label (car fn))
+	     (referencep (/= (line-beginning-position) beg)))
+	(when (and referencep (nth 3 fn))
+	  (save-excursion
+	    (goto-char beg)
+	    (search-forward (or label "fn:"))
+	    (org-remove-flyspell-overlays-in beg (match-end 0))))
 	(add-text-properties beg end
 			     (list 'mouse-face 'highlight
 				   'keymap org-mouse-map
 				   'help-echo
-				   (if (= (point-at-bol) beg)
-				       "Footnote definition"
-				     "Footnote reference")
+				   (if referencep "Footnote reference"
+				     "Footnote definition")
 				   'font-lock-fontified t
 				   'font-lock-multiline t
 				   'face 'org-footnote))))))
@@ -6231,8 +6254,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   '("^[ \t]*|\\( *\\([$!_^/]\\) *|.*\\)|" (1 'org-formula t))
 	   '("| *\\(<[lrc]?[0-9]*>\\)" (1 'org-formula t))
 	   ;; Drawers
-	   (list org-drawer-regexp '(0 'org-special-keyword t))
-	   (list "^[ \t]*:END:" '(0 'org-special-keyword t))
+	   '(org-fontify-drawers)
 	   ;; Properties
 	   (list org-property-re
 		 '(1 'org-special-keyword t)
@@ -6465,7 +6487,7 @@ If KWD is a number, get the corresponding match group."
     (remove-text-properties beg end
 			    '(mouse-face t keymap t org-linked-text t
 					 invisible t intangible t
-					 org-no-flyspell t org-emphasis t))
+					 org-emphasis t))
     (org-remove-font-lock-display-properties beg end)))
 
 (defconst org-script-display  '(((raise -0.3) (height 0.7))
@@ -23958,34 +23980,99 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 
 ;;; Fixes and Hacks for problems with other packages
 
-;; Make flyspell not check words in links, to not mess up our keymap
-(defvar org-element-affiliated-keywords) ; From org-element.el
-(defvar org-element-block-name-alist)	 ; From org-element.el
 (defun org-mode-flyspell-verify ()
-  "Don't let flyspell put overlays at active buttons, or on
-   {todo,all-time,additional-option-like}-keywords."
-  (require 'org-element) ; For `org-element-affiliated-keywords'
-  (let ((pos (max (1- (point)) (point-min)))
-	(word (thing-at-point 'word)))
-    (and (not (get-text-property pos 'keymap))
-	 (not (get-text-property pos 'org-no-flyspell))
-	 (not (member word org-todo-keywords-1))
-	 (not (member word org-all-time-keywords))
-	 (not (member word org-options-keywords))
-	 (not (member word (mapcar 'car org-startup-options)))
-	 (not (member-ignore-case word org-element-affiliated-keywords))
-	 (not (member-ignore-case word (org-get-export-keywords)))
-	 (not (member-ignore-case
-	       word (mapcar 'car org-element-block-name-alist)))
-	 (not (member-ignore-case word '("BEGIN" "END" "ATTR")))
-	 (not (org-in-src-block-p)))))
+  "Function used for `flyspell-generic-check-word-predicate'."
+  (if (org-at-heading-p)
+      ;; At a headline or an inlinetask, check title only.  This is
+      ;; faster than relying on `org-element-at-point'.
+      (and (save-excursion (beginning-of-line)
+			   (and (let ((case-fold-search t))
+				  (not (looking-at "\\*+ END[ \t]*$")))
+				(looking-at org-complex-heading-regexp)))
+	   (match-beginning 4)
+	   (>= (point) (match-beginning 4))
+	   (or (not (match-beginning 5))
+	       (< (point) (match-beginning 5))))
+    (let* ((element (org-element-at-point))
+	   (post-affiliated (org-element-property :post-affiliated element))
+	   (object-check
+	    (function
+	     ;; Non-nil if checks can be done for object at point.
+	     (lambda ()
+	       (let ((object (save-excursion
+			       (when (org-looking-at-p "\\>") (backward-char))
+			       (org-element-context element))))
+		 (case (org-element-type object)
+		   ;; Prevent checks in links due to keybinding conflict
+		   ;; with Flyspell.
+		   ((code entity export-snippet inline-babel-call
+			  inline-src-block line-break latex-fragment link macro
+			  statistics-cookie target timestamp verbatim)
+		    nil)
+		   (footnote-reference
+		    ;; Only in inline footnotes, within the definition.
+		    (and (eq (org-element-property :type object) 'inline)
+			 (< (save-excursion
+			      (goto-char (org-element-property :begin object))
+			      (search-forward ":" nil t 2))
+			    (point))))
+		   (otherwise t)))))))
+      (cond
+       ;; Ignore checks in all affiliated keywords but captions.
+       ((and post-affiliated (< (point) post-affiliated))
+	(and (save-excursion
+	       (beginning-of-line)
+	       (let ((case-fold-search t)) (looking-at "[ \t]*#\\+CAPTION:")))
+	     (> (point) (match-end 0))
+	     (funcall object-check)))
+       ;; Ignore checks in LOGBOOK (or equivalent) drawer.
+       ((and org-log-into-drawer
+	     (let ((log (or (org-string-nw-p org-log-into-drawer) "LOGBOOK"))
+		   (parent element))
+	       (while (and parent (not (eq (org-element-type parent) 'drawer)))
+		 (setq parent (org-element-property :parent parent)))
+	       (and parent
+		    (eq (compare-strings
+			 log nil nil
+			 (org-element-property :drawer-name parent) nil nil t)
+			t))))
+	nil)
+       (t
+	(case (org-element-type element)
+	  ((comment quote-section) t)
+	  (comment-block
+	   ;; Allow checks between block markers, not on them.
+	   (and (> (line-beginning-position)
+		   (org-element-property :post-affiliated element))
+		(save-excursion
+		  (end-of-line)
+		  (skip-chars-forward " \r\t\n")
+		  (< (point) (org-element-property :end element)))))
+	  ;; Arbitrary list of keywords where checks are meaningful.
+	  ;; Make sure point is on the value part of the element.
+	  (keyword
+	   (and (member (org-element-property :key element)
+			'("DESCRIPTION" "TITLE"))
+		(< (save-excursion
+		     (beginning-of-line) (search-forward ":") (point))
+		   (point))))
+	  ;; Check is globally allowed in paragraphs verse blocks and
+	  ;; table rows (after affiliated keywords) but some objects
+	  ;; must not be affected.
+	  ((paragraph table-row verse-block)
+	   (and (>= (point) (org-element-property :contents-begin element))
+		(< (point) (org-element-property :contents-end element))
+		(funcall object-check)))))))))
+(put 'org-mode 'flyspell-mode-predicate 'org-mode-flyspell-verify)
 
 (defun org-remove-flyspell-overlays-in (beg end)
   "Remove flyspell overlays in region."
   (and (org-bound-and-true-p flyspell-mode)
        (fboundp 'flyspell-delete-region-overlays)
-       (flyspell-delete-region-overlays beg end))
-  (add-text-properties beg end '(org-no-flyspell t)))
+       (flyspell-delete-region-overlays beg end)))
+
+(eval-after-load "flyspell"
+  '(add-to-list 'flyspell-delayed-commands 'org-self-insert-command))
 
 ;; Make `bookmark-jump' shows the jump location if it was hidden.
 (eval-after-load "bookmark"
