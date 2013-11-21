@@ -5512,7 +5512,10 @@ The following commands are available:
      (unless org-inhibit-startup-visibility-stuff
        (org-set-startup-visibility))))
   ;; Try to set org-hide correctly
-  (set-face-foreground 'org-hide (org-find-invisible-foreground)))
+  (set-face-foreground 'org-hide (org-find-invisible-foreground))
+  ;; Make sure that file local variables are set.
+  (report-errors "File local-variables error: %s"
+    (hack-local-variables)))
 
 ;; Update `customize-package-emacs-version-alist'
 (add-to-list 'customize-package-emacs-version-alist
