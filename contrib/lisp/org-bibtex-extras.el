@@ -94,6 +94,14 @@ For example, to point to your `obe-bibtex-file' use the following.
       (outline-previous-visible-heading 1)
       t)))
 
+(defun obe-citation-export (path desc format)
+  (cond
+   ((eq format 'html)  (format "<i>%s</i>" desc))
+   ((eq format 'latex) (format "\\cite{%s}" path))
+   (t desc)))
+
+(org-add-link-type "cite" 'obe-goto-citation 'obe-citation-export)
+
 (defun obe-html-export-citations ()
   "Convert all \\cite{...} citations in the current file into HTML links."
   (save-excursion
