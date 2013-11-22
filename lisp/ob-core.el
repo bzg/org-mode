@@ -277,6 +277,7 @@ Returns a list
 	    (setq name (org-no-properties (match-string 3)))))
       ;; inline source block
       (when (org-babel-get-inline-src-block-matches)
+	(setq head (match-beginning 0))
 	(setq info (org-babel-parse-inline-src-block-match))))
     ;; resolve variable references and add summary parameters
     (when (and info (not light))
@@ -615,7 +616,10 @@ block."
   (let* ((org-babel-current-src-block-location
 	  (or org-babel-current-src-block-location
 	      (nth 6 info)
-	      (org-babel-where-is-src-block-head)))
+	      (org-babel-where-is-src-block-head)
+	      ;; inline src block
+	      (and (org-babel-get-inline-src-block-matches)
+		   (match-beginning 0))))
 	 (info (if info
 		   (copy-tree info)
 		 (org-babel-get-src-block-info)))
