@@ -19590,9 +19590,6 @@ because, in this case the deletion might narrow the column."
 (put 'org-self-insert-command 'pabbrev-expand-after-command t)
 (put 'orgtbl-self-insert-command 'pabbrev-expand-after-command t)
 
-;; How to do this: Measure non-white length of current string
-;; If equal to column width, we should realign.
-
 (defun org-remap (map &rest commands)
   "In MAP, remap the functions given in COMMANDS.
 COMMANDS is a list of alternating OLDDEF NEWDEF command names."
