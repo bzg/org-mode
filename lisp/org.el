@@ -15298,30 +15298,32 @@ when a \"nil\" value can supersede a non-nil value higher up the hierarchy."
 		       t))
 	(org-entry-get-with-inheritance property literal-nil)
       (if (member property org-special-properties)
-	  ;; We need a special property.  Use `org-entry-properties' to
-	  ;; retrieve it, but specify the wanted property
+	  ;; We need a special property.  Use `org-entry-properties'
+	  ;; to retrieve it, but specify the wanted property
 	  (cdr (assoc property (org-entry-properties nil 'special property)))
-	(let ((range (org-get-property-block)))
-	  (when (and range (not (eq (car range) (cdr range))))
-	    (let* ((props (list (or (assoc property org-file-properties)
-				    (assoc property org-global-properties)
-				    (assoc property org-global-properties-fixed))))
-		   (ap (lambda (key)
-			 (when (re-search-forward
-				(org-re-property key) (cdr range) t)
-			   (setq props
-				 (org-update-property-plist
-				  key
-				  (if (match-end 3)
-				      (org-match-string-no-properties 3) "")
-				  props)))))
-		   val)
-	      (goto-char (car range))
-	      (funcall ap property)
-	      (goto-char (car range))
-	      (while (funcall ap (concat property "+")))
-	      (setq val (cdr (assoc property props)))
-	      (when val (if literal-nil val (org-not-nil val))))))))))
+	(org-with-wide-buffer
+	 (let ((range (org-get-property-block)))
+	   (when (and range (not (eq (car range) (cdr range))))
+	     (let* ((props
+		     (list (or (assoc property org-file-properties)
+			       (assoc property org-global-properties)
+			       (assoc property org-global-properties-fixed))))
+		    (ap (lambda (key)
+			  (when (re-search-forward
+				 (org-re-property key) (cdr range) t)
+			    (setq props
+				  (org-update-property-plist
+				   key
+				   (if (match-end 3)
+				       (org-match-string-no-properties 3) "")
+				   props)))))
+		    val)
+	       (goto-char (car range))
+	       (funcall ap property)
+	       (goto-char (car range))
+	       (while (funcall ap (concat property "+")))
+	       (setq val (cdr (assoc property props)))
+	       (when val (if literal-nil val (org-not-nil val)))))))))))
 
 (defun org-property-or-variable-value (var &optional inherit)
   "Check if there is a property fixing the value of VAR.
