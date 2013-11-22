@@ -77,8 +77,8 @@
 ;; Initialization
 
 (eval-when-compile (require 'cl))
-(org-add-link-type "cite" 'ebib)
-
+(let ((jump-fn (car (org-remove-if-not #'fboundp '(ebib obe-goto-citation)))))
+  (org-add-link-type "cite" jump-fn))
 
 ;;; Internal Functions
 
@@ -284,7 +284,8 @@ Return new parse tree.  This function assumes current back-end is HTML."
 
 (eval-after-load 'ox
   '(add-to-list 'org-export-filter-parse-tree-functions
-                'org-bibtex-process-bib-files))
+                (lambda (e b i) (when (eql b 'html)
+			     (org-bibtex-process-bib-files e b i)))))
 
 
 
