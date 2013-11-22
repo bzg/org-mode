@@ -7101,7 +7101,13 @@ specifying which drawers should not be hidden."
 	(goto-char beg)
 	(while (re-search-forward org-drawer-regexp end t)
 	  (unless (member-ignore-case (match-string 1) exceptions)
-	    (org-flag-drawer t)))))))
+	    (let ((drawer (org-element-at-point)))
+	      (when (memq (org-element-type drawer) '(drawer property-drawer))
+		(org-flag-drawer t drawer)
+		;; Make sure to skip drawer entirely or we might flag
+		;; it another time when matching its ending line with
+		;; `org-drawer-regexp'.
+		(goto-char (org-element-property :end drawer))))))))))
 
 (defun org-cycle-hide-inline-tasks (state)
   "Re-hide inline tasks when switching to 'contents or 'children
