@@ -377,8 +377,8 @@ Matched keyword is in group 1.")
 ;;;; Drawer
 
 (defconst org-drawer-regexp "^[ \t]*:\\(\\(?:\\w\\|[-_]\\)+\\):[ \t]*$"
-  "Matches first line of a hidden block.
-Group 1 contains drawer's name.")
+  "Matches first or last line of a hidden block.
+Group 1 contains drawer's name or \"END\".")
 
 (defconst org-property-start-re "^[ \t]*:PROPERTIES:[ \t]*$"
   "Regular expression matching the first line of a property drawer.")
@@ -387,10 +387,10 @@ Group 1 contains drawer's name.")
   "Regular expression matching the last line of a property drawer.")
 
 (defconst org-clock-drawer-start-re "^[ \t]*:CLOCK:[ \t]*$"
-  "Regular expression matching the first line of a property drawer.")
+  "Regular expression matching the first line of a clock drawer.")
 
 (defconst org-clock-drawer-end-re "^[ \t]*:END:[ \t]*$"
-  "Regular expression matching the first line of a property drawer.")
+  "Regular expression matching the last line of a clock drawer.")
 
 (defconst org-property-drawer-re
   (concat "\\(" org-property-start-re "\\)[^\000]*?\\("
@@ -399,7 +399,7 @@ Group 1 contains drawer's name.")
 
 (defconst org-clock-drawer-re
   (concat "\\(" org-clock-drawer-start-re "\\)[^\000]*?\\("
-	  org-property-end-re "\\)\n?")
+	  org-clock-drawer-end-re "\\)\n?")
   "Matches an entire clock drawer.")
 
 ;;;; Headline
