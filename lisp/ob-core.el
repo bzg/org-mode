@@ -1454,7 +1454,8 @@ specified in the properties of the current outline entry."
 		 (append
 		  (org-babel-params-from-properties lang)
 		  (list (org-babel-parse-header-arguments
-			 (org-no-properties (or (match-string 4) "")))))))))
+			 (org-no-properties (or (match-string 4) ""))))))
+	  nil)))
 
 (defun org-babel-balanced-split (string alts)
   "Split STRING on instances of ALTS.
