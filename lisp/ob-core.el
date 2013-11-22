@@ -217,7 +217,7 @@ not match KEY should be returned."
 	 (lambda (p) (when (funcall (if others #'not #'identity) (eq (car p) key)) p))
 	 params)))
 
-(defun org-babel-get-inline-src-block-matches()
+(defun org-babel-get-inline-src-block-matches ()
   "Set match data if within body of an inline source block.
 Returns non-nil if match-data set"
   (let ((src-at-0-p (save-excursion
@@ -240,7 +240,7 @@ Returns non-nil if match-data set"
 	    t ))))))
 
 (defvar org-babel-inline-lob-one-liner-regexp)
-(defun org-babel-get-lob-one-liner-matches()
+(defun org-babel-get-lob-one-liner-matches ()
   "Set match data if on line of an lob one liner.
 Returns non-nil if match-data set"
   (save-excursion
