@@ -1981,7 +1981,8 @@ and value is its relative level, as an integer."
 (defun org-html--format-toc-headline (headline info)
   "Return an appropriate table of contents entry for HEADLINE.
 INFO is a plist used as a communication channel."
-  (let* ((todo (and (plist-get info :with-todo-keywords)
+  (let* ((headline-number (org-export-get-headline-number headline info))
+	 (todo (and (plist-get info :with-todo-keywords)
 		    (let ((todo (org-element-property :todo-keyword headline)))
 		      (and todo (org-export-data todo info)))))
 	 (todo-type (and todo (org-element-property :todo-type headline)))
@@ -2002,19 +2003,23 @@ INFO is a plist used as a communication channel."
 	 (tags (and (eq (plist-get info :with-tags) t)
 		    (org-export-get-tags headline info))))
     (format "<a href=\"#%s\">%s</a>"
+	    ;; Label.
 	    (org-export-solidify-link-text
 	     (or (org-element-property :CUSTOM_ID headline)
 		 (concat "sec-"
-			 (mapconcat
-			  #'number-to-string
-			  (org-export-get-headline-number headline info)
-			  "-"))))
-	    (apply (if (not (eq org-html-format-headline-function 'ignore))
-		       (lambda (todo todo-type priority text tags &rest ignore)
-			 (funcall org-html-format-headline-function
-				  todo todo-type priority text tags))
-		     #'org-html-format-headline)
-		   todo todo-type priority text tags :section-number nil))))
+			 (mapconcat #'number-to-string headline-number "-"))))
+	    ;; Body.
+	    (concat
+	     (and (not (org-export-low-level-p headline info))
+		  (org-export-numbered-headline-p headline info)
+		  (concat (mapconcat #'number-to-string headline-number ".")
+			  ". "))
+	     (apply (if (not (eq org-html-format-headline-function 'ignore))
+			(lambda (todo todo-type priority text tags &rest ignore)
+			  (funcall org-html-format-headline-function
+				   todo todo-type priority text tags))
+		      #'org-html-format-headline)
+		    todo todo-type priority text tags :section-number nil)))))
 
 (defun org-html-list-of-listings (info)
   "Build a list of listings.
