@@ -73,6 +73,8 @@
 			     compress-algorithm))
 (declare-function epg-encrypt-string "epg"
 		  (context plain recipients &optional sign always-trust))
+(defvar epg-context)
+
 
 (defgroup org-crypt nil
   "Org Crypt."
@@ -161,7 +163,7 @@ See `org-crypt-disable-auto-save'."
   (if (and (string= crypt-key (get-text-property 0 'org-crypt-key str))
 	   (string= (sha1 str) (get-text-property 0 'org-crypt-checksum str)))
       (get-text-property 0 'org-crypt-text str)
-      (set (make-local-variable 'epg-context) (epg-make-context nil t t))
+    (set (make-local-variable 'epg-context) (epg-make-context nil t t))
     (epg-encrypt-string epg-context str (epg-list-keys epg-context crypt-key))))
 
 (defun org-encrypt-entry ()
