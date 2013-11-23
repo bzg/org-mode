@@ -106,11 +106,11 @@ controlled by the :comments header argument."
   :version "24.1"
   :type 'string)
 
-(defcustom org-babel-process-comment-text #'org-babel-trim
+(defcustom org-babel-process-comment-text #'org-remove-indentation
   "Function called to process raw Org-mode text collected to be
 inserted as comments in tangled source-code files.  The function
 should take a single string argument and return a string
-result.  The default value is `org-babel-trim'."
+result.  The default value is `org-remove-indentation'."
   :group 'org-babel
   :version "24.1"
   :type 'function)

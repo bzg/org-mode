@@ -62,8 +62,9 @@
 		     (org-babel-process-file-name tmp-src-file)) ""))))
     (let ((results
            (org-babel-trim
-            (org-babel-eval
-             (concat tmp-bin-file (if cmdline (concat " " cmdline) "")) ""))))
+            (org-remove-indentation
+	     (org-babel-eval
+	      (concat tmp-bin-file (if cmdline (concat " " cmdline) "")) "")))))
       (org-babel-reassemble-table
        (org-babel-result-cond (cdr (assoc :result-params params))
 	 (org-babel-read results)
