@@ -424,6 +424,7 @@ Load all test files first."
     (org-test-touch-all-examples)
     (org-test-update-id-locations)
     (org-test-load)
+    (message "selected tests: %s" org-test-selector)
     (ert-run-tests-batch-and-exit org-test-selector)))
 
 (defun org-test-run-all-tests ()
@@ -431,6 +432,7 @@ Load all test files first."
 Load all test files first."
   (interactive)
   (org-test-touch-all-examples)
+  (org-test-update-id-locations)
   (org-test-load)
   (ert "\\(org\\|ob\\)")
   (org-test-kill-all-examples))
