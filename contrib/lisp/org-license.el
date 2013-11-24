@@ -35,7 +35,10 @@
 ;;
 ;; You can download the images from http://www.davidam/img/licenses.tar.gz
 ;;
-;; TODO: create a function to test all combinations of licenses
+;;; CHANGELOG:
+;; v 0.2 - add public domain functions
+;; v 0.1 - Initial release
+
 
 (defvar org-license-images-directory "")
 
@@ -69,7 +72,6 @@ Testua [[" org-license-cc-url "][Aitortu 3.0 Espainia]] lizentziari jarraituz er
 	  (setq org-license-cc-url "http://creativecommons.org/licenses/by/1.0/fi/deed.fi")
 	  (insert (concat "* Lisenssi
 Teksti on saatavilla [[" org-license-cc-url "][Nimeä 1.0 Suomi]] lisenssillä\n")))
-;;Nimeä 1.0 Suomi
 	 ((equal language "fr")
 	  (setq org-license-cc-url "http://creativecommons.org/licenses/by/3.0/fr/deed.fr")
 	  (insert (concat "* Licence
@@ -413,11 +415,38 @@ Copyright (C)  2013 " user-full-name
       (insert "\n[[https://www.gnu.org/copyleft/fdl.html][file:https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/GFDL_Logo.svg/200px-GFDL_Logo.svg.png]]\n")
     (insert (concat "\n[[https://www.gnu.org/copyleft/fdl.html][file:" org-license-images-directory "/gfdl/gfdl.png]]\n"))))
 
+(defun org-license-publicdomain-zero (language)
+  (interactive "MLanguage ( en | es ): " language)
+  (setq org-license-pd-url "http://creativecommons.org/publicdomain/zero/1.0/")
+  (cond ((equal language "es")
+         (insert (concat "* Licencia
+Este documento está bajo una licencia [[" org-license-pd-url "][Public Domain Zero]]\n")))
+        (t
+         (insert (concat "* License
+This documento is under a [[" org-license-pd-url "][Public Domain Zero]] license\n"))))
+  (insert (concat "\n[[" org-license-pd-url "][file:http://i.creativecommons.org/p/zero/1.0/80x15.png]]\n")))
+
+(defun org-license-publicdomain-mark (language)
+  (interactive "MLanguage ( en | es ): " language)
+  (setq org-license-pd-url "http://creativecommons.org/publicdomain/mark/1.0/")
+  (setq org-license-pd-file "file:http://i.creativecommons.org/p/mark/1.0/80x15.png")
+  (cond ((equal language "es")
+         (insert (concat "* Licencia
+Este documento está bajo una licencia [[" org-license-pd-url "][Etiqueta de Dominio Público 1.0]]\n"))
+        (t
+          (insert (concat "* License
+This documento is under a [[" org-license-pd-url "][Public Domain Mark]] license\n"))))))
+
+
 (defun org-license-print-all ()
 "Print all combinations of licenses and languages, it's useful to find bugs"
   (interactive)
   (org-license-gfdl "es")
   (org-license-gfdl "en")
+  (org-license-pd-mark "es")
+  (org-license-pd-mark "en")
+  (org-license-pd-zero "es")
+  (org-license-pd-zero "en")
   (org-license-cc-by "br")
   (org-license-cc-by "ca")
   (org-license-cc-by "de")
