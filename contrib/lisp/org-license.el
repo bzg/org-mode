@@ -418,35 +418,38 @@ Copyright (C)  2013 " user-full-name
 (defun org-license-publicdomain-zero (language)
   (interactive "MLanguage ( en | es ): " language)
   (setq org-license-pd-url "http://creativecommons.org/publicdomain/zero/1.0/")
-  (cond ((equal language "es")
+  (setq org-license-pd-file "zero/1.0/80x15.png")
+  (if (equal language "es")
          (insert (concat "* Licencia
-Este documento está bajo una licencia [[" org-license-pd-url "][Public Domain Zero]]\n")))
-        (t
-         (insert (concat "* License
-This documento is under a [[" org-license-pd-url "][Public Domain Zero]] license\n"))))
-  (insert (concat "\n[[" org-license-pd-url "][file:http://i.creativecommons.org/p/zero/1.0/80x15.png]]\n")))
+Este documento está bajo una licencia [[" org-license-pd-url "][Public Domain Zero]]\n"))
+    (insert (concat "* License
+This documento is under a [[" org-license-pd-url "][Public Domain Zero]] license\n")))
+  (if (string= "" org-license-images-directory)
+      (insert (concat "\n[[" org-license-pd-url "][file:http://i.creativecommons.org/p/zero/1.0/80x15.png]]\n"))
+    (insert (concat "\n[[" org-license-pd-url "][file:" org-license-images-directory org-license-pd-file "]]\n"))))
 
 (defun org-license-publicdomain-mark (language)
   (interactive "MLanguage ( en | es ): " language)
   (setq org-license-pd-url "http://creativecommons.org/publicdomain/mark/1.0/")
-  (setq org-license-pd-file "file:http://i.creativecommons.org/p/mark/1.0/80x15.png")
-  (cond ((equal language "es")
+  (setq org-license-pd-file "mark/1.0/80x15.png")
+  (if (equal language "es")
          (insert (concat "* Licencia
 Este documento está bajo una licencia [[" org-license-pd-url "][Etiqueta de Dominio Público 1.0]]\n"))
-        (t
-          (insert (concat "* License
-This documento is under a [[" org-license-pd-url "][Public Domain Mark]] license\n"))))))
-
+    (insert (concat "* License
+This documento is under a [[" org-license-pd-url "][Public Domain Mark]] license\n")))
+  (if (string= "" org-license-images-directory)
+      (insert (concat "\n[[" org-license-pd-url "][file:http://i.creativecommons.org/p/mark/1.0/80x15.png]]\n"))
+    (insert (concat "\n[[" org-license-pd-url "][file:" org-license-images-directory org-license-pd-file "]]\n"))))
 
 (defun org-license-print-all ()
 "Print all combinations of licenses and languages, it's useful to find bugs"
   (interactive)
   (org-license-gfdl "es")
   (org-license-gfdl "en")
-  (org-license-pd-mark "es")
-  (org-license-pd-mark "en")
-  (org-license-pd-zero "es")
-  (org-license-pd-zero "en")
+  (org-license-publicdomain-mark "es")
+  (org-license-publicdomain-mark "en")
+  (org-license-publicdomain-zero "es")
+  (org-license-publicdomain-zero "en")
   (org-license-cc-by "br")
   (org-license-cc-by "ca")
   (org-license-cc-by "de")
