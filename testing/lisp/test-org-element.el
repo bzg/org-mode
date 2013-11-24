@@ -2875,12 +2875,6 @@ Paragraph \\alpha."
        (org-test-with-temp-text "- a"
 	 (end-of-line)
 	 (org-element-type (org-element-at-point)))))
-  ;; With an optional argument, return trail.
-  (should
-   (equal '(paragraph center-block)
-	  (org-test-with-temp-text "#+BEGIN_CENTER\nA\n#+END_CENTER\nZ"
-	    (progn (search-forward "Z")
-		   (mapcar 'org-element-type (org-element-at-point t))))))
   ;; Parse a list within a block itself contained in a list.
   (should
    (eq 'plain-list

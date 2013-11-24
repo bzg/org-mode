@@ -41,7 +41,7 @@
 ;;; Code:
 (require 'org-macs)
 
-(declare-function org-element-at-point "org-element" (&optional keep-trail))
+(declare-function org-element-at-point "org-element" ())
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))

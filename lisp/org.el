@@ -148,7 +148,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 
 (declare-function org-element--parse-objects "org-element"
 		  (beg end acc restriction))
-(declare-function org-element-at-point "org-element" (&optional keep-trail))
+(declare-function org-element-at-point "org-element" ())
 (declare-function org-element-cache-reset "org-element" (&optional all))
 (declare-function org-element-contents "org-element" (element))
 (declare-function org-element-context "org-element" (&optional element))
@@ -23607,18 +23607,21 @@ Move to the previous element at the same level, when possible."
 		 (progn (goto-char origin)
 			(user-error "Cannot move further up"))))))
 	(t
-	 (let* ((trail (org-element-at-point 'keep-trail))
-		(elem (car trail))
-		(prev-elem (nth 1 trail))
+	 (let* ((elem (org-element-at-point))
 		(beg (org-element-property :begin elem)))
 	   (cond
 	    ;; Move to beginning of current element if point isn't
 	    ;; there already.
 	    ((null beg) (message "No element at point"))
 	    ((/= (point) beg) (goto-char beg))
-	    (prev-elem (goto-char (org-element-property :begin prev-elem)))
-	    ((org-before-first-heading-p) (goto-char (point-min)))
-	    (t (org-back-to-heading)))))))
+	    (t (goto-char beg)
+	       (skip-chars-backward " \r\t\n")
+	       (unless (bobp)
+		 (let ((prev (org-element-at-point)))
+		   (goto-char (org-element-property :begin prev))
+		   (while (and (setq prev (org-element-property :parent prev))
+			       (<= (org-element-property :end prev) beg))
+		     (goto-char (org-element-property :begin prev)))))))))))
 
 (defun org-up-element ()
   "Move to upper element."
@@ -23652,9 +23655,19 @@ Move to the previous element at the same level, when possible."
   "Move backward element at point."
   (interactive)
   (if (org-with-limited-levels (org-at-heading-p)) (org-move-subtree-up)
-    (let* ((trail (org-element-at-point 'keep-trail))
-	   (elem (car trail))
-	   (prev-elem (nth 1 trail)))
+    (let* ((elem (org-element-at-point))
+	   (prev-elem
+	    (save-excursion
+	      (goto-char (org-element-property :begin elem))
+	      (skip-chars-backward " \r\t\n")
+	      (unless (bobp)
+		(let* ((beg (org-element-property :begin elem))
+		       (prev (org-element-at-point))
+		       (up prev))
+		  (while (and (setq up (org-element-property :parent up))
+			      (<= (org-element-property :end prev) beg))
+		    (setq prev up))
+		  prev)))))
       ;; Error out if no previous element or previous element is
       ;; a parent of the current one.
       (if (or (not prev-elem) (org-element-nested-p elem prev-elem))
