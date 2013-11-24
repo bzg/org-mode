@@ -5058,7 +5058,7 @@ removed from the cache."
 	  (org-element--cache-cancel-changes))))))
 
 ;;;###autoload
-(defun org-element-at-point (&optional keep-trail)
+(defun org-element-at-point ()
   "Determine closest element around point.
 
 Return value is a list like (TYPE PROPS) where TYPE is the type
@@ -5073,85 +5073,122 @@ As a special case, if point is at the very beginning of a list or
 sub-list, returned element will be that list instead of the first
 item.  In the same way, if point is at the beginning of the first
 row of a table, returned element will be the table instead of the
-first row.
-
-If optional argument KEEP-TRAIL is non-nil, the function returns
-a list of elements leading to element at point.  The list's CAR
-is always the element at point.  The following positions contain
-element's siblings, then parents, siblings of parents, until the
-first element of current section."
+first row."
   (org-with-wide-buffer
-   ;; If at a headline, parse it.  It is the sole element that
-   ;; doesn't require to know about context.  Be sure to disallow
-   ;; secondary string parsing, though.
-   (if (org-with-limited-levels (org-at-heading-p))
-       (progn
-	 (beginning-of-line)
-	 (let ((headline
-		(or (org-element-cache-get (point) 'element)
-		    (car (org-element-cache-put
-			  (point)
-			  (list (org-element-headline-parser
-				 (point-max) t)))))))
-	   (if keep-trail (list headline) headline)))
-     ;; Otherwise move at the beginning of the section containing
-     ;; point.
-     (catch 'exit
-       (let ((origin (point)))
-	 (if (not (org-with-limited-levels (outline-previous-heading)))
-	     ;; In empty lines at buffer's beginning, return nil.
-	     (progn (goto-char (point-min))
-		    (org-skip-whitespace)
-		    (when (or (eobp) (> (line-beginning-position) origin))
-		      (throw 'exit nil)))
-	   (forward-line)
-	   (org-skip-whitespace)
-	   (when (or (eobp) (> (line-beginning-position) origin))
-	     ;; In blank lines just after the headline, point still
-	     ;; belongs to the headline.
-	     (throw 'exit
-		    (progn
-		      (skip-chars-backward " \r\t\n")
-		      (beginning-of-line)
-		      (let ((headline
-			     (or (org-element-cache-get (point) 'element)
-				 (car (org-element-cache-put
-				       (point)
-				       (list (org-element-headline-parser
-					      (point-max) t)))))))
-			(if keep-trail (list headline) headline))))))
-	 (beginning-of-line)
-	 (let ((end (save-excursion
-		      (org-with-limited-levels (outline-next-heading)) (point)))
-	       element type special-flag trail struct parent)
-	   ;; Parse successively each element, skipping those ending
-	   ;; before original position.
+   (let ((origin (point)) element parent end)
+     (end-of-line)
+     (skip-chars-backward " \r\t\n")
+     (cond
+      ((bobp) nil)
+      ((org-with-limited-levels (org-at-heading-p))
+       (beginning-of-line)
+       (or (org-element-cache-get (point) 'element)
+	   (car (org-element-cache-put
+		 (point)
+		 (list (org-element-headline-parser (point-max) t))))))
+      (t
+       ;; Opportunistic shortcut.  Instead of going back to headline
+       ;; above (or beginning of buffer) and descending again, first
+       ;; try to find a known element above current position.  Give up
+       ;; after 3 tries or when we hit a headline (or beginning of
+       ;; buffer).
+       (beginning-of-line)
+       (skip-chars-backward " \r\t\n")
+       (catch 'loop
+	 (dotimes (i 3)
+	   (unless (re-search-backward org-element-paragraph-separate nil t)
+	     (throw 'loop (goto-char (point-min))))
+	   (cond ((not (org-string-match-p "\\S-" (match-string 0)))
+		  (when (bobp) (throw 'loop nil))
+		  ;; An element cannot start at a headline, so check
+		  ;; first non-blank line below.
+		  (skip-chars-forward " \r\t\n" origin)
+		  (beginning-of-line))
+		 ((org-looking-at-p org-element--affiliated-re)
+		  ;; At an affiliated keyword, make sure to move to
+		  ;; the first one.
+		  (if (re-search-backward "^[ \t]*[^#]" nil t)
+		      (forward-line)
+		    (throw 'loop (goto-char (point-min)))))
+		 ((org-looking-at-p "^[ \t]*:\\(?: \\|$\\)")
+		  ;; At a fixed width area or a property drawer, reach
+		  ;; the beginning of the element.
+		  (if (re-search-backward "^[ \t]*[^:]" nil t)
+		      (forward-line)
+		    (throw 'loop (goto-char (point-min))))))
+	   (when (org-with-limited-levels (org-at-heading-p))
+	     ;; Tough luck: we're back at a headline above.  Move to
+	     ;; beginning of section.
+	     (forward-line)
+	     (skip-chars-forward " \r\t\n")
+	     (beginning-of-line)
+	     (throw 'loop nil))
+	   (let ((cached (org-element-cache-get (point) 'element)))
+	     ;; Search successful: we know an element before point
+	     ;; which is not an headline.  If it has a common ancestor
+	     ;; with ORIGIN, set this ancestor as the current parent
+	     ;; and the element as the one to check.  Otherwise, move
+	     ;; at top level and start parsing right after its broader
+	     ;; ancestor.
+	     (when cached
+	       (let ((cache-end (org-element-property :end cached)))
+		 (if (or (> cache-end origin)
+			 (and (= cache-end origin) (= (point-max) origin)))
+		     (setq element cached
+			   parent (org-element-property :parent cached)
+			   end cache-end)
+		   (goto-char cache-end)
+		   (let ((up cached))
+		     (while (and (setq up (org-element-property :parent up))
+				 (<= (org-element-property :end up) origin))
+		       (goto-char (org-element-property :end up)))
+		     (when up
+		       (setq element up
+			     parent (org-element-property :parent up)
+			     end (org-element-property :end up))))))
+	       (throw 'loop nil))))
+	 ;; Opportunistic search failed.  Move back to beginning of
+	 ;; section in current headline, if any, or to first non-empty
+	 ;; line in buffer otherwise.
+	 (org-with-limited-levels (outline-previous-heading))
+	 (unless (bobp) (forward-line))
+	 (skip-chars-forward " \r\t\n")
+	 (beginning-of-line))
+       ;; Now we are at the beginning of an element, start parsing.
+       (unless end
+	 (save-excursion (org-with-limited-levels (outline-next-heading))
+			 (setq end (point))))
+       (let (type special-flag struct)
+	 ;; Parse successively each element, skipping those ending
+	 ;; before original position.
+	 (catch 'exit
 	   (while t
-	     (setq element
-		   (let* ((pos (if (and (memq special-flag '(item table-row))
-					(memq type '(plain-list table)))
-				   ;; First item (resp. row) in plain
-				   ;; list (resp. table) gets
-				   ;; a special key in cache.
-				   (1+ (point))
-				 (point)))
-			  (cached (org-element-cache-get pos 'element)))
-		     (cond
-		      ((not cached)
-		       (let ((element (org-element--current-element
-				       end 'element special-flag struct)))
-			 (when (derived-mode-p 'org-mode)
-			   (org-element-cache-put pos (cons element nil)))
-			 element))
-		      ;; When changes happened in the middle of a list,
-		      ;; its structure ends up being invalid.
-		      ;; Therefore, we make sure to use a valid one.
-		      ((and struct (memq (car cached) '(item plain-list)))
-		       (org-element-put-property cached :structure struct))
-		      (t cached))))
+	     (unless element
+	       (setq element
+		     (let* ((pos (if (and (memq special-flag '(item table-row))
+					  (memq type '(plain-list table)))
+				     ;; First item (resp. row) in
+				     ;; plain list (resp. table) gets
+				     ;; a special key in cache.
+				     (1+ (point))
+				   (point)))
+			    (cached (org-element-cache-get pos 'element)))
+		       (cond
+			((not cached)
+			 (let ((element (org-element--current-element
+					 end 'element special-flag struct)))
+			   (when (derived-mode-p 'org-mode)
+			     (org-element-cache-put pos (cons element nil)))
+			   (org-element-put-property element :parent parent)))
+			;; When changes happened in the middle of
+			;; a list, its structure ends up being
+			;; invalid.  Therefore, we make sure to use
+			;; a valid one.
+			((and struct (memq (org-element-type cached)
+					   '(item plain-list)))
+			 (org-element-put-property cached :structure struct))
+			(t cached)))))
 	     (setq type (org-element-type element))
-	     (org-element-put-property element :parent parent)
-	     (when keep-trail (push element trail))
 	     (cond
 	      ;; 1. Skip any element ending before point.  Also skip
 	      ;;    element ending at point when we're sure that
@@ -5159,11 +5196,12 @@ first element of current section."
 	      ((let ((elem-end (org-element-property :end element)))
 		 (when (or (< elem-end origin)
 			   (and (= elem-end origin) (/= elem-end end)))
-		   (goto-char elem-end))))
+		   (goto-char elem-end)))
+	       (setq element nil))
 	      ;; 2. An element containing point is always the element at
 	      ;;    point.
 	      ((not (memq type org-element-greater-elements))
-	       (throw 'exit (if keep-trail trail element)))
+	       (throw 'exit element))
 	      ;; 3. At any other greater element type, if point is
 	      ;;    within contents, move into it.
 	      (t
@@ -5192,8 +5230,7 @@ first element of current section."
 				  (and (memq type '(item plain-list))
 				       (progn (goto-char cend)
 					      (or (bolp) (not (eobp))))))))
-		     (throw 'exit (if keep-trail trail element))
-		   (setq parent element)
+		     (throw 'exit element)
 		   (case type
 		     (plain-list
 		      (setq special-flag 'item
@@ -5203,8 +5240,8 @@ first element of current section."
 		      (setq special-flag 'node-property struct nil))
 		     (table (setq special-flag 'table-row struct nil))
 		     (otherwise (setq special-flag nil struct nil)))
-		   (setq end cend)
-		   (goto-char cbeg))))))))))))
+		   (setq parent element element nil end cend)
+		   (goto-char cbeg)))))))))))))
 
 ;;;###autoload
 (defun org-element-context (&optional element)
