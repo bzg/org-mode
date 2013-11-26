@@ -82,8 +82,6 @@ to `directory'."
 		;; in  heading - deactivate flyspell
 		(org-remove-flyspell-overlays-in (match-beginning 0)
 						 (match-end 0))
-		(add-text-properties (match-beginning 0) (match-end 0)
-				     '(org-no-flyspell t))
 		t)
 	    ;; this is a wiki link
 	    (org-remove-flyspell-overlays-in (match-beginning 0)

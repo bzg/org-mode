@@ -1,6 +1,6 @@
 ;;; ob-ebnf.el --- org-babel functions for ebnf evaluation
 
-;; Copyright (C) your name here
+;; Copyright (C) 2013 Free Software Foundation, Inc.
 
 ;; Author: Michael Gauland
 ;; Keywords: literate programming, reproducible research
@@ -36,7 +36,7 @@
 ;;;
 ;;;     :style specifies a value in ebnf-style-database. This provides the
 ;;;            ability to customise the output. The style can also specify the
-;;;            gramnmar syntax (by setting ebnf-syntax); note that only ebnf,
+;;;            grammar syntax (by setting ebnf-syntax); note that only ebnf,
 ;;;            iso-ebnf, and yacc are supported by this file.
 
 ;;; Requirements:
@@ -64,14 +64,13 @@ called by `org-babel-execute-src-block'"
 	   (result nil))
       (with-temp-buffer
 	(when style (ebnf-push-style style))
-	(let 
-	    ((comment-format
-	      (cond ((string= ebnf-syntax 'yacc) "/*%s*/")
-		    ((string= ebnf-syntax 'ebnf) ";%s")
-		    ((string= ebnf-syntax 'iso-ebnf) "(*%s*)")
-		    (t (setq result
-			     (format "EBNF error: format %s not supported."
-				     ebnf-syntax))))))
+	(let ((comment-format
+	       (cond ((string= ebnf-syntax 'yacc) "/*%s*/")
+		     ((string= ebnf-syntax 'ebnf) ";%s")
+		     ((string= ebnf-syntax 'iso-ebnf) "(*%s*)")
+		     (t (setq result
+			      (format "EBNF error: format %s not supported."
+				      ebnf-syntax))))))
 	  (setq ebnf-eps-prefix dest-dir)
 	  (insert (format comment-format (format "[%s" dest-root)))
 	  (newline)
@@ -80,8 +79,7 @@ called by `org-babel-execute-src-block'"
 	  (insert (format comment-format (format "]%s" dest-root)))
 	  (ebnf-eps-buffer)
 	  (when style (ebnf-pop-style))))
-      result
-      )))
+      result)))
 
 (provide 'ob-ebnf)
 ;;; ob-ebnf.el ends here

@@ -69,7 +69,7 @@ there are kept outside the narrowed region."
 This will save the content of the source code editing buffer into
 a newly created file, not the base buffer for this source block.
 
-If you want to regularily save the base buffer instead of the source
+If you want to regularly save the base buffer instead of the source
 code editing buffer, see `org-edit-src-auto-save-idle-delay' instead."
   :group 'org-edit-structure
   :version "24.4"
@@ -753,14 +753,14 @@ with \",*\", \",#+\", \",,*\" and \",,#+\"."
       (kill-buffer buffer))
     (goto-char beg)
     (when allow-write-back-p
-      (let ((buffer-undo-list t))
-	(delete-region beg (max beg end))
-	(unless (string-match "\\`[ \t]*\\'" code)
-	  (insert code))
-	;; Make sure the overlay stays in place
+      (undo-boundary)
+      (delete-region beg (max beg end))
+      (unless (string-match "\\`[ \t]*\\'" code)
+	(insert code))
+      	;; Make sure the overlay stays in place
 	(when (eq context 'save) (move-overlay ovl beg (point)))
-	(goto-char beg)
-	(if single (just-one-space))))
+      (goto-char beg)
+      (if single (just-one-space)))
     (if (memq t (mapcar (lambda (overlay)
 			  (eq (overlay-get overlay 'invisible)
 			      'org-hide-block))
@@ -844,8 +844,9 @@ with \",*\", \",#+\", \",,*\" and \",,#+\"."
   (let ((session (cdr (assoc :session (nth 2 info)))))
     (and session (not (string= session "none"))
 	 (org-babel-comint-buffer-livep session)
-	 ((lambda (f) (and (fboundp f) (funcall f session)))
-	  (intern (format "org-babel-%s-associate-session" (nth 0 info)))))))
+	 (let ((f (intern (format "org-babel-%s-associate-session"
+                                  (nth 0 info)))))
+           (and (fboundp f) (funcall f session))))))
 
 (defun org-src-babel-configure-edit-buffer ()
   (when org-src-babel-info
@@ -953,8 +954,9 @@ fontification of code blocks see `org-src-fontify-block' and
 LANG is a string, and the returned major mode is a symbol."
   (intern
    (concat
-    ((lambda (l) (if (symbolp l) (symbol-name l) l))
-     (or (cdr (assoc lang org-src-lang-modes)) lang)) "-mode")))
+    (let ((l (or (cdr (assoc lang org-src-lang-modes)) lang)))
+      (if (symbolp l) (symbol-name l) l))
+    "-mode")))
 
 (provide 'org-src)
 

@@ -323,6 +323,7 @@ for the duration of the command.")
 (defvar org-colview-initial-truncate-line-value nil
   "Remember the value of `truncate-lines' across colview.")
 
+;;;###autoload
 (defun org-columns-remove-overlays ()
   "Remove all currently active column overlays."
   (interactive)
@@ -415,6 +416,10 @@ If yes, throw an error indicating that changing it does not make sense."
 		    (get-char-property (point) 'org-columns-value))
       (org-columns-next-allowed-value)
     (org-columns-edit-value "TAGS")))
+
+(defvar org-agenda-overriding-columns-format nil
+  "When set, overrides any other format definition for the agenda.
+Don't set this, this is meant for dynamic scoping.")
 
 (defun org-columns-edit-value (&optional key)
   "Edit the value of the property at point in column view.
@@ -666,6 +671,7 @@ around it."
   (let ((value (get-char-property (point) 'org-columns-value)))
     (org-open-link-from-string value arg)))
 
+;;;###autoload
 (defun org-columns-get-format-and-top-level ()
   (let ((fmt (org-columns-get-format)))
     (org-columns-goto-top-level)
@@ -901,10 +907,6 @@ display, or in the #+COLUMNS line of the current buffer."
 		(insert-before-markers "#+COLUMNS: " fmt "\n")))
 	    (org-set-local 'org-columns-default-format fmt))))))
 
-(defvar org-agenda-overriding-columns-format nil
-  "When set, overrides any other format definition for the agenda.
-Don't set this, this is meant for dynamic scoping.")
-
 (defun org-columns-get-autowidth-alist (s cache)
   "Derive the maximum column widths from the format and the cache."
   (let ((start 0) rtn)
@@ -951,6 +953,8 @@ Don't set this, this is meant for dynamic scoping.")
 
 (defvar org-inlinetask-min-level
   (if (featurep 'org-inlinetask) org-inlinetask-min-level 15))
+
+;;;###autoload
 (defun org-columns-compute (property)
   "Sum the values of property PROPERTY hierarchically, for the entire buffer."
   (interactive)
@@ -1054,6 +1058,7 @@ Don't set this, this is meant for dynamic scoping.")
 	(setq sum (+ (string-to-number (pop l)) (/ sum 60))))
       sum)))
 
+;;;###autoload
 (defun org-columns-number-to-string (n fmt &optional printf)
   "Convert a computed column number to a string value, according to FMT."
   (cond

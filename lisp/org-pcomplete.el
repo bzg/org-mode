@@ -363,25 +363,6 @@ This needs more work, to handle headings with lots of spaces in them."
 	     lst))
    (substring pcomplete-stub 1)))
 
-(defvar org-drawers)
-
-(defun pcomplete/org-mode/drawer ()
-  "Complete a drawer name."
-  (let ((spc (save-excursion
-	       (move-beginning-of-line 1)
-	       (looking-at "^\\([ \t]*\\):")
-	       (match-string 1)))
-	(cpllist (mapcar (lambda (x) (concat x ": ")) org-drawers)))
-    (pcomplete-here cpllist
-		    (substring pcomplete-stub 1)
-		    (unless (or (not (delq
-				      nil
-				      (mapcar (lambda(x)
-						(string-match (substring pcomplete-stub 1) x))
-					      cpllist)))
-				(looking-at "[ \t]*\n.*:END:"))
-		      (save-excursion (insert "\n" spc ":END:"))))))
-
 (defun pcomplete/org-mode/block-option/src ()
   "Complete the arguments of a begin_src block.
 Complete a language in the first field, the header arguments and switches."

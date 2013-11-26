@@ -96,7 +96,25 @@
    (equal "# \n#+KEYWORD: value"
 	  (org-test-with-temp-text "#+KEYWORD: value"
 	    (progn (call-interactively 'comment-dwim)
-		   (buffer-string))))))
+		   (buffer-string)))))
+  ;; In a source block, use appropriate syntax.
+  (should
+   (equal "  ;; "
+	  (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n\n#+END_SRC"
+	    (forward-line)
+	    (let ((org-edit-src-content-indentation 2))
+	      (call-interactively 'comment-dwim))
+	    (buffer-substring-no-properties (line-beginning-position) (point)))))
+  (should
+   (equal "#+BEGIN_SRC emacs-lisp\n  ;; a\n  ;; b\n#+END_SRC"
+	  (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\na\nb\n#+END_SRC"
+	    (forward-line)
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (forward-line 2)
+	    (let ((org-edit-src-content-indentation 2))
+	      (call-interactively 'comment-dwim))
+	    (buffer-string)))))
 
 
 
@@ -392,21 +410,41 @@
      (looking-at "- $")))
   ;; In a drawer and paragraph insert an empty line, in this case above.
   (should
-   (let ((org-drawers '("MYDRAWER")))
-     (org-test-with-temp-text ":MYDRAWER:\na\n:END:"
-       (forward-line)
-       (org-meta-return)
-       (forward-line -1)
-       (looking-at "$"))))
+   (org-test-with-temp-text ":MYDRAWER:\na\n:END:"
+     (forward-line)
+     (org-meta-return)
+     (forward-line -1)
+     (looking-at "$")))
   ;; In a drawer and item insert an item, in this case above.
   (should
-   (let ((org-drawers '("MYDRAWER")))
-     (org-test-with-temp-text ":MYDRAWER:\n- a\n:END:"
-       (forward-line)
-       (org-meta-return)
-       (beginning-of-line)
-       (looking-at "- $")))))
+   (org-test-with-temp-text ":MYDRAWER:\n- a\n:END:"
+     (forward-line)
+     (org-meta-return)
+     (beginning-of-line)
+     (looking-at "- $"))))
 
+(ert-deftest test-org/insert-todo-heading-respect-content ()
+  "Test `org-insert-todo-heading-respect-content' specifications."
+  ;; Create a TODO heading.
+  (should
+   (org-test-with-temp-text "* H1\n Body"
+     (org-insert-todo-heading-respect-content)
+     (nth 2 (org-heading-components))))
+  ;; Add headline after body of current subtree.
+  (should
+   (org-test-with-temp-text "* H1\nBody"
+     (org-insert-todo-heading-respect-content)
+     (eobp)))
+  (should
+   (org-test-with-temp-text "* H1\n** H2\nBody"
+     (org-insert-todo-heading-respect-content)
+     (eobp)))
+  ;; In a list, do not create a new item.
+  (should
+   (org-test-with-temp-text "* H\n- an item\n- another one"
+     (search-forward "an ")
+     (org-insert-todo-heading-respect-content)
+     (and (eobp) (org-at-heading-p)))))
 
 
 
@@ -1273,6 +1311,49 @@ Text.
    (equal '("radio-target")
 	  (org-test-with-temp-text "<<target>> <<<radio-target>>>"
 	    (org-all-targets t)))))
+
+
+;;; Visibility
+
+(ert-deftest test-org/flag-drawer ()
+  "Test `org-flag-drawer' specifications."
+  ;; Hide drawer.
+  (should
+   (org-test-with-temp-text ":DRAWER:\ncontents\n:END:"
+     (org-flag-drawer t)
+     (get-char-property (line-end-position) 'invisible)))
+  ;; Show drawer.
+  (should-not
+   (org-test-with-temp-text ":DRAWER:\ncontents\n:END:"
+     (org-flag-drawer t)
+     (org-flag-drawer nil)
+     (get-char-property (line-end-position) 'invisible)))
+  ;; Test optional argument.
+  (should
+   (org-test-with-temp-text ":D1:\nc1\n:END:\n\n:D2:\nc2\n:END:"
+     (let ((drawer (save-excursion (search-forward ":D2")
+				   (org-element-at-point))))
+       (org-flag-drawer t drawer)
+       (get-char-property (progn (search-forward ":D2") (line-end-position))
+			  'invisible))))
+  (should-not
+   (org-test-with-temp-text ":D1:\nc1\n:END:\n\n:D2:\nc2\n:END:"
+     (let ((drawer (save-excursion (search-forward ":D2")
+				   (org-element-at-point))))
+       (org-flag-drawer t drawer)
+       (get-char-property (line-end-position) 'invisible))))
+  ;; Do not hide fake drawers.
+  (should-not
+   (org-test-with-temp-text "#+begin_example\n:D:\nc\n:END:\n#+end_example"
+     (forward-line 1)
+     (org-flag-drawer t)
+     (get-char-property (line-end-position) 'invisible)))
+  ;; Do not hide incomplete drawers.
+  (should-not
+   (org-test-with-temp-text ":D:\nparagraph"
+     (forward-line 1)
+     (org-flag-drawer t)
+     (get-char-property (line-end-position) 'invisible))))
 
 
 (provide 'test-org)

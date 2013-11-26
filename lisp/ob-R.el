@@ -37,6 +37,7 @@
 (declare-function ess-eval-buffer "ext:ess-inf" (vis))
 (declare-function org-number-sequence "org-compat" (from &optional to inc))
 (declare-function org-remove-if-not "org" (predicate seq))
+(declare-function org-every "org" (pred seq))
 
 (defconst org-babel-header-args:R
   '((width		 . :any)
@@ -65,7 +66,20 @@
 			    (output value graphics))))
   "R-specific header arguments.")
 
+(defconst ob-R-safe-header-args
+  (append org-babel-safe-header-args
+	  '(:width :height :bg :units :pointsize :antialias :quality
+		   :compression :res :type :family :title :fonts
+		   :version :paper :encoding :pagecentre :colormodel
+		   :useDingbats :horizontal))
+  "Header args which are safe for R babel blocks.
+
+See `org-babel-safe-header-args' for documentation of the format of
+this variable.")
+
 (defvar org-babel-default-header-args:R '())
+(put 'org-babel-default-header-args:R 'safe-local-variable
+     (org-babel-header-args-safe-fn ob-R-safe-header-args))
 
 (defcustom org-babel-R-command "R --slave --no-save"
   "Name of command to use for executing R code."
@@ -85,21 +99,22 @@
 	 (or graphics-file (org-babel-R-graphical-output-file params))))
     (mapconcat
      #'identity
-     ((lambda (inside)
-	(if graphics-file
-	    (append
-	     (list (org-babel-R-construct-graphics-device-call
-		    graphics-file params))
-	     inside
-	     (list "dev.off()"))
-	  inside))
-      (append
-       (when (cdr (assoc :prologue params))
-	 (list (cdr (assoc :prologue params))))
-       (org-babel-variable-assignments:R params)
-       (list body)
-       (when (cdr (assoc :epilogue params))
-	 (list (cdr (assoc :epilogue params)))))) "\n")))
+     (let ((inside
+            (append
+             (when (cdr (assoc :prologue params))
+               (list (cdr (assoc :prologue params))))
+             (org-babel-variable-assignments:R params)
+             (list body)
+             (when (cdr (assoc :epilogue params))
+               (list (cdr (assoc :epilogue params)))))))
+       (if graphics-file
+           (append
+            (list (org-babel-R-construct-graphics-device-call
+                   graphics-file params))
+            inside
+            (list "dev.off()"))
+         inside))
+     "\n")))
 
 (defun org-babel-execute:R (body params)
   "Execute a block of R code.
@@ -323,6 +338,8 @@ last statement in BODY, as elisp."
 	  (org-babel-import-elisp-from-file tmp-file '(16)))
 	column-names-p)))
     (output (org-babel-eval org-babel-R-command body))))
+
+(defvar ess-eval-visibly-p)
 
 (defun org-babel-R-evaluate-session
   (session body result-type result-params column-names-p row-names-p)

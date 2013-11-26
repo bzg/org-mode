@@ -107,7 +107,6 @@ When nil, the first star is not shown."
 
 (defvar org-odd-levels-only)
 (defvar org-keyword-time-regexp)
-(defvar org-drawer-regexp)
 (defvar org-complex-heading-regexp)
 (defvar org-property-end-re)
 
@@ -315,7 +314,8 @@ If the task has an end part, also demote it."
      ((= end start))
      ;; Inlinetask was folded: expand it.
      ((get-char-property (1+ start) 'invisible)
-      (org-show-entry))
+      (outline-flag-region start end nil)
+      (org-cycle-hide-drawers 'children))
      (t (outline-flag-region start end t)))))
 
 (defun org-inlinetask-remove-END-maybe ()

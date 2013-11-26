@@ -69,6 +69,7 @@
 (declare-function calendar-persian-date-string  "cal-persia" (&optional date))
 (declare-function calendar-check-holidays       "holidays" (date))
 
+(declare-function org-columns-remove-overlays "org-colview" ())
 (declare-function org-datetree-find-date-create "org-datetree"
 		  (date &optional keep-restriction))
 (declare-function org-columns-quit              "org-colview" ())
@@ -863,7 +864,7 @@ When set to the symbol `not-today', skip scheduled previously,
 but not scheduled today.
 
 When set to the symbol `repeated-after-deadline', skip scheduled
-items if they are repeated beyond the current dealine."
+items if they are repeated beyond the current deadline."
   :group 'org-agenda-skip
   :group 'org-agenda-daily/weekly
   :type '(choice
@@ -1419,13 +1420,14 @@ When nil, they may also match part of a word."
   :version "24.1"
   :type 'boolean)
 
-(defcustom org-agenda-search-view-max-outline-level nil
+(defcustom org-agenda-search-view-max-outline-level 0
   "Maximum outline level to display in search view.
 E.g. when this is set to 1, the search view will only
-show headlines of level 1."
+show headlines of level 1.  When set to 0, the default
+value, don't limit agenda view by outline level."
   :group 'org-agenda-search-view
   :version "24.4"
-  :package-version '(Org . "8.0")
+  :package-version '(Org . "8.3")
   :type 'integer)
 
 (defgroup org-agenda-time-grid nil
@@ -1746,10 +1748,9 @@ to capture the number of days."
   :version "24.4"
   :package-version '(Org . "8.0")
   :type '(list
-	  (string :tag "Deadline today   ")
-	  (choice :tag "Deadline relative"
-		  (string :tag "Format string")
-		  (function))))
+	  (string :tag "Deadline today          ")
+	  (string :tag "Deadline in the future  ")
+	  (string :tag "Deadline in the past    ")))
 
 (defcustom org-agenda-remove-times-when-in-prefix t
   "Non-nil means remove duplicate time specifications in agenda items.
@@ -2840,6 +2841,8 @@ Pressing `<' twice means to restrict to the current subtree or region
        ((equal org-keys "!") (customize-variable 'org-stuck-projects))
        (t (user-error "Invalid agenda key"))))))
 
+(defvar org-agenda-multi)
+
 (defun org-agenda-append-agenda ()
   "Append another agenda view to the current one.
 This function allows interactive building of block agendas.
@@ -3642,7 +3645,6 @@ generating a new one."
 	(or org-agenda-multi (org-agenda-fit-window-to-buffer))
 	(throw 'exit "Sticky Agenda buffer, use `r' to refresh"))
     (setq org-todo-keywords-for-agenda nil)
-    (setq org-drawers-for-agenda nil)
     (unless org-agenda-persistent-filter
       (setq org-agenda-tag-filter nil
 	    org-agenda-category-filter nil
@@ -3682,7 +3684,6 @@ generating a new one."
 	    (org-uniquify org-todo-keywords-for-agenda))
       (setq org-done-keywords-for-agenda
 	    (org-uniquify org-done-keywords-for-agenda))
-      (setq org-drawers-for-agenda (org-uniquify org-drawers-for-agenda))
       (setq org-agenda-last-prefix-arg current-prefix-arg)
       (setq org-agenda-this-buffer-name org-agenda-buffer-name)
       (and name (not org-agenda-name)
@@ -3816,6 +3817,8 @@ generating a new one."
 		     ((equal p h) 'bold))
 	       'org-priority))
 	(overlay-put ov 'org-type 'org-priority)))))
+
+(defvar org-depend-tag-blocked)
 
 (defun org-agenda-dim-blocked-tasks (&optional invisible)
   "Dim currently blocked TODO's in the agenda display.
@@ -3985,6 +3988,7 @@ This check for agenda markers in all agenda buffers currently active."
 ;;; Agenda timeline
 
 (defvar org-agenda-only-exact-dates nil) ; dynamically scoped
+(defvar org-agenda-show-log-scoped) ;; dynamically scope in `org-timeline' or `org-agenda-list'
 
 (defun org-timeline (&optional dotodo)
   "Show a time-sorted view of the entries in the current org file.
@@ -4581,7 +4585,7 @@ in `org-agenda-text-search-extra-files'."
 		    (goto-char (max (point-min) (1- (point))))
 		    (while (re-search-forward regexp nil t)
 		      (org-back-to-heading t)
-		      (while (and org-agenda-search-view-max-outline-level
+		      (while (and (not (zerop org-agenda-search-view-max-outline-level))
 				  (> (org-reduced-level (org-outline-level))
 				     org-agenda-search-view-max-outline-level)
 				  (forward-line -1)
@@ -4591,7 +4595,7 @@ in `org-agenda-text-search-extra-files'."
 			    beg1 (point)
 			    end (progn
 				  (outline-next-heading)
-				  (while (and org-agenda-search-view-max-outline-level
+				  (while (and (not (zerop org-agenda-search-view-max-outline-level))
 					      (> (org-reduced-level (org-outline-level))
 						 org-agenda-search-view-max-outline-level)
 					      (forward-line 1)
@@ -5449,6 +5453,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	(>= days n)
       (<= days n))))
 
+;;;###autoload
 (defun org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item
   (&optional end)
   "Do we have a reason to ignore this TODO entry because it has a time stamp?"
@@ -5765,7 +5770,6 @@ please use `org-class' instead."
      dayname skip-weeks)))
 (make-obsolete 'org-diary-class 'org-class "")
 
-(defvar org-agenda-show-log-scoped) ;; dynamically scope in `org-timeline' or `org-agenda-list'
 (defalias 'org-get-closed 'org-agenda-get-progress)
 (defun org-agenda-get-progress ()
   "Return the logged TODO entries for agenda display."
@@ -7083,6 +7087,7 @@ their type."
 	     'help-echo "Agendas are currently limited to this subtree.")
 (org-detach-overlay org-agenda-restriction-lock-overlay)
 
+;;;###autoload
 (defun org-agenda-set-restriction-lock (&optional type)
   "Set restriction lock for agenda, to current subtree or file.
 Restriction will be the file if TYPE is `file', or if type is the
@@ -7532,9 +7537,11 @@ to switch to narrowing."
 		 (if notgroup
 		     (push (cons 'and nf0) f)
 		   (push (cons (or op 'or) nf0) f)))))
-	  (if (equal nfilter filter)
-	      (funcall ffunc f1 f filter t nil)
-	    (funcall ffunc nf1 nf nfilter nil nil)))))
+	  (cond ((equal filter '("+"))
+		 (setq f (list (list 'not 'tags))))
+		((equal nfilter filter)
+		 (funcall ffunc f1 f filter t nil))
+		(t (funcall ffunc nf1 nf nfilter nil nil))))))
      ;; Category filter
      ((eq type 'category)
       (setq filter
@@ -8627,15 +8634,10 @@ if it was hidden in the outline."
 	(run-hook-with-args 'org-cycle-hook 'subtree))
       (message "Remote: SUBTREE"))
      ((= more 4)
-      (let* ((org-drawers (delete "LOGBOOK" (copy-sequence org-drawers)))
-	     (org-drawer-regexp
-	      (concat "^[ \t]*:\\("
-		      (mapconcat 'regexp-quote org-drawers "\\|")
-		      "\\):[ \t]*$")))
-	(show-subtree)
-	(save-excursion
-	  (org-back-to-heading)
-	  (org-cycle-hide-drawers 'subtree)))
+      (show-subtree)
+      (save-excursion
+	(org-back-to-heading)
+	(org-cycle-hide-drawers 'subtree '("LOGBOOK")))
       (message "Remote: SUBTREE AND LOGBOOK"))
      ((> more 4)
       (show-subtree)
@@ -9150,7 +9152,7 @@ Called with a universal prefix arg, show the priority instead of setting it."
       (goto-char (point-max))
       (while (not (bobp))
 	(when (equal marker (org-get-at-bol 'org-marker))
-	  (org-move-to-column (- (window-width) (length stamp)) t)
+	  (org-move-to-column (- (window-width) (length stamp)) t nil t)
 	  (org-agenda-fix-tags-filter-overlays-at (point))
           (if (featurep 'xemacs)
 	      ;; Use `duplicable' property to trigger undo recording
@@ -9916,11 +9918,12 @@ current HH:MM time."
   "Drag an agenda line forward by ARG lines."
   (interactive "p")
   (let ((inhibit-read-only t) lst)
-    (if (save-excursion
-	  (dotimes (n arg)
-	    (beginning-of-line 2)
-	    (push (not (get-text-property (point) 'txt)) lst))
-	  (delq nil lst))
+    (if (or (not (get-text-property (point) 'txt))
+	    (save-excursion
+	      (dotimes (n arg)
+		(move-beginning-of-line 2)
+		(push (not (get-text-property (point) 'txt)) lst))
+	      (delq nil lst)))
 	(message "Cannot move line forward")
       (org-drag-line-forward arg))))
 
@@ -9928,11 +9931,12 @@ current HH:MM time."
   "Drag an agenda line backward by ARG lines."
   (interactive "p")
   (let ((inhibit-read-only t) lst)
-    (if (save-excursion
-	  (dotimes (n arg)
-	    (beginning-of-line 0)
-	    (push (not (get-text-property (point) 'txt)) lst))
-	  (delq nil lst))
+    (if (or (not (get-text-property (point) 'txt))
+	    (save-excursion
+	      (dotimes (n arg)
+		(move-beginning-of-line 0)
+		(push (not (get-text-property (point) 'txt)) lst))
+	      (delq nil lst)))
 	(message "Cannot move line backward")
       (org-drag-line-backward arg))))
 

@@ -75,7 +75,8 @@ For example, to point to your `obe-bibtex-file' use the following.
   "Return all citations from `obe-bibtex-file'."
   (or obe-citations
       (save-window-excursion
-	(find-file obe-bibtex-file)
+	(find-file (or obe-bibtex-file
+		       (error "`obe-bibtex-file' has not been configured")))
 	(goto-char (point-min))
 	(while (re-search-forward "  :CUSTOM_ID: \\(.+\\)$" nil t)
 	  (push (org-no-properties (match-string 1))
@@ -88,7 +89,8 @@ For example, to point to your `obe-bibtex-file' use the following.
   (let ((citation (or citation
 		      (org-icompleting-read "Citation: "
 					    (obe-citations)))))
-    (find-file obe-bibtex-file)
+    (find-file (or obe-bibtex-file
+		   (error "`obe-bibtex-file' has not been configured")))
     (goto-char (point-min))
     (when (re-search-forward (format "  :CUSTOM_ID: %s" citation) nil t)
       (outline-previous-visible-heading 1)

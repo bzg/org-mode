@@ -281,7 +281,7 @@ Paragraph"
 	      :transcoders
 	      '((template . (lambda (text info)
 			      (org-element-interpret-data
-			       (plist-get info :title) info))))))
+			       (plist-get info :title)))))))
 	    (file-name-nondirectory
 	     (file-name-sans-extension (buffer-file-name)))))))
   ;; If no title is specified, and no file is associated to the
@@ -296,7 +296,7 @@ Paragraph"
 	      :transcoders
 	      '((template . (lambda (text info)
 			      (org-element-interpret-data
-			       (plist-get info :title) info))))))
+			       (plist-get info :title)))))))
 	    (buffer-name)))))
   ;; If a title is specified, use it.
   (should
@@ -309,7 +309,7 @@ Paragraph"
 	:transcoders
 	'((template . (lambda (text info)
 			(org-element-interpret-data
-			 (plist-get info :title) info)))))))))
+			 (plist-get info :title))))))))))
   ;; If an empty title is specified, do not set it.
   (should
    (equal
@@ -321,7 +321,7 @@ Paragraph"
 	:transcoders
 	'((template . (lambda (text info)
 			(org-element-interpret-data
-			 (plist-get info :title) info))))))))))
+			 (plist-get info :title)))))))))))
 
 (ert-deftest test-org-export/handle-options ()
   "Test if export options have an impact on output."
@@ -400,42 +400,36 @@ Paragraph"
 		       nil nil nil '(:with-archived-trees t))))))
   ;; Clocks.
   (should
-   (equal "CLOCK: [2012-04-29 sun. 10:45]\n"
-	  (let ((org-clock-string "CLOCK:"))
-	    (org-test-with-temp-text "CLOCK: [2012-04-29 sun. 10:45]"
-	      (org-export-as (org-test-default-backend)
-			     nil nil nil '(:with-clocks t))))))
+   (string-match "CLOCK: \\[2012-04-29 .* 10:45\\]"
+		 (org-test-with-temp-text "CLOCK: [2012-04-29 sun. 10:45]"
+		   (org-export-as (org-test-default-backend)
+				  nil nil nil '(:with-clocks t)))))
   (should
    (equal ""
-	  (let ((org-clock-string "CLOCK:"))
-	    (org-test-with-temp-text "CLOCK: [2012-04-29 sun. 10:45]"
-	      (org-export-as (org-test-default-backend)
-			     nil nil nil '(:with-clocks nil))))))
+	  (org-test-with-temp-text "CLOCK: [2012-04-29 sun. 10:45]"
+	    (org-export-as (org-test-default-backend)
+			   nil nil nil '(:with-clocks nil)))))
   ;; Drawers.
   (should
    (equal ""
-	  (let ((org-drawers '("TEST")))
-	    (org-test-with-temp-text ":TEST:\ncontents\n:END:"
-	      (org-export-as (org-test-default-backend)
-			     nil nil nil '(:with-drawers nil))))))
+	  (org-test-with-temp-text ":TEST:\ncontents\n:END:"
+	    (org-export-as (org-test-default-backend)
+			   nil nil nil '(:with-drawers nil)))))
   (should
    (equal ":TEST:\ncontents\n:END:\n"
-	  (let ((org-drawers '("TEST")))
-	    (org-test-with-temp-text ":TEST:\ncontents\n:END:"
-	      (org-export-as (org-test-default-backend)
-			     nil nil nil '(:with-drawers t))))))
+	  (org-test-with-temp-text ":TEST:\ncontents\n:END:"
+	    (org-export-as (org-test-default-backend)
+			   nil nil nil '(:with-drawers t)))))
   (should
    (equal ":FOO:\nkeep\n:END:\n"
-	  (let ((org-drawers '("FOO" "BAR")))
-	    (org-test-with-temp-text ":FOO:\nkeep\n:END:\n:BAR:\nremove\n:END:"
-	      (org-export-as (org-test-default-backend)
-			     nil nil nil '(:with-drawers ("FOO")))))))
+	  (org-test-with-temp-text ":FOO:\nkeep\n:END:\n:BAR:\nremove\n:END:"
+	    (org-export-as (org-test-default-backend)
+			   nil nil nil '(:with-drawers ("FOO"))))))
   (should
    (equal ":FOO:\nkeep\n:END:\n"
-	  (let ((org-drawers '("FOO" "BAR")))
-	    (org-test-with-temp-text ":FOO:\nkeep\n:END:\n:BAR:\nremove\n:END:"
-	      (org-export-as (org-test-default-backend)
-			     nil nil nil '(:with-drawers (not "BAR")))))))
+	  (org-test-with-temp-text ":FOO:\nkeep\n:END:\n:BAR:\nremove\n:END:"
+	    (org-export-as (org-test-default-backend)
+			   nil nil nil '(:with-drawers (not "BAR"))))))
   ;; Footnotes.
   (should
    (equal "Footnote?"
@@ -468,11 +462,12 @@ Paragraph"
 			 nil nil nil '(:with-inlinetasks nil)))))))
   ;; Plannings.
   (should
-   (equal "CLOSED: [2012-04-29 sun. 10:45]\n"
-	  (let ((org-closed-string "CLOSED:"))
-	    (org-test-with-temp-text "CLOSED: [2012-04-29 sun. 10:45]"
-	      (org-export-as (org-test-default-backend)
-			     nil nil nil '(:with-planning t))))))
+   (string-match
+    "CLOSED: \\[2012-04-29 .* 10:45\\]"
+    (let ((org-closed-string "CLOSED:"))
+      (org-test-with-temp-text "CLOSED: [2012-04-29 sun. 10:45]"
+	(org-export-as (org-test-default-backend)
+		       nil nil nil '(:with-planning t))))))
   (should
    (equal ""
 	  (let ((org-closed-string "CLOSED:"))
@@ -509,8 +504,8 @@ Paragraph"
   "Test `org-export-with-timestamps' specifications."
   ;; t value.
   (should
-   (equal
-    "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>\n"
+   (string-match
+    "\\[2012-04-29 .*? 10:45\\]<2012-04-29 .*? 10:45>"
     (org-test-with-temp-text "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>"
       (org-export-as (org-test-default-backend)
 		     nil nil nil '(:with-timestamps t)))))
@@ -523,24 +518,24 @@ Paragraph"
 		     nil nil nil '(:with-timestamps nil)))))
   ;; `active' value.
   (should
-   (equal
-    "<2012-03-29 Thu>\n\nParagraph <2012-03-29 Thu>[2012-03-29 Thu]"
+   (string-match
+    "<2012-03-29 .*?>\n\nParagraph <2012-03-29 .*?>\\[2012-03-29 .*?\\]"
     (org-test-with-temp-text
 	"<2012-03-29 Thu>[2012-03-29 Thu]
 
 Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
-      (org-trim (org-export-as (org-test-default-backend)
-			       nil nil nil '(:with-timestamps active))))))
+      (org-export-as (org-test-default-backend)
+		     nil nil nil '(:with-timestamps active)))))
   ;; `inactive' value.
   (should
-   (equal
-    "[2012-03-29 Thu]\n\nParagraph <2012-03-29 Thu>[2012-03-29 Thu]"
+   (string-match
+    "\\[2012-03-29 .*?\\]\n\nParagraph <2012-03-29 .*?>\\[2012-03-29 .*?\\]"
     (org-test-with-temp-text
 	"<2012-03-29 Thu>[2012-03-29 Thu]
 
 Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
-      (org-trim (org-export-as (org-test-default-backend)
-			       nil nil nil '(:with-timestamps inactive)))))))
+      (org-export-as (org-test-default-backend)
+		     nil nil nil '(:with-timestamps inactive))))))
 
 (ert-deftest test-org-export/comment-tree ()
   "Test if export process ignores commented trees."
@@ -2756,6 +2751,12 @@ Another text. (ref:text)
 	 (org-element-type
 	  (org-export-get-next-element
 	   (org-element-map tree 'plain-text 'identity info t) info)))))
+  (should
+   (eq 'verbatim
+       (org-test-with-parsed-data "* /italic/ =verb="
+	 (org-element-type
+	  (org-export-get-next-element
+	   (org-element-map tree 'italic 'identity info t) info)))))
   ;; Find next element in document keywords.
   (should
    (eq 'verbatim
@@ -2816,6 +2817,12 @@ Another text. (ref:text)
 	 (org-element-type
 	  (org-export-get-previous-element
 	   (org-element-map tree 'plain-text 'identity info t) info)))))
+  (should
+   (eq 'verbatim
+       (org-test-with-parsed-data "* =verb= /italic/"
+	 (org-element-type
+	  (org-export-get-previous-element
+	   (org-element-map tree 'italic 'identity info t) info)))))
   ;; Find previous element in document keywords.
   (should
    (eq 'verbatim

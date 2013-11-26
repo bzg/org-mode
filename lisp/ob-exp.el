@@ -69,6 +69,8 @@ be executed."
    ('otherwise
     (error "Requested export buffer when `org-current-export-file' is nil"))))
 
+(defvar org-link-search-inhibit-query)
+
 (defmacro org-babel-exp-in-export-file (lang &rest body)
   (declare (indent 1))
   `(let* ((lang-headers (intern (concat "org-babel-default-header-args:" ,lang)))
@@ -110,12 +112,14 @@ none ---- do not display either code or results upon export
 
 Assume point is at the beginning of block's starting line."
   (interactive)
-  (unless noninteractive (message "org-babel-exp processing..."))
   (save-excursion
     (let* ((info (org-babel-get-src-block-info 'light))
+	   (line (org-current-line))
 	   (lang (nth 0 info))
 	   (raw-params (nth 2 info)) hash)
       ;; bail if we couldn't get any info from the block
+      (unless noninteractive
+	(message "org-babel-exp process %s at line %d..." lang line))
       (when info
 	;; if we're actually going to need the parameters
 	(when (member (cdr (assoc :exports (nth 2 info))) '("both" "results"))
@@ -174,7 +178,9 @@ this template."
 		    (end-el (org-element-property :end element)))
 		(case type
 		  (inline-src-block
-		   (let* ((info (org-babel-parse-inline-src-block-match))
+		   (let* ((head (match-beginning 0))
+			  (info (append (org-babel-parse-inline-src-block-match)
+					(list nil nil head)))
 			  (params (nth 2 info)))
 		     (setf (nth 1 info)
 			   (if (and (cdr (assoc :noweb params))
@@ -372,7 +378,7 @@ replaced with its value."
 		 (cons (substring (symbol-name (car pair)) 1)
 		       (format "%S" (cdr pair))))
 	       (nth 2 info))
-     ("flags" . ,((lambda (f) (when f (concat " " f))) (nth 3 info)))
+     ("flags" . ,(let ((f (nth 3 info))) (when f (concat " " f))))
      ("name"  . ,(or (nth 4 info) "")))))
 
 (defun org-babel-exp-results (info type &optional silent hash)

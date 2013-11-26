@@ -97,11 +97,11 @@ this variable requires a restart of Emacs to become effective."
 Each template must define lines that will be treated as a comment and that
 must contain the \"BEGIN RECEIVE ORGTBL %n\" and \"END RECEIVE ORGTBL\"
 lines where \"%n\" will be replaced with the name of the table during
-insertion of the tempate.  The transformed table will later be inserted
+insertion of the template.  The transformed table will later be inserted
 between these lines.
 
 The template should also contain a minimal table in a multiline comment.
-If multiline comments are not possible in the buffer language, 
+If multiline comments are not possible in the buffer language,
 you can pack it into a string that will not be used when the code
 is compiled or executed.  Above the table will you need a line with
 the fixed string \"#+ORGTBL: SEND\", followed by instruction on how to
@@ -921,6 +921,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
     (setq org-table-may-need-update nil)
     ))
 
+;;;###autoload
 (defun org-table-begin (&optional table-type)
   "Find the beginning of the table and return its position.
 With argument TABLE-TYPE, go to the beginning of a table.el-type table."
@@ -934,6 +935,7 @@ With argument TABLE-TYPE, go to the beginning of a table.el-type table."
       (beginning-of-line 2)
       (point))))
 
+;;;###autoload
 (defun org-table-end (&optional table-type)
   "Find the end of the table and return its position.
 With argument TABLE-TYPE, go to the end of a table.el-type table."
@@ -1205,6 +1207,7 @@ Return t when the line exists, nil if it does not exist."
 		(< (setq cnt (1+ cnt)) N)))
     (= cnt N)))
 
+;;;###autoload
 (defun org-table-blank-field ()
   "Blank the current table field or active region."
   (interactive)
@@ -3016,6 +3019,8 @@ known that the table will be realigned a little later anyway."
       ;; Insert constants in all formulas
       (setq eqlist
 	    (mapcar (lambda (x)
+		      (if (string-match "^@-?I+" (car x))
+			  (user-error "Can't assign to hline relative reference"))
 		      (when (string-match "\\`$[<>]" (car x))
 			(setq lhs1 (car x))
 			(setq x (cons (substring
@@ -4136,7 +4141,7 @@ to execute outside of tables."
 	 '(arg)
 	 (concat "In tables, run `" (symbol-name fun) "'.\n"
 		 "Outside of tables, run the binding of `"
-		 (mapconcat (lambda (x) (format "%s" x)) keys "' or `")
+		 (mapconcat #'key-description keys "' or `")
 		 "'.")
 	 '(interactive "p")
 	 (list 'if

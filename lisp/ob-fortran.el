@@ -33,6 +33,7 @@
 (declare-function org-entry-get "org"
 		  (pom property &optional inherit literal-nil))
 (declare-function org-every "org" (pred seq))
+(declare-function org-remove-indentation "org" (code &optional n))
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("fortran" . "F90"))
@@ -60,20 +61,21 @@
 		     (mapconcat 'identity
 				(if (listp flags) flags (list flags)) " ")
 		     (org-babel-process-file-name tmp-src-file)) ""))))
-    ((lambda (results)
-       (org-babel-reassemble-table
-	(org-babel-result-cond (cdr (assoc :result-params params))
-	  (org-babel-read results)
-	  (let ((tmp-file (org-babel-temp-file "f-")))
-	    (with-temp-file tmp-file (insert results))
-	    (org-babel-import-elisp-from-file tmp-file)))
-	(org-babel-pick-name
-	 (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
-	(org-babel-pick-name
-	 (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))
-     (org-babel-trim
-      (org-babel-eval
-       (concat tmp-bin-file (if cmdline (concat " " cmdline) "")) "")))))
+    (let ((results
+           (org-babel-trim
+            (org-remove-indentation
+	     (org-babel-eval
+	      (concat tmp-bin-file (if cmdline (concat " " cmdline) "")) "")))))
+      (org-babel-reassemble-table
+       (org-babel-result-cond (cdr (assoc :result-params params))
+	 (org-babel-read results)
+         (let ((tmp-file (org-babel-temp-file "f-")))
+           (with-temp-file tmp-file (insert results))
+           (org-babel-import-elisp-from-file tmp-file)))
+       (org-babel-pick-name
+        (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
+       (org-babel-pick-name
+        (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))))
 
 (defun org-babel-expand-body:fortran (body params)
   "Expand a block of fortran or fortran code with org-babel according to

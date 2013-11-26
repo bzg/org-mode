@@ -39,8 +39,9 @@ BTEST_POST  =
               # -L <path-to>/ert      # needed for Emacs23, Emacs24 has ert built in
               # -L <path-to>/ess      # needed for running R tests
               # -L <path-to>/htmlize  # need at least version 1.34 for source code formatting
-BTEST_OB_LANGUAGES = awk C fortran maxima lilypond octave python sh perl
+BTEST_OB_LANGUAGES = awk C fortran maxima lilypond octave perl python
               # R                     # requires ESS to be installed and configured
+              # ruby                  # requires inf-ruby to be installed and configured
 # extra packages to require for testing
 BTEST_EXTRA =
               # ess-site  # load ESS for R tests
@@ -50,17 +51,26 @@ BTEST_EXTRA =
 
 # How to run tests
 req-ob-lang = --eval '(require '"'"'ob-$(ob-lang))'
+lst-ob-lang = ($(ob-lang) . t)
 req-extra   = --eval '(require '"'"'$(req))'
+BTEST_RE ?= \\(org\\|ob\\)
 BTEST	= $(BATCH) \
 	  $(BTEST_PRE) \
-	  --eval '(add-to-list '"'"'load-path "./lisp")' \
-	  --eval '(add-to-list '"'"'load-path "./testing")' \
+	  --eval '(add-to-list '"'"'load-path (concat default-directory "lisp"))' \
+	  --eval '(add-to-list '"'"'load-path (concat default-directory "testing"))' \
 	  $(BTEST_POST) \
+	  -l org-batch-test-init \
+	  --eval '(setq \
+		org-batch-test t \
+		org-babel-load-languages \
+	          (quote ($(foreach ob-lang,$(BTEST_OB_LANGUAGES) emacs-lisp sh org,$(lst-ob-lang)))) \
+	    org-test-select-re "$(BTEST_RE)" \
+	  )' \
 	  -l org-loaddefs.el \
-	  -l testing/org-test.el \
-	  $(foreach ob-lang,$(BTEST_OB_LANGUAGES),$(req-ob-lang)) \
+	  -l cl -l testing/org-test.el \
+	  -l ert -l org -l ox \
 	  $(foreach req,$(BTEST_EXTRA),$(req-extra)) \
-	  --eval '(setq org-confirm-babel-evaluate nil)'
+	  --eval '(org-test-run-batch-tests org-test-select-re)'
 
 # Using emacs in batch mode.
 # BATCH = $(EMACS) -batch -vanilla # XEmacs

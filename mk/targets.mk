@@ -35,7 +35,7 @@ endif
 
 CONF_BASE = EMACS DESTDIR ORGCM ORG_MAKE_DOC
 CONF_DEST = lispdir infodir datadir testdir
-CONF_TEST = BTEST_PRE BTEST_POST BTEST_OB_LANGUAGES BTEST_EXTRA
+CONF_TEST = BTEST_PRE BTEST_POST BTEST_OB_LANGUAGES BTEST_EXTRA BTEST_RE
 CONF_EXEC = CP MKDIR RM RMR FIND SUDO PDFTEX TEXI2PDF TEXI2HTML MAKEINFO INSTALL_INFO
 CONF_CALL = BATCH BATCHL ELC ELCDIR BTEST MAKE_LOCAL_MK MAKE_ORG_INSTALL MAKE_ORG_VERSION
 config-eol:: EOL = \#
@@ -94,15 +94,10 @@ compile compile-dirty::
 all clean-install::
 	$(foreach dir, $(SUBDIRS), $(MAKE) -C $(dir) $@;)
 
-check test single-test::	compile
+check test::	compile
 check test test-dirty::
 	-$(MKDIR) $(testdir)
-	TMPDIR=$(testdir) $(BTEST) -f org-test-run-batch-tests
-
-single-test single-test-dirty::
-	-$(MKDIR) $(testdir)
-	TMPDIR=$(testdir) $(BTEST) --eval "(org-test-load)" --eval "(ert '$(TEST))"
-
+	TMPDIR=$(testdir) $(BTEST)
 ifeq ($(TEST_NO_AUTOCLEAN),) # define this variable to leave $(testdir) around for inspection
 	$(MAKE) cleantest
 endif

@@ -24,14 +24,14 @@
 ;;
 ;;; Commentary:
 
-;; This file contains an alternative implementation of the same functionality
-;; that is also provided by org-remember.el.  The implementation is more
+;; This file contains an alternative implementation of the functionality
+;; that used to be provided by org-remember.el.  The implementation is more
 ;; streamlined, can produce more target types (e.g. plain list items or
 ;; table lines).  Also, it does not use a temporary buffer for editing
 ;; the captured entry - instead it uses an indirect buffer that visits
 ;; the new entry already in the target buffer (this was an idea by Samuel
-;; Wales).  John Wiegley's excellent `remember.el' is not needed for this
-;; implementation, even though we borrow heavily from its ideas.
+;; Wales).  John Wiegley's excellent `remember.el' is not needed anymore
+;; for this implementation, even though we borrow heavily from its ideas.
 
 ;; This implementation heavily draws on ideas by James TD Smith and
 ;; Samuel Wales, and, of cause, uses John Wiegley's remember.el as inspiration.
@@ -577,8 +577,9 @@ of the day at point (if any) or the current HH:MM time."
 			      (file-name-nondirectory
 			       (buffer-file-name orig-buf)))
 			 :annotation annotation
-			 :initial initial)
-	(org-capture-put :default-time
+			 :initial initial
+			 :return-to-wconf (current-window-configuration)
+			 :default-time
 			 (or org-overriding-default-time
 			     (org-current-time)))
 	(org-capture-set-target-location)
@@ -593,7 +594,8 @@ of the day at point (if any) or the current HH:MM time."
 	    ;;insert at point
 	    (org-capture-insert-template-here)
 	  (condition-case error
-	      (org-capture-place-template)
+	      (org-capture-place-template
+	       (equal (car (org-capture-get :target)) 'function))
 	    ((error quit)
 	     (if (and (buffer-base-buffer (current-buffer))
 		      (string-match "\\`CAPTURE-" (buffer-name)))
@@ -787,14 +789,14 @@ already gone.  Any prefix argument will be passed to the refile command."
   (let ((pos (point))
 	(base (buffer-base-buffer (current-buffer)))
 	(org-refile-for-capture t))
-    (org-capture-finalize)
     (save-window-excursion
       (with-current-buffer (or base (current-buffer))
 	(save-excursion
 	  (save-restriction
 	    (widen)
 	    (goto-char pos)
-	    (call-interactively 'org-refile)))))))
+	    (call-interactively 'org-refile)))))
+    (org-capture-finalize)))
 
 (defun org-capture-kill ()
   "Abort the current capture process."
@@ -986,9 +988,12 @@ it.  When it is a variable, retrieve the value.  Return whatever we get."
 	  (ignore-errors (org-set-local (car v) (cdr v))))
 	(buffer-local-variables buffer)))
 
-(defun org-capture-place-template ()
-  "Insert the template at the target location, and display the buffer."
-  (org-capture-put :return-to-wconf (current-window-configuration))
+(defun org-capture-place-template (&optional inhibit-wconf-store)
+  "Insert the template at the target location, and display the buffer.
+When `inhibit-wconf-store', don't store the window configuration, as it
+may have been stored before."
+  (unless inhibit-wconf-store
+    (org-capture-put :return-to-wconf (current-window-configuration)))
   (delete-other-windows)
   (org-switch-to-buffer-other-window
    (org-capture-get-indirect-buffer (org-capture-get :buffer) "CAPTURE"))
