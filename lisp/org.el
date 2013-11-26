@@ -20466,7 +20466,8 @@ This command does many different things, depending on context:
   "Restart Org-mode, to scan again for special lines.
 Also updates the keyword regular expressions."
   (interactive)
-  (org-mode)
+  ;; this will set the mode *and* set file local variables.
+  (normal-mode)
   (message "Org-mode restarted"))
 
 (defun org-kill-note-or-show-branches ()
