@@ -1131,7 +1131,7 @@ display, or in the #+COLUMNS line of the current buffer."
 	    printf (nth 5 e)
 	    fun (nth 6 e)
 	    calc (nth 7 e))
-      (setq map (copy-list org-columns-compile-map))
+      (setq map (copy-sequence org-columns-compile-map))
       (while (setq ee (pop map))
 	(if (equal fmt (nth 1 ee))
 	    (setq op (car ee) map nil)))
