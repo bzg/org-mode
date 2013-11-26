@@ -1121,7 +1121,7 @@ display, or in the #+COLUMNS line of the current buffer."
 
 (defun org-columns-uncompile-format (cfmt)
   "Turn the compiled columns format back into a string representation."
-  (let ((rtn "") e s prop title op op-match width fmt printf fun calc)
+  (let ((rtn "") e s prop title op op-match width fmt printf fun calc ee map)
     (while (setq e (pop cfmt))
       (setq prop (car e)
 	    title (nth 1 e)
@@ -1131,8 +1131,10 @@ display, or in the #+COLUMNS line of the current buffer."
 	    printf (nth 5 e)
 	    fun (nth 6 e)
 	    calc (nth 7 e))
-      (when (setq op-match (rassoc (list fmt fun calc) org-columns-compile-map))
-	(setq op (car op-match)))
+      (setq map (copy-list org-columns-compile-map))
+      (while (setq ee (pop map))
+	(if (equal fmt (nth 1 ee))
+	    (setq op (car ee) map nil)))
       (if (and op printf) (setq op (concat op ";" printf)))
       (if (equal title prop) (setq title nil))
       (setq s (concat "%" (if width (number-to-string width))
