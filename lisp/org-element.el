@@ -5087,66 +5087,67 @@ first row."
 		 (point)
 		 (list (org-element-headline-parser (point-max) t))))))
       (t
-       ;; Opportunistic shortcut.  Instead of going back to headline
-       ;; above (or beginning of buffer) and descending again, first
-       ;; try to find a known element above current position.  Give up
-       ;; after 3 tries or when we hit a headline (or beginning of
-       ;; buffer).
-       (beginning-of-line)
-       (skip-chars-backward " \r\t\n")
        (catch 'loop
-	 (dotimes (i 3)
-	   (unless (re-search-backward org-element-paragraph-separate nil t)
-	     (throw 'loop (goto-char (point-min))))
-	   (cond ((not (org-string-match-p "\\S-" (match-string 0)))
-		  (when (bobp) (throw 'loop nil))
-		  ;; An element cannot start at a headline, so check
-		  ;; first non-blank line below.
-		  (skip-chars-forward " \r\t\n" origin)
-		  (beginning-of-line))
-		 ((org-looking-at-p org-element--affiliated-re)
-		  ;; At an affiliated keyword, make sure to move to
-		  ;; the first one.
-		  (if (re-search-backward "^[ \t]*[^#]" nil t)
-		      (forward-line)
-		    (throw 'loop (goto-char (point-min)))))
-		 ((org-looking-at-p "^[ \t]*:\\(?: \\|$\\)")
-		  ;; At a fixed width area or a property drawer, reach
-		  ;; the beginning of the element.
-		  (if (re-search-backward "^[ \t]*[^:]" nil t)
-		      (forward-line)
-		    (throw 'loop (goto-char (point-min))))))
-	   (when (org-with-limited-levels (org-at-heading-p))
-	     ;; Tough luck: we're back at a headline above.  Move to
-	     ;; beginning of section.
-	     (forward-line)
-	     (skip-chars-forward " \r\t\n")
-	     (beginning-of-line)
-	     (throw 'loop nil))
-	   (let ((cached (org-element-cache-get (point) 'element)))
-	     ;; Search successful: we know an element before point
-	     ;; which is not an headline.  If it has a common ancestor
-	     ;; with ORIGIN, set this ancestor as the current parent
-	     ;; and the element as the one to check.  Otherwise, move
-	     ;; at top level and start parsing right after its broader
-	     ;; ancestor.
-	     (when cached
-	       (let ((cache-end (org-element-property :end cached)))
-		 (if (or (> cache-end origin)
-			 (and (= cache-end origin) (= (point-max) origin)))
-		     (setq element cached
-			   parent (org-element-property :parent cached)
-			   end cache-end)
-		   (goto-char cache-end)
-		   (let ((up cached))
-		     (while (and (setq up (org-element-property :parent up))
-				 (<= (org-element-property :end up) origin))
-		       (goto-char (org-element-property :end up)))
-		     (when up
-		       (setq element up
-			     parent (org-element-property :parent up)
-			     end (org-element-property :end up))))))
-	       (throw 'loop nil))))
+	 (when org-element-use-cache
+	   ;; Opportunistic shortcut.  Instead of going back to
+	   ;; headline above (or beginning of buffer) and descending
+	   ;; again, first try to find a known element above current
+	   ;; position.  Give up after 3 tries or when we hit
+	   ;; a headline (or beginning of buffer).
+	   (beginning-of-line)
+	   (skip-chars-backward " \r\t\n")
+	   (dotimes (i 3)
+	     (unless (re-search-backward org-element-paragraph-separate nil t)
+	       (throw 'loop (goto-char (point-min))))
+	     (cond ((not (org-string-match-p "\\S-" (match-string 0)))
+		    (when (bobp) (throw 'loop nil))
+		    ;; An element cannot start at a headline, so check
+		    ;; first non-blank line below.
+		    (skip-chars-forward " \r\t\n" origin)
+		    (beginning-of-line))
+		   ((org-looking-at-p org-element--affiliated-re)
+		    ;; At an affiliated keyword, make sure to move to
+		    ;; the first one.
+		    (if (re-search-backward "^[ \t]*[^#]" nil t)
+			(forward-line)
+		      (throw 'loop (goto-char (point-min)))))
+		   ((org-looking-at-p "^[ \t]*:\\(?: \\|$\\)")
+		    ;; At a fixed width area or a property drawer, reach
+		    ;; the beginning of the element.
+		    (if (re-search-backward "^[ \t]*[^:]" nil t)
+			(forward-line)
+		      (throw 'loop (goto-char (point-min))))))
+	     (when (org-with-limited-levels (org-at-heading-p))
+	       ;; Tough luck: we're back at a headline above.  Move to
+	       ;; beginning of section.
+	       (forward-line)
+	       (skip-chars-forward " \r\t\n")
+	       (beginning-of-line)
+	       (throw 'loop nil))
+	     (let ((cached (org-element-cache-get (point) 'element)))
+	       ;; Search successful: we know an element before point
+	       ;; which is not an headline.  If it has a common
+	       ;; ancestor with ORIGIN, set this ancestor as the
+	       ;; current parent and the element as the one to check.
+	       ;; Otherwise, move at top level and start parsing right
+	       ;; after its broader ancestor.
+	       (when cached
+		 (let ((cache-end (org-element-property :end cached)))
+		   (if (or (> cache-end origin)
+			   (and (= cache-end origin) (= (point-max) origin)))
+		       (setq element cached
+			     parent (org-element-property :parent cached)
+			     end cache-end)
+		     (goto-char cache-end)
+		     (let ((up cached))
+		       (while (and (setq up (org-element-property :parent up))
+				   (<= (org-element-property :end up) origin))
+			 (goto-char (org-element-property :end up)))
+		       (when up
+			 (setq element up
+			       parent (org-element-property :parent up)
+			       end (org-element-property :end up))))))
+		 (throw 'loop nil)))))
 	 ;; Opportunistic search failed.  Move back to beginning of
 	 ;; section in current headline, if any, or to first non-empty
 	 ;; line in buffer otherwise.
