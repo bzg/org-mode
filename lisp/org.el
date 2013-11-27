@@ -20468,8 +20468,8 @@ Also updates the keyword regular expressions."
   (interactive)
   ;; this will set the mode *and* set file local variables.
   (normal-mode)
-  ;; but it may leave us in some other mode
-  (unless (string= "org-mode" mode-name)
+  ;; but it may leave us in some unrelated mode
+  (unless (derived-mode-p "org-mode")
     (org-mode))
   (message "Org-mode restarted"))
 
