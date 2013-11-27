@@ -20468,6 +20468,9 @@ Also updates the keyword regular expressions."
   (interactive)
   ;; this will set the mode *and* set file local variables.
   (normal-mode)
+  ;; but it may leave us in some other mode
+  (unless (string= "org-mode" mode-name)
+    (org-mode))
   (message "Org-mode restarted"))
 
 (defun org-kill-note-or-show-branches ()
