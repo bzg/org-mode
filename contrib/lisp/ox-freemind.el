@@ -520,7 +520,7 @@ Return output file's name."
   (let* ((extension (concat ".mm" ))
 	 (file (org-export-output-file-name extension subtreep))
 	 (org-export-coding-system 'utf-8))
-    (org-export-to-file 'freemind ,file
+    (org-export-to-file 'freemind file
       async subtreep visible-only body-only ext-plist)))
 
 (provide 'ox-freemind)
