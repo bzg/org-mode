@@ -2937,7 +2937,12 @@ The function assumes BUFFER's major mode is `org-mode'."
 	       (when (consp entry)
 		 (let ((var (car entry))
 		       (val (cdr entry)))
-		   (and (not (eq var 'org-font-lock-keywords))
+		   (and (not (memq var '(org-font-lock-keywords
+					 ;; Do not share cache across
+					 ;; buffers as both keys and
+					 ;; values are modified by
+					 ;; side effect.
+					 org-element--cache)))
 			(or (memq var
 				  '(default-directory
 				     buffer-file-name
