@@ -7118,7 +7118,7 @@ specifying which drawers should not be hidden."
 			(save-excursion (outline-next-heading) (point))
 		      (org-end-of-subtree t)))))
 	(goto-char beg)
-	(while (re-search-forward org-drawer-regexp end t)
+	(while (re-search-forward org-drawer-regexp (max end (point)) t)
 	  (unless (member-ignore-case (match-string 1) exceptions)
 	    (let ((drawer (org-element-at-point)))
 	      (when (memq (org-element-type drawer) '(drawer property-drawer))
