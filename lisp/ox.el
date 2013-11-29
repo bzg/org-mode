@@ -2939,9 +2939,8 @@ The function assumes BUFFER's major mode is `org-mode'."
 		       (val (cdr entry)))
 		   (and (not (memq var '(org-font-lock-keywords
 					 ;; Do not share cache across
-					 ;; buffers as both keys and
-					 ;; values are modified by
-					 ;; side effect.
+					 ;; buffers as values are
+					 ;; modified by side effect.
 					 org-element--cache)))
 			(or (memq var
 				  '(default-directory
