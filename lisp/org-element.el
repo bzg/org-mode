@@ -459,6 +459,22 @@ Return parent element."
   ;; Return modified PARENT element.
   (or parent children))
 
+(defun org-element-extract-element (element)
+  "Extract ELEMENT from parse tree.
+Remove element from the parse tree by side-effect, and return it
+with its `:parent' property stripped out."
+  (let ((parent (org-element-property :parent element))
+	(secondary (org-element-secondary-p element)))
+    (if secondary
+        (org-element-put-property
+	 parent secondary
+	 (delq element (org-element-property secondary parent)))
+      (apply #'org-element-set-contents
+	     parent
+	     (delq element (org-element-contents parent))))
+    ;; Return ELEMENT with its :parent removed.
+    (org-element-put-property element :parent nil)))
+
 
 
 ;;; Greater elements

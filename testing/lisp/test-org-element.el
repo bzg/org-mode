@@ -179,6 +179,54 @@ Some other text
 	      (org-element-contents
 	       (org-element-map tree 'bold 'identity nil t)))))))
 
+(ert-deftest test-org-element/extract-element ()
+  "Test `org-element-extract-element' specifications."
+  ;; Extract a greater element.
+  (should
+   (equal '(org-data nil)
+	  (org-test-with-temp-text "* Headline"
+	    (let* ((tree (org-element-parse-buffer))
+		   (element (org-element-map tree 'headline 'identity nil t)))
+	      (org-element-extract-element element)
+	      tree))))
+  ;; Extract an element.
+  (should-not
+   (org-element-map
+       (org-test-with-temp-text "Paragraph"
+	 (let* ((tree (org-element-parse-buffer))
+		(element (org-element-map tree 'paragraph 'identity nil t)))
+	   (org-element-extract-element element)
+	   tree))
+       'paragraph
+     'identity))
+  ;; Extract an object, even in a secondary string.
+  (should-not
+   (org-element-map
+       (org-test-with-temp-text "*bold*"
+	 (let* ((tree (org-element-parse-buffer))
+		(element (org-element-map tree 'bold 'identity nil t)))
+	   (org-element-extract-element element)
+	   tree))
+       'bold
+     'identity))
+  (should-not
+   (org-element-map
+       (org-test-with-temp-text "* Headline *bold*"
+	 (let* ((tree (org-element-parse-buffer))
+		(element (org-element-map tree 'bold 'identity nil t)))
+	   (org-element-extract-element element)
+	   tree))
+       'bold
+     'identity))
+  ;; Return value doesn't have any :parent set.
+  (should-not
+   (org-element-property
+    :parent
+    (org-test-with-temp-text "* Headline\n  Paragraph with *bold* text."
+      (let* ((tree (org-element-parse-buffer))
+	     (element (org-element-map tree 'bold 'identity nil t)))
+	(org-element-extract-element element))))))
+
 
 
 ;;; Test Parsers
