@@ -361,10 +361,15 @@ These variables are copied to the temporary buffer created by
 ;; `org-element-contents' and `org-element-restriction'.
 ;;
 ;; Setter functions allow to modify elements by side effect.  There is
-;; `org-element-put-property', `org-element-set-contents',
-;; `org-element-set-element' and `org-element-adopt-element'.  Note
-;; that `org-element-set-element' and `org-element-adopt-elements' are
-;; higher level functions since also update `:parent' property.
+;; `org-element-put-property', `org-element-set-contents'.  These
+;; low-level functions are useful to build a parse tree.
+;;
+;; `org-element-adopt-element', `org-element-set-element',
+;; `org-element-extract-element' and `org-element-insert-before' are
+;; high-level functions useful to modify a parse tree.
+;;
+;; `org-element-secondary-p' is a predicate used to know if a given
+;; object belongs to a secondary string.
 
 (defsubst org-element-type (element)
   "Return type of ELEMENT.
@@ -474,6 +479,29 @@ with its `:parent' property stripped out."
 	     (delq element (org-element-contents parent))))
     ;; Return ELEMENT with its :parent removed.
     (org-element-put-property element :parent nil)))
+
+(defun org-element-insert-before (element location)
+  "Insert ELEMENT before LOCATION in parse tree.
+LOCATION is an element, object or string within the parse tree.
+Parse tree is modified by side effect."
+  (let* ((parent (org-element-property :parent location))
+	 (property (org-element-secondary-p location))
+	 (siblings (if property (org-element-property property parent)
+		     (org-element-contents parent))))
+    ;; Install ELEMENT at the appropriate POSITION within SIBLINGS.
+    (cond ((or (null siblings) (eq (car siblings) location))
+	   (push element siblings))
+	  ((null location) (nconc siblings (list element)))
+	  (t (let ((previous (cadr (memq location (reverse siblings)))))
+	       (if (not previous)
+		   (error "No location found to insert element")
+		 (let ((next (memq previous siblings)))
+		   (setcdr next (cons element (cdr next))))))))
+    ;; Store SIBLINGS at appropriate place in parse tree.
+    (if property (org-element-put-property parent property siblings)
+      (apply #'org-element-set-contents parent siblings))
+    ;; Set appropriate :parent property.
+    (org-element-put-property element :parent parent)))
 
 
 

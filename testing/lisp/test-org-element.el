@@ -227,6 +227,30 @@ Some other text
 	     (element (org-element-map tree 'bold 'identity nil t)))
 	(org-element-extract-element element))))))
 
+(ert-deftest test-org-element/insert-before ()
+  "Test `org-element-insert-before' specifications."
+  ;; Standard test.
+  (should
+   (equal
+    '(italic entity bold)
+    (org-test-with-temp-text "/some/ *paragraph*"
+      (let* ((tree (org-element-parse-buffer))
+	     (paragraph (org-element-map tree 'paragraph 'identity nil t))
+	     (bold (org-element-map tree 'bold 'identity nil t)))
+	(org-element-insert-before '(entity (:name "\\alpha")) bold)
+	(org-element-map tree '(bold entity italic) #'org-element-type nil)))))
+  ;; Insert an object in a secondary string.
+  (should
+   (equal
+    '(entity italic)
+    (org-test-with-temp-text "* /A/\n  Paragraph."
+      (let* ((tree (org-element-parse-buffer))
+	     (headline (org-element-map tree 'headline 'identity nil t))
+	     (italic (org-element-map tree 'italic 'identity nil t)))
+	(org-element-insert-before '(entity (:name "\\alpha")) italic)
+	(org-element-map (org-element-property :title headline) '(entity italic)
+	  #'org-element-type))))))
+
 
 
 ;;; Test Parsers
