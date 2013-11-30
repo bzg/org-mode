@@ -420,7 +420,7 @@ Load all test files first."
   (let ((org-id-track-globally t)
 	(org-test-selector
 	 (if org-test-selector org-test-selector "\\(org\\|ob\\)"))
-	org-confirm-babel-evaluate vc-handled-backends)
+	org-confirm-babel-evaluate org-startup-folded vc-handled-backends)
     (org-test-touch-all-examples)
     (org-test-update-id-locations)
     (org-test-load)

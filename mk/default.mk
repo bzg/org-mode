@@ -75,7 +75,7 @@ BTEST	= $(BATCH) \
 # Using emacs in batch mode.
 # BATCH = $(EMACS) -batch -vanilla # XEmacs
 BATCH	= $(EMACS) -batch -Q \
-	  --eval '(setq vc-handled-backends nil)'
+	  --eval '(setq vc-handled-backends nil org-startup-folded nil)'
 
 # Emacs must be started in toplevel directory
 BATCHO	= $(BATCH) \
