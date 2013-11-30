@@ -5220,27 +5220,19 @@ When optional argument N is a positive integer, return a list
 containing up to N siblings before BLOB, from farthest to
 closest.  With any other non-nil value, return a list containing
 all of them."
-  (let ((siblings
-	 ;; An object can belong to the contents of its parent or
-	 ;; to a secondary string.  We check the latter option
-	 ;; first.
-	 (let ((parent (org-export-get-parent blob)))
-	   (or (let ((sec-value (org-element-property
-				 (cdr (assq (org-element-type parent)
-					    org-element-secondary-value-alist))
-				 parent)))
-		 (and (memq blob sec-value) sec-value))
-	       (org-element-contents parent))))
-	prev)
+  (let* ((secondary (org-element-secondary-p blob))
+	 (parent (org-export-get-parent blob))
+	 (siblings
+	  (if secondary (org-element-property secondary parent)
+	    (org-element-contents parent)))
+	 prev)
     (catch 'exit
-      (mapc (lambda (obj)
-	      (cond ((memq obj (plist-get info :ignore-list)))
-		    ((null n) (throw 'exit obj))
-		    ((not (wholenump n)) (push obj prev))
-		    ((zerop n) (throw 'exit prev))
-		    (t (decf n) (push obj prev))))
-	    (cdr (memq blob (reverse siblings))))
-      prev)))
+      (dolist (obj (cdr (memq blob (reverse siblings))) prev)
+	(cond ((memq obj (plist-get info :ignore-list)))
+	      ((null n) (throw 'exit obj))
+	      ((not (wholenump n)) (push obj prev))
+	      ((zerop n) (throw 'exit prev))
+	      (t (decf n) (push obj prev)))))))
 
 (defun org-export-get-next-element (blob info &optional n)
   "Return next element or object.
@@ -5253,26 +5245,20 @@ When optional argument N is a positive integer, return a list
 containing up to N siblings after BLOB, from closest to farthest.
 With any other non-nil value, return a list containing all of
 them."
-  (let ((siblings
-	 ;; An object can belong to the contents of its parent or to
-	 ;; a secondary string.  We check the latter option first.
-	 (let ((parent (org-export-get-parent blob)))
-	   (or (let ((sec-value (org-element-property
-				 (cdr (assq (org-element-type parent)
-					    org-element-secondary-value-alist))
-				 parent)))
-		 (cdr (memq blob sec-value)))
-	       (cdr (memq blob (org-element-contents parent))))))
-	next)
+  (let* ((secondary (org-element-secondary-p blob))
+	 (parent (org-export-get-parent blob))
+	 (siblings
+	  (cdr (memq blob
+		     (if secondary (org-element-property secondary parent)
+		       (org-element-contents parent)))))
+	 next)
     (catch 'exit
-      (mapc (lambda (obj)
-	      (cond ((memq obj (plist-get info :ignore-list)))
-		    ((null n) (throw 'exit obj))
-		    ((not (wholenump n)) (push obj next))
-		    ((zerop n) (throw 'exit (nreverse next)))
-		    (t (decf n) (push obj next))))
-	    siblings)
-      (nreverse next))))
+      (dolist (obj siblings (nreverse next))
+	(cond ((memq obj (plist-get info :ignore-list)))
+	      ((null n) (throw 'exit obj))
+	      ((not (wholenump n)) (push obj next))
+	      ((zerop n) (throw 'exit (nreverse next)))
+	      (t (decf n) (push obj next)))))))
 
 
 ;;;; Translation

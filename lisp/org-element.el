@@ -428,6 +428,16 @@ The function takes care of setting `:parent' property for NEW."
   ;; Transfer type.
   (setcar old (car new)))
 
+(defun org-element-secondary-p (object)
+  "Non-nil when OBJECT belongs to a secondary string.
+Return value is the property name, as a keyword, or nil."
+  (let* ((parent (org-element-property :parent object))
+	 (property (cdr (assq (org-element-type parent)
+			      org-element-secondary-value-alist))))
+    (and property
+	 (memq object (org-element-property property parent))
+	 property)))
+
 (defsubst org-element-adopt-elements (parent &rest children)
   "Append elements to the contents of another element.
 
