@@ -10523,7 +10523,8 @@ clocktable.
 The tags that select a tree for export (@code{org-export-select-tags}).  The
 default value is @code{:export:}.  Within a subtree tagged with
 @code{:export:}, you can still exclude entries with @code{:noexport:} (see
-below).
+below).  When headlines are selectively exported with @code{:export:}
+anywhere in a file, text before the first headline is ignored.
 
 @item EXCLUDE_TAGS
 @cindex #+EXCLUDE_TAGS
