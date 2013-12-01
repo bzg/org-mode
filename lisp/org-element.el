@@ -416,23 +416,6 @@ Return modified element."
 	((cdr element) (setcdr (cdr element) contents))
 	(t (nconc element contents))))
 
-(defsubst org-element-set-element (old new)
-  "Replace element or object OLD with element or object NEW.
-The function takes care of setting `:parent' property for NEW."
-  ;; Since OLD is going to be changed into NEW by side-effect, first
-  ;; make sure that every element or object within NEW has OLD as
-  ;; parent.
-  (mapc (lambda (blob) (org-element-put-property blob :parent old))
-	(org-element-contents new))
-  ;; Transfer contents.
-  (apply 'org-element-set-contents old (org-element-contents new))
-  ;; Ensure NEW has same parent as OLD, then overwrite OLD properties
-  ;; with NEW's.
-  (org-element-put-property new :parent (org-element-property :parent old))
-  (setcar (cdr old) (nth 1 new))
-  ;; Transfer type.
-  (setcar old (car new)))
-
 (defun org-element-secondary-p (object)
   "Non-nil when OBJECT belongs to a secondary string.
 Return value is the property name, as a keyword, or nil."
@@ -502,6 +485,29 @@ Parse tree is modified by side effect."
       (apply #'org-element-set-contents parent siblings))
     ;; Set appropriate :parent property.
     (org-element-put-property element :parent parent)))
+
+(defun org-element-set-element (old new)
+  "Replace element or object OLD with element or object NEW.
+The function takes care of setting `:parent' property for NEW."
+  ;; Ensure OLD and NEW have the same parent.
+  (org-element-put-property new :parent (org-element-property :parent old))
+  (if (or (memq (org-element-type old) '(plain-text nil))
+	  (memq (org-element-type new) '(plain-text nil)))
+      ;; We cannot replace OLD with NEW since one of them is not an
+      ;; object or element.  We take the long path.
+      (progn (org-element-insert-before new old)
+	     (org-element-extract-element old))
+    ;; Since OLD is going to be changed into NEW by side-effect, first
+    ;; make sure that every element or object within NEW has OLD as
+    ;; parent.
+    (dolist (blob (org-element-contents new))
+      (org-element-put-property blob :parent old))
+    ;; Transfer contents.
+    (apply #'org-element-set-contents old (org-element-contents new))
+    ;; Overwrite OLD's properties with NEW's.
+    (setcar (cdr old) (nth 1 new))
+    ;; Transfer type.
+    (setcar old (car new))))
 
 
 

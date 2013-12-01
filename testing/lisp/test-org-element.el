@@ -124,23 +124,6 @@ Some other text
        (org-element-set-contents (org-element-map tree 'bold 'identity nil t))
        (org-element-contents (org-element-map tree 'bold 'identity nil t))))))
 
-(ert-deftest test-org-element/set-element ()
-  "Test `org-element-set-element' specifications."
-  (org-test-with-temp-text "* Headline\n*a*"
-    (let ((tree (org-element-parse-buffer)))
-      (org-element-set-element
-       (org-element-map tree 'bold 'identity nil t)
-       '(italic nil "b"))
-      ;; Check if object is correctly replaced.
-      (should (org-element-map tree 'italic 'identity))
-      (should-not (org-element-map tree 'bold 'identity))
-      ;; Check if new object's parent is correctly set.
-      (should
-       (eq
-	(org-element-property :parent
-			      (org-element-map tree 'italic 'identity nil t))
-	(org-element-map tree 'paragraph 'identity nil t))))))
-
 (ert-deftest test-org-element/secondary-p ()
   "Test `org-element-secondary-p' specifications."
   ;; In a secondary string, return property name.
@@ -250,6 +233,57 @@ Some other text
 	(org-element-insert-before '(entity (:name "\\alpha")) italic)
 	(org-element-map (org-element-property :title headline) '(entity italic)
 	  #'org-element-type))))))
+
+(ert-deftest test-org-element/set-element ()
+  "Test `org-element-set-element' specifications."
+  ;; Check if new element is inserted.
+  (should
+   (org-test-with-temp-text "* Headline\n*a*"
+     (let* ((tree (org-element-parse-buffer))
+	    (bold (org-element-map tree 'bold 'identity nil t)))
+       (org-element-set-element bold '(italic nil "b"))
+       (org-element-map tree 'italic 'identity))))
+  ;; Check if old element is removed.
+  (should-not
+   (org-test-with-temp-text "* Headline\n*a*"
+     (let* ((tree (org-element-parse-buffer))
+	    (bold (org-element-map tree 'bold 'identity nil t)))
+       (org-element-set-element bold '(italic nil "b"))
+       (org-element-map tree 'bold 'identity))))
+  ;; Check if :parent property is correctly set.
+  (should
+   (eq 'paragraph
+       (org-test-with-temp-text "* Headline\n*a*"
+	 (let* ((tree (org-element-parse-buffer))
+		(bold (org-element-map tree 'bold 'identity nil t)))
+	   (org-element-set-element bold '(italic nil "b"))
+	   (org-element-type
+	    (org-element-property
+	     :parent (org-element-map tree 'italic 'identity nil t)))))))
+  ;; Allow to replace strings with elements.
+  (should
+   (equal '("b")
+	  (org-test-with-temp-text "* Headline"
+	    (let* ((tree (org-element-parse-buffer))
+		   (text (org-element-map tree 'plain-text 'identity nil t)))
+	      (org-element-set-element text (list 'bold nil "b"))
+	      (org-element-map tree 'plain-text 'identity)))))
+  ;; Allow to replace elements with strings.
+  (should
+   (equal "a"
+	  (org-test-with-temp-text "* =verbatim="
+	    (let* ((tree (org-element-parse-buffer))
+		   (verb (org-element-map tree 'verbatim 'identity nil t)))
+	      (org-element-set-element verb "a")
+	      (org-element-map tree 'plain-text 'identity nil t)))))
+  ;; Allow to replace strings with strings.
+  (should
+   (equal "b"
+	  (org-test-with-temp-text "a"
+	    (let* ((tree (org-element-parse-buffer))
+		   (text (org-element-map tree 'plain-text 'identity nil t)))
+	      (org-element-set-element text "b")
+	      (org-element-map tree 'plain-text 'identity nil t))))))
 
 
 
