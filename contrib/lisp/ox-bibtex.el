@@ -103,9 +103,9 @@ return nil instead."
 (defun org-bibtex-get-arguments (keyword)
   "Return \"bibtex2html\" arguments specified by the user.
 KEYWORD is a \"BIBLIOGRAPHY\" keyword. Return value is a plist
-containing `:options' and `:limit' properties. The former
-contains a list of strings to be passed as options ot
-\"bibtex2html\" process. The latter contains a boolean."
+containing `:options' and `:limit' properties.  The former
+contains a list of strings to be passed as options to
+\"bibtex2html\" process.  The latter contains a boolean."
   (let ((value (org-element-property :value keyword)))
     (and value
          (string-match "\\(\\S-+\\)[ \t]+\\(\\S-+\\)\\(.*\\)" value)
@@ -201,9 +201,50 @@ Return new parse tree."
   ;; Return parse tree unchanged.
   tree)
 
+(defun org-bibtex-merge-contiguous-citations (tree backend info)
+  "Merge all contiguous citation in parse tree.
+As a side effect, this filter will also turn all \"cite\" links
+into \"\\cite{...}\" LaTeX fragments."
+  (when (org-export-derived-backend-p backend 'html 'latex)
+    (org-element-map tree '(link latex-fragment)
+      (lambda (object)
+	(when (org-bibtex-citation-p object)
+	  (let ((new-citation (list 'latex-fragment
+				    (list :value ""
+					  :post-blank (org-element-property
+						       :post-blank object)))))
+	    ;; Insert NEW-CITATION right before OBJECT.
+	    (org-element-insert-before new-citation object)
+	    ;; Remove all subsequent contiguous citations from parse
+	    ;; tree, keeping only their citation key.
+	    (let ((keys (list (org-bibtex-get-citation-key object)))
+		  next)
+	      (while (and (setq next (org-export-get-next-element object info))
+			  (or (and (stringp next)
+				   (not (org-string-match-p "\\S-" next)))
+			      (org-bibtex-citation-p next)))
+		(unless (stringp next)
+		  (push (org-bibtex-get-citation-key next) keys))
+		(org-element-extract-element object)
+		(setq object next))
+	      (org-element-extract-element object)
+	      ;; Eventually merge all keys within NEW-CITATION.  Also
+	      ;; ensure NEW-CITATION has the same :post-blank property
+	      ;; as the last citation removed.
+	      (org-element-put-property
+	       new-citation
+	       :post-blank (org-element-property :post-blank object))
+	      (org-element-put-property
+	       new-citation
+	       :value (format "\\cite{%s}"
+			      (mapconcat 'identity (nreverse keys) ",")))))))))
+  tree)
+
 (eval-after-load 'ox
-  '(add-to-list 'org-export-filter-parse-tree-functions
-                'org-bibtex-process-bib-files))
+  '(progn (add-to-list 'org-export-filter-parse-tree-functions
+		       'org-bibtex-process-bib-files)
+	  (add-to-list 'org-export-filter-parse-tree-functions
+		       'org-bibtex-merge-contiguous-citations)))
 
 
 
@@ -222,16 +263,7 @@ Fallback to `latex' back-end for other keywords."
                 (concat (and style (format "\\bibliographystyle{%s}\n" style))
                         (format "\\bibliography{%s}" file))))))))
 
-(defadvice org-latex-link (around bibtex-link)
-  "Translate \"cite\" type links into LaTeX syntax.
-Fallback to `latex' back-end for other keywords."
-  (let ((link (ad-get-arg 0)))
-    (if (not (org-bibtex-citation-p link)) ad-do-it
-      (setq ad-return-value
-	    (format "\\cite{%s}" (org-bibtex-get-citation-key link))))))
-
 (ad-activate 'org-latex-keyword)
-(ad-activate 'org-latex-link)
 
 
 
@@ -258,35 +290,18 @@ Fallback to `html' back-end for other keywords."
   (let ((fragment (ad-get-arg 0)))
     (if (not (org-bibtex-citation-p fragment)) ad-do-it
       (setq ad-return-value
-            (mapconcat
-             (lambda (key)
-               (let ((key (org-trim key)))
-                 (format "[<a href=\"#%s\">%s</a>]"
-                         key
-                         (or (cdr (assoc key org-bibtex-html-entries-alist))
-                             key))))
-             (org-split-string (org-bibtex-get-citation-key fragment) ",")
-             "")))))
-
-(defadvice org-html-link (around bibtex-link)
-  "Translate \"cite:\" type links into HTML syntax.
-Fallback to `html' back-end for other types."
-  (let ((link (ad-get-arg 0)))
-    (if (not (org-bibtex-citation-p link)) ad-do-it
-      (setq ad-return-value
-	    (mapconcat
-	     (lambda (key)
-	       (format "[<a href=\"#%s\">%s</a>]"
-		       key
-		       (or (cdr (assoc key org-bibtex-html-entries-alist))
-			   key)))
-	     (org-split-string (org-bibtex-get-citation-key link)
-			       "[ \t]*,[ \t]*")
-	     "")))))
+            (format "[%s]"
+		    (mapconcat
+		     (lambda (key)
+		       (format "<a href=\"#%s\">%s</a>"
+			       key
+			       (or (cdr (assoc key org-bibtex-html-entries-alist))
+				   key)))
+		     (org-split-string
+		      (org-bibtex-get-citation-key fragment) ",") ","))))))
 
 (ad-activate 'org-html-keyword)
 (ad-activate 'org-html-latex-fragment)
-(ad-activate 'org-html-link)
 
 
 (provide 'ox-bibtex)
