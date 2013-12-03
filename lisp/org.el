@@ -20324,10 +20324,17 @@ This command does many different things, depending on context:
       (if (save-excursion (beginning-of-line) (looking-at "[ \t]*$"))
 	  (or (run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-final-hook)
 	      (user-error "C-c C-c can do nothing useful at this location"))
-	;; When at a link, act according to the parent instead.
-	(when (eq type 'link)
-	  (setq context (org-element-property :parent context))
-	  (setq type (org-element-type context)))
+	(case type
+	  ;; When at a link, act according to the parent instead.
+	  (link (setq context (org-element-property :parent context))
+		(setq type (org-element-type context)))
+	  ;; Unsupported object types: check parent element instead.
+	  ((bold code entity export-snippet inline-babel-call inline-src-block
+		 italic latex-fragment line-break macro strike-through subscript
+		 superscript underline verbatim)
+	   (while (and (setq context (org-element-property :parent context))
+		       (not (memq (setq type (org-element-type context))
+				  '(paragraph verse-block)))))))
 	;; For convenience: at the first line of a paragraph on the
 	;; same line as an item, apply function on that item instead.
 	(when (eq type 'paragraph)
