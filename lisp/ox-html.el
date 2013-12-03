@@ -130,7 +130,9 @@
     (:infojs-opt "INFOJS_OPT" nil nil)
     ;; Redefine regular options.
     (:creator "CREATOR" nil org-html-creator-string)
-    (:with-latex nil "tex" org-html-with-latex)))
+    (:with-latex nil "tex" org-html-with-latex)
+    ;; Retrieve LaTeX header for fragments.
+    (:latex-header "LATEX_HEADER" nil nil newline)))
 
 
 ;;; Internal Variables
@@ -2488,18 +2490,34 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Latex Environment
 
-(defun org-html-format-latex (latex-frag processing-type)
-  "Format a LaTeX fragment LATEX-FRAG into HTML."
+(defun org-html-format-latex (latex-frag processing-type info)
+  "Format a LaTeX fragment LATEX-FRAG into HTML.
+PROCESSING-TYPE designates the tool used for conversion.  It is
+a symbol among `mathjax', `dvipng', `imagemagick', `verbatim' nil
+and t.  See `org-html-with-latex' for more information.  INFO is
+a plist containing export properties."
   (let ((cache-relpath "") (cache-dir ""))
     (unless (eq processing-type 'mathjax)
       (let ((bfn (or (buffer-file-name)
 		     (make-temp-name
-		      (expand-file-name "latex" temporary-file-directory)))))
+		      (expand-file-name "latex" temporary-file-directory))))
+	    (latex-header
+	     (let ((header (plist-get info :latex-header)))
+	       (and header
+		    (concat (mapconcat
+			     (lambda (line) (concat "#+LATEX_HEADER: " line))
+			     (org-split-string header "\n")
+			     "\n")
+			    "\n")))))
 	(setq cache-relpath
 	      (concat "ltxpng/"
 		      (file-name-sans-extension
 		       (file-name-nondirectory bfn)))
-	      cache-dir (file-name-directory bfn))))
+	      cache-dir (file-name-directory bfn))
+	;; Re-create LaTeX environment from original buffer in
+	;; temporary buffer so that dvipng/imagemagick can properly
+	;; turn the fragment into an image.
+	(setq latex-frag (concat latex-header latex-frag))))
     (with-temp-buffer
       (insert latex-frag)
       (org-format-latex cache-relpath cache-dir nil "Creating LaTeX Image..."
@@ -2515,9 +2533,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	(attributes (org-export-read-attribute :attr_html latex-environment)))
     (case processing-type
       ((t mathjax)
-       (org-html-format-latex latex-frag 'mathjax))
+       (org-html-format-latex latex-frag 'mathjax info))
       ((dvipng imagemagick)
-       (let ((formula-link (org-html-format-latex latex-frag processing-type)))
+       (let ((formula-link
+	      (org-html-format-latex latex-frag processing-type info)))
 	 (when (and formula-link (string-match "file:\\([^]]*\\)" formula-link))
 	   ;; Do not provide a caption or a name to be consistent with
 	   ;; `mathjax' handling.
@@ -2535,9 +2554,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	(processing-type (plist-get info :with-latex)))
     (case processing-type
       ((t mathjax)
-       (org-html-format-latex latex-frag 'mathjax))
+       (org-html-format-latex latex-frag 'mathjax info))
       ((dvipng imagemagick)
-       (let ((formula-link (org-html-format-latex latex-frag processing-type)))
+       (let ((formula-link
+	      (org-html-format-latex latex-frag processing-type info)))
 	 (when (and formula-link (string-match "file:\\([^]]*\\)" formula-link))
 	   (org-html--format-image (match-string 1 formula-link) nil info))))
       (t latex-frag))))
