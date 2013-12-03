@@ -154,8 +154,7 @@ to `org-bibtex-citation-p' predicate."
 (defun org-bibtex-process-bib-files (tree backend info)
   "Send each bibliography in parse tree to \"bibtex2html\" process.
 Return new parse tree."
-  (when (or (org-export-derived-backend-p backend 'html)
-	    (org-export-derived-backend-p backend 'ascii))
+  (when (org-export-derived-backend-p backend 'ascii 'html)
     ;; Initialize dynamically scoped variables.  The first one
     ;; contain an alist between keyword objects and their HTML
     ;; translation.  The second one will contain an alist between
