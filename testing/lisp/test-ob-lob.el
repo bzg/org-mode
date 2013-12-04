@@ -86,6 +86,7 @@
 	(let ((org-current-export-file buf))
 	  (org-babel-exp-process-buffer))
 	(message (buffer-string))
+	(goto-char (point-min))
 	(should (re-search-forward "^: 0" nil t))
 	(should (re-search-forward "call =2= stuck" nil t))
 	(should (re-search-forward
