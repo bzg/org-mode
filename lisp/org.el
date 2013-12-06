@@ -20503,13 +20503,6 @@ If `org-special-ctrl-o' is nil, just call `open-line' everywhere."
    (t
     (open-line n))))
 
-(defun org-comment-dwim (arg)
-  (interactive "*P")
-  "Call `comment-dwim' within a source edit buffer if needed"
-  (if (org-in-src-block-p)
-      (org-babel-do-in-edit-buffer (call-interactively #'comment-dwim))
-    (call-interactively #'comment-dwim)))
-
 (defun org-return (&optional indent)
   "Goto next table row or insert a newline.
 Calls `org-table-next-row' or `newline', depending on context.
@@ -22683,6 +22676,13 @@ strictly within a source block, use appropriate comment syntax."
 		    (org-move-to-column min-indent t))
 		  (insert comment-start))
 		(forward-line)))))))))
+
+(defun org-comment-dwim (arg)
+  (interactive "*P")
+  "Call `comment-dwim' within a source edit buffer if needed."
+  (if (org-in-src-block-p)
+      (org-babel-do-in-edit-buffer (call-interactively #'comment-dwim))
+    (call-interactively #'comment-dwim)))
 
 
 ;;; Planning
