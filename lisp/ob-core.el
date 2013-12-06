@@ -972,6 +972,7 @@ with a prefix argument then this is passed on to
     (org-edit-src-code)
     (funcall swap-windows)))
 
+;;;###autoload
 (defmacro org-babel-do-in-edit-buffer (&rest body)
   "Evaluate BODY in edit buffer if there is a code block at point.
 Return t if a code block was found at point, nil otherwise."
