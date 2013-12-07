@@ -19489,8 +19489,14 @@ because, in this case the deletion might narrow the column."
       (org-fix-tags-on-the-fly))))
 
 ;; Make `delete-selection-mode' work with org-mode and orgtbl-mode
-(put 'org-self-insert-command 'delete-selection t)
-(put 'orgtbl-self-insert-command 'delete-selection t)
+(put 'org-self-insert-command 'delete-selection
+     (lambda ()
+       (not (run-hook-with-args-until-success
+             'self-insert-uses-region-functions))))
+(put 'orgtbl-self-insert-command 'delete-selection
+     (lambda ()
+       (not (run-hook-with-args-until-success
+             'self-insert-uses-region-functions))))
 (put 'org-delete-char 'delete-selection 'supersede)
 (put 'org-delete-backward-char 'delete-selection 'supersede)
 (put 'org-yank 'delete-selection 'yank)
