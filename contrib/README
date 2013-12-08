@@ -37,8 +37,7 @@ org-invoice.el           --- Help manage client invoices in OrgMode
 org-jira.el              --- Add a jira:ticket protocol to Org
 org-learn.el             --- SuperMemo's incremental learning algorithm
 org-mac-iCal.el          --- Imports events from iCal.app to the Emacs diary
-org-mac-link-grabber.el  --- Grab links and URLs from various Mac applications
-org-mac-message.el	 --- Links to Apple Mail.app messages from within Org-mode
+org-mac-link.el          --- Grab links and URLs from various Mac applications
 org-mairix.el 	         --- Hook mairix search into Org for different MUAs
 org-man.el 	         --- Support for links to manpages in Org-mode
 org-mew.el		 --- Support for links to Mew messages

@@ -134,7 +134,7 @@ applications and inserting them in org documents"
   :type 'boolean)
 
 (defcustom org-mac-grab-Chrome-app-p t
-  "Enable menu option [f]irefox to grab links from Google Chrome.app"
+  "Enable menu option [c]hrome to grab links from Google Chrome.app"
   :tag "Grab Google Chrome.app links"
   :group 'org-mac-link
   :type 'boolean)
