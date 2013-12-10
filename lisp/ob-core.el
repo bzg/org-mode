@@ -1223,9 +1223,8 @@ the current subtree."
 	   ;; expanded body
 	   (lang (nth 0 info))
 	   (params (nth 2 info))
-	   (body (setf (nth 1 info)
-		       (if (org-babel-noweb-p params :eval)
-			   (org-babel-expand-noweb-references info) (nth 1 info))))
+	   (body (if (org-babel-noweb-p params :eval)
+			   (org-babel-expand-noweb-references info) (nth 1 info)))
 	   (expand-cmd (intern (concat "org-babel-expand-body:" lang)))
 	   (assignments-cmd (intern (concat "org-babel-variable-assignments:"
 					    lang)))
