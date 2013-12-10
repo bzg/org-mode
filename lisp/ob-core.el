@@ -1222,10 +1222,7 @@ the current subtree."
 			(t v))))))
 	   ;; expanded body
 	   (lang (nth 0 info))
-	   (params (setf (nth 2 info)
-			 (sort (org-babel-merge-params (nth 2 info) params)
-			       (lambda (el1 el2) (string< (symbol-name (car el1))
-						     (symbol-name (car el2)))))))
+	   (params (nth 2 info))
 	   (body (setf (nth 1 info)
 		       (if (org-babel-noweb-p params :eval)
 			   (org-babel-expand-noweb-references info) (nth 1 info))))
