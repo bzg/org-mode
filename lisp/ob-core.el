@@ -1219,7 +1219,24 @@ the current subtree."
 			      (member (car arg) '(:results :exports)))
 			 (mapconcat #'identity (sort (funcall rm (split-string v))
 						     #'string<) " "))
-			(t v)))))))
+			(t v))))))
+	   ;; expanded body
+	   (lang (nth 0 info))
+	   (params (setf (nth 2 info)
+			 (sort (org-babel-merge-params (nth 2 info) params)
+			       (lambda (el1 el2) (string< (symbol-name (car el1))
+						     (symbol-name (car el2)))))))
+	   (body (setf (nth 1 info)
+		       (if (org-babel-noweb-p params :eval)
+			   (org-babel-expand-noweb-references info) (nth 1 info))))
+	   (expand-cmd (intern (concat "org-babel-expand-body:" lang)))
+	   (assignments-cmd (intern (concat "org-babel-variable-assignments:"
+					    lang)))
+	   (expanded
+	    (if (fboundp expand-cmd) (funcall expand-cmd body params)
+	      (org-babel-expand-body:generic
+	       body params (and (fboundp assignments-cmd)
+				(funcall assignments-cmd params))))))
       (let* ((it (format "%s-%s"
                          (mapconcat
                           #'identity
@@ -1228,7 +1245,7 @@ the current subtree."
                                                 (when normalized
                                                   (format "%S" normalized))))
                                             (nth 2 info))) ":")
-                         (nth 1 info)))
+                         expanded))
              (hash (sha1 it)))
         (when (org-called-interactively-p 'interactive) (message hash))
         hash))))
