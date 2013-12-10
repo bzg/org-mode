@@ -1205,6 +1205,38 @@ echo \"$data\"
       (should (not (org-babel-one-header-arg-safe-p arg org-babel-safe-header-args))))
     (should (not (funcall safe-p (append safe-args unsafe-args))))))
 
+(ert-deftest test-ob/noweb-expansions-in-cache ()
+  "Test location of header argument evaluation."
+  (let ((noweb-expansions-in-cache-var 0))
+    (org-test-with-temp-text "
+#+name: foo
+#+begin_src emacs-lisp
+  \"I said\"
+#+end_src
+
+#+name: bar
+#+begin_src emacs-lisp :cache yes
+  (setq noweb-expansions-in-cache-var
+        (+ 1 noweb-expansions-in-cache-var))
+  (concat <<foo>> \" check noweb expansions\")
+#+end_src
+"
+      ;; run the second block to create the cache
+      (goto-char (point-min))
+      (re-search-forward (regexp-quote "#+name: bar"))
+      (should (string= "I said check noweb expansions"
+		       (org-babel-execute-src-block)))
+      (should (= noweb-expansions-in-cache-var 1))
+      ;; change the value of the first block
+      (goto-char (point-min))
+      (re-search-forward (regexp-quote "said"))
+      (goto-char (match-beginning 0))
+      (insert "haven't ")
+      (re-search-forward (regexp-quote "#+name: bar"))
+      (should (string= "I haven't said check noweb expansions"
+		       (org-babel-execute-src-block)))
+      (should (= noweb-expansions-in-cache-var 2)))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
