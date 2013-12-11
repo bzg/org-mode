@@ -1206,7 +1206,7 @@ echo \"$data\"
     (should (not (funcall safe-p (append safe-args unsafe-args))))))
 
 (ert-deftest test-ob/noweb-expansions-in-cache ()
-  "Test location of header argument evaluation."
+  "Ensure that noweb expansions are expanded before caching."
   (let ((noweb-expansions-in-cache-var 0))
     (org-test-with-temp-text "
 #+name: foo
@@ -1215,7 +1215,7 @@ echo \"$data\"
 #+end_src
 
 #+name: bar
-#+begin_src emacs-lisp :cache yes
+#+begin_src emacs-lisp :noweb yes :cache yes
   (setq noweb-expansions-in-cache-var
         (+ 1 noweb-expansions-in-cache-var))
   (concat <<foo>> \" check noweb expansions\")
