@@ -5020,6 +5020,13 @@ new one."
 		       (- (max current-end bottom) offset))
 		 (incf (aref org-element--cache-status 3) offset))))))))))
 
+(defconst org-element--cache-stable-types
+  '(center-block drawer dynamic-block headline inlinetask property-drawer
+		 quote-block special-block)
+  "List of stable greater elements types.
+Stable elements are elements that don't need to be removed from
+cache when their contents only are modified.")
+
 (defun org-element--cache-sync (buffer)
   "Synchronize cache with recent modification in BUFFER.
 Elements ending before modification area are kept in cache.
@@ -5051,68 +5058,108 @@ removed from the cache."
 		 ;;
 		 ;; Such a conflict can only occur if shifted key hash
 		 ;; hasn't been processed by `maphash' yet.
-		 (unless (zerop offset)
-		   (let* ((conflictp (consp (caar value)))
-			  (value-to-shift (if conflictp (cdr value) value)))
-		     ;; Shift element part.
-		     (org-element--cache-shift-positions (car value-to-shift) offset)
-		     ;; Shift objects part.
-		     (dolist (object-data (cdr value-to-shift))
-		       (incf (car object-data) offset)
-		       (dolist (successor (nth 1 object-data))
-			 (incf (cdr successor) offset))
-		       (dolist (object (cddr object-data))
-			 (org-element--cache-shift-positions object offset)))
-		     ;; Shift key-value pair.
-		     (let* ((new-key (+ key offset))
-			    (new-value (gethash new-key org-element--cache)))
-		       ;; Put new value to shifted key.
-		       ;;
-		       ;; If one already exists, do not overwrite it:
-		       ;; store it as the car of a cons cell instead,
-		       ;; and handle it when `maphash' reaches
-		       ;; NEW-KEY.
-		       ;;
-		       ;; If there is no element stored at NEW-KEY or
-		       ;; if NEW-KEY is going to be removed anyway
-		       ;; (i.e., it is before END), just store new
-		       ;; value there and make sure it will not be
-		       ;; processed again by storing NEW-KEY in
-		       ;; NEW-KEYS.
-		       (puthash new-key
-				(if (and new-value (> new-key end))
-				    (cons value-to-shift new-value)
-				  (push new-key new-keys)
-				  value-to-shift)
-				org-element--cache)
-		       ;; If current value contains two elements, car
-		       ;; should be the new value, since cdr has been
-		       ;; shifted already.
-		       (if conflictp
-			   (puthash key (car value) org-element--cache)
-			 (remhash key org-element--cache))))))
+		 (let* ((conflictp (consp (caar value)))
+			(value-to-shift (if conflictp (cdr value) value)))
+		   (cond
+		    ;; If an elements is missing one of its parents,
+		    ;; remove it from cache.  In a middle of
+		    ;; a conflict take care not to remove already
+		    ;; shifted element.
+		    ((catch 'remove
+		       (let ((parent (car value-to-shift)))
+			 (while (setq parent
+				      (org-element-property :parent parent))
+			   (cond
+			    ((<= (org-element-property :contents-begin parent)
+				 beg)
+			     (unless (memq (org-element-type parent)
+					   org-element--cache-stable-types)
+			       (throw 'remove t)))
+			    ((<= (org-element-property :begin parent) end)
+			     (throw 'remove t))))
+			 ;; No missing parent: Proceed with shifting.
+			 nil))
+		     (if conflictp (puthash key (car value) org-element--cache)
+		       (remhash key org-element--cache)))
+		    ;; No offset: no need to shift.
+		    ((zerop offset))
+		    (t
+		     (let* ((conflictp (consp (caar value)))
+			    (value-to-shift (if conflictp (cdr value) value)))
+		       ;; Shift element part.
+		       (org-element--cache-shift-positions
+			(car value-to-shift) offset)
+		       ;; Shift objects part.
+		       (dolist (object-data (cdr value-to-shift))
+			 (incf (car object-data) offset)
+			 (dolist (successor (nth 1 object-data))
+			   (incf (cdr successor) offset))
+			 (dolist (object (cddr object-data))
+			   (org-element--cache-shift-positions object offset)))
+		       ;; Shift key-value pair.
+		       (let* ((new-key (+ key offset))
+			      (new-value (gethash new-key org-element--cache)))
+			 ;; Put new value to shifted key.
+			 ;;
+			 ;; If one already exists, do not overwrite
+			 ;; it: store it as the car of a cons cell
+			 ;; instead, and handle it when `maphash'
+			 ;; reaches NEW-KEY.
+			 ;;
+			 ;; If there is no element stored at NEW-KEY
+			 ;; or if NEW-KEY is going to be removed
+			 ;; anyway (i.e., it is before END), just
+			 ;; store new value there and make sure it
+			 ;; will not be processed again by storing
+			 ;; NEW-KEY in NEW-KEYS.
+			 (puthash new-key
+				  (if (and new-value (> new-key end))
+				      (cons value-to-shift new-value)
+				    (push new-key new-keys)
+				    value-to-shift)
+				  org-element--cache)
+			 ;; If current value contains two elements,
+			 ;; car should be the new value, since cdr has
+			 ;; been shifted already.
+			 (if conflictp
+			     (puthash key (car value) org-element--cache)
+			   (remhash key org-element--cache))))))))
 		;; Remove every element between BEG and END, since
 		;; this is where changes happened.
 		((>= key beg) (remhash key org-element--cache))
-		;; Preserve any element ending before BEG.  If it
-		;; overlaps the BEG-END area, remove it.
+		;; From now on, element starts before changes.
 		(t
 		 (let ((element (car value)))
-		   (if (>= (org-element-property :end element) beg)
-		       (remhash key org-element--cache)
-		     ;; Special case: footnote definitions and plain
-		     ;; lists can end with blank lines.  Modifying
-		     ;; those can also alter last element inside.  We
-		     ;; must therefore remove them from cache.
-		     (let ((parent (org-element-property :parent element)))
-		       (when (and parent (eq (org-element-type parent) 'item))
-			 (setq parent (org-element-property :parent parent)))
-		       (when (and (memq (org-element-type parent)
-					'(footnote-definition plain-list))
-				  (>= (org-element-property :end parent) beg)
-				  (= (org-element-property :contents-end parent)
-				     (org-element-property :end element)))
-			 (remhash key org-element--cache))))))))
+		   (cond
+		    ;; Element ended before actual buffer
+		    ;; modifications.  Remove it only if any of its
+		    ;; parents is or will be removed from cache.
+		    ((< (org-element-property :end element) beg)
+		     (catch 'remove
+		       (let ((parent element))
+			 (while (setq parent
+				      (org-element-property :parent parent))
+			   (cond
+			    ((> (org-element-property :contents-end parent) end)
+			     (unless (memq (org-element-type parent)
+					   org-element--cache-stable-types)
+			       (throw 'remove
+				      (remhash key org-element--cache))))
+			    ((>= (org-element-property :end parent) beg)
+			     (throw 'remove (remhash key org-element--cache)))))
+			 ;; No missing parent: Keep element.
+			 t)))
+		    ;; Preserve stable greater elements (or verse
+		    ;; blocks) when changes are limited to their
+		    ;; contents only.
+		    ((let ((contents-end
+			    (org-element-property :contents-end element))
+			   (type (org-element-type element)))
+		       (and contents-end
+			    (> contents-end end)
+			    (or (memq type org-element--cache-stable-types)
+				(eq type 'verse-block)))))
+		    (t (remhash key org-element--cache)))))))
 	   org-element--cache)
 	  ;; Signal cache as up-to-date.
 	  (org-element--cache-cancel-changes))))))
