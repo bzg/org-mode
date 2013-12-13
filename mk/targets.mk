@@ -31,7 +31,8 @@ endif
 	clean-install cleanelc cleandirs cleanaddcontrib \
 	cleanlisp cleandoc cleandocs cleantest \
 	compile compile-dirty uncompiled \
-	config config-test config-exe config-all config-eol config-version
+	config config-test config-exe config-all config-eol config-version \
+	vanilla
 
 CONF_BASE = EMACS DESTDIR ORGCM ORG_MAKE_DOC
 CONF_DEST = lispdir infodir datadir testdir
@@ -93,6 +94,9 @@ compile compile-dirty::
 	$(MAKE) -C lisp $@
 all clean-install::
 	$(foreach dir, $(SUBDIRS), $(MAKE) -C $(dir) $@;)
+
+vanilla:
+	$(NOBATCH) &
 
 check test::	compile
 check test test-dirty::

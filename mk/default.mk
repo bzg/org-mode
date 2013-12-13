@@ -54,11 +54,12 @@ req-ob-lang = --eval '(require '"'"'ob-$(ob-lang))'
 lst-ob-lang = ($(ob-lang) . t)
 req-extra   = --eval '(require '"'"'$(req))'
 BTEST_RE ?= \\(org\\|ob\\)
-BTEST	= $(BATCH) \
+BTEST_INIT = $(BATCH) \
 	  $(BTEST_PRE) \
 	  --eval '(add-to-list '"'"'load-path (concat default-directory "lisp"))' \
 	  --eval '(add-to-list '"'"'load-path (concat default-directory "testing"))' \
-	  $(BTEST_POST) \
+	  $(BTEST_POST)
+BTEST	= $(BTEST_INIT) \
 	  -l org-batch-test-init \
 	  --eval '(setq \
 		org-batch-test t \
@@ -71,6 +72,10 @@ BTEST	= $(BATCH) \
 	  -l ert -l org -l ox \
 	  $(foreach req,$(BTEST_EXTRA),$(req-extra)) \
 	  --eval '(org-test-run-batch-tests org-test-select-re)'
+
+# Running a plain emacs with no config and this Org-mode loaded.  This
+# should be useful for testing and for manually verrifying problems.
+NOBATCH = $(filter-out -batch,$(BTEST_INIT)) -l org -f org-version
 
 # Using emacs in batch mode.
 # BATCH = $(EMACS) -batch -vanilla # XEmacs
