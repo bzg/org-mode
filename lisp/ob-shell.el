@@ -51,7 +51,8 @@ passed to `shell-command-on-region'"
   :group 'org-babel
   :type 'string)
 
-(defcustom org-babel-shell-names '("sh" "bash" "csh" "ash" "dash")
+(defcustom org-babel-shell-names
+  '("sh" "bash" "csh" "ash" "dash" "ksh" "mksh" "posh")
   "List of names of shell supported by babel shell code blocks."
   :group 'org-babel
   :type 'string
