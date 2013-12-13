@@ -38,7 +38,7 @@
 
 (defvar org-babel-default-header-args:sh '())
 
-(defvar org-babel-sh-command "bash"
+(defvar org-babel-sh-command "sh"
   "Command used to invoke a shell.
 This will be passed to  `shell-command-on-region'")
 
