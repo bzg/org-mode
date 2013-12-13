@@ -1,4 +1,4 @@
-;;; ob-sh.el --- org-babel functions for shell evaluation
+;;; ob-shell.el --- org-babel functions for shell evaluation
 
 ;; Copyright (C) 2009-2013 Free Software Foundation, Inc.
 
@@ -223,8 +223,8 @@ return the value of the last statement in BODY."
     (setq string (substring string (match-end 0))))
   string)
 
-(provide 'ob-sh)
+(provide 'ob-shell)
 
 
 
-;;; ob-sh.el ends here
+;;; ob-shell.el ends here
