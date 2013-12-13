@@ -63,7 +63,7 @@ BTEST	= $(BATCH) \
 	  --eval '(setq \
 		org-batch-test t \
 		org-babel-load-languages \
-	          (quote ($(foreach ob-lang,$(BTEST_OB_LANGUAGES) emacs-lisp sh org,$(lst-ob-lang)))) \
+	          (quote ($(foreach ob-lang,$(BTEST_OB_LANGUAGES) emacs-lisp shell org,$(lst-ob-lang)))) \
 	    org-test-select-re "$(BTEST_RE)" \
 	  )' \
 	  -l org-loaddefs.el \
