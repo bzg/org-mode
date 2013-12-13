@@ -38,9 +38,12 @@
 
 (defvar org-babel-default-header-args:sh '())
 
-(defvar org-babel-sh-command "sh"
+(defcustom org-babel-sh-command shell-file-name
   "Command used to invoke a shell.
-This will be passed to  `shell-command-on-region'")
+Set by default to the value of `shell-file-name'.  This will be
+passed to `shell-command-on-region'"
+  :group 'org-babel
+  :type 'string)
 
 (defcustom org-babel-sh-var-quote-fmt
   "$(cat <<'BABEL_TABLE'\n%s\nBABEL_TABLE\n)"
@@ -48,7 +51,22 @@ This will be passed to  `shell-command-on-region'")
   :group 'org-babel
   :type 'string)
 
-(defun org-babel-execute:sh (body params)
+(defcustom org-babel-shell-names '("sh" "bash" "csh" "ash" "dash")
+  "List of names of shell supported by babel shell code blocks."
+  :group 'org-babel
+  :type 'string
+  :initialize
+  (lambda (symbol value)
+    (set-default symbol (second value))
+    (mapc
+     (lambda (name)
+       (eval `(defun ,(intern (concat "org-babel-execute:" name)) (body params)
+		,(format "Execute a block of %s commands with Babel." name)
+		(let ((org-babel-sh-command ,name))
+		  (org-babel-execute:shell body params)))))
+     (second value))))
+
+(defun org-babel-execute:shell (body params)
   "Execute a block of Shell commands with Babel.
 This function is called by `org-babel-execute-src-block'."
   (let* ((session (org-babel-sh-initiate-session
