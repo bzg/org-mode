@@ -24,7 +24,7 @@
 
 ;;; Code:
 (org-test-for-executable "sh")
-(unless (featurep 'ob-sh)
+(unless (featurep 'ob-shell)
   (signal 'missing-test-dependency "Support for Sh code blocks"))
 
 (ert-deftest test-ob-sh/dont-insert-spaces-on-expanded-bodies ()
