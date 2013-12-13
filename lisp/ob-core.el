@@ -1940,29 +1940,30 @@ following the source block."
 	  (progn (end-of-line 1)
 		 (if (eobp) (insert "\n") (forward-char 1))
 		 (setq end (point))
-		 (or (and
-		      (not name)
-		      (progn ;; unnamed results line already exists
-			(catch 'non-comment
-			  (while (re-search-forward "[^ \f\t\n\r\v]" nil t)
-			    (beginning-of-line 1)
-			    (cond
-			     ((looking-at (concat org-babel-result-regexp "\n"))
-			      (throw 'non-comment t))
-			     ((and (looking-at "^[ \t]*#")
-				   (not (looking-at
-					 org-babel-lob-one-liner-regexp)))
-			      (end-of-line 1))
-			     (t (throw 'non-comment nil))))))
-		      (let ((this-hash (match-string 5)))
-			(prog1 (point)
-			  ;; must remove and rebuild if hash!=old-hash
-			  (if (and hash (not (string= hash this-hash)))
-			      (prog1 nil
-				(forward-line 1)
-				(delete-region
-				 end (org-babel-result-end)))
-			    (setq end nil)))))))))))
+		 (and
+		  (not name)
+		  (progn ;; unnamed results line already exists
+		    (catch 'non-comment
+		      (while (re-search-forward "[^ \f\t\n\r\v]" nil t)
+			(beginning-of-line 1)
+			(cond
+			 ((looking-at (concat org-babel-result-regexp "\n"))
+			  (throw 'non-comment t))
+			 ((and (looking-at "^[ \t]*#")
+			       (not (looking-at
+				     org-babel-lob-one-liner-regexp)))
+			  (end-of-line 1))
+			 (t (throw 'non-comment nil))))))
+		  (let ((this-hash (match-string 5)))
+		    (prog1 (point)
+		      ;; must remove and rebuild if hash!=old-hash
+		      (if (and hash (not (string= hash this-hash)))
+			  (progn
+			    (setq end (point-at-bol))
+			    (forward-line 1)
+			    (delete-region end (org-babel-result-end))
+			    (setq beg end))
+			(setq end nil))))))))))
       (if (not (and insert end)) found
 	(goto-char end)
 	(unless beg
