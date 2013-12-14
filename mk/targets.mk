@@ -108,6 +108,7 @@ endif
 
 up0::	cleanaddcontrib
 up0 up1 up2::
+	git checkout $(GIT_BRANCH)
 	git remote update
 	git pull
 up1 up2::	all
