@@ -53,20 +53,22 @@ BTEST_EXTRA =
 req-ob-lang = --eval '(require '"'"'ob-$(ob-lang))'
 lst-ob-lang = ($(ob-lang) . t)
 req-extra   = --eval '(require '"'"'$(req))'
-BTEST_RE ?= \\(org\\|ob\\)
-BTEST_INIT = $(BATCH) \
-	  $(BTEST_PRE) \
-	  --eval '(add-to-list '"'"'load-path (concat default-directory "lisp"))' \
-	  --eval '(add-to-list '"'"'load-path (concat default-directory "testing"))' \
-	  $(BTEST_POST)
-BTEST	= $(BTEST_INIT) \
+BTEST_RE   ?= \\(org\\|ob\\)
+BTEST_LOAD  = \
+	--eval '(add-to-list '"'"'load-path (concat default-directory "lisp"))' \
+	--eval '(add-to-list '"'"'load-path (concat default-directory "testing"))'
+BTEST_INIT  = $(BTEST_PRE) $(BTEST_LOAD) $(BTEST_POST)
+
+BTEST = $(BATCH) $(BTEST_INIT) \
 	  -l org-batch-test-init \
 	  --eval '(setq \
 		org-batch-test t \
 		org-babel-load-languages \
-	          (quote ($(foreach ob-lang,$(BTEST_OB_LANGUAGES) emacs-lisp shell org,$(lst-ob-lang)))) \
-	    org-test-select-re "$(BTEST_RE)" \
-	  )' \
+		  (quote ($(foreach ob-lang,\
+				$(BTEST_OB_LANGUAGES) emacs-lisp shell org,\
+				$(lst-ob-lang)))) \
+		org-test-select-re "$(BTEST_RE)" \
+		)' \
 	  -l org-loaddefs.el \
 	  -l cl -l testing/org-test.el \
 	  -l ert -l org -l ox \
@@ -74,12 +76,15 @@ BTEST	= $(BTEST_INIT) \
 	  --eval '(org-test-run-batch-tests org-test-select-re)'
 
 # Running a plain emacs with no config and this Org-mode loaded.  This
-# should be useful for testing and for manually verrifying problems.
-NOBATCH = $(filter-out -batch,$(BTEST_INIT)) -l org -f org-version
+# should be useful for manual testing and verification of problems.
+NOBATCH = $(EMACSQ) $(BTEST_INIT) -l org -f org-version
+
+# start Emacs with no user and site configuration
+# EMACSQ = -vanilla # XEmacs
+EMACSQ  = $(EMACS)  -Q
 
 # Using emacs in batch mode.
-# BATCH = $(EMACS) -batch -vanilla # XEmacs
-BATCH	= $(EMACS) -batch -Q \
+BATCH	= $(EMACSQ) -batch \
 	  --eval '(setq vc-handled-backends nil org-startup-folded nil)'
 
 # Emacs must be started in toplevel directory
