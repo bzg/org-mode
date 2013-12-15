@@ -11120,11 +11120,11 @@ Becomes:
 
 Special blocks that do not correspond to HTML5 elements (see
 @code{org-html-html5-elements}) will revert to the usual behavior,
-i.e. #+BEGIN_LEDERHOSEN will still export to <div class=''lederhosen''>.
+i.e. @code{#+BEGIN_LEDERHOSEN} will still export to @samp{<div class="lederhosen">}.
 
 Headlines cannot appear within special blocks.  To wrap a headline and its
-contents in e.g. <section> or <article> tags, set the @code{HTML_CONTAINER}
-property on the headline itself.
+contents in e.g. @samp{<section>} or @samp{<article>} tags, set the
+@code{HTML_CONTAINER} property on the headline itself.
 
 @node HTML preamble and postamble
 @subsection HTML preamble and postamble
@@ -13344,10 +13344,13 @@ string of these options for details.
 @end multitable
 
 @vindex org-html-doctype
+@vindex org-html-container-element
+@vindex org-html-html5-fancy
 @vindex org-html-xml-declaration
 @vindex org-html-link-up
 @vindex org-html-link-home
 @vindex org-html-link-org-files-as-html
+@vindex org-html-link-use-abs-url
 @vindex org-html-head
 @vindex org-html-head-extra
 @vindex org-html-inline-images
@@ -13355,21 +13358,26 @@ string of these options for details.
 @vindex org-html-preamble
 @vindex org-html-postamble
 @vindex org-html-table-default-attributes
+@vindex org-html-table-row-tags
 @vindex org-html-head-include-default-style
 @vindex org-html-head-include-scripts
 @multitable @columnfractions 0.32 0.68
 @item @code{:html-doctype}          @tab @code{org-html-doctype}
+@item @code{:html-container}        @tab @code{org-html-container-element}
+@item @code{:html-html5-fancy}      @tab @code{org-html-html5-fancy}
 @item @code{:html-xml-declaration}  @tab @code{org-html-xml-declaration}
 @item @code{:html-link-up}          @tab @code{org-html-link-up}
 @item @code{:html-link-home}        @tab @code{org-html-link-home}
 @item @code{:html-link-org-as-html} @tab @code{org-html-link-org-files-as-html}
+@item @code{:html-link-use-abs-url} @tab @code{org-html-link-use-abs-url}
 @item @code{:html-head}             @tab @code{org-html-head}
 @item @code{:html-head-extra}       @tab @code{org-html-head-extra}
 @item @code{:html-inline-images}    @tab @code{org-html-inline-images}
 @item @code{:html-extension}        @tab @code{org-html-extension}
 @item @code{:html-preamble}         @tab @code{org-html-preamble}
 @item @code{:html-postamble}        @tab @code{org-html-postamble}
-@item @code{:html-table-attributes}        @tab @code{org-html-table-default-attributes}
+@item @code{:html-table-attributes} @tab @code{org-html-table-default-attributes}
+@item @code{:html-table-row-tags}   @tab @code{org-html-table-row-tags}
 @item @code{:html-head-include-default-style} @tab @code{org-html-head-include-default-style}
 @item @code{:html-head-include-scripts} @tab @code{org-html-head-include-scripts}
 @end multitable
