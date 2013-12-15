@@ -22,15 +22,8 @@
 
 ;;; Commentary:
 
-;; This library implements an Org back-end for Org exporter.
-;;
-;; It introduces two interactive functions, `org-org-export-as-org'
-;; and `org-org-export-to-org', which export, respectively, to
-;; a temporary buffer and to a file.
-;;
-;; A publishing function is also provided: `org-org-publish-to-org'.
-
 ;;; Code:
+
 (require 'ox)
 (declare-function htmlize-buffer "htmlize" (&optional buffer))
 
