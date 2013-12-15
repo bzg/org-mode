@@ -11107,11 +11107,11 @@ Becomes:
 @end example
 
 Special blocks that do not correspond to HTML5 elements (see
-@code{org-html-html5-elements}) will revert to the usual behavior,
-i.e. @code{#+BEGIN_LEDERHOSEN} will still export to @samp{<div class="lederhosen">}.
+@code{org-html-html5-elements}) will revert to the usual behavior, i.e.,
+@code{#+BEGIN_LEDERHOSEN} will still export to @samp{<div class="lederhosen">}.
 
 Headlines cannot appear within special blocks.  To wrap a headline and its
-contents in e.g. @samp{<section>} or @samp{<article>} tags, set the
+contents in e.g., @samp{<section>} or @samp{<article>} tags, set the
 @code{HTML_CONTAINER} property on the headline itself.
 
 @node HTML preamble and postamble, Quoting HTML tags, HTML doctypes, HTML export
