@@ -588,6 +588,7 @@ Exporting
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
 * Markdown export::             Exporting to Markdown
 * OpenDocument Text export::    Exporting to OpenDocument Text
+* Org export::                  Exporting to Org
 * iCalendar export::            Exporting to iCalendar
 * Other built-in back-ends::    Exporting to @code{Texinfo}, a man page, or Org
 * Export in foreign buffers::   Author tables in lists in Org syntax
@@ -10350,6 +10351,7 @@ in the iCalendar format.
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
 * Markdown export::             Exporting to Markdown
 * OpenDocument Text export::    Exporting to OpenDocument Text
+* Org export::                  Exporting to Org
 * iCalendar export::            Exporting to iCalendar
 * Other built-in back-ends::    Exporting to @code{Texinfo}, a man page, or Org
 * Export in foreign buffers::   Author tables in lists in Org syntax
@@ -10449,6 +10451,7 @@ Built-in back-ends include:
 @item man (Man page format)
 @item md (Markdown format)
 @item odt (OpenDocument Text format)
+@item org (Org format)
 @item texinfo (Texinfo format)
 @end itemize
 
@@ -11872,7 +11875,7 @@ that one (@pxref{Export settings}).
 
 @c begin opendocument
 
-@node OpenDocument Text export, iCalendar export, Markdown export, Exporting
+@node OpenDocument Text export, Org export, Markdown export, Exporting
 @section OpenDocument Text export
 @cindex ODT
 @cindex OpenDocument
@@ -12789,7 +12792,28 @@ will take care of updating the @code{rng-schema-locating-files} for you.
 
 @c end opendocument
 
-@node iCalendar export, Other built-in back-ends, OpenDocument Text export, Exporting
+@node Org export
+@section Org export
+@cindex Org export
+
+@code{org} export back-end creates a normalized version of the Org document
+in current buffer.  In particular, it evaluates Babel code (@pxref{Evaluating
+code blocks}) and removes other back-ends specific contents.
+
+@subheading Org export commands
+
+@table @kbd
+@orgcmd{C-c C-e O o,org-org-export-to-org}
+Export as an Org document.  For an Org file, @file{myfile.org}, the resulting
+file will be @file{myfile.org.org}.  The file will be overwritten without
+warning.
+@orgcmd{C-c C-e O O,org-org-export-as-org}
+Export to a temporary buffer.  Do not create a file.
+@item C-c C-e O v
+Export to an Org file, then open it.
+@end table
+
+@node iCalendar export, Other built-in back-ends, Org export, Exporting
 @section iCalendar export
 @cindex iCalendar export
 
@@ -12868,7 +12892,6 @@ On top of the aforementioned back-ends, Org comes with other built-in ones:
 @itemize
 @item @file{ox-man.el}: export to a man page.
 @item @file{ox-texinfo.el}: export to @code{Texinfo} format.
-@item @file{ox-org.el}: export to an Org document.
 @end itemize
 
 To activate these export back-end, customize @code{org-export-backends} or
