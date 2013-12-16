@@ -71,8 +71,8 @@ To add files to this list use the `org-babel-lob-ingest' command."
 
 (defconst org-babel-inline-lob-one-liner-regexp
   (concat
-   "\\([^\n]*?\\)call_\\([^\(\)\n]+?\\)\\(\\[\\(.*?\\)\\]\\|\\(\\)\\)"
-   "\(\\([^\n]*?\\)\)\\(\\[\\(.*?\\)\\]\\)?")
+   "\\([^\n]*?\\)call_\\([^\(\)[:space:]\n]+?\\)\\(\\[\\(.*?\\)\\]\\|\\(\\)\\)"
+   "\(\\(.*?\\)\)\\(\\[\\(.*?\\)\\]\\)?")
   "Regexp to match inline calls to predefined source block functions.")
 
 (defconst org-babel-lob-one-liner-regexp
