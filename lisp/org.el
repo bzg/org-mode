@@ -6269,7 +6269,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   ;; Diary sexps.
 	   '("^&?%%(.*\\|<%%([^>\n]*?>" (0 'org-sexp-date t))
 	   ;; Macro
-	   '("{{{.+}}}" (0 'org-macro t))
+	   '("{{{.+?}}}" (0 'org-macro t))
 	   '(org-hide-wide-columns (0 nil append))
 	   ;; TODO keyword
 	   (list (format org-heading-keyword-regexp-format
