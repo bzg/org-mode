@@ -2170,10 +2170,8 @@ a tree with a select tag."
 ;; Internally, three functions handle the filtering of objects and
 ;; elements during the export.  In particular,
 ;; `org-export-ignore-element' marks an element or object so future
-;; parse tree traversals skip it, `org-export--interpret-p' tells which
-;; elements or objects should be seen as real Org syntax and
-;; `org-export-expand' transforms the others back into their original
-;; shape
+;; parse tree traversals skip it and `org-export-expand' transforms
+;; the others back into their original shape.
 ;;
 ;; `org-export-transcoder' is an accessor returning appropriate
 ;; translator function for a given element or object.
@@ -2207,16 +2205,6 @@ Return transcoded string."
 		 (plist-get info :filter-plain-text)
 		 (let ((transcoder (org-export-transcoder data info)))
 		   (if transcoder (funcall transcoder data info) data))
-		 info))
-	       ;; Uninterpreted element/object: change it back to Org
-	       ;; syntax and export again resulting raw string.
-	       ((not (org-export--interpret-p data info))
-		(org-export-data
-		 (org-export-expand
-		  data
-		  (mapconcat (lambda (blob) (org-export-data blob info))
-			     (org-element-contents data)
-			     ""))
 		 info))
 	       ;; Secondary string.
 	       ((not type)
@@ -2315,31 +2303,67 @@ recursively convert DATA using BACKEND translation table."
 	  ;; will probably be used on small trees.
 	  :exported-data (make-hash-table :test 'eq :size 401)))))
 
-(defun org-export--interpret-p (blob info)
-  "Non-nil if element or object BLOB should be interpreted during export.
-If nil, BLOB will appear as raw Org syntax.  Check is done
-according to export options INFO, stored as a plist."
-  (case (org-element-type blob)
-    ;; ... entities...
-    (entity (plist-get info :with-entities))
-    ;; ... emphasis...
-    ((bold italic strike-through underline)
-     (plist-get info :with-emphasize))
-    ;; ... fixed-width areas.
-    (fixed-width (plist-get info :with-fixed-width))
-    ;; ... LaTeX environments and fragments...
-    ((latex-environment latex-fragment)
-     (let ((with-latex-p (plist-get info :with-latex)))
-       (and with-latex-p (not (eq with-latex-p 'verbatim)))))
-    ;; ... sub/superscripts...
-    ((subscript superscript)
-     (let ((sub/super-p (plist-get info :with-sub-superscript)))
-       (if (eq sub/super-p '{})
-	   (org-element-property :use-brackets-p blob)
-	 sub/super-p)))
-    ;; ... tables...
-    (table (plist-get info :with-tables))
-    (otherwise t)))
+(defun org-export--remove-uninterpreted (data info)
+  "Change uninterpreted elements back into Org syntax.
+DATA is the parse tree.  INFO is a plist containing export
+options.  Each uninterpreted element or object is changed back
+into a string.  Contents, if any, are not modified.  The parse
+tree is modified by side effect and returned by the function."
+  (org-element-map data
+      '(entity bold italic latex-environment latex-fragment strike-through
+	       subscript superscript underline)
+    #'(lambda (blob)
+	(let ((new
+	       (case (org-element-type blob)
+		 ;; ... entities...
+		 (entity (and (not (plist-get info :with-entities))
+			      (list (org-export-expand blob nil))))
+		 ;; ... emphasis...
+		 ((bold italic strike-through underline)
+		  (and (not (plist-get info :with-emphasize))
+		       (let ((marker (case (org-element-type blob)
+				       (bold "*")
+				       (italic "/")
+				       (strike-through "+")
+				       (underline "_"))))
+			 (append
+			  (list marker)
+			  (org-element-contents blob)
+			  (list (concat
+				 marker
+				 (make-string
+				  (or (org-element-property :post-blank blob)
+				      0)
+				  ?\s)))))))
+		 ;; ... LaTeX environments and fragments...
+		 ((latex-environment latex-fragment)
+		  (and (eq (plist-get info :with-latex) 'verbatim)
+		       (list (org-export-expand blob nil))))
+		 ;; ... sub/superscripts...
+		 ((subscript superscript)
+		  (let ((sub/super-p (plist-get info :with-sub-superscript))
+			(bracketp (org-element-property :use-brackets-p blob)))
+		    (and (or (not sub/super-p)
+			     (and (eq sub/super-p '{}) bracketp))
+			 (append
+			  (list (concat
+				 (if (eq (org-element-type blob) 'subscript)
+				     "_"
+				   "^")
+				 (and bracketp "{")))
+			  (org-element-contents blob)
+			  (list (concat
+				 (and bracketp "}")
+				 (make-string
+				  (or (org-element-property :post-blank blob) 0)
+				  ?\s))))))))))
+	  (when new
+	    ;; Splice NEW at BLOB location in parse tree.
+	    (dolist (e new) (org-element-insert-before e blob))
+	    (org-element-extract-element blob))))
+    info)
+  ;; Return modified parse tree.
+  data)
 
 (defun org-export-expand (blob contents &optional with-affiliated)
   "Expand a parsed element or object to its original state.
@@ -3082,11 +3106,14 @@ Return code as a string."
 	   (dolist (filter (plist-get info :filter-options))
 	     (let ((result (funcall filter info backend-name)))
 	       (when result (setq info result)))))
-	 ;; Parse buffer and call parse-tree filter on it.
+	 ;; Parse buffer, handle uninterpreted elements or objects,
+	 ;; then call parse-tree filters.
 	 (setq tree
 	       (org-export-filter-apply-functions
 		(plist-get info :filter-parse-tree)
-		(org-element-parse-buffer nil visible-only) info))
+		(org-export--remove-uninterpreted
+		 (org-element-parse-buffer nil visible-only) info)
+		info))
 	 ;; Now tree is complete, compute its properties and add them
 	 ;; to communication channel.
 	 (setq info
