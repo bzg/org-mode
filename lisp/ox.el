@@ -5612,7 +5612,7 @@ a registered back-end.  FILE is the name of the output file, as
 a string.
 
 A non-nil optional argument ASYNC means the process should happen
-asynchronously.  The resulting buffer file then be accessible
+asynchronously.  The resulting buffer will then be accessible
 through the `org-export-stack' interface.
 
 Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and
