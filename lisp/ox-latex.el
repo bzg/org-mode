@@ -2027,24 +2027,28 @@ tree."
 			    'latex-math-block))
 		   (funcall valid-object-p object))
 	  (let ((math-block (list 'latex-math-block nil))
-		(next-objects (org-export-get-next-element object info t)))
-	    ;; Insert empty MATH-BLOCK in parse tree.
+		(next-elements (org-export-get-next-element object info t))
+		(last object))
+	    ;; Wrap MATH-BLOCK around OBJECT in parse tree.
 	    (org-element-insert-before math-block object)
-	    ;; MATH-BLOCK swallows consecutive math objects.
-	    (while (and (let ((blank (org-element-property :post-blank object)))
-			  (or (null blank) (zerop blank)))
-			next-objects
-			(funcall valid-object-p (setq next (pop next-objects))))
-	      (org-element-adopt-elements math-block
-					  (org-element-extract-element object))
-	      ;; Eschew the following case: \alpha$x$ -> \(\alphax\).
-	      (unless (memq (org-element-type next) '(subscript subscript))
-		(org-element-put-property object :post-blank 1))
-	      (setq object next))
+	    (org-element-extract-element object)
+	    (org-element-adopt-elements math-block object)
+	    (when (zerop (or (org-element-property :post-blank object) 0))
+	      ;; MATH-BLOCK swallows consecutive math objects.
+	      (catch 'exit
+		(dolist (next next-elements)
+		  (if (not (funcall valid-object-p next)) (throw 'exit nil)
+		    (org-element-extract-element next)
+		    (org-element-adopt-elements math-block next)
+		    ;; Eschew the case: \beta$x$ -> \(\betax\).
+		    (unless (memq (org-element-type next)
+				  '(subscript superscript))
+		      (org-element-put-property last :post-blank 1))
+		    (setq last next)
+		    (when (> (or (org-element-property :post-blank next) 0) 0)
+		      (throw 'exit nil))))))
 	    (org-element-put-property
-	     math-block :post-blank (org-element-property :post-blank object))
-	    (org-element-adopt-elements math-block
-					(org-element-extract-element object)))))
+	     math-block :post-blank (org-element-property :post-blank last)))))
       info nil '(subscript superscript latex-math-block) t)
     ;; Return updated parse tree.
     tree))
