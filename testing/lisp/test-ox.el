@@ -541,9 +541,122 @@ Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
   "Test if export process ignores commented trees."
   (should
    (equal ""
-	  (let ((org-comment-string "COMMENT"))
-	    (org-test-with-temp-text "* COMMENT Head1"
-	      (org-export-as (org-test-default-backend)))))))
+	  (org-test-with-temp-text "* COMMENT Head1"
+	    (org-export-as (org-test-default-backend))))))
+
+(ert-deftest test-org-export/uninterpreted ()
+  "Test handling of uninterpreted elements."
+  ;; Entities.
+  (should
+   (equal "dummy\n"
+	  (org-test-with-temp-text "\\alpha"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders '((entity . (lambda (e c i) "dummy"))
+			     (paragraph . (lambda (p c i) c))
+			     (section . (lambda (s c i) c))))
+	     nil nil nil '(:with-entities t)))))
+  (should
+   (equal "\\alpha\n"
+	  (org-test-with-temp-text "\\alpha"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders '((entity . (lambda (e c i) "dummy"))
+			     (paragraph . (lambda (p c i) c))
+			     (section . (lambda (s c i) c))))
+	     nil nil nil '(:with-entities nil)))))
+  ;; Emphasis.
+  (should
+   (equal "dummy\n"
+	  (org-test-with-temp-text "*bold*"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders '((bold . (lambda (b c i) "dummy"))
+			     (paragraph . (lambda (p c i) c))
+			     (section . (lambda (s c i) c))))
+	     nil nil nil '(:with-emphasize t)))))
+  (should
+   (equal "*bold*\n"
+	  (org-test-with-temp-text "*bold*"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders '((bold . (lambda (b c i) "dummy"))
+			     (paragraph . (lambda (p c i) c))
+			     (section . (lambda (s c i) c))))
+	     nil nil nil '(:with-emphasize nil)))))
+  ;; LaTeX environment.
+  (should
+   (equal "dummy\n"
+	  (org-test-with-temp-text "\\begin{equation}\n1+1=2\n\\end{equation}"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders '((latex-environment . (lambda (l c i) "dummy"))
+			     (section . (lambda (s c i) c))))
+	     nil nil nil '(:with-latex t)))))
+  (should
+   (equal "\\begin{equation}\n1+1=2\n\\end{equation}\n"
+	  (org-test-with-temp-text "\\begin{equation}\n1+1=2\n\\end{equation}"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders '((latex-environment . (lambda (l c i) "dummy"))
+			     (section . (lambda (s c i) c))))
+	     nil nil nil '(:with-latex verbatim)))))
+  ;; LaTeX fragment.
+  (should
+   (equal "dummy\n"
+	  (org-test-with-temp-text "$1$"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders '((latex-fragment . (lambda (l c i) "dummy"))
+			     (paragraph . (lambda (p c i) c))
+			     (section . (lambda (s c i) c))))
+	     nil nil nil '(:with-latex t)))))
+  (should
+   (equal "$1$\n"
+	  (org-test-with-temp-text "$1$"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders '((latex-fragment . (lambda (l c i) "dummy"))
+			     (paragraph . (lambda (p c i) c))
+			     (section . (lambda (s c i) c))))
+	     nil nil nil '(:with-latex verbatim)))))
+  ;; Sub/superscript.
+  (should
+   (equal "adummy\n"
+	  (org-test-with-temp-text "a_b"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders '((subscript . (lambda (s c i) "dummy"))
+			     (paragraph . (lambda (p c i) c))
+			     (section . (lambda (s c i) c))))
+	     nil nil nil '(:with-sub-superscript t)))))
+  (should
+   (equal "a_b\n"
+	  (org-test-with-temp-text "a_b"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders '((subscript . (lambda (s c i) "dummy"))
+			     (paragraph . (lambda (p c i) c))
+			     (section . (lambda (s c i) c))))
+	     nil nil nil '(:with-sub-superscript nil)))))
+  (should
+   (equal "a_b\n"
+	  (org-test-with-temp-text "a_b"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders '((subscript . (lambda (s c i) "dummy"))
+			     (paragraph . (lambda (p c i) c))
+			     (section . (lambda (s c i) c))))
+	     nil nil nil '(:with-sub-superscript {})))))
+  (should
+   (equal "adummy\n"
+	  (org-test-with-temp-text "a_{b}"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders '((subscript . (lambda (s c i) "dummy"))
+			     (paragraph . (lambda (p c i) c))
+			     (section . (lambda (s c i) c))))
+	     nil nil nil '(:with-sub-superscript {}))))))
 
 (ert-deftest test-org-export/export-scope ()
   "Test all export scopes."

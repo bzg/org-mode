@@ -2344,7 +2344,7 @@ tree is modified by side effect and returned by the function."
 		  (let ((sub/super-p (plist-get info :with-sub-superscript))
 			(bracketp (org-element-property :use-brackets-p blob)))
 		    (and (or (not sub/super-p)
-			     (and (eq sub/super-p '{}) bracketp))
+			     (and (eq sub/super-p '{}) (not bracketp)))
 			 (append
 			  (list (concat
 				 (if (eq (org-element-type blob) 'subscript)
