@@ -252,6 +252,7 @@ requirements) is loaded."
 		 (const :tag "Gnuplot" gnuplot)
 		 (const :tag "Haskell" haskell)
 		 (const :tag "IO" io)
+		 (const :tag "J" j)
 		 (const :tag "Java" java)
 		 (const :tag "Javascript" js)
 		 (const :tag "LaTeX" latex)
