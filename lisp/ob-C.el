@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2010-2013 Free Software Foundation, Inc.
 
-;; Author: Eric Schulte
+;; Author: Eric Schulte, Thierry Banel
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 
@@ -23,7 +23,7 @@
 
 ;;; Commentary:
 
-;; Org-Babel support for evaluating C code.
+;; Org-Babel support for evaluating C, C++, D code.
 ;;
 ;; very limited implementation:
 ;; - currently only support :results output
@@ -41,6 +41,7 @@
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("C++" . "cpp"))
+(add-to-list 'org-babel-tangle-lang-exts '("D" . "d"))
 
 (defvar org-babel-default-header-args:C '())
 
@@ -52,8 +53,11 @@ executable.")
   "Command used to compile a C++ source code file into an
 executable.")
 
+(defvar org-babel-D-compiler "rdmd"
+  "Command used to compile and execute a D source code file.")
+
 (defvar org-babel-c-variant nil
-  "Internal variable used to hold which type of C (e.g. C or C++)
+  "Internal variable used to hold which type of C (e.g. C or C++ or D)
 is currently being evaluated.")
 
 (defun org-babel-execute:cpp (body params)
@@ -66,72 +70,100 @@ This function calls `org-babel-execute:C++'."
 This function is called by `org-babel-execute-src-block'."
   (let ((org-babel-c-variant 'cpp)) (org-babel-C-execute body params)))
 
-(defun org-babel-expand-body:C++ (body params)
-  "Expand a block of C++ code with org-babel according to it's
-header arguments (calls `org-babel-C-expand')."
-  (let ((org-babel-c-variant 'cpp)) (org-babel-C-expand body params)))
+;;(defun org-babel-expand-body:C++ (body params) ;; unused
+;;  "Expand a block of C++ code with org-babel according to it's
+;;header arguments (calls `org-babel-C-expand')."
+;;  (let ((org-babel-c-variant 'cpp)) (org-babel-C-expand body params)))
+
+(defun org-babel-execute:D (body params)
+  "Execute a block of D code with org-babel.
+This function is called by `org-babel-execute-src-block'."
+  (let ((org-babel-c-variant 'd)) (org-babel-C-execute body params)))
+
+;; (defun org-babel-expand-body:D (body params) ;; unused
+;;  "Expand a block of D code with org-babel according to it's
+;;header arguments (calls `org-babel-C-expand')."
+;;  (let ((org-babel-c-variant 'd)) (org-babel-C-expand body params)))
 
 (defun org-babel-execute:C (body params)
   "Execute a block of C code with org-babel.
 This function is called by `org-babel-execute-src-block'."
   (let ((org-babel-c-variant 'c)) (org-babel-C-execute body params)))
 
-(defun org-babel-expand-body:c (body params)
-  "Expand a block of C code with org-babel according to it's
-header arguments (calls `org-babel-C-expand')."
-  (let ((org-babel-c-variant 'c)) (org-babel-C-expand body params)))
+;; (defun org-babel-expand-body:c (body params) ;; unused
+;;  "Expand a block of C code with org-babel according to it's
+;;header arguments (calls `org-babel-C-expand')."
+;;  (let ((org-babel-c-variant 'c)) (org-babel-C-expand body params)))
 
 (defun org-babel-C-execute (body params)
   "This function should only be called by `org-babel-execute:C'
-or `org-babel-execute:C++'."
+or `org-babel-execute:C++' or `org-babel-execute:D'."
   (let* ((tmp-src-file (org-babel-temp-file
 			"C-src-"
 			(cond
-			 ((equal org-babel-c-variant 'c) ".c")
-			 ((equal org-babel-c-variant 'cpp) ".cpp"))))
-         (tmp-bin-file (org-babel-temp-file "C-bin-" org-babel-exeext))
-         (cmdline (cdr (assoc :cmdline params)))
-         (flags (cdr (assoc :flags params)))
-         (full-body (org-babel-C-expand body params))
-         (compile
-	  (progn
-	    (with-temp-file tmp-src-file (insert full-body))
-	    (org-babel-eval
-	     (format "%s -o %s %s %s"
-		     (cond
-		      ((equal org-babel-c-variant 'c) org-babel-C-compiler)
-		      ((equal org-babel-c-variant 'cpp) org-babel-C++-compiler))
-		     (org-babel-process-file-name tmp-bin-file)
-		     (mapconcat 'identity
-				(if (listp flags) flags (list flags)) " ")
-		     (org-babel-process-file-name tmp-src-file)) ""))))
+			 ((equal org-babel-c-variant 'c  ) ".c"  )
+			 ((equal org-babel-c-variant 'cpp) ".cpp")
+			 ((equal org-babel-c-variant 'd  ) ".d"  ))))
+	 (tmp-bin-file (org-babel-temp-file "C-bin-" org-babel-exeext)) ;; not used for D
+	 (cmdline (cdr (assoc :cmdline params)))
+	 (cmdline (if cmdline (concat " " cmdline) ""))
+	 (flags (cdr (assoc :flags params)))
+	 (flags (mapconcat 'identity
+			   (if (listp flags) flags (list flags)) " "))
+	 (full-body
+	  (cond ((equal org-babel-c-variant 'c  ) (org-babel-C-expand-C   body params))
+		((equal org-babel-c-variant 'cpp) (org-babel-C-expand-C++ body params))
+		((equal org-babel-c-variant 'd  ) (org-babel-C-expand-D   body params)))))
+    (with-temp-file tmp-src-file (insert full-body))
+    (if (memq org-babel-c-variant '(c cpp)) ;; no separate compilation for D
+	(org-babel-eval
+	 (format "%s -o %s %s %s"
+		 (cond
+		  ((equal org-babel-c-variant 'c  ) org-babel-C-compiler)
+		  ((equal org-babel-c-variant 'cpp) org-babel-C++-compiler))
+		 (org-babel-process-file-name tmp-bin-file)
+		 flags
+		 (org-babel-process-file-name tmp-src-file)) ""))
     (let ((results
-           (org-babel-trim
+	   (org-babel-trim
 	    (org-remove-indentation
 	     (org-babel-eval
-	      (concat tmp-bin-file (if cmdline (concat " " cmdline) "")) "")))))
+	      (cond ((memq org-babel-c-variant '(c cpp))
+		     (concat tmp-bin-file cmdline))
+		    ((equal org-babel-c-variant 'd)
+		     (format "%s %s %s %s"
+			     org-babel-D-compiler
+			     flags
+			     (org-babel-process-file-name tmp-src-file)
+			     cmdline)))
+	      "")))))
       (org-babel-reassemble-table
        (org-babel-result-cond (cdr (assoc :result-params params))
 	 (org-babel-read results t)
-         (let ((tmp-file (org-babel-temp-file "c-")))
-           (with-temp-file tmp-file (insert results))
-           (org-babel-import-elisp-from-file tmp-file)))
+	 (let ((tmp-file (org-babel-temp-file "c-")))
+	   (with-temp-file tmp-file (insert results))
+	   (org-babel-import-elisp-from-file tmp-file)))
        (org-babel-pick-name
-        (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
+	(cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
        (org-babel-pick-name
-        (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))
+	(cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))
     ))
 
-(defun org-babel-C-expand (body params)
+(defun org-babel-C-expand-C++ (body params)
+  "Expand a block of C or C++ code with org-babel according to
+it's header arguments."
+  (org-babel-C-expand-C body params))
+
+(defun org-babel-C-expand-C (body params)
   "Expand a block of C or C++ code with org-babel according to
 it's header arguments."
   (let ((vars (mapcar #'cdr (org-babel-get-header params :var)))
-        (main-p (not (string= (cdr (assoc :main params)) "no")))
-        (includes (or (cdr (assoc :includes params))
-                      (org-babel-read (org-entry-get nil "includes" t))))
-        (defines (org-babel-read
-                  (or (cdr (assoc :defines params))
-                      (org-babel-read (org-entry-get nil "defines" t))))))
+	(main-p (not (string= (cdr (assoc :main params)) "no")))
+	(includes (or (cdr (assoc :includes params))
+		      (org-babel-read (org-entry-get nil "includes" t))))
+	(defines (org-babel-read
+		  (or (cdr (assoc :defines params))
+		      (org-babel-read (org-entry-get nil "defines" t))))))
     (mapconcat 'identity
 	       (list
 		;; includes
@@ -142,6 +174,27 @@ it's header arguments."
 		(mapconcat
 		 (lambda (inc) (format "#define %s" inc))
 		 (if (listp defines) defines (list defines)) "\n")
+		;; variables
+		(mapconcat 'org-babel-C-var-to-C vars "\n")
+		;; body
+		(if main-p
+		    (org-babel-C-ensure-main-wrap body)
+		  body) "\n") "\n")))
+
+(defun org-babel-C-expand-D (body params)
+  "Expand a block of D code with org-babel according to
+it's header arguments."
+  (let ((vars (mapcar #'cdr (org-babel-get-header params :var)))
+	(main-p (not (string= (cdr (assoc :main params)) "no")))
+	(imports (or (cdr (assoc :imports params))
+		     (org-babel-read (org-entry-get nil "imports" t)))))
+    (mapconcat 'identity
+	       (list
+		"module mmm;"
+		;; imports
+		(mapconcat
+		 (lambda (inc) (format "import %s;" inc))
+		 (if (listp imports) imports (list imports)) "\n")
 		;; variables
 		(mapconcat 'org-babel-C-var-to-C vars "\n")
 		;; body
@@ -189,17 +242,16 @@ FORMAT can be either a format string or a function which is called with VAL."
 	       (format "[%d]%s"
 		       (length val)
 		       (car (org-babel-C-format-val type (elt val 0))))
-	       (concat "{ "
+	       (concat (if (equal org-babel-c-variant 'd) "[ " "{ ")
 		       (mapconcat (lambda (v)
 				    (cdr (org-babel-C-format-val type v)))
 				  val
 				  ", ")
-		       " }"))))))
+		       (if (equal org-babel-c-variant 'd) " ]" " }")))))))
    (t ;; treat unknown types as string
-    '("char" (lambda (val)
-	       (let ((s (format "%s" val))) ;; convert to string for unknown types
-		 (cons (format "[%d]" (1+ (length s)))
-		       (concat "\"" s "\""))))))))
+    (list
+     (if (equal org-babel-c-variant 'd) "string" "const char*")
+     "\"%s\""))))
 
 (defun org-babel-C-val-to-C-list-type (val)
   "Determine the C array type of a VAL."
@@ -225,11 +277,11 @@ FORMAT can be either a format string or a function which is called with VAL."
 of the same value."
   ;; TODO list support
   (let ((var (car pair))
-        (val (cdr pair)))
+	(val (cdr pair)))
     (when (symbolp val)
       (setq val (symbol-name val))
       (when (= (length val) 1)
-        (setq val (string-to-char val))))
+	(setq val (string-to-char val))))
     (let* ((type-data (org-babel-C-val-to-C-type val))
 	   (type (car type-data))
 	   (formated (org-babel-C-format-val type-data val))
