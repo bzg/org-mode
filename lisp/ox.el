@@ -5326,7 +5326,7 @@ them."
      ("es" :default "Continúa de la página anterior")
      ("fr" :default "Suite de la page précédente")
      ("it" :default "Continua da pagina precedente")
-     ("ja" :utf-8 "前ページから続く")
+     ("ja" :utf-8 "前ページからの続き")
      ("nl" :default "Vervolg van vorige pagina")
      ("pt" :default "Continuação da página anterior"))
     ("Continued on next page"
