@@ -3,13 +3,13 @@
 ;;
 ;; Copyright (c) 2010-2013 Free Software Foundation, Inc.
 ;;
-;; Authors: 
+;; Authors:
 ;;          Anthony Lander <anthony.lander@gmail.com>
 ;;          John Wiegley <johnw@gnu.org>
 ;;          Christopher Suckling <suckling at gmail dot com>
 ;;          Daniil Frumin <difrumin@gmail.com>
 ;;
-;;          
+;;
 ;; Version: 1.1
 ;; Keywords: org, mac, hyperlink
 ;;
@@ -201,14 +201,14 @@ applications and inserting them in org documents"
                         ("S" "kim" org-mac-skim-insert-page ,org-mac-grab-Skim-app-p)))
          (menu-string (make-string 0 ?x))
          input)
-    
+
     ;; Create the menu string for the keymap
     (mapc '(lambda (descriptor)
             (when (elt descriptor 3)
               (setf menu-string (concat menu-string "[" (elt descriptor 0) "]" (elt descriptor 1) " "))))
           descriptors)
     (setf (elt menu-string (- (length menu-string) 1)) ?:)
-    
+
     ;; Prompt the user, and grab the link
     (message menu-string)
     (setq input (read-char-exclusive))
@@ -368,7 +368,7 @@ applications and inserting them in org documents"
                      "set links to {}\n"
                      "copy theResult to the end of links\n"
                      "return links as string\n"))))
-    (car (split-string result "[\r\n]+" t))))
+    (substring (car (split-string result "[\r\n]+" t)) 1 -1)))
 
 (defun org-mac-chrome-get-frontmost-url ()
   (interactive)
