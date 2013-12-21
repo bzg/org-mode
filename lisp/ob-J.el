@@ -27,7 +27,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'j-console)
 
 (defun org-babel-expand-body:J (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body.
