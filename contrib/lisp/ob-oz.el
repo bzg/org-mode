@@ -90,7 +90,7 @@
 
 (require 'ob)
 ;;; major mode for editing Oz programs
-(require 'mozart)
+(require 'mozart nil t)
 
 ;;
 ;; Interface to communicate with Oz.
