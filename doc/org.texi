@@ -10314,12 +10314,19 @@ Org syntax includes pre-defined blocks (@pxref{Paragraphs} and @ref{Literal
 examples}).  It is also possible to create blocks containing raw code
 targeted at a specific back-ends (e.g., @samp{#+BEGIN_LATEX}).
 
-Any other block is a @emph{special block}.  Each export back-end decides if
-they should be exported, and how.  When the block is ignored, its contents
-are still exported, as if the block were not there.  For example, when
-exporting a @samp{#+BEGIN_TEST} block, HTML back-end wraps its contents
-within @samp{<div name="test">} tag.  Refer to back-end specific
-documentation for more information.
+Any other block is a @emph{special block}.
+
+For example, @samp{#+BEGIN_ABSTRACT} and @samp{#+BEGIN_VIDEO} are special
+blocks.  The first one is useful when exporting to @LaTeX{}, the second one
+when exporting to HTML5.
+
+Each export back-end decides if they should be exported, and how.  When the
+block is ignored, its contents are still exported, as if the opening and
+closing block lines were not there.  For example, when exporting a
+@samp{#+BEGIN_TEST} block, HTML back-end wraps its contents within a
+@samp{<div name="test">} tag.
+
+Refer to back-end specific documentation for more information.
 
 @node Exporting, Publishing, Markup, Top
 @chapter Exporting
@@ -11794,12 +11801,18 @@ Code that may not fit in a single page.
 
 @subsubheading Special blocks in @LaTeX{} export
 @cindex special blocks, in @LaTeX{} export
+@cindex abstract, in @LaTeX{} export
+@cindex proof, in @LaTeX{} export
 
 In @LaTeX{} back-end, special blocks become environments of the same name.
 Value of @code{:options} attribute will be appended as-is to that
 environment's opening string.  For example:
 
 @example
+#+BEGIN_ABSTRACT
+We demonstrate how to solve the Syracuse problem.
+#+END_ABSTRACT
+
 #+ATTR_LATEX: :options [Proof of important theorem]
 #+BEGIN_PROOF
 ...
@@ -11811,6 +11824,10 @@ Therefore, any even number greater than 2 is the sum of two primes.
 becomes
 
 @example
+\begin@{abstract@}
+We demonstrate how to solve the Syracuse problem.
+\end@{abstract@}
+
 \begin@{proof@}[Proof of important theorem]
 ...
 Therefore, any even number greater than 2 is the sum of two primes.
