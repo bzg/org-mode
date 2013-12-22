@@ -39,7 +39,7 @@ PROCESSED-PARAMS isn't used yet."
 
 (defun org-babel-J-interleave-echos-except-functions (body)
   "Interleave echo'' between source lines of BODY that aren't functions."
-  (if (string-match-m "\\(?:^\\|\n\\)[^\n]*\\(?:1\\|2\\|3\\|4\\) : 0\n.*)" body)
+  (if (obj-string-match-m "\\(?:^\\|\n\\)[^\n]*\\(?:1\\|2\\|3\\|4\\) : 0\n.*)" body)
       (let ((s1 (substring body 0 (match-beginning 0)))
 	    (s2 (match-string 0 body))
 	    (s3 (substring body (match-end 0))))
@@ -120,6 +120,13 @@ This function is called by `org-babel-execute-src-block'"
   "String leading whitespace from S."
   (and (string-match "^ *\\([^ ].*\\)" s)
        (match-string 1 s)))
+
+(defun obj-string-match-m (regexp string &optional start)
+  "Like `sting-match', only .* includes newlines too."
+  (string-match
+   (replace-regexp-in-string "\\.\\*" "[\0-\377[:nonascii:]]*" regexp)
+   string
+   start))
 
 (defun org-babel-j-initiate-session (&optional session)
   "Initiate a J session.
