@@ -39,7 +39,7 @@ PROCESSED-PARAMS isn't used yet."
 
 (defun org-babel-J-interleave-echos-except-functions (body)
   "Interleave echo'' between source lines of BODY that aren't functions."
-  (if (obj-string-match-m "\\(?:^\\|\n\\)[^\n]*\\(?:1\\|2\\|3\\|4\\) : 0\n.*)" body)
+  (if (obj-string-match-m "\\(?:^\\|\n\\)[^\n]*\\(?:1\\|2\\|3\\|4\\) : 0\n.*)\\(?:\n\\|$\\)" body)
       (let ((s1 (substring body 0 (match-beginning 0)))
 	    (s2 (match-string 0 body))
 	    (s3 (substring body (match-end 0))))
