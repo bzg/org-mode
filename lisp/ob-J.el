@@ -100,7 +100,7 @@ This function is called by `org-babel-execute-src-block'"
 (defun org-babel-J-print-block (x)
   "Prettify jconsole output X."
   (if (= 1 (length x))
-      (obj-strip-leading-ws (car x))
+      (org-trim (car x))
     ;; assume only first row is misaligned
     (let ((n1 (obj-match-second-space (car x)))
 	  (n2 (obj-match-second-space (cadr x))))
@@ -108,18 +108,13 @@ This function is called by `org-babel-execute-src-block'"
        x
        (if (and n1 n2)
 	   (substring (car x) (- n1 n2))
-	 (obj-strip-leading-ws (car x))))
+	 (org-trim (car x))))
       (mapconcat #'identity x "\n"))))
 
 (defun obj-match-second-space (s)
   "Return position of second space in S or nil."
   (and (string-match "^ *[^ ]+\\( \\)" s)
        (match-beginning 1)))
-
-(defun obj-strip-leading-ws (s)
-  "String leading whitespace from S."
-  (and (string-match "^ *\\([^ ].*\\)" s)
-       (match-string 1 s)))
 
 (defun obj-string-match-m (regexp string &optional start)
   "Like `sting-match', only .* includes newlines too."
