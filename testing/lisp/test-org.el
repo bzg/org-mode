@@ -441,6 +441,163 @@
 
 
 
+;;; Indentation
+
+(ert-deftest test-org/indent-line ()
+  "Test `org-indent-line' specifications."
+  ;; Do not indent footnote definitions or headlines.
+  (should
+   (zerop
+    (org-test-with-temp-text "* H"
+      (org-indent-line)
+      (org-get-indentation))))
+  (should
+   (zerop
+    (org-test-with-temp-text "[fn:1] fn"
+      (let ((org-adapt-indentation t)) (org-indent-line))
+      (org-get-indentation))))
+  ;; Do not indent before first headline.
+  (should
+   (zerop
+    (org-test-with-temp-text ""
+      (org-indent-line)
+      (org-get-indentation))))
+  ;; Indent according to headline level otherwise, unless
+  ;; `org-adapt-indentation' is nil.
+  (should
+   (= 2
+      (org-test-with-temp-text "* H\nA"
+	(forward-line)
+	(let ((org-adapt-indentation t)) (org-indent-line))
+	(org-get-indentation))))
+  (should
+   (= 2
+      (org-test-with-temp-text "* H\n\nA"
+	(forward-line)
+	(let ((org-adapt-indentation t)) (org-indent-line))
+	(org-get-indentation))))
+  (should
+   (zerop
+    (org-test-with-temp-text "* H\nA"
+      (forward-line)
+      (let ((org-adapt-indentation nil)) (org-indent-line))
+      (org-get-indentation))))
+  ;; Indenting preserves point position.
+  (should
+   (org-test-with-temp-text "* H\nAB"
+     (forward-line)
+     (forward-char)
+     (let ((org-adapt-indentation t)) (org-indent-line))
+     (looking-at "B")))
+  ;; Do not change indentation at an item.
+  (should
+   (= 1
+      (org-test-with-temp-text "* H\n - A"
+	(forward-line)
+	(let ((org-adapt-indentation t)) (org-indent-line))
+	(org-get-indentation))))
+  ;; On blank lines at the end of a list, indent like last element
+  ;; within it if the line is still in the list.  Otherwise, indent
+  ;; like the whole list.
+  (should
+   (= 4
+      (org-test-with-temp-text "* H\n- A\n  - AA\n"
+	(goto-char (point-max))
+	(let ((org-adapt-indentation t)) (org-indent-line))
+	(org-get-indentation))))
+  (should
+   (zerop
+    (org-test-with-temp-text "* H\n- A\n  - AA\n\n\n\n"
+      (goto-char (point-max))
+      (let ((org-adapt-indentation t)) (org-indent-line))
+      (org-get-indentation))))
+  ;; Likewise, on a blank line at the end of a footnote definition,
+  ;; indent at column 0 if line belongs to the definition.  Otherwise,
+  ;; indent like the definition itself.
+  (should
+   (zerop
+    (org-test-with-temp-text "* H\n[fn:1] Definition\n"
+      (goto-char (point-max))
+      (let ((org-adapt-indentation t)) (org-indent-line))
+      (org-get-indentation))))
+  (should
+   (zerop
+    (org-test-with-temp-text "* H\n[fn:1] Definition\n\n\n\n"
+      (goto-char (point-max))
+      (let ((org-adapt-indentation t)) (org-indent-line))
+      (org-get-indentation))))
+  ;; After the end of the contents of a greater element, indent like
+  ;; the beginning of the element.
+  (should
+   (= 1
+      (org-test-with-temp-text " #+BEGIN_CENTER\n  Contents\n#+END_CENTER"
+	(forward-line 2)
+	(org-indent-line)
+	(org-get-indentation))))
+  ;; At the first line of an element, indent like previous element's
+  ;; first line, ignoring footnotes definitions and inline tasks, or
+  ;; according to parent.
+  (should
+   (= 2
+      (org-test-with-temp-text "A\n\n  B\n\nC"
+	(goto-char (point-max))
+	(org-indent-line)
+	(org-get-indentation))))
+  (should
+   (= 1
+      (org-test-with-temp-text " A\n\n[fn:1] B\n\n\nC"
+	(goto-char (point-max))
+	(org-indent-line)
+	(org-get-indentation))))
+  (should
+   (= 1
+      (org-test-with-temp-text " #+BEGIN_CENTER\n  Contents\n#+END_CENTER"
+	(forward-line 1)
+	(org-indent-line)
+	(org-get-indentation))))
+  ;; Within code part of a source block, use language major mode if
+  ;; `org-src-tab-acts-natively' is non-nil.  Do nothing otherwise.
+  (should
+   (= 6
+      (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n (and A\nB)\n#+END_SRC"
+	(forward-line 2)
+	(let ((org-src-tab-acts-natively t)
+	      (org-edit-src-content-indentation 0))
+	  (org-indent-line))
+	(org-get-indentation))))
+  (should
+   (zerop
+    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n (and A\nB)\n#+END_SRC"
+      (forward-line 2)
+      (let ((org-src-tab-acts-natively nil)
+	    (org-edit-src-content-indentation 0))
+	(org-indent-line))
+      (org-get-indentation))))
+  ;; Otherwise, indent like the first non-blank line above.
+  (should
+   (zerop
+    (org-test-with-temp-text "#+BEGIN_CENTER\nline1\n\n  line2\n#+END_CENTER"
+      (forward-line 3)
+      (org-indent-line)
+      (org-get-indentation))))
+  ;; Align node properties according to `org-property-format'.  Handle
+  ;; nicely empty values.
+  (should
+   (equal ":PROPERTIES:\n:key:      value\n:END:"
+	  (org-test-with-temp-text ":PROPERTIES:\n:key: value\n:END:"
+	    (forward-line)
+	    (let ((org-property-format "%-10s %s"))
+	      (org-indent-line)
+	      (buffer-string)))))
+  (should
+   (equal ":PROPERTIES:\n:key:\n:END:"
+	  (org-test-with-temp-text ":PROPERTIES:\n:key:\n:END:"
+	    (forward-line)
+	    (let ((org-property-format "%-10s %s"))
+	      (org-indent-line)
+	      (buffer-string))))))
+
+
 ;;; Editing
 
 ;;;; Insert elements

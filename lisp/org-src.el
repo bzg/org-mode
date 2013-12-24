@@ -895,17 +895,6 @@ issued in the language major mode buffer."
   :version "24.1"
   :group 'org-babel)
 
-(defun org-src-native-tab-command-maybe ()
-  "Perform language-specific TAB action.
-Alter code block according to what TAB does in the language major mode."
-  (and org-src-tab-acts-natively
-       (org-in-src-block-p)
-       (not (equal this-command 'org-shifttab))
-       (let ((org-src-strip-leading-and-trailing-blank-lines nil))
-	 (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB")))))
-
-(add-hook 'org-tab-first-hook 'org-src-native-tab-command-maybe)
-
 (defun org-src-font-lock-fontify-block (lang start end)
   "Fontify code block.
 This function is called by emacs automatic fontification, as long

@@ -22206,116 +22206,181 @@ hierarchy of headlines by UP levels before marking the subtree."
 
 ;;; Indentation
 
+(defun org--get-expected-indentation (element contentsp)
+  "Expected indentation column for current line, according to ELEMENT.
+ELEMENT is an element containing point.  CONTENTSP is non-nil
+when indentation is to be computed according to contents of
+ELEMENT."
+  (let ((type (org-element-type element))
+	(start (org-element-property :begin element)))
+    (org-with-wide-buffer
+     (cond
+      (contentsp
+       (case type
+	 (footnote-definition 0)
+	 ((headline inlinetask nil)
+	  (if (not org-adapt-indentation) 0
+	    (let ((level (org-current-level)))
+	      (if level (1+ level) 0))))
+	 ((item plain list)
+	  (org-list-item-body-column
+	   (or (org-element-property :post-affiliated element) start)))
+	 (otherwise
+	  (goto-char start)
+	  (org-get-indentation))))
+      ((memq type '(headline inlinetask nil))
+       (if (save-excursion (beginning-of-line) (looking-at "[ \t]*$"))
+	   (org--get-expected-indentation element t)
+	 0))
+      ((eq type 'footnote-definition) 0)
+      ;; First paragraph of a footnote definition or an item.
+      ;; Indent like parent.
+      ((< (line-beginning-position) start)
+       (org--get-expected-indentation
+	(org-element-property :parent element) t))
+      ;; At first line: indent according to previous sibling, if any,
+      ;; ignoring footnote definitions and inline tasks, or parent's
+      ;; contents.
+      ((= (line-beginning-position) start)
+       (catch 'exit
+	 (while t
+	   (if (= (point-min) start) (throw 'exit 0)
+	     (goto-char (1- start))
+	     (let ((previous (org-element-at-point)))
+	       (while (let ((parent (org-element-property :parent previous)))
+			(and parent
+			     (setq previous parent)
+			     (<= (org-element-property :end parent) start))))
+	       (cond ((or (not previous)
+			  (> (org-element-property :end previous) start))
+		      (throw 'exit (org--get-expected-indentation previous t)))
+		     ((memq (org-element-type previous)
+			    '(footnote-definition inlinetask))
+		      (setq start (org-element-property :begin previous)))
+		     (t (goto-char (org-element-property :begin previous))
+			(throw 'exit (org-get-indentation)))))))))
+      ;; Otherwise, move to the first non-blank line above.
+      (t
+       (beginning-of-line)
+       (let ((pos (point)))
+	 (skip-chars-backward " \r\t\n")
+	 (cond
+	  ;; Two blank lines end a footnote definition or a plain
+	  ;; list.  When we indent an empty line after them, the
+	  ;; containing list or footnote definition is over, so it
+	  ;; qualifies as a previous sibling.  Therefore, we indent
+	  ;; like its first line.
+	  ((and (memq type '(footnote-definition plain-list))
+		(> (count-lines (point) pos) 2))
+	   (goto-char start)
+	   (org-get-indentation))
+	  ;; Line above is the first one of a paragraph at the
+	  ;; beginning of an item or a footnote definition.  Indent
+	  ;; like parent.
+	  ((< (line-beginning-position) start)
+	   (org--get-expected-indentation
+	    (org-element-property :parent element) t))
+	  ;; POS is after contents in a greater element.  Indent like
+	  ;; the beginning of the element.
+	  ;;
+	  ;; As a special case, if point is at the end of a footnote
+	  ;; definition or an item, indent like the very last element
+	  ;; within.
+	  ((let ((cend (org-element-property :contents-end element)))
+	     (and cend (<= cend pos)))
+	   (if (memq type '(footnote-definition item plain-list))
+	       (org--get-expected-indentation (org-element-at-point) nil)
+	     (goto-char start)
+	     (org-get-indentation)))
+	  ;; In any other case, indent like the current line.
+	  (t (org-get-indentation)))))))))
+
+(defun org--align-node-property ()
+  "Align node property at point.
+Alignment is done according to `org-property-format', which see."
+  (when (save-excursion
+	  (beginning-of-line)
+	  (looking-at org-property-re))
+    (replace-match
+     (concat (match-string 4)
+	     (format org-property-format (match-string 1) (match-string 3)))
+     t t)))
+
 (defun org-indent-line ()
-  "Indent line depending on context."
+  "Indent line depending on context.
+
+Indentation is done according to the following rules:
+
+  - Footnote definitions, headlines and inline tasks have to
+    start at column 0.
+
+  - On the very first line of an element, consider, in order, the
+    next rules until one matches:
+
+    1. If there's a sibling element before, ignoring footnote
+       definitions and inline tasks, indent like its first line.
+
+    2. If element has a parent, indent like its contents.  More
+       precisely, if parent is an item, indent after the
+       description part, if any, or the bullet (see
+       ``org-list-description-max-indent').  Else, indent like
+       parent's first line.
+
+    3. Otherwise, indent relatively to current level, if
+       `org-adapt-indentation' is non-nil, or to left margin.
+
+  - On a blank line at the end of a plain list, an item, or
+    a footnote definition, indent like the very last element
+    within.
+
+  - In the code part of a source block, use language major mode
+    to indent current line if `org-src-tab-acts-natively' is
+    non-nil.  If it is nil, do nothing.
+
+  - Otherwise, indent like the first non-blank line above.
+
+The function doesn't indent an item as it could break the whole
+list structure.  Instead, use \\<org-mode-map>\\[org-shiftmetaleft] or \
+\\[org-shiftmetaright].
+
+Also align node properties according to `org-property-format'."
   (interactive)
-  (let* ((pos (point))
-	 (itemp (org-at-item-p))
-	 (case-fold-search t)
-	 (org-drawer-regexp (or org-drawer-regexp "\000"))
-	 (inline-task-p (and (featurep 'org-inlinetask)
-			     (org-inlinetask-in-task-p)))
-	 (inline-re (and inline-task-p
-			 (org-inlinetask-outline-regexp)))
-	 column)
-    (if (and orgstruct-is-++ (eq pos (point)))
-	(let ((indent-line-function (cadadr (assoc 'indent-line-function org-fb-vars))))
-	  (indent-according-to-mode))
-      (beginning-of-line 1)
-      (cond
-       ;; Headings
-       ((looking-at org-outline-regexp) (setq column 0))
-       ;; Footnote definition
-       ((looking-at org-footnote-definition-re) (setq column 0))
-       ;; Literal examples
-       ((looking-at "[ \t]*:\\( \\|$\\)")
-	(setq column (org-get-indentation))) ; do nothing
-       ;; Lists
-       ((ignore-errors (goto-char (org-in-item-p)))
-	(setq column (if itemp
-			 (org-get-indentation)
-		       (org-list-item-body-column (point))))
-	(goto-char pos))
-       ;; Drawers
-       ((and (looking-at "[ \t]*:END:")
-	     (save-excursion (re-search-backward org-drawer-regexp nil t)))
-	(save-excursion
-	  (goto-char (1- (match-beginning 1)))
-	  (setq column (current-column))))
-       ;; Special blocks
-       ((and (looking-at "[ \t]*#\\+end_\\([a-z]+\\)")
-	     (save-excursion
-	       (re-search-backward
-		(concat "^[ \t]*#\\+begin_" (downcase (match-string 1))) nil t)))
-	(setq column (org-get-indentation (match-string 0))))
-       ((and (not (looking-at "[ \t]*#\\+begin_"))
-	     (org-between-regexps-p "^[ \t]*#\\+begin_" "[ \t]*#\\+end_"))
-	(save-excursion
-	  (re-search-backward "^[ \t]*#\\+begin_\\([a-z]+\\)" nil t))
-	(setq column
-	      (cond ((equal (downcase (match-string 1)) "src")
-		     ;; src blocks: let `org-edit-src-exit' handle them
-		     (org-get-indentation))
-		    ((equal (downcase (match-string 1)) "example")
-		     (max (org-get-indentation)
-			  (org-get-indentation (match-string 0))))
-		    (t
-		     (org-get-indentation (match-string 0))))))
-       ;; This line has nothing special, look at the previous relevant
-       ;; line to compute indentation
-       (t
-	(beginning-of-line 0)
-	(while (and (not (bobp))
-		    (not (looking-at org-table-line-regexp))
-		    (not (looking-at org-drawer-regexp))
-		    ;; When point started in an inline task, do not move
-		    ;; above task starting line.
-		    (not (and inline-task-p (looking-at inline-re)))
-		    ;; Skip drawers, blocks, empty lines, verbatim,
-		    ;; comments, tables, footnotes definitions, lists,
-		    ;; inline tasks.
-		    (or (and (looking-at "[ \t]*:END:")
-			     (re-search-backward org-drawer-regexp nil t))
-			(and (looking-at "[ \t]*#\\+end_")
-			     (re-search-backward "[ \t]*#\\+begin_"nil t))
-			(looking-at "[ \t]*[\n:#|]")
-			(looking-at org-footnote-definition-re)
-			(and (not inline-task-p)
-			     (featurep 'org-inlinetask)
-			     (org-inlinetask-in-task-p)
-			     (or (org-inlinetask-goto-beginning) t))))
-	  (beginning-of-line 0))
-	(cond
-	 ;; There was a list item above.
-	 ((ignore-errors (goto-char (org-in-item-p)))
-	  (goto-char (org-list-get-top-point (org-list-struct)))
-	  (setq column (org-get-indentation)))
-	 ;; There was an heading above.
-	 ((looking-at "\\*+[ \t]+")
-	  (if (not org-adapt-indentation)
-	      (setq column 0)
-	    (goto-char (match-end 0))
-	    (setq column (current-column))))
-	 ;; A drawer had started and is unfinished
-	 ((looking-at org-drawer-regexp)
-	  (goto-char (1- (match-beginning 1)))
-	  (setq column (current-column)))
-	 ;; Else, nothing noticeable found: get indentation and go on.
-	 (t (setq column (org-get-indentation))))))
-      ;; Now apply indentation and move cursor accordingly
-      (goto-char pos)
-      (if (<= (current-column) (current-indentation))
-	  (org-indent-line-to column)
-	(save-excursion (org-indent-line-to column)))
-      ;; Special polishing for properties, see `org-property-format'
-      (setq column (current-column))
-      (beginning-of-line 1)
-      (if (looking-at org-property-re)
-	  (replace-match (concat (match-string 4)
-				 (format org-property-format
-					 (match-string 1) (match-string 3)))
-			 t t))
-      (org-move-to-column column))))
+  (cond
+   (orgstruct-is-++
+    (let ((indent-line-function
+	   (cadadr (assq 'indent-line-function org-fb-vars))))
+      (indent-according-to-mode)))
+   ((org-at-heading-p) 'noindent)
+   (t
+    (let* ((element (save-excursion (beginning-of-line) (org-element-at-point)))
+	   (type (org-element-type element)))
+      (cond ((and (memq type '(plain-list item))
+		  (= (line-beginning-position)
+		     (or (org-element-property :post-affiliated element)
+			 (org-element-property :begin element))))
+	     'noindent)
+	    ((and (eq type 'src-block)
+		  (> (line-beginning-position)
+		     (org-element-property :post-affiliated element))
+		  (< (line-beginning-position)
+		     (org-with-wide-buffer
+		      (goto-char (org-element-property :end element))
+		      (skip-chars-backward " \r\t\n")
+		      (line-beginning-position))))
+	     (if (not org-src-tab-acts-natively) 'noindent
+	       (let ((org-src-strip-leading-and-trailing-blank-lines nil))
+		 (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB")))))
+	    (t
+	     (let ((column (org--get-expected-indentation element nil)))
+	       ;; Preserve current column.
+	       (if (<= (current-column) (current-indentation))
+		   (org-indent-line-to column)
+		 (save-excursion (org-indent-line-to column))))
+	     ;; Align node property.  Also preserve current column.
+	     (when (eq type 'node-property)
+	       (let ((column (current-column)))
+		 (org--align-node-property)
+		 (org-move-to-column column)))))))))
 
 (defun org-indent-drawer ()
   "Indent the drawer at point."
