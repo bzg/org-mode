@@ -109,7 +109,8 @@
 		   (:latex-hyperref-p nil "texht" org-latex-with-hyperref t)
 		   ;; Redefine regular options.
 		   (:date "DATE" nil "\\today" t))
-  :filters-alist '((:filter-parse-tree . org-latex--wrap-latex-math-block)))
+  :filters-alist '((:filter-options . org-latex-math-block-options-filter)
+		   (:filter-parse-tree . org-latex-math-block-tree-filter)))
 
 
 
@@ -2003,11 +2004,10 @@ holding contextual information."
 
 ;;;; Pseudo Object: LaTeX Math Block
 
-(defun org-latex--wrap-latex-math-block (tree backend info)
+(defun org-latex--wrap-latex-math-block (data info)
   "Merge contiguous math objects in a pseudo-object container.
-TREE is the parse tree.  BACKEND is the export back-end used.
-INFO is a plist used as a communication channel.  Return parse
-tree."
+DATA is a parse tree or a secondary string.  INFO is a plist
+containing export options.  Modify DATA by side-effect and return it."
   (let ((valid-object-p
 	 (function
 	  ;; Non-nil when OBJ can be added to the latex math block.
@@ -2019,7 +2019,7 @@ tree."
 		 (or (org-string-match-p "\\`\\\\([^\000]*\\\\)\\'" value)
 		     (org-string-match-p "\\`\\$[^\000]*\\$\\'" value))))
 	      ((subscript superscript) t))))))
-    (org-element-map tree '(entity latex-fragment subscript superscript)
+    (org-element-map data '(entity latex-fragment subscript superscript)
       (lambda (object)
 	;; Skip objects already wrapped.
 	(when (and (not (eq (org-element-type
@@ -2029,7 +2029,7 @@ tree."
 	  (let ((math-block (list 'latex-math-block nil))
 		(next-elements (org-export-get-next-element object info t))
 		(last object))
-	    ;; Wrap MATH-BLOCK around OBJECT in parse tree.
+	    ;; Wrap MATH-BLOCK around OBJECT in DATA.
 	    (org-element-insert-before math-block object)
 	    (org-element-extract-element object)
 	    (org-element-adopt-elements math-block object)
@@ -2050,8 +2050,16 @@ tree."
 	    (org-element-put-property
 	     math-block :post-blank (org-element-property :post-blank last)))))
       info nil '(subscript superscript latex-math-block) t)
-    ;; Return updated parse tree.
-    tree))
+    ;; Return updated DATA.
+    data))
+
+(defun org-latex-math-block-tree-filter (tree backend info)
+  (org-latex--wrap-latex-math-block tree info))
+
+(defun org-latex-math-block-options-filter (info backend)
+  (dolist (prop '(:author :date :title) info)
+    (plist-put info prop
+	       (org-latex--wrap-latex-math-block (plist-get info prop) info))))
 
 (defun org-latex-math-block (math-block contents info)
   "Transcode a MATH-BLOCK object from Org to LaTeX.
