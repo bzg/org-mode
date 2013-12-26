@@ -482,9 +482,16 @@ Parse tree is modified by side effect."
   (let* ((parent (org-element-property :parent location))
 	 (property (org-element-secondary-p location))
 	 (siblings (if property (org-element-property property parent)
-		     (org-element-contents parent))))
+		     (org-element-contents parent)))
+	 ;; Special case: LOCATION is the first element of an
+	 ;; independent secondary string (e.g. :title property).  Add
+	 ;; ELEMENT in-place.
+	 (specialp (and (not property)
+			(eq siblings parent)
+			(eq (car parent) location))))
     ;; Install ELEMENT at the appropriate POSITION within SIBLINGS.
-    (cond ((or (null siblings) (eq (car siblings) location))
+    (cond (specialp)
+	  ((or (null siblings) (eq (car siblings) location))
 	   (push element siblings))
 	  ((null location) (nconc siblings (list element)))
 	  (t (let ((previous (cadr (memq location (reverse siblings)))))
@@ -493,8 +500,10 @@ Parse tree is modified by side effect."
 		 (let ((next (memq previous siblings)))
 		   (setcdr next (cons element (cdr next))))))))
     ;; Store SIBLINGS at appropriate place in parse tree.
-    (if property (org-element-put-property parent property siblings)
-      (apply #'org-element-set-contents parent siblings))
+    (cond
+     (specialp (setcdr parent (copy-sequence parent)) (setcar parent element))
+     (property (org-element-put-property parent property siblings))
+     (t (apply #'org-element-set-contents parent siblings)))
     ;; Set appropriate :parent property.
     (org-element-put-property element :parent parent)))
 
