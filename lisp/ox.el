@@ -4955,7 +4955,7 @@ If no translation is found, the quote character is left as-is.")
 (defconst org-export-smart-quotes-regexps
   (list
    ;; Possible opening quote at beginning of string.
-   "\\`\\([\"']\\)\\(\\w\\|\\s.\\|\\s_\\)"
+   "\\`\\([\"']\\)\\(\\w\\|\\s.\\|\\s_\\|\\s(\\)"
    ;; Possible closing quote at beginning of string.
    "\\`\\([\"']\\)\\(\\s-\\|\\s)\\|\\s.\\)"
    ;; Possible apostrophe at beginning of string.
