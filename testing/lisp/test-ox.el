@@ -656,7 +656,19 @@ Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
 	      :transcoders '((subscript . (lambda (s c i) "dummy"))
 			     (paragraph . (lambda (p c i) c))
 			     (section . (lambda (s c i) c))))
-	     nil nil nil '(:with-sub-superscript {}))))))
+	     nil nil nil '(:with-sub-superscript {})))))
+  ;; Also handle uninterpreted objects in title.
+  (should
+   (equal "a_b"
+	  (org-test-with-temp-text "#+TITLE: a_b"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders
+	      '((subscript . (lambda (s c i) "dummy"))
+		(template . (lambda (c i) (org-export-data
+				      (plist-get i :title) i)))
+		(section . (lambda (s c i) c))))
+	     nil nil nil '(:with-sub-superscript nil))))))
 
 (ert-deftest test-org-export/export-scope ()
   "Test all export scopes."

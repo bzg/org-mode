@@ -2303,12 +2303,25 @@ recursively convert DATA using BACKEND translation table."
 	  ;; will probably be used on small trees.
 	  :exported-data (make-hash-table :test 'eq :size 401)))))
 
-(defun org-export--remove-uninterpreted (data info)
+(defun org-export-remove-uninterpreted-data (data info)
   "Change uninterpreted elements back into Org syntax.
 DATA is the parse tree.  INFO is a plist containing export
 options.  Each uninterpreted element or object is changed back
 into a string.  Contents, if any, are not modified.  The parse
 tree is modified by side effect and returned by the function."
+  (org-export--remove-uninterpreted-data-1 data info)
+  (dolist (prop '(:author :date :title))
+    (plist-put info
+	       prop
+	       (org-export--remove-uninterpreted-data-1
+		(plist-get info prop)
+		info))))
+
+(defun org-export--remove-uninterpreted-data-1 (data info)
+  "Change uninterpreted elements back into Org syntax.
+DATA is a parse tree or a secondary string.  INFO is a plist
+containing export options.  It is modified by side effect and
+returned by the function."
   (org-element-map data
       '(entity bold italic latex-environment latex-fragment strike-through
 	       subscript superscript underline)
@@ -2316,8 +2329,13 @@ tree is modified by side effect and returned by the function."
 	(let ((new
 	       (case (org-element-type blob)
 		 ;; ... entities...
-		 (entity (and (not (plist-get info :with-entities))
-			      (list (org-export-expand blob nil))))
+		 (entity
+		  (and (not (plist-get info :with-entities))
+		       (list (concat
+			      (org-export-expand blob nil)
+			      (make-string
+			       (or (org-element-property :post-blank blob) 0)
+			       ?\s)))))
 		 ;; ... emphasis...
 		 ((bold italic strike-through underline)
 		  (and (not (plist-get info :with-emphasize))
@@ -2354,9 +2372,10 @@ tree is modified by side effect and returned by the function."
 			  (org-element-contents blob)
 			  (list (concat
 				 (and bracketp "}")
-				 (make-string
-				  (or (org-element-property :post-blank blob) 0)
-				  ?\s))))))))))
+				 (and (org-element-property :post-blank blob)
+				      (make-string
+				       (org-element-property :post-blank blob)
+				       ?\s)))))))))))
 	  (when new
 	    ;; Splice NEW at BLOB location in parse tree.
 	    (dolist (e new) (org-element-insert-before e blob))
@@ -3099,6 +3118,11 @@ Return code as a string."
 		(cons "email" (or (plist-get info :email) ""))
 		(cons "title"
 		      (org-element-interpret-data (plist-get info :title)))))
+	 ;; Parse buffer.
+	 (setq tree (org-element-parse-buffer nil visible-only))
+	 ;; Handle left-over uninterpreted elements or objects in
+	 ;; parse tree and communication channel.
+	 (org-export-remove-uninterpreted-data tree info)
 	 ;; Call options filters and update export options.  We do not
 	 ;; use `org-export-filter-apply-functions' here since the
 	 ;; arity of such filters is different.
@@ -3110,10 +3134,7 @@ Return code as a string."
 	 ;; then call parse-tree filters.
 	 (setq tree
 	       (org-export-filter-apply-functions
-		(plist-get info :filter-parse-tree)
-		(org-export--remove-uninterpreted
-		 (org-element-parse-buffer nil visible-only) info)
-		info))
+		(plist-get info :filter-parse-tree) tree info))
 	 ;; Now tree is complete, compute its properties and add them
 	 ;; to communication channel.
 	 (setq info
