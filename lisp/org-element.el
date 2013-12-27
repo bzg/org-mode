@@ -5219,16 +5219,15 @@ first row."
 	   ;; position.  Give up after 10 tries or when we hit
 	   ;; a headline (or beginning of buffer).
 	   (beginning-of-line)
-	   (skip-chars-backward " \r\t\n")
 	   (dotimes (i 10)
+	     (skip-chars-backward " \r\t\n")
 	     (cond ((not (re-search-backward "^\\(?:\\*+ \\|[ \t]*$\\)" nil t))
 		    (throw 'loop (goto-char (point-min))))
 		   ((/= (char-after) ?*)
 		    (when (bobp) (throw 'loop nil))
-		    ;; An element cannot start at a headline, so check
-		    ;; first non-blank line below.
-		    (skip-chars-forward " \r\t\n" origin)
-		    (beginning-of-line))
+		    ;; An element cannot start at a blank line, so
+		    ;; check line below.
+		    (forward-line))
 		   ((org-with-limited-levels (org-at-heading-p))
 		    ;; Tough luck: we're back at a headline above.
 		    ;; Move to beginning of section.
