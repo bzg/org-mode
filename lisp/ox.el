@@ -5349,7 +5349,9 @@ them."
      ("it" :default "Continua da pagina precedente")
      ("ja" :utf-8 "前ページからの続き")
      ("nl" :default "Vervolg van vorige pagina")
-     ("pt" :default "Continuação da página anterior"))
+     ("pt" :default "Continuação da página anterior")
+     ("ru" :html "(&#1055;&#1088;&#1086;&#1076;&#1086;&#1083;&#1078;&#1077;&#1085;&#1080;&#1077;)"
+      :utf-8 "(Продолжение)"))
     ("Continued on next page"
      ("de" :default "Fortsetzung nächste Seite")
      ("es" :default "Continúa en la siguiente página")
@@ -5357,7 +5359,9 @@ them."
      ("it" :default "Continua alla pagina successiva")
      ("ja" :utf-8 "次ページに続く")
      ("nl" :default "Vervolg op volgende pagina")
-     ("pt" :default "Continua na página seguinte"))
+     ("pt" :default "Continua na página seguinte")
+     ("ru" :html "(&#1055;&#1088;&#1086;&#1076;&#1086;&#1083;&#1078;&#1077;&#1085;&#1080;&#1077; &#1089;&#1083;&#1077;&#1076;&#1091;&#1077;&#1090;)"
+      :utf-8 "(Продолжение следует)"))
     ("Date"
      ("ca" :default "Data")
      ("cs" :default "Datum")
@@ -5390,6 +5394,8 @@ them."
      ("no" :default "Ligning")
      ("nb" :default "Ligning")
      ("nn" :default "Likning")
+     ("ru" :html "&#1059;&#1088;&#1072;&#1074;&#1085;&#1077;&#1085;&#1080;&#1077;"
+      :utf-8 "Уравнение")
      ("sv" :default "Ekvation")
      ("zh-CN" :html "&#26041;&#31243;" :utf-8 "方程"))
     ("Figure"
@@ -5401,6 +5407,7 @@ them."
      ("no" :default "Illustrasjon")
      ("nb" :default "Illustrasjon")
      ("nn" :default "Illustrasjon")
+     ("ru" :html "&#1056;&#1080;&#1089;&#1091;&#1085;&#1086;&#1082;" :utf-8 "Рисунок")
      ("sv" :default "Illustration")
      ("zh-CN" :html "&#22270;" :utf-8 "图"))
     ("Figure %d:"
@@ -5413,6 +5420,7 @@ them."
      ("no" :default "Illustrasjon %d")
      ("nb" :default "Illustrasjon %d")
      ("nn" :default "Illustrasjon %d")
+     ("ru" :html "&#1056;&#1080;&#1089;. %d.:" :utf-8 "Рис. %d.:")
      ("sv" :default "Illustration %d")
      ("zh-CN" :html "&#22270;%d&nbsp;" :utf-8 "图%d "))
     ("Footnotes"
@@ -5448,6 +5456,8 @@ them."
      ("fr" :default "Liste des programmes")
      ("no" :default "Dataprogrammer")
      ("nb" :default "Dataprogrammer")
+     ("ru" :html "&#1057;&#1087;&#1080;&#1089;&#1086;&#1082; &#1088;&#1072;&#1089;&#1087;&#1077;&#1095;&#1072;&#1090;&#1086;&#1082;"
+      :utf-8 "Список распечаток")
      ("zh-CN" :html "&#20195;&#30721;&#30446;&#24405;" :utf-8 "代码目录"))
     ("List of Tables"
      ("da" :default "Tabeller")
@@ -5458,6 +5468,8 @@ them."
      ("no" :default "Tabeller")
      ("nb" :default "Tabeller")
      ("nn" :default "Tabeller")
+     ("ru" :html "&#1057;&#1087;&#1080;&#1089;&#1086;&#1082; &#1090;&#1072;&#1073;&#1083;&#1080;&#1094;"
+      :utf-8 "Список таблиц")
      ("sv" :default "Tabeller")
      ("zh-CN" :html "&#34920;&#26684;&#30446;&#24405;" :utf-8 "表格目录"))
     ("Listing %d:"
@@ -5468,6 +5480,8 @@ them."
      ("fr" :default "Programme %d :" :html "Programme&nbsp;%d&nbsp;:")
      ("no" :default "Dataprogram %d")
      ("nb" :default "Dataprogram %d")
+     ("ru" :html "&#1056;&#1072;&#1089;&#1087;&#1077;&#1095;&#1072;&#1090;&#1082;&#1072; %d.:"
+      :utf-8 "Распечатка %d.:")
      ("zh-CN" :html "&#20195;&#30721;%d&nbsp;" :utf-8 "代码%d "))
     ("See section %s"
      ("da" :default "jævnfør afsnit %s")
@@ -5475,6 +5489,8 @@ them."
      ("es" :default "vea seccion %s")
      ("et" :html "Vaata peat&#252;kki %s" :utf-8 "Vaata peatükki %s")
      ("fr" :default "cf. section %s")
+     ("ru" :html "&#1057;&#1084;. &#1088;&#1072;&#1079;&#1076;&#1077;&#1083; %s"
+      :utf-8 "См. раздел %s")
      ("zh-CN" :html "&#21442;&#35265;&#31532;%s&#33410;" :utf-8 "参见第%s节"))
     ("Table"
      ("de" :default "Tabelle")
@@ -5482,6 +5498,7 @@ them."
      ("et" :default "Tabel")
      ("fr" :default "Tableau")
      ("ja" :html "&#34920;" :utf-8 "表")
+     ("ru" :html "&#1058;&#1072;&#1073;&#1083;&#1080;&#1094;&#1072;" :utf-8 "Таблица")
      ("zh-CN" :html "&#34920;" :utf-8 "表"))
     ("Table %d:"
      ("da" :default "Tabel %d")
@@ -5493,6 +5510,8 @@ them."
      ("no" :default "Tabell %d")
      ("nb" :default "Tabell %d")
      ("nn" :default "Tabell %d")
+     ("ru" :html "&#1058;&#1072;&#1073;&#1083;&#1080;&#1094;&#1072; %d.:"
+      :utf-8 "Таблица %d.:")
      ("sv" :default "Tabell %d")
      ("zh-CN" :html "&#34920;%d&nbsp;" :utf-8 "表%d "))
     ("Table of Contents"
@@ -5526,6 +5545,8 @@ them."
      ("es" :default "referencia desconocida")
      ("et" :default "Tundmatu viide")
      ("fr" :ascii "Destination inconnue" :default "Référence inconnue")
+     ("ru" :html "&#1053;&#1077;&#1080;&#1079;&#1074;&#1077;&#1089;&#1090;&#1085;&#1072;&#1103; &#1089;&#1089;&#1099;&#1083;&#1082;&#1072;"
+      :utf-8 "Неизвестная ссылка")
      ("zh-CN" :html "&#26410;&#30693;&#24341;&#29992;" :utf-8 "未知引用")))
   "Dictionary for export engine.
 
