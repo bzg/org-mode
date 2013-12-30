@@ -362,7 +362,7 @@ If the value is `comment' insert it as a comment."
   :group 'org-export-general
   :type '(choice
 	  (const :tag "No creator sentence" nil)
-	  (const :tag "Sentence as a comment" 'comment)
+	  (const :tag "Sentence as a comment" comment)
 	  (const :tag "Insert the sentence" t)))
 
 (defcustom org-export-with-date t

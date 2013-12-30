@@ -602,7 +602,7 @@ The list of commands is: `org-schedule', `org-deadline',
 already archived entries."
   :type '(choice (const :tag "Don't loop" nil)
 		 (const :tag "All headlines in active region" t)
-		 (const :tag "In active region, headlines at the same level than the first one" 'start-level)
+		 (const :tag "In active region, headlines at the same level than the first one" start-level)
 		 (string :tag "Tags/Property/Todo matcher"))
   :version "24.1"
   :group 'org-todo
@@ -1741,7 +1741,7 @@ Needs to be set before org.el is loaded."
   :version "24.4"
   :package-version '(Org . "8.3")
   :type '(choice
-	  (const :tag "A double click follows the link" 'double)
+	  (const :tag "A double click follows the link" double)
 	  (const :tag "Unconditionally follow the link with mouse-1" t)
 	  (integer :tag "mouse-1 click does not follow the link if longer than N ms" 450)))
 
@@ -2428,7 +2428,7 @@ current entry each time a todo state is changed."
   :group 'org-todo
   :type '(choice
 	  (const :tag "Yes, only for TODO entries" t)
-	  (const :tag "Yes, including all entries" 'all-headlines)
+	  (const :tag "Yes, including all entries" all-headlines)
 	  (repeat :tag "Yes, for TODOs in this list"
 		  (string :tag "TODO keyword"))
 	  (other :tag "No TODO statistics" nil)))
