@@ -5252,20 +5252,19 @@ first row."
 		 ;; check.  Otherwise, move at top level and start
 		 ;; parsing right after its broader ancestor.
 		 (let ((cache-end (org-element-property :end cached)))
-		   (if (or (> cache-end origin)
-			   (and (= cache-end origin) (= (point-max) origin)))
+		   (if (> cache-end origin)
 		       (setq element cached
 			     parent (org-element-property :parent cached)
 			     end cache-end)
 		     (goto-char cache-end)
-		     (let ((up cached))
+		     (let ((up cached) (last cached))
 		       (while (and (setq up (org-element-property :parent up))
 				   (<= (org-element-property :end up) origin))
-			 (goto-char (org-element-property :end up)))
-		       (when up
-			 (setq element up
-			       parent (org-element-property :parent up)
-			       end (org-element-property :end up))))))
+			 (goto-char (org-element-property :end up))
+			 (setq last up))
+		       (setq element (or up last)
+			     parent (org-element-property :parent up)
+			     end (org-element-property :end up)))))
 		 (throw 'loop nil)))))
 	 ;; Opportunistic search failed.  Move back to beginning of
 	 ;; section in current headline, if any, or to first non-empty
