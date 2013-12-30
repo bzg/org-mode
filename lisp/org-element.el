@@ -5270,7 +5270,7 @@ first row."
 	 ;; section in current headline, if any, or to first non-empty
 	 ;; line in buffer otherwise.
 	 (org-with-limited-levels (outline-previous-heading))
-	 (unless (bobp) (forward-line))
+	 (when (org-at-heading-p) (forward-line))
 	 (skip-chars-forward " \r\t\n")
 	 (beginning-of-line))
        ;; Now we are at the beginning of an element, start parsing.
