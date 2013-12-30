@@ -4886,25 +4886,29 @@ the value to store.  Nothing will be stored if
     (unless org-element--cache (org-element-cache-reset))
     (puthash pos data org-element--cache)))
 
-(defsubst org-element--cache-shift-positions (element offset)
+(defsubst org-element--cache-shift-positions (element offset &optional props)
   "Shift ELEMENT properties relative to buffer positions by OFFSET.
+
 Properties containing buffer positions are `:begin', `:end',
-`:contents-begin', `:contents-end' and `:structure'.  They are
-modified by side-effect.  Return modified element."
+`:contents-begin', `:contents-end' and `:structure'.  When
+optional argument PROPS is a list of keywords, only shift
+properties provided in that list.
+
+Properties are modified by side-effect.  Return ELEMENT."
   (let ((properties (nth 1 element)))
     ;; Shift :structure property for the first plain list only: it is
     ;; the only one that really matters and it prevents from shifting
     ;; it more than once.
-    (when (and (eq (org-element-type element) 'plain-list)
+    (when (and (or (not props) (memq :structure props))
+	       (eq (org-element-type element) 'plain-list)
 	       (not (eq (org-element-type (plist-get properties :parent))
 			'item)))
       (dolist (item (plist-get properties :structure))
 	(incf (car item) offset)
 	(incf (nth 6 item) offset)))
-    (plist-put properties :begin (+ (plist-get properties :begin) offset))
-    (plist-put properties :end (+ (plist-get properties :end) offset))
-    (dolist (key '(:contents-begin :contents-end :post-affiliated))
-      (let ((value (plist-get properties key)))
+    (dolist (key '(:begin :contents-begin :contents-end :end :post-affiliated))
+      (let ((value (and (or (not props) (memq key props))
+			(plist-get properties key))))
 	(and value (plist-put properties key (+ offset value))))))
   element)
 
@@ -5078,7 +5082,7 @@ removed from the cache."
 		 (let* ((conflictp (consp (caar value)))
 			(value-to-shift (if conflictp (cdr value) value)))
 		   (cond
-		    ;; If an elements is missing one of its parents,
+		    ;; If an element is missing one of its parents,
 		    ;; remove it from cache.  In a middle of
 		    ;; a conflict take care not to remove already
 		    ;; shifted element.
@@ -5094,7 +5098,7 @@ removed from the cache."
 			       (throw 'remove t)))
 			    ((<= (org-element-property :begin parent) end)
 			     (throw 'remove t))))
-			 ;; No missing parent: Proceed with shifting.
+			 ;; No missing parent: proceed with shifting.
 			 nil))
 		     (if conflictp (puthash key (car value) org-element--cache)
 		       (remhash key org-element--cache)))
@@ -5163,19 +5167,23 @@ removed from the cache."
 			       (throw 'remove
 				      (remhash key org-element--cache))))
 			    ((>= (org-element-property :end parent) beg)
-			     (throw 'remove (remhash key org-element--cache)))))
-			 ;; No missing parent: Keep element.
-			 t)))
+			     (throw 'remove
+				    (remhash key org-element--cache))))))))
 		    ;; Preserve stable greater elements (or verse
 		    ;; blocks) when changes are limited to their
-		    ;; contents only.
+		    ;; contents only.  In that case, extend both their
+		    ;; contents ending position and their ending
+		    ;; position by OFFSET.
 		    ((let ((contents-end
 			    (org-element-property :contents-end element))
 			   (type (org-element-type element)))
 		       (and contents-end
 			    (> contents-end end)
 			    (or (memq type org-element--cache-stable-types)
-				(eq type 'verse-block)))))
+				(eq type 'verse-block))))
+		     (org-element--cache-shift-positions
+		      element offset '(:contents-end :end)))
+		    ;; Element ended within modified area: remove it.
 		    (t (remhash key org-element--cache)))))))
 	   org-element--cache)
 	  ;; Signal cache as up-to-date.
