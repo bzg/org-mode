@@ -5284,29 +5284,20 @@ first row."
 	   (while t
 	     (unless element
 	       (setq element
-		     (let* ((pos (if (and (memq special-flag '(item table-row))
-					  (memq type '(plain-list table)))
-				     ;; First item (resp. row) in
-				     ;; plain list (resp. table) gets
-				     ;; a special key in cache.
-				     (1+ (point))
-				   (point)))
-			    (cached (org-element-cache-get pos 'element)))
-		       (cond
-			((not cached)
-			 (let ((element (org-element--current-element
-					 end 'element special-flag struct)))
-			   (when (derived-mode-p 'org-mode)
-			     (org-element-cache-put pos (cons element nil)))
-			   (org-element-put-property element :parent parent)))
-			;; When changes happened in the middle of
-			;; a list, its structure ends up being
-			;; invalid.  Therefore, we make sure to use
-			;; a valid one.
-			((and struct (memq (org-element-type cached)
-					   '(item plain-list)))
-			 (org-element-put-property cached :structure struct))
-			(t cached)))))
+		     (let ((pos (if (and (memq special-flag '(item table-row))
+					 (memq type '(plain-list table)))
+				    ;; First item (resp. row) in plain
+				    ;; list (resp. table) gets
+				    ;; a special key in cache.
+				    (1+ (point))
+				  (point))))
+		       (or (org-element-cache-get pos 'element)
+			   (let ((element (org-element--current-element
+					   end 'element special-flag struct)))
+			     (when (derived-mode-p 'org-mode)
+			       (org-element-cache-put pos (cons element nil)))
+			     (org-element-put-property element
+						       :parent parent))))))
 	     (setq type (org-element-type element))
 	     (cond
 	      ;; 1. Skip any element ending before point.  Also skip
@@ -5317,8 +5308,8 @@ first row."
 			   (and (= elem-end origin) (/= elem-end end)))
 		   (goto-char elem-end)))
 	       (setq element nil))
-	      ;; 2. An element containing point is always the element at
-	      ;;    point.
+	      ;; 2. An element containing point is always the element
+	      ;;    at point.
 	      ((not (memq type org-element-greater-elements))
 	       (throw 'exit element))
 	      ;; 3. At any other greater element type, if point is
