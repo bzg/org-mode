@@ -280,8 +280,6 @@ for the JavaScript code in this tag.
   pre.src-sql:before   { content: 'SQL'; }
 
   table { border-collapse:collapse; }
-  caption.t-above { caption-side: top; }
-  caption.t-bottom { caption-side: bottom; }
   td, th { vertical-align:top;  }
   th.right  { text-align: center;  }
   th.left   { text-align: center;   }
@@ -3270,8 +3268,8 @@ contextual information."
 	       (if (equal attributes "") "" (concat " " attributes))
 	       (if (not caption) ""
 		 (format (if org-html-table-caption-above
-			     "<caption class=\"t-above\">%s</caption>"
-			   "<caption class=\"t-bottom\">%s</caption>")
+			     "<caption align=\"above\">%s</caption>"
+			   "<caption align=\"bottom\">%s</caption>")
 			 (concat
 			  "<span class=\"table-number\">"
                           (format (org-html--translate "Table %d:" info) number)
