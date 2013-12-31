@@ -115,7 +115,7 @@ Don't trust first line."
 		(setq n2 (obj-match-second-space-right (nth 1 lines))))
 	       n2
 	     0))
-	  ((not (obj-match-second-space (nth 0 lines)))
+	  ((not (obj-match-second-space-left (nth 0 lines)))
 	   0)
 	  ((and
 	    (setq n1 (obj-match-second-space-left (nth 1 lines)))
