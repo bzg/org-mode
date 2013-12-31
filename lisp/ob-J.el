@@ -23,7 +23,8 @@
 
 ;;; Commentary:
 
-;; Session interaction depends on `j-console'.
+;; Org-Babel support for evaluating J code.
+;; Session interaction depends on `j-console' provided by `j-mode'.
 
 ;;; Code:
 (require 'ob)
@@ -35,18 +36,21 @@ PROCESSED-PARAMS isn't used yet."
 
 (defun org-babel-J-interleave-echos (body)
   "Interleave echo'' between each source line of BODY."
-  (mapconcat #'identity (split-string body "\n") "\necho''\n"))
+  (mapconcat #'identity (split-string body "\n") "\necho','\n"))
 
 (defun org-babel-J-interleave-echos-except-functions (body)
   "Interleave echo'' between source lines of BODY that aren't functions."
-  (if (obj-string-match-m "\\(?:^\\|\n\\)[^\n]*\\(?:1\\|2\\|3\\|4\\) : 0\n.*)\\(?:\n\\|$\\)" body)
+  (if (obj-string-match-m "\\(?:^\\|\n\\)[^\n]*\\(?:0\\|1\\|2\\|3\\|4\\|dyad\\) : 0\n.*\n)\\(?:\n\\|$\\)" body)
       (let ((s1 (substring body 0 (match-beginning 0)))
 	    (s2 (match-string 0 body))
 	    (s3 (substring body (match-end 0))))
 	(concat
-	 (org-babel-J-interleave-echos s1)
-	 "\necho''\n"
+	 (if (string= s1 "")
+	     ""
+	   (concat (org-babel-J-interleave-echos s1)
+		   "\necho','\n"))
 	 s2
+	 "\necho','\n"
 	 (org-babel-J-interleave-echos-except-functions s3)))
     (org-babel-J-interleave-echos body)))
 
@@ -86,34 +90,67 @@ This function is called by `org-babel-execute-src-block'"
 
 (defun org-babel-J-strip-whitespace (str)
   "Remove whitespace from jconsole output STR."
-  (let ((strs (split-string str "\n" t))
-	out cur s)
-    (while (setq s (pop strs))
-      (if (string-match "^ *$" s)
-	  (progn (push (nreverse cur) out)
-		 (setq cur))
-	(push s cur)))
-    (mapconcat #'org-babel-J-print-block
-	       (delq nil (nreverse out))
-	       "\n\n")))
+  (mapconcat
+   #'identity
+   (delete "" (mapcar
+	       #'org-babel-J-print-block
+	       (split-string str "^ *,\n" t)))
+   "\n\n"))
+
+(defun obj-get-string-alignment (str)
+  "Return a number to describe STR alignment.
+Positive/negative/zero mean right/left/undetermined.
+Don't trust first line."
+  (let* ((str (org-trim str))
+	 (lines (split-string str "\n" t))
+	 n1 n2)
+    (cond ((<= (length lines) 1)
+	   0)
+	  ((= (length lines) 2)
+	   ;; numbers are right-aligned
+	   (if (and
+		(numberp (read (car lines)))
+		(numberp (read (cadr lines)))
+		(setq n1 (obj-match-second-space-right (nth 0 lines)))
+		(setq n2 (obj-match-second-space-right (nth 1 lines))))
+	       n2
+	     0))
+	  ((not (obj-match-second-space (nth 0 lines)))
+	   0)
+	  ((and
+	    (setq n1 (obj-match-second-space-left (nth 1 lines)))
+	    (setq n2 (obj-match-second-space-left (nth 2 lines)))
+	    (= n1 n2))
+	   n1)
+	  ((and
+	    (setq n1 (obj-match-second-space-right (nth 1 lines)))
+	    (setq n2 (obj-match-second-space-right (nth 2 lines)))
+	    (= n1 n2))
+	   (- n1))
+	  (t 0))))
 
 (defun org-babel-J-print-block (x)
   "Prettify jconsole output X."
-  (if (= 1 (length x))
-      (org-trim (car x))
-    ;; assume only first row is misaligned
-    (let ((n1 (obj-match-second-space (car x)))
-	  (n2 (obj-match-second-space (cadr x))))
-      (setcar
-       x
-       (if (and n1 n2)
-	   (substring (car x) (- n1 n2))
-	 (org-trim (car x))))
-      (mapconcat #'identity x "\n"))))
+  (let* ((x (org-trim x))
+	 (a (obj-get-string-alignment x))
+	 (lines (split-string x "\n" t))
+	 b)
+    (cond ((minusp a)
+	   (setq b (obj-match-second-space-right (nth 0 lines)))
+	   (concat (make-string (+ a b) ? ) x))
+	  ((plusp a)
+	   (setq b (obj-match-second-space-left (nth 0 lines)))
+	   (concat (make-string (- a b) ? ) x))
+	  (t x))))
 
-(defun obj-match-second-space (s)
-  "Return position of second space in S or nil."
+(defun obj-match-second-space-left (s)
+  "Return position of leftmost space in second space block of S or nil."
   (and (string-match "^ *[^ ]+\\( \\)" s)
+       (match-beginning 1)))
+
+(defun obj-match-second-space-right (s)
+  "Return position of rightmost space in second space block of S or nil."
+  (and (string-match "^ *[^ ]+ *\\( \\)[^ ]" s)
        (match-beginning 1)))
 
 (defun obj-string-match-m (regexp string &optional start)
