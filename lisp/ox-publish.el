@@ -1072,7 +1072,7 @@ publishing directory."
 Return value is a list of numbers, or nil.  This function allows
 to resolve external fuzzy links like:
 
-  [[file.org::*fuzzy][description]"
+  [[file.org::*fuzzy][description]]"
   (when org-publish-cache
     (cdr (assoc (org-split-string
 		 (if (eq (aref fuzzy 0) ?*) (substring fuzzy 1) fuzzy))
