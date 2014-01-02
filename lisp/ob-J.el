@@ -24,10 +24,14 @@
 ;;; Commentary:
 
 ;; Org-Babel support for evaluating J code.
-;; Session interaction depends on `j-console' provided by `j-mode'.
+;;
+;; Session interaction depends on `j-console' from package `j-mode'
+;; (available in MELPA).
 
 ;;; Code:
 (require 'ob)
+
+(declare-function j-console-ensure-session "ext:j-console" ())
 
 (defun org-babel-expand-body:J (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body.
@@ -35,11 +39,11 @@ PROCESSED-PARAMS isn't used yet."
   (org-babel-J-interleave-echos-except-functions body))
 
 (defun org-babel-J-interleave-echos (body)
-  "Interleave echo'' between each source line of BODY."
+  "Interleave echo',' between each source line of BODY."
   (mapconcat #'identity (split-string body "\n") "\necho','\n"))
 
 (defun org-babel-J-interleave-echos-except-functions (body)
-  "Interleave echo'' between source lines of BODY that aren't functions."
+  "Interleave echo',' between source lines of BODY that aren't functions."
   (if (obj-string-match-m "\\(?:^\\|\n\\)[^\n]*\\(?:0\\|1\\|2\\|3\\|4\\|dyad\\) : 0\n.*\n)\\(?:\n\\|$\\)" body)
       (let ((s1 (substring body 0 (match-beginning 0)))
 	    (s2 (match-string 0 body))
@@ -99,7 +103,8 @@ This function is called by `org-babel-execute-src-block'"
 
 (defun obj-get-string-alignment (str)
   "Return a number to describe STR alignment.
-Positive/negative/zero mean right/left/undetermined.
+STR represents a table.
+Positive/negative/zero result means right/left/undetermined.
 Don't trust first line."
   (let* ((str (org-trim str))
 	 (lines (split-string str "\n" t))
@@ -154,7 +159,8 @@ Don't trust first line."
        (match-beginning 1)))
 
 (defun obj-string-match-m (regexp string &optional start)
-  "Like `sting-match', only .* includes newlines too."
+  "Call (string-match REGEXP STRING START).
+REGEXP is modified so that .* matches newlines as well."
   (string-match
    (replace-regexp-in-string "\\.\\*" "[\0-\377[:nonascii:]]*" regexp)
    string
