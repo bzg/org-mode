@@ -5693,7 +5693,7 @@ The time stamps may be either active or inactive.")
 				   '(invisible org-link))
 	      (add-text-properties (match-beginning 3) (match-end 3)
 				   '(invisible org-link)))))
-      (backward-char 1))
+      (goto-char (1+ (match-beginning 0))))
     rtn))
 
 (defun org-emphasize (&optional char)
