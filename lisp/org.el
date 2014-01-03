@@ -15454,14 +15454,19 @@ Each hook function should accept two arguments, the name of the property
 and the new value.")
 
 (defun org-entry-put (pom property value)
-  "Set PROPERTY to VALUE for entry at point-or-marker POM."
+  "Set PROPERTY to VALUE for entry at point-or-marker POM.
+If the value is `nil', it is converted to the empty string.
+If it is not a string, an error is raised."
+  (cond ((null value) (setq value ""))
+	((not (stringp value))
+	 (error "Properties values should be strings.")))
   (org-with-point-at pom
     (org-back-to-heading t)
     (let ((beg (point)) (end (save-excursion (outline-next-heading) (point)))
 	  range)
       (cond
        ((equal property "TODO")
-	(when (and (stringp value) (string-match "\\S-" value)
+	(when (and (string-match "\\S-" value)
 		   (not (member value org-todo-keywords-1)))
 	  (user-error "\"%s\" is not a valid TODO state" value))
 	(if (or (not value)
@@ -15470,7 +15475,7 @@ and the new value.")
 	(org-todo value)
 	(org-set-tags nil 'align))
        ((equal property "PRIORITY")
-	(org-priority (if (and value (stringp value) (string-match "\\S-" value))
+	(org-priority (if (and value (string-match "\\S-" value))
 			  (string-to-char value) ?\ ))
 	(org-set-tags nil 'align))
        ((equal property "CLOCKSUM")
