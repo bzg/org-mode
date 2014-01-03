@@ -63,7 +63,10 @@
 (defvar org-babel-default-header-args:clojure '())
 (defvar org-babel-header-args:clojure '((package . :any)))
 
-(defcustom org-babel-clojure-backend 'nrepl
+(defcustom org-babel-clojure-backend
+  (cond ((featurep 'cider) 'cider)
+	((featurep 'nrepl) 'nrepl)
+	(t 'slime))
   "Backend used to evaluate Clojure code blocks."
   :group 'org-babel
   :type '(choice
