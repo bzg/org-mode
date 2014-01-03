@@ -66,7 +66,7 @@
 ;;
 ;; Updates:
 ;;
-;;  The latest stable version of this file can always be found at:
+;;  The latest tested version of this file can always be found at:
 ;;
 ;;    http://orgmode.org/w/org-mode.git?p=org-mode.git;a=blob;f=contrib/lisp/org-index.el;hb=HEAD
 
@@ -1474,8 +1474,8 @@ retrieves the value of the count-column for reference 12.
       (insert (format "\n\n* %s %s\n" firstref title))
       (insert "\n\n  Below you find your initial index table, which will grow over time.\n"
               "  Following that your may read its detailed explanation, which will help you,\n"
-              "  to adopt org-index to your needs. This however is optional reading and not\n" 
-              "  required to start using org-index.\n\n")
+              "  to adjust org-index to your needs. This however is optional reading and not\n" 
+              "  required to start using org-index.\n")
 
       (setq id (org-id-get-create))
       (insert (format "
@@ -1523,17 +1523,17 @@ retrieves the value of the count-column for reference 12.
 
   - ref: This contains the reference, which consists of a decorated
     number, which is incremented for each new line. References are
-    meant to be used in org-mode headlines or outside of org´,
+    meant to be used in org-mode headlines or outside of org,
     e.g. within folder names.
 
   - link: org-mode link pointing to the matching location within org.
 
   - first: When has this line been first accessed (i.e. created) ?
 
-  - count: How many times has this line accessed ? The trailing
-    flag \"s\" makes the table beeing sorted after
-    this column, so that often used entries appear at the top of
-    the table.
+  - count: How many times has this line been accessed ? The
+    trailing flag \"s\" makes the table beeing sorted after this
+    column this column, so that often used entries appear at the
+    top of the table.
 
   - last: When has this line been accessed last ?
 
@@ -2034,7 +2034,7 @@ retrieves the value of the count-column for reference 12.
         (if show-headings (insert "\n\n" org-index--headings)))
       (forward-line))
     
-    (toggle-read-only 1)
+    (setq buffer-read-only t)
 
     ;; perform action according to last char
     (forward-line -1)
