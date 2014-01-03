@@ -5737,7 +5737,7 @@ This should be called after the variable `org-link-types' has changed."
 				   '(invisible org-link))
 	      (add-text-properties (match-beginning 3) (match-end 3)
 				   '(invisible org-link)))))
-      (backward-char 1))
+      (goto-char (1+ (match-beginning 0))))
     rtn))
 
 (defun org-emphasize (&optional char)
