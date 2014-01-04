@@ -2029,7 +2029,10 @@ Return a list whose CAR is `keyword' and CDR is a plist
 containing `:key', `:value', `:begin', `:end', `:post-blank' and
 `:post-affiliated' keywords."
   (save-excursion
-    (let ((begin (car affiliated))
+    ;; An orphaned affiliated keyword is considered as a regular
+    ;; keyword.  In this case AFFILIATED is nil, so we take care of
+    ;; this corner case.
+    (let ((begin (or (car affiliated) (point)))
 	  (post-affiliated (point))
 	  (key (progn (looking-at "[ \t]*#\\+\\(\\S-+*\\):")
 		      (upcase (org-match-string-no-properties 1))))
