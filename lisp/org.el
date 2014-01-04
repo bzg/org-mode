@@ -6894,10 +6894,12 @@ With a numeric prefix, show all headlines up to that level."
   "Set the visibility required by startup options and properties."
   (cond
    ((eq org-startup-folded t)
-    (org-cycle '(4)))
+    (org-overview))
    ((eq org-startup-folded 'content)
-    (let ((this-command 'org-cycle) (last-command 'org-cycle))
-      (org-cycle '(4)) (org-cycle '(4)))))
+    (org-content))
+   ((or (eq org-startup-folded 'showeverything)
+	(eq org-startup-folded nil))
+    (show-all)))
   (unless (eq org-startup-folded 'showeverything)
     (if org-hide-block-startup (org-hide-block-all))
     (org-set-visibility-according-to-property 'no-cleanup)
@@ -6976,7 +6978,6 @@ With numerical argument N, show content up to level N."
 	    (show-children (1- arg))
 	  (show-branches))
 	(if (bobp) (throw 'exit nil))))))
-
 
 (defun org-optimize-window-after-visibility-change (state)
   "Adjust the window after a change in outline visibility.
