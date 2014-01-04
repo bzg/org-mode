@@ -15380,6 +15380,8 @@ in `org-use-property-inheritance' selects PROPERTY for inheritance.
 If the property is present but empty, the return value is the empty string.
 If the property is not present at all, nil is returned.
 
+Return the value as a string.
+
 If LITERAL-NIL is set, return the string value \"nil\" as a string,
 do not interpret it as the list atom nil.  This is used for inheritance
 when a \"nil\" value can supersede a non-nil value higher up the hierarchy."
