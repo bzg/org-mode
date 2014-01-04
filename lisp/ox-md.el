@@ -80,6 +80,7 @@ This variable can be set to either `atx' or `setext'."
 		     (inline-src-block . org-md-verbatim)
 		     (italic . org-md-italic)
 		     (item . org-md-item)
+		     (keyword . org-md-keyword)
 		     (line-break . org-md-line-break)
 		     (link . org-md-link)
 		     (node-property . org-md-node-property)
@@ -156,8 +157,9 @@ channel."
 (defun org-md-export-block (export-block contents info)
   "Transcode a EXPORT-BLOCK element from Org to Markdown.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (when (equal (org-element-property :type export-block) "MD")
+  (when (member (org-element-property :type export-block) '("MARKDOWN" "MD"))
     (org-remove-indentation (org-element-property :value export-block))))
+
 
 ;;;; Headline
 
@@ -252,6 +254,18 @@ a communication channel."
 	    (let ((tag (org-element-property :tag item)))
 	      (and tag (format "**%s:** "(org-export-data tag info))))
 	    (org-trim (replace-regexp-in-string "^" "    " contents)))))
+
+
+
+;;;; Keyword
+
+(defun org-md-keyword (keyword contents info)
+  "Transcode a KEYWORD element into Markdown format.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (if (member (org-element-property :key keyword) '("MARKDOWN" "MD"))
+      (org-element-property :value keyword)
+    (org-export-with-backend 'html keyword contents info)))
 
 
 ;;;; Line Break
