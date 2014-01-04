@@ -1,6 +1,6 @@
 ;;; ox-deck.el --- deck.js Presentation Back-End for Org Export Engine
 
-;; Copyright (C) 2013  Rick Frankel
+;; Copyright (C) 2013, 2014  Rick Frankel
 
 ;; Author: Rick Frankel <emacs at rickster dot com>
 ;; Keywords: outlines, hypermedia, slideshow

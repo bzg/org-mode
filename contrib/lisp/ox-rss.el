@@ -1,6 +1,6 @@
 ;;; ox-rss.el --- RSS 2.0 Back-End for Org Export Engine
 
-;; Copyright (C) 2013  Bastien Guerry
+;; Copyright (C) 2013, 2014  Bastien Guerry
 
 ;; Author: Bastien Guerry <bzg@gnu.org>
 ;; Keywords: org, wp, blog, feed, rss
