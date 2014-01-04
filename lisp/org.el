@@ -2246,7 +2246,7 @@ fast, while still showing the whole path to the entry."
   "Non-nil means allow to create new nodes as refile targets.
 New nodes are then created by adding \"/new node name\" to the completion
 of an existing node.  When the value of this variable is `confirm',
-new node creation must be confirmed by the user (recommended)
+new node creation must be confirmed by the user (recommended).
 When nil, the completion must match an existing entry.
 
 Note that, if the new heading is not seen by the criteria
