@@ -11805,9 +11805,9 @@ this is used for the GOTO interface."
     (setq answ (funcall cfunc prompt tbl nil (not new-nodes)
 			nil 'org-refile-history (or cdef (car org-refile-history))))
     (setq pa (or (assoc answ tbl) (assoc (concat answ "/") tbl)))
-    (org-refile-check-position pa)
     (if pa
 	(progn
+	  (org-refile-check-position pa)
 	  (when (or (not org-refile-history)
 		    (not (eq old-hist org-refile-history))
 		    (not (equal (car pa) (car org-refile-history))))
