@@ -157,8 +157,10 @@ channel."
 (defun org-md-export-block (export-block contents info)
   "Transcode a EXPORT-BLOCK element from Org to Markdown.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (when (member (org-element-property :type export-block) '("MARKDOWN" "MD"))
-    (org-remove-indentation (org-element-property :value export-block))))
+  (if (member (org-element-property :type export-block) '("MARKDOWN" "MD"))
+      (org-remove-indentation (org-element-property :value export-block))
+    ;; Also include HTML export blocks.
+    (org-export-with-backend 'html export-block contents info)))
 
 
 ;;;; Headline
