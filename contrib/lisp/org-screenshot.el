@@ -1,6 +1,6 @@
 ;;; org-screenshot.el --- Take and manage screenshots in Org-mode files
 ;;
-;; Copyright (C) 2009-2013
+;; Copyright (C) 2009-2014
 ;;   Free Software Foundation, Inc.
 ;;
 ;; Author: Max Mikhanosha <max@openchat.com>

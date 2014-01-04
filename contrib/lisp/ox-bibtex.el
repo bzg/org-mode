@@ -1,6 +1,6 @@
 ;;; ox-bibtex.el --- Export bibtex fragments
 
-;; Copyright (C) 2009-2013 Taru Karttunen
+;; Copyright (C) 2009-2014 Taru Karttunen
 
 ;; Author: Taru Karttunen <taruti@taruti.net>
 ;;      Nicolas Goaziou <n dot goaziou at gmail dot com>

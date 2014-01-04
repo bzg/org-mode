@@ -1,6 +1,6 @@
 ;;; ox-confluence --- Confluence Wiki Back-End for Org Export Engine
 
-;; Copyright (C) 2012 Sébastien Delafond
+;; Copyright (C) 2012, 2014 Sébastien Delafond
 
 ;; Author: Sébastien Delafond <sdelafond@gmail.com>
 ;; Keywords: outlines, confluence, wiki
