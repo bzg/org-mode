@@ -430,6 +430,17 @@ Paragraph"
 	  (org-test-with-temp-text ":FOO:\nkeep\n:END:\n:BAR:\nremove\n:END:"
 	    (org-export-as (org-test-default-backend)
 			   nil nil nil '(:with-drawers (not "BAR"))))))
+  ;; Fixed-width.
+  (should
+   (equal ": A\n"
+	  (org-test-with-temp-text ": A"
+	    (org-export-as (org-test-default-backend) nil nil nil
+			   '(:with-fixed-width t)))))
+  (should
+   (equal ""
+	  (org-test-with-temp-text ": A"
+	    (org-export-as (org-test-default-backend) nil nil nil
+			   '(:with-fixed-width nil)))))
   ;; Footnotes.
   (should
    (equal "Footnote?"
@@ -498,7 +509,18 @@ Paragraph"
    (equal ""
 	  (org-test-with-temp-text "[0/0]"
 	    (org-export-as (org-test-default-backend)
-			   nil nil nil '(:with-statistics-cookies nil))))))
+			   nil nil nil '(:with-statistics-cookies nil)))))
+  ;; Tables.
+  (should
+   (equal "| A |\n"
+	  (org-test-with-temp-text "| A |"
+	    (org-export-as (org-test-default-backend) nil nil nil
+			   '(:with-tables t)))))
+  (should
+   (equal ""
+	  (org-test-with-temp-text "| A |"
+	    (org-export-as (org-test-default-backend) nil nil nil
+			   '(:with-tables nil))))))
 
 (ert-deftest test-org-export/with-timestamps ()
   "Test `org-export-with-timestamps' specifications."

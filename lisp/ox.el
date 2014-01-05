@@ -457,19 +457,12 @@ This option can also be set with the EXCLUDE_TAGS keyword."
   :type '(repeat (string :tag "Tag")))
 
 (defcustom org-export-with-fixed-width t
-  "Non-nil means lines starting with \":\" will be in fixed width font.
-
-This can be used to have pre-formatted text, fragments of code
-etc.  For example:
-  : ;; Some Lisp examples
-  : (while (defc cnt)
-  :   (ding))
-will be looking just like this in also HTML.  See also the QUOTE
-keyword.  Not all export backends support this.
-
+  "Non-nil means export lines starting with \":\".
 This option can also be set with the OPTIONS keyword,
 e.g. \"::nil\"."
   :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-export-with-footnotes t
@@ -703,16 +696,12 @@ e.g. \"toc:nil\" or \"toc:3\"."
 	  (integer :tag "TOC to level")))
 
 (defcustom org-export-with-tables t
-  "If non-nil, lines starting with \"|\" define a table.
-For example:
-
-  | Name        | Address  | Birthday  |
-  |-------------+----------+-----------|
-  | Arthur Dent | England  | 29.2.2100 |
-
+  "Non-nil means export tables.
 This option can also be set with the OPTIONS keyword,
 e.g. \"|:nil\"."
   :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-export-with-tags t
@@ -1440,7 +1429,7 @@ The back-end could then be called with, for example:
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 ;;
-;; + `:with-fixed-width' :: Non-nil if transcoder should interpret
+;; + `:with-fixed-width' :: Non-nil if transcoder should export
 ;;      strings starting with a colon as a fixed-with (verbatim) area.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
@@ -1482,8 +1471,7 @@ The back-end could then be called with, for example:
 ;;   - category :: option
 ;;   - type :: symbol (nil, {}, t)
 ;;
-;; + `:with-tables' :: Non-nil means transcoding should interpret
-;;      tables.
+;; + `:with-tables' :: Non-nil means transcoding should export tables.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 ;;
@@ -2091,6 +2079,7 @@ a tree with a select tag."
 		  (if (eq (car with-drawers-p) 'not)
 		      (member-ignore-case name (cdr with-drawers-p))
 		    (not (member-ignore-case name with-drawers-p))))))))
+    (fixed-width (not (plist-get options :with-fixed-width)))
     ((footnote-definition footnote-reference)
      (not (plist-get options :with-footnotes)))
     ((headline inlinetask)
@@ -2128,6 +2117,7 @@ a tree with a select tag."
     (planning (not (plist-get options :with-planning)))
     (property-drawer (not (plist-get options :with-properties)))
     (statistics-cookie (not (plist-get options :with-statistics-cookies)))
+    (table (not (plist-get options :with-tables)))
     (table-cell
      (and (org-export-table-has-special-column-p
 	   (org-export-get-parent-table blob))
