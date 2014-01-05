@@ -14670,7 +14670,7 @@ With prefix ARG, realign all tags in headings in the current buffer."
 	  (and (not (featurep 'xemacs)) c0 indent-tabs-mode (tabify p0 (point)))
 	  tags)
 	 (t (error "Tags alignment failed")))
-	(org-move-to-column col)
+	(org-move-to-column col nil nil t)
 	(unless just-align
 	  (run-hooks 'org-after-tags-change-hook))))))
 
