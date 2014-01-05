@@ -1,6 +1,6 @@
 ;;; ox-s5.el --- S5 Presentation Back-End for Org Export Engine
 
-;; Copyright (C) 2011-2014  Rick Frankel
+;; Copyright (C) 2011-2013  Rick Frankel
 
 ;; Author: Rick Frankel <emacs at rickster dot com>
 ;; Keywords: outlines, hypermedia, S5, wp
