@@ -1277,7 +1277,7 @@ tables, @kbd{S-@key{TAB}} jumps to the previous field.
 
 @cindex set startup visibility, command
 @orgcmd{C-u C-u @key{TAB},org-set-startup-visibility}
-Switch back to the startup visibility of the buffer (pxref{Initial visibility}).
+Switch back to the startup visibility of the buffer (@pxref{Initial visibility}).
 @cindex show all, command
 @orgcmd{C-u C-u C-u @key{TAB},show-all}
 Show all, including drawers.
