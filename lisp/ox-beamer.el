@@ -1094,6 +1094,7 @@ aid, but the tag does not have any semantic meaning."
 			  envs)
 		  '((:endgroup))
 		  '(("BMCOL" . ?|))))
+	 (org-use-fast-tag-selection t)
 	 (org-fast-tag-selection-single-key t))
     (org-set-tags)
     (let ((tags (or (ignore-errors (org-get-tags-string)) "")))
