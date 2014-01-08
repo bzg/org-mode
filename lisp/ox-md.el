@@ -255,7 +255,8 @@ a communication channel."
 	      (off "[ ] "))
 	    (let ((tag (org-element-property :tag item)))
 	      (and tag (format "**%s:** "(org-export-data tag info))))
-	    (org-trim (replace-regexp-in-string "^" "    " contents)))))
+	    (and contents
+		 (org-trim (replace-regexp-in-string "^" "    " contents))))))
 
 
 
