@@ -123,7 +123,8 @@ This function is called by `org-babel-execute-src-block'."
 				    (org-babel-process-file-name in-file)
 				    (org-babel-process-file-name out-file)))
 		    ('postgresql (format
-				  "psql --set=\"ON_ERROR_STOP=1\" -A -P footer=off -F \"\t\"  -f %s -o %s %s"
+				  "psql --set=\"ON_ERROR_STOP=1\" %s -A -P footer=off -F \"\t\"  -f %s -o %s %s"
+				  (if colnames-p "" "-t")
 				  (org-babel-process-file-name in-file)
 				  (org-babel-process-file-name out-file)
 				  (or cmdline "")))
