@@ -136,7 +136,7 @@ specifying a variable of the same value."
     (if (equal var 'hline)
 	org-babel-python-hline-to
       (format
-       (if (and (stringp var) (string-match "[\n\r]" var)) "\"\"%s\"\"" "%s")
+       (if (and (stringp var) (string-match "[\n\r]" var)) "\"\"%S\"\"" "%S")
        var))))
 
 (defun org-babel-python-table-or-string (results)
