@@ -4789,14 +4789,14 @@ element ending there."
 	  ;; parsing from NEXT, which is located after CACHED or its
 	  ;; higher ancestor not containing point.
           (t
-	   (let ((up cached))
+	   (let ((up cached)
+		 (origin (if (= (point-max) origin) (1- origin) origin)))
 	     (goto-char (or (org-element-property :contents-begin cached)
 			    begin))
-	     (while (and up
-			 (not (eobp))
-			 (<= (org-element-property :end up) origin))
-	       (goto-char (org-element-property :end up))
-	       (setq up (org-element-property :parent up)))
+	     (while (let ((end (org-element-property :end up)))
+		      (and (<= end origin)
+			   (goto-char end)
+			   (setq up (org-element-property :parent up)))))
 	     (cond ((not up))
 		   ((eobp) (setq element up))
 		   (t (setq element up next (point))))))))
