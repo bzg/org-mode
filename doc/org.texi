@@ -591,7 +591,7 @@ Exporting
 * OpenDocument Text export::    Exporting to OpenDocument Text
 * Org export::                  Exporting to Org
 * iCalendar export::            Exporting to iCalendar
-* Other built-in back-ends::    Exporting to @code{Texinfo}, a man page, or Org
+* Other built-in back-ends::    Exporting to @code{Texinfo} or a man page
 * Export in foreign buffers::   Author tables in lists in Org syntax
 * Advanced configuration::      Fine-tuning the export output
 
@@ -10364,7 +10364,7 @@ in the iCalendar format.
 * OpenDocument Text export::    Exporting to OpenDocument Text
 * Org export::                  Exporting to Org
 * iCalendar export::            Exporting to iCalendar
-* Other built-in back-ends::    Exporting to @code{Texinfo}, a man page, or Org
+* Other built-in back-ends::    Exporting to @code{Texinfo} or a man page
 * Export in foreign buffers::   Author tables in lists in Org syntax
 * Advanced configuration::      Fine-tuning the export output
 @end menu
