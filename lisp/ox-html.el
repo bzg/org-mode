@@ -648,7 +648,7 @@ The function result will be used in the section format string."
 
 ;;;; HTML-specific
 
-(defcustom org-html-allow-name-attribute-in-anchors t
+(defcustom org-html-allow-name-attribute-in-anchors nil
   "When nil, do not set \"name\" attribute in anchors.
 By default, anchors are formatted with both \"id\" and \"name\"
 attributes, when appropriate."
