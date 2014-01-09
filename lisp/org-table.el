@@ -2275,7 +2275,8 @@ For all numbers larger than LIMIT, shift them by DELTA."
   (save-excursion
     (goto-char (org-table-end))
     (let ((case-fold-search t)
-	  (s-end (save-excursion (re-search-forward "^\\S-*$\\|\\'" nil t))))
+	  (s-end (min (save-excursion (re-search-forward "^\\S-*$\\|\\'" nil t))
+		      (save-excursion (org-end-of-subtree t)))))
       (while (re-search-forward "[ \t]*#\\+tblfm:" s-end t)
 	(let ((msg "The formulas in #+TBLFM have been updated")
 	      (re (concat key "\\([0-9]+\\)"))
