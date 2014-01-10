@@ -988,25 +988,27 @@ org-info.js for your website."
 	  (trans . "<input type='checkbox' />"))))
   "Alist of checkbox types.
 The cdr of each entry is an alist list three checkbox types for
-html export: \"on\", \"off\" and \"trans\".
+HTML export: `on', `off' and `trans'.
 
 The choices are:
-  - unicode characters (html entities)
-  - ascii characters
-  - html checkboxes
-Note that only the ascii characters implement tri-state
-checkboxes. The other two use the \"off\" checkbox for \"trans\".")
+  - Unicode characters (HTML entities)
+  - ASCII characters
+  - HTML checkboxes
 
-(defcustom org-html-checkbox-type "ascii"
-  "The type of checkboxes to use for html export. See
-`org-html-checkbox-types' for for the values used for each option."
+Note that only the ascii characters implement tri-state
+checkboxes. The other two use the `off' checkbox for `trans'.")
+
+(defcustom org-html-checkbox-type 'ascii
+  "The type of checkboxes to use for HTML export.
+See `org-html-checkbox-types' for for the values used for each
+option."
   :group 'org-export-html
   :version "24.4"
   :package-version '(Org . "8.0")
   :type '(choice
-	  (const :tag "ASCII characters" "ascii")
-	  (const :tag "Unicode characters" "unicode")
-	  (const :tag "HTML checkboxes" "html")))
+	  (const :tag "ASCII characters" ascii)
+	  (const :tag "Unicode characters" unicode)
+	  (const :tag "HTML checkboxes" html)))
 
 (defcustom org-html-metadata-timestamp-format "%Y-%m-%d %a %H:%M"
   "Format used for timestamps in preamble, postamble and metadata.
@@ -2451,12 +2453,11 @@ contextual information."
 ;;;; Item
 
 (defun org-html-checkbox (checkbox info)
-  "Format CHECKBOX into HTML.  INFO is a plist holding contextual
-information.
-See `org-html-checkbox-type' for customization options."
-  (cdr (assoc checkbox
-	      (cdr (assoc (intern org-html-checkbox-type)
-			  org-html-checkbox-types)))))
+  "Format CHECKBOX into HTML.
+INFO is a plist holding contextual information.  See
+`org-html-checkbox-type' for customization options."
+  (cdr (assq checkbox
+	     (cdr (assq org-html-checkbox-type org-html-checkbox-types)))))
 
 (defun org-html-format-list-item (contents type checkbox info
 					     &optional term-counter-id
