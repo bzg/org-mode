@@ -991,9 +991,9 @@ The cdr of each entry is an alist list three checkbox types for
 HTML export: `on', `off' and `trans'.
 
 The choices are:
-  - Unicode characters (HTML entities)
-  - ASCII characters
-  - HTML checkboxes
+  `unicode' Unicode characters (HTML entities)
+  `ascii'   ASCII characters
+  `html'    HTML checkboxes
 
 Note that only the ascii characters implement tri-state
 checkboxes. The other two use the `off' checkbox for `trans'.")
