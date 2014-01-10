@@ -650,8 +650,8 @@ The function result will be used in the section format string."
 
 (defcustom org-html-allow-name-attribute-in-anchors nil
   "When nil, do not set \"name\" attribute in anchors.
-By default, anchors are formatted with both \"id\" and \"name\"
-attributes, when appropriate."
+By default, when appropriate, anchors are formatted with \"id\"
+but without \"name\" attribute."
   :group 'org-export-html
   :version "24.4"
   :package-version '(Org . "8.0")
