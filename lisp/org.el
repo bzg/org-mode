@@ -7887,14 +7887,10 @@ The level is the number of stars at the beginning of the headline."
   "Return the outline depth of the last headline before the current line.
 Returns 0 for the first headline in the buffer, and nil if before the
 first headline."
-  (let ((current-level (org-current-level))
-	(prev-level (when (> (line-number-at-pos) 1)
-		      (save-excursion
-			(beginning-of-line 0)
-			(org-current-level)))))
-    (cond ((null current-level) nil) ; Before first headline
-	  ((null prev-level) 0)      ; At first headline
-	  (prev-level))))
+  (and (org-current-level)
+       (or (and (/= (line-beginning-position) (point-min))
+		(save-excursion (beginning-of-line 0) (org-current-level)))
+	   0)))
 
 (defun org-reduced-level (l)
   "Compute the effective level of a heading.
