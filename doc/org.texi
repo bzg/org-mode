@@ -371,11 +371,6 @@ Visibility cycling
 * Initial visibility::          Setting the initial visibility state
 * Catching invisible edits::    Preventing mistakes when editing invisible parts
 
-Global and local cycling
-
-* Initial visibility::          Setting the initial visibility state
-* Catching invisible edits::    Preventing mistakes when editing invisible parts
-
 Tables
 
 * Built-in table editor::       Simple tables
@@ -1314,11 +1309,6 @@ the previously used indirect buffer.
 @orgcmd{C-c C-x v,org-copy-visible}
 Copy the @i{visible} text in the region into the kill ring.
 @end table
-
-@menu
-* Initial visibility::          Setting the initial visibility state
-* Catching invisible edits::    Preventing mistakes when editing invisible parts
-@end menu
 
 @node Initial visibility
 @subsection Initial visibility
