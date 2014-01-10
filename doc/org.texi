@@ -592,7 +592,7 @@ Exporting
 * Org export::                  Exporting to Org
 * iCalendar export::            Exporting to iCalendar
 * Other built-in back-ends::    Exporting to @code{Texinfo} or a man page
-* Export in foreign buffers::   Author tables in lists in Org syntax
+* Export in foreign buffers::   Author tables and lists in Org syntax
 * Advanced configuration::      Fine-tuning the export output
 
 HTML export
@@ -10365,7 +10365,7 @@ in the iCalendar format.
 * Org export::                  Exporting to Org
 * iCalendar export::            Exporting to iCalendar
 * Other built-in back-ends::    Exporting to @code{Texinfo} or a man page
-* Export in foreign buffers::   Author tables in lists in Org syntax
+* Export in foreign buffers::   Author tables and lists in Org syntax
 * Advanced configuration::      Fine-tuning the export output
 @end menu
 
