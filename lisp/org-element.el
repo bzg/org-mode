@@ -3385,13 +3385,12 @@ Return a list whose CAR is `subscript' and CDR a plist with
 Assume point is at the underscore."
   (save-excursion
     (unless (bolp) (backward-char))
-    (let ((bracketsp (if (looking-at org-match-substring-with-braces-regexp)
-			 t
-		       (not (looking-at org-match-substring-regexp))))
+    (looking-at org-match-substring-regexp)
+    (let ((bracketsp (match-beginning 4))
 	  (begin (match-beginning 2))
-	  (contents-begin (or (match-beginning 5)
+	  (contents-begin (or (match-beginning 4)
 			      (match-beginning 3)))
-	  (contents-end (or (match-end 5) (match-end 3)))
+	  (contents-end (or (match-end 4) (match-end 3)))
 	  (post-blank (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
@@ -3434,12 +3433,12 @@ Return a list whose CAR is `superscript' and CDR a plist with
 Assume point is at the caret."
   (save-excursion
     (unless (bolp) (backward-char))
-    (let ((bracketsp (if (looking-at org-match-substring-with-braces-regexp) t
-		       (not (looking-at org-match-substring-regexp))))
+    (looking-at org-match-substring-regexp)
+    (let ((bracketsp (match-beginning 4))
 	  (begin (match-beginning 2))
-	  (contents-begin (or (match-beginning 5)
+	  (contents-begin (or (match-beginning 4)
 			      (match-beginning 3)))
-	  (contents-end (or (match-end 5) (match-end 3)))
+	  (contents-end (or (match-end 4) (match-end 3)))
 	  (post-blank (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
