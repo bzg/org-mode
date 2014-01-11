@@ -319,7 +319,7 @@ and have the id \"title-slide\"."
         (include (plist-get info :deck-include-extensions))
         (exclude (plist-get info :deck-exclude-extensions))
         (scripts '()) (sheets '()) (snippets '()))
-    (add-to-list 'scripts (concat prefix "jquery-1.7.2.min.js"))
+    (add-to-list 'scripts (concat prefix "jquery.min.js"))
     (add-to-list 'scripts (concat prefix "core/deck.core.js"))
     (add-to-list 'scripts (concat prefix "modernizr.custom.js"))
     (add-to-list 'sheets  (concat prefix "core/deck.core.css"))
