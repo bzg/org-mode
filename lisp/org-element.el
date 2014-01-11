@@ -5602,14 +5602,19 @@ cache, unless optional argument IGNORE-CHANGES is non-nil."
 	      (cond
 	       ((< key beg)
 		(setq node (avl-tree--node-left node)))
-	       ((= key beg)
-		(if (memq (org-element-type element) '(item table-row))
-		    (setq last (avl-tree--node-data node)
-			  node (avl-tree--node-left node))
-		  (throw 'found (avl-tree--node-data node))))
-	       (t
+	       ((> key beg)
 		(setq last (avl-tree--node-data node)
-		      node (avl-tree--node-right node))))))
+		      node (avl-tree--node-right node)))
+	       ;; When KEY is at the beginning of a table or list,
+	       ;; make sure to return it instead of the first row or
+	       ;; item.
+	       ((and (memq (org-element-type element) '(item table-row))
+		     (= (org-element-property
+			 :contents-begin (org-element-property :parent element))
+			beg))
+		(setq last (avl-tree--node-data node)
+		      node (avl-tree--node-left node)))
+	       (t (throw 'found (avl-tree--node-data node))))))
 	  last)))))
 
 (defun org-element-cache-put (data &optional element)
