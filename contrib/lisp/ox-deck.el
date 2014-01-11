@@ -368,7 +368,7 @@ holding export options."
   "Transcode an ITEM element from Org to HTML.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information.
-If the containing headline has the property :slide, then
+If the containing headline has the property :STEP, then
 the \"slide\" class will be added to the to the list element,
  which will make the list into a \"build\"."
   (let ((text (org-html-item item contents info)))
