@@ -5220,6 +5220,11 @@ This cache is used in `org-element-context'.")
 	     (memq (org-element-type a) '(plain-list table))
 	     (memq (org-element-type b) '(item table-row))))))
 
+(defsubst org-element--cache-root ()
+  "Return root value in cache.
+This function assumes `org-element--cache' is a valid AVL tree."
+  (avl-tree--node-left (avl-tree--dummyroot org-element--cache)))
+
 
 ;;;; Staging Buffer Changes
 
@@ -5506,7 +5511,7 @@ removed from the cache."
 			   (if (< (org-element-property :end element) beg)
 			       (org-element-property :end element)
 			     (org-element-property :begin element))))))))
-	      (while (let ((node (avl-tree--root org-element--cache)) data)
+	      (while (let ((node (org-element--cache-root)) data)
 		       ;; DATA will contain the closest element from
 		       ;; BEG, always after it.
 		       (while node
@@ -5589,7 +5594,7 @@ cache, unless optional argument IGNORE-CHANGES is non-nil."
     (when (and (not ignore-changes) (org-element--cache-pending-changes-p))
       (org-element--cache-sync (current-buffer)))
     (if (not (wholenump key)) (gethash key org-element--cache-objects)
-      (let ((node (avl-tree--root org-element--cache)) last)
+      (let ((node (org-element--cache-root)) last)
 	(catch 'found
 	  (while node
 	    (let* ((element (avl-tree--node-data node))
