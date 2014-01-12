@@ -3385,13 +3385,12 @@ Return a list whose CAR is `subscript' and CDR a plist with
 Assume point is at the underscore."
   (save-excursion
     (unless (bolp) (backward-char))
-    (let ((bracketsp (if (looking-at org-match-substring-with-braces-regexp)
-			 t
-		       (not (looking-at org-match-substring-regexp))))
+    (looking-at org-match-substring-regexp)
+    (let ((bracketsp (match-beginning 4))
 	  (begin (match-beginning 2))
-	  (contents-begin (or (match-beginning 5)
+	  (contents-begin (or (match-beginning 4)
 			      (match-beginning 3)))
-	  (contents-end (or (match-end 5) (match-end 3)))
+	  (contents-end (or (match-end 4) (match-end 3)))
 	  (post-blank (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
@@ -3434,12 +3433,12 @@ Return a list whose CAR is `superscript' and CDR a plist with
 Assume point is at the caret."
   (save-excursion
     (unless (bolp) (backward-char))
-    (let ((bracketsp (if (looking-at org-match-substring-with-braces-regexp) t
-		       (not (looking-at org-match-substring-regexp))))
+    (looking-at org-match-substring-regexp)
+    (let ((bracketsp (match-beginning 4))
 	  (begin (match-beginning 2))
-	  (contents-begin (or (match-beginning 5)
+	  (contents-begin (or (match-beginning 4)
 			      (match-beginning 3)))
-	  (contents-end (or (match-end 5) (match-end 3)))
+	  (contents-end (or (match-end 4) (match-end 3)))
 	  (post-blank (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
@@ -5602,14 +5601,19 @@ cache, unless optional argument IGNORE-CHANGES is non-nil."
 	      (cond
 	       ((< key beg)
 		(setq node (avl-tree--node-left node)))
-	       ((= key beg)
-		(if (memq (org-element-type element) '(item table-row))
-		    (setq last (avl-tree--node-data node)
-			  node (avl-tree--node-left node))
-		  (throw 'found (avl-tree--node-data node))))
-	       (t
+	       ((> key beg)
 		(setq last (avl-tree--node-data node)
-		      node (avl-tree--node-right node))))))
+		      node (avl-tree--node-right node)))
+	       ;; When KEY is at the beginning of a table or list,
+	       ;; make sure to return it instead of the first row or
+	       ;; item.
+	       ((and (memq (org-element-type element) '(item table-row))
+		     (= (org-element-property
+			 :contents-begin (org-element-property :parent element))
+			beg))
+		(setq last (avl-tree--node-data node)
+		      node (avl-tree--node-left node)))
+	       (t (throw 'found (avl-tree--node-data node))))))
 	  last)))))
 
 (defun org-element-cache-put (data &optional element)

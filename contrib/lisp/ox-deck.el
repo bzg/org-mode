@@ -319,7 +319,7 @@ and have the id \"title-slide\"."
         (include (plist-get info :deck-include-extensions))
         (exclude (plist-get info :deck-exclude-extensions))
         (scripts '()) (sheets '()) (snippets '()))
-    (add-to-list 'scripts (concat prefix "jquery-1.7.2.min.js"))
+    (add-to-list 'scripts (concat prefix "jquery.min.js"))
     (add-to-list 'scripts (concat prefix "core/deck.core.js"))
     (add-to-list 'scripts (concat prefix "modernizr.custom.js"))
     (add-to-list 'sheets  (concat prefix "core/deck.core.css"))
@@ -368,7 +368,7 @@ holding export options."
   "Transcode an ITEM element from Org to HTML.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information.
-If the containing headline has the property :slide, then
+If the containing headline has the property :STEP, then
 the \"slide\" class will be added to the to the list element,
  which will make the list into a \"build\"."
   (let ((text (org-html-item item contents info)))
