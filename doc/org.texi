@@ -2624,6 +2624,12 @@ table in that entry.  REF is an absolute field or range reference as
 described above for example @code{@@3$3} or @code{$somename}, valid in the
 referenced table.
 
+Indirection of NAME-OR-ID: When NAME-OR-ID has the format @code{@@ROW$COLUMN}
+it will be substituted with the name or ID found in this field of the current
+table.  For example @code{remote($1, @@>$2)} => @code{remote(year_2013,
+@@>$1)}.  The format @code{B3} is not supported because it can not be
+distinguished from a plain table name or ID.
+
 @node Formula syntax for Calc
 @subsection Formula syntax for Calc
 @cindex formula syntax, Calc

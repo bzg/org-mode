@@ -837,14 +837,9 @@ See also `test-org-table/copy-field'."
 ")
      1
      ;; Calc formula
-     (concat "#+TBLFM: "
-	     "@2$2 = remote(2012, @>$1) :: "
-	     "@3$2 = remote(2013, @>$1) :: "
-	     "@>$2 = vsum(@I..@II)")
+     "#+TBLFM: @<<$2..@>>$2 = remote($<, @>$1) :: @>$2 = vsum(@I..@II)"
      ;; Lisp formula
-     (concat "#+TBLFM: "
-	     "@2$2 = '(identity remote(2012, @>$1)); N :: "
-	     "@3$2 = '(identity remote(2013, @>$1)); N :: "
+     (concat "#+TBLFM: @<<$2..@>>$2 = '(identity remote($<, @>$1)); N :: "
 	     "@>$2 = '(+ @I..@II); N"))
 
     ;; Read several remote references from same row
@@ -863,14 +858,9 @@ See also `test-org-table/copy-field'."
 ")
      1
      ;; Calc formula
-     (concat "#+TBLFM: "
-	     "@2$2 = remote(2012, @>$1) :: "
-	     "@2$3 = remote(2013, @>$1) :: "
-	     "@2$> = vsum($<<..$>>)")
+     "#+TBLFM: @2$<<..@2$>> = remote(@<, @>$1) :: @2$> = vsum($<<..$>>)"
      ;; Lisp formula
-     (concat "#+TBLFM: "
-	     "@2$2 = '(identity remote(2012, @>$1)); N :: "
-	     "@2$3 = '(identity remote(2013, @>$1)); N :: "
+     (concat "#+TBLFM: @2$<<..@2$>> = '(identity remote(@<, @>$1)); N :: "
 	     "@2$> = '(+ $<<..$>>); N"))))
 
 (ert-deftest test-org-table/org-at-TBLFM-p ()
