@@ -793,6 +793,76 @@ See also `test-org-table/copy-field'."
 	     ;; Do a calculation: Use Calc (or Lisp ) formula
 	     "$2 = 2 * remote(table, @1$2)")))
 
+(ert-deftest test-org-table/remote-reference-indirect ()
+  "Access to remote reference with indirection of name or ID."
+  (let ((source-tables "
+#+NAME: 2012
+| amount |
+|--------|
+|      1 |
+|      2 |
+|--------|
+|      3 |
+#+TBLFM: @>$1 = vsum(@I..@II)
+
+#+NAME: 2013
+| amount |
+|--------|
+|      4 |
+|      8 |
+|--------|
+|     12 |
+#+TBLFM: @>$1 = vsum(@I..@II)
+"))
+
+    ;; Read several remote references from same column
+    (org-test-table-target-expect
+     (concat source-tables "
+#+NAME: summary
+|  year | amount  |
+|-------+---------|
+|  2012 | replace |
+|  2013 | replace |
+|-------+---------|
+| total | replace |
+")
+     (concat source-tables "
+#+NAME: summary
+|  year | amount |
+|-------+--------|
+|  2012 |      3 |
+|  2013 |     12 |
+|-------+--------|
+| total |     15 |
+")
+     1
+     ;; Calc formula
+     "#+TBLFM: @<<$2..@>>$2 = remote($<, @>$1) :: @>$2 = vsum(@I..@II)"
+     ;; Lisp formula
+     (concat "#+TBLFM: @<<$2..@>>$2 = '(identity remote($<, @>$1)); N :: "
+	     "@>$2 = '(+ @I..@II); N"))
+
+    ;; Read several remote references from same row
+    (org-test-table-target-expect
+     (concat source-tables "
+#+NAME: summary
+| year   |    2012 |    2013 | total   |
+|--------+---------+---------+---------|
+| amount | replace | replace | replace |
+")
+     (concat source-tables "
+#+NAME: summary
+| year   | 2012 | 2013 | total |
+|--------+------+------+-------|
+| amount |    3 |   12 |    15 |
+")
+     1
+     ;; Calc formula
+     "#+TBLFM: @2$<<..@2$>> = remote(@<, @>$1) :: @2$> = vsum($<<..$>>)"
+     ;; Lisp formula
+     (concat "#+TBLFM: @2$<<..@2$>> = '(identity remote(@<, @>$1)); N :: "
+	     "@2$> = '(+ $<<..$>>); N"))))
+
 (ert-deftest test-org-table/org-at-TBLFM-p ()
   (org-test-with-temp-text-in-file
       "

@@ -2657,6 +2657,7 @@ not overwrite the stored one."
 	;; Check for old vertical references
 	(setq form (org-table-rewrite-old-row-references form))
 	;; Insert remote references
+	(setq form (org-table-remote-reference-indirection form))
 	(while (string-match "\\<remote([ \t]*\\([-_a-zA-Z0-9]+\\)[ \t]*,[ \t]*\\([^\n)]+\\))" form)
 	  (setq form
 		(replace-match
@@ -5009,6 +5010,33 @@ list of the fields in the rectangle."
 		    (save-match-data
 		      (org-table-get-range (match-string 0 form) tbeg 1))
 		  form)))))))))
+
+(defun org-table-remote-reference-indirection (form)
+  "Return formula with table remote references substituted by indirection.
+For example \"remote($1, @>$2)\" => \"remote(year_2013, @>$1)\".
+This indirection works only with the format @ROW$COLUMN.  The
+format \"B3\" is not supported because it can not be
+distinguished from a plain table name or ID."
+  (let ((start 0))
+    (while (string-match (concat
+			  ;; Same as in `org-table-eval-formula'.
+			  "\\<remote([ \t]*\\("
+			  ;; Allow "$1", "@<", "$-1", "@<<$1" etc.
+			  "[@$][^,)]+"
+			  ;; Same as in `org-table-eval-formula'.
+			  "\\)[ \t]*,[ \t]*\\([^\n)]+\\))")
+			 form
+			 start)
+      (setq start (match-end 0))
+      ;; Substitute the remote reference with the value found in the
+      ;; field.
+      (setq form
+	    (replace-match
+	     (save-match-data
+	       (org-table-get-range (org-table-formula-handle-first/last-rc
+				     (match-string 1 form))))
+	     t t form 1))))
+  form)
 
 (defmacro org-define-lookup-function (mode)
   (let ((mode-str (symbol-name mode))
