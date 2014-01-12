@@ -9608,8 +9608,8 @@ active region."
 	 (message "Stored: %s" (or desc link))
 	 (when custom-id
 	   (setq link (concat "file:" (abbreviate-file-name
-				       (buffer-file-name)) "::#" custom-id))
-	   (push (list link desc) org-stored-links)))))))
+				       (buffer-file-name)) "::#" custom-id)))
+	 (push (list link desc) org-stored-links))))))
 
 (defun org-store-link-props (&rest plist)
   "Store link properties, extract names and addresses."
