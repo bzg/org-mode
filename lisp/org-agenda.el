@@ -3579,7 +3579,7 @@ the global options and expect it to be applied to the entire view.")
 
 (defvar org-agenda-regexp-filter-preset nil
   "A preset of the regexp filter used for secondary agenda filtering.
-This must be a list of strings, each string must be a single category
+This must be a list of strings, each string must be a single regexp
 preceded by \"+\" or \"-\".
 This variable should not be set directly, but agenda custom commands can
 bind it in the options section.  The preset filter is a global property of
@@ -9917,31 +9917,42 @@ current HH:MM time."
 
 ;;; Dragging agenda lines forward/backward
 
-(defun org-agenda-drag-line-forward (arg)
-  "Drag an agenda line forward by ARG lines."
+(defun org-agenda-reapply-filters ()
+  "Re-apply all agenda filters."
+  (mapcar
+   (lambda(f) (when (car f) (org-agenda-apply-filter (car f) (cadr f))))
+   `((org-agenda-tag-filter 'tag)
+     (org-agenda-category-filter 'category)
+     (org-agenda-regexp-filter 'regexp)
+     (,(get 'org-agenda-tag-filter :preset-filter) 'tag)
+     (,(get 'org-agenda-category-filter :preset-filter) 'category)
+     (,(get 'org-agenda-regexp-filter :preset-filter) 'regexp))))
+
+(defun org-agenda-drag-line-forward (arg &optional backward)
+  "Drag an agenda line forward by ARG lines.
+When the optional argument `backward' is non-nil, move backward."
   (interactive "p")
-  (let ((inhibit-read-only t) lst)
+  (let ((inhibit-read-only t) lst line)
     (if (or (not (get-text-property (point) 'txt))
 	    (save-excursion
 	      (dotimes (n arg)
-		(move-beginning-of-line 2)
+		(move-beginning-of-line (if backward 0 2))
 		(push (not (get-text-property (point) 'txt)) lst))
 	      (delq nil lst)))
 	(message "Cannot move line forward")
-      (org-drag-line-forward arg))))
+      (let ((end (save-excursion (move-beginning-of-line 2) (point))))
+	(move-beginning-of-line 1)
+	(setq line (buffer-substring (point) end))
+	(delete-region (point) end)
+	(move-beginning-of-line (funcall (if backward '1- '1+) arg))
+	(insert line)
+	(org-agenda-apply-filters)
+	(move-beginning-of-line 0)))))
 
 (defun org-agenda-drag-line-backward (arg)
   "Drag an agenda line backward by ARG lines."
   (interactive "p")
-  (let ((inhibit-read-only t) lst)
-    (if (or (not (get-text-property (point) 'txt))
-	    (save-excursion
-	      (dotimes (n arg)
-		(move-beginning-of-line 0)
-		(push (not (get-text-property (point) 'txt)) lst))
-	      (delq nil lst)))
-	(message "Cannot move line backward")
-      (org-drag-line-backward arg))))
+  (org-agenda-drag-line-forward arg t))
 
 ;;; Flagging notes
 
