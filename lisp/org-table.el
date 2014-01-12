@@ -5017,19 +5017,17 @@ For example \"remote($1, @>$2)\" => \"remote(year_2013, @>$1)\".
 This indirection works only with the format @ROW$COLUMN.  The
 format \"B3\" is not supported because it can not be
 distinguished from a plain table name or ID."
-  (let ((index-last -1) index-this)
-    (while (and (setq index-this
-		      (string-match (concat
-				     ;; Same as in `org-table-eval-formula'.
-				     "\\<remote([ \t]*\\("
-				     ;; Allow "$1", "@<", "$-1", "@<<$1" etc.
-				     "[@$][^,]+"
-				     ;; Same as in `org-table-eval-formula'.
-				     "\\)[ \t]*,[ \t]*\\([^\n)]+\\))")
-				    form))
-		;; Protect from last replace replaced itself.
-		(/= index-last index-this))
-      (setq index-last index-this)
+  (let ((start 0))
+    (while (string-match (concat
+			  ;; Same as in `org-table-eval-formula'.
+			  "\\<remote([ \t]*\\("
+			  ;; Allow "$1", "@<", "$-1", "@<<$1" etc.
+			  "[@$][^,)]+"
+			  ;; Same as in `org-table-eval-formula'.
+			  "\\)[ \t]*,[ \t]*\\([^\n)]+\\))")
+			 form
+			 start)
+      (setq start (match-end 0))
       ;; Substitute the remote reference with the value found in the
       ;; field.
       (setq form
