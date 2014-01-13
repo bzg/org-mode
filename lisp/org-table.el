@@ -5022,12 +5022,15 @@ distinguished from a plain table name or ID."
 			  ;; Same as in `org-table-eval-formula'.
 			  "\\<remote([ \t]*\\("
 			  ;; Allow "$1", "@<", "$-1", "@<<$1" etc.
-			  "[@$][^,)]+"
+			  "[@$][^ \t,]+"
 			  ;; Same as in `org-table-eval-formula'.
 			  "\\)[ \t]*,[ \t]*\\([^\n)]+\\))")
 			 form
 			 start)
-      (setq start (match-end 0))
+      ;; The position of the character as far as possible to the right
+      ;; that will not be replaced and particularly not be shifted by
+      ;; `replace-match'.
+      (setq start (match-beginning 1))
       ;; Substitute the remote reference with the value found in the
       ;; field.
       (setq form
