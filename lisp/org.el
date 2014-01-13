@@ -20684,13 +20684,11 @@ With a prefix argument ARG, change the region in a single item."
 	       (when (< level ref-level) (setq ref-level level))
 	       (replace-match bul t t)
 	       (org-indent-line-to (+ start-ind (* delta bul-len)))
-	       (if (or done todo)
-		   (let* ((struct0 (org-list-struct))
-			  (struct (org-list-struct))
-			  (parents (org-list-parents-alist struct))
-			  (item (car (assoc (point) struct))))
-		     (org-list-set-checkbox item struct (if done "[X]" "[ ]"))
-		     (org-list-struct-apply-struct struct struct0)))
+	       (when (or done todo)
+		 (let ((struct (org-list-struct)))
+		   (org-list-set-checkbox (point) struct (if done "[X]" "[ ]"))
+		   (org-list-write-struct struct
+					  (org-list-parents-alist struct))))
 	       ;; Ensure all text down to END (or SECTION-END) belongs
 	       ;; to the newly created item.
 	       (let ((section-end (save-excursion
