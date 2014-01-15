@@ -7943,7 +7943,7 @@ in the region."
 	  (t (replace-match up-head nil t)))
     ;; Fixup tag positioning
     (unless (= level 1)
-      (and org-auto-align-tags (org-set-tags nil t))
+      (and org-auto-align-tags (org-set-tags nil 'ignore-column))
       (if org-adapt-indentation (org-fixup-indentation (- diff))))
     (run-hooks 'org-after-promote-entry-hook)))
 
