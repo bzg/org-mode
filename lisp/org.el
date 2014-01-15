@@ -20374,10 +20374,11 @@ This command does many different things, depending on context:
 
 (defun org-mode-restart ()
   "Restart Org-mode, to scan again for special lines.
-Also updates the keyword regular expressions."
+Also updates the keyword regular expressions and file variables."
   (interactive)
-  (org-mode)
-  (message "Org-mode restarted"))
+  (funcall major-mode)
+  (hack-local-variables)
+  (message "%s restarted" major-mode))
 
 (defun org-kill-note-or-show-branches ()
   "If this is a Note buffer, abort storing the note.  Else call `show-branches'."
