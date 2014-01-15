@@ -4491,14 +4491,6 @@ If yes, offer to stop it and to save the buffer with the changes."
   (add-hook 'org-mode-hook 'org-clock-load)
   (add-hook 'kill-emacs-hook 'org-clock-save))
 
-;; Define the variable already here, to make sure we have it.
-(defvar org-indent-mode nil
-  "Non-nil if Org-Indent mode is enabled.
-Use the command `org-indent-mode' to change this variable.")
-
-;; Autoload archiving code
-;; The stuff that is needed for cycling and tags has to be defined here.
-
 (defgroup org-archive nil
   "Options concerning archiving in Org-mode."
   :tag "Org Archive"
@@ -8023,7 +8015,7 @@ in the region."
 	  (t (replace-match up-head nil t)))
     ;; Fixup tag positioning
     (unless (= level 1)
-      (and org-auto-align-tags (org-set-tags nil t))
+      (and org-auto-align-tags (org-set-tags nil 'ignore-column))
       (if org-adapt-indentation (org-fixup-indentation (- diff))))
     (run-hooks 'org-after-promote-entry-hook)))
 

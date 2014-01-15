@@ -9917,13 +9917,13 @@ current HH:MM time."
 (defun org-agenda-reapply-filters ()
   "Re-apply all agenda filters."
   (mapcar
-   (lambda(f) (when (car f) (org-agenda-apply-filter (car f) (cadr f))))
-   `((org-agenda-tag-filter 'tag)
-     (org-agenda-category-filter 'category)
-     (org-agenda-regexp-filter 'regexp)
-     (,(get 'org-agenda-tag-filter :preset-filter) 'tag)
-     (,(get 'org-agenda-category-filter :preset-filter) 'category)
-     (,(get 'org-agenda-regexp-filter :preset-filter) 'regexp))))
+   (lambda(f) (when (car f) (org-agenda-filter-apply (car f) (cadr f))))
+   `((,org-agenda-tag-filter tag)
+     (,org-agenda-category-filter category)
+     (,org-agenda-regexp-filter regexp)
+     (,(get 'org-agenda-tag-filter :preset-filter) tag)
+     (,(get 'org-agenda-category-filter :preset-filter) category)
+     (,(get 'org-agenda-regexp-filter :preset-filter) regexp))))
 
 (defun org-agenda-drag-line-forward (arg &optional backward)
   "Drag an agenda line forward by ARG lines.
@@ -9943,7 +9943,7 @@ When the optional argument `backward' is non-nil, move backward."
 	(delete-region (point) end)
 	(move-beginning-of-line (funcall (if backward '1- '1+) arg))
 	(insert line)
-	(org-agenda-apply-filters)
+	(org-agenda-reapply-filters)
 	(move-beginning-of-line 0)))))
 
 (defun org-agenda-drag-line-backward (arg)
