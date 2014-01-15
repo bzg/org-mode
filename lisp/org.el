@@ -9689,8 +9689,9 @@ active region."
 	 (message "Stored: %s" (or desc link))
 	 (when custom-id
 	   (setq link (concat "file:" (abbreviate-file-name
-				       (buffer-file-name)) "::#" custom-id)))
-	 (push (list link desc) org-stored-links))))))
+				       (buffer-file-name)) "::#" custom-id))
+	   (push (list link desc) org-stored-links))
+	 (car org-stored-links))))))
 
 (defun org-store-link-props (&rest plist)
   "Store link properties, extract names and addresses."
@@ -20482,14 +20483,11 @@ This command does many different things, depending on context:
 
 (defun org-mode-restart ()
   "Restart Org-mode, to scan again for special lines.
-Also updates the keyword regular expressions."
+Also updates the keyword regular expressions and file variables."
   (interactive)
-  ;; this will set the mode *and* set file local variables.
-  (normal-mode)
-  ;; but it may leave us in some unrelated mode
-  (unless (derived-mode-p "org-mode")
-    (org-mode))
-  (message "Org-mode restarted"))
+  (funcall major-mode)
+  (hack-local-variables)
+  (message "%s restarted" major-mode))
 
 (defun org-kill-note-or-show-branches ()
   "If this is a Note buffer, abort storing the note.  Else call `show-branches'."
