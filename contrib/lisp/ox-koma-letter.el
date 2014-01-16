@@ -157,22 +157,22 @@ a function may be given.  Functions must return a string."
 		(function)
 		(const :tag "Do not export email" nil)))
 
-(defcustom org-koma-letter-from-address nil
+(defcustom org-koma-letter-from-address ""
   "Sender's address, as a string."
   :group 'org-export-koma-letter
   :type 'string)
 
-(defcustom org-koma-letter-phone-number nil
+(defcustom org-koma-letter-phone-number ""
   "Sender's phone number, as a string."
   :group 'org-export-koma-letter
   :type 'string)
 
-(defcustom org-koma-letter-place nil
+(defcustom org-koma-letter-place ""
   "Place from which the letter is sent, as a string."
   :group 'org-export-koma-letter
   :type 'string)
 
-(defcustom org-koma-letter-opening nil
+(defcustom org-koma-letter-opening ""
   "Letter's opening, as a string.
 If (1) this value is nil; (2) the letter is started with a
 headline; and (3) `org-koma-letter-headline-is-opening-maybe' is
@@ -180,8 +180,13 @@ t the value opening will be implicit set as the headline title."
   :group 'org-export-koma-letter
   :type 'string)
 
-(defcustom org-koma-letter-closing nil
+(defcustom org-koma-letter-closing ""
   "Koma-Letter's closing, as a string."
+  :group 'org-export-koma-letter
+  :type 'string)
+
+(defcustom org-koma-letter-signature ""
+  "Signature, as a string."
   :group 'org-export-koma-letter
   :type 'string)
 
@@ -189,11 +194,6 @@ t the value opening will be implicit set as the headline title."
   "Non-nil means prefer headlines over keywords for TO and FROM."
   :group 'org-export-koma-letter
   :type 'boolean)
-
-(defcustom org-koma-letter-signature nil
-  "Signature, as a string."
-  :group 'org-export-koma-letter
-  :type 'string)
 
 (defcustom org-koma-letter-subject-format t
   "Use the title as the subject of the letter.
@@ -211,21 +211,20 @@ At this time the following values are allowed:
  nil             Do no insert a subject even if present
  t               Use default options
 
-It can also be a string.  Please refer to the KOMA-script
-manual (Table 4.16. in the English manual of 2012-07-22)."
+Please refer to the KOMA-script manual (Table 4.16. in the
+English manual of 2012-07-22)."
   :type '(radio
 	  (const :tag "No export" nil)
 	  (const :tag "Default options" t)
 	  (set :tag "selection"
-	   (const  'afteropening)
-	   (const  'beforeopening)
-	   (const  'centered)
-	   (const  'left)
-	   (const  'right)
-	   (const  'underlined)
-	   (const  'titled)
-	   (const  'untitled))
-	  (string))
+	       (const afteropening)
+	       (const beforeopening)
+	       (const centered)
+	       (const left)
+	       (const right)
+	       (const underlined)
+	       (const titled)
+	       (const untitled)))
   :group 'org-export-koma-letter)
 
 (defcustom org-koma-letter-use-backaddress nil
@@ -258,7 +257,7 @@ Use `foldmarks:true' to activate default fold marks or
   :group 'org-export-koma-letter
   :type 'boolean)
 
-(defcustom org-koma-letter-default-class nil
+(defcustom org-koma-letter-default-class ""
   "Default class for `org-koma-letter'.
 The value must be a member of `org-latex-classes'."
   :group 'org-export-koma-letter
