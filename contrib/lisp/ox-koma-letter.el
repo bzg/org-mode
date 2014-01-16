@@ -181,7 +181,7 @@ t the value opening will be implicit set as the headline title."
   :type 'string)
 
 (defcustom org-koma-letter-closing ""
-  "Koma-Letter's closing, as a string."
+  "Letter's closing, as a string."
   :group 'org-export-koma-letter
   :type 'string)
 
