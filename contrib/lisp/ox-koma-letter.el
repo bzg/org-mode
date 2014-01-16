@@ -288,41 +288,47 @@ A headline is only used if #+OPENING is not set.  See also
 
 (org-export-define-derived-backend 'koma-letter 'latex
   :options-alist
-  '((:lco "LCO" nil org-koma-letter-class-option-file)
-    (:latex-class "LATEX_CLASS" nil (if org-koma-letter-default-class
-					org-koma-letter-default-class
-					org-latex-default-class) t)
-    (:author "AUTHOR" nil (org-koma-letter--get-value org-koma-letter-author) t)
-    (:author-changed-in-buffer-p "AUTHOR" nil nil t)
-    (:from-address "FROM_ADDRESS" nil nil newline)
-    (:phone-number "PHONE_NUMBER" nil org-koma-letter-phone-number)
-    (:email "EMAIL" nil (org-koma-letter--get-value org-koma-letter-email) t)
-    (:email-changed-in-buffer-p "EMAIL" nil nil t)
-    (:to-address "TO_ADDRESS" nil nil newline)
-    (:place "PLACE" nil org-koma-letter-place)
-    (:opening "OPENING" nil org-koma-letter-opening)
+  '((:author "AUTHOR" nil (org-koma-letter--get-value org-koma-letter-author) t)
     (:closing "CLOSING" nil org-koma-letter-closing)
+    (:email "EMAIL" nil (org-koma-letter--get-value org-koma-letter-email) t)
+    (:from-address "FROM_ADDRESS" nil nil newline)
+    (:latex-class "LATEX_CLASS" nil
+		  (or org-koma-letter-default-class org-latex-default-class)
+		  t)
+    (:lco "LCO" nil org-koma-letter-class-option-file)
+    (:opening "OPENING" nil org-koma-letter-opening)
+    (:phone-number "PHONE_NUMBER" nil org-koma-letter-phone-number)
+    (:place "PLACE" nil org-koma-letter-place)
     (:signature "SIGNATURE" nil org-koma-letter-signature newline)
+    (:to-address "TO_ADDRESS" nil nil newline)
+    (:special-headings nil "special-headings"
+		       org-koma-letter-prefer-special-headings)
     (:special-tags nil nil (append
 			    org-koma-letter-special-tags-in-letter
 			    org-koma-letter-special-tags-after-closing
 			    org-koma-letter-special-tags-after-letter))
-    (:special-headings nil "special-headings"
-		       org-koma-letter-prefer-special-headings)
     (:with-after-closing nil "after-closing-order"
 			 org-koma-letter-special-tags-after-closing)
     (:with-after-letter nil "after-letter-order"
 			org-koma-letter-special-tags-after-letter)
     (:with-backaddress nil "backaddress" org-koma-letter-use-backaddress)
-    (:with-backaddress-changed-in-buffer-p nil "backaddress" nil)
-    (:with-foldmarks nil "foldmarks" org-koma-letter-use-foldmarks)
-    (:with-foldmarks-changed-in-buffer-p nil "foldmarks" "foldmarks-not-set")
-    (:with-phone nil "phone" org-koma-letter-use-phone)
-    (:with-phone-changed-in-buffer-p nil "phone" nil)
     (:with-email nil "email" org-koma-letter-use-email)
-    (:with-email-changed-in-buffer-p nil "email" nil)
+    (:with-foldmarks nil "foldmarks" org-koma-letter-use-foldmarks)
+    (:with-phone nil "phone" org-koma-letter-use-phone)
     (:with-place nil "place" org-koma-letter-use-place)
-    (:with-subject nil "subject" org-koma-letter-subject-format))
+    (:with-subject nil "subject" org-koma-letter-subject-format)
+    ;; Special properties non-nil when a setting happened in buffer.
+    ;; They are used to prioritize in-buffer settings over "lco"
+    ;; files.  See `org-koma-letter-template'.
+    (:inbuffer-author "AUTHOR" nil 'unset)
+    (:inbuffer-email "EMAIL" nil 'unset)
+    (:inbuffer-phone-number "PHONE_NUMBER" nil 'koma-letter:empty)
+    (:inbuffer-place "PLACE" nil 'koma-letter:empty)
+    (:inbuffer-signature "SIGNATURE" nil 'koma-letter:empty)
+    (:inbuffer-with-backaddress nil "backaddress" 'koma-letter:empty)
+    (:inbuffer-with-email nil "email" 'koma-letter:empty)
+    (:inbuffer-with-foldmarks nil "foldmarks" 'koma-letter:empty)
+    (:inbuffer-with-phone nil "phone" 'koma-letter:empty))
   :translate-alist '((export-block . org-koma-letter-export-block)
 		     (export-snippet . org-koma-letter-export-snippet)
 		     (headline . org-koma-letter-headline)
@@ -337,6 +343,7 @@ A headline is only used if #+OPENING is not set.  See also
 	    (lambda (a s v b)
 	      (if a (org-koma-letter-export-to-pdf t s v b)
 		(org-open-file (org-koma-letter-export-to-pdf nil s v b))))))))
+
 
 
 ;;; Initialize class function
@@ -515,9 +522,6 @@ appropriate place."
   "Return complete document string after KOMA Scrlttr2 conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  ;; FIXME: instead of setq'ing org-koma-letter-special-contents and
-  ;; callying varioues stuff it might be nice to put a big let* around the templace
-  ;; as in org-groff...
   (concat
    ;; Time-stamp.
    (and (plist-get info :time-stamp-file)
@@ -544,63 +548,19 @@ holding export options."
 	   (concat (org-element-normalize-string (plist-get info :latex-header))
 		   (plist-get info :latex-header-extra)))))
 	info)))
-   (let ((lco (plist-get info :lco))
-	 (author (plist-get info :author))
-	 (author-set (plist-get info :author-changed-in-buffer-p))
-	 (from-address (org-koma-letter--determine-to-and-from info 'from))
-	 (phone-number (plist-get info :phone-number))
-	 (email (plist-get info :email))
-	 (email-set (plist-get info :email-changed-in-buffer-p))
-	 (signature (plist-get info :signature)))
-     (concat
-      ;; author or email not set in file: may be overridden by lco
-      (unless author-set
-	(when author (format "\\setkomavar{fromname}{%s}\n"
-			     (org-export-data author info))))
-      (unless email-set
-	(when email (format "\\setkomavar{fromemail}{%s}\n" email)))
-      ;; Letter Class Option File
-      (when lco
-	(let ((lco-files (split-string lco " "))
-	      (lco-def ""))
-	  (dolist (lco-file lco-files lco-def)
-	    (setq lco-def (format "%s\\LoadLetterOption{%s}\n" lco-def lco-file)))
-	  lco-def))
-      ;; Define "From" data.
-      (when (and author author-set) (format "\\setkomavar{fromname}{%s}\n"
-					    (org-export-data author info)))
-      (when from-address (format "\\setkomavar{fromaddress}{%s}\n" from-address))
-      (when phone-number
-	(format "\\setkomavar{fromphone}{%s}\n" phone-number))
-      (when (and email email-set) (format "\\setkomavar{fromemail}{%s}\n" email))
-      (when signature (format "\\setkomavar{signature}{%s}\n" signature))))
+   ;; Settings.  They can come from three locations: global variables,
+   ;; LCO files and in-buffer settings.  We prioritize them in that
+   ;; order.
+   (org-koma-letter--build-settings 'global info)
+   (mapconcat #'(lambda (file) (format "\\LoadLetterOption{%s}\n" file))
+	      (org-split-string (or (plist-get info :lco) "") " ")
+	      "")
+   (org-koma-letter--build-settings 'buffer info)
+   ;; From address.
+   (let ((from-address (org-koma-letter--determine-to-and-from info 'from)))
+     (and from-address (format "\\setkomavar{fromaddress}{%s}\n" from-address)))
    ;; Date.
    (format "\\date{%s}\n" (org-export-data (org-export-get-date info) info))
-   ;; Place
-   (let ((with-place (plist-get info :with-place))
-	 (place (plist-get info :place)))
-     (when (or place (not with-place))
-       (format "\\setkomavar{place}{%s}\n" (if with-place place ""))))
-   ;; KOMA options
-   (let ((with-backaddress (plist-get info :with-backaddress))
-	 (with-backaddress-set (plist-get info :with-backaddress-changed-in-buffer-p))
-	 (with-foldmarks (plist-get info :with-foldmarks))
-	 (with-foldmarks-set 
-	  (not (string-equal (plist-get info :with-foldmarks-changed-in-buffer-p)
-			     "foldmarks-not-set")))
-	 (with-phone (plist-get info :with-phone))
-	 (with-phone-set (plist-get info :with-phone-changed-in-buffer-p))
-	 (with-email (plist-get info :with-email))
-	 (with-email-set (plist-get info :with-email-changed-in-buffer-p)))
-     (concat
-      (when with-backaddress-set
-	(format "\\KOMAoption{backaddress}{%s}\n" (if with-backaddress "true" "false")))
-      (when with-foldmarks-set
-	(format "\\KOMAoption{foldmarks}{%s}\n" (if with-foldmarks with-foldmarks "false")))
-      (when with-phone-set
-	(format "\\KOMAoption{fromphone}{%s}\n" (if with-phone "true" "false")))
-      (when with-email-set
-	(format "\\KOMAoption{fromemail}{%s}\n" (if with-email "true" "false")))))
    ;; Document start
    "\\begin{document}\n\n"
    ;; Subject
@@ -623,15 +583,15 @@ holding export options."
 		subject-format) "}\n"))
       (when (and subject with-subject)
 	(format "\\setkomavar{subject}{%s}\n\n" subject))))
-   ;; Letter start
+   ;; Letter start.
    (format "\\begin{letter}{%%\n%s}\n\n"
 	   (org-koma-letter--determine-to-and-from info 'to))
    ;; Opening.
-   (format "\\opening{%s}\n\n" (or (plist-get info :opening) ""))
+   (format "\\opening{%s}\n\n" (plist-get info :opening))
    ;; Letter body.
    contents
    ;; Closing.
-   (format "\n\\closing{%s}\n" (or (plist-get info :closing) ""))
+   (format "\n\\closing{%s}\n" (plist-get info :closing))
    (org-koma-letter--special-contents-as-macro
     (plist-get info :with-after-closing))
    ;; Letter end.
@@ -639,8 +599,64 @@ holding export options."
    (org-koma-letter--special-contents-as-macro
     (plist-get info :with-after-letter) t t)
    ;; Document end.
-   "\n\\end{document}"
-   ))
+   "\n\\end{document}"))
+
+(defun org-koma-letter--build-settings (type info)
+  "Build settings string according to type.
+Type is either `global' or `buffer'.  INFO is a plist used as
+a communication channel."
+  (let ((check-validity
+         (function
+          ;; Non-nil value when SETTING is a valid TYPE setting.
+          (lambda (setting)
+            (let ((property (intern (format ":inbuffer-%s" setting))))
+              (if (eq type 'global)
+		  (eq (plist-get info property) 'koma-letter:empty)
+                (not (eq (plist-get info property) 'koma-letter:empty))))))))
+    (concat
+     ;; Variables.
+     (let ((author (plist-get info :author)))
+       (and author
+            (funcall check-validity 'author)
+            (format "\\setkomavar{fromname}{%s}\n"
+                    (org-export-data author info))))
+     (let ((email (plist-get info :email)))
+       (and email
+            (funcall check-validity 'email)
+            (format "\\setkomavar{fromemail}{%s}\n" email)))
+     (let ((phone-number (plist-get info :phone-number)))
+       (and (org-string-nw-p phone-number)
+            (funcall check-validity 'phone-number)
+            (format "\\setkomavar{fromphone}{%s}\n" phone-number)))
+     (let ((signature (plist-get info :signature)))
+       (and (org-string-nw-p signature)
+            (funcall check-validity 'signature)
+            (format "\\setkomavar{signature}{%s}\n" signature)))
+     ;; Options.
+     (and (funcall check-validity 'with-backaddress)
+          (format "\\KOMAoption{backaddress}{%s}\n"
+                  (if (plist-get info :with-backaddress) "true" "false")))
+     (and (funcall check-validity 'with-email)
+          (format "\\KOMAoption{fromemail}{%s}\n"
+                  (if (plist-get info :with-email) "true" "false")))
+     (and (funcall check-validity 'with-phone)
+          (format "\\KOMAoption{fromphone}{%s}\n"
+                  (if (plist-get info :with-phone) "true" "false")))
+     ;; Special cases: place and foldmarks.
+     (and (funcall check-validity 'place)
+          (format "\\setkomavar{place}{%s}\n"
+                  (if (plist-get info :with-place) (plist-get info :place) "")))
+     (and (funcall check-validity 'with-foldmarks)
+          (let ((foldmarks (plist-get info :with-foldmarks)))
+	    (cond
+	     ((symbolp foldmarks)
+	      (format "\\KOMAoptions{foldmarks=%s}\n"
+		      (if foldmarks "true" "false")))
+	     ((member foldmarks '("true" "on" "yes" "false" "off" "no"))
+	      (format "\\KOMAoptions{foldmarks=%s}\n" foldmarks))
+	     (t (format "\\KOMAoptions{foldmarks=true,foldmarks=%s}\n"
+			foldmarks))))))))
+
 
 
 ;;; Commands
