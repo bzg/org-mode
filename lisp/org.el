@@ -5809,10 +5809,11 @@ prompted for."
 				'(display t invisible t intangible t))
 	t)))
 
-(defcustom org-src-fontify-natively nil
+(defcustom org-src-fontify-natively t
   "When non-nil, fontify code in code blocks."
   :type 'boolean
-  :version "24.1"
+  :version "24.4"
+  :package-version '(Org . "8.3")
   :group 'org-appearance
   :group 'org-babel)
 
