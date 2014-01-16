@@ -135,12 +135,11 @@
   :type 'string)
 
 (defcustom org-koma-letter-author 'user-full-name
-  "The sender's name.
-
+  "Sender's name.
 This variable defaults to calling the function `user-full-name'
-which just returns the current function `user-full-name'.  Alternatively a
-string, nil or a function may be given.  Functions must return a
-string."
+which just returns the current function `user-full-name'.
+Alternatively a string, nil or a function may be given.
+Functions must return a string."
   :group 'org-export-koma-letter
   :type '(radio (function-item user-full-name)
 		(string)
@@ -148,11 +147,10 @@ string."
 		(const :tag "Do not export author" nil)))
 
 (defcustom org-koma-letter-email 'org-koma-letter-email
-  "The sender's email address.
-
+  "Sender's email address.
 This variable defaults to the value `org-koma-letter-email' which
-returns `user-mail-address'.  Alternatively a string, nil or a
-function may be given.  Functions must return a string."
+returns `user-mail-address'.  Alternatively a string, nil or
+a function may be given.  Functions must return a string."
   :group 'org-export-koma-letter
   :type '(radio (function-item org-koma-letter-email)
 		(string)
@@ -170,13 +168,12 @@ function may be given.  Functions must return a string."
   :type 'string)
 
 (defcustom org-koma-letter-place nil
-  "Place from which the letter is sent."
+  "Place from which the letter is sent, as a string."
   :group 'org-export-koma-letter
   :type 'string)
 
 (defcustom org-koma-letter-opening nil
   "Letter's opening, as a string.
-
 If (1) this value is nil; (2) the letter is started with a
 headline; and (3) `org-koma-letter-headline-is-opening-maybe' is
 t the value opening will be implicit set as the headline title."
@@ -189,12 +186,12 @@ t the value opening will be implicit set as the headline title."
   :type 'string)
 
 (defcustom org-koma-letter-prefer-special-headings nil
-  "If TO and/or FROM is specified using both a heading and a keyword the heading value will be preferred if the variable is t."
+  "Non-nil means prefer headlines over keywords for TO and FROM."
   :group 'org-export-koma-letter
   :type 'boolean)
 
 (defcustom org-koma-letter-signature nil
-  "String used as the signature."
+  "Signature, as a string."
   :group 'org-export-koma-letter
   :type 'string)
 
@@ -203,18 +200,19 @@ t the value opening will be implicit set as the headline title."
 
 At this time the following values are allowed:
 
- - afteropening: subject after opening.
- - beforeopening: subject before opening.
- - centered: subject centered.
- - left:subject left-justified.
- - right: subject right-justified.
- - titled: add title/description to subject.
- - underlined: set subject underlined.
- - untitled: do not add title/description to subject.
- - No-export: do no insert a subject even if present.
+ `afteropening'  Subject after opening
+ `beforeopening' Subject before opening
+ `centered'      Subject centered
+ `left'          Subject left-justified
+ `right'         Subject right-justified
+ `titled'        Add title/description to subject
+ `underlined'    Set subject underlined
+ `untitled'      Do not add title/description to subject
+ nil             Do no insert a subject even if present
+ t               Use default options
 
-Please refer to the KOMA-script manual (Table 4.16. in the
-English manual of 2012-07-22)."
+It can also be a string.  Please refer to the KOMA-script
+manual (Table 4.16. in the English manual of 2012-07-22)."
   :type '(radio
 	  (const :tag "No export" nil)
 	  (const :tag "Default options" t)
@@ -230,10 +228,8 @@ English manual of 2012-07-22)."
 	  (string))
   :group 'org-export-koma-letter)
 
-
-
 (defcustom org-koma-letter-use-backaddress nil
-  "Print return address in small line above to address."
+  "Non-nil prints return address in small line above to address."
   :group 'org-export-koma-letter
   :type 'boolean)
 
@@ -248,29 +244,28 @@ Use `foldmarks:true' to activate default fold marks or
   :type 'string)
 
 (defcustom org-koma-letter-use-phone nil
-  "Print sender's phone number."
+  "Non-nil prints sender's phone number."
   :group 'org-export-koma-letter
   :type 'boolean)
 
 (defcustom org-koma-letter-use-email nil
-  "Print sender's email address."
+  "Non-nil prints sender's email address."
   :group 'org-export-koma-letter
   :type 'boolean)
 
 (defcustom org-koma-letter-use-place t
-  "Print the letter's place next to the date."
+  "Non-nil prints the letter's place next to the date."
   :group 'org-export-koma-letter
   :type 'boolean)
 
 (defcustom org-koma-letter-default-class nil
   "Default class for `org-koma-letter'.
-
 The value must be a member of `org-latex-classes'."
   :group 'org-export-koma-letter
   :type 'string)
 
 (defcustom org-koma-letter-headline-is-opening-maybe t
-  "Whether a headline may be used as an opening.
+  "Non-nil means a headline may be used as an opening.
 A headline is only used if #+OPENING is not set.  See also
 `org-koma-letter-opening'."
   :group 'org-export-koma-letter
@@ -348,7 +343,9 @@ A headline is only used if #+OPENING is not set.  See also
 ;;; Initialize class function
 
 (defun org-koma-letter-plug-into-ox ()
-  "Add a sparse `default-koma-letter' to `org-latex-classes' and set `org-koma-letter-default-class' to `default-koma-letter'."
+  "Initialize `koma-letter' export back-end.
+Add a sparse `default-koma-letter' to `org-latex-classes' and set
+`org-koma-letter-default-class' to `default-koma-letter'."
   (let ((class "default-koma-letter"))
     (eval-after-load "ox-latex"
       `(unless (member ,class 'org-latex-classes)
@@ -368,12 +365,14 @@ A headline is only used if #+OPENING is not set.  See also
 
 (defun org-koma-letter--get-tagged-contents (key)
   "Get contents from a headline tagged with KEY.
-Technically, the contents is stored in `org-koma-letter-special-contents'."
+The contents is stored in `org-koma-letter-special-contents'."
   (cdr (assoc (org-koma-letter--get-value key)
 	      org-koma-letter-special-contents)))
 
 (defun org-koma-letter--get-value (value)
-  "Determines if VALUE is nil, a string, a function or a symbol and return a string or nil."
+  "Turn value into a string whenever possible.
+Determines if VALUE is nil, a string, a function or a symbol and
+return a string or nil."
   (when value
     (cond ((stringp value) value)
 	  ((functionp value) (funcall value))
@@ -408,13 +407,15 @@ called."
 		  (unless no-tag  ac)))))))))
 
 (defun org-koma-letter--format-string-as-macro (string &optional macro)
-  "Format STRING as  \"\\macro{string}\" if MACRO is given else as \"string\"."
+  "Format STRING as \"string\".
+If optional argument MACRO is provided, format it as
+\"\\macro{string}\" instead."
   (if macro
       (format "\\%s{%s}" macro string)
     (format "%s" string)))
 
 (defun org-koma-letter--normalize-string (string)
-  "Remove new lines in the beginning and end of `STRING'."
+  "Remove new lines in the beginning and end of STRING."
   (replace-regexp-in-string "\\`[ \n\t]+\\|[\n\t ]*\\'" "" string))
 
 (defun org-koma-letter--determine-to-and-from (info key)
