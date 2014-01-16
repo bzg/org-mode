@@ -14650,7 +14650,7 @@ the column by ignoring invisible text."
 	    (goto-char (match-beginning 0))
 	    (setq c0 (current-column)
 		  ;; compute offset for the case of org-indent-mode active
-		  di (if org-indent-mode
+		  di (if (org-bound-and-true-p org-indent-mode)
 			 (* (1- org-indent-indentation-per-level) (1- level))
 		       0)
 		  p0 (if (equal (char-before) ?*) (1+ (point)) (point))
