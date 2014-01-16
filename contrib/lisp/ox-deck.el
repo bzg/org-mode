@@ -55,7 +55,7 @@
     (:html-link-up "HTML_LINK_UP" nil nil)
     (:deck-postamble "DECK_POSTAMBLE" nil org-deck-postamble newline)
     (:deck-preamble "DECK_PREAMBLE" nil org-deck-preamble newline)
-    (:html-head-include-default-style "HTML_INCLUDE_DEFAULT_STYLE" nil nil)
+    (:html-head-include-default-style "HTML_INCLUDE_DEFAULT_STYLE" "html-style" nil)
     (:html-head-include-scripts "HTML_INCLUDE_SCRIPTS" nil nil)
     (:deck-base-url "DECK_BASE_URL" nil org-deck-base-url)
     (:deck-theme "DECK_THEME" nil org-deck-theme)
