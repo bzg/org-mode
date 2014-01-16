@@ -923,7 +923,10 @@ publishing, with :html-doctype."
   :group 'org-export-html
   :version "24.4"
   :package-version '(Org . "8.0")
-  :type 'string)
+  :type (append
+	 '(choice)
+	 (mapcar (lambda (x) `(const ,(car x))) org-html-doctype-alist)
+	 '((string :tag "Custom doctype" ))))
 
 (defcustom org-html-html5-fancy nil
   "Non-nil means using new HTML5 elements.
