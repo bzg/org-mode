@@ -20365,11 +20365,12 @@ This command does many different things, depending on context:
 		"C-c C-c can do nothing useful at this location")))))))))
 
 (defun org-mode-restart ()
-  "Restart Org-mode, to scan again for special lines.
-Also updates the keyword regular expressions and file variables."
   (interactive)
-  (funcall major-mode)
-  (hack-local-variables)
+  (let ((indent-status (org-bound-and-true-p org-indent-mode)))
+    (funcall major-mode)
+    (hack-local-variables)
+    (when (and indent-status (not (org-bound-and-true-p org-indent-mode)))
+      (org-indent-mode -1)))
   (message "%s restarted" major-mode))
 
 (defun org-kill-note-or-show-branches ()
