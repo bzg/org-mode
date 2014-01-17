@@ -485,8 +485,8 @@ CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (let ((key (org-element-property :key keyword))
 	(value (org-element-property :value keyword)))
-    ;; Handle specifically BEAMER and TOC (headlines only) keywords.
-    ;; Otherwise, fallback to `latex' back-end.
+    ;; Handle specifically KOMA-LETTER keywords.  Otherwise, fallback
+    ;; to `latex' back-end.
     (if (equal key "KOMA-LETTER") value
       (org-export-with-backend 'latex keyword contents info))))
 
