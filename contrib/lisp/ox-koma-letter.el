@@ -558,9 +558,11 @@ holding export options."
 	   (concat (org-element-normalize-string (plist-get info :latex-header))
 		   (plist-get info :latex-header-extra)))))
 	info)))
-   ;; Settings.  They can come from three locations: global variables,
-   ;; LCO files and in-buffer settings.  We prioritize them in that
-   ;; order.
+   ;; Settings.  They can come from three locations, in increasing
+   ;; order of precedence: global variables, LCO files and in-buffer
+   ;; settings.  Thus, we first insert settings coming from global
+   ;; variables, then we insert LCO files, and, eventually, we insert
+   ;; settings coming from buffer keywords.
    (org-koma-letter--build-settings 'global info)
    (mapconcat #'(lambda (file) (format "\\LoadLetterOption{%s}\n" file))
 	      (org-split-string (or (plist-get info :lco) "") " ")
@@ -602,52 +604,56 @@ holding export options."
    ;; Document end.
    "\n\\end{document}"))
 
-(defun org-koma-letter--build-settings (type info)
+(defun org-koma-letter--build-settings (scope info)
   "Build settings string according to type.
-Type is either `global' or `buffer'.  INFO is a plist used as
+SCOPE is either `global' or `buffer'.  INFO is a plist used as
 a communication channel."
-  (let ((check-validity
+  (let ((check-scope
          (function
-          ;; Non-nil value when SETTING is a valid TYPE setting.
+          ;; Non-nil value when SETTING was defined in SCOPE.
           (lambda (setting)
             (let ((property (intern (format ":inbuffer-%s" setting))))
-              (if (eq type 'global)
+              (if (eq scope 'global)
 		  (eq (plist-get info property) 'koma-letter:empty)
                 (not (eq (plist-get info property) 'koma-letter:empty))))))))
     (concat
-     ;; Variables.
+     ;; Name.
      (let ((author (plist-get info :author)))
        (and author
-            (funcall check-validity 'author)
+            (funcall check-scope 'author)
             (format "\\setkomavar{fromname}{%s}\n"
                     (org-export-data author info))))
+     ;; Email.
      (let ((email (plist-get info :email)))
        (and email
-            (funcall check-validity 'email)
+            (funcall check-scope 'email)
             (format "\\setkomavar{fromemail}{%s}\n" email)))
-     (let ((phone-number (plist-get info :phone-number)))
-       (and (org-string-nw-p phone-number)
-            (funcall check-validity 'phone-number)
-            (format "\\setkomavar{fromphone}{%s}\n" phone-number)))
-     (let ((signature (plist-get info :signature)))
-       (and (org-string-nw-p signature)
-            (funcall check-validity 'signature)
-            (format "\\setkomavar{signature}{%s}\n" signature)))
-     ;; Options.
-     (and (funcall check-validity 'with-backaddress)
-          (format "\\KOMAoption{backaddress}{%s}\n"
-                  (if (plist-get info :with-backaddress) "true" "false")))
-     (and (funcall check-validity 'with-email)
+     (and (funcall check-scope 'with-email)
           (format "\\KOMAoption{fromemail}{%s}\n"
                   (if (plist-get info :with-email) "true" "false")))
-     (and (funcall check-validity 'with-phone)
+     ;; Phone number.
+     (let ((phone-number (plist-get info :phone-number)))
+       (and (org-string-nw-p phone-number)
+            (funcall check-scope 'phone-number)
+            (format "\\setkomavar{fromphone}{%s}\n" phone-number)))
+     (and (funcall check-scope 'with-phone)
           (format "\\KOMAoption{fromphone}{%s}\n"
                   (if (plist-get info :with-phone) "true" "false")))
-     ;; Special cases: place and foldmarks.
-     (and (funcall check-validity 'place)
+     ;; Signature.
+     (let ((signature (plist-get info :signature)))
+       (and (org-string-nw-p signature)
+            (funcall check-scope 'signature)
+            (format "\\setkomavar{signature}{%s}\n" signature)))
+     ;; Back address.
+     (and (funcall check-scope 'with-backaddress)
+          (format "\\KOMAoption{backaddress}{%s}\n"
+                  (if (plist-get info :with-backaddress) "true" "false")))
+     ;; Place.
+     (and (funcall check-scope 'place)
           (format "\\setkomavar{place}{%s}\n"
                   (if (plist-get info :with-place) (plist-get info :place) "")))
-     (and (funcall check-validity 'with-foldmarks)
+     ;; Folding marks.
+     (and (funcall check-scope 'with-foldmarks)
           (let ((foldmarks (plist-get info :with-foldmarks)))
 	    (cond
 	     ((symbolp foldmarks)
