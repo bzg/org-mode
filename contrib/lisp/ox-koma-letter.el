@@ -413,73 +413,50 @@ return a string or nil."
 	  ((symbolp value) (symbol-name value))
 	  (t value))))
 
+(defun org-koma-letter--special-contents-as-macro
+  (keywords &optional keep-newlines no-tag)
+  "Process KEYWORDS  members of `org-koma-letter-special-contents'.
+KEYWORDS is a list of symbols.  Return them as a string to be
+formatted.
 
-(defun org-koma-letter--special-contents-as-macro (a-list &optional keep-newlines no-tag)
-  "Find members of `org-koma-letter-special-contents' corresponding to A-LIST.
-Return them as a string to be formatted.
-
-The function is used for inserting content of speciall headings
+The function is used for inserting content of special headings
 such as PS.
 
 If KEEP-NEWLINES is t newlines will not be removed.  If NO-TAG is
-is t the content in `org-koma-letter-special-contents' will not
-be wrapped in a macro named whatever the members of A-LIST are
+t the content in `org-koma-letter-special-contents' will not be
+wrapped in a macro named whatever the members of KEYWORDS are
 called."
-  (let (output)
-    (dolist (ac* a-list output)
-      (let*
-	  ((ac (org-koma-letter--get-value ac*))
-	   (x (org-koma-letter--get-tagged-contents ac)))
-	(when x
-	  (setq output
-		(concat
-		 output "\n"
-		 ;; sometimes LaTeX complains about newlines
-		 ;; at the end or beginning of macros.  Remove them.
-		 (org-koma-letter--format-string-as-macro
-		  (if keep-newlines x (org-koma-letter--normalize-string x))
-		  (unless no-tag  ac)))))))))
-
-(defun org-koma-letter--format-string-as-macro (string &optional macro)
-  "Format STRING as \"string\".
-If optional argument MACRO is provided, format it as
-\"\\macro{string}\" instead."
-  (if macro
-      (format "\\%s{%s}" macro string)
-    (format "%s" string)))
-
-(defun org-koma-letter--normalize-string (string)
-  "Remove new lines in the beginning and end of STRING."
-  (replace-regexp-in-string "\\`[ \n\t]+\\|[\n\t ]*\\'" "" string))
+  (mapconcat
+   #'(lambda (keyword)
+       (let* ((name (org-koma-letter--get-value keyword))
+	      (value (org-koma-letter--get-tagged-contents name)))
+	 (when value
+	   (if no-tag (if keep-newlines value (org-trim value))
+	     (format "\\%s{%s}\n"
+		     name
+		     (if keep-newlines value (org-trim value)))))))
+   keywords
+   ""))
 
 (defun org-koma-letter--determine-to-and-from (info key)
   "Given INFO determine KEY for the letter.
 KEY should be `to' or `from'.
 
-`ox-koma-letter' allows two ways to specify to and from.  If both
+`ox-koma-letter' allows two ways to specify TO and FROM.  If both
 are present return the preferred one as determined by
 `org-koma-letter-prefer-special-headings'."
-  (let* ((plist-alist '((from . :from-address)
-		       (to . :to-address)))
-	 (default-alist  `((from  ,org-koma-letter-from-address)
-			   (to  "\\mbox{}")))
-	 (option-value (plist-get info (cdr-safe (assoc key plist-alist))))
-	 (head-value (org-koma-letter--get-tagged-contents key))
-	 (order (append
-		 (funcall
-		  (if (plist-get info :special-headings)
-		      'reverse 'identity)
-		  `(,option-value ,head-value))
-		 (cdr-safe (assoc key default-alist))))
-	 tmp
-	 (adr (dolist (x order tmp)
-		(when (and (not tmp) x)
-		  (setq tmp x)))))
-  (when adr
-    (replace-regexp-in-string
-     "\n" "\\\\\\\\\n"
-     (org-koma-letter--normalize-string adr)))))
+  (let* ((options-value
+	  (plist-get info (if (eq key 'to) :to-address :from-address)))
+	 (headline-value (org-koma-letter--get-tagged-contents key))
+	 (value (or (if (plist-get info :special-headings)
+			(or headline-value option-value)
+		      (or option-value headline-value))
+		    ;; Fallback values.
+		    (if (eq key 'to) "\\mbox{}" org-koma-letter-from-address))))
+    (and value (replace-regexp-in-string "\n" "\\\\\\\\\n" (org-trim value)))))
 
+
+
 ;;; Transcode Functions
 
 ;;;; Export Block
@@ -513,7 +490,6 @@ channel."
     (if (equal key "KOMA-LETTER") value
       (org-export-with-backend 'latex keyword contents info))))
 
-
 ;; Headline
 
 (defun org-koma-letter-headline (headline contents info)
@@ -525,24 +501,19 @@ Note that if a headline is tagged with a tag from
 `org-koma-letter-special-tags' it will not be exported, but
 stored in `org-koma-letter-special-contents' and included at the
 appropriate place."
-  (let*
-      ((tags (org-export-get-tags headline info))
-       (tag* (car tags))
-       (tag  (when tag*
-	       (car (member-ignore-case
-		     tag*
-		     (mapcar 'symbol-name (plist-get info :special-tags)))))))
-    (if tag
-	(progn
-	  (push (cons tag contents)
-		org-koma-letter-special-contents)
-	  nil)
-      (unless (or (plist-get info :opening)
-		  (not org-koma-letter-headline-is-opening-maybe))
-	(plist-put info :opening
-		   (org-export-data (org-element-property :title headline) info)))
-      contents)))
-
+  (unless (let ((tag (car (org-export-get-tags headline info))))
+	    (and tag
+		 (member-ignore-case
+		  tag (mapcar #'symbol-name (plist-get info :special-tags)))
+		 ;; Store association for later use and bail out.
+		 (push (cons tag contents) org-koma-letter-special-contents)))
+    ;; Opening is not defined yet: use headline's title.
+    (when (and org-koma-letter-headline-is-opening-maybe
+	       (not (plist-get info :opening)))
+      (plist-put info :opening
+		 (org-export-data (org-element-property :title headline) info)))
+    ;; In any case, insert contents in letter's body.
+    contents))
 
 ;;;; Template
 
