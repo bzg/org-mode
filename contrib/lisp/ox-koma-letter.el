@@ -445,15 +445,15 @@ KEY should be `to' or `from'.
 `ox-koma-letter' allows two ways to specify TO and FROM.  If both
 are present return the preferred one as determined by
 `org-koma-letter-prefer-special-headings'."
-  (let* ((options-value
-	  (plist-get info (if (eq key 'to) :to-address :from-address)))
-	 (headline-value (org-koma-letter--get-tagged-contents key))
-	 (value (or (if (plist-get info :special-headings)
-			(or headline-value option-value)
-		      (or option-value headline-value))
-		    ;; Fallback values.
-		    (if (eq key 'to) "\\mbox{}" org-koma-letter-from-address))))
-    (and value (replace-regexp-in-string "\n" "\\\\\\\\\n" (org-trim value)))))
+  (let ((option (plist-get info (if (eq key 'to) :to-address :from-address)))
+	(headline (org-koma-letter--get-tagged-contents key)))
+    (replace-regexp-in-string
+     "\n" "\\\\\\\\\n"
+     (org-trim
+      (or (if (plist-get info :special-headings) (or headline option)
+	    (or option headline))
+	  ;; Fallback values.
+	  (if (eq key 'to) "\\mbox{}" org-koma-letter-from-address))))))
 
 
 
