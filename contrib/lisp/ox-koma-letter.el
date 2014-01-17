@@ -232,15 +232,22 @@ English manual of 2012-07-22)."
   :group 'org-export-koma-letter
   :type 'boolean)
 
-(defcustom org-koma-letter-use-foldmarks "true"
+(defcustom org-koma-letter-use-foldmarks t
   "Configure appearence of fold marks.
 
 Accepts any valid value for the KOMA-Script `foldmarks' option.
+This option can also be set with the OPTIONS keyword, e.g.:
 
-Use `foldmarks:true' to activate default fold marks or
-`foldmarks:nil' to deactivate fold marks."
+  foldmarks:\"blmt\"
+
+nil and t are also accepted, as shortcuts for, respectively,
+\"false\" and \"true\", i.e. to deactivate folding marks or
+activate default ones."
   :group 'org-export-koma-letter
-  :type 'string)
+  :type '(choice
+	  (const :tag "Activate default folding marks" t)
+	  (const :tag "Deactivate folding marks" nil)
+	  (string :tag "Choose configuration flags")))
 
 (defcustom org-koma-letter-use-phone nil
   "Non-nil prints sender's phone number."
