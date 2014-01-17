@@ -7513,6 +7513,10 @@ the archive.  To do this, each subtree is checked for open TODO entries.
 If none are found, the command offers to move it to the archive
 location.  If the cursor is @emph{not} on a headline when this command
 is invoked, the level 1 trees will be checked.
+@orgkey{C-u C-u C-c C-x C-s}
+As above, but check subtree for timestamps instead of TODO entries.  The
+command will offer to archive the subtree if it @emph{does} contain a
+timestamp, and that timestamp is in the past.
 @end table
 
 @cindex archive locations
