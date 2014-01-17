@@ -198,7 +198,9 @@ t the value opening will be implicit set as the headline title."
 (defcustom org-koma-letter-subject-format t
   "Use the title as the subject of the letter.
 
-At this time the following values are allowed:
+When t, insert a subject using default options.  When nil, do not
+insert a subject at all.  It can also be a list of symbols among
+the following ones:
 
  `afteropening'  Subject after opening
  `beforeopening' Subject before opening
@@ -208,15 +210,16 @@ At this time the following values are allowed:
  `titled'        Add title/description to subject
  `underlined'    Set subject underlined
  `untitled'      Do not add title/description to subject
- nil             Do no insert a subject even if present
- t               Use default options
 
 Please refer to the KOMA-script manual (Table 4.16. in the
-English manual of 2012-07-22)."
+English manual of 2012-07-22).
+
+This option can also be set with the OPTIONS keyword, e.g.:
+\"subject:(underlined centered)\"."
   :type '(radio
 	  (const :tag "No export" nil)
 	  (const :tag "Default options" t)
-	  (set :tag "selection"
+	  (set :tag "Selection"
 	       (const afteropening)
 	       (const beforeopening)
 	       (const centered)
@@ -571,25 +574,16 @@ holding export options."
    ;; Document start
    "\\begin{document}\n\n"
    ;; Subject
-   (let* ((with-subject (plist-get info :with-subject))
-	  (subject-format (cond ((member with-subject '("true" "t" t)) nil)
-				((stringp with-subject) (list with-subject))
-				((symbolp with-subject)
-				 (list (symbol-name with-subject)))
-				(t with-subject)))
-	  (subject (org-export-data (plist-get info :title) info))
-	  (l (length subject-format))
-	  (y ""))
-     (concat
-      (when (and with-subject subject-format)
-	(concat
-	 "\\KOMAoption{subject}{"
-	 (apply 'format
-		(dotimes (x l y)
-		  (setq y (concat (if (> x 0) "%s," "%s") y)))
-		subject-format) "}\n"))
-      (when (and subject with-subject)
-	(format "\\setkomavar{subject}{%s}\n\n" subject))))
+   (let ((with-subject (plist-get info :with-subject)))
+     (when with-subject
+       (concat
+	(unless (eq with-subject t)
+	  (format "\\KOMAoption{subject}{%s}\n"
+		  (if (symbolp with-subject) with-subject
+		    (mapconcat #'symbol-name with-subject ","))))
+	(let ((subject (org-export-data (plist-get info :title) info)))
+	  (and (org-string-nw-p subject)
+	       (format "\\setkomavar{subject}{%s}\n\n" subject))))))
    ;; Letter start.
    (format "\\begin{letter}{%%\n%s}\n\n"
 	   (org-koma-letter--determine-to-and-from info 'to))
