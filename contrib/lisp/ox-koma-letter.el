@@ -236,21 +236,55 @@ This option can also be set with the OPTIONS keyword, e.g.:
   :type 'boolean)
 
 (defcustom org-koma-letter-use-foldmarks t
-  "Configure appearence of fold marks.
+  "Configure appearance of folding marks.
 
-Accepts any valid value for the KOMA-Script `foldmarks' option.
+When t, activate default folding marks.  When nil, do not insert
+folding marks at all.  It can also be a list of symbols among the
+following ones:
+
+  `B'  Activate upper horizontal mark on left paper edge
+  `b'  Deactivate upper horizontal mark on left paper edge
+
+  `H'  Activate all horizontal marks on left paper edge
+  `h'  Deactivate all horizontal marks on left paper edge
+
+  `L'  Activate left vertical mark on upper paper edge
+  `l'  Deactivate left vertical mark on upper paper edge
+
+  `M'  Activate middle horizontal mark on left paper edge
+  `m'  Deactivate middle horizontal mark on left paper edge
+
+  `P'  Activate punch or center mark on left paper edge
+  `p'  Deactivate punch or center mark on left paper edge
+
+  `T'  Activate lower horizontal mark on left paper edge
+  `t'  Deactivate lower horizontal mark on left paper edge
+
+  `V'  Activate all vertical marks on upper paper edge
+  `v'  Deactivate all vertical marks on upper paper edge
+
 This option can also be set with the OPTIONS keyword, e.g.:
-
-  foldmarks:\"blmt\"
-
-nil and t are also accepted, as shortcuts for, respectively,
-\"false\" and \"true\", i.e. to deactivate folding marks or
-activate default ones."
+\"foldmarks:(b l m t)\"."
   :group 'org-export-koma-letter
   :type '(choice
 	  (const :tag "Activate default folding marks" t)
 	  (const :tag "Deactivate folding marks" nil)
-	  (string :tag "Choose configuration flags")))
+	  (set
+	   :tag "Configure folding marks"
+	   (const :tag "Activate upper horizontal mark on left paper edge" B)
+	   (const :tag "Deactivate upper horizontal mark on left paper edge" b)
+	   (const :tag "Activate all horizontal marks on left paper edge" H)
+	   (const :tag "Deactivate all horizontal marks on left paper edge" h)
+	   (const :tag "Activate left vertical mark on upper paper edge" L)
+	   (const :tag "Deactivate left vertical mark on upper paper edge" l)
+	   (const :tag "Activate middle horizontal mark on left paper edge" M)
+	   (const :tag "Deactivate middle horizontal mark on left paper edge" m)
+	   (const :tag "Activate punch or center mark on left paper edge" P)
+	   (const :tag "Deactivate punch or center mark on left paper edge" p)
+	   (const :tag "Activate lower horizontal mark on left paper edge" T)
+	   (const :tag "Deactivate lower horizontal mark on left paper edge" t)
+	   (const :tag "Activate all vertical marks on upper paper edge" V)
+	   (const :tag "Deactivate all vertical marks on upper paper edge" v))))
 
 (defcustom org-koma-letter-use-phone nil
   "Non-nil prints sender's phone number."
@@ -655,14 +689,11 @@ a communication channel."
      ;; Folding marks.
      (and (funcall check-scope 'with-foldmarks)
           (let ((foldmarks (plist-get info :with-foldmarks)))
-	    (cond
-	     ((symbolp foldmarks)
-	      (format "\\KOMAoptions{foldmarks=%s}\n"
-		      (if foldmarks "true" "false")))
-	     ((member foldmarks '("true" "on" "yes" "false" "off" "no"))
-	      (format "\\KOMAoptions{foldmarks=%s}\n" foldmarks))
-	     (t (format "\\KOMAoptions{foldmarks=true,foldmarks=%s}\n"
-			foldmarks))))))))
+	    (cond ((consp foldmarks)
+		   (format "\\KOMAoptions{foldmarks=true,foldmarks=%s}\n"
+			   (mapconcat #'symbol-name foldmarks "")))
+		  (foldmarks "\\KOMAoptions{foldmarks=true}\n")
+		  (t "\\KOMAoptions{foldmarks=false}\n")))))))
 
 
 
