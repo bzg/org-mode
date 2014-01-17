@@ -216,18 +216,19 @@ English manual of 2012-07-22).
 
 This option can also be set with the OPTIONS keyword, e.g.:
 \"subject:(underlined centered)\"."
-  :type '(radio
-	  (const :tag "No export" nil)
-	  (const :tag "Default options" t)
-	  (set :tag "Selection"
-	       (const afteropening)
-	       (const beforeopening)
-	       (const centered)
-	       (const left)
-	       (const right)
-	       (const underlined)
-	       (const titled)
-	       (const untitled)))
+  :type
+  '(choice
+    (const :tag "No export" nil)
+    (const :tag "Default options" t)
+    (set :tag "Configure options"
+	 (const :tag "Subject after opening" afteropening)
+	 (const :tag "Subject before opening" beforeopening)
+	 (const :tag "Subject centered" centered)
+	 (const :tag "Subject left-justified" left)
+	 (const :tag "Subject right-justified" right)
+	 (const :tag "Add title or description to subject" underlined)
+	 (const :tag "Set subject underlined" titled)
+	 (const :tag "Do not add title or description to subject" untitled)))
   :group 'org-export-koma-letter)
 
 (defcustom org-koma-letter-use-backaddress nil
