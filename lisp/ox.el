@@ -3215,8 +3215,8 @@ locally for the subtree through node properties."
     ;; Populate OPTIONS and KEYWORDS.
     (dolist (entry (cond ((eq backend 'default) org-export-options-alist)
 			 ((org-export-backend-p backend)
-			  (org-export-get-all-options backend))
-			 (t (org-export-get-all-options
+			  (org-export-backend-options backend))
+			 (t (org-export-backend-options
 			     (org-export-get-backend backend)))))
       (let ((keyword (nth 1 entry))
             (option (nth 2 entry)))
