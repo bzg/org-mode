@@ -116,7 +116,7 @@
 (require 'ox-latex)
 
 ;; Install a default letter class.
-(unless (assoc "default-koma-letter" 'org-latex-classes)
+(unless (assoc "default-koma-letter" org-latex-classes)
   (add-to-list 'org-latex-classes
 	       '("default-koma-letter" "\\documentclass[11pt]{scrlttr2}")))
 
