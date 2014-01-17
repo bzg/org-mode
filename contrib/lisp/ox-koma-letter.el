@@ -84,16 +84,10 @@
 ;; with information is present precedence is determined by
 ;; `org-koma-letter-prefer-special-headings'.
 ;;
-;; You will need to add an appropriate association in
-;; `org-latex-classes' in order to use the KOMA Scrlttr2 class.
-;; The easiest way to do this is by adding
-;;
-;;   (eval-after-load "ox-koma-letter"
-;;   '(org-koma-letter-plug-into-ox))
-;;
-;; to your init file.  This will add a sparse scrlttr2 class and
-;; set it as the default `org-koma-latex-default-class'.  You can also
-;; add you own letter class.  For instace:
+;; You need an appropriate association in `org-latex-classes' in order
+;; to use the KOMA Scrlttr2 class.  By default, a sparse scrlttr2
+;; class is provided: "default-koma-letter".  You can also add you own
+;; letter class.  For instance:
 ;;
 ;;   (add-to-list 'org-latex-classes
 ;;                '("my-letter"
@@ -120,6 +114,11 @@
 ;;; Code:
 
 (require 'ox-latex)
+
+;; Install a default letter class.
+(unless (assoc "default-koma-letter" 'org-latex-classes)
+  (add-to-list 'org-latex-classes
+	       '("default-koma-letter" "\\documentclass[11pt]{scrlttr2}")))
 
 
 ;;; User-Configurable Variables
@@ -302,7 +301,7 @@ This option can also be set with the OPTIONS keyword, e.g.:
   :group 'org-export-koma-letter
   :type 'boolean)
 
-(defcustom org-koma-letter-default-class ""
+(defcustom org-koma-letter-default-class "default-koma-letter"
   "Default class for `org-koma-letter'.
 The value must be a member of `org-latex-classes'."
   :group 'org-export-koma-letter
@@ -337,9 +336,7 @@ A headline is only used if #+OPENING is not set.  See also
     (:closing "CLOSING" nil org-koma-letter-closing)
     (:email "EMAIL" nil (org-koma-letter--get-value org-koma-letter-email) t)
     (:from-address "FROM_ADDRESS" nil nil newline)
-    (:latex-class "LATEX_CLASS" nil
-		  (or org-koma-letter-default-class org-latex-default-class)
-		  t)
+    (:latex-class "LATEX_CLASS" nil org-koma-letter-default-class t)
     (:lco "LCO" nil org-koma-letter-class-option-file)
     (:opening "OPENING" nil org-koma-letter-opening)
     (:phone-number "PHONE_NUMBER" nil org-koma-letter-phone-number)
@@ -391,20 +388,6 @@ A headline is only used if #+OPENING is not set.  See also
 
 
 
-;;; Initialize class function
-
-(defun org-koma-letter-plug-into-ox ()
-  "Initialize `koma-letter' export back-end.
-Add a sparse `default-koma-letter' to `org-latex-classes' and set
-`org-koma-letter-default-class' to `default-koma-letter'."
-  (let ((class "default-koma-letter"))
-    (eval-after-load "ox-latex"
-      `(unless (member ,class 'org-latex-classes)
-	 (add-to-list 'org-latex-classes
-		      `(,class
-			"\\documentclass[11pt]{scrlttr2}") ())
-	 (setq org-koma-letter-default-class class)))))
-
 ;;; Helper functions
 
 (defun org-koma-letter-email ()
