@@ -362,8 +362,8 @@ A headline is only used if #+OPENING is not set.  See also
     ;; Special properties non-nil when a setting happened in buffer.
     ;; They are used to prioritize in-buffer settings over "lco"
     ;; files.  See `org-koma-letter-template'.
-    (:inbuffer-author "AUTHOR" nil 'unset)
-    (:inbuffer-email "EMAIL" nil 'unset)
+    (:inbuffer-author "AUTHOR" nil 'koma-letter:empty)
+    (:inbuffer-email "EMAIL" nil 'koma-letter:empty)
     (:inbuffer-phone-number "PHONE_NUMBER" nil 'koma-letter:empty)
     (:inbuffer-place "PLACE" nil 'koma-letter:empty)
     (:inbuffer-signature "SIGNATURE" nil 'koma-letter:empty)
