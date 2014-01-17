@@ -174,8 +174,8 @@ or an empty string."
 (defcustom org-s5-title-slide-template
   "<h1>%t</h1>
 <h2>%a</h2>
-<h2>%e</h2>
-<h2>%d</h2>"
+<h3>%e</h3>
+<h4>%d</h4>"
   "Format template to specify title page section.
 See `org-html-postamble-format' for the valid elements which
 can be included.
