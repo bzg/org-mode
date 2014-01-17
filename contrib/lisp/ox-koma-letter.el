@@ -173,9 +173,15 @@ a function may be given.  Functions must return a string."
 
 (defcustom org-koma-letter-opening ""
   "Letter's opening, as a string.
-If (1) this value is nil; (2) the letter is started with a
-headline; and (3) `org-koma-letter-headline-is-opening-maybe' is
-t the value opening will be implicit set as the headline title."
+
+This option can also be set with the OPENING keyword.  Moreover,
+when:
+  (1) this value is the empty string;
+  (2) there's no OPENING keyword or it is empty;
+  (3) `org-koma-letter-headline-is-opening-maybe' is non-nil;
+  (4) the letter contains a headline without a special
+      tag (e.g. \"to\" or \"ps\");
+then the opening will be implicitly set as the headline title."
   :group 'org-export-koma-letter
   :type 'string)
 
@@ -509,7 +515,7 @@ appropriate place."
 		 (push (cons tag contents) org-koma-letter-special-contents)))
     ;; Opening is not defined yet: use headline's title.
     (when (and org-koma-letter-headline-is-opening-maybe
-	       (not (plist-get info :opening)))
+	       (not (org-string-nw-p (plist-get info :opening))))
       (plist-put info :opening
 		 (org-export-data (org-element-property :title headline) info)))
     ;; In any case, insert contents in letter's body.
