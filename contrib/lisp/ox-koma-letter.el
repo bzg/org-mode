@@ -129,16 +129,20 @@
   :group 'org-export)
 
 (defcustom org-koma-letter-class-option-file "NF"
-  "Letter Class Option File."
+  "Letter Class Option File.
+This option can also be set with the LCO keyword."
   :group 'org-export-koma-letter
   :type 'string)
 
 (defcustom org-koma-letter-author 'user-full-name
   "Sender's name.
+
 This variable defaults to calling the function `user-full-name'
 which just returns the current function `user-full-name'.
 Alternatively a string, nil or a function may be given.
-Functions must return a string."
+Functions must return a string.
+
+This option can also be set with the AUTHOR keyword."
   :group 'org-export-koma-letter
   :type '(radio (function-item user-full-name)
 		(string)
@@ -147,9 +151,12 @@ Functions must return a string."
 
 (defcustom org-koma-letter-email 'org-koma-letter-email
   "Sender's email address.
+
 This variable defaults to the value `org-koma-letter-email' which
 returns `user-mail-address'.  Alternatively a string, nil or
-a function may be given.  Functions must return a string."
+a function may be given.  Functions must return a string.
+
+This option can also be set with the EMAIL keyword."
   :group 'org-export-koma-letter
   :type '(radio (function-item org-koma-letter-email)
 		(string)
@@ -157,17 +164,21 @@ a function may be given.  Functions must return a string."
 		(const :tag "Do not export email" nil)))
 
 (defcustom org-koma-letter-from-address ""
-  "Sender's address, as a string."
+  "Sender's address, as a string.
+This option can also be set with one or more FROM_ADDRESS
+keywords."
   :group 'org-export-koma-letter
   :type 'string)
 
 (defcustom org-koma-letter-phone-number ""
-  "Sender's phone number, as a string."
+  "Sender's phone number, as a string.
+This option can also be set with the PHONE_NUMBER keyword."
   :group 'org-export-koma-letter
   :type 'string)
 
 (defcustom org-koma-letter-place ""
-  "Place from which the letter is sent, as a string."
+  "Place from which the letter is sent, as a string.
+This option can also be set with the PLACE keyword."
   :group 'org-export-koma-letter
   :type 'string)
 
@@ -186,17 +197,21 @@ then the opening will be implicitly set as the headline title."
   :type 'string)
 
 (defcustom org-koma-letter-closing ""
-  "Letter's closing, as a string."
+  "Letter's closing, as a string.
+This option can also be set with the CLOSING keyword."
   :group 'org-export-koma-letter
   :type 'string)
 
 (defcustom org-koma-letter-signature ""
-  "Signature, as a string."
+  "Signature, as a string.
+This option can also be set with the SIGNATURE keyword."
   :group 'org-export-koma-letter
   :type 'string)
 
 (defcustom org-koma-letter-prefer-special-headings nil
-  "Non-nil means prefer headlines over keywords for TO and FROM."
+  "Non-nil means prefer headlines over keywords for TO and FROM.
+This option can also be set with the OPTIONS keyword, e.g.:
+\"special-headings:t\"."
   :group 'org-export-koma-letter
   :type 'boolean)
 
@@ -237,7 +252,9 @@ This option can also be set with the OPTIONS keyword, e.g.:
   :group 'org-export-koma-letter)
 
 (defcustom org-koma-letter-use-backaddress nil
-  "Non-nil prints return address in small line above to address."
+  "Non-nil prints return address in small line above to address.
+This option can also be set with the OPTIONS keyword, e.g.:
+\"backaddress:t\"."
   :group 'org-export-koma-letter
   :type 'boolean)
 
@@ -293,17 +310,23 @@ This option can also be set with the OPTIONS keyword, e.g.:
 	   (const :tag "Deactivate all vertical marks on upper paper edge" v))))
 
 (defcustom org-koma-letter-use-phone nil
-  "Non-nil prints sender's phone number."
+  "Non-nil prints sender's phone number.
+This option can also be set with the OPTIONS keyword, e.g.:
+\"phone:t\"."
   :group 'org-export-koma-letter
   :type 'boolean)
 
 (defcustom org-koma-letter-use-email nil
-  "Non-nil prints sender's email address."
+  "Non-nil prints sender's email address.
+This option can also be set with the OPTIONS keyword, e.g.:
+\"email:t\"."
   :group 'org-export-koma-letter
   :type 'boolean)
 
 (defcustom org-koma-letter-use-place t
-  "Non-nil prints the letter's place next to the date."
+  "Non-nil prints the letter's place next to the date.
+This option can also be set with the OPTIONS keyword, e.g.:
+\"place:nil\"."
   :group 'org-export-koma-letter
   :type 'boolean)
 
