@@ -142,7 +142,18 @@ if so then run the appropriate source block from the Library."
 	 (pre-info (funcall mkinfo pre-params))
 	 (cache-p (and (cdr (assoc :cache pre-params))
 		       (string= "yes" (cdr (assoc :cache pre-params)))))
-	 (new-hash (when cache-p (org-babel-sha1-hash pre-info)))
+	 (new-hash (when cache-p
+		     (org-babel-sha1-hash
+		      ;; Do *not* pre-process params for call line
+		      ;; hash evaluation, since for a call line :var
+		      ;; extension *is* execution.
+		      (let ((params (nth 2 pre-info)))
+			(append (subseq pre-info 0 2)
+				(list
+				 (cons
+				  (cons :c-var (cdr (assoc :var params)))
+				  (assq-delete-all :var (copy-tree params))))
+				(subseq pre-info 3))))))
 	 (old-hash (when cache-p (org-babel-current-result-hash)))
 	 (org-babel-current-src-block-location (point-marker)))
     (if (and cache-p (equal new-hash old-hash))
