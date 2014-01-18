@@ -1246,14 +1246,14 @@ the current subtree."
         (when (org-called-interactively-p 'interactive) (message hash))
         hash))))
 
-(defun org-babel-current-result-hash ()
+(defun org-babel-current-result-hash (&optional info)
   "Return the current in-buffer hash."
-  (org-babel-where-is-src-block-result)
+  (org-babel-where-is-src-block-result nil info)
   (org-no-properties (match-string 5)))
 
-(defun org-babel-set-current-result-hash (hash)
+(defun org-babel-set-current-result-hash (hash info)
   "Set the current in-buffer hash to HASH."
-  (org-babel-where-is-src-block-result)
+  (org-babel-where-is-src-block-result nil info)
   (save-excursion (goto-char (match-beginning 5))
 		  (mapc #'delete-overlay (overlays-at (point)))
 		  (forward-char org-babel-hash-show)

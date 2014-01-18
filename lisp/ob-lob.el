@@ -154,17 +154,19 @@ if so then run the appropriate source block from the Library."
 				  (cons :c-var (cdr (assoc :var params)))
 				  (assq-delete-all :var (copy-tree params))))
 				(subseq pre-info 3))))))
-	 (old-hash (when cache-p (org-babel-current-result-hash)))
+	 (old-hash (when cache-p (org-babel-current-result-hash pre-info)))
 	 (org-babel-current-src-block-location (point-marker)))
     (if (and cache-p (equal new-hash old-hash))
-	(save-excursion (goto-char (org-babel-where-is-src-block-result))
+	(save-excursion (goto-char (org-babel-where-is-src-block-result
+				    nil pre-info))
 			(forward-line 1)
 			(message "%S" (org-babel-read-result)))
       (prog1 (let* ((proc-params (org-babel-process-params pre-params))
 		     org-confirm-babel-evaluate)
 	       (org-babel-execute-src-block nil (funcall mkinfo proc-params)))
 	;; update the hash
-	(when new-hash (org-babel-set-current-result-hash new-hash))))))
+	(when new-hash
+	  (org-babel-set-current-result-hash new-hash pre-info))))))
 
 (provide 'ob-lob)
 

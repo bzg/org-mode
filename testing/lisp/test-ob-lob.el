@@ -105,29 +105,34 @@ for export
     (should (progn (org-export-execute-babel-code) t))))
 
 (ert-deftest test-ob-lob/caching-call-line ()
-  (require 'ox)
-  (let ((temporary-value-for-test nil))
+  (let ((temporary-value-for-test 0))
     (org-test-with-temp-text "
 #+name: call-line-caching-example
 #+begin_src emacs-lisp :var bar=\"baz\"
-  (setq temporary-value-for-test (not temporary-value-for-test))
+  (setq temporary-value-for-test (+ 1 temporary-value-for-test))
 #+end_src
 
 #+call: call-line-caching-example(\"qux\") :cache yes
 "
       (goto-char (point-max)) (forward-line -1)
       ;; first execution should flip value to t
-      (should (org-babel-lob-execute (org-babel-lob-get-info)))
+      (should (equal (org-babel-lob-execute (org-babel-lob-get-info)) 1))
       ;; if cached, second evaluation will retain the t value
-      (should (org-babel-lob-execute (org-babel-lob-get-info))))))
+      ;;
+      ;; Note: This instance tests for equality with "1".  We would
+      ;; prefer if the cached result returned was actually 1, however
+      ;; this is not the current behavior so this test is encoding
+      ;; undesired behavior (because the current goal is simply to see
+      ;; that caching is used on call lines).
+      ;;
+      (should (equal (org-babel-lob-execute (org-babel-lob-get-info)) "1")))))
 
 (ert-deftest test-ob-lob/named-caching-call-line ()
-  (require 'ox)
-  (let ((temporary-value-for-test nil))
+  (let ((temporary-value-for-test 0))
     (org-test-with-temp-text "
 #+name: call-line-caching-example
 #+begin_src emacs-lisp :var bar=\"baz\"
-  (setq temporary-value-for-test (not temporary-value-for-test))
+  (setq temporary-value-for-test (+ 1 temporary-value-for-test))
 #+end_src
 
 #+name: call-line-caching-called
@@ -135,9 +140,16 @@ for export
 "
       (goto-char (point-max)) (forward-line -1)
       ;; first execution should flip value to t
-      (should (org-babel-lob-execute (org-babel-lob-get-info)))
+      (should (equal (org-babel-lob-execute (org-babel-lob-get-info)) 1))
       ;; if cached, second evaluation will retain the t value
-      (should (org-babel-lob-execute (org-babel-lob-get-info))))))
+      ;;
+      ;; Note: This instance tests for equality with "1".  We would
+      ;; prefer if the cached result returned was actually 1, however
+      ;; this is not the current behavior so this test is encoding
+      ;; undesired behavior (because the current goal is simply to see
+      ;; that caching is used on call lines).
+      ;;
+      (should (equal (org-babel-lob-execute (org-babel-lob-get-info)) "1")))))
 
 (provide 'test-ob-lob)
 
