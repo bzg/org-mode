@@ -282,6 +282,26 @@ Here is one at the end of a line. =2=
       (should (string-match (regexp-quote (format nil "%S" '(:foo :bar)))
 			    ascii)))))
 
+(ert-deftest ob-export/export-with-results-before-block ()
+  "Test export when results are inserted before source block."
+  (should
+   (equal
+    "#+RESULTS: src1
+: 2
+
+#+NAME: src1
+#+BEGIN_SRC emacs-lisp 
+\(+ 1 1)
+#+END_SRC"
+    (org-test-with-temp-text
+	"#+RESULTS: src1
+
+#+NAME: src1
+#+BEGIN_SRC emacs-lisp :exports both
+\(+ 1 1)
+#+END_SRC"
+      (org-export-execute-babel-code)
+      (buffer-string)))))
 
 (provide 'test-ob-exp)
 
