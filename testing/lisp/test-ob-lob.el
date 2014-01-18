@@ -104,6 +104,22 @@ for export
 #+end_example"
     (should (progn (org-export-execute-babel-code) t))))
 
+(ert-deftest test-ob-lob/caching-call-line ()
+  (require 'ox)
+  (let ((temporary-value-for-test nil))
+    (org-test-with-temp-text "
+#+name: call-line-caching-example
+#+begin_src emacs-lisp :var bar=\"baz\"
+  (setq temporary-value-for-test (not temporary-value-for-test))
+#+end_src
+
+#+call: call-line-caching-example(\"qux\") :cache yes
+"
+      (goto-char (point-max)) (forward-line -1)
+      ;; first execution should flip value to t
+      (should (org-babel-lob-execute (org-babel-lob-get-info)))
+      ;; if cached, second evaluation will retain the t value
+      (should (org-babel-lob-execute (org-babel-lob-get-info))))))
 
 (provide 'test-ob-lob)
 
