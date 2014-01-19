@@ -3841,12 +3841,12 @@ This is a property list with the following properties:
              the same numbers for HTML export.
 :matchers    a list indicating which matchers should be used to
              find LaTeX fragments.  Valid members of this list are:
-             \"begin\"  find environments
-             \"$1\"     find single characters surrounded by $.$
-             \"$\"      find math expressions surrounded by $...$
-             \"$$\"     find math expressions surrounded by $$....$$
-             \"\\(\"     find math expressions surrounded by \\(...\\)
-             \"\\ [\"    find math expressions surrounded by \\ [...\\]"
+             \"begin\" find environments
+             \"$1\"    find single characters surrounded by $.$
+             \"$\"     find math expressions surrounded by $...$
+             \"$$\"    find math expressions surrounded by $$....$$
+             \"\\(\"    find math expressions surrounded by \\(...\\)
+             \"\\=\\[\"    find math expressions surrounded by \\=\\[...\\]"
   :group 'org-latex
   :type 'plist)
 
