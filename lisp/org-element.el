@@ -4800,8 +4800,7 @@ element ending there."
 		   ((eobp) (setq element up))
 		   (t (setq element up next (point))))))))
        ;; Parse successively each element until we reach ORIGIN.
-       (let ((end (or (org-element-property
-                       :contents-end (org-element-property :parent element))
+       (let ((end (or (org-element-property :end element)
                       (save-excursion
                         (org-with-limited-levels (outline-next-heading))
                         (point))))
