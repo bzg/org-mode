@@ -1613,10 +1613,11 @@ for export.  Return options as a plist."
      ;; Make sure point is at a heading.
      (if (org-at-heading-p) (org-up-heading-safe) (org-back-to-heading t))
      ;; Take care of EXPORT_TITLE. If it isn't defined, use headline's
-     ;; title as its fallback value.
+     ;; title (with no todo keyword, priority cookie or tag) as its
+     ;; fallback value.
      (when (setq prop (or (org-entry-get (point) "EXPORT_TITLE")
-			  (progn (looking-at org-todo-line-regexp)
-				 (org-match-string-no-properties 3))))
+			  (progn (looking-at org-complex-heading-regexp)
+				 (org-match-string-no-properties 4))))
        (setq plist
 	     (plist-put
 	      plist :title
