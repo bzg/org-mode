@@ -290,7 +290,7 @@ Here is one at the end of a line. =2=
 : 2
 
 #+NAME: src1
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 \(+ 1 1)
 #+END_SRC"
     (org-test-with-temp-text
