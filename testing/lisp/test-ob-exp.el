@@ -303,6 +303,15 @@ Here is one at the end of a line. =2=
       (org-export-execute-babel-code)
       (buffer-string)))))
 
+(ert-deftest ob-export/export-src-block-with-flags ()
+  "Test exporting a source block with a flag."
+  (should
+   (string-match "\\`#\\+BEGIN_SRC emacs-lisp -some-flag$"
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp :flags -some-flag\n\(+ 1 1)\n#+END_SRC"
+      (org-export-execute-babel-code)
+      (buffer-string)))))
+
 (provide 'test-ob-exp)
 
 ;;; test-ob-exp.el ends here

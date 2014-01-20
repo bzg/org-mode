@@ -341,11 +341,12 @@ replaced with its value."
    org-babel-exp-code-template
    `(("lang"  . ,(nth 0 info))
      ("body"  . ,(org-escape-code-in-string (nth 1 info)))
+     ("flags" . ,(let ((f (assq :flags (nth 2 info))))
+		   (when f (concat " " (cdr f)))))
      ,@(mapcar (lambda (pair)
 		 (cons (substring (symbol-name (car pair)) 1)
 		       (format "%S" (cdr pair))))
 	       (nth 2 info))
-     ("flags" . ,(let ((f (nth 3 info))) (when f (concat " " f))))
      ("name"  . ,(or (nth 4 info) "")))))
 
 (defun org-babel-exp-results (info type &optional silent hash)
