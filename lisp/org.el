@@ -13882,7 +13882,7 @@ ACTION can be `set', `up', `down', or a character."
 		(insert " [#" news "]"))
 	    (goto-char (match-beginning 3))
 	    (insert "[#" news "] "))))
-      (org-preserve-lc (org-set-tags nil 'align)))
+      (org-set-tags nil 'align))
     (if remove
 	(message "Priority removed")
       (message "Priority of current item set to %s" news)))))
