@@ -8275,7 +8275,7 @@ When called with a prefix argument, include all archive files as well."
       (when (next-single-property-change (point-at-eol) 'org-marker)
 	(move-end-of-line 1)
 	(goto-char (next-single-property-change (point) 'org-marker))))
-    (org-move-to-column col))
+    (org-move-to-column col nil nil t))
   (org-agenda-do-context-action))
 
 (defun org-agenda-previous-item (n)
@@ -8287,7 +8287,7 @@ When called with a prefix argument, include all archive files as well."
 		  (move-end-of-line 0)
 		  (previous-single-property-change (point) 'org-marker))))
       (if goto (goto-char goto))
-      (org-move-to-column col)))
+      (org-move-to-column col nil nil t)))
   (org-agenda-do-context-action))
 
 (defun org-agenda-do-context-action ()
@@ -8767,6 +8767,7 @@ the same tree node, and the headline of the tree node in the Org-mode file."
       (with-current-buffer buffer
 	(widen)
 	(goto-char pos)
+	(setq col (current-column))
 	(org-show-context 'agenda)
 	(save-excursion
 	  (and (outline-next-heading)
@@ -8788,7 +8789,11 @@ the same tree node, and the headline of the tree node in the Org-mode file."
       (beginning-of-line 1)
       (save-excursion
 	(org-agenda-change-all-lines newhead hdmarker 'fixface just-one))
-      (org-move-to-column col))))
+      (when (org-bound-and-true-p org-clock-out-when-done)
+      	(string-match (concat "^" (regexp-opt org-done-keywords-for-agenda))
+		      newhead)
+	(org-agenda-unmark-clocking-task))
+      (org-move-to-column col nil nil t))))
 
 (defun org-agenda-add-note (&optional arg)
   "Add a time-stamped note to the entry at point."
@@ -8924,7 +8929,8 @@ Called with a universal prefix arg, show the priority instead of setting it."
     (unless org-enable-priority-commands
       (error "Priority commands are disabled"))
     (org-agenda-check-no-diary)
-    (let* ((marker (or (org-get-at-bol 'org-marker)
+    (let* ((col (current-column))
+	   (marker (or (org-get-at-bol 'org-marker)
 		       (org-agenda-error)))
 	   (hdmarker (org-get-at-bol 'org-hd-marker))
 	   (buffer (marker-buffer hdmarker))
@@ -8943,7 +8949,7 @@ Called with a universal prefix arg, show the priority instead of setting it."
 	  (end-of-line 1)
 	  (setq newhead (org-get-heading)))
 	(org-agenda-change-all-lines newhead hdmarker)
-	(beginning-of-line 1)))))
+	(org-move-to-column col nil nil t)))))
 
 ;; FIXME: should fix the tags property of the agenda line.
 (defun org-agenda-set-tags (&optional tag onoff)
@@ -9254,7 +9260,7 @@ ARG is passed through to `org-deadline'."
 	  (org-clock-in arg)
 	  (setq newhead (org-get-heading)))
 	(org-agenda-change-all-lines newhead hdmarker))
-      (org-move-to-column col))))
+      (org-move-to-column col nil nil t))))
 
 (defun org-agenda-clock-out ()
   "Stop the currently running clock."
@@ -9274,7 +9280,7 @@ ARG is passed through to `org-deadline'."
 	    (setq newhead (org-get-heading))))))
     (org-agenda-change-all-lines newhead marker)
     (move-marker marker nil)
-    (org-move-to-column col)
+    (org-move-to-column col nil nil t)
     (org-agenda-unmark-clocking-task)))
 
 (defun org-agenda-clock-cancel (&optional arg)
