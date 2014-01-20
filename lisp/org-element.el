@@ -5537,7 +5537,8 @@ removed from the cache."
 			(t
 			 (setq end
 			       (max (1- (org-element-property :end data)) end))
-			 (avl-tree-delete org-element--cache data nil t))))))
+			 (avl-tree-delete org-element--cache data)
+			 t)))))
 	    ;; Phase 2.
 	    ;;
 	    ;; Shift all elements starting after END by OFFSET (for an
