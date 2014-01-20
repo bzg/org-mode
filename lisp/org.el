@@ -9923,14 +9923,33 @@ This command can be called in any mode to insert a link in Org-mode syntax."
   (org-load-modules-maybe)
   (org-run-like-in-org-mode 'org-insert-link))
 
-(defun org-insert-all-links (&optional keep)
-  "Insert all links in `org-stored-links'."
+(defun org-insert-all-links (arg &optional pre post)
+  "Insert all links in `org-stored-links'.
+When a universal prefix, do not delete the links from `org-stored-links'.
+When `ARG' is a number, insert the last N link(s).
+`PRE' and `POST' are optional arguments to define a string to
+prepend or to append."
   (interactive "P")
-  (let ((links (copy-sequence org-stored-links)) l)
-    (while (setq l (if keep (pop links) (pop org-stored-links)))
-      (insert "- ")
+  (let ((org-keep-stored-link-after-insertion (equal arg '(4)))
+	(links (copy-seq org-stored-links))
+	(pr (or pre "- "))
+	(po (or post "\n"))
+	(cnt 1) l)
+    (if (null org-stored-links)
+	(message "No link to insert")
+    (while (and (or (listp arg) (>= arg cnt))
+		(setq l (if (listp arg)
+			    (pop links)
+		      	(pop org-stored-links))))
+      (setq cnt (1+ cnt))
+      (insert pr)
       (org-insert-link nil (car l) (or (cadr l) "<no description>"))
-      (insert "\n"))))
+      (insert po)))))
+
+(defun org-insert-last-stored-link (arg)
+  "Insert the last link stored in `org-stored-links'."
+  (interactive "p")
+  (org-insert-all-links arg "" "\n"))
 
 (defun org-link-fontify-links-to-this-file ()
   "Fontify links to the current file in `org-stored-links'."
@@ -19191,6 +19210,7 @@ boundaries."
 (org-defkey org-mode-map "\C-c\C-x\C-n" 'org-next-link)
 (org-defkey org-mode-map "\C-c\C-x\C-p" 'org-previous-link)
 (org-defkey org-mode-map "\C-c\C-l" 'org-insert-link)
+(org-defkey org-mode-map "\C-c\M-l" 'org-insert-last-stored-link)
 (org-defkey org-mode-map "\C-c\C-\M-l" 'org-insert-all-links)
 (org-defkey org-mode-map "\C-c\C-o" 'org-open-at-point)
 (org-defkey org-mode-map "\C-c%"    'org-mark-ring-push)
