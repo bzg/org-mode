@@ -112,7 +112,7 @@ this variable.")
             (list (org-babel-R-construct-graphics-device-call
                    graphics-file params))
             inside
-            (list "dev.off()"))
+            (list "},error=function(e){plot(x=-1:1, y=-1:1, type='n', xlab='', ylab='', axes=FALSE); text(x=0, y=0, labels=e$message, col='red'); paste('ERROR', e$message, sep=' : ')}); dev.off()"))
          inside))
      "\n")))
 
@@ -295,7 +295,7 @@ Each member of this list is a list with three members:
 			      (substring (symbol-name (car pair)) 1)
 			      (cdr pair)) ""))
 		params ""))
-    (format "%s(%s=\"%s\"%s%s%s)"
+    (format "%s(%s=\"%s\"%s%s%s); tryCatch({"
 	    device filearg out-file args
 	    (if extra-args "," "") (or extra-args ""))))
 
