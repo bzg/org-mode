@@ -78,6 +78,7 @@ This variable can be set to either `atx' or `setext'."
 		     (headline . org-md-headline)
 		     (horizontal-rule . org-md-horizontal-rule)
 		     (inline-src-block . org-md-verbatim)
+		     (inner-template . org-md-inner-template)
 		     (italic . org-md-italic)
 		     (item . org-md-item)
 		     (keyword . org-md-keyword)
@@ -99,19 +100,26 @@ This variable can be set to either `atx' or `setext'."
 ;;; Filters
 
 (defun org-md-separate-elements (tree backend info)
-  "Make sure elements are separated by at least one blank line.
+  "Fix blank lines between elements.
 
 TREE is the parse tree being exported.  BACKEND is the export
 back-end used.  INFO is a plist used as a communication channel.
 
+Make sure there's no blank line before a plain list, unless it is
+located right after a paragraph.  Otherwise, add a blank line
+between elements.  Blank lines between items are preserved.
+
 Assume BACKEND is `md'."
-  (org-element-map tree org-element-all-elements
+  (org-element-map tree (remq 'item org-element-all-elements)
     (lambda (elem)
-      (unless (eq (org-element-type elem) 'org-data)
-	(org-element-put-property
-	 elem :post-blank
-	 (let ((post-blank (org-element-property :post-blank elem)))
-	   (if (not post-blank) 1 (max 1 post-blank)))))))
+      (org-element-put-property
+       elem :post-blank
+       (if (and (eq (org-element-type (org-export-get-next-element elem info))
+		    'plain-list)
+		(not (and (eq (org-element-type elem) 'paragraph)
+			  (org-export-get-previous-element elem info))))
+	   0
+	 1))))
   ;; Return updated tree.
   tree)
 
@@ -448,6 +456,14 @@ a communication channel."
 
 
 ;;;; Template
+
+(defun org-md-inner-template (contents info)
+  "Return body of document after converting it to Markdown syntax.
+CONTENTS is the transcoded contents string.  INFO is a plist
+holding export options."
+  ;; Make sure CONTENTS is separated from table of contents and
+  ;; footnotes with at least a blank line.
+  (org-trim (org-html-inner-template (concat "\n" contents "\n") info)))
 
 (defun org-md-template (contents info)
   "Return complete document string after Markdown conversion.
