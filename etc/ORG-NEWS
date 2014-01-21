@@ -11,6 +11,12 @@ Please send Org bug reports to emacs-orgmode@gnu.org.
 * Version 8.2
 
 ** Incompatible changes
+*** =ob-sh.el= renamed to =ob-shell=
+This may require two changes in user config.
+
+1. In =org-babel-do-load-languages=, change =(sh . t)= to =(shell . t)=.
+2. Edit =local.mk= files to change the value of =BTEST_OB_LANGUAGES=
+   to remove "sh" and include "shell".
 
 *** Combine org-mac-message.el and org-mac-link-grabber into org-mac-link.el
 
