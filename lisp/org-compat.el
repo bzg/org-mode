@@ -260,6 +260,12 @@ ignored in this case."
 		  next (+ from (* n inc)))))
 	(nreverse seq)))))
 
+;; `set-transient-map' is only in Emacs >= 24.4
+(defalias 'org-set-transient-map
+  (if (fboundp 'set-transient-map)
+      'set-transient-map
+    'set-temporary-overlay-map))
+
 ;; Region compatibility
 
 (defvar org-ignore-region nil
