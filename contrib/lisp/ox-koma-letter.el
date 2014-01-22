@@ -361,17 +361,17 @@ A headline is only used if #+OPENING is not set.  See also
 
 (org-export-define-derived-backend 'koma-letter 'latex
   :options-alist
-  '((:author "AUTHOR" nil (org-koma-letter--get-value org-koma-letter-author) t)
-    (:closing "CLOSING" nil org-koma-letter-closing)
-    (:email "EMAIL" nil (org-koma-letter--get-value org-koma-letter-email) t)
-    (:from-address "FROM_ADDRESS" nil nil newline)
-    (:latex-class "LATEX_CLASS" nil org-koma-letter-default-class t)
+  '((:latex-class "LATEX_CLASS" nil org-koma-letter-default-class t)
     (:lco "LCO" nil org-koma-letter-class-option-file)
-    (:opening "OPENING" nil org-koma-letter-opening)
+    (:author "AUTHOR" nil (org-koma-letter--get-value org-koma-letter-author) t)
+    (:from-address "FROM_ADDRESS" nil nil newline)
     (:phone-number "PHONE_NUMBER" nil org-koma-letter-phone-number)
-    (:place "PLACE" nil org-koma-letter-place)
-    (:signature "SIGNATURE" nil org-koma-letter-signature newline)
+    (:email "EMAIL" nil (org-koma-letter--get-value org-koma-letter-email) t)
     (:to-address "TO_ADDRESS" nil nil newline)
+    (:place "PLACE" nil org-koma-letter-place)
+    (:opening "OPENING" nil org-koma-letter-opening)
+    (:closing "CLOSING" nil org-koma-letter-closing)
+    (:signature "SIGNATURE" nil org-koma-letter-signature newline)
     (:special-headings nil "special-headings"
 		       org-koma-letter-prefer-special-headings)
     (:special-tags nil nil (append
