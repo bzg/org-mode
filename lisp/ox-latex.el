@@ -102,13 +102,12 @@
 	    (lambda (a s v b)
 	      (if a (org-latex-export-to-pdf t s v b)
 		(org-open-file (org-latex-export-to-pdf nil s v b)))))))
-  :options-alist '((:latex-class "LATEX_CLASS" nil org-latex-default-class t)
+  :options-alist '((:date "DATE" nil "\\today" t)
+		   (:latex-class "LATEX_CLASS" nil org-latex-default-class t)
 		   (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
 		   (:latex-header "LATEX_HEADER" nil nil newline)
 		   (:latex-header-extra "LATEX_HEADER_EXTRA" nil nil newline)
-		   (:latex-hyperref-p nil "texht" org-latex-with-hyperref t)
-		   ;; Redefine regular options.
-		   (:date "DATE" nil "\\today" t))
+		   (:latex-hyperref-p nil "texht" org-latex-with-hyperref t))
   :filters-alist '((:filter-options . org-latex-math-block-options-filter)
 		   (:filter-parse-tree . org-latex-math-block-tree-filter)))
 
