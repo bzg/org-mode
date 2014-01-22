@@ -106,20 +106,20 @@ BLOB is the element or object considered."
   "Maximum nesting depth for headlines, counting from 0.")
 
 (defconst org-export-options-alist
-  '((:author "AUTHOR" nil user-full-name t)
-    (:creator "CREATOR" nil org-export-creator-string)
+  '((:title "TITLE" nil nil space)
     (:date "DATE" nil nil t)
-    (:description "DESCRIPTION" nil nil newline)
+    (:author "AUTHOR" nil user-full-name t)
     (:email "EMAIL" nil user-mail-address t)
-    (:exclude-tags "EXCLUDE_TAGS" nil org-export-exclude-tags split)
-    (:headline-levels nil "H" org-export-headline-levels)
+    (:description "DESCRIPTION" nil nil newline)
     (:keywords "KEYWORDS" nil nil space)
     (:language "LANGUAGE" nil org-export-default-language t)
+    (:select-tags "SELECT_TAGS" nil org-export-select-tags split)
+    (:exclude-tags "EXCLUDE_TAGS" nil org-export-exclude-tags split)
+    (:creator "CREATOR" nil org-export-creator-string)
+    (:headline-levels nil "H" org-export-headline-levels)
     (:preserve-breaks nil "\\n" org-export-preserve-breaks)
     (:section-numbers nil "num" org-export-with-section-numbers)
-    (:select-tags "SELECT_TAGS" nil org-export-select-tags split)
     (:time-stamp-file nil "timestamp" org-export-time-stamp-file)
-    (:title "TITLE" nil nil space)
     (:with-archived-trees nil "arch" org-export-with-archived-trees)
     (:with-author nil "author" org-export-with-author)
     (:with-clocks nil "c" org-export-with-clocks)
@@ -3209,8 +3209,8 @@ locally for the subtree through node properties."
 	      (org-completing-read
 	       "Options category: "
 	       (cons "default"
-		     (mapcar (lambda (b)
-			       (symbol-name (org-export-backend-name b)))
+		     (mapcar #'(lambda (b)
+				 (symbol-name (org-export-backend-name b)))
 			     org-export--registered-backends))))))
 	options keywords)
     ;; Populate OPTIONS and KEYWORDS.
@@ -3225,43 +3225,14 @@ locally for the subtree through node properties."
          (keyword (unless (assoc keyword keywords)
                     (let ((value
                            (if (eq (nth 4 entry) 'split)
-                               (mapconcat 'identity (eval (nth 3 entry)) " ")
+                               (mapconcat #'identity (eval (nth 3 entry)) " ")
                              (eval (nth 3 entry)))))
                       (push (cons keyword value) keywords))))
          (option (unless (assoc option options)
                    (push (cons option (eval (nth 3 entry))) options))))))
     ;; Move to an appropriate location in order to insert options.
     (unless subtreep (beginning-of-line))
-    ;; First get TITLE, DATE, AUTHOR and EMAIL if they belong to the
-    ;; list of available keywords.
-    (when (assoc "TITLE" keywords)
-      (let ((title
-	     (or (let ((visited-file (buffer-file-name (buffer-base-buffer))))
-		   (and visited-file
-			(file-name-sans-extension
-			 (file-name-nondirectory visited-file))))
-		 (buffer-name (buffer-base-buffer)))))
-	(if (not subtreep) (insert (format "#+TITLE: %s\n" title))
-	  (org-entry-put node "EXPORT_TITLE" title))))
-    (when (assoc "DATE" keywords)
-      (let ((date (with-temp-buffer (org-insert-time-stamp (current-time)))))
-	(if (not subtreep) (insert "#+DATE: " date "\n")
-	  (org-entry-put node "EXPORT_DATE" date))))
-    (when (assoc "AUTHOR" keywords)
-      (let ((author (cdr (assoc "AUTHOR" keywords))))
-	(if subtreep (org-entry-put node "EXPORT_AUTHOR" author)
-	  (insert
-	   (format "#+AUTHOR:%s\n"
-		   (if (not (org-string-nw-p author)) ""
-		     (concat " " author)))))))
-    (when (assoc "EMAIL" keywords)
-      (let ((email (cdr (assoc "EMAIL" keywords))))
-	(if subtreep (org-entry-put node "EXPORT_EMAIL" email)
-	  (insert
-	   (format "#+EMAIL:%s\n"
-		   (if (not (org-string-nw-p email)) ""
-		     (concat " " email)))))))
-    ;; Then (multiple) OPTIONS lines.  Never go past fill-column.
+    ;; First (multiple) OPTIONS lines.  Never go past fill-column.
     (when options
       (let ((items
 	     (mapcar
@@ -3279,15 +3250,26 @@ locally for the subtree through node properties."
 		  (insert " " item)
 		  (incf width (1+ (length item))))))
 	    (insert "\n")))))
-    ;; And the rest of keywords.
-    (dolist (key (sort keywords (lambda (k1 k2) (string< (car k1) (car k2)))))
-      (unless (member (car key) '("TITLE" "DATE" "AUTHOR" "EMAIL"))
-        (let ((val (cdr key)))
-          (if subtreep (org-entry-put node (concat "EXPORT_" (car key)) val)
-            (insert
-             (format "#+%s:%s\n"
-                     (car key)
-                     (if (org-string-nw-p val) (format " %s" val) "")))))))))
+    ;; Then the rest of keywords, in the order specified in either
+    ;; `org-export-options-alist' or respective export back-ends.
+    (dolist (key (nreverse keywords))
+      (let ((val (cond ((equal (car key) "DATE")
+			(or (cdr key)
+			    (with-temp-buffer
+			      (org-insert-time-stamp (current-time)))))
+		       ((equal (car key) "TITLE")
+			(or (let ((visited-file
+				   (buffer-file-name (buffer-base-buffer))))
+			      (and visited-file
+				   (file-name-sans-extension
+				    (file-name-nondirectory visited-file))))
+			    (buffer-name (buffer-base-buffer))))
+		       (t (cdr key)))))
+	(if subtreep (org-entry-put node (concat "EXPORT_" (car key)) val)
+	  (insert
+	   (format "#+%s:%s\n"
+		   (car key)
+		   (if (org-string-nw-p val) (format " %s" val) ""))))))))
 
 (defun org-export-expand-include-keyword (&optional included dir)
   "Expand every include keyword in buffer.

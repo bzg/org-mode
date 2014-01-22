@@ -231,15 +231,14 @@ Return overlay specification, as a string, or nil."
 	      (if a (org-beamer-export-to-pdf t s v b)
 		(org-open-file (org-beamer-export-to-pdf nil s v b)))))))
   :options-alist
-  '((:beamer-theme "BEAMER_THEME" nil org-beamer-theme)
+  '((:latex-class "LATEX_CLASS" nil "beamer" t)
+    (:beamer-theme "BEAMER_THEME" nil org-beamer-theme)
     (:beamer-color-theme "BEAMER_COLOR_THEME" nil nil t)
     (:beamer-font-theme "BEAMER_FONT_THEME" nil nil t)
     (:beamer-inner-theme "BEAMER_INNER_THEME" nil nil t)
     (:beamer-outer-theme "BEAMER_OUTER_THEME" nil nil t)
     (:beamer-header-extra "BEAMER_HEADER" nil nil newline)
-    ;; Modify existing properties.
-    (:headline-levels nil "H" org-beamer-frame-level)
-    (:latex-class "LATEX_CLASS" nil "beamer" t))
+    (:headline-levels nil "H" org-beamer-frame-level))
   :translate-alist '((bold . org-beamer-bold)
 		     (export-block . org-beamer-export-block)
 		     (export-snippet . org-beamer-export-snippet)

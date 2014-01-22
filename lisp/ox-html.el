@@ -109,31 +109,30 @@
 	      (if a (org-html-export-to-html t s v b)
 		(org-open-file (org-html-export-to-html nil s v b)))))))
   :options-alist
-  '((:html-extension nil nil org-html-extension)
-    (:html-link-org-as-html nil nil org-html-link-org-files-as-html)
+  '((:creator "CREATOR" nil org-html-creator-string)
     (:html-doctype "HTML_DOCTYPE" nil org-html-doctype)
-    (:html-container "HTML_CONTAINER" nil org-html-container-element)
-    (:html-html5-fancy nil "html5-fancy" org-html-html5-fancy)
-    (:html-link-use-abs-url nil "html-link-use-abs-url" org-html-link-use-abs-url)
     (:html-link-home "HTML_LINK_HOME" nil org-html-link-home)
     (:html-link-up "HTML_LINK_UP" nil org-html-link-up)
-    (:html-mathjax "HTML_MATHJAX" nil "" space)
-    (:html-postamble nil "html-postamble" org-html-postamble)
-    (:html-preamble nil "html-preamble" org-html-preamble)
     (:html-head "HTML_HEAD" nil org-html-head newline)
     (:html-head-extra "HTML_HEAD_EXTRA" nil org-html-head-extra newline)
+    (:html-container "HTML_CONTAINER" nil org-html-container-element)
+    (:html-mathjax "HTML_MATHJAX" nil "" space)
+    (:infojs-opt "INFOJS_OPT" nil nil)
+    ;; Retrieve LaTeX header for fragments.
+    (:latex-header "LATEX_HEADER" nil nil newline)
+    (:html-extension nil nil org-html-extension)
+    (:html-link-org-as-html nil nil org-html-link-org-files-as-html)
+    (:html-html5-fancy nil "html5-fancy" org-html-html5-fancy)
+    (:html-link-use-abs-url nil "html-link-use-abs-url" org-html-link-use-abs-url)
+    (:html-postamble nil "html-postamble" org-html-postamble)
+    (:html-preamble nil "html-preamble" org-html-preamble)
     (:html-head-include-default-style nil "html-style" org-html-head-include-default-style)
     (:html-head-include-scripts nil "html-scripts" org-html-head-include-scripts)
     (:html-table-attributes nil nil org-html-table-default-attributes)
     (:html-table-row-tags nil nil org-html-table-row-tags)
     (:html-xml-declaration nil nil org-html-xml-declaration)
     (:html-inline-images nil nil org-html-inline-images)
-    (:infojs-opt "INFOJS_OPT" nil nil)
-    ;; Redefine regular options.
-    (:creator "CREATOR" nil org-html-creator-string)
-    (:with-latex nil "tex" org-html-with-latex)
-    ;; Retrieve LaTeX header for fragments.
-    (:latex-header "LATEX_HEADER" nil nil newline)))
+    (:with-latex nil "tex" org-html-with-latex)))
 
 
 ;;; Internal Variables
