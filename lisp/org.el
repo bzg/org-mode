@@ -5235,10 +5235,8 @@ Support for group tags is controlled by the option
   (if (or (not file)
 	  (not (file-readable-p file)))
       (if noerror
-	  (message "Cannot read file \"%s\" referenced in file \"%s\""
-		   file (buffer-file-name))
-	(error "Cannot read file \"%s\" referenced in file \"%s\""
-	       file (buffer-file-name)))
+	  (message "Cannot read file \"%s\"" file)
+	(error "Cannot read file \"%s\"" file))
     (with-temp-buffer
       (insert-file-contents file)
       (buffer-string))))
