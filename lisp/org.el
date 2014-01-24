@@ -9142,7 +9142,7 @@ if `orgstruct-heading-prefix-regexp' is not empty."
 					      (key-description key))))))
 			      thereis (key-binding key))))
 		  (if (keymapp binding)
-		      (set-transient-map binding)
+		      (org-set-transient-map binding)
 		    (let ((func (or binding
 				    (unless disable
 				      'orgstruct-error))))
