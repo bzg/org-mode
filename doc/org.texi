@@ -11776,13 +11776,12 @@ the @LaTeX{} @code{\includegraphics} macro will be commented out.
 @cindex plain lists, in @LaTeX{} export
 
 Plain lists accept two optional attributes: @code{:environment} and
-@code{:options}.  The first one allows the use of a non-standard
-environment (e.g., @samp{inparaenum}).  The second one specifies
-optional arguments for that environment (square brackets may be
-omitted).
+@code{:options}.  The first one allows the use of a non-standard environment
+(e.g., @samp{inparaenum}).  The second one specifies additional arguments for
+that environment.
 
 @example
-#+ATTR_LATEX: :environment compactitem :options $\circ$
+#+ATTR_LATEX: :environment compactitem :options [$\circ$]
 - you need ``paralist'' package to reproduce this example.
 @end example
 
