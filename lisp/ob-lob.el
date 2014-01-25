@@ -147,13 +147,14 @@ if so then run the appropriate source block from the Library."
 		      ;; Do *not* pre-process params for call line
 		      ;; hash evaluation, since for a call line :var
 		      ;; extension *is* execution.
-		      (let ((params (nth 2 pre-info)))
-			(append (subseq pre-info 0 2)
-				(list
-				 (cons
-				  (cons :c-var (cdr (assoc :var params)))
-				  (assq-delete-all :var (copy-tree params))))
-				(subseq pre-info 3))))))
+		      (let* ((params (nth 2 pre-info))
+			     (sha1-nth2 (list
+				    (cons
+				     (cons :c-var (cdr (assoc :var params)))
+				     (assq-delete-all :var (copy-tree params)))))
+			     (sha1-info (copy-tree pre-info)))
+			(prog1 sha1-info
+			  (setcar (cddr sha1-info) sha1-nth2))))))
 	 (old-hash (when cache-p (org-babel-current-result-hash pre-info)))
 	 (org-babel-current-src-block-location (point-marker)))
     (if (and cache-p (equal new-hash old-hash))
