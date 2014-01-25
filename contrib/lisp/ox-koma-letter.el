@@ -34,14 +34,14 @@
 ;; On top of buffer keywords supported by `latex' back-end (see
 ;; `org-latex-options-alist'), this back-end introduces the following
 ;; keywords:
-;;   - "CLOSING" (see `org-koma-letter-closing'),
-;;   - "FROM_ADDRESS" (see `org-koma-letter-from-address'),
-;;   - "LCO" (see `org-koma-letter-class-option-file'),
-;;   - "OPENING" (see `org-koma-letter-opening'),
-;;   - "PHONE_NUMBER" (see `org-koma-letter-phone-number'),
-;;   - "SIGNATURE" (see `org-koma-letter-signature')
-;;   - "PLACE" (see `org-koma-letter-place')
-;;   - and "TO_ADDRESS".  If unspecified this is set to "\mbox{}".
+;;   - CLOSING: see `org-koma-letter-closing',
+;;   - FROM_ADDRESS: see `org-koma-letter-from-address',
+;;   - LCO: see `org-koma-letter-class-option-file',
+;;   - OPENING: see `org-koma-letter-opening',
+;;   - PHONE_NUMBER: see `org-koma-letter-phone-number',
+;;   - SIGNATURE: see `org-koma-letter-signature',
+;;   - PLACE: see `org-koma-letter-place',
+;;   - TO_ADDRESS:  If unspecified this is set to "\mbox{}".
 ;;
 ;; TO_ADDRESS and FROM_ADDRESS can also be specified using heading
 ;; with the special tags specified in
@@ -67,8 +67,9 @@
 ;;     (see `org-koma-letter-special-tags-after-letter').
 ;;
 ;; The following variables works differently from the main LaTeX class
-;;   - "AUTHOR": default to user-full-name but may be disabled.  (see org-koma-letter-author),
-;;   - "EMAIL": same as AUTHOR, (see org-koma-letter-email),
+;;   - AUTHOR: Default to user-full-name but may be disabled.
+;;     (See also `org-koma-letter-author'),
+;;   - EMAIL: Same as AUTHOR. (see also `org-koma-letter-email'),
 ;;
 ;; Headlines are in general ignored.  However, headlines with special
 ;; tags can be used for specified contents like postscript (ps),
@@ -105,11 +106,16 @@
 ;;   \[EXTRA]"))
 ;;
 ;; Then, in your Org document, be sure to require the proper class
-;; with :
+;; with:
 ;;
 ;;    #+LATEX_CLASS: my-letter
 ;;
 ;; Or by setting `org-koma-letter-default-class'.
+;;
+;; You may have to load (LaTeX) Babel as well, e.g., by adding
+;; it to `org-latex-packages-alist',
+;;
+;;    (add-to-list 'org-latex-packages-alist '("AUTO" "babel" nil))
 
 ;;; Code:
 
@@ -252,7 +258,7 @@ This option can also be set with the OPTIONS keyword, e.g.:
   :group 'org-export-koma-letter)
 
 (defcustom org-koma-letter-use-backaddress nil
-  "Non-nil prints return address in small line above to address.
+  "Non-nil prints return address in line above to address.
 This option can also be set with the OPTIONS keyword, e.g.:
 \"backaddress:t\"."
   :group 'org-export-koma-letter
