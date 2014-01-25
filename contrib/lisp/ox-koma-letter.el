@@ -70,6 +70,8 @@
 ;;   - AUTHOR: Default to user-full-name but may be disabled.
 ;;     (See also `org-koma-letter-author'),
 ;;   - EMAIL: Same as AUTHOR. (see also `org-koma-letter-email'),
+;;   - TITLE: May be the letter title or subject depending on
+;;     `org-koma-letter-prefer-subject'.
 ;;
 ;; Headlines are in general ignored.  However, headlines with special
 ;; tags can be used for specified contents like postscript (ps),
@@ -336,6 +338,16 @@ This option can also be set with the OPTIONS keyword, e.g.:
   :group 'org-export-koma-letter
   :type 'boolean)
 
+(defcustom org-koma-letter-use-title t
+  "Non-nil means use a title in the letter if present.
+This option can also be set with the OPTIONS keyword,
+e.g. \"with-title:nil\".
+
+See also `org-koma-letter-prefer-subject' for the handling of
+title versus subject."
+  :group 'org-export-koma-letter
+  :type 'boolean)
+
 (defcustom org-koma-letter-default-class "default-koma-letter"
   "Default class for `org-koma-letter'.
 The value must be a member of `org-latex-classes'."
@@ -348,6 +360,16 @@ A headline is only used if #+OPENING is not set.  See also
 `org-koma-letter-opening'."
   :group 'org-export-koma-letter
   :type 'boolean)
+
+(defcustom org-koma-letter-prefer-subject nil
+  "Non-nil means title should be interpret as subject if subject is missing.
+This option can also be set with the OPTIONS keyword,
+e.g. \"title-subject:t\".
+
+This may be useful for older documents where the SUBJECT keyword
+was not present."
+    :group 'org-export-koma-letter
+    :type 'boolean)
 
 (defconst org-koma-letter-special-tags-in-letter '(to from)
   "Header tags related to the letter itself.")
@@ -378,6 +400,7 @@ A headline is only used if #+OPENING is not set.  See also
     (:opening "OPENING" nil org-koma-letter-opening)
     (:closing "CLOSING" nil org-koma-letter-closing)
     (:signature "SIGNATURE" nil org-koma-letter-signature newline)
+    (:subject "SUBJECT" nil nil space)
     (:special-headings nil "special-headings"
 		       org-koma-letter-prefer-special-headings)
     (:special-tags nil nil (append
@@ -394,6 +417,8 @@ A headline is only used if #+OPENING is not set.  See also
     (:with-phone nil "phone" org-koma-letter-use-phone)
     (:with-place nil "place" org-koma-letter-use-place)
     (:with-subject nil "subject" org-koma-letter-subject-format)
+    (:with-title nil "title" org-koma-letter-use-title)
+    (:with-title-as-subject nil "title-subject" org-koma-letter-prefer-subject)
     ;; Special properties non-nil when a setting happened in buffer.
     ;; They are used to prioritize in-buffer settings over "lco"
     ;; files.  See `org-koma-letter-template'.
@@ -599,7 +624,7 @@ holding export options."
    (format "\\date{%s}\n" (org-export-data (org-export-get-date info) info))
    ;; Document start
    "\\begin{document}\n\n"
-   ;; Subject
+   ;; Subject and title
    (let ((with-subject (plist-get info :with-subject)))
      (when with-subject
        (concat
@@ -607,9 +632,17 @@ holding export options."
 	  (format "\\KOMAoption{subject}{%s}\n"
 		  (if (symbolp with-subject) with-subject
 		    (mapconcat #'symbol-name with-subject ","))))
-	(let ((subject (org-export-data (plist-get info :title) info)))
-	  (and (org-string-nw-p subject)
-	       (format "\\setkomavar{subject}{%s}\n\n" subject))))))
+	(let* ((title-as-subject (plist-get info :with-title-as-subject))
+	       (subject* (org-string-nw-p (org-export-data (plist-get info :subject) info)))
+	       (title* (org-string-nw-p (org-export-data (plist-get info :title) info)))
+	       (subject (if title-as-subject (or subject* title*) subject*))
+	       (title (if title-as-subject (and subject* title*) title*)))
+	  (concat
+	   (and (org-string-nw-p subject)
+		(format "\\setkomavar{subject}{%s}\n" subject))
+	   (and (org-string-nw-p title)
+		(format "\\setkomavar{title}{%s}\n" title))
+	   (when (or (org-string-nw-p title) (org-string-nw-p subject)) "\n"))))))
    ;; Letter start.
    (format "\\begin{letter}{%%\n%s}\n\n"
 	   (org-koma-letter--determine-to-and-from info 'to))
