@@ -8767,7 +8767,6 @@ the same tree node, and the headline of the tree node in the Org-mode file."
       (with-current-buffer buffer
 	(widen)
 	(goto-char pos)
-	(setq col (current-column))
 	(org-show-context 'agenda)
 	(save-excursion
 	  (and (outline-next-heading)
