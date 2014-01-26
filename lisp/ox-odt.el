@@ -66,7 +66,6 @@
     (planning . org-odt-planning)
     (property-drawer . org-odt-property-drawer)
     (quote-block . org-odt-quote-block)
-    (quote-section . org-odt-quote-section)
     (radio-target . org-odt-radio-target)
     (section . org-odt-section)
     (special-block . org-odt-special-block)
@@ -2996,16 +2995,6 @@ holding contextual information."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   contents)
-
-
-;;;; Quote Section
-
-(defun org-odt-quote-section (quote-section contents info)
-  "Transcode a QUOTE-SECTION element from Org to ODT.
-CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((value (org-remove-indentation
-		(org-element-property :value quote-section))))
-    (when value (org-odt-do-format-code value))))
 
 
 ;;;; Section

@@ -86,7 +86,6 @@ setting of `org-html-htmlize-output-type' is 'css."
     (planning . org-org-identity)
     (property-drawer . org-org-identity)
     (quote-block . org-org-identity)
-    (quote-section . org-org-identity)
     (radio-target . org-org-identity)
     (section . org-org-identity)
     (special-block . org-org-identity)

@@ -90,7 +90,6 @@ This variable can be set to either `atx' or `setext'."
 		     (plain-text . org-md-plain-text)
 		     (property-drawer . org-md-property-drawer)
 		     (quote-block . org-md-quote-block)
-		     (quote-section . org-md-example-block)
 		     (section . org-md-section)
 		     (src-block . org-md-example-block)
 		     (template . org-md-template)

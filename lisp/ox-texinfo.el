@@ -96,7 +96,6 @@
     (planning . org-texinfo-planning)
     (property-drawer . org-texinfo-property-drawer)
     (quote-block . org-texinfo-quote-block)
-    (quote-section . org-texinfo-quote-section)
     (radio-target . org-texinfo-radio-target)
     (section . org-texinfo-section)
     (special-block . org-texinfo-special-block)
@@ -1436,15 +1435,6 @@ holding contextual information."
 			      (if title
 				  (format " %s" title)))))
     (format "%s\n%s@end quotation" start-quote contents)))
-
-;;; Quote Section
-
-(defun org-texinfo-quote-section (quote-section contents info)
-  "Transcode a QUOTE-SECTION element from Org to Texinfo.
-CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((value (org-remove-indentation
-		(org-element-property :value quote-section))))
-    (when value (format "@verbatim\n%s@end verbatim" value))))
 
 ;;; Radio Target
 

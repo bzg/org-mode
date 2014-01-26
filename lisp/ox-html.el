@@ -79,7 +79,6 @@
     (planning . org-html-planning)
     (property-drawer . org-html-property-drawer)
     (quote-block . org-html-quote-block)
-    (quote-section . org-html-quote-section)
     (radio-target . org-html-radio-target)
     (section . org-html-section)
     (special-block . org-html-special-block)
@@ -3049,15 +3048,6 @@ holding contextual information."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (format "<blockquote>\n%s</blockquote>" contents))
-
-;;;; Quote Section
-
-(defun org-html-quote-section (quote-section contents info)
-  "Transcode a QUOTE-SECTION element from Org to HTML.
-CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((value (org-remove-indentation
-		(org-element-property :value quote-section))))
-    (when value (format "<pre>\n%s</pre>" value))))
 
 ;;;; Section
 

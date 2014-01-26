@@ -72,7 +72,6 @@
     (planning . org-latex-planning)
     (property-drawer . org-latex-property-drawer)
     (quote-block . org-latex-quote-block)
-    (quote-section . org-latex-quote-section)
     (radio-target . org-latex-radio-target)
     (section . org-latex-section)
     (special-block . org-latex-special-block)
@@ -2095,16 +2094,6 @@ holding contextual information."
   (org-latex--wrap-label
    quote-block
    (format "\\begin{quote}\n%s\\end{quote}" contents)))
-
-
-;;;; Quote Section
-
-(defun org-latex-quote-section (quote-section contents info)
-  "Transcode a QUOTE-SECTION element from Org to LaTeX.
-CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((value (org-remove-indentation
-		(org-element-property :value quote-section))))
-    (when value (format "\\begin{verbatim}\n%s\\end{verbatim}" value))))
 
 
 ;;;; Radio Target

@@ -78,7 +78,6 @@
     (planning . org-ascii-planning)
     (property-drawer . org-ascii-property-drawer)
     (quote-block . org-ascii-quote-block)
-    (quote-section . org-ascii-quote-section)
     (radio-target . org-ascii-radio-target)
     (section . org-ascii-section)
     (special-block . org-ascii-special-block)
@@ -504,11 +503,11 @@ INFO is a plist used as a communication channel."
 			(if low-level-rank (* low-level-rank 2)
 			  org-ascii-inner-margin))))))))
        (- total-width
-	  ;; Each `quote-block', `quote-section' and `verse-block' above
-	  ;; narrows text width by twice the standard margin size.
+	  ;; Each `quote-block' and `verse-block' above narrows text
+	  ;; width by twice the standard margin size.
 	  (+ (* (loop for parent in genealogy
 		      when (memq (org-element-type parent)
-				 '(quote-block quote-section verse-block))
+				 '(quote-block verse-block))
 		      count parent)
 		2 org-ascii-quote-margin)
 	     ;; Text width within a plain-list is restricted by
@@ -1509,25 +1508,6 @@ holding contextual information."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (org-ascii--indent-string contents org-ascii-quote-margin))
-
-
-;;;; Quote Section
-
-(defun org-ascii-quote-section (quote-section contents info)
-  "Transcode a QUOTE-SECTION element from Org to ASCII.
-CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((width (org-ascii--current-text-width quote-section info))
-	(value
-	 (org-export-data
-	  (org-remove-indentation (org-element-property :value quote-section))
-	  info)))
-    (org-ascii--indent-string
-     value
-     (+ org-ascii-quote-margin
-	;; Don't apply inner margin if parent headline is low level.
-	(let ((headline (org-export-get-parent-headline quote-section)))
-	  (if (org-export-low-level-p headline info) 0
-	    org-ascii-inner-margin))))))
 
 
 ;;;; Radio Target
