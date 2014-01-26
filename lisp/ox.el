@@ -221,7 +221,6 @@ way they are handled must be hard-coded into
     (:filter-planning . org-export-filter-planning-functions)
     (:filter-property-drawer . org-export-filter-property-drawer-functions)
     (:filter-quote-block . org-export-filter-quote-block-functions)
-    (:filter-quote-section . org-export-filter-quote-section-functions)
     (:filter-radio-target . org-export-filter-radio-target-functions)
     (:filter-section . org-export-filter-section-functions)
     (:filter-special-block . org-export-filter-special-block-functions)
@@ -2653,12 +2652,6 @@ Each filter is called with three arguments: the transcoded quote
 data, as a string, the back-end, as a symbol, and the
 communication channel, as a plist.  It must return a string or
 nil.")
-
-(defvar org-export-filter-quote-section-functions nil
-  "List of functions applied to a transcoded quote-section.
-Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
-channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-section-functions nil
   "List of functions applied to a transcoded section.
