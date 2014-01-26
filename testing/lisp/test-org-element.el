@@ -1712,20 +1712,6 @@ Outside list"
      (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
-;;;; Quote Section
-
-(ert-deftest test-org-element/quote-section-parser ()
-  "Test `quote-section' parser."
-  (should
-   (let ((org-quote-string "QUOTE"))
-     (org-test-with-temp-text "* QUOTE Headline\nBody"
-       (org-element-map (org-element-parse-buffer) 'quote-section 'identity))))
-  (should-not
-   (let ((org-quote-string "TEST"))
-     (org-test-with-temp-text "* QUOTE Headline\nBody"
-       (org-element-map (org-element-parse-buffer) 'quote-section 'identity)))))
-
-
 ;;;; Radio Target
 
 (ert-deftest test-org-element/radio-target-parser ()

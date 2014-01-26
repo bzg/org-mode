@@ -31,13 +31,12 @@
 ;;
 ;; An element always starts and ends at the beginning of a line.  With
 ;; a few exceptions (`clock', `headline', `inlinetask', `item',
-;; `planning', `node-property', `quote-section' `section' and
-;; `table-row' types), it can also accept a fixed set of keywords as
-;; attributes.  Those are called "affiliated keywords" to distinguish
-;; them from other keywords, which are full-fledged elements.  Almost
-;; all affiliated keywords are referenced in
-;; `org-element-affiliated-keywords'; the others are export attributes
-;; and start with "ATTR_" prefix.
+;; `planning', `node-property', `section' and `table-row' types), it
+;; can also accept a fixed set of keywords as attributes.  Those are
+;; called "affiliated keywords" to distinguish them from other
+;; keywords, which are full-fledged elements.  Almost all affiliated
+;; keywords are referenced in `org-element-affiliated-keywords'; the
+;; others are export attributes and start with "ATTR_" prefix.
 ;;
 ;; Element containing other elements (and only elements) are called
 ;; greater elements.  Concerned types are: `center-block', `drawer',
@@ -48,10 +47,9 @@
 ;; Other element types are: `babel-call', `clock', `comment',
 ;; `comment-block', `diary-sexp', `example-block', `export-block',
 ;; `fixed-width', `horizontal-rule', `keyword', `latex-environment',
-;; `node-property', `paragraph', `planning', `quote-section',
-;; `src-block', `table', `table-row' and `verse-block'.  Among them,
-;; `paragraph' and `verse-block' types can contain Org objects and
-;; plain text.
+;; `node-property', `paragraph', `planning', `src-block', `table',
+;; `table-row' and `verse-block'.  Among them, `paragraph' and
+;; `verse-block' types can contain Org objects and plain text.
 ;;
 ;; Objects are related to document's contents.  Some of them are
 ;; recursive.  Associated types are of the following: `bold', `code',
@@ -178,7 +176,7 @@ is not sufficient to know if point is at a paragraph ending.  See
 	       dynamic-block example-block export-block fixed-width
 	       footnote-definition headline horizontal-rule inlinetask item
 	       keyword latex-environment node-property paragraph plain-list
-	       planning property-drawer quote-block quote-section section
+	       planning property-drawer quote-block section
 	       special-block src-block table table-row verse-block)
   "Complete list of element types.")
 
@@ -2295,37 +2293,6 @@ CONTENTS is nil."
    " "))
 
 
-;;;; Quote Section
-
-(defun org-element-quote-section-parser (limit)
-  "Parse a quote section.
-
-LIMIT bounds the search.
-
-Return a list whose CAR is `quote-section' and CDR is a plist
-containing `:begin', `:end', `:value' and `:post-blank' keywords.
-
-Assume point is at beginning of the section."
-  (save-excursion
-    (let* ((begin (point))
-	   (end (progn (org-with-limited-levels (outline-next-heading))
-		       (point)))
-	   (pos-before-blank (progn (skip-chars-backward " \r\t\n")
-				    (forward-line)
-				    (point)))
-	   (value (buffer-substring-no-properties begin pos-before-blank)))
-      (list 'quote-section
-	    (list :begin begin
-		  :end end
-		  :value value
-		  :post-blank (count-lines pos-before-blank end))))))
-
-(defun org-element-quote-section-interpreter (quote-section contents)
-  "Interpret QUOTE-SECTION element as Org syntax.
-CONTENTS is nil."
-  (org-element-property :value quote-section))
-
-
 ;;;; Src Block
 
 (defun org-element-src-block-parser (limit affiliated)
@@ -3812,7 +3779,7 @@ CONTENTS is nil."
 ;; are activated for fixed element chaining (i.e. `plain-list' >
 ;; `item') or fixed conditional element chaining (i.e. `headline' >
 ;; `section').  Special modes are: `first-section', `item',
-;; `node-property', `quote-section', `section' and `table-row'.
+;; `node-property', `section' and `table-row'.
 
 (defun org-element--current-element
   (limit &optional granularity special structure)
@@ -3833,8 +3800,8 @@ nil), secondary values will not be parsed, since they only
 contain objects.
 
 Optional argument SPECIAL, when non-nil, can be either
-`first-section', `item', `node-property', `quote-section',
-`section', and `table-row'.
+`first-section', `item', `node-property', `section', and
+`table-row'.
 
 If STRUCTURE isn't provided but SPECIAL is set to `item', it will
 be computed.
@@ -3860,7 +3827,6 @@ element it has to parse."
         (org-element-headline-parser limit raw-secondary-p))
        ;; Sections (must be checked after headline).
        ((eq special 'section) (org-element-section-parser limit))
-       ((eq special 'quote-section) (org-element-quote-section-parser limit))
        ((eq special 'first-section)
 	(org-element-section-parser
 	 (or (save-excursion (org-with-limited-levels (outline-next-heading)))
@@ -4296,8 +4262,7 @@ looking into captions:
   "Parse elements between BEG and END positions.
 
 SPECIAL prioritize some elements over the others.  It can be set
-to `first-section', `quote-section', `section' `item' or
-`table-row'.
+to `first-section', `section' `item' or `table-row'.
 
 When value is `item', STRUCTURE will be used as the current list
 structure.
@@ -4347,9 +4312,7 @@ Elements are accumulated into ACC."
 	   cbeg (org-element-property :contents-end element)
 	   ;; Possibly switch to a special mode.
 	   (case type
-	     (headline
-	      (if (org-element-property :quotedp element) 'quote-section
-		'section))
+	     (headline 'section)
 	     (plain-list 'item)
 	     (property-drawer 'node-property)
 	     (table 'table-row))
