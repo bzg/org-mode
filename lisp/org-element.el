@@ -865,7 +865,7 @@ Assume point is at beginning of the headline."
 				     (skip-chars-backward " \r\t\n")
 				     (forward-line)
 				     (point)))))
-      ;; Clean RAW-VALUE from any quote or comment string.
+      ;; Clean RAW-VALUE from any comment string.
       (when commentedp
 	(let ((case-fold-search nil))
 	  (setq raw-value
