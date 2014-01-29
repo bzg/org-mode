@@ -358,12 +358,13 @@ that the appropriate major-mode is set.  SPEC has the form:
 (defvar org-comment-string) ;; Defined in org.el
 (defun org-babel-under-commented-heading-p ()
   "Return t if currently under a commented heading."
-  (if (let ((hd (nth 4 (org-heading-components))))
-	(and hd (string-match (concat "^" org-comment-string) hd)))
-      t
-    (save-excursion
-      (and (org-up-heading-safe)
-	   (org-babel-under-commented-heading-p)))))
+  (unless (org-before-first-heading-p)
+    (if (let ((hd (nth 4 (org-heading-components))))
+	  (and hd (string-match (concat "^" org-comment-string) hd)))
+	t
+      (save-excursion
+	(and (org-up-heading-safe)
+	     (org-babel-under-commented-heading-p))))))
 
 (defun org-babel-tangle-collect-blocks (&optional language tangle-file)
   "Collect source blocks in the current Org-mode file.
