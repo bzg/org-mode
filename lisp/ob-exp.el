@@ -311,7 +311,7 @@ The function respects the value of the :exports header argument."
 	     (org-babel-exp-code info)))))
 
 (defcustom org-babel-exp-code-template
-  "#+BEGIN_SRC %lang%flags\n%body\n#+END_SRC"
+  "#+BEGIN_SRC %lang%switches%flags\n%body\n#+END_SRC"
   "Template used to export the body of code blocks.
 This template may be customized to include additional information
 such as the code block name, or the values of particular header
@@ -321,6 +321,7 @@ and the following %keys may be used.
  lang ------ the language of the code block
  name ------ the name of the code block
  body ------ the body of the code block
+ switches -- the switches associated to the code block
  flags ----- the flags passed to the code block
 
 In addition to the keys mentioned above, every header argument
@@ -343,8 +344,10 @@ replaced with its value."
    org-babel-exp-code-template
    `(("lang"  . ,(nth 0 info))
      ("body"  . ,(org-escape-code-in-string (nth 1 info)))
+     ("switches" . ,(let ((f (nth 3 info)))
+		      (and (org-string-nw-p f) (concat " " f))))
      ("flags" . ,(let ((f (assq :flags (nth 2 info))))
-		   (when f (concat " " (cdr f)))))
+		   (and f (concat " " (cdr f)))))
      ,@(mapcar (lambda (pair)
 		 (cons (substring (symbol-name (car pair)) 1)
 		       (format "%S" (cdr pair))))
