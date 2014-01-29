@@ -934,40 +934,6 @@ Some other text
 
 ;;;; Headline
 
-(ert-deftest test-org-element/headline-quote-keyword ()
-  "Test QUOTE keyword recognition."
-  ;; Reference test.
-  (org-test-with-temp-text "* Headline"
-    (let ((org-quote-string "QUOTE"))
-      (should-not (org-element-property :quotedp (org-element-at-point)))))
-  ;; Standard position.
-  (org-test-with-temp-text "* QUOTE Headline"
-    (let* ((org-quote-string "QUOTE")
-	   (headline (org-element-at-point)))
-      (should (org-element-property :quotedp headline))
-      ;; Test removal from raw value.
-      (should (equal (org-element-property :raw-value headline) "Headline"))))
-  ;; Case sensitivity.
-  (org-test-with-temp-text "* QUOTE Headline"
-    (let* ((org-quote-string "Quote")
-	   (headline (org-element-at-point)))
-      (should-not (org-element-property :quotedp headline))
-      (should (equal (org-element-property :raw-value headline)
-		     "QUOTE Headline"))))
-  ;; With another keyword.
-  (org-test-with-temp-text "* TODO QUOTE Headline"
-    (let* ((org-quote-string "QUOTE")
-	   (org-todo-keywords '((sequence "TODO" "DONE")))
-	   (headline (org-element-at-point)))
-      (should (org-element-property :quotedp headline))
-      (should (equal (org-element-property :raw-value headline) "Headline"))))
-  ;; With the keyword only.
-  (org-test-with-temp-text "* QUOTE"
-    (let* ((org-quote-string "QUOTE")
-	   (headline (org-element-at-point)))
-      (should (org-element-property :quotedp headline))
-      (should (equal (org-element-property :raw-value headline) "")))))
-
 (ert-deftest test-org-element/headline-comment-keyword ()
   "Test COMMENT keyword recognition."
   ;; Reference test.
@@ -2199,12 +2165,7 @@ Outside list"
    (equal (let ((org-comment-string "COMMENT"))
 	    (org-test-parse-and-interpret "* COMMENT Headline"))
 	  "* COMMENT Headline\n"))
-  ;; 6. With quote section.
-  (should
-   (equal (let ((org-quote-string "QUOTE"))
-	    (org-test-parse-and-interpret "* QUOTE Headline"))
-	  "* QUOTE Headline\n"))
-  ;; 7. Keep same number of blank lines before body.
+  ;; 6. Keep same number of blank lines before body.
   (should
    (equal (org-test-parse-and-interpret
 	   "* Headline\n\n\nText after two blank lines.")

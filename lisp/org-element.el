@@ -796,8 +796,8 @@ Return a list whose CAR is `headline' and CDR is a plist
 containing `:raw-value', `:title', `:alt-title', `:begin',
 `:end', `:pre-blank', `:contents-begin' and `:contents-end',
 `:level', `:priority', `:tags', `:todo-keyword',`:todo-type',
-`:scheduled', `:deadline', `:closed', `:quotedp', `:archivedp',
-`:commentedp' and `:footnote-section-p' keywords.
+`:scheduled', `:deadline', `:closed', `:archivedp', `:commentedp'
+and `:footnote-section-p' keywords.
 
 The plist also contains any property set in the property drawer,
 with its name in upper cases and colons added at the
@@ -816,10 +816,6 @@ Assume point is at beginning of the headline."
 	   (tags (let ((raw-tags (nth 5 components)))
 		   (and raw-tags (org-split-string raw-tags ":"))))
 	   (raw-value (or (nth 4 components) ""))
-	   (quotedp
-	    (let ((case-fold-search nil))
-	      (string-match (format "^%s\\( \\|$\\)" org-quote-string)
-			    raw-value)))
 	   (commentedp
 	    (let ((case-fold-search nil))
 	      (string-match (format "^%s\\( \\|$\\)" org-comment-string)
@@ -869,14 +865,12 @@ Assume point is at beginning of the headline."
 				     (skip-chars-backward " \r\t\n")
 				     (forward-line)
 				     (point)))))
-      ;; Clean RAW-VALUE from any quote or comment string.
-      (when (or quotedp commentedp)
+      ;; Clean RAW-VALUE from any comment string.
+      (when commentedp
 	(let ((case-fold-search nil))
 	  (setq raw-value
 		(replace-regexp-in-string
-		 (concat
-		  (regexp-opt (list org-quote-string org-comment-string))
-		  "\\(?: \\|$\\)")
+		 (concat (regexp-quote org-comment-string) "\\(?: \\|$\\)")
 		 ""
 		 raw-value))))
       ;; Clean TAGS from archive tag, if any.
@@ -905,8 +899,7 @@ Assume point is at beginning of the headline."
 				       end)
 			  :footnote-section-p footnote-section-p
 			  :archivedp archivedp
-			  :commentedp commentedp
-			  :quotedp quotedp)
+			  :commentedp commentedp)
 		    time-props
 		    standard-props))))
 	(let ((alt-title (org-element-property :ALT_TITLE headline)))
@@ -937,11 +930,9 @@ CONTENTS is the contents of the element."
 		 (and tag-list
 		      (format ":%s:" (mapconcat 'identity tag-list ":")))))
 	 (commentedp (org-element-property :commentedp headline))
-	 (quotedp (org-element-property :quotedp headline))
 	 (pre-blank (or (org-element-property :pre-blank headline) 0))
 	 (heading (concat (make-string (org-reduced-level level) ?*)
 			  (and todo (concat " " todo))
-			  (and quotedp (concat " " org-quote-string))
 			  (and commentedp (concat " " org-comment-string))
 			  (and priority
 			       (format " [#%s]" (char-to-string priority)))

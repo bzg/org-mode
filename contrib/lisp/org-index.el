@@ -68,10 +68,13 @@
 ;;
 ;;  The latest tested version of this file can always be found at:
 ;;
-;;    http://orgmode.org/w/org-mode.git?p=org-mode.git;a=blob;f=contrib/lisp/org-index.el;hb=HEAD
+;;    http://orgmode.org/w/org-mode.git?p=org-mode.git;a=blob_plain;f=contrib/lisp/org-index.el;hb=HEAD
 
 ;;; Change Log:
 
+;;   [2014-01-28 Tu] Version 2.4.1:
+;;   - Follow mode in occur-buffer
+;;
 ;;   [2014-01-02 Th] Version 2.4.0:
 ;;   - New command "put" to store a nodes reference in a property
 ;;   - New functions org-index-new-line and org-index-get-line 
@@ -166,6 +169,7 @@
 (defvar org-index--below-cursor)   ; Word below cursor
 (defvar org-index--within-node)    ; True, if we are within node of the index table
 (defvar org-index--active-window-index nil) ; Active window with index table (if any)
+(defvar org-index--occur-follow-mode nil)   ; True, if follow mode in occur-buffer is on    
 
 (setq org-index--commands '(occur head ref link leave put enter goto help + reorder fill sort update highlight unhighlight missing statistics)) ; list of commands available
 
@@ -1723,7 +1727,7 @@ retrieves the value of the count-column for reference 12.
       message-text))
 
 
-(defun org-index--do-head (ref link)
+(defun org-index--do-head (ref link &optional other)
     
   (if ref (setq org-index--last-ref ref))
     
@@ -1764,9 +1768,17 @@ retrieves the value of the count-column for reference 12.
               (if (eq buffer org-index--buffer)
                   (setq org-index--point-before nil))
               (setq message-text (format "Found '%s'" (or ref link)))
-              (org-pop-to-buffer-same-window buffer)
-              (goto-char point)
-              (org-reveal))
+              (if other
+                  (progn
+                    (pop-to-buffer buffer)
+                    (goto-char point)
+                    (org-reveal t)
+                    (recenter)
+                    (pop-to-buffer "*org-index-occur*"))
+                (org-pop-to-buffer-same-window buffer)
+                (goto-char point)
+                (org-reveal t)
+                (recenter)))
           (setq message-text (format "Did not find '%s'" (or ref link))))))
     message-text))
 
@@ -1783,12 +1795,14 @@ retrieves the value of the count-column for reference 12.
         start-of-help              ; start of displayed help (if any)
         left-off-at                ; stack of last positions in index table
         after-inserted             ; in occur-buffer
+        at-end                     ; in occur-buffer
         lines-visible              ; in occur-buffer
         below-hline-bol            ; below-hline and at bol
         exit-gracefully            ; true if normal exit
         in-c-backspace             ; true while processing C-backspace
         show-headings              ; true, if headings should be shown
-        fun-on-ret                 ; function to be executed, if return has been pressed
+        fun-on-ret                 ; function to be executed, if return is pressed
+        fun-on-tab                 ; function to be executed, if letter TAB is pressed
         ret from to key)
         
     ;; clear buffer
@@ -1801,12 +1815,19 @@ retrieves the value of the count-column for reference 12.
       (let ((keymap (make-sparse-keymap)))
 
         (set-keymap-parent keymap org-mode-map)
-        (setq fun-on-ret (lambda () (interactive) 
-                           (let ((ref (org-index--get-field :ref)) 
-                                 (link (org-index--get-field :link)))
-                             (message (org-index--do-head ref link)))))
-        
+        (setq fun-on-ret (lambda () (interactive) (org-index--occur-find-heading nil)))
         (define-key keymap (kbd "RET") fun-on-ret)
+        (setq fun-on-tab (lambda () (interactive)
+                           (org-index--occur-find-heading t)
+                           (setq org-index--occur-follow-mode (not org-index--occur-follow-mode))))
+        (define-key keymap (kbd "<tab>") fun-on-tab)
+        (define-key keymap [(control ?i)] fun-on-tab)
+        (define-key keymap (kbd "<up>") (lambda () (interactive)
+                                          (forward-line -1)
+                                          (if org-index--occur-follow-mode (org-index--occur-find-heading t))))
+        (define-key keymap (kbd "<down>") (lambda () (interactive)
+                                            (forward-line 1)
+                                            (if org-index--occur-follow-mode (org-index--occur-find-heading t))))
         (use-local-map keymap)))
 
     (with-current-buffer org-index--buffer
@@ -1824,7 +1845,7 @@ retrieves the value of the count-column for reference 12.
           
           ;; fill in header
           (erase-buffer)
-          (insert (concat "Incremental search, showing one window of matches. TAB toggles help.\n\n"))
+          (insert (concat "Incremental search, showing one window of matches. '?' toggles help.\n\n"))
           (setq start-of-lines (point))
           (setq start-of-help start-of-lines)
           (setq cursor-type 'hollow)
@@ -1835,9 +1856,9 @@ retrieves the value of the count-column for reference 12.
 
           ;; fill initially
           (setq ret (org-index--get-matching-lines nil lines-to-show below-hline-bol))
-          (when (car ret)
-            (insert (cdr ret))
-            (setq left-off-at (cons (car ret) nil))
+          (when (nth 0 ret)
+            (insert (nth 1 ret))
+            (setq left-off-at (cons (nth 0 ret) nil))
             (setq after-inserted (cons (point) nil)))
 
           ;; read keys
@@ -1863,7 +1884,7 @@ retrieves the value of the count-column for reference 12.
                                          (if (string= search-text "") "" " ")
                                          hint))))
                     (setq hint "")
-                    (setq exit-gracefully (member key (list 'up 'down 'left 'right 'RET ?\C-g ?\C-m)))))
+                    (setq exit-gracefully (member key (list 'up 'down 'left 'right 'RET ?\C-g ?\C-m 'C-return ?\C-i 'TAB)))))
                 
                 (not exit-gracefully))
             
@@ -1936,7 +1957,7 @@ retrieves the value of the count-column for reference 12.
               (setq word ""))
 
 
-             ((member key (list 'TAB ?\C-i))    ; tab: toggle display of headlines
+             ((eq key ??)    ; tab: toggle display of headlines and help
               (setq show-headings (not show-headings))
               (goto-char start-of-lines)
               (if show-headings
@@ -1945,7 +1966,7 @@ retrieves the value of the count-column for reference 12.
                     (kill-line)
                     (setq start-of-help (point))
                     (if (display-graphic-p)
-                        (insert "<backspace> and <c-backspace> erase, cursor keys move. RET finds node, C-RET all matches.\nComma seperates words, any other key adds to search word.\n\n")
+                        (insert "<backspace> and <c-backspace> erase, cursor keys move. RET finds node, C-RET all matches.\nTAB finds in other window. Comma seperates words, any other key adds to search word.\n\n")
                       (insert "BACKSPACE to erase,  to finish. Then cursor keys and RET to find node.\n\n"))
                     (insert org-index--headings))
                 (delete-region start-of-help start-of-lines)
@@ -1987,9 +2008,10 @@ retrieves the value of the count-column for reference 12.
                                                          (- lines-to-show lines-visible) 
                                                          (car left-off-at)))
 
-                (when (car ret)
-                  (insert (cdr ret))
-                  (setcar left-off-at (car ret))
+                (when (nth 0 ret)
+                  (insert (nth 1 ret))
+                  (setq at-end (nth 2 ret))
+                  (setcar left-off-at (nth 0 ret))
                   (setcar after-inserted (point))))
 
               ;; highlight longer word
@@ -2013,11 +2035,11 @@ retrieves the value of the count-column for reference 12.
               (forward-line 1)))
 
           ;; get all the rest
-          (when (eq key 'C-return)
+          (when (eq key (kbd "<c-return>"))
             (message "Getting all matches ...")
             (setq ret (org-index--get-matching-lines (cons word words) 0 (car left-off-at)))
             (message "done.")
-            (insert (cdr ret))))
+            (insert (nth 1 ret))))
       
       ;; postprocessing even for non graceful exit
       (setq cursor-type t)
@@ -2026,10 +2048,10 @@ retrieves the value of the count-column for reference 12.
         (goto-char start-of-lines)
         (delete-region (point-min) (point))
         (insert (format  (concat (if exit-gracefully "Search is done;" "Search aborted;")
-                                 (if (eq key 'C-return) 
+                                 (if (or at-end (eq key 'C-return)) 
                                      " showing all %d matches." 
                                    " showing only some matches.")
-                                 " Use cursor keys to move, press RET to find node.\n\n")
+                                 " Use cursor keys to move, press RET or TAB to find node.\n\n")
                          numlines))
         (if show-headings (insert "\n\n" org-index--headings)))
       (forward-line))
@@ -2043,6 +2065,9 @@ retrieves the value of the count-column for reference 12.
      ((member key (list 'RET ?\C-m))
       (funcall fun-on-ret))
 
+     ((member key (list 'TAB ?\C-i))
+      (funcall fun-on-tab))
+
      ((eq key 'up)
       (forward-line -1))
 
@@ -2054,6 +2079,14 @@ retrieves the value of the count-column for reference 12.
 
      ((eq key 'right)
       (forward-char 1)))))
+
+(defun org-index--occur-find-heading (x) 
+  "helper for keymap of occur"
+  (interactive)
+  (save-excursion
+    (let ((ref (org-index--get-field :ref)) 
+          (link (org-index--get-field :link)))
+      (message (org-index--do-head ref link x)))))
 
 
 (defun org-index--do-new-line (create-ref)
@@ -2098,7 +2131,7 @@ retrieves the value of the count-column for reference 12.
 (defun org-index--get-matching-lines (words numlines start-from)
   (let ((numfound 0)
         pos
-        initial line lines)
+        initial line lines at-end)
     
     (with-current-buffer org-index--buffer
 
@@ -2119,11 +2152,13 @@ retrieves the value of the count-column for reference 12.
         (forward-line 1)
         (setq pos (point)))
 
+      (setq at-end (not (org-at-table-p)))
+
       ;; return to initial position
       (goto-char initial))
 
     (unless lines (setq lines ""))
-    (cons pos lines)))
+    (list pos lines at-end)))
 
 
 (defun org-index--test-words (words line)

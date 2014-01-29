@@ -429,12 +429,6 @@ not contribute to the agenda listings.")
 An entry can be toggled between COMMENT and normal with
 \\[org-toggle-comment].")
 
-(defconst org-quote-string "QUOTE"
-  "Entries starting with this keyword will be exported in fixed-width font.
-Quoting applies only to the text in the entry following the headline, and does
-not extend beyond the next headline, even if that is lower level.
-An entry can be toggled between QUOTE and normal with
-\\[org-toggle-fixed-width-section].")
 
 ;;;; LaTeX Environments and Fragments
 
@@ -1554,8 +1548,7 @@ the list structure."
 (defcustom org-enable-fixed-width-editor t
   "Non-nil means lines starting with \":\" are treated as fixed-width.
 This currently only means they are never auto-wrapped.
-When nil, such lines will be treated like ordinary lines.
-See also the QUOTE keyword."
+When nil, such lines will be treated like ordinary lines."
   :group 'org-edit-structure
   :type 'boolean)
 
@@ -6324,9 +6317,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   '(org-activate-code (1 'org-code t))
 	   ;; COMMENT
 	   (list (format org-heading-keyword-regexp-format
-			 (concat "\\("
-				 org-comment-string "\\|" org-quote-string
-				 "\\)"))
+			 (concat "\\(" org-comment-string "\\)"))
 		 '(2 'org-special-keyword t))
 	   ;; Blocks and meta lines
 	   '(org-fontify-meta-lines-and-blocks))))
@@ -19275,7 +19266,6 @@ boundaries."
 (org-defkey org-mode-map "\C-c}"    'org-table-toggle-coordinate-overlays)
 (org-defkey org-mode-map "\C-c{"    'org-table-toggle-formula-debugger)
 (org-defkey org-mode-map "\C-c\C-e" 'org-export-dispatch)
-(org-defkey org-mode-map "\C-c:"    'org-toggle-fixed-width-section)
 (org-defkey org-mode-map "\C-c\C-x\C-f" 'org-emphasize)
 (org-defkey org-mode-map "\C-c\C-xf"    'org-footnote-action)
 (org-defkey org-mode-map "\C-c\C-x\C-mg"    'org-mobile-pull)
@@ -21668,7 +21658,7 @@ contexts are:
 :clocktable       in a clocktable
 :src-block        in a source block
 :link             on a hyperlink
-:keyword          on a keyword: SCHEDULED, DEADLINE, CLOSE, COMMENT, QUOTE.
+:keyword          on a keyword: SCHEDULED, DEADLINE, CLOSE, COMMENT.
 :target           on a <<target>>
 :radio-target     on a <<<radio-target>>>
 :latex-fragment   on a LaTeX fragment
@@ -22830,54 +22820,6 @@ range.  Otherwise, translate both parts."
 
 
 ;;; Other stuff.
-
-(defun org-toggle-fixed-width-section (arg)
-  "Toggle the fixed-width export.
-If there is no active region, the QUOTE keyword at the current headline is
-inserted or removed.  When present, it causes the text between this headline
-and the next to be exported as fixed-width text, and unmodified.
-If there is an active region, this command adds or removes a colon as the
-first character of this line.  If the first character of a line is a colon,
-this line is also exported in fixed-width font."
-  (interactive "P")
-  (let* ((cc 0)
-	 (regionp (org-region-active-p))
-	 (beg (if regionp (region-beginning) (point)))
-	 (end (if regionp (region-end)))
-	 (nlines (or arg (if (and beg end) (count-lines beg end) 1)))
-	 (case-fold-search nil)
-	 (re "[ \t]*\\(:\\(?: \\|$\\)\\)")
-	 off)
-    (if regionp
-	(save-excursion
-	  (goto-char beg)
-	  (setq cc (current-column))
-	  (beginning-of-line 1)
-	  (setq off (looking-at re))
-	  (while (> nlines 0)
-	    (setq nlines (1- nlines))
-	    (beginning-of-line 1)
-	    (cond
-	     (arg
-	      (org-move-to-column cc t)
-	      (insert ": \n")
-	      (forward-line -1))
-	     ((and off (looking-at re))
-	      (replace-match "" t t nil 1))
-	     ((not off) (org-move-to-column cc t) (insert ": ")))
-	    (forward-line 1)))
-      (save-excursion
-	(org-back-to-heading)
-	(cond
-	 ((looking-at (format org-heading-keyword-regexp-format
-			      org-quote-string))
-	  (goto-char (match-end 1))
-	  (looking-at (concat " +" org-quote-string))
-	  (replace-match "" t t)
-	  (when (eolp) (insert " ")))
-	 ((looking-at org-outline-regexp)
-	  (goto-char (match-end 0))
-	  (insert org-quote-string " ")))))))
 
 (defun org-reftex-citation ()
   "Use reftex-citation to insert a citation into the buffer.
