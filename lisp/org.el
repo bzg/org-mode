@@ -9490,7 +9490,7 @@ active region."
 		       (funcall (intern
 				 (completing-read
 				  "Which function for creating the link? "
-				  sfunsn t (car sfunsn)))))
+				  sfunsn nil t (car sfunsn)))))
 		  (funcall (caar sfuns)))
 	      (setq link (plist-get org-store-link-plist :link)
 		    desc (or (plist-get org-store-link-plist
