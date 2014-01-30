@@ -8637,7 +8637,7 @@ links."
       (show-all)))
 
     (setq beg (point))
-    (if (>= beg end) (user-error "Nothing to sort"))
+    (when (>= beg end) (goto-char start) (user-error "Nothing to sort"))
 
     (looking-at "\\(\\*+\\)")
     (setq stars (match-string 1)
