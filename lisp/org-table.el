@@ -1241,6 +1241,7 @@ is always the old value."
 (defun org-table-field-info (arg)
   "Show info about the current field, and highlight any reference at point."
   (interactive "P")
+  (unless (org-at-table-p) (user-error "Not at a table"))
   (org-table-get-specials)
   (save-excursion
     (let* ((pos (point))
