@@ -3720,12 +3720,7 @@ generating a new one."
 	  (org-agenda-fontify-priorities))
 	(when (and org-agenda-dim-blocked-tasks org-blocker-hook)
 	  (org-agenda-dim-blocked-tasks))
-	;; We need to widen when `org-agenda-finalize' is called from
-	;; `org-agenda-change-all-lines' (e.g. in `org-agenda-clock-in')
-	(when org-clock-current-task
-	  (save-restriction
-	    (widen)
-	    (org-agenda-mark-clocking-task)))
+	(org-agenda-mark-clocking-task)
 	(when org-agenda-entry-text-mode
 	  (org-agenda-entry-text-hide)
 	  (org-agenda-entry-text-show))
@@ -3762,20 +3757,25 @@ generating a new one."
 
 (defun org-agenda-mark-clocking-task ()
   "Mark the current clock entry in the agenda if it is present."
-  (org-agenda-unmark-clocking-task)
-  (when (marker-buffer org-clock-hd-marker)
-    (save-excursion
-      (goto-char (point-min))
-      (let (s ov)
-	(while (setq s (next-single-property-change (point) 'org-hd-marker))
-	  (goto-char s)
-	  (when (equal (org-get-at-bol 'org-hd-marker)
-		       org-clock-hd-marker)
-	    (setq ov (make-overlay (point-at-bol) (1+ (point-at-eol))))
-	    (overlay-put ov 'type 'org-agenda-clocking)
-	    (overlay-put ov 'face 'org-agenda-clocking)
-	    (overlay-put ov 'help-echo
-			 "The clock is running in this item")))))))
+  ;; We need to widen when `org-agenda-finalize' is called from
+  ;; `org-agenda-change-all-lines' (e.g. in `org-agenda-clock-in')
+  (when org-clock-current-task
+    (save-restriction
+      (widen)
+      (org-agenda-unmark-clocking-task)
+      (when (marker-buffer org-clock-hd-marker)
+	(save-excursion
+	  (goto-char (point-min))
+	  (let (s ov)
+	    (while (setq s (next-single-property-change (point) 'org-hd-marker))
+	      (goto-char s)
+	      (when (equal (org-get-at-bol 'org-hd-marker)
+			   org-clock-hd-marker)
+		(setq ov (make-overlay (point-at-bol) (1+ (point-at-eol))))
+		(overlay-put ov 'type 'org-agenda-clocking)
+		(overlay-put ov 'face 'org-agenda-clocking)
+		(overlay-put ov 'help-echo
+			     "The clock is running in this item")))))))))
 
 (defun org-agenda-unmark-clocking-task ()
   "Unmark the current clocking task."
@@ -9949,6 +9949,7 @@ When the optional argument `backward' is non-nil, move backward."
 	(move-beginning-of-line (funcall (if backward '1- '1+) arg))
 	(insert line)
 	(org-agenda-reapply-filters)
+	(org-agenda-mark-clocking-task)
 	(move-beginning-of-line 0)))))
 
 (defun org-agenda-drag-line-backward (arg)

@@ -8716,7 +8716,7 @@ When sorting is done, call `org-after-sorting-entries-or-items-hook'."
       (show-all)))
 
     (setq beg (point))
-    (if (>= beg end) (user-error "Nothing to sort"))
+    (when (>= beg end) (goto-char start) (user-error "Nothing to sort"))
 
     (looking-at "\\(\\*+\\)")
     (setq stars (match-string 1)
