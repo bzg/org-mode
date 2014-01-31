@@ -3204,7 +3204,8 @@ locally for the subtree through node properties."
 	       (cons "default"
 		     (mapcar #'(lambda (b)
 				 (symbol-name (org-export-backend-name b)))
-			     org-export--registered-backends))))))
+			     org-export--registered-backends))
+	       nil t))))
 	options keywords)
     ;; Populate OPTIONS and KEYWORDS.
     (dolist (entry (cond ((eq backend 'default) org-export-options-alist)
