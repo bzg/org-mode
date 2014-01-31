@@ -49,6 +49,8 @@
   (require 'cl))
 
 (declare-function cider-current-ns "ext:cider-interaction" ())
+(declare-function cider-get-raw-value "ext:cider-client" (eval-result))
+(declare-function cider-eval-sync "ext:cider-client" (input &optional ns session))
 (declare-function nrepl-send-string-sync "ext:nrepl-client" (input &optional ns session))
 (declare-function nrepl-current-tooling-session "ext:nrepl-client" ())
 
