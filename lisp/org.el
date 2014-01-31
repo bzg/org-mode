@@ -24103,6 +24103,7 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
        (fboundp 'flyspell-delete-region-overlays)
        (flyspell-delete-region-overlays beg end)))
 
+(defvar flyspell-delayed-commands)
 (eval-after-load "flyspell"
   '(add-to-list 'flyspell-delayed-commands 'org-self-insert-command))
 
