@@ -3036,5 +3036,116 @@ Paragraph \\alpha."
 	   (org-element-type (org-element-context (org-element-at-point))))))))
 
 
+
+;;; Test Cache.
+
+(ert-deftest test-org-element/cache ()
+  "Test basic expectations and common pitfalls for cache."
+  ;; Shift positions.
+  (should
+   (equal '(18 . 23)
+	  (org-test-with-temp-text "para1\n\npara2\n\npara3"
+	    (let ((org-element-use-cache t))
+	      (save-excursion (goto-char (point-max)) (org-element-at-point))
+	      (insert "add")
+	      (forward-line 4)
+	      (let ((element (org-element-at-point)))
+		(cons (org-element-property :begin element)
+		      (org-element-property :end element)))))))
+  ;; Partial shifting: when the contents of a greater element are
+  ;; modified, only shift ending positions.
+  (should
+   (org-test-with-temp-text
+       "#+BEGIN_CENTER\nPara1\n\nPara2\n\nPara3\n#+END_CENTER"
+     (let ((org-element-use-cache t))
+       (save-excursion (search-forward "3") (org-element-at-point))
+       (search-forward "Para2")
+       (insert " ")
+       (let ((element (org-element-property :parent (org-element-at-point))))
+	 (equal (cons (org-element-property :begin element)
+		      (org-element-property :end element))
+		(cons (point-min) (point-max)))))))
+  ;; Re-parent shifted elements.
+  (should
+   (eq 'item
+       (org-test-with-temp-text "- item\n\n\n  para1\n  para2"
+	 (let ((org-element-use-cache t))
+	   (end-of-line)
+	   (org-element-at-point)
+	   (save-excursion (goto-char (point-max)) (org-element-at-point))
+	   (forward-line)
+	   (delete-char 1)
+	   (goto-char (point-max))
+	   (org-element-type
+	    (org-element-property :parent (org-element-at-point)))))))
+  ;; Modifying the last line of an element alters the element below.
+  (should
+   (org-test-with-temp-text "para1\n\npara2"
+     (let ((org-element-use-cache t))
+       (goto-char (point-max))
+       (org-element-at-point)
+       (forward-line -1)
+       (insert "merge")
+       (let ((element (org-element-at-point)))
+	 (equal (cons (org-element-property :begin element)
+		      (org-element-property :end element))
+		(cons (point-min) (point-max)))))))
+  ;; Modifying the first line of an element alters the element above.
+  (should
+   (org-test-with-temp-text ": fixed-width\n:not-fixed-width"
+     (let ((org-element-use-cache t))
+       (goto-char (point-max))
+       (org-element-at-point)
+       (search-backward ":")
+       (forward-char)
+       (insert " ")
+       (let ((element (org-element-at-point)))
+	 (equal (cons (org-element-property :begin element)
+		      (org-element-property :end element))
+		(cons (point-min) (point-max)))))))
+  ;; Sensitive change: adding a line alters document structure both
+  ;; above and below.
+  (should
+   (eq 'example-block
+       (org-test-with-temp-text "#+BEGIN_EXAMPLE\nPara1\n\nPara2\n"
+	 (let ((org-element-use-cache t))
+	   (goto-char (point-max))
+	   (org-element-at-point)
+	   (insert "#+END_EXAMPLE")
+	   (search-backward "Para1")
+	   (org-element-type (org-element-at-point))))))
+  (should
+   (eq 'example-block
+       (org-test-with-temp-text "Para1\n\nPara2\n#+END_EXAMPLE"
+	 (let ((org-element-use-cache t))
+	   (save-excursion (goto-char (point-max)) (org-element-at-point))
+	   (insert "#+BEGIN_EXAMPLE\n")
+	   (search-forward "Para2")
+	   (org-element-type (org-element-at-point))))))
+  ;; Sensitive change: removing a line alters document structure both
+  ;; above and below.
+  (should
+   (eq 'example-block
+       (org-test-with-temp-text
+	   "# +BEGIN_EXAMPLE\nPara1\n\nPara2\n#+END_EXAMPLE"
+	 (let ((org-element-use-cache t))
+	   (save-excursion (goto-char (point-max)) (org-element-at-point))
+	   (forward-char)
+	   (delete-char 1)
+	   (search-forward "Para2")
+	   (org-element-type (org-element-at-point))))))
+  (should
+   (eq 'example-block
+       (org-test-with-temp-text
+	   "#+BEGIN_EXAMPLE\nPara1\n\nPara2\n# +END_EXAMPLE"
+	 (let ((org-element-use-cache t))
+	   (save-excursion (goto-char (point-max)) (org-element-at-point))
+	   (search-forward "# ")
+	   (delete-char -1)
+	   (search-backward "Para1")
+	   (org-element-type (org-element-at-point)))))))
+
+
 (provide 'test-org-element)
+
 ;;; test-org-element.el ends here

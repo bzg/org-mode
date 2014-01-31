@@ -263,6 +263,16 @@ whose extension is either \"png\", \"jpeg\", \"jpg\", \"gif\",
 See `org-export-inline-image-p' for more information about
 rules.")
 
+(defconst org-export-ignored-local-variables
+  '(org-font-lock-keywords
+    org-element--cache org-element--cache-objects org-element--cache-sync-keys
+    org-element--cache-sync-requests org-element--cache-sync-timer)
+  "List of variables not copied through upon buffer duplication.
+Export process takes place on a copy of the original buffer.
+When this copy is created, all Org related local variables not in
+this list are copied to the new buffer.  Variables with an
+unreadable value are also ignored.")
+
 (defvar org-export-async-debug nil
   "Non-nil means asynchronous export process should leave data behind.
 
@@ -2964,11 +2974,7 @@ The function assumes BUFFER's major mode is `org-mode'."
 	       (when (consp entry)
 		 (let ((var (car entry))
 		       (val (cdr entry)))
-		   (and (not (memq var '(org-font-lock-keywords
-					 ;; Do not share cache across
-					 ;; buffers as values are
-					 ;; modified by side effect.
-					 org-element--cache)))
+		   (and (not (memq var org-export-ignored-local-variables))
 			(or (memq var
 				  '(default-directory
 				     buffer-file-name
