@@ -4145,6 +4145,11 @@ following symbols:
   :group 'org-appearance
   :type 'boolean)
 
+(defcustom org-hide-macro-markers nil
+  "Non-nil mean font-lock should hide the brackets marking macro calls."
+  :group 'org-appearance
+  :type 'boolean)
+
 (defcustom org-pretty-entities nil
   "Non-nil means show entities as UTF8 characters.
 When nil, the \\name form remains in the buffer."
@@ -5949,6 +5954,20 @@ by a #."
     (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
     t))
 
+  (defun org-fontify-macros (limit)
+    "Fontify macros."
+    (when (re-search-forward "\\({{{\\).+?\\(}}}\\)" limit t)
+      (add-text-properties
+       (match-beginning 0) (match-end 0)
+       '(font-lock-fontified t face org-macro))
+      (when org-hide-macro-markers
+        (add-text-properties (match-end 2) (match-beginning 2)
+                             '(invisible t))
+        (add-text-properties (match-beginning 1) (match-end 1)
+                             '(invisible t)))
+      (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
+      t))
+
 (defun org-activate-angle-links (limit)
   "Run through the buffer and add overlays to links."
   (if (and (re-search-forward org-angle-link-re limit t)
@@ -6260,7 +6279,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   ;; Diary sexps.
 	   '("^&?%%(.*\\|<%%([^>\n]*?>" (0 'org-sexp-date t))
 	   ;; Macro
-	   '("{{{.+?}}}" (0 'org-macro t))
+	   '(org-fontify-macros)
 	   '(org-hide-wide-columns (0 nil append))
 	   ;; TODO keyword
 	   (list (format org-heading-keyword-regexp-format

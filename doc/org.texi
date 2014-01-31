@@ -10019,6 +10019,9 @@ and to the modification time of the file being exported, respectively.
 @var{FORMAT} should be a format string understood by
 @code{format-time-string}.
 
+The surrounding brackets can be made invisible by setting 
+@code{org-hide-macro-markers} to @code{t}.
+
 Macro expansion takes place during export.
 
 
