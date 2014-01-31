@@ -275,7 +275,7 @@ requirements) is loaded."
 		 (const :tag "Scala" scala)
 		 (const :tag "Scheme" scheme)
 		 (const :tag "Screen" screen)
-		 (const :tag "Shell Script" sh)
+		 (const :tag "Shell Script" shell)
 		 (const :tag "Shen" shen)
 		 (const :tag "Sql" sql)
 		 (const :tag "Sqlite" sqlite)

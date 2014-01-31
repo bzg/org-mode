@@ -52,7 +52,7 @@
       (require 'org-id)
       (require 'ox)
       (org-babel-do-load-languages
-       'org-babel-load-languages '((sh . t) (org . t))))
+       'org-babel-load-languages '((shell . t) (org . t))))
 
     (let* ((load-path (cons
 		       org-test-dir

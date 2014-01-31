@@ -1,4 +1,4 @@
-;;; test-ob-sh.el
+;;; test-ob-shell.el
 
 ;; Copyright (c) 2010-2014 Eric Schulte
 ;; Authors: Eric Schulte
@@ -25,9 +25,9 @@
 ;;; Code:
 (org-test-for-executable "sh")
 (unless (featurep 'ob-shell)
-  (signal 'missing-test-dependency "Support for Sh code blocks"))
+  (signal 'missing-test-dependency "Support for Shell code blocks"))
 
-(ert-deftest test-ob-sh/dont-insert-spaces-on-expanded-bodies ()
+(ert-deftest test-ob-shell/dont-insert-spaces-on-expanded-bodies ()
   "Expanded shell bodies should not start with a blank line
 unless the body of the tangled block does."
   (should-not (string-match "^[\n\r][\t ]*[\n\r]"
@@ -35,18 +35,19 @@ unless the body of the tangled block does."
   (should (string-match "^[\n\r][\t ]*[\n\r]"
 			(org-babel-expand-body:generic "\n\necho 2" '()))))
 
-(ert-deftest test-ob-sh/dont-error-on-empty-results ()
+(ert-deftest test-ob-shell/dont-error-on-empty-results ()
   "Was throwing an elisp error when shell blocks threw errors and
 returned empty results."
   (should (null (org-babel-execute:sh "ls NoSuchFileOrDirectory.txt" nil))))
 
-(ert-deftest test-ob-sh/session ()
+(ert-deftest test-ob-shell/session ()
   "This also tests `org-babel-comint-with-output' in
 ob-comint.el, which was not previously tested."
   (let ((res (org-babel-execute:sh "echo 1; echo 2" '((:session . "yes")))))
     (should res)
     (should (listp res))))
 
-(provide 'test-ob-sh)
 
-;;; test-ob-sh.el ends here
+(provide 'test-ob-shell)
+
+;;; test-ob-shell.el ends here

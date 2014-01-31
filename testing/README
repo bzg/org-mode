@@ -24,7 +24,7 @@ Also note that many of the current tests uses babel evaluation...
         -l lisp/org-id.el -l testing/org-test.el \
         --eval "(progn (org-reload) (setq org-confirm-babel-evaluate nil) \
         (org-babel-do-load-languages 'org-babel-load-languages \
-        '((emacs-lisp . t) (sh . t) (org . t))))" \
+        '((emacs-lisp . t) (shell . t) (org . t))))" \
         -f org-test-run-batch-tests
 #+END_SRC
 
