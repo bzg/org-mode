@@ -38,6 +38,7 @@
 (declare-function org-babel-update-block-body "org" (new-body))
 (declare-function org-up-heading-safe "org" ())
 (declare-function make-directory "files" (dir &optional parents))
+(declare-function org-before-first-heading-p "org" ())
 
 (defcustom org-babel-tangle-lang-exts
   '(("emacs-lisp" . "el"))
