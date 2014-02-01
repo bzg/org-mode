@@ -20378,12 +20378,9 @@ This command does many different things, depending on context:
 	  ((bold code entity export-snippet inline-babel-call inline-src-block
 		 italic latex-fragment line-break macro strike-through subscript
 		 superscript underline verbatim)
-	   (while (and (not (memq (setq type (org-element-type context))
-				  '(paragraph verse-block)))
-		       (org-element-property
-			:parent
-			(org-element-property :parent context)))
-	     (setq context (org-element-property :parent context)))))
+	   (while (and (setq context (org-element-property :parent context))
+		       (not (memq (setq type (org-element-type context))
+				  '(paragraph verse-block table-cell)))))))
 	;; For convenience: at the first line of a paragraph on the
 	;; same line as an item, apply function on that item instead.
 	(when (eq type 'paragraph)
