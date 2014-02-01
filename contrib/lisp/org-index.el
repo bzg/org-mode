@@ -5,7 +5,7 @@
 ;; Author: Marc Ihm <org-index@2484.de>
 ;; Keywords: outlines, hypermedia, matching
 ;; Requires: org
-;; Version: 2.4.0
+;; Version: 2.4.2
 
 ;; This file is not part of GNU Emacs.
 
@@ -72,14 +72,15 @@
 
 ;;; Change Log:
 
-;;   [2014-01-28 Tu] Version 2.4.1:
+;;   [2014-02-01 Sa] Version 2.4.2:
 ;;   - Follow mode in occur-buffer
+;;   - Reorder for x-columns
 ;;
 ;;   [2014-01-02 Th] Version 2.4.0:
 ;;   - New command "put" to store a nodes reference in a property
 ;;   - New functions org-index-new-line and org-index-get-line 
 ;;     offer access to org-index from other lisp programs
-;;   - New flags p,x1,x2 and x3
+;;   - New flag p, new columns x1,x2 and x3
 ;;   - Major Code refactoring
 ;;   - Regression tests with ert
 ;;   - Lots of bugfixes
@@ -1003,11 +1004,13 @@ retrieves the value of the count-column for reference 12.
                (if (eq what 'reorder)
                    (setq reorder-once
                          (intern
-                          (concat ":"
-                                  (org-icompleting-read 
-                                   "Please choose column to reorder index table once: " 
-                                   (mapcar 'symbol-name '(ref count accessed))
-                                   nil t)))))
+                          (org-icompleting-read 
+                           "Please choose column to reorder index table once: " 
+                           (mapcar 'symbol-name 
+                                   (append '(:ref :count :first :last)
+                                           (delq nil (mapcar (lambda (x) (if (> (cdr (assoc x org-index--columns)) 0) x nil)) 
+                                                             '(:x1 :x2 :x3)))))
+                           nil t))))
              
                ;; maybe ask initial question again
                (memq what '(reorder +)))))
@@ -1297,14 +1300,14 @@ retrieves the value of the count-column for reference 12.
                                                         ""))) 
                                  ref))
                         
-                        ((eq sort-column :accessed)
-                         (concat count-special
-                                 (org-index--get-field :accessed) 
-                                 " " 
-                                 ref))
-                        
                         ((eq sort-column :ref)
                          (concat count-special
+                                 ref))
+                        
+                        ((memq sort-column '(:last :x1 :x2 :x3))
+                         (concat count-special
+                                 (org-index--get-field sort-column) 
+                                 " " 
                                  ref))
                         
                         (t (error "This is a bug: unmatched case '%s'" sort-column)))))
