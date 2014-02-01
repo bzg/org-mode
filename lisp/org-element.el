@@ -4489,8 +4489,8 @@ Return Org syntax as a string."
 	    (mapconcat
 	     (lambda (obj) (org-element-interpret-data obj parent))
 	     (org-element-contents data) ""))
-	   ;; Plain text: remove `:parent' text property from output.
-	   ((stringp data) (org-no-properties data))
+	   ;; Plain text: return it.
+	   ((stringp data) data)
 	   ;; Element/Object without contents.
 	   ((not (org-element-contents data))
 	    (funcall (intern (format "org-element-%s-interpreter" type))
