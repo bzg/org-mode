@@ -4467,8 +4467,8 @@ Return Org syntax as a string."
 	     (lambda (obj)
 	       (org-element--interpret-data-1 obj parent pseudo-objects))
 	     (org-element-contents data) ""))
-	   ;; Plain text: remove `:parent' text property from output.
-	   ((stringp data) (org-no-properties data))
+	   ;; Plain text: return it.
+	   ((stringp data) data)
 	   ;; Element or object without contents.
 	   ((not (org-element-contents data)) (funcall interpret data nil))
 	   ;; Element or object with contents.
