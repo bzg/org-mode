@@ -70,8 +70,6 @@
 ;;   - AUTHOR: Default to user-full-name but may be disabled.
 ;;     (See also `org-koma-letter-author'),
 ;;   - EMAIL: Same as AUTHOR. (see also `org-koma-letter-email'),
-;;   - TITLE: May be the letter title or subject depending on
-;;     `org-koma-letter-prefer-subject'.
 ;;
 ;; Headlines are in general ignored.  However, headlines with special
 ;; tags can be used for specified contents like postscript (ps),
@@ -260,9 +258,13 @@ This option can also be set with the OPTIONS keyword, e.g.:
   :group 'org-export-koma-letter)
 
 (defcustom org-koma-letter-use-backaddress nil
+<<<<<<< HEAD
   "Non-nil prints return address in line above to address.
 This option can also be set with the OPTIONS keyword, e.g.:
 \"backaddress:t\"."
+=======
+  "Print return address in line above to address."
+>>>>>>> maint
   :group 'org-export-koma-letter
   :type 'boolean)
 

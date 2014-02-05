@@ -5230,11 +5230,11 @@ Support for group tags is controlled by the option
 
 (defun org-file-contents (file &optional noerror)
   "Return the contents of FILE, as a string."
-  (if (or (not file)
-	  (not (file-readable-p file)))
-      (if noerror
-	  (message "Cannot read file \"%s\"" file)
-	(error "Cannot read file \"%s\"" file))
+  (if (or (not file) (not (file-readable-p file)))
+      (if (not noerror)
+	  (error "Cannot read file \"%s\"" file)
+	(message "Cannot read file \"%s\"" file)
+	"")
     (with-temp-buffer
       (insert-file-contents file)
       (buffer-string))))
