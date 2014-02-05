@@ -18183,7 +18183,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	file re pos)
     (setq org-tag-alist-for-agenda nil
 	  org-tag-groups-alist-for-agenda nil)
-    (save-window-excursion
+    (save-excursion
       (save-restriction
 	(while (setq file (pop files))
 	  (catch 'nextfile
