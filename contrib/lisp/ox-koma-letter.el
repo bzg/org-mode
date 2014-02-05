@@ -631,15 +631,16 @@ holding export options."
 		  (if (symbolp with-subject) with-subject
 		    (mapconcat #'symbol-name with-subject ","))))
 	(let* ((title-as-subject (plist-get info :with-title-as-subject))
-	       (subject* (org-string-nw-p (org-export-data (plist-get info :subject) info)))
-	       (title* (org-string-nw-p (org-export-data (plist-get info :title) info)))
+	       (subject* (org-string-nw-p
+			  (org-export-data (plist-get info :subject) info)))
+	       (title* (and (plist-get info :with-title)
+			    (org-string-nw-p
+			     (org-export-data (plist-get info :title) info))))
 	       (subject (if title-as-subject (or subject* title*) subject*))
 	       (title (if title-as-subject (and subject* title*) title*)))
 	  (concat
-	   (and (org-string-nw-p subject)
-		(format "\\setkomavar{subject}{%s}\n" subject))
-	   (and (org-string-nw-p title)
-		(format "\\setkomavar{title}{%s}\n" title))
+	   (and subject (format "\\setkomavar{subject}{%s}\n" subject))
+	   (and title (format "\\setkomavar{title}{%s}\n" title))
 	   (when (or (org-string-nw-p title) (org-string-nw-p subject)) "\n"))))))
    ;; Letter start.
    (format "\\begin{letter}{%%\n%s}\n\n"
