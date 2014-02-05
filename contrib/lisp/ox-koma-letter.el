@@ -258,13 +258,9 @@ This option can also be set with the OPTIONS keyword, e.g.:
   :group 'org-export-koma-letter)
 
 (defcustom org-koma-letter-use-backaddress nil
-<<<<<<< HEAD
   "Non-nil prints return address in line above to address.
 This option can also be set with the OPTIONS keyword, e.g.:
 \"backaddress:t\"."
-=======
-  "Print return address in line above to address."
->>>>>>> maint
   :group 'org-export-koma-letter
   :type 'boolean)
 
