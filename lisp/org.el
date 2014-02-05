@@ -18057,10 +18057,10 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	(inhibit-read-only t)
 	(org-inhibit-startup org-agenda-inhibit-startup)
 	(rea (concat ":" org-archive-tag ":"))
-	file re pos)
+	file re)
     (setq org-tag-alist-for-agenda nil
 	  org-tag-groups-alist-for-agenda nil)
-    (save-window-excursion
+    (save-excursion
       (save-restriction
 	(while (setq file (pop files))
 	  (catch 'nextfile
@@ -18070,7 +18070,6 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	      (set-buffer (org-get-agenda-file-buffer file)))
 	    (widen)
 	    (org-set-regexps-and-options-for-tags)
-	    (setq pos (point))
 	    (goto-char (point-min))
 	    (let ((case-fold-search t))
 	      (when (search-forward "#+setupfile" nil t)
@@ -18114,8 +18113,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 				org-comment-string))
 	       (while (re-search-forward re nil t)
 		 (add-text-properties
-		  (match-beginning 0) (org-end-of-subtree t) pc))))
-	    (goto-char pos)))))
+		  (match-beginning 0) (org-end-of-subtree t) pc))))))))
     (setq org-todo-keywords-for-agenda
           (org-uniquify org-todo-keywords-for-agenda))
     (setq org-todo-keyword-alist-for-agenda
