@@ -395,10 +395,10 @@ was not present."
     (:email "EMAIL" nil (org-koma-letter--get-value org-koma-letter-email) t)
     (:to-address "TO_ADDRESS" nil nil newline)
     (:place "PLACE" nil org-koma-letter-place)
+    (:subject "SUBJECT" nil nil space)
     (:opening "OPENING" nil org-koma-letter-opening)
     (:closing "CLOSING" nil org-koma-letter-closing)
     (:signature "SIGNATURE" nil org-koma-letter-signature newline)
-    (:subject "SUBJECT" nil nil space)
     (:special-headings nil "special-headings"
 		       org-koma-letter-prefer-special-headings)
     (:special-tags nil nil (append
