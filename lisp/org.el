@@ -10339,7 +10339,8 @@ application the system uses for this file type."
       (let (type path link line search (pos (point)))
 	(catch 'match
 	  (save-excursion
-	    (skip-chars-forward "^]\n\r")
+	    (or (org-in-regexp org-plain-link-re)
+		(skip-chars-forward "^]\n\r"))
 	    (when (org-in-regexp org-bracket-link-regexp 1)
 	      (setq link (org-extract-attributes
 			  (org-link-unescape (org-match-string-no-properties 1))))
@@ -10377,9 +10378,10 @@ application the system uses for this file type."
 			;; Check a plain link is not within a bracket link
 			(and match
 			     (save-excursion
-			       (progn
-				 (goto-char (car match))
-				 (not (org-in-regexp org-bracket-link-regexp))))))
+			       (save-match-data
+				 (progn
+				   (goto-char (car match))
+				   (not (org-in-regexp org-bracket-link-regexp)))))))
 		      (let ((line_ending (save-excursion (end-of-line) (point))))
 			;; We are in a line before a plain or bracket link
 			(or (re-search-forward org-plain-link-re line_ending t)
