@@ -448,6 +448,102 @@
 
 
 
+;;; Fixed-Width Areas
+
+(ert-deftest test-org/toggle-fixed-with ()
+  "Test `org-toggle-fixed-width' specifications."
+  ;; No region: Toggle on fixed-width marker in paragraphs.
+  (should
+   (equal ": A"
+	  (org-test-with-temp-text "A"
+	    (org-toggle-fixed-width)
+	    (buffer-string))))
+  ;; No region: Toggle off fixed-width markers in fixed-width areas.
+  (should
+   (equal "A"
+	  (org-test-with-temp-text ": A"
+	    (org-toggle-fixed-width)
+	    (buffer-string))))
+  ;; No region: Toggle on marker in blank lines after elements or just
+  ;; after a headline.
+  (should
+   (equal "* H\n: "
+	  (org-test-with-temp-text "* H\n"
+	    (forward-line)
+	    (org-toggle-fixed-width)
+	    (buffer-string))))
+  (should
+   (equal "#+BEGIN_EXAMPLE\nContents\n#+END_EXAMPLE\n: "
+	  (org-test-with-temp-text "#+BEGIN_EXAMPLE\nContents\n#+END_EXAMPLE\n"
+	    (goto-char (point-max))
+	    (org-toggle-fixed-width)
+	    (buffer-string))))
+  ;; No region: Toggle on marker in front of one line elements (e.g.,
+  ;; headlines, clocks)
+  (should
+   (equal ": * Headline"
+	  (org-test-with-temp-text "* Headline"
+	    (org-toggle-fixed-width)
+	    (buffer-string))))
+  (should
+   (equal ": #+KEYWORD: value"
+	  (org-test-with-temp-text "#+KEYWORD: value"
+	    (org-toggle-fixed-width)
+	    (buffer-string))))
+  ;; No region: error in other situations.
+  (should-error
+   (org-test-with-temp-text "#+BEGIN_EXAMPLE\n: A\n#+END_EXAMPLE"
+     (forward-line)
+     (org-toggle-fixed-width)
+     (buffer-string)))
+  ;; No region: Indentation is preserved.
+  (should
+   (equal "- A\n  : B"
+	  (org-test-with-temp-text "- A\n  B"
+	    (forward-line)
+	    (org-toggle-fixed-width)
+	    (buffer-string))))
+  ;; Region: If it contains only fixed-width elements and blank lines,
+  ;; toggle off fixed-width markup.
+  (should
+   (equal "A\n\nB"
+	  (org-test-with-temp-text ": A\n\n: B"
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (goto-char (point-max))
+	    (org-toggle-fixed-width)
+	    (buffer-string))))
+  ;; Region: If it contains anything else, toggle on fixed-width but
+  ;; not on fixed-width areas.
+  (should
+   (equal ": A\n: \n: B\n: \n: C"
+	  (org-test-with-temp-text "A\n\n: B\n\nC"
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (goto-char (point-max))
+	    (org-toggle-fixed-width)
+	    (buffer-string))))
+  ;; Region: Ignore blank lines at its end, unless it contains only
+  ;; such lines.
+  (should
+   (equal ": A\n\n"
+	  (org-test-with-temp-text "A\n\n"
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (goto-char (point-max))
+	    (org-toggle-fixed-width)
+	    (buffer-string))))
+  (should
+   (equal ": \n: \n"
+	  (org-test-with-temp-text "\n\n"
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (goto-char (point-max))
+	    (org-toggle-fixed-width)
+	    (buffer-string)))))
+
+
+
 ;;; Links
 
 ;;;; Fuzzy Links

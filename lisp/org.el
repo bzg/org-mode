@@ -19297,6 +19297,7 @@ boundaries."
 (org-defkey org-mode-map "\C-c}"    'org-table-toggle-coordinate-overlays)
 (org-defkey org-mode-map "\C-c{"    'org-table-toggle-formula-debugger)
 (org-defkey org-mode-map "\C-c\C-e" 'org-export-dispatch)
+(org-defkey org-mode-map "\C-c:"    'org-toggle-fixed-width)
 (org-defkey org-mode-map "\C-c\C-x\C-f" 'org-emphasize)
 (org-defkey org-mode-map "\C-c\C-xf"    'org-footnote-action)
 (org-defkey org-mode-map "\C-c\C-x\C-mg"    'org-mobile-pull)
@@ -22635,6 +22636,132 @@ non-nil."
   (delete-horizontal-space)
   (indent-to-left-margin)
   (insert-before-markers-and-inherit fill-prefix))
+
+
+;;; Fixed Width Areas
+
+(defun org-toggle-fixed-width ()
+  "Toggle fixed-width markup.
+
+Add or remove fixed-width markup on current line, whenever it
+makes sense.  Return an error otherwise.
+
+If a region is active and if it contains only fixed-width areas
+or blank lines, remove all fixed-width markup in it.  If the
+region contains anything else, convert all non-fixed-width lines
+to fixed-width ones.
+
+Blank lines at the end of the region are ignored unless the
+region only contains such lines."
+  (interactive)
+  (if (not (org-region-active-p))
+      ;; No region:
+      ;;
+      ;; Remove fixed width marker only in a fixed-with element.
+      ;;
+      ;; Add fixed width maker in paragraphs, in blank lines after
+      ;; elements or at the beginning of a headline or an inlinetask,
+      ;; and before any one-line elements (e.g., a clock).
+      (progn
+        (beginning-of-line)
+        (let* ((element (org-element-at-point))
+               (type (org-element-type element)))
+          (cond
+           ((and (eq type 'fixed-width)
+                 (looking-at "[ \t]*\\(:\\(?: \\|$\\)\\)"))
+            (replace-match
+	     "" nil nil nil (if (= (line-end-position) (match-end 0)) 0 1)))
+           ((and (memq type '(babel-call clock diary-sexp headline
+					 horizontal-rule keyword paragraph
+					 planning))
+		 (or (not (org-element-property :post-affiliated element))
+		     (<= (org-element-property :post-affiliated element)
+			 (point))))
+            (skip-chars-forward " \t")
+            (insert ": "))
+           ((and (org-looking-at-p "[ \t]*$")
+                 (or (eq type 'inlinetask)
+                     (save-excursion
+                       (skip-chars-forward " \r\t\n")
+                       (<= (org-element-property :end element) (point)))))
+            (delete-region (point) (line-end-position))
+            (org-indent-line)
+            (insert ": "))
+           (t (user-error "Cannot insert a fixed-width line here")))))
+    ;; Region active.
+    (let* ((begin (save-excursion
+                    (goto-char (region-beginning))
+                    (line-beginning-position)))
+           (end (copy-marker
+                 (save-excursion
+                   (goto-char (region-end))
+                   (unless (eolp) (beginning-of-line))
+                   (if (save-excursion (re-search-backward "\\S-" begin t))
+                       (progn (skip-chars-backward " \r\t\n") (point))
+                     (point)))))
+           (all-fixed-width-p
+            (catch 'not-all-p
+              (save-excursion
+                (goto-char begin)
+                (skip-chars-forward " \r\t\n")
+                (when (eobp) (throw 'not-all-p nil))
+                (while (< (point) end)
+                  (let ((element (org-element-at-point)))
+                    (if (eq (org-element-type element) 'fixed-width)
+                        (goto-char (org-element-property :end element))
+                      (throw 'not-all-p nil))))
+                t))))
+      (if all-fixed-width-p
+          (save-excursion
+            (goto-char begin)
+            (while (< (point) end)
+              (when (looking-at "[ \t]*\\(:\\(?: \\|$\\)\\)")
+                (replace-match
+                 "" nil nil nil
+                 (if (= (line-end-position) (match-end 0)) 0 1)))
+              (forward-line)))
+        (let ((min-ind (point-max)))
+          ;; Find minimum indentation across all lines.
+          (save-excursion
+            (goto-char begin)
+            (if (not (save-excursion (re-search-forward "\\S-" end t)))
+                (setq min-ind 0)
+              (catch 'zerop
+                (while (< (point) end)
+                  (unless (org-looking-at-p "[ \t]*$")
+                    (let ((ind (org-get-indentation)))
+                      (setq min-ind (min min-ind ind))
+                      (when (zerop ind) (throw 'zerop t))))
+                  (forward-line)))))
+          ;; Loop over all lines and add fixed-width markup everywhere
+          ;; but in fixed-width lines.
+          (save-excursion
+            (goto-char begin)
+            (while (< (point) end)
+              (cond
+               ((org-at-heading-p)
+                (insert ": ")
+                (forward-line)
+                (while (and (< (point) end) (org-looking-at-p "[ \t]*$"))
+                  (insert ":")
+                  (forward-line)))
+               ((org-looking-at-p "[ \t]*:\\( \\|$\\)")
+                (let* ((element (org-element-at-point))
+                       (element-end (org-element-property :end element)))
+                  (if (eq (org-element-type element) 'fixed-width)
+                      (progn (goto-char element-end)
+                             (skip-chars-backward " \r\t\n")
+                             (forward-line))
+                    (let ((limit (min end element-end)))
+                      (while (< (point) limit)
+                        (org-move-to-column min-ind t)
+                        (insert ": ")
+                        (forward-line))))))
+               (t
+                (org-move-to-column min-ind t)
+                (insert ": ")
+                (forward-line)))))))
+      (set-marker end nil))))
 
 
 ;;; Comments
