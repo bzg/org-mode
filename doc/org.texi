@@ -1325,7 +1325,7 @@ When Emacs first visits an Org file, the global state is set to OVERVIEW,
 i.e., only the top level headlines are visible@footnote{When
 @code{org-agenda-inhibit-startup} is non-@code{nil}, Org will not honor the default
 visibility state when first opening a file for the agenda (@pxref{Speeding up
-your agendas}).}  This can be configured through the variable
+your agendas}).}.  This can be configured through the variable
 @code{org-startup-folded}, or on a per-file basis by adding one of the
 following lines anywhere in the buffer:
 
@@ -15888,7 +15888,7 @@ The corresponding variable is @code{org-archive-location}.
 This line sets the category for the agenda file.  The category applies
 for all subsequent lines until the next @samp{#+CATEGORY} line, or the
 end of the file.  The first such line also applies to any entries before it.
-@item #+COLUMNS: %25ITEM .....
+@item #+COLUMNS: %25ITEM ...
 @cindex property, COLUMNS
 Set the default format for columns view.  This format applies when
 columns view is invoked in locations where no @code{COLUMNS} property
@@ -15903,7 +15903,11 @@ The global version of this variable is
 @item #+FILETAGS: :tag1:tag2:tag3:
 Set tags that can be inherited by any entry in the file, including the
 top-level entries.
-@item #+LINK:  linkword replace
+@item #+DRAWERS: NAME1 ...
+@vindex org-drawers
+Set the file-local set of additional drawers.  The corresponding global
+variable is @code{org-drawers}.
+@item #+LINK: linkword replace
 @vindex org-link-abbrev-alist
 These lines (several are allowed) specify link abbreviations.
 @xref{Link abbreviations}.  The corresponding variable is
@@ -16919,7 +16923,7 @@ Orgtbl mode how to translate this table and where to install it.  For
 example:
 @cindex #+ORGTBL
 @example
-#+ORGTBL: SEND table_name translation_function arguments....
+#+ORGTBL: SEND table_name translation_function arguments...
 @end example
 
 @noindent
