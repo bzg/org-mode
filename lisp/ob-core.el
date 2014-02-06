@@ -2291,11 +2291,16 @@ file's directory then expand relative links."
   "Comment out region using the inline '==' or ': ' org example quote."
   (interactive "*r")
   (let ((chars-between (lambda (b e)
-			 (not (string-match "^[\\s]*$" (buffer-substring b e)))))
+			 (not (string-match "^[\\s]*$"
+					    (buffer-substring b e)))))
 	(maybe-cap (lambda (str) (if org-babel-capitalize-examplize-region-markers
-				     (upcase str) str))))
-    (if (or (funcall chars-between (save-excursion (goto-char beg) (point-at-bol)) beg)
-	    (funcall chars-between end (save-excursion (goto-char end) (point-at-eol))))
+				(upcase str) str)))
+	(beg-bol (save-excursion (goto-char beg) (point-at-bol)))
+	(end-bol (save-excursion (goto-char end) (point-at-bol)))
+	(end-eol (save-excursion (goto-char end) (point-at-eol))))
+    (if (and (not (= end end-bol))
+	     (or (funcall chars-between beg-bol beg)
+		 (funcall chars-between end end-eol)))
 	(save-excursion
 	  (goto-char beg)
 	  (insert (format org-babel-inline-result-wrap
