@@ -1345,7 +1345,7 @@ When Emacs first visits an Org file, the global state is set to OVERVIEW,
 i.e., only the top level headlines are visible@footnote{When
 @code{org-agenda-inhibit-startup} is non-@code{nil}, Org will not honor the default
 visibility state when first opening a file for the agenda (@pxref{Speeding up
-your agendas}).}  This can be configured through the variable
+your agendas}).}.  This can be configured through the variable
 @code{org-startup-folded}, or on a per-file basis by adding one of the
 following lines anywhere in the buffer:
 
