@@ -4583,71 +4583,65 @@ indentation to compute maximal common indentation.
 Return the normalized element that is element with global
 indentation removed from its contents.  The function assumes that
 indentation is not done with TAB characters."
-  (let* (ind-list			; for byte-compiler
-	 collect-inds			; for byte-compiler
-	 (collect-inds
+  (let* ((min-ind most-positive-fixnum)
+	 find-min-ind			; For byte-compiler.
+	 (find-min-ind
 	  (function
-	   ;; Return list of indentations within BLOB.  This is done by
-	   ;; walking recursively BLOB and updating IND-LIST along the
-	   ;; way.  FIRST-FLAG is non-nil when the first string hasn't
-	   ;; been seen yet.  It is required as this string is the only
-	   ;; one whose indentation doesn't happen after a newline
-	   ;; character.
+	   ;; Return minimal common indentation within BLOB.  This is
+	   ;; done by walking recursively BLOB and updating MIN-IND
+	   ;; along the way.  FIRST-FLAG is non-nil when the first
+	   ;; string hasn't been seen yet.  It is required as this
+	   ;; string is the only one whose indentation doesn't happen
+	   ;; after a newline character.
 	   (lambda (blob first-flag)
-	     (mapc
-	      (lambda (object)
-		(when (and first-flag (stringp object))
-		  (setq first-flag nil)
-		  (string-match "\\`\\( *\\)" object)
-		  (let ((len (length (match-string 1 object))))
-		    ;; An indentation of zero means no string will be
-		    ;; modified.  Quit the process.
-		    (if (zerop len) (throw 'zero (setq ind-list nil))
-		      (push len ind-list))))
-		(cond
-		 ((stringp object)
-		  (let ((start 0))
-		    ;; Avoid matching blank or empty lines.
-		    (while (and (string-match "\n\\( *\\)\\(.\\)" object start)
-				(not (equal (match-string 2 object) " ")))
-		      (setq start (match-end 0))
-		      (push (length (match-string 1 object)) ind-list))))
-		 ((memq (org-element-type object) org-element-recursive-objects)
-		  (funcall collect-inds object first-flag))))
-	      (org-element-contents blob))))))
-    ;; Collect indentation list in ELEMENT.  Possibly remove first
-    ;; value if IGNORE-FIRST is non-nil.
-    (catch 'zero (funcall collect-inds element (not ignore-first)))
-    (if (not ind-list) element
+	     (dolist (object (org-element-contents blob))
+	       (when (and first-flag (stringp object))
+		 (setq first-flag nil)
+		 (string-match "\\`\\( *\\)" object)
+		 (let ((len (length (match-string 1 object))))
+		   ;; An indentation of zero means no string will be
+		   ;; modified.  Quit the process.
+		   (if (zerop len) (throw 'zero (setq min-ind 0))
+		     (setq min-ind (min len min-ind)))))
+	       (cond
+		((stringp object)
+		 (dolist (line (delq "" (cdr (org-split-string object " *\n"))))
+		   (setq min-ind (min (org-get-indentation line) min-ind))))
+		((memq (org-element-type object) org-element-recursive-objects)
+		 (funcall find-min-ind object first-flag))))))))
+    ;; Find minimal indentation in ELEMENT.
+    (catch 'zero (funcall find-min-ind element (not ignore-first)))
+    (if (or (zerop min-ind) (= min-ind most-positive-fixnum)) element
       ;; Build ELEMENT back, replacing each string with the same
       ;; string minus common indentation.
       (let* (build			; For byte compiler.
 	     (build
 	      (function
-	       (lambda (blob mci first-flag)
+	       (lambda (blob first-flag)
 		 ;; Return BLOB with all its strings indentation
-		 ;; shortened from MCI white spaces.  FIRST-FLAG is
-		 ;; non-nil when the first string hasn't been seen
+		 ;; shortened from MIN-IND white spaces.  FIRST-FLAG
+		 ;; is non-nil when the first string hasn't been seen
 		 ;; yet.
 		 (setcdr (cdr blob)
 			 (mapcar
-			  (lambda (object)
-			    (when (and first-flag (stringp object))
-			      (setq first-flag nil)
-			      (setq object
-				    (replace-regexp-in-string
-				     (format "\\` \\{%d\\}" mci) "" object)))
-			    (cond
-			     ((stringp object)
-			      (replace-regexp-in-string
-			       (format "\n \\{%d\\}" mci) "\n" object))
-			     ((memq (org-element-type object)
-				    org-element-recursive-objects)
-			      (funcall build object mci first-flag))
-			     (t object)))
+			  #'(lambda (object)
+			      (when (and first-flag (stringp object))
+				(setq first-flag nil)
+				(setq object
+				      (replace-regexp-in-string
+				       (format "\\` \\{%d\\}" min-ind)
+				       "" object)))
+			      (cond
+			       ((stringp object)
+				(replace-regexp-in-string
+				 (format "\n \\{%d\\}" min-ind) "\n" object))
+			       ((memq (org-element-type object)
+				      org-element-recursive-objects)
+				(funcall build object first-flag))
+			       (t object)))
 			  (org-element-contents blob)))
 		 blob))))
-	(funcall build element (apply 'min ind-list) (not ignore-first))))))
+	(funcall build element (not ignore-first))))))
 
 
 
