@@ -2219,7 +2219,7 @@ code ---- the results are extracted in the syntax of the source
 		  (funcall wrap ":RESULTS:" ":END:" 'no-escape))
 		 ((and (not (funcall proper-list-p result))
 		       (not (member "file" result-params)))
-		  (org-babel-examplize-region beg end results-switches)
+		  (org-babel-examplify-region beg end results-switches)
 		  (setq end (point)))))
 	      ;; possibly indent the results to match the #+results line
 	      (when (and (not inlinep) (numberp indent) indent (> indent 0)
@@ -2284,16 +2284,20 @@ file's directory then expand relative links."
 	      result)
 	    (if description (concat "[" description "]") ""))))
 
-(defvar org-babel-capitalize-examplize-region-markers nil
+(defvar org-babel-capitalize-example-region-markers nil
   "Make true to capitalize begin/end example markers inserted by code blocks.")
 
-(defun org-babel-examplize-region (beg end &optional results-switches)
+(define-obsolete-function-alias
+  'org-babel-examplize-region
+  'org-babel-examplify-region "24.5")
+
+(defun org-babel-examplify-region (beg end &optional results-switches)
   "Comment out region using the inline '==' or ': ' org example quote."
   (interactive "*r")
   (let ((chars-between (lambda (b e)
 			 (not (string-match "^[\\s]*$"
 					    (buffer-substring b e)))))
-	(maybe-cap (lambda (str) (if org-babel-capitalize-examplize-region-markers
+	(maybe-cap (lambda (str) (if org-babel-capitalize-example-region-markers
 				(upcase str) str)))
 	(beg-bol (save-excursion (goto-char beg) (point-at-bol)))
 	(end-bol (save-excursion (goto-char end) (point-at-bol)))
