@@ -2869,34 +2869,38 @@ Paragraph \\alpha."
 
 (ert-deftest test-org-element/normalize-contents ()
   "Test `org-element-normalize-contents' specifications."
-  ;; 1. Remove maximum common indentation from element's contents.
+  ;; Remove maximum common indentation from element's contents.
   (should
    (equal
     (org-element-normalize-contents
      '(paragraph nil "  Two spaces\n   Three spaces"))
     '(paragraph nil "Two spaces\n Three spaces")))
-  ;; 2. Ignore objects within contents when computing maximum common
-  ;;    indentation.
+  ;; Ignore objects within contents when computing maximum common
+  ;; indentation.
   (should
    (equal
     (org-element-normalize-contents
      '(paragraph nil " One " (emphasis nil "space") "\n  Two spaces"))
     '(paragraph nil "One " (emphasis nil "space") "\n Two spaces")))
-  ;; 3. Ignore blank lines.
+  ;; Ignore blank lines.
   (should
    (equal
     (org-element-normalize-contents
      '(paragraph nil "  Two spaces\n\n \n  Two spaces"))
     '(paragraph nil "Two spaces\n\n \nTwo spaces")))
-  ;; 4. Recursively enter objects in order to compute common
-  ;;    indentation.
+  (should
+   (equal
+    '(paragraph nil " Two spaces\n" (verbatim nil "V") "\n Two spaces")
+    (org-element-normalize-contents
+     '(paragraph nil "  Two spaces\n " (verbatim nil "V") "\n  Two spaces"))))
+  ;; Recursively enter objects in order to compute common indentation.
   (should
    (equal
     (org-element-normalize-contents
      '(paragraph nil "  Two spaces " (bold nil " and\n One space")))
     '(paragraph nil " Two spaces " (bold nil " and\nOne space"))))
-  ;; 5. When optional argument is provided, ignore first line
-  ;;    indentation.
+  ;; When optional argument is provided, ignore first line
+  ;; indentation.
   (should
    (equal
     (org-element-normalize-contents
