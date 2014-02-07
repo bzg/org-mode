@@ -22671,7 +22671,7 @@ region only contains such lines."
                  (looking-at "[ \t]*\\(:\\(?: \\|$\\)\\)"))
             (replace-match
 	     "" nil nil nil (if (= (line-end-position) (match-end 0)) 0 1)))
-           ((and (memq type '(babel-call clock diary-sexp headline
+           ((and (memq type '(babel-call clock comment diary-sexp headline
 					 horizontal-rule keyword paragraph
 					 planning))
 		 (or (not (org-element-property :post-affiliated element))
