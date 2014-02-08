@@ -324,12 +324,13 @@ a communication channel."
 	  ((org-export-inline-image-p link org-html-inline-image-rules)
 	   (let ((path (let ((raw-path (org-element-property :path link)))
 			 (if (not (file-name-absolute-p raw-path)) raw-path
-			   (expand-file-name raw-path)))))
-	     (format "![%s](%s)"
-		     (let ((caption (org-export-get-caption
-				     (org-export-get-parent-element link))))
-		       (when caption (org-export-data caption info)))
-		     path)))
+			   (expand-file-name raw-path))))
+		 (caption (org-export-data
+			   (org-export-get-caption
+			    (org-export-get-parent-element link)) info)))
+	     (format "![img](%s)"
+		     (if (not (org-string-nw-p caption)) path
+		       (format "%s \"%s\"" path caption)))))
 	  ((string= type "coderef")
 	   (let ((ref (org-element-property :path link)))
 	     (format (org-export-get-coderef-format ref contents)
