@@ -75,10 +75,11 @@ This function is called by `org-babel-execute-src-block'."
 	 (stdin (let ((stdin (cdr (assoc :stdin params))))
                   (when stdin (org-babel-sh-var-to-string
                                (org-babel-ref-resolve stdin)))))
+	 (cmdline (cdr (assoc :cmdline params)))
          (full-body (org-babel-expand-body:generic
 		     body params (org-babel-variable-assignments:sh params))))
     (org-babel-reassemble-table
-     (org-babel-sh-evaluate session full-body params stdin)
+     (org-babel-sh-evaluate session full-body params stdin cmdline)
      (org-babel-pick-name
       (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
      (org-babel-pick-name
@@ -149,14 +150,14 @@ Emacs-lisp table, otherwise return the results as a string."
 (defvar org-babel-sh-eoe-output "org_babel_sh_eoe"
   "String to indicate that evaluation has completed.")
 
-(defun org-babel-sh-evaluate (session body &optional params stdin)
+(defun org-babel-sh-evaluate (session body &optional params stdin cmdline)
   "Pass BODY to the Shell process in BUFFER.
 If RESULT-TYPE equals 'output then return a list of the outputs
 of the statements in BODY, if RESULT-TYPE equals 'value then
 return the value of the last statement in BODY."
   (let ((results
          (cond
-          (stdin                        ; external shell script w/STDIN
+          ((or stdin cmdline)	       ; external shell script w/STDIN
            (let ((script-file (org-babel-temp-file "sh-script-"))
                  (stdin-file (org-babel-temp-file "sh-stdin-"))
                  (shebang (cdr (assoc :shebang params)))
@@ -166,14 +167,14 @@ return the value of the last statement in BODY."
                (when padline (insert "\n"))
                (insert body))
              (set-file-modes script-file #o755)
-             (with-temp-file stdin-file (insert stdin))
+             (with-temp-file stdin-file (insert (or stdin "")))
              (with-temp-buffer
                (call-process-shell-command
                 (if shebang
                     script-file
                   (format "%s %s" org-babel-sh-command script-file))
                 stdin-file
-                (current-buffer))
+                (current-buffer) nil cmdline)
                (buffer-string))))
           (session                      ; session evaluation
            (mapconcat
