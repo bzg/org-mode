@@ -5531,6 +5531,9 @@ of 5 to 20 days, representing what to expect if everything goes either
 extremely well or extremely poorly.  In contrast, @code{est+} estimates the
 full job more realistically, at 10--15 days.
 
+Numbers are right-aligned when a format specifier with an explicit width like
+@{%5d} or @code{%5.1f} is used.
+
 Here is an example for a complete columns definition, along with allowed
 values.
 
