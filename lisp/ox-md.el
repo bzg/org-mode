@@ -271,24 +271,18 @@ channel."
   "Transcode LINE-BREAK object into Markdown format.
 CONTENTS is the link's description.  INFO is a plist used as
 a communication channel."
-  (let ((--link-org-files-as-html-maybe
+  (let ((link-org-files-as-md
 	 (function
-	  (lambda (raw-path info)
-	    ;; Treat links to `file.org' as links to `file.html', if
-            ;; needed.  See `org-html-link-org-files-as-html'.
-	    (cond
-	     ((and org-html-link-org-files-as-html
-		   (string= ".org"
-			    (downcase (file-name-extension raw-path "."))))
-	      (concat (file-name-sans-extension raw-path) "."
-		      (plist-get info :html-extension)))
-	     (t raw-path)))))
+	  (lambda (raw-path)
+	    ;; Treat links to `file.org' as links to `file.md'.
+	    (if (string= ".org" (downcase (file-name-extension raw-path ".")))
+		(concat (file-name-sans-extension raw-path) ".md")
+	      raw-path))))
 	(type (org-element-property :type link)))
     (cond ((member type '("custom-id" "id"))
 	   (let ((destination (org-export-resolve-id-link link info)))
 	     (if (stringp destination)	; External file.
-		 (let ((path (funcall --link-org-files-as-html-maybe
-				      destination info)))
+		 (let ((path (funcall link-org-files-as-md destination)))
 		   (if (not contents) (format "<%s>" path)
 		     (format "[%s](%s)" contents path)))
 	       (concat
@@ -325,20 +319,17 @@ a communication channel."
 		     (if (atom number) (number-to-string number)
 		       (mapconcat 'number-to-string number "."))))))))
 	  (t (let* ((raw-path (org-element-property :path link))
-		    (path (cond
-			   ((member type '("http" "https" "ftp"))
-			    (concat type ":" raw-path))
-			   ((equal type "file")
-			    ;; Treat links to ".org" files as ".html",
-			    ;; if needed.
-			    (setq raw-path
-				  (funcall --link-org-files-as-html-maybe
-					   raw-path info))
-			    ;; If file path is absolute, prepend it
-			    ;; with protocol component - "file://".
-			    (if (not (file-name-absolute-p raw-path)) raw-path
-			      (concat "file://" (expand-file-name raw-path))))
-			   (t raw-path))))
+		    (path
+		     (cond
+		      ((member type '("http" "https" "ftp"))
+		       (concat type ":" raw-path))
+		      ((equal type "file")
+		       (let ((path (funcall link-org-files-as-md raw-path)))
+			 (if (not (file-name-absolute-p path)) path
+			   ;; If file path is absolute, prepend it
+			   ;; with "file://" component.
+			   (concat "file://" (expand-file-name raw-path)))))
+		      (t raw-path))))
 	       (if (not contents) (format "<%s>" path)
 		 (format "[%s](%s)" contents path)))))))
 
