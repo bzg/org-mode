@@ -603,7 +603,53 @@ See also `test-org-table/remote-reference-access'."
 "
      1 "#+TBLFM: $2 = if(\"$1\" == \"nan\", string(\"\"), $1); E")))
 
-;; End of table examples and beginning of internal tests.
+(ert-deftest test-org-table/sub-total ()
+  "Grouped rows with sub-total.
+Begin range with \"@II\" to handle multiline header.  Convert
+integer to float with \"+.0\" for sub-total of items c1 and c2.
+Sum empty fields as value zero but without ignoring them for
+\"vlen\" with format specifier \"EN\".  Format possibly empty
+results with the Calc formatter \"f-1\" instead of the printf
+formatter \"%.1f\"."
+  (org-test-table-target-expect
+   "
+|-------+---------+---------|
+| Item  |    Item | Sub-    |
+| name  |   value | total   |
+|-------+---------+---------|
+| a1    |     4.1 | replace |
+| a2    |     8.2 | replace |
+| a3    |         | replace |
+|-------+---------+---------|
+| b1    |    16.0 | replace |
+|-------+---------+---------|
+| c1    |      32 | replace |
+| c2    |      64 | replace |
+|-------+---------+---------|
+| Total | replace | replace |
+|-------+---------+---------|
+"
+   "
+|-------+-------+-------|
+| Item  |  Item |  Sub- |
+| name  | value | total |
+|-------+-------+-------|
+| a1    |   4.1 |       |
+| a2    |   8.2 |       |
+| a3    |       |  12.3 |
+|-------+-------+-------|
+| b1    |  16.0 |  16.0 |
+|-------+-------+-------|
+| c1    |    32 |       |
+| c2    |    64 |  96.0 |
+|-------+-------+-------|
+| Total | 124.3 |       |
+|-------+-------+-------|
+"
+   1 (concat "#+TBLFM: @>$2 = vsum(@II..@>>) ::"
+	     "$3 = if(vlen(@-I$2..@0$2) == vlen(@-I$2..@+I$2), "
+	     "vsum(@-I$2..@+I$2) +.0, string(\"\")); EN f-1 :: "
+	     "@>$3 = string(\"\")")))
 
 (ert-deftest test-org-table/org-table-make-reference/mode-string-EL ()
   (fset 'f 'org-table-make-reference)
