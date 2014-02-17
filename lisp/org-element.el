@@ -1023,8 +1023,9 @@ Assume point is at beginning of the inline task."
 		  plist))))
 	   (task-end (save-excursion
 		       (end-of-line)
-		       (and (re-search-forward "^\\*+ END" limit t)
-			    (match-beginning 0))))
+		       (and (re-search-forward org-outline-regexp-bol limit t)
+			    (org-looking-at-p "END[ \t]*$")
+			    (line-beginning-position))))
 	   (contents-begin (progn (forward-line)
 				  (and task-end (< (point) task-end) (point))))
 	   (contents-end (and contents-begin task-end))
