@@ -1021,55 +1021,58 @@ Some other text
   "Test `inlinetask' parser."
   (when (featurep 'org-inlinetask)
     (let ((org-inlinetask-min-level 15))
-      ;; 1. Regular inlinetask.
+      ;; Regular inlinetask.
       (should
+       (eq 'inlinetask
+	   (org-test-with-temp-text
+	       "*************** Task\nTest\n*************** END"
+	     (org-element-type (org-element-at-point)))))
+      ;; Degenerate inlinetask.
+      (should
+       (eq 'inlinetask
+	   (org-test-with-temp-text "*************** Task"
+	     (org-element-type (org-element-at-point)))))
+      ;; Mixed inlinetasks.
+      (should-not
        (org-test-with-temp-text
-	   "*************** Task\nTest\n*************** END"
-	 (org-element-map (org-element-parse-buffer) 'inlinetask 'identity)))
-      ;; 2. Degenerate inlinetask.
-      (should
-       (org-test-with-temp-text "*************** Task"
-	 (org-element-map (org-element-parse-buffer) 'inlinetask 'identity)))
+	   "
+*************** Task
+*************** Task2
+Contents
+*************** END"
+	 (forward-line)
+	 (goto-char (org-element-property :end (org-element-at-point)))
+	 (eobp)))
       ;; TODO keyword.
       (should
        (equal
 	"TODO"
 	(let ((org-todo-keywords '((sequence "TODO" "DONE"))))
 	  (org-test-with-temp-text "*************** TODO Task"
-	    (org-element-property
-	     :todo-keyword
-	     (org-element-map (org-element-parse-buffer) 'inlinetask
-	       'identity nil t))))))
+	    (org-element-property :todo-keyword (org-element-at-point))))))
       ;; Planning info.
       (should
-       (equal
-	"2012-03-29 thu."
-	(org-test-with-temp-text "
+       (org-test-with-temp-text "
 *************** Task
 DEADLINE: <2012-03-29 thu.>"
-	  (org-element-property
-	   :deadline
-	   (org-element-map (org-element-parse-buffer) 'inlinetask 'identity nil t)))))
+	 (forward-line)
+	 (org-element-property :deadline (org-element-at-point))))
       ;; Priority.
       (should
-       (equal
+       (eq
 	?A
 	(org-test-with-temp-text "
 *************** [#A] Task"
-	  (org-element-property
-	   :priority
-	   (org-element-map
-	       (org-element-parse-buffer) 'inlinetask 'identity nil t)))))
+	  (forward-line)
+	  (org-element-property :priority (org-element-at-point)))))
       ;; Tags.
       (should
        (equal
 	'("test")
 	(org-test-with-temp-text "
 *************** Task :test:"
-	  (org-element-property
-	   :tags
-	   (org-element-map
-	       (org-element-parse-buffer) 'inlinetask 'identity nil t)))))
+	  (forward-line)
+	  (org-element-property :tags (org-element-at-point)))))
       ;; Regular properties are accessed through upper case keywords.
       (should
        (org-test-with-temp-text "
