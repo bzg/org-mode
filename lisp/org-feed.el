@@ -117,8 +117,8 @@ to create inbox items in Org.  Each entry is a list with the following items:
 name         a custom name for this feed
 URL          the Feed URL
 file         the target Org file where entries should be listed, when
-             nil the target becomes the current buffer each time the
-             feed update is invoked
+             nil the target becomes the current buffer (may be an
+             indirect buffer) each time the feed update is invoked
 headline     the headline under which entries should be listed
 
 Additional arguments can be given using keyword-value pairs.  Many of these
@@ -298,7 +298,8 @@ it can be a list structured like an entry in `org-feed-alist'."
   (catch 'exit
     (let ((name (car feed))
 	  (url (nth 1 feed))
-	  (file (or (nth 2 feed) (buffer-file-name (current-buffer))))
+	  (file (or (nth 2 feed) (buffer-file-name (or (buffer-base-buffer)
+						       (current-buffer)))))
 	  (headline (nth 3 feed))
 	  (filter (nth 1 (memq :filter feed)))
 	  (formatter (nth 1 (memq :formatter feed)))
