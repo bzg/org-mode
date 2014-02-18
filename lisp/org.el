@@ -5230,14 +5230,15 @@ Support for group tags is controlled by the option
 
 (defun org-file-contents (file &optional noerror)
   "Return the contents of FILE, as a string."
-  (if (or (not file) (not (file-readable-p file)))
-      (if (not noerror)
-	  (error "Cannot read file \"%s\"" file)
-	(message "Cannot read file \"%s\"" file)
-	"")
-    (with-temp-buffer
-      (insert-file-contents file)
-      (buffer-string))))
+  (if (and file (file-readable-p file))
+      (with-temp-buffer
+	(insert-file-contents file)
+	(buffer-string))
+    (funcall (if noerror #'message #'error)
+	     "Cannot read file \"%s\"%s"
+	     file
+	     (let ((from (buffer-file-name (buffer-base-buffer))))
+	       (if from (concat " (referenced in file \"" from "\")") "")))))
 
 (defun org-extract-log-state-settings (x)
   "Extract the log state setting from a TODO keyword string.
