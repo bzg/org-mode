@@ -2,7 +2,7 @@
 ;;; org-drill.el - Self-testing using spaced repetition
 ;;;
 ;;; Author: Paul Sexton <eeeickythump@gmail.com>
-;;; Version: 2.4.0
+;;; Version: 2.4.1
 ;;; Repository at http://bitbucket.org/eeeickythump/org-drill/
 ;;;
 ;;;
@@ -577,9 +577,9 @@ value."
   "Randomly permute the elements of LIST (all permutations equally likely)."
   ;; Adapted from 'shuffle-vector' in cookie1.el
   (let ((i 0)
-	j
-	temp
-	(len (length list)))
+        j
+        temp
+        (len (length list)))
     (while (< i len)
       (setq j (+ i (random* (- len i))))
       (setq temp (nth i list))
@@ -1013,16 +1013,16 @@ Returns a list: (INTERVAL REPEATS EF FAILURES MEAN TOTAL-REPEATS OFMATRIX), wher
 (defun get-optimal-factor-sm5 (n ef of-matrix)
   (let ((factors (assoc n of-matrix)))
     (or (and factors
-	     (let ((ef-of (assoc ef (cdr factors))))
-	       (and ef-of (cdr ef-of))))
-	(initial-optimal-factor-sm5 n ef))))
+             (let ((ef-of (assoc ef (cdr factors))))
+               (and ef-of (cdr ef-of))))
+        (initial-optimal-factor-sm5 n ef))))
 
 
 (defun inter-repetition-interval-sm5 (last-interval n ef &optional of-matrix)
   (let ((of (get-optimal-factor-sm5 n ef (or of-matrix
                                              org-drill-optimal-factor-matrix))))
     (if (= 1 n)
-	of
+        of
       (* of last-interval))))
 
 
@@ -2498,6 +2498,16 @@ If RESUME-P is non-nil, resume a suspended drill session rather
 than starting a new one."
 
   (interactive)
+  ;; Check org version. Org 7.9.3f introduced a backwards-incompatible change
+  ;; to the arguments accepted by `org-schedule'. At the time of writing there
+  ;; are still lots of people using versions of org older than this.
+  (let ((majorv (first (mapcar 'string-to-number (split-string (org-release) "[.]")))))
+    (if (and (< majorv 8)
+             (not (string-match-p "universal prefix argument" (documentation 'org-schedule))))
+        (read-char-exclusive
+         (format "Warning: org-drill requires org mode 7.9.3f or newer. Scheduling of failed cards will not
+work correctly with older versions of org mode. Your org mode version (%s) appears to be older than
+7.9.3f. Please consider installing a more recent version of org mode." (org-release)))))
   (let ((end-pos nil)
         (overdue-data nil)
         (cnt 0))
@@ -2712,24 +2722,36 @@ values as `org-drill-scope'."
     (message "Done.")))
 
 
-
 (defun org-drill-add-cloze-fontification ()
-  (when (eql major-mode 'org-mode)
-    ;; Compute local versions of the regexp for cloze deletions, in case
-    ;; the left and right delimiters are redefined locally.
-    (setq-local org-drill-cloze-regexp (org-drill--compute-cloze-regexp))
-    (setq-local org-drill-cloze-keywords (org-drill--compute-cloze-keywords))
-    (when org-drill-use-visible-cloze-face-p
-      (font-lock-add-keywords nil       ;'org-mode
-                              org-drill-cloze-keywords
-                              nil))))
+  ;; Compute local versions of the regexp for cloze deletions, in case
+  ;; the left and right delimiters are redefined locally.
+  (setq-local org-drill-cloze-regexp (org-drill--compute-cloze-regexp))
+  (setq-local org-drill-cloze-keywords (org-drill--compute-cloze-keywords))
+  (when org-drill-use-visible-cloze-face-p
+    (add-to-list 'org-font-lock-extra-keywords
+                 (first org-drill-cloze-keywords))))
+
+(add-hook 'org-font-lock-set-keywords-hook 'org-drill-add-cloze-fontification)
 
 ;; Can't add to org-mode-hook, because local variables won't have been loaded
 ;; yet.
-(add-hook 'hack-local-variables-hook
-          'org-drill-add-cloze-fontification)
 
-(org-drill-add-cloze-fontification)
+;; (defun org-drill-add-cloze-fontification ()
+;;   (when (eql major-mode 'org-mode)
+;;     ;; Compute local versions of the regexp for cloze deletions, in case
+;;     ;; the left and right delimiters are redefined locally.
+;;     (setq-local org-drill-cloze-regexp (org-drill--compute-cloze-regexp))
+;;     (setq-local org-drill-cloze-keywords (org-drill--compute-cloze-keywords))
+;;     (when org-drill-use-visible-cloze-face-p
+;;       (font-lock-add-keywords nil       ;'org-mode
+;;                               org-drill-cloze-keywords
+;;                               nil))))
+
+;; XXX
+;; (add-hook 'hack-local-variables-hook
+;;           'org-drill-add-cloze-fontification)
+;;
+;; (org-drill-add-cloze-fontification)
 
 
 ;;; Synching card collections =================================================
