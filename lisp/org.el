@@ -9812,14 +9812,17 @@ according to FMT (default from `org-email-link-description-format')."
 (defconst org-link-escape-chars
   ;;%20 %2B %3B %3D %5B %5D
   '(?\  ?\+ ?\; ?\= ?\[ ?\])
-  "List of characters that should be escaped in link.
+  "List of characters that should be escaped in a link when stored to Org.
 This is the list that is used for internal purposes.")
 
 (defconst org-link-escape-chars-browser
   ;;%20 %22
   '(?\  ?\")
-  "List of escapes for characters that are problematic in links.
-This is the list that is used before handing over to the browser.")
+  "List of characters to be escaped before handing over to the browser.
+If you consider using this constant then you probably want to use
+the function `org-link-escape-browser' instead.  See there why
+this constant is a candidate to be removed once Org drops support
+for Emacs 24.1 and 24.2.")
 
 (defun org-link-escape (text &optional table merge)
   "Return percent escaped representation of TEXT.
@@ -9848,11 +9851,27 @@ If optional argument MERGE is set, merge TABLE into
        (char-to-string char))) text ""))
 
 (defun org-link-escape-browser (text)
-  (if (org-string-match-p
-       (concat "[[:nonascii:]" org-link-escape-chars-browser "]")
-       text)
-      (org-link-escape text org-link-escape-chars-browser)
-    text))
+  "Escape some characters before handing over to the browser.
+This function is a candidate to be removed together with the
+constant `org-link-escape-chars-browser' once Org drops support
+for Emacs 24.1 and 24.2.  All calls to this function will have to
+be replaced with `url-encode-url' which is available since Emacs
+24.3.1."
+  ;; Example with the Org link
+  ;; [[http://lists.gnu.org/archive/cgi-bin/namazu.cgi?idxname=emacs-orgmode&query=%252Bsubject:"Release+8.2"]]
+  ;; to open the browser with +subject:"Release 8.2" filled into the
+  ;; query field: In this case the variable TEXT contains the
+  ;; unescaped [...]=%2Bsubject:"Release+8.2".  Then `url-encode-url'
+  ;; converts correctly to [...]=%2Bsubject:%22Release+8.2%22 or
+  ;; `org-link-escape' with `org-link-escape-chars-browser' converts
+  ;; wrongly to [...]=%252Bsubject:%22Release+8.2%22.
+  (if (fboundp 'url-encode-url)
+      (url-encode-url text)
+    (if (org-string-match-p
+	 (concat "[[:nonascii:]" org-link-escape-chars-browser "]")
+	 text)
+	(org-link-escape text org-link-escape-chars-browser)
+      text)))
 
 (defun org-link-unescape (str)
   "Unhex hexified Unicode strings as returned from the JavaScript function
@@ -10577,29 +10596,12 @@ application the system uses for this file type."
 	      (apply cmd (nreverse args1))))
 
 	   ((member type '("http" "https" "ftp" "news"))
-	    ;; In the example of the http Org link
-	    ;; [[http://lists.gnu.org/archive/cgi-bin/namazu.cgi?idxname=emacs-orgmode&query=%252Bsubject:"Release+8.2"]]
-	    ;; to open a browser with +subject:"Release 8.2" in the
-	    ;; query field the variable `path' contains
-	    ;; [...]=%2Bsubject:"Release+8.2", `url-encode-url'
-	    ;; converts correct to [...]=%2Bsubject:%22Release+8.2%22
-	    ;; and `org-link-escape-browser' converts wrong to
-	    ;; [...]=%252Bsubject:%22Release+8.2%22.
-	    ;;
-	    ;; `url-encode-url' is available since Emacs 24.3.1 and
-	    ;; `org-link-escape-browser' can be removed altogether
-	    ;; once Org drops support for Emacs 24.1 and 24.2.
-	    (browse-url (funcall (if (fboundp 'url-encode-url)
-				     #'url-encode-url
-				   #'org-link-escape-browser)
-				 (concat type ":" path))))
+	    (browse-url (org-link-escape-browser
+			 (concat type ":" path))))
 
 	   ((string= type "doi")
-	    ;; See comments for type http above
-	    (browse-url (funcall (if (fboundp 'url-encode-url)
-				     #'url-encode-url
-				   #'org-link-escape-browser)
-				 (concat org-doi-server-url path))))
+	    (browse-url (org-link-escape-browser
+			 (concat org-doi-server-url path))))
 
 	   ((member type '("message"))
 	    (browse-url (concat type ":" path)))
