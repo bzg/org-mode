@@ -5362,20 +5362,18 @@ if the process stopped before finding the expected result."
            (cond ((not up))
                  ((eobp) (setq element up))
                  (t (setq element up next (point)))))))
-       ;; Nothing to parse before POS in order to know the result:
-       ;; return current parent, if any.
-       (when (and syncp (= (point) pos)) (throw 'exit element))
        ;; Parse successively each element until we reach POS.
        (let ((end (or (org-element-property :end element)
 		      (save-excursion
 			(org-with-limited-levels (outline-next-heading))
 			(point))))
-	     parent special-flag)
+	     (parent element)
+	     special-flag)
 	 (while t
-	   ;; Break requested: return `interrupted' so there is no
-	   ;; confusion where there is no parent (nil value).
-	   (when (and syncp (org-element--cache-interrupt-p time-limit))
-	     (throw 'exit 'interrupted))
+	   (when syncp
+	     (cond ((= (point) pos) (throw 'exit parent))
+		   ((org-element--cache-interrupt-p time-limit)
+		    (throw 'exit 'interrupted))))
 	   (unless element
 	     (setq element (org-element--current-element
 			    end 'element special-flag
@@ -5385,59 +5383,49 @@ if the process stopped before finding the expected result."
 	   (let ((elem-end (org-element-property :end element))
 		 (type (org-element-type element)))
 	     (cond
-	      ((and syncp (= elem-end pos)) (throw 'exit parent))
-	      ;; Special case: POS is at the end of the buffer and
-	      ;; CACHED ends here.  No element can start after it, but
-	      ;; more than one may end there.  Arbitrarily, we choose
-	      ;; to return the innermost of such elements.  This
-	      ;; cannot happen when SYNCP is non-nil.
-	      ((and (not syncp) (= (point-max) pos) (= pos elem-end))
-	       (let ((cend (org-element-property :contents-end element)))
-		 (if (or (not (memq type org-element-greater-elements))
-			 (not cend)
-			 (< cend pos))
-		     (throw 'exit element)
-		   (goto-char
-		    (or next (org-element-property :contents-begin element)))
-		   (setq special-flag (case type
+	      ;; Skip any element ending before point.  Also skip
+	      ;; element ending at point (unless it is also the end of
+	      ;; buffer) since we're sure that another element begins
+	      ;; after it.
+	      ((and (<= elem-end pos) (/= (point-max) elem-end))
+	       (goto-char elem-end))
+	      ;; A non-greater element contains point: return it.
+	      ((not (memq type org-element-greater-elements))
+	       (throw 'exit element))
+	      ;; Otherwise, we have to decide if ELEMENT really
+	      ;; contains POS.  In that case we start parsing from
+	      ;; contents' beginning.
+	      ;;
+	      ;; If POS is at contents' beginning but it is also at
+	      ;; the beginning of the first item in a list or a table.
+	      ;; In that case, we need to create an anchor for that
+	      ;; list or table, so return it.
+	      ;;
+	      ;; Also, if POS is at the end of the buffer, no element
+	      ;; can start after it, but more than one may end there.
+	      ;; Arbitrarily, we choose to return the innermost of
+	      ;; such elements.
+	      ((let ((cbeg (org-element-property :contents-begin element))
+		     (cend (org-element-property :contents-end element)))
+		 (when (or syncp
+			   (and cbeg cend
+				(or (< cbeg pos)
+				    (and (= cbeg pos)
+					 (not (memq type '(plain-list table)))))
+				(or (> cend pos)
+				    (and (= cend pos) (= (point-max) pos)))))
+		   (goto-char (or next cbeg))
+		   (setq next nil
+			 special-flag (case type
 					(plain-list 'item)
 					(property-drawer 'node-property)
 					(table 'table-row))
 			 parent element
 			 end cend))))
-	      ;; Skip any element ending before point.  Also skip
-	      ;; element ending at point since we're sure that another
-	      ;; element begins after it.
-	      ((<= elem-end pos) (goto-char elem-end))
-	      ;; A non-greater element contains point: return it.
-	      ;; This cannot happen when SYNCP is non-nil.
-	      ((not (or syncp (memq type org-element-greater-elements)))
-	       (throw 'exit element))
-	      ;; Otherwise, we have to decide if ELEMENT really
-	      ;; contains POS.  In that case we start parsing from
-	      ;; contents' beginning.  Otherwise we return UP as it is
-	      ;; the smallest element containing POS.
-	      ;;
-	      ;; There is a special cases to consider, though.  If POS
-	      ;; is at contents' beginning but it is also at the
-	      ;; beginning of the first item in a list or a table.  In
-	      ;; that case, we need to create an anchor for that list
-	      ;; or table, so return it.
-	      (t
-	       (let ((cbeg (org-element-property :contents-begin element))
-		     (cend (org-element-property :contents-end element)))
-		 (if (or (not cbeg) (not cend) (> cbeg pos) (<= cend pos)
-			 (and (= cbeg pos) (memq type '(plain-list table))))
-		     (throw 'exit element)
-		   (goto-char (or next cbeg))
-		   (setq special-flag (case type
-					(plain-list 'item)
-					(property-drawer 'node-property)
-					(table 'table-row))
-			 parent element
-			 end cend))))))
-	   ;; Continue parsing buffer contents from new position.
-	   (setq element nil next nil)))))))
+	      ;; Otherwise, return ELEMENT as it is the smallest
+	      ;; element containing POS.
+	      (t (throw 'exit element))))
+	   (setq element nil)))))))
 
 
 ;;;; Staging Buffer Changes
