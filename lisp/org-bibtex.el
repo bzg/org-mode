@@ -613,7 +613,8 @@ This uses `bibtex-parse-entry'."
 	(strip-delim
 	 (lambda (str)	     ; strip enclosing "..." and {...}
 	   (dolist (pair '((34 . 34) (123 . 125) (123 . 125)))
-	     (when (and (= (aref str 0) (car pair))
+	     (when (and (> (length str) 1)
+			(= (aref str 0) (car pair))
 			(= (aref str (1- (length str))) (cdr pair)))
 	       (setf str (substring str 1 (1- (length str)))))) str)))
     (push (mapcar
