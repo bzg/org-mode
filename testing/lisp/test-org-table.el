@@ -554,8 +554,7 @@ reference (with row).  Mode string N."
 (ert-deftest test-org-table/copy-field ()
   "Experiments on how to copy one field into another field.
 See also `test-org-table/remote-reference-access'."
-  (let ((target
-	 "
+  (let ((target "
 | 0                | replace |
 | a b              | replace |
 | c   d            | replace |
@@ -650,6 +649,61 @@ formatter \"%.1f\"."
 	     "$3 = if(vlen(@0..@+I) == 1, "
 	     "vsum(@-I$2..@+I$2) +.0, string(\"\")); EN f-1 :: "
 	     "@>$3 = string(\"\")")))
+
+(ert-deftest test-org-table/org-lookup-all ()
+  "Use `org-lookup-all' for several GROUP BY as in SQL and for ranking.
+See also http://orgmode.org/worg/org-tutorials/org-lookups.html ."
+  (let ((data "
+#+NAME: data
+| Purchase | Product | Shop | Rating |
+|----------+---------+------+--------|
+| a        | p1      | s1   |      1 |
+| b        | p1      | s2   |      4 |
+| c        | p2      | s1   |      2 |
+| d        | p3      | s2   |      8 |
+"))
+
+    ;; Product rating and ranking by average purchase from "#+NAME: data"
+    (org-test-table-target-expect
+     (concat data "
+| Product | Rating  | Ranking |
+|---------+---------+---------|
+| p1      | replace | replace |
+| p2      | replace | replace |
+| p3      | replace | replace |
+")
+     (concat data "
+| Product | Rating | Ranking |
+|---------+--------+---------|
+| p1      |    2.5 |       2 |
+| p2      |    2.0 |       3 |
+| p3      |    8.0 |       1 |
+")
+    2 (concat
+       "#+TBLFM: $2 = '(let ((all (org-lookup-all '$1 "
+       "'(remote(data, @I$2..@>$2)) '(remote(data, @I$4..@>$4))))) "
+       "(/ (apply '+ all) (length all) 1.0)); L :: "
+       "$3 = '(+ 1 (length (org-lookup-all $2 '(@I$2..@>$2) nil '<))); N"))
+
+    ;; Shop rating and ranking by average purchase from "#+NAME: data"
+    (org-test-table-target-expect
+     (concat data "
+| Shop | Rating  | Ranking |
+|------+---------+---------|
+| s1   | replace | replace |
+| s2   | replace | replace |
+")
+     (concat data "
+| Shop | Rating | Ranking |
+|------+--------+---------|
+| s1   |    1.5 |       2 |
+| s2   |    6.0 |       1 |
+")
+     2 (concat
+       "#+TBLFM: $2 = '(let ((all (org-lookup-all '$1 "
+       "'(remote(data, @I$3..@>$3)) '(remote(data, @I$4..@>$4))))) "
+       "(/ (apply '+ all) (length all) 1.0)); L :: "
+       "$3 = '(+ 1 (length (org-lookup-all $2 '(@I$2..@>$2) nil '<))); N"))))
 
 (ert-deftest test-org-table/org-table-make-reference/mode-string-EL ()
   (fset 'f 'org-table-make-reference)
