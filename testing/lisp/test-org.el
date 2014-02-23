@@ -546,6 +546,17 @@
 
 ;;; Links
 
+;;;; Custom ID
+
+(ert-deftest test-org/custom-id ()
+  "Test custom ID links specifications."
+  (should
+   (org-test-with-temp-text
+       "* H1\n:PROPERTIES:\n:CUSTOM_ID: custom\n:END:\n* H2\n[[#custom]]"
+     (goto-char (point-max))
+     (org-open-at-point)
+     (org-looking-at-p "\\* H1"))))
+
 ;;;; Fuzzy Links
 
 ;; Fuzzy links [[text]] encompass links to a target (<<text>>), to
