@@ -10482,7 +10482,6 @@ is used internally by `org-open-link-from-string'."
 	    (require 'org-attach)
 	    (org-attach-reveal 'if-exists))))
        ((run-hook-with-args-until-success 'org-open-at-point-functions))
-       ;; On a timestamp.
        ((eq type 'timestamp) (org-follow-timestamp-link))
        ;; On tags within a headline or an inlinetask.
        ((save-excursion (beginning-of-line)
@@ -10490,7 +10489,6 @@ is used internally by `org-open-link-from-string'."
                              (match-beginning 5)
                              (>= (point) (match-beginning 5))))
         (org-tags-view arg (substring (match-string 5) 0 -1)))
-       ;; On a link.
        ((eq type 'link)
         (let ((type (org-element-property :type context))
               (path (org-element-property :path context)))
@@ -10498,14 +10496,22 @@ is used internally by `org-open-link-from-string'."
           ;; a temporary buffer through `org-open-link-from-string'.
           (with-current-buffer (or reference-buffer (current-buffer))
             (cond
-             ;; Add application before looking into
-             ;; `org-link-protocols', as, e.g., "file" is different
-             ;; from "file+emacs".
-             ((let ((protocol
-		     (let ((app (org-element-property :application context)))
-		       (assoc (concat type (and app (concat "+" app)))
-			      org-link-protocols))))
-		(when protocol (funcall (nth 1 protocol) path) t)))
+             ((equal type "file")
+              (if (string-match "[*?{]" (file-name-nondirectory path))
+                  (dired path)
+                (apply
+		 (or (let ((app (org-element-property :application context)))
+		       (nth 1 (assoc (concat "file" (and app (concat "+" app)))
+				     org-link-protocols)))
+		     #'org-open-file)
+		 path arg
+		 (let ((option (org-element-property :search-option context)))
+		   (cond ((not option) nil)
+			 ((org-string-match-p "\\`[0-9]+\\'" option)
+			  (list (string-to-number option)))
+			 (t (list nil option)))))))
+	     ((assoc type org-link-protocols)
+	      (funcall (nth 1 (assoc type org-link-protocols)) path))
              ((equal type "help")
               (let ((f-or-v (intern path)))
                 (cond ((fboundp f-or-v) (describe-function f-or-v))
@@ -10531,15 +10537,6 @@ is used internally by `org-open-link-from-string'."
               (browse-url
                (org-link-escape-browser (concat org-doi-server-url path))))
              ((equal type "message") (browse-url (concat type ":" path)))
-             ((equal type "file")
-              (if (string-match "[*?{]" (file-name-nondirectory path))
-                  (dired path)
-                (let ((option (org-element-property :search-option context)))
-                  (apply #'org-open-file path arg
-                         (cond ((not option) nil)
-                               ((org-string-match-p "\\`[0-9]+\\'" option)
-                                (list (string-to-number option)))
-                               (t (list nil option)))))))
              ((equal type "shell")
               (let ((buf (generate-new-buffer "*Org Shell Output"))
                     (cmd path))
@@ -10668,12 +10665,16 @@ there is one, return it."
 
 (org-add-link-type "file+sys" 'org-open-file-with-system)
 (org-add-link-type "file+emacs" 'org-open-file-with-emacs)
-(defun org-open-file-with-system (path)
-  "Open file at PATH using the system way of opening it."
-  (org-open-file path 'system))
-(defun org-open-file-with-emacs (path)
-  "Open file at PATH in Emacs."
-  (org-open-file path 'emacs))
+(defun org-open-file-with-system (path &optional arg line search)
+  "Open file at PATH using the system way of opening it.
+Optional argument ARG is ignored.  See `org-open-file' for LINE
+and SEARCH arguments."
+  (org-open-file path 'system line search))
+(defun org-open-file-with-emacs (path &optional arg line search)
+  "Open file at PATH in Emacs.
+Optional argument ARG is ignored.  See `org-open-file' for LINE
+and SEARCH arguments."
+  (org-open-file path 'emacs line search))
 
 
 ;;; File search
