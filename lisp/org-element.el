@@ -5753,7 +5753,8 @@ Providing it allows for quicker computation."
 	 (let ((cbeg (org-element-property :contents-begin element))
 	       (cend (org-element-property :contents-end element)))
 	   ;; CBEG is nil for table rules.
-	   (if (and cbeg cend (>= origin cbeg) (< origin cend))
+	   (if (and cbeg cend (>= origin cbeg)
+		    (or (< origin cend) (and (= origin cend) (eobp))))
 	       (narrow-to-region cbeg cend)
 	     (throw 'objects-forbidden element))))
 	;; At a parsed keyword, objects are located within value.
@@ -5773,7 +5774,7 @@ Providing it allows for quicker computation."
 	      (parent element)
 	      (candidates 'initial)
 	      (cache (gethash element org-element--cache-objects))
-	      objects-data next update-cache-flag)
+	      objects-data next)
 	 (prog1
 	     (catch 'exit
 	       (while t
@@ -5810,12 +5811,13 @@ Providing it allows for quicker computation."
 		       (catch 'found
 			 (dolist (obj (cddr objects-data) (throw 'exit parent))
 			   (when (<= (org-element-property :begin obj) origin)
-			     (if (<= (org-element-property :end obj) origin)
-				 ;; Object ends before ORIGIN and we
-				 ;; know next one in cache starts
-				 ;; after it: bail out.
-				 (throw 'exit parent)
-			       (throw 'found (setq next obj))))))
+			     (let ((end (org-element-property :end obj)))
+			       (cond
+				((> end origin) (throw 'found (setq next obj)))
+				((and (= end origin) (= (point-max) end))
+				 (org-element-put-property obj :parent parent)
+				 (throw 'exit obj))
+				(t (throw 'exit parent)))))))
 		     (goto-char (cdr closest))
 		     (setq next
 			   (funcall (intern (format "org-element-%s-parser"
@@ -5832,8 +5834,8 @@ Providing it allows for quicker computation."
 		    ;; ORIGIN is within a non-recursive next or
 		    ;; at an object boundaries: Return that object.
 		    ((or (not cbeg) (< origin cbeg) (>= origin cend))
-		     (throw 'exit
-			    (org-element-put-property next :parent parent)))
+		     (org-element-put-property next :parent parent)
+		     (throw 'exit next))
 		    ;; Otherwise, move into NEXT and reset flags as we
 		    ;; shift parent.
 		    (t (goto-char cbeg)

@@ -3013,6 +3013,12 @@ Paragraph \\alpha."
        (org-test-with-temp-text "#+caption: *bold*\nParagraph"
 	 (progn (search-forward "*")
 		(org-element-type (org-element-context))))))
+  ;; Find objects at the end of buffer.
+  (should
+   (eq 'bold
+       (org-test-with-temp-text "*bold*"
+	 (goto-char (point-max))
+	 (org-element-type (org-element-context)))))
   ;; Correctly set `:parent' property.
   (should
    (eq 'paragraph
