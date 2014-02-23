@@ -5010,9 +5010,8 @@ the cache."
 (defun org-element--cache-put (element &optional data)
   "Store ELEMENT in current buffer's cache, if allowed.
 When optional argument DATA is non-nil, assume is it object data
-relative to ELEMENT and store it in the objects cache.  This
-function does nothing if `org-element-use-cache' is nil."
-  (when org-element-use-cache
+relative to ELEMENT and store it in the objects cache."
+  (when (org-element--cache-active-p)
     (if data (puthash element data org-element--cache-objects)
       (when org-element--cache-sync-requests
 	;; During synchronization, first build an appropriate key for
@@ -5773,7 +5772,8 @@ Providing it allows for quicker computation."
        (let* ((restriction (org-element-restriction type))
 	      (parent element)
 	      (candidates 'initial)
-	      (cache (gethash element org-element--cache-objects))
+	      (cache (and (org-element--cache-active-p)
+			  (gethash element org-element--cache-objects)))
 	      objects-data next)
 	 (prog1
 	     (catch 'exit
