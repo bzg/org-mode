@@ -106,7 +106,8 @@
 		   (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
 		   (:latex-header "LATEX_HEADER" nil nil newline)
 		   (:latex-header-extra "LATEX_HEADER_EXTRA" nil nil newline)
-		   (:latex-hyperref-p nil "texht" org-latex-with-hyperref t))
+		   (:latex-hyperref-p nil "texht" org-latex-with-hyperref t)
+		   (:latex-custom-id-labels nil nil org-latex-custom-id-as-label))
   :filters-alist '((:filter-options . org-latex-math-block-options-filter)
 		   (:filter-parse-tree . org-latex-math-block-tree-filter)))
 
@@ -375,6 +376,59 @@ which format headlines like for Org version prior to 8.0."
   :package-version '(Org . "8.0")
   :type 'function)
 
+(defcustom org-latex-custom-id-as-label nil
+   "Toggle use of CUSTOM_ID properties for generating section labels.
+
+When this variable is non-nil, Org will use the value of a
+headline's CUSTOM_ID property as the key for the \\label command
+for the LaTeX section corresponding to the headline.
+
+By default, Org generates its own internal section labels for all
+headlines during LaTeX export.  This process ensures that the
+\\label keys are unique and valid, but it means the keys are not
+available in advance of the export process.
+
+Setting this variable gives you control over how Org generates
+labels for sections during LaTeX export, so that you may know
+their keys in advance.  One reason to do this is that it allows
+you to refer to headlines using a single label both in Org's link
+syntax and in embedded LaTeX code.
+
+For example, when this variable is non-nil, a headline like this:
+
+  ** Some section
+     :PROPERTIES:
+     :CUSTOM_ID: sec:foo
+     :END:
+  This is section [[#sec:foo]].
+  #+BEGIN_LATEX
+  And this is still section \\ref{sec:foo}.
+  #+END_LATEX
+
+will be exported to LaTeX as:
+
+  \\subsection{Some section}
+  \\label{sec:foo}
+  This is section \\ref{sec:foo}.
+  And this is still section \\ref{sec:foo}.
+
+Note, however, that setting this variable introduces a limitation
+on the possible values for CUSTOM_ID.  When this variable is
+non-nil and a headline defines a CUSTOM_ID value, Org simply
+passes this value to \\label unchanged.  You are responsible for
+ensuring that the value is a valid LaTeX \\label key, and that no
+other \\label commands with the same key appear elsewhere in your
+document.  (Keys may contain letters, numbers, and the following
+punctuation: '_' '.' '-' ':'.)  There are no such limitations on
+CUSTOM_ID when this variable is nil.
+
+For headlines that do not define the CUSTOM_ID property, Org will
+continue to use its default labeling scheme to generate labels
+and resolve links into section references."
+  :group 'org-export-latex
+  :type 'boolean
+  :version "24.5"
+  :package-version '(Org . "8.3"))
 
 ;;;; Footnotes
 
@@ -1373,10 +1427,15 @@ holding contextual information."
 			       todo todo-type priority text tags))
 	   ;; Associate \label to the headline for internal links.
 	   (headline-label
-	    (format "\\label{sec-%s}\n"
-		    (mapconcat 'number-to-string
-			       (org-export-get-headline-number headline info)
-			       "-")))
+	    (let ((custom-label
+		   (and (plist-get info :latex-custom-id-labels)
+			(org-element-property :CUSTOM_ID headline))))
+	      (if custom-label (format "\\label{%s}\n" custom-label)
+		(format "\\label{sec-%s}\n"
+			(mapconcat
+			 #'number-to-string
+			 (org-export-get-headline-number headline info)
+			 "-")))))
 	   (pre-blanks
 	    (make-string (org-element-property :pre-blank headline) 10)))
       (if (or (not section-fmt) (org-export-low-level-p headline info))
@@ -1845,12 +1904,17 @@ INFO is a plist holding contextual information.  See
 	  ;; number.  Otherwise, display description or headline's
 	  ;; title.
 	  (headline
-	   (let ((label
-		  (format "sec-%s"
-			  (mapconcat
-			   'number-to-string
-			   (org-export-get-headline-number destination info)
-			   "-"))))
+	   (let* ((custom-label
+		   (and (plist-get info :latex-custom-id-labels)
+			(org-element-property :CUSTOM_ID destination)))
+		  (label
+		   (or
+		    custom-label
+		    (format "sec-%s"
+			    (mapconcat
+			     #'number-to-string
+			     (org-export-get-headline-number destination info)
+			     "-")))))
 	     (if (and (plist-get info :section-numbers) (not desc))
 		 (format "\\ref{%s}" label)
 	       (format "\\hyperref[%s]{%s}" label
