@@ -1268,7 +1268,7 @@ CONTENTS is the contents of the element."
 	    (forward-line)
 	    (let ((origin (point)))
 	      (when (re-search-forward inlinetask-re limit t)
-		(if (looking-at "^\\*+ END[ \t]*$") (forward-line)
+		(if (org-looking-at-p "END[ \t]*$") (forward-line)
 		  (goto-char origin)))))
 	   ;; At some text line.  Check if it ends any previous item.
 	   (t
