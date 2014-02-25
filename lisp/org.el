@@ -10482,7 +10482,7 @@ is used internally by `org-open-link-from-string'."
 	    (require 'org-attach)
 	    (org-attach-reveal 'if-exists))))
        ((run-hook-with-args-until-success 'org-open-at-point-functions))
-       ((eq type 'timestamp) (org-follow-timestamp-link))
+       ((memq type '(planning timestamp)) (org-follow-timestamp-link))
        ;; On tags within a headline or an inlinetask.
        ((save-excursion (beginning-of-line)
                         (and (looking-at org-complex-heading-regexp)
