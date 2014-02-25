@@ -643,11 +643,11 @@ contextual information."
 		  (and (eq (org-element-type first-element) 'paragraph)
 		       (org-beamer--element-has-overlay-p first-element))))
 	(output (org-export-with-backend 'latex item contents info)))
-    (if (not action) output
+    (if (or (not action) (not (string-match "\\\\item" output))) output
       ;; If the item starts with a paragraph and that paragraph starts
       ;; with an export snippet specifying an overlay, insert it after
       ;; \item command.
-      (replace-regexp-in-string "\\\\item" (concat "\\\\item" action) output))))
+      (replace-match (concat "\\\\item" action) nil nil output))))
 
 
 ;;;; Keyword
