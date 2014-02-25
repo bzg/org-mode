@@ -3022,6 +3022,17 @@ Paragraph \\alpha."
        (org-test-with-temp-text "| a | b {{{macro}}} |"
 	 (progn (search-forward "b")
 		(org-element-type (org-element-context))))))
+  ;; Find objects in planning lines.
+  (should
+   (eq 'timestamp
+       (org-test-with-temp-text "* H\n  SCHEDULED: <2012-03-29 thu.>"
+	 (search-forward "2012")
+	 (org-element-type (org-element-context)))))
+  (should-not
+   (eq 'timestamp
+       (org-test-with-temp-text "* H\n  SCHEDULED: <2012-03-29 thu.>"
+	 (search-forward "SCHEDULED")
+	 (org-element-type (org-element-context)))))
   ;; Find objects in document keywords.
   (should
    (eq 'macro
