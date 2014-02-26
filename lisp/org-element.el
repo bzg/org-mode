@@ -5782,8 +5782,10 @@ Providing it allows for quicker computation."
        (let* ((restriction (org-element-restriction type))
 	      (parent element)
 	      (candidates 'initial)
-	      (cache (and (org-element--cache-active-p)
-			  (gethash element org-element--cache-objects)))
+	      (cache (cond ((not (org-element--cache-active-p)) nil)
+			   (org-element--cache-objects
+			    (gethash element org-element--cache-objects))
+			   (t (org-element-cache-reset) nil)))
 	      objects-data next)
 	 (prog1
 	     (catch 'exit
