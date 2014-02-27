@@ -553,7 +553,7 @@
   (should
    (org-test-with-temp-text
        "* H1\n:PROPERTIES:\n:CUSTOM_ID: custom\n:END:\n* H2\n[[#custom]]"
-     (goto-char (point-max))
+     (goto-char (1- (point-max)))
      (org-open-at-point)
      (org-looking-at-p "\\* H1"))))
 

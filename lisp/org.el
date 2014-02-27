@@ -10482,6 +10482,17 @@ is used internally by `org-open-link-from-string'."
 	    (require 'org-attach)
 	    (org-attach-reveal 'if-exists))))
        ((run-hook-with-args-until-success 'org-open-at-point-functions))
+       ;; Do nothing on white spaces after an object.
+       ((let ((end (org-element-property :end context)))
+	  (= (save-excursion
+	       ;; Make sure we're not on invisible text, as it would
+	       ;; make the check unpredictable on object's borders.
+	       (when (invisible-p (point))
+		 (goto-char
+		  (next-single-property-change (point) 'invisible nil end)))
+	       (skip-chars-forward " \t" end) (point))
+	     end))
+	(user-error "No link found"))
        ((eq type 'timestamp) (org-follow-timestamp-link))
        ;; On tags within a headline or an inlinetask.
        ((save-excursion (beginning-of-line)
