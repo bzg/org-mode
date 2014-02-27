@@ -10459,159 +10459,178 @@ is used internally by `org-open-link-from-string'."
     (move-marker org-open-link-marker (point))
     (setq org-window-config-before-follow-link (current-window-configuration))
     (org-remove-occur-highlights nil nil t)
-    (let* ((context (org-element-context))
-           (type (org-element-type context)))
-      (cond
-       ;; On a headline or an inlinetask, but not on a timestamp,
-       ;; a link or on tags.
-       ((and (org-at-heading-p)
-             (not (memq type '(timestamp link)))
-             ;; Not on tags.
-             (save-excursion (beginning-of-line)
-                             (looking-at org-complex-heading-regexp)
-                             (or (not (match-beginning 5))
-                                 (< (point) (match-beginning 5)))))
-        (let* ((data (org-offer-links-in-entry (current-buffer) (point) arg))
-	       (links (car data))
-	       (links-end (cdr data)))
-	  (if links
-	      (dolist (link (if (stringp links) (list links) links))
-		(search-forward link nil links-end)
-		(goto-char (match-beginning 0))
-		(org-open-at-point))
-	    (require 'org-attach)
-	    (org-attach-reveal 'if-exists))))
-       ((run-hook-with-args-until-success 'org-open-at-point-functions))
-       ;; Do nothing on white spaces after an object.
-       ((let ((end (org-element-property :end context)))
-	  (= (save-excursion
-	       ;; Make sure we're not on invisible text, as it would
-	       ;; make the check unpredictable on object's borders.
-	       (when (invisible-p (point))
-		 (goto-char
-		  (next-single-property-change (point) 'invisible nil end)))
-	       (skip-chars-forward " \t" end) (point))
-	     end))
-	(user-error "No link found"))
-       ((eq type 'timestamp) (org-follow-timestamp-link))
-       ;; On tags within a headline or an inlinetask.
-       ((save-excursion (beginning-of-line)
-                        (and (looking-at org-complex-heading-regexp)
-                             (match-beginning 5)
-                             (>= (point) (match-beginning 5))))
-        (org-tags-view arg (substring (match-string 5) 0 -1)))
-       ((eq type 'link)
-        (let ((type (org-element-property :type context))
-              (path (org-element-property :path context)))
-          ;; Switch back to REFERENCE-BUFFER needed when called in
-          ;; a temporary buffer through `org-open-link-from-string'.
-          (with-current-buffer (or reference-buffer (current-buffer))
-            (cond
-             ((equal type "file")
-              (if (string-match "[*?{]" (file-name-nondirectory path))
-                  (dired path)
-                (apply
-		 (or (let ((app (org-element-property :application context)))
-		       (nth 1 (assoc (concat "file" (and app (concat "+" app)))
-				     org-link-protocols)))
-		     #'org-open-file)
-		 path arg
-		 (let ((option (org-element-property :search-option context)))
-		   (cond ((not option) nil)
-			 ((org-string-match-p "\\`[0-9]+\\'" option)
-			  (list (string-to-number option)))
-			 (t (list nil option)))))))
-	     ((assoc type org-link-protocols)
-	      (funcall (nth 1 (assoc type org-link-protocols)) path))
-             ((equal type "help")
-              (let ((f-or-v (intern path)))
-                (cond ((fboundp f-or-v) (describe-function f-or-v))
-                      ((boundp f-or-v) (describe-variable f-or-v))
-                      (t (error "Not a known function or variable")))))
-             ((equal type "mailto")
-              (let ((cmd (car org-link-mailto-program))
-                    (args (cdr org-link-mailto-program))
-                    (spec
-                     (format-spec-make
-                      ?a path           ; %a is address.
-                      ?s (let ((option  ; %s is subject.
-                                (org-element-property :search-option context)))
-                           (if (not option) "" (org-link-escape option)))))
-                    final-args)
-                (apply cmd
-                       (dolist (arg args (nreverse final-args))
-                         (if (not (stringp arg)) (push arg final-args)
-                           (push (format-spec arg spec) final-args))))))
-             ((member type '("http" "https" "ftp" "news"))
-              (browse-url (org-link-escape-browser (concat type ":" path))))
-             ((equal type "doi")
-              (browse-url
-               (org-link-escape-browser (concat org-doi-server-url path))))
-             ((equal type "message") (browse-url (concat type ":" path)))
-             ((equal type "shell")
-              (let ((buf (generate-new-buffer "*Org Shell Output"))
-                    (cmd path))
-                (if (or (and (org-string-nw-p org-confirm-shell-link-not-regexp)
-                             (string-match org-confirm-shell-link-not-regexp cmd))
-                        (not org-confirm-shell-link-function)
-                        (funcall org-confirm-shell-link-function
-                                 (format "Execute \"%s\" in shell? "
-                                         (org-add-props cmd nil
-                                           'face 'org-warning))))
-                    (progn
-                      (message "Executing %s" cmd)
-                      (shell-command cmd buf)
-                      (when (featurep 'midnight)
-                        (setq clean-buffer-list-kill-buffer-names
-                              (cons buf clean-buffer-list-kill-buffer-names))))
-                  (error "Abort"))))
-             ((equal type "elisp")
-              (let ((cmd path))
-                (if (or (and (org-string-nw-p org-confirm-elisp-link-not-regexp)
-                             (org-string-match-p
-                              org-confirm-elisp-link-not-regexp cmd))
-                        (not org-confirm-elisp-link-function)
-                        (funcall org-confirm-elisp-link-function
-                                 (format "Execute \"%s\" as elisp? "
-                                         (org-add-props cmd nil
-                                           'face 'org-warning))))
-                    (message "%s => %s" cmd
-                             (if (eq (string-to-char cmd) ?\() (eval (read cmd))
-                               (call-interactively (read cmd))))
-                  (error "Abort"))))
-             ((equal type "id")
-              (require 'ord-id)
-              (funcall (nth 1 (assoc "id" org-link-protocols)) path))
-             ((member type '("coderef" "custom-id" "fuzzy" "radio"))
-              (unless (run-hook-with-args-until-success
-		       'org-open-link-functions path)
-		(if (not arg) (org-mark-ring-push)
-		  (switch-to-buffer-other-window
-		   (org-get-buffer-for-internal-link (current-buffer))))
-		(let ((cmd `(org-link-search
-			     ,(org-element-property :raw-link context)
-			     ,(cond ((equal arg '(4)) ''occur)
-				    ((equal arg '(16)) ''org-occur))
-			     ,(org-element-property :begin context))))
-		  (condition-case nil
-		      (let ((org-link-search-inhibit-query t))
-			(eval cmd))
-		    (error (progn (widen) (eval cmd)))))))
-             (t (browse-url-at-point))))))
-       ;; On a footnote reference or at a footnote definition's label.
-       ((or (eq type 'footnote-reference)
-	    (and (eq type 'footnote-definition)
-		 (save-excursion
-		   ;; Do not validate action when point is on the
-		   ;; spaces right after the footnote label, in order
-		   ;; to be on par with behaviour on links.
-		   (skip-chars-forward " \t")
-		   (let ((begin (org-element-property :contents-begin context)))
-		     (if begin (< (point) begin)
-		       (= (line-beginning-position)
-			  (org-element-property :post-affiliated context)))))))
-        (org-footnote-action))
-       (t (user-error "No link found"))))
+    (unless (run-hook-with-args-until-success 'org-open-at-point-functions)
+      (let* ((context (org-element-context))
+	     (type (org-element-type context)))
+	;; On an unsupported object type, check if it is contained
+	;; within a support one.  Bail out if we find an element
+	;; instead.
+	(when (memq type '(bold code entity export-snippet inline-babel-call
+				inline-src-block italic line-break
+				latex-fragment macro radio-target
+				statistics-cookie strike-through subscript
+				superscript table-cell underline verbatim))
+	  (while (and (setq context (org-element-property :parent context))
+		      (not (memq (setq type (org-element-type context))
+				 '(link footnote-reference paragraph verse-block
+					table-cell))))))
+	(cond
+	 ;; On a headline or an inlinetask, but not on a timestamp,
+	 ;; a link or on tags.
+	 ((and (org-at-heading-p)
+	       (not (memq type '(timestamp link)))
+	       ;; Not on tags.
+	       (save-excursion (beginning-of-line)
+			       (looking-at org-complex-heading-regexp)
+			       (or (not (match-beginning 5))
+				   (< (point) (match-beginning 5)))))
+	  (let* ((data (org-offer-links-in-entry (current-buffer) (point) arg))
+		 (links (car data))
+		 (links-end (cdr data)))
+	    (if links
+		(dolist (link (if (stringp links) (list links) links))
+		  (search-forward link nil links-end)
+		  (goto-char (match-beginning 0))
+		  (org-open-at-point))
+	      (require 'org-attach)
+	      (org-attach-reveal 'if-exists))))
+	 ;; Do nothing on white spaces after an object.
+	 ((let ((end (org-element-property :end context)))
+	    (= (save-excursion
+		 ;; Make sure we're not on invisible text, as it would
+		 ;; make the check unpredictable on object's borders.
+		 (when (invisible-p (point))
+		   (goto-char
+		    (next-single-property-change (point) 'invisible nil end)))
+		 (skip-chars-forward " \t" end) (point))
+	       end))
+	  (user-error "No link found"))
+	 ((eq type 'timestamp) (org-follow-timestamp-link))
+	 ;; On tags within a headline or an inlinetask.
+	 ((save-excursion (beginning-of-line)
+			  (and (looking-at org-complex-heading-regexp)
+			       (match-beginning 5)
+			       (>= (point) (match-beginning 5))))
+	  (org-tags-view arg (substring (match-string 5) 0 -1)))
+	 ((eq type 'link)
+	  (let ((type (org-element-property :type context))
+		(path (org-element-property :path context)))
+	    ;; Switch back to REFERENCE-BUFFER needed when called in
+	    ;; a temporary buffer through `org-open-link-from-string'.
+	    (with-current-buffer (or reference-buffer (current-buffer))
+	      (cond
+	       ((equal type "file")
+		(if (string-match "[*?{]" (file-name-nondirectory path))
+		    (dired path)
+		  (apply
+		   (or (let ((app (org-element-property :application context)))
+			 (nth 1 (assoc (concat "file" (and app (concat "+" app)))
+				       org-link-protocols)))
+		       #'org-open-file)
+		   path arg
+		   (let ((option (org-element-property :search-option context)))
+		     (cond ((not option) nil)
+			   ((org-string-match-p "\\`[0-9]+\\'" option)
+			    (list (string-to-number option)))
+			   (t (list nil option)))))))
+	       ((assoc type org-link-protocols)
+		(funcall (nth 1 (assoc type org-link-protocols)) path))
+	       ((equal type "help")
+		(let ((f-or-v (intern path)))
+		  (cond ((fboundp f-or-v) (describe-function f-or-v))
+			((boundp f-or-v) (describe-variable f-or-v))
+			(t (error "Not a known function or variable")))))
+	       ((equal type "mailto")
+		(let ((cmd (car org-link-mailto-program))
+		      (args (cdr org-link-mailto-program))
+		      (spec
+		       (format-spec-make
+			?a path		 ; %a is address.
+			?s (let ((option ; %s is subject.
+				  (org-element-property
+				   :search-option context)))
+			     (if (not option) "" (org-link-escape option)))))
+		      final-args)
+		  (apply cmd
+			 (dolist (arg args (nreverse final-args))
+			   (if (not (stringp arg)) (push arg final-args)
+			     (push (format-spec arg spec) final-args))))))
+	       ((member type '("http" "https" "ftp" "news"))
+		(browse-url (org-link-escape-browser (concat type ":" path))))
+	       ((equal type "doi")
+		(browse-url
+		 (org-link-escape-browser (concat org-doi-server-url path))))
+	       ((equal type "message") (browse-url (concat type ":" path)))
+	       ((equal type "shell")
+		(let ((buf (generate-new-buffer "*Org Shell Output"))
+		      (cmd path))
+		  (if (or (and (org-string-nw-p
+				org-confirm-shell-link-not-regexp)
+			       (string-match
+				org-confirm-shell-link-not-regexp cmd))
+			  (not org-confirm-shell-link-function)
+			  (funcall org-confirm-shell-link-function
+				   (format "Execute \"%s\" in shell? "
+					   (org-add-props cmd nil
+					     'face 'org-warning))))
+		      (progn
+			(message "Executing %s" cmd)
+			(shell-command cmd buf)
+			(when (featurep 'midnight)
+			  (setq clean-buffer-list-kill-buffer-names
+				(cons buf
+				      clean-buffer-list-kill-buffer-names))))
+		    (error "Abort"))))
+	       ((equal type "elisp")
+		(let ((cmd path))
+		  (if (or (and (org-string-nw-p
+				org-confirm-elisp-link-not-regexp)
+			       (org-string-match-p
+				org-confirm-elisp-link-not-regexp cmd))
+			  (not org-confirm-elisp-link-function)
+			  (funcall org-confirm-elisp-link-function
+				   (format "Execute \"%s\" as elisp? "
+					   (org-add-props cmd nil
+					     'face 'org-warning))))
+		      (message "%s => %s" cmd
+			       (if (eq (string-to-char cmd) ?\()
+				   (eval (read cmd))
+				 (call-interactively (read cmd))))
+		    (error "Abort"))))
+	       ((equal type "id")
+		(require 'ord-id)
+		(funcall (nth 1 (assoc "id" org-link-protocols)) path))
+	       ((member type '("coderef" "custom-id" "fuzzy" "radio"))
+		(unless (run-hook-with-args-until-success
+			 'org-open-link-functions path)
+		  (if (not arg) (org-mark-ring-push)
+		    (switch-to-buffer-other-window
+		     (org-get-buffer-for-internal-link (current-buffer))))
+		  (let ((cmd `(org-link-search
+			       ,(org-element-property :raw-link context)
+			       ,(cond ((equal arg '(4)) ''occur)
+				      ((equal arg '(16)) ''org-occur))
+			       ,(org-element-property :begin context))))
+		    (condition-case nil
+			(let ((org-link-search-inhibit-query t))
+			  (eval cmd))
+		      (error (progn (widen) (eval cmd)))))))
+	       (t (browse-url-at-point))))))
+	 ;; On a footnote reference or at a footnote definition's label.
+	 ((or (eq type 'footnote-reference)
+	      (and (eq type 'footnote-definition)
+		   (save-excursion
+		     ;; Do not validate action when point is on the
+		     ;; spaces right after the footnote label, in order
+		     ;; to be on par with behaviour on links.
+		     (skip-chars-forward " \t")
+		     (let ((begin
+			    (org-element-property :contents-begin context)))
+		       (if begin (< (point) begin)
+			 (= (org-element-property :post-affiliated context)
+			    (line-beginning-position)))))))
+	  (org-footnote-action))
+	 (t (user-error "No link found")))))
     (move-marker org-open-link-marker nil)
     (run-hook-with-args 'org-follow-link-hook)))
 
