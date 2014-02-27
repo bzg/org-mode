@@ -10598,13 +10598,18 @@ is used internally by `org-open-link-from-string'."
 			(eval cmd))
 		    (error (progn (widen) (eval cmd)))))))
              (t (browse-url-at-point))))))
-       ;; On a footnote reference or in a footnote definition.
+       ;; On a footnote reference or at a footnote definition's label.
        ((or (eq type 'footnote-reference)
-            (let ((parent context))
-              (while (and (setq parent (org-element-property :parent parent))
-                          (not (eq (org-element-type parent)
-                                   'footnote-definition))))
-              parent))
+	    (and (eq type 'footnote-definition)
+		 (save-excursion
+		   ;; Do not validate action when point is on the
+		   ;; spaces right after the footnote label, in order
+		   ;; to be on par with behaviour on links.
+		   (skip-chars-forward " \t")
+		   (let ((begin (org-element-property :contents-begin context)))
+		     (if begin (< (point) begin)
+		       (= (line-beginning-position)
+			  (org-element-property :post-affiliated context)))))))
         (org-footnote-action))
        (t (user-error "No link found"))))
     (move-marker org-open-link-marker nil)
