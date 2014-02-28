@@ -10445,7 +10445,7 @@ they must return nil.")
   "Open link, timestamp, footnote or tags at point.
 
 When point is on a link, follow it.  Normally, files will be
-opened by an appropriate application. If the optional prefix
+opened by an appropriate application.  If the optional prefix
 argument ARG is non-nil, Emacs will visit the file.  With
 a double prefix argument, try to open outside of Emacs, in the
 application the system uses for this file type.
@@ -10511,12 +10511,11 @@ is used internally by `org-open-link-from-string'."
 	  (user-error "No link found"))
 	 ((eq type 'timestamp) (org-follow-timestamp-link))
 	 ;; On tags within a headline or an inlinetask.
-	 ((progn
-	    (and (memq type '(headline inlinetask))
-		 (progn (save-excursion (beginning-of-line)
-					(looking-at org-complex-heading-regexp))
-			(and (match-beginning 5)
-			     (>= (point) (match-beginning 5))))))
+	 ((and (memq type '(headline inlinetask))
+	       (progn (save-excursion (beginning-of-line)
+				      (looking-at org-complex-heading-regexp))
+		      (and (match-beginning 5)
+			   (>= (point) (match-beginning 5)))))
 	  (org-tags-view arg (substring (match-string 5) 0 -1)))
 	 ((eq type 'link)
 	  (let ((type (org-element-property :type context))
@@ -10627,8 +10626,8 @@ is used internally by `org-open-link-from-string'."
 	      (and (eq type 'footnote-definition)
 		   (save-excursion
 		     ;; Do not validate action when point is on the
-		     ;; spaces right after the footnote label, in order
-		     ;; to be on par with behaviour on links.
+		     ;; spaces right after the footnote label, in
+		     ;; order to be on par with behaviour on links.
 		     (skip-chars-forward " \t")
 		     (let ((begin
 			    (org-element-property :contents-begin context)))
