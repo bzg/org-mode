@@ -106,7 +106,7 @@
 		   (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
 		   (:latex-header "LATEX_HEADER" nil nil newline)
 		   (:latex-header-extra "LATEX_HEADER_EXTRA" nil nil newline)
-		   (:latex-hyperref-p nil "texht" org-latex-with-hyperref t)
+		   (:latex-hyperref nil nil org-latex-hyperref-template t)
 		   (:latex-custom-id-labels nil nil org-latex-custom-id-as-label))
   :filters-alist '((:filter-options . org-latex-math-block-options-filter)
 		   (:filter-parse-tree . org-latex-math-block-tree-filter)))
@@ -348,11 +348,19 @@ the toc:nil option, not to those generated with #+TOC keyword."
   :group 'org-export-latex
   :type 'string)
 
-(defcustom org-latex-with-hyperref t
-  "Toggle insertion of \\hypersetup{...} in the preamble."
+(defcustom org-latex-hyperref-template
+  "\\hypersetup{\n pdfkeywords={%k},\n  pdfsubject={%d},\n  pdfcreator={%c}}\n"
+  "Template for hyperref package options.
+
+Value is a format string, which can contain the following placeholders:
+
+  %k for KEYWORDS line
+  %d for DESCRIPTION line
+  %c for CREATOR line
+
+Set it to the empty string to ignore the command completely."
   :group 'org-export-latex
-  :type 'boolean
-  :safe #'booleanp)
+  :type 'string)
 
 ;;;; Headline
 
@@ -1188,12 +1196,13 @@ holding export options."
      ;; Title
      (format "\\title{%s}\n" title)
      ;; Hyperref options.
-     (when (plist-get info :latex-hyperref-p)
-       (format "\\hypersetup{\n  pdfkeywords={%s},\n  pdfsubject={%s},\n  pdfcreator={%s}}\n"
-	       (or (plist-get info :keywords) "")
-	       (or (plist-get info :description) "")
-	       (if (not (plist-get info :with-creator)) ""
-		 (plist-get info :creator))))
+     (format-spec (plist-get info :latex-hyperref)
+                  (format-spec-make
+                   ?k (or (plist-get info :keywords) "")
+                   ?d (or (plist-get info :description)"")
+                   ?c (if (plist-get info :with-creator)
+                          (plist-get info :creator)
+                        "")))
      ;; Document start.
      "\\begin{document}\n\n"
      ;; Title command.
