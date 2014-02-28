@@ -10442,12 +10442,24 @@ they must return nil.")
 (defvar org-link-search-inhibit-query nil) ;; dynamically scoped
 (defvar clean-buffer-list-kill-buffer-names) ; Defined in midnight.el
 (defun org-open-at-point (&optional arg reference-buffer)
-  "Open link at point.
+  "Open link, timestamp, footnote or tags at point.
 
-Normally, files will be opened by an appropriate application. If
-the optional prefix argument ARG is non-nil, Emacs will visit the
-file.  With a double prefix argument, try to open outside of
-Emacs, in the application the system uses for this file type.
+When point is on a link, follow it.  Normally, files will be
+opened by an appropriate application. If the optional prefix
+argument ARG is non-nil, Emacs will visit the file.  With
+a double prefix argument, try to open outside of Emacs, in the
+application the system uses for this file type.
+
+When point is on a timestamp, open the agenda at the day
+specified.
+
+When point is a footnote definition, move to the first reference
+found.  If it is on a reference, move to the associated
+definition.
+
+When point is on a headline, display a list of every link in the
+entry, so it is possible to pick one, or all, of them.  If point
+is on a tag, call `org-tags-view' instead.
 
 When optional argument REFERENCE-BUFFER is non-nil, it should
 specify a buffer from where the link search should happen.  This
