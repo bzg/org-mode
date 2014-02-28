@@ -10460,30 +10460,22 @@ is used internally by `org-open-link-from-string'."
     (setq org-window-config-before-follow-link (current-window-configuration))
     (org-remove-occur-highlights nil nil t)
     (unless (run-hook-with-args-until-success 'org-open-at-point-functions)
-      (let* ((context (org-element-context))
-	     (type (org-element-type context)))
-	;; On an unsupported object type, check if it is contained
-	;; within a support one.  Bail out if we find an element
-	;; instead.
-	(when (memq type '(bold code entity export-snippet inline-babel-call
-				inline-src-block italic line-break
-				latex-fragment macro radio-target
-				statistics-cookie strike-through subscript
-				superscript table-cell underline verbatim))
-	  (while (and (setq context (org-element-property :parent context))
-		      (not (memq (setq type (org-element-type context))
-				 '(link footnote-reference paragraph verse-block
-					table-cell))))))
+      (let* ((context (org-element-context)) type)
+	;; On an unsupported type, check if point is contained within
+	;; a support one.
+	(while (and (not (memq (setq type (org-element-type context))
+			       '(headline inlinetask link footnote-definition
+					  footnote-reference timestamp)))
+		    (setq context (org-element-property :parent context))))
 	(cond
 	 ;; On a headline or an inlinetask, but not on a timestamp,
-	 ;; a link or on tags.
-	 ((and (org-at-heading-p)
-	       (not (memq type '(timestamp link)))
+	 ;; a link, a footnote reference or on tags.
+	 ((and (memq type '(headline inlinetask))
 	       ;; Not on tags.
-	       (save-excursion (beginning-of-line)
-			       (looking-at org-complex-heading-regexp)
-			       (or (not (match-beginning 5))
-				   (< (point) (match-beginning 5)))))
+	       (progn (save-excursion (beginning-of-line)
+				      (looking-at org-complex-heading-regexp))
+		      (or (not (match-beginning 5))
+			  (< (point) (match-beginning 5)))))
 	  (let* ((data (org-offer-links-in-entry (current-buffer) (point) arg))
 		 (links (car data))
 		 (links-end (cdr data)))
@@ -10507,10 +10499,12 @@ is used internally by `org-open-link-from-string'."
 	  (user-error "No link found"))
 	 ((eq type 'timestamp) (org-follow-timestamp-link))
 	 ;; On tags within a headline or an inlinetask.
-	 ((save-excursion (beginning-of-line)
-			  (and (looking-at org-complex-heading-regexp)
-			       (match-beginning 5)
-			       (>= (point) (match-beginning 5))))
+	 ((progn
+	    (and (memq type '(headline inlinetask))
+		 (progn (save-excursion (beginning-of-line)
+					(looking-at org-complex-heading-regexp))
+			(and (match-beginning 5)
+			     (>= (point) (match-beginning 5))))))
 	  (org-tags-view arg (substring (match-string 5) 0 -1)))
 	 ((eq type 'link)
 	  (let ((type (org-element-property :type context))
