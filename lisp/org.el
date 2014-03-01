@@ -10480,6 +10480,7 @@ is used internally by `org-open-link-from-string'."
 					  footnote-reference timestamp)))
 		    (setq context (org-element-property :parent context))))
 	(cond
+	 ((not context) (user-error "No link found"))
 	 ;; On a headline or an inlinetask, but not on a timestamp,
 	 ;; a link, a footnote reference or on tags.
 	 ((and (memq type '(headline inlinetask))
