@@ -10406,7 +10406,7 @@ See the docstring of `org-open-file' for details."
 This is saved in case the need arises to restore it.")
 
 (defvar org-open-link-marker (make-marker)
-  "Marker pointing to the location where `org-open-at-point; was called.")
+  "Marker pointing to the location where `org-open-at-point' was called.")
 
 ;;;###autoload
 (defun org-open-at-point-global ()
