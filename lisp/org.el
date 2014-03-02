@@ -10480,6 +10480,7 @@ is used internally by `org-open-link-from-string'."
 					  footnote-reference timestamp)))
 		    (setq context (org-element-property :parent context))))
 	(cond
+	 ;; Unsupported context: return an error.
 	 ((not context) (user-error "No link found"))
 	 ;; On a headline or an inlinetask, but not on a timestamp,
 	 ;; a link, a footnote reference or on tags.
@@ -10499,16 +10500,13 @@ is used internally by `org-open-link-from-string'."
 		  (org-open-at-point))
 	      (require 'org-attach)
 	      (org-attach-reveal 'if-exists))))
-	 ;; Do nothing on white spaces after an object.
-	 ((let ((end (org-element-property :end context)))
-	    (= (save-excursion
-		 ;; Make sure we're not on invisible text, as it would
-		 ;; make the check unpredictable on object's borders.
-		 (when (invisible-p (point))
-		   (goto-char
-		    (next-single-property-change (point) 'invisible nil end)))
-		 (skip-chars-forward " \t" end) (point))
-	       end))
+	 ;; Do nothing on white spaces after an object, unless point
+	 ;; is right after it.
+	 ((> (point)
+	     (save-excursion
+	       (goto-char (org-element-property :end context))
+	       (skip-chars-backward " \t")
+	       (point)))
 	  (user-error "No link found"))
 	 ((eq type 'timestamp) (org-follow-timestamp-link))
 	 ;; On tags within a headline or an inlinetask.
