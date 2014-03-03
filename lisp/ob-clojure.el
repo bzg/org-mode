@@ -109,11 +109,7 @@
       (cider
        (require 'cider)
        (setq result
-	     (or (cider-get-raw-value
-		  (cider-eval-sync
-		   expanded
-		   (cider-current-ns)
-		   (nrepl-current-tooling-session)))
+	     (or (cider-get-raw-value (cider-eval-sync expanded))
 		 (error "nREPL not connected!  Use M-x cider-jack-in RET"))))
       (nrepl
        (require 'nrepl)
