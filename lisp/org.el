@@ -10518,7 +10518,7 @@ is used internally by `org-open-link-from-string'."
 	  (org-tags-view arg (substring (match-string 5) 0 -1)))
 	 ((eq type 'link)
 	  (let ((type (org-element-property :type context))
-		(path (org-element-property :path context)))
+		(path (org-link-unescape (org-element-property :path context))))
 	    ;; Switch back to REFERENCE-BUFFER needed when called in
 	    ;; a temporary buffer through `org-open-link-from-string'.
 	    (with-current-buffer (or reference-buffer (current-buffer))
