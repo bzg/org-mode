@@ -10526,17 +10526,34 @@ is used internally by `org-open-link-from-string'."
 	       ((equal type "file")
 		(if (string-match "[*?{]" (file-name-nondirectory path))
 		    (dired path)
-		  (apply
-		   (or (let ((app (org-element-property :application context)))
-			 (nth 1 (assoc (concat "file" (and app (concat "+" app)))
-				       org-link-protocols)))
-		       #'org-open-file)
-		   path arg
-		   (let ((option (org-element-property :search-option context)))
-		     (cond ((not option) nil)
-			   ((org-string-match-p "\\`[0-9]+\\'" option)
-			    (list (string-to-number option)))
-			   (t (list nil option)))))))
+		  ;; Look into `org-link-protocols' in order to find
+		  ;; a DEDICATED-FUNCTION to open file.  The function
+		  ;; will be applied on raw link instead of parsed
+		  ;; link due to the limitation in `org-add-link-type'
+		  ;; ("open" function called with a single argument).
+		  ;; If no such function is found, fallback to
+		  ;; `org-open-file'.
+		  ;;
+		  ;; Note : "file+emacs" and "file+sys" types are
+		  ;; hard-coded in order to escape the previous
+		  ;; limitation.
+		  (let* ((option (org-element-property :search-option context))
+			 (app (org-element-property :application context))
+			 (dedicated-function
+			  (nth 1 (assoc app org-link-protocols))))
+		    (if dedicated-function
+			(funcall dedicated-function
+				 (concat path
+					 (and option (concat "::" option))))
+		      (apply #'org-open-file
+			     path
+			     (cond (arg)
+				   ((equal app "emacs") 'emacs)
+				   ((equal app "sys") 'system))
+			     (cond ((not option) nil)
+				   ((org-string-match-p "\\`[0-9]+\\'" option)
+				    (list (string-to-number option)))
+				   (t (list nil option))))))))
 	       ((assoc type org-link-protocols)
 		(funcall (nth 1 (assoc type org-link-protocols)) path))
 	       ((equal type "help")
@@ -10700,20 +10717,14 @@ there is one, return it."
 	      (setq link (nth (1- nth) links)))))
 	  (cons link end))))))
 
-;; Add special file links that specify the way of opening
-
-(org-add-link-type "file+sys" 'org-open-file-with-system)
-(org-add-link-type "file+emacs" 'org-open-file-with-emacs)
-(defun org-open-file-with-system (path &optional arg line search)
-  "Open file at PATH using the system way of opening it.
-Optional argument ARG is ignored.  See `org-open-file' for LINE
-and SEARCH arguments."
-  (org-open-file path 'system line search))
-(defun org-open-file-with-emacs (path &optional arg line search)
-  "Open file at PATH in Emacs.
-Optional argument ARG is ignored.  See `org-open-file' for LINE
-and SEARCH arguments."
-  (org-open-file path 'emacs line search))
+;; TODO: These functions are deprecated since `org-open-at-point'
+;; hard-codes behaviour for "file+emacs" and "file+sys" types.
+(defun org-open-file-with-system (path)
+  "Open file at PATH using the system way of opening it."
+  (org-open-file path 'system))
+(defun org-open-file-with-emacs (path)
+  "Open file at PATH in Emacs."
+  (org-open-file path 'emacs))
 
 
 ;;; File search

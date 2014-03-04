@@ -66,13 +66,14 @@
        (t path)))))
 
 (defun org-docview-open (link)
-  (when (string-match "\\(.*\\)::\\([0-9]+\\)$"  link)
-    (let* ((path (match-string 1 link))
-	   (page (string-to-number (match-string 2 link))))
-      (org-open-file path 1) ;; let org-mode open the file (in-emacs = 1)
-      ;; to ensure org-link-frame-setup is respected
-      (doc-view-goto-page page)
-      )))
+  (string-match "\\(.*?\\)\\(?:::\\([0-9]+\\)\\)?$" link)
+  (let ((path (match-string 1 link))
+	(page (and (match-beginning 2)
+		   (string-to-number (match-string 2 link)))))
+    ;; Let Org mode open the file (in-emacs = 1) to ensure
+    ;; org-link-frame-setup is respected.
+    (org-open-file path 1)
+    (when page (doc-view-goto-page page))))
 
 (defun org-docview-store-link ()
   "Store a link to a docview buffer."
