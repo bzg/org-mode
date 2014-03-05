@@ -4257,8 +4257,8 @@ You need to reload Org or to restart Emacs after customizing this.")
   `(("*" bold)
     ("/" italic)
     ("_" underline)
-    ("=" org-code verbatim)
-    ("~" org-verbatim verbatim)
+    ("=" org-verbatim verbatim)
+    ("~" org-code verbatim)
     ("+" ,(if (featurep 'xemacs) 'org-table '(:strike-through t))))
   "Alist of characters and faces to emphasize text.
 Text starting and ending with a special character will be emphasized,

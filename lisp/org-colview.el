@@ -174,7 +174,7 @@ This is the compiled version of the format.")
 	 (face (list color font 'org-column ref-face))
 	 (face1 (list color font 'org-agenda-column-dateline ref-face))
 	 (cphr (get-text-property (point-at-bol) 'org-complex-heading-regexp))
-	 pom property ass width f fc string ov column val modval s2 title calc)
+	 pom property ass width f fc string fm ov column val modval s2 title calc)
     ;; Check if the entry is in another buffer.
     (unless props
       (if (eq major-mode 'org-agenda-mode)
