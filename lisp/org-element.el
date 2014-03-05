@@ -5461,23 +5461,23 @@ BEG and END are the beginning and end of the range of changed
 text.  See `before-change-functions' for more information."
   (let ((inhibit-quit t))
     ;; Make sure buffer positions in cache are correct until END.
-    (org-element--cache-sync (current-buffer) end)
-    (org-with-wide-buffer
-     (goto-char beg)
-     (beginning-of-line)
-     (let ((top (point))
-	   (bottom (save-excursion (goto-char end) (line-end-position)))
-	   (sensitive-re
-	    ;; A sensitive line is a headline or a block (or drawer,
-	    ;; or latex-environment) boundary.  Inserting one can
-	    ;; modify buffer drastically both above and below that
-	    ;; line, possibly making cache invalid.  Therefore, we
-	    ;; need to pay attention to changes happening to them.
-	    (concat
-	     "\\(" (org-with-limited-levels org-outline-regexp-bol) "\\)" "\\|"
-	     org-element--cache-closing-line "\\|"
-	     org-element--cache-opening-line)))
-       (save-match-data
+    (save-match-data
+      (org-element--cache-sync (current-buffer) end)
+      (org-with-wide-buffer
+       (goto-char beg)
+       (beginning-of-line)
+       (let ((top (point))
+	     (bottom (save-excursion (goto-char end) (line-end-position)))
+	     (sensitive-re
+	      ;; A sensitive line is a headline or a block (or drawer,
+	      ;; or latex-environment) boundary.  Inserting one can
+	      ;; modify buffer drastically both above and below that
+	      ;; line, possibly making cache invalid.  Therefore, we
+	      ;; need to pay attention to changes happening to them.
+	      (concat
+	       "\\(" (org-with-limited-levels org-outline-regexp-bol) "\\)" "\\|"
+	       org-element--cache-closing-line "\\|"
+	       org-element--cache-opening-line)))
 	 (setq org-element--cache-change-warning
 	       (cond ((not (re-search-forward sensitive-re bottom t)) nil)
 		     ((and (match-beginning 1)
