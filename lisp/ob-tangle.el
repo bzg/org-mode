@@ -41,7 +41,8 @@
 (declare-function org-before-first-heading-p "org" ())
 
 (defcustom org-babel-tangle-lang-exts
-  '(("emacs-lisp" . "el"))
+  '(("emacs-lisp" . "el")
+    ("elisp" . "el"))
   "Alist mapping languages to their file extensions.
 The key is the language name, the value is the string that should
 be inserted as the extension commonly used to identify files
