@@ -32,6 +32,9 @@
 ;;; Code:
 (require 'ob)
 
+(declare-function run-coq "ext:coq-inferior.el" (cmd))
+(declare-function coq-proc "ext:coq-inferior.el" ())
+
 (defvar org-babel-coq-buffer "*coq*"
   "Buffer in which to evaluate coq code blocks.")
 
