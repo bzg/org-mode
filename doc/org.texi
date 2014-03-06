@@ -10147,19 +10147,13 @@ format sub- and superscripts in a WYSIWYM way.
 Going beyond symbols and sub- and superscripts, a full formula language is
 needed.  Org mode can contain @LaTeX{} math fragments, and it supports ways
 to process these for several export back-ends.  When exporting to @LaTeX{},
-the code is obviously left as it is.  When exporting to HTML, Org invokes the
-@uref{http://www.mathjax.org, MathJax library} (@pxref{Math formatting in
+the code is obviously left as it is.  When exporting to HTML, Org can invoke
+the @uref{http://www.mathjax.org, MathJax library} (@pxref{Math formatting in
 HTML export}) to process and display the math@footnote{If you plan to use
 this regularly or on pages with significant page views, you should install
 @file{MathJax} on your own server in order to limit the load of our server.}.
-Finally, it can also process the mathematical expressions into
-images@footnote{For this to work you need to be on a system with a working
-@LaTeX{} installation.  You also need the @file{dvipng} program or the
-@file{convert}, respectively available at
-@url{http://sourceforge.net/projects/dvipng/} and from the @file{imagemagick}
-suite.  The @LaTeX{} header that will be used when processing a fragment can
-be configured with the variable @code{org-format-latex-header}.} that can be
-displayed in a browser.
+It can also process the mathematical expressions into images that can be
+displayed in a browser (see @pxref{Previewing @LaTeX{} fragments}).
 
 @LaTeX{} fragments don't need any special marking at all.  The following
 snippets will be identified as @LaTeX{} source code:
@@ -10217,11 +10211,21 @@ lines:
 @cindex @LaTeX{} fragments, preview
 
 @vindex org-latex-create-formula-image-program
-If you have @file{dvipng} or @file{imagemagick} installed@footnote{Choose the
-converter by setting the variable
+If you have a working @LaTeX{} installation and either @file{dvipng} or
+@file{convert} installed@footnote{These are respectively available at
+@url{http://sourceforge.net/projects/dvipng/} and from the @file{imagemagick}
+suite. Choose the converter by setting the variable
 @code{org-latex-create-formula-image-program} accordingly.}, @LaTeX{}
-fragments can be processed to produce preview images of the typeset
-expressions:
+fragments can be processed to produce images of the typeset expressions to be
+used for inclusion while exporting to HTML (see @pxref{@LaTeX{} fragments}),
+or for inline previewing within Org mode.
+
+@vindex org-format-latex-options
+@vindex org-format-latex-header
+You can customize the variables @code{org-format-latex-options} and
+@code{org-format-latex-header} to influence some aspects of the preview.  In
+particular, the @code{:scale} (and for HTML export, @code{:html-scale})
+property of the former can be used to adjust the size of the preview images.
 
 @table @kbd
 @kindex C-c C-x C-l
@@ -10236,12 +10240,6 @@ process the entire buffer.
 @item C-c C-c
 Remove the overlay preview images.
 @end table
-
-@vindex org-format-latex-options
-You can customize the variable @code{org-format-latex-options} to influence
-some aspects of the preview.  In particular, the @code{:scale} (and for HTML
-export, @code{:html-scale}) property can be used to adjust the size of the
-preview images.
 
 @vindex org-startup-with-latex-preview
 You can turn on the previewing of all @LaTeX{} fragments in a file with
