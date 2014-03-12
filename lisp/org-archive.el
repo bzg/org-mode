@@ -121,7 +121,7 @@ information."
 
 (defun org-get-local-archive-location ()
   "Get the archive location applicable at point."
-  (let ((re "^#\\+ARCHIVE:[ \t]+\\(\\S-.*\\S-\\)[ \t]*$")
+  (let ((re "^[ \t]*#\\+ARCHIVE:[ \t]+\\(\\S-.*\\S-\\)[ \t]*$")
 	prop)
     (save-excursion
       (save-restriction

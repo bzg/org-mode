@@ -900,7 +900,7 @@ display, or in the #+COLUMNS line of the current buffer."
 	      (org-entry-put nil "COLUMNS" fmt)
 	    (goto-char (point-min))
 	    ;; Overwrite all #+COLUMNS lines....
-	    (while (re-search-forward "^#\\+COLUMNS:.*" nil t)
+	    (while (re-search-forward "^[ \t]*#\\+COLUMNS:.*" nil t)
 	      (setq cnt (1+ cnt))
 	      (replace-match (concat "#+COLUMNS: " fmt) t t))
 	    (unless (> cnt 0)

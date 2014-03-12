@@ -5464,7 +5464,7 @@ The following commands are available:
   (org-set-local
    'align-mode-rules-list
    '((org-in-buffer-settings
-      (regexp . "^#\\+[A-Z_]+:\\(\\s-*\\)\\S-+")
+      (regexp . "^[ \t]*#\\+[A-Z_]+:\\(\\s-*\\)\\S-+")
       (modes . '(org-mode)))))
 
   ;; Imenu
@@ -22980,7 +22980,7 @@ package ox-bibtex by Taru Karttunen."
       (save-restriction
 	(widen)
 	(let ((case-fold-search t)
-	      (re "^#\\+bibliography:[ \t]+\\([^ \t\n]+\\)"))
+	      (re "^[ \t]*#\\+BIBLIOGRAPHY:[ \t]+\\([^ \t\n]+\\)"))
 	  (if (not (save-excursion
 		     (or (re-search-forward re nil t)
 			 (re-search-backward re nil t))))
@@ -23981,7 +23981,7 @@ Show the heading too, if it is currently invisible."
 (defun org-make-options-regexp (kwds &optional extra)
   "Make a regular expression for keyword lines."
   (concat
-   "^#\\+\\("
+   "^[ \t]*#\\+\\("
    (mapconcat 'regexp-quote kwds "\\|")
    (if extra (concat "\\|" extra))
    "\\):[ \t]*\\(.*\\)"))
