@@ -7641,7 +7641,7 @@ This is important for non-interactive uses of the command."
   (let ((itemp (org-in-item-p))
 	(may-split (org-get-alist-option org-M-RET-may-split-line 'headline))
 	(respect-content (or org-insert-heading-respect-content
-			     (equal arg '(16))))
+			     (equal arg '(4))))
 	(initial-content "")
 	(adjust-empty-lines t))
 
@@ -7664,6 +7664,10 @@ This is important for non-interactive uses of the command."
       (org-insert-item))
 
      (t
+      ;; Maybe move at the end of the subtree
+      (when (equal arg '(16))
+	(org-up-heading-safe)
+	(org-end-of-subtree t))
       ;; Insert a heading
       (save-restriction
 	(widen)
@@ -7858,8 +7862,8 @@ This is a list with the following elements:
 (defun org-insert-todo-heading (arg &optional force-heading)
   "Insert a new heading with the same level and TODO state as current heading.
 If the heading has no TODO state, or if the state is DONE, use the first
-state (TODO by default).  Also one prefix arg, force first state.  With two
-prefix args, force inserting at the end of the parent subtree."
+state (TODO by default).  Also with one prefix arg, force first state.  With
+two prefix args, force inserting at the end of the parent subtree."
   (interactive "P")
   (when (or force-heading (not (org-insert-item 'checkbox)))
     (org-insert-heading (or (and (equal arg '(16)) '(16))
@@ -7870,7 +7874,7 @@ prefix args, force inserting at the end of the parent subtree."
       (looking-at org-todo-line-regexp))
     (let*
         ((new-mark-x
-	  (if (or arg
+	  (if (or (equal arg '(4))
 		  (not (match-beginning 2))
 		  (member (match-string 2) org-done-keywords))
  	      (car org-todo-keywords-1)
@@ -9230,9 +9234,10 @@ definitions."
 			  (string-match (cdr rr) (symbol-name major-mode)))
 		     (and (eq (car rr) 'in-buffer)
 			  (string-match (cdr rr) (buffer-name)))
-		     (when (and (eq (car rr) 'not-in-file)
+		     (if (and (eq (car rr) 'not-in-file)
 				(buffer-file-name))
-		       (not (string-match (cdr rr) (buffer-file-name))))
+			 (not (string-match (cdr rr) (buffer-file-name)))
+		       t)
 		     (when (eq (car rr) 'not-in-mode)
 		       (not (string-match (cdr rr) (symbol-name major-mode))))
 		     (when (eq (car rr) 'not-in-buffer)
@@ -15895,13 +15900,16 @@ in the current file."
   "In the current entry, delete PROPERTY."
   (interactive
    (let* ((completion-ignore-case t)
-	  (prop (org-icompleting-read "Property: "
-				      (org-entry-properties nil 'standard))))
+	  (cat (org-entry-get (point) "CATEGORY"))
+	  (props0 (org-entry-properties nil 'standard))
+	  (props (if cat props0
+		   (delete `("CATEGORY" . ,(org-get-category)) props0)))
+	  (prop (if (< 1 (length props))
+		    (org-icompleting-read "Property: " props nil t)
+		  (caar props))))
      (list prop)))
-  (message "Property %s %s" property
-	   (if (org-entry-delete nil property)
-	       "deleted"
-	     "was not present in the entry")))
+  (if (org-entry-delete nil property delete-empty-drawer)
+      (message "Property %s deleted" property)))
 
 (defun org-delete-property-globally (property)
   "Remove PROPERTY globally, from all entries."

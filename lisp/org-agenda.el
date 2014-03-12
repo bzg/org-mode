@@ -4923,7 +4923,7 @@ See `org-agenda-skip-if' for details."
   (org-agenda-skip-if nil conditions))
 
 (defun org-agenda-skip-subtree-if (&rest conditions)
-  "Skip entry if any of CONDITIONS is true.
+  "Skip subtree if any of CONDITIONS is true.
 See `org-agenda-skip-if' for details."
   (org-agenda-skip-if t conditions))
 
