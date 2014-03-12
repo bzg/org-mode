@@ -3050,7 +3050,13 @@ Paragraph \\alpha."
        (org-test-with-temp-text "Some *text with _underline_ text*"
 	 (progn
 	   (search-forward "under")
-	   (org-element-type (org-element-context (org-element-at-point))))))))
+	   (org-element-type (org-element-context (org-element-at-point)))))))
+  ;; Special case: bold object at the beginning of a headline.
+  (should
+   (eq 'bold
+       (org-test-with-temp-text "* *bold*"
+	 (search-forward "bo")
+	 (org-element-type (org-element-context))))))
 
 
 

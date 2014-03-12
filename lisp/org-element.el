@@ -5742,8 +5742,8 @@ Providing it allows for quicker computation."
 	;; At an headline or inlinetask, objects are in title.
 	((memq type '(headline inlinetask))
 	 (goto-char (org-element-property :begin element))
-	 (skip-chars-forward "* ")
-	 (if (and (>= origin (point)) (< origin (line-end-position)))
+	 (skip-chars-forward "*")
+	 (if (and (> origin (point)) (< origin (line-end-position)))
 	     (narrow-to-region (point) (line-end-position))
 	   (throw 'objects-forbidden element)))
 	;; At a paragraph, a table-row or a verse block, objects are
