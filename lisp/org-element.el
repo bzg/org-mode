@@ -5011,22 +5011,25 @@ the cache."
   "Store ELEMENT in current buffer's cache, if allowed.
 When optional argument DATA is non-nil, assume is it object data
 relative to ELEMENT and store it in the objects cache."
-  (when (org-element--cache-active-p)
-    (if data (puthash element data org-element--cache-objects)
-      (when org-element--cache-sync-requests
-	;; During synchronization, first build an appropriate key for
-	;; the new element so `avl-tree-enter' can insert it at the
-	;; right spot in the cache.
-	(let ((keys (org-element--cache-find
-		     (org-element-property :begin element) 'both)))
-	  (puthash element
-		   (org-element--cache-generate-key
-		    (and (car keys) (org-element--cache-key (car keys)))
-		    (cond ((cdr keys) (org-element--cache-key (cdr keys)))
-			  (org-element--cache-sync-requests
-			   (aref (car org-element--cache-sync-requests) 0))))
-		   org-element--cache-sync-keys)))
-      (avl-tree-enter org-element--cache element))))
+  (cond ((not (org-element--cache-active-p)) nil)
+	((not data)
+	 (when org-element--cache-sync-requests
+	   ;; During synchronization, first build an appropriate key
+	   ;; for the new element so `avl-tree-enter' can insert it at
+	   ;; the right spot in the cache.
+	   (let ((keys (org-element--cache-find
+			(org-element-property :begin element) 'both)))
+	     (puthash element
+		      (org-element--cache-generate-key
+		       (and (car keys) (org-element--cache-key (car keys)))
+		       (cond ((cdr keys) (org-element--cache-key (cdr keys)))
+			     (org-element--cache-sync-requests
+			      (aref (car org-element--cache-sync-requests) 0))))
+		      org-element--cache-sync-keys))))
+	;; Headlines are not stored in cache, so objects in titles are
+	;; not stored either.
+	((eq (org-element-type element) 'headline) nil)
+	(t (puthash element data org-element--cache-objects))))
 
 
 ;;;; Synchronization
