@@ -403,6 +403,8 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
     ("rfloor" "\\rfloor" t "&rfloor;" "[right floor]" "[right floor]" "⌋")
     ("lang" "\\langle" t "&lang;" "<" "<" "⟨")
     ("rang" "\\rangle" t "&rang;" ">" ">" "⟩")
+    ("langle" "\\langle" t "&lang;" "<" "<" "⟨")
+    ("rangle" "\\rangle" t "&rang;" ">" ">" "⟩")
     ("hbar" "\\hbar" t "&hbar;" "hbar" "hbar" "ℏ")
     ("mho" "\\mho" t "&mho;" "mho" "mho" "℧")
 
