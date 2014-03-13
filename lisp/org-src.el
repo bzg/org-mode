@@ -740,7 +740,7 @@ with \",*\", \",#+\", \",,*\" and \",,#+\"."
         (while (re-search-forward "^" nil t)
           (if (not (looking-at "$"))
               (replace-match indent)
-	    (forward-char 1))))
+	    (or (eobp) (forward-char 1)))))
       (if (org-bound-and-true-p org-edit-src-picture)
 	  (setq total-nindent (+ total-nindent 2)))
       (setq code (buffer-string))
