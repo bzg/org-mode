@@ -15905,7 +15905,7 @@ in the current file."
 		    (org-icompleting-read "Property: " props nil t)
 		  (caar props))))
      (list prop)))
-  (if (org-entry-delete nil property delete-empty-drawer)
+  (if (org-entry-delete nil property)
       (message "Property %s deleted" property)))
 
 (defun org-delete-property-globally (property)
