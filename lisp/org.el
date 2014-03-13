@@ -9586,7 +9586,7 @@ active region."
        ;; We're done setting link and desc, clean up
        (if (consp link) (setq cpltxt (car link) link (cdr link)))
        (setq link (or link cpltxt)
-	     desc (or desc cpltxt))
+	     desc (or desc cpltxt ""))
        (cond ((equal desc "NONE") (setq desc nil))
 	     ((string-match org-bracket-link-analytic-regexp desc)
 	      (let ((d0 (match-string 3 desc))
