@@ -297,11 +297,12 @@ identifier."
 
 ;;;###autoload
 (defun org-version (&optional here full message)
-  "Show the org-mode version in the echo area.
-With prefix argument HERE, insert it at point.
-When FULL is non-nil, use a verbose version string.
-When MESSAGE is non-nil, display a message with the version."
-  (interactive "P")
+  "Show the org-mode version.
+Interactively, or when MESSAGE is non-nil, show it in echo area.
+With prefix argument, or when HERE is non-nil, insert it at point.
+In non-interactive uses, a reduced version string is output unless
+FULL is given."
+  (interactive (list current-prefix-arg t (not current-prefix-arg)))
   (let* ((org-dir         (ignore-errors (org-find-library-dir "org")))
 	 (save-load-suffixes (when (boundp 'load-suffixes) load-suffixes))
 	 (load-suffixes (list ".el"))
@@ -321,12 +322,9 @@ When MESSAGE is non-nil, display a message with the version."
 				(concat "mixed installation! " org-install-dir " and " org-dir))
 			    "org-loaddefs.el can not be found!")))
 	 (version1 (if full version org-version)))
-    (if (org-called-interactively-p 'interactive)
-	(if here
-	    (insert version)
-	  (message version))
-      (if message (message version1))
-      version1)))
+    (when here (insert version1))
+    (when message (message "%s" version1))
+    version1))
 
 (defconst org-version (org-version))
 
