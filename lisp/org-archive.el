@@ -158,7 +158,7 @@ archive file is."
       (save-restriction
 	(goto-char (point-min))
 	(while (re-search-forward
-		"^\\(#\\+\\|[ \t]*:\\)ARCHIVE:[ \t]+\\(.*\\)"
+		"^[ \t]*\\(#\\+\\|:\\)ARCHIVE:[ \t]+\\(.*\\)"
 		nil t)
 	  (setq file (org-extract-archive-file
 		      (org-match-string-no-properties 2)))

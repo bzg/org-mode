@@ -1284,7 +1284,7 @@ CONTENTS is the contents of the element."
 		    (throw 'exit (sort struct 'car-less-than-car))))))
 	    ;; Skip blocks (any type) and drawers contents.
 	    (cond
-	     ((and (looking-at "#\\+BEGIN\\(:\\|_\\S-+\\)")
+	     ((and (looking-at "\\(?:[ \t]*\\)?#\\+BEGIN\\(:\\|_\\S-+\\)")
 		   (re-search-forward
 		    (format "^[ \t]*#\\+END%s[ \t]*$"
 			    (org-match-string-no-properties 1))
