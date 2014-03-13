@@ -344,12 +344,9 @@ Works on both Emacs and XEmacs."
     (indent-line-to column)))
 
 (defun org-move-to-column (column &optional force buffer ignore-invisible)
-  (let ((buffer-invisibility-spec
-	 (and ignore-invisible
-	      (member '(org-link) buffer-invisibility-spec))))
+  (let ((buffer-invisibility-spec ignore-invisible))
     (if (featurep 'xemacs)
-	(org-xemacs-without-invisibility
-	 (move-to-column column force buffer))
+	(org-xemacs-without-invisibility (move-to-column column force buffer))
       (move-to-column column force))))
 
 (defun org-get-x-clipboard-compat (value)
