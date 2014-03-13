@@ -5086,6 +5086,7 @@ of what a project is and how to check if it stuck, customize the variable
 	      (mapconcat 'identity re-list "\\|")
 	    (error "No information how to identify unstuck projects")))
     (org-tags-view nil matcher)
+    (setq org-agenda-buffer-name (buffer-name))
     (with-current-buffer org-agenda-buffer-name
       (setq org-agenda-redo-command
 	    `(org-agenda-list-stuck-projects ,current-prefix-arg)))))
