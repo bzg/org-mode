@@ -161,7 +161,8 @@ With prefix arg STOP, stop it entirely."
   (interactive)
   (run-hooks 'org-timer-stop-hook)
   (setq org-timer-start-time nil
-	org-timer-pause-time nil)
+	org-timer-pause-time nil
+	org-timer-current-timer nil)
   (org-timer-set-mode-line 'off)
   (message "Timer stopped"))
 
