@@ -83,8 +83,7 @@
       (with-temp-buffer
 	(org-mode)
 	(insert string)
-	(let ((org-current-export-file buf))
-	  (org-babel-exp-process-buffer))
+	(org-babel-exp-process-buffer buf)
 	(message (buffer-string))
 	(goto-char (point-min))
 	(should (re-search-forward "^: 0" nil t))

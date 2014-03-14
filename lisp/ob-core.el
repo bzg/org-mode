@@ -285,7 +285,11 @@ Returns a list
       (setf (nth 2 info) (org-babel-process-params (nth 2 info))))
     (when info (append info (list name indent head)))))
 
-(defvar org-current-export-file) ; dynamically bound
+(defvar org-babel-exp-reference-buffer nil
+  "Buffer containing original contents of the exported buffer.
+This is used by Babel to resolve references in source blocks.
+Its value is dynamically bound during export.")
+
 (defmacro org-babel-check-confirm-evaluate (info &rest body)
   "Evaluate BODY with special execution confirmation variables set.
 
@@ -305,7 +309,7 @@ name of the code block."
 				 (when (assoc :noeval ,headers) "no")))
 	    (,eval-no        (or (equal ,eval "no")
 				 (equal ,eval "never")))
-	    (,export         (org-bound-and-true-p org-current-export-file))
+	    (,export         org-babel-exp-reference-buffer)
 	    (,eval-no-export (and ,export (or (equal ,eval "no-export")
 					      (equal ,eval "never-export"))))
 	    (noeval          (or ,eval-no ,eval-no-export))

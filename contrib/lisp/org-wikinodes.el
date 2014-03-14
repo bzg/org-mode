@@ -268,7 +268,6 @@ If there is no such wiki target, return nil."
 		    (car org-export-target-aliases))))
       (push (caar target-alist) (cdr a)))))
 
-(defvar org-current-export-file)
 (defun org-wikinodes-process-links-for-export ()
   "Process Wiki links in the export preprocess buffer.
 
@@ -294,12 +293,6 @@ with working links."
 	   ((eq org-wikinodes-scope 'file)
 	    ;; No match in file, and other files are not allowed
 	    (insert (format "%s" link)))
-	   ((setq file
-		  (and (org-string-nw-p org-current-export-file)
-		       (org-wikinodes-which-file
-			link (file-name-directory org-current-export-file))))
-	    ;; Match in another file in the current directory
-	    (insert (format "[[file:%s::%s][%s]]" file link link)))
 	   (t ;; No match for this link
 	    (insert (format "%s" link)))))))))
 

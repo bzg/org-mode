@@ -318,6 +318,7 @@ there is no export process in progress.
 It can be used to teach Babel blocks how to act differently
 according to the back-end used.")
 
+
 
 ;;; User-configurable Variables
 ;;
@@ -3434,8 +3435,7 @@ file should have."
   ;; Get a pristine copy of current buffer so Babel references can be
   ;; properly resolved.
   (let ((reference (org-export-copy-buffer)))
-    (unwind-protect (let ((org-current-export-file reference))
-		      (org-babel-exp-process-buffer))
+    (unwind-protect (org-babel-exp-process-buffer reference)
       (kill-buffer reference))))
 
 (defun org-export--copy-to-kill-ring-p ()

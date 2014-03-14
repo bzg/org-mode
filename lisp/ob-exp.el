@@ -27,7 +27,6 @@
 (eval-when-compile
   (require 'cl))
 
-(defvar org-current-export-file)
 (defvar org-babel-lob-one-liner-regexp)
 (defvar org-babel-ref-split-regexp)
 (defvar org-list-forbidden-blocks)
@@ -61,27 +60,18 @@ be executed."
 		 (const :tag "Always" t)))
 (put 'org-export-babel-evaluate 'safe-local-variable (lambda (x) (eq x nil)))
 
-(defun org-babel-exp-get-export-buffer ()
-  "Return the current export buffer if possible."
-  (cond
-   ((bufferp org-current-export-file) org-current-export-file)
-   (org-current-export-file (get-file-buffer org-current-export-file))
-   ('otherwise
-    (error "Requested export buffer when `org-current-export-file' is nil"))))
-
 (defvar org-link-search-inhibit-query)
-
 (defmacro org-babel-exp-in-export-file (lang &rest body)
   (declare (indent 1))
   `(let* ((lang-headers (intern (concat "org-babel-default-header-args:" ,lang)))
 	  (heading (nth 4 (ignore-errors (org-heading-components))))
 	  (export-buffer (current-buffer))
-	  (original-buffer (org-babel-exp-get-export-buffer)) results)
-     (when original-buffer
-       ;; resolve parameters in the original file so that
-       ;; headline and file-wide parameters are included, attempt
-       ;; to go to the same heading in the original file
-       (set-buffer original-buffer)
+	  results)
+     (when org-babel-exp-reference-buffer
+       ;; Resolve parameters in the original file so that headline and
+       ;; file-wide parameters are included, attempt to go to the same
+       ;; heading in the original file
+       (set-buffer org-babel-exp-reference-buffer)
        (save-restriction
 	 (when heading
 	   (condition-case nil
@@ -152,12 +142,17 @@ this template."
   :type 'string)
 
 (defvar org-babel-default-lob-header-args)
-(defun org-babel-exp-process-buffer ()
-  "Execute all Babel blocks in current buffer."
+(defun org-babel-exp-process-buffer (reference-buffer)
+  "Execute all Babel blocks in current buffer.
+REFERENCE-BUFFER is the buffer containing a pristine copy of the
+buffer being processed.  It is used to properly resolve
+references in source blocks, as modifications in current buffer
+may make them unreachable."
   (interactive)
   (save-window-excursion
     (save-excursion
       (let ((case-fold-search t)
+	    (org-babel-exp-reference-buffer reference-buffer)
 	    (regexp (concat org-babel-inline-src-block-regexp "\\|"
 			    org-babel-lob-one-liner-regexp "\\|"
 			    "^[ \t]*#\\+BEGIN_SRC")))
@@ -186,7 +181,7 @@ this template."
 			 (if (and (cdr (assoc :noweb params))
 				  (string= "yes" (cdr (assoc :noweb params))))
 			     (org-babel-expand-noweb-references
-			      info (org-babel-exp-get-export-buffer))
+			      info org-babel-exp-reference-buffer)
 			   (nth 1 info)))
 		   (goto-char begin)
 		   (let ((replacement (org-babel-exp-do-export info 'inline)))
@@ -342,7 +337,7 @@ replaced with its value."
 	     (org-babel-noweb-wrap) "" (nth 1 info))
 	  (if (org-babel-noweb-p (nth 2 info) :export)
 	      (org-babel-expand-noweb-references
-	       info (org-babel-exp-get-export-buffer))
+	       info org-babel-exp-reference-buffer)
 	    (nth 1 info))))
   (org-fill-template
    org-babel-exp-code-template
@@ -371,7 +366,7 @@ inhibit insertion of results into the buffer."
     (let ((lang (nth 0 info))
 	  (body (if (org-babel-noweb-p (nth 2 info) :eval)
 		    (org-babel-expand-noweb-references
-		     info (org-babel-exp-get-export-buffer))
+		     info org-babel-exp-reference-buffer)
 		  (nth 1 info)))
 	  (info (copy-sequence info))
 	  (org-babel-current-src-block-location (point-marker)))

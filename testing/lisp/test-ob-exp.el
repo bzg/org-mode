@@ -32,8 +32,7 @@ Current buffer is a copy of the original buffer."
      (with-temp-buffer
        (org-mode)
        (insert string)
-       (let ((org-current-export-file buf))
-	 (org-babel-exp-process-buffer))
+       (org-babel-exp-process-buffer buf)
        (goto-char (point-min))
        (progn ,@body))))
 
@@ -404,6 +403,20 @@ src_emacs-lisp{(+ 1 1)}"
 #+END_SRC"
       (org-export-execute-babel-code)
       (buffer-string)))))
+
+(ert-deftest ob-export/reference-in-post-header ()
+  "Test references in :post header during export."
+  (should
+   (org-test-with-temp-text "
+#+NAME: foo
+#+BEGIN_SRC emacs-lisp :exports none :var bar=\"baz\"
+  (concat \"bar\" bar)
+#+END_SRC
+
+#+NAME: nofun
+#+BEGIN_SRC emacs-lisp :exports results :post foo(\"nofun\")
+#+END_SRC"
+     (org-export-execute-babel-code) t)))
 
 
 (provide 'test-ob-exp)

@@ -645,7 +645,7 @@ on two lines
     (check-eval "no" nil)
     (check-eval "never-export" t)
     (check-eval "no-export" t)
-    (let ((org-current-export-file "something"))
+    (let ((org-babel-exp-reference-buffer (current-buffer)))
       (check-eval "never" nil)
       (check-eval "no" nil)
       (check-eval "never-export" nil)
