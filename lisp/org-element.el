@@ -2880,8 +2880,12 @@ CONTENTS is nil."
 Return value is a cons cell whose CAR is `inline-babel-call' and
 CDR is beginning position."
   (save-excursion
-    (when (re-search-forward org-babel-inline-lob-one-liner-regexp nil t)
-      (cons 'inline-babel-call (match-end 1)))))
+    (catch 'exit
+      (while (search-forward "call_" nil t)
+	(save-excursion
+	  (goto-char (match-beginning 0))
+	  (when (looking-at org-babel-inline-lob-one-liner-regexp)
+	    (throw 'exit (cons 'inline-babel-call (point)))))))))
 
 
 ;;;; Inline Src Block
