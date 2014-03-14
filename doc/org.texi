@@ -13828,7 +13828,8 @@ results of code block evaluation.  For information on exporting code block
 bodies, see @ref{Literal examples}.
 
 The @code{:exports} header argument can be used to specify export
-behavior:
+behavior (note that these arguments are only relevant for code blocks, not
+inline code):
 
 @subsubheading Header arguments:
 
@@ -14831,7 +14832,8 @@ which the link does not point.
 @cindex @code{:exports}, src header argument
 
 The @code{:exports} header argument specifies what should be included in HTML
-or @LaTeX{} exports of the Org mode file.
+or @LaTeX{} exports of the Org mode file.  Note that the @code{:exports}
+option is only relevant for code blocks, not inline code.
 
 @itemize @bullet
 @item @code{code}
