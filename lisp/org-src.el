@@ -119,11 +119,12 @@ These are the regions where each line starts with a colon."
   "If non-nil preserve leading whitespace characters on export.
 If non-nil leading whitespace characters in source code blocks
 are preserved on export, and when switching between the org
-buffer and the language mode edit buffer.  If this variable is nil
-then, after editing with \\[org-edit-src-code], the
-minimum (across-lines) number of leading whitespace characters
-are removed from all lines, and the code block is uniformly
-indented according to the value of `org-edit-src-content-indentation'."
+buffer and the language mode edit buffer.
+
+When this variable is nil, after editing with \\[org-edit-src-code],
+the minimum (across-lines) number of leading whitespace characters
+are removed from all lines, and the code block is uniformly indented
+according to the value of `org-edit-src-content-indentation'."
   :group 'org-edit-structure
   :type 'boolean)
 
