@@ -33,6 +33,22 @@
 
 (require 'org)
 
+(defcustom org-effectiveness-max-todo 50
+  "This variable is useful to advice to the user about 
+many TODO pending"
+  :type 'integer
+  :group 'org-effectiveness)
+
+(defun org-effectiveness-advice()
+  "Advicing about a possible excess of TODOS"
+  (interactive)
+  (goto-char (point-min))
+  (if (< org-effectiveness-max-todo (count-matches "* TODO"))
+      (message "An excess of TODOS!")))
+
+;; Check advice starting an org file
+(add-hook 'org-mode-hook 'org-effectiveness-advice)
+
 (defun org-effectiveness-count-keyword(keyword)
   "Print a message with the number of keyword outline in the current buffer"
   (interactive "sKeyword: ")
@@ -208,21 +224,26 @@
 (defun org-effectiveness-plot-ascii (startdate enddate)
   (interactive "sGive me the start date: \nsGive me the end date: " startdate enddate)
   (setq dates (org-effectiveness-check-dates startdate enddate))
-  (setq syear (cadr (assoc 'startyear dates)))
-  (setq smonth (cadr (assoc 'startmonth dates)))
-  (setq eyear (cadr (assoc 'endyear dates)))
-  (setq emonth (cadr (assoc 'endmonth dates)))
-;;  (switch-to-buffer "*org-effectiveness*")
-  (let ((month smonth)
-  	(year syear)
+  (let ((syear (cadr (assoc 'startyear dates)))
+	(smonth (cadr (assoc 'startmonth dates)))
+  	(year (cadr (assoc 'startyear dates)))
+	(month (cadr (assoc 'startmonth dates)))
+	(emonth (cadr (assoc 'endmonth dates)))
+	(eyear (cadr (assoc 'endyear dates)))
+	(buffer (current-buffer))
   	(str ""))
-    (while (and (>= eyear year) (>= emonth month))
-      (org-effectiveness-ascii-bar (string-to-number (org-effectiveness-in-date (concat (number-to-string year) "-" (org-effectiveness-month-to-string month)) 1)) (format "%s-%s" year month))
-      (if (= month 12)
+    (while (or (> eyear year) (and (= eyear year) (>= emonth month)))
+      (setq str (org-effectiveness-in-date (concat (number-to-string year) "-" (org-effectiveness-month-to-string month)) 1))
+      (switch-to-buffer "*org-effectiveness*")
+      (org-effectiveness-ascii-bar (string-to-number str) (format "%s-%s" year month))
+      (switch-to-buffer buffer)
+      (if (eq month 12)
   	  (progn 
   	    (setq year (+ 1 year))
   	    (setq month 1))
-  	(setq month (+ 1 month))))))
+  	(setq month (+ 1 month)))))
+  (switch-to-buffer "*org-effectiveness*"))
+
 
 (provide 'org-effectiveness)
 

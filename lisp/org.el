@@ -10556,7 +10556,8 @@ is used internally by `org-open-link-from-string'."
 			     (cond ((not option) nil)
 				   ((org-string-match-p "\\`[0-9]+\\'" option)
 				    (list (string-to-number option)))
-				   (t (list nil option))))))))
+				   (t (list nil
+					    (org-link-unescape option)))))))))
 	       ((assoc type org-link-protocols)
 		(funcall (nth 1 (assoc type org-link-protocols)) path))
 	       ((equal type "help")
