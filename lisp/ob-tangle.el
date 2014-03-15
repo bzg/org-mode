@@ -359,12 +359,17 @@ that the appropriate major-mode is set.  SPEC has the form:
 
 (defvar org-comment-string) ;; Defined in org.el
 (defun org-babel-under-commented-heading-p ()
-  "Return t if currently under a commented heading."
-  (unless (org-before-first-heading-p)
-    (if (let ((hd (nth 4 (org-heading-components))))
-	  (and hd (string-match (concat "^" org-comment-string) hd)))
-	t
-      (save-excursion
+  "Non-nil if point is under a commented heading.
+This function also checks ancestors of the current headline, if
+any."
+  (cond
+   ((org-before-first-heading-p) nil)
+   ((let ((headline (nth 4 (org-heading-components))))
+      (and headline
+	   (let ((case-fold-search nil))
+	     (org-string-match-p (concat "^" org-comment-string "\\(?: \\|$\\)")
+				 headline)))))
+   (t (save-excursion
 	(and (org-up-heading-safe)
 	     (org-babel-under-commented-heading-p))))))
 
