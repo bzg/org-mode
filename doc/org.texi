@@ -9889,6 +9889,10 @@ In line [[(sc)]] we remember the current position.  [[(jump)][Line (jump)]]
 jumps to point-min.
 @end example
 
+@index indentation, in source blocks
+Finally, you can use @code{-i} to preserve the indentation of a specific code
+block (@pxref{Editing source code}).
+
 @vindex org-coderef-label-format
 If the syntax for the label format conflicts with the language syntax, use a
 @code{-l} switch to change the format, for example @samp{#+BEGIN_SRC pascal
@@ -13799,6 +13803,7 @@ can be used to map arbitrary language names to existing major modes.
 @item org-src-window-setup
 Controls the way Emacs windows are rearranged when the edit buffer is created.
 @item org-src-preserve-indentation
+@index indentation, in source blocks
 By default, the value is @code{nil}, which means that when code blocks are
 evaluated during export or tangled, they are re-inserted into the code block,
 which may replace sequences of spaces with tab characters.  When non-nil,
