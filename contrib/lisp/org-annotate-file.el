@@ -84,40 +84,49 @@ Trim whitespace at beginning and end of STRING and replace any
     string))
 
 (defun org-annotate-file ()
-  "Put a section for the current file into your annotation file."
+  "Visit `org-annotate-file-storage-file` and add a new annotation section.
+The annotation is opened at the new section which will be referencing
+the point in the current file."
   (interactive)
   (unless (buffer-file-name)
     (error "This buffer has no associated file!"))
-  (org-annotate-file-show-section org-annotate-file-storage-file))
+  (switch-to-buffer
+   (org-annotate-file-show-section org-annotate-file-storage-file)))
 
-(defun org-annotate-file-show-section (storage-file &optional buffer)
-  "Visit the buffer named STORAGE-FILE.
-The cursor will be placed at the relevant section.  If BUFFER is
-  specified the annotation will be referencing it, otherwise the
-  current buffer is used."
-  (let* ((filename (abbreviate-file-name (or buffer (buffer-file-name))))
-         (line (buffer-substring-no-properties (point-at-bol) (point-at-eol)))
-         (link (org-make-link-string (concat "file:" filename) filename))
+(defun org-annotate-file-show-section (storage-file &optional annotated-buffer)
+  "Add or show annotation entry in STORAGE-FILE and return the buffer.
+The annotation will link to ANNOTATED-BUFFER if specified,
+  otherwise the current buffer is used."
+  (let ((filename (abbreviate-file-name (or annotated-buffer
+					    (buffer-file-name))))
+        (line (buffer-substring-no-properties (point-at-bol) (point-at-eol)))
+        (annotation-buffer (find-file-noselect storage-file)))
+    (with-current-buffer annotation-buffer
+      (org-annotate-file-annotate filename line))
+    annotation-buffer))
+
+(defun org-annotate-file-annotate (filename line)
+  "Add annotation for FILENAME at LINE using current buffer."
+  (let* ((link (org-make-link-string (concat "file:" filename) filename))
          (search-link (org-make-link-string
                        (concat "file:" filename "::" line)
-                               (org-annotate-file-ellipsify-desc line))))
-    (with-current-buffer (find-file storage-file)
-      (unless (eq major-mode 'org-mode)
-        (org-mode))
-      (goto-char (point-min))
-      (widen)
-      (when org-annotate-file-always-open
-        (show-all))
+		       (org-annotate-file-ellipsify-desc line))))
+    (unless (eq major-mode 'org-mode)
+      (org-mode))
+    (goto-char (point-min))
+    (widen)
+    (when org-annotate-file-always-open
+      (show-all))
+    (unless (search-forward-regexp
+	     (concat "^* " (regexp-quote link)) nil t)
+      (org-annotate-file-add-upper-level link))
+    (beginning-of-line)
+    (org-narrow-to-subtree)
+    ;; deal with a '::' search if need be
+    (when org-annotate-file-add-search
       (unless (search-forward-regexp
-               (concat "^* " (regexp-quote link)) nil t)
-        (org-annotate-file-add-upper-level link))
-      (beginning-of-line)
-      (org-narrow-to-subtree)
-      ;; deal with a '::' search if need be
-      (when org-annotate-file-add-search
-        (unless (search-forward-regexp
-                 (concat "^** " (regexp-quote search-link)) nil t)
-          (org-annotate-file-add-second-level search-link))))))
+	       (concat "^** " (regexp-quote search-link)) nil t)
+	(org-annotate-file-add-second-level search-link)))))
 
 (defun org-annotate-file-add-upper-level (link)
   "Add and link heading to LINK."
