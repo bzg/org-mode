@@ -33,6 +33,22 @@
 
 (require 'org)
 
+(defcustom org-effectiveness-max-todo 50
+  "This variable is useful to advice to the user about 
+many TODO pending"
+  :type 'integer
+  :group 'org-effectiveness)
+
+(defun org-effectiveness-advice()
+  "Advicing about a possible excess of TODOS"
+  (interactive)
+  (goto-char (point-min))
+  (if (< org-effectiveness-max-todo (count-matches "* TODO"))
+      (message "An excess of TODOS!")))
+
+;; Check advice starting an org file
+(add-hook 'org-mode-hook 'org-effectiveness-advice)
+
 (defun org-effectiveness-count-keyword(keyword)
   "Print a message with the number of keyword outline in the current buffer"
   (interactive "sKeyword: ")
