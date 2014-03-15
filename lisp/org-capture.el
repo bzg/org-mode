@@ -1149,6 +1149,9 @@ may have been stored before."
     ;; Check if the template is good
     (if (not (string-match org-table-dataline-regexp txt))
 	(setq txt "| %?Bad template |\n"))
+    (if (functionp table-line-pos)
+	(setq table-line-pos (funcall table-line-pos))
+      (setq table-line-pos (eval table-line-pos)))
     (cond
      ((and table-line-pos
 	   (string-match "\\(I+\\)\\([-+][0-9]\\)" table-line-pos))
