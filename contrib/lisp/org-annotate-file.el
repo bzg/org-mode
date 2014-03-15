@@ -88,10 +88,10 @@ Trim whitespace at beginning and end of STRING and replace any
   (interactive)
   (unless (buffer-file-name)
     (error "This buffer has no associated file!"))
-  (org-annotate-file-show-section))
+  (org-annotate-file-show-section org-annotate-file-storage-file))
 
-(defun org-annotate-file-show-section (&optional buffer)
-  "Visit the buffer named `org-annotate-file-storage-file'.
+(defun org-annotate-file-show-section (storage-file &optional buffer)
+  "Visit the buffer named STORAGE-FILE.
 The cursor will be placed at the relevant section.  If BUFFER is
   specified the annotation will be referencing it, otherwise the
   current buffer is used."
@@ -101,7 +101,7 @@ The cursor will be placed at the relevant section.  If BUFFER is
          (search-link (org-make-link-string
                        (concat "file:" filename "::" line)
                                (org-annotate-file-ellipsify-desc line))))
-    (with-current-buffer (find-file org-annotate-file-storage-file)
+    (with-current-buffer (find-file storage-file)
       (unless (eq major-mode 'org-mode)
         (org-mode))
       (goto-char (point-min))
