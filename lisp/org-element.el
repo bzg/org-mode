@@ -1284,10 +1284,9 @@ CONTENTS is the contents of the element."
 		    (throw 'exit (sort struct 'car-less-than-car))))))
 	    ;; Skip blocks (any type) and drawers contents.
 	    (cond
-	     ((and (looking-at "\\(?:[ \t]*\\)?#\\+BEGIN\\(:\\|_\\S-+\\)")
+	     ((and (looking-at "#\\+BEGIN\\(:\\|_\\S-+\\)")
 		   (re-search-forward
-		    (format "^[ \t]*#\\+END%s[ \t]*$"
-			    (org-match-string-no-properties 1))
+		    (format "^[ \t]*#\\+END%s[ \t]*$" (match-string 1))
 		    limit t)))
 	     ((and (looking-at org-drawer-regexp)
 		   (re-search-forward "^[ \t]*:END:[ \t]*$" limit t))))
@@ -2881,8 +2880,12 @@ CONTENTS is nil."
 Return value is a cons cell whose CAR is `inline-babel-call' and
 CDR is beginning position."
   (save-excursion
-    (when (re-search-forward org-babel-inline-lob-one-liner-regexp nil t)
-      (cons 'inline-babel-call (match-end 1)))))
+    (catch 'exit
+      (while (search-forward "call_" nil t)
+	(save-excursion
+	  (goto-char (match-beginning 0))
+	  (when (looking-at org-babel-inline-lob-one-liner-regexp)
+	    (throw 'exit (cons 'inline-babel-call (point)))))))))
 
 
 ;;;; Inline Src Block
