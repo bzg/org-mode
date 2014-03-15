@@ -83,6 +83,7 @@ Trim whitespace at beginning and end of STRING and replace any
           replace-map)
     string))
 
+;;;###autoload
 (defun org-annotate-file ()
   "Visit `org-annotate-file-storage-file` and add a new annotation section.
 The annotation is opened at the new section which will be referencing
@@ -93,6 +94,7 @@ the point in the current file."
   (switch-to-buffer
    (org-annotate-file-show-section org-annotate-file-storage-file)))
 
+;;;###autoload
 (defun org-annotate-file-show-section (storage-file &optional annotated-buffer)
   "Add or show annotation entry in STORAGE-FILE and return the buffer.
 The annotation will link to ANNOTATED-BUFFER if specified,
