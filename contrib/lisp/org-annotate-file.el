@@ -25,7 +25,7 @@
 ;;; Commentary:
 
 ;; This is yet another implementation to allow the annotation of a
-;; file without modification of the file itself. The annotation is in
+;; file without modification of the file itself.  The annotation is in
 ;; org syntax so you can use all of the org features you are used to.
 
 ;; To use you might put the following in your .emacs:
@@ -47,13 +47,15 @@
 ;; and next time you hit C-c C-l you will hit those notes again.
 ;;
 ;; To put a subheading with a text search for the current line set
-;; `org-annotate-file-add-search` to non-nil value. Then when you hit
+;; `org-annotate-file-add-search` to non-nil value.  Then when you hit
 ;; C-c C-l (on the above line for example) you will get:
 
 ;; * ~/org-annotate-file.el
-;; ** `org-annotate-file-add-search` to non-nil value. Then whe...
+;; ** `org-annotate-file-add-search` to non-nil value.  Then whe...
 
 ;; Note that both of the above will be links.
+
+;;; Code:
 
 (require 'org)
 
@@ -61,16 +63,15 @@
   "File in which to keep annotations.")
 
 (defvar org-annotate-file-add-search nil
-  "If non-nil then add a link as a second level to the actual
-location in the file")
+  "If non-nil, add a link as a second level to the actual file location.")
 
 (defvar org-annotate-file-always-open t
-  "non-nil means always expand the full tree when you visit
-`org-annotate-file-storage-file'.")
+  "If non-nil, always expand the full tree when visiting the annotation file.")
 
-(defun org-annotate-file-elipsify-desc (string &optional after)
-  "Strip starting and ending whitespace and replace any chars
-that appear after the value in `after' with '...'"
+(defun org-annotate-file-ellipsify-desc (string &optional after)
+  "Return shortened STRING with appended ellipsis.
+Trim whitespace at beginning and end of STRING and replace any
+  characters that appear after the occurrence of AFTER with '...'"
   (let* ((after (number-to-string (or after 30)))
          (replace-map (list (cons "^[ \t]*" "")
                             (cons "[ \t]*$" "")
@@ -83,21 +84,23 @@ that appear after the value in `after' with '...'"
     string))
 
 (defun org-annotate-file ()
-  "Put a section for the current file into your annotation file"
+  "Put a section for the current file into your annotation file."
   (interactive)
   (unless (buffer-file-name)
-    (error "This buffer has no associated file"))
+    (error "This buffer has no associated file!"))
   (org-annotate-file-show-section))
 
 (defun org-annotate-file-show-section (&optional buffer)
-  "Visit the buffer named `org-annotate-file-storage-file' and
-show the relevant section"
+  "Visit the buffer named `org-annotate-file-storage-file'.
+The cursor will be placed at the relevant section.  If BUFFER is
+  specified the annotation will be referencing it, otherwise the
+  current buffer is used."
   (let* ((filename (abbreviate-file-name (or buffer (buffer-file-name))))
          (line (buffer-substring-no-properties (point-at-bol) (point-at-eol)))
          (link (org-make-link-string (concat "file:" filename) filename))
          (search-link (org-make-link-string
                        (concat "file:" filename "::" line)
-                               (org-annotate-file-elipsify-desc line))))
+                               (org-annotate-file-ellipsify-desc line))))
     (with-current-buffer (find-file org-annotate-file-storage-file)
       (unless (eq major-mode 'org-mode)
         (org-mode))
@@ -117,11 +120,13 @@ show the relevant section"
           (org-annotate-file-add-second-level search-link))))))
 
 (defun org-annotate-file-add-upper-level (link)
+  "Add and link heading to LINK."
   (goto-char (point-min))
   (call-interactively 'org-insert-heading)
   (insert link))
 
 (defun org-annotate-file-add-second-level (link)
+  "Add and link subheading to LINK."
   (goto-char (point-at-eol))
   (call-interactively 'org-insert-subheading)
   (insert link))
