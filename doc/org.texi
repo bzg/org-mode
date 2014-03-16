@@ -9751,15 +9751,17 @@ a horizontal line.
 
 Lines starting with zero or more whitespace characters followed by one
 @samp{#} and a whitespace are treated as comments and will never be exported.
-Also entire subtrees starting with the word @samp{COMMENT} will never be
-exported (and included code blocks will not be executed on export).  Finally,
-regions surrounded by @samp{#+BEGIN_COMMENT} ... @samp{#+END_COMMENT} will
-not be exported.
+
+Also entire subtrees starting with the keyword @samp{COMMENT} will never be
+exported (and included code blocks will not be executed on export).
+
+Finally, regions surrounded by @samp{#+BEGIN_COMMENT}
+... @samp{#+END_COMMENT} will not be exported.
 
 @table @kbd
 @kindex C-c ;
 @item C-c ;
-Toggle the COMMENT keyword at the beginning of an entry.
+Toggle the @samp{COMMENT} keyword at the beginning of an entry.
 @end table
 
 
@@ -10549,7 +10551,7 @@ The tags that exclude a tree from export (@code{org-export-exclude-tags}).
 The default value is @code{:noexport:}.  Entries with the @code{:noexport:}
 tag will be unconditionally excluded from the export, even if they have an
 @code{:export:} tag.  Code blocks contained in excluded subtrees will still
-be executed during export even thought the subtree is not exported.
+be executed during export even though the subtree is not exported.
 
 @item TITLE
 @cindex #+TITLE
@@ -13863,16 +13865,15 @@ ensure that no code blocks are evaluated as part of the export process.  This
 can be useful in situations where potentially untrusted Org mode files are
 exported in an automated fashion, for example when Org mode is used as the
 markup language for a wiki.  It is also possible to set this variable to
-@code{'inline-only}.  In that case, only inline code blocks will be
+@code{inline-only}.  In that case, only inline code blocks will be
 evaluated, in order to insert their results.  Non-inline code blocks are
 assumed to have their results already inserted in the buffer by manual
 evaluation.  This setting is useful to avoid expensive recalculations during
 export, not to provide security.
 
-Code blocks in commented subtrees (e.g., with the @code{COMMENT} keyword)
-(@pxref{Horizontal rules}) are never evaluated on export.  However, code
-blocks in subtrees excluded from export (@pxref{Export settings}) may be
-evaluated on export.
+Code blocks in commented subtrees (@pxref{Comment lines}) are never evaluated
+on export.  However, code blocks in subtrees excluded from export
+(@pxref{Export settings}) may be evaluated on export.
 
 @node Extracting source code
 @section Extracting source code
