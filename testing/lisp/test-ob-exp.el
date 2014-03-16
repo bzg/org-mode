@@ -356,6 +356,56 @@ Here is one at the end of a line. =2=
 	(org-export-execute-babel-code)
 	(buffer-string))))))
 
+(ert-deftest ob-export/export-under-commented-headline ()
+  "Test evaluation of code blocks under COMMENT headings."
+  ;; Do not eval block in a commented headline.
+  (should
+   (string-match
+    ": 2"
+    (org-test-with-temp-text "* Headline
+#+BEGIN_SRC emacs-lisp :exports results
+\(+ 1 1)
+#+END_SRC"
+      (org-export-execute-babel-code)
+      (buffer-string))))
+  (should-not
+   (string-match
+    ": 2"
+    (org-test-with-temp-text "* COMMENT Headline
+#+BEGIN_SRC emacs-lisp :exports results
+\(+ 1 1)
+#+END_SRC"
+      (org-export-execute-babel-code)
+      (buffer-string))))
+  ;; Do not eval inline blocks either.
+  (should
+   (string-match
+    "=2="
+    (org-test-with-temp-text "* Headline
+src_emacs-lisp{(+ 1 1)}"
+      (org-export-execute-babel-code)
+      (buffer-string))))
+  (should-not
+   (string-match
+    "=2="
+    (org-test-with-temp-text "* COMMENT Headline
+src_emacs-lisp{(+ 1 1)}"
+      (org-export-execute-babel-code)
+      (buffer-string))))
+  ;; Also check parent headlines.
+  (should-not
+   (string-match
+    ": 2"
+    (org-test-with-temp-text "
+* COMMENT Headline
+** Children
+#+BEGIN_SRC emacs-lisp :exports results
+\(+ 1 1)
+#+END_SRC"
+      (org-export-execute-babel-code)
+      (buffer-string)))))
+
+
 (provide 'test-ob-exp)
 
 ;;; test-ob-exp.el ends here
