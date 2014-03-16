@@ -9752,8 +9752,9 @@ a horizontal line.
 Lines starting with zero or more whitespace characters followed by one
 @samp{#} and a whitespace are treated as comments and will never be exported.
 Also entire subtrees starting with the word @samp{COMMENT} will never be
-exported.  Finally, regions surrounded by @samp{#+BEGIN_COMMENT}
-... @samp{#+END_COMMENT} will not be exported.
+exported (and included code blocks will not be executed on export).  Finally,
+regions surrounded by @samp{#+BEGIN_COMMENT} ... @samp{#+END_COMMENT} will
+not be exported.
 
 @table @kbd
 @kindex C-c ;
@@ -10547,7 +10548,8 @@ anywhere in a file, text before the first headline is ignored.
 The tags that exclude a tree from export (@code{org-export-exclude-tags}).
 The default value is @code{:noexport:}.  Entries with the @code{:noexport:}
 tag will be unconditionally excluded from the export, even if they have an
-@code{:export:} tag.
+@code{:export:} tag.  Code blocks contained in excluded subtrees will still
+be executed during export even thought the subtree is not exported.
 
 @item TITLE
 @cindex #+TITLE
@@ -13867,6 +13869,10 @@ assumed to have their results already inserted in the buffer by manual
 evaluation.  This setting is useful to avoid expensive recalculations during
 export, not to provide security.
 
+Code blocks in commented subtrees (e.g., with the @code{COMMENT} keyword)
+(@pxref{Horizontal rules}) are never evaluated on export.  However, code
+blocks in subtrees excluded from export (@pxref{Export settings}) may be
+evaluated on export.
 
 @node Extracting source code
 @section Extracting source code
