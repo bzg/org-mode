@@ -5715,24 +5715,30 @@ This should be called after the variable `org-link-types' has changed."
   "Run through the buffer and add overlays to emphasized strings."
   (let (rtn a)
     (while (and (not rtn) (re-search-forward org-emph-re limit t))
-      (if (not (= (char-after (match-beginning 3))
-		  (char-after (match-beginning 4))))
-	  (progn
-	    (setq rtn t)
-	    (setq a (assoc (match-string 3) org-emphasis-alist))
-	    (font-lock-prepend-text-property (match-beginning 2) (match-end 2)
-					     'face
-					     (nth 1 a))
-	    (and (nth 2 a)
-		 (org-remove-flyspell-overlays-in
-		  (match-beginning 0) (match-end 0)))
-	    (add-text-properties (match-beginning 2) (match-end 2)
-				 '(font-lock-multiline t org-emphasis t))
-	    (when org-hide-emphasis-markers
-	      (add-text-properties (match-end 4) (match-beginning 5)
-				   '(invisible org-link))
-	      (add-text-properties (match-beginning 3) (match-end 3)
-				   '(invisible org-link)))))
+      (let* ((border (char-after (match-beginning 3)))
+	     (bre (regexp-quote (char-to-string border))))
+	(if (and (not (= border (char-after (match-beginning 4))))
+		 (not (save-match-data
+			(string-match (concat bre ".*" bre)
+				      (replace-regexp-in-string
+				       "\n" " "
+				       (substring (match-string 2) 1 -1))))))
+	    (progn
+	      (setq rtn t)
+	      (setq a (assoc (match-string 3) org-emphasis-alist))
+	      (font-lock-prepend-text-property (match-beginning 2) (match-end 2)
+					       'face
+					       (nth 1 a))
+	      (and (nth 2 a)
+		   (org-remove-flyspell-overlays-in
+		    (match-beginning 0) (match-end 0)))
+	      (add-text-properties (match-beginning 2) (match-end 2)
+				   '(font-lock-multiline t org-emphasis t))
+	      (when org-hide-emphasis-markers
+		(add-text-properties (match-end 4) (match-beginning 5)
+				     '(invisible org-link))
+		(add-text-properties (match-beginning 3) (match-end 3)
+				     '(invisible org-link))))))
       (goto-char (1+ (match-beginning 0))))
     rtn))
 
