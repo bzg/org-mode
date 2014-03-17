@@ -15455,15 +15455,14 @@ However, if LITERAL-NIL is set, return the string value \"nil\" instead."
       (save-restriction
 	(widen)
 	(catch 'ex
-	  (let (org-file-properties org-global-properties org-global-properties-fixed)
-	    (while t
-	      (when (setq tmp (org-entry-get nil property nil 'literal-nil))
-		(or (ignore-errors (org-back-to-heading t))
-		    (goto-char (point-min)))
-		(move-marker org-entry-property-inherited-from (point))
-		(throw 'ex tmp))
-	      (or (ignore-errors (org-up-heading-safe))
-		  (throw 'ex nil)))))))
+	  (while t
+	    (when (setq tmp (org-entry-get nil property nil 'literal-nil))
+	      (or (ignore-errors (org-back-to-heading t))
+		  (goto-char (point-min)))
+	      (move-marker org-entry-property-inherited-from (point))
+	      (throw 'ex tmp))
+	    (or (ignore-errors (org-up-heading-safe))
+		(throw 'ex nil))))))
     (setq tmp (or tmp
 		  (cdr (assoc property org-file-properties))
 		  (cdr (assoc property org-global-properties))
