@@ -1385,12 +1385,8 @@ INFO is a plist holding contextual information."
       (let ((ref (org-element-property :path link)))
 	(format (org-export-get-coderef-format ref desc)
 		(org-export-resolve-coderef ref info))))
-     ;; Do not apply a special syntax on radio links.  Though, use
-     ;; transcoded target's contents as output.
-     ((string= type "radio")
-      (let ((destination (org-export-resolve-radio-link link info)))
-	(when destination
-	  (org-export-data (org-element-contents destination) info))))
+     ;; Do not apply a special syntax on radio links.
+     ((string= type "radio") desc)
      ;; Do not apply a special syntax on fuzzy links pointing to
      ;; targets.
      ((string= type "fuzzy")
