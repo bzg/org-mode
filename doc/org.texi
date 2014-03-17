@@ -7095,9 +7095,10 @@ narrow it so that you only see the new material.
 
 @item :table-line-pos
 Specification of the location in the table where the new line should be
-inserted.  It should be a string like @code{"II-3"} meaning that the new
-line should become the third line before the second horizontal separator
-line.
+inserted. It can be a string, a variable holding a string or a function
+returning a string. The string should look like @code{"II-3"} meaning that
+the new line should become the third line before the second horizontal
+separator line.
 
 @item :kill-buffer
 If the target file was not yet visited when capture was invoked, kill the
