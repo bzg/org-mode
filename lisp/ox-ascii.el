@@ -1387,8 +1387,7 @@ INFO is a plist holding contextual information."
 	(format (org-export-get-coderef-format ref desc)
 		(org-export-resolve-coderef ref info))))
      ;; Do not apply a special syntax on radio links.
-     ((string= type "radio")
-      (org-element-property :path link))
+     ((string= type "radio") desc)
      ;; Do not apply a special syntax on fuzzy links pointing to
      ;; targets.
      ((string= type "fuzzy")

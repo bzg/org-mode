@@ -689,8 +689,8 @@ used as a communication channel."
 	(when destination
 	  (format "\\hyperlink%s{%s}{%s}"
 		  (or (org-beamer--element-has-overlay-p link) "")
-		  (org-export-data (org-element-contents destination) info)
-		  (org-export-solidify-link-text path)))))
+		  (org-export-solidify-link-text path)
+		  (org-export-data (org-element-contents destination) info)))))
      ((and (member type '("custom-id" "fuzzy" "id"))
 	   (let ((destination (if (string= type "fuzzy")
 				  (org-export-resolve-fuzzy-link link info)

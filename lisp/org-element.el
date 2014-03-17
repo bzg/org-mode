@@ -60,7 +60,7 @@
 ;; `table-cell', `target', `timestamp', `underline' and `verbatim'.
 ;;
 ;; Some elements also have special properties whose value can hold
-;; objects themselves (i.e. an item tag or a headline name).  Such
+;; objects themselves (e.g. an item tag or a headline name).  Such
 ;; values are called "secondary strings".  Any object belongs to
 ;; either an element or a secondary string.
 ;;
@@ -236,7 +236,7 @@ application to open them.")
   '("CAPTION" "DATA" "HEADER" "HEADERS" "LABEL" "NAME" "PLOT" "RESNAME" "RESULT"
     "RESULTS" "SOURCE" "SRCNAME" "TBLNAME")
   "List of affiliated keywords as strings.
-By default, all keywords setting attributes (i.e. \"ATTR_LATEX\")
+By default, all keywords setting attributes (e.g., \"ATTR_LATEX\")
 are affiliated keywords and need not to be in this list.")
 
 (defconst org-element-keyword-translation-alist
@@ -256,7 +256,7 @@ returned as the value of the property.
 This list is checked after translations have been applied.  See
 `org-element-keyword-translation-alist'.
 
-By default, all keywords setting attributes (i.e. \"ATTR_LATEX\")
+By default, all keywords setting attributes (e.g., \"ATTR_LATEX\")
 allow multiple occurrences and need not to be in this list.")
 
 (defconst org-element-parsed-keywords '("CAPTION")
@@ -801,7 +801,7 @@ and `:footnote-section-p' keywords.
 
 The plist also contains any property set in the property drawer,
 with its name in upper cases and colons added at the
-beginning (i.e. `:CUSTOM_ID').
+beginning (e.g., `:CUSTOM_ID').
 
 When RAW-SECONDARY-P is non-nil, headline's title will not be
 parsed as a secondary string, but as a plain string instead.
@@ -973,7 +973,7 @@ containing `:title', `:begin', `:end', `:contents-begin' and
 
 The plist also contains any property set in the property drawer,
 with its name in upper cases and colons added at the
-beginning (i.e. `:CUSTOM_ID').
+beginning (e.g., `:CUSTOM_ID').
 
 When optional argument RAW-SECONDARY-P is non-nil, inline-task's
 title will not be parsed as a secondary string, but as a plain
@@ -2154,8 +2154,8 @@ Assume point is at the beginning of the paragraph."
 		;; A matching `org-element-paragraph-separate' is not
 		;; necessarily the end of the paragraph.  In
 		;; particular, lines starting with # or : as a first
-		;; non-space character are ambiguous.  We have check
-		;; if they are valid Org syntax (i.e. not an
+		;; non-space character are ambiguous.  We have to
+		;; check if they are valid Org syntax (e.g., not an
 		;; incomplete keyword).
 		(beginning-of-line)
 		(while (not
@@ -2558,8 +2558,8 @@ CONTENTS is verse block contents."
 ;;
 ;; Unlike to elements, interstices can be found between objects.
 ;; That's why, along with the parser, successor functions are provided
-;; for each object.  Some objects share the same successor (i.e. `code'
-;; and `verbatim' objects).
+;; for each object.  Some objects share the same successor (e.g.,
+;; `code' and `verbatim' objects).
 ;;
 ;; A successor must accept a single argument bounding the search.  It
 ;; will return either a cons cell whose CAR is the object's type, as
@@ -2569,7 +2569,7 @@ CONTENTS is verse block contents."
 ;; org-element-NAME-successor, where NAME is the name of the
 ;; successor, as defined in `org-element-all-successors'.
 ;;
-;; Some object types (i.e. `italic') are recursive.  Restrictions on
+;; Some object types (e.g., `italic') are recursive.  Restrictions on
 ;; object types they can contain will be specified in
 ;; `org-element-object-restrictions'.
 ;;
@@ -3059,9 +3059,12 @@ Assume point is at the beginning of the link."
        ;; Type 1: Text targeted from a radio target.
        ((and org-target-link-regexp (looking-at org-target-link-regexp))
 	(setq type "radio"
-	      link-end (match-end 0)
-	      path (org-match-string-no-properties 0)))
-       ;; Type 2: Standard link, i.e. [[http://orgmode.org][homepage]]
+	      contents-begin (match-beginning 0)
+	      contents-end (match-end 0)
+	      link-end contents-end
+	      raw-link (org-match-string-no-properties 0)
+	      path (downcase raw-link)))
+       ;; Type 2: Standard link, e.g. [[http://orgmode.org][homepage]]
        ((looking-at org-bracket-link-regexp)
 	(setq contents-begin (match-beginning 3)
 	      contents-end (match-end 3)
@@ -3093,13 +3096,13 @@ Assume point is at the beginning of the link."
 	 ;; headline name or nothing.  PATH is the target or
 	 ;; headline's name.
 	 (t (setq type "fuzzy" path raw-link))))
-       ;; Type 3: Plain link, i.e. http://orgmode.org
+       ;; Type 3: Plain link, e.g., http://orgmode.org
        ((looking-at org-plain-link-re)
 	(setq raw-link (org-match-string-no-properties 0)
 	      type (org-match-string-no-properties 1)
 	      link-end (match-end 0)
 	      path (org-match-string-no-properties 2)))
-       ;; Type 4: Angular link, i.e. <http://orgmode.org>
+       ;; Type 4: Angular link, e.g., <http://orgmode.org>
        ((looking-at org-angle-link-re)
 	(setq raw-link (buffer-substring-no-properties
 			(match-beginning 1) (match-end 2))
@@ -3229,8 +3232,8 @@ beginning position."
   "Parse radio target at point.
 
 Return a list whose CAR is `radio-target' and CDR a plist with
-`:begin', `:end', `:contents-begin', `:contents-end', `:value'
-and `:post-blank' as keywords.
+`:value', `:raw-value', `:begin', `:end', `:contents-begin',
+`:contents-end', and `:post-blank' as keywords.
 
 Assume point is at the radio target."
   (save-excursion
@@ -3238,17 +3241,18 @@ Assume point is at the radio target."
     (let ((begin (point))
 	  (contents-begin (match-beginning 1))
 	  (contents-end (match-end 1))
-	  (value (org-match-string-no-properties 1))
+	  (raw-value (org-match-string-no-properties 1))
 	  (post-blank (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
       (list 'radio-target
-	    (list :begin begin
+	    (list :value (downcase raw-value)
+		  :raw-value raw-value
+		  :begin begin
 		  :end end
 		  :contents-begin contents-begin
 		  :contents-end contents-end
-		  :post-blank post-blank
-		  :value value)))))
+		  :post-blank post-blank)))))
 
 (defun org-element-radio-target-interpreter (target contents)
   "Interpret TARGET object as Org syntax.
@@ -3771,8 +3775,8 @@ CONTENTS is nil."
 ;; point.
 ;;
 ;; `org-element--current-element' makes use of special modes.  They
-;; are activated for fixed element chaining (i.e. `plain-list' >
-;; `item') or fixed conditional element chaining (i.e. `headline' >
+;; are activated for fixed element chaining (e.g., `plain-list' >
+;; `item') or fixed conditional element chaining (e.g., `headline' >
 ;; `section').  Special modes are: `first-section', `item',
 ;; `node-property', `section' and `table-row'.
 
@@ -3915,7 +3919,7 @@ CDR a plist of keywords and values and move point to the
 beginning of the first line after them.
 
 As a special case, if element doesn't start at the beginning of
-the line (i.e. a paragraph starting an item), CAR is current
+the line (e.g., a paragraph starting an item), CAR is current
 position of point and CDR is nil."
   (if (not (bolp)) (list (point))
     (let ((case-fold-search t)
