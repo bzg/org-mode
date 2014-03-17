@@ -3094,8 +3094,11 @@ Assume point is at the beginning of the link."
        ;; Type 1: Text targeted from a radio target.
        ((and org-target-link-regexp (looking-at org-target-link-regexp))
 	(setq type "radio"
-	      link-end (match-end 0)
-	      path (org-match-string-no-properties 0)))
+	      contents-begin (match-beginning 0)
+	      contents-end (match-end 0)
+	      link-end contents-end
+	      raw-link (org-match-string-no-properties 0)
+	      path (downcase raw-link)))
        ;; Type 2: Standard link, i.e. [[http://orgmode.org][homepage]]
        ((looking-at org-bracket-link-regexp)
 	(setq contents-begin (match-beginning 3)
@@ -3264,8 +3267,8 @@ beginning position."
   "Parse radio target at point.
 
 Return a list whose CAR is `radio-target' and CDR a plist with
-`:begin', `:end', `:contents-begin', `:contents-end', `:value'
-and `:post-blank' as keywords.
+`:value', `:raw-value', `:begin', `:end', `:contents-begin',
+`:contents-end', and `:post-blank' as keywords.
 
 Assume point is at the radio target."
   (save-excursion
@@ -3273,17 +3276,18 @@ Assume point is at the radio target."
     (let ((begin (point))
 	  (contents-begin (match-beginning 1))
 	  (contents-end (match-end 1))
-	  (value (org-match-string-no-properties 1))
+	  (raw-value (org-match-string-no-properties 1))
 	  (post-blank (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
       (list 'radio-target
-	    (list :begin begin
+	    (list :value (downcase raw-value)
+		  :raw-value raw-value
+		  :begin begin
 		  :end end
 		  :contents-begin contents-begin
 		  :contents-end contents-end
-		  :post-blank post-blank
-		  :value value)))))
+		  :post-blank post-blank)))))
 
 (defun org-element-radio-target-interpreter (target contents)
   "Interpret TARGET object as Org syntax.
