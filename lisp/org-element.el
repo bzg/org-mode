@@ -5032,7 +5032,8 @@ relative to ELEMENT and store it in the objects cache."
 		       (cond ((cdr keys) (org-element--cache-key (cdr keys)))
 			     (org-element--cache-sync-requests
 			      (aref (car org-element--cache-sync-requests) 0))))
-		      org-element--cache-sync-keys))))
+		      org-element--cache-sync-keys)))
+	 (avl-tree-enter org-element--cache element))
 	;; Headlines are not stored in cache, so objects in titles are
 	;; not stored either.
 	((eq (org-element-type element) 'headline) nil)
