@@ -9583,7 +9583,7 @@ active region."
 	 (org-store-link-props :type "image" :file buffer-file-name))
 
 	;; In dired, store a link to the file of the current line
-	((eq major-mode 'dired-mode)
+	((derived-mode-p 'dired-mode)
 	 (let ((file (dired-get-filename nil t)))
 	   (setq file (if file
 			  (abbreviate-file-name
