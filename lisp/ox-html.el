@@ -2721,9 +2721,9 @@ INFO is a plist holding contextual information.  See
       (let ((destination (org-export-resolve-radio-link link info)))
 	(when destination
 	  (format "<a href=\"#%s\"%s>%s</a>"
-		  (org-export-data (org-element-contents destination) info)
+		  (org-export-solidify-link-text path)
 		  attributes
-		  (org-export-solidify-link-text path)))))
+		  (org-export-data (org-element-contents destination) info)))))
      ;; Links pointing to a headline: Find destination and build
      ;; appropriate referencing command.
      ((member type '("custom-id" "fuzzy" "id"))
