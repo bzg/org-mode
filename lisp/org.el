@@ -5431,7 +5431,9 @@ The following commands are available:
      (unless org-inhibit-startup-visibility-stuff
        (org-set-startup-visibility))))
   ;; Try to set org-hide correctly
-  (set-face-foreground 'org-hide (org-find-invisible-foreground)))
+  (let ((foreground (org-find-invisible-foreground)))
+    (if foreground
+        (set-face-foreground 'org-hide foreground))))
 
 ;; Update `customize-package-emacs-version-alist'
 (add-to-list 'customize-package-emacs-version-alist
