@@ -8484,7 +8484,8 @@ It also looks at the text of the entry itself."
 		     (org-get-at-bol 'org-marker)))
 	 (buffer (and marker (marker-buffer marker)))
 	 (prefix (buffer-substring (point-at-bol) (point-at-eol)))
-	 (lkall (org-offer-links-in-entry buffer marker arg prefix))
+	 (lkall (and buffer (org-offer-links-in-entry
+			     buffer marker arg prefix)))
 	 (lk0 (car lkall))
 	 (lk (if (stringp lk0) (list lk0) lk0))
 	 (lkend (cdr lkall))
