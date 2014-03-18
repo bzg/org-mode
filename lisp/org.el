@@ -15324,7 +15324,13 @@ when a \"nil\" value can supersede a non-nil value higher up the hierarchy."
 	  (cdr (assoc property (org-entry-properties nil 'special property)))
 	(org-with-wide-buffer
 	 (let ((range (org-get-property-block)))
-	   (when (and range (not (eq (car range) (cdr range))))
+	   (when (and range (not (eq (car range) (cdr range)))
+		      (save-excursion
+		      	(goto-char (car range))
+		      	(re-search-forward
+		      	 (concat (org-re-property property) "\\|"
+				 (org-re-property (concat property "+")))
+			 (cdr range) t)))
 	     (let* ((props
 		     (list (or (assoc property org-file-properties)
 			       (assoc property org-global-properties)
