@@ -417,15 +417,15 @@ This can be used after files have been added externally."
 	(and files (org-attach-tag))
 	(when org-attach-file-list-property
 	  (dolist (file files)
-	    (unless (string-match "^\\." file)
+	    (unless (string-match "^\\.\\.?\\'" file)
 	      (org-entry-add-to-multivalued-property
 	       (point) org-attach-file-list-property file))))))))
 
 (defun org-attach-file-list (dir)
   "Return a list of files in the attachment directory.
-This ignores files starting with a \".\", and files ending in \"~\"."
+This ignores files ending in \"~\"."
   (delq nil
-	(mapcar (lambda (x) (if (string-match "^\\." x) nil x))
+	(mapcar (lambda (x) (if (string-match "^\\.\\.?\\'" x) nil x))
 		(directory-files dir nil "[^~]\\'"))))
 
 (defun org-attach-reveal (&optional if-exists)
