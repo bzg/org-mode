@@ -8806,7 +8806,7 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 	  (org-back-to-heading)
 	  (move-marker org-last-heading-marker (point))))
       (beginning-of-line 1)
-      (save-excursion
+      (save-window-excursion
 	(org-agenda-change-all-lines newhead hdmarker 'fixface just-one))
       (when (org-bound-and-true-p org-clock-out-when-done)
       	(string-match (concat "^" (regexp-opt org-done-keywords-for-agenda))
