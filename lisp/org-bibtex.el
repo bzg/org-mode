@@ -631,7 +631,7 @@ This uses `bibtex-parse-entry'."
 (defun org-bibtex-read-buffer (buffer)
   "Read all bibtex entries in BUFFER and save to `org-bibtex-entries'.
 Return the number of saved entries."
-  (interactive "bbuffer: ")
+  (interactive "bBuffer: ")
   (let ((start-length (length org-bibtex-entries)))
     (with-current-buffer buffer
       (save-excursion
@@ -641,12 +641,12 @@ Return the number of saved entries."
 	  (org-bibtex-read)
 	  (bibtex-beginning-of-entry))))
     (let ((added (- (length org-bibtex-entries) start-length)))
-      (message "parsed %d entries" added)
+      (message "Parsed %d entries" added)
       added)))
 
 (defun org-bibtex-read-file (file)
   "Read FILE with `org-bibtex-read-buffer'."
-  (interactive "ffile: ")
+  (interactive "fFile: ")
   (org-bibtex-read-buffer (find-file-noselect file 'nowarn 'rawfile)))
 
 (defun org-bibtex-write ()
@@ -692,7 +692,7 @@ Return the number of saved entries."
 
 (defun org-bibtex-import-from-file (file)
   "Read bibtex entries from FILE and insert as Org-mode headlines after point."
-  (interactive "ffile: ")
+  (interactive "fFile: ")
   (dotimes (_ (org-bibtex-read-file file))
     (save-excursion (org-bibtex-write))
     (re-search-forward org-property-end-re)
