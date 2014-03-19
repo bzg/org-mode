@@ -794,7 +794,7 @@ When exporting to HTML5, these values will be disregarded."
 		:value-type (string :tag "Value")))
 
 (defcustom org-html-table-header-tags '("<th scope=\"%s\"%s>" . "</th>")
-  "The opening tag for table header fields.
+  "The opening and ending tags for table header fields.
 This is customizable so that alignment options can be specified.
 The first %s will be filled with the scope of the field, either row or col.
 The second %s will be replaced by a style entry to align the field.
@@ -804,7 +804,7 @@ See also the variable `org-html-table-align-individual-fields'."
   :type '(cons (string :tag "Opening tag") (string :tag "Closing tag")))
 
 (defcustom org-html-table-data-tags '("<td%s>" . "</td>")
-  "The opening tag for table data fields.
+  "The opening and ending tags for table data fields.
 This is customizable so that alignment options can be specified.
 The first %s will be filled with the scope of the field, either row or col.
 The second %s will be replaced by a style entry to align the field.
