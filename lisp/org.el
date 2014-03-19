@@ -11597,8 +11597,8 @@ below it are allowed.
 With prefix arg GOTO, the command will only visit the target location
 and not actually move anything.
 
-With a double prefix arg \\[universal-argument] \\[universal-argument], \
-go to the location where the last refiling operation has put the subtree.
+With a double prefix arg \\[universal-argument] \\[universal-argument], go to the location where the last
+refiling operation has put the subtree.
 
 With a numeric prefix argument of `2', refile to the running clock.
 
