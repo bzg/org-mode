@@ -2709,9 +2709,12 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
 			   (format "file:%s::%s"
 				   (buffer-file-name)
 				   (save-match-data
-				     (org-make-org-heading-search-string
-				      (match-string 2))))
-			   (match-string 2)))
+				     (match-string 2)))
+			   (org-make-org-heading-search-string
+				      (replace-regexp-in-string
+				       org-bracket-link-regexp
+				       "\\3"
+				       (match-string 2)))))
 		    tsp (when timestamp
 			  (setq props (org-entry-properties (point)))
 			  (or (cdr (assoc "SCHEDULED" props))
