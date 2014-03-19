@@ -11580,22 +11580,21 @@ the *old* location.")
   (let ((org-refile-keep t))
     (funcall 'org-refile nil nil nil "Copy")))
 
-(defun org-refile (&optional goto default-buffer rfloc msg)
+(defun org-refile (&optional arg default-buffer rfloc msg)
   "Move the entry or entries at point to another heading.
 The list of target headings is compiled using the information in
 `org-refile-targets', which see.
 
-At the target location, the entry is filed as a subitem of the target
-heading.  Depending on `org-reverse-note-order', the new subitem will
-either be the first or the last subitem.
+At the target location, the entry is filed as a subitem of the
+target heading.  Depending on `org-reverse-note-order', the new
+subitem will either be the first or the last subitem.
 
-If there is an active region, all entries in that region will be moved.
-However, the region must fulfill the requirement that the first heading
-is the first one sets the top-level of the moved text - at most siblings
-below it are allowed.
+If there is an active region, all entries in that region will be
+refiled.  However, the region must fulfill the requirement that
+the first heading sets the top-level of the moved text.
 
-With prefix arg GOTO, the command will only visit the target location
-and not actually move anything.
+With prefix arg ARG, the command will only visit the target
+location and not actually move anything.
 
 With a double prefix arg \\[universal-argument] \\[universal-argument], go to the location where the last
 refiling operation has put the subtree.
@@ -11614,23 +11613,22 @@ another verb.  E.g. `org-copy' sets this parameter to \"Copy\".
 
 See also `org-refile-use-outline-path' and `org-completion-use-ido'.
 
-If you are using target caching (see `org-refile-use-cache'),
-you have to clear the target cache in order to find new targets.
+If you are using target caching (see `org-refile-use-cache'), you
+have to clear the target cache in order to find new targets.
 This can be done with a 0 prefix (`C-0 C-c C-w') or a triple
 prefix argument (`C-u C-u C-u C-c C-w')."
-
   (interactive "P")
-  (if (member goto '(0 (64)))
+  (if (member arg '(0 (64)))
       (org-refile-cache-clear)
     (let* ((actionmsg (cond (msg msg)
-			    ((equal goto 3) "Refile (and keep)")
+			    ((equal arg 3) "Refile (and keep)")
 			    (t "Refile")))
 	   (cbuf (current-buffer))
 	   (regionp (org-region-active-p))
 	   (region-start (and regionp (region-beginning)))
 	   (region-end (and regionp (region-end)))
 	   (filename (buffer-file-name (buffer-base-buffer cbuf)))
-	   (org-refile-keep (if (equal goto 3) t org-refile-keep))
+	   (org-refile-keep (if (equal arg 3) t org-refile-keep))
 	   pos it nbuf file re level reversed)
       (setq last-command nil)
       (when regionp
@@ -11644,10 +11642,10 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 			(org-toggle-heading)
 			(setq region-end (+ (- (point-at-eol) s) region-end)))))
 	  (user-error "The region is not a (sequence of) subtree(s)")))
-      (if (equal goto '(16))
+      (if (equal arg '(16))
 	  (org-refile-goto-last-stored)
 	(when (or
-	       (and (equal goto 2)
+	       (and (equal arg 2)
 		    org-clock-hd-marker (marker-buffer org-clock-hd-marker)
 		    (prog1
 			(setq it (list (or org-clock-heading "running clock")
@@ -11655,28 +11653,30 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 					(marker-buffer org-clock-hd-marker))
 				       ""
 				       (marker-position org-clock-hd-marker)))
-		      (setq goto nil)))
+		      (setq arg nil)))
 	       (setq it (or rfloc
 			    (let (heading-text)
 			      (save-excursion
-				(unless (and goto (listp goto))
+				(unless (and arg (listp arg))
 				  (org-back-to-heading t)
 				  (setq heading-text
-					(nth 4 (org-heading-components))))
-
+					(replace-regexp-in-string
+					 org-bracket-link-regexp
+					 "\\3"
+					 (nth 4 (org-heading-components)))))
 				(org-refile-get-location
-				 (cond ((and goto (listp goto)) "Goto")
+				 (cond ((and arg (listp arg)) "Goto")
 				       (regionp (concat actionmsg " region to"))
 				       (t (concat actionmsg " subtree \""
 						  heading-text "\" to")))
 				 default-buffer
-				 (and (not (equal '(4) goto))
+				 (and (not (equal '(4) arg))
 				      org-refile-allow-creating-parent-nodes)
-				 goto))))))
+				 arg))))))
 	  (setq file (nth 1 it)
 		re (nth 2 it)
 		pos (nth 3 it))
-	  (if (and (not goto)
+	  (if (and (not arg)
 		   pos
 		   (equal (buffer-file-name) file)
 		   (if regionp
@@ -11686,10 +11686,9 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 			  (< pos (save-excursion
 				   (org-end-of-subtree t t))))))
 	      (error "Cannot refile to position inside the tree or region"))
-
 	  (setq nbuf (or (find-buffer-visiting file)
 			 (find-file-noselect file)))
-	  (if (and goto (not (equal goto 3)))
+	  (if (and arg (not (equal arg 3)))
 	      (progn
 		(org-pop-to-buffer-same-window nbuf)
 		(goto-char pos)
