@@ -11243,10 +11243,39 @@ individual tables, place something like the following before the table:
 #+ATTR_HTML: :border 2 :rules all :frame border
 @end example
 
+You can also group columns in the HTML output (@pxref{Column groups}).
+
+Below is a list of options for customizing tables HTML export.
+
+@table @code
+@vindex org-html-table-align-individual-fields
+@item org-html-table-align-individual-fields
+Non-nil means attach style attributes for alignment to each table field.
+
+@vindex org-html-table-caption-above
+@item org-html-table-caption-above
+When non-nil, place caption string at the beginning of the table.
+
+@vindex org-html-table-data-tags
+@item org-html-table-data-tags
+The opening and ending tags for table data fields.
+
+@vindex org-html-table-default-attributes
+@item org-html-table-default-attributes
+Default attributes and values which will be used in table tags.
+
+@vindex org-html-table-header-tags
+@item org-html-table-header-tags
+The opening and ending tags for table header fields.
+
 @vindex org-html-table-row-tags
-You can also modify the default tags used for each row by setting
-@code{org-html-table-row-tags}.  See the docstring for an example on
-how to use this option.
+@item org-html-table-row-tags
+The opening and ending tags for table rows.
+
+@vindex org-html-table-use-header-tags-for-first-column
+@item org-html-table-use-header-tags-for-first-column
+Non-nil means format column one in tables with header tags.
+@end table
 
 @node Images in HTML export
 @subsection Images in HTML export
