@@ -11622,7 +11622,9 @@ prefix argument (`C-u C-u C-u C-c C-w')."
   (interactive "P")
   (if (member goto '(0 (64)))
       (org-refile-cache-clear)
-    (let* ((actionmsg (or msg "Refile"))
+    (let* ((actionmsg (cond (msg msg)
+			    ((equal goto 3) "Refile (and keep)")
+			    (t "Refile")))
 	   (cbuf (current-buffer))
 	   (regionp (org-region-active-p))
 	   (region-start (and regionp (region-beginning)))
@@ -11657,13 +11659,13 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 	       (setq it (or rfloc
 			    (let (heading-text)
 			      (save-excursion
-				(unless goto
+				(unless (and goto (listp goto))
 				  (org-back-to-heading t)
 				  (setq heading-text
 					(nth 4 (org-heading-components))))
 
 				(org-refile-get-location
-				 (cond (goto "Goto")
+				 (cond ((and goto (listp goto)) "Goto")
 				       (regionp (concat actionmsg " region to"))
 				       (t (concat actionmsg " subtree \""
 						  heading-text "\" to")))
