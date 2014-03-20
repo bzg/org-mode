@@ -343,10 +343,25 @@ Works on both Emacs and XEmacs."
       (org-xemacs-without-invisibility (indent-line-to column))
     (indent-line-to column)))
 
-(defun org-move-to-column (column &optional force buffer ignore-invisible)
-  (let ((buffer-invisibility-spec ignore-invisible))
+(defun org-move-to-column (column &optional force buffer)
+  "Move to column COLUMN.
+Pass COLUMN and FORCE to `move-to-column'.
+Pass BUFFER to the XEmacs version of `move-to-column'."
+  (let ((buffer-invisibility-spec
+	 (if (or
+	      ;; Ignore all visibility spec in agenda
+	      (not (derived-mode-p 'org-mode))
+	      ;; Ignore bracket links elsewere
+	      (and (save-excursion
+		     (forward-line 0)
+		     (looking-at (concat "^.*" org-bracket-link-regexp)))
+		   (member '(org-link)
+			   buffer-invisibility-spec)))
+	     t
+	   buffer-invisibility-spec)))
     (if (featurep 'xemacs)
-	(org-xemacs-without-invisibility (move-to-column column force buffer))
+	(org-xemacs-without-invisibility
+	 (move-to-column column force buffer))
       (move-to-column column force))))
 
 (defun org-get-x-clipboard-compat (value)
