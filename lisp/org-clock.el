@@ -2712,8 +2712,9 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
 				     (match-string 2)))
 			   (org-make-org-heading-search-string
 				      (replace-regexp-in-string
-				       org-bracket-link-regexp
-				       "\\3"
+				       org-bracket-link-analytic-regexp
+				       (lambda (m) (or (match-string 3 m)
+						       (match-string 1 m)))
 				       (match-string 2)))))
 		    tsp (when timestamp
 			  (setq props (org-entry-properties (point)))
