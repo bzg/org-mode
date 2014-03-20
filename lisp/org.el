@@ -14403,6 +14403,7 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
 
 (defun org-align-tags-here (to-col)
   ;; Assumes that this is a headline
+  "Align tags on the current headline to TO-COL."
   (let ((pos (point)) (col (current-column)) ncol tags-l p)
     (beginning-of-line 1)
     (if	(and (looking-at (org-re ".*?\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"))
@@ -14421,7 +14422,7 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
 	  (insert (make-string (- ncol (current-column)) ?\ ))
 	  (setq ncol (current-column))
 	  (when indent-tabs-mode (tabify p (point-at-eol)))
-	  (org-move-to-column (min ncol col) t nil t))
+	  (org-move-to-column (min ncol col)))
       (goto-char pos))))
 
 (defun org-set-tags-command (&optional arg just-align)
@@ -14480,9 +14481,7 @@ If DATA is nil or the empty string, any tags will be removed."
 (defun org-set-tags (&optional arg just-align)
   "Set the tags for the current headline.
 With prefix ARG, realign all tags in headings in the current buffer.
-When JUST-ALIGN is non-nil, only align tags.
-When JUST-ALIGN is 'ignore-column, align tags without trying to set
-the column by ignoring invisible text."
+When JUST-ALIGN is non-nil, only align tags."
   (interactive "P")
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
       (let ((cl (if (eq org-loop-over-headlines-in-active-region 'start-level)
@@ -14579,7 +14578,7 @@ the column by ignoring invisible text."
 	  (and (not (featurep 'xemacs)) c0 indent-tabs-mode (tabify p0 (point)))
 	  tags)
 	 (t (error "Tags alignment failed")))
-	(org-move-to-column col nil nil (not (eq just-align 'ignore-column)))
+	(org-move-to-column col)
 	(unless just-align
 	  (run-hooks 'org-after-tags-change-hook))))))
 
