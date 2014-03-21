@@ -9281,7 +9281,7 @@ property to set."
 	   (save-excursion
 	     (org-back-to-heading t)
 	     (put-text-property
-	      (point-at-bol) (org-end-of-subtree t t) tprop p))))))))
+	      (point-at-bol) (outline-next-heading) tprop p))))))))
 
 
 ;;;; Link Stuff
