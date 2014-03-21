@@ -3973,6 +3973,7 @@ header, or they will be appended."
     (""     "wrapfig"   nil)
     (""     "rotating"  nil)
     ("normalem" "ulem"  t)
+    (""     "soul"      t)
     (""     "amsmath"   t)
     (""     "textcomp"  t)
     (""     "marvosym"  t)

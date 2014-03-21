@@ -605,7 +605,7 @@ When nil, no transformation is made."
 					 (code . verb)
 					 (italic . "\\emph{%s}")
 					 (strike-through . "\\sout{%s}")
-					 (underline . "\\uline{%s}")
+					 (underline . "\\ul{%s}")
 					 (verbatim . protectedtexttt))
   "Alist of LaTeX expressions to convert text markup.
 
