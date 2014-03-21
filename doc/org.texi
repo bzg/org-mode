@@ -10011,13 +10011,20 @@ You can define text snippets with
 #+MACRO: name   replacement text $1, $2 are arguments
 @end example
 
-@noindent which can be referenced in
-paragraphs, verse blocks, table cells and some keywords with
-@code{@{@{@{name(arg1,arg2)@}@}@}}@footnote{Since commas separate arguments,
+@noindent which can be referenced
+@code{@{@{@{name(arg1, arg2)@}@}@}}@footnote{Since commas separate arguments,
 commas within arguments have to be escaped with a backslash character.
 Conversely, backslash characters before a comma, and only them, need to be
-escaped with another backslash character.}.  In addition to user-defined
-macros, @code{@{@{@{title@}@}@}}, @code{@{@{@{author@}@}@}}, etc., will
+escaped with another backslash character.}.
+
+These references, called macros, can be inserted anywhere Org markup is
+recognized: paragraphs, headlines, verse and example blocks, tables cells,
+lists and comments.  They cannot be used within ordinary keywords (starting
+with @code{#+:}) but are allowed in @code{#+CAPTION}, @code{#+TITLE},
+@code{#+AUTHOR} and @code{#+EMAIL}.
+
+In addition to user-defined macros, a set of already defined macros can be
+used: @code{@{@{@{title@}@}@}}, @code{@{@{@{author@}@}@}}, etc., will
 reference information set by the @code{#+TITLE:}, @code{#+AUTHOR:}, and
 similar lines.  Also, @code{@{@{@{time(@var{FORMAT})@}@}@}} and
 @code{@{@{@{modification-time(@var{FORMAT})@}@}@}} refer to current date time
