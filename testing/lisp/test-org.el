@@ -546,6 +546,20 @@
 
 ;;; Links
 
+;;;; Coderefs
+
+(ert-deftest test-org/coderef ()
+  "Test coderef links specifications."
+  (should
+   (org-test-with-temp-text "
+#+BEGIN_SRC emacs-lisp
+\(+ 1 1)                  (ref:sc)
+#+END_SRC
+\[[(sc)]]"
+     (goto-char (point-max))
+     (org-open-at-point)
+     (looking-at "(ref:sc)"))))
+
 ;;;; Custom ID
 
 (ert-deftest test-org/custom-id ()
@@ -564,30 +578,36 @@
 
 (ert-deftest test-org/fuzzy-links ()
   "Test fuzzy links specifications."
-  ;; 1. Fuzzy link goes in priority to a matching target.
+  ;; Fuzzy link goes in priority to a matching target.
   (should
    (org-test-with-temp-text "#+NAME: Test\n|a|b|\n<<Test>>\n* Test\n[[Test]]"
      (goto-line 5)
      (org-open-at-point)
      (looking-at "<<Test>>")))
-  ;; 2. Then fuzzy link points to an element with a given name.
+  ;; Then fuzzy link points to an element with a given name.
   (should
    (org-test-with-temp-text "Test\n#+NAME: Test\n|a|b|\n* Test\n[[Test]]"
      (goto-line 5)
      (org-open-at-point)
      (looking-at "#\\+NAME: Test")))
-  ;; 3. A target still lead to a matching headline otherwise.
+  ;; A target still lead to a matching headline otherwise.
   (should
    (org-test-with-temp-text "* Head1\n* Head2\n*Head3\n[[Head2]]"
      (goto-line 4)
      (org-open-at-point)
      (looking-at "\\* Head2")))
-  ;; 4. With a leading star in link, enforce heading match.
+  ;; With a leading star in link, enforce heading match.
   (should
    (org-test-with-temp-text "* Test\n<<Test>>\n[[*Test]]"
      (goto-line 3)
      (org-open-at-point)
-     (looking-at "\\* Test"))))
+     (looking-at "\\* Test")))
+  ;; Correctly un-hexify fuzzy links.
+  (should
+   (org-test-with-temp-text "* With space\n[[*With%20space][With space]]"
+     (goto-char (point-max))
+     (org-open-at-point)
+     (bobp))))
 
 
 ;;;; Link Escaping
