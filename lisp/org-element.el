@@ -5803,9 +5803,16 @@ Providing it allows for quicker computation."
 		 ;; for each subsequent iteration in PARENT, always
 		 ;; compute it since we're beyond cache anyway.
 		 (unless next
-		   (let ((data (assq (point) cache)))
+		   (let* ((key
+			   ;; Increase key of objects contained in
+			   ;; table cells by one so they cannot get
+			   ;; the same key as the cell itself.
+			   (if (eq (org-element-type parent) 'table-cell)
+			       (1+ (point))
+			     (point)))
+			  (data (assq key cache)))
 		     (if data (setq candidates (nth 1 (setq objects-data data)))
-		       (push (setq objects-data (list (point) 'initial))
+		       (push (setq objects-data (list key 'initial))
 			     cache))))
 		 (when (or next (eq 'initial candidates))
 		   (setq candidates
