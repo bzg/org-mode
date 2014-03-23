@@ -6097,7 +6097,7 @@ The regular expression finds the targets also if there is a line break
 between words."
   (and targets
        (concat
-	"\\<\\("
+	"\\_<\\("
 	(mapconcat
 	 (lambda (x)
 	   (setq x (regexp-quote x))
@@ -6106,7 +6106,7 @@ between words."
 	   x)
 	 targets
 	 "\\|")
-	"\\)\\>")))
+	"\\)\\_>")))
 
 (defun org-activate-tags (limit)
   (if (re-search-forward (org-re "^\\*+.*[ \t]\\(:[[:alnum:]_@#%:]+:\\)[ \r\n]") limit t)
@@ -20262,13 +20262,15 @@ This command does many different things, depending on context:
 	  ;; When at a link, act according to the parent instead.
 	  (link (setq context (org-element-property :parent context))
 		(setq type (org-element-type context)))
-	  ;; Unsupported object types: check parent element instead.
+	  ;; Unsupported object types: refer to the first supported
+	  ;; element or object containing it.
 	  ((bold code entity export-snippet inline-babel-call inline-src-block
 		 italic latex-fragment line-break macro strike-through subscript
 		 superscript underline verbatim)
 	   (while (and (setq context (org-element-property :parent context))
 		       (not (memq (setq type (org-element-type context))
-				  '(paragraph verse-block table-cell)))))))
+				  '(radio-target paragraph verse-block
+						 table-cell)))))))
 	;; For convenience: at the first line of a paragraph on the
 	;; same line as an item, apply function on that item instead.
 	(when (eq type 'paragraph)

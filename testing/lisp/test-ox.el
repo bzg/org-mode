@@ -1858,6 +1858,15 @@ Another text. (ref:text)
        (org-export-resolve-radio-link
 	(org-element-map tree 'link 'identity info t)
 	info))))
+  ;; Radio target with objects at its beginning.
+  (should
+   (org-test-with-temp-text "<<<\\alpha radio>>> \\alpha radio"
+     (org-update-radio-target-regexp)
+     (let* ((tree (org-element-parse-buffer))
+	    (info `(:parse-tree ,tree)))
+       (org-export-resolve-radio-link
+	(org-element-map tree 'link 'identity info t)
+	info))))
   ;; Multiple radio targets.
   (should
    (equal '("radio1" "radio2")
