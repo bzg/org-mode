@@ -349,26 +349,18 @@ applications and inserting them in org documents"
 
 (defun org-as-mac-chrome-get-frontmost-url ()
   (let ((result (do-applescript
-                    (concat
-                     "set oldClipboard to the clipboard\n"
-                     "set frontmostApplication to path to frontmost application\n"
-                     "tell application \"Google Chrome\"\n"
-                     "	activate\n"
-                     "	delay 0.15\n"
-                     "	tell application \"System Events\"\n"
-                     "		keystroke \"l\" using command down\n"
-                     "		keystroke \"c\" using command down\n"
-                     "	end tell\n"
-                     "	delay 0.15\n"
-                     "	set theUrl to the clipboard\n"
-                     "	set the clipboard to oldClipboard\n"
-                     "	set theResult to (get theUrl) & \"::split::\" & (get name of window 1)\n"
-                     "end tell\n"
-                     "activate application (frontmostApplication as text)\n"
-                     "set links to {}\n"
-                     "copy theResult to the end of links\n"
-                     "return links as string\n"))))
-    (substring (car (split-string result "[\r\n]+" t)) 1 -1)))
+		 (concat
+                  "set frontmostApplication to path to frontmost application\n"
+                  "tell application \"Google Chrome\"\n"
+                  "	set theUrl to get URL of active tab of first window\n"
+                  "	set theResult to (get theUrl) & \"::split::\" & (get name of window 1)\n"
+                  "end tell\n"
+                  "activate application (frontmostApplication as text)\n"
+                  "set links to {}\n"
+                  "copy theResult to the end of links\n"
+                  "return links as string\n"))))
+    (replace-regexp-in-string "^\"\\|\"$" ""
+     (car (split-string result "[\r\n]+" t)))))
 
 (defun org-mac-chrome-get-frontmost-url ()
   (interactive)
