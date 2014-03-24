@@ -187,10 +187,10 @@ is not sufficient to know if point is at a paragraph ending.  See
   "List of recursive element types aka Greater Elements.")
 
 (defconst org-element-all-successors
-  '(export-snippet footnote-reference inline-babel-call inline-src-block
-		   latex-or-entity line-break link macro plain-link radio-target
-		   statistics-cookie sub/superscript table-cell target
-		   text-markup timestamp)
+  '(link export-snippet footnote-reference inline-babel-call
+	 inline-src-block latex-or-entity line-break macro plain-link
+	 radio-target statistics-cookie sub/superscript table-cell target
+	 text-markup timestamp)
   "Complete list of successors.")
 
 (defconst org-element-object-successor-alist
@@ -328,13 +328,13 @@ Don't modify it, set `org-element-affiliated-keywords' instead.")
       (paragraph ,@standard-set)
       ;; Remove any variable object from radio target as it would
       ;; prevent it from being properly recognized.
-      (radio-target latex-or-entity sub/superscript)
+      (radio-target latex-or-entity sub/superscript text-markup)
       (strike-through ,@standard-set)
       (subscript ,@standard-set)
       (superscript ,@standard-set)
       ;; Ignore inline babel call and inline src block as formulas are
       ;; possible.  Also ignore line breaks and statistics cookies.
-      (table-cell export-snippet footnote-reference latex-or-entity link macro
+      (table-cell link export-snippet footnote-reference latex-or-entity macro
 		  radio-target sub/superscript target text-markup timestamp)
       (table-row table-cell)
       (underline ,@standard-set)
@@ -346,7 +346,8 @@ a list of successors that will be called within an element or
 object of such type.
 
 For example, in a `radio-target' object, one can only find
-entities, latex-fragments, subscript and superscript.
+entities, latex-fragments, subscript, superscript and text
+markup.
 
 This alist also applies to secondary string.  For example, an
 `headline' type element doesn't directly contain objects, but
@@ -3060,7 +3061,9 @@ Assume point is at the beginning of the link."
        ((and org-target-link-regexp (looking-at org-target-link-regexp))
 	(setq type "radio"
 	      link-end (match-end 0)
-	      path (org-match-string-no-properties 0)))
+	      path (org-match-string-no-properties 0)
+	      contents-begin (match-beginning 0)
+	      contents-end (match-end 0)))
        ;; Type 2: Standard link, i.e. [[http://orgmode.org][homepage]]
        ((looking-at org-bracket-link-regexp)
 	(setq contents-begin (match-beginning 3)

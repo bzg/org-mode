@@ -329,9 +329,7 @@ a communication channel."
 	   (let ((ref (org-element-property :path link)))
 	     (format (org-export-get-coderef-format ref contents)
 		     (org-export-resolve-coderef ref info))))
-	  ((equal type "radio")
-	   (let ((destination (org-export-resolve-radio-link link info)))
-	     (org-export-data (org-element-contents destination) info)))
+	  ((equal type "radio") contents)
 	  ((equal type "fuzzy")
 	   (let ((destination (org-export-resolve-fuzzy-link link info)))
 	     (if (org-string-nw-p contents) contents
