@@ -158,7 +158,7 @@ may make them unreachable."
 			    "^[ \t]*#\\+BEGIN_SRC")))
 	(goto-char (point-min))
 	(while (re-search-forward regexp nil t)
-	  (unless (save-match-data (org-babel-under-commented-heading-p))
+	  (unless (save-match-data (org-in-commented-heading-p))
 	    (let* ((element (save-excursion
 			      ;; If match is inline, point is at its
 			      ;; end.  Move backward so

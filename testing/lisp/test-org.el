@@ -544,6 +544,38 @@
 
 
 
+;;; Headline
+
+(ert-deftest test-org/in-commented-heading-p ()
+  "Test `org-in-commented-heading-p' specifications."
+  ;; Commented headline.
+  (should
+   (org-test-with-temp-text "* COMMENT Headline\nBody"
+     (goto-char (point-max))
+     (org-in-commented-heading-p)))
+  ;; Commented ancestor.
+  (should
+   (org-test-with-temp-text "* COMMENT Headline\n** Level 2\nBody"
+     (goto-char (point-max))
+     (org-in-commented-heading-p)))
+  ;; Comment keyword is case-sensitive.
+  (should-not
+   (org-test-with-temp-text "* Comment Headline\nBody"
+     (goto-char (point-max))
+     (org-in-commented-heading-p)))
+  ;; Keyword is standalone.
+  (should-not
+   (org-test-with-temp-text "* COMMENTHeadline\nBody"
+     (goto-char (point-max))
+     (org-in-commented-heading-p)))
+  ;; Optional argument.
+  (should-not
+   (org-test-with-temp-text "* COMMENT Headline\n** Level 2\nBody"
+     (goto-char (point-max))
+     (org-in-commented-heading-p t))))
+
+
+
 ;;; Links
 
 ;;;; Coderefs
