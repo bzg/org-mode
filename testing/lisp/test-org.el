@@ -27,6 +27,64 @@
 
 ;;; Comments
 
+(ert-deftest test-org/toggle-comment ()
+  "Test `org-toggle-comment' specifications."
+  ;; Simple headline.
+  (should
+   (equal "* Test"
+	  (org-test-with-temp-text "* COMMENT Test"
+	    (org-toggle-comment)
+	    (buffer-string))))
+  (should
+   (equal "* COMMENT Test"
+	  (org-test-with-temp-text "* Test"
+	    (org-toggle-comment)
+	    (buffer-string))))
+  ;; Headline with a regular keyword.
+  (should
+   (equal "* TODO Test"
+	  (org-test-with-temp-text "* TODO COMMENT Test"
+	    (org-toggle-comment)
+	    (buffer-string))))
+  (should
+   (equal "* TODO COMMENT Test"
+	  (org-test-with-temp-text "* TODO Test"
+	    (org-toggle-comment)
+	    (buffer-string))))
+  ;; Empty headline.
+  (should
+   (equal "* "
+	  (org-test-with-temp-text "* COMMENT"
+	    (org-toggle-comment)
+	    (buffer-string))))
+  (should
+   (equal "* COMMENT"
+	  (org-test-with-temp-text "* "
+	    (org-toggle-comment)
+	    (buffer-string))))
+  ;; Headline with a single keyword.
+  (should
+   (equal "* TODO "
+	  (org-test-with-temp-text "* TODO COMMENT"
+	    (org-toggle-comment)
+	    (buffer-string))))
+  (should
+   (equal "* TODO COMMENT"
+	  (org-test-with-temp-text "* TODO"
+	    (org-toggle-comment)
+	    (buffer-string))))
+  ;; Headline with a keyword, a priority cookie and contents.
+  (should
+   (equal "* TODO [#A] Headline"
+	  (org-test-with-temp-text "* TODO [#A] COMMENT Headline"
+	    (org-toggle-comment)
+	    (buffer-string))))
+  (should
+   (equal "* TODO [#A] COMMENT Headline"
+	  (org-test-with-temp-text "* TODO [#A] Headline"
+	    (org-toggle-comment)
+	    (buffer-string)))))
+
 (ert-deftest test-org/comment-dwim ()
   "Test `comment-dwim' behaviour in an Org buffer."
   ;; No region selected, no comment on current line and line not

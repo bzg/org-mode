@@ -6357,9 +6357,11 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   ;; Code
 	   '(org-activate-code (1 'org-code t))
 	   ;; COMMENT
-	   (list (format org-heading-keyword-regexp-format
-			 (concat "\\(" org-comment-string "\\)"))
-		 '(2 'org-special-keyword t))
+	   (list (format
+		  "^\\*\\(?: +%s\\)?\\(?: +\\[#[A-Z0-9]\\]\\)? +\\(?9:%s\\)\\(?: \\|$\\)"
+		  org-todo-regexp
+		  org-comment-string)
+		 '(9 'org-special-keyword t))
 	   ;; Blocks and meta lines
 	   '(org-fontify-meta-lines-and-blocks))))
     (setq org-font-lock-extra-keywords (delq nil org-font-lock-extra-keywords))
@@ -12190,17 +12192,17 @@ expands them."
   (interactive)
   (save-excursion
     (org-back-to-heading)
-    (let (case-fold-search)
-      (cond
-       ((looking-at (format org-heading-keyword-regexp-format
-			    org-comment-string))
-	(goto-char (match-end 1))
-	(looking-at (concat " +" org-comment-string))
-	(replace-match "" t t)
-	(when (eolp) (insert " ")))
-       ((looking-at org-outline-regexp)
-	(goto-char (match-end 0))
-	(insert org-comment-string " "))))))
+    (looking-at org-complex-heading-regexp)
+    (goto-char (or (match-end 3) (match-end 2) (match-end 1)))
+    (skip-chars-forward " \t")
+    (unless (memq (char-before) '(?\s ?\t)) (insert " "))
+    (if (org-in-commented-heading-p t)
+	(delete-region (point)
+		       (progn (search-forward " " (line-end-position) 'move)
+			      (skip-chars-forward " \t")
+			      (point)))
+      (insert org-comment-string)
+      (unless (eolp) (insert " ")))))
 
 (defvar org-last-todo-state-is-todo nil
   "This is non-nil when the last TODO state change led to a TODO state.
@@ -12315,7 +12317,7 @@ When called through ELisp, arg is also interpreted in the following way:
       (save-excursion
 	(catch 'exit
 	  (org-back-to-heading t)
-	  (when (looking-at (concat "^\\*+ " org-comment-string))
+	  (when (org-in-commented-heading-p t)
 	    (org-toggle-comment)
 	    (setq commentp t))
 	  (if (looking-at org-outline-regexp) (goto-char (1- (match-end 0))))
@@ -18243,11 +18245,11 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		   (if (org-at-heading-p t)
 		       (add-text-properties (point-at-bol) (org-end-of-subtree t) pa))))
 	       (goto-char (point-min))
-	       (setq re (format org-heading-keyword-regexp-format
-				org-comment-string))
+	       (setq re (format "^\\* .*\\<%s\\>" org-comment-string))
 	       (while (re-search-forward re nil t)
-		 (add-text-properties
-		  (match-beginning 0) (org-end-of-subtree t) pc))))
+		 (when (save-match-data (org-in-commented-heading-p t))
+		   (add-text-properties
+		    (match-beginning 0) (org-end-of-subtree t) pc)))))
 	    (goto-char pos)))))
     (setq org-todo-keywords-for-agenda
           (org-uniquify org-todo-keywords-for-agenda))

@@ -1201,8 +1201,6 @@ containing the title row and all other rows.  Each row is a list
 of fields."
   (save-excursion
     (let* ((title (mapcar 'cadr org-columns-current-fmt-compiled))
-	   (re-comment (format org-heading-keyword-regexp-format
-			       org-comment-string))
 	   (re-archive (concat ".*:" org-archive-tag ":"))
 	   (n (length title)) row tbl)
       (goto-char (point-min))
@@ -1214,9 +1212,9 @@ of fields."
 				 (/ (1+ (length (match-string 1))) 2)
 			       (length (match-string 1)))))
 		     (get-char-property (match-beginning 0) 'org-columns-key))
-	    (when (save-excursion
-		    (goto-char (point-at-bol))
-		    (or (looking-at re-comment)
+	    (when (or (org-in-commented-heading-p t)
+		      (save-excursion
+			(beginning-of-line)
 			(looking-at re-archive)))
 	      (org-end-of-subtree t)
 	      (throw 'next t))
