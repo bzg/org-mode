@@ -1166,7 +1166,9 @@ Return output file name."
   ;; working directory and then moved to publishing directory.
   (org-publish-attachment
    plist
-   (org-latex-compile (org-publish-org-to 'beamer filename ".tex" plist))
+   (org-latex-compile
+    (org-publish-org-to
+     'beamer filename ".tex" plist (file-name-directory filename)))
    pub-dir))
 
 
