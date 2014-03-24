@@ -1842,9 +1842,9 @@ Use \\[org-clock-remove-overlays] to remove the subtree times."
 	(when org-remove-highlights-with-change
 	  (org-add-hook 'before-change-functions 'org-clock-remove-overlays
 			nil 'local))))
-      (message (concat "Total file time: "
-		       (org-minutes-to-clocksum-string org-clock-file-total-minutes)
-		       " (%d hours and %d minutes)") h m)))
+    (message (concat "Total file time: "
+		     (org-minutes-to-clocksum-string org-clock-file-total-minutes)
+		     " (%d hours and %d minutes)") h m)))
 
 (defvar org-clock-overlays nil)
 (make-variable-buffer-local 'org-clock-overlays)
@@ -2711,11 +2711,11 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
 				   (save-match-data
 				     (match-string 2)))
 			   (org-make-org-heading-search-string
-				      (replace-regexp-in-string
-				       org-bracket-link-analytic-regexp
-				       (lambda (m) (or (match-string 3 m)
-						       (match-string 1 m)))
-				       (match-string 2)))))
+			    (replace-regexp-in-string
+			     org-bracket-link-regexp
+			     (lambda (m) (or (match-string 3 m)
+					     (match-string 1 m)))
+			     (match-string 2)))))
 		    tsp (when timestamp
 			  (setq props (org-entry-properties (point)))
 			  (or (cdr (assoc "SCHEDULED" props))
