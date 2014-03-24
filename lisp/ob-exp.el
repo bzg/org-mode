@@ -37,6 +37,7 @@
 		  (start-re end-re &optional lim-up lim-down))
 (declare-function org-get-indentation "org" (&optional line))
 (declare-function org-heading-components "org" ())
+(declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
 (declare-function org-in-block-p "org" (names))
 (declare-function org-in-verbatim-emphasis "org" ())
 (declare-function org-link-search "org" (s &optional type avoid-pos stealth))
