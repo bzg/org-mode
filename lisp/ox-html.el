@@ -756,9 +756,10 @@ link's path."
 
 (defcustom org-html-htmlize-output-type 'inline-css
   "Output type to be used by htmlize when formatting code snippets.
-Choices are `css', to export the CSS selectors only, or `inline-css', to
-export the CSS attribute values inline in the HTML.  We use as default
-`inline-css', in order to make the resulting HTML self-containing.
+Choices are `css' to export the CSS selectors only,`inline-css'
+to export the CSS attribute values inline in the HTML or `nil' to
+export plain text.  We use as default `inline-css', in order to
+make the resulting HTML self-containing.
 
 However, this will fail when using Emacs in batch mode for export, because
 then no rich font definitions are in place.  It will also not be good if
@@ -771,7 +772,7 @@ all the faces you are interested in are defined, for example by loading files
 in all modes you want.  Then, use the command
 \\[org-html-htmlize-generate-css] to extract class definitions."
   :group 'org-export-html
-  :type '(choice (const css) (const inline-css)))
+  :type '(choice (const css) (const inline-css) (const nil)))
 
 (defcustom org-html-htmlize-font-prefix "org-"
   "The prefix for CSS class names for htmlize font specifications."
@@ -1892,6 +1893,10 @@ is the language used for CODE, as a string, or nil."
      ((not (and (require 'htmlize nil t) (fboundp 'htmlize-region-for-paste)))
       ;; Emit a warning.
       (message "Cannot fontify src block (htmlize.el >= 1.34 required)")
+      ;; Simple transcoding.
+      (org-html-encode-plain-text code))
+     ;; Case 3: plain text explicitly set
+     ((not org-html-htmlize-output-type)
       ;; Simple transcoding.
       (org-html-encode-plain-text code))
      (t
