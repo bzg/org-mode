@@ -1169,7 +1169,9 @@ the file including them will be republished as well."
 	  (let* ((element (org-element-at-point))
 		 (included-file
 		  (and (eq (org-element-type element) 'keyword)
-		       (org-string-nw-p (org-element-property :value element)))))
+		       (string-match "^\\(\".+?\"\\|\\S-+\\)"
+				     (org-element-property :value element))
+		       (org-match-string-no-properties (match-string 1)))))
 	    (when included-file
 	      (add-to-list 'included-files-ctime
 			   (org-publish-cache-ctime-of-src
