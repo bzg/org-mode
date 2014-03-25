@@ -109,8 +109,7 @@ will be added.  Returns the resulting property list."
 
 (defun org-plot-quote-tsv-field (s)
   "Quote field S for export to gnuplot."
-  (if (or (string-match org-table-number-regexp s)
-          (plist-get params :timeind)) s
+  (if (string-match org-table-number-regexp s) s
     (if (string-match org-ts-regexp3 s)
 	(org-plot-quote-timestamp-field s)
       (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"") "\""))))
@@ -313,9 +312,7 @@ line directly before or after the table."
 		 (when y-labels (plist-put params :ylabels y-labels)))))
       ;; check for timestamp ind column
       (let ((ind (- (plist-get params :ind) 1)))
-        (when (and (>= ind 0) (equal '2d (plist-get params :plot-type))
-                   (not (or (plist-get params :timeind)
-                            (plist-get params :textind))))
+	(when (and (>= ind 0) (equal '2d (plist-get params :plot-type)))
 	  (if (= (length
 		  (delq 0 (mapcar
 			   (lambda (el)
