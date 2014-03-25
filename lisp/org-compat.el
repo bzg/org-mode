@@ -347,18 +347,18 @@ Works on both Emacs and XEmacs."
   "Move to column COLUMN.
 Pass COLUMN and FORCE to `move-to-column'.
 Pass BUFFER to the XEmacs version of `move-to-column'."
-  (let ((buffer-invisibility-spec
-	 (if (or
-	      ;; Ignore all visibility spec in agenda
-	      (not (derived-mode-p 'org-mode))
-	      ;; Ignore bracket links elsewere
-	      (and (save-excursion
-		     (forward-line 0)
-		     (looking-at (concat "^.*" org-bracket-link-regexp)))
-		   (member '(org-link)
-			   buffer-invisibility-spec)))
-	     t
-	   buffer-invisibility-spec)))
+  (let* ((with-bracket-link
+	  (save-excursion
+	    (forward-line 0)
+	    (looking-at (concat "^.*" org-bracket-link-regexp))))
+	 (buffer-invisibility-spec
+	  (cond
+	   ((or (not (derived-mode-p 'org-mode))
+		(and with-bracket-link (org-invisible-p2)))
+	    (remove '(org-link) buffer-invisibility-spec))
+	   (with-bracket-link
+	    (remove t buffer-invisibility-spec))
+	   (t buffer-invisibility-spec))))
     (if (featurep 'xemacs)
 	(org-xemacs-without-invisibility
 	 (move-to-column column force buffer))
