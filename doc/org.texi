@@ -9842,6 +9842,7 @@ Here is an example
 @end example
 
 @cindex formatting source code, markup rules
+@vindex org-latex-listings
 If the example is source code from a programming language, or any other text
 that can be marked up by font-lock in Emacs, you can ask for the example to
 look like the fontified Emacs buffer@footnote{This works automatically for
@@ -11833,8 +11834,10 @@ that environment.
 @cindex source blocks, in @LaTeX{} export
 
 In addition to syntax defined in @ref{Literal examples}, names and captions
-(@pxref{Images and tables}), source blocks also accept a @code{:float}
-attribute.  You may set it to:
+(@pxref{Images and tables}), source blocks also accept two additional
+attributes: @code{:float} and @code{:options}.
+
+You may set the former to
 @itemize @minus
 @item
 @code{t}: if you want to make the source block a float.  It is the default
@@ -11851,6 +11854,21 @@ is provided.  It is useful for source code that may not fit in a single page.
 #+ATTR_LATEX: :float nil
 #+BEGIN_SRC emacs-lisp
 Code that may not fit in a single page.
+#+END_SRC
+@end example
+
+@vindex org-latex-listings-options
+@vindex org-latex-minted-options
+The latter allows to specify options relative to the package used to
+highlight code in the output (e.g., @code{listings}).  This is the local
+counterpart to @code{org-latex-listings-options} and
+@code{org-latex-minted-options} variables, which see.
+
+@example
+#+ATTR_LATEX: :options commentstyle=\bfseries
+#+BEGIN_SRC emacs-lisp
+  (defun Fib (n)                          ; Count rabbits.
+    (if (< n 2) n (+ (Fib (- n 1)) (Fib (- n 2)))))
 #+END_SRC
 @end example
 

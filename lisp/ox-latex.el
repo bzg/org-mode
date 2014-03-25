@@ -770,7 +770,13 @@ will typeset the code in a small size font with underlined, bold
 black keywords.
 
 Note that the same options will be applied to blocks of all
-languages."
+languages.  If you need block-specific options, you may use the
+following syntax:
+
+  #+ATTR_LATEX: :options key1=value1,key2=value2
+  #+BEGIN_SRC <LANG>
+  ...
+  #+END_SRC"
   :group 'org-export-latex
   :type '(repeat
 	  (list
@@ -817,7 +823,13 @@ will result in src blocks being exported with
 \\begin{minted}[bgcolor=bg,frame=lines]{<LANG>}
 
 as the start of the minted environment. Note that the same
-options will be applied to blocks of all languages."
+options will be applied to blocks of all languages.  If you need
+block-specific options, you may use the following syntax:
+
+  #+ATTR_LATEX: :options key1=value1,key2=value2
+  #+BEGIN_SRC <LANG>
+  ...
+  #+END_SRC"
   :group 'org-export-latex
   :type '(repeat
 	  (list
@@ -2279,14 +2291,17 @@ contextual information."
 		(format
 		 "\\begin{minted}[%s]{%s}\n%s\\end{minted}"
 		 ;; Options.
-		 (org-latex--make-option-string
-		  (if (or (not num-start)
-			  (assoc "linenos" org-latex-minted-options))
-		      org-latex-minted-options
-		    (append
-		     `(("linenos")
-		       ("firstnumber" ,(number-to-string (1+ num-start))))
-		     org-latex-minted-options)))
+		 (concat
+		  (org-latex--make-option-string
+		   (if (or (not num-start)
+			   (assoc "linenos" org-latex-minted-options))
+		       org-latex-minted-options
+		     (append
+		      `(("linenos")
+			("firstnumber" ,(number-to-string (1+ num-start))))
+		      org-latex-minted-options)))
+		  (let ((local-options (plist-get attributes :options)))
+		    (and local-options (concat "," local-options))))
 		 ;; Language.
 		 (or (cadr (assq (intern lang) org-latex-minted-langs)) lang)
 		 ;; Source code.
@@ -2328,23 +2343,26 @@ contextual information."
 	   ;; Options.
 	   (format
 	    "\\lstset{%s}\n"
-	    (org-latex--make-option-string
-	     (append
-	      org-latex-listings-options
-	      (cond
-	       ((and (not float) (plist-member attributes :float)) nil)
-	       ((string= "multicolumn" float) '(("float" "*")))
-	       ((and float (not (assoc "float" org-latex-listings-options)))
-		`(("float" ,org-latex-default-figure-position))))
-	      `(("language" ,lst-lang))
-	      (when label `(("label" ,label)))
-	      (when caption-str `(("caption" ,caption-str)))
-	      (cond ((assoc "numbers" org-latex-listings-options) nil)
-		    ((not num-start) '(("numbers" "none")))
-		    ((zerop num-start) '(("numbers" "left")))
-		    (t `(("numbers" "left")
-			 ("firstnumber"
-			  ,(number-to-string (1+ num-start)))))))))
+	    (concat
+	     (org-latex--make-option-string
+	      (append
+	       org-latex-listings-options
+	       (cond
+		((and (not float) (plist-member attributes :float)) nil)
+		((string= "multicolumn" float) '(("float" "*")))
+		((and float (not (assoc "float" org-latex-listings-options)))
+		 `(("float" ,org-latex-default-figure-position))))
+	       `(("language" ,lst-lang))
+	       (when label `(("label" ,label)))
+	       (when caption-str `(("caption" ,caption-str)))
+	       (cond ((assoc "numbers" org-latex-listings-options) nil)
+		     ((not num-start) '(("numbers" "none")))
+		     ((zerop num-start) '(("numbers" "left")))
+		     (t `(("numbers" "left")
+			  ("firstnumber"
+			   ,(number-to-string (1+ num-start))))))))
+	     (let ((local-options (plist-get attributes :options)))
+	       (and local-options (concat "," local-options)))))
 	   ;; Source code.
 	   (format
 	    "\\begin{lstlisting}\n%s\\end{lstlisting}"
