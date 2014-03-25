@@ -9192,8 +9192,8 @@ Called with a universal prefix arg, show the priority instead of setting it."
              (1- (point)) (point-at-eol)
 	     (list 'display (org-add-props stamp nil
 			      'face 'secondary-selection))))
-	  (move-beginning-of-line 1))
-	(move-beginning-of-line 0)))))
+	  (beginning-of-line 1))
+	(beginning-of-line 0)))))
 
 (defun org-agenda-date-prompt (arg)
   "Change the date of this item.  Date is prompted for, with default today.
