@@ -1171,7 +1171,7 @@ the file including them will be republished as well."
 		  (and (eq (org-element-type element) 'keyword)
 		       (string-match "^\\(\".+?\"\\|\\S-+\\)"
 				     (org-element-property :value element))
-		       (match-string 1))))
+		       (org-remove-double-quotes (match-string 1)))))
 	    (when included-file
 	      (add-to-list 'included-files-ctime
 			   (org-publish-cache-ctime-of-src
