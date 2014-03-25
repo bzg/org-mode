@@ -6179,17 +6179,13 @@ targets."
 The regular expression finds the targets also if there is a line break
 between words."
   (and targets
-       (concat
-	"\\_<\\("
-	(mapconcat
-	 (lambda (x)
-	   (setq x (regexp-quote x))
-	   (while (string-match " +" x)
-	     (setq x (replace-match "\\s-+" t t x)))
-	   x)
-	 targets
-	 "\\|")
-	"\\)\\_>")))
+       (concat "\\("
+	       (mapconcat
+		(lambda (x)
+		  (replace-regexp-in-string " +" "\\s-+" (regexp-quote x) t t))
+		targets
+		"\\|")
+	       "\\)")))
 
 (defun org-activate-tags (limit)
   (if (re-search-forward (org-re "^\\*+.*[ \t]\\(:[[:alnum:]_@#%:]+:\\)[ \r\n]") limit t)

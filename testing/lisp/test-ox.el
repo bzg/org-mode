@@ -2042,6 +2042,15 @@ Another text. (ref:text)
        (org-export-resolve-radio-link
 	(org-element-map tree 'link 'identity info t)
 	info))))
+  ;; Radio link next to an apostrophe.
+  (should
+   (org-test-with-temp-text "<<<radio>>> radio's"
+     (org-update-radio-target-regexp)
+     (let* ((tree (org-element-parse-buffer))
+	    (info `(:parse-tree ,tree)))
+       (org-export-resolve-radio-link
+	(org-element-map tree 'link 'identity info t)
+	info))))
   ;; Multiple radio targets.
   (should
    (equal '("radio1" "radio2")
