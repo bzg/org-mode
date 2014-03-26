@@ -360,6 +360,8 @@ Value is a format string, which can contain the following placeholders:
 
 Set it to the empty string to ignore the command completely."
   :group 'org-export-latex
+  :version "24.5"
+  :package-version '(Org . "8.3")
   :type 'string)
 
 ;;;; Headline
