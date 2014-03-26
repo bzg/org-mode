@@ -850,7 +850,48 @@ body\n")))
        org-test-dir)
     (org-export-expand-include-keyword)
     (should (equal (buffer-string)
-		   "#+BEGIN_SRC emacs-lisp\n(+ 2 1)\n#+END_SRC\n"))))
+		   "#+BEGIN_SRC emacs-lisp\n(+ 2 1)\n#+END_SRC\n")))
+  ;; Footnotes labels are local to each included file.
+  (should
+   (= 6
+      (length
+       (delete-dups
+	(let ((contents "
+Footnotes[fn:1], [fn:test] and [fn:inline:anonymous footnote].
+\[fn:1] Footnote 1
+\[fn:test] Footnote \"test\""))
+	  (org-test-with-temp-text-in-file contents
+	    (let ((file1 (buffer-file-name)))
+	      (org-test-with-temp-text-in-file contents
+		(let ((file2 (buffer-file-name)))
+		  (org-test-with-temp-text
+		      (format "#+INCLUDE: \"%s\"\n#+INCLUDE: \"%s\""
+			      file1 file2)
+		    (org-export-expand-include-keyword)
+		    (let (unique-labels)
+		      (org-element-map (org-element-parse-buffer)
+			  'footnote-reference
+			(lambda (ref)
+			  (org-element-property :label ref))))))))))))))
+  ;; Footnotes labels are not local to each include keyword.
+  (should
+   (= 3
+      (length
+       (delete-dups
+	(let ((contents "
+Footnotes[fn:1], [fn:test] and [fn:inline:anonymous footnote].
+\[fn:1] Footnote 1
+\[fn:test] Footnote \"test\""))
+	  (org-test-with-temp-text-in-file contents
+	    (let ((file (buffer-file-name)))
+	      (org-test-with-temp-text
+		  (format "#+INCLUDE: \"%s\"\n#+INCLUDE: \"%s\"" file file)
+		(org-export-expand-include-keyword)
+		(let (unique-labels)
+		  (org-element-map (org-element-parse-buffer)
+		      'footnote-reference
+		    (lambda (ref)
+		      (org-element-property :label ref)))))))))))))
 
 (ert-deftest test-org-export/expand-macro ()
   "Test macro expansion in an Org buffer."

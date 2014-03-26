@@ -3279,7 +3279,9 @@ with their line restriction, when appropriate.  It is used to
 avoid infinite recursion.  Optional argument DIR is the current
 working directory.  It is used to properly resolve relative
 paths."
-  (let ((case-fold-search t))
+  (let ((case-fold-search t)
+	(file-prefix (make-hash-table :test #'equal))
+	(current-prefix 0))
     (goto-char (point-min))
     (while (re-search-forward "^[ \t]*#\\+INCLUDE:" nil t)
       (let ((element (save-match-data (org-element-at-point))))
@@ -3349,13 +3351,16 @@ paths."
 		 (with-temp-buffer
 		   (let ((org-inhibit-startup t)) (org-mode))
 		   (insert
-		    (org-export--prepare-file-contents file lines ind minlevel))
+		    (org-export--prepare-file-contents
+		     file lines ind minlevel
+		     (or (gethash file file-prefix)
+			 (puthash file (incf current-prefix) file-prefix))))
 		   (org-export-expand-include-keyword
 		    (cons (list file lines) included)
 		    (file-name-directory file))
 		   (buffer-string)))))))))))))
 
-(defun org-export--prepare-file-contents (file &optional lines ind minlevel)
+(defun org-export--prepare-file-contents (file &optional lines ind minlevel id)
   "Prepare the contents of FILE for inclusion and return them as a string.
 
 When optional argument LINES is a string specifying a range of
@@ -3369,7 +3374,12 @@ headline encountered.
 
 Optional argument MINLEVEL, when non-nil, is an integer
 specifying the level that any top-level headline in the included
-file should have."
+file should have.
+
+Optional argument ID is an integer that will be inserted before
+each footnote definition and reference if FILE is an Org file.
+This is useful to avoid conflicts when more than one Org file
+with footnotes is included in a document."
   (with-temp-buffer
     (insert-file-contents file)
     (when lines
@@ -3428,6 +3438,21 @@ file should have."
 	       (org-map-entries
 		(lambda () (if (< offset 0) (delete-char (abs offset))
 			(insert (make-string offset ?*)))))))))))
+    ;; Append ID to all footnote references and definitions, so they
+    ;; become file specific and cannot collide with footnotes in other
+    ;; included files.
+    (goto-char (point-min))
+    (while (re-search-forward org-footnote-re nil t)
+      (let ((reference (org-element-context)))
+	(when (memq (org-element-type reference)
+		    '(footnote-reference footnote-definition))
+	  (goto-char (org-element-property :begin reference))
+	  (forward-char)
+	  (let ((label (org-element-property :label reference)))
+	    (cond ((not label))
+		  ((org-string-match-p "\\`[0-9]+\\'" label)
+		   (insert (format "fn:%d-" id)))
+		  (t (forward-char 3) (insert (format "%d-" id))))))))
     (org-element-normalize-string (buffer-string))))
 
 (defun org-export-execute-babel-code ()
