@@ -4621,12 +4621,12 @@ with `org-element--cache-compare'.  This cache is used in
 Key is an element, as returned by `org-element-at-point', and
 value is an alist where each association is:
 
-  \(POS CANDIDATES . OBJECTS)
+  \(POS COMPLETEP . OBJECTS)
 
-where POS is a buffer position, CANDIDATES is the last know list
-of successors (see `org-element--get-next-object-candidates') in
-container starting at POS and OBJECTS is a list of objects known
-to live within that container, from farthest to closest.
+where POS is a buffer position, COMPLETEP is a boolean non-nil
+when all objects at this level are already in cache and OBJECTS
+is a list of objects known to live within that container, from
+farthest to closest.
 
 In the following example, \\alpha, bold object and \\beta start
 at, respectively, positions 1, 7 and 8,
@@ -4635,12 +4635,12 @@ at, respectively, positions 1, 7 and 8,
 
 If the paragraph is completely parsed, OBJECTS-DATA will be
 
-  \((1 nil BOLD-OBJECT ENTITY-OBJECT)
-   \(8 nil ENTITY-OBJECT))
+  \((1 t BOLD-OBJECT ENTITY-OBJECT)
+   \(8 t ENTITY-OBJECT))
 
 whereas in a partially parsed paragraph, it could be
 
-  \((1 ((entity . 1) (bold . 7)) ENTITY-OBJECT))
+  \((1 nil ENTITY-OBJECT))
 
 This cache is used in `org-element-context'.")
 
