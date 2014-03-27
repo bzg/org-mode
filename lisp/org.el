@@ -23311,9 +23311,8 @@ unless optional argument NO-INHERITANCE is non-nil."
 	     (org-string-match-p (concat "^" org-comment-string "\\(?: \\|$\\)")
 				 headline)))))
    (no-inheritance nil)
-   (t (save-excursion
-	(and (org-up-heading-safe)
-	     (org-in-commented-heading-p t))))))
+   (t
+    (save-excursion (and (org-up-heading-safe) (org-in-commented-heading-p))))))
 
 (defun org-at-comment-p nil
   "Is cursor in a line starting with a # character?"
