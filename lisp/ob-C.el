@@ -264,7 +264,7 @@ FORMAT can be either a format string or a function which is called with VAL."
 	   (when (and type (not (string= type-name tmp-type-name)))
 	     (if (and (member type-name '("int" "double" "int32_t"))
 		      (member tmp-type-name '("int" "double" "int32_t")))
-		 (setq tmp-type '("double" "" "%f"))
+		 (setq tmp-type '("double" "%f"))
 	       (error "Only homogeneous lists are supported by C.  You can not mix %s and %s"
 		      type-name
 		      tmp-type-name)))
