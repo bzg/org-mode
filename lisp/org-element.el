@@ -4147,7 +4147,8 @@ Elements are accumulated into ACC."
 		"\\(?:[_^][-{(*+.,[:alnum:]]\\)"
 		;; Bold, code, italic, strike-through, underline and
 		;; verbatim.
-		"[*~=+_/][^- \t.,:!?;'\"]"
+		(concat "[*~=+_/]"
+			(format "[^%s]" (nth 2 org-emphasis-regexp-components)))
 		;; Plain links.
 		(concat "\\<" link-types ":")
 		;; Objects starting with "[": regular link, footnote
