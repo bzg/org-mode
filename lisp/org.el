@@ -5594,34 +5594,29 @@ stacked delimiters is N.  Escaping delimiters is not possible."
   "Update the link regular expressions.
 This should be called after the variable `org-link-types' has changed."
   (setq org-link-types-re
-	(concat
-	 "\\`\\(" (mapconcat 'regexp-quote org-link-types "\\|") "\\):")
+	(concat "\\`" (regexp-opt org-link-types t) ":\\(?://\\)")
 	org-link-re-with-space
-	(concat
-	 "<?\\(" (mapconcat 'regexp-quote org-link-types "\\|") "\\):"
-	 "\\([^" org-non-link-chars " ]"
-	 "[^" org-non-link-chars "]*"
-	 "[^" org-non-link-chars " ]\\)>?")
+	(concat "<?" (regexp-opt org-link-types t) ":\\(?://\\)"
+		"\\([^" org-non-link-chars " ]"
+		"[^" org-non-link-chars "]*"
+		"[^" org-non-link-chars " ]\\)>?")
 	org-link-re-with-space2
-	(concat
-	 "<?\\(" (mapconcat 'regexp-quote org-link-types "\\|") "\\):"
-	 "\\([^" org-non-link-chars " ]"
-	 "[^\t\n\r]*"
-	 "[^" org-non-link-chars " ]\\)>?")
+	(concat "<?" (regexp-opt org-link-types t) ":\\(?://\\)?"
+		"\\([^" org-non-link-chars " ]"
+		"[^\t\n\r]*"
+		"[^" org-non-link-chars " ]\\)>?")
 	org-link-re-with-space3
-	(concat
-	 "<?\\(" (mapconcat 'regexp-quote org-link-types "\\|") "\\):"
-	 "\\([^" org-non-link-chars " ]"
-	 "[^\t\n\r]*\\)")
+	(concat "<?" (regexp-opt org-link-types t) ":\\(?://\\)?"
+		"\\([^" org-non-link-chars " ]"
+		"[^\t\n\r]*\\)")
 	org-angle-link-re
-	(concat
-	 "<\\(" (mapconcat 'regexp-quote org-link-types "\\|") "\\):"
-	 "\\([^" org-non-link-chars " ]"
-	 "[^" org-non-link-chars "]*"
-	 "\\)>")
+	(concat "<" (regexp-opt org-link-types t) ":\\(?://\\)?"
+		"\\([^" org-non-link-chars " ]"
+		"[^" org-non-link-chars "]*"
+		"\\)>")
 	org-plain-link-re
 	(concat
-	 "\\<\\(" (mapconcat 'regexp-quote org-link-types "\\|") "\\):"
+	 "\\<" (regexp-opt org-link-types t) ":\\(?://\\)?"
 	 (org-re "\\([^ \t\n()<>]+\\(?:([[:word:]0-9_]+)\\|\\([^[:punct:] \t\n]\\|/\\)\\)\\)"))
 	;;	 "\\([^]\t\n\r<>() ]+[^]\t\n\r<>,.;() ]\\)")
 	org-bracket-link-regexp
@@ -5629,7 +5624,7 @@ This should be called after the variable `org-link-types' has changed."
 	org-bracket-link-analytic-regexp
 	(concat
 	 "\\[\\["
-	 "\\(\\(" (mapconcat 'regexp-quote org-link-types "\\|") "\\):\\)?"
+	 "\\(" (regexp-opt org-link-types t) ":\\(?://\\)?\\)?"
 	 "\\([^]]+\\)"
 	 "\\]"
 	 "\\(\\[" "\\([^]]+\\)" "\\]\\)?"
@@ -5637,7 +5632,7 @@ This should be called after the variable `org-link-types' has changed."
 	org-bracket-link-analytic-regexp++
 	(concat
 	 "\\[\\["
-	 "\\(\\(" (mapconcat 'regexp-quote (cons "coderef" org-link-types) "\\|") "\\):\\)?"
+	 "\\(" (regexp-opt (cons "coderef" org-link-types) t) ":\\(?://\\)?\\)?"
 	 "\\([^]]+\\)"
 	 "\\]"
 	 "\\(\\[" "\\([^]]+\\)" "\\]\\)?"
