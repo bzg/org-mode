@@ -1502,7 +1502,7 @@ original parsed data.  INFO is a plist holding export options."
 	      (email (and (plist-get info :with-email) email)))
 	 (concat
 	  ;; Title.
-	  (when title
+	  (when (org-string-nw-p title)
 	    (concat
 	     (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
 		     "OrgTitle" (format "\n<text:title>%s</text:title>" title))
