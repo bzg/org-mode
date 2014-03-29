@@ -690,7 +690,17 @@ Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
 		(template . (lambda (c i) (org-export-data
 				      (plist-get i :title) i)))
 		(section . (lambda (s c i) c))))
-	     nil nil nil '(:with-sub-superscript nil))))))
+	     nil nil nil '(:with-sub-superscript nil)))))
+  ;; Special case: multiples uninterpreted objects in a row.
+  (should
+   (equal "a_b_c_d\n"
+	  (org-test-with-temp-text "a_b_c_d"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders '((subscript . (lambda (s c i) "dummy"))
+			     (paragraph . (lambda (p c i) c))
+			     (section . (lambda (s c i) c))))
+	     nil nil nil '(:with-sub-superscript {}))))))
 
 (ert-deftest test-org-export/export-scope ()
   "Test all export scopes."

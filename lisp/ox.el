@@ -2379,8 +2379,8 @@ returned by the function."
 				       ?\s)))))))))))
 	  (when new
 	    ;; Splice NEW at BLOB location in parse tree.
-	    (dolist (e new) (org-element-insert-before e blob))
-	    (org-element-extract-element blob))))
+	    (dolist (e new (org-element-extract-element blob))
+	      (unless (string= e "") (org-element-insert-before e blob))))))
     info)
   ;; Return modified parse tree.
   data)
