@@ -15976,10 +15976,6 @@ The global version of this variable is
 @item #+FILETAGS: :tag1:tag2:tag3:
 Set tags that can be inherited by any entry in the file, including the
 top-level entries.
-@item #+DRAWERS: NAME1 ...
-@vindex org-drawers
-Set the file-local set of additional drawers.  The corresponding global
-variable is @code{org-drawers}.
 @item #+LINK: linkword replace
 @vindex org-link-abbrev-alist
 These lines (several are allowed) specify link abbreviations.
