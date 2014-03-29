@@ -942,19 +942,20 @@ logfiles to remove, set `org-latex-logfiles-extensions'."
   :group 'org-export-latex
   :type 'boolean)
 
-(defcustom org-latex-known-errors
-  '(("Reference.*?undefined" .  "[undefined reference]")
-    ("Citation.*?undefined" .  "[undefined citation]")
-    ("Undefined control sequence" .  "[undefined control sequence]")
-    ("^! LaTeX.*?Error" .  "[LaTeX error]")
-    ("^! Package.*?Error" .  "[package error]")
-    ("Runaway argument" .  "Runaway argument"))
+(defcustom org-latex-known-warnings
+  '(("Reference.*?undefined" . "[undefined reference]")
+    ("Runaway argument" . "[runaway argument]")
+    ("Underfull \\hbox" . "[underfull hbox]")
+    ("Overfull \\hbox" . "[overfull hbox]")
+    ("Citation.*?undefined" . "[undefined citation]")
+    ("Undefined control sequence" . "[undefined control sequence]"))
   "Alist of regular expressions and associated messages for the user.
-The regular expressions are used to find possible errors in the
-log of a latex-run."
+The regular expressions are used to find possible warnings in the
+log of a latex-run.  These warnings will be reported after
+calling `org-latex-compile'."
   :group 'org-export-latex
-  :version "24.4"
-  :package-version '(Org . "8.0")
+  :version "24.5"
+  :package-version '(Org . "8.3")
   :type '(repeat
 	  (cons
 	   (string :tag "Regexp")
@@ -3033,7 +3034,8 @@ Return PDF file name or an error if it couldn't be produced."
 	 (default-directory (if (file-name-absolute-p texfile)
 				(file-name-directory full-name)
 			      default-directory))
-	 errors)
+	 (time (current-time))
+	 warnings)
     (unless snippet (message (format "Processing LaTeX file %s..." texfile)))
     (save-window-excursion
       (cond
@@ -3058,14 +3060,15 @@ Return PDF file name or an error if it couldn't be produced."
 	      outbuf))
 	   org-latex-pdf-process)
 	  ;; Collect standard errors from output buffer.
-	  (setq errors (and (not snippet) (org-latex--collect-errors outbuf)))))
+	  (setq warnings (and (not snippet)
+			      (org-latex--collect-warnings outbuf)))))
        (t (error "No valid command to process to PDF")))
       (let ((pdffile (concat out-dir base-name ".pdf")))
 	;; Check for process failure.  Provide collected errors if
 	;; possible.
-	(if (not (file-exists-p pdffile))
-	    (error (concat (format "PDF file %s wasn't produced" pdffile)
-			   (when errors (concat ": " errors))))
+	(if (or (not (file-exists-p pdffile))
+		(time-less-p (nth 5 (file-attributes pdffile)) time))
+	    (error (format "PDF file %s wasn't produced" pdffile))
 	  ;; Else remove log files, when specified, and signal end of
 	  ;; process to user, along with any error encountered.
 	  (when (and (not snippet) org-latex-remove-logfiles)
@@ -3076,29 +3079,31 @@ Return PDF file name or an error if it couldn't be produced."
 				   "\\."
 				   (regexp-opt org-latex-logfiles-extensions))))
 	      (delete-file file)))
-	  (message (concat "Process completed"
-			   (if (not errors) "."
-			     (concat " with errors: " errors)))))
+	  (message (concat "PDF file produced"
+			   (cond
+			    ((eq warnings 'error) " with errors.")
+			    (warnings (concat " with warnings: " warnings))
+			    (t ".")))))
 	;; Return output file name.
 	pdffile))))
 
-(defun org-latex--collect-errors (buffer)
-  "Collect some kind of errors from \"pdflatex\" command output.
-
-BUFFER is the buffer containing output.
-
-Return collected error types as a string, or nil if there was
-none."
+(defun org-latex--collect-warnings (buffer)
+  "Collect some warnings from \"pdflatex\" command output.
+BUFFER is the buffer containing output.  Return collected
+warnings types as a string, `error' if a LaTeX error was
+encountered or nil if there was none."
   (with-current-buffer buffer
     (save-excursion
       (goto-char (point-max))
       (when (re-search-backward "^[ \t]*This is .*?TeX.*?Version" nil t)
-	(let ((case-fold-search t)
-	      (errors ""))
-	  (dolist (latex-error org-latex-known-errors)
-	    (when (save-excursion (re-search-forward (car latex-error) nil t))
-	      (setq errors (concat errors " " (cdr latex-error)))))
-	  (and (org-string-nw-p errors) (org-trim errors)))))))
+	(if (re-search-forward "^!" nil t) 'error
+	  (let ((case-fold-search t)
+		(warnings ""))
+	    (dolist (warning org-latex-known-warnings)
+	      (save-excursion
+		(when (save-excursion (re-search-forward (car warning) nil t))
+		  (setq warnings (concat warnings " " (cdr warning))))))
+	    (and (org-string-nw-p warnings) (org-trim warnings))))))))
 
 ;;;###autoload
 (defun org-latex-publish-to-latex (plist filename pub-dir)
