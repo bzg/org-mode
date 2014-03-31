@@ -4622,26 +4622,26 @@ with `org-element--cache-compare'.  This cache is used in
 Key is an element, as returned by `org-element-at-point', and
 value is an alist where each association is:
 
-  \(POS COMPLETEP . OBJECTS)
+  \(PARENT COMPLETEP . OBJECTS)
 
-where POS is a buffer position, COMPLETEP is a boolean non-nil
-when all objects at this level are already in cache and OBJECTS
-is a list of objects known to live within that container, from
-farthest to closest.
+where PARENT is an element or object, COMPLETEP is a boolean,
+non-nil when all direct children of parent are already cached and
+OBJECTS is a list of such children, as objects, from farthest to
+closest.
 
-In the following example, \\alpha, bold object and \\beta start
-at, respectively, positions 1, 7 and 8,
+In the following example, \\alpha, bold object and \\beta are
+contained within a paragraph
 
   \\alpha *\\beta*
 
 If the paragraph is completely parsed, OBJECTS-DATA will be
 
-  \((1 t BOLD-OBJECT ENTITY-OBJECT)
-   \(8 t ENTITY-OBJECT))
+  \((PARAGRAPH t BOLD-OBJECT ENTITY-OBJECT)
+   \(BOLD-OBJECT t ENTITY-OBJECT))
 
 whereas in a partially parsed paragraph, it could be
 
-  \((1 nil ENTITY-OBJECT))
+  \((PARAGRAPH nil ENTITY-OBJECT))
 
 This cache is used in `org-element-context'.")
 
@@ -5696,16 +5696,9 @@ Providing it allows for quicker computation."
 		 ;; of objects within known so far.  Store it in
 		 ;; OBJECT-DATA.
 		 (unless next
-		   (let* ((key
-			   ;; Increase key of objects contained in
-			   ;; table cells by one so they cannot get
-			   ;; the same key as the cell itself.
-			   (if (eq (org-element-type parent) 'table-cell)
-			       (1+ (point))
-			     (point)))
-			  (data (assq key cache)))
+		   (let ((data (assq parent cache)))
 		     (if data (setq object-data data)
-		       (push (setq object-data (list key nil)) cache))))
+		       (push (setq object-data (list parent nil)) cache))))
 		 ;; Find NEXT object for analysis.
 		 (catch 'found
 		   ;; If NEXT is non-nil, we already exhausted the
