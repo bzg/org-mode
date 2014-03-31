@@ -95,7 +95,9 @@
 	((member "verbatim" result-params) raw)
 	((member "output" result-params) output)
 	(t raw))
-       (org-babel-ocaml-parse-output value type))
+       (if (and value type)
+	   (org-babel-ocaml-parse-output value type)
+	 raw))
      (org-babel-pick-name
       (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
      (org-babel-pick-name
