@@ -5175,7 +5175,6 @@ t otherwise."
 		(org-element--cache-shift-positions data offset)
 		;; Shift associated objects data, if any.
 		(dolist (object-data (gethash data org-element--cache-objects))
-		  (incf (car object-data) offset)
 		  (dolist (object (cddr object-data))
 		    (org-element--cache-shift-positions object offset))))
 	      (let ((begin (org-element-property :begin data)))
