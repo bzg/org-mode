@@ -159,7 +159,7 @@ channel."
   (replace-regexp-in-string
    "^" "    "
    (org-remove-indentation
-    (org-element-property :value example-block))))
+    (org-export-format-code-default example-block info))))
 
 (defun org-md-export-block (export-block contents info)
   "Transcode a EXPORT-BLOCK element from Org to Markdown.
