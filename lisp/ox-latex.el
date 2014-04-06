@@ -1476,7 +1476,7 @@ contextual information."
       (let* ((org-lang (org-element-property :language inline-src-block))
 	     (mint-lang (or (cadr (assq (intern org-lang)
 					org-latex-minted-langs))
-			    org-lang))
+			    (downcase org-lang)))
 	     (options (org-latex--make-option-string
 		       org-latex-minted-options)))
 	(concat (format "\\mint%s{%s}"
@@ -2116,7 +2116,8 @@ contextual information."
 		       ("firstnumber" ,(number-to-string (1+ num-start))))
 		     org-latex-minted-options)))
 		 ;; Language.
-		 (or (cadr (assq (intern lang) org-latex-minted-langs)) lang)
+		 (or (cadr (assq (intern lang) org-latex-minted-langs))
+		     (downcase lang))
 		 ;; Source code.
 		 (let* ((code-info (org-export-unravel-code src-block))
 			(max-width
