@@ -1801,6 +1801,7 @@ used as a communication channel."
 	 (float (let ((float (plist-get attr :float)))
 		  (cond ((and (not float) (plist-member attr :float)) nil)
 			((string= float "wrap") 'wrap)
+			((string= float "sideways") 'sideways)
 			((string= float "multicolumn") 'multicolumn)
 			((or float
 			     (org-element-property :caption parent)
@@ -1876,6 +1877,10 @@ used as a communication channel."
 \\centering
 %s%s
 %s\\end{wrapfigure}" placement comment-include image-code caption))
+      (sideways (format "\\begin{sidewaysfigure}
+\\centering
+%s%s
+%s\\end{sidewaysfigure}" comment-include image-code caption))
       (multicolumn (format "\\begin{figure*}%s
 \\centering
 %s%s
@@ -2547,7 +2552,8 @@ This function assumes TABLE has `org' as its `:type' property and
 		      (let ((float (plist-get attr :float)))
 			(cond
 			 ((and (not float) (plist-member attr :float)) nil)
-			 ((string= float "sidewaystable") "sidewaystable")
+			 ((or (string= float "sidewaystable")
+			      (string= float "sideways")) "sidewaystable")
 			 ((string= float "multicolumn") "table*")
 			 ((or float
 			      (org-element-property :caption table)

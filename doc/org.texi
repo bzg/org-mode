@@ -11696,10 +11696,13 @@ task, you can use @code{:caption} attribute instead.  Its value should be raw
 @LaTeX{} code.  It has precedence over @code{#+CAPTION}.
 @item :float
 @itemx :placement
-Float environment for the table.  Possible values are @code{sidewaystable},
+The @code{:float} specifies the float environment for the table.  Possible
+values are @code{sideways}@footnote{Formerly, the value was
+@code{sidewaystable}.  This is deprecated since Org 8.3.},
 @code{multicolumn}, @code{t} and @code{nil}.  When unspecified, a table with
-a caption will have a @code{table} environment.  Moreover, @code{:placement}
-attribute can specify the positioning of the float.
+a caption will have a @code{table} environment.  Moreover, the
+@code{:placement} attribute can specify the positioning of the float.  Note:
+@code{:placement} is ignored for @code{:float sideways} tables.
 @item :align
 @itemx :font
 @itemx :width
@@ -11801,6 +11804,11 @@ environment.
 @item
 @code{wrap}: if you would like to let text flow around the image.  It will
 make the figure occupy the left half of the page.
+@item
+@code{sideways}: if you would like the image to appear alone on a separate
+page rotated ninety degrees using the @code{sidewaysfigure}
+environment.  Setting this @code{:float} option will ignore the
+@code{:placement} setting.
 @item
 @code{nil}: if you need to avoid any floating environment, even when
 a caption is provided.
