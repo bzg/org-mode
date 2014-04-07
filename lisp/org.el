@@ -11566,13 +11566,13 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 	       (setq it (or rfloc
 			    (let (heading-text)
 			      (save-excursion
-				(unless (and goto (listp goto))
+				(unless (or goto (listp goto))
 				  (org-back-to-heading t)
 				  (setq heading-text
 					(nth 4 (org-heading-components))))
 
 				(org-refile-get-location
-				 (cond ((and goto (listp goto)) "Goto")
+				 (cond ((or goto (listp goto)) "Goto")
 				       (regionp (concat actionmsg " region to"))
 				       (t (concat actionmsg " subtree \""
 						  heading-text "\" to")))
