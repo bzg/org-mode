@@ -1922,8 +1922,13 @@ Outside list"
 
 (ert-deftest test-org-element/table-cell-parser ()
   "Test `table-cell' parser."
+  ;; Regular table cell.
   (should
    (org-test-with-temp-text "| a |"
+     (org-element-map (org-element-parse-buffer) 'table-cell 'identity)))
+  ;; Last vertical bar may be omitted.
+  (should
+   (org-test-with-temp-text "| a "
      (org-element-map (org-element-parse-buffer) 'table-cell 'identity))))
 
 

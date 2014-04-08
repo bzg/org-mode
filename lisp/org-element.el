@@ -3467,7 +3467,7 @@ CONTENTS is the contents of the object."
 Return a list whose CAR is `table-cell' and CDR is a plist
 containing `:begin', `:end', `:contents-begin', `:contents-end'
 and `:post-blank' keywords."
-  (looking-at "[ \t]*\\(.*?\\)[ \t]*|")
+  (looking-at "[ \t]*\\(.*?\\)[ \t]*\\(?:|\\|$\\)")
   (let* ((begin (match-beginning 0))
 	 (end (match-end 0))
 	 (contents-begin (match-beginning 1))
@@ -3489,7 +3489,7 @@ CONTENTS is the contents of the cell, or nil."
 
 Return value is a cons cell whose CAR is `table-cell' and CDR is
 beginning position."
-  (when (looking-at "[ \t]*.*?[ \t]*|") (cons 'table-cell (point))))
+  (when (looking-at "[ \t]*.*?[ \t]*\\(|\\|$\\)") (cons 'table-cell (point))))
 
 
 ;;;; Target
