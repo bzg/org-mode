@@ -15009,6 +15009,9 @@ during tangling.  This has the effect of assigning values to variables
 specified with @code{:var} (see @ref{var}), and of replacing ``noweb''
 references (see @ref{Noweb reference syntax}) with their targets.  The
 @code{:no-expand} header argument can be used to turn off this behavior.
+Note: The @code{:no-expand} header argument has no impact on export,
+i.e. code blocks will irrespective of this header argument expanded for
+execution.
 
 @node session
 @subsubsection @code{:session}
