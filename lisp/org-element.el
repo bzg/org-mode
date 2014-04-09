@@ -742,6 +742,8 @@ The plist also contains any property set in the property drawer,
 with its name in upper cases and colons added at the
 beginning (e.g., `:CUSTOM_ID').
 
+LIMIT is a buffer position bounding the search.
+
 When RAW-SECONDARY-P is non-nil, headline's title will not be
 parsed as a secondary string, but as a plain string instead.
 
@@ -798,7 +800,8 @@ Assume point is at beginning of the headline."
 			    (t (setq plist (plist-put plist :closed time))))))
 		  plist))))
 	   (begin (point))
-	   (end (save-excursion (goto-char (org-end-of-subtree t t))))
+	   (end (save-excursion
+		  (goto-char (min (org-end-of-subtree t t) limit))))
 	   (pos-after-head (progn (forward-line) (point)))
 	   (contents-begin (save-excursion
 			     (skip-chars-forward " \r\t\n" end)
@@ -839,10 +842,7 @@ Assume point is at beginning of the headline."
 			  :todo-keyword todo
 			  :todo-type todo-type
 			  :post-blank (count-lines
-				       (if (not contents-end) pos-after-head
-					 (goto-char contents-end)
-					 (forward-line)
-					 (point))
+				       (or contents-end pos-after-head)
 				       end)
 			  :footnote-section-p footnote-section-p
 			  :archivedp archivedp
