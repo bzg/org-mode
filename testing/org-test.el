@@ -209,11 +209,12 @@ otherwise place the point at the beginning of the inserted text."
      (with-temp-buffer
        (org-mode)
        (let ((point (string-match (regexp-quote "<point>") inside-text)))
-	  (if point
-	      (progn (insert (replace-match "" nil nil inside-text))
-		     (goto-char (match-beginning 0)))
-	    (progn (insert inside-text)
-		   (goto-char (point-min)))))
+	 (if point
+	     (progn
+	       (insert (replace-match "" nil nil inside-text))
+	       (goto-char (1+ (match-beginning 0))))
+	   (progn (insert inside-text)
+		  (goto-char (point-min)))))
        ,@body)))
 (def-edebug-spec org-test-with-temp-text (form body))
 
