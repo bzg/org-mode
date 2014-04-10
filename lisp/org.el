@@ -6091,13 +6091,13 @@ by a #."
     (let ((case-fold-search t))
       (if (re-search-forward org-target-link-regexp limit t)
 	  (progn
-	    (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
-	    (add-text-properties (match-beginning 0) (match-end 0)
+	    (org-remove-flyspell-overlays-in (match-beginning 1) (match-end 1))
+	    (add-text-properties (match-beginning 1) (match-end 1)
 				 (list 'mouse-face 'highlight
 				       'keymap org-mouse-map
 				       'help-echo "Radio target link"
 				       'org-linked-text t))
-	    (org-rear-nonsticky-at (match-end 0))
+	    (org-rear-nonsticky-at (match-end 1))
 	    t)))))
 
 (defun org-update-radio-target-regexp ()
@@ -6192,13 +6192,13 @@ targets."
 The regular expression finds the targets also if there is a line break
 between words."
   (and targets
-       (concat "\\("
+       (concat "\\(?:^\\|[^[:alnum:]]\\)\\("
 	       (mapconcat
 		(lambda (x)
 		  (replace-regexp-in-string " +" "\\s-+" (regexp-quote x) t t))
 		targets
 		"\\|")
-	       "\\)")))
+	       "\\)\\(?:$\\|[^[:alnum:]]\\)")))
 
 (defun org-activate-tags (limit)
   (if (re-search-forward (org-re "^\\*+.*[ \t]\\(:[[:alnum:]_@#%:]+:\\)[ \r\n]") limit t)

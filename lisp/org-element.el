@@ -2943,12 +2943,14 @@ Assume point is at the beginning of the link."
 	  raw-link link search-option application)
       (cond
        ;; Type 1: Text targeted from a radio target.
-       ((and org-target-link-regexp (looking-at org-target-link-regexp))
+       ((and org-target-link-regexp
+	     (save-excursion (or (bolp) (backward-char))
+			     (looking-at org-target-link-regexp)))
 	(setq type "radio"
-	      link-end (match-end 0)
-	      path (org-match-string-no-properties 0)
-	      contents-begin (match-beginning 0)
-	      contents-end (match-end 0)))
+	      link-end (match-end 1)
+	      path (org-match-string-no-properties 1)
+	      contents-begin (match-beginning 1)
+	      contents-end (match-end 1)))
        ;; Type 2: Standard link, i.e. [[http://orgmode.org][homepage]]
        ((looking-at org-bracket-link-regexp)
 	(setq contents-begin (match-beginning 3)
@@ -4184,8 +4186,9 @@ to an appropriate container (e.g., a paragraph)."
     (save-excursion
       (let ((limit (and org-target-link-regexp
 			(save-excursion
+			  (or (bolp) (backward-char))
 			  (re-search-forward org-target-link-regexp nil t))
-			(match-beginning 0)))
+			(match-beginning 1)))
 	    found)
 	(while (and (not found)
 		    (re-search-forward org-element--object-regexp limit t))
