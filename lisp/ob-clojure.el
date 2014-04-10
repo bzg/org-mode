@@ -99,7 +99,7 @@
   "Execute a block of Clojure code with Babel."
   (let ((expanded (org-babel-expand-body:clojure body params))
 	result)
-    (cl-case org-babel-clojure-backend
+    (case org-babel-clojure-backend
       (cider
        (require 'cider)
        (let ((result-params (cdr (assoc :result-params params))))
