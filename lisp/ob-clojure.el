@@ -48,15 +48,9 @@
 (eval-when-compile
   (require 'cl))
 
-(declare-function cider-current-ns "ext:cider-interaction" ())
-(declare-function cider-get-raw-value "ext:cider-client" (eval-result))
-(declare-function cider-eval-sync "ext:cider-client" (input &optional ns session))
 (declare-function nrepl-send-string-sync "ext:nrepl-client" (input &optional ns session))
-(declare-function nrepl-current-tooling-session "ext:nrepl-client" ())
-
 (declare-function nrepl-current-connection-buffer "ext:nrepl" ())
 (declare-function nrepl-eval "ext:nrepl" (body))
-
 (declare-function slime-eval "ext:slime" (sexp &optional package))
 
 (defvar org-babel-tangle-lang-exts)
@@ -97,20 +91,24 @@
 			   "(str org-mode-print-catcher)))")
 		   (if (member "code" result-params) "code" "simple") body))
 	  ;; if (:results output), collect printed output
-	  ((member "output" result-params)
-	   (format "(clojure.core/with-out-str %s)" body))
+	  ;; ((member "output" result-params)
+	  ;;  (format "(clojure.core/with-out-str %s)" body))
 	  (t body))))
 
 (defun org-babel-execute:clojure (body params)
   "Execute a block of Clojure code with Babel."
   (let ((expanded (org-babel-expand-body:clojure body params))
 	result)
-    (case org-babel-clojure-backend
+    (cl-case org-babel-clojure-backend
       (cider
        (require 'cider)
-       (setq result
-	     (or (cider-get-raw-value (cider-eval-sync expanded))
-		 (error "nREPL not connected!  Use M-x cider-jack-in RET"))))
+       (let ((result-params (cdr (assoc :result-params params))))
+	 (setq result
+	       (plist-get
+		(nrepl-send-string-sync expanded)
+		(if (member "output" result-params)
+		    :stdout
+		  :value)))))
       (nrepl
        (require 'nrepl)
        (setq result
