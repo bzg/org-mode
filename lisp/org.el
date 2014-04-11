@@ -9290,7 +9290,7 @@ property to set."
 	   (save-excursion
 	     (org-back-to-heading t)
 	     (put-text-property
-	      (point-at-bol) (outline-next-heading) tprop p))))))))
+	      (point-at-bol) (or (outline-next-heading) (point-max)) tprop p))))))))
 
 
 ;;;; Link Stuff
