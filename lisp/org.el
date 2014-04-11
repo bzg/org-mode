@@ -9390,7 +9390,7 @@ property to set."
 	   (save-excursion
 	     (org-back-to-heading t)
 	     (put-text-property
-	      (point-at-bol) (outline-next-heading) tprop p))))))))
+	      (point-at-bol) (or (outline-next-heading) (point-max)) tprop p))))))))
 
 
 ;;;; Link Stuff
@@ -11672,7 +11672,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 	       (setq it (or rfloc
 			    (let (heading-text)
 			      (save-excursion
-				(unless (and arg (listp arg))
+				(unless (or arg (listp arg))
 				  (org-back-to-heading t)
 				  (setq heading-text
 					(replace-regexp-in-string
@@ -11680,7 +11680,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 					 "\\3"
 					 (nth 4 (org-heading-components)))))
 				(org-refile-get-location
-				 (cond ((and arg (listp arg)) "Goto")
+				 (cond ((or arg (listp arg)) "Goto")
 				       (regionp (concat actionmsg " region to"))
 				       (t (concat actionmsg " subtree \""
 						  heading-text "\" to")))
