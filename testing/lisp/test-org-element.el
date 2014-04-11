@@ -1336,12 +1336,11 @@ e^{i\\pi}+1=0
   (should
    (equal
     "radio"
-    (org-test-with-temp-text "A radio link"
+    (org-test-with-temp-text "<<<radio>>>A radio link"
+      (org-update-radio-target-regexp)
       (org-element-property
        :type
-       (org-element-map
-	   (let ((org-target-link-regexp "radio")) (org-element-parse-buffer))
-	   'link 'identity nil t)))))
+       (org-element-map (org-element-parse-buffer) 'link #'identity nil t)))))
   ;; Standard link.
   ;;
   ;; ... with description.
