@@ -9751,13 +9751,16 @@ a horizontal line.
 @cindex #+BEGIN_COMMENT
 
 Lines starting with zero or more whitespace characters followed by one
-@samp{#} and a whitespace are treated as comments and will never be exported.
+@samp{#} and a whitespace are treated as comments and, as such, are not
+exported.
 
-Also entire subtrees starting with the keyword @samp{COMMENT} will never be
-exported (and included code blocks will not be executed on export).
+Likewise, regions surrounded by @samp{#+BEGIN_COMMENT}
+... @samp{#+END_COMMENT} are not exported.
 
-Finally, regions surrounded by @samp{#+BEGIN_COMMENT}
-... @samp{#+END_COMMENT} will not be exported.
+Finally, a @samp{COMMENT} keyword at the beginning of an entry, but after any
+other keyword or priority cookie, comments out the entire subtree.  In this
+case, the subtree is not exported and no code block within it is executed
+either.  The command below helps changing the comment status of a headline.
 
 @table @kbd
 @kindex C-c ;

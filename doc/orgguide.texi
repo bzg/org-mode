@@ -2169,10 +2169,14 @@ consisting of only dashes, and at least 5 of them.
 @subheading Comment lines
 
 Lines starting with zero or more whitespace characters followed by @samp{#}
-and a whitespace are treated as comments and will never be exported.  Also
-entire subtrees starting with the word @samp{COMMENT} will never be exported.
-Finally, regions surrounded by @samp{#+BEGIN_COMMENT}
-... @samp{#+END_COMMENT} will not be exported.
+and a whitespace are treated as comments and, as such, are not exported.
+
+Likewise, regions surrounded by @samp{#+BEGIN_COMMENT}
+... @samp{#+END_COMMENT} are not exported.
+
+Finally, a @samp{COMMENT} keyword at the beginning of an entry, but after any
+other keyword or priority cookie, comments out the entire subtree.  The
+command below helps changing the comment status of a headline.
 
 @table @kbd
 @item C-c ;
