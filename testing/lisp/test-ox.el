@@ -868,11 +868,10 @@ Footnotes[fn:1], [fn:test] and [fn:inline:anonymous footnote].
 		      (format "#+INCLUDE: \"%s\"\n#+INCLUDE: \"%s\""
 			      file1 file2)
 		    (org-export-expand-include-keyword)
-		    (let (unique-labels)
-		      (org-element-map (org-element-parse-buffer)
-			  'footnote-reference
-			(lambda (ref)
-			  (org-element-property :label ref))))))))))))))
+		    (org-element-map (org-element-parse-buffer)
+			'footnote-reference
+		      (lambda (ref)
+			(org-element-property :label ref)))))))))))))
   ;; Footnotes labels are not local to each include keyword.
   (should
    (= 3
@@ -887,11 +886,9 @@ Footnotes[fn:1], [fn:test] and [fn:inline:anonymous footnote].
 	      (org-test-with-temp-text
 		  (format "#+INCLUDE: \"%s\"\n#+INCLUDE: \"%s\"" file file)
 		(org-export-expand-include-keyword)
-		(let (unique-labels)
-		  (org-element-map (org-element-parse-buffer)
-		      'footnote-reference
-		    (lambda (ref)
-		      (org-element-property :label ref)))))))))))))
+		(org-element-map (org-element-parse-buffer)
+		    'footnote-reference
+		  (lambda (ref) (org-element-property :label ref))))))))))))
 
 (ert-deftest test-org-export/expand-macro ()
   "Test macro expansion in an Org buffer."
