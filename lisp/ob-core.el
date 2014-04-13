@@ -2252,6 +2252,15 @@ code ---- the results are extracted in the syntax of the source
 	   (if keep-keyword (1+ (match-end 0)) (1- (match-beginning 0)))
 	   (progn (forward-line 1) (org-babel-result-end))))))))
 
+(defun org-babel-remove-result-one-or-many (x)
+  "Remove the result of the current source block.
+If called with a prefix argument, remove all result blocks
+in the buffer."
+  (interactive "P")
+  (if x
+      (org-babel-map-src-blocks nil (org-babel-remove-result))
+    (org-babel-remove-result)))
+
 (defun org-babel-result-end ()
   "Return the point at the end of the current set of results."
   (save-excursion
