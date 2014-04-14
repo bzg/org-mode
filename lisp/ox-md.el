@@ -342,7 +342,7 @@ a communication channel."
 		    (path
 		     (cond
 		      ((member type '("http" "https" "ftp"))
-		       (concat type ":" raw-path))
+		       (concat type "://" raw-path))
 		      ((equal type "file")
 		       (let ((path (funcall link-org-files-as-md raw-path)))
 			 (if (not (file-name-absolute-p path)) path
