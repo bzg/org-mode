@@ -105,11 +105,13 @@ This function is called by `org-babel-execute-src-block'."
       buffer)))
 
 ;; helper functions
-(defun org-babel-variable-assignments:generic (varname values &optional sep hline)
+(defun org-babel-variable-assignments:sh-generic
+    (varname values &optional sep hline)
   "Returns a list of statements declaring the values as a generic variable."
   (format "%s=%s" varname (org-babel-sh-var-to-sh values sep hline)))
 
-(defun org-babel-variable-assignments:bash_array (varname values &optional sep hline)
+(defun org-babel-variable-assignments:bash_array
+    (varname values &optional sep hline)
   "Returns a list of statements declaring the values as a bash array."
   (format "unset %s\ndeclare -a %s=( \"%s\" )"
      varname varname
@@ -119,7 +121,8 @@ This function is called by `org-babel-execute-src-block'."
          values)
        "\" \"")))
 
-(defun org-babel-variable-assignments:bash_assoc (varname values &optional sep hline)
+(defun org-babel-variable-assignments:bash_assoc
+    (varname values &optional sep hline)
   "Returns a list of statements declaring the values as bash associative array."
   (format "unset %s\ndeclare -A %s\n%s"
     varname varname
@@ -136,13 +139,10 @@ This function is called by `org-babel-execute-src-block'."
 (defun org-babel-variable-assignments:bash (varname values &optional sep hline)
   "Represents the parameters as useful Bash shell variables."
   (if (listp values)
-    (if (and (listp (car values)) (= 1 (length (car values))))
-      (org-babel-variable-assignments:bash_array varname values sep hline)
-      (org-babel-variable-assignments:bash_assoc varname values sep hline)
-    )
-    (org-babel-variable-assignments:generic varname values sep hline)
-  )
-)
+      (if (and (listp (car values)) (= 1 (length (car values))))
+	  (org-babel-variable-assignments:bash_array varname values sep hline)
+	(org-babel-variable-assignments:bash_assoc varname values sep hline))
+    (org-babel-variable-assignments:sh-generic varname values sep hline)))
 
 (defun org-babel-variable-assignments:sh (params)
   "Return list of shell statements assigning the block's variables."
@@ -153,20 +153,18 @@ This function is called by `org-babel-execute-src-block'."
     (mapcar
      (lambda (pair)
        (if (string= org-babel-sh-command "bash")
-         (org-babel-variable-assignments:bash 
+	   (org-babel-variable-assignments:bash
             (car pair) (cdr pair) sep hline)
-         (org-babel-variable-assignments:generic 
-	    (car pair) (cdr pair) sep hline)
-       )
-     )
-     (mapcar #'cdr (org-babel-get-header params :var))))
-)
+         (org-babel-variable-assignments:sh-generic
+	  (car pair) (cdr pair) sep hline)))
+     (mapcar #'cdr (org-babel-get-header params :var)))))
 
 (defun org-babel-sh-var-to-sh (var &optional sep hline)
   "Convert an elisp value to a shell variable.
 Convert an elisp var into a string of shell commands specifying a
 var of the same value."
-  (format org-babel-sh-var-quote-fmt (org-babel-sh-var-to-string var sep hline)))
+  (format org-babel-sh-var-quote-fmt
+	  (org-babel-sh-var-to-string var sep hline)))
 
 (defun org-babel-sh-var-to-string (var &optional sep hline)
   "Convert an elisp value to a string."
