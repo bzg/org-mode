@@ -6533,6 +6533,8 @@ but you can specify your own function using the @code{:formatter} parameter.
 :tcolumns    @r{Number of columns to be used for times.  If this is smaller}
              @r{than @code{:maxlevel}, lower levels will be lumped into one column.}
 :level       @r{Should a level number column be included?}
+:sort        @r{A cons cell like containing the column to sort and a sorting type.}
+             @r{E.g., @code{:sort (1 . ?a)} sorts the first column alphabetically.}
 :compact     @r{Abbreviation for @code{:level nil :indent t :narrow 40! :tcolumns 1}}
              @r{All are overwritten except if there is an explicit @code{:narrow}}
 :timestamp   @r{A timestamp for the entry, when available.  Look for SCHEDULED,}

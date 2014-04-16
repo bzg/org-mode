@@ -8885,9 +8885,10 @@ When sorting is done, call `org-after-sorting-entries-or-items-hook'."
 (defun org-do-sort (table what &optional with-case sorting-type)
   "Sort TABLE of WHAT according to SORTING-TYPE.
 The user will be prompted for the SORTING-TYPE if the call to this
-function does not specify it.  WHAT is only for the prompt, to indicate
-what is being sorted.  The sorting key will be extracted from
-the car of the elements of the table.
+function does not specify it.
+WHAT is only for the prompt, to indicate what is being sorted.
+The sorting key will be extracted from the car of the elements of
+the table.
 If WITH-CASE is non-nil, the sorting will be case-sensitive."
   (unless sorting-type
     (message
@@ -8911,11 +8912,13 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
      ((= dcst ?t)
       (setq extractfun
 	    (lambda (x)
-	      (if (or (string-match org-ts-regexp x)
-		      (string-match org-ts-regexp-both x))
-		  (org-float-time
-		   (org-time-string-to-time (match-string 0 x)))
-		0))
+	      (cond ((or (string-match org-ts-regexp x)
+			 (string-match org-ts-regexp-both x))
+		     (org-float-time
+		      (org-time-string-to-time (match-string 0 x))))
+		    ((string-match "[0-9]\\{1,2\\}:[0-9]\\{2\\}" x)
+		     (org-hh:mm-string-to-minutes x))
+		    (t 0)))
 	    comparefun (if (= dcst sorting-type) '< '>)))
      (t (error "Invalid sorting type `%c'" sorting-type)))
 

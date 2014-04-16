@@ -1642,7 +1642,8 @@ should be in the last line to be included into the sorting.
 
 The command then prompts for the sorting type which can be
 alphabetically, numerically, or by time (as given in a time stamp
-in the field).  Sorting in reverse order is also possible.
+in the field, or as a HH:MM value).  Sorting in reverse order is
+also possible.
 
 With prefix argument WITH-CASE, alphabetic sorting will be case-sensitive.
 

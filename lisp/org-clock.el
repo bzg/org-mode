@@ -2339,6 +2339,7 @@ from the dynamic block definition."
 			org-clock-clocktable-language-setup))
 	 (multifile (plist-get params :multifile))
 	 (block (plist-get params :block))
+	 (sort (plist-get params :sort))
 	 (ts (plist-get params :tstart))
 	 (te (plist-get params :tend))
 	 (header (plist-get  params :header))
@@ -2545,6 +2546,11 @@ from the dynamic block definition."
     (when org-hide-emphasis-markers
       ;; we need to align a second time
       (org-table-align))
+    (when sort
+      (save-excursion
+	(org-table-goto-line 3)
+	(org-table-goto-column (car sort))
+	(org-table-sort-lines nil (cdr sort))))
     (when recalc
       (if (eq formula '%)
 	  (save-excursion
