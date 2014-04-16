@@ -7735,7 +7735,7 @@ This is important for non-interactive uses of the command."
 	  (when respect-content
 	    (org-end-of-subtree nil t)
 	    (skip-chars-backward " \r\n")
-	    (and (not (looking-back "^\*+"))
+	    (and (not (looking-back "^\\*+"))
 		 (looking-at "[ \t]+") (replace-match ""))
 	    (unless (eobp) (forward-char 1))
 	    (when (looking-at "^\\*")
