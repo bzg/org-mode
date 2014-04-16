@@ -2486,7 +2486,8 @@ INFO is a plist holding contextual information.  See
 					     &optional term-counter-id
 					     headline)
   "Format a list item into HTML."
-  (let ((checkbox (concat (org-html-checkbox checkbox info)
+  (let ((class (symbol-name checkbox))
+	(checkbox (concat (org-html-checkbox checkbox info)
 			  (and checkbox " ")))
 	(br (org-html-close-tag "br" nil info)))
     (concat
@@ -2495,20 +2496,20 @@ INFO is a plist holding contextual information.  See
 	(let* ((counter term-counter-id)
 	       (extra (if counter (format " value=\"%s\"" counter) "")))
 	  (concat
-	   (format "<li%s>" extra)
+	   (format "<li class=\"%s\"%s>" class extra)
 	   (when headline (concat headline br)))))
        (unordered
 	(let* ((id term-counter-id)
 	       (extra (if id (format " id=\"%s\"" id) "")))
 	  (concat
-	   (format "<li%s>" extra)
+	   (format "<li class=\"%s\"%s>" class extra)
 	   (when headline (concat headline br)))))
        (descriptive
 	(let* ((term term-counter-id))
 	  (setq term (or term "(no term)"))
 	  ;; Check-boxes in descriptive lists are associated to tag.
-	  (concat (format "<dt> %s </dt>"
-			  (concat checkbox term))
+	  (concat (format "<dt class=\"%s\">%s</dt>"
+			  class (concat checkbox term))
 		  "<dd>"))))
      (unless (eq type 'descriptive) checkbox)
      contents
