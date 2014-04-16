@@ -1251,9 +1251,8 @@ INFO is a plist holding contextual information.  See
          (imagep (org-export-inline-image-p
                   link org-groff-inline-image-rules))
          (path (cond
-                ((member type '("http" "https" "ftp"))
+                ((member type '("http" "https" "ftp" "mailto"))
                  (concat type "://" raw-path))
-		((string= type "mailto") (concat type ":" raw-path))
                 ((string= type "file")
                  (if (file-name-absolute-p raw-path)
                      (concat "file://" (expand-file-name raw-path))

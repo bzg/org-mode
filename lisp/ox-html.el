@@ -2658,11 +2658,7 @@ INFO is a plist holding contextual information.  See
 	 (desc (org-string-nw-p desc))
 	 (path
 	  (cond
-	   ((member type '("http" "https" "ftp"))
-	    (org-link-escape
-	     (org-link-unescape
-	      (concat type "://" raw-path)) org-link-escape-chars-browser))
-	   ((string= type "mailto")
+	   ((member type '("http" "https" "ftp" "mailto"))
 	    (org-link-escape
 	     (org-link-unescape
 	      (concat type "://" raw-path)) org-link-escape-chars-browser))
