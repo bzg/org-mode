@@ -2902,6 +2902,8 @@ the plist used as a communication channel."
   (let* ((parent (org-export-get-parent paragraph))
 	 (parent-type (org-element-type parent))
 	 (style '((footnote-definition " class=\"footpara\"")))
+	 (attributes (org-html--make-attribute-string
+		      (org-export-read-attribute :attr_html paragraph)))
 	 (extra (or (cadr (assoc parent-type style)) "")))
     (cond
      ((and (eq (org-element-type parent) 'item)
@@ -2928,7 +2930,10 @@ the plist used as a communication channel."
 	    (label (org-element-property :name paragraph)))
 	(org-html--wrap-image contents info caption label)))
      ;; Regular paragraph.
-     (t (format "<p%s>\n%s</p>" extra contents)))))
+     (t (format "<p%s%s>\n%s</p>"
+		(if (org-string-nw-p attributes)
+		    (concat " " attributes) "")
+		extra contents)))))
 
 ;;;; Plain List
 
