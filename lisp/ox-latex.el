@@ -1798,7 +1798,7 @@ INFO is a plist holding contextual information.  See
 		  link org-latex-inline-image-rules))
 	 (path (cond
 		((member type '("http" "https" "ftp" "mailto"))
-		 (concat type "://" raw-path))
+		 (concat type ":" raw-path))
 		((string= type "file")
 		 (if (not (file-name-absolute-p raw-path)) raw-path
 		   (concat "file://" (expand-file-name raw-path))))

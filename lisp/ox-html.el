@@ -2661,7 +2661,7 @@ INFO is a plist holding contextual information.  See
 	   ((member type '("http" "https" "ftp" "mailto"))
 	    (org-link-escape
 	     (org-link-unescape
-	      (concat type "://" raw-path)) org-link-escape-chars-browser))
+	      (concat type ":" raw-path)) org-link-escape-chars-browser))
 	   ((string= type "file")
 	    ;; Treat links to ".org" files as ".html", if needed.
 	    (setq raw-path
