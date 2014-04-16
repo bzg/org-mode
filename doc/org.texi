@@ -7737,15 +7737,17 @@ current region/subtree.}.  After pressing @kbd{< <}, you still need to press the
 character selecting the command.
 
 @item *
+@cindex agenda, sticky
 @vindex org-agenda-sticky
 Toggle sticky agenda views.  By default, Org maintains only a single agenda
 buffer and rebuilds it each time you change the view, to make sure everything
-is always up to date.  If you switch between views often and the build time
-bothers you, you can turn on sticky agenda buffers (make this the default by
-customizing the variable @code{org-agenda-sticky}).  With sticky agendas, the
-dispatcher only switches to the selected view, you need to update it by hand
-with @kbd{r} or @kbd{g}.  You can toggle sticky agenda view any time with
-@code{org-toggle-sticky-agenda}.
+is always up to date.  If you often switch between agenda views and the build
+time bothers you, you can turn on sticky agenda buffers or make this the
+default by customizing the variable @code{org-agenda-sticky}.  With sticky
+agendas, the agenda dispatcher will not recreate agenda views from scratch,
+it will only switch to the selected one, and you need to update the agenda by
+hand with @kbd{r} or @kbd{g} when needed.  You can toggle sticky agenda view
+any time with @code{org-toggle-sticky-agenda}.
 @end table
 
 You can also define custom commands that will be accessible through the
