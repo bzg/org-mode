@@ -576,13 +576,13 @@ content of these blocks will still be treated as Org syntax."
 (defface org-clock-overlay ;; copied from secondary-selection
   (org-compatible-face nil
     '((((class color) (min-colors 88) (background light))
-       (:background "yellow1"))
+       (:background "LightGray" :foreground "black"))
       (((class color) (min-colors 88) (background dark))
-       (:background "SkyBlue4"))
+       (:background "SkyBlue4" :foreground "white"))
       (((class color) (min-colors 16) (background light))
-       (:background "yellow"))
+       (:background "gray" :foreground "black"))
       (((class color) (min-colors 16) (background dark))
-       (:background "SkyBlue4"))
+       (:background "SkyBlue4" :foreground "white"))
       (((class color) (min-colors 8))
        (:background "cyan" :foreground "black"))
       (t (:inverse-video t))))

@@ -36,6 +36,7 @@
 (declare-function notifications-notify "notifications" (&rest params))
 (declare-function org-pop-to-buffer-same-window "org-compat" (&optional buffer-or-name norecord label))
 (declare-function org-refresh-properties "org" (dprop tprop))
+(declare-function org-table-goto-line "org-table" (n))
 (defvar org-time-stamp-formats)
 (defvar org-ts-what)
 (defvar org-frame-title-format-backup frame-title-format)
@@ -1835,7 +1836,7 @@ Use \\[org-clock-remove-overlays] to remove the subtree times."
 			    (point) :org-clock-minutes)))
 	  (goto-char p)
 	  (when (setq time (get-text-property p :org-clock-minutes))
-	    (org-clock-put-overlay time (funcall outline-level))))
+	    (org-clock-put-overlay time)))
 	(setq h (/ org-clock-file-total-minutes 60)
 	      m (- org-clock-file-total-minutes (* 60 h)))
 	;; Arrange to remove the overlays upon next change.
@@ -1849,13 +1850,11 @@ Use \\[org-clock-remove-overlays] to remove the subtree times."
 (defvar org-clock-overlays nil)
 (make-variable-buffer-local 'org-clock-overlays)
 
-(defun org-clock-put-overlay (time &optional level)
+(defun org-clock-put-overlay (time)
   "Put an overlays on the current line, displaying TIME.
-If LEVEL is given, prefix time with a corresponding number of stars.
 This creates a new overlay and stores it in `org-clock-overlays', so that it
 will be easy to remove."
   (let* ((c 60) (h (floor (/ time 60))) (m (- time (* 60 h)))
-	 (l (if level (org-get-valid-level level 0) 0))
 	 (off 0)
 	 ov tx)
     (org-move-to-column c)
@@ -1864,9 +1863,8 @@ will be easy to remove."
     (setq ov (make-overlay (point-at-bol) (point-at-eol))
     	  tx (concat (buffer-substring (point-at-bol) (point))
 		     (make-string (+ off (max 0 (- c (current-column)))) ?.)
-		     (org-add-props (concat (make-string l ?*) " "
-					    (org-minutes-to-clocksum-string time)
-					    (make-string (- 16 l) ?\ ))
+		     (org-add-props
+			 (concat " " (org-minutes-to-clocksum-string time) " ")
 			 (list 'face 'org-clock-overlay))
 		     ""))
     (if (not (featurep 'xemacs))
