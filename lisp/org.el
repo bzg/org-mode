@@ -8833,7 +8833,7 @@ When sorting is done, call `org-after-sorting-entries-or-items-hook'."
 		 (funcall case-func (org-sort-remove-invisible (match-string 4)))
 	       nil))
 	    ((= dcst ?k)
-	     (get-text-property (point) :org-clock-minutes))
+	     (or (get-text-property (point) :org-clock-minutes) 0))
 	    ((= dcst ?t)
 	     (let ((end (save-excursion (outline-next-heading) (point))))
 	       (if (or (re-search-forward org-ts-regexp end t)
@@ -8879,7 +8879,7 @@ When sorting is done, call `org-after-sorting-entries-or-items-hook'."
          (cond
           ((= dcst ?a) 'string<)
           ((= dcst ?f) compare-func)
-          ((member dcst '(?p ?t ?s ?d ?c)) '<)))))
+          ((member dcst '(?p ?t ?s ?d ?c ?k)) '<)))))
     (run-hooks 'org-after-sorting-entries-or-items-hook)
     ;; Reset the clock marker if needed
     (when cmstr
