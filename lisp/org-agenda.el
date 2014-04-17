@@ -3760,7 +3760,7 @@ generating a new one."
 	  (org-agenda-filter-apply org-agenda-regexp-filter 'regexp))
 	(when (get 'org-agenda-regexp-filter :preset-filter)
 	  (org-agenda-filter-apply
-	   (get 'org-agenda-regexp-filter :preset-filter)) 'regexp)
+	   (get 'org-agenda-regexp-filter :preset-filter) 'regexp))
 	(org-add-hook 'kill-buffer-hook 'org-agenda-reset-markers 'append 'local)))))
 
 (defun org-agenda-mark-clocking-task ()
