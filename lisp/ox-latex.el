@@ -1797,12 +1797,10 @@ INFO is a plist holding contextual information.  See
 	 (imagep (org-export-inline-image-p
 		  link org-latex-inline-image-rules))
 	 (path (cond
-		((member type '("http" "https" "ftp"))
-		 (concat type "://" raw-path))
-		((string= type "mailto") (concat type ":" raw-path))
-		((string= type "file")
-		 (if (not (file-name-absolute-p raw-path)) raw-path
-		   (concat "file://" (expand-file-name raw-path))))
+		((member type '("http" "https" "ftp" "mailto"))
+		 (concat type ":" raw-path))
+		((and (string= type "file") (file-name-absolute-p raw-path))
+		 (concat "file:" raw-path))
 		(t raw-path)))
 	 protocol)
     (cond

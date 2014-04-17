@@ -1221,11 +1221,9 @@ INFO is a plist holding contextual information.  See
 	 (desc (and (not (string= desc "")) desc))
 	 (path (cond
 		((member type '("http" "https" "ftp"))
-		 (concat type "://" raw-path))
-		((string= type "file")
-		 (if (file-name-absolute-p raw-path)
-		     (concat "file://" (expand-file-name raw-path))
-		   (concat "file://" raw-path)))
+		 (concat type ":" raw-path))
+		((and (string= type "file") (file-name-absolute-p raw-path))
+		 (concat "file:" raw-path))
 		(t raw-path)))
 	 (email (if (string= type "mailto")
 		    (let ((text (replace-regexp-in-string

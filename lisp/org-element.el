@@ -3147,18 +3147,20 @@ Assume point is at the beginning of the link."
       ;; LINK-END variable.
       (setq post-blank (progn (goto-char link-end) (skip-chars-forward " \t"))
 	    end (point))
-      ;; Extract search option and opening application out of
-      ;; "file"-type links.
+      ;; Special "file" type link processing.
       (when (member type org-element-link-type-is-file)
-	;; Application.
+	;; Extract opening application and search option.
 	(cond ((string-match "^file\\+\\(.*\\)$" type)
 	       (setq application (match-string 1 type)))
 	      ((not (string-match "^file" type))
 	       (setq application type)))
-	;; Extract search option from PATH.
-	(when (string-match "::\\(.*\\)$" path)
+	(when (string-match "::\\(.*\\)\\'" path)
 	  (setq search-option (match-string 1 path)
 		path (replace-match "" nil nil path)))
+	;; Normalize URI.
+	(when (and (not (org-string-match-p "\\`//" path))
+		   (file-name-absolute-p path))
+	  (setq path (concat "//" (expand-file-name path))))
 	;; Make sure TYPE always reports "file".
 	(setq type "file"))
       (list 'link
