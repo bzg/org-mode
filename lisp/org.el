@@ -7640,22 +7640,29 @@ When NEXT is non-nil, check the next line instead."
 
 (defun org-insert-heading (&optional arg invisible-ok)
   "Insert a new heading or item with same depth at point.
-If point is in a plain list and ARG is nil, create a new list item.
-With one universal prefix argument, insert a heading even when the
-point is within a list.
-With two universal prefix arguments, insert the heading at the end
-of the parent subtree.
 
-If point is at the beginning of a headline, insert a sibling before
-the current headline.  If point is not at the beginning, split the line
-and create a new headline with the text in the current line after point
-\(see `org-M-RET-may-split-line' on how to modify this behavior).
+If point is in a plain list and ARG is nil, add a new list item.
 
-If point is at the beginning of a normal line, turn this line into
-a heading.
+With one universal prefix argument, insert a heading even when
+the point is within a list.
 
-When INVISIBLE-OK is set, stop at invisible headlines when going back.
-This is important for non-interactive uses of the command."
+With two universal prefix arguments, insert the heading at the
+end of the grandparent subtree.  For example, if point is within
+a 2nd-level heading, then it will insert a 2nd-level heading at
+the end of the 1st-level parent heading.
+
+If point is at the beginning of a headline, insert a sibling
+before the current headline.  If point is not at the beginning,
+split the line and create a new headline with the text in the
+current line after point \(see `org-M-RET-may-split-line' on how
+to modify this behavior).
+
+If point is at the beginning of a normal line, turn this line
+into a heading.
+
+When INVISIBLE-OK is set, stop at invisible headlines when going
+back.  This is important for non-interactive uses of the
+command."
   (interactive "P")
   (if (org-called-interactively-p 'any) (org-reveal))
   (let ((itemp (org-in-item-p))
