@@ -1361,10 +1361,12 @@ e^{i\\pi}+1=0
   ;; ... with expansion.
   (should
    (equal
-    "orgmode.org/worg"
+    "//orgmode.org/worg"
     (org-test-with-temp-text "[[Org:worg]]"
       (let ((org-link-abbrev-alist '(("Org" . "http://orgmode.org/"))))
-	(org-element-property :path (org-element-context))))))
+	(org-element-property
+	 :path
+	 (org-element-map (org-element-parse-buffer) 'link 'identity nil t))))))
   ;; ... with translation.
   (should
    (equal

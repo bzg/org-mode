@@ -2721,24 +2721,21 @@ INFO is a plist holding contextual information.  See
 	 (desc (org-string-nw-p desc))
 	 (path
 	  (cond
-	   ((member type '("http" "https" "ftp"))
-	    (org-link-escape-browser
-	     (org-link-unescape (concat type "://" raw-path))))
-	   ((string= type "mailto")
-	    (org-link-escape-browser
-	     (org-link-unescape (concat type ":" raw-path))))
+	   ((member type '("http" "https" "ftp" "mailto"))
+	    (org-link-escape
+	     (org-link-unescape
+	      (concat type ":" raw-path)) org-link-escape-chars-browser))
 	   ((string= type "file")
 	    ;; Treat links to ".org" files as ".html", if needed.
 	    (setq raw-path
 		  (funcall link-org-files-as-html-maybe raw-path info))
 	    ;; If file path is absolute, prepend it with protocol
-	    ;; component - "file://".
-	    (cond ((file-name-absolute-p raw-path)
-		   (setq raw-path
-			 (concat "file://" (expand-file-name
-					    raw-path))))
-		  ((and home use-abs-url)
-		   (setq raw-path (concat (file-name-as-directory home) raw-path))))
+	    ;; component - "file:".
+	    (cond
+	     ((file-name-absolute-p raw-path)
+	      (setq raw-path (concat "file:" raw-path)))
+	     ((and home use-abs-url)
+	      (setq raw-path (concat (file-name-as-directory home) raw-path))))
 	    ;; Add search option, if any.  A search option can be
 	    ;; relative to a custom-id or a headline title.  Append
 	    ;; a hash sign to any unresolved option, as it might point
