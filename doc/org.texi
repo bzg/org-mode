@@ -10989,7 +10989,7 @@ Here is a simple example Org document that is intended for Beamer export.
 @smallexample
 #+TITLE: Example Presentation
 #+AUTHOR: Carsten Dominik
-#+OPTIONS: H:2
+#+OPTIONS: H:2 toc:t num:t
 #+LATEX_CLASS: beamer
 #+LATEX_CLASS_OPTIONS: [presentation]
 #+BEAMER_THEME: Madrid
@@ -10998,20 +10998,20 @@ Here is a simple example Org document that is intended for Beamer export.
 * This is the first structural section
 
 ** Frame 1
-*** Thanks to Eric Fraga                                           :B_block:BMCOL:
+*** Thanks to Eric Fraga                                           :B_block:
     :PROPERTIES:
     :BEAMER_COL: 0.48
     :BEAMER_ENV: block
     :END:
     for the first viable Beamer setup in Org
-*** Thanks to everyone else                                        :B_block:BMCOL:
+*** Thanks to everyone else                                        :B_block:
     :PROPERTIES:
     :BEAMER_COL: 0.48
     :BEAMER_ACT: <2->
     :BEAMER_ENV: block
     :END:
     for contributing to the discussion
-**** This will be formatted as a beamer note                              :B_note:
+**** This will be formatted as a beamer note                       :B_note:
      :PROPERTIES:
      :BEAMER_env: note
      :END:
