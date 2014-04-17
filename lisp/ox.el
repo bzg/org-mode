@@ -817,7 +817,7 @@ HTML code while every other back-end will ignore it."
   :package-version '(Org . "8.0")
   :type 'coding-system)
 
-(defcustom org-export-copy-to-kill-ring 'if-interactive
+(defcustom org-export-copy-to-kill-ring nil
   "Should we push exported content to the kill ring?"
   :group 'org-export-general
   :version "24.3"
