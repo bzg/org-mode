@@ -3746,12 +3746,21 @@ generating a new one."
 					     (delete-dups
 					      (mapcar 'downcase (org-get-tags-at))))))))))
 	(run-hooks 'org-agenda-finalize-hook)
-	(when (or org-agenda-tag-filter (get 'org-agenda-tag-filter :preset-filter))
+	(when org-agenda-tag-filter
 	  (org-agenda-filter-apply org-agenda-tag-filter 'tag))
-	(when (or org-agenda-category-filter (get 'org-agenda-category-filter :preset-filter))
+	(when (get 'org-agenda-tag-filter :preset-filter)
+	  (org-agenda-filter-apply
+	   (get 'org-agenda-tag-filter :preset-filter) 'tag))
+	(when org-agenda-category-filter
 	  (org-agenda-filter-apply org-agenda-category-filter 'category))
-	(when (or org-agenda-regexp-filter (get 'org-agenda-regexp-filter :preset-filter))
+	(when (get 'org-agenda-category-filter :preset-filter)
+	  (org-agenda-filter-apply
+	   (get 'org-agenda-category-filter :preset-filter) 'category))
+	(when org-agenda-regexp-filter
 	  (org-agenda-filter-apply org-agenda-regexp-filter 'regexp))
+	(when (get 'org-agenda-regexp-filter :preset-filter)
+	  (org-agenda-filter-apply
+	   (get 'org-agenda-regexp-filter :preset-filter)) 'regexp)
 	(org-add-hook 'kill-buffer-hook 'org-agenda-reset-markers 'append 'local)))))
 
 (defun org-agenda-mark-clocking-task ()
