@@ -1983,19 +1983,6 @@ window on that directory."
   :group 'org-link-follow
   :type 'boolean)
 
-(defcustom org-link-mailto-program '(browse-url "mailto:%a?subject=%s")
-  "Function and arguments to call for following mailto links.
-This is a list with the first element being a Lisp function, and the
-remaining elements being arguments to the function.  In string arguments,
-%a will be replaced by the address, and %s will be replaced by the subject
-if one was given like in <mailto:arthur@galaxy.org::this subject>."
-  :group 'org-link-follow
-  :type '(choice
-	  (const :tag "browse-url" (browse-url-mail "mailto:%a?subject=%s"))
-	  (const :tag "compose-mail" (compose-mail "%a" "%s"))
-	  (const :tag "message-mail" (message-mail "%a" "%s"))
-	  (cons :tag "other" (function) (repeat :tag "argument" sexp))))
-
 (defcustom org-confirm-shell-link-function 'yes-or-no-p
   "Non-nil means ask for confirmation before executing shell links.
 Shell links can be dangerous: just think about a link
@@ -10605,29 +10592,14 @@ is used internally by `org-open-link-from-string'."
 		  (cond ((fboundp f-or-v) (describe-function f-or-v))
 			((boundp f-or-v) (describe-variable f-or-v))
 			(t (error "Not a known function or variable")))))
-	       ((equal type "mailto")
-		(let ((cmd (car org-link-mailto-program))
-		      (args (cdr org-link-mailto-program))
-		      (spec
-		       (format-spec-make
-			?a path		 ; %a is address.
-			?s (let ((option ; %s is subject.
-				  (org-element-property
-				   :search-option context)))
-			     (if (not option) "" (org-link-escape option)))))
-		      final-args)
-		  (apply cmd
-			 (dolist (arg args (nreverse final-args))
-			   (if (not (stringp arg)) (push arg final-args)
-			     (push (format-spec arg spec) final-args))))))
-	       ((member type '("http" "https" "ftp" "news"))
+	       ((member type '("http" "https" "ftp" "mailto" "news"))
 		(browse-url (org-link-escape-browser (concat type ":" path))))
 	       ((equal type "doi")
 		(browse-url
 		 (org-link-escape-browser (concat org-doi-server-url path))))
 	       ((equal type "message") (browse-url (concat type ":" path)))
 	       ((equal type "shell")
-		(let ((buf (generate-new-buffer "*Org Shell Output"))
+		(let ((buf (generate-new-buffer "*Org Shell Output*"))
 		      (cmd path))
 		  (if (or (and (org-string-nw-p
 				org-confirm-shell-link-not-regexp)
