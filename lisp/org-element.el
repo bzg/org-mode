@@ -5745,8 +5745,11 @@ Providing it allows for quicker computation."
 			 (cbeg (org-element-property :contents-begin next))
 			 (cend (org-element-property :contents-end next)))
 		     (cond
-		      ;; Skip objects ending before or at POS.
-		      ((<= end pos)
+		      ;; Skip objects ending before point.  Also skip
+		      ;; objects ending at point unless it is also the
+		      ;; end of buffer, since we want to return the
+		      ;; innermost object.
+		      ((and (<= end pos) (/= (point-max) end))
 		       (goto-char end)
 		       ;; For convenience, when object ends at POS,
 		       ;; without any space, store it in LAST, as we
@@ -5764,7 +5767,9 @@ Providing it allows for quicker computation."
 				;; object, for consistency with
 				;; convenience feature above.
 				(and (= pos cend)
-				     (not (memq (char-before pos) '(?\s ?\t))))))
+				     (or (= (point-max) pos)
+					 (not (memq (char-before pos)
+						    '(?\s ?\t)))))))
 		       (goto-char cbeg)
 		       (narrow-to-region (point) cend)
 		       (setq parent next

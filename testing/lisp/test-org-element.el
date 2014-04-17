@@ -3076,6 +3076,12 @@ Paragraph \\alpha."
    (eq 'bold
        (org-test-with-temp-text "* *bold*"
 	 (search-forward "bo")
+	 (org-element-type (org-element-context)))))
+  ;; Special case: incomplete cell at the end of a table row.
+  (should
+   (eq 'table-cell
+       (org-test-with-temp-text "|a|b|c"
+	 (goto-char (point-max))
 	 (org-element-type (org-element-context))))))
 
 
