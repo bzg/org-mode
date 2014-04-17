@@ -1863,9 +1863,9 @@ will be easy to remove."
     	  tx (concat (buffer-substring (1- (point)) (point))
 		     (make-string
 		      (max 0 (- (- c (current-column))
-				(length (org-get-at-bol 'line-prefix)))) ?.)
+				(length (org-get-at-bol 'line-prefix)))) ? )
 		     (org-add-props
-			 (concat " " (org-minutes-to-clocksum-string time) " ")
+			 (format " %9s " (org-minutes-to-clocksum-string time))
 			 (list 'face 'org-clock-overlay))
 		     ""))
     (if (not (featurep 'xemacs))
