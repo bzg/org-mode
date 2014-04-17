@@ -213,7 +213,7 @@ Return new parse tree."
 	      (cond
 	       ((org-export-derived-backend-p backend 'html)
 		(insert (format "<div id=\"bibliography\">\n<h2>%s</h2>\n"
-				(org-export-translates "References" :bibtex info)))
+				(org-export-translate "References" :html info)))
 		(insert-file-contents (concat file ".html"))
 		(insert "\n</div>"))
 	       ((org-export-derived-backend-p backend 'ascii)
@@ -223,9 +223,13 @@ Return new parse tree."
 					    "-o"
 					    (concat file ".txt")))
 		  (error "Executing pandoc failed"))
-		(insert (format
-			 "%s\n==========\n\n"
-			 (org-export-translates "References" :bibtex info)))
+		(insert
+		 (format
+		  "%s\n==========\n\n"
+		  (org-export-translate
+		   "References"
+		   (intern (format ":%s" (plist-get info :ascii-charset)))
+		   info)))
 		(insert-file-contents (concat file ".txt"))
 		(goto-char (point-min))
 		(while (re-search-forward
