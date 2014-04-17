@@ -2145,6 +2145,7 @@ The following commands are available:
   ;; Keep global-font-lock-mode from turning on font-lock-mode
   (org-set-local 'font-lock-global-modes (list 'not major-mode))
   (setq mode-name "Org-Agenda")
+  (setq indent-tabs-mode nil)
   (use-local-map org-agenda-mode-map)
   (easy-menu-add org-agenda-menu)
   (if org-startup-truncated (setq truncate-lines t))
@@ -3857,11 +3858,12 @@ dimming them."
 		  e (point-at-eol)
 		  ov (make-overlay b e))
 	    (if invis1
-		(overlay-put ov 'invisible t)
+		(progn (overlay-put ov 'invisible t)
+		       (overlay-put ov 'intangible t))
 	      (overlay-put ov 'face 'org-agenda-dimmed-todo-face))
 	    (overlay-put ov 'org-type 'org-blocked-todo))))))
-    (when (org-called-interactively-p 'interactive)
-      (message "Dim or hide blocked tasks...done")))
+  (when (org-called-interactively-p 'interactive)
+    (message "Dim or hide blocked tasks...done")))
 
 (defvar org-agenda-skip-function nil
   "Function to be called at each match during agenda construction.
@@ -5460,7 +5462,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 
 ;;;###autoload
 (defun org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item
-  (&optional end)
+    (&optional end)
   "Do we have a reason to ignore this TODO entry because it has a time stamp?"
   (when (or org-agenda-todo-ignore-with-date
 	    org-agenda-todo-ignore-scheduled
@@ -5697,10 +5699,10 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	      (setq txt "SEXP entry returned empty string"))
 	    (setq txt (org-agenda-format-item extra txt level category tags 'time))
 	    (org-add-props txt props 'org-marker marker
-	      'org-category category 'date date 'todo-state todo-state
-	      'org-category-position category-pos 'tags tags
-	      'level level
-	      'type "sexp" 'warntime warntime)
+			   'org-category category 'date date 'todo-state todo-state
+			   'org-category-position category-pos 'tags tags
+			   'level level
+			   'type "sexp" 'warntime warntime)
 	    (push txt ee)))))
     (nreverse ee)))
 
@@ -7378,7 +7380,7 @@ With two prefix arguments, remove the regexp filters."
 			 (read-from-minibuffer
 			  (if (equal strip '(4))
 			      "Filter out entries matching regexp: "
-			      "Narrow to entries matching regexp: ")))))
+			    "Narrow to entries matching regexp: ")))))
 	(push flt org-agenda-regexp-filter)
 	(org-agenda-filter-apply org-agenda-regexp-filter 'regexp))
     (org-agenda-filter-show-all-re)
@@ -7653,7 +7655,7 @@ When NO-OPERATOR is non-nil, do not add the + operator to returned tags."
       (let* ((pos (org-get-at-bol 'org-hd-marker))
              (tophl (and pos (org-find-top-headline pos))))
         (if (and tophl (funcall (if negative 'identity 'not)
-                                 (string= hl tophl)))
+				(string= hl tophl)))
             (org-agenda-filter-hide-line 'category)))
       (beginning-of-line 2)))
   (if (get-char-property (point) 'invisible)
@@ -7663,10 +7665,11 @@ When NO-OPERATOR is non-nil, do not add the + operator to returned tags."
 
 (defun org-agenda-filter-hide-line (type)
   "Hide lines with TYPE in the agenda buffer."
-  (let (ov)
-    (setq ov (make-overlay (max (point-min) (1- (point-at-bol)))
-			   (point-at-eol)))
+  (let* ((b (max (point-min) (1- (point-at-bol))))
+	 (e (point-at-eol))
+	 (ov (make-overlay b e)))
     (overlay-put ov 'invisible t)
+    (overlay-put ov 'intangible t)
     (overlay-put ov 'type type)
     (cond ((eq type 'tag) (push ov org-agenda-tag-filter-overlays))
 	  ((eq type 'category) (push ov org-agenda-cat-filter-overlays))
@@ -9178,7 +9181,9 @@ Called with a universal prefix arg, show the priority instead of setting it."
       (goto-char (point-max))
       (while (not (bobp))
 	(when (equal marker (org-get-at-bol 'org-marker))
+	  (remove-text-properties (point-at-bol) (point-at-eol) '(display))
 	  (org-move-to-column (- (window-width) (length stamp)) t)
+
 	  (org-agenda-fix-tags-filter-overlays-at (point))
           (if (featurep 'xemacs)
 	      ;; Use `duplicable' property to trigger undo recording
@@ -9189,7 +9194,7 @@ Called with a universal prefix arg, show the priority instead of setting it."
                  ex (list 'invisible t 'end-glyph gl 'duplicable t))
                 (insert-extent ex (1- (point)) (point-at-eol)))
             (add-text-properties
-             (1- (point)) (point-at-eol)
+	     (1- (point)) (point-at-eol)
 	     (list 'display (org-add-props stamp nil
 			      'face 'secondary-selection))))
 	  (beginning-of-line 1))
