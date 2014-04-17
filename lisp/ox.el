@@ -820,7 +820,8 @@ HTML code while every other back-end will ignore it."
 (defcustom org-export-copy-to-kill-ring nil
   "Should we push exported content to the kill ring?"
   :group 'org-export-general
-  :version "24.3"
+  :version "25.1"
+  :package-version '(Org . "8.3")
   :type '(choice
 	  (const :tag "Always" t)
 	  (const :tag "When export is done interactively" if-interactive)
