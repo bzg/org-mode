@@ -12039,8 +12039,9 @@ blocks in the buffer."
 This means to empty the block, parse for parameters and then call
 the correct writing function."
   (interactive)
-  (save-window-excursion
-    (let* ((pos (point))
+  (save-excursion
+    (let* ((win (selected-window))
+	   (pos (point))
 	   (line (org-current-line))
 	   (params (org-prepare-dblock))
 	   (name (plist-get params :name))
@@ -12053,6 +12054,7 @@ the correct writing function."
       (when (and indent (> indent 0))
 	(setq indent (make-string indent ?\ ))
 	(save-excursion
+	  (select-window win)
 	  (org-beginning-of-dblock)
 	  (forward-line 1)
 	  (while (not (looking-at org-dblock-end-re))
