@@ -7641,7 +7641,8 @@ When NEXT is non-nil, check the next line instead."
 (defun org-insert-heading (&optional arg invisible-ok)
   "Insert a new heading or item with same depth at point.
 If point is in a plain list and ARG is nil, create a new list item.
-With one universal prefix argument, insert a heading even in lists.
+With one universal prefix argument, insert a heading even when the
+point is within a list.
 With two universal prefix arguments, insert the heading at the end
 of the parent subtree.
 
