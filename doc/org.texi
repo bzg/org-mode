@@ -991,6 +991,8 @@ active region by using the mouse to select a region, or pressing
 
 If you find problems with Org, or if you have questions, remarks, or ideas
 about it, please mail to the Org mailing list @email{emacs-orgmode@@gnu.org}.
+You can subscribe to the list
+@uref{https://lists.gnu.org/mailman/listinfo/emacs-orgmode, on this web page}.
 If you are not a member of the mailing list, your mail will be passed to the
 list after a moderator has approved it@footnote{Please consider subscribing
 to the mailing list, in order to minimize the work the mailing list
