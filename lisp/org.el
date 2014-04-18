@@ -5711,7 +5711,7 @@ This should be called after the variable `org-link-types' has changed."
 (defvar org-emph-face nil)
 
 (defun org-do-emphasis-faces (limit)
-  "Run through the buffer and add overlays to emphasized strings."
+  "Run through the buffer and emphasize strings."
   (let (rtn a)
     (while (and (not rtn) (re-search-forward org-emph-re limit t))
       (let* ((border (char-after (match-beginning 3)))
