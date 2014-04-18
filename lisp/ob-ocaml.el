@@ -70,7 +70,8 @@
 		  (session org-babel-ocaml-eoe-output t full-body)
 		(insert
 		 (concat
-		  (org-babel-chomp full-body)";;\n"org-babel-ocaml-eoe-indicator))
+		  (org-babel-chomp full-body) ";;\n"
+		  org-babel-ocaml-eoe-indicator))
 		(tuareg-interactive-send-input)))
 	 (clean
 	  (car (let ((re (regexp-quote org-babel-ocaml-eoe-output)) out)
