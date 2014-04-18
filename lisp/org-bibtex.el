@@ -269,9 +269,10 @@ with underscores, and characters that are not permitted in org
 tags will be removed.
 
 If t, local tags in an org entry will be exported as a
-comma-separated string of keywords when exported to bibtex.  Tags
-defined in `org-bibtex-tags' or `org-bibtex-no-export-tags' will
-not be exported."
+comma-separated string of keywords when exported to bibtex.
+If `org-bibtex-inherit-tags' is t, inherited tags will also
+be exported as keywords.  Tags defined in `org-bibtex-tags'
+or `org-bibtex-no-export-tags' will not be exported."
   :group 'org-bibtex
   :version "24.1"
   :type 'boolean)
@@ -282,6 +283,16 @@ This variable is relevant only if `org-bibtex-tags-are-keywords' is t."
   :group 'org-bibtex
   :version "24.1"
   :type '(repeat :tag "Tag" (string)))
+
+(defcustom org-bibtex-inherit-tags nil
+  "Controls whether inherited tags are converted to bibtex keywords.
+It is relevant only if `org-bibtex-tags-are-keywords' is t.  Tag 
+inheritence itself is controlled by `org-use-tag-inheritence' and
+`org-exclude-tags-from-inheritence'."
+  :group 'org-bibtex
+  :version "25.1"
+  :package-version '(Org . "8.3")
+  :type 'boolean)
 
 (defcustom org-bibtex-type-property-name "btype"
   "Property in which to store bibtex entry type (e.g., article)."
@@ -331,7 +342,9 @@ This variable is relevant only if `org-bibtex-tags-are-keywords' is t."
 					  (append org-bibtex-tags
 						  org-bibtex-no-export-tags))
 			    tag))
-			(org-get-local-tags-at))))))
+			(if org-bibtex-inherit-tags
+			    (org-get-tags-at)
+			  (org-get-local-tags-at)))))))
     (when type
       (let ((entry (format
 		    "@%s{%s,\n%s\n}\n" type id
