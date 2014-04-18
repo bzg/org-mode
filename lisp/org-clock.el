@@ -1854,16 +1854,15 @@ Use \\[org-clock-remove-overlays] to remove the subtree times."
   "Put an overlays on the current line, displaying TIME.
 This creates a new overlay and stores it in `org-clock-overlays', so that it
 will be easy to remove."
-  (let* ((c 60) (h (floor (/ time 60))) (m (- time (* 60 h)))
-	 ov tx)
-    (org-move-to-column c)
+  (let (ov tx)
+    (org-move-to-column 60)
     (unless (eolp) (skip-chars-backward "^ \t"))
     (skip-chars-backward " \t")
-    (setq ov (make-overlay (1- (point-at-eol)) (point-at-eol))
-    	  tx (concat (buffer-substring (1- (point)) (point))
+    (setq ov (make-overlay (point-at-bol) (point-at-eol))
+    	  tx (concat (buffer-substring (point-at-bol) (point))
 		     (make-string
-		      (max 0 (- (- c (current-column))
-				(length (org-get-at-bol 'line-prefix)))) ? )
+		      (max 0 (- (- 60 (current-column))
+				(length (org-get-at-bol 'line-prefix)))) ?·)
 		     (org-add-props
 			 (format " %9s " (org-minutes-to-clocksum-string time))
 			 (list 'face 'org-clock-overlay))
