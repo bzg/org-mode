@@ -5169,7 +5169,7 @@ first, and the value after it.  Here is an example:
 @end example
 
 Depending on the value of @code{org-use-property-inheritance}, a property set
-this way will either be associated with a single entry, or the sub-tree
+this way will either be associated with a single entry, or the subtree
 defined by the entry, see @ref{Property inheritance}.
 
 You may define the allowed values for a particular property @samp{:Xyz:}
@@ -15095,12 +15095,12 @@ references.
 @node noweb-ref
 @subsubsection @code{:noweb-ref}
 @cindex @code{:noweb-ref}, src header argument
-When expanding ``noweb'' style references the bodies of all code block with
+When expanding ``noweb'' style references, the bodies of all code block with
 @emph{either} a block name matching the reference name @emph{or} a
 @code{:noweb-ref} header argument matching the reference name will be
 concatenated together to form the replacement text.
 
-By setting this header argument at the sub-tree or file level, simple code
+By setting this header argument at the subtree or file level, simple code
 block concatenation may be achieved.  For example, when tangling the
 following Org mode file, the bodies of code blocks will be concatenated into
 the resulting pure code file@footnote{(The example needs property inheritance
