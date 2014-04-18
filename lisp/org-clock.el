@@ -1850,16 +1850,15 @@ Use \\[org-clock-remove-overlays] to remove the subtree times."
 If LEVEL is given, prefix time with a corresponding number of stars.
 This creates a new overlay and stores it in `org-clock-overlays', so that it
 will be easy to remove."
-  (let* ((c 60) (h (floor (/ time 60))) (m (- time (* 60 h)))
-	 (l (if level (org-get-valid-level level 0) 0))
+  (let* ((l (if level (org-get-valid-level level 0) 0))
 	 ov tx)
-    (org-move-to-column c)
+    (org-move-to-column 60)
     (unless (eolp) (skip-chars-backward "^ \t"))
     (skip-chars-backward " \t")
-    (setq ov (make-overlay (1- (point-at-eol)) (point-at-eol))
-    	  tx (concat (buffer-substring (1- (point)) (point))
+    (setq ov (make-overlay (point-at-bol) (point-at-eol))
+    	  tx (concat (buffer-substring (point-at-bol) (point))
 		     (make-string
-		      (max 0 (- (- c (current-column))
+		      (max 0 (- (- 60 (current-column))
 				(length (org-get-at-bol 'line-prefix)))) ?.)
 		     (org-add-props (concat (make-string l ?*) " "
 					    (org-minutes-to-clocksum-string time)
