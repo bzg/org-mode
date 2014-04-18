@@ -1855,17 +1855,20 @@ Use \\[org-clock-remove-overlays] to remove the subtree times."
 This creates a new overlay and stores it in `org-clock-overlays', so that it
 will be easy to remove."
   (let (ov tx)
-    (org-move-to-column 60)
-    (unless (eolp) (skip-chars-backward "^ \t"))
-    (skip-chars-backward " \t")
-    (setq ov (make-overlay (point-at-bol) (point-at-eol))
-    	  tx (concat (buffer-substring (point-at-bol) (point))
-		     (make-string
-		      (max 0 (- (- 60 (current-column))
-				(length (org-get-at-bol 'line-prefix)))) ?·)
+    (beginning-of-line)
+    (when (looking-at org-complex-heading-regexp)
+      (goto-char (match-beginning 4)))
+    (setq ov (make-overlay (point) (point-at-eol))
+    	  tx (concat (buffer-substring-no-properties (point) (match-end 4))
+		     (org-add-props
+			 (make-string
+			  (max 0 (- (- 60 (current-column))
+				    (- (match-end 4) (match-beginning 4))
+				    (length (org-get-at-bol 'line-prefix)))) ?·)
+			 '(face shadow))
 		     (org-add-props
 			 (format " %9s " (org-minutes-to-clocksum-string time))
-			 (list 'face 'org-clock-overlay))
+			 '(face org-clock-overlay))
 		     ""))
     (if (not (featurep 'xemacs))
 	(overlay-put ov 'display tx)
