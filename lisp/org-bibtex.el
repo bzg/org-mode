@@ -371,7 +371,7 @@ This variable is relevant only if `org-bibtex-tags-are-keywords' is t."
 	    (bibtex-beginning-of-entry)
 	    (if (re-search-forward "keywords.*=.*{\\(.*\\)}" nil t)
 		(progn (goto-char (match-end 1)) (insert ", "))
-	      (bibtex-make-field "keywords" t t))
+	      (ignore-errors (bibtex-make-field "keywords" t t)))
 	    (insert (mapconcat #'identity tags ", ")))
 	  (buffer-string))))))
 
