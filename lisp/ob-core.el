@@ -2741,9 +2741,9 @@ If the table is trivial, then return it as a scalar."
                       cell) t))
 
 (defun org-babel-chomp (string &optional regexp)
-  "Strip trailing spaces and carriage returns from STRING.
-Default regexp used is \"[ \f\t\n\r\v]\" but can be
-overwritten by specifying a regexp as a second argument."
+  "Strip a trailing space or carriage return from STRING.
+The default regexp used is \"[ \\f\\t\\n\\r\\v]\" but another one
+can be specified as the REGEXP argument."
   (let ((regexp (or regexp "[ \f\t\n\r\v]")))
     (while (and (> (length string) 0)
                 (string-match regexp (substring string -1)))
@@ -2751,12 +2751,12 @@ overwritten by specifying a regexp as a second argument."
     string))
 
 (defun org-babel-trim (string &optional regexp)
-  "Strip leading and trailing spaces and carriage returns from STRING.
-Like `org-babel-chomp' only it runs on both the front and back
-of the string."
-  (org-babel-chomp (org-reverse-string
-                    (org-babel-chomp (org-reverse-string string) regexp))
-                   regexp))
+  "Strip a leading and trailing space or carriage return from STRING.
+Like `org-babel-chomp', but run on both the first and last
+character of the string."
+  (org-babel-chomp
+   (org-reverse-string
+    (org-babel-chomp (org-reverse-string string) regexp)) regexp))
 
 (defun org-babel-tramp-handle-call-process-region
   (start end program &optional delete buffer display &rest args)
