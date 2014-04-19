@@ -99,9 +99,6 @@
 (declare-function org-element-context "org-element" (&optional ELEMENT))
 (declare-function org-every "org" (pred seq))
 
-(defalias 'org-babel-trim 'org-trim)
-(defalias 'org-babel-chomp 'org-trim-trailing)
-
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
   :tag "Babel"
@@ -2305,11 +2302,7 @@ file's directory then expand relative links."
 
 (define-obsolete-function-alias
   'org-babel-examplize-region
-  'org-babel-examplify-region "25.1")
-
-(defsubst org-trim-trailing (s)
-  "Strip trailing spaces and carriage returns from string S."
-  (replace-regexp-in-string "[ \f\t\n\r\v]+\\'" "" s))
+  'org-babel-examplify-region "24.5")
 
 (defun org-babel-examplify-region (beg end &optional results-switches)
   "Comment out region using the inline '==' or ': ' org example quote."
@@ -2746,6 +2739,24 @@ If the table is trivial, then return it as a scalar."
                            (string-match "\\\"\\(.+\\)\\\"" cell)
                            (match-string 1 cell))
                       cell) t))
+
+(defun org-babel-chomp (string &optional regexp)
+  "Strip trailing spaces and carriage returns from STRING.
+Default regexp used is \"[ \f\t\n\r\v]\" but can be
+overwritten by specifying a regexp as a second argument."
+  (let ((regexp (or regexp "[ \f\t\n\r\v]")))
+    (while (and (> (length string) 0)
+                (string-match regexp (substring string -1)))
+      (setq string (substring string 0 -1)))
+    string))
+
+(defun org-babel-trim (string &optional regexp)
+  "Strip leading and trailing spaces and carriage returns from STRING.
+Like `org-babel-chomp' only it runs on both the front and back
+of the string."
+  (org-babel-chomp (org-reverse-string
+                    (org-babel-chomp (org-reverse-string string) regexp))
+                   regexp))
 
 (defun org-babel-tramp-handle-call-process-region
   (start end program &optional delete buffer display &rest args)

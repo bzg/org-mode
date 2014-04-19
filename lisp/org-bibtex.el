@@ -120,6 +120,7 @@
 (declare-function bibtex-generate-autokey "bibtex" ())
 (declare-function bibtex-parse-entry "bibtex" (&optional content))
 (declare-function bibtex-url "bibtex" (&optional pos no-browse))
+(declare-function org-babel-trim "ob" (string &optional regexp))
 
 
 ;;; Bibtex data
@@ -311,7 +312,7 @@ and `org-exclude-tags-from-inheritence'."
                (org-entry-get (point) (upcase property))
                (org-entry-get (point) (concat org-bibtex-prefix
                                               (upcase property)))))))
-    (when it (org-trim it))))
+    (when it (org-babel-trim it))))
 
 (defun org-bibtex-put (property value)
   (let ((prop (upcase (if (keywordp property)
