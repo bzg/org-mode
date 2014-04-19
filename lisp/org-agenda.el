@@ -8726,6 +8726,7 @@ docstring of `org-agenda-show-1'."
       (org-agenda-error)))
 
 (defun org-agenda-error ()
+  "Throw an error when a command is not allowed in the agenda."
   (error "Command not allowed in this line"))
 
 (defun org-agenda-tree-to-indirect-buffer (arg)
