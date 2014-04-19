@@ -352,10 +352,7 @@ that the appropriate major-mode is set.  SPEC has the form:
      (format
       "%s\n"
       (org-unescape-code-in-string
-       (let ((rep (if org-src-preserve-indentation "[\f\n\r\v]"
-		    "[\f\t\n\r\v]")))
-	 (replace-regexp-in-string
-	  (concat rep "\\(.+\\)" rep) "\\1" body)))))
+       (org-babel-trim body (if org-src-preserve-indentation "[\f\n\r\v]")))))
     (when link-p
       (funcall
        insert-comment
