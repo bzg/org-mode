@@ -1523,7 +1523,6 @@ Text.
     (insert "<<<")
     (search-forward "o")
     (insert ">>>")
-    (replace-match "<<<radio>>>")
     (org-update-radio-target-regexp)
     (goto-char (point-max))
     (org-element-type (org-element-context))))
