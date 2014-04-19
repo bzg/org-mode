@@ -5510,8 +5510,7 @@ change, as an integer."
 (defun org-element-cache-reset (&optional all)
   "Reset cache in current buffer.
 When optional argument ALL is non-nil, reset cache in all Org
-buffers.  This function will do nothing if
-`org-element-use-cache' is nil."
+buffers."
   (interactive "P")
   (dolist (buffer (if all (buffer-list) (list (current-buffer))))
     (with-current-buffer buffer
@@ -5529,6 +5528,14 @@ buffers.  This function will do nothing if
 		  #'org-element--cache-before-change nil t)
 	(add-hook 'after-change-functions
 		  #'org-element--cache-after-change nil t)))))
+
+;;;###autoload
+(defun org-element-cache-refresh (pos)
+  "Refresh cache at position POS."
+  (when (org-element--cache-active-p)
+    (org-element--cache-sync (current-buffer) pos)
+    (org-element--cache-submit-request pos pos 0)
+    (org-element--cache-set-timer (current-buffer))))
 
 
 

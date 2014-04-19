@@ -1514,23 +1514,20 @@ Text.
 
 
 
-;;; Targets and Radio Targets
+;;; Radio Targets
 
-(ert-deftest test-org/all-targets ()
-  "Test `org-all-targets' specifications."
-  ;; Without an argument.
-  (should
-   (equal '("radio-target" "target")
-	  (org-test-with-temp-text "<<target>> <<<radio-target>>>\n: <<verb>>"
-	    (org-all-targets))))
-  (should
-   (equal '("radio-target")
-	  (org-test-with-temp-text "<<<radio-target>>>!" (org-all-targets))))
-  ;; With argument.
-  (should
-   (equal '("radio-target")
-	  (org-test-with-temp-text "<<target>> <<<radio-target>>>"
-	    (org-all-targets t)))))
+(ert-deftest test-org/update-radio-target-regexp ()
+  "Test `org-update-radio-target-regexp' specifications."
+  (org-test-with-temp-text "radio\n\nParagraph\n\nradio"
+    (save-excursion (goto-char (point-max)) (org-element-context))
+    (insert "<<<")
+    (search-forward "o")
+    (insert ">>>")
+    (replace-match "<<<radio>>>")
+    (org-update-radio-target-regexp)
+    (goto-char (point-max))
+    (org-element-type (org-element-context))))
+
 
 
 ;;; Visibility

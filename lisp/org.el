@@ -6089,12 +6089,41 @@ by a #."
 	    t)))))
 
 (defun org-update-radio-target-regexp ()
-  "Find all radio targets in this file and update the regular expression."
+  "Find all radio targets in this file and update the regular expression.
+Also refresh fontification if needed."
   (interactive)
-  (when (memq 'radio org-activate-links)
+  (let ((old-regexp org-target-link-regexp)
+	(targets
+	 (org-with-wide-buffer
+	  (goto-char (point-min))
+	  (let (rtn)
+	    (while (re-search-forward org-radio-target-regexp nil t)
+	      ;; Make sure point is really within the object.
+	      (backward-char)
+	      (let ((obj (org-element-context)))
+		(when (eq (org-element-type obj) 'radio-target)
+		  (add-to-list 'rtn (org-element-property :value obj)))))
+	    rtn))))
     (setq org-target-link-regexp
-	  (org-make-target-link-regexp (org-all-targets 'radio)))
-    (org-restart-font-lock)))
+	  (and targets
+	       (concat "\\(?:^\\|[^[:alnum:]]\\)\\("
+		       (mapconcat
+			(lambda (x)
+			  (replace-regexp-in-string
+			   " +" "\\s-+" (regexp-quote x) t t))
+			targets
+			"\\|")
+		       "\\)\\(?:$\\|[^[:alnum:]]\\)")))
+    (unless (equal old-regexp org-target-link-regexp)
+      ;; Clean-up cache.
+      (when old-regexp
+	(org-with-wide-buffer
+	 (goto-char (point-min))
+	 (while (re-search-forward old-regexp nil t)
+	   (org-element-cache-refresh (match-beginning 1)))))
+      ;; Re fontify buffer.
+      (when (memq 'radio org-activate-links)
+	(org-restart-font-lock)))))
 
 (defun org-hide-wide-columns (limit)
   (let (s e)
@@ -6159,34 +6188,6 @@ done, nil otherwise."
   (when (and (boundp 'font-lock-mode) font-lock-mode)
     (font-lock-mode -1)
     (font-lock-mode 1)))
-
-(defun org-all-targets (&optional radio)
-  "Return a list of all targets in this file.
-When optional argument RADIO is non-nil, only find radio
-targets."
-  (let ((re (if radio org-radio-target-regexp org-target-regexp)) rtn)
-    (save-excursion
-      (goto-char (point-min))
-      (while (re-search-forward re nil t)
-	;; Make sure point is really within the object.
-	(backward-char)
-	(let ((obj (org-element-context)))
-	  (when (memq (org-element-type obj) '(radio-target target))
-	    (add-to-list 'rtn (downcase (org-element-property :value obj))))))
-      rtn)))
-
-(defun org-make-target-link-regexp (targets)
-  "Make regular expression matching all strings in TARGETS.
-The regular expression finds the targets also if there is a line break
-between words."
-  (and targets
-       (concat "\\(?:^\\|[^[:alnum:]]\\)\\("
-	       (mapconcat
-		(lambda (x)
-		  (replace-regexp-in-string " +" "\\s-+" (regexp-quote x) t t))
-		targets
-		"\\|")
-	       "\\)\\(?:$\\|[^[:alnum:]]\\)")))
 
 (defun org-activate-tags (limit)
   (if (re-search-forward (org-re "^\\*+.*[ \t]\\(:[[:alnum:]_@#%:]+:\\)[ \r\n]") limit t)
