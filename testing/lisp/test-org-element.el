@@ -1428,6 +1428,25 @@ e^{i\\pi}+1=0
 	(lambda (l) (list (org-element-property :type l)
 		     (org-element-property :path l)
 		     (org-element-property :application l)))))))
+  ;; ... `:path' in a file-type link must be compatible with "file"
+  ;; scheme in URI syntax, even if Org syntax isn't.
+  (should
+   (org-test-with-temp-text-in-file ""
+     (let ((file (expand-file-name (buffer-file-name))))
+       (insert (format "[[file://%s]]" file))
+       (equal (org-element-property :path (org-element-context))
+	      (concat "//" file)))))
+  (should
+   (org-test-with-temp-text-in-file ""
+     (let ((file (expand-file-name (buffer-file-name))))
+       (insert (format "[[file:%s]]" file))
+       (equal (org-element-property :path (org-element-context))
+	      (concat "//" file)))))
+  (should
+   (org-test-with-temp-text-in-file ""
+     (let ((file (file-relative-name (buffer-file-name))))
+       (insert (format "[[file:%s]]" file))
+       (list (org-element-property :path (org-element-context)) file))))
   ;; Plain link.
   (should
    (org-test-with-temp-text "A link: http://orgmode.org"
