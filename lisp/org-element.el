@@ -4937,7 +4937,7 @@ relative to ELEMENT and store it in the objects cache."
 (defsubst org-element--cache-remove (element)
   "Remove ELEMENT from cache.
 Assume ELEMENT belongs to cache and that a cache is active."
-  (avl-tree-delete org-element--cache data)
+  (avl-tree-delete org-element--cache element)
   (remhash element org-element--cache-objects))
 
 
