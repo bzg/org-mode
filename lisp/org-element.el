@@ -4934,6 +4934,12 @@ relative to ELEMENT and store it in the objects cache."
 	((eq (org-element-type element) 'headline) nil)
 	(t (puthash element data org-element--cache-objects))))
 
+(defsubst org-element--cache-remove (element)
+  "Remove ELEMENT from cache.
+Assume ELEMENT belongs to cache and that a cache is active."
+  (avl-tree-delete org-element--cache data)
+  (remhash element org-element--cache-objects))
+
 
 ;;;; Synchronization
 
@@ -5084,7 +5090,7 @@ t otherwise."
 				   (setq up (org-element-property :parent up))
 				   (not (eq up deleted-parent))))
 			   up))
-		    (avl-tree-delete org-element--cache data))
+		    (org-element--cache-remove data))
 		   ((or (and next
 			     (not (org-element--cache-key-less-p data-key
 								 next)))
@@ -5093,7 +5099,7 @@ t otherwise."
 		    (aset request 1 pos)
 		    (aset request 4 1)
 		    (throw 'end-phase nil))
-		   (t (avl-tree-delete org-element--cache data)
+		   (t (org-element--cache-remove data)
 		      (when (= (org-element-property :end data) end)
 			(setq deleted-parent data)))))))))))
     (when (= (aref request 4) 1)
@@ -5517,8 +5523,7 @@ buffers."
       (when (org-element--cache-active-p)
 	(org-set-local 'org-element--cache
 		       (avl-tree-create #'org-element--cache-compare))
-	(org-set-local 'org-element--cache-objects
-		       (make-hash-table :weakness 'key :test #'eq))
+	(org-set-local 'org-element--cache-objects (make-hash-table :test #'eq))
 	(org-set-local 'org-element--cache-sync-keys
 		       (make-hash-table :weakness 'key :test #'eq))
 	(org-set-local 'org-element--cache-change-warning nil)
