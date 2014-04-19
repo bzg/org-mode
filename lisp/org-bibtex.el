@@ -534,7 +534,7 @@ With optional argument OPTIONAL, also prompt for optional fields."
 ;;; Bibtex <-> Org-mode headline translation functions
 (defun org-bibtex (&optional filename)
   "Export each headline in the current file to a bibtex entry.
-Headlines are exported using `org-bibtex-export-headline'."
+Headlines are exported using `org-bibtex-headline'."
   (interactive
    (list (read-file-name
 	  "Bibtex file: " nil nil nil
