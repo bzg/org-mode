@@ -5487,7 +5487,7 @@ them."
       :utf-8 "Распечатка %d.:")
      ("zh-CN" :html "&#20195;&#30721;%d&nbsp;" :utf-8 "代码%d "))
     ("References"
-     ("fr" :ascii "References" :default "Références"))
+     ("fr" :ascii "References" :default "Références")
      ("de" :default "Quellen"))
     ("See section %s"
      ("da" :default "jævnfør afsnit %s")
