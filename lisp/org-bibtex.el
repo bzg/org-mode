@@ -386,9 +386,9 @@ and `org-exclude-tags-from-inheritence'."
 	    (bibtex-beginning-of-entry)
 	    (if (re-search-forward "keywords.*=.*{\\(.*\\)}" nil t)
 		(progn (goto-char (match-end 1)) (insert ", "))
-	      (progn (re-search-forward ",\\(\n\\)" nil t) 
-		     (insert "  keywords={},\n"))
-	      (re-search-backward "}," nil t))
+	      (search-forward ",\n" nil t)
+	      (insert "  keywords={},\n")
+	      (search-backward "}," nil t))
 	    (insert (mapconcat #'identity tags ", ")))
 	  (buffer-string))))))
 
