@@ -1712,9 +1712,21 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
 
 (defun org-clock-sum-today (&optional headline-filter)
   "Sum the times for each subtree for today."
-  (interactive)
   (let ((range (org-clock-special-range 'today)))
-    (org-clock-sum (car range) (cadr range) nil :org-clock-minutes-today)))
+    (org-clock-sum (car range) (cadr range)
+		   headline-filter :org-clock-minutes-today)))
+
+(defun org-clock-sum-custom (&optional headline-filter)
+  "Sum the times for each subtree for today."
+  (let ((range
+	 (org-clock-special-range
+	  (intern (completing-read
+		   "Range: "
+		   '("today" "yesterday" "thisweek" "lastweek"
+		     "thismonth" "lastmonth" "thisyear" "lastyear")
+		   nil t)))))
+    (org-clock-sum (car range) (cadr range)
+		   headline-filter :org-clock-minutes-custom)))
 
 ;;;###autoload
 (defun org-clock-sum (&optional tstart tend headline-filter propname)
@@ -1725,7 +1737,6 @@ HEADLINE-FILTER is a zero-arg function that, if specified, is called for
 each headline in the time range with point at the headline.  Headlines for
 which HEADLINE-FILTER returns nil are excluded from the clock summation.
 PROPNAME lets you set a custom text property instead of :org-clock-minutes."
-  (interactive)
   (org-with-silent-modifications
    (let* ((re (concat "^\\(\\*+\\)[ \t]\\|^[ \t]*"
 		      org-clock-string
@@ -1817,25 +1828,35 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
       org-clock-file-total-minutes)))
 
 ;;;###autoload
-(defun org-clock-display (&optional total-only)
+(defun org-clock-display (arg)
   "Show subtree times in the entire buffer.
-If TOTAL-ONLY is non-nil, only show the total time for the entire file
-in the echo area.
+
+With one universal prefix argument, show the total time for
+today.  With two universal prefix arguments, show the total time
+for a custom range, entered at the prompt.  With three universal
+prefix arguments, show the total time in the echo area.
 
 Use \\[org-clock-remove-overlays] to remove the subtree times."
-  (interactive)
+  (interactive "P")
   (org-clock-remove-overlays)
-  (let (time h m p)
-    (org-clock-sum)
-    (unless total-only
+  (let* ((todayp (equal arg '(4)))
+	 (customp (equal arg '(16)))
+	 (prop (cond (todayp :org-clock-minutes-today)
+		     (customp :org-clock-minutes-custom)
+		     (t :org-clock-minutes)))
+	 time h m p)
+    (cond (todayp (org-clock-sum-today))
+	  (customp (org-clock-sum-custom))
+	  (t (org-clock-sum)))
+    (unless (eq arg '(64))
       (save-excursion
 	(goto-char (point-min))
 	(while (or (and (equal (setq p (point)) (point-min))
-			(get-text-property p :org-clock-minutes))
+			(get-text-property p prop))
 		   (setq p (next-single-property-change
-			    (point) :org-clock-minutes)))
+			    (point) prop)))
 	  (goto-char p)
-	  (when (setq time (get-text-property p :org-clock-minutes))
+	  (when (setq time (get-text-property p prop))
 	    (org-clock-put-overlay time)))
 	(setq h (/ org-clock-file-total-minutes 60)
 	      m (- org-clock-file-total-minutes (* 60 h)))
@@ -1843,7 +1864,10 @@ Use \\[org-clock-remove-overlays] to remove the subtree times."
 	(when org-remove-highlights-with-change
 	  (org-add-hook 'before-change-functions 'org-clock-remove-overlays
 			nil 'local))))
-    (message (concat "Total file time: "
+    (message (concat (format "Total file time%s: "
+			     (cond (todayp " for today")
+				   (customp " (custom)")
+				   (t "")))
 		     (org-minutes-to-clocksum-string org-clock-file-total-minutes)
 		     " (%d hours and %d minutes)") h m)))
 
