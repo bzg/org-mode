@@ -818,7 +818,8 @@ HTML code while every other back-end will ignore it."
   :type 'coding-system)
 
 (defcustom org-export-copy-to-kill-ring nil
-  "Should we push exported content to the kill ring?"
+  "Non-nil means pushing export output to the kill ring.
+This variable is ignored during asynchronous export."
   :group 'org-export-general
   :version "25.1"
   :package-version '(Org . "8.3")

@@ -10427,10 +10427,10 @@ export dispatcher with the following key combinations:
 Toggle asynchronous export.  Asynchronous export uses an external Emacs
 process that is configured with a specified initialization file.
 
-While exporting asynchronously, the output is not displayed.  It is stored in
-a list called ``the export stack'', and can be viewed from there.  The stack
-can be reached by calling the dispatcher with a double @kbd{C-u} prefix
-argument, or with @kbd{&} key from the dispatcher.
+While exporting asynchronously, the output is not displayed, but stored in
+a place called ``the export stack''.  This stack can be displayed by calling
+the dispatcher with a double @kbd{C-u} prefix argument, or with @kbd{&} key
+from the dispatcher menu.
 
 @vindex org-export-in-background
 To make this behavior the default, customize the variable
