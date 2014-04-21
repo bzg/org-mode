@@ -96,7 +96,9 @@ Dit werk is valt onder een [[" org-license-cc-url "][Creative Commons Naamsverme
 	  (setq org-license-cc-url "http://creativecommons.org/licenses/by/3.0/pt/deed.pt")
 	  (insert (concat "* Licença
 Este texto é disponibilizado nos termos da licença [[" org-license-cc-url "][Atribuição 3.0 Portugal]]\n")))
-	 (t (concat (insert "* License
+	 (t
+	  (setq org-license-cc-url "http://creativecommons.org/licenses/by/3.0/en/deed.en") 
+	  (concat (insert "* License
 This document is under a [[" org-license-cc-url "][Creative Commons Attribution 3.0]]\n"))))
   (if (string= "" org-license-images-directory)
       (insert (concat "\n[[" org-license-cc-url "][file:http://i.creativecommons.org/l/by/3.0/80x15.png]]\n"))
