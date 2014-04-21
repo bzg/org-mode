@@ -10451,13 +10451,7 @@ You can change the default state of this option by setting
 @item C-v
 Toggle visible-only export.  Only export the text that is currently
 visible, i.e. not hidden by outline visibility in the buffer.
-
 @end table
-
-@vindex org-export-copy-to-kill-ring
-With the exception of asynchronous export, a successful export process writes
-its output to the kill-ring. You can configure this behavior by altering the
-option @code{org-export-copy-to-kill-ring}.
 
 @node Export back-ends
 @section Export back-ends
