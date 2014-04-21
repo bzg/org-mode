@@ -13643,8 +13643,8 @@ D      Show deadlines and scheduled items between a date range."
 	      (value (org-icompleting-read
 		      "Value: " (mapcar #'list (org-property-values kwd)))))
 	 (unless (string-match "\\`{.*}\\'" value)
-	   (setq value (concat "\"" value "\""))))
-       (org-match-sparse-tree arg (concat kwd "=" value)))
+	   (setq value (concat "\"" value "\"")))
+	 (org-match-sparse-tree arg (concat kwd "=" value))))
       ((?r ?R ?/) (call-interactively #'org-occur))
       (otherwise (user-error "No such sparse tree command \"%c\"" answer)))))
 
