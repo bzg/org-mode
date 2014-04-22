@@ -7546,21 +7546,31 @@ When NEXT is non-nil, check the next line instead."
 
 (defun org-insert-heading (&optional arg invisible-ok)
   "Insert a new heading or item with same depth at point.
-If point is in a plain list and ARG is nil, create a new list item.
-With one universal prefix argument, insert a heading even in lists.
-With two universal prefix arguments, insert the heading at the end
-of the parent subtree.
 
-If point is at the beginning of a headline, insert a sibling before
-the current headline.  If point is not at the beginning, split the line
-and create a new headline with the text in the current line after point
-\(see `org-M-RET-may-split-line' on how to modify this behavior).
+If point is at the beginning of a heading or a list item, insert
+a heading or a list item before it.
 
-If point is at the beginning of a normal line, turn this line into
-a heading.
+If point is at the beginning of a normal line, turn this line
+into a heading.
 
-When INVISIBLE-OK is set, stop at invisible headlines when going back.
-This is important for non-interactive uses of the command."
+If point is in the middle of a headline or a list item, split the
+headline or the item and create a new headline/item with the text
+in the current line after point \(see `org-M-RET-may-split-line'
+on how to modify this behavior).
+
+With one universal prefix argument: If point is within a list,
+insert a heading instead of a list item.  Otherwise, set the
+value of `org-insert-heading-respect-content' to `t' for the
+duration of the command.
+
+With two universal prefix arguments, insert the heading at the
+end of the grandparent subtree.  For example, if point is within
+a 2nd-level heading, then it will insert a 2nd-level heading at
+the end of the 1st-level parent heading.
+
+When INVISIBLE-OK is set, stop at invisible headlines when going
+back.  This is important for non-interactive uses of the
+command."
   (interactive "P")
   (if (org-called-interactively-p 'any) (org-reveal))
   (let ((itemp (org-in-item-p))
@@ -7640,7 +7650,7 @@ This is important for non-interactive uses of the command."
 	       pos hide-previous previous-pos)
 
 	  ;; If we insert after content, move there and clean up whitespace
-	  (when respect-content
+	  (when (and respect-content (not (org-on-heading-p)))
 	    (org-end-of-subtree nil t)
 	    (skip-chars-backward " \r\n")
 	    (and (not (looking-back "^\*+"))
