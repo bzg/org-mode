@@ -1591,7 +1591,7 @@ shown below.
 ;; row and column names
 (defun org-babel-del-hlines (table)
   "Remove all 'hlines from TABLE."
-  (remove 'hline table))
+  (remq 'hline table))
 
 (defun org-babel-get-colnames (table)
   "Return the column names of TABLE.
