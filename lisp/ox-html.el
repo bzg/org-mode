@@ -454,6 +454,7 @@ export back-end currently used."
 	      (not org-html-use-infojs)
 	      (and (eq org-html-use-infojs 'when-configured)
 		   (or (not (plist-get exp-plist :infojs-opt))
+		       (string= "" (plist-get exp-plist :infojs-opt))
 		       (string-match "\\<view:nil\\>"
 				     (plist-get exp-plist :infojs-opt)))))
     (let* ((template org-html-infojs-template)
