@@ -283,6 +283,8 @@ Returns a list
     ;; resolve variable references and add summary parameters
     (when (and info (not light))
       (setf (nth 2 info) (org-babel-process-params (nth 2 info))))
+    (when info
+      (setf (nth 2 info) (org-babel-generate-file-param name (nth 2 info))))
     (when info (append info (list name indent head)))))
 
 (defvar org-babel-exp-reference-buffer nil
@@ -2435,6 +2437,16 @@ parameters when merging lists."
 		 (setq exports (funcall e-merge exports-exclusive-groups
 					exports '("results"))))
 	       (setq params (cons pair (assq-delete-all (car pair) params)))))
+	    (:file-ext
+	     (when (cdr pair)
+	       (setq results (funcall e-merge results-exclusive-groups
+				      results '("file")))
+	       (unless (or (member "both" exports)
+			   (member "none" exports)
+			   (member "code" exports))
+		 (setq exports (funcall e-merge exports-exclusive-groups
+					exports '("results"))))
+	       (setq params (cons pair (assq-delete-all (car pair) params)))))
 	    (:exports
 	     (setq exports (funcall e-merge exports-exclusive-groups
 				    exports (split-string (cdr pair)))))
@@ -2890,10 +2902,48 @@ For the format of SAFE-LIST, see `org-babel-safe-header-args'."
 		      (member (cdr pair) (cdr entry)))
 		     (t nil)))))))
 
+(defun org-babel-generate-file-param (src-name params)
+  "Calculate the filename for source block results.
+
+The directory is calculated from the :output-dir property of the
+source block; if not specified, use the current directory.
+
+If the source block has a #+NAME and the :file parameter does not
+contain any period characters, then the :file parameter is
+treated as an extension, and the output file name is the
+concatenation of the directory (as calculated above), the block
+name, a period, and the parameter value as a file extension.
+Otherwise, the :file parameter is treated as a full file name,
+and the output file name is the directory (as calculated above)
+plus the parameter value."
+  (let* ((file-cons (assq :file params))
+	   (file-ext-cons (assq :file-ext params))
+	   (file-ext (cdr-safe file-ext-cons))
+	   (dir (cdr-safe (assq :output-dir params)))
+	   fname)
+    ;; create the output-dir if it does not exist
+    (when dir
+      (make-directory dir t))
+    (if file-cons
+	;; :file given; add :output-dir if given
+	(when dir
+	  (setcdr file-cons (concat (file-name-as-directory dir) (cdr file-cons))))
+      ;; :file not given; compute from name and :file-ext if possible
+      (when (and src-name file-ext)
+	(if dir
+	    (setq fname (concat (file-name-as-directory (or dir ""))
+				src-name "." file-ext))
+	  (setq fname (concat src-name "." file-ext)))
+	(setq params (cons (cons :file fname) params))))
+    params))
 
 ;;; Used by backends: R, Maxima, Octave.
 (defun org-babel-graphical-output-file (params)
   "File where a babel block should send graphical output, per PARAMS."
+  (unless (assq :file params)
+    (if (assq :file-ext params)
+	(error ":file-ext given but no :file generated; did you forget to give a block a #+NAME?")
+      (error "No :file header argument given; cannot create graphical result.")))
   (and (member "graphics" (cdr (assq :result-params params)))
        (cdr (assq :file params))))
 

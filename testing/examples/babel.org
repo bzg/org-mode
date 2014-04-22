@@ -458,3 +458,37 @@ comments for ":var":
                 "0"))))
   (format "elisp a:%d, b:%d, c:%d, d:%d, e:%d" a b c d e)
 #+END_SRC
+
+* =:file-ext= and =:output-dir= header args
+  :PROPERTIES:
+  :ID:       93573e1d-6486-442e-b6d0-3fedbdc37c9b
+  :END:
+#+name: file-ext-basic
+#+BEGIN_SRC emacs-lisp :file-ext txt
+nil
+#+END_SRC
+
+#+name: file-ext-dir-relative
+#+BEGIN_SRC emacs-lisp :file-ext txt :output-dir foo
+nil
+#+END_SRC
+
+#+name: file-ext-dir-relative-slash
+#+BEGIN_SRC emacs-lisp :file-ext txt :output-dir foo/
+nil
+#+END_SRC
+
+#+name: file-ext-dir-absolute
+#+BEGIN_SRC emacs-lisp :file-ext txt :output-dir /tmp
+nil
+#+END_SRC
+
+#+name: file-ext-file-wins
+#+BEGIN_SRC emacs-lisp :file-ext txt :file foo.bar
+nil
+#+END_SRC
+
+#+name: output-dir-and-file
+#+BEGIN_SRC emacs-lisp :output-dir xxx :file foo.bar
+nil
+#+END_SRC

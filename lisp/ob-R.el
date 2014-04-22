@@ -95,17 +95,15 @@ this variable.")
 
 (defun org-babel-expand-body:R (body params &optional graphics-file)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((graphics-file
-	 (or graphics-file (org-babel-graphical-output-file params))))
-    (mapconcat #'identity
-	       (append
-		(when (cdr (assoc :prologue params))
-		  (list (cdr (assoc :prologue params))))
-		(org-babel-variable-assignments:R params)
-		(list body)
-		(when (cdr (assoc :epilogue params))
-		  (list (cdr (assoc :epilogue params)))))
-	       "\n")))
+  (mapconcat #'identity
+	     (append
+	      (when (cdr (assoc :prologue params))
+		(list (cdr (assoc :prologue params))))
+	      (org-babel-variable-assignments:R params)
+	      (list body)
+	      (when (cdr (assoc :epilogue params))
+		(list (cdr (assoc :epilogue params)))))
+	     "\n"))
 
 (defun org-babel-execute:R (body params)
   "Execute a block of R code.
@@ -117,7 +115,8 @@ This function is called by `org-babel-execute-src-block'."
 		     (cdr (assoc :session params)) params))
 	   (colnames-p (cdr (assoc :colnames params)))
 	   (rownames-p (cdr (assoc :rownames params)))
-	   (graphics-file (org-babel-graphical-output-file params))
+	   (graphics-file (and (member "graphics" (assq :result-params params))
+			       (org-babel-graphical-output-file params)))
 	   (full-body
 	    (let ((inside
 		   (list (org-babel-expand-body:R body params graphics-file))))

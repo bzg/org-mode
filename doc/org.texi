@@ -14406,6 +14406,8 @@ argument in lowercase letters.  The following header arguments are defined:
                                 be collected and handled
 * file::                        Specify a path for file output
 * file-desc::                   Specify a description for file results
+* file-ext::                    Specify an extension for file output
+* output-dir::                  Specify a directory to write file output to
 * dir::                         Specify the default (possibly remote)
                                 directory for code block execution
 * exports::                     Export code and/or results
@@ -14839,6 +14841,29 @@ description for file code block results which are inserted as Org mode links
 (see @ref{Link format}).  If the @code{:file-desc} header argument is given
 with no value the link path will be placed in both the ``link'' and the
 ``description'' portion of the Org mode link.
+
+@node file-ext
+@subsubsection @code{:file-ext}
+@cindex @code{:file-ext}, src header argument
+
+The value of the @code{:file-ext} header argument is used to provide an
+extension to write the file output to.  It is combined with the
+@code{#+NAME:} of the source block and the value of the @ref{output-dir}
+header argument to generate a complete file name.
+
+This header arg will be overridden by @code{:file}, and thus has no effect
+when the latter is specified.
+
+@node output-dir
+@subsubsection @code{:output-dir}
+@cindex @code{:output-dir}, src header argument
+
+The value of the @code{:output-dir} header argument is used to provide a
+directory to write the file output to.  It may specify an absolute directory
+(beginning with @code{/}) or a relative directory (without @code{/}).  It can
+be combined with the @code{#+NAME:} of the source block and the value of the
+@ref{file-ext} header argument to generate a complete file name, or used
+along with a @ref{file} header arg.
 
 @node dir
 @subsubsection @code{:dir} and remote execution

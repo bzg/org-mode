@@ -1237,6 +1237,28 @@ echo \"$data\"
 		       (org-babel-execute-src-block)))
       (should (= noweb-expansions-in-cache-var 2)))))
 
+(ert-deftest test-org-babel/file-ext-and-output-dir ()
+  (org-test-at-id "93573e1d-6486-442e-b6d0-3fedbdc37c9b"
+    (org-babel-next-src-block)
+    (should (equal  "file-ext-basic.txt"
+		   (cdr (assq :file (nth 2 (org-babel-get-src-block-info t))))))
+    (org-babel-next-src-block)
+    (should (equal "foo/file-ext-dir-relative.txt"
+		   (cdr (assq :file (nth 2 (org-babel-get-src-block-info t))))))
+    (org-babel-next-src-block)
+    (should (equal  "foo/file-ext-dir-relative-slash.txt"
+		   (cdr (assq :file (nth 2 (org-babel-get-src-block-info t))))))
+    (org-babel-next-src-block)
+    (should (equal  "/tmp/file-ext-dir-absolute.txt"
+		   (cdr (assq :file (nth 2 (org-babel-get-src-block-info t))))))
+    (org-babel-next-src-block)
+    (should (equal  "foo.bar"
+		   (cdr (assq :file (nth 2 (org-babel-get-src-block-info t))))))
+    (org-babel-next-src-block)
+    (should (equal "xxx/foo.bar"
+		   (cdr (assq :file (nth 2 (org-babel-get-src-block-info t))))))
+    ))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
