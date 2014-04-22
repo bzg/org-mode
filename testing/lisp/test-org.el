@@ -414,15 +414,12 @@
    (org-test-with-temp-text "* H1\n Body"
      (org-insert-todo-heading-respect-content)
      (nth 2 (org-heading-components))))
-  ;; Add headline after body of current subtree.
+  ;; Add headline at the end of the first subtree
   (should
-   (org-test-with-temp-text "* H1\nBody"
+   (org-test-with-temp-text "* H1\nH1Body\n** H2\nH2Body"
+     (search-forward "H1Body")
      (org-insert-todo-heading-respect-content)
-     (eobp)))
-  (should
-   (org-test-with-temp-text "* H1\n** H2\nBody"
-     (org-insert-todo-heading-respect-content)
-     (eobp)))
+     (and (eobp) (org-at-heading-p))))
   ;; In a list, do not create a new item.
   (should
    (org-test-with-temp-text "* H\n- an item\n- another one"
