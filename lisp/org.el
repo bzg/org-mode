@@ -5377,9 +5377,8 @@ The following commands are available:
   ;; Comments.
   (org-setup-comments-handling)
   ;; Beginning/end of defun
-  (org-set-local 'beginning-of-defun-function 'org-back-to-heading)
-  (org-set-local 'end-of-defun-function
-		 (lambda () (interactive) (org-end-of-subtree nil t)))
+  (org-set-local 'beginning-of-defun-function 'org-backward-element)
+  (org-set-local 'end-of-defun-function 'org-forward-element)
   ;; Next error for sparse trees
   (org-set-local 'next-error-function 'org-occur-next-match)
   ;; Make sure dependence stuff works reliably, even for users who set it
