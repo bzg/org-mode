@@ -5451,9 +5451,13 @@ The following commands are available:
   ;; Initialize cache.
   (org-element-cache-reset)
   ;; Beginning/end of defun
-  (org-set-local 'beginning-of-defun-function 'org-back-to-heading)
+  (org-set-local 'beginning-of-defun-function 'org-backward-element)
   (org-set-local 'end-of-defun-function
-		 (lambda () (interactive) (org-end-of-subtree nil t)))
+		 (lambda ()
+		   (if (not (org-at-heading-p))
+		       (org-forward-element)
+		     (org-forward-element)
+		     (forward-char -1))))
   ;; Next error for sparse trees
   (org-set-local 'next-error-function 'org-occur-next-match)
   ;; Make sure dependence stuff works reliably, even for users who set it
