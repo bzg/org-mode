@@ -7744,7 +7744,7 @@ command."
 	       pos hide-previous previous-pos)
 
 	  ;; If we insert after content, move there and clean up whitespace
-	  (when respect-content
+	  (when (and respect-content (not (org-on-heading-p)))
 	    (org-end-of-subtree nil t)
 	    (skip-chars-backward " \r\n")
 	    (and (not (looking-back "^\\*+"))
