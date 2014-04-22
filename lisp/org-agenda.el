@@ -649,7 +649,7 @@ of custom agenda commands."
   :tag "Org Agenda Match View"
   :group 'org-agenda)
 (defgroup org-agenda-search-view nil
-  "Options concerning the general tags/property/todo match agenda view."
+  "Options concerning the search agenda view."
   :tag "Org Agenda Search View"
   :group 'org-agenda)
 
