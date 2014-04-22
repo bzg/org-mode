@@ -156,7 +156,7 @@ many TODO pending"
   (let ((month startmonth)
 	(year startyear)
 	(str ""))
-    (while (and (>= endyear year) (>= endmonth month))
+    (while (or (> endyear year) (and (= endyear year) (>= endmonth month))) 
       (setq str (concat str (number-to-string year) "-" (org-effectiveness-month-to-string month) " " (org-effectiveness-in-date (concat (number-to-string year) "-" (org-effectiveness-month-to-string month)) 1) "\n"))
       (if (= month 12)
 	  (progn 
