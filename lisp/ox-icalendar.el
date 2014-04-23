@@ -101,7 +101,8 @@ This is a list with several symbols in it.  Valid symbol are:
 (defcustom org-icalendar-use-scheduled '(todo-start)
   "Contexts where iCalendar export should use a scheduling time stamp.
 
-This is a list with several symbols in it.  Valid symbol are:
+This is a list with possibly several symbols in it.  Valid symbols are:
+
 `event-if-todo'       Scheduling time stamps in TODO entries become an event.
 `event-if-not-todo'   Scheduling time stamps in non-TODO entries become an event.
 `todo-start'          Scheduling time stamps in TODO entries become start date.
