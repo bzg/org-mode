@@ -650,7 +650,7 @@ of custom agenda commands."
   :tag "Org Agenda Match View"
   :group 'org-agenda)
 (defgroup org-agenda-search-view nil
-  "Options concerning the general tags/property/todo match agenda view."
+  "Options concerning the search agenda view."
   :tag "Org Agenda Search View"
   :group 'org-agenda)
 
@@ -3752,6 +3752,9 @@ generating a new one."
 					     (delete-dups
 					      (mapcar 'downcase (org-get-tags-at))))))))))
 	(run-hooks 'org-agenda-finalize-hook)
+	(when org-agenda-top-headline-filter
+	  (org-agenda-filter-top-headline-apply
+	   org-agenda-top-headline-filter))
 	(when org-agenda-tag-filter
 	  (org-agenda-filter-apply org-agenda-tag-filter 'tag))
 	(when (get 'org-agenda-tag-filter :preset-filter)

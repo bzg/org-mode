@@ -1591,7 +1591,7 @@ shown below.
 ;; row and column names
 (defun org-babel-del-hlines (table)
   "Remove all 'hlines from TABLE."
-  (remove 'hline table))
+  (remq 'hline table))
 
 (defun org-babel-get-colnames (table)
   "Return the column names of TABLE.
@@ -2889,6 +2889,13 @@ For the format of SAFE-LIST, see `org-babel-safe-header-args'."
 		     ((listp (cdr entry))
 		      (member (cdr pair) (cdr entry)))
 		     (t nil)))))))
+
+
+;;; Used by backends: R, Maxima, Octave.
+(defun org-babel-graphical-output-file (params)
+  "File where a babel block should send graphical output, per PARAMS."
+  (and (member "graphics" (cdr (assq :result-params params)))
+       (cdr (assq :file params))))
 
 (provide 'ob-core)
 

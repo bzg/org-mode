@@ -96,7 +96,7 @@ this variable.")
 (defun org-babel-expand-body:R (body params &optional graphics-file)
   "Expand BODY according to PARAMS, return the expanded body."
   (let ((graphics-file
-	 (or graphics-file (org-babel-R-graphical-output-file params))))
+	 (or graphics-file (org-babel-graphical-output-file params))))
     (mapconcat #'identity
 	       (append
 		(when (cdr (assoc :prologue params))
@@ -117,7 +117,7 @@ This function is called by `org-babel-execute-src-block'."
 		     (cdr (assoc :session params)) params))
 	   (colnames-p (cdr (assoc :colnames params)))
 	   (rownames-p (cdr (assoc :rownames params)))
-	   (graphics-file (org-babel-R-graphical-output-file params))
+	   (graphics-file (org-babel-graphical-output-file params))
 	   (full-body
 	    (let ((inside
 		   (list (org-babel-expand-body:R body params graphics-file))))
@@ -250,11 +250,6 @@ current code buffer."
   (setq ess-local-process-name
 	(process-name (get-buffer-process session)))
   (ess-make-buffer-current))
-
-(defun org-babel-R-graphical-output-file (params)
-  "Name of file to which R should send graphical output."
-  (and (member "graphics" (cdr (assq :result-params params)))
-       (cdr (assq :file params))))
 
 (defvar org-babel-R-graphics-devices
   '((:bmp "bmp" "filename")
