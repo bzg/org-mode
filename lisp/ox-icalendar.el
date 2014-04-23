@@ -174,8 +174,7 @@ The anniversaries are defined in the BBDB database."
 
 (defcustom org-icalendar-include-sexps t
   "Non-nil means export to iCalendar files should also cover sexp entries.
-These are entries like in the diary, but directly in an Org mode
-file."
+These are entries like in the diary, but directly in an Org file."
   :group 'org-export-icalendar
   :type 'boolean)
 
@@ -302,14 +301,14 @@ which will be updated."
 
 INFO is a plist used as a communication channel.
 
-a headline is blocked when either:
+A headline is blocked when either
 
-  - It has children which are not all in a completed state.
+  - it has children which are not all in a completed state;
 
-  - It has a parent with the property :ORDERED:, and there are
-    siblings prior to it with incomplete status.
+  - it has a parent with the property :ORDERED:, and there are
+    siblings prior to it with incomplete status;
 
-  - Its parent is blocked because it has siblings that should be
+  - its parent is blocked because it has siblings that should be
     done first or is a child of a blocked grandparent entry."
   (or
    ;; Check if any child is not done.
@@ -478,10 +477,10 @@ or subject for the event."
 ;;; Filters
 
 (defun org-icalendar-clear-blank-lines (headline back-end info)
-  "Remove trailing blank lines in HEADLINE export.
+  "Remove blank lines in HEADLINE export.
 HEADLINE is a string representing a transcoded headline.
 BACK-END and INFO are ignored."
-  (replace-regexp-in-string "^\\(?:[ \t]*\n\\)*" "" headline))
+  (replace-regexp-in-string "^\\(?:[ \t]*\n\\)+" "" headline))
 
 
 
