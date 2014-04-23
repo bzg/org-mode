@@ -3541,7 +3541,7 @@ Return a list whose CAR is `timestamp', and CDR a plist with
 `:month-end', `:day-end', `:hour-end', `:minute-end',
 `:repeater-type', `:repeater-value', `:repeater-unit',
 `:warning-type', `:warning-value', `:warning-unit', `:begin',
-`:end', `:value' and `:post-blank' keywords.
+`:end' and `:post-blank' keywords.
 
 Assume point is at the beginning of the timestamp."
   (save-excursion
