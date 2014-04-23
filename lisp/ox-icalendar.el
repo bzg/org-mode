@@ -572,13 +572,19 @@ inlinetask within the section."
 	    ;; happen once ENTRY is one of them.
 	    (let ((counter 0))
 	      (mapconcat
-	       'identity
+	       #'identity
 	       (org-element-map (cons (org-element-property :title entry)
 				      (org-element-contents inside))
 		   'timestamp
 		 (lambda (ts)
-		   (let ((uid (format "TS%d-%s" (incf counter) uid)))
-		     (org-icalendar--vevent entry ts uid summary loc desc cat)))
+		   (when (let ((type (org-element-property :type ts)))
+			   (case (plist-get info :with-timestamps)
+			     (active (memq type '(active active-range)))
+			     (inactive (memq type '(inactive inactive-range)))
+			     ((t) t)))
+		     (let ((uid (format "TS%d-%s" (incf counter) uid)))
+		       (org-icalendar--vevent
+			entry ts uid summary loc desc cat))))
 		 info nil (and (eq type 'headline) 'inlinetask))
 	       ""))
 	    ;; Task: First check if it is appropriate to export it.
@@ -591,7 +597,7 @@ inlinetask within the section."
 			  (and (eq type 'headline)
 			       (not (org-icalendar-blocked-headline-p
 				     entry info))))
-			 ('t (eq todo-type 'todo))))
+			 ((t) (eq todo-type 'todo))))
 	      (org-icalendar--vtodo entry uid summary loc desc cat))
 	    ;; Diary-sexp: Collect every diary-sexp element within
 	    ;; ENTRY and its title, and transcode them.  If ENTRY is
@@ -599,7 +605,7 @@ inlinetask within the section."
 	    ;; separately.
 	    (when org-icalendar-include-sexps
 	      (let ((counter 0))
-		(mapconcat 'identity
+		(mapconcat #'identity
 			   (org-element-map
 			       (cons (org-element-property :title entry)
 				     (org-element-contents inside))
@@ -615,7 +621,7 @@ inlinetask within the section."
        ;; inlinetask within it.  In agenda export, this is independent
        ;; from the mark (or lack thereof) on the entry.
        (when (eq type 'headline)
-	 (mapconcat 'identity
+	 (mapconcat #'identity
 		    (org-element-map inside 'inlinetask
 		      (lambda (task) (org-icalendar-entry task nil info))
 		      info) ""))
