@@ -3332,8 +3332,8 @@ cdr a plist with `:type', `:raw-value', `:year-start',
 `:year-end', `:month-end', `:day-end', `:hour-end',
 `:minute-end', `:repeater-type', `:repeater-value',
 `:repeater-unit', `:warning-type', `:warning-value',
-`:warning-unit', `:begin', `:end', `:value' and `:post-blank'
-keywords.  Otherwise, return nil.
+`:warning-unit', `:begin', `:end' and `:post-blank' keywords.
+Otherwise, return nil.
 
 Assume point is at the beginning of the timestamp."
   (when (org-looking-at-p org-element--timestamp-regexp)
