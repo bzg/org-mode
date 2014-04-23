@@ -18158,8 +18158,9 @@ Optional argument FILE means use this file instead of the current."
        (t (user-error "Abort"))))))
 
 (defun org-get-agenda-file-buffer (file)
-  "Get a buffer visiting FILE.  If the buffer needs to be created, add
-it to the list of buffers which might be released later."
+  "Get an agenda buffer visiting FILE.
+If the buffer needs to be created, add it to the list of buffers
+which might be released later."
   (let ((buf (org-find-base-buffer-visiting file)))
     (if buf
 	buf ; just return it
