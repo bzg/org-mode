@@ -8593,11 +8593,11 @@ and still retain the repeater to cover future instances of the task."
 	beg end template task idprop
 	shift-n shift-what doshift nmin nmax)
     (if (not (and (integerp n) (> n 0)))
-	(error "Invalid number of replications %s" n))
+	(user-error "Invalid number of replications %s" n))
     (if (and (setq doshift (and (stringp shift) (string-match "\\S-" shift)))
 	     (not (string-match "\\`[ \t]*\\+?\\([0-9]+\\)\\([hdwmy]\\)[ \t]*\\'"
 				shift)))
-	(error "Invalid shift specification %s" shift))
+	(user-error "Invalid shift specification %s" shift))
     (when doshift
       (setq shift-n (string-to-number (match-string 1 shift))
 	    shift-what (cdr (assoc (match-string 2 shift)
@@ -10631,7 +10631,7 @@ is used internally by `org-open-link-from-string'."
 			  (setq clean-buffer-list-kill-buffer-names
 				(cons buf
 				      clean-buffer-list-kill-buffer-names))))
-		    (error "Abort"))))
+		    (user-error "Abort"))))
 	       ((equal type "elisp")
 		(let ((cmd path))
 		  (if (or (and (org-string-nw-p
@@ -10647,7 +10647,7 @@ is used internally by `org-open-link-from-string'."
 			       (if (eq (string-to-char cmd) ?\()
 				   (eval (read cmd))
 				 (call-interactively (read cmd))))
-		    (error "Abort"))))
+		    (user-error "Abort"))))
 	       ((equal type "id")
 		(require 'ord-id)
 		(funcall (nth 1 (assoc "id" org-link-protocols)) path))
@@ -10739,7 +10739,7 @@ there is one, return it."
 		(message "Select link to open, RET to open all:")
 		(setq c (read-char-exclusive))
 		(and (get-buffer "*Select Link*") (kill-buffer "*Select Link*"))))
-	    (when (equal c ?q) (error "Abort"))
+	    (when (equal c ?q) (user-error "Abort"))
 	    (if (equal c ?\C-m)
 		(setq link links)
 	      (setq nth (- c ?0))
@@ -13040,7 +13040,7 @@ This function is run automatically after each state change to a DONE state."
 			       (time-to-days (current-time))))
 		  (when (= (incf nshift) nshiftmax)
 		    (or (y-or-n-p (message "%d repeater intervals were not enough to shift date past today.  Continue? " nshift))
-			(error "Abort")))
+			(user-error "Abort")))
 		  (org-timestamp-change n (cdr (assoc what whata)))
 		  (org-at-timestamp-p t)
 		  (setq ts (match-string 1))
@@ -13724,7 +13724,7 @@ starting point when no match is found."
       (while (setq p1 (funcall search-func (point) 'org-type))
 	(when (equal p1 limit)
 	  (goto-char pos)
-	  (error "No more matches"))
+	  (user-error "No more matches"))
 	(when (equal (get-char-property p1 'org-type) 'org-occur)
 	  (setq n (1- n))
 	  (when (= n 0)
@@ -13732,7 +13732,7 @@ starting point when no match is found."
 	    (throw 'exit (point))))
 	(goto-char p1))
       (goto-char p1)
-      (error "No more matches"))))
+      (user-error "No more matches"))))
 
 (defun org-show-context (&optional key)
   "Make sure point and context are visible.
@@ -18155,7 +18155,7 @@ Optional argument FILE means use this file instead of the current."
        ((equal r ?r)
 	(org-remove-file file)
 	(throw 'nextfile t))
-       (t (error "Abort"))))))
+       (t (user-error "Abort"))))))
 
 (defun org-get-agenda-file-buffer (file)
   "Get a buffer visiting FILE.  If the buffer needs to be created, add
@@ -18581,7 +18581,7 @@ inspection."
 				   (buffer-substring-no-properties
 				    (region-beginning) (region-end)))))
 		       (read-string "LaTeX Fragment: " frag nil frag))))
-  (unless latex-frag (error "Invalid LaTeX fragment"))
+  (unless latex-frag (user-error "Invalid LaTeX fragment"))
   (let* ((tmp-in-file (file-relative-name
 		       (make-temp-name (expand-file-name "ltxmathml-in"))))
 	 (ignore (write-region latex-frag nil tmp-in-file))
@@ -23015,7 +23015,7 @@ package ox-bibtex by Taru Karttunen."
 	  (if (not (save-excursion
 		     (or (re-search-forward re nil t)
 			 (re-search-backward re nil t))))
-	      (error "No bibliography defined in file")
+	      (user-error "No bibliography defined in file")
 	    (setq bib (concat (match-string 1) ".bib")
 		  rds (list (list 'bib bib)))))))
     (call-interactively 'reftex-citation)))
@@ -23608,7 +23608,8 @@ When BLOCK-REGEXP is non-nil, use this regexp to find blocks."
     (if (looking-at re) (forward-char 1))
     (condition-case nil
 	(funcall re-search-fn re nil nil arg)
-      (error (error "No %s code blocks" (if backward "previous" "further" ))))
+      (error (user-error "No %s code blocks"
+			 (if backward "previous" "further" ))))
     (goto-char (match-beginning 0)) (org-show-context)))
 
 (defun org-previous-block (arg &optional block-regexp)
