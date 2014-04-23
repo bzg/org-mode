@@ -89,7 +89,7 @@ This function is called by `org-babel-execute-src-block'."
                                           (= 0 (length line)))
                                 line))
                             (split-string raw "[\r\n]"))) "\n")))))
-    (if (org-babel-maxima-graphical-output-file params)
+    (if (org-babel-graphical-output-file params)
 	nil
       (org-babel-result-cond result-params
 	result
