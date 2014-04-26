@@ -45,15 +45,15 @@
 (defun org-license-cc-by (language)
   (interactive "MLanguage ( br | ca | de | en | es | eo | eu | fi | fr | gl | it | jp | nl | pt ): " language)
   (cond ((equal language "br")
-	 (setq org-license-cc-url "https://creativecommons.org/licenses/by-sa/3.0/br/deed.pt_BR")
+	 (setq org-license-cc-url "https://creativecommons.org/licenses/by/3.0/br/deed.pt_BR")
 	 (insert (concat "* Licença
 Este texto é disponibilizado nos termos da licença [[" org-license-cc-url "][Atribuição 3.0 Brasil]]\n")))
 	((equal language "ca")
-	 (setq org-license-cc-url "https://creativecommons.org/licenses/by-sa/3.0/es/deed.ca")
+	 (setq org-license-cc-url "https://creativecommons.org/licenses/by/3.0/es/deed.ca")
 	 (insert (concat "* Licència
 El text està disponible sota la [[" org-license-cc-url "][Reconeixement 3.0 Espanya]]\n")))
 	((equal language "de")
-	 (setq org-license-cc-url "https://creativecommons.org/licenses/by-sa/3.0/de/deed.de")
+	 (setq org-license-cc-url "https://creativecommons.org/licenses/by/3.0/de/deed.de")
 	 (insert (concat "* Lizenz
 Dieses Werk bzw. Inhalt steht unter einer [[" org-license-cc-url "][Lizenz Creative Commons Namensnennung 3.0 Deutschland]]\n")))
 	((equal language "eo")
@@ -181,11 +181,11 @@ Dieses Werk bzw. Inhalt steht unter einer [[" org-license-cc-url "][Namensnennun
 	 (insert (concat "* Licencia
 Este documento está bajo una [[" org-license-cc-url "][Licencia Creative Commons Atribución-SinDerivadas 3.0]]\n")))
 	((equal language "eu")
-	 (setq org-license-cc-url "http://creativecommons.org/licenses/by-sa/3.0/es/deed.eu")
+	 (setq org-license-cc-url "http://creativecommons.org/licenses/by-nd/3.0/es/deed.eu")
 	 (insert (concat "* Licenzua
 Testua [[" org-license-cc-url "][Aitortu-LanEratorririkGabe 3.0 Espainia]] lizentziari jarraituz erabil daiteke\n")))
 	((equal language "fi")
-	  (setq org-license-cc-url "http://creativecommons.org/licenses/by-sa/1.0/fi/deed.fi")
+	  (setq org-license-cc-url "http://creativecommons.org/licenses/by-nd/1.0/fi/deed.fi")
 	  (insert (concat "* Lisenssi
 Teksti on saatavilla [[" org-license-cc-url "][Nimeä-JaaSamoin 1.0 Suomi]] lisenssillä\n")))
 	((equal language "fr")
