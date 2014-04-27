@@ -22424,15 +22424,101 @@ Also align node properties according to `org-property-format'."
   (message "Block at point indented"))
 
 (defun org-indent-region (start end)
-  "Indent region."
+  "Indent each non-blank line in the region.
+Called from a program, START and END specify the region to
+indent.  The function will not indent contents of example blocks,
+verse blocks and export blocks as leading white spaces are
+assumed to be significant there."
   (interactive "r")
   (save-excursion
-    (let ((line-end (org-current-line end)))
-      (goto-char start)
-      (while (< (org-current-line) line-end)
-	(cond ((org-in-src-block-p t) (org-src-native-tab-command-maybe))
-	      (t (call-interactively 'org-indent-line)))
-	(move-beginning-of-line 2)))))
+    (goto-char start)
+    (beginning-of-line)
+    (let ((indent-to
+	   (lambda (ind pos)
+	     ;; Set IND as indentation for all lines between point and
+	     ;; POS or END, whichever comes first.  Blank lines are
+	     ;; ignored.  Leave point after POS once done.
+	     (let ((limit (copy-marker  (min end pos))))
+	       (while (< (point) limit)
+		 (unless (org-looking-at-p "[ \t]*$") (org-indent-line-to ind))
+		 (forward-line))
+	       (set-marker limit nil))))
+	  (end (copy-marker end)))
+      (while (< (point) end)
+	(if (or (org-looking-at-p " \r\t\n") (org-at-heading-p)) (forward-line)
+	  (let* ((element (org-element-at-point))
+		 (type (org-element-type element))
+		 (element-end (copy-marker (org-element-property :end element)))
+		 (ind (org--get-expected-indentation element nil)))
+	    (if (or (memq type '(paragraph table table-row))
+		    (not (or (org-element-property :contents-begin element)
+			     (memq type
+				   '(example-block export-block src-block)))))
+		;; Elements here are indented as a single block.  Also
+		;; align node properties.
+		(progn
+		  (when (eq type 'node-property)
+		    (org--align-node-property)
+		    (beginning-of-line))
+		  (funcall indent-to ind element-end))
+	      ;; Elements in this category consist of three parts:
+	      ;; before the contents, the contents, and after the
+	      ;; contents.  The contents are treated specially,
+	      ;; according to the element type, or not indented at
+	      ;; all.  Other parts are indented as a single block.
+	      (let* ((post (copy-marker
+			    (or (org-element-property :post-affiliated element)
+				(org-element-property :begin element))))
+		     (cbeg
+		      (copy-marker
+		       (cond
+			((not (org-element-property :contents-begin element))
+			 ;; Fake contents for source blocks.
+			 (org-with-wide-buffer
+			  (goto-char post)
+			  (forward-line)
+			  (point)))
+			((memq type '(footnote-definition item plain-list))
+			 ;; Contents in these elements could start on
+			 ;; the same line as the beginning of the
+			 ;; element.  Make sure we start indenting
+			 ;; from the second line.
+			 (org-with-wide-buffer
+			  (goto-char post)
+			  (forward-line)
+			  (point)))
+			(t (org-element-property :contents-begin element)))))
+		     (cend (copy-marker
+			    (or (org-element-property :contents-end element)
+				;; Fake contents for source blocks.
+				(org-with-wide-buffer
+				 (goto-char element-end)
+				 (skip-chars-backward " \r\t\n")
+				 (line-beginning-position))))))
+		(funcall indent-to ind cbeg)
+		(when (< (point) end)
+		  (case type
+		    ((example-block export-block verse-block))
+		    (src-block
+		     ;; In a source block, indent source code according
+		     ;; to language major mode, but only if
+		     ;; `org-src-tab-acts-natively' is non-nil.
+		     (when (and (< (point) end) org-src-tab-acts-natively)
+		       (ignore-errors
+			 (let (org-src-strip-leading-and-trailing-blank-lines
+			       ;; Region boundaries in edit buffer.
+			       (start (1+ (- (point) cbeg)))
+			       (end (- (min cend end) cbeg)))
+			   (org-babel-do-in-edit-buffer
+			    (indent-region start end))))))
+		    (t (org-indent-region (point) (min cend end))))
+		  (goto-char (min cend end))
+		  (when (< (point) end) (funcall indent-to ind element-end)))
+		(set-marker post nil)
+		(set-marker cbeg nil)
+		(set-marker cend nil)))
+	    (set-marker element-end nil))))
+      (set-marker end nil))))
 
 
 ;;; Filling

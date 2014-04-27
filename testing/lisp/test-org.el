@@ -597,6 +597,76 @@
 	      (org-indent-line)
 	      (buffer-string))))))
 
+(ert-deftest test-org/indent-region ()
+  "Test `org-indent-region' specifications."
+  ;; Indent paragraph.
+  (should
+   (equal "A\nB\nC"
+	  (org-test-with-temp-text " A\nB\n  C"
+	    (org-indent-region (point-min) (point-max))
+	    (buffer-string))))
+  ;; Indent greater elements along with their contents.
+  (should
+   (equal "#+BEGIN_CENTER\nA\nB\n#+END_CENTER"
+	  (org-test-with-temp-text "#+BEGIN_CENTER\n A\n  B\n#+END_CENTER"
+	    (org-indent-region (point-min) (point-max))
+	    (buffer-string))))
+  ;; Ignore contents of verse blocks and example blocks.
+  (should
+   (equal "#+BEGIN_VERSE\n A\n  B\n#+END_VERSE"
+	  (org-test-with-temp-text "#+BEGIN_VERSE\n A\n  B\n#+END_VERSE"
+	    (org-indent-region (point-min) (point-max))
+	    (buffer-string))))
+  (should
+   (equal "#+BEGIN_EXAMPLE\n A\n  B\n#+END_EXAMPLE"
+	  (org-test-with-temp-text "#+BEGIN_EXAMPLE\n A\n  B\n#+END_EXAMPLE"
+	    (org-indent-region (point-min) (point-max))
+	    (buffer-string))))
+  ;; Indent according to mode if `org-src-tab-acts-natively' is
+  ;; non-nil.  Otherwise, do not indent code at all.
+  (should
+   (equal "#+BEGIN_SRC emacs-lisp\n(and A\n     B)\n#+END_SRC"
+	  (org-test-with-temp-text
+	      "#+BEGIN_SRC emacs-lisp\n (and A\nB)\n#+END_SRC"
+	    (let ((org-src-tab-acts-natively t)
+		  (org-edit-src-content-indentation 0))
+	      (org-indent-region (point-min) (point-max)))
+	    (buffer-string))))
+  (should
+   (equal "#+BEGIN_SRC emacs-lisp\n (and A\nB)\n#+END_SRC"
+	  (org-test-with-temp-text
+	      "#+BEGIN_SRC emacs-lisp\n (and A\nB)\n#+END_SRC"
+	    (let ((org-src-tab-acts-natively nil)
+		  (org-edit-src-content-indentation 0))
+	      (org-indent-region (point-min) (point-max)))
+	    (buffer-string))))
+  ;; Align node properties according to `org-property-format'.  Handle
+  ;; nicely empty values.
+  (should
+   (equal ":PROPERTIES:\n:key:      value\n:END:"
+	  (org-test-with-temp-text ":PROPERTIES:\n:key: value\n:END:"
+	    (let ((org-property-format "%-10s %s"))
+	      (org-indent-region (point-min) (point-max)))
+	    (buffer-string))))
+  (should
+   (equal ":PROPERTIES:\n:key:\n:END:"
+	  (org-test-with-temp-text ":PROPERTIES:\n:key:\n:END:"
+	    (let ((org-property-format "%-10s %s"))
+	      (org-indent-region (point-min) (point-max)))
+	    (buffer-string))))
+  ;; Special case: plain lists and footnote definitions.
+  (should
+   (equal "- A\n  B\n  - C\n\n    D"
+	  (org-test-with-temp-text "- A\n   B\n  - C\n\n     D"
+	    (org-indent-region (point-min) (point-max))
+	    (buffer-string))))
+  (should
+   (equal "[fn:1] Definition\n\nDefinition"
+	  (org-test-with-temp-text "[fn:1] Definition\n\n  Definition"
+	    (org-indent-region (point-min) (point-max))
+	    (buffer-string)))))
+
+
 
 ;;; Editing
 
