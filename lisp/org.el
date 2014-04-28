@@ -22382,47 +22382,6 @@ Also align node properties according to `org-property-format'."
 		 (org--align-node-property)
 		 (org-move-to-column column)))))))))
 
-(defun org-indent-drawer ()
-  "Indent the drawer at point."
-  (interactive)
-  (let ((p (point))
-	(e (and (save-excursion (re-search-forward ":END:" nil t))
-		(match-end 0)))
-	(folded
-	 (save-excursion
-	   (end-of-line)
-	   (when (overlays-at (point))
-	     (member 'invisible (overlay-properties
-				 (car (overlays-at (point)))))))))
-    (when folded (org-cycle))
-    (indent-for-tab-command)
-    (while (and (move-beginning-of-line 2) (< (point) e))
-      (indent-for-tab-command))
-    (goto-char p)
-    (when folded (org-cycle)))
-  (message "Drawer at point indented"))
-
-(defun org-indent-block ()
-  "Indent the block at point."
-  (interactive)
-  (let ((p (point))
-	(case-fold-search t)
-	(e (and (save-excursion (re-search-forward "#\\+end_?\\(?:[a-z]+\\)?" nil t))
-		(match-end 0)))
-	(folded
-	 (save-excursion
-	   (end-of-line)
-	   (when (overlays-at (point))
-	     (member 'invisible (overlay-properties
-				 (car (overlays-at (point)))))))))
-    (when folded (org-cycle))
-    (indent-for-tab-command)
-    (while (and (move-beginning-of-line 2) (< (point) e))
-      (indent-for-tab-command))
-    (goto-char p)
-    (when folded (org-cycle)))
-  (message "Block at point indented"))
-
 (defun org-indent-region (start end)
   "Indent each non-blank line in the region.
 Called from a program, START and END specify the region to
@@ -22519,6 +22478,40 @@ assumed to be significant there."
 		(set-marker cend nil)))
 	    (set-marker element-end nil))))
       (set-marker end nil))))
+
+(defun org-indent-drawer ()
+  "Indent the drawer at point."
+  (interactive)
+  (unless (save-excursion
+	    (beginning-of-line)
+	    (org-looking-at-p org-drawer-regexp))
+    (user-error "Not at a drawer"))
+  (let ((element (org-element-at-point)))
+    (unless (memq (org-element-type element) '(drawer property-drawer))
+      (user-error "Not at a drawer"))
+    (org-with-wide-buffer
+     (org-indent-region (org-element-property :begin element)
+			(org-element-property :end element))))
+  (message "Drawer at point indented"))
+
+(defun org-indent-block ()
+  "Indent the block at point."
+  (interactive)
+  (unless (save-excursion
+	    (beginning-of-line)
+	    (let ((case-fold-search t))
+	      (org-looking-at-p "[ \t]*#\\+\\(begin\\|end\\)_")))
+    (user-error "Not at a block"))
+  (let ((element (org-element-at-point)))
+    (unless (memq (org-element-type element)
+		  '(comment-block center-block example-block export-block
+				  quote-block special-block src-block
+				  verse-block))
+      (user-error "Not at a block"))
+    (org-with-wide-buffer
+     (org-indent-region (org-element-property :begin element)
+			(org-element-property :end element))))
+  (message "Block at point indented"))
 
 
 ;;; Filling
