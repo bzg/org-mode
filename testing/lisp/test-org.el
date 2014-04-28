@@ -1566,7 +1566,21 @@ Text.
    (org-test-with-temp-text ":D:\nparagraph"
      (forward-line 1)
      (org-flag-drawer t)
-     (get-char-property (line-end-position) 'invisible))))
+     (get-char-property (line-end-position) 'invisible)))
+  ;; Do not hide drawers when called from final blank lines.
+  (should-not
+   (org-test-with-temp-text ":DRAWER:\nA\n:END:\n\n"
+     (goto-char (point-max))
+     (org-flag-drawer t)
+     (goto-char (point-min))
+     (get-char-property (line-end-position) 'invisible)))
+  ;; Don't leave point in an invisible part of the buffer when hiding
+  ;; a drawer away.
+  (should-not
+   (org-test-with-temp-text ":DRAWER:\ncontents\n:END:"
+     (goto-char (point-max))
+     (org-flag-drawer t)
+     (get-char-property (point) 'invisible))))
 
 
 (provide 'test-org)
