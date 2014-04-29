@@ -16136,7 +16136,7 @@ a priority cookie and tags in the standard locations."
   "Find Org node headline HEADING in all .org files in directory DIR.
 When the target headline is found, return a marker to this location."
   (let ((files (directory-files (or dir default-directory)
-				nil "\\`[^.#].*\\.org\\'"))
+				t "\\`[^.#].*\\.org\\'"))
         file visiting m buffer)
     (catch 'found
       (while (setq file (pop files))
