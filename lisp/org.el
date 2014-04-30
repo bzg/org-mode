@@ -7684,9 +7684,11 @@ command."
     (cond
 
      ((or (= (buffer-size) 0)
-	  (and (not (save-excursion
-		      (and (ignore-errors (org-back-to-heading invisible-ok))
-			   (org-at-heading-p))))
+	  (and (or (and (bolp)
+			(not (save-excursion
+			       (and (ignore-errors (org-back-to-heading invisible-ok))
+				    (org-at-heading-p)))))
+		   (and (bolp) (not (looking-at org-outline-regexp-bol))))
 	       (or arg (not itemp))))
       ;; At beginning of buffer or so high up that only a heading
       ;; makes sense.
@@ -7715,11 +7717,12 @@ command."
 			       nil))
 	       ;; Get a level string to fall back on
 	       (fix-level
-		(save-excursion
-		  (org-back-to-heading t)
-		  (if (org-previous-line-empty-p) (setq empty-line-p t))
-		  (looking-at org-outline-regexp)
-		  (make-string (1- (length (match-string 0))) ?*)))
+		(if (org-before-first-heading-p) "*"
+		  (save-excursion
+		    (org-back-to-heading t)
+		    (if (org-previous-line-empty-p) (setq empty-line-p t))
+		    (looking-at org-outline-regexp)
+		    (make-string (1- (length (match-string 0))) ?*))))
 	       (stars
 		(save-excursion
 		  (condition-case nil
