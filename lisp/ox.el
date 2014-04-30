@@ -3443,18 +3443,19 @@ with footnotes is included in a document."
     ;; Append ID to all footnote references and definitions, so they
     ;; become file specific and cannot collide with footnotes in other
     ;; included files.
-    (goto-char (point-min))
-    (while (re-search-forward org-footnote-re nil t)
-      (let ((reference (org-element-context)))
-	(when (memq (org-element-type reference)
-		    '(footnote-reference footnote-definition))
-	  (goto-char (org-element-property :begin reference))
-	  (forward-char)
-	  (let ((label (org-element-property :label reference)))
-	    (cond ((not label))
-		  ((org-string-match-p "\\`[0-9]+\\'" label)
-		   (insert (format "fn:%d-" id)))
-		  (t (forward-char 3) (insert (format "%d-" id))))))))
+    (when id
+      (goto-char (point-min))
+      (while (re-search-forward org-footnote-re nil t)
+	(let ((reference (org-element-context)))
+	  (when (memq (org-element-type reference)
+		      '(footnote-reference footnote-definition))
+	    (goto-char (org-element-property :begin reference))
+	    (forward-char)
+	    (let ((label (org-element-property :label reference)))
+	      (cond ((not label))
+		    ((org-string-match-p "\\`[0-9]+\\'" label)
+		     (insert (format "fn:%d-" id)))
+		    (t (forward-char 3) (insert (format "%d-" id)))))))))
     (org-element-normalize-string (buffer-string))))
 
 (defun org-export-execute-babel-code ()
