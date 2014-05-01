@@ -2100,9 +2100,9 @@ code ---- the results are extracted in the syntax of the source
 		 ((funcall proper-list-p result)
 		  (goto-char beg)
 		  (insert (concat (orgtbl-to-orgtbl
-				   (if (or (eq 'hline (car result))
-					   (and (listp (car result))
-						(listp (cdr (car result)))))
+				   (if (org-every
+					(lambda (el) (or (listp el) (eq el 'hline)))
+					result)
 				       result (list result))
 				   '(:fmt (lambda (cell) (format "%s" cell)))) "\n"))
 		  (goto-char beg) (when (org-at-table-p) (org-table-align)))
