@@ -24511,6 +24511,27 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 			   (outline-invisible-p)))
        (org-show-context 'bookmark-jump)))
 
+(eval-after-load "simple"
+  '(defadvice pop-to-mark-command (after org-make-visible activate)
+     "Make the point visible with `org-show-context'."
+     (org-mark-jump-unhide)))
+
+(eval-after-load "simple"
+  '(defadvice exchange-point-and-mark (after org-make-visible activate)
+     "Make the point visible with `org-show-context'."
+     (org-mark-jump-unhide)))
+
+(eval-after-load "simple"
+  '(defadvice pop-global-mark (after org-make-visible activate)
+     "Make the point visible with `org-show-context'."
+     (org-mark-jump-unhide)))
+
+(defun org-mark-jump-unhide ()
+  "Make the point visible with `org-show-context' after jumping to the mark."
+  (when (and (derived-mode-p 'org-mode)
+	     (outline-invisible-p))
+    (org-show-context 'mark-goto)))
+
 ;; Make session.el ignore our circular variable
 (defvar session-globals-exclude)
 (eval-after-load "session"
