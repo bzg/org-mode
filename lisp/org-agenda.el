@@ -2604,7 +2604,7 @@ type."
   :package-version '(Org . "8.0")
   :group 'org-agenda-custom-commands
   :type '(choice (symbol :tag "No limit" nil)
-		 (integer :tag "Max number of entries")
+		 (integer :tag "Max number of TODOs")
 		 (repeat
 		  (cons (choice :tag "Agenda type"
 				(const agenda)
@@ -2612,7 +2612,7 @@ type."
 				(const tags)
 				(const search)
 				(const timeline))
-			(integer :tag "Max number of entries")))))
+			(integer :tag "Max number of TODOs")))))
 
 (defcustom org-agenda-max-tags nil
   "Maximum number of tagged entries to display in an agenda.
@@ -2623,7 +2623,7 @@ type."
   :package-version '(Org . "8.0")
   :group 'org-agenda-custom-commands
   :type '(choice (symbol :tag "No limit" nil)
-		 (integer :tag "Max number of entries")
+		 (integer :tag "Max number of tagged entries")
 		 (repeat
 		  (cons (choice :tag "Agenda type"
 				(const agenda)
@@ -2631,7 +2631,7 @@ type."
 				(const tags)
 				(const search)
 				(const timeline))
-			(integer :tag "Max number of entries")))))
+			(integer :tag "Max number of tagged entries")))))
 
 (defcustom org-agenda-max-effort nil
   "Maximum cumulated effort duration for the agenda.
@@ -2642,7 +2642,7 @@ to limit entries to in this type."
   :package-version '(Org . "8.0")
   :group 'org-agenda-custom-commands
   :type '(choice (symbol :tag "No limit" nil)
-		 (integer :tag "Max number of entries")
+		 (integer :tag "Max number of minutes")
 		 (repeat
 		  (cons (choice :tag "Agenda type"
 				(const agenda)
@@ -2650,7 +2650,7 @@ to limit entries to in this type."
 				(const tags)
 				(const search)
 				(const timeline))
-			(integer :tag "Max number of entries")))))
+			(integer :tag "Max number of minutes")))))
 
 (defvar org-keys nil)
 (defvar org-match nil)
