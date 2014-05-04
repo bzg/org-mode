@@ -196,6 +196,18 @@ many TODO pending"
 	(setq z (+ z 1)))
       (insert "+"))))
 
+(defun org-effectiveness-html-bar(n &optional label)
+  "Print a bar with the percentage from 0 to 100 printed in html"
+  (interactive "nPercentage: \nsLabel: ")
+  (if (or (< n 0) (> n 100))
+      (message "The percentage must be between 0 to 100")
+    (let ((x 0)
+	  (y 0)
+	  (z 0))
+      (insert (format "\n<div class='percentage-%d'>%d</div>" n n))
+)))
+
+
 (defun org-effectiveness-check-dates (startdate enddate)
   "Generate a list with ((startyear startmonth) (endyear endmonth))"
   (setq str nil)
@@ -244,6 +256,33 @@ many TODO pending"
   	(setq month (+ 1 month)))))
   (switch-to-buffer "*org-effectiveness*"))
 
+(defun org-effectiveness-plot-html (startdate enddate)
+  "Print html bars about the effectiveness in a buffer"
+  (interactive "sGive me the start date: \nsGive me the end date: " startdate enddate)
+  (setq dates (org-effectiveness-check-dates startdate enddate))
+  (let ((syear (cadr (assoc 'startyear dates)))
+	(smonth (cadr (assoc 'startmonth dates)))
+  	(year (cadr (assoc 'startyear dates)))
+	(month (cadr (assoc 'startmonth dates)))
+	(emonth (cadr (assoc 'endmonth dates)))
+	(eyear (cadr (assoc 'endyear dates)))
+	(buffer (current-buffer))
+  	(str ""))
+    (switch-to-buffer "*org-effectiveness-html*")
+    (insert "<html><head><title>Graphbar</title><meta http-equiv='Content-type' content='text/html; charset=utf-8'><link rel='stylesheet' type='text/css' href='graphbar.css' title='graphbar'></head><body>")
+    (while (or (> eyear year) (and (= eyear year) (>= emonth month)))
+      (setq str (org-effectiveness-in-date (concat (number-to-string year) "-" (org-effectiveness-month-to-string month)) 1))
+      (switch-to-buffer "*org-effectiveness-html*")
+      (org-effectiveness-html-bar (string-to-number str) (format "%s-%s" year month))
+      (switch-to-buffer buffer)
+      (format "%s-%s" year month)
+      (if (eq month 12)
+    	  (progn 
+    	    (setq year (+ 1 year))
+    	    (setq month 1))
+    	(setq month (+ 1 month))))
+    (switch-to-buffer "*org-effectiveness-html*")
+    (insert "</body></html>")))
 
 (provide 'org-effectiveness)
 
