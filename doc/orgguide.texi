@@ -211,7 +211,7 @@ Exporting
 * ASCII/Latin-1/UTF-8 export::	Exporting to flat files with encoding
 * HTML export::			Exporting to HTML
 * @LaTeX{} and PDF export::	Exporting to @LaTeX{}, and processing to PDF
-* iCalendar export::            Exporting to iCalendar
+* iCalendar export::		Exporting to iCalendar
 
 Miscellaneous
 
@@ -2307,7 +2307,7 @@ that planning information can be incorporated into desktop calendars.
 * ASCII/Latin-1/UTF-8 export::	Exporting to flat files with encoding
 * HTML export::			Exporting to HTML
 * @LaTeX{} and PDF export::	Exporting to @LaTeX{}, and processing to PDF
-* iCalendar export::            Exporting to iCalendar
+* iCalendar export::		Exporting to iCalendar
 @end menu
 
 @node Export options, The export dispatcher, Exporting, Exporting
