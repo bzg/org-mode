@@ -106,7 +106,7 @@ In case you want to use a different screen than one selected by your $PATH")
 
 (defun org-babel-screen-session-write-temp-file (session body)
   "Save BODY in a temp file that is named after SESSION."
-  (let ((tmpfile (concat "/tmp/screen.org-babel-session-" session)))
+  (let ((tmpfile (org-babel-temp-file "screen-")))
     (with-temp-file tmpfile
       (insert body)
 
