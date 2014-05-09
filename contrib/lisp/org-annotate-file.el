@@ -59,14 +59,24 @@
 
 (require 'org)
 
-(defvar org-annotate-file-storage-file "~/.org-annotate-file.org"
-  "File in which to keep annotations.")
+(defgroup org-annotate-file nil
+  "Org Annotate"
+  :group 'org)
 
-(defvar org-annotate-file-add-search nil
-  "If non-nil, add a link as a second level to the actual file location.")
+(defcustom org-annotate-file-storage-file "~/.org-annotate-file.org"
+  "File in which to keep annotations."
+  :group 'org-annotate-file
+  :type 'file)
 
-(defvar org-annotate-file-always-open t
-  "If non-nil, always expand the full tree when visiting the annotation file.")
+(defcustom org-annotate-file-add-search nil
+  "If non-nil, add a link as a second level to the actual file location."
+  :group 'org-annotate-file
+  :type 'boolean)
+
+(defcustom org-annotate-file-always-open t
+  "If non-nil, always expand the full tree when visiting the annotation file."
+  :group 'org-annotate-file
+  :type 'boolean)
 
 (defun org-annotate-file-ellipsify-desc (string &optional after)
   "Return shortened STRING with appended ellipsis.
