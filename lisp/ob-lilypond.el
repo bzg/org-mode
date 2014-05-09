@@ -28,6 +28,8 @@
 ;;
 ;; Lilypond documentation can be found at
 ;; http://lilypond.org/manuals.html
+;;
+;; This depends on epstopdf --- See http://www.ctan.org/pkg/epstopdf.
 
 ;;; Code:
 (require 'ob)
