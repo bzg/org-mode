@@ -10721,10 +10721,7 @@ there is one, return it."
       (save-restriction
 	(widen)
 	(goto-char marker)
-	(let ((re (concat "\\(" org-bracket-link-regexp "\\)\\|"
-			  "\\(" org-angle-link-re "\\)\\|"
-			  "\\(" org-plain-link-re "\\)"))
-	      (cnt ?0)
+	(let ((cnt ?0)
 	      (in-emacs (if (integerp nth) nil nth))
 	      have-zero end links link c)
 	  (when (and (stringp zero) (string-match org-bracket-link-regexp zero))
@@ -10733,7 +10730,7 @@ there is one, return it."
 	  (save-excursion
 	    (org-back-to-heading t)
 	    (setq end (save-excursion (outline-next-heading) (point)))
-	    (while (re-search-forward re end t)
+	    (while (re-search-forward org-any-link-re end t)
 	      (push (match-string 0) links))
 	    (setq links (org-uniquify (reverse links))))
 	  (cond
