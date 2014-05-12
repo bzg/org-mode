@@ -2194,9 +2194,8 @@ INFO is a plist containing export directives."
 DATA is a parse tree, an element or an object or a secondary
 string.  INFO is a plist holding export options.
 
-Return transcoded string."
-  (let ((memo (gethash data (plist-get info :exported-data) 'no-memo)))
-    (if (not (eq memo 'no-memo)) memo
+Return a string."
+  (or (gethash data (plist-get info :exported-data))
       (let* ((type (org-element-type data))
 	     (results
 	      (cond
@@ -2212,9 +2211,9 @@ Return transcoded string."
 	       ;; Secondary string.
 	       ((not type)
 		(mapconcat (lambda (obj) (org-export-data obj info)) data ""))
-	       ;; Element/Object without contents or, as a special case,
-	       ;; headline with archive tag and archived trees restricted
-	       ;; to title only.
+	       ;; Element/Object without contents or, as a special
+	       ;; case, headline with archive tag and archived trees
+	       ;; restricted to title only.
 	       ((or (not (org-element-contents data))
 		    (and (eq type 'headline)
 			 (eq (plist-get info :with-archived-trees) 'headline)
@@ -2239,16 +2238,16 @@ Return transcoded string."
 			     (lambda (element) (org-export-data element info))
 			     (org-element-contents
 			      (if (or greaterp objectp) data
-				;; Elements directly containing objects
-				;; must have their indentation normalized
-				;; first.
+				;; Elements directly containing
+				;; objects must have their indentation
+				;; normalized first.
 				(org-element-normalize-contents
 				 data
-				 ;; When normalizing contents of the first
-				 ;; paragraph in an item or a footnote
-				 ;; definition, ignore first line's
-				 ;; indentation: there is none and it
-				 ;; might be misleading.
+				 ;; When normalizing contents of the
+				 ;; first paragraph in an item or
+				 ;; a footnote definition, ignore
+				 ;; first line's indentation: there is
+				 ;; none and it might be misleading.
 				 (when (eq type 'paragraph)
 				   (let ((parent (org-export-get-parent data)))
 				     (and
@@ -2265,10 +2264,10 @@ Return transcoded string."
 	(puthash
 	 data
 	 (cond
-	  ((not results) nil)
+	  ((not results) "")
 	  ((memq type '(org-data plain-text nil)) results)
-	  ;; Append the same white space between elements or objects as in
-	  ;; the original buffer, and call appropriate filters.
+	  ;; Append the same white space between elements or objects
+	  ;; as in the original buffer, and call appropriate filters.
 	  (t
 	   (let ((results
 		  (org-export-filter-apply-functions
@@ -2278,10 +2277,10 @@ Return transcoded string."
 		     (if (memq type org-element-all-elements)
 			 (concat (org-element-normalize-string results)
 				 (make-string post-blank ?\n))
-		       (concat results (make-string post-blank ? ))))
+		       (concat results (make-string post-blank ?\s))))
 		   info)))
 	     results)))
-	 (plist-get info :exported-data))))))
+	 (plist-get info :exported-data)))))
 
 (defun org-export-data-with-backend (data backend info)
   "Convert DATA into BACKEND format.
