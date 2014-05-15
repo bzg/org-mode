@@ -2596,18 +2596,17 @@ if its description is a single link targeting an image file."
 
 (defvar org-html-standalone-image-predicate)
 (defun org-html-standalone-image-p (element info)
-  "Test if ELEMENT is a standalone image.
+  "Non-nil if ELEMENT is a standalone image.
 
 INFO is a plist holding contextual information.
 
-Return non-nil, if ELEMENT is of type paragraph and its sole
-content, save for white spaces, is a link that qualifies as an
-inline image.
+An element or object is a standalone image when
 
-Return non-nil, if ELEMENT is of type link and its containing
-paragraph has no other content save white spaces.
+  - its type is `paragraph' and its sole content, save for white
+    spaces, is a link that qualifies as an inline image;
 
-Return nil, otherwise.
+  - its type is `link' and its containing paragraph has no other
+    content save white spaces.
 
 Bind `org-html-standalone-image-predicate' to constrain paragraph
 further.  For example, to check for only captioned standalone
@@ -2618,19 +2617,21 @@ images, set it to:
 		     (paragraph element)
 		     (link (org-export-get-parent element)))))
     (and (eq (org-element-type paragraph) 'paragraph)
-	 (or (not (and (boundp 'org-html-standalone-image-predicate)
-		       (functionp org-html-standalone-image-predicate)))
+	 (or (not (fboundp 'org-html-standalone-image-predicate))
 	     (funcall org-html-standalone-image-predicate paragraph))
-	 (not (let ((link-count 0))
-		(org-element-map (org-element-contents paragraph)
-		    (cons 'plain-text org-element-all-objects)
-		  (lambda (obj) (case (org-element-type obj)
-			     (plain-text (org-string-nw-p obj))
-			     (link
-			      (or (> (incf link-count) 1)
-				  (not (org-html-inline-image-p obj info))))
-			     (otherwise t)))
-		  info 'first-match 'link))))))
+	 (catch 'exit
+	   (let ((link-count 0))
+	     (org-element-map (org-element-contents paragraph)
+		 (cons 'plain-text org-element-all-objects)
+	       #'(lambda (obj)
+		   (when (case (org-element-type obj)
+			   (plain-text (org-string-nw-p obj))
+			   (link (or (> (incf link-count) 1)
+				     (not (org-html-inline-image-p obj info))))
+			   (otherwise t))
+		     (throw 'exit nil)))
+	       info nil 'link)
+	     (= link-count 1))))))
 
 (defun org-html-link (link desc info)
   "Transcode a LINK object from Org to HTML.
