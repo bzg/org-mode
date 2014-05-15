@@ -6974,21 +6974,20 @@ With a numeric prefix, show all headlines up to that level."
 ;; buffers, where outline-regexp is needed.
 (defun org-overview ()
   "Switch to overview mode, showing only top-level headlines.
-Really, this shows all headlines with level equal or greater than the level
+This shows all headlines with a level equal or greater than the level
 of the first headline in the buffer.  This is important, because if the
 first headline is not level one, then (hide-sublevels 1) gives confusing
 results."
   (interactive)
-  (let ((pos (point))
-	(level (save-excursion
-		 (goto-char (point-min))
-		 (if (re-search-forward (concat "^" outline-regexp) nil t)
-		     (progn
-		       (goto-char (match-beginning 0))
-		       (funcall outline-level))))))
-    (and level (hide-sublevels level))
-    (recenter '(4))
-    (goto-char pos)))
+  (save-excursion
+    (let ((level
+	   (save-excursion
+	     (goto-char (point-min))
+	     (if (re-search-forward (concat "^" outline-regexp) nil t)
+		 (progn
+		   (goto-char (match-beginning 0))
+		   (funcall outline-level))))))
+      (and level (hide-sublevels level)))))
 
 (defun org-content (&optional arg)
   "Show all headlines in the buffer, like a table of contents.
