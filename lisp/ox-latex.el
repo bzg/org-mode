@@ -1526,17 +1526,16 @@ holding contextual information."
 	       (when priority (format "\\framebox{\\#%c} " priority))
 	       title
 	       (when tags (format "\\hfill{}\\textsc{:%s:}"
-				  (mapconcat 'identity tags ":"))))))
-	 (format (concat "\\begin{center}\n"
-			 "\\fbox{\n"
-			 "\\begin{minipage}[c]{.6\\textwidth}\n"
-			 "%s\n\n"
-			 "\\rule[.8em]{\\textwidth}{2pt}\n\n"
-			 "%s"
-			 "\\end{minipage}\n"
-			 "}\n"
-			 "\\end{center}")
-		 full-title contents))))))
+				  (mapconcat #'identity tags ":"))))))
+	 (concat "\\begin{center}\n"
+		 "\\fbox{\n"
+		 "\\begin{minipage}[c]{.6\\textwidth}\n"
+		 full-title "\n\n"
+		 (and (org-string-nw-p contents)
+		      (concat "\\rule[.8em]{\\textwidth}{2pt}\n\n" contents))
+		 "\\end{minipage}\n"
+		 "}\n"
+		 "\\end{center}"))))))
 
 
 ;;;; Italic
