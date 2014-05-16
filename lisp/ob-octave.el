@@ -82,18 +82,19 @@ end")
 	 (full-body
 	  (org-babel-expand-body:generic
 	   body params (org-babel-variable-assignments:octave params)))
+	 (gfx-file (ignore-errors (org-babel-graphical-output-file params)))
 	 (result (org-babel-octave-evaluate
 		  session
-		  (if (org-babel-graphical-output-file params)
+		  (if gfx-file
 		      (mapconcat 'identity
 				 (list
 				  "set (0, \"defaultfigurevisible\", \"off\");"
 				  full-body
-				  (format "print -dpng %s" (org-babel-graphical-output-file params)))
+				  (format "print -dpng %s" gfx-file))
 				 "\n")
 		    full-body)
 		  result-type matlabp)))
-    (if (org-babel-graphical-output-file params)
+    (if gfx-file
 	nil
       (org-babel-reassemble-table
        result

@@ -2942,8 +2942,8 @@ plus the parameter value."
   "File where a babel block should send graphical output, per PARAMS."
   (unless (assq :file params)
     (if (assq :file-ext params)
-	(error ":file-ext given but no :file generated; did you forget to give a block a #+NAME?")
-      (error "No :file header argument given; cannot create graphical result.")))
+	(user-error ":file-ext given but no :file generated; did you forget to give a block a #+NAME?")
+      (user-error "No :file header argument given; cannot create graphical result.")))
   (and (member "graphics" (cdr (assq :result-params params)))
        (cdr (assq :file params))))
 
