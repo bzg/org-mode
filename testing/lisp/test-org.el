@@ -732,7 +732,7 @@
 
 ;;; Fixed-Width Areas
 
-(ert-deftest test-org/toggle-fixed-with ()
+(ert-deftest test-org/toggle-fixed-width ()
   "Test `org-toggle-fixed-width' specifications."
   ;; No region: Toggle on fixed-width marker in paragraphs.
   (should
