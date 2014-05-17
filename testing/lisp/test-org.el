@@ -1742,14 +1742,17 @@ Text.
 
 (ert-deftest test-org/update-radio-target-regexp ()
   "Test `org-update-radio-target-regexp' specifications."
-  (org-test-with-temp-text "radio\n\nParagraph\n\nradio"
-    (save-excursion (goto-char (point-max)) (org-element-context))
-    (insert "<<<")
-    (search-forward "o")
-    (insert ">>>")
-    (org-update-radio-target-regexp)
-    (goto-char (point-max))
-    (org-element-type (org-element-context))))
+  ;; Properly update cache.
+  (should
+   (eq 'link
+       (org-test-with-temp-text "radio\n\nParagraph\n\nradio"
+	 (save-excursion (goto-char (point-max)) (org-element-context))
+	 (insert "<<<")
+	 (search-forward "o")
+	 (insert ">>>")
+	 (org-update-radio-target-regexp)
+	 (goto-char (point-max))
+	 (org-element-type (org-element-context))))))
 
 
 

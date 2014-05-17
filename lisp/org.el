@@ -6130,11 +6130,15 @@ Also refresh fontification if needed."
 		       "\\)\\(?:$\\|[^[:alnum:]]\\)")))
     (unless (equal old-regexp org-target-link-regexp)
       ;; Clean-up cache.
-      (when old-regexp
-	(org-with-wide-buffer
-	 (goto-char (point-min))
-	 (while (re-search-forward old-regexp nil t)
-	   (org-element-cache-refresh (match-beginning 1)))))
+      (let ((regexp (cond
+		     ((not old-regexp) org-target-link-regexp)
+		     ((not org-target-link-regexp) old-regexp)
+		     (t (concat old-regexp "\\|" org-target-link-regexp)))))
+	(when regexp
+	  (org-with-wide-buffer
+	   (goto-char (point-min))
+	   (while (re-search-forward regexp nil t)
+	     (org-element-cache-refresh (match-beginning 1))))))
       ;; Re fontify buffer.
       (when (memq 'radio org-highlight-links)
 	(org-restart-font-lock)))))
