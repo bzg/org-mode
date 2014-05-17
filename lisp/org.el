@@ -6107,6 +6107,8 @@ by a #."
 Also refresh fontification if needed."
   (interactive)
   (let ((old-regexp org-target-link-regexp)
+	(before-re "\\(?:^\\|[^[:alnum:]]\\)\\(")
+	(after-re "\\)\\(?:$\\|[^[:alnum:]]\\)")
 	(targets
 	 (org-with-wide-buffer
 	  (goto-char (point-min))
@@ -6120,25 +6122,31 @@ Also refresh fontification if needed."
 	    rtn))))
     (setq org-target-link-regexp
 	  (and targets
-	       (concat "\\(?:^\\|[^[:alnum:]]\\)\\("
+	       (concat before-re
 		       (mapconcat
-			(lambda (x)
-			  (replace-regexp-in-string
-			   " +" "\\s-+" (regexp-quote x) t t))
+			#'(lambda (x)
+			    (replace-regexp-in-string
+			     " +" "\\s-+" (regexp-quote x) t t))
 			targets
 			"\\|")
-		       "\\)\\(?:$\\|[^[:alnum:]]\\)")))
+		       after-re)))
     (unless (equal old-regexp org-target-link-regexp)
       ;; Clean-up cache.
-      (let ((regexp (cond
-		     ((not old-regexp) org-target-link-regexp)
-		     ((not org-target-link-regexp) old-regexp)
-		     (t (concat old-regexp "\\|" org-target-link-regexp)))))
-	(when regexp
-	  (org-with-wide-buffer
-	   (goto-char (point-min))
-	   (while (re-search-forward regexp nil t)
-	     (org-element-cache-refresh (match-beginning 1))))))
+      (let ((regexp (cond ((not old-regexp) org-target-link-regexp)
+			  ((not org-target-link-regexp) old-regexp)
+			  (t
+			   (concat before-re
+				   (mapconcat
+				    #'(lambda (re)
+					(substring re (length before-re)
+						   (- (length after-re))))
+				    (list old-regexp org-target-link-regexp)
+				    "\\|")
+				   after-re)))))
+	(org-with-wide-buffer
+	 (goto-char (point-min))
+	 (while (re-search-forward regexp nil t)
+	   (org-element-cache-refresh (match-beginning 1)))))
       ;; Re fontify buffer.
       (when (memq 'radio org-highlight-links)
 	(org-restart-font-lock)))))
