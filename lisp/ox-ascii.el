@@ -193,8 +193,10 @@ original Org buffer at the same place."
 (defcustom org-ascii-indented-line-width 'auto
   "Additional indentation width for the first line in a paragraph.
 If the value is an integer, indent the first line of each
-paragraph by this number.  If it is the symbol `auto' preserve
-indentation from original document."
+paragraph by this width, unless it is located at the beginning of
+a section, in which case indentation is removed from that line.
+If it is the symbol `auto' preserve indentation from original
+document."
   :group 'org-export-ascii
   :version "24.4"
   :package-version '(Org . "8.0")
@@ -1431,12 +1433,16 @@ information."
   "Transcode a PARAGRAPH element from Org to ASCII.
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
-  (let ((contents (if (not (wholenump org-ascii-indented-line-width)) contents
-		    (concat
-		     (make-string org-ascii-indented-line-width ? )
-		     (replace-regexp-in-string "\\`[ \t]+" "" contents)))))
-    (org-ascii--fill-string
-     contents (org-ascii--current-text-width paragraph info) info)))
+  (org-ascii--fill-string
+   (if (not (wholenump org-ascii-indented-line-width)) contents
+     (concat
+      ;; Do not indent first paragraph in a section.
+      (unless (and (not (org-export-get-previous-element paragraph info))
+		   (eq (org-element-type (org-export-get-parent paragraph))
+		       'section))
+	(make-string org-ascii-indented-line-width ?\s))
+      (replace-regexp-in-string "\\`[ \t]+" "" contents)))
+   (org-ascii--current-text-width paragraph info) info))
 
 
 ;;;; Plain List
