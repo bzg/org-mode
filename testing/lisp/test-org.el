@@ -556,7 +556,8 @@
 	(org-indent-line)
 	(org-get-indentation))))
   ;; Within code part of a source block, use language major mode if
-  ;; `org-src-tab-acts-natively' is non-nil.  Do nothing otherwise.
+  ;; `org-src-tab-acts-natively' is non-nil.  Otherwise, indent
+  ;; according to line above.
   (should
    (= 6
       (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n (and A\nB)\n#+END_SRC"
@@ -566,13 +567,13 @@
 	  (org-indent-line))
 	(org-get-indentation))))
   (should
-   (zerop
-    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n (and A\nB)\n#+END_SRC"
-      (forward-line 2)
-      (let ((org-src-tab-acts-natively nil)
-	    (org-edit-src-content-indentation 0))
-	(org-indent-line))
-      (org-get-indentation))))
+   (= 1
+      (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n (and A\nB)\n#+END_SRC"
+	(forward-line 2)
+	(let ((org-src-tab-acts-natively nil)
+	      (org-edit-src-content-indentation 0))
+	  (org-indent-line))
+	(org-get-indentation))))
   ;; Otherwise, indent like the first non-blank line above.
   (should
    (zerop

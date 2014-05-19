@@ -22371,6 +22371,7 @@ Also align node properties according to `org-property-format'."
 			 (org-element-property :begin element))))
 	     'noindent)
 	    ((and (eq type 'src-block)
+		  org-src-tab-acts-natively
 		  (> (line-beginning-position)
 		     (org-element-property :post-affiliated element))
 		  (< (line-beginning-position)
@@ -22378,9 +22379,8 @@ Also align node properties according to `org-property-format'."
 		      (goto-char (org-element-property :end element))
 		      (skip-chars-backward " \r\t\n")
 		      (line-beginning-position))))
-	     (if (not org-src-tab-acts-natively) 'noindent
-	       (let ((org-src-strip-leading-and-trailing-blank-lines nil))
-		 (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB")))))
+	     (let ((org-src-strip-leading-and-trailing-blank-lines nil))
+	       (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB"))))
 	    (t
 	     (let ((column (org--get-expected-indentation element nil)))
 	       ;; Preserve current column.
