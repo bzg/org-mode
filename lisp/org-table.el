@@ -41,6 +41,8 @@
 (declare-function org-export-string-as "ox"
 		  (string backend &optional body-only ext-plist))
 (declare-function aa2u "ext:ascii-art-to-unicode" ())
+(declare-function calc-eval "calc" (str &optional separator &rest args))
+		  
 (defvar orgtbl-mode) ; defined below
 (defvar orgtbl-mode-menu) ; defined when orgtbl mode get initialized
 (defvar constants-unit-system)
@@ -1152,29 +1154,27 @@ to a number.  In the case of a timestamp, increment by days."
       (org-table-blank-field))
     (setq inc (cond
 	       ((numberp org-table-copy-increment) org-table-copy-increment)
-	       (txt-up
-		(cond ((and (string-match org-ts-regexp3 txt-up)
-			    (string-match org-ts-regexp3 txt))
-		       (- (org-time-string-to-absolute txt)
-			  (org-time-string-to-absolute txt-up)))
-		      (t (- (string-to-number txt)
-			    (string-to-number txt-up)))))
+	       (txt-up (cond ((and (string-match org-ts-regexp3 txt-up)
+				   (string-match org-ts-regexp3 txt))
+			      (- (org-time-string-to-absolute txt)
+				 (org-time-string-to-absolute txt-up)))
+			     (t (- (string-to-number txt)
+				   (string-to-number txt-up)))))
 	       (t 1)))
-    (if txt
-	(progn
-	  (if (and org-table-copy-increment
-		   (not (equal orig-n 0))
-		   (string-match "^[0-9]+$" txt)
-		   (< (string-to-number txt) 100000000))
-	      (setq txt (format "%d" (+ (string-to-number txt) inc))))
-	  (insert txt)
-	  (org-move-to-column col)
-	  (if (and org-table-copy-increment (org-at-timestamp-p t))
-	      (org-timestamp-up-day inc)
-	    (org-table-maybe-recalculate-line))
-	  (org-table-align)
-	  (org-move-to-column col))
-      (user-error "No non-empty field found"))))
+    (if (not txt)
+	(user-error "No non-empty field found")
+      (if (and org-table-copy-increment
+	       (not (equal orig-n 0))
+	       (string-match "^[-+^/*0-9eE.]+$" txt)
+	       (< (string-to-number txt) 100000000))
+	  (setq txt (calc-eval (concat txt "+" (number-to-string inc)))))
+      (insert txt)
+      (org-move-to-column col)
+      (if (and org-table-copy-increment (org-at-timestamp-p t))
+	  (org-timestamp-up-day inc)
+	(org-table-maybe-recalculate-line))
+      (org-table-align)
+      (org-move-to-column col))))
 
 (defun org-table-check-inside-data-field (&optional noerror)
   "Is point inside a table data field?

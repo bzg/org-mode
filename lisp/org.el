@@ -4376,6 +4376,7 @@ Normal means, no org-mode-specific context."
 (defvar texmathp-why)
 (declare-function speedbar-line-directory "speedbar" (&optional depth))
 (declare-function table--at-cell-p "table" (position &optional object at-column))
+(declare-function calc-eval "calc" (str &optional separator &rest args))
 
 ;;;###autoload
 (defun turn-on-orgtbl ()
@@ -20259,15 +20260,19 @@ Optional argument N tells to change by that many units."
 With an optional prefix numeric argument INC, increment using
 this numeric value."
   (interactive "p")
-  (unless inc (setq inc 1))
-  (let ((nap (thing-at-point 'number)))
-    (when nap
-      (skip-chars-backward "-+0123456789")
-      (kill-word 1)
-      (insert (number-to-string (+ inc nap)))))
-  (when (org-at-table-p)
-    (org-table-align)
-    (org-table-end-of-field 1)))
+  (if (not (number-at-point))
+      (user-error "Not on a number")
+    (unless inc (setq inc 1))
+    (let ((pos (point))
+	  (beg (skip-chars-backward "-+^/*0-9eE."))
+	  (end (skip-chars-forward "-+^/*0-9eE^.")) nap)
+      (setq nap (buffer-substring-no-properties
+		 (+ pos beg) (+ pos beg end)))
+      (delete-region (+ pos beg) (+ pos beg end))
+      (insert (calc-eval (concat (number-to-string inc) "+" nap))))
+    (when (org-at-table-p)
+      (org-table-align)
+      (org-table-end-of-field 1))))
 
 (defun org-decrease-number-at-point (&optional inc)
   "Decrement the number at point.
