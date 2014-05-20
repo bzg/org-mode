@@ -1858,10 +1858,13 @@ split.  When called from outside of a code block a new code block
 is created.  In both cases if the region is demarcated and if the
 region is not active then the point is demarcated."
   (interactive "P")
-  (let ((info (org-babel-get-src-block-info 'light))
-	(headers (progn (org-babel-where-is-src-block-head)
-			(match-string 4)))
-	(stars (concat (make-string (or (org-current-level) 1) ?*) " ")))
+  (let* ((info (org-babel-get-src-block-info 'light))
+	 (block (progn (org-babel-where-is-src-block-head) (match-string 0)))
+	 (headers (progn (org-babel-where-is-src-block-head) (match-string 4)))
+	 (stars (concat (make-string (or (org-current-level) 1) ?*) " "))
+	 lower-case-p)
+    (if (let (case-fold-search) (string-match "#\\+begin_src" block))
+	(setq lower-case-p t))
     (if info
         (mapc
          (lambda (place)
@@ -1875,9 +1878,10 @@ region is not active then the point is demarcated."
 		 (delete-region (point-at-bol) (point-at-eol)))
                (insert (concat
 			(if (looking-at "^") "" "\n")
-			indent "#+end_src\n"
+			indent (funcall (if lower-case-p 'downcase 'upcase) "#+end_src\n")
 			(if arg stars indent) "\n"
-			indent "#+begin_src " lang
+			indent (funcall (if lower-case-p 'downcase 'upcase) "#+begin_src ")
+			lang
 			(if (> (length headers) 1)
 			    (concat " " headers) headers)
 			(if (looking-at "[\n\r]")
@@ -1897,11 +1901,12 @@ region is not active then the point is demarcated."
 		   (if (org-region-active-p) (mark) (point)) (point))))
 	(insert (concat (if (looking-at "^") "" "\n")
 			(if arg (concat stars "\n") "")
-			"#+begin_src " lang "\n"
+			(funcall (if lower-case-p 'downcase 'upcase) "#+begin_src ")
+			lang "\n"
 			body
 			(if (or (= (length body) 0)
 				(string-match "[\r\n]$" body)) "" "\n")
-			"#+end_src\n"))
+			(funcall (if lower-case-p 'downcase 'upcase) "#+end_src\n")))
 	(goto-char start) (move-end-of-line 1)))))
 
 (defvar org-babel-lob-one-liner-regexp)
