@@ -14748,8 +14748,8 @@ Returns the new tags string, or nil to not change the current settings."
       (if expert
 	  (set-buffer (get-buffer-create " *Org tags*"))
 	(delete-other-windows)
-	(split-window-vertically)
-	(org-switch-to-buffer-other-window (get-buffer-create " *Org tags*")))
+	(set-window-buffer (split-window-vertically) (get-buffer-create " *Org tags*"))
+	(org-switch-to-buffer-other-window " *Org tags*"))
       (erase-buffer)
       (org-set-local 'org-done-keywords done-keywords)
       (org-fast-tag-insert "Inherited" inherited i-face "\n")
