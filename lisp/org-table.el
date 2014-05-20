@@ -243,7 +243,7 @@ t       accept as input and present for editing"
   :type '(choice
 	  (const :tag "Use the difference between the current and the above fields" t)
 	  (integer :tag "Use a number" 1)
-	  (const :tag "Don't increment the value when copying a field" t)))
+	  (const :tag "Don't increment the value when copying a field" nil)))
 
 (defcustom org-calc-default-modes
   '(calc-internal-prec 12
