@@ -7768,7 +7768,10 @@ command."
 	  ;; If we insert after content, move there and clean up whitespace
 	  (when (and respect-content
 		     (not (org-looking-at-p org-outline-regexp-bol)))
-	    (org-end-of-subtree nil t)
+	    (if (not (org-before-first-heading-p))
+		(org-end-of-subtree nil t)
+	      (re-search-forward org-outline-regexp-bol)
+	      (beginning-of-line 0))
 	    (skip-chars-backward " \r\n")
 	    (and (not (looking-back "^\\*+"))
 		 (looking-at "[ \t]+") (replace-match ""))
