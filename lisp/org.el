@@ -20255,6 +20255,9 @@ Optional argument N tells to change by that many units."
     (user-error "Not at a clock log")))
 
 (defun org-increase-number-at-point (&optional inc)
+  "Increment the number at point.
+With an optional prefix numeric argument INC, increment using
+this numeric value."
   (interactive "p")
   (unless inc (setq inc 1))
   (let ((nap (thing-at-point 'number)))
@@ -20267,6 +20270,9 @@ Optional argument N tells to change by that many units."
     (org-table-end-of-field 1)))
 
 (defun org-decrease-number-at-point (&optional inc)
+  "Decrement the number at point.
+With an optional prefix numeric argument INC, decrement using
+this numeric value."
   (interactive "p")
   (org-increase-number-at-point (- inc)))
 
