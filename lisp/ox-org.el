@@ -194,7 +194,7 @@ a communication channel."
    (let ((footnotes-alist
 	  (org-element-map section 'footnote-reference
 	    (lambda (fn)
-	      (and (not (org-element-property :inline-definition fn))
+	      (and (eq (org-element-property :type fn) 'standard)
 		   (org-export-footnote-first-reference-p fn info)
 		   (cons (org-element-property :label fn)
 			 (org-export-get-footnote-definition fn info))))
