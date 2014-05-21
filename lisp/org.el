@@ -7583,14 +7583,15 @@ command."
     (cond
 
      ((or (= (buffer-size) 0)
-	  (and (or (and (bolp)
-			(not (save-excursion
-			       (and (ignore-errors (org-back-to-heading invisible-ok))
-				    (org-at-heading-p)))))
-		   (and (bolp) (not (looking-at org-outline-regexp-bol))))
+	  (and (not (save-excursion
+		      (and (ignore-errors (org-back-to-heading invisible-ok))
+			   (org-at-heading-p))))
 	       (or arg (not itemp))))
       ;; At beginning of buffer or so high up that only a heading
       ;; makes sense.
+      (when (and (org-before-first-heading-p) (not (bolp)))
+	(re-search-forward org-outline-regexp-bol)
+	(beginning-of-line 0))
       (insert
        (if (or (bobp) (org-previous-line-empty-p)) "" "\n")
        (if (org-in-src-block-p) ",* " "* "))
@@ -7654,7 +7655,8 @@ command."
 
 	  ;; If we insert after content, move there and clean up whitespace
 	  (when (and respect-content
-		     (not (org-looking-at-p org-outline-regexp-bol)))
+		     (not (org-looking-at-p org-outline-regexp-bol))
+		     (not (bolp)))
 	    (if (not (org-before-first-heading-p))
 		(org-end-of-subtree nil t)
 	      (re-search-forward org-outline-regexp-bol)
@@ -7687,10 +7689,9 @@ command."
 		    (setq initial-content (org-trim initial-content)))
 		  (goto-char pos))
 	      ;; a normal line
-	      (unless (bolp)
-		(setq initial-content (buffer-substring (point) (point-at-eol)))
-		(delete-region (point) (point-at-eol))
-		(setq initial-content (org-trim initial-content)))))
+	      (setq initial-content
+		    (org-trim (buffer-substring (point) (point-at-eol))))
+	      (delete-region (point) (point-at-eol))))
 
 	  ;; If we are at the beginning of the line, insert before it.  Else after
 	  (cond
