@@ -95,7 +95,7 @@ this variable.")
 
 (defun org-babel-expand-body:R (body params &optional graphics-file)
   "Expand BODY according to PARAMS, return the expanded body."
-  (mapconcat #'identity
+  (mapconcat 'identity
 	     (append
 	      (when (cdr (assoc :prologue params))
 		(list (cdr (assoc :prologue params))))
@@ -120,7 +120,7 @@ This function is called by `org-babel-execute-src-block'."
 	   (full-body
 	    (let ((inside
 		   (list (org-babel-expand-body:R body params graphics-file))))
-	      (mapconcat #'identity
+	      (mapconcat 'identity
 			 (if graphics-file
 			     (append
 			      (list (org-babel-R-construct-graphics-device-call
@@ -163,7 +163,7 @@ This function is called by `org-babel-execute-src-block'."
 
 (defun org-babel-variable-assignments:R (params)
   "Return list of R statements assigning the block's variables."
-  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
+  (let ((vars (mapcar 'cdr (org-babel-get-header params :var))))
     (mapcar
      (lambda (pair)
        (org-babel-R-assign-elisp
@@ -368,7 +368,7 @@ last statement in BODY, as elisp."
 	column-names-p)))
     (output
      (mapconcat
-      #'org-babel-chomp
+      'org-babel-chomp
       (butlast
        (delq nil
 	     (mapcar
@@ -380,7 +380,7 @@ last statement in BODY, as elisp."
 		     (substring line (match-end 1))
 		   line))
 	       (org-babel-comint-with-output (session org-babel-R-eoe-output)
-		 (insert (mapconcat #'org-babel-chomp
+		 (insert (mapconcat 'org-babel-chomp
 				    (list body org-babel-R-eoe-indicator)
 				    "\n"))
 		 (inferior-ess-send-input)))))) "\n"))))
