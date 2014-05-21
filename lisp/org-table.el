@@ -1135,8 +1135,7 @@ to a number.  In the case of a timestamp, increment by days."
 	 (orig-n n)
 	 txt txt-up inc)
     (org-table-check-inside-data-field)
-    (if non-empty
-	(setq txt (org-trim field))
+    (if (not non-empty)
       (save-excursion
 	(setq txt
 	      (catch 'exit
@@ -1147,11 +1146,23 @@ to a number.  In the case of a timestamp, increment by days."
 		  (if (and (looking-at
 			    "|[ \t]*\\([^| \t][^|]*?\\)[ \t]*|")
 			   (<= (setq n (1- n)) 0))
-		      (throw 'exit (match-string 1))))))))
-    (if non-empty-up (setq txt-up (org-trim field-up)))
-    (when txt
+		      (throw 'exit (match-string 1))))))
+	(setq field-up
+	      (catch 'exit
+		(while (progn (beginning-of-line 1)
+			      (re-search-backward org-table-dataline-regexp
+						  beg t))
+		  (org-table-goto-column colpos t)
+		  (if (and (looking-at
+			    "|[ \t]*\\([^| \t][^|]*?\\)[ \t]*|")
+			   (<= (setq n (1- n)) 0))
+		      (throw 'exit (match-string 1))))))
+	(setq non-empty-up (string-match "[^ \t]" field-up)))
+      ;; Above field was not empty, go down to the next row
+      (setq txt (org-trim field))
       (org-table-next-row)
       (org-table-blank-field))
+    (if non-empty-up (setq txt-up (org-trim field-up)))
     (setq inc (cond
 	       ((numberp org-table-copy-increment) org-table-copy-increment)
 	       (txt-up (cond ((and (string-match org-ts-regexp3 txt-up)
