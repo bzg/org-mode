@@ -93,7 +93,8 @@ This variable can be set to either `atx' or `setext'."
 		     (section . org-md-section)
 		     (src-block . org-md-example-block)
 		     (template . org-md-template)
-		     (verbatim . org-md-verbatim)))
+		     (verbatim . org-md-verbatim))
+  :options-alist '((:md-headline-style nil nil org-md-headline-style)))
 
 
 ;;; Filters

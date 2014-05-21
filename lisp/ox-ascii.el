@@ -120,7 +120,28 @@
 		   (:filter-parse-tree org-ascii-filter-paragraph-spacing
 				       org-ascii-filter-comment-spacing)
 		   (:filter-section . org-ascii-filter-headline-blank-lines))
-  :options-alist '((:ascii-charset nil nil org-ascii-charset)))
+  :options-alist
+  '((:ascii-bullets nil nil org-ascii-bullets)
+    (:ascii-caption-above nil nil org-ascii-caption-above)
+    (:ascii-charset nil nil org-ascii-charset)
+    (:ascii-global-margin nil nil org-ascii-global-margin)
+    (:ascii-format-drawer-function nil nil org-ascii-format-drawer-function)
+    (:ascii-format-inlinetask-function
+     nil nil org-ascii-format-inlinetask-function)
+    (:ascii-headline-spacing nil nil org-ascii-headline-spacing)
+    (:ascii-indented-line-width nil nil org-ascii-indented-line-width)
+    (:ascii-inlinetask-width nil nil org-ascii-inlinetask-width)
+    (:ascii-inner-margin nil nil org-ascii-inner-margin)
+    (:ascii-links-to-notes nil nil org-ascii-links-to-notes)
+    (:ascii-paragraph-spacing nil nil org-ascii-paragraph-spacing)
+    (:ascii-quote-margin nil nil org-ascii-quote-margin)
+    (:ascii-table-keep-all-vertical-lines
+     nil nil org-ascii-table-keep-all-vertical-lines)
+    (:ascii-table-use-ascii-art nil nil org-ascii-table-use-ascii-art)
+    (:ascii-table-widen-columns nil nil org-ascii-table-widen-columns)
+    (:ascii-text-width nil nil org-ascii-text-width)
+    (:ascii-underline nil nil org-ascii-underline)
+    (:ascii-verbatim-format nil nil org-ascii-verbatim-format)))
 
 
 

@@ -102,6 +102,7 @@ setting of `org-html-htmlize-output-type' is 'css."
     (underline . org-org-identity)
     (verbatim . org-org-identity)
     (verse-block . org-org-identity))
+  :options-alist '((:org-htmlized-css-url nil nil org-org-htmlized-css-url))
   :menu-entry
   '(?O "Export to Org"
        ((?O "As Org buffer" org-org-export-as-org)

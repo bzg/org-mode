@@ -13412,41 +13412,21 @@ result into the destination folder.
 @subsection Options for the exporters
 @cindex options, for publishing
 
-The property list can be used to set many export options for the exporters.
-In most cases, these properties correspond to user variables in Org.  The
-first table below lists these properties along with the variable they belong
-to.  The second table list HTML specific properties.  See the documentation
-string of these options for details.
+The property list can be used to set export options during the publishing
+process.  In most cases, these properties correspond to user variables in
+Org.  While some properties are available for all export back-ends, most of
+them are back-end specific.  The following sections list properties along
+with the variable they belong to.  See the documentation string of these
+options for details.
 
-@vindex org-display-custom-times
-@vindex org-export-default-language
-@vindex org-export-exclude-tags
-@vindex org-export-headline-levels
-@vindex org-export-preserve-breaks
-@vindex org-export-publishing-directory
-@vindex org-export-select-tags
-@vindex org-export-with-archived-trees
-@vindex org-export-with-author
-@vindex org-export-with-creator
-@vindex org-export-with-drawers
-@vindex org-export-with-email
-@vindex org-export-with-emphasize
-@vindex org-export-with-fixed-width
-@vindex org-export-with-footnotes
-@vindex org-export-with-latex
-@vindex org-export-with-planning
-@vindex org-export-with-priority
-@vindex org-export-with-properties
-@vindex org-export-with-section-numbers
-@vindex org-export-with-special-strings
-@vindex org-export-with-sub-superscripts
-@vindex org-export-with-tables
-@vindex org-export-with-tags
-@vindex org-export-with-tasks
-@vindex org-export-with-timestamps
-@vindex org-export-with-toc
-@vindex org-export-with-todo-keywords
-@vindex user-mail-address
+@vindex org-publish-project-alist
+When a property is given a value in @code{org-publish-project-alist}, its
+setting overrides the value of the corresponding user variable (if any)
+during publishing.  Options set within a file (@pxref{Export settings}),
+however, override everything.
+
+@subsubheading Generic properties
+
 @multitable @columnfractions 0.32 0.68
 @item @code{:archived-trees}        @tab @code{org-export-with-archived-trees}
 @item @code{:exclude-tags}          @tab @code{org-export-exclude-tags}
@@ -13477,53 +13457,197 @@ string of these options for details.
 @item @code{:with-todo-keywords}    @tab @code{org-export-with-todo-keywords}
 @end multitable
 
-@vindex org-html-doctype
-@vindex org-html-container-element
-@vindex org-html-html5-fancy
-@vindex org-html-xml-declaration
-@vindex org-html-link-up
-@vindex org-html-link-home
-@vindex org-html-link-org-files-as-html
-@vindex org-html-link-use-abs-url
-@vindex org-html-head
-@vindex org-html-head-extra
-@vindex org-html-inline-images
-@vindex org-html-extension
-@vindex org-html-preamble
-@vindex org-html-postamble
-@vindex org-html-table-default-attributes
-@vindex org-html-table-row-tags
-@vindex org-html-head-include-default-style
-@vindex org-html-head-include-scripts
+@subsubheading ASCII specific properties
+
 @multitable @columnfractions 0.32 0.68
-@item @code{:html-doctype}          @tab @code{org-html-doctype}
-@item @code{:html-container}        @tab @code{org-html-container-element}
-@item @code{:html-html5-fancy}      @tab @code{org-html-html5-fancy}
-@item @code{:html-xml-declaration}  @tab @code{org-html-xml-declaration}
-@item @code{:html-link-up}          @tab @code{org-html-link-up}
-@item @code{:html-link-home}        @tab @code{org-html-link-home}
-@item @code{:html-link-org-as-html} @tab @code{org-html-link-org-files-as-html}
-@item @code{:html-link-use-abs-url} @tab @code{org-html-link-use-abs-url}
-@item @code{:html-head}             @tab @code{org-html-head}
-@item @code{:html-head-extra}       @tab @code{org-html-head-extra}
-@item @code{:html-inline-images}    @tab @code{org-html-inline-images}
-@item @code{:html-extension}        @tab @code{org-html-extension}
-@item @code{:html-preamble}         @tab @code{org-html-preamble}
-@item @code{:html-postamble}        @tab @code{org-html-postamble}
-@item @code{:html-table-attributes} @tab @code{org-html-table-default-attributes}
-@item @code{:html-table-row-tags}   @tab @code{org-html-table-row-tags}
-@item @code{:html-head-include-default-style} @tab @code{org-html-head-include-default-style}
-@item @code{:html-head-include-scripts} @tab @code{org-html-head-include-scripts}
+@item @code{:ascii-bullets}                       @tab @code{org-ascii-bullets}
+@item @code{:ascii-caption-above}                 @tab @code{org-ascii-caption-above}
+@item @code{:ascii-charset}                       @tab @code{org-ascii-charset}
+@item @code{:ascii-global-margin}                 @tab @code{org-ascii-global-margin}
+@item @code{:ascii-format-drawer-function}        @tab @code{org-ascii-format-drawer-function}
+@item @code{:ascii-format-inlinetask-function}    @tab @code{org-ascii-format-inlinetask-function}
+@item @code{:ascii-headline-spacing}              @tab @code{org-ascii-headline-spacing}
+@item @code{:ascii-indented-line-width}           @tab @code{org-ascii-indented-line-width}
+@item @code{:ascii-inlinetask-width}              @tab @code{org-ascii-inlinetask-width}
+@item @code{:ascii-inner-margin}                  @tab @code{org-ascii-inner-margin}
+@item @code{:ascii-links-to-notes}                @tab @code{org-ascii-links-to-notes}
+@item @code{:ascii-paragraph-spacing}             @tab @code{org-ascii-paragraph-spacing}
+@item @code{:ascii-quote-margin}                  @tab @code{org-ascii-quote-margin}
+@item @code{:ascii-table-keep-all-vertical-lines} @tab @code{org-ascii-table-keep-all-vertical-lines}
+@item @code{:ascii-table-use-ascii-art}           @tab @code{org-ascii-table-use-ascii-art}
+@item @code{:ascii-table-widen-columns}           @tab @code{org-ascii-table-widen-columns}
+@item @code{:ascii-text-width}                    @tab @code{org-ascii-text-width}
+@item @code{:ascii-underline}                     @tab @code{org-ascii-underline}
+@item @code{:ascii-verbatim-format}               @tab @code{org-ascii-verbatim-format}
 @end multitable
 
-Most of the @code{org-export-with-*} variables have the same effect in each
-exporter.
+@subsubheading Beamer specific properties
 
-@vindex org-publish-project-alist
-When a property is given a value in @code{org-publish-project-alist}, its
-setting overrides the value of the corresponding user variable (if any)
-during publishing.  Options set within a file (@pxref{Export settings}),
-however, override everything.
+@multitable @columnfractions 0.32 0.68
+@item @code{:beamer-theme}                 @tab @code{org-beamer-theme}
+@item @code{:beamer-column-view-format}    @tab @code{org-beamer-column-view-format}
+@item @code{:beamer-environments-extra}    @tab @code{org-beamer-environments-extra}
+@item @code{:beamer-frame-default-options} @tab @code{org-beamer-frame-default-options}
+@item @code{:beamer-outline-frame-options} @tab @code{org-beamer-outline-frame-options}
+@item @code{:beamer-outline-frame-title}   @tab @code{org-beamer-outline-frame-title}
+@end multitable
+
+@subsubheading HTML specific properties
+
+@multitable @columnfractions 0.32 0.68
+@item @code{:html-allow-name-attribute-in-anchors} @tab @code{org-html-allow-name-attribute-in-anchors}
+@item @code{:html-coding-system}              @tab @code{org-html-coding-system}
+@item @code{:html-container}                  @tab @code{org-html-container-element}
+@item @code{:html-divs}                       @tab @code{org-html-divs}
+@item @code{:html-doctype}                    @tab @code{org-html-doctype}
+@item @code{:html-extension}                  @tab @code{org-html-extension}
+@item @code{:html-footnote-format}            @tab @code{org-html-footnote-format}
+@item @code{:html-footnote-separator}         @tab @code{org-html-footnote-separator}
+@item @code{:html-footnotes-section}          @tab @code{org-html-footnotes-section}
+@item @code{:html-format-drawer-function}     @tab @code{org-html-format-drawer-function}
+@item @code{:html-format-headline-function}   @tab @code{org-html-format-headline-function}
+@item @code{:html-format-inlinetask-function} @tab @code{org-html-format-inlinetask-function}
+@item @code{:html-head-extra}                 @tab @code{org-html-head-extra}
+@item @code{:html-head-include-default-style} @tab @code{org-html-head-include-default-style}
+@item @code{:html-head-include-scripts}       @tab @code{org-html-head-include-scripts}
+@item @code{:html-head}                       @tab @code{org-html-head}
+@item @code{:html-home/up-format}             @tab @code{org-html-home/up-format}
+@item @code{:html-html5-fancy}                @tab @code{org-html-html5-fancy}
+@item @code{:html-htmlize-font-prefix}        @tab @code{org-html-htmlize-font-prefix}
+@item @code{:html-htmlize-output-type}        @tab @code{org-html-htmlize-output-type}
+@item @code{:html-indent}                     @tab @code{org-html-indent}
+@item @code{:html-infojs-options}             @tab @code{org-html-infojs-options}
+@item @code{:html-infojs-template}            @tab @code{org-html-infojs-template}
+@item @code{:html-inline-image-rules}         @tab @code{org-html-inline-image-rules}
+@item @code{:html-inline-images}              @tab @code{org-html-inline-images}
+@item @code{:html-link-home}                  @tab @code{org-html-link-home}
+@item @code{:html-link-org-as-html}           @tab @code{org-html-link-org-files-as-html}
+@item @code{:html-link-up}                    @tab @code{org-html-link-up}
+@item @code{:html-link-use-abs-url}           @tab @code{org-html-link-use-abs-url}
+@item @code{:html-mathjax-options}            @tab @code{org-html-mathjax-options}
+@item @code{:html-mathjax-template}           @tab @code{org-html-mathjax-template}
+@item @code{:html-metadata-timestamp-format}  @tab @code{org-html-metadata-timestamp-format}
+@item @code{:html-postamble-format}           @tab @code{org-html-postamble-format}
+@item @code{:html-postamble}                  @tab @code{org-html-postamble}
+@item @code{:html-preamble-format}            @tab @code{org-html-preamble-format}
+@item @code{:html-preamble}                   @tab @code{org-html-preamble}
+@item @code{:html-protect-char-alist}         @tab @code{org-html-protect-char-alist}
+@item @code{:html-table-align-individual-fields} @tab @code{org-html-table-align-individual-fields}
+@item @code{:html-table-attributes}           @tab @code{org-html-table-default-attributes}
+@item @code{:html-table-caption-above}        @tab @code{org-html-table-caption-above}
+@item @code{:html-table-data-tags}            @tab @code{org-html-table-data-tags}
+@item @code{:html-table-header-tags}          @tab @code{org-html-table-header-tags}
+@item @code{:html-table-row-tags}             @tab @code{org-html-table-row-tags}
+@item @code{:html-table-use-header-tags-for-first-column} @tab @code{org-html-table-use-header-tags-for-first-column}
+@item @code{:html-tag-class-prefix}           @tab @code{org-html-tag-class-prefix}
+@item @code{:html-text-markup-alist}          @tab @code{org-html-text-markup-alist}
+@item @code{:html-todo-kwd-class-prefix}      @tab @code{org-html-todo-kwd-class-prefix}
+@item @code{:html-toplevel-hlevel}            @tab @code{org-html-toplevel-hlevel}
+@item @code{:html-use-infojs}                 @tab @code{org-html-use-infojs}
+@item @code{:html-use-unicode-chars}          @tab @code{org-html-use-unicode-chars}
+@item @code{:html-validation-link}            @tab @code{org-html-validation-link}
+@item @code{:html-xml-declaration}            @tab @code{org-html-xml-declaration}
+@end multitable
+
+@subsubheading @LaTeX{} specific properties
+
+@multitable @columnfractions 0.32 0.68
+@item @code{:latex-active-timestamp-format}    @tab @code{org-latex-active-timestamp-format}
+@item @code{:latex-classes}                    @tab @code{org-latex-classes}
+@item @code{:latex-class}                      @tab @code{org-latex-default-class t}
+@item @code{:latex-default-figure-position}    @tab @code{org-latex-default-figure-position}
+@item @code{:latex-default-table-environment}  @tab @code{org-latex-default-table-environment}
+@item @code{:latex-default-table-mode}         @tab @code{org-latex-default-table-mode}
+@item @code{:latex-diary-timestamp-format}     @tab @code{org-latex-diary-timestamp-format}
+@item @code{:latex-footnote-separator}         @tab @code{org-latex-footnote-separator}
+@item @code{:latex-format-drawer-function}     @tab @code{org-latex-format-drawer-function}
+@item @code{:latex-format-headline-function}   @tab @code{org-latex-format-headline-function}
+@item @code{:latex-format-inlinetask-function} @tab @code{org-latex-format-inlinetask-function}
+@item @code{:latex-hyperref-p}                 @tab @code{org-latex-with-hyperref t}
+@item @code{:latex-image-default-height}       @tab @code{org-latex-image-default-height}
+@item @code{:latex-image-default-option}       @tab @code{org-latex-image-default-option}
+@item @code{:latex-image-default-width}        @tab @code{org-latex-image-default-width}
+@item @code{:latex-inactive-timestamp-format}  @tab @code{org-latex-inactive-timestamp-format}
+@item @code{:latex-inline-image-rules}         @tab @code{org-latex-inline-image-rules}
+@item @code{:latex-inputenc-alist}             @tab @code{org-latex-inputenc-alist}
+@item @code{:latex-known-errors}               @tab @code{org-latex-known-errors}
+@item @code{:latex-link-with-unknown-path-format} @tab @code{org-latex-link-with-unknown-path-format}
+@item @code{:latex-listings-langs}             @tab @code{org-latex-listings-langs}
+@item @code{:latex-listings-options}           @tab @code{org-latex-listings-options}
+@item @code{:latex-listings}                   @tab @code{org-latex-listings}
+@item @code{:latex-logfiles-extensions}        @tab @code{org-latex-logfiles-extensions}
+@item @code{:latex-minted-langs}               @tab @code{org-latex-minted-langs}
+@item @code{:latex-minted-options}             @tab @code{org-latex-minted-options}
+@item @code{:latex-pdf-process}                @tab @code{org-latex-pdf-process}
+@item @code{:latex-remove-logfiles}            @tab @code{org-latex-remove-logfiles}
+@item @code{:latex-table-caption-above}        @tab @code{org-latex-table-caption-above}
+@item @code{:latex-table-scientific-notation}  @tab @code{org-latex-table-scientific-notation}
+@item @code{:latex-tables-booktabs}            @tab @code{org-latex-tables-booktabs}
+@item @code{:latex-tables-centered}            @tab @code{org-latex-tables-centered}
+@item @code{:latex-text-markup-alist}          @tab @code{org-latex-text-markup-alist}
+@item @code{:latex-title-command}              @tab @code{org-latex-title-command}
+@item @code{:latex-toc-command}                @tab @code{org-latex-toc-command}
+@end multitable
+
+@subsubheading Markdown specific properties
+
+@multitable @columnfractions 0.32 0.68
+@item @code{:md-headline-style} @tab @code{org-md-headline-style}
+@end multitable
+
+@subsubheading ODT specific properties
+
+@multitable @columnfractions 0.32 0.68
+@item @code{:odt-convert-capabilities}       @tab @code{org-odt-convert-capabilities}
+@item @code{:odt-convert-processes}          @tab @code{org-odt-convert-processes}
+@item @code{:odt-convert-process}            @tab @code{org-odt-convert-process}
+@item @code{:odt-create-custom-styles-for-srcblocks} @tab @code{org-odt-create-custom-styles-for-srcblocks}
+@item @code{:odt-display-outline-level}      @tab @code{org-odt-display-outline-level}
+@item @code{:odt-fontify-srcblocks}          @tab @code{org-odt-fontify-srcblocks}
+@item @code{:odt-format-drawer-function}     @tab @code{org-odt-format-drawer-function}
+@item @code{:odt-format-headline-function}   @tab @code{org-odt-format-headline-function}
+@item @code{:odt-format-inlinetask-function} @tab @code{org-odt-format-inlinetask-function}
+@item @code{:odt-inline-formula-rules}       @tab @code{org-odt-inline-formula-rules}
+@item @code{:odt-inline-image-rules}         @tab @code{org-odt-inline-image-rules}
+@item @code{:odt-pixels-per-inch}            @tab @code{org-odt-pixels-per-inch}
+@item @code{:odt-preferred-output-format}    @tab @code{org-odt-preferred-output-format}
+@item @code{:odt-prettify-xml}               @tab @code{org-odt-prettify-xml}
+@item @code{:odt-schema-dir}                 @tab @code{org-odt-schema-dir}
+@item @code{:odt-styles-file}                @tab @code{org-odt-content-template-file}
+@item @code{:odt-styles-file}                @tab @code{org-odt-styles-file}
+@item @code{:odt-table-styles}               @tab @code{org-odt-table-styles}
+@item @code{:odt-use-date-fields}            @tab @code{org-odt-use-date-fields}
+@end multitable
+
+@subsubheading Org specific properties
+
+@multitable @columnfractions 0.32 0.68
+@item @code{:org-htmlized-css-url} @tab @code{org-org-htmlized-css-url}
+@end multitable
+
+@subsubheading Texinfo specific properties
+
+@multitable @columnfractions 0.32 0.68
+@item @code{:texinfo-active-timestamp-format}    @tab @code{org-texinfo-active-timestamp-format}
+@item @code{:texinfo-classes}                    @tab @code{org-texinfo-classes}
+@item @code{:texinfo-class}                      @tab @code{org-texinfo-default-class}
+@item @code{:texinfo-coding-system}              @tab @code{org-texinfo-coding-system}
+@item @code{:texinfo-def-table-markup}           @tab @code{org-texinfo-def-table-markup}
+@item @code{:texinfo-diary-timestamp-format}     @tab @code{org-texinfo-diary-timestamp-format}
+@item @code{:texinfo-filename}                   @tab @code{org-texinfo-filename}
+@item @code{:texinfo-format-drawer-function}     @tab @code{org-texinfo-format-drawer-function}
+@item @code{:texinfo-format-headline-function}   @tab @code{org-texinfo-format-headline-function}
+@item @code{:texinfo-format-inlinetask-function} @tab @code{org-texinfo-format-inlinetask-function}
+@item @code{:texinfo-inactive-timestamp-format}  @tab @code{org-texinfo-inactive-timestamp-format}
+@item @code{:texinfo-info-process}               @tab @code{org-texinfo-info-process}
+@item @code{:texinfo-link-with-unknown-path-format} @tab @code{org-texinfo-link-with-unknown-path-format}
+@item @code{:texinfo-logfiles-extensions}        @tab @code{org-texinfo-logfiles-extensions}
+@item @code{:texinfo-node-description-column}    @tab @code{org-texinfo-node-description-column}
+@item @code{:texinfo-remove-logfiles}            @tab @code{org-texinfo-remove-logfiles}
+@item @code{:texinfo-table-scientific-notation}  @tab @code{org-texinfo-table-scientific-notation}
+@item @code{:texinfo-tables-verbatim}            @tab @code{org-texinfo-tables-verbatim}
+@item @code{:texinfo-text-markup-alist}          @tab @code{org-texinfo-text-markup-alist}
+@end multitable
 
 @node Publishing links
 @subsection Links between published files

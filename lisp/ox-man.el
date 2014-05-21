@@ -112,7 +112,16 @@
   :options-alist
   '((:man-class "MAN_CLASS" nil nil t)
     (:man-class-options "MAN_CLASS_OPTIONS" nil nil t)
-    (:man-header-extra "MAN_HEADER" nil nil newline)))
+    (:man-header-extra "MAN_HEADER" nil nil newline)
+    ;; Other variables.
+    (:man-tables-centered nil nil org-man-tables-centered)
+    (:man-tables-verbatim nil nil org-man-tables-verbatim)
+    (:man-table-scientific-notation nil nil org-man-table-scientific-notation)
+    (:man-source-highlight nil nil org-man-source-highlight)
+    (:man-source-highlight-langs nil nil org-man-source-highlight-langs)
+    (:man-pdf-process nil nil org-man-pdf-process)
+    (:man-logfiles-extensions nil nil org-man-logfiles-extensions)
+    (:man-remove-logfiles nil nil org-man-remove-logfiles)))
 
 
 

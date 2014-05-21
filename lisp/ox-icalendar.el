@@ -258,7 +258,21 @@ re-read the iCalendar file.")
   '((:exclude-tags
      "ICALENDAR_EXCLUDE_TAGS" nil org-icalendar-exclude-tags split)
     (:with-timestamps nil "<" org-icalendar-with-timestamps)
-    (:with-vtodo nil nil org-icalendar-include-todo)
+    ;; Other variables.
+    (:icalendar-alarm-time nil nil org-icalendar-alarm-time)
+    (:icalendar-categories nil nil org-icalendar-categories)
+    (:icalendar-combined-agenda-file nil nil org-icalendar-combined-agenda-file)
+    (:icalendar-combined-description nil nil org-icalendar-combined-description)
+    (:icalendar-combined-name nil nil org-icalendar-combined-name)
+    (:icalendar-date-time-format nil nil org-icalendar-date-time-format)
+    (:icalendar-include-bbdb-anniversaries nil nil org-icalendar-include-bbdb-anniversaries)
+    (:icalendar-include-body nil nil org-icalendar-include-body)
+    (:icalendar-include-sexps nil nil org-icalendar-include-sexps)
+    (:icalendar-include-todo nil nil org-icalendar-include-todo)
+    (:icalendar-store-UID nil nil org-icalendar-store-UID)
+    (:icalendar-timezone nil nil org-icalendar-timezone)
+    (:icalendar-use-deadline nil nil org-icalendar-use-deadline)
+    (:icalendar-use-scheduled nil nil org-icalendar-use-scheduled)
     ;; The following property will be non-nil when export has been
     ;; started from org-agenda-mode.  In this case, any entry without
     ;; a non-nil "ICALENDAR_MARK" property will be ignored.
@@ -590,7 +604,7 @@ inlinetask within the section."
 	    ;; If so, call `org-icalendar--vtodo' to transcode it
 	    ;; into a "VTODO" component.
 	    (when (and todo-type
-		       (case (plist-get info :with-vtodo)
+		       (case (plist-get info :icalendar-include-todo)
 			 (all t)
 			 (unblocked
 			  (and (eq type 'headline)

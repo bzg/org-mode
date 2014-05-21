@@ -128,7 +128,25 @@
     (:subauthor "SUBAUTHOR" nil nil newline)
     (:texinfo-dircat "TEXINFO_DIR_CATEGORY" nil nil t)
     (:texinfo-dirtitle "TEXINFO_DIR_TITLE" nil nil t)
-    (:texinfo-dirdesc "TEXINFO_DIR_DESC" nil nil t)))
+    (:texinfo-dirdesc "TEXINFO_DIR_DESC" nil nil t)
+    ;; Other variables.
+    (:texinfo-coding-system nil nil org-texinfo-coding-system)
+    (:texinfo-classes nil nil org-texinfo-classes)
+    (:texinfo-format-headline-function nil nil org-texinfo-format-headline-function)
+    (:texinfo-node-description-column nil nil org-texinfo-node-description-column)
+    (:texinfo-active-timestamp-format nil nil org-texinfo-active-timestamp-format)
+    (:texinfo-inactive-timestamp-format nil nil org-texinfo-inactive-timestamp-format)
+    (:texinfo-diary-timestamp-format nil nil org-texinfo-diary-timestamp-format)
+    (:texinfo-link-with-unknown-path-format nil nil org-texinfo-link-with-unknown-path-format)
+    (:texinfo-tables-verbatim nil nil org-texinfo-tables-verbatim)
+    (:texinfo-table-scientific-notation nil nil org-texinfo-table-scientific-notation)
+    (:texinfo-def-table-markup nil nil org-texinfo-def-table-markup)
+    (:texinfo-text-markup-alist nil nil org-texinfo-text-markup-alist)
+    (:texinfo-format-drawer-function nil nil org-texinfo-format-drawer-function)
+    (:texinfo-format-inlinetask-function nil nil org-texinfo-format-inlinetask-function)
+    (:texinfo-info-process nil nil org-texinfo-info-process)
+    (:texinfo-logfiles-extensions nil nil org-texinfo-logfiles-extensions)
+    (:texinfo-remove-logfiles nil nil org-texinfo-remove-logfiles)))
 
 
 
