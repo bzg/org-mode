@@ -1157,7 +1157,7 @@ to a number.  In the case of a timestamp, increment by days."
 			    "|[ \t]*\\([^| \t][^|]*?\\)[ \t]*|")
 			   (<= (setq n (1- n)) 0))
 		      (throw 'exit (match-string 1))))))
-	(setq non-empty-up (string-match "[^ \t]" field-up)))
+	(setq non-empty-up (and field-up (string-match "[^ \t]" field-up))))
       ;; Above field was not empty, go down to the next row
       (setq txt (org-trim field))
       (org-table-next-row)
@@ -1169,6 +1169,7 @@ to a number.  In the case of a timestamp, increment by days."
 				   (string-match org-ts-regexp3 txt))
 			      (- (org-time-string-to-absolute txt)
 				 (org-time-string-to-absolute txt-up)))
+			     ((string-match org-ts-regexp3 txt) 1)
 			     (t (- (string-to-number txt)
 				   (string-to-number txt-up)))))
 	       (t 1)))
