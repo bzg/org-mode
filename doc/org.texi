@@ -10750,6 +10750,10 @@ ASCII export produces a simple and very readable version of an Org mode
 file, containing only plain ASCII@.  Latin-1 and UTF-8 export augment the file
 with special characters and symbols available in these encodings.
 
+@vindex org-ascii-text-width
+Upon exporting, text is filled and justified, when appropriate, according the
+text width set in @code{org-ascii-text-width}.
+
 @vindex org-ascii-links-to-notes
 Links are exported in a footnote-like style, with the descriptive part in the
 text and the link in a note before the next heading.  See the variable
@@ -10802,6 +10806,25 @@ specified using an @code{ATTR_ASCII} line, directly preceding the rule.
 @example
 #+ATTR_ASCII: :width 10
 -----
+@end example
+
+@subheading ASCII special blocks
+@cindex special blocks, in ASCII export
+@cindex #+BEGIN_JUSTIFYLEFT
+@cindex #+BEGIN_JUSTIFYRIGHT
+
+In addition to @code{#+BEGIN_CENTER} blocks (@pxref{Paragraphs}), it is
+possible to justify contents to the left or the right of the page with the
+following dedicated blocks.
+
+@example
+#+BEGIN_JUSTIFYLEFT
+It's just a jump to the left...
+#+END_JUSTIFYLEFT
+
+#+BEGIN_JUSTIFYRIGHT
+...and then a step to the right.
+#+END_JUSTIFYRIGHT
 @end example
 
 @node Beamer export

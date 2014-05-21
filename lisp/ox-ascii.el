@@ -385,14 +385,18 @@ nil to ignore the inline task."
 
 ;; Internal functions fall into three categories.
 
-;; The first one is about text formatting.  The core function is
-;; `org-ascii--current-text-width', which determines the current
-;; text width allowed to a given element.  In other words, it helps
-;; keeping each line width within maximum text width defined in
-;; `org-ascii-text-width'.  Once this information is known,
-;; `org-ascii--fill-string', `org-ascii--justify-string',
-;; `org-ascii--box-string' and `org-ascii--indent-string' can
-;; operate on a given output string.
+;; The first one is about text formatting.  The core functions are
+;; `org-ascii--current-text-width' and
+;; `org-ascii--current-justification', which determine, respectively,
+;; the current text width allowed to a given element and its expected
+;; justification.  Once this information is known,
+;; `org-ascii--fill-string', `org-ascii--justify-lines',
+;; `org-ascii--justify-element' `org-ascii--box-string' and
+;; `org-ascii--indent-string' can operate on a given output string.
+;; In particular, justification happens at the regular (i.e.,
+;; non-greater) element level, which means that when the exporting
+;; process reaches a container (e.g., a center block) content are
+;; already justified.
 
 ;; The second category contains functions handling elements listings,
 ;; triggered by "#+TOC:" keyword.  As such, `org-ascii--build-toc'
@@ -421,7 +425,8 @@ a communication channel.
 Optional argument JUSTIFY can specify any type of justification
 among `left', `center', `right' or `full'.  A nil value is
 equivalent to `left'.  For a justification that doesn't also fill
-string, see `org-ascii--justify-string'.
+string, see `org-ascii--justify-lines' and
+`org-ascii--justify-block'.
 
 Return nil if S isn't a string."
   ;; Don't fill paragraph when break should be preserved.
@@ -436,8 +441,8 @@ Return nil if S isn't a string."
 		 (fill-region (point-min) (point-max) justify))
 	       (buffer-string))))))
 
-(defun org-ascii--justify-string (s text-width how)
-  "Justify string S.
+(defun org-ascii--justify-lines (s text-width how)
+  "Justify all lines in string S.
 TEXT-WIDTH is an integer specifying maximum length of a line.
 HOW determines the type of justification: it can be `left',
 `right', `full' or `center'."
@@ -452,6 +457,48 @@ HOW determines the type of justification: it can be `left',
 	(justify-current-line how)
 	(forward-line)))
     (buffer-string)))
+
+(defun org-ascii--justify-element (contents element info)
+  "Justify CONTENTS of ELEMENT.
+INFO is a plist used as a communication channel.  Justification
+is done according to the type of element.  More accurately,
+paragraphs are filled and other elements are justified as blocks,
+that is according to the widest non blank line in CONTENTS."
+  (if (not (org-string-nw-p contents)) contents
+    (let ((text-width (org-ascii--current-text-width element info))
+	  (how (org-ascii--current-justification element)))
+      (if (eq how 'left) contents
+	;; Paragraphs are treated specially as they also need to be
+	;; filled.
+	(if (eq (org-element-type element) 'paragraph)
+	    (org-ascii--fill-string contents text-width info how)
+	  (with-temp-buffer
+	    (insert contents)
+	    (goto-char (point-min))
+	    (catch 'exit
+	      (let ((max-width 0))
+		;; Compute maximum width.  Bail out if it is greater
+		;; than page width, since no justification is
+		;; possible.
+		(save-excursion
+		  (while (not (eobp))
+		    (unless (org-looking-at-p "[ \t]*$")
+		      (end-of-line)
+		      (let ((column (current-column)))
+			(cond
+			 ((>= column text-width) (throw 'exit contents))
+			 ((> column max-width) (setq max-width column)))))
+		    (forward-line)))
+		;; Justify every line according to TEXT-WIDTH and
+		;; MAX-WIDTH.
+		(let ((offset (/ (- text-width max-width)
+				 (if (eq how 'right) 1 2))))
+		  (if (zerop offset) (throw 'exit contents)
+		    (while (not (eobp))
+		      (unless (org-looking-at-p "[ \t]*$")
+			(org-indent-to-column offset))
+		      (forward-line)))))
+	      (buffer-string))))))))
 
 (defun org-ascii--indent-string (s width)
   "Indent string S by WIDTH white spaces.
@@ -538,6 +585,21 @@ INFO is a plist used as a communication channel."
 		      (string-width
 		       (or (org-list-get-tag beg-item struct)
 			   (org-list-get-bullet beg-item struct)))))))))))))
+
+(defun org-ascii--current-justification (element)
+  "Return expected justification for ELEMENT's contents.
+Return value is a symbol among `left', `center', `right' and
+`full'."
+  (let (justification)
+    (while (and (not justification)
+		(setq element (org-element-property :parent element)))
+      (case (org-element-type element)
+	(center-block (setq justification 'center))
+	(special-block
+	 (let ((name (org-element-property :type element)))
+	   (cond ((string= name "JUSTIFYRIGHT") (setq justification 'right))
+		 ((string= name "JUSTIFYLEFT") (setq justification 'left)))))))
+    (or justification 'left)))
 
 (defun org-ascii--build-title
   (element info text-width &optional underline notags toc)
@@ -879,7 +941,7 @@ INFO is a plist used as a communication channel."
 	   date "\n\n\n"))
 	 ((org-string-nw-p date)
 	  (concat
-	   (org-ascii--justify-string date text-width 'right)
+	   (org-ascii--justify-lines date text-width 'right)
 	   "\n\n\n"))
 	 ((and (org-string-nw-p author) (org-string-nw-p email))
 	  (concat author "\n" email "\n\n\n"))
@@ -900,7 +962,7 @@ INFO is a plist used as a communication channel."
 			    (string-width (or email "")))
 		       2)
 		    text-width) (if utf8p ?━ ?_))))
-	(org-ascii--justify-string
+	(org-ascii--justify-lines
 	 (concat line "\n"
 		 (unless utf8p "\n")
 		 (upcase formatted-title)
@@ -1021,8 +1083,9 @@ contextual information."
   "Transcode a CENTER-BLOCK element from Org to ASCII.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (org-ascii--justify-string
-   contents (org-ascii--current-text-width center-block info) 'center))
+  ;; Center has already been taken care of at a lower level, so
+  ;; there's nothing left to do.
+  contents)
 
 
 ;;;; Clock
@@ -1031,16 +1094,18 @@ holding contextual information."
   "Transcode a CLOCK object from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (concat org-clock-string " "
-	  (org-translate-time
-	   (org-element-property :raw-value
-				 (org-element-property :value clock)))
-	  (let ((time (org-element-property :duration clock)))
-	    (and time
-		 (concat " => "
-			 (apply 'format
-				"%2s:%02s"
-				(org-split-string time ":")))))))
+  (org-ascii--justify-element
+   (concat org-clock-string " "
+	   (org-translate-time
+	    (org-element-property :raw-value
+				  (org-element-property :value clock)))
+	   (let ((time (org-element-property :duration clock)))
+	     (and time
+		  (concat " => "
+			  (apply 'format
+				 "%2s:%02s"
+				 (org-split-string time ":"))))))
+   clock info))
 
 
 ;;;; Code
@@ -1088,8 +1153,10 @@ contextual information."
 (defun org-ascii-example-block (example-block contents info)
   "Transcode a EXAMPLE-BLOCK element from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (org-ascii--box-string
-   (org-export-format-code-default example-block info) info))
+  (org-ascii--justify-element
+   (org-ascii--box-string
+    (org-export-format-code-default example-block info) info)
+   example-block info))
 
 
 ;;;; Export Snippet
@@ -1107,7 +1174,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode a EXPORT-BLOCK element from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (when (string= (org-element-property :type export-block) "ASCII")
-    (org-remove-indentation (org-element-property :value export-block))))
+    (org-ascii--justify-element
+     (org-element-property :value export-block) export-block info)))
 
 
 ;;;; Fixed Width
@@ -1115,9 +1183,11 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-ascii-fixed-width (fixed-width contents info)
   "Transcode a FIXED-WIDTH element from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (org-ascii--box-string
-   (org-remove-indentation
-    (org-element-property :value fixed-width)) info))
+  (org-ascii--justify-element
+   (org-ascii--box-string
+    (org-remove-indentation
+     (org-element-property :value fixed-width)) info)
+   fixed-width info))
 
 
 ;;;; Footnote Definition
@@ -1193,7 +1263,7 @@ information."
   (let ((text-width (org-ascii--current-text-width horizontal-rule info))
 	(spec-width
 	 (org-export-read-attribute :attr_ascii horizontal-rule :width)))
-    (org-ascii--justify-string
+    (org-ascii--justify-lines
      (make-string (if (and spec-width (string-match "^[0-9]+$" spec-width))
 		      (string-to-number spec-width)
 		    text-width)
@@ -1332,23 +1402,26 @@ contextual information."
   "Transcode a KEYWORD element from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let ((key (org-element-property :key keyword))
-	(value (org-element-property :value keyword)))
+  (let ((key (org-element-property :key keyword)))
     (cond
-     ((string= key "ASCII") value)
+     ((string= key "ASCII")
+      (org-ascii--justify-element
+       (org-element-property :value keyword) keyword info))
      ((string= key "TOC")
-      (let ((value (downcase value)))
-	(cond
-	 ((string-match "\\<headlines\\>" value)
-	  (let ((depth (or (and (string-match "[0-9]+" value)
-				(string-to-number (match-string 0 value)))
-			   (plist-get info :with-toc))))
-	    (org-ascii--build-toc
-	     info (and (wholenump depth) depth) keyword)))
-	 ((string= "tables" value)
-	  (org-ascii--list-tables keyword info))
-	 ((string= "listings" value)
-	  (org-ascii--list-listings keyword info))))))))
+      (org-ascii--justify-element
+       (let ((value (downcase (org-element-property :value keyword))))
+	 (cond
+	  ((string-match "\\<headlines\\>" value)
+	   (let ((depth (or (and (string-match "[0-9]+" value)
+				 (string-to-number (match-string 0 value)))
+			    (plist-get info :with-toc))))
+	     (org-ascii--build-toc
+	      info (and (wholenump depth) depth) keyword)))
+	  ((string= "tables" value)
+	   (org-ascii--list-tables keyword info))
+	  ((string= "listings" value)
+	   (org-ascii--list-listings keyword info))))
+       keyword info)))))
 
 
 ;;;; Latex Environment
@@ -1358,7 +1431,9 @@ information."
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (when (plist-get info :with-latex)
-    (org-remove-indentation (org-element-property :value latex-environment))))
+    (org-ascii--justify-element
+     (org-remove-indentation (org-element-property :value latex-environment))
+     latex-environment info)))
 
 
 ;;;; Latex Fragment
@@ -1433,7 +1508,7 @@ information."
   "Transcode a PARAGRAPH element from Org to ASCII.
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
-  (org-ascii--fill-string
+  (org-ascii--justify-element
    (if (not (wholenump org-ascii-indented-line-width)) contents
      (concat
       ;; Do not indent first paragraph in a section.
@@ -1442,7 +1517,7 @@ the plist used as a communication channel."
 		       'section))
 	(make-string org-ascii-indented-line-width ?\s))
       (replace-regexp-in-string "\\`[ \t]+" "" contents)))
-   (org-ascii--current-text-width paragraph info) info))
+   paragraph info))
 
 
 ;;;; Plain List
@@ -1479,25 +1554,27 @@ INFO is a plist used as a communication channel."
   "Transcode a PLANNING element from Org to ASCII.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (mapconcat
-   'identity
-   (delq nil
-	 (list (let ((closed (org-element-property :closed planning)))
-		 (when closed
-		   (concat org-closed-string " "
-			   (org-translate-time
-			    (org-element-property :raw-value closed)))))
-	       (let ((deadline (org-element-property :deadline planning)))
-		 (when deadline
-		   (concat org-deadline-string " "
-			   (org-translate-time
-			    (org-element-property :raw-value deadline)))))
-	       (let ((scheduled (org-element-property :scheduled planning)))
-		 (when scheduled
-		   (concat org-scheduled-string " "
-			   (org-translate-time
-			    (org-element-property :raw-value scheduled)))))))
-   " "))
+  (org-ascii--justify-element
+   (mapconcat
+    #'identity
+    (delq nil
+	  (list (let ((closed (org-element-property :closed planning)))
+		  (when closed
+		    (concat org-closed-string " "
+			    (org-translate-time
+			     (org-element-property :raw-value closed)))))
+		(let ((deadline (org-element-property :deadline planning)))
+		  (when deadline
+		    (concat org-deadline-string " "
+			    (org-translate-time
+			     (org-element-property :raw-value deadline)))))
+		(let ((scheduled (org-element-property :scheduled planning)))
+		  (when scheduled
+		    (concat org-scheduled-string " "
+			    (org-translate-time
+			     (org-element-property :raw-value scheduled)))))))
+    " ")
+   planning info))
 
 
 ;;;; Property Drawer
@@ -1506,7 +1583,8 @@ channel."
   "Transcode a PROPERTY-DRAWER element from Org to ASCII.
 CONTENTS holds the contents of the drawer.  INFO is a plist
 holding contextual information."
-  (org-string-nw-p contents))
+  (and (org-string-nw-p contents)
+       (org-ascii--justify-element contents property-drawer info)))
 
 
 ;;;; Quote Block
@@ -1555,6 +1633,9 @@ contextual information."
   "Transcode a SPECIAL-BLOCK element from Org to ASCII.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
+  ;; "JUSTIFYLEFT" and "JUSTFYRIGHT" have already been taken care of
+  ;; at a lower level.  There is no other special block type to
+  ;; handle.
   contents)
 
 
@@ -1567,11 +1648,13 @@ contextual information."
   (let ((caption (org-ascii--build-caption src-block info))
 	(code (org-export-format-code-default src-block info)))
     (if (equal code "") ""
-      (concat
-       (when (and caption org-ascii-caption-above) (concat caption "\n"))
-       (org-ascii--box-string code info)
-       (when (and caption (not org-ascii-caption-above))
-	 (concat "\n" caption))))))
+      (org-ascii--justify-element
+       (concat
+	(when (and caption org-ascii-caption-above) (concat caption "\n"))
+	(org-ascii--box-string code info)
+	(when (and caption (not org-ascii-caption-above))
+	  (concat "\n" caption)))
+       src-block info))))
 
 
 ;;;; Statistics Cookie
@@ -1620,25 +1703,27 @@ holding contextual information."
 CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
   (let ((caption (org-ascii--build-caption table info)))
-    (concat
-     ;; Possibly add a caption string above.
-     (when (and caption org-ascii-caption-above) (concat caption "\n"))
-     ;; Insert table.  Note: "table.el" tables are left unmodified.
-     (cond ((eq (org-element-property :type table) 'org) contents)
-	   ((and org-ascii-table-use-ascii-art
-		 (eq (plist-get info :ascii-charset) 'utf-8)
-		 (require 'ascii-art-to-unicode nil t))
-	    (with-temp-buffer
-	      (insert (org-remove-indentation
-		       (org-element-property :value table)))
-	      (goto-char (point-min))
-	      (aa2u)
-	      (goto-char (point-max))
-	      (skip-chars-backward " \r\t\n")
-	      (buffer-substring (point-min) (point))))
-	   (t (org-remove-indentation (org-element-property :value table))))
-     ;; Possible add a caption string below.
-     (and (not org-ascii-caption-above) caption))))
+    (org-ascii--justify-element
+     (concat
+      ;; Possibly add a caption string above.
+      (when (and caption org-ascii-caption-above) (concat caption "\n"))
+      ;; Insert table.  Note: "table.el" tables are left unmodified.
+      (cond ((eq (org-element-property :type table) 'org) contents)
+	    ((and org-ascii-table-use-ascii-art
+		  (eq (plist-get info :ascii-charset) 'utf-8)
+		  (require 'ascii-art-to-unicode nil t))
+	     (with-temp-buffer
+	       (insert (org-remove-indentation
+			(org-element-property :value table)))
+	       (goto-char (point-min))
+	       (aa2u)
+	       (goto-char (point-max))
+	       (skip-chars-backward " \r\t\n")
+	       (buffer-substring (point-min) (point))))
+	    (t (org-remove-indentation (org-element-property :value table))))
+      ;; Possible add a caption string below.
+      (and (not org-ascii-caption-above) caption))
+     table info)))
 
 
 ;;;; Table Cell
@@ -1701,7 +1786,7 @@ a communication channel."
     (let* ((indent-tabs-mode nil)
 	   (data
 	    (when contents
-	      (org-ascii--justify-string
+	      (org-ascii--justify-lines
 	       contents width
 	       (org-export-table-cell-alignment table-cell info)))))
       (setq contents
@@ -1800,7 +1885,7 @@ CONTENTS is verse block contents.  INFO is a plist holding
 contextual information."
   (let ((verse-width (org-ascii--current-text-width verse-block info)))
     (org-ascii--indent-string
-     (org-ascii--justify-string contents verse-width 'left)
+     (org-ascii--justify-element contents verse-block info)
      org-ascii-quote-margin)))
 
 
