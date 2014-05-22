@@ -15277,7 +15277,10 @@ things up because then unnecessary parsing is avoided."
 			     '("SCHEDULED" "DEADLINE" "CLOCK" "CLOSED"
 			       "TIMESTAMP" "TIMESTAMP_IA")))
 	     (catch 'match
-	       (while (re-search-forward org-maybe-keyword-time-regexp end t)
+	       (while (and (re-search-forward org-maybe-keyword-time-regexp end t)
+			   (not (text-property-any 0 (length (match-string 0))
+						   'face 'font-lock-comment-face
+						   (match-string 0))))
 		 (setq key (if (match-end 1)
 			       (substring (org-match-string-no-properties 1)
 					  0 -1))
