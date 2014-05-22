@@ -2094,6 +2094,7 @@ When nil, `q' will kill the single agenda buffer."
     org-agenda-columns-active
     org-agenda-tag-filter
     org-agenda-category-filter
+    org-agenda-top-headline-filter
     org-agenda-regexp-filter
     org-agenda-markers
     org-agenda-last-search-view-search-was-boolean
@@ -7318,7 +7319,7 @@ The category is that of the current line."
         (org-agenda-filter-apply
          (setq org-agenda-category-filter
 	       (list (concat "+" cat))) 'category))
-       ((error "No category at point"))))))
+       (t (error "No category at point"))))))
 
 (defun org-find-top-headline (&optional pos)
   "Find the topmost parent headline and return it."
@@ -7339,10 +7340,10 @@ The top headline is that of the current line."
       (progn
         (setq org-agenda-filtered-by-top-headline nil
 	      org-agenda-top-headline-filter nil)
-        (org-agenda-filter-show-all-cat))
-    (let ((cat (org-find-top-headline (org-get-at-bol 'org-hd-marker))))
-      (if cat (org-agenda-filter-top-headline-apply cat strip)
-        (error "No top-level category at point")))))
+        (org-agenda-filter-show-all-top-filter))
+    (let ((toph (org-find-top-headline (org-get-at-bol 'org-hd-marker))))
+      (if toph (org-agenda-filter-top-headline-apply toph strip)
+        (error "No top-level headline at point")))))
 
 (defvar org-agenda-regexp-filter nil)
 (defun org-agenda-filter-by-regexp (strip)
@@ -7372,6 +7373,8 @@ With two prefix arguments, remove the regexp filters."
     (org-agenda-filter-show-all-cat))
   (when org-agenda-regexp-filter
     (org-agenda-filter-show-all-re))
+  (when org-agenda-top-headline-filter
+    (org-agenda-filter-show-all-top-filter))
   (org-agenda-finalize))
 
 (defun org-agenda-filter-by-tag (strip &optional char narrow)
@@ -7634,7 +7637,7 @@ When NO-OPERATOR is non-nil, do not add the + operator to returned tags."
              (tophl (and pos (org-find-top-headline pos))))
         (if (and tophl (funcall (if negative 'identity 'not)
 				(string= hl tophl)))
-            (org-agenda-filter-hide-line 'category)))
+            (org-agenda-filter-hide-line 'top-headline)))
       (beginning-of-line 2)))
   (if (get-char-property (point) 'invisible)
       (org-agenda-previous-line))
@@ -7661,7 +7664,8 @@ When NO-OPERATOR is non-nil, do not add the + operator to returned tags."
        `(invisible t org-filter-type ,type))))
   (set (intern (format "org-agenda-%s-filter" (intern-soft type))) nil)
   (setq org-agenda-filter-form nil)
-  (org-agenda-set-mode-name))
+  (org-agenda-set-mode-name)
+  (org-agenda-finalize))
 
 (defun org-agenda-filter-show-all-tag nil
   (org-agenda-remove-filter 'tag))
@@ -7669,6 +7673,8 @@ When NO-OPERATOR is non-nil, do not add the + operator to returned tags."
   (org-agenda-remove-filter 'regexp))
 (defun org-agenda-filter-show-all-cat nil
   (org-agenda-remove-filter 'category))
+(defun org-agenda-filter-show-all-top-filter nil
+  (org-agenda-remove-filter 'top-headline))
 
 (defun org-agenda-manipulate-query-add ()
   "Manipulate the query by adding a search term with positive selection.
