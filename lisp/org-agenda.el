@@ -7655,17 +7655,18 @@ When NO-OPERATOR is non-nil, do not add the + operator to returned tags."
 (defun org-agenda-remove-filter (type)
   (interactive)
   "Remove filter of type TYPE from the agenda buffer."
-  (goto-char (point-min))
-  (let ((inhibit-read-only t) pos)
-    (while (setq pos (text-property-any (point) (point-max) 'org-filter-type type))
-      (goto-char pos)
-      (remove-text-properties
-       (point) (next-single-property-change (point) 'org-filter-type)
-       `(invisible t org-filter-type ,type))))
-  (set (intern (format "org-agenda-%s-filter" (intern-soft type))) nil)
-  (setq org-agenda-filter-form nil)
-  (org-agenda-set-mode-name)
-  (org-agenda-finalize))
+  (save-excursion
+    (goto-char (point-min))
+    (let ((inhibit-read-only t) pos)
+      (while (setq pos (text-property-any (point) (point-max) 'org-filter-type type))
+	(goto-char pos)
+	(remove-text-properties
+	 (point) (next-single-property-change (point) 'org-filter-type)
+	 `(invisible t org-filter-type ,type))))
+    (set (intern (format "org-agenda-%s-filter" (intern-soft type))) nil)
+    (setq org-agenda-filter-form nil)
+    (org-agenda-set-mode-name)
+    (org-agenda-finalize)))
 
 (defun org-agenda-filter-show-all-tag nil
   (org-agenda-remove-filter 'tag))
