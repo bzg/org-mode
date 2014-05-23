@@ -6729,7 +6729,8 @@ in special contexts.
 	    (setq has-children (org-list-has-child-p (point) struct)))
 	(org-back-to-heading)
 	(setq eoh (save-excursion (outline-end-of-heading) (point)))
-	(setq eos (save-excursion (1- (org-end-of-subtree t t))))
+	(setq eos (save-excursion (org-end-of-subtree t t)
+				  (when (bolp) (backward-char)) (point)))
 	(setq has-children
 	      (or (save-excursion
 		    (let ((level (funcall outline-level)))
