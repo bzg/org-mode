@@ -6822,7 +6822,8 @@ in special contexts.
 	    (setq has-children (org-list-has-child-p (point) struct)))
 	(org-back-to-heading)
 	(setq eoh (save-excursion (outline-end-of-heading) (point)))
-	(setq eos (save-excursion (1- (org-end-of-subtree t t))))
+	(setq eos (save-excursion (org-end-of-subtree t t)
+				  (when (bolp) (backward-char)) (point)))
 	(setq has-children
 	      (or (save-excursion
 		    (let ((level (funcall outline-level)))
@@ -8271,7 +8272,8 @@ case."
     (save-match-data
       (save-excursion (outline-end-of-heading)
 		      (setq folded (outline-invisible-p)))
-      (outline-end-of-subtree))
+      (progn (org-end-of-subtree nil t)
+	     (unless (eobp) (backward-char))))
     (outline-next-heading)
     (setq ne-end (org-back-over-empty-lines))
     (setq end (point))
@@ -23734,14 +23736,6 @@ If there is no such heading, return nil."
     		;; leave blank line before heading
     		(forward-char -1))))))
   (point))
-
-(defadvice outline-end-of-subtree (around prefer-org-version activate compile)
-  "Use Org version in org-mode, for dramatic speed-up."
-  (if (derived-mode-p 'org-mode)
-      (progn
-	(org-end-of-subtree nil t)
-	(unless (eobp) (backward-char 1)))
-    ad-do-it))
 
 (defun org-end-of-meta-data-and-drawers ()
   "Jump to the first text after meta data and drawers in the current entry.
