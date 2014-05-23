@@ -9379,8 +9379,6 @@ call CMD."
     (eval `(let ,binds
 	     (call-interactively (quote ,cmd))))))
 
-;;;; Archiving
-
 (defun org-get-category (&optional pos force-refresh)
   "Get the category applying to position POS."
   (save-match-data
@@ -9389,6 +9387,8 @@ call CMD."
       (or (get-text-property pos 'org-category)
 	  (progn (org-refresh-category-properties)
 		 (get-text-property pos 'org-category))))))
+
+;;; Refresh properties
 
 (defun org-refresh-category-properties ()
   "Refresh category text properties in the buffer."
@@ -9419,8 +9419,27 @@ call CMD."
 	     (org-back-to-heading t)
 	     (setq beg (point) end (org-end-of-subtree t t)))
 	   (put-text-property beg end 'org-category cat)
-	   (put-text-property beg end 'org-category-position beg)
 	   (goto-char pos)))))))
+
+(defun org-refresh-stats-properties ()
+  "Refresh stats text properties in the buffer."
+  (let (stats)
+    (org-with-silent-modifications
+     (save-excursion
+       (save-restriction
+	 (widen)
+	 (goto-char (point-min))
+	 (while (re-search-forward
+		 (concat org-outline-regexp-bol ".*"
+			 "\\(?:\\[\\([0-9]+\\)%\\|\\([0-9]+\\)/\\([0-9]+\\)\\]\\)")
+		 nil t)
+	   (setq stats (if (match-string 2)
+			   (/ (* (string-to-number (match-string 2)) 100)
+			      (string-to-number (match-string 3)))
+			 (string-to-number (match-string 1))))
+	   (org-back-to-heading t)
+	   (put-text-property (point) (progn (org-end-of-subtree t t) (point))
+			      'org-stats stats)))))))
 
 (defun org-refresh-properties (dprop tprop)
   "Refresh buffer text properties.
@@ -17868,19 +17887,25 @@ is not set, the tables are not re-aligned, etc."
   :version "24.3"
   :group 'org-agenda)
 
-(defcustom org-agenda-ignore-drawer-properties nil
+(define-obsolete-variable-alias
+  'org-agenda-ignore-drawer-properties
+  'org-agenda-ignore-properties "24.5")
+  
+(defcustom org-agenda-ignore-properties nil
   "Avoid updating text properties when building the agenda.
-Properties are used to prepare buffers for effort estimates, appointments,
-and subtree-local categories.
-If you don't use these in the agenda, you can add them to this list and
-agenda building will be a bit faster.
+Properties are used to prepare buffers for effort estimates,
+appointments, statistics and subtree-local categories.
+If you don't use these in the agenda, you can add them to this
+list and agenda building will be a bit faster.
 The value is a list, with zero or more of the symbols `effort', `appt',
-or `category'."
+`stats' or `category'."
   :type '(set :greedy t
 	      (const effort)
 	      (const appt)
+	      (const stats)
 	      (const category))
-  :version "24.3"
+  :version "24.5"
+  :package-version '(Org . "8.3")
   :group 'org-agenda)
 
 (defun org-duration-string-to-minutes (s &optional output-to-string)
@@ -18246,11 +18271,13 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		;; this is only run for setting agenda tags from setup
 		;; file
 		(org-set-regexps-and-options)))
-	    (or (memq 'category org-agenda-ignore-drawer-properties)
+	    (or (memq 'category org-agenda-ignore-properties)
 		(org-refresh-category-properties))
-	    (or (memq 'effort org-agenda-ignore-drawer-properties)
+	    (or (memq 'stats org-agenda-ignore-properties)
+		(org-refresh-stats-properties))
+	    (or (memq 'effort org-agenda-ignore-properties)
 		(org-refresh-properties org-effort-property 'org-effort))
-	    (or (memq 'appt org-agenda-ignore-drawer-properties)
+	    (or (memq 'appt org-agenda-ignore-properties)
 		(org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime))
 	    (setq org-todo-keywords-for-agenda
 		  (append org-todo-keywords-for-agenda org-todo-keywords-1))
@@ -21435,9 +21462,13 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 
 ;;; Generally useful functions
 
-(defun org-get-at-bol (property)
-  "Get text property PROPERTY at beginning of line."
+(defsubst org-get-at-bol (property)
+  "Get text property PROPERTY at the beginning of line."
   (get-text-property (point-at-bol) property))
+
+(defsubst org-get-at-eol (property n)
+  "Get text property PROPERTY at the end of line less N characters."
+  (get-text-property (- (point-at-eol) n) property))
 
 (defun org-find-text-property-in-string (prop s)
   "Return the first non-nil value of property PROP in string S."

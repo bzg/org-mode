@@ -4444,7 +4444,7 @@ in `org-agenda-text-search-extra-files'."
 	 (full-words org-agenda-search-view-force-full-words)
 	 (org-agenda-text-search-extra-files org-agenda-text-search-extra-files)
 	 regexp rtn rtnall files file pos inherited-tags
-	 marker category category-pos level tags c neg re boolean
+	 marker category level tags c neg re boolean
 	 ee txt beg end words regexps+ regexps- hdl-only buffer beg1 str)
     (unless (and (not edit-at)
 		 (stringp string)
@@ -4610,7 +4610,6 @@ in `org-agenda-text-search-extra-files'."
 			(setq marker (org-agenda-new-marker (point))
 			      category (org-get-category)
 			      level (make-string (org-reduced-level (org-outline-level)) ? )
-			      category-pos (get-text-property (point) 'org-category-position)
 			      inherited-tags
 			      (or (eq org-agenda-show-inherited-tags 'always)
 				  (and (listp org-agenda-show-inherited-tags)
@@ -4629,8 +4628,7 @@ in `org-agenda-text-search-extra-files'."
 			  'org-todo-regexp org-todo-regexp
 			  'level level
 			  'org-complex-heading-regexp org-complex-heading-regexp
-			  'priority 1000 'org-category category
-			  'org-category-position category-pos
+			  'priority 1000
 			  'type "search")
 			(push txt ee)
 			(goto-char (1- end))))))))))
@@ -5356,7 +5354,7 @@ the documentation of `org-diary'."
 					       "|")
 					      "\\|") "\\)"))
 			  (t org-not-done-regexp))))
-	 marker priority category category-pos level tags todo-state ts-date ts-date-type
+	 marker priority category level tags todo-state ts-date ts-date-type
 	 ee txt beg end inherited-tags todo-state-end-pos)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
@@ -5403,9 +5401,7 @@ the documentation of `org-diary'."
 				       ts-date-type ""))
 				(t (setq ts-date-type "")))
 			  (when ts (ignore-errors (org-time-string-to-absolute ts)))))
-	      category-pos (get-text-property (point) 'org-category-position)
-	      txt (org-trim
-		   (buffer-substring (match-beginning 2) (match-end 0)))
+	      txt (org-trim (buffer-substring (match-beginning 2) (match-end 0)))
 	      inherited-tags
 	      (or (eq org-agenda-show-inherited-tags 'always)
 		  (and (listp org-agenda-show-inherited-tags)
@@ -5419,10 +5415,9 @@ the documentation of `org-diary'."
 	      priority (1+ (org-get-priority txt)))
 	(org-add-props txt props
 	  'org-marker marker 'org-hd-marker marker
-	  'priority priority 'org-category category
+	  'priority priority
 	  'level level
 	  'ts-date ts-date
-	  'org-category-position category-pos
 	  'type (concat "todo" ts-date-type) 'todo-state todo-state)
 	(push txt ee)
 	(if org-agenda-todo-list-sublevels
@@ -5541,7 +5536,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	   "\\|\\(<[0-9]+-[0-9]+-[0-9]+[^>\n]+?\\+[0-9]+[hdwmy]>\\)"
 	   "\\|\\(<%%\\(([^>\n]+)\\)>\\)"))
 	 marker hdmarker deadlinep scheduledp clockp closedp inactivep
-	 donep tmp priority category category-pos level ee txt timestr tags
+	 donep tmp priority category level ee txt timestr tags
 	 b0 b3 e3 head todo-state end-of-match show-all warntime habitp
 	 inherited-tags ts-date)
     (goto-char (point-min))
@@ -5585,8 +5580,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	    ;; substring should only run to end of time stamp
 	    (setq timestr (substring timestr 0 (match-end 0))))
 	(setq marker (org-agenda-new-marker b0)
-	      category (org-get-category b0)
-	      category-pos (get-text-property b0 'org-category-position))
+	      category (org-get-category b0))
 	(save-excursion
 	  (if (not (re-search-backward org-outline-regexp-bol nil t))
 	      (throw :skip nil)
@@ -5613,11 +5607,10 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	  (setq priority (org-get-priority txt))
 	  (org-add-props txt props 'priority priority
 			 'org-marker marker 'org-hd-marker hdmarker
-			 'org-category category 'date date
+			 'date date
 			 'level level
 			 'ts-date
 			 (ignore-errors (org-time-string-to-absolute timestr))
-			 'org-category-position category-pos
 			 'todo-state todo-state
 			 'warntime warntime
 			 'type "timestamp")
@@ -5636,7 +5629,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
 	 (regexp "^&?%%(")
-	 marker category extra category-pos level ee txt tags entry
+	 marker category extra level ee txt tags entry
 	 result beg b sexp sexp-entry todo-state warntime inherited-tags)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
@@ -5655,7 +5648,6 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	  (setq marker (org-agenda-new-marker beg)
 		level (make-string (org-reduced-level (org-outline-level)) ? )
 		category (org-get-category beg)
-		category-pos (get-text-property beg 'org-category-position)
 		inherited-tags
 		(or (eq org-agenda-show-inherited-tags 'always)
 		    (and (listp org-agenda-show-inherited-tags)
@@ -5680,9 +5672,8 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	      (setq txt "SEXP entry returned empty string"))
 	    (setq txt (org-agenda-format-item extra txt level category tags 'time))
 	    (org-add-props txt props 'org-marker marker
-			   'org-category category 'date date 'todo-state todo-state
-			   'org-category-position category-pos 'tags tags
-			   'level level
+			   'date date 'todo-state todo-state
+			   'tags tags 'level level
 			   'type "sexp" 'warntime warntime)
 	    (push txt ee)))))
     (nreverse ee)))
@@ -5792,7 +5783,7 @@ please use `org-class' instead."
 			    (list 0 0 0 (nth 1 date) (car date) (nth 2 date))))
 		    1 11))))
 	 (org-agenda-search-headline-for-time nil)
-	 marker hdmarker priority category category-pos level tags closedp
+	 marker hdmarker priority category level tags closedp
 	 statep clockp state ee txt extra timestr rest clocked inherited-tags)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
@@ -5804,7 +5795,6 @@ please use `org-class' instead."
 	      clockp (not (or closedp statep))
 	      state (and statep (match-string 2))
 	      category (org-get-category (match-beginning 0))
-	      category-pos (get-text-property (match-beginning 0) 'org-category-position)
 	      timestr (buffer-substring (match-beginning 0) (point-at-eol)))
 	(when (string-match "\\]" timestr)
 	  ;; substring should only run to end of time stamp
@@ -5856,9 +5846,7 @@ please use `org-class' instead."
 	  (setq priority 100000)
 	  (org-add-props txt props
 	    'org-marker marker 'org-hd-marker hdmarker 'face 'org-agenda-done
-	    'priority priority 'org-category category
-	    'org-category-position category-pos
-	    'level level
+	    'priority priority 'level level
 	    'type "closed" 'date date
 	    'undone-face 'org-warning 'done-face 'org-agenda-done)
 	  (push txt ee))
@@ -6004,7 +5992,7 @@ specification like [h]h:mm."
 	 (dl0 (car org-agenda-deadline-leaders))
 	 (dl1 (nth 1 org-agenda-deadline-leaders))
 	 (dl2 (or (nth 2 org-agenda-deadline-leaders) dl1))
-	 d2 diff dfrac wdays pos pos1 category category-pos level
+	 d2 diff dfrac wdays pos pos1 category level
 	 tags suppress-prewarning ee txt head face s todo-state
 	 show-all upcomingp donep timestr warntime inherited-tags ts-date)
     (goto-char (point-min))
@@ -6064,8 +6052,7 @@ specification like [h]h:mm."
 			   (not (= diff 0))))
 		  (setq txt nil)
 		(setq category (org-get-category)
-		      warntime (get-text-property (point) 'org-appt-warntime)
-		      category-pos (get-text-property (point) 'org-category-position))
+		      warntime (get-text-property (point) 'org-appt-warntime))
 		(if (not (re-search-backward "^\\*+[ \t]+" nil t))
 		    (throw :skip nil)
 		  (goto-char (match-end 0))
@@ -6110,8 +6097,6 @@ specification like [h]h:mm."
 		  'org-hd-marker (org-agenda-new-marker pos1)
 		  'priority (+ (- diff)
 			       (org-get-priority txt))
-		  'org-category category
-		  'org-category-position category-pos
 		  'todo-state todo-state
 		  'type (if upcomingp "upcoming-deadline" "deadline")
 		  'date (if upcomingp date d2)
@@ -6151,7 +6136,7 @@ an hour specification like [h]h:mm."
 					     0 'org-hd-marker a))
 				   (cons (marker-position mm) a)))
 		  deadline-results))
-	 d2 diff pos pos1 category category-pos level tags donep
+	 d2 diff pos pos1 category level tags donep
 	 ee txt head pastschedp todo-state face timestr s habitp show-all
 	 did-habit-check-p warntime inherited-tags ts-date suppress-delay
 	 ddays)
@@ -6230,8 +6215,7 @@ an hour specification like [h]h:mm."
 	      (setq habitp (if did-habit-check-p habitp
 			     (and (functionp 'org-is-habit-p)
 				  (org-is-habit-p))))
-	      (setq category (org-get-category)
-		    category-pos (get-text-property (point) 'org-category-position))
+	      (setq category (org-get-category))
 	      (if (and (eq org-agenda-skip-scheduled-if-deadline-is-shown
 			   'repeated-after-deadline)
 		       (org-get-deadline-time (point))
@@ -6299,8 +6283,6 @@ an hour specification like [h]h:mm."
 		'priority (if habitp
 			      (org-habit-get-priority habitp)
 			    (+ 94 (- 5 diff) (org-get-priority txt)))
-		'org-category category
-		'category-position category-pos
 		'org-habit-p habitp
 		'todo-state todo-state)
 	      (push txt ee))))))
@@ -6318,7 +6300,7 @@ an hour specification like [h]h:mm."
 			      (abbreviate-file-name buffer-file-name))))
 	 (regexp org-tr-regexp)
 	 (d0 (calendar-absolute-from-gregorian date))
-	 marker hdmarker ee txt d1 d2 s1 s2 category category-pos
+	 marker hdmarker ee txt d1 d2 s1 s2 category
 	 level todo-state tags pos head donep inherited-tags)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
@@ -6339,9 +6321,8 @@ an hour specification like [h]h:mm."
 		(setq donep (member todo-state org-done-keywords))
 		(if (and donep org-agenda-skip-timestamp-if-done)
 		    (throw :skip t))
-		(setq marker (org-agenda-new-marker (point)))
-		(setq category (org-get-category)
-		      category-pos (get-text-property (point) 'org-category-position))
+		(setq marker (org-agenda-new-marker (point))
+		      category (org-get-category))
 		(if (not (re-search-backward org-outline-regexp-bol nil t))
 		    (throw :skip nil)
 		  (goto-char (match-beginning 0))
@@ -6383,8 +6364,7 @@ an hour specification like [h]h:mm."
 		  'type "block" 'date date
 		  'level level
 		  'todo-state todo-state
-		  'priority (org-get-priority txt) 'org-category category
-		  'org-category-position category-pos)
+		  'priority (org-get-priority txt))
 		(push txt ee))))
 	(goto-char pos)))
     ;; Sort the entries by expiration date.
@@ -6455,9 +6435,6 @@ Any match of REMOVE-RE will be removed from TXT."
 		 org-agenda-hide-tags-regexp))
 
       (let* ((category (or category
-			   (if (stringp org-category)
-			       org-category
-			     (and org-category (symbol-name org-category)))
 			   (if buffer-file-name
 			       (file-name-sans-extension
 				(file-name-nondirectory buffer-file-name))
@@ -6474,7 +6451,7 @@ Any match of REMOVE-RE will be removed from TXT."
 			     (and org-agenda-search-headline-for-time txt))))
 	     (time-of-day (and dotime (org-get-time-of-day ts)))
 	     stamp plain s0 s1 s2 rtn srp l
-	     duration thecategory breadcrumbs)
+	     duration breadcrumbs)
 	(and (derived-mode-p 'org-mode) buffer-file-name
 	     (add-to-list 'org-agenda-contributing-files buffer-file-name))
 	(when (and dotime time-of-day)
@@ -6561,7 +6538,6 @@ Any match of REMOVE-RE will be removed from TXT."
 			 (t ""))
 	      extra (or (and (not habitp) extra) "")
 	      category (if (symbolp category) (symbol-name category) category)
-	      thecategory (copy-sequence category)
 	      level (or level ""))
 	(if (string-match org-bracket-link-regexp category)
 	    (progn
@@ -6582,7 +6558,7 @@ Any match of REMOVE-RE will be removed from TXT."
 	;; And finally add the text properties
 	(remove-text-properties 0 (length rtn) '(line-prefix t wrap-prefix t) rtn)
 	(org-add-props rtn nil
-	  'org-category (if thecategory (downcase thecategory) category)
+	  'org-category category
 	  'tags (mapcar 'org-downcase-keep-props tags)
 	  'org-highest-priority org-highest-priority
 	  'org-lowest-priority org-lowest-priority
@@ -6906,25 +6882,25 @@ The optional argument TYPE tells the agenda type."
 			    (substring x (match-end 3)))))))
       x)))
 
-(defsubst org-cmp-priority (a b)
-  "Compare the priorities of string A and B."
-  (let ((pa (or (get-text-property 1 'priority a) 0))
-	(pb (or (get-text-property 1 'priority b) 0)))
+(defsubst org-cmp-values (a b property)
+  "Compare the numeric value of text PROPERTY for string A and B."
+  (let ((pa (or (get-text-property (1- (length a)) property a) 0))
+	(pb (or (get-text-property (1- (length b)) property b) 0)))
     (cond ((> pa pb) +1)
 	  ((< pa pb) -1))))
 
 (defsubst org-cmp-effort (a b)
   "Compare the effort values of string A and B."
   (let* ((def (if org-sort-agenda-noeffort-is-high 32767 -1))
-	 (ea (or (get-text-property 1 'effort-minutes a) def))
-	 (eb (or (get-text-property 1 'effort-minutes b) def)))
+	 (ea (or (get-text-property (1- (length a)) 'effort-minutes a) def))
+	 (eb (or (get-text-property (1- (length b)) 'effort-minutes b) def)))
     (cond ((> ea eb) +1)
 	  ((< ea eb) -1))))
 
 (defsubst org-cmp-category (a b)
   "Compare the string values of categories of strings A and B."
-  (let ((ca (or (get-text-property 1 'org-category a) ""))
-	(cb (or (get-text-property 1 'org-category b) "")))
+  (let ((ca (or (get-text-property (1- (length a)) 'org-category a) ""))
+	(cb (or (get-text-property (1- (length b)) 'org-category b) "")))
     (cond ((string-lessp ca cb) -1)
 	  ((string-lessp cb ca) +1))))
 
@@ -7032,8 +7008,11 @@ their type."
 	 (time-up         (and (org-em 'time-up 'time-down ss)
 			       (org-cmp-time a b)))
 	 (time-down       (if time-up (- time-up) nil))
+	 (stats-up        (and (org-em 'stats-up 'stats-down ss)
+			       (org-cmp-values a b 'org-stats)))
+	 (stats-down      (if stats-up (- stats-up) nil))
 	 (priority-up     (and (org-em 'priority-up 'priority-down ss)
-			       (org-cmp-priority a b)))
+			       (org-cmp-values a b 'priority)))
 	 (priority-down   (if priority-up (- priority-up) nil))
 	 (effort-up       (and (org-em 'effort-up 'effort-down ss)
 			       (org-cmp-effort a b)))
@@ -7316,7 +7295,7 @@ The category is that of the current line."
   (if (and org-agenda-filtered-by-category
 	   org-agenda-category-filter)
       (org-agenda-filter-show-all-cat)
-    (let ((cat (org-no-properties (get-text-property (point) 'org-category))))
+    (let ((cat (org-no-properties (org-get-at-eol 'org-category 1))))
       (cond
        ((and cat strip)
         (org-agenda-filter-apply
@@ -7624,7 +7603,7 @@ When NO-OPERATOR is non-nil, do not add the + operator to returned tags."
 			   (mapcar (lambda (f)
 				     (org-agenda-filter-expand-tags (list f) t))
 				   (org-get-at-bol 'tags)))
-		    cat (get-text-property (point) 'org-category)
+		    cat (org-get-at-eol 'org-category 1)
 		    txt (get-text-property (point) 'txt))
 	      (if (not (eval org-agenda-filter-form))
 		  (org-agenda-filter-hide-line type))
@@ -8838,7 +8817,7 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 		   (equal m hdmarker))
 	  (setq props (text-properties-at (point))
 		dotime (org-get-at-bol 'dotime)
-		cat (org-get-at-bol 'org-category)
+		cat (org-get-at-eol 'org-category 1)
 		level (org-get-at-bol 'level)
 		tags thetags
 		new
@@ -10069,7 +10048,7 @@ to override `appt-message-warning-time'."
 		    (replace-regexp-in-string
 		     org-bracket-link-regexp "\\3"
 		     (or (get-text-property 1 'txt x) ""))))
-	      (cat (get-text-property 1 'org-category x))
+	      (cat (get-text-property (1- (length x)) 'org-category x))
 	      (tod (get-text-property 1 'time-of-day x))
 	      (ok (or (null filter)
 		      (and (stringp filter) (string-match filter evt))
