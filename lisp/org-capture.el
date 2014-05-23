@@ -985,10 +985,11 @@ it.  When it is a variable, retrieve the value.  Return whatever we get."
 	     (find-file-noselect (expand-file-name file org-directory)))))
 
 (defun org-capture-steal-local-variables (buffer)
-  "Install Org-mode local variables of BUFFER."
-  (mapc (lambda (v)
-	  (ignore-errors (org-set-local (car v) (cdr v))))
-	(buffer-local-variables buffer)))
+  "Install Org-mode local variables of BUFFER in the capture target buffer.
+Take care of not installing `mark-active', which should be nil."
+  (mapc (lambda (v) (ignore-errors (org-set-local (car v) (cdr v))))
+	(org-remove-if (lambda(e) (eq (car e) 'mark-active))
+		       (buffer-local-variables buffer))))
 
 (defun org-capture-place-template (&optional inhibit-wconf-store)
   "Insert the template at the target location, and display the buffer.
