@@ -15712,12 +15712,17 @@ formats in the current buffer."
 	(widen)
 	(goto-char (point-min))
 	(while (re-search-forward org-property-start-re nil t)
-	  (setq range (org-get-property-block))
-	  (goto-char (car range))
-	  (while (re-search-forward org-property-re
-		  (cdr range) t)
-	    (add-to-list 'rtn (org-match-string-no-properties 2)))
-	  (outline-next-heading))))
+	  (catch 'cont
+	    (setq range (or (org-get-property-block)
+			    (if (y-or-n-p
+				 (format "Malformed drawer at %d, repair?" (point)))
+				(org-get-property-block nil nil t)
+				(throw 'cont nil))))
+	    (goto-char (car range))
+	    (while (re-search-forward org-property-re
+				      (cdr range) t)
+	      (add-to-list 'rtn (org-match-string-no-properties 2)))
+	    (outline-next-heading)))))
 
     (when include-specials
       (setq rtn (append org-special-properties rtn)))
