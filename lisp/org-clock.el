@@ -1131,7 +1131,9 @@ time as the start time \(see `org-clock-continuously' to
 make this the default behavior.)"
   (interactive "P")
   (setq org-clock-notification-was-shown nil)
-  (org-refresh-properties org-effort-property 'org-effort)
+  (org-refresh-properties
+   org-effort-property '((effort . identity)
+			 (effort-minutes . org-duration-string-to-minutes)))
   (catch 'abort
     (let ((interrupting (and (not org-clock-resolving-clocks-due-to-idleness)
 			     (org-clocking-p)))

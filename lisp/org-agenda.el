@@ -6443,9 +6443,10 @@ Any match of REMOVE-RE will be removed from TXT."
 	     (category-icon (if category-icon
 				(propertize " " 'display category-icon)
 			      ""))
+	     (effort (get-text-property 1 'effort txt))
 	     ;; time, tag, effort are needed for the eval of the prefix format
 	     (tag (if tags (nth (1- (length tags)) tags) ""))
-	     time effort neffort
+	     time
 	     (ts (if dotime (concat
 			     (if (stringp dotime) dotime "")
 			     (and org-agenda-search-headline-for-time txt))))
@@ -6502,16 +6503,6 @@ Any match of REMOVE-RE will be removed from TXT."
 		       (concat (make-string (max (- 50 (length txt)) 1) ?\ )
 			       (match-string 2 txt))
 		       t t txt))))
-	(when (derived-mode-p 'org-mode)
-	  (setq effort (ignore-errors (get-text-property 0 'org-effort txt))))
-
-	;; org-agenda-add-time-grid-maybe calls us with *Agenda* as
-	;; current buffer, so move this check outside of above
-	(if effort
-	    (setq neffort (org-duration-string-to-minutes effort)
-		  effort (setq effort (concat "[" effort "]")))
-	  ;; prevent erroring out with %e format when there is no effort
-	  (setq effort ""))
 
 	(when remove-re
 	  (while (string-match remove-re txt)
@@ -6564,8 +6555,6 @@ Any match of REMOVE-RE will be removed from TXT."
 	  'org-lowest-priority org-lowest-priority
 	  'time-of-day time-of-day
 	  'duration duration
-	  'effort effort
-	  'effort-minutes neffort
 	  'breadcrumbs breadcrumbs
 	  'txt txt
 	  'level level
@@ -6701,10 +6690,13 @@ and stored in the variable `org-prefix-format-compiled'."
 	  (setq varform `(format ,f (org-eval ,(read (match-string 4 s)))))
 	(if opt
 	    (setq varform
-		  `(if (equal "" ,var)
+		  `(if (or (equal "" ,var) (equal nil ,var))
 		       ""
-		     (format ,f (if (equal "" ,var) "" (concat ,var ,c)))))
-	  (setq varform `(format ,f (if (equal ,var "") "" (concat ,var ,c (get-text-property 0 'extra-space ,var)))))))
+		     (format ,f (concat ,var ,c))))
+	  (setq varform
+		`(format ,f (if (or (equal ,var "")
+				    (equal ,var nil)) ""
+			      (concat ,var ,c (get-text-property 0 'extra-space ,var)))))))
       (setq s (replace-match "%s" t nil s))
       (push varform vars))
     (setq vars (nreverse vars))
@@ -7556,7 +7548,7 @@ E looks like \"+<2:25\"."
 (defun org-agenda-compare-effort (op value)
   "Compare the effort of the current line with VALUE, using OP.
 If the line does not have an effort defined, return nil."
-  (let ((eff (org-get-at-bol 'effort-minutes)))
+  (let ((eff (org-get-at-eol 'effort-minutes 1)))
     (if (equal op ??)
 	(not eff)
       (funcall op (or eff (if org-sort-agenda-noeffort-is-high 32767 0))

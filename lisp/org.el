@@ -9443,8 +9443,10 @@ call CMD."
 
 (defun org-refresh-properties (dprop tprop)
   "Refresh buffer text properties.
-DPROP is the drawer property and TPROP is the corresponding text
-property to set."
+DPROP is the drawer property and TPROP is either the
+corresponding text property to set, or an alist with each element
+being a text property (as a symbol) and a function to apply to
+the value of the drawer property."
   (let ((case-fold-search t)
 	(inhibit-read-only t) p)
     (org-with-silent-modifications
@@ -9456,9 +9458,18 @@ property to set."
 	   (setq p (org-match-string-no-properties 1))
 	   (save-excursion
 	     (org-back-to-heading t)
-	     (put-text-property
-	      (point-at-bol) (or (outline-next-heading) (point-max)) tprop p))))))))
-
+	     ;; tprop is a text property symbol
+	     (if (symbolp tprop)
+		 (put-text-property
+		  (point-at-bol) (or (outline-next-heading) (point-max)) tprop p)
+	       ;; tprop is an alist with (properties . function) elements
+	       (mapc (lambda(al)
+		       (save-excursion
+			 (put-text-property
+			  (point-at-bol) (or (outline-next-heading) (point-max))
+			  (car al)
+			  (funcall (cdr al) p))))
+		     tprop)))))))))
 
 ;;;; Link Stuff
 
@@ -15315,9 +15326,9 @@ When INCREMENT is non-nil, set the property to the next allowed value."
       (org-entry-put nil prop val))
     (save-excursion
       (org-back-to-heading t)
-      (put-text-property (point-at-bol) (point-at-eol) 'org-effort val))
+      (put-text-property (point-at-bol) (point-at-eol) 'effort val))
     (when (string= heading org-clock-current-task)
-      (setq org-clock-effort (get-text-property (point-at-bol) 'org-effort))
+      (setq org-clock-effort (get-text-property (point-at-bol) 'effort))
       (org-clock-update-mode-line))
     (message "%s is now %s" prop val)))
 
@@ -16103,7 +16114,9 @@ completion."
     (when (equal prop org-effort-property)
       (save-excursion
 	(org-back-to-heading t)
-	(put-text-property (point-at-bol) (point-at-eol) 'org-effort nval))
+	(put-text-property (point-at-bol) (point-at-eol) 'effort nval)
+	(put-text-property (point-at-bol) (point-at-eol) 'effort-minutes
+			   (org-duration-string-to-minutes nval)))
       (when (string= org-clock-current-task heading)
 	(setq org-clock-effort nval)
 	(org-clock-update-mode-line)))
@@ -18276,7 +18289,10 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	    (or (memq 'stats org-agenda-ignore-properties)
 		(org-refresh-stats-properties))
 	    (or (memq 'effort org-agenda-ignore-properties)
-		(org-refresh-properties org-effort-property 'org-effort))
+		(org-refresh-properties
+		 org-effort-property
+		 '((effort . identity)
+		   (effort-minutes . org-duration-string-to-minutes))))
 	    (or (memq 'appt org-agenda-ignore-properties)
 		(org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime))
 	    (setq org-todo-keywords-for-agenda
@@ -24544,6 +24560,12 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 			   (outline-invisible-p)))
        (org-show-context 'bookmark-jump)))
 
+(defun org-mark-jump-unhide ()
+  "Make the point visible with `org-show-context' after jumping to the mark."
+  (when (and (derived-mode-p 'org-mode)
+	     (outline-invisible-p))
+    (org-show-context 'mark-goto)))
+
 (eval-after-load "simple"
   '(defadvice pop-to-mark-command (after org-make-visible activate)
      "Make the point visible with `org-show-context'."
@@ -24558,12 +24580,6 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
   '(defadvice pop-global-mark (after org-make-visible activate)
      "Make the point visible with `org-show-context'."
      (org-mark-jump-unhide)))
-
-(defun org-mark-jump-unhide ()
-  "Make the point visible with `org-show-context' after jumping to the mark."
-  (when (and (derived-mode-p 'org-mode)
-	     (outline-invisible-p))
-    (org-show-context 'mark-goto)))
 
 ;; Make session.el ignore our circular variable
 (defvar session-globals-exclude)
