@@ -845,7 +845,8 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 			   (> (org-string-width xx) fmax))
 		  (org-add-props xx nil
 		    'help-echo
-		    (concat "Clipped table field, use C-c ` to edit.  Full value is:\n" (org-no-properties (copy-sequence xx))))
+		    (concat "Clipped table field, use C-c ` to edit.  Full value is:\n"
+			    (org-no-properties (copy-sequence xx))))
 		  (setq f1 (min fmax (or (string-match org-bracket-link-regexp xx) fmax)))
 		  (unless (> f1 1)
 		    (user-error "Cannot narrow field starting with wide link \"%s\""
