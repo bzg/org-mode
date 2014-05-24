@@ -523,7 +523,7 @@ INFO is a plist used as a communication channel."
   (case (org-element-type element)
     ;; Elements with an absolute width: `headline' and `inlinetask'.
     (inlinetask org-ascii-inlinetask-width)
-    ('headline
+    (headline
      (- org-ascii-text-width
 	(let ((low-level-rank (org-export-low-level-p element info)))
 	  (if low-level-rank (* low-level-rank 2) org-ascii-global-margin))))
