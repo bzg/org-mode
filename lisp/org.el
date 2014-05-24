@@ -11936,9 +11936,7 @@ this is used for the GOTO interface."
 	 (pos (nth 3 refile-pointer))
 	 buffer)
     (if (and (not (markerp pos)) (not file))
-	(if file
-	    (user-error "Please save the buffer to a file before refiling")
-	  (user-error "Please indicate a target file in the refile path"))
+	(user-error "Please indicate a target file in the refile path")
       (when (org-string-nw-p re)
 	(setq buffer (if (markerp pos)
 			 (marker-buffer pos)
