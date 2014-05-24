@@ -6443,7 +6443,8 @@ Any match of REMOVE-RE will be removed from TXT."
 	     (category-icon (if category-icon
 				(propertize " " 'display category-icon)
 			      ""))
-	     (effort (get-text-property 1 'effort txt))
+	     (effort (and (not (string= txt ""))
+			  (get-text-property 1 'effort txt)))
 	     ;; time, tag, effort are needed for the eval of the prefix format
 	     (tag (if tags (nth (1- (length tags)) tags) ""))
 	     time
