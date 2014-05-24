@@ -1293,20 +1293,13 @@ Expose all the headings of the subtree, CONTENT view for just one subtree.
 Expose all direct children of the subtree.  With a numeric prefix argument N,
 expose all children down to level N@.
 @orgcmd{C-c C-x b,org-tree-to-indirect-buffer}
-Show the current subtree in an indirect buffer@footnote{The indirect
-buffer
-@ifinfo
-(@pxref{Indirect Buffers,,,emacs,GNU Emacs Manual})
-@end ifinfo
-@ifnotinfo
-(see the Emacs manual for more information about indirect buffers)
-@end ifnotinfo
-will contain the entire buffer, but will be narrowed to the current
-tree.  Editing the indirect buffer will also change the original buffer,
-but without affecting visibility in that buffer.}.  With a numeric
-prefix argument N, go up to level N and then take that tree.  If N is
-negative then go up that many levels.  With a @kbd{C-u} prefix, do not remove
-the previously used indirect buffer.
+Show the current subtree in an indirect buffer@footnote{The indirect buffer
+(@pxref{Indirect Buffers,,,emacs,GNU Emacs Manual}) will contain the entire
+buffer, but will be narrowed to the current tree.  Editing the indirect
+buffer will also change the original buffer, but without affecting visibility
+in that buffer.}.  With a numeric prefix argument N, go up to level N and
+then take that tree.  If N is negative then go up that many levels.  With a
+@kbd{C-u} prefix, do not remove the previously used indirect buffer.
 @orgcmd{C-c C-x v,org-copy-visible}
 Copy the @i{visible} text in the region into the kill ring.
 @end table
