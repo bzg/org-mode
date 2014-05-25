@@ -9914,8 +9914,8 @@ according to FMT (default from `org-email-link-description-format')."
 	  "]"))
 
 (defconst org-link-escape-chars
-  ;;%20 %2B %3B %3D %5B %5D
-  '(?\  ?\+ ?\; ?\= ?\[ ?\])
+  ;;%20 %5B %5D
+  '(?\  ?\[ ?\])
   "List of characters that should be escaped in a link when stored to Org.
 This is the list that is used for internal purposes.")
 
@@ -10018,9 +10018,8 @@ Note: this function also decodes single byte encodings like
 	    (setq ret (concat ret (org-char-to-string sum)))
 	    (setq sum 0))
 	   ((not bytes)			; single byte(s)
-	    (setq ret (org-link-unescape-single-byte-sequence hex))))
-	  )) ;; end (while bytes
-      ret )))
+	    (setq ret (org-link-unescape-single-byte-sequence hex))))))
+      ret)))
 
 (defun org-link-unescape-single-byte-sequence (hex)
   "Unhexify hex-encoded single byte character sequences."
