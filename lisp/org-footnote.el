@@ -46,8 +46,7 @@
 (declare-function org-icompleting-read "org" (&rest args))
 (declare-function org-id-uuid "org-id" ())
 (declare-function org-in-block-p "org" (names))
-(declare-function org-in-commented-line "org" ())
-(declare-function org-in-indented-comment-line "org" ())
+(declare-function org-at-comment-p "org" ())
 (declare-function org-in-regexp "org" (re &optional nlines visually))
 (declare-function org-in-verbatim-emphasis "org" ())
 (declare-function org-inside-LaTeX-fragment-p "org" ())
@@ -192,8 +191,7 @@ extracted will be filled again."
 (defun org-footnote-in-valid-context-p ()
   "Is point in a context where footnotes are allowed?"
   (save-match-data
-    (not (or (org-in-commented-line)
-	     (org-in-indented-comment-line)
+    (not (or (org-at-comment-p)
 	     (org-inside-LaTeX-fragment-p)
 	     ;; Avoid literal example.
 	     (org-in-verbatim-emphasis)

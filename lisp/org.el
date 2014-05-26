@@ -6427,7 +6427,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	(while (re-search-forward
 		"\\\\\\(there4\\|sup[123]\\|frac[13][24]\\|[a-zA-Z]+\\)\\($\\|{}\\|[^[:alpha:]\n]\\)"
 		limit t)
-	  (if (and (not (org-in-indented-comment-line))
+	  (if (and (not (org-at-comment-p))
 		   (setq ee (org-entity-get (match-string 1)))
 		   (= (length (nth 6 ee)) 1))
 	      (let*
@@ -21526,17 +21526,6 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 	   (>= (match-end 0) pos)
 	   start))))
 
-(defun org-in-commented-line ()
-  "Is point in a line starting with `#'?"
-  (equal (char-after (point-at-bol)) ?#))
-
-(defun org-in-indented-comment-line ()
-  "Is point in a line starting with `#' after some white space?"
-  (save-excursion
-    (save-match-data
-      (goto-char (point-at-bol))
-      (looking-at "[ \t]*#"))))
-
 (defun org-in-verbatim-emphasis ()
   (save-match-data
     (and (org-in-regexp org-emph-re 2)
@@ -23588,10 +23577,11 @@ unless optional argument NO-INHERITANCE is non-nil."
     (save-excursion (and (org-up-heading-safe) (org-in-commented-heading-p))))))
 
 (defun org-at-comment-p nil
-  "Is cursor in a line starting with a # character?"
+  "Is cursor in a commented line?"
   (save-excursion
-    (beginning-of-line)
-    (looking-at "^#")))
+    (save-match-data
+      (beginning-of-line)
+      (looking-at "^[ \t]*# "))))
 
 (defun org-at-drawer-p nil
   "Is cursor at a drawer keyword?"
