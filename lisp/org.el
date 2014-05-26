@@ -9936,24 +9936,28 @@ Optional argument TABLE is a list with characters that should be
 escaped.  When nil, `org-link-escape-chars' is used.
 If optional argument MERGE is set, merge TABLE into
 `org-link-escape-chars'."
-  (cond
-   ((and table merge)
-    (mapc (lambda (defchr)
-	    (unless (member defchr table)
-	      (setq table (cons defchr table)))) org-link-escape-chars))
-   ((null table)
-    (setq table org-link-escape-chars)))
-  (mapconcat
-   (lambda (char)
-     (if (or (member char table)
-	     (and (or (< char 32) (= char ?\%) (> char 126))
-		  org-url-hexify-p))
-	 (mapconcat (lambda (sequence-element)
-		      (format "%%%.2X" sequence-element))
-		    (or (encode-coding-char char 'utf-8)
-			(error "Unable to percent escape character: %s"
-			       (char-to-string char))) "")
-       (char-to-string char))) text ""))
+  ;; Don't escape chars in internal links
+  (if (string-match "^\\*[[:alnum:]]+" text)
+      text
+    (cond
+     ((and table merge)
+      (mapc (lambda (defchr)
+	      (unless (member defchr table)
+		(setq table (cons defchr table))))
+	    org-link-escape-chars))
+     ((null table)
+      (setq table org-link-escape-chars)))
+    (mapconcat
+     (lambda (char)
+       (if (or (member char table)
+	       (and (or (< char 32) (= char ?\%) (> char 126))
+		    org-url-hexify-p))
+	   (mapconcat (lambda (sequence-element)
+			(format "%%%.2X" sequence-element))
+		      (or (encode-coding-char char 'utf-8)
+			  (error "Unable to percent escape character: %s"
+				 (char-to-string char))) "")
+	 (char-to-string char))) text "")))
 
 (defun org-link-escape-browser (text)
   "Escape some characters before handing over to the browser.
