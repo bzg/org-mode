@@ -8904,8 +8904,9 @@ When sorting is done, call `org-after-sorting-entries-or-items-hook'."
 	     (or (org-entry-get nil property) ""))
 	    ((= dcst ?o)
 	     (if (looking-at org-complex-heading-regexp)
-		 (- 9999 (length (member (match-string 2)
-					 org-todo-keywords-1)))))
+		 (let* ((m (match-string 2))
+			(s (if (member m org-done-keywords) '- '+)))
+		   (- 99 (funcall s (length (member m org-todo-keywords-1)))))))
 	    ((= dcst ?f)
 	     (if getkey-func
 		 (progn
