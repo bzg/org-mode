@@ -3652,7 +3652,7 @@ FILTER-ALIST is an alist of filters we need to apply when
 	;; Setting any org variables that are in org-agenda-local-vars
 	;; list need to be done after the prepare call
 	(org-agenda-prepare-window
-	 (get-buffer-ecreate org-agenda-buffer-name) filter-alist)
+	 (get-buffer-create org-agenda-buffer-name) filter-alist)
 	(setq buffer-read-only nil)
 	(org-agenda-reset-markers)
 	(let ((inhibit-read-only t)) (erase-buffer))
