@@ -10547,6 +10547,28 @@ Functions in this hook must return t if they identify and follow
 a link at point.  If they don't find anything interesting at point,
 they must return nil.")
 
+(defun org-open-link-in-comment-or-property ()
+  "Open the link at point in a comment or in a property."
+  (let* ((comment-or-prop "\\s-*# \\|[ \t]*:[^:]+:[ \t]*")
+	 (string-rear
+	  (replace-regexp-in-string
+	   comment-or-prop ""
+	   (buffer-substring (point) (line-beginning-position))))
+	 (string-front
+	  (replace-regexp-in-string
+	   comment-or-prop ""
+	   (buffer-substring (point) (line-end-position))))
+	 (value (org-element-property :value (org-element-at-point))))
+    (with-temp-buffer
+      (let ((org-inhibit-startup t)) (org-mode))
+      (insert value)
+      (goto-char (point-min))
+      (while (and (re-search-forward (regexp-quote string-rear) nil t)
+		  (re-search-forward (regexp-quote string-front) nil t))
+	(goto-char (match-beginning 0))	
+	(org-open-at-point)
+	(when (string= string-rear "") (forward-char))))))
+
 (defvar org-link-search-inhibit-query nil) ;; dynamically scoped
 (defvar clean-buffer-list-kill-buffer-names) ; Defined in midnight.el
 (defun org-open-at-point (&optional arg reference-buffer)
@@ -10588,7 +10610,12 @@ is used internally by `org-open-link-from-string'."
 					  footnote-reference timestamp)))
 		    (setq context (org-element-property :parent context))))
 	(cond
-	 ;; Unsupported context: return an error.
+	 ;; WARNING: Before checking for syntactically correct
+	 ;; contexts, we make two exceptions as we open links in
+	 ;; comments and properties.
+	 ((or (org-at-comment-p) (org-at-property-p))
+	  (org-open-link-in-comment-or-property))
+	 ;; Now check for context where link opening is not supported.
 	 ((not context) (user-error "No link found"))
 	 ;; On a headline or an inlinetask, but not on a timestamp,
 	 ;; a link, a footnote reference or on tags.
