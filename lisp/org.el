@@ -15363,10 +15363,11 @@ When INCREMENT is non-nil, set the property to the next allowed value."
     (message "%s is now %s" prop val)))
 
 (defun org-at-property-p ()
-  "Is cursor inside a property drawer?"
-  (save-excursion
-    (when (equal 'node-property (car (org-element-at-point)))
-      (beginning-of-line 1)
+  "Non-nil when point is inside a property drawer.
+See `org-property-re' for match data, if applicable."
+  (when (eq (org-element-type (org-element-at-point)) 'node-property)
+    (save-excursion
+      (beginning-of-line)
       (looking-at org-property-re))))
 
 (defun org-get-property-block (&optional beg end force)
