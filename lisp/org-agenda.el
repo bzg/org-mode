@@ -6753,8 +6753,10 @@ The optional STRING argument forces conversion into a 5 character wide string
 HH:MM."
   (save-match-data
     (when
-	(or (string-match "\\<\\([012]?[0-9]\\)\\(:\\([0-5][0-9]\\)\\)\\([AaPp][Mm]\\)?\\> *" s)
-	    (string-match "\\<\\([012]?[0-9]\\)\\(:\\([0-5][0-9]\\)\\)?\\([AaPp][Mm]\\)\\> *" s))
+	(and
+	 (or (string-match "\\<\\([012]?[0-9]\\)\\(:\\([0-5][0-9]\\)\\)\\([AaPp][Mm]\\)?\\> *" s)
+	     (string-match "\\<\\([012]?[0-9]\\)\\(:\\([0-5][0-9]\\)\\)?\\([AaPp][Mm]\\)\\> *" s))
+	 (not (eq (get-text-property 1 'face s) 'org-link)))
       (let* ((h (string-to-number (match-string 1 s)))
 	     (m (if (match-end 3) (string-to-number (match-string 3 s)) 0))
 	     (ampm (if (match-end 4) (downcase (match-string 4 s))))
