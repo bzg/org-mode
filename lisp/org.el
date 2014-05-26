@@ -10606,17 +10606,18 @@ is used internally by `org-open-link-from-string'."
 	;; On an unsupported type, check if point is contained within
 	;; a support one.
 	(while (and (not (memq (setq type (org-element-type context))
-			       '(headline inlinetask link footnote-definition
-					  footnote-reference timestamp)))
+			       '(comment headline inlinetask link
+					 footnote-definition footnote-reference
+					 node-property timestamp)))
 		    (setq context (org-element-property :parent context))))
 	(cond
+	 ;; Blank lines at the beginning of buffer: bail out.
+	 ((not context) (user-error "No link found"))
 	 ;; WARNING: Before checking for syntactically correct
 	 ;; contexts, we make two exceptions as we open links in
 	 ;; comments and properties.
-	 ((or (org-at-comment-p) (org-at-property-p))
+	 ((memq type '(comment node-property))
 	  (org-open-link-in-comment-or-property))
-	 ;; Now check for context where link opening is not supported.
-	 ((not context) (user-error "No link found"))
 	 ;; On a headline or an inlinetask, but not on a timestamp,
 	 ;; a link, a footnote reference or on tags.
 	 ((and (memq type '(headline inlinetask))
