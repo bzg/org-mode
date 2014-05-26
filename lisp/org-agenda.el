@@ -2159,7 +2159,8 @@ The following commands are available:
 	  org-agenda-entry-text-mode org-agenda-start-with-entry-text-mode
 	  org-agenda-clockreport-mode org-agenda-start-with-clockreport-mode
 	  org-agenda-show-log org-agenda-start-with-log-mode))
-
+  (add-to-invisibility-spec '(org-filtered))
+  (add-to-invisibility-spec '(org-link))
   (easy-menu-change
    '("Agenda") "Agenda Files"
    (append
@@ -7652,7 +7653,7 @@ When NO-OPERATOR is non-nil, do not add the + operator to returned tags."
 	 (e (point-at-eol)))
     (let ((inhibit-read-only t))
       (add-text-properties
-       b e `(invisible t org-filtered t org-filter-type ,type)))))
+       b e `(invisible org-filtered org-filter-type ,type)))))
 
 (defun org-agenda-remove-filter (type)
   (interactive)
@@ -7664,7 +7665,7 @@ When NO-OPERATOR is non-nil, do not add the + operator to returned tags."
 	(goto-char pos)
 	(remove-text-properties
 	 (point) (next-single-property-change (point) 'org-filter-type)
-	 `(invisible t org-filter-type ,type))))
+	 `(invisible org-filtered org-filter-type ,type))))
     (set (intern (format "org-agenda-%s-filter" (intern-soft type))) nil)
     (setq org-agenda-filter-form nil)
     (org-agenda-set-mode-name)
@@ -9153,7 +9154,7 @@ Called with a universal prefix arg, show the priority instead of setting it."
             (add-text-properties
 	     (1- (point)) (point-at-eol)
 	     (list 'display (org-add-props stamp nil
-			      'face 'secondary-selection))))
+			      'face '(secondary-selection default)))))
 	  (beginning-of-line 1))
 	(beginning-of-line 0)))))
 
