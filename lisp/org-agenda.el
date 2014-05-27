@@ -6791,7 +6791,7 @@ The optional argument TYPE tells the agenda type."
 			(t org-agenda-max-tags)))
 	(max-entries (cond ((listp org-agenda-max-entries)
 			    (cdr (assoc type org-agenda-max-entries)))
-			   (t org-agenda-max-entries))) l)
+			   (t org-agenda-max-entries))))
     (when org-agenda-before-sorting-filter-function
       (setq list
 	    (delq nil
@@ -6826,19 +6826,29 @@ The optional argument TYPE tells the agenda type."
 		 list)))
       list)))
 
-(defun org-agenda-limit-interactively ()
+(defun org-agenda-limit-interactively (remove)
   "In agenda, interactively limit entries to various maximums."
-  (interactive)
-  (let* ((max (read-char "Number of [e]ntries [t]odos [T]ags [E]ffort? "))
-	 (num (string-to-number (read-from-minibuffer "How many? "))))
-    (cond ((equal max ?e)
-	   (let ((org-agenda-max-entries num)) (org-agenda-redo)))
-	  ((equal max ?t)
-	   (let ((org-agenda-max-todos num)) (org-agenda-redo)))
-	  ((equal max ?T)
-	   (let ((org-agenda-max-tags num)) (org-agenda-redo)))
-	  ((equal max ?E)
-	   (let ((org-agenda-max-effort num)) (org-agenda-redo)))))
+  (interactive "P")
+  (if remove
+      (progn (setq org-agenda-max-entries nil
+		   org-agenda-max-todos nil
+		   org-agenda-max-tags nil
+		   org-agenda-max-effort nil)
+	     (org-agenda-redo))
+    (let* ((max (read-char "Number of [e]ntries [t]odos [T]ags [E]ffort? "))
+	   (msg (cond ((= max ?E) "How many minutes? ")
+		      ((= max ?e) "How many entries? ")
+		      ((= max ?t) "How many TODO entries? ")
+		      ((= max ?T) "How many tagged entries? ")))
+	   (num (string-to-number (read-from-minibuffer msg))))
+      (cond ((equal max ?e)
+	     (let ((org-agenda-max-entries num)) (org-agenda-redo)))
+	    ((equal max ?t)
+	     (let ((org-agenda-max-todos num)) (org-agenda-redo)))
+	    ((equal max ?T)
+	     (let ((org-agenda-max-tags num)) (org-agenda-redo)))
+	    ((equal max ?E)
+	     (let ((org-agenda-max-effort num)) (org-agenda-redo))))))
   (org-agenda-fit-window-to-buffer))
 
 (defun org-agenda-highlight-todo (x)
