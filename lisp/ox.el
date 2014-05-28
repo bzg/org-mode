@@ -1843,6 +1843,13 @@ an alist where associations are (VARIABLE-NAME VALUE)."
       ;; Return value in appropriate order of appearance.
       (nreverse (funcall collect-bind nil nil)))))
 
+;; defsubst org-export-get-parent must be defined before first use,
+;; was originally defined in the topology section
+
+(defsubst org-export-get-parent (blob)
+  "Return BLOB parent or nil.
+BLOB is the element or object considered."
+  (org-element-property :parent blob))
 
 ;;;; Tree Properties
 ;;
@@ -5105,11 +5112,7 @@ Return the new string."
 ;; `org-export-get-genealogy' returns the full genealogy of a given
 ;; element or object, from closest parent to full parse tree.
 
-(defsubst org-export-get-parent (blob)
-  "Return BLOB parent or nil.
-BLOB is the element or object considered."
-  (org-element-property :parent blob))
-
+;; defsubst org-export-get-parent must be defined before first use
 (defun org-export-get-genealogy (blob)
   "Return full genealogy relative to a given element or object.
 

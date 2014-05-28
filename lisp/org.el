@@ -10602,6 +10602,10 @@ application the system uses for this file type."
     (move-marker org-open-link-marker nil)
     (run-hook-with-args 'org-follow-link-hook)))
 
+(defsubst org-uniquify (list)
+  "Non-destructively remove duplicate elements from LIST."
+  (let ((res (copy-sequence list))) (delete-dups res)))
+
 (defun org-offer-links-in-entry (buffer marker &optional nth zero)
   "Offer links in the current entry and return the selected link.
 If there is only one link, return it.
@@ -21832,9 +21836,7 @@ for the search purpose."
   "Return the reverse of STRING."
   (apply 'string (reverse (string-to-list string))))
 
-(defsubst org-uniquify (list)
-  "Non-destructively remove duplicate elements from LIST."
-  (let ((res (copy-sequence list))) (delete-dups res)))
+;; defsubst org-uniquify must be defined before first use
 
 (defun org-uniquify-alist (alist)
   "Merge elements of ALIST with the same key.
