@@ -401,10 +401,10 @@ By default, the timer duration will be set to the number of
 minutes in the Effort property, if any.  You can ignore this by
 using three `C-u' prefix arguments."
   (interactive "P")
-  (let ((minutes (or (and (not (equal opt '(64)))
-			  (number-to-string
-			   (org-hh:mm-string-to-minutes
-			    (org-entry-get (point) "effort"))))
+  (let* ((effort-minutes (org-get-at-eol 'effort-minutes 1))
+	 (minutes (or (and (not (equal opt '(64)))
+			   effort-minutes
+			   (number-to-string effort-minutes))
 		     (and (numberp opt) (number-to-string opt))
 		     (and (listp opt) (not (null opt))
 			  (number-to-string org-timer-default-timer))

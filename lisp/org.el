@@ -9450,28 +9450,32 @@ corresponding text property to set, or an alist with each element
 being a text property (as a symbol) and a function to apply to
 the value of the drawer property."
   (let ((case-fold-search t)
-	(inhibit-read-only t) p)
+	(inhibit-read-only t))
     (org-with-silent-modifications
      (save-excursion
        (save-restriction
 	 (widen)
 	 (goto-char (point-min))
 	 (while (re-search-forward (concat "^[ \t]*:" dprop ": +\\(.*\\)[ \t]*$") nil t)
-	   (setq p (org-match-string-no-properties 1))
-	   (save-excursion
-	     (org-back-to-heading t)
-	     ;; tprop is a text property symbol
-	     (if (symbolp tprop)
-		 (put-text-property
-		  (point-at-bol) (or (outline-next-heading) (point-max)) tprop p)
-	       ;; tprop is an alist with (properties . function) elements
-	       (mapc (lambda(al)
-		       (save-excursion
-			 (put-text-property
-			  (point-at-bol) (or (outline-next-heading) (point-max))
-			  (car al)
-			  (funcall (cdr al) p))))
-		     tprop)))))))))
+	   (org-refresh-property tprop (org-match-string-no-properties 1))))))))
+
+(defun org-refresh-property (tprop p)
+  "Refresh the buffer text property TPROP from the drawer property P.
+The refresh happens only for the current tree (not subtree)."
+  (save-excursion
+    (org-back-to-heading t)
+    ;; tprop is a text property symbol
+    (if (symbolp tprop)
+	(put-text-property
+	 (point) (or (outline-next-heading) (point-max)) tprop p)
+      ;; tprop is an alist with (properties . function) elements
+      (mapc (lambda(al)
+	      (save-excursion
+		(put-text-property
+		 (point-at-bol) (or (outline-next-heading) (point-max))
+		 (car al)
+		 (funcall (cdr al) p))))
+	    tprop))))
 
 ;;;; Link Stuff
 
@@ -15353,9 +15357,10 @@ When INCREMENT is non-nil, set the property to the next allowed value."
 		   existing nil nil "" nil cur))))))
     (unless (equal (org-entry-get nil prop) val)
       (org-entry-put nil prop val))
-    (save-excursion
-      (org-back-to-heading t)
-      (put-text-property (point-at-bol) (point-at-eol) 'effort val))
+    (org-refresh-property
+     '((effort . identity)
+       (effort-minutes . org-duration-string-to-minutes))
+     val)
     (when (string= heading org-clock-current-task)
       (setq org-clock-effort (get-text-property (point-at-bol) 'effort))
       (org-clock-update-mode-line))
@@ -16142,11 +16147,10 @@ completion."
     (beginning-of-line 1)
     (skip-chars-forward " \t")
     (when (equal prop org-effort-property)
-      (save-excursion
-	(org-back-to-heading t)
-	(put-text-property (point-at-bol) (point-at-eol) 'effort nval)
-	(put-text-property (point-at-bol) (point-at-eol) 'effort-minutes
-			   (org-duration-string-to-minutes nval)))
+      (org-refresh-property
+       '((effort . identity)
+	 (effort-minutes . org-duration-string-to-minutes))
+       nval)
       (when (string= org-clock-current-task heading)
 	(setq org-clock-effort nval)
 	(org-clock-update-mode-line)))
