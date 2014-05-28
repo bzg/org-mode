@@ -111,17 +111,19 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (unless (boundp 'diary-fancy-buffer)
   (org-defvaralias 'diary-fancy-buffer 'fancy-diary-buffer))
 
+(declare-function org-add-archive-files "org-archive" (files))
+
 (declare-function org-inlinetask-at-task-p "org-inlinetask" ())
 (declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 (declare-function org-inlinetask-toggle-visibility "org-inlinetask" ())
 (declare-function org-pop-to-buffer-same-window "org-compat" (&optional buffer-or-name norecord label))
-(declare-function org-clocktable-shift "org-clock" (dir n))
 (declare-function org-clock-get-last-clock-out-time "org-clock" ())
-(declare-function org-clock-update-time-maybe "org-clock" ())
-(declare-function org-clock-remove-overlays "org-clock" (&optional beg end noremove))
 (declare-function org-clock-timestamps-up "org-clock" (&optional n))
 (declare-function org-clock-timestamps-down "org-clock" (&optional n))
+(declare-function org-clock-remove-overlays "org-clock" (&optional beg end noremove))
 (declare-function org-clock-sum-current-item "org-clock" (&optional tstart))
+(declare-function org-clock-update-time-maybe "org-clock" ())
+(declare-function org-clocktable-shift "org-clock" (dir n))
 
 (declare-function org-babel-tangle-file "ob-tangle" (file &optional target-file lang))
 (declare-function org-babel-do-in-edit-buffer "ob-core" (&rest body))
@@ -142,7 +144,9 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-agenda-redo "org-agenda" (&optional all))
 (declare-function org-table-align "org-table" ())
 (declare-function org-table-begin "org-table" (&optional table-type))
+(declare-function org-table-blank-field "org-table" ())
 (declare-function org-table-end "org-table" (&optional table-type))
+(declare-function org-table-insert-row "org-table" (&optional arg))
 (declare-function org-table-paste-rectangle "org-table" ())
 (declare-function org-table-maybe-eval-formula "org-table" ())
 (declare-function org-table-maybe-recalculate-line "org-table" ())
@@ -175,6 +179,16 @@ Stars are put in group 1 and the trimmed body in group 2.")
   "Non-destructively remove duplicate elements from LIST."
   (let ((res (copy-sequence list))) (delete-dups res)))
 
+(defsubst org-get-at-bol (property)
+  "Get text property PROPERTY at the beginning of line."
+  (get-text-property (point-at-bol) property))
+
+(defsubst org-trim (s)
+ "Remove whitespace at the beginning and the end of string S."
+ (replace-regexp-in-string
+  "\\`[ \t\n\r]+" ""
+  (replace-regexp-in-string "[ \t\n\r]+\\'" "" s)))
+
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
 
@@ -194,6 +208,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 			 (intern (concat "org-babel-expand-body:" lang)))))))
 	org-babel-load-languages))
 
+(declare-function org-babel-tangle-file "ob-tangle" (file &optional target-file lang))
 ;;;###autoload
 (defun org-babel-load-file (file &optional compile)
   "Load Emacs Lisp source code blocks in the Org-mode FILE.
@@ -21512,10 +21527,6 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 
 ;;; Generally useful functions
 
-(defsubst org-get-at-bol (property)
-  "Get text property PROPERTY at the beginning of line."
-  (get-text-property (point-at-bol) property))
-
 (defsubst org-get-at-eol (property n)
   "Get text property PROPERTY at the end of line less N characters."
   (get-text-property (- (point-at-eol) n) property))
@@ -21719,12 +21730,6 @@ N may optionally be the number of spaces to remove."
       buffer
     (or (buffer-base-buffer buffer)
 	buffer)))
-
-(defsubst org-trim (s)
- "Remove whitespace at the beginning and the end of string S."
- (replace-regexp-in-string
-  "\\`[ \t\n\r]+" ""
-  (replace-regexp-in-string "[ \t\n\r]+\\'" "" s)))
 
 (defun org-wrap (string &optional width lines)
   "Wrap string to either a number of lines, or a width in characters.
@@ -22084,6 +22089,8 @@ for the search purpose."
 (defun org-reverse-string (string)
   "Return the reverse of STRING."
   (apply 'string (reverse (string-to-list string))))
+
+;; defsubst org-uniquify must be defined before first use
 
 (defun org-uniquify-alist (alist)
   "Merge elements of ALIST with the same key.
