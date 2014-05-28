@@ -13427,7 +13427,7 @@ however, override everything.
 
 @subsubheading Generic properties
 
-@multitable @columnfractions 0.32 0.68
+@multitable {@code{:with-sub-superscript}}  {@code{org-export-with-sub-superscripts}}
 @item @code{:archived-trees}        @tab @code{org-export-with-archived-trees}
 @item @code{:exclude-tags}          @tab @code{org-export-exclude-tags}
 @item @code{:headline-levels}       @tab @code{org-export-headline-levels}
@@ -13459,7 +13459,7 @@ however, override everything.
 
 @subsubheading ASCII specific properties
 
-@multitable @columnfractions 0.32 0.68
+@multitable {@code{:ascii-table-keep-all-vertical-lines}} {@code{org-ascii-table-keep-all-vertical-lines}}
 @item @code{:ascii-bullets}                       @tab @code{org-ascii-bullets}
 @item @code{:ascii-caption-above}                 @tab @code{org-ascii-caption-above}
 @item @code{:ascii-charset}                       @tab @code{org-ascii-charset}
@@ -13483,7 +13483,7 @@ however, override everything.
 
 @subsubheading Beamer specific properties
 
-@multitable @columnfractions 0.32 0.68
+@multitable {@code{:beamer-frame-default-options}} {@code{org-beamer-frame-default-options}}
 @item @code{:beamer-theme}                 @tab @code{org-beamer-theme}
 @item @code{:beamer-column-view-format}    @tab @code{org-beamer-column-view-format}
 @item @code{:beamer-environments-extra}    @tab @code{org-beamer-environments-extra}
@@ -13494,7 +13494,7 @@ however, override everything.
 
 @subsubheading HTML specific properties
 
-@multitable @columnfractions 0.32 0.68
+@multitable {@code{:html-table-use-header-tags-for-first-column}} {@code{org-html-table-use-header-tags-for-first-column}}
 @item @code{:html-allow-name-attribute-in-anchors} @tab @code{org-html-allow-name-attribute-in-anchors}
 @item @code{:html-coding-system}              @tab @code{org-html-coding-system}
 @item @code{:html-container}                  @tab @code{org-html-container-element}
@@ -13551,7 +13551,7 @@ however, override everything.
 
 @subsubheading @LaTeX{} specific properties
 
-@multitable @columnfractions 0.32 0.68
+@multitable {@code{:latex-link-with-unknown-path-format}} {@code{org-latex-link-with-unknown-path-format}} 
 @item @code{:latex-active-timestamp-format}    @tab @code{org-latex-active-timestamp-format}
 @item @code{:latex-classes}                    @tab @code{org-latex-classes}
 @item @code{:latex-class}                      @tab @code{org-latex-default-class}
@@ -13591,13 +13591,13 @@ however, override everything.
 
 @subsubheading Markdown specific properties
 
-@multitable @columnfractions 0.32 0.68
+@multitable {@code{:md-headline-style}} {@code{org-md-headline-style}}
 @item @code{:md-headline-style} @tab @code{org-md-headline-style}
 @end multitable
 
 @subsubheading ODT specific properties
 
-@multitable @columnfractions 0.32 0.68
+@multitable {@code{:odt-create-custom-styles-for-srcblocks}} {@code{org-odt-create-custom-styles-for-srcblocks}}
 @item @code{:odt-convert-capabilities}       @tab @code{org-odt-convert-capabilities}
 @item @code{:odt-convert-processes}          @tab @code{org-odt-convert-processes}
 @item @code{:odt-convert-process}            @tab @code{org-odt-convert-process}
@@ -13621,13 +13621,13 @@ however, override everything.
 
 @subsubheading Org specific properties
 
-@multitable @columnfractions 0.32 0.68
+@multitable {@code{:org-htmlized-css-url}} {@code{org-org-htmlized-css-url}}
 @item @code{:org-htmlized-css-url} @tab @code{org-org-htmlized-css-url}
 @end multitable
 
 @subsubheading Texinfo specific properties
 
-@multitable @columnfractions 0.32 0.68
+@multitable {@code{:texinfo-link-with-unknown-path-format}} {@code{org-texinfo-link-with-unknown-path-format}}
 @item @code{:texinfo-active-timestamp-format}    @tab @code{org-texinfo-active-timestamp-format}
 @item @code{:texinfo-classes}                    @tab @code{org-texinfo-classes}
 @item @code{:texinfo-class}                      @tab @code{org-texinfo-default-class}
