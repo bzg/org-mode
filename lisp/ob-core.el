@@ -1349,7 +1349,7 @@ specified in the properties of the current outline entry."
 	  (org-entry-get org-babel-current-src-block-location
 			 (concat "header-args:" lang) 'inherit))))))
 
-(defvar org-src-preserve-indentation)
+(defvar org-src-preserve-indentation) ;; declare defcustom from org-src
 (defun org-babel-parse-src-block-match ()
   "Parse the results from a match of the `org-babel-src-block-regexp'."
   (let* ((block-indentation (length (match-string 1)))
