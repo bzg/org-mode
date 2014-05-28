@@ -126,7 +126,7 @@
     (:latex-inactive-timestamp-format nil nil org-latex-inactive-timestamp-format)
     (:latex-inline-image-rules nil nil org-latex-inline-image-rules)
     (:latex-inputenc-alist nil nil org-latex-inputenc-alist)
-    (:latex-known-errors nil nil org-latex-known-errors)
+    (:latex-known-warnings nil nil org-latex-known-warnings)
     (:latex-link-with-unknown-path-format nil nil org-latex-link-with-unknown-path-format)
     (:latex-listings nil nil org-latex-listings)
     (:latex-listings-langs nil nil org-latex-listings-langs)

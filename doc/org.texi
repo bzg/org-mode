@@ -13570,7 +13570,7 @@ however, override everything.
 @item @code{:latex-inactive-timestamp-format}  @tab @code{org-latex-inactive-timestamp-format}
 @item @code{:latex-inline-image-rules}         @tab @code{org-latex-inline-image-rules}
 @item @code{:latex-inputenc-alist}             @tab @code{org-latex-inputenc-alist}
-@item @code{:latex-known-errors}               @tab @code{org-latex-known-errors}
+@item @code{:latex-known-warnings}             @tab @code{org-latex-known-warnings}
 @item @code{:latex-link-with-unknown-path-format} @tab @code{org-latex-link-with-unknown-path-format}
 @item @code{:latex-listings-langs}             @tab @code{org-latex-listings-langs}
 @item @code{:latex-listings-options}           @tab @code{org-latex-listings-options}
