@@ -13335,7 +13335,6 @@ string of these options for details.
 @item @code{:headline-levels}       @tab @code{org-export-headline-levels}
 @item @code{:language}              @tab @code{org-export-default-language}
 @item @code{:preserve-breaks}       @tab @code{org-export-preserve-breaks}
-@item @code{:publishing-directory}  @tab @code{org-export-publishing-directory}
 @item @code{:section-numbers}       @tab @code{org-export-with-section-numbers}
 @item @code{:select-tags}           @tab @code{org-export-select-tags}
 @item @code{:with-author}           @tab @code{org-export-with-author}
