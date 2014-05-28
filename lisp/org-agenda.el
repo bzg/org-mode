@@ -7638,7 +7638,7 @@ When NO-OPERATOR is non-nil, do not add the + operator to returned tags."
   "Set FILTER as the new agenda filter and apply it."
   ;; Deactivate `org-agenda-entry-text-mode' when filtering
   (if org-agenda-entry-text-mode (org-agenda-entry-text-mode))
-  (let (tags cat txt effort-minutes)
+  (let (tags cat txt)
     (setq org-agenda-filter-form
 	  (org-agenda-filter-make-matcher filter type))
     (if (and (eq type 'category)
@@ -7658,8 +7658,7 @@ When NO-OPERATOR is non-nil, do not add the + operator to returned tags."
 				     (org-agenda-filter-expand-tags (list f) t))
 				   (org-get-at-bol 'tags)))
 		    cat (org-get-at-eol 'org-category 1)
-		    txt (org-get-at-eol 'txt 1)
-		    effort-minutes (org-get-at-eol 'effort-minutes 1))
+		    txt (org-get-at-eol 'txt 1))
 	      (if (not (eval org-agenda-filter-form))
 		  (org-agenda-filter-hide-line type))
 	      (beginning-of-line 2))
