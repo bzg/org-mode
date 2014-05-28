@@ -108,7 +108,6 @@
     (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
     (:latex-header "LATEX_HEADER" nil nil newline)
     (:latex-header-extra "LATEX_HEADER_EXTRA" nil nil newline)
-    (:latex-hyperref-p nil "texht" org-latex-with-hyperref t)
     ;; Other variables.
     (:latex-active-timestamp-format nil nil org-latex-active-timestamp-format)
     (:latex-classes nil nil org-latex-classes)
@@ -120,6 +119,7 @@
     (:latex-format-drawer-function nil nil org-latex-format-drawer-function)
     (:latex-format-headline-function nil nil org-latex-format-headline-function)
     (:latex-format-inlinetask-function nil nil org-latex-format-inlinetask-function)
+    (:latex-hyperref-template nil nil org-latex-hyperref-template t)
     (:latex-image-default-height nil nil org-latex-image-default-height)
     (:latex-image-default-option nil nil org-latex-image-default-option)
     (:latex-image-default-width nil nil org-latex-image-default-width)
@@ -1248,7 +1248,7 @@ holding export options."
      ;; Title
      (format "\\title{%s}\n" title)
      ;; Hyperref options.
-     (format-spec (plist-get info :latex-hyperref)
+     (format-spec (plist-get info :latex-hyperref-template)
                   (format-spec-make
                    ?k (or (plist-get info :keywords) "")
                    ?d (or (plist-get info :description)"")

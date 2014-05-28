@@ -13554,7 +13554,7 @@ however, override everything.
 @multitable @columnfractions 0.32 0.68
 @item @code{:latex-active-timestamp-format}    @tab @code{org-latex-active-timestamp-format}
 @item @code{:latex-classes}                    @tab @code{org-latex-classes}
-@item @code{:latex-class}                      @tab @code{org-latex-default-class t}
+@item @code{:latex-class}                      @tab @code{org-latex-default-class}
 @item @code{:latex-default-figure-position}    @tab @code{org-latex-default-figure-position}
 @item @code{:latex-default-table-environment}  @tab @code{org-latex-default-table-environment}
 @item @code{:latex-default-table-mode}         @tab @code{org-latex-default-table-mode}
@@ -13563,7 +13563,7 @@ however, override everything.
 @item @code{:latex-format-drawer-function}     @tab @code{org-latex-format-drawer-function}
 @item @code{:latex-format-headline-function}   @tab @code{org-latex-format-headline-function}
 @item @code{:latex-format-inlinetask-function} @tab @code{org-latex-format-inlinetask-function}
-@item @code{:latex-hyperref-p}                 @tab @code{org-latex-with-hyperref t}
+@item @code{:latex-hyperref-template}          @tab @code{org-latex-hyperref-template}
 @item @code{:latex-image-default-height}       @tab @code{org-latex-image-default-height}
 @item @code{:latex-image-default-option}       @tab @code{org-latex-image-default-option}
 @item @code{:latex-image-default-width}        @tab @code{org-latex-image-default-width}
