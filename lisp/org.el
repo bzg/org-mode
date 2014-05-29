@@ -5550,7 +5550,8 @@ The following commands are available:
      (when org-startup-with-latex-preview
        (org-preview-latex-fragment))
      (unless org-inhibit-startup-visibility-stuff
-       (org-set-startup-visibility))))
+       (org-set-startup-visibility))
+     (org-refresh-effort-properties)))
   ;; Try to set org-hide correctly
   (let ((foreground (org-find-invisible-foreground)))
     (if foreground
@@ -9414,6 +9415,40 @@ call CMD."
 
 ;;; Refresh properties
 
+(defun org-refresh-properties (dprop tprop)
+  "Refresh buffer text properties.
+DPROP is the drawer property and TPROP is either the
+corresponding text property to set, or an alist with each element
+being a text property (as a symbol) and a function to apply to
+the value of the drawer property."
+  (let ((case-fold-search t)
+	(inhibit-read-only t))
+    (org-with-silent-modifications
+     (save-excursion
+       (save-restriction
+	 (widen)
+	 (goto-char (point-min))
+	 (while (re-search-forward (concat "^[ \t]*:" dprop ": +\\(.*\\)[ \t]*$") nil t)
+	   (org-refresh-property tprop (org-match-string-no-properties 1))))))))
+
+(defun org-refresh-property (tprop p)
+  "Refresh the buffer text property TPROP from the drawer property P.
+The refresh happens only for the current tree (not subtree)."
+  (save-excursion
+    (org-back-to-heading t)
+    ;; tprop is a text property symbol
+    (if (symbolp tprop)
+	(put-text-property
+	 (point) (or (outline-next-heading) (point-max)) tprop p)
+      ;; tprop is an alist with (properties . function) elements
+      (mapc (lambda(al)
+	      (save-excursion
+		(put-text-property
+		 (point-at-bol) (or (outline-next-heading) (point-max))
+		 (car al)
+		 (funcall (cdr al) p))))
+	    tprop))))
+
 (defun org-refresh-category-properties ()
   "Refresh category text properties in the buffer."
   (let ((case-fold-search t)
@@ -9466,39 +9501,12 @@ call CMD."
 	   (put-text-property (point) (progn (org-end-of-subtree t t) (point))
 			      'org-stats stats)))))))
 
-(defun org-refresh-properties (dprop tprop)
-  "Refresh buffer text properties.
-DPROP is the drawer property and TPROP is either the
-corresponding text property to set, or an alist with each element
-being a text property (as a symbol) and a function to apply to
-the value of the drawer property."
-  (let ((case-fold-search t)
-	(inhibit-read-only t))
-    (org-with-silent-modifications
-     (save-excursion
-       (save-restriction
-	 (widen)
-	 (goto-char (point-min))
-	 (while (re-search-forward (concat "^[ \t]*:" dprop ": +\\(.*\\)[ \t]*$") nil t)
-	   (org-refresh-property tprop (org-match-string-no-properties 1))))))))
-
-(defun org-refresh-property (tprop p)
-  "Refresh the buffer text property TPROP from the drawer property P.
-The refresh happens only for the current tree (not subtree)."
-  (save-excursion
-    (org-back-to-heading t)
-    ;; tprop is a text property symbol
-    (if (symbolp tprop)
-	(put-text-property
-	 (point) (or (outline-next-heading) (point-max)) tprop p)
-      ;; tprop is an alist with (properties . function) elements
-      (mapc (lambda(al)
-	      (save-excursion
-		(put-text-property
-		 (point-at-bol) (or (outline-next-heading) (point-max))
-		 (car al)
-		 (funcall (cdr al) p))))
-	    tprop))))
+(defun org-refresh-effort-properties ()
+  "Refresh effort properties"
+  (org-refresh-properties
+   org-effort-property
+   '((effort . identity)
+     (effort-minutes . org-duration-string-to-minutes))))
 
 ;;;; Link Stuff
 
@@ -18344,10 +18352,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	    (or (memq 'stats org-agenda-ignore-properties)
 		(org-refresh-stats-properties))
 	    (or (memq 'effort org-agenda-ignore-properties)
-		(org-refresh-properties
-		 org-effort-property
-		 '((effort . identity)
-		   (effort-minutes . org-duration-string-to-minutes))))
+		(org-refresh-effort-properties))
 	    (or (memq 'appt org-agenda-ignore-properties)
 		(org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime))
 	    (setq org-todo-keywords-for-agenda
