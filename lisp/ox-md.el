@@ -182,6 +182,14 @@ a communication channel."
 	    (and (plist-get info :with-priority)
 		 (let ((char (org-element-property :priority headline)))
 		   (and char (format "[#%c] " char)))))
+	   (anchor
+	    (when (plist-get info :with-toc)
+	      (org-html--anchor
+	       (or (org-element-property :CUSTOM_ID headline)
+		   (concat "sec-"
+			   (mapconcat 'number-to-string
+				      (org-export-get-headline-number
+				       headline info) "-"))))))
 	   ;; Headline text without tags.
 	   (heading (concat todo priority title)))
       (cond
@@ -202,12 +210,12 @@ a communication channel."
 		       (replace-regexp-in-string "^" "    " contents)))))
        ;; Use "Setext" style.
        ((eq org-md-headline-style 'setext)
-	(concat heading tags "\n"
+	(concat heading tags anchor "\n"
 		(make-string (length heading) (if (= level 1) ?= ?-))
 		"\n\n"
 		contents))
        ;; Use "atx" style.
-       (t (concat (make-string level ?#) " " heading tags "\n\n" contents))))))
+       (t (concat (make-string level ?#) " " heading tags anchor "\n\n" contents))))))
 
 
 ;;;; Horizontal Rule
