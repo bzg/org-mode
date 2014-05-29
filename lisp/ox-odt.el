@@ -139,7 +139,7 @@
 ;;; Internal Variables
 
 (defconst org-odt-lib-dir
-  (file-name-directory load-file-name)
+  (file-name-directory (or load-file-name (buffer-file-name)))
   "Location of ODT exporter.
 Use this to infer values of `org-odt-styles-dir' and
 `org-odt-schema-dir'.")
@@ -3149,7 +3149,7 @@ and prefix with \"OrgSrc\".  For example,
 		 (with-temp-buffer
 		   (insert code)
 		   (funcall lang-mode)
-		   (font-lock-fontify-buffer)
+		   (font-lock-ensure)
 		   (buffer-string))))
 	 (fontifier (if use-htmlfontify-p 'org-odt-htmlfontify-string
 		      'org-odt--encode-plain-text))

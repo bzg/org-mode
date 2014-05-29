@@ -77,7 +77,19 @@
 (require 'find-func)
 (require 'format-spec)
 
-(load "org-loaddefs.el" t t t)
+(or (equal this-command 'eval-buffer)
+    (condition-case nil
+	(load (concat (file-name-directory load-file-name)
+		      "org-loaddefs.el")
+	      nil t t t)
+      (error
+       (message (org-add-props
+		    "WARNING: No org-loaddefs.el file could be found from where org.el is loaded."
+		    nil 'face 'org-warning))
+       (sit-for 3)
+       (message (org-add-props "You need to run \"make\" or \"make autoloads\" from Org lisp directory"
+		    nil 'face 'org-warning))
+       (sit-for 3))))
 
 (require 'org-macs)
 (require 'org-compat)
@@ -6246,9 +6258,7 @@ done, nil otherwise."
 If this is called at a normal headline, the level is the number of stars.
 Use `org-reduced-level' to remove the effect of `org-odd-levels'."
   (save-excursion
-    (if (not (condition-case nil
-		 (org-back-to-heading t)
-	       (error nil)))
+    (if (not (ignore-errors (org-back-to-heading t)))
 	0
       (looking-at org-outline-regexp)
       (1- (- (match-end 0) (match-beginning 0))))))
@@ -6464,7 +6474,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
     (insert s)
     (let ((org-odd-levels-only odd-levels))
       (org-mode)
-      (font-lock-fontify-buffer)
+      (font-lock-ensure)
       (buffer-string))))
 
 (defvar org-m nil)
@@ -8383,9 +8393,7 @@ useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
 	  (outline-next-heading)
 	(save-excursion (outline-end-of-heading)
 			(setq folded (outline-invisible-p)))
-	(condition-case nil
-	    (org-forward-heading-same-level (1- n) t)
-	  (error nil))
+	(ignore-errors (org-forward-heading-same-level (1- n) t))
 	(org-end-of-subtree t t)))
     (setq end (point))
     (goto-char beg0)
@@ -8788,7 +8796,7 @@ When sorting is done, call `org-after-sorting-entries-or-items-hook'."
       (if (not (org-at-heading-p)) (outline-next-heading))
       (setq start (point)))
      ((or (org-at-heading-p)
-          (condition-case nil (progn (org-back-to-heading) t) (error nil)))
+          (ignore-errors (progn (org-back-to-heading) t)))
       ;; we will sort the children of the current headline
       (org-back-to-heading)
       (setq start (point)
@@ -9164,11 +9172,11 @@ buffer.  It will also recognize item context in multiline items."
 	  (dolist (binding new-bindings)
 	    (let ((key (lookup-key orgstruct-mode-map binding)))
 	      (when (or (not key) (numberp key))
-		(condition-case nil
-		    (org-defkey orgstruct-mode-map
-				binding
-				(orgstruct-make-binding f binding disable-when-heading-prefix))
-		  (error nil)))))))))
+		(ignore-errors
+		  (org-defkey orgstruct-mode-map
+			      binding
+			      (orgstruct-make-binding
+			       f binding disable-when-heading-prefix))))))))))
   (run-hooks 'orgstruct-setup-hook))
 
 (defun orgstruct-make-binding (fun key disable-when-heading-prefix)
@@ -13862,9 +13870,7 @@ How much context is shown depends upon the variables
     (when hierarchy-p
       ;; show all higher headings, possibly with siblings
       (save-excursion
-	(while (and (condition-case nil
-			(progn (org-up-heading-all 1) t)
-		      (error nil))
+	(while (and (ignore-errors (progn (org-up-heading-all 1) t))
 		    (not (bobp)))
 	  (org-flag-heading nil)
 	  (when siblings-p (org-show-siblings)))))
@@ -18857,29 +18863,26 @@ share a good deal of logic."
 	(insert latex-header)
 	(insert "\n\\begin{document}\n" string "\n\\end{document}\n")))
     (let ((dir default-directory))
-      (condition-case nil
-	  (progn
-	    (cd tmpdir)
-	    (call-process "latex" nil nil nil texfile))
-	(error nil))
+      (ignore-errors
+	(cd tmpdir)
+	(call-process "latex" nil nil nil texfile))
       (cd dir))
     (if (not (file-exists-p dvifile))
 	(progn (message "Failed to create dvi file from %s" texfile) nil)
-      (condition-case nil
-	  (if (featurep 'xemacs)
-	      (call-process "dvipng" nil nil nil
-			    "-fg" fg "-bg" bg
-			    "-T" "tight"
-			    "-o" pngfile
-			    dvifile)
+      (ignore-errors
+	(if (featurep 'xemacs)
 	    (call-process "dvipng" nil nil nil
 			  "-fg" fg "-bg" bg
-			  "-D" dpi
-			  ;;"-x" scale "-y" scale
 			  "-T" "tight"
 			  "-o" pngfile
-			  dvifile))
-	(error nil))
+			  dvifile)
+	  (call-process "dvipng" nil nil nil
+			"-fg" fg "-bg" bg
+			"-D" dpi
+			;;"-x" scale "-y" scale
+			"-T" "tight"
+			"-o" pngfile
+			dvifile)))
       (if (not (file-exists-p pngfile))
 	  (if org-format-latex-signal-error
 	      (error "Failed to create png file from %s" texfile)
@@ -18932,25 +18935,24 @@ share a good deal of logic."
     (org-latex-compile texfile t)
     (if (not (file-exists-p pdffile))
 	(progn (message "Failed to create pdf file from %s" texfile) nil)
-      (condition-case nil
-	  (if (featurep 'xemacs)
-	      (call-process "convert" nil nil nil
-			    "-density" "96"
-			    "-trim"
-			    "-antialias"
-			    pdffile
-			    "-quality" "100"
-			    ;; "-sharpen" "0x1.0"
-			    pngfile)
+      (ignore-errors
+	(if (featurep 'xemacs)
 	    (call-process "convert" nil nil nil
-			  "-density" dpi
+			  "-density" "96"
 			  "-trim"
 			  "-antialias"
 			  pdffile
 			  "-quality" "100"
 			  ;; "-sharpen" "0x1.0"
-			  pngfile))
-	(error nil))
+			  pngfile)
+	  (call-process "convert" nil nil nil
+			"-density" dpi
+			"-trim"
+			"-antialias"
+			pdffile
+			"-quality" "100"
+			;; "-sharpen" "0x1.0"
+			pngfile)))
       (if (not (file-exists-p pngfile))
 	  (if org-format-latex-signal-error
 	      (error "Failed to create png file from %s" texfile)
@@ -23700,7 +23702,7 @@ move point."
 	(pos (point))
 	(re org-outline-regexp-bol)
 	level l)
-    (when (condition-case nil (org-back-to-heading t) (error nil))
+    (when (ignore-errors (org-back-to-heading t))
       (setq level (funcall outline-level))
       (catch 'exit
 	(or previous (forward-char 1))
@@ -23724,7 +23726,7 @@ move point."
 Return t when a child was found.  Otherwise don't move point and
 return nil."
   (let (level (pos (point)) (re org-outline-regexp-bol))
-    (when (condition-case nil (org-back-to-heading t) (error nil))
+    (when (ignore-errors (org-back-to-heading t))
       (setq level (outline-level))
       (forward-char 1)
       (if (and (re-search-forward re nil t) (> (outline-level) level))
@@ -24286,19 +24288,17 @@ modified."
 Show the heading too, if it is currently invisible."
   (interactive)
   (save-excursion
-    (condition-case nil
-	(progn
-	  (org-back-to-heading t)
-	  (outline-flag-region
-	   (max (point-min) (1- (point)))
-	   (save-excursion
-	     (if (re-search-forward
-		  (concat "[\r\n]\\(" org-outline-regexp "\\)") nil t)
-		 (match-beginning 1)
-	       (point-max)))
-	   nil)
-	  (org-cycle-hide-drawers 'children))
-      (error nil))))
+    (ignore-errors
+      (org-back-to-heading t)
+      (outline-flag-region
+       (max (point-min) (1- (point)))
+       (save-excursion
+	 (if (re-search-forward
+	      (concat "[\r\n]\\(" org-outline-regexp "\\)") nil t)
+	     (match-beginning 1)
+	   (point-max)))
+       nil)
+      (org-cycle-hide-drawers 'children))))
 
 (defun org-make-options-regexp (kwds &optional extra)
   "Make a regular expression for keyword lines."

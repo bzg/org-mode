@@ -299,7 +299,7 @@ Return output file name."
 	   (visitingp (find-buffer-visiting filename))
 	   (work-buffer (or visitingp (find-file filename)))
 	   newbuf)
-      (font-lock-fontify-buffer)
+      (font-lock-ensure)
       (show-all)
       (org-show-block-all)
       (setq newbuf (htmlize-buffer))
