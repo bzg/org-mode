@@ -20030,31 +20030,29 @@ individual commands for more information."
    (t (org-modifier-cursor-error))))
 
 (defun org-shiftmetaup (&optional arg)
-  "Move subtree up or kill table row.
-Calls `org-move-subtree-up' or `org-table-kill-row' or
-`org-move-item-up' or `org-timestamp-up', depending on context.
-See the individual commands for more information."
+  "Drag the line at point up.
+In a table, kill the current row.
+On a clock timestamp, update the value of the timestamp like `S-<up>'
+but also adjust the previous clocked item in the clock history.
+Everywhere else, drag the line at point up."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-shiftmetaup-hook))
    ((org-at-table-p) (call-interactively 'org-table-kill-row))
-   ((org-at-heading-p) (call-interactively 'org-move-subtree-up))
-   ((org-at-item-p) (call-interactively 'org-move-item-up))
    ((org-at-clock-log-p) (let ((org-clock-adjust-closest t))
 			   (call-interactively 'org-timestamp-up)))
    (t (call-interactively 'org-drag-line-backward))))
 
 (defun org-shiftmetadown (&optional arg)
-  "Move subtree down or insert table row.
-Calls `org-move-subtree-down' or `org-table-insert-row' or
-`org-move-item-down' or `org-timestamp-up', depending on context.
-See the individual commands for more information."
+  "Drag the line at point down.
+In a table, insert an empty row at the current line.
+On a clock timestamp, update the value of the timestamp like `S-<down>'
+but also adjust the previous clocked item in the clock history.
+Everywhere else, drag the line at point down."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-shiftmetadown-hook))
    ((org-at-table-p) (call-interactively 'org-table-insert-row))
-   ((org-at-heading-p) (call-interactively 'org-move-subtree-down))
-   ((org-at-item-p) (call-interactively 'org-move-item-down))
    ((org-at-clock-log-p) (let ((org-clock-adjust-closest t))
 			   (call-interactively 'org-timestamp-down)))
    (t (call-interactively 'org-drag-line-forward))))
