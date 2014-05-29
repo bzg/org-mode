@@ -3735,8 +3735,7 @@ FILTER-ALIST is an alist of filters we need to apply when
 	    (save-excursion
 	      (goto-char (point-min))
 	      (while (equal (forward-line) 0)
-		(when (setq mrk (or (get-text-property (point) 'org-hd-marker)
-				    (get-text-property (point) 'org-hd-marker)))
+		(when (setq mrk (get-text-property (point) 'org-hd-marker))
 		  (put-text-property (point-at-bol) (point-at-eol)
 				     'tags (org-with-point-at mrk
 					     (delete-dups
