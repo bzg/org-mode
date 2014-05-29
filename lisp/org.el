@@ -7726,7 +7726,7 @@ command."
        (if (org-in-src-block-p) ",* " "* "))
       (run-hooks 'org-insert-heading-hook))
 
-     ((and itemp (not (equal arg '(4))))
+     ((and itemp (not (member arg '((4) (16)))))
       ;; Insert an item
       (org-insert-item))
 
