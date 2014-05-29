@@ -1416,19 +1416,23 @@ See also the option @code{org-goto-interface}.
 @orgcmd{M-@key{RET},org-insert-heading}
 @vindex org-M-RET-may-split-line
 Insert a new heading/item with the same level as the one at point.
-If the cursor is in a plain list item, a new item is created
-(@pxref{Plain lists}).  To prevent this behavior in lists, call the
-command with a prefix argument.  When this command is used in the
-middle of a line, the line is split and the rest of the line becomes
-the new item or headline@footnote{If you do not want the line to be
-split, customize the variable @code{org-M-RET-may-split-line}.}.  If
-the command is used at the @emph{beginning} of a headline, the new
-headline is created before the current line.  If the command is used
-at the @emph{end} of a folded subtree (i.e., behind the ellipses at
-the end of a headline), then a headline will be
-inserted after the end of the subtree.  Calling this command with
-@kbd{C-u C-u} will unconditionally respect the headline's content and
-create a new item at the end of the parent subtree.
+
+If the cursor is in a plain list item, a new item is created (@pxref{Plain
+lists}).  To prevent this behavior in lists, call the command with one prefix
+argument.  When this command is used in the middle of a line, the line is
+split and the rest of the line becomes the new item or headline.  If you do
+not want the line to be split, customize @code{org-M-RET-may-split-line}.
+
+If the command is used at the @emph{beginning} of a line, and if there is a
+heading or an item at point, the new heading/item is created @emph{before}
+the current line.  If the command is used at the @emph{end} of a folded
+subtree (i.e., behind the ellipses at the end of a headline), then a headline
+will be inserted after the end of the subtree.
+
+Calling this command with @kbd{C-u C-u} will unconditionally respect the
+headline's content and create a new item at the end of the parent subtree.
+
+If point is at the beginning of a normal line, turn this line into a heading.
 @orgcmd{C-@key{RET},org-insert-heading-respect-content}
 Just like @kbd{M-@key{RET}}, except when adding a new heading below the
 current heading, the new heading is placed after the body instead of before
