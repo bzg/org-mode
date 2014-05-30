@@ -6266,12 +6266,14 @@ Use `org-reduced-level' to remove the effect of `org-odd-levels'."
 
 (defvar org-font-lock-keywords nil)
 
-(defsubst org-re-property (property &optional literal)
-  "Return a regexp matching a PROPERTY line.
-Match group 3 will be set to the value if it exists."
-  (concat "^\\(?4:[ \t]*\\)\\(?1::\\(?2:"
-	  (if literal property (regexp-quote property))
-	  "\\):\\)[ \t]+\\(?3:[^ \t\r\n].*?\\)\\(?5:[ \t]*\\)$"))
+(defsubst org-re-property (property &optional literal allow-null)
+   "Return a regexp matching a PROPERTY line.
+ Match group 3 will be set to the value if it exists."
+   (concat "^\\(?4:[ \t]*\\)\\(?1::\\(?2:"
+ 	  (if literal property (regexp-quote property))
+	  "\\):\\)[ \t]+\\(?3:[^ \t\r\n]"
+	  (if allow-null "*")
+	  ".*?\\)\\(?5:[ \t]*\\)$"))
 
 (defconst org-property-re
   (org-re-property ".*?" 'literal)
@@ -15780,7 +15782,7 @@ If it is not a string, an error is raised."
 	  (setq range (org-get-property-block beg end 'force))
 	  (goto-char (car range))
 	  (if (re-search-forward
-	       (org-re-property property) (cdr range) t)
+	       (org-re-property property nil t) (cdr range) t)
 	      (progn
 		(delete-region (match-beginning 0) (match-end 0))
 		(goto-char (match-beginning 0)))
