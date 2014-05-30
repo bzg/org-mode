@@ -8436,24 +8436,6 @@ will be narrowed by requiring or forbidding the selected additional tag.
 Instead of pressing @kbd{+} or @kbd{-} after @kbd{/}, you can also
 immediately use the @kbd{\} command.
 
-@vindex org-sort-agenda-noeffort-is-high
-In order to filter for effort estimates, you should set up allowed
-efforts globally, for example
-@lisp
-(setq org-global-properties
-    '(("Effort_ALL". "0 0:10 0:30 1:00 2:00 3:00 4:00")))
-@end lisp
-You can then filter for an effort by first typing an operator, one of
-@kbd{<}, @kbd{>}, and @kbd{=}, and then the one-digit index of an effort
-estimate in your array of allowed values, where @kbd{0} means the 10th value.
-The filter will then restrict to entries with effort smaller-or-equal, equal,
-or larger-or-equal than the selected value.  If the digits 0--9 are not used
-as fast access keys to tags, you can also simply press the index digit
-directly without an operator.  In this case, @kbd{<} will be assumed.  For
-application of the operator, entries without a defined effort will be treated
-according to the value of @code{org-sort-agenda-noeffort-is-high}.  To filter
-for tasks without effort definition, press @kbd{?} as the operator.
-
 Org also supports automatic, context-aware tag filtering.  If the variable
 @code{org-agenda-auto-exclude-function} is set to a user-defined function,
 that function can decide which tags should be excluded from the agenda
@@ -8524,6 +8506,23 @@ universal prefix arguments, it will remove all the regexp filters, which can
 be accumulated.  You can add a filter preset through the option
 @code{org-agenda-category-filter-preset} (see below.)
 
+@orgcmd{_,org-agenda-filter-by-effort}
+@vindex org-agenda-effort-filter-preset
+@vindex org-sort-agenda-noeffort-is-high
+Filter the agenda view with respect to effort estimates.  
+You first need to set up allowed efforts globally, for example
+@lisp
+(setq org-global-properties
+    '(("Effort_ALL". "0 0:10 0:30 1:00 2:00 3:00 4:00")))
+@end lisp
+You can then filter for an effort by first typing an operator, one of
+@kbd{<}, @kbd{>}, and @kbd{=}, and then the one-digit index of an effort
+estimate in your array of allowed values, where @kbd{0} means the 10th value.
+The filter will then restrict to entries with effort smaller-or-equal, equal,
+or larger-or-equal than the selected value.  For application of the operator,
+entries without a defined effort will be treated according to the value of
+@code{org-sort-agenda-noeffort-is-high}.
+
 @orgcmd{|,org-agenda-filter-remove-all}
 Remove all filters in the current agenda view.
 @end table
@@ -8569,8 +8568,8 @@ Once you mark one of these five entry as @code{DONE}, rebuilding the agenda
 will again the next five entries again, including the first entry that was
 excluded so far.
 
-You can also dynamically set temporary limits@footnote{Those temporary limits
-are lost when rebuilding the agenda.}:
+You can also dynamically set temporary limits, which will be lost when
+rebuilding the agenda:
 
 @table @kbd
 @orgcmd{~,org-agenda-limit-interactively}
@@ -8598,6 +8597,10 @@ the other commands, the cursor needs to be in the desired line.
 Next line (same as @key{down} and @kbd{C-n}).
 @orgcmd{p,org-agenda-previous-line}
 Previous line (same as @key{up} and @kbd{C-p}).
+@orgcmd{N,org-agenda-next-item}
+Next item: same as next line, but only consider items.
+@orgcmd{P,org-agenda-previous-item}
+Previous item: same as previous line, but only consider items.
 @tsubheading{View/Go to Org file}
 @orgcmdkkc{@key{SPC},mouse-3,org-agenda-show-and-scroll-up}
 Display the original location of the item in another window.
