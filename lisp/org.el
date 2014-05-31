@@ -12550,8 +12550,10 @@ When called through ELisp, arg is also interpreted in the following way:
 		  (throw 'exit nil))))
 	    (store-match-data match-data)
 	    (replace-match next t t)
-	    (unless (pos-visible-in-window-p hl-pos)
-	      (message "TODO state changed to %s" (org-trim next)))
+	    (cond ((equal this org-state)
+		   (message "TODO state was already %s" (org-trim next)))
+		  ((pos-visible-in-window-p hl-pos)
+		   (message "TODO state changed to %s" (org-trim next))))
 	    (unless head
 	      (setq head (org-get-todo-sequence-head org-state)
 		    ass (assoc head org-todo-kwd-alist)
