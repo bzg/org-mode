@@ -8839,7 +8839,8 @@ the same tree node, and the headline of the tree node in the Org-mode file."
       	(string-match (concat "^" (regexp-opt org-done-keywords-for-agenda))
 		      newhead)
 	(org-agenda-unmark-clocking-task))
-      (org-move-to-column col))))
+      (org-move-to-column col)
+      (org-agenda-mark-clocking-task))))
 
 (defun org-agenda-add-note (&optional arg)
   "Add a time-stamped note to the entry at point."
