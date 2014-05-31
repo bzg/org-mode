@@ -83,12 +83,9 @@
 		      "org-loaddefs.el")
 	      nil t t t)
       (error
-       (message (org-add-props
-		    "WARNING: No org-loaddefs.el file could be found from where org.el is loaded."
-		    nil 'face 'org-warning))
+       (message "WARNING: No org-loaddefs.el file could be found from where org.el is loaded.")
        (sit-for 3)
-       (message (org-add-props "You need to run \"make\" or \"make autoloads\" from Org lisp directory"
-		    nil 'face 'org-warning))
+       (message "You need to run \"make\" or \"make autoloads\" from Org lisp directory")
        (sit-for 3))))
 
 (require 'org-macs)
