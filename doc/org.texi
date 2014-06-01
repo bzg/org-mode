@@ -2726,9 +2726,11 @@ Operations, , Logical Operations, calc, GNU Emacs Calc Manual}).  For example
 @item if($1 < 20, teen, string(""))
 "teen" if age $1 is less than 20, else the Org table result field is set to
 empty with the empty string.
-@item if("$1" == "nan" || "$2" == "nan", string(""), $1 + $2); E
+@item if("$1" == "nan" || "$2" == "nan", string(""), $1 + $2); E f-1
 Sum of the first two columns.  When at least one of the input fields is empty
-the Org table result field is set to empty.
+the Org table result field is set to empty.  @samp{E} is required to not
+convert empty fields to 0.  @samp{f-1} is an optional Calc format string
+similar to @samp{%.1f} but leaves empty results empty.
 @item if(typeof(vmean($1..$7)) == 12, string(""), vmean($1..$7); E
 Mean value of a range unless there is any empty field.  Every field in the
 range that is empty is replaced by @samp{nan} which lets @samp{vmean} result
