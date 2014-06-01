@@ -422,6 +422,10 @@ TIME defaults to the current time."
 (unless (fboundp 'user-error)
   (defalias 'user-error 'error))
 
+;; `font-lock-ensure' is only available from 24.4.50 on
+(unless (fboundp 'font-lock-ensure)
+  (defalias 'font-lock-ensure 'font-lock-fontify-buffer))
+
 (defmacro org-no-popups (&rest body)
   "Suppress popup windows.
 Let-bind some variables to nil around BODY to achieve the desired
