@@ -9952,11 +9952,10 @@ include your @file{.emacs} file, you could use:
 @end example
 
 @noindent
-The optional second and third parameter are the markup (e.g., @samp{quote},
-@samp{example}, or @samp{src}), and, if the markup is @samp{src}, the
-language for formatting the contents.  The markup is optional; if it is not
-given, the text will be assumed to be in Org mode format and will be
-processed normally.
+The optional second and third parameter are the markup (i.e., @samp{example}
+or @samp{src}), and, if the markup is @samp{src}, the language for formatting
+the contents.  The markup is optional; if it is not given, the text will be
+assumed to be in Org mode format and will be processed normally.
 
 Contents of the included file will belong to the same structure (headline,
 item) containing the @code{INCLUDE} keyword.  In particular, headlines within
