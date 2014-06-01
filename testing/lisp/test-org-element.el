@@ -1479,6 +1479,14 @@ e^{i\\pi}+1=0
 	    (search-forward "file:")
 	    (org-element-property :type (org-element-context))))))
 
+(ert-deftest test-org-element/org-open-at-point ()
+  "Test `org-open-at-point' with link being a heading property."
+  (org-test-with-temp-text
+   "* Headline
+:PROPERTIES:
+:URL: <point>[[info:org#Top]]
+:END:"
+   (org-open-at-point)))
 
 ;;;; Macro
 
