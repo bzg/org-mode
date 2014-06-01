@@ -572,38 +572,43 @@ When at a definition, jump to the references if they exist, offer
 to create them otherwise.
 
 When neither at definition or reference, create a new footnote,
-interactively.
+interactively if possible.
 
-With prefix arg SPECIAL, offer additional commands in a menu."
+With prefix arg SPECIAL, or when no footnote can be created,
+offer additional commands in a menu."
   (interactive "P")
-  (let (tmp c)
+  (let* ((context (and (not special) (org-element-context)))
+	 (type (org-element-type context)))
     (cond
-     (special
+     ((eq type 'footnote-reference)
+      (let ((label (org-element-property :label context)))
+	(cond
+	 ;; Anonymous footnote: move point at the beginning of its
+	 ;; definition.
+	 ((not label)
+	  (goto-char (org-element-property :contents-begin context)))
+	 ;; A definition exists: move to it.
+	 ((ignore-errors (org-footnote-goto-definition label)))
+	 ;; No definition exists: offer to create it.
+	 ((yes-or-no-p (format "No definition for %s.  Create one? " label))
+	  (org-footnote-create-definition label)))))
+     ((eq type 'footnote-definition)
+      (org-footnote-goto-previous-reference
+       (org-element-property :label context)))
+     ((or special
+	  (zerop (current-column))
+	  (not (org-footnote-in-valid-context-p)))
       (message "Footnotes: [s]ort  |  [r]enumber fn:N  |  [S]=r+s |->[n]umeric  |  [d]elete")
-      (setq c (read-char-exclusive))
-      (cond
-       ((eq c ?s) (org-footnote-normalize 'sort))
-       ((eq c ?r) (org-footnote-renumber-fn:N))
-       ((eq c ?S)
-	(org-footnote-renumber-fn:N)
-	(org-footnote-normalize 'sort))
-       ((eq c ?n) (org-footnote-normalize))
-       ((eq c ?d) (org-footnote-delete))
-       (t (error "No such footnote command %c" c))))
-     ((setq tmp (org-footnote-at-reference-p))
-      (cond
-       ;; Anonymous footnote: move point at the beginning of its
-       ;; definition.
-       ((not (car tmp))
-	(goto-char (nth 1 tmp))
-	(forward-char 5))
-       ;; A definition exists: move to it.
-       ((ignore-errors (org-footnote-goto-definition (car tmp))))
-       ;; No definition exists: offer to create it.
-       ((yes-or-no-p (format "No definition for %s.  Create one? " (car tmp)))
-	(org-footnote-create-definition (car tmp)))))
-     ((setq tmp (org-footnote-at-definition-p))
-      (org-footnote-goto-previous-reference (car tmp)))
+      (let ((c (read-char-exclusive)))
+	(cond
+	 ((eq c ?s) (org-footnote-normalize 'sort))
+	 ((eq c ?r) (org-footnote-renumber-fn:N))
+	 ((eq c ?S)
+	  (org-footnote-renumber-fn:N)
+	  (org-footnote-normalize 'sort))
+	 ((eq c ?n) (org-footnote-normalize))
+	 ((eq c ?d) (org-footnote-delete))
+	 (t (error "No such footnote command %c" c)))))
      (t (org-footnote-new)))))
 
 ;;;###autoload
