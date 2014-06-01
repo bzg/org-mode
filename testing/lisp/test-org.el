@@ -1013,6 +1013,17 @@ drops support for Emacs 24.1 and 24.2."
      (concat "http://lists.gnu.org/archive/cgi-bin/namazu.cgi?query="
 	     "\"Release 8.2\"&idxname=emacs-orgmode")))))
 
+;;;; Open at point
+
+(ert-deftest test-org/open-at-point ()
+  "Test `org-open-at-point' with link being a heading property."
+  (org-test-with-temp-text
+      "* Headline
+:PROPERTIES:
+:URL: <point>[[info:org#Top]]
+:END:"
+    (org-open-at-point)))
+
 
 
 ;;; Node Properties
