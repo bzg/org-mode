@@ -6276,7 +6276,7 @@ Use `org-reduced-level' to remove the effect of `org-odd-levels'."
 	  ".*?\\)\\(?5:[ \t]*\\)$"))
 
 (defconst org-property-re
-  (org-re-property ".*?" 'literal)
+  (org-re-property ".*?" 'literal t)
   "Regular expression matching a property line.
 There are four matching groups:
 1: :PROPKEY: including the leading and trailing colon,
@@ -15621,7 +15621,7 @@ If yes, return this value.  If not, return the current value of the variable."
 	(if (and range
 		 (goto-char (car range))
 		 (re-search-forward
-		  (org-re-property property)
+		  (org-re-property property nil t)
 		  (cdr range) t))
 	    (progn
 	      (delete-region (match-beginning 0) (1+ (point-at-eol)))
@@ -15991,9 +15991,7 @@ This is computed according to `org-property-set-functions-alist'."
 		  (funcall set-function prompt
 			   (mapcar 'list (org-property-values property))
 			   nil nil "" nil cur)))))
-    (if (equal val "")
-	cur
-      val)))
+    (org-trim val)))
 
 (defvar org-last-set-property nil)
 (defvar org-last-set-property-value nil)
@@ -16069,8 +16067,10 @@ in the current file."
 		    (org-icompleting-read "Property: " props nil t)
 		  (caar props))))
      (list prop)))
-  (if (org-entry-delete nil property)
-      (message "Property %s deleted" property)))
+  (if (not property)
+      (message "No property to delete in this entry")
+    (org-entry-delete nil property delete-empty-drawer)
+    (message "Property \"%s\" deleted" property)))
 
 (defun org-delete-property-globally (property)
   "Remove PROPERTY globally, from all entries."
