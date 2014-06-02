@@ -1017,12 +1017,17 @@ drops support for Emacs 24.1 and 24.2."
 
 (ert-deftest test-org/open-at-point ()
   "Test `org-open-at-point' with link being a heading property."
-  (org-test-with-temp-text
-      "* Headline
+  (should
+    (org-test-with-temp-text
+	"* Headline
 :PROPERTIES:
 :URL: <point>[[info:org#Top]]
 :END:"
-    (org-open-at-point)))
+      (org-open-at-point)
+      (and (switch-to-buffer "*info*")
+	   (prog1
+	       (looking-at "\nOrg Mode Manual")
+	     (kill-buffer))))))
 
 
 
