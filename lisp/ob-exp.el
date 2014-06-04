@@ -78,6 +78,10 @@ be executed."
 	 (when heading
 	   (condition-case nil
 	       (let ((org-link-search-inhibit-query t))
+		 ;; TODO: When multiple headings have the same title,
+		 ;;       this returns the first, which is not always
+		 ;;       the right heading.  Consider a better way to
+		 ;;       find the proper heading.
 		 (org-link-search heading))
 	     (error (when heading
 		      (goto-char (point-min))
