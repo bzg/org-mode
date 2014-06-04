@@ -8,6 +8,7 @@
 ;;          John Wiegley <johnw@gnu.org>
 ;;          Christopher Suckling <suckling at gmail dot com>
 ;;          Daniil Frumin <difrumin@gmail.com>
+;;          Alan Schmitt <alan.schmitt@polytechnique.org>
 ;;
 ;;
 ;; Version: 1.1
@@ -727,7 +728,10 @@ This will use the command `open' with the message URL."
        "repeat with theMessage in theSelection\n"
        "set theID to message id of theMessage\n"
        "set theSubject to subject of theMessage\n"
-       "set theLink to \"message://\" & theID & \"::split::\" & theSubject & \"\n\"\n"
+       "set theLink to \"message://\" & theID & \"::split::\" & theSubject\n"
+       "if (theLinkList is not equal to {}) then\n"
+       "set theLink to \"\n\" & theLink\n"
+       "end if\n"
        "copy theLink to end of theLinkList\n"
        "end repeat\n"
        "return theLinkList as string\n"
@@ -801,7 +805,7 @@ The Org-syntax text will be pushed to the kill ring, and also returned."
          (link-list
           (mapcar
            (lambda (x) (if (string-match "\\`\"\\(.*\\)\"\\'" x) (setq x (match-string 1 x))) x)
-           (split-string as-link-list "[\r\n]+")))
+           (split-string (substring as-link-list 1 -1) "[\r\n]+")))
          split-link URL description orglink orglink-insert rtn orglink-list)
     (while link-list
       (setq split-link (split-string (pop link-list) "::split::"))
