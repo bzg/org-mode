@@ -16069,7 +16069,7 @@ in the current file."
      (list prop)))
   (if (not property)
       (message "No property to delete in this entry")
-    (org-entry-delete nil property delete-empty-drawer)
+    (org-entry-delete nil property)
     (message "Property \"%s\" deleted" property)))
 
 (defun org-delete-property-globally (property)
