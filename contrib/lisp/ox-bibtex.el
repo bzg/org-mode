@@ -250,7 +250,8 @@ Return new parse tree."
 (defun org-bibtex-merge-contiguous-citations (tree backend info)
   "Merge all contiguous citation in parse tree.
 As a side effect, this filter will also turn all \"cite\" links
-into \"\\cite{...}\" LaTeX fragments."
+into \"\\cite{...}\" LaTeX fragments and will extract options
+into square brackets at the beginning of the \"\\cite\" command."
   (when (org-export-derived-backend-p backend 'html 'latex 'ascii)
     (org-element-map tree '(link latex-fragment)
       (lambda (object)
@@ -258,7 +259,8 @@ into \"\\cite{...}\" LaTeX fragments."
 	  (let ((new-citation (list 'latex-fragment
 				    (list :value ""
 					  :post-blank (org-element-property
-						       :post-blank object)))))
+						       :post-blank object))))
+		option)
 	    ;; Insert NEW-CITATION right before OBJECT.
 	    (org-element-insert-before new-citation object)
 	    ;; Remove all subsequent contiguous citations from parse
@@ -273,6 +275,17 @@ into \"\\cite{...}\" LaTeX fragments."
 		  (push (org-bibtex-get-citation-key next) keys))
 		(org-element-extract-element object)
 		(setq object next))
+	      ;; Find any options in keys, e.g., "(Chapter 2)key" has
+	      ;; the option "Chapter 2".
+	      (setq keys
+		    (mapcar
+		     (lambda (k)
+		       (if (string-match "^(\\([^)]\+\\))\\(.*\\)" k)
+			   (progn
+			     (setq option (format "[%s]" (match-string 1 k)))
+			     (match-string 2 k))
+			 k))
+		     keys))
 	      (org-element-extract-element object)
 	      ;; Eventually merge all keys within NEW-CITATION.  Also
 	      ;; ensure NEW-CITATION has the same :post-blank property
@@ -282,7 +295,8 @@ into \"\\cite{...}\" LaTeX fragments."
 	       :post-blank (org-element-property :post-blank object))
 	      (org-element-put-property
 	       new-citation
-	       :value (format "\\cite{%s}"
+	       :value (format "\\cite%s{%s}"
+			      (or option "")
 			      (mapconcat 'identity (nreverse keys) ",")))))))))
   tree)
 
