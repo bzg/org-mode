@@ -66,7 +66,12 @@ be executed."
 (defmacro org-babel-exp-in-export-file (lang &rest body)
   (declare (indent 1))
   `(let* ((lang-headers (intern (concat "org-babel-default-header-args:" ,lang)))
-	  (heading (nth 4 (ignore-errors (org-heading-components))))
+	  (heading-query (or (org-id-get)
+			     ;; CUSTOM_IDs don't work, maybe they are
+			     ;; stripped, or maybe they resolve too
+			     ;; late in `org-link-search'.
+			     ;; (org-entry-get nil "CUSTOM_ID")
+			     (nth 4 (ignore-errors (org-heading-components)))))
 	  (export-buffer (current-buffer))
 	  results)
      (when org-babel-exp-reference-buffer
@@ -75,17 +80,17 @@ be executed."
        ;; heading in the original file
        (set-buffer org-babel-exp-reference-buffer)
        (save-restriction
-	 (when heading
+	 (when heading-query
 	   (condition-case nil
 	       (let ((org-link-search-inhibit-query t))
 		 ;; TODO: When multiple headings have the same title,
 		 ;;       this returns the first, which is not always
 		 ;;       the right heading.  Consider a better way to
 		 ;;       find the proper heading.
-		 (org-link-search heading))
-	     (error (when heading
+		 (org-link-search heading-query))
+	     (error (when heading-query
 		      (goto-char (point-min))
-		      (re-search-forward (regexp-quote heading) nil t)))))
+		      (re-search-forward (regexp-quote heading-query) nil t)))))
 	 (setq results ,@body))
        (set-buffer export-buffer)
        results)))
