@@ -66,14 +66,14 @@ called by `org-babel-execute-src-block'"
 			 (insert (org-babel-awk-var-to-awk res)))
 		       tmp))))
          (cmd (mapconcat #'identity
-			 (apply #'append
-				(list org-babel-awk-command
-				      "-f" code-file cmd-line)
-				(mapcar (lambda (pair)
-					  (format "-v %s=%s"
-						  (cadr pair) (cddr pair)))
-					(org-babel-get-header params :var))
-				(list in-file))
+			 (append
+			  (list org-babel-awk-command
+				"-f" code-file cmd-line)
+			  (mapcar (lambda (pair)
+				    (format "-v %s=%s"
+					    (cadr pair) (cddr pair)))
+				  (org-babel-get-header params :var))
+			  (list in-file))
 			 " ")))
     (org-babel-reassemble-table
      (let ((results
