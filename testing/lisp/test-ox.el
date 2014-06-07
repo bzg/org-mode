@@ -835,22 +835,44 @@ body\n")))
       (org-export-expand-include-keyword)
       (buffer-string))))
   ;; Inclusion within an example block.
-  (org-test-with-temp-text
-      (format "#+INCLUDE: \"%s/examples/include.org\" :lines \"1-2\" example"
-	      org-test-dir)
-    (org-export-expand-include-keyword)
-    (should
-     (equal
-      (buffer-string)
-      "#+BEGIN_EXAMPLE\nSmall Org file with an include keyword.\n#+END_EXAMPLE\n")))
+  (should
+   (equal
+    "#+BEGIN_EXAMPLE\nSmall Org file with an include keyword.\n#+END_EXAMPLE\n"
+    (org-test-with-temp-text
+     (format "#+INCLUDE: \"%s/examples/include.org\" :lines \"1-2\" EXAMPLE"
+	     org-test-dir)
+     (org-export-expand-include-keyword)
+     (buffer-string))))
   ;; Inclusion within a src-block.
-  (org-test-with-temp-text
-      (format
-       "#+INCLUDE: \"%s/examples/include.org\" :lines \"4-5\" src emacs-lisp"
-       org-test-dir)
-    (org-export-expand-include-keyword)
-    (should (equal (buffer-string)
-		   "#+BEGIN_SRC emacs-lisp\n(+ 2 1)\n#+END_SRC\n")))
+  (should
+   (equal
+    "#+BEGIN_SRC emacs-lisp\n(+ 2 1)\n#+END_SRC\n"
+    (org-test-with-temp-text
+     (format
+      "#+INCLUDE: \"%s/examples/include.org\" :lines \"4-5\" SRC emacs-lisp"
+      org-test-dir)
+     (org-export-expand-include-keyword)
+     (buffer-string))))
+  ;; Inclusion within an html export-block.
+  (should
+   (equal
+    "#+BEGIN_HTML\n<p>HTML!</p>\n#+END_HTML\n"
+    (org-test-with-temp-text
+     (format
+      "#+INCLUDE: \"%s/examples/include.html\" HTML"
+      org-test-dir)
+     (org-export-expand-include-keyword)
+     (buffer-string))))
+  ;; Inclusion within an center paragraph
+  (should
+   (equal
+    "#+BEGIN_CENTER\nSuccess!\n#+END_CENTER\n"
+    (org-test-with-temp-text
+     (format
+      "#+INCLUDE: \"%s/examples/include2.org\" CENTER"
+      org-test-dir)
+     (org-export-expand-include-keyword)
+     (buffer-string))))
   ;; Footnotes labels are local to each included file.
   (should
    (= 6

@@ -9963,30 +9963,37 @@ include your @file{.emacs} file, you could use:
 @end example
 
 @noindent
-The optional second and third parameter are the markup (i.e., @samp{example}
-or @samp{src}), and, if the markup is @samp{src}, the language for formatting
-the contents.
+The first parameter names the the file to include.  The optional second and
+third parameter specify the markup (i.e., @samp{example} or @samp{src}), and,
+if the markup is @samp{src}, the language for formatting the contents.
 
-If no markup is given, the text will be assumed to be in Org mode format and
-will be processed normally.  However, footnote labels (@pxref{Footnotes}) in
-the file will be made local to that file.
+If markup is requested, the included content will be placed within an
+appropriate block@footnote{While you can request paragraphs (@samp{verse},
+@samp{quote}, @samp{center}), but this places severe restrictions on the type
+of content that is permissible}.  No changes to the included content are made
+and it is the responsibility of the user to ensure that the result is valid
+Org syntax.  For markup @samp{example} and @samp{src}, which is requesting a
+literal example, the content will be code-escaped before inclusion.
 
-Contents of the included file will belong to the same structure (headline,
-item) containing the @code{INCLUDE} keyword.  In particular, headlines within
-the file will become children of the current section.  That behavior can be
-changed by providing an additional keyword parameter, @code{:minlevel}.  In
-that case, all headlines in the included file will be shifted so the one with
-the lowest level reaches that specified level.  For example, to make a file
-become a sibling of the current top-level headline, use
+If no markup is requested, the text will be assumed to be in Org mode format
+and will be processed normally.  However, footnote labels (@pxref{Footnotes})
+in the file will be made local to that file.  Contents of the included file
+will belong to the same structure (headline, item) containing the
+@code{INCLUDE} keyword.  In particular, headlines within the file will become
+children of the current section.  That behavior can be changed by providing
+an additional keyword parameter, @code{:minlevel}.  In that case, all
+headlines in the included file will be shifted so the one with the lowest
+level reaches that specified level.  For example, to make a file become a
+sibling of the current top-level headline, use
 
 @example
 #+INCLUDE: "~/my-book/chapter2.org" :minlevel 1
 @end example
 
 You can also include a portion of a file by specifying a lines range using
-the @code{:lines} parameter.  The line at the upper end of the range will not
-be included.  The start and/or the end of the range may be omitted to use the
-obvious defaults.
+the @code{:lines} keyword parameter.  The line at the upper end of the range
+will not be included.  The start and/or the end of the range may be omitted
+to use the obvious defaults.
 
 @example
 #+INCLUDE: "~/.emacs" :lines "5-10"   @r{Include lines 5 to 10, 10 excluded}
