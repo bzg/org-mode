@@ -70,8 +70,10 @@ called by `org-babel-execute-src-block'"
 			  (list org-babel-awk-command
 				"-f" code-file cmd-line)
 			  (mapcar (lambda (pair)
-				    (format "-v %s=%s"
-					    (cadr pair) (cddr pair)))
+				    (format "-v %s='%s'"
+					    (cadr pair)
+					    (org-babel-awk-var-to-awk
+					     (cddr pair))))
 				  (org-babel-get-header params :var))
 			  (list in-file))
 			 " ")))
