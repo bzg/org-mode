@@ -88,6 +88,11 @@ information into the output using `org-fill-template'.
 %link --------- Org-mode style link to the code block
 %source-name -- name of the code block
 
+Upon insertion the formatted comment will be commented out, and
+followed by a newline.  To inhibit this post-insertion processing
+set the `org-babel-tangle-uncomment-comments' variable to a
+non-nil value.
+
 Whether or not comments are inserted during tangling is
 controlled by the :comments header argument."
   :group 'org-babel
@@ -103,11 +108,24 @@ information into the output using `org-fill-template'.
 %link --------- Org-mode style link to the code block
 %source-name -- name of the code block
 
+Upon insertion the formatted comment will be commented out, and
+followed by a newline.  To inhibit this post-insertion processing
+set the `org-babel-tangle-uncomment-comments' variable to a
+non-nil value.
+
 Whether or not comments are inserted during tangling is
 controlled by the :comments header argument."
   :group 'org-babel
   :version "24.1"
   :type 'string)
+
+(defcustom org-babel-tangle-uncomment-comments nil
+  "Inhibits automatic commenting and addition of trailing newline
+of tangle comments.  Use `org-babel-tangle-comment-format-beg'
+and `org-babel-tangle-comment-format-end' to customize the format
+of tangled comments."
+  :group 'org-babel
+  :type 'boolean)
 
 (defcustom org-babel-process-comment-text #'org-remove-indentation
   "Function called to process raw Org-mode text collected to be
@@ -342,8 +360,15 @@ that the appropriate major-mode is set.  SPEC has the form:
 	 (insert-comment (lambda (text)
 			   (when (and comments (not (string= comments "no"))
 				      (> (length text) 0))
-			     (comment-region (point) (progn (insert text) (point)))
-			     (end-of-line nil) (insert "\n")))))
+			     (if org-babel-tangle-uncomment-comments
+				 ;; just plain comments with no processing
+				 (insert text)
+			       ;; ensure comments are made to be
+			       ;; comments, and add a trailing newline
+			       (comment-region
+				(point) (progn (insert text) (point)))
+			       (end-of-line nil)
+			       (insert "\n"))))))
     (when comment (funcall insert-comment comment))
     (when link-p
       (funcall
