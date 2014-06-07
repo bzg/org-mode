@@ -48,6 +48,7 @@
 (declare-function org-element-context "org-element" ())
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
+(declare-function org-id-get "org-id" (&optional pom create prefix))
 (declare-function org-escape-code-in-string "org-src" (s))
 
 (defcustom org-export-babel-evaluate t
