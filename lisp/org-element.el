@@ -4794,22 +4794,21 @@ the following rules:
 	  (while (and upper (zerop (car upper)))
 	    (push 0 key)
 	    (setq upper (cdr upper)))
-	  ;; (n) is equivalent to (n 0 0 0 0 ...) so we want to avoid
-	  ;; ending on a sequence of 0.
-	  (if (= (car upper) 1)
-	      (progn (push 0 key)
-		     (push org-element--cache-default-key key))
-	    (push (if upper (ash (car upper) -1) org-element--cache-default-key)
-		  key)))
+	  ;; (n) is equivalent to (n 0 0 0 0 ...) so we forbid ending
+	  ;; sequences on 0.
+	  (cond ((not upper) (push org-element--cache-default-key key))
+		((= (car upper) 1)
+		 (push 0 key)
+		 (push org-element--cache-default-key key))
+		(t (push (ash (car upper) -1) key))))
 	 ((not upper)
 	  (while (and lower (= (car lower) most-positive-fixnum))
 	    (push most-positive-fixnum key)
 	    (setq lower (cdr lower)))
-	  (push (if lower
-		    (let ((n (car lower)))
-		      (+ (ash (if (zerop (mod n 2)) n (1+ n)) -1)
-			 org-element--cache-default-key))
-		  org-element--cache-default-key)
+	  (push (if (not lower) org-element--cache-default-key
+		  (let ((n (car lower)))
+		    (+ (ash (if (zerop (mod n 2)) n (1+ n)) -1)
+		       org-element--cache-default-key)))
 		key))))
       ;; Ensure we don't return a list with a single element.
       (if (cdr key) (nreverse key) (car key)))))
