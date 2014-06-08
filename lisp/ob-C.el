@@ -34,8 +34,6 @@
   (require 'cl))
 (require 'ob)
 (require 'cc-mode)
-(eval-when-compile
-  (require 'cl))
 
 (declare-function org-entry-get "org"
 		  (pom property &optional inherit literal-nil))
@@ -72,40 +70,40 @@ This function calls `org-babel-execute:C++'."
 This function is called by `org-babel-execute-src-block'."
   (let ((org-babel-c-variant 'cpp)) (org-babel-C-execute body params)))
 
-;;(defun org-babel-expand-body:C++ (body params) ;; unused
-;;  "Expand a block of C++ code with org-babel according to it's
-;;header arguments (calls `org-babel-C-expand')."
-;;  (let ((org-babel-c-variant 'cpp)) (org-babel-C-expand body params)))
+(defun org-babel-expand-body:C++ (body params)
+  "Expand a block of C++ code with org-babel according to it's
+header arguments."
+  (let ((org-babel-c-variant 'cpp)) (org-babel-C-expand-C++ body params)))
 
 (defun org-babel-execute:D (body params)
   "Execute a block of D code with org-babel.
 This function is called by `org-babel-execute-src-block'."
   (let ((org-babel-c-variant 'd)) (org-babel-C-execute body params)))
 
-;; (defun org-babel-expand-body:D (body params) ;; unused
-;;  "Expand a block of D code with org-babel according to it's
-;;header arguments (calls `org-babel-C-expand')."
-;;  (let ((org-babel-c-variant 'd)) (org-babel-C-expand body params)))
+(defun org-babel-expand-body:D (body params)
+  "Expand a block of D code with org-babel according to it's
+header arguments."
+  (let ((org-babel-c-variant 'd)) (org-babel-C-expand-D body params)))
 
 (defun org-babel-execute:C (body params)
   "Execute a block of C code with org-babel.
 This function is called by `org-babel-execute-src-block'."
   (let ((org-babel-c-variant 'c)) (org-babel-C-execute body params)))
 
-;; (defun org-babel-expand-body:c (body params) ;; unused
-;;  "Expand a block of C code with org-babel according to it's
-;;header arguments (calls `org-babel-C-expand')."
-;;  (let ((org-babel-c-variant 'c)) (org-babel-C-expand body params)))
+(defun org-babel-expand-body:C (body params)
+  "Expand a block of C code with org-babel according to it's
+header arguments."
+  (let ((org-babel-c-variant 'c)) (org-babel-C-expand-C body params)))
 
 (defun org-babel-C-execute (body params)
   "This function should only be called by `org-babel-execute:C'
 or `org-babel-execute:C++' or `org-babel-execute:D'."
   (let* ((tmp-src-file (org-babel-temp-file
 			"C-src-"
-			(cond
-			 ((equal org-babel-c-variant 'c  ) ".c"  )
-			 ((equal org-babel-c-variant 'cpp) ".cpp")
-			 ((equal org-babel-c-variant 'd  ) ".d"  ))))
+			(case org-babel-c-variant
+			 (c   ".c"  )
+			 (cpp ".cpp")
+			 (d   ".d"  ))))
 	 (tmp-bin-file (org-babel-temp-file "C-bin-" org-babel-exeext)) ;; not used for D
 	 (cmdline (cdr (assoc :cmdline params)))
 	 (cmdline (if cmdline (concat " " cmdline) ""))
@@ -113,43 +111,47 @@ or `org-babel-execute:C++' or `org-babel-execute:D'."
 	 (flags (mapconcat 'identity
 			   (if (listp flags) flags (list flags)) " "))
 	 (full-body
-	  (cond ((equal org-babel-c-variant 'c  ) (org-babel-C-expand-C   body params))
-		((equal org-babel-c-variant 'cpp) (org-babel-C-expand-C++ body params))
-		((equal org-babel-c-variant 'd  ) (org-babel-C-expand-D   body params)))))
+	  (case org-babel-c-variant
+	    (c   (org-babel-C-expand-C   body params))
+	    (cpp (org-babel-C-expand-C++ body params))
+	    (d   (org-babel-C-expand-D   body params)))))
     (with-temp-file tmp-src-file (insert full-body))
-    (if (memq org-babel-c-variant '(c cpp)) ;; no separate compilation for D
-	(org-babel-eval
-	 (format "%s -o %s %s %s"
-		 (cond
-		  ((equal org-babel-c-variant 'c  ) org-babel-C-compiler)
-		  ((equal org-babel-c-variant 'cpp) org-babel-C++-compiler))
-		 (org-babel-process-file-name tmp-bin-file)
-		 flags
-		 (org-babel-process-file-name tmp-src-file)) ""))
+    (case org-babel-c-variant
+      ((c cpp)
+       (org-babel-eval
+	(format "%s -o %s %s %s"
+		(case org-babel-c-variant
+		 (c   org-babel-C-compiler)
+		 (cpp org-babel-C++-compiler))
+		(org-babel-process-file-name tmp-bin-file)
+		flags
+		(org-babel-process-file-name tmp-src-file)) ""))
+      (d nil)) ;; no separate compilation for D
     (let ((results
-	   (org-babel-trim
-	    (org-remove-indentation
-	     (org-babel-eval
-	      (cond ((memq org-babel-c-variant '(c cpp))
-		     (concat tmp-bin-file cmdline))
-		    ((equal org-babel-c-variant 'd)
-		     (format "%s %s %s %s"
-			     org-babel-D-compiler
-			     flags
-			     (org-babel-process-file-name tmp-src-file)
-			     cmdline)))
-	      "")))))
-      (org-babel-reassemble-table
-       (org-babel-result-cond (cdr (assoc :result-params params))
-	 (org-babel-read results t)
-	 (let ((tmp-file (org-babel-temp-file "c-")))
-	   (with-temp-file tmp-file (insert results))
-	   (org-babel-import-elisp-from-file tmp-file)))
-       (org-babel-pick-name
-	(cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
-       (org-babel-pick-name
-	(cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))
-    ))
+	   (org-babel-eval
+	    (case org-babel-c-variant
+	      ((c cpp)
+	       (concat tmp-bin-file cmdline))
+	      (d
+	       (format "%s %s %s %s"
+		       org-babel-D-compiler
+		       flags
+		       (org-babel-process-file-name tmp-src-file)
+		       cmdline)))
+	    "")))
+      (when results
+	(setq results (org-babel-trim (org-remove-indentation results)))
+	(org-babel-reassemble-table
+	 (org-babel-result-cond (cdr (assoc :result-params params))
+	   (org-babel-read results t)
+	   (let ((tmp-file (org-babel-temp-file "c-")))
+	     (with-temp-file tmp-file (insert results))
+	     (org-babel-import-elisp-from-file tmp-file)))
+	 (org-babel-pick-name
+	  (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
+	 (org-babel-pick-name
+	  (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))
+      )))
 
 (defun org-babel-C-expand-C++ (body params)
   "Expand a block of C or C++ code with org-babel according to
@@ -160,24 +162,34 @@ it's header arguments."
   "Expand a block of C or C++ code with org-babel according to
 it's header arguments."
   (let ((vars (mapcar #'cdr (org-babel-get-header params :var)))
+	(colnames (cdar (org-babel-get-header params :colname-names)))
 	(main-p (not (string= (cdr (assoc :main params)) "no")))
 	(includes (or (cdr (assoc :includes params))
 		      (org-babel-read (org-entry-get nil "includes" t))))
 	(defines (org-babel-read
 		  (or (cdr (assoc :defines params))
 		      (org-babel-read (org-entry-get nil "defines" t))))))
+    (unless (listp includes) (setq includes (list includes)))
+    (setq includes (append includes '("<string.h>" "<stdio.h>" "<stdlib.h>")))
     (mapconcat 'identity
 	       (list
 		;; includes
 		(mapconcat
 		 (lambda (inc) (format "#include %s" inc))
-		 (if (listp includes) includes (list includes)) "\n")
+		 includes "\n")
 		;; defines
 		(mapconcat
 		 (lambda (inc) (format "#define %s" inc))
 		 (if (listp defines) defines (list defines)) "\n")
 		;; variables
 		(mapconcat 'org-babel-C-var-to-C vars "\n")
+		;; table sizes
+		(mapconcat 'org-babel-C-table-sizes-to-C vars "\n")
+		;; tables headers utility
+		(when colnames
+		  (org-babel-C-utility-header-to-C))
+		;; tables headers
+		(mapconcat 'org-babel-C-header-to-C colnames "\n")
 		;; body
 		(if main-p
 		    (org-babel-C-ensure-main-wrap body)
@@ -187,18 +199,28 @@ it's header arguments."
   "Expand a block of D code with org-babel according to
 it's header arguments."
   (let ((vars (mapcar #'cdr (org-babel-get-header params :var)))
+	(colnames (cdar (org-babel-get-header params :colname-names)))
 	(main-p (not (string= (cdr (assoc :main params)) "no")))
 	(imports (or (cdr (assoc :imports params))
 		     (org-babel-read (org-entry-get nil "imports" t)))))
+    (unless (listp imports) (setq imports (list imports)))
+    (setq imports (append imports '("std.stdio" "std.conv")))
     (mapconcat 'identity
 	       (list
 		"module mmm;"
 		;; imports
 		(mapconcat
 		 (lambda (inc) (format "import %s;" inc))
-		 (if (listp imports) imports (list imports)) "\n")
+		 imports "\n")
 		;; variables
 		(mapconcat 'org-babel-C-var-to-C vars "\n")
+		;; table sizes
+		(mapconcat 'org-babel-C-table-sizes-to-C vars "\n")
+		;; tables headers utility
+		(when colnames
+		  (org-babel-C-utility-header-to-C))
+		;; tables headers
+		(mapconcat 'org-babel-C-header-to-C colnames "\n")
 		;; body
 		(if main-p
 		    (org-babel-C-ensure-main-wrap body)
@@ -233,46 +255,68 @@ support for sessions"
   "Determine the type of VAL.
 Return a list (TYPE-NAME FORMAT).  TYPE-NAME should be the name of the type.
 FORMAT can be either a format string or a function which is called with VAL."
-  (cond
-   ((integerp val) '("int" "%d"))
-   ((floatp val) '("double" "%f"))
-   ((or (listp val) (vectorp val))
-    (lexical-let ((type (org-babel-C-val-to-C-list-type val)))
-      (list (car type)
-	    (lambda (val)
-	      (cons
-	       (format "[%d]%s"
-		       (length val)
-		       (car (org-babel-C-format-val type (elt val 0))))
-	       (concat (if (equal org-babel-c-variant 'd) "[ " "{ ")
-		       (mapconcat (lambda (v)
-				    (cdr (org-babel-C-format-val type v)))
-				  val
-				  ", ")
-		       (if (equal org-babel-c-variant 'd) " ]" " }")))))))
-   (t ;; treat unknown types as string
-    (list
-     (if (equal org-babel-c-variant 'd) "string" "const char*")
-     "\"%s\""))))
+  (let* ((basetype (org-babel-C-val-to-base-type val))
+	 (type
+	  (case basetype
+	    (integerp '("int" "%d"))
+	    (floatp '("double" "%f"))
+	    (stringp
+	     (list
+	      (if (equal org-babel-c-variant 'd) "string" "const char*")
+	      "\"%s\""))
+	    (t (error "unknown type %S" type)))))
+    (cond
+     ((integerp val) type) ;; an integer declared in the #+begin_src line
+     ((floatp val) type) ;; a numeric declared in the #+begin_src line
+     ((and (listp val) (listp (car val))) ;; a table
+      `(,(car type)
+	(lambda (val)
+	  (cons
+	   (format "[%d][%d]" (length val) (length (car val)))
+	   (concat
+	    (if (equal org-babel-c-variant 'd) "[\n" "{\n")
+	    (mapconcat
+	     (lambda (v)
+	       (concat
+		(if (equal org-babel-c-variant 'd) " [" " {")
+		(mapconcat (lambda (w) (format ,(cadr type) w)) v ",")
+		(if (equal org-babel-c-variant 'd) "]" "}")))
+	     val
+	     ",\n")
+	    (if (equal org-babel-c-variant 'd) "\n]" "\n}"))))))
+     ((or (listp val) (vectorp val)) ;; a list declared in the #+begin_src line
+      `(,(car type)
+	(lambda (val)
+	  (cons
+	   (format "[%d]" (length val))
+	   (concat
+	    (if (equal org-babel-c-variant 'd) "[" "{")
+	    (mapconcat (lambda (v) (format ,(cadr type) v)) val ",")
+	    (if (equal org-babel-c-variant 'd) "]" "}"))))))
+     (t ;; treat unknown types as string
+      type))))
 
-(defun org-babel-C-val-to-C-list-type (val)
-  "Determine the C array type of a VAL."
-  (let (type)
-    (mapc
-     #'(lambda (i)
-	 (let* ((tmp-type (org-babel-C-val-to-C-type i))
-		(type-name (car type))
-		(tmp-type-name (car tmp-type)))
-	   (when (and type (not (string= type-name tmp-type-name)))
-	     (if (and (member type-name '("int" "double" "int32_t"))
-		      (member tmp-type-name '("int" "double" "int32_t")))
-		 (setq tmp-type '("double" "%f"))
-	       (error "Only homogeneous lists are supported by C.  You can not mix %s and %s"
-		      type-name
-		      tmp-type-name)))
-	   (setq type tmp-type)))
-     val)
-    type))
+(defun org-babel-C-val-to-base-type (val)
+  "Determine the base type of VAL which may be
+'integerp if all base values are integers
+'floatp if all base values are either floating points or integers
+'stringp otherwise."
+  (cond
+   ((integerp val) 'integerp)
+   ((floatp val) 'floatp)
+   ((or (listp val) (vectorp val))
+    (let ((type nil))
+      (mapc (lambda (v)
+	      (case (org-babel-C-val-to-base-type v)
+		(stringp (setq type 'stringp))
+		(floatp
+		 (if (or (not type) (eq type 'integerp))
+		     (setq type 'floatp)))
+		(integerp
+		 (unless type (setq type 'integerp)))))
+	    val)
+      type))
+   (t 'stringp)))
 
 (defun org-babel-C-var-to-C (pair)
   "Convert an elisp val into a string of C code specifying a var
@@ -294,6 +338,68 @@ of the same value."
 	      var
 	      suffix
 	      data))))
+
+(defun org-babel-C-table-sizes-to-C (pair)
+  "Create constants of table dimensions, if PAIR is a table."
+  (when (listp (cdr pair))
+    (cond
+     ((listp (cadr pair)) ;; a table
+      (concat
+       (format "const int %s_rows = %d;" (car pair) (length (cdr pair)))
+       "\n"
+       (format "const int %s_cols = %d;" (car pair) (length (cadr pair)))))
+     (t ;; a list declared in the #+begin_src line
+      (format "const int %s_cols = %d;" (car pair) (length (cdr pair)))))))
+
+(defun org-babel-C-utility-header-to-C ()
+  "Generate a utility function to convert a column name
+into a column number."
+  (case org-babel-c-variant
+    ((c cpp)
+     "int get_column_num (int nbcols, const char** header, const char* column)
+{
+  int c;
+  for (c=0; c<nbcols; c++)
+    if (strcmp(header[c],column)==0)
+      return c;
+  return -1;
+}
+"
+     )
+    (d
+     "int get_column_num (string[] header, string column)
+{
+  foreach (c, h; header)
+    if (h==column)
+      return to!int(c);
+  return -1;
+}
+"
+     )))
+
+(defun org-babel-C-header-to-C (head)
+  "Convert an elisp list of header table into a C or D vector
+specifying a variable with the name of the table."
+  (let ((table (car head))
+        (headers (cdr head)))
+    (concat
+     (format
+      (case org-babel-c-variant
+	((c cpp) "const char* %s_header[%d] = {%s};")
+	(d       "string %s_header[%d] = [%s];"))
+      table
+      (length headers)
+      (mapconcat (lambda (h) (format "%S" h)) headers ","))
+     "\n"
+     (case org-babel-c-variant
+       ((c cpp)
+	(format
+	 "const char* %s_h (int row, const char* col) { return %s[row][get_column_num(%d,%s_header,col)]; }"
+	 table table (length headers) table))
+       (d
+	(format
+	 "string %s_h (ulong row, string col) { return %s[row][get_column_num(%s_header,col)]; }"
+	 table table table))))))
 
 (provide 'ob-C)
 
