@@ -7573,7 +7573,7 @@ on how to modify this behavior).
 
 With one universal prefix argument: If point is within a list,
 insert a heading instead of a list item.  Otherwise, set the
-value of `org-insert-heading-respect-content' to `t' for the
+value of `org-insert-heading-respect-content' to t for the
 duration of the command.
 
 With two universal prefix arguments, insert the heading at the
@@ -7602,12 +7602,16 @@ command."
 	       (or arg (not itemp))))
       ;; At beginning of buffer or so high up that only a heading
       ;; makes sense.
-      (when (and (org-before-first-heading-p) (not (bolp)))
-	(re-search-forward org-outline-regexp-bol)
-	(beginning-of-line 0))
-      (insert
-       (if (or (bobp) (org-previous-line-empty-p)) "" "\n")
-       (if (org-in-src-block-p) ",* " "* "))
+      (cond ((bolp) (insert "* "))
+	    ((not respect-content)
+	     (unless may-split (end-of-line))
+	     (insert "\n* "))
+	    ((re-search-forward org-outline-regexp-bol nil t)
+	     (beginning-of-line)
+	     (insert "* \n")
+	     (backward-char))
+	    (t (goto-char (point-max))
+	       (insert "\n* ")))
       (run-hooks 'org-insert-heading-hook))
 
      ((and itemp (not (member arg '((4) (16)))))
