@@ -7689,12 +7689,22 @@ When NEXT is non-nil, check the next line instead."
 	   (looking-at "[ \t]*$")))))
 
 (defun org-insert-heading (&optional arg invisible-ok)
-  "Insert a new heading or item with same depth at point.
+  "Insert a new heading or an item with the same depth at point.
 
-If point is in a plain list and ARG is nil, add a new list item.
+If point is at the beginning of a heading or a list item, insert
+a new heading or a new item above the current one.  If point is
+at the beginning of a normal line, turn the line into a heading.
 
-With one universal prefix argument, insert a heading even when
-the point is within a list.
+If point is in the middle of a headline or a list item, split the
+headline or the item and create a new headline/item with the text
+in the current line after point \(see `org-M-RET-may-split-line'
+on how to modify this behavior).
+
+With one universal prefirx argument, set the user option
+`org-insert-heading-respect-content' to t for the duration of
+the command.  This modifies the behavior described above in this
+ways: on list items and at the beginning of normal lines, force
+the insertion of a heading after the current subtree.
 
 With two universal prefix arguments, insert the heading at the
 end of the grandparent subtree.  For example, if point is within
@@ -7731,7 +7741,7 @@ command."
 	       (or arg (not itemp))))
       ;; At beginning of buffer or so high up that only a heading
       ;; makes sense.
-      (cond ((bolp) (insert "* "))
+      (cond ((and (bolp) (not respect-content)) (insert "* "))
 	    ((not respect-content)
 	     (unless may-split (end-of-line))
 	     (insert "\n* "))
@@ -7801,8 +7811,7 @@ command."
 
 	  ;; If we insert after content, move there and clean up whitespace
 	  (when (and respect-content
-		     (not (org-looking-at-p org-outline-regexp-bol))
-		     (not (bolp)))
+		     (not (org-looking-at-p org-outline-regexp-bol)))
 	    (if (not (org-before-first-heading-p))
 		(org-end-of-subtree nil t)
 	      (re-search-forward org-outline-regexp-bol)
@@ -7937,17 +7946,15 @@ This is a list with the following elements:
   (org-move-subtree-down)
   (end-of-line 1))
 
-(defun org-insert-heading-respect-content (&optional arg invisible-ok)
+(defun org-insert-heading-respect-content (&optional invisible-ok)
   "Insert heading with `org-insert-heading-respect-content' set to t."
-  (interactive "P")
-  (let ((org-insert-heading-respect-content t))
-    (org-insert-heading '(4) invisible-ok)))
+  (interactive)
+  (org-insert-heading '(4) invisible-ok))
 
 (defun org-insert-todo-heading-respect-content (&optional force-state)
   "Insert TODO heading with `org-insert-heading-respect-content' set to t."
-  (interactive "P")
-  (let ((org-insert-heading-respect-content t))
-    (org-insert-todo-heading force-state '(4))))
+  (interactive)
+  (org-insert-todo-heading force-state '(4)))
 
 (defun org-insert-todo-heading (arg &optional force-heading)
   "Insert a new heading with the same level and TODO state as current heading.
