@@ -22727,63 +22727,62 @@ matches in paragraphs or comments, use it."
 	      ((looking-at message-cite-prefix-regexp)
 	       (throw 'exit (match-string-no-properties 0)))
 	      ((looking-at org-outline-regexp)
-	       (throw 'exit (make-string (length (match-string 0)) ? ))))))
+	       (throw 'exit (make-string (length (match-string 0)) ?\s))))))
     (org-with-wide-buffer
-     (let* ((p (line-beginning-position))
-	    (element (save-excursion
-		       (beginning-of-line)
-		       (or (ignore-errors (org-element-at-point))
-			   (user-error "An element cannot be parsed line %d"
-				       (line-number-at-pos (point))))))
-	    (type (org-element-type element))
-	    (post-affiliated (org-element-property :post-affiliated element)))
-       (unless (and post-affiliated (< p post-affiliated))
-	 (case type
-	   (comment
-	    (save-excursion
-	      (beginning-of-line)
-	      (looking-at "[ \t]*")
-	      (concat (match-string 0) "# ")))
-	   (footnote-definition "")
-	   ((item plain-list)
-	    (make-string (org-list-item-body-column
-			  (or post-affiliated
-			      (org-element-property :begin element)))
-			 ? ))
-	   (paragraph
-	    ;; Fill prefix is usually the same as the current line,
-	    ;; unless the paragraph is at the beginning of an item.
-	    (let ((parent (org-element-property :parent element)))
+     (unless (org-at-heading-p)
+       (let* ((p (line-beginning-position))
+	      (element (save-excursion
+			 (beginning-of-line)
+			 (org-element-at-point)))
+	      (type (org-element-type element))
+	      (post-affiliated (org-element-property :post-affiliated element)))
+	 (unless (and post-affiliated (< p post-affiliated))
+	   (case type
+	     (comment
 	      (save-excursion
 		(beginning-of-line)
-		(cond ((eq (org-element-type parent) 'item)
-		       (make-string (org-list-item-body-column
-				     (org-element-property :begin parent))
-				    ? ))
-		      ((and adaptive-fill-regexp
-			    ;; Locally disable
-			    ;; `adaptive-fill-function' to let
-			    ;; `fill-context-prefix' handle
-			    ;; `adaptive-fill-regexp' variable.
-			    (let (adaptive-fill-function)
-			      (fill-context-prefix
-			       post-affiliated
-			       (org-element-property :end element)))))
-		      ((looking-at "[ \t]+") (match-string 0))
-		      (t  "")))))
-	   (comment-block
-	    ;; Only fill contents if P is within block boundaries.
-	    (let* ((cbeg (save-excursion (goto-char post-affiliated)
-					 (forward-line)
-					 (point)))
-		   (cend (save-excursion
-			   (goto-char (org-element-property :end element))
-			   (skip-chars-backward " \r\t\n")
-			   (line-beginning-position))))
-	      (when (and (>= p cbeg) (< p cend))
-		(if (save-excursion (beginning-of-line) (looking-at "[ \t]+"))
-		    (match-string 0)
-		  ""))))))))))
+		(looking-at "[ \t]*")
+		(concat (match-string 0) "# ")))
+	     (footnote-definition "")
+	     ((item plain-list)
+	      (make-string (org-list-item-body-column
+			    (or post-affiliated
+				(org-element-property :begin element)))
+			   ?\s))
+	     (paragraph
+	      ;; Fill prefix is usually the same as the current line,
+	      ;; unless the paragraph is at the beginning of an item.
+	      (let ((parent (org-element-property :parent element)))
+		(save-excursion
+		  (beginning-of-line)
+		  (cond ((eq (org-element-type parent) 'item)
+			 (make-string (org-list-item-body-column
+				       (org-element-property :begin parent))
+				      ?\s))
+			((and adaptive-fill-regexp
+			      ;; Locally disable
+			      ;; `adaptive-fill-function' to let
+			      ;; `fill-context-prefix' handle
+			      ;; `adaptive-fill-regexp' variable.
+			      (let (adaptive-fill-function)
+				(fill-context-prefix
+				 post-affiliated
+				 (org-element-property :end element)))))
+			((looking-at "[ \t]+") (match-string 0))
+			(t  "")))))
+	     (comment-block
+	      ;; Only fill contents if P is within block boundaries.
+	      (let* ((cbeg (save-excursion (goto-char post-affiliated)
+					   (forward-line)
+					   (point)))
+		     (cend (save-excursion
+			     (goto-char (org-element-property :end element))
+			     (skip-chars-backward " \r\t\n")
+			     (line-beginning-position))))
+		(when (and (>= p cbeg) (< p cend))
+		  (if (save-excursion (beginning-of-line) (looking-at "[ \t]+"))
+		      (match-string 0)
+		    "")))))))))))
 
 (declare-function message-goto-body "message" ())
 (defvar message-cite-prefix-regexp)	; From message.el
