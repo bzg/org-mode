@@ -187,7 +187,9 @@ may make them unreachable."
 			   (point)))))
 	      (case type
 		(inline-src-block
-		 (let* ((info (org-babel-parse-inline-src-block-match))
+		 (let* ((head (match-beginning 0))
+			(info (append (org-babel-parse-inline-src-block-match)
+				      (list nil nil head)))
 			(params (nth 2 info)))
 		   (setf (nth 1 info)
 			 (if (and (cdr (assoc :noweb params))
