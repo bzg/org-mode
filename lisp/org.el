@@ -5575,8 +5575,7 @@ The following commands are available:
 		    :parents (list text-mode-abbrev-table)))
 
 (defsubst org-fix-ellipsis-at-bol ()
-  (save-excursion
-    (set-window-start (selected-window) (point-min))))
+  (save-excursion (set-window-start (selected-window) (window-start))))
 
 (defun org-find-invisible-foreground ()
   (let ((candidates (remove
