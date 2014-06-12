@@ -2160,9 +2160,9 @@ The following commands are available:
 		nil t)
   (unless org-agenda-keep-modes
     (setq org-agenda-follow-mode org-agenda-start-with-follow-mode
-	  org-agenda-entry-text-mode org-agenda-start-with-entry-text-mode
-	  org-agenda-clockreport-mode org-agenda-start-with-clockreport-mode
-	  org-agenda-show-log org-agenda-start-with-log-mode))
+	  org-agenda-entry-text-mode org-agenda-start-with-entry-text-mode))
+  (setq org-agenda-show-log org-agenda-start-with-log-mode)
+  (setq org-agenda-clockreport-mode org-agenda-start-with-clockreport-mode)
   (add-to-invisibility-spec '(org-filtered))
   (add-to-invisibility-spec '(org-link))
   (easy-menu-change
@@ -3531,7 +3531,6 @@ removed from the entry content.  Currently only `planning' is allowed here."
 (defvar org-agenda-category-filter nil)
 (defvar org-agenda-regexp-filter nil)
 (defvar org-agenda-top-headline-filter nil)
-(defvar org-agenda-tag-filter-while-redo nil)
 (defvar org-agenda-tag-filter-preset nil
   "A preset of the tags filter used for secondary agenda filtering.
 This must be a list of strings, each string must be a single tag preceded
@@ -4309,14 +4308,6 @@ items if they have an hour specification like [h]h:mm."
 	  (setq p (plist-put p :tstart clocktable-start))
 	  (setq p (plist-put p :tend clocktable-end))
 	  (setq p (plist-put p :scope 'agenda))
-	  (when (and (eq org-agenda-clockreport-mode 'with-filter)
-		     (setq filter (or org-agenda-tag-filter-while-redo
-				      (get 'org-agenda-tag-filter :preset-filter))))
-	    (setq p (plist-put p :tags (mapconcat (lambda (x)
-						    (if (string-match "[<>=]" x)
-							""
-						      x))
-						  filter ""))))
 	  (setq tbl (apply 'org-clock-get-clocktable p))
 	  (insert tbl)))
       (goto-char (point-min))
@@ -7268,7 +7259,6 @@ in the agenda."
 	 (cat-preset (get 'org-agenda-category-filter :preset-filter))
 	 (re-filter org-agenda-regexp-filter)
 	 (re-preset (get 'org-agenda-regexp-filter :preset-filter))
-	 (org-agenda-tag-filter-while-redo (or tag-filter tag-preset))
 	 (cols org-agenda-columns-active)
 	 (line (org-current-line))
 	 (window-line (- line (org-current-line (window-start))))
@@ -7491,8 +7481,7 @@ to switch to narrowing."
       (org-agenda-filter-apply org-agenda-tag-filter 'tag)
       (setq maybe-refresh t))
      (t (error "Invalid tag selection character %c" char)))
-    (when (and maybe-refresh
-	       (eq org-agenda-clockreport-mode 'with-filter))
+    (when maybe-refresh
       (org-agenda-redo))))
 
 (defun org-agenda-get-represented-tags ()
@@ -8082,15 +8071,12 @@ so that the date SD will be in that range."
 	       (format " (maximum number of lines is %d)"
 		       (if (integerp arg) arg org-agenda-entry-text-maxlines))))))
 
-(defun org-agenda-clockreport-mode (&optional with-filter)
-  "Toggle clocktable mode in an agenda buffer.
-With prefix arg WITH-FILTER, make the clocktable respect the current
-agenda filter."
-  (interactive "P")
+(defun org-agenda-clockreport-mode ()
+  "Toggle clocktable mode in an agenda buffer."
+  (interactive)
   (org-agenda-check-type t 'agenda)
-  (if with-filter
-      (setq org-agenda-clockreport-mode 'with-filter)
-    (setq org-agenda-clockreport-mode (not org-agenda-clockreport-mode)))
+  (setq org-agenda-clockreport-mode (not org-agenda-clockreport-mode))
+  (setq org-agenda-start-with-clockreport-mode org-agenda-clockreport-mode)
   (org-agenda-set-mode-name)
   (org-agenda-redo)
   (message "Clocktable mode is %s"
@@ -8111,6 +8097,7 @@ With a double `C-u' prefix arg, show *only* log items, nothing else."
 	      nil 'clockcheck))
 	 (special '(closed clock state))
 	 (t (not org-agenda-show-log))))
+  (setq org-agenda-start-with-log-mode org-agenda-show-log)
   (org-agenda-set-mode-name)
   (org-agenda-redo)
   (message "Log mode is %s"
@@ -8228,10 +8215,7 @@ When called with a prefix argument, include all archive files as well."
 		      " Archives"
 		    (format " :%s:" org-archive-tag))
 		"")
-	      (if org-agenda-clockreport-mode
-		  (if (eq org-agenda-clockreport-mode 'with-filter)
-		      " Clock{}" " Clock")
-		"")))
+	      (if org-agenda-clockreport-mode " Clock" "")))
   (force-mode-line-update))
 
 (define-obsolete-function-alias
