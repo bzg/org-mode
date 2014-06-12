@@ -5484,8 +5484,7 @@ The following commands are available:
 (put 'org-mode 'flyspell-mode-predicate 'org-mode-flyspell-verify)
 
 (defsubst org-fix-ellipsis-at-bol ()
-  (save-excursion
-    (set-window-start (selected-window) (point-min))))
+  (save-excursion (set-window-start (selected-window) (window-start))))
 
 (defun org-find-invisible-foreground ()
   (let ((candidates (remove
