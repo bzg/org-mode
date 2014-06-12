@@ -570,11 +570,17 @@ block.  Otherwise the output is marked as literal by inserting
 colons at the starts of the lines.  This variable only takes
 effect if the :results output option is in effect.")
 
+(defvar org-babel-noweb-error-all-langs nil
+  "Raise errors when noweb references don't resolve.
+Also see `org-babel-noweb-error-langs' to control noweb errors on
+a language by language bases.")
+
 (defvar org-babel-noweb-error-langs nil
   "Languages for which Babel will raise literate programming errors.
 List of languages for which errors should be raised when the
 source code block satisfying a noweb reference in this language
-can not be resolved.")
+can not be resolved.  Also see `org-babel-noweb-error-all-langs'
+to raise errors for all languages.")
 
 (defvar org-babel-hash-show 4
   "Number of initial characters to show of a hidden results hash.")
@@ -2645,7 +2651,8 @@ block but are passed literally to the \"example-block\"."
                     (and expansion
                          (mapconcat #'identity (nreverse (cdr expansion)) "")))
                   ;; Possibly raise an error if named block doesn't exist.
-                  (if (member lang org-babel-noweb-error-langs)
+                  (if (or org-babel-noweb-error-all-langs
+			  (member lang org-babel-noweb-error-langs))
                       (error "%s" (concat
                                    (org-babel-noweb-wrap source-name)
                                    "could not be resolved (see "
