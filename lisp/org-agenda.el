@@ -8599,7 +8599,8 @@ if it was hidden in the outline."
   (interactive "p")
   (let ((win (selected-window)))
     (org-agenda-goto t)
-    (org-recenter-heading 1)
+    (org-back-to-heading)
+    (set-window-start (selected-window) (point-at-bol))
     (cond
      ((= more 0)
       (hide-subtree)
@@ -8637,11 +8638,6 @@ if it was hidden in the outline."
       (show-subtree)
       (message "Remote: SUBTREE AND ALL DRAWERS")))
     (select-window win)))
-
-(defun org-recenter-heading (n)
-  (save-excursion
-    (org-back-to-heading)
-    (recenter n)))
 
 (defvar org-agenda-cycle-counter nil)
 (defun org-agenda-cycle-show (&optional n)
