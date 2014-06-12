@@ -5575,7 +5575,8 @@ The following commands are available:
 		    :parents (list text-mode-abbrev-table)))
 
 (defsubst org-fix-ellipsis-at-bol ()
-  (save-excursion (goto-char (window-start)) (recenter 0)))
+  (save-excursion
+    (set-window-start (selected-window) (point-min))))
 
 (defun org-find-invisible-foreground ()
   (let ((candidates (remove
@@ -7245,13 +7246,11 @@ show that drawer instead."
   (pos-visible-in-window-p
    (save-excursion (org-end-of-subtree t) (point))))
 
-(defun org-first-headline-recenter (&optional N)
-  "Move cursor to the first headline and recenter the headline.
-Optional argument N means put the headline into the Nth line of the window."
+(defun org-first-headline-recenter ()
+  "Move cursor to the first headline and recenter the headline."
   (goto-char (point-min))
   (when (re-search-forward (concat "^\\(" org-outline-regexp "\\)") nil t)
-    (beginning-of-line)
-    (recenter (prefix-numeric-value N))))
+    (set-window-start (selected-window) (point-at-bol))))
 
 ;;; Saving and restoring visibility
 
