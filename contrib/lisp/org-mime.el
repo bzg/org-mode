@@ -163,10 +163,13 @@ and images in a multipart/related part."
     ('semi (concat
             "--" "<<alternative>>-{\n"
             "--" "[[text/plain]]\n" plain
-	    (when images (concat "--" "<<alternative>>-{\n"))
-            "--" "[[text/html]]\n"  html
-	    images
-	    (when images (concat "--" "}-<<alternative>>\n"))
+	    (if (and images (> (length images) 0))
+		(concat "--" "<<related>>-{\n"
+			"--" "[[text/html]]\n"  html
+			images
+			"--" "}-<<related>>\n")
+	      (concat "--" "[[text/html]]\n"  html
+		      images))
             "--" "}-<<alternative>>\n"))
     ('vm "?")))
 
