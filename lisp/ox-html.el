@@ -2414,7 +2414,13 @@ CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((org-lang (org-element-property :language inline-src-block))
 	 (code (org-element-property :value inline-src-block)))
-    (error "Cannot export inline src block")))
+    (let ((lang (org-element-property :language inline-src-block))
+	  (code (org-html-format-code inline-src-block info))
+	  (label (let ((lbl (org-element-property :name inline-src-block)))
+		   (if (not lbl) ""
+		       (format " id=\"%s\""
+			       (org-export-solidify-link-text lbl))))))
+      (format "<code class=\"src src-%s\"%s>%s</code>" lang label code))))
 
 ;;;; Inlinetask
 
