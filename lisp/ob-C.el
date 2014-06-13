@@ -264,7 +264,7 @@ FORMAT can be either a format string or a function which is called with VAL."
 	     (list
 	      (if (equal org-babel-c-variant 'd) "string" "const char*")
 	      "\"%s\""))
-	    (t (error "unknown type %S" type)))))
+	    (t (error "unknown type %S" basetype)))))
     (cond
      ((integerp val) type) ;; an integer declared in the #+begin_src line
      ((floatp val) type) ;; a numeric declared in the #+begin_src line
