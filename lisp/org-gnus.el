@@ -36,11 +36,13 @@
 (eval-when-compile (require 'gnus-sum))
 
 ;; Declare external functions and variables
+
 (declare-function message-fetch-field "message" (header &optional not-all))
 (declare-function message-narrow-to-head-1 "message" nil)
 (declare-function nnimap-group-overview-filename "nnimap" (group server))
-;; The following line suppresses a compiler warning stemming from gnus-sum.el
 (declare-function gnus-summary-last-subject "gnus-sum" nil)
+(declare-function nnvirtual-map-article "nnvirtual" (article))
+
 ;; Customization variables
 
 (org-defvaralias 'org-usenet-links-prefer-google 'org-gnus-prefer-web-links)
