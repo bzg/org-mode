@@ -1051,6 +1051,28 @@ Some other text
   (should
    (org-test-with-temp-text "src_emacs-lisp{(+ 1 1)}"
      (org-element-map (org-element-parse-buffer) 'inline-src-block 'identity)))
+  ;; With switches.
+  (should
+   (org-test-with-temp-text "src_emacs-lisp[:foo bar]{(+ 1 1)}"
+     (org-element-map (org-element-parse-buffer) 'inline-src-block 'identity)))
+  (should
+   (org-test-with-temp-text "src_emacs-lisp[ :foo bar]{(+ 1 1)}"
+     (org-element-map (org-element-parse-buffer) 'inline-src-block 'identity)))
+  ;; Empty switches.
+  (should
+   (org-test-with-temp-text "src_emacs-lisp[]{(+ 1 1)}"
+     (org-element-map (org-element-parse-buffer) 'inline-src-block 'identity)))
+  ;; Invalid syntax.
+  (should-not
+   (org-test-with-temp-text "foosrc_emacs-lisp[]{(+ 1 1)}"
+     (org-element-map (org-element-parse-buffer) 'inline-src-block 'identity)))
+  (should-not
+   (org-test-with-temp-text "src_emacs-lisp[]foo{(+ 1 1)}"
+     (org-element-map (org-element-parse-buffer) 'inline-src-block 'identity)))
+  ;; Invalid language name
+  (should-not
+   (org-test-with-temp-text "src_emacs-\tlisp{(+ 1 1)}"
+     (org-element-map (org-element-parse-buffer) 'inline-src-block 'identity)))
   ;; Test parsing at the beginning of an item.
   (should
    (org-test-with-temp-text "- src_emacs-lisp{(+ 1 1)}"

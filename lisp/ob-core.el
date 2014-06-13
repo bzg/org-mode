@@ -203,9 +203,9 @@ This string must include a \"%s\" which will be replaced by the results."
 (defvar org-babel-inline-src-block-regexp
   (concat
    ;; (1) replacement target (2) lang
-   "\\(?:^\\|[^-[:alnum:]]\\)\\(src_\\([^ \f\t\n\r\v]+\\)"
+   "\\(?:^\\|[^-[:alnum:]]\\)\\(src_\\([^ \f\t\n\r\v[]+\\)"
    ;; (3,4) (unused, headers)
-   "\\(\\|\\[\\(.*?\\)\\]\\)"
+   "\\(\\|\\[[ \t]*\\(.*?\\)\\]\\)"
    ;; (5) body
    "{\\([^\f\n\r\v]+?\\)}\\)")
   "Regexp used to identify inline src-blocks.")

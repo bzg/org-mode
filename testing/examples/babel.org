@@ -200,6 +200,17 @@ Here is one in the middle src_sh{echo 1} of a line.
 Here is one at the end of a line. src_sh{echo 2}
 src_sh{echo 3} Here is one at the beginning of a line.
 
+* exported inline source block
+:PROPERTIES:
+:ID:       cd54fc88-1b6b-45b6-8511-4d8fa7fc8076
+:results:  silent
+:exports:  code
+:END:
+Here is one in the middle src_sh{echo 1} of a line.
+Here is one at the end of a line. src_sh{echo 2}
+src_sh{echo 3} Here is one at the beginning of a line.
+Here is one that is also evaluated: src_sh[:exports both]{echo 4}
+
 * mixed blocks with exports both
   :PROPERTIES:
   :ID:       5daa4d03-e3ea-46b7-b093-62c1b7632df3
@@ -283,6 +294,17 @@ src_sh{echo "One"} block at start of line
  One spaced block in  src_sh{ echo "middle" } of line
 src_sh{echo 2} blocks on the src_emacs-lisp{"same"} line
  Inline block with src_sh[:results silent]{ echo "parameters" }.
+
+* org-babel-get-inline-src-block-matches (with empty args)
+  :PROPERTIES:
+  :results:  silent
+  :ID:       d55dada7-de0e-4340-8061-787cccbedee5
+  :END:
+src_sh[]{echo "One"} block at start of line
+ One spaced block in  src_sh[]{ echo "middle" } of line
+src_sh[]{echo 2} blocks on the src_emacs-lisp[]{"same"} line
+ Inline block with src_sh[:results silent]{ echo "parameters" }.
+
 * exporting a code block with a name
   :PROPERTIES:
   :ID:       b02ddd8a-eeb8-42ab-8664-8a759e6f43d9

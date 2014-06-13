@@ -249,38 +249,49 @@ this is simple"
     (should (= 14 (org-babel-execute-src-block)))))
 
 (ert-deftest test-org-babel/inline-src-blocks ()
-  (org-test-at-id "54cb8dc3-298c-4883-a933-029b3c9d4b18"
-    (macrolet ((at-next (&rest body)
-			`(progn
-			   (move-end-of-line 1)
-			   (re-search-forward org-babel-inline-src-block-regexp nil t)
-			   (goto-char (match-beginning 1))
-			   (save-match-data ,@body))))
-      (at-next (should (equal 1 (org-babel-execute-src-block))))
-      (at-next (should (equal 2 (org-babel-execute-src-block))))
-      (at-next (should (equal 3 (org-babel-execute-src-block)))))))
+  (macrolet ((at-next (&rest body)
+	       `(progn
+		  (move-end-of-line 1)
+		  (re-search-forward org-babel-inline-src-block-regexp nil t)
+		  (goto-char (match-beginning 1))
+		  (save-match-data ,@body))))
+    (org-test-at-id
+     "54cb8dc3-298c-4883-a933-029b3c9d4b18"
+     (at-next (should (equal 1 (org-babel-execute-src-block))))
+     (at-next (should (equal 2 (org-babel-execute-src-block))))
+     (at-next (should (equal 3 (org-babel-execute-src-block)))))
+    (org-test-at-id
+     "cd54fc88-1b6b-45b6-8511-4d8fa7fc8076"
+     (at-next (should (equal 1 (org-babel-execute-src-block))))
+     (at-next (should (equal 2 (org-babel-execute-src-block))))
+     (at-next (should (equal 3 (org-babel-execute-src-block))))
+     (at-next (should (equal 4 (org-babel-execute-src-block)))))))
 
 (ert-deftest test-org-babel/org-babel-get-inline-src-block-matches ()
-  (org-test-at-id "0D0983D4-DE33-400A-8A05-A225A567BC74"
-    (let ((test-point (point)))
-      (should (fboundp 'org-babel-get-inline-src-block-matches))
-      (should (re-search-forward "src_" nil t)) ;; 1
-      (should (org-babel-get-inline-src-block-matches))
-      (should (re-search-forward "}" nil (point-at-bol))) ;; 1
-      (should-not (org-babel-get-inline-src-block-matches))
-      (should (re-search-forward "in" nil t)) ;; 2
-      (should-not (org-babel-get-inline-src-block-matches))
-      (should (re-search-forward "echo" nil t)) ;; 2
-      (should (org-babel-get-inline-src-block-matches))
-      (should (re-search-forward "blocks" nil t)) ;; 3
-      (backward-char 8) ;; 3
-      (should (org-babel-get-inline-src-block-matches))
-      (forward-char 1) ;;3
-      (should-not (org-babel-get-inline-src-block-matches))
-      (should (re-search-forward ":results" nil t)) ;; 4
-      (should (org-babel-get-inline-src-block-matches))
-      (end-of-line)
-      (should-not (org-babel-get-inline-src-block-matches)))))
+  (flet ((test-at-id (id)
+	   (org-test-at-id 
+	    id
+	    (let ((test-point (point)))
+	      (should (fboundp 'org-babel-get-inline-src-block-matches))
+	      (should (re-search-forward "src_" nil t)) ;; 1
+	      (should (org-babel-get-inline-src-block-matches))
+	      (should (re-search-forward "}" nil (point-at-bol))) ;; 1
+	      (should-not (org-babel-get-inline-src-block-matches))
+	      (should (re-search-forward "in" nil t)) ;; 2
+	      (should-not (org-babel-get-inline-src-block-matches))
+	      (should (re-search-forward "echo" nil t)) ;; 2
+	      (should (org-babel-get-inline-src-block-matches))
+	      (should (re-search-forward "blocks" nil t)) ;; 3
+	      (backward-char 8) ;; 3
+	      (should (org-babel-get-inline-src-block-matches))
+	      (forward-char 1) ;;3
+	      (should-not (org-babel-get-inline-src-block-matches))
+	      (should (re-search-forward ":results" nil t)) ;; 4
+	      (should (org-babel-get-inline-src-block-matches))
+	      (end-of-line)
+	      (should-not (org-babel-get-inline-src-block-matches))))))
+    (test-at-id "0D0983D4-DE33-400A-8A05-A225A567BC74")
+    (test-at-id "d55dada7-de0e-4340-8061-787cccbedee5")))
 
 (ert-deftest test-org-babel/inline-src_blk-default-results-replace-line-1 ()
   (let ((test-line "src_sh{echo 1}"))
