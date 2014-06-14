@@ -9,6 +9,7 @@
 ;;          Christopher Suckling <suckling at gmail dot com>
 ;;          Daniil Frumin <difrumin@gmail.com>
 ;;          Alan Schmitt <alan.schmitt@polytechnique.org>
+;;          Mike McLean <mike.mclean@pobox.com>
 ;;
 ;;
 ;; Version: 1.1
@@ -58,6 +59,7 @@
 ;; Together.app - Grab links to the selected items in the library list
 ;; Skim.app - Grab a link to the selected page in the topmost pdf document
 ;; Microsoft Outlook.app - Grab a link to the selected message in the message list
+;; DEVONthink Pro Office.app - Grab a link to the selected DEVONthink item(s); open DEVONthink item by reference
 ;;
 ;;
 ;; Installation:
@@ -107,6 +109,12 @@ applications and inserting them in org documents"
 (defcustom org-mac-grab-Outlook-app-p t
   "Enable menu option [o]utlook to grab links from Microsoft Outlook.app"
   :tag "Grab Microsoft Outlook.app links"
+  :group 'org-mac-link
+  :type 'boolean)
+
+(defcustom org-mac-grab-devonthink-app-p t
+  "Enable menu option [d]EVONthink to grab links from DEVONthink Pro Office.app"
+  :tag "Grab DEVONthink Pro Office.app links"
   :group 'org-mac-link
   :type 'boolean)
 
@@ -192,6 +200,7 @@ applications and inserting them in org documents"
   (interactive)
   (let* ((descriptors `(("F" "inder" org-mac-finder-insert-selected ,org-mac-grab-Finder-app-p)
                         ("m" "ail" org-mac-message-insert-selected ,org-mac-grab-Mail-app-p)
+                        ("d" "EVONthink Pro Office" org-mac-devonthink-item-insert-selected ,org-mac-grab-devonthink-app-p)
                         ("o" "utlook" org-mac-outlook-message-insert-selected ,org-mac-grab-Outlook-app-p)
                         ("a" "ddressbook" org-mac-addressbook-insert-selected ,org-mac-grab-Addressbook-app-p)
                         ("s" "afari" org-mac-safari-insert-frontmost-url ,org-mac-grab-Safari-app-p)
@@ -703,6 +712,70 @@ list of mac-outlook:// links to flagged mail after heading."
 	(org-insert-heading nil t)
 	(insert org-heading "\n" (org-mac-outlook-message-get-links "f"))))))
 
+
+
+;;
+;;
+;; Handle links from DEVONthink Pro Office.app
+;;
+
+(org-add-link-type "x-devonthink-item" 'org-devonthink-item-open)
+
+(defun org-devonthink-item-open (uid)
+  "Open the given uid, which is a reference to an item in DEVONthink Pro Office"
+  (shell-command (concat "open \"x-devonthink-item:" uid "\"")))
+
+(defun org-as-get-selected-devonthink-item ()
+  "AppleScript to create links to selected items in DEVONthink Pro Office.app."
+  (do-applescript
+   (concat
+    "set theLinkList to {}\n"
+    "tell application \"DEVONthink Pro\"\n"
+    "set selectedRecords to selection\n"
+    "set selectionCount to count of selectedRecords\n"
+    "if (selectionCount < 1) then\n"
+    "return\n"
+    "end if\n"
+    "repeat with theRecord in selectedRecords\n"
+    "set theID to uuid of theRecord\n"
+    "set theURL to \"x-devonthink-item:\" & theID\n"
+    "set theSubject to name of theRecord\n"
+    "set theLink to theURL & \"::split::\" & theSubject & \"\n\"\n"
+    "copy theLink to end of theLinkList\n"
+    "end repeat\n"
+    "end tell\n"
+    "return theLinkList as string"
+    )))
+
+(defun org-mac-devonthink-get-links ()
+  "Create links to the item(s) currently selected in DEVONthink Pro Office.
+This will use AppleScript to get the `uuid' and the `name' of the
+selected items in DEVONthink Pro Office.app and make links out of
+it/them. This function will push the Org-syntax text to the kill
+ring, and also return it."
+  (message "Org Mac DEVONthink: looking for selected items...")
+  (let* ((as-link-list (org-as-get-selected-devonthink-item))
+         (link-list (if as-link-list
+                        (mapcar
+                         (lambda (x) (if (string-match "\\`\"\\(.*\\)\"\\'" x) (setq x (match-string 1 x))) x)
+                         (split-string as-link-list "[\r\n]+"))
+                      nil))
+         orglink-list)
+    (while link-list
+      (let* ((current-item (pop link-list)))
+        (message "current item: %s" current-item)
+        (when (and current-item (not (string= current-item "")))
+          (let* ((split-link (split-string current-item "::split::"))
+                 (orglink (org-make-link-string (url-encode-url (car split-link)) (cadr split-link))))
+            (push orglink orglink-list)))))
+    (kill-new (mapconcat 'identity orglink-list "\n"))))
+
+(defun org-mac-devonthink-item-insert-selected ()
+  "Insert a link to the item(s) currently selected in DEVONthink Pro Office.
+This will use AppleScript to get the `uuid'(s) and the name(s) of the
+selected items in DEVONthink Pro Office and make link(s) out of it/them."
+  (interactive)
+  (insert (org-mac-devonthink-get-links)))
 
 
 ;;
