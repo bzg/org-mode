@@ -12240,27 +12240,24 @@ keywords relative to each registered export back-end."
     "TITLE:" "TODO:" "TYP_TODO:" "SELECT_TAGS:" "EXCLUDE_TAGS:"))
 
 (defcustom org-structure-template-alist
-  '(("s" "#+BEGIN_SRC ?\n\n#+END_SRC" "<src lang=\"?\">\n\n</src>")
-    ("e" "#+BEGIN_EXAMPLE\n?\n#+END_EXAMPLE" "<example>\n?\n</example>")
-    ("q" "#+BEGIN_QUOTE\n?\n#+END_QUOTE" "<quote>\n?\n</quote>")
-    ("v" "#+BEGIN_VERSE\n?\n#+END_VERSE" "<verse>\n?\n</verse>")
-    ("V" "#+BEGIN_VERBATIM\n?\n#+END_VERBATIM" "<verbatim>\n?\n</verbatim>")
-    ("c" "#+BEGIN_CENTER\n?\n#+END_CENTER" "<center>\n?\n</center>")
-    ("l" "#+BEGIN_LaTeX\n?\n#+END_LaTeX"
-     "<literal style=\"latex\">\n?\n</literal>")
-    ("L" "#+LaTeX: " "<literal style=\"latex\">?</literal>")
-    ("h" "#+BEGIN_HTML\n?\n#+END_HTML"
-     "<literal style=\"html\">\n?\n</literal>")
-    ("H" "#+HTML: " "<literal style=\"html\">?</literal>")
-    ("a" "#+BEGIN_ASCII\n?\n#+END_ASCII" "")
-    ("A" "#+ASCII: " "")
-    ("i" "#+INDEX: ?" "#+INDEX: ?")
-    ("I" "#+INCLUDE: %file ?"
-     "<include file=%file markup=\"?\">"))
+  '(("s" "#+BEGIN_SRC ?\n\n#+END_SRC")
+    ("e" "#+BEGIN_EXAMPLE\n?\n#+END_EXAMPLE")
+    ("q" "#+BEGIN_QUOTE\n?\n#+END_QUOTE")
+    ("v" "#+BEGIN_VERSE\n?\n#+END_VERSE")
+    ("V" "#+BEGIN_VERBATIM\n?\n#+END_VERBATIM")
+    ("c" "#+BEGIN_CENTER\n?\n#+END_CENTER")
+    ("l" "#+BEGIN_LaTeX\n?\n#+END_LaTeX")
+    ("L" "#+LaTeX: ")
+    ("h" "#+BEGIN_HTML\n?\n#+END_HTML")
+    ("H" "#+HTML: ")
+    ("a" "#+BEGIN_ASCII\n?\n#+END_ASCII")
+    ("A" "#+ASCII: ")
+    ("i" "#+INDEX: ?")
+    ("I" "#+INCLUDE: %file ?"))
   "Structure completion elements.
 This is a list of abbreviation keys and values.  The value gets inserted
 if you type `<' followed by the key and then press the completion key,
-usually `M-TAB'.  %file will be replaced by a file name after prompting
+usually `TAB'.  %file will be replaced by a file name after prompting
 for the file using completion.  The cursor will be placed at the position
 of the `?` in the template.
 There are two templates for each key, the first uses the original Org syntax,
@@ -12271,8 +12268,9 @@ variable `org-mtags-prefer-muse-templates'."
   :type '(repeat
 	  (list
 	   (string :tag "Key")
-	   (string :tag "Template")
-	   (string :tag "Muse Template"))))
+	   (string :tag "Template")))
+  :version 24.4
+  :package-version ("Org" . "8.3"))
 
 (defun org-try-structure-completion ()
   "Try to complete a structure template before point.
@@ -12289,9 +12287,8 @@ expands them."
 
 (defun org-complete-expand-structure-template (start cell)
   "Expand a structure template."
-  (let* ((musep (org-bound-and-true-p org-mtags-prefer-muse-templates))
-	 (rpl (nth (if musep 2 1) cell))
-	 (ind ""))
+  (let ((rpl (nth 1 cell))
+	(ind ""))
     (delete-region start (point))
     (when (string-match "\\`[ \t]*#\\+" rpl)
       (cond
