@@ -5043,14 +5043,13 @@ state."
 	  (while org-element--cache-sync-requests
 	    (setq request (car org-element--cache-sync-requests)
 		  next (nth 1 org-element--cache-sync-requests))
-	    (or (org-element--cache-process-request
-		 request
-		 (and next (aref next 0))
-		 threshold
-		 (and (not threshold)
-		      (time-add (current-time)
-				org-element-cache-sync-duration)))
-		(throw 'interrupt t))
+	    (org-element--cache-process-request
+	     request
+	     (and next (aref next 0))
+	     threshold
+	     (and (not threshold)
+		  (time-add (current-time)
+			    org-element-cache-sync-duration)))
 	    ;; Request processed.  Merge current and next offsets and
 	    ;; transfer phase number and ending position.
 	    (when next
@@ -5078,8 +5077,8 @@ stops as soon as a shifted element begins after it.
 When non-nil, TIME-LIMIT is a time value.  Synchronization stops
 after this time or when Emacs exits idle state.
 
-Return nil if the process stops before completing the request,
-t otherwise."
+Throw `interrupt' if the process stops before completing the
+request."
   (catch 'quit
     (when (= (aref request 4) 0)
       ;; Phase 1.
@@ -5100,7 +5099,7 @@ t otherwise."
           (while t
             (when (org-element--cache-interrupt-p time-limit)
 	      (aset request 3 deleted-parent)
-	      (throw 'quit nil))
+	      (throw 'interrupt nil))
             ;; Find first element in cache with key BEG or after it.
 	    ;; We don't use `org-element--cache-find' because it
 	    ;; couldn't reach orphaned elements past NEXT.  Moreover,
@@ -5178,12 +5177,11 @@ t otherwise."
 	;; to shift and re-parent.
 	(when (equal (aref request 0) next) (throw 'quit t))
 	(let ((limit (+ (aref request 1) (aref request 2))))
-	  (when (and threshold (< threshold limit)) (throw 'quit nil))
+	  (when (and threshold (< threshold limit)) (throw 'interrupt nil))
 	  (let ((parent (org-element--parse-to limit t time-limit)))
-	    (if (eq parent 'interrupted) (throw 'quit nil)
-	      (aset request 3 parent)
-	      (aset request 4 2)
-	      (throw 'end-phase nil))))))
+	    (aset request 3 parent)
+	    (aset request 4 2)
+	    (throw 'end-phase nil)))))
     ;; Phase 3.
     ;;
     ;; Shift all elements starting from key START, but before NEXT, by
@@ -5218,7 +5216,7 @@ t otherwise."
 	      (when (or exit-flag (org-element--cache-interrupt-p time-limit))
 		(aset request 0 key)
 		(aset request 3 parent)
-		(throw 'quit nil))
+		(throw 'interrupt nil))
 	      ;; Shift element.
 	      (unless (zerop offset)
 		(org-element--cache-shift-positions data offset)
@@ -5252,8 +5250,8 @@ POS.
 When optional argument SYNCP is non-nil, return the parent of the
 element containing POS instead.  In that case, it is also
 possible to provide TIME-LIMIT, which is a time value specifying
-when the parsing should stop.  The function returns `interrupted'
-if the process stopped before finding the expected result."
+when the parsing should stop.  The function throws `interrupt' if
+the process stopped before finding the expected result."
   (catch 'exit
     (org-with-wide-buffer
      (goto-char pos)
@@ -5320,7 +5318,7 @@ if the process stopped before finding the expected result."
 	   (when syncp
 	     (cond ((= (point) pos) (throw 'exit parent))
 		   ((org-element--cache-interrupt-p time-limit)
-		    (throw 'exit 'interrupted))))
+		    (throw 'interrupt nil))))
 	   (unless element
 	     (setq element (org-element--current-element
 			    end 'element special-flag
