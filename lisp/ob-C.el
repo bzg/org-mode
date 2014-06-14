@@ -2,7 +2,8 @@
 
 ;; Copyright (C) 2010-2014 Free Software Foundation, Inc.
 
-;; Author: Eric Schulte, Thierry Banel
+;; Author: Eric Schulte
+;;      Thierry Banel
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 
