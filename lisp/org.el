@@ -5959,7 +5959,7 @@ by a #."
 	     (if (equal "+title:" dc1) (match-end 2) (match-end 0)))
 	    (add-text-properties
 	     beg (match-end 3)
-	     (if (member (intern (substring dc1 0 -1)) org-hidden-keywords)
+	     (if (member (intern (substring dc1 1 -1)) org-hidden-keywords)
 		 '(font-lock-fontified t invisible t)
 	       '(font-lock-fontified t face org-document-info-keyword)))
 	    (add-text-properties
