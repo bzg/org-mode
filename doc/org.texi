@@ -9595,10 +9595,6 @@ The title of the exported document is taken from the special line
 #+TITLE: This is the title of the document
 @end example
 
-@noindent
-If this line does not exist, the title will be the name of the file
-associated with the buffer, without extension, or the buffer name.
-
 @cindex property, EXPORT_TITLE
 If you are exporting only a subtree, its heading will become the title of the
 document.  If the subtree has a property @code{EXPORT_TITLE}, that will take
@@ -10580,8 +10576,7 @@ be executed during export even though the subtree is not exported.
 
 @item TITLE
 @cindex #+TITLE
-The title to be shown (otherwise derived from buffer's name).  You can use
-several such keywords for long titles.
+The title to be shown.  You can use several such keywords for long titles.
 @end table
 
 The @code{#+OPTIONS} keyword is a compact@footnote{If you want to configure

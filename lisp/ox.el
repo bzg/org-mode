@@ -1340,10 +1340,6 @@ The back-end could then be called with, for example:
 ;;   - category :: tree
 ;;   - type :: list of elements and objects
 ;;
-;; + `:input-buffer' :: Original buffer name.
-;;   - category :: option
-;;   - type :: string
-;;
 ;; + `:input-file' :: Full path to input file, if any.
 ;;   - category :: option
 ;;   - type :: string or nil
@@ -1805,19 +1801,13 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 	  (when (stringp value)
 	    (setq plist
 		  (plist-put plist property
-			     (or (org-element-parse-secondary-string
-				  value (org-element-restriction 'keyword))
-				 ;; When TITLE keyword sets an empty
-				 ;; string, make sure it doesn't
-				 ;; appear as nil in the plist.
-				 (and (eq property :title) ""))))))))))
+			     (org-element-parse-secondary-string
+			      value (org-element-restriction 'keyword))))))))))
 
 (defun org-export--get-buffer-attributes ()
   "Return properties related to buffer attributes, as a plist."
   ;; Store full path of input file name, or nil.  For internal use.
-  (let ((visited-file (buffer-file-name (buffer-base-buffer))))
-    (list :input-file visited-file
-	  :input-buffer (buffer-name (buffer-base-buffer)))))
+  (list :input-file (buffer-file-name (buffer-base-buffer))))
 
 (defun org-export--get-global-options (&optional backend)
   "Return global export options as a plist.
@@ -3107,14 +3097,6 @@ Return code as a string."
 	       (org-export-install-filters
 		(org-combine-plists
 		 info (org-export-get-environment backend subtreep ext-plist))))
-	 ;; Special case: provide original file name or buffer name as
-	 ;; default value for :title property.
-	 (unless (plist-get info :title)
-	   (plist-put
-	    info :title
-	    (let ((file (plist-get info :input-file)))
-	      (if file (file-name-sans-extension (file-name-nondirectory file))
-		(plist-get info :input-buffer)))))
 	 ;; Expand export-specific set of macros: {{{author}}},
 	 ;; {{{date}}}, {{{email}}} and {{{title}}}.  It must be done
 	 ;; once regular macros have been expanded, since document

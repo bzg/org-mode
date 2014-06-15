@@ -2324,7 +2324,7 @@ Insert template with export options, see example below.
 @end table
 
 @smallexample
-#+TITLE:       the title to be shown (default is the buffer name)
+#+TITLE:       the title to be shown
 #+AUTHOR:      the author (default taken from @code{user-full-name})
 #+DATE:        a date, fixed, or an Org timestamp
 #+EMAIL:       his/her email address (default from @code{user-mail-address})

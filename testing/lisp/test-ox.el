@@ -270,58 +270,66 @@ Paragraph"
 
 (ert-deftest test-org-export/set-title ()
   "Test title setting."
-  ;; If no title if specified, use file name.
-  (should
-   (apply
-    'equal
-    (org-test-with-temp-text-in-file "Test"
-      (org-mode)
-      (list (org-export-as
-	     (org-export-create-backend
-	      :transcoders
-	      '((template . (lambda (text info)
-			      (org-element-interpret-data
-			       (plist-get info :title)))))))
-	    (file-name-nondirectory
-	     (file-name-sans-extension (buffer-file-name)))))))
-  ;; If no title is specified, and no file is associated to the
-  ;; buffer, use buffer's name.
-  (should
-   (apply
-    'equal
-    (org-test-with-temp-text "Test"
-      (org-mode)
-      (list (org-export-as
-	     (org-export-create-backend
-	      :transcoders
-	      '((template . (lambda (text info)
-			      (org-element-interpret-data
-			       (plist-get info :title)))))))
-	    (buffer-name)))))
-  ;; If a title is specified, use it.
+  ;; Without TITLE keyword.
   (should
    (equal
-    "Title"
-    (org-test-with-temp-text-in-file "#+TITLE: Title\nTest"
-      (org-mode)
+    ""
+    (org-test-with-temp-text "Test"
       (org-export-as
        (org-export-create-backend
 	:transcoders
 	'((template . (lambda (text info)
 			(org-element-interpret-data
 			 (plist-get info :title))))))))))
-  ;; If an empty title is specified, do not set it.
+  ;; With a blank TITLE keyword.
   (should
    (equal
     ""
-    (org-test-with-temp-text-in-file "#+TITLE:\nTest"
-      (org-mode)
+    (org-test-with-temp-text "#+TITLE:\nTest"
       (org-export-as
        (org-export-create-backend
 	:transcoders
 	'((template . (lambda (text info)
 			(org-element-interpret-data
-			 (plist-get info :title)))))))))))
+			 (plist-get info :title))))))))))
+  ;; With a non-empty TITLE keyword.
+  (should
+   (equal
+    "Title"
+    (org-test-with-temp-text "#+TITLE: Title\nTest"
+      (org-export-as
+       (org-export-create-backend
+	:transcoders
+	'((template . (lambda (text info)
+			(org-element-interpret-data
+			 (plist-get info :title))))))))))
+  ;; When exporting a subtree, its heading becomes the headline of the
+  ;; document...
+  (should
+   (equal
+    "Headline"
+    (org-test-with-temp-text "* Headline\nBody"
+      (org-export-as
+       (org-export-create-backend
+	:transcoders
+	'((template . (lambda (text info)
+			(org-element-interpret-data
+			 (plist-get info :title))))))
+       'subtree))))
+  ;; ... unless there is an EXPORT_TITLE property at the root of the
+  ;; subtree.
+  (should
+   (equal
+    "B"
+    (org-test-with-temp-text
+	"* A\n  :PROPERTIES:\n  :EXPORT_TITLE: B\n  :END:\nBody"
+      (org-export-as
+       (org-export-create-backend
+	:transcoders
+	'((template . (lambda (text info)
+			(org-element-interpret-data
+			 (plist-get info :title))))))
+       'subtree)))))
 
 (ert-deftest test-org-export/handle-options ()
   "Test if export options have an impact on output."
