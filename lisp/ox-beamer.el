@@ -231,20 +231,19 @@ Return overlay specification, as a string, or nil."
 	      (if a (org-beamer-export-to-pdf t s v b)
 		(org-open-file (org-beamer-export-to-pdf nil s v b)))))))
   :options-alist
-  '((:beamer-theme "BEAMER_THEME" nil org-beamer-theme)
+  '((:headline-levels nil "H" org-beamer-frame-level)
+    (:latex-class "LATEX_CLASS" nil "beamer" t)
+    (:beamer-column-view-format "COLUMNS" nil org-beamer-column-view-format)
+    (:beamer-theme "BEAMER_THEME" nil org-beamer-theme)
     (:beamer-color-theme "BEAMER_COLOR_THEME" nil nil t)
     (:beamer-font-theme "BEAMER_FONT_THEME" nil nil t)
     (:beamer-inner-theme "BEAMER_INNER_THEME" nil nil t)
     (:beamer-outer-theme "BEAMER_OUTER_THEME" nil nil t)
     (:beamer-header-extra "BEAMER_HEADER" nil nil newline)
-    (:beamer-column-view-format nil nil org-beamer-column-view-format)
     (:beamer-environments-extra nil nil org-beamer-environments-extra)
     (:beamer-frame-default-options nil nil org-beamer-frame-default-options)
     (:beamer-outline-frame-options nil nil org-beamer-outline-frame-options)
-    (:beamer-outline-frame-title nil nil org-beamer-outline-frame-title)
-    ;; Modify existing properties.
-    (:headline-levels nil "H" org-beamer-frame-level)
-    (:latex-class "LATEX_CLASS" nil "beamer" t))
+    (:beamer-outline-frame-title nil nil org-beamer-outline-frame-title))
   :translate-alist '((bold . org-beamer-bold)
 		     (export-block . org-beamer-export-block)
 		     (export-snippet . org-beamer-export-snippet)
@@ -1124,30 +1123,6 @@ aid, but the tag does not have any semantic meaning."
        ((string-match (concat ":B_\\(" (mapconcat 'car envs "\\|") "\\):") tags)
 	(org-entry-put nil "BEAMER_env" (match-string 1 tags)))
        (t (org-entry-delete nil "BEAMER_env"))))))
-
-;;;###autoload
-(defun org-beamer-insert-options-template (&optional kind)
-  "Insert a settings template, to make sure users do this right."
-  (interactive (progn
-		 (message "Current [s]ubtree or [g]lobal?")
-		 (if (eq (read-char-exclusive) ?g) (list 'global)
-		   (list 'subtree))))
-  (if (eq kind 'subtree)
-      (progn
-	(org-back-to-heading t)
-	(org-reveal)
-	(org-entry-put nil "EXPORT_LaTeX_CLASS" "beamer")
-	(org-entry-put nil "EXPORT_LaTeX_CLASS_OPTIONS" "[presentation]")
-	(org-entry-put nil "EXPORT_FILE_NAME" "presentation.pdf")
-	(when org-beamer-column-view-format
-	  (org-entry-put nil "COLUMNS" org-beamer-column-view-format))
-	(org-entry-put nil "BEAMER_col_ALL" org-beamer-column-widths))
-    (insert "#+LaTeX_CLASS: beamer\n")
-    (insert "#+LaTeX_CLASS_OPTIONS: [presentation]\n")
-    (when org-beamer-theme (insert "#+BEAMER_THEME: " org-beamer-theme "\n"))
-    (when org-beamer-column-view-format
-      (insert "#+COLUMNS: " org-beamer-column-view-format "\n"))
-    (insert "#+PROPERTY: BEAMER_col_ALL " org-beamer-column-widths "\n")))
 
 ;;;###autoload
 (defun org-beamer-publish-to-latex (plist filename pub-dir)

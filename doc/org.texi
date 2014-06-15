@@ -11009,11 +11009,6 @@ In @code{org-beamer-mode}, this key offers fast selection of a Beamer
 environment or the @code{BEAMER_COL} property.
 @end table
 
-Also, a template for useful in-buffer settings or properties can be inserted
-into the buffer with @kbd{M-x org-beamer-insert-options-template}.  Among
-other things, this will install a column view format which is very handy for
-editing special properties used by Beamer.
-
 @subheading An example
 
 Here is a simple example Org document that is intended for Beamer export.
