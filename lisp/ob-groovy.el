@@ -36,8 +36,14 @@
 (defvar org-babel-tangle-lang-exts) ;; Autoloaded
 (add-to-list 'org-babel-tangle-lang-exts '("groovy" . "groovy"))
 (defvar org-babel-default-header-args:groovy '())
-(defvar org-babel-groovy-command "groovy"
-  "Name of the command to use for executing Groovy code.")
+(defcustom org-babel-groovy-command "groovy"
+  "Name of the command to use for executing Groovy code.
+May be either a command in the path, like groovy
+or an absolute path name, like /usr/local/bin/groovy
+parameters may be used, like groovy -v"
+  :group 'org-babel
+  :version "24.3"
+  :type 'string)
 
 (defun org-babel-execute:groovy (body params)
   "Execute a block of Groovy code with org-babel.  This function is

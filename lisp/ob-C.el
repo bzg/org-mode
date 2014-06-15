@@ -46,16 +46,32 @@
 
 (defvar org-babel-default-header-args:C '())
 
-(defvar org-babel-C-compiler "gcc"
-  "Command used to compile a C source code file into an
-executable.")
+(defcustom org-babel-C-compiler "gcc"
+  "Command used to compile a C source code file into an executable.
+May be either a command in the path, like gcc
+or an absolute path name, like /usr/local/bin/gcc
+parameter may be used, like gcc -v"
+  :group 'org-babel
+  :version "24.3"
+  :type 'string)
 
-(defvar org-babel-C++-compiler "g++"
-  "Command used to compile a C++ source code file into an
-executable.")
+(defcustom org-babel-C++-compiler "g++"
+  "Command used to compile a C++ source code file into an executable.
+May be either a command in the path, like g++
+or an absolute path name, like /usr/local/bin/g++
+parameter may be used, like g++ -v"
+  :group 'org-babel
+  :version "24.3"
+  :type 'string)
 
-(defvar org-babel-D-compiler "rdmd"
-  "Command used to compile and execute a D source code file.")
+(defcustom org-babel-D-compiler "rdmd"
+  "Command used to compile and execute a D source code file.
+May be either a command in the path, like rdmd
+or an absolute path name, like /usr/local/bin/rdmd
+parameter may be used, like rdmd --chatty"
+  :group 'org-babel
+  :version "24.3"
+  :type 'string)
 
 (defvar org-babel-c-variant nil
   "Internal variable used to hold which type of C (e.g. C or C++ or D)
