@@ -7454,7 +7454,7 @@ to switch to narrowing."
 		     alist ""))
 	 (inhibit-read-only t)
 	 (current org-agenda-tag-filter)
-	 maybe-refresh a n tag)
+	 a n tag)
     (unless char
       (message
        "%s by tag [%s ], [TAB], %s[/]:off, [+-]:narrow"
@@ -7485,19 +7485,16 @@ to switch to narrowing."
 	    (if modifier
 		(push modifier org-agenda-tag-filter))))
 	(if (not (null org-agenda-tag-filter))
-	    (org-agenda-filter-apply org-agenda-tag-filter 'tag)))
-      (setq maybe-refresh t))
+	    (org-agenda-filter-apply org-agenda-tag-filter 'tag))))
      ((equal char ?/)
       (org-agenda-filter-show-all-tag)
       (when (get 'org-agenda-tag-filter :preset-filter)
-	(org-agenda-filter-apply org-agenda-tag-filter 'tag))
-      (setq maybe-refresh t))
+	(org-agenda-filter-apply org-agenda-tag-filter 'tag)))
      ((equal char ?. )
       (setq org-agenda-tag-filter
 	    (mapcar (lambda(tag) (concat "+" tag))
 		    (org-get-at-bol 'tags)))
-      (org-agenda-filter-apply org-agenda-tag-filter 'tag)
-      (setq maybe-refresh t))
+      (org-agenda-filter-apply org-agenda-tag-filter 'tag))
      ((or (equal char ?\ )
 	  (setq a (rassoc char alist))
 	  (and tag (setq a (cons tag nil))))
@@ -7506,11 +7503,8 @@ to switch to narrowing."
       (setq org-agenda-tag-filter
 	    (cons (concat (if strip "-" "+") tag)
 		  (if narrow current nil)))
-      (org-agenda-filter-apply org-agenda-tag-filter 'tag)
-      (setq maybe-refresh t))
-     (t (error "Invalid tag selection character %c" char)))
-    (when maybe-refresh
-      (org-agenda-redo))))
+      (org-agenda-filter-apply org-agenda-tag-filter 'tag))
+     (t (error "Invalid tag selection character %c" char)))))
 
 (defun org-agenda-get-represented-tags ()
   "Get a list of all tags currently represented in the agenda."
