@@ -5491,79 +5491,96 @@ that range.  See `after-change-functions' for more information."
       ;; Activate a timer to process the request during idle time.
       (org-element--cache-set-timer (current-buffer)))))
 
+(defun org-element--cache-for-removal (beg end offset)
+  "Return first element to remove from cache.
+
+BEG and END are buffer positions delimiting buffer modifications.
+OFFSET is the size of the changes.
+
+Returned element is usually the first element in cache containing
+any position between BEG and END.  As an exception, greater
+elements around the changes that are robust to contents
+modifications are preserved and updated according to the
+changes."
+  (let* ((elements (org-element--cache-find (1- beg) 'both))
+	 (before (car elements))
+	 (after (cdr elements)))
+    (if (not before) after
+      (let ((up before))
+	(while (setq up (org-element-property :parent up))
+	  (if (and (memq (org-element-type up)
+			 '(center-block
+			   drawer dynamic-block inlinetask
+			   property-drawer quote-block special-block))
+		   (<= (org-element-property :contents-begin up) beg)
+		   (> (org-element-property :contents-end up) end))
+	      ;; UP is a robust greater element containing changes.
+	      ;; We only need to extend its ending boundaries and
+	      ;; those of all its parents.
+	      (while up
+		(org-element--cache-shift-positions
+		 up offset '(:contents-end :end))
+		(setq up (org-element-property :parent up)))
+	    (setq before up)))
+	;; We're at top level element containing ELEMENT: if it's
+	;; altered by buffer modifications, it is first element in
+	;; cache to be removed.  Otherwise, that first element is the
+	;; following one.
+	(if (< (org-element-property :end before) beg) after before)))))
+
 (defun org-element--cache-submit-request (beg end offset)
   "Submit a new cache synchronization request for current buffer.
 BEG and END are buffer positions delimiting the minimal area
 where cache data should be removed.  OFFSET is the size of the
 change, as an integer."
-  ;; Make sure buffer positions in cache are correct until END.  This
-  ;; also ensures that pending cache requests have their phases
-  ;; properly ordered.  We need to provide OFFSET as optional
-  ;; parameter since current modifications are not known yet to the
-  ;; otherwise correct part of the cache (i.e, before the first
-  ;; request).
-  (org-element--cache-sync (current-buffer) end offset)
-  (let ((first-element
-	 ;; Find the position of the first element in cache to remove.
-	 ;;
-	 ;; Partially modified elements will be removed during request
-	 ;; processing.  As an exception, greater elements around the
-	 ;; changes that are robust to contents modifications are
-	 ;; preserved.
-	 ;;
-	 ;; We look just before BEG because an element ending at BEG
-	 ;; needs to be removed too.
-	 (let* ((elements (org-element--cache-find (1- beg) 'both))
-		(before (car elements))
-		(after (cdr elements)))
-	   (if (not before) after
-	     (let ((up before))
-	       (while (setq up (org-element-property :parent up))
-		 (if (and (memq (org-element-type up)
-				'(center-block
-				  drawer dynamic-block inlinetask
-				  property-drawer quote-block special-block))
-			  (<= (org-element-property :contents-begin up) beg)
-			  (> (org-element-property :contents-end up) end))
-		     ;; UP is a greater element that is wrapped around
-		     ;; the changes.  We only need to extend its
-		     ;; ending boundaries and those of all its
-		     ;; parents.
-		     (while up
-		       (org-element--cache-shift-positions
-			up offset '(:contents-end :end))
-		       (setq up (org-element-property :parent up)))
-		   (setq before up)))
-	       ;; We're at top level element containing ELEMENT: if
-	       ;; it's altered by buffer modifications, it is first
-	       ;; element in cache to be removed.  Otherwise, that
-	       ;; first element is the following one.
-	       (if (< (org-element-property :end before) beg) after before))))))
-    (cond
-     ;; Changes happened before the first known element.  Shift the
-     ;; rest of the cache.
-     ((and first-element (> (org-element-property :begin first-element) end))
-      (push (vector (org-element--cache-key first-element) nil nil offset nil 2)
-	    org-element--cache-sync-requests))
-     ;; There is at least an element to remove.  Find position past
-     ;; every element containing END.
-     (first-element
-      (if (> (org-element-property :end first-element) end)
-	  (setq end (org-element-property :end first-element))
-	(let ((element (org-element--cache-find end)))
-	  (setq end (org-element-property :end element))
-	  (let ((up element))
-	    (while (and (setq up (org-element-property :parent up))
-			(>= (org-element-property :begin up) beg))
-	      (setq end (org-element-property :end up))))))
-      (push (vector (org-element--cache-key first-element)
-		    (org-element-property :begin first-element)
-		    end offset nil 0)
-	    org-element--cache-sync-requests))
-     ;; No element to remove.  No need to re-parent either.  Simply
-     ;; shift additional elements, if any, by OFFSET.
-     (org-element--cache-sync-requests
-      (incf (aref (car org-element--cache-sync-requests) 2) offset)))))
+  (let ((next (car org-element--cache-sync-requests)))
+    (if (and next
+	     (zerop (aref next 5))
+	     (let ((offset (aref next 3)))
+	       (and (>= (+ (aref next 2) offset) end)
+		    (<= (+ (aref next 1) offset) end))))
+	;; Current changes can be merged with first sync request: we
+	;; can save a partial cache synchronization.
+	(progn
+	  (incf (aref next 2) offset)
+	  (incf (aref next 3) offset)
+	  (when (> (aref next 1) beg)
+	    (let ((first (org-element--cache-for-removal beg end offset)))
+	      (when first
+		(aset next 0 (org-element--cache-key first))
+		(aset next 1 (org-element-property :begin first))))))
+      ;; Ensure cache is correct up to END.  Also make sure that NEXT,
+      ;; if any, is no longer a 0-phase request, thus ensuring that
+      ;; phases are properly ordered.  We need to provide OFFSET as
+      ;; optional parameter since current modifications are not known
+      ;; yet to the otherwise correct part of the cache (i.e, before
+      ;; the first request).
+      (org-element--cache-sync (current-buffer) end offset)
+      (let ((first (org-element--cache-for-removal beg end offset)))
+	(cond
+	 ;; Changes happened before the first known element.  Shift
+	 ;; the rest of the cache.
+	 ((and first (> (org-element-property :begin first) end))
+	  (push (vector (org-element--cache-key first) nil nil offset nil 2)
+		org-element--cache-sync-requests))
+	 ;; There is at least an element to remove.  Find position
+	 ;; past every element containing END.
+	 (first
+	  (if (> (org-element-property :end first) end)
+	      (setq end (org-element-property :end first))
+	    (let ((element (org-element--cache-find end)))
+	      (setq end (org-element-property :end element))
+	      (let ((up element))
+		(while (and (setq up (org-element-property :parent up))
+			    (>= (org-element-property :begin up) beg))
+		  (setq end (org-element-property :end up))))))
+	  (push (vector (org-element--cache-key first)
+			(org-element-property :begin first)
+			end offset nil 0)
+		org-element--cache-sync-requests))
+	 ;; No element to remove.  No need to re-parent either.
+	 ;; Simply shift additional elements, if any, by OFFSET.
+	 (org-element--cache-sync-requests (incf (aref next 3) offset)))))))
 
 
 ;;;; Public Functions
