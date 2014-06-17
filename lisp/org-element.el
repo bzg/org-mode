@@ -4694,19 +4694,19 @@ This cache is used in `org-element-context'.")
 
 A request is a vector with the following pattern:
 
- \[NEXT END OFFSET PARENT PHASE]
+ \[NEXT BEG END OFFSET PARENT PHASE]
 
-Processing a synchronization request consists in three phases:
+Processing a synchronization request consists of three phases:
 
   0. Delete modified elements,
   1. Fill missing area in cache,
   2. Shift positions and re-parent elements after the changes.
 
 During phase 0, NEXT is the key of the first element to be
-removed and END is buffer position delimiting the modifications.
-Every element starting between these are removed.  PARENT is an
-element to be removed.  Every element contained in it will also
-be removed.
+removed, BEG and END is buffer position delimiting the
+modifications.  Every element starting between these are removed.
+PARENT is an element to be removed.  Every element contained in
+it will also be removed.
 
 During phase 1, NEXT is the key of the next known element in
 cache.  Parse buffer between that element and the one before it
@@ -5053,9 +5053,9 @@ state."
 	    ;; Request processed.  Merge current and next offsets and
 	    ;; transfer phase number and ending position.
 	    (when next
-	      (incf (aref next 2) (aref request 2))
-	      (aset next 1 (aref request 1))
-	      (aset next 4 (aref request 4)))
+	      (incf (aref next 3) (aref request 3))
+	      (aset next 2 (aref request 2))
+	      (aset next 5 (aref request 5)))
 	    (setq org-element--cache-sync-requests
 		  (cdr org-element--cache-sync-requests))))
 	;; If more requests are awaiting, set idle timer accordingly.
@@ -5080,7 +5080,7 @@ after this time or when Emacs exits idle state.
 Throw `interrupt' if the process stops before completing the
 request."
   (catch 'quit
-    (when (= (aref request 4) 0)
+    (when (= (aref request 5) 0)
       ;; Phase 1.
       ;;
       ;; Delete all elements starting after BEG, but not after buffer
@@ -5094,11 +5094,11 @@ request."
       ;; a deletion modifies structure of the balanced tree.
       (catch 'end-phase
         (let ((beg (aref request 0))
-              (end (aref request 1))
-              (deleted-parent (aref request 3)))
+              (end (aref request 2))
+              (deleted-parent (aref request 4)))
           (while t
             (when (org-element--cache-interrupt-p time-limit)
-	      (aset request 3 deleted-parent)
+	      (aset request 4 deleted-parent)
 	      (throw 'interrupt nil))
             ;; Find first element in cache with key BEG or after it.
 	    ;; We don't use `org-element--cache-find' because it
@@ -5134,13 +5134,13 @@ request."
 								 next)))
 			(> pos end))
 		    (aset request 0 data-key)
-		    (aset request 1 pos)
-		    (aset request 4 1)
+		    (aset request 2 pos)
+		    (aset request 5 1)
 		    (throw 'end-phase nil))
 		   (t (org-element--cache-remove data)
 		      (when (= (org-element-property :end data) end)
 			(setq deleted-parent data)))))))))))
-    (when (= (aref request 4) 1)
+    (when (= (aref request 5) 1)
       ;; Phase 2.
       ;;
       ;; Phase 1 left a hole in the parse tree.  Some elements after
@@ -5179,8 +5179,8 @@ request."
 	(let ((limit (+ (aref request 1) (aref request 2))))
 	  (when (and threshold (< threshold limit)) (throw 'interrupt nil))
 	  (let ((parent (org-element--parse-to limit t time-limit)))
-	    (aset request 3 parent)
-	    (aset request 4 2)
+	    (aset request 4 parent)
+	    (aset request 5 2)
 	    (throw 'end-phase nil)))))
     ;; Phase 3.
     ;;
@@ -5194,8 +5194,8 @@ request."
     ;; pending, exit.  Before leaving, the current synchronization
     ;; request is updated.
     (let ((start (aref request 0))
-	  (offset (aref request 2))
-	  (parent (aref request 3))
+	  (offset (aref request 3))
+	  (parent (aref request 4))
 	  (node (org-element--cache-root))
 	  (stack (list nil))
 	  (leftp t)
@@ -5215,7 +5215,7 @@ request."
 	      ;; Handle interruption request.  Update current request.
 	      (when (or exit-flag (org-element--cache-interrupt-p time-limit))
 		(aset request 0 key)
-		(aset request 3 parent)
+		(aset request 4 parent)
 		(throw 'interrupt nil))
 	      ;; Shift element.
 	      (unless (zerop offset)
@@ -5526,7 +5526,7 @@ change, as an integer."
      ;; Changes happened before the first known element.  Shift the
      ;; rest of the cache.
      ((and first-element (> (org-element-property :begin first-element) end))
-      (push (vector (org-element--cache-key first-element) nil offset nil 2)
+      (push (vector (org-element--cache-key first-element) nil nil offset nil 2)
 	    org-element--cache-sync-requests))
      ;; There is at least an element to remove.  Find position past
      ;; every element containing END.
@@ -5539,7 +5539,9 @@ change, as an integer."
 	    (while (and (setq up (org-element-property :parent up))
 			(>= (org-element-property :begin up) beg))
 	      (setq end (org-element-property :end up))))))
-      (push (vector (org-element--cache-key first-element) end offset nil 0)
+      (push (vector (org-element--cache-key first-element)
+		    (org-element-property :begin first-element)
+		    end offset nil 0)
 	    org-element--cache-sync-requests))
      ;; No element to remove.  No need to re-parent either.  Simply
      ;; shift additional elements, if any, by OFFSET.
