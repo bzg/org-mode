@@ -250,7 +250,7 @@ to dead or no buffer."
   (let* (todo-only
 	 (contacts-matcher
 	  (cdr (org-make-tags-matcher org-contacts-matcher)))
-	 markers result)
+	 result)
     (when (org-contacts-db-need-update-p)
       (let ((progress-reporter
 	     (make-progress-reporter "Updating Org Contacts Database..." 0 (length org-contacts-files)))
@@ -259,20 +259,25 @@ to dead or no buffer."
 	  (org-check-agenda-file file)
 	  (with-current-buffer (org-get-agenda-file-buffer file)
 	    (unless (eq major-mode 'org-mode)
-	      (error "File %s is no in `org-mode'" file))
-	    (org-scan-tags
-	     '(add-to-list 'markers (set-marker (make-marker) (point)))
-	     contacts-matcher
-	     todo-only))
+	      (error "File %s is not in `org-mode'" file))
+	    (setf result
+		  (append result
+			  (org-scan-tags
+			   'org-contacts-at-point
+			   contacts-matcher
+			   todo-only))))
 	  (progress-reporter-update progress-reporter (setq i (1+ i))))
-	(dolist (marker markers result)
-	  (org-with-point-at marker
-	    (add-to-list 'result
-			 (list (org-get-heading t) marker (org-entry-properties marker 'all)))))
 	(setf org-contacts-db result
 	      org-contacts-last-update (current-time))
-      (progress-reporter-done progress-reporter)))
+	(progress-reporter-done progress-reporter)))
     org-contacts-db))
+
+(defun org-contacts-at-point (&optional pom)
+  "Return the contacts at point-or-marker POM or current position
+if nil."
+  (setq pom (or pom (point)))
+  (org-with-point-at pom
+    (list (org-get-heading t) (set-marker (make-marker) pom) (org-entry-properties pom 'all))))
 
 (defun org-contacts-filter (&optional name-match tags-match prop-match)
   "Search for a contact matching any of NAME-MATCH, TAGS-MATCH, PROP-MATCH.
