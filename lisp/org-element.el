@@ -5027,13 +5027,19 @@ Properties are modified by side-effect."
 			(plist-get properties key))))
 	(and value (plist-put properties key (+ offset value)))))))
 
-(defun org-element--cache-sync (buffer &optional threshold)
+(defun org-element--cache-sync (buffer &optional threshold extra)
   "Synchronize cache with recent modification in BUFFER.
+
 When optional argument THRESHOLD is non-nil, do the
 synchronization for all elements starting before or at threshold,
 then exit.  Otherwise, synchronize cache for as long as
 `org-element-cache-sync-duration' or until Emacs leaves idle
-state."
+state.
+
+EXTRA, when non-nil, is an additional offset for changes not
+registered yet in the cache.  It is used in
+`org-element--cache-submit-request', where cache is partially
+updated before current modification are actually submitted."
   (when (buffer-live-p buffer)
     (with-current-buffer buffer
       (let ((inhibit-quit t) request next)
@@ -5049,7 +5055,8 @@ state."
 	     threshold
 	     (and (not threshold)
 		  (time-add (current-time)
-			    org-element-cache-sync-duration)))
+			    org-element-cache-sync-duration))
+	     (or extra 0))
 	    ;; Request processed.  Merge current and next offsets and
 	    ;; transfer phase number and ending position.
 	    (when next
@@ -5064,7 +5071,8 @@ state."
 	    (org-element--cache-set-timer buffer)
 	  (clrhash org-element--cache-sync-keys))))))
 
-(defun org-element--cache-process-request (request next threshold time-limit)
+(defun org-element--cache-process-request
+  (request next threshold time-limit extra)
   "Process synchronization REQUEST for all entries before NEXT.
 
 REQUEST is a vector, built by `org-element--cache-submit-request'.
@@ -5076,6 +5084,10 @@ stops as soon as a shifted element begins after it.
 
 When non-nil, TIME-LIMIT is a time value.  Synchronization stops
 after this time or when Emacs exits idle state.
+
+EXTRA is an additional offset taking into consideration changes
+not registered yet.  See `org-element--cache-submit-request' for
+more information.
 
 Throw `interrupt' if the process stops before completing the
 request."
@@ -5176,7 +5188,7 @@ request."
 	;; contains the real beginning position of the first element
 	;; to shift and re-parent.
 	(when (equal (aref request 0) next) (throw 'quit t))
-	(let ((limit (+ (aref request 1) (aref request 2))))
+	(let ((limit (+ (aref request 2) (aref request 3) extra)))
 	  (when (and threshold (< threshold limit)) (throw 'interrupt nil))
 	  (let ((parent (org-element--parse-to limit t time-limit)))
 	    (aset request 4 parent)
@@ -5406,9 +5418,7 @@ It is a symbol among nil, t and `headline'.")
 BEG and END are the beginning and end of the range of changed
 text.  See `before-change-functions' for more information."
   (let ((inhibit-quit t))
-    ;; Make sure buffer positions in cache are correct until END.
     (save-match-data
-      (org-element--cache-sync (current-buffer) end)
       (org-with-wide-buffer
        (goto-char beg)
        (beginning-of-line)
@@ -5486,6 +5496,13 @@ that range.  See `after-change-functions' for more information."
 BEG and END are buffer positions delimiting the minimal area
 where cache data should be removed.  OFFSET is the size of the
 change, as an integer."
+  ;; Make sure buffer positions in cache are correct until END.  This
+  ;; also ensures that pending cache requests have their phases
+  ;; properly ordered.  We need to provide OFFSET as optional
+  ;; parameter since current modifications are not known yet to the
+  ;; otherwise correct part of the cache (i.e, before the first
+  ;; request).
+  (org-element--cache-sync (current-buffer) end offset)
   (let ((first-element
 	 ;; Find the position of the first element in cache to remove.
 	 ;;
