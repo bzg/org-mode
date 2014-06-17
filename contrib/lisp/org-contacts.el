@@ -183,6 +183,12 @@ This overrides `org-email-link-description-format' if set."
   :group 'org-contacts
   :type 'boolean)
 
+(defcustom org-contacts-complete-functions
+  '(org-contacts-complete-group org-contacts-complete-name)
+  "List of functions used to complete contacts in `message-mode'."
+  :group 'org-contacts
+  :type 'hook)
+
 ;; Decalre external functions and variables
 (declare-function org-reverse-string "org")
 (declare-function diary-ordinal-suffix "ext:diary-lib")
@@ -512,7 +518,6 @@ A group FOO is composed of contacts with the tag FOO."
 		(completion-table-case-fold completion-list
 					    (not org-contacts-completion-ignore-case))))))))
 
-
 (defun org-contacts-remove-ignored-property-values (ignore-list list)
   "Remove all ignore-list's elements from list and you can use
    regular expressions in the ignore list."
@@ -570,8 +575,8 @@ A group FOO is composed of contacts with the tag FOO."
 			(goto-char (match-end 0))
 			(point))))
 	   (string (buffer-substring start end)))
-	(or (org-contacts-complete-group start end string)
-	    (org-contacts-complete-name start end string))))))
+	(run-hook-with-args-until-success
+	 'org-contacts-complete-functions start end string)))))
 
 (defun org-contacts-gnus-get-name-email ()
   "Get name and email address from Gnus message."
