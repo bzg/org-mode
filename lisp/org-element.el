@@ -4639,7 +4639,7 @@ indentation is not done with TAB characters."
   "Non nil when Org parser should cache its results.
 This is mostly for debugging purpose.")
 
-(defvar org-element-cache-sync-idle-time 0.4
+(defvar org-element-cache-sync-idle-time 0.6
   "Length, in seconds, of idle time before syncing cache.")
 
 (defvar org-element-cache-sync-duration (seconds-to-time 0.04)
@@ -4648,7 +4648,7 @@ If the synchronization is not over after this delay, the process
 pauses and resumes after `org-element-cache-sync-break'
 seconds.")
 
-(defvar org-element-cache-sync-break (seconds-to-time 0.2)
+(defvar org-element-cache-sync-break (seconds-to-time 0.3)
   "Duration, as a time value, of the pause between synchronizations.
 See `org-element-cache-sync-duration' for more information.")
 
