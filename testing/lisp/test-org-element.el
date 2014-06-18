@@ -1003,7 +1003,33 @@ Some other text
      (org-element-property :FOO (org-element-at-point))))
   (should-not
    (org-test-with-temp-text "* Headline\n:PROPERTIES:\n:foo: bar\n:END:"
-     (org-element-property :foo (org-element-at-point)))))
+     (org-element-property :foo (org-element-at-point))))
+  ;; Do not find property drawer in a verbatim area.
+  (should-not
+   (org-test-with-temp-text
+       "* Headline
+#+BEGIN_EXAMPLE
+:PROPERTIES:
+:foo: bar
+:END:
+#+END_EXAMPLE"
+     (org-element-property :FOO (org-element-at-point))))
+  ;; Do not use properties from a drawer associated to an inlinetask.
+  (when (featurep 'org-inlinetask)
+    (should-not
+     (org-test-with-temp-text
+	 "* Headline
+*************** Inlinetask
+:PROPERTIES:
+:foo: bar
+:END:
+*************** END"
+       (org-element-property
+	:FOO (let ((org-inlinetask-min-level 15)) (org-element-at-point))))))
+  ;; Do not find incomplete drawers.
+  (should-not
+   (org-test-with-temp-text "* Headline\n:PROPERTIES:\n:foo: bar"
+     (org-element-property :FOO (org-element-at-point)))))
 
 
 ;;;; Horizontal Rule

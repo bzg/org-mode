@@ -811,24 +811,48 @@ Assume point is at beginning of the headline."
 	   (archivedp (member org-archive-tag tags))
 	   (footnote-section-p (and org-footnote-section
 				    (string= org-footnote-section raw-value)))
-	   ;; Upcase property names.  It avoids confusion between
-	   ;; properties obtained through property drawer and default
-	   ;; properties from the parser (e.g. `:end' and :END:)
 	   (standard-props
-	    (let (plist)
-	      (mapc
-	       (lambda (p)
-		 (setq plist
-		       (plist-put plist
-				  (intern (concat ":" (upcase (car p))))
-				  (cdr p))))
-	       (org-entry-properties nil 'standard))
-	      plist))
+	    ;; Find property drawer associated to current headline and
+	    ;; extract properties.
+	    ;;
+	    ;; Upcase property names.  It avoids confusion between
+	    ;; properties obtained through property drawer and default
+	    ;; properties from the parser (e.g. `:end' and :END:)
+	    (let ((end (save-excursion
+			 (org-with-limited-levels (outline-next-heading))
+			 (point)))
+		  plist)
+	      (save-excursion
+		(while (and (null plist)
+			    (re-search-forward org-property-start-re end t))
+		  (let ((drawer (org-element-at-point)))
+		    (when (and (eq (org-element-type drawer) 'property-drawer)
+			       ;; Make sure drawer is not associated
+			       ;; to an inlinetask.
+			       (let ((p drawer))
+				 (while (and (setq p (org-element-property
+						      :parent p))
+					     (not (eq (org-element-type p)
+						      'inlinetask))))
+				 (not p)))
+		      (let ((end (org-element-property :contents-end drawer)))
+			(when end
+			  (forward-line)
+			  (while (< (point) end)
+			    (looking-at org-property-re)
+			    (setq plist
+				  (plist-put
+				   plist
+				   (intern
+				    (concat ":" (upcase (match-string 2))))
+				   (org-match-string-no-properties 3)))
+			    (forward-line)))))))
+		plist)))
 	   (time-props
 	    ;; Read time properties on the line below the headline.
 	    (save-excursion
-	      (when (progn (forward-line)
-			   (looking-at org-planning-or-clock-line-re))
+	      (forward-line)
+	      (when (looking-at org-planning-or-clock-line-re)
 		(let ((end (line-end-position)) plist)
 		  (while (re-search-forward
 			  org-keyword-time-not-clock-regexp end t)
@@ -974,43 +998,59 @@ Assume point is at beginning of the inline task."
 	   (tags (let ((raw-tags (nth 5 components)))
 		   (and raw-tags (org-split-string raw-tags ":"))))
 	   (raw-value (or (nth 4 components) ""))
-	   ;; Upcase property names.  It avoids confusion between
-	   ;; properties obtained through property drawer and default
-	   ;; properties from the parser (e.g. `:end' and :END:)
-	   (standard-props
-	    (let (plist)
-	      (mapc
-	       (lambda (p)
-		 (setq plist
-		       (plist-put plist
-				  (intern (concat ":" (upcase (car p))))
-				  (cdr p))))
-	       (org-entry-properties nil 'standard))
-	      plist))
-	   (time-props
-	    ;; Read time properties on the line below the inlinetask
-	    ;; opening string.
-	    (save-excursion
-	      (when (progn (forward-line)
-			   (looking-at org-planning-or-clock-line-re))
-		(let ((end (line-end-position)) plist)
-		  (while (re-search-forward
-			  org-keyword-time-not-clock-regexp end t)
-		    (goto-char (match-end 1))
-		    (skip-chars-forward " \t")
-		    (let ((keyword (match-string 1))
-			  (time (org-element-timestamp-parser)))
-		      (cond ((equal keyword org-scheduled-string)
-			     (setq plist (plist-put plist :scheduled time)))
-			    ((equal keyword org-deadline-string)
-			     (setq plist (plist-put plist :deadline time)))
-			    (t (setq plist (plist-put plist :closed time))))))
-		  plist))))
 	   (task-end (save-excursion
 		       (end-of-line)
 		       (and (re-search-forward org-outline-regexp-bol limit t)
 			    (org-looking-at-p "END[ \t]*$")
 			    (line-beginning-position))))
+	   (standard-props
+	    ;; Find property drawer associated to current inlinetask
+	    ;; and extract properties.
+	    ;;
+	    ;; Upcase property names.  It avoids confusion between
+	    ;; properties obtained through property drawer and default
+	    ;; properties from the parser (e.g. `:end' and :END:)
+	    (when task-end
+	      (let (plist)
+		(save-excursion
+		  (while (and (null plist)
+			      (re-search-forward
+			       org-property-start-re task-end t))
+		    (let ((d (org-element-at-point)))
+		      (when (eq (org-element-type d) 'property-drawer)
+			(let ((end (org-element-property :contents-end d)))
+			  (when end
+			    (forward-line)
+			    (while (< (point) end)
+			      (looking-at org-property-re)
+			      (setq plist
+				    (plist-put
+				     plist
+				     (intern
+				      (concat ":" (upcase (match-string 2))))
+				     (org-match-string-no-properties 3)))
+			      (forward-line)))))))
+		  plist))))
+	   (time-props
+	    ;; Read time properties on the line below the inlinetask
+	    ;; opening string.
+	    (when task-end
+	      (save-excursion
+		(when (progn (forward-line)
+			     (looking-at org-planning-or-clock-line-re))
+		  (let ((end (line-end-position)) plist)
+		    (while (re-search-forward
+			    org-keyword-time-not-clock-regexp end t)
+		      (goto-char (match-end 1))
+		      (skip-chars-forward " \t")
+		      (let ((keyword (match-string 1))
+			    (time (org-element-timestamp-parser)))
+			(cond ((equal keyword org-scheduled-string)
+			       (setq plist (plist-put plist :scheduled time)))
+			      ((equal keyword org-deadline-string)
+			       (setq plist (plist-put plist :deadline time)))
+			      (t (setq plist (plist-put plist :closed time))))))
+		    plist)))))
 	   (contents-begin (progn (forward-line)
 				  (and task-end (< (point) task-end) (point))))
 	   (contents-end (and contents-begin task-end))
