@@ -3015,7 +3015,7 @@ Assume point is at the beginning of the link."
 	  ;; Normalize URI.
 	  (when (and (not (org-string-match-p "\\`//" path))
 		     (file-name-absolute-p path))
-	    (setq path (concat "//" (expand-file-name path))))
+	    (setq path (concat "//" path)))
 	  ;; Make sure TYPE always reports "file".
 	  (setq type "file"))
 	(list 'link
