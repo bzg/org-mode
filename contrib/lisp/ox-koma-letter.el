@@ -304,7 +304,7 @@ A headline is only used if #+OPENING is not set.  See also
 					org-latex-default-class) t)
     (:author "AUTHOR" nil (org-koma-letter--get-value org-koma-letter-author) t)
     (:author-changed-in-buffer-p "AUTHOR" nil nil t)
-    (:from-address "FROM_ADDRESS" nil nil newline)
+    (:from-address "FROM_ADDRESS" nil org-koma-letter-from-address newline)
     (:phone-number "PHONE_NUMBER" nil org-koma-letter-phone-number)
     (:email "EMAIL" nil (org-koma-letter--get-value org-koma-letter-email) t)
     (:email-changed-in-buffer-p "EMAIL" nil nil t)
