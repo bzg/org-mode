@@ -3875,19 +3875,7 @@ INFO is a plist used as a communication channel.
 CATEGORY is automatically inherited from a parent headline, from
 #+CATEGORY: keyword or created out of original file name.  If all
 fail, the fall-back value is \"???\"."
-  (or (let ((headline (if (eq (org-element-type blob) 'headline) blob
-			(org-export-get-parent-headline blob))))
-	;; Almost like `org-export-node-property', but we cannot trust
-	;; `plist-member' as every headline has a `:CATEGORY'
-	;; property, would it be nil or equal to "???" (which has the
-	;; same meaning).
-	(let ((parent headline) value)
-	  (catch 'found
-	    (while parent
-	      (let ((category (org-element-property :CATEGORY parent)))
-		(and category (not (equal "???" category))
-		     (throw 'found category)))
-	      (setq parent (org-element-property :parent parent))))))
+  (or (org-export-get-node-property :CATEGORY blob t)
       (org-element-map (plist-get info :parse-tree) 'keyword
 	(lambda (kwd)
 	  (when (equal (org-element-property :key kwd) "CATEGORY")
