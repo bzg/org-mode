@@ -45,12 +45,6 @@ passed to `shell-command-on-region'"
   :group 'org-babel
   :type 'string)
 
-(defcustom org-babel-sh-var-quote-fmt
-  "$(cat <<'BABEL_TABLE'\n%s\nBABEL_TABLE\n)"
-  "Format string used to escape variables when passed to shell scripts."
-  :group 'org-babel
-  :type 'string)
-
 (defcustom org-babel-shell-names
   '("sh" "bash" "csh" "ash" "dash" "ksh" "mksh" "posh")
   "List of names of shell supported by babel shell code blocks."
@@ -113,28 +107,26 @@ This function is called by `org-babel-execute-src-block'."
 (defun org-babel-variable-assignments:bash_array
     (varname values &optional sep hline)
   "Returns a list of statements declaring the values as a bash array."
-  (format "unset %s\ndeclare -a %s=( \"%s\" )"
-     varname varname
-     (mapconcat 'identity
-       (mapcar
-         (lambda (value) (org-babel-sh-var-to-sh value sep hline))
-         values)
-       "\" \"")))
+  (format "unset %s\ndeclare -a %s=( %s )"
+	  varname varname
+	  (mapconcat
+	   (lambda (value) (org-babel-sh-var-to-sh value sep hline))
+	   values
+	   " ")))
 
 (defun org-babel-variable-assignments:bash_assoc
     (varname values &optional sep hline)
   "Returns a list of statements declaring the values as bash associative array."
   (format "unset %s\ndeclare -A %s\n%s"
     varname varname
-    (mapconcat 'identity
-      (mapcar
-        (lambda (items)
-          (format "%s[\"%s\"]=%s"
-            varname
-            (org-babel-sh-var-to-sh (car items) sep hline)
-            (org-babel-sh-var-to-sh (cdr items) sep hline)))
-        values)
-      "\n")))
+    (mapconcat
+     (lambda (items)
+       (format "%s[%s]=%s"
+	       varname
+	       (org-babel-sh-var-to-sh (car items) sep hline)
+	       (org-babel-sh-var-to-sh (cdr items) sep hline)))
+     values
+     "\n")))
 
 (defun org-babel-variable-assignments:bash (varname values &optional sep hline)
   "Represents the parameters as useful Bash shell variables."
@@ -163,8 +155,10 @@ This function is called by `org-babel-execute-src-block'."
   "Convert an elisp value to a shell variable.
 Convert an elisp var into a string of shell commands specifying a
 var of the same value."
-  (format org-babel-sh-var-quote-fmt
-	  (org-babel-sh-var-to-string var sep hline)))
+  (concat "'" (replace-regexp-in-string
+	       "'" "'\"'\"'"
+	       (org-babel-sh-var-to-string var sep hline))
+	  "'"))
 
 (defun org-babel-sh-var-to-string (var &optional sep hline)
   "Convert an elisp value to a string."
