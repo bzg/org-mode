@@ -391,7 +391,7 @@ was not present."
     (:lco "LCO" nil org-koma-letter-class-option-file)
     (:author "AUTHOR" nil (org-koma-letter--get-value org-koma-letter-author) t)
     (:author-changed-in-buffer-p "AUTHOR" nil nil t)
-    (:from-address "FROM_ADDRESS" nil org-koma-letter-from-address newline)
+    (:from-address "FROM_ADDRESS" nil nil newline)
     (:phone-number "PHONE_NUMBER" nil org-koma-letter-phone-number)
     (:email "EMAIL" nil (org-koma-letter--get-value org-koma-letter-email) t)
     (:to-address "TO_ADDRESS" nil nil newline)
