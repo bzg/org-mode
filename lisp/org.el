@@ -5427,8 +5427,7 @@ The following commands are available:
       (org-add-hook 'isearch-mode-end-hook 'org-isearch-end 'append 'local)
     ;; Emacs 22 deals with this through a special variable
     (org-set-local 'outline-isearch-open-invisible-function
-		   (lambda (&rest ignore) (org-show-context 'isearch)))
-    (org-add-hook 'isearch-mode-end-hook 'org-fix-ellipsis-at-bol 'append 'local))
+		   (lambda (&rest ignore) (org-show-context 'isearch))))
 
   ;; Setup the pcomplete hooks
   (set (make-local-variable 'pcomplete-command-completion-function)
@@ -5482,9 +5481,6 @@ The following commands are available:
 		    :parents (list text-mode-abbrev-table)))
 
 (put 'org-mode 'flyspell-mode-predicate 'org-mode-flyspell-verify)
-
-(defsubst org-fix-ellipsis-at-bol ()
-  (save-excursion (set-window-start (selected-window) (window-start))))
 
 (defun org-find-invisible-foreground ()
   (let ((candidates (remove
@@ -13663,8 +13659,7 @@ How much context is shown depends upon the variables
 		      (error nil))
 		    (not (bobp)))
 	  (org-flag-heading nil)
-	  (when siblings-p (org-show-siblings)))))
-    (unless (eq key 'agenda) (org-fix-ellipsis-at-bol))))
+	  (when siblings-p (org-show-siblings)))))))
 
 (defvar org-reveal-start-hook nil
   "Hook run before revealing a location.")
@@ -23793,8 +23788,7 @@ Show the heading too, if it is currently invisible."
 		   isearch-mode-end-hook-quit)
 	;; Only when the isearch was not quitted.
 	(org-add-hook 'post-command-hook 'org-isearch-post-command
-		      'append 'local)))
-    (org-fix-ellipsis-at-bol)))
+		      'append 'local)))))
 
 (defun org-isearch-post-command ()
   "Remove self from hook, and show context."
