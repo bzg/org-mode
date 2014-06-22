@@ -962,7 +962,8 @@ file name as its single argument."
 	  (function)))
 
 (defcustom org-latex-logfiles-extensions
-  '("aux" "idx" "log" "out" "toc" "nav" "snm" "vrb")
+  '("aux" "bcf" "blg" "figlist" "idx" "log" "nav" "out" "run.xml"
+    "snm" "toc" "vrb" "xdv")
   "The list of file extensions to consider as LaTeX logfiles.
 The logfiles will be remove if `org-latex-remove-logfiles' is
 non-nil."
