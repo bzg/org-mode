@@ -38,13 +38,6 @@
 
 (defvar org-babel-default-header-args:sh '())
 
-(defcustom org-babel-sh-command shell-file-name
-  "Command used to invoke a shell.
-Set by default to the value of `shell-file-name'.  This will be
-passed to `shell-command-on-region'"
-  :group 'org-babel
-  :type 'string)
-
 (defcustom org-babel-shell-names
   '("sh" "bash" "csh" "ash" "dash" "ksh" "mksh" "posh")
   "List of names of shell supported by babel shell code blocks."
@@ -57,7 +50,7 @@ passed to `shell-command-on-region'"
      (lambda (name)
        (eval `(defun ,(intern (concat "org-babel-execute:" name)) (body params)
 		,(format "Execute a block of %s commands with Babel." name)
-		(let ((org-babel-sh-command ,name))
+		(let ((shell-file-name ,name))
 		  (org-babel-execute:shell body params)))))
      (second value))))
 
@@ -144,7 +137,7 @@ This function is called by `org-babel-execute-src-block'."
 		     "hline"))))
     (mapcar
      (lambda (pair)
-       (if (string= org-babel-sh-command "bash")
+       (if (string-match "bash$" shell-file-name)
 	   (org-babel-variable-assignments:bash
             (car pair) (cdr pair) sep hline)
          (org-babel-variable-assignments:sh-generic
@@ -211,7 +204,7 @@ return the value of the last statement in BODY."
                (call-process-shell-command
                 (if shebang
                     script-file
-                  (format "%s %s" org-babel-sh-command script-file))
+                  (format "%s %s" shell-file-name script-file))
                 stdin-file
                 (current-buffer) nil cmdline)
                (buffer-string))))
@@ -249,7 +242,7 @@ return the value of the last statement in BODY."
                    (insert body))
                  (set-file-modes script-file #o755)
                  (org-babel-eval script-file ""))
-             (org-babel-eval org-babel-sh-command (org-babel-trim body)))))))
+             (org-babel-eval shell-file-name (org-babel-trim body)))))))
     (when results
       (let ((result-params (cdr (assoc :result-params params))))
         (org-babel-result-cond result-params
