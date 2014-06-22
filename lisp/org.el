@@ -12270,7 +12270,7 @@ variable `org-mtags-prefer-muse-templates'."
 	   (string :tag "Key")
 	   (string :tag "Template")))
   :version 24.4
-  :package-version '("Org" . "8.3"))
+  :package-version '(Org . "8.3"))
 
 (defun org-try-structure-completion ()
   "Try to complete a structure template before point.
