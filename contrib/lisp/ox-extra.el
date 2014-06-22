@@ -46,36 +46,37 @@
 (require 'ox)
 (eval-when-compile (require 'cl))
 
-(defun org-latex-header-blocks-filter ()
-  (let ((positions
-	 (org-element-map (org-element-parse-buffer 'greater-element nil) 'export-block
-	   (lambda (block)
-	     (when (and (string= (org-element-property :type block) "LATEX")
-			(string= (org-export-read-attribute
-				  :header block :header)
-				 "yes"))
-	       (list (org-element-property :begin block)
-		     (org-element-property :end block)
-		     (org-element-property :post-affiliated block)))))))
-    (mapc (lambda (pos)
-	    (goto-char (nth 2 pos))
-	    (destructuring-bind
-		(beg end &rest ignore)
-		(org-edit-src-find-region-and-lang)
-	      (let ((contents-lines (split-string
-				     (buffer-substring-no-properties beg end)
-				     "\n")))
-		(delete-region (nth 0 pos) (nth 1 pos))
-		(dolist (line contents-lines)
-		  (insert (concat "#+latex_header: "
-				  (replace-regexp-in-string "\\` *" "" line)
-				  "\n"))))))
-	  ;; go in reverse, to avoid wrecking the numeric positions
-	  ;; earlier in the file
-	  (reverse positions))))
+(defun org-latex-header-blocks-filter (backend)
+  (when (org-export-derived-backend-p backend 'latex)
+    (let ((positions
+	   (org-element-map (org-element-parse-buffer 'greater-element nil) 'export-block
+	     (lambda (block)
+	       (when (and (string= (org-element-property :type block) "LATEX")
+			  (string= (org-export-read-attribute
+				    :header block :header)
+				   "yes"))
+		 (list (org-element-property :begin block)
+		       (org-element-property :end block)
+		       (org-element-property :post-affiliated block)))))))
+      (mapc (lambda (pos)
+	      (goto-char (nth 2 pos))
+	      (destructuring-bind
+		  (beg end &rest ignore)
+		  (org-edit-src-find-region-and-lang)
+		(let ((contents-lines (split-string
+				       (buffer-substring-no-properties beg end)
+				       "\n")))
+		  (delete-region (nth 0 pos) (nth 1 pos))
+		  (dolist (line contents-lines)
+		    (insert (concat "#+latex_header: "
+				    (replace-regexp-in-string "\\` *" "" line)
+				    "\n"))))))
+	    ;; go in reverse, to avoid wrecking the numeric positions
+	    ;; earlier in the file
+	    (reverse positions)))))
 
 (defconst ox-extras
-  '((latex-header-blocks org-latex-latex-header-blocks-filter org-export-before-parsing-hook))
+  '((latex-header-blocks org-latex-header-blocks-filter org-export-before-parsing-hook))
   "A list of org export extras that can be enabled.
 
 Should be a list of items of the form (NAME FN HOOK).  NAME is a
