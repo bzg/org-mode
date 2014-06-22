@@ -1008,7 +1008,7 @@ This means, between the beginning of line and the point."
 	(let ((endmarker (with-current-buffer buffer
 			   (org-end-of-subtree nil t)
 			   (unless (eobp) (forward-char 1))
-			   (copy-marker (point)))))
+			   (point-marker))))
 	  (org-with-remote-undo buffer
 	    (with-current-buffer buffer
 	      (widen)
@@ -1018,7 +1018,7 @@ This means, between the beginning of line and the point."
 		(and (outline-next-heading)
 		     (org-flag-heading nil)))   ; show the next heading
 	      (org-back-to-heading)
-	      (setq marker (copy-marker (point)))
+	      (setq marker (point-marker))
 	      (goto-char (max (point-at-bol) (- (point-at-eol) anticol)))
 	      (funcall command)
 	      (message "_cmd: %S" org-mouse-cmd)
