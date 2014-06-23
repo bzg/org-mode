@@ -5449,47 +5449,46 @@ text.  See `before-change-functions' for more information."
 BEG and END are the beginning and end of the range of changed
 text, and the length in bytes of the pre-change text replaced by
 that range.  See `after-change-functions' for more information."
-  (let ((inhibit-quit t))
-    (when (org-element--cache-active-p)
-      (org-with-wide-buffer
-       (goto-char beg)
-       (beginning-of-line)
+  (when (org-element--cache-active-p)
+    (org-with-wide-buffer
+     (goto-char beg)
+     (beginning-of-line)
+     (save-match-data
        (let ((top (point))
 	     (bottom (save-excursion (goto-char end) (line-end-position))))
 	 (org-with-limited-levels
-	  (save-match-data
-	    ;; Determine if modified area needs to be extended,
-	    ;; according to both previous and current state.  We make
-	    ;; a special case for headline editing: if a headline is
-	    ;; modified but not removed, do not extend.
-	    (when (let ((previous-state org-element--cache-change-warning)
-			(sensitive-re
-			 (concat "\\(" org-outline-regexp-bol "\\)" "\\|"
-				 org-element--cache-closing-line "\\|"
-				 org-element--cache-opening-line))
-			(case-fold-search t))
-		    (cond ((eq previous-state t))
-			  ((not (re-search-forward sensitive-re bottom t))
-			   (eq previous-state 'headline))
-			  ((match-beginning 1)
-			   (or (not (eq previous-state 'headline))
-			       (and (progn (goto-char bottom)
-					   (re-search-backward
-					    sensitive-re (match-end 1) t))
-				    (not (match-beginning 1)))))
-			  (t)))
-	      ;; Effectively extend modified area.
-	      (setq top (progn (goto-char top)
-			       (when (outline-previous-heading) (forward-line))
-			       (point)))
-	      (setq bottom (progn (goto-char bottom)
-				  (if (outline-next-heading) (1- (point))
-				    (point)))))))
+	  ;; Determine if modified area needs to be extended,
+	  ;; according to both previous and current state.  We make
+	  ;; a special case for headline editing: if a headline is
+	  ;; modified but not removed, do not extend.
+	  (when (let ((previous-state org-element--cache-change-warning)
+		      (sensitive-re
+		       (concat "\\(" org-outline-regexp-bol "\\)" "\\|"
+			       org-element--cache-closing-line "\\|"
+			       org-element--cache-opening-line))
+		      (case-fold-search t))
+		  (cond ((eq previous-state t))
+			((not (re-search-forward sensitive-re bottom t))
+			 (eq previous-state 'headline))
+			((match-beginning 1)
+			 (or (not (eq previous-state 'headline))
+			     (and (progn (goto-char bottom)
+					 (re-search-backward
+					  sensitive-re (match-end 1) t))
+				  (not (match-beginning 1)))))
+			(t)))
+	    ;; Effectively extend modified area.
+	    (setq top (progn (goto-char top)
+			     (when (outline-previous-heading) (forward-line))
+			     (point)))
+	    (setq bottom (progn (goto-char bottom)
+				(if (outline-next-heading) (1- (point))
+				  (point))))))
 	 ;; Store synchronization request.
 	 (let ((offset (- end beg pre)))
-	   (org-element--cache-submit-request top (- bottom offset) offset))))
-      ;; Activate a timer to process the request during idle time.
-      (org-element--cache-set-timer (current-buffer)))))
+	   (org-element--cache-submit-request top (- bottom offset) offset)))))
+    ;; Activate a timer to process the request during idle time.
+    (org-element--cache-set-timer (current-buffer))))
 
 (defun org-element--cache-for-removal (beg end offset)
   "Return first element to remove from cache.
