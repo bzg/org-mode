@@ -93,6 +93,44 @@ this variable.")
     (when (and session (string-match "^\\*\\(.+?\\)\\*$" session))
       (save-match-data (org-babel-R-initiate-session session nil)))))
 
+(defconst ob-R-transfer-variable-table-with-header
+  "%s <- local({
+     con <- textConnection(
+       %S
+     )
+     res <- read.table(
+       con,
+       header    = %s,
+       row.names = %s,
+       sep       = \"\\t\",
+       as.is     = TRUE
+     )
+     close(con)
+     res
+   })"
+  "R code used to transfer a table defined as a variable from org to R. 
+This function is used when the table contains a header.")
+
+(defconst ob-R-transfer-variable-table-without-header
+  "%s <- local({
+     con <- textConnection(
+       %S
+     )
+     res <- read.table(
+       con,
+       header    = %s,
+       row.names = %s,
+       sep       = \"\\t\",
+       as.is     = TRUE,
+       fill      = TRUE,
+       col.names = paste(\"V\", seq_len(%d), sep =\"\")
+     )
+     close(con)
+     res
+   })"
+  "R code used to transfer a table defined as a variable from org to R. 
+This function is used when the table does not contain a header.")
+
 (defun org-babel-expand-body:R (body params &optional graphics-file)
   "Expand BODY according to PARAMS, return the expanded body."
   (mapconcat 'identity
@@ -198,37 +236,15 @@ This function is called by `org-babel-execute-src-block'."
 			  "TRUE" "FALSE"))
 	      (row-names (if rownames-p "1" "NULL")))
 	  (if (= max min)
-	      (format "%s <- local({
-                        con <- textConnection(
-                          %S
-                        )
-                        res <- read.table(
-                          con,
-                          header    = %s,
-                          row.names = %s,
-                          sep       = \"\\t\",
-                          as.is     = TRUE
-                        )
-                        close(con)
-                        res
-                        })" name file header row-names)
-	    (format "%s <- local({
-                       con <- textConnection(
-                         %S
-                       )
-                       res <- read.table(
-                         con,
-                         header    = %s,
-                         row.names = %s,
-                         sep       = \"\\t\",
-                         as.is     = TRUE,
-                         fill      = TRUE,
-                         col.names = paste(\"V\", seq_len(%d), sep =\"\")
-                       )
-                       close(con)
-                       res
-                       })" name file header row-names max))))
-    (format "%s <- %s" name (org-babel-R-quote-tsv-field value))))
+	      (format ob-R-transfer-variable-table-with-header
+		      name file header row-names)
+	    (format ob-R-transfer-variable-table-without-header
+		    name file header row-names max))))
+    (cond ((integerp value) (format "%s <- %s" name (concat (number-to-string value) "L")))
+	  ((floatp   value) (format "%s <- %s" name value))
+	  ((stringp  value) (format "%s <- %S" name value))
+	  (t                (format "%s <- %S" name (prin1-to-string value))))))
+
 
 (defvar ess-ask-for-ess-directory) ; dynamically scoped
 (defun org-babel-R-initiate-session (session params)
