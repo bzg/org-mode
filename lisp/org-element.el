@@ -4864,12 +4864,13 @@ A and B are either integers or lists of integers, as returned by
 	  (cond ((car-less-than-car a b) (throw 'exit t))
 		((car-less-than-car b a) (throw 'exit nil))
 		(t (setq a (cdr a) b (cdr b)))))
-	;; If A is empty, either keys are equal (B is also empty) or
-	;; B is less than A (B is longer).  Therefore return nil.
+	;; If A is empty, either keys are equal (B is also empty) and
+	;; we return nil, or A is lesser than B (B is longer) and we
+	;; return a non-nil value.
 	;;
-	;; If A is not empty, B is necessarily empty and A is less
-	;; than B (A is longer).  Therefore, return a non-nil value.
-	a))))
+	;; If A is not empty, B is necessarily empty and A is greater
+	;; than B (A is longer).  Therefore, return nil.
+	(and (null a) b)))))
 
 (defun org-element--cache-compare (a b)
   "Non-nil when element A is located before element B."
