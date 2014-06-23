@@ -2956,8 +2956,17 @@ the plist used as a communication channel."
     (cond
      ((and (eq (org-element-type parent) 'item)
 	   (= (org-element-property :begin paragraph)
-	      (org-element-property :contents-begin parent)))
-      ;; Leading paragraph in a list item have no tags.
+	      (org-element-property :contents-begin parent))
+	   (not (org-element-map (org-export-get-parent parent) 'item
+		  (lambda (item)
+		    (let ((contents (org-element-contents item)))
+		      (and contents
+			   (or (cdr contents)
+			       (not (eq (org-element-type (car contents))
+					'paragraph))))))
+		  info 'first-match 'item)))
+      ;; Leading paragraph in a list item have no tags if every
+      ;; element of the containing list is only a single paragraph.
       contents)
      ((org-html-standalone-image-p paragraph info)
       ;; Standalone image.
