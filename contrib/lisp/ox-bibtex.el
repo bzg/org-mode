@@ -89,8 +89,6 @@
 ;; Initialization
 
 (eval-when-compile (require 'cl))
-(let ((jump-fn (car (org-remove-if-not #'fboundp '(ebib obe-goto-citation)))))
-  (org-add-link-type "cite" jump-fn))
 
 ;;; Internal Functions
 
@@ -148,6 +146,27 @@ to `org-bibtex-citation-p' predicate."
     (let ((value (org-element-property :value citation)))
       (and (string-match "\\`\\\\cite{" value)
 	   (substring value (match-end 0) -1)))))
+
+
+;;; Follow cite: links
+
+(defun org-bibtex-file nil "Org-mode file of bibtex entries.")
+
+(defun org-bibtex-goto-citation (&optional citation)
+  "Visit a citation given its ID."
+  (interactive)
+  (let ((citation (or citation
+		      (org-icompleting-read "Citation: "
+					    (obe-citations)))))
+    (find-file (or org-bibtex-file
+		   (error "`org-bibtex-file' has not been configured")))
+    (goto-char (point-min))
+    (when (re-search-forward (format "  :CUSTOM_ID: %s" citation) nil t)
+      (outline-previous-visible-heading 1)
+      t)))
+
+(let ((jump-fn (car (org-remove-if-not #'fboundp '(ebib org-bibtex-goto-citation)))))
+  (org-add-link-type "cite" jump-fn))
 
 
 

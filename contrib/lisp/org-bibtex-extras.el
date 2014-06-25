@@ -83,19 +83,6 @@ For example, to point to your `obe-bibtex-file' use the following.
 		obe-citations))
 	obe-citations)))
 
-(defun obe-goto-citation (&optional citation)
-  "Visit a citation given its ID."
-  (interactive)
-  (let ((citation (or citation
-		      (org-icompleting-read "Citation: "
-					    (obe-citations)))))
-    (find-file (or obe-bibtex-file
-		   (error "`obe-bibtex-file' has not been configured")))
-    (goto-char (point-min))
-    (when (re-search-forward (format "  :CUSTOM_ID: %s" citation) nil t)
-      (outline-previous-visible-heading 1)
-      t)))
-
 (defun obe-html-export-citations ()
   "Convert all \\cite{...} citations in the current file into HTML links."
   (save-excursion
@@ -106,15 +93,6 @@ For example, to point to your `obe-bibtex-file' use the following.
 	 (mapconcat (lambda (c) (format "[[%s#%s][%s]]" obe-html-link-base c c))
 		    (mapcar #'org-babel-trim
 			    (split-string (match-string 1) ",")) ", "))))))
-
-(defun obe-get-meta-data (citation)
-  "Collect meta-data for CITATION."
-  (save-excursion
-    (when (obe-goto-citation citation)
-      (let ((pt (point)))
-	`((:authors . ,(split-string (org-entry-get pt "AUTHOR") " and " t))
-	  (:title   . ,(org-no-properties (org-get-heading 1 1)))
-	  (:journal . ,(org-entry-get pt "JOURNAL")))))))
 
 (defun obe-meta-to-json (meta &optional fields)
   "Turn a list of META data from citations into a string of json."
