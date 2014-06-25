@@ -4758,10 +4758,6 @@ table is cleared once the synchronization is complete."
 	    (puthash element key org-element--cache-sync-keys)
 	  key))))
 
-(defconst org-element--cache-default-key (ash most-positive-fixnum -1)
-  "Default value for a new key level.
-See `org-element--cache-generate-key' for more information.")
-
 (defun org-element--cache-generate-key (lower upper)
   "Generate a key between LOWER and UPPER.
 
@@ -4775,8 +4771,8 @@ the following rules:
 
   - If, at a given level, LOWER and UPPER differ from more than
     2, the new key shares all the levels above with LOWER and
-    gets a new level.  Its value is the mean between LOWER and
-    UPPER.
+    gets a new level. Its value is the mean between LOWER and
+    UPPER:
 
       \(1 2) + (1 4) --> (1 3)
 
@@ -4789,69 +4785,48 @@ the following rules:
     `most-positive-fixnum'.
 
   - If they differ from only one, the new key inherits from
-    current LOWER lever and has a new level at the value
-    `org-element--cache-default-key'.
+    current LOWER level and fork it at the next level.  E.g.,
 
-      \(1 2) + (1 3) --> (1 2 org-element--cache-default-key)
+      \(2 1) + (3 3)
+
+    is equivalent to
+
+      \(2 1) + (2 M)
+
+    where M is `most-positive-fixnum'.
 
   - If the key is only one level long, it is returned as an
-    integer.
+    integer:
 
-      \(1 2) + (3 2) --> 2"
+      \(1 2) + (3 2) --> 2
+
+When they are not equals, the function assumes that LOWER is
+lesser than UPPER, per `org-element--cache-key-less-p'."
   (if (equal lower upper) lower
     (let ((lower (if (integerp lower) (list lower) lower))
 	  (upper (if (integerp upper) (list upper) upper))
-	  key)
+          skip-upper key)
       (catch 'exit
-	(while (and lower upper)
-	  (let ((lower-level (car lower))
-		(upper-level (car upper)))
-	    (cond
-	     ((= lower-level upper-level)
-	      (push lower-level key)
-	      (setq lower (cdr lower) upper (cdr upper)))
-	     ((= (- upper-level lower-level) 1)
-	      (push lower-level key)
-	      (setq lower (cdr lower))
-	      (while (and lower (= (car lower) most-positive-fixnum))
-		(push most-positive-fixnum key)
-		(setq lower (cdr lower)))
-	      (push (if lower
-			(let ((n (car lower)))
-			  (+ (ash (if (zerop (mod n 2)) n (1+ n)) -1)
-			     org-element--cache-default-key))
-		      org-element--cache-default-key)
-		    key)
-	      (throw 'exit t))
-	     (t
-	      (push (let ((n (car lower)))
-		      (+ (ash (if (zerop (mod n 2)) n (1+ n)) -1)
-			 (ash (car upper) -1)))
-		    key)
-	      (throw 'exit t)))))
-	(cond
-	 ((not lower)
-	  (while (and upper (zerop (car upper)))
-	    (push 0 key)
-	    (setq upper (cdr upper)))
-	  ;; (n) is equivalent to (n 0 0 0 0 ...) so we forbid ending
-	  ;; sequences on 0.
-	  (cond ((not upper) (push org-element--cache-default-key key))
-		((= (car upper) 1)
-		 (push 0 key)
-		 (push org-element--cache-default-key key))
-		(t (push (ash (car upper) -1) key))))
-	 ((not upper)
-	  (while (and lower (= (car lower) most-positive-fixnum))
-	    (push most-positive-fixnum key)
-	    (setq lower (cdr lower)))
-	  (push (if (not lower) org-element--cache-default-key
-		  (let ((n (car lower)))
-		    (+ (ash (if (zerop (mod n 2)) n (1+ n)) -1)
-		       org-element--cache-default-key)))
-		key))))
-      ;; Ensure we don't return a list with a single element.
-      (if (cdr key) (nreverse key) (car key)))))
+	(while t
+	  (let ((min (or (car lower) 0))
+		(max (cond (skip-upper most-positive-fixnum)
+                           ((car upper))
+                           (t most-positive-fixnum))))
+            (if (<= (- max min) 1)
+                (progn
+                  (when (and (< min max) (not skip-upper))
+                    ;; When at a given level, LOWER and UPPER differ
+                    ;; from 1, ignore UPPER altogether.  Instead
+                    ;; create a key between LOWER and the greatest key
+                    ;; with the same prefix as LOWER so far.
+                    (setq skip-upper t))
+                  (push min key)
+                  (setq lower (cdr lower) upper (cdr upper)))
+              (let ((mean (+ (ash min -1) (ash max -1))))
+                ;; Fix MEAN when both MIN and MAX are odd numbers.
+                (push (if (zerop (logand min max 1)) mean (1+ mean)) key))
+              ;; Ensure we don't return a list with a single element.
+              (throw 'exit (if (cdr key) (nreverse key) (car key))))))))))
 
 (defsubst org-element--cache-key-less-p (a b)
   "Non-nil if key A is less than key B.
