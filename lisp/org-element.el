@@ -5434,7 +5434,8 @@ text.  See `before-change-functions' for more information."
 	      (concat
 	       "\\(" (org-with-limited-levels org-outline-regexp-bol) "\\)" "\\|"
 	       org-element--cache-closing-line "\\|"
-	       org-element--cache-opening-line)))
+	       org-element--cache-opening-line))
+	     (case-fold-search t))
 	 (setq org-element--cache-change-warning
 	       (cond ((not (re-search-forward sensitive-re bottom t)) nil)
 		     ((and (match-beginning 1)
