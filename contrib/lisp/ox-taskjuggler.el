@@ -310,6 +310,19 @@ If one of these appears as a property for a headline, it will be
 exported with the corresponding task."
   :group 'org-export-taskjuggler)
 
+(defcustom org-taskjuggler-valid-project-attributes
+  '(timingresolution timezone alertlevels currency currencyformat
+  dailyworkinghours extend includejournalentry now numberformat
+  outputdir scenario shorttimeformat timeformat trackingscenario
+  weekstartsmonday weekstartssunday workinghours
+  yearlyworkingdays)
+  "Valid attributes for Taskjuggler project.
+If one of these appears as a property for a headline that is a
+project definition, it will be exported with the corresponding
+task. Attribute 'timingresolution' should be the first in the
+list."
+  :group 'org-export-taskjuggler)
+
 (defcustom org-taskjuggler-valid-resource-attributes
   '(limits vacation shift booking efficiency journalentry rate
 	   workinghours flags)
@@ -483,9 +496,9 @@ Return new string.  If S is the empty string, return it."
   (if (equal "" s) s (replace-regexp-in-string "^ *\\S-" "  \\&" s)))
 
 (defun org-taskjuggler--build-attributes (item attributes)
-  "Return attributes string for task, resource or report ITEM.
-ITEM is a headline.  ATTRIBUTES is a list of symbols
-representing valid attributes for ITEM."
+  "Return attributes string for ITEM.
+ITEM is a project, task, resource or report headline.  ATTRIBUTES
+is a list of symbols representing valid attributes for ITEM."
   (mapconcat
    (lambda (attribute)
      (let ((value (org-element-property
@@ -715,18 +728,27 @@ PROJECT is a headline.  INFO is a plist used as a communication
 channel.  If no start date is specified, start today.  If no end
 date is specified, end `org-taskjuggler-default-project-duration'
 days from now."
-  (format "project %s \"%s\" \"%s\" %s %s {\n}\n"
-          (org-taskjuggler-get-id project info)
-          (org-taskjuggler-get-name project)
-          ;; Version is obtained through :TASKJUGGLER_VERSION:
-          ;; property or `org-taskjuggler-default-project-version'.
-          (or (org-element-property :VERSION project)
-              org-taskjuggler-default-project-version)
-          (or (org-taskjuggler-get-start project)
-              (format-time-string "%Y-%m-%d"))
-          (let ((end (org-taskjuggler-get-end project)))
-            (or (and end (format "- %s" end))
-                (format "+%sd" org-taskjuggler-default-project-duration)))))
+  (concat 
+   ;; Opening project.
+   (format "project %s \"%s\" \"%s\" %s %s {\n"
+	   (org-taskjuggler-get-id project info)
+	   (org-taskjuggler-get-name project)
+	   ;; Version is obtained through :TASKJUGGLER_VERSION:
+	   ;; property or `org-taskjuggler-default-project-version'.
+	   (or (org-element-property :VERSION project)
+	       org-taskjuggler-default-project-version)
+	   (or (org-taskjuggler-get-start project)
+	       (format-time-string "%Y-%m-%d"))
+	   (let ((end (org-taskjuggler-get-end project)))
+	     (or (and end (format "- %s" end))
+		 (format "+%sd"
+			 org-taskjuggler-default-project-duration))))
+   ;; Add attributes.
+   (org-taskjuggler--indent-string
+    (org-taskjuggler--build-attributes
+     project org-taskjuggler-valid-project-attributes))
+   ;; Closing project.
+   "}\n"))
 
 (defun org-taskjuggler--build-resource (resource info)
   "Return a resource declaration.
