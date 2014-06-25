@@ -1587,27 +1587,50 @@ Outside."
 
 (ert-deftest test-org/drag-element-backward ()
   "Test `org-drag-element-backward' specifications."
-  ;; 1. Error when trying to move first element of buffer.
-  (org-test-with-temp-text "Paragraph 1.\n\nParagraph 2."
-    (should-error (org-drag-element-backward)))
-  ;; 2. Error when trying to swap nested elements.
-  (org-test-with-temp-text "#+BEGIN_CENTER\nTest.\n#+END_CENTER"
-    (forward-line)
-    (should-error (org-drag-element-backward)))
-  ;; 3. Error when trying to swap an headline element and
-  ;;    a non-headline element.
-  (org-test-with-temp-text "Test.\n* Head 1"
-    (forward-line)
-    (should-error (org-drag-element-backward)))
-  ;; 4. Otherwise, swap elements, preserving column and blank lines
-  ;;    between elements.
-  (org-test-with-temp-text "Para1\n\n\nParagraph 2\n\nPara3"
-    (search-forward "graph")
-    (org-drag-element-backward)
-    (should (equal (buffer-string) "Paragraph 2\n\n\nPara1\n\nPara3"))
-    (should (looking-at " 2")))
-  ;; 5. Preserve visibility of elements and their contents.
-  (org-test-with-temp-text "
+  ;; Standard test.
+  (should
+   (equal
+    "#+key2: val2\n#+key1: val1\n#+key3: val3"
+    (org-test-with-temp-text "#+key1: val1\n<point>#+key2: val2\n#+key3: val3"
+      (org-drag-element-backward)
+      (buffer-string))))
+  (should
+   (equal
+    "#+BEGIN_CENTER\n#+B: 2\n#+A: 1\n#+END_CENTER"
+    (org-test-with-temp-text
+	"#+BEGIN_CENTER\n#+A: 1\n<point>#+B: 2\n#+END_CENTER"
+      (org-drag-element-backward)
+      (buffer-string))))
+  ;; Preserve blank lines.
+  (should
+   (equal "Paragraph 2\n\n\nPara1\n\nPara3"
+	  (org-test-with-temp-text "Para1\n\n\n<point>Paragraph 2\n\nPara3"
+	    (org-drag-element-backward)
+	    (buffer-string))))
+  ;; Preserve column.
+  (should
+   (org-test-with-temp-text "#+key1: v\n#+key<point>2: v\n#+key3: v"
+     (org-drag-element-backward)
+     (org-looking-at-p "2")))
+  ;; Error when trying to move first element of buffer.
+  (should-error
+   (org-test-with-temp-text "Paragraph 1.\n\nParagraph 2."
+     (org-drag-element-backward)))
+  ;; Error when trying to swap nested elements.
+  (should-error
+   (org-test-with-temp-text "#+BEGIN_CENTER\nTest.\n#+END_CENTER"
+     (forward-line)
+     (org-drag-element-backward)))
+  ;; Error when trying to swap an headline element and a non-headline
+  ;; element.
+  (should-error
+   (org-test-with-temp-text "Test.\n* Head 1"
+     (forward-line)
+     (org-drag-element-backward)))
+  ;; Preserve visibility of elements and their contents.
+  (should
+   (equal '((63 . 82) (26 . 48))
+	  (org-test-with-temp-text "
 #+BEGIN_CENTER
 Text.
 #+END_CENTER
@@ -1615,14 +1638,11 @@ Text.
   #+BEGIN_QUOTE
   Text.
   #+END_QUOTE"
-    (while (search-forward "BEGIN_" nil t) (org-cycle))
-    (search-backward "- item 1")
-    (org-drag-element-backward)
-    (should
-     (equal
-      '((63 . 82) (26 . 48))
-      (mapcar (lambda (ov) (cons (overlay-start ov) (overlay-end ov)))
-	      (overlays-in (point-min) (point-max)))))))
+	    (while (search-forward "BEGIN_" nil t) (org-cycle))
+	    (search-backward "- item 1")
+	    (org-drag-element-backward)
+	    (mapcar (lambda (ov) (cons (overlay-start ov) (overlay-end ov)))
+		    (overlays-in (point-min) (point-max)))))))
 
 (ert-deftest test-org/drag-element-forward ()
   "Test `org-drag-element-forward' specifications."

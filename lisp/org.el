@@ -24145,7 +24145,7 @@ Move to the previous element at the same level, when possible."
 		       (prev (org-element-at-point))
 		       (up prev))
 		  (while (and (setq up (org-element-property :parent up))
-			      (<= (org-element-property :end prev) beg))
+			      (<= (org-element-property :end up) beg))
 		    (setq prev up))
 		  prev)))))
       ;; Error out if no previous element or previous element is
