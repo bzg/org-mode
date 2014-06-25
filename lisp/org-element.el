@@ -4771,7 +4771,7 @@ the following rules:
 
   - If, at a given level, LOWER and UPPER differ from more than
     2, the new key shares all the levels above with LOWER and
-    gets a new level. Its value is the mean between LOWER and
+    gets a new level.  Its value is the mean between LOWER and
     UPPER:
 
       \(1 2) + (1 4) --> (1 3)
