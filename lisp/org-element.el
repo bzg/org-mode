@@ -5388,27 +5388,22 @@ the process stopped before finding the expected result."
 
 ;;;; Staging Buffer Changes
 
-(defconst org-element--cache-opening-line
-  (concat "^[ \t]*\\(?:"
-	  "#\\+BEGIN[:_]" "\\|"
-	  "\\\\begin{[A-Za-z0-9]+\\*?}" "\\|"
-	  ":\\S-+:[ \t]*$"
-	  "\\)")
-  "Regexp matching an element opening line.
-When such a line is modified, modifications may propagate after
-modified area.  In that situation, every element between that
-area and next section is removed from cache.")
-
-(defconst org-element--cache-closing-line
-  (concat "^[ \t]*\\(?:"
-	  "#\\+END\\(?:_\\|:?[ \t]*$\\)" "\\|"
-	  "\\\\end{[A-Za-z0-9]+\\*?}[ \t]*$" "\\|"
-	  ":END:[ \t]*$"
-	  "\\)")
-  "Regexp matching an element closing line.
-When such a line is modified, modifications may propagate before
-modified area.  In that situation, every element between that
-area and previous section is removed from cache.")
+(defconst org-element--cache-sensitive-re
+  (concat
+   org-outline-regexp-bol "\\|"
+   "^[ \t]*\\(?:"
+   ;; Blocks
+   "#\\+\\(?:BEGIN[:_]\\|END\\(?:_\\|:?[ \t]*$\\)\\)" "\\|"
+   ;; LaTeX environments.
+   "\\\\\\(?:begin{[A-Za-z0-9]+\\*?}\\|end{[A-Za-z0-9]+\\*?}[ \t]*$\\)" "\\|"
+   ;; Drawers.
+   ":\\S-+:[ \t]*$"
+   "\\)")
+  "Regexp matching a sensitive line, structure wise.
+A sensitive line is a headline, inlinetask, block, drawer, or
+latex-environment boundary.  When such a line is modified,
+structure changes in the document may propagate in the whole
+section, possibly making cache invalid.")
 
 (defvar org-element--cache-change-warning nil
   "Non-nil when a sensitive line is about to be changed.
@@ -5418,33 +5413,19 @@ It is a symbol among nil, t and `headline'.")
   "Request extension of area going to be modified if needed.
 BEG and END are the beginning and end of the range of changed
 text.  See `before-change-functions' for more information."
-  (let ((inhibit-quit t))
-    (save-match-data
-      (org-with-wide-buffer
-       (goto-char beg)
-       (beginning-of-line)
-       (let ((top (point))
-	     (bottom (save-excursion (goto-char end) (line-end-position)))
-	     (sensitive-re
-	      ;; A sensitive line is a headline or a block (or drawer,
-	      ;; or latex-environment) boundary.  Inserting one can
-	      ;; modify buffer drastically both above and below that
-	      ;; line, possibly making cache invalid.  Therefore, we
-	      ;; need to pay attention to changes happening to them.
-	      (concat
-	       "\\(" (org-with-limited-levels org-outline-regexp-bol) "\\)" "\\|"
-	       org-element--cache-closing-line "\\|"
-	       org-element--cache-opening-line))
-	     (case-fold-search t))
-	 (setq org-element--cache-change-warning
-	       (cond ((not (re-search-forward sensitive-re bottom t)) nil)
-		     ((and (match-beginning 1)
-			   (progn (goto-char bottom)
-				  (or (not (re-search-backward sensitive-re
-							       (match-end 1) t))
-				      (match-beginning 1))))
-		      'headline)
-		     (t))))))))
+  (when (org-element--cache-active-p)
+    (org-with-wide-buffer
+     (goto-char beg)
+     (beginning-of-line)
+     (let ((bottom (save-excursion (goto-char end) (line-end-position))))
+       (setq org-element--cache-change-warning
+	     (save-match-data
+	       (if (and (org-with-limited-levels (org-at-heading-p))
+			(= (line-end-position) bottom))
+		   'headline
+		 (let ((case-fold-search t))
+		   (re-search-forward
+		    org-element--cache-sensitive-re bottom t)))))))))
 
 (defun org-element--cache-after-change (beg end pre)
   "Update buffer modifications for current buffer.
@@ -5458,28 +5439,21 @@ that range.  See `after-change-functions' for more information."
      (save-match-data
        (let ((top (point))
 	     (bottom (save-excursion (goto-char end) (line-end-position))))
-	 (org-with-limited-levels
-	  ;; Determine if modified area needs to be extended,
-	  ;; according to both previous and current state.  We make
-	  ;; a special case for headline editing: if a headline is
-	  ;; modified but not removed, do not extend.
-	  (when (let ((previous-state org-element--cache-change-warning)
-		      (sensitive-re
-		       (concat "\\(" org-outline-regexp-bol "\\)" "\\|"
-			       org-element--cache-closing-line "\\|"
-			       org-element--cache-opening-line))
-		      (case-fold-search t))
-		  (cond ((eq previous-state t))
-			((not (re-search-forward sensitive-re bottom t))
-			 (eq previous-state 'headline))
-			((match-beginning 1)
-			 (or (not (eq previous-state 'headline))
-			     (and (progn (goto-char bottom)
-					 (re-search-backward
-					  sensitive-re (match-end 1) t))
-				  (not (match-beginning 1)))))
-			(t)))
-	    ;; Effectively extend modified area.
+	 ;; Determine if modified area needs to be extended, according
+	 ;; to both previous and current state.  We make a special
+	 ;; case for headline editing: if a headline is modified but
+	 ;; not removed, do not extend.
+	 (when (case org-element--cache-change-warning
+		 ((t) t)
+		 (headline
+		  (not (and (org-with-limited-levels (org-at-heading-p))
+			    (= (line-end-position) bottom))))
+		 (otherwise
+		  (let ((case-fold-search t))
+		    (re-search-forward
+		     org-element--cache-sensitive-re bottom t))))
+	   ;; Effectively extend modified area.
+	   (org-with-limited-levels
 	    (setq top (progn (goto-char top)
 			     (when (outline-previous-heading) (forward-line))
 			     (point)))
