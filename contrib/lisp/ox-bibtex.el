@@ -250,8 +250,10 @@ Return new parse tree."
 (defun org-bibtex-merge-contiguous-citations (tree backend info)
   "Merge all contiguous citation in parse tree.
 As a side effect, this filter will also turn all \"cite\" links
-into \"\\cite{...}\" LaTeX fragments and will extract options
-into square brackets at the beginning of the \"\\cite\" command."
+into \"\\cite{...}\" LaTeX fragments and will extract options.
+Cite options are placed into square brackets at the beginning of
+the \"\\cite\" command for the LaTeX backend, and are removed for
+the HTML and ASCII backends."
   (when (org-export-derived-backend-p backend 'html 'latex 'ascii)
     (org-element-map tree '(link latex-fragment)
       (lambda (object)
@@ -282,7 +284,8 @@ into square brackets at the beginning of the \"\\cite\" command."
 		     (lambda (k)
 		       (if (string-match "^(\\([^)]\+\\))\\(.*\\)" k)
 			   (progn
-			     (setq option (format "[%s]" (match-string 1 k)))
+			     (when (org-export-derived-backend-p backend 'latex)
+			       (setq option (format "[%s]" (match-string 1 k))))
 			     (match-string 2 k))
 			 k))
 		     keys))
