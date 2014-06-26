@@ -4817,11 +4817,8 @@ lesser than UPPER, per `org-element--cache-key-less-p'."
                            ((car upper))
                            (t most-positive-fixnum))))
             (if (< (1+ min) max)
-		(let* ((mean (+ (ash min -1) (ash max -1)))
-		       ;; Fix MEAN when both MIN and MAX are odd.
-		       (new (if (zerop (logand min max 1)) mean (1+ mean))))
-		  ;; Ensure we don't return a singleton.
-		  (throw 'exit (if key (nreverse (cons new key)) new)))
+		(let ((mean (+ (ash min -1) (ash max -1) (logand min max 1))))
+		  (throw 'exit (if key (nreverse (cons mean key)) mean)))
 	      (when (and (< min max) (not skip-upper))
 		;; When at a given level, LOWER and UPPER differ from
 		;; 1, ignore UPPER altogether.  Instead create a key
