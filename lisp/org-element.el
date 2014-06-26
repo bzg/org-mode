@@ -4777,12 +4777,16 @@ the following rules:
       \(1 2) + (1 4) --> (1 3)
 
   - If LOWER has no value to compare with, it is assumed that its
-    value is 0:
+    value is `most-negative-fixnum'.  E.g.,
 
-      \(1 1) + (1 1 2) --> (1 1 1)
+      \(1 1) + (1 1 2)
 
-    Likewise, if UPPER is short of levels, the current value is
-    `most-positive-fixnum'.
+    is equivalent to
+
+      \(1 1 m) + (1 1 2)
+
+    where m is `most-negative-fixnum'.  Likewise, if UPPER is
+    short of levels, the current value is `most-positive-fixnum'.
 
   - If they differ from only one, the new key inherits from
     current LOWER level and fork it at the next level.  E.g.,
@@ -4808,25 +4812,24 @@ lesser than UPPER, per `org-element--cache-key-less-p'."
           skip-upper key)
       (catch 'exit
 	(while t
-	  (let ((min (or (car lower) 0))
+	  (let ((min (or (car lower) most-negative-fixnum))
 		(max (cond (skip-upper most-positive-fixnum)
                            ((car upper))
                            (t most-positive-fixnum))))
-            (if (<= (- max min) 1)
-                (progn
-                  (when (and (< min max) (not skip-upper))
-                    ;; When at a given level, LOWER and UPPER differ
-                    ;; from 1, ignore UPPER altogether.  Instead
-                    ;; create a key between LOWER and the greatest key
-                    ;; with the same prefix as LOWER so far.
-                    (setq skip-upper t))
-                  (push min key)
-                  (setq lower (cdr lower) upper (cdr upper)))
-              (let ((mean (+ (ash min -1) (ash max -1))))
-                ;; Fix MEAN when both MIN and MAX are odd numbers.
-                (push (if (zerop (logand min max 1)) mean (1+ mean)) key))
-              ;; Ensure we don't return a list with a single element.
-              (throw 'exit (if (cdr key) (nreverse key) (car key))))))))))
+            (if (< (1+ min) max)
+		(let* ((mean (+ (ash min -1) (ash max -1)))
+		       ;; Fix MEAN when both MIN and MAX are odd.
+		       (new (if (zerop (logand min max 1)) mean (1+ mean))))
+		  ;; Ensure we don't return a singleton.
+		  (throw 'exit (if key (nreverse (cons new key)) new)))
+	      (when (and (< min max) (not skip-upper))
+		;; When at a given level, LOWER and UPPER differ from
+		;; 1, ignore UPPER altogether.  Instead create a key
+		;; between LOWER and the greatest key with the same
+		;; prefix as LOWER so far.
+		(setq skip-upper t))
+	      (push min key)
+	      (setq lower (cdr lower) upper (cdr upper)))))))))
 
 (defsubst org-element--cache-key-less-p (a b)
   "Non-nil if key A is less than key B.
