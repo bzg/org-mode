@@ -1665,20 +1665,25 @@ are ignored."
     (or (gethash key cache)
 	(puthash
 	 key
-	 (or (and (not org-ascii-table-widen-columns)
-		  (org-export-table-cell-width table-cell info))
-	     (let* ((max-width 0))
-	       (org-element-map table 'table-row
-		 (lambda (row)
-		   (setq max-width
-			 (max (string-width
-			       (org-export-data
-				(org-element-contents
-				 (elt (org-element-contents row) col))
-				info))
-			      max-width)))
-		 info)
-	       max-width))
+	 (let ((cookie-width (org-export-table-cell-width table-cell info)))
+	   (or (and (not org-ascii-table-widen-columns) cookie-width)
+	       (let ((contents-width
+		      (let ((max-width 0))
+			(org-element-map table 'table-row
+			  (lambda (row)
+			    (setq max-width
+				  (max (string-width
+					(org-export-data
+					 (org-element-contents
+					  (elt (org-element-contents row) col))
+					 info))
+				       max-width)))
+			  info)
+			max-width)))
+		 (cond ((not cookie-width) contents-width)
+		       (org-ascii-table-widen-columns
+			(max cookie-width contents-width))
+		       (t cookie-width)))))
 	 cache))))
 
 (defun org-ascii-table-cell (table-cell contents info)
