@@ -5494,11 +5494,20 @@ change, as an integer."
 	(progn
 	  (incf (aref next 2) offset)
 	  (incf (aref next 3) offset)
-	  (when (> (aref next 1) beg)
-	    (let ((first (org-element--cache-for-removal beg end offset)))
-	      (when first
-		(aset next 0 (org-element--cache-key first))
-		(aset next 1 (org-element-property :begin first))))))
+	  ;; If last changes happened before old ones, we need to
+	  ;; recompute the key of the first element to remove.
+	  ;; Otherwise, we need to extend boundaries of robust parents
+	  ;; (see `org-element--cache-for-removal'), if any.
+	  (let ((first-beg (aref next 1)))
+	    (if (> first-beg beg)
+		(let ((first (org-element--cache-for-removal beg end offset)))
+		  (when first
+		    (aset next 0 (org-element--cache-key first))
+		    (aset next 1 (org-element-property :begin first))))
+	      (let ((up (org-element--cache-find first-beg)))
+		(while (setq up (org-element-property :parent up))
+		  (org-element--cache-shift-positions
+		   up offset '(:contents-end :end)))))))
       ;; Ensure cache is correct up to END.  Also make sure that NEXT,
       ;; if any, is no longer a 0-phase request, thus ensuring that
       ;; phases are properly ordered.  We need to provide OFFSET as
