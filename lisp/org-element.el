@@ -3053,8 +3053,8 @@ Assume point is at the beginning of the link."
 	    (setq search-option (match-string 1 path)
 		  path (replace-match "" nil nil path)))
 	  ;; Normalize URI.
-	  (when (and (not (org-string-match-p "\\`//" path))
-		     (file-name-absolute-p path))
+	  (when (and (file-name-absolute-p path)
+		     (not (org-string-match-p "\\`[/~]/" path)))
 	    (setq path (concat "//" path)))
 	  ;; Make sure TYPE always reports "file".
 	  (setq type "file"))
