@@ -1003,34 +1003,6 @@ Assume point is at beginning of the inline task."
 		       (and (re-search-forward org-outline-regexp-bol limit t)
 			    (org-looking-at-p "END[ \t]*$")
 			    (line-beginning-position))))
-	   (standard-props
-	    ;; Find property drawer associated to current inlinetask
-	    ;; and extract properties.
-	    ;;
-	    ;; Upcase property names.  It avoids confusion between
-	    ;; properties obtained through property drawer and default
-	    ;; properties from the parser (e.g. `:end' and :END:)
-	    (when task-end
-	      (let (plist)
-		(save-excursion
-		  (while (and (null plist)
-			      (re-search-forward
-			       org-property-start-re task-end t))
-		    (let ((d (org-element-at-point)))
-		      (when (eq (org-element-type d) 'property-drawer)
-			(let ((end (org-element-property :contents-end d)))
-			  (when end
-			    (forward-line)
-			    (while (< (point) end)
-			      (looking-at org-property-re)
-			      (setq plist
-				    (plist-put
-				     plist
-				     (intern
-				      (concat ":" (upcase (match-string 2))))
-				     (org-match-string-no-properties 3)))
-			      (forward-line)))))))
-		  plist))))
 	   (time-props
 	    ;; Read time properties on the line below the inlinetask
 	    ;; opening string.
@@ -1060,6 +1032,43 @@ Assume point is at beginning of the inline task."
 			   (point)))
 	   (end (progn (skip-chars-forward " \r\t\n" limit)
 		       (if (eobp) (point) (line-beginning-position))))
+	   (standard-props
+	    ;; Find property drawer associated to current inlinetask
+	    ;; and extract properties.
+	    ;;
+	    ;; HACK: Calling `org-element-at-point' triggers a parsing
+	    ;; of this inlinetask and, thus, an infloop.  To avoid the
+	    ;; problem, we extract contents of the inlinetask and
+	    ;; parse them in a new buffer.
+	    ;;
+	    ;; Upcase property names.  It avoids confusion between
+	    ;; properties obtained through property drawer and default
+	    ;; properties from the parser (e.g. `:end' and :END:)
+	    (when contents-begin
+	      (let ((contents (buffer-substring contents-begin contents-end))
+		    plist)
+		(with-temp-buffer
+		  (let ((org-inhibit-startup t)) (org-mode))
+		  (insert contents)
+		  (goto-char (point-min))
+		  (while (and (null plist)
+			      (re-search-forward
+			       org-property-start-re task-end t))
+		    (let ((d (org-element-at-point)))
+		      (when (eq (org-element-type d) 'property-drawer)
+			(let ((end (org-element-property :contents-end d)))
+			  (when end
+			    (forward-line)
+			    (while (< (point) end)
+			      (when (looking-at org-property-re)
+				(setq plist
+				      (plist-put
+				       plist
+				       (intern
+					(concat ":" (upcase (match-string 2))))
+				       (org-match-string-no-properties 3))))
+			      (forward-line))))))))
+		plist)))
 	   (inlinetask
 	    (list 'inlinetask
 		  (nconc
