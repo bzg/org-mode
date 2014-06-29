@@ -839,13 +839,13 @@ Assume point is at beginning of the headline."
 			(when end
 			  (forward-line)
 			  (while (< (point) end)
-			    (looking-at org-property-re)
-			    (setq plist
-				  (plist-put
-				   plist
-				   (intern
-				    (concat ":" (upcase (match-string 2))))
-				   (org-match-string-no-properties 3)))
+			    (when (looking-at org-property-re)
+			      (setq plist
+				    (plist-put
+				     plist
+				     (intern
+				      (concat ":" (upcase (match-string 2))))
+				     (org-match-string-no-properties 3))))
 			    (forward-line)))))))
 		plist)))
 	   (time-props
