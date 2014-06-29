@@ -5503,12 +5503,12 @@ change, as an integer."
 	(progn
 	  (incf (aref next 2) offset)
 	  (incf (aref next 3) offset)
-	  ;; If last changes happened before old ones, we need to
+	  ;; If last changes happened before (position wise) old ones,
 	  ;; recompute the key of the first element to remove.
-	  ;; Otherwise, we need to extend boundaries of robust parents
-	  ;; (see `org-element--cache-for-removal'), if any.
+	  ;; Otherwise, extend boundaries of robust parents (see
+	  ;; `org-element--cache-for-removal'), if any.
 	  (let ((first-beg (aref next 1)))
-	    (if (> first-beg beg)
+	    (if (>= first-beg beg)
 		(let ((first (org-element--cache-for-removal beg end offset)))
 		  (when first
 		    (aset next 0 (org-element--cache-key first))
@@ -5523,7 +5523,7 @@ change, as an integer."
       ;; optional parameter since current modifications are not known
       ;; yet to the otherwise correct part of the cache (i.e, before
       ;; the first request).
-      (org-element--cache-sync (current-buffer) end offset)
+      (when next (org-element--cache-sync (current-buffer) end offset))
       (let ((first (org-element--cache-for-removal beg end offset)))
 	(cond
 	 ;; Changes happened before the first known element.  Shift
@@ -5548,7 +5548,7 @@ change, as an integer."
 		org-element--cache-sync-requests))
 	 ;; No element to remove.  No need to re-parent either.
 	 ;; Simply shift additional elements, if any, by OFFSET.
-	 (org-element--cache-sync-requests (incf (aref next 3) offset)))))))
+	 (next (incf (aref next 3) offset)))))))
 
 
 ;;;; Public Functions
