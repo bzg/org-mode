@@ -5456,12 +5456,9 @@ changes."
 		   (<= (org-element-property :contents-begin up) beg)
 		   (> (org-element-property :contents-end up) end))
 	      ;; UP is a robust greater element containing changes.
-	      ;; We only need to extend its ending boundaries and
-	      ;; those of all its parents.
-	      (while up
-		(org-element--cache-shift-positions
-		 up offset '(:contents-end :end))
-		(setq up (org-element-property :parent up)))
+	      ;; We only need to extend its ending boundaries.
+	      (org-element--cache-shift-positions
+	       up offset '(:contents-end :end))
 	    (setq before up)))
 	;; We're at top level element containing ELEMENT: if it's
 	;; altered by buffer modifications, it is first element in
