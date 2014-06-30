@@ -5477,9 +5477,9 @@ change, as an integer."
   (let ((next (car org-element--cache-sync-requests)))
     (if (and next
 	     (zerop (aref next 5))
-	     (let ((offset (aref next 3)))
-	       (and (>= (+ (aref next 2) offset) end)
-		    (<= (+ (aref next 1) offset) end))))
+	     (let ((relative-end (- end (aref next 3))))
+	       (and (> (aref next 2) relative-end)
+		    (<= (aref next 1) relative-end))))
 	;; Current changes can be merged with first sync request: we
 	;; can save a partial cache synchronization.
 	(progn
