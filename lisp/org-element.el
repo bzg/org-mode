@@ -5483,7 +5483,6 @@ change, as an integer."
 	;; Current changes can be merged with first sync request: we
 	;; can save a partial cache synchronization.
 	(progn
-	  (incf (aref next 2) offset)
 	  (incf (aref next 3) offset)
 	  ;; If last changes happened before (position wise) old ones,
 	  ;; recompute the key of the first element to remove.
