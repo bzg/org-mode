@@ -5548,7 +5548,8 @@ change, as an integer."
 		org-element--cache-sync-requests))
 	 ;; No element to remove.  No need to re-parent either.
 	 ;; Simply shift additional elements, if any, by OFFSET.
-	 (next (incf (aref next 3) offset)))))))
+	 (org-element--cache-sync-requests
+	  (incf (aref (car org-element--cache-sync-requests) 3) offset)))))))
 
 
 ;;;; Public Functions
