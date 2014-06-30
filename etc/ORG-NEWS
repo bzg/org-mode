@@ -10,6 +10,12 @@ Please send Org bug reports to emacs-orgmode@gnu.org.
 
 * Version 8.3
 
+** Removed functions
+*** Removed function ~org-beamer-insert-options-template~
+This function inserted a Beamer specific template at point or in
+current subtree.  Use ~org-export-insert-default-template~ instead, as
+it provides more features and covers all export back-ends.  It is also
+accessible from the export dispatcher.
 ** Removed options
 *** Removed option =org-babel-sh-command=
 This undocumented option defaulted to the value of =shell-file-name=
@@ -32,7 +38,29 @@ If the argument =:hlines yes= is present in a babel call, an optional
 argument =:hlines-string= can be used to define a string to use as a
 representation for the lisp symbol ='hline= in the shell program.  The
 default is =hline=.
+*** Drawers do not need anymore to be referenced in =#+DRAWERS=
+One can use a drawer without listing it in the =#+DRAWERS= keyword,
+which is now obsolete.  As a consequence, this change also deprecates
+~org-drawers~ variable.
+*** Markdown export supports switches in source blocks
+For example, it is now possible to number lines using the =-n= switch
+in a source block.
+*** New blocks in ASCII export
+ASCII export now supports =#+BEGIN_JUSTIFYRIGHT= and
+=#+BEGIN_JUSTIFYLEFT= blocks.  See documentation for details.
 ** Miscellaneous
+*** File names in links accept are now compatible with URI syntax
+Absolute file names can now start with =///= in addition to =/=. E.g.,
+=[[file:///home/me/unicorn.jpg]]=.
+*** Footnotes in included files are now local to the file
+As a consequence, it is possible to include multiple Org files with
+footnotes in a master document without being concerned about footnote
+labels colliding.
+*** Mailto links now use regular URI syntax
+This change deprecates old Org syntax for mailto links:
+=mailto:user@domain::Subject=.
+*** =QUOTE= keywords do not exist anymore
+=QUOTES= keywords have been deprecated since Org 8.2.
 *** Select tests to perform with the build system
 The build system has been enhanced to allow test selection with a
 regular expression by defining =BTEST_RE= during the test invocation.
