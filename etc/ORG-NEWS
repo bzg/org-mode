@@ -8,6 +8,36 @@ See the end of the file for license conditions.
 
 Please send Org bug reports to emacs-orgmode@gnu.org.
 
+* Version 8.3
+
+** Removed options
+*** Removed option =org-babel-sh-command=
+This undocumented option defaulted to the value of =shell-file-name=
+at the time of loading =ob-shell=.  The new behaviour is to use the
+value of =shell-file-name= directly when the shell langage is =shell=.
+To chose a different shell, either customize =shell-file-name= or bind
+this variable locally.
+*** Removed option =org-babel-sh-var-quote-fmt=
+This undocumented option was supposed to provide different quoting
+styles when changing the shell type.  Changing the shell type can now
+be done directly from the source block and the quoting style has to be
+compatible across all shells, so a customization doesn't make sense
+anymore.  The chosen hard coded quoting style conforms to POSIX.
+** New features
+*** Additional markup with =#+INCLUDE= keyword
+The content of the included file can now be optionally marked up, for
+instance as HTML.  See the documentation for details.
+*** Additional =:hline= processing to ob-shell
+If the argument =:hlines yes= is present in a babel call, an optional
+argument =:hlines-string= can be used to define a string to use as a
+representation for the lisp symbol ='hline= in the shell program.  The
+default is =hline=.
+** Miscellaneous
+*** Select tests to perform with the build system
+The build system has been enhanced to allow test selection with a
+regular expression by defining =BTEST_RE= during the test invocation.
+This is especially useful during bisection to find just when a
+particular test failure was introduced.
 * Version 8.2
 
 ** Incompatible changes
