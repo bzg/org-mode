@@ -5155,7 +5155,7 @@ request."
 	;; contains the real beginning position of the first element
 	;; to shift and re-parent.
 	(when (equal (aref request 0) next) (throw 'quit t))
-	(let ((limit (+ (aref request 2) (aref request 3) extra)))
+	(let ((limit (+ (aref request 1) (aref request 3) extra)))
 	  (when (and threshold (< threshold limit)) (throw 'interrupt nil))
 	  (let ((parent (org-element--parse-to limit t time-limit)))
 	    (aset request 4 parent)
