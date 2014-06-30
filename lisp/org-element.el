@@ -4713,14 +4713,14 @@ Processing a synchronization request consists of three phases:
 
 During phase 0, NEXT is the key of the first element to be
 removed, BEG and END is buffer position delimiting the
-modifications.  Every element starting between these are removed.
-PARENT is an element to be removed.  Every element contained in
-it will also be removed.
+modifications.  Every element starting between them (inclusive)
+are removed.  PARENT, when non-nil, is the parent of the first
+element to be removed.
 
 During phase 1, NEXT is the key of the next known element in
-cache.  Parse buffer between that element and the one before it
-in order to determine the parent of the next element.  Set PARENT
-to the element containing NEXT.
+cache and BEG its beginning position.  Parse buffer between that
+element and the one before it in order to determine the parent of
+the next element.  Set PARENT to the element containing NEXT.
 
 During phase 2, NEXT is the key of the next element to shift in
 the parse tree.  All elements starting from this one have their
@@ -5489,16 +5489,17 @@ change, as an integer."
 	  ;; recompute the key of the first element to remove.
 	  ;; Otherwise, extend boundaries of robust parents (see
 	  ;; `org-element--cache-for-removal'), if any.
-	  (let ((first-beg (aref next 1)))
-	    (if (>= first-beg beg)
-		(let ((first (org-element--cache-for-removal beg end offset)))
-		  (when first
-		    (aset next 0 (org-element--cache-key first))
-		    (aset next 1 (org-element-property :begin first))))
-	      (let ((up (org-element--cache-find first-beg)))
-		(while (setq up (org-element-property :parent up))
-		  (org-element--cache-shift-positions
-		   up offset '(:contents-end :end)))))))
+	  (if (>= (aref next 1) beg)
+	      (let ((first (org-element--cache-for-removal beg end offset)))
+		(when first
+		  (aset next 0 (org-element--cache-key first))
+		  (aset next 1 (org-element-property :begin first))
+		  (aset next 4 (org-element-property :parent first))))
+	    (let ((up (aref next 4)))
+	      (while up
+		(org-element--cache-shift-positions
+		 up offset '(:contents-end :end))
+		(setq up (org-element-property :parent up))))))
       ;; Ensure cache is correct up to END.  Also make sure that NEXT,
       ;; if any, is no longer a 0-phase request, thus ensuring that
       ;; phases are properly ordered.  We need to provide OFFSET as
@@ -5526,7 +5527,10 @@ change, as an integer."
 		  (setq end (org-element-property :end up))))))
 	  (push (vector (org-element--cache-key first)
 			(org-element-property :begin first)
-			end offset nil 0)
+			end
+			offset
+			(org-element-property :parent first)
+			0)
 		org-element--cache-sync-requests))
 	 ;; No element to remove.  No need to re-parent either.
 	 ;; Simply shift additional elements, if any, by OFFSET.
