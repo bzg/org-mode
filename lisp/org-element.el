@@ -5083,24 +5083,15 @@ request."
       ;; Delete all elements starting after BEG, but not after buffer
       ;; position END or past element with key NEXT.
       ;;
-      ;; As an exception, also delete elements starting after
-      ;; modifications but included in an element altered by
-      ;; modifications (orphans).
-      ;;
       ;; At each iteration, we start again at tree root since
       ;; a deletion modifies structure of the balanced tree.
       (catch 'end-phase
         (let ((beg (aref request 0))
-              (end (aref request 2))
-              (deleted-parent (aref request 4)))
+              (end (aref request 2)))
           (while t
             (when (org-element--cache-interrupt-p time-limit)
-	      (aset request 4 deleted-parent)
 	      (throw 'interrupt nil))
             ;; Find first element in cache with key BEG or after it.
-	    ;; We don't use `org-element--cache-find' because it
-	    ;; couldn't reach orphaned elements past NEXT.  Moreover,
-	    ;; BEG is a key, not a buffer position.
             (let ((node (org-element--cache-root)) data data-key)
               (while node
                 (let* ((element (avl-tree--node-data node))
@@ -5115,28 +5106,19 @@ request."
                    (t (setq data element
                             data-key key
                             node nil)))))
-	      (if (not data) (throw 'quit t)
-		(let ((pos (org-element-property :begin data)))
-		  (cond
-		   ;; Remove orphaned elements.
-		   ((and deleted-parent
-			 (let ((up data))
-			   (while (and
-				   (setq up (org-element-property :parent up))
-				   (not (eq up deleted-parent))))
-			   up))
-		    (org-element--cache-remove data))
-		   ((or (and next
-			     (not (org-element--cache-key-less-p data-key
-								 next)))
-			(> pos end))
-		    (aset request 0 data-key)
-		    (aset request 2 pos)
-		    (aset request 5 1)
-		    (throw 'end-phase nil))
-		   (t (org-element--cache-remove data)
-		      (when (= (org-element-property :end data) end)
-			(setq deleted-parent data)))))))))))
+	      (if data
+		  (let ((pos (org-element-property :begin data)))
+		    (if (and (<= pos end)
+			     (or (not next)
+				 (org-element--cache-key-less-p data-key next)))
+			(org-element--cache-remove data)
+		      (aset request 0 data-key)
+		      (aset request 1 pos)
+		      (aset request 5 1)
+		      (throw 'end-phase nil)))
+		;; No element starting after modifications left in
+		;; cache: further processing is futile.
+		(throw 'quit t)))))))
     (when (= (aref request 5) 1)
       ;; Phase 2.
       ;;
