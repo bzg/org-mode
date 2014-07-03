@@ -5471,31 +5471,30 @@ changes."
 BEG and END are buffer positions delimiting the minimal area
 where cache data should be removed.  OFFSET is the size of the
 change, as an integer."
-  (let ((next (car org-element--cache-sync-requests)))
+  (let ((next (car org-element--cache-sync-requests))
+	delete-to delete-from)
     (if (and next
 	     (zerop (aref next 5))
-	     (let ((relative-end (- end (aref next 3))))
-	       (and (> (aref next 2) relative-end)
-		    (<= (aref next 1) relative-end))))
+	     (> (setq delete-to (+ (aref next 2) (aref next 3))) end)
+	     (<= (setq delete-from (aref next 1)) end))
 	;; Current changes can be merged with first sync request: we
 	;; can save a partial cache synchronization.
 	(progn
 	  (incf (aref next 3) offset)
-	  ;; If last changes happened before (position wise) old ones,
-	  ;; recompute the key of the first element to remove.
-	  ;; Otherwise, extend boundaries of robust parents (see
-	  ;; `org-element--cache-for-removal'), if any.
-	  (if (>= (aref next 1) beg)
-	      (let ((first (org-element--cache-for-removal beg end offset)))
-		(when first
-		  (aset next 0 (org-element--cache-key first))
-		  (aset next 1 (org-element-property :begin first))
-		  (aset next 4 (org-element-property :parent first))))
-	    (let ((up (aref next 4)))
-	      (while up
-		(org-element--cache-shift-positions
-		 up offset '(:contents-end :end))
-		(setq up (org-element-property :parent up))))))
+	  ;; If last change happened within area to be removed, extend
+	  ;; boundaries of robust parents, if any.  Otherwise, find
+	  ;; first element to remove and update request accordingly.
+	  (if (> beg delete-from)
+	      (let ((up (aref next 4)))
+		(while up
+		  (org-element--cache-shift-positions
+		   up offset '(:contents-end :end))
+		  (setq up (org-element-property :parent up))))
+	    (let ((first (org-element--cache-for-removal beg delete-to offset)))
+	      (when first
+		(aset next 0 (org-element--cache-key first))
+		(aset next 1 (org-element-property :begin first))
+		(aset next 4 (org-element-property :parent first))))))
       ;; Ensure cache is correct up to END.  Also make sure that NEXT,
       ;; if any, is no longer a 0-phase request, thus ensuring that
       ;; phases are properly ordered.  We need to provide OFFSET as
