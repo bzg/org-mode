@@ -2788,7 +2788,7 @@ When at a footnote reference, return a list whose car is
 
 (defun org-element-footnote-reference-interpreter (footnote-reference contents)
   "Interpret FOOTNOTE-REFERENCE object as Org syntax.
-CONTENTS is nil."
+CONTENTS is its definition, when inline, or nil."
   (format "[%s]"
 	  (concat (or (org-element-property :label footnote-reference) "fn:")
 		  (and contents (concat ":" contents)))))
