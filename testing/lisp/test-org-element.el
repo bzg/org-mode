@@ -891,45 +891,45 @@ Some other text
 
 (ert-deftest test-org-element/footnote-reference-parser ()
   "Test `footnote-reference' parser."
-  ;; 1. Parse a standard reference.
-  (org-test-with-temp-text "Text[fn:label]"
-    (should
+  ;; Parse a standard reference.
+  (should
+   (org-test-with-temp-text "Text[fn:label]"
      (org-element-map
-      (org-element-parse-buffer) 'footnote-reference 'identity)))
-  ;; 2. Parse a normalized reference.
-  (org-test-with-temp-text "Text[1]"
-    (should
+	 (org-element-parse-buffer) 'footnote-reference 'identity)))
+  ;; Parse a normalized reference.
+  (should
+   (org-test-with-temp-text "Text[1]"
      (org-element-map
-      (org-element-parse-buffer) 'footnote-reference 'identity)))
-  ;; 3. Parse an inline reference.
-  (org-test-with-temp-text "Text[fn:test:def]"
-    (should
+	 (org-element-parse-buffer) 'footnote-reference 'identity)))
+  ;; Parse an inline reference.
+  (should
+   (org-test-with-temp-text "Text[fn:test:def]"
      (org-element-map
-      (org-element-parse-buffer) 'footnote-reference 'identity)))
-  ;; 4. Parse an anonymous reference.
-  (org-test-with-temp-text "Text[fn::def]"
-    (should
+	 (org-element-parse-buffer) 'footnote-reference 'identity)))
+  ;; Parse an anonymous reference.
+  (should
+   (org-test-with-temp-text "Text[fn::def]"
      (org-element-map
-      (org-element-parse-buffer) 'footnote-reference 'identity)))
-  ;; 5. Parse nested footnotes.
-  (org-test-with-temp-text "Text[fn::def [fn:label]]"
-    (should
+	 (org-element-parse-buffer) 'footnote-reference 'identity)))
+  ;; Parse nested footnotes.
+  (should
+   (= 2
+      (length
+       (org-test-with-temp-text "Text[fn::def [fn:label]]"
+	 (org-element-map
+	     (org-element-parse-buffer) 'footnote-reference 'identity)))))
+  ;; Parse adjacent footnotes.
+  (should
+   (org-test-with-temp-text "Text[fn:label1][fn:label2]"
      (= 2
 	(length
 	 (org-element-map
-	  (org-element-parse-buffer) 'footnote-reference 'identity)))))
-  ;; 6. Parse adjacent footnotes.
-  (org-test-with-temp-text "Text[fn:label1][fn:label2]"
-    (should
-     (= 2
-	(length
-	 (org-element-map
-	  (org-element-parse-buffer) 'footnote-reference 'identity)))))
-  ;; 7. Only properly closed footnotes are recognized as such.
-  (org-test-with-temp-text "Text[fn:label"
-    (should-not
+	     (org-element-parse-buffer) 'footnote-reference 'identity)))))
+  ;; Only properly closed footnotes are recognized as such.
+  (should-not
+   (org-test-with-temp-text "Text[fn:label"
      (org-element-map
-      (org-element-parse-buffer) 'footnote-reference 'identity))))
+	 (org-element-parse-buffer) 'footnote-reference 'identity))))
 
 
 ;;;; Headline
@@ -3136,6 +3136,11 @@ Paragraph \\alpha."
    (eq 'table-cell
        (org-test-with-temp-text "|a|b|c"
 	 (goto-char (point-max))
+	 (org-element-type (org-element-context)))))
+  ;; Special case: objects in inline footnotes.
+  (should
+   (eq 'link
+       (org-test-with-temp-text "[fn::[[<point>http://orgmode.org]]]"
 	 (org-element-type (org-element-context))))))
 
 

@@ -194,8 +194,8 @@ is not sufficient to know if point is at a paragraph ending.  See
   "Complete list of object types.")
 
 (defconst org-element-recursive-objects
-  '(bold italic link subscript radio-target strike-through superscript
-	 table-cell underline)
+  '(bold footnote-reference italic link subscript radio-target strike-through
+	 superscript table-cell underline)
   "List of recursive object types.")
 
 (defvar org-element-block-name-alist
@@ -341,8 +341,7 @@ still has an entry since one of its properties (`:title') does.")
 (defconst org-element-secondary-value-alist
   '((headline . :title)
     (inlinetask . :title)
-    (item . :tag)
-    (footnote-reference . :inline-definition))
+    (item . :tag))
   "Alist between element types and location of secondary value.")
 
 (defconst org-element-object-variables '(org-link-abbrev-alist-local)
@@ -2755,16 +2754,17 @@ CONTENTS is nil."
 
 When at a footnote reference, return a list whose car is
 `footnote-reference' and cdr a plist with `:label', `:type',
-`:inline-definition', `:begin', `:end' and `:post-blank' as
-keywords.  Otherwise, return nil."
+`:begin', `:end', `:content-begin', `:contents-end' and
+`:post-blank' as keywords.  Otherwise, return nil."
   (catch 'no-object
     (when (looking-at org-footnote-re)
       (save-excursion
 	(let* ((begin (point))
-	       (label (or (org-match-string-no-properties 2)
-			  (org-match-string-no-properties 3)
-			  (and (match-string 1)
-			       (concat "fn:" (org-match-string-no-properties 1)))))
+	       (label
+		(or (org-match-string-no-properties 2)
+		    (org-match-string-no-properties 3)
+		    (and (match-string 1)
+			 (concat "fn:" (org-match-string-no-properties 1)))))
 	       (type (if (or (not label) (match-string 1)) 'inline 'standard))
 	       (inner-begin (match-end 0))
 	       (inner-end
@@ -2776,32 +2776,22 @@ keywords.  Otherwise, return nil."
 		  (1- (point))))
 	       (post-blank (progn (goto-char (1+ inner-end))
 				  (skip-chars-forward " \t")))
-	       (end (point))
-	       (footnote-reference
-		(list 'footnote-reference
-		      (list :label label
-			    :type type
-			    :begin begin
-			    :end end
-			    :post-blank post-blank))))
-	  (org-element-put-property
-	   footnote-reference :inline-definition
-	   (and (eq type 'inline)
-		(org-element-parse-secondary-string
-		 (buffer-substring inner-begin inner-end)
-		 (org-element-restriction 'footnote-reference)
-		 footnote-reference))))))))
+	       (end (point)))
+	  (list 'footnote-reference
+		(list :label label
+		      :type type
+		      :begin begin
+		      :end end
+		      :contents-begin (and (eq type 'inline) inner-begin)
+		      :contents-end (and (eq type 'inline) inner-end)
+		      :post-blank post-blank)))))))
 
 (defun org-element-footnote-reference-interpreter (footnote-reference contents)
   "Interpret FOOTNOTE-REFERENCE object as Org syntax.
 CONTENTS is nil."
-  (let ((label (or (org-element-property :label footnote-reference) "fn:"))
-	(def
-	 (let ((inline-def
-		(org-element-property :inline-definition footnote-reference)))
-	   (if (not inline-def) ""
-	     (concat ":" (org-element-interpret-data inline-def))))))
-    (format "[%s]" (concat label def))))
+  (format "[%s]"
+	  (concat (or (org-element-property :label footnote-reference) "fn:")
+		  (and contents (concat ":" contents)))))
 
 
 ;;;; Inline Babel Call

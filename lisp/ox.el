@@ -1579,17 +1579,31 @@ inferior to file-local settings."
     (let (alist)
       (org-with-wide-buffer
        (goto-char (point-min))
-       (while (re-search-forward org-footnote-definition-re nil t)
-	 (let ((def (save-match-data (org-element-at-point))))
-	   (when (eq (org-element-type def) 'footnote-definition)
-	     (push
-	      (cons (org-element-property :label def)
-		    (let ((cbeg (org-element-property :contents-begin def)))
-		      (when cbeg
-			(org-element--parse-elements
-			 cbeg (org-element-property :contents-end def)
-			 nil nil nil nil (list 'org-data nil)))))
-	      alist))))
+       (while (re-search-forward org-footnote-re nil t)
+	 (backward-char)
+	 (let ((fn (save-match-data (org-element-context))))
+	   (case (org-element-type fn)
+	     (footnote-definition
+	      (push
+	       (cons (org-element-property :label fn)
+		     (let ((cbeg (org-element-property :contents-begin fn)))
+		       (when cbeg
+			 (org-element--parse-elements
+			  cbeg (org-element-property :contents-end fn)
+			  nil nil nil nil (list 'org-data nil)))))
+	       alist))
+	     (footnote-reference
+	      (let ((label (org-element-property :label fn))
+		    (cbeg (org-element-property :contents-begin fn)))
+		(when (and label cbeg
+			   (eq (org-element-property :type fn) 'inline))
+		  (push
+		   (cons label
+			 (org-element-parse-secondary-string
+			  (buffer-substring
+			   cbeg (org-element-property :contents-end fn))
+			  (org-element-restriction 'footnote-reference)))
+		   alist)))))))
        alist))
     :id-alist
     ;; Collect id references.
@@ -3689,11 +3703,11 @@ INFO is the plist used as a communication channel."
 (defun org-export-get-footnote-definition (footnote-reference info)
   "Return definition of FOOTNOTE-REFERENCE as parsed data.
 INFO is the plist used as a communication channel.  If no such
-definition can be found, return the \"DEFINITION NOT FOUND\"
-string."
+definition can be found, return \"DEFINITION NOT FOUND\"."
   (let ((label (org-element-property :label footnote-reference)))
-    (or (org-element-property :inline-definition footnote-reference)
-        (cdr (assoc label (plist-get info :footnote-definition-alist)))
+    (or (if label
+	    (cdr (assoc label (plist-get info :footnote-definition-alist)))
+	  (org-element-contents footnote-reference))
 	"DEFINITION NOT FOUND.")))
 
 (defun org-export-get-footnote-number (footnote info)
