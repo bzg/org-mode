@@ -2911,27 +2911,26 @@ Assume point is at the beginning of the LaTeX fragment."
   (catch 'no-object
     (save-excursion
       (let* ((begin (point))
-	     (substring-match
-	      (or (catch 'exit
-		    (dolist (e (cdr org-latex-regexps))
-		      (let ((latex-regexp (nth 1 e)))
-			(when (or (looking-at latex-regexp)
-				  (and (not (bobp))
-				       (save-excursion
-					 (backward-char)
-					 (looking-at latex-regexp))))
-			  (throw 'exit (nth 2 e))))))
-		  ;; Macro.
-		  (and (looking-at "\\\\[a-zA-Z]+\\*?\\(\\(\\[[^][\n{}]*\\]\\)\\|\\({[^{}\n]*}\\)\\)*")
-		       0)
-		  ;; No fragment found.
-		  (throw 'no-object nil)))
-	     (value (org-match-string-no-properties substring-match))
-	     (post-blank (progn (goto-char (match-end substring-match))
-				(skip-chars-forward " \t")))
+	     (after-fragment
+	      (if (eq (char-after) ?$)
+		  (if (eq (char-after (1+ (point))) ?$)
+		      (search-forward "$$" nil t 2)
+		    (and (not (eq (char-before) ?$))
+			 (looking-at "\\$[^ \t\n,;.$]\\(?:[^$]*?[^ \t\n,.$]\\)?\\$\\([- \t.,?;:'\")]\\|$\\)")
+			 (match-beginning 1)))
+		(case (char-after (1+ (point)))
+		  (?\( (search-forward "\\)" nil t))
+		  (?\[ (search-forward "\\]" nil t))
+		  (otherwise
+		   ;; Macro.
+		   (and (looking-at "\\\\[a-zA-Z]+\\*?\\(\\(\\[[^][\n{}]*\\]\\)\\|\\({[^{}\n]*}\\)\\)*")
+			(match-end 0))))))
+	     (post-blank (if (not after-fragment) (throw 'no-object nil)
+			   (goto-char after-fragment)
+			   (skip-chars-forward " \t")))
 	     (end (point)))
 	(list 'latex-fragment
-	      (list :value value
+	      (list :value (buffer-substring-no-properties begin after-fragment)
 		    :begin begin
 		    :end end
 		    :post-blank post-blank))))))
@@ -4277,12 +4276,14 @@ to an appropriate container (e.g., a paragraph)."
 				  (org-element-timestamp-parser))
 			     (and (memq 'link restriction)
 				  (org-element-link-parser)))))
-		      (?\\ (or (and (memq 'line-break restriction)
-				    (org-element-line-break-parser))
-			       (and (memq 'entity restriction)
-				    (org-element-entity-parser))
-			       (and (memq 'latex-fragment restriction)
-				    (org-element-latex-fragment-parser))))
+		      (?\\
+		       (if (eq (aref result 1) ?\\)
+			   (and (memq 'line-break restriction)
+				(org-element-line-break-parser))
+			 (or (and (memq 'entity restriction)
+				  (org-element-entity-parser))
+			     (and (memq 'latex-fragment restriction)
+				  (org-element-latex-fragment-parser)))))
 		      (?\[
 		       (if (eq (aref result 1) ?\[)
 			   (and (memq 'link restriction)
