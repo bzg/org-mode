@@ -777,7 +777,8 @@ into previewing problems, please consult
     (shell-script "bash")
     (gnuplot "Gnuplot")
     (ocaml "Caml") (caml "Caml")
-    (sql "SQL") (sqlite "sql"))
+    (sql "SQL") (sqlite "sql")
+    (makefile "make"))
   "Alist mapping languages to their listing language counterpart.
 The key is a symbol, the major mode symbol without the \"-mode\".
 The value is the string that should be inserted as the language
@@ -785,6 +786,8 @@ parameter for the listings package.  If the mode name and the
 listings name are the same, the language does not need an entry
 in this list - but it does not hurt if it is present."
   :group 'org-export-latex
+  :version "24.4"
+  :package-version '(Org . "8.3")
   :type '(repeat
 	  (list
 	   (symbol :tag "Major mode       ")
