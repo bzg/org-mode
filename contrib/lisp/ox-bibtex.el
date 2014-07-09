@@ -36,13 +36,17 @@
 ;;
 ;; The usage is as follows:
 ;;
-;;   #+BIBLIOGRAPHY: bibfilebasename stylename optional-options
+;;   #+BIBLIOGRAPHY: bibfilename stylename optional-options
 ;;
 ;; e.g. given foo.bib and using style plain:
 ;;
 ;;   #+BIBLIOGRAPHY: foo plain option:-d
 ;;
 ;; "stylename" can also be "nil", in which case no style will be used.
+;;
+;; Full filepaths are also possible:
+;;
+;;   #+BIBLIOGRAPHY: /home/user/Literature/foo.bib plain option:-d
 ;;
 ;; Optional options are of the form:
 ;;
@@ -187,7 +191,16 @@ Return new parse tree."
 	(when (equal (org-element-property :key keyword) "BIBLIOGRAPHY")
 	  (let ((arguments (org-bibtex-get-arguments keyword))
 		(file (org-bibtex-get-file keyword))
-		temp-file)
+		temp-file
+		out-file)
+	    ;; Test if filename is given with .bib-extension and strip
+    	    ;; it off. Filenames with another extensions will be
+	    ;; untouched and will finally rise an error in bibtex2html.
+	    (setq file (if (equal (file-name-extension file) "bib")
+			   (file-name-sans-extension file) file))
+	    ;; Outpufiles of bibtex2html will be put into current working directory
+	    ;; so define a variable for this.
+	    (setq out-file (file-name-base file))
 	    ;; limit is set: collect citations throughout the document
 	    ;; in TEMP-FILE and pass it to "bibtex2html" as "-citefile"
 	    ;; argument.
@@ -219,7 +232,7 @@ Return new parse tree."
 	    (and temp-file (delete-file temp-file))
 	    ;; Open produced HTML file, and collect Bibtex key names
 	    (with-temp-buffer
-	      (insert-file-contents (concat file ".html"))
+	      (insert-file-contents (concat out-file ".html"))
 	      ;; Update `org-bibtex-html-entries-alist'.
 	      (goto-char (point-min))
 	      (while (re-search-forward
@@ -233,14 +246,14 @@ Return new parse tree."
 	       ((org-export-derived-backend-p backend 'html)
 		(insert (format "<div id=\"bibliography\">\n<h2>%s</h2>\n"
 				(org-export-translate "References" :html info)))
-		(insert-file-contents (concat file ".html"))
+		(insert-file-contents (concat out-file ".html"))
 		(insert "\n</div>"))
 	       ((org-export-derived-backend-p backend 'ascii)
 		;; convert HTML references to text w/pandoc
 		(unless (eq 0 (call-process "pandoc" nil nil nil
-					    (concat file ".html")
+					    (concat out-file ".html")
 					    "-o"
-					    (concat file ".txt")))
+					    (concat out-file ".txt")))
 		  (error "Executing pandoc failed"))
 		(insert
 		 (format
@@ -249,7 +262,7 @@ Return new parse tree."
 		   "References"
 		   (intern (format ":%s" (plist-get info :ascii-charset)))
 		   info)))
-		(insert-file-contents (concat file ".txt"))
+		(insert-file-contents (concat out-file ".txt"))
 		(goto-char (point-min))
 		(while (re-search-forward
 			"\\[ \\[bib\\][^ ]+ \\(\\]\\||[\n\r]\\)" nil t)
