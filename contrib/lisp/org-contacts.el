@@ -516,11 +516,12 @@ A group FOO is composed of contacts with the tag FOO."
 				       ;; returned by `org-contacts-filter'.
 				       for contact-name = (car contact)
 				       ;; Grab the first email of the contact
-				       for email = (org-contacts-strip-link (car (org-contacts-split-property
-							 (or
-							  (cdr (assoc-string org-contacts-email-property
-									     (caddr contact)))
-							  ""))))
+				       for email = (org-contacts-strip-link
+						    (or (car (org-contacts-split-property
+							      (or
+							       (cdr (assoc-string org-contacts-email-property
+										  (caddr contact)))
+							       ""))) ""))
 				       ;; If the user has an email address, append USER <EMAIL>.
 				       if email collect (org-contacts-format-email contact-name email))
 				 ", ")))
@@ -528,7 +529,7 @@ A group FOO is composed of contacts with the tag FOO."
 		(completion-table-case-fold completion-list
 					    (not org-contacts-completion-ignore-case))))))))
 
-(defun org-contacts-complete-tags-props (start end matcher)
+(defun org-contacts-complete-tags-props (start end string)
   "Insert emails that match the tags expression.
 
 For example: FOO-BAR will match entries tagged with FOO but not
@@ -538,25 +539,28 @@ See (org) Matching tags and properties for a complete
 description."
   (let* ((completion-ignore-case org-contacts-completion-ignore-case)
 	 (completion-p (org-string-match-p
-			      (concat "^" org-contacts-tags-props-prefix) string)))
+			(concat "^" org-contacts-tags-props-prefix) string)))
     (when completion-p
       (let ((result
 	     (mapconcat
 	      'identity
 	      (loop for contact in (org-contacts-db)
 		    for contact-name = (car contact)
-		    for email = (org-contacts-strip-link (car (org-contacts-split-property
+		    for email = (org-contacts-strip-link (or (car (org-contacts-split-property
 							       (or
 								(cdr (assoc-string org-contacts-email-property
 										   (caddr contact)))
-								""))))
+								""))) ""))
 		    for tags = (cdr (assoc "TAGS" (nth 2 contact)))
 		    for tags-list = (if tags
 					(split-string (substring (cdr (assoc "TAGS" (nth 2 contact))) 1 -1) ":")
 				      '())
-		    if (let ((todo-only nil))
-			 (eval (cdr (org-make-tags-matcher matcher))))
-		    
+		    for marker = (second contact)
+		    if (with-current-buffer (marker-buffer marker)
+			 (save-excursion
+			   (goto-char marker)
+			   (let (todo-only)
+			     (eval (cdr (org-make-tags-matcher (subseq string 1)))))))
 		    collect (org-contacts-format-email contact-name email))
 	      ",")))
 	(when (not (string= "" result))
