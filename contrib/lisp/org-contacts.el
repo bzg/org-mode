@@ -155,6 +155,11 @@ The following replacements are available:
   :type 'string
   :group 'org-contacts)
 
+(defcustom org-contacts-tags-props-prefix "#"
+  "Tags and properties prefix."
+  :type 'string
+  :group 'org-contacts)
+
 (defcustom org-contacts-matcher
   (mapconcat 'identity (list org-contacts-email-property
 			     org-contacts-alias-property
@@ -184,7 +189,7 @@ This overrides `org-email-link-description-format' if set."
   :type 'boolean)
 
 (defcustom org-contacts-complete-functions
-  '(org-contacts-complete-group org-contacts-complete-name)
+  '(org-contacts-complete-group org-contacts-complete-tags-props org-contacts-complete-name)
   "List of functions used to complete contacts in `message-mode'."
   :group 'org-contacts
   :type 'hook)
@@ -522,6 +527,43 @@ A group FOO is composed of contacts with the tag FOO."
 		;; We haven't found the correct group
 		(completion-table-case-fold completion-list
 					    (not org-contacts-completion-ignore-case))))))))
+
+(defun org-contacts-complete-tags-props (start end matcher)
+  "Insert emails that match the tags expression.
+
+For example: FOO-BAR will match entries tagged with FOO but not
+with BAR.
+
+See (org) Matching tags and properties for a complete
+description."
+  (let* ((completion-ignore-case org-contacts-completion-ignore-case)
+	 (completion-p (org-string-match-p
+			      (concat "^" org-contacts-tags-props-prefix) string)))
+    (when completion-p
+      (let ((result
+	     (mapconcat
+	      'identity
+	      (loop for contact in (org-contacts-db)
+		    for contact-name = (car contact)
+		    for email = (org-contacts-strip-link (car (org-contacts-split-property
+							       (or
+								(cdr (assoc-string org-contacts-email-property
+										   (caddr contact)))
+								""))))
+		    for tags = (cdr (assoc "TAGS" (nth 2 contact)))
+		    for tags-list = (if tags
+					(split-string (substring (cdr (assoc "TAGS" (nth 2 contact))) 1 -1) ":")
+				      '())
+		    if (let ((todo-only nil))
+			 (eval (cdr (org-make-tags-matcher matcher))))
+		    
+		    collect (org-contacts-format-email contact-name email))
+	      ",")))
+	(when (not (string= "" result))
+	  ;; return (start end function)
+	  (lexical-let* ((to-return result))
+	    (list start end
+		  (lambda (string pred &optional to-ignore) to-return))))))))
 
 (defun org-contacts-remove-ignored-property-values (ignore-list list)
   "Remove all ignore-list's elements from list and you can use
