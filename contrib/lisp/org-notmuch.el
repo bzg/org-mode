@@ -121,6 +121,13 @@ Can link to more than one message, if so all matching messages are shown."
   (require 'notmuch)
   (notmuch-search (org-link-unescape search)))
 
+
+
+(defun org-notmuch-tree-follow-link (search)
+  "Follow a notmuch link by displaying SEARCH in notmuch-tree mode."
+  (require 'notmuch)
+  (notmuch-tree (org-link-unescape search)))
+
 (provide 'org-notmuch)
 
 ;;; org-notmuch.el ends here
