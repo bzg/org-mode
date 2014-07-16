@@ -1953,17 +1953,21 @@ Return updated plist."
 	(plist-put info
 		   :headline-offset
 		   (- 1 (org-export--get-min-level data info))))
-  ;; Update footnotes definitions list with definitions in parse tree.
-  ;; This is required since buffer expansion might have modified
-  ;; boundaries of footnote definitions contained in the parse tree.
-  ;; This way, definitions in `footnote-definition-alist' are bound to
-  ;; match those in the parse tree.
+  ;; Footnote definitions in parse tree override those stored in
+  ;; `:footnote-definition-alist'.  This way, any change to
+  ;; a definition in the parse tree (e.g., through a parse tree
+  ;; filter) propagates into the alist.
   (let ((defs (plist-get info :footnote-definition-alist)))
-    (org-element-map data 'footnote-definition
+    (org-element-map data '(footnote-definition footnote-reference)
       (lambda (fn)
-	(push (cons (org-element-property :label fn)
-		    `(org-data nil ,@(org-element-contents fn)))
-	      defs)))
+	(cond ((eq (org-element-type fn) 'footnote-definition)
+	       (push (cons (org-element-property :label fn)
+			   (append '(org-data nil) (org-element-contents fn)))
+		     defs))
+	      ((eq (org-element-property :type fn) 'inline)
+	       (push (cons (org-element-property :label fn)
+			   (org-element-contents fn))
+		     defs)))))
     (setq info (plist-put info :footnote-definition-alist defs)))
   ;; Properties order doesn't matter: get the rest of the tree
   ;; properties.
