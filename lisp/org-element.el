@@ -5147,9 +5147,7 @@ request."
       ;; delegate phase 1 processing to next request in order to keep
       ;; keys unique among requests.
       (when (equal (aref request 0) next)
-	(let ((next-request (nth 1 org-element--cache-sync-requests)))
-	  (aset next-request 1 (aref request 1))
-	  (aset next-request 6 1))
+	(aset (nth 1 org-element--cache-sync-requests) 6 1)
 	(throw 'quit t))
       (let ((limit (+ (aref request 1) (aref request 3) extra)))
 	;; Next element will start at its beginning position plus
@@ -5507,9 +5505,9 @@ change, as an integer."
 			(key (org-element--cache-key first)))
 		    (cond
 		     ;; When changes happen before the first known
-		     ;; element, shift the rest of the cache.
-		     ((> beg end)
-		      (vector key nil nil offset nil nil 2))
+		     ;; element, re-parent and shift the rest of the
+		     ;; cache.
+		     ((> beg end) (vector key beg nil offset nil nil 1))
 		     ;; Otherwise, we find the first non robust
 		     ;; element containing END.  All elements between
 		     ;; FIRST and this one are to be removed.
