@@ -3186,6 +3186,40 @@ Paragraph \\alpha."
 	   (goto-char (point-max))
 	   (org-element-type
 	    (org-element-property :parent (org-element-at-point)))))))
+  ;; Preserve local structures when re-parenting.
+  (should
+   (eq 'table
+       (org-test-with-temp-text
+	   "#+begin_center\nP0\n\n<point>\n\n  P1\n  | a | b |\n| c | d |\n#+end_center"
+	 (let ((org-element-use-cache t))
+	   (save-excursion (search-forward "| c |") (org-element-at-point))
+	   (insert "- item")
+	   (search-forward "| c |")
+	   (beginning-of-line)
+	   (org-element-type
+	    (org-element-property :parent (org-element-at-point)))))))
+  (should-not
+   (eq 'center-block
+       (org-test-with-temp-text
+	   "#+begin_center\nP0\n\n<point>\n\n  P1\n  | a | b |\n#+end_center"
+	 (let ((org-element-use-cache t))
+	   (save-excursion (search-forward "| a |") (org-element-at-point))
+	   (insert "- item")
+	   (search-forward "| a |")
+	   (beginning-of-line)
+	   (org-element-type
+	    (org-element-property :parent (org-element-at-point)))))))
+  ;; When re-parenting, also propagate changes to list structures.
+  (should
+   (= 2
+      (org-test-with-temp-text "\n  Para\n  - item<point>"
+	(let ((org-element-use-cache t))
+	  (org-element-at-point)
+	  (goto-char (point-min))
+	  (insert "- Top\n")
+	  (search-forward "- item")
+	  (beginning-of-line)
+	  (length (org-element-property :structure (org-element-at-point)))))))
   ;; Modifying the last line of an element alters the element below.
   (should
    (org-test-with-temp-text "para1\n\npara2"

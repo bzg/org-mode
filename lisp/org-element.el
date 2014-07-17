@@ -5201,12 +5201,21 @@ request."
 		  (dolist (object (cddr object-data))
 		    (org-element--cache-shift-positions object offset))))
 	      (let ((begin (org-element-property :begin data)))
-		;; Re-parent it.
+		;; Update PARENT and re-parent DATA, only when
+		;; necessary.  Propagate new structures for lists.
 		(while (and parent
 			    (<= (org-element-property :end parent) begin))
 		  (setq parent (org-element-property :parent parent)))
-		(cond (parent (org-element-put-property data :parent parent))
-		      ((zerop offset) (throw 'quit t)))
+		(cond ((and (not parent) (zerop offset)) (throw 'quit nil))
+		      ((and parent
+			    (let ((p (org-element-property :parent data)))
+			      (or (not p)
+				  (< (org-element-property :begin p)
+				     (org-element-property :begin parent)))))
+		       (org-element-put-property data :parent parent)
+		       (let ((s (org-element-property :structure parent)))
+			 (when (and s (org-element-property :structure data))
+			   (org-element-put-property data :structure s)))))
 		;; Cache is up-to-date past THRESHOLD.  Request
 		;; interruption.
 		(when (and threshold (> begin threshold)) (setq exit-flag t))))
