@@ -5037,11 +5037,10 @@ updated before current modification are actually submitted."
 			    org-element-cache-sync-duration))
 	     (or extra 0))
 	    ;; Request processed.  Merge current and next offsets and
-	    ;; transfer phase number and ending position.
+	    ;; transfer ending position.
 	    (when next
 	      (incf (aref next 3) (aref request 3))
-	      (aset next 2 (aref request 2))
-	      (aset next 6 (aref request 6)))
+	      (aset next 2 (aref request 2)))
 	    (setq org-element--cache-sync-requests
 		  (cdr org-element--cache-sync-requests))))
 	;; If more requests are awaiting, set idle timer accordingly.
@@ -5072,7 +5071,7 @@ Throw `interrupt' if the process stops before completing the
 request."
   (catch 'quit
     (when (= (aref request 6) 0)
-      ;; Phase 1.
+      ;; Phase 0.
       ;;
       ;; Delete all elements starting after BEG, but not after buffer
       ;; position END or past element with key NEXT.
@@ -5119,12 +5118,11 @@ request."
 		;; cache: further processing is futile.
 		(throw 'quit t)))))))
     (when (= (aref request 6) 1)
-      ;; Phase 2.
+      ;; Phase 1.
       ;;
-      ;; Phase 1 left a hole in the parse tree.  Some elements after
-      ;; it could have parents within.  For example, in the following
+      ;; Phase 0 left a hole in the cache.  Some elements after it
+      ;; could have parents within.  For example, in the following
       ;; buffer:
-      ;;
       ;;
       ;;   - item
       ;;
@@ -5133,7 +5131,6 @@ request."
       ;;
       ;;     Paragraph2
       ;;
-      ;;
       ;; if we remove a blank line between "item" and "Paragraph1",
       ;; everything down to "Paragraph2" is removed from cache.  But
       ;; the paragraph now belongs to the list, and its `:parent'
@@ -5141,26 +5138,29 @@ request."
       ;;
       ;; Therefore we need to parse again elements in the hole, or at
       ;; least in its last section, so that we can re-parent
-      ;; subsequent elements, during phase 3.
+      ;; subsequent elements, during phase 2.
       ;;
       ;; Note that we only need to get the parent from the first
       ;; element in cache after the hole.
       ;;
-      ;; Also, this part can be delayed if we don't need to retrieve
-      ;; an element after the hole.
-      (catch 'end-phase
+      ;; When next request has the same key as the current one,
+      ;; delegate phase 1 processing to next request in order to keep
+      ;; keys unique among requests.
+      (when (equal (aref request 0) next)
+	(let ((next-request (nth 1 org-element--cache-sync-requests)))
+	  (aset next-request 1 (aref request 1))
+	  (aset next-request 6 1))
+	(throw 'quit t))
+      (let ((limit (+ (aref request 1) (aref request 3) extra)))
 	;; Next element will start at its beginning position plus
 	;; offset, since it hasn't been shifted yet.  Therefore, LIMIT
 	;; contains the real beginning position of the first element
 	;; to shift and re-parent.
-	(when (equal (aref request 0) next) (throw 'quit t))
-	(let ((limit (+ (aref request 1) (aref request 3) extra)))
-	  (when (and threshold (< threshold limit)) (throw 'interrupt nil))
-	  (let ((parent (org-element--parse-to limit t time-limit)))
-	    (aset request 5 parent)
-	    (aset request 6 2)
-	    (throw 'end-phase nil)))))
-    ;; Phase 3.
+	(when (and threshold (< threshold limit)) (throw 'interrupt nil))
+	(let ((parent (org-element--parse-to limit t time-limit)))
+	  (aset request 5 parent)
+	  (aset request 6 2))))
+    ;; Phase 2.
     ;;
     ;; Shift all elements starting from key START, but before NEXT, by
     ;; OFFSET, and re-parent them when appropriate.
