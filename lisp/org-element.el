@@ -5463,24 +5463,31 @@ changes."
 	 (before (car elements))
 	 (after (cdr elements)))
     (if (not before) after
-      (let ((up before))
-	(while (setq up (org-element-property :parent up))
+      (let ((up before)
+	    (robust-flag t))
+	(while up
 	  (if (and (memq (org-element-type up)
-			 '(center-block
-			   drawer dynamic-block inlinetask
-			   property-drawer quote-block special-block))
+			 '(center-block drawer dynamic-block
+					property-drawer quote-block
+					special-block))
 		   (<= (org-element-property :contents-begin up) beg)
 		   (> (org-element-property :contents-end up) end))
 	      ;; UP is a robust greater element containing changes.
 	      ;; We only need to extend its ending boundaries.
 	      (org-element--cache-shift-positions
 	       up offset '(:contents-end :end))
-	    (setq before up)))
+	    (setq before up)
+	    (when robust-flag (setq robust-flag nil)))
+	  (setq up (org-element-property :parent up)))
 	;; We're at top level element containing ELEMENT: if it's
 	;; altered by buffer modifications, it is first element in
 	;; cache to be removed.  Otherwise, that first element is the
 	;; following one.
-	(if (< (org-element-property :end before) beg) after before)))))
+	;;
+	;; As a special case, do not remove BEFORE if it is a robust
+	;; container for current changes.
+	(if (or (< (org-element-property :end before) beg) robust-flag) after
+	  before)))))
 
 (defun org-element--cache-submit-request (beg end offset)
   "Submit a new cache synchronization request for current buffer.
