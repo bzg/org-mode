@@ -5143,12 +5143,16 @@ request."
       ;; Note that we only need to get the parent from the first
       ;; element in cache after the hole.
       ;;
-      ;; When next request has the same key as the current one,
-      ;; delegate phase 1 processing to next request in order to keep
-      ;; keys unique among requests.
-      (when (equal (aref request 0) next)
-	(aset (nth 1 org-element--cache-sync-requests) 6 1)
-	(throw 'quit t))
+      ;; When next key is lesser or equal to the current one, delegate
+      ;; phase 1 processing to next request in order to preserve key
+      ;; order among requests.
+      (let ((key (aref request 0)))
+	(when (and next (not (org-element--cache-key-less-p key next)))
+	  (let ((next-request (nth 1 org-element--cache-sync-requests)))
+	    (aset next-request 0 key)
+	    (aset next-request 1 (aref request 1))
+	    (aset next-request 6 1))
+	  (throw 'quit t)))
       (let ((limit (+ (aref request 1) (aref request 3) extra)))
 	;; Next element will start at its beginning position plus
 	;; offset, since it hasn't been shifted yet.  Therefore, LIMIT
