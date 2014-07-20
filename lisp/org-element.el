@@ -5006,7 +5006,7 @@ Properties are modified by side-effect."
 			(plist-get properties key))))
 	(and value (plist-put properties key (+ offset value)))))))
 
-(defun org-element--cache-sync (buffer &optional threshold extra)
+(defun org-element--cache-sync (buffer &optional threshold future-change)
   "Synchronize cache with recent modification in BUFFER.
 
 When optional argument THRESHOLD is non-nil, do the
@@ -5015,9 +5015,9 @@ then exit.  Otherwise, synchronize cache for as long as
 `org-element-cache-sync-duration' or until Emacs leaves idle
 state.
 
-EXTRA, when non-nil, is an additional offset for changes not
-registered yet in the cache.  It is used in
-`org-element--cache-submit-request', where cache is partially
+FUTURE-CHANGE, when non-nil, is a buffer position where changes
+not registered yet in the cache are going to happen.  It is used
+in `org-element--cache-submit-request', where cache is partially
 updated before current modification are actually submitted."
   (when (buffer-live-p buffer)
     (with-current-buffer buffer
@@ -5035,7 +5035,7 @@ updated before current modification are actually submitted."
 	     (and (not threshold)
 		  (time-add (current-time)
 			    org-element-cache-sync-duration))
-	     (or extra 0))
+	     future-change)
 	    ;; Request processed.  Merge current and next offsets and
 	    ;; transfer ending position.
 	    (when next
@@ -5050,7 +5050,7 @@ updated before current modification are actually submitted."
 	  (clrhash org-element--cache-sync-keys))))))
 
 (defun org-element--cache-process-request
-  (request next threshold time-limit extra)
+  (request next threshold time-limit future-change)
   "Process synchronization REQUEST for all entries before NEXT.
 
 REQUEST is a vector, built by `org-element--cache-submit-request'.
@@ -5063,9 +5063,9 @@ stops as soon as a shifted element begins after it.
 When non-nil, TIME-LIMIT is a time value.  Synchronization stops
 after this time or when Emacs exits idle state.
 
-EXTRA is an additional offset taking into consideration changes
-not registered yet.  See `org-element--cache-submit-request' for
-more information.
+When non-nil, FUTURE-CHANGE is a buffer position where changes
+not registered yet in the cache are going to happen.  See
+`org-element--cache-submit-request' for more information.
 
 Throw `interrupt' if the process stops before completing the
 request."
@@ -5153,15 +5153,21 @@ request."
 	    (aset next-request 1 (aref request 1))
 	    (aset next-request 6 1))
 	  (throw 'quit t)))
-      (let ((limit (+ (aref request 1) (aref request 3) extra)))
-	;; Next element will start at its beginning position plus
-	;; offset, since it hasn't been shifted yet.  Therefore, LIMIT
-	;; contains the real beginning position of the first element
-	;; to shift and re-parent.
-	(when (and threshold (< threshold limit)) (throw 'interrupt nil))
-	(let ((parent (org-element--parse-to limit t time-limit)))
-	  (aset request 5 parent)
-	  (aset request 6 2))))
+      ;; Next element will start at its beginning position plus
+      ;; offset, since it hasn't been shifted yet.  Therefore, LIMIT
+      ;; contains the real beginning position of the first element to
+      ;; shift and re-parent.
+      (let ((limit (+ (aref request 1) (aref request 3))))
+	(cond ((and threshold (> limit threshold)) (throw 'interrupt nil))
+	      ((and future-change (>= limit future-change))
+	       ;; Changes are going to happen around this element and
+	       ;; they will trigger another phase 1 request.  Skip the
+	       ;; current one.
+	       (aset request 6 2))
+	      (t
+	       (let ((parent (org-element--parse-to limit t time-limit)))
+		 (aset request 5 parent)
+		 (aset request 6 2))))))
     ;; Phase 2.
     ;;
     ;; Shift all elements starting from key START, but before NEXT, by
@@ -5511,7 +5517,7 @@ change, as an integer."
       ;; optional parameter since current modifications are not known
       ;; yet to the otherwise correct part of the cache (i.e, before
       ;; the first request).
-      (when next (org-element--cache-sync (current-buffer) end offset))
+      (when next (org-element--cache-sync (current-buffer) end beg))
       (let ((first (org-element--cache-for-removal beg end offset)))
 	(if first
 	    (push (let ((beg (org-element-property :begin first))
