@@ -1310,9 +1310,29 @@ e^{i\\pi}+1=0
    (eq 'latex-environment
        (org-test-with-temp-text "\\begin{env}{arg}\nvalue\n\\end{env}"
 	 (org-element-type (org-element-at-point)))))
+  ;; Allow environments without newline after \begin{.}.
+  (should
+   (eq 'latex-environment
+       (org-test-with-temp-text "\\begin{env}{arg}something\nvalue\n\\end{env}"
+	 (org-element-type (org-element-at-point)))))
+  ;; Allow one-line environments.
+  (should
+   (eq 'latex-environment
+       (org-test-with-temp-text "\\begin{env}{arg}something\\end{env}"
+	 (org-element-type (org-element-at-point)))))
+  ;; Should not allow different tags.
   (should-not
    (eq 'latex-environment
-       (org-test-with-temp-text "\\begin{env}{arg} something\nvalue\n\\end{env}"
+       (org-test-with-temp-text "\\begin{env*}{arg}something\\end{env}"
+				(org-element-type (org-element-at-point)))))
+  ;; LaTeX environments must be on separate lines.
+  (should-not
+   (eq 'latex-environment
+       (org-test-with-temp-text "\\begin{env} x \\end{env} y"
+	 (org-element-type (org-element-at-point)))))
+  (should-not
+   (eq 'latex-environment
+       (org-test-with-temp-text "y \\begin{env} x<point> \\end{env}"
 	 (org-element-type (org-element-at-point)))))
   ;; Handle non-empty blank line at the end of buffer.
   (should

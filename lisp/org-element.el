@@ -2084,6 +2084,18 @@ CONTENTS is nil."
 
 ;;;; Latex Environment
 
+(defconst org-element--latex-begin-environment
+  "^[ \t]*\\\\begin{\\([A-Za-z0-9*]+\\)}"
+  "Regexp matching the beginning of a LaTeX environment.
+The environment is captured by the first group.
+
+See also `org-element--latex-end-environment'.")
+
+(defconst org-element--latex-end-environment
+  "\\\\end{%s}[ \t]*$"
+  "Format string matching the ending of a LaTeX environment.
+See also `org-element--latex-begin-environment'.")
+
 (defun org-element-latex-environment-parser (limit affiliated)
   "Parse a LaTeX environment.
 
@@ -2100,8 +2112,8 @@ Assume point is at the beginning of the latex environment."
   (save-excursion
     (let ((case-fold-search t)
 	  (code-begin (point)))
-      (looking-at "[ \t]*\\\\begin{\\([A-Za-z0-9]+\\*?\\)}")
-      (if (not (re-search-forward (format "^[ \t]*\\\\end{%s}[ \t]*$"
+      (looking-at org-element--latex-begin-environment)
+      (if (not (re-search-forward (format org-element--latex-end-environment
 					  (regexp-quote (match-string 1)))
 				  limit t))
 	  ;; Incomplete latex environment: parse it as a paragraph.
@@ -2219,11 +2231,10 @@ Assume point is at the beginning of the paragraph."
 					  (org-match-string-no-properties 1)))
 				 limit t)))
 			 ;; Stop at valid latex environments.
-			 (and (looking-at
-			       "[ \t]*\\\\begin{\\([A-Za-z0-9]+\\*?\\)}")
+			 (and (looking-at org-element--latex-begin-environment)
 			      (save-excursion
 				(re-search-forward
-				 (format "^[ \t]*\\\\end{%s}[ \t]*$"
+				 (format org-element--latex-end-environment
 					 (regexp-quote
 					  (org-match-string-no-properties 1)))
 				 limit t)))
@@ -3707,7 +3718,7 @@ element it has to parse."
 	      (goto-char (car affiliated))
 	      (org-element-keyword-parser limit nil))
 	     ;; LaTeX Environment.
-	     ((looking-at "[ \t]*\\\\begin{\\([A-Za-z0-9]+\\*?\\)}\\(\\[.*?\\]\\|{.*?}\\)*[ \t]*$")
+	     ((looking-at org-element--latex-begin-environment)
 	      (org-element-latex-environment-parser limit affiliated))
 	     ;; Drawer and Property Drawer.
 	     ((looking-at org-drawer-regexp)
