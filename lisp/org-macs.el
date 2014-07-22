@@ -352,11 +352,16 @@ point nowhere."
 (defun org-get-limited-outline-regexp ()
   "Return outline-regexp with limited number of levels.
 The number of levels is controlled by `org-inlinetask-min-level'"
-  (if (or (not (derived-mode-p 'org-mode)) (not (featurep 'org-inlinetask)))
-      org-outline-regexp
-    (let* ((limit-level (1- org-inlinetask-min-level))
-	   (nstars (if org-odd-levels-only (1- (* limit-level 2)) limit-level)))
-      (format "\\*\\{1,%d\\} " nstars))))
+  (cond ((not (derived-mode-p 'org-mode))
+	 outline-regexp)
+	((not (featurep 'org-inlinetask))
+	 org-outline-regexp)
+	(t
+	 (let* ((limit-level (1- org-inlinetask-min-level))
+		(nstars (if org-odd-levels-only
+			    (1- (* limit-level 2))
+			  limit-level)))
+	   (format "\\*\\{1,%d\\} " nstars)))))
 
 (defun org-format-seconds (string seconds)
   "Compatibility function replacing format-seconds."
