@@ -204,11 +204,10 @@ publishing directory.
 Return output file name."
   (let ((bf (get-file-buffer filename)))
     (if bf
-	(progn
-	  (org-icalendar-create-uid filename 'warn-user)
 	  (with-current-buffer bf
+	    (org-icalendar-create-uid filename 'warn-user)
 	    (org-rss-add-pubdate-property)
-	    (write-file filename)))
+	    (write-file filename))
       (find-file filename)
       (org-icalendar-create-uid filename 'warn-user)
       (org-rss-add-pubdate-property)
