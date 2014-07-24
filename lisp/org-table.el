@@ -3931,10 +3931,10 @@ With prefix ARG, apply the new formulas to the table."
 	(push org-table-current-begin-pos org-show-positions)
 	(let ((min (apply 'min org-show-positions))
 	      (max (apply 'max org-show-positions)))
-	  (set-window-start (selected-window) (point-min))
+	  (set-window-start (selected-window) min)
 	  (goto-char max)
 	  (or (pos-visible-in-window-p max)
-	      (set-window-start (selected-window) (point-max)))))
+	      (set-window-start (selected-window) max))))
       (select-window win))))
 
 (defun org-table-force-dataline ()
