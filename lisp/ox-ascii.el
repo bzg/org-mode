@@ -543,11 +543,12 @@ INFO is a plist used as a communication channel."
 INFO is a plist used as a communication channel."
   (case (org-element-type element)
     ;; Elements with an absolute width: `headline' and `inlinetask'.
-    (inlinetask org-ascii-inlinetask-width)
+    (inlinetask (plist-get info :ascii-inlinetask-width))
     (headline
-     (- org-ascii-text-width
+     (- (plist-get info :ascii-text-width)
 	(let ((low-level-rank (org-export-low-level-p element info)))
-	  (if low-level-rank (* low-level-rank 2) org-ascii-global-margin))))
+	  (if low-level-rank (* low-level-rank 2)
+	    (plist-get info :ascii-global-margin)))))
     ;; Elements with a relative width: store maximum text width in
     ;; TOTAL-WIDTH.
     (otherwise
@@ -557,10 +558,10 @@ INFO is a plist used as a communication channel."
 	    (total-width
 	     (if (loop for parent in genealogy
 		       thereis (eq (org-element-type parent) 'inlinetask))
-		 org-ascii-inlinetask-width
+		 (plist-get info :ascii-inlinetask-width)
 	       ;; No inlinetask: Remove global margin from text width.
-	       (- org-ascii-text-width
-		  org-ascii-global-margin
+	       (- (plist-get info :ascii-text-width)
+		  (plist-get info :ascii-global-margin)
 		  (let ((parent (org-export-get-parent-headline element)))
 		    ;; Inner margin doesn't apply to text before first
 		    ;; headline.
@@ -571,7 +572,7 @@ INFO is a plist used as a communication channel."
 			;; low level headlines, since they've got their
 			;; own indentation mechanism.
 			(if low-level-rank (* low-level-rank 2)
-			  org-ascii-inner-margin))))))))
+			  (plist-get info :ascii-inner-margin)))))))))
        (- total-width
 	  ;; Each `quote-block' and `verse-block' above narrows text
 	  ;; width by twice the standard margin size.
@@ -579,7 +580,7 @@ INFO is a plist used as a communication channel."
 		      when (memq (org-element-type parent)
 				 '(quote-block verse-block))
 		      count parent)
-		2 org-ascii-quote-margin)
+		2 (plist-get info :ascii-quote-margin))
 	     ;; Text width within a plain-list is restricted by
 	     ;; indentation of current item.  If that's the case,
 	     ;; compute it with the help of `:structure' property from
@@ -685,7 +686,7 @@ possible.  It doesn't apply to `inlinetask' elements."
        (let ((under-char
 	      (nth (1- (org-export-get-relative-level element info))
 		   (cdr (assq (plist-get info :ascii-charset)
-			      org-ascii-underline)))))
+			      (plist-get info :ascii-underline))))))
 	 (and under-char
 	      (concat "\n"
 		      (make-string (/ (string-width first-part)
@@ -742,7 +743,8 @@ which the table of contents generation has been initiated."
      "\n\n"
      (let ((text-width
 	    (if keyword (org-ascii--current-text-width keyword info)
-	      (- org-ascii-text-width org-ascii-global-margin))))
+	      (- (plist-get info :ascii-text-width)
+		 (plist-get info :ascii-global-margin)))))
        (mapconcat
 	(lambda (headline)
 	  (let* ((level (org-export-get-relative-level headline info))
@@ -769,7 +771,8 @@ generation.  INFO is a plist used as a communication channel."
      "\n\n"
      (let ((text-width
 	    (if keyword (org-ascii--current-text-width keyword info)
-	      (- org-ascii-text-width org-ascii-global-margin)))
+	      (- (plist-get info :ascii-text-width)
+		 (plist-get info :ascii-global-margin))))
 	   ;; Use a counter instead of retrieving ordinal of each
 	   ;; src-block.
 	   (count 0))
@@ -808,7 +811,8 @@ generation.  INFO is a plist used as a communication channel."
      "\n\n"
      (let ((text-width
 	    (if keyword (org-ascii--current-text-width keyword info)
-	      (- org-ascii-text-width org-ascii-global-margin)))
+	      (- (plist-get info :ascii-text-width)
+		 (plist-get info :ascii-global-margin))))
 	   ;; Use a counter instead of retrieving ordinal of each
 	   ;; src-block.
 	   (count 0))
@@ -927,10 +931,10 @@ INFO is a plist used as a communication channel."
 (defun org-ascii-template--document-title (info)
   "Return document title, as a string.
 INFO is a plist used as a communication channel."
-  (let* ((text-width org-ascii-text-width)
+  (let* ((text-width (plist-get info :ascii-text-width))
 	 ;; Links in the title will not be resolved later, so we make
 	 ;; sure their path is located right after them.
-	 (org-ascii-links-to-notes nil)
+	 (info (org-combine-plists info '(:ascii-links-to-notes nil)))
 	 (title (org-export-data (plist-get info :title) info))
 	 (author (and (plist-get info :with-author)
 		      (let ((auth (plist-get info :author)))
@@ -1003,81 +1007,84 @@ INFO is a plist used as a communication channel."
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   (org-element-normalize-string
-   (org-ascii--indent-string
-    (concat
-     ;; 1. Document's body.
-     contents
-     ;; 2. Footnote definitions.
-     (let ((definitions (org-export-collect-footnote-definitions
-			 (plist-get info :parse-tree) info))
-	   ;; Insert full links right inside the footnote definition
-	   ;; as they have no chance to be inserted later.
-	   (org-ascii-links-to-notes nil))
-       (when definitions
-	 (concat
-	  "\n\n\n"
-	  (let ((title (org-ascii--translate "Footnotes" info)))
-	    (concat
-	     title "\n"
-	     (make-string
-	      (string-width title)
-	      (if (eq (plist-get info :ascii-charset) 'utf-8) ?─ ?_))))
-	  "\n\n"
-	  (let ((text-width (- org-ascii-text-width org-ascii-global-margin)))
-	    (mapconcat
-	     (lambda (ref)
-	       (let ((id (format "[%s] " (car ref))))
-		 ;; Distinguish between inline definitions and
-		 ;; full-fledged definitions.
-		 (org-trim
-		  (let ((def (nth 2 ref)))
-		    (if (eq (org-element-type def) 'org-data)
-			;; Full-fledged definition: footnote ID is
-			;; inserted inside the first parsed paragraph
-			;; (FIRST), if any, to be sure filling will
-			;; take it into consideration.
-			(let ((first (car (org-element-contents def))))
-			  (if (not (eq (org-element-type first) 'paragraph))
-			      (concat id "\n" (org-export-data def info))
-			    (push id (nthcdr 2 first))
-			    (org-export-data def info)))
-		      ;; Fill paragraph once footnote ID is inserted
-		      ;; in order to have a correct length for first
-		      ;; line.
-		      (org-ascii--fill-string
-		       (concat id (org-export-data def info))
-		       text-width info))))))
-	     definitions "\n\n"))))))
-    org-ascii-global-margin)))
+   (let ((global-margin (plist-get info :ascii-global-margin)))
+     (org-ascii--indent-string
+      (concat
+       ;; 1. Document's body.
+       contents
+       ;; 2. Footnote definitions.
+       (let ((definitions (org-export-collect-footnote-definitions
+			   (plist-get info :parse-tree) info))
+	     ;; Insert full links right inside the footnote definition
+	     ;; as they have no chance to be inserted later.
+	     (info (org-combine-plists info '(:ascii-links-to-notes nil))))
+	 (when definitions
+	   (concat
+	    "\n\n\n"
+	    (let ((title (org-ascii--translate "Footnotes" info)))
+	      (concat
+	       title "\n"
+	       (make-string
+		(string-width title)
+		(if (eq (plist-get info :ascii-charset) 'utf-8) ?─ ?_))))
+	    "\n\n"
+	    (let ((text-width (- (plist-get info :ascii-text-width)
+				 global-margin)))
+	      (mapconcat
+	       (lambda (ref)
+		 (let ((id (format "[%s] " (car ref))))
+		   ;; Distinguish between inline definitions and
+		   ;; full-fledged definitions.
+		   (org-trim
+		    (let ((def (nth 2 ref)))
+		      (if (eq (org-element-type def) 'org-data)
+			  ;; Full-fledged definition: footnote ID is
+			  ;; inserted inside the first parsed
+			  ;; paragraph (FIRST), if any, to be sure
+			  ;; filling will take it into consideration.
+			  (let ((first (car (org-element-contents def))))
+			    (if (not (eq (org-element-type first) 'paragraph))
+				(concat id "\n" (org-export-data def info))
+			      (push id (nthcdr 2 first))
+			      (org-export-data def info)))
+			;; Fill paragraph once footnote ID is inserted
+			;; in order to have a correct length for first
+			;; line.
+			(org-ascii--fill-string
+			 (concat id (org-export-data def info))
+			 text-width info))))))
+	       definitions "\n\n"))))))
+      global-margin))))
 
 (defun org-ascii-template (contents info)
   "Return complete document string after ASCII conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (concat
-   ;; 1. Build title block.
-   (org-ascii--indent-string
-    (concat (org-ascii-template--document-title info)
-	    ;; 2. Table of contents.
-	    (let ((depth (plist-get info :with-toc)))
-	      (when depth
-		(concat
-		 (org-ascii--build-toc info (and (wholenump depth) depth))
-		 "\n\n\n"))))
-    org-ascii-global-margin)
-   ;; 3. Document's body.
-   contents
-   ;; 4. Creator.  Ignore `comment' value as there are no comments in
-   ;;    ASCII.  Justify it to the bottom right.
-   (org-ascii--indent-string
-    (let ((creator-info (plist-get info :with-creator))
-	  (text-width (- org-ascii-text-width org-ascii-global-margin)))
-      (unless (or (not creator-info) (eq creator-info 'comment))
-	(concat
-	 "\n\n\n"
-	 (org-ascii--fill-string
-	  (plist-get info :creator) text-width info 'right))))
-    org-ascii-global-margin)))
+  (let ((global-margin (plist-get info :ascii-global-margin)))
+    (concat
+     ;; 1. Build title block.
+     (org-ascii--indent-string
+      (concat (org-ascii-template--document-title info)
+	      ;; 2. Table of contents.
+	      (let ((depth (plist-get info :with-toc)))
+		(when depth
+		  (concat
+		   (org-ascii--build-toc info (and (wholenump depth) depth))
+		   "\n\n\n"))))
+      global-margin)
+     ;; 3. Document's body.
+     contents
+     ;; 4. Creator.  Ignore `comment' value as there are no comments in
+     ;;    ASCII.  Justify it to the bottom right.
+     (org-ascii--indent-string
+      (let ((creator-info (plist-get info :with-creator))
+	    (text-width (- (plist-get info :ascii-text-width) global-margin)))
+	(unless (or (not creator-info) (eq creator-info 'comment))
+	  (concat
+	   "\n\n\n"
+	   (org-ascii--fill-string
+	    (plist-get info :creator) text-width info 'right))))
+      global-margin))))
 
 (defun org-ascii--translate (s info)
   "Translate string S according to specified language and charset.
@@ -1135,7 +1142,8 @@ information."
   "Return a CODE object from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (format org-ascii-verbatim-format (org-element-property :value code)))
+  (format (plist-get info :ascii-verbatim-format)
+	  (org-element-property :value code)))
 
 
 ;;;; Drawer
@@ -1146,7 +1154,8 @@ CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (let ((name (org-element-property :drawer-name drawer))
 	(width (org-ascii--current-text-width drawer info)))
-    (funcall org-ascii-format-drawer-function name contents width)))
+    (funcall (plist-get info :ascii-format-drawer-function)
+	     name contents width)))
 
 
 ;;;; Dynamic Block
@@ -1241,8 +1250,9 @@ holding contextual information."
 	   ;; original buffer's spacing.
 	   (pre-blanks
 	    (make-string
-	     (if org-ascii-headline-spacing (car org-ascii-headline-spacing)
-	       (org-element-property :pre-blank headline)) ?\n))
+	     (or (car (plist-get info :ascii-headline-spacing))
+		 (org-element-property :pre-blank headline))
+	     ?\n))
 	   ;; Even if HEADLINE has no section, there might be some
 	   ;; links in its title that we shouldn't forget to describe.
 	   (links
@@ -1256,7 +1266,7 @@ holding contextual information."
 	  (concat
 	   ;; Bullet.
 	   (let ((bullets (cdr (assq (plist-get info :ascii-charset)
-				     org-ascii-bullets))))
+				     (plist-get info :ascii-bullets)))))
 	     (char-to-string
 	      (nth (mod (1- low-level-rank) (length bullets)) bullets)))
 	   " "
@@ -1298,7 +1308,7 @@ information."
   "Transcode an INLINE-SRC-BLOCK element from Org to ASCII.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (format org-ascii-verbatim-format
+  (format (plist-get info :ascii-verbatim-format)
 	  (org-element-property :value inline-src-block)))
 
 
@@ -1310,7 +1320,7 @@ contextual information."
 See `org-ascii-format-inlinetask-function' for a description
 of the parameters."
   (let* ((utf8p (eq (plist-get info :ascii-charset) 'utf-8))
-	 (width (or width org-ascii-inlinetask-width)))
+	 (width (or width (plist-get info :ascii-inlinetask-width))))
     (org-ascii--indent-string
      (concat
       ;; Top line, with an additional blank line if not in UTF-8.
@@ -1328,9 +1338,9 @@ of the parameters."
       ;; Bottom line.
       (make-string width (if utf8p ?━ ?_)))
      ;; Flush the inlinetask to the right.
-     (- org-ascii-text-width org-ascii-global-margin
+     (- (plist-get info :ascii-text-width) (plist-get info :ascii-global-margin)
 	(if (not (org-export-get-parent-headline inlinetask)) 0
-	  org-ascii-inner-margin)
+	  (plist-get info :ascii-inner-margin))
 	(org-ascii--current-text-width inlinetask info)))))
 
 (defun org-ascii-inlinetask (inlinetask contents info)
@@ -1338,7 +1348,7 @@ of the parameters."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (let ((width (org-ascii--current-text-width inlinetask info)))
-    (funcall org-ascii-format-inlinetask-function
+    (funcall (plist-get info :ascii-format-inlinetask-function)
 	     ;; todo.
 	     (and (plist-get info :with-todo-keywords)
 		  (let ((todo (org-element-property
@@ -1506,9 +1516,9 @@ INFO is a plist holding contextual information."
 		  (mapconcat 'number-to-string number "."))))))))
      (t
       (if (not (org-string-nw-p desc)) (format "[%s]" raw-link)
-	(concat
-	 (format "[%s]" desc)
-	 (unless org-ascii-links-to-notes (format " (%s)" raw-link))))))))
+	(concat (format "[%s]" desc)
+		(and (not (plist-get info :ascii-links-to-notes))
+		     (format " (%s)" raw-link))))))))
 
 
 ;;;; Node Properties
@@ -1530,14 +1540,15 @@ information."
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
   (org-ascii--justify-element
-   (if (not (wholenump org-ascii-indented-line-width)) contents
-     (concat
-      ;; Do not indent first paragraph in a section.
-      (unless (and (not (org-export-get-previous-element paragraph info))
-		   (eq (org-element-type (org-export-get-parent paragraph))
-		       'section))
-	(make-string org-ascii-indented-line-width ?\s))
-      (replace-regexp-in-string "\\`[ \t]+" "" contents)))
+   (let ((indented-line-width (plist-get info :ascii-indented-line-width)))
+     (if (not (wholenump indented-line-width)) contents
+       (concat
+	;; Do not indent first paragraph in a section.
+	(unless (and (not (org-export-get-previous-element paragraph info))
+		     (eq (org-element-type (org-export-get-parent paragraph))
+			 'section))
+	  (make-string indented-line-width ?\s))
+	(replace-regexp-in-string "\\`[ \t]+" "" contents))))
    paragraph info))
 
 
@@ -1614,7 +1625,7 @@ holding contextual information."
   "Transcode a QUOTE-BLOCK element from Org to ASCII.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (org-ascii--indent-string contents org-ascii-quote-margin))
+  (org-ascii--indent-string contents (plist-get info :ascii-quote-margin)))
 
 
 ;;;; Radio Target
@@ -1635,7 +1646,7 @@ contextual information."
   (org-ascii--indent-string
    (concat
     contents
-    (when org-ascii-links-to-notes
+    (when (plist-get info :ascii-links-to-notes)
       ;; Add list of links at the end of SECTION.
       (let ((links (org-ascii--describe-links
 		    (org-ascii--unique-links section info)
@@ -1645,7 +1656,7 @@ contextual information."
    ;; Do not apply inner margin if parent headline is low level.
    (let ((headline (org-export-get-parent-headline section)))
      (if (or (not headline) (org-export-low-level-p headline info)) 0
-       org-ascii-inner-margin))))
+       (plist-get info :ascii-inner-margin)))))
 
 
 ;;;; Special Block
@@ -1667,14 +1678,14 @@ holding contextual information."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let ((caption (org-ascii--build-caption src-block info))
+	(caption-above-p (plist-get info :ascii-caption-above))
 	(code (org-export-format-code-default src-block info)))
     (if (equal code "") ""
       (org-ascii--justify-element
        (concat
-	(when (and caption org-ascii-caption-above) (concat caption "\n"))
+	(and caption caption-above-p (concat caption "\n"))
 	(org-ascii--box-string code info)
-	(when (and caption (not org-ascii-caption-above))
-	  (concat "\n" caption)))
+	(and caption (not caption-above-p) (concat "\n" caption)))
        src-block info))))
 
 
@@ -1723,14 +1734,15 @@ holding contextual information."
   "Transcode a TABLE element from Org to ASCII.
 CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
-  (let ((caption (org-ascii--build-caption table info)))
+  (let ((caption (org-ascii--build-caption table info))
+	(caption-above-p (plist-get info :ascii-caption-above)))
     (org-ascii--justify-element
      (concat
       ;; Possibly add a caption string above.
-      (when (and caption org-ascii-caption-above) (concat caption "\n"))
+      (and caption caption-above-p (concat caption "\n"))
       ;; Insert table.  Note: "table.el" tables are left unmodified.
       (cond ((eq (org-element-property :type table) 'org) contents)
-	    ((and org-ascii-table-use-ascii-art
+	    ((and (plist-get info :ascii-table-use-ascii-art)
 		  (eq (plist-get info :ascii-charset) 'utf-8)
 		  (require 'ascii-art-to-unicode nil t))
 	     (with-temp-buffer
@@ -1743,7 +1755,7 @@ contextual information."
 	       (buffer-substring (point-min) (point))))
 	    (t (org-remove-indentation (org-element-property :value table))))
       ;; Possible add a caption string below.
-      (and (not org-ascii-caption-above) caption))
+      (and (not caption-above-p) caption))
      table info)))
 
 
@@ -1770,12 +1782,13 @@ are ignored."
 			       (plist-put info :ascii-table-cell-width-cache
 					  (make-hash-table :test 'equal)))
 			 :ascii-table-cell-width-cache)))
-	 (key (cons table col)))
+	 (key (cons table col))
+	 (widenp (plist-get info :ascii-table-widen-columns)))
     (or (gethash key cache)
 	(puthash
 	 key
 	 (let ((cookie-width (org-export-table-cell-width table-cell info)))
-	   (or (and (not org-ascii-table-widen-columns) cookie-width)
+	   (or (and (not widenp) cookie-width)
 	       (let ((contents-width
 		      (let ((max-width 0))
 			(org-element-map table 'table-row
@@ -1790,8 +1803,7 @@ are ignored."
 			  info)
 			max-width)))
 		 (cond ((not cookie-width) contents-width)
-		       (org-ascii-table-widen-columns
-			(max cookie-width contents-width))
+		       (widenp (max cookie-width contents-width))
 		       (t cookie-width)))))
 	 cache))))
 
@@ -1805,7 +1817,7 @@ a communication channel."
   ;; each cell in the column.
   (let ((width (org-ascii--table-cell-width table-cell info)))
     ;; When contents are too large, truncate them.
-    (unless (or org-ascii-table-widen-columns
+    (unless (or (plist-get info :ascii-table-widen-columns)
 		(<= (string-width (or contents "")) width))
       (setq contents (concat (substring contents 0 (- width 2)) "=>")))
     ;; Align contents correctly within the cell.
@@ -1899,7 +1911,7 @@ holding contextual information."
 (defun org-ascii-verbatim (verbatim contents info)
   "Return a VERBATIM object from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (format org-ascii-verbatim-format
+  (format (plist-get info :ascii-verbatim-format)
 	  (org-element-property :value verbatim)))
 
 
@@ -1912,7 +1924,7 @@ contextual information."
   (let ((verse-width (org-ascii--current-text-width verse-block info)))
     (org-ascii--indent-string
      (org-ascii--justify-element contents verse-block info)
-     org-ascii-quote-margin)))
+     (plist-get info :ascii-quote-margin))))
 
 
 
@@ -1927,9 +1939,10 @@ plist containing the communication channel.
 
 This function only applies to `ascii' back-end.  See
 `org-ascii-headline-spacing' for information."
-  (if (not org-ascii-headline-spacing) headline
-    (let ((blanks (make-string (1+ (cdr org-ascii-headline-spacing)) ?\n)))
-      (replace-regexp-in-string "\n\\(?:\n[ \t]*\\)*\\'" blanks headline))))
+  (let ((headline-spacing (plist-get info :ascii-headline-spacing)))
+    (if (not headline-spacing) headline
+      (let ((blanks (make-string (1+ (cdr headline-spacing)) ?\n)))
+	(replace-regexp-in-string "\n\\(?:\n[ \t]*\\)*\\'" blanks headline)))))
 
 (defun org-ascii-filter-paragraph-spacing (tree back-end info)
   "Filter controlling number of blank lines between paragraphs.
@@ -1939,13 +1952,13 @@ back-end used for export.  INFO is a plist used as
 a communication channel.
 
 See `org-ascii-paragraph-spacing' for information."
-  (when (wholenump org-ascii-paragraph-spacing)
-    (org-element-map tree 'paragraph
-      (lambda (p)
-	(when (eq (org-element-type (org-export-get-next-element p info))
-		  'paragraph)
-	  (org-element-put-property
-	   p :post-blank org-ascii-paragraph-spacing)))))
+  (let ((paragraph-spacing (plist-get info :ascii-paragraph-spacing)))
+    (when paragraph-spacing
+      (org-element-map tree 'paragraph
+	(lambda (p)
+	  (when (eq (org-element-type (org-export-get-next-element p info))
+		    'paragraph)
+	    (org-element-put-property p :post-blank paragraph-spacing))))))
   tree)
 
 (defun org-ascii-filter-comment-spacing (tree backend info)
