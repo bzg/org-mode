@@ -5379,9 +5379,9 @@ the process stopped before finding the expected result."
    ;; Blocks
    "#\\+\\(?:BEGIN[:_]\\|END\\(?:_\\|:?[ \t]*$\\)\\)" "\\|"
    ;; LaTeX environments.
-   "\\\\\\(?:begin{[A-Za-z0-9]+\\*?}\\|end{[A-Za-z0-9]+\\*?}[ \t]*$\\)" "\\|"
+   "\\\\\\(?:begin{[A-Za-z0-9*]+}\\|end{[A-Za-z0-9*]+}[ \t]*$\\)" "\\|"
    ;; Drawers.
-   ":\\S-+:[ \t]*$"
+   ":\\(?:\\w\\|[-_]\\)+:[ \t]*$"
    "\\)")
   "Regexp matching a sensitive line, structure wise.
 A sensitive line is a headline, inlinetask, block, drawer, or
