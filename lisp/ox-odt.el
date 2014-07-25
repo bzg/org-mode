@@ -1761,7 +1761,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 			       :transcoders
 			       '((paragraph . (lambda (p c i)
 						(org-odt--format-paragraph
-						 p c "Footnote"
+						 p c i
+						 "Footnote"
 						 "OrgFootnoteCenter"
 						 "OrgFootnoteQuotations")))))
 			      info))))
@@ -2875,13 +2876,13 @@ Style is a symbol among `quoted', `centered' and nil."
       (center-block 'centered)
       (quote-block 'quoted))))
 
-(defun org-odt--format-paragraph (paragraph contents default center quote)
+(defun org-odt--format-paragraph (paragraph contents info default center quote)
   "Format paragraph according to given styles.
 PARAGRAPH is a paragraph type element.  CONTENTS is the
-transcoded contents of that paragraph, as a string.  DEFAULT,
-CENTER and QUOTE are, respectively, style to use when paragraph
-belongs to no special environment, a center block, or a quote
-block."
+transcoded contents of that paragraph, as a string.  INFO is
+a plist used as a communication channel.  DEFAULT, CENTER and
+QUOTE are, respectively, style to use when paragraph belongs to
+no special environment, a center block, or a quote block."
   (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
 	  (case (org-odt--paragraph-style paragraph)
 	    (quoted quote)
@@ -2901,7 +2902,7 @@ block."
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
   (org-odt--format-paragraph
-   paragraph contents
+   paragraph contents info
    (or (org-element-property :style paragraph) "Text_20_body")
    "OrgCenter"
    "Quotations"))
