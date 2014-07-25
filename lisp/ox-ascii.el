@@ -488,12 +488,12 @@ that is according to the widest non blank line in CONTENTS."
   (if (not (org-string-nw-p contents)) contents
     (let ((text-width (org-ascii--current-text-width element info))
 	  (how (org-ascii--current-justification element)))
-      (if (eq how 'left) contents
-	;; Paragraphs are treated specially as they also need to be
-	;; filled.
-	(if (eq (org-element-type element) 'paragraph)
-	    (org-ascii--fill-string contents text-width info how)
-	  (with-temp-buffer
+      (cond
+       ((eq (org-element-type element) 'paragraph)
+	;; Paragraphs are treated specially as they need to be filled.
+	(org-ascii--fill-string contents text-width info how))
+       ((eq how 'left) contents)
+       (t (with-temp-buffer
 	    (insert contents)
 	    (goto-char (point-min))
 	    (catch 'exit
