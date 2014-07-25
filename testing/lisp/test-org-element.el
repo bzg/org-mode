@@ -2845,47 +2845,57 @@ Paragraph \\alpha."
 
 (ert-deftest test-org-element/secondary-string-parsing ()
   "Test if granularity correctly toggles secondary strings parsing."
-  ;; 1. With a granularity bigger than `object', no secondary string
-  ;;    should be parsed.
-  ;;
-  ;; 1.1. Test with `headline' type.
-  (org-test-with-temp-text "* Headline"
-    (let ((headline
-	   (org-element-map (org-element-parse-buffer 'headline) 'headline
-			    'identity
-			    nil
-			    'first-match)))
-      (should (stringp (org-element-property :title headline)))))
-  ;; 1.2. Test with `item' type.
-  (org-test-with-temp-text "* Headline\n- tag :: item"
-    (let ((item (org-element-map (org-element-parse-buffer 'element)
-				 'item
-				 'identity
-				 nil
-				 'first-match)))
-      (should (stringp (org-element-property :tag item)))))
-  ;; 1.3. Test with `inlinetask' type, if avalaible.
+  ;; With a granularity bigger than `object', no secondary string
+  ;; should be parsed.
+  (should
+   (stringp
+    (org-test-with-temp-text "* Headline"
+      (let ((headline
+	     (org-element-map (org-element-parse-buffer 'headline) 'headline
+	       #'identity nil 'first-match)))
+	(org-element-property :title headline)))))
+  (should
+   (stringp
+    (org-test-with-temp-text "* Headline\n- tag :: item"
+      (let ((item (org-element-map (org-element-parse-buffer 'element) 'item
+		    #'identity nil 'first-match)))
+	(org-element-property :tag item)))))
   (when (featurep 'org-inlinetask)
-    (let ((org-inlinetask-min-level 15))
-      (org-test-with-temp-text "*************** Inlinetask"
-	(let ((inlinetask (org-element-map (org-element-parse-buffer 'element)
-					   'inlinetask
-					   'identity
-					   nil
-					   'first-match)))
-	  (should (stringp (org-element-property :title inlinetask)))))))
-  ;; 2. With a default granularity, secondary strings should be
-  ;;    parsed.
-  (org-test-with-temp-text "* Headline"
-    (let ((headline
-	   (org-element-map (org-element-parse-buffer) 'headline
-			    'identity
-			    nil
-			    'first-match)))
-      (should (listp (org-element-property :title headline)))))
-  ;; 3. `org-element-at-point' should never parse a secondary string.
-  (org-test-with-temp-text "* Headline"
-    (should (stringp (org-element-property :title (org-element-at-point))))))
+    (should
+     (stringp
+      (let ((org-inlinetask-min-level 15))
+	(org-test-with-temp-text "*************** Inlinetask"
+	  (let ((inlinetask (org-element-map (org-element-parse-buffer 'element)
+				'inlinetask
+			      #'identity nil 'first-match)))
+	    (org-element-property :title inlinetask)))))))
+  ;; With a default granularity, secondary strings should be parsed.
+  (should
+   (listp
+    (org-test-with-temp-text "* Headline"
+      (let ((headline
+	     (org-element-map (org-element-parse-buffer) 'headline
+	       #'identity nil 'first-match)))
+	(org-element-property :title headline)))))
+  ;; `org-element-at-point' should never parse a secondary string.
+  (should-not
+   (listp
+    (org-test-with-temp-text "* Headline"
+      (org-element-property :title (org-element-at-point)))))
+  ;; Preserve current local variables when parsing a secondary string.
+  (should
+   (let ((org-entities nil)
+	 (org-entities-user nil))
+     (org-test-with-temp-text "
+#+CAPTION: \\foo
+Text
+# Local Variables:
+# org-entities-user: ((\"foo\"))
+# End:"
+       (let ((safe-local-variable-values '((org-entities-user . (("foo"))))))
+	 (hack-local-variables))
+       (org-element-map (org-element-parse-buffer) 'entity
+	 #'identity nil nil nil t)))))
 
 
 
