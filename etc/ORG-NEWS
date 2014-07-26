@@ -9,7 +9,41 @@ See the end of the file for license conditions.
 Please send Org bug reports to emacs-orgmode@gnu.org.
 
 * Version 8.3
+** Incompatible changes
+*** Remove ~export-block~ element type
+For export back-end developers.
 
+So called "Export blocks" are now raw "Special blocks".  As
+a consequence ~export-block~ type doesn't exist anymore in parser, and
+should not have a translator associated in an export back-end.
+
+In order to tell the difference between a special block and a former
+export block, a new predicate, ~org-export-raw-special-block-p~ is
+implemented.
+
+To put it simply, two steps may be needed to update a back-end
+defining export blocks.
+
+1. Remove any ~org-BACKEND-export-block~ function and remove
+   ~export-block~ entry from back-end definition.
+
+2. If there is a translator for special blocks, e.g.,
+   ~org-BACKEND-special-block~, first check if the current block is an
+   export block using the predicate and, if that is true, simply
+   insert raw value, obtained through block's ~:raw-value~
+   property. E.g.,
+   
+   #+BEGIN_SRC emacs-lisp
+   (defun org-latex-special-block (special-block contents info)
+     (if (org-export-raw-special-block-p special-block info)
+         (org-element-property :raw-value special-block)
+       ;; Usual handling for special blocks goes here.
+       ))
+   #+END_SRC
+
+   Note that If BACKEND is a derived back-end and doesn't implement
+   its own special block translator already, there is nothing to
+   change.  The parent back-end will take care of such blocks.
 ** Removed functions
 *** Removed function ~org-beamer-insert-options-template~
 This function inserted a Beamer specific template at point or in
