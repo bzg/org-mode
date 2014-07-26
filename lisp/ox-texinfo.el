@@ -76,7 +76,6 @@
     (dynamic-block . org-texinfo-dynamic-block)
     (entity . org-texinfo-entity)
     (example-block . org-texinfo-example-block)
-    (export-block . org-texinfo-export-block)
     (export-snippet . org-texinfo-export-snippet)
     (fixed-width . org-texinfo-fixed-width)
     (footnote-definition . org-texinfo-footnote-definition)
@@ -930,14 +929,6 @@ information."
   (format "@verbatim\n%s@end verbatim"
 	  (org-export-format-code-default example-block info)))
 
-;;; Export Block
-
-(defun org-texinfo-export-block (export-block contents info)
-  "Transcode a EXPORT-BLOCK element from Org to Texinfo.
-CONTENTS is nil.  INFO is a plist holding contextual information."
-  (when (string= (org-element-property :type export-block) "TEXINFO")
-    (org-remove-indentation (org-element-property :value export-block))))
-
 ;;; Export Snippet
 
 (defun org-texinfo-export-snippet (export-snippet contents info)
@@ -1477,7 +1468,9 @@ holding contextual information."
   "Transcode a SPECIAL-BLOCK element from Org to Texinfo.
 CONTENTS holds the contents of the block.  INFO is a plist used
 as a communication channel."
-  contents)
+  (if (org-export-raw-special-block-p special-block info)
+      (org-remove-indentation (org-element-property :raw-value special-block))
+    contents))
 
 ;;; Src Block
 
