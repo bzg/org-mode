@@ -1518,8 +1518,9 @@ keyword and CDR is a plist of affiliated keywords along with
 their value.
 
 Return a list whose CAR is `special-block' and CDR is a plist
-containing `:type', `:begin', `:end', `:contents-begin',
-`:contents-end', `:post-blank' and `:post-affiliated' keywords.
+containing `:type', `:raw-value', `:begin', `:end',
+`:contents-begin', `:contents-end', `:post-blank' and
+`:post-affiliated' keywords.
 
 Assume point is at the beginning of the block."
   (let* ((case-fold-search t)
@@ -1548,6 +1549,10 @@ Assume point is at the beginning of the block."
 	    (list 'special-block
 		  (nconc
 		   (list :type type
+			 :raw-value
+			 (and contents-begin
+			      (buffer-substring-no-properties
+			       contents-begin contents-end))
 			 :begin begin
 			 :end end
 			 :contents-begin contents-begin
