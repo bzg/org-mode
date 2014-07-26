@@ -1472,19 +1472,19 @@ e^{i\\pi}+1=0
     (org-test-with-temp-text "[[file:projects.org::*task title]]"
       (org-element-map (org-element-parse-buffer) 'link
 	(lambda (l) (list (org-element-property :type l)
-		     (org-element-property :path l)
-		     (org-element-property :search-option l)))))))
-  ;; ... file-type link with application.
+			  (org-element-property :path l)
+			  (org-element-property :search-option l)))))))
+  ;; ... file-type link with application...
   (should
    (equal
-    '(("file" "projects.org" "docview"))
+    '("file" "projects.org" "docview")
     (org-test-with-temp-text "[[docview:projects.org]]"
-      (org-element-map (org-element-parse-buffer) 'link
-	(lambda (l) (list (org-element-property :type l)
-		     (org-element-property :path l)
-		     (org-element-property :application l)))))))
+      (let ((l (org-element-context)))
+	(list (org-element-property :type l)
+	      (org-element-property :path l)
+	      (org-element-property :application l))))))
   ;; ... `:path' in a file-type link must be compatible with "file"
-  ;; scheme in URI syntax, even if Org syntax isn't.
+  ;; scheme in URI syntax, even if Org syntax isn't...
   (should
    (org-test-with-temp-text-in-file ""
      (let ((file (expand-file-name (buffer-file-name))))
@@ -1502,7 +1502,12 @@ e^{i\\pi}+1=0
      (let ((file (file-relative-name (buffer-file-name))))
        (insert (format "[[file:%s]]" file))
        (list (org-element-property :path (org-element-context)) file))))
-  ;; Plain link.
+  ;; ... multi-line link.
+  (should
+   (equal "//orgmode.org"
+	  (org-test-with-temp-text "[[http://orgmode.\norg]]"
+	    (org-element-property :path (org-element-context)))))
+    ;; Plain link.
   (should
    (org-test-with-temp-text "A link: http://orgmode.org"
      (org-element-map (org-element-parse-buffer) 'link 'identity)))
