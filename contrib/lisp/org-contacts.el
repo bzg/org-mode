@@ -1016,11 +1016,39 @@ to do our best."
 	    "END:VCARD\n\n")))
 
 (defun org-contacts-export-as-vcard (&optional name file to-buffer)
+  "Export org contacts to V-Card 3.0.
+
+By default, all contacts are exported to `org-contacts-vcard-file'.
+
+When NAME is \\[universal-argument], prompts for a contact name.
+
+When NAME is \\[universal-argument] \\[universal-argument],
+prompts for a contact name and a file name where to export.
+
+When NAME is \\[universal-argument] \\[universal-argument]
+\\[universal-argument], prompts for a contact name and a buffer where to export.
+
+If the function is not called interactively, all parameters are
+passed to `org-contacts-export-as-vcard-internal'."
+  (interactive "P")
+  (when (called-interactively-p 'any)
+    (cl-psetf name
+	     (when name
+	       (read-string "Contact name: "
+			    (first (org-contacts-at-point))))
+	     file
+	     (when (equal name '(16))
+	       (read-file-name "File: " nil org-contacts-vcard-file))
+	     to-buffer
+	     (when (equal name '(64))
+	       (read-buffer "Buffer: "))))
+  (org-contacts-export-as-vcard-internal name file to-buffer))
+
+(defun org-contacts-export-as-vcard-internal (&optional name file to-buffer)
   "Export all contacts matching NAME as VCard 3.0.
 If TO-BUFFER is nil, the content is written to FILE or
 `org-contacts-vcard-file'.  If TO-BUFFER is non-nil, the buffer
 is created and the VCard is written into that buffer."
-  (interactive) ; TODO ask for name?
   (let* ((filename (or file org-contacts-vcard-file))
 	 (buffer (if to-buffer
 		     (get-buffer-create to-buffer)
