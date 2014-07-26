@@ -188,7 +188,6 @@ way they are handled must be hard-coded into
     (:filter-dynamic-block . org-export-filter-dynamic-block-functions)
     (:filter-entity . org-export-filter-entity-functions)
     (:filter-example-block . org-export-filter-example-block-functions)
-    (:filter-export-block . org-export-filter-export-block-functions)
     (:filter-export-snippet . org-export-filter-export-snippet-functions)
     (:filter-final-output . org-export-filter-final-output-functions)
     (:filter-fixed-width . org-export-filter-fixed-width-functions)
@@ -935,10 +934,6 @@ BACKEND is a structure with `org-export-backend' type."
   (let ((parent (org-export-backend-parent backend)))
     (when (and parent (not (org-export-get-backend parent)))
       (error "Cannot use unknown \"%s\" back-end as a parent" parent)))
-  ;; Register dedicated export blocks in the parser.
-  (dolist (name (org-export-backend-blocks backend))
-    (add-to-list 'org-element-block-name-alist
-		 (cons name 'org-element-export-block-parser)))
   ;; If a back-end with the same name as BACKEND is already
   ;; registered, replace it with BACKEND.  Otherwise, simply add
   ;; BACKEND to the list of registered back-ends.
@@ -1070,7 +1065,7 @@ keywords are understood:
     String, or list of strings, representing block names that
     will not be parsed.  This is used to specify blocks that will
     contain raw code specific to the back-end.  These blocks
-    still have to be handled by the relative `export-block' type
+    still have to be handled by the `special-block' type
     translator.
 
   :filters-alist
@@ -1174,7 +1169,7 @@ keywords are understood:
     String, or list of strings, representing block names that
     will not be parsed.  This is used to specify blocks that will
     contain raw code specific to the back-end.  These blocks
-    still have to be handled by the relative `export-block' type
+    still have to be handled by the `special-block' type
     translator.
 
   :filters-alist
@@ -2589,12 +2584,6 @@ channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-example-block-functions nil
   "List of functions applied to a transcoded example-block.
-Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
-channel, as a plist.  It must return a string or nil.")
-
-(defvar org-export-filter-export-block-functions nil
-  "List of functions applied to a transcoded export-block.
 Each filter is called with three arguments: the transcoded data,
 as a string, the back-end, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
