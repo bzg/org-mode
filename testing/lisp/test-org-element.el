@@ -1507,7 +1507,7 @@ e^{i\\pi}+1=0
    (equal "//orgmode.org"
 	  (org-test-with-temp-text "[[http://orgmode.\norg]]"
 	    (org-element-property :path (org-element-context)))))
-    ;; Plain link.
+  ;; Plain link.
   (should
    (org-test-with-temp-text "A link: http://orgmode.org"
      (org-element-map (org-element-parse-buffer) 'link 'identity)))
