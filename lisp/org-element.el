@@ -3012,16 +3012,20 @@ Assume point is at the beginning of the link."
 	(cond
 	 ;; File type.
 	 ((or (file-name-absolute-p raw-link)
-	      (string-match "^\\.\\.?/" raw-link))
+	      (string-match "\\`\\.\\.?/" raw-link))
 	  (setq type "file" path raw-link))
 	 ;; Explicit type (http, irc, bbdb...).  See `org-link-types'.
-	 ((string-match org-link-re-with-space3 raw-link)
-	  (setq type (match-string 1 raw-link) path (match-string 2 raw-link)))
+	 ((string-match org-link-types-re raw-link)
+	  (setq type (match-string 1 raw-link)
+		;; According to RFC 3986, extra whitespace should be
+		;; ignored when a URI is extracted.
+		path (replace-regexp-in-string
+		      "[ \t]*\n[ \t]*" "" (substring raw-link (match-end 0)))))
 	 ;; Id type: PATH is the id.
-	 ((string-match "^id:\\([-a-f0-9]+\\)" raw-link)
+	 ((string-match "\\`id:\\([-a-f0-9]+\\)" raw-link)
 	  (setq type "id" path (match-string 1 raw-link)))
 	 ;; Code-ref type: PATH is the name of the reference.
-	 ((string-match "^(\\(.*\\))$" raw-link)
+	 ((string-match "\\`(\\(.*\\))\\'" raw-link)
 	  (setq type "coderef" path (match-string 1 raw-link)))
 	 ;; Custom-id type: PATH is the name of the custom id.
 	 ((= (aref raw-link 0) ?#)
