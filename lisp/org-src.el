@@ -906,7 +906,7 @@ fontification of code blocks see `org-src-fontify-block' and
 	    (delete-region (point-min) (point-max))
 	    (insert string " ") ;; so there's a final property change
 	    (unless (eq major-mode lang-mode) (funcall lang-mode))
-	    (font-lock-ensure)
+	    (font-lock-fontify-buffer)
 	    (setq pos (point-min))
 	    (while (setq next (next-single-property-change pos 'face))
 	      (put-text-property
