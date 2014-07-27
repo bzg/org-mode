@@ -8417,7 +8417,7 @@ useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
 	       (if cut "Cut" "Copied")
 	       (length org-subtree-clip)))))
 
-(defun org-paste-subtree (&optional level tree for-yank)
+(defun org-paste-subtree (&optional level tree for-yank remove)
   "Paste the clipboard as a subtree, with modification of headline level.
 The entire subtree is promoted or demoted in order to match a new headline
 level.
@@ -8440,7 +8440,9 @@ If optional TREE is given, use this text instead of the kill ring.
 
 When FOR-YANK is set, this is called by `org-yank'.  In this case, do not
 move back over whitespace before inserting, and move point to the end of
-the inserted text when done."
+the inserted text when done.
+
+When REMOVE is non-nil, remove the subtree from the clipboard."
   (interactive "P")
   (setq tree (or tree (and kill-ring (current-kill 0))))
   (unless (org-kill-is-subtree-p tree)
@@ -8524,7 +8526,8 @@ the inserted text when done."
 	      org-subtree-clip-folded)
 	 ;; The tree was folded before it was killed/copied
 	 (hide-subtree))
-     (and for-yank (goto-char newend)))))
+     (and for-yank (goto-char newend))
+     (and remove (setq kill-ring (cdr kill-ring))))))
 
 (defun org-kill-is-subtree-p (&optional txt)
   "Check if the current kill is an outline subtree, or a set of trees.
@@ -11871,7 +11874,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 		      (goto-char (point-min))
 		      (or (outline-next-heading) (goto-char (point-max)))))
 		  (if (not (bolp)) (newline))
-		  (org-paste-subtree level)
+		  (org-paste-subtree level nil nil t)
 		  (when org-log-refile
 		    (org-add-log-setup 'refile nil nil 'findpos org-log-refile)
 		    (unless (eq org-log-refile 'note)
