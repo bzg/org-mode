@@ -20552,11 +20552,9 @@ This command does many different things, depending on context:
   (interactive "P")
   (cond
    ((or (and (boundp 'org-clock-overlays) org-clock-overlays)
-	org-occur-highlights
-	org-latex-fragment-image-overlays)
+	org-occur-highlights)
     (and (boundp 'org-clock-overlays) (org-clock-remove-overlays))
     (org-remove-occur-highlights)
-    (org-remove-latex-fragment-image-overlays)
     (message "Temporary highlights/overlays removed from current buffer"))
    ((and (local-variable-p 'org-finish-function (current-buffer))
 	 (fboundp org-finish-function))
