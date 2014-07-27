@@ -108,7 +108,7 @@ this variable.")
      close(con)
      res
    })"
-  "R code used to transfer a table defined as a variable from org to R. 
+  "R code used to transfer a table defined as a variable from org to R.
 This function is used when the table contains a header.")
 
 (defconst ob-R-transfer-variable-table-without-header
@@ -128,7 +128,7 @@ This function is used when the table contains a header.")
      close(con)
      res
    })"
-  "R code used to transfer a table defined as a variable from org to R. 
+  "R code used to transfer a table defined as a variable from org to R.
 This function is used when the table does not contain a header.")
 
 (defun org-babel-expand-body:R (body params &optional graphics-file)
