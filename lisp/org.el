@@ -8318,7 +8318,7 @@ the inserted text when done."
 				   (string-match
 				    "^\\*+$" (buffer-substring
 					      (point-at-bol) (point))))
-			      (- (match-end 1) (match-beginning 1)))
+			      (- (match-end 0) (match-beginning 0)))
 			     ((and (bolp)
 				   (looking-at org-outline-regexp))
 			      (- (match-end 0) (point) 1))))
