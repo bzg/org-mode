@@ -5831,9 +5831,11 @@ prompted for."
   (add-text-properties (1- pos) pos (list 'rear-nonsticky org-nonsticky-props)))
 
 (defun org-activate-plain-links (limit)
-  "Run through the buffer and add overlays to links."
+  "Add link properties for plain links."
   (let (f hl)
     (when (and (re-search-forward (concat org-plain-link-re) limit t)
+	       (not (member 'org-tag
+			    (get-text-property (1- (match-beginning 0)) 'face)))
 	       (not (org-in-src-block-p)))
       (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
       (setq f (get-text-property (match-beginning 0) 'face))
@@ -6011,7 +6013,7 @@ by a #."
     t))
 
 (defun org-activate-angle-links (limit)
-  "Run through the buffer and add overlays to links."
+  "Add text properties for angle links."
   (if (and (re-search-forward org-angle-link-re limit t)
 	   (not (org-in-src-block-p)))
       (progn
@@ -6023,7 +6025,7 @@ by a #."
 	t)))
 
 (defun org-activate-footnote-links (limit)
-  "Run through the buffer and add overlays to footnotes."
+  "Add text properties for footnotes."
   (let ((fn (org-footnote-next-reference-or-definition limit)))
     (when fn
       (let* ((beg (nth 1 fn))
@@ -6046,7 +6048,7 @@ by a #."
 				   'face 'org-footnote))))))
 
 (defun org-activate-bracket-links (limit)
-  "Run through the buffer and add overlays to bracketed links."
+  "Add text properties for bracketed links."
   (if (and (re-search-forward org-bracket-link-regexp limit t)
 	   (not (org-in-src-block-p)))
       (let* ((hl (org-match-string-no-properties 1))
@@ -6081,7 +6083,7 @@ by a #."
 	t)))
 
 (defun org-activate-dates (limit)
-  "Run through the buffer and add overlays to dates."
+  "Add text properties for dates."
   (if (and (re-search-forward org-tsr-regexp-both limit t)
 	   (not (equal (char-before (match-beginning 0)) 91)))
       (progn
@@ -6113,7 +6115,7 @@ by a #."
   "Regular expression matching any target.")
 
 (defun org-activate-target-links (limit)
-  "Run through the buffer and add overlays to target matches."
+  "Add text properties for target matches."
   (when org-target-link-regexp
     (let ((case-fold-search t))
       (if (re-search-forward org-target-link-regexp limit t)
