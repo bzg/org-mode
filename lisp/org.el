@@ -18563,38 +18563,41 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
   (interactive "P")
   (unless buffer-file-name
     (user-error "Can't preview LaTeX fragment in a non-file buffer"))
-  (when (display-graphic-p)
-    (org-remove-latex-fragment-image-overlays)
-    (save-excursion
-      (save-restriction
-	(let (beg end at msg)
-	  (cond
-	   ((or (equal subtree '(16))
-		(not (save-excursion
-		       (re-search-backward org-outline-regexp-bol nil t))))
-	    (setq beg (point-min) end (point-max)
-		  msg "Creating images for buffer...%s"))
-	   ((equal subtree '(4))
-	    (org-back-to-heading)
-	    (setq beg (point) end (org-end-of-subtree t)
-		  msg "Creating images for subtree...%s"))
-	   (t
-	    (if (setq at (org-inside-LaTeX-fragment-p))
-		(goto-char (max (point-min) (- (cdr at) 2)))
-	      (org-back-to-heading))
-	    (setq beg (point) end (progn (outline-next-heading) (point))
-		  msg (if at "Creating image...%s"
-			"Creating images for entry...%s"))))
-	  (message msg "")
-	  (narrow-to-region beg end)
-	  (goto-char beg)
-	  (org-format-latex
-	   (concat org-latex-preview-ltxpng-directory (file-name-sans-extension
-						       (file-name-nondirectory
-							buffer-file-name)))
-	   default-directory 'overlays msg at 'forbuffer
-	   org-latex-create-formula-image-program)
-	  (message msg "done.  Use `C-c C-c' to remove images."))))))
+  (if org-latex-fragment-image-overlays
+      (progn (org-remove-latex-fragment-image-overlays)
+	     (message "LaTeX fragments images removed"))
+    (when (display-graphic-p)
+      (org-remove-latex-fragment-image-overlays)
+      (save-excursion
+	(save-restriction
+	  (let (beg end at msg)
+	    (cond
+	     ((or (equal subtree '(16))
+		  (not (save-excursion
+			 (re-search-backward org-outline-regexp-bol nil t))))
+	      (setq beg (point-min) end (point-max)
+		    msg "Creating images for buffer...%s"))
+	     ((equal subtree '(4))
+	      (org-back-to-heading)
+	      (setq beg (point) end (org-end-of-subtree t)
+		    msg "Creating images for subtree...%s"))
+	     (t
+	      (if (setq at (org-inside-LaTeX-fragment-p))
+		  (goto-char (max (point-min) (- (cdr at) 2)))
+		(org-back-to-heading))
+	      (setq beg (point) end (progn (outline-next-heading) (point))
+		    msg (if at "Creating image...%s"
+			  "Creating images for entry...%s"))))
+	    (message msg "")
+	    (narrow-to-region beg end)
+	    (goto-char beg)
+	    (org-format-latex
+	     (concat org-latex-preview-ltxpng-directory
+		     (file-name-sans-extension
+		      (file-name-nondirectory buffer-file-name)))
+	     default-directory 'overlays msg at 'forbuffer
+	     org-latex-create-formula-image-program)
+	    (message msg "done.  Use `C-c C-x C-l' to remove images.")))))))
 
 (defun org-format-latex (prefix &optional dir overlays msg at
 				forbuffer processing-type)
