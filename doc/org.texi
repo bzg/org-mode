@@ -15474,10 +15474,10 @@ are active:
 @item @kbd{C-c C-c} @tab @code{org-babel-execute-src-block}
 @kindex C-c C-o
 @item @kbd{C-c C-o} @tab @code{org-babel-open-src-block-result}
-@kindex C-up
-@item @kbd{C-@key{up}}    @tab @code{org-babel-load-in-session}
+@kindex M-up
+@item @kbd{M-@key{up}}    @tab @code{org-babel-load-in-session}
 @kindex M-down
-@item @kbd{M-@key{down}}  @tab @code{org-babel-pop-to-session}
+@item @kbd{M-@key{down}}  @tab @code{org-babel-switch-to-session}
 @end multitable
 
 In an Org mode buffer, the following key bindings are active:
