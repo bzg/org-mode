@@ -862,7 +862,7 @@ arguments and pop open the results in a preview buffer."
 		      (mapconcat
 		       (lambda (group)
 			 (let ((arg (org-icompleting-read
-				     "value: "
+				     "Value: "
 				     (cons "default"
 					   (mapcar #'symbol-name group)))))
 			   (if (and arg (not (string= "default" arg)))
