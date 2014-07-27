@@ -728,7 +728,7 @@ PROJECT is a headline.  INFO is a plist used as a communication
 channel.  If no start date is specified, start today.  If no end
 date is specified, end `org-taskjuggler-default-project-duration'
 days from now."
-  (concat 
+  (concat
    ;; Opening project.
    (format "project %s \"%s\" \"%s\" %s %s {\n"
 	   (org-taskjuggler-get-id project info)
