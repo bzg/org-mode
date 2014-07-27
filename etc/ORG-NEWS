@@ -24,8 +24,11 @@ implemented.
 To put it simply, two steps may be needed to update a back-end
 defining export blocks.
 
-1. Remove any ~org-BACKEND-export-block~ function and remove
-   ~export-block~ entry from back-end definition.
+1. Remove any ~org-BACKEND-export-block~ function, associated filter
+   and remove ~export-block~ entry from back-end definition.  This
+   step can be omitted if you want to preserve backward-compatibility
+   with Org 8.2.  In this case, the function and filter will be used
+   in Org 8.2 but ignored in Org 8.3.
 
 2. If there is a translator for special blocks, e.g.,
    ~org-BACKEND-special-block~, first check if the current block is an
