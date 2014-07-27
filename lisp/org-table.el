@@ -2758,15 +2758,17 @@ not overwrite the stored one."
 	(while (string-match "\\$\\(\\([-+]\\)?[0-9]+\\)" form)
 	  (setq n (+ (string-to-number (match-string 1 form))
 		     (if (match-end 2) n0 0))
-		x (nth (1- (if (= n 0) n0 (max n 1))) fields))
-	  (unless x (user-error "Invalid field specifier \"%s\""
-			   (match-string 0 form)))
-	  (setq form (replace-match
-		      (save-match-data
-			(org-table-make-reference
-			 x keep-empty numbers lispp))
-		      t t form)))
-
+		x (nth (1- (if (= n 0) n0 (max n 1))) fields)
+		formrpl (save-match-data
+			  (org-table-make-reference
+			   x keep-empty numbers lispp)))
+	  (when (or (not x)
+		    (save-match-data
+		      (string-match (regexp-quote formula) formrpl)))
+	    (user-error "Invalid field specifier \"%s\""
+			(match-string 0 form)))
+	  (setq form (replace-match repl t t form)))
+	
 	(if lispp
 	    (setq ev (condition-case nil
 			 (eval (eval (read form)))
