@@ -1044,7 +1044,7 @@ drops support for Emacs 24.1 and 24.2."
    (org-test-with-temp-text
     "* Headline
 :PROPERTIES:
-:URL: <point>[[info:org#Top]]
+:URL: <point>[[info:emacs#Top]]
 :END:"
     (org-open-at-point) t)))
 
@@ -1052,14 +1052,14 @@ drops support for Emacs 24.1 and 24.2."
   "Does `org-open-at-point' open link in a commented line?"
   (should
    (org-test-with-temp-text
-    "# <point>[[info:org#Top]]"
+    "# <point>[[info:emacs#Top]]"
     (org-open-at-point) t)))
 
 (ert-deftest test-org/open-at-point/info ()
   "Test `org-open-at-point' on info links."
   (should
    (org-test-with-temp-text
-    "<point>[[info:org#Top]]"
+    "<point>[[info:emacs#Top]]"
     (org-open-at-point)
     (and (switch-to-buffer "*info*")
 	 (prog1
