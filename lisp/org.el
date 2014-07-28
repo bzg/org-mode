@@ -10621,8 +10621,8 @@ specify a buffer from where the link search should happen.  This
 is used internally by `org-open-link-from-string'.
 
 On top of syntactically correct links, this function will open
-the link at point in comments and the first link in a property
-drawer line."
+the link at point in comments or comment blocks and the first
+link in a property drawer line."
   (interactive "P")
   ;; On a code block, open block's results.
   (unless (call-interactively 'org-babel-open-src-block-result)
@@ -10635,7 +10635,8 @@ drawer line."
 	;; On an unsupported type, check if point is contained within
 	;; a support one.
 	(while (and (not (memq (setq type (org-element-type context))
-			       '(comment headline inlinetask link
+			       '(comment comment-block
+					 headline inlinetask link
 					 footnote-definition footnote-reference
 					 node-property timestamp)))
 		    (setq context (org-element-property :parent context))))
@@ -10649,20 +10650,22 @@ drawer line."
 	   (and (string-match org-any-link-re value)
 		(match-string-no-properties 0 value))))
 	 ;; Exception n°2: links in comments.
-	 ((eq type 'comment)
-	  (let ((string-rear (replace-regexp-in-string
-			      "^[ \t]*# [ \t]*" ""
-			      (buffer-substring (point) (line-beginning-position))))
-		(string-front (buffer-substring (point) (line-end-position))))
-	    (with-temp-buffer
-	      (let ((org-inhibit-startup t)) (org-mode))
-	      (insert value)
-	      (goto-char (point-min))
-	      (when (and (search-forward string-rear nil t)
-			 (search-forward string-front (line-end-position) t))
-		(goto-char (match-beginning 0))
-		(org-open-at-point)
-		(when (string= string-rear "") (forward-char))))))
+	 ((memq type '(comment comment-block))
+	  (save-excursion
+	    (skip-chars-forward "\\S-" (point-at-eol))
+	    (let ((string-rear (replace-regexp-in-string
+				"^[ \t]*# [ \t]*" ""
+				(buffer-substring (point) (line-beginning-position))))
+		  (string-front (buffer-substring (point) (line-end-position))))
+	      (with-temp-buffer
+		(let ((org-inhibit-startup t)) (org-mode))
+		(insert value)
+		(goto-char (point-min))
+		(when (and (search-forward string-rear nil t)
+			   (search-forward string-front (line-end-position) t))
+		  (goto-char (match-beginning 0))
+		  (org-open-at-point)
+		  (when (string= string-rear "") (forward-char)))))))
 	 ;; On a headline or an inlinetask, but not on a timestamp,
 	 ;; a link, a footnote reference or on tags.
 	 ((and (memq type '(headline inlinetask))
