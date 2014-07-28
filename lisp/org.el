@@ -19685,7 +19685,7 @@ overwritten, and the table is not marked as requiring realignment."
        ;; check if we blank the field, and if that triggers align
        (and (featurep 'org-table) org-table-auto-blank-field
 	    (member last-command
-		    '(org-cycle org-return org-shifttab org-ctrl-c-ctrl-c yas/expand))
+		    '(org-cycle org-return org-shifttab org-ctrl-c-ctrl-c yas-expand))
 	    (if (or (equal (char-after) ?\ ) (looking-at "[^|\n]*  |"))
 		;; got extra space, this field does not determine column width
 		(let (org-table-may-need-update) (org-table-blank-field))
