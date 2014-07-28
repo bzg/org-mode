@@ -1958,6 +1958,10 @@ is the language used for CODE, as a string, or nil."
 	  (setq code (with-temp-buffer
 		       ;; Switch to language-specific mode.
 		       (funcall lang-mode)
+		       ;; Disable fci-mode if present
+		       (when (and (fboundp 'fci-mode)
+				  (require 'fill-column-indicator nil 'noerror))
+			 (fci-mode -1))
 		       (insert code)
 		       ;; Fontify buffer.
 		       (font-lock-ensure)
