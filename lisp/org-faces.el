@@ -537,9 +537,6 @@ follows a #+DATE:, #+AUTHOR: or #+EMAIL: keyword."
   :group 'org-faces
   :version "22.1")
 
-(defface org-block-background '((t ()))
-  "Face used for the source block background.")
-
 (org-copy-face 'org-meta-line 'org-block-begin-line
   "Face used for the line delimiting the begin of source blocks.")
 

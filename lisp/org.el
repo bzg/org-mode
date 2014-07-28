@@ -5930,15 +5930,7 @@ by a #."
 	      (cond
 	       ((and lang (not (string= lang "")) org-src-fontify-natively)
 		(org-src-font-lock-fontify-block lang block-start block-end)
-		;; remove old background overlays
-		(mapc (lambda (ov)
-			(if (eq (overlay-get ov 'face) 'org-block-background)
-			    (delete-overlay ov)))
-		      (overlays-at (/ (+ beg1 block-end) 2)))
-		;; add a background overlay
-		(setq ovl (make-overlay beg1 block-end))
-                (overlay-put ovl 'face 'org-block-background)
-                (overlay-put ovl 'evaporate t)) ; make it go away when empty
+		(add-text-properties beg1 block-end '(src-block t)))
 	       (quoting
 		(add-text-properties beg1 (min (point-max) (1+ end1))
 				     '(face org-block))) ; end of source block
@@ -21828,9 +21820,7 @@ and end of string."
 When INSIDE is non-nil, don't consider we are within a src block
 when point is at #+BEGIN_SRC or #+END_SRC."
   (let ((case-fold-search t) ov)
-    (or (and (setq ov (overlays-at (point)))
-	     (memq 'org-block-background
-		   (overlay-properties (car ov))))
+    (or (and (eq (get-char-property (point) 'src-block) t))
 	(and (not inside)
 	     (save-match-data
 	       (save-excursion
