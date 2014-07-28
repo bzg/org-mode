@@ -6364,6 +6364,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 			     ":\\).*$")
 		     '(1 'org-tag-group prepend)))
 	   ;; Special keywords
+	   (list (concat "\\<" org-comment-string) '(0 'org-special-keyword t))
 	   (list (concat "\\<" org-deadline-string) '(0 'org-special-keyword t))
 	   (list (concat "\\<" org-scheduled-string) '(0 'org-special-keyword t))
 	   (list (concat "\\<" org-closed-string) '(0 'org-special-keyword t))
