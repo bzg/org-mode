@@ -414,6 +414,25 @@ if you are using Debian."
   :package-version '(Org . "8.0")
   :type 'string)
 
+(defcustom org-clock-goto-before-context 2
+  "Number of lines of context to display before currently clocked-in entry.
+This applies when using `org-clock-goto'."
+  :group 'org-clock
+  :type 'integer)
+
+(defcustom org-clock-display-default-range 'thisyear
+  "Default range when displaying clocks with `org-clock-display'."
+  :group 'org-clock
+  :type '(choice (const today)
+		 (const yesterday)
+		 (const thisweek)
+		 (const lastweek)
+		 (const thismonth)
+		 (const lastmonth)
+		 (const thisyear)
+		 (const lastyear)
+		 (const :tag "Select range interactively" interactive)))
+
 (defvar org-clock-in-prepare-hook nil
   "Hook run when preparing the clock.
 This hook is run before anything happens to the task that
@@ -1673,12 +1692,6 @@ Optional argument N tells to change by that many units."
   (message "Clock canceled")
   (run-hooks 'org-clock-cancel-hook))
 
-(defcustom org-clock-goto-before-context 2
-  "Number of lines of context to display before currently clocked-in entry.
-This applies when using `org-clock-goto'."
-  :group 'org-clock
-  :type 'integer)
-
 ;;;###autoload
 (defun org-clock-goto (&optional select)
   "Go to the currently clocked-in entry, or to the most recently clocked one.
@@ -1718,17 +1731,18 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
     (org-clock-sum (car range) (cadr range)
 		   headline-filter :org-clock-minutes-today)))
 
-(defun org-clock-sum-custom (&optional headline-filter)
+(defun org-clock-sum-custom (&optional headline-filter range propname)
   "Sum the times for each subtree for today."
-  (let ((range
-	 (org-clock-special-range
-	  (intern (completing-read
-		   "Range: "
-		   '("today" "yesterday" "thisweek" "lastweek"
-		     "thismonth" "lastmonth" "thisyear" "lastyear")
-		   nil t)))))
-    (org-clock-sum (car range) (cadr range)
-		   headline-filter :org-clock-minutes-custom)))
+  (let ((r (or (and (symbolp range) (org-clock-special-range range))
+	       (org-clock-special-range
+		(intern (completing-read
+			 "Range: "
+			 '("today" "yesterday" "thisweek" "lastweek"
+			   "thismonth" "lastmonth" "thisyear" "lastyear"
+			   "interactive")
+			 nil t))))))
+    (org-clock-sum (car r) (cadr r)
+		   headline-filter (or propname :org-clock-minutes-custom))))
 
 ;;;###autoload
 (defun org-clock-sum (&optional tstart tend headline-filter propname)
@@ -1842,13 +1856,19 @@ Use \\[org-clock-remove-overlays] to remove the subtree times."
   (interactive "P")
   (org-clock-remove-overlays)
   (let* ((todayp (equal arg '(4)))
-	 (customp (equal arg '(16)))
-	 (prop (cond (todayp :org-clock-minutes-today)
+	 (customp (member arg '((16) today yesterday
+			       thisweek lastweek thismonth
+			       lastmonth thisyear lastyear
+			       interactive)))
+	 (prop (cond ((not arg) :org-clock-minutes-default)
+		     (todayp :org-clock-minutes-today)
 		     (customp :org-clock-minutes-custom)
 		     (t :org-clock-minutes)))
 	 time h m p)
-    (cond (todayp (org-clock-sum-today))
-	  (customp (org-clock-sum-custom))
+    (cond ((not arg) (org-clock-sum-custom
+		      nil org-clock-display-default-range prop))
+	  (todayp (org-clock-sum-today))
+	  (customp (org-clock-sum-custom nil arg))
 	  (t (org-clock-sum)))
     (unless (eq arg '(64))
       (save-excursion
@@ -2147,10 +2167,12 @@ If you can combine both, the month starting day will have priority."
        ((> (+ q shift) 0) ; shift is within this year
 	(setq shiftedq (+ q shift))
 	(setq shiftedy y)
-	(setq d 1 h 0 m 0 d1 1 month (+ 1 (* 3 (- (+ q shift) 1))) month1 (+ 4 (* 3 (- (+ q shift) 1))) h1 0 m1 0))))
+	(setq d 1 h 0 m 0 d1 1 month (+ 1 (* 3 (- (+ q shift) 1)))
+	      month1 (+ 4 (* 3 (- (+ q shift) 1))) h1 0 m1 0))))
      ((memq key '(year thisyear))
       (setq m 0 h 0 d 1 month 1 y (+ y shift) y1 (1+ y)))
-     (t (error "No such time block %s" key)))
+     ((eq key 'interactive) nil)
+     (t (user-error "No such time block %s" key)))
     (setq ts (encode-time s m h d month y)
 	  te (encode-time (or s1 s) (or m1 m) (or h1 h)
 			  (or d1 d) (or month1 month) (or y1 y)))
@@ -2165,10 +2187,15 @@ If you can combine both, the month starting day will have priority."
      ((memq key '(year thisyear))
       (setq txt (format-time-string "the year %Y" ts)))
      ((memq key '(quarter thisq))
-      (setq txt (concat (org-count-quarter shiftedq) " quarter of " (number-to-string shiftedy)))))
+      (setq txt (concat (org-count-quarter shiftedq)
+			" quarter of " (number-to-string shiftedy)))))
     (if as-strings
 	(list (format-time-string fm ts) (format-time-string fm te) txt)
-      (list ts te txt))))
+      (if (eq key 'interactive)
+	  (list (org-read-date nil t nil "Range start? ")
+		(org-read-date nil t nil "Range end? ")
+		"(Range interactively set)")
+	(list ts te txt)))))
 
 (defun org-count-quarter (n)
   (cond
