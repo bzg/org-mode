@@ -39,7 +39,6 @@
 
 (declare-function org-do-remove-indentation "org" (&optional n))
 (declare-function org-at-table.el-p "org" ())
-(declare-function org-in-src-block-p "org" (&optional inside))
 (declare-function org-in-block-p "org" (names))
 (declare-function org-get-indentation "org" (&optional line))
 (declare-function org-switch-to-buffer-other-window "org" (&rest args))
