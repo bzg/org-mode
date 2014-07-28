@@ -5693,8 +5693,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	    (setq txt (org-agenda-format-item extra txt level category tags 'time))
 	    (org-add-props txt props 'org-marker marker
 			   'date date 'todo-state todo-state
-			   'tags tags 'level level
-			   'type "sexp" 'warntime warntime)
+			   'level level 'type "sexp" 'warntime warntime)
 	    (push txt ee)))))
     (nreverse ee)))
 
