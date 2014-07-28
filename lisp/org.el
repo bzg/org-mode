@@ -23194,8 +23194,8 @@ strictly within a source block, use appropriate comment syntax."
 		(forward-line)))))))))
 
 (defun org-comment-dwim (arg)
-  (interactive "*P")
   "Call `comment-dwim' within a source edit buffer if needed."
+  (interactive "*P")
   (if (org-in-src-block-p)
       (org-babel-do-in-edit-buffer (call-interactively 'comment-dwim))
     (call-interactively 'comment-dwim)))
