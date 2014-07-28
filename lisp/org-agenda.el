@@ -3638,6 +3638,9 @@ FILTER-ALIST is an alist of filters we need to apply when
 				`(car . ,org-agenda-category-filter)))))
     (if (org-agenda-use-sticky-p)
 	(progn
+	  (put 'org-agenda-tag-filter :preset-filter nil)
+	  (put 'org-agenda-category-filter :preset-filter nil)
+	  (put 'org-agenda-regexp-filter :preset-filter nil)
 	  ;; Popup existing buffer
 	  (org-agenda-prepare-window (get-buffer org-agenda-buffer-name)
 				     filter-alist)
