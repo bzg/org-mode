@@ -524,7 +524,7 @@ When nil, no transformation is made."
   :package-version '(Org . "8.0")
   :type '(choice
 	  (string :tag "Format string")
-	  (const :tag "No formatting")))
+	  (const :tag "No formatting" nil)))
 
 
 ;;;; Text markup
@@ -689,9 +689,9 @@ These options are supplied as a comma-separated list to the
 a list containing two strings: the name of the option, and the
 value.  For example,
 
-  (setq org-latex-listings-options
+  \(setq org-latex-listings-options
     '((\"basicstyle\" \"\\\\small\")
-      (\"keywordstyle\" \"\\\\color{black}\\\\bfseries\\\\underbar\")))
+      \(\"keywordstyle\" \"\\\\color{black}\\\\bfseries\\\\underbar\")))
 
 will typeset the code in a small size font with underlined, bold
 black keywords.
