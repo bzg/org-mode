@@ -117,8 +117,6 @@
     (:html-head-extra "HTML_HEAD_EXTRA" nil org-html-head-extra newline)
     (:html-container "HTML_CONTAINER" nil org-html-container-element)
     (:html-mathjax "HTML_MATHJAX" nil "" space)
-    (:html-extension nil nil org-html-extension)
-    (:html-link-org-as-html nil nil org-html-link-org-files-as-html)
     (:html-html5-fancy nil "html5-fancy" org-html-html5-fancy)
     (:html-link-use-abs-url nil "html-link-use-abs-url" org-html-link-use-abs-url)
     (:html-postamble nil "html-postamble" org-html-postamble)
@@ -130,7 +128,6 @@
     (:html-head-include-scripts nil "html-scripts" org-html-head-include-scripts)
     (:html-allow-name-attribute-in-anchors
      nil nil org-html-allow-name-attribute-in-anchors)
-    (:html-coding-system nil nil org-html-coding-system)
     (:html-divs nil nil org-html-divs)
     (:html-extension nil nil org-html-extension)
     (:html-footnote-format nil nil org-html-footnote-format)
@@ -141,8 +138,6 @@
     (:html-format-inlinetask-function
      nil nil org-html-format-inlinetask-function)
     (:html-home/up-format nil nil org-html-home/up-format)
-    (:html-htmlize-font-prefix nil nil org-html-htmlize-font-prefix)
-    (:html-htmlize-output-type nil nil org-html-htmlize-output-type)
     (:html-indent nil nil org-html-indent)
     (:html-infojs-options nil nil org-html-infojs-options)
     (:html-infojs-template nil nil org-html-infojs-template)
@@ -153,7 +148,6 @@
     (:html-metadata-timestamp-format nil nil org-html-metadata-timestamp-format)
     (:html-postamble-format nil nil org-html-postamble-format)
     (:html-preamble-format nil nil org-html-preamble-format)
-    (:html-protect-char-alist nil nil org-html-protect-char-alist)
     (:html-table-align-individual-fields
      nil nil org-html-table-align-individual-fields)
     (:html-table-caption-above nil nil org-html-table-caption-above)

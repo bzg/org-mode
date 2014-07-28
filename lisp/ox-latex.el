@@ -124,17 +124,12 @@
     (:latex-image-default-width nil nil org-latex-image-default-width)
     (:latex-inactive-timestamp-format nil nil org-latex-inactive-timestamp-format)
     (:latex-inline-image-rules nil nil org-latex-inline-image-rules)
-    (:latex-inputenc-alist nil nil org-latex-inputenc-alist)
-    (:latex-known-warnings nil nil org-latex-known-warnings)
     (:latex-link-with-unknown-path-format nil nil org-latex-link-with-unknown-path-format)
     (:latex-listings nil nil org-latex-listings)
     (:latex-listings-langs nil nil org-latex-listings-langs)
     (:latex-listings-options nil nil org-latex-listings-options)
-    (:latex-logfiles-extensions nil nil org-latex-logfiles-extensions)
     (:latex-minted-langs nil nil org-latex-minted-langs)
     (:latex-minted-options nil nil org-latex-minted-options)
-    (:latex-pdf-process nil nil org-latex-pdf-process)
-    (:latex-remove-logfiles nil nil org-latex-remove-logfiles)
     (:latex-table-caption-above nil nil org-latex-table-caption-above)
     (:latex-table-scientific-notation nil nil org-latex-table-scientific-notation)
     (:latex-tables-booktabs nil nil org-latex-tables-booktabs)
@@ -1024,7 +1019,7 @@ Return the new header, as a string."
 		 "utf8")))
     (if (not cs) header
       ;; First translate if that is requested.
-      (setq cs (or (cdr (assoc cs (plist-get info :latex-inputenc-alist))) cs))
+      (setq cs (or (cdr (assoc cs org-latex-inputenc-alist)) cs))
       ;; Then find the \usepackage statement and replace the option.
       (replace-regexp-in-string "\\\\usepackage\\[\\(AUTO\\)\\]{inputenc}"
 				cs header t nil 1))))
@@ -3059,17 +3054,17 @@ Return PDF file name or an error if it couldn't be produced."
 				(file-name-directory full-name)
 			      default-directory))
 	 (time (current-time))
-	 (process (plist-get info :latex-pdf-process))
 	 warnings)
     (unless snippet (message (format "Processing LaTeX file %s..." texfile)))
     (save-window-excursion
       (cond
        ;; A function is provided: Apply it.
-       ((functionp process) (funcall process (shell-quote-argument texfile)))
+       ((functionp org-latex-pdf-process)
+	(funcall org-latex-pdf-process (shell-quote-argument texfile)))
        ;; A list is provided: Replace %b, %f and %o with appropriate
        ;; values in each command before applying it.  Output is
        ;; redirected to "*Org PDF LaTeX Output*" buffer.
-       ((consp process)
+       ((consp org-latex-pdf-process)
 	(let ((outbuf (and (not snippet)
 			   (get-buffer-create "*Org PDF LaTeX Output*"))))
 	  (mapc
@@ -3082,7 +3077,7 @@ Return PDF file name or an error if it couldn't be produced."
 		(replace-regexp-in-string
 		 "%o" (shell-quote-argument out-dir) command t t) t t) t t)
 	      outbuf))
-	   process)
+	   org-latex-pdf-process)
 	  ;; Collect standard errors from output buffer.
 	  (setq warnings (and (not snippet)
 			      (org-latex--collect-warnings outbuf)))))
@@ -3095,15 +3090,13 @@ Return PDF file name or an error if it couldn't be produced."
 	    (error (format "PDF file %s wasn't produced" pdffile))
 	  ;; Else remove log files, when specified, and signal end of
 	  ;; process to user, along with any error encountered.
-	  (when (and (not snippet) (plist-get info :latex-remove-logfiles))
+	  (when (and (not snippet) org-latex-remove-logfiles)
 	    (dolist (file (directory-files
 			   out-dir t
-			   (concat
-			    (regexp-quote base-name)
-			    "\\(?:\\.[0-9]+\\)?"
-			    "\\."
-			    (regexp-opt
-			     (plist-get info :latex-logfiles-extensions)))))
+			   (concat (regexp-quote base-name)
+				   "\\(?:\\.[0-9]+\\)?"
+				   "\\."
+				   (regexp-opt org-latex-logfiles-extensions))))
 	      (delete-file file)))
 	  (message (concat "PDF file produced"
 			   (cond
@@ -3125,7 +3118,7 @@ encountered or nil if there was none."
 	(if (re-search-forward "^!" nil t) 'error
 	  (let ((case-fold-search t)
 		(warnings ""))
-	    (dolist (warning (plist-get info :latex-known-warnings))
+	    (dolist (warning org-latex-known-warnings)
 	      (save-excursion
 		(when (save-excursion (re-search-forward (car warning) nil t))
 		  (setq warnings (concat warnings " " (cdr warning))))))

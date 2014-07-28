@@ -98,11 +98,6 @@
   '((:odt-styles-file "ODT_STYLES_FILE" nil nil t)
     ;; Other variables.
     (:odt-content-template-file nil nil org-odt-content-template-file)
-    (:odt-convert-capabilities nil nil org-odt-convert-capabilities)
-    (:odt-convert-process nil nil org-odt-convert-process)
-    (:odt-convert-processes nil nil org-odt-convert-processes)
-    (:odt-create-custom-styles-for-srcblocks
-     nil nil org-odt-create-custom-styles-for-srcblocks)
     (:odt-display-outline-level nil nil org-odt-display-outline-level)
     (:odt-fontify-srcblocks nil nil org-odt-fontify-srcblocks)
     (:odt-format-drawer-function nil nil org-odt-format-drawer-function)
@@ -111,9 +106,6 @@
     (:odt-inline-formula-rules nil nil org-odt-inline-formula-rules)
     (:odt-inline-image-rules nil nil org-odt-inline-image-rules)
     (:odt-pixels-per-inch nil nil org-odt-pixels-per-inch)
-    (:odt-preferred-output-format nil nil org-odt-preferred-output-format)
-    (:odt-prettify-xml nil nil org-odt-prettify-xml)
-    (:odt-schema-dir nil nil org-odt-schema-dir)
     (:odt-styles-file nil nil org-odt-styles-file)
     (:odt-table-styles nil nil org-odt-table-styles)
     (:odt-use-date-fields nil nil org-odt-use-date-fields)
