@@ -806,11 +806,9 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
   "Find the title of FILE in project."
   (or
    (and (not reset) (org-publish-cache-get-file-property file :title nil t))
-   (let* ((org-inhibit-startup t)
-	  (visiting (find-buffer-visiting file))
+   (let* ((visiting (find-buffer-visiting file))
 	  (buffer (or visiting (find-file-noselect file))))
      (with-current-buffer buffer
-       (org-mode)
        (let ((title
 	      (let ((property (plist-get (org-export-get-environment) :title)))
 		(if property
@@ -831,7 +829,6 @@ time in `current-time' format."
 	   (file-buf (or visiting (find-file-noselect file nil)))
 	   (date (plist-get
 		  (with-current-buffer file-buf
-		    (let ((org-inhibit-startup t)) (org-mode))
 		    (org-export-get-environment))
 		  :date)))
       (unless visiting (kill-buffer file-buf))
