@@ -60,6 +60,12 @@ current subtree.  Use ~org-export-insert-default-template~ instead, as
 it provides more features and covers all export back-ends.  It is also
 accessible from the export dispatcher.
 ** Removed options
+*** ~org-list-empty-line-terminates-plain-lists~ is deprecated
+It will be kept in code base until next release, for backward
+compatibility.
+
+If you need to separate consecutive lists with blank lines, always use
+two of them, as if this option was nil (default value).
 *** Removed option =org-babel-sh-command=
 This undocumented option defaulted to the value of =shell-file-name=
 at the time of loading =ob-shell=.  The new behaviour is to use the
@@ -106,7 +112,7 @@ labels colliding.
 This change deprecates old Org syntax for mailto links:
 =mailto:user@domain::Subject=.
 *** =QUOTE= keywords do not exist anymore
-=QUOTES= keywords have been deprecated since Org 8.2.
+=QUOTE= keywords have been deprecated since Org 8.2.
 *** Select tests to perform with the build system
 The build system has been enhanced to allow test selection with a
 regular expression by defining =BTEST_RE= during the test invocation.
