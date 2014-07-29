@@ -13506,7 +13506,6 @@ however, override everything.
 
 @multitable {@code{:html-table-use-header-tags-for-first-column}} {@code{org-html-table-use-header-tags-for-first-column}}
 @item @code{:html-allow-name-attribute-in-anchors} @tab @code{org-html-allow-name-attribute-in-anchors}
-@item @code{:html-coding-system}              @tab @code{org-html-coding-system}
 @item @code{:html-container}                  @tab @code{org-html-container-element}
 @item @code{:html-divs}                       @tab @code{org-html-divs}
 @item @code{:html-doctype}                    @tab @code{org-html-doctype}
@@ -13523,8 +13522,6 @@ however, override everything.
 @item @code{:html-head}                       @tab @code{org-html-head}
 @item @code{:html-home/up-format}             @tab @code{org-html-home/up-format}
 @item @code{:html-html5-fancy}                @tab @code{org-html-html5-fancy}
-@item @code{:html-htmlize-font-prefix}        @tab @code{org-html-htmlize-font-prefix}
-@item @code{:html-htmlize-output-type}        @tab @code{org-html-htmlize-output-type}
 @item @code{:html-indent}                     @tab @code{org-html-indent}
 @item @code{:html-infojs-options}             @tab @code{org-html-infojs-options}
 @item @code{:html-infojs-template}            @tab @code{org-html-infojs-template}
@@ -13541,7 +13538,6 @@ however, override everything.
 @item @code{:html-postamble}                  @tab @code{org-html-postamble}
 @item @code{:html-preamble-format}            @tab @code{org-html-preamble-format}
 @item @code{:html-preamble}                   @tab @code{org-html-preamble}
-@item @code{:html-protect-char-alist}         @tab @code{org-html-protect-char-alist}
 @item @code{:html-table-align-individual-fields} @tab @code{org-html-table-align-individual-fields}
 @item @code{:html-table-attributes}           @tab @code{org-html-table-default-attributes}
 @item @code{:html-table-caption-above}        @tab @code{org-html-table-caption-above}
@@ -13579,17 +13575,12 @@ however, override everything.
 @item @code{:latex-image-default-width}        @tab @code{org-latex-image-default-width}
 @item @code{:latex-inactive-timestamp-format}  @tab @code{org-latex-inactive-timestamp-format}
 @item @code{:latex-inline-image-rules}         @tab @code{org-latex-inline-image-rules}
-@item @code{:latex-inputenc-alist}             @tab @code{org-latex-inputenc-alist}
-@item @code{:latex-known-warnings}             @tab @code{org-latex-known-warnings}
 @item @code{:latex-link-with-unknown-path-format} @tab @code{org-latex-link-with-unknown-path-format}
 @item @code{:latex-listings-langs}             @tab @code{org-latex-listings-langs}
 @item @code{:latex-listings-options}           @tab @code{org-latex-listings-options}
 @item @code{:latex-listings}                   @tab @code{org-latex-listings}
-@item @code{:latex-logfiles-extensions}        @tab @code{org-latex-logfiles-extensions}
 @item @code{:latex-minted-langs}               @tab @code{org-latex-minted-langs}
 @item @code{:latex-minted-options}             @tab @code{org-latex-minted-options}
-@item @code{:latex-pdf-process}                @tab @code{org-latex-pdf-process}
-@item @code{:latex-remove-logfiles}            @tab @code{org-latex-remove-logfiles}
 @item @code{:latex-table-caption-above}        @tab @code{org-latex-table-caption-above}
 @item @code{:latex-table-scientific-notation}  @tab @code{org-latex-table-scientific-notation}
 @item @code{:latex-tables-booktabs}            @tab @code{org-latex-tables-booktabs}
@@ -13607,11 +13598,8 @@ however, override everything.
 
 @subsubheading ODT specific properties
 
-@multitable {@code{:odt-create-custom-styles-for-srcblocks}} {@code{org-odt-create-custom-styles-for-srcblocks}}
-@item @code{:odt-convert-capabilities}       @tab @code{org-odt-convert-capabilities}
-@item @code{:odt-convert-processes}          @tab @code{org-odt-convert-processes}
-@item @code{:odt-convert-process}            @tab @code{org-odt-convert-process}
-@item @code{:odt-create-custom-styles-for-srcblocks} @tab @code{org-odt-create-custom-styles-for-srcblocks}
+@multitable {@code{:odt-format-inlinetask-function}} {@code{org-odt-format-inlinetask-function}}
+@item @code{:odt-content-template-file}      @tab @code{org-odt-content-template-file}
 @item @code{:odt-display-outline-level}      @tab @code{org-odt-display-outline-level}
 @item @code{:odt-fontify-srcblocks}          @tab @code{org-odt-fontify-srcblocks}
 @item @code{:odt-format-drawer-function}     @tab @code{org-odt-format-drawer-function}
@@ -13620,19 +13608,9 @@ however, override everything.
 @item @code{:odt-inline-formula-rules}       @tab @code{org-odt-inline-formula-rules}
 @item @code{:odt-inline-image-rules}         @tab @code{org-odt-inline-image-rules}
 @item @code{:odt-pixels-per-inch}            @tab @code{org-odt-pixels-per-inch}
-@item @code{:odt-preferred-output-format}    @tab @code{org-odt-preferred-output-format}
-@item @code{:odt-prettify-xml}               @tab @code{org-odt-prettify-xml}
-@item @code{:odt-schema-dir}                 @tab @code{org-odt-schema-dir}
-@item @code{:odt-styles-file}                @tab @code{org-odt-content-template-file}
 @item @code{:odt-styles-file}                @tab @code{org-odt-styles-file}
 @item @code{:odt-table-styles}               @tab @code{org-odt-table-styles}
 @item @code{:odt-use-date-fields}            @tab @code{org-odt-use-date-fields}
-@end multitable
-
-@subsubheading Org specific properties
-
-@multitable {@code{:org-htmlized-css-url}} {@code{org-org-htmlized-css-url}}
-@item @code{:org-htmlized-css-url} @tab @code{org-org-htmlized-css-url}
 @end multitable
 
 @subsubheading Texinfo specific properties
@@ -13641,7 +13619,6 @@ however, override everything.
 @item @code{:texinfo-active-timestamp-format}    @tab @code{org-texinfo-active-timestamp-format}
 @item @code{:texinfo-classes}                    @tab @code{org-texinfo-classes}
 @item @code{:texinfo-class}                      @tab @code{org-texinfo-default-class}
-@item @code{:texinfo-coding-system}              @tab @code{org-texinfo-coding-system}
 @item @code{:texinfo-def-table-markup}           @tab @code{org-texinfo-def-table-markup}
 @item @code{:texinfo-diary-timestamp-format}     @tab @code{org-texinfo-diary-timestamp-format}
 @item @code{:texinfo-filename}                   @tab @code{org-texinfo-filename}
@@ -13649,11 +13626,8 @@ however, override everything.
 @item @code{:texinfo-format-headline-function}   @tab @code{org-texinfo-format-headline-function}
 @item @code{:texinfo-format-inlinetask-function} @tab @code{org-texinfo-format-inlinetask-function}
 @item @code{:texinfo-inactive-timestamp-format}  @tab @code{org-texinfo-inactive-timestamp-format}
-@item @code{:texinfo-info-process}               @tab @code{org-texinfo-info-process}
 @item @code{:texinfo-link-with-unknown-path-format} @tab @code{org-texinfo-link-with-unknown-path-format}
-@item @code{:texinfo-logfiles-extensions}        @tab @code{org-texinfo-logfiles-extensions}
 @item @code{:texinfo-node-description-column}    @tab @code{org-texinfo-node-description-column}
-@item @code{:texinfo-remove-logfiles}            @tab @code{org-texinfo-remove-logfiles}
 @item @code{:texinfo-table-scientific-notation}  @tab @code{org-texinfo-table-scientific-notation}
 @item @code{:texinfo-tables-verbatim}            @tab @code{org-texinfo-tables-verbatim}
 @item @code{:texinfo-text-markup-alist}          @tab @code{org-texinfo-text-markup-alist}

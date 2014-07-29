@@ -1063,7 +1063,7 @@ drops support for Emacs 24.1 and 24.2."
     (org-open-at-point)
     (and (switch-to-buffer "*info*")
 	 (prog1
-	     (looking-at "\nOrg Mode Manual")
+	     (looking-at "\nThe Emacs Editor")
 	   (kill-buffer))))))
 
 

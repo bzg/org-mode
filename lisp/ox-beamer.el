@@ -406,7 +406,8 @@ used as a communication channel."
 		    ;; Collect options from default value and headline's
 		    ;; properties.  Also add a label for links.
 		    (append
-		     (org-split-string org-beamer-frame-default-options ",")
+		     (org-split-string
+		      (plist-get info :beamer-frame-default-options) ",")
 		     (and beamer-opt
 			  (org-split-string
 			   ;; Remove square brackets if user provided
@@ -468,7 +469,7 @@ used as a communication channel."
 	 (env-format
 	  (cond ((member environment '("column" "columns")) nil)
 		((assoc environment
-			(append org-beamer-environments-extra
+			(append (plist-get info :beamer-environments-extra)
 				org-beamer-environments-default)))
 		(t (user-error "Wrong block type at a headline named \"%s\""
 			       raw-title))))
@@ -875,8 +876,8 @@ holding export options."
 	 (concat
 	  (format "\\begin{frame}%s{%s}\n"
 		  (org-beamer--normalize-argument
-		   org-beamer-outline-frame-options 'option)
-		  org-beamer-outline-frame-title)
+		   (plist-get info :beamer-outline-frame-options) 'option)
+		  (plist-get info :beamer-outline-frame-title))
 	  (when (wholenump depth)
 	    (format "\\setcounter{tocdepth}{%d}\n" depth))
 	  "\\tableofcontents\n"

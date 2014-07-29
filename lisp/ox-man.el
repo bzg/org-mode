@@ -117,10 +117,7 @@
     (:man-tables-verbatim nil nil org-man-tables-verbatim)
     (:man-table-scientific-notation nil nil org-man-table-scientific-notation)
     (:man-source-highlight nil nil org-man-source-highlight)
-    (:man-source-highlight-langs nil nil org-man-source-highlight-langs)
-    (:man-pdf-process nil nil org-man-pdf-process)
-    (:man-logfiles-extensions nil nil org-man-logfiles-extensions)
-    (:man-remove-logfiles nil nil org-man-remove-logfiles)))
+    (:man-source-highlight-langs nil nil org-man-source-highlight-langs)))
 
 
 
@@ -525,7 +522,7 @@ CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((code (org-element-property :value inline-src-block)))
     (cond
-     (org-man-source-highlight
+     ((plist-get info :man-source-highlight)
       (let* ((tmpdir (if (featurep 'xemacs)
                          temp-directory
                        temporary-file-directory ))
@@ -534,8 +531,9 @@ contextual information."
              (out-file (make-temp-name
                         (expand-file-name "reshilite" tmpdir)))
              (org-lang (org-element-property :language inline-src-block))
-             (lst-lang (cadr (assq (intern org-lang)
-                                   org-man-source-highlight-langs)))
+             (lst-lang
+	      (cadr (assq (intern org-lang)
+			  (plist-get info :man-source-highlight-langs))))
 
              (cmd (concat (expand-file-name "source-highlight")
                           " -s " lst-lang
@@ -788,31 +786,22 @@ contextual information."
                       (continued (org-export-get-loc src-block info))
                       (new 0)))
          (retain-labels (org-element-property :retain-labels src-block)))
-    (cond
-     ;; Case 1.  No source fontification.
-     ((not org-man-source-highlight)
-      (format ".RS\n.nf\n\\fC%s\\fP\n.fi\n.RE\n\n"
-	      (org-export-format-code-default src-block info)))
-     (org-man-source-highlight
-      (let* ((tmpdir (if (featurep 'xemacs)
-			 temp-directory
-		       temporary-file-directory ))
-
-	     (in-file  (make-temp-name
-			(expand-file-name "srchilite" tmpdir)))
-	     (out-file (make-temp-name
-			(expand-file-name "reshilite" tmpdir)))
-
+    (if (not (plist-get info :man-source-highlight))
+	(format ".RS\n.nf\n\\fC%s\\fP\n.fi\n.RE\n\n"
+		(org-export-format-code-default src-block info))
+      (let* ((tmpdir (if (featurep 'xemacs) temp-directory
+		       temporary-file-directory))
+	     (in-file  (make-temp-name (expand-file-name "srchilite" tmpdir)))
+	     (out-file (make-temp-name (expand-file-name "reshilite" tmpdir)))
 	     (org-lang (org-element-property :language src-block))
-	     (lst-lang (cadr (assq (intern org-lang)
-				   org-man-source-highlight-langs)))
-
+	     (lst-lang
+	      (cadr (assq (intern org-lang)
+			  (plist-get info :man-source-highlight-langs))))
 	     (cmd (concat "source-highlight"
 			  " -s " lst-lang
 			  " -f groff_man "
 			  " -i " in-file
 			  " -o " out-file)))
-
 	(if lst-lang
 	    (let ((code-block ""))
 	      (with-temp-file in-file (insert code))
@@ -821,7 +810,7 @@ contextual information."
 	      (delete-file in-file)
 	      (delete-file out-file)
 	      code-block)
-	  (format ".RS\n.nf\n\\fC\\m[black]%s\\m[]\\fP\n.fi\n.RE" code)))))))
+	  (format ".RS\n.nf\n\\fC\\m[black]%s\\m[]\\fP\n.fi\n.RE" code))))))
 
 
 ;;; Statistics Cookie
@@ -874,7 +863,7 @@ CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
   (cond
    ;; Case 1: verbatim table.
-   ((or org-man-tables-verbatim
+   ((or (plist-get info :man-tables-verbatim)
         (let ((attr (read (format "(%s)"
                  (mapconcat
                   #'identity
@@ -949,7 +938,8 @@ This function assumes TABLE has `org' as its `:type' attribute."
 		 (let ((placement (plist-get attr :placement)))
 		   (cond ((string= placement 'center) "center")
 			 ((string= placement 'left) nil)
-			 (t (if org-man-tables-centered "center" ""))))
+			 ((plist-get info :man-tables-centered) "center")
+			 (t "")))
 		 (or (plist-get attr :boxtype) "box"))))
 
          (title-line  (plist-get attr :title-line))
@@ -1024,16 +1014,17 @@ This function assumes TABLE has `org' as its `:type' attribute."
   "Transcode a TABLE-CELL element from Org to Man
 CONTENTS is the cell contents.  INFO is a plist used as
 a communication channel."
-    (concat (if (and contents
-                     org-man-table-scientific-notation
-                     (string-match orgtbl-exp-regexp contents))
-                ;; Use appropriate format string for scientific
-                ;; notation.
-              (format org-man-table-scientific-notation
-                        (match-string 1 contents)
-                        (match-string 2 contents))
-              contents )
-            (when (org-export-get-next-element table-cell info) "\t")))
+  (concat
+   (let ((scientific-format (plist-get info :man-table-scientific-notation)))
+     (if (and contents
+	      scientific-format
+	      (string-match orgtbl-exp-regexp contents))
+	 ;; Use appropriate format string for scientific notation.
+	 (format scientific-format
+		 (match-string 1 contents)
+		 (match-string 2 contents))
+       contents))
+   (when (org-export-get-next-element table-cell info) "\t")))
 
 
 ;;; Table Row

@@ -191,15 +191,17 @@ a communication channel."
 		   (concat "sec-"
 			   (mapconcat 'number-to-string
 				      (org-export-get-headline-number
-				       headline info) "-"))))))
+				       headline info) "-")))
+	       nil nil info)))
 	   ;; Headline text without tags.
-	   (heading (concat todo priority title)))
+	   (heading (concat todo priority title))
+	   (style (plist-get info :md-headline-style)))
       (cond
        ;; Cannot create a headline.  Fall-back to a list.
        ((or (org-export-low-level-p headline info)
-	    (not (memq org-md-headline-style '(atx setext)))
-	    (and (eq org-md-headline-style 'atx) (> level 6))
-	    (and (eq org-md-headline-style 'setext) (> level 2)))
+	    (not (memq style '(atx setext)))
+	    (and (eq style 'atx) (> level 6))
+	    (and (eq style 'setext) (> level 2)))
 	(let ((bullet
 	       (if (not (org-export-numbered-headline-p headline info)) "-"
 		 (concat (number-to-string
@@ -211,7 +213,7 @@ a communication channel."
 		  (and contents
 		       (replace-regexp-in-string "^" "    " contents)))))
        ;; Use "Setext" style.
-       ((eq org-md-headline-style 'setext)
+       ((eq style 'setext)
 	(concat heading tags anchor "\n"
 		(make-string (length heading) (if (= level 1) ?= ?-))
 		"\n\n"
