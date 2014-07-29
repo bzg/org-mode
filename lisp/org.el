@@ -23476,15 +23476,15 @@ cursor is at the beginning of a line or after the stars of a currently
 empty headline, then the yank is handled specially.  How exactly depends
 on the value of the following variables, both set by default.
 
-org-yank-folded-subtrees
+`org-yank-folded-subtrees'
     When set, the subtree(s) will be folded after insertion, but only
     if doing so would now swallow text after the yanked text.
 
-org-yank-adjusted-subtrees
+`org-yank-adjusted-subtrees'
     When set, the subtree will be promoted or demoted in order to
-    fit into the local outline tree structure, which means that the level
-    will be adjusted so that it becomes the smaller one of the two
-    *visible* surrounding headings.
+    fit into the local outline tree structure, which means that the
+    level will be adjusted so that it becomes the smaller one of the
+    two *visible* surrounding headings.
 
 Any prefix to this command will cause `yank' to be called directly with
 no special treatment.  In particular, a simple \\[universal-argument] prefix \
