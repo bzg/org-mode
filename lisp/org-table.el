@@ -2767,7 +2767,7 @@ not overwrite the stored one."
 		      (string-match (regexp-quote formula) formrpl)))
 	    (user-error "Invalid field specifier \"%s\""
 			(match-string 0 form)))
-	  (setq form (replace-match repl t t form)))
+	  (setq form (replace-match formrpl t t form)))
 	
 	(if lispp
 	    (setq ev (condition-case nil
