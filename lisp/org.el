@@ -17961,9 +17961,9 @@ This requires Emacs >= 24.1, build with imagemagick support."
 
 (defcustom org-agenda-inhibit-startup nil
   "Inhibit startup when preparing agenda buffers.
-When this variable is `t' (the default), the initialization of
-the Org agenda buffers is inhibited: e.g. the visibility state
-is not set, the tables are not re-aligned, etc."
+When this variable is `t', the initialization of the Org agenda
+buffers is inhibited: e.g. the visibility state is not set, the
+tables are not re-aligned, etc."
   :type 'boolean
   :version "24.3"
   :group 'org-agenda)
