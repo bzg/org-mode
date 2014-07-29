@@ -47,6 +47,12 @@ defining export blocks.
    Note that If BACKEND is a derived back-end and doesn't implement
    its own special block translator already, there is nothing to
    change.  The parent back-end will take care of such blocks.
+*** ~org-html-format-headline-function~ requires an additional argument
+The function provided is required to accept export options, as
+a plist, as its final (sixth) argument.
+*** ~org-html-format-inlinetask-function~ requires an additional argument
+The function provided is required to accept export options, as
+a plist, as its final (seventh) argument.
 ** Removed functions
 *** Removed function ~org-beamer-insert-options-template~
 This function inserted a Beamer specific template at point or in
@@ -85,6 +91,9 @@ in a source block.
 *** New blocks in ASCII export
 ASCII export now supports =#+BEGIN_JUSTIFYRIGHT= and
 =#+BEGIN_JUSTIFYLEFT= blocks.  See documentation for details.
+*** More back-end specific publishing options
+The number of publishing options specific to each back-end has been
+increased.  See manual for details.
 ** Miscellaneous
 *** File names in links accept are now compatible with URI syntax
 Absolute file names can now start with =///= in addition to =/=. E.g.,
