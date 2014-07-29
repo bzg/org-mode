@@ -191,7 +191,8 @@ a communication channel."
 		   (concat "sec-"
 			   (mapconcat 'number-to-string
 				      (org-export-get-headline-number
-				       headline info) "-"))))))
+				       headline info) "-")))
+	       nil nil info)))
 	   ;; Headline text without tags.
 	   (heading (concat todo priority title))
 	   (style (plist-get info :md-headline-style)))

@@ -201,7 +201,7 @@ INFO is a plist used as a communication channel."
     (concat section-number
             (org-export-data
              (org-export-get-alt-title headline info) info)
-            (and tags "&nbsp;&nbsp;&nbsp;") (org-html--tags tags))))
+            (and tags "&nbsp;&nbsp;&nbsp;") (org-html--tags tags info))))
 
 (defun org-s5-toc (depth info)
   (let* ((headlines (org-export-collect-headlines info depth))
