@@ -801,11 +801,18 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
   "Find the title of FILE in project."
   (or
    (and (not reset) (org-publish-cache-get-file-property file :title nil t))
-   (let* ((visiting (find-buffer-visiting file))
+   (let* ((org-inhibit-startup t)
+	  (visiting (find-buffer-visiting file))
 	  (buffer (or visiting (find-file-noselect file))))
      (with-current-buffer buffer
        (let ((title
-	      (let ((property (plist-get (org-export-get-environment) :title)))
+	      (let ((property
+		     (plist-get
+		      ;; protect local variables in open buffers
+		      (if visiting
+			  (org-export-with-buffer-copy (org-export-get-environment))
+			(org-export-get-environment))
+		      :title)))
 		(if property
 		    (org-no-properties (org-element-interpret-data property))
 		  (file-name-nondirectory (file-name-sans-extension file))))))
@@ -820,11 +827,14 @@ If FILE is an Org file and provides a DATE keyword use it.  In
 any other case use the file system's modification time.  Return
 time in `current-time' format."
   (if (file-directory-p file) (nth 5 (file-attributes file))
-    (let* ((visiting (find-buffer-visiting file))
+    (let* ((org-inhibit-startup t)
+	   (visiting (find-buffer-visiting file))
 	   (file-buf (or visiting (find-file-noselect file nil)))
 	   (date (plist-get
 		  (with-current-buffer file-buf
-		    (org-export-get-environment))
+		    (if visiting
+			(org-export-with-buffer-copy (org-export-get-environment))
+		      (org-export-get-environment)))
 		  :date)))
       (unless visiting (kill-buffer file-buf))
       ;; DATE is either a timestamp object or a secondary string.  If it
