@@ -142,7 +142,7 @@
     (:html-infojs-options nil nil org-html-infojs-options)
     (:html-infojs-template nil nil org-html-infojs-template)
     (:html-inline-image-rules nil nil org-html-inline-image-rules)
-    (:html-link-org-as-html nil nil org-html-link-org-files-as-html)
+    (:html-link-org-files-as-html nil nil org-html-link-org-files-as-html)
     (:html-mathjax-options nil nil org-html-mathjax-options)
     (:html-mathjax-template nil nil org-html-mathjax-template)
     (:html-metadata-timestamp-format nil nil org-html-metadata-timestamp-format)
