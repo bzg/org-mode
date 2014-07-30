@@ -13528,7 +13528,7 @@ however, override everything.
 @item @code{:html-inline-image-rules}         @tab @code{org-html-inline-image-rules}
 @item @code{:html-inline-images}              @tab @code{org-html-inline-images}
 @item @code{:html-link-home}                  @tab @code{org-html-link-home}
-@item @code{:html-link-org-as-html}           @tab @code{org-html-link-org-files-as-html}
+@item @code{:html-link-org-files-as-html}     @tab @code{org-html-link-org-files-as-html}
 @item @code{:html-link-up}                    @tab @code{org-html-link-up}
 @item @code{:html-link-use-abs-url}           @tab @code{org-html-link-use-abs-url}
 @item @code{:html-mathjax-options}            @tab @code{org-html-mathjax-options}
