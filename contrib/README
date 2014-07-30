@@ -80,6 +80,7 @@ ob-fomus.el        	 --- Org-babel functions for fomus evaluation
 ob-julia.el  	 	 --- Org-babel functions for julia evaluation
 ob-mathomatic.el   	 --- Org-babel functions for mathomatic evaluation
 ob-oz.el           	 --- Org-babel functions for Oz evaluation
+ob-stata.el              --- Org-babel functions for Stata evaluation
 ob-tcl.el 		 --- Org-babel functions for tcl evaluation
 
 External libraries
