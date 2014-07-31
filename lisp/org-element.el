@@ -727,11 +727,11 @@ CONTENTS is the contents of the footnote-definition."
 
 Return a list whose CAR is `headline' and CDR is a plist
 containing `:raw-value', `:title', `:alt-title', `:begin',
-`:end', `:pre-blank', `:hiddenp', `:contents-begin' and
+`:end', `:pre-blank', `:hiddenp', `:contents-begin',
 `:contents-end', `:level', `:priority', `:tags',
 `:todo-keyword',`:todo-type', `:scheduled', `:deadline',
-`:closed', `:quotedp', `:archivedp', `:commentedp' and
-`:footnote-section-p' keywords.
+`:closed', `:quotedp', `:archivedp', `:commentedp',
+`:footnote-section-p' and `:post-blank' keywords.
 
 The plist also contains any property set in the property drawer,
 with its name in upper cases and colons added at the
