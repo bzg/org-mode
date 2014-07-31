@@ -2341,9 +2341,8 @@ holding contextual information."
 		     (org-html-end-plain-list type)))))
      ;; Case 3: Standard headline.  Export it as a section.
      (t
-      (let* ((headline-number
-	      (and numberedp (org-export-get-headline-number headline info)))
-	     (section-number (mapconcat #'number-to-string headline-number "-"))
+      (let* ((numbers (org-export-get-headline-number headline info))
+	     (section-number (mapconcat #'number-to-string numbers "-"))
 	     (ids (remq nil
 			(list (org-element-property :CUSTOM_ID headline)
 			      (concat "sec-" section-number)
@@ -2371,8 +2370,9 @@ holding contextual information."
 			     (org-html--anchor id nil nil info)))
 			 extra-ids "")
 			(concat
-			 (mapconcat #'number-to-string headline-number ".")
-			 (and headline-number " ")
+			 (and numberedp
+			      (concat (mapconcat #'number-to-string numbers ".")
+				      " "))
 			 full-text)
 			level)
 		;; When there is no section, pretend there is an empty
