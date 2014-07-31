@@ -777,7 +777,7 @@ containing `:raw-value', `:title', `:alt-title', `:begin',
 `:end', `:pre-blank', `:contents-begin' and `:contents-end',
 `:level', `:priority', `:tags', `:todo-keyword',`:todo-type',
 `:scheduled', `:deadline', `:closed', `:archivedp', `:commentedp'
-and `:footnote-section-p' keywords.
+`:footnote-section-p' and `:post-blank' keywords.
 
 The plist also contains any property set in the property drawer,
 with its name in upper cases and colons added at the
