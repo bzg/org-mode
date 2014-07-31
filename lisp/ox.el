@@ -1139,14 +1139,15 @@ keywords are understood:
   (declare (indent 1))
   (let (blocks filters menu-entry options contents)
     (while (keywordp (car body))
-      (case (pop body)
-        (:export-block (let ((names (pop body)))
-			 (setq blocks (if (consp names) (mapcar 'upcase names)
-					(list (upcase names))))))
-	(:filters-alist (setq filters (pop body)))
-	(:menu-entry (setq menu-entry (pop body)))
-        (:options-alist (setq options (pop body)))
-        (t (pop body))))
+      (let ((keyword (pop body)))
+	(case keyword
+	  (:export-block (let ((names (pop body)))
+			   (setq blocks (if (consp names) (mapcar 'upcase names)
+					  (list (upcase names))))))
+	  (:filters-alist (setq filters (pop body)))
+	  (:menu-entry (setq menu-entry (pop body)))
+	  (:options-alist (setq options (pop body)))
+	  (t (error "Unknown keyword: %s" keyword)))))
     (org-export-register-backend
      (org-export-create-backend :name backend
 				:transcoders transcoders
@@ -1210,15 +1211,16 @@ The back-end could then be called with, for example:
   (declare (indent 2))
   (let (blocks filters menu-entry options transcoders contents)
     (while (keywordp (car body))
-      (case (pop body)
-	(:export-block (let ((names (pop body)))
-			 (setq blocks (if (consp names) (mapcar 'upcase names)
-					(list (upcase names))))))
-        (:filters-alist (setq filters (pop body)))
-	(:menu-entry (setq menu-entry (pop body)))
-        (:options-alist (setq options (pop body)))
-        (:translate-alist (setq transcoders (pop body)))
-        (t (pop body))))
+      (let ((keyword (pop body)))
+	(case keyword
+	  (:export-block (let ((names (pop body)))
+			   (setq blocks (if (consp names) (mapcar 'upcase names)
+					  (list (upcase names))))))
+	  (:filters-alist (setq filters (pop body)))
+	  (:menu-entry (setq menu-entry (pop body)))
+	  (:options-alist (setq options (pop body)))
+	  (:translate-alist (setq transcoders (pop body)))
+	  (t (error "Unknown keyword: %s" keyword)))))
     (org-export-register-backend
      (org-export-create-backend :name child
 				:parent parent
