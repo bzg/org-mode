@@ -30,10 +30,10 @@
 ;; It is basically result of find-and-replace "stata" for "julia"
 ;; in ob-julia.el by G. Jay Kerns. Only ":results output" works: the
 ;; header args must include ":results output" (this is the default).
-;; Note that I'm not sure ':results value' makes sense or is useful 
-;; but I have left all the value-processing stuff inherited from 
+;; Note that I'm not sure ':results value' makes sense or is useful
+;; but I have left all the value-processing stuff inherited from
 ;; ob-julia and ob-R. ':results graphics' would be nice, but I have
-;; not tried to implement it. 
+;; not tried to implement it.
 ;; --Ista, 07/30/2014
 
 ;;; Requirements:
