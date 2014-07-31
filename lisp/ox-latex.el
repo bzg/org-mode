@@ -1861,6 +1861,12 @@ used as a communication channel."
 	(setq options (concat options ",width=" width)))
       (when (org-string-nw-p height)
 	(setq options (concat options ",height=" height)))
+      (let ((search-option (org-element-property :search-option link)))
+        (when (and search-option
+                   (equal filetype "pdf")
+                   (org-string-match-p "\\`[0-9]+\\'" search-option)
+                   (not (org-string-match-p "page=" options)))
+          (setq options (concat options ",page=" search-option))))
       (setq image-code
 	    (format "\\includegraphics%s{%s}"
 		    (cond ((not (org-string-nw-p options)) "")
