@@ -10043,9 +10043,9 @@ Conversely, backslash characters before a comma, and only them, need to be
 escaped with another backslash character.}.
 
 These references, called macros, can be inserted anywhere Org markup is
-recognized: paragraphs, headlines, verse and example blocks, tables cells,
-lists and comments.  They cannot be used within ordinary keywords (starting
-with @code{#+:}) but are allowed in @code{#+CAPTION}, @code{#+TITLE},
+recognized: paragraphs, headlines, verse and quote blocks, tables cells, and
+lists.  They cannot be used within ordinary keywords (starting with
+@code{#+}) but are allowed in @code{#+CAPTION}, @code{#+TITLE},
 @code{#+AUTHOR} and @code{#+EMAIL}.
 
 In addition to user-defined macros, a set of already defined macros can be
@@ -10060,7 +10060,7 @@ and to the modification time of the file being exported, respectively.
 The surrounding brackets can be made invisible by setting
 @code{org-hide-macro-markers} to @code{t}.
 
-Macro expansion takes place during export.
+Macro expansion takes place during the very beginning of the export process.
 
 
 @node Embedded @LaTeX{}
