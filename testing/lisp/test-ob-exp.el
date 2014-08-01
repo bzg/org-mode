@@ -249,14 +249,10 @@ Here is one that is also evaluated: src_sh[]{echo 4} =4=")
       (org-narrow-to-subtree)
       (org-test-with-expanded-babel-code (buffer-string))))))
 
-(ert-deftest ob-exp/exports-inline-code-double-eval-bug ()
-  "Failing for now as the result actually is
-`#+BEGIN_SRC emacs-lisp\n2#+END_SRC\n'.
-
-Based on default header arguments for inline code blocks (:exports
+(ert-deftest ob-exp/exports-inline-code-double-eval ()
+  "Based on default header arguments for inline code blocks (:exports
 results), the resulting code block `src_emacs-lisp{2}' should also be
 evaluated."
-  :expected-result :failed
   (should
    (string-match "\\`=2=$"
   		 (org-test-with-temp-text
@@ -264,11 +260,9 @@ evaluated."
   		  (org-export-execute-babel-code)
   		  (buffer-string)))))
 
-(ert-deftest ob-exp/exports-inline-code-eval-code-once-bug ()
+(ert-deftest ob-exp/exports-inline-code-eval-code-once ()
   "Ibid above, except that the resulting inline code block should not
-be evaluated. Result for now is
-`#+BEGIN_SRC emacs-lisp :exports code\n2#+END_SRC\n'"
-  :expected-result :failed
+be evaluated."
   (should
    (string-match "\\`src_emacs-lisp\\(?:\\[]\\)?{2}$"
   		 (org-test-with-temp-text
@@ -277,10 +271,7 @@ be evaluated. Result for now is
   		  (org-export-execute-babel-code)
   		  (buffer-string)))))
 
-(ert-deftest ob-exp/exports-inline-code-double-eval-exports-both-bug ()
-  "Failing for now as the result actually is 
-`src_emacs-lisp[]{(+ 1 1)} #+BEGIN_SRC emacs-lisp\n2#+END_SRC\n'."
-  :expected-result :failed
+(ert-deftest ob-exp/exports-inline-code-double-eval-exports-both ()
   (should
    (string-match (concat "\\`src_emacs-lisp\\(?:\\[]\\)?{(\\+ 1 1)} "
   			 "src_emacs-lisp\\(?:\\[]\\)?{2}$")

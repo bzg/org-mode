@@ -2095,9 +2095,11 @@ drawer -- results are added directly to the Org-mode file as with
           \"raw\", but are wrapped in a RESULTS drawer, allowing
           them to later be replaced or removed automatically.
 
-org ----- results are added inside of a \"#+BEGIN_SRC org\" block.
-          They are not comma-escaped when inserted, but Org syntax
-          here will be discarded when exporting the file.
+org ----- results are added inside of a \"src_org{}\" or \"#+BEGIN_SRC
+          org\" block depending on whether the current source block is
+          inline or not.  They are not comma-escaped when inserted,
+          but Org syntax here will be discarded when exporting the
+          file.
 
 html ---- results are added inside of a #+BEGIN_HTML block.  This
           is a good option if you code block will output html
@@ -2109,8 +2111,9 @@ latex --- results are added inside of a #+BEGIN_LATEX block.
 
 code ---- the results are extracted in the syntax of the source
           code of the language being evaluated and are added
-          inside of a #+BEGIN_SRC block with the source-code
-          language set appropriately.  Note this relies on the
+          inside of a source block with the source-code language
+          set appropriately.  Also, source block inlining is
+          preserved in this case.  Note this relies on the
           optional LANG argument."
   (if (stringp result)
       (progn
@@ -2172,12 +2175,15 @@ code ---- the results are extracted in the syntax of the source
 		 ((member "prepend" result-params)))) ; already there
 	      (setq results-switches
 		    (if results-switches (concat " " results-switches) ""))
-	      (let ((wrap (lambda (start finish &optional no-escape)
-			    (goto-char end) (insert (concat finish "\n"))
-			    (goto-char beg) (insert (concat start "\n"))
+	      (let ((wrap (lambda (start finish &optional no-escape no-newlines)
+			    (goto-char end)
+			    (insert (concat finish (unless no-newlines "\n")))
+			    (goto-char beg)
+			    (insert (concat start (unless no-newlines "\n")))
 			    (unless no-escape
 			      (org-escape-code-in-region (min (point) end) end))
-			    (goto-char end) (goto-char (point-at-eol))
+			    (goto-char end)
+			    (unless no-newlines (goto-char (point-at-eol)))
 			    (setq end (point-marker))))
 		    (proper-list-p (lambda (it) (and (listp it) (null (cdr (last it)))))))
 		;; insert results based on type
@@ -2225,10 +2231,16 @@ code ---- the results are extracted in the syntax of the source
 		  (funcall wrap "#+BEGIN_LaTeX" "#+END_LaTeX"))
 		 ((member "org" result-params)
 		  (goto-char beg) (if (org-at-table-p) (org-cycle))
-		  (funcall wrap "#+BEGIN_SRC org" "#+END_SRC"))
+		  (if inlinep
+		      (funcall wrap "src_org{" "}" nil t)
+		      (funcall wrap "#+BEGIN_SRC org" "#+END_SRC")))
 		 ((member "code" result-params)
-		  (funcall wrap (format "#+BEGIN_SRC %s%s" (or lang "none") results-switches)
-			   "#+END_SRC"))
+		  (let ((lang (or lang "none")))
+		    (if inlinep
+			(funcall wrap (format "src_%s[%s]{" lang results-switches)
+				 "}" nil t)
+			(funcall wrap (format "#+BEGIN_SRC %s%s" lang results-switches)
+				 "#+END_SRC"))))
 		 ((member "raw" result-params)
 		  (goto-char beg) (if (org-at-table-p) (org-cycle)))
 		 ((or (member "drawer" result-params)
