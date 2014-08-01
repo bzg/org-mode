@@ -7325,41 +7325,55 @@ Optional arguments START and END can be used to limit the range."
       nil))) ;; to signal that we did not
 
 (defun org-hide-block-toggle (&optional force)
-  "Toggle the visibility of the current block."
+  "Toggle the visibility of the current block.
+When optional argument FORCE is `off', make block visible.  If it
+is non-nil, hide it unconditionally."
   (interactive)
-  (save-excursion
-    (beginning-of-line)
-    (if (re-search-forward org-block-regexp nil t)
-        (let ((start (- (match-beginning 4) 1)) ;; beginning of body
-              (end (match-end 0)) ;; end of entire body
-              ov)
-          (if (memq t (mapcar (lambda (overlay)
-                                (eq (overlay-get overlay 'invisible)
-				    'org-hide-block))
-                              (overlays-at start)))
-              (if (or (not force) (eq force 'off))
-                  (mapc (lambda (ov)
-                          (when (member ov org-hide-block-overlays)
-                            (setq org-hide-block-overlays
-                                  (delq ov org-hide-block-overlays)))
-                          (when (eq (overlay-get ov 'invisible)
-                                    'org-hide-block)
-                            (delete-overlay ov)))
-                        (overlays-at start)))
-            (setq ov (make-overlay start end))
-            (overlay-put ov 'invisible 'org-hide-block)
-            ;; make the block accessible to isearch
-            (overlay-put
-             ov 'isearch-open-invisible
-             (lambda (ov)
-               (when (member ov org-hide-block-overlays)
-                 (setq org-hide-block-overlays
-                       (delq ov org-hide-block-overlays)))
-               (when (eq (overlay-get ov 'invisible)
-                         'org-hide-block)
-                 (delete-overlay ov))))
-            (push ov org-hide-block-overlays)))
-      (user-error "Not looking at a source block"))))
+  (let ((element (org-element-at-point)))
+    (unless (memq (org-element-type element)
+		  '(center-block comment-block example-block quote-block
+				 src-block verse-block))
+      (user-error "Not at a block"))
+    (let* ((start (save-excursion
+		    (goto-char (org-element-property :post-affiliated element))
+		    (line-end-position)))
+	   (end (save-excursion
+		  (goto-char (org-element-property :end element))
+		  (skip-chars-backward " \r\t\n")
+		  (line-end-position)))
+	   (overlays (overlays-at start)))
+      (cond
+       ;; Do nothing when not before or at the block opening line or
+       ;; at the block closing line.
+       ((let ((eol (line-end-position)))
+	  (and (> eol start) (/= eol end))))
+       ((and (not (eq force 'off))
+	     (not (memq t (mapcar
+			   (lambda (o)
+			     (eq (overlay-get o 'invisible) 'org-hide-block))
+			   overlays))))
+	(let ((ov (make-overlay start end)))
+	  (overlay-put ov 'invisible 'org-hide-block)
+	  ;; Make the block accessible to `isearch'.
+	  (overlay-put
+	   ov 'isearch-open-invisible
+	   (lambda (ov)
+	     (when (memq ov org-hide-block-overlays)
+	       (setq org-hide-block-overlays (delq ov org-hide-block-overlays)))
+	     (when (eq (overlay-get ov 'invisible) 'org-hide-block)
+	       (delete-overlay ov))))
+	  (push ov org-hide-block-overlays)
+	  ;; When the block is hidden away, make sure point is left in
+	  ;; a visible part of the buffer.
+	  (when (> (line-beginning-position) start)
+	    (goto-char start)
+	    (beginning-of-line))))
+       ((or (not force) (eq force 'off))
+	(dolist (ov overlays)
+	  (when (memq ov org-hide-block-overlays)
+	    (setq org-hide-block-overlays (delq ov org-hide-block-overlays)))
+	  (when (eq (overlay-get ov 'invisible) 'org-hide-block)
+	    (delete-overlay ov))))))))
 
 ;; org-tab-after-check-for-cycling-hook
 (add-hook 'org-tab-first-hook 'org-hide-block-toggle-maybe)
