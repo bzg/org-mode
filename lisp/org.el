@@ -1049,7 +1049,7 @@ When nil, just use the standard three dots.
 When a string, use that string instead.
 When a face, use the standard 3 dots, but with the specified face.
 The change affects only Org-mode (which will then use its own display table).
-Changing this requires executing `M-x org-mode RET' in a buffer to become
+Changing this requires executing \\[org-mode] in a buffer to become
 effective."
   :group 'org-startup
   :type '(choice (const :tag "Default" nil)
@@ -1605,9 +1605,9 @@ changed by an edit command."
 (defcustom org-remove-highlights-with-change t
   "Non-nil means any change to the buffer will remove temporary highlights.
 Such highlights are created by `org-occur' and `org-clock-display'.
-When nil, `C-c C-c needs to be used to get rid of the highlights.
-The highlights created by `org-preview-latex-fragment' always need
-`C-c C-c' to be removed."
+When nil, `C-c C-c' needs to be used to get rid of the highlights.
+The highlights created by `org-toggle-latex-fragment' always need
+`C-c C-x C-l' to be removed."
   :group 'org-sparse-trees
   :group 'org-time
   :type 'boolean)
@@ -5547,7 +5547,7 @@ The following commands are available:
      (when org-startup-with-inline-images
        (org-display-inline-images))
      (when org-startup-with-latex-preview
-       (org-preview-latex-fragment))
+       (org-toggle-latex-fragment))
      (unless org-inhibit-startup-visibility-stuff
        (org-set-startup-visibility))
      (org-refresh-effort-properties)))
@@ -18560,7 +18560,9 @@ looks only before point, not after."
   (mapc 'delete-overlay org-latex-fragment-image-overlays)
   (setq org-latex-fragment-image-overlays nil))
 
-(defun org-preview-latex-fragment (&optional subtree)
+(define-obsolete-function-alias
+  'org-preview-latex-fragment 'org-toggle-latex-fragment "24.4")
+(defun org-toggle-latex-fragment (&optional subtree)
   "Preview the LaTeX fragment at point, or all locally or globally.
 If the cursor is in a LaTeX fragment, create the image and overlay
 it over the source code.  If there is no fragment at point, display
@@ -18569,7 +18571,7 @@ prefix SUBTREE, display all fragments in the current subtree.  With a
 double prefix arg \\[universal-argument] \\[universal-argument], or when \
 the cursor is before the first headline,
 display all fragments in the buffer.
-The images can be removed again with \\[org-ctrl-c-ctrl-c]."
+The images can be removed again with \\[org-toggle-latex-fragment]."
   (interactive "P")
   (unless buffer-file-name
     (user-error "Can't preview LaTeX fragment in a non-file buffer"))
@@ -19488,7 +19490,7 @@ boundaries."
 (org-defkey org-mode-map "\C-c\C-x\C-d" 'org-clock-display)
 (org-defkey org-mode-map "\C-c\C-x\C-r" 'org-clock-report)
 (org-defkey org-mode-map "\C-c\C-x\C-u" 'org-dblock-update)
-(org-defkey org-mode-map "\C-c\C-x\C-l" 'org-preview-latex-fragment)
+(org-defkey org-mode-map "\C-c\C-x\C-l" 'org-toggle-latex-fragment)
 (org-defkey org-mode-map "\C-c\C-x\C-v" 'org-toggle-inline-images)
 (org-defkey org-mode-map "\C-c\C-x\C-\M-v" 'org-redisplay-inline-images)
 (org-defkey org-mode-map "\C-c\C-x\\"   'org-toggle-pretty-entities)
