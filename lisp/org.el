@@ -162,8 +162,6 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-table-maybe-eval-formula "org-table" ())
 (declare-function org-table-maybe-recalculate-line "org-table" ())
 
-(declare-function org-element--parse-objects "org-element"
-		  (beg end acc restriction))
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-cache-reset "org-element" (&optional all))
 (declare-function org-element-cache-refresh "org-element" (pos))
@@ -171,8 +169,6 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-interpret-data "org-element"
 		  (data &optional parent))
-(declare-function org-element-map "org-element"
-		  (data types fun &optional info first-match no-recursion))
 (declare-function org-element-nested-p "org-element" (elem-a elem-b))
 (declare-function org-element-parse-buffer "org-element"
 		  (&optional granularity visible-only))
@@ -180,11 +176,8 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-element-put-property "org-element"
 		  (element property value))
 (declare-function org-element-swap-A-B "org-element" (elem-a elem-b))
-(declare-function org-element--parse-objects "org-element"
-		  (beg end acc restriction))
 (declare-function org-element-parse-buffer "org-element"
 		  (&optional granularity visible-only))
-(declare-function org-element-restriction "org-element" (element))
 (declare-function org-element-type "org-element" (element))
 
 (defsubst org-uniquify (list)
@@ -22858,25 +22851,17 @@ a footnote definition, try to fill the first paragraph within."
 			  (concat "^" message-cite-prefix-regexp) end t))
 		   (setq end (match-beginning 0))))
 	       ;; Fill paragraph, taking line breaks into account.
-	       ;; For that, slice the paragraph using line breaks as
-	       ;; separators, and fill the parts in reverse order to
-	       ;; avoid messing with markers.
+	       ;; For that, insert hard newline characters after line
+	       ;; breaks and activate `use-hard-newlines'.
 	       (save-excursion
-		 (goto-char end)
-		 (mapc
-		  (lambda (pos)
-		    (fill-region-as-paragraph pos (point) justify)
-		    (goto-char pos))
-		  ;; Find the list of ending positions for line breaks
-		  ;; in the current paragraph.  Add paragraph
-		  ;; beginning to include first slice.
-		  (nreverse
-		   (cons beg
-			 (org-element-map
-			     (org-element--parse-objects
-			      beg end nil (org-element-restriction 'paragraph))
-			     'line-break
-			   (lambda (lb) (org-element-property :end lb)))))))
+		 (goto-char beg)
+		 (while (re-search-forward "\\\\\\\\[ \t]*\\(\n\\)" end t)
+		   (when (eq 'line-break
+			     (org-element-type
+			      (progn (backward-char)
+				     (save-match-data (org-element-context)))))
+		     (replace-match hard-newline nil nil nil 1)))
+		 (let ((use-hard-newlines t)) (fill-region beg end justify)))
 	       t)))
 	  ;; Contents of `comment-block' type elements should be
 	  ;; filled as plain text, but only if point is within block
