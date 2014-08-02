@@ -10,6 +10,9 @@ Please send Org bug reports to emacs-orgmode@gnu.org.
 
 * Version 8.3
 ** Incompatible changes
+*** No default title is provided when =TITLE= keyword is missing
+Skipping =TITLE= keyword no longer provides the current file name, or
+buffer name, as the title. Instead, simply ignore the title.
 *** Remove ~export-block~ element type
 For export back-end developers.
 
