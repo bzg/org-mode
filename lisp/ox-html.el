@@ -2371,8 +2371,10 @@ holding contextual information."
 			 extra-ids "")
 			(concat
 			 (and numberedp
-			      (concat (mapconcat #'number-to-string numbers ".")
-				      " "))
+			      (format
+			       "<span class=\"section-number-%d\">%s</span> "
+			       level
+			       (mapconcat #'number-to-string numbers ".")))
 			 full-text)
 			level)
 		;; When there is no section, pretend there is an empty
