@@ -22851,17 +22851,19 @@ a footnote definition, try to fill the first paragraph within."
 			  (concat "^" message-cite-prefix-regexp) end t))
 		   (setq end (match-beginning 0))))
 	       ;; Fill paragraph, taking line breaks into account.
-	       ;; For that, insert hard newline characters after line
-	       ;; breaks and activate `use-hard-newlines'.
 	       (save-excursion
 		 (goto-char beg)
-		 (while (re-search-forward "\\\\\\\\[ \t]*\\(\n\\)" end t)
-		   (when (eq 'line-break
-			     (org-element-type
-			      (progn (backward-char)
-				     (save-match-data (org-element-context)))))
-		     (replace-match hard-newline nil nil nil 1)))
-		 (let ((use-hard-newlines t)) (fill-region beg end justify)))
+		 (let ((starters (list beg)))
+		   (while (re-search-forward "\\\\\\\\[ \t]*\\(\n\\)" end t)
+		     (when (eq 'line-break
+			       (org-element-type
+				(progn
+				  (backward-char)
+				  (save-match-data (org-element-context)))))
+		       (push (point) starters)))
+		   (dolist (s starters)
+		     (fill-region-as-paragraph s end justify)
+		     (setq end s))))
 	       t)))
 	  ;; Contents of `comment-block' type elements should be
 	  ;; filled as plain text, but only if point is within block
