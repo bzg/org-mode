@@ -22853,17 +22853,16 @@ a footnote definition, try to fill the first paragraph within."
 	       ;; Fill paragraph, taking line breaks into account.
 	       (save-excursion
 		 (goto-char beg)
-		 (let ((starters (list beg)))
-		   (while (re-search-forward "\\\\\\\\[ \t]*\\(\n\\)" end t)
+		 (let ((cuts (list beg)))
+		   (while (re-search-forward "\\\\\\\\[ \t]*\n" end t)
 		     (when (eq 'line-break
 			       (org-element-type
-				(progn
-				  (backward-char)
-				  (save-match-data (org-element-context)))))
-		       (push (point) starters)))
-		   (dolist (s starters)
-		     (fill-region-as-paragraph s end justify)
-		     (setq end s))))
+				(save-excursion (backward-char)
+						(org-element-context))))
+		       (push (point) cuts)))
+		   (dolist (c (delq end cuts))
+		     (fill-region-as-paragraph c end justify)
+		     (setq end c))))
 	       t)))
 	  ;; Contents of `comment-block' type elements should be
 	  ;; filled as plain text, but only if point is within block
