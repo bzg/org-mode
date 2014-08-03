@@ -1945,7 +1945,7 @@ a communication channel.
 
 See `org-ascii-paragraph-spacing' for information."
   (let ((paragraph-spacing (plist-get info :ascii-paragraph-spacing)))
-    (when paragraph-spacing
+    (when (wholenump paragraph-spacing)
       (org-element-map tree 'paragraph
 	(lambda (p)
 	  (when (eq (org-element-type (org-export-get-next-element p info))
