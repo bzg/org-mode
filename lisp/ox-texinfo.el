@@ -682,12 +682,10 @@ holding export options."
 	 (info-filename (or (plist-get info :texinfo-filename)
 			    (file-name-nondirectory
 			     (org-export-output-file-name ".info"))))
-	 (author (org-export-data (plist-get info :author) info))
 	 (lang (org-export-data (plist-get info :language) info))
 	 (texinfo-header (plist-get info :texinfo-header))
 	 (texinfo-post-header (plist-get info :texinfo-post-header))
 	 (subtitle (plist-get info :subtitle))
-	 (subauthor (plist-get info :subauthor))
 	 (class (plist-get info :texinfo-class))
 	 (header (nth 1 (assoc class org-texinfo-classes)))
 	 (copying
@@ -715,8 +713,6 @@ holding export options."
      "\n"
      (format "@documentlanguage %s\n" lang)
      "\n\n"
-     "@c Version and Contact Info\n"
-     "@set AUTHOR " author "\n"
 
      ;; Additional Header Options set by `#+TEXINFO_HEADER
      (if texinfo-header
@@ -766,10 +762,23 @@ holding export options."
      "@title " title "\n\n"
      (if subtitle
 	 (concat "@subtitle " subtitle "\n"))
-     "@author " author "\n"
-     (if subauthor
-	 (concat subauthor "\n"))
-     "\n"
+     (when (plist-get info :with-author)
+       (concat
+	;; Primary author.
+	(let ((author (org-string-nw-p
+		       (org-export-data (plist-get info :author) info)))
+	      (email (and (plist-get info :with-email)
+			  (org-string-nw-p
+			   (org-export-data (plist-get info :email) info)))))
+	  (cond ((and author email)
+		 (format "@author %s (@email{%s})\n" author email))
+		(author (format "@author %s\n" author))
+		(email (format "@author @email{%s}\n" email))))
+	;; Other authors.
+	(let ((subauthor (plist-get info :subauthor)))
+	  (and subauthor
+	       (org-element-normalize-string
+		(replace-regexp-in-string "^" "@author " subauthor))))))
      "@c The following two commands start the copyright page.\n"
      "@page\n"
      "@vskip 0pt plus 1filll\n"
