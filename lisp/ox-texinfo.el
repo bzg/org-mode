@@ -783,9 +783,8 @@ holding export options."
 		(replace-regexp-in-string "^" "@author " subauthor))))))
      (and copying "@page\n@vskip 0pt plus 1filll\n@insertcopying\n")
      "@end titlepage\n\n"
-     "@c Output the table of contents at the beginning.\n"
-     "@contents\n\n"
-
+     ;; Table of contents.
+     (and (plist-get info :with-toc) "@contents\n\n")
      ;; Configure Top Node when not for Tex
      "@ifnottex\n"
      "@node Top\n"
