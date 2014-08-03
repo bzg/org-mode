@@ -695,12 +695,6 @@ holding export options."
 	 (copying
 	  (org-element-map (plist-get info :parse-tree) 'headline
 	    (lambda (hl) (and (org-element-property :COPYING hl) hl)) info t))
-	 (dircat (plist-get info :texinfo-dircat))
-	 (dirtitle (plist-get info :texinfo-dirtitle))
-	 (dirdesc (plist-get info :texinfo-dirdesc))
-	 ;; Spacing to align description (column 32 - 3 for `* ' and
-	 ;; `.' in text.
-	 (dirspacing (- 29 (length dirtitle)))
 	 (menu (org-texinfo-make-menu info 'main))
 	 (detail-menu (org-texinfo-make-menu info 'detailed)))
     (concat
@@ -749,18 +743,26 @@ holding export options."
      (org-export-data (nth 2 copying) info)
      "@end copying\n"
      "\n\n"
-
-     ;; Info directory information
-     ;; Only supply if both title and category are provided
-     (if (and dircat dirtitle)
+     ;; Info directory information.  Only supply if both title and
+     ;; category are provided.
+     (let ((dircat (plist-get info :texinfo-dircat))
+	   ;; Make sure title ends with a full stop.
+	   (dirtitle
+	    (let ((title (plist-get info :texinfo-dirtitle)))
+	      (and title
+		   (string-match "^\\(?:\\* \\)?\\(.*?\\)\\(\\.\\)?$" title)
+		   (format "* %s." (match-string 1 title))))))
+       (when (and dircat dirtitle)
 	 (concat "@dircategory " dircat "\n"
 		 "@direntry\n"
-		 "* " dirtitle "."
-		 (make-string dirspacing ?\s)
-		 dirdesc "\n"
-		 "@end direntry\n"))
-     "\n\n"
-
+		 (let ((dirdesc
+			(let ((desc (plist-get info :texinfo-dirdesc)))
+			  (cond ((not desc) nil)
+				((org-string-match-p "\\.$" desc) desc)
+				(t (concat desc "."))))))
+		   (if dirdesc (format "%-23s %s" dirtitle dirdesc) dirtitle))
+		 "\n"
+		 "@end direntry\n\n")))
      ;; Title
      "@titlepage\n"
      "@title " title "\n\n"
