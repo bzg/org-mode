@@ -233,9 +233,7 @@ order to reproduce the default set-up:
 ;;; Node listing (menu)
 
 (defcustom org-texinfo-node-description-column 32
-  "Column at which to start the description in the node
-  listings.
-
+  "Column at which to start the description in the node listings.
 If a node title is greater than this length, the description will
 be placed after the end of the title."
   :group 'org-export-texinfo
@@ -285,7 +283,7 @@ When nil, no transformation is made."
   :group 'org-export-texinfo
   :type '(choice
 	  (string :tag "Format string")
-	  (const :tag "No formatting")))
+	  (const :tag "No formatting" nil)))
 
 (defcustom org-texinfo-def-table-markup "@samp"
   "Default setting for @table environments."
@@ -331,7 +329,7 @@ The function should return the string to be exported.
 The default function simply returns the value of CONTENTS."
   :group 'org-export-texinfo
   :version "24.4"
-  :package-version '(Org . "8.3")
+  :package-version '(Org . "8.2")
   :type 'function)
 
 ;;; Inlinetasks
