@@ -70,8 +70,8 @@
     (center-block . org-texinfo-center-block)
     (clock . org-texinfo-clock)
     (code . org-texinfo-code)
-    (comment . org-texinfo-comment)
-    (comment-block . org-texinfo-comment-block)
+    (comment . (lambda (&rest args) ""))
+    (comment-block . (lambda (&rest args) ""))
     (drawer . org-texinfo-drawer)
     (dynamic-block . org-texinfo-dynamic-block)
     (entity . org-texinfo-entity)
@@ -860,22 +860,6 @@ information."
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (org-texinfo--text-markup (org-element-property :value code) 'code))
-
-;;; Comment
-
-(defun org-texinfo-comment (comment contents info)
-  "Transcode a COMMENT object from Org to Texinfo.
-CONTENTS is the text in the comment.  INFO is a plist holding
-contextual information."
-  (org-texinfo--text-markup (org-element-property :value comment) 'comment))
-
-;;; Comment Block
-
-(defun org-texinfo-comment-block (comment-block contents info)
-  "Transcode a COMMENT-BLOCK object from Org to Texinfo.
-CONTENTS is the text within the block.  INFO is a plist holding
-contextual information."
-  (format "@ignore\n%s@end ignore" (org-element-property :value comment-block)))
 
 ;;; Drawer
 
