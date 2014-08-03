@@ -685,7 +685,6 @@ holding export options."
 	 (lang (org-export-data (plist-get info :language) info))
 	 (texinfo-header (plist-get info :texinfo-header))
 	 (texinfo-post-header (plist-get info :texinfo-post-header))
-	 (subtitle (plist-get info :subtitle))
 	 (class (plist-get info :texinfo-class))
 	 (header (nth 1 (assoc class org-texinfo-classes)))
 	 ;; Copying data is the contents of the first headline in
@@ -703,7 +702,7 @@ holding export options."
      "@c %**start of header\n"
      ;; Filename and Title
      "@setfilename " info-filename "\n"
-     "@settitle " title "\n"
+     (format "@settitle %s\n" title)
      ;; Coding system.
      (format
       "@documentencoding %s\n"
@@ -761,9 +760,11 @@ holding export options."
 		 "@end direntry\n\n")))
      ;; Title
      "@titlepage\n"
-     "@title " title "\n\n"
-     (if subtitle
-	 (concat "@subtitle " subtitle "\n"))
+     "@title " title "\n"
+     (let ((subtitle (plist-get info :subtitle)))
+       (and subtitle
+	    (org-element-normalize-string
+	     (replace-regexp-in-string "^" "@subtitle " subtitle))))
      (when (plist-get info :with-author)
        (concat
 	;; Primary author.
