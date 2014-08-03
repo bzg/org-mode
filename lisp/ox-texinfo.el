@@ -688,9 +688,13 @@ holding export options."
 	 (subtitle (plist-get info :subtitle))
 	 (class (plist-get info :texinfo-class))
 	 (header (nth 1 (assoc class org-texinfo-classes)))
-	 (copying
-	  (org-element-map (plist-get info :parse-tree) 'headline
-	    (lambda (hl) (and (org-element-property :COPYING hl) hl)) info t))
+	 ;; Copying data is the contents of the first headline in
+	 ;; parse tree with a non-nil copying property.
+	 (copying (org-element-map (plist-get info :parse-tree) 'headline
+		    (lambda (hl)
+		      (and (org-not-nil (org-element-property :COPYING hl))
+			   (org-element-contents hl)))
+		    info t))
 	 (menu (org-texinfo-make-menu info 'main))
 	 (detail-menu (org-texinfo-make-menu info 'detailed)))
     (concat
@@ -730,13 +734,11 @@ holding export options."
 		 texinfo-post-header
 		 "\n"))
 
-     ;; Copying
-     "@copying\n"
-     ;; Only export the content of the headline, do not need the
-     ;; initial headline.
-     (org-export-data (nth 2 copying) info)
-     "@end copying\n"
-     "\n\n"
+     ;; Copying.
+     (and copying
+	  (format "@copying\n%s@end copying\n\n"
+		  (org-element-normalize-string
+		   (org-export-data copying info))))
      ;; Info directory information.  Only supply if both title and
      ;; category are provided.
      (let ((dircat (plist-get info :texinfo-dircat))
@@ -779,10 +781,7 @@ holding export options."
 	  (and subauthor
 	       (org-element-normalize-string
 		(replace-regexp-in-string "^" "@author " subauthor))))))
-     "@c The following two commands start the copyright page.\n"
-     "@page\n"
-     "@vskip 0pt plus 1filll\n"
-     "@insertcopying\n"
+     (and copying "@page\n@vskip 0pt plus 1filll\n@insertcopying\n")
      "@end titlepage\n\n"
      "@c Output the table of contents at the beginning.\n"
      "@contents\n\n"
@@ -791,7 +790,7 @@ holding export options."
      "@ifnottex\n"
      "@node Top\n"
      "@top " title " Manual\n"
-     "@insertcopying\n"
+     (and copying "@insertcopying\n")
      "@end ifnottex\n\n"
 
      ;; Do not output menus if they are empty
