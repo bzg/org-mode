@@ -804,7 +804,7 @@ holding export options."
      ;; Configure Top Node when not for Tex
      "@ifnottex\n"
      "@node Top\n"
-     "@top " title " Manual\n"
+     (format "@top %s\n" title)
      (and copying "@insertcopying\n")
      "@end ifnottex\n\n"
      ;; Menu.
