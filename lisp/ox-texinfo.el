@@ -1609,20 +1609,7 @@ channel."
   "Transcode a VERSE-BLOCK element from Org to Texinfo.
 CONTENTS is verse block contents. INFO is a plist holding
 contextual information."
-  ;; In a verse environment, add a line break to each newline
-  ;; character and change each white space at beginning of a line
-  ;; into a space of 1 em.  Also change each blank line with
-  ;; a vertical space of 1 em.
-  (progn
-    (setq contents (replace-regexp-in-string
-		    "^ *\\\\\\\\$" "\\\\vspace*{1em}"
-		    (replace-regexp-in-string
-		     "\\(\\\\\\\\\\)?[ \t]*\n" " \\\\\\\\\n" contents)))
-    (while (string-match "^[ \t]+" contents)
-      (let ((new-str (format "\\hspace*{%dem}"
-			     (length (match-string 0 contents)))))
-	(setq contents (replace-match new-str nil t contents))))
-    (format "\\begin{verse}\n%s\\end{verse}" contents)))
+  (format "@display\n%s@end display" contents))
 
 
 ;;; Interactive functions
