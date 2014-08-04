@@ -120,7 +120,7 @@
        ((?t "As TEXI file" org-texinfo-export-to-texinfo)
 	(?i "As INFO file" org-texinfo-export-to-info)))
   :options-alist
-  '((:texinfo-filename "TEXINFO_FILENAME" nil org-texinfo-filename t)
+  '((:texinfo-filename "TEXINFO_FILENAME" nil nil t)
     (:texinfo-class "TEXINFO_CLASS" nil org-texinfo-default-class t)
     (:texinfo-header "TEXINFO_HEADER" nil nil newline)
     (:texinfo-post-header "TEXINFO_POST_HEADER" nil nil newline)
@@ -142,11 +142,6 @@
   :group 'org-export)
 
 ;;; Preamble
-
-(defcustom org-texinfo-filename ""
-  "Default filename for Texinfo output."
-  :group 'org-export-texinfo
-  :type '(string :tag "Export Filename"))
 
 (defcustom org-texinfo-coding-system nil
   "Default document encoding for Texinfo output.
@@ -704,9 +699,6 @@ of the longest menu entry."
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   (let ((title (org-export-data (plist-get info :title) info))
-	(info-filename (or (plist-get info :texinfo-filename)
-			   (file-name-nondirectory
-			    (org-export-output-file-name ".info"))))
 	;; Copying data is the contents of the first headline in
 	;; parse tree with a non-nil copying property.
 	(copying (org-element-map (plist-get info :parse-tree) 'headline
@@ -717,7 +709,10 @@ holding export options."
     (concat
      "\\input texinfo    @c -*- texinfo -*-\n"
      "@c %**start of header\n"
-     "@setfilename " info-filename "\n"
+     (let ((file (or (plist-get info :texinfo-filename)
+		     (let ((f (plist-get info :output-file)))
+		       (and f (concat (file-name-sans-extension f) ".info"))))))
+       (and file (format "@setfilename %s\n" file)))
      (format "@settitle %s\n" title)
      ;; Insert class-defined header.
      (org-element-normalize-string
