@@ -1333,6 +1333,10 @@ The back-end could then be called with, for example:
 ;;   - category :: option
 ;;   - type :: string
 ;;
+;; + `:output-file' :: Full path to output file, if any.
+;;   - category :: option
+;;   - type :: string or nil
+;;
 ;; + `:parse-tree' :: Whole parse tree, available at any time during
 ;;      transcoding.
 ;;   - category :: option
@@ -5674,7 +5678,8 @@ The function returns either a file name returned by POST-PROCESS,
 or FILE."
   (declare (indent 2))
   (if (not (file-writable-p file)) (error "Output file not writable")
-    (let ((encoding (or org-export-coding-system buffer-file-coding-system)))
+    (let ((ext-plist (org-combine-plists `(:output-file ,file) ext-plist))
+	  (encoding (or org-export-coding-system buffer-file-coding-system)))
       (if async
           (org-export-async-start
 	      `(lambda (file)
