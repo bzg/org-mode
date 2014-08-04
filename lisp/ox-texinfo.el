@@ -162,19 +162,42 @@ If `nil' it will default to `buffer-file-coding-system'."
 
 (defcustom org-texinfo-classes
   '(("info"
-     "\\input texinfo    @c -*- texinfo -*-"
+     "@documentencoding AUTO\n@documentlanguage AUTO"
      ("@chapter %s" . "@unnumbered %s")
      ("@section %s" . "@unnumberedsec %s")
      ("@subsection %s" . "@unnumberedsubsec %s")
      ("@subsubsection %s" . "@unnumberedsubsubsec %s")))
   "Alist of Texinfo classes and associated header and structure.
-If #+Texinfo_CLASS is set in the buffer, use its value and the
+If #+TEXINFO_CLASS is set in the buffer, use its value and the
 associated information.  Here is the structure of each cell:
 
   \(class-name
     header-string
-    \(numbered-section . unnumbered-section\)
-    ...\)
+    \(numbered-section . unnumbered-section)
+    ...)
+
+
+The header string
+-----------------
+
+The header string is inserted in the header of the generated
+document, right after \"@setfilename\" and \"@settitle\"
+commands.
+
+If it contains the special string
+
+  \"@documentencoding AUTO\"
+
+\"AUTO\" will be replaced with an appropriate coding system.  See
+`org-texinfo-coding-system' for more information.  Likewise, if
+the string contains the special string
+
+  \"@documentlanguage AUTO\"
+
+\"AUTO\" will be replaced with the language defined in the
+buffer, through #+LANGUAGE keyword, or globally, with
+`org-export-default-language', which see.
+
 
 The sectioning structure
 ------------------------
@@ -186,10 +209,12 @@ section string and will be replaced by the title of the section.
 
 Instead of a list of sectioning commands, you can also specify
 a function name.  That function will be called with two
-parameters, the \(reduced) level of the headline, and a predicate
+parameters, the reduced) level of the headline, and a predicate
 non-nil when the headline should be numbered.  It must return
 a format string in which the section title will be added."
   :group 'org-export-texinfo
+  :version "24.4"
+  :package-version '(Org . "8.2")
   :type '(repeat
 	  (list (string :tag "Texinfo class")
 		(string :tag "Texinfo header")
@@ -682,8 +707,6 @@ holding export options."
 	(info-filename (or (plist-get info :texinfo-filename)
 			   (file-name-nondirectory
 			    (org-export-output-file-name ".info"))))
-	(header (nth 1 (assoc (plist-get info :texinfo-class)
-			      org-texinfo-classes)))
 	;; Copying data is the contents of the first headline in
 	;; parse tree with a non-nil copying property.
 	(copying (org-element-map (plist-get info :parse-tree) 'headline
@@ -692,24 +715,31 @@ holding export options."
 			  (org-element-contents hl)))
 		   info t)))
     (concat
-     ;; Header
-     header "\n"
+     "\\input texinfo    @c -*- texinfo -*-\n"
      "@c %**start of header\n"
-     ;; Filename and Title
      "@setfilename " info-filename "\n"
      (format "@settitle %s\n" title)
-     ;; Coding system.
-     (format
-      "@documentencoding %s\n"
-      (catch 'coding-system
-	(let ((case-fold-search t)
-	      (name (symbol-name (or org-texinfo-coding-system
-				     buffer-file-coding-system))))
-	  (dolist (system org-texinfo-supported-coding-systems "UTF-8")
-	    (when (org-string-match-p (regexp-quote system) name)
-	      (throw 'coding-system system))))))
-     ;; Language.
-     (format "@documentlanguage %s\n" (plist-get info :language))
+     ;; Insert class-defined header.
+     (org-element-normalize-string
+      (let ((header (nth 1 (assoc (plist-get info :texinfo-class)
+				  org-texinfo-classes)))
+	    (coding
+	     (catch 'coding-system
+	       (let ((case-fold-search t)
+		     (name (symbol-name (or org-texinfo-coding-system
+					    buffer-file-coding-system))))
+		 (dolist (system org-texinfo-supported-coding-systems "UTF-8")
+		   (when (org-string-match-p (regexp-quote system) name)
+		     (throw 'coding-system system))))))
+	    (language (plist-get info :language))
+	    (case-fold-search nil))
+	;; Auto coding system.
+	(replace-regexp-in-string
+	 "^@documentencoding \\(AUTO\\)$"
+	 coding
+	 (replace-regexp-in-string
+	  "^@documentlanguage \\(AUTO\\)$" language header nil nil 1)
+	 nil nil 1)))
      ;; Additional header options set by #+TEXINFO_HEADER.
      (let ((texinfo-header (plist-get info :texinfo-header)))
        (and texinfo-header (org-element-normalize-string texinfo-header)))
