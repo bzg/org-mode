@@ -1498,93 +1498,44 @@ contextual information."
   (format "@math{^%s}" contents))
 
 ;;; Table
-;;
-;; `org-texinfo-table' is the entry point for table transcoding.  It
-;; takes care of tables with a "verbatim" attribute.  Otherwise, it
-;; delegates the job to either `org-texinfo-table--table.el-table' or
-;; `org-texinfo-table--org-table' functions, depending of the type of
-;; the table.
-;;
-;; `org-texinfo-table--align-string' is a subroutine used to build
-;; alignment string for Org tables.
 
 (defun org-texinfo-table (table contents info)
   "Transcode a TABLE element from Org to Texinfo.
 CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
-  (cond
-   ;; Case 1: verbatim table.
-   ((or org-texinfo-tables-verbatim
-	(let ((attr (mapconcat 'identity
-			       (org-element-property :attr_latex table)
-			       " ")))
-	  (and attr (string-match "\\<verbatim\\>" attr))))
-    (format "@verbatim \n%s\n@end verbatim"
-	    ;; Re-create table, without affiliated keywords.
-	    (org-trim
-	     (org-element-interpret-data
-	      `(table nil ,@(org-element-contents table))))))
-   ;; Case 2: table.el table.  Convert it using appropriate tools.
-   ((eq (org-element-property :type table) 'table.el)
-    (org-texinfo-table--table.el-table table contents info))
-   ;; Case 3: Standard table.
-   (t (org-texinfo-table--org-table table contents info))))
+  (if (eq (org-element-property :type table) 'table.el)
+      (format "@verbatim\n%s@end verbatim"
+	      (org-element-normalize-string
+	       (org-element-property :value table)))
+    (let* ((col-width (org-export-read-attribute :attr_texinfo table :columns))
+	   (columns
+	    (if col-width (format "@columnfractions %s" col-width)
+	      (org-texinfo-table-column-widths table info))))
+      (format "@multitable %s\n%s@end multitable"
+	      columns
+	      contents))))
 
 (defun org-texinfo-table-column-widths (table info)
   "Determine the largest table cell in each column to process alignment.
-
 TABLE is the table element to transcode.  INFO is a plist used as
 a communication channel."
-  (let* ((rows (org-element-map table 'table-row 'identity info))
-	 (collected (loop for row in rows collect
-			  (org-element-map row 'table-cell 'identity info)))
-	 (number-cells (length (car collected)))
-	 cells counts)
-    (loop for row in collected do
-	  (push (mapcar (lambda (ref)
-			  (let* ((start (org-element-property :contents-begin ref))
-				 (end (org-element-property :contents-end ref))
-				 (length (- end start)))
-			    length)) row) cells))
-    (setq cells (org-remove-if 'null cells))
-    (push (loop for count from 0 to (- number-cells 1) collect
-		(loop for item in cells collect
-		      (nth count item))) counts)
-    (mapconcat (lambda (size)
-		 (make-string size ?a)) (mapcar (lambda (ref)
-						  (apply 'max `(,@ref))) (car counts))
-		 "} {")))
-
-(defun org-texinfo-table--org-table (table contents info)
-  "Return appropriate Texinfo code for an Org table.
-
-TABLE is the table type element to transcode.  CONTENTS is its
-contents, as a string.  INFO is a plist used as a communication
-channel.
-
-This function assumes TABLE has `org' as its `:type' attribute."
-  (let* ((attr (org-export-read-attribute :attr_texinfo table))
-	 (col-width (plist-get attr :columns))
-	 (columns (if col-width
-		      (format "@columnfractions %s"
-			      col-width)
-		    (format "{%s}"
-			    (org-texinfo-table-column-widths
-			     table info)))))
-    ;; Prepare the final format string for the table.
-    (cond
-     ;; Longtable.
-     ;; Others.
-     (t (concat
-	 (format "@multitable %s\n%s@end multitable"
-		 columns
-		 contents))))))
-
-(defun org-texinfo-table--table.el-table (table contents info)
-  "Returns nothing.
-
-Rather than return an invalid table, nothing is returned."
-  'nil)
+  (let ((widths (make-vector (cdr (org-export-table-dimensions table info)) 0)))
+    (org-element-map table 'table-row
+      (lambda (row)
+	(let ((idx 0))
+	  (org-element-map row 'table-cell
+	    (lambda (cell)
+	      ;; Length of the cell in the original buffer is only an
+	      ;; approximation of the length of the cell in the
+	      ;; output.  It can sometimes fail (e.g. it considers
+	      ;; "/a/" being larger than "ab").
+	      (let ((w (- (org-element-property :contents-end cell)
+			  (org-element-property :contents-begin cell))))
+		(aset widths idx (max w (aref widths idx))))
+	      (incf idx))
+	    info)))
+      info)
+    (format "{%s}" (mapconcat (lambda (w) (make-string w ?a)) widths "} {"))))
 
 ;;; Table Cell
 
@@ -1612,19 +1563,13 @@ a communication channel."
   ;; Rules are ignored since table separators are deduced from
   ;; borders of the current row.
   (when (eq (org-element-property :type table-row) 'standard)
-   (let ((rowgroup-tag
-	  (cond
-	   ;; Case 1: Belongs to second or subsequent rowgroup.
-	   ((not (= 1 (org-export-table-row-group table-row info)))
-	    "@item ")
-	   ;; Case 2: Row is from first rowgroup.  Table has >=1 rowgroups.
-	   ((org-export-table-has-header-p
-	     (org-export-get-parent-table table-row) info)
-	    "@headitem ")
-	   ;; Case 3: Row is from first and only row group.
-	   (t "@item "))))
-     (when (eq (org-element-property :type table-row) 'standard)
-       (concat rowgroup-tag contents "\n")))))
+    (let ((rowgroup-tag
+	   (if (and (= 1 (org-export-table-row-group table-row info))
+		    (org-export-table-has-header-p
+		     (org-export-get-parent-table table-row) info))
+	       "@headitem "
+	     "@item ")))
+      (concat rowgroup-tag contents "\n"))))
 
 ;;; Target
 
