@@ -128,7 +128,8 @@
     (:subauthor "SUBAUTHOR" nil nil newline)
     (:texinfo-dircat "TEXINFO_DIR_CATEGORY" nil nil t)
     (:texinfo-dirtitle "TEXINFO_DIR_TITLE" nil nil t)
-    (:texinfo-dirdesc "TEXINFO_DIR_DESC" nil nil t)))
+    (:texinfo-dirdesc "TEXINFO_DIR_DESC" nil nil t)
+    (:texinfo-printed-title "TEXINFO_PRINTED_TITLE" nil nil t)))
 
 
 
@@ -770,7 +771,7 @@ holding export options."
      ;; Title
      "@finalout\n"
      "@titlepage\n"
-     "@title " title "\n"
+     (format "@title %s\n" (or (plist-get info :texinfo-printed-title) title))
      (let ((subtitle (plist-get info :subtitle)))
        (and subtitle
 	    (org-element-normalize-string
