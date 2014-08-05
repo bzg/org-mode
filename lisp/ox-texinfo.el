@@ -956,8 +956,6 @@ holding contextual information."
 	 (class-sectioning (assoc class org-texinfo-classes))
 	 ;; Find the index type, if any
 	 (index (org-element-property :INDEX headline))
-	 ;; Check if it is an appendix
-	 (appendix (org-element-property :APPENDIX headline))
 	 ;; Retrieve headline text
 	 (text (org-texinfo--sanitize-headline
 		(org-element-property :title headline) info))
@@ -989,31 +987,24 @@ holding contextual information."
 	 ;; Section formatting will set two placeholders: one for the
 	 ;; title and the other for the contents.
 	 (section-fmt
-	  (let ((sec (if (and (symbolp (nth 2 class-sectioning))
-			      (fboundp (nth 2 class-sectioning)))
-			 (funcall (nth 2 class-sectioning) level numberedp)
-		       (nth (1+ level) class-sectioning))))
-	    (cond
-	     ;; No section available for that LEVEL.
-	     ((not sec) nil)
-	     ;; Section format directly returned by a function.
-	     ((stringp sec) sec)
-	     ;; (numbered-section . unnumbered-section)
-	     ((not (consp (cdr sec)))
+	  (if (org-not-nil (org-element-property :APPENDIX headline))
+	      (concat menu node "appendix\n%s")
+	    (let ((sec (if (and (symbolp (nth 2 class-sectioning))
+				(fboundp (nth 2 class-sectioning)))
+			   (funcall (nth 2 class-sectioning) level numberedp)
+			 (nth (1+ level) class-sectioning))))
 	      (cond
-	       ;;If an index, always unnumbered
-	       (index
-		(concat menu node (cdr sec) "\n%s"))
-	       (appendix
-		(concat menu node (replace-regexp-in-string
-				   "unnumbered"
-				   "appendix"
-				   (cdr sec)) "\n%s"))
-		;; Otherwise number as needed.
-	       (t
-		(concat menu node
-			(funcall
-			 (if numberedp #'car #'cdr) sec) "\n%s")))))))
+	       ;; No section available for that LEVEL.
+	       ((not sec) nil)
+	       ;; Section format directly returned by a function.
+	       ((stringp sec) sec)
+	       ;; (numbered-section . unnumbered-section)
+	       ((not (consp (cdr sec)))
+		(concat menu
+			node
+			;; An index is always unnumbered.
+			(if (or index (not numberedp)) (cdr sec) (car sec))
+			"\n%s"))))))
 	 (todo
 	  (and (plist-get info :with-todo-keywords)
 	       (let ((todo (org-element-property :todo-keyword headline)))
