@@ -678,24 +678,19 @@ of the longest menu entry."
   "Return complete document string after Texinfo conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (let* ((title (org-export-data (plist-get info :title) info))
-	 (info-filename (or (plist-get info :texinfo-filename)
-			    (file-name-nondirectory
-			     (org-export-output-file-name ".info"))))
-	 (lang (org-export-data (plist-get info :language) info))
-	 (texinfo-header (plist-get info :texinfo-header))
-	 (texinfo-post-header (plist-get info :texinfo-post-header))
-	 (class (plist-get info :texinfo-class))
-	 (header (nth 1 (assoc class org-texinfo-classes)))
-	 ;; Copying data is the contents of the first headline in
-	 ;; parse tree with a non-nil copying property.
-	 (copying (org-element-map (plist-get info :parse-tree) 'headline
-		    (lambda (hl)
-		      (and (org-not-nil (org-element-property :COPYING hl))
-			   (org-element-contents hl)))
-		    info t))
-	 (menu (org-texinfo-make-menu info 'main))
-	 (detail-menu (org-texinfo-make-menu info 'detailed)))
+  (let ((title (org-export-data (plist-get info :title) info))
+	(info-filename (or (plist-get info :texinfo-filename)
+			   (file-name-nondirectory
+			    (org-export-output-file-name ".info"))))
+	(header (nth 1 (assoc (plist-get info :texinfo-class)
+			      org-texinfo-classes)))
+	;; Copying data is the contents of the first headline in
+	;; parse tree with a non-nil copying property.
+	(copying (org-element-map (plist-get info :parse-tree) 'headline
+		   (lambda (hl)
+		     (and (org-not-nil (org-element-property :COPYING hl))
+			  (org-element-contents hl)))
+		   info t)))
     (concat
      ;; Header
      header "\n"
@@ -713,26 +708,16 @@ holding export options."
 	  (dolist (system org-texinfo-supported-coding-systems "UTF-8")
 	    (when (org-string-match-p (regexp-quote system) name)
 	      (throw 'coding-system system))))))
-     "\n"
-     (format "@documentlanguage %s\n" lang)
-     "\n\n"
-
-     ;; Additional Header Options set by `#+TEXINFO_HEADER
-     (if texinfo-header
-	 (concat "\n"
-		 texinfo-header
-		 "\n"))
-
-     "@c %**end of header\n"
-     "@finalout\n"
-     "\n\n"
-
-     ;; Additional Header Options set by #+TEXINFO_POST_HEADER
-     (if texinfo-post-header
-	 (concat "\n"
-		 texinfo-post-header
-		 "\n"))
-
+     ;; Language.
+     (format "@documentlanguage %s\n" (plist-get info :language))
+     ;; Additional header options set by #+TEXINFO_HEADER.
+     (let ((texinfo-header (plist-get info :texinfo-header)))
+       (and texinfo-header (org-element-normalize-string texinfo-header)))
+     "@c %**end of header\n\n"
+     ;; Additional options set by #+TEXINFO_POST_HEADER.
+     (let ((texinfo-post-header (plist-get info :texinfo-post-header)))
+       (and texinfo-post-header
+	    (org-element-normalize-string texinfo-post-header)))
      ;; Copying.
      (and copying
 	  (format "@copying\n%s@end copying\n\n"
@@ -741,7 +726,6 @@ holding export options."
      ;; Info directory information.  Only supply if both title and
      ;; category are provided.
      (let ((dircat (plist-get info :texinfo-dircat))
-	   ;; Make sure title ends with a full stop.
 	   (dirtitle
 	    (let ((title (plist-get info :texinfo-dirtitle)))
 	      (and title
@@ -759,6 +743,7 @@ holding export options."
 		 "\n"
 		 "@end direntry\n\n")))
      ;; Title
+     "@finalout\n"
      "@titlepage\n"
      "@title " title "\n"
      (let ((subtitle (plist-get info :subtitle)))
@@ -792,35 +777,27 @@ holding export options."
      "@top " title " Manual\n"
      (and copying "@insertcopying\n")
      "@end ifnottex\n\n"
-
-     ;; Do not output menus if they are empty
-     (if menu
-	 ;; Menu
-	 (concat "@menu\n"
-		 menu
-		 "\n\n"
-		 ;; Detailed Menu
-		 (if detail-menu
-		     (concat "@detailmenu\n"
-			     " --- The Detailed Node Listing ---\n"
-			     detail-menu
-			     "\n\n"
-			     "@end detailmenu\n"))
-		 "@end menu\n"))
-     "\n\n"
-
+     ;; Menu.
+     (let ((menu (org-texinfo-make-menu info 'main))
+	   (detail-menu (org-texinfo-make-menu info 'detailed)))
+       (and menu
+	    (concat "@menu\n"
+		    menu "\n"
+		    (and detail-menu
+			 (concat "\n@detailmenu\n"
+				 " --- The Detailed Node Listing ---\n"
+				 detail-menu "\n"
+				 "@end detailmenu\n"))
+		    "@end menu\n\n")))
      ;; Document's body.
-     contents
-     "\n"
+     contents "\n"
      ;; Creator.
-     (let ((creator-info (plist-get info :with-creator)))
-       (cond
-	((not creator-info) "")
-	((eq creator-info 'comment)
-	 (format "@c %s\n" (plist-get info :creator)))
-	(t (concat (plist-get info :creator) "\n"))))
+     (case (plist-get info :with-creator)
+       ((nil) nil)
+       (comment (format "@c %s\n" (plist-get info :creator)))
+       (otherwise (concat (plist-get info :creator) "\n")))
      ;; Document end.
-     "\n@bye")))
+     "@bye")))
 
 
 
