@@ -1303,21 +1303,16 @@ the plist used as a communication channel."
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
   (let* ((attr (org-export-read-attribute :attr_texinfo plain-list))
-	 (indic (or (plist-get attr :indic)
-		    org-texinfo-def-table-markup))
-	 (type (org-element-property :type plain-list))
+	 (indic (or (plist-get attr :indic) org-texinfo-def-table-markup))
 	 (table-type (plist-get attr :table-type))
-	 ;; Ensure valid texinfo table type.
-	 (table-type (if (member table-type '("ftable" "vtable")) table-type
-		       "table"))
+	 (type (org-element-property :type plain-list))
 	 (list-type (cond
 		     ((eq type 'ordered) "enumerate")
 		     ((eq type 'unordered) "itemize")
-		     ((eq type 'descriptive) table-type))))
-    (format "@%s%s\n@end %s"
-	    (if (eq type 'descriptive)
-		(concat list-type " " indic)
-	      list-type)
+		     ((member table-type '("ftable" "vtable")) table-type)
+		     (t "table"))))
+    (format "@%s\n%s@end %s"
+	    (if (eq type 'descriptive) (concat list-type " " indic) list-type)
 	    contents
 	    list-type)))
 
