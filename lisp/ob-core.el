@@ -473,6 +473,7 @@ then run `org-babel-switch-to-session'."
     (noweb	. ((yes no tangle no-export strip-export)))
     (noweb-ref	. :any)
     (noweb-sep  . :any)
+    (output-dir . :any)
     (padline	. ((yes no)))
     (post       . :any)
     (prologue   . :any)
