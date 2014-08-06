@@ -129,6 +129,7 @@
     (:html-allow-name-attribute-in-anchors
      nil nil org-html-allow-name-attribute-in-anchors)
     (:html-divs nil nil org-html-divs)
+    (:html-checkbox-type nil nil org-html-checkbox-type)
     (:html-extension nil nil org-html-extension)
     (:html-footnote-format nil nil org-html-footnote-format)
     (:html-footnote-separator nil nil org-html-footnote-separator)
