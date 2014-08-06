@@ -21,38 +21,7 @@
 
 ;;; Commentary:
 ;;
-;; This library implements a Texinfo back-end for Org generic
-;; exporter.
-;;
-;; To test it, run
-;;
-;;   M-: (org-export-to-buffer 'texinfo "*Test Texinfo*") RET
-;;
-;; in an Org mode buffer then switch to the buffer to see the Texinfo
-;; export.  See ox.el for more details on how this exporter works.
-;;
-
-;; It introduces nine new buffer keywords: "TEXINFO_CLASS",
-;; "TEXINFO_FILENAME", "TEXINFO_HEADER", "TEXINFO_POST_HEADER",
-;; "TEXINFO_DIR_CATEGORY", "TEXINFO_DIR_TITLE", "TEXINFO_DIR_DESC"
-;; "SUBTITLE" and "SUBAUTHOR".
-
-;;
-;; It introduces 1 new headline property keywords:
-;; "TEXINFO_MENU_TITLE" for optional menu titles.
-;;
-;; To include inline code snippets (for example for generating @kbd{}
-;; and @key{} commands), the following export-snippet keys are
-;; accepted:
-;;
-;;     texinfo
-;;     info
-;;
-;; You can add them for export snippets via any of the below:
-;;
-;;    (add-to-list 'org-export-snippet-translation-alist
-;;                 '("info" . "texinfo"))
-;;
+;; See Org manual for details.
 
 ;;; Code:
 
@@ -142,7 +111,7 @@
   :package-version '(Org . "8.0")
   :group 'org-export)
 
-;;; Preamble
+;;;; Preamble
 
 (defcustom org-texinfo-coding-system nil
   "Default document encoding for Texinfo output.
@@ -221,7 +190,7 @@ a format string in which the section title will be added."
 			       (string :tag "unnumbered"))
 			 (function :tag "Hook computing sectioning"))))))
 
-;;; Headline
+;;;; Headline
 
 (defcustom org-texinfo-format-headline-function 'ignore
   "Function to format headline text.
@@ -251,7 +220,7 @@ order to reproduce the default set-up:
   :group 'org-export-texinfo
   :type 'function)
 
-;;; Node listing (menu)
+;;;; Node listing (menu)
 
 (defcustom org-texinfo-node-description-column 32
   "Column at which to start the description in the node listings.
@@ -260,11 +229,7 @@ be placed after the end of the title."
   :group 'org-export-texinfo
   :type 'integer)
 
-;;; Footnotes
-;;
-;; Footnotes are inserted directly
-
-;;; Timestamps
+;;;; Timestamps
 
 (defcustom org-texinfo-active-timestamp-format "@emph{%s}"
   "A printf format string to be applied to active timestamps."
@@ -281,14 +246,14 @@ be placed after the end of the title."
   :group 'org-export-texinfo
   :type 'string)
 
-;;; Links
+;;;; Links
 
 (defcustom org-texinfo-link-with-unknown-path-format "@indicateurl{%s}"
   "Format string for links with unknown path type."
   :group 'org-export-texinfo
   :type 'string)
 
-;;; Tables
+;;;; Tables
 
 (defcustom org-texinfo-tables-verbatim nil
   "When non-nil, tables are exported verbatim."
@@ -311,7 +276,7 @@ When nil, no transformation is made."
   :group 'org-export-texinfo
   :type 'string)
 
-;;; Text markup
+;;;; Text markup
 
 (defcustom org-texinfo-text-markup-alist '((bold . "@strong{%s}")
 					   (code . code)
@@ -335,7 +300,7 @@ returned as-is."
   :type 'alist
   :options '(bold code italic verbatim comment))
 
-;;; Drawers
+;;;; Drawers
 
 (defcustom org-texinfo-format-drawer-function
   (lambda (name contents) contents)
@@ -353,7 +318,7 @@ The default function simply returns the value of CONTENTS."
   :package-version '(Org . "8.2")
   :type 'function)
 
-;;; Inlinetasks
+;;;; Inlinetasks
 
 (defcustom org-texinfo-format-inlinetask-function 'ignore
   "Function called to format an inlinetask in Texinfo code.
@@ -389,11 +354,7 @@ in order to mimic default behavior:
   :group 'org-export-texinfo
   :type 'function)
 
-;;; Src blocks
-;;
-;; Src Blocks are example blocks, except for LISP
-
-;;; Compilation
+;;;; Compilation
 
 (defcustom org-texinfo-info-process
   '("makeinfo %f")
@@ -422,8 +383,8 @@ set `org-texinfo-logfiles-extensions'."
   :group 'org-export-latex
   :type 'boolean)
 
-
 ;;; Constants
+
 (defconst org-texinfo-max-toc-depth 4
   "Maximum depth for creation of detailed menu listings.  Beyond
   this depth Texinfo will not recognize the nodes and will cause
@@ -502,7 +463,7 @@ INFO is a plist used as a communication channel."
 	(org-texinfo--sanitize-headline
 	 (org-element-property :title headline) info))))))
 
-;;; Headline sanitizing
+;;;; Headline sanitizing
 
 (defun org-texinfo--sanitize-headline (headline info)
   "Remove all formatting from the text of a headline for use in
@@ -529,7 +490,7 @@ retrieved."
 	  (org-texinfo--sanitize-headline-contents
 	   (org-element-contents contents) info)))))
 
-;;; Menu sanitizing
+;;;; Menu sanitizing
 
 (defun org-texinfo--sanitize-menu (title)
   "Remove invalid characters from TITLE for use in menus and
@@ -539,7 +500,7 @@ Based on Texinfo specifications, the following must be removed:
 @ { } ( ) : . ,"
   (replace-regexp-in-string "[@{}():,.]" "" title))
 
-;;; Content sanitizing
+;;;; Content sanitizing
 
 (defun org-texinfo--sanitize-content (text)
   "Ensure characters are properly escaped when used in headlines or blocks.
@@ -547,7 +508,7 @@ Based on Texinfo specifications, the following must be removed:
 Escape characters are: @ { }"
   (replace-regexp-in-string "\\\([@{}]\\\)" "@\\1" text))
 
-;;; Menu creation
+;;;; Menu creation
 
 (defun org-texinfo--build-menu (tree level info &optional detailed)
   "Create the @menu/@end menu information from TREE at headline
@@ -829,7 +790,7 @@ holding export options."
 
 ;;; Transcode Functions
 
-;;; Bold
+;;;; Bold
 
 (defun org-texinfo-bold (bold contents info)
   "Transcode BOLD from Org to Texinfo.
@@ -837,7 +798,7 @@ CONTENTS is the text with bold markup.  INFO is a plist holding
 contextual information."
   (org-texinfo--text-markup contents 'bold))
 
-;;; Center Block
+;;;; Center Block
 
 (defun org-texinfo-center-block (center-block contents info)
   "Transcode a CENTER-BLOCK element from Org to Texinfo.
@@ -845,7 +806,7 @@ CONTENTS holds the contents of the block.  INFO is a plist used
 as a communication channel."
   contents)
 
-;;; Clock
+;;;; Clock
 
 (defun org-texinfo-clock (clock contents info)
   "Transcode a CLOCK element from Org to Texinfo.
@@ -862,7 +823,7 @@ information."
 		     (and time (format " (%s)" time)))))
    "@*"))
 
-;;; Code
+;;;; Code
 
 (defun org-texinfo-code (code contents info)
   "Transcode a CODE object from Org to Texinfo.
@@ -870,7 +831,7 @@ CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (org-texinfo--text-markup (org-element-property :value code) 'code))
 
-;;; Drawer
+;;;; Drawer
 
 (defun org-texinfo-drawer (drawer contents info)
   "Transcode a DRAWER element from Org to Texinfo.
@@ -881,15 +842,15 @@ holding contextual information."
 			  name contents)))
     output))
 
-;;; Dynamic Block
+;;;; Dynamic Block
 
 (defun org-texinfo-dynamic-block (dynamic-block contents info)
   "Transcode a DYNAMIC-BLOCK element from Org to Texinfo.
 CONTENTS holds the contents of the block.  INFO is a plist
-holding contextual information.  See `org-export-data'."
+holding contextual information."
   contents)
 
-;;; Entity
+;;;; Entity
 
 (defun org-texinfo-entity (entity contents info)
   "Transcode an ENTITY object from Org to Texinfo.
@@ -898,7 +859,7 @@ contextual information."
   (let ((ent (org-element-property :latex entity)))
     (if (org-element-property :latex-math-p entity) (format "@math{%s}" ent) ent)))
 
-;;; Example Block
+;;;; Example Block
 
 (defun org-texinfo-example-block (example-block contents info)
   "Transcode an EXAMPLE-BLOCK element from Org to Texinfo.
@@ -907,7 +868,7 @@ information."
   (format "@verbatim\n%s@end verbatim"
 	  (org-export-format-code-default example-block info)))
 
-;;; Export Block
+;;;; Export Block
 
 (defun org-texinfo-export-block (export-block contents info)
   "Transcode a EXPORT-BLOCK element from Org to Texinfo.
@@ -915,7 +876,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (when (string= (org-element-property :type export-block) "TEXINFO")
     (org-remove-indentation (org-element-property :value export-block))))
 
-;;; Export Snippet
+;;;; Export Snippet
 
 (defun org-texinfo-export-snippet (export-snippet contents info)
   "Transcode a EXPORT-SNIPPET object from Org to Texinfo.
@@ -923,7 +884,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (when (eq (org-export-snippet-backend export-snippet) 'texinfo)
     (org-element-property :value export-snippet)))
 
-;;; Fixed Width
+;;;; Fixed Width
 
 (defun org-texinfo-fixed-width (fixed-width contents info)
   "Transcode a FIXED-WIDTH element from Org to Texinfo.
@@ -933,8 +894,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	   (org-texinfo--sanitize-content
 	    (org-element-property :value fixed-width)))))
 
-;;; Footnote Reference
-;;
+;;;; Footnote Reference
 
 (defun org-texinfo-footnote-reference (footnote contents info)
   "Create a footnote reference for FOOTNOTE.
@@ -945,7 +905,7 @@ plist holding contextual information."
     (format "@footnote{%s}"
 	    (org-trim (org-export-data def info)))))
 
-;;; Headline
+;;;; Headline
 
 (defun org-texinfo-headline (headline contents info)
   "Transcode a HEADLINE element from Org to Texinfo.
@@ -1108,7 +1068,7 @@ holding contextual information."
 	(format (replace-regexp-in-string "%]" "%%]" section-fmt) full-text
 		(concat pre-blanks contents))))))))
 
-;;; Inline Src Block
+;;;; Inline Src Block
 
 (defun org-texinfo-inline-src-block (inline-src-block contents info)
   "Transcode an INLINE-SRC-BLOCK element from Org to Texinfo.
@@ -1118,7 +1078,7 @@ contextual information."
 	 (separator (org-texinfo--find-verb-separator code)))
     (concat "@verb{" separator code separator "}")))
 
-;;; Inlinetask
+;;;; Inlinetask
 
 (defun org-texinfo-inlinetask (inlinetask contents info)
   "Transcode an INLINETASK element from Org to Texinfo.
@@ -1151,7 +1111,7 @@ holding contextual information."
 			"\n")
 		full-title contents)))))
 
-;;; Italic
+;;;; Italic
 
 (defun org-texinfo-italic (italic contents info)
   "Transcode ITALIC from Org to Texinfo.
@@ -1159,7 +1119,7 @@ CONTENTS is the text with italic markup.  INFO is a plist holding
 contextual information."
   (org-texinfo--text-markup contents 'italic))
 
-;;; Item
+;;;; Item
 
 (defun org-texinfo-item (item contents info)
   "Transcode an ITEM element from Org to Texinfo.
@@ -1170,7 +1130,7 @@ contextual information."
     (concat "\n@item " (if tag desc) "\n"
 	    (and contents (org-trim contents)) "\n")))
 
-;;; Keyword
+;;;; Keyword
 
 (defun org-texinfo-keyword (keyword contents info)
   "Transcode a KEYWORD element from Org to Texinfo.
@@ -1186,14 +1146,14 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      ((string= key "TINDEX") (format "@tindex %s" value))
      ((string= key "VINDEX") (format "@vindex %s" value)))))
 
-;;; Line Break
+;;;; Line Break
 
 (defun org-texinfo-line-break (line-break contents info)
   "Transcode a LINE-BREAK object from Org to Texinfo.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   "@*\n")
 
-;;; Link
+;;;; Link
 
 (defun org-texinfo-link (link desc info)
   "Transcode a LINK object from Org to Texinfo.
@@ -1268,7 +1228,7 @@ INFO is a plist holding contextual information.  See
      (t (format org-texinfo-link-with-unknown-path-format desc)))))
 
 
-;;; Menu
+;;;; Menu
 
 (defun org-texinfo-make-menu (info level)
   "Create the menu for inclusion in the texifo document.
@@ -1288,7 +1248,7 @@ are generated directly."
       ;;(org-texinfo--build-detailed-menu parse top info)
       (org-texinfo--build-menu parse 1 info 'detailed)))))
 
-;;; Paragraph
+;;;; Paragraph
 
 (defun org-texinfo-paragraph (paragraph contents info)
   "Transcode a PARAGRAPH element from Org to Texinfo.
@@ -1296,7 +1256,7 @@ CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
   contents)
 
-;;; Plain List
+;;;; Plain List
 
 (defun org-texinfo-plain-list (plain-list contents info)
   "Transcode a PLAIN-LIST element from Org to Texinfo.
@@ -1316,7 +1276,7 @@ contextual information."
 	    contents
 	    list-type)))
 
-;;; Plain Text
+;;;; Plain Text
 
 (defun org-texinfo-plain-text (text info)
   "Transcode a TEXT string from Org to Texinfo.
@@ -1347,7 +1307,7 @@ contextual information."
     ;; Return value.
     output))
 
-;;; Planning
+;;;; Planning
 
 (defun org-texinfo-planning (planning contents info)
   "Transcode a PLANNING element from Org to Texinfo.
@@ -1383,7 +1343,7 @@ information."
     " ")
    "@*"))
 
-;;; Property Drawer
+;;;; Property Drawer
 
 (defun org-texinfo-property-drawer (property-drawer contents info)
   "Transcode a PROPERTY-DRAWER element from Org to Texinfo.
@@ -1393,7 +1353,7 @@ information."
   ;; lines nonetheless.
   "")
 
-;;; Quote Block
+;;;; Quote Block
 
 (defun org-texinfo-quote-block (quote-block contents info)
   "Transcode a QUOTE-BLOCK element from Org to Texinfo.
@@ -1405,7 +1365,7 @@ holding contextual information."
 				  (format " %s" title)))))
     (format "%s\n%s@end quotation" start-quote contents)))
 
-;;; Quote Section
+;;;; Quote Section
 
 (defun org-texinfo-quote-section (quote-section contents info)
   "Transcode a QUOTE-SECTION element from Org to Texinfo.
@@ -1414,7 +1374,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		(org-element-property :value quote-section))))
     (when value (format "@verbatim\n%s@end verbatim" value))))
 
-;;; Radio Target
+;;;; Radio Target
 
 (defun org-texinfo-radio-target (radio-target text info)
   "Transcode a RADIO-TARGET object from Org to Texinfo.
@@ -1425,7 +1385,7 @@ contextual information."
 	   (org-element-property :value radio-target))
 	  text))
 
-;;; Section
+;;;; Section
 
 (defun org-texinfo-section (section contents info)
   "Transcode a SECTION element from Org to Texinfo.
@@ -1433,7 +1393,7 @@ CONTENTS holds the contents of the section.  INFO is a plist
 holding contextual information."
   contents)
 
-;;; Special Block
+;;;; Special Block
 
 (defun org-texinfo-special-block (special-block contents info)
   "Transcode a SPECIAL-BLOCK element from Org to Texinfo.
@@ -1441,7 +1401,7 @@ CONTENTS holds the contents of the block.  INFO is a plist used
 as a communication channel."
   contents)
 
-;;; Src Block
+;;;; Src Block
 
 (defun org-texinfo-src-block (src-block contents info)
   "Transcode a SRC-BLOCK element from Org to Texinfo.
@@ -1461,14 +1421,14 @@ contextual information."
       (format "@example\n%s@end example"
 	      src-contents)))))
 
-;;; Statistics Cookie
+;;;; Statistics Cookie
 
 (defun org-texinfo-statistics-cookie (statistics-cookie contents info)
   "Transcode a STATISTICS-COOKIE object from Org to Texinfo.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (org-element-property :value statistics-cookie))
 
-;;; Subscript
+;;;; Subscript
 
 (defun org-texinfo-subscript (subscript contents info)
   "Transcode a SUBSCRIPT object from Org to Texinfo.
@@ -1476,7 +1436,7 @@ CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
   (format "@math{_%s}" contents))
 
-;;; Superscript
+;;;; Superscript
 
 (defun org-texinfo-superscript (superscript contents info)
   "Transcode a SUPERSCRIPT object from Org to Texinfo.
@@ -1484,7 +1444,7 @@ CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
   (format "@math{^%s}" contents))
 
-;;; Table
+;;;; Table
 
 (defun org-texinfo-table (table contents info)
   "Transcode a TABLE element from Org to Texinfo.
@@ -1524,7 +1484,7 @@ a communication channel."
       info)
     (format "{%s}" (mapconcat (lambda (w) (make-string w ?a)) widths "} {"))))
 
-;;; Table Cell
+;;;; Table Cell
 
 (defun org-texinfo-table-cell (table-cell contents info)
   "Transcode a TABLE-CELL element from Org to Texinfo.
@@ -1541,7 +1501,7 @@ a communication channel."
 	    contents)
 	  (when (org-export-get-next-element table-cell info) "\n@tab ")))
 
-;;; Table Row
+;;;; Table Row
 
 (defun org-texinfo-table-row (table-row contents info)
   "Transcode a TABLE-ROW element from Org to Texinfo.
@@ -1558,7 +1518,7 @@ a communication channel."
 	     "@item ")))
       (concat rowgroup-tag contents "\n"))))
 
-;;; Target
+;;;; Target
 
 (defun org-texinfo-target (target contents info)
   "Transcode a TARGET object from Org to Texinfo.
@@ -1567,7 +1527,7 @@ information."
   (format "@anchor{%s}"
 	  (org-export-solidify-link-text (org-element-property :value target))))
 
-;;; Timestamp
+;;;; Timestamp
 
 (defun org-texinfo-timestamp (timestamp contents info)
   "Transcode a TIMESTAMP object from Org to Texinfo.
@@ -1582,7 +1542,7 @@ information."
        (format org-texinfo-inactive-timestamp-format value))
       (t (format org-texinfo-diary-timestamp-format value)))))
 
-;;; Verbatim
+;;;; Verbatim
 
 (defun org-texinfo-verbatim (verbatim contents info)
   "Transcode a VERBATIM object from Org to Texinfo.
@@ -1590,7 +1550,7 @@ CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (org-texinfo--text-markup (org-element-property :value verbatim) 'verbatim))
 
-;;; Verse Block
+;;;; Verse Block
 
 (defun org-texinfo-verse-block (verse-block contents info)
   "Transcode a VERSE-BLOCK element from Org to Texinfo.
