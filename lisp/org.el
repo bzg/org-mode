@@ -19177,13 +19177,13 @@ boundaries."
 			     (when paragraph
 			       (save-excursion
 				 (goto-char (org-element-property :begin paragraph))
-				 (when (save-match-data
-					 (re-search-forward
-					  "^[ \t]*#\\+attr_.*?: +.*?:width +\\(\\S-+\\)"
-					  (org-element-property
-					   :post-affiliated paragraph)
-					  t))
-				   (string-to-number (match-string 1))))))
+				   (when
+				       (re-search-forward
+					"^[ \t]*#\\+attr_.*?: +.*?:width +\\(\\S-+\\)"
+					(org-element-property
+					 :post-affiliated paragraph)
+					t)
+				     (string-to-number (match-string 1))))))
 			   ;; Otherwise, fall-back to provided number.
 			   (car org-image-actual-width)))
 			 ((numberp org-image-actual-width)
@@ -19193,11 +19193,10 @@ boundaries."
 			     'org-image-overlay)))
 		   (if (and (car-safe old) refresh)
 		       (image-refresh (overlay-get (cdr old) 'display))
-		     (let ((image (save-match-data
-				    (create-image file
+		     (let ((image (create-image file
 						  (and width 'imagemagick)
 						  nil
-						  :width width))))
+						  :width width)))
 		       (when image
 			 (let* ((link
 				 ;; If inline image is the description
