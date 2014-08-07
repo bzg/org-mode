@@ -365,7 +365,7 @@ last statement in BODY, as elisp."
 (defvar ess-eval-visibly-p)
 
 (defun org-babel-R-evaluate-session
-  (session body result-type result-params column-names-p row-names-p)
+    (session body result-type result-params column-names-p row-names-p)
   "Evaluate BODY in SESSION.
 If RESULT-TYPE equals 'output then return standard output as a
 string.  If RESULT-TYPE equals 'value then return the value of the
@@ -395,23 +395,20 @@ last statement in BODY, as elisp."
 	  (org-babel-import-elisp-from-file tmp-file '(16)))
 	column-names-p)))
     (output
-     (mapconcat
-      'org-babel-chomp
-      (butlast
-       (delq nil
-	     (mapcar
-	      (lambda (line) (when (> (length line) 0) line))
-	      (mapcar
-	       (lambda (line) ;; cleanup extra prompts left in output
-		 (if (string-match
-		      "^\\([ ]*[>+\\.][ ]?\\)+\\([[0-9]+\\|[ ]\\)" line)
-		     (substring line (match-end 1))
-		   line))
-	       (org-babel-comint-with-output (session org-babel-R-eoe-output)
-		 (insert (mapconcat 'org-babel-chomp
-				    (list body org-babel-R-eoe-indicator)
-				    "\n"))
-		 (inferior-ess-send-input)))))) "\n"))))
+     (let* ((output-file (org-babel-temp-file "R-"))
+	    (sentinel-file (concat output-file "-sentinel")))
+       (org-babel-comint-eval-invisibly-and-wait-for-file
+	session sentinel-file
+	(format "capture.output({%s}, file=%S); file.create(%S)"
+		(org-babel-chomp body)
+		output-file
+		sentinel-file))
+       (with-temp-buffer
+	 (insert-file-contents output-file)
+	 (goto-char (point-min))
+	 (flush-lines "^$")
+	 (delete-trailing-whitespace)
+	 (buffer-string))))))
 
 (defun org-babel-R-process-value-result (result column-names-p)
   "R-specific processing of return value.
