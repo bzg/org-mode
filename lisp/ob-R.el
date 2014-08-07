@@ -242,7 +242,7 @@ This function is called by `org-babel-execute-src-block'."
 		    name file header row-names max))))
     (cond ((integerp value) (format "%s <- %s" name (concat (number-to-string value) "L")))
 	  ((floatp   value) (format "%s <- %s" name value))
-	  ((stringp  value) (format "%s <- %S" name value))
+	  ((stringp  value) (format "%s <- %S" name (org-no-properties value)))
 	  (t                (format "%s <- %S" name (prin1-to-string value))))))
 
 
