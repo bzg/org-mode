@@ -1768,7 +1768,9 @@ Assume point is at comment block beginning."
   "Interpret COMMENT-BLOCK element as Org syntax.
 CONTENTS is nil."
   (format "#+BEGIN_COMMENT\n%s#+END_COMMENT"
-	  (org-remove-indentation (org-element-property :value comment-block))))
+	  (org-element-normalize-string
+	   (org-remove-indentation
+	    (org-element-property :value comment-block)))))
 
 
 ;;;; Diary Sexp
@@ -1891,11 +1893,12 @@ CONTENTS is nil."
   (let ((switches (org-element-property :switches example-block))
 	(value (org-element-property :value example-block)))
     (concat "#+BEGIN_EXAMPLE" (and switches (concat " " switches)) "\n"
-	    (org-escape-code-in-string
-	     (if (or org-src-preserve-indentation
-		     (org-element-property :preserve-indent example-block))
-		 value
-	       (org-element-remove-indentation value)))
+	    (org-element-normalize-string
+	     (org-escape-code-in-string
+	      (if (or org-src-preserve-indentation
+		      (org-element-property :preserve-indent example-block))
+		  value
+		(org-element-remove-indentation value))))
 	    "#+END_EXAMPLE")))
 
 
@@ -2390,7 +2393,7 @@ CONTENTS is nil."
 		    (concat (and lang (concat " " lang))
 			    (and switches (concat " " switches))
 			    (and params (concat " " params))))
-	    (org-escape-code-in-string value)
+	    (org-element-normalize-string (org-escape-code-in-string value))
 	    "#+END_SRC")))
 
 

@@ -2372,7 +2372,12 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))))
   "Test comment block interpreter."
   (should (equal (org-test-parse-and-interpret
 		  "#+BEGIN_COMMENT\nTest\n#+END_COMMENT")
-		 "#+BEGIN_COMMENT\nTest\n#+END_COMMENT\n")))
+		 "#+BEGIN_COMMENT\nTest\n#+END_COMMENT\n"))
+  ;; Accept missing final newline in value.
+  (should
+   (equal
+    "#+BEGIN_COMMENT\nTest\n#+END_COMMENT\n"
+    (org-element-interpret-data '(comment-block (:value "Test"))))))
 
 (ert-deftest test-org-element/diary-sexp ()
   "Test diary-sexp interpreter."
@@ -2397,7 +2402,12 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))))
   (should
    (equal (org-test-parse-and-interpret
 	   "#+BEGIN_EXAMPLE\n,* Headline\n ,#+keyword\nText #+END_EXAMPLE")
-	  "#+BEGIN_EXAMPLE\n,* Headline\n ,#+keyword\nText #+END_EXAMPLE\n")))
+	  "#+BEGIN_EXAMPLE\n,* Headline\n ,#+keyword\nText #+END_EXAMPLE\n"))
+  ;; Accept missing final newline in value.
+  (should
+   (equal
+    "#+BEGIN_EXAMPLE\nTest\n#+END_EXAMPLE\n"
+    (org-element-interpret-data '(example-block (:value "Test"))))))
 
 (ert-deftest test-org-element/fixed-width-interpreter ()
   "Test fixed width interpreter."
@@ -2493,7 +2503,14 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
 		(org-src-preserve-indentation nil))
 	    (org-test-parse-and-interpret
 	     "#+BEGIN_SRC emacs-lisp -i\n(+ 1 1)\n#+END_SRC"))
-	  "#+BEGIN_SRC emacs-lisp -i\n(+ 1 1)\n#+END_SRC\n")))
+	  "#+BEGIN_SRC emacs-lisp -i\n(+ 1 1)\n#+END_SRC\n"))
+  ;; Accept missing final newline in value.
+  (should
+   (equal
+    "#+BEGIN_SRC emacs-lisp\n  Test\n#+END_SRC\n"
+    (let ((org-edit-src-content-indentation 2))
+      (org-element-interpret-data
+       '(src-block (:language "emacs-lisp" :value "Test")))))))
 
 (ert-deftest test-org-element/table-interpreter ()
   "Test table, table-row and table-cell interpreters."
