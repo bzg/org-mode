@@ -268,6 +268,7 @@ requirements) is loaded."
 		 (const :tag "Ditaa" ditaa)
 		 (const :tag "Dot" dot)
 		 (const :tag "Emacs Lisp" emacs-lisp)
+		 (const :tag "Forth" forth)
 		 (const :tag "Fortran" fortran)
 		 (const :tag "Gnuplot" gnuplot)
 		 (const :tag "Haskell" haskell)
