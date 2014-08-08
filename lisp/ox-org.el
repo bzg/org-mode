@@ -135,19 +135,11 @@ CONTENTS is its contents, as a string or nil.  INFO is ignored."
 
 (defun org-org-keyword (keyword contents info)
   "Transcode KEYWORD element back into Org syntax.
-CONTENTS is nil.  INFO is ignored.  This function ignores
-keywords targeted at other export back-ends."
+CONTENTS is nil.  INFO is ignored."
   (let ((key (org-element-property :key keyword)))
-    (unless (or (member key
-			(mapcar
-			 (lambda (block-cons)
-			   (and (eq (cdr block-cons)
-				    'org-element-export-block-parser)
-				(car block-cons)))
-			 org-element-block-name-alist))
-		(member key
-			'("AUTHOR" "CREATOR" "DATE" "DESCRIPTION" "EMAIL"
-			  "KEYWORDS" "OPTIONS" "TITLE")))
+    (unless (member key
+		    '("AUTHOR" "CREATOR" "DATE" "DESCRIPTION" "EMAIL" "KEYWORDS"
+		      "OPTIONS" "TITLE"))
       (org-element-keyword-interpreter keyword nil))))
 
 (defun org-org-template (contents info)
