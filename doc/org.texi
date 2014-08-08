@@ -12016,8 +12016,8 @@ that one (@pxref{Export settings}).
 
 @c begin opendocument
 
-@node OpenDocument text export
-@section OpenDocument text export
+@node OpenDocument Text export
+@section OpenDocument Text export
 @cindex ODT
 @cindex OpenDocument
 @cindex export, OpenDocument
@@ -12951,10 +12951,7 @@ Export to a temporary buffer.  Do not create a file.
 Export to an Org file, then open it.
 @end table
 
-<<<<<<< HEAD
-@node iCalendar export
-=======
-@node Texinfo export, iCalendar export, Org export, Exporting
+@node Texinfo export
 @section Texinfo export
 @cindex Texinfo export
 
@@ -12971,7 +12968,7 @@ an Info file.
 * An example::
 @end menu
 
-@node Texinfo export commands, Document preamble, Texinfo export, Texinfo export
+@node Texinfo export commands
 @subsection Texinfo export commands
 
 @vindex org-texinfo-info-process
@@ -12986,7 +12983,7 @@ Export to Texinfo and then process to an Info file@footnote{By setting
 including DocBook}.
 @end table
 
-@node Document preamble, Headings and sectioning structure, Texinfo export commands, Texinfo export
+@node Document preamble
 @subsection Document preamble
 
 When processing a document, @samp{texinfo} back-end generates a minimal file
@@ -13076,7 +13073,7 @@ using @code{#+TEXINFO_DIR_DESC}.
 #+TEXINFO_DIR_DESC: Outline-based notes management and organizer
 @end example
 
-@node Headings and sectioning structure, Indices, Document preamble, Texinfo export
+@node Headings and sectioning structure
 @subsection Headings and sectioning structure
 
 @vindex org-texinfo-classes
@@ -13099,7 +13096,7 @@ Texinfo output.
 As an exception, a headline with a non-nil @code{:APPENDIX:} property becomes
 an appendix, independently on its level and the class used.
 
-@node Indices, Quoting Texinfo code, Headings and sectioning structure, Texinfo export
+@node Indices
 @subsection Indices
 
 @cindex #+CINDEX
@@ -13131,7 +13128,7 @@ the index is inserted after its contents.
   :END:
 @end example
 
-@node Quoting Texinfo code, Texinfo specific attributes, Indices, Texinfo export
+@node Quoting Texinfo code
 @subsection Quoting Texinfo code
 
 It is possible to insert raw Texinfo code using any of the following
@@ -13151,7 +13148,7 @@ This paragraph is preceded by...
 #+END_TEXINFO
 @end example
 
-@node Texinfo specific attributes, An example, Quoting Texinfo code, Texinfo export
+@node Texinfo specific attributes
 @subsection Texinfo specific attributes
 
 @cindex #+ATTR_TEXINFO
@@ -13188,7 +13185,7 @@ length using @code{:columns} attribute.
 | a cell | another cell |
 @end example
 
-@node An example,  , Texinfo specific attributes, Texinfo export
+@node An example
 @subsection An example
 
 Here is a thorough example, taken from @inforef{GNU Sample Texts,,texinfo}.
@@ -13255,8 +13252,7 @@ Here is a thorough example, taken from @inforef{GNU Sample Texts,,texinfo}.
   :END:
 @end smallexample
 
-@node iCalendar export, Other built-in back-ends, Texinfo export, Exporting
->>>>>>> maint
+@node iCalendar export
 @section iCalendar export
 @cindex iCalendar export
 
@@ -13336,15 +13332,9 @@ On top of the aforementioned back-ends, Org comes with other built-in ones:
 @item @file{ox-man.el}: export to a man page.
 @end itemize
 
-<<<<<<< HEAD
-To activate these export back-ends, customize @code{org-export-backends} or
-load them directly with e.g., @code{(require 'ox-texinfo)}.  This will add
-new keys in the export dispatcher (@pxref{The export dispatcher}).
-=======
 To activate these export back-end, customize @code{org-export-backends} or
 load them directly with e.g., @code{(require 'ox-man)}.  This will add new
-keys in the export dispatcher (@pxref{The Export Dispatcher}).
->>>>>>> maint
+keys in the export dispatcher (@pxref{The export dispatcher}).
 
 See the comment section of these files for more information on how to use
 them.
