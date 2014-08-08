@@ -12988,7 +12988,7 @@ including DocBook.}.
 
 When processing a document, @samp{texinfo} back-end generates a minimal file
 header along with a title page, a copyright page, and a menu.  You control
-the latter through the structure of the document (@pxref{Heading and
+the latter through the structure of the document (@pxref{Headings and
 sectioning structure}).  Various keywords allow to tweak the other parts.  It
 is also possible to give directions to install the document in the @samp{Top}
 node.
@@ -13139,7 +13139,7 @@ constructs
 @cindex #+TEXINFO
 @cindex #+BEGIN_TEXINFO
 @example
-Richard @@@@texinfo:@@sc@{@@@@Stallman@@@@@texinfo:}@@@@ commence' GNU.
+Richard @@@@texinfo:@@sc@{@@@@Stallman@@@@texinfo:@}@@@@ commence' GNU.
 
 #+TEXINFO: @@need800
 This paragraph is preceded by...
