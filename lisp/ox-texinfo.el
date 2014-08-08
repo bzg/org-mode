@@ -915,16 +915,13 @@ holding contextual information."
 	 (level (org-export-get-relative-level headline info))
 	 (numberedp (org-export-numbered-headline-p headline info))
 	 (class-sectioning (assoc class org-texinfo-classes))
-	 ;; Find the index type, if any
+	 ;; Find the index type, if any.
 	 (index (org-element-property :INDEX headline))
-	 ;; Retrieve headline text
-	 (text (org-texinfo--sanitize-headline
-		(org-element-property :title headline) info))
 	 ;; Create node info, to insert it before section formatting.
-	 ;; Use custom menu title if present
+	 ;; Use custom menu title if present.
 	 (node (format "@node %s\n" (org-texinfo--get-node headline info)))
 	 ;; Menus must be generated with first child, otherwise they
-	 ;; will not nest properly
+	 ;; will not nest properly.
 	 (menu (let* ((first (org-export-first-sibling-p headline info))
 		      (parent (org-export-get-parent-headline headline))
 		      (title (org-texinfo--sanitize-headline
@@ -975,33 +972,33 @@ holding contextual information."
 		    (org-export-get-tags headline info)))
 	 (priority (and (plist-get info :with-priority)
 			(org-element-property :priority headline)))
+	 ;; Retrieve headline text for structuring command.
+	 (text (org-export-data (org-element-property :title headline) info))
 	 ;; Create the headline text along with a no-tag version.  The
 	 ;; latter is required to remove tags from table of contents.
-	 (full-text (org-texinfo--sanitize-content
-		     (if (not (eq org-texinfo-format-headline-function 'ignore))
-			 ;; User-defined formatting function.
-			 (funcall org-texinfo-format-headline-function
-				  todo todo-type priority text tags)
-		       ;; Default formatting.
-		       (concat
-			(when todo
-			  (format "@strong{%s} " todo))
-			(when priority (format "@emph{#%s} " priority))
-			text
-			(when tags
-			  (format " :%s:"
-				  (mapconcat 'identity tags ":")))))))
+	 (full-text (if (not (eq org-texinfo-format-headline-function 'ignore))
+			;; User-defined formatting function.
+			(funcall org-texinfo-format-headline-function
+				 todo todo-type priority text tags)
+		      ;; Default formatting.
+		      (concat
+		       (when todo
+			 (format "@strong{%s} " todo))
+		       (when priority (format "@emph{#%s} " priority))
+		       text
+		       (when tags
+			 (format " :%s:"
+				 (mapconcat 'identity tags ":"))))))
 	 (full-text-no-tag
-	  (org-texinfo--sanitize-content
-	   (if (not (eq org-texinfo-format-headline-function 'ignore))
-	       ;; User-defined formatting function.
-	       (funcall org-texinfo-format-headline-function
-			todo todo-type priority text nil)
-	     ;; Default formatting.
-	     (concat
-	      (when todo (format "@strong{%s} " todo))
-	      (when priority (format "@emph{#%c} " priority))
-	      text))))
+	  (if (not (eq org-texinfo-format-headline-function 'ignore))
+	      ;; User-defined formatting function.
+	      (funcall org-texinfo-format-headline-function
+		       todo todo-type priority text nil)
+	    ;; Default formatting.
+	    (concat
+	     (when todo (format "@strong{%s} " todo))
+	     (when priority (format "@emph{#%c} " priority))
+	     text)))
 	 (pre-blanks
 	  (make-string (org-element-property :pre-blank headline) 10)))
     (cond
