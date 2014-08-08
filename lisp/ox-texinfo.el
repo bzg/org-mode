@@ -571,7 +571,7 @@ contextual information."
     (lambda (head)
       (and (= (org-export-get-relative-level head info) level)
 	   ;; Do not take note of footnotes or copying headlines.
-	   (not (org-element-property :COPYING head))
+	   (not (org-not-nil (org-element-property :COPYING head)))
 	   (not (org-element-property :footnote-section-p head))
 	   ;; Collect headline.
 	   head))
@@ -1009,7 +1009,7 @@ holding contextual information."
      ((org-element-property :footnote-section-p headline) nil)
      ;; Case 2: This is the `copying' section: ignore it
      ;;         This is used elsewhere.
-     ((org-element-property :COPYING headline) nil)
+     ((org-not-nil (org-element-property :COPYING headline)) nil)
      ;; Case 3: An index.  If it matches one of the known indexes,
      ;;         print it as such following the contents, otherwise
      ;;         print the contents and leave the index up to the user.
