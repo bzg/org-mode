@@ -12871,13 +12871,13 @@ an Info file.
 @vindex org-texinfo-info-process
 @table @kbd
 @orgcmd{C-c C-e i t,org-texinfo-export-to-texinfo}
-Export as a text file written in Markdown syntax.  For an Org file,
-@file{myfile.org}, the resulting file will be @file{myfile.texi}.  The file
-will be overwritten without warning.
+Export as a Textinfo file.  For an Org file, @file{myfile.org}, the resulting
+file will be @file{myfile.texi}.  The file will be overwritten without
+warning.
 @orgcmd{C-c C-e m M,org-texinfo-export-to-info}
 Export to Texinfo and then process to an Info file@footnote{By setting
 @code{org-texinfo-info-process}, it is possible to generate other formats,
-including DocBook}.
+including DocBook.}.
 @end table
 
 @node Document preamble, Headings and sectioning structure, Texinfo export commands, Texinfo export
@@ -12885,9 +12885,10 @@ including DocBook}.
 
 When processing a document, @samp{texinfo} back-end generates a minimal file
 header along with a title page, a copyright page, and a menu.  You control
-the latter through the structure of the document.  Various keywords allow to
-tweak the other parts.  It is also possible to give directions to install the
-document in the @samp{Top} node.
+the latter through the structure of the document (@pxref{Heading and
+sectioning structure}).  Various keywords allow to tweak the other parts.  It
+is also possible to give directions to install the document in the @samp{Top}
+node.
 
 @subsubheading File header
 
@@ -12895,7 +12896,7 @@ document in the @samp{Top} node.
 Upon creating the header of a Texinfo file, the back-end guesses a name for
 the Info file to be compiled.  This may not be a sensible choice, e.g., if
 you want to produce the final document in a different directory.  Specify an
-alternate path with @code{#+TEXINFO_FILENAME} keyword to override this
+alternate path with @code{#+TEXINFO_FILENAME} keyword to override the default
 destination.
 
 @vindex org-texinfo-coding-system
@@ -12919,9 +12920,9 @@ to define your own class in @code{org-texinfo-classes}, which see.  Set
 The default template includes a title page for hard copy output.  The title
 and author displayed on this page are extracted from, respectively,
 @code{#+TITLE} and @code{#+AUTHOR} keywords (@pxref{Export settings}).  It is
-also possible to a different, more specific, title with
-@code{#+TEXINFO_PRINTED_TITLE} keyword, and subtitles with @code{#+SUBTITLE}
-keywords.  Both expect raw Texinfo code in their value.
+also possible to print a different, more specific, title with
+@code{#+TEXINFO_PRINTED_TITLE} keyword, and add subtitles with
+@code{#+SUBTITLE} keyword.  Both expect raw Texinfo code in their value.
 
 @cindex #+SUBAUTHOR
 Likewise, information brought by @code{#+AUTHOR} may not be enough.  You can
@@ -12962,7 +12963,8 @@ You may ultimately want to install your new Info file to your system.  You
 can write an appropriate entry in the top level directory specifying its
 category and title with, respectively, @code{#+TEXINFO_DIR_CATEGORY} and
 @code{#+TEXINFO_DIR_TITLE}.  Optionally, you can add a short description
-using @code{#+TEXINFO_DIR_DESC}.
+using @code{#+TEXINFO_DIR_DESC}.  The following example would write an entry
+similar to Org's in the @samp{Top} node.
 
 @example
 #+TEXINFO_DIR_CATEGORY: Emacs
@@ -12977,13 +12979,13 @@ using @code{#+TEXINFO_DIR_DESC}.
 @vindex org-texinfo-default-class
 @cindex #+TEXINFO_CLASS
 @samp{texinfo} uses a pre-defined scheme, or class, to convert headlines into
-Texinfo structuring commands.  For example, a top level headline becomes
-@code{@@chapter} if it should be numbered or @code{@@unnumbered} otherwise.
-If you need to use a different set of commands, e.g., beginning with
-@code{@@part} command, install a new class in @var{org-texinfo-classes}, then
-activate it with @code{#+TEXINFO_CLASS} keyword.  Export process defaults to
-@var{org-texinfo-default-class} if no such keyword is present in the
-document.
+Texinfo structuring commands.  For example, a top level headline appears as
+@code{@@chapter} if it should be numbered or as @code{@@unnumbered}
+otherwise.  If you need to use a different set of commands, e.g., to start
+with @code{@@part} instead of @code{@@chapter}, install a new class in
+@code{org-texinfo-classes}, then activate it with @code{#+TEXINFO_CLASS}
+keyword.  Export process defaults to @code{org-texinfo-default-class} when
+there is no such keyword in the document.
 
 If a headline's level has no associated structuring command, or is below
 a certain threshold @pxref{Export settings}, that headline becomes a list in
@@ -13034,7 +13036,7 @@ constructs
 @cindex #+TEXINFO
 @cindex #+BEGIN_TEXINFO
 @example
-Richard @@@@texinfo:@@sc@{@@@@Stallman@@@@@}@@@@ commence' GNU.
+Richard @@@@texinfo:@@sc@{@@@@Stallman@@@@@texinfo:}@@@@ commence' GNU.
 
 #+TEXINFO: @@need800
 This paragraph is preceded by...
@@ -13055,16 +13057,17 @@ written just above the list or table.
 
 @subsubheading Plain lists
 
-@samp{texinfo} back-ends uses two-column tables to export descriptions lists.
-The default command is @code{@@table}.  You can use @code{@@ftable} or
+In Texinfo output, description lists appear as two-column tables, using the
+default command @code{@@table}.  You can use @code{@@ftable} or
 @code{@@vtable}@footnote{For more information, please refer to
-@inforef{Two-colum Tables,,texinfo}.} instead with @code{:table-type}
+@inforef{Two-column Tables,,texinfo}.} instead with @code{:table-type}
 attribute.
 
 @vindex org-texinfo-def-table-markup
-In any case, these constructs require an highlighting command for the
-entries.  You can provide one with @code{:indic} attribute.  If you do not,
-@samp{texinfo} defaults to the value in @var{org-texinfo-def-table-markup}.
+In any case, these constructs require a highlighting command for entries in
+the list.  You can provide one with @code{:indic} attribute.  If you do not,
+it defaults to the value stored in @code{org-texinfo-def-table-markup}, which
+see.
 
 @example
 #+ATTR_TEXINFO: :indic @@asis
@@ -13074,8 +13077,8 @@ entries.  You can provide one with @code{:indic} attribute.  If you do not,
 @subsubheading Tables
 
 When exporting a table, column widths are deduced from the longest cell in
-the column.  You can also define them explicitly as fractions of the line
-length using @code{:columns} attribute.
+each column.  You can also define them explicitly as fractions of the line
+length, using @code{:columns} attribute.
 
 @example
 #+ATTR_TEXINFO: :columns .5 .5
