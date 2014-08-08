@@ -837,9 +837,9 @@
 		    (point)))))))
 
 (ert-deftest test-org-list/to-texinfo ()
-  "Test `org-list-to-latex' specifications."
+  "Test `org-list-to-texinfo' specifications."
   (should
-   (equal "@itemize\n@item \na\n\n@end itemize"
+   (equal "@itemize\n@item\na\n@end itemize"
 	  (with-temp-buffer
 	    (insert "@c BEGIN RECEIVE ORGLST name
 @c END RECEIVE ORGLST name
