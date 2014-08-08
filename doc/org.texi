@@ -12871,7 +12871,7 @@ an Info file.
 @vindex org-texinfo-info-process
 @table @kbd
 @orgcmd{C-c C-e i t,org-texinfo-export-to-texinfo}
-Export as a Textinfo file.  For an Org file, @file{myfile.org}, the resulting
+Export as a Texinfo file.  For an Org file, @file{myfile.org}, the resulting
 file will be @file{myfile.texi}.  The file will be overwritten without
 warning.
 @orgcmd{C-c C-e m M,org-texinfo-export-to-info}
