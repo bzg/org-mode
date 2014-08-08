@@ -1083,10 +1083,10 @@ contextual information."
   "Transcode an ITEM element from Org to Texinfo.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let* ((tag (org-element-property :tag item))
-	 (desc (org-export-data tag info)))
-    (concat "\n@item " (if tag desc) "\n"
-	    (and contents (org-trim contents)) "\n")))
+  (format "@item%s\n%s"
+	  (let ((tag (org-element-property :tag item)))
+	    (if tag (concat " " (org-export-data tag info)) ""))
+	  (or contents "")))
 
 ;;;; Keyword
 
