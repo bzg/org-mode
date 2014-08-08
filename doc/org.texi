@@ -14471,16 +14471,15 @@ option @code{org-babel-no-eval-on-ctrl-c-ctrl-c} can be used to remove code
 evaluation from the @kbd{C-c C-c} key binding.}.  This will call the
 @code{org-babel-execute-src-block} function to evaluate the block and insert
 its results into the Org mode buffer.
-@cindex #+CALL
 
+@cindex #+CALL
 It is also possible to evaluate named code blocks from anywhere in an Org
 mode buffer or an Org mode table.  These named code blocks can be located in
-the current Org mode buffer or in the ``Library of Babel'' (see @ref{Library
-of Babel}).  Named code blocks can be evaluated with a separate
-@code{#+CALL:} line or inline within a block of text. In both cases
-the result is wrapped according to the value of
-@var{org-babel-inline-result-wrap}, which by default is @code{"=%s="} for
-markup that produces verbatim text.
+the current Org mode buffer or in the ``Library of Babel'' (@pxref{Library of
+Babel}).  Named code blocks can be evaluated with a separate @code{#+CALL:}
+line or inline within a block of text.  In both cases the result is wrapped
+according to the value of @code{org-babel-inline-result-wrap}, which by
+default is @code{"=%s="} for markup that produces verbatim text.
 
 The syntax of the @code{#+CALL:} line is
 
