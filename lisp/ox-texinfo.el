@@ -946,7 +946,7 @@ holding contextual information."
 	 ;; title and the other for the contents.
 	 (section-fmt
 	  (if (org-not-nil (org-element-property :APPENDIX headline))
-	      (concat menu node "appendix\n%s")
+	      (concat menu node "@appendix %s\n%s")
 	    (let ((sec (if (and (symbolp (nth 2 class-sectioning))
 				(fboundp (nth 2 class-sectioning)))
 			   (funcall (nth 2 class-sectioning) level numberedp)
