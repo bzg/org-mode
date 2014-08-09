@@ -413,11 +413,14 @@ BACK-END is the symbol specifying back-end used for export. INFO
 is a plist used as a communication channel.
 
 Make sure every headline in TREE contains a section, since those
-are required to install a menu.
+are required to install a menu.  Also put exactly one blank line
+at the beginning and the end of each section.
 
 Return new tree."
   (org-element-map tree 'headline
     (lambda (hl)
+      (org-element-put-property hl :pre-blank 1)
+      (org-element-put-property hl :post-blank 1)
       (let ((contents (org-element-contents hl)))
 	(when contents
 	  (let ((first (org-element-map contents '(headline section)
@@ -858,7 +861,7 @@ holding contextual information."
      (index
       (format
        section-fmt full-text
-       (concat pre-blanks contents "\n"
+       (concat pre-blanks contents (and (org-string-nw-p contents) "\n")
 	       (if (member index '("cp" "fn" "ky" "pg" "tp" "vr"))
 		   (concat "@printindex " index)))))
      ;; Case 4: This is a deep sub-tree: export it as a list item.
