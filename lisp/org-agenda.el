@@ -8475,8 +8475,8 @@ If this information is not given, the function uses the tree at point."
 (defun org-agenda-refile (&optional goto rfloc no-update)
   "Refile the item at point.
 
-When GOTO is 0 or '(64), clear the refile cache.
-When GOTO is '(16), go to the location of the last refiled item.
+When GOTO is 0 or '(64) or \\[universal-argument] \\[universal-argument] \\[universal-argument], clear the refile cache.
+When GOTO is '(16) or \\[universal-argument] \\[universal-argument], go to the location of the last refiled item.
 RFLOC can be a refile location obtained in a different way.
 When NO-UPDATE is non-nil, don't redo the agenda buffer."
   (interactive "P")
