@@ -519,19 +519,16 @@ retrieved."
 ;;;; Menu sanitizing
 
 (defun org-texinfo--sanitize-menu (title)
-  "Remove invalid characters from TITLE for use in menus and
-nodes.
-
-Based on Texinfo specifications, the following must be removed:
-@ { } ( ) : . ,"
+  "Remove invalid characters for use in menus and nodes.
+TITLE is the menu entry to sanitize, as a string.  The following
+must be removed: @ { } ( ) : . ,"
   (replace-regexp-in-string "[@{}():,.]" "" title))
 
 ;;;; Content sanitizing
 
 (defun org-texinfo--sanitize-content (text)
-  "Ensure characters are properly escaped when used in headlines or blocks.
-
-Escape characters are: @ { }"
+  "Escape special characters in string TEXT.
+Special characters are: @ { }"
   (replace-regexp-in-string "\\\([@{}]\\\)" "@\\1" text))
 
 ;;; Template
