@@ -439,18 +439,6 @@ This is used to choose a separator for constructs like \\verb."
 	  when (not (string-match (regexp-quote (char-to-string c)) s))
 	  return (char-to-string c))))
 
-(defun org-texinfo--make-option-string (options)
-  "Return a comma separated string of keywords and values.
-OPTIONS is an alist where the key is the options keyword as
-a string, and the value a list containing the keyword value, or
-nil."
-  (mapconcat (lambda (pair)
-	       (concat (first pair)
-		       (when (> (length (second pair)) 0)
-			 (concat "=" (second pair)))))
-	     options
-	     ","))
-
 (defun org-texinfo--text-markup (text markup)
   "Format TEXT depending on MARKUP text markup.
 See `org-texinfo-text-markup-alist' for details."
@@ -491,33 +479,6 @@ guarantees the node name is unique."
 	  (while (rassoc name cache) (setq name (concat name "x")))
 	  (plist-put info :texinfo-node-cache (cons (cons headline name) cache))
 	  name))))
-
-;;;; Headline sanitizing
-
-(defun org-texinfo--sanitize-headline (headline info)
-  "Remove all formatting from the text of a headline for use in
-  node and menu listing."
-  (mapconcat 'identity
-	     (org-texinfo--sanitize-headline-contents headline info) " "))
-
-(defun org-texinfo--sanitize-headline-contents (headline info)
-  "Retrieve the content of the headline.
-
-Any content that can contain further formatting is checked
-recursively, to ensure that nested content is also properly
-retrieved."
-  (loop for contents in headline append
-	(cond
-	 ;; already a string
-	 ((stringp contents)
-	  (list (replace-regexp-in-string " $" "" contents)))
-	 ;; Is exported as-is (value)
-	 ((org-element-map contents '(verbatim code)
-	    (lambda (value) (org-element-property :value value)) info))
-	 ;; Has content and recurse into the content
-	 ((org-element-contents contents)
-	  (org-texinfo--sanitize-headline-contents
-	   (org-element-contents contents) info)))))
 
 ;;;; Menu sanitizing
 
