@@ -480,14 +480,17 @@ See `org-texinfo-text-markup-alist' for details."
 
 (defun org-texinfo--get-node (headline info)
   "Return node entry associated to HEADLINE.
-INFO is a plist used as a communication channel."
-  (let ((menu-title (org-export-get-alt-title headline info)))
-    (org-texinfo--sanitize-menu
-     (replace-regexp-in-string
-      "%" "%%"
-      (if menu-title (org-export-data menu-title info)
-	(org-texinfo--sanitize-headline
-	 (org-element-property :title headline) info))))))
+INFO is a plist used as a communication channel.  The function
+guarantees the node name is unique."
+  (let ((cache (plist-get info :texinfo-node-cache)))
+    (or (cdr (assq headline cache))
+	(let ((name (org-texinfo--sanitize-node
+		     (org-export-data
+		      (org-export-get-alt-title headline info) info))))
+	  ;; Ensure NAME is unique.
+	  (while (rassoc name cache) (setq name (concat name "x")))
+	  (plist-put info :texinfo-node-cache (cons (cons headline name) cache))
+	  name))))
 
 ;;;; Headline sanitizing
 
@@ -518,11 +521,17 @@ retrieved."
 
 ;;;; Menu sanitizing
 
-(defun org-texinfo--sanitize-menu (title)
-  "Remove invalid characters for use in menus and nodes.
-TITLE is the menu entry to sanitize, as a string.  The following
-must be removed: @ { } ( ) : . ,"
-  (replace-regexp-in-string "[@{}():,.]" "" title))
+(defun org-texinfo--sanitize-node (title)
+  "Bend string TITLE to node line requirements.
+Trim string and collapse multiple whitespace characters as they
+are not significant.  Also remove the following characters: @
+{ } ( ) : . ,"
+  (org-trim
+   (replace-regexp-in-string
+    "[:,.]" ""
+    (replace-regexp-in-string
+     "\\`(\\(.*)\\)" "[\\1"
+     (replace-regexp-in-string "[ \t]\\{2,\\}" " " title)))))
 
 ;;;; Content sanitizing
 
@@ -792,7 +801,7 @@ holding contextual information."
 	 ;; title and the other for the contents.
 	 (section-fmt
 	  (if (org-not-nil (org-element-property :APPENDIX headline))
-	      (concat node "@appendix %s\n%s")
+	      "@appendix %s\n%s"
 	    (let ((sec (if (and (symbolp (nth 2 class-sectioning))
 				(fboundp (nth 2 class-sectioning)))
 			   (funcall (nth 2 class-sectioning) level numberedp)
@@ -804,9 +813,7 @@ holding contextual information."
 	       ((stringp sec) sec)
 	       ;; (numbered-section . unnumbered-section)
 	       ((not (consp (cdr sec)))
-		(concat node
-			;; An index is always unnumbered.
-			(if (or index (not numberedp)) (cdr sec) (car sec))
+		(concat (if (or index (not numberedp)) (cdr sec) (car sec))
 			"\n%s"))))))
 	 (todo
 	  (and (plist-get info :with-todo-keywords)
@@ -856,11 +863,13 @@ holding contextual information."
      ;;         print it as such following the contents, otherwise
      ;;         print the contents and leave the index up to the user.
      (index
-      (format
-       section-fmt full-text
-       (concat pre-blanks contents (and (org-string-nw-p contents) "\n")
-	       (if (member index '("cp" "fn" "ky" "pg" "tp" "vr"))
-		   (concat "@printindex " index)))))
+      (concat node
+	      (format
+	       section-fmt
+	       full-text
+	       (concat pre-blanks contents (and (org-string-nw-p contents) "\n")
+		       (if (member index '("cp" "fn" "ky" "pg" "tp" "vr"))
+			   (concat "@printindex " index))))))
      ;; Case 4: This is a deep sub-tree: export it as a list item.
      ;;         Also export as items headlines for which no section
      ;;         format has been found.
@@ -883,32 +892,34 @@ holding contextual information."
 	   low-level-body))))
      ;; Case 5: Standard headline.  Export it as a section.
      (t
-      (cond
-       ((not (and tags (eq (plist-get info :with-tags) 'not-in-toc)))
-	;; Regular section.  Use specified format string.
-	(format (replace-regexp-in-string "%]" "%%]" section-fmt) full-text
-		(concat pre-blanks contents)))
-       ((string-match "\\`@\\(.*?\\){" section-fmt)
-	;; If tags should be removed from table of contents, insert
-	;; title without tags as an alternative heading in sectioning
-	;; command.
-	(format (replace-match (concat (match-string 1 section-fmt) "[%s]")
-			       nil nil section-fmt 1)
-		;; Replace square brackets with parenthesis since
-		;; square brackets are not supported in optional
-		;; arguments.
-		(replace-regexp-in-string
-		 "\\[" "("
+      (concat
+       node
+       (cond
+	((not (and tags (eq (plist-get info :with-tags) 'not-in-toc)))
+	 ;; Regular section.  Use specified format string.
+	 (format (replace-regexp-in-string "%]" "%%]" section-fmt) full-text
+		 (concat pre-blanks contents)))
+	((string-match "\\`@\\(.*?\\){" section-fmt)
+	 ;; If tags should be removed from table of contents, insert
+	 ;; title without tags as an alternative heading in sectioning
+	 ;; command.
+	 (format (replace-match (concat (match-string 1 section-fmt) "[%s]")
+				nil nil section-fmt 1)
+		 ;; Replace square brackets with parenthesis since
+		 ;; square brackets are not supported in optional
+		 ;; arguments.
 		 (replace-regexp-in-string
-		  "\\]" ")"
-		  full-text-no-tag))
-		full-text
-		(concat pre-blanks contents)))
-       (t
-	;; Impossible to add an alternative heading.  Fallback to
-	;; regular sectioning format string.
-	(format (replace-regexp-in-string "%]" "%%]" section-fmt) full-text
-		(concat pre-blanks contents))))))))
+		  "\\[" "("
+		  (replace-regexp-in-string
+		   "\\]" ")"
+		   full-text-no-tag))
+		 full-text
+		 (concat pre-blanks contents)))
+	(t
+	 ;; Impossible to add an alternative heading.  Fallback to
+	 ;; regular sectioning format string.
+	 (format (replace-regexp-in-string "%]" "%%]" section-fmt) full-text
+		 (concat pre-blanks contents)))))))))
 
 ;;;; Inline Src Block
 
