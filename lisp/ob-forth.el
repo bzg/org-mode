@@ -50,7 +50,7 @@ This function is called by `org-babel-execute-src-block'"
 (defun org-babel-forth-session-execute (body params)
   (require 'forth-mode)
   (let ((proc (forth-proc))
-	(forth-rx (concat " " (regexp-opt (list "ok" "compiled")) "\n"))
+	(rx " \\(\n:\\|compiled\n\\\|ok\n\\)")
 	(result-start))
     (with-current-buffer (process-buffer (forth-proc))
       (mapcar (lambda (line)
@@ -59,11 +59,21 @@ This function is called by `org-babel-execute-src-block'"
 		(comint-send-string proc (concat line "\n"))
 		;; wait for forth to say "ok"
 		(while (not (progn (goto-char result-start)
-				   (re-search-forward forth-rx nil t)))
+				   (re-search-forward rx nil t)))
 		  (accept-process-output proc 0.01))
-		(unless (string= "compiled" (match-string 1))
-		  (buffer-substring (+ result-start 1 (length line))
-				    (match-beginning 0))))
+		(let ((case (match-string 1)))
+		  (cond
+		   ((string= "ok\n" case)
+		    ;; Collect intermediate output.
+		    (buffer-substring (+ result-start 1 (length line))
+				      (match-beginning 0)))
+		   ((string= "compiled\n" case))
+		   ;; Ignore partial compilation.
+		   ((string= "\n:" case)
+		    ;; Report errors.
+		    (org-babel-eval-error-notify 1
+		     (buffer-substring
+		      (+ (match-beginning 0) 1) (point-max))) nil))))
 	      (split-string (org-babel-trim
 			     (org-babel-expand-body:generic
 			      body params))
