@@ -763,9 +763,8 @@ holding contextual information."
 	 (priority (and (plist-get info :with-priority)
 			(org-element-property :priority headline)))
 	 (text (org-export-data (org-element-property :title headline) info))
-	 (full-text (org-texinfo--sanitize-content
-		     (funcall (plist-get info :texinfo-format-headline-function)
-			      todo todo-type priority text tags)))
+	 (full-text (funcall (plist-get info :texinfo-format-headline-function)
+			     todo todo-type priority text tags))
 	 (pre-blanks
 	  (make-string (org-element-property :pre-blank headline) ?\n)))
     (cond
