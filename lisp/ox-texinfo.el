@@ -802,16 +802,6 @@ holding contextual information."
 		       (when tags
 			 (format " :%s:"
 				 (mapconcat 'identity tags ":"))))))
-	 (full-text-no-tag
-	  (if (not (eq org-texinfo-format-headline-function 'ignore))
-	      ;; User-defined formatting function.
-	      (funcall org-texinfo-format-headline-function
-		       todo todo-type priority text nil)
-	    ;; Default formatting.
-	    (concat
-	     (when todo (format "@strong{%s} " todo))
-	     (when priority (format "@emph{#%c} " priority))
-	     text)))
 	 (pre-blanks
 	  (make-string (org-element-property :pre-blank headline) ?\n)))
     (cond
@@ -853,13 +843,8 @@ holding contextual information."
 	   low-level-body))))
      ;; Case 5: Standard headline.  Export it as a section.
      (t
-      (concat
-       node
-       (format section-fmt
-	       (if (eq (plist-get info :with-tags) 'not-in-toc) full-text-no-tag
-		 full-text))
-       pre-blanks
-       contents)))))
+      (concat node
+	      (format section-fmt full-text (concat pre-blanks contents)))))))
 
 ;;;; Inline Src Block
 
