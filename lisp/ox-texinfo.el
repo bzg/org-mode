@@ -357,12 +357,11 @@ in order to mimic default behavior:
 
 ;;;; Compilation
 
-(defcustom org-texinfo-info-process
-  '("makeinfo %f")
+(defcustom org-texinfo-info-process '("makeinfo %f")
   "Commands to process a Texinfo file to an INFO file.
 This is list of strings, each of them will be given to the shell
 as a command.  %f in the command will be replaced by the full
-file name, %b by the file base name \(i.e without extension) and
+file name, %b by the file base name (i.e without extension) and
 %o by the base directory of the file."
   :group 'org-export-texinfo
   :type '(repeat :tag "Shell command sequence"
@@ -1557,29 +1556,21 @@ Return INFO file name or an error if it couldn't be produced."
 	 errors)
     (message (format "Processing Texinfo file %s..." file))
     (save-window-excursion
-      (cond
-       ;; A function is provided: Apply it.
-       ((functionp org-texinfo-info-process)
-	(funcall org-texinfo-info-process (shell-quote-argument file)))
-       ;; A list is provided: Replace %b, %f and %o with appropriate
-       ;; values in each command before applying it.  Output is
-       ;; redirected to "*Org INFO Texinfo Output*" buffer.
-       ((consp org-texinfo-info-process)
-	(let ((outbuf (get-buffer-create "*Org INFO Texinfo Output*")))
-	  (mapc
-	   (lambda (command)
-	     (shell-command
-	      (replace-regexp-in-string
-	       "%b" (shell-quote-argument base-name)
-	       (replace-regexp-in-string
-		"%f" (shell-quote-argument full-name)
-		(replace-regexp-in-string
-		 "%o" (shell-quote-argument out-dir) command t t) t t) t t)
-	      outbuf))
-	   org-texinfo-info-process)
-	  ;; Collect standard errors from output buffer.
-	  (setq errors (org-texinfo-collect-errors outbuf))))
-       (t (error "No valid command to process to Info")))
+      ;; Replace %b, %f and %o with appropriate values in each command
+      ;; before applying it.  Output is redirected to "*Org INFO
+      ;; Texinfo Output*" buffer.
+      (let ((outbuf (get-buffer-create "*Org INFO Texinfo Output*")))
+	(dolist (command org-texinfo-info-process)
+	  (shell-command
+	   (replace-regexp-in-string
+	    "%b" (shell-quote-argument base-name)
+	    (replace-regexp-in-string
+	     "%f" (shell-quote-argument full-name)
+	     (replace-regexp-in-string
+	      "%o" (shell-quote-argument out-dir) command t t) t t) t t)
+	   outbuf))
+	;; Collect standard errors from output buffer.
+	(setq errors (org-texinfo-collect-errors outbuf)))
       (let ((infofile (concat out-dir base-name ".info")))
 	;; Check for process failure.  Provide collected errors if
 	;; possible.
