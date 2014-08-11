@@ -387,9 +387,10 @@ set `org-texinfo-logfiles-extensions'."
 ;;; Constants
 
 (defconst org-texinfo-max-toc-depth 4
-  "Maximum depth for creation of detailed menu listings.  Beyond
-  this depth Texinfo will not recognize the nodes and will cause
-  errors.  Left as a constant in case this value ever changes.")
+  "Maximum depth for creation of detailed menu listings.
+Beyond this depth, Texinfo will not recognize the nodes and will
+cause errors.  Left as a constant in case this value ever
+changes.")
 
 (defconst org-texinfo-supported-coding-systems
   '("US-ASCII" "UTF-8" "ISO-8859-15" "ISO-8859-1" "ISO-8859-2" "koi8-r" "koi8-u")
