@@ -472,12 +472,11 @@ guarantees the node name is unique."
 Trim string and collapse multiple whitespace characters as they
 are not significant.  Also remove the following characters: @
 { } ( ) : . ,"
-  (org-trim
+  (replace-regexp-in-string
+   "[:,.]" ""
    (replace-regexp-in-string
-    "[:,.]" ""
-    (replace-regexp-in-string
-     "\\`(\\(.*)\\)" "[\\1"
-     (replace-regexp-in-string "[ \t]\\{2,\\}" " " title)))))
+    "\\`(\\(.*)\\)" "[\\1"
+    (org-trim (replace-regexp-in-string "[ \t]\\{2,\\}" " " title)))))
 
 ;;;; Content sanitizing
 
