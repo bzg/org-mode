@@ -762,10 +762,7 @@ holding contextual information."
 		    (org-export-get-tags headline info)))
 	 (priority (and (plist-get info :with-priority)
 			(org-element-property :priority headline)))
-	 ;; Retrieve headline text for structuring command.
 	 (text (org-export-data (org-element-property :title headline) info))
-	 ;; Create the headline text along with a no-tag version.  The
-	 ;; latter is required to remove tags from table of contents.
 	 (full-text (org-texinfo--sanitize-content
 		     (funcall (plist-get info :texinfo-format-headline-function)
 			      todo todo-type priority text tags)))
