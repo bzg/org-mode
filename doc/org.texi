@@ -12995,6 +12995,12 @@ Texinfo output.
 As an exception, a headline with a non-nil @code{:APPENDIX:} property becomes
 an appendix, independently on its level and the class used.
 
+@cindex property, DESCRIPTION
+Each regular sectioning structure creates a menu entry, named after the
+heading.  You can provide a different, e.g., shorter, title in
+@code{:ALT_TITLE:} property (@pxref{Table of contents}).  Optionally, you can
+specify a description for the item in @code{:DESCRIPTION:} property.
+
 @node Indices, Quoting Texinfo code, Headings and sectioning structure, Texinfo export
 @subsection Indices
 
