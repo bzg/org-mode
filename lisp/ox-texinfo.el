@@ -813,7 +813,7 @@ holding contextual information."
 	     (when priority (format "@emph{#%c} " priority))
 	     text)))
 	 (pre-blanks
-	  (make-string (org-element-property :pre-blank headline) 10)))
+	  (make-string (org-element-property :pre-blank headline) ?\n)))
     (cond
      ;; Case 1: This is a footnote section: ignore it.
      ((org-element-property :footnote-section-p headline) nil)
@@ -855,32 +855,11 @@ holding contextual information."
      (t
       (concat
        node
-       (cond
-	((not (and tags (eq (plist-get info :with-tags) 'not-in-toc)))
-	 ;; Regular section.  Use specified format string.
-	 (format (replace-regexp-in-string "%]" "%%]" section-fmt) full-text
-		 (concat pre-blanks contents)))
-	((string-match "\\`@\\(.*?\\){" section-fmt)
-	 ;; If tags should be removed from table of contents, insert
-	 ;; title without tags as an alternative heading in sectioning
-	 ;; command.
-	 (format (replace-match (concat (match-string 1 section-fmt) "[%s]")
-				nil nil section-fmt 1)
-		 ;; Replace square brackets with parenthesis since
-		 ;; square brackets are not supported in optional
-		 ;; arguments.
-		 (replace-regexp-in-string
-		  "\\[" "("
-		  (replace-regexp-in-string
-		   "\\]" ")"
-		   full-text-no-tag))
-		 full-text
-		 (concat pre-blanks contents)))
-	(t
-	 ;; Impossible to add an alternative heading.  Fallback to
-	 ;; regular sectioning format string.
-	 (format (replace-regexp-in-string "%]" "%%]" section-fmt) full-text
-		 (concat pre-blanks contents)))))))))
+       (format section-fmt
+	       (if (eq (plist-get info :with-tags) 'not-in-toc) full-text-no-tag
+		 full-text))
+       pre-blanks
+       contents)))))
 
 ;;;; Inline Src Block
 
