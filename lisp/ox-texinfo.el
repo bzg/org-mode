@@ -398,20 +398,20 @@ is a plist used as a communication channel.
 
 Make sure every headline in TREE contains a section, since those
 are required to install a menu.  Also put exactly one blank line
-at the beginning and the end of each section.
+at the end of each section.
 
 Return new tree."
   (org-element-map tree 'headline
     (lambda (hl)
-      (org-element-put-property hl :pre-blank 1)
       (org-element-put-property hl :post-blank 1)
       (let ((contents (org-element-contents hl)))
 	(when contents
 	  (let ((first (org-element-map contents '(headline section)
 			 #'identity info t)))
 	    (unless (eq (org-element-type first) 'section)
-	      (org-element-set-contents
-	       hl (cons `(section (:parent ,hl)) contents)))))))
+	      (apply #'org-element-set-contents
+		     hl
+		     (cons `(section (:parent ,hl)) contents)))))))
     info)
   tree)
 
@@ -764,8 +764,7 @@ holding contextual information."
 	 (text (org-export-data (org-element-property :title headline) info))
 	 (full-text (funcall (plist-get info :texinfo-format-headline-function)
 			     todo todo-type priority text tags))
-	 (pre-blanks
-	  (make-string (org-element-property :pre-blank headline) ?\n)))
+	 (contents (if (org-string-nw-p contents) (concat "\n" contents) "")))
     (cond
      ;; Case 1: This is a footnote section: ignore it.
      ((org-element-property :footnote-section-p headline) nil)
@@ -780,33 +779,23 @@ holding contextual information."
 	      (format
 	       section-fmt
 	       full-text
-	       (concat pre-blanks contents (and (org-string-nw-p contents) "\n")
-		       (if (member index '("cp" "fn" "ky" "pg" "tp" "vr"))
-			   (concat "@printindex " index))))))
+	       (concat contents
+		       (and (member index '("cp" "fn" "ky" "pg" "tp" "vr"))
+			    (concat "\n@printindex " index))))))
      ;; Case 4: This is a deep sub-tree: export it as a list item.
      ;;         Also export as items headlines for which no section
      ;;         format has been found.
      ((or (not section-fmt) (org-export-low-level-p headline info))
       ;; Build the real contents of the sub-tree.
-      (let ((low-level-body
-	     (concat
-	      ;; If the headline is the first sibling, start a list.
-	      (when (org-export-first-sibling-p headline info)
-		(format "@%s\n" (if numberedp 'enumerate 'itemize)))
-	      ;; Itemize headline
-	      "@item\n" full-text "\n" pre-blanks contents)))
-	;; If headline is not the last sibling simply return
-	;; LOW-LEVEL-BODY.  Otherwise, also close the list, before any
-	;; blank line.
-	(if (not (org-export-last-sibling-p headline info)) low-level-body
-	  (replace-regexp-in-string
-	   "[ \t\n]*\\'"
-	   (format "\n@end %s" (if numberedp 'enumerate 'itemize))
-	   low-level-body))))
+      (concat (and (org-export-first-sibling-p headline info)
+		   (format "@%s\n" (if numberedp 'enumerate 'itemize)))
+	      "@item\n" full-text "\n"
+	      contents
+	      (if (org-export-last-sibling-p headline info)
+		  (format "@end %s" (if numberedp 'enumerate 'itemize))
+		"\n")))
      ;; Case 5: Standard headline.  Export it as a section.
-     (t
-      (concat node
-	      (format section-fmt full-text (concat pre-blanks contents)))))))
+     (t (concat node (format section-fmt full-text contents))))))
 
 (defun org-texinfo-format-headline-default-function
   (todo todo-type priority text tags)
@@ -1229,19 +1218,11 @@ as a communication channel."
   "Transcode a SRC-BLOCK element from Org to Texinfo.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let* ((lang (org-element-property :language src-block))
-	 (lisp-p (string-match-p "lisp" lang))
-	 (src-contents (org-texinfo--sanitize-content
-		   (org-export-format-code-default src-block info))))
-    (cond
-     ;; Case 1.  Lisp Block
-     (lisp-p
-      (format "@lisp\n%s@end lisp"
-	      src-contents))
-     ;; Case 2.  Other blocks
-     (t
-      (format "@example\n%s@end example"
-	      src-contents)))))
+  (let ((lispp (org-string-match-p "lisp"
+				   (org-element-property :language src-block)))
+	(code (org-texinfo--sanitize-content
+	       (org-export-format-code-default src-block info))))
+    (format (if lispp "@lisp\n%s@end lisp" "@example\n%s@end example") code)))
 
 ;;;; Statistics Cookie
 
