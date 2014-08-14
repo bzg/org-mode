@@ -425,8 +425,9 @@ Return new tree."
 	  (let ((first (org-element-map contents '(headline section)
 			 #'identity info t)))
 	    (unless (eq (org-element-type first) 'section)
-	      (org-element-set-contents
-	       hl (cons `(section (:parent ,hl)) contents)))))))
+	      (apply #'org-element-set-contents
+		     hl
+		     (cons `(section (:parent ,hl)) contents)))))))
     info)
   tree)
 
