@@ -34,6 +34,8 @@
 ;;; Code:
 (require 'ob)
 
+(declare-function forth-proc "ext:gforth" ())
+
 (defvar org-babel-default-header-args:forth '((:session . "yes"))
   "Default header arguments for forth code blocks.")
 
