@@ -4492,29 +4492,29 @@ indentation is not done with TAB characters."
   (let* ((min-ind most-positive-fixnum)
 	 find-min-ind			; For byte-compiler.
 	 (find-min-ind
-	  (function
-	   ;; Return minimal common indentation within BLOB.  This is
-	   ;; done by walking recursively BLOB and updating MIN-IND
-	   ;; along the way.  FIRST-FLAG is non-nil when the first
-	   ;; string hasn't been seen yet.  It is required as this
-	   ;; string is the only one whose indentation doesn't happen
-	   ;; after a newline character.
-	   (lambda (blob first-flag)
-	     (dolist (object (org-element-contents blob))
-	       (when (and first-flag (stringp object))
-		 (setq first-flag nil)
-		 (string-match "\\`\\( *\\)" object)
-		 (let ((len (length (match-string 1 object))))
-		   ;; An indentation of zero means no string will be
-		   ;; modified.  Quit the process.
-		   (if (zerop len) (throw 'zero (setq min-ind 0))
-		     (setq min-ind (min len min-ind)))))
-	       (cond
-		((stringp object)
-		 (dolist (line (delq "" (cdr (org-split-string object " *\n"))))
-		   (setq min-ind (min (org-get-indentation line) min-ind))))
-		((memq (org-element-type object) org-element-recursive-objects)
-		 (funcall find-min-ind object first-flag))))))))
+	  ;; Return minimal common indentation within BLOB.  This is
+	  ;; done by walking recursively BLOB and updating MIN-IND
+	  ;; along the way.  FIRST-FLAG is non-nil when the first
+	  ;; string hasn't been seen yet.  It is required as this
+	  ;; string is the only one whose indentation doesn't happen
+	  ;; after a newline character.
+	  (lambda (blob first-flag)
+	    (dolist (object (org-element-contents blob))
+	      (when (and first-flag (stringp object))
+		(setq first-flag nil)
+		(string-match "\\` *" object)
+		(let ((len (match-end 0)))
+		  ;; An indentation of zero means no string will be
+		  ;; modified.  Quit the process.
+		  (if (zerop len) (throw 'zero (setq min-ind 0))
+		    (setq min-ind (min len min-ind)))))
+	      (cond
+	       ((stringp object)
+		(dolist (line (cdr (org-split-string object " *\n")))
+		  (unless (string= line "")
+		    (setq min-ind (min (org-get-indentation line) min-ind)))))
+	       ((memq (org-element-type object) org-element-recursive-objects)
+		(funcall find-min-ind object first-flag)))))))
     ;; Find minimal indentation in ELEMENT.
     (catch 'zero (funcall find-min-ind element (not ignore-first)))
     (if (or (zerop min-ind) (= min-ind most-positive-fixnum)) element

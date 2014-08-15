@@ -2957,6 +2957,11 @@ Text
     '(paragraph nil " Two spaces\n" (verbatim nil "V") "\n Two spaces")
     (org-element-normalize-contents
      '(paragraph nil "  Two spaces\n " (verbatim nil "V") "\n  Two spaces"))))
+  (should
+   (equal
+    '(verse-block nil "line 1\n\nline 2")
+    (org-element-normalize-contents
+     '(verse-block nil "  line 1\n\n  line 2"))))
   ;; Recursively enter objects in order to compute common indentation.
   (should
    (equal
