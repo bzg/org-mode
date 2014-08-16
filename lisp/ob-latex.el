@@ -135,13 +135,18 @@ This function is called by `org-babel-execute-src-block'."
 	     ((string-match "\\.pdf$" out-file)
 	      (rename-file transient-pdf-file out-file))
 	     (imagemagick
-	      (convert-pdf
+	      (org-babel-latex-convert-pdf
 	       transient-pdf-file out-file im-in-options im-out-options)
 	      (when (file-exists-p transient-pdf-file)
 		(delete-file transient-pdf-file))))))
 	 ((and (or (string-match "\\.svg$" out-file)
 		   (string-match "\\.html$" out-file))
 	       (not (string= "" org-babel-latex-htlatex)))
+	  ;; TODO: this is a very different way of generating the
+	  ;; frame latex document than in the pdf case.  Ideally, both
+	  ;; would be unified.  This would prevent bugs creeping in
+	  ;; such as the one fixed on Aug 16 2014 whereby :headers was
+	  ;; not included in the SVG/HTML case.
 	  (with-temp-file tex-file
 	    (insert (concat
 		     "\\documentclass[preview]{standalone}
@@ -151,6 +156,12 @@ This function is called by `org-babel-execute-src-block'."
 				  (concat "\\usepackage" pkg))
 				org-babel-latex-htlatex-packages
 				"\n")
+		     (if headers
+			 (concat "\n"
+				 (if (listp headers)
+				     (mapconcat #'identity headers "\n")
+				   headers) "\n")
+		       "")
 		     "\\begin{document}"
 		     body
 		     "\\end{document}")))
@@ -179,7 +190,7 @@ This function is called by `org-babel-execute-src-block'."
         nil) ;; signal that output has already been written to file
     body))
 
-(defun convert-pdf (pdffile out-file im-in-options im-out-options)
+(defun org-babel-latex-convert-pdf (pdffile out-file im-in-options im-out-options)
   "Generate a file from a pdf file using imagemagick."
   (let ((cmd (concat "convert " im-in-options " " pdffile " "
 		     im-out-options " " out-file)))
