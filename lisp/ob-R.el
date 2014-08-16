@@ -252,7 +252,8 @@ This function is called by `org-babel-execute-src-block'."
   (unless (string= session "none")
     (let ((session (or session "*R*"))
 	  (ess-ask-for-ess-directory
-	   (and (and (boundp 'ess-ask-for-ess-directory) ess-ask-for-ess-directory)
+	   (and (boundp 'ess-ask-for-ess-directory)
+		ess-ask-for-ess-directory
 		(not (cdr (assoc :dir params))))))
       (if (org-babel-comint-buffer-livep session)
 	  session
