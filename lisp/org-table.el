@@ -42,7 +42,7 @@
 		  (string backend &optional body-only ext-plist))
 (declare-function aa2u "ext:ascii-art-to-unicode" ())
 (declare-function calc-eval "calc" (str &optional separator &rest args))
-		  
+
 (defvar orgtbl-mode) ; defined below
 (defvar orgtbl-mode-menu) ; defined when orgtbl mode get initialized
 (defvar constants-unit-system)
@@ -2772,7 +2772,7 @@ not overwrite the stored one."
 	    (user-error "Invalid field specifier \"%s\""
 			(match-string 0 form)))
 	  (setq form (replace-match formrpl t t form)))
-	
+
 	(if lispp
 	    (setq ev (condition-case nil
 			 (eval (eval (read form)))
@@ -5057,7 +5057,7 @@ list of the fields in the rectangle."
 		(widen)
 		(goto-char loc)
 		(forward-char 1)
-		(unless (and (re-search-forward "^\\(\\*+ \\)\\|[ \t]*|" nil t)
+		(unless (and (re-search-forward "^\\(\\*+ \\)\\|^[ \t]*|" nil t)
 			     (not (match-beginning 1)))
 		  (user-error "Cannot find a table at NAME or ID %s" name-or-id))
 		(setq tbeg (point-at-bol))
