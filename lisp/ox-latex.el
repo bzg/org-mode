@@ -110,6 +110,7 @@
     ;; Other variables.
     (:latex-active-timestamp-format nil nil org-latex-active-timestamp-format)
     (:latex-classes nil nil org-latex-classes)
+    (:latex-custom-id-labels nil nil org-latex-custom-id-as-label)
     (:latex-default-figure-position nil nil org-latex-default-figure-position)
     (:latex-default-table-environment nil nil org-latex-default-table-environment)
     (:latex-default-table-mode nil nil org-latex-default-table-mode)
