@@ -13822,6 +13822,7 @@ however, override everything.
 
 @multitable {@code{:html-table-use-header-tags-for-first-column}} {@code{org-html-table-use-header-tags-for-first-column}}
 @item @code{:html-allow-name-attribute-in-anchors} @tab @code{org-html-allow-name-attribute-in-anchors}
+@item @code{:html-checkbox-type}              @tab @code{org-html-checkbox-type}
 @item @code{:html-container}                  @tab @code{org-html-container-element}
 @item @code{:html-divs}                       @tab @code{org-html-divs}
 @item @code{:html-doctype}                    @tab @code{org-html-doctype}
@@ -13877,6 +13878,7 @@ however, override everything.
 @item @code{:latex-active-timestamp-format}    @tab @code{org-latex-active-timestamp-format}
 @item @code{:latex-classes}                    @tab @code{org-latex-classes}
 @item @code{:latex-class}                      @tab @code{org-latex-default-class}
+@item @code{:latex-custom-id-labels}           @tab @code{org-latex-custom-id-as-label}
 @item @code{:latex-default-figure-position}    @tab @code{org-latex-default-figure-position}
 @item @code{:latex-default-table-environment}  @tab @code{org-latex-default-table-environment}
 @item @code{:latex-default-table-mode}         @tab @code{org-latex-default-table-mode}
