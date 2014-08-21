@@ -310,57 +310,62 @@ a communication channel."
 		(concat (file-name-sans-extension raw-path) ".md")
 	      raw-path))))
 	(type (org-element-property :type link)))
-    (cond ((member type '("custom-id" "id"))
-	   (let ((destination (org-export-resolve-id-link link info)))
-	     (if (stringp destination)	; External file.
-		 (let ((path (funcall link-org-files-as-md destination)))
-		   (if (not contents) (format "<%s>" path)
-		     (format "[%s](%s)" contents path)))
-	       (concat
-		(and contents (concat contents " "))
-		(format "(%s)"
-			(format (org-export-translate "See section %s" :html info)
-				(mapconcat 'number-to-string
-					   (org-export-get-headline-number
-					    destination info)
-					   ".")))))))
-	  ((org-export-inline-image-p link org-html-inline-image-rules)
-	   (let ((path (let ((raw-path (org-element-property :path link)))
-			 (if (not (file-name-absolute-p raw-path)) raw-path
-			   (expand-file-name raw-path))))
-		 (caption (org-export-data
-			   (org-export-get-caption
-			    (org-export-get-parent-element link)) info)))
-	     (format "![img](%s)"
-		     (if (not (org-string-nw-p caption)) path
-		       (format "%s \"%s\"" path caption)))))
-	  ((string= type "coderef")
-	   (let ((ref (org-element-property :path link)))
-	     (format (org-export-get-coderef-format ref contents)
-		     (org-export-resolve-coderef ref info))))
-	  ((equal type "radio") contents)
-	  ((equal type "fuzzy")
-	   (let ((destination (org-export-resolve-fuzzy-link link info)))
-	     (if (org-string-nw-p contents) contents
-	       (when destination
-		 (let ((number (org-export-get-ordinal destination info)))
-		   (when number
-		     (if (atom number) (number-to-string number)
-		       (mapconcat 'number-to-string number "."))))))))
-	  (t (let* ((raw-path (org-element-property :path link))
-		    (path
-		     (cond
-		      ((member type '("http" "https" "ftp"))
-		       (concat type ":" raw-path))
-		      ((string= type "file")
-		       (let ((path (funcall link-org-files-as-md raw-path)))
-			 (if (not (file-name-absolute-p path)) path
-			   ;; If file path is absolute, prepend it
-			   ;; with "file:" component.
-			   (concat "file:" path))))
-		      (t raw-path))))
-	       (if (not contents) (format "<%s>" path)
-		 (format "[%s](%s)" contents path)))))))
+    (cond
+     ((member type '("custom-id" "id"))
+      (let ((destination (org-export-resolve-id-link link info)))
+	(if (stringp destination)	; External file.
+	    (let ((path (funcall link-org-files-as-md destination)))
+	      (if (not contents) (format "<%s>" path)
+		(format "[%s](%s)" contents path)))
+	  (concat
+	   (and contents (concat contents " "))
+	   (format "(%s)"
+		   (format (org-export-translate "See section %s" :html info)
+			   (mapconcat 'number-to-string
+				      (org-export-get-headline-number
+				       destination info)
+				      ".")))))))
+     ((org-export-inline-image-p link org-html-inline-image-rules)
+      (let ((path (let ((raw-path (org-element-property :path link)))
+		    (if (not (file-name-absolute-p raw-path)) raw-path
+		      (expand-file-name raw-path))))
+	    (caption (org-export-data
+		      (org-export-get-caption
+		       (org-export-get-parent-element link)) info)))
+	(format "![img](%s)"
+		(if (not (org-string-nw-p caption)) path
+		  (format "%s \"%s\"" path caption)))))
+     ((string= type "coderef")
+      (let ((ref (org-element-property :path link)))
+	(format (org-export-get-coderef-format ref contents)
+		(org-export-resolve-coderef ref info))))
+     ((equal type "radio") contents)
+     ((equal type "fuzzy")
+      (let ((destination (org-export-resolve-fuzzy-link link info)))
+	(if (org-string-nw-p contents) contents
+	  (when destination
+	    (let ((number (org-export-get-ordinal destination info)))
+	      (when number
+		(if (atom number) (number-to-string number)
+		  (mapconcat 'number-to-string number "."))))))))
+     ;; Link type is handled by a special function.
+     ((let ((protocol (nth 2 (assoc type org-link-protocols))))
+	(and (functionp protocol)
+	     (funcall protocol (org-link-unescape path) desc 'md))))
+     (t (let* ((raw-path (org-element-property :path link))
+	       (path
+		(cond
+		 ((member type '("http" "https" "ftp"))
+		  (concat type ":" raw-path))
+		 ((string= type "file")
+		  (let ((path (funcall link-org-files-as-md raw-path)))
+		    (if (not (file-name-absolute-p path)) path
+		      ;; If file path is absolute, prepend it
+		      ;; with "file:" component.
+		      (concat "file:" path))))
+		 (t raw-path))))
+	  (if (not contents) (format "<%s>" path)
+	    (format "[%s](%s)" contents path)))))))
 
 
 ;;;; Node Property
