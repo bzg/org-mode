@@ -351,7 +351,10 @@ a communication channel."
      ;; Link type is handled by a special function.
      ((let ((protocol (nth 2 (assoc type org-link-protocols))))
 	(and (functionp protocol)
-	     (funcall protocol (org-link-unescape path) desc 'md))))
+	     (funcall protocol
+		      (org-link-unescape (org-element-property :path link))
+		      contents
+		      'md))))
      (t (let* ((raw-path (org-element-property :path link))
 	       (path
 		(cond
