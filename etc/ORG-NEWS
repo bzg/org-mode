@@ -103,6 +103,10 @@ ASCII export now supports =#+BEGIN_JUSTIFYRIGHT= and
 *** More back-end specific publishing options
 The number of publishing options specific to each back-end has been
 increased.  See manual for details.
+*** Export inline source blocks
+Inline source code was used to be removed upon exporting.  They are
+now handled as standard code blocks, i.e., the source code can appear
+in the output, depending on the parameters.
 ** Miscellaneous
 *** File names in links accept are now compatible with URI syntax
 Absolute file names can now start with =///= in addition to =/=. E.g.,
