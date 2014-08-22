@@ -9488,21 +9488,20 @@ a timestamp can be added there."
   (if org-adapt-indentation (org-indent-to-column 2)))
 
 (defun org-agenda-insert-diary-make-new-entry (text)
-  "Make new entry as last child of current entry.
-Add TEXT as headline, and position the cursor in the second line so that
-a timestamp can be added there."
+  "Make a new entry with TEXT as the first child of the current subtree.
+Position the point in the line right after the new heading so
+that a timestamp can be added there."
   (let ((org-show-following-heading t)
 	(org-show-siblings t)
 	(org-show-hierarchy-above t)
 	(org-show-entry-below t)
-	(has-children (save-excursion (org-goto-first-child)))
 	col)
+    (outline-next-heading)
     (org-back-over-empty-lines)
     (or (looking-at "[ \t]*$")
 	(progn (insert "\n") (backward-char 1)))
-    (org-insert-heading 16 t)
-    (unless has-children
-      (org-do-demote))
+    (org-insert-heading nil t)
+    (org-do-demote)
     (setq col (current-column))
     (insert text "\n")
     (if org-adapt-indentation (org-indent-to-column col))
