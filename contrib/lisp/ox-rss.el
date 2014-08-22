@@ -238,13 +238,12 @@ communication channel."
 		 (concat "sec-" (mapconcat 'number-to-string hl-number "-")))))
 	   (category (org-rss-plain-text
 		      (or (org-element-property :CATEGORY headline) "") info))
-	   (pubdate
-	    (let ((system-time-locale "C"))
-	      (format-time-string
-	       "%a, %d %b %Y %H:%M:%S %z"
-	       (org-time-string-to-time
-		(or (org-element-property :PUBDATE headline)
-		    (error "Missing PUBDATE property"))))))
+	   (pubdate0 (org-element-property :PUBDATE headline))
+	   (pubdate (let ((system-time-locale "C"))
+		      (if pubdate0
+			  (format-time-string
+			   "%a, %d %b %Y %H:%M:%S %z"
+			   (org-time-string-to-time pubdate0)))))
 	   (title (replace-regexp-in-string
 		   org-bracket-link-regexp
 		   (lambda (m) (or (match-string 3 m)
@@ -264,18 +263,19 @@ communication channel."
 			(org-element-property :CUSTOM_ID headline)
 			publink)
 		    info))))
-      (format
-       (concat
-	"<item>\n"
-	"<title>%s</title>\n"
-	"<link>%s</link>\n"
-	"<author>%s</author>\n"
-	"<guid isPermaLink=\"false\">%s</guid>\n"
-	"<pubDate>%s</pubDate>\n"
-	(org-rss-build-categories headline info) "\n"
-	"<description><![CDATA[%s]]></description>\n"
-	"</item>\n")
-       title publink author guid pubdate contents))))
+      (if (not pubdate0) "" ;; Skip entries with no PUBDATE prop
+	(format
+	 (concat
+	  "<item>\n"
+	  "<title>%s</title>\n"
+	  "<link>%s</link>\n"
+	  "<author>%s</author>\n"
+	  "<guid isPermaLink=\"false\">%s</guid>\n"
+	  "<pubDate>%s</pubDate>\n"
+	  (org-rss-build-categories headline info) "\n"
+	  "<description><![CDATA[%s]]></description>\n"
+	  "</item>\n")
+	 title publink author guid pubdate contents)))))
 
 (defun org-rss-build-categories (headline info)
   "Build categories for the RSS item."
