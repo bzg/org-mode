@@ -846,8 +846,7 @@ holding export options."
 		       (org-export-data (plist-get info :email) info))))
        (cond ((and author email (not (string= "" email)))
 	      (format "\\author{%s\\thanks{%s}}\n" author email))
-	     (author (format "\\author{%s}\n" author))
-	     (t "\\author{}\n")))
+	     ((or author email) (format "\\author{%s}\n" (or author email)))))
      ;; 6. Date.
      (let ((date (and (plist-get info :with-date) (org-export-get-date info))))
        (format "\\date{%s}\n" (org-export-data date info)))
