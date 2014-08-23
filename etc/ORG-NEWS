@@ -77,6 +77,13 @@ These functions now support any element or object, not only headlines.
 *** New filter: ~org-export-filter-body-functions~
 Functions in this filter are applied on the body of the exported
 document, befor wrapping it within the template.
+*** Improve radio tables
+Radio tables feature now relies on Org's export framework ("ox.el").
+~:no-escape~ parameter no longer exists, but additional global
+parameters are now supported: ~:raw~, ~:backend~.  Moreover, there are
+new parameters specific to some pre-defined translators, e.g.,
+~:environment~ and ~:booktabs~ for ~orgtbl-to-latex~.  See translators
+docstrings (including ~orgtbl-to-generic~) for details.
 ** Miscellaneous
 *** File names in links accept are now compatible with URI syntax
 Absolute file names can now start with =///= in addition to =/=. E.g.,

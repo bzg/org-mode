@@ -17508,10 +17508,6 @@ calculation marks, that column is automatically discarded as well.
 Please note that the translator function sees the table @emph{after} the
 removal of these columns, the function never knows that there have been
 additional columns.
-
-@item :no-escape t
-When non-@code{nil}, do not escape special characters @code{&%#_^} when exporting
-the table.  The default value is @code{nil}.
 @end table
 
 @noindent
@@ -17619,14 +17615,15 @@ Month & \multicolumn@{1@}@{c@}@{Days@} & Nr.\ sold & per day\\
 @end example
 
 The @LaTeX{} translator function @code{orgtbl-to-latex} is already part of
-Orgtbl mode.  It uses a @code{tabular} environment to typeset the table
-and marks horizontal lines with @code{\hline}.  Furthermore, it
-interprets the following parameters (see also @pxref{Translator functions}):
+Orgtbl mode.  By default, it uses a @code{tabular} environment to typeset the
+table and marks horizontal lines with @code{\hline}.  You can control the
+output through several parameters (see also @pxref{Translator functions}),
+including the following ones :
 
 @table @code
 @item :splice nil/t
-When set to t, return only table body lines, don't wrap them into a
-tabular environment.  Default is @code{nil}.
+When non-nil, return only table body lines, don't wrap them into a tabular
+environment.  Default is @code{nil}.
 
 @item :fmt fmt
 A format to be used to wrap each field, it should contain @code{%s} for the
@@ -17637,14 +17634,14 @@ A function of one argument can be used in place of the strings; the
 function must return a formatted string.
 
 @item :efmt efmt
-Use this format to print numbers with exponentials.  The format should
-have @code{%s} twice for inserting mantissa and exponent, for example
-@code{"%s\\times10^@{%s@}"}.  The default is @code{"%s\\,(%s)"}.  This
-may also be a property list with column numbers and formats, for example
-@code{:efmt (2 "$%s\\times10^@{%s@}$" 4 "$%s\\cdot10^@{%s@}$")}.  After
-@code{efmt} has been applied to a value, @code{fmt} will also be
-applied.  Similar to @code{fmt}, functions of two arguments can be
-supplied instead of strings.
+Use this format to print numbers with exponentials.  The format should have
+@code{%s} twice for inserting mantissa and exponent, for example
+@code{"%s\\times10^@{%s@}"}.  This may also be a property list with column
+numbers and formats, for example @code{:efmt (2 "$%s\\times10^@{%s@}$"
+4 "$%s\\cdot10^@{%s@}$")}.  After @code{efmt} has been applied to a value,
+@code{fmt} will also be applied.  Similar to @code{fmt}, functions of two
+arguments can be supplied instead of strings.  By default, no special
+formatting is applied.
 @end table
 
 @node Translator functions
@@ -17654,54 +17651,36 @@ supplied instead of strings.
 
 Orgtbl mode has several translator functions built-in: @code{orgtbl-to-csv}
 (comma-separated values), @code{orgtbl-to-tsv} (TAB-separated values)
-@code{orgtbl-to-latex}, @code{orgtbl-to-html}, and @code{orgtbl-to-texinfo}.
-Except for @code{orgtbl-to-html}@footnote{The HTML translator uses the same
-code that produces tables during HTML export.}, these all use a generic
-translator, @code{orgtbl-to-generic}.  For example, @code{orgtbl-to-latex}
-itself is a very short function that computes the column definitions for the
-@code{tabular} environment, defines a few field and line separators and then
-hands processing over to the generic translator.  Here is the entire code:
+@code{orgtbl-to-latex}, @code{orgtbl-to-html}, @code{orgtbl-to-texinfo},
+@code{orgtbl-to-unicode} and @code{orgtbl-to-orgtbl}.  These all use
+a generic translator, @code{orgtbl-to-generic}, which, in turn, can delegate
+translations to various export back-ends (@pxref{Export back-ends}).
 
-@lisp
-@group
-(defun orgtbl-to-latex (table params)
-  "Convert the Orgtbl mode TABLE to LaTeX."
-  (let* ((alignment (mapconcat (lambda (x) (if x "r" "l"))
-                               org-table-last-alignment ""))
-         (params2
-          (list
-           :tstart (concat "\\begin@{tabular@}@{" alignment "@}")
-           :tend "\\end@{tabular@}"
-           :lstart "" :lend " \\\\" :sep " & "
-           :efmt "%s\\,(%s)" :hline "\\hline")))
-    (orgtbl-to-generic table (org-combine-plists params2 params))))
-@end group
-@end lisp
-
-As you can see, the properties passed into the function (variable
-@var{PARAMS}) are combined with the ones newly defined in the function
-(variable @var{PARAMS2}).  The ones passed into the function (i.e., the
-ones set by the @samp{ORGTBL SEND} line) take precedence.  So if you
-would like to use the @LaTeX{} translator, but wanted the line endings to
-be @samp{\\[2mm]} instead of the default @samp{\\}, you could just
-overrule the default with
+In particular, properties passed into the function (i.e., the ones set by the
+@samp{ORGTBL SEND} line) take precedence over translations defined in the
+function.  So if you would like to use the @LaTeX{} translator, but wanted
+the line endings to be @samp{\\[2mm]} instead of the default @samp{\\}, you
+could just overrule the default with
 
 @example
 #+ORGTBL: SEND test orgtbl-to-latex :lend " \\\\[2mm]"
 @end example
 
-For a new language, you can either write your own converter function in
-analogy with the @LaTeX{} translator, or you can use the generic function
-directly.  For example, if you have a language where a table is started
-with @samp{!BTBL!}, ended with @samp{!ETBL!}, and where table lines are
-started with @samp{!BL!}, ended with @samp{!EL!}, and where the field
-separator is a TAB, you could call the generic translator like this (on
-a single line!):
+For a new language, you can use the generic function to write your own
+converter function.  For example, if you have a language where a table is
+started with @samp{!BTBL!}, ended with @samp{!ETBL!}, and where table lines
+are started with @samp{!BL!}, ended with @samp{!EL!}, and where the field
+separator is a TAB, you could define your generic translator like this:
 
-@example
-#+ORGTBL: SEND test orgtbl-to-generic :tstart "!BTBL!" :tend "!ETBL!"
-                              :lstart "!BL! " :lend " !EL!" :sep "\t"
-@end example
+@lisp
+(defun orgtbl-to-language (table params)
+  "Convert the orgtbl-mode TABLE to language."
+  (orgtbl-to-generic
+   table
+   (org-combine-plists
+    '(:tstart "!BTBL!" :tend "!ETBL!" :lstart "!BL!" :lend "!EL!" :sep "\t")
+    params)))
+@end lisp
 
 @noindent
 Please check the documentation string of the function
