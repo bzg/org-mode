@@ -4000,6 +4000,7 @@ header, or they will be appended."
     (""     "marvosym"  t)
     (""     "wasysym"   t)
     (""     "amssymb"   t)
+    (""     "capt-of"   nil)
     (""     "hyperref"  nil)
     "\\tolerance=1000")
   "Alist of default packages to be inserted in the header.
@@ -4021,6 +4022,7 @@ Org mode to function properly:
 - textcomp, marvosymb, wasysym, amssymb: for various symbols used
   for interpreting the entities in `org-entities'.  You can skip
   some of these packages if you don't use any of their symbols.
+- capt-of: for captions outside of floats
 - hyperref: for cross references
 
 Therefore you should not modify this variable unless you know

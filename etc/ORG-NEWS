@@ -87,6 +87,9 @@ parameters are now supported: ~:raw~, ~:backend~.  Moreover, there are
 new parameters specific to some pre-defined translators, e.g.,
 ~:environment~ and ~:booktabs~ for ~orgtbl-to-latex~.  See translators
 docstrings (including ~orgtbl-to-generic~) for details.
+*** Non-floating minted listings in Latex export
+It is not possible to specify =#+attr_latex: :float nil= in conjunction with
+source blocks exported by the minted package.
 ** Miscellaneous
 *** File names in links accept are now compatible with URI syntax
 Absolute file names can now start with =///= in addition to =/=. E.g.,
@@ -140,7 +143,7 @@ So you need to replace
 
 : #+HTML_INCLUDE_STYLE: t
 
-by 
+by
 
 : #+OPTIONS: :html-include-style t
 
@@ -194,13 +197,13 @@ of the list.
   now use =amssymb= symbols by default instead.
 
 *** New functions for paragraph motion
-    
+
     The commands =C-down= and =C-up= now invoke special commands
     that use knowledge from the org-elements parser to move the cursor
     in a paragraph-like way.
 
 *** New entities in =org-entities.el=
-    
+
 Add support for ell, imath, jmath, varphi, varpi, aleph, gimel, beth,
 dalet, cdots, S (§), dag, ddag, colon, therefore, because, triangleq,
 leq, geq, lessgtr, lesseqgtr, ll, lll, gg, ggg, prec, preceq,
@@ -308,7 +311,7 @@ instructions:
 - when updating through ELPA (either from GNU ELPA or from Org ELPA),
   you have to install Org's ELPA package in a session where no Org
   function has been called already.
-  
+
 When in doubt, run =M-x org-version RET= and see if you have a mixed-up
 installation.
 
