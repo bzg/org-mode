@@ -2481,7 +2481,7 @@ Assume point is at the beginning of the table."
 
 (defun org-element-table-interpreter (table contents)
   "Interpret TABLE element as Org syntax.
-CONTENTS is nil."
+CONTENTS is a string, if table's type is `org', or nil."
   (if (eq (org-element-property :type table) 'table.el)
       (org-remove-indentation (org-element-property :value table))
     (concat (with-temp-buffer (insert contents)
