@@ -222,7 +222,7 @@ This option can also be set with the OPTIONS keyword, e.g.:
   :type 'boolean)
 
 (defcustom org-koma-letter-subject-format t
-  "Use the title as the subject of the letter.
+  "When non-nil include subject.  Supports formatting options.
 
 When t, insert a subject using default options.  When nil, do not
 insert a subject at all.  It can also be a list of symbols among
@@ -618,7 +618,7 @@ holding export options."
    (org-koma-letter--build-settings 'buffer info)
    ;; From address.
    (let ((from-address (org-koma-letter--determine-to-and-from info 'from)))
-     (when (org-string-nw-p from-address) 
+     (when (org-string-nw-p from-address)
        (format "\\setkomavar{fromaddress}{%s}\n" from-address)))
    ;; Date.
    (format "\\date{%s}\n" (org-export-data (org-export-get-date info) info))
