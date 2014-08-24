@@ -1498,7 +1498,7 @@ the resulting time in inserts it after the time range as @samp{=>
 HH:MM}.
 @item C-c C-x C-e
 Update the effort estimate for the current clock task.
-@item C-c C-x C-x
+@item C-c C-x C-q
 Cancel the current clock.  This is useful if a clock was started by
 mistake, or if you ended up working on something else.
 @item C-c C-x C-j
