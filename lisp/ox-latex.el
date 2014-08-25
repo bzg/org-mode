@@ -400,17 +400,15 @@ Set it to the empty string to ignore the command completely."
   'org-latex-format-headline-default-function
   "Function for formatting the headline's text.
 
-This function will be called with 5 arguments:
-TODO      the todo keyword (string or nil).
+This function will be called with six arguments:
+TODO      the todo keyword (string or nil)
 TODO-TYPE the type of todo (symbol: `todo', `done', nil)
 PRIORITY  the priority of the headline (integer or nil)
-TEXT      the main headline text (string).
-TAGS      the tags as a list of strings (list of strings or nil).
+TEXT      the main headline text (string)
+TAGS      the tags (list of strings or nil)
+INFO      the export options (plist)
 
-The function result will be used in the section format string.
-
-Use `org-latex-format-headline-default-function' by default,
-which format headlines like for Org version prior to 8.0."
+The function result will be used in the section format string."
   :group 'org-export-latex
   :version "24.4"
   :package-version '(Org . "8.0")
@@ -683,17 +681,16 @@ The default function simply returns the value of CONTENTS."
   'org-latex-format-inlinetask-default-function
   "Function called to format an inlinetask in LaTeX code.
 
-The function must accept six parameters:
-  TODO      the todo keyword, as a string
-  TODO-TYPE the todo type, a symbol among `todo', `done' and nil.
-  PRIORITY  the inlinetask priority, as a string
-  NAME      the inlinetask name, as a string.
-  TAGS      the inlinetask tags, as a list of strings.
-  CONTENTS  the contents of the inlinetask, as a string.
+The function must accept seven parameters:
+  TODO      the todo keyword (string or nil)
+  TODO-TYPE the todo type (symbol: `todo', `done', nil)
+  PRIORITY  the inlinetask priority (integer or nil)
+  NAME      the inlinetask name (string)
+  TAGS      the inlinetask tags (list of strings or nil)
+  CONTENTS  the contents of the inlinetask (string or nil)
+  INFO      the export options (plist)
 
-The function should return the string to be exported.
-
-Use `org-latex-format-headline-default-function' by default."
+The function should return the string to be exported."
   :group 'org-export-latex
   :type 'function
   :version "24.5"
@@ -1466,7 +1463,7 @@ holding contextual information."
 	   ;; Create the headline text along with a no-tag version.
 	   ;; The latter is required to remove tags from toc.
 	   (full-text (funcall (plist-get info :latex-format-headline-function)
-			       todo todo-type priority text tags))
+			       todo todo-type priority text tags info))
 	   ;; Associate \label to the headline for internal links.
 	   (headline-label
 	    (let ((custom-label
@@ -1514,7 +1511,8 @@ holding contextual information."
 			(org-export-data-with-backend
 			 (org-export-get-alt-title headline info)
 			 section-back-end info)
-			(and (eq (plist-get info :with-tags) t) tags))))
+			(and (eq (plist-get info :with-tags) t) tags)
+			info)))
 	  (if (and numberedp opt-title
 		   (not (equal opt-title full-text))
 		   (string-match "\\`\\\\\\(.*?[^*]\\){" section-fmt))
@@ -1532,7 +1530,7 @@ holding contextual information."
 		    (concat headline-label pre-blanks contents))))))))
 
 (defun org-latex-format-headline-default-function
-  (todo todo-type priority text tags)
+  (todo todo-type priority text tags info)
   "Default format function for a headline.
 See `org-latex-format-headline-function' for details."
   (concat
@@ -1540,7 +1538,9 @@ See `org-latex-format-headline-function' for details."
    (and priority (format "\\framebox{\\#%c} " priority))
    text
    (and tags
-	(format "\\hfill{}\\textsc{%s}" (mapconcat 'identity tags ":")))))
+	(format "\\hfill{}\\textsc{%s}"
+		(mapconcat (lambda (tag) (org-latex-plain-text tag info))
+			   tags ":")))))
 
 
 ;;;; Horizontal Rule
@@ -1621,18 +1621,21 @@ holding contextual information."
 		     (and label (format "\\label{%s}\n" label)))
 		   contents)))
     (funcall (plist-get info :latex-format-inlinetask-function)
-	     todo todo-type priority title tags contents)))
+	     todo todo-type priority title tags contents info)))
 
 (defun org-latex-format-inlinetask-default-function
-  (todo todo-type priority title tags contents)
+  (todo todo-type priority title tags contents info)
   "Default format function for a inlinetasks.
 See `org-latex-format-inlinetask-function' for details."
   (let ((full-title
 	 (concat (when todo (format "\\textbf{\\textsf{\\textsc{%s}}} " todo))
 		 (when priority (format "\\framebox{\\#%c} " priority))
 		 title
-		 (when tags (format "\\hfill{}\\textsc{:%s:}"
-				    (mapconcat #'identity tags ":"))))))
+		 (when tags
+		   (format "\\hfill{}\\textsc{:%s:}"
+			   (mapconcat
+			    (lambda (tag) (org-latex-plain-text tag info))
+			    tags ":"))))))
     (concat "\\begin{center}\n"
 	    "\\fbox{\n"
 	    "\\begin{minipage}[c]{.6\\textwidth}\n"
