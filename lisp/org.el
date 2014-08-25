@@ -6720,7 +6720,8 @@ in special contexts.
       (setq org-cycle-global-status 'overview)
       (run-hook-with-args 'org-cycle-hook 'overview)))))
 
-(defvar org-called-with-limited-levels);Dyn-bound in ̀org-with-limited-levels'.
+(defvar org-called-with-limited-levels nil
+  "Non-nil when `org-with-limited-levels' is currently active.")
 
 (defun org-cycle-internal-local ()
   "Do the local cycling action."
