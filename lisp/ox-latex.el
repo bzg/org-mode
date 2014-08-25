@@ -2045,47 +2045,35 @@ contextual information."
   "Transcode a TEXT string from Org to LaTeX.
 TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
-  (let ((specialp (plist-get info :with-special-strings))
-	(output text))
-    ;; Protect %, #, &, $, _, { and }.
-    (while (string-match "\\([^\\]\\|^\\)\\([%$#&{}_]\\)" output)
-      (setq output
-	    (replace-match
-	     (format "\\%s" (match-string 2 output)) nil t output 2)))
-    ;; Protect ^.
-    (setq output
-	  (replace-regexp-in-string
-	   "\\([^\\]\\|^\\)\\(\\^\\)" "\\\\^{}" output nil nil 2))
-    ;; Protect \.  If special strings are used, be careful not to
-    ;; protect "\" in "\-" constructs.
-    (let ((symbols (if specialp "-%$#&{}^_\\" "%$#&{}^_\\")))
-      (setq output
+  (let* ((specialp (plist-get info :with-special-strings))
+	 (output
+	  ;; Turn LaTeX into \LaTeX{} and TeX into \TeX{}.
+	  (let ((case-fold-search nil))
 	    (replace-regexp-in-string
-	     (format "\\(?:[^\\]\\|^\\)\\(\\\\\\)\\(?:[^%s]\\|$\\)" symbols)
-	     "$\\backslash$" output nil t 1)))
-    ;; Protect ~.
-    (setq output
-	  (replace-regexp-in-string
-	   "\\([^\\]\\|^\\)\\(~\\)" "\\textasciitilde{}" output nil t 2))
+	     "\\<\\(?:La\\)?TeX\\>" "\\\\\\&{}"
+	     ;; Protect ^, ~, %, #, &, $, _, { and }.  Also protect \.
+	     ;; However, if special strings are used, be careful not
+	     ;; to protect "\" in "\-" constructs.
+	     (replace-regexp-in-string
+	      (concat "[%$#&{}_~^]\\|\\\\" (and specialp "\\(?:[^-]\\|$\\)"))
+	      (lambda (m)
+		(case (aref m 0)
+		  (?\\ "$\\\\backslash$")
+		  (?~ "\\\\textasciitilde{}")
+		  (?^ "\\\\^{}")
+		  (t "\\\\\\&")))
+	      text)))))
     ;; Activate smart quotes.  Be sure to provide original TEXT string
     ;; since OUTPUT may have been modified.
     (when (plist-get info :with-smart-quotes)
       (setq output (org-export-activate-smart-quotes output :latex info text)))
-    ;; LaTeX into \LaTeX{} and TeX into \TeX{}.
-    (let ((case-fold-search nil)
-	  (start 0))
-      (while (string-match "\\<\\(\\(?:La\\)?TeX\\)\\>" output start)
-	(setq output (replace-match
-		      (format "\\%s{}" (match-string 1 output)) nil t output)
-	      start (match-end 0))))
     ;; Convert special strings.
     (when specialp
-      (setq output
-	    (replace-regexp-in-string "\\.\\.\\." "\\ldots{}" output nil t)))
+      (setq output (replace-regexp-in-string "\\.\\.\\." "\\\\ldots{}" output)))
     ;; Handle break preservation if required.
     (when (plist-get info :preserve-breaks)
       (setq output (replace-regexp-in-string
-		    "\\(\\\\\\\\\\)?[ \t]*\n" " \\\\\\\\\n" output)))
+		    "\\(?:[ \t]*\\\\\\\\\\)?[ \t]*\n" "\\\\\n" output nil t)))
     ;; Return value.
     output))
 
@@ -2874,15 +2862,14 @@ information."
   "Transcode a TIMESTAMP object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let ((value (org-latex-plain-text
-		(org-timestamp-translate timestamp) info)))
-    (case (org-element-property :type timestamp)
-      ((active active-range)
-       (format (plist-get info :latex-active-timestamp-format) value))
-      ((inactive inactive-range)
-       (format (plist-get info :latex-inactive-timestamp-format) value))
-      (otherwise
-       (format (plist-get info :latex-diary-timestamp-format) value)))))
+  (let ((value (org-latex-plain-text (org-timestamp-translate timestamp) info)))
+    (format
+     (plist-get info
+		(case (org-element-property :type timestamp)
+		  ((active active-range) :latex-active-timestamp-format)
+		  ((inactive inactive-range) :latex-inactive-timestamp-format)
+		  (otherwise :latex-diary-timestamp-format)))
+     value)))
 
 
 ;;;; Underline
@@ -2916,16 +2903,14 @@ contextual information."
    ;; character and change each white space at beginning of a line
    ;; into a space of 1 em.  Also change each blank line with
    ;; a vertical space of 1 em.
-   (progn
-     (setq contents (replace-regexp-in-string
-		     "^ *\\\\\\\\$" "\\\\vspace*{1em}"
-		     (replace-regexp-in-string
-		      "\\(\\\\\\\\\\)?[ \t]*\n" " \\\\\\\\\n" contents)))
-     (while (string-match "^[ \t]+" contents)
-       (let ((new-str (format "\\hspace*{%dem}"
-			      (length (match-string 0 contents)))))
-	 (setq contents (replace-match new-str nil t contents))))
-     (format "\\begin{verse}\n%s\\end{verse}" contents))))
+   (format "\\begin{verse}\n%s\\end{verse}"
+	   (replace-regexp-in-string
+	    "^[ \t]+" (lambda (m) (format "\\hspace*{%dem}" (length m)))
+	    (replace-regexp-in-string
+	     "^[ \t]*\\\\\\\\$" "\\vspace*{1em}"
+	     (replace-regexp-in-string
+	      "\\([ \t]*\\\\\\\\\\)?[ \t]*\n" "\\\\\n"
+	      contents nil t) nil t) nil t))))
 
 
 
@@ -3074,17 +3059,15 @@ Return PDF file name or an error if it couldn't be produced."
        ((consp org-latex-pdf-process)
 	(let ((outbuf (and (not snippet)
 			   (get-buffer-create "*Org PDF LaTeX Output*"))))
-	  (mapc
-	   (lambda (command)
-	     (shell-command
+	  (dolist (command org-latex-pdf-process)
+	    (shell-command
+	     (replace-regexp-in-string
+	      "%b" (shell-quote-argument base-name)
 	      (replace-regexp-in-string
-	       "%b" (shell-quote-argument base-name)
+	       "%f" (shell-quote-argument full-name)
 	       (replace-regexp-in-string
-		"%f" (shell-quote-argument full-name)
-		(replace-regexp-in-string
-		 "%o" (shell-quote-argument out-dir) command t t) t t) t t)
-	      outbuf))
-	   org-latex-pdf-process)
+		"%o" (shell-quote-argument out-dir) command t t) t t) t t)
+	     outbuf))
 	  ;; Collect standard errors from output buffer.
 	  (setq warnings (and (not snippet)
 			      (org-latex--collect-warnings outbuf)))))
@@ -3126,10 +3109,9 @@ encountered or nil if there was none."
 	  (let ((case-fold-search t)
 		(warnings ""))
 	    (dolist (warning org-latex-known-warnings)
-	      (save-excursion
-		(when (save-excursion (re-search-forward (car warning) nil t))
-		  (setq warnings (concat warnings " " (cdr warning))))))
-	    (and (org-string-nw-p warnings) (org-trim warnings))))))))
+	      (when (save-excursion (re-search-forward (car warning) nil t))
+		(setq warnings (concat warnings " " (cdr warning)))))
+	    (org-string-nw-p (org-trim warnings))))))))
 
 ;;;###autoload
 (defun org-latex-publish-to-latex (plist filename pub-dir)
