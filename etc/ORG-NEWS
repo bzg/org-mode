@@ -50,12 +50,13 @@ defining export blocks.
    Note that If BACKEND is a derived back-end and doesn't implement
    its own special block translator already, there is nothing to
    change.  The parent back-end will take care of such blocks.
-*** ~org-html-format-headline-function~ requires an additional argument
-The function provided is required to accept export options, as
-a plist, as its final (sixth) argument.
-*** ~org-html-format-inlinetask-function~ requires an additional argument
-The function provided is required to accept export options, as
-a plist, as its final (seventh) argument.
+*** Signature changes
+The following functions require an additional argument.  See their
+docstring for more information.
+- ~org-html-format-headline-function~
+- ~org-html-format-inlinetask-function~
+- ~org-latex-format-headline-function~
+- ~org-latex-format-inlinetask-function~
 ** Removed functions
 *** Removed function ~org-beamer-insert-options-template~
 This function inserted a Beamer specific template at point or in
