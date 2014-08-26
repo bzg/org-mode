@@ -795,11 +795,12 @@ If CLOCK-SOUND is non-nil, it overrides `org-clock-sound'."
   "Search through the given file and find all open clocks."
   (let ((buf (or (get-file-buffer file)
 		 (find-file-noselect file)))
+	(org-clock-re (concat org-clock-string " \\(\\[.*?\\]\\)$"))
 	clocks)
     (with-current-buffer buf
       (save-excursion
 	(goto-char (point-min))
-	(while (re-search-forward "CLOCK: \\(\\[.*?\\]\\)$" nil t)
+	(while (re-search-forward org-clock-re nil t)
 	  (push (cons (copy-marker (match-end 1) t)
 		      (org-time-string-to-time (match-string 1))) clocks))))
     clocks))
