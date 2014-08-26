@@ -3312,19 +3312,20 @@ This ensures the export commands can easily use it."
 (defvar org-agenda-write-buffer-name "Agenda View")
 (defun org-agenda-write (file &optional open nosettings agenda-bufname)
   "Write the current buffer (an agenda view) as a file.
+
 Depending on the extension of the file name, plain text (.txt),
 HTML (.html or .htm), PDF (.pdf) or Postscript (.ps) is produced.
-If the extension is .ics, run icalendar export over all files used
-to construct the agenda and limit the export to entries listed in the
-agenda now.
-If the extension is .org, collect all subtrees corresponding to the
-agenda entries and add them in an .org file.
-With prefix argument OPEN, open the new file immediately.
-If NOSETTINGS is given, do not scope the settings of
-`org-agenda-exporter-settings' into the export commands.  This is used when
-the settings have already been scoped and we do not wish to overrule other,
-higher priority settings.
-If AGENDA-BUFFER-NAME, use this as the buffer name for the agenda to write."
+If the extension is .ics, translate visible agenda into iCalendar
+format.  If the extension is .org, collect all subtrees
+corresponding to the agenda entries and add them in an .org file.
+
+With prefix argument OPEN, open the new file immediately.  If
+NOSETTINGS is given, do not scope the settings of
+`org-agenda-exporter-settings' into the export commands.  This is
+used when the settings have already been scoped and we do not
+wish to overrule other, higher priority settings.  If
+AGENDA-BUFFER-NAME is provided, use this as the buffer name for
+the agenda to write."
   (interactive "FWrite agenda to file: \nP")
   (if (or (not (file-writable-p file))
 	  (and (file-exists-p file)
@@ -3359,7 +3360,7 @@ If AGENDA-BUFFER-NAME, use this as the buffer name for the agenda to write."
 			   content)))
 		 (find-file file)
 		 (erase-buffer)
-		 (mapcar (lambda (s) (org-paste-subtree 1 s)) (reverse content))
+		 (dolist (s content) (org-paste-subtree 1 s))
 		 (write-file file)
 		 (kill-buffer (current-buffer))
 		 (message "Org file written to %s" file)))

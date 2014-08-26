@@ -269,11 +269,7 @@ re-read the iCalendar file.")
     (:icalendar-store-UID nil nil org-icalendar-store-UID)
     (:icalendar-timezone nil nil org-icalendar-timezone)
     (:icalendar-use-deadline nil nil org-icalendar-use-deadline)
-    (:icalendar-use-scheduled nil nil org-icalendar-use-scheduled)
-    ;; The following property will be non-nil when export has been
-    ;; started from org-agenda-mode.  In this case, any entry without
-    ;; a non-nil "ICALENDAR_MARK" property will be ignored.
-    (:icalendar-agenda-view nil nil nil))
+    (:icalendar-use-scheduled nil nil org-icalendar-use-scheduled))
   :filters-alist
   '((:filter-headline . org-icalendar-clear-blank-lines))
   :menu-entry
@@ -288,22 +284,18 @@ re-read the iCalendar file.")
 
 ;;; Internal Functions
 
-(defun org-icalendar-create-uid (file &optional bell h-markers)
+(defun org-icalendar-create-uid (file &optional bell)
   "Set ID property on headlines missing it in FILE.
 When optional argument BELL is non-nil, inform the user with
-a message if the file was modified.  With optional argument
-H-MARKERS non-nil, it is a list of markers for the headlines
-which will be updated."
-  (let ((pt (if h-markers (goto-char (car h-markers)) (point-min)))
-	modified-flag)
+a message if the file was modified."
+  (let (modified-flag)
     (org-map-entries
      (lambda ()
        (let ((entry (org-element-at-point)))
-	 (unless (or (< (point) pt) (org-element-property :ID entry))
+	 (unless (org-element-property :ID entry)
 	   (org-id-get-create)
 	   (setq modified-flag t)
-	   (forward-line))
-	 (when h-markers (setq org-map-continue-from (pop h-markers)))))
+	   (forward-line))))
      nil nil 'comment)
     (when (and bell modified-flag)
       (message "ID properties created in file \"%s\"" file)
@@ -534,99 +526,97 @@ inlinetask within the section."
 		     (cons 'org-data
 			   (cons nil (org-element-contents first))))))))
       (concat
-       (unless (and (plist-get info :icalendar-agenda-view)
-		    (not (org-element-property :ICALENDAR-MARK entry)))
-	 (let ((todo-type (org-element-property :todo-type entry))
-	       (uid (or (org-element-property :ID entry) (org-id-new)))
-	       (summary (org-icalendar-cleanup-string
-			 (or (org-element-property :SUMMARY entry)
-			     (org-export-data
-			      (org-element-property :title entry) info))))
-	       (loc (org-icalendar-cleanup-string
-		     (org-element-property :LOCATION entry)))
-	       ;; Build description of the entry from associated
-	       ;; section (headline) or contents (inlinetask).
-	       (desc
-		(org-icalendar-cleanup-string
-		 (or (org-element-property :DESCRIPTION entry)
-		     (let ((contents (org-export-data inside info)))
-		       (cond
-			((not (org-string-nw-p contents)) nil)
-			((wholenump org-icalendar-include-body)
-			 (let ((contents (org-trim contents)))
-			   (substring
-			    contents 0 (min (length contents)
-					    org-icalendar-include-body))))
-			(org-icalendar-include-body (org-trim contents)))))))
-	       (cat (org-icalendar-get-categories entry info)))
-	   (concat
-	    ;; Events: Delegate to `org-icalendar--vevent' to
-	    ;; generate "VEVENT" component from scheduled, deadline,
-	    ;; or any timestamp in the entry.
-	    (let ((deadline (org-element-property :deadline entry)))
-	      (and deadline
-		   (memq (if todo-type 'event-if-todo 'event-if-not-todo)
-			 org-icalendar-use-deadline)
-		   (org-icalendar--vevent
-		    entry deadline (concat "DL-" uid)
-		    (concat "DL: " summary) loc desc cat)))
-	    (let ((scheduled (org-element-property :scheduled entry)))
-	      (and scheduled
-		   (memq (if todo-type 'event-if-todo 'event-if-not-todo)
-			 org-icalendar-use-scheduled)
-		   (org-icalendar--vevent
-		    entry scheduled (concat "SC-" uid)
-		    (concat "S: " summary) loc desc cat)))
-	    ;; When collecting plain timestamps from a headline and
-	    ;; its title, skip inlinetasks since collection will
-	    ;; happen once ENTRY is one of them.
+       (let ((todo-type (org-element-property :todo-type entry))
+	     (uid (or (org-element-property :ID entry) (org-id-new)))
+	     (summary (org-icalendar-cleanup-string
+		       (or (org-element-property :SUMMARY entry)
+			   (org-export-data
+			    (org-element-property :title entry) info))))
+	     (loc (org-icalendar-cleanup-string
+		   (org-element-property :LOCATION entry)))
+	     ;; Build description of the entry from associated section
+	     ;; (headline) or contents (inlinetask).
+	     (desc
+	      (org-icalendar-cleanup-string
+	       (or (org-element-property :DESCRIPTION entry)
+		   (let ((contents (org-export-data inside info)))
+		     (cond
+		      ((not (org-string-nw-p contents)) nil)
+		      ((wholenump org-icalendar-include-body)
+		       (let ((contents (org-trim contents)))
+			 (substring
+			  contents 0 (min (length contents)
+					  org-icalendar-include-body))))
+		      (org-icalendar-include-body (org-trim contents)))))))
+	     (cat (org-icalendar-get-categories entry info)))
+	 (concat
+	  ;; Events: Delegate to `org-icalendar--vevent' to generate
+	  ;; "VEVENT" component from scheduled, deadline, or any
+	  ;; timestamp in the entry.
+	  (let ((deadline (org-element-property :deadline entry)))
+	    (and deadline
+		 (memq (if todo-type 'event-if-todo 'event-if-not-todo)
+		       org-icalendar-use-deadline)
+		 (org-icalendar--vevent
+		  entry deadline (concat "DL-" uid)
+		  (concat "DL: " summary) loc desc cat)))
+	  (let ((scheduled (org-element-property :scheduled entry)))
+	    (and scheduled
+		 (memq (if todo-type 'event-if-todo 'event-if-not-todo)
+		       org-icalendar-use-scheduled)
+		 (org-icalendar--vevent
+		  entry scheduled (concat "SC-" uid)
+		  (concat "S: " summary) loc desc cat)))
+	  ;; When collecting plain timestamps from a headline and its
+	  ;; title, skip inlinetasks since collection will happen once
+	  ;; ENTRY is one of them.
+	  (let ((counter 0))
+	    (mapconcat
+	     #'identity
+	     (org-element-map (cons (org-element-property :title entry)
+				    (org-element-contents inside))
+		 'timestamp
+	       (lambda (ts)
+		 (when (let ((type (org-element-property :type ts)))
+			 (case (plist-get info :with-timestamps)
+			   (active (memq type '(active active-range)))
+			   (inactive (memq type '(inactive inactive-range)))
+			   ((t) t)))
+		   (let ((uid (format "TS%d-%s" (incf counter) uid)))
+		     (org-icalendar--vevent
+		      entry ts uid summary loc desc cat))))
+	       info nil (and (eq type 'headline) 'inlinetask))
+	     ""))
+	  ;; Task: First check if it is appropriate to export it.  If
+	  ;; so, call `org-icalendar--vtodo' to transcode it into
+	  ;; a "VTODO" component.
+	  (when (and todo-type
+		     (case (plist-get info :icalendar-include-todo)
+		       (all t)
+		       (unblocked
+			(and (eq type 'headline)
+			     (not (org-icalendar-blocked-headline-p
+				   entry info))))
+		       ((t) (eq todo-type 'todo))))
+	    (org-icalendar--vtodo entry uid summary loc desc cat))
+	  ;; Diary-sexp: Collect every diary-sexp element within ENTRY
+	  ;; and its title, and transcode them.  If ENTRY is
+	  ;; a headline, skip inlinetasks: they will be handled
+	  ;; separately.
+	  (when org-icalendar-include-sexps
 	    (let ((counter 0))
-	      (mapconcat
-	       #'identity
-	       (org-element-map (cons (org-element-property :title entry)
-				      (org-element-contents inside))
-		   'timestamp
-		 (lambda (ts)
-		   (when (let ((type (org-element-property :type ts)))
-			   (case (plist-get info :with-timestamps)
-			     (active (memq type '(active active-range)))
-			     (inactive (memq type '(inactive inactive-range)))
-			     ((t) t)))
-		     (let ((uid (format "TS%d-%s" (incf counter) uid)))
-		       (org-icalendar--vevent
-			entry ts uid summary loc desc cat))))
-		 info nil (and (eq type 'headline) 'inlinetask))
-	       ""))
-	    ;; Task: First check if it is appropriate to export it.
-	    ;; If so, call `org-icalendar--vtodo' to transcode it
-	    ;; into a "VTODO" component.
-	    (when (and todo-type
-		       (case (plist-get info :icalendar-include-todo)
-			 (all t)
-			 (unblocked
-			  (and (eq type 'headline)
-			       (not (org-icalendar-blocked-headline-p
-				     entry info))))
-			 ((t) (eq todo-type 'todo))))
-	      (org-icalendar--vtodo entry uid summary loc desc cat))
-	    ;; Diary-sexp: Collect every diary-sexp element within
-	    ;; ENTRY and its title, and transcode them.  If ENTRY is
-	    ;; a headline, skip inlinetasks: they will be handled
-	    ;; separately.
-	    (when org-icalendar-include-sexps
-	      (let ((counter 0))
-		(mapconcat #'identity
-			   (org-element-map
-			       (cons (org-element-property :title entry)
-				     (org-element-contents inside))
-			       'diary-sexp
-			     (lambda (sexp)
-			       (org-icalendar-transcode-diary-sexp
-				(org-element-property :value sexp)
-				(format "DS%d-%s" (incf counter) uid)
-				summary))
-			     info nil (and (eq type 'headline) 'inlinetask))
-			   ""))))))
+	      (mapconcat #'identity
+			 (org-element-map
+			     (cons (org-element-property :title entry)
+				   (org-element-contents inside))
+			     'diary-sexp
+			   (lambda (sexp)
+			     (org-icalendar-transcode-diary-sexp
+			      (org-element-property :value sexp)
+			      (format "DS%d-%s" (incf counter) uid)
+			      summary))
+			   info nil (and (eq type 'headline) 'inlinetask))
+			 "")))))
        ;; If ENTRY is a headline, call current function on every
        ;; inlinetask within it.  In agenda export, this is independent
        ;; from the mark (or lack thereof) on the entry.
@@ -833,7 +823,8 @@ Return ICS file name."
   ;; links will not be collected at the end of sections.
   (let ((outfile (org-export-output-file-name ".ics" subtreep)))
     (org-export-to-file 'icalendar outfile
-      async subtreep visible-only body-only '(:ascii-charset utf-8)
+      async subtreep visible-only body-only
+      '(:ascii-charset utf-8 :ascii-links-to-notes nil)
       (lambda (file)
 	(run-hook-with-args 'org-icalendar-after-save-hook file) nil))))
 
@@ -888,50 +879,44 @@ The file is stored under the name chosen in
 	      (org-export-add-to-stack
 	       (expand-file-name org-icalendar-combined-agenda-file)
 	       'icalendar))
-	  `(apply 'org-icalendar--combine-files nil ',files)))
-    (apply 'org-icalendar--combine-files nil (org-agenda-files t))))
+	  `(apply 'org-icalendar--combine-files ',files)))
+    (apply 'org-icalendar--combine-files (org-agenda-files t))))
 
 (defun org-icalendar-export-current-agenda (file)
   "Export current agenda view to an iCalendar FILE.
 This function assumes major mode for current buffer is
 `org-agenda-mode'."
-  (let (org-export-babel-evaluate ; Don't evaluate Babel block
-	(org-icalendar-combined-agenda-file file)
-	(marker-list
-	 ;; Collect the markers pointing to entries in the current
-	 ;; agenda buffer.
-	 (let (markers)
-	   (save-excursion
-	     (goto-char (point-min))
-	     (while (not (eobp))
-	       (let ((m (or (org-get-at-bol 'org-hd-marker)
-			    (org-get-at-bol 'org-marker))))
-		 (and m (push m markers)))
-	       (beginning-of-line 2)))
-	   (nreverse markers))))
-    (apply 'org-icalendar--combine-files
-	   ;; Build restriction alist.
-	   (let (restriction)
-	     ;; Sort markers in each association within RESTRICTION.
-	     (mapcar (lambda (x) (setcdr x (sort (copy-sequence (cdr x)) '<)) x)
-		     (dolist (m marker-list restriction)
-		       (let* ((pos (marker-position m))
-			      (file (buffer-file-name
-				     (org-base-buffer (marker-buffer m))))
-			      (file-markers (assoc file restriction)))
-			 ;; Add POS in FILE association if one exists
-			 ;; or create a new association for FILE.
-			 (if file-markers (push pos (cdr file-markers))
-			   (push (list file pos) restriction))))))
-	   (org-agenda-files nil 'ifmode))))
+  (let* ((org-export-babel-evaluate)	; Don't evaluate Babel block.
+	 (contents
+	  (org-export-string-as
+	   (with-output-to-string
+	     (save-excursion
+	       (let ((p (point-min)))
+		 (while (setq p (next-single-property-change p 'org-hd-marker))
+		   (let ((m (get-text-property p 'org-hd-marker)))
+		     (when m
+		       (with-current-buffer (marker-buffer m)
+			 (org-with-wide-buffer
+			  (goto-char (marker-position m))
+			  (princ
+			   (org-element-normalize-string
+			    (buffer-substring
+			     (point) (progn (outline-next-heading) (point)))))))))
+		   (forward-line)))))
+	   'icalendar file)))
+    (with-temp-file file
+      (insert
+       (org-icalendar--vcalendar
+	org-icalendar-combined-name
+	user-full-name
+	org-icalendar-combined-description
+	(or (org-string-nw-p org-icalendar-timezone) (cadr (current-time-zone)))
+	contents)))
+    (run-hook-with-args 'org-icalendar-after-save-hook file)))
 
-(defun org-icalendar--combine-files (restriction &rest files)
+(defun org-icalendar--combine-files (&rest files)
   "Combine entries from multiple files into an iCalendar file.
-RESTRICTION, when non-nil, is an alist where key is a file name
-and value a list of buffer positions pointing to entries that
-should appear in the calendar.  It only makes sense if the
-function was called from an agenda buffer.  FILES is a list of
-files to build the calendar from."
+FILES is a list of files to build the calendar from."
   (org-agenda-prepare-buffers files)
   (unwind-protect
       (progn
@@ -955,29 +940,12 @@ files to build the calendar from."
 		(catch 'nextfile
 		  (org-check-agenda-file file)
 		  (with-current-buffer (org-get-agenda-file-buffer file)
-		    (let ((marks (cdr (assoc (expand-file-name file)
-					     restriction))))
-		      ;; Create ID if necessary.
-		      (when org-icalendar-store-UID
-			(org-icalendar-create-uid file t marks))
-		      (unless (and restriction (not marks))
-			;; Add a hook adding :ICALENDAR_MARK: property
-			;; to each entry appearing in agenda view.
-			;; Use `apply-partially' because the function
-			;; still has to accept one argument.
-			(let ((org-export-before-processing-hook
-			       (cons (apply-partially
-				      (lambda (m-list dummy)
-					(mapc (lambda (m)
-						(org-entry-put
-						 m "ICALENDAR-MARK" "t"))
-					      m-list))
-				      (sort marks '>))
-				     org-export-before-processing-hook)))
-			  (org-export-as
-			   'icalendar nil nil t
-			   (list :ascii-charset 'utf-8
-				 :icalendar-agenda-view restriction))))))))
+		    ;; Create ID if necessary.
+		    (when org-icalendar-store-UID
+		      (org-icalendar-create-uid file t))
+		    (org-export-as
+		     'icalendar nil nil t
+		     '(:ascii-charset utf-8 :ascii-links-to-notes nil)))))
 	      files "")
 	     ;; BBDB anniversaries.
 	     (when (and org-icalendar-include-bbdb-anniversaries

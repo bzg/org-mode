@@ -400,17 +400,15 @@ Set it to the empty string to ignore the command completely."
   'org-latex-format-headline-default-function
   "Function for formatting the headline's text.
 
-This function will be called with 5 arguments:
-TODO      the todo keyword (string or nil).
+This function will be called with six arguments:
+TODO      the todo keyword (string or nil)
 TODO-TYPE the type of todo (symbol: `todo', `done', nil)
 PRIORITY  the priority of the headline (integer or nil)
-TEXT      the main headline text (string).
-TAGS      the tags as a list of strings (list of strings or nil).
+TEXT      the main headline text (string)
+TAGS      the tags (list of strings or nil)
+INFO      the export options (plist)
 
-The function result will be used in the section format string.
-
-Use `org-latex-format-headline-default-function' by default,
-which format headlines like for Org version prior to 8.0."
+The function result will be used in the section format string."
   :group 'org-export-latex
   :version "24.4"
   :package-version '(Org . "8.0")
@@ -683,17 +681,16 @@ The default function simply returns the value of CONTENTS."
   'org-latex-format-inlinetask-default-function
   "Function called to format an inlinetask in LaTeX code.
 
-The function must accept six parameters:
-  TODO      the todo keyword, as a string
-  TODO-TYPE the todo type, a symbol among `todo', `done' and nil.
-  PRIORITY  the inlinetask priority, as a string
-  NAME      the inlinetask name, as a string.
-  TAGS      the inlinetask tags, as a list of strings.
-  CONTENTS  the contents of the inlinetask, as a string.
+The function must accept seven parameters:
+  TODO      the todo keyword (string or nil)
+  TODO-TYPE the todo type (symbol: `todo', `done', nil)
+  PRIORITY  the inlinetask priority (integer or nil)
+  NAME      the inlinetask name (string)
+  TAGS      the inlinetask tags (list of strings or nil)
+  CONTENTS  the contents of the inlinetask (string or nil)
+  INFO      the export options (plist)
 
-The function should return the string to be exported.
-
-Use `org-latex-format-headline-default-function' by default."
+The function should return the string to be exported."
   :group 'org-export-latex
   :type 'function
   :version "24.5"
@@ -1466,7 +1463,7 @@ holding contextual information."
 	   ;; Create the headline text along with a no-tag version.
 	   ;; The latter is required to remove tags from toc.
 	   (full-text (funcall (plist-get info :latex-format-headline-function)
-			       todo todo-type priority text tags))
+			       todo todo-type priority text tags info))
 	   ;; Associate \label to the headline for internal links.
 	   (headline-label
 	    (let ((custom-label
@@ -1514,7 +1511,8 @@ holding contextual information."
 			(org-export-data-with-backend
 			 (org-export-get-alt-title headline info)
 			 section-back-end info)
-			(and (eq (plist-get info :with-tags) t) tags))))
+			(and (eq (plist-get info :with-tags) t) tags)
+			info)))
 	  (if (and numberedp opt-title
 		   (not (equal opt-title full-text))
 		   (string-match "\\`\\\\\\(.*?[^*]\\){" section-fmt))
@@ -1532,7 +1530,7 @@ holding contextual information."
 		    (concat headline-label pre-blanks contents))))))))
 
 (defun org-latex-format-headline-default-function
-  (todo todo-type priority text tags)
+  (todo todo-type priority text tags info)
   "Default format function for a headline.
 See `org-latex-format-headline-function' for details."
   (concat
@@ -1540,7 +1538,9 @@ See `org-latex-format-headline-function' for details."
    (and priority (format "\\framebox{\\#%c} " priority))
    text
    (and tags
-	(format "\\hfill{}\\textsc{%s}" (mapconcat 'identity tags ":")))))
+	(format "\\hfill{}\\textsc{%s}"
+		(mapconcat (lambda (tag) (org-latex-plain-text tag info))
+			   tags ":")))))
 
 
 ;;;; Horizontal Rule
@@ -1621,18 +1621,21 @@ holding contextual information."
 		     (and label (format "\\label{%s}\n" label)))
 		   contents)))
     (funcall (plist-get info :latex-format-inlinetask-function)
-	     todo todo-type priority title tags contents)))
+	     todo todo-type priority title tags contents info)))
 
 (defun org-latex-format-inlinetask-default-function
-  (todo todo-type priority title tags contents)
+  (todo todo-type priority title tags contents info)
   "Default format function for a inlinetasks.
 See `org-latex-format-inlinetask-function' for details."
   (let ((full-title
 	 (concat (when todo (format "\\textbf{\\textsf{\\textsc{%s}}} " todo))
 		 (when priority (format "\\framebox{\\#%c} " priority))
 		 title
-		 (when tags (format "\\hfill{}\\textsc{:%s:}"
-				    (mapconcat #'identity tags ":"))))))
+		 (when tags
+		   (format "\\hfill{}\\textsc{:%s:}"
+			   (mapconcat
+			    (lambda (tag) (org-latex-plain-text tag info))
+			    tags ":"))))))
     (concat "\\begin{center}\n"
 	    "\\fbox{\n"
 	    "\\begin{minipage}[c]{.6\\textwidth}\n"
@@ -2045,47 +2048,35 @@ contextual information."
   "Transcode a TEXT string from Org to LaTeX.
 TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
-  (let ((specialp (plist-get info :with-special-strings))
-	(output text))
-    ;; Protect %, #, &, $, _, { and }.
-    (while (string-match "\\([^\\]\\|^\\)\\([%$#&{}_]\\)" output)
-      (setq output
-	    (replace-match
-	     (format "\\%s" (match-string 2 output)) nil t output 2)))
-    ;; Protect ^.
-    (setq output
-	  (replace-regexp-in-string
-	   "\\([^\\]\\|^\\)\\(\\^\\)" "\\\\^{}" output nil nil 2))
-    ;; Protect \.  If special strings are used, be careful not to
-    ;; protect "\" in "\-" constructs.
-    (let ((symbols (if specialp "-%$#&{}^_\\" "%$#&{}^_\\")))
-      (setq output
+  (let* ((specialp (plist-get info :with-special-strings))
+	 (output
+	  ;; Turn LaTeX into \LaTeX{} and TeX into \TeX{}.
+	  (let ((case-fold-search nil))
 	    (replace-regexp-in-string
-	     (format "\\(?:[^\\]\\|^\\)\\(\\\\\\)\\(?:[^%s]\\|$\\)" symbols)
-	     "$\\backslash$" output nil t 1)))
-    ;; Protect ~.
-    (setq output
-	  (replace-regexp-in-string
-	   "\\([^\\]\\|^\\)\\(~\\)" "\\textasciitilde{}" output nil t 2))
+	     "\\<\\(?:La\\)?TeX\\>" "\\\\\\&{}"
+	     ;; Protect ^, ~, %, #, &, $, _, { and }.  Also protect \.
+	     ;; However, if special strings are used, be careful not
+	     ;; to protect "\" in "\-" constructs.
+	     (replace-regexp-in-string
+	      (concat "[%$#&{}_~^]\\|\\\\" (and specialp "\\(?:[^-]\\|$\\)"))
+	      (lambda (m)
+		(case (aref m 0)
+		  (?\\ "$\\\\backslash$")
+		  (?~ "\\\\textasciitilde{}")
+		  (?^ "\\\\^{}")
+		  (t "\\\\\\&")))
+	      text)))))
     ;; Activate smart quotes.  Be sure to provide original TEXT string
     ;; since OUTPUT may have been modified.
     (when (plist-get info :with-smart-quotes)
       (setq output (org-export-activate-smart-quotes output :latex info text)))
-    ;; LaTeX into \LaTeX{} and TeX into \TeX{}.
-    (let ((case-fold-search nil)
-	  (start 0))
-      (while (string-match "\\<\\(\\(?:La\\)?TeX\\)\\>" output start)
-	(setq output (replace-match
-		      (format "\\%s{}" (match-string 1 output)) nil t output)
-	      start (match-end 0))))
     ;; Convert special strings.
     (when specialp
-      (setq output
-	    (replace-regexp-in-string "\\.\\.\\." "\\ldots{}" output nil t)))
+      (setq output (replace-regexp-in-string "\\.\\.\\." "\\\\ldots{}" output)))
     ;; Handle break preservation if required.
     (when (plist-get info :preserve-breaks)
       (setq output (replace-regexp-in-string
-		    "\\(\\\\\\\\\\)?[ \t]*\n" " \\\\\\\\\n" output)))
+		    "\\(?:[ \t]*\\\\\\\\\\)?[ \t]*\n" "\\\\\n" output nil t)))
     ;; Return value.
     output))
 
@@ -2874,15 +2865,14 @@ information."
   "Transcode a TIMESTAMP object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let ((value (org-latex-plain-text
-		(org-timestamp-translate timestamp) info)))
-    (case (org-element-property :type timestamp)
-      ((active active-range)
-       (format (plist-get info :latex-active-timestamp-format) value))
-      ((inactive inactive-range)
-       (format (plist-get info :latex-inactive-timestamp-format) value))
-      (otherwise
-       (format (plist-get info :latex-diary-timestamp-format) value)))))
+  (let ((value (org-latex-plain-text (org-timestamp-translate timestamp) info)))
+    (format
+     (plist-get info
+		(case (org-element-property :type timestamp)
+		  ((active active-range) :latex-active-timestamp-format)
+		  ((inactive inactive-range) :latex-inactive-timestamp-format)
+		  (otherwise :latex-diary-timestamp-format)))
+     value)))
 
 
 ;;;; Underline
@@ -2916,16 +2906,14 @@ contextual information."
    ;; character and change each white space at beginning of a line
    ;; into a space of 1 em.  Also change each blank line with
    ;; a vertical space of 1 em.
-   (progn
-     (setq contents (replace-regexp-in-string
-		     "^ *\\\\\\\\$" "\\\\vspace*{1em}"
-		     (replace-regexp-in-string
-		      "\\(\\\\\\\\\\)?[ \t]*\n" " \\\\\\\\\n" contents)))
-     (while (string-match "^[ \t]+" contents)
-       (let ((new-str (format "\\hspace*{%dem}"
-			      (length (match-string 0 contents)))))
-	 (setq contents (replace-match new-str nil t contents))))
-     (format "\\begin{verse}\n%s\\end{verse}" contents))))
+   (format "\\begin{verse}\n%s\\end{verse}"
+	   (replace-regexp-in-string
+	    "^[ \t]+" (lambda (m) (format "\\hspace*{%dem}" (length m)))
+	    (replace-regexp-in-string
+	     "^[ \t]*\\\\\\\\$" "\\vspace*{1em}"
+	     (replace-regexp-in-string
+	      "\\([ \t]*\\\\\\\\\\)?[ \t]*\n" "\\\\\n"
+	      contents nil t) nil t) nil t))))
 
 
 
@@ -3074,17 +3062,15 @@ Return PDF file name or an error if it couldn't be produced."
        ((consp org-latex-pdf-process)
 	(let ((outbuf (and (not snippet)
 			   (get-buffer-create "*Org PDF LaTeX Output*"))))
-	  (mapc
-	   (lambda (command)
-	     (shell-command
+	  (dolist (command org-latex-pdf-process)
+	    (shell-command
+	     (replace-regexp-in-string
+	      "%b" (shell-quote-argument base-name)
 	      (replace-regexp-in-string
-	       "%b" (shell-quote-argument base-name)
+	       "%f" (shell-quote-argument full-name)
 	       (replace-regexp-in-string
-		"%f" (shell-quote-argument full-name)
-		(replace-regexp-in-string
-		 "%o" (shell-quote-argument out-dir) command t t) t t) t t)
-	      outbuf))
-	   org-latex-pdf-process)
+		"%o" (shell-quote-argument out-dir) command t t) t t) t t)
+	     outbuf))
 	  ;; Collect standard errors from output buffer.
 	  (setq warnings (and (not snippet)
 			      (org-latex--collect-warnings outbuf)))))
@@ -3126,10 +3112,9 @@ encountered or nil if there was none."
 	  (let ((case-fold-search t)
 		(warnings ""))
 	    (dolist (warning org-latex-known-warnings)
-	      (save-excursion
-		(when (save-excursion (re-search-forward (car warning) nil t))
-		  (setq warnings (concat warnings " " (cdr warning))))))
-	    (and (org-string-nw-p warnings) (org-trim warnings))))))))
+	      (when (save-excursion (re-search-forward (car warning) nil t))
+		(setq warnings (concat warnings " " (cdr warning)))))
+	    (org-string-nw-p (org-trim warnings))))))))
 
 ;;;###autoload
 (defun org-latex-publish-to-latex (plist filename pub-dir)
