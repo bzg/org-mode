@@ -73,9 +73,9 @@
 ;; refers to the element or object containing it.  Greater elements,
 ;; elements and objects containing objects will also have
 ;; `:contents-begin' and `:contents-end' properties to delimit
-;; contents.  Eventually, greater elements and elements accepting
-;; affiliated keywords will have a `:post-affiliated' property,
-;; referring to the buffer position after all such keywords.
+;; contents.  Eventually, All elements have a `:post-affiliated'
+;; property referring to the buffer position after all affiliated
+;; keywords, if any, or to their beginning position otherwise.
 ;;
 ;; At the lowest level, a `:parent' property is also attached to any
 ;; string, as a text property.
@@ -777,7 +777,8 @@ containing `:raw-value', `:title', `:alt-title', `:begin',
 `:end', `:pre-blank', `:contents-begin' and `:contents-end',
 `:level', `:priority', `:tags', `:todo-keyword',`:todo-type',
 `:scheduled', `:deadline', `:closed', `:archivedp', `:commentedp'
-`:footnote-section-p' and `:post-blank' keywords.
+`:footnote-section-p', `:post-blank' and `:post-affiliated'
+keywords.
 
 The plist also contains any property set in the property drawer,
 with its name in upper cases and colons added at the
@@ -902,7 +903,8 @@ Assume point is at beginning of the headline."
 				       end)
 			  :footnote-section-p footnote-section-p
 			  :archivedp archivedp
-			  :commentedp commentedp)
+			  :commentedp commentedp
+			  :post-affiliated begin)
 		    time-props
 		    standard-props))))
 	(let ((alt-title (org-element-property :ALT_TITLE headline)))
@@ -972,7 +974,7 @@ Return a list whose CAR is `inlinetask' and CDR is a plist
 containing `:title', `:begin', `:end', `:contents-begin' and
 `:contents-end', `:level', `:priority', `:raw-value', `:tags',
 `:todo-keyword', `:todo-type', `:scheduled', `:deadline',
-`:closed' and `:post-blank' keywords.
+`:closed', `:post-blank' and `:post-affiliated' keywords.
 
 The plist also contains any property set in the property drawer,
 with its name in upper cases and colons added at the
@@ -1076,7 +1078,8 @@ Assume point is at beginning of the inline task."
 			 :tags tags
 			 :todo-keyword todo
 			 :todo-type todo-type
-			 :post-blank (count-lines before-blank end))
+			 :post-blank (count-lines before-blank end)
+			 :post-affiliated begin)
 		   time-props
 		   standard-props))))
       (org-element-put-property
@@ -1135,8 +1138,8 @@ STRUCT is the structure of the plain list.
 
 Return a list whose CAR is `item' and CDR is a plist containing
 `:bullet', `:begin', `:end', `:contents-begin', `:contents-end',
-`:checkbox', `:counter', `:tag', `:structure' and `:post-blank'
-keywords.
+`:checkbox', `:counter', `:tag', `:structure', `:post-blank' and
+`:post-affiliated' keywords.
 
 When optional argument RAW-SECONDARY-P is non-nil, item's tag, if
 any, will not be parsed as a secondary string, but as a plain
@@ -1195,7 +1198,8 @@ Assume point is at the beginning of the item."
 			:checkbox checkbox
 			:counter counter
 			:structure struct
-			:post-blank (count-lines contents-end end)))))
+			:post-blank (count-lines contents-end end)
+			:post-affiliated begin))))
       (org-element-put-property
        item :tag
        (let ((raw-tag (org-list-get-tag begin struct)))
@@ -1483,8 +1487,8 @@ CONTENTS is the contents of the element."
 LIMIT bounds the search.
 
 Return a list whose CAR is `section' and CDR is a plist
-containing `:begin', `:end', `:contents-begin', `contents-end'
-and `:post-blank' keywords."
+containing `:begin', `:end', `:contents-begin', `contents-end',
+`:post-blank' and `:post-affiliated' keywords."
   (save-excursion
     ;; Beginning of section is the beginning of the first non-blank
     ;; line after previous headline.
@@ -1499,7 +1503,8 @@ and `:post-blank' keywords."
 		  :end end
 		  :contents-begin begin
 		  :contents-end pos-before-blank
-		  :post-blank (count-lines pos-before-blank end))))))
+		  :post-blank (count-lines pos-before-blank end)
+		  :post-affiliated begin)))))
 
 (defun org-element-section-interpreter (section contents)
   "Interpret SECTION element as Org syntax.
@@ -1629,8 +1634,8 @@ CONTENTS is nil."
 LIMIT bounds the search.
 
 Return a list whose CAR is `clock' and CDR is a plist containing
-`:status', `:value', `:time', `:begin', `:end' and `:post-blank'
-as keywords."
+`:status', `:value', `:time', `:begin', `:end', `:post-blank' and
+`:post-affiliated' as keywords."
   (save-excursion
     (let* ((case-fold-search nil)
 	   (begin (point))
@@ -1654,7 +1659,8 @@ as keywords."
 		  :duration duration
 		  :begin begin
 		  :end end
-		  :post-blank post-blank)))))
+		  :post-blank post-blank
+		  :post-affiliated begin)))))
 
 (defun org-element-clock-interpreter (clock contents)
   "Interpret CLOCK element as Org syntax.
@@ -2095,8 +2101,8 @@ CONTENTS is nil."
 LIMIT bounds the search.
 
 Return a list whose CAR is `node-property' and CDR is a plist
-containing `:key', `:value', `:begin', `:end' and `:post-blank'
-keywords."
+containing `:key', `:value', `:begin', `:end', `:post-blank' and
+`:post-affiliated' keywords."
   (save-excursion
     (looking-at org-property-re)
     (let ((case-fold-search t)
@@ -2111,7 +2117,8 @@ keywords."
 		  :value value
 		  :begin begin
 		  :end end
-		  :post-blank (count-lines pos-before-blank end))))))
+		  :post-blank (count-lines pos-before-blank end)
+		  :post-affiliated begin)))))
 
 (defun org-element-node-property-interpreter (node-property contents)
   "Interpret NODE-PROPERTY element as Org syntax.
@@ -2227,8 +2234,8 @@ CONTENTS is the contents of the element."
 LIMIT bounds the search.
 
 Return a list whose CAR is `planning' and CDR is a plist
-containing `:closed', `:deadline', `:scheduled', `:begin', `:end'
-and `:post-blank' keywords."
+containing `:closed', `:deadline', `:scheduled', `:begin',
+`:end', `:post-blank' and `:post-affiliated' keywords."
   (save-excursion
     (let* ((case-fold-search nil)
 	   (begin (point))
@@ -2254,7 +2261,8 @@ and `:post-blank' keywords."
 		  :scheduled scheduled
 		  :begin begin
 		  :end end
-		  :post-blank post-blank)))))
+		  :post-blank post-blank
+		  :post-affiliated begin)))))
 
 (defun org-element-planning-interpreter (planning contents)
   "Interpret PLANNING element as Org syntax.
@@ -2470,7 +2478,7 @@ LIMIT bounds the search.
 
 Return a list whose CAR is `table-row' and CDR is a plist
 containing `:begin', `:end', `:contents-begin', `:contents-end',
-`:type' and `:post-blank' keywords."
+`:type', `:post-blank' and `:post-affiliated' keywords."
   (save-excursion
     (let* ((type (if (looking-at "^[ \t]*|-") 'rule 'standard))
 	   (begin (point))
@@ -2491,7 +2499,8 @@ containing `:begin', `:end', `:contents-begin', `:contents-end',
 		  :end end
 		  :contents-begin contents-begin
 		  :contents-end contents-end
-		  :post-blank 0)))))
+		  :post-blank 0
+		  :post-affiliated begin)))))
 
 (defun org-element-table-row-interpreter (table-row contents)
   "Interpret TABLE-ROW element as Org syntax.
