@@ -1719,10 +1719,23 @@ Paragraph[fn:1]"
   (should
    (equal
     '(yes yes no)
-    (org-test-with-parsed-data "* Headline\n** Headline 2\n** Headline 3"
+    (org-test-with-parsed-data "* H\n** H 2\n** H 3"
       (org-element-map tree 'headline
 	(lambda (h) (if (org-export-first-sibling-p h info) 'yes 'no))
 	info))))
+  (should
+   (equal '(yes no)
+	  (org-test-with-parsed-data "- item\n\n  para"
+	    (org-element-map tree 'paragraph
+	      (lambda (h) (if (org-export-first-sibling-p h info) 'yes 'no))
+	      info))))
+  ;; Ignore sections for headlines.
+  (should
+   (equal '(yes yes)
+	  (org-test-with-parsed-data "* H\nSection\n** H 2"
+	    (org-element-map tree 'headline
+	      (lambda (h) (if (org-export-first-sibling-p h info) 'yes 'no))
+	      info))))
   ;; Ignore headlines not exported.
   (should
    (equal
@@ -1743,6 +1756,12 @@ Paragraph[fn:1]"
       (org-element-map tree 'headline
 	(lambda (h) (if (org-export-last-sibling-p h info) 'yes 'no))
 	info))))
+  (should
+   (equal '(no yes)
+	  (org-test-with-parsed-data "- item\n\n  para"
+	    (org-element-map tree 'paragraph
+	      (lambda (h) (if (org-export-last-sibling-p h info) 'yes 'no))
+	      info))))
   ;; Ignore headlines not exported.
   (should
    (equal

@@ -3887,16 +3887,19 @@ title is defined, fall-back to the regular title."
   (or (org-element-property :alt-title headline)
       (org-element-property :title headline)))
 
-(defun org-export-first-sibling-p (headline info)
-  "Non-nil when HEADLINE is the first sibling in its sub-tree.
-INFO is a plist used as a communication channel."
-  (not (eq (org-element-type (org-export-get-previous-element headline info))
-	   'headline)))
+(defun org-export-first-sibling-p (blob info)
+  "Non-nil when BLOB is the first sibling in its parent.
+BLOB is an element or an object.  If BLOB is a headline, non-nil
+means it is the first sibling in the sub-tree.  INFO is a plist
+used as a communication channel."
+  (memq (org-element-type (org-export-get-previous-element blob info))
+	'(nil section)))
 
-(defun org-export-last-sibling-p (headline info)
-  "Non-nil when HEADLINE is the last sibling in its sub-tree.
-INFO is a plist used as a communication channel."
-  (not (org-export-get-next-element headline info)))
+(defun org-export-last-sibling-p (blob info)
+  "Non-nil when BLOB is the last sibling in its parent.
+BLOB is an element or an object.  INFO is a plist used as
+a communication channel."
+  (not (org-export-get-next-element blob info)))
 
 
 ;;;; For Keywords
