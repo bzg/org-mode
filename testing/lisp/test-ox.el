@@ -2912,6 +2912,25 @@ Another text. (ref:text)
 	  (if (org-export-table-row-ends-rowgroup-p row info) 'yes 'no))
 	info)))))
 
+(ert-deftest test-org-export/table-row-in-header-p ()
+  "Test `org-export-table-row-in-header-p' specifications."
+  ;; Standard test.  Separators are always nil.
+  (should
+   (equal
+    '(yes no no)
+    (org-test-with-parsed-data "| a |\n|---|\n| b |"
+      (org-element-map tree 'table-row
+	(lambda (row)
+	  (if (org-export-table-row-in-header-p row info) 'yes 'no)) info))))
+  ;; Nil when there is no header.
+  (should
+   (equal
+    '(no no)
+    (org-test-with-parsed-data "| a |\n| b |"
+      (org-element-map tree 'table-row
+	(lambda (row)
+	  (if (org-export-table-row-in-header-p row info) 'yes 'no)) info)))))
+
 (ert-deftest test-org-export/table-row-starts-header-p ()
   "Test `org-export-table-row-starts-header-p' specifications."
   ;; 1. Only the row starting the first row group starts the table

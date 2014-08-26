@@ -4434,9 +4434,10 @@ code."
 ;; `org-export-table-cell-ends-colgroup-p',
 ;; `org-export-table-row-starts-rowgroup-p',
 ;; `org-export-table-row-ends-rowgroup-p',
-;; `org-export-table-row-starts-header-p' and
-;; `org-export-table-row-ends-header-p' indicate position of current
-;; row or cell within the table.
+;; `org-export-table-row-starts-header-p',
+;; `org-export-table-row-ends-header-p' and
+;; `org-export-table-row-in-header-p' indicate position of current row
+;; or cell within the table.
 
 (defun org-export-table-has-special-column-p (table)
   "Non-nil when TABLE has a special column.
@@ -4790,21 +4791,25 @@ INFO is a plist used as a communication channel."
 		    (car (org-element-contents table-row)) info)))
       (or (memq 'bottom borders) (memq 'below borders)))))
 
+(defun org-export-table-row-in-header-p (table-row info)
+  "Non-nil when TABLE-ROW is located within table's header.
+INFO is a plist used as a communication channel.  Always return
+nil for special rows and rows separators."
+  (and (org-export-table-has-header-p
+	(org-export-get-parent-table table-row) info)
+       (eql (org-export-table-row-group table-row info) 1)))
+
 (defun org-export-table-row-starts-header-p (table-row info)
   "Non-nil when TABLE-ROW is the first table header's row.
 INFO is a plist used as a communication channel."
-  (and (org-export-table-has-header-p
-	(org-export-get-parent-table table-row) info)
-       (org-export-table-row-starts-rowgroup-p table-row info)
-       (= (org-export-table-row-group table-row info) 1)))
+  (and (org-export-table-row-in-header-p table-row info)
+       (org-export-table-row-starts-rowgroup-p table-row info)))
 
 (defun org-export-table-row-ends-header-p (table-row info)
   "Non-nil when TABLE-ROW is the last table header's row.
 INFO is a plist used as a communication channel."
-  (and (org-export-table-has-header-p
-	(org-export-get-parent-table table-row) info)
-       (org-export-table-row-ends-rowgroup-p table-row info)
-       (= (org-export-table-row-group table-row info) 1)))
+  (and (org-export-table-row-in-header-p table-row info)
+       (org-export-table-row-ends-rowgroup-p table-row info)))
 
 (defun org-export-table-row-number (table-row info)
   "Return TABLE-ROW number.
