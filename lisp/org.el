@@ -22380,7 +22380,7 @@ ELEMENT."
 	      (if level (1+ level) 0))))
 	 ((item plain list)
 	  (org-list-item-body-column
-	   (or (org-element-property :post-affiliated element) start)))
+	   (org-element-property :post-affiliated element)))
 	 (otherwise
 	  (goto-char start)
 	  (org-get-indentation))))
@@ -22512,8 +22512,7 @@ Also align node properties according to `org-property-format'."
 	   (type (org-element-type element)))
       (cond ((and (memq type '(plain-list item))
 		  (= (line-beginning-position)
-		     (or (org-element-property :post-affiliated element)
-			 (org-element-property :begin element))))
+		     (org-element-property :post-affiliated element)))
 	     'noindent)
 	    ((and (eq type 'src-block)
 		  org-src-tab-acts-natively
@@ -22582,8 +22581,7 @@ assumed to be significant there."
 	      ;; according to the element type, or not indented at
 	      ;; all.  Other parts are indented as a single block.
 	      (let* ((post (copy-marker
-			    (or (org-element-property :post-affiliated element)
-				(org-element-property :begin element))))
+			    (org-element-property :post-affiliated element)))
 		     (cbeg
 		      (copy-marker
 		       (cond
@@ -22744,7 +22742,7 @@ matches in paragraphs or comments, use it."
 			 (org-element-at-point)))
 	      (type (org-element-type element))
 	      (post-affiliated (org-element-property :post-affiliated element)))
-	 (unless (and post-affiliated (< p post-affiliated))
+	 (unless (< p post-affiliated)
 	   (case type
 	     (comment
 	      (save-excursion
@@ -22753,10 +22751,7 @@ matches in paragraphs or comments, use it."
 		(concat (match-string 0) "# ")))
 	     (footnote-definition "")
 	     ((item plain-list)
-	      (make-string (org-list-item-body-column
-			    (or post-affiliated
-				(org-element-property :begin element)))
-			   ?\s))
+	      (make-string (org-list-item-body-column post-affiliated) ?\s))
 	     (paragraph
 	      ;; Fill prefix is usually the same as the current line,
 	      ;; unless the paragraph is at the beginning of an item.
@@ -22989,9 +22984,7 @@ region only contains such lines."
            ((and (memq type '(babel-call clock comment diary-sexp headline
 					 horizontal-rule keyword paragraph
 					 planning))
-		 (or (not (org-element-property :post-affiliated element))
-		     (<= (org-element-property :post-affiliated element)
-			 (point))))
+		 (<= (org-element-property :post-affiliated element) (point)))
             (skip-chars-forward " \t")
             (insert ": "))
            ((and (org-looking-at-p "[ \t]*$")
@@ -23946,7 +23939,7 @@ item, etc.  It also provides some special moves for convenience:
            (skip-chars-forward " \r\t\n")
            (or (eobp) (beginning-of-line)))
           ;; On affiliated keywords, move to element's beginning.
-          ((and post-affiliated (< (point) post-affiliated))
+          ((< (point) post-affiliated)
            (goto-char post-affiliated))
           ;; At a table row, move to the end of the table.  Similarly,
           ;; at a node property, move to the end of the property
@@ -24025,7 +24018,7 @@ convenience:
      ((= (point) begin)
       (backward-char)
       (org-backward-paragraph))
-     ((and post-affiliated (<= (point) post-affiliated)) (goto-char begin))
+     ((<= (point) post-affiliated) (goto-char begin))
      ((memq type '(node-property table-row))
       (goto-char (org-element-property
                   :post-affiliated (org-element-property :parent element))))
@@ -24521,7 +24514,7 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 		   (otherwise t)))))))
       (cond
        ;; Ignore checks in all affiliated keywords but captions.
-       ((and post-affiliated (< (point) post-affiliated))
+       ((< (point) post-affiliated)
 	(and (save-excursion
 	       (beginning-of-line)
 	       (let ((case-fold-search t)) (looking-at "[ \t]*#\\+CAPTION:")))
@@ -24544,8 +24537,7 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 	  ((comment quote-section) t)
 	  (comment-block
 	   ;; Allow checks between block markers, not on them.
-	   (and (> (line-beginning-position)
-		   (org-element-property :post-affiliated element))
+	   (and (> (line-beginning-position) post-affiliated)
 		(save-excursion
 		  (end-of-line)
 		  (skip-chars-forward " \r\t\n")
