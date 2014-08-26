@@ -110,6 +110,7 @@ now handled as standard code blocks, i.e., the source code can appear
 in the output, depending on the parameters.
 *** Extend ~org-export-first-sibling-p~ and ~org-export-last-sibling-p~
 These functions now support any element or object, not only headlines.
+*** New function: ~org-export-table-row-in-header-p~
 ** Miscellaneous
 *** File names in links accept are now compatible with URI syntax
 Absolute file names can now start with =///= in addition to =/=. E.g.,
