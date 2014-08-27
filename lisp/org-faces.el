@@ -491,7 +491,7 @@ changes."
 
 (defface org-meta-line
   (org-compatible-face 'font-lock-comment-face nil)
-  "Face for meta lines startin with \"#+\"."
+  "Face for meta lines starting with \"#+\"."
   :group 'org-faces
   :version "22.1")
 

@@ -396,6 +396,10 @@ a timestamp with \\[org-schedule].")
   "Matches a line with planning or clock info.
 Matched keyword is in group 1.")
 
+(defconst org-clock-line-re
+  (concat "^[ \t]*" org-clock-string)
+  "Matches a line with clock info.")
+
 ;;;; Drawer
 
 (defconst org-drawer-regexp "^[ \t]*:\\(\\(?:\\w\\|[-_]\\)+\\):[ \t]*$"
@@ -8659,6 +8663,7 @@ and still retain the repeater to cover future instances of the task."
 	       ""))) ;; No time shift
 	(n-no-remove -1)
 	(drawer-re org-drawer-regexp)
+	(org-clock-re (format "^[ \t]*%s.*$" org-clock-string))
 	beg end template task idprop
 	shift-n shift-what doshift nmin nmax)
     (if (not (and (integerp n) (> n 0)))
@@ -8698,7 +8703,7 @@ and still retain the repeater to cover future instances of the task."
 			    (org-entry-delete nil "ID")
 			  (org-id-get-create t)))
 	    (unless (= n 0)
-	      (while (re-search-forward "^[ \t]*CLOCK:.*$" nil t)
+	      (while (re-search-forward org-clock-re nil t)
 		(kill-whole-line))
 	      (goto-char (point-min))
 	      (while (re-search-forward drawer-re nil t)
@@ -15883,6 +15888,9 @@ formats in the current buffer."
 		  0))
 	(beg (point))
 	(re (concat "^[ \t]*" org-keyword-time-regexp))
+	(org-clock-re (format "^[ \t]*\\(:CLOCK:\\|:LOGBOOK:\\|%s\\|:END:\\)"
+			      org-clock-string))
+	(org-skip-line-list (list org-clock-string ":END:"))
 	end hiddenp)
     (outline-next-heading)
     (setq end (point))
@@ -15891,8 +15899,8 @@ formats in the current buffer."
     (setq hiddenp (outline-invisible-p))
     (end-of-line 1)
     (and (equal (char-after) ?\n) (forward-char 1))
-    (while (looking-at "^[ \t]*\\(:CLOCK:\\|:LOGBOOK:\\|CLOCK:\\|:END:\\)")
-      (if (member (match-string 1) '("CLOCK:" ":END:"))
+    (while (looking-at org-clock-re)
+      (if (member (match-string 1) org-skip-line-list)
 	  ;; just skip this line
 	  (beginning-of-line 2)
 	;; Drawer start, find the end
@@ -17589,7 +17597,7 @@ With prefix ARG, change that many days."
   "Is the cursor on the clock log line?"
   (save-excursion
     (move-beginning-of-line 1)
-    (looking-at "^[ \t]*CLOCK:")))
+    (looking-at org-clock-line-re)))
 
 (defvar org-clock-history)                     ; defined in org-clock.el
 (defvar org-clock-adjust-closest nil)          ; defined in org-clock.el
