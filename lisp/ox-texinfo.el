@@ -466,18 +466,23 @@ See `org-texinfo-text-markup-alist' for details."
      ;; Else use format string.
      (t (format fmt text)))))
 
-(defun org-texinfo--get-node (headline info)
-  "Return node entry associated to HEADLINE.
-INFO is a plist used as a communication channel.  The function
-guarantees the node name is unique."
+(defun org-texinfo--get-node (blob info)
+  "Return node or anchor associated to BLOB.
+BLOB is an element or object.  INFO is a plist used as
+a communication channel.  The function guarantees the node or
+anchor name is unique."
   (let ((cache (plist-get info :texinfo-node-cache)))
-    (or (cdr (assq headline cache))
-	(let ((name (org-texinfo--sanitize-node
-		     (org-export-data
-		      (org-export-get-alt-title headline info) info))))
+    (or (cdr (assq blob cache))
+	(let ((name
+	       (org-texinfo--sanitize-node
+		(case (org-element-type blob)
+		  (headline
+		   (org-export-data (org-export-get-alt-title blob info) info))
+		  ((radio-target target) (org-element-property :value blob))
+		  (otherwise (or (org-element-property :name blob) ""))))))
 	  ;; Ensure NAME is unique.
 	  (while (rassoc name cache) (setq name (concat name "x")))
-	  (plist-put info :texinfo-node-cache (cons (cons headline name) cache))
+	  (plist-put info :texinfo-node-cache (cons (cons blob name) cache))
 	  name))))
 
 ;;;; Menu sanitizing
@@ -498,7 +503,7 @@ are not significant.  Also remove the following characters: @
 (defun org-texinfo--sanitize-content (text)
   "Escape special characters in string TEXT.
 Special characters are: @ { }"
-  (replace-regexp-in-string "\\\([@{}]\\\)" "@\\1" text))
+  (replace-regexp-in-string "[@{}]" "@\\&" text))
 
 ;;; Template
 
@@ -933,55 +938,69 @@ INFO is a plist holding contextual information.  See
 		((and (string= type "file") (file-name-absolute-p raw-path))
 		 (concat "file:" raw-path))
 		(t raw-path)))
-	 (email (if (string= type "mailto")
-		    (let ((text (replace-regexp-in-string
-				 "@" "@@" raw-path)))
-		      (concat text (if desc (concat "," desc))))))
 	 protocol)
     (cond
-     ;; Links pointing to a headline: Find destination and build
-     ;; appropriate referencing command.
-     ((member type '("custom-id" "id"))
-      (let ((destination (org-export-resolve-id-link link info)))
+     ((equal type "radio")
+      (let ((destination (org-export-resolve-radio-link link info)))
+	(if (not destination) desc
+	  (format "@ref{%s,,%s}"
+		  (org-texinfo--get-node destination info)
+		  desc))))
+     ((member type '("custom-id" "id" "fuzzy"))
+      (let ((destination
+	     (if (equal type "fuzzy")
+		 (org-export-resolve-fuzzy-link link info)
+	       (org-export-resolve-id-link link info))))
 	(case (org-element-type destination)
+	  ((nil)
+	   (format org-texinfo-link-with-unknown-path-format
+		   (org-texinfo--sanitize-content path)))
 	  ;; Id link points to an external file.
 	  (plain-text
 	   (if desc (format "@uref{file://%s,%s}" destination desc)
 	     (format "@uref{file://%s}" destination)))
-	  ;; LINK points to a headline.  Use the headline as the NODE target
 	  (headline
 	   (format "@ref{%s,%s}"
 		   (org-texinfo--get-node destination info)
-		   (or desc "")))
+		   (cond
+		    (desc)
+		    ((org-export-numbered-headline-p destination info)
+		     (org-export-data
+		      (org-element-property :title destination) info))
+		    (t
+		     (mapconcat
+		      #'number-to-string
+		      (org-export-get-headline-number destination info) ".")))))
 	  (otherwise
-	   (let ((path (org-export-solidify-link-text path)))
-	     (if (not desc) (format "@ref{%s}" path)
-	       (format "@ref{%s,,%s}" path desc)))))))
-     ((member type '("info"))
+	   (let ((topic
+		  (or desc
+		      (if (and (eq (org-element-type destination) 'headline)
+			       (not (org-export-numbered-headline-p
+				     destination info)))
+			  (org-export-data
+			   (org-element-property :title destination) info))
+		      (let ((n (org-export-get-ordinal destination info)))
+			(cond
+			 ((not n) nil)
+			 ((integerp n) n)
+			 (t (mapconcat #'number-to-string n ".")))))))
+	     (when topic
+	       (format "@ref{%s,,%s}"
+		       (org-texinfo--get-node destination info)
+		       topic)))))))
+     ((equal type "info")
       (let* ((info-path (split-string path "[:#]"))
 	     (info-manual (car info-path))
 	     (info-node (or (cadr info-path) "top"))
 	     (title (or desc "")))
 	(format "@ref{%s,%s,,%s,}" info-node title info-manual)))
-     ((member type '("fuzzy"))
-      (let ((destination (org-export-resolve-fuzzy-link link info)))
-	(case (org-element-type destination)
-	  ;; Id link points to an external file.
-	  (plain-text
-	   (if desc (format "@uref{file://%s,%s}" destination desc)
-	     (format "@uref{file://%s}" destination)))
-	  ;; LINK points to a headline.  Use the headline as the NODE target
-	  (headline
-	   (format "@ref{%s,%s}"
-		   (org-texinfo--get-node destination info)
-		   (or desc "")))
-	  (otherwise
-	   (let ((path (org-export-solidify-link-text path)))
-	     (if (not desc) (format "@ref{%s}" path)
-	       (format "@ref{%s,,%s}" path desc)))))))
-     ;; Special case for email addresses
-     (email
-      (format "@email{%s}" email))
+     ((string= type "mailto")
+      (format "@email{%s}"
+	      (concat (org-texinfo--sanitize-content path)
+		      (and desc (concat "," desc)))))
+     ((let ((protocol (nth 2 (assoc type org-link-protocols))))
+	(and (functionp protocol)
+	     (funcall protocol (org-link-unescape path) desc 'texinfo))))
      ;; External link with a description part.
      ((and path desc) (format "@uref{%s,%s}" path desc))
      ;; External link without a description part.
