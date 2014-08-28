@@ -4326,7 +4326,8 @@ to execute outside of tables."
 	 ["Move Column Left" org-metaleft :active (org-at-table-p) :keys "M-<left>"]
 	 ["Move Column Right" org-metaright :active (org-at-table-p) :keys "M-<right>"]
 	 ["Delete Column" org-shiftmetaleft :active (org-at-table-p) :keys "M-S-<left>"]
-	 ["Insert Column" org-shiftmetaright :active (org-at-table-p) :keys "M-S-<right>"])
+	 ["Insert Column" org-shiftmetaright :active (org-at-table-p) :keys "M-S-<right>"]
+	 ["Ascii plot" orgtbl-ascii-plot :active (org-at-table-p) :keys "C-c p"])
 	("Row"
 	 ["Move Row Up" org-metaup :active (org-at-table-p) :keys "M-<up>"]
 	 ["Move Row Down" org-metadown :active (org-at-table-p) :keys "M-<down>"]
@@ -5007,6 +5008,108 @@ it here: http://gnuvola.org/software/j/aa2u/ascii-art-to-unicode.el."
 		"Link to ascii-art-to-unicode.el") org-stored-links))
       (user-error "Please download ascii-art-to-unicode.el (use C-c C-l to insert the link to it)"))
     (buffer-string)))
+
+;; Put the cursor in a column containing numerical values
+;; of an Org-Mode table,
+;; type C-c p
+;; A new column is added with a bar plot.
+;; When the table is refreshed (C-u C-c *),
+;; the plot is updated to reflect the new values.
+
+(defun orgtbl-ascii-draw (value min max &optional width characters)
+  "Draw an ascii bar in a table.
+VALUE is a the value to plot, the width of the bar to draw.  A
+value equal to MIN will be displayed as empty (zero width bar).
+A value equal to MAX will draw a bar filling all the WIDTH.
+WIDTH is the expected width in characters of the column.
+CHARACTERS is a string that will compose the bar, with shades of
+grey from pure white to pure black.  It defaults to a 10
+characters string of regular ascii characters."
+  (let* ((characters (or characters " .:;c!lhVHW"))
+	 (width (or width 12))
+	 (value (if (numberp value) value (string-to-number value)))
+	 (value (* (/ (- (+ value 0.0) min) (- max min)) width)))
+    (cond
+     ((< value     0) "too small")
+     ((> value width) "too large")
+     (t
+      (let ((len (1- (length characters))))
+	(concat
+	 (make-string (floor value) (elt characters len))
+	 (string (elt characters
+		      (floor (* (- value (floor value)) len))))))))))
+
+;;;###autoload
+(defun orgtbl-ascii-plot (&optional ask)
+  "Draw an ascii bar plot in a column.
+With cursor in a column containing numerical values, this
+function will draw a plot in a new column.
+ASK, if given, is a numeric prefix to override the default 12
+characters width of the plot.  ASK may also be the
+\\[universal-argument] prefix, which will prompt for the width."
+  (interactive "P")
+  (let ((col (org-table-current-column))
+	(min  1e999)		 ; 1e999 will be converted to infinity
+	(max -1e999)		 ; which is the desired result
+	(table (org-table-to-lisp))
+	(length
+	 (cond ((consp ask)
+		(read-number "Length of column " 12))
+	       ((numberp ask) ask)
+	       (t 12))))
+    ;; Skip any hline a the top of table.
+    (while (eq (car table) 'hline) (setq table (cdr table)))
+    ;; Skip table header if any.
+    (dolist (x (or (cdr (memq 'hline table)) table))
+      (when (consp x)
+	(setq x (nth (1- col) x))
+	(when (string-match
+	       "^[-+]?\\([0-9]*[.]\\)?[0-9]*\\([eE][+-]?[0-9]+\\)?$"
+	       x)
+	  (setq x (string-to-number x))
+	  (when (> min x) (setq min x))
+	  (when (< max x) (setq max x)))))
+    (org-table-insert-column)
+    (org-table-move-column-right)
+    (org-table-store-formulas
+     (cons
+      (cons
+       (number-to-string (1+ col))
+       (format "'(%s $%s %s %s %s)"
+	       "orgtbl-ascii-draw" col min max length))
+      (org-table-get-stored-formulas)))
+    (org-table-recalculate t)))
+
+;; Example of extension: unicode characters
+;; Here are two examples of different styles.
+
+;; Unicode block characters are used to give a smooth effect.
+;; See http://en.wikipedia.org/wiki/Block_Elements
+;; Use one of those drawing functions
+;; - orgtbl-ascii-draw   (the default ascii)
+;; - orgtbl-uc-draw-grid (unicode with a grid effect)
+;; - orgtbl-uc-draw-cont (smooth unicode)
+
+;; This is best viewed with the "DejaVu Sans Mono" font
+;; (use M-x set-default-font).
+
+(defun orgtbl-uc-draw-grid (value min max &optional width)
+  "Draw a bar in a table using block unicode characters.
+It is a variant of orgtbl-ascii-draw with Unicode block
+characters, for a smooth display.  Bars appear as grids (to the
+extent the font allows)."
+  ;; http://en.wikipedia.org/wiki/Block_Elements
+  ;; best viewed with the "DejaVu Sans Mono" font.
+  (orgtbl-ascii-draw value min max width
+		     " \u258F\u258E\u258D\u258C\u258B\u258A\u2589"))
+
+(defun orgtbl-uc-draw-cont (value min max &optional width)
+  "Draw a bar in a table using block unicode characters.
+It is a variant of orgtbl-ascii-draw with Unicode block
+characters, for a smooth display.  Bars are solid (to the extent
+the font allows)."
+  (orgtbl-ascii-draw value min max width
+		     " \u258F\u258E\u258D\u258C\u258B\u258A\u2589\u2588"))
 
 (defun org-table-get-remote-range (name-or-id form)
   "Get a field value or a list of values in a range from table at ID.
