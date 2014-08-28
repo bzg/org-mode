@@ -2260,7 +2260,12 @@ Outside list"
   (should
    (equal (org-test-parse-and-interpret
 	   "* Headline\n\n\nText after two blank lines.")
-	  "* Headline\n\n\nText after two blank lines.\n")))
+	  "* Headline\n\n\nText after two blank lines.\n"))
+  ;; 8. Preserve `org-odd-levels-only' state.
+  (should
+   (equal "* H\n*** H2\n"
+	  (let ((org-odd-levels-only t))
+	    (org-test-parse-and-interpret "* H\n*** H2")))))
 
 (ert-deftest test-org-element/inlinetask-interpreter ()
   "Test inlinetask interpretation."
