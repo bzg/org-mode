@@ -57,6 +57,12 @@ STDERR with `org-babel-eval-error-notify'."
 	  (progn
 	    (with-current-buffer err-buff
 	      (org-babel-eval-error-notify exit-code (buffer-string)))
+	    (save-excursion
+	      (when (get-buffer org-babel-error-buffer-name)
+		(with-current-buffer org-babel-error-buffer-name
+		  (compilation-mode)
+		  ;;compilation-mode enforces read-only
+		  (read-only-mode 0))))
 	    nil)
 	(buffer-string)))))
 

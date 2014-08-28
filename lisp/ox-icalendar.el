@@ -903,7 +903,7 @@ This function assumes major mode for current buffer is
 			    (buffer-substring
 			     (point) (progn (outline-next-heading) (point)))))))))
 		   (forward-line)))))
-	   'icalendar file)))
+	   'icalendar t '(:ascii-charset utf-8 :ascii-links-to-notes nil))))
     (with-temp-file file
       (insert
        (org-icalendar--vcalendar

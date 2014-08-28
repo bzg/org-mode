@@ -933,36 +933,38 @@ CONTENTS is the contents of the element."
 					 (org-element-property :tags headline))
 				 (org-element-property :tags headline))))
 		 (and tag-list
-		      (format ":%s:" (mapconcat 'identity tag-list ":")))))
+		      (format ":%s:" (mapconcat #'identity tag-list ":")))))
 	 (commentedp (org-element-property :commentedp headline))
 	 (pre-blank (or (org-element-property :pre-blank headline) 0))
-	 (heading (concat (make-string (org-reduced-level level) ?*)
-			  (and todo (concat " " todo))
-			  (and commentedp (concat " " org-comment-string))
-			  (and priority
-			       (format " [#%s]" (char-to-string priority)))
-			  (cond ((and org-footnote-section
-				      (org-element-property
-				       :footnote-section-p headline))
-				 (concat " " org-footnote-section))
-				(title (concat " " title))))))
-    (concat heading
-	    ;; Align tags.
-	    (when tags
-	      (cond
-	       ((zerop org-tags-column) (format " %s" tags))
-	       ((< org-tags-column 0)
-		(concat
-		 (make-string
-		  (max (- (+ org-tags-column (length heading) (length tags))) 1)
-		  ? )
-		 tags))
-	       (t
-		(concat
-		 (make-string (max (- org-tags-column (length heading)) 1) ? )
-		 tags))))
-	    (make-string (1+ pre-blank) 10)
-	    contents)))
+	 (heading
+	  (concat (make-string (if org-odd-levels-only (1- (* level 2)) level)
+			       ?*)
+		  (and todo (concat " " todo))
+		  (and commentedp (concat " " org-comment-string))
+		  (and priority (format " [#%s]" (char-to-string priority)))
+		  " "
+		  (if (and org-footnote-section
+			   (org-element-property :footnote-section-p headline))
+		      org-footnote-section
+		    title))))
+    (concat
+     heading
+     ;; Align tags.
+     (when tags
+       (cond
+	((zerop org-tags-column) (format " %s" tags))
+	((< org-tags-column 0)
+	 (concat
+	  (make-string
+	   (max (- (+ org-tags-column (length heading) (length tags))) 1)
+	   ?\s)
+	  tags))
+	(t
+	 (concat
+	  (make-string (max (- org-tags-column (length heading)) 1) ?\s)
+	  tags))))
+     (make-string (1+ pre-blank) ?\n)
+     contents)))
 
 
 ;;;; Inlinetask

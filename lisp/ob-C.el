@@ -82,6 +82,11 @@ is currently being evaluated.")
 This function calls `org-babel-execute:C++'."
   (org-babel-execute:C++ body params))
 
+(defun org-babel-expand-body:cpp (body params)
+  "Expand a block of C++ code with org-babel according to it's
+header arguments."
+  (org-babel-expand-body:C++ body params))
+
 (defun org-babel-execute:C++ (body params)
   "Execute a block of C++ code with org-babel.
 This function is called by `org-babel-execute-src-block'."
