@@ -515,7 +515,7 @@ used as a communication channel."
 	       ;; One can specify placement for column only when
 	       ;; HEADLINE stands for a column on its own.
 	       (if (equal environment "column") options "")
-	       (format "%s\\textwidth" column-width)))
+	       (format "%s\\columnwidth" column-width)))
      ;; Block's opening string.
      (when (nth 2 env-format)
        (concat

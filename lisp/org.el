@@ -19470,6 +19470,7 @@ boundaries."
 (org-defkey org-mode-map "\C-c="    'org-table-eval-formula)
 (org-defkey org-mode-map "\C-c'"    'org-edit-special)
 (org-defkey org-mode-map "\C-c`"    'org-table-edit-field)
+(org-defkey org-mode-map "\C-cp"    'orgtbl-ascii-plot)
 (org-defkey org-mode-map "\C-c|"    'org-table-create-or-convert-from-region)
 (org-defkey org-mode-map [(control ?#)] 'org-table-rotate-recalc-marks)
 (org-defkey org-mode-map "\C-c~"    'org-table-create-with-table.el)
@@ -21142,7 +21143,8 @@ on context.  See the individual commands for more information."
      ["Move Column Left" org-metaleft (org-at-table-p)]
      ["Move Column Right" org-metaright (org-at-table-p)]
      ["Delete Column" org-shiftmetaleft (org-at-table-p)]
-     ["Insert Column" org-shiftmetaright (org-at-table-p)])
+     ["Insert Column" org-shiftmetaright (org-at-table-p)]
+     ["Ascii plot" orgtbl-ascii-plot (org-at-table-p)])
     ("Row"
      ["Move Row Up" org-metaup (org-at-table-p)]
      ["Move Row Down" org-metadown (org-at-table-p)]
