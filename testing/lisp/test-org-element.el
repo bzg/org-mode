@@ -1571,23 +1571,37 @@ e^{i\\pi}+1=0
   ;; Standard test.
   (should
    (equal '("abc" "value")
-	  (org-test-with-temp-text ":PROPERTIES:\n:abc: value\n:END:"
-	    (progn (forward-line)
-		   (let ((element (org-element-at-point)))
-		     (list (org-element-property :key element)
-			   (org-element-property :value element)))))))
+	  (org-test-with-temp-text ":PROPERTIES:\n<point>:abc: value\n:END:"
+	    (let ((element (org-element-at-point)))
+	      (list (org-element-property :key element)
+		    (org-element-property :value element))))))
   ;; Value should be trimmed.
   (should
    (equal "value"
-	  (org-test-with-temp-text ":PROPERTIES:\n:abc: value  \n:END:"
-	    (progn (forward-line)
-		   (let ((element (org-element-at-point)))
-		     (org-element-property :value element))))))
+	  (org-test-with-temp-text ":PROPERTIES:\n<point>:abc: value  \n:END:"
+	    (org-element-property :value (org-element-at-point)))))
   ;; A node property requires to be wrapped within a property drawer.
   (should-not
    (eq 'node-property
        (org-test-with-temp-text ":abc: value"
-	 (org-element-type (org-element-at-point))))))
+	 (org-element-type (org-element-at-point)))))
+  ;; Accept empty properties.
+  (should
+   (equal '(("foo" "value") ("bar" nil))
+	  (org-test-with-temp-text ":PROPERTIES:\n:foo: value\n:bar:\n:END:"
+	    (org-element-map (org-element-parse-buffer) 'node-property
+	      (lambda (p)
+		(list (org-element-property :key p)
+		      (org-element-property :value p)))))))
+  ;; Ignore all non-property lines in property drawers.
+  (should
+   (equal
+    '(("foo" "value"))
+    (org-test-with-temp-text ":PROPERTIES:\nWrong1\n:foo: value\nWrong2\n:END:"
+      (org-element-map (org-element-parse-buffer) 'node-property
+	(lambda (p)
+	  (list (org-element-property :key p)
+		(org-element-property :value p))))))))
 
 
 ;;;; Paragraph
@@ -1679,30 +1693,27 @@ Outside list"
 
 (ert-deftest test-org-element/planning-parser ()
   "Test `planning' parser."
+  ;; Test various keywords.
   (should
-   (equal "[2012-03-29 thu.]"
-	  (org-element-property
-	   :raw-value
-	   (org-element-property
-	    :closed
-	    (org-test-with-temp-text "CLOSED: [2012-03-29 thu.]"
-	      (org-element-at-point))))))
+   (org-element-property
+    :closed
+    (org-test-with-temp-text "* H\n<point>CLOSED: [2012-03-29 thu.]"
+      (org-element-at-point))))
   (should
-   (equal "<2012-03-29 thu.>"
-	  (org-element-property
-	   :raw-value
-	   (org-element-property
-	    :deadline
-	    (org-test-with-temp-text "DEADLINE: <2012-03-29 thu.>"
-	      (org-element-at-point))))))
+   (org-element-property
+    :deadline
+    (org-test-with-temp-text "* H\n<point>DEADLINE: <2012-03-29 thu.>"
+      (org-element-at-point))))
   (should
-   (equal "<2012-03-29 thu.>"
-	  (org-element-property
-	   :raw-value
-	   (org-element-property
-	    :scheduled
-	    (org-test-with-temp-text "SCHEDULED: <2012-03-29 thu.>"
-	      (org-element-at-point)))))))
+   (org-element-property
+    :scheduled
+    (org-test-with-temp-text "* H\n<point>SCHEDULED: <2012-03-29 thu.>"
+      (org-element-at-point))))
+  ;; Planning line only exists right after a headline.
+  (should-not
+   (eq 'planning
+       (org-test-with-temp-text "DEADLINE: <2012-03-29 thu.>"
+	 (org-element-type (org-element-at-point))))))
 
 
 ;;;; Property Drawer
@@ -2075,11 +2086,7 @@ Outside list"
 	  (org-test-with-temp-text "<2012-03-29 Thu +1y -1y>"
 	    (let ((ts (org-element-context)))
 	      (list (org-element-property :repeater-type ts)
-		    (org-element-property :warning-type ts))))))
-  ;; Timestamps are not planning elements.
-  (should-not
-   (org-test-with-temp-text "SCHEDULED: <2012-03-29 Thu 16:40>"
-     (org-element-map (org-element-parse-buffer) 'timestamp 'identity))))
+		    (org-element-property :warning-type ts)))))))
 
 
 ;;;; Underline

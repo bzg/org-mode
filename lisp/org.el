@@ -387,13 +387,12 @@ A schedule is this string, followed by a time stamp.  Should be a word,
 terminated by a colon.  You can insert a schedule keyword and
 a timestamp with \\[org-schedule].")
 
-(defconst org-planning-or-clock-line-re
+(defconst org-planning-line-re
   (concat "^[ \t]*"
 	  (regexp-opt
-	   (list org-clock-string org-closed-string org-deadline-string
-		 org-scheduled-string)
+	   (list org-closed-string org-deadline-string org-scheduled-string)
 	   t))
-  "Matches a line with planning or clock info.
+  "Matches a line with planning info.
 Matched keyword is in group 1.")
 
 (defconst org-clock-line-re
@@ -6261,9 +6260,9 @@ Use `org-reduced-level' to remove the effect of `org-odd-levels'."
  Match group 3 will be set to the value if it exists."
   (concat "^\\(?4:[ \t]*\\)\\(?1::\\(?2:"
  	  (if literal property (regexp-quote property))
-	  "\\):\\)[ \t]+\\(?3:[^ \t\r\n]"
-	  (if allow-null "*")
-	  ".*?\\)\\(?5:[ \t]*\\)$"))
+	  "\\):\\)\\(?:[ \t]+\\(?3:[^ \t\r\n].*?\\)\\)"
+	  (and allow-null "?")
+	  "\\(?5:[ \t]*\\)$"))
 
 (defconst org-property-re
   (org-re-property ".*?" 'literal t)
@@ -22469,7 +22468,9 @@ Alignment is done according to `org-property-format', which see."
 	  (looking-at org-property-re))
     (replace-match
      (concat (match-string 4)
-	     (format org-property-format (match-string 1) (match-string 3)))
+	     (if (match-string 3)
+		 (format org-property-format (match-string 1) (match-string 3))
+	       (match-string 1)))
      t t)))
 
 (defun org-indent-line ()
