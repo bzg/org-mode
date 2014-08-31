@@ -1571,23 +1571,37 @@ e^{i\\pi}+1=0
   ;; Standard test.
   (should
    (equal '("abc" "value")
-	  (org-test-with-temp-text ":PROPERTIES:\n:abc: value\n:END:"
-	    (progn (forward-line)
-		   (let ((element (org-element-at-point)))
-		     (list (org-element-property :key element)
-			   (org-element-property :value element)))))))
+	  (org-test-with-temp-text ":PROPERTIES:\n<point>:abc: value\n:END:"
+	    (let ((element (org-element-at-point)))
+	      (list (org-element-property :key element)
+		    (org-element-property :value element))))))
   ;; Value should be trimmed.
   (should
    (equal "value"
-	  (org-test-with-temp-text ":PROPERTIES:\n:abc: value  \n:END:"
-	    (progn (forward-line)
-		   (let ((element (org-element-at-point)))
-		     (org-element-property :value element))))))
+	  (org-test-with-temp-text ":PROPERTIES:\n<point>:abc: value  \n:END:"
+	    (org-element-property :value (org-element-at-point)))))
   ;; A node property requires to be wrapped within a property drawer.
   (should-not
    (eq 'node-property
        (org-test-with-temp-text ":abc: value"
-	 (org-element-type (org-element-at-point))))))
+	 (org-element-type (org-element-at-point)))))
+  ;; Accept empty properties.
+  (should
+   (equal '(("foo" "value") ("bar" nil))
+	  (org-test-with-temp-text ":PROPERTIES:\n:foo: value\n:bar:\n:END:"
+	    (org-element-map (org-element-parse-buffer) 'node-property
+	      (lambda (p)
+		(list (org-element-property :key p)
+		      (org-element-property :value p)))))))
+  ;; Ignore all non-property lines in property drawers.
+  (should
+   (equal
+    '(("foo" "value"))
+    (org-test-with-temp-text ":PROPERTIES:\nWrong1\n:foo: value\nWrong2\n:END:"
+      (org-element-map (org-element-parse-buffer) 'node-property
+	(lambda (p)
+	  (list (org-element-property :key p)
+		(org-element-property :value p))))))))
 
 
 ;;;; Paragraph
