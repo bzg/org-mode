@@ -97,9 +97,9 @@ Dit werk is valt onder een [[" org-license-cc-url "][Creative Commons Naamsverme
 	  (insert (concat "* Licença
 Este texto é disponibilizado nos termos da licença [[" org-license-cc-url "][Atribuição 3.0 Portugal]]\n")))
 	 (t
-	  (setq org-license-cc-url "http://creativecommons.org/licenses/by/3.0/en/deed.en") 
+	  (setq org-license-cc-url "http://creativecommons.org/licenses/by/4.0/deed") 
 	  (concat (insert "* License
-This document is under a [[" org-license-cc-url "][Creative Commons Attribution 3.0]]\n"))))
+This document is under a [[" org-license-cc-url "][Creative Commons Attribution 4.0 International]]\n"))))
   (if (string= "" org-license-images-directory)
       (insert (concat "\n[[" org-license-cc-url "][file:http://i.creativecommons.org/l/by/3.0/80x15.png]]\n"))
     (insert (concat "\n[[" org-license-cc-url "][file:" org-license-images-directory "/by/3.0/80x15.png]]\n"))))
@@ -155,9 +155,9 @@ Dit werk is valt onder een [[" org-license-cc-url "][Creative Commons Naamsverme
 	 (insert (concat "* Licença
 Este texto é disponibilizado nos termos da licença [[" org-license-cc-url "][Atribuição-CompartilhaIgual 3.0 Portugal]]\n")))
 	(t
-	 (setq org-license-cc-url "http://creativecommons.org/licenses/by-sa/3.0/deed")
+	 (setq org-license-cc-url "http://creativecommons.org/licenses/by-sa/4.0/deed")
 	 (insert (concat "* License
-This document is under a [[" org-license-cc-url "][Creative Commons Attribution-ShareAlike Unported 3.0]]\n"))))
+This document is under a [[" org-license-cc-url "][Creative Commons Attribution-ShareAlike 4.0 International]]\n"))))
   (if (string= "" org-license-images-directory)
       (insert (concat "\n[[" org-license-cc-url "][file:http://i.creativecommons.org/l/by-sa/3.0/80x15.png]]\n"))
     (insert (concat "\n[[" org-license-cc-url "][file:" org-license-images-directory "/by-sa/3.0/80x15.png]]\n"))))
@@ -213,9 +213,9 @@ Dit werk is valt onder een [[" org-license-cc-url "][Creative Commons Naamsverme
 	 (insert (concat "* Licença
 Este texto é disponibilizado nos termos da licença [[" org-license-cc-url "][Atribuição Sem Derivados 3.0 Portugal]]\n")))
 	(t
-	 (setq org-license-cc-url "http://creativecommons.org/licenses/by-nd/3.0/deed")
+	 (setq org-license-cc-url "http://creativecommons.org/licenses/by-nd/4.0/deed")
 	 (insert (concat "* License
-This document is under a [[" org-license-cc-url "][Creative Commons No Derivatives Unported 3.0]]\n"))))
+This document is under a [[" org-license-cc-url "][Creative Commons No Derivatives 4.0 International]]\n"))))
   (if (string= "" org-license-images-directory)
       (insert (concat "\n[[" org-license-cc-url "][file:http://i.creativecommons.org/l/by-nd/3.0/80x15.png]]\n"))
     (insert (concat "\n[[" org-license-cc-url "][file:" org-license-images-directory "/by-nd/3.0/80x15.png]]\n"))))
@@ -272,9 +272,9 @@ Dit werk is valt onder een [[" org-license-cc-url "][Creative Commons Naamsverme
 	 (insert (concat "* Licença
 Este texto é disponibilizado nos termos da licença [[" org-license-cc-url "][Atribuição Não Comercial 3.0 Portugal]]\n")))
 	(t 
-	 (setq org-license-cc-url "http://creativecommons.org/licenses/by-nc/3.0/deed")
+	 (setq org-license-cc-url "http://creativecommons.org/licenses/by-nc/4.0/deed")
 	 (insert (concat "* License 
-This document is under a [[" org-license-cc-url "][Creative Commons Attribution-NonCommercial 3.0 Unported]]\n"))))
+This document is under a [[" org-license-cc-url "][Creative Commons Attribution-NonCommercial 4.0 International]]\n"))))
   (if (string= "" org-license-images-directory)
       (insert (concat "\n[[" org-license-cc-url "][file:http://i.creativecommons.org/l/by-nc/3.0/80x15.png]]\n"))
     (insert (concat "\n[[" org-license-cc-url "][file:" org-license-images-directory "/by-nc/3.0/80x15.png]]\n"))))
@@ -330,9 +330,9 @@ Dit werk is valt onder een [[" org-license-cc-url "][Creative Commons Naamsverme
 	 (insert (concat "* Licença
 Este texto é disponibilizado nos termos da licença [[" org-license-cc-url "][Atribuição NãoComercial Compartil ha Igual 3.0 Portugal]]\n")))
 	(t 
-	 (setq org-license-cc-url "http://creativecommons.org/licenses/by-nc-sa/3.0/deed")
+	 (setq org-license-cc-url "http://creativecommons.org/licenses/by-nc-sa/4.0/deed")
 	 (insert (concat "* License
-This document is under a [[" org-license-cc-url "][License Creative Commons Attribution Non Commercial Share Alike 3.0 Unported]]\n"))))
+This document is under a [[" org-license-cc-url "][License Creative Commons Attribution Non Commercial Share Alike 4.0 International]]\n"))))
   (if (string= "" org-license-images-directory)
       (insert (concat "\n[[" org-license-cc-url  "][file:http://i.creativecommons.org/l/by-nc-sa/3.0/80x15.png]]\n"))
     (insert (concat "\n[[" org-license-cc-url "][file:" org-license-images-directory "/by-nc-sa/3.0/80x15.png]]\n"))))
@@ -388,10 +388,9 @@ Dit werk is valt onder een [[" org-license-cc-url "][Creative Commons Naamsverme
 	 (insert (concat "* Licença
 Este texto é disponibilizado nos termos da licença [[" org-license-cc-url "][Atribuição Não Comercial Sem Derivados 3.0 Portugal]]\n")))
 	(t 
-	 (setq org-license-cc-url "http://creativecommons.org/licenses/by-nc-nd/3.0/deed")
+	 (setq org-license-cc-url "http://creativecommons.org/licenses/by-nc-nd/4.0/deed")
 	 (insert (concat "* License
-This document is under a [[" org-license-cc-url "][License Creative Commons
-Reconocimiento-NoComercial-SinObraDerivada 3.0 Unported]]\n"))))
+This document is under a [[" org-license-cc-url "][License Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International]]\n"))))
   (if (string= "" org-license-images-directory)
       (insert (concat "\n[[" org-license-cc-url "][file:http://i.creativecommons.org/l/by-nc-nd/3.0/80x15.png]]\n"))
     (insert (concat "\n[[" org-license-cc-url "][file:" org-license-images-directory "/by-nc-nd/3.0/80x15.png]]\n"))))
