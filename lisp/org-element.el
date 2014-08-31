@@ -1312,36 +1312,36 @@ containing `:begin', `:end', `:hiddenp', `:contents-begin',
 `:contents-end', `:post-blank' and `:post-affiliated' keywords.
 
 Assume point is at the beginning of the property drawer."
-  (save-excursion
-    (let ((case-fold-search t))
-      (if (not (save-excursion
-		 (re-search-forward "^[ \t]*:END:[ \t]*$" limit t)))
-	  ;; Incomplete drawer: parse it as a paragraph.
-	  (org-element-paragraph-parser limit affiliated)
-	(save-excursion
-	  (let* ((drawer-end-line (match-beginning 0))
-		 (begin (car affiliated))
-		 (post-affiliated (point))
-		 (contents-begin (progn (forward-line)
-					(and (< (point) drawer-end-line)
-					     (point))))
-		 (contents-end (and contents-begin drawer-end-line))
-		 (hidden (org-invisible-p2))
-		 (pos-before-blank (progn (goto-char drawer-end-line)
-					  (forward-line)
-					  (point)))
-		 (end (progn (skip-chars-forward " \r\t\n" limit)
-			     (if (eobp) (point) (line-beginning-position)))))
-	    (list 'property-drawer
-		  (nconc
-		   (list :begin begin
-			 :end end
-			 :hiddenp hidden
-			 :contents-begin contents-begin
-			 :contents-end contents-end
-			 :post-blank (count-lines pos-before-blank end)
-			 :post-affiliated post-affiliated)
-		   (cdr affiliated)))))))))
+  (let ((case-fold-search t))
+    (if (not (save-excursion (re-search-forward "^[ \t]*:END:[ \t]*$" limit t)))
+	;; Incomplete drawer: parse it as a paragraph.
+	(org-element-paragraph-parser limit affiliated)
+      (save-excursion
+	(let* ((drawer-end-line (match-beginning 0))
+	       (begin (car affiliated))
+	       (post-affiliated (point))
+	       (contents-begin
+		(progn
+		  (forward-line)
+		  (and (re-search-forward org-property-re drawer-end-line t)
+		       (line-beginning-position))))
+	       (contents-end (and contents-begin drawer-end-line))
+	       (hidden (org-invisible-p2))
+	       (pos-before-blank (progn (goto-char drawer-end-line)
+					(forward-line)
+					(point)))
+	       (end (progn (skip-chars-forward " \r\t\n" limit)
+			   (if (eobp) (point) (line-beginning-position)))))
+	  (list 'property-drawer
+		(nconc
+		 (list :begin begin
+		       :end end
+		       :hiddenp hidden
+		       :contents-begin contents-begin
+		       :contents-end contents-end
+		       :post-blank (count-lines pos-before-blank end)
+		       :post-affiliated post-affiliated)
+		 (cdr affiliated))))))))
 
 (defun org-element-property-drawer-interpreter (property-drawer contents)
   "Interpret PROPERTY-DRAWER element as Org syntax.
@@ -2096,28 +2096,28 @@ LIMIT bounds the search.
 Return a list whose CAR is `node-property' and CDR is a plist
 containing `:key', `:value', `:begin', `:end' and `:post-blank'
 keywords."
-  (save-excursion
-    (looking-at org-property-re)
-    (let ((case-fold-search t)
-	  (begin (point))
-	  (key   (org-match-string-no-properties 2))
-	  (value (org-match-string-no-properties 3))
-	  (pos-before-blank (progn (forward-line) (point)))
-	  (end (progn (skip-chars-forward " \r\t\n" limit)
-		      (if (eobp) (point) (point-at-bol)))))
-      (list 'node-property
-	    (list :key key
-		  :value value
-		  :begin begin
-		  :end end
-		  :post-blank (count-lines pos-before-blank end))))))
+  (looking-at org-property-re)
+  (let ((begin (point))
+	(key   (org-match-string-no-properties 2))
+	(value (org-match-string-no-properties 3))
+	(end (save-excursion
+	       (end-of-line)
+	       (if (re-search-forward org-property-re limit t)
+		   (line-beginning-position)
+		 limit))))
+    (list 'node-property
+	  (list :key key
+		:value value
+		:begin begin
+		:end end
+		:post-blank 0))))
 
 (defun org-element-node-property-interpreter (node-property contents)
   "Interpret NODE-PROPERTY element as Org syntax.
 CONTENTS is nil."
   (format org-property-format
 	  (format ":%s:" (org-element-property :key node-property))
-	  (org-element-property :value node-property)))
+	  (or (org-element-property :value node-property) "")))
 
 
 ;;;; Paragraph
