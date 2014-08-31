@@ -1693,30 +1693,27 @@ Outside list"
 
 (ert-deftest test-org-element/planning-parser ()
   "Test `planning' parser."
+  ;; Test various keywords.
   (should
-   (equal "[2012-03-29 thu.]"
-	  (org-element-property
-	   :raw-value
-	   (org-element-property
-	    :closed
-	    (org-test-with-temp-text "CLOSED: [2012-03-29 thu.]"
-	      (org-element-at-point))))))
+   (org-element-property
+    :closed
+    (org-test-with-temp-text "* H\n<point>CLOSED: [2012-03-29 thu.]"
+      (org-element-at-point))))
   (should
-   (equal "<2012-03-29 thu.>"
-	  (org-element-property
-	   :raw-value
-	   (org-element-property
-	    :deadline
-	    (org-test-with-temp-text "DEADLINE: <2012-03-29 thu.>"
-	      (org-element-at-point))))))
+   (org-element-property
+    :deadline
+    (org-test-with-temp-text "* H\n<point>DEADLINE: <2012-03-29 thu.>"
+      (org-element-at-point))))
   (should
-   (equal "<2012-03-29 thu.>"
-	  (org-element-property
-	   :raw-value
-	   (org-element-property
-	    :scheduled
-	    (org-test-with-temp-text "SCHEDULED: <2012-03-29 thu.>"
-	      (org-element-at-point)))))))
+   (org-element-property
+    :scheduled
+    (org-test-with-temp-text "* H\n<point>SCHEDULED: <2012-03-29 thu.>"
+      (org-element-at-point))))
+  ;; Planning line only exists right after a headline.
+  (should-not
+   (eq 'planning
+       (org-test-with-temp-text "DEADLINE: <2012-03-29 thu.>"
+	 (org-element-type (org-element-at-point))))))
 
 
 ;;;; Property Drawer
@@ -2089,11 +2086,7 @@ Outside list"
 	  (org-test-with-temp-text "<2012-03-29 Thu +1y -1y>"
 	    (let ((ts (org-element-context)))
 	      (list (org-element-property :repeater-type ts)
-		    (org-element-property :warning-type ts))))))
-  ;; Timestamps are not planning elements.
-  (should-not
-   (org-test-with-temp-text "SCHEDULED: <2012-03-29 Thu 16:40>"
-     (org-element-map (org-element-parse-buffer) 'timestamp 'identity))))
+		    (org-element-property :warning-type ts)))))))
 
 
 ;;;; Underline

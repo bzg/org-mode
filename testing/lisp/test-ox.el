@@ -482,15 +482,15 @@ Paragraph"
   ;; Plannings.
   (should
    (string-match
-    "CLOSED: \\[2012-04-29 .* 10:45\\]"
+    "* H\nCLOSED: \\[2012-04-29 .* 10:45\\]"
     (let ((org-closed-string "CLOSED:"))
-      (org-test-with-temp-text "CLOSED: [2012-04-29 sun. 10:45]"
+      (org-test-with-temp-text "* H\nCLOSED: [2012-04-29 sun. 10:45]"
 	(org-export-as (org-test-default-backend)
 		       nil nil nil '(:with-planning t))))))
   (should
-   (equal ""
+   (equal "* H\n"
 	  (let ((org-closed-string "CLOSED:"))
-	    (org-test-with-temp-text "CLOSED: [2012-04-29 sun. 10:45]"
+	    (org-test-with-temp-text "* H\nCLOSED: [2012-04-29 sun. 10:45]"
 	      (org-export-as (org-test-default-backend)
 			     nil nil nil '(:with-planning nil))))))
   ;; Property Drawers.

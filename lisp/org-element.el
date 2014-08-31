@@ -153,12 +153,8 @@
           "-\\{5,\\}[ \t]*$" "\\|"
           ;; LaTeX environments.
           "\\\\begin{\\([A-Za-z0-9]+\\*?\\)}" "\\|"
-          ;; Planning and Clock lines.
-          (regexp-opt (list org-scheduled-string
-                            org-deadline-string
-                            org-closed-string
-                            org-clock-string))
-          "\\|"
+          ;; Clock lines.
+          (regexp-quote org-clock-string) "\\|"
           ;; Lists.
           (let ((term (case org-plain-list-ordered-item-terminator
                         (?\) ")") (?. "\\.") (otherwise "[.)]")))
@@ -847,7 +843,7 @@ Assume point is at beginning of the headline."
 	    ;; Read time properties on the line below the headline.
 	    (save-excursion
 	      (forward-line)
-	      (when (looking-at org-planning-or-clock-line-re)
+	      (when (looking-at org-planning-line-re)
 		(let ((end (line-end-position)) plist)
 		  (while (re-search-forward
 			  org-keyword-time-not-clock-regexp end t)
@@ -1006,8 +1002,7 @@ Assume point is at beginning of the inline task."
 	    ;; opening string.
 	    (when task-end
 	      (save-excursion
-		(when (progn (forward-line)
-			     (looking-at org-planning-or-clock-line-re))
+		(when (progn (forward-line) (looking-at org-planning-line-re))
 		  (let ((end (line-end-position)) plist)
 		    (while (re-search-forward
 			    org-keyword-time-not-clock-regexp end t)
@@ -2239,33 +2234,35 @@ LIMIT bounds the search.
 Return a list whose CAR is `planning' and CDR is a plist
 containing `:closed', `:deadline', `:scheduled', `:begin',
 `:end', `:post-blank' and `:post-affiliated' keywords."
-  (save-excursion
-    (let* ((case-fold-search nil)
-	   (begin (point))
-	   (post-blank (let ((before-blank (progn (forward-line) (point))))
-			 (skip-chars-forward " \r\t\n" limit)
-			 (skip-chars-backward " \t")
-			 (unless (bolp) (end-of-line))
-			 (count-lines before-blank (point))))
-	   (end (point))
-	   closed deadline scheduled)
-      (goto-char begin)
-      (while (re-search-forward org-keyword-time-not-clock-regexp end t)
-	(goto-char (match-end 1))
-	(skip-chars-forward " \t" end)
-	(let ((keyword (match-string 1))
-	      (time (org-element-timestamp-parser)))
-	  (cond ((equal keyword org-closed-string) (setq closed time))
-		((equal keyword org-deadline-string) (setq deadline time))
-		(t (setq scheduled time)))))
-      (list 'planning
-	    (list :closed closed
-		  :deadline deadline
-		  :scheduled scheduled
-		  :begin begin
-		  :end end
-		  :post-blank post-blank
-		  :post-affiliated begin)))))
+  (if (not (save-excursion (forward-line -1) (org-at-heading-p)))
+      (org-element-paragraph-parser limit (list (point)))
+    (save-excursion
+      (let* ((case-fold-search nil)
+	     (begin (point))
+	     (post-blank (let ((before-blank (progn (forward-line) (point))))
+			   (skip-chars-forward " \r\t\n" limit)
+			   (skip-chars-backward " \t")
+			   (unless (bolp) (end-of-line))
+			   (count-lines before-blank (point))))
+	     (end (point))
+	     closed deadline scheduled)
+	(goto-char begin)
+	(while (re-search-forward org-keyword-time-not-clock-regexp end t)
+	  (goto-char (match-end 1))
+	  (skip-chars-forward " \t" end)
+	  (let ((keyword (match-string 1))
+		(time (org-element-timestamp-parser)))
+	    (cond ((equal keyword org-closed-string) (setq closed time))
+		  ((equal keyword org-deadline-string) (setq deadline time))
+		  (t (setq scheduled time)))))
+	(list 'planning
+	      (list :closed closed
+		    :deadline deadline
+		    :scheduled scheduled
+		    :begin begin
+		    :end end
+		    :post-blank post-blank
+		    :post-affiliated begin))))))
 
 (defun org-element-planning-interpreter (planning contents)
   "Interpret PLANNING element as Org syntax.
@@ -3667,10 +3664,8 @@ element it has to parse."
        ;; a footnote definition: next item is always a paragraph.
        ((not (bolp)) (org-element-paragraph-parser limit (list (point))))
        ;; Planning and Clock.
-       ((looking-at org-planning-or-clock-line-re)
-	(if (equal (match-string 1) org-clock-string)
-	    (org-element-clock-parser limit)
-	  (org-element-planning-parser limit)))
+       ((looking-at org-planning-line-re) (org-element-planning-parser limit))
+       ((looking-at org-clock-line-re) (org-element-clock-parser limit))
        ;; Inlinetask.
        ((org-at-heading-p)
 	(org-element-inlinetask-parser limit raw-secondary-p))

@@ -387,13 +387,12 @@ A schedule is this string, followed by a time stamp.  Should be a word,
 terminated by a colon.  You can insert a schedule keyword and
 a timestamp with \\[org-schedule].")
 
-(defconst org-planning-or-clock-line-re
+(defconst org-planning-line-re
   (concat "^[ \t]*"
 	  (regexp-opt
-	   (list org-clock-string org-closed-string org-deadline-string
-		 org-scheduled-string)
+	   (list org-closed-string org-deadline-string org-scheduled-string)
 	   t))
-  "Matches a line with planning or clock info.
+  "Matches a line with planning info.
 Matched keyword is in group 1.")
 
 (defconst org-clock-line-re
