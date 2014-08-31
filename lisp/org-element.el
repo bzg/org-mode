@@ -3610,8 +3610,7 @@ CONTENTS is nil."
 ;; `section').  Special modes are: `first-section', `item',
 ;; `node-property', `section' and `table-row'.
 
-(defun org-element--current-element
-  (limit &optional granularity special structure)
+(defun org-element--current-element (limit &optional granularity mode structure)
   "Parse the element starting at point.
 
 Return value is a list like (TYPE PROPS) where TYPE is the type
@@ -3628,12 +3627,12 @@ recursion.  Allowed values are `headline', `greater-element',
 nil), secondary values will not be parsed, since they only
 contain objects.
 
-Optional argument SPECIAL, when non-nil, can be either
-`first-section', `item', `node-property', `section', and
-`table-row'.
+Optional argument MODE, when non-nil, can be either
+`first-section', `section', `planning', `item', `node-property'
+and `table-row'.
 
-If STRUCTURE isn't provided but SPECIAL is set to `item', it will
-be computed.
+If STRUCTURE isn't provided but MODE is set to `item', it will be
+computed.
 
 This function assumes point is always at the beginning of the
 element it has to parse."
@@ -3645,26 +3644,28 @@ element it has to parse."
 	  (raw-secondary-p (and granularity (not (eq granularity 'object)))))
       (cond
        ;; Item.
-       ((eq special 'item)
+       ((eq mode 'item)
 	(org-element-item-parser limit structure raw-secondary-p))
        ;; Table Row.
-       ((eq special 'table-row) (org-element-table-row-parser limit))
+       ((eq mode 'table-row) (org-element-table-row-parser limit))
        ;; Node Property.
-       ((eq special 'node-property) (org-element-node-property-parser limit))
+       ((eq mode 'node-property) (org-element-node-property-parser limit))
        ;; Headline.
        ((org-with-limited-levels (org-at-heading-p))
         (org-element-headline-parser limit raw-secondary-p))
        ;; Sections (must be checked after headline).
-       ((eq special 'section) (org-element-section-parser limit))
-       ((eq special 'first-section)
+       ((eq mode 'section) (org-element-section-parser limit))
+       ((eq mode 'first-section)
 	(org-element-section-parser
 	 (or (save-excursion (org-with-limited-levels (outline-next-heading)))
 	     limit)))
+       ;; Planning.
+       ((and (eq mode 'planning) (looking-at org-planning-line-re))
+	(org-element-planning-parser limit))
        ;; When not at bol, point is at the beginning of an item or
        ;; a footnote definition: next item is always a paragraph.
        ((not (bolp)) (org-element-paragraph-parser limit (list (point))))
-       ;; Planning and Clock.
-       ((looking-at org-planning-line-re) (org-element-planning-parser limit))
+       ;; Clock.
        ((looking-at org-clock-line-re) (org-element-clock-parser limit))
        ;; Inlinetask.
        ((org-at-heading-p)
@@ -4078,6 +4079,18 @@ looking into captions:
 ;; object is searched only once at top level (but sometimes more for
 ;; nested types).
 
+(defsubst org-element--next-mode (type)
+  "Return next special mode according to TYPE, or nil.
+TYPE is a symbol representing the type of an element or object.
+Modes can be either `first-section', `section', `planning',
+`item', `node-property' and `table-row'."
+  (case type
+    (headline 'section)
+    (section 'planning)
+    (plain-list 'item)
+    (property-drawer 'node-property)
+    (table 'table-row)))
+
 (defun org-element--parse-elements
   (beg end special structure granularity visible-only acc)
   "Parse elements between BEG and END positions.
@@ -4132,11 +4145,7 @@ Elements are accumulated into ACC."
 	  (org-element--parse-elements
 	   cbeg (org-element-property :contents-end element)
 	   ;; Possibly switch to a special mode.
-	   (case type
-	     (headline 'section)
-	     (plain-list 'item)
-	     (property-drawer 'node-property)
-	     (table 'table-row))
+	   (org-element--next-mode type)
 	   (and (memq type '(item plain-list))
 		(org-element-property :structure element))
 	   granularity visible-only element))
@@ -5220,7 +5229,7 @@ the process stopped before finding the expected result."
      (let* ((cached (and (org-element--cache-active-p)
 			 (org-element--cache-find pos nil)))
             (begin (org-element-property :begin cached))
-            element next)
+            element next mode)
        (cond
         ;; Nothing in cache before point: start parsing from first
         ;; element following headline above, or first element in
@@ -5229,7 +5238,8 @@ the process stopped before finding the expected result."
          (when (org-with-limited-levels (outline-previous-heading))
            (forward-line))
          (skip-chars-forward " \r\t\n")
-         (beginning-of-line))
+         (beginning-of-line)
+	 (setq mode 'planning))
         ;; Cache returned exact match: return it.
         ((= pos begin)
 	 (throw 'exit (if syncp (org-element-property :parent cached) cached)))
@@ -5240,7 +5250,8 @@ the process stopped before finding the expected result."
           (org-with-limited-levels org-outline-regexp-bol) begin t)
          (forward-line)
          (skip-chars-forward " \r\t\n")
-         (beginning-of-line))
+         (beginning-of-line)
+	 (setq mode 'planning))
         ;; Check if CACHED or any of its ancestors contain point.
         ;;
         ;; If there is such an element, we inspect it in order to know
@@ -5274,8 +5285,7 @@ the process stopped before finding the expected result."
 		      (save-excursion
 			(org-with-limited-levels (outline-next-heading))
 			(point))))
-	     (parent element)
-	     special-flag)
+	     (parent element))
 	 (while t
 	   (when syncp
 	     (cond ((= (point) pos) (throw 'exit parent))
@@ -5283,7 +5293,7 @@ the process stopped before finding the expected result."
 		    (throw 'interrupt nil))))
 	   (unless element
 	     (setq element (org-element--current-element
-			    end 'element special-flag
+			    end 'element mode
 			    (org-element-property :structure parent)))
 	     (org-element-put-property element :parent parent)
 	     (org-element--cache-put element))
@@ -5323,10 +5333,7 @@ the process stopped before finding the expected result."
 				    (and (= cend pos) (= (point-max) pos)))))
 		   (goto-char (or next cbeg))
 		   (setq next nil
-			 special-flag (case type
-					(plain-list 'item)
-					(property-drawer 'node-property)
-					(table 'table-row))
+			 mode (org-element--next-mode type)
 			 parent element
 			 end cend))))
 	      ;; Otherwise, return ELEMENT as it is the smallest
