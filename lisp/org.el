@@ -22469,7 +22469,9 @@ Alignment is done according to `org-property-format', which see."
 	  (looking-at org-property-re))
     (replace-match
      (concat (match-string 4)
-	     (format org-property-format (match-string 1) (match-string 3)))
+	     (if (match-string 3)
+		 (format org-property-format (match-string 1) (match-string 3))
+	       (match-string 1)))
      t t)))
 
 (defun org-indent-line ()
