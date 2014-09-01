@@ -5236,10 +5236,10 @@ the process stopped before finding the expected result."
         ;; buffer.
         ((not cached)
          (when (org-with-limited-levels (outline-previous-heading))
-           (forward-line))
+           (setq mode 'planning)
+	   (forward-line))
          (skip-chars-forward " \r\t\n")
-         (beginning-of-line)
-	 (setq mode 'planning))
+         (beginning-of-line))
         ;; Cache returned exact match: return it.
         ((= pos begin)
 	 (throw 'exit (if syncp (org-element-property :parent cached) cached)))
