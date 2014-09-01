@@ -148,7 +148,7 @@ FILE exists at end of evaluation."
   (if (file-exists-p file) (delete-file file))
   (process-send-string
    (get-buffer-process buffer)
-   (if (string-match "\n$" string) string (concat string "\n")))
+   (if (= (aref string (1- (length string))) ?\n) string (concat string "\n")))
   ;; From Tramp 2.1.19 the following cache flush is not necessary
   (if (file-remote-p default-directory)
       (let (v)
