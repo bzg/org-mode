@@ -5442,8 +5442,7 @@ changes."
 	(while up
 	  (if (and (memq (org-element-type up)
 			 '(center-block drawer dynamic-block
-					property-drawer quote-block
-					special-block))
+					quote-block special-block))
 		   (<= (org-element-property :contents-begin up) beg)
 		   (> (org-element-property :contents-end up) end))
 	      ;; UP is a robust greater element containing changes.
