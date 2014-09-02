@@ -1587,7 +1587,7 @@ e^{i\\pi}+1=0
 	 (org-element-type (org-element-at-point)))))
   ;; Accept empty properties.
   (should
-   (equal '(("foo" "value") ("bar" nil))
+   (equal '(("foo" "value") ("bar" ""))
 	  (org-test-with-temp-text ":PROPERTIES:\n:foo: value\n:bar:\n:END:"
 	    (org-element-map (org-element-parse-buffer) 'node-property
 	      (lambda (p)
