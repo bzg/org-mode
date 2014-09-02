@@ -6257,12 +6257,20 @@ Use `org-reduced-level' to remove the effect of `org-odd-levels'."
 
 (defsubst org-re-property (property &optional literal allow-null)
   "Return a regexp matching a PROPERTY line.
- Match group 3 will be set to the value if it exists."
-  (concat "^\\(?4:[ \t]*\\)\\(?1::\\(?2:"
- 	  (if literal property (regexp-quote property))
-	  "\\):\\)\\(?:[ \t]+\\(?3:[^ \t\r\n].*?\\)\\)"
-	  (and allow-null "?")
-	  "\\(?5:[ \t]*\\)$"))
+
+When optional argument LITERAL is non-nil, do not quote PROPERTY.
+This is useful when PROPERTY is a regexp.  When ALLOW-NULL is
+non-nil, match properties even without a value.
+
+Match group 3 is set to the value when it exists.  If there is no
+value and ALLOW-NULL is non-nil, it is set to the empty string."
+  (concat
+   "^\\(?4:[ \t]*\\)"
+   (format "\\(?1::\\(?2:%s\\):\\)"
+	   (if literal property (regexp-quote property)))
+   (if allow-null
+       "\\(?:\\(?3:$\\)\\|[ \t]+\\(?3:.*?\\)\\)\\(?5:[ \t]*\\)$"
+     "[ \t]+\\(?3:[^ \r\t\n]+.*?\\)\\(?5:[ \t]*\\)$")))
 
 (defconst org-property-re
   (org-re-property ".*?" 'literal t)
@@ -22468,9 +22476,8 @@ Alignment is done according to `org-property-format', which see."
 	  (looking-at org-property-re))
     (replace-match
      (concat (match-string 4)
-	     (if (match-string 3)
-		 (format org-property-format (match-string 1) (match-string 3))
-	       (match-string 1)))
+	     (org-trim
+	      (format org-property-format (match-string 1) (match-string 3))))
      t t)))
 
 (defun org-indent-line ()
