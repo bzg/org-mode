@@ -2313,13 +2313,12 @@ that planning information can be incorporated into desktop calendars.
 @node Export options, The export dispatcher, Exporting, Exporting
 @section Export options
 
-The exporter recognizes special lines in the buffer which provide
-additional information.  These lines may be put anywhere in the file.
-The whole set of lines can be inserted into the buffer with @kbd{C-c
-C-e t}.
+The exporter recognizes special lines in the buffer which provide additional
+information.  These lines may be put anywhere in the file.  The whole set of
+lines can be inserted into the buffer with @kbd{C-c C-e #}.
 
 @table @kbd
-@item C-c C-e t
+@item C-c C-e #
 Insert template with export options, see example below.
 @end table
 
@@ -2330,7 +2329,7 @@ Insert template with export options, see example below.
 #+EMAIL:       his/her email address (default from @code{user-mail-address})
 #+DESCRIPTION: the page description, e.g.@: for the XHTML meta tag
 #+KEYWORDS:    the page keywords, e.g.@: for the XHTML meta tag
-#+LANGUAGE:    language for HTML, e.g.@: @samp{en} (@code{org-export-default-language})
+#+LANGUAGE:    language, e.g.@: @samp{en} (@code{org-export-default-language})
 #+OPTIONS:     H:2 num:t toc:t \n:nil ::t |:t ^:t f:t tex:t ...
 @end smallexample
 
