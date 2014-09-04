@@ -4424,7 +4424,7 @@ To record a timestamp without a note for TODO keywords configured with
 
 @noindent
 @vindex org-log-done
-you not only define global TODO keywords and fast access keys, but also
+You not only define global TODO keywords and fast access keys, but also
 request that a time is recorded when the entry is set to
 DONE@footnote{It is possible that Org mode will record two timestamps
 when you are using both @code{org-log-done} and state change logging.
