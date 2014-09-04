@@ -186,13 +186,26 @@ it's header arguments."
   (let ((vars (mapcar #'cdr (org-babel-get-header params :var)))
 	(colnames (cdar (org-babel-get-header params :colname-names)))
 	(main-p (not (string= (cdr (assoc :main params)) "no")))
-	(includes (or (cdr (assoc :includes params))
-		      (org-babel-read (org-entry-get nil "includes" t))))
+	(includes (org-babel-read
+		   (or (cdr (assoc :includes params))
+		       (org-entry-get nil "includes" t))
+		   nil))
 	(defines (org-babel-read
 		  (or (cdr (assoc :defines params))
-		      (org-babel-read (org-entry-get nil "defines" t))))))
-    (unless (listp includes) (setq includes (list includes)))
+		      (org-entry-get nil "defines" t))
+		  nil)))
+    (when (stringp includes)
+      (setq includes (split-string includes)))
     (setq includes (append includes '("<string.h>" "<stdio.h>" "<stdlib.h>")))
+    (when (stringp defines)
+      (let ((y nil)
+	    (result (list t)))
+	(dolist (x (split-string defines))
+	  (if (null y)
+	      (setq y x)
+	    (nconc result (list (concat y " " x)))
+	    (setq y nil)))
+	(setq defines (cdr result))))
     (mapconcat 'identity
 	       (list
 		;; includes
@@ -225,7 +238,8 @@ it's header arguments."
 	(main-p (not (string= (cdr (assoc :main params)) "no")))
 	(imports (or (cdr (assoc :imports params))
 		     (org-babel-read (org-entry-get nil "imports" t)))))
-    (unless (listp imports) (setq imports (list imports)))
+    (when (stringp imports)
+      (setq imports (split-string imports)))
     (setq imports (append imports '("std.stdio" "std.conv")))
     (mapconcat 'identity
 	       (list
