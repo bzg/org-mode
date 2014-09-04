@@ -221,12 +221,12 @@ uppercase letters.  Argument ARG include symbols."
   "Return a string consisting of PREVIOUS-STRING and
 NUMS-OF-CHARS random characters."
   (if (eq nums-of-chars 0) previous-string
-    (insert (org-passwords-generate-password-with-symbols
+    (org-passwords-generate-password-with-symbols
 	     (concat previous-string
 		     (char-to-string
 		      ;; symbols, letters, numbers are from 33 to 126
 		      (+ (random (- 127 33)) 33)))
-	     (1- nums-of-chars)))))
+	     (1- nums-of-chars))))
 
 (defun org-passwords-generate-password-without-symbols (previous-string nums-of-chars)
   "Return string consisting of PREVIOUS-STRING and NUMS-OF-CHARS
