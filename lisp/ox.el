@@ -176,7 +176,8 @@ way they are handled must be hard-coded into
 `org-export--get-inbuffer-options' function.")
 
 (defconst org-export-filters-alist
-  '((:filter-bold . org-export-filter-bold-functions)
+  '((:filter-body . org-export-filter-body-functions)
+    (:filter-bold . org-export-filter-bold-functions)
     (:filter-babel-call . org-export-filter-babel-call-functions)
     (:filter-center-block . org-export-filter-center-block-functions)
     (:filter-clock . org-export-filter-clock-functions)
@@ -2447,9 +2448,13 @@ Any element in `:ignore-list' will be skipped when using
 ;;   tree.  Users can set it through
 ;;   `org-export-filter-parse-tree-functions' variable.
 ;;
+;; - `:filter-body' applies to the body of the output, before template
+;;   translator chimes in.  Users can set it through
+;;   `org-export-filter-body-functions' variable.
+;;
 ;; - `:filter-final-output' applies to the final transcoded string.
 ;;   Users can set it with `org-export-filter-final-output-functions'
-;;   variable
+;;   variable.
 ;;
 ;; - `:filter-plain-text' applies to any string not recognized as Org
 ;;   syntax.  `org-export-filter-plain-text-functions' allows users to
@@ -2457,7 +2462,7 @@ Any element in `:ignore-list' will be skipped when using
 ;;
 ;; - `:filter-TYPE' applies on the string returned after an element or
 ;;   object of type TYPE has been transcoded.  A user can modify
-;;   `org-export-filter-TYPE-functions'
+;;   `org-export-filter-TYPE-functions' to install these filters.
 ;;
 ;; All filters sets are applied with
 ;; `org-export-filter-apply-functions' function.  Filters in a set are
@@ -2515,6 +2520,13 @@ return the modified parse tree to transcode.")
 
 (defvar org-export-filter-plain-text-functions nil
   "List of functions applied to plain text.
+Each filter is called with three arguments: a string which
+contains no Org syntax, the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
+
+(defvar org-export-filter-body-functions nil
+  "List of functions applied to transcoded body.
 Each filter is called with three arguments: a string which
 contains no Org syntax, the back-end, as a symbol, and the
 communication channel, as a plist.  It must return a string or
@@ -3142,8 +3154,11 @@ Return code as a string."
 		       (or (org-export-data tree info) "")))
 		(inner-template (cdr (assq 'inner-template
 					   (plist-get info :translate-alist))))
-		(full-body (if (not (functionp inner-template)) body
-			     (funcall inner-template body info)))
+		(full-body (org-export-filter-apply-functions
+			    (plist-get info :filter-body)
+			    (if (not (functionp inner-template)) body
+			      (funcall inner-template body info))
+			    info))
 		(template (cdr (assq 'template
 				     (plist-get info :translate-alist)))))
 	   ;; Remove all text properties since they cannot be
