@@ -2896,7 +2896,8 @@ the plist used as a communication channel."
 		      (org-export-read-attribute :attr_html paragraph)))
 	 (extra (or (cadr (assoc parent-type style)) "")))
     (cond
-     ((and (not (org-export-get-previous-element paragraph info))
+     ((and (eq parent-type 'item)
+	   (not (org-export-get-previous-element paragraph info))
 	   (let ((followers (org-export-get-next-element paragraph info 2)))
 	     (and (not (cdr followers))
 		  (memq (org-element-type (car followers)) '(nil plain-list)))))
