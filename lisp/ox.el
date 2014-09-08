@@ -4138,29 +4138,8 @@ objects of the same type."
 	    ((funcall predicate el info) (incf counter) nil)))
 	 info 'first-match)))))
 
-;;;; For Special Blocks
-;;
-;; `org-export-raw-special-block-p' check if current special block is
-;; an "export block", i.e., a block whose contents should be inserted
-;; as-is in the output.  This should generally be the first check to
-;; do when handling special blocks in the export back-end.
 
-(defun org-export-raw-special-block-p (element info &optional no-inheritance)
-  "Non-nil if ELEMENT is an export block relatively to current back-end.
-An export block is a special block whose contents should be
-included as-is in the final output.  Such blocks are defined
-through :export-block property in `org-export-define-backend',
-which see."
-  (and (eq (org-element-type element) 'special-block)
-       (let ((type (org-element-property :type element))
-	     (b (plist-get info :back-end)))
-	 (if no-inheritance (member type (org-export-backend-blocks b))
-	   (while (and b (not (member type (org-export-backend-blocks b))))
-	     (setq b (org-export-get-backend (org-export-backend-parent b))))
-	   b))))
-
-
-;;;; For Src Blocks
+;;;; For Src-Blocks
 ;;
 ;; `org-export-get-loc' counts number of code lines accumulated in
 ;; src-block or example-block elements with a "+n" switch until
