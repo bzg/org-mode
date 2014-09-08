@@ -55,6 +55,7 @@
     (dynamic-block . org-ascii-dynamic-block)
     (entity . org-ascii-entity)
     (example-block . org-ascii-example-block)
+    (export-block . org-ascii-export-block)
     (export-snippet . org-ascii-export-snippet)
     (fixed-width . org-ascii-fixed-width)
     (footnote-reference . org-ascii-footnote-reference)
@@ -1197,6 +1198,16 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (org-element-property :value export-snippet)))
 
 
+;;;; Export Block
+
+(defun org-ascii-export-block (export-block contents info)
+  "Transcode a EXPORT-BLOCK element from Org to ASCII.
+CONTENTS is nil.  INFO is a plist holding contextual information."
+  (when (string= (org-element-property :type export-block) "ASCII")
+    (org-ascii--justify-element
+     (org-element-property :value export-block) export-block info)))
+
+
 ;;;; Fixed Width
 
 (defun org-ascii-fixed-width (fixed-width contents info)
@@ -1654,13 +1665,10 @@ contextual information."
   "Transcode a SPECIAL-BLOCK element from Org to ASCII.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (if (org-export-raw-special-block-p special-block info)
-      (org-ascii--justify-element
-       (org-element-property :raw-value special-block) special-block info)
-    ;; "JUSTIFYLEFT" and "JUSTFYRIGHT" have already been taken care of
-    ;; at a lower level.  There is no other special block type to
-    ;; handle.
-    contents))
+  ;; "JUSTIFYLEFT" and "JUSTFYRIGHT" have already been taken care of
+  ;; at a lower level.  There is no other special block type to
+  ;; handle.
+  contents)
 
 
 ;;;; Src Block

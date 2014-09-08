@@ -13,43 +13,6 @@ Please send Org bug reports to emacs-orgmode@gnu.org.
 *** No default title is provided when =TITLE= keyword is missing
 Skipping =TITLE= keyword no longer provides the current file name, or
 buffer name, as the title. Instead, simply ignore the title.
-*** Remove ~export-block~ element type
-For export back-end developers.
-
-So called "Export blocks" are now raw "Special blocks".  As
-a consequence ~export-block~ type doesn't exist anymore in parser, and
-should not have a translator associated in an export back-end.
-
-In order to tell the difference between a special block and a former
-export block, a new predicate, ~org-export-raw-special-block-p~ is
-implemented.
-
-To put it simply, two steps may be needed to update a back-end
-defining export blocks.
-
-1. Remove any ~org-BACKEND-export-block~ function, associated filter
-   and remove ~export-block~ entry from back-end definition.  This
-   step can be omitted if you want to preserve backward-compatibility
-   with Org 8.2.  In this case, the function and filter will be used
-   in Org 8.2 but ignored in Org 8.3.
-
-2. If there is a translator for special blocks, e.g.,
-   ~org-BACKEND-special-block~, first check if the current block is an
-   export block using the predicate and, if that is true, simply
-   insert raw value, obtained through block's ~:raw-value~
-   property. E.g.,
-   
-   #+BEGIN_SRC emacs-lisp
-   (defun org-latex-special-block (special-block contents info)
-     (if (org-export-raw-special-block-p special-block info)
-         (org-element-property :raw-value special-block)
-       ;; Usual handling for special blocks goes here.
-       ))
-   #+END_SRC
-
-   Note that If BACKEND is a derived back-end and doesn't implement
-   its own special block translator already, there is nothing to
-   change.  The parent back-end will take care of such blocks.
 *** Signature changes
 The following functions require an additional argument.  See their
 docstring for more information.

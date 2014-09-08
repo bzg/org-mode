@@ -45,11 +45,11 @@
 ;; and `special-block'.
 ;;
 ;; Other element types are: `babel-call', `clock', `comment',
-;; `comment-block', `diary-sexp', `example-block', `fixed-width',
-;; `horizontal-rule', `keyword', `latex-environment', `node-property',
-;; `paragraph', `planning', `src-block', `table', `table-row' and
-;; `verse-block'.  Among them, `paragraph' and `verse-block' types can
-;; contain Org objects and plain text.
+;; `comment-block', `diary-sexp', `example-block', `export-block',
+;; `fixed-width', `horizontal-rule', `keyword', `latex-environment',
+;; `node-property', `paragraph', `planning', `src-block', `table',
+;; `table-row' and `verse-block'.  Among them, `paragraph' and
+;; `verse-block' types can contain Org objects and plain text.
 ;;
 ;; Objects are related to document's contents.  Some of them are
 ;; recursive.  Associated types are of the following: `bold', `code',
@@ -169,11 +169,11 @@ is not sufficient to know if point is at a paragraph ending.  See
 
 (defconst org-element-all-elements
   '(babel-call center-block clock comment comment-block diary-sexp drawer
-	       dynamic-block example-block fixed-width footnote-definition
-	       headline horizontal-rule inlinetask item keyword
-	       latex-environment node-property paragraph plain-list
-	       planning property-drawer quote-block section special-block
-	       src-block table table-row verse-block)
+	       dynamic-block example-block export-block fixed-width
+	       footnote-definition headline horizontal-rule inlinetask item
+	       keyword latex-environment node-property paragraph plain-list
+	       planning property-drawer quote-block section
+	       special-block src-block table table-row verse-block)
   "Complete list of element types.")
 
 (defconst org-element-greater-elements
@@ -194,7 +194,7 @@ is not sufficient to know if point is at a paragraph ending.  See
 	 superscript table-cell underline)
   "List of recursive object types.")
 
-(defconst org-element-block-name-alist
+(defvar org-element-block-name-alist
   '(("CENTER" . org-element-center-block-parser)
     ("COMMENT" . org-element-comment-block-parser)
     ("EXAMPLE" . org-element-example-block-parser)
@@ -1520,9 +1520,8 @@ keyword and CDR is a plist of affiliated keywords along with
 their value.
 
 Return a list whose CAR is `special-block' and CDR is a plist
-containing `:type', `:raw-value', `:begin', `:end',
-`:contents-begin', `:contents-end', `:post-blank' and
-`:post-affiliated' keywords.
+containing `:type', `:begin', `:end', `:contents-begin',
+`:contents-end', `:post-blank' and `:post-affiliated' keywords.
 
 Assume point is at the beginning of the block."
   (let* ((case-fold-search t)
@@ -1551,10 +1550,6 @@ Assume point is at the beginning of the block."
 	    (list 'special-block
 		  (nconc
 		   (list :type type
-			 :raw-value
-			 (and contents-begin
-			      (buffer-substring-no-properties
-			       contents-begin contents-end))
 			 :begin begin
 			 :end end
 			 :contents-begin contents-begin
@@ -1903,6 +1898,60 @@ CONTENTS is nil."
 		  value
 		(org-element-remove-indentation value))))
 	    "#+END_EXAMPLE")))
+
+
+;;;; Export Block
+
+(defun org-element-export-block-parser (limit affiliated)
+  "Parse an export block.
+
+LIMIT bounds the search.  AFFILIATED is a list of which CAR is
+the buffer position at the beginning of the first affiliated
+keyword and CDR is a plist of affiliated keywords along with
+their value.
+
+Return a list whose CAR is `export-block' and CDR is a plist
+containing `:begin', `:end', `:type', `:value', `:post-blank' and
+`:post-affiliated' keywords.
+
+Assume point is at export-block beginning."
+  (let* ((case-fold-search t)
+	 (type (progn (looking-at "[ \t]*#\\+BEGIN_\\(\\S-+\\)")
+		      (upcase (org-match-string-no-properties 1)))))
+    (if (not (save-excursion
+	       (re-search-forward
+		(format "^[ \t]*#\\+END_%s[ \t]*$" type) limit t)))
+	;; Incomplete block: parse it as a paragraph.
+	(org-element-paragraph-parser limit affiliated)
+      (let ((contents-end (match-beginning 0)))
+	(save-excursion
+	  (let* ((begin (car affiliated))
+		 (post-affiliated (point))
+		 (contents-begin (progn (forward-line) (point)))
+		 (pos-before-blank (progn (goto-char contents-end)
+					  (forward-line)
+					  (point)))
+		 (end (progn (skip-chars-forward " \r\t\n" limit)
+			     (if (eobp) (point) (line-beginning-position))))
+		 (value (buffer-substring-no-properties contents-begin
+							contents-end)))
+	    (list 'export-block
+		  (nconc
+		   (list :begin begin
+			 :end end
+			 :type type
+			 :value value
+			 :post-blank (count-lines pos-before-blank end)
+			 :post-affiliated post-affiliated)
+		   (cdr affiliated)))))))))
+
+(defun org-element-export-block-interpreter (export-block contents)
+  "Interpret EXPORT-BLOCK element as Org syntax.
+CONTENTS is nil."
+  (let ((type (org-element-property :type export-block)))
+    (concat (format "#+BEGIN_%s\n" type)
+	    (org-element-property :value export-block)
+	    (format "#+END_%s" type))))
 
 
 ;;;; Fixed-width

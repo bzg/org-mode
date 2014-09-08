@@ -55,6 +55,7 @@
     (dynamic-block . org-html-dynamic-block)
     (entity . org-html-entity)
     (example-block . org-html-example-block)
+    (export-block . org-html-export-block)
     (export-snippet . org-html-export-snippet)
     (fixed-width . org-html-fixed-width)
     (footnote-definition . org-html-footnote-definition)
@@ -2271,6 +2272,14 @@ information."
   (when (eq (org-export-snippet-backend export-snippet) 'html)
     (org-element-property :value export-snippet)))
 
+;;;; Export Block
+
+(defun org-html-export-block (export-block contents info)
+  "Transcode a EXPORT-BLOCK element from Org to HTML.
+CONTENTS is nil.  INFO is a plist holding contextual information."
+  (when (string= (org-element-property :type export-block) "HTML")
+    (org-remove-indentation (org-element-property :value export-block))))
+
 ;;;; Fixed Width
 
 (defun org-html-fixed-width (fixed-width contents info)
@@ -3090,25 +3099,25 @@ contextual information."
   "Transcode a SPECIAL-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (if (org-export-raw-special-block-p special-block info)
-      (org-remove-indentation (org-element-property :raw-value special-block))
-    (let* ((block-type (downcase (org-element-property :type special-block)))
-	   (contents (or contents ""))
-	   (html5-fancy (and (org-html-html5-p info)
-			     (plist-get info :html-html5-fancy)
-			     (member block-type org-html-html5-elements)))
-	   (attributes (org-export-read-attribute :attr_html special-block)))
-      (unless html5-fancy
-	(let ((class (plist-get attributes :class)))
-	  (setq attributes (plist-put attributes :class
-				      (if class (concat class " " block-type)
-					block-type)))))
-      (setq attributes (org-html--make-attribute-string attributes))
-      (when (not (equal attributes ""))
-	(setq attributes (concat " " attributes)))
-      (if html5-fancy
-	  (format "<%s%s>\n%s</%s>" block-type attributes contents block-type)
-	(format "<div%s>\n%s\n</div>" attributes contents)))))
+  (let* ((block-type (downcase
+		      (org-element-property :type special-block)))
+	 (contents (or contents ""))
+	 (html5-fancy (and (org-html-html5-p info)
+			   (plist-get info :html-html5-fancy)
+			   (member block-type org-html-html5-elements)))
+	 (attributes (org-export-read-attribute :attr_html special-block)))
+    (unless html5-fancy
+      (let ((class (plist-get attributes :class)))
+	(setq attributes (plist-put attributes :class
+				    (if class (concat class " " block-type)
+				      block-type)))))
+    (setq attributes (org-html--make-attribute-string attributes))
+    (when (not (equal attributes ""))
+      (setq attributes (concat " " attributes)))
+    (if html5-fancy
+	(format "<%s%s>\n%s</%s>" block-type attributes
+		contents block-type)
+      (format "<div%s>\n%s\n</div>" attributes contents))))
 
 ;;;; Src Block
 
