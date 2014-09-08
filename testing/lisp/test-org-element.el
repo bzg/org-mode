@@ -777,6 +777,39 @@ Some other text
 	(org-element-property :label-fmt (org-element-at-point)))))))
 
 
+;;;; Export Block
+
+(ert-deftest test-org-element/export-block-parser ()
+  "Test `export-block' parser."
+  ;; Standard test.
+  (should
+   (org-test-with-temp-text "#+BEGIN_LATEX\nText\n#+END_LATEX"
+     (org-element-map
+      (let ((org-element-block-name-alist
+	     '(("LATEX" . org-element-export-block-parser))))
+	(org-element-parse-buffer))
+      'export-block 'identity)))
+  ;; Ignore case.
+  (should
+   (let ((org-element-block-name-alist
+	  '(("LATEX" . org-element-export-block-parser))))
+     (org-test-with-temp-text "#+begin_latex\nText\n#+end_latex"
+       (org-element-map (org-element-parse-buffer) 'export-block 'identity))))
+  ;; Ignore incomplete block.
+  (should-not
+   (let ((org-element-block-name-alist
+	  '(("LATEX" . org-element-export-block-parser))))
+     (org-test-with-temp-text "#+BEGIN_LATEX"
+       (org-element-map (org-element-parse-buffer) 'export-block
+	 'identity nil t))))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (let ((org-element-block-name-alist
+	  '(("LATEX" . org-element-export-block-parser))))
+     (org-test-with-temp-text "#+BEGIN_LATEX\nC\n#+END_LATEX\n "
+       (= (org-element-property :end (org-element-at-point)) (point-max))))))
+
+
 ;;;; Export Snippet
 
 (ert-deftest test-org-element/export-snippet-parser ()
@@ -2442,6 +2475,12 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))))
    (equal
     "#+BEGIN_EXAMPLE\nTest\n#+END_EXAMPLE\n"
     (org-element-interpret-data '(example-block (:value "Test"))))))
+
+(ert-deftest test-org-element/export-block-interpreter ()
+  "Test export block interpreter."
+  (should (equal (org-test-parse-and-interpret
+		  "#+BEGIN_HTML\nTest\n#+END_HTML")
+		 "#+BEGIN_HTML\nTest\n#+END_HTML\n")))
 
 (ert-deftest test-org-element/fixed-width-interpreter ()
   "Test fixed width interpreter."

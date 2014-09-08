@@ -245,6 +245,7 @@ Return overlay specification, as a string, or nil."
     (:beamer-outline-frame-options nil nil org-beamer-outline-frame-options)
     (:beamer-outline-frame-title nil nil org-beamer-outline-frame-title))
   :translate-alist '((bold . org-beamer-bold)
+		     (export-block . org-beamer-export-block)
 		     (export-snippet . org-beamer-export-snippet)
 		     (headline . org-beamer-headline)
 		     (item . org-beamer-item)
@@ -268,6 +269,16 @@ a communication channel."
   (format "\\alert%s{%s}"
 	  (or (org-beamer--element-has-overlay-p bold) "")
 	  contents))
+
+
+;;;; Export Block
+
+(defun org-beamer-export-block (export-block contents info)
+  "Transcode an EXPORT-BLOCK element into Beamer code.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (when (member (org-element-property :type export-block) '("BEAMER" "LATEX"))
+    (org-remove-indentation (org-element-property :value export-block))))
 
 
 ;;;; Export Snippet

@@ -56,6 +56,7 @@
     (dynamic-block . org-groff-dynamic-block)
     (entity . org-groff-entity)
     (example-block . org-groff-example-block)
+    (export-block . org-groff-export-block)
     (export-snippet . org-groff-export-snippet)
     (fixed-width . org-groff-fixed-width)
     (footnote-definition . org-groff-footnote-definition)
@@ -882,6 +883,14 @@ information."
    (format ".DS L\n%s\n.DE"
            (org-export-format-code-default example-block info))))
 
+;;; Export Block
+
+(defun org-groff-export-block (export-block contents info)
+  "Transcode a EXPORT-BLOCK element from Org to Groff.
+CONTENTS is nil.  INFO is a plist holding contextual information."
+  (when (string= (org-element-property :type export-block) "GROFF")
+    (org-remove-indentation (org-element-property :value export-block))))
+
 ;;; Export Snippet
 
 (defun org-groff-export-snippet (export-snippet contents info)
@@ -1469,10 +1478,10 @@ holding contextual information."
   "Transcode a SPECIAL-BLOCK element from Org to Groff.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (if (org-export-raw-special-block-p special-block info)
-      (org-remove-indentation (org-element-property :raw-value special-block))
-    (let ((type (downcase (org-element-property :type special-block))))
-      (org-groff--wrap-label special-block (format "%s\n" contents)))))
+  (let ((type (downcase (org-element-property :type special-block))))
+    (org-groff--wrap-label
+     special-block
+     (format "%s\n" contents))))
 
 ;;; Src Block
 

@@ -1126,7 +1126,15 @@ Footnotes[fn:1], [fn:test] and [fn:inline:anonymous footnote].
 	    (org-export-define-backend 'test
 	      '((headline . my-headline-test))
 	      :menu-entry '(?k "Test Export" test))
-	    (org-export-backend-menu (org-export-get-backend 'test))))))
+	    (org-export-backend-menu (org-export-get-backend 'test)))))
+  ;; Export Blocks.
+  (should
+   (equal '(("TEST" . org-element-export-block-parser))
+	  (let (org-export--registered-backends org-element-block-name-alist)
+	    (org-export-define-backend 'test
+	      '((headline . my-headline-test))
+	      :export-block '("test"))
+	    org-element-block-name-alist))))
 
 (ert-deftest test-org-export/define-derived-backend ()
   "Test `org-export-define-derived-backend' specifications."

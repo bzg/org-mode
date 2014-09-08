@@ -49,6 +49,7 @@
     (dynamic-block . org-latex-dynamic-block)
     (entity . org-latex-entity)
     (example-block . org-latex-example-block)
+    (export-block . org-latex-export-block)
     (export-snippet . org-latex-export-snippet)
     (fixed-width . org-latex-fixed-width)
     (footnote-definition . org-latex-footnote-definition)
@@ -1355,6 +1356,15 @@ information."
 	     (org-export-format-code-default example-block info)))))
 
 
+;;;; Export Block
+
+(defun org-latex-export-block (export-block contents info)
+  "Transcode a EXPORT-BLOCK element from Org to LaTeX.
+CONTENTS is nil.  INFO is a plist holding contextual information."
+  (when (member (org-element-property :type export-block) '("LATEX" "TEX"))
+    (org-remove-indentation (org-element-property :value export-block))))
+
+
 ;;;; Export Snippet
 
 (defun org-latex-export-snippet (export-snippet contents info)
@@ -2232,17 +2242,15 @@ holding contextual information."
   "Transcode a SPECIAL-BLOCK element from Org to LaTeX.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (if (org-export-raw-special-block-p special-block info)
-      (org-remove-indentation (org-element-property :raw-value special-block))
-    (let ((type (downcase (org-element-property :type special-block)))
-	  (opt (org-export-read-attribute :attr_latex special-block :options)))
-      (concat (format "\\begin{%s}%s\n" type (or opt ""))
-	      ;; Insert any label or caption within the block
-	      ;; (otherwise, a reference pointing to that element will
-	      ;; count the section instead).
-	      (org-latex--caption/label-string special-block info)
-	      contents
-	      (format "\\end{%s}" type)))))
+  (let ((type (downcase (org-element-property :type special-block)))
+	(opt (org-export-read-attribute :attr_latex special-block :options)))
+    (concat (format "\\begin{%s}%s\n" type (or opt ""))
+	    ;; Insert any label or caption within the block
+	    ;; (otherwise, a reference pointing to that element will
+	    ;; count the section instead).
+	    (org-latex--caption/label-string special-block info)
+	    contents
+	    (format "\\end{%s}" type))))
 
 
 ;;;; Src Block

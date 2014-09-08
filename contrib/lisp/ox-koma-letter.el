@@ -518,6 +518,15 @@ are present return the preferred one as determined by
 
 ;;; Transcode Functions
 
+;;;; Export Block
+
+(defun org-koma-letter-export-block (export-block contents info)
+  "Transcode an EXPORT-BLOCK element into KOMA Scrlttr2 code.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (when (member (org-element-property :type export-block) '("KOMA-LETTER" "LATEX"))
+    (org-remove-indentation (org-element-property :value export-block))))
+
 ;;;; Export Snippet
 
 (defun org-koma-letter-export-snippet (export-snippet contents info)
