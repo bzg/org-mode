@@ -60,9 +60,10 @@ STDERR with `org-babel-eval-error-notify'."
 	    (save-excursion
 	      (when (get-buffer org-babel-error-buffer-name)
 		(with-current-buffer org-babel-error-buffer-name
-		  (compilation-mode)
-		  ;;compilation-mode enforces read-only
-		  (read-only-mode 0))))
+		  (unless (derived-mode-p 'compilation-mode)
+		    (compilation-mode))
+		  ;; Compilation-mode enforces read-only, but Babel expects the buffer modifiable.
+		  (setq buffer-read-only nil))))
 	    nil)
 	(buffer-string)))))
 
