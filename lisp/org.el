@@ -7339,8 +7339,9 @@ is non-nil, hide it unconditionally."
   (interactive)
   (let ((element (org-element-at-point)))
     (unless (memq (org-element-type element)
-		  '(center-block comment-block example-block quote-block
-				 special-block src-block verse-block))
+		  '(center-block comment-block example-block export-block
+				 quote-block special-block src-block
+				 verse-block))
       (user-error "Not at a block"))
     (let* ((start (save-excursion
 		    (goto-char (org-element-property :post-affiliated element))
