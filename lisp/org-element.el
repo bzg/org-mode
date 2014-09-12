@@ -5492,8 +5492,10 @@ changes."
 	  (if (and (memq (org-element-type up)
 			 '(center-block drawer dynamic-block
 					quote-block special-block))
-		   (<= (org-element-property :contents-begin up) beg)
-		   (> (org-element-property :contents-end up) end))
+		   (let ((cbeg (org-element-property :contents-begin up)))
+		     (and cbeg
+			  (<= cbeg beg)
+			  (> (org-element-property :contents-end up) end))))
 	      ;; UP is a robust greater element containing changes.
 	      ;; We only need to extend its ending boundaries.
 	      (org-element--cache-shift-positions
