@@ -420,8 +420,9 @@ Group 1 contains drawer's name or \"END\".")
   "Regular expression matching the last line of a clock drawer.")
 
 (defconst org-property-drawer-re
-  (concat "\\(" org-property-start-re "\\)[^\000]*?\\("
-	  org-property-end-re "\\)\n?")
+  (concat "^[ \t]*:PROPERTIES:[ \t]*\n"
+	  "\\(?:[ \t]*:\\S-+:\\(?: .*\\)?[ \t]*\n\\)*"
+	  "[ \t]*:END:[ \t]*$")
   "Matches an entire property drawer.")
 
 (defconst org-clock-drawer-re
@@ -6278,7 +6279,7 @@ value and ALLOW-NULL is non-nil, it is set to the empty string."
      "[ \t]+\\(?3:[^ \r\t\n]+.*?\\)\\(?5:[ \t]*\\)$")))
 
 (defconst org-property-re
-  (org-re-property ".*?" 'literal t)
+  (org-re-property "\\S-+" 'literal t)
   "Regular expression matching a property line.
 There are four matching groups:
 1: :PROPKEY: including the leading and trailing colon,
@@ -8628,10 +8629,6 @@ If yes, remember the marker and the distance to BEG."
 	(narrow-to-region (car blockp) (cdr blockp))
       (user-error "Not in a block"))))
 
-(eval-when-compile
-  (defvar org-property-drawer-re))
-
-(defvar org-property-start-re)  ;; defined below
 (defun org-clone-subtree-with-time-shift (n &optional shift)
   "Clone the task (subtree) at point N times.
 The clones will be inserted as siblings.
