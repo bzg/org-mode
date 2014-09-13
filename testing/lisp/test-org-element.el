@@ -555,10 +555,6 @@ Some other text
   (should
    (org-test-with-temp-text ":TEST:\nText\n:END:"
      (org-element-map (org-element-parse-buffer) 'drawer 'identity)))
-  ;; Do not mix regular drawers and property drawers.
-  (should-not
-   (org-test-with-temp-text ":PROPERTIES:\n:prop: value\n:END:"
-     (org-element-map (org-element-parse-buffer) 'drawer 'identity nil t)))
   ;; Ignore incomplete drawer.
   (should-not
    (org-test-with-temp-text ":TEST:"
@@ -1604,14 +1600,15 @@ e^{i\\pi}+1=0
   ;; Standard test.
   (should
    (equal '("abc" "value")
-	  (org-test-with-temp-text ":PROPERTIES:\n<point>:abc: value\n:END:"
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n<point>:abc: value\n:END:"
 	    (let ((element (org-element-at-point)))
 	      (list (org-element-property :key element)
 		    (org-element-property :value element))))))
   ;; Value should be trimmed.
   (should
    (equal "value"
-	  (org-test-with-temp-text ":PROPERTIES:\n<point>:abc: value  \n:END:"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n<point>:abc: value  \n:END:"
 	    (org-element-property :value (org-element-at-point)))))
   ;; A node property requires to be wrapped within a property drawer.
   (should-not
@@ -1621,20 +1618,11 @@ e^{i\\pi}+1=0
   ;; Accept empty properties.
   (should
    (equal '(("foo" "value") ("bar" ""))
-	  (org-test-with-temp-text ":PROPERTIES:\n:foo: value\n:bar:\n:END:"
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:foo: value\n:bar:\n:END:"
 	    (org-element-map (org-element-parse-buffer) 'node-property
 	      (lambda (p)
 		(list (org-element-property :key p)
-		      (org-element-property :value p)))))))
-  ;; Ignore all non-property lines in property drawers.
-  (should
-   (equal
-    '(("foo" "value"))
-    (org-test-with-temp-text ":PROPERTIES:\nWrong1\n:foo: value\nWrong2\n:END:"
-      (org-element-map (org-element-parse-buffer) 'node-property
-	(lambda (p)
-	  (list (org-element-property :key p)
-		(org-element-property :value p))))))))
+		      (org-element-property :value p))))))))
 
 
 ;;;; Paragraph
@@ -1760,22 +1748,42 @@ Outside list"
   "Test `property-drawer' parser."
   ;; Standard test.
   (should
-   (org-test-with-temp-text ":PROPERTIES:\n:prop: value\n:END:"
-     (org-element-map
-	 (org-element-parse-buffer) 'property-drawer 'identity nil t)))
-  ;; Do not mix property drawers and regular drawers.
-  (should-not
-   (org-test-with-temp-text ":TEST:\n:prop: value\n:END:"
-     (org-element-map
-	 (org-element-parse-buffer) 'property-drawer 'identity nil t)))
-  ;; Ignore incomplete drawer.
-  (should-not
-   (org-test-with-temp-text ":PROPERTIES:\n:prop: value"
-     (org-element-map
-	 (org-element-parse-buffer) 'property-drawer 'identity nil t)))
-    ;; Handle non-empty blank line at the end of buffer.
+   (eq 'property-drawer
+       (org-test-with-temp-text "* H\n<point>:PROPERTIES:\n:prop: value\n:END:"
+	 (org-element-type (org-element-at-point)))))
   (should
-   (org-test-with-temp-text ":PROPERTIES:\n:END:\n "
+   (eq 'property-drawer
+       (org-test-with-temp-text
+	   "* H\nDEADLINE: <2014-03-04 tue.>\n<point>:PROPERTIES:\n:prop: value\n:END:"
+	 (org-element-type (org-element-at-point)))))
+  ;; Allow properties without value and no property at all.
+  (should
+   (eq 'property-drawer
+       (org-test-with-temp-text "* H\n<point>:PROPERTIES:\n:prop:\n:END:"
+	 (org-element-type (org-element-at-point)))))
+  (should
+   (eq 'property-drawer
+       (org-test-with-temp-text "* H\n<point>:PROPERTIES:\n:END:"
+	 (org-element-type (org-element-at-point)))))
+  ;; Ignore incomplete drawer, drawer at a wrong location or with
+  ;; wrong contents.
+  (should-not
+   (eq 'property-drawer
+       (org-test-with-temp-text "* H\n<point>:PROPERTIES:\n:prop: value"
+	 (org-element-type (org-element-at-point)))))
+  (should-not
+   (eq 'property-drawer
+       (org-test-with-temp-text
+	   "* H\nParagraph\n<point>:PROPERTIES:\n:prop: value\n:END:"
+	 (org-element-type (org-element-at-point)))))
+  (should-not
+   (eq 'property-drawer
+       (org-test-with-temp-text
+	   "* H\nParagraph\n<point>:PROPERTIES:\nparagraph\n:END:"
+	 (org-element-type (org-element-at-point)))))
+  ;; Handle non-empty blank line at the end of buffer.
+  (should
+   (org-test-with-temp-text "* H\n<point>:PROPERTIES:\n:END:\n "
      (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
@@ -2550,8 +2558,8 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
   "Test property drawer interpreter."
   (should (equal (let ((org-property-format "%-10s %s"))
 		   (org-test-parse-and-interpret
-		    ":PROPERTIES:\n:prop: value\n:END:"))
-		 ":PROPERTIES:\n:prop:     value\n:END:\n")))
+		    "* H\n:PROPERTIES:\n:prop: value\n:END:"))
+		 "* H\n:PROPERTIES:\n:prop:     value\n:END:\n")))
 
 (ert-deftest test-org-element/src-block-interpreter ()
   "Test src block interpreter."

@@ -584,19 +584,15 @@
   ;; Align node properties according to `org-property-format'.  Handle
   ;; nicely empty values.
   (should
-   (equal ":PROPERTIES:\n:key:      value\n:END:"
-	  (org-test-with-temp-text ":PROPERTIES:\n:key: value\n:END:"
-	    (forward-line)
-	    (let ((org-property-format "%-10s %s"))
-	      (org-indent-line)
-	      (buffer-string)))))
+   (equal "* H\n:PROPERTIES:\n:key:      value\n:END:"
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n<point>:key: value\n:END:"
+	    (let ((org-property-format "%-10s %s")) (org-indent-line))
+	    (buffer-string))))
   (should
-   (equal ":PROPERTIES:\n:key:\n:END:"
-	  (org-test-with-temp-text ":PROPERTIES:\n:key:\n:END:"
-	    (forward-line)
-	    (let ((org-property-format "%-10s %s"))
-	      (org-indent-line)
-	      (buffer-string))))))
+   (equal "* H\n:PROPERTIES:\n:key:\n:END:"
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n<point>:key:\n:END:"
+	    (let ((org-property-format "%-10s %s")) (org-indent-line))
+	    (buffer-string)))))
 
 (ert-deftest test-org/indent-region ()
   "Test `org-indent-region' specifications."
@@ -644,16 +640,18 @@
   ;; Align node properties according to `org-property-format'.  Handle
   ;; nicely empty values.
   (should
-   (equal ":PROPERTIES:\n:key:      value\n:END:"
-	  (org-test-with-temp-text ":PROPERTIES:\n:key: value\n:END:"
-	    (let ((org-property-format "%-10s %s"))
-	      (org-indent-region (point-min) (point-max)))
+   (equal "* H\n:PROPERTIES:\n:key:      value\n:END:"
+	  (org-test-with-temp-text "* H\n<point>:PROPERTIES:\n:key: value\n:END:"
+	    (let ((org-property-format "%-10s %s")
+		  (org-adapt-indentation nil))
+	      (org-indent-region (point) (point-max)))
 	    (buffer-string))))
   (should
-   (equal ":PROPERTIES:\n:key:\n:END:"
-	  (org-test-with-temp-text ":PROPERTIES:\n:key:\n:END:"
-	    (let ((org-property-format "%-10s %s"))
-	      (org-indent-region (point-min) (point-max)))
+   (equal "* H\n:PROPERTIES:\n:key:\n:END:"
+	  (org-test-with-temp-text "* H\n<point>:PROPERTIES:\n:key:\n:END:"
+	    (let ((org-property-format "%-10s %s")
+		  (org-adapt-indentation nil))
+	      (org-indent-region (point) (point-max)))
 	    (buffer-string))))
   ;; Indent plain lists.
   (should
@@ -1261,7 +1259,8 @@ drops support for Emacs 24.1 and 24.2."
      (org-forward-paragraph)
      (looking-at "Paragraph")))
   (should
-   (org-test-with-temp-text ":PROPERTIES:\n:prop: value\n:END:\nParagraph"
+   (org-test-with-temp-text
+       "* H\n<point>:PROPERTIES:\n:prop: value\n:END:\nParagraph"
      (org-forward-paragraph)
      (looking-at "Paragraph")))
   ;; On a verse or source block, stop after blank lines.
@@ -1336,11 +1335,9 @@ drops support for Emacs 24.1 and 24.2."
      (org-backward-paragraph)
      (bobp)))
   (should
-   (org-test-with-temp-text ":PROPERTIES:\n:prop: value\n:END:\nP1"
-     (goto-char (point-max))
-     (beginning-of-line)
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:prop: value\n:END:\n<point>P1"
      (org-backward-paragraph)
-     (bobp)))
+     (looking-at ":PROPERTIES:")))
   ;; On a source or verse block, stop before blank lines.
   (should
    (org-test-with-temp-text "#+BEGIN_VERSE\nL1\n\nL2\n\nL3\n#+END_VERSE"

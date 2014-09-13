@@ -31,12 +31,13 @@
 ;;
 ;; An element always starts and ends at the beginning of a line.  With
 ;; a few exceptions (`clock', `headline', `inlinetask', `item',
-;; `planning', `node-property', `section' and `table-row' types), it
-;; can also accept a fixed set of keywords as attributes.  Those are
-;; called "affiliated keywords" to distinguish them from other
-;; keywords, which are full-fledged elements.  Almost all affiliated
-;; keywords are referenced in `org-element-affiliated-keywords'; the
-;; others are export attributes and start with "ATTR_" prefix.
+;; `planning', `property-drawer', `node-property', `section' and
+;; `table-row' types), it can also accept a fixed set of keywords as
+;; attributes.  Those are called "affiliated keywords" to distinguish
+;; them from other keywords, which are full-fledged elements.  Almost
+;; all affiliated keywords are referenced in
+;; `org-element-affiliated-keywords'; the others are export attributes
+;; and start with "ATTR_" prefix.
 ;;
 ;; Element containing other elements (and only elements) are called
 ;; greater elements.  Concerned types are: `center-block', `drawer',
@@ -765,6 +766,42 @@ CONTENTS is the contents of the footnote-definition."
 
 ;;;; Headline
 
+(defun org-element--get-node-properties ()
+  "Return node properties associated to headline at point.
+Upcase property names.  It avoids confusion between properties
+obtained through property drawer and default properties from the
+parser (e.g. `:end' and :END:).  Return value is a plist."
+  (save-excursion
+    (forward-line)
+    (when (org-looking-at-p org-planning-line-re) (forward-line))
+    (when (looking-at org-property-drawer-re)
+      (forward-line)
+      (let ((end (match-end 0)) properties)
+	(while (< (line-end-position) end)
+	  (looking-at org-property-re)
+	  (push (org-match-string-no-properties 3) properties)
+	  (push (intern (concat ":" (upcase (match-string 2)))) properties)
+	  (forward-line))
+	properties))))
+
+(defun org-element--get-time-properties ()
+  "Return time properties associated to headline at point.
+Return value is a plist."
+  (save-excursion
+    (when (progn (forward-line) (looking-at org-planning-line-re))
+      (let ((end (line-end-position)) plist)
+	(while (re-search-forward org-keyword-time-not-clock-regexp end t)
+	  (goto-char (match-end 1))
+	  (skip-chars-forward " \t")
+	  (let ((keyword (match-string 1))
+		(time (org-element-timestamp-parser)))
+	    (cond ((equal keyword org-scheduled-string)
+		   (setq plist (plist-put plist :scheduled time)))
+		  ((equal keyword org-deadline-string)
+		   (setq plist (plist-put plist :deadline time)))
+		  (t (setq plist (plist-put plist :closed time))))))
+	plist))))
+
 (defun org-element-headline-parser (limit &optional raw-secondary-p)
   "Parse a headline.
 
@@ -802,61 +839,8 @@ Assume point is at beginning of the headline."
 	   (archivedp (member org-archive-tag tags))
 	   (footnote-section-p (and org-footnote-section
 				    (string= org-footnote-section raw-value)))
-	   (standard-props
-	    ;; Find property drawer associated to current headline and
-	    ;; extract properties.
-	    ;;
-	    ;; Upcase property names.  It avoids confusion between
-	    ;; properties obtained through property drawer and default
-	    ;; properties from the parser (e.g. `:end' and :END:)
-	    (let ((end (save-excursion
-			 (org-with-limited-levels (outline-next-heading))
-			 (point)))
-		  plist)
-	      (save-excursion
-		(while (and (null plist)
-			    (re-search-forward org-property-start-re end t))
-		  (let ((drawer (org-element-at-point)))
-		    (when (and (eq (org-element-type drawer) 'property-drawer)
-			       ;; Make sure drawer is not associated
-			       ;; to an inlinetask.
-			       (let ((p drawer))
-				 (while (and (setq p (org-element-property
-						      :parent p))
-					     (not (eq (org-element-type p)
-						      'inlinetask))))
-				 (not p)))
-		      (let ((end (org-element-property :contents-end drawer)))
-			(when end
-			  (forward-line)
-			  (while (< (point) end)
-			    (when (looking-at org-property-re)
-			      (setq plist
-				    (plist-put
-				     plist
-				     (intern
-				      (concat ":" (upcase (match-string 2))))
-				     (org-match-string-no-properties 3))))
-			    (forward-line)))))))
-		plist)))
-	   (time-props
-	    ;; Read time properties on the line below the headline.
-	    (save-excursion
-	      (forward-line)
-	      (when (looking-at org-planning-line-re)
-		(let ((end (line-end-position)) plist)
-		  (while (re-search-forward
-			  org-keyword-time-not-clock-regexp end t)
-		    (goto-char (match-end 1))
-		    (skip-chars-forward " \t")
-		    (let ((keyword (match-string 1))
-			  (time (org-element-timestamp-parser)))
-		      (cond ((equal keyword org-scheduled-string)
-			     (setq plist (plist-put plist :scheduled time)))
-			    ((equal keyword org-deadline-string)
-			     (setq plist (plist-put plist :deadline time)))
-			    (t (setq plist (plist-put plist :closed time))))))
-		  plist))))
+	   (standard-props (org-element--get-node-properties))
+	   (time-props (org-element--get-time-properties))
 	   (begin (point))
 	   (end (min (save-excursion (org-end-of-subtree t t)) limit))
 	   (pos-after-head (progn (forward-line) (point)))
@@ -997,25 +981,8 @@ Assume point is at beginning of the inline task."
 		       (and (re-search-forward org-outline-regexp-bol limit t)
 			    (org-looking-at-p "END[ \t]*$")
 			    (line-beginning-position))))
-	   (time-props
-	    ;; Read time properties on the line below the inlinetask
-	    ;; opening string.
-	    (when task-end
-	      (save-excursion
-		(when (progn (forward-line) (looking-at org-planning-line-re))
-		  (let ((end (line-end-position)) plist)
-		    (while (re-search-forward
-			    org-keyword-time-not-clock-regexp end t)
-		      (goto-char (match-end 1))
-		      (skip-chars-forward " \t")
-		      (let ((keyword (match-string 1))
-			    (time (org-element-timestamp-parser)))
-			(cond ((equal keyword org-scheduled-string)
-			       (setq plist (plist-put plist :scheduled time)))
-			      ((equal keyword org-deadline-string)
-			       (setq plist (plist-put plist :deadline time)))
-			      (t (setq plist (plist-put plist :closed time))))))
-		    plist)))))
+	   (standard-props (and task-end (org-element--get-node-properties)))
+	   (time-props (and task-end (org-element--get-time-properties)))
 	   (contents-begin (progn (forward-line)
 				  (and task-end (< (point) task-end) (point))))
 	   (contents-end (and contents-begin task-end))
@@ -1025,43 +992,6 @@ Assume point is at beginning of the inline task."
 			   (point)))
 	   (end (progn (skip-chars-forward " \r\t\n" limit)
 		       (if (eobp) (point) (line-beginning-position))))
-	   (standard-props
-	    ;; Find property drawer associated to current inlinetask
-	    ;; and extract properties.
-	    ;;
-	    ;; HACK: Calling `org-element-at-point' triggers a parsing
-	    ;; of this inlinetask and, thus, an infloop.  To avoid the
-	    ;; problem, we extract contents of the inlinetask and
-	    ;; parse them in a new buffer.
-	    ;;
-	    ;; Upcase property names.  It avoids confusion between
-	    ;; properties obtained through property drawer and default
-	    ;; properties from the parser (e.g. `:end' and :END:)
-	    (when contents-begin
-	      (let ((contents (buffer-substring contents-begin contents-end))
-		    plist)
-		(with-temp-buffer
-		  (let ((org-inhibit-startup t)) (org-mode))
-		  (insert contents)
-		  (goto-char (point-min))
-		  (while (and (null plist)
-			      (re-search-forward
-			       org-property-start-re task-end t))
-		    (let ((d (org-element-at-point)))
-		      (when (eq (org-element-type d) 'property-drawer)
-			(let ((end (org-element-property :contents-end d)))
-			  (when end
-			    (forward-line)
-			    (while (< (point) end)
-			      (when (looking-at org-property-re)
-				(setq plist
-				      (plist-put
-				       plist
-				       (intern
-					(concat ":" (upcase (match-string 2))))
-				       (org-match-string-no-properties 3))))
-			      (forward-line))))))))
-		plist)))
 	   (inlinetask
 	    (list 'inlinetask
 		  (nconc
@@ -1378,47 +1308,33 @@ CONTENTS is the contents of the element."
 
 ;;;; Property Drawer
 
-(defun org-element-property-drawer-parser (limit affiliated)
+(defun org-element-property-drawer-parser (limit)
   "Parse a property drawer.
 
-LIMIT bounds the search.  AFFILIATED is a list of which CAR is
-the buffer position at the beginning of the first affiliated
-keyword and CDR is a plist of affiliated keywords along with
-their value.
+LIMIT bounds the search.
 
-Return a list whose CAR is `property-drawer' and CDR is a plist
+Return a list whose car is `property-drawer' and cdr is a plist
 containing `:begin', `:end', `:contents-begin', `:contents-end',
 `:post-blank' and `:post-affiliated' keywords.
 
 Assume point is at the beginning of the property drawer."
-  (let ((case-fold-search t))
-    (if (not (save-excursion (re-search-forward "^[ \t]*:END:[ \t]*$" limit t)))
-	;; Incomplete drawer: parse it as a paragraph.
-	(org-element-paragraph-parser limit affiliated)
-      (save-excursion
-	(let* ((drawer-end-line (match-beginning 0))
-	       (begin (car affiliated))
-	       (post-affiliated (point))
-	       (contents-begin
-		(progn
-		  (forward-line)
-		  (and (re-search-forward org-property-re drawer-end-line t)
-		       (line-beginning-position))))
-	       (contents-end (and contents-begin drawer-end-line))
-	       (pos-before-blank (progn (goto-char drawer-end-line)
-					(forward-line)
-					(point)))
-	       (end (progn (skip-chars-forward " \r\t\n" limit)
-			   (if (eobp) (point) (line-beginning-position)))))
-	  (list 'property-drawer
-		(nconc
-		 (list :begin begin
-		       :end end
-		       :contents-begin contents-begin
-		       :contents-end contents-end
-		       :post-blank (count-lines pos-before-blank end)
-		       :post-affiliated post-affiliated)
-		 (cdr affiliated))))))))
+  (save-excursion
+    (let ((case-fold-search t)
+	  (begin (point))
+	  (contents-begin (line-beginning-position 2)))
+      (re-search-forward "^[ \t]*:END:[ \t]*$" limit t)
+      (let ((contents-end (and (> (match-beginning 0) contents-begin)
+			       (match-beginning 0)))
+	    (before-blank (progn (forward-line) (point)))
+	    (end (progn (skip-chars-forward " \r\t\n" limit)
+			(if (eobp) (point) (line-beginning-position)))))
+	(list 'property-drawer
+	      (list :begin begin
+		    :end end
+		    :contents-begin (and contents-end contents-begin)
+		    :contents-end contents-end
+		    :post-blank (count-lines before-blank end)
+		    :post-affiliated begin))))))
 
 (defun org-element-property-drawer-interpreter (property-drawer contents)
   "Interpret PROPERTY-DRAWER element as Org syntax.
@@ -3709,6 +3625,10 @@ element it has to parse."
        ;; Planning.
        ((and (eq mode 'planning) (looking-at org-planning-line-re))
 	(org-element-planning-parser limit))
+       ;; Property drawer.
+       ((and (memq mode '(planning property-drawer))
+	     (looking-at org-property-drawer-re))
+	(org-element-property-drawer-parser limit))
        ;; When not at bol, point is at the beginning of an item or
        ;; a footnote definition: next item is always a paragraph.
        ((not (bolp)) (org-element-paragraph-parser limit (list (point))))
@@ -3730,9 +3650,7 @@ element it has to parse."
 	      (org-element-latex-environment-parser limit affiliated))
 	     ;; Drawer and Property Drawer.
 	     ((looking-at org-drawer-regexp)
-	      (if (equal (match-string 1) "PROPERTIES")
-		  (org-element-property-drawer-parser limit affiliated)
-		(org-element-drawer-parser limit affiliated)))
+	      (org-element-drawer-parser limit affiliated))
 	     ;; Fixed Width
 	     ((looking-at "[ \t]*:\\( \\|$\\)")
 	      (org-element-fixed-width-parser limit affiliated))
@@ -4125,8 +4043,9 @@ looking into captions:
   "Return next special mode according to TYPE, or nil.
 TYPE is a symbol representing the type of an element or object
 containing next element if PARENTP is non-nil, or before it
-otherwise.  Modes can be either `first-section', `section',
-`planning', `item', `node-property' and `table-row'."
+otherwise.  Modes can be either `first-section', `item',
+`node-property', `planning', `property-drawer', `section',
+`table-row' or nil."
   (if parentp
       (case type
 	(headline 'section)
@@ -4137,7 +4056,7 @@ otherwise.  Modes can be either `first-section', `section',
     (case type
       (item 'item)
       (node-property 'node-property)
-      (planning nil)
+      (planning 'property-drawer)
       (table-row 'table-row))))
 
 (defun org-element--parse-elements
