@@ -1746,6 +1746,11 @@ Outside list"
   (should-not
    (eq 'planning
        (org-test-with-temp-text "DEADLINE: <2012-03-29 thu.>"
+	 (org-element-type (org-element-at-point)))))
+  (should-not
+   (eq 'planning
+       (org-test-with-temp-text
+	   "* H\n# Comment\n<point>DEADLINE: <2012-03-29 thu.>"
 	 (org-element-type (org-element-at-point))))))
 
 
