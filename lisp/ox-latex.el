@@ -2801,31 +2801,36 @@ a communication channel."
   "Transcode a TABLE-ROW element from Org to LaTeX.
 CONTENTS is the contents of the row.  INFO is a plist used as
 a communication channel."
-  ;; Rules are ignored since table separators are deduced from
-  ;; borders of the current row.
-  (when (eq (org-element-property :type table-row) 'standard)
-    (let* ((attr (org-export-read-attribute :attr_latex
-					    (org-export-get-parent table-row)))
-	   (longtablep
-	    (member (or (plist-get attr :environment)
-			(plist-get info :latex-default-table-environment))
-		    '("longtable" "longtabu")))
-	   (booktabsp (if (plist-member attr :booktabs)
-			  (plist-get attr :booktabs)
-			(plist-get info :latex-tables-booktabs)))
-	   ;; TABLE-ROW's borders are extracted from its first cell.
-	   (borders (org-export-table-cell-borders
-		     (car (org-element-contents table-row)) info)))
+  (let* ((attr (org-export-read-attribute :attr_latex
+					  (org-export-get-parent table-row)))
+	 (booktabsp (if (plist-member attr :booktabs) (plist-get attr :booktabs)
+		      (plist-get info :latex-tables-booktabs)))
+	 (longtablep
+	  (member (or (plist-get attr :environment)
+		      (plist-get info :latex-default-table-environment))
+		  '("longtable" "longtabu"))))
+    (if (eq (org-element-property :type table-row) 'rule)
+	(cond
+	 ((not booktabsp) "\\hline")
+	 ((not (org-export-get-previous-element table-row info)) "\\toprule")
+	 ((not (org-export-get-next-element table-row info)) "\\bottomrule")
+	 ((and longtablep
+	       (org-export-table-row-ends-header-p
+		(org-export-get-previous-element table-row info) info))
+	  "")
+	 (t "\\midrule"))
       (concat
        ;; When BOOKTABS are activated enforce top-rule even when no
        ;; hline was specifically marked.
-       (cond ((and booktabsp (memq 'top borders)) "\\toprule\n")
-	     ((and (memq 'top borders) (memq 'above borders)) "\\hline\n"))
+       (and booktabsp (not (org-export-get-previous-element table-row info))
+	    "\\toprule\n")
        contents "\\\\\n"
        (cond
 	;; Special case for long tables.  Define header and footers.
 	((and longtablep (org-export-table-row-ends-header-p table-row info))
-	 (format "%s
+	 (let ((columns (cdr (org-export-table-dimensions
+			      (org-export-get-parent-table table-row) info))))
+	   (format "%s
 \\endfirsthead
 \\multicolumn{%d}{l}{%s} \\\\
 %s
@@ -2835,26 +2840,23 @@ a communication channel."
 %s\\multicolumn{%d}{r}{%s} \\\\
 \\endfoot
 \\endlastfoot"
-		 (if booktabsp "\\midrule" "\\hline")
-		 (cdr (org-export-table-dimensions
-		       (org-export-get-parent-table table-row) info))
-		 (org-latex--translate "Continued from previous page" info)
-		 (cond ((and booktabsp (memq 'top borders)) "\\toprule\n")
-		       ((and (memq 'top borders)
-			     (memq 'above borders)) "\\hline\n")
-		       (t ""))
-		 contents
-		 (if booktabsp "\\midrule" "\\hline")
-		 (if booktabsp "\\midrule" "\\hline")
-		 ;; Number of columns.
-		 (cdr (org-export-table-dimensions
-		       (org-export-get-parent-table table-row) info))
-		 (org-latex--translate "Continued on next page" info)))
+		   (if booktabsp "\\midrule" "\\hline")
+		   columns
+		   (org-latex--translate "Continued from previous page" info)
+		   (cond
+		    ((not (org-export-table-row-starts-header-p table-row info))
+		     "")
+		    (booktabsp "\\toprule\n")
+		    (t "\\hline\n"))
+		   contents
+		   (if booktabsp "\\midrule" "\\hline")
+		   (if booktabsp "\\midrule" "\\hline")
+		   columns
+		   (org-latex--translate "Continued on next page" info))))
 	;; When BOOKTABS are activated enforce bottom rule even when
 	;; no hline was specifically marked.
-	((and booktabsp (memq 'bottom borders)) "\\bottomrule")
-	((and (memq 'bottom borders) (memq 'below borders)) "\\hline")
-	((memq 'below borders) (if booktabsp "\\midrule" "\\hline")))))))
+	((and booktabsp (not (org-export-get-next-element table-row info)))
+	 "\\bottomrule"))))))
 
 
 ;;;; Target

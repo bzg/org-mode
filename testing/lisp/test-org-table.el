@@ -1168,6 +1168,352 @@ See also `test-org-table/copy-field'."
       (should (string= got
 		       expect)))))
 
+;;; Radio Tables
+
+(ert-deftest test-org-table/to-generic ()
+  "Test `orgtbl-to-generic' specifications."
+  ;; Test :hline parameter.
+  (should
+   (equal "a\nb"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |\n|---|\n| b |")
+			     '(:hline nil))))
+  (should
+   (equal "a\n~\nb"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |\n|---|\n| b |")
+			     '(:hline "~"))))
+  ;; Test :sep parameter.
+  (should
+   (equal "a!b\nc!d"
+	  (orgtbl-to-generic
+	   (org-table-to-lisp "| a | b |\n|---+---|\n| c | d |")
+	   '(:sep "!"))))
+  ;; Test :hsep parameter.
+  (should
+   (equal "a!b\nc?d"
+	  (orgtbl-to-generic
+	   (org-table-to-lisp "| a | b |\n|---+---|\n| c | d |")
+	   '(:sep "?" :hsep "!"))))
+  ;; Test :tstart parameter.
+  (should
+   (equal "<begin>\na"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |") '(:tstart "<begin>"))))
+  (should
+   (equal "<begin>\na"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |")
+			     '(:tstart (lambda () "<begin>")))))
+  (should
+   (equal "a"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |")
+			     '(:tstart "<begin>" :splice t))))
+  ;; Test :tend parameter.
+  (should
+   (equal "a\n<end>"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |") '(:tend "<end>"))))
+  (should
+   (equal "a\n<end>"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |")
+			     '(:tend (lambda () "<end>")))))
+  (should
+   (equal "a"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |")
+			     '(:tend "<end>" :splice t))))
+  ;; Test :lstart parameter.
+  (should
+   (equal "> a"
+	  (orgtbl-to-generic
+	   (org-table-to-lisp "| a |") '(:lstart "> "))))
+  (should
+   (equal "> a"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |")
+			     '(:lstart (lambda () "> ")))))
+  ;; Test :llstart parameter.
+  (should
+   (equal "> a\n>> b"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |\n|---|\n| b |")
+			     '(:lstart "> " :llstart ">> "))))
+  ;; Test :hlstart parameter.
+  (should
+   (equal "!> a\n> b"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |\n|---|\n| b |")
+			     '(:lstart "> " :hlstart "!> "))))
+  ;; Test :hllstart parameter.
+  (should
+   (equal "!> a\n!!> b\n> c"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |\n| b |\n|---|\n| c |")
+			     '(:lstart "> " :hlstart "!> " :hllstart "!!> "))))
+  ;; Test :lend parameter.
+  (should
+   (equal "a <"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |") '(:lend " <"))))
+  ;; Test :llend parameter.
+  (should
+   (equal "a <\nb <<"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |\n|---|\n| b |")
+			     '(:lend " <" :llend " <<"))))
+  ;; Test :hlend parameter.
+  (should
+   (equal "a <!\nb <"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |\n|---|\n| b |")
+			     '(:lend " <" :hlend " <!"))))
+  ;; Test :hllend parameter.
+  (should
+   (equal "a <!\nb <!!\nc <"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |\n| b |\n|---|\n| c |")
+			     '(:lend " <" :hlend " <!" :hllend " <!!"))))
+  ;; Test :lfmt parameter.
+  (should
+   (equal "a!b"
+	  (orgtbl-to-generic (org-table-to-lisp "| a | b |")
+			     '(:lfmt "%s!%s"))))
+  (should
+   (equal "a+b"
+	  (orgtbl-to-generic
+	   (org-table-to-lisp "| a | b |")
+	   '(:lfmt (lambda (c) (concat (car c) "+" (cadr c)))))))
+  (should
+   (equal "a!b"
+	  (orgtbl-to-generic (org-table-to-lisp "| a | b |")
+			     '(:lfmt "%s!%s" :lstart ">" :lend "<" :sep " "))))
+  ;; Test :llfmt parameter.
+  (should
+   (equal "a!b"
+	  (orgtbl-to-generic (org-table-to-lisp "| a | b |")
+			     '(:llfmt "%s!%s"))))
+  (should
+   (equal "a!b\nc+d"
+	  (orgtbl-to-generic
+	   (org-table-to-lisp "| a | b |\n| c | d |")
+	   '(:lfmt "%s!%s" :llfmt (lambda (c) (concat (car c) "+" (cadr c)))))))
+  (should
+   (equal "a!b"
+	  (orgtbl-to-generic (org-table-to-lisp "| a | b |")
+			     '(:llfmt "%s!%s" :lstart ">" :lend "<" :sep " "))))
+  ;; Test :hlfmt parameter.
+  (should
+   (equal "a!b\ncd"
+	  (orgtbl-to-generic
+	   (org-table-to-lisp "| a | b |\n|---+---|\n| c | d |")
+	   '(:hlfmt "%s!%s"))))
+  (should
+   (equal "a+b\ncd"
+	  (orgtbl-to-generic
+	   (org-table-to-lisp "| a | b |\n|---+---|\n| c | d |")
+	   '(:hlfmt (lambda (c) (concat (car c) "+" (cadr c)))))))
+  (should
+   (equal "a!b\n>c d<"
+	  (orgtbl-to-generic
+	   (org-table-to-lisp "| a | b |\n|---+---|\n| c | d |")
+	   '(:hlfmt "%s!%s" :lstart ">" :lend "<" :sep " "))))
+  ;; Test :hllfmt parameter.
+  (should
+   (equal "a!b\ncd"
+	  (orgtbl-to-generic
+	   (org-table-to-lisp "| a | b |\n|---+---|\n| c | d |")
+	   '(:hllfmt "%s!%s"))))
+  (should
+   (equal "a+b\ncd"
+	  (orgtbl-to-generic
+	   (org-table-to-lisp "| a | b |\n|---+---|\n| c | d |")
+	   '(:hllfmt (lambda (c) (concat (car c) "+" (cadr c)))))))
+  (should
+   (equal "a!b\n>c d<"
+	  (orgtbl-to-generic
+	   (org-table-to-lisp "| a | b |\n|---+---|\n| c | d |")
+	   '(:hllfmt "%s!%s" :lstart ">" :lend "<" :sep " "))))
+  ;; Test :fmt parameter.
+  (should
+   (equal ">a<\n>b<"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |\n|---|\n| b |")
+			     '(:fmt ">%s<"))))
+  (should
+   (equal ">a<b"
+	  (orgtbl-to-generic (org-table-to-lisp "| a | b |")
+			     '(:fmt (1 ">%s<" 2 (lambda (c) c))))))
+  (should
+   (equal "a b"
+	  (orgtbl-to-generic (org-table-to-lisp "| a | b |")
+			     '(:fmt (2 " %s")))))
+  (should
+   (equal ">a<"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |")
+			     '(:fmt (lambda (c) (format ">%s<" c))))))
+  ;; Test :hfmt parameter.
+  (should
+   (equal ">a<\nb"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |\n|---|\n| b |")
+			     '(:hfmt ">%s<"))))
+  (should
+   (equal ">a<b\ncd"
+	  (orgtbl-to-generic
+	   (org-table-to-lisp "| a | b |\n|---+---|\n| c | d |")
+	   '(:hfmt (1 ">%s<" 2 identity)))))
+  (should
+   (equal "a b\ncd"
+	  (orgtbl-to-generic
+	   (org-table-to-lisp "| a | b |\n|---+---|\n| c | d |")
+	   '(:hfmt (2 " %s")))))
+  (should
+   (equal ">a<\nb"
+	  (orgtbl-to-generic (org-table-to-lisp "| a |\n|---|\n| b |")
+			     '(:hfmt (lambda (c) (format ">%s<" c))))))
+  ;; Test :efmt parameter.
+  (should
+   (equal "2x10^3"
+	  (orgtbl-to-generic (org-table-to-lisp "| 2e3 |")
+			     '(:efmt "%sx10^%s"))))
+  (should
+   (equal "2x10^3"
+	  (orgtbl-to-generic (org-table-to-lisp "| 2e3 |")
+			     '(:efmt (lambda (m e) (concat m "x10^" e))))))
+  (should
+   (equal "2x10^3"
+	  (orgtbl-to-generic (org-table-to-lisp "| 2e3 |")
+			     '(:efmt (1 "%sx10^%s")))))
+  (should
+   (equal "2x10^3"
+	  (orgtbl-to-generic
+	   (org-table-to-lisp "| 2e3 |")
+	   '(:efmt (1 (lambda (m e) (format "%sx10^%s" m e)))))))
+  (should
+   (equal "2e3"
+	  (orgtbl-to-generic (org-table-to-lisp "| 2e3 |") '(:efmt nil))))
+  ;; Test :skip parameter.
+  (should
+   (equal "cd"
+	  (orgtbl-to-generic
+	   (org-table-to-lisp "| \ | <c> |\n| a | b |\n|---+---|\n| c | d |")
+	   '(:skip 2))))
+  ;; Test :skipcols parameter.
+  (should
+   (equal "a\nc"
+	  (orgtbl-to-generic
+	   (org-table-to-lisp "| a | b |\n| c | d |") '(:skipcols (2)))))
+  (should
+   (equal "a\nc"
+	  (orgtbl-to-generic
+	   (org-table-to-lisp
+	    "| / | <c> | <c> |\n| # | a | b |\n|---+---+---|\n|   | c | d |")
+	   '(:skipcols (2)))))
+  ;; Test :raw parameter.
+  (when (featurep 'ox-latex)
+    (should
+     (org-string-match-p
+      "/a/"
+      (orgtbl-to-generic (org-table-to-lisp "| /a/ | b |")
+			 '(:backend latex :raw t))))))
+
+(ert-deftest test-org-table/to-latex ()
+  "Test `orgtbl-to-latex' specifications."
+  (should
+   (equal "\\begin{tabular}{l}\na\\\\\n\\end{tabular}"
+	  (orgtbl-to-latex (org-table-to-lisp "| a |") nil)))
+  ;; Test :environment parameter.
+  (should
+   (equal "\\begin{tabularx}{l}\na\\\\\n\\end{tabularx}"
+	  (orgtbl-to-latex (org-table-to-lisp "| a |")
+			   '(:environment "tabularx"))))
+  ;; Test :booktabs parameter.
+  (should
+   (org-string-match-p
+    "\\toprule" (orgtbl-to-latex (org-table-to-lisp "| a |") '(:booktabs t)))))
+
+(ert-deftest test-org-table/to-html ()
+  "Test `orgtbl-to-html' specifications."
+  (should
+   (equal (orgtbl-to-html (org-table-to-lisp "| a |") nil)
+	  "<table border=\"2\" cellspacing=\"0\" cellpadding=\"6\" rules=\"groups\" frame=\"hsides\">
+
+
+<colgroup>
+<col  class=\"left\" />
+</colgroup>
+<tbody>
+<tr>
+<td class=\"left\">a</td>
+</tr>
+</tbody>
+</table>"))
+  ;; Test :attributes parameter.
+  (should
+   (org-string-match-p
+    "<table>"
+    (orgtbl-to-html (org-table-to-lisp "| a |") '(:attributes nil))))
+  (should
+   (org-string-match-p
+    "<table border=\"2\">"
+    (orgtbl-to-html (org-table-to-lisp "| a |") '(:attributes (:border "2"))))))
+
+(ert-deftest test-org-table/to-texinfo ()
+  "Test `orgtbl-to-texinfo' specifications."
+  (should
+   (equal "@multitable {a}\n@item a\n@end multitable"
+	  (orgtbl-to-texinfo (org-table-to-lisp "| a |") nil)))
+  ;; Test :columns parameter.
+  (should
+   (equal "@multitable @columnfractions .4 .6\n@item a\n@tab b\n@end multitable"
+	  (orgtbl-to-texinfo (org-table-to-lisp "| a | b |")
+			     '(:columns ".4 .6"))))
+  (should
+   (equal "@multitable @columnfractions .4 .6\n@item a\n@tab b\n@end multitable"
+	  (orgtbl-to-texinfo (org-table-to-lisp "| a | b |")
+			     '(:columns "@columnfractions .4 .6"))))
+  (should
+   (equal "@multitable {xxx} {xx}\n@item a\n@tab b\n@end multitable"
+	  (orgtbl-to-texinfo (org-table-to-lisp "| a | b |")
+			     '(:columns "{xxx} {xx}")))))
+
+(ert-deftest test-org-table/to-orgtbl ()
+  "Test `orgtbl-to-orgtbl' specifications."
+  (should
+   (equal "| a | b |\n|---+---|\n| c | d |"
+	  (orgtbl-to-orgtbl
+	   (org-table-to-lisp "| a | b |\n|---+---|\n| c | d |") nil))))
+
+(ert-deftest test-org-table/to-unicode ()
+  "Test `orgtbl-to-unicode' specifications."
+  (should
+   (equal "━━━\n a \n━━━"
+	  (orgtbl-to-unicode (org-table-to-lisp "| a |") nil)))
+  ;; Test :narrow parameter.
+  (should
+   (equal "━━━━\n => \n━━━━"
+	  (orgtbl-to-unicode (org-table-to-lisp "| <2> |\n| xxx |")
+			     '(:narrow t)))))
+
+(ert-deftest test-org-table/send-region ()
+  "Test `orgtbl-send-table' specifications."
+  ;; Error when not at a table.
+  (should-error
+   (org-test-with-temp-text "Paragraph"
+     (orgtbl-send-table)))
+  ;; Error when destination is missing.
+  (should-error
+   (org-test-with-temp-text "#+ORGTBL: SEND\n<point>| a |"
+     (orgtbl-send-table)))
+  ;; Error when transformation function is not specified.
+  (should-error
+   (org-test-with-temp-text "
+# BEGIN RECEIVE ORGTBL table
+# END RECEIVE ORGTBL table
+#+ORGTBL: SEND table
+<point>| a |"
+     (orgtbl-send-table)))
+  ;; Standard test.
+  (should
+   (equal "| a |\n|---|\n| b |\n"
+	  (org-test-with-temp-text "
+# BEGIN RECEIVE ORGTBL table
+# END RECEIVE ORGTBL table
+#+ORGTBL: SEND table orgtbl-to-orgtbl :hlines nil
+<point>| a |\n|---|\n| b |"
+	    (orgtbl-send-table)
+	    (goto-char (point-min))
+	    (buffer-substring-no-properties
+	     (search-forward "# BEGIN RECEIVE ORGTBL table\n")
+	     (progn (search-forward "# END RECEIVE ORGTBL table")
+		    (match-beginning 0)))))))
+
+
 (provide 'test-org-table)
 
 ;;; test-org-table.el ends here
