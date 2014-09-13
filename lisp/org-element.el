@@ -4117,14 +4117,9 @@ looking into captions:
 ;; level.
 ;;
 ;; The second one, `org-element--parse-objects' applies on all objects
-;; of a paragraph or a secondary string.
-;;
-;; More precisely, that function looks for every allowed object type
-;; first.  Then, it discards failed searches, keeps further matches,
-;; and searches again types matched behind point, for subsequent
-;; calls.  Thus, searching for a given type fails only once, and every
-;; object is searched only once at top level (but sometimes more for
-;; nested types).
+;; of a paragraph or a secondary string.  It calls
+;; `org-element--object-lex' to find the next object in the current
+;; container.
 
 (defsubst org-element--next-mode (type parentp)
   "Return next special mode according to TYPE, or nil.
