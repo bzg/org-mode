@@ -15426,45 +15426,40 @@ When INCREMENT is non-nil, set the property to the next allowed value."
       (org-clock-update-mode-line))
     (message "%s is now %s" prop val)))
 
+(defun org-get-property-block (&optional beg force)
+  "Return the (beg . end) range of the body of the property drawer.
+BEG is the beginning and end of the current subtree, or of the
+part before the first headline.  If it is not given, it will be
+found.  If the drawer does not exist, create it if FORCE is
+non-nil, or return nil."
+  (org-with-wide-buffer
+   (when beg (goto-char beg))
+   (unless (org-before-first-heading-p)
+     (let ((beg (cond (beg)
+		      ((or (not (featurep 'org-inlinetask))
+			   (org-inlinetask-in-task-p))
+		       (org-back-to-heading t))
+		      (t (org-with-limited-levels (org-back-to-heading t))))))
+       (forward-line)
+       (when (org-looking-at-p org-planning-line-re) (forward-line))
+       (cond ((looking-at org-property-drawer-re)
+	      (forward-line)
+	      (cons (point) (progn (goto-char (match-end 0))
+				   (line-beginning-position))))
+	     (force
+	      (org-insert-property-drawer)
+	      (let ((pos (save-excursion (search-forward ":END:")
+					 (line-beginning-position))))
+		(cons pos pos))))))))
+
 (defun org-at-property-p ()
   "Non-nil when point is inside a property drawer.
 See `org-property-re' for match data, if applicable."
-  (when (eq (org-element-type (org-element-at-point)) 'node-property)
-    (save-excursion
-      (beginning-of-line)
-      (looking-at org-property-re))))
-
-(defun org-get-property-block (&optional beg end force)
-  "Return the (beg . end) range of the body of the property drawer.
-BEG and END are the beginning and end of the current subtree, or of
-the part before the first headline.  If they are not given, they will
-be found.  If the drawer does not exist and FORCE is non-nil, create
-the drawer."
-  (catch 'exit
-    (save-excursion
-      (let* ((beg (or beg (and (org-before-first-heading-p) (point-min))
-		      (progn (org-back-to-heading t) (point))))
-	     (end (or end (and (not (outline-next-heading)) (point-max))
-		      (point))))
-	(goto-char beg)
-	(if (re-search-forward org-property-start-re end t)
-	    (setq beg (1+ (match-end 0)))
-	  (if force
-	      (save-excursion
-		(org-insert-property-drawer)
-		(setq end (progn (outline-next-heading) (point))))
-	    (throw 'exit nil))
-	  (goto-char beg)
-	  (if (re-search-forward org-property-start-re end t)
-	      (setq beg (1+ (match-end 0)))))
-	(if (re-search-forward org-property-end-re end t)
-	    (setq end (match-beginning 0))
-	  (or force (throw 'exit nil))
-	  (goto-char beg)
-	  (setq end beg)
-	  (org-indent-line)
-	  (insert ":END:\n"))
-	(cons beg end)))))
+  (save-excursion
+    (beginning-of-line)
+    (and (looking-at org-property-re)
+	 (let ((property-drawer (save-match-data (org-get-property-block))))
+	   (and property-drawer (< (point) (cdr property-drawer)))))))
 
 (defun org-entry-properties (&optional pom which specific)
   "Get all properties of the entry at point-or-marker POM.
@@ -15556,7 +15551,7 @@ things up because then unnecessary parsing is avoided."
 
 	 (when (memq which '(all standard))
 	   ;; Get the standard properties, like :PROP: ...
-	   (setq range (org-get-property-block beg end))
+	   (setq range (org-get-property-block beg))
 	   (when range
 	     (goto-char (car range))
 	     (while (re-search-forward org-property-re
@@ -15808,7 +15803,7 @@ If it is not a string, an error is raised."
 	       property))
        (t ; a non-special property
 	(let ((buffer-invisibility-spec (org-inhibit-invisibility))) ; Emacs 21
-	  (setq range (org-get-property-block beg end 'force))
+	  (setq range (org-get-property-block beg 'force))
 	  (goto-char (car range))
 	  (if (re-search-forward
 	       (org-re-property property nil t) (cdr range) t)
@@ -15843,7 +15838,7 @@ formats in the current buffer."
 	    (setq range (or (org-get-property-block)
 			    (if (y-or-n-p
 				 (format "Malformed drawer at %d, repair?" (point)))
-				(org-get-property-block nil nil t)
+				(org-get-property-block nil t)
 			      (throw 'cont nil))))
 	    (goto-char (car range))
 	    (while (re-search-forward org-property-re
