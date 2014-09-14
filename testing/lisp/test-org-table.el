@@ -411,7 +411,6 @@ reference (with row).  Mode string N."
 | type-of (identity @1)   | r           | r      | r   |
 | identity @1             | r           | r      | r   |
 "
-   ;; TODO Fix "#ERROR".
    "
 |                         | nil    | (list) | '()    |
 |-------------------------+--------+--------+--------|
@@ -425,7 +424,7 @@ reference (with row).  Mode string N."
 |-------------------------+--------+--------+--------|
 | type-of @1              | symbol | symbol | symbol |
 | type-of (identity @1)   | symbol | symbol | symbol |
-| identity @1             | #ERROR | #ERROR | #ERROR |
+| identity @1             | nil    | nil    | nil    |
 "
    1 (concat "#+TBLFM: @2$<<..@2$> = '(type-of @1) :: "
 	     "@3$<<..@3$> = '(type-of (identity @1)) :: "
