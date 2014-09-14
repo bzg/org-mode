@@ -2283,35 +2283,33 @@ LIMIT bounds the search.
 Return a list whose CAR is `planning' and CDR is a plist
 containing `:closed', `:deadline', `:scheduled', `:begin',
 `:end', `:post-blank' and `:post-affiliated' keywords."
-  (if (not (save-excursion (forward-line -1) (org-at-heading-p)))
-      (org-element-paragraph-parser limit (list (point)))
-    (save-excursion
-      (let* ((case-fold-search nil)
-	     (begin (point))
-	     (post-blank (let ((before-blank (progn (forward-line) (point))))
-			   (skip-chars-forward " \r\t\n" limit)
-			   (skip-chars-backward " \t")
-			   (unless (bolp) (end-of-line))
-			   (count-lines before-blank (point))))
-	     (end (point))
-	     closed deadline scheduled)
-	(goto-char begin)
-	(while (re-search-forward org-keyword-time-not-clock-regexp end t)
-	  (goto-char (match-end 1))
-	  (skip-chars-forward " \t" end)
-	  (let ((keyword (match-string 1))
-		(time (org-element-timestamp-parser)))
-	    (cond ((equal keyword org-closed-string) (setq closed time))
-		  ((equal keyword org-deadline-string) (setq deadline time))
-		  (t (setq scheduled time)))))
-	(list 'planning
-	      (list :closed closed
-		    :deadline deadline
-		    :scheduled scheduled
-		    :begin begin
-		    :end end
-		    :post-blank post-blank
-		    :post-affiliated begin))))))
+  (save-excursion
+    (let* ((case-fold-search nil)
+	   (begin (point))
+	   (post-blank (let ((before-blank (progn (forward-line) (point))))
+			 (skip-chars-forward " \r\t\n" limit)
+			 (skip-chars-backward " \t")
+			 (unless (bolp) (end-of-line))
+			 (count-lines before-blank (point))))
+	   (end (point))
+	   closed deadline scheduled)
+      (goto-char begin)
+      (while (re-search-forward org-keyword-time-not-clock-regexp end t)
+	(goto-char (match-end 1))
+	(skip-chars-forward " \t" end)
+	(let ((keyword (match-string 1))
+	      (time (org-element-timestamp-parser)))
+	  (cond ((equal keyword org-closed-string) (setq closed time))
+		((equal keyword org-deadline-string) (setq deadline time))
+		(t (setq scheduled time)))))
+      (list 'planning
+	    (list :closed closed
+		  :deadline deadline
+		  :scheduled scheduled
+		  :begin begin
+		  :end end
+		  :post-blank post-blank
+		  :post-affiliated begin)))))
 
 (defun org-element-planning-interpreter (planning contents)
   "Interpret PLANNING element as Org syntax.
@@ -4119,33 +4117,36 @@ looking into captions:
 ;; level.
 ;;
 ;; The second one, `org-element--parse-objects' applies on all objects
-;; of a paragraph or a secondary string.
-;;
-;; More precisely, that function looks for every allowed object type
-;; first.  Then, it discards failed searches, keeps further matches,
-;; and searches again types matched behind point, for subsequent
-;; calls.  Thus, searching for a given type fails only once, and every
-;; object is searched only once at top level (but sometimes more for
-;; nested types).
+;; of a paragraph or a secondary string.  It calls
+;; `org-element--object-lex' to find the next object in the current
+;; container.
 
-(defsubst org-element--next-mode (type)
+(defsubst org-element--next-mode (type parentp)
   "Return next special mode according to TYPE, or nil.
-TYPE is a symbol representing the type of an element or object.
-Modes can be either `first-section', `section', `planning',
-`item', `node-property' and `table-row'."
-  (case type
-    (headline 'section)
-    (section 'planning)
-    (plain-list 'item)
-    (property-drawer 'node-property)
-    (table 'table-row)))
+TYPE is a symbol representing the type of an element or object
+containing next element if PARENTP is non-nil, or before it
+otherwise.  Modes can be either `first-section', `section',
+`planning', `item', `node-property' and `table-row'."
+  (if parentp
+      (case type
+	(headline 'section)
+	(plain-list 'item)
+	(property-drawer 'node-property)
+	(section 'planning)
+	(table 'table-row))
+    (case type
+      (item 'item)
+      (node-property 'node-property)
+      (planning nil)
+      (table-row 'table-row))))
 
 (defun org-element--parse-elements
-  (beg end special structure granularity visible-only acc)
+  (beg end mode structure granularity visible-only acc)
   "Parse elements between BEG and END positions.
 
-SPECIAL prioritize some elements over the others.  It can be set
-to `first-section', `section' `item' or `table-row'.
+MODE prioritizes some elements over the others.  It can be set to
+`first-section', `section', `planning', `item', `node-property'
+or `table-row'.
 
 When value is `item', STRUCTURE will be used as the current list
 structure.
@@ -4171,7 +4172,7 @@ Elements are accumulated into ACC."
       ;; Find current element's type and parse it accordingly to
       ;; its category.
       (let* ((element (org-element--current-element
-		       end granularity special structure))
+		       end granularity mode structure))
 	     (type (org-element-type element))
 	     (cbeg (org-element-property :contents-begin element)))
 	(goto-char (org-element-property :end element))
@@ -4194,7 +4195,7 @@ Elements are accumulated into ACC."
 	  (org-element--parse-elements
 	   cbeg (org-element-property :contents-end element)
 	   ;; Possibly switch to a special mode.
-	   (org-element--next-mode type)
+	   (org-element--next-mode type t)
 	   (and (memq type '(item plain-list))
 		(org-element-property :structure element))
 	   granularity visible-only element))
@@ -4204,7 +4205,9 @@ Elements are accumulated into ACC."
 	  (org-element--parse-objects
 	   cbeg (org-element-property :contents-end element) element
 	   (org-element-restriction type))))
-	(org-element-adopt-elements acc element)))
+	(org-element-adopt-elements acc element)
+	;; Update mode.
+	(setq mode (org-element--next-mode type nil))))
     ;; Return result.
     acc))
 
@@ -5354,7 +5357,8 @@ the process stopped before finding the expected result."
 	      ;; buffer) since we're sure that another element begins
 	      ;; after it.
 	      ((and (<= elem-end pos) (/= (point-max) elem-end))
-	       (goto-char elem-end))
+	       (goto-char elem-end)
+	       (setq mode (org-element--next-mode type nil)))
 	      ;; A non-greater element contains point: return it.
 	      ((not (memq type org-element-greater-elements))
 	       (throw 'exit element))
@@ -5382,7 +5386,7 @@ the process stopped before finding the expected result."
 				    (and (= cend pos) (= (point-max) pos)))))
 		   (goto-char (or next cbeg))
 		   (setq next nil
-			 mode (org-element--next-mode type)
+			 mode (org-element--next-mode type t)
 			 parent element
 			 end cend))))
 	      ;; Otherwise, return ELEMENT as it is the smallest

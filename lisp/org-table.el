@@ -2764,7 +2764,7 @@ Orig:   %s
 $xyz->  %s
 @r$c->  %s
 $1->    %s\n" orig formula form0 form))
-	    (if (listp ev)
+	    (if (consp ev)
 		(princ (format "        %s^\nError:  %s"
 			       (make-string (car ev) ?\-) (nth 1 ev)))
 	      (princ (format "Result: %s\nFormat: %s\nFinal:  %s"
@@ -2779,7 +2779,7 @@ $1->    %s\n" orig formula form0 form))
 	      (user-error "Abort"))
 	    (delete-window bw)
 	    (message "")))
-	(if (listp ev) (setq fmt nil ev "#ERROR"))
+	(when (consp ev) (setq fmt nil ev "#ERROR"))
 	(org-table-justify-field-maybe
 	 (format org-table-formula-field-format
 		 (if fmt (format fmt (string-to-number ev)) ev)))
