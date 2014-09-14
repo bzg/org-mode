@@ -393,6 +393,44 @@ reference (with row).  Mode string N."
 "
      1 calc)))
 
+(ert-deftest test-org-table/lisp-return-value ()
+  "Basic: Return value of Lisp formulas."
+  (org-test-table-target-expect
+   "
+|                         | nil         | (list) | '() |
+|-------------------------+-------------+--------+-----|
+| type-of, no L           | replace (r) | r      | r   |
+| type-of identity, no L  | r           | r      | r   |
+| identity, no L          | r           | r      | r   |
+|-------------------------+-------------+--------+-----|
+| type-of \"@1\"            | r           | r      | r   |
+| type-of (identity \"@1\") | r           | r      | r   |
+| identity \"@1\"           | r           | r      | r   |
+|-------------------------+-------------+--------+-----|
+| type-of @1              | r           | r      | r   |
+| type-of (identity @1)   | r           | r      | r   |
+| identity @1             | r           | r      | r   |
+"
+   ;; TODO Fix "#ERROR".
+   "
+|                         | nil    | (list) | '()    |
+|-------------------------+--------+--------+--------|
+| type-of, no L           | string | string | string |
+| type-of identity, no L  | string | string | string |
+| identity, no L          | nil    | (list) | '()    |
+|-------------------------+--------+--------+--------|
+| type-of \"@1\"            | string | string | string |
+| type-of (identity \"@1\") | string | string | string |
+| identity \"@1\"           | nil    | (list) | '()    |
+|-------------------------+--------+--------+--------|
+| type-of @1              | symbol | symbol | symbol |
+| type-of (identity @1)   | symbol | symbol | symbol |
+| identity @1             | #ERROR | #ERROR | #ERROR |
+"
+   1 (concat "#+TBLFM: @2$<<..@2$> = '(type-of @1) :: "
+	     "@3$<<..@3$> = '(type-of (identity @1)) :: "
+	     "@4$<<..@4$> = '(identity @1) :: @5$<<..@>$> = '(@0$1); L")))
+
 (ert-deftest test-org-table/compare ()
   "Basic: Compare field references in Calc."
   (org-test-table-target-expect
