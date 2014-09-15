@@ -207,6 +207,59 @@
 		 '(0 nil nil 29 3 2012 nil nil nil))))
 
 
+;;; Drawers
+
+(ert-deftest test-org/insert-property-drawer ()
+  "Test `org-insert-property-drawer' specifications."
+  ;; Error before first headline.
+  (should-error (org-test-with-temp-text "" (org-insert-property-drawer)))
+  ;; Insert drawer right after headline if there is no planning line,
+  ;; or after it otherwise.
+  (should
+   (equal "* H\n:PROPERTIES:\n:END:\nParagraph"
+	  (org-test-with-temp-text "* H\nParagraph<point>"
+	    (let ((org-adapt-indentation nil)) (org-insert-property-drawer))
+	    (buffer-string))))
+  (should
+   (equal "* H\nDEADLINE: <2014-03-04 tue.>\n:PROPERTIES:\n:END:\nParagraph"
+	  (org-test-with-temp-text
+	      "* H\nDEADLINE: <2014-03-04 tue.>\nParagraph<point>"
+	    (let ((org-adapt-indentation nil)) (org-insert-property-drawer))
+	    (buffer-string))))
+  ;; Indent inserted drawer.
+  (should
+   (equal "* H\n  :PROPERTIES:\n  :END:\nParagraph"
+	  (org-test-with-temp-text "* H\nParagraph<point>"
+	    (let ((org-adapt-indentation t)) (org-insert-property-drawer))
+	    (buffer-string))))
+  ;; Handle insertion at eob.
+  (should
+   (equal "* H\n:PROPERTIES:\n:END:\n"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-adapt-indentation nil)) (org-insert-property-drawer))
+	    (buffer-string))))
+  ;; Skip inlinetasks before point.
+  (when (featurep 'org-inlinetask)
+    (should
+     (equal "* H\n:PROPERTIES:\n:END:\n*************** I\n*************** END\nP"
+	    (org-test-with-temp-text
+		"* H\n*************** I\n*************** END\nP<point>"
+	      (let ((org-adapt-indentation nil)
+		    (org-inlinetask-min-level 15))
+		(org-insert-property-drawer))
+	      (buffer-string)))))
+  ;; Correctly set drawer in an inlinetask.
+  (when (featurep 'org-inlinetask)
+    (should
+     (equal "* H\n*************** I\n:PROPERTIES:\n:END:\nP\n*************** END"
+	    (org-test-with-temp-text
+		"* H\n*************** I\nP<point>\n*************** END"
+	      (let ((org-adapt-indentation nil)
+		    (org-inlinetask-min-level 15))
+		(org-insert-property-drawer))
+	      (buffer-string))))))
+
+
 ;;; Filling
 
 (ert-deftest test-org/fill-paragraph ()
@@ -1824,6 +1877,343 @@ Text.
 		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
 	      (org-timestamp-translate (org-element-context)))))))
 
+
+
+;;; Property API
+
+(ert-deftest test-org/buffer-property-keys ()
+  "Test `org-buffer-property-keys' specifications."
+  ;; Retrieve properties accross siblings.
+  (should
+   (equal '("A" "B")
+	  (org-test-with-temp-text "
+* H1
+:PROPERTIES:
+:A: 1
+:END:
+* H2
+:PROPERTIES:
+:B: 1
+:END:"
+	    (org-buffer-property-keys))))
+  ;; Retrieve properties accross children.
+  (should
+   (equal '("A" "B")
+	  (org-test-with-temp-text "
+* H1
+:PROPERTIES:
+:A: 1
+:END:
+** H2
+:PROPERTIES:
+:B: 1
+:END:"
+	    (org-buffer-property-keys))))
+  ;; Retrieve muliple properties in the same drawer.
+  (should
+   (equal '("A" "B")
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:B: 2\n:END:"
+	    (org-buffer-property-keys))))
+  ;; Ignore extension symbol in property name.
+  (should
+   (equal '("A")
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:A+: 2\n:END:"
+	    (org-buffer-property-keys))))
+  ;; With non-nil COLUMNS, extract property names from columns.
+  (should
+   (equal '("A" "B")
+	  (org-test-with-temp-text "#+COLUMNS: %25ITEM %A %20B"
+	    (org-buffer-property-keys nil nil t))))
+  (should
+   (equal '("A" "B" "COLUMNS")
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:COLUMNS: %25ITEM %A %20B\n:END:"
+	    (org-buffer-property-keys nil nil t)))))
+
+(ert-deftest test-org/property-values ()
+  "Test `org-property-values' specifications."
+  ;; Regular test.
+  (should
+   (equal '("2" "1")
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A: 1\n:END:\n* H\n:PROPERTIES:\n:A: 2\n:END:"
+	    (org-property-values "A"))))
+  ;; Ignore empty values.
+  (should-not
+   (org-test-with-temp-text
+       "* H1\n:PROPERTIES:\n:A:\n:END:\n* H2\n:PROPERTIES:\n:A:  \n:END:"
+     (org-property-values "A")))
+  ;; Take into consideration extended values.
+  (should
+   (equal '("1 2")
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:A+: 2\n:END:"
+	    (org-property-values "A")))))
+
+(ert-deftest test-org/entry-delete ()
+  "Test `org-entry-delete' specifications."
+  ;; Regular test.
+  (should
+   (string-match
+    " *:PROPERTIES:\n *:B: +2\n *:END:"
+    (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:B: 2\n:END:"
+      (org-entry-delete (point) "A")
+      (buffer-string))))
+  ;; When last property is removed, remove the property drawer.
+  (should-not
+   (string-match
+    ":PROPERTIES:"
+    (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:\nParagraph"
+      (org-entry-delete (point) "A")
+      (buffer-string)))))
+
+(ert-deftest test-org/entry-get ()
+  "Test `org-entry-get' specifications."
+  ;; Regular test.
+  (should
+   (equal "1"
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:"
+	    (org-entry-get (point) "A"))))
+  ;; Ignore case.
+  (should
+   (equal "1"
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:"
+	    (org-entry-get (point) "a"))))
+  ;; Handle extended values, both before and after base value.
+  (should
+   (equal "1 2 3"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A+: 2\n:A: 1\n:A+: 3\n:END:"
+	    (org-entry-get (point) "A"))))
+  ;; Empty values are returned as the empty string.
+  (should
+   (equal ""
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A:\n:END:"
+	    (org-entry-get (point) "A"))))
+  ;; Special nil value.  If LITERAL-NIL is non-nil, return "nil",
+  ;; otherwise, return nil.
+  (should-not
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: nil\n:END:"
+     (org-entry-get (point) "A")))
+  (should
+   (equal "nil"
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: nil\n:END:"
+	    (org-entry-get (point) "A" nil t))))
+  ;; Return nil when no property is found, independently on the
+  ;; LITERAL-NIL argument.
+  (should-not
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:"
+     (org-entry-get (point) "B")))
+  (should-not
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:"
+     (org-entry-get (point) "B" nil t)))
+  ;; Handle inheritance, when allowed.
+  (should
+   (equal
+    "1"
+    (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:\n** <point>H2"
+      (org-entry-get (point) "A" t))))
+  (should
+   (equal
+    "1"
+    (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:\n** <point>H2"
+      (let ((org-use-property-inheritance t))
+	(org-entry-get (point) "A" 'selective)))))
+  (should-not
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:\n** <point>H2"
+     (let ((org-use-property-inheritance nil))
+       (org-entry-get (point) "A" 'selective)))))
+
+(ert-deftest test-org/entry-properties ()
+  "Test `org-entry-properties' specifications."
+  ;; Get "TODO" property.
+  (should
+   (equal "TODO"
+	  (org-test-with-temp-text "* TODO H"
+	    (cdr (assoc "TODO" (org-entry-properties nil "TODO"))))))
+  (should-not
+   (org-test-with-temp-text "* H"
+     (assoc "TODO" (org-entry-properties nil "TODO"))))
+  ;; Get "PRIORITY" property.
+  (should
+   (equal "A"
+	  (org-test-with-temp-text "* [#A] H"
+	    (cdr (assoc "PRIORITY" (org-entry-properties nil "PRIORITY"))))))
+  (should-not
+   (org-test-with-temp-text "* H"
+     (assoc "PRIORITY" (org-entry-properties nil "PRIORITY"))))
+  ;; Get "FILE" property.
+  (should
+   (org-test-with-temp-text-in-file "* H\nParagraph"
+     (org-file-equal-p (cdr (assoc "FILE" (org-entry-properties nil "FILE")))
+		       (buffer-file-name))))
+  (should-not
+   (org-test-with-temp-text "* H\nParagraph"
+     (cdr (assoc "FILE" (org-entry-properties nil "FILE")))))
+  ;; Get "TAGS" property.
+  (should
+   (equal ":tag1:tag2:"
+	  (org-test-with-temp-text "* H :tag1:tag2:"
+	    (cdr (assoc "TAGS" (org-entry-properties nil "TAGS"))))))
+  (should-not
+   (org-test-with-temp-text "* H"
+     (cdr (assoc "TAGS" (org-entry-properties nil "TAGS")))))
+  ;; Get "ALLTAGS" property.
+  (should
+   (equal ":tag1:tag2:"
+	  (org-test-with-temp-text "* H :tag1:\n<point>** H2 :tag2:"
+	    (cdr (assoc "ALLTAGS" (org-entry-properties nil "ALLTAGS"))))))
+  (should-not
+   (org-test-with-temp-text "* H"
+     (cdr (assoc "ALLTAGS" (org-entry-properties nil "ALLTAGS")))))
+  ;; Get "BLOCKED" property.
+  (should
+   (equal "t"
+	  (org-test-with-temp-text "* Blocked\n** DONE one\n** TODO two"
+	    (let ((org-enforce-todo-dependencies t)
+		  (org-blocker-hook
+		   '(org-block-todo-from-children-or-siblings-or-parent)))
+	      (cdr (assoc "BLOCKED" (org-entry-properties nil "BLOCKED")))))))
+  (should
+   (equal ""
+	  (org-test-with-temp-text "* Blocked\n** DONE one\n** DONE two"
+	    (let ((org-enforce-todo-dependencies t))
+	      (cdr (assoc "BLOCKED" (org-entry-properties nil "BLOCKED")))))))
+  ;; Get "CLOSED", "DEADLINE" and "SCHEDULED" properties.
+  (should
+   (equal
+    "[2012-03-29 thu.]"
+    (org-test-with-temp-text "* H\nCLOSED: [2012-03-29 thu.]"
+      (cdr (assoc "CLOSED" (org-entry-properties nil "CLOSED"))))))
+  (should-not
+   (org-test-with-temp-text "* H"
+     (cdr (assoc "CLOSED" (org-entry-properties nil "CLOSED")))))
+  (should
+   (equal
+    "<2014-03-04 tue.>"
+    (org-test-with-temp-text "* H\nDEADLINE: <2014-03-04 tue.>"
+      (cdr (assoc "DEADLINE" (org-entry-properties nil "DEADLINE"))))))
+  (should-not
+   (org-test-with-temp-text "* H"
+     (cdr (assoc "DEADLINE" (org-entry-properties nil "DEADLINE")))))
+  (should
+   (equal
+    "<2014-03-04 tue.>"
+    (org-test-with-temp-text "* H\nSCHEDULED: <2014-03-04 tue.>"
+      (cdr (assoc "SCHEDULED" (org-entry-properties nil "SCHEDULED"))))))
+  (should-not
+   (org-test-with-temp-text "* H"
+     (cdr (assoc "SCHEDULED" (org-entry-properties nil "SCHEDULED")))))
+  ;; Get "CATEGORY"
+  (should
+   (equal "cat"
+	  (org-test-with-temp-text "#+CATEGORY: cat\n<point>* H"
+	    (cdr (assoc "CATEGORY" (org-entry-properties nil "CATEGORY"))))))
+  (should
+   (equal "cat"
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:CATEGORY: cat\n:END:"
+	    (cdr (assoc "CATEGORY" (org-entry-properties nil "CATEGORY"))))))
+  ;; Get standard properties.
+  (should
+   (equal "1"
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:"
+	    (cdr (assoc "A" (org-entry-properties nil 'standard))))))
+  ;; Handle extended properties.
+  (should
+   (equal "1 2 3"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A+: 2\n:A: 1\n:A+: 3\n:END:"
+	    (cdr (assoc "A" (org-entry-properties nil 'standard))))))
+  (should
+   (equal "1 2 3"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A+: 2\n:A: 1\n:a+: 3\n:END:"
+	    (cdr (assoc "A" (org-entry-properties nil 'standard))))))
+  ;; Ignore forbidden (special) properties.
+  (should-not
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:TODO: foo\n:END:"
+     (cdr (assoc "TODO" (org-entry-properties nil 'standard))))))
+
+(ert-deftest test-org/entry-put ()
+  "Test `org-entry-put' specifications."
+  ;; Error when not a string or nil.
+  (should-error
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:test: 1\n:END:"
+     (org-entry-put 1 "test" 2)))
+  ;; Set "TODO" property.
+  (should
+   (string-match (regexp-quote " TODO H")
+		 (org-test-with-temp-text "#+TODO: TODO | DONE\n<point>* H"
+		   (org-entry-put (point) "TODO" "TODO")
+		   (buffer-string))))
+  (should
+   (string-match (regexp-quote "* H")
+		 (org-test-with-temp-text "#+TODO: TODO | DONE\n<point>* H"
+		   (org-entry-put (point) "TODO" nil)
+		   (buffer-string))))
+  ;; Set "PRIORITY" property.
+  (should
+   (equal "* [#A] H"
+	  (org-test-with-temp-text "* [#B] H"
+	    (org-entry-put (point) "PRIORITY" "A")
+	    (buffer-string))))
+  (should
+   (equal "* H"
+	  (org-test-with-temp-text "* [#B] H"
+	    (org-entry-put (point) "PRIORITY" nil)
+	    (buffer-string))))
+  ;; Set "SCHEDULED" property.
+  (should
+   (string-match "* H\n *SCHEDULED: <2014-03-04 .*?>"
+		 (org-test-with-temp-text "* H"
+		   (org-entry-put (point) "SCHEDULED" "2014-03-04")
+		   (buffer-string))))
+  (should
+   (string= "* H\n"
+	    (org-test-with-temp-text "* H\nSCHEDULED: <2014-03-04 tue.>"
+	      (org-entry-put (point) "SCHEDULED" nil)
+	      (buffer-string))))
+  (should
+   (string-match "* H\n *SCHEDULED: <2014-03-03 .*?>"
+		 (org-test-with-temp-text "* H\nSCHEDULED: <2014-03-04 tue.>"
+		   (org-entry-put (point) "SCHEDULED" "earlier")
+		   (buffer-string))))
+  (should
+   (string-match "^ *SCHEDULED: <2014-03-05 .*?>"
+		 (org-test-with-temp-text "* H\nSCHEDULED: <2014-03-04 tue.>"
+		   (org-entry-put (point) "SCHEDULED" "later")
+		   (buffer-string))))
+  ;; Set "DEADLINE" property.
+  (should
+   (string-match "^ *DEADLINE: <2014-03-04 .*?>"
+		 (org-test-with-temp-text "* H"
+		   (org-entry-put (point) "DEADLINE" "2014-03-04")
+		   (buffer-string))))
+  (should
+   (string= "* H\n"
+	    (org-test-with-temp-text "* H\nDEADLINE: <2014-03-04 tue.>"
+	      (org-entry-put (point) "DEADLINE" nil)
+	      (buffer-string))))
+  (should
+   (string-match "^ *DEADLINE: <2014-03-03 .*?>"
+		 (org-test-with-temp-text "* H\nDEADLINE: <2014-03-04 tue.>"
+		   (org-entry-put (point) "DEADLINE" "earlier")
+		   (buffer-string))))
+  (should
+   (string-match "^ *DEADLINE: <2014-03-05 .*?>"
+		 (org-test-with-temp-text "* H\nDEADLINE: <2014-03-04 tue.>"
+		   (org-entry-put (point) "DEADLINE" "later")
+		   (buffer-string))))
+  ;; Regular properties, with or without pre-existing drawer.
+  (should
+   (string-match "^ *:A: +2$"
+		 (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:"
+		   (org-entry-put (point) "A" "2")
+		   (buffer-string))))
+  (should
+   (string-match "^ *:A: +1$"
+		 (org-test-with-temp-text "* H"
+		   (org-entry-put (point) "A" "1")
+		   (buffer-string)))))
 
 
 ;;; Radio Targets
