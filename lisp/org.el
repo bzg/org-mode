@@ -4883,16 +4883,6 @@ in the #+STARTUP line), the corresponding variable, and the value to set
 this variable to if the option is found.  An optional forth element PUSH
 means to push this value onto the list in the variable.")
 
-(defun org-update-property-plist (key val props)
-  "Update PROPS with KEY and VAL."
-  (let* ((appending (string= "+" (substring key (- (length key) 1))))
-	 (key (if appending (substring key 0 (- (length key) 1)) key))
-	 (remainder (org-remove-if (lambda (p) (string= (car p) key)) props))
-	 (previous (cdr (assoc key props))))
-    (if appending
-	(cons (cons key (if previous (concat previous " " val) val)) remainder)
-      (cons (cons key val) remainder))))
-
 (defcustom org-group-tags t
   "When non-nil (the default), use group tags.
 This can be turned on/off through `org-toggle-tags-groups'."
@@ -5069,9 +5059,9 @@ Support for group tags is controlled by the option
 	      (setq prio (org-split-string value " +")))
 	     ((equal key "PROPERTY")
 	      (when (string-match "\\(\\S-+\\)\\s-+\\(.*\\)" value)
-		(setq props (org-update-property-plist (match-string 1 value)
-						       (match-string 2 value)
-						       props))))
+		(setq props (org--update-property-plist (match-string 1 value)
+							(match-string 2 value)
+							props))))
 	     ((equal key "CONSTANTS")
 	      (org-table-set-constants))
 	     ((equal key "STARTUP")
@@ -5105,17 +5095,7 @@ Support for group tags is controlled by the option
 		(setq ext-setup-or-nil
 		      (concat (substring ext-setup-or-nil 0 start)
 			      "\n" setup-contents "\n"
-			      (substring ext-setup-or-nil start)))))))
-	  ;; search for property blocks
-	  (goto-char (point-min))
-	  (while (re-search-forward org-block-regexp nil t)
-	    (when (equal "PROPERTY" (upcase (match-string 1)))
-	      (setq value (replace-regexp-in-string
-			   "[\n\r]" " " (match-string 4)))
-	      (when (string-match "\\(\\S-+\\)\\s-+\\(.*\\)" value)
-		(setq props (org-update-property-plist (match-string 1 value)
-						       (match-string 2 value)
-						       props)))))))
+			      (substring ext-setup-or-nil start)))))))))
       (org-set-local 'org-use-sub-superscripts scripts)
       (when cat
 	(org-set-local 'org-category (intern cat))
@@ -5126,7 +5106,7 @@ Support for group tags is controlled by the option
 	(org-set-local 'org-highest-priority (nth 0 prio))
 	(org-set-local 'org-lowest-priority  (nth 1 prio))
 	(org-set-local 'org-default-priority (nth 2 prio)))
-      (and props (org-set-local 'org-file-properties (nreverse props)))
+      (and props (org-set-local 'org-file-properties props))
       (and arch (org-set-local 'org-archive-location arch))
       (and links (setq org-link-abbrev-alist-local (nreverse links)))
       ;; Process the TODO keywords
@@ -15345,34 +15325,74 @@ but in some other way.")
     "EXPORT_TITLE" "EXPORT_AUTHOR" "EXPORT_DATE" "UNNUMBERED"
     "ORDERED" "NOBLOCKING" "COOKIE_DATA" "LOG_INTO_DRAWER" "REPEAT_TO_STATE"
     "CLOCK_MODELINE_TOTAL" "STYLE" "HTML_CONTAINER_CLASS")
-  "Some properties that are used by Org-mode for various purposes.
+  "Some properties that are used by Org mode for various purposes.
 Being in this list makes sure that they are offered for completion.")
+
+(defun org--update-property-plist (key val props)
+  "Associate KEY to VAL in alist PROPS.
+Modifications are made by side-effect.  Return new alist."
+  (let* ((appending (string= (substring key -1) "+"))
+	 (key (if appending (substring key 0 -1) key))
+	 (old (assoc-string key props t)))
+    (if (not old) (cons (cons key val) props)
+      (setcdr old (if appending (concat (cdr old) " " val) val))
+      props)))
+
+(defun org-get-property-block (&optional beg force)
+  "Return the (beg . end) range of the body of the property drawer.
+BEG is the beginning of the current subtree, or of the part
+before the first headline.  If it is not given, it will be found.
+If the drawer does not exist, create it if FORCE is non-nil, or
+return nil."
+  (org-with-wide-buffer
+   (when beg (goto-char beg))
+   (unless (org-before-first-heading-p)
+     (let ((beg (cond (beg)
+		      ((or (not (featurep 'org-inlinetask))
+			   (org-inlinetask-in-task-p))
+		       (org-back-to-heading t))
+		      (t (org-with-limited-levels (org-back-to-heading t))))))
+       (forward-line)
+       (when (org-looking-at-p org-planning-line-re) (forward-line))
+       (cond ((looking-at org-property-drawer-re)
+	      (forward-line)
+	      (cons (point) (progn (goto-char (match-end 0))
+				   (line-beginning-position))))
+	     (force
+	      (org-insert-property-drawer)
+	      (let ((pos (save-excursion (search-forward ":END:")
+					 (line-beginning-position))))
+		(cons pos pos))))))))
+
+(defun org-at-property-p ()
+  "Non-nil when point is inside a property drawer.
+See `org-property-re' for match data, if applicable."
+  (save-excursion
+    (beginning-of-line)
+    (and (looking-at org-property-re)
+	 (let ((property-drawer (save-match-data (org-get-property-block))))
+	   (and property-drawer (< (point) (cdr property-drawer)))))))
 
 (defun org-property-action ()
   "Do an action on properties."
   (interactive)
-  (let (c)
-    (org-at-property-p)
-    (message "Property Action:  [s]et  [d]elete  [D]elete globally  [c]ompute")
-    (setq c (read-char-exclusive))
-    (cond
-     ((equal c ?s)
-      (call-interactively 'org-set-property))
-     ((equal c ?d)
-      (call-interactively 'org-delete-property))
-     ((equal c ?D)
-      (call-interactively 'org-delete-property-globally))
-     ((equal c ?c)
-      (call-interactively 'org-compute-property-at-point))
-     (t (user-error "No such property action %c" c)))))
+  (unless (org-at-property-p) (user-error "Not at a property"))
+  (message "Property Action:  [s]et  [d]elete  [D]elete globally  [c]ompute")
+  (let ((c (read-char-exclusive)))
+    (case c
+      (?s (call-interactively #'org-set-property))
+      (?d (call-interactively #'org-delete-property))
+      (?D (call-interactively #'org-delete-property-globally))
+      (?c (call-interactively #'org-compute-property-at-point))
+      (otherwise (user-error "No such property action %c" c)))))
 
 (defun org-inc-effort ()
   "Increment the value of the effort property in the current entry."
   (interactive)
   (org-set-effort nil t))
 
-(defvar org-clock-effort)       ;; Defined in org-clock.el
-(defvar org-clock-current-task) ;; Defined in org-clock.el
+(defvar org-clock-effort)       ; Defined in org-clock.el.
+(defvar org-clock-current-task) ; Defined in org-clock.el.
 (defun org-set-effort (&optional value increment)
   "Set the effort property of the current entry.
 With numerical prefix arg, use the nth allowed value, 0 stands for the
@@ -15425,41 +15445,6 @@ When INCREMENT is non-nil, set the property to the next allowed value."
       (setq org-clock-effort (get-text-property (point-at-bol) 'effort))
       (org-clock-update-mode-line))
     (message "%s is now %s" prop val)))
-
-(defun org-get-property-block (&optional beg force)
-  "Return the (beg . end) range of the body of the property drawer.
-BEG is the beginning and end of the current subtree, or of the
-part before the first headline.  If it is not given, it will be
-found.  If the drawer does not exist, create it if FORCE is
-non-nil, or return nil."
-  (org-with-wide-buffer
-   (when beg (goto-char beg))
-   (unless (org-before-first-heading-p)
-     (let ((beg (cond (beg)
-		      ((or (not (featurep 'org-inlinetask))
-			   (org-inlinetask-in-task-p))
-		       (org-back-to-heading t))
-		      (t (org-with-limited-levels (org-back-to-heading t))))))
-       (forward-line)
-       (when (org-looking-at-p org-planning-line-re) (forward-line))
-       (cond ((looking-at org-property-drawer-re)
-	      (forward-line)
-	      (cons (point) (progn (goto-char (match-end 0))
-				   (line-beginning-position))))
-	     (force
-	      (org-insert-property-drawer)
-	      (let ((pos (save-excursion (search-forward ":END:")
-					 (line-beginning-position))))
-		(cons pos pos))))))))
-
-(defun org-at-property-p ()
-  "Non-nil when point is inside a property drawer.
-See `org-property-re' for match data, if applicable."
-  (save-excursion
-    (beginning-of-line)
-    (and (looking-at org-property-re)
-	 (let ((property-drawer (save-match-data (org-get-property-block))))
-	   (and property-drawer (< (point) (cdr property-drawer)))))))
 
 (defun org-entry-properties (&optional pom which specific)
   "Get all properties of the entry at point-or-marker POM.
@@ -15576,56 +15561,60 @@ things up because then unnecessary parsing is avoided."
 
 (defun org-entry-get (pom property &optional inherit literal-nil)
   "Get value of PROPERTY for entry or content at point-or-marker POM.
+
 If INHERIT is non-nil and the entry does not have the property,
-then also check higher levels of the hierarchy.
-If INHERIT is the symbol `selective', use inheritance only if the setting
-in `org-use-property-inheritance' selects PROPERTY for inheritance.
-If the property is present but empty, the return value is the empty string.
-If the property is not present at all, nil is returned.
+then also check higher levels of the hierarchy.  If INHERIT is
+the symbol `selective', use inheritance only if the setting in
+`org-use-property-inheritance' selects PROPERTY for inheritance.
 
-Return the value as a string.
+If the property is present but empty, the return value is the
+empty string.  If the property is not present at all, nil is
+returned.  In any other case, return the value as a string.
+Search is case-insensitive.
 
-If LITERAL-NIL is set, return the string value \"nil\" as a string,
-do not interpret it as the list atom nil.  This is used for inheritance
-when a \"nil\" value can supersede a non-nil value higher up the hierarchy."
+If LITERAL-NIL is set, return the string value \"nil\" as
+a string, do not interpret it as the list atom nil.  This is used
+for inheritance when a \"nil\" value can supersede a non-nil
+value higher up the hierarchy."
   (org-with-point-at pom
-    (if (and inherit (if (eq inherit 'selective)
-			 (org-property-inherit-p property)
-		       t))
-	(org-entry-get-with-inheritance property literal-nil)
-      (if (member property org-special-properties)
-	  ;; We need a special property.  Use `org-entry-properties'
-	  ;; to retrieve it, but specify the wanted property
-	  (cdr (assoc property (org-entry-properties nil 'special property)))
-	(org-with-wide-buffer
-	 (let ((range (org-get-property-block)))
-	   (when (and range (not (eq (car range) (cdr range)))
-		      (save-excursion
-		      	(goto-char (car range))
-		      	(re-search-forward
-		      	 (concat (org-re-property property) "\\|"
-				 (org-re-property (concat property "+")))
-			 (cdr range) t)))
-	     (let* ((props
-		     (list (or (assoc property org-file-properties)
-			       (assoc property org-global-properties)
-			       (assoc property org-global-properties-fixed))))
-		    (ap (lambda (key)
-			  (when (re-search-forward
-				 (org-re-property key) (cdr range) t)
-			    (setq props
-				  (org-update-property-plist
-				   key
-				   (if (match-end 3)
-				       (org-match-string-no-properties 3) "")
-				   props)))))
-		    val)
-	       (goto-char (car range))
-	       (funcall ap property)
-	       (goto-char (car range))
-	       (while (funcall ap (concat property "+")))
-	       (setq val (cdr (assoc property props)))
-	       (when val (if literal-nil val (org-not-nil val)))))))))))
+    (cond
+     ((and inherit
+	   (or (not (eq inherit 'selective)) (org-property-inherit-p property)))
+      (org-entry-get-with-inheritance property literal-nil))
+     ((member-ignore-case property org-special-properties)
+      ;; We need a special property.  Use `org-entry-properties' to
+      ;; retrieve it, but specify the wanted property.
+      (cdr (assoc-string property (org-entry-properties nil 'special property))))
+     (t
+      (let ((range (org-get-property-block)))
+	(when range
+	  (let* ((case-fold-search t)
+		 (end (cdr range))
+		 (props
+		  (let ((global
+			 (or (assoc-string property org-file-properties t)
+			     (assoc-string property org-global-properties t)
+			     (assoc-string
+			      property org-global-properties-fixed t))))
+		    ;; Make sure to not re-use GLOBAL as
+		    ;; `org--update-property-plist' would alter it by
+		    ;; side-effect.
+		    (and global (list (cons property (cdr global))))))
+		 (find-value
+		  (lambda (key)
+		    (when (re-search-forward (org-re-property key nil t) end t)
+		      (setq props
+			    (org--update-property-plist
+			     key (org-match-string-no-properties 3) props))))))
+	    (goto-char (car range))
+	    ;; Find base value.
+	    (save-excursion (funcall find-value property))
+	    ;; Find additional values.
+	    (let ((property+ (concat property "+")))
+	      (while (funcall find-value property+)))
+	    ;; Return final value.
+	    (let ((val (cdr (assoc-string property props t))))
+	      (if literal-nil val (org-not-nil val))))))))))
 
 (defun org-property-or-variable-value (var &optional inherit)
   "Check if there is a property fixing the value of VAR.
@@ -15640,16 +15629,17 @@ If yes, return this value.  If not, return the current value of the variable."
   (unless (member property org-special-properties)
     (org-with-point-at pom
       (let ((range (org-get-property-block)))
-	(if (and range
-		 (goto-char (car range))
-		 (re-search-forward
-		  (org-re-property property nil t)
-		  (cdr range) t))
-	    (progn
-	      (delete-region (match-beginning 0) (1+ (point-at-eol)))
-	      (org-remove-empty-drawer-at (car range))
-	      t)
-	  nil)))))
+	(when range
+	  (let ((begin (car range))
+		(end (copy-marker (cdr range))))
+	    (goto-char begin)
+	    (when (re-search-forward (org-re-property property nil t) end t)
+	      (delete-region (match-beginning 0) (line-beginning-position 2))
+	      ;; If drawer is empty, remove it altogether.
+	      (when (= begin end)
+		(delete-region (line-beginning-position 0)
+			       (line-beginning-position 2)))
+	      (set-marker end nil))))))))
 
 ;; Multi-values properties are properties that contain multiple values
 ;; These values are assumed to be single words, separated by whitespace.
@@ -15726,24 +15716,21 @@ If the value found is \"nil\", return nil to show that the property
 should be considered as undefined (this is the meaning of nil here).
 However, if LITERAL-NIL is set, return the string value \"nil\" instead."
   (move-marker org-entry-property-inherited-from nil)
-  (let (tmp)
-    (save-excursion
-      (save-restriction
-	(widen)
-	(catch 'ex
-	  (while t
-	    (when (setq tmp (org-entry-get nil property nil literal-nil))
-	      (or (ignore-errors (org-back-to-heading t))
-		  (goto-char (point-min)))
-	      (move-marker org-entry-property-inherited-from (point))
-	      (throw 'ex tmp))
-	    (or (ignore-errors (org-up-heading-safe))
-		(throw 'ex nil))))))
-    (setq tmp (or tmp
-		  (cdr (assoc property org-file-properties))
-		  (cdr (assoc property org-global-properties))
-		  (cdr (assoc property org-global-properties-fixed))))
-    (if literal-nil tmp (org-not-nil tmp))))
+  (let (value)
+    (org-with-wide-buffer
+     (catch 'exit
+       (while t
+	 (when (setq value (org-entry-get nil property nil literal-nil))
+	   (org-back-to-heading t)
+	   (move-marker org-entry-property-inherited-from (point))
+	   (throw 'exit nil))
+	 (or (org-up-heading-safe) (throw 'exit nil)))))
+    (unless value
+      (setq value
+	    (cdr (or (assoc-string property org-file-properties t)
+		     (assoc-string property org-global-properties t)
+		     (assoc-string property org-global-properties-fixed t)))))
+    (if literal-nil value (org-not-nil value))))
 
 (defvar org-property-changed-functions nil
   "Hook called when the value of a property has changed.
@@ -15752,184 +15739,176 @@ and the new value.")
 
 (defun org-entry-put (pom property value)
   "Set PROPERTY to VALUE for entry at point-or-marker POM.
-If the value is `nil', it is converted to the empty string.
-If it is not a string, an error is raised."
+
+If the value is `nil', it is converted to the empty string.  If
+it is not a string, an error is raised.
+
+PROPERTY can be any regular property (see
+`org-special-properties').  It can also be \"TODO\",
+\"PRIORITY\", \"SCHEDULED\" and \"DEADLINE\".
+
+For the last two properties, VALUE may have any of the special
+values \"earlier\" and \"later\".  The function then increases or
+decreases scheduled or deadline date by one day."
   (cond ((null value) (setq value ""))
-	((not (stringp value))
-	 (error "Properties values should be strings.")))
+	((not (stringp value)) (error "Properties values should be strings")))
   (org-with-point-at pom
-    (org-back-to-heading t)
-    (let ((beg (point)) (end (save-excursion (outline-next-heading) (point)))
-	  range)
+    (if (or (not (featurep 'org-inlinetask)) (org-inlinetask-in-task-p))
+	(org-back-to-heading t)
+      (org-with-limited-levels (org-back-to-heading t)))
+    (let ((beg (point)))
       (cond
        ((equal property "TODO")
-	(when (and (string-match "\\S-" value)
-		   (not (member value org-todo-keywords-1)))
-	  (user-error "\"%s\" is not a valid TODO state" value))
-	(if (or (not value)
-		(not (string-match "\\S-" value)))
-	    (setq value 'none))
+	(cond ((not (org-string-nw-p value)) (setq value 'none))
+	      ((not (member value org-todo-keywords-1))
+	       (user-error "\"%s\" is not a valid TODO state" value)))
 	(org-todo value)
 	(org-set-tags nil 'align))
        ((equal property "PRIORITY")
-	(org-priority (if (and value (string-match "\\S-" value))
-			  (string-to-char value) ?\ ))
+	(org-priority (if (org-string-nw-p value) (string-to-char value) ?\s))
 	(org-set-tags nil 'align))
-       ((equal property "CLOCKSUM")
-	(if (not (re-search-forward
-		  (concat org-clock-string ".*\\]--\\(\\[[^]]+\\]\\)") nil t))
-	    (error "Cannot find a clock log")
-	  (goto-char (- (match-end 1) 2))
-	  (cond
-	   ((eq value 'earlier) (org-timestamp-down))
-	   ((eq value 'later) (org-timestamp-up)))
-	  (org-clock-sum-current-item)))
        ((equal property "SCHEDULED")
-	(if (re-search-forward org-scheduled-time-regexp end t)
-	    (cond
-	     ((eq value 'earlier) (org-timestamp-change -1 'day))
-	     ((eq value 'later) (org-timestamp-change 1 'day))
-	     (t (call-interactively 'org-schedule)))
-	  (call-interactively 'org-schedule)))
+	(forward-line)
+	(if (and (org-looking-at-p org-planning-line-re)
+		 (re-search-forward
+		  org-scheduled-time-regexp (line-end-position) t))
+	    (cond ((string= value "earlier") (org-timestamp-change -1 'day))
+		  ((string= value "later") (org-timestamp-change 1 'day))
+		  ((string= value "") (org-schedule '(4)))
+		  (t (org-schedule nil value)))
+	  (if (member value '("earlier" "later" ""))
+	      (call-interactively #'org-schedule)
+	    (org-schedule nil value))))
        ((equal property "DEADLINE")
-	(if (re-search-forward org-deadline-time-regexp end t)
-	    (cond
-	     ((eq value 'earlier) (org-timestamp-change -1 'day))
-	     ((eq value 'later) (org-timestamp-change 1 'day))
-	     (t (call-interactively 'org-deadline)))
-	  (call-interactively 'org-deadline)))
+	(forward-line)
+	(if (and (org-looking-at-p org-planning-line-re)
+		 (re-search-forward
+		  org-deadline-time-regexp (line-end-position) t))
+	    (cond ((string= value "earlier") (org-timestamp-change -1 'day))
+		  ((string= value "later") (org-timestamp-change 1 'day))
+		  ((string= value "") (org-deadline '(4)))
+		  (t (org-deadline nil value)))
+	  (if (member value '("earlier" "later" ""))
+	      (call-interactively #'org-deadline)
+	    (org-deadline nil value))))
        ((member property org-special-properties)
-	(error "The %s property can not yet be set with `org-entry-put'"
-	       property))
-       (t ; a non-special property
-	(let ((buffer-invisibility-spec (org-inhibit-invisibility))) ; Emacs 21
-	  (setq range (org-get-property-block beg 'force))
+	(error "The %s property cannot be set with `org-entry-put'" property))
+       (t
+	(let* ((range (org-get-property-block beg 'force))
+	       (end (cdr range))
+	       (case-fold-search t))
 	  (goto-char (car range))
-	  (if (re-search-forward
-	       (org-re-property property nil t) (cdr range) t)
-	      (progn
-		(delete-region (match-beginning 0) (match-end 0))
-		(goto-char (match-beginning 0)))
-	    (goto-char (cdr range))
+	  (if (re-search-forward (org-re-property property nil t) end t)
+	      (progn (delete-region (match-beginning 0) (match-end 0))
+		     (goto-char (match-beginning 0)))
+	    (goto-char end)
 	    (insert "\n")
-	    (backward-char 1)
-	    (org-indent-line))
+	    (backward-char))
 	  (insert ":" property ":")
-	  (and value (insert " " value))
+	  (when value (insert " " value))
 	  (org-indent-line)))))
     (run-hook-with-args 'org-property-changed-functions property value)))
 
-(defun org-buffer-property-keys (&optional include-specials include-defaults include-columns)
+(defun org-buffer-property-keys (&optional specials defaults columns)
   "Get all property keys in the current buffer.
-With INCLUDE-SPECIALS, also list the special properties that reflect things
-like tags and TODO state.
-With INCLUDE-DEFAULTS, also include properties that has special meaning
-internally: ARCHIVE, CATEGORY, SUMMARY, DESCRIPTION, LOCATION, and LOGGING
-and others.
-With INCLUDE-COLUMNS, also include property names given in COLUMN
-formats in the current buffer."
-  (let (rtn range cfmt s p)
-    (save-excursion
-      (save-restriction
-	(widen)
-	(goto-char (point-min))
-	(while (re-search-forward org-property-start-re nil t)
-	  (catch 'cont
-	    (setq range (or (org-get-property-block)
-			    (if (y-or-n-p
-				 (format "Malformed drawer at %d, repair?" (point)))
-				(org-get-property-block nil t)
-			      (throw 'cont nil))))
-	    (goto-char (car range))
-	    (while (re-search-forward org-property-re
-				      (cdr range) t)
-	      (add-to-list 'rtn (org-match-string-no-properties 2)))
-	    (outline-next-heading)))))
 
-    (when include-specials
-      (setq rtn (append org-special-properties rtn)))
+When SPECIALS is non-nil, also list the special properties that
+reflect things like tags and TODO state.
 
-    (when include-defaults
-      (mapc (lambda (x) (add-to-list 'rtn x)) org-default-properties)
-      (add-to-list 'rtn org-effort-property))
+When DEFAULTS is non-nil, also include properties that has
+special meaning internally: ARCHIVE, CATEGORY, SUMMARY,
+DESCRIPTION, LOCATION, and LOGGING and others.
 
-    (when include-columns
-      (save-excursion
-	(save-restriction
-	  (widen)
-	  (goto-char (point-min))
-	  (while (re-search-forward
-		  "^[ \t]*\\(#\\+COLUMNS:\\|[ \t]*:COLUMNS:\\)[ \t]*\\(.*\\)"
-		  nil t)
-	    (setq cfmt (match-string 2) s 0)
-	    (while (string-match (org-re "%[0-9]*\\([-[:alnum:]_]+\\)")
-				 cfmt s)
-	      (setq s (match-end 0)
-		    p (match-string 1 cfmt))
-	      (unless (or (equal p "ITEM")
-			  (member p org-special-properties))
-		(add-to-list 'rtn (match-string 1 cfmt))))))))
-
-    (sort rtn (lambda (a b) (string< (upcase a) (upcase b))))))
+When COLUMNS in non-nil, also include property names given in
+COLUMN formats in the current buffer."
+  (let ((case-fold-search t)
+	(props (append
+		(and specials org-special-properties)
+		(and defaults (cons org-effort-property org-default-properties))
+		nil)))
+    (org-with-wide-buffer
+     (goto-char (point-min))
+     (while (re-search-forward org-property-start-re nil t)
+       (let ((range (org-get-property-block)))
+	 (catch 'skip
+	   (unless range
+	     (when (and (not (org-before-first-heading-p))
+			(y-or-n-p (format "Malformed drawer at %d, repair?"
+					  (line-beginning-position))))
+	       (org-get-property-block nil t))
+	     (throw 'skip nil))
+	   (goto-char (car range))
+	   (let ((begin (car range))
+		 (end (cdr range)))
+	     ;; Make sure that found property block is not located
+	     ;; before current point, as it would generate an infloop.
+	     ;; It can happen, for example, in the following
+	     ;; situation:
+	     ;;
+	     ;; * Headline
+	     ;;   :PROPERTIES:
+	     ;;   ...
+	     ;;   :END:
+	     ;; *************** Inlinetask
+	     ;; #+BEGIN_EXAMPLE
+	     ;; :PROPERTIES:
+	     ;; #+END_EXAMPLE
+	     ;;
+	     (if (< begin (point)) (throw 'skip nil) (goto-char begin))
+	     (while (< (point) end)
+	       (let ((p (progn (looking-at org-property-re)
+			       (org-match-string-no-properties 2))))
+		 ;; Only add true property name, not extension symbol.
+		 (add-to-list 'props
+			      (if (not (org-string-match-p "\\+\\'" p)) p
+				(substring p 0 -1))))
+	       (forward-line))))
+	 (outline-next-heading)))
+     (when columns
+       (goto-char (point-min))
+       (while (re-search-forward "^[ \t]*\\(?:#\\+\\|:\\)COLUMNS:" nil t)
+	 (let ((element (org-element-at-point)))
+	   (when (memq (org-element-type element) '(keyword node-property))
+	     (let ((value (org-element-property :value element))
+		   (start 0))
+	       (while (string-match "%[0-9]*\\(\\S-+\\)" value start)
+		 (setq start (match-end 0))
+		 (let ((p (org-match-string-no-properties 1 value)))
+		   (unless (member-ignore-case
+			    p (cons "ITEM" org-special-properties))
+		     (add-to-list 'props p))))))))))
+    (sort props (lambda (a b) (string< (upcase a) (upcase b))))))
 
 (defun org-property-values (key)
-  "Return a list of all values of property KEY in the current buffer."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (goto-char (point-min))
-      (let ((re (org-re-property key))
-	    values)
-	(while (re-search-forward re nil t)
-	  (add-to-list 'values (org-trim (match-string 3))))
-	(delete "" values)))))
+  "List all non-nil values of property KEY in current buffer."
+  (org-with-wide-buffer
+   (goto-char (point-min))
+   (let ((case-fold-search t)
+	 (re (org-re-property key))
+	 values)
+     (while (re-search-forward re nil t)
+       (add-to-list 'values (org-entry-get (point) key)))
+     values)))
 
 (defun org-insert-property-drawer ()
   "Insert a property drawer into the current entry."
-  (org-back-to-heading t)
-  (looking-at org-outline-regexp)
-  (let ((indent (if org-adapt-indentation
-		    (- (match-end 0) (match-beginning 0))
-		  0))
-	(beg (point))
-	(re (concat "^[ \t]*" org-keyword-time-regexp))
-	(org-clock-re (format "^[ \t]*\\(:CLOCK:\\|:LOGBOOK:\\|%s\\|:END:\\)"
-			      org-clock-string))
-	(org-skip-line-list (list org-clock-string ":END:"))
-	end hiddenp)
-    (outline-next-heading)
-    (setq end (point))
-    (goto-char beg)
-    (while (re-search-forward re end t))
-    (setq hiddenp (outline-invisible-p))
-    (end-of-line 1)
-    (and (equal (char-after) ?\n) (forward-char 1))
-    (while (looking-at org-clock-re)
-      (if (member (match-string 1) org-skip-line-list)
-	  ;; just skip this line
-	  (beginning-of-line 2)
-	;; Drawer start, find the end
-	(re-search-forward "^\\*+ \\|^[ \t]*:END:" nil t)
-	(beginning-of-line 1)))
-    (org-skip-over-state-notes)
-    (skip-chars-backward " \t\n\r")
-    (if (and (eq (char-before) ?*) (not (eq (char-after) ?\n)))
-	(forward-char 1))
-    (goto-char (point-at-eol))
-    (let ((inhibit-read-only t)) (insert "\n:PROPERTIES:\n:END:"))
-    (beginning-of-line 0)
-    (org-indent-to-column indent)
-    (beginning-of-line 2)
-    (org-indent-to-column indent)
-    (beginning-of-line 0)
-    (if hiddenp
-	(save-excursion
-	  (org-back-to-heading t)
-	  (hide-entry))
-      (org-flag-drawer t))))
+  (org-with-wide-buffer
+   (if (or (not (featurep 'org-inlinetask)) (org-inlinetask-in-task-p))
+       (org-back-to-heading t)
+     (org-with-limited-levels (org-back-to-heading t)))
+   (forward-line)
+   (when (org-looking-at-p org-planning-line-re) (forward-line))
+   (unless (org-looking-at-p org-property-drawer-re)
+     (let ((inhibit-read-only t))
+       (unless (bolp) (insert "\n"))
+       (let ((begin (point)))
+	 (insert ":PROPERTIES:\n:END:\n")
+	 (org-indent-region begin (point)))))))
 
 (defun org-insert-drawer (&optional arg drawer)
   "Insert a drawer at point.
+
+When optional argument ARG is non-nil, insert a property drawer.
 
 Optional argument DRAWER, when non-nil, is a string representing
 drawer's name.  Otherwise, the user is prompted for a name.
@@ -15944,7 +15923,7 @@ Point is left between drawer's boundaries."
     (cond
      ;; With C-u, fall back on `org-insert-property-drawer'
      (arg (org-insert-property-drawer))
-     ;;
+     ;; Check validity of suggested drawer's name.
      ((not (org-string-match-p org-drawer-regexp (format ":%s:" drawer)))
       (user-error "Invalid drawer name"))
      ;; With an active region, insert a drawer at point.
