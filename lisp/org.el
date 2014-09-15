@@ -7322,20 +7322,16 @@ Optional arguments START and END can be used to limit the range."
   (setq org-hide-block-overlays nil))
 
 (defun org-hide-block-toggle-maybe ()
-  "Toggle visibility of block at point."
+  "Toggle visibility of block at point.
+Do not throw an error.  Return t when toggling is successful."
   (interactive)
-  (let ((case-fold-search t))
-    (if (save-excursion
-          (beginning-of-line 1)
-          (looking-at org-block-regexp))
-        (progn (org-hide-block-toggle)
-               t) ;; to signal that we took action
-      nil))) ;; to signal that we did not
+  (ignore-errors (org-hide-block-toggle) t))
 
 (defun org-hide-block-toggle (&optional force)
   "Toggle the visibility of the current block.
 When optional argument FORCE is `off', make block visible.  If it
-is non-nil, hide it unconditionally."
+is non-nil, hide it unconditionally.  Throw an error when not at
+a block."
   (interactive)
   (let ((element (org-element-at-point)))
     (unless (memq (org-element-type element)
