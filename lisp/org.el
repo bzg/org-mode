@@ -23702,14 +23702,11 @@ headline found, or nil if no higher level is found.
 Also, this function will be a lot faster than `outline-up-heading',
 because it relies on stars being the outline starters.  This can really
 make a significant difference in outlines with very many siblings."
-  (let (start-level re)
-    (org-back-to-heading t)
-    (setq start-level (funcall outline-level))
-    (if (equal start-level 1)
-	nil
-      (setq re (concat "^\\*\\{1," (number-to-string (1- start-level)) "\\} "))
-      (if (re-search-backward re nil t)
-	  (funcall outline-level)))))
+  (when (ignore-errors (org-back-to-heading t))
+    (let ((level-up (1- (funcall outline-level))))
+      (and (> level-up 0)
+	   (re-search-backward (format "^\\*\\{1,%d\\} " level-up) nil t)
+	   (funcall outline-level)))))
 
 (defun org-first-sibling-p ()
   "Is this heading the first child of its parents?"
