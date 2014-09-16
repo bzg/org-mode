@@ -1951,6 +1951,14 @@ Text.
      (org-hide-block-toggle)
      (get-char-property (point) 'invisible))))
 
+(ert-deftest test-org/hide-block-toggle-maybe ()
+  "Test `org-hide-block-toggle-maybe' specifications."
+  (should
+   (org-test-with-temp-text "#+BEGIN: dynamic\nContents\n#+END:"
+     (org-hide-block-toggle-maybe)))
+  (should-not
+   (org-test-with-temp-text "Paragraph" (org-hide-block-toggle-maybe))))
+
 
 (provide 'test-org)
 

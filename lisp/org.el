@@ -7323,15 +7323,16 @@ Optional arguments START and END can be used to limit the range."
 
 (defun org-hide-block-toggle-maybe ()
   "Toggle visibility of block at point.
-Do not throw an error.  Return t when toggling is successful."
+Unlike to `org-hide-block-toggle', this function does not throw
+an error.  Return a non-nil value when toggling is successful."
   (interactive)
-  (ignore-errors (org-hide-block-toggle) t))
+  (and (ignore-errors (org-hide-block-toggle)) t))
 
 (defun org-hide-block-toggle (&optional force)
   "Toggle the visibility of the current block.
 When optional argument FORCE is `off', make block visible.  If it
 is non-nil, hide it unconditionally.  Throw an error when not at
-a block."
+a block.  Return a non-nil value when toggling is successful."
   (interactive)
   (let ((element (org-element-at-point)))
     (unless (memq (org-element-type element)
@@ -7350,8 +7351,7 @@ a block."
       (cond
        ;; Do nothing when not before or at the block opening line or
        ;; at the block closing line.
-       ((let ((eol (line-end-position)))
-	  (and (> eol start) (/= eol end))))
+       ((let ((eol (line-end-position))) (and (> eol start) (/= eol end))) nil)
        ((and (not (eq force 'off))
 	     (not (memq t (mapcar
 			   (lambda (o)
@@ -7372,9 +7372,11 @@ a block."
 	  ;; a visible part of the buffer.
 	  (when (> (line-beginning-position) start)
 	    (goto-char start)
-	    (beginning-of-line))))
+	    (beginning-of-line))
+	  ;; Signal successful toggling.
+	  t))
        ((or (not force) (eq force 'off))
-	(dolist (ov overlays)
+	(dolist (ov overlays t)
 	  (when (memq ov org-hide-block-overlays)
 	    (setq org-hide-block-overlays (delq ov org-hide-block-overlays)))
 	  (when (eq (overlay-get ov 'invisible) 'org-hide-block)
