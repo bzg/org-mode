@@ -7326,7 +7326,7 @@ Optional arguments START and END can be used to limit the range."
 Unlike to `org-hide-block-toggle', this function does not throw
 an error.  Return a non-nil value when toggling is successful."
   (interactive)
-  (and (ignore-errors (org-hide-block-toggle)) t))
+  (ignore-errors (org-hide-block-toggle)))
 
 (defun org-hide-block-toggle (&optional force)
   "Toggle the visibility of the current block.
