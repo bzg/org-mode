@@ -35,6 +35,8 @@
 (declare-function inferior-ess-send-input "ext:ess-inf" ())
 (declare-function ess-make-buffer-current "ext:ess-inf" ())
 (declare-function ess-eval-buffer "ext:ess-inf" (vis))
+(declare-function ess-wait-for-process "ext:ess-inf"
+		  (&optional proc sec-prompt wait force-redisplay))
 (declare-function org-number-sequence "org-compat" (from &optional to inc))
 (declare-function org-remove-if-not "org" (predicate seq))
 (declare-function org-every "org" (pred seq))
@@ -262,6 +264,7 @@ This function is called by `org-babel-execute-src-block'."
 	    ;; Session buffer exists, but with dead process
 	    (set-buffer session))
 	  (require 'ess) (R)
+	  (ess-wait-for-process)
 	  (rename-buffer
 	   (if (bufferp session)
 	       (buffer-name session)
