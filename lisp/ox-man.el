@@ -775,7 +775,7 @@ holding contextual information."
   "Transcode a SPECIAL-BLOCK element from Org to Man.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let ((type (downcase (org-element-property :type special-block))))
+  (let ((type (org-element-property :type special-block)))
     (org-man--wrap-label
      special-block
      (format "%s\n" contents))))

@@ -1860,6 +1860,11 @@ Outside list"
    (equal "SPECIAL"
 	  (org-test-with-temp-text "#+BEGIN_SPECIAL\nText\n#+END_SPECIAL"
 	    (org-element-property :type (org-element-at-point)))))
+  ;; Special blocks are case sensitive.
+  (should
+   (equal "CaSe"
+	  (org-test-with-temp-text "#+BEGIN_CaSe\nText\n#+END_CaSe"
+	    (org-element-property :type (org-element-at-point)))))
   ;; Special blocks can contain paragraphs.
   (should
    (eq 'paragraph

@@ -3099,8 +3099,7 @@ contextual information."
   "Transcode a SPECIAL-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let* ((block-type (downcase
-		      (org-element-property :type special-block)))
+  (let* ((block-type (org-element-property :type special-block))
 	 (contents (or contents ""))
 	 (html5-fancy (and (org-html-html5-p info)
 			   (plist-get info :html-html5-fancy)

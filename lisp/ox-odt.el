@@ -3059,7 +3059,7 @@ contextual information."
   "Transcode a SPECIAL-BLOCK element from Org to ODT.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let ((type (downcase (org-element-property :type special-block)))
+  (let ((type (org-element-property :type special-block))
 	(attributes (org-export-read-attribute :attr_odt special-block)))
     (cond
      ;; Annotation.

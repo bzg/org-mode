@@ -1526,7 +1526,7 @@ containing `:type', `:begin', `:end', `:contents-begin',
 Assume point is at the beginning of the block."
   (let* ((case-fold-search t)
 	 (type (progn (looking-at "[ \t]*#\\+BEGIN_\\(\\S-+\\)")
-		      (upcase (match-string-no-properties 1)))))
+		      (match-string-no-properties 1))))
     (if (not (save-excursion
 	       (re-search-forward
 		(format "^[ \t]*#\\+END_%s[ \t]*$" (regexp-quote type))
