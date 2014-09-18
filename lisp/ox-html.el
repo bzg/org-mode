@@ -2318,81 +2318,80 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode a HEADLINE element from Org to HTML.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
-  (let* ((numberedp (org-export-numbered-headline-p headline info))
-	 (level (+ (org-export-get-relative-level headline info)
-		   (1- (plist-get info :html-toplevel-hlevel))))
-	 (todo (and (plist-get info :with-todo-keywords)
-		    (let ((todo (org-element-property :todo-keyword headline)))
-		      (and todo (org-export-data todo info)))))
-	 (todo-type (and todo (org-element-property :todo-type headline)))
-	 (priority (and (plist-get info :with-priority)
-			(org-element-property :priority headline)))
-	 (text (org-export-data (org-element-property :title headline) info))
-	 (tags (and (plist-get info :with-tags)
-		    (org-export-get-tags headline info)))
-	 (full-text (funcall (plist-get info :html-format-headline-function)
-			     todo todo-type priority text tags info))
-	 (contents (or contents "")))
-    (cond
-     ;; Case 1: This is a footnote section: ignore it.
-     ((org-element-property :footnote-section-p headline) nil)
-     ;; Case 2: This is a deep sub-tree: export it as a list item.
-     ;;         Also export as items headlines for which no section
-     ;;         format has been found.
-     ((org-export-low-level-p headline info)
-      ;; Build the real contents of the sub-tree.
-      (let* ((type (if numberedp 'ordered 'unordered))
-	     (itemized-body (org-html-format-list-item
-			     contents type nil info nil full-text)))
-	(concat (and (org-export-first-sibling-p headline info)
-		     (org-html-begin-plain-list type))
-		itemized-body
-		(and (org-export-last-sibling-p headline info)
-		     (org-html-end-plain-list type)))))
-     ;; Case 3: Standard headline.  Export it as a section.
-     (t
-      (let* ((numbers (org-export-get-headline-number headline info))
-	     (section-number (mapconcat #'number-to-string numbers "-"))
-	     (ids (remq nil
-			(list (org-element-property :CUSTOM_ID headline)
-			      (concat "sec-" section-number)
-			      (org-element-property :ID headline))))
-	     (preferred-id (car ids))
-	     (extra-ids (cdr ids))
-	     (extra-class (org-element-property :HTML_CONTAINER_CLASS headline))
-	     (first-content (car (org-element-contents headline))))
-	(format "<%s id=\"%s\" class=\"%s\">%s%s</%s>\n"
-		(org-html--container headline info)
-		(format "outline-container-%s"
-			(or (org-element-property :CUSTOM_ID headline)
-			    (concat "sec-" section-number)))
-		(concat (format "outline-%d" level)
-			(and extra-class " ")
-			extra-class)
-		(format "\n<h%d id=\"%s\">%s%s</h%d>\n"
-			level
-			preferred-id
-			(mapconcat
-			 (lambda (x)
-			   (let ((id (org-export-solidify-link-text
-				      (if (org-uuidgen-p x) (concat "ID-" x)
-					x))))
-			     (org-html--anchor id nil nil info)))
-			 extra-ids "")
-			(concat
-			 (and numberedp
-			      (format
-			       "<span class=\"section-number-%d\">%s</span> "
-			       level
-			       (mapconcat #'number-to-string numbers ".")))
-			 full-text)
-			level)
-		;; When there is no section, pretend there is an empty
-		;; one to get the correct <div class="outline- ...>
-		;; which is needed by `org-info.js'.
-		(if (eq (org-element-type first-content) 'section) contents
-		  (concat (org-html-section first-content "" info) contents))
-		(org-html--container headline info)))))))
+  (unless (org-element-property :footnote-section-p headline)
+    (let* ((numberedp (org-export-numbered-headline-p headline info))
+           (numbers (org-export-get-headline-number headline info))
+           (section-number (mapconcat #'number-to-string numbers "-"))
+           (level (+ (org-export-get-relative-level headline info)
+                     (1- (plist-get info :html-toplevel-hlevel))))
+           (todo (and (plist-get info :with-todo-keywords)
+                      (let ((todo (org-element-property :todo-keyword headline)))
+                        (and todo (org-export-data todo info)))))
+           (todo-type (and todo (org-element-property :todo-type headline)))
+           (priority (and (plist-get info :with-priority)
+                          (org-element-property :priority headline)))
+           (text (org-export-data (org-element-property :title headline) info))
+           (tags (and (plist-get info :with-tags)
+                      (org-export-get-tags headline info)))
+           (full-text (funcall (plist-get info :html-format-headline-function)
+                               todo todo-type priority text tags info))
+           (contents (or contents ""))
+           (ids (delq nil
+                      (list (org-element-property :CUSTOM_ID headline)
+                            (concat "sec-" section-number)
+                            (org-element-property :ID headline))))
+           (preferred-id (car ids))
+           (extra-ids (mapconcat
+                       (lambda (id)
+                         (org-html--anchor
+                          (org-export-solidify-link-text
+                           (if (org-uuidgen-p id) (concat "ID-" id) id))
+                          nil nil info))
+                       (cdr ids) "")))
+      (if (org-export-low-level-p headline info)
+          ;; This is a deep sub-tree: export it as a list item.
+          (let* ((type (if numberedp 'ordered 'unordered))
+                 (itemized-body
+                  (org-html-format-list-item
+                   contents type nil info nil
+                   (concat (org-html--anchor preferred-id nil nil info)
+                           extra-ids
+                           full-text))))
+            (concat (and (org-export-first-sibling-p headline info)
+                         (org-html-begin-plain-list type))
+                    itemized-body
+                    (and (org-export-last-sibling-p headline info)
+                         (org-html-end-plain-list type))))
+        (let ((extra-class (org-element-property :HTML_CONTAINER_CLASS headline))
+              (first-content (car (org-element-contents headline))))
+          ;; Standard headline.  Export it as a section.
+          (format "<%s id=\"%s\" class=\"%s\">%s%s</%s>\n"
+                  (org-html--container headline info)
+                  (format "outline-container-%s"
+                          (or (org-element-property :CUSTOM_ID headline)
+                              (concat "sec-" section-number)))
+                  (concat (format "outline-%d" level)
+                          (and extra-class " ")
+                          extra-class)
+                  (format "\n<h%d id=\"%s\">%s%s</h%d>\n"
+                          level
+                          preferred-id
+                          extra-ids
+                          (concat
+                           (and numberedp
+                                (format
+                                 "<span class=\"section-number-%d\">%s</span> "
+                                 level
+                                 (mapconcat #'number-to-string numbers ".")))
+                           full-text)
+                          level)
+                  ;; When there is no section, pretend there is an
+                  ;; empty one to get the correct <div
+                  ;; class="outline-...> which is needed by
+                  ;; `org-info.js'.
+                  (if (eq (org-element-type first-content) 'section) contents
+                    (concat (org-html-section first-content "" info) contents))
+                  (org-html--container headline info)))))))
 
 (defun org-html-format-headline-default-function
   (todo todo-type priority text tags info)
