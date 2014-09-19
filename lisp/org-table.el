@@ -619,7 +619,7 @@ extension of the given file name, and finally on the variable
     (when (file-directory-p file)
       (user-error "This is a directory path, not a file"))
     (when (and (buffer-file-name (buffer-base-buffer))
-	       (file-equal-p
+	       (org-file-equal-p
 		(file-truename file)
 		(file-truename (buffer-file-name (buffer-base-buffer)))))
       (user-error "Please specify a file name that is different from current"))
