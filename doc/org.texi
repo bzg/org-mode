@@ -10704,16 +10704,12 @@ Toggle inclusion of TODO keywords into exported text
 Toggle inclusion of tables (@code{org-export-with-tables}).
 @end table
 
-@cindex property, EXPORT_FILE_NAME
 When exporting only a subtree, each of the previous keywords@footnote{With
 the exception of @samp{SETUPFILE}.} can be overridden locally by special node
 properties.  These begin with @samp{EXPORT_}, followed by the name of the
 keyword they supplant.  For example, @samp{DATE} and @samp{OPTIONS} keywords
 become, respectively, @samp{EXPORT_DATE} and @samp{EXPORT_OPTIONS}
-properties.  Subtree export also supports the self-explicit
-@samp{EXPORT_FILE_NAME} property@footnote{There is no buffer-wide equivalent
-for this property.  The file name in this case is derived from the file
-associated to the buffer, if possible, or asked to the user otherwise.}.
+properties.
 
 @cindex #+BIND
 @vindex org-export-allow-bind-keywords
@@ -10721,6 +10717,13 @@ If @code{org-export-allow-bind-keywords} is non-@code{nil}, Emacs variables
 can become buffer-local during export by using the BIND keyword.  Its syntax
 is @samp{#+BIND: variable value}.  This is particularly useful for in-buffer
 settings that cannot be changed using specific keywords.
+
+@cindex property, EXPORT_FILE_NAME
+The name of the output file to be generated is taken from the file associated
+to the buffer, when possible, or asked to you otherwise.  For subtree export,
+you can also set @samp{EXPORT_FILE_NAME} property.  In all cases, only the
+base name of the file is retained, and a back-end specific extension is
+added.
 
 @node ASCII/Latin-1/UTF-8 export, Beamer export, Export settings, Exporting
 @section ASCII/Latin-1/UTF-8 export
