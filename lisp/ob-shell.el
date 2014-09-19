@@ -177,10 +177,10 @@ Emacs-lisp table, otherwise return the results as a string."
       (or (org-babel-comint-buffer-livep session)
           (progn
 	    (shell session)
-	    ; Needed for Emacs 23 since the marker is initially
-	    ; undefined and the filter functions try to use it without
-	    ; checking.
-	    (set-mark comint-last-output-start (point))
+	    ;; Needed for Emacs 23 since the marker is initially
+	    ;; undefined and the filter functions try to use it without
+	    ;; checking.
+	    (set-marker comint-last-output-start (point))
 	    (get-buffer (current-buffer)))))))
 
 (defvar org-babel-sh-eoe-indicator "echo 'org_babel_sh_eoe'"
