@@ -10355,16 +10355,17 @@ Org syntax includes pre-defined blocks (@pxref{Paragraphs} and @ref{Literal
 examples}).  It is also possible to create blocks containing raw code
 targeted at a specific back-end (e.g., @samp{#+BEGIN_LATEX}).
 
-Any other block is a @emph{special block}.
+Any other block is a @emph{special block}.  Unlike to other blocks, their
+name is case-sensitive.
 
-For example, @samp{#+BEGIN_ABSTRACT} and @samp{#+BEGIN_VIDEO} are special
+For example, @samp{#+BEGIN_abstract} and @samp{#+BEGIN_video} are special
 blocks.  The first one is useful when exporting to @LaTeX{}, the second one
 when exporting to HTML5.
 
 Each export back-end decides if they should be exported, and how.  When the
 block is ignored, its contents are still exported, as if the opening and
 closing block lines were not there.  For example, when exporting a
-@samp{#+BEGIN_TEST} block, HTML back-end wraps its contents within a
+@samp{#+BEGIN_test} block, HTML back-end wraps its contents within a
 @samp{<div name="test">} tag.
 
 Refer to back-end specific documentation for more information.
@@ -11189,7 +11190,7 @@ Becomes:
 
 Special blocks that do not correspond to HTML5 elements (see
 @code{org-html-html5-elements}) will revert to the usual behavior, i.e.,
-@code{#+BEGIN_LEDERHOSEN} will still export to @samp{<div class="lederhosen">}.
+@code{#+BEGIN_lederhosen} will still export to @samp{<div class="lederhosen">}.
 
 Headlines cannot appear within special blocks.  To wrap a headline and its
 contents in e.g., @samp{<section>} or @samp{<article>} tags, set the
@@ -11933,15 +11934,15 @@ Value of @code{:options} attribute will be appended as-is to that
 environment's opening string.  For example:
 
 @example
-#+BEGIN_ABSTRACT
+#+BEGIN_abstract
 We demonstrate how to solve the Syracuse problem.
-#+END_ABSTRACT
+#+END_abstract
 
 #+ATTR_LATEX: :options [Proof of important theorem]
-#+BEGIN_PROOF
+#+BEGIN_proof
 ...
 Therefore, any even number greater than 2 is the sum of two primes.
-#+END_PROOF
+#+END_proof
 @end example
 
 @noindent
@@ -11964,9 +11965,9 @@ example:
 
 @example
 #+ATTR_LATEX: :caption \MyCaption@{HeadingA@}
-#+BEGIN_PROOF
+#+BEGIN_proof
 ...
-#+END_PROOF
+#+END_proof
 @end example
 
 @subsubheading Horizontal rules
