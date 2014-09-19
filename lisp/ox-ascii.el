@@ -450,17 +450,17 @@ string, see `org-ascii--justify-lines' and
 `org-ascii--justify-block'.
 
 Return nil if S isn't a string."
-  ;; Don't fill paragraph when break should be preserved.
-  (cond ((not (stringp s)) nil)
-	((plist-get info :preserve-breaks) s)
-	(t (let ((double-space-p sentence-end-double-space))
-	     (with-temp-buffer
-	       (let ((fill-column text-width)
-		     (use-hard-newlines t)
-		     (sentence-end-double-space double-space-p))
-		 (insert s)
-		 (fill-region (point-min) (point-max) justify))
-	       (buffer-string))))))
+  (when (stringp s)
+    (let ((double-space-p sentence-end-double-space))
+      (with-temp-buffer
+	(let ((fill-column text-width)
+	      (use-hard-newlines t)
+	      (sentence-end-double-space double-space-p))
+	  (insert (if (plist-get info :preserve-breaks)
+		      (replace-regexp-in-string "\n" hard-newline s)
+		    s))
+	  (fill-region (point-min) (point-max) justify))
+	(buffer-string)))))
 
 (defun org-ascii--justify-lines (s text-width how)
   "Justify all lines in string S.
