@@ -89,7 +89,8 @@ this variable.")
   :version "24.1"
   :type 'string)
 
-(defvar ess-local-process-name) ; dynamically scoped
+(defvar ess-current-process-name) ; dynamically scoped
+(defvar ess-local-process-name)   ; dynamically scoped
 (defun org-babel-edit-prep:R (info)
   (let ((session (cdr (assoc :session (nth 2 info)))))
     (when (and session (string-match "^\\*\\(.+?\\)\\*$" session))
