@@ -10355,8 +10355,7 @@ Org syntax includes pre-defined blocks (@pxref{Paragraphs} and @ref{Literal
 examples}).  It is also possible to create blocks containing raw code
 targeted at a specific back-end (e.g., @samp{#+BEGIN_LATEX}).
 
-Any other block is a @emph{special block}.  Unlike to other blocks, their
-name is case-sensitive.
+Any other block is a @emph{special block}.  Its name is case-sensitive.
 
 For example, @samp{#+BEGIN_abstract} and @samp{#+BEGIN_video} are special
 blocks.  The first one is useful when exporting to @LaTeX{}, the second one
