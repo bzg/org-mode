@@ -7733,13 +7733,12 @@ command."
   "Make the number of empty lines before current exactly N.
 So this will delete or add empty lines."
   (save-excursion
-    (goto-char (point-at-bol))
-    (if (looking-back "\\s-+" nil 'greedy)
-	(replace-match ""))
-    (or (bobp) (insert "\n"))
-    (while (> N 0)
-      (insert "\n")
-      (setq N (1- N)))))
+    (beginning-of-line)
+    (let ((p (point)))
+      (skip-chars-backward " \r\t\n")
+      (unless (bolp) (forward-line))
+      (delete-region (point) p))
+    (when (> N 0) (insert (make-string N ?\n)))))
 
 (defun org-get-heading (&optional no-tags no-todo)
   "Return the heading of the current entry, without the stars.
