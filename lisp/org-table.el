@@ -1175,7 +1175,7 @@ If LINE is larger than the number of data lines in the table, the function
 returns nil.  However, if COLUMN is too large, we will simply return an
 empty string.
 If LINE is nil, use the current line.
-If column is nil, use the current column."
+If COLUMN is nil, use the current column."
   (setq column (or column (org-table-current-column)))
   (save-excursion
     (and (or (not line) (org-table-goto-line line))
