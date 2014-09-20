@@ -78,10 +78,10 @@
   (org-babel-sql-expand-vars
    body (mapcar #'cdr (org-babel-get-header params :var))))
 
-(defun dbstring-mysql (host user password database)
+(defun org-babel-sql-dbstring-mysql (host user password database)
   "Make MySQL cmd line args for database connection.  Pass nil to omit that arg."
   (combine-and-quote-strings
-   (remq nil
+   (delq nil
 	 (list (when host     (concat "-h" host))
 	       (when user     (concat "-u" user))
 	       (when password (concat "-p" password))
@@ -126,7 +126,7 @@ This function is called by `org-babel-execute-src-block'."
                                      (org-babel-process-file-name in-file)
                                      (org-babel-process-file-name out-file)))
                     ('mysql (format "mysql %s %s %s < %s > %s"
-				    (dbstring-mysql dbhost dbuser dbpassword database)
+				    (org-babel-sql-dbstring-mysql dbhost dbuser dbpassword database)
 				    (if colnames-p "" "-N")
                                     (or cmdline "")
 				    (org-babel-process-file-name in-file)
