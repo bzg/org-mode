@@ -35,7 +35,8 @@
 (declare-function calendar-absolute-from-iso "cal-iso" (&optional date))
 (declare-function notifications-notify "notifications" (&rest params))
 (declare-function org-pop-to-buffer-same-window "org-compat" (&optional buffer-or-name norecord label))
-(declare-function org-refresh-properties "org" (dprop tprop))
+(declare-function org-element-property "org-element" (property element))
+(declare-function org-element-type "org-element" (element))
 (declare-function org-table-goto-line "org-table" (n))
 (defvar org-time-stamp-formats)
 (defvar org-ts-what)
@@ -1421,87 +1422,98 @@ When FIND-UNCLOSED is non-nil, first check if there is an unclosed clock
 line and position cursor in that line."
   (org-back-to-heading t)
   (catch 'exit
-    (let* ((org-clock-into-drawer (org-clock-into-drawer))
-	   (beg (save-excursion
-		  (beginning-of-line 2)
-		  (or (bolp) (newline))
-		  (point)))
-	   (end (progn (outline-next-heading) (point)))
-	   (re (concat "^[ \t]*" org-clock-string))
-	   (cnt 0)
-	   (drawer (if (stringp org-clock-into-drawer)
-		       org-clock-into-drawer "LOGBOOK"))
-	   first last ind-last)
+    (let* ((beg (line-beginning-position 2))
+	   (end (save-excursion (outline-next-heading) (point)))
+	   (org-clock-into-drawer (org-clock-into-drawer))
+	   (drawer (cond
+		    ((not org-clock-into-drawer) nil)
+		    ((stringp org-clock-into-drawer) org-clock-into-drawer)
+		    (t "LOGBOOK"))))
+      ;; Look for a running clock if FIND-UNCLOSED in non-nil.
+      (when find-unclosed
+	(let ((open-clock-re
+	       (concat "^[ \t]*"
+		       org-clock-string
+		       " \\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}"
+		       " *\\sw+ +[012][0-9]:[0-5][0-9]\\)\\][ \t]*$")))
+	  (while (re-search-forward open-clock-re end t)
+	    (let ((element (org-element-at-point)))
+	      (when (and (eq (org-element-type element) 'clock)
+			 (eq (org-element-property :status element) 'running))
+		(beginning-of-line)
+		(throw 'exit t))))))
+      ;; Look for an existing clock drawer.
+      (when drawer
+	(goto-char beg)
+	(let ((drawer-re (concat "^[ \t]*:" drawer ":[ \t]*$")))
+	  (while (re-search-forward drawer-re end t)
+	    (let ((element (org-element-at-point)))
+	      (when (eq (org-element-type element) 'drawer)
+		(let ((cend (org-element-property :contents-end element)))
+		  (if (and (not org-log-states-order-reversed) cend)
+		      (goto-char cend)
+		    (forward-line))
+		  (throw 'exit t)))))))
       (goto-char beg)
-      (when (and find-unclosed
-		 (re-search-forward
-		  (concat "^[ \t]*" org-clock-string
-			  " \\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}"
-			  " *\\sw+ +[012][0-9]:[0-5][0-9]\\)\\][ \t]*$")
-		  end t))
-	(beginning-of-line 1)
-	(throw 'exit t))
-      (when (eobp) (newline) (setq end (max (point) end)))
-      (when (re-search-forward (concat "^[ \t]*:" drawer ":") end t)
-	;; we seem to have a CLOCK drawer, so go there.
-	(beginning-of-line 2)
-	(or org-log-states-order-reversed
-	    (and (re-search-forward org-property-end-re nil t)
-		 (goto-char (match-beginning 0))))
-	(throw 'exit t))
-      ;; Lets count the CLOCK lines
-      (goto-char beg)
-      (while (re-search-forward re end t)
-	(setq first (or first (match-beginning 0))
-	      last (match-beginning 0)
-	      cnt (1+ cnt)))
-      (when (and (integerp org-clock-into-drawer)
-		 last
-		 (>= (1+ cnt) org-clock-into-drawer))
-	;; Wrap current entries into a new drawer
-	(goto-char last)
-	(setq ind-last (org-get-indentation))
-	(beginning-of-line 2)
-	(if (and (>= (org-get-indentation) ind-last)
-		 (org-at-item-p))
-	    (when (and (>= (org-get-indentation) ind-last)
-		       (org-at-item-p))
-	      (let ((struct (org-list-struct)))
-		(goto-char (org-list-get-bottom-point struct)))))
-	(insert ":END:\n")
-	(beginning-of-line 0)
-	(org-indent-line-to ind-last)
-	(goto-char first)
-	(insert ":" drawer ":\n")
-	(beginning-of-line 0)
-	(org-indent-line)
-	(org-flag-drawer t)
-	(beginning-of-line 2)
-	(or org-log-states-order-reversed
-	    (and (re-search-forward org-property-end-re nil t)
-		 (goto-char (match-beginning 0))))
-	(throw 'exit nil))
-
-      (goto-char beg)
-      (while (and (looking-at (concat "[ \t]*" org-keyword-time-regexp))
-		  (not (equal (match-string 1) org-clock-string)))
-	;; Planning info, skip to after it
-	(beginning-of-line 2)
-	(or (bolp) (newline)))
-      (when (or (eq org-clock-into-drawer t)
-		(stringp org-clock-into-drawer)
-		(and (integerp org-clock-into-drawer)
-		     (< org-clock-into-drawer 2)))
-	(insert ":" drawer ":\n:END:\n")
-	(beginning-of-line -1)
-	(org-indent-line)
-	(org-flag-drawer t)
-	(beginning-of-line 2)
-	(org-indent-line)
-	(beginning-of-line)
-	(or org-log-states-order-reversed
-	    (and (re-search-forward org-property-end-re nil t)
-		 (goto-char (match-beginning 0))))))))
+      (let ((clock-re (concat "^[ \t]*" org-clock-string))
+	    (count 0) positions first)
+	;; Count the CLOCK lines and store their positions.
+	(save-excursion
+	  (while (re-search-forward clock-re end t)
+	    (let ((element (org-element-at-point)))
+	      (when (eq (org-element-type element) 'clock)
+		(setq positions (cons (line-beginning-position) positions)
+		      count (1+ count))))))
+	(cond
+	 ((null positions)
+	  ;; Skip planning line and property drawer, if any.
+	  (when (org-looking-at-p org-planning-line-re) (forward-line))
+	  (when (looking-at org-property-drawer-re)
+	    (goto-char (match-end 0))
+	    (forward-line))
+	  (unless (bolp) (insert "\n"))
+	  ;; Create a new drawer if necessary.
+	  (when org-clock-into-drawer
+	    (let ((beg (point)))
+	      (insert ":" drawer ":\n:END:\n")
+	      (org-indent-region beg (point))
+	      (goto-char beg)
+	      (org-flag-drawer t)
+	      (forward-line))))
+	 ;; When a clock drawer needs to be created because of the
+	 ;; number of clock items, collect all clocks in the section
+	 ;; and wrap them within the drawer.
+	 ((and (wholenump org-clock-into-drawer)
+	       (>= (1+ count) org-clock-into-drawer))
+	  ;; Skip planning line and property drawer, if any.
+	  (when (org-looking-at-p org-planning-line-re) (forward-line))
+	  (when (looking-at org-property-drawer-re)
+	    (goto-char (match-end 0))
+	    (forward-line))
+	  (let ((beg (point)))
+	    (insert
+	     (mapconcat
+	      (lambda (p)
+		(save-excursion
+		  (goto-char p)
+		  (org-trim (delete-and-extract-region
+			     (save-excursion (skip-chars-backward " \r\t\n")
+					     (line-beginning-position 2))
+			     (line-beginning-position 2)))))
+	      positions "\n")
+	     "\n:END:\n")
+	    (let ((end (point-marker)))
+	      (goto-char beg)
+	      (save-excursion (insert ":" drawer ":\n"))
+	      (org-flag-drawer t)
+	      (org-indent-region (point) end)
+	      (forward-line)
+	      (unless org-log-states-order-reversed
+		(goto-char end)
+		(beginning-of-line -1))
+	      (set-marker end nil))))
+	 (org-log-states-order-reversed (goto-char (car (last positions))))
+	 (t (goto-char (car positions))))))))
 
 ;;;###autoload
 (defun org-clock-out (&optional switch-to-state fail-quietly at-time)
