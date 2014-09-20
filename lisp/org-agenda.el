@@ -9627,7 +9627,7 @@ This is a command that has to be installed in `calendar-mode-map'."
 	  (overlay-put ov 'type 'org-marked-entry-overlay))
 	(end-of-line 1)
 	(or (ignore-errors
-	      (goto-char (next-single-property-change (point) 'txt)))
+	      (goto-char (next-single-property-change (point) 'org-hd-marker)))
 	    (beginning-of-line 2))
 	(while (and (get-char-property (point) 'invisible) (not (eobp)))
 	  (beginning-of-line 2))
@@ -9645,7 +9645,7 @@ This is a command that has to be installed in `calendar-mode-map'."
   (let ((entries-marked 0) txt-at-point)
     (save-excursion
       (goto-char (point-min))
-      (goto-char (next-single-property-change (point) 'txt))
+      (goto-char (next-single-property-change (point) 'org-hd-marker))
       (while (and (re-search-forward regexp nil t)
 		  (setq txt-at-point (get-text-property (point) 'txt)))
 	(when (string-match regexp txt-at-point)
@@ -9681,7 +9681,7 @@ This is a command that has to be installed in `calendar-mode-map'."
   (save-excursion
     (goto-char (point-min))
     (while (ignore-errors
-	     (goto-char (next-single-property-change (point) 'txt)))
+	     (goto-char (next-single-property-change (point) 'org-hd-marker)))
       (org-agenda-bulk-toggle))))
 
 (defun org-agenda-bulk-toggle ()
