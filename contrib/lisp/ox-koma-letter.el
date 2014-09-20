@@ -391,7 +391,7 @@ was not present."
     (:lco "LCO" nil org-koma-letter-class-option-file)
     (:author "AUTHOR" nil (org-koma-letter--get-value org-koma-letter-author) t)
     (:author-changed-in-buffer-p "AUTHOR" nil nil t)
-    (:from-address "FROM_ADDRESS" nil nil newline)
+    (:from-address "FROM_ADDRESS" nil org-koma-letter-from-address newline)
     (:phone-number "PHONE_NUMBER" nil org-koma-letter-phone-number)
     (:email "EMAIL" nil (org-koma-letter--get-value org-koma-letter-email) t)
     (:to-address "TO_ADDRESS" nil nil newline)
@@ -504,15 +504,14 @@ KEY should be `to' or `from'.
 `ox-koma-letter' allows two ways to specify TO and FROM.  If both
 are present return the preferred one as determined by
 `org-koma-letter-prefer-special-headings'."
-  (let ((option (plist-get info (if (eq key 'to) :to-address :from-address)))
+  (let ((option (org-string-nw-p
+		 (plist-get info (if (eq key 'to) :to-address :from-address))))
 	(headline (org-koma-letter--get-tagged-contents key)))
     (replace-regexp-in-string
      "\n" "\\\\\\\\\n"
      (org-trim
-      (or (if (plist-get info :special-headings) (or headline option)
-	    (or option headline))
-	  ;; Fallback values.
-	  (if (eq key 'to) "\\mbox{}" org-koma-letter-from-address))))))
+      (if (plist-get info :special-headings) (or headline option "")
+	(or option headline ""))))))
 
 
 
@@ -618,7 +617,7 @@ holding export options."
    (org-koma-letter--build-settings 'buffer info)
    ;; From address.
    (let ((from-address (org-koma-letter--determine-to-and-from info 'from)))
-     (when (org-string-nw-p from-address) 
+     (when (org-string-nw-p from-address)
        (format "\\setkomavar{fromaddress}{%s}\n" from-address)))
    ;; Date.
    (format "\\date{%s}\n" (org-export-data (org-export-get-date info) info))
