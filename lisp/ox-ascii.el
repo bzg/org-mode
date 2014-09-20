@@ -133,6 +133,7 @@
     (:ascii-inlinetask-width nil nil org-ascii-inlinetask-width)
     (:ascii-inner-margin nil nil org-ascii-inner-margin)
     (:ascii-links-to-notes nil nil org-ascii-links-to-notes)
+    (:ascii-list-margin nil nil org-ascii-list-margin)
     (:ascii-paragraph-spacing nil nil org-ascii-paragraph-spacing)
     (:ascii-quote-margin nil nil org-ascii-quote-margin)
     (:ascii-table-keep-all-vertical-lines
@@ -182,6 +183,15 @@ This margin is applied on both sides of the text."
   :group 'org-export-ascii
   :version "24.4"
   :package-version '(Org . "8.0")
+  :type 'integer)
+
+(defcustom org-ascii-list-margin 0
+  "Width of margin used for plain lists, in characters.
+This margin applies to top level list only, not to its
+sub-lists."
+  :group 'org-export-ascii
+  :version "24.5"
+  :package-version '(Org . "8.3")
   :type 'integer)
 
 (defcustom org-ascii-inlinetask-width 30
@@ -581,6 +591,15 @@ INFO is a plist used as a communication channel."
 				 '(quote-block verse-block))
 		      count parent)
 		2 (plist-get info :ascii-quote-margin))
+	     ;; Apply list margin once per "top-level" plain-list
+	     ;; containing current line
+	     (* (let ((count 0))
+		  (dolist (e genealogy count)
+		    (and (eq (org-element-type e) 'plain-list)
+			 (not (eq (org-element-type (org-export-get-parent e))
+				  'item))
+			 (incf count))))
+		(plist-get info :ascii-list-margin))
 	     ;; Text width within a plain-list is restricted by
 	     ;; indentation of current item.  If that's the case,
 	     ;; compute it with the help of `:structure' property from
@@ -1558,7 +1577,11 @@ the plist used as a communication channel."
   "Transcode a PLAIN-LIST element from Org to ASCII.
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
-  contents)
+  (let ((margin (plist-get info :ascii-list-margin)))
+    (if (or (< margin 1)
+	    (eq (org-element-type (org-export-get-parent plain-list)) 'item))
+	contents
+      (org-ascii--indent-string contents margin))))
 
 
 ;;;; Plain Text

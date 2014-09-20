@@ -13807,6 +13807,7 @@ however, override everything.
 @item @code{:ascii-inlinetask-width}              @tab @code{org-ascii-inlinetask-width}
 @item @code{:ascii-inner-margin}                  @tab @code{org-ascii-inner-margin}
 @item @code{:ascii-links-to-notes}                @tab @code{org-ascii-links-to-notes}
+@item @code{:ascii-list-margin}                   @tab @code{org-ascii-list-margin}
 @item @code{:ascii-paragraph-spacing}             @tab @code{org-ascii-paragraph-spacing}
 @item @code{:ascii-quote-margin}                  @tab @code{org-ascii-quote-margin}
 @item @code{:ascii-table-keep-all-vertical-lines} @tab @code{org-ascii-table-keep-all-vertical-lines}
