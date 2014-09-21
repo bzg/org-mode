@@ -1477,15 +1477,10 @@ holding contextual information."
 			       todo todo-type priority text tags info))
 	   ;; Associate \label to the headline for internal links.
 	   (headline-label
-	    (let ((custom-label
-		   (and (plist-get info :latex-custom-id-labels)
-			(org-element-property :CUSTOM_ID headline))))
-	      (if custom-label (format "\\label{%s}\n" custom-label)
-		(format "\\label{sec-%s}\n"
-			(mapconcat
-			 #'number-to-string
-			 (org-export-get-headline-number headline info)
-			 "-")))))
+	    (format "\\label{%s}\n"
+		    (or (and (plist-get info :latex-custom-id-labels)
+			     (org-element-property :CUSTOM_ID headline))
+			(org-export-get-headline-id headline info))))
 	   (pre-blanks
 	    (make-string (org-element-property :pre-blank headline) 10)))
       (if (or (not section-fmt) (org-export-low-level-p headline info))
@@ -1975,14 +1970,8 @@ INFO is a plist holding contextual information.  See
 	   (let* ((custom-label
 		   (and (plist-get info :latex-custom-id-labels)
 			(org-element-property :CUSTOM_ID destination)))
-		  (label
-		   (or
-		    custom-label
-		    (format "sec-%s"
-			    (mapconcat
-			     #'number-to-string
-			     (org-export-get-headline-number destination info)
-			     "-")))))
+		  (label (or custom-label
+			     (org-export-get-headline-id destination info))))
 	     (if (and (not desc)
 		      (org-export-numbered-headline-p destination info))
 		 (format "\\ref{%s}" label)

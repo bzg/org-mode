@@ -1974,6 +1974,7 @@ Return updated plist."
   ;; properties.
   (nconc
    `(:headline-numbering ,(org-export--collect-headline-numbering data info)
+     :unnumbered-headline-id ,(org-export--collect-unnumbered-headline-id data info)
      :exported-data ,(make-hash-table :test 'eq :size 4001))
    info))
 
@@ -1996,7 +1997,7 @@ OPTIONS is a plist holding export options."
       (if (= min-level 10000) 1 min-level))))
 
 (defun org-export--collect-headline-numbering (data options)
-  "Return numbering of all exportable headlines in a parse tree.
+  "Return numbering of all exportable, numbered headlines in a parse tree.
 
 DATA is the parse tree.  OPTIONS is the plist holding export
 options.
@@ -2007,7 +2008,8 @@ for a footnotes section."
   (let ((numbering (make-vector org-export-max-depth 0)))
     (org-element-map data 'headline
       (lambda (headline)
-	(unless (org-element-property :footnote-section-p headline)
+	(when (and (org-export-numbered-headline-p headline options)
+		   (not (org-element-property :footnote-section-p headline)))
 	  (let ((relative-level
 		 (1- (org-export-get-relative-level headline options))))
 	    (cons
@@ -2018,6 +2020,17 @@ for a footnotes section."
 		   when (= idx relative-level) collect (aset numbering idx (1+ n))
 		   when (> idx relative-level) do (aset numbering idx 0))))))
       options)))
+
+(defun org-export--collect-unnumbered-headline-id (data options)
+  "Return numbering of all exportable, unnumbered headlines.
+DATA is the parse tree.  OPTIONS is the plist holding export
+options.  Unnumbered headlines are numbered as a function of
+occurrence."
+  (let ((num 0))
+    (org-element-map data 'headline
+	(lambda (headline)
+	  (unless (org-export-numbered-headline-p headline options)
+	    (list headline (incf num)))))))
 
 (defun org-export--populate-ignore-list (data options)
   "Return list of elements and objects to ignore during export.
@@ -3873,7 +3886,12 @@ INFO is the plist used as a communication channel."
 ;;
 ;; `org-export-get-headline-number' returns the section number of an
 ;; headline, while `org-export-number-to-roman' allows to convert it
-;; to roman numbers.
+;; to roman numbers.  With an optional argument,
+;; `org-export-get-headline-number' returns a number to unnumbered
+;; headlines (used for internal id).
+;;
+;; `org-export-get-headline-id' returns the unique internal id of a
+;; headline.
 ;;
 ;; `org-export-low-level-p', `org-export-first-sibling-p' and
 ;; `org-export-last-sibling-p' are three useful predicates when it
@@ -3908,17 +3926,32 @@ and the last level being considered as high enough, or nil."
       (let ((level (org-export-get-relative-level headline info)))
         (and (> level limit) (- level limit))))))
 
-(defun org-export-get-headline-number (headline info)
-  "Return HEADLINE numbering as a list of numbers.
+(defun org-export-get-headline-id (headline info)
+  "Return a unique ID for HEADLINE.
 INFO is a plist holding contextual information."
-  (cdr (assoc headline (plist-get info :headline-numbering))))
+  (let ((numbered (org-export-numbered-headline-p headline info)))
+    (concat
+     (if numbered "sec-" "unnumbered-")
+     (mapconcat #'number-to-string
+		(if numbered
+		    (org-export-get-headline-number headline info)
+		  (cdr (assq headline (plist-get info :unnumbered-headline-id)))) "-"))))
+
+(defun org-export-get-headline-number (headline info)
+  "Return numbered HEADLINE numbering as a list of numbers.
+INFO is a plist holding contextual information."
+  (and (org-export-numbered-headline-p headline info)
+       (cdr (assq headline (plist-get info :headline-numbering)))))
 
 (defun org-export-numbered-headline-p (headline info)
   "Return a non-nil value if HEADLINE element should be numbered.
 INFO is a plist used as a communication channel."
-  (let ((sec-num (plist-get info :section-numbers))
-	(level (org-export-get-relative-level headline info)))
-    (if (wholenump sec-num) (<= level sec-num) sec-num)))
+  (unless (org-some
+	   (lambda (head) (org-not-nil (org-element-property :UNNUMBERED head)))
+	   (cons headline (org-export-get-genealogy headline)))
+    (let ((sec-num (plist-get info :section-numbers))
+	  (level (org-export-get-relative-level headline info)))
+      (if (wholenump sec-num) (<= level sec-num) sec-num))))
 
 (defun org-export-number-to-roman (n)
   "Convert integer N into a roman numeral."

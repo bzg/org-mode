@@ -1633,6 +1633,68 @@ Paragraph[fn:1]"
        (lambda (h) (org-export-numbered-headline-p h info))
        (plist-put info :section-numbers t)))))
 
+(ert-deftest test-org-export/org-export-get-headline-id ()
+  "Test `org-export-get-headline-id' specifications."
+  ;; Numbered headlines have IDs akin to "sec-N".
+  (should
+   (equal "sec-1"
+	  (org-test-with-parsed-data "* H"
+	    (org-export-get-headline-id
+	     (org-element-map tree 'headline #'identity info t)
+	     info))))
+  ;; The ID of numbered headlines reflect the hierarchy.
+  (should
+   (equal "sec-1-1"
+	  (org-test-with-parsed-data "* H1\n** H2"
+	    (org-export-get-headline-id
+	     (org-element-map tree 'headline
+	       (lambda (h)
+		 (and (equal "H2" (org-element-property :raw-value h)) h))
+	       info t)
+	     info))))
+  ;; Unnumbered headlines have IDs akin to "unnumbered-N".
+  (should
+   (equal "unnumbered-1"
+	  (org-test-with-parsed-data
+	      "* H\n:PROPERTIES:\n:UNNUMBERED: t\n:END:"
+	    (org-export-get-headline-id
+	     (org-element-map tree 'headline #'identity info t)
+	     info))))
+  ;; The ID of Unnumbered headlines do not reflect the hierarchy.
+  (should
+   (equal "unnumbered-2"
+	  (org-test-with-parsed-data
+	      "* H1\n:PROPERTIES:\n:UNNUMBERED: t\n:END:\n** H2"
+	    (org-export-get-headline-id
+	     (org-element-map tree 'headline
+	       (lambda (h)
+		 (and (equal "H2" (org-element-property :raw-value h)) h))
+	       info t)
+	     info))))
+  ;; When #+OPTIONS: num:nil all headlines are unnumbered.
+  (should
+   (equal "unnumbered-1"
+	  (org-test-with-parsed-data "* H\n#+OPTIONS: num:nil"
+	    (org-export-get-headline-id
+	     (org-element-map tree 'headline 'identity info t)
+	     info))))
+  ;; UNNUMBERED ignores inheritance.  Any non-nil value among
+  ;; ancestors disables numbering.
+  (should
+   (org-test-with-parsed-data
+       "* H
+:PROPERTIES:
+:UNNUMBERED: t
+:END:
+** H2
+:PROPERTIES:
+:UNNUMBERED: nil
+:END:
+*** H3"
+     (org-every
+      (lambda (h) (not (org-export-numbered-headline-p h info)))
+      (org-element-map tree 'headline #'identity info)))))
+
 (ert-deftest test-org-export/number-to-roman ()
   "Test `org-export-number-to-roman' specifications."
   ;; If number is negative, return it as a string.
