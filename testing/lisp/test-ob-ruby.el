@@ -39,7 +39,6 @@ puts s
 #+end_src
 
 #+RESULTS:
-: 
 : 3
 
 ")))

@@ -221,8 +221,10 @@ return the value of the last statement in BODY, as elisp."
 	      (mapc
 	       (lambda (line)
 		 (insert (org-babel-chomp line)) (comint-send-input nil t))
-	       (list "conf.echo=false" body "conf.echo=true" org-babel-ruby-eoe-indicator))
-	      (comint-send-input nil t)) 2)
+	       (list "conf.echo=false;_org_prompt_mode=conf.prompt_mode;conf.prompt_mode=:NULL"
+		     body
+		     "conf.prompt_mode=_org_prompt_mode;conf.echo=true" org-babel-ruby-eoe-indicator))
+	      ) 2)
 	   "\n") "[\r\n]")) "\n"))
       (value
        (let* ((tmp-file (org-babel-temp-file "ruby-"))
