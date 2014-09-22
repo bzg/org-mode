@@ -13520,9 +13520,7 @@ This is done in the same way as adding a state change note."
   (interactive)
   (org-add-log-setup 'note nil nil 'findpos nil))
 
-(defvar org-property-end-re)
-(defun org-add-log-setup (&optional purpose state prev-state
-				    findpos how extra)
+(defun org-add-log-setup (&optional purpose state prev-state findpos how extra)
   "Set up the post command hook to take a note.
 If this is about to TODO state change, the new state is expected in STATE.
 When FINDPOS is non-nil, find the correct position for the note in
@@ -13530,55 +13528,55 @@ the current entry.  If not, assume that it can be inserted at point.
 HOW is an indicator what kind of note should be created.
 EXTRA is additional text that will be inserted into the notes buffer."
   (let* ((org-log-into-drawer (org-log-into-drawer))
-	 (drawer (cond ((stringp org-log-into-drawer)
-			org-log-into-drawer)
+	 (drawer (cond ((stringp org-log-into-drawer) org-log-into-drawer)
 		       (org-log-into-drawer "LOGBOOK"))))
-    (save-restriction
-      (save-excursion
-	(when findpos
-	  (org-back-to-heading t)
-	  (narrow-to-region (point) (save-excursion
-				      (outline-next-heading) (point)))
-	  (looking-at (concat org-outline-regexp "\\( *\\)[^\r\n]*"
-			      "\\(\n[^\r\n]*?" org-keyword-time-not-clock-regexp
-			      "[^\r\n]*\\)?"))
-	  (goto-char (match-end 0))
-	  (cond
-	   (drawer
-	    (if (re-search-forward (concat "^[ \t]*:" drawer ":[ \t]*$")
-				   nil t)
-		(progn
-		  (goto-char (match-end 0))
-		  (or org-log-states-order-reversed
-		      (and (re-search-forward org-property-end-re nil t)
-			   (goto-char (1- (match-beginning 0))))))
-	      (insert "\n:" drawer ":\n:END:")
-	      (beginning-of-line 0)
-	      (org-indent-line)
-	      (beginning-of-line 2)
-	      (org-indent-line)
-	      (end-of-line 0)))
-	   ((and org-log-state-notes-insert-after-drawers
-		 (save-excursion
-		   (forward-line) (looking-at org-drawer-regexp)))
-	    (forward-line)
-	    (while (looking-at org-drawer-regexp)
-	      (goto-char (match-end 0))
-	      (re-search-forward org-property-end-re (point-max) t)
-	      (forward-line))
-	    (forward-line -1)))
-	  (unless org-log-states-order-reversed
-	    (and (= (char-after) ?\n) (forward-char 1))
-	    (org-skip-over-state-notes)
-	    (skip-chars-backward " \t\n\r")))
-	(move-marker org-log-note-marker (point))
-	(setq org-log-note-purpose purpose
-	      org-log-note-state state
-	      org-log-note-previous-state prev-state
-	      org-log-note-how how
-	      org-log-note-extra extra
-	      org-log-note-effective-time (org-current-effective-time))
-	(add-hook 'post-command-hook 'org-add-log-note 'append)))))
+    (org-with-wide-buffer
+     (when findpos
+       (org-back-to-heading t)
+       ;; Skip planning info and property drawer.
+       (forward-line)
+       (when (org-looking-at-p org-planning-line-re) (forward-line))
+       (when (looking-at org-property-drawer-re)
+	 (goto-char (match-end 0))
+	 (forward-line))
+       (let ((end (if (org-at-heading-p) (point)
+		    (save-excursion (outline-next-heading) (point)))))
+	 (cond
+	  (drawer
+	   (let ((regexp (concat "^[ \t]*:" (regexp-quote drawer) ":[ \t]*$"))
+		 (case-fold-search t))
+	     (catch 'exit
+	       ;; Try to find existing drawer.
+	       (while (re-search-forward regexp end t)
+		 (let ((element (org-element-at-point)))
+		   (when (eq (org-element-type element) 'drawer)
+		     (when (and (not org-log-states-order-reversed)
+				(org-element-property :contents-end element))
+		       (goto-char (org-element-property :contents-end element)))
+		     (throw 'exit nil))))
+	       ;; No drawer found.  Create one.
+	       (unless (bolp) (insert "\n"))
+	       (let ((beg (point)))
+		 (insert ":" drawer ":\n:END:\n")
+		 (org-indent-region beg (point)))
+	       (end-of-line -1))))
+	  (org-log-state-notes-insert-after-drawers
+	   (while (and (looking-at org-drawer-regexp)
+		       (progn (goto-char (match-end 0))
+			      (re-search-forward org-property-end-re end t)))
+	     (forward-line)))))
+       (unless org-log-states-order-reversed
+	 (and (= (char-after) ?\n) (forward-char 1))
+	 (org-skip-over-state-notes)
+	 (skip-chars-backward " \t\n\r")))
+     (move-marker org-log-note-marker (point))
+     (setq org-log-note-purpose purpose
+	   org-log-note-state state
+	   org-log-note-previous-state prev-state
+	   org-log-note-how how
+	   org-log-note-extra extra
+	   org-log-note-effective-time (org-current-effective-time))
+     (add-hook 'post-command-hook 'org-add-log-note 'append))))
 
 (defun org-skip-over-state-notes ()
   "Skip past the list of State notes in an entry."
