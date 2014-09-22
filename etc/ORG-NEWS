@@ -61,6 +61,9 @@ which is now obsolete.  As a consequence, this change also deprecates
 *** Markdown export supports switches in source blocks
 For example, it is now possible to number lines using the =-n= switch
 in a source block.
+*** New option in ASCII export
+Plain lists can have an extra margin by setting
+~org-ascii-list-margin~ variable to an appopriate integer.
 *** New blocks in ASCII export
 ASCII export now supports =#+BEGIN_JUSTIFYRIGHT= and
 =#+BEGIN_JUSTIFYLEFT= blocks.  See documentation for details.

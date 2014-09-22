@@ -1982,7 +1982,8 @@ INFO is a plist holding contextual information.  See
 			     #'number-to-string
 			     (org-export-get-headline-number destination info)
 			     "-")))))
-	     (if (and (plist-get info :section-numbers) (not desc))
+	     (if (and (not desc)
+		      (org-export-numbered-headline-p destination info))
 		 (format "\\ref{%s}" label)
 	       (format "\\hyperref[%s]{%s}" label
 		       (or desc

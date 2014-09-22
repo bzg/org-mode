@@ -21,7 +21,7 @@
 (unless (featurep 'ob-ruby)
   (signal 'missing-test-dependency "Support for Ruby code blocks"))
 
-(ert-deftest test-ob-ruby/session-output ()
+(ert-deftest test-ob-ruby/session-output-1 ()
     (should (equal (org-test-with-temp-text "#+begin_src ruby :session :results output
 s = \"1\"
 s = \"2\"
@@ -39,8 +39,39 @@ puts s
 #+end_src
 
 #+RESULTS:
-: 
 : 3
+
+")))
+(ert-deftest test-ob-ruby/session-output-2 ()
+    (should (equal (org-test-with-temp-text "#+begin_src ruby :session :results output
+s = \"5\"
+puts s
+#+end_src"
+  (org-ctrl-c-ctrl-c)
+  (substring-no-properties
+   (buffer-string)))
+		   "#+begin_src ruby :session :results output
+s = \"5\"
+puts s
+#+end_src
+
+#+RESULTS:
+: 5
+
+")))
+(ert-deftest test-ob-ruby/session-output-3 ()
+    (should (equal (org-test-with-temp-text "#+begin_src ruby :session :results output
+puts s
+#+end_src"
+  (org-ctrl-c-ctrl-c)
+  (substring-no-properties
+   (buffer-string)))
+		   "#+begin_src ruby :session :results output
+puts s
+#+end_src
+
+#+RESULTS:
+: 5
 
 ")))
 
