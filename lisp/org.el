@@ -19693,9 +19693,11 @@ overwritten, and the table is not marked as requiring realignment."
   (org-check-before-invisible-edit 'insert)
   (cond
    ((and org-use-speed-commands
-	 (setq org-speed-command
-	       (run-hook-with-args-until-success
-		'org-speed-command-hook (this-command-keys))))
+	 (let ((kv (this-command-keys-vector)))
+	   (setq org-speed-command
+		 (run-hook-with-args-until-success
+		  'org-speed-command-hook
+		  (make-string 1 (aref kv (1- (length kv))))))))
     (cond
      ((commandp org-speed-command)
       (setq this-command org-speed-command)
