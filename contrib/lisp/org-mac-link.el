@@ -171,7 +171,7 @@
   :tag "Org Mail.app"
   :group 'org-link)
 
-(defcustom org-mac-mail-account "customize"
+(defcustom org-mac-mail-account nil
   "The Mail.app account in which to search for flagged messages."
   :group 'org-mac-flagged-mail
   :type 'string)
@@ -799,18 +799,10 @@ This will use the command `open' with the message URL."
 
 (defun org-as-get-flagged-mail ()
   "AppleScript to create links to flagged messages in Mail.app."
+  (unless org-mac-mail-account
+    (error "You must set org-mac-mail-account"))
   (do-applescript
    (concat
-    ;; Is Growl installed?
-    "tell application \"System Events\"\n"
-    "set growlHelpers to the name of every process whose creator type contains \"GRRR\"\n"
-    "if (count of growlHelpers) > 0 then\n"
-    "set growlHelperApp to item 1 of growlHelpers\n"
-    "else\n"
-    "set growlHelperApp to \"\"\n"
-    "end if\n"
-    "end tell\n"
-
     ;; Get links
     "tell application \"Mail\"\n"
     "set theMailboxes to every mailbox of account \"" org-mac-mail-account "\"\n"
@@ -822,25 +814,6 @@ This will use the command `open' with the message URL."
     "set theSubject to subject of theMessage\n"
     "set theLink to \"message://\" & theID & \"::split::\" & theSubject & \"\n\"\n"
     "copy theLink to end of theLinkList\n"
-
-    ;; Report progress through Growl
-    ;; This "double tell" idiom is described in detail at
-    ;; http://macscripter.net/viewtopic.php?id=24570 The
-    ;; script compiler needs static knowledge of the
-    ;; growlHelperApp.  Hmm, since we're compiling
-    ;; on-the-fly here, this is likely to be way less
-    ;; portable than I'd hoped.  It'll work when the name
-    ;; is still "GrowlHelperApp", though.
-    "if growlHelperApp is not \"\" then\n"
-    "tell application \"GrowlHelperApp\"\n"
-    "tell application growlHelperApp\n"
-    "set the allNotificationsList to {\"FlaggedMail\"}\n"
-    "set the enabledNotificationsList to allNotificationsList\n"
-    "register as application \"FlaggedMail\" all notifications allNotificationsList default notifications enabledNotificationsList icon of application \"Mail\"\n"
-    "notify with name \"FlaggedMail\" title \"Importing flagged message\" description theSubject application name \"FlaggedMail\"\n"
-    "end tell\n"
-    "end tell\n"
-    "end if\n"
     "end repeat\n"
     "end repeat\n"
     "return theLinkList as string\n"
