@@ -1,5 +1,4 @@
-;;; org-mac-link.el --- Grab links and url from various mac
-;; Application and insert them as links into org-mode documents
+;;; org-mac-link.el --- Insert org-mode links to items selected in various Mac apps
 ;;
 ;; Copyright (c) 2010-2014 Free Software Foundation, Inc.
 ;;
