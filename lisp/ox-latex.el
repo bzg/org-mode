@@ -1085,7 +1085,8 @@ This function shouldn't be used for floats.  See
 `org-latex--caption/label-string'."
   (let ((label (org-element-property :name element)))
     (if (not (and (org-string-nw-p output) (org-string-nw-p label))) output
-      (concat (format "\\label{%s}\n" (org-export-solidify-link-text label))
+      (concat (format "\\phantomsection\n\\label{%s}\n"
+		      (org-export-solidify-link-text label))
 	      output))))
 
 (defun org-latex--text-markup (text markup info)
