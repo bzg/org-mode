@@ -3153,7 +3153,8 @@ Return code as a string."
 		;; EMAIL is not a parsed keyword: store it as-is.
 		(cons "email" (or (plist-get info :email) ""))
 		(cons "title"
-		      (org-element-interpret-data (plist-get info :title)))))
+		      (org-element-interpret-data (plist-get info :title))))
+	  'finalize)
 	 ;; Parse buffer.
 	 (setq tree (org-element-parse-buffer nil visible-only))
 	 ;; Handle left-over uninterpreted elements or objects in
