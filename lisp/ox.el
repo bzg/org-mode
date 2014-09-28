@@ -3325,13 +3325,25 @@ paths."
 	  ;; Extract arguments from keyword's value.
 	  (let* ((value (org-element-property :value element))
 		 (ind (org-get-indentation))
+		 location
 		 (file (and (string-match
 			     "^\\(\".+?\"\\|\\S-+\\)\\(?:\\s-+\\|$\\)" value)
-			    (prog1 (expand-file-name
-				    (org-remove-double-quotes
-				     (match-string 1 value))
-				    dir)
+			    (prog1
+				(save-match-data
+				  (let ((matched (match-string 1 value)))
+				    (when (string-match "\\(::\\(.*?\\)\\)\"?\\'" matched)
+				      (setq location (match-string 2 matched))
+				      (setq matched
+					    (replace-match "" nil nil matched 1)))
+				    (expand-file-name
+				     (org-remove-double-quotes
+				      matched)
+				     dir)))
 			      (setq value (replace-match "" nil nil value)))))
+		 (only-contents
+		  (and (string-match ":only-contents *\\([^: \r\t\n]\\S-*\\)?" value)
+		       (prog1 (org-not-nil (match-string 1 value))
+			 (setq value (replace-match "" nil nil value)))))
 		 (lines
 		  (and (string-match
 			":lines +\"\\(\\(?:[0-9]+\\)?-\\(?:[0-9]+\\)?\\)\""
@@ -3391,16 +3403,87 @@ paths."
 	       (t
 		(insert
 		 (with-temp-buffer
-		   (let ((org-inhibit-startup t)) (org-mode))
-		   (insert
-		    (org-export--prepare-file-contents
-		     file lines ind minlevel
-		     (or (gethash file file-prefix)
-			 (puthash file (incf current-prefix) file-prefix))))
+		   (let ((org-inhibit-startup t)
+			 (lines
+			  (if location
+			      (org-export--inclusion-absolute-lines
+			       file location only-contents lines)
+			    lines)))
+		     (org-mode)
+		     (insert
+		      (org-export--prepare-file-contents
+		       file lines ind minlevel
+		       (or (gethash file file-prefix)
+			   (puthash file (incf current-prefix) file-prefix)))))
 		   (org-export-expand-include-keyword
 		    (cons (list file lines) included)
 		    (file-name-directory file))
 		   (buffer-string)))))))))))))
+
+(defun org-export--inclusion-absolute-lines (file location only-contents lines)
+  "Resolve absolute lines for an included file with file-link.
+
+FILE is string file-name of the file to include.  LOCATION is a
+string name within FILE to be included (located via
+`org-link-search').  If ONLY-CONTENTS is non-nil only the
+contents of the named element will be included, as determined
+Org-Element.  If LINES is non-nil only those lines are included.
+
+Return a string of lines to be included in the format expected by
+`org-export--prepare-file-contents'."
+  (with-temp-buffer
+    (insert-file-contents file)
+    (unless (eq major-mode 'org-mode)
+      (let ((org-inhibit-startup t)) (org-mode)))
+    (condition-case err
+	;; Enforce consistent search.
+	(let ((org-link-search-must-match-exact-headline t))
+	  (org-link-search location))
+      (error
+       (error (format "%s for %s::%s" (error-message-string err) file location))))
+    (let* ((element (org-element-at-point))
+	   (contents-begin
+	    (and only-contents (org-element-property :contents-begin element))))
+      (narrow-to-region
+       (or contents-begin (org-element-property :begin element))
+       (org-element-property (if contents-begin :contents-end :end) element))
+      (when (and only-contents
+		 (memq (org-element-type element) '(headline inlinetask)))
+	;; Skip planning line and property-drawer.  If a normal drawer
+	;; precedes a property-drawer both will be included.
+	;; Remaining property-drawers are removed as needed in
+	;; `org-export--prepare-file-contents'.
+	(goto-char (point-min))
+	(when (org-looking-at-p org-planning-line-re) (forward-line))
+	(when (looking-at org-property-drawer-re) (goto-char (match-end 0)))
+	(unless (bolp) (forward-line))
+	(narrow-to-region (point) (point-max))))
+    (when lines
+      (org-skip-whitespace)
+      (beginning-of-line)
+      (let* ((lines (split-string lines "-"))
+	     (lbeg (string-to-number (car lines)))
+	     (lend (string-to-number (cadr lines)))
+	     (beg (if (zerop lbeg) (point-min)
+		    (goto-char (point-min))
+		    (forward-line (1- lbeg))
+		    (point)))
+	     (end (if (zerop lend) (point-max)
+		    (goto-char beg)
+		    (forward-line (1- lend))
+		    (point))))
+	(narrow-to-region beg end)))
+    (let ((end (point-max)))
+      (goto-char (point-min))
+      (widen)
+      (let ((start-line (line-number-at-pos)))
+	(format "%d-%d"
+		start-line
+		(save-excursion
+		  (+ start-line
+		     (let ((counter 0))
+		       (while (< (point) end) (incf counter) (forward-line))
+		       counter))))))))
 
 (defun org-export--prepare-file-contents (file &optional lines ind minlevel id)
   "Prepare the contents of FILE for inclusion and return them as a string.
@@ -3448,6 +3531,20 @@ with footnotes is included in a document."
     (skip-chars-backward " \r\t\n")
     (forward-line)
     (delete-region (point) (point-max))
+    ;; Remove property-drawers after drawers.
+    (when (or ind minlevel)
+      (unless (eq major-mode 'org-mode)
+	(let ((org-inhibit-startup t)) (org-mode)))
+      (goto-char (point-min))
+      (when (looking-at org-drawer-regexp)
+	(goto-char (match-end 0))
+	(search-forward-regexp org-drawer-regexp)
+	(forward-line 1)
+	(beginning-of-line))
+      (when (looking-at org-property-drawer-re)
+	(delete-region (match-beginning 0) (match-end 0))
+	(beginning-of-line))
+      (delete-region (point) (save-excursion (and (org-skip-whitespace) (point)))))
     ;; If IND is set, preserve indentation of include keyword until
     ;; the first headline encountered.
     (when ind

@@ -918,7 +918,64 @@ Footnotes[fn:1], [fn:test] and [fn:inline:anonymous footnote].
 		(org-export-expand-include-keyword)
 		(org-element-map (org-element-parse-buffer)
 		    'footnote-reference
-		  (lambda (ref) (org-element-property :label ref))))))))))))
+		  (lambda (ref) (org-element-property :label ref)))))))))))
+  ;; If only-contents is non-nil only include contents of element.
+  (should
+   (equal
+    "body\n"
+    (org-test-with-temp-text
+     (concat
+      (format "#+INCLUDE: \"%s/examples/include.org::*Heading\" " org-test-dir)
+      ":only-contents t")
+      (org-export-expand-include-keyword)
+      (buffer-string))))
+  ;; Headings can be included via CUSTOM_ID.
+  (should
+   (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include.org::#ah\"" org-test-dir)
+     (org-export-expand-include-keyword)
+     (goto-char (point-min))
+     (looking-at "* Another heading")))
+  ;; Named objects can be included.
+  (should
+   (equal
+    "| 1 |\n"
+    (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include.org::tbl\" :only-contents t" org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))))
+  ;; Including non-existing elements should result in an error.
+  (should-error
+   (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include.org::*non-existing heading\"" org-test-dir)
+     (org-export-expand-include-keyword)))
+  ;; Lines work relatively to an included element.
+  (should
+   (equal
+    "2\n3\n"
+    (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include.org::#ah\" :only-contents t :lines \"2-3\"" org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))))
+  ;; Properties should be dropped from headlines.
+  (should
+   (equal
+    (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include.org::#ht\" :only-contents t" org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))
+    (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include.org::tbl\"" org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))))
+  ;; Properties should be dropped, drawers should not be.
+  (should
+   (equal
+    ":LOGBOOK:\ndrawer\n:END:\ncontent\n"
+    (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include.org::#dh\" :only-contents t" org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string)))))
 
 (ert-deftest test-org-export/expand-macro ()
   "Test macro expansion in an Org buffer."

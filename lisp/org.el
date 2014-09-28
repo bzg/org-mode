@@ -20525,9 +20525,12 @@ Otherwise, return a user error."
 		       session params))))))
       (keyword
        (if (member (org-element-property :key element) '("INCLUDE" "SETUPFILE"))
-           (find-file-other-window
-            (org-remove-double-quotes
-             (car (org-split-string (org-element-property :value element)))))
+           (org-open-link-from-string
+	    (format "[[%s]]"
+		    (expand-file-name
+		     (org-remove-double-quotes
+		      (car (org-split-string
+			    (org-element-property :value element)))))))
          (user-error "No special environment to edit here")))
       (table
        (if (eq (org-element-property :type element) 'table.el)
