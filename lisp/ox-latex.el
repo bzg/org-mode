@@ -1085,7 +1085,8 @@ This function shouldn't be used for floats.  See
 `org-latex--caption/label-string'."
   (let ((label (org-element-property :name element)))
     (if (not (and (org-string-nw-p output) (org-string-nw-p label))) output
-      (concat (format "\\label{%s}\n" (org-export-solidify-link-text label))
+      (concat (format "\\phantomsection\n\\label{%s}\n"
+		      (org-export-solidify-link-text label))
 	      output))))
 
 (defun org-latex--text-markup (text markup info)
@@ -2301,7 +2302,11 @@ contextual information."
        ((eq listings 'minted)
 	(let* ((caption-str (org-latex--caption/label-string src-block info))
 	       (float-env
-		(cond ((and (not float) (plist-member attributes :float)) "%s")
+		(cond ((and (not float) (plist-member attributes :float) caption)
+		       (format "%%s\n%s" (replace-regexp-in-string
+					  "\\\\caption" "\\captionof{listing}"
+					  caption-str t t)))
+		      ((and (not float) (plist-member attributes :float)) "%s")
 		      ((string= "multicolumn" float)
 		       (format "\\begin{listing*}\n%%s\n%s\\end{listing*}"
 			       caption-str))

@@ -833,7 +833,7 @@ This variable can be either set to `buffer' or `subtree'."
 
 (defcustom org-export-show-temporary-export-buffer t
   "Non-nil means show buffer after exporting to temp buffer.
-When Org exports to a file, the buffer visiting that file is ever
+When Org exports to a file, the buffer visiting that file is never
 shown, but remains buried.  However, when exporting to
 a temporary buffer, that buffer is popped up in a second window.
 When this variable is nil, the buffer remains buried also in
@@ -1346,6 +1346,10 @@ The back-end could then be called with, for example:
 ;;   - category :: tree
 ;;   - type :: list of elements and objects
 ;;
+;; + `:input-buffer' :: Original buffer name.
+;;   - category :: option
+;;   - type :: string
+;;
 ;; + `:input-file' :: Full path to input file, if any.
 ;;   - category :: option
 ;;   - type :: string or nil
@@ -1816,8 +1820,8 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 
 (defun org-export--get-buffer-attributes ()
   "Return properties related to buffer attributes, as a plist."
-  ;; Store full path of input file name, or nil.  For internal use.
-  (list :input-file (buffer-file-name (buffer-base-buffer))))
+  (list :input-buffer (buffer-name (buffer-base-buffer))
+	:input-file (buffer-file-name (buffer-base-buffer))))
 
 (defun org-export--get-global-options (&optional backend)
   "Return global export options as a plist.

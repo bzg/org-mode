@@ -542,7 +542,7 @@ Empty lines are not indented."
   "Return string S with a partial box to its left.
 INFO is a plist used as a communication channel."
   (let ((utf8p (eq (plist-get info :ascii-charset) 'utf-8)))
-    (format (if utf8p "╭────\n%s\n╰────" ",----\n%s\n`----")
+    (format (if utf8p "┌────\n%s\n└────" ",----\n%s\n`----")
 	    (replace-regexp-in-string
 	     "^" (if utf8p "│ " "| ")
 	     ;; Remove last newline character.
