@@ -90,6 +90,12 @@ docstrings (including ~orgtbl-to-generic~) for details.
 *** Non-floating minted listings in Latex export
 It is not possible to specify =#+attr_latex: :float nil= in conjunction with
 source blocks exported by the minted package.
+*** Field formulas can now create columns as needed
+Previously, evaluating formulas that referenced out-of-bounds columns
+would throw an error. A new variable
+~org-table-formula-create-columns~ was added to adjust this
+behavior. It is now possible to silently add new columns, to do so
+with a warning or to explicitly ask the user each time.
 ** Miscellaneous
 *** File names in links accept are now compatible with URI syntax
 Absolute file names can now start with =///= in addition to =/=. E.g.,

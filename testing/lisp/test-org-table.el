@@ -1554,6 +1554,62 @@ See also `test-org-table/copy-field'."
 	     (progn (search-forward "# END RECEIVE ORGTBL table")
 		    (match-beginning 0)))))))
 
+(ert-deftest test-org-table/field-formula-outside-table ()
+  "If `org-table-formula-create-columns' is nil, then a formula
+that references an out-of-bounds column should do nothing. If it
+is t, then new columns should be added as needed"
+
+  (let ((org-table-formula-create-columns nil))
+
+    ;; need condition-case to trap the out-of-bounds user-error
+    (condition-case
+	nil
+	(org-test-table-target-expect
+	 "
+| 2 |
+| 4 |
+| 8 |
+"
+	 "
+| 2 |
+| 4 |
+| 8 |
+"
+	 1
+	 "#+TBLFM: @1$2=5")
+      ('user-error t)))
+
+  (let ((org-table-formula-create-columns t))
+
+    ;; make sure field formulas work
+    (org-test-table-target-expect
+     "
+| 2 |
+| 4 |
+| 8 |
+"
+     "
+| 2 | 5 |
+| 4 |   |
+| 8 |   |
+"
+     1
+     "#+TBLFM: @1$2=5")
+
+    ;; and make sure column formulas work too
+    (org-test-table-target-expect
+     "
+| 2 |
+| 4 |
+| 8 |
+"
+     "
+| 2 |   | 15 |
+| 4 |   | 15 |
+| 8 |   | 15 |
+"
+     1
+     "#+TBLFM: $3=15")))
 
 (provide 'test-org-table)
 

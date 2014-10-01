@@ -354,6 +354,18 @@ portability of tables."
 	  (const :tag "Stick to hline" nil)
 	  (const :tag "Error on attempt to cross" error)))
 
+(defcustom org-table-formula-create-columns nil
+  "Non-nil means that evaluation of a field formula can add new
+columns if an out-of-bounds field is being set."
+  :group 'org-table-calculation
+  :version "24.5"
+  :package-version '(Org . "8.3")
+  :type '(choice
+	  (const :tag "Setting an out-of-bounds field generates an error (default)" nil)
+	  (const :tag "Setting an out-of-bounds field silently adds columns as needed" t)
+	  (const :tag "Setting an out-of-bounds field adds columns as needed, but issues a warning message" warn)
+	  (const :tag "When setting an out-of-bounds field, the user is prompted" prompt)))
+
 (defgroup org-table-import-export nil
   "Options concerning table import and export in Org-mode."
   :tag "Org Table Import Export"
@@ -3125,9 +3137,26 @@ known that the table will be realigned a little later anyway."
       (while (setq eq (pop eqlname1))
 	(message "Re-applying formula to field: %s" (car eq))
 	(org-goto-line (nth 1 eq))
-	(org-table-goto-column (nth 2 eq))
-	(org-table-eval-formula nil (nth 3 eq) 'noalign 'nocst
-				'nostore 'noanalysis))
+	(let ((column-target (nth 2 eq)))
+	  (when (> column-target 1000)
+	    (user-error "Formula column target too large"))
+	  (let* ((column-count (progn (end-of-line)
+				      (1- (org-table-current-column))))
+		 (create-new-column
+		  (and (> column-target column-count)
+		       (or (eq org-table-formula-create-columns t)
+			   (and
+			    (eq org-table-formula-create-columns 'warn)
+			    (progn
+			      (org-display-warning "Out-of-bounds formula added columns")
+			      t))
+			   (and
+			    (eq org-table-formula-create-columns 'prompt)
+			    (yes-or-no-p "Out-of-bounds formula. Add columns?"))))))
+	    (org-table-goto-column column-target nil create-new-column))
+
+	  (org-table-eval-formula nil (nth 3 eq) 'noalign 'nocst
+				  'nostore 'noanalysis)))
 
       (org-goto-line thisline)
       (org-table-goto-column thiscol)
