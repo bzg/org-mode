@@ -804,18 +804,18 @@ text
    (org-test-with-temp-text "#+INCLUDE: dummy.org"
      (org-export-expand-include-keyword)))
   ;; Full insertion with recursive inclusion.
-  (org-test-with-temp-text
-      (format "#+INCLUDE: \"%s/examples/include.org\"" org-test-dir)
-    (org-export-expand-include-keyword)
-    (should (equal (buffer-string)
-		   "Small Org file with an include keyword.
-
-#+BEGIN_SRC emacs-lisp :exports results\n(+ 2 1)\n#+END_SRC
-
-Success!
-
-* Heading
-body\n")))
+  (should
+   (equal
+    (with-temp-buffer
+      (insert-file
+       (expand-file-name "examples/include.org" org-test-dir))
+      (replace-regexp-in-string
+       (regexp-quote "#+INCLUDE: \"include2.org\"")
+       "Success!" (buffer-string)))
+    (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include.org\"" org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))))
   ;; Localized insertion.
   (org-test-with-temp-text
       (format "#+INCLUDE: \"%s/examples/include.org\" :lines \"1-2\""
@@ -829,7 +829,7 @@ body\n")))
     "* Top heading\n** Heading\nbody\n"
     (org-test-with-temp-text
 	(format
-	 "* Top heading\n#+INCLUDE: \"%s/examples/include.org\" :lines \"9-\""
+	 "* Top heading\n#+INCLUDE: \"%s/examples/include.org\" :lines \"9-11\""
 	 org-test-dir)
       (org-export-expand-include-keyword)
       (buffer-string))))
@@ -838,7 +838,7 @@ body\n")))
     "* Top heading\n* Heading\nbody\n"
     (org-test-with-temp-text
 	(format
-	 "* Top heading\n#+INCLUDE: \"%s/examples/include.org\" :lines \"9-\" :minlevel 1"
+	 "* Top heading\n#+INCLUDE: \"%s/examples/include.org\" :lines \"9-11\" :minlevel 1"
 	 org-test-dir)
       (org-export-expand-include-keyword)
       (buffer-string))))
