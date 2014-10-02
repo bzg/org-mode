@@ -20528,9 +20528,14 @@ Otherwise, return a user error."
            (org-open-link-from-string
 	    (format "[[%s]]"
 		    (expand-file-name
-		     (org-remove-double-quotes
-		      (car (org-split-string
-			    (org-element-property :value element)))))))
+		     (let ((value (org-element-property :value element)))
+		       (cond ((not (org-string-nw-p value))
+			      (user-error "No file to edit"))
+			     ((string-match "\\`\"\\(.*?\\)\"" value)
+			      (match-string 1 value))
+			     ((string-match "\\`[^ \t\"]\\S-*" value)
+			      (match-string 0 value))
+			     (t (user-error "No valid file specified")))))))
          (user-error "No special environment to edit here")))
       (table
        (if (eq (org-element-property :type element) 'table.el)
