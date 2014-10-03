@@ -2807,12 +2807,9 @@ INFO is a plist holding contextual information.  See
 			(org-element-property :raw-link link) info))))
 	  ;; Link points to a headline.
 	  (headline
-	   (let ((href
-		  ;; Headline linked via CUSTOM_ID.
-		  (or (and (string= type "custom-id")
-			   (org-element-property :CUSTOM_ID destination))
-		      (org-export-get-headline-id destination info)
-		      (t (error "Shouldn't reach here"))))
+	   (let ((href (or (and (string= type "custom-id")
+				(org-element-property :CUSTOM_ID destination))
+			   (org-export-get-headline-id destination info)))
 		 ;; What description to use?
 		 (desc
 		  ;; Case 1: Headline is numbered and LINK has no

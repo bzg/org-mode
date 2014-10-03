@@ -355,12 +355,13 @@ a communication channel."
 	  (when destination
 	    (let ((number (org-export-get-ordinal destination info)))
 	      (if number
-		(if (atom number) (number-to-string number)
-		  (mapconcat #'number-to-string number "."))
+		  (if (atom number) (number-to-string number)
+		    (mapconcat #'number-to-string number "."))
 		;; Unnumbered headline.
 		(and (eq 'headline (org-element-type destination))
-		  ;; BUG: shouldn't headlines have a form like [ref](name) in md?
-		  (org-export-data (org-element-property :title headline) info))))))))
+		     ;; BUG: shouldn't headlines have a form like [ref](name) in md?
+		     (org-export-data
+		      (org-element-property :title destination) info))))))))
      ;; Link type is handled by a special function.
      ((let ((protocol (nth 2 (assoc type org-link-protocols))))
 	(and (functionp protocol)
