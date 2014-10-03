@@ -26,10 +26,10 @@ body
 | 1 |
 
 * drawer-headline
-:LOGBOOK:
-drawer
-:END:
 :PROPERTIES:
 :CUSTOM_ID: dh
+:END:
+:LOGBOOK:
+drawer
 :END:
 content

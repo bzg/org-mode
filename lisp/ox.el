@@ -3195,10 +3195,7 @@ Return a string of lines to be included in the format expected by
        (org-element-property (if contents-begin :contents-end :end) element))
       (when (and only-contents
 		 (memq (org-element-type element) '(headline inlinetask)))
-	;; Skip planning line and property-drawer.  If a normal drawer
-	;; precedes a property-drawer both will be included.
-	;; Remaining property-drawers are removed as needed in
-	;; `org-export--prepare-file-contents'.
+	;; Skip planning line and property-drawer.
 	(goto-char (point-min))
 	(when (org-looking-at-p org-planning-line-re) (forward-line))
 	(when (looking-at org-property-drawer-re) (goto-char (match-end 0)))
@@ -3277,20 +3274,6 @@ with footnotes is included in a document."
     (skip-chars-backward " \r\t\n")
     (forward-line)
     (delete-region (point) (point-max))
-    ;; Remove property-drawers after drawers.
-    (when (or ind minlevel)
-      (unless (eq major-mode 'org-mode)
-	(let ((org-inhibit-startup t)) (org-mode)))
-      (goto-char (point-min))
-      (when (looking-at org-drawer-regexp)
-	(goto-char (match-end 0))
-	(search-forward-regexp org-drawer-regexp)
-	(forward-line 1)
-	(beginning-of-line))
-      (when (looking-at org-property-drawer-re)
-	(delete-region (match-beginning 0) (match-end 0))
-	(beginning-of-line))
-      (delete-region (point) (save-excursion (and (org-skip-whitespace) (point)))))
     ;; If IND is set, preserve indentation of include keyword until
     ;; the first headline encountered.
     (when ind
@@ -3322,7 +3305,7 @@ with footnotes is included in a document."
 	       ;; sections.
 	       (org-map-entries
 		(lambda () (if (< offset 0) (delete-char (abs offset))
-			(insert (make-string offset ?*)))))))))))
+			     (insert (make-string offset ?*)))))))))))
     ;; Append ID to all footnote references and definitions, so they
     ;; become file specific and cannot collide with footnotes in other
     ;; included files.
