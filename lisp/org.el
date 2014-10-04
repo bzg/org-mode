@@ -15340,7 +15340,7 @@ but in some other way.")
     "LOCATION" "LOGGING" "COLUMNS" "VISIBILITY"
     "TABLE_EXPORT_FORMAT" "TABLE_EXPORT_FILE"
     "EXPORT_OPTIONS" "EXPORT_TEXT" "EXPORT_FILE_NAME"
-    "EXPORT_TITLE" "EXPORT_AUTHOR" "EXPORT_DATE"
+    "EXPORT_TITLE" "EXPORT_AUTHOR" "EXPORT_DATE" "UNNUMBERED"
     "ORDERED" "NOBLOCKING" "COOKIE_DATA" "LOG_INTO_DRAWER" "REPEAT_TO_STATE"
     "CLOCK_MODELINE_TOTAL" "STYLE" "HTML_CONTAINER_CLASS")
   "Some properties that are used by Org-mode for various purposes.
@@ -20525,9 +20525,17 @@ Otherwise, return a user error."
 		       session params))))))
       (keyword
        (if (member (org-element-property :key element) '("INCLUDE" "SETUPFILE"))
-           (find-file-other-window
-            (org-remove-double-quotes
-             (car (org-split-string (org-element-property :value element)))))
+           (org-open-link-from-string
+	    (format "[[%s]]"
+		    (expand-file-name
+		     (let ((value (org-element-property :value element)))
+		       (cond ((not (org-string-nw-p value))
+			      (user-error "No file to edit"))
+			     ((string-match "\\`\"\\(.*?\\)\"" value)
+			      (match-string 1 value))
+			     ((string-match "\\`[^ \t\"]\\S-*" value)
+			      (match-string 0 value))
+			     (t (user-error "No valid file specified")))))))
          (user-error "No special environment to edit here")))
       (table
        (if (eq (org-element-property :type element) 'table.el)

@@ -2264,8 +2264,13 @@ include your @file{.emacs} file, you could use:
 The optional second and third parameter are the markup (i.e., @samp{example}
 or @samp{src}), and, if the markup is @samp{src}, the language for formatting
 the contents.  The markup is optional, if it is not given, the text will be
-assumed to be in Org mode format and will be processed normally. @kbd{C-c '}
-will visit the included file.
+assumed to be in Org mode format and will be processed normally.  File-links
+will be interpreted as well:
+@smallexample
+#+INCLUDE: "./otherfile.org::#my_custom_id" :only-contents t
+@end smallexample
+@noindent
+@kbd{C-c '} will visit the included file.
 
 @node Embedded @LaTeX{},  , Include files, Markup
 @section Embedded @LaTeX{}

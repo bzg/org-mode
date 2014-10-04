@@ -804,18 +804,18 @@ text
    (org-test-with-temp-text "#+INCLUDE: dummy.org"
      (org-export-expand-include-keyword)))
   ;; Full insertion with recursive inclusion.
-  (org-test-with-temp-text
-      (format "#+INCLUDE: \"%s/examples/include.org\"" org-test-dir)
-    (org-export-expand-include-keyword)
-    (should (equal (buffer-string)
-		   "Small Org file with an include keyword.
-
-#+BEGIN_SRC emacs-lisp :exports results\n(+ 2 1)\n#+END_SRC
-
-Success!
-
-* Heading
-body\n")))
+  (should
+   (equal
+    (with-temp-buffer
+      (insert-file
+       (expand-file-name "examples/include.org" org-test-dir))
+      (replace-regexp-in-string
+       (regexp-quote "#+INCLUDE: \"include2.org\"")
+       "Success!" (buffer-string)))
+    (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include.org\"" org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))))
   ;; Localized insertion.
   (org-test-with-temp-text
       (format "#+INCLUDE: \"%s/examples/include.org\" :lines \"1-2\""
@@ -829,7 +829,7 @@ body\n")))
     "* Top heading\n** Heading\nbody\n"
     (org-test-with-temp-text
 	(format
-	 "* Top heading\n#+INCLUDE: \"%s/examples/include.org\" :lines \"9-\""
+	 "* Top heading\n#+INCLUDE: \"%s/examples/include.org\" :lines \"9-11\""
 	 org-test-dir)
       (org-export-expand-include-keyword)
       (buffer-string))))
@@ -838,7 +838,7 @@ body\n")))
     "* Top heading\n* Heading\nbody\n"
     (org-test-with-temp-text
 	(format
-	 "* Top heading\n#+INCLUDE: \"%s/examples/include.org\" :lines \"9-\" :minlevel 1"
+	 "* Top heading\n#+INCLUDE: \"%s/examples/include.org\" :lines \"9-11\" :minlevel 1"
 	 org-test-dir)
       (org-export-expand-include-keyword)
       (buffer-string))))
@@ -918,7 +918,64 @@ Footnotes[fn:1], [fn:test] and [fn:inline:anonymous footnote].
 		(org-export-expand-include-keyword)
 		(org-element-map (org-element-parse-buffer)
 		    'footnote-reference
-		  (lambda (ref) (org-element-property :label ref))))))))))))
+		  (lambda (ref) (org-element-property :label ref)))))))))))
+  ;; If only-contents is non-nil only include contents of element.
+  (should
+   (equal
+    "body\n"
+    (org-test-with-temp-text
+     (concat
+      (format "#+INCLUDE: \"%s/examples/include.org::*Heading\" " org-test-dir)
+      ":only-contents t")
+      (org-export-expand-include-keyword)
+      (buffer-string))))
+  ;; Headings can be included via CUSTOM_ID.
+  (should
+   (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include.org::#ah\"" org-test-dir)
+     (org-export-expand-include-keyword)
+     (goto-char (point-min))
+     (looking-at "* Another heading")))
+  ;; Named objects can be included.
+  (should
+   (equal
+    "| 1 |\n"
+    (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include.org::tbl\" :only-contents t" org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))))
+  ;; Including non-existing elements should result in an error.
+  (should-error
+   (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include.org::*non-existing heading\"" org-test-dir)
+     (org-export-expand-include-keyword)))
+  ;; Lines work relatively to an included element.
+  (should
+   (equal
+    "2\n3\n"
+    (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include.org::#ah\" :only-contents t :lines \"2-3\"" org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))))
+  ;; Properties should be dropped from headlines.
+  (should
+   (equal
+    (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include.org::#ht\" :only-contents t" org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))
+    (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include.org::tbl\"" org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))))
+  ;; Properties should be dropped, drawers should not be.
+  (should
+   (equal
+    ":LOGBOOK:\ndrawer\n:END:\ncontent\n"
+    (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include.org::#dh\" :only-contents t" org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string)))))
 
 (ert-deftest test-org-export/expand-macro ()
   "Test macro expansion in an Org buffer."
@@ -1575,6 +1632,68 @@ Paragraph[fn:1]"
      (org-element-map tree 'headline
        (lambda (h) (org-export-numbered-headline-p h info))
        (plist-put info :section-numbers t)))))
+
+(ert-deftest test-org-export/org-export-get-headline-id ()
+  "Test `org-export-get-headline-id' specifications."
+  ;; Numbered headlines have IDs akin to "sec-N".
+  (should
+   (equal "sec-1"
+	  (org-test-with-parsed-data "* H"
+	    (org-export-get-headline-id
+	     (org-element-map tree 'headline #'identity info t)
+	     info))))
+  ;; The ID of numbered headlines reflect the hierarchy.
+  (should
+   (equal "sec-1-1"
+	  (org-test-with-parsed-data "* H1\n** H2"
+	    (org-export-get-headline-id
+	     (org-element-map tree 'headline
+	       (lambda (h)
+		 (and (equal "H2" (org-element-property :raw-value h)) h))
+	       info t)
+	     info))))
+  ;; Unnumbered headlines have IDs akin to "unnumbered-N".
+  (should
+   (equal "unnumbered-1"
+	  (org-test-with-parsed-data
+	      "* H\n:PROPERTIES:\n:UNNUMBERED: t\n:END:"
+	    (org-export-get-headline-id
+	     (org-element-map tree 'headline #'identity info t)
+	     info))))
+  ;; The ID of Unnumbered headlines do not reflect the hierarchy.
+  (should
+   (equal "unnumbered-2"
+	  (org-test-with-parsed-data
+	      "* H1\n:PROPERTIES:\n:UNNUMBERED: t\n:END:\n** H2"
+	    (org-export-get-headline-id
+	     (org-element-map tree 'headline
+	       (lambda (h)
+		 (and (equal "H2" (org-element-property :raw-value h)) h))
+	       info t)
+	     info))))
+  ;; When #+OPTIONS: num:nil all headlines are unnumbered.
+  (should
+   (equal "unnumbered-1"
+	  (org-test-with-parsed-data "* H\n#+OPTIONS: num:nil"
+	    (org-export-get-headline-id
+	     (org-element-map tree 'headline 'identity info t)
+	     info))))
+  ;; UNNUMBERED ignores inheritance.  Any non-nil value among
+  ;; ancestors disables numbering.
+  (should
+   (org-test-with-parsed-data
+       "* H
+:PROPERTIES:
+:UNNUMBERED: t
+:END:
+** H2
+:PROPERTIES:
+:UNNUMBERED: nil
+:END:
+*** H3"
+     (org-every
+      (lambda (h) (not (org-export-numbered-headline-p h info)))
+      (org-element-map tree 'headline #'identity info)))))
 
 (ert-deftest test-org-export/number-to-roman ()
   "Test `org-export-number-to-roman' specifications."

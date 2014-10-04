@@ -10008,6 +10008,23 @@ to use the obvious defaults.
 #+INCLUDE: "~/.emacs" :lines "10-"    @r{Include lines from 10 to EOF}
 @end example
 
+Finally, you may use a file-link to extract an object as matched by
+@code{org-link-search}@footnote{Note that
+@code{org-link-search-must-match-exact-headline} is locally bound to non-nil.
+Therefore, @code{org-link-search} only matches headlines and named elements.}
+(@pxref{Search options}).  If the @code{:only-contents} property is non-nil,
+only the contents of the requested element will be included, omitting
+properties drawer and planning-line if present.  The @code{:lines} keyword
+operates locally with respect to the requested element.  Some examples:
+
+@example
+#+INCLUDE: "./paper.org::#theory" :only-contents t
+   @r{Include the body of the heading with the custom id @code{theory}}
+#+INCLUDE: "./paper.org::mytable"  @r{Include named element.}
+#+INCLUDE: "./paper.org::*conclusion" :lines 1-20
+   @r{Include the first 20 lines of the headline named conclusion.}
+@end example
+
 @table @kbd
 @kindex C-c '
 @item C-c '

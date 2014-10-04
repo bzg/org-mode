@@ -1530,9 +1530,13 @@ INFO is a plist holding contextual information."
 	    (let ((number
 		   (org-export-get-ordinal
 		    destination info nil 'org-ascii--has-caption-p)))
-	      (when number
+	      (if number
 		(if (atom number) (number-to-string number)
-		  (mapconcat 'number-to-string number "."))))))))
+		  (mapconcat #'number-to-string number "."))
+		;; Unnumbered headline.
+		(when (eq 'headline (org-element-type destination))
+		  (format "[%s]" (org-export-data
+				  (org-element-property :title destination) info)))))))))
      (t
       (if (not (org-string-nw-p desc)) (format "[%s]" raw-link)
 	(concat (format "[%s]" desc)
