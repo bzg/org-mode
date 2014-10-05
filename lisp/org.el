@@ -389,6 +389,14 @@ A schedule is this string, followed by a time stamp.  Should be a word,
 terminated by a colon.  You can insert a schedule keyword and
 a timestamp with \\[org-schedule].")
 
+(defconst org-ds-keyword-length
+  (+ 2
+     (apply #'max
+	    (mapcar #'length
+		    (list org-deadline-string org-scheduled-string
+			  org-clock-string org-closed-string))))
+  "Maximum length of the DEADLINE and SCHEDULED keywords.")
+
 (defconst org-planning-line-re
   (concat "^[ \t]*"
 	  (regexp-opt
@@ -400,6 +408,73 @@ Matched keyword is in group 1.")
 (defconst org-clock-line-re
   (concat "^[ \t]*" org-clock-string)
   "Matches a line with clock info.")
+
+(defconst org-deadline-regexp (concat "\\<" org-deadline-string)
+  "Matches the DEADLINE keyword.")
+
+(defconst org-deadline-time-regexp
+  (concat "\\<" org-deadline-string " *<\\([^>]+\\)>")
+  "Matches the DEADLINE keyword together with a time stamp.")
+
+(defconst org-deadline-time-hour-regexp
+  (concat "\\<" org-deadline-string
+	  " *<\\([^>]+[0-9]\\{1,2\\}:[0-9]\\{2\\}[0-9-+:hdwmy \t.]*\\)>")
+  "Matches the DEADLINE keyword together with a time-and-hour stamp.")
+
+(defconst org-deadline-line-regexp
+  (concat "\\<\\(" org-deadline-string "\\).*")
+  "Matches the DEADLINE keyword and the rest of the line.")
+
+(defconst org-scheduled-regexp (concat "\\<" org-scheduled-string)
+  "Matches the SCHEDULED keyword.")
+
+(defconst org-scheduled-time-regexp
+  (concat "\\<" org-scheduled-string " *<\\([^>]+\\)>")
+  "Matches the SCHEDULED keyword together with a time stamp.")
+
+(defconst org-scheduled-time-hour-regexp
+  (concat "\\<" org-scheduled-string
+	  " *<\\([^>]+[0-9]\\{1,2\\}:[0-9]\\{2\\}[0-9-+:hdwmy \t.]*\\)>")
+  "Matches the SCHEDULED keyword together with a time-and-hour stamp.")
+
+(defconst org-closed-time-regexp
+  (concat "\\<" org-closed-string " *\\[\\([^]]+\\)\\]")
+  "Matches the CLOSED keyword together with a time stamp.")
+
+(defconst org-keyword-time-regexp
+  (concat "\\<"
+	  (regexp-opt
+	   (list org-scheduled-string org-deadline-string org-closed-string
+		 org-clock-string)
+	   t)
+	  " *[[<]\\([^]>]+\\)[]>]")
+  "Matches any of the 4 keywords, together with the time stamp.")
+
+(defconst org-keyword-time-not-clock-regexp
+  (concat
+   "\\<"
+   (regexp-opt
+    (list org-scheduled-string org-deadline-string org-closed-string) t)
+   " *[[<]\\([^]>]+\\)[]>]")
+  "Matches any of the 3 keywords, together with the time stamp.")
+
+(defconst org-maybe-keyword-time-regexp
+  (concat "\\(\\<"
+	  (regexp-opt
+	   (list org-scheduled-string org-deadline-string org-closed-string
+		 org-clock-string)
+	   t)
+	  "\\)?"
+	  " *\\([[<][0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^]\r\n>]*?[]>]"
+	  "\\|"
+	  "<%%([^\r\n>]*>\\)")
+  "Matches a timestamp, possibly preceded by a keyword.")
+
+(defconst org-all-time-keywords
+  (mapcar (lambda (w) (substring w 0 -1))
+	  (list org-scheduled-string org-deadline-string
+		org-clock-string org-closed-string))
+  "List of time keywords.")
 
 ;;;; Drawer
 
@@ -4738,46 +4813,6 @@ TODO state, priority and tags.")
   "Matches a headline and puts TODO state into group 2 if present.
 Also put tags into group 4 if tags are present.")
 (make-variable-buffer-local 'org-todo-line-tags-regexp)
-(defvar org-ds-keyword-length 12
-  "Maximum length of the DEADLINE and SCHEDULED keywords.")
-(make-variable-buffer-local 'org-ds-keyword-length)
-(defvar org-deadline-regexp nil
-  "Matches the DEADLINE keyword.")
-(make-variable-buffer-local 'org-deadline-regexp)
-(defvar org-deadline-time-regexp nil
-  "Matches the DEADLINE keyword together with a time stamp.")
-(make-variable-buffer-local 'org-deadline-time-regexp)
-(defvar org-deadline-time-hour-regexp nil
-  "Matches the DEADLINE keyword together with a time-and-hour stamp.")
-(make-variable-buffer-local 'org-deadline-time-hour-regexp)
-(defvar org-deadline-line-regexp nil
-  "Matches the DEADLINE keyword and the rest of the line.")
-(make-variable-buffer-local 'org-deadline-line-regexp)
-(defvar org-scheduled-regexp nil
-  "Matches the SCHEDULED keyword.")
-(make-variable-buffer-local 'org-scheduled-regexp)
-(defvar org-scheduled-time-regexp nil
-  "Matches the SCHEDULED keyword together with a time stamp.")
-(make-variable-buffer-local 'org-scheduled-time-regexp)
-(defvar org-scheduled-time-hour-regexp nil
-  "Matches the SCHEDULED keyword together with a time-and-hour stamp.")
-(make-variable-buffer-local 'org-scheduled-time-hour-regexp)
-(defvar org-closed-time-regexp nil
-  "Matches the CLOSED keyword together with a time stamp.")
-(make-variable-buffer-local 'org-closed-time-regexp)
-
-(defvar org-keyword-time-regexp nil
-  "Matches any of the 4 keywords, together with the time stamp.")
-(make-variable-buffer-local 'org-keyword-time-regexp)
-(defvar org-keyword-time-not-clock-regexp nil
-  "Matches any of the 3 keywords, together with the time stamp.")
-(make-variable-buffer-local 'org-keyword-time-not-clock-regexp)
-(defvar org-maybe-keyword-time-regexp nil
-  "Matches a timestamp, possibly preceded by a keyword.")
-(make-variable-buffer-local 'org-maybe-keyword-time-regexp)
-(defvar org-all-time-keywords nil
-  "List of time keywords.")
-(make-variable-buffer-local 'org-all-time-keywords)
 
 (defconst org-plain-time-of-day-regexp
   (concat
@@ -5162,11 +5197,7 @@ Support for group tags is controlled by the option
       (if (not org-done-keywords)
 	  (setq org-done-keywords (and org-todo-keywords-1
 				       (list (org-last org-todo-keywords-1)))))
-      (setq org-ds-keyword-length (+ 2 (max (length org-deadline-string)
-					    (length org-scheduled-string)
-					    (length org-clock-string)
-					    (length org-closed-string)))
-	    org-not-done-keywords
+      (setq org-not-done-keywords
 	    (org-delete-all org-done-keywords (copy-sequence org-todo-keywords-1))
 	    org-todo-regexp
 	    (concat "\\("
@@ -5204,46 +5235,7 @@ Support for group tags is controlled by the option
 		    "\\(?: +" org-todo-regexp "\\)?"
 		    "\\(?: +\\(.*?\\)\\)??"
 		    (org-re "\\(?:[ \t]+\\(:[[:alnum:]:_@#%]+:\\)\\)?")
-		    "[ \t]*$")
-	    org-deadline-regexp (concat "\\<" org-deadline-string)
-	    org-deadline-time-regexp
-	    (concat "\\<" org-deadline-string " *<\\([^>]+\\)>")
-	    org-deadline-time-hour-regexp
-	    (concat "\\<" org-deadline-string
-		    " *<\\([^>]+[0-9]\\{1,2\\}:[0-9]\\{2\\}[0-9-+:hdwmy \t.]*\\)>")
-	    org-deadline-line-regexp
-	    (concat "\\<\\(" org-deadline-string "\\).*")
-	    org-scheduled-regexp
-	    (concat "\\<" org-scheduled-string)
-	    org-scheduled-time-regexp
-	    (concat "\\<" org-scheduled-string " *<\\([^>]+\\)>")
-	    org-scheduled-time-hour-regexp
-	    (concat "\\<" org-scheduled-string
-		    " *<\\([^>]+[0-9]\\{1,2\\}:[0-9]\\{2\\}[0-9-+:hdwmy \t.]*\\)>")
-	    org-closed-time-regexp
-	    (concat "\\<" org-closed-string " *\\[\\([^]]+\\)\\]")
-	    org-keyword-time-regexp
-	    (concat "\\<\\(" org-scheduled-string
-		    "\\|" org-deadline-string
-		    "\\|" org-closed-string
-		    "\\|" org-clock-string "\\)"
-		    " *[[<]\\([^]>]+\\)[]>]")
-	    org-keyword-time-not-clock-regexp
-	    (concat "\\<\\(" org-scheduled-string
-		    "\\|" org-deadline-string
-		    "\\|" org-closed-string
-		    "\\)"
-		    " *[[<]\\([^]>]+\\)[]>]")
-	    org-maybe-keyword-time-regexp
-	    (concat "\\(\\<\\(" org-scheduled-string
-		    "\\|" org-deadline-string
-		    "\\|" org-closed-string
-		    "\\|" org-clock-string "\\)\\)?"
-		    " *\\([[<][0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^]\r\n>]*?[]>]\\|<%%([^\r\n>]*>\\)")
-	    org-all-time-keywords
-	    (mapcar (lambda (w) (substring w 0 -1))
-		    (list org-scheduled-string org-deadline-string
-			  org-clock-string org-closed-string)))
+		    "[ \t]*$"))
       (setq org-ota nil)
       (org-compute-latex-and-related-regexp))))
 
