@@ -89,12 +89,12 @@
        (require 'cider)
        (let ((result-params (cdr (assoc :result-params params))))
 	 (setq result
-	       (plist-get
-		(nrepl-send-string-sync expanded)
+	       (nrepl-dict-get
+		(nrepl-sync-request:eval expanded)
 		(if (or (member "output" result-params)
 			(member "pp" result-params))
 		    :stdout
-		  :value)))))
+		  "value")))))
       (slime
        (require 'slime)
        (with-temp-buffer
