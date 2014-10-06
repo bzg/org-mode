@@ -1974,6 +1974,7 @@ Return updated plist."
   ;; properties.
   (nconc
    `(:headline-numbering ,(org-export--collect-headline-numbering data info)
+     :unnumbered-headline-id ,(org-export--collect-unnumbered-headline-id data info)
      :exported-data ,(make-hash-table :test 'eq :size 4001))
    info))
 
@@ -1996,7 +1997,7 @@ OPTIONS is a plist holding export options."
       (if (= min-level 10000) 1 min-level))))
 
 (defun org-export--collect-headline-numbering (data options)
-  "Return numbering of all exportable headlines in a parse tree.
+  "Return numbering of all exportable, numbered headlines in a parse tree.
 
 DATA is the parse tree.  OPTIONS is the plist holding export
 options.
@@ -2007,7 +2008,8 @@ for a footnotes section."
   (let ((numbering (make-vector org-export-max-depth 0)))
     (org-element-map data 'headline
       (lambda (headline)
-	(unless (org-element-property :footnote-section-p headline)
+	(when (and (org-export-numbered-headline-p headline options)
+		   (not (org-element-property :footnote-section-p headline)))
 	  (let ((relative-level
 		 (1- (org-export-get-relative-level headline options))))
 	    (cons
@@ -2018,6 +2020,17 @@ for a footnotes section."
 		   when (= idx relative-level) collect (aset numbering idx (1+ n))
 		   when (> idx relative-level) do (aset numbering idx 0))))))
       options)))
+
+(defun org-export--collect-unnumbered-headline-id (data options)
+  "Return numbering of all exportable, unnumbered headlines.
+DATA is the parse tree.  OPTIONS is the plist holding export
+options.  Unnumbered headlines are numbered as a function of
+occurrence."
+  (let ((num 0))
+    (org-element-map data 'headline
+	(lambda (headline)
+	  (unless (org-export-numbered-headline-p headline options)
+	    (list headline (incf num)))))))
 
 (defun org-export--populate-ignore-list (data options)
   "Return list of elements and objects to ignore during export.
@@ -3325,13 +3338,25 @@ paths."
 	  ;; Extract arguments from keyword's value.
 	  (let* ((value (org-element-property :value element))
 		 (ind (org-get-indentation))
+		 location
 		 (file (and (string-match
 			     "^\\(\".+?\"\\|\\S-+\\)\\(?:\\s-+\\|$\\)" value)
-			    (prog1 (expand-file-name
-				    (org-remove-double-quotes
-				     (match-string 1 value))
-				    dir)
+			    (prog1
+				(save-match-data
+				  (let ((matched (match-string 1 value)))
+				    (when (string-match "\\(::\\(.*?\\)\\)\"?\\'" matched)
+				      (setq location (match-string 2 matched))
+				      (setq matched
+					    (replace-match "" nil nil matched 1)))
+				    (expand-file-name
+				     (org-remove-double-quotes
+				      matched)
+				     dir)))
 			      (setq value (replace-match "" nil nil value)))))
+		 (only-contents
+		  (and (string-match ":only-contents *\\([^: \r\t\n]\\S-*\\)?" value)
+		       (prog1 (org-not-nil (match-string 1 value))
+			 (setq value (replace-match "" nil nil value)))))
 		 (lines
 		  (and (string-match
 			":lines +\"\\(\\(?:[0-9]+\\)?-\\(?:[0-9]+\\)?\\)\""
@@ -3391,16 +3416,87 @@ paths."
 	       (t
 		(insert
 		 (with-temp-buffer
-		   (let ((org-inhibit-startup t)) (org-mode))
-		   (insert
-		    (org-export--prepare-file-contents
-		     file lines ind minlevel
-		     (or (gethash file file-prefix)
-			 (puthash file (incf current-prefix) file-prefix))))
+		   (let ((org-inhibit-startup t)
+			 (lines
+			  (if location
+			      (org-export--inclusion-absolute-lines
+			       file location only-contents lines)
+			    lines)))
+		     (org-mode)
+		     (insert
+		      (org-export--prepare-file-contents
+		       file lines ind minlevel
+		       (or (gethash file file-prefix)
+			   (puthash file (incf current-prefix) file-prefix)))))
 		   (org-export-expand-include-keyword
 		    (cons (list file lines) included)
 		    (file-name-directory file))
 		   (buffer-string)))))))))))))
+
+(defun org-export--inclusion-absolute-lines (file location only-contents lines)
+  "Resolve absolute lines for an included file with file-link.
+
+FILE is string file-name of the file to include.  LOCATION is a
+string name within FILE to be included (located via
+`org-link-search').  If ONLY-CONTENTS is non-nil only the
+contents of the named element will be included, as determined
+Org-Element.  If LINES is non-nil only those lines are included.
+
+Return a string of lines to be included in the format expected by
+`org-export--prepare-file-contents'."
+  (with-temp-buffer
+    (insert-file-contents file)
+    (unless (eq major-mode 'org-mode)
+      (let ((org-inhibit-startup t)) (org-mode)))
+    (condition-case err
+	;; Enforce consistent search.
+	(let ((org-link-search-must-match-exact-headline t))
+	  (org-link-search location))
+      (error
+       (error (format "%s for %s::%s" (error-message-string err) file location))))
+    (let* ((element (org-element-at-point))
+	   (contents-begin
+	    (and only-contents (org-element-property :contents-begin element))))
+      (narrow-to-region
+       (or contents-begin (org-element-property :begin element))
+       (org-element-property (if contents-begin :contents-end :end) element))
+      (when (and only-contents
+		 (memq (org-element-type element) '(headline inlinetask)))
+	;; Skip planning line and property-drawer.  If a normal drawer
+	;; precedes a property-drawer both will be included.
+	;; Remaining property-drawers are removed as needed in
+	;; `org-export--prepare-file-contents'.
+	(goto-char (point-min))
+	(when (org-looking-at-p org-planning-line-re) (forward-line))
+	(when (looking-at org-property-drawer-re) (goto-char (match-end 0)))
+	(unless (bolp) (forward-line))
+	(narrow-to-region (point) (point-max))))
+    (when lines
+      (org-skip-whitespace)
+      (beginning-of-line)
+      (let* ((lines (split-string lines "-"))
+	     (lbeg (string-to-number (car lines)))
+	     (lend (string-to-number (cadr lines)))
+	     (beg (if (zerop lbeg) (point-min)
+		    (goto-char (point-min))
+		    (forward-line (1- lbeg))
+		    (point)))
+	     (end (if (zerop lend) (point-max)
+		    (goto-char beg)
+		    (forward-line (1- lend))
+		    (point))))
+	(narrow-to-region beg end)))
+    (let ((end (point-max)))
+      (goto-char (point-min))
+      (widen)
+      (let ((start-line (line-number-at-pos)))
+	(format "%d-%d"
+		start-line
+		(save-excursion
+		  (+ start-line
+		     (let ((counter 0))
+		       (while (< (point) end) (incf counter) (forward-line))
+		       counter))))))))
 
 (defun org-export--prepare-file-contents (file &optional lines ind minlevel id)
   "Prepare the contents of FILE for inclusion and return them as a string.
@@ -3448,6 +3544,20 @@ with footnotes is included in a document."
     (skip-chars-backward " \r\t\n")
     (forward-line)
     (delete-region (point) (point-max))
+    ;; Remove property-drawers after drawers.
+    (when (or ind minlevel)
+      (unless (eq major-mode 'org-mode)
+	(let ((org-inhibit-startup t)) (org-mode)))
+      (goto-char (point-min))
+      (when (looking-at org-drawer-regexp)
+	(goto-char (match-end 0))
+	(search-forward-regexp org-drawer-regexp)
+	(forward-line 1)
+	(beginning-of-line))
+      (when (looking-at org-property-drawer-re)
+	(delete-region (match-beginning 0) (match-end 0))
+	(beginning-of-line))
+      (delete-region (point) (save-excursion (and (org-skip-whitespace) (point)))))
     ;; If IND is set, preserve indentation of include keyword until
     ;; the first headline encountered.
     (when ind
@@ -3776,7 +3886,12 @@ INFO is the plist used as a communication channel."
 ;;
 ;; `org-export-get-headline-number' returns the section number of an
 ;; headline, while `org-export-number-to-roman' allows to convert it
-;; to roman numbers.
+;; to roman numbers.  With an optional argument,
+;; `org-export-get-headline-number' returns a number to unnumbered
+;; headlines (used for internal id).
+;;
+;; `org-export-get-headline-id' returns the unique internal id of a
+;; headline.
 ;;
 ;; `org-export-low-level-p', `org-export-first-sibling-p' and
 ;; `org-export-last-sibling-p' are three useful predicates when it
@@ -3811,17 +3926,32 @@ and the last level being considered as high enough, or nil."
       (let ((level (org-export-get-relative-level headline info)))
         (and (> level limit) (- level limit))))))
 
-(defun org-export-get-headline-number (headline info)
-  "Return HEADLINE numbering as a list of numbers.
+(defun org-export-get-headline-id (headline info)
+  "Return a unique ID for HEADLINE.
 INFO is a plist holding contextual information."
-  (cdr (assoc headline (plist-get info :headline-numbering))))
+  (let ((numbered (org-export-numbered-headline-p headline info)))
+    (concat
+     (if numbered "sec-" "unnumbered-")
+     (mapconcat #'number-to-string
+		(if numbered
+		    (org-export-get-headline-number headline info)
+		  (cdr (assq headline (plist-get info :unnumbered-headline-id)))) "-"))))
+
+(defun org-export-get-headline-number (headline info)
+  "Return numbered HEADLINE numbering as a list of numbers.
+INFO is a plist holding contextual information."
+  (and (org-export-numbered-headline-p headline info)
+       (cdr (assq headline (plist-get info :headline-numbering)))))
 
 (defun org-export-numbered-headline-p (headline info)
   "Return a non-nil value if HEADLINE element should be numbered.
 INFO is a plist used as a communication channel."
-  (let ((sec-num (plist-get info :section-numbers))
-	(level (org-export-get-relative-level headline info)))
-    (if (wholenump sec-num) (<= level sec-num) sec-num)))
+  (unless (org-some
+	   (lambda (head) (org-not-nil (org-element-property :UNNUMBERED head)))
+	   (cons headline (org-export-get-genealogy headline)))
+    (let ((sec-num (plist-get info :section-numbers))
+	  (level (org-export-get-relative-level headline info)))
+      (if (wholenump sec-num) (<= level sec-num) sec-num))))
 
 (defun org-export-number-to-roman (n)
   "Convert integer N into a roman numeral."

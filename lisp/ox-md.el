@@ -204,10 +204,7 @@ a communication channel."
 	    (when (plist-get info :with-toc)
 	      (org-html--anchor
 	       (or (org-element-property :CUSTOM_ID headline)
-		   (concat "sec-"
-			   (mapconcat 'number-to-string
-				      (org-export-get-headline-number
-				       headline info) "-")))
+		   (org-export-get-headline-id headline info))
 	       nil nil info)))
 	   ;; Headline text without tags.
 	   (heading (concat todo priority title))
@@ -330,10 +327,13 @@ a communication channel."
 	   (and contents (concat contents " "))
 	   (format "(%s)"
 		   (format (org-export-translate "See section %s" :html info)
-			   (mapconcat 'number-to-string
-				      (org-export-get-headline-number
-				       destination info)
-				      ".")))))))
+			   (if (org-export-numbered-headline-p destination info)
+			       (mapconcat #'number-to-string
+					  (org-export-get-headline-number
+					   destination info)
+					  ".")
+			     (org-export-data
+			      (org-element-property :title destination) info))))))))
      ((org-export-inline-image-p link org-html-inline-image-rules)
       (let ((path (let ((raw-path (org-element-property :path link)))
 		    (if (not (file-name-absolute-p raw-path)) raw-path
@@ -354,9 +354,14 @@ a communication channel."
 	(if (org-string-nw-p contents) contents
 	  (when destination
 	    (let ((number (org-export-get-ordinal destination info)))
-	      (when number
-		(if (atom number) (number-to-string number)
-		  (mapconcat 'number-to-string number "."))))))))
+	      (if number
+		  (if (atom number) (number-to-string number)
+		    (mapconcat #'number-to-string number "."))
+		;; Unnumbered headline.
+		(and (eq 'headline (org-element-type destination))
+		     ;; BUG: shouldn't headlines have a form like [ref](name) in md?
+		     (org-export-data
+		      (org-element-property :title destination) info))))))))
      ;; Link type is handled by a special function.
      ((let ((protocol (nth 2 (assoc type org-link-protocols))))
 	(and (functionp protocol)

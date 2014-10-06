@@ -2096,8 +2096,7 @@ INFO is a plist used as a communication channel."
 	    ;; Label.
 	    (org-export-solidify-link-text
 	     (or (org-element-property :CUSTOM_ID headline)
-		 (concat "sec-"
-			 (mapconcat #'number-to-string headline-number "-"))))
+		 (org-export-get-headline-id headline info)))
 	    ;; Body.
 	    (concat
 	     (and (not (org-export-low-level-p headline info))
@@ -2321,7 +2320,8 @@ holding contextual information."
   (unless (org-element-property :footnote-section-p headline)
     (let* ((numberedp (org-export-numbered-headline-p headline info))
            (numbers (org-export-get-headline-number headline info))
-           (section-number (mapconcat #'number-to-string numbers "-"))
+           (section-number (and numbers
+				(mapconcat #'number-to-string numbers "-")))
            (level (+ (org-export-get-relative-level headline info)
                      (1- (plist-get info :html-toplevel-hlevel))))
            (todo (and (plist-get info :with-todo-keywords)
@@ -2338,7 +2338,7 @@ holding contextual information."
            (contents (or contents ""))
            (ids (delq nil
                       (list (org-element-property :CUSTOM_ID headline)
-                            (concat "sec-" section-number)
+                            (org-export-get-headline-id headline info)
                             (org-element-property :ID headline))))
            (preferred-id (car ids))
            (extra-ids (mapconcat
@@ -2369,7 +2369,7 @@ holding contextual information."
                   (org-html--container headline info)
                   (format "outline-container-%s"
                           (or (org-element-property :CUSTOM_ID headline)
-                              (concat "sec-" section-number)))
+                              (org-export-get-headline-id headline info)))
                   (concat (format "outline-%d" level)
                           (and extra-class " ")
                           extra-class)
@@ -2807,21 +2807,9 @@ INFO is a plist holding contextual information.  See
 			(org-element-property :raw-link link) info))))
 	  ;; Link points to a headline.
 	  (headline
-	   (let ((href
-		  ;; What href to use?
-		  (cond
-		   ;; Case 1: Headline is linked via it's CUSTOM_ID
-		   ;; property.  Use CUSTOM_ID.
-		   ((string= type "custom-id")
-		    (org-element-property :CUSTOM_ID destination))
-		   ;; Case 2: Headline is linked via it's ID property
-		   ;; or through other means.  Use the default href.
-		   ((member type '("id" "fuzzy"))
-		    (format "sec-%s"
-			    (mapconcat 'number-to-string
-				       (org-export-get-headline-number
-					destination info) "-")))
-		   (t (error "Shouldn't reach here"))))
+	   (let ((href (or (and (string= type "custom-id")
+				(org-element-property :CUSTOM_ID destination))
+			   (org-export-get-headline-id destination info)))
 		 ;; What description to use?
 		 (desc
 		  ;; Case 1: Headline is numbered and LINK has no
@@ -3073,13 +3061,16 @@ holding contextual information."
       (let* ((class-num (+ (org-export-get-relative-level parent info)
 			   (1- (plist-get info :html-toplevel-hlevel))))
 	     (section-number
-	      (mapconcat
-	       'number-to-string
-	       (org-export-get-headline-number parent info) "-")))
+	      (and (org-export-numbered-headline-p parent info)
+		   (mapconcat
+		    #'number-to-string
+		    (org-export-get-headline-number parent info) "-"))))
         ;; Build return value.
 	(format "<div class=\"outline-text-%d\" id=\"text-%s\">\n%s</div>"
 		class-num
-		(or (org-element-property :CUSTOM_ID parent) section-number)
+		(or (org-element-property :CUSTOM_ID parent)
+		    section-number
+		    (org-export-get-headline-id parent info))
 		contents)))))
 
 ;;;; Radio Target

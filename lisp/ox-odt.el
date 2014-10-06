@@ -1122,7 +1122,7 @@ See `org-odt--build-date-styles' for implementation details."
   (setq text
 	(concat
 	 ;; Section number.
-	 (when section-number (concat section-number ". "))
+	 (and section-number (concat section-number ". "))
 	 ;; Todo.
 	 (when todo
 	   (let ((style (if (member todo org-done-keywords)
@@ -1789,8 +1789,7 @@ INFO is a plist holding contextual information."
 		(org-element-property :title headline) backend info))
 	 (tags (and (plist-get info :with-tags)
 		    (org-export-get-tags headline info)))
-	 (headline-label (concat "sec-" (mapconcat 'number-to-string
-						   headline-number "-")))
+	 (headline-label (org-export-get-headline-id headline info))
 	 (format-function
 	  (if (functionp format-function) format-function
 	    (function*
@@ -1815,10 +1814,9 @@ holding contextual information."
 	   (full-text (org-odt-format-headline--wrap headline nil info))
 	   ;; Get level relative to current parsed data.
 	   (level (org-export-get-relative-level headline info))
+	   (numbered (org-export-numbered-headline-p headline info))
 	   ;; Get canonical label for the headline.
-	   (id (concat "sec-" (mapconcat 'number-to-string
-					 (org-export-get-headline-number
-					  headline info) "-")))
+	   (id (org-export-get-headline-id headline info))
 	   ;; Get user-specified labels for the headline.
 	   (extra-ids (list (org-element-property :CUSTOM_ID headline)
 			    (org-element-property :ID headline)))
@@ -1842,8 +1840,7 @@ holding contextual information."
 	 (and (org-export-first-sibling-p headline info)
 	      (format "\n<text:list text:style-name=\"%s\" %s>"
 		      ;; Choose style based on list type.
-		      (if (org-export-numbered-headline-p headline info)
-			  "OrgNumberedList" "OrgBulletedList")
+		      (if numbered "OrgNumberedList" "OrgBulletedList")
 		      ;; If top-level list, re-start numbering.  Otherwise,
 		      ;; continue numbering.
 		      (format "text:continue-numbering=\"%s\""
@@ -1870,9 +1867,11 @@ holding contextual information."
        (t
 	(concat
 	 (format
-	  "\n<text:h text:style-name=\"%s\" text:outline-level=\"%s\">%s</text:h>"
-	  (format "Heading_20_%s" level)
+	  "\n<text:h text:style-name=\"%s\" text:outline-level=\"%s\" text:is-list-header=\"%s\">%s</text:h>"
+	  (format "Heading_20_%s%s"
+		  level (if numbered "" "_unnumbered"))
 	  level
+	  (if numbered "false" "true")
 	  (concat extra-targets anchored-title))
 	 contents))))))
 
@@ -2643,10 +2642,7 @@ Return nil, otherwise."
   (let* ((genealogy (org-export-get-genealogy destination))
 	 (data (reverse genealogy))
 	 (label (case (org-element-type destination)
-		  (headline
-		   (format "sec-%s" (mapconcat 'number-to-string
-					       (org-export-get-headline-number
-						destination info) "-")))
+		  (headline (org-export-get-headline-id destination info))
 		  (target
 		   (org-element-property :value destination))
 		  (t (error "FIXME: Resolve %S" destination)))))
@@ -2692,11 +2688,15 @@ Return nil, otherwise."
 			      item-numbers "")))))
      ;; Case 2: Locate a regular and numbered headline in the
      ;; hierarchy.  Display its section number.
-     (let ((headline (loop for el in (cons destination genealogy)
-			   when (and (eq (org-element-type el) 'headline)
-				     (not (org-export-low-level-p el info))
-				     (org-export-numbered-headline-p el info))
-			   return el)))
+     (let ((headline
+	    (and
+	     ;; Test if destination is a numbered headline.
+	     (org-export-numbered-headline-p destination info)
+	     (loop for el in (cons destination genealogy)
+		   when (and (eq (org-element-type el) 'headline)
+			     (not (org-export-low-level-p el info))
+			     (org-export-numbered-headline-p el info))
+		   return el))))
        ;; We found one.
        (when headline
 	 (format "<text:bookmark-ref text:reference-format=\"chapter\" text:ref-name=\"OrgXref.%s\">%s</text:bookmark-ref>"
@@ -2776,11 +2776,9 @@ INFO is a plist holding contextual information.  See
 	   ;; If there's a description, create a hyperlink.
 	   ;; Otherwise, try to provide a meaningful description.
 	   (if (not desc) (org-odt-link--infer-description destination info)
-	     (let* ((headline-no
-		     (org-export-get-headline-number destination info))
-		    (label
-		     (format "sec-%s"
-			     (mapconcat 'number-to-string headline-no "-"))))
+	     (let ((label (or (and (string= type "custom-id")
+				   (org-element-property :CUSTOM_ID destination))
+			      (org-export-get-headline-id destination info))))
 	       (format
 		"<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
 		label desc))))

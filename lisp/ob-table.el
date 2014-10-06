@@ -47,7 +47,10 @@
 ;; |        7 |        |
 ;; |        8 |        |
 ;; |        9 |        |
-;; #+TBLFM: $2='(org-sbe 'fibbd (n $1))
+;; #+TBLFM: $2='(org-sbe "fibbd" (n $1))
+
+;; NOTE: The quotation marks around the function name, 'fibbd' here,
+;; are optional.
 
 ;;; Code:
 (require 'ob-core)
@@ -69,13 +72,16 @@ string of its value.
 
 So this `org-sbe' construct
 
- (org-sbe 'source-block (n $2) (m 3))
+ (org-sbe \"source-block\" (n $2) (m 3))
 
 is the equivalent of the following source code block:
 
  #+begin_src emacs-lisp :var results=source-block(n=val_at_col_2, m=3) :results silent
  results
  #+end_src
+
+NOTE: The quotation marks around the function name,
+'source-block', are optional.
 
 NOTE: By default, string variable names are interpreted as
 references to source-code blocks, to force interpretation of a
