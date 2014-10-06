@@ -96,12 +96,15 @@ this variable.")
     (when (and session (string-match "^\\*\\(.+?\\)\\*$" session))
       (save-match-data (org-babel-R-initiate-session session nil)))))
 
+;; The usage of utils::read.table() ensures that the command
+;; read.table() can be found even in circumstances when the utils
+;; package is not in the search path from R.
 (defconst ob-R-transfer-variable-table-with-header
   "%s <- local({
      con <- textConnection(
        %S
      )
-     res <- read.table(
+     res <- utils::read.table(
        con,
        header    = %s,
        row.names = %s,
@@ -112,6 +115,7 @@ this variable.")
      res
    })"
   "R code used to transfer a table defined as a variable from org to R.
+
 This function is used when the table contains a header.")
 
 (defconst ob-R-transfer-variable-table-without-header
@@ -119,7 +123,7 @@ This function is used when the table contains a header.")
      con <- textConnection(
        %S
      )
-     res <- read.table(
+     res <- utils::read.table(
        con,
        header    = %s,
        row.names = %s,
@@ -132,6 +136,7 @@ This function is used when the table contains a header.")
      res
    })"
   "R code used to transfer a table defined as a variable from org to R.
+
 This function is used when the table does not contain a header.")
 
 (defun org-babel-expand-body:R (body params &optional graphics-file)
