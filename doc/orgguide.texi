@@ -35,7 +35,8 @@
 @end macro
 
 @macro seealso{text}
-@noindent @b{Further reading}@*@noindent \text\
+@noindent 
+@b{Further reading}@*@noindent \text\
 @end macro
 @copying
 
@@ -263,7 +264,8 @@ to the Emacs load path.  To do this, add the following line to @file{.emacs}:
 (setq load-path (cons "~/path/to/orgdir/contrib/lisp" load-path))
 @end smallexample
 
-@noindent If you have been using git or a tar ball to get Org, you need to
+@noindent 
+If you have been using git or a tar ball to get Org, you need to
 run the following command to generate autoload information.
 command:
 
@@ -343,7 +345,8 @@ of @kbd{C-a} and @kbd{C-e} in headlines.}.  For example:
 * Another top level headline
 @end smallexample
 
-@noindent Some people find the many stars too noisy and would prefer an
+@noindent 
+Some people find the many stars too noisy and would prefer an
 outline that has whitespace followed by a single star as headline
 starters.  @ref{Clean view}, describes a setup to realize this.
 
@@ -543,7 +546,8 @@ The Org homepage[fn:1] now looks a lot better than it used to.
 [fn:1] The link is: http://orgmode.org
 @end smallexample
 
-@noindent The following commands handle footnotes:
+@noindent 
+The following commands handle footnotes:
 
 @table @kbd
 @item C-c C-x f
@@ -604,7 +608,8 @@ create the above table, you would only type
 |-
 @end smallexample
 
-@noindent and then press @key{TAB} to align the table and start filling in
+@noindent 
+and then press @key{TAB} to align the table and start filling in
 fields.  Even faster would be to type @code{|Name|Phone|Age} followed by
 @kbd{C-c @key{RET}}.
 
@@ -1068,7 +1073,8 @@ are checkboxes, toggling one of the children checkboxes will make the
 parent checkbox reflect if none, some, or all of the children are
 checked.
 
-@noindent The following commands work with checkboxes:
+@noindent 
+The following commands work with checkboxes:
 
 @table @kbd
 @item C-c C-c
@@ -1176,7 +1182,8 @@ like:
 (setq org-tag-alist '(("@@work" . ?w) ("@@home" . ?h) ("laptop" . ?l)))
 @end smalllisp
 
-@noindent If the tag is only relevant to the file you are working on, then you
+@noindent 
+If the tag is only relevant to the file you are working on, then you
 can instead set the TAGS option line as:
 
 @smallexample
@@ -1332,7 +1339,8 @@ timestamp can appear anywhere in the headline or body of an Org tree entry.
 Its presence causes entries to be shown on specific dates in the agenda
 (@pxref{Weekly/daily agenda}).  We distinguish:
 
-@noindent @b{Plain timestamp; Event; Appointment}@*
+@noindent 
+@b{Plain timestamp; Event; Appointment}@*
 A simple timestamp just assigns a date/time to an item.  This is just
 like writing down an appointment or event in a paper agenda.
 
@@ -1343,7 +1351,8 @@ like writing down an appointment or event in a paper agenda.
   <2006-11-02 Thu 20:00-22:00>
 @end smallexample
 
-@noindent @b{Timestamp with repeater interval}@*
+@noindent 
+@b{Timestamp with repeater interval}@*
 A timestamp may contain a @emph{repeater interval}, indicating that it
 applies not only on the given date, but again and again after a certain
 interval of N days (d), weeks (w), months (m), or years (y).  The
@@ -1353,7 +1362,8 @@ following will show up in the agenda every Wednesday:
   <2007-05-16 Wed 12:30 +1w>
 @end smallexample
 
-@noindent @b{Diary-style sexp entries}@*
+@noindent 
+@b{Diary-style sexp entries}@*
 For more complex date specifications, Org mode supports using the
 special sexp diary entries implemented in the Emacs calendar/diary
 package.  For example
@@ -1362,14 +1372,16 @@ package.  For example
   <%%(diary-float t 4 2)>
 @end smallexample
 
-@noindent @b{Time/Date range}@*
+@noindent 
+@b{Time/Date range}@*
 Two timestamps connected by @samp{--} denote a range.
 @smallexample
 ** Meeting in Amsterdam
    <2004-08-23 Mon>--<2004-08-26 Thu>
 @end smallexample
 
-@noindent @b{Inactive timestamp}@*
+@noindent 
+@b{Inactive timestamp}@*
 Just like a plain timestamp, but with square brackets instead of
 angular ones.  These timestamps are inactive in the sense that they do
 @emph{not} trigger an entry to show up in the agenda.
@@ -1421,7 +1433,8 @@ information on how exactly the date/time prompt works.
 
 A timestamp may be preceded by special keywords to facilitate planning:
 
-@noindent @b{DEADLINE}@*
+@noindent 
+@b{DEADLINE}@*
 Meaning: the task (most likely a TODO item, though not necessarily) is supposed
 to be finished on that date.
 @table @kbd
@@ -1443,7 +1456,8 @@ until the entry is marked DONE.  An example:
 @end smallexample
 
 
-@noindent @b{SCHEDULED}@*
+@noindent 
+@b{SCHEDULED}@*
 Meaning: you are @i{planning to start working} on that task on the given
 date@footnote{This is quite different from what is normally understood by
 @i{scheduling a meeting}, which is done in Org-mode by just inserting a time
@@ -1605,7 +1619,8 @@ use:
         "* %?\nEntered on %U\n  %i\n  %a")))
 @end smallexample
 
-@noindent In these entries, the first string is the key to reach the
+@noindent 
+In these entries, the first string is the key to reach the
 template, the second is a short description.  Then follows the type of the
 entry and a definition of the target location for storing the note.  Finally,
 the template itself, a string with %-escapes to fill in information based on
@@ -2290,7 +2305,8 @@ $a=+\sqrt@{2@}$ or $a=-\sqrt@{2@}$.
 x=\sqrt@{b@}
 \end@{equation@}
 @end smallexample
-@noindent  With
+@noindent  
+With
 @uref{http://orgmode.org/manual/LaTeX-fragments.html#LaTeX-fragments,special
 setup}, @LaTeX{} snippets will be included as images when exporting to HTML.
 
@@ -2383,7 +2399,8 @@ the exported file use either
 @smallexample
 #+HTML: Literal HTML code for export
 @end smallexample
-@noindent or
+@noindent 
+or
 @smallexample
 #+BEGIN_HTML
 All lines between these markers are exported literally
