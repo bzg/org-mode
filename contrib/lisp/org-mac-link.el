@@ -234,11 +234,15 @@ When done, go grab the link, and insert it at point."
 (defun org-mac-paste-applescript-links (as-link-list)
   "Paste in a list of links from an applescript handler.
 The links are of the form <link>::split::<name>."
-  (let* ((link-list
+  (let* ((noquote-as-link-list 
+	  (if (string-prefix-p "\"" as-link-list) 
+	      (substring as-link-list 1 -1) 
+	    as-link-list))
+	 (link-list
           (mapcar (lambda (x) (if (string-match "\\`\"\\(.*\\)\"\\'" x)
 				  (setq x (match-string 1 x)))
 		    x)
-		  (split-string as-link-list "[\r\n]+")))
+		  (split-string noquote-as-link-list "[\r\n]+")))
          split-link URL description orglink orglink-insert rtn orglink-list)
     (while link-list
       (setq split-link (split-string (pop link-list) "::split::"))
@@ -828,27 +832,11 @@ The Org-syntax text will be pushed to the kill ring, and also returned."
   (interactive "sLink to (s)elected or (f)lagged messages: ")
   (setq select-or-flag (or select-or-flag "s"))
   (message "AppleScript: searching mailboxes...")
-  (let* ((as-link-list
-          (if (string= select-or-flag "s")
-              (org-as-get-selected-mail)
-	    (if (string= select-or-flag "f")
-		(org-as-get-flagged-mail)
-	      (error "Please select \"s\" or \"f\""))))
-         (link-list
-          (mapcar
-           (lambda (x) (if (string-match "\\`\"\\(.*\\)\"\\'" x) (setq x (match-string 1 x))) x)
-           (split-string (substring as-link-list 1 -1) "[\r\n]+")))
-         split-link URL description orglink orglink-insert rtn orglink-list)
-    (while link-list
-      (setq split-link (split-string (pop link-list) "::split::"))
-      (setq URL (car split-link))
-      (setq description (cadr split-link))
-      (when (not (string= URL ""))
-        (setq orglink (org-make-link-string URL description))
-        (push orglink orglink-list)))
-    (setq rtn (mapconcat 'identity orglink-list "\n"))
-    (kill-new rtn)
-    rtn))
+  (org-mac-paste-applescript-links
+   (cond
+    ((string= select-or-flag "s") (org-as-get-selected-mail))
+    ((string= select-or-flag "f") (org-as-get-flagged-mail))
+    (t (error "Please select \"s\" or \"f\"")))))
 
 (defun org-mac-message-insert-selected ()
   "Insert a link to the messages currently selected in Mail.app.
