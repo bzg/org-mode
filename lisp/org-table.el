@@ -4372,7 +4372,6 @@ With prefix arg, also recompute table."
       (when (orgtbl-send-table 'maybe)
 	(run-hooks 'orgtbl-after-send-table-hook)))
      ((eq action 'recalc)
-      (org-table-set-constants)
       (save-excursion
 	(beginning-of-line 1)
 	(skip-chars-backward " \r\n\t")
