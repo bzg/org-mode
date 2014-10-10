@@ -270,9 +270,10 @@ This function is called by `org-babel-execute-src-block'."
 	    ;; Session buffer exists, but with dead process
 	    (set-buffer session))
 	  (require 'ess) (R)
-	  (ess-wait-for-process
-	   (get-process (or ess-local-process-name
-			    ess-current-process-name)))
+	  (let ((R-proc (get-process (or ess-local-process-name
+					 ess-current-process-name))))
+	    (while (process-get R-proc 'callbacks)
+	      (ess-wait-for-process R-proc)))
 	  (rename-buffer
 	   (if (bufferp session)
 	       (buffer-name session)
