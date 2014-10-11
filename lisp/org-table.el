@@ -4305,8 +4305,7 @@ to execute outside of tables."
 	 ["Move Column Left" org-metaleft :active (org-at-table-p) :keys "M-<left>"]
 	 ["Move Column Right" org-metaright :active (org-at-table-p) :keys "M-<right>"]
 	 ["Delete Column" org-shiftmetaleft :active (org-at-table-p) :keys "M-S-<left>"]
-	 ["Insert Column" org-shiftmetaright :active (org-at-table-p) :keys "M-S-<right>"]
-	 ["Ascii plot" orgtbl-ascii-plot :active (org-at-table-p) :keys "C-c p"])
+	 ["Insert Column" org-shiftmetaright :active (org-at-table-p) :keys "M-S-<right>"])
 	("Row"
 	 ["Move Row Up" org-metaup :active (org-at-table-p) :keys "M-<up>"]
 	 ["Move Row Down" org-metadown :active (org-at-table-p) :keys "M-<down>"]
@@ -4344,7 +4343,10 @@ to execute outside of tables."
 	 org-table-toggle-coordinate-overlays :active (org-at-table-p)
 	 :keys "C-c }"
 	 :style toggle :selected org-table-overlay-coordinates]
-	))
+	"--"
+	("Plot"
+	 ["Ascii plot" orgtbl-ascii-plot :active (org-at-table-p) :keys "C-c \" a"]
+	 ["Gnuplot" org-plot/gnuplot :active (org-at-table-p) :keys "C-c \" g"])))
     t))
 
 (defun orgtbl-ctrl-c-ctrl-c (arg)
@@ -5092,7 +5094,7 @@ supported.  It is also possible to use the following ones:
 
 ;; Put the cursor in a column containing numerical values
 ;; of an Org-Mode table,
-;; type C-c p
+;; type C-c " a
 ;; A new column is added with a bar plot.
 ;; When the table is refreshed (C-u C-c *),
 ;; the plot is updated to reflect the new values.

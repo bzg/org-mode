@@ -163,6 +163,8 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-table-paste-rectangle "org-table" ())
 (declare-function org-table-maybe-eval-formula "org-table" ())
 (declare-function org-table-maybe-recalculate-line "org-table" ())
+(declare-function orgtbl-ascii-plot "org-table" (&optional ask))
+(declare-function org-plot/gnuplot "org-plot" (&optional params))
 
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-cache-reset "org-element" (&optional all))
@@ -19481,7 +19483,8 @@ boundaries."
 (org-defkey org-mode-map "\C-c="    'org-table-eval-formula)
 (org-defkey org-mode-map "\C-c'"    'org-edit-special)
 (org-defkey org-mode-map "\C-c`"    'org-table-edit-field)
-(org-defkey org-mode-map "\C-cp"    'orgtbl-ascii-plot)
+(org-defkey org-mode-map "\C-c\"a"  'orgtbl-ascii-plot)
+(org-defkey org-mode-map "\C-c\"g"  'org-plot/gnuplot)
 (org-defkey org-mode-map "\C-c|"    'org-table-create-or-convert-from-region)
 (org-defkey org-mode-map [(control ?#)] 'org-table-rotate-recalc-marks)
 (org-defkey org-mode-map "\C-c~"    'org-table-create-with-table.el)
@@ -21164,8 +21167,7 @@ on context.  See the individual commands for more information."
      ["Move Column Left" org-metaleft (org-at-table-p)]
      ["Move Column Right" org-metaright (org-at-table-p)]
      ["Delete Column" org-shiftmetaleft (org-at-table-p)]
-     ["Insert Column" org-shiftmetaright (org-at-table-p)]
-     ["Ascii plot" orgtbl-ascii-plot (org-at-table-p)])
+     ["Insert Column" org-shiftmetaright (org-at-table-p)])
     ("Row"
      ["Move Row Up" org-metaup (org-at-table-p)]
      ["Move Row Down" org-metadown (org-at-table-p)]
@@ -21208,7 +21210,11 @@ on context.  See the individual commands for more information."
     ["Import from File" org-table-import (not (org-at-table-p))]
     ["Export to File" org-table-export (org-at-table-p)]
     "--"
-    ["Create/Convert from/to table.el" org-table-create-with-table.el t]))
+    ["Create/Convert from/to table.el" org-table-create-with-table.el t]
+    "--"
+    ("Plot"
+     ["Ascii plot" orgtbl-ascii-plot :active (org-at-table-p) :keys "C-c \" a"]
+     ["Gnuplot" org-plot/gnuplot :active (org-at-table-p) :keys "C-c \" g"])))
 
 (easy-menu-define org-org-menu org-mode-map "Org menu"
   '("Org"
