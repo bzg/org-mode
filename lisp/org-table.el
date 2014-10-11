@@ -4850,8 +4850,19 @@ information."
 	 ;; Make sure that contents are exported as Org data when :raw
 	 ;; parameter is non-nil.
 	 ,(when (and backend (plist-get params :raw))
-	    `(setq contents (org-export-data-with-backend
-			     (org-element-contents cell) 'org info)))
+	    `(setq contents
+		   ;; Since we don't know what are the pseudo object
+		   ;; types defined in backend, we cannot pass them to
+		   ;; `org-element-interpret-data'.  As a consequence,
+		   ;; they will be treated as pseudo elements, and
+		   ;; will have newlines appended instead of spaces.
+		   ;; Therefore, we must make sure :post-blank value
+		   ;; is really turned into spaces.
+		   (replace-regexp-in-string
+		    "\n" " "
+		    (org-trim
+		     (org-element-interpret-data
+		      (org-element-contents cell))))))
 	 (when contents
 	   ;; Check if we can apply `:efmt' on CONTENTS.
 	   ,(when efmt

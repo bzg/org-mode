@@ -1452,7 +1452,11 @@ See also `test-org-table/copy-field'."
   ;; Test :booktabs parameter.
   (should
    (org-string-match-p
-    "\\toprule" (orgtbl-to-latex (org-table-to-lisp "| a |") '(:booktabs t)))))
+    "\\toprule" (orgtbl-to-latex (org-table-to-lisp "| a |") '(:booktabs t))))
+  ;; Test pseudo objects and :raw parameter.
+  (should
+   (org-string-match-p
+    "\\$x\\$" (orgtbl-to-latex (org-table-to-lisp "| $x$ |") '(:raw t)))))
 
 (ert-deftest test-org-table/to-html ()
   "Test `orgtbl-to-html' specifications."
