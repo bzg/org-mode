@@ -1532,10 +1532,9 @@ Paragraph[fn:1]"
 		      (org-export-backend-transcoders backend)))
 	  (forward-line)
 	  (org-export-as backend 'subtree)))))
-    ;; 6. Footnotes without a definition should be provided a fallback
-    ;;    definition.
-    (should
-     (org-test-with-parsed-data "[fn:1]"
+    ;; 6. Footnotes without a definition should throw an error.
+    (should-error
+     (org-test-with-parsed-data "Text[fn:1]"
        (org-export-get-footnote-definition
 	(org-element-map tree 'footnote-reference 'identity info t) info)))
     ;; 7. Footnote section should be ignored in TOC and in headlines
