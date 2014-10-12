@@ -18181,8 +18181,10 @@ used by the agenda files.  If ARCHIVE is `ifmode', do this only if
   "Return non-nil, if FILE is an agenda file.
 If FILE is omitted, use the file associated with the current
 buffer."
-  (member (or file (buffer-file-name))
-          (org-agenda-files t)))
+  (let ((fname (or file (buffer-file-name))))
+    (and fname
+         (member (file-truename fname)
+                 (mapcar #'file-truename (org-agenda-files t))))))
 
 (defun org-edit-agenda-file-list ()
   "Edit the list of agenda files.
