@@ -23,12 +23,14 @@
 ;;; Commentary:
 
 ;; This file contains the code for managing your passwords with
-;; Org-mode.
+;; Org-mode. It is part of org/contrib (see http://orgmode.org/). If
+;; you want to contribute with development, or have a problem, do it
+;; here: https://bitbucket.org/alfaromurillo/org-passwords.el
 
 ;; A basic setup needs to indicate a passwords file, and a dictionary
 ;; for the random words:
 
-;;   (require org-passwords)
+;;   (require 'org-passwords)
 ;;   (setq org-passwords-file "~/documents/passwords.gpg")
 ;;   (setq org-passwords-random-words-dictionary "/etc/dictionaries-common/words")
 
@@ -54,13 +56,12 @@
 ;;   `org-passwords-random-words-substitutions'.
 
 ;; It is also useful to set up keybindings for the functions
-;; `org-passwords-copy-username' and
-;; `org-passwords-copy-password' in the
-;; `org-passwords-mode', to easily make the passwords and usernames
-;; available to the facility for pasting text of the window system
-;; (clipboard on X and MS-Windows, pasteboard on Nextstep/Mac OS,
-;; etc.), without inserting them in the kill-ring. You can set for
-;; example:
+;; `org-passwords-copy-username', `org-passwords-copy-password' and
+;; `org-passwords-open-url' in the `org-passwords-mode', to easily
+;; make the passwords and usernames available to the facility for
+;; pasting text of the window system (clipboard on X and MS-Windows,
+;; pasteboard on Nextstep/Mac OS, etc.), without inserting them in the
+;; kill-ring. You can set for example:
 
 ;;   (eval-after-load "org-passwords"
 ;;     '(progn
@@ -69,12 +70,15 @@
 ;; 	 'org-passwords-copy-username)
 ;;        (define-key org-passwords-mode-map
 ;; 	 (kbd "C-c p")
-;; 	 'org-passwords-copy-password)))
+;; 	 'org-passwords-copy-password)
+;; 	 (kbd "C-c o")
+;; 	 'org-passwords-open-url)))
 
-;; Finally, to enter new passwords, you can use `org-capture' and a minimal template like:
+;; Finally, to enter new passwords, you can use `org-capture' and a
+;; minimal template like:
 
 ;;   ("p" "password" entry (file "~/documents/passwords.gpg")
-;;    "* %^{Title}\n  %^{PASSWORD}p %^{USERNAME}p")
+;;    "* %^{Title}\n  %^{URL}p %^{USERNAME}p %^{PASSWORD}p")
 
 ;; When asked for the password you can then call either
 ;; `org-passwords-generate-password' or `org-passwords-random-words'.
@@ -87,6 +91,7 @@
 
 (require 'org)
 
+;;;###autoload
 (define-derived-mode org-passwords-mode org-mode
   "org-passwords-mode"
   "Mode for storing passwords"
@@ -97,12 +102,17 @@
   :group 'org)
 
 (defcustom org-passwords-password-property "PASSWORD"
-  "Name of the property for password entry password."
+  "Name of the property for password entry."
   :type 'string
   :group 'org-passwords)
 
 (defcustom org-passwords-username-property "USERNAME"
-  "Name of the property for password entry user name."
+  "Name of the property for user name entry."
+  :type 'string
+  :group 'org-passwords)
+
+(defcustom org-passwords-url-property "URL"
+  "Name of the property for URL entry."
   :type 'string
   :group 'org-passwords)
 
@@ -117,11 +127,23 @@ string, a number followed by units."
   :type 'str
   :group 'org-passwords)
 
+(defcustom org-passwords-default-password-size "20"
+  "Default number of characters to use in
+org-passwords-generate-password. It has to be a string."
+  :type 'str
+  :group 'org-passwords)
+
 (defcustom org-passwords-random-words-dictionary nil
   "Default file name for the file that contains a dictionary of
 words for `org-passwords-random-words'. Each non-empty line in
 the file is considered a word."
   :type 'file
+  :group 'org-passwords)
+
+(defcustom org-passwords-default-random-words-number "5"
+  "Default number of words to use in org-passwords-random-words.
+It has to be a string."
+  :type 'str
   :group 'org-passwords)
 
 (defvar org-passwords-random-words-separator "-"
@@ -143,16 +165,9 @@ facility for pasting text of the window system (clipboard on X
 and MS-Windows, pasteboard on Nextstep/Mac OS, etc.), without
 putting it in the kill ring."
   (interactive)
-  (save-excursion
-    (search-backward-regexp "^\\*")
-    (search-forward-regexp (concat "^[[:space:]]*:"
-				   org-passwords-password-property
-				   ":[[:space:]]*"))
-    (funcall interprogram-cut-function
-	     (buffer-substring-no-properties (point)
-					     (funcall (lambda ()
-							(end-of-line)
-							(point)))))))
+  (funcall interprogram-cut-function
+           (org-entry-get (point)
+			  org-passwords-password-property)))
 
 (defun org-passwords-copy-username ()
   "Makes the password available to other programs. Puts the
@@ -161,25 +176,33 @@ facility for pasting text of the window system (clipboard on X
 and MS-Windows, pasteboard on Nextstep/Mac OS, etc.), without
 putting it in the kill ring."
   (interactive)
-  (save-excursion
-    (search-backward-regexp "^\\*")
-    (search-forward-regexp (concat "^[[:space:]]*:"
-				   org-passwords-username-property
-				   ":[[:space:]]*"))
-    (funcall interprogram-cut-function
-	     (buffer-substring-no-properties (point)
-					     (funcall (lambda ()
-							(end-of-line)
-							(point)))))))
+  (funcall interprogram-cut-function
+           (org-entry-get (point)
+			  org-passwords-username-property
+			  t)))
 
-(defun org-passwords ()
+(defun org-passwords-open-url ()
+  "Browse the URL associated with the entry at the location of
+the cursor."
+  (interactive)
+  (browse-url (org-entry-get (point)
+			    org-passwords-url-property
+			    t)))
+
+;;;###autoload
+(defun org-passwords (&optional arg)
   "Open the password file. Open the password file defined by the
 variable `org-password-file' in read-only mode and kill that
 buffer later according to the value of the variable
 `org-passwords-time-opened'. It also adds the `org-password-file'
 to the auto-mode-alist so that it is opened with its mode being
-`org-passwords-mode'."
-  (interactive)
+`org-passwords-mode'.
+
+With prefix arg ARG, the command does not set up a timer to kill the buffer.
+
+With a double prefix arg \\[universal-argument] \\[universal-argument], open the file for editing.
+"
+  (interactive "P")
   (if org-passwords-file
       (progn
 	(add-to-list 'auto-mode-alist
@@ -187,8 +210,13 @@ to the auto-mode-alist so that it is opened with its mode being
 		      (regexp-quote
 		       (expand-file-name org-passwords-file))
 		      'org-passwords-mode))
-	(find-file-read-only org-passwords-file)
-	(org-passwords-set-up-kill-password-buffer))
+	(if (equal arg '(4))
+	    (find-file-read-only org-passwords-file)
+	  (if (equal arg '(16))
+	      (find-file org-passwords-file)
+	    (progn
+	      (find-file-read-only org-passwords-file)
+	      (org-passwords-set-up-kill-password-buffer)))))
     (minibuffer-message "No default password file defined. Set the variable `org-password-file'.")))
 
 (defun org-passwords-set-up-kill-password-buffer ()
@@ -211,8 +239,15 @@ Password has a random string of numbers, lowercase letters, and
 uppercase letters.  Argument ARG include symbols."
   (interactive "P")
   (let ((number-of-chars
-	 (string-to-number
-	  (read-from-minibuffer "Number of Characters: "))))
+	 (read-from-minibuffer
+	  (concat "Number of characters (default "
+		  org-passwords-default-password-size
+		  "): ")
+	  nil
+	  nil
+	  t
+	  nil
+	  org-passwords-default-password-size)))
     (if arg
 	(insert (org-passwords-generate-password-with-symbols "" number-of-chars))
 	(insert (org-passwords-generate-password-without-symbols "" number-of-chars)))))
@@ -222,11 +257,11 @@ uppercase letters.  Argument ARG include symbols."
 NUMS-OF-CHARS random characters."
   (if (eq nums-of-chars 0) previous-string
     (org-passwords-generate-password-with-symbols
-	     (concat previous-string
-		     (char-to-string
-		      ;; symbols, letters, numbers are from 33 to 126
-		      (+ (random (- 127 33)) 33)))
-	     (1- nums-of-chars))))
+     (concat previous-string
+	     (char-to-string
+	      ;; symbols, letters, numbers are from 33 to 126
+	      (+ (random (- 127 33)) 33)))
+     (1- nums-of-chars))))
 
 (defun org-passwords-generate-password-without-symbols (previous-string nums-of-chars)
   "Return string consisting of PREVIOUS-STRING and NUMS-OF-CHARS
@@ -269,8 +304,15 @@ the words as defined by
   (interactive "P")
   (if org-passwords-random-words-dictionary
       (let ((number-of-words
-	     (string-to-number
-	      (read-from-minibuffer "Number of words: ")))
+	     (read-from-minibuffer
+	      (concat "Number of words (default "
+		      org-passwords-default-random-words-number
+		      "): ")
+	      nil
+	      nil
+	      t
+	      nil
+	      org-passwords-default-random-words-number))
 	    (list-of-words
 	     (with-temp-buffer
 	       (insert-file-contents
@@ -333,8 +375,8 @@ Substitutions are made in order of the list, so for example:
       (concat (car list-of-strings)
 	      this
 	      (org-passwords-concat-this-with-string
-	       (cdr list-of-strings)
-	       this))
+	       this
+	       (cdr list-of-strings)))
     (car list-of-strings)))
 
 (provide 'org-passwords)
