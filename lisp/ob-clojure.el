@@ -43,7 +43,8 @@
 (eval-when-compile
   (require 'cl))
 
-(declare-function nrepl-send-string-sync "ext:nrepl-client" (input &optional ns session))
+(declare-function nrepl-dict-get "ext:nrepl-client" (dict key))
+(declare-function nrepl-sync-request:eval "ext:nrepl-client" (input &optional ns session))
 (declare-function slime-eval "ext:slime" (sexp &optional package))
 
 (defvar org-babel-tangle-lang-exts)
