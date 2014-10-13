@@ -655,15 +655,27 @@
 	    (let ((org-property-format "%-10s %s"))
 	      (org-indent-region (point-min) (point-max)))
 	    (buffer-string))))
-  ;; Special case: plain lists and footnote definitions.
+  ;; Indent plain lists.
   (should
    (equal "- A\n  B\n  - C\n\n    D"
 	  (org-test-with-temp-text "- A\n   B\n  - C\n\n     D"
 	    (org-indent-region (point-min) (point-max))
 	    (buffer-string))))
   (should
+   (equal "- A\n\n- B"
+	  (org-test-with-temp-text " - A\n\n - B"
+	    (org-indent-region (point-min) (point-max))
+	    (buffer-string))))
+  ;; Indent footnote definitions.
+  (should
    (equal "[fn:1] Definition\n\nDefinition"
 	  (org-test-with-temp-text "[fn:1] Definition\n\n  Definition"
+	    (org-indent-region (point-min) (point-max))
+	    (buffer-string))))
+  ;; Special case: Start indenting on a blank line.
+  (should
+   (equal "\nParagraph"
+	  (org-test-with-temp-text "\n  Paragraph"
 	    (org-indent-region (point-min) (point-max))
 	    (buffer-string)))))
 

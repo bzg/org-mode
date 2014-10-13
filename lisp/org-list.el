@@ -2051,16 +2051,19 @@ Possible values are: `folded', `children' or `subtree'.  See
 
 (defun org-list-item-body-column (item)
   "Return column at which body of ITEM should start."
-  (let (bpos bcol tpos tcol)
-    (save-excursion
-      (goto-char item)
-      (looking-at "[ \t]*\\(\\S-+\\)\\(.*[ \t]+::\\)?\\([ \t]+\\|$\\)")
-      (setq bpos (match-beginning 1) tpos (match-end 0)
-	    bcol (progn (goto-char bpos) (current-column))
-	    tcol (progn (goto-char tpos) (current-column)))
-      (when (> tcol (+ bcol org-description-max-indent))
-	(setq tcol (+ bcol 5))))
-    tcol))
+  (save-excursion
+    (goto-char item)
+    (looking-at "[ \t]*\\(\\S-+\\)\\(.*[ \t]+::\\)?\\([ \t]+\\|$\\)")
+    (if (match-beginning 2)
+	(let ((start (1+ (match-end 2)))
+	      (ind (org-get-indentation)))
+	  (if (> start (+ ind org-description-max-indent)) (+ ind 5) start))
+      (+ (progn (goto-char (match-end 1)) (current-column))
+	 (if (and org-list-two-spaces-after-bullet-regexp
+		  (org-string-match-p org-list-two-spaces-after-bullet-regexp
+				      (match-string 1)))
+	     2
+	   1)))))
 
 
 
