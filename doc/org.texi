@@ -13224,7 +13224,8 @@ length, using @code{:columns} attribute.
 @node An example
 @subsection An example
 
-Here is a thorough example, taken from @inforef{GNU Sample Texts,,texinfo}.
+Here is a thorough example.  @inforef{GNU Sample Texts,,texinfo} for an
+equivalent Texinfo code.
 
 @smallexample
 #+MACRO: version 2.0
