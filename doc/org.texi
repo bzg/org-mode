@@ -4244,11 +4244,10 @@ unique keys across both sets of keywords.}
 @cindex #+SEQ_TODO
 
 It can be very useful to use different aspects of the TODO mechanism in
-different files.  For file-local settings, you need to add special lines
-to the file which set the keywords and interpretation for that file
-only.  For example, to set one of the two examples discussed above, you
-need one of the following lines, starting in column zero anywhere in the
-file:
+different files.  For file-local settings, you need to add special lines to
+the file which set the keywords and interpretation for that file only.  For
+example, to set one of the two examples discussed above, you need one of the
+following lines anywhere in the file:
 
 @example
 #+TODO: TODO FEEDBACK VERIFY | DONE CANCELED
@@ -4545,6 +4544,10 @@ actual habit with some history:
 @example
 ** TODO Shave
    SCHEDULED: <2009-10-17 Sat .+2d/4d>
+   :PROPERTIES:
+   :STYLE:    habit
+   :LAST_REPEAT: [2009-10-19 Mon 00:36]
+   :END:
    - State "DONE"       from "TODO"       [2009-10-15 Thu]
    - State "DONE"       from "TODO"       [2009-10-12 Mon]
    - State "DONE"       from "TODO"       [2009-10-10 Sat]
@@ -4555,10 +4558,6 @@ actual habit with some history:
    - State "DONE"       from "TODO"       [2009-09-19 Sat]
    - State "DONE"       from "TODO"       [2009-09-16 Wed]
    - State "DONE"       from "TODO"       [2009-09-12 Sat]
-   :PROPERTIES:
-   :STYLE:    habit
-   :LAST_REPEAT: [2009-10-19 Mon 00:36]
-   :END:
 @end example
 
 What this habit says is: I want to shave at most every 2 days (given by the
@@ -5207,10 +5206,12 @@ Properties can be conveniently edited and viewed in column view
 @cindex drawer, for properties
 
 Properties are key-value pairs.  When they are associated with a single entry
-or with a tree they need to be inserted into a special
-drawer (@pxref{Drawers}) with the name @code{PROPERTIES}.  Each property
-is specified on a single line, with the key (surrounded by colons)
-first, and the value after it.  Here is an example:
+or with a tree they need to be inserted into a special drawer
+(@pxref{Drawers}) with the name @code{PROPERTIES}, which has to be located
+right below a headline, and its planning line (@pxref{Deadlines and
+scheduling}) when applicable.  Each property is specified on a single line,
+with the key (surrounded by colons) first, and the value after it.  Keys are
+case-insensitives.  Here is an example:
 
 @example
 * CD collection
@@ -18169,7 +18170,7 @@ Get all property keys in the current buffer.
 @end defun
 
 @defun org-insert-property-drawer
-Insert a property drawer for the current entry.  Also
+Insert a property drawer for the current entry.
 @end defun
 
 @defun org-entry-put-multivalued-property pom property &rest values
