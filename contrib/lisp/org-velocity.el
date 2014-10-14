@@ -671,7 +671,7 @@ Stop searching once there are more matches than can be displayed."
                      ;; Truncate the index to the size of the buffer to be
                      ;; displayed.
                      (with-selected-window match-window
-                       (if (> (window-height) (length org-velocity-index))
+                       (if (< (window-height) (length org-velocity-index))
                            ;; (subseq org-velocity-index 0 (window-height))
                            (let ((hints (copy-sequence org-velocity-index)))
                              (setcdr (nthcdr (window-height) hints) nil)
