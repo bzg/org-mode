@@ -952,6 +952,159 @@
 
 
 
+;;; Keywords
+
+(ert-deftest test-org/set-regexps-and-options ()
+  "Test `org-set-regexps-and-options' specifications."
+  ;; TAGS keyword.
+  (should
+   (equal '(("A" . ?a) ("B") ("C"))
+	  (org-test-with-temp-text "#+TAGS: A(a) B C"
+	    (org-mode-restart)
+	    org-tag-alist)))
+  (should
+   (equal '(("A") (:newline) ("B"))
+	  (org-test-with-temp-text "#+TAGS: A\n#+TAGS: B"
+	    (org-mode-restart)
+	    org-tag-alist)))
+  (should
+   (equal '((:startgroup) ("A") ("B") (:endgroup) ("C"))
+	  (org-test-with-temp-text "#+TAGS: { A B } C"
+	    (org-mode-restart)
+	    org-tag-alist)))
+  (should
+   (equal '((:startgroup) ("A") (:grouptags) ("B") ("C") (:endgroup))
+	  (org-test-with-temp-text "#+TAGS: { A : B C }"
+	    (org-mode-restart)
+	    org-tag-alist)))
+  (should
+   (equal '(("A" "B" "C"))
+	  (org-test-with-temp-text "#+TAGS: { A : B C }"
+	    (org-mode-restart)
+	    org-tag-groups-alist)))
+  ;; FILETAGS keyword.
+  (should
+   (equal '("A" "B" "C")
+	  (org-test-with-temp-text "#+FILETAGS: :A:B:C:"
+	    (org-mode-restart)
+	    org-file-tags)))
+  ;; PROPERTY keyword.  Property names are case-insensitive.
+  (should
+   (equal "foo=1"
+	  (org-test-with-temp-text "#+PROPERTY: var foo=1"
+	    (org-mode-restart)
+	    (cdr (assoc "var" org-file-properties)))))
+  (should
+   (equal
+    "foo=1 bar=2"
+    (org-test-with-temp-text "#+PROPERTY: var foo=1\n#+PROPERTY: var+ bar=2"
+      (org-mode-restart)
+      (cdr (assoc "var" org-file-properties)))))
+  (should
+   (equal
+    "foo=1 bar=2"
+    (org-test-with-temp-text "#+PROPERTY: var foo=1\n#+PROPERTY: VAR+ bar=2"
+      (org-mode-restart)
+      (cdr (assoc "var" org-file-properties)))))
+  ;; ARCHIVE keyword.
+  (should
+   (equal "%s_done::"
+	  (org-test-with-temp-text "#+ARCHIVE: %s_done::"
+	    (org-mode-restart)
+	    org-archive-location)))
+  ;; CATEGORY keyword.
+  (should
+   (eq 'test
+       (org-test-with-temp-text "#+CATEGORY: test"
+	 (org-mode-restart)
+	 org-category)))
+  (should
+   (equal "test"
+	  (org-test-with-temp-text "#+CATEGORY: test"
+	    (org-mode-restart)
+	    (cdr (assoc "CATEGORY" org-file-properties)))))
+  ;; COLUMNS keyword.
+  (should
+   (equal "%25ITEM %TAGS %PRIORITY %TODO"
+	  (org-test-with-temp-text "#+COLUMNS: %25ITEM %TAGS %PRIORITY %TODO"
+	    (org-mode-restart)
+	    org-columns-default-format)))
+  ;; CONSTANTS keyword.  Constants names are case sensitive.
+  (should
+   (equal '("299792458." "3.14")
+	  (org-test-with-temp-text "#+CONSTANTS: c=299792458. pi=3.14"
+	    (org-mode-restart)
+	    (mapcar
+	     (lambda (n) (cdr (assoc n org-table-formula-constants-local)))
+	     '("c" "pi")))))
+  (should
+   (equal "3.14"
+	  (org-test-with-temp-text "#+CONSTANTS: pi=22/7 pi=3.14"
+	    (org-mode-restart)
+	    (cdr (assoc "pi" org-table-formula-constants-local)))))
+  (should
+   (equal "22/7"
+	  (org-test-with-temp-text "#+CONSTANTS: PI=22/7 pi=3.14"
+	    (org-mode-restart)
+	    (cdr (assoc "PI" org-table-formula-constants-local)))))
+  ;; LINK keyword.
+  (should
+   (equal
+    '("url1" "url2")
+    (org-test-with-temp-text "#+LINK: a url1\n#+LINK: b url2"
+      (org-mode-restart)
+      (mapcar (lambda (abbrev) (cdr (assoc abbrev org-link-abbrev-alist-local)))
+	      '("a" "b")))))
+  ;; PRIORITIES keyword.  Incomplete priorities sets are ignored.
+  (should
+   (equal
+    '(?X ?Z ?Y)
+    (org-test-with-temp-text "#+PRIORITIES: X Z Y"
+      (org-mode-restart)
+      (list org-highest-priority org-lowest-priority org-default-priority))))
+  (should
+   (equal
+    '(?A ?C ?B)
+    (org-test-with-temp-text "#+PRIORITIES: X Z"
+      (org-mode-restart)
+      (list org-highest-priority org-lowest-priority org-default-priority))))
+  ;; STARTUP keyword.
+  (should
+   (equal '(t t)
+	  (org-test-with-temp-text "#+STARTUP: fold odd"
+	    (org-mode-restart)
+	    (list org-startup-folded org-odd-levels-only))))
+  ;; TODO keywords.
+  (should
+   (equal '(("A" "B") ("C"))
+	  (org-test-with-temp-text "#+TODO: A B | C"
+	    (org-mode-restart)
+	    (list org-not-done-keywords org-done-keywords))))
+  (should
+   (equal '(("A" "B") ("C"))
+	  (org-test-with-temp-text "#+TYP_TODO: A B | C"
+	    (org-mode-restart)
+	    (list org-not-done-keywords org-done-keywords))))
+  (should
+   (equal '((:startgroup) ("A" . ?a) (:endgroup))
+	  (org-test-with-temp-text "#+TODO: A(a)"
+	    (org-mode-restart)
+	    org-todo-key-alist)))
+  (should
+   (equal '(("D" note nil) ("C" time nil) ("B" note time))
+	  (org-test-with-temp-text "#+TODO: A(a) B(b@/!) | C(c!) D(d@)"
+	    (org-mode-restart)
+	    org-todo-log-states)))
+  ;; Enter SETUPFILE keyword.
+  (should
+   (equal "1"
+	  (org-test-with-temp-text
+	      (format "#+SETUPFILE: \"%s/examples/setupfile.org\"" org-test-dir)
+	    (org-mode-restart)
+	    (cdr (assoc "a" org-file-properties))))))
+
+
+
 ;;; Links
 
 ;;;; Coderefs
