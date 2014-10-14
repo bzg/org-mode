@@ -15337,6 +15337,7 @@ return nil."
 	      (cons (point) (progn (goto-char (match-end 0))
 				   (line-beginning-position))))
 	     (force
+	      (goto-char beg)
 	      (org-insert-property-drawer)
 	      (let ((pos (save-excursion (search-forward ":END:")
 					 (line-beginning-position))))

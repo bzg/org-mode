@@ -2366,7 +2366,13 @@ Text.
    (string-match "^ *:A: +1$"
 		 (org-test-with-temp-text "* H"
 		   (org-entry-put (point) "A" "1")
-		   (buffer-string)))))
+		   (buffer-string))))
+  ;; Special case: two consecutive headlines.
+  (should
+   (string-match "\\* A\n *:PROPERTIES:"
+    (org-test-with-temp-text "* A\n** B"
+      (org-entry-put (point) "A" "1")
+      (buffer-string)))))
 
 
 ;;; Radio Targets
