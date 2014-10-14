@@ -10,6 +10,41 @@ Please send Org bug reports to emacs-orgmode@gnu.org.
 
 * Version 8.3
 ** Incompatible changes
+*** Properties drawers syntax changes
+Properties drawers are now required to be located right after
+a headline and its planning line, when applicable.
+
+It will break some documents as TODO states changes were sometimes
+logged before the property drawer.  The following function will repair
+them.
+
+#+BEGIN_SRC emacs-lisp
+(defun org-repair-property-drawers ()
+  "Fix properties drawers in current buffer.
+Ignore non Org buffers."
+  (when (eq major-mode 'org-mode)
+    (org-with-wide-buffer
+     (goto-char (point-min))
+     (let ((case-fold-search t)
+           (inline-re (and (featurep 'org-inlinetask)
+                           (concat (org-inlinetask-outline-regexp)
+                                   "END[ \t]*$"))))
+       (org-map-entries
+        (lambda ()
+          (unless (and inline-re (org-looking-at-p inline-re))
+            (save-excursion
+              (let ((end (save-excursion (outline-next-heading) (point))))
+                (forward-line)
+                (when (org-looking-at-p org-planning-line-re) (forward-line))
+                (when (and (< (point) end)
+                           (not (org-looking-at-p org-property-drawer-re))
+                           (save-excursion
+                             (re-search-forward org-property-drawer-re end t)))
+                  (insert (delete-and-extract-region
+                           (match-beginning 0)
+                           (min (1+ (match-end 0)) end)))
+                  (unless (bolp) (insert "\n"))))))))))))
+#+END_SRC 
 *** No default title is provided when =TITLE= keyword is missing
 Skipping =TITLE= keyword no longer provides the current file name, or
 buffer name, as the title. Instead, simply ignore the title.
