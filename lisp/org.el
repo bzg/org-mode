@@ -4941,303 +4941,302 @@ Support for group tags is controlled by the option
   (message "Groups tags support has been turned %s"
 	   (if org-group-tags "on" "off")))
 
-(defun org-set-regexps-and-options-for-tags ()
-  "Precompute variables used for tags."
+(defun org-set-regexps-and-options (&optional tags-only)
+  "Precompute regular expressions used in the current buffer.
+When optional argument TAGS-ONLY is non-nil, only compute tags
+related expressions."
   (when (derived-mode-p 'org-mode)
-    (org-set-local 'org-file-tags nil)
-    (let ((re (org-make-options-regexp '("FILETAGS" "TAGS")))
-	  (splitre "[ \t]+")
-	  (start 0)
-	  tags ftags key value)
-      (save-excursion
-	(save-restriction
-	  (widen)
-	  (goto-char (point-min))
-	  (while (re-search-forward re nil t)
-	    (setq key (upcase (org-match-string-no-properties 1))
-		  value (org-match-string-no-properties 2))
-	    (if (stringp value) (setq value (org-trim value)))
-	    (cond
-	     ((equal key "TAGS")
-	      (setq tags (append tags (if tags '("\\n") nil)
-				 (org-split-string value splitre))))
-	     ((equal key "FILETAGS")
-	      (when (string-match "\\S-" value)
-		(setq ftags
-		      (append
-		       ftags
-		       (apply 'append
-			      (mapcar (lambda (x) (org-split-string x ":"))
-				      (org-split-string value)))))))))))
-      ;; Process the file tags.
-      (and ftags (org-set-local 'org-file-tags
-				(mapcar 'org-add-prop-inherited ftags)))
-      (org-set-local 'org-tag-groups-alist nil)
-      ;; Process the tags.
-      (when (and (not tags) org-tag-alist)
-	(setq tags
-	      (mapcar
-	       (lambda (tg) (cond ((eq (car tg) :startgroup) "{")
-				  ((eq (car tg) :endgroup) "}")
-				  ((eq (car tg) :grouptags) ":")
-				  ((eq (car tg) :newline) "\n")
-				  (t (concat (car tg)
-					     (if (characterp (cdr tg))
-						 (format "(%s)" (char-to-string (cdr tg))) "")))))
-	       org-tag-alist)))
-      (let (e tgs g)
-	(while (setq e (pop tags))
-	  (cond
-	   ((equal e "{")
-	    (progn (push '(:startgroup) tgs)
-		   (when (equal (nth 1 tags) ":")
-		     (push (list (replace-regexp-in-string
-				  "(.+)$" "" (nth 0 tags)))
-			   org-tag-groups-alist)
-		     (setq g 0))))
-	   ((equal e ":") (push '(:grouptags) tgs))
-	   ((equal e "}") (push '(:endgroup) tgs) (if g (setq g nil)))
-	   ((equal e "\\n") (push '(:newline) tgs))
-	   ((string-match (org-re "^\\([[:alnum:]_@#%]+\\)(\\(.\\))$") e)
-	    (push (cons (match-string 1 e)
-			(string-to-char (match-string 2 e))) tgs)
-	    (if (and g (> g 0))
-		(setcar org-tag-groups-alist
-			(append (car org-tag-groups-alist)
-				(list (match-string 1 e)))))
-	    (if g (setq g (1+ g))))
-	   (t (push (list e) tgs)
-	      (if (and g (> g 0))
-		  (setcar org-tag-groups-alist
-			  (append (car org-tag-groups-alist) (list e))))
-	      (if g (setq g (1+ g))))))
-	(org-set-local 'org-tag-alist nil)
-	(while (setq e (pop tgs))
-	  (or (and (stringp (car e))
-		   (assoc (car e) org-tag-alist))
-	      (push e org-tag-alist)))
-	;; Return a list with tag variables
-	(list org-file-tags org-tag-alist org-tag-groups-alist)))))
-
-(defvar org-ota nil)
-(defun org-set-regexps-and-options ()
-  "Precompute regular expressions used in the current buffer."
-  (when (derived-mode-p 'org-mode)
-    (org-set-local 'org-todo-kwd-alist nil)
-    (org-set-local 'org-todo-key-alist nil)
-    (org-set-local 'org-todo-key-trigger nil)
-    (org-set-local 'org-todo-keywords-1 nil)
-    (org-set-local 'org-done-keywords nil)
-    (org-set-local 'org-todo-heads nil)
-    (org-set-local 'org-todo-sets nil)
-    (org-set-local 'org-todo-log-states nil)
-    (org-set-local 'org-file-properties nil)
-    (let ((re (org-make-options-regexp
-	       '("CATEGORY" "TODO" "COLUMNS" "STARTUP" "ARCHIVE"
-		 "LINK" "PRIORITIES" "CONSTANTS" "PROPERTY" "DRAWERS"
-		 "SETUPFILE" "OPTIONS")
-	       "\\(?:[a-zA-Z][0-9a-zA-Z_]*_TODO\\)"))
-	  (splitre "[ \t]+")
-	  (scripts org-use-sub-superscripts)
-	  kwds kws0 kwsa key log value cat arch const links hw dws
-	  tail sep kws1 prio props drawers ext-setup-or-nil setup-contents
-	  (start 0))
-      (save-excursion
-	(save-restriction
-	  (widen)
-	  (goto-char (point-min))
-	  (while
-	      (or (and
-		   ext-setup-or-nil
-		   (not org-ota)
-		   (let (ret)
-		     (with-temp-buffer
-		       (insert ext-setup-or-nil)
-		       (let ((major-mode 'org-mode) org-ota)
-			 (setq ret (save-match-data
-				     (org-set-regexps-and-options-for-tags)))))
-		     ;; Append setupfile tags to existing tags
-		     (setq org-ota t)
-		     (setq org-file-tags
-			   (delq nil (append org-file-tags (nth 0 ret)))
-			   org-tag-alist
-			   (delq nil (append org-tag-alist (nth 1 ret)))
-			   org-tag-groups-alist
-			   (delq nil (append org-tag-groups-alist (nth 2 ret))))))
-		  (and ext-setup-or-nil
-		       (string-match re ext-setup-or-nil start)
-		       (setq start (match-end 0)))
-		  (and (setq ext-setup-or-nil nil start 0)
-		       (re-search-forward re nil t)))
-	    (setq key (upcase (match-string 1 ext-setup-or-nil))
-		  value (org-match-string-no-properties 2 ext-setup-or-nil))
-	    (if (stringp value) (setq value (org-trim value)))
-	    (cond
-	     ((equal key "CATEGORY")
-	      (setq cat value))
-	     ((member key '("SEQ_TODO" "TODO"))
-	      (push (cons 'sequence (org-split-string value splitre)) kwds))
-	     ((equal key "TYP_TODO")
-	      (push (cons 'type (org-split-string value splitre)) kwds))
- 	     ((string-match "\\`\\([a-zA-Z][0-9a-zA-Z_]*\\)_TODO\\'" key)
-	      ;; general TODO-like setup
- 	      (push (cons (intern (downcase (match-string 1 key)))
-			  (org-split-string value splitre)) kwds))
-	     ((equal key "COLUMNS")
-	      (org-set-local 'org-columns-default-format value))
-	     ((equal key "LINK")
-	      (when (string-match "^\\(\\S-+\\)[ \t]+\\(.+\\)" value)
-		(push (cons (match-string 1 value)
-			    (org-trim (match-string 2 value)))
-		      links)))
-	     ((equal key "PRIORITIES")
-	      (setq prio (org-split-string value " +")))
-	     ((equal key "PROPERTY")
-	      (when (string-match "\\(\\S-+\\)\\s-+\\(.*\\)" value)
-		(setq props (org--update-property-plist (match-string 1 value)
-							(match-string 2 value)
-							props))))
-	     ((equal key "CONSTANTS")
-	      (org-table-set-constants))
-	     ((equal key "STARTUP")
-	      (let ((opts (org-split-string value splitre))
-		    l var val)
-		(while (setq l (pop opts))
-		  (when (setq l (assoc l org-startup-options))
-		    (setq var (nth 1 l) val (nth 2 l))
-		    (if (not (nth 3 l))
-			(set (make-local-variable var) val)
-		      (if (not (listp (symbol-value var)))
-			  (set (make-local-variable var) nil))
-		      (set (make-local-variable var) (symbol-value var))
-		      (add-to-list var val))))))
-	     ((equal key "ARCHIVE")
-	      (setq arch value)
-	      (remove-text-properties 0 (length arch)
-				      '(face t fontified t) arch))
-	     ((equal key "OPTIONS")
-	      (if (string-match "\\([ \t]\\|\\`\\)\\^:\\(t\\|nil\\|{}\\)" value)
-		  (setq scripts (read (match-string 2 value)))))
-	     ((and (equal key "SETUPFILE")
-		   ;; Prevent checking in Gnus messages
-		   (not buffer-read-only))
-	      (setq setup-contents (org-file-contents
-				    (expand-file-name
-				     (org-remove-double-quotes value))
-				    'noerror))
-	      (if (not ext-setup-or-nil)
-		  (setq ext-setup-or-nil setup-contents start 0)
-		(setq ext-setup-or-nil
-		      (concat (substring ext-setup-or-nil 0 start)
-			      "\n" setup-contents "\n"
-			      (substring ext-setup-or-nil start)))))))))
-      (org-set-local 'org-use-sub-superscripts scripts)
-      (when cat
-	(org-set-local 'org-category (intern cat))
-	(push (cons "CATEGORY" cat) props))
-      (when prio
-	(if (< (length prio) 3) (setq prio '("A" "C" "B")))
-	(setq prio (mapcar 'string-to-char prio))
-	(org-set-local 'org-highest-priority (nth 0 prio))
-	(org-set-local 'org-lowest-priority  (nth 1 prio))
-	(org-set-local 'org-default-priority (nth 2 prio)))
-      (and props (org-set-local 'org-file-properties props))
-      (and arch (org-set-local 'org-archive-location arch))
-      (and links (setq org-link-abbrev-alist-local (nreverse links)))
-      ;; Process the TODO keywords
-      (unless kwds
-	;; Use the global values as if they had been given locally.
-	(setq kwds (default-value 'org-todo-keywords))
-	(if (stringp (car kwds))
-	    (setq kwds (list (cons org-todo-interpretation
-				   (default-value 'org-todo-keywords)))))
-	(setq kwds (reverse kwds)))
-      (setq kwds (nreverse kwds))
-      (let (inter kws kw)
-	(while (setq kws (pop kwds))
- 	  (let ((kws (or
-		      (run-hook-with-args-until-success
- 		       'org-todo-setup-filter-hook kws)
-		      kws)))
-	    (setq inter (pop kws) sep (member "|" kws)
-		  kws0 (delete "|" (copy-sequence kws))
-		  kwsa nil
-		  kws1 (mapcar
-			(lambda (x)
-			  ;;                     1              2
-			  (if (string-match "^\\(.*?\\)\\(?:(\\([^!@/]\\)?.*?)\\)?$" x)
-			      (progn
-				(setq kw (match-string 1 x)
-				      key (and (match-end 2) (match-string 2 x))
-				      log (org-extract-log-state-settings x))
-				(push (cons kw (and key (string-to-char key))) kwsa)
-				(and log (push log org-todo-log-states))
-				kw)
-			    (error "Invalid TODO keyword %s" x)))
-			kws0)
-		  kwsa (if kwsa (append '((:startgroup))
-					(nreverse kwsa)
-					'((:endgroup))))
-		  hw (car kws1)
-		  dws (if sep (org-remove-keyword-keys (cdr sep)) (last kws1))
-		  tail (list inter hw (car dws) (org-last dws))))
-	  (add-to-list 'org-todo-heads hw 'append)
-	  (push kws1 org-todo-sets)
-	  (setq org-done-keywords (append org-done-keywords dws nil))
-	  (setq org-todo-key-alist (append org-todo-key-alist kwsa))
-	  (mapc (lambda (x) (push (cons x tail) org-todo-kwd-alist)) kws1)
-	  (setq org-todo-keywords-1 (append org-todo-keywords-1 kws1 nil)))
+    (let ((alist (org--setup-collect-keywords
+		  (org-make-options-regexp
+		   (append '("FILETAGS" "TAGS" "SETUPFILE")
+			   (and (not tags-only)
+				'("ARCHIVE" "CATEGORY" "COLUMNS" "CONSTANTS"
+				  "LINK" "PRIORITIES" "PROPERTY" "SEQ_TODO"
+				  "STARTUP" "TODO" "TYP_TODO")))))))
+      (org--setup-process-tags
+       (cdr (assq 'tags alist)) (cdr (assq 'filetags alist)))
+      (unless tags-only
+	;; File properties.
+	(org-set-local 'org-file-properties (cdr (assq 'property alist)))
+	;; Archive location.
+	(let ((archive (cdr (assq 'archive alist))))
+	  (when archive (org-set-local 'org-archive-location archive)))
+	;; Category.
+	(let ((cat (org-string-nw-p (cdr (assq 'category alist)))))
+	  (when cat
+	    (org-set-local 'org-category (intern cat))
+	    (org-set-local 'org-file-properties
+			   (org--update-property-plist
+			    "CATEGORY" cat org-file-properties))))
+	;; Columns.
+	(let ((column (cdr (assq 'columns alist))))
+	  (when column (org-set-local 'org-columns-default-format column)))
+	;; Constants.
+	(setq org-table-formula-constants-local (cdr (assq 'constants alist)))
+	;; Link abbreviations.
+	(let ((links (cdr (assq 'link alist))))
+	  (when links (setq org-link-abbrev-alist-local (nreverse links))))
+	;; Priorities.
+	(let ((priorities (cdr (assq 'priorities alist))))
+	  (when priorities
+	    (org-set-local 'org-highest-priority (nth 0 priorities))
+	    (org-set-local 'org-lowest-priority (nth 1 priorities))
+	    (org-set-local 'org-default-priority (nth 2 priorities))))
+	;; Startup options.
+	(let ((startup (cdr (assq 'startup alist))))
+	  (dolist (option startup)
+	    (let ((entry (assoc-string option org-startup-options t)))
+	      (let ((var (nth 1 entry))
+		    (val (nth 2 entry)))
+		(if (not (nth 3 entry)) (org-set-local var val)
+		  (unless (listp (symbol-value var))
+		    (org-set-local var nil))
+		  (add-to-list var val))))))
+	;; TODO keywords.
+	(org-set-local 'org-todo-kwd-alist nil)
+	(org-set-local 'org-todo-key-alist nil)
+	(org-set-local 'org-todo-key-trigger nil)
+	(org-set-local 'org-todo-keywords-1 nil)
+	(org-set-local 'org-done-keywords nil)
+	(org-set-local 'org-todo-heads nil)
+	(org-set-local 'org-todo-sets nil)
+	(org-set-local 'org-todo-log-states nil)
+	(let ((todo-sequences
+	       (reverse
+		(or (cdr (assq 'todo alist))
+		    (let ((d (default-value 'org-todo-keywords)))
+		      (if (not (stringp (car d))) d
+			;; XXX: Backward compatibility code.
+			(list (cons org-todo-interpretation d))))))))
+	  (dolist (sequence todo-sequences)
+	    (let* ((sequence (or (run-hook-with-args-until-success
+				  'org-todo-setup-filter-hook sequence)
+				 sequence))
+		   (sequence-type (car sequence))
+		   (keywords (cdr sequence))
+		   (sep (member "|" keywords))
+		   names alist)
+	      (dolist (k (remove "|" keywords))
+		(unless (string-match "^\\(.*?\\)\\(?:(\\([^!@/]\\)?.*?)\\)?$"
+				      k)
+		  (error "Invalid TODO keyword %s" k))
+		(let ((name (match-string 1 k))
+		      (key (match-string 2 k))
+		      (log (org-extract-log-state-settings k)))
+		  (push name names)
+		  (push (cons name (and key (string-to-char key))) alist)
+		  (when log (push log org-todo-log-states))))
+	      (let* ((names (nreverse names))
+		     (done (if sep (org-remove-keyword-keys (cdr sep))
+			     (last names)))
+		     (head (car names))
+		     (tail (list sequence-type head (car done) (org-last done))))
+		(add-to-list 'org-todo-heads head 'append)
+		(push names org-todo-sets)
+		(setq org-done-keywords (append org-done-keywords done nil))
+		(setq org-todo-keywords-1 (append org-todo-keywords-1 names nil))
+		(setq org-todo-key-alist
+		      (append org-todo-key-alist
+			      (and alist
+				   (append '((:startgroup))
+					   (nreverse alist)
+					   '((:endgroup))))))
+		(dolist (k names) (push (cons k tail) org-todo-kwd-alist))))))
 	(setq org-todo-sets (nreverse org-todo-sets)
 	      org-todo-kwd-alist (nreverse org-todo-kwd-alist)
-	      org-todo-key-trigger (delq nil (mapcar 'cdr org-todo-key-alist))
-	      org-todo-key-alist (org-assign-fast-keys org-todo-key-alist)))
-      ;; Compute the regular expressions and other local variables.
-      ;; Using `org-outline-regexp-bol' would complicate them much,
-      ;; because of the fixed white space at the end of that string.
-      (if (not org-done-keywords)
-	  (setq org-done-keywords (and org-todo-keywords-1
-				       (list (org-last org-todo-keywords-1)))))
-      (setq org-not-done-keywords
-	    (org-delete-all org-done-keywords (copy-sequence org-todo-keywords-1))
-	    org-todo-regexp
-	    (concat "\\("
-		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
-		    "\\)")
-	    org-not-done-regexp
-	    (concat "\\("
-		    (mapconcat 'regexp-quote org-not-done-keywords "\\|")
-		    "\\)")
-	    org-not-done-heading-regexp
-	    (format org-heading-keyword-regexp-format org-not-done-regexp)
-	    org-todo-line-regexp
-	    (format org-heading-keyword-maybe-regexp-format org-todo-regexp)
-	    org-complex-heading-regexp
-	    (concat "^\\(\\*+\\)"
-		    "\\(?: +" org-todo-regexp "\\)?"
-		    "\\(?: +\\(\\[#.\\]\\)\\)?"
-		    "\\(?: +\\(.*?\\)\\)??"
-		    (org-re "\\(?:[ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)?")
-		    "[ \t]*$")
-	    org-complex-heading-regexp-format
-	    (concat "^\\(\\*+\\)"
-		    "\\(?: +" org-todo-regexp "\\)?"
-		    "\\(?: +\\(\\[#.\\]\\)\\)?"
-		    "\\(?: +"
-		    ;; Stats cookies can be stuck to body.
-		    "\\(?:\\[[0-9%%/]+\\] *\\)*"
-		    "\\(%s\\)"
-		    "\\(?: *\\[[0-9%%/]+\\]\\)*"
-		    "\\)"
-		    (org-re "\\(?:[ \t]+\\(:[[:alnum:]_@#%%:]+:\\)\\)?")
-		    "[ \t]*$")
-	    org-todo-line-tags-regexp
-	    (concat "^\\(\\*+\\)"
-		    "\\(?: +" org-todo-regexp "\\)?"
-		    "\\(?: +\\(.*?\\)\\)??"
-		    (org-re "\\(?:[ \t]+\\(:[[:alnum:]:_@#%]+:\\)\\)?")
-		    "[ \t]*$"))
-      (setq org-ota nil)
-      (org-compute-latex-and-related-regexp))))
+	      org-todo-key-trigger (delq nil (mapcar #'cdr org-todo-key-alist))
+	      org-todo-key-alist (org-assign-fast-keys org-todo-key-alist))
+	;; Compute the regular expressions and other local variables.
+	;; Using `org-outline-regexp-bol' would complicate them much,
+	;; because of the fixed white space at the end of that string.
+	(if (not org-done-keywords)
+	    (setq org-done-keywords
+		  (and org-todo-keywords-1 (last org-todo-keywords-1))))
+	(setq org-not-done-keywords
+	      (org-delete-all org-done-keywords
+			      (copy-sequence org-todo-keywords-1))
+	      org-todo-regexp (regexp-opt org-todo-keywords-1 t)
+	      org-not-done-regexp (regexp-opt org-not-done-keywords t)
+	      org-not-done-heading-regexp
+	      (format org-heading-keyword-regexp-format org-not-done-regexp)
+	      org-todo-line-regexp
+	      (format org-heading-keyword-maybe-regexp-format org-todo-regexp)
+	      org-complex-heading-regexp
+	      (concat "^\\(\\*+\\)"
+		      "\\(?: +" org-todo-regexp "\\)?"
+		      "\\(?: +\\(\\[#.\\]\\)\\)?"
+		      "\\(?: +\\(.*?\\)\\)??"
+		      (org-re "\\(?:[ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)?")
+		      "[ \t]*$")
+	      org-complex-heading-regexp-format
+	      (concat "^\\(\\*+\\)"
+		      "\\(?: +" org-todo-regexp "\\)?"
+		      "\\(?: +\\(\\[#.\\]\\)\\)?"
+		      "\\(?: +"
+		      ;; Stats cookies can be stuck to body.
+		      "\\(?:\\[[0-9%%/]+\\] *\\)*"
+		      "\\(%s\\)"
+		      "\\(?: *\\[[0-9%%/]+\\]\\)*"
+		      "\\)"
+		      (org-re "\\(?:[ \t]+\\(:[[:alnum:]_@#%%:]+:\\)\\)?")
+		      "[ \t]*$")
+	      org-todo-line-tags-regexp
+	      (concat "^\\(\\*+\\)"
+		      "\\(?: +" org-todo-regexp "\\)?"
+		      "\\(?: +\\(.*?\\)\\)??"
+		      (org-re "\\(?:[ \t]+\\(:[[:alnum:]:_@#%]+:\\)\\)?")
+		      "[ \t]*$"))
+	(org-compute-latex-and-related-regexp)))))
+
+(defun org--setup-collect-keywords (regexp &optional files alist)
+  "Return setup keywords values as an alist.
+
+REGEXP matches a subset of setup keywords.  FILES is a list of
+file names already visited.  It is used to avoid circular setup
+files.  ALIST, when non-nil, is the alist computed so far.
+
+Return value contains the following keys: `archive', `category',
+`columns', `constants', `filetags', `link', `priorities',
+`property', `startup', `tags' and `todo'."
+  (org-with-wide-buffer
+   (goto-char (point-min))
+   (let ((case-fold-search t))
+     (while (re-search-forward regexp nil t)
+       (let ((element (org-element-at-point)))
+	 (when (eq (org-element-type element) 'keyword)
+	   (let ((key (org-element-property :key element))
+		 (value (org-element-property :value element)))
+	     (cond
+	      ((equal key "ARCHIVE")
+	       (when (org-string-nw-p value)
+		 (push (cons 'archive value) alist)))
+	      ((equal key "CATEGORY") (push (cons 'category value) alist))
+	      ((equal key "COLUMNS") (push (cons 'columns value) alist))
+	      ((equal key "CONSTANTS")
+	       (let* ((constants (assq 'constants alist))
+		      (store (cdr constants)))
+		 (dolist (pair (org-split-string value))
+		   (when (string-match "^\\([a-zA-Z0][_a-zA-Z0-9]*\\)=\\(.*\\)"
+				       pair)
+		     (let* ((name (match-string 1 pair))
+			    (value (match-string 2 pair))
+			    (old (assoc name store)))
+		       (if old (setcdr old value)
+			 (push (cons name value) store)))))
+		 (if constants (setcdr constants store)
+		   (push (cons 'constants store) alist))))
+	      ((equal key "FILETAGS")
+	       (when (org-string-nw-p value)
+		 (let ((old (assq 'filetags alist))
+		       (new (apply #'nconc
+				   (mapcar (lambda (x) (org-split-string x ":"))
+					   (org-split-string value)))))
+		   (if old (setcdr old (nconc new (cdr old)))
+		     (push (cons 'filetags new) alist)))))
+	      ((equal key "LINK")
+	       (when (string-match "\\`\\(\\S-+\\)[ \t]+\\(.+\\)" value)
+		 (let ((links (assq 'link alist))
+		       (pair (cons (org-match-string-no-properties 1 value)
+				   (org-match-string-no-properties 2 value))))
+		   (if links (push pair (cdr links))
+		     (push (list 'link pair) alist)))))
+	      ((equal key "PRIORITIES")
+	       (push (cons 'priorities
+			   (let ((prio (org-split-string value)))
+			     (if (< (length prio) 3) '(?A ?C ?B)
+			       (mapcar #'string-to-char prio))))
+		     alist))
+	      ((equal key "PROPERTY")
+	       (when (string-match "\\(\\S-+\\)[ \t]+\\(.*\\)" value)
+		 (let* ((property (assq 'property alist))
+			(value (org--update-property-plist
+				(org-match-string-no-properties 1 value)
+				(org-match-string-no-properties 2 value)
+				(cdr property))))
+		   (if property (setcdr property value)
+		     (push (cons 'property value) alist)))))
+	      ((equal key "STARTUP")
+	       (let ((startup (assq 'startup alist)))
+		 (if startup
+		     (setcdr startup
+			     (nconc (cdr startup) (org-split-string value)))
+		   (push (cons 'startup (org-split-string value)) alist))))
+	      ((equal key "TAGS")
+	       (let ((tag-cell (assq 'tags alist)))
+		 (if tag-cell
+		     (setcdr tag-cell
+			     (nconc (cdr tag-cell)
+				    '("\\n")
+				    (org-split-string value)))
+		   (push (cons 'tags (org-split-string value)) alist))))
+	      ((member key '("TODO" "SEQ_TODO" "TYP_TODO"))
+	       (let ((todo (cdr (assq 'todo alist)))
+		     (value (cons (if (equal key "TYP_TODO") 'type 'sequence)
+				  (org-split-string value))))
+		 (if todo (push value todo)
+		   (push (list 'todo value) alist))))
+	      ((equal key "SETUPFILE")
+	       (unless buffer-read-only ; Do not check in Gnus messages.
+		 (let ((f (expand-file-name (org-remove-double-quotes value))))
+		   (when (and (org-string-nw-p f)
+			      (file-readable-p f)
+			      (not (member f files)))
+		     (with-temp-buffer
+		       (let ((org-inhibit-startup t)) (org-mode))
+		       (insert-file-contents f)
+		       (setq alist
+			     (org--setup-collect-keywords
+			      regexp alist (cons f files)))))))))))))))
+  alist)
+
+(defun org--setup-process-tags (tags filetags)
+  "Precompute variables used for tags.
+TAGS is a list of tags and tag group symbols, as strings.
+FILETAGS is a list of tags, as strings."
+  ;; Process the file tags.
+  (org-set-local 'org-file-tags
+		 (mapcar #'org-add-prop-inherited filetags))
+  ;; Provide default tags if no local tags are found.
+  (when (and (not tags) org-tag-alist)
+    (setq tags
+	  (mapcar (lambda (tag)
+		    (case (car tag)
+		      (:startgroup "{")
+		      (:endgroup "}")
+		      (:grouptags ":")
+		      (:newline "\\n")
+		      (otherwise (concat (car tag)
+					 (and (characterp (cdr tag))
+					      (format "(%c)" (cdr tag)))))))
+		  org-tag-alist)))
+  ;; Process the tags.
+  (org-set-local 'org-tag-groups-alist nil)
+  (org-set-local 'org-tag-alist nil)
+  (let (group-flag)
+    (dolist (e tags)
+      (cond
+       ((equal e "{")
+	(push '(:startgroup) org-tag-alist)
+	(setq group-flag t))
+       ((equal e "}")
+	(push '(:endgroup) org-tag-alist)
+	(setq group-flag nil))
+       ((equal e ":")
+	(push '(:grouptags) org-tag-alist)
+	(setq group-flag 'append))
+       ((equal e "\\n") (push '(:newline) org-tag-alist))
+       ((string-match (org-re "\\`\\([[:alnum:]_@#%]+\\)\\(?:(\\(.\\))\\)?\\'")
+		      e)
+	(let ((tag (match-string 1 e))
+	      (key (and (match-beginning 2)
+			(string-to-char (match-string 2 e)))))
+	  (cond ((eq group-flag 'append)
+		 (setcar org-tag-groups-alist
+			 (append (car org-tag-groups-alist) (list tag))))
+		(group-flag (push (list tag) org-tag-groups-alist)))
+	  (unless (assoc tag org-tag-alist)
+	    (push (cons tag key) org-tag-alist)))))))
+  (setq org-tag-alist (nreverse org-tag-alist)))
 
 (defun org-file-contents (file &optional noerror)
   "Return the contents of FILE, as a string."
@@ -5419,7 +5418,6 @@ The following commands are available:
 						   org-ellipsis)))
 	       (if (stringp org-ellipsis) org-ellipsis "..."))))
     (setq buffer-display-table org-display-table))
-  (org-set-regexps-and-options-for-tags)
   (org-set-regexps-and-options)
   (org-set-font-lock-defaults)
   (when (and org-tag-faces (not org-tags-special-faces-re))
@@ -18399,15 +18397,8 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	      (org-check-agenda-file file)
 	      (set-buffer (org-get-agenda-file-buffer file)))
 	    (widen)
-	    (org-set-regexps-and-options-for-tags)
+	    (org-set-regexps-and-options 'tags-only)
 	    (setq pos (point))
-	    (goto-char (point-min))
-	    (let ((case-fold-search t))
-	      (when (search-forward "#+setupfile" nil t)
-		;; Don't set all regexps and options systematically as
-		;; this is only run for setting agenda tags from setup
-		;; file
-		(org-set-regexps-and-options)))
 	    (or (memq 'category org-agenda-ignore-properties)
 		(org-refresh-category-properties))
 	    (or (memq 'stats org-agenda-ignore-properties)
@@ -24397,12 +24388,13 @@ Show the heading too, if it is currently invisible."
       (org-cycle-hide-drawers 'children))))
 
 (defun org-make-options-regexp (kwds &optional extra)
-  "Make a regular expression for keyword lines."
-  (concat
-   "^[ \t]*#\\+\\("
-   (mapconcat 'regexp-quote kwds "\\|")
-   (if extra (concat "\\|" extra))
-   "\\):[ \t]*\\(.*\\)"))
+  "Make a regular expression for keyword lines.
+KWDS is a list of keywords, as strings.  Optional argument EXTRA,
+when non-nil, is a regexp matching keywords names."
+  (concat "^[ \t]*#\\+\\("
+	  (regexp-opt kwds)
+	  (and extra (concat (and kwds "\\|") extra))
+	  "\\):[ \t]*\\(.*\\)"))
 
 ;; Make isearch reveal the necessary context
 (defun org-isearch-end ()

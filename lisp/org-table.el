@@ -2996,24 +2996,6 @@ list, 'literal is for the format specifier L."
 		   ",") "]"))))
 
 ;;;###autoload
-(defun org-table-set-constants ()
-  "Set `org-table-formula-constants-local' in the current buffer."
-  (let (cst consts const-str)
-    (save-excursion
-      (goto-char (point-min))
-      (while (re-search-forward "^[ \t]*#\\+CONSTANTS: \\(.*\\)" nil t)
-	(setq const-str (substring-no-properties (match-string 1)))
-	(setq consts (append consts (org-split-string const-str "[ \t]+")))
-	(when consts
-	  (let (e)
-	    (while (setq e (pop consts))
-	      (when (string-match "^\\([a-zA-Z0][_a-zA-Z0-9]*\\)=\\(.*\\)" e)
-		(if (assoc-string (match-string 1 e) cst)
-		    (setq cst (delete (assoc-string (match-string 1 e) cst) cst)))
-		(push (cons (match-string 1 e) (match-string 2 e)) cst)))
-	    (setq org-table-formula-constants-local cst)))))))
-
-;;;###autoload
 (defun org-table-recalculate (&optional all noalign)
   "Recalculate the current table line by applying all stored formulas.
 With prefix arg ALL, do this for all lines in the table.
