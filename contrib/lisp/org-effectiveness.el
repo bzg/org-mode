@@ -127,7 +127,7 @@ many TODO pending"
       (concat "0" (number-to-string m))
     (number-to-string m)))
 
-(defun org-effectiveness-plot(startdate enddate)
+(defun org-effectiveness-plot(startdate enddate &optional save)
   (interactive "sGive me the start date: \nsGive me the end date: " startdate enddate)
   (setq dates (org-effectiveness-check-dates startdate enddate))
   (setq syear (cadr (assoc 'startyear dates)))
@@ -165,9 +165,19 @@ many TODO pending"
 	(setq month (+ 1 month))))
       (write-region str nil "/tmp/org-effectiveness"))
 ;; Create the bar graph 
+  (if (eq save t)
+      (setq strplot "/usr/bin/gnuplot -e 'set term png; set output \"/tmp/org-effectiveness.png\"; plot \"/tmp/org-effectiveness\" using 2:xticlabels(1) with histograms' -p")
+    (setq strplot "/usr/bin/gnuplot -e 'plot \"/tmp/org-effectiveness\" using 2:xticlabels(1) with histograms' -p"))
   (if (file-exists-p "/usr/bin/gnuplot")
-      (call-process "/bin/bash" nil t nil "-c" "/usr/bin/gnuplot -e 'plot \"/tmp/org-effectiveness\" using 2:xticlabels(1) with histograms' -p")
+      (call-process "/bin/bash" nil t nil "-c" strplot)
     (message "gnuplot is not installed")))
+
+(defun org-effectiveness-plot-save(startdate enddate &optional save)
+  (interactive "sGive me the start date: \nsGive me the end date: " startdate enddate)
+  (org-effectiveness-plot startdate enddate t))
+
+;; (defun org-effectiveness-plot(startdate enddate)
+
 
 (defun org-effectiveness-ascii-bar(n &optional label)
   "Print a bar with the percentage from 0 to 100 printed in ascii"
