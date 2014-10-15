@@ -3258,11 +3258,17 @@ functions.
 @cindex plot tables using Gnuplot
 @cindex #+PLOT
 
-Org-Plot can produce 2D and 3D graphs of information stored in org tables
-using @file{Gnuplot} @uref{http://www.gnuplot.info/} and @file{gnuplot-mode}
+Org-Plot can produce graphs of information stored in org tables, either
+graphically or in ASCII-art.
+
+@subheading Graphical plots using @file{Gnuplot}
+
+Org-Plot produces 2D and 3D graphs using @file{Gnuplot}
+@uref{http://www.gnuplot.info/} and @file{gnuplot-mode}
 @uref{http://xafs.org/BruceRavel/GnuplotMode}.  To see this in action, ensure
 that you have both Gnuplot and Gnuplot mode installed on your system, then
-call @code{org-plot/gnuplot} on the following table.
+call @kbd{C-c " g} or @kbd{M-x org-plot/gnuplot @key{RET}} on the following
+table.
 
 @example
 @group
@@ -3280,8 +3286,8 @@ call @code{org-plot/gnuplot} on the following table.
 Notice that Org Plot is smart enough to apply the table's headers as labels.
 Further control over the labels, type, content, and appearance of plots can
 be exercised through the @code{#+PLOT:} lines preceding a table.  See below
-for a complete list of Org-plot options.  For more information and examples
-see the Org-plot tutorial at
+for a complete list of Org-plot options.  The @code{#+PLOT:} lines are
+optional.  For more information and examples see the Org-plot tutorial at
 @uref{http://orgmode.org/worg/org-tutorials/org-plot.html}.
 
 @subsubheading Plot Options
@@ -3335,6 +3341,47 @@ instance of @code{$datafile} in the specified script will be replaced with
 the path to the generated data file.  Note: even if you set this option, you
 may still want to specify the plot type, as that can impact the content of
 the data file.
+@end table
+
+@subheading ASCII bar plots
+
+While the cursor is on a column, typing @kbd{C-c \" a} or
+@kbd{M-x orgtbl-ascii-plot @key{RET}} create a new column containing an
+ASCII-art bars plot.  The plot is implemented through a regular column
+formula.  When the source column changes, the bar plot may be updated by
+refreshing the table, for example typing @kbd{C-u C-c *}.
+
+@example
+@group
+| Sede          | Max cites |              |
+|---------------+-----------+--------------|
+| Chile         |    257.72 | WWWWWWWWWWWW |
+| Leeds         |    165.77 | WWWWWWWh     |
+| Sao Paolo     |     71.00 | WWW;         |
+| Stockholm     |    134.19 | WWWWWW:      |
+| Morelia       |    257.56 | WWWWWWWWWWWH |
+| Rochefourchat |      0.00 |              |
+#+TBLFM: $3='(orgtbl-ascii-draw $2 0.0 257.72 12)
+@end group
+@end example
+
+The formula is an elisp call:
+@lisp
+(orgtbl-ascii-draw COLUMN MIN MAX WIDTH)
+@end lisp
+
+@table @code
+@item COLUMN
+  is a reference to the source column.
+
+@item MIN MAX
+  are the minimal and maximal values displayed.  Sources values
+  outside this range are displayed as @samp{too small}
+  or @samp{too large}.
+
+@item WIDTH
+  is the width in characters of the bar-plot.  It defaults to @samp{12}.
+
 @end table
 
 @node Hyperlinks
@@ -13224,7 +13271,8 @@ length, using @code{:columns} attribute.
 @node An example
 @subsection An example
 
-Here is a thorough example, taken from @inforef{GNU Sample Texts,,texinfo}.
+Here is a thorough example.  @inforef{GNU Sample Texts,,texinfo} for an
+equivalent Texinfo code.
 
 @smallexample
 #+MACRO: version 2.0

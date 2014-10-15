@@ -1075,21 +1075,18 @@ may have been stored before."
        (t
 	(setq beg (1+ (point-at-eol))
 	      end (save-excursion (outline-next-heading) (point)))))
+      (setq ind nil)
       (if (org-capture-get :prepend)
 	  (progn
 	    (goto-char beg)
-	    (if (org-list-search-forward (org-item-beginning-re) end t)
-		(progn
-		  (goto-char (match-beginning 0))
-		  (setq ind (org-get-indentation)))
-	      (goto-char end)
-	      (setq ind 0)))
+	    (when (org-list-search-forward (org-item-beginning-re) end t)
+	      (goto-char (match-beginning 0))
+	      (setq ind (org-get-indentation))))
 	(goto-char end)
-	(if (org-list-search-backward (org-item-beginning-re) beg t)
-	    (progn
-	      (setq ind (org-get-indentation))
-	      (org-end-of-item))
-	  (setq ind 0))))
+	(when (org-list-search-backward (org-item-beginning-re) beg t)
+	  (setq ind (org-get-indentation))
+	  (org-end-of-item)))
+      (unless ind (goto-char end)))
     ;; Remove common indentation
     (setq txt (org-remove-indentation txt))
     ;; Make sure this is indeed an item
@@ -1097,17 +1094,22 @@ may have been stored before."
       (setq txt (concat "- "
 			(mapconcat 'identity (split-string txt "\n")
 				   "\n  "))))
+    ;; Prepare surrounding empty lines.
+    (org-capture-empty-lines-before)
+    (setq beg (point))
+    (unless (eolp) (save-excursion (insert "\n")))
+    (unless ind
+      (org-indent-line)
+      (setq ind (org-get-indentation))
+      (delete-region beg (point)))
     ;; Set the correct indentation, depending on context
     (setq ind (make-string ind ?\ ))
     (setq txt (concat ind
 		      (mapconcat 'identity (split-string txt "\n")
 				 (concat "\n" ind))
 		      "\n"))
-    ;; Insert, with surrounding empty lines
-    (org-capture-empty-lines-before)
-    (setq beg (point))
+    ;; Insert item.
     (insert txt)
-    (or (bolp) (insert "\n"))
     (org-capture-empty-lines-after 1)
     (org-capture-position-for-last-stored beg)
     (forward-char 1)
