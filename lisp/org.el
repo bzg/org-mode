@@ -5170,10 +5170,10 @@ Return value contains the following keys: `archive', `category',
 				    (org-split-string value)))
 		   (push (cons 'tags (org-split-string value)) alist))))
 	      ((member key '("TODO" "SEQ_TODO" "TYP_TODO"))
-	       (let ((todo (cdr (assq 'todo alist)))
+	       (let ((todo (assq 'todo alist))
 		     (value (cons (if (equal key "TYP_TODO") 'type 'sequence)
 				  (org-split-string value))))
-		 (if todo (push value todo)
+		 (if todo (push value (cdr todo))
 		   (push (list 'todo value) alist))))
 	      ((equal key "SETUPFILE")
 	       (unless buffer-read-only ; Do not check in Gnus messages.

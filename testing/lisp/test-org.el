@@ -1081,6 +1081,11 @@
 	    (org-mode-restart)
 	    (list org-not-done-keywords org-done-keywords))))
   (should
+   (equal '(("A" "C") ("B" "D"))
+	  (org-test-with-temp-text "#+TODO: A | B\n#+TODO: C | D"
+	    (org-mode-restart)
+	    (list org-not-done-keywords org-done-keywords))))
+  (should
    (equal '(("A" "B") ("C"))
 	  (org-test-with-temp-text "#+TYP_TODO: A B | C"
 	    (org-mode-restart)
