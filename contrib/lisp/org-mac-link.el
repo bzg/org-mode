@@ -402,28 +402,19 @@ The links are of the form <link>::split::<name>."
 ;; Grab the frontmost url from Safari.
 
 (defun org-as-mac-safari-get-frontmost-url ()
-  (let ((result
-	 (do-applescript
-	  (concat
-	   "tell application \"Safari\"\n"
-	   "	set theUrl to URL of document 1\n"
-	   "	set theName to the name of the document 1\n"
-	   "	return theUrl & \"::split::\" & theName & \"\n\"\n"
-	   "end tell\n"))))
-    (car (split-string result "[\r\n]+" t))))
+  (do-applescript
+   (concat
+    "tell application \"Safari\"\n"
+    "	set theUrl to URL of document 1\n"
+    "	set theName to the name of the document 1\n"
+    "	return theUrl & \"::split::\" & theName & \"\n\"\n"
+    "end tell\n")))
 
 (defun org-mac-safari-get-frontmost-url ()
   (interactive)
   (message "Applescript: Getting Safari url...")
-  (let* ((url-and-title (org-as-mac-safari-get-frontmost-url))
-         (split-link (split-string url-and-title "::split::"))
-         (URL (car split-link))
-         (description (cadr split-link))
-         (org-link))
-    (when (not (string= URL ""))
-      (setq org-link (org-make-link-string URL description)))
-    (kill-new org-link)
-    org-link))
+  (org-mac-paste-applescript-links 
+   (org-as-mac-safari-get-frontmost-url)))
 
 (defun org-mac-safari-insert-frontmost-url ()
   (interactive)
