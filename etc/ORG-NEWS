@@ -98,6 +98,11 @@ behavior. It is now possible to silently add new columns, to do so
 with a warning or to explicitly ask the user each time.
 *** ASCII plot
 Ability to plot values in a column through ASCII-art bars.
+*** New hook: ~org-archive-hook~
+This hook is called after successfully archiving a subtree, with point
+on the original subtree, not yet deleted.
+*** New option: ~org-attach-archive-delete~
+When non-nil, attachments from archived subtrees are removed.
 ** Miscellaneous
 *** File names in links accept are now compatible with URI syntax
 Absolute file names can now start with =///= in addition to =/=. E.g.,
