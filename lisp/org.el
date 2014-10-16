@@ -6405,21 +6405,28 @@ needs to be inserted at a specific position in the font-lock sequence.")
   "Display or hide properties in `org-custom-properties'."
   (interactive)
   (if org-custom-properties-overlays
-      (progn (mapc 'delete-overlay org-custom-properties-overlays)
+      (progn (mapc #'delete-overlay org-custom-properties-overlays)
 	     (setq org-custom-properties-overlays nil))
-    (unless (not org-custom-properties)
-      (save-excursion
-	(save-restriction
-	  (widen)
-	  (goto-char (point-min))
-	  (while (re-search-forward org-property-re nil t)
-	    (mapc (lambda(p)
-		    (when (equal p (substring (match-string 1) 1 -1))
-		      (let ((o (make-overlay (match-beginning 0) (1+ (match-end 0)))))
-			(overlay-put o 'invisible t)
-			(overlay-put o 'org-custom-property t)
-			(push o org-custom-properties-overlays))))
-		  org-custom-properties)))))))
+    (when org-custom-properties
+      (org-with-wide-buffer
+       (goto-char (point-min))
+       (let ((regexp (org-re-property (regexp-opt org-custom-properties) t t)))
+	 (while (re-search-forward regexp nil t)
+	   (let ((end (cdr (save-match-data (org-get-property-block)))))
+	     (when (and end (< (point) end))
+	       ;; Hide first custom property in current drawer.
+	       (let ((o (make-overlay (match-beginning 0) (1+ (match-end 0)))))
+		 (overlay-put o 'invisible t)
+		 (overlay-put o 'org-custom-property t)
+		 (push o org-custom-properties-overlays))
+	       ;; Hide additional custom properties in the same drawer.
+	       (while (re-search-forward regexp end t)
+		 (let ((o (make-overlay (match-beginning 0) (1+ (match-end 0)))))
+		   (overlay-put o 'invisible t)
+		   (overlay-put o 'org-custom-property t)
+		   (push o org-custom-properties-overlays)))))
+	   ;; Each entry is limited to a single property drawer.
+	   (outline-next-heading)))))))
 
 (defun org-fontify-entities (limit)
   "Find an entity to fontify."

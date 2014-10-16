@@ -1302,6 +1302,53 @@ drops support for Emacs 24.1 and 24.2."
     (org-babel-next-src-block)
     (should (equal '(2 1) (org-babel-execute-src-block)))))
 
+(ert-deftest test-org/custom-properties ()
+  "Test custom properties specifications."
+  ;; Standard test.
+  (should
+   (let ((org-custom-properties '("FOO")))
+     (org-test-with-temp-text "* H\n:PROPERTIES:\n<point>:FOO: val\n:END:\n"
+       (org-toggle-custom-properties-visibility)
+       (org-invisible-p2))))
+  ;; Properties are case-insensitive.
+  (should
+   (let ((org-custom-properties '("FOO")))
+     (org-test-with-temp-text "* H\n:PROPERTIES:\n<point>:foo: val\n:END:\n"
+       (org-toggle-custom-properties-visibility)
+       (org-invisible-p2))))
+  (should
+   (let ((org-custom-properties '("foo")))
+     (org-test-with-temp-text "* H\n:PROPERTIES:\n<point>:FOO: val\n:END:\n"
+       (org-toggle-custom-properties-visibility)
+       (org-invisible-p2))))
+  ;; Multiple custom properties in the same drawer.
+  (should
+   (let ((org-custom-properties '("FOO" "BAR")))
+     (org-test-with-temp-text
+	 "* H\n:PROPERTIES:\n<point>:FOO: val\n:P: 1\n:BAR: baz\n:END:\n"
+       (org-toggle-custom-properties-visibility)
+       (and (org-invisible-p2)
+	    (not (progn (forward-line) (org-invisible-p2)))
+	    (progn (forward-line) (org-invisible-p2))))))
+  ;; Hide custom properties with an empty value.
+  (should
+   (let ((org-custom-properties '("FOO")))
+     (org-test-with-temp-text "* H\n:PROPERTIES:\n<point>:FOO:\n:END:\n"
+       (org-toggle-custom-properties-visibility)
+       (org-invisible-p2))))
+  ;; Do not hide fake properties.
+  (should-not
+   (let ((org-custom-properties '("FOO")))
+     (org-test-with-temp-text ":FOO: val\n"
+       (org-toggle-custom-properties-visibility)
+       (org-invisible-p2))))
+  (should-not
+   (let ((org-custom-properties '("A")))
+     (org-test-with-temp-text
+	 "* H\n:PROPERTIES:\n:A: 1\n:END:\n\n:PROPERTIES:\n<point>:A: 2\n:END:"
+       (org-toggle-custom-properties-visibility)
+       (org-invisible-p2)))))
+
 
 
 ;;; Mark Region
