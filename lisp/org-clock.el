@@ -74,13 +74,15 @@ if the current entry has or inherits a LOG_INTO_DRAWER property,
 it will be used instead of the default value.
 The default is the value of the customizable variable `org-clock-into-drawer',
 which see."
-  (let ((p (org-entry-get nil "CLOCK_INTO_DRAWER" 'inherit))
-	(q (org-entry-get nil "LOG_INTO_DRAWER" 'inherit)))
-    (cond
-     ((or (not (or p q)) (equal p "nil") (equal q "nil")) org-clock-into-drawer)
-     ((or (equal p "t") (equal q "t")) "LOGBOOK")
-     ((not p) q)
-     (t p))))
+  (let ((p (org-entry-get nil "CLOCK_INTO_DRAWER" 'inherit t))
+        (q (org-entry-get nil "LOG_INTO_DRAWER" 'inherit t)))
+    (cond ((equal p "nil") nil)
+          ((equal p "t") t)
+          (p)
+          ((equal q "nil") nil)
+          ((equal q "t") t)
+          (q)
+          (t org-clock-into-drawer))))
 
 (defcustom org-clock-out-when-done t
   "When non-nil, clock will be stopped when the clocked entry is marked DONE.
