@@ -89,8 +89,9 @@
     (underline . org-latex-underline)
     (verbatim . org-latex-verbatim)
     (verse-block . org-latex-verse-block)
-    ;; Pseudo objects.
-    (latex-math-block . org-latex-math-block))
+    ;; Pseudo objects and elements.
+    (latex-math-block . org-latex-math-block)
+    (latex-matrices . org-latex-matrices))
   :export-block '("LATEX" "TEX")
   :menu-entry
   '(?l "Export to LaTeX"
@@ -102,7 +103,8 @@
 	      (if a (org-latex-export-to-pdf t s v b)
 		(org-open-file (org-latex-export-to-pdf nil s v b)))))))
   :filters-alist '((:filter-options . org-latex-math-block-options-filter)
-		   (:filter-parse-tree . org-latex-math-block-tree-filter))
+		   (:filter-parse-tree org-latex-math-block-tree-filter
+				       org-latex-matrices-tree-filter))
   :options-alist
   '((:latex-class "LATEX_CLASS" nil org-latex-default-class t)
     (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
@@ -2129,6 +2131,66 @@ holding contextual information."
        (format "\\begin{verbatim}\n%s\\end{verbatim}" contents)))
 
 
+;;;; Pseudo Element: LaTeX Matrix
+
+(defun org-latex--wrap-latex-matrices (data info)
+  "Merge contiguous tables with the same mode within a pseudo-element.
+DATA is a parse tree or a secondary string.  INFO is a plist
+containing export options.  Modify DATA by side-effect and return
+it."
+  (org-element-map data 'table
+    (lambda (table)
+      (when (eq (org-element-property :type table) 'org)
+	(let ((mode (or (org-export-read-attribute :attr_latex table :mode)
+			(plist-get info :latex-default-table-mode))))
+	  (when (and (member mode '("inline-math" "math"))
+		     ;; Do not wrap twice the same table.
+		     (not (eq (org-element-type
+			       (org-element-property :parent table))
+			      'latex-matrices)))
+	    (let* ((caption (and (not (string= mode "inline-math"))
+				 (org-element-property :caption table)))
+		   (matrices
+		    (list 'latex-matrices
+			  (list :caption caption
+				:markup
+				(cond ((string= mode "inline-math") 'inline)
+				      (caption 'equation)
+				      (t 'math)))))
+		   (previous table)
+		   (next (org-export-get-next-element table info)))
+	      (org-element-insert-before matrices table)
+	      ;; Swallow all contiguous tables sharing the same mode.
+	      (while (and
+		      (zerop (or (org-element-property :post-blank previous) 0))
+		      (setq next (org-export-get-next-element previous info))
+		      (string= (or (org-export-read-attribute
+				    :attr_latex next :mode)
+				   (plist-get info :latex-default-table-mode))
+			       mode))
+		(org-element-extract-element previous)
+		(org-element-adopt-elements matrices previous)
+		(setq previous next))
+	      (org-element-put-property
+	       matrices :post-blank (org-element-property :post-blank previous))
+	      (org-element-extract-element previous)
+	      (org-element-adopt-elements matrices previous))))))
+    info)
+  data)
+
+(defun org-latex-matrices (matrices contents info)
+  "Transcode a MATRICES element from Org to LaTeX.
+CONTENTS is a string.  INFO is a plist used as a communication
+channel."
+  (format (case (org-element-property :markup matrices)
+	    (inline "\\(%s\\)")
+	    (equation "\\begin{equation}\n%s\\end{equation}")
+	    (t "\\[\n%s\\]"))
+	  contents))
+
+(defun org-latex-matrices-tree-filter (tree backend info)
+  (org-latex--wrap-latex-matrices tree info))
+
 ;;;; Pseudo Object: LaTeX Math Block
 
 (defun org-latex--wrap-latex-math-block (data info)
@@ -2689,10 +2751,8 @@ TABLE is the table type element to transcode.  INFO is a plist
 used as a communication channel.
 
 This function assumes TABLE has `org' as its `:type' property and
-`inline-math' or `math' as its `:mode' attribute.."
-  (let* ((caption (org-latex--caption/label-string table info))
-	 (attr (org-export-read-attribute :attr_latex table))
-	 (inlinep (equal (plist-get attr :mode) "inline-math"))
+`inline-math' or `math' as its `:mode' attribute."
+  (let* ((attr (org-export-read-attribute :attr_latex table))
 	 (env (or (plist-get attr :environment)
 		  (plist-get info :latex-default-table-environment)))
 	 (contents
@@ -2707,34 +2767,13 @@ This function assumes TABLE has `org' as its `:type' property and
 		   (substring
 		    (org-element-interpret-data cell org-latex-pseudo-objects)
 		    0 -1))
-		 (org-element-map row 'table-cell 'identity info) "&")
+		 (org-element-map row 'table-cell #'identity info) "&")
 		(or (cdr (assoc env org-latex-table-matrix-macros)) "\\\\")
 		"\n")))
-	   (org-element-map table 'table-row 'identity info) ""))
-	 ;; Variables related to math clusters (contiguous math tables
-	 ;; of the same type).
-	 (mode (org-export-read-attribute :attr_latex table :mode))
-	 (prev (org-export-get-previous-element table info))
-	 (next (org-export-get-next-element table info))
-	 (same-mode-p
-	  (lambda (table)
-	    ;; Non-nil when TABLE has the same mode as current table.
-	    (string= (or (org-export-read-attribute :attr_latex table :mode)
-			 (plist-get info :latex-default-table-mode))
-		     mode))))
+	   (org-element-map table 'table-row #'identity info) "")))
     (concat
-     ;; Opening string.  If TABLE is in the middle of a table cluster,
-     ;; do not insert any.
-     (cond ((and prev
-		 (eq (org-element-type prev) 'table)
-		 (memq (org-element-property :post-blank prev) '(0 nil))
-		 (funcall same-mode-p prev))
-	    nil)
-	   (inlinep "\\(")
-	   ((org-string-nw-p caption) (concat "\\begin{equation}\n" caption))
-	   (t "\\["))
      ;; Prefix.
-     (or (plist-get attr :math-prefix) "")
+     (plist-get attr :math-prefix)
      ;; Environment.  Also treat special cases.
      (cond ((equal env "array")
 	    (let ((align (org-latex--align-string table info)))
@@ -2746,28 +2785,7 @@ This function assumes TABLE has `org' as its `:type' property and
 		    contents))
 	   (t (format "\\begin{%s}\n%s\\end{%s}" env contents env)))
      ;; Suffix.
-     (or (plist-get attr :math-suffix) "")
-     ;; Closing string.  If TABLE is in the middle of a table cluster,
-     ;; do not insert any.  If it closes such a cluster, be sure to
-     ;; close the cluster with a string matching the opening string.
-     (cond ((and next
-		 (eq (org-element-type next) 'table)
-		 (memq (org-element-property :post-blank table) '(0 nil))
-		 (funcall same-mode-p next))
-	    nil)
-	   (inlinep "\\)")
-	   ;; Find cluster beginning to know which environment to use.
-	   ((let ((cluster-beg table) prev)
-	      (while (and (setq prev (org-export-get-previous-element
-				      cluster-beg info))
-			  (memq (org-element-property :post-blank prev)
-				'(0 nil))
-			  (funcall same-mode-p prev))
-		(setq cluster-beg prev))
-	      (and (or (org-element-property :caption cluster-beg)
-		       (org-element-property :name cluster-beg))
-		   "\n\\end{equation}")))
-	   (t "\\]")))))
+     (plist-get attr :math-suffix))))
 
 
 ;;;; Table Cell
