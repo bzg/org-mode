@@ -103,6 +103,10 @@ This hook is called after successfully archiving a subtree, with point
 on the original subtree, not yet deleted.
 *** New option: ~org-attach-archive-delete~
 When non-nil, attachments from archived subtrees are removed.
+*** New option: ~org-latex-caption-above~
+This variable generalizes ~org-latex-table-caption-above~, which is
+now deprecated.  In addition to tables, it applies to source blocks,
+special blocks and images.  See docstring for more information.
 ** Miscellaneous
 *** File names in links accept are now compatible with URI syntax
 Absolute file names can now start with =///= in addition to =/=. E.g.,

@@ -112,6 +112,7 @@
     (:latex-header-extra "LATEX_HEADER_EXTRA" nil nil newline)
     ;; Other variables.
     (:latex-active-timestamp-format nil nil org-latex-active-timestamp-format)
+    (:latex-caption-above nil nil org-latex-caption-above)
     (:latex-classes nil nil org-latex-classes)
     (:latex-custom-id-labels nil nil org-latex-custom-id-as-label)
     (:latex-default-figure-position nil nil org-latex-default-figure-position)
@@ -134,7 +135,6 @@
     (:latex-listings-options nil nil org-latex-listings-options)
     (:latex-minted-langs nil nil org-latex-minted-langs)
     (:latex-minted-options nil nil org-latex-minted-options)
-    (:latex-table-caption-above nil nil org-latex-table-caption-above)
     (:latex-table-scientific-notation nil nil org-latex-table-scientific-notation)
     (:latex-tables-booktabs nil nil org-latex-tables-booktabs)
     (:latex-tables-centered nil nil org-latex-tables-centered)
@@ -218,6 +218,24 @@
   :tag "Org Export LaTeX"
   :group 'org-export)
 
+;;;; Generic
+
+(defcustom org-latex-caption-above t
+  "When non-nil, place caption string at the beginning of elements.
+Otherwise, place it near the end.  When value is a list of
+symbols, put caption above selected elements only.  Allowed
+symbols are: `image', `table', `src-block' and `special-block'."
+  :group 'org-export-latex
+  :type '(choice
+	  (const :tag "For all elements" t)
+	  (const :tag "For no element" nil)
+	  (set :tag "For the following elements only" :greedy t
+	       (const :tag "Images" image)
+	       (const :tag "Tables" table)
+	       (const :tag "Source code" src-block)
+	       (const :tag "Special blocks" special-block))))
+(define-obsolete-variable-alias
+  'org-latex-table-caption-above 'org-latex-caption-above "25.1") ; Since 8.3.
 
 ;;;; Preamble
 
@@ -612,13 +630,6 @@ attributes."
   :type 'boolean
   :safe #'booleanp)
 
-(defcustom org-latex-table-caption-above t
-  "When non-nil, place caption string at the beginning of the table.
-Otherwise, place it near the end."
-  :group 'org-export-latex
-  :type 'boolean
-  :safe #'booleanp)
-
 (defcustom org-latex-table-scientific-notation "%s\\,(%s)"
   "Format string to display numbers in scientific notation.
 The format should have \"%s\" twice, for mantissa and exponent
@@ -979,6 +990,14 @@ calling `org-latex-compile'."
 
 
 ;;; Internal Functions
+
+(defun org-latex--caption-above-p (element info)
+  "Non nil when caption is expected to be located above ELEMENT.
+INFO is a plist holding contextual information."
+  (let ((above (plist-get info :latex-caption-above)))
+    (if (symbolp above) above
+      (let ((type (org-element-type element)))
+	(memq (if (eq type 'link) 'image type) above)))))
 
 (defun org-latex--caption/label-string (element info)
   "Return caption and label LaTeX string for ELEMENT.
@@ -1813,6 +1832,7 @@ used as a communication channel."
 		   (expand-file-name raw-path))))
 	 (filetype (file-name-extension path))
 	 (caption (org-latex--caption/label-string parent info))
+	 (caption-above-p (org-latex--caption-above-p link info))
 	 ;; Retrieve latex attributes from the element around.
 	 (attr (org-export-read-attribute :attr_latex parent))
 	 (float (let ((float (plist-get attr :float)))
@@ -1898,21 +1918,36 @@ used as a communication channel."
     ;; Return proper string, depending on FLOAT.
     (case float
       (wrap (format "\\begin{wrapfigure}%s
-\\centering
+%s\\centering
 %s%s
-%s\\end{wrapfigure}" placement comment-include image-code caption))
+%s\\end{wrapfigure}"
+		    placement
+		    (if caption-above-p caption "")
+		    comment-include image-code
+		    (if caption-above-p "" caption)))
       (sideways (format "\\begin{sidewaysfigure}
-\\centering
+%s\\centering
 %s%s
-%s\\end{sidewaysfigure}" comment-include image-code caption))
+%s\\end{sidewaysfigure}"
+			(if caption-above-p caption "")
+			comment-include image-code
+			(if caption-above-p "" caption)))
       (multicolumn (format "\\begin{figure*}%s
-\\centering
+%s\\centering
 %s%s
-%s\\end{figure*}" placement comment-include image-code caption))
+%s\\end{figure*}"
+			   placement
+			   (if caption-above-p caption "")
+			   comment-include image-code
+			   (if caption-above-p "" caption)))
       (figure (format "\\begin{figure}%s
-\\centering
+%s\\centering
 %s%s
-%s\\end{figure}" placement comment-include image-code caption))
+%s\\end{figure}"
+		      placement
+		      (if caption-above-p caption "")
+		      comment-include image-code
+		      (if caption-above-p "" caption)))
       (otherwise image-code))))
 
 (defun org-latex-link (link desc info)
@@ -2296,13 +2331,13 @@ holding contextual information."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (let ((type (org-element-property :type special-block))
-	(opt (org-export-read-attribute :attr_latex special-block :options)))
+	(opt (org-export-read-attribute :attr_latex special-block :options))
+	(caption (org-latex--caption/label-string special-block info))
+	(caption-above-p (org-latex--caption-above-p special-block info)))
     (concat (format "\\begin{%s}%s\n" type (or opt ""))
-	    ;; Insert any label or caption within the block
-	    ;; (otherwise, a reference pointing to that element will
-	    ;; count the section instead).
-	    (org-latex--caption/label-string special-block info)
+	    (and caption-above-p caption)
 	    contents
+	    (and (not caption-above-p) caption)
 	    (format "\\end{%s}" type))))
 
 
@@ -2315,6 +2350,7 @@ contextual information."
   (when (org-string-nw-p (org-element-property :value src-block))
     (let* ((lang (org-element-property :language src-block))
 	   (caption (org-element-property :caption src-block))
+	   (caption-above-p (org-latex--caption-above-p src-block info))
 	   (label (org-element-property :name src-block))
 	   (custom-env (and lang
 			    (cadr (assq (intern lang)
@@ -2333,11 +2369,12 @@ contextual information."
 	       (float-env
 		(cond ((and (not float) (plist-member attributes :float)) "%s")
 		      ((string= "multicolumn" float)
-		       (format "\\begin{figure*}[%s]\n%%s%s\n\\end{figure*}"
+		       (format "\\begin{figure*}[%s]\n%s%%s\n%s\\end{figure*}"
 			       (plist-get info :latex-default-figure-position)
-			       caption-str))
+			       (if caption-above-p caption-str "")
+			       (if caption-above-p "" caption-str)))
 		      ((or caption float)
-		       (format "\\begin{figure}[H]\n%%s%s\n\\end{figure}"
+		       (format "\\begin{figure}[H]\n%%s\n%s\\end{figure}"
 			       caption-str))
 		      (t "%s"))))
 	  (format
@@ -2345,26 +2382,37 @@ contextual information."
 	   (concat (format "\\begin{verbatim}\n%s\\end{verbatim}"
 			   (org-export-format-code-default src-block info))))))
        ;; Case 2.  Custom environment.
-       (custom-env (format "\\begin{%s}\n%s\\end{%s}\n"
-			   custom-env
-			   (org-export-format-code-default src-block info)
-			   custom-env))
+       (custom-env
+	(let ((caption-str (org-latex--caption/label-string src-block info)))
+	  (format "\\begin{%s}\n%s\\end{%s}\n"
+		  custom-env
+		  (concat (and caption-above-p caption-str)
+			  (org-export-format-code-default src-block info)
+			  (and (not caption-above-p) caption-str))
+		  custom-env)))
        ;; Case 3.  Use minted package.
        ((eq listings 'minted)
 	(let* ((caption-str (org-latex--caption/label-string src-block info))
 	       (float-env
-		(cond ((and (not float) (plist-member attributes :float) caption)
-		       (format "%%s\n%s" (replace-regexp-in-string
-					  "\\\\caption" "\\captionof{listing}"
-					  caption-str t t)))
-		      ((and (not float) (plist-member attributes :float)) "%s")
-		      ((string= "multicolumn" float)
-		       (format "\\begin{listing*}\n%%s\n%s\\end{listing*}"
-			       caption-str))
-		      ((or caption float)
-		       (format "\\begin{listing}[H]\n%%s\n%s\\end{listing}"
-			       caption-str))
-		      (t "%s")))
+		(cond
+		 ((and (not float) (plist-member attributes :float) caption)
+		  (let ((caption
+			 (replace-regexp-in-string
+			  "\\\\caption" "\\captionof{listing}" caption-str
+			  t t)))
+		    (concat (and caption-above-p caption)
+			    "%%s"
+			    (and (not caption-above-p) (concat "\n" caption)))))
+		 ((and (not float) (plist-member attributes :float)) "%s")
+		 ((string= "multicolumn" float)
+		  (format "\\begin{listing*}\n%s%%s\n%s\\end{listing*}"
+			  (if caption-above-p caption-str "")
+			  (if caption-above-p "" caption-str)))
+		 ((or caption float)
+		  (format "\\begin{listing}[H]\n%s%%s\n%s\\end{listing}"
+			  (if caption-above-p caption-str "")
+			  (if caption-above-p "" caption-str)))
+		 (t "%s")))
 	       (options (plist-get info :latex-minted-options))
 	       (body
 		(format
@@ -2438,12 +2486,12 @@ contextual information."
 	       `(("language" ,lst-lang))
 	       (if label `(("label" ,label)) '(("label" " ")))
 	       (if caption-str `(("caption" ,caption-str)) '(("caption" " ")))
+	       `(("captionpos" ,(if caption-above-p "t" "b")))
 	       (cond ((assoc "numbers" lst-opt) nil)
 		     ((not num-start) '(("numbers" "none")))
 		     ((zerop num-start) '(("numbers" "left")))
-		     (t `(("numbers" "left")
-			  ("firstnumber"
-			   ,(number-to-string (1+ num-start))))))))
+		     (t `(("firstnumber" ,(number-to-string (1+ num-start)))
+			  ("numbers" "left"))))))
 	     (let ((local-options (plist-get attributes :options)))
 	       (and local-options (concat "," local-options)))))
 	   ;; Source code.
@@ -2645,7 +2693,7 @@ This function assumes TABLE has `org' as its `:type' property and
 	      (format "[%s]" (plist-get info :latex-default-figure-position))))
 	 (centerp (if (plist-member attr :center) (plist-get attr :center)
 		    (plist-get info :latex-tables-centered)))
-	 (caption-above-p (plist-get info :latex-table-caption-above)))
+	 (caption-above-p (org-latex--caption-above-p table info)))
     ;; Prepare the final format string for the table.
     (cond
      ;; Longtable.

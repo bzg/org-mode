@@ -13952,6 +13952,7 @@ however, override everything.
 
 @multitable {@code{:latex-link-with-unknown-path-format}} {@code{org-latex-link-with-unknown-path-format}} 
 @item @code{:latex-active-timestamp-format}    @tab @code{org-latex-active-timestamp-format}
+@item @code{:latex-caption-above}              @tab @code{org-latex-caption-above}
 @item @code{:latex-classes}                    @tab @code{org-latex-classes}
 @item @code{:latex-class}                      @tab @code{org-latex-default-class}
 @item @code{:latex-custom-id-labels}           @tab @code{org-latex-custom-id-as-label}
@@ -13975,7 +13976,6 @@ however, override everything.
 @item @code{:latex-listings}                   @tab @code{org-latex-listings}
 @item @code{:latex-minted-langs}               @tab @code{org-latex-minted-langs}
 @item @code{:latex-minted-options}             @tab @code{org-latex-minted-options}
-@item @code{:latex-table-caption-above}        @tab @code{org-latex-table-caption-above}
 @item @code{:latex-table-scientific-notation}  @tab @code{org-latex-table-scientific-notation}
 @item @code{:latex-tables-booktabs}            @tab @code{org-latex-tables-booktabs}
 @item @code{:latex-tables-centered}            @tab @code{org-latex-tables-centered}
