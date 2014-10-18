@@ -202,8 +202,8 @@
   "Alist between language code and corresponding Babel option.")
 
 (defconst org-latex-table-matrix-macros '(("bordermatrix" . "\\cr")
-					    ("qbordermatrix" . "\\cr")
-					    ("kbordermatrix" . "\\\\"))
+					  ("qbordermatrix" . "\\cr")
+					  ("kbordermatrix" . "\\\\"))
   "Alist between matrix macros and their row ending.")
 
 (defconst org-latex-pseudo-objects '(latex-math-block)
@@ -2166,7 +2166,11 @@ holding contextual information."
        (format "\\begin{verbatim}\n%s\\end{verbatim}" contents)))
 
 
-;;;; Pseudo Element: LaTeX Matrix
+;;;; Pseudo Element: LaTeX Matrices
+
+;; `latex-matrices' elements have the following properties:
+;; `:caption', `:post-blank' and `:markup' (`inline', `equation' or
+;; `math').
 
 (defun org-latex--wrap-latex-matrices (data info)
   "Merge contiguous tables with the same mode within a pseudo-element.
@@ -2199,6 +2203,8 @@ it."
 	      (while (and
 		      (zerop (or (org-element-property :post-blank previous) 0))
 		      (setq next (org-export-get-next-element previous info))
+		      (eq (org-element-type next) 'table)
+		      (eq (org-element-property :type next) 'org)
 		      (string= (or (org-export-read-attribute
 				    :attr_latex next :mode)
 				   (plist-get info :latex-default-table-mode))
@@ -2227,6 +2233,9 @@ channel."
   (org-latex--wrap-latex-matrices tree info))
 
 ;;;; Pseudo Object: LaTeX Math Block
+
+;; `latex-math-block' objects have the following property:
+;; `:post-blank'.
 
 (defun org-latex--wrap-latex-math-block (data info)
   "Merge contiguous math objects in a pseudo-object container.
