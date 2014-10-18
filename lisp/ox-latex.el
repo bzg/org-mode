@@ -2832,9 +2832,10 @@ This function assumes TABLE has `org' as its `:type' property and
      ;; Prefix.
      (plist-get attr :math-prefix)
      ;; Environment.  Also treat special cases.
-     (cond ((equal env "array")
-	    (let ((align (org-latex--align-string table info)))
-	      (format "\\begin{array}{%s}\n%s\\end{array}" align contents)))
+     (cond ((member env '("array" "tabular"))
+	    (let ((align (make-string
+			  (cdr (org-export-table-dimensions table info)) ?c)))
+	      (format "\\begin{%s}{%s}\n%s\\end{%s}" env align contents env)))
 	   ((assoc env org-latex-table-matrix-macros)
 	    (format "\\%s%s{\n%s}"
 		    env
