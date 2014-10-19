@@ -3345,7 +3345,7 @@ the data file.
 
 @subheading ASCII bar plots
 
-While the cursor is on a column, typing @kbd{C-c \" a} or
+While the cursor is on a column, typing @kbd{C-c " a} or
 @kbd{M-x orgtbl-ascii-plot @key{RET}} create a new column containing an
 ASCII-art bars plot.  The plot is implemented through a regular column
 formula.  When the source column changes, the bar plot may be updated by
