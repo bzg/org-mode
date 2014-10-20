@@ -581,6 +581,7 @@ of a different task.")
 	(fit-window-to-buffer nil nil (if (< chl 10) chl (+ 5 chl)))
 	(message (or prompt "Select task for clocking:"))
 	(setq cursor-type nil rpl (read-char-exclusive))
+	(kill-buffer)
 	(cond
 	 ((eq rpl ?q) nil)
 	 ((eq rpl ?x) nil)
