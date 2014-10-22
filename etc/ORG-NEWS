@@ -49,6 +49,9 @@ anymore.  The chosen hard coded quoting style conforms to POSIX.
 *** Additional markup with =#+INCLUDE= keyword
 The content of the included file can now be optionally marked up, for
 instance as HTML.  See the documentation for details.
+*** File links with =#+INCLUDE= keyword
+Objects can be extracted via =#+INCLUDE= using file links.  It is
+possible to include only the contents of the object.
 *** Additional =:hline= processing to ob-shell
 If the argument =:hlines yes= is present in a babel call, an optional
 argument =:hlines-string= can be used to define a string to use as a
@@ -107,6 +110,10 @@ When non-nil, attachments from archived subtrees are removed.
 This variable generalizes ~org-latex-table-caption-above~, which is
 now deprecated.  In addition to tables, it applies to source blocks,
 special blocks and images.  See docstring for more information.
+*** Export unnumbered headlines
+Headlines, for which the property ~UNNUMBERED~ is non-nil, are now
+exported without section numbers irrespective of their levels.  The
+property is inherited by children.
 ** Miscellaneous
 *** File names in links accept are now compatible with URI syntax
 Absolute file names can now start with =///= in addition to =/=. E.g.,
