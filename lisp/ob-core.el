@@ -2329,7 +2329,7 @@ file's directory then expand relative links."
 
 (define-obsolete-function-alias
   'org-babel-examplize-region
-  'org-babel-examplify-region "24.5")
+  'org-babel-examplify-region "25.1")
 
 (defun org-babel-examplify-region (beg end &optional results-switches)
   "Comment out region using the inline '==' or ': ' org example quote."

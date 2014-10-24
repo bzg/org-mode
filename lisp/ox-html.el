@@ -683,7 +683,7 @@ INFO      the export options (plist).
 
 The function result will be used in the section format string."
   :group 'org-export-html
-  :version "24.5"
+  :version "25.1"
   :package-version '(Org . "8.3")
   :type 'function)
 
@@ -715,7 +715,7 @@ The function must accept seven parameters:
 
 The function should return the string to be exported."
   :group 'org-export-html
-  :version "24.5"
+  :version "25.1"
   :package-version '(Org . "8.3")
   :type 'function)
 

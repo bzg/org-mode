@@ -362,7 +362,7 @@ defined for the code block may be used as a key and will be
 replaced with its value."
   :group 'org-babel
   :type 'string
-  :version "24.5"
+  :version "25.1"
   :package-version '(Org . "8.3"))
 
 (defun org-babel-exp-code (info type)

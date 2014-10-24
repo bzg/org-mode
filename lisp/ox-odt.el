@@ -689,7 +689,7 @@ TAGS      the tags string, separated with colons \(string or nil\).
 
 The function result will be used as headline text."
   :group 'org-export-odt
-  :version "24.5"
+  :version "25.1"
   :package-version '(Org . "8.3")
   :type 'function)
 
@@ -710,7 +710,7 @@ The function must accept six parameters:
 
 The function should return the string to be exported."
   :group 'org-export-odt
-  :version "24.5"
+  :version "25.1"
   :package-version '(Org . "8.3")
   :type 'function)
 

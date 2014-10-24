@@ -18002,7 +18002,7 @@ tables are not re-aligned, etc."
 
 (define-obsolete-variable-alias
   'org-agenda-ignore-drawer-properties
-  'org-agenda-ignore-properties "24.5")
+  'org-agenda-ignore-properties "25.1")
 
 (defcustom org-agenda-ignore-properties nil
   "Avoid updating text properties when building the agenda.
@@ -18017,7 +18017,7 @@ The value is a list, with zero or more of the symbols `effort', `appt',
 	      (const appt)
 	      (const stats)
 	      (const category))
-  :version "24.5"
+  :version "25.1"
   :package-version '(Org . "8.3")
   :group 'org-agenda)
 

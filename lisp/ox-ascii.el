@@ -190,7 +190,7 @@ This margin is applied on both sides of the text."
 This margin applies to top level list only, not to its
 sub-lists."
   :group 'org-export-ascii
-  :version "24.5"
+  :version "25.1"
   :package-version '(Org . "8.3")
   :type 'integer)
 

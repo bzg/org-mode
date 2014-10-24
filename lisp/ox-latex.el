@@ -411,7 +411,7 @@ Value is a format string, which can contain the following placeholders:
 
 Set it to the empty string to ignore the command completely."
   :group 'org-export-latex
-  :version "24.5"
+  :version "25.1"
   :package-version '(Org . "8.3")
   :type 'string)
 
@@ -486,7 +486,7 @@ continue to use its default labeling scheme to generate labels
 and resolve links into section references."
   :group 'org-export-latex
   :type 'boolean
-  :version "24.5"
+  :version "25.1"
   :package-version '(Org . "8.3"))
 
 ;;;; Footnotes
@@ -707,7 +707,7 @@ The function must accept seven parameters:
 The function should return the string to be exported."
   :group 'org-export-latex
   :type 'function
-  :version "24.5"
+  :version "25.1"
   :package-version '(Org . "8.3"))
 
 
@@ -980,7 +980,7 @@ The regular expressions are used to find possible warnings in the
 log of a latex-run.  These warnings will be reported after
 calling `org-latex-compile'."
   :group 'org-export-latex
-  :version "24.5"
+  :version "25.1"
   :package-version '(Org . "8.3")
   :type '(repeat
 	  (cons
