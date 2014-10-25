@@ -3185,7 +3185,19 @@ Another text. (ref:text)
    (= 1
       (length
        (org-test-with-parsed-data "#+OPTIONS: H:1\n* H1\n** H2"
-	 (org-export-collect-headlines info 2))))))
+	 (org-export-collect-headlines info 2)))))
+  ;; Collect headlines locally.
+  (should
+   (= 2
+      (org-test-with-parsed-data "* H1\n** H2\n** H3"
+	(let ((scope (org-element-map tree 'headline #'identity info t)))
+	  (length (org-export-collect-headlines info nil scope))))))
+  ;; When collecting locally, optional level is relative.
+  (should
+   (= 1
+      (org-test-with-parsed-data "* H1\n** H2\n*** H3"
+	(let ((scope (org-element-map tree 'headline #'identity info t)))
+	  (length (org-export-collect-headlines info 1 scope)))))))
 
 
 

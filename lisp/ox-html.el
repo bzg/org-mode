@@ -2026,31 +2026,34 @@ a plist used as a communication channel."
 
 ;;; Tables of Contents
 
-(defun org-html-toc (depth info)
+(defun org-html-toc (depth info &optional scope)
   "Build a table of contents.
-DEPTH is an integer specifying the depth of the table.  INFO is a
-plist used as a communication channel.  Return the table of
-contents as a string, or nil if it is empty."
+DEPTH is an integer specifying the depth of the table.  INFO is
+a plist used as a communication channel.  Optional argument SCOPE
+is an element defining the scope of the table.  Return the table
+of contents as a string, or nil if it is empty."
   (let ((toc-entries
 	 (mapcar (lambda (headline)
 		   (cons (org-html--format-toc-headline headline info)
 			 (org-export-get-relative-level headline info)))
-		 (org-export-collect-headlines info depth)))
-	(outer-tag (if (and (org-html-html5-p info)
-			    (plist-get info :html-html5-fancy))
-		       "nav"
-		     "div")))
+		 (org-export-collect-headlines info depth scope))))
     (when toc-entries
-      (concat (format "<%s id=\"table-of-contents\">\n" outer-tag)
-	      (let ((top-level (plist-get info :html-toplevel-hlevel)))
-		(format "<h%d>%s</h%d>\n"
-			top-level
-			(org-html--translate "Table of Contents" info)
-			top-level))
-	      "<div id=\"text-table-of-contents\">"
-	      (org-html--toc-text toc-entries)
-	      "</div>\n"
-	      (format "</%s>\n" outer-tag)))))
+      (let ((toc (concat "<div id=\"text-table-of-contents\">"
+			 (org-html--toc-text toc-entries)
+			 "</div>\n")))
+	(if scope toc
+	  (let ((outer-tag (if (and (org-html-html5-p info)
+				    (plist-get info :html-html5-fancy))
+			       "nav"
+			     "div")))
+	    (concat (format "<%s id=\"table-of-contents\">\n" outer-tag)
+		    (let ((top-level (plist-get info :html-toplevel-hlevel)))
+		      (format "<h%d>%s</h%d>\n"
+			      top-level
+			      (org-html--translate "Table of Contents" info)
+			      top-level))
+		    toc
+		    (format "</%s>\n" outer-tag))))))))
 
 (defun org-html--toc-text (toc-entries)
   "Return innards of a table of contents, as a string.
@@ -2550,13 +2553,13 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (cond
      ((string= key "HTML") value)
      ((string= key "TOC")
-      (let ((value (downcase value)))
+      (let ((case-fold-search t))
 	(cond
 	 ((string-match "\\<headlines\\>" value)
-	  (let ((depth (or (and (string-match "[0-9]+" value)
-				(string-to-number (match-string 0 value)))
-			   (plist-get info :with-toc))))
-	    (org-html-toc depth info)))
+	  (let ((depth (and (string-match "\\<[0-9]+\\>" value)
+			    (string-to-number (match-string 0 value))))
+		(localp (org-string-match-p "\\<local\\>" value)))
+	    (org-html-toc depth info (and localp keyword))))
 	 ((string= "listings" value) (org-html-list-of-listings info))
 	 ((string= "tables" value) (org-html-list-of-tables info))))))))
 

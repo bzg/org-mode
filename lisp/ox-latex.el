@@ -953,11 +953,13 @@ file name as its single argument."
 
 (defcustom org-latex-logfiles-extensions
   '("aux" "bcf" "blg" "fdb_latexmk" "fls" "figlist" "idx" "log" "nav" "out"
-    "run.xml" "snm" "toc" "vrb" "xdv")
+    "ptc" "run.xml" "snm" "toc" "vrb" "xdv")
   "The list of file extensions to consider as LaTeX logfiles.
-The logfiles will be remove if `org-latex-remove-logfiles' is
+The logfiles will be removed if `org-latex-remove-logfiles' is
 non-nil."
   :group 'org-export-latex
+  :version "25.1"
+  :package-version '(Org . "8.3")
   :type '(repeat (string :tag "Extension")))
 
 (defcustom org-latex-remove-logfiles t
@@ -1536,7 +1538,23 @@ holding contextual information."
 			 (org-export-get-alt-title headline info)
 			 section-back-end info)
 			(and (eq (plist-get info :with-tags) t) tags)
-			info)))
+			info))
+	      ;; Maybe end local TOC (see `org-latex-keyword').
+	      (contents
+	       (concat
+		contents
+		(let ((case-fold-search t)
+		      (section
+		       (let ((first (car (org-element-contents headline))))
+			 (and (eq (org-element-type first) 'section) first))))
+		  (org-element-map section 'keyword
+		    (lambda (k)
+		      (and (equal (org-element-property :key k) "TOC")
+			   (let ((v (org-element-property :value k)))
+			     (and (org-string-match-p "\\<headlines\\>" v)
+				  (org-string-match-p "\\<local\\>" v)
+				  (format "\\stopcontents[level-%d]" level)))))
+		    info t)))))
 	  (if (and numberedp opt-title
 		   (not (equal opt-title full-text))
 		   (string-match "\\`\\\\\\(.*?[^*]\\){" section-fmt))
@@ -1754,18 +1772,27 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      ((string= key "LATEX") value)
      ((string= key "INDEX") (format "\\index{%s}" value))
      ((string= key "TOC")
-      (let ((value (downcase value)))
+      (let ((case-fold-search t))
 	(cond
-	 ((string-match "\\<headlines\\>" value)
-	  (let ((depth (or (and (string-match "[0-9]+" value)
-				(string-to-number (match-string 0 value)))
-			   (plist-get info :with-toc))))
-	    (concat
-	     (when (wholenump depth)
-	       (format "\\setcounter{tocdepth}{%s}\n" depth))
-	     "\\tableofcontents")))
-	 ((string= "tables" value) "\\listoftables")
-	 ((string= "listings" value)
+	 ((org-string-match-p "\\<headlines\\>" value)
+	  (let* ((localp (org-string-match-p "\\<local\\>" value))
+		 (parent (org-element-lineage keyword '(headline)))
+		 (level (if (not (and localp parent)) 0
+			  (org-export-get-relative-level parent info)))
+		 (depth
+		  (and (string-match "\\<[0-9]+\\>" value)
+		       (format
+			"\\setcounter{tocdepth}{%d}"
+			(+ (string-to-number (match-string 0 value)) level)))))
+	    (if (and localp parent)
+		;; Start local TOC, assuming package "titletoc" is
+		;; required.
+		(format "\\startcontents[level-%d]
+\\printcontents[level-%d]{}{0}{%s}"
+			level level (or depth ""))
+	      (concat depth (and depth "\n") "\\tableofcontents"))))
+	 ((org-string-match-p "\\<tables\\>" value) "\\listoftables")
+	 ((org-string-match-p "\\<listings\\>" value)
 	  (case (plist-get info :latex-listings)
 	    ((nil) "\\listoffigures")
 	    (minted "\\listoflistings")

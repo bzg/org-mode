@@ -9700,9 +9700,18 @@ location(s).
 #+TOC: headlines 2        (insert TOC here, with two headline levels)
 @end example
 
-Multiple @code{#+TOC: headline} lines are allowed.  The same @code{TOC}
-keyword can also generate a list of all tables (resp.@: all listings) with a
-caption in the buffer.
+Moreover, if you append @samp{local} parameter, the table contains only
+entries for current section's children@footnote{For @LaTeX{} export, this
+feature requires ``titletoc'' package.}.  In this case, any depth parameter
+becomes relative to the current level.
+
+@example
+* Section
+#+TOC: headlines 1 local  (insert local TOC, with direct children only)
+@end example
+
+The same @code{TOC} keyword can also generate a list of all tables (resp.@:
+all listings) with a caption in the document.
 
 @example
 #+TOC: listings           (build a list of listings)

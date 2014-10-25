@@ -744,7 +744,7 @@ caption keyword."
 		 (org-export-data caption info))
 	 (org-ascii--current-text-width element info) info)))))
 
-(defun org-ascii--build-toc (info &optional n keyword)
+(defun org-ascii--build-toc (info &optional n keyword local)
   "Return a table of contents.
 
 INFO is a plist used as a communication channel.
@@ -753,29 +753,34 @@ Optional argument N, when non-nil, is an integer specifying the
 depth of the table.
 
 Optional argument KEYWORD specifies the TOC keyword, if any, from
-which the table of contents generation has been initiated."
-  (let ((title (org-ascii--translate "Table of Contents" info)))
-    (concat
-     title "\n"
-     (make-string (string-width title)
-		  (if (eq (plist-get info :ascii-charset) 'utf-8) ?─ ?_))
-     "\n\n"
-     (let ((text-width
-	    (if keyword (org-ascii--current-text-width keyword info)
-	      (- (plist-get info :ascii-text-width)
-		 (plist-get info :ascii-global-margin)))))
-       (mapconcat
-	(lambda (headline)
-	  (let* ((level (org-export-get-relative-level headline info))
-		 (indent (* (1- level) 3)))
-	    (concat
-	     (unless (zerop indent) (concat (make-string (1- indent) ?.) " "))
-	     (org-ascii--build-title
-	      headline info (- text-width indent) nil
-	      (or (not (plist-get info :with-tags))
-		  (eq (plist-get info :with-tags) 'not-in-toc))
-	      'toc))))
-	(org-export-collect-headlines info n) "\n")))))
+which the table of contents generation has been initiated.
+
+When optional argument LOCAL is non-nil, build a table of
+contents according to the current headline."
+  (concat
+   (unless local
+     (let ((title (org-ascii--translate "Table of Contents" info)))
+       (concat title "\n"
+	       (make-string
+		(string-width title)
+		(if (eq (plist-get info :ascii-charset) 'utf-8) ?─ ?_))
+	       "\n\n")))
+   (let ((text-width
+	  (if keyword (org-ascii--current-text-width keyword info)
+	    (- (plist-get info :ascii-text-width)
+	       (plist-get info :ascii-global-margin)))))
+     (mapconcat
+      (lambda (headline)
+	(let* ((level (org-export-get-relative-level headline info))
+	       (indent (* (1- level) 3)))
+	  (concat
+	   (unless (zerop indent) (concat (make-string (1- indent) ?.) " "))
+	   (org-ascii--build-title
+	    headline info (- text-width indent) nil
+	    (or (not (plist-get info :with-tags))
+		(eq (plist-get info :with-tags) 'not-in-toc))
+	    'toc))))
+      (org-export-collect-headlines info n keyword) "\n"))))
 
 (defun org-ascii--list-listings (keyword info)
   "Return a list of listings.
@@ -1459,24 +1464,22 @@ contextual information."
   "Transcode a KEYWORD element from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let ((key (org-element-property :key keyword)))
+  (let ((key (org-element-property :key keyword))
+	(value (org-element-property :value keyword)))
     (cond
-     ((string= key "ASCII")
-      (org-ascii--justify-element
-       (org-element-property :value keyword) keyword info))
+     ((string= key "ASCII") (org-ascii--justify-element value keyword info))
      ((string= key "TOC")
       (org-ascii--justify-element
-       (let ((value (downcase (org-element-property :value keyword))))
+       (let ((case-fold-search t))
 	 (cond
-	  ((string-match "\\<headlines\\>" value)
-	   (let ((depth (or (and (string-match "[0-9]+" value)
-				 (string-to-number (match-string 0 value)))
-			    (plist-get info :with-toc))))
-	     (org-ascii--build-toc
-	      info (and (wholenump depth) depth) keyword)))
-	  ((string= "tables" value)
+	  ((org-string-match-p "\\<headlines\\>" value)
+	   (let ((depth (and (string-match "\\<[0-9]+\\>" value)
+			     (string-to-number (match-string 0 value))))
+		 (localp (org-string-match-p "\\<local\\>" value)))
+	     (org-ascii--build-toc info depth keyword localp)))
+	  ((org-string-match-p "\\<tables\\>" value)
 	   (org-ascii--list-tables keyword info))
-	  ((string= "listings" value)
+	  ((org-string-match-p "\\<listings\\>" value)
 	   (org-ascii--list-listings keyword info))))
        keyword info)))))
 

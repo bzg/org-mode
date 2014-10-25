@@ -4828,7 +4828,7 @@ return nil."
 ;; `org-export-collect-tables', `org-export-collect-figures' and
 ;; `org-export-collect-listings' can be derived from it.
 
-(defun org-export-collect-headlines (info &optional n)
+(defun org-export-collect-headlines (info &optional n scope)
   "Collect headlines in order to build a table of contents.
 
 INFO is a plist used as a communication channel.
@@ -4838,15 +4838,28 @@ the table of contents.  Otherwise, it is set to the value of the
 last headline level.  See `org-export-headline-levels' for more
 information.
 
+Optional argument SCOPE, when non-nil, is an element.  If it is
+a headline, only children of SCOPE are collected.  Otherwise,
+collect children of the headline containing provided element.  If
+there is no such headline, collect all headlines.  In any case,
+argument N becomes relative to the level of that headline.
+
 Return a list of all exportable headlines as parsed elements.
-Footnote sections, if any, will be ignored."
-  (let ((limit (plist-get info :headline-levels)))
-    (setq n (if (wholenump n) (min n limit) limit))
-    (org-element-map (plist-get info :parse-tree) 'headline
-      #'(lambda (headline)
-	  (unless (org-element-property :footnote-section-p headline)
-	    (let ((level (org-export-get-relative-level headline info)))
-	      (and (<= level n) headline))))
+Footnote sections are ignored."
+  (let* ((scope (cond ((not scope) (plist-get info :parse-tree))
+		      ((eq (org-element-type scope) 'headline) scope)
+		      ((org-export-get-parent-headline scope))
+		      (t (plist-get info :parse-tree))))
+	 (limit (plist-get info :headline-levels))
+	 (n (if (not (wholenump n)) limit
+	      (min (if (eq (org-element-type scope) 'org-data) n
+		     (+ (org-export-get-relative-level scope info) n))
+		   limit))))
+    (org-element-map (org-element-contents scope) 'headline
+      (lambda (headline)
+	(unless (org-element-property :footnote-section-p headline)
+	  (let ((level (org-export-get-relative-level headline info)))
+	    (and (<= level n) headline))))
       info)))
 
 (defun org-export-collect-elements (type info &optional predicate)

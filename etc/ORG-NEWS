@@ -180,6 +180,9 @@ property is inherited by children.
 It is now possible to specify a function, both programatically,
 through a new optional argument, and interactively with ~f~ or ~F~
 keys, to sort a table.
+*** Table of contents can be local to a section
+The ~TOC~ keywords now accepts an optional ~local~ parameter.  See
+manual for details.
 *** Countdown timers can now be paused.
 ~org-timer-pause-time~ wil now pause and restart both relative and
 countdown timers.
