@@ -24536,6 +24536,28 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 
 ;;; Fixes and Hacks for problems with other packages
 
+(defun org--flyspell-object-check-p (element)
+  "Non-nil when Flyspell can check object at point.
+ELEMENT is the element at point."
+  (let ((object (save-excursion
+		  (when (org-looking-at-p "\\>") (backward-char))
+		  (org-element-context element))))
+    (case (org-element-type object)
+      ;; Prevent checks in links due to keybinding conflict with
+      ;; Flyspell.
+      ((code entity export-snippet inline-babel-call
+	     inline-src-block line-break latex-fragment link macro
+	     statistics-cookie target timestamp verbatim)
+       nil)
+      (footnote-reference
+       ;; Only in inline footnotes, within the definition.
+       (and (eq (org-element-property :type object) 'inline)
+	    (< (save-excursion
+		 (goto-char (org-element-property :begin object))
+		 (search-forward ":" nil t 2))
+	       (point))))
+      (otherwise t))))
+
 (defun org-mode-flyspell-verify ()
   "Function used for `flyspell-generic-check-word-predicate'."
   (if (org-at-heading-p)
@@ -24550,29 +24572,7 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 	   (or (not (match-beginning 5))
 	       (< (point) (match-beginning 5))))
     (let* ((element (org-element-at-point))
-	   (post-affiliated (org-element-property :post-affiliated element))
-	   (object-check
-	    (function
-	     ;; Non-nil if checks can be done for object at point.
-	     (lambda ()
-	       (let ((object (save-excursion
-			       (when (org-looking-at-p "\\>") (backward-char))
-			       (org-element-context element))))
-		 (case (org-element-type object)
-		   ;; Prevent checks in links due to keybinding conflict
-		   ;; with Flyspell.
-		   ((code entity export-snippet inline-babel-call
-			  inline-src-block line-break latex-fragment link macro
-			  statistics-cookie target timestamp verbatim)
-		    nil)
-		   (footnote-reference
-		    ;; Only in inline footnotes, within the definition.
-		    (and (eq (org-element-property :type object) 'inline)
-			 (< (save-excursion
-			      (goto-char (org-element-property :begin object))
-			      (search-forward ":" nil t 2))
-			    (point))))
-		   (otherwise t)))))))
+	   (post-affiliated (org-element-property :post-affiliated element)))
       (cond
        ;; Ignore checks in all affiliated keywords but captions.
        ((< (point) post-affiliated)
@@ -24580,7 +24580,7 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 	       (beginning-of-line)
 	       (let ((case-fold-search t)) (looking-at "[ \t]*#\\+CAPTION:")))
 	     (> (point) (match-end 0))
-	     (funcall object-check)))
+	     (org--flyspell-object-check-p element)))
        ;; Ignore checks in LOGBOOK (or equivalent) drawer.
        ((and org-log-into-drawer
 	     (let ((log (or (org-string-nw-p org-log-into-drawer) "LOGBOOK"))
@@ -24615,9 +24615,10 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 	  ;; table rows (after affiliated keywords) but some objects
 	  ;; must not be affected.
 	  ((paragraph table-row verse-block)
-	   (and (>= (point) (org-element-property :contents-begin element))
-		(< (point) (org-element-property :contents-end element))
-		(funcall object-check)))))))))
+	   (let ((cbeg (org-element-property :contents-begin element))
+		 (cend (org-element-property :contents-end element)))
+	     (and cbeg (>= (point) cbeg) (< (point) cend)
+		  (org--flyspell-object-check-p element))))))))))
 (put 'org-mode 'flyspell-mode-predicate 'org-mode-flyspell-verify)
 
 (defun org-remove-flyspell-overlays-in (beg end)
