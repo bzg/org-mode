@@ -2446,7 +2446,7 @@ holding contextual information."
 	 (tags (and (plist-get info :with-tags)
 		    (org-export-get-tags inlinetask info))))
     (funcall (plist-get info :html-format-inlinetask-function)
-	     todo todo-type priority text tags contents)))
+	     todo todo-type priority text tags contents info)))
 
 (defun org-html-format-inlinetask-default-function
   (todo todo-type priority text tags contents info)
