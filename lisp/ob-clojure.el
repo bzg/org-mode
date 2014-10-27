@@ -94,7 +94,7 @@
 		(nrepl-sync-request:eval expanded)
 		(if (or (member "output" result-params)
 			(member "pp" result-params))
-		    :stdout
+		    "out"
 		  "value")))))
       (slime
        (require 'slime)
