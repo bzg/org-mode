@@ -2582,7 +2582,7 @@ a plist containing export properties."
     (with-temp-buffer
       (insert latex-frag)
       (org-format-latex cache-relpath cache-dir nil "Creating LaTeX Image..."
-			nil nil processing-type)
+			nil processing-type)
       (buffer-string))))
 
 (defun org-html-latex-environment (latex-environment contents info)

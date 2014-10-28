@@ -3804,7 +3804,7 @@ contextual information."
 				(insert latex-frag)
 				(org-format-latex cache-subdir cache-dir
 						  nil display-msg
-						  nil nil processing-type)
+						  nil processing-type)
 				(buffer-substring-no-properties
 				 (point-min) (point-max)))))
 		    (if (not (string-match "file:\\([^]]*\\)" link))
