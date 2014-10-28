@@ -580,6 +580,10 @@ This works for both table types.")
 (defconst org-ts-regexp "<\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^\r\n>]*?\\)>"
   "Regular expression for fast time stamp matching.")
 
+(defconst org-ts-regexp-inactive
+  "\\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^\r\n>]*?\\)\\]"
+  "Regular expression for fast inactive time stamp matching.")
+
 (defconst org-ts-regexp-both "[[<]\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^]\r\n>]*?\\)[]>]"
   "Regular expression for fast time stamp matching.")
 
@@ -13510,6 +13514,50 @@ This is done in the same way as adding a state change note."
   (interactive)
   (org-add-log-setup 'note nil nil 'findpos nil))
 
+(defun org-log-beginning (&optional create)
+  "Return expected start of log notes in current entry.
+When optional argument CREATE is non-nil, the function creates
+a drawer to store notes, if necessary.  Returned position ignores
+narrowing."
+  (org-with-wide-buffer
+   (org-back-to-heading t)
+   ;; Skip planning info and property drawer.
+   (forward-line)
+   (when (org-looking-at-p org-planning-line-re) (forward-line))
+   (when (looking-at org-property-drawer-re)
+     (goto-char (match-end 0))
+     (forward-line))
+   (if (org-at-heading-p) (point)
+     (let ((end (save-excursion (outline-next-heading) (point)))
+	   (drawer (cond ((stringp org-log-into-drawer) org-log-into-drawer)
+			 (org-log-into-drawer "LOGBOOK"))))
+       (cond
+	(drawer
+	 (let ((regexp (concat "^[ \t]*:" (regexp-quote drawer) ":[ \t]*$"))
+	       (case-fold-search t))
+	   (catch 'exit
+	     ;; Try to find existing drawer.
+	     (while (re-search-forward regexp end t)
+	       (let ((element (org-element-at-point)))
+		 (when (eq (org-element-type element) 'drawer)
+		   (let ((cend  (org-element-property :contents-end element)))
+		     (when (and (not org-log-states-order-reversed) cend)
+		       (goto-char cend)))
+		   (throw 'exit nil))))
+	     ;; No drawer found.  Create one, if permitted.
+	     (when create
+	       (unless (bolp) (insert "\n"))
+	       (let ((beg (point)))
+		 (insert ":" drawer ":\n:END:\n")
+		 (org-indent-region beg (point)))
+	       (end-of-line -1)))))
+	(org-log-state-notes-insert-after-drawers
+	 (while (and (looking-at org-drawer-regexp)
+		     (progn (goto-char (match-end 0))
+			    (re-search-forward org-property-end-re end t)))
+	   (forward-line)))))
+     (if (bolp) (point) (line-beginning-position 2)))))
+
 (defun org-add-log-setup (&optional purpose state prev-state findpos how extra)
   "Set up the post command hook to take a note.
 If this is about to TODO state change, the new state is expected in STATE.
@@ -13517,64 +13565,42 @@ When FINDPOS is non-nil, find the correct position for the note in
 the current entry.  If not, assume that it can be inserted at point.
 HOW is an indicator what kind of note should be created.
 EXTRA is additional text that will be inserted into the notes buffer."
-  (let* ((org-log-into-drawer (org-log-into-drawer))
-	 (drawer (cond ((stringp org-log-into-drawer) org-log-into-drawer)
-		       (org-log-into-drawer "LOGBOOK"))))
-    (org-with-wide-buffer
-     (when findpos
-       (org-back-to-heading t)
-       ;; Skip planning info and property drawer.
-       (forward-line)
-       (when (org-looking-at-p org-planning-line-re) (forward-line))
-       (when (looking-at org-property-drawer-re)
-	 (goto-char (match-end 0))
-	 (forward-line))
-       (let ((end (if (org-at-heading-p) (point)
-		    (save-excursion (outline-next-heading) (point)))))
-	 (cond
-	  (drawer
-	   (let ((regexp (concat "^[ \t]*:" (regexp-quote drawer) ":[ \t]*$"))
-		 (case-fold-search t))
-	     (catch 'exit
-	       ;; Try to find existing drawer.
-	       (while (re-search-forward regexp end t)
-		 (let ((element (org-element-at-point)))
-		   (when (eq (org-element-type element) 'drawer)
-		     (when (and (not org-log-states-order-reversed)
-				(org-element-property :contents-end element))
-		       (goto-char (org-element-property :contents-end element)))
-		     (throw 'exit nil))))
-	       ;; No drawer found.  Create one.
-	       (unless (bolp) (insert "\n"))
-	       (let ((beg (point)))
-		 (insert ":" drawer ":\n:END:\n")
-		 (org-indent-region beg (point)))
-	       (end-of-line -1))))
-	  (org-log-state-notes-insert-after-drawers
-	   (while (and (looking-at org-drawer-regexp)
-		       (progn (goto-char (match-end 0))
-			      (re-search-forward org-property-end-re end t)))
-	     (forward-line)))))
-       (unless org-log-states-order-reversed
-	 (and (= (char-after) ?\n) (forward-char 1))
-	 (org-skip-over-state-notes)
-	 (skip-chars-backward " \t\n\r")))
-     (move-marker org-log-note-marker (point))
-     (setq org-log-note-purpose purpose
-	   org-log-note-state state
-	   org-log-note-previous-state prev-state
-	   org-log-note-how how
-	   org-log-note-extra extra
-	   org-log-note-effective-time (org-current-effective-time))
-     (add-hook 'post-command-hook 'org-add-log-note 'append))))
+  (org-with-wide-buffer
+   (when findpos
+     (goto-char (org-log-beginning t))
+     (unless org-log-states-order-reversed
+       (org-skip-over-state-notes)
+       (skip-chars-backward " \t\n\r")
+       (forward-line)))
+   (move-marker org-log-note-marker (point))
+   (setq org-log-note-purpose purpose
+	 org-log-note-state state
+	 org-log-note-previous-state prev-state
+	 org-log-note-how how
+	 org-log-note-extra extra
+	 org-log-note-effective-time (org-current-effective-time))
+   (add-hook 'post-command-hook 'org-add-log-note 'append)))
 
 (defun org-skip-over-state-notes ()
   "Skip past the list of State notes in an entry."
-  (if (looking-at "\n[ \t]*- State") (forward-char 1))
   (when (ignore-errors (goto-char (org-in-item-p)))
     (let* ((struct (org-list-struct))
-	   (prevs (org-list-prevs-alist struct)))
-      (while (looking-at "[ \t]*- State")
+	   (prevs (org-list-prevs-alist struct))
+	   (regexp
+	    (concat "[ \t]*- +"
+		    (replace-regexp-in-string
+		     " +" " +"
+		     (org-replace-escapes
+		      (regexp-quote (cdr (assq 'state org-log-note-headings)))
+		      `(("%d" . ,org-ts-regexp-inactive)
+			("%D" . ,org-ts-regexp)
+			("%s" . "\"\\S-+\"")
+			("%S" . "\"\\S-+\"")
+			("%t" . ,org-ts-regexp-inactive)
+			("%T" . ,org-ts-regexp)
+			("%u" . ".*?")
+			("%U" . ".*?")))))))
+      (while (org-looking-at-p regexp)
 	(goto-char (or (org-list-get-next-item (point) struct prevs)
 		       (org-list-get-item-end (point) struct)))))))
 
@@ -13622,8 +13648,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
   "Finish taking a log note, and insert it to where it belongs."
   (let ((txt (buffer-string)))
     (kill-buffer (current-buffer))
-    (let ((note (cdr (assq org-log-note-purpose org-log-note-headings)))
-	  lines ind bul)
+    (let ((note (cdr (assq org-log-note-purpose org-log-note-headings))) lines)
       (while (string-match "\\`# .*\n[ \t\n]*" txt)
 	(setq txt (replace-match "" t t txt)))
       (if (string-match "\\s-+\\'" txt)
@@ -13653,10 +13678,10 @@ EXTRA is additional text that will be inserted into the notes buffer."
 		     (cons "%S" (if org-log-note-previous-state
 				    (concat "\"" org-log-note-previous-state "\"")
 				  "\"\"")))))
-	(if lines (setq note (concat note " \\\\")))
+	(when lines (setq note (concat note " \\\\")))
 	(push note lines))
       (when (or current-prefix-arg org-note-abort)
-	(when org-log-into-drawer
+	(when (org-log-into-drawer)
 	  (org-remove-empty-drawer-at org-log-note-marker))
 	(setq lines nil))
       (when lines
@@ -13664,28 +13689,24 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	  (save-excursion
 	    (goto-char org-log-note-marker)
 	    (move-marker org-log-note-marker nil)
-	    (end-of-line 1)
-	    (if (not (bolp)) (let ((inhibit-read-only t)) (insert "\n")))
-	    (setq ind (save-excursion
-			(if (ignore-errors (goto-char (org-in-item-p)))
-			    (let ((struct (org-list-struct)))
-			      (org-list-get-ind
-			       (org-list-get-top-point struct) struct))
-			  (skip-chars-backward " \r\t\n")
-			  (cond
-			   ((and (org-at-heading-p)
-				 org-adapt-indentation)
-			    (1+ (org-current-level)))
-			   ((org-at-heading-p) 0)
-			   (t (org-get-indentation))))))
-	    (setq bul (org-list-bullet-string "-"))
-	    (org-indent-line-to ind)
-	    (insert bul (pop lines))
-	    (let ((ind-body (+ (length bul) ind)))
-	      (while lines
+	    ;; Make sure point is at the beginning of an empty line.
+	    (cond ((not (bolp)) (let ((inhibit-read-only t)) (insert "\n")))
+		  ((looking-at "[ \t]*\\S-") (save-excursion (insert "\n"))))
+	    ;; In an existing list, add a new item at the top level.
+	    ;; Otherwise, indent line like a regular one.
+	    (let ((itemp (org-in-item-p)))
+	      (if itemp
+		  (org-indent-line-to
+		   (let ((struct (save-excursion
+				   (goto-char itemp) (org-list-struct))))
+		     (org-list-get-ind (org-list-get-top-point struct) struct)))
+		(org-indent-line)))
+	    (insert (org-list-bullet-string "-") (pop lines))
+	    (let ((ind (org-list-item-body-column (line-beginning-position))))
+	      (dolist (line lines)
 		(insert "\n")
-		(org-indent-line-to ind-body)
-		(insert (pop lines))))
+		(org-indent-line-to ind)
+		(insert line)))
 	    (message "Note stored")
 	    (org-back-to-heading t)
 	    (org-cycle-hide-drawers 'children))
