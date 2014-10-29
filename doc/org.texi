@@ -10260,8 +10260,8 @@ Environments of any kind@footnote{When @file{MathJax} is used, only the
 environments recognized by @file{MathJax} will be processed.  When
 @file{dvipng} program or @file{imagemagick} suite is used to create images,
 any @LaTeX{} environment will be handled.}.  The only requirement is that the
-@code{\begin} and @code{\end} statements appear on a new line, at the
-beginning of the line or after whitespaces only.
+@code{\begin} statement appears on a new line, at the beginning of the line
+or after whitespaces only.
 @item
 Text within the usual @LaTeX{} math delimiters.  To avoid conflicts with
 currency specifications, single @samp{$} characters are only recognized as
