@@ -226,6 +226,8 @@ Otherwise, place it near the end.  When value is a list of
 symbols, put caption above selected elements only.  Allowed
 symbols are: `image', `table', `src-block' and `special-block'."
   :group 'org-export-latex
+  :version "25.1"
+  :package-version '(Org . "8.3")
   :type '(choice
 	  (const :tag "For all elements" t)
 	  (const :tag "For no element" nil)
