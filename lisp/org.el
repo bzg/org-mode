@@ -18691,7 +18691,7 @@ Some of the options can be changed using the variable
 `org-format-latex-options'."
   (when (and overlays (fboundp 'clear-image-cache)) (clear-image-cache))
   (unless (eq processing-type 'verbatim)
-    (let* ((math-regexp "\\$\\|\\\\[(]]\\|^[ \t]*\\\\begin{[A-Za-z0-9*]+}")
+    (let* ((math-regexp "\\$\\|\\\\[([]\\|^[ \t]*\\\\begin{[A-Za-z0-9*]+}")
 	   (cnt 0)
 	   checkdir-flag)
       (goto-char (point-min))
