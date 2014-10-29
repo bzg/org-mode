@@ -6241,14 +6241,6 @@ keywords @code{logreschedule}, @code{lognotereschedule}, and
 @code{nologreschedule}}, a note will be taken when changing an existing
 scheduling time.
 @c
-@orgcmd{C-c C-x C-k,org-mark-entry-for-agenda-action}
-@kindex k a
-@kindex k s
-Mark the current entry for agenda action.  After you have marked the entry
-like this, you can open the agenda or the calendar to find an appropriate
-date.  With the cursor on the selected date, press @kbd{k s} or @kbd{k d} to
-schedule the marked item.
-@c
 @orgcmd{C-c / d,org-check-deadlines}
 @cindex sparse tree, for deadlines
 @vindex org-deadline-warning-days
