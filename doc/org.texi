@@ -10181,7 +10181,7 @@ Angles are written as Greek letters \alpha, \beta and \gamma.
 @vindex org-entities
 During export, these symbols will be transformed into the native format of
 the exporter back-end.  Strings like @code{\alpha} will be exported as
-@code{&alpha;} in the HTML output, and as @code{(\alpha\)} in the @LaTeX{}
+@code{&alpha;} in the HTML output, and as @code{\(\alpha\)} in the @LaTeX{}
 output.  Similarly, @code{\nbsp} will become @code{&nbsp;} in HTML and
 @code{~} in @LaTeX{}.  If you need such a symbol inside a word, terminate it
 like this: @samp{\Aacute@{@}stor}.
