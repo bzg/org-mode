@@ -146,7 +146,6 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-table-edit-field "org-table" (arg))
 (declare-function org-table-insert-row "org-table" (&optional arg))
 (declare-function org-table-justify-field-maybe "org-table" (&optional new))
-(declare-function org-table-set-constants "org-table" ())
 (declare-function org-table-calc-current-TBLFM "org-table" (&optional arg))
 (declare-function org-id-get-create "org-id" (&optional force))
 (declare-function org-add-archive-files "org-archive" (files))
@@ -5181,16 +5180,18 @@ Return value contains the following keys: `archive', `category',
 		   (push (list 'todo value) alist))))
 	      ((equal key "SETUPFILE")
 	       (unless buffer-read-only ; Do not check in Gnus messages.
-		 (let ((f (expand-file-name (org-remove-double-quotes value))))
-		   (when (and (org-string-nw-p f)
-			      (file-readable-p f)
-			      (not (member f files)))
+		 (let ((f (and (org-string-nw-p value)
+			       (expand-file-name
+				(org-remove-double-quotes value)))))
+		   (when (and f (file-readable-p f) (not (member f files)))
 		     (with-temp-buffer
-		       (let ((org-inhibit-startup t)) (org-mode))
 		       (insert-file-contents f)
 		       (setq alist
-			     (org--setup-collect-keywords
-			      regexp alist (cons f files)))))))))))))))
+			     ;; Fake Org mode to benefit from cache
+			     ;; without recurring needlessly.
+			     (let ((major-mode 'org-mode))
+			       (org--setup-collect-keywords
+				regexp (cons f files) alist)))))))))))))))
   alist)
 
 (defun org--setup-process-tags (tags filetags)
