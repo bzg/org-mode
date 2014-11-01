@@ -1235,7 +1235,7 @@ The following issues are influenced by this variable:
   body starts with text at column 0, indentation is not changed at all.
 
 - Property drawers and planning information is inserted indented when
-  this variable s set.  When nil, they will not be indented.
+  this variable is set.  When nil, they will not be indented.
 
 - TAB indents a line relative to context.  The lines below a headline
   will be indented when this variable is set.
