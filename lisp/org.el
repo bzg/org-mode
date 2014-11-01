@@ -5134,7 +5134,7 @@ Return value contains the following keys: `archive', `category',
 		       (new (apply #'nconc
 				   (mapcar (lambda (x) (org-split-string x ":"))
 					   (org-split-string value)))))
-		   (if old (setcdr old (nconc new (cdr old)))
+		   (if old (setcdr old (append new (cdr old)))
 		     (push (cons 'filetags new) alist)))))
 	      ((equal key "LINK")
 	       (when (string-match "\\`\\(\\S-+\\)[ \t]+\\(.+\\)" value)
@@ -5162,15 +5162,15 @@ Return value contains the following keys: `archive', `category',
 	       (let ((startup (assq 'startup alist)))
 		 (if startup
 		     (setcdr startup
-			     (nconc (cdr startup) (org-split-string value)))
+			     (append (cdr startup) (org-split-string value)))
 		   (push (cons 'startup (org-split-string value)) alist))))
 	      ((equal key "TAGS")
 	       (let ((tag-cell (assq 'tags alist)))
 		 (if tag-cell
 		     (setcdr tag-cell
-			     (nconc (cdr tag-cell)
-				    '("\\n")
-				    (org-split-string value)))
+			     (append (cdr tag-cell)
+				     '("\\n")
+				     (org-split-string value)))
 		   (push (cons 'tags (org-split-string value)) alist))))
 	      ((member key '("TODO" "SEQ_TODO" "TYP_TODO"))
 	       (let ((todo (assq 'todo alist))
