@@ -105,28 +105,26 @@ This variable can be set to either `atx' or `setext'."
 TREE is the parse tree being exported.  BACKEND is the export
 back-end used.  INFO is a plist used as a communication channel.
 
-Enforce a blank line between elements.  There are three
-exceptions to this rule:
+Enforce a blank line between elements.  There are two exceptions
+to this rule:
 
   1. Preserve blank lines between sibling items in a plain list,
 
-  2. Outside of plain lists, preserve blank lines between
-     a paragraph and a plain list,
-
-  3. In an item, remove any blank line before the very first
+  2. In an item, remove any blank line before the very first
      paragraph and the next sub-list.
 
 Assume BACKEND is `md'."
   (org-element-map tree (remq 'item org-element-all-elements)
     (lambda (e)
-      (cond
-       ((not (and (eq (org-element-type e) 'paragraph)
-		  (eq (org-element-type (org-export-get-next-element e info))
-		      'plain-list)))
-	(org-element-put-property e :post-blank 1))
-       ((not (eq (org-element-type (org-element-property :parent e)) 'item)))
-       (t (org-element-put-property
-	   e :post-blank (if (org-export-get-previous-element e info) 1 0))))))
+      (org-element-put-property
+       e :post-blank
+       (if (and (eq (org-element-type e) 'paragraph)
+		(eq (org-element-type (org-element-property :parent e)) 'item)
+		(eq (org-element-type (org-export-get-next-element e info))
+		    'plain-list)
+		(not (org-export-get-previous-element e info)))
+	   0
+	 1))))
   ;; Return updated tree.
   tree)
 
