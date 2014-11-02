@@ -17883,7 +17883,8 @@ If there is already a time stamp at the cursor position, update it."
        (encode-time 0 0 0 (nth 1 cal-date) (car cal-date) (nth 2 cal-date))))))
 
 (defcustom org-effort-durations
-  `(("h" . 60)
+  `(("min" . 1)
+    ("h" . 60)
     ("d" . ,(* 60 8))
     ("w" . ,(* 60 8 5))
     ("m" . ,(* 60 8 5 4))
