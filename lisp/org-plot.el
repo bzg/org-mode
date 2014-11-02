@@ -281,8 +281,7 @@ line directly before or after the table."
     (delete-other-windows)
     (when (get-buffer "*gnuplot*") ;; reset *gnuplot* if it already running
       (with-current-buffer "*gnuplot*"
-	(goto-char (point-max))
-	(gnuplot-delchar-or-maybe-eof nil)))
+	(goto-char (point-max))))
     (org-plot/goto-nearest-table)
     ;; set default options
     (mapc
