@@ -6693,11 +6693,10 @@ with @code{org-clock-in} and two @kbd{C-u C-u} with @code{org-clock-in-last}.
 If you want to plan your work in a very detailed way, or if you need to
 produce offers with quotations of the estimated work effort, you may want to
 assign effort estimates to entries.  If you are also clocking your work, you
-may later want to compare the planned effort with the actual working time, a
-great way to improve planning estimates.  Effort estimates are stored in a
-special property @samp{Effort}@footnote{You may change the property being
-used with the variable @code{org-effort-property}.}.  You can set the effort
-for an entry with the following commands:
+may later want to compare the planned effort with the actual working time,
+a great way to improve planning estimates.  Effort estimates are stored in
+a special property @code{EFFORT}.  You can set the effort for an entry with
+the following commands:
 
 @table @kbd
 @orgcmd{C-c C-x e,org-set-effort}
