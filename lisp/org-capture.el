@@ -1608,8 +1608,6 @@ The template may still contain \"%?\" for cursor positioning."
 		(insert-file-contents filename)
 	      (error (insert (format "%%![Couldn't insert %s: %s]"
 				     filename error)))))))
-      ;; %() embedded elisp
-      (org-capture-expand-embedded-elisp)
 
       ;; The current time
       (goto-char (point-min))
@@ -1638,6 +1636,10 @@ The template may still contain \"%?\" for cursor positioning."
 	    (and (setq x (or (plist-get org-store-link-plist
 					(intern (match-string 1))) ""))
 		 (replace-match x t t)))))
+
+      ;; %() embedded elisp
+      (goto-char (point-min))
+      (org-capture-expand-embedded-elisp)
 
       ;; Turn on org-mode in temp buffer, set local variables
       ;; This is to support completion in interactive prompts
