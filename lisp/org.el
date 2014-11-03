@@ -21293,8 +21293,8 @@ on context.  See the individual commands for more information."
     ("Edit Structure"
      ["Refile Subtree" org-refile (org-in-subtree-not-table-p)]
      "--"
-     ["Move Subtree Up" org-shiftmetaup (org-in-subtree-not-table-p)]
-     ["Move Subtree Down" org-shiftmetadown (org-in-subtree-not-table-p)]
+     ["Move Subtree Up" org-metaup (org-at-heading-p)]
+     ["Move Subtree Down" org-metadown (org-at-heading-p)]
      "--"
      ["Copy Subtree"  org-copy-special (org-in-subtree-not-table-p)]
      ["Cut Subtree"  org-cut-special (org-in-subtree-not-table-p)]
