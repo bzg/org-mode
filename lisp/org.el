@@ -5544,7 +5544,7 @@ The following commands are available:
 		   ("8.2.6" . "24.4")))
 
 (defvar org-mode-transpose-word-syntax-table
-  (let ((st (make-syntax-table)))
+  (let ((st (make-syntax-table text-mode-syntax-table)))
     (mapc (lambda(c) (modify-syntax-entry
 		      (string-to-char (car c)) "w p" st))
 	  org-emphasis-alist)
