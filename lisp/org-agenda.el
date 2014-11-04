@@ -9583,12 +9583,12 @@ entries in that Org-mode file."
 (defun org-agenda-phases-of-moon ()
   "Display the phases of the moon for the 3 months around the cursor date."
   (interactive)
-  (org-agenda-execute-calendar-command 'calendar-phases-of-moon))
+  (org-agenda-execute-calendar-command 'calendar-lunar-phases))
 
 (defun org-agenda-holidays ()
   "Display the holidays for the 3 months around the cursor date."
   (interactive)
-  (org-agenda-execute-calendar-command 'list-calendar-holidays))
+  (org-agenda-execute-calendar-command 'calendar-list-holidays))
 
 (defvar calendar-longitude)      ; defined in calendar.el
 (defvar calendar-latitude)       ; defined in calendar.el
