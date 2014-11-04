@@ -875,25 +875,28 @@ When optional argument FORCE is non-nil, force publishing all
 files in PROJECT.  With a non-nil optional argument ASYNC,
 publishing will be done asynchronously, in another process."
   (interactive
-   (list
-    (assoc (org-icompleting-read
-	    "Publish project: "
-	    org-publish-project-alist nil t)
-	   org-publish-project-alist)
-    current-prefix-arg))
-  (let ((project-alist  (if (not (stringp project)) (list project)
-			  ;; If this function is called in batch mode,
-			  ;; project is still a string here.
-			  (list (assoc project org-publish-project-alist)))))
-    (if async
-	(org-export-async-start (lambda (results) nil)
-	  `(let ((org-publish-use-timestamps-flag
-		  (if ',force nil ,org-publish-use-timestamps-flag)))
-	     (org-publish-projects ',project-alist)))
-      (save-window-excursion
-	(let* ((org-publish-use-timestamps-flag
-		(if force nil org-publish-use-timestamps-flag)))
-	  (org-publish-projects project-alist))))))
+   (list (assoc (org-icompleting-read "Publish project: "
+				      org-publish-project-alist nil t)
+		org-publish-project-alist)
+	 current-prefix-arg))
+  (let ((project (if (not (stringp project)) project
+		   ;; If this function is called in batch mode,
+		   ;; PROJECT is still a string here.
+		   (assoc project org-publish-project-alist))))
+    (cond
+     ((not project))
+     (async
+      (org-export-async-start (lambda (results) nil)
+	`(let ((org-publish-use-timestamps-flag
+		,(and (not force) org-publish-use-timestamps-flag)))
+	   ;; Expand components right now as external process may not
+	   ;; be aware of complete `org-publish-project-alist'.
+	   (org-publish-projects
+	    ',(org-publish-expand-projects (list project))))))
+     (t (save-window-excursion
+	  (let ((org-publish-use-timestamps-flag
+		 (and (not force) org-publish-use-timestamps-flag)))
+	    (org-publish-projects (list project))))))))
 
 ;;;###autoload
 (defun org-publish-all (&optional force async)
