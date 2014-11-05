@@ -307,7 +307,10 @@ but before any resource and task declarations."
 	    startbuffer startcredit statusnote chargeset charge)
   "Valid attributes for Taskjuggler tasks.
 If one of these appears as a property for a headline, it will be
-exported with the corresponding task."
+exported with the corresponding task.
+
+Note that multiline properties are not supported, so attributes
+like note or journalentry have to be on a single line."
   :group 'org-export-taskjuggler)
 
 (defcustom org-taskjuggler-valid-resource-attributes
