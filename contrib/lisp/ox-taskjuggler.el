@@ -64,7 +64,7 @@
 ;; should end up with something similar to the example by Peter Jones
 ;; in:
 ;;
-;;   http://www.contextualdevelopment.com/static/artifacts/articles/2008/project-planning/project-planning.org.
+;;   http://www.devalot.com/assets/articles/2008/07/project-planning/project-planning.org.
 ;;
 ;; Now mark the top node of your tasks with a tag named
 ;; "taskjuggler_project" (or whatever you customized
