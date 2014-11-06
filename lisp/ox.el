@@ -5222,6 +5222,7 @@ them."
      ("nb" :default "Forfatter")
      ("nn" :default "Forfattar")
      ("pl" :default "Autor")
+     ("pt_BR" :default "Autor")
      ("ru" :html "&#1040;&#1074;&#1090;&#1086;&#1088;" :utf-8 "Автор")
      ("sv" :html "F&ouml;rfattare")
      ("uk" :html "&#1040;&#1074;&#1090;&#1086;&#1088;" :utf-8 "Автор")
@@ -5265,6 +5266,7 @@ them."
      ("nb" :default "Dato")
      ("nn" :default "Dato")
      ("pl" :default "Data")
+     ("pt_BR" :default "Data")
      ("ru" :html "&#1044;&#1072;&#1090;&#1072;" :utf-8 "Дата")
      ("sv" :default "Datum")
      ("uk" :html "&#1044;&#1072;&#1090;&#1072;" :utf-8 "Дата")
@@ -5280,6 +5282,7 @@ them."
      ("no" :default "Ligning")
      ("nb" :default "Ligning")
      ("nn" :default "Likning")
+     ("pt_BR" :html "Equa&ccedil;&atilde;o" :default "Equação" :ascii "Equacao")
      ("ru" :html "&#1059;&#1088;&#1072;&#1074;&#1085;&#1077;&#1085;&#1080;&#1077;"
       :utf-8 "Уравнение")
      ("sv" :default "Ekvation")
@@ -5293,6 +5296,7 @@ them."
      ("no" :default "Illustrasjon")
      ("nb" :default "Illustrasjon")
      ("nn" :default "Illustrasjon")
+     ("pt_BR" :default "Figura")
      ("ru" :html "&#1056;&#1080;&#1089;&#1091;&#1085;&#1086;&#1082;" :utf-8 "Рисунок")
      ("sv" :default "Illustration")
      ("zh-CN" :html "&#22270;" :utf-8 "图"))
@@ -5306,6 +5310,7 @@ them."
      ("no" :default "Illustrasjon %d")
      ("nb" :default "Illustrasjon %d")
      ("nn" :default "Illustrasjon %d")
+     ("pt_BR" :default "Figura %d:")
      ("ru" :html "&#1056;&#1080;&#1089;. %d.:" :utf-8 "Рис. %d.:")
      ("sv" :default "Illustration %d")
      ("zh-CN" :html "&#22270;%d&nbsp;" :utf-8 "图%d "))
@@ -5328,6 +5333,7 @@ them."
      ("nb" :default "Fotnoter")
      ("nn" :default "Fotnotar")
      ("pl" :default "Przypis")
+     ("pt_BR" :html "Notas de Rodap&eacute;" :default "Notas de Rodapé" :ascii "Notas de Rodape")
      ("ru" :html "&#1057;&#1085;&#1086;&#1089;&#1082;&#1080;" :utf-8 "Сноски")
      ("sv" :default "Fotnoter")
      ("uk" :html "&#1055;&#1088;&#1080;&#1084;&#1110;&#1090;&#1082;&#1080;"
@@ -5356,6 +5362,7 @@ them."
      ("no" :default "Tabeller")
      ("nb" :default "Tabeller")
      ("nn" :default "Tabeller")
+     ("pt_BR" :default "Índice de Tabelas" :ascii "Indice de Tabelas")
      ("ru" :html "&#1057;&#1087;&#1080;&#1089;&#1086;&#1082; &#1090;&#1072;&#1073;&#1083;&#1080;&#1094;"
       :utf-8 "Список таблиц")
      ("sv" :default "Tabeller")
@@ -5369,6 +5376,7 @@ them."
      ("ja" :default "ソースコード%d:")
      ("no" :default "Dataprogram %d")
      ("nb" :default "Dataprogram %d")
+     ("pt_BR" :default "Listagem %d")
      ("ru" :html "&#1056;&#1072;&#1089;&#1087;&#1077;&#1095;&#1072;&#1090;&#1082;&#1072; %d.:"
       :utf-8 "Распечатка %d.:")
      ("zh-CN" :html "&#20195;&#30721;%d&nbsp;" :utf-8 "代码%d "))
@@ -5382,6 +5390,8 @@ them."
      ("et" :html "Vaata peat&#252;kki %s" :utf-8 "Vaata peatükki %s")
      ("fr" :default "cf. section %s")
      ("ja" :default "セクション %s を参照")
+     ("pt_BR" :html "Veja a se&ccedil;&atilde;o %s" :default "Veja a seção %s"
+      :ascii "Veja a secao %s")
      ("ru" :html "&#1057;&#1084;. &#1088;&#1072;&#1079;&#1076;&#1077;&#1083; %s"
       :utf-8 "См. раздел %s")
      ("zh-CN" :html "&#21442;&#35265;&#31532;%s&#33410;" :utf-8 "参见第%s节"))
@@ -5391,7 +5401,9 @@ them."
      ("et" :default "Tabel")
      ("fr" :default "Tableau")
      ("ja" :default "表" :html "&#34920;")
-     ("ru" :html "&#1058;&#1072;&#1073;&#1083;&#1080;&#1094;&#1072;" :utf-8 "Таблица")
+     ("pt_BR" :default "Tabela")
+     ("ru" :html "&#1058;&#1072;&#1073;&#1083;&#1080;&#1094;&#1072;"
+      :utf-8 "Таблица")
      ("zh-CN" :html "&#34920;" :utf-8 "表"))
     ("Table %d:"
      ("da" :default "Tabel %d")
@@ -5403,6 +5415,7 @@ them."
      ("no" :default "Tabell %d")
      ("nb" :default "Tabell %d")
      ("nn" :default "Tabell %d")
+     ("pt_BR" :default "Tabela %d")
      ("ru" :html "&#1058;&#1072;&#1073;&#1083;&#1080;&#1094;&#1072; %d.:"
       :utf-8 "Таблица %d.:")
      ("sv" :default "Tabell %d")
@@ -5426,6 +5439,7 @@ them."
      ("nb" :default "Innhold")
      ("nn" :default "Innhald")
      ("pl" :html "Spis tre&#x015b;ci")
+     ("pt_BR" :html "&Iacute;ndice" :utf8 "Índice" :ascii "Indice")
      ("ru" :html "&#1057;&#1086;&#1076;&#1077;&#1088;&#1078;&#1072;&#1085;&#1080;&#1077;"
       :utf-8 "Содержание")
      ("sv" :html "Inneh&aring;ll")
@@ -5439,6 +5453,8 @@ them."
      ("et" :default "Tundmatu viide")
      ("fr" :ascii "Destination inconnue" :default "Référence inconnue")
      ("ja" :default "不明な参照先")
+     ("pt_BR" :default "Referência desconhecida"
+      :ascii "Referencia desconhecida")
      ("ru" :html "&#1053;&#1077;&#1080;&#1079;&#1074;&#1077;&#1089;&#1090;&#1085;&#1072;&#1103; &#1089;&#1089;&#1099;&#1083;&#1082;&#1072;"
       :utf-8 "Неизвестная ссылка")
      ("zh-CN" :html "&#26410;&#30693;&#24341;&#29992;" :utf-8 "未知引用")))
