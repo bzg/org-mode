@@ -9488,7 +9488,10 @@ a timestamp can be added there."
   (widen)
   (goto-char (point-max))
   (or (bolp) (insert "\n"))
-  (insert "* " text "\n")
+  (org-insert-heading)
+  (insert text)
+  (org-end-of-meta-data)
+  (unless (bolp) (insert "\n"))
   (if org-adapt-indentation (org-indent-to-column 2)))
 
 (defun org-agenda-insert-diary-make-new-entry (text)
