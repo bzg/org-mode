@@ -782,7 +782,7 @@ contextual information."
   "Transcode a TARGET object into Beamer code.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (format "\\hypertarget{%s}{}"
+  (format "\\label{%s}"
 	  (org-export-solidify-link-text (org-element-property :value target))))
 
 
