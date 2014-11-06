@@ -64,7 +64,7 @@
 ;; should end up with something similar to the example by Peter Jones
 ;; in:
 ;;
-;;   http://www.contextualdevelopment.com/static/artifacts/articles/2008/project-planning/project-planning.org.
+;;   http://www.devalot.com/assets/articles/2008/07/project-planning/project-planning.org.
 ;;
 ;; Now mark the top node of your tasks with a tag named
 ;; "taskjuggler_project" (or whatever you customized
@@ -307,7 +307,10 @@ but before any resource and task declarations."
 	    startbuffer startcredit statusnote chargeset charge)
   "Valid attributes for Taskjuggler tasks.
 If one of these appears as a property for a headline, it will be
-exported with the corresponding task."
+exported with the corresponding task.
+
+Note that multiline properties are not supported, so attributes
+like note or journalentry have to be on a single line."
   :group 'org-export-taskjuggler)
 
 (defcustom org-taskjuggler-valid-project-attributes
@@ -600,7 +603,7 @@ doesn't include leading \"depends\"."
 		   (let ((id (org-element-property :TASK_ID dep)))
 		     (and id
 			  (string-match (concat id " +\\({.*?}\\)") dep-str)
-			  (org-match-string-no-properties 1))))
+			  (org-match-string-no-properties 1 dep-str))))
 		  path)
 	      ;; Compute number of exclamation marks by looking for the
 	      ;; common ancestor between TASK and DEP.
