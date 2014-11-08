@@ -8125,42 +8125,38 @@ even level numbers will become the next higher odd number."
 	'org-get-valid-level "23.1")))
 
 (defun org-promote ()
-  "Promote the current heading higher up the tree.
-If the region is active in `transient-mark-mode', promote all headings
-in the region."
-  (org-back-to-heading t)
-  (let* ((level (save-match-data (funcall outline-level)))
-	 (after-change-functions (remove 'flyspell-after-change-function
-					 after-change-functions))
-	 (up-head (concat (make-string (org-get-valid-level level -1) ?*) " "))
-	 (diff (abs (- level (length up-head) -1))))
-    (cond ((and (= level 1) org-called-with-limited-levels
-		org-allow-promoting-top-level-subtree)
-	   (replace-match "# " nil t))
-	  ((= level 1)
-	   (user-error "Cannot promote to level 0.  UNDO to recover if necessary"))
-	  (t (replace-match up-head nil t)))
-    ;; Fixup tag positioning
-    (unless (= level 1)
-      (and org-auto-align-tags (org-set-tags nil 'ignore-column))
-      (if org-adapt-indentation (org-fixup-indentation (- diff))))
-    (run-hooks 'org-after-promote-entry-hook)))
+  "Promote the current heading higher up the tree."
+  (org-with-wide-buffer
+   (org-back-to-heading t)
+   (let* ((after-change-functions (remq 'flyspell-after-change-function
+					after-change-functions))
+	  (level (save-match-data (funcall outline-level)))
+	  (up-head (concat (make-string (org-get-valid-level level -1) ?*) " "))
+	  (diff (abs (- level (length up-head) -1))))
+     (cond
+      ((and (= level 1) org-allow-promoting-top-level-subtree)
+       (replace-match "# " nil t))
+      ((= level 1)
+       (user-error "Cannot promote to level 0.  UNDO to recover if necessary"))
+      (t (replace-match up-head nil t)))
+     (unless (= level 1)
+       (when org-auto-align-tags (org-set-tags nil 'ignore-column))
+       (when org-adapt-indentation (org-fixup-indentation (- diff))))
+     (run-hooks 'org-after-promote-entry-hook))))
 
 (defun org-demote ()
-  "Demote the current heading lower down the tree.
-If the region is active in `transient-mark-mode', demote all headings
-in the region."
-  (org-back-to-heading t)
-  (let* ((level (save-match-data (funcall outline-level)))
-	 (after-change-functions (remove 'flyspell-after-change-function
-					 after-change-functions))
-	 (down-head (concat (make-string (org-get-valid-level level 1) ?*) " "))
-	 (diff (abs (- level (length down-head) -1))))
-    (replace-match down-head nil t)
-    ;; Fixup tag positioning
-    (and org-auto-align-tags (org-set-tags nil 'ignore-column))
-    (if org-adapt-indentation (org-fixup-indentation diff))
-    (run-hooks 'org-after-demote-entry-hook)))
+  "Demote the current heading lower down the tree."
+  (org-with-wide-buffer
+   (org-back-to-heading t)
+   (let* ((after-change-functions (remq 'flyspell-after-change-function
+					after-change-functions))
+	  (level (save-match-data (funcall outline-level)))
+	  (down-head (concat (make-string (org-get-valid-level level 1) ?*) " "))
+	  (diff (abs (- level (length down-head) -1))))
+     (replace-match down-head nil t)
+     (when org-auto-align-tags (org-set-tags nil 'ignore-column))
+     (when org-adapt-indentation (org-fixup-indentation diff))
+     (run-hooks 'org-after-demote-entry-hook))))
 
 (defun org-cycle-level ()
   "Cycle the level of an empty headline through possible states.
@@ -8225,27 +8221,82 @@ After top level, it switches back to sibling level."
 		  (not (eobp)))
 	(funcall fun)))))
 
-(defvar org-property-end-re) ; silence byte-compiler
 (defun org-fixup-indentation (diff)
   "Change the indentation in the current entry by DIFF.
-However, if any line in the current entry has no indentation, or if it
-would end up with no indentation after the change, nothing at all is done."
-  (save-excursion
-    (let ((end (save-excursion (outline-next-heading)
-			       (point-marker)))
-	  (prohibit (if (> diff 0)
-			"^\\S-"
-		      (concat "^ \\{0," (int-to-string (- diff)) "\\}\\S-")))
-	  col)
-      (unless (save-excursion (end-of-line 1)
-			      (re-search-forward prohibit end t))
-	(while (and (< (point) end)
-		    (re-search-forward "^[ \t]+" end t))
-	  (goto-char (match-end 0))
-	  (setq col (current-column))
-	  (if (< diff 0) (replace-match ""))
-	  (org-indent-to-column (+ diff col))))
-      (move-marker end nil))))
+
+DIFF is an integer.  Indentation is done according to the
+following rules:
+
+  - Planning information and property drawers are always indented
+    according to the new level of the headline;
+
+  - Footnote definitions and their contents are ignored;
+
+  - Inlinetasks' boundaries are not shifted;
+
+  - Empty lines are ignored;
+
+  - Other lines' indentation are shifted by DIFF columns, unless
+    it would introduce a structural change in the document, in
+    which case no shifting is done at all.
+
+Assume point is at a heading or an inlinetask beginning."
+  (org-with-wide-buffer
+   (narrow-to-region (line-beginning-position)
+		     (save-excursion
+		       (if (org-with-limited-levels (org-at-heading-p))
+			   (org-with-limited-levels (outline-next-heading))
+			 (org-inlinetask-goto-end))
+		       (point)))
+   (forward-line)
+   ;; Indent properly planning info and property drawer.
+   (when (org-looking-at-p org-planning-line-re)
+     (org-indent-line)
+     (forward-line))
+   (when (looking-at org-property-drawer-re)
+     (goto-char (match-end 0))
+     (forward-line)
+     (save-excursion (org-indent-region (match-beginning 0) (match-end 0))))
+   (catch 'no-shift
+     (when (zerop diff) (throw 'no-shift nil))
+     ;; If DIFF is negative, first check if a shift is possible at all
+     ;; (e.g., it doesn't break structure).  This can only happen if
+     ;; some contents are not properly indented.
+     (when (< diff 0)
+       (let ((diff (- diff))
+	     (forbidden-re (concat org-outline-regexp
+				   "\\|"
+				   (substring org-footnote-definition-re 1))))
+	 (save-excursion
+	   (while (not (eobp))
+	     (cond
+	      ((org-looking-at-p "[ \t]*$") (forward-line))
+	      ((and (org-looking-at-p org-footnote-definition-re)
+		    (let ((e (org-element-at-point)))
+		      (and (eq (org-element-type e) 'footnote-definition)
+			   (goto-char (org-element-property :end e))))))
+	      ((org-looking-at-p org-outline-regexp) (forward-line))
+	      ;; Give up if shifting would move before column 0 or if
+	      ;; it would introduce a headline or a footnote
+	      ;; definition.
+	      (t
+	       (skip-chars-forward " \t")
+	       (let ((ind (current-column)))
+		 (when (or (< ind diff)
+			   (and (= ind diff) (org-looking-at-p forbidden-re)))
+		   (throw 'no-shift nil)))
+	       (forward-line)))))))
+     ;; Shift lines but footnote definitions and inlinetasks by DIFF.
+     (while (not (eobp))
+       (cond
+	((and (org-looking-at-p org-footnote-definition-re)
+	      (let ((e (org-element-at-point)))
+		(and (eq (org-element-type e) 'footnote-definition)
+		     (goto-char (org-element-property :end e))))))
+	((org-looking-at-p org-outline-regexp) (forward-line))
+	((org-looking-at-p "[ \t]*$") (forward-line))
+	(t (org-indent-line-to (+ (org-get-indentation) diff))
+	   (forward-line)))))))
 
 (defun org-convert-to-odd-levels ()
   "Convert an org-mode file with all levels allowed to one with odd levels.

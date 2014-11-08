@@ -1958,6 +1958,251 @@ Text.
 
 
 
+;;; Outline structure
+
+(ert-deftest test-org/demote ()
+  "Test `org-demote' specifications."
+  ;; Add correct number of stars according to `org-odd-levels-only'.
+  (should
+   (= 2
+      (org-test-with-temp-text "* H"
+	(let ((org-odd-levels-only nil)) (org-demote))
+	(org-current-level))))
+  (should
+   (= 3
+      (org-test-with-temp-text "* H"
+	(let ((org-odd-levels-only t)) (org-demote))
+	(org-current-level))))
+  ;; When `org-auto-align-tags' is non-nil, move tags accordingly.
+  (should
+   (org-test-with-temp-text "* H  :tag:"
+     (let ((org-tags-column 10)
+	   (org-auto-align-tags t)
+	   (org-odd-levels-only nil))
+       (org-demote))
+     (org-move-to-column 10)
+     (org-looking-at-p ":tag:$")))
+  (should-not
+   (org-test-with-temp-text "* H  :tag:"
+     (let ((org-tags-column 10)
+	   (org-auto-align-tags nil)
+	   (org-odd-levels-only nil))
+       (org-demote))
+     (org-move-to-column 10)
+     (org-looking-at-p ":tag:$")))
+  ;; When `org-adapt-indentation' is non-nil, always indent planning
+  ;; info and property drawers accordingly.
+  (should
+   (= 3
+      (org-test-with-temp-text "* H\n  SCHEDULED: <2014-03-04 tue.>"
+	(let ((org-odd-levels-only nil)
+	      (org-adapt-indentation t))
+	  (org-demote))
+	(forward-line)
+	(org-get-indentation))))
+  (should
+   (= 3
+      (org-test-with-temp-text "* H\n  :PROPERTIES:\n  :FOO: Bar\n  :END:"
+	(let ((org-odd-levels-only nil)
+	      (org-adapt-indentation t))
+	  (org-demote))
+	(forward-line)
+	(org-get-indentation))))
+  (should-not
+   (= 3
+      (org-test-with-temp-text "* H\n  SCHEDULED: <2014-03-04 tue.>"
+	(let ((org-odd-levels-only nil)
+	      (org-adapt-indentation nil))
+	  (org-demote))
+	(forward-line)
+	(org-get-indentation))))
+  ;; When `org-adapt-indentation' is non-nil, shift all lines in
+  ;; section accordingly.  Ignore, however, footnote definitions and
+  ;; inlinetasks boundaries.
+  (should
+   (= 3
+      (org-test-with-temp-text "* H\n  Paragraph"
+	(let ((org-odd-levels-only nil)
+	      (org-adapt-indentation t))
+	  (org-demote))
+	(forward-line)
+	(org-get-indentation))))
+  (should
+   (= 2
+      (org-test-with-temp-text "* H\n  Paragraph"
+	(let ((org-odd-levels-only nil)
+	      (org-adapt-indentation nil))
+	  (org-demote))
+	(forward-line)
+	(org-get-indentation))))
+  (should
+   (zerop
+    (org-test-with-temp-text "* H\n[fn:1] Definition."
+      (let ((org-odd-levels-only nil)
+	    (org-adapt-indentation t))
+	(org-demote))
+      (forward-line)
+      (org-get-indentation))))
+  (should
+   (= 3
+      (org-test-with-temp-text "* H\n[fn:1] Def.\n\n\n  After def."
+	(let ((org-odd-levels-only nil)
+	      (org-adapt-indentation t))
+	  (org-demote))
+	(goto-char (point-max))
+	(org-get-indentation))))
+  (when (featurep 'org-inlinetask)
+    (should
+     (zerop
+      (let ((org-inlinetask-min-level 5)
+	    (org-adapt-indentation t))
+	(org-test-with-temp-text "* H\n***** I\n***** END"
+	  (org-demote)
+	  (forward-line)
+	  (org-get-indentation))))))
+  (when (featurep 'org-inlinetask)
+    (should
+     (= 3
+	(let ((org-inlinetask-min-level 5)
+	      (org-adapt-indentation t))
+	  (org-test-with-temp-text "* H\n***** I\n  Contents\n***** END"
+	    (org-demote)
+	    (forward-line 2)
+	    (org-get-indentation)))))))
+
+(ert-deftest test-org/promote ()
+  "Test `org-promote' specifications."
+  ;; Return an error if headline is to be promoted to level 0, unless
+  ;; `org-allow-promoting-top-level-subtree' is non-nil, in which case
+  ;; headline becomes a comment.
+  (should-error
+   (org-test-with-temp-text "* H"
+     (let ((org-allow-promoting-top-level-subtree nil)) (org-promote))))
+  (should
+   (equal "# H"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-allow-promoting-top-level-subtree t)) (org-promote))
+	    (buffer-string))))
+  ;; Remove correct number of stars according to
+  ;; `org-odd-levels-only'.
+  (should
+   (= 2
+      (org-test-with-temp-text "*** H"
+	(let ((org-odd-levels-only nil)) (org-promote))
+	(org-current-level))))
+  (should
+   (= 1
+      (org-test-with-temp-text "*** H"
+	(let ((org-odd-levels-only t)) (org-promote))
+	(org-current-level))))
+  ;; When `org-auto-align-tags' is non-nil, move tags accordingly.
+  (should
+   (org-test-with-temp-text "** H :tag:"
+     (let ((org-tags-column 10)
+	   (org-auto-align-tags t)
+	   (org-odd-levels-only nil))
+       (org-promote))
+     (org-move-to-column 10)
+     (org-looking-at-p ":tag:$")))
+  (should-not
+   (org-test-with-temp-text "** H :tag:"
+     (let ((org-tags-column 10)
+	   (org-auto-align-tags nil)
+	   (org-odd-levels-only nil))
+       (org-promote))
+     (org-move-to-column 10)
+     (org-looking-at-p ":tag:$")))
+  ;; When `org-adapt-indentation' is non-nil, always indent planning
+  ;; info and property drawers.
+  (should
+   (= 2
+      (org-test-with-temp-text "** H\n   SCHEDULED: <2014-03-04 tue.>"
+	(let ((org-odd-levels-only nil)
+	      (org-adapt-indentation t))
+	  (org-promote))
+	(forward-line)
+	(org-get-indentation))))
+  (should
+   (= 2
+      (org-test-with-temp-text "** H\n   :PROPERTIES:\n   :FOO: Bar\n   :END:"
+	(let ((org-odd-levels-only nil)
+	      (org-adapt-indentation t))
+	  (org-promote))
+	(forward-line)
+	(org-get-indentation))))
+  (should-not
+   (= 2
+      (org-test-with-temp-text "** H\n   SCHEDULED: <2014-03-04 tue.>"
+	(let ((org-odd-levels-only nil)
+	      (org-adapt-indentation nil))
+	  (org-promote))
+	(forward-line)
+	(org-get-indentation))))
+  ;; When `org-adapt-indentation' is non-nil, shift all lines in
+  ;; section accordingly.  Ignore, however, footnote definitions and
+  ;; inlinetasks boundaries.
+  (should
+   (= 2
+      (org-test-with-temp-text "** H\n   Paragraph"
+	(let ((org-odd-levels-only nil)
+	      (org-adapt-indentation t))
+	  (org-promote))
+	(forward-line)
+	(org-get-indentation))))
+  (should-not
+   (= 2
+      (org-test-with-temp-text "** H\n   Paragraph"
+	(let ((org-odd-levels-only nil)
+	      (org-adapt-indentation nil))
+	  (org-promote))
+	(forward-line)
+	(org-get-indentation))))
+  (should
+   (= 2
+      (org-test-with-temp-text "** H\n   Paragraph\n[fn:1] Definition."
+	(let ((org-odd-levels-only nil)
+	      (org-adapt-indentation t))
+	  (org-promote))
+	(forward-line)
+	(org-get-indentation))))
+  (when (featurep 'org-inlinetask)
+    (should
+     (zerop
+      (let ((org-inlinetask-min-level 5)
+	    (org-adapt-indentation t))
+	(org-test-with-temp-text "** H\n***** I\n***** END"
+	  (org-promote)
+	  (forward-line)
+	  (org-get-indentation))))))
+  (when (featurep 'org-inlinetask)
+    (should
+     (= 2
+	(let ((org-inlinetask-min-level 5)
+	      (org-adapt-indentation t))
+	  (org-test-with-temp-text "** H\n***** I\n   Contents\n***** END"
+	    (org-promote)
+	    (forward-line 2)
+	    (org-get-indentation))))))
+  ;; Give up shifting if it would break document's structure
+  ;; otherwise.
+  (should
+   (= 3
+      (org-test-with-temp-text "** H\n   Paragraph\n [fn:1] Def."
+	(let ((org-odd-levels-only nil)
+	      (org-adapt-indentation t))
+	  (org-promote))
+	(forward-line)
+	(org-get-indentation))))
+  (should
+   (= 3
+      (org-test-with-temp-text "** H\n   Paragraph\n * list."
+	(let ((org-odd-levels-only nil)
+	      (org-adapt-indentation t))
+	  (org-promote))
+	(forward-line)
+	(org-get-indentation)))))
+
+
 ;;; Planning
 
 (ert-deftest test-org/timestamp-has-time-p ()
