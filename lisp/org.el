@@ -16600,8 +16600,7 @@ So these are more for recording a certain time/date."
 (defvar org-read-date-inactive)
 
 (defvar org-read-date-minibuffer-local-map
-  (let* ((org-replace-disputed-keys nil)
-	 (map (make-sparse-keymap)))
+  (let* ((map (make-sparse-keymap)))
     (set-keymap-parent map minibuffer-local-map)
     (org-defkey map (kbd ".")
                 (lambda () (interactive)
