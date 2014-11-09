@@ -211,11 +211,19 @@ into
 
 (defcustom org-plain-list-ordered-item-terminator t
   "The character that makes a line with leading number an ordered list item.
-Valid values are ?. and ?\).  To get both terminators, use t."
+Valid values are ?. and ?\).  To get both terminators, use t.
+
+This variable needs to be set before org.el is loaded.  If you
+need to make a change while Emacs is running, use the customize
+interface or run the following code after updating it:
+
+  \\[org-element-update-syntax]"
   :group 'org-plain-lists
   :type '(choice (const :tag "dot like in \"2.\"" ?.)
 		 (const :tag "paren like in \"2)\"" ?\))
-		 (const :tag "both" t)))
+		 (const :tag "both" t))
+  :set (lambda (var val) (set var val)
+	 (when (featurep 'org-element) (org-element-update-syntax))))
 
 (define-obsolete-variable-alias 'org-alphabetical-lists
   'org-list-allow-alphabetical "24.4") ; Since 8.0
@@ -230,13 +238,12 @@ This variable needs to be set before org.el is loaded.  If you
 need to make a change while Emacs is running, use the customize
 interface or run the following code after updating it:
 
-  \(when (featurep 'org-element) (load \"org-element\" t t))"
+  \\[org-element-update-syntax]"
   :group 'org-plain-lists
   :version "24.1"
   :type 'boolean
-  :set (lambda (var val)
-	 (when (featurep 'org-element) (load "org-element" t t))
-	 (set var val)))
+  :set (lambda (var val) (set var val)
+	 (when (featurep 'org-element) (org-element-update-syntax))))
 
 (defcustom org-list-two-spaces-after-bullet-regexp nil
   "A regular expression matching bullets that should have 2 spaces after them.

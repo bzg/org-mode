@@ -9665,11 +9665,12 @@ depending on the format.  The return value will be put literally into
 the exported file.  If the return value is nil, this means Org should
 do what it normally does with links which do not have EXPORT defined.
 
-Org-mode has a built-in default for exporting links.  If you are happy with
+Org mode has a built-in default for exporting links.  If you are happy with
 this default, there is no need to define an export function for the link
 type.  For a simple example of an export function, see `org-bbdb.el'."
   (add-to-list 'org-link-types type t)
   (org-make-link-regexps)
+  (org-element-update-syntax)
   (if (assoc type org-link-protocols)
       (setcdr (assoc type org-link-protocols) (list follow export))
     (push (list type follow export) org-link-protocols)))

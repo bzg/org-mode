@@ -128,45 +128,99 @@
 ;; along with the affiliated keywords recognized.  Also set up
 ;; restrictions on recursive objects combinations.
 ;;
-;; These variables really act as a control center for the parsing
-;; process.
+;; `org-element-update-syntax' builds proper syntax regexps according
+;; to current setup.
 
-(defconst org-element-paragraph-separate
-  (concat "^\\(?:"
-          ;; Headlines, inlinetasks.
-          org-outline-regexp "\\|"
-          ;; Footnote definitions.
-	  "\\[\\(?:[0-9]+\\|fn:[-_[:word:]]+\\)\\]" "\\|"
-	  ;; Diary sexps.
-	  "%%(" "\\|"
-          "[ \t]*\\(?:"
-          ;; Empty lines.
-          "$" "\\|"
-	  ;; Tables (any type).
-	  "\\(?:|\\|\\+-[-+]\\)" "\\|"
-          ;; Blocks (any type), Babel calls and keywords.  Note: this
-	  ;; is only an indication and need some thorough check.
-          "#\\(?:[+ ]\\|$\\)" "\\|"
-	  ;; Drawers (any type) and fixed-width areas.  This is also
-	  ;; only an indication.
-	  ":" "\\|"
-          ;; Horizontal rules.
-          "-\\{5,\\}[ \t]*$" "\\|"
-          ;; LaTeX environments.
-          "\\\\begin{\\([A-Za-z0-9]+\\*?\\)}" "\\|"
-          ;; Clock lines.
-          (regexp-quote org-clock-string) "\\|"
-          ;; Lists.
-          (let ((term (case org-plain-list-ordered-item-terminator
-                        (?\) ")") (?. "\\.") (otherwise "[.)]")))
-                (alpha (and org-list-allow-alphabetical "\\|[A-Za-z]")))
-            (concat "\\(?:[-+*]\\|\\(?:[0-9]+" alpha "\\)" term "\\)"
-                    "\\(?:[ \t]\\|$\\)"))
-          "\\)\\)")
+(defvar org-element-paragraph-separate nil
   "Regexp to separate paragraphs in an Org buffer.
 In the case of lines starting with \"#\" and \":\", this regexp
 is not sufficient to know if point is at a paragraph ending.  See
 `org-element-paragraph-parser' for more information.")
+
+(defvar org-element--object-regexp nil
+  "Regexp possibly matching the beginning of an object.
+This regexp allows false positives.  Dedicated parser (e.g.,
+`org-export-bold-parser') will take care of further filtering.
+Radio links are not matched by this regexp, as they are treated
+specially in `org-element--object-lex'.")
+
+(defun org-element--set-regexps ()
+  "Build variable syntax regexps."
+  (setq org-element-paragraph-separate
+	(concat "^\\(?:"
+		;; Headlines, inlinetasks.
+		org-outline-regexp "\\|"
+		;; Footnote definitions.
+		"\\[\\(?:[0-9]+\\|fn:[-_[:word:]]+\\)\\]" "\\|"
+		;; Diary sexps.
+		"%%(" "\\|"
+		"[ \t]*\\(?:"
+		;; Empty lines.
+		"$" "\\|"
+		;; Tables (any type).
+		"\\(?:|\\|\\+-[-+]\\)" "\\|"
+		;; Blocks (any type), Babel calls and keywords.  This
+		;; is only an indication and need some thorough check.
+		"#\\(?:[+ ]\\|$\\)" "\\|"
+		;; Drawers (any type) and fixed-width areas.  This is
+		;; also only an indication.
+		":" "\\|"
+		;; Horizontal rules.
+		"-\\{5,\\}[ \t]*$" "\\|"
+		;; LaTeX environments.
+		"\\\\begin{\\([A-Za-z0-9]+\\*?\\)}" "\\|"
+		;; Clock lines.
+		(regexp-quote org-clock-string) "\\|"
+		;; Lists.
+		(let ((term (case org-plain-list-ordered-item-terminator
+			      (?\) ")") (?. "\\.") (otherwise "[.)]")))
+		      (alpha (and org-list-allow-alphabetical "\\|[A-Za-z]")))
+		  (concat "\\(?:[-+*]\\|\\(?:[0-9]+" alpha "\\)" term "\\)"
+			  "\\(?:[ \t]\\|$\\)"))
+		"\\)\\)")
+	org-element--object-regexp
+	(mapconcat #'identity
+		   (let ((link-types (regexp-opt org-link-types)))
+		     (list
+		      ;; Sub/superscript.
+		      "\\(?:[_^][-{(*+.,[:alnum:]]\\)"
+		      ;; Bold, code, italic, strike-through, underline
+		      ;; and verbatim.
+		      (concat "[*~=+_/]"
+			      (format "[^%s]"
+				      (nth 2 org-emphasis-regexp-components)))
+		      ;; Plain links.
+		      (concat "\\<" link-types ":")
+		      ;; Objects starting with "[": regular link,
+		      ;; footnote reference, statistics cookie,
+		      ;; timestamp (inactive).
+		      "\\[\\(?:fn:\\|\\(?:[0-9]\\|\\(?:%\\|/[0-9]*\\)\\]\\)\\|\\[\\)"
+		      ;; Objects starting with "@": export snippets.
+		      "@@"
+		      ;; Objects starting with "{": macro.
+		      "{{{"
+		      ;; Objects starting with "<" : timestamp
+		      ;; (active, diary), target, radio target and
+		      ;; angular links.
+		      (concat "<\\(?:%%\\|<\\|[0-9]\\|" link-types "\\)")
+		      ;; Objects starting with "$": latex fragment.
+		      "\\$"
+		      ;; Objects starting with "\": line break,
+		      ;; entity, latex fragment.
+		      "\\\\\\(?:[a-zA-Z[(]\\|\\\\[ \t]*$\\)"
+		      ;; Objects starting with raw text: inline Babel
+		      ;; source block, inline Babel call.
+		      "\\(?:call\\|src\\)_"))
+		   "\\|")))
+
+(org-element--set-regexps)
+
+;;;###autoload
+(defun org-element-update-syntax ()
+  "Update parser internals."
+  (interactive)
+  (org-element--set-regexps)
+  (org-element-cache-reset 'all))
 
 (defconst org-element-all-elements
   '(babel-call center-block clock comment comment-block diary-sexp drawer
@@ -4129,43 +4183,6 @@ Elements are accumulated into ACC."
 	(setq mode (org-element--next-mode type nil))))
     ;; Return result.
     acc))
-
-(defconst org-element--object-regexp
-  (mapconcat #'identity
-	     (let ((link-types (regexp-opt org-link-types)))
-	       (list
-		;; Sub/superscript.
-		"\\(?:[_^][-{(*+.,[:alnum:]]\\)"
-		;; Bold, code, italic, strike-through, underline and
-		;; verbatim.
-		(concat "[*~=+_/]"
-			(format "[^%s]" (nth 2 org-emphasis-regexp-components)))
-		;; Plain links.
-		(concat "\\<" link-types ":")
-		;; Objects starting with "[": regular link, footnote
-		;; reference, statistics cookie, timestamp (inactive).
-		"\\[\\(?:fn:\\|\\(?:[0-9]\\|\\(?:%\\|/[0-9]*\\)\\]\\)\\|\\[\\)"
-		;; Objects starting with "@": export snippets.
-		"@@"
-		;; Objects starting with "{": macro.
-		"{{{"
-		;; Objects starting with "<" : timestamp (active,
-		;; diary), target, radio target and angular links.
-		(concat "<\\(?:%%\\|<\\|[0-9]\\|" link-types "\\)")
-		;; Objects starting with "$": latex fragment.
-		"\\$"
-		;; Objects starting with "\": line break, entity,
-		;; latex fragment.
-		"\\\\\\(?:[a-zA-Z[(]\\|\\\\[ \t]*$\\)"
-		;; Objects starting with raw text: inline Babel
-		;; source block, inline Babel call.
-		"\\(?:call\\|src\\)_"))
-	     "\\|")
-  "Regexp possibly matching the beginning of an object.
-This regexp allows false positives.  Dedicated parser (e.g.,
-`org-export-bold-parser') will take care of further filtering.
-Radio links are not matched by this regexp, as they are treated
-specially in `org-element--object-lex'.")
 
 (defun org-element--object-lex (restriction)
   "Return next object in current buffer or nil.
