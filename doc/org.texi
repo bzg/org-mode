@@ -5330,49 +5330,45 @@ nearest column format definition.
 
 Special properties provide an alternative access method to Org mode features,
 like the TODO state or the priority of an entry, discussed in the previous
-chapters.  This interface exists so that you can include these states in a
-column view (@pxref{Column view}), or to use them in queries.  The following
-property names are special and (except for @code{:CATEGORY:}) should not be
-used as keys in the properties drawer:
+chapters.  This interface exists so that you can include these states in
+a column view (@pxref{Column view}), or to use them in queries.  The
+following property names are special and (except for @code{:CATEGORY:})
+should not be used as keys in the properties drawer:
 
-@cindex property, special, ID
-@cindex property, special, TODO
-@cindex property, special, TAGS
 @cindex property, special, ALLTAGS
+@cindex property, special, BLOCKED
 @cindex property, special, CATEGORY
-@cindex property, special, PRIORITY
-@cindex property, special, DEADLINE
-@cindex property, special, SCHEDULED
-@cindex property, special, CLOSED
-@cindex property, special, TIMESTAMP
-@cindex property, special, TIMESTAMP_IA
 @cindex property, special, CLOCKSUM
 @cindex property, special, CLOCKSUM_T
-@cindex property, special, BLOCKED
-@c guessing that ITEM is needed in this area; also, should this list be sorted?
-@cindex property, special, ITEM
+@cindex property, special, CLOSED
+@cindex property, special, DEADLINE
 @cindex property, special, FILE
+@cindex property, special, ITEM
+@cindex property, special, PRIORITY
+@cindex property, special, SCHEDULED
+@cindex property, special, TAGS
+@cindex property, special, TIMESTAMP
+@cindex property, special, TIMESTAMP_IA
+@cindex property, special, TODO
 @example
-ID           @r{A globally unique ID used for synchronization during}
-             @r{iCalendar or MobileOrg export.}
-TODO         @r{The TODO keyword of the entry.}
-TAGS         @r{The tags defined directly in the headline.}
 ALLTAGS      @r{All tags, including inherited ones.}
+BLOCKED      @r{"t" if task is currently blocked by children or siblings}
 CATEGORY     @r{The category of an entry.}
-PRIORITY     @r{The priority of the entry, a string with a single letter.}
-DEADLINE     @r{The deadline time string, without the angular brackets.}
-SCHEDULED    @r{The scheduling timestamp, without the angular brackets.}
-CLOSED       @r{When was this entry closed?}
-TIMESTAMP    @r{The first keyword-less timestamp in the entry.}
-TIMESTAMP_IA @r{The first inactive timestamp in the entry.}
 CLOCKSUM     @r{The sum of CLOCK intervals in the subtree.  @code{org-clock-sum}}
              @r{must be run first to compute the values in the current buffer.}
 CLOCKSUM_T   @r{The sum of CLOCK intervals in the subtree for today.}
              @r{@code{org-clock-sum-today} must be run first to compute the}
              @r{values in the current buffer.}
-BLOCKED      @r{"t" if task is currently blocked by children or siblings}
-ITEM         @r{The headline of the entry.}
+CLOSED       @r{When was this entry closed?}
+DEADLINE     @r{The deadline time string, without the angular brackets.}
 FILE         @r{The filename the entry is located in.}
+ITEM         @r{The headline of the entry.}
+PRIORITY     @r{The priority of the entry, a string with a single letter.}
+SCHEDULED    @r{The scheduling timestamp, without the angular brackets.}
+TAGS         @r{The tags defined directly in the headline.}
+TIMESTAMP    @r{The first keyword-less timestamp in the entry.}
+TIMESTAMP_IA @r{The first inactive timestamp in the entry.}
+TODO         @r{The TODO keyword of the entry.}
 @end example
 
 @node Property searches
