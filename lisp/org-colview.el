@@ -186,20 +186,7 @@ This is the compiled version of the format.")
     (while (setq column (pop fmt))
       (setq property (car column)
 	    title (nth 1 column)
-	    ass (if (equal property "ITEM")
-		    (cons "ITEM"
-			  ;; When in a buffer, get the whole line,
-			  ;; we'll clean it later…
-			  (if (derived-mode-p 'org-mode)
-			      (save-match-data
-				(org-remove-tabs
-				 (buffer-substring-no-properties
-				  (point-at-bol) (point-at-eol))))
-			    ;; In agenda, just get the `txt' property
-			    (or (org-get-at-bol 'txt)
-				(buffer-substring-no-properties
-				 (point) (progn (end-of-line) (point))))))
-		  (assoc property props))
+	    ass (assoc property props)
 	    width (or (cdr (assoc property org-columns-current-maxwidths))
 		      (nth 2 column)
 		      (length property))
@@ -214,9 +201,7 @@ This is the compiled version of the format.")
 			  (funcall org-columns-modify-value-for-display-function
 				   title val))
 			 ((equal property "ITEM")
-			  (org-columns-cleanup-item
-			   val org-columns-current-fmt-compiled
-			   (or org-complex-heading-regexp cphr)))
+			  (org-columns-compact-links val))
 			 (fc (org-columns-number-to-string
 			      (org-columns-string-to-number val fm) fm fc))
 			 ((and calc (functionp calc)
@@ -347,29 +332,6 @@ for the duration of the command.")
 	(flyspell-mode 1))
       (when (local-variable-p 'org-colview-initial-truncate-line-value)
 	(setq truncate-lines org-colview-initial-truncate-line-value)))))
-
-(defun org-columns-cleanup-item (item fmt cphr)
-  "Remove from ITEM what is a column in the format FMT.
-CPHR is the complex heading regexp to use for parsing ITEM."
-  (let (fixitem)
-    (if (not cphr)
-	item
-      (unless (string-match "^\*+ " item)
-	(setq item (concat "* " item) fixitem t))
-      (if (string-match cphr item)
-	  (setq item
-		(concat
-		 (org-add-props (match-string 1 item) nil
-		   'org-whitespace (* 2 (1- (org-reduced-level (- (match-end 1) (match-beginning 1))))))
-		 (and (match-end 2) (not (assoc "TODO" fmt)) (concat " " (match-string 2 item)))
-		 (and (match-end 3) (not (assoc "PRIORITY" fmt)) (concat " " (match-string 3 item)))
-		 " " (save-match-data (org-columns-compact-links (or (match-string 4 item) "")))
-		 (and (match-end 5) (not (assoc "TAGS" fmt)) (concat " " (match-string 5 item)))))
-	(add-text-properties
-	 0 (1+ (match-end 1))
-	 (list 'org-whitespace (* 2 (1- (org-reduced-level (- (match-end 1) (match-beginning 1))))))
-	 item))
-      (if fixitem (replace-regexp-in-string "^\*+ " "" item) item))))
 
 (defun org-columns-compact-links (s)
   "Replace [[link][desc]] with [desc] or [link]."

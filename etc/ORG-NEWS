@@ -150,6 +150,8 @@ Headlines, for which the property ~UNNUMBERED~ is non-nil, are now
 exported without section numbers irrespective of their levels.  The
 property is inherited by children.
 ** Miscellaneous
+*** Strip all meta data from ITEM special property
+ITEM special property do not contain anymore TODO, priority or tags.
 *** File names in links accept are now compatible with URI syntax
 Absolute file names can now start with =///= in addition to =/=. E.g.,
 =[[file:///home/me/unicorn.jpg]]=.
