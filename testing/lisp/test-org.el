@@ -2475,6 +2475,11 @@ Text.
 
 (ert-deftest test-org/entry-properties ()
   "Test `org-entry-properties' specifications."
+  ;; Get "ITEM" property.
+  (should
+   (equal "* H"
+	  (org-test-with-temp-text "* TODO H"
+	    (cdr (assoc "ITEM" (org-entry-properties nil "ITEM"))))))
   ;; Get "TODO" property.
   (should
    (equal "TODO"

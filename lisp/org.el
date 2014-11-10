@@ -15379,9 +15379,9 @@ a *different* entry, you cannot use these techniques."
 ;;; Properties API
 
 (defconst org-special-properties
-  '("TODO" "TAGS" "ALLTAGS" "DEADLINE" "SCHEDULED" "CLOSED" "PRIORITY"
-    "TIMESTAMP" "TIMESTAMP_IA" "BLOCKED" "FILE" "CLOCKSUM" "CLOCKSUM_T")
-  "The special properties valid in Org-mode.
+  '("ALLTAGS" "BLOCKED" "CLOCKSUM" "CLOCKSUM_T" "CLOSED" "DEADLINE" "FILE"
+    "ITEM" "PRIORITY" "SCHEDULED" "TAGS" "TIMESTAMP" "TIMESTAMP_IA" "TODO")
+  "The special properties valid in Org mode.
 These are properties that are not defined in the property drawer,
 but in some other way.")
 
@@ -15559,6 +15559,16 @@ strings."
 			      (org-columns-number-to-string
 			       (/ (float clocksumt) 60.) 'add_times))
 			props)))
+	      (when specific (throw 'exit props)))
+	    (when (or (not specific) (string= specific "ITEM"))
+	      (when (looking-at org-complex-heading-regexp)
+		(push (cons "ITEM"
+			    (concat
+			     (org-match-string-no-properties 1)
+			     (let ((title (org-match-string-no-properties 4)))
+			       (when (org-string-nw-p title)
+				 (concat " " (org-remove-tabs title))))))
+		      props))
 	      (when specific (throw 'exit props)))
 	    (when (or (not specific) (string= specific "TODO"))
 	      (when (and (looking-at org-todo-line-regexp) (match-end 2))
@@ -16014,8 +16024,7 @@ COLUMN formats in the current buffer."
 	       (while (string-match "%[0-9]*\\(\\S-+\\)" value start)
 		 (setq start (match-end 0))
 		 (let ((p (org-match-string-no-properties 1 value)))
-		   (unless (member-ignore-case
-			    p (cons "ITEM" org-special-properties))
+		   (unless (member-ignore-case p org-special-properties)
 		     (add-to-list 'props p))))))))))
     (sort props (lambda (a b) (string< (upcase a) (upcase b))))))
 

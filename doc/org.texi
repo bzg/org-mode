@@ -5362,7 +5362,7 @@ CLOCKSUM_T   @r{The sum of CLOCK intervals in the subtree for today.}
 CLOSED       @r{When was this entry closed?}
 DEADLINE     @r{The deadline time string, without the angular brackets.}
 FILE         @r{The filename the entry is located in.}
-ITEM         @r{The headline of the entry.}
+ITEM         @r{The headline of the entry, with stars.}
 PRIORITY     @r{The priority of the entry, a string with a single letter.}
 SCHEDULED    @r{The scheduling timestamp, without the angular brackets.}
 TAGS         @r{The tags defined directly in the headline.}
