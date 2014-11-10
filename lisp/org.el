@@ -1461,23 +1461,25 @@ lines to the buffer:
   "Non-nil means adapt indentation to outline node level.
 
 When this variable is set, Org assumes that you write outlines by
-indenting text in each node to align with the headline (after the stars).
-The following issues are influenced by this variable:
+indenting text in each node to align with the headline (after the
+stars).  The following issues are influenced by this variable:
 
-- When this is set and the *entire* text in an entry is indented, the
-  indentation is increased by one space in a demotion command, and
-  decreased by one in a promotion command.  If any line in the entry
-  body starts with text at column 0, indentation is not changed at all.
+- The indentation is increased by one space in a demotion
+  command, and decreased by one in a promotion command.  However,
+  in the latter case, if shifting some line in the entry body
+  would alter document structure (e.g., insert a new headline),
+  indentation is not changed at all.
 
-- Property drawers and planning information is inserted indented when
-  this variable is set.  When nil, they will not be indented.
+- Property drawers and planning information is inserted indented
+  when this variable is set.  When nil, they will not be indented.
 
-- TAB indents a line relative to context.  The lines below a headline
-  will be indented when this variable is set.
+- TAB indents a line relative to current level.  The lines below
+  a headline will be indented when this variable is set.
 
-Note that this is all about true indentation, by adding and removing
-space characters.  See also `org-indent.el' which does level-dependent
-indentation in a virtual way, i.e. at display time in Emacs."
+Note that this is all about true indentation, by adding and
+removing space characters.  See also `org-indent.el' which does
+level-dependent indentation in a virtual way, i.e. at display
+time in Emacs."
   :group 'org-edit-structure
   :type 'boolean)
 
@@ -8262,41 +8264,70 @@ Assume point is at a heading or an inlinetask beginning."
      ;; If DIFF is negative, first check if a shift is possible at all
      ;; (e.g., it doesn't break structure).  This can only happen if
      ;; some contents are not properly indented.
-     (when (< diff 0)
-       (let ((diff (- diff))
-	     (forbidden-re (concat org-outline-regexp
-				   "\\|"
-				   (substring org-footnote-definition-re 1))))
-	 (save-excursion
-	   (while (not (eobp))
-	     (cond
-	      ((org-looking-at-p "[ \t]*$") (forward-line))
-	      ((and (org-looking-at-p org-footnote-definition-re)
+     (let ((case-fold-search t))
+       (when (< diff 0)
+	 (let ((diff (- diff))
+	       (forbidden-re (concat org-outline-regexp
+				     "\\|"
+				     (substring org-footnote-definition-re 1))))
+	   (save-excursion
+	     (while (not (eobp))
+	       (cond
+		((org-looking-at-p "[ \t]*$") (forward-line))
+		((and (org-looking-at-p org-footnote-definition-re)
+		      (let ((e (org-element-at-point)))
+			(and (eq (org-element-type e) 'footnote-definition)
+			     (goto-char (org-element-property :end e))))))
+		((org-looking-at-p org-outline-regexp) (forward-line))
+		;; Give up if shifting would move before column 0 or
+		;; if it would introduce a headline or a footnote
+		;; definition.
+		(t
+		 (skip-chars-forward " \t")
+		 (let ((ind (current-column)))
+		   (when (or (< ind diff)
+			     (and (= ind diff) (org-looking-at-p forbidden-re)))
+		     (throw 'no-shift nil)))
+		 ;; Ignore contents of example blocks and source
+		 ;; blocks if their indentation is meant to be
+		 ;; preserved.  Jump to block's closing line.
+		 (beginning-of-line)
+		 (or (and (org-looking-at-p "[ \t]*#\\+BEGIN_\\(EXAMPLE\\|SRC\\)")
+			  (let ((e (org-element-at-point)))
+			    (and (memq (org-element-type e)
+				       '(example-block src-block))
+				 (or org-src-preserve-indentation
+				     (org-element-property :preserve-indent e))
+				 (goto-char (org-element-property :end e))
+				 (progn (skip-chars-backward " \r\t\n")
+					(beginning-of-line)
+					t))))
+		     (forward-line))))))))
+       ;; Shift lines but footnote definitions, inlinetasks boundaries
+       ;; by DIFF.  Also skip contents of source or example blocks
+       ;; when indentation is meant to be preserved.
+       (while (not (eobp))
+	 (cond
+	  ((and (org-looking-at-p org-footnote-definition-re)
+		(let ((e (org-element-at-point)))
+		  (and (eq (org-element-type e) 'footnote-definition)
+		       (goto-char (org-element-property :end e))))))
+	  ((org-looking-at-p org-outline-regexp) (forward-line))
+	  ((org-looking-at-p "[ \t]*$") (forward-line))
+	  (t
+	   (org-indent-line-to (+ (org-get-indentation) diff))
+	   (beginning-of-line)
+	   (or (and (org-looking-at-p "[ \t]*#\\+BEGIN_\\(EXAMPLE\\|SRC\\)")
 		    (let ((e (org-element-at-point)))
-		      (and (eq (org-element-type e) 'footnote-definition)
-			   (goto-char (org-element-property :end e))))))
-	      ((org-looking-at-p org-outline-regexp) (forward-line))
-	      ;; Give up if shifting would move before column 0 or if
-	      ;; it would introduce a headline or a footnote
-	      ;; definition.
-	      (t
-	       (skip-chars-forward " \t")
-	       (let ((ind (current-column)))
-		 (when (or (< ind diff)
-			   (and (= ind diff) (org-looking-at-p forbidden-re)))
-		   (throw 'no-shift nil)))
-	       (forward-line)))))))
-     ;; Shift lines but footnote definitions and inlinetasks by DIFF.
-     (while (not (eobp))
-       (cond
-	((and (org-looking-at-p org-footnote-definition-re)
-	      (let ((e (org-element-at-point)))
-		(and (eq (org-element-type e) 'footnote-definition)
-		     (goto-char (org-element-property :end e))))))
-	((org-looking-at-p org-outline-regexp) (forward-line))
-	((org-looking-at-p "[ \t]*$") (forward-line))
-	(t (org-indent-line-to (+ (org-get-indentation) diff))
-	   (forward-line)))))))
+		      (and (memq (org-element-type e)
+				 '(example-block src-block))
+			   (or org-src-preserve-indentation
+			       (org-element-property :preserve-indent e))
+			   (goto-char (org-element-property :end e))
+			   (progn (skip-chars-backward " \r\t\n")
+				  (beginning-of-line)
+				  t))))
+	       (forward-line)))))))))
 
 (defun org-convert-to-odd-levels ()
   "Convert an org-mode file with all levels allowed to one with odd levels.

@@ -2037,11 +2037,11 @@ Text.
 	(org-get-indentation))))
   (should
    (zerop
-    (org-test-with-temp-text "* H\n[fn:1] Definition."
+    (org-test-with-temp-text "* H\n[fn:1] def line 1\ndef line 2"
       (let ((org-odd-levels-only nil)
 	    (org-adapt-indentation t))
 	(org-demote))
-      (forward-line)
+      (goto-char (point-max))
       (org-get-indentation))))
   (should
    (= 3
@@ -2068,7 +2068,43 @@ Text.
 	  (org-test-with-temp-text "* H\n***** I\n  Contents\n***** END"
 	    (org-demote)
 	    (forward-line 2)
-	    (org-get-indentation)))))))
+	    (org-get-indentation))))))
+  ;; Ignore contents of source blocks or example blocks when
+  ;; indentation should be preserved (through
+  ;; `org-src-preserve-indentation' or "-i" flag).
+  (should-not
+   (zerop
+    (org-test-with-temp-text "* H\n#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
+      (let ((org-adapt-indentation t)
+	    (org-src-preserve-indentation nil))
+	(org-demote))
+      (forward-line 2)
+      (org-get-indentation))))
+  (should
+   (zerop
+    (org-test-with-temp-text "* H\n#+BEGIN_EXAMPLE\n(+ 1 1)\n#+END_EXAMPLE"
+      (let ((org-adapt-indentation t)
+	    (org-src-preserve-indentation t))
+	(org-demote))
+      (forward-line 2)
+      (org-get-indentation))))
+  (should
+   (zerop
+    (org-test-with-temp-text "* H\n#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
+      (let ((org-adapt-indentation t)
+	    (org-src-preserve-indentation t))
+	(org-demote))
+      (forward-line 2)
+      (org-get-indentation))))
+  (should
+   (zerop
+    (org-test-with-temp-text
+	"* H\n#+BEGIN_SRC emacs-lisp -i\n(+ 1 1)\n#+END_SRC"
+      (let ((org-adapt-indentation t)
+	    (org-src-preserve-indentation nil))
+	(org-demote))
+      (forward-line 2)
+      (org-get-indentation)))))
 
 (ert-deftest test-org/promote ()
   "Test `org-promote' specifications."
@@ -2159,7 +2195,7 @@ Text.
 	(org-get-indentation))))
   (should
    (= 2
-      (org-test-with-temp-text "** H\n   Paragraph\n[fn:1] Definition."
+      (org-test-with-temp-text "** H\n   Paragraph\n[fn:1] line1\nline2"
 	(let ((org-odd-levels-only nil)
 	      (org-adapt-indentation t))
 	  (org-promote))
@@ -2200,7 +2236,50 @@ Text.
 	      (org-adapt-indentation t))
 	  (org-promote))
 	(forward-line)
-	(org-get-indentation)))))
+	(org-get-indentation))))
+  ;; Ignore contents of source blocks or example blocks when
+  ;; indentation should be preserved (through
+  ;; `org-src-preserve-indentation' or "-i" flag).
+  (should-not
+   (zerop
+    (org-test-with-temp-text
+	"** H\n #+BEGIN_SRC emacs-lisp\n(+ 1 1)\n #+END_SRC"
+      (let ((org-adapt-indentation t)
+	    (org-src-preserve-indentation nil)
+	    (org-odd-levels-only nil))
+	(org-promote))
+      (forward-line)
+      (org-get-indentation))))
+  (should
+   (zerop
+    (org-test-with-temp-text
+	"** H\n #+BEGIN_EXAMPLE\nContents\n #+END_EXAMPLE"
+      (let ((org-adapt-indentation t)
+	    (org-src-preserve-indentation t)
+	    (org-odd-levels-only nil))
+	(org-promote))
+      (forward-line)
+      (org-get-indentation))))
+  (should
+   (zerop
+    (org-test-with-temp-text
+	"** H\n #+BEGIN_SRC emacs-lisp\n(+ 1 1)\n #+END_SRC"
+      (let ((org-adapt-indentation t)
+	    (org-src-preserve-indentation t)
+	    (org-odd-levels-only nil))
+	(org-promote))
+      (forward-line)
+      (org-get-indentation))))
+  (should
+   (zerop
+    (org-test-with-temp-text
+	"** H\n #+BEGIN_SRC emacs-lisp -i\n(+ 1 1)\n #+END_SRC"
+      (let ((org-adapt-indentation t)
+	    (org-src-preserve-indentation nil)
+	    (org-odd-levels-only nil))
+	(org-promote))
+      (forward-line)
+      (org-get-indentation)))))
 
 
 ;;; Planning
