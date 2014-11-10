@@ -15232,16 +15232,16 @@ Returns the new tags string, or nil to not change the current settings."
 
 (defun org-get-buffer-tags ()
   "Get a table of all tags used in the buffer, for completion."
-  (let (tags)
-    (save-excursion
-      (goto-char (point-min))
-      (while (re-search-forward
-	      (org-re "[ \t]:\\([[:alnum:]_@#%:]+\\):[ \t\r\n]") nil t)
-	(when (equal (char-after (point-at-bol 0)) ?*)
-	  (mapc (lambda (x) (add-to-list 'tags x))
-		(org-split-string (org-match-string-no-properties 1) ":")))))
-    (mapc (lambda (s) (add-to-list 'tags s)) org-file-tags)
-    (mapcar 'list tags)))
+  (org-with-wide-buffer
+   (goto-char (point-min))
+   (let ((tag-re (concat org-outline-regexp-bol
+			 "\\(?:.*?[ \t]\\)?"
+			 (org-re ":\\([[:alnum:]_@#%:]+\\):[ \t]*$")))
+	 tags)
+     (while (re-search-forward tag-re nil t)
+       (dolist (tag (org-split-string (org-match-string-no-properties 1) ":"))
+	 (push tag tags)))
+     (mapcar #'list (append org-file-tags (org-uniquify tags))))))
 
 ;;;; The mapping API
 
