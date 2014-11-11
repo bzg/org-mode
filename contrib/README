@@ -26,6 +26,7 @@ org-depend.el            --- TODO dependencies for Org-mode
 org-drill.el             --- Self-testing with org-learn
 org-effectiveness.el     --- Measuring your personal effectiveness
 org-element.el           --- Parser and applications for Org syntax
+org-eldoc.el             --- Eldoc documentation for SRC blocks
 org-elisp-symbol.el      --- Org links to emacs-lisp symbols
 org-eval-light.el        --- Evaluate in-buffer code on demand
 org-eval.el              --- The <lisp> tag, adapted from Muse
