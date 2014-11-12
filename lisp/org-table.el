@@ -3007,6 +3007,17 @@ list, 'literal is for the format specifier L."
 		   elements
 		   ",") "]"))))
 
+(defun org-table-message-once-per-second (t1 &rest args)
+  "If there has been more than one second since T1, display message.
+ARGS are passed as arguments to the `message' function.  Returns
+current time if a message is printed, otherwise returns T1.  If
+T1 is nil, always messages."
+  (let ((curtime (current-time)))
+    (if (or (not t1) (< 0 (nth 1 (time-subtract curtime t1))))
+	(progn (apply 'message args)
+	       curtime)
+      t1)))
+
 ;;;###autoload
 (defun org-table-recalculate (&optional all noalign)
   "Recalculate the current table line by applying all stored formulas.
@@ -3031,6 +3042,8 @@ known that the table will be realigned a little later anyway."
 	   (line-re org-table-dataline-regexp)
 	   (thisline (org-current-line))
 	   (thiscol (org-table-current-column))
+	   (log-first-time (current-time))
+	   (log-last-time log-first-time)
 	   seen-fields lhs1
 	   beg end entry eqlnum eqlname eqlname1 eql (cnt 0) eq a name name1)
       ;; Insert constants in all formulas
@@ -3080,7 +3093,6 @@ known that the table will be realigned a little later anyway."
 	  (setq beg (point-at-bol)
 		end (move-marker (make-marker) (1+ (point-at-eol)))))
 	(goto-char beg)
-	(and all (message "Re-applying formulas to full table..."))
 
 	;; First find the named fields, and mark them untouchable.
 	;; Also check if several field/range formulas try to set the same field.
@@ -3105,7 +3117,10 @@ known that the table will be realigned a little later anyway."
 						  name)))
 			     (string-to-number (match-string 2 name)))))
 	  (when (and a (or all (equal (nth 1 a) thisline)))
-	    (message "Re-applying formula to field: %s" name)
+	    (setq log-last-time
+		  (org-table-message-once-per-second
+		   (and all log-last-time)
+		   "Re-applying formula to field: %s" name))
 	    (org-goto-line (nth 1 a))
 	    (org-table-goto-column (nth 2 a))
 	    (push (append a (list (cdr eq))) eqlname1)
@@ -3118,8 +3133,11 @@ known that the table will be realigned a little later anyway."
 	(while (re-search-forward line-re end t)
 	  (unless (string-match "^ *[_^!$/] *$" (org-table-get-field 1))
 	    ;; Unprotected line, recalculate
-	    (and all (message "Re-applying formulas to full table...(line %d)"
-			      (setq cnt (1+ cnt))))
+	    (setq cnt (1+ cnt))
+	    (and all (setq log-last-time
+			   (org-table-message-once-per-second
+			    log-last-time
+			    "Re-applying formulas to full table...(line %d)" cnt)))
 	    (setq org-last-recalc-line (org-current-line))
 	    (setq eql eqlnum)
 	    (while (setq entry (pop eql))
@@ -3132,7 +3150,10 @@ known that the table will be realigned a little later anyway."
 
 	;; Now evaluate the field formulas
 	(while (setq eq (pop eqlname1))
-	  (message "Re-applying formula to field: %s" (car eq))
+	  (setq log-last-time
+		(org-table-message-once-per-second
+		 (and all log-last-time)
+		 "Re-applying formula to field: %s" (car eq)))
 	  (org-goto-line (nth 1 eq))
 	  (let ((column-target (nth 2 eq)))
 	    (when (> column-target 1000)
@@ -3161,14 +3182,19 @@ known that the table will be realigned a little later anyway."
 	(org-table-goto-column thiscol)
 	(remove-text-properties (point-min) (point-max) '(org-untouchable t))
 	(or noalign (and org-table-may-need-update (org-table-align))
-	    (and all (message "Re-applying formulas to %d lines...done" cnt)))
+	    (and all (org-table-message-once-per-second
+		      log-first-time
+		      "Re-applying formulas to %d lines...done" cnt)))
+
 
 	;; back to initial position
-	(message "Re-applying formulas...done")
+	(org-table-message-once-per-second
+         (and all log-first-time)
+         "Re-applying formulas...done")
+
 	(org-goto-line thisline)
 	(org-table-goto-column thiscol)
-	(or noalign (and org-table-may-need-update (org-table-align))
-	    (and all (message "Re-applying formulas...done")))))))
+	(or noalign (and org-table-may-need-update (org-table-align)))))))
 
 ;;;###autoload
 (defun org-table-iterate (&optional arg)
