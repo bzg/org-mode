@@ -79,7 +79,7 @@
 			  (Info-index nodename-or-index)
 			(user-error "Could not find '%s' node or index entry"
 				    nodename-or-index)))))
-    (message "Could not open: %s" name)))
+    (user-error "Could not open: %s" name)))
 
 (provide 'org-info)
 
