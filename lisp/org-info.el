@@ -67,11 +67,18 @@
   "Follow an Info file and node link specified by NAME."
   (if (or (string-match "\\(.*\\)[#:]:?\\(.*\\)" name)
           (string-match "\\(.*\\)" name))
-      (progn
+      (let ((filename (match-string 1 name))
+	    (nodename-or-index (or (match-string 2 name) "Top")))
 	(require 'info)
-        (if (match-string 2 name) ; If there isn't a node, choose "Top"
-            (Info-find-node (match-string 1 name) (match-string 2 name))
-          (Info-find-node (match-string 1 name) "Top")))
+	;; If nodename-or-index is invalid node name, then look it up
+	;; in the index.
+	(condition-case nil
+	    (Info-find-node filename nodename-or-index)
+	  (user-error (Info-find-node filename "Top")
+		      (condition-case nil
+			  (Info-index nodename-or-index)
+			(user-error "Could not find '%s' node or index entry"
+				    nodename-or-index)))))
     (message "Could not open: %s" name)))
 
 (provide 'org-info)
