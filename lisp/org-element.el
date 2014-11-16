@@ -5813,7 +5813,7 @@ Providing it allows for quicker computation."
 	   (org-element--cache-put element cache)))))))
 
 (defun org-element-lineage (blob &optional types with-self)
-  "List all BLOB's ancestors, including BLOB.
+  "List all ancestors of a given element or object.
 
 BLOB is an object or element.
 
@@ -5822,7 +5822,7 @@ first element or object in the lineage whose type belongs to that
 list.
 
 When optional argument WITH-SELF is non-nil, lineage includes
-BLOB itself as the first element and TYPES, if provided, also
+BLOB itself as the first element, and TYPES, if provided, also
 apply to it.
 
 When BLOB is obtained through `org-element-context' or
