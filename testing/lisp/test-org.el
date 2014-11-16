@@ -841,6 +841,36 @@
 	    (let ((org-M-RET-may-split-line '((default . nil))))
 	      (org-insert-heading))
 	    (buffer-string))))
+  ;; When on a list, insert an item instead, unless called with an
+  ;; universal argument or if list is invisible.  In this case, create
+  ;; a new headline after contents.
+  (should
+   (equal "* H\n- item\n- "
+	  (org-test-with-temp-text "* H\n- item<point>"
+	    (let ((org-insert-heading-respect-content nil))
+	      (org-insert-heading))
+	    (buffer-string))))
+  (should
+   (equal "* H\n- item\n- item 2\n* "
+	  (org-test-with-temp-text "* H\n- item<point>\n- item 2"
+	    (let ((org-insert-heading-respect-content nil))
+	      (org-insert-heading '(4)))
+	    (buffer-string))))
+  (should
+   (equal "* H\n- item\n* "
+	  (org-test-with-temp-text "* H\n- item"
+	    (org-cycle)
+	    (goto-char (point-max))
+	    (let ((org-insert-heading-respect-content nil)) (org-insert-heading))
+	    (buffer-string))))
+  ;; When called with two universal arguments, insert a new headline
+  ;; at the end of the grandparent subtree.
+  (should
+   (equal "* H1\n** H3\n- item\n** H2\n** "
+	  (org-test-with-temp-text "* H1\n** H3\n- item<point>\n** H2"
+	    (let ((org-insert-heading-respect-content nil))
+	      (org-insert-heading '(16)))
+	    (buffer-string))))
   ;; Corner case: correctly insert a headline after an empty one.
   (should
    (equal "* \n* "
