@@ -2087,7 +2087,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (let* ((--numbered-parent-headline-at-<=-n
 	  (function
 	   (lambda (element n info)
-	     (loop for x in (org-export-get-genealogy element)
+	     (loop for x in (org-element-lineage element)
 		   thereis (and (eq (org-element-type x) 'headline)
 				(<= (org-export-get-relative-level x info) n)
 				(org-export-numbered-headline-p x info)
@@ -2639,7 +2639,7 @@ Return nil, otherwise."
 
   ;; NOTE: Counterpart of `org-export-get-ordinal'.
   ;; FIXME: Handle footnote-definition footnote-reference?
-  (let* ((genealogy (org-export-get-genealogy destination))
+  (let* ((genealogy (org-element-lineage destination))
 	 (data (reverse genealogy))
 	 (label (case (org-element-type destination)
 		  (headline (org-export-get-headline-id destination info))
@@ -2684,7 +2684,7 @@ Return nil, otherwise."
 	   (format "<text:bookmark-ref text:reference-format=\"number-all-superior\" text:ref-name=\"%s\">%s</text:bookmark-ref>"
 		   (org-export-solidify-link-text label)
 		   (mapconcat (lambda (n) (if (not n) " "
-					    (concat (number-to-string n) ".")))
+				       (concat (number-to-string n) ".")))
 			      item-numbers "")))))
      ;; Case 2: Locate a regular and numbered headline in the
      ;; hierarchy.  Display its section number.
@@ -3515,7 +3515,7 @@ pertaining to indentation here."
 	 (--walk-list-genealogy-and-collect-tags
 	  (function
 	   (lambda (table info)
-	     (let* ((genealogy (org-export-get-genealogy table))
+	     (let* ((genealogy (org-element-lineage table))
 		    (list-genealogy
 		     (when (eq (org-element-type (car genealogy)) 'item)
 		       (loop for el in genealogy

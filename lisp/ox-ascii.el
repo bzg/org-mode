@@ -562,7 +562,7 @@ INFO is a plist used as a communication channel."
     ;; Elements with a relative width: store maximum text width in
     ;; TOTAL-WIDTH.
     (otherwise
-     (let* ((genealogy (cons element (org-export-get-genealogy element)))
+     (let* ((genealogy (org-element-lineage element nil t))
 	    ;; Total width is determined by the presence, or not, of an
 	    ;; inline task among ELEMENT parents.
 	    (total-width

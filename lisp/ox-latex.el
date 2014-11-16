@@ -1425,9 +1425,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	     (org-export-get-footnote-number footnote-reference info)))
     ;; Use \footnotemark if reference is within another footnote
     ;; reference, footnote definition or table cell.
-    ((loop for parent in (org-export-get-genealogy footnote-reference)
-	   thereis (memq (org-element-type parent)
-			 '(footnote-reference footnote-definition table-cell)))
+    ((org-element-lineage footnote-reference
+			  '(footnote-reference footnote-definition table-cell))
      "\\footnotemark")
     ;; Otherwise, define it with \footnote command.
     (t

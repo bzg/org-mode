@@ -323,19 +323,17 @@ A headline is blocked when either
    ;; Check :ORDERED: node property.
    (catch 'blockedp
      (let ((current headline))
-       (mapc (lambda (parent)
-	       (cond
-		((not (org-element-property :todo-keyword parent))
-		 (throw 'blockedp nil))
-		((org-not-nil (org-element-property :ORDERED parent))
-		 (let ((sibling current))
-		   (while (setq sibling (org-export-get-previous-element
-					 sibling info))
-		     (when (eq (org-element-property :todo-type sibling) 'todo)
-		       (throw 'blockedp t)))))
-		(t (setq current parent))))
-	     (org-export-get-genealogy headline))
-       nil))))
+       (dolist (parent (org-element-lineage headline))
+	 (cond
+	  ((not (org-element-property :todo-keyword parent))
+	   (throw 'blockedp nil))
+	  ((org-not-nil (org-element-property :ORDERED parent))
+	   (let ((sibling current))
+	     (while (setq sibling (org-export-get-previous-element
+				   sibling info))
+	       (when (eq (org-element-property :todo-type sibling) 'todo)
+		 (throw 'blockedp t)))))
+	  (t (setq current parent))))))))
 
 (defun org-icalendar-use-UTC-date-time-p ()
   "Non-nil when `org-icalendar-date-time-format' requires UTC time."
