@@ -3254,6 +3254,52 @@ Text
 
 
 
+;;; Test Tools
+
+(ert-deftest test-org-element/lineage ()
+  "Test `org-element-lineage' specifications."
+  ;; Regular tests.  When applied to an element or object returned by
+  ;; `org-element-at-point' or `org-element-context', the list is
+  ;; limited to the current section.
+  (should
+   (equal '(paragraph center-block)
+	  (org-test-with-temp-text
+	      "* H1\n** H2\n#+BEGIN_CENTER\n*bold<point>*\n#+END_CENTER"
+	    (mapcar #'car (org-element-lineage (org-element-context))))))
+  (should
+   (equal '(paragraph center-block section headline headline org-data)
+	  (org-test-with-temp-text
+	      "* H1\n** H2\n#+BEGIN_CENTER\n*bold<point>*\n#+END_CENTER"
+	    (mapcar #'car
+		    (org-element-lineage
+		     (org-element-map (org-element-parse-buffer) 'bold
+		       #'identity nil t))))))
+  ;; Test TYPES optional argument.
+  (should
+   (eq 'center-block
+       (org-test-with-temp-text
+	   "* H1\n** H2\n#+BEGIN_CENTER\n*bold<point>*\n#+END_CENTER"
+	 (org-element-type
+	  (org-element-lineage (org-element-context) '(center-block))))))
+  (should-not
+   (org-test-with-temp-text
+       "* H1\n** H2\n#+BEGIN_CENTER\n*bold<point>*\n#+END_CENTER"
+     (org-element-lineage (org-element-context) '(example-block))))
+  ;; Test WITH-SELF optional argument.
+  (should
+   (equal '(bold paragraph center-block)
+	  (org-test-with-temp-text
+	      "* H1\n** H2\n#+BEGIN_CENTER\n*bold<point>*\n#+END_CENTER"
+	    (mapcar #'car (org-element-lineage (org-element-context) nil t)))))
+  ;; When TYPES and WITH-SELF are provided, the latter is also checked
+  ;; against the former.
+  (should
+   (org-test-with-temp-text
+       "* H1\n** H2\n#+BEGIN_CENTER\n*bold<point>*\n#+END_CENTER"
+     (org-element-lineage (org-element-context) '(bold) t))))
+
+
+
 ;;; Test Cache.
 
 (ert-deftest test-org-element/cache ()
