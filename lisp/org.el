@@ -20953,44 +20953,57 @@ If `org-special-ctrl-o' is nil, just call `open-line' everywhere."
 
 (defun org-return (&optional indent)
   "Goto next table row or insert a newline.
+
 Calls `org-table-next-row' or `newline', depending on context.
-See the individual commands for more information."
+
+When optional INDENT argument is non-nil, call
+`newline-and-indent' instead of `newline'.
+
+When `org-return-follows-link' is non-nil and point is on
+a timestamp or a link, call `org-open-at-point'.  However, it
+will not happen if point is in a table or on a \"dead\"
+object (e.g., within a comment).  In these case, you need to use
+`org-open-at-point' directly."
   (interactive)
-  (let (org-ts-what)
-    (cond
-     ((or (bobp) (org-in-src-block-p))
-      (if indent (newline-and-indent) (newline)))
-     ((org-at-table-p)
-      (org-table-justify-field-maybe)
-      (call-interactively 'org-table-next-row))
-     ;; when `newline-and-indent' is called within a list, make sure
-     ;; text moved stays inside the item.
-     ((and (org-in-item-p) indent)
-      (if (and (org-at-item-p) (>= (point) (match-end 0)))
-	  (progn
-	    (save-match-data (newline))
-	    (org-indent-line-to (length (match-string 0))))
-	(let ((ind (org-get-indentation)))
-	  (newline)
-	  (if (org-looking-back org-list-end-re)
-	      (org-indent-line)
-	    (org-indent-line-to ind)))))
-     ((and org-return-follows-link
-	   (org-at-timestamp-p t)
-	   (not (eq org-ts-what 'after)))
-      (org-follow-timestamp-link))
-     ((and org-return-follows-link
-	   (let ((tprop (get-text-property (point) 'face)))
-	     (or (eq tprop 'org-link)
-		 (and (listp tprop) (memq 'org-link tprop)))))
-      (call-interactively 'org-open-at-point))
-     ((and (org-at-heading-p)
-	   (looking-at
-	    (org-re "\\([ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)[ \t]*$")))
-      (org-show-entry)
-      (end-of-line 1)
-      (newline))
-     (t (if indent (newline-and-indent) (newline))))))
+  (if (and (save-excursion
+	     (beginning-of-line)
+	     (looking-at org-todo-line-regexp))
+	   (match-beginning 3)
+	   (>= (point) (match-beginning 3)))
+      ;; Point is on headline tags.  Do not break them: add a newline
+      ;; after the headline instead.
+      (progn (org-show-entry)
+	     (end-of-line)
+	     (if indent (newline-and-indent) (newline)))
+    (let* ((context (if org-return-follows-link (org-element-context)
+		      (org-element-at-point)))
+	   (type (org-element-type context)))
+      (cond
+       ;; In a table, call `org-table-next-row'.
+       ((or (and (eq type 'table)
+		 (>= (point) (org-element-property :contents-begin context))
+		 (< (point) (org-element-property :contents-end context)))
+	    (org-element-lineage context '(table-row table-cell) t))
+	(org-table-justify-field-maybe)
+	(call-interactively #'org-table-next-row))
+       ;; On a link or a timestamp but not on white spaces after it,
+       ;; call `org-open-line' if `org-return-follows-link' allows it.
+       ((and org-return-follows-link
+	     (memq type '(link timestamp))
+	     (< (point)
+		(save-excursion (goto-char (org-element-property :end context))
+				(skip-chars-backward " \t")
+				(point))))
+	(call-interactively #'org-open-at-point))
+       ;; In a list, make sure indenting keeps trailing text within.
+       ((and indent
+	     (not (eolp))
+	     (org-element-lineage context '(item plain-list) t))
+	(let ((trailing-data
+	       (delete-and-extract-region (point) (line-end-position))))
+	  (newline-and-indent)
+	  (save-excursion (insert trailing-data))))
+       (t (if indent (newline-and-indent) (newline)))))))
 
 (defun org-return-indent ()
   "Goto next table row or insert a newline and indent.

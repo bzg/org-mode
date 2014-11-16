@@ -734,10 +734,56 @@
 
 ;;; Editing
 
-;;;; Insert elements
+(ert-deftest test-org/return ()
+  "Test RET (`org-return') specifications."
+  ;; Regular test.
+  (should
+   (equal "Para\ngraph"
+	  (org-test-with-temp-text "Para<point>graph"
+	    (org-return)
+	    (buffer-string))))
+  ;; With optional argument, indent line.
+  (should
+   (equal "  Para\n  graph"
+	  (org-test-with-temp-text "  Para<point>graph"
+	    (org-return t)
+	    (buffer-string))))
+  ;; On a table, call `org-table-next-row'.
+  (should
+   (org-test-with-temp-text "| <point>a |\n| b |"
+     (org-return)
+     (org-looking-at-p "b")))
+  ;; Open link or timestamp under point when `org-return-follows-link'
+  ;; is non-nil.
+  (should
+   (org-test-with-temp-text "Link [[target<point>]] <<target>>"
+     (let ((org-return-follows-link t)) (org-return))
+     (org-looking-at-p "<<target>>")))
+  (should-not
+   (org-test-with-temp-text "Link [[target<point>]] <<target>>"
+     (let ((org-return-follows-link nil)) (org-return))
+     (org-looking-at-p "<<target>>")))
+  ;; However, do not open link when point is in a table.
+  (should
+   (org-test-with-temp-text "| [[target<point>]] |\n| between |\n| <<target>> |"
+     (let ((org-return-follows-link t)) (org-return))
+     (org-looking-at-p "between")))
+  ;; Special case: in a list, when indenting, do not break structure.
+  (should
+   (equal "- A\n  B"
+	  (org-test-with-temp-text "- A <point>B"
+	    (org-return t)
+	    (buffer-string))))
+  ;; Special case: on tags part of a headline, add a newline below it
+  ;; instead of breaking it.
+  (should
+   (equal "* H :tag:\n"
+	  (org-test-with-temp-text "* H :<point>tag:"
+	    (org-return)
+	    (buffer-string)))))
 
 (ert-deftest test-org/meta-return ()
-  "Test M-RET (`org-meta-return')."
+  "Test M-RET (`org-meta-return') specifications."
   ;; In a table field insert a row above.
   (should
    (org-test-with-temp-text "| a |"
