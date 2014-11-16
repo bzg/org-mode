@@ -22653,8 +22653,9 @@ ELEMENT."
 	  ;; As a special case, if point is at the end of a footnote
 	  ;; definition or an item, indent like the very last element
 	  ;; within.
-	  ((let ((cend (org-element-property :contents-end element)))
-	     (and cend (<= cend pos)))
+	  ((and (not (eq type 'paragraph))
+		(let ((cend (org-element-property :contents-end element)))
+		  (and cend (<= cend pos))))
 	   (if (memq type '(footnote-definition item plain-list))
 	       (org--get-expected-indentation (org-element-at-point) nil)
 	     (goto-char start)
@@ -22691,15 +22692,22 @@ Indentation is done according to the following rules:
     2. If element has a parent, indent like its contents.  More
        precisely, if parent is an item, indent after the
        description part, if any, or the bullet (see
-       ``org-list-description-max-indent').  Else, indent like
+       `org-list-description-max-indent').  Else, indent like
        parent's first line.
 
     3. Otherwise, indent relatively to current level, if
        `org-adapt-indentation' is non-nil, or to left margin.
 
-  - On a blank line at the end of a plain list, an item, or
-    a footnote definition, indent like the very last element
-    within.
+  - On a blank line at the end of an element, indent according to
+    the type of the element.  More precisely
+
+    1. If element is a plain list, an item, or a footnote
+       definition, indent like the very last element within.
+
+    2. If element is a paragraph, indent like its last non blank
+       line.
+
+    3. Otherwise, indent like its very first line.
 
   - In the code part of a source block, use language major mode
     to indent current line if `org-src-tab-acts-natively' is

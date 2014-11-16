@@ -587,6 +587,13 @@
 	(forward-line 2)
 	(org-indent-line)
 	(org-get-indentation))))
+  ;; On blank lines after a paragraph, indent like its last non-empty
+  ;; line.
+  (should
+   (= 1
+      (org-test-with-temp-text " Paragraph\n\n<point>"
+	(org-indent-line)
+	(org-get-indentation))))
   ;; At the first line of an element, indent like previous element's
   ;; first line, ignoring footnotes definitions and inline tasks, or
   ;; according to parent.
