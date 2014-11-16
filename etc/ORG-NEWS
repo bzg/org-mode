@@ -92,7 +92,8 @@ The content of the included file can now be optionally marked up, for
 instance as HTML.  See the documentation for details.
 *** File links with =#+INCLUDE= keyword
 Objects can be extracted via =#+INCLUDE= using file links.  It is
-possible to include only the contents of the object.
+possible to include only the contents of the object.  See manual for
+more information.
 *** Additional =:hline= processing to ob-shell
 If the argument =:hlines yes= is present in a babel call, an optional
 argument =:hlines-string= can be used to define a string to use as a
@@ -121,6 +122,9 @@ in the output, depending on the parameters.
 *** Extend ~org-export-first-sibling-p~ and ~org-export-last-sibling-p~
 These functions now support any element or object, not only headlines.
 *** New function: ~org-export-table-row-in-header-p~
+*** New function: ~org-element-lineage~
+This function deprecates ~org-export-get-genealogy~.  It also provides
+more features.  See docstring for details.
 *** New filter: ~org-export-filter-body-functions~
 Functions in this filter are applied on the body of the exported
 document, befor wrapping it within the template.
@@ -141,7 +145,8 @@ would throw an error. A new variable
 behavior. It is now possible to silently add new columns, to do so
 with a warning or to explicitly ask the user each time.
 *** ASCII plot
-Ability to plot values in a column through ASCII-art bars.
+Ability to plot values in a column through ASCII-art bars.  See manual
+for details.
 *** New hook: ~org-archive-hook~
 This hook is called after successfully archiving a subtree, with point
 on the original subtree, not yet deleted.
@@ -157,7 +162,7 @@ exported without section numbers irrespective of their levels.  The
 property is inherited by children.
 ** Miscellaneous
 *** Strip all meta data from ITEM special property
-ITEM special property do not contain anymore TODO, priority or tags.
+ITEM special property does not contain TODO, priority or tags anymore.
 *** File names in links accept are now compatible with URI syntax
 Absolute file names can now start with =///= in addition to =/=. E.g.,
 =[[file:///home/me/unicorn.jpg]]=.
