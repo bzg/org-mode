@@ -7621,9 +7621,7 @@ command."
 	       (insert "\n* ")))
       (run-hooks 'org-insert-heading-hook))
 
-     ((and itemp (not (member arg '((4) (16)))))
-      ;; Insert an item
-      (org-insert-item))
+     ((and itemp (not (member arg '((4) (16)))) (org-insert-item)))
 
      (t
       ;; Maybe move at the end of the subtree
