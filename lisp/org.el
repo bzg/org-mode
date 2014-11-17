@@ -5008,12 +5008,11 @@ related expressions."
 	(org-set-local 'org-todo-sets nil)
 	(org-set-local 'org-todo-log-states nil)
 	(let ((todo-sequences
-	       (reverse
-		(or (cdr (assq 'todo alist))
-		    (let ((d (default-value 'org-todo-keywords)))
-		      (if (not (stringp (car d))) d
-			;; XXX: Backward compatibility code.
-			(list (cons org-todo-interpretation d))))))))
+	       (or (nreverse (cdr (assq 'todo alist)))
+		   (let ((d (default-value 'org-todo-keywords)))
+		     (if (not (stringp (car d))) d
+		       ;; XXX: Backward compatibility code.
+		       (list (cons org-todo-interpretation d)))))))
 	  (dolist (sequence todo-sequences)
 	    (let* ((sequence (or (run-hook-with-args-until-success
 				  'org-todo-setup-filter-hook sequence)
