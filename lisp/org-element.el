@@ -5698,7 +5698,7 @@ Providing it allows for quicker computation."
 	 (if (not (member (org-element-property :key element)
 			  org-element-document-properties))
 	     (throw 'objects-forbidden element)
-	   (beginning-of-line)
+	   (goto-char (org-element-property :begin element))
 	   (search-forward ":")
 	   (if (and (>= pos (point)) (< pos (line-end-position)))
 	       (narrow-to-region (point) (line-end-position))
