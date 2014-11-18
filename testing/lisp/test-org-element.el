@@ -3087,9 +3087,16 @@ Text
   ;; Find objects in document keywords.
   (should
    (eq 'macro
-       (org-test-with-temp-text "#+DATE: {{{macro}}}"
-	 (progn (search-forward "{")
-		(org-element-type (org-element-context))))))
+       (org-test-with-temp-text "#+DATE: <point>{{{macro}}}"
+	 (org-element-type (org-element-context)))))
+  (should-not
+   (eq 'macro
+       (org-test-with-temp-text "#+DATE: {{{macro}}}\n<point>"
+	 (org-element-type (org-element-context)))))
+  (should-not
+   (eq 'macro
+       (org-test-with-temp-text "#+RANDOM_KEYWORD: <point>{{{macro}}}"
+	 (org-element-type (org-element-context)))))
   ;; Do not find objects in table rules.
   (should
    (eq 'table-row
