@@ -15730,6 +15730,7 @@ strings."
 			      (if p (setcdr p (concat value " " (cdr p)))
 				(push (cons key value) props))))))))))))
 	  (unless (assoc "CATEGORY" props)
+	    (goto-char beg)
 	    (push (cons "CATEGORY" (org-get-category)) props)
 	    (when (string= specific "CATEGORY") (throw 'exit props)))
 	  ;; Return value.

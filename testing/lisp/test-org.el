@@ -2770,6 +2770,10 @@ Text.
   (should
    (equal "cat"
 	  (org-test-with-temp-text "#+CATEGORY: cat\n<point>* H"
+	    (cdr (assoc "CATEGORY" (org-entry-properties))))))
+  (should
+   (equal "cat"
+	  (org-test-with-temp-text "#+CATEGORY: cat\n<point>* H"
 	    (cdr (assoc "CATEGORY" (org-entry-properties nil "CATEGORY"))))))
   (should
    (equal "cat"
