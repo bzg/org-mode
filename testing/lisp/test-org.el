@@ -2642,11 +2642,19 @@ Text.
    (equal "* H"
 	  (org-test-with-temp-text "* TODO H"
 	    (cdr (assoc "ITEM" (org-entry-properties nil "ITEM"))))))
+  (should
+   (equal "* H"
+	  (org-test-with-temp-text "* TODO H"
+	    (cdr (assoc "ITEM" (org-entry-properties))))))
   ;; Get "TODO" property.
   (should
    (equal "TODO"
 	  (org-test-with-temp-text "* TODO H"
 	    (cdr (assoc "TODO" (org-entry-properties nil "TODO"))))))
+  (should
+   (equal "TODO"
+	  (org-test-with-temp-text "* TODO H"
+	    (cdr (assoc "TODO" (org-entry-properties))))))
   (should-not
    (org-test-with-temp-text "* H"
      (assoc "TODO" (org-entry-properties nil "TODO"))))
@@ -2655,6 +2663,10 @@ Text.
    (equal "A"
 	  (org-test-with-temp-text "* [#A] H"
 	    (cdr (assoc "PRIORITY" (org-entry-properties nil "PRIORITY"))))))
+  (should
+   (equal "A"
+	  (org-test-with-temp-text "* [#A] H"
+	    (cdr (assoc "PRIORITY" (org-entry-properties))))))
   (should-not
    (org-test-with-temp-text "* H"
      (assoc "PRIORITY" (org-entry-properties nil "PRIORITY"))))
@@ -2662,6 +2674,10 @@ Text.
   (should
    (org-test-with-temp-text-in-file "* H\nParagraph"
      (org-file-equal-p (cdr (assoc "FILE" (org-entry-properties nil "FILE")))
+		       (buffer-file-name))))
+  (should
+   (org-test-with-temp-text-in-file "* H\nParagraph"
+     (org-file-equal-p (cdr (assoc "FILE" (org-entry-properties)))
 		       (buffer-file-name))))
   (should-not
    (org-test-with-temp-text "* H\nParagraph"
@@ -2671,6 +2687,10 @@ Text.
    (equal ":tag1:tag2:"
 	  (org-test-with-temp-text "* H :tag1:tag2:"
 	    (cdr (assoc "TAGS" (org-entry-properties nil "TAGS"))))))
+  (should
+   (equal ":tag1:tag2:"
+	  (org-test-with-temp-text "* H :tag1:tag2:"
+	    (cdr (assoc "TAGS" (org-entry-properties))))))
   (should-not
    (org-test-with-temp-text "* H"
      (cdr (assoc "TAGS" (org-entry-properties nil "TAGS")))))
@@ -2679,6 +2699,10 @@ Text.
    (equal ":tag1:tag2:"
 	  (org-test-with-temp-text "* H :tag1:\n<point>** H2 :tag2:"
 	    (cdr (assoc "ALLTAGS" (org-entry-properties nil "ALLTAGS"))))))
+  (should
+   (equal ":tag1:tag2:"
+	  (org-test-with-temp-text "* H :tag1:\n<point>** H2 :tag2:"
+	    (cdr (assoc "ALLTAGS" (org-entry-properties))))))
   (should-not
    (org-test-with-temp-text "* H"
      (cdr (assoc "ALLTAGS" (org-entry-properties nil "ALLTAGS")))))
@@ -2691,6 +2715,13 @@ Text.
 		   '(org-block-todo-from-children-or-siblings-or-parent)))
 	      (cdr (assoc "BLOCKED" (org-entry-properties nil "BLOCKED")))))))
   (should
+   (equal "t"
+	  (org-test-with-temp-text "* Blocked\n** DONE one\n** TODO two"
+	    (let ((org-enforce-todo-dependencies t)
+		  (org-blocker-hook
+		   '(org-block-todo-from-children-or-siblings-or-parent)))
+	      (cdr (assoc "BLOCKED" (org-entry-properties)))))))
+  (should
    (equal ""
 	  (org-test-with-temp-text "* Blocked\n** DONE one\n** DONE two"
 	    (let ((org-enforce-todo-dependencies t))
@@ -2701,6 +2732,11 @@ Text.
     "[2012-03-29 thu.]"
     (org-test-with-temp-text "* H\nCLOSED: [2012-03-29 thu.]"
       (cdr (assoc "CLOSED" (org-entry-properties nil "CLOSED"))))))
+  (should
+   (equal
+    "[2012-03-29 thu.]"
+    (org-test-with-temp-text "* H\nCLOSED: [2012-03-29 thu.]"
+      (cdr (assoc "CLOSED" (org-entry-properties))))))
   (should-not
    (org-test-with-temp-text "* H"
      (cdr (assoc "CLOSED" (org-entry-properties nil "CLOSED")))))
@@ -2709,6 +2745,11 @@ Text.
     "<2014-03-04 tue.>"
     (org-test-with-temp-text "* H\nDEADLINE: <2014-03-04 tue.>"
       (cdr (assoc "DEADLINE" (org-entry-properties nil "DEADLINE"))))))
+  (should
+   (equal
+    "<2014-03-04 tue.>"
+    (org-test-with-temp-text "* H\nDEADLINE: <2014-03-04 tue.>"
+      (cdr (assoc "DEADLINE" (org-entry-properties))))))
   (should-not
    (org-test-with-temp-text "* H"
      (cdr (assoc "DEADLINE" (org-entry-properties nil "DEADLINE")))))
@@ -2717,6 +2758,11 @@ Text.
     "<2014-03-04 tue.>"
     (org-test-with-temp-text "* H\nSCHEDULED: <2014-03-04 tue.>"
       (cdr (assoc "SCHEDULED" (org-entry-properties nil "SCHEDULED"))))))
+  (should
+   (equal
+    "<2014-03-04 tue.>"
+    (org-test-with-temp-text "* H\nSCHEDULED: <2014-03-04 tue.>"
+      (cdr (assoc "SCHEDULED" (org-entry-properties))))))
   (should-not
    (org-test-with-temp-text "* H"
      (cdr (assoc "SCHEDULED" (org-entry-properties nil "SCHEDULED")))))

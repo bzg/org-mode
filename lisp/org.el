@@ -15629,25 +15629,23 @@ strings."
 	      (forward-line)
 	      (when (org-looking-at-p org-planning-line-re)
 		(end-of-line)
-		(let ((bol (line-beginning-position)))
-		  ;; Backward compatibility: time keywords used to be
-		  ;; configurable (before 8.3).  Make sure we get the
-		  ;; correct keyword.
-		  (dolist (k (if (not specific)
-				 (list org-closed-string
-				       org-deadline-string
-				       org-scheduled-string)
-			       (list (cond ((string= specific "CLOSED")
-					    org-closed-string)
-					   ((string= specific "DEADLINE")
-					    org-deadline-string)
-					   (t org-scheduled-string)))))
+		(let ((bol (line-beginning-position))
+		      ;; Backward compatibility: time keywords used to
+		      ;; be configurable (before 8.3).  Make sure we
+		      ;; get the correct keyword.
+		      (key-assoc `(("CLOSED" . ,org-closed-string)
+				   ("DEADLINE" . ,org-deadline-string)
+				   ("SCHEDULED" . ,org-scheduled-string))))
+		  (dolist (pair (if specific (list (assoc specific key-assoc))
+				  key-assoc))
 		    (save-excursion
-		      (when (search-backward k bol t)
+		      (when (search-backward (cdr pair) bol t)
 			(goto-char (match-end 0))
 			(skip-chars-forward " \t")
 			(and (looking-at org-ts-regexp-both)
-			     (push (cons specific (match-string 0)) props)))))))
+			     (push (cons (car pair)
+					 (org-match-string-no-properties 0))
+				   props)))))))
 	      (when specific (throw 'exit props)))
 	    (when (or (not specific)
 		      (member specific '("TIMESTAMP" "TIMESTAMP_IA")))
