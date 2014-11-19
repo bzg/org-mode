@@ -394,6 +394,7 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
     ("ang" "\\angle" t "&ang;" "[angle]" "[angle]" "∠")
     ("angle" "\\angle" t "&ang;" "[angle]" "[angle]" "∠")
     ("perp" "\\perp" t "&perp;" "[up tack]" "[up tack]" "⊥")
+    ("parallel" "\\parallel" t "&parallel;" "||" "||" "∥")
     ("sdot" "\\cdot" t "&sdot;" "[dot]" "[dot]" "⋅")
     ("cdot" "\\cdot" t "&sdot;" "[dot]" "[dot]" "⋅")
     ("lceil" "\\lceil" t "&lceil;" "[left ceiling]" "[left ceiling]" "⌈")
