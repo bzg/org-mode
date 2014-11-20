@@ -1376,6 +1376,14 @@ drops support for Emacs 24.1 and 24.2."
 	     (looking-at "\nThe Emacs Editor")
 	   (kill-buffer))))))
 
+(ert-deftest test-org/open-at-point/inline-image ()
+  "Test `org-open-at-point' on nested links."
+  (should
+   (org-test-with-temp-text "[[info:org#Top][info:<point>emacs#Top]]"
+     (org-open-at-point)
+     (prog1 (with-current-buffer "*info*" (looking-at "\nOrg Mode Manual"))
+       (kill-buffer "*info*")))))
+
 
 ;;; Node Properties
 

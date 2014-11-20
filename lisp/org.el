@@ -10791,8 +10791,13 @@ link in a property drawer line."
 			   (>= (point) (match-beginning 5)))))
 	  (org-tags-view arg (substring (match-string 5) 0 -1)))
 	 ((eq type 'link)
-	  (let ((type (org-element-property :type context))
-		(path (org-link-unescape (org-element-property :path context))))
+	  ;; When link is located within the description of another
+	  ;; link (e.g., an inline image), always open the parent
+	  ;; link.
+	  (let*((link (let ((up (org-element-property :parent context)))
+			(if (eq (org-element-type up) 'link) up context)))
+		(type (org-element-property :type link))
+		(path (org-link-unescape (org-element-property :path link))))
 	    ;; Switch back to REFERENCE-BUFFER needed when called in
 	    ;; a temporary buffer through `org-open-link-from-string'.
 	    (with-current-buffer (or reference-buffer (current-buffer))
@@ -10811,8 +10816,8 @@ link in a property drawer line."
 		  ;; Note : "file+emacs" and "file+sys" types are
 		  ;; hard-coded in order to escape the previous
 		  ;; limitation.
-		  (let* ((option (org-element-property :search-option context))
-			 (app (org-element-property :application context))
+		  (let* ((option (org-element-property :search-option link))
+			 (app (org-element-property :application link))
 			 (dedicated-function
 			  (nth 1 (assoc app org-link-protocols))))
 		    (if dedicated-function
@@ -10889,11 +10894,11 @@ link in a property drawer line."
 		     (org-get-buffer-for-internal-link (current-buffer))))
 		  (let ((cmd `(org-link-search
 			       ,(if (member type '("custom-id" "coderef"))
-				    (org-element-property :raw-link context)
+				    (org-element-property :raw-link link)
 				  path)
 			       ,(cond ((equal arg '(4)) 'occur)
 				      ((equal arg '(16)) 'org-occur))
-			       ,(org-element-property :begin context))))
+			       ,(org-element-property :begin link))))
 		    (condition-case nil
 			(let ((org-link-search-inhibit-query t))
 			  (eval cmd))
