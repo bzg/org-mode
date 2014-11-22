@@ -22745,8 +22745,7 @@ Also align node properties according to `org-property-format'."
 		      (goto-char (org-element-property :end element))
 		      (skip-chars-backward " \r\t\n")
 		      (line-beginning-position))))
-	     (let ((org-src-strip-leading-and-trailing-blank-lines nil))
-	       (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB"))))
+	     (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB")))
 	    (t
 	     (let ((column (org--get-expected-indentation element nil)))
 	       ;; Preserve current column.
@@ -22854,9 +22853,7 @@ assumed to be significant there."
 		     ;; `org-src-tab-acts-natively' is non-nil.
 		     (when (and (< (point) end) org-src-tab-acts-natively)
 		       (ignore-errors
-			 (let (org-src-strip-leading-and-trailing-blank-lines
-			       ;; Region boundaries in edit buffer.
-			       (start (1+ (- (point) cbeg)))
+			 (let ((start (1+ (- (point) cbeg)))
 			       (end (- (min cend end) cbeg)))
 			   (org-babel-do-in-edit-buffer
 			    (indent-region start end))))))

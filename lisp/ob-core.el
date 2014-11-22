@@ -49,9 +49,8 @@
 (declare-function tramp-file-name-host "tramp" (vec))
 (declare-function with-parsed-tramp-file-name "tramp" (filename var &rest body))
 (declare-function org-icompleting-read "org" (&rest args))
-(declare-function org-edit-src-code "org-src"
-                  (&optional context code edit-buffer-name quietp))
-(declare-function org-edit-src-exit "org-src"  (&optional context))
+(declare-function org-edit-src-code "org-src" (&optional code edit-buffer-name))
+(declare-function org-edit-src-exit "org-src"  ())
 (declare-function org-open-at-point "org" (&optional in-emacs reference-buffer))
 (declare-function org-save-outline-visibility "org-macs" (use-markers &rest body))
 (declare-function org-outline-overlay-data "org" (&optional use-markers))
@@ -777,8 +776,7 @@ arguments and pop open the results in a preview buffer."
 			      (funcall assignments-cmd params))))))
     (if (org-called-interactively-p 'any)
 	(org-edit-src-code
-	 nil expanded
-	 (concat "*Org-Babel Preview " (buffer-name) "[ " lang " ]*"))
+	 expanded (concat "*Org-Babel Preview " (buffer-name) "[ " lang " ]*"))
       expanded)))
 
 (defun org-babel-edit-distance (s1 s2)
@@ -994,8 +992,7 @@ Return t if a code block was found at point, nil otherwise."
      (when (and (org-babel-where-is-src-block-head)
 		(org-edit-src-code))
        (unwind-protect (progn ,@body)
-	 (if (org-bound-and-true-p org-edit-src-from-org-mode)
-	     (org-edit-src-exit)))
+	 (org-edit-src-exit))
        t)))
 (def-edebug-spec org-babel-do-in-edit-buffer (body))
 
