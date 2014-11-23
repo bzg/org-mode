@@ -103,6 +103,11 @@ default is =hline=.
 One can use a drawer without listing it in the =#+DRAWERS= keyword,
 which is now obsolete.  As a consequence, this change also deprecates
 ~org-drawers~ variable.
+*** ~org-edit-special~  can edit export blocks
+Using C-c ' on an export block now opens a sub-editing buffer.  Major
+mode in that buffer is determined by export backend name (e.g.,
+"latex" \to "latex-mode").  You can define exceptions to this rule by
+configuring ~org-src-lang-modes~, which see.
 *** Markdown export supports switches in source blocks
 For example, it is now possible to number lines using the =-n= switch
 in a source block.

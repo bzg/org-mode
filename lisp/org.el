@@ -20661,6 +20661,7 @@ See the individual commands for more information."
 When at a table, call the formula editor with `org-table-edit-formulas'.
 When in a source code block, call `org-edit-src-code'.
 When in a fixed-width region, call `org-edit-fixed-width-region'.
+When in an export block, call `org-edit-export-block'.
 When at an #+INCLUDE keyword, visit the included file.
 On a link, call `ffap' to visit the link at point.
 Otherwise, return a user error."
@@ -20698,11 +20699,12 @@ Otherwise, return a user error."
          (user-error "No special environment to edit here")))
       (table
        (if (eq (org-element-property :type element) 'table.el)
-           (org-edit-src-code)
+           (org-edit-table.el)
          (call-interactively 'org-table-edit-formulas)))
       ;; Only Org tables contain `table-row' type elements.
       (table-row (call-interactively 'org-table-edit-formulas))
-      ((example-block export-block) (org-edit-src-code))
+      ((example-block src-block) (org-edit-src-code))
+      (export-block (org-edit-export-block))
       (fixed-width (org-edit-fixed-width-region))
       (otherwise
        ;; No notable element at point.  Though, we may be at a link,
