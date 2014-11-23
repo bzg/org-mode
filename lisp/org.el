@@ -22831,7 +22831,8 @@ assumed to be significant there."
 				(org-with-wide-buffer
 				 (goto-char element-end)
 				 (skip-chars-backward " \r\t\n")
-				 (line-beginning-position))))))
+				 (line-beginning-position)))
+			    t)))
 		;; Do not change items indentation individually as it
 		;; might break the list as a whole.  On the other
 		;; hand, when at a plain list, indent it as a whole.
@@ -22853,10 +22854,8 @@ assumed to be significant there."
 		     ;; `org-src-tab-acts-natively' is non-nil.
 		     (when (and (< (point) end) org-src-tab-acts-natively)
 		       (ignore-errors
-			 (let ((start (1+ (- (point) cbeg)))
-			       (end (- (min cend end) cbeg)))
-			   (org-babel-do-in-edit-buffer
-			    (indent-region start end))))))
+			 (org-babel-do-in-edit-buffer
+			  (indent-region (point-min) (point-max))))))
 		    (t (org-indent-region (point) (min cend end))))
 		  (goto-char (min cend end))
 		  (when (< (point) end) (funcall indent-to ind element-end)))
