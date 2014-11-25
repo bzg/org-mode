@@ -18465,7 +18465,7 @@ Optional argument FILE means use this file instead of the current."
 	(progn
 	  (org-store-new-agenda-file-list files)
 	  (org-install-agenda-files-menu)
-	  (message "Removed file: %s" afile))
+	  (message "Removed from Org Agenda list: %s" afile))
       (message "File was not in list: %s (not removed)" afile))))
 
 (defun org-file-menu-entry (file)
