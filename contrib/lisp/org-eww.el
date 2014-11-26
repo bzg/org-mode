@@ -54,9 +54,14 @@
   (when (eq major-mode 'eww-mode)
     (org-store-link-props
      :type "eww"
-     :link eww-current-url
+     :link (if (< emacs-major-version 25)
+	       eww-current-url
+	     (eww-current-url))
      :url (url-view-url t)
-     :description (or eww-current-title eww-current-url))))
+     :description (if (< emacs-major-version 25)
+		      (or eww-current-title eww-current-url)
+		    (or (plist-get eww-data :title)
+			  (eww-current-url))))))
 
 
 ;; Some auxiliary functions concerning links in eww buffers
