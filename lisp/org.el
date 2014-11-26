@@ -13515,63 +13515,48 @@ be removed."
 					default-time default-input)))))
 
       (org-with-wide-buffer
-       (let (col list elt ts buffer-invisibility-spec)
-	 (org-back-to-heading t)
-	 (looking-at (concat org-outline-regexp "\\( *\\)[^\r\n]*"))
-	 (goto-char (match-end 1))
-	 (setq col (current-column))
-	 (goto-char (match-end 0))
-	 (if (eobp) (insert "\n") (forward-char 1))
-	 (unless (or what (org-looking-at-p org-planning-line-re))
-	   ;; Nothing to add, nothing to remove...... :-)
-	   (throw 'exit nil))
-	 (if (and (not (looking-at org-outline-regexp))
-		  (looking-at (concat "[^\r\n]*?" org-keyword-time-regexp
-				      "[^\r\n]*"))
-		  (not (equal (match-string 1) org-clock-string)))
-	     (narrow-to-region (match-beginning 0) (match-end 0))
-	   (insert-before-markers "\n")
-	   (backward-char 1)
-	   (narrow-to-region (point) (point))
-	   (and org-adapt-indentation (org-indent-to-column col)))
-	 ;; Check if we have to remove something.
-	 (setq list (cons what remove))
-	 (while list
-	   (setq elt (pop list))
-	   (when (or (and (eq elt 'scheduled)
-			  (re-search-forward org-scheduled-time-regexp nil t))
-		     (and (eq elt 'deadline)
-			  (re-search-forward org-deadline-time-regexp nil t))
-		     (and (eq elt 'closed)
-			  (re-search-forward org-closed-time-regexp nil t)))
-	     (replace-match "")
-	     (if (looking-at "--+<[^>]+>") (replace-match ""))))
-	 (and (looking-at "[ \t]+") (replace-match ""))
-	 (and org-adapt-indentation (bolp) (org-indent-to-column col))
-	 (when what
-	   (insert
-	    (if (or (bolp) (eq (char-before) ?\s)) "" " ")
-	    (cond ((eq what 'scheduled) org-scheduled-string)
-		  ((eq what 'deadline) org-deadline-string)
-		  ((eq what 'closed) org-closed-string))
-	    " ")
-	   (setq ts (org-insert-time-stamp
-		     time
-		     (or org-time-was-given
-			 (and (eq what 'closed) org-log-done-with-time))
-		     (eq what 'closed)
-		     nil nil (list org-end-time-was-given)))
-	   (unless (or (bolp)
-		       (eq (char-before) ?\s)
-		       (memq (char-after) '(?\n ?\s))
-		       (eobp))
-	     (insert " "))
-	   (end-of-line 1))
-	 (goto-char (point-min))
-	 (widen)
-	 (when (and (looking-at "[ \t]*\n") (eq (char-before) ?\n))
-	   (delete-region (1- (point)) (line-end-position)))
-	 ts)))))
+       (org-back-to-heading t)
+       (forward-line)
+       (unless (bolp) (insert "\n"))
+       (cond ((org-looking-at-p org-planning-line-re)
+	      ;; Move to current indentation.
+	      (skip-chars-forward " \t")
+	      ;; Check if we have to remove something.
+	      (dolist (type (if what (cons what remove) remove))
+		(when (save-excursion
+			(re-search-forward
+			 (case type
+			   (closed org-closed-time-regexp)
+			   (deadline org-deadline-time-regexp)
+			   (scheduled org-scheduled-time-regexp)
+			   (otherwise (error "Invalid planning type: %s" type)))
+			 (line-end-position) t))
+		  (replace-match "")
+		  (when (looking-at "--+<[^>]+>") (replace-match ""))))
+	      ;; Remove leading white spaces.
+	      (when (looking-at "[ \t]+") (replace-match "")))
+	     ((not what) (throw 'exit nil)) ; Nothing to do.
+	     (t (insert-before-markers "\n")
+		(backward-char 1)
+		(when org-adapt-indentation
+		  (org-indent-to-column (1+ (org-outline-level))))))
+       (when what
+	 ;; Insert planning keyword.
+	 (insert (case what
+		   (closed org-closed-string)
+		   (deadline org-deadline-string)
+		   (scheduled org-scheduled-string)
+		   (otherwise (error "Invalid planning type: %s" what)))
+		 " ")
+	 ;; Insert associated timestamp.
+	 (let ((ts (org-insert-time-stamp
+		    time
+		    (or org-time-was-given
+			(and (eq what 'closed) org-log-done-with-time))
+		    (eq what 'closed)
+		    nil nil (list org-end-time-was-given))))
+	   (unless (eolp) (insert " "))
+	   ts))))))
 
 (defvar org-log-note-marker (make-marker))
 (defvar org-log-note-purpose nil)
