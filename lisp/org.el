@@ -13479,12 +13479,12 @@ nil."
 (defvar org-end-time-was-given) ; dynamically scoped parameter
 
 (defun org-add-planning-info (what &optional time &rest remove)
-  "Insert new timestamp with keyword in the line directly after the headline.
-WHAT indicates what kind of time stamp to add.  TIME indicates the time to use.
-If non is given, the user is prompted for a date.
-REMOVE indicates what kind of entries to remove.  An old WHAT entry will also
-be removed."
-  (interactive)
+  "Insert new timestamp with keyword in the planning line.
+WHAT indicates what kind of time stamp to add.  It is a symbol
+among `closed', `deadline', `scheduled' and nil.  TIME indicates
+the time to use.  If none is given, the user is prompted for
+a date.  REMOVE indicates what kind of entries to remove.  An old
+WHAT entry will also be removed."
   (let (org-time-was-given org-end-time-was-given default-time default-input)
     (catch 'exit
       (when (and (memq what '(scheduled deadline))
