@@ -9237,7 +9237,6 @@ ARG is passed through to `org-schedule'."
 	 (type (marker-insertion-type marker))
 	 (buffer (marker-buffer marker))
 	 (pos (marker-position marker))
-	 (org-insert-labeled-timestamps-at-point nil)
 	 ts)
     (set-marker-insertion-type marker t)
     (org-with-remote-undo buffer
@@ -9258,7 +9257,6 @@ ARG is passed through to `org-deadline'."
 		     (org-agenda-error)))
 	 (buffer (marker-buffer marker))
 	 (pos (marker-position marker))
-	 (org-insert-labeled-timestamps-at-point nil)
 	 ts)
     (org-with-remote-undo buffer
       (with-current-buffer buffer

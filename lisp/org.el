@@ -3100,14 +3100,6 @@ as an argument and return the numeric priority."
   :tag "Org Time"
   :group 'org)
 
-(defcustom org-insert-labeled-timestamps-at-point nil
-  "Non-nil means SCHEDULED and DEADLINE timestamps are inserted at point.
-When nil, these labeled time stamps are forces into the second line of an
-entry, just after the headline.  When scheduling from the global TODO list,
-the time stamp will always be forced into the second line."
-  :group 'org-time
-  :type 'boolean)
-
 (defcustom org-time-stamp-rounding-minutes '(0 5)
   "Number of minutes to round time stamps to.
 These are two values, the first applies when first creating a time stamp.
@@ -13513,21 +13505,15 @@ be removed."
       (when what
 	(setq time
 	      (if (stringp time)
-		  ;; This is a string (relative or absolute), set proper date
-		  (apply 'encode-time
+		  ;; This is a string (relative or absolute), set
+		  ;; proper date.
+		  (apply #'encode-time
 			 (org-read-date-analyze
 			  time default-time (decode-time default-time)))
 		;; If necessary, get the time from the user
 		(or time (org-read-date nil 'to-time nil nil
 					default-time default-input)))))
 
-      (when (and org-insert-labeled-timestamps-at-point
-		 (memq what '(scheduled deadline)))
-	(insert
-	 (if (eq what 'scheduled) org-scheduled-string org-deadline-string) " ")
-	(org-insert-time-stamp time org-time-was-given
-			       nil nil nil (list org-end-time-was-given))
-	(setq what nil))
       (org-with-wide-buffer
        (let (col list elt ts buffer-invisibility-spec)
 	 (org-back-to-heading t)

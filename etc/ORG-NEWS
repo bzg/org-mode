@@ -86,6 +86,10 @@ styles when changing the shell type.  Changing the shell type can now
 be done directly from the source block and the quoting style has to be
 compatible across all shells, so a customization doesn't make sense
 anymore.  The chosen hard coded quoting style conforms to POSIX.
+*** Removed option ~org-insert-labeled-timestamps-at-point~
+Setting this option to anything else that the default value (nil)
+would create invalid planning info.  This dangerous option is now
+removed.
 ** New features
 *** Additional markup with =#+INCLUDE= keyword
 The content of the included file can now be optionally marked up, for
