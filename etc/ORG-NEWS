@@ -27,7 +27,7 @@ them.
 #+BEGIN_SRC emacs-lisp
 (defun org-repair-property-drawers ()
   "Fix properties drawers in current buffer.
-Ignore non Org buffers."
+ Ignore non Org buffers."
   (when (eq major-mode 'org-mode)
     (org-with-wide-buffer
      (goto-char (point-min))
@@ -45,7 +45,10 @@ Ignore non Org buffers."
                 (when (and (< (point) end)
                            (not (org-looking-at-p org-property-drawer-re))
                            (save-excursion
-                             (re-search-forward org-property-drawer-re end t)))
+                             (and (re-search-forward org-property-drawer-re end t)
+                                  (eq (org-element-type
+                                       (save-match-data (org-element-at-point)))
+                                      'drawer))))
                   (insert (delete-and-extract-region
                            (match-beginning 0)
                            (min (1+ (match-end 0)) end)))
