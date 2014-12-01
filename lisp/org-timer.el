@@ -177,11 +177,13 @@ that was not started at the correct moment.
 If NO-INSERT-P is non-nil, return the string instead of inserting
 it in the buffer."
   (interactive "P")
-  (when (or (equal restart '(4)) (not org-timer-start-time))
-    (org-timer-start))
-  (if no-insert-p
-      (org-timer-value-string)
-    (insert (org-timer-value-string))))
+  (if (equal restart '(16))
+      (org-timer-start restart)
+    (when (or (equal restart '(4)) (not org-timer-start-time))
+      (org-timer-start))
+    (if no-insert-p
+	(org-timer-value-string)
+      (insert (org-timer-value-string)))))
 
 (defun org-timer-value-string ()
   "Set the timer string."
