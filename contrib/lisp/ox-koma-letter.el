@@ -222,7 +222,9 @@ This option can also be set with the OPTIONS keyword, e.g.:
   :type 'boolean)
 
 (defcustom org-koma-letter-subject-format t
-  "When non-nil include subject.  Supports formatting options.
+  "Non-nil means include the subject.
+
+Support formatting options.
 
 When t, insert a subject using default options.  When nil, do not
 insert a subject at all.  It can also be a list of symbols among
