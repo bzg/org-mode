@@ -13532,9 +13532,14 @@ WHAT entry will also be removed."
 			   (otherwise (error "Invalid planning type: %s" type)))
 			 (line-end-position) t))
 		  (replace-match "")
-		  (when (looking-at "--+<[^>]+>") (replace-match ""))))
-	      ;; Remove leading white spaces.
-	      (when (looking-at "[ \t]+") (replace-match "")))
+		  (when (looking-at "--+<[^>]+>") (replace-match ""))
+		  (when (and (not what) (eq type 'closed))
+		    (save-excursion
+		      (beginning-of-line)
+		      (if (looking-at "[ \t]*$")
+			  (delete-region (point) (1+ (point-at-eol)))))))
+		;; Remove leading white spaces.
+		(when (and (not (bolp)) (looking-at "[ \t]+")) (replace-match ""))))
 	     ((not what) (throw 'exit nil)) ; Nothing to do.
 	     (t (insert-before-markers "\n")
 		(backward-char 1)
