@@ -2150,6 +2150,9 @@ table.  But it is easier just to start typing, like
 @orgcmd{C-c C-c,org-table-align}
 Re-align the table and don't move to another field.
 @c
+@orgcmd{C-c SPC,org-table-blank-field}
+Blank the field at point.
+@c
 @orgcmd{<TAB>,org-table-next-field}
 Re-align the table, move to the next field.  Creates a new row if
 necessary.
