@@ -4313,6 +4313,7 @@ foreground or a background color.
 @subsection TODO dependencies
 @cindex TODO dependencies
 @cindex dependencies, of TODO states
+@cindex TODO dependencies, NOBLOCKING
 
 @vindex org-enforce-todo-dependencies
 @cindex property, ORDERED
@@ -4339,6 +4340,16 @@ example:
 ** TODO a
 ** TODO b, needs to wait for (a)
 ** TODO c, needs to wait for (a) and (b)
+@end example
+
+You can ensure an entry is never blocked by using the @code{NOBLOCKING}
+property:
+
+@example
+* This entry is never blocked
+  :PROPERTIES:
+  :NOBLOCKING: t
+  :END:
 @end example
 
 @table @kbd
@@ -5337,6 +5348,7 @@ should not be used as keys in the properties drawer:
 
 @cindex property, special, ALLTAGS
 @cindex property, special, BLOCKED
+@cindex property, special, NOBLOCKING
 @cindex property, special, CATEGORY
 @cindex property, special, CLOCKSUM
 @cindex property, special, CLOCKSUM_T
@@ -5352,7 +5364,8 @@ should not be used as keys in the properties drawer:
 @cindex property, special, TODO
 @example
 ALLTAGS      @r{All tags, including inherited ones.}
-BLOCKED      @r{"t" if task is currently blocked by children or siblings}
+BLOCKED      @r{"t" if task is currently blocked by children or siblings.}
+NOBLOCKING   @r{"t" if blocking is disabled for this task.}
 CATEGORY     @r{The category of an entry.}
 CLOCKSUM     @r{The sum of CLOCK intervals in the subtree.  @code{org-clock-sum}}
              @r{must be run first to compute the values in the current buffer.}
