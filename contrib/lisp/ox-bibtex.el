@@ -200,7 +200,7 @@ Return new parse tree."
 			   (file-name-sans-extension file) file))
 	    ;; Outpufiles of bibtex2html will be put into current working directory
 	    ;; so define a variable for this.
-	    (setq out-file (file-name-sans-extension 
+	    (setq out-file (file-name-sans-extension
 			    (file-name-nondirectory file)))
 	    ;; limit is set: collect citations throughout the document
 	    ;; in TEMP-FILE and pass it to "bibtex2html" as "-citefile"
