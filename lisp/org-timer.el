@@ -160,14 +160,12 @@ With prefix arg STOP, stop it entirely."
 (defun org-timer-stop ()
   "Stop the relative timer."
   (interactive)
-  (if (not org-timer-current-timer)
-      (message "No running timer")
-    (run-hooks 'org-timer-stop-hook)
-    (setq org-timer-start-time nil
-	  org-timer-pause-time nil
-	  org-timer-current-timer nil)
-    (org-timer-set-mode-line 'off)
-    (message "Timer stopped")))
+  (run-hooks 'org-timer-stop-hook)
+  (setq org-timer-start-time nil
+	org-timer-pause-time nil
+	org-timer-current-timer nil)
+  (org-timer-set-mode-line 'off)
+  (message "Timer stopped"))
 
 ;;;###autoload
 (defun org-timer (&optional restart no-insert-p)
