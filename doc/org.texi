@@ -5351,7 +5351,6 @@ should not be used as keys in the properties drawer:
 
 @cindex property, special, ALLTAGS
 @cindex property, special, BLOCKED
-@cindex property, special, NOBLOCKING
 @cindex property, special, CATEGORY
 @cindex property, special, CLOCKSUM
 @cindex property, special, CLOCKSUM_T
