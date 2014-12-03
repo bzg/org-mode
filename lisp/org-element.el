@@ -3548,7 +3548,8 @@ CONTENTS is nil."
 				(org-element-property :month-end timestamp)
 				(org-element-property :year-end timestamp))
 		   (eq type 'active-range)
-		   (and hour-end minute-end))))))))
+		   (and hour-end minute-end)))))
+      (otherwise (org-element-property :raw-value timestamp)))))
 
 
 ;;;; Underline
