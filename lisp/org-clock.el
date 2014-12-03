@@ -1473,7 +1473,9 @@ line and position cursor in that line."
 	    (forward-line))
 	  (unless (bolp) (insert "\n"))
 	  ;; Create a new drawer if necessary.
-	  (when org-clock-into-drawer
+	  (when (and org-clock-into-drawer
+		     (or (not (wholenump org-clock-into-drawer))
+			 (< org-clock-into-drawer 2)))
 	    (let ((beg (point)))
 	      (insert ":" drawer ":\n:END:\n")
 	      (org-indent-region beg (point))
