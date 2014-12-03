@@ -17449,8 +17449,8 @@ back-end from scratch) and @file{ox-beamer.el} (for how to derive a new
 back-end from an existing one.
 
 When creating a new back-end from scratch, the basic idea is to set the name
-of the back-end (as a symbol) and an an alist of elements and export
-functions.  On top of this, you will need to set additional keywords like
+of the back-end (as a symbol) and an alist of elements and export functions.
+On top of this, you will need to set additional keywords like
 @code{:menu-entry} (to display the back-end in the export dispatcher),
 @code{:export-block} (to specify what blocks should not be exported by this
 back-end), and @code{:options-alist} (to let the user set export options that
