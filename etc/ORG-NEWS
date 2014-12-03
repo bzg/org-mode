@@ -65,6 +65,8 @@ docstring for more information.
 - ~org-latex-format-headline-function~
 - ~org-latex-format-inlinetask-function~
 ** Removed functions
+*** Removed function ~org-translate-time~
+Use ~org-timestamp-translate~ instead.
 *** Removed function ~org-beamer-insert-options-template~
 This function inserted a Beamer specific template at point or in
 current subtree.  Use ~org-export-insert-default-template~ instead, as

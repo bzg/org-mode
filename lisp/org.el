@@ -17181,33 +17181,6 @@ The command returns the inserted time stamp."
 	  (put-text-property beg end 'end-glyph (make-glyph str)))
       (put-text-property beg end 'display str))))
 
-(defun org-translate-time (string)
-  "Translate all timestamps in STRING to custom format.
-But do this only if the variable `org-display-custom-times' is set."
-  (when org-display-custom-times
-    (save-match-data
-      (let* ((start 0)
-	     (re org-ts-regexp-both)
-	     t1 with-hm inactive tf time str beg end)
-	(while (setq start (string-match re string start))
-	  (setq beg (match-beginning 0)
-		end (match-end 0)
-		t1 (save-match-data
-		     (org-parse-time-string (substring string beg end) t))
-		with-hm (and (nth 1 t1) (nth 2 t1))
-		inactive (equal (substring string beg (1+ beg)) "[")
-		tf (funcall (if with-hm 'cdr 'car)
-			    org-time-stamp-custom-formats)
-		time (org-fix-decoded-time t1)
-		str (format-time-string
-		     (concat
-		      (if inactive "[" "<") (substring tf 1 -1)
-		      (if inactive "]" ">"))
-		     (apply 'encode-time time))
-		string (replace-match str t t string)
-		start (+ start (length str)))))))
-  string)
-
 (defun org-fix-decoded-time (time)
   "Set 0 instead of nil for the first 6 elements of time.
 Don't touch the rest."
@@ -23471,27 +23444,28 @@ TIMESTAMP."
 	   split-ts :raw-value (org-element-interpret-data split-ts)))))))
 
 (defun org-timestamp-translate (timestamp &optional boundary)
-  "Apply `org-translate-time' on a TIMESTAMP object.
+  "Translate TIMESTAMP object to custom format.
+
+Format string is defined in `org-time-stamp-custom-formats',
+which see.
+
 When optional argument BOUNDARY is non-nil, it is either the
 symbol `start' or `end'.  In this case, only translate the
 starting or ending part of TIMESTAMP if it is a date or time
-range.  Otherwise, translate both parts."
-  (if (and (not boundary)
-	   (memq (org-element-property :type timestamp)
-		 '(active-range inactive-range)))
-      (concat
-       (org-translate-time
-	(org-element-property :raw-value
-			      (org-timestamp-split-range timestamp)))
-       "--"
-       (org-translate-time
-	(org-element-property :raw-value
-			      (org-timestamp-split-range timestamp t))))
-    (org-translate-time
-     (org-element-property
-      :raw-value
-      (if (not boundary) timestamp
-	(org-timestamp-split-range timestamp (eq boundary 'end)))))))
+range.  Otherwise, translate both parts.
+
+Return timestamp as-is if `org-display-custom-times' is nil or if
+it has a `diary' type."
+  (let ((type (org-element-property :type timestamp)))
+    (if (or (not org-display-custom-times) (eq type 'diary))
+	(org-element-interpret-data timestamp)
+      (let ((fmt (funcall (if (org-timestamp-has-time-p timestamp) #'cdr #'car)
+			  org-time-stamp-custom-formats)))
+	(if (and (not boundary) (memq type '(active-range inactive-range)))
+	    (concat (org-timestamp-format timestamp fmt)
+		    "--"
+		    (org-timestamp-format timestamp fmt t))
+	  (org-timestamp-format timestamp fmt (eq boundary 'end)))))))
 
 
 

@@ -2210,9 +2210,7 @@ channel."
 </span>
 </p>"
 	  org-clock-string
-	  (org-translate-time
-	   (org-element-property :raw-value
-				 (org-element-property :value clock)))
+	  (org-timestamp-translate (org-element-property :value clock))
 	  (let ((time (org-element-property :duration clock)))
 	    (and time (format " <span class=\"timestamp\">(%s)</span>" time)))))
 
@@ -3017,18 +3015,15 @@ channel."
 	     (let ((closed (org-element-property :closed planning)))
 	       (when closed
 		 (format span-fmt org-closed-string
-			 (org-translate-time
-			  (org-element-property :raw-value closed)))))
+			 (org-timestamp-translate closed))))
 	     (let ((deadline (org-element-property :deadline planning)))
 	       (when deadline
 		 (format span-fmt org-deadline-string
-			 (org-translate-time
-			  (org-element-property :raw-value deadline)))))
+			 (org-timestamp-translate deadline))))
 	     (let ((scheduled (org-element-property :scheduled planning)))
 	       (when scheduled
 		 (format span-fmt org-scheduled-string
-			 (org-translate-time
-			  (org-element-property :raw-value scheduled)))))))
+			 (org-timestamp-translate scheduled))))))
       " "))))
 
 ;;;; Property Drawer
@@ -3349,8 +3344,7 @@ information."
   "Transcode a TIMESTAMP object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let ((value (org-html-plain-text
-		(org-timestamp-translate timestamp) info)))
+  (let ((value (org-html-plain-text (org-timestamp-translate timestamp) info)))
     (format "<span class=\"timestamp-wrapper\"><span class=\"timestamp\">%s</span></span>"
 	    (replace-regexp-in-string "--" "&#x2013;" value))))
 

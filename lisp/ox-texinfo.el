@@ -643,9 +643,7 @@ information."
    "@noindent"
    (format "@strong{%s} " org-clock-string)
    (format (plist-get info :texinfo-inactive-timestamp-format)
-	   (concat (org-translate-time
-		    (org-element-property :raw-value
-					  (org-element-property :value clock)))
+	   (concat (org-timestamp-translate (org-element-property :value clock))
 		   (let ((time (org-element-property :duration clock)))
 		     (and time (format " (%s)" time)))))
    "@*"))
@@ -1168,22 +1166,19 @@ information."
 	       (concat
 		(format "@strong{%s} " org-closed-string)
 		(format (plist-get info :texinfo-inactive-timestamp-format)
-			(org-translate-time
-			 (org-element-property :raw-value closed))))))
+			(org-timestamp-translate closed)))))
 	   (let ((deadline (org-element-property :deadline planning)))
 	     (when deadline
 	       (concat
 		(format "@strong{%s} " org-deadline-string)
 		(format (plist-get info :texinfo-active-timestamp-format)
-			(org-translate-time
-			 (org-element-property :raw-value deadline))))))
+			(org-timestamp-translate deadline)))))
 	   (let ((scheduled (org-element-property :scheduled planning)))
 	     (when scheduled
 	       (concat
 		(format "@strong{%s} " org-scheduled-string)
 		(format (plist-get info :texinfo-active-timestamp-format)
-			(org-translate-time
-			 (org-element-property :raw-value scheduled))))))))
+			(org-timestamp-translate scheduled)))))))
     " ")
    "@*"))
 

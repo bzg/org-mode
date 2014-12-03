@@ -1318,9 +1318,7 @@ information."
    "\\noindent"
    (format "\\textbf{%s} " org-clock-string)
    (format (plist-get info :latex-inactive-timestamp-format)
-	   (concat (org-translate-time
-		    (org-element-property :raw-value
-					  (org-element-property :value clock)))
+	   (concat (org-timestamp-translate (org-element-property :value clock))
 		   (let ((time (org-element-property :duration clock)))
 		     (and time (format " (%s)" time)))))
    "\\\\"))
@@ -2135,22 +2133,19 @@ information."
 	       (concat
 		(format "\\textbf{%s} " org-closed-string)
 		(format (plist-get info :latex-inactive-timestamp-format)
-			(org-translate-time
-			 (org-element-property :raw-value closed))))))
+			(org-timestamp-translate closed)))))
 	   (let ((deadline (org-element-property :deadline planning)))
 	     (when deadline
 	       (concat
 		(format "\\textbf{%s} " org-deadline-string)
 		(format (plist-get info :latex-active-timestamp-format)
-			(org-translate-time
-			 (org-element-property :raw-value deadline))))))
+			(org-timestamp-translate deadline)))))
 	   (let ((scheduled (org-element-property :scheduled planning)))
 	     (when scheduled
 	       (concat
 		(format "\\textbf{%s} " org-scheduled-string)
 		(format (plist-get info :latex-active-timestamp-format)
-			(org-translate-time
-			 (org-element-property :raw-value scheduled))))))))
+			(org-timestamp-translate scheduled)))))))
     " ")
    "\\\\"))
 
