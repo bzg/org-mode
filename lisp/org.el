@@ -4948,8 +4948,8 @@ related expressions."
 		   (append '("FILETAGS" "TAGS" "SETUPFILE")
 			   (and (not tags-only)
 				'("ARCHIVE" "CATEGORY" "COLUMNS" "CONSTANTS"
-				  "LINK" "PRIORITIES" "PROPERTY" "SEQ_TODO"
-				  "STARTUP" "TODO" "TYP_TODO")))))))
+				  "LINK" "OPTIONS" "PRIORITIES" "PROPERTY"
+				  "SEQ_TODO" "STARTUP" "TODO" "TYP_TODO")))))))
       (org--setup-process-tags
        (cdr (assq 'tags alist)) (cdr (assq 'filetags alist)))
       (unless tags-only
@@ -4979,6 +4979,9 @@ related expressions."
 	    (org-set-local 'org-highest-priority (nth 0 priorities))
 	    (org-set-local 'org-lowest-priority (nth 1 priorities))
 	    (org-set-local 'org-default-priority (nth 2 priorities))))
+	;; Scripts.
+	(let ((scripts (cdr (assq 'scripts alist))))
+	  (when scripts (org-set-local 'org-use-sub-superscripts scripts)))
 	;; Startup options.
 	(let ((startup (cdr (assq 'startup alist))))
 	  (dolist (option startup)
@@ -5094,7 +5097,7 @@ files.  ALIST, when non-nil, is the alist computed so far.
 
 Return value contains the following keys: `archive', `category',
 `columns', `constants', `filetags', `link', `priorities',
-`property', `startup', `tags' and `todo'."
+`property', `startup', `tags', `todo' and `scripts'."
   (org-with-wide-buffer
    (goto-char (point-min))
    (let ((case-fold-search t))
@@ -5137,6 +5140,10 @@ Return value contains the following keys: `archive', `category',
 				   (org-match-string-no-properties 2 value))))
 		   (if links (push pair (cdr links))
 		     (push (list 'link pair) alist)))))
+	      ((equal key "OPTIONS")
+	       (when (and (org-string-nw-p value)
+			  (string-match "\\^:\\(t\\|nil\\|{}\\)" value))
+		 (push (cons 'scripts (read (match-string 1 value))) alist)))
 	      ((equal key "PRIORITIES")
 	       (push (cons 'priorities
 			   (let ((prio (org-split-string value)))
