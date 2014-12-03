@@ -11324,15 +11324,17 @@ All lines between these markers are exported literally
 @cindex links, in HTML export
 @cindex internal links, in HTML export
 @cindex external links, in HTML export
+@vindex org-html-link-org-files-as-html
 Internal links (@pxref{Internal links}) will continue to work in HTML@.  This
 includes automatic links created by radio targets (@pxref{Radio
 targets}).  Links to external files will still work if the target file is on
 the same @i{relative} path as the published Org file.  Links to other
 @file{.org} files will be translated into HTML links under the assumption
 that an HTML version also exists of the linked file, at the same relative
-path.  @samp{id:} links can then be used to jump to specific entries across
-files.  For information related to linking files while publishing them to a
-publishing directory see @ref{Publishing links}.
+path; setting @code{org-html-link-org-files-as-html} to @code{nil} disables
+this translation.  @samp{id:} links can then be used to jump to specific
+entries across files.  For information related to linking files while
+publishing them to a publishing directory see @ref{Publishing links}.
 
 If you want to specify attributes for links, you can do so using a special
 @code{#+ATTR_HTML} line to define attributes that will be added to the
