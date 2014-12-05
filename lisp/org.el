@@ -4980,8 +4980,9 @@ related expressions."
 	    (org-set-local 'org-lowest-priority (nth 1 priorities))
 	    (org-set-local 'org-default-priority (nth 2 priorities))))
 	;; Scripts.
-	(let ((scripts (cdr (assq 'scripts alist))))
-	  (when scripts (org-set-local 'org-use-sub-superscripts scripts)))
+	(let ((scripts (assq 'scripts alist)))
+	  (when scripts
+	    (org-set-local 'org-use-sub-superscripts (cdr scripts))))
 	;; Startup options.
 	(let ((startup (cdr (assq 'startup alist))))
 	  (dolist (option startup)
@@ -5097,7 +5098,7 @@ files.  ALIST, when non-nil, is the alist computed so far.
 
 Return value contains the following keys: `archive', `category',
 `columns', `constants', `filetags', `link', `priorities',
-`property', `startup', `tags', `todo' and `scripts'."
+`property', `scripts', `startup', `tags' and `todo'."
   (org-with-wide-buffer
    (goto-char (point-min))
    (let ((case-fold-search t))
