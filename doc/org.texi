@@ -8122,9 +8122,7 @@ time as matching tags.  The properties may be real properties, or special
 properties that represent other metadata (@pxref{Special properties}).  For
 example, the ``property'' @code{TODO} represents the TODO keyword of the
 entry and the ``property'' @code{PRIORITY} represents the PRIORITY keyword of
-the entry.  The ITEM special property cannot currently be used in tags/property
-searches@footnote{But @pxref{x-agenda-skip-entry-regexp,
-,skipping entries based on regexp}.}.
+the entry.
 
 In addition to the @ref{Special properties}, one other ``property'' can also
 be used. @code{LEVEL} represents the level of an entry.  So a search
