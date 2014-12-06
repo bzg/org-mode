@@ -8126,8 +8126,8 @@ the entry.  The ITEM special property cannot currently be used in tags/property
 searches@footnote{But @pxref{x-agenda-skip-entry-regexp,
 ,skipping entries based on regexp}.}.
 
-In addition to the @pxref{Special properties}, one other ``property'' can
-also be used. @code{LEVEL} represents the level of an entry.  So a search
+In addition to the @ref{Special properties}, one other ``property'' can also
+be used. @code{LEVEL} represents the level of an entry.  So a search
 @samp{+LEVEL=3+boss-TODO="DONE"} lists all level three headlines that have
 the tag @samp{boss} and are @emph{not} marked with the TODO keyword DONE@.
 In buffers with @code{org-odd-levels-only} set, @samp{LEVEL} does not count
@@ -8184,11 +8184,6 @@ not @samp{:boss:}, which also have a priority value @samp{A}, a
 property that is numerically smaller than 2, a @samp{:With:} property that is
 matched by the regular expression @samp{Sarah\|Denny}, and that are scheduled
 on or after October 11, 2008.
-
-Accessing TODO, LEVEL, and CATEGORY during a search is fast.  Accessing any
-other properties will slow down the search.  However, once you have paid the
-price by accessing one property, testing additional properties is cheap
-again.
 
 You can configure Org mode to use property inheritance during a search, but
 beware that this can slow down searches considerably.  See @ref{Property
