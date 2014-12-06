@@ -794,7 +794,7 @@ link's path."
   '(("&" . "&amp;")
     ("<" . "&lt;")
     (">" . "&gt;"))
-  "Alist of characters to be converted by `org-html-protect'.")
+  "Alist of characters to be converted by `org-html-encode-plain-text'.")
 
 ;;;; Src Block
 
