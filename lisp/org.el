@@ -14363,15 +14363,17 @@ also TODO lines."
 (defun org-cached-entry-get (pom property)
   (if (or (eq t org-use-property-inheritance)
 	  (and (stringp org-use-property-inheritance)
-	       (string-match org-use-property-inheritance property))
+	       (let ((case-fold-search t))
+		 (org-string-match-p org-use-property-inheritance property)))
 	  (and (listp org-use-property-inheritance)
-	       (member property org-use-property-inheritance)))
-      ;; Caching is not possible, check it directly
+	       (member-ignore-case property org-use-property-inheritance)))
+      ;; Caching is not possible, check it directly.
       (org-entry-get pom property 'inherit)
-    ;; Get all properties, so that we can do complicated checks easily
-    (cdr (assoc property (or org-cached-props
-			     (setq org-cached-props
-				   (org-entry-properties pom)))))))
+    ;; Get all properties, so we can do complicated checks easily.
+    (cdr (assoc-string property
+		       (or org-cached-props
+			   (setq org-cached-props (org-entry-properties pom)))
+		       t))))
 
 (defun org-global-tags-completion-table (&optional files)
   "Return the list of all tags in all agenda buffer/files.

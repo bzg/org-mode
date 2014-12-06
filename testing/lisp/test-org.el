@@ -2932,6 +2932,151 @@ Text.
 
 
 
+;;; Sparse trees
+
+(ert-deftest test-org/match-sparse-tree ()
+  "Test `org-match-sparse-tree' specifications."
+  ;; Match tags.
+  (should-not
+   (org-test-with-temp-text "* H\n** H1 :tag:"
+     (org-match-sparse-tree nil "tag")
+     (search-forward "H1")
+     (org-invisible-p2)))
+  (should
+   (org-test-with-temp-text "* H\n** H1 :tag:\n** H2 :tag2:"
+     (org-match-sparse-tree nil "tag")
+     (search-forward "H2")
+     (org-invisible-p2)))
+  ;; "-" operator for tags.
+  (should-not
+   (org-test-with-temp-text "* H\n** H1 :tag1:\n** H2 :tag1:tag2:"
+     (org-match-sparse-tree nil "tag1-tag2")
+     (search-forward "H1")
+     (org-invisible-p2)))
+  (should
+   (org-test-with-temp-text "* H\n** H1 :tag1:\n** H2 :tag1:tag2:"
+     (org-match-sparse-tree nil "tag1-tag2")
+     (search-forward "H2")
+     (org-invisible-p2)))
+  ;; "&" operator for tags.
+  (should
+   (org-test-with-temp-text "* H\n** H1 :tag1:\n** H2 :tag1:tag2:"
+     (org-match-sparse-tree nil "tag1&tag2")
+     (search-forward "H1")
+     (org-invisible-p2)))
+  (should-not
+   (org-test-with-temp-text "* H\n** H1 :tag1:\n** H2 :tag1:tag2:"
+     (org-match-sparse-tree nil "tag1&tag2")
+     (search-forward "H2")
+     (org-invisible-p2)))
+  ;; "|" operator for tags.
+  (should-not
+   (org-test-with-temp-text "* H\n** H1 :tag1:\n** H2 :tag1:tag2:"
+     (org-match-sparse-tree nil "tag1|tag2")
+     (search-forward "H1")
+     (org-invisible-p2)))
+  (should-not
+   (org-test-with-temp-text "* H\n** H1 :tag1:\n** H2 :tag1:tag2:"
+     (org-match-sparse-tree nil "tag1|tag2")
+     (search-forward "H2")
+     (org-invisible-p2)))
+  ;; Regexp match on tags.
+  (should-not
+   (org-test-with-temp-text "* H\n** H1 :tag1:\n** H2 :foo:"
+     (org-match-sparse-tree nil "{^tag.*}")
+     (search-forward "H1")
+     (org-invisible-p2)))
+  (should
+   (org-test-with-temp-text "* H\n** H1 :tag1:\n** H2 :foo:"
+     (org-match-sparse-tree nil "{^tag.*}")
+     (search-forward "H2")
+     (org-invisible-p2)))
+  ;; Match group tags.
+  (should-not
+   (org-test-with-temp-text
+       "#+TAGS: { work : lab }\n* H\n** H1 :work:\n** H2 :lab:"
+     (org-match-sparse-tree nil "work")
+     (search-forward "H1")
+     (org-invisible-p2)))
+  (should-not
+   (org-test-with-temp-text
+       "#+TAGS: { work : lab }\n* H\n** H1 :work:\n** H2 :lab:"
+     (org-match-sparse-tree nil "work")
+     (search-forward "H2")
+     (org-invisible-p2)))
+  ;; Match properties.
+  (should
+   (org-test-with-temp-text
+       "* H\n** H1\n:PROPERTIES:\n:A: 1\n:END:\n** H2\n:PROPERTIES:\n:A: 2\n:END:"
+     (org-match-sparse-tree nil "A=\"1\"")
+     (search-forward "H2")
+     (org-invisible-p2)))
+  (should-not
+   (org-test-with-temp-text "* H1\n** H2\n:PROPERTIES:\n:A: 1\n:END:"
+     (org-match-sparse-tree nil "A=\"1\"")
+     (search-forward "H2")
+     (org-invisible-p2)))
+  ;; Case is not significant when matching properties.
+  (should-not
+   (org-test-with-temp-text "* H1\n** H2\n:PROPERTIES:\n:A: 1\n:END:"
+     (org-match-sparse-tree nil "a=\"1\"")
+     (search-forward "H2")
+     (org-invisible-p2)))
+  (should-not
+   (org-test-with-temp-text "* H1\n** H2\n:PROPERTIES:\n:a: 1\n:END:"
+     (org-match-sparse-tree nil "A=\"1\"")
+     (search-forward "H2")
+     (org-invisible-p2)))
+  ;; Match special LEVEL property.
+  (should-not
+   (org-test-with-temp-text "* H\n** H1\n*** H2"
+     (let ((org-odd-levels-only nil)) (org-match-sparse-tree nil "LEVEL=2"))
+     (search-forward "H1")
+     (org-invisible-p2)))
+  (should
+   (org-test-with-temp-text "* H\n** H1\n*** H2"
+     (let ((org-odd-levels-only nil)) (org-match-sparse-tree nil "LEVEL=2"))
+     (search-forward "H2")
+     (org-invisible-p2)))
+  ;; Comparison operators when matching properties.
+  (should
+   (org-test-with-temp-text
+       "* H\n** H1\nSCHEDULED: <2014-03-04 tue.>\n** H2\nSCHEDULED: <2012-03-29 thu.>"
+     (org-match-sparse-tree nil "SCHEDULED<=\"<2013-01-01>\"")
+     (search-forward "H1")
+     (org-invisible-p2)))
+  (should-not
+   (org-test-with-temp-text
+       "* H\n** H1\nSCHEDULED: <2014-03-04 tue.>\n** H2\nSCHEDULED: <2012-03-29 thu.>"
+     (org-match-sparse-tree nil "SCHEDULED<=\"<2013-01-01>\"")
+     (search-forward "H2")
+     (org-invisible-p2)))
+  ;; Regexp match on properties values.
+  (should-not
+   (org-test-with-temp-text
+       "* H\n** H1\n:PROPERTIES:\n:A: foo\n:END:\n** H2\n:PROPERTIES:\n:A: bar\n:END:"
+     (org-match-sparse-tree nil "A={f.*}")
+     (search-forward "H1")
+     (org-invisible-p2)))
+  (should
+   (org-test-with-temp-text
+       "* H\n** H1\n:PROPERTIES:\n:A: foo\n:END:\n** H2\n:PROPERTIES:\n:A: bar\n:END:"
+     (org-match-sparse-tree nil "A={f.*}")
+     (search-forward "H2")
+     (org-invisible-p2)))
+  ;; With an optional argument, limit match to TODO entries.
+  (should-not
+   (org-test-with-temp-text "* H\n** TODO H1 :tag:\n** H2 :tag:"
+     (org-match-sparse-tree t "tag")
+     (search-forward "H1")
+     (org-invisible-p2)))
+  (should
+   (org-test-with-temp-text "* H\n** TODO H1 :tag:\n** H2 :tag:"
+     (org-match-sparse-tree t "tag")
+     (search-forward "H2")
+     (org-invisible-p2))))
+
+
 ;;; Visibility
 
 (ert-deftest test-org/flag-drawer ()
