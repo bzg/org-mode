@@ -13652,6 +13652,9 @@ EXTRA is additional text that will be inserted into the notes buffer."
        (skip-chars-backward " \t\n\r")
        (forward-line)))
    (move-marker org-log-note-marker (point))
+   ;; Preserve position even if a property drawer is inserted in the
+   ;; process.
+   (set-marker-insertion-type org-log-note-marker t)
    (setq org-log-note-purpose purpose
 	 org-log-note-state state
 	 org-log-note-previous-state prev-state
