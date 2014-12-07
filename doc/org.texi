@@ -10588,7 +10588,7 @@ Toggle fixed-width sections
 Toggle inclusion of any time/date active/inactive stamps
 (@code{org-export-with-timestamps}).
 
-@item :
+@item \n:
 @vindex org-export-preserve-breaks
 Toggle line-break-preservation (@code{org-export-preserve-breaks}).
 
