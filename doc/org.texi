@@ -462,8 +462,7 @@ Dates and times
 * Deadlines and scheduling::    Planning your work
 * Clocking work time::          Tracking how long you spend on a task
 * Effort estimates::            Planning work effort in advance
-* Relative timer::              Notes with a running timer
-* Countdown timer::             Starting a countdown timer for a task
+* Timers::                      Notes with a running timer
 
 Creating timestamps
 
@@ -5790,8 +5789,7 @@ is used in a much wider sense.
 * Deadlines and scheduling::    Planning your work
 * Clocking work time::          Tracking how long you spend on a task
 * Effort estimates::            Planning work effort in advance
-* Relative timer::              Notes with a running timer
-* Countdown timer::             Starting a countdown timer for a task
+* Timers::                      Notes with a running timer
 @end menu
 
 
@@ -6793,59 +6791,55 @@ with the @kbd{/} key in the agenda (@pxref{Agenda commands}).  If you have
 these estimates defined consistently, two or three key presses will narrow
 down the list to stuff that fits into an available time slot.
 
-@node Relative timer
-@section Taking notes with a relative timer
+@node Timers
+@section Taking notes with a timer
 @cindex relative timer
+@cindex countdown timer
+@kindex ;
 
-When taking notes during, for example, a meeting or a video viewing, it can
-be useful to have access to times relative to a starting time.  Org provides
-such a relative timer and make it easy to create timed notes.
+Org provides provides two types of timers.  There is a relative timer that
+counts up, which can be useful when taking notes during, for example, a
+meeting or a video viewing.  There is also a countdown timer.
+
+The relative and countdown are started with separate commands.
+
+@table @kbd
+@orgcmd{C-c C-x 0,org-timer-start}
+Start or reset the relative timer.  By default, the timer is set to 0.  When
+called with a @kbd{C-u} prefix, prompt the user for a starting offset.  If
+there is a timer string at point, this is taken as the default, providing a
+convenient way to restart taking notes after a break in the process.  When
+called with a double prefix argument @kbd{C-u C-u}, change all timer strings
+in the active region by a certain amount.  This can be used to fix timer
+strings if the timer was not started at exactly the right moment.
+@orgcmd{C-c C-x ;,org-timer-set-timer}
+Start a countdown timer.  The user is prompted for a duration.
+@code{org-timer-default-timer} sets the default countdown value.  Giving a
+prefix numeric argument overrides this default value.  This command is
+available as @kbd{;} in agenda buffers.
+@end table
+
+Once started, relative and countdown timers are controlled with the same
+commands.
 
 @table @kbd
 @orgcmd{C-c C-x .,org-timer}
-Insert a relative time into the buffer.  The first time you use this, the
-timer will be started.  When called with a prefix argument, the timer is
-restarted.
+Insert the value of the current relative or countdown timer into the buffer.
+If no timer is running, the relative timer will be started.  When called with
+a prefix argument, the relative timer is restarted.
 @orgcmd{C-c C-x -,org-timer-item}
-Insert a description list item with the current relative time.  With a prefix
-argument, first reset the timer to 0.
+Insert a description list item with the value of the current relative or
+countdown timer.  With a prefix argument, first reset the relative timer to
+0.
 @orgcmd{M-@key{RET},org-insert-heading}
 Once the timer list is started, you can also use @kbd{M-@key{RET}} to insert
 new timer items.
-@c for key sequences with a comma, command name macros fail :(
-@kindex C-c C-x ,
-@item C-c C-x ,
-Pause the timer, or continue it if it is already paused
-(@command{org-timer-pause-or-continue}).
-@c removed the sentence because it is redundant to the following item
-@kindex C-u C-c C-x ,
-@item C-u C-c C-x ,
+@orgcmd{C-c C-x \,,org-timer-pause-or-continue}
+Pause the timer, or continue it if it is already paused.
+@orgcmd{C-c C-x _,org-timer-stop}
 Stop the timer.  After this, you can only start a new timer, not continue the
 old one.  This command also removes the timer from the mode line.
-@orgcmd{C-c C-x 0,org-timer-start}
-Reset the timer without inserting anything into the buffer.  By default, the
-timer is reset to 0.  When called with a @kbd{C-u} prefix, reset the timer to
-specific starting offset.  The user is prompted for the offset, with a
-default taken from a timer string at point, if any, So this can be used to
-restart taking notes after a break in the process.  When called with a double
-prefix argument @kbd{C-u C-u}, change all timer strings in the active region
-by a certain amount.  This can be used to fix timer strings if the timer was
-not started at exactly the right moment.
 @end table
-
-@node Countdown timer
-@section Countdown timer
-@cindex Countdown timer
-@kindex C-c C-x ;
-@kindex ;
-
-Calling @code{org-timer-set-timer} from an Org mode buffer runs a countdown
-timer.  Use @kbd{;} from agenda buffers, @key{C-c C-x ;} everywhere else.
-
-@code{org-timer-set-timer} prompts the user for a duration and displays a
-countdown timer in the modeline.  @code{org-timer-default-timer} sets the
-default countdown value.  Giving a prefix numeric argument overrides this
-default value.
 
 @node Capture - Refile - Archive
 @chapter Capture - Refile - Archive

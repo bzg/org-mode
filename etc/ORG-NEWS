@@ -72,6 +72,8 @@ This function inserted a Beamer specific template at point or in
 current subtree.  Use ~org-export-insert-default-template~ instead, as
 it provides more features and covers all export back-ends.  It is also
 accessible from the export dispatcher.
+*** Removed function ~org-timer-cancel-timer~
+~org-timer-stop~ now stops both relative and countdown timers.
 ** Removed options
 *** ~org-list-empty-line-terminates-plain-lists~ is deprecated
 It will be kept in code base until next release, for backward
@@ -174,6 +176,9 @@ special blocks and images.  See docstring for more information.
 Headlines, for which the property ~UNNUMBERED~ is non-nil, are now
 exported without section numbers irrespective of their levels.  The
 property is inherited by children.
+*** Countdown timers can now be paused.
+~org-timer-pause-time~ wil now pause and restart both relative and
+countdown timers.
 ** Miscellaneous
 *** Strip all meta data from ITEM special property
 ITEM special property does not contain TODO, priority or tags anymore.
