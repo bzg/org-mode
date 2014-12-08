@@ -10143,7 +10143,8 @@ to override `appt-message-warning-time'."
 (defun org-agenda-todo-yesterday (&optional arg)
   "Like `org-agenda-todo' but the time of change will be 23:59 of yesterday."
   (interactive "P")
-  (let* ((hour (third (decode-time
+  (let* ((org-use-effective-time t)
+	 (hour (third (decode-time
                        (org-current-time))))
          (org-extend-today-until (1+ hour)))
     (org-agenda-todo arg)))

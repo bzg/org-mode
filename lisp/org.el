@@ -12469,7 +12469,8 @@ nil or a string to be used for the todo mark." )
   (interactive "P")
   (if (eq major-mode 'org-agenda-mode)
       (apply 'org-agenda-todo-yesterday arg)
-    (let* ((hour (third (decode-time
+    (let* ((org-use-effective-time t)
+	   (hour (third (decode-time
 			 (org-current-time))))
 	   (org-extend-today-until (1+ hour)))
       (org-todo arg))))
