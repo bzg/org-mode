@@ -1577,7 +1577,9 @@ is t, then new columns should be added as needed"
 "
 	 1
 	 "#+TBLFM: @1$2=5")
-      ('user-error t)))
+      ('user-error t)
+      ;; Older Emacsen will throw an 'error instead of 'user-error.
+      ('error t)))
 
   (let ((org-table-formula-create-columns t))
 
