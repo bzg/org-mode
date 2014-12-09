@@ -44,7 +44,26 @@ For example, this will replace \"\\nsup\" with \"[not a superset of]\"
 in backends where the corresponding character is not available."
   :group 'org-entities
   :version "24.1"
-  :type 'boolean)
+  :type 'boolean
+  :safe #'booleanp)
+
+(defun org-entities--user-safe-p (v)
+  "Return t if V is a safe value for `org-entities-user'."
+  (or (eq v nil)
+      (and (listp v)
+	   ;; The stupid `eval' trick is needed because `apply'
+	   ;; doesn't work with the special form `and'.
+	   (eval (cons #'and (mapcar (lambda (v2)
+				       (and (listp v2)
+					    (= (length v2) 7)
+					    (stringp (nth 0 v2))
+					    (stringp (nth 1 v2))
+					    (booleanp (nth 2 v2))
+					    (stringp (nth 3 v2))
+					    (stringp (nth 4 v2))
+					    (stringp (nth 5 v2))
+					    (stringp (nth 6 v2))))
+				     v))))))
 
 (defcustom org-entities-user nil
   "User-defined entities used in Org-mode to produce special characters.
@@ -77,7 +96,8 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
 	   (string :tag "HTML  ")
 	   (string :tag "ASCII ")
 	   (string :tag "Latin1")
-	   (string :tag "utf-8 "))))
+	   (string :tag "utf-8 ")))
+  :safe #'org-entities--user-safe-p)
 
 (defconst org-entities
   '(
