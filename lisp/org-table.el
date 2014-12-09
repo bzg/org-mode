@@ -2672,7 +2672,7 @@ not overwrite the stored one."
 		 t t form)))
 
 	;; Check for old vertical references
-	(setq form (org-table-rewrite-old-row-references form))
+	(org-table--error-on-old-row-references form)
 	;; Insert remote references
 	(setq form (org-table-remote-reference-indirection form))
 	(while (string-match "\\<remote([ \t]*\\([-_a-zA-Z0-9]+\\)[ \t]*,[ \t]*\\([^\n)]+\\))" form)
@@ -2939,10 +2939,9 @@ and TABLE is a vector with line types."
 	       desc cline)
       i)))
 
-(defun org-table-rewrite-old-row-references (s)
-  (if (string-match "&[-+0-9I]" s)
-      (user-error "Formula contains old &row reference, please rewrite using @-syntax")
-    s))
+(defun org-table--error-on-old-row-references (s)
+  (when (string-match "&[-+0-9I]" s)
+    (user-error "Formula contains old &row reference, please rewrite using @-syntax")))
 
 (defun org-table-make-reference (elements keep-empty numbers lispp)
   "Convert list ELEMENTS to something appropriate to insert into formula.
@@ -4888,7 +4887,7 @@ information."
 	    ,(and hfmt `(headerp (setq contents ,(org-table--generic-apply
 						  hfmt ":hfmt" t 'contents))))
 	    ,(and fmt `(t (setq contents ,(org-table--generic-apply
-					   fmt ":hfmt" t 'contents))))))
+					   fmt ":fmt" t 'contents))))))
 	 ;; If a separator is provided, use it instead of BACKEND's.
 	 ;; Separators are ignored when LFMT (or equivalent) is
 	 ;; provided.
@@ -5027,7 +5026,7 @@ Useful when slicing one table into many.  The :hline, :sep,
 :lstart, and :lend provide orgtbl framing.  :tstart and :tend can
 be set to provide ORGTBL directives for the generated table."
   (require 'ox-org)
-  (orgtbl-to-generic table (org-combine-plists (list :backend 'org))))
+  (orgtbl-to-generic table (org-combine-plists params (list :backend 'org))))
 
 (defun orgtbl-to-table.el (table params)
   "Convert the orgtbl-mode TABLE into a table.el table.
