@@ -904,12 +904,13 @@ Footnotes[fn:1], [fn:test] and [fn:inline:anonymous footnote].
 			(org-element-property :label ref)))))))))))))
   ;; Footnotes labels are not local to each include keyword.
   (should
-   (= 3
+   (= 4
       (length
        (delete-dups
 	(let ((contents "
-Footnotes[fn:1], [fn:test] and [fn:inline:anonymous footnote].
+Footnotes[fn:1], [fn:test], [2] and [fn:inline:anonymous footnote].
 \[fn:1] Footnote 1
+\[2] Footnote 2
 \[fn:test] Footnote \"test\""))
 	  (org-test-with-temp-text-in-file contents
 	    (let ((file (buffer-file-name)))
@@ -918,6 +919,33 @@ Footnotes[fn:1], [fn:test] and [fn:inline:anonymous footnote].
 		(org-export-expand-include-keyword)
 		(org-element-map (org-element-parse-buffer)
 		    'footnote-reference
+		  (lambda (ref) (org-element-property :label ref)))))))))))
+  ;; Footnotes are supported by :lines-like elements and unnecessary
+  ;; footnotes are dropped.
+  (should
+   (= 4
+      (length
+       (delete-dups
+	(let ((contents "
+* foo
+Footnotes[fn:1]
+* bar
+Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote]
+
+\[fn:1] Footnote 1
+\[fn:2] Footnote 1
+* Footnotes
+\[fn:test] Footnote \"test\"
+\[3] Footnote 3
+"))
+	  (org-test-with-temp-text-in-file contents
+	    (let ((file (buffer-file-name)))
+	      (org-test-with-temp-text
+		  (format "#+INCLUDE: \"%s::*bar\"
+" file)
+		(org-export-expand-include-keyword)
+		(org-element-map (org-element-parse-buffer)
+		    'footnote-definition
 		  (lambda (ref) (org-element-property :label ref)))))))))))
   ;; If only-contents is non-nil only include contents of element.
   (should
