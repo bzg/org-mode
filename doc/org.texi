@@ -13120,7 +13120,7 @@ Copyright information is printed on the back of the title page.
 @cindex #+TEXINFO_DIR_CATEGORY
 @cindex #+TEXINFO_DIR_TITLE
 @cindex #+TEXINFO_DIR_DESC
-You may ultimately want to install your new Info file to your system.  You
+You may ultimately want to install your new Info file in your system.  You
 can write an appropriate entry in the top level directory specifying its
 category and title with, respectively, @code{#+TEXINFO_DIR_CATEGORY} and
 @code{#+TEXINFO_DIR_TITLE}.  Optionally, you can add a short description
@@ -13149,8 +13149,8 @@ keyword.  Export process defaults to @code{org-texinfo-default-class} when
 there is no such keyword in the document.
 
 If a headline's level has no associated structuring command, or is below
-a certain threshold @pxref{Export settings}, that headline becomes a list in
-Texinfo output.
+a certain threshold (@pxref{Export settings}), that headline becomes a list
+in Texinfo output.
 
 @cindex property, APPENDIX
 As an exception, a headline with a non-nil @code{:APPENDIX:} property becomes
