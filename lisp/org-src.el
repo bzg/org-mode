@@ -710,7 +710,8 @@ name of the sub-editing buffer."
 	      "example"))
 	   (lang-f (and (eq type 'src-block) (org-src--get-lang-mode lang)))
 	   (babel-info (and (eq type 'src-block)
-			    (org-babel-get-src-block-info 'light))))
+			    (org-babel-get-src-block-info 'light)))
+	   deactivate-mark)
       (when (and (eq type 'src-block) (not (functionp lang-f)))
 	(error "No such language mode: %s" lang-f))
       (org-src--edit-element
