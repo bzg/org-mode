@@ -50,7 +50,7 @@
   '((:results . "latex") (:exports . "results"))
   "Default arguments to use when evaluating a LaTeX source block.")
 
-(defcustom org-babel-latex-htlatex ""
+(defcustom org-babel-latex-htlatex "htlatex"
   "The htlatex command to enable conversion of latex to SVG or HTML."
   :group 'org-babel
   :type 'string)
@@ -141,7 +141,7 @@ This function is called by `org-babel-execute-src-block'."
 		(delete-file transient-pdf-file))))))
 	 ((and (or (string-match "\\.svg$" out-file)
 		   (string-match "\\.html$" out-file))
-	       (not (string= "" org-babel-latex-htlatex)))
+	       (executable-find org-babel-latex-htlatex))
 	  ;; TODO: this is a very different way of generating the
 	  ;; frame latex document than in the pdf case.  Ideally, both
 	  ;; would be unified.  This would prevent bugs creeping in
