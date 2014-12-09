@@ -425,9 +425,12 @@ used as a communication channel."
 				(match-string 1 beamer-opt))
 			   ","))
 		     ;; Provide an automatic label for the frame
-		     ;; unless the user specified one.
+		     ;; unless the user specified one.  Also refrain
+		     ;; from labeling `allowframebreaks' frames; this
+		     ;; is not allowed by beamer.
 		     (unless (and beamer-opt
-				  (string-match "\\(^\\|,\\)label=" beamer-opt))
+				  (or (string-match "\\(^\\|,\\)label=" beamer-opt)
+				      (string-match "allowframebreaks" beamer-opt)))
 		       (list
 			(format "label=%s"
 				(org-beamer--get-label headline info)))))))
