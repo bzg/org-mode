@@ -6689,7 +6689,6 @@ with @code{org-clock-in} and two @kbd{C-u C-u} with @code{org-clock-in-last}.
 @cindex effort estimates
 
 @cindex property, Effort
-@vindex org-effort-property
 If you want to plan your work in a very detailed way, or if you need to
 produce offers with quotations of the estimated work effort, you may want to
 assign effort estimates to entries.  If you are also clocking your work, you
