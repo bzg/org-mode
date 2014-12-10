@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011-2014 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 3.0
+;; Version: 3.0.1
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -66,6 +66,10 @@
 
 ;;; Change Log:
 
+;;   [2014-12-10 We] Version 3.0.1:
+;;   - Bugfixes related with assistant
+;;   - Fix for editing of category
+;;
 ;;   [2014-12-07 Sa] Version 3.0.0:
 ;;   - New commands "add" and "delete" to easily add and remove
 ;;     the current node to or from your index.
@@ -239,7 +243,7 @@ as created by this package; they are well suited to be used
 outside of org.  Links are normal `org-mode' links.
 
 
-This is version 3.0 of org-index.el .
+This is version 3.0.1 of org-index.el .
 
 
 The function `org-index' operates on a dedicated table, the index
@@ -1491,8 +1495,6 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
                       (with-temp-buffer (org-insert-time-stamp nil nil t))
                       id))
 
-      (save-excursion(org-index--goto-list "columns-and-flags")
-                              )
       ;; make sure, that node can be found
       (org-id-add-location id (buffer-file-name))
       (setq buffer-save-without-query t)
@@ -1501,6 +1503,10 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
       (while (not (org-at-table-p)) (forward-line -1))
       (unless buffer-read-only (org-table-align))
       (while (not (org-at-heading-p)) (forward-line -1))
+
+      ;; read back some info about new index
+      (let ((org-index-id id))
+	(org-index--verify-id))
 
       ;; present results to user
       (if temporary
@@ -1529,7 +1535,8 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
           (if (y-or-n-p "This is your new index table.  It is already set for this Emacs session, so you may try it out.  Do you want to save its id to make it available for future Emacs sessions too ? ")
               (progn
                 (customize-save-variable 'org-index-id id)
-                (error "Saved org-index-id '%s' to %s" id custom-file))
+                (error "Saved org-index-id '%s' to %s" id (or custom-file
+							      user-init-file)))
             (let (sq)
               (setq sq (format "(setq org-index-id \"%s\")" id))
               (kill-new sq)
@@ -1685,9 +1692,9 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
           (setq content org-index--category-before))
 
       (if (org-index--flag-p 'edit-on-add (car col-num))
-          (read-from-minibuffer
-           (format "Edit text for column '%s': " (symbol-name (car col-num)))
-           content))
+          (setq content (read-from-minibuffer
+                         (format "Edit text for column '%s': " (symbol-name (car col-num)))
+                         content)))
 
       (if (not (string= content ""))
           (setq args (append (list (car col-num) content) args))))
