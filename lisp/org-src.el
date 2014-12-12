@@ -294,6 +294,14 @@ END."
 		 (let ((map (make-sparse-keymap)))
 		   (define-key map [mouse-1] 'org-edit-src-continue)
 		   map))
+    ;; TODO: The below line doesn't work for two reasons:
+    ;; - It should be 'read-only
+    ;; - 'read-only apparently doesn't work on overlays (also empirically tested):
+    ;;    <https://lists.gnu.org/archive/html/emacs-devel/2008-01/msg01598.html>
+    ;; If this feature is to be kept, it should be implemented via text
+    ;; properties, which will require fiddling around in more places
+    ;; (such as when the contents are copied back into the buffer after
+    ;; editing is complete.)
     (overlay-put overlay :read-only "Leave me alone")
     overlay))
 
