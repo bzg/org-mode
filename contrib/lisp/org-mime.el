@@ -111,7 +111,7 @@
 ;; example hook, for setting a dark background in <pre style="background-color: #EEE;"> elements
 (defun org-mime-change-element-style (element style)
   "Set new default htlm style for <ELEMENT> elements in exported html."
-  (while (re-search-forward (format "<%s" element) nil t)
+  (while (re-search-forward (format "<%s\\>" element) nil t)
     (replace-match (format "<%s style=\"%s\"" element style))))
 
 (defun org-mime-change-class-style (class style)
