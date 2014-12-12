@@ -380,6 +380,16 @@ available parameters."
   :group 'org-table-import-export
   :type 'string)
 
+(defcustom org-table-convert-region-max-lines 999
+  "Max lines that `org-table-convert-region' will attempt to process.
+
+The function can be slow on larger regions; this safety feature
+prevents it from hanging emacs."
+  :group 'org-table-import-export
+  :type 'integer
+  :version "25.1"
+  :package-version '(Org . "8.3"))
+
 (defconst org-table-auto-recalculate-regexp "^[ \t]*| *# *\\(|\\|$\\)"
   "Detects a table line marked for automatic recalculation.")
 (defconst org-table-recalculate-regexp "^[ \t]*| *[#*] *\\(|\\|$\\)"
@@ -546,49 +556,52 @@ nil      When nil, the command tries to be smart and figure out the
   (let* ((beg (min beg0 end0))
 	 (end (max beg0 end0))
 	 re)
-    (if (equal separator '(64))
-	(setq separator (read-regexp "Regexp for field separator")))
-    (goto-char beg)
-    (beginning-of-line 1)
-    (setq beg (point-marker))
-    (goto-char end)
-    (if (bolp) (backward-char 1) (end-of-line 1))
-    (setq end (point-marker))
-    ;; Get the right field separator
-    (unless separator
+    (if (> (count-lines beg end) org-table-convert-region-max-lines)
+	(user-error "Region is longer than `org-table-convert-region-max-lines' (%s) lines; not converting"
+		    org-table-convert-region-max-lines)
+      (if (equal separator '(64))
+	  (setq separator (read-regexp "Regexp for field separator")))
       (goto-char beg)
-      (setq separator
+      (beginning-of-line 1)
+      (setq beg (point-marker))
+      (goto-char end)
+      (if (bolp) (backward-char 1) (end-of-line 1))
+      (setq end (point-marker))
+      ;; Get the right field separator
+      (unless separator
+	(goto-char beg)
+	(setq separator
+	      (cond
+	       ((not (re-search-forward "^[^\n\t]+$" end t)) '(16))
+	       ((not (re-search-forward "^[^\n,]+$" end t)) '(4))
+	       (t 1))))
+      (goto-char beg)
+      (if (equal separator '(4))
+	  (while (< (point) end)
+	    ;; parse the csv stuff
 	    (cond
-	     ((not (re-search-forward "^[^\n\t]+$" end t)) '(16))
-	     ((not (re-search-forward "^[^\n,]+$" end t)) '(4))
-	     (t 1))))
-    (goto-char beg)
-    (if (equal separator '(4))
-	(while (< (point) end)
-	  ;; parse the csv stuff
-	  (cond
-	   ((looking-at "^") (insert "| "))
-	   ((looking-at "[ \t]*$") (replace-match " |") (beginning-of-line 2))
-	   ((looking-at "[ \t]*\"\\([^\"\n]*\\)\"")
-	    (replace-match "\\1")
-	    (if (looking-at "\"") (insert "\"")))
-	   ((looking-at "[^,\n]+") (goto-char (match-end 0)))
-	   ((looking-at "[ \t]*,") (replace-match " | "))
-	   (t (beginning-of-line 2))))
-      (setq re (cond
-		((equal separator '(4)) "^\\|\"?[ \t]*,[ \t]*\"?")
-		((equal separator '(16)) "^\\|\t")
-		((integerp separator)
-		 (if (< separator 1)
-		     (user-error "Number of spaces in separator must be >= 1")
-		   (format "^ *\\| *\t *\\| \\{%d,\\}" separator)))
-		((stringp separator)
-		 (format "^ *\\|%s" separator))
-		(t (error "This should not happen"))))
-      (while (re-search-forward re end t)
-	(replace-match "| " t t)))
-    (goto-char beg)
-    (org-table-align)))
+	     ((looking-at "^") (insert "| "))
+	     ((looking-at "[ \t]*$") (replace-match " |") (beginning-of-line 2))
+	     ((looking-at "[ \t]*\"\\([^\"\n]*\\)\"")
+	      (replace-match "\\1")
+	      (if (looking-at "\"") (insert "\"")))
+	     ((looking-at "[^,\n]+") (goto-char (match-end 0)))
+	     ((looking-at "[ \t]*,") (replace-match " | "))
+	     (t (beginning-of-line 2))))
+	(setq re (cond
+		  ((equal separator '(4)) "^\\|\"?[ \t]*,[ \t]*\"?")
+		  ((equal separator '(16)) "^\\|\t")
+		  ((integerp separator)
+		   (if (< separator 1)
+		       (user-error "Number of spaces in separator must be >= 1")
+		     (format "^ *\\| *\t *\\| \\{%d,\\}" separator)))
+		  ((stringp separator)
+		   (format "^ *\\|%s" separator))
+		  (t (error "This should not happen"))))
+	(while (re-search-forward re end t)
+	  (replace-match "| " t t)))
+      (goto-char beg)
+      (org-table-align))))
 
 ;;;###autoload
 (defun org-table-import (file arg)
