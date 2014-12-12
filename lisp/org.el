@@ -11007,8 +11007,7 @@ visibility around point, thus ignoring
 						    org-emphasis-alist)
 					    "\\|") "\\)"))
 	(pos (point))
-	(pre nil) (post nil)
-	words re0 re1 re2 re3 re4_ re4 re5 re2a re2a_ reall)
+	words re0 re2 re4_ re4 re5 re2a re2a_ reall)
     (cond
      ;; First check if there are any special search functions
      ((run-hook-with-args-until-success 'org-execute-file-search-functions s))
@@ -11062,14 +11061,34 @@ visibility around point, thus ignoring
        ((derived-mode-p 'org-mode)
 	(org-occur (match-string 1 s)))
        (t (org-do-occur (match-string 1 s)))))
-     ((and (derived-mode-p 'org-mode) org-link-search-must-match-exact-headline)
-      (and (equal (string-to-char s) ?*) (setq s (substring s 1)))
+     ((and (derived-mode-p 'org-mode)
+	   (or (and (equal (string-to-char s) ?*) (setq s (substring s 1)))
+	       org-link-search-must-match-exact-headline))
+      ;; Headline search.
       (goto-char (point-min))
       (cond
        ((let (case-fold-search)
-	  (re-search-forward (format org-complex-heading-regexp-format
-				     (regexp-quote s))
-			     nil t))
+	  (re-search-forward
+	   (let* ((wspace "[ \t]")
+		  (wspaceopt (concat wspace "*"))
+		  (cookie (concat "\\(?:"
+				  wspaceopt
+				  "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]"
+				  wspaceopt
+				  "\\)"))
+		  (sep (concat "\\(?:" wspace "+\\|" cookie "+\\)")))
+	     (concat
+	      org-outline-regexp-bol
+	      "\\(?:" org-todo-regexp "[ \t]+\\)?"
+	      "\\(?:\\[#.\\][ \t]+\\)?"
+	      sep "*"
+	      (mapconcat #'identity
+			 (org-split-string (regexp-quote s))
+			 (concat sep "+"))
+	      sep "*"
+	      (org-re "\\(?:[ \t]+:[[:alnum:]_@#%%:]+:\\)?")
+	      "[ \t]*$"))
+	   nil t))
 	;; OK, found a match
 	(setq type 'dedicated)
 	(goto-char (match-beginning 0)))
@@ -11085,11 +11104,6 @@ visibility around point, thus ignoring
 	(error "No match"))))
      (t
       ;; A normal search string
-      (when (equal (string-to-char s) ?*)
-	;; Anchor on headlines, post may include tags.
-	(setq pre "^\\*+[ \t]+\\(?:\\sw+\\)?[ \t]*"
-	      post (org-re "[ \t]*\\(?:[ \t]+:[[:alnum:]_@#%:+]:[ \t]*\\)?$")
-	      s (substring s 1)))
       (remove-text-properties
        0 (length s)
        '(face nil mouse-face nil keymap nil fontified nil) s)
@@ -11106,15 +11120,9 @@ visibility around point, thus ignoring
 					  "[^a-zA-Z_\r\n]+") "\\)[^a-zA-Z_]")
 	    re4 (concat "[^a-zA-Z_]" re4_)
 
-	    re1 (concat pre re2 post)
-	    re3 (concat pre (if pre re4_ re4) post)
-	    re5 (concat pre ".*" re4)
-	    re2 (concat pre re2)
-	    re2a (concat pre (if pre re2a_ re2a))
-	    re4 (concat pre (if pre re4_ re4))
-	    reall (concat "\\(" re0 "\\)\\|\\(" re1 "\\)\\|\\(" re2
-			  "\\)\\|\\(" re3 "\\)\\|\\(" re4 "\\)\\|\\("
-			  re5 "\\)"))
+	    re5 (concat ".*" re4)
+	    reall (concat "\\(" re0 "\\)\\|\\(" re2 "\\)\\|\\(" re4
+			  "\\)\\|\\(" re5 "\\)"))
       (cond
        ((eq type 'org-occur) (org-occur reall))
        ((eq type 'occur) (org-do-occur (downcase reall) 'cleanup))
@@ -11122,10 +11130,8 @@ visibility around point, thus ignoring
 	  (setq type 'fuzzy)
 	  (if (or (and (org-search-not-self 1 re0 nil t)
 		       (setq type 'dedicated))
-		  (org-search-not-self 1 re1 nil t)
 		  (org-search-not-self 1 re2 nil t)
 		  (org-search-not-self 1 re2a nil t)
-		  (org-search-not-self 1 re3 nil t)
 		  (org-search-not-self 1 re4 nil t)
 		  (org-search-not-self 1 re5 nil t))
 	      (goto-char (match-beginning 1))

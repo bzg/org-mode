@@ -1331,6 +1331,32 @@
      (goto-line 3)
      (org-open-at-point)
      (looking-at "\\* Test")))
+  ;; With a leading star in link, enforce exact heading match, even
+  ;; with `org-link-search-must-match-exact-headline' set to nil.
+  (should-error
+   (org-test-with-temp-text "* Test 1\nFoo Bar\n<point>[[*Test]]"
+     (let ((org-link-search-must-match-exact-headline nil))
+       (org-open-at-point))))
+  ;; Heading match should not care about spaces, cookies, todo
+  ;; keywords, priorities, and tags.
+  (should
+   (let ((first-line
+	  "** TODO [#A] [/]  Test [1/2] [33%] 1 \t  2 [%] :work:urgent: "))
+     (org-test-with-temp-text
+	 (concat first-line "\nFoo Bar\n<point>[[*Test 1 2]]")
+       (let ((org-link-search-must-match-exact-headline nil)
+	     (org-todo-regexp "TODO"))
+	 (org-open-at-point))
+       (looking-at (regexp-quote first-line)))))
+  ;; Heading match should still be exact.
+  (should-error
+   (let ((first-line
+	  "** TODO [#A] [/]  Test [1/2] [33%] 1 \t  2 [%] :work:urgent: "))
+     (org-test-with-temp-text
+	 (concat first-line "\nFoo Bar\n<point>[[*Test 1]]")
+       (let ((org-link-search-must-match-exact-headline nil)
+	     (org-todo-regexp "TODO"))
+	 (org-open-at-point)))))
   ;; Correctly un-hexify fuzzy links.
   (should
    (org-test-with-temp-text "* With space\n[[*With%20space][With space]]"

@@ -218,6 +218,11 @@ The build system has been enhanced to allow test selection with a
 regular expression by defining =BTEST_RE= during the test invocation.
 This is especially useful during bisection to find just when a
 particular test failure was introduced.
+*** Exact heading search for external links ignore spaces and cookies
+Exact heading search for links now ignore spaces and cookies. This is
+the case for links of the form ~file:projects.org::*task title~, as
+well as links of the form ~file:projects.org::some words~
+when ~org-link-search-must-match-exact-headline~ is not nil.
 * Version 8.2
 
 ** Incompatible changes
