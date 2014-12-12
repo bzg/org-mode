@@ -216,8 +216,10 @@ Return nil if there is no such buffer."
     (dolist (b (buffer-list))
       (with-current-buffer b
 	(and (org-src-edit-buffer-p)
-	     (eq beg org-src--beg-marker)
-	     (eq end org-src--end-marker)
+	     (= beg org-src--beg-marker)
+	     (eq (marker-buffer beg) (marker-buffer org-src--beg-marker))
+	     (= end org-src--end-marker)
+	     (eq (marker-buffer end) (marker-buffer org-src--end-marker))
 	     (throw 'exit b))))))
 
 (defun org-src--source-buffer ()
@@ -779,6 +781,7 @@ Throw an error if there is no such buffer."
 	(overlay org-src--overlay))
     (with-current-buffer (org-src--source-buffer)
       (undo-boundary)
+      (goto-char beg)
       (delete-region beg end)
       (when (org-string-nw-p edited-code) (insert edited-code))
       (unless (bolp) (insert "\n"))
