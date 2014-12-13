@@ -73,8 +73,6 @@ This variable can be set to either `atx' or `setext'."
 		     (example-block . org-md-example-block)
 		     (export-block . org-md-export-block)
 		     (fixed-width . org-md-example-block)
-		     (footnote-definition . ignore)
-		     (footnote-reference . ignore)
 		     (headline . org-md-headline)
 		     (horizontal-rule . org-md-horizontal-rule)
 		     (inline-src-block . org-md-verbatim)
