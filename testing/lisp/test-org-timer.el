@@ -25,7 +25,7 @@
   "Like `org-test-with-temp-text', but set timer-specific variables.
 Also, mute output from `message'."
   (declare (indent 1))
-  `(cl-letf (((symbol-function 'message) (lambda (&rest args) nil)))
+  `(letf (((symbol-function 'message) (lambda (&rest args) nil)))
      (org-test-with-temp-text ,text
        (let (org-timer-start-time
 	     org-timer-pause-time
@@ -38,7 +38,7 @@ Also, mute output from `message'."
 (defmacro test-org-timer/with-current-time (time &rest body)
   "Run BODY, setting `current-time' output to TIME."
   (declare (indent 1))
-  `(cl-letf (((symbol-function 'current-time) (lambda () ,time)))
+  `(letf (((symbol-function 'current-time) (lambda () ,time)))
      ,@body))
 
 
