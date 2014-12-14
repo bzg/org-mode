@@ -47,19 +47,26 @@
   :tag "Org Clock"
   :group 'org-progress)
 
-(defcustom org-clock-into-drawer org-log-into-drawer
-  "Should clocking info be wrapped into a drawer?
-When t, clocking info will always be inserted into a :LOGBOOK: drawer.
-If necessary, the drawer will be created.
-When nil, the drawer will not be created, but used when present.
-When an integer and the number of clocking entries in an item
-reaches or exceeds this number, a drawer will be created.
-When a string, it names the drawer to be used.
+(defcustom org-clock-into-drawer t
+  "Non-nil when clocking info should be wrapped into a drawer.
 
-The default for this variable is the value of `org-log-into-drawer',
-which see."
+When non-nil, clocking info will be inserted into the same drawer
+as log notes (see variable `org-log-into-drawer'), if it exists,
+or \"LOGBOOK\" otherwise.  If necessary, the drawer will be
+created.
+
+When an integer, the drawer is created only when the number of
+clocking entries in an item reaches or exceeds this value.
+
+When a string, it becomes the name of the drawer, ignoring the
+log notes drawer altogether.
+
+Do not check directly this variable in a Lisp program.  Call
+function `org-clock-into-drawer' instead."
   :group 'org-todo
   :group 'org-clock
+  :version "25.1"
+  :package-version '(Org . "8.3")
   :type '(choice
 	  (const :tag "Always" t)
 	  (const :tag "Only when drawer exists" nil)
@@ -68,22 +75,21 @@ which see."
 	  (string :tag "Into Drawer named...")))
 
 (defun org-clock-into-drawer ()
-  "Return the value of `org-clock-into-drawer', but let properties overrule.
+  "Value of `org-clock-into-drawer'. but let properties overrule.
+
 If the current entry has or inherits a CLOCK_INTO_DRAWER
-property, it will be used instead of the default value; otherwise
-if the current entry has or inherits a LOG_INTO_DRAWER property,
-it will be used instead of the default value.
-The default is the value of the customizable variable `org-clock-into-drawer',
-which see."
-  (let ((p (org-entry-get nil "CLOCK_INTO_DRAWER" 'inherit t))
-        (q (org-entry-get nil "LOG_INTO_DRAWER" 'inherit t)))
+property, it will be used instead of the default value.
+
+Return value is either a string, an integer, or nil."
+  (let ((p (org-entry-get nil "CLOCK_INTO_DRAWER" 'inherit t)))
     (cond ((equal p "nil") nil)
-          ((equal p "t") t)
-          (p)
-          ((equal q "nil") nil)
-          ((equal q "t") t)
-          (q)
-          (t org-clock-into-drawer))))
+	  ((equal p "t") (or (org-log-into-drawer) "LOGBOOK"))
+          ((org-string-nw-p p)
+	   (if (org-string-match-p "\\`[0-9]+\\'" p) (string-to-number p) p))
+	  ((org-string-nw-p org-clock-into-drawer))
+	  ((not org-clock-into-drawer) nil)
+	  ((org-log-into-drawer))
+	  (t "LOGBOOK"))))
 
 (defcustom org-clock-out-when-done t
   "When non-nil, clock will be stopped when the clocked entry is marked DONE.
@@ -909,7 +915,7 @@ If necessary, clock-out of the currently active clock."
 
 (defun org-clock-jump-to-current-clock (&optional effective-clock)
   (interactive)
-  (let ((org-clock-into-drawer (org-clock-into-drawer))
+  (let ((drawer (org-clock-into-drawer))
 	(clock (or effective-clock (cons org-clock-marker
 					 org-clock-start-time))))
     (unless (marker-buffer (car clock))
@@ -917,23 +923,18 @@ If necessary, clock-out of the currently active clock."
     (org-with-clock clock (org-clock-goto))
     (with-current-buffer (marker-buffer (car clock))
       (goto-char (car clock))
-      (if org-clock-into-drawer
-	  (let ((logbook
-		 (if (stringp org-clock-into-drawer)
-		     (concat ":" org-clock-into-drawer ":")
-		   ":LOGBOOK:")))
-	    (ignore-errors
-	      (outline-flag-region
-	       (save-excursion
-		 (outline-back-to-heading t)
-		 (search-forward logbook)
-		 (goto-char (match-beginning 0)))
-	       (save-excursion
-		 (outline-back-to-heading t)
-		 (search-forward logbook)
-		 (search-forward ":END:")
-		 (goto-char (match-end 0)))
-	       nil)))))))
+      (when drawer
+	(org-with-wide-buffer
+	 (let ((drawer-re (format "^[ \t]*:%s:[ \t]*$"
+				  (regexp-quote (or drawer "LOGBOOK"))))
+	       (beg (save-excursion (outline-back-to-heading t) (point))))
+	   (catch 'exit
+	     (while (re-search-backward drawer-re beg t)
+	       (let ((element (org-element-at-point)))
+		 (when (eq (org-element-type element) 'drawer)
+		   (when (> (org-element-property :end element) (car clock))
+		     (org-flag-drawer nil element))
+		   (throw 'exit nil)))))))))))
 
 (defun org-clock-resolve (clock &optional prompt-fn last-valid fail-quietly)
   "Resolve an open org-mode clock.
@@ -1445,7 +1446,7 @@ line and position cursor in that line."
       ;; Look for an existing clock drawer.
       (when drawer
 	(goto-char beg)
-	(let ((drawer-re (concat "^[ \t]*:" drawer ":[ \t]*$")))
+	(let ((drawer-re (concat "^[ \t]*:" (regexp-quote drawer) ":[ \t]*$")))
 	  (while (re-search-forward drawer-re end t)
 	    (let ((element (org-element-at-point)))
 	      (when (eq (org-element-type element) 'drawer)
@@ -1603,11 +1604,14 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	  (message (concat "Clock stopped at %s after "
 			   (org-minutes-to-clocksum-string (+ (* 60 h) m)) "%s")
 		   te (if remove " => LINE REMOVED" ""))
-	  (let ((h org-clock-out-hook))
+	  (let ((h org-clock-out-hook)
+		(clock-drawer (org-clock-into-drawer)))
 	    ;; If a closing note needs to be stored in the drawer
 	    ;; where clocks are stored, let's temporarily disable
-	    ;; `org-clock-remove-empty-clock-drawer'
-	    (if (and (equal org-clock-into-drawer org-log-into-drawer)
+	    ;; `org-clock-remove-empty-clock-drawer'.
+	    (if (and clock-drawer
+		     (not (stringp clock-drawer))
+		     (org-log-into-drawer)
 		     (eq org-log-done 'note)
 		     org-clock-out-when-done)
 		(setq h (delq 'org-clock-remove-empty-clock-drawer h)))
@@ -1619,10 +1623,8 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 
 (defun org-clock-remove-empty-clock-drawer nil
   "Remove empty clock drawer in the current subtree."
-  (let* ((olid (or (org-entry-get (point) "LOG_INTO_DRAWER")
-		   org-log-into-drawer))
-	 (clock-drawer (if (eq t olid) "LOGBOOK" olid))
-	 (end (save-excursion (org-end-of-subtree t t))))
+  (let ((clock-drawer (org-log-into-drawer))
+	(end (save-excursion (org-end-of-subtree t t))))
     (when clock-drawer
       (save-excursion
 	(org-back-to-heading t)
