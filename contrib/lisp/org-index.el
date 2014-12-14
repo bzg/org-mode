@@ -246,7 +246,7 @@ as created by this package; they are well suited to be used
 outside of org.  Links are normal `org-mode' links.
 
 
-This is version 3.0.1 of org-index.el .
+This is version 3.0.2 of org-index.el .
 
 
 The function `org-index' operates on a dedicated table, the index
