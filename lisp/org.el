@@ -13609,8 +13609,7 @@ narrowing."
      (forward-line))
    (if (org-at-heading-p) (point)
      (let ((end (save-excursion (outline-next-heading) (point)))
-	   (drawer (cond ((stringp org-log-into-drawer) org-log-into-drawer)
-			 (org-log-into-drawer "LOGBOOK"))))
+	   (drawer (org-log-into-drawer)))
        (cond
 	(drawer
 	 (let ((regexp (concat "^[ \t]*:" (regexp-quote drawer) ":[ \t]*$"))
