@@ -96,7 +96,8 @@
 (declare-function org-unescape-code-in-string "org-src" (s))
 (declare-function org-table-to-lisp "org-table" (&optional txt))
 (declare-function org-reverse-string "org" (string))
-(declare-function org-element-context "org-element" (&optional ELEMENT))
+(declare-function org-element-context "org-element" (&optional element))
+(declare-function org-element-type "org-element" (element))
 (declare-function org-every "org" (pred seq))
 
 (defgroup org-babel nil
@@ -1013,7 +1014,7 @@ evaluation mechanisms."
 (defvar org-bracket-link-regexp)
 
 (defun org-babel-active-location-p ()
-  (memq (car (save-match-data (org-element-context)))
+  (memq (org-element-type (save-match-data (org-element-context)))
 	'(babel-call inline-babel-call inline-src-block src-block)))
 
 ;;;###autoload
@@ -1067,7 +1068,8 @@ beg-body --------- point at the beginning of the body
 end-body --------- point at the end of the body"
   (declare (indent 1))
   (let ((tempvar (make-symbol "file")))
-    `(let* ((,tempvar ,file)
+    `(let* ((case-fold-search t)
+	    (,tempvar ,file)
 	    (visited-p (or (null ,tempvar)
 			   (get-file-buffer (expand-file-name ,tempvar))))
 	    (point (point)) to-be-removed)
@@ -1106,7 +1108,8 @@ If FILE is nil evaluate BODY forms on source blocks in current
 buffer."
   (declare (indent 1))
   (let ((tempvar (make-symbol "file")))
-    `(let* ((,tempvar ,file)
+    `(let* ((case-fold-search t)
+	    (,tempvar ,file)
 	    (visited-p (or (null ,tempvar)
 			   (get-file-buffer (expand-file-name ,tempvar))))
 	    (point (point)) to-be-removed)
