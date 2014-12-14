@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011-2014 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 3.0.1
+;; Version: 3.0.2
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -66,6 +66,10 @@
 
 ;;; Change Log:
 
+;;   [2014-12-14 Su] Version 3.0.2:
+;;   - Bugfixes in occur mode
+;;   - New function `org-index-copy-references-from-heading-to-property'
+;;
 ;;   [2014-12-10 We] Version 3.0.1:
 ;;   - Bugfixes related with assistant
 ;;   - Fix for editing of category
@@ -185,7 +189,6 @@
 (defvar org-index--below-cursor nil "Word below cursor.")
 (defvar org-index--within-node nil "True, if we are within node of the index table.")
 (defvar org-index--active-window-index nil "Active window with index table (if any).")
-(defvar org-index--occur-follow-mode nil "True, if follow mode in occur-buffer is on.")
 (defvar org-index--message-text nil "Text that was issued as an explanation; helpful for regression tests.")
 
 
@@ -495,9 +498,9 @@ Optional argument COMMAND is a symbol naming the command to execute."
       (let (link)
         (if (and org-index--within-node
                  (org-at-table-p))
-            (setq link (org-index--get-field 'link))))
+            (setq link (org-index--get-field 'link)))
 
-      (setq message-text (org-index--do-head search-ref search-link)))
+        (setq message-text (org-index--do-head search-ref (or link search-link)))))
 
 
      ((eq command 'leave)
@@ -786,9 +789,9 @@ from the result.
 
 Example:
 
-  (plist-get (org-index-get-line 'ref \"12\") 'count)
+  (plist-get (org-index-get-line 'ref \"R12\") 'count)
 
-retrieves the value of the count-column for reference 12.
+retrieves the value of the count-column for reference number 12.
 
 Argument TYPE is a symbol, either ref or link,
 argument VALUE specifies the value to search for."
@@ -1736,55 +1739,77 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
   "Perform command head: Find node with REF or LINK and present it; if OTHER in separate window."
 
   (if ref (setq org-index--last-ref ref))
+  (let (message marker)
 
-  (let (message)
-    ;; Use link if available
+    ;; Prefer link if available
     (if link
+        (setq marker (org-id-find link t))
+      (setq marker
+            (catch 'found
+              (message (format "Scanning headlines for '%s' ..." ref))
+              (org-map-entries
+               (lambda ()
+                 (when (string= ref (org-entry-get (point) "org-index-ref"))
+                   (throw 'found (point-marker))))
+               nil 'agenda)
+              nil)))
+
+    (if marker
         (progn
-          (org-index--update-line link)
-          (org-id-goto link)
-          (org-reveal)
-          (setq message "Followed link"))
-
-      (message (format "Scanning headlines for '%s' ..." ref))
-      (org-index--update-line ref)
-      (let ((search (concat ".*" (org-index--make-guarded-search ref)))
-            (org-trust-scanner-tags t)
-            buffer point)
-        (if (catch 'found
+          (org-index--update-line (or link ref))
+          (if link
+              (setq message "Followed link")
+            (setq message (format "Found '%s'" ref)))
+          (if other
               (progn
-                ;; loop over all headlines, stop on first match
-                (org-map-entries
-                 (lambda ()
-                   (when (or (looking-at search)
-                             (eq ref (org-entry-get (point) "org-index-ref")))
-                     ;; If this is not an inlinetask ...
-                     (when (< (org-element-property :level (org-element-at-point))
-                              org-inlinetask-min-level)
-                       ;; ... remember location and bail out
-                       (setq buffer (current-buffer))
-                       (setq point (point))
-                       (throw 'found t))))
-                 nil 'agenda)
-                nil))
-
-            (progn
-              (setq message (format "Found '%s'" (or ref link)))
-              (if other
-                  (progn
-                    (pop-to-buffer buffer)
-                    (goto-char point)
-                    (org-reveal t)
-                    (recenter)
-                    (pop-to-buffer "*org-index-occur*"))
-                (org-pop-to-buffer-same-window buffer)
-                (goto-char point)
+                (pop-to-buffer (marker-buffer marker))
+                (goto-char marker)
                 (org-reveal t)
-                (recenter)))
-          (setq message (format "Did not find '%s'" (or ref link))))))
+                (org-show-entry)
+                (recenter)
+                (pop-to-buffer "*org-index-occur*"))
+            (org-pop-to-buffer-same-window (marker-buffer marker))
+            (goto-char marker)
+            (org-reveal t)
+            (recenter)))
+      (if link
+          (setq message (format "Did not find link '%s'" link))
+        (setq message (format "Did not find '%s'. Note: References in headings are no longer found in recent versions of this package; simply call `org-index-copy-references-from-heading-to-property' once to fix this." ref))))
+    
     message))
 
 
+(defun org-index-copy-references-from-heading-to-property ()
+  "Loop over all headings and copy; needs to be done only once"
+  (interactive)
+
+  (org-index--verify-id)
+  (org-index--parse-table)
+
+  (if (y-or-n-p "This function will scan all headings and copy any reference to the property. Do you want to proceed? ")
+      (let (results)
+        (message "Scanning headlines ...")
+        (setq results (org-map-entries
+                       (lambda ()
+                         (let (ref-from-head ref-from-property)
+                           (when (looking-at (concat ".*\\("
+                                                     (org-index--make-guarded-search org-index--ref-regex 'dont-quote)
+                                                     "\\)"))
+
+                             (setq ref-from-head (match-string 1))
+                             (setq ref-from-property (org-entry-get (point) "org-index-ref"))
+                             
+                             (when (and (not (string= ref-from-head ref-from-property))          ; ref from head is not in property
+                                        (< (org-element-property :level (org-element-at-point))  ; node is not an inline task
+                                           org-inlinetask-min-level)
+                                        (org-index--get-or-delete-line 'get 'ref ref-from-head)) ; ref appears in index table
+                               (org-entry-put (point)  "org-index-ref" ref-from-head)
+                                1))))
+                      nil 'agenda))
+        (message "Scanned %d entries, %d of them needed to be and were fixed." (length results) (count 1 results)))
+    (message "Please note, that some headings may not be found. Call this function once to fix this.")))
+
+  
 (defun org-index--do-occur ()
   "Perform command occur."
   (let ((occur-buffer-name "*org-index-occur*")
@@ -1806,8 +1831,6 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
         in-c-backspace             ; true while processing C-backspace
         show-headings              ; true, if headings should be shown
         fun-on-ret                 ; function to be executed, if return is pressed
-        fun-on-s-ret               ; shift
-        fun-on-m-ret               ; shift
         fun-on-tab                 ; function to be executed, if tab is pressed
         ret from to key)
 
@@ -1821,19 +1844,12 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
       (let ((keymap (make-sparse-keymap)))
 
         (set-keymap-parent keymap org-mode-map)
-        (setq fun-on-ret (lambda () (interactive) (org-index--occur-find-heading nil)))
+        (setq fun-on-ret (lambda () (interactive) (org-index--occur-find-heading)))
         (define-key keymap [return] fun-on-ret)
         (setq fun-on-tab (lambda () (interactive)
-                           (org-index--occur-find-heading t)
-                           (setq org-index--occur-follow-mode (not org-index--occur-follow-mode))))
+                           (org-index--occur-find-heading t)))
         (define-key keymap [tab] fun-on-tab)
         (define-key keymap [(control ?i)] fun-on-tab)
-        (define-key keymap [up] (lambda () (interactive)
-                                          (forward-line -1)
-                                          (if org-index--occur-follow-mode (org-index--occur-find-heading t))))
-        (define-key keymap [down] (lambda () (interactive)
-                                            (forward-line 1)
-                                            (if org-index--occur-follow-mode (org-index--occur-find-heading t))))
         (use-local-map keymap)))
 
     (with-current-buffer org-index--buffer
@@ -2073,13 +2089,12 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
       (forward-line 1)))))
 
 
-(defun org-index--occur-find-heading (x)
-  "Helper for keymap of occur: find heading, if X in other window."
-  (interactive)
+(defun org-index--occur-find-heading (&optional other)
+  "Helper for keymap of occur: find heading, if other in other window and expand."
   (save-excursion
     (let ((ref (org-index--get-field 'ref))
           (link (org-index--get-field 'link)))
-      (message (org-index--do-head ref link x)))))
+      (message (org-index--do-head ref link other)))))
 
 
 (defun org-index--create-new-line (create-ref)
