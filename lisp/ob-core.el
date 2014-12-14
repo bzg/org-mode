@@ -96,7 +96,8 @@
 (declare-function org-unescape-code-in-string "org-src" (s))
 (declare-function org-table-to-lisp "org-table" (&optional txt))
 (declare-function org-reverse-string "org" (string))
-(declare-function org-element-context "org-element" (&optional ELEMENT))
+(declare-function org-element-context "org-element" (&optional element))
+(declare-function org-element-type "org-element" (element))
 
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
@@ -941,7 +942,7 @@ evaluation mechanisms."
 (defvar org-bracket-link-regexp)
 
 (defun org-babel-active-location-p ()
-  (memq (car (save-match-data (org-element-context)))
+  (memq (org-element-type (save-match-data (org-element-context)))
 	'(babel-call inline-babel-call inline-src-block src-block)))
 
 ;;;###autoload
