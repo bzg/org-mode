@@ -2953,7 +2953,10 @@ If this variable is set, `org-log-state-notes-insert-after-drawers'
 will be ignored.
 
 You can set the property LOG_INTO_DRAWER to overrule this setting for
-a subtree."
+a subtree.
+
+Do not check directly this variable in a Lisp program.  Call
+function `org-log-into-drawer' instead."
   :group 'org-todo
   :group 'org-progress
   :type '(choice
@@ -2964,15 +2967,17 @@ a subtree."
 (org-defvaralias 'org-log-state-notes-into-drawer 'org-log-into-drawer)
 
 (defun org-log-into-drawer ()
-  "Return the value of `org-log-into-drawer', but let properties overrule.
-If the current entry has or inherits a LOG_INTO_DRAWER property, it will be
-used instead of the default value."
+  "Name of the log drawer, as a string, or nil.
+This is the value of `org-log-into-drawer'.  However, if the
+current entry has or inherits a LOG_INTO_DRAWER property, it will
+be used instead of the default value."
   (let ((p (org-entry-get nil "LOG_INTO_DRAWER" 'inherit t)))
     (cond
      ((not p) org-log-into-drawer)
      ((equal p "nil") nil)
      ((equal p "t") "LOGBOOK")
-     (t p))))
+     ((stringp p) p)
+     (p "LOGBOOK"))))
 
 (defcustom org-log-state-notes-insert-after-drawers nil
   "Non-nil means insert state change notes after any drawers in entry.
@@ -24717,16 +24722,14 @@ ELEMENT is the element at point."
 	     (> (point) (match-end 0))
 	     (org--flyspell-object-check-p element)))
        ;; Ignore checks in LOGBOOK (or equivalent) drawer.
-       ((and org-log-into-drawer
-	     (let ((log (or (org-string-nw-p org-log-into-drawer) "LOGBOOK"))
-		   (parent element))
-	       (while (and parent (not (eq (org-element-type parent) 'drawer)))
-		 (setq parent (org-element-property :parent parent)))
-	       (and parent
-		    (eq (compare-strings
-			 log nil nil
-			 (org-element-property :drawer-name parent) nil nil t)
-			t))))
+       ((let ((log (org-log-into-drawer)))
+	  (and log
+	       (let ((drawer (org-element-lineage element '(drawer))))
+		 (and drawer
+		      (eq (compare-strings
+			   log nil nil
+			   (org-element-property :drawer-name drawer) nil nil t)
+			  t)))))
 	nil)
        (t
 	(case (org-element-type element)
