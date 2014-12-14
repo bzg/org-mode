@@ -996,7 +996,8 @@ beg-body --------- point at the beginning of the body
 end-body --------- point at the end of the body"
   (declare (indent 1))
   (let ((tempvar (make-symbol "file")))
-    `(let* ((,tempvar ,file)
+    `(let* ((case-fold-search t)
+	    (,tempvar ,file)
 	    (visited-p (or (null ,tempvar)
 			   (get-file-buffer (expand-file-name ,tempvar))))
 	    (point (point)) to-be-removed)
@@ -1035,7 +1036,8 @@ If FILE is nil evaluate BODY forms on source blocks in current
 buffer."
   (declare (indent 1))
   (let ((tempvar (make-symbol "file")))
-    `(let* ((,tempvar ,file)
+    `(let* ((case-fold-search t)
+	    (,tempvar ,file)
 	    (visited-p (or (null ,tempvar)
 			   (get-file-buffer (expand-file-name ,tempvar))))
 	    (point (point)) to-be-removed)
