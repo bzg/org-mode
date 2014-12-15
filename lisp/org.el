@@ -2972,12 +2972,12 @@ This is the value of `org-log-into-drawer'.  However, if the
 current entry has or inherits a LOG_INTO_DRAWER property, it will
 be used instead of the default value."
   (let ((p (org-entry-get nil "LOG_INTO_DRAWER" 'inherit t)))
-    (cond
-     ((not p) org-log-into-drawer)
-     ((equal p "nil") nil)
-     ((equal p "t") "LOGBOOK")
-     ((stringp p) p)
-     (p "LOGBOOK"))))
+    (cond ((equal p "nil") nil)
+	  ((equal p "t") "LOGBOOK")
+	  ((stringp p) p)
+	  (p "LOGBOOK")
+	  ((stringp org-log-into-drawer) org-log-into-drawer)
+	  (org-log-into-drawer "LOGBOOK"))))
 
 (defcustom org-log-state-notes-insert-after-drawers nil
   "Non-nil means insert state change notes after any drawers in entry.
