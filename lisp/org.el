@@ -16733,9 +16733,10 @@ user."
 		    (setcar (nthcdr 1 org-defdecode) 59)
 		    (setq org-def (apply 'encode-time org-defdecode)
 			  org-defdecode (decode-time org-def)))))
+         (cur-frame (selected-frame))
 	 (mouse-autoselect-window nil) ; Don't let the mouse jump
 	 (calendar-frame-setup nil)
-	 (calendar-setup nil)
+	 (calendar-setup (when (eq calendar-setup 'calendar-only) 'calendar-only))
 	 (calendar-move-hook nil)
 	 (calendar-view-diary-initially-flag nil)
 	 (calendar-view-holidays-initially-flag nil)
@@ -16743,7 +16744,7 @@ user."
 		   (if org-with-time "%Y-%m-%d %H:%M" "%Y-%m-%d") org-def))
 	 (prompt (concat (if prompt (concat prompt " ") "")
 			 (format "Date+time [%s]: " timestr)))
-	 ans (org-ans0 "") org-ans1 org-ans2 final)
+	 ans (org-ans0 "") org-ans1 org-ans2 final cal-frame)
 
     (cond
      (from-string (setq ans from-string))
@@ -16751,9 +16752,13 @@ user."
       (save-excursion
 	(save-window-excursion
 	  (calendar)
+	  (when (eq calendar-setup 'calendar-only)
+	    (setq cal-frame
+		  (window-frame (get-buffer-window "*Calendar*" 'visible)))
+	    (select-frame cal-frame))
 	  (org-eval-in-calendar '(setq cursor-type nil) t)
-          (unwind-protect
-              (progn
+	  (unwind-protect
+	      (progn
 		(calendar-forward-day (- (time-to-days org-def)
 					 (calendar-absolute-from-gregorian
 					  (calendar-current-date))))
@@ -16780,8 +16785,11 @@ user."
 		    (use-local-map old-map)
 		    (when org-read-date-overlay
 		      (delete-overlay org-read-date-overlay)
-                      (setq org-read-date-overlay nil)))))
-	    (bury-buffer "*Calendar*")))))
+		      (setq org-read-date-overlay nil)))))
+	    (bury-buffer "*Calendar*")
+	    (when cal-frame
+	      (delete-frame cal-frame)
+	      (select-frame-set-input-focus cur-frame))))))
 
      (t ; Naked prompt only
       (unwind-protect
