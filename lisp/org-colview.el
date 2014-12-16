@@ -952,12 +952,16 @@ display, or in the #+COLUMNS line of the current buffer."
 	      valflag (and val (string-match "\\S-" val)))
 	(cond
 	 ((< level last-level)
-	  ;; put the sum of lower levels here as a property
-	  (setq sum (+ (if (and (/= last-level inminlevel)
-				(aref lvals last-level))
-			   (apply fun (aref lvals last-level)) 0)
-		       (if (aref lvals inminlevel)
-			   (apply fun (aref lvals inminlevel)) 0))
+	  ;; Put the sum of lower levels here as a property.  If
+	  ;; values are estimate, use an appropriate sum function.
+	  (setq sum (funcall
+		     (if (eq fun 'org-estimate-combine) #'org-estimate-combine
+		       #'+)
+		     (if (and (/= last-level inminlevel)
+			      (aref lvals last-level))
+			 (apply fun (aref lvals last-level)) 0)
+		     (if (aref lvals inminlevel)
+			 (apply fun (aref lvals inminlevel)) 0))
 		flag (or (aref lflag last-level) ; any valid entries from children?
 			 (aref lflag inminlevel)) ; or inline tasks?
 		str (org-columns-number-to-string sum format printf)
@@ -1071,6 +1075,9 @@ display, or in the #+COLUMNS line of the current buffer."
           (while l
             (setq sum (+ (string-to-number (pop l)) (/ sum 60))))
           sum))
+       ((memq fmt '(checkbox checkbox-n-of-m checkbox-percent))
+        (if (equal s "[X]") 1. 0.000001))
+       ((memq fmt '(estimate)) (org-string-to-estimate s))
        ((string-match (concat "\\([0-9.]+\\) *\\("
 			      (regexp-opt (mapcar 'car org-effort-durations))
 			      "\\)") s)
@@ -1079,9 +1086,6 @@ display, or in the #+COLUMNS line of the current buffer."
           (while l
             (setq sum (+ (string-to-number (pop l)) (/ sum 60))))
           sum))
-       ((memq fmt '(checkbox checkbox-n-of-m checkbox-percent))
-        (if (equal s "[X]") 1. 0.000001))
-       ((memq fmt '(estimate)) (org-string-to-estimate s))
        (t (string-to-number s)))))
 
 (defun org-columns-uncompile-format (cfmt)
@@ -1509,7 +1513,10 @@ This will add overlays to the date lines, to show the summary for each day."
 
 (defun org-estimate-mean-and-var (v)
   "Return the mean and variance of an estimate."
-  (let* ((low (float (car v)))
+  (let* ((v (cond ((consp v) v)
+		  ((numberp v) (list v v))
+		  (t (error "Invalid estimate type"))))
+	 (low (float (car v)))
          (high (float (cadr v)))
          (mean (/ (+ low high) 2.0))
          (var (/ (+ (expt (- mean low) 2.0) (expt (- high mean) 2.0)) 2.0)))
@@ -1532,8 +1539,11 @@ and variances (respectively) of the individual estimates."
 (defun org-estimate-print (e &optional fmt)
   "Prepare a string representation of an estimate.
 This formats these numbers as two numbers with a \"-\" between them."
-  (if (null fmt) (set 'fmt "%.0f"))
-  (format "%s" (mapconcat (lambda (n) (format fmt n))  e "-")))
+  (let ((fmt (or fmt "%.0f"))
+	(e (cond ((consp e) e)
+		 ((numberp e) (list e e))
+		 (t (error "Invalid estimate type")))))
+    (format "%s" (mapconcat (lambda (n) (format fmt n)) e "-"))))
 
 (defun org-string-to-estimate (s)
   "Convert a string to an estimate.
