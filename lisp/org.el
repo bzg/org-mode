@@ -4750,13 +4750,14 @@ Otherwise, these types are allowed:
 
 (defun org-hide-archived-subtrees (beg end)
   "Re-hide all archived subtrees after a visibility state change."
-  (save-excursion
-    (let* ((re (concat ":" org-archive-tag ":")))
-      (goto-char beg)
-      (while (re-search-forward re end t)
-	(when (org-at-heading-p)
-	  (org-flag-subtree t)
-	  (org-end-of-subtree t))))))
+  (org-with-wide-buffer
+   (let ((case-fold-search nil)
+	 (re (concat org-outline-regexp-bol ".*:" org-archive-tag ":")))
+     (goto-char beg)
+     (while (and (< (point) end) (re-search-forward re end t))
+       (when (member org-archive-tag (org-get-tags))
+	 (org-flag-subtree t)
+	 (org-end-of-subtree t))))))
 
 (declare-function outline-end-of-heading "outline" ())
 (declare-function outline-flag-region "outline" (from to flag))
