@@ -2508,7 +2508,7 @@ INFO is a plist holding contextual information.  See
 			  class (concat checkbox term))
 		  "<dd>"))))
      (unless (eq type 'descriptive) checkbox)
-     contents
+     (org-trim contents)
      (case type
        (ordered "</li>")
        (unordered "</li>")

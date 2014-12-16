@@ -792,7 +792,7 @@
 (ert-deftest test-org-list/to-html ()
   "Test `org-list-to-html' specifications."
   (should
-   (equal "<ul class=\"org-ul\">\n<li>a\n</li>\n</ul>"
+   (equal "<ul class=\"org-ul\">\n<li>a</li>\n</ul>"
 	  (let (org-html-indent)
 	    (with-temp-buffer
 	      (insert "<!-- BEGIN RECEIVE ORGLST name -->
