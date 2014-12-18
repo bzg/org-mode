@@ -3063,10 +3063,20 @@ storing and resolving footnotes.  It is created automatically."
   (let ((case-fold-search t)
 	(file-prefix (make-hash-table :test #'equal))
 	(current-prefix 0)
-	(footnotes (or footnotes (make-hash-table :test #'equal))))
+	(footnotes (or footnotes (make-hash-table :test #'equal)))
+	(include-re "^[ \t]*#\\+INCLUDE:"))
+    ;; If :minlevel is not set the text-property
+    ;; `:org-include-induced-level' will be used to determine the
+    ;; relative level when expanding INCLUDE.
+    ;; Only affects included Org documents.
     (goto-char (point-min))
+    (while (re-search-forward include-re nil t)
+      (put-text-property (line-beginning-position) (line-end-position)
+			 :org-include-induced-level
+			 (1+ (org-reduced-level (or (org-current-level) 0)))))
     ;; Expand INCLUDE keywords.
-    (while (re-search-forward "^[ \t]*#\\+INCLUDE:" nil t)
+    (goto-char (point-min))
+    (while (re-search-forward include-re nil t)
       (let ((element (save-match-data (org-element-at-point))))
 	(when (eq (org-element-type element) 'keyword)
 	  (beginning-of-line)
@@ -3111,8 +3121,7 @@ storing and resolving footnotes.  It is created automatically."
 		       (if (string-match ":minlevel +\\([0-9]+\\)" value)
 			   (prog1 (string-to-number (match-string 1 value))
 			     (setq value (replace-match "" nil nil value)))
-			 (let ((cur (org-current-level)))
-			   (if cur (1+ (org-reduced-level cur)) 1)))))
+			 (get-text-property (point) :org-include-induced-level))))
 		 (src-args (and (eq env 'literal)
 				(match-string 1 value)))
 		 (block (and (string-match "\\<\\(\\S-+\\)\\>" value)
@@ -3134,8 +3143,8 @@ storing and resolving footnotes.  It is created automatically."
 		(insert
 		 (let ((ind-str (make-string ind ? ))
 		       (arg-str (if (stringp src-args)
-				  (format " %s" src-args)
-				""))
+				    (format " %s" src-args)
+				  ""))
 		       (contents
 			(org-escape-code-in-string
 			 (org-export--prepare-file-contents file lines))))
@@ -3145,7 +3154,7 @@ storing and resolving footnotes.  It is created automatically."
 		(insert
 		 (let ((ind-str (make-string ind ? ))
 		       (contents
-			 (org-export--prepare-file-contents file lines)))
+			(org-export--prepare-file-contents file lines)))
 		   (format "%s#+BEGIN_%s\n%s%s#+END_%s\n"
 			   ind-str block contents ind-str block))))
 	       (t

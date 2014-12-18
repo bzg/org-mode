@@ -1003,7 +1003,42 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
     (org-test-with-temp-text
 	(format "#+INCLUDE: \"%s/examples/include.org::#dh\" :only-contents t" org-test-dir)
       (org-export-expand-include-keyword)
-      (buffer-string)))))
+      (buffer-string))))
+  ;; Adjacent INCLUDE-keywords should have the same :minlevel if unspecified.
+  (should
+   (org-every (lambda (level) (zerop (1- level)))
+	      (org-test-with-temp-text
+		  (concat
+		   (format "#+INCLUDE: \"%s/examples/include.org::#ah\"\n" org-test-dir)
+		   (format "#+INCLUDE: \"%s/examples/include.org::*Heading\"" org-test-dir))
+		(org-export-expand-include-keyword)
+		(org-element-map (org-element-parse-buffer) 'headline
+		  (lambda (head) (org-element-property :level head))))))
+  ;; INCLUDE does not insert induced :minlevel for src-blocks.
+  (should-not
+   (equal
+    (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include2.org\" src emacs-lisp" org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))
+    (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include2.org\" src emacs-lisp :minlevel 1" org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))))
+  ;; INCLUDE assigns the relative :minlevel conditional on narrowing.
+  (should
+   (org-test-with-temp-text-in-file
+       (format "* h1\n<point>#+INCLUDE: \"%s/examples/include.org::#ah\"" org-test-dir)
+     (narrow-to-region (point) (point-max))
+     (org-export-expand-include-keyword)
+     (eq 1 (org-current-level))))
+  ;; If :minlevel is present do not alter it.
+  (should
+   (org-test-with-temp-text
+       (format "* h1\n<point>#+INCLUDE: \"%s/examples/include.org::#ah\" :minlevel 3" org-test-dir)
+     (narrow-to-region (point) (point-max))
+     (org-export-expand-include-keyword)
+     (eq 3 (org-current-level)))))
 
 (ert-deftest test-org-export/expand-macro ()
   "Test macro expansion in an Org buffer."
