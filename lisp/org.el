@@ -13630,35 +13630,35 @@ narrowing."
    (when (looking-at org-property-drawer-re)
      (goto-char (match-end 0))
      (forward-line))
-   (if (org-at-heading-p) (point)
-     (let ((end (save-excursion (outline-next-heading) (point)))
-	   (drawer (org-log-into-drawer)))
-       (cond
-	(drawer
-	 (let ((regexp (concat "^[ \t]*:" (regexp-quote drawer) ":[ \t]*$"))
-	       (case-fold-search t))
-	   (catch 'exit
-	     ;; Try to find existing drawer.
-	     (while (re-search-forward regexp end t)
-	       (let ((element (org-element-at-point)))
-		 (when (eq (org-element-type element) 'drawer)
-		   (let ((cend  (org-element-property :contents-end element)))
-		     (when (and (not org-log-states-order-reversed) cend)
-		       (goto-char cend)))
-		   (throw 'exit nil))))
-	     ;; No drawer found.  Create one, if permitted.
-	     (when create
-	       (unless (bolp) (insert "\n"))
-	       (let ((beg (point)))
-		 (insert ":" drawer ":\n:END:\n")
-		 (org-indent-region beg (point)))
-	       (end-of-line -1)))))
-	(org-log-state-notes-insert-after-drawers
-	 (while (and (looking-at org-drawer-regexp)
-		     (progn (goto-char (match-end 0))
-			    (re-search-forward org-property-end-re end t)))
-	   (forward-line)))))
-     (if (bolp) (point) (line-beginning-position 2)))))
+   (let ((end (if (org-at-heading-p) (point)
+		(save-excursion (outline-next-heading) (point))))
+	 (drawer (org-log-into-drawer)))
+     (cond
+      (drawer
+       (let ((regexp (concat "^[ \t]*:" (regexp-quote drawer) ":[ \t]*$"))
+	     (case-fold-search t))
+	 (catch 'exit
+	   ;; Try to find existing drawer.
+	   (while (re-search-forward regexp end t)
+	     (let ((element (org-element-at-point)))
+	       (when (eq (org-element-type element) 'drawer)
+		 (let ((cend  (org-element-property :contents-end element)))
+		   (when (and (not org-log-states-order-reversed) cend)
+		     (goto-char cend)))
+		 (throw 'exit nil))))
+	   ;; No drawer found.  Create one, if permitted.
+	   (when create
+	     (unless (bolp) (insert "\n"))
+	     (let ((beg (point)))
+	       (insert ":" drawer ":\n:END:\n")
+	       (org-indent-region beg (point)))
+	     (end-of-line -1)))))
+      (org-log-state-notes-insert-after-drawers
+       (while (and (looking-at org-drawer-regexp)
+		   (progn (goto-char (match-end 0))
+			  (re-search-forward org-property-end-re end t)))
+	 (forward-line)))))
+   (if (bolp) (point) (line-beginning-position 2))))
 
 (defun org-add-log-setup (&optional purpose state prev-state findpos how extra)
   "Set up the post command hook to take a note.
