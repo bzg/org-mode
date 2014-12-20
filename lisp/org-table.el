@@ -1657,7 +1657,7 @@ In particular, this does handle wide and invisible characters."
 			      dline -1 dline))))
 
 ;;;###autoload
-(defun org-table-sort-lines (with-case &optional sorting-type)
+(defun org-table-sort-lines (with-case &optional sorting-type getkey-func compare-func)
   "Sort table lines according to the column at point.
 
 The position of point indicates the column to be used for
@@ -1677,8 +1677,15 @@ With prefix argument WITH-CASE, alphabetic sorting will be case-sensitive.
 
 If SORTING-TYPE is specified when this function is called from a Lisp
 program, no prompting will take place.  SORTING-TYPE must be a character,
-any of (?a ?A ?n ?N ?t ?T) where the capital letter indicate that sorting
-should be done in reverse order."
+any of (?a ?A ?n ?N ?t ?T ?f ?F) where the capital letters indicate that
+sorting should be done in reverse order.
+
+If the SORTING-TYPE is ?f or ?F, then GETKEY-FUNC specifies
+a function to be called to extract the key.  It must return either
+a string or a number that should serve as the sorting key for that
+row.  It will then use COMPARE-FUNC to compare entries.  If GETKEY-FUNC
+is specified interactively, the comparison will be either a string or
+numeric compare based on the type of the first key in the table."
   (interactive "P")
   (let* ((thisline (org-current-line))
 	 (thiscol (org-table-current-column))
@@ -1730,7 +1737,7 @@ should be done in reverse order."
 					(org-split-string x "[ \t]*|[ \t]*")))
 				  x))
 		      (org-split-string (buffer-substring beg end) "\n")))
-    (setq lns (org-do-sort lns "Table" with-case sorting-type))
+    (setq lns (org-do-sort lns "Table" with-case sorting-type getkey-func compare-func))
     (when org-table-overlay-coordinates
       (org-table-toggle-coordinate-overlays))
     (delete-region beg end)

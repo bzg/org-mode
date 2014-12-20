@@ -2205,8 +2205,10 @@ point is before the first column, you will be prompted for the sorting
 column.  If there is an active region, the mark specifies the first line
 and the sorting column, while point should be in the last line to be
 included into the sorting.  The command prompts for the sorting type
-(alphabetically, numerically, or by time).  When called with a prefix
-argument, alphabetic sorting will be case-sensitive.
+(alphabetically, numerically, or by time).  You can sort in normal or
+reverse order.  You can also supply your own key extraction and comparison
+functions.  When called with a prefix argument, alphabetic sorting will be
+case-sensitive.
 
 @tsubheading{Regions}
 @orgcmd{C-c C-x M-w,org-table-copy-region}
