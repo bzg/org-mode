@@ -1554,6 +1554,103 @@ See also `test-org-table/copy-field'."
 	     (progn (search-forward "# END RECEIVE ORGTBL table")
 		    (match-beginning 0)))))))
 
+
+;;; Sorting
+
+(ert-deftest test-org-table/sort-lines ()
+  "Test `org-table-sort-lines' specifications."
+  ;; Sort numerically.
+  (should
+   (equal "| 1 | 2 |\n| 2 | 4 |\n| 5 | 3 |\n"
+	  (org-test-with-temp-text "| <point>1 | 2 |\n| 5 | 3 |\n| 2 | 4 |\n"
+	    (org-table-sort-lines nil ?n)
+	    (buffer-string))))
+  (should
+   (equal "| 5 | 3 |\n| 2 | 4 |\n| 1 | 2 |\n"
+	  (org-test-with-temp-text "| <point>1 | 2 |\n| 5 | 3 |\n| 2 | 4 |\n"
+	    (org-table-sort-lines nil ?N)
+	    (buffer-string))))
+  ;; Sort alphabetically.
+  (should
+   (equal "| a | x |\n| b | 4 |\n| c | 3 |\n"
+	  (org-test-with-temp-text "| <point>a | x |\n| c | 3 |\n| b | 4 |\n"
+	    (org-table-sort-lines nil ?a)
+	    (buffer-string))))
+  (should
+   (equal "| c | 3 |\n| b | 4 |\n| a | x |\n"
+	  (org-test-with-temp-text "| <point>a | x |\n| c | 3 |\n| b | 4 |\n"
+	    (org-table-sort-lines nil ?A)
+	    (buffer-string))))
+  ;; Sort alphabetically with case.
+  (should
+   (equal "| C |\n| a |\n| b |\n"
+	  (org-test-with-temp-text "| <point>a |\n| C |\n| b |\n"
+	    (org-table-sort-lines t ?a)
+	    (buffer-string))))
+  (should
+   (equal "| C |\n| b |\n| a |\n"
+	  (org-test-with-temp-text "| <point>a |\n| C |\n| b |\n"
+	    (org-table-sort-lines nil ?A)
+	    (buffer-string))))
+  ;; Sort by time (timestamps)
+  (should
+   (equal
+    "| <2008-08-08 sat.> |\n| <2012-03-29 thu.> |\n| <2014-03-04 tue.> |\n"
+    (org-test-with-temp-text
+	"| <2014-03-04 tue.> |\n| <2008-08-08 sat.> |\n| <2012-03-29 thu.> |\n"
+      (org-table-sort-lines nil ?t)
+      (buffer-string))))
+  (should
+   (equal
+    "| <2014-03-04 tue.> |\n| <2012-03-29 thu.> |\n| <2008-08-08 sat.> |\n"
+    (org-test-with-temp-text
+	"| <2014-03-04 tue.> |\n| <2008-08-08 sat.> |\n| <2012-03-29 thu.> |\n"
+      (org-table-sort-lines nil ?T)
+      (buffer-string))))
+  ;; Sort by time (HH:MM values)
+  (should
+   (equal "| 1:00 |\n| 14:00 |\n| 17:00 |\n"
+	  (org-test-with-temp-text "| 14:00 |\n| 17:00 |\n| 1:00 |\n"
+	    (org-table-sort-lines nil ?t)
+	    (buffer-string))))
+  (should
+   (equal "| 17:00 |\n| 14:00 |\n| 1:00 |\n"
+	  (org-test-with-temp-text "| 14:00 |\n| 17:00 |\n| 1:00 |\n"
+	    (org-table-sort-lines nil ?T)
+	    (buffer-string))))
+  ;; Sort with custom functions.
+  (should
+   (equal "| 22 |\n| 15 |\n| 18 |\n"
+	  (org-test-with-temp-text "| 15 |\n| 22 |\n| 18 |\n"
+	    (org-table-sort-lines nil ?f
+				  (lambda (s) (% (string-to-number s) 10))
+				  #'<)
+	    (buffer-string))))
+  (should
+   (equal "| 18 |\n| 15 |\n| 22 |\n"
+	  (org-test-with-temp-text "| 15 |\n| 22 |\n| 18 |\n"
+	    (org-table-sort-lines nil ?F
+				  (lambda (s) (% (string-to-number s) 10))
+				  #'<)
+	    (buffer-string))))
+  ;; Sort according to current column.
+  (should
+   (equal "| 1 | 2 |\n| 7 | 3 |\n| 5 | 4 |\n"
+	  (org-test-with-temp-text "| 1 | <point>2 |\n| 5 | 4 |\n| 7 | 3 |\n"
+	    (org-table-sort-lines nil ?n)
+	    (buffer-string))))
+  ;; Sort between horizontal separators if possible.
+  (should
+   (equal
+    "| 9 | 8 |\n|---+---|\n| 5 | 3 |\n| 7 | 4 |\n|---+---|\n| 1 | 2 |\n"
+    (org-test-with-temp-text
+	"| 9 | 8 |\n|---+---|\n| <point>7 | 4 |\n| 5 | 3 |\n|---+---|\n| 1 | 2 |\n"
+      (org-table-sort-lines nil ?n)
+      (buffer-string)))))
+
+
+;;; Field formulas
+
 (ert-deftest test-org-table/field-formula-outside-table ()
   "If `org-table-formula-create-columns' is nil, then a formula
 that references an out-of-bounds column should do nothing. If it

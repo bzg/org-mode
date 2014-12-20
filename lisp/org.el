@@ -9076,46 +9076,44 @@ numeric compare based on the type of the first key in the table."
      "Sort %s: [a]lphabetic, [n]umeric, [t]ime, [f]unc.  A/N/T/F means reversed:"
      what)
     (setq sorting-type (read-char-exclusive)))
-  (let ((dcst (downcase sorting-type))
-	extractfun comparefun tempfun)
+  (let (extractfun comparefun tempfun)
     ;; Define the appropriate functions
-    (cond
-     ((= dcst ?n)
-      (setq extractfun 'string-to-number
-	    comparefun (if (= dcst sorting-type) '< '>)))
-     ((= dcst ?a)
-      (setq extractfun (if with-case (lambda(x) (org-sort-remove-invisible x))
-			 (lambda(x) (downcase (org-sort-remove-invisible x))))
-	    comparefun (if (= dcst sorting-type)
-			   'string<
-			 (lambda (a b) (and (not (string< a b))
-					    (not (string= a b)))))))
-     ((= dcst ?t)
-      (setq extractfun
-	    (lambda (x)
-	      (cond ((or (string-match org-ts-regexp x)
-			 (string-match org-ts-regexp-both x))
-		     (org-float-time
-		      (org-time-string-to-time (match-string 0 x))))
-		    ((string-match "[0-9]\\{1,2\\}:[0-9]\\{2\\}" x)
-		     (org-hh:mm-string-to-minutes x))
-		    (t 0)))
-	    comparefun (if (= dcst sorting-type) '< '>)))
-     ((= dcst ?f)
-      (setq tempfun (or getkey-func
-			(intern (org-icompleting-read
-				 "Sort using function: "
-				 obarray #'fboundp t nil nil))))
-      (let* ((extract-string-p (stringp (funcall tempfun (caar table)))))
-	(setq extractfun (if (and extract-string-p (not with-case))
-			     (lambda (x) (downcase (funcall tempfun x)))
-			   tempfun))
-	(setq comparefun (cond (compare-func)
-			       (extract-string-p
-				(if (= sorting-type ?f) #'string<
-				  #'org-string>))
-			       (t (if (= sorting-type ?f) #'< #'>))))))
-     (t (error "Invalid sorting type `%c'" sorting-type)))
+    (case sorting-type
+      ((?n ?N)
+       (setq extractfun #'string-to-number
+	     comparefun (if (= sorting-type ?n) #'< #'>)))
+      ((?a ?A)
+       (setq extractfun (if with-case (lambda(x) (org-sort-remove-invisible x))
+			  (lambda(x) (downcase (org-sort-remove-invisible x))))
+	     comparefun (if (= sorting-type ?a) #'string< #'org-string>)))
+      ((?t ?T)
+       (setq extractfun
+	     (lambda (x)
+	       (cond ((or (string-match org-ts-regexp x)
+			  (string-match org-ts-regexp-both x))
+		      (org-float-time
+		       (org-time-string-to-time (match-string 0 x))))
+		     ((string-match "[0-9]\\{1,2\\}:[0-9]\\{2\\}" x)
+		      (org-hh:mm-string-to-minutes x))
+		     (t 0)))
+	     comparefun (if (= sorting-type ?t) '< '>)))
+      ((?f ?F)
+       (setq tempfun (or getkey-func
+			 (intern (org-icompleting-read
+				  "Sort using function: "
+				  obarray #'fboundp t nil nil))))
+       (let ((extract-string-p (stringp (funcall tempfun (caar table)))))
+	 (setq extractfun (if (and extract-string-p (not with-case))
+			      (lambda (x) (downcase (funcall tempfun x)))
+			    tempfun))
+	 (setq comparefun (cond (compare-func
+				 (if (= sorting-type ?f) compare-func
+				   (lambda (a b) (funcall compare-func b a))))
+				(extract-string-p
+				 (if (= sorting-type ?f) #'string<
+				   #'org-string>))
+				(t (if (= sorting-type ?f) #'< #'>))))))
+      (t (error "Invalid sorting type `%c'" sorting-type)))
 
     (sort (mapcar (lambda (x) (cons (funcall extractfun (car x)) (cdr x)))
 		  table)
