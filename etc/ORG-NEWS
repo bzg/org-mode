@@ -176,6 +176,10 @@ special blocks and images.  See docstring for more information.
 Headlines, for which the property ~UNNUMBERED~ is non-nil, are now
 exported without section numbers irrespective of their levels.  The
 property is inherited by children.
+*** Tables can be sorted with an arbitrary function
+It is now possible to specify a function, both programatically,
+through a new optional argument, and interactively with ~f~ or ~F~
+keys, to sort a table.
 *** Countdown timers can now be paused.
 ~org-timer-pause-time~ wil now pause and restart both relative and
 countdown timers.
