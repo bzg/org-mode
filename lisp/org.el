@@ -17257,7 +17257,7 @@ both scheduled and deadline timestamps."
     (all org-ts-regexp-both)
     (active org-ts-regexp)
     (inactive org-ts-regexp-inactive)
-    (schedule org-scheduled-time-regexp)
+    (scheduled org-scheduled-time-regexp)
     (deadline org-deadline-time-regexp)
     (closed org-closed-time-regexp)
     (otherwise
