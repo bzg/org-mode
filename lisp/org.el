@@ -6238,11 +6238,11 @@ done, nil otherwise."
   "Compute the outline level of the heading at point.
 If this is called at a normal headline, the level is the number of stars.
 Use `org-reduced-level' to remove the effect of `org-odd-levels'."
-  (save-excursion
-    (if (not (ignore-errors (org-back-to-heading t)))
-	0
-      (looking-at org-outline-regexp)
-      (1- (- (match-end 0) (match-beginning 0))))))
+  (org-with-wide-buffer
+   (end-of-line)
+   (if (re-search-backward org-outline-regexp-bol nil t)
+       (1- (- (match-end 0) (match-beginning 0)))
+     0)))
 
 (defvar org-font-lock-keywords nil)
 
