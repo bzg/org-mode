@@ -4707,24 +4707,25 @@ collapsed state."
   :group 'org-sparse-trees
   :type 'boolean)
 
-(defcustom org-sparse-tree-default-date-type 'scheduled-or-deadline
+(defcustom org-sparse-tree-default-date-type nil
   "The default date type when building a sparse tree.
 When this is nil, a date is a scheduled or a deadline timestamp.
 Otherwise, these types are allowed:
 
         all: all timestamps
      active: only active timestamps (<...>)
-   inactive: only inactive timestamps (<...)
+   inactive: only inactive timestamps ([...])
   scheduled: only scheduled timestamps
    deadline: only deadline timestamps"
-  :type '(choice (const :tag "Scheduled or deadline" scheduled-or-deadline)
+  :type '(choice (const :tag "Scheduled or deadline" nil)
 		 (const :tag "All timestamps" all)
 		 (const :tag "Only active timestamps" active)
 		 (const :tag "Only inactive timestamps" inactive)
 		 (const :tag "Only scheduled timestamps" scheduled)
 		 (const :tag "Only deadline timestamps" deadline)
 		 (const :tag "Only closed timestamps" closed))
-  :version "24.3"
+  :version "25.1"
+  :package-version '(Org . "8.3")
   :group 'org-sparse-trees)
 
 (defun org-cycle-hide-archived-subtrees (state)
@@ -13809,7 +13810,6 @@ D      Show deadlines and scheduled items between a date range."
 	     (deadline "only deadline")
 	     (active "only active timestamps")
 	     (inactive "only inactive timestamps")
-	     (scheduled-or-deadline "scheduled/deadline")
 	     (closed "with a closed time-stamp")
 	     (otherwise "scheduled/deadline")))
   (let ((answer (read-char-exclusive)))
@@ -13817,8 +13817,8 @@ D      Show deadlines and scheduled items between a date range."
       (?c
        (org-sparse-tree
 	arg
-	(cadr (memq type '(scheduled-or-deadline all scheduled deadline active
-						 inactive closed)))))
+	(cadr
+	 (memq type '(nil all scheduled deadline active inactive closed)))))
       (?d (call-interactively 'org-check-deadlines))
       (?b (call-interactively 'org-check-before-date))
       (?a (call-interactively 'org-check-after-date))
@@ -17253,14 +17253,17 @@ Allowed values for TYPE are:
 
 When TYPE is nil, fall back on returning a regexp that matches
 both scheduled and deadline timestamps."
-  (cond ((eq type 'all) "\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\(?: +[^]+0-9>\n -]+\\)?\\(?: +[0-9]\\{1,2\\}:[0-9]\\{2\\}\\)?\\)")
-	((eq type 'active) org-ts-regexp)
-	((eq type 'inactive) "\\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^\n>]*?\\)\\]")
-	((eq type 'scheduled) (concat "\\<" org-scheduled-string " *<\\([^>]+\\)>"))
-	((eq type 'deadline) (concat "\\<" org-deadline-string " *<\\([^>]+\\)>"))
-	((eq type 'closed) (concat org-closed-string " \\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^\n>]*?\\)\\]"))
-	((eq type 'scheduled-or-deadline)
-	 (concat "\\<\\(?:" org-deadline-string "\\|" org-scheduled-string "\\) *<\\([^>]+\\)>"))))
+  (case type
+    (all org-ts-regexp-both)
+    (active org-ts-regexp)
+    (inactive org-ts-regexp-inactive)
+    (schedule org-scheduled-time-regexp)
+    (deadline org-deadline-time-regexp)
+    (closed org-closed-time-regexp)
+    (otherwise
+     (concat "\\<"
+	     (regexp-opt (list org-deadline-string org-scheduled-string))
+	     " *<\\([^>]+\\)>"))))
 
 (defun org-check-before-date (date)
   "Check if there are deadlines or scheduled entries before DATE."
