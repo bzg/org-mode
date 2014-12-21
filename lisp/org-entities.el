@@ -627,12 +627,6 @@ Kind can be any of `latex', `html', `ascii', `latin1', or `utf8'."
   (select-window (get-buffer-window "*Org Entity Help*")))
 
 
-(defun replace-amp ()
-  "Postprocess HTML file to unescape the ampersand."
-  (interactive)
-  (while (re-search-forward "<td>&amp;\\([^<;]+;\\)" nil t)
-    (replace-match (concat "<td>&" (match-string 1)) t t)))
-
 (provide 'org-entities)
 
 ;; Local variables:
