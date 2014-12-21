@@ -8084,10 +8084,8 @@ in the region."
 (defun org-current-level ()
   "Return the level of the current entry, or nil if before the first headline.
 The level is the number of stars at the beginning of the headline."
-  (save-excursion
-    (org-with-limited-levels
-     (if (ignore-errors (org-back-to-heading t))
-	 (funcall outline-level)))))
+  (let ((level (org-with-limited-levels (org-outline-level))))
+    (and (> level 0) level)))
 
 (defun org-get-previous-line-level ()
   "Return the outline depth of the last headline before the current line.
