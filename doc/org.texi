@@ -15570,14 +15570,21 @@ execution.
 @subsubsection @code{:session}
 @cindex @code{:session}, src header argument
 
-The @code{:session} header argument starts a session for an interpreted
-language where state is preserved.
+The @code{:session} header argument starts a (possibly named) session for an interpreted
+language where state is preserved.  All code blocks sharing the same name are exectuted by the same interpreter process.  By default, a session is not started.
 
-By default, a session is not started.
-
-A string passed to the @code{:session} header argument will give the session
-a name.  This makes it possible to run concurrent sessions for each
-interpreted language.
+@itemize @bullet
+@item @code{none}
+The default.  Each block is evaluated in its own session.  The session is
+not preserved after the evaluation.
+@item @code{other}
+Any other string passed to the @code{:session} header argument will give the
+session a name.  If the given name is empty, the session is named according
+to the language used in the block.  All blocks with the same session name
+share the same session.  Using different session name enables concurrent
+sessions (even for the same interpreted language).  E.g., @code{:session
+mysession}.
+@end itemize
 
 @node noweb
 @subsubsection @code{:noweb}
