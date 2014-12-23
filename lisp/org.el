@@ -17289,9 +17289,13 @@ both scheduled and deadline timestamps."
   (let ((case-fold-search nil)
 	(regexp (org-re-timestamp org-ts-type))
 	(callback
-	 (lambda () (time-less-p
-		     (org-time-string-to-time (match-string 1))
-		     (org-time-string-to-time date)))))
+	 `(lambda ()
+	    (and ,(if (memq org-ts-type '(active inactive all))
+		      '(eq (org-element-type (org-element-context) 'timestamp))
+		    '(org-at-planning-p))
+		 (time-less-p
+		  (org-time-string-to-time (match-string 1))
+		  (org-time-string-to-time date))))))
     (message "%d entries before %s"
 	     (org-occur regexp nil callback) date)))
 
@@ -17301,10 +17305,13 @@ both scheduled and deadline timestamps."
   (let ((case-fold-search nil)
 	(regexp (org-re-timestamp org-ts-type))
 	(callback
-	 (lambda () (not
-		     (time-less-p
-		      (org-time-string-to-time (match-string 1))
-		      (org-time-string-to-time date))))))
+	 `(lambda ()
+	    (and ,(if (memq org-ts-type '(active inactive all))
+		      '(eq (org-element-type (org-element-context) 'timestamp))
+		    '(org-at-planning-p))
+		 (not (time-less-p
+		       (org-time-string-to-time (match-string 1))
+		       (org-time-string-to-time date)))))))
     (message "%d entries after %s"
 	     (org-occur regexp nil callback) date)))
 
@@ -17315,15 +17322,18 @@ both scheduled and deadline timestamps."
   (let ((case-fold-search nil)
 	(regexp (org-re-timestamp org-ts-type))
 	(callback
-	 (lambda ()
-	   (let ((match (match-string 1)))
-	     (and
-	      (not (time-less-p
-		    (org-time-string-to-time match)
-		    (org-time-string-to-time start-date)))
-	      (time-less-p
-	       (org-time-string-to-time match)
-	       (org-time-string-to-time end-date)))))))
+	 `(lambda ()
+	    (let ((match (match-string 1)))
+	      (and
+	       ,(if (memq org-ts-type '(active inactive all))
+		    '(eq (org-element-type (org-element-context) 'timestamp))
+		  '(org-at-planning-p))
+	       (not (time-less-p
+		     (org-time-string-to-time match)
+		     (org-time-string-to-time start-date)))
+	       (time-less-p
+		(org-time-string-to-time match)
+		(org-time-string-to-time end-date)))))))
     (message "%d entries between %s and %s"
 	     (org-occur regexp nil callback) start-date end-date)))
 
