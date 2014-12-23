@@ -2047,7 +2047,6 @@ Text.
       (mapcar (lambda (ov) (cons (overlay-start ov) (overlay-end ov)))
 	      (overlays-in (point-min) (point-max)))))))
 
-
 
 ;;; Outline structure
 
@@ -2375,128 +2374,33 @@ Text.
 
 ;;; Planning
 
-(ert-deftest test-org/timestamp-has-time-p ()
-  "Test `org-timestamp-has-time-p' specifications."
-  ;; With time.
-  (should
-   (org-test-with-temp-text "<2012-03-29 Thu 16:40>"
-     (org-timestamp-has-time-p (org-element-context))))
-  ;; Without time.
-  (should-not
-   (org-test-with-temp-text "<2012-03-29 Thu>"
-     (org-timestamp-has-time-p (org-element-context)))))
-
-(ert-deftest test-org/timestamp-format ()
-  "Test `org-timestamp-format' specifications."
+(ert-deftest test-org/at-planning-p ()
+  "Test `org-at-planning-p' specifications."
   ;; Regular test.
   (should
-   (equal
-    "2012-03-29 16:40"
-    (org-test-with-temp-text "<2012-03-29 Thu 16:40>"
-      (org-timestamp-format (org-element-context) "%Y-%m-%d %R"))))
-  ;; Range end.
-  (should
-   (equal
-    "2012-03-29"
-    (org-test-with-temp-text "[2011-07-14 Thu]--[2012-03-29 Thu]"
-      (org-timestamp-format (org-element-context) "%Y-%m-%d" t)))))
-
-(ert-deftest test-org/timestamp-split-range ()
-  "Test `org-timestamp-split-range' specifications."
-  ;; Extract range start (active).
-  (should
-   (equal '(2012 3 29)
-	  (org-test-with-temp-text "<2012-03-29 Thu>--<2012-03-30 Fri>"
-	    (let ((ts (org-timestamp-split-range (org-element-context))))
-	      (mapcar (lambda (p) (org-element-property p ts))
-		      '(:year-end :month-end :day-end))))))
-  ;; Extract range start (inactive)
-  (should
-   (equal '(2012 3 29)
-	  (org-test-with-temp-text "[2012-03-29 Thu]--[2012-03-30 Fri]"
-	    (let ((ts (org-timestamp-split-range (org-element-context))))
-	      (mapcar (lambda (p) (org-element-property p ts))
-		      '(:year-end :month-end :day-end))))))
-  ;; Extract range end (active).
-  (should
-   (equal '(2012 3 30)
-	  (org-test-with-temp-text "<2012-03-29 Thu>--<2012-03-30 Fri>"
-	    (let ((ts (org-timestamp-split-range
-		       (org-element-context) t)))
-	      (mapcar (lambda (p) (org-element-property p ts))
-		      '(:year-end :month-end :day-end))))))
-  ;; Extract range end (inactive)
-  (should
-   (equal '(2012 3 30)
-	  (org-test-with-temp-text "[2012-03-29 Thu]--[2012-03-30 Fri]"
-	    (let ((ts (org-timestamp-split-range
-		       (org-element-context) t)))
-	      (mapcar (lambda (p) (org-element-property p ts))
-		      '(:year-end :month-end :day-end))))))
-  ;; Return the timestamp if not a range.
-  (should
-   (org-test-with-temp-text "[2012-03-29 Thu]"
-     (let* ((ts-orig (org-element-context))
-	    (ts-copy (org-timestamp-split-range ts-orig)))
-       (eq ts-orig ts-copy))))
-  (should
-   (org-test-with-temp-text "<%%(org-float t 4 2)>"
-     (let* ((ts-orig (org-element-context))
-	    (ts-copy (org-timestamp-split-range ts-orig)))
-       (eq ts-orig ts-copy))))
-  ;; Check that parent is the same when a range was split.
-  (should
-   (org-test-with-temp-text "[2012-03-29 Thu]--[2012-03-30 Fri]"
-     (let* ((ts-orig (org-element-context))
-	    (ts-copy (org-timestamp-split-range ts-orig)))
-       (eq (org-element-property :parent ts-orig)
-	   (org-element-property :parent ts-copy))))))
-
-(ert-deftest test-org/timestamp-translate ()
-  "Test `org-timestamp-translate' specifications."
-  ;; Translate whole date range.
-  (should
-   (equal "<29>--<30>"
-	  (org-test-with-temp-text "<2012-03-29 Thu>--<2012-03-30 Fri>"
-	    (let ((org-display-custom-times t)
-		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
-	      (org-timestamp-translate (org-element-context))))))
-  ;; Translate date range start.
-  (should
-   (equal "<29>"
-	  (org-test-with-temp-text "<2012-03-29 Thu>--<2012-03-30 Fri>"
-	    (let ((org-display-custom-times t)
-		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
-	      (org-timestamp-translate (org-element-context) 'start)))))
-  ;; Translate date range end.
-  (should
-   (equal "<30>"
-	  (org-test-with-temp-text "<2012-03-29 Thu>--<2012-03-30 Fri>"
-	    (let ((org-display-custom-times t)
-		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
-	      (org-timestamp-translate (org-element-context) 'end)))))
-  ;; Translate time range.
-  (should
-   (equal "<08>--<16>"
-	  (org-test-with-temp-text "<2012-03-29 Thu 8:30-16:40>"
-	    (let ((org-display-custom-times t)
-		  (org-time-stamp-custom-formats '("<%d>" . "<%H>")))
-	      (org-timestamp-translate (org-element-context))))))
-  ;; Translate non-range timestamp.
-  (should
-   (equal "<29>"
-	  (org-test-with-temp-text "<2012-03-29 Thu>"
-	    (let ((org-display-custom-times t)
-		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
-	      (org-timestamp-translate (org-element-context))))))
-  ;; Do not change `diary' timestamps.
-  (should
-   (equal "<%%(org-float t 4 2)>"
-	  (org-test-with-temp-text "<%%(org-float t 4 2)>"
-	    (let ((org-display-custom-times t)
-		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
-	      (org-timestamp-translate (org-element-context)))))))
-
+   (org-test-with-temp-text "* Headline\n<point>DEADLINE: <2014-03-04 tue.>"
+     (org-at-planning-p)))
+  (should-not
+   (org-test-with-temp-text "DEADLINE: <2014-03-04 tue.>"
+     (org-at-planning-p)))
+  ;; Correctly find planning attached to inlinetasks.
+  (when (featurep 'org-inlinetask)
+    (should
+     (org-test-with-temp-text
+	 "*** Inlinetask\n<point>DEADLINE: <2014-03-04 tue.>\n*** END"
+       (let ((org-inlinetask-min-level 3)) (org-at-planning-p))))
+    (should-not
+     (org-test-with-temp-text
+	 "*** Inlinetask\n<point>DEADLINE: <2014-03-04 tue.>"
+       (let ((org-inlinetask-min-level 3)) (org-at-planning-p))))
+    (should-not
+     (org-test-with-temp-text
+	 "* Headline\n*** Inlinetask\n<point>DEADLINE: <2014-03-04 tue.>"
+       (let ((org-inlinetask-min-level 3)) (org-at-planning-p))))
+    (should-not
+     (org-test-with-temp-text
+	 "* Headline\n*** Inlinetask\n*** END\n<point>DEADLINE: <2014-03-04 tue.>"
+       (let ((org-inlinetask-min-level 3)) (org-at-planning-p))))))
 
 
 ;;; Property API
@@ -2930,7 +2834,6 @@ Text.
 	 (insert "new")
 	 (org-element-type (org-element-context))))))
 
-
 
 ;;; Sparse trees
 
@@ -3075,6 +2978,132 @@ Text.
      (org-match-sparse-tree t "tag")
      (search-forward "H2")
      (org-invisible-p2))))
+
+
+;;; Timestamps API
+
+(ert-deftest test-org/timestamp-has-time-p ()
+  "Test `org-timestamp-has-time-p' specifications."
+  ;; With time.
+  (should
+   (org-test-with-temp-text "<2012-03-29 Thu 16:40>"
+     (org-timestamp-has-time-p (org-element-context))))
+  ;; Without time.
+  (should-not
+   (org-test-with-temp-text "<2012-03-29 Thu>"
+     (org-timestamp-has-time-p (org-element-context)))))
+
+(ert-deftest test-org/timestamp-format ()
+  "Test `org-timestamp-format' specifications."
+  ;; Regular test.
+  (should
+   (equal
+    "2012-03-29 16:40"
+    (org-test-with-temp-text "<2012-03-29 Thu 16:40>"
+      (org-timestamp-format (org-element-context) "%Y-%m-%d %R"))))
+  ;; Range end.
+  (should
+   (equal
+    "2012-03-29"
+    (org-test-with-temp-text "[2011-07-14 Thu]--[2012-03-29 Thu]"
+      (org-timestamp-format (org-element-context) "%Y-%m-%d" t)))))
+
+(ert-deftest test-org/timestamp-split-range ()
+  "Test `org-timestamp-split-range' specifications."
+  ;; Extract range start (active).
+  (should
+   (equal '(2012 3 29)
+	  (org-test-with-temp-text "<2012-03-29 Thu>--<2012-03-30 Fri>"
+	    (let ((ts (org-timestamp-split-range (org-element-context))))
+	      (mapcar (lambda (p) (org-element-property p ts))
+		      '(:year-end :month-end :day-end))))))
+  ;; Extract range start (inactive)
+  (should
+   (equal '(2012 3 29)
+	  (org-test-with-temp-text "[2012-03-29 Thu]--[2012-03-30 Fri]"
+	    (let ((ts (org-timestamp-split-range (org-element-context))))
+	      (mapcar (lambda (p) (org-element-property p ts))
+		      '(:year-end :month-end :day-end))))))
+  ;; Extract range end (active).
+  (should
+   (equal '(2012 3 30)
+	  (org-test-with-temp-text "<2012-03-29 Thu>--<2012-03-30 Fri>"
+	    (let ((ts (org-timestamp-split-range
+		       (org-element-context) t)))
+	      (mapcar (lambda (p) (org-element-property p ts))
+		      '(:year-end :month-end :day-end))))))
+  ;; Extract range end (inactive)
+  (should
+   (equal '(2012 3 30)
+	  (org-test-with-temp-text "[2012-03-29 Thu]--[2012-03-30 Fri]"
+	    (let ((ts (org-timestamp-split-range
+		       (org-element-context) t)))
+	      (mapcar (lambda (p) (org-element-property p ts))
+		      '(:year-end :month-end :day-end))))))
+  ;; Return the timestamp if not a range.
+  (should
+   (org-test-with-temp-text "[2012-03-29 Thu]"
+     (let* ((ts-orig (org-element-context))
+	    (ts-copy (org-timestamp-split-range ts-orig)))
+       (eq ts-orig ts-copy))))
+  (should
+   (org-test-with-temp-text "<%%(org-float t 4 2)>"
+     (let* ((ts-orig (org-element-context))
+	    (ts-copy (org-timestamp-split-range ts-orig)))
+       (eq ts-orig ts-copy))))
+  ;; Check that parent is the same when a range was split.
+  (should
+   (org-test-with-temp-text "[2012-03-29 Thu]--[2012-03-30 Fri]"
+     (let* ((ts-orig (org-element-context))
+	    (ts-copy (org-timestamp-split-range ts-orig)))
+       (eq (org-element-property :parent ts-orig)
+	   (org-element-property :parent ts-copy))))))
+
+(ert-deftest test-org/timestamp-translate ()
+  "Test `org-timestamp-translate' specifications."
+  ;; Translate whole date range.
+  (should
+   (equal "<29>--<30>"
+	  (org-test-with-temp-text "<2012-03-29 Thu>--<2012-03-30 Fri>"
+	    (let ((org-display-custom-times t)
+		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
+	      (org-timestamp-translate (org-element-context))))))
+  ;; Translate date range start.
+  (should
+   (equal "<29>"
+	  (org-test-with-temp-text "<2012-03-29 Thu>--<2012-03-30 Fri>"
+	    (let ((org-display-custom-times t)
+		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
+	      (org-timestamp-translate (org-element-context) 'start)))))
+  ;; Translate date range end.
+  (should
+   (equal "<30>"
+	  (org-test-with-temp-text "<2012-03-29 Thu>--<2012-03-30 Fri>"
+	    (let ((org-display-custom-times t)
+		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
+	      (org-timestamp-translate (org-element-context) 'end)))))
+  ;; Translate time range.
+  (should
+   (equal "<08>--<16>"
+	  (org-test-with-temp-text "<2012-03-29 Thu 8:30-16:40>"
+	    (let ((org-display-custom-times t)
+		  (org-time-stamp-custom-formats '("<%d>" . "<%H>")))
+	      (org-timestamp-translate (org-element-context))))))
+  ;; Translate non-range timestamp.
+  (should
+   (equal "<29>"
+	  (org-test-with-temp-text "<2012-03-29 Thu>"
+	    (let ((org-display-custom-times t)
+		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
+	      (org-timestamp-translate (org-element-context))))))
+  ;; Do not change `diary' timestamps.
+  (should
+   (equal "<%%(org-float t 4 2)>"
+	  (org-test-with-temp-text "<%%(org-float t 4 2)>"
+	    (let ((org-display-custom-times t)
+		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
+	      (org-timestamp-translate (org-element-context)))))))
+
 
 
 ;;; Visibility

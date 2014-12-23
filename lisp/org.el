@@ -13453,6 +13453,20 @@ nil."
 (defvar org-time-was-given) ; dynamically scoped parameter
 (defvar org-end-time-was-given) ; dynamically scoped parameter
 
+(defun org-at-planning-p ()
+  "Non-nil when point is on a planning info line."
+  ;; This is as accurate and faster than `org-element-at-point' since
+  ;; planning info location is fixed in the section.
+  (org-with-wide-buffer
+   (beginning-of-line)
+   (and (org-looking-at-p org-planning-line-re)
+	(eq (point)
+	    (ignore-errors
+	      (if (and (featurep 'org-inlinetask) (org-inlinetask-in-task-p))
+		  (org-back-to-heading t)
+		(org-with-limited-levels (org-back-to-heading t)))
+	      (line-beginning-position 2))))))
+
 (defun org-add-planning-info (what &optional time &rest remove)
   "Insert new timestamp with keyword in the planning line.
 WHAT indicates what kind of time stamp to add.  It is a symbol
@@ -23370,7 +23384,7 @@ strictly within a source block, use appropriate comment syntax."
     (call-interactively 'comment-dwim)))
 
 
-;;; Planning
+;;; Timestamps API
 
 ;; This section contains tools to operate on timestamp objects, as
 ;; returned by, e.g. `org-element-context'.
