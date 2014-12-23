@@ -6237,8 +6237,11 @@ done, nil otherwise."
 
 (defun org-outline-level ()
   "Compute the outline level of the heading at point.
-If this is called at a normal headline, the level is the number of stars.
-Use `org-reduced-level' to remove the effect of `org-odd-levels'."
+
+If this is called at a normal headline, the level is the number
+of stars.  Use `org-reduced-level' to remove the effect of
+`org-odd-levels'.  Unlike to `org-current-level', this functions
+takes into consideration inline tasks."
   (org-with-wide-buffer
    (end-of-line)
    (if (re-search-backward org-outline-regexp-bol nil t)
@@ -8083,7 +8086,10 @@ in the region."
 
 (defun org-current-level ()
   "Return the level of the current entry, or nil if before the first headline.
-The level is the number of stars at the beginning of the headline."
+The level is the number of stars at the beginning of the
+headline.  Use `org-reduced-level' to remove the effect of
+`org-odd-levels'.  Unlike to `org-outline-level', this function
+ignores inlinetasks."
   (let ((level (org-with-limited-levels (org-outline-level))))
     (and (> level 0) level)))
 
