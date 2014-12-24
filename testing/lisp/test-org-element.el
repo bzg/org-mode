@@ -1147,6 +1147,13 @@ Contents
       (should
        (org-test-with-temp-text "
 *************** Task
+DEADLINE: <2012-03-29 thu.>
+*************** END"
+	 (forward-line)
+	 (org-element-property :deadline (org-element-at-point))))
+      (should-not
+       (org-test-with-temp-text "
+*************** Task
 DEADLINE: <2012-03-29 thu.>"
 	 (forward-line)
 	 (org-element-property :deadline (org-element-at-point))))
