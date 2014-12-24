@@ -6240,8 +6240,8 @@ done, nil otherwise."
 
 If this is called at a normal headline, the level is the number
 of stars.  Use `org-reduced-level' to remove the effect of
-`org-odd-levels'.  Unlike to `org-current-level', this functions
-takes into consideration inline tasks."
+`org-odd-levels'.  Unlike to `org-current-level', this function
+takes into consideration inlinetasks."
   (org-with-wide-buffer
    (end-of-line)
    (if (re-search-backward org-outline-regexp-bol nil t)
