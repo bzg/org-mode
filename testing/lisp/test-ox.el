@@ -904,12 +904,13 @@ Footnotes[fn:1], [fn:test] and [fn:inline:anonymous footnote].
 			(org-element-property :label ref)))))))))))))
   ;; Footnotes labels are not local to each include keyword.
   (should
-   (= 3
+   (= 4
       (length
        (delete-dups
 	(let ((contents "
-Footnotes[fn:1], [fn:test] and [fn:inline:anonymous footnote].
+Footnotes[fn:1], [fn:test], [2] and [fn:inline:anonymous footnote].
 \[fn:1] Footnote 1
+\[2] Footnote 2
 \[fn:test] Footnote \"test\""))
 	  (org-test-with-temp-text-in-file contents
 	    (let ((file (buffer-file-name)))
@@ -918,6 +919,33 @@ Footnotes[fn:1], [fn:test] and [fn:inline:anonymous footnote].
 		(org-export-expand-include-keyword)
 		(org-element-map (org-element-parse-buffer)
 		    'footnote-reference
+		  (lambda (ref) (org-element-property :label ref)))))))))))
+  ;; Footnotes are supported by :lines-like elements and unnecessary
+  ;; footnotes are dropped.
+  (should
+   (= 4
+      (length
+       (delete-dups
+	(let ((contents "
+* foo
+Footnotes[fn:1]
+* bar
+Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote]
+
+\[fn:1] Footnote 1
+\[fn:2] Footnote 1
+* Footnotes
+\[fn:test] Footnote \"test\"
+\[3] Footnote 3
+"))
+	  (org-test-with-temp-text-in-file contents
+	    (let ((file (buffer-file-name)))
+	      (org-test-with-temp-text
+		  (format "#+INCLUDE: \"%s::*bar\"
+" file)
+		(org-export-expand-include-keyword)
+		(org-element-map (org-element-parse-buffer)
+		    'footnote-definition
 		  (lambda (ref) (org-element-property :label ref)))))))))))
   ;; If only-contents is non-nil only include contents of element.
   (should
@@ -975,7 +1003,42 @@ Footnotes[fn:1], [fn:test] and [fn:inline:anonymous footnote].
     (org-test-with-temp-text
 	(format "#+INCLUDE: \"%s/examples/include.org::#dh\" :only-contents t" org-test-dir)
       (org-export-expand-include-keyword)
-      (buffer-string)))))
+      (buffer-string))))
+  ;; Adjacent INCLUDE-keywords should have the same :minlevel if unspecified.
+  (should
+   (org-every (lambda (level) (zerop (1- level)))
+	      (org-test-with-temp-text
+		  (concat
+		   (format "#+INCLUDE: \"%s/examples/include.org::#ah\"\n" org-test-dir)
+		   (format "#+INCLUDE: \"%s/examples/include.org::*Heading\"" org-test-dir))
+		(org-export-expand-include-keyword)
+		(org-element-map (org-element-parse-buffer) 'headline
+		  (lambda (head) (org-element-property :level head))))))
+  ;; INCLUDE does not insert induced :minlevel for src-blocks.
+  (should-not
+   (equal
+    (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include2.org\" src emacs-lisp" org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))
+    (org-test-with-temp-text
+	(format "#+INCLUDE: \"%s/examples/include2.org\" src emacs-lisp :minlevel 1" org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))))
+  ;; INCLUDE assigns the relative :minlevel conditional on narrowing.
+  (should
+   (org-test-with-temp-text-in-file
+       (format "* h1\n<point>#+INCLUDE: \"%s/examples/include.org::#ah\"" org-test-dir)
+     (narrow-to-region (point) (point-max))
+     (org-export-expand-include-keyword)
+     (eq 1 (org-current-level))))
+  ;; If :minlevel is present do not alter it.
+  (should
+   (org-test-with-temp-text
+       (format "* h1\n<point>#+INCLUDE: \"%s/examples/include.org::#ah\" :minlevel 3" org-test-dir)
+     (narrow-to-region (point) (point-max))
+     (org-export-expand-include-keyword)
+     (eq 3 (org-current-level)))))
 
 (ert-deftest test-org-export/expand-macro ()
   "Test macro expansion in an Org buffer."

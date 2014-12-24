@@ -3052,18 +3052,31 @@ locally for the subtree through node properties."
 		   (car key)
 		   (if (org-string-nw-p val) (format " %s" val) ""))))))))
 
-(defun org-export-expand-include-keyword (&optional included dir)
+(defun org-export-expand-include-keyword (&optional included dir footnotes)
   "Expand every include keyword in buffer.
 Optional argument INCLUDED is a list of included file names along
 with their line restriction, when appropriate.  It is used to
 avoid infinite recursion.  Optional argument DIR is the current
 working directory.  It is used to properly resolve relative
-paths."
+paths.  Optional argument FOOTNOTES is a hash-table used for
+storing and resolving footnotes.  It is created automatically."
   (let ((case-fold-search t)
 	(file-prefix (make-hash-table :test #'equal))
-	(current-prefix 0))
+	(current-prefix 0)
+	(footnotes (or footnotes (make-hash-table :test #'equal)))
+	(include-re "^[ \t]*#\\+INCLUDE:"))
+    ;; If :minlevel is not set the text-property
+    ;; `:org-include-induced-level' will be used to determine the
+    ;; relative level when expanding INCLUDE.
+    ;; Only affects included Org documents.
     (goto-char (point-min))
-    (while (re-search-forward "^[ \t]*#\\+INCLUDE:" nil t)
+    (while (re-search-forward include-re nil t)
+      (put-text-property (line-beginning-position) (line-end-position)
+			 :org-include-induced-level
+			 (1+ (org-reduced-level (or (org-current-level) 0)))))
+    ;; Expand INCLUDE keywords.
+    (goto-char (point-min))
+    (while (re-search-forward include-re nil t)
       (let ((element (save-match-data (org-element-at-point))))
 	(when (eq (org-element-type element) 'keyword)
 	  (beginning-of-line)
@@ -3108,8 +3121,7 @@ paths."
 		       (if (string-match ":minlevel +\\([0-9]+\\)" value)
 			   (prog1 (string-to-number (match-string 1 value))
 			     (setq value (replace-match "" nil nil value)))
-			 (let ((cur (org-current-level)))
-			   (if cur (1+ (org-reduced-level cur)) 1)))))
+			 (get-text-property (point) :org-include-induced-level))))
 		 (src-args (and (eq env 'literal)
 				(match-string 1 value)))
 		 (block (and (string-match "\\<\\(\\S-+\\)\\>" value)
@@ -3131,8 +3143,8 @@ paths."
 		(insert
 		 (let ((ind-str (make-string ind ? ))
 		       (arg-str (if (stringp src-args)
-				  (format " %s" src-args)
-				""))
+				    (format " %s" src-args)
+				  ""))
 		       (contents
 			(org-escape-code-in-string
 			 (org-export--prepare-file-contents file lines))))
@@ -3142,7 +3154,7 @@ paths."
 		(insert
 		 (let ((ind-str (make-string ind ? ))
 		       (contents
-			 (org-export--prepare-file-contents file lines)))
+			(org-export--prepare-file-contents file lines)))
 		   (format "%s#+BEGIN_%s\n%s%s#+END_%s\n"
 			   ind-str block contents ind-str block))))
 	       (t
@@ -3155,15 +3167,23 @@ paths."
 			       file location only-contents lines)
 			    lines)))
 		     (org-mode)
-		     (insert
-		      (org-export--prepare-file-contents
-		       file lines ind minlevel
-		       (or (gethash file file-prefix)
-			   (puthash file (incf current-prefix) file-prefix)))))
+                     (insert (org-export--prepare-file-contents
+			      file lines ind minlevel
+			      (or (gethash file file-prefix)
+				  (puthash file (incf current-prefix) file-prefix))
+			      footnotes)))
 		   (org-export-expand-include-keyword
 		    (cons (list file lines) included)
-		    (file-name-directory file))
-		   (buffer-string)))))))))))))
+		    (file-name-directory file)
+		    footnotes)
+		   (buffer-string)))))
+	      ;; Expand footnotes after all files have been
+	      ;; included.  Footnotes are stored at end of buffer.
+	      (unless included
+		(org-with-wide-buffer
+		 (goto-char (point-max))
+		 (maphash (lambda (ref def) (insert (format "\n[%s] %s\n" ref def)))
+			  footnotes)))))))))))
 
 (defun org-export--inclusion-absolute-lines (file location only-contents lines)
   "Resolve absolute lines for an included file with file-link.
@@ -3227,8 +3247,26 @@ Return a string of lines to be included in the format expected by
 		       (while (< (point) end) (incf counter) (forward-line))
 		       counter))))))))
 
-(defun org-export--prepare-file-contents (file &optional lines ind minlevel id)
-  "Prepare the contents of FILE for inclusion and return them as a string.
+(defun org-export--update-footnote-label (ref-begin digit-label id)
+  "Prefix footnote-label at point REF-BEGIN in buffer with ID.
+
+REF-BEGIN corresponds to the property `:begin' of objects of type
+footnote-definition and footnote-reference.
+
+If DIGIT-LABEL is non-nil the label is assumed to be of the form
+\[N] where N is one or more numbers.
+
+Return the new label."
+  (goto-char (1+ ref-begin))
+  (buffer-substring (point)
+		    (progn
+		      (if digit-label (insert (format "fn:%d-" id))
+			(forward-char 3)
+			(insert (format "%d-" id)))
+		      (1- (search-forward "]")))))
+
+(defun org-export--prepare-file-contents (file &optional lines ind minlevel id footnotes)
+  "Prepare contents of FILE for inclusion and return it as a string.
 
 When optional argument LINES is a string specifying a range of
 lines, include only those lines.
@@ -3242,11 +3280,14 @@ headline encountered.
 Optional argument MINLEVEL, when non-nil, is an integer
 specifying the level that any top-level headline in the included
 file should have.
-
 Optional argument ID is an integer that will be inserted before
 each footnote definition and reference if FILE is an Org file.
 This is useful to avoid conflicts when more than one Org file
-with footnotes is included in a document."
+with footnotes is included in a document.
+
+Optional argument FOOTNOTES is a hash-table to store footnotes in
+the included document.
+"
   (with-temp-buffer
     (insert-file-contents file)
     (when lines
@@ -3307,20 +3348,40 @@ with footnotes is included in a document."
 			     (insert (make-string offset ?*)))))))))))
     ;; Append ID to all footnote references and definitions, so they
     ;; become file specific and cannot collide with footnotes in other
-    ;; included files.
+    ;; included files.  Further, collect relevant footnotes outside of
+    ;; LINES.
     (when id
-      (goto-char (point-min))
-      (while (re-search-forward org-footnote-re nil t)
-	(let ((reference (org-element-context)))
-	  (when (memq (org-element-type reference)
-		      '(footnote-reference footnote-definition))
-	    (goto-char (org-element-property :begin reference))
-	    (forward-char)
-	    (let ((label (org-element-property :label reference)))
-	      (cond ((not label))
-		    ((org-string-match-p "\\`[0-9]+\\'" label)
-		     (insert (format "fn:%d-" id)))
-		    (t (forward-char 3) (insert (format "%d-" id)))))))))
+      (let ((marker-min (point-min-marker))
+	    (marker-max (point-max-marker)))
+	(goto-char (point-min))
+	(while (re-search-forward org-footnote-re nil t)
+	  (let ((reference (org-element-context)))
+	    (when (eq (org-element-type reference) 'footnote-reference)
+	      (let* ((label (org-element-property :label reference))
+		     (digit-label (and label (org-string-match-p "\\`[0-9]+\\'" label))))
+		;; Update the footnote-reference at point and collect
+		;; the new label, which is only used for footnotes
+		;; outsides LINES.
+		(when label
+		  ;; If label is akin to [1] convert it to [fn:ID-1].
+		  ;; Otherwise add "ID-" after "fn:".
+		  (let ((new-label (org-export--update-footnote-label
+				    (org-element-property :begin reference) digit-label id)))
+		    (unless (eq (org-element-property :type reference) 'inline)
+		      (org-with-wide-buffer
+		       (let* ((definition (org-footnote-get-definition label))
+			      (beginning (nth 1 definition)))
+			 (unless definition
+			   (error "Definition not found for footnote %s in file %s" label file))
+			 (if (or (< beginning marker-min) (> beginning marker-max))
+			     ;; Store since footnote-definition is outside of LINES.
+			     (puthash new-label
+				      (org-element-normalize-string (nth 3 definition))
+				      footnotes)
+			   ;; Update label of definition since it is included directly.
+			   (org-export--update-footnote-label beginning digit-label id)))))))))))
+	(set-marker marker-min nil)
+	(set-marker marker-max nil)))
     (org-element-normalize-string (buffer-string))))
 
 (defun org-export-execute-babel-code ()
