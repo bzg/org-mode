@@ -515,13 +515,16 @@ duplicate results block."
 
 (ert-deftest test-org-babel/nested-code-block ()
   "Test nested code blocks inside code blocks don't cause problems."
-  (org-test-with-temp-text "#+begin_src org :results silent
+  (should
+   (string= "#+begin_src emacs-lisp\n  'foo\n#+end_src"
+	    (org-test-with-temp-text "#+begin_src org :results silent
   ,#+begin_src emacs-lisp
   ,  'foo
   ,#+end_src
 #+end_src"
-    (should (string= (org-babel-execute-src-block)
-		     "#+begin_src emacs-lisp\n  'foo\n#+end_src"))))
+	      (let ((org-edit-src-content-indentation 2)
+		    (org-src-preserve-indentation nil))
+		(org-babel-execute-src-block))))))
 
 (ert-deftest test-org-babel/partial-nested-code-block ()
   "Test nested code blocks inside code blocks don't cause problems."
@@ -1057,7 +1060,8 @@ Line 3\"
 	  (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp
 \(+ 1 2)
 #+END_SRC\n\n\n"
-	    (org-babel-execute-src-block)
+	    (let ((org-babel-next-src-block "RESULTS"))
+	      (org-babel-execute-src-block))
 	    (buffer-string)))))
 
 (ert-deftest test-ob/results-in-narrowed-buffer ()
@@ -1070,7 +1074,8 @@ Line 3\"
     (org-test-with-temp-text
 	"#+BEGIN_SRC emacs-lisp\n(+ 1 2)\n#+END_SRC\n\nParagraph"
       (narrow-to-region (point) (save-excursion (forward-line 3) (point)))
-      (org-babel-execute-src-block)
+      (let ((org-babel-results-keyword "RESULTS"))
+	(org-babel-execute-src-block))
       (org-trim (buffer-string)))))
   (should
    (equal
@@ -1078,7 +1083,8 @@ Line 3\"
     (org-test-with-temp-text
 	"#+NAME: test\n#+BEGIN_SRC emacs-lisp\n(+ 1 2)\n#+END_SRC\n\nParagraph"
       (narrow-to-region (point) (save-excursion (forward-line 4) (point)))
-      (org-babel-execute-src-block)
+      (let ((org-babel-results-keyword "RESULTS"))
+	(org-babel-execute-src-block))
       (org-trim (buffer-string)))))
   ;; Results in visible part of buffer, should be updated here.
   (should
@@ -1101,7 +1107,8 @@ Line 3\"
 
 Paragraph"
       (narrow-to-region (point) (save-excursion (forward-line 7) (point)))
-      (org-babel-execute-src-block)
+      (let ((org-babel-results-keyword "RESULTS"))
+	(org-babel-execute-src-block))
       (org-trim (buffer-string)))))
   ;; Results in invisible part of buffer, should be updated there.
   (org-test-with-temp-text
@@ -1115,7 +1122,8 @@ Paragraph"
 
 Paragraph"
     (narrow-to-region (point) (save-excursion (forward-line 4) (point)))
-    (org-babel-execute-src-block)
+    (let ((org-babel-results-keyword "RESULTS"))
+      (org-babel-execute-src-block))
     (should-not (re-search-forward "^#\\+RESULTS:" nil t))
     (widen)
     (should (should (re-search-forward "^: 3" nil t)))))
@@ -1155,7 +1163,8 @@ echo \"$data\"
 	    (should (re-search-forward org-babel-src-block-regexp nil t))
 	    (goto-char (match-beginning 0))
 	    ;; now that we've located the code block, it may be evaluated
-	    (org-babel-execute-src-block)
+	    (let ((org-babel-execute-src-block "RESULTS"))
+	      (org-babel-execute-src-block))
 	    (buffer-string)))))
 
 (ert-deftest test-ob/location-of-header-arg-eval ()

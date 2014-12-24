@@ -2572,19 +2572,22 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
   "Test src block interpreter."
   ;; With arguments.
   (should
-   (equal (let ((org-edit-src-content-indentation 2))
+   (equal (let ((org-edit-src-content-indentation 2)
+		(org-src-preserve-indentation nil))
 	    (org-test-parse-and-interpret
 	     "#+BEGIN_SRC emacs-lisp :results silent\n(+ 1 1)\n#+END_SRC"))
 	  "#+BEGIN_SRC emacs-lisp :results silent\n  (+ 1 1)\n#+END_SRC\n"))
   ;; With switches.
   (should
-   (equal (let ((org-edit-src-content-indentation 2))
+   (equal (let ((org-edit-src-content-indentation 2)
+		(org-src-preserve-indentation nil))
 	    (org-test-parse-and-interpret
 	     "#+BEGIN_SRC emacs-lisp -n -k\n(+ 1 1)\n#+END_SRC"))
 	  "#+BEGIN_SRC emacs-lisp -n -k\n  (+ 1 1)\n#+END_SRC\n"))
   ;; Preserve code escaping.
   (should
-   (equal (let ((org-edit-src-content-indentation 2))
+   (equal (let ((org-edit-src-content-indentation 2)
+		(org-src-preserve-indentation nil))
 	    (org-test-parse-and-interpret
 	     "#+BEGIN_SRC org\n,* Headline\n ,#+keyword\nText #+END_SRC"))
 	  "#+BEGIN_SRC org\n,* Headline\n ,#+keyword\nText #+END_SRC\n"))
@@ -2606,7 +2609,8 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
   (should
    (equal
     "#+BEGIN_SRC emacs-lisp\n  Test\n#+END_SRC\n"
-    (let ((org-edit-src-content-indentation 2))
+    (let ((org-edit-src-content-indentation 2)
+	  (org-src-preserve-indentation nil))
       (org-element-interpret-data
        '(src-block (:language "emacs-lisp" :value "Test")))))))
 

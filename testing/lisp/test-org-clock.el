@@ -98,7 +98,7 @@ contents.  The clocktable doesn't appear in the buffer."
 | Bar                          |         | 11:00 |
 "
     (org-test-with-temp-text "* Relative times in clocktable\n** Foo\n** Bar\n"
-      (progn
+      (let ((org-clock-total-time-cell-format "*%s*"))
 	;; Install Clock lines in "Foo".
 	(search-forward "** Foo")
 	(forward-line)

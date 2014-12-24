@@ -26,26 +26,25 @@
 
 
 (ert-deftest test-org-src/basic ()
-  "Editing regular block works. with point on
-
-#+begin_src line
-"
+  "Editing regular block works, with point on source block."
   (org-test-with-temp-text
       "
 #+begin_src emacs-lisp
   (message hello)
 #+end_src
 "
-    (goto-line 2)
-    (org-edit-special)
-    (insert "blah")
-    (org-edit-src-exit)
-    (should (equal (buffer-string) "
+    (let ((org-edit-src-content-indentation 2)
+	  (org-src-preserve-indentation nil))
+      (goto-line 2)
+      (org-edit-special)
+      (insert "blah")
+      (org-edit-src-exit)
+      (should (equal (buffer-string) "
 #+begin_src emacs-lisp
   blah(message hello)
 #+end_src
 "))
-    (should (equal (word-at-point) "blah"))))
+      (should (equal (word-at-point) "blah")))))
 
 (ert-deftest test-org-src/point-outside-block ()
   "Editing with point before/after block signals expected error."
@@ -67,16 +66,18 @@
 #+begin_src emacs-lisp
 #+end_src
 "
-    (goto-line 2)
-    (org-edit-special)
-    (insert "blah")
-    (org-edit-src-exit)
-    (should (equal (buffer-string) "
+    (let ((org-edit-src-content-indentation 2)
+	  (org-src-preserve-indentation nil))
+      (goto-line 2)
+      (org-edit-special)
+      (insert "blah")
+      (org-edit-src-exit)
+      (should (equal (buffer-string) "
 #+begin_src emacs-lisp
   blah
 #+end_src
 "))
-    (should (equal (word-at-point) "blah"))))
+      (should (equal (word-at-point) "blah")))))
 
 (ert-deftest test-org-src/blank-line-block ()
   "Editing block with just a blank line."
@@ -86,15 +87,17 @@
 
 #+end_src
 "
-    (goto-line 2)
-    (org-edit-special)
-    (insert "blah")
-    (org-edit-src-exit)
-    (should (equal (buffer-string) "
+    (let ((org-edit-src-content-indentation 2)
+	  (org-src-preserve-indentation nil))
+      (goto-line 2)
+      (org-edit-special)
+      (insert "blah")
+      (org-edit-src-exit)
+      (should (equal (buffer-string) "
 #+begin_src emacs-lisp
   blah
 #+end_src
-"))))
+")))))
 
 (provide 'test-org-src)
 ;;; test-org-src.el ends here
