@@ -3017,10 +3017,13 @@ and TABLE is a vector with line types."
 			  nil))
 		    t)))
       (setq n (1- n)))
-    (if (or (< i 0) (>= i l))
-	(user-error "Row descriptor %s used in line %d leads outside table"
-	       desc cline)
-      i)))
+    (cond ((or (< i 0) (>= i l))
+	   (user-error "Row descriptor %s used in line %d leads outside table"
+		       desc cline))
+	  ;; The last hline doesn't exist.  Instead, point to last row
+	  ;; in table.
+	  ((= i (1- l)) (1- i))
+	  (t i))))
 
 (defun org-table--error-on-old-row-references (s)
   (when (string-match "&[-+0-9I]" s)
