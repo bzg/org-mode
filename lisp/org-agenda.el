@@ -7182,17 +7182,13 @@ Like `org-agenda-quit', but kill the buffer even when
     (let ((buf (current-buffer)))
       (if (eq org-agenda-window-setup 'other-frame)
 	  (progn
-	    (org-agenda-reset-markers)
 	    (kill-buffer buf)
-	    (org-columns-remove-overlays)
 	    (setq org-agenda-archives-mode nil)
 	    (delete-frame))
 	(and (not (eq org-agenda-window-setup 'current-window))
 	     (not (one-window-p))
 	     (delete-window))
-	(org-agenda-reset-markers)
 	(kill-buffer buf)
-	(org-columns-remove-overlays)
 	(setq org-agenda-archives-mode nil)))
     (setq org-agenda-buffer nil)
     ;; Maybe restore the pre-agenda window configuration.
