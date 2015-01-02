@@ -7244,8 +7244,10 @@ agenda."
   "Exit the agenda, killing Org buffers loaded by the agenda.
 Like `org-agenda-Quit', but kill any buffers that were created by
 the agenda.  Org buffers visited directly by the user will not be
-touched."
+touched.  Also, exit the agenda even if it is in column view."
   (interactive)
+  (when org-agenda-columns-active
+    (org-columns-quit))
   (org-release-buffers org-agenda-new-buffers)
   (setq org-agenda-new-buffers nil)
   (org-agenda-Quit))
