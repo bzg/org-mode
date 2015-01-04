@@ -3912,18 +3912,13 @@ the provided rules is non-nil.  The default rule is
 
 This only applies to links without a description."
   (and (not (org-element-contents link))
-       (let ((case-fold-search t)
-	     (rules (or rules org-export-default-inline-image-rule)))
+       (let ((case-fold-search t))
 	 (catch 'exit
-	   (mapc
-	    (lambda (rule)
-	      (and (string= (org-element-property :type link) (car rule))
-		   (string-match (cdr rule)
-				 (org-element-property :path link))
-		   (throw 'exit t)))
-	    rules)
-	   ;; Return nil if no rule matched.
-	   nil))))
+	   (dolist (rule (or rules org-export-default-inline-image-rule))
+	     (and (string= (org-element-property :type link) (car rule))
+		  (org-string-match-p (cdr rule)
+				      (org-element-property :path link))
+		  (throw 'exit t)))))))
 
 (defun org-export-resolve-coderef (ref info)
   "Resolve a code reference REF.
