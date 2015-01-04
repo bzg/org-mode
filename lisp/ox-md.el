@@ -313,6 +313,8 @@ a communication channel."
 	      raw-path))))
 	(type (org-element-property :type link)))
     (cond
+     ;; Link type is handled by a special function.
+     ((org-export-custom-protocol-maybe link contents info))
      ((member type '("custom-id" "id"))
       (let ((destination (org-export-resolve-id-link link info)))
 	(if (stringp destination)	; External file.
@@ -358,13 +360,6 @@ a communication channel."
 		     ;; BUG: shouldn't headlines have a form like [ref](name) in md?
 		     (org-export-data
 		      (org-element-property :title destination) info))))))))
-     ;; Link type is handled by a special function.
-     ((let ((protocol (nth 2 (assoc type org-link-protocols))))
-	(and (functionp protocol)
-	     (funcall protocol
-		      (org-link-unescape (org-element-property :path link))
-		      contents
-		      'md))))
      (t (let* ((raw-path (org-element-property :path link))
 	       (path
 		(cond

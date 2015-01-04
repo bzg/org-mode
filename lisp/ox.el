@@ -3862,6 +3862,9 @@ meant to be translated with `org-export-data' or alike."
 
 ;;;; For Links
 ;;
+;; `org-export-custom-protocol-maybe' handles custom protocol defined
+;; with `org-add-link-type', which see.
+;;
 ;; `org-export-solidify-link-text' turns a string into a safer version
 ;; for links, replacing most non-standard characters with hyphens.
 ;;
@@ -3887,6 +3890,28 @@ meant to be translated with `org-export-data' or alike."
   "Take link text S and make a safe target out of it."
   (save-match-data
     (mapconcat 'identity (org-split-string s "[^a-zA-Z0-9_.-:]+") "-")))
+
+(defun org-export-custom-protocol-maybe (link desc info)
+  "Try exporting LINK with a dedicated function.
+
+DESC is its description, as a string, or nil.  INFO is the plist
+containing export state.  Return output as a string, or nil if no
+protocol handles LINK.
+
+A custom protocol is expected to have precedence over regular
+back-end export.  The function ignores links with an implicit
+type (e.g., \"custom-id\")."
+  (let ((type (org-element-property :type link))
+	(backend (let ((b (plist-get info :back-end)))
+		   (and b (org-export-backend-name b)))))
+    (unless (or (member type '("coderef" "custom-id" "fuzzy" "radio"))
+		(not backend))
+      (let ((protocol (nth 2 (assoc type org-link-protocols))))
+	(and (functionp protocol)
+	     (funcall protocol
+		      (org-link-unescape (org-element-property :path link))
+		      desc
+		      backend))))))
 
 (defun org-export-get-coderef-format (path desc)
   "Return format string for code reference link.

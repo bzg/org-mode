@@ -1965,9 +1965,10 @@ INFO is a plist holding contextual information.  See
 		 (concat type ":" raw-path))
 		((and (string= type "file") (file-name-absolute-p raw-path))
 		 (concat "file:" raw-path))
-		(t raw-path)))
-	 protocol)
+		(t raw-path))))
     (cond
+     ;; Link type is handled by a special function.
+     ((org-export-custom-protocol-maybe link desc info))
      ;; Image file.
      (imagep (org-latex--inline-image link info))
      ;; Radio link: Transcode target's contents and use them as link's
@@ -2023,9 +2024,6 @@ INFO is a plist holding contextual information.  See
      ((string= type "coderef")
       (format (org-export-get-coderef-format path desc)
 	      (org-export-resolve-coderef path info)))
-     ;; Link type is handled by a special function.
-     ((functionp (setq protocol (nth 2 (assoc type org-link-protocols))))
-      (funcall protocol (org-link-unescape path) desc 'latex))
      ;; External link with a description part.
      ((and path desc) (format "\\href{%s}{%s}" path desc))
      ;; External link without a description part.

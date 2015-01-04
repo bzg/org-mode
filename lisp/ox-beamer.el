@@ -689,8 +689,10 @@ CONTENTS is the description part of the link.  INFO is a plist
 used as a communication channel."
   (let ((type (org-element-property :type link))
 	(path (org-element-property :path link)))
-    ;; Use \hyperlink command for all internal links.
     (cond
+     ;; Link type is handled by a special function.
+     ((org-export-custom-protocol-maybe link contents info))
+     ;; Use \hyperlink command for all internal links.
      ((equal type "radio")
       (let ((destination (org-export-resolve-radio-link link info)))
 	(if (not destination) contents

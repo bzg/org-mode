@@ -2736,9 +2736,10 @@ INFO is a plist holding contextual information.  See
 		 (concat "file:" raw-path))
 		(t raw-path)))
 	 ;; Convert & to &amp; for correct XML representation
-	 (path (replace-regexp-in-string "&" "&amp;" path))
-	 protocol)
+	 (path (replace-regexp-in-string "&" "&amp;" path)))
     (cond
+     ;; Link type is handled by a special function.
+     ((org-export-custom-protocol-maybe link desc info))
      ;; Image file.
      ((and (not desc) (org-export-inline-image-p
 		       link (plist-get info :odt-inline-image-rules)))
@@ -2820,9 +2821,6 @@ INFO is a plist holding contextual information.  See
 	 (format
 	  "<text:bookmark-ref text:reference-format=\"number\" text:ref-name=\"OrgXref.%s\">%s</text:bookmark-ref>"
 	  href line-no))))
-     ;; Link type is handled by a special function.
-     ((functionp (setq protocol (nth 2 (assoc type org-link-protocols))))
-      (funcall protocol (org-link-unescape path) desc 'odt))
      ;; External link with a description part.
      ((and path desc)
       (let ((link-contents (org-element-contents link)))

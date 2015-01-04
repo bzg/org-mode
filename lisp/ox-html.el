@@ -2765,9 +2765,10 @@ INFO is a plist holding contextual information.  See
 		 (org-export-read-attribute :attr_html parent))))
 	 (attributes
 	  (let ((attr (org-html--make-attribute-string attributes-plist)))
-	    (if (org-string-nw-p attr) (concat " " attr) "")))
-	 protocol)
+	    (if (org-string-nw-p attr) (concat " " attr) ""))))
     (cond
+     ;; Link type is handled by a special function.
+     ((org-export-custom-protocol-maybe link desc info))
      ;; Image file.
      ((and (plist-get info :html-inline-images)
 	   (org-export-inline-image-p
@@ -2856,9 +2857,6 @@ INFO is a plist holding contextual information.  See
 		attributes
 		(format (org-export-get-coderef-format path desc)
 			(org-export-resolve-coderef path info)))))
-     ;; Link type is handled by a special function.
-     ((functionp (setq protocol (nth 2 (assoc type org-link-protocols))))
-      (funcall protocol (org-link-unescape path) desc 'html))
      ;; External link with a description part.
      ((and path desc) (format "<a href=\"%s\"%s>%s</a>" path attributes desc))
      ;; External link without a description part.

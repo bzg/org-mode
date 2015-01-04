@@ -2026,6 +2026,53 @@ Paragraph[fn:1]"
 
 ;;; Links
 
+(ert-deftest test-org-export/custom-protocol-maybe ()
+  "Test `org-export-custom-protocol-maybe' specifications."
+  (should
+   (string-match
+    "success"
+    (let ((org-link-types (copy-sequence org-link-types)))
+      (org-add-link-type "foo" nil (lambda (p d f) "success"))
+      (org-export-string-as
+       "[[foo:path]]"
+       (org-export-create-backend
+	:name 'test
+	:transcoders '((section . (lambda (s c i) c))
+		       (paragraph . (lambda (p c i) c))
+		       (link . (lambda (l c i)
+				 (or (org-export-custom-protocol-maybe l c i)
+				     "failure")))))))))
+  (should-not
+   (string-match
+    "success"
+    (let ((org-link-types (copy-sequence org-link-types)))
+      (org-add-link-type
+       "foo" nil (lambda (p d f) (and (eq f 'test) "success")))
+      (org-export-string-as
+       "[[foo:path]]"
+       (org-export-create-backend
+	:name 'no-test
+	:transcoders '((section . (lambda (s c i) c))
+		       (paragraph . (lambda (p c i) c))
+		       (link . (lambda (l c i)
+				 (or (org-export-custom-protocol-maybe l c i)
+				     "failure")))))))))
+  ;; Ignore anonymous back-ends.
+  (should-not
+   (string-match
+    "success"
+    (let ((org-link-types (copy-sequence org-link-types)))
+      (org-add-link-type
+       "foo" nil (lambda (p d f) (and (eq f 'test) "success")))
+      (org-export-string-as
+       "[[foo:path]]"
+       (org-export-create-backend
+	:transcoders '((section . (lambda (s c i) c))
+		       (paragraph . (lambda (p c i) c))
+		       (link . (lambda (l c i)
+				 (or (org-export-custom-protocol-maybe l c i)
+				     "failure"))))))))))
+
 (ert-deftest test-org-export/get-coderef-format ()
   "Test `org-export-get-coderef-format' specifications."
   ;; A link without description returns "%s"

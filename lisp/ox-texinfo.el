@@ -915,9 +915,9 @@ INFO is a plist holding contextual information.  See
 		 (concat type ":" raw-path))
 		((and (string= type "file") (file-name-absolute-p raw-path))
 		 (concat "file:" raw-path))
-		(t raw-path)))
-	 protocol)
+		(t raw-path))))
     (cond
+     ((org-export-custom-protocol-maybe link desc info))
      ((equal type "radio")
       (let ((destination (org-export-resolve-radio-link link info)))
 	(if (not destination) desc
@@ -976,9 +976,6 @@ INFO is a plist holding contextual information.  See
       (format "@email{%s}"
 	      (concat (org-texinfo--sanitize-content path)
 		      (and desc (concat "," desc)))))
-     ((let ((protocol (nth 2 (assoc type org-link-protocols))))
-	(and (functionp protocol)
-	     (funcall protocol (org-link-unescape path) desc 'texinfo))))
      ;; External link with a description part.
      ((and path desc) (format "@uref{%s,%s}" path desc))
      ;; External link without a description part.
