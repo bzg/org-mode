@@ -1437,7 +1437,23 @@ See also `test-org-table/copy-field'."
      (org-string-match-p
       "/a/"
       (orgtbl-to-generic (org-table-to-lisp "| /a/ | b |")
-			 '(:backend latex :raw t))))))
+			 '(:backend latex :raw t)))))
+  ;; Hooks are ignored.
+  (should
+   (equal
+    "a\nb"
+    (let* ((fun-list (list (lambda (backend) (search-forward "a") (insert "hook"))))
+	   (org-export-before-parsing-hook fun-list)
+	   (org-export-before-processing-hook fun-list))
+      (orgtbl-to-generic (org-table-to-lisp "| a |\n|---|\n| b |")
+			 '(:hline nil)))))
+  ;; User-defined export filters are ignored.
+  (should
+   (equal
+    "a\nb"
+    (let ((org-export-filter-table-cell-functions (list (lambda (c b i) "filter"))))
+      (orgtbl-to-generic (org-table-to-lisp "| a |\n|---|\n| b |")
+			 '(:hline nil))))))
 
 (ert-deftest test-org-table/to-latex ()
   "Test `orgtbl-to-latex' specifications."

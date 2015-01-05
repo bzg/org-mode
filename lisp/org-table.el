@@ -4778,7 +4778,11 @@ This may be either a string or a function of two arguments:
   example \"%s\\\\times10^{%s}\".  This may also be a property
   list with column numbers and format strings or functions.
   :fmt will still be applied after :efmt."
-  (let ((backend (plist-get params :backend)))
+  (let ((backend (plist-get params :backend))
+	;; Disable user-defined export filters and hooks.
+	(org-export-filters-alist nil)
+	(org-export-before-parsing-hook nil)
+	(org-export-before-processing-hook nil))
     (when (and backend (symbolp backend) (not (org-export-get-backend backend)))
       (user-error "Unknown :backend value"))
     (when (or (not backend) (plist-get params :raw)) (require 'ox-org))
