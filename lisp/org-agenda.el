@@ -2078,6 +2078,8 @@ When nil, `q' will kill the single agenda buffer."
 (defvar org-agenda-this-buffer-name nil)
 (defvar org-agenda-doing-sticky-redo nil)
 (defvar org-agenda-this-buffer-is-sticky nil)
+(defvar org-agenda-last-indirect-buffer nil
+  "Last buffer loaded by `org-agenda-tree-to-indirect-buffer'.")
 
 (defconst org-agenda-local-vars
   '(org-agenda-this-buffer-name
@@ -2102,6 +2104,7 @@ When nil, `q' will kill the single agenda buffer."
     org-agenda-effort-filter
     org-agenda-markers
     org-agenda-last-search-view-search-was-boolean
+    org-agenda-last-indirect-buffer
     org-agenda-filtered-by-category
     org-agenda-filter-form
     org-agenda-cycle-counter
@@ -7177,6 +7180,12 @@ Allowed types are 'agenda 'timeline 'todo 'tags 'search."
 Like `org-agenda-quit', but kill the buffer even when
 `org-agenda-sticky' is non-nil."
   (interactive)
+  (let ((org-agenda-last-indirect-window
+	 (and (eq org-indirect-buffer-display 'other-window)
+	      org-agenda-last-indirect-buffer
+	      (get-buffer-window org-agenda-last-indirect-buffer))))
+    (when org-agenda-last-indirect-window
+      (delete-window org-agenda-last-indirect-window)))
   (if org-agenda-columns-active
       (org-columns-quit)
     (let ((buf (current-buffer)))
@@ -7210,12 +7219,12 @@ the pre-agenda window configuration.
 When column view is active, exit column view instead of the
 agenda."
   (interactive)
-  (if (and (eq org-indirect-buffer-display 'other-window)
-	   org-last-indirect-buffer)
-      (let ((org-last-indirect-window
-	     (get-buffer-window org-last-indirect-buffer)))
-	(if org-last-indirect-window
-	    (delete-window org-last-indirect-window))))
+  (let ((org-agenda-last-indirect-window
+	 (and (eq org-indirect-buffer-display 'other-window)
+	      org-agenda-last-indirect-buffer
+	      (get-buffer-window org-agenda-last-indirect-buffer))))
+    (when org-agenda-last-indirect-window
+      (delete-window org-agenda-last-indirect-window)))
   (if org-agenda-columns-active
       (org-columns-quit)
     (if org-agenda-sticky
@@ -8758,7 +8767,8 @@ use the dedicated frame)."
 	  (and indirect-window (select-window indirect-window))
 	  (switch-to-buffer org-last-indirect-buffer :norecord)
 	  (fit-window-to-buffer indirect-window)))
-      (select-window (get-buffer-window agenda-buffer)))))
+      (select-window (get-buffer-window agenda-buffer))
+      (setq org-agenda-last-indirect-buffer org-last-indirect-buffer))))
 
 (defun org-agenda-do-tree-to-indirect-buffer (arg)
   "Same as `org-agenda-tree-to-indirect-buffer' without saving window."
