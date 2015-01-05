@@ -9650,9 +9650,8 @@ EXPORT should format the link path for export to one of the export formats.
 It should be a function accepting three arguments:
 
   path    the path of the link, the text after the prefix (like \"http:\")
-  desc    the description of the link, if any, or a description added by
-          org-export-normalize-links if there is none
-  format  the export format, a symbol like `html' or `latex' or `ascii'..
+  desc    the description of the link, if any
+  format  the export format, a symbol like `html' or `latex' or `ascii'.
 
 The function may use the FORMAT information to return different values
 depending on the format.  The return value will be put literally into
