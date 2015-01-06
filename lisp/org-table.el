@@ -5188,7 +5188,6 @@ supported.  It is also possible to use the following ones:
    (org-combine-plists
     (list :backend 'ascii
 	  :ascii-charset 'utf-8
-	  :ascii-table-keep-all-vertical-lines (plist-get params :)
 	  :ascii-table-widen-columns (not (plist-get params :narrow))
 	  :ascii-table-use-ascii-art (plist-get params :ascii-art))
     params)))
