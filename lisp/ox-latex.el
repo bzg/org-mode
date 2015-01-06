@@ -2687,7 +2687,8 @@ This function assumes TABLE has `org' as its `:type' property and
 	 ;; Extract others display options.
 	 (fontsize (let ((font (plist-get attr :font)))
 		     (and font (concat font "\n"))))
-	 (width (plist-get attr :width))
+	 ;; "tabular" environment doesn't allow to define a width.
+	 (width (and (not (equal table-env "tabular")) (plist-get attr :width)))
 	 (spreadp (plist-get attr :spread))
 	 (placement
 	  (or (plist-get attr :placement)
