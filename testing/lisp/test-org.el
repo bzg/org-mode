@@ -191,7 +191,87 @@
   ;; Parse Europeans dates without year.
   (should (string-match "2[0-9]\\{3\\}-03-29 16:40"
 			(let ((org-time-was-given t))
-			  (org-read-date t nil "29.03. 16:40")))))
+			  (org-read-date t nil "29.03. 16:40"))))
+  ;; Relative date applied to current time if there is single
+  ;; plus/minus, or to default date when there are two of them.
+  (should
+   (equal
+    "2015-03-04"
+    (flet ((current-time () (apply #'encode-time
+				   (org-parse-time-string "2014-03-04"))))
+      (org-read-date
+       t nil "+1y" nil
+       (apply #'encode-time (org-parse-time-string "2012-03-29"))))))
+  (should
+   (equal
+    "2013-03-29"
+    (flet ((current-time () (apply #'encode-time
+				   (org-parse-time-string "2014-03-04"))))
+      (org-read-date
+       t nil "++1y" nil
+       (apply #'encode-time (org-parse-time-string "2012-03-29"))))))
+  ;; When `org-read-date-prefer-future' is non-nil, prefer future
+  ;; dates (relatively to now) when incomplete.  Otherwise, use
+  ;; default date.
+  (should
+   (equal
+    "2014-04-01"
+    (flet ((current-time () (apply #'encode-time
+				   (org-parse-time-string "2014-03-04"))))
+      (let ((org-read-date-prefer-future t))
+	(org-read-date t nil "1")))))
+  (should
+   (equal
+    "2013-03-04"
+    (flet ((current-time () (apply #'encode-time
+				   (org-parse-time-string "2012-03-29"))))
+      (let ((org-read-date-prefer-future t))
+	(org-read-date t nil "3-4")))))
+  (should
+   (equal
+    "2012-03-04"
+    (flet ((current-time () (apply #'encode-time
+				   (org-parse-time-string "2012-03-29"))))
+      (let ((org-read-date-prefer-future nil))
+	(org-read-date t nil "3-4")))))
+  ;; When set to `org-read-date-prefer-future' is set to `time', read
+  ;; day is moved to tomorrow if specified hour is before current
+  ;; time.  However, it only happens in no other part of the date is
+  ;; specified.
+  (should
+   (equal
+    "2012-03-30"
+    (flet ((current-time () (apply #'encode-time
+				   (org-parse-time-string "2012-03-29 16:40"))))
+      (let ((org-read-date-prefer-future 'time))
+	(org-read-date t nil "00:40" nil)))))
+  (should-not
+   (equal
+    "2012-03-30"
+    (flet ((current-time () (apply #'encode-time
+				   (org-parse-time-string "2012-03-29 16:40"))))
+      (let ((org-read-date-prefer-future 'time))
+	(org-read-date t nil "29 00:40" nil)))))
+  ;; Caveat: `org-read-date-prefer-future' always refers to current
+  ;; time, not default time, when they differ.
+  (should
+   (equal
+    "2014-04-01"
+    (flet ((current-time
+	    () (apply #'encode-time (org-parse-time-string "2014-03-04"))))
+      (let ((org-read-date-prefer-future t))
+	(org-read-date
+	 t nil "1" nil
+	 (apply #'encode-time (org-parse-time-string "2012-03-29")))))))
+  (should
+   (equal
+    "2014-03-25"
+    (flet ((current-time
+	    () (apply #'encode-time (org-parse-time-string "2014-03-04"))))
+      (let ((org-read-date-prefer-future t))
+	(org-read-date
+	 t nil "25" nil
+	 (apply #'encode-time (org-parse-time-string "2012-03-29"))))))))
 
 (ert-deftest test-org/org-parse-time-string ()
   "Test `org-parse-time-string'."
