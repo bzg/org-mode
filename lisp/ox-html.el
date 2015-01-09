@@ -275,7 +275,7 @@ for the JavaScript code in this tag.
  <!--/*--><![CDATA[/*><!--*/
   .title  { text-align: center; }
   .todo   { font-family: monospace; color: red; }
-  .done   { color: green; }
+  .done   { font-family: monospace; color: green; }
   .tag    { background-color: #eee; font-family: monospace;
             padding: 2px; font-size: 80%; font-weight: normal; }
   .timestamp { color: #bebebe; }
