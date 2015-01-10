@@ -276,6 +276,7 @@ for the JavaScript code in this tag.
   .title  { text-align: center; }
   .todo   { font-family: monospace; color: red; }
   .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
   .tag    { background-color: #eee; font-family: monospace;
             padding: 2px; font-size: 80%; font-weight: normal; }
   .timestamp { color: #bebebe; }
@@ -1885,6 +1886,14 @@ INFO is a plist used as a communication channel."
 	    (org-html-fix-class-name todo)
 	    todo)))
 
+;;;; Priority
+
+(defun org-html--priority (priority info)
+  "Format a priority into HTML.
+PRIORITY is the character code of the priority or nil.  INFO is
+a plist containing export options."
+  (and priority (format "<span class=\"priority\">[%c]</span>" priority)))
+
 ;;;; Tags
 
 (defun org-html--tags (tags info)
@@ -2396,8 +2405,12 @@ holding contextual information."
   "Default format function for a headline.
 See `org-html-format-headline-function' for details."
   (let ((todo (org-html--todo todo info))
+	(priority (org-html--priority priority info))
 	(tags (org-html--tags tags info)))
-    (concat todo (and todo " ") text (and tags "&#xa0;&#xa0;&#xa0;") tags)))
+    (concat todo (and todo " ")
+	    priority (and priority " ")
+	    text
+	    (and tags "&#xa0;&#xa0;&#xa0;") tags)))
 
 (defun org-html--container (headline info)
   (or (org-element-property :HTML_CONTAINER headline)
