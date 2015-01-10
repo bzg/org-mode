@@ -17127,6 +17127,7 @@ This is used by `org-read-date' in a temporary keymap for the calendar buffer."
 
 (defun org-insert-time-stamp (time &optional with-hm inactive pre post extra)
   "Insert a date stamp for the date given by the internal TIME.
+See `format-time-string' for the format of TIME.
 WITH-HM means use the stamp format that includes the time of the day.
 INACTIVE means use square brackets instead of angular ones, so that the
 stamp will not contribute to the agenda.
