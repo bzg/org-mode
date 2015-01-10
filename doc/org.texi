@@ -12840,7 +12840,7 @@ export the table that follows:
 @end lisp
 
 @example
-#+ATTR_ODT: :style "TableWithHeaderRowAndColumn"
+#+ATTR_ODT: :style TableWithHeaderRowAndColumn
 | Name  | Phone | Age |
 | Peter |  1234 |  17 |
 | Anna  |  4321 |  25 |
