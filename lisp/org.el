@@ -4443,7 +4443,7 @@ Normal means, no org-mode-specific context."
 (defvar mark-active)
 
 ;; Various packages
-(declare-function calendar-absolute-from-iso    "cal-iso"    (date))
+(declare-function calendar-iso-to-absolute    "cal-iso"    (date))
 (declare-function calendar-forward-day          "cal-move"   (arg))
 (declare-function calendar-goto-date            "cal-move"   (date))
 (declare-function calendar-goto-today           "cal-move"   ())
@@ -16993,7 +16993,7 @@ user."
 	    day (or iso-weekday wday 1)
 	    wday nil ; to make sure that the trigger below does not match
 	    iso-date (calendar-gregorian-from-absolute
-		      (calendar-absolute-from-iso
+		      (calendar-iso-to-absolute
 		       (list iso-week day year))))
 					; FIXME:  Should we also push ISO weeks into the future?
 					;      (when (and org-read-date-prefer-future
@@ -17002,7 +17002,7 @@ user."
 					;		    (time-to-days (current-time))))
 					;	(setq year (1+ year)
 					;	      iso-date (calendar-gregorian-from-absolute
-					;			(calendar-absolute-from-iso
+					;			(calendar-iso-to-absolute
 					;			 (list iso-week day year)))))
       (setq month (car iso-date)
 	    year (nth 2 iso-date)

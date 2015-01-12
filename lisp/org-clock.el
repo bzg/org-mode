@@ -32,7 +32,7 @@
   (require 'cl))
 (require 'org)
 
-(declare-function calendar-absolute-from-iso "cal-iso" (&optional date))
+(declare-function calendar-iso-to-absolute "cal-iso" (&optional date))
 (declare-function notifications-notify "notifications" (&rest params))
 (declare-function org-pop-to-buffer-same-window "org-compat" (&optional buffer-or-name norecord label))
 (declare-function org-element-property "org-element" (property element))
@@ -2127,7 +2127,7 @@ If you can combine both, the month starting day will have priority."
       (setq y (string-to-number (match-string 1 skey))
 	    w (string-to-number (match-string 2 skey)))
       (setq date (calendar-gregorian-from-absolute
-		  (calendar-absolute-from-iso (list w 1 y))))
+		  (calendar-iso-to-absolute (list w 1 y))))
       (setq d (nth 1 date) month (car date) y (nth 2 date)
 	    dow 1
 	    key 'week))
@@ -2136,7 +2136,7 @@ If you can combine both, the month starting day will have priority."
       (setq y (string-to-number (match-string 1 skey)))
       (setq q (string-to-number (match-string 2 skey)))
       (setq date (calendar-gregorian-from-absolute
-		  (calendar-absolute-from-iso (org-quarter-to-date q y))))
+		  (calendar-iso-to-absolute (org-quarter-to-date q y))))
       (setq d (nth 1 date) month (car date) y (nth 2 date)
             dow 1
             key 'quarter))
@@ -2271,7 +2271,7 @@ the currently selected interval size."
 	   ((and wp (string-match "w\\|W" wp) mw (> (length wp) 0))
 	    (require 'cal-iso)
 	    (setq date (calendar-gregorian-from-absolute
-			(calendar-absolute-from-iso (list (+ mw n) 1 y))))
+			(calendar-iso-to-absolute (list (+ mw n) 1 y))))
 	    (setq ins (format-time-string
 		       "%G-W%V"
 		       (encode-time 0 0 0 (nth 1 date) (car date) (nth 2 date)))))
@@ -2288,7 +2288,7 @@ the currently selected interval size."
 		      y (- y 1))
 	      ())
 	    (setq date (calendar-gregorian-from-absolute
-			(calendar-absolute-from-iso (org-quarter-to-date (+ mw n) y))))
+			(calendar-iso-to-absolute (org-quarter-to-date (+ mw n) y))))
 	    (setq ins (format-time-string
 		       (concat (number-to-string y) "-Q" (number-to-string (+ mw n)))
 		       (encode-time 0 0 0 (nth 1 date) (car date) (nth 2 date)))))
