@@ -9701,9 +9701,11 @@ location(s).
 @end example
 
 Moreover, if you append @samp{local} parameter, the table contains only
-entries for current section's children@footnote{For @LaTeX{} export, this
-feature requires ``titletoc'' package.}.  In this case, any depth parameter
-becomes relative to the current level.
+entries for the children of the current section@footnote{For @LaTeX{} export,
+this feature requires the @code{titletoc} package.  Note that @code{titletoc}
+must be loaded @emph{before} @code{hyperref}.  Thus, you may have to customize
+@code{org-latex-default-table-environment}.}.  In this case, any depth
+parameter becomes relative to the current level.
 
 @example
 * Section
