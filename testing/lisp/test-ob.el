@@ -953,7 +953,7 @@ content
    "* org-babel-remove-result
 #+begin_src emacs-lisp :results org
 \"* heading
-** subheading
+,** subheading
 content\"
 #+end_src
 
@@ -1024,7 +1024,7 @@ Line 3\"
   #+name: foo
   #+begin_src emacs-lisp
     1
-  #+end_src emacs-lisp
+  #+end_src
 
 #+name: foo
 #+begin_src emacs-lisp

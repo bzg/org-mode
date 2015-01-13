@@ -98,6 +98,8 @@
 (declare-function org-reverse-string "org" (string))
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-type "org-element" (element))
+(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-property "org-element" (property element))
 (declare-function org-every "org" (pred seq))
 
 (defgroup org-babel nil
@@ -1701,33 +1703,20 @@ to the table for reinsertion to org-mode."
 
 (defun org-babel-where-is-src-block-head ()
   "Find where the current source block begins.
-Return the point at the beginning of the current source
-block.  Specifically at the beginning of the #+BEGIN_SRC line.
+Return the point at the beginning of the current source block.
+Specifically at the beginning of the #+BEGIN_SRC line.  Also set
+match-data relatively to `org-babel-src-block-regexp', which see.
 If the point is not on a source block then return nil."
-  (let ((initial (point)) (case-fold-search t) top bottom)
-    (or
-     (save-excursion ;; on a source name line or a #+header line
-       (beginning-of-line 1)
-       (and (or (looking-at org-babel-src-name-regexp)
-		(looking-at org-babel-multi-line-header-regexp))
-	    (progn
-	      (while (and (forward-line 1)
-			  (or (looking-at org-babel-src-name-regexp)
-			      (looking-at org-babel-multi-line-header-regexp))))
-	      (looking-at org-babel-src-block-regexp))
-            (point)))
-     (save-excursion ;; on a #+begin_src line
-       (beginning-of-line 1)
-       (and (looking-at org-babel-src-block-regexp)
-            (point)))
-     (save-excursion ;; inside a src block
-       (and
-        (re-search-backward "^[ \t]*#\\+begin_src" nil t) (setq top (point))
-        (re-search-forward "^[ \t]*#\\+end_src" nil t) (setq bottom (point))
-        (< top initial) (< initial bottom)
-        (progn (goto-char top) (beginning-of-line 1)
-	       (looking-at org-babel-src-block-regexp))
-        (point-marker))))))
+  (let ((element (org-element-at-point)))
+    (when (eq (org-element-type element) 'src-block)
+      (let ((end (org-element-property :end element)))
+	(org-with-wide-buffer
+	 ;; Ensure point is not on a blank line after the block.
+	 (beginning-of-line)
+	 (skip-chars-forward " \r\t\n" end)
+	 (when (< (point) end)
+	   (prog1 (goto-char (org-element-property :post-affiliated element))
+	     (looking-at org-babel-src-block-regexp))))))))
 
 ;;;###autoload
 (defun org-babel-goto-src-block-head ()
