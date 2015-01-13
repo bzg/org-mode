@@ -1860,12 +1860,13 @@ is created.  In both cases if the region is demarcated and if the
 region is not active then the point is demarcated."
   (interactive "P")
   (let* ((info (org-babel-get-src-block-info 'light))
-	 (block (progn (org-babel-where-is-src-block-head) (match-string 0)))
-	 (headers (progn (org-babel-where-is-src-block-head) (match-string 4)))
+	 (start (org-babel-where-is-src-block-head))
+	 (block (and start (match-string 0)))
+	 (headers (and start (match-string 4)))
 	 (stars (concat (make-string (or (org-current-level) 1) ?*) " "))
-	 lower-case-p)
-    (if (let (case-fold-search) (string-match "#\\+begin_src" block))
-	(setq lower-case-p t))
+	 (lower-case-p (and block
+			    (let (case-fold-search)
+			      (org-string-match-p "#\\+begin_src" block)))))
     (if info
         (mapc
          (lambda (place)
