@@ -9685,8 +9685,8 @@ of contents entirely, by configuring the variable @code{org-export-with-toc},
 or on a per-file basis with a line like
 
 @example
-#+OPTIONS: toc:2          (only to two levels in TOC)
-#+OPTIONS: toc:nil        (no default TOC at all)
+#+OPTIONS: toc:2          @r{only inlcude two levels in TOC}
+#+OPTIONS: toc:nil        @r{no default TOC at all}
 @end example
 
 If you would like to move the table of contents to a different location, you
@@ -9695,9 +9695,9 @@ should turn off the default table using @code{org-export-with-toc} or
 location(s).
 
 @example
-#+OPTIONS: toc:nil        (no default TOC)
+#+OPTIONS: toc:nil        @r{no default TOC}
 ...
-#+TOC: headlines 2        (insert TOC here, with two headline levels)
+#+TOC: headlines 2        @r{insert TOC here, with two headline levels}
 @end example
 
 Moreover, if you append @samp{local} parameter, the table contains only
@@ -9709,15 +9709,15 @@ parameter becomes relative to the current level.
 
 @example
 * Section
-#+TOC: headlines 1 local  (insert local TOC, with direct children only)
+#+TOC: headlines 1 local  @r{insert local TOC, with direct children only}
 @end example
 
 The same @code{TOC} keyword can also generate a list of all tables (resp.@:
 all listings) with a caption in the document.
 
 @example
-#+TOC: listings           (build a list of listings)
-#+TOC: tables             (build a list of tables)
+#+TOC: listings           @r{build a list of listings}
+#+TOC: tables             @r{build a list of tables}
 @end example
 
 @cindex property, ALT_TITLE
