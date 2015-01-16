@@ -2669,60 +2669,106 @@ block but are passed literally to the \"example-block\"."
       (funcall nb-add (buffer-substring index (point-max))))
     new-body))
 
+(defun org-babel--script-escape-inner (str)
+  (let (in-single in-double backslash out)
+    (mapc
+     (lambda (ch)
+       (setq
+	out
+	(if backslash
+	    (progn
+	      (setq backslash nil)
+	      (cond
+	       ((and in-single (eq ch ?'))
+		;; Escaped single quote inside single quoted string:
+		;; emit just a single quote, since we've changed the
+		;; outer quotes to double.
+		(cons ch out))
+	       ((eq ch ?\")
+		;; Escaped double quote
+		(if in-single
+		    ;; This should be interpreted as backslash+quote,
+		    ;; not an escape.  Emit a three backslashes
+		    ;; followed by a quote (because one layer of
+		    ;; quoting will be stripped by `org-babel-read').
+		    (append (list ch ?\\ ?\\ ?\\) out)
+		  ;; Otherwise we are in a double-quoted string.  Emit
+		  ;; a single escaped quote
+		  (append (list ch ?\\) out)))
+	       ((eq ch ?\\)
+		;; Escaped backslash: emit a single escaped backslash
+		(append (list ?\\ ?\\) out))
+	       ;; Other: emit a quoted backslash followed by whatever
+	       ;; the character was (because one layer of quoting will
+	       ;; be stripped by `org-babel-read').
+	       (t (append (list ch ?\\ ?\\) out))))
+	  (case ch
+	    (?\[ (if (or in-double in-single)
+		     (cons ?\[ out)
+		   (cons ?\( out)))
+	    (?\] (if (or in-double in-single)
+		     (cons ?\] out)
+		   (cons ?\) out)))
+	    (?\{ (if (or in-double in-single)
+		     (cons ?\{ out)
+		   (cons ?\( out)))
+	    (?\} (if (or in-double in-single)
+		     (cons ?\} out)
+		   (cons ?\) out)))
+	    (?, (if (or in-double in-single)
+		    (cons ?, out) (cons ?\s out)))
+	    (?\' (if in-double
+		     (cons ?\' out)
+		   (setq in-single (not in-single)) (cons ?\" out)))
+	    (?\" (if in-single
+		     (append (list ?\" ?\\) out)
+		   (setq in-double (not in-double)) (cons ?\" out)))
+	    (?\\ (unless (or in-single in-double)
+		   (error "Can't handle backslash outside string in `org-babel-script-escape'"))
+		 (setq backslash t)
+		 out)
+	    (t  (cons ch out))))))
+     (string-to-list str))
+    (when (or in-single in-double)
+      (error "Unterminated string in `org-babel-script-escape'."))
+    (apply #'string (reverse out))))
+
 (defun org-babel-script-escape (str &optional force)
   "Safely convert tables into elisp lists."
+  (unless (stringp str)
+    (error "`org-babel-script-escape' expects a string."))
   (let ((escaped
-          (if (or force
-                  (and (stringp str)
-                       (> (length str) 2)
-                       (or (and (string-equal "[" (substring str 0 1))
-                                (string-equal "]" (substring str -1)))
-                           (and (string-equal "{" (substring str 0 1))
-                                (string-equal "}" (substring str -1)))
-                           (and (string-equal "(" (substring str 0 1))
-                                (string-equal ")" (substring str -1))))))
-              (org-babel-read
-               (concat
-                "'"
-                (let (in-single in-double out)
-                  (mapc
-                   (lambda (ch)
-                     (setq
-                      out
-                      (case ch
-                        (91 (if (or in-double in-single) ; [
-                                (cons 91 out)
-                              (cons 40 out)))
-                        (93 (if (or in-double in-single) ; ]
-                                (cons 93 out)
-                              (cons 41 out)))
-                        (123 (if (or in-double in-single) ; {
-                                 (cons 123 out)
-                               (cons 40 out)))
-                        (125 (if (or in-double in-single) ; }
-                                 (cons 125 out)
-                               (cons 41 out)))
-                        (44 (if (or in-double in-single) ; ,
-                                (cons 44 out) (cons 32 out)))
-                        (39 (if in-double ; '
-                                (cons 39 out)
-                              (setq in-single (not in-single)) (cons 34 out)))
-                        (34 (if in-single ; "
-                                (append (list 34 32) out)
-                              (setq in-double (not in-double)) (cons 34 out)))
-                        (t  (cons ch out)))))
-                   (string-to-list str))
-                  (apply #'string (reverse out)))))
-            str)))
+	 (cond
+	  ((and (> (length str) 2)
+		(or (and (string-equal "[" (substring str 0 1))
+			 (string-equal "]" (substring str -1)))
+		    (and (string-equal "{" (substring str 0 1))
+			 (string-equal "}" (substring str -1)))
+		    (and (string-equal "(" (substring str 0 1))
+			 (string-equal ")" (substring str -1)))))
+
+	   (concat "'" (org-babel--script-escape-inner str)))
+	  ((or force
+	       (and (> (length str) 2)
+		    (or (and (string-equal "'" (substring str 0 1))
+			     (string-equal "'" (substring str -1)))
+			;; We need to pass double-quoted strings
+			;; through the backslash-twiddling bits, even
+			;; though we don't need to change their
+			;; delimiters.
+			(and (string-equal "\"" (substring str 0 1))
+			     (string-equal "\"" (substring str -1))))))
+	   (org-babel--script-escape-inner str))
+	  (t str))))
     (condition-case nil (org-babel-read escaped) (error escaped))))
 
 (defun org-babel-read (cell &optional inhibit-lisp-eval)
   "Convert the string value of CELL to a number if appropriate.
-Otherwise if cell looks like lisp (meaning it starts with a
-\"(\", \"'\", \"`\" or a \"[\") then read it as lisp,
-otherwise return it unmodified as a string.  Optional argument
-NO-LISP-EVAL inhibits lisp evaluation for situations in which is
-it not appropriate."
+Otherwise if CELL looks like lisp (meaning it starts with a
+\"(\", \"'\", \"`\" or a \"[\") then read and evaluate it as
+lisp, otherwise return it unmodified as a string.  Optional
+argument INHIBIT-LISP-EVAL inhibits lisp evaluation for
+situations in which is it not appropriate."
   (if (and (stringp cell) (not (equal cell "")))
       (or (org-babel-number-p cell)
           (if (and (not inhibit-lisp-eval)

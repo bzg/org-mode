@@ -1287,6 +1287,91 @@ echo \"$data\"
 		   (cdr (assq :file (nth 2 (org-babel-get-src-block-info t))))))
     ))
 
+(ert-deftest test-org-babel/script-escape ()
+  ;; Delimited lists of numbers
+  (should (equal '(1 2 3)
+		 (org-babel-script-escape "[1 2 3]")))
+  (should (equal '(1 2 3)
+		 (org-babel-script-escape "{1 2 3}")))
+  (should (equal '(1 2 3)
+		 (org-babel-script-escape "(1 2 3)")))
+  ;; Delimited lists of double-quoted strings
+  (should (equal '("foo" "bar")
+		 (org-babel-script-escape "(\"foo\" \"bar\")")))
+  (should (equal '("foo" "bar")
+		 (org-babel-script-escape "[\"foo\" \"bar\"]")))
+  (should (equal '("foo" "bar")
+		 (org-babel-script-escape "{\"foo\" \"bar\"}")))
+  ;; ... with commas
+  (should (equal '("foo" "bar")
+		 (org-babel-script-escape "(\"foo\", \"bar\")")))
+  (should (equal '("foo" "bar")
+		 (org-babel-script-escape "[\"foo\", \"bar\"]")))
+  (should (equal '("foo" "bar")
+		 (org-babel-script-escape "{\"foo\", \"bar\"}")))
+  ;; Delimited lists of single-quoted strings
+  (should (equal '("foo" "bar")
+		 (org-babel-script-escape "('foo' 'bar')")))
+  (should (equal '("foo" "bar")
+		 (org-babel-script-escape "['foo' 'bar']")))
+  (should (equal '("foo" "bar")
+		 (org-babel-script-escape "{'foo' 'bar'}")))
+  ;; ... with commas
+  (should (equal '("foo" "bar")
+		 (org-babel-script-escape "('foo', 'bar')")))
+  (should (equal '("foo" "bar")
+		 (org-babel-script-escape "['foo', 'bar']")))
+  (should (equal '("foo" "bar")
+		 (org-babel-script-escape "{'foo', 'bar'}")))
+  ;; Single quoted strings
+  (should (equal "foo"
+		 (org-babel-script-escape "'foo'")))
+  ;; ... with internal double quote
+  (should (equal "foo\"bar"
+		 (org-babel-script-escape "'foo\"bar'")))
+  ;; ... with internal backslash
+  (should (equal "foo\\bar"
+		 (org-babel-script-escape "'foo\\bar'")))
+  ;; ... with internal escaped backslash
+  (should (equal "foo\\bar"
+		 (org-babel-script-escape "'foo\\\\bar'")))
+  ;; ... with internal backslash-double quote
+  (should (equal "foo\\\"bar"
+		 (org-babel-script-escape "'foo\\\"bar'")))
+  ;; ... with internal escaped backslash-double quote
+  (should (equal "foo\\\"bar"
+		 (org-babel-script-escape "'foo\\\\\"bar'")))
+  ;; ... with internal escaped single quote
+  (should (equal "foo'bar"
+		 (org-babel-script-escape "'foo\\'bar'")))
+  ;; ... with internal escaped backslash-escaped single quote
+  (should (equal "foo\\'bar"
+		 (org-babel-script-escape "'foo\\\\\\'bar'")))
+  ;; Double quoted strings
+  (should (equal "foo"
+		 (org-babel-script-escape "\"foo\"")))
+  ;; ... with internal single quote
+  (should (equal "foo'bar"
+		 (org-babel-script-escape "\"foo'bar\"")))
+  ;; ... with internal backslash
+  (should (equal "foo\\bar"
+		 (org-babel-script-escape "\"foo\\bar\"")))
+  ;; ... with internal escaped backslash
+  (should (equal "foo\\bar"
+		 (org-babel-script-escape "\"foo\\\\bar\"")))
+  ;; ... with internal backslash-single quote
+  (should (equal "foo\\'bar"
+		 (org-babel-script-escape "\"foo\\'bar\"")))
+  ;; ... with internal escaped backslash-single quote
+  (should (equal "foo\\'bar"
+		 (org-babel-script-escape "\"foo\\\\'bar\"")))
+  ;; ... with internal escaped double quote
+  (should (equal "foo\"bar"
+		 (org-babel-script-escape "\"foo\\\"bar\"")))
+  ;; ... with internal escaped backslash-escaped double quote
+  (should (equal "foo\\\"bar"
+		 (org-babel-script-escape "\"foo\\\\\\\"bar\""))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
