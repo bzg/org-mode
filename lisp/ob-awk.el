@@ -105,11 +105,6 @@ called by `org-babel-execute-src-block'"
       (mapconcat echo-var var "\n"))
      (t (funcall echo-var var)))))
 
-(defun org-babel-awk-table-or-string (results)
-  "If the results look like a table, then convert them into an
-Emacs-lisp table, otherwise return the results as a string."
-  (org-babel-script-escape results))
-
 (provide 'ob-awk)
 
 
