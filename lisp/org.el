@@ -22237,15 +22237,6 @@ block from point."
 	      names))
       nil)))
 
-(defun org-in-drawer-p ()
-  "Non-nil if point is within a drawer.
-If point is within a drawer, return it, as parsed data."
-  (let ((element (save-match-data (org-element-at-point))))
-    (while (and element (not (memq (org-element-type element)
-				   '(drawer property-drawer))))
-      (setq element (org-element-property :parent element)))
-    element))
-
 (defun org-occur-in-agenda-files (regexp &optional nlines)
   "Call `multi-occur' with buffers for all agenda files."
   (interactive "sOrg-files matching: \np")
