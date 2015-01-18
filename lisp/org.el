@@ -6983,34 +6983,33 @@ With a numeric prefix, show all headlines up to that level."
 (defun org-set-visibility-according-to-property (&optional no-cleanup)
   "Switch subtree visibilities according to :VISIBILITY: property."
   (interactive)
-  (let (org-show-entry-below state)
-    (save-excursion
-      (goto-char (point-min))
-      (while (re-search-forward
-	      "^[ \t]*:VISIBILITY:[ \t]+\\([a-z]+\\)"
-	      nil t)
-	(setq state (match-string 1))
-	(save-excursion
-	  (org-back-to-heading t)
-	  (hide-subtree)
-	  (org-reveal)
-	  (cond
-	   ((equal state '("fold" "folded"))
-	    (hide-subtree))
-	   ((equal state "children")
-	    (org-show-hidden-entry)
-	    (show-children))
-	   ((equal state "content")
-	    (save-excursion
-	      (save-restriction
-		(org-narrow-to-subtree)
-		(org-content))))
-	   ((member state '("all" "showall"))
-	    (show-subtree)))))
-      (unless no-cleanup
-	(org-cycle-hide-archived-subtrees 'all)
-	(org-cycle-hide-drawers 'all)
-	(org-cycle-show-empty-lines 'all)))))
+  (let (org-show-entry-below)
+    (org-with-wide-buffer
+     (goto-char (point-min))
+     (while (re-search-forward "^[ \t]*:VISIBILITY:" nil t)
+       (if (not (org-at-property-p)) (outline-next-heading)
+	 (let ((state (match-string 3)))
+	   (save-excursion
+	     (org-back-to-heading t)
+	     (hide-subtree)
+	     (org-reveal)
+	     (cond
+	      ((equal state "folded")
+	       (hide-subtree))
+	      ((equal state "children")
+	       (org-show-hidden-entry)
+	       (show-children))
+	      ((equal state "content")
+	       (save-excursion
+		 (save-restriction
+		   (org-narrow-to-subtree)
+		   (org-content))))
+	      ((member state '("all" "showall"))
+	       (show-subtree)))))))
+     (unless no-cleanup
+       (org-cycle-hide-archived-subtrees 'all)
+       (org-cycle-hide-drawers 'all)
+       (org-cycle-show-empty-lines 'all)))))
 
 ;; This function uses outline-regexp instead of the more fundamental
 ;; org-outline-regexp so that org-cycle-global works outside of Org
