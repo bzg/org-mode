@@ -19264,13 +19264,14 @@ INCLUDE-LINKED is passed to `org-display-inline-images'."
   (if org-inline-image-overlays
       (progn
 	(org-remove-inline-images)
-	(message "Inline image display turned off"))
+	(when (org-called-interactively-p 'interactive)
+	  (message "Inline image display turned off")))
     (org-display-inline-images include-linked)
-    (if (and (org-called-interactively-p)
-	     org-inline-image-overlays)
-	(message "%d images displayed inline"
-		 (length org-inline-image-overlays))
-      (message "No images to display inline"))))
+    (when (org-called-interactively-p 'interactive)
+      (message (if org-inline-image-overlays
+		   (format "%d images displayed inline"
+			   (length org-inline-image-overlays))
+		 "No images to display inline")))))
 
 (defun org-redisplay-inline-images ()
   "Refresh the display of inline images."
