@@ -19021,6 +19021,16 @@ share a good deal of logic."
        (plist-get info :latex-header)))
      info)))
 
+(defun org--get-display-dpi ()
+  "Get the DPI of the display.
+
+Assumes that the display has the same pixel width in the
+horizontal and vertical directions."
+  (if (display-graphic-p)
+      (round (/ (display-pixel-height)
+		(/ (display-mm-height) 25.4)))
+    (error "Attempt to calculate the dpi of a non-graphic display.")))
+
 ;; This function borrows from Ganesh Swami's latex2png.el
 (defun org-create-formula-image-with-dvipng (string tofile options buffer)
   "This calls dvipng."
@@ -19033,11 +19043,10 @@ share a good deal of logic."
 	 (texfile (concat texfilebase ".tex"))
 	 (dvifile (concat texfilebase ".dvi"))
 	 (pngfile (concat texfilebase ".png"))
-	 (fnh (if (featurep 'xemacs)
-                  (font-height (face-font 'default))
-                (face-attribute 'default :height nil)))
 	 (scale (or (plist-get options (if buffer :scale :html-scale)) 1.0))
-	 (dpi (number-to-string (* scale (floor (* 0.9 (if buffer fnh 140.))))))
+	 ;; This assumes that the display has the same pixel width in
+	 ;; the horizontal and vertical directions
+	 (dpi (number-to-string (* scale (if buffer (org--get-display-dpi) 120))))
 	 (fg (or (plist-get options (if buffer :foreground :html-foreground))
 		 "Black"))
 	 (bg (or (plist-get options (if buffer :background :html-background))
@@ -19095,11 +19104,8 @@ share a good deal of logic."
 	 (texfile (concat texfilebase ".tex"))
 	 (pdffile (concat texfilebase ".pdf"))
 	 (pngfile (concat texfilebase ".png"))
-	 (fnh (if (featurep 'xemacs)
-                  (font-height (face-font 'default))
-                (face-attribute 'default :height nil)))
 	 (scale (or (plist-get options (if buffer :scale :html-scale)) 1.0))
-	 (dpi (number-to-string (* scale (floor (if buffer fnh 120.)))))
+	 (dpi (number-to-string (* scale (if buffer (org--get-display-dpi) 120))))
 	 (fg (or (plist-get options (if buffer :foreground :html-foreground))
 		 "black"))
 	 (bg (or (plist-get options (if buffer :background :html-background))
