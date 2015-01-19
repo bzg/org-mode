@@ -465,8 +465,7 @@ or new, let the user edit the definition of the footnote."
 	    ((member org-footnote-auto-label '(t plain))
 	     propose)
 	    ((equal org-footnote-auto-label 'random)
-	     (require 'org-id)
-	     (substring (org-id-uuid) 0 8))
+	     (format "fn:%x" (random #x100000000)))
 	    (t
 	     (org-icompleting-read
 	      "Label (leave empty for anonymous): "
