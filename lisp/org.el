@@ -19412,34 +19412,38 @@ boundaries."
 (define-key org-mode-map [remap outline-promote] 'org-promote-subtree)
 (define-key org-mode-map [remap outline-demote] 'org-demote-subtree)
 (define-key org-mode-map [remap outline-insert-heading] 'org-ctrl-c-ret)
+(define-key org-mode-map [remap outline-next-visible-heading]
+  'org-next-visible-heading)
+(define-key org-mode-map [remap outline-previous-visible-heading]
+  'org-previous-visible-heading)
 
 ;; Outline functions from `outline-mode-prefix-map' that can not
 ;; be remapped in Org:
-;;
+
 ;; - the column "key binding" shows whether the Outline function is still
 ;;   available in Org mode on the same key that it has been bound to in
 ;;   Outline mode:
 ;;   - "overridden": key used for a different functionality in Org mode
 ;;   - else: key still bound to the same Outline function in Org mode
-;;
-;; | Outline function                   | key binding | Org replacement       |
-;; |------------------------------------+-------------+-----------------------|
-;; | `outline-next-visible-heading'     | `C-c C-n'   | still same function   |
-;; | `outline-previous-visible-heading' | `C-c C-p'   | still same function   |
-;; | `outline-up-heading'               | `C-c C-u'   | still same function   |
-;; | `outline-move-subtree-up'          | overridden  | better: org-shiftup   |
-;; | `outline-move-subtree-down'        | overridden  | better: org-shiftdown |
-;; | `show-entry'                       | overridden  | no replacement        |
-;; | `show-children'                    | `C-c C-i'   | visibility cycling    |
-;; | `show-branches'                    | `C-c C-k'   | still same function   |
-;; | `show-subtree'                     | overridden  | visibility cycling    |
-;; | `show-all'                         | overridden  | no replacement        |
-;; | `hide-subtree'                     | overridden  | visibility cycling    |
-;; | `hide-body'                        | overridden  | no replacement        |
-;; | `hide-entry'                       | overridden  | visibility cycling    |
-;; | `hide-leaves'                      | overridden  | no replacement        |
-;; | `hide-sublevels'                   | overridden  | no replacement        |
-;; | `hide-other'                       | overridden  | no replacement        |
+
+;; | Outline function                   | key binding | Org replacement          |
+;; |------------------------------------+-------------+--------------------------|
+;; | `outline-next-visible-heading'     | `C-c C-n'   | better: skip inlinetasks |
+;; | `outline-previous-visible-heading' | `C-c C-p'   | better: skip inlinetasks |
+;; | `outline-up-heading'               | `C-c C-u'   | still same function      |
+;; | `outline-move-subtree-up'          | overridden  | better: org-shiftup      |
+;; | `outline-move-subtree-down'        | overridden  | better: org-shiftdown    |
+;; | `show-entry'                       | overridden  | no replacement           |
+;; | `show-children'                    | `C-c C-i'   | visibility cycling       |
+;; | `show-branches'                    | `C-c C-k'   | still same function      |
+;; | `show-subtree'                     | overridden  | visibility cycling       |
+;; | `show-all'                         | overridden  | no replacement           |
+;; | `hide-subtree'                     | overridden  | visibility cycling       |
+;; | `hide-body'                        | overridden  | no replacement           |
+;; | `hide-entry'                       | overridden  | visibility cycling       |
+;; | `hide-leaves'                      | overridden  | no replacement           |
+;; | `hide-sublevels'                   | overridden  | no replacement           |
+;; | `hide-other'                       | overridden  | no replacement           |
 
 ;; Make `C-c C-x' a prefix key
 (org-defkey org-mode-map "\C-c\C-x" (make-sparse-keymap))
@@ -19679,8 +19683,8 @@ boundaries."
 (defconst org-speed-commands-default
   '(
     ("Outline Navigation")
-    ("n" . (org-speed-move-safe 'outline-next-visible-heading))
-    ("p" . (org-speed-move-safe 'outline-previous-visible-heading))
+    ("n" . (org-speed-move-safe 'org-next-visible-heading))
+    ("p" . (org-speed-move-safe 'org-previous-visible-heading))
     ("f" . (org-speed-move-safe 'org-forward-heading-same-level))
     ("b" . (org-speed-move-safe 'org-backward-heading-same-level))
     ("F" . org-next-block)
@@ -24081,6 +24085,26 @@ non-nil it will also look at invisible ones."
 Stop at the first and last subheadings of a superior heading."
   (interactive "p")
   (org-forward-heading-same-level (if arg (- arg) -1) invisible-ok))
+
+(defun org-next-visible-heading (arg)
+  "Move to the next visible heading, respecting Org mode-specific structures.
+
+This function wraps `outline-next-visible-heading' with
+`org-with-limited-levels' in order to skip over inline tasks and
+resepct customization of `org-odd-levels-only'."
+  (interactive "p")
+  (org-with-limited-levels
+   (outline-next-visible-heading arg)))
+
+(defun org-previous-visible-heading (arg)
+  "Move to the next visible heading, respecting Org mode-specific structures.
+
+This function wraps `outline-previous-visible-heading' with
+`org-with-limited-levels' in order to skip over inline tasks and
+resepct customization of `org-odd-levels-only'."
+  (interactive "p")
+  (org-with-limited-levels
+   (outline-previous-visible-heading arg)))
 
 (defun org-next-block (arg &optional backward block-regexp)
   "Jump to the next block.
