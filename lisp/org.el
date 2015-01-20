@@ -10685,41 +10685,26 @@ link in a property drawer line."
     (setq org-window-config-before-follow-link (current-window-configuration))
     (org-remove-occur-highlights nil nil t)
     (unless (run-hook-with-args-until-success 'org-open-at-point-functions)
-      (let* ((context (org-element-context)) type value)
-	;; On an unsupported type, check if point is contained within
-	;; a support one.
-	(while (and (not (memq (setq type (org-element-type context))
-			       '(comment comment-block
-					 headline inlinetask link
-					 footnote-definition footnote-reference
-					 node-property timestamp)))
-		    (setq context (org-element-property :parent context))))
-	(setq value (org-element-property :value context))
+      (let* ((context
+	      ;; Only consider supported types, even if they are not
+	      ;; the closest one.
+	      (org-element-lineage
+	       (org-element-context)
+	       '(comment comment-block footnote-definition footnote-reference
+			 headline inlinetask link node-property timestamp)
+	       t))
+	     (type (org-element-type context))
+	     (value (org-element-property :value context)))
 	(cond
-	 ;; Blank lines at the beginning of buffer: bail out.
 	 ((not context) (user-error "No link found"))
-	 ;; Exception n°1: links in property drawers
-	 ((eq type 'node-property)
-	  (org-open-link-from-string
-	   (and (string-match org-any-link-re value)
-		(match-string-no-properties 0 value))))
-	 ;; Exception n°2: links in comments.
-	 ((memq type '(comment comment-block))
-	  (save-excursion
-	    (skip-chars-forward "\\S-" (point-at-eol))
-	    (let ((string-rear (replace-regexp-in-string
-				"^[ \t]*# [ \t]*" ""
-				(buffer-substring (point) (line-beginning-position))))
-		  (string-front (buffer-substring (point) (line-end-position))))
-	      (with-temp-buffer
-		(let ((org-inhibit-startup t)) (org-mode))
-		(insert value)
-		(goto-char (point-min))
-		(when (and (search-forward string-rear nil t)
-			   (search-forward string-front (line-end-position) t))
-		  (goto-char (match-beginning 0))
-		  (org-open-at-point)
-		  (when (string= string-rear "") (forward-char)))))))
+	 ;; Exception: open timestamps and links in properties drawers
+	 ;; and comments.
+	 ((memq type '(comment comment-block node-property))
+	  (cond ((org-at-regexp-p org-any-link-re)
+		 (org-open-link-from-string (match-string-no-properties 0)))
+		((or (org-at-timestamp-p t) (org-at-date-range-p t))
+		 (org-follow-timestamp-link))
+		(t (user-error "No link found"))))
 	 ;; On a headline or an inlinetask, but not on a timestamp,
 	 ;; a link, a footnote reference or on tags.
 	 ((and (memq type '(headline inlinetask))
