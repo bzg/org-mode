@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011-2015 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 3.1.0
+;; Version: 3.1.1
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -65,6 +65,9 @@
 
 ;;; Change Log:
 
+;;   [2015-01-20 Mo] Version 3.1.1:
+;;   - Bugfix for delete within occur
+;;
 ;;   [2015-01-19 Mo] Version 3.1.0:
 ;;   - Rewrote command "occur" with overlays in an indirect buffer
 ;;   - Removed function `org-index-copy-references-from-heading-to-property'
@@ -166,7 +169,7 @@
   :group 'org-index)
 
 ;; Version of this package
-(defvar org-index-version "3.1.0" "Version of `org-index', format is major.minor.bugfix, where \"major\" is a change in index-table and \"minor\" are new features.")
+(defvar org-index-version "3.1.1" "Version of `org-index', format is major.minor.bugfix, where \"major\" is a change in index-table and \"minor\" are new features.")
 
 ;; Variables to hold the configuration of the index table
 (defvar org-index--maxref nil "Maximum number from reference table (e.g. \"153\").")
@@ -199,6 +202,8 @@
 (defvar org-index--message-text nil "Text that was issued as an explanation; helpful for regression tests.")
 (defvar org-index--occur-help-text nil "Text for help in occur buffer.")
 (defvar org-index--occur-help-overlay nil "Overlay for help in occur buffer.")
+(defvar org-index--occur-stack nil "Stack with overlays for hiding lines.")
+(defvar org-index--occur-tail-overlay nil "Overlay to cover invisible lines.")
 
 ;; static information for this program package
 (defconst org-index--commands '(occur add delete head enter leave ref help example reorder sort multi-occur highlight statistics) "List of commands available.")
@@ -255,7 +260,7 @@ as created by this package; they are well suited to be used
 outside of org.  Links are normal `org-mode' links.
 
 
-This is version 3.1.0 of org-index.el .
+This is version 3.1.1 of org-index.el .
 
 
 The function `org-index' operates on a dedicated table, the index
@@ -670,16 +675,17 @@ first letter of a subcommand, so that `C-c i a' invokes the
 subcommand \"add\". Subcommands available are occur, add, delete,
 head, enter, leave and ref. As a special case `C-c i i' invokes
 `org-index' to let you choose."
+  (interactive)
   (define-prefix-command 'org-index-map)
   (global-set-key (kbd "C-c i") 'org-index-map)
-  (define-key org-index-map (kbd "i") (lambda () (interactive) (org-index)))
-  (define-key org-index-map (kbd "o") (lambda () (interactive) (org-index 'occur)))
-  (define-key org-index-map (kbd "a") (lambda () (interactive) (org-index 'add)))
-  (define-key org-index-map (kbd "d") (lambda () (interactive) (org-index 'delete)))
-  (define-key org-index-map (kbd "h") (lambda () (interactive) (org-index 'head)))
-  (define-key org-index-map (kbd "e") (lambda () (interactive) (org-index 'enter)))
-  (define-key org-index-map (kbd "l") (lambda () (interactive) (org-index 'leave)))
-  (define-key org-index-map (kbd "r") (lambda () (interactive) (org-index 'ref))))
+  (define-key org-index-map (kbd "i") (lambda () (interactive) (message nil) (org-index)))
+  (define-key org-index-map (kbd "o") (lambda () (interactive) (message nil) (org-index 'occur)))
+  (define-key org-index-map (kbd "a") (lambda () (interactive) (message nil) (org-index 'add)))
+  (define-key org-index-map (kbd "d") (lambda () (interactive) (message nil) (org-index 'delete)))
+  (define-key org-index-map (kbd "h") (lambda () (interactive) (message nil) (org-index 'head)))
+  (define-key org-index-map (kbd "e") (lambda () (interactive) (message nil) (org-index 'enter)))
+  (define-key org-index-map (kbd "l") (lambda () (interactive) (message nil) (org-index 'leave)))
+  (define-key org-index-map (kbd "r") (lambda () (interactive) (message nil) (org-index 'ref))))
 
 
 (defun org-index-new-line (&rest keys-values)
@@ -894,7 +900,7 @@ argument VALUE specifies the value to search for."
             ;; read one character
             (while (not (memq char (append (number-sequence ?0 ?9) (list ?c ?l ?. ?\C-m))))
               ;; start with short prompt but give more help on next iteration
-              (setq prompt "Please specify, where to go (0-9.l<return> or ?): ")
+              (setq prompt "Please specify, where to go (0-9.l<return> or ? for help): ")
               (setq char (read-char prompt))
               (setq prompt "Digits specify a reference number to got to, `.' goes to index line of current node, `l' to last line created and <return> to top of index. Please choose: "))
 
@@ -1804,7 +1810,6 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
         (lines-found 0)                      ; number of lines found
         words                                ; list words that should match
         occur-buffer
-        stack ; stack of lists of structs with overlays for hiding; used within called functions
         begin ; position of first line
         narrow                         ; start of narrowed buffer
         help-text                      ; cons with help text short and long
@@ -1814,7 +1819,6 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
         in-c-backspace                 ; true, while processing C-backspace
         show-headings                  ; true, if headings should be shown
         help-overlay                   ; Overlay with help text
-        tail-overlay                   ; To cover unsearched tail
         last-point                     ; Last position before end of search
         key                            ; input from user
         key-sequence)                  ; as a sequence
@@ -1831,6 +1835,10 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
     (setq font-lock-keywords-case-fold-search t)
     (setq case-fold-search t)
 
+    ;; reset stack and overlays
+    (setq org-index--occur-stack nil)
+    (setq org-index--occur-tail-overlay nil)
+    
     ;; narrow to table rows and one line before
     (goto-char (marker-position org-index--below-hline))
     (forward-line 0)
@@ -1856,8 +1864,8 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
     (setq help-overlay (make-overlay (point-min) begin))
     (overlay-put help-overlay 'display (car help-text))
     (overlay-put help-overlay 'face 'org-agenda-dimmed-todo-face)
-    (setq tail-overlay (make-overlay (point-max) (point-max)))
-    (overlay-put tail-overlay 'invisible t)
+    (setq org-index--occur-tail-overlay (make-overlay (point-max) (point-max)))
+    (overlay-put org-index--occur-tail-overlay 'invisible t)
 
     (while (not done)
 
@@ -1901,9 +1909,9 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
             (setq in-c-backspace nil))
 
           ;; free top list of overlays and remove list
-          (setq lines-found (or (org-index--unhide stack) lines-wanted))
-          (move-overlay tail-overlay
-                        (if stack (cdr (assoc :end-of-visible (car stack)))
+          (setq lines-found (or (org-index--unhide) lines-wanted))
+          (move-overlay org-index--occur-tail-overlay
+                        (if org-index--occur-stack (cdr (assoc :end-of-visible (car org-index--occur-stack)))
                           (point-max))
                         (point-max))
         
@@ -1939,10 +1947,10 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
                 
         ;; make overlays to hide lines, that do not match longer word any more
         (goto-char begin)
-        (setq lines-found (org-index--hide-with-overlays (cons word words) lines-wanted stack tail-overlay))
-        (move-overlay tail-overlay
-                      (if stack (cdr (assoc :end-of-visible (car stack)))
-                        (point-max))                      
+        (setq lines-found (org-index--hide-with-overlays (cons word words) lines-wanted))
+        (move-overlay org-index--occur-tail-overlay
+                      (if org-index--occur-stack (cdr (assoc :end-of-visible (car org-index--occur-stack)))
+                        (point-max))
                       (point-max))
         
         (goto-char begin)
@@ -2071,9 +2079,9 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
                       other))
 
 
-(defun org-index--hide-with-overlays (words lines-wanted stack tail-overlay)
-  "Hide text that is currently visible and does not match WORDS by creating overlays and add them to STACK; TAIL-OVERLAY gives end of visible region.Leave LINES-WANTED lines visible."
-  (let ((symbol (intern (format "org-index-%d" (length stack))))
+(defun org-index--hide-with-overlays (words lines-wanted)
+  "Hide text that is currently visible and does not match WORDS by creating overlays; leave LINES-WANTED lines visible."
+  (let ((symbol (intern (format "org-index-%d" (length org-index--occur-stack))))
         (lines-found 0)
         (end-of-visible (point))
         overlay overlays start matched)
@@ -2086,7 +2094,7 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
       (while (and (not (eobp))
                   (and
                    (invisible-p (point))
-                   (< (point) (overlay-start tail-overlay))))
+                   (< (point) (overlay-start org-index--occur-tail-overlay))))
         (goto-char (overlay-end (car (overlays-at (point))))))
 
       ;; find stretch of lines, that are currently visible but should be invisible now
@@ -2096,7 +2104,7 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
                   (not
                    (and
                     (invisible-p (point))
-                    (< (point) (overlay-start tail-overlay))))
+                    (< (point) (overlay-start org-index--occur-tail-overlay))))
                   (not (and (org-index--test-words words)
                             (setq matched t)))) ; for its side effect
         (forward-line 1))
@@ -2114,12 +2122,12 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
         (incf lines-found)))
     
     ;; put new list on top of stack
-    (setq stack
+    (setq org-index--occur-stack
           (cons (list (cons :symbol symbol)
                       (cons :overlays overlays)
                       (cons :end-of-visible end-of-visible)
                       (cons :lines lines-found))
-                stack))
+                org-index--occur-stack))
 
     ;; make lines invisible
     (add-to-invisibility-spec symbol)
@@ -2127,19 +2135,19 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
     lines-found))
 
 
-(defun org-index--unhide (stack)
-  "Unhide text that does has been hidden by `org-index--hide-with-overlays' remove them from STACK."
-  (when stack
+(defun org-index--unhide ()
+  "Unhide text that does has been hidden by `org-index--hide-with-overlays'."
+  (when org-index--occur-stack
     ;; make text visible again
-    (remove-from-invisibility-spec (cdr (assoc :symbol (car stack))))
+    (remove-from-invisibility-spec (cdr (assoc :symbol (car org-index--occur-stack))))
     ;; delete overlays
     (mapc (lambda (y)
             (delete-overlay y))
-          (cdr (assoc :overlays (car stack))))
+          (cdr (assoc :overlays (car org-index--occur-stack))))
           ;; remove from stack
-    (setq stack (cdr stack))
+    (setq org-index--occur-stack (cdr org-index--occur-stack))
     ;; return number of lines, that are now visible
-    (if stack (cdr (assoc :lines (car stack))))))
+    (if org-index--occur-stack (cdr (assoc :lines (car org-index--occur-stack))))))
 
 
 (defun org-index--test-words (words)
