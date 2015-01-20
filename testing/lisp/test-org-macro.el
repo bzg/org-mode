@@ -76,6 +76,30 @@
       (org-macro-replace-all org-macro-templates)
       (buffer-string)))))
 
+(ert-deftest test-org-macro/escape-arguments ()
+  "Test `org-macro-escape-arguments' specifications."
+  ;; Regular tests.
+  (should (equal "a" (org-macro-escape-arguments "a")))
+  (should (equal "a,b" (org-macro-escape-arguments "a" "b")))
+  ;; Handle empty arguments.
+  (should (equal "a,,b" (org-macro-escape-arguments "a" "" "b")))
+  ;; Properly escape commas and backslashes preceding them.
+  (should (equal "a\\,b" (org-macro-escape-arguments "a,b")))
+  (should (equal "a\\\\,b" (org-macro-escape-arguments "a\\" "b")))
+  (should (equal "a\\\\\\,b" (org-macro-escape-arguments "a\\,b"))))
+
+(ert-deftest test-org-macro/extract-arguments ()
+  "Test `org-macro-extract-arguments' specifications."
+  ;; Regular tests.
+  (should (equal '("a") (org-macro-extract-arguments "a")))
+  (should (equal '("a" "b") (org-macro-extract-arguments "a,b")))
+  ;; Handle empty arguments.
+  (should (equal '("a" "" "b") (org-macro-extract-arguments "a,,b")))
+  ;; Handle escaped commas and backslashes.
+  (should (equal '("a,b") (org-macro-extract-arguments "a\\,b")))
+  (should (equal '("a\\" "b") (org-macro-extract-arguments "a\\\\,b")))
+  (should (equal '("a\\,b") (org-macro-extract-arguments "a\\\\\\,b"))))
+
 
 (provide 'test-org-macro)
 ;;; test-org-macro.el ends here

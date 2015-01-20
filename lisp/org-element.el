@@ -3091,18 +3091,7 @@ Assume point is at the macro."
 			       (skip-chars-forward " \t")))
 	    (end (point))
 	    (args (let ((args (org-match-string-no-properties 3)))
-		    (when args
-		      ;; Do not use `org-split-string' since empty
-		      ;; strings are meaningful here.
-		      (split-string
-		       (replace-regexp-in-string
-			"\\(\\\\*\\)\\(,\\)"
-			(lambda (str)
-			  (let ((len (length (match-string 1 str))))
-			    (concat (make-string (/ len 2) ?\\)
-				    (if (zerop (mod len 2)) "\000" ","))))
-			args nil t)
-		       "\000")))))
+		    (and args (org-macro-extract-arguments args)))))
 	(list 'macro
 	      (list :key key
 		    :value value
