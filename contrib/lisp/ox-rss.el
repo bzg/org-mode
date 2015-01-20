@@ -42,6 +42,9 @@
 ;; PUBDATE property.  If `org-rss-use-entry-url-as-guid', it will also add
 ;; an ID property, later used as the guid for the feed's item.
 ;;
+;; The top-level headline is used as the title of each RSS item unless
+;; an RSS_TITLE property is set on the headline.
+;;
 ;; You typically want to use it within a publishing project like this:
 ;;
 ;; (add-to-list
@@ -244,11 +247,12 @@ communication channel."
 			  (format-time-string
 			   "%a, %d %b %Y %H:%M:%S %z"
 			   (org-time-string-to-time pubdate0)))))
-	   (title (replace-regexp-in-string
-		   org-bracket-link-regexp
-		   (lambda (m) (or (match-string 3 m)
-				   (match-string 1 m)))
-		   (org-element-property :raw-value headline)))
+	   (title (or (org-element-property :RSS_TITLE headline)
+		      (replace-regexp-in-string
+		       org-bracket-link-regexp
+		       (lambda (m) (or (match-string 3 m)
+				  (match-string 1 m)))
+		       (org-element-property :raw-value headline))))
 	   (publink
 	    (or (and hl-perm (concat (or hl-home hl-pdir) hl-perm))
 		(concat
