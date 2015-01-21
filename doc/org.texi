@@ -10749,10 +10749,11 @@ Toggle inclusion of inlinetasks (@code{org-export-with-inlinetasks}).
 
 @item num:
 @vindex org-export-with-section-numbers
+@cindex property, UNNUMBERED
 Toggle section-numbers (@code{org-export-with-section-numbers}).  It can also
 be set to a number @samp{n}, so only headlines at that level or above will be
-numbered. Finally, irrespective of the level of a specific headline, the
-numbering of it can be disabled by setting the @samp{UNNUMBERED} property to
+numbered.  Finally, irrespective of the level of a specific headline, the
+numbering of it can be disabled by setting the @code{UNNUMBERED} property to
 non-nil.  This also affects subheadings.
 
 @item p:
@@ -10828,7 +10829,7 @@ settings that cannot be changed using specific keywords.
 @cindex property, EXPORT_FILE_NAME
 The name of the output file to be generated is taken from the file associated
 to the buffer, when possible, or asked to you otherwise.  For subtree export,
-you can also set @samp{EXPORT_FILE_NAME} property.  In all cases, only the
+you can also set @code{EXPORT_FILE_NAME} property.  In all cases, only the
 base name of the file is retained, and a back-end specific extension is
 added.
 
