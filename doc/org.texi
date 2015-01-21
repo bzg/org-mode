@@ -10751,7 +10751,9 @@ Toggle inclusion of inlinetasks (@code{org-export-with-inlinetasks}).
 @vindex org-export-with-section-numbers
 Toggle section-numbers (@code{org-export-with-section-numbers}).  It can also
 be set to a number @samp{n}, so only headlines at that level or above will be
-numbered.
+numbered. Finally, irrespective of the level of a specific headline, the
+numbering of it can be disabled by setting the @samp{UNNUMBERED} property to
+non-nil.  This also affects subheadings.
 
 @item p:
 @vindex org-export-with-planning
