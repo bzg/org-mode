@@ -1672,13 +1672,11 @@ Return updated plist."
   ;; Install the parse tree in the communication channel.
   (setq info (plist-put info :parse-tree data))
   ;; Get the list of elements and objects to ignore, and put it into
-  ;; `:ignore-list'.  Do not overwrite any user ignore that might have
-  ;; been done during parse tree filtering.
+  ;; `:ignore-list'.
   (setq info
 	(plist-put info
 		   :ignore-list
-		   (append (org-export--populate-ignore-list data info)
-			   (plist-get info :ignore-list))))
+		   (org-export--populate-ignore-list data info)))
   ;; Compute `:headline-offset' in order to be able to use
   ;; `org-export-get-relative-level'.
   (setq info
@@ -1934,12 +1932,6 @@ a tree with a select tag."
 ;; `org-export-data' or even use a temporary back-end by using
 ;; `org-export-data-with-backend'.
 ;;
-;; Internally, three functions handle the filtering of objects and
-;; elements during the export.  In particular,
-;; `org-export-ignore-element' marks an element or object so future
-;; parse tree traversals skip it and `org-export-expand' transforms
-;; the others back into their original shape.
-;;
 ;; `org-export-transcoder' is an accessor returning appropriate
 ;; translator function for a given element or object.
 
@@ -2163,13 +2155,6 @@ keywords before output."
 		 (org-element--interpret-affiliated-keywords blob))
 	    (funcall (intern (format "org-element-%s-interpreter" type))
 		     blob contents))))
-
-(defun org-export-ignore-element (element info)
-  "Add ELEMENT to `:ignore-list' in INFO.
-
-Any element in `:ignore-list' will be skipped when using
-`org-element-map'.  INFO is modified by side effects."
-  (plist-put info :ignore-list (cons element (plist-get info :ignore-list))))
 
 
 

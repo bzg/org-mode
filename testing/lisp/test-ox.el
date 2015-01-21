@@ -1078,34 +1078,6 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 	    (let ((output (org-export-as (org-test-default-backend))))
 	      (substring output (string-match ".*\n\\'" output)))))))
 
-(ert-deftest test-org-export/user-ignore-list ()
-  "Test if `:ignore-list' accepts user input."
-  (let ((backend (org-test-default-backend)))
-    (setf (org-export-backend-transcoders backend)
-	  (cons '(template . (lambda (body i)
-			       (format "BEGIN\n%sEND" body)))
-		(org-export-backend-transcoders backend)))
-    (org-test-with-temp-text "Text"
-      (should (equal (org-export-as backend nil nil 'body-only)
-		     "Text\n"))
-      (should (equal (org-export-as backend) "BEGIN\nText\nEND"))))
-  (should
-   (equal
-    "* Head1\n"
-    (let ((org-export-filter-parse-tree-functions
-	   '((lambda (data backend info)
-	       ;; Ignore headlines with the word "note" in their title.
-	       (org-element-map data 'headline
-		 (lambda (headline)
-		   (when (string-match "\\<note\\>"
-				       (org-element-property :raw-value
-							     headline))
-		     (org-export-ignore-element headline info)))
-		 info)
-	       data))))
-      (org-test-with-temp-text "* Head1\n* Head2 (note)\n"
-	(org-export-as (org-test-default-backend)))))))
-
 (ert-deftest test-org-export/before-processing-hook ()
   "Test `org-export-before-processing-hook'."
   (should
