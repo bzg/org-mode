@@ -24087,21 +24087,21 @@ Stop at the first and last subheadings of a superior heading."
   (org-forward-heading-same-level (if arg (- arg) -1) invisible-ok))
 
 (defun org-next-visible-heading (arg)
-  "Move to the next visible heading, respecting Org mode-specific structures.
+  "Move to the next visible heading.
 
 This function wraps `outline-next-visible-heading' with
 `org-with-limited-levels' in order to skip over inline tasks and
-resepct customization of `org-odd-levels-only'."
+respect customization of `org-odd-levels-only'."
   (interactive "p")
   (org-with-limited-levels
    (outline-next-visible-heading arg)))
 
 (defun org-previous-visible-heading (arg)
-  "Move to the next visible heading, respecting Org mode-specific structures.
+  "Move to the next visible heading.
 
 This function wraps `outline-previous-visible-heading' with
 `org-with-limited-levels' in order to skip over inline tasks and
-resepct customization of `org-odd-levels-only'."
+respect customization of `org-odd-levels-only'."
   (interactive "p")
   (org-with-limited-levels
    (outline-previous-visible-heading arg)))
