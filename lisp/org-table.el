@@ -3730,16 +3730,16 @@ minutes or seconds."
 
 (defun org-table-fedit-shift-reference (dir)
   (cond
-   ((org-at-regexp-p "\\(\\<[a-zA-Z]\\)&")
+   ((org-in-regexp "\\(\\<[a-zA-Z]\\)&")
     (if (memq dir '(left right))
 	(org-rematch-and-replace 1 (eq dir 'left))
       (user-error "Cannot shift reference in this direction")))
-   ((org-at-regexp-p "\\(\\<[a-zA-Z]\\{1,2\\}\\)\\([0-9]+\\)")
+   ((org-in-regexp "\\(\\<[a-zA-Z]\\{1,2\\}\\)\\([0-9]+\\)")
     ;; A B3-like reference
     (if (memq dir '(up down))
 	(org-rematch-and-replace 2 (eq dir 'up))
       (org-rematch-and-replace 1 (eq dir 'left))))
-   ((org-at-regexp-p
+   ((org-in-regexp
      "\\(@\\|\\.\\.\\)\\([-+]?\\(I+\\>\\|[0-9]+\\)\\)\\(\\$\\([-+]?[0-9]+\\)\\)?")
     ;; An internal reference
     (if (memq dir '(up down))
@@ -3896,21 +3896,21 @@ With prefix ARG, apply the new formulas to the table."
 	  var name e what match dest)
       (if local (org-table-get-specials))
       (setq what (cond
-		  ((org-at-regexp-p "^@[0-9]+[ \t=]")
+		  ((org-in-regexp "^@[0-9]+[ \t=]")
 		   (setq match (concat (substring (match-string 0) 0 -1)
 				       "$1.."
 				       (substring (match-string 0) 0 -1)
 				       "$100"))
 		   'range)
-		  ((or (org-at-regexp-p org-table-range-regexp2)
-		       (org-at-regexp-p org-table-translate-regexp)
-		       (org-at-regexp-p org-table-range-regexp))
+		  ((or (org-in-regexp- org-table-range-regexp2)
+		       (org-in-regexp- org-table-translate-regexp)
+		       (org-in-regexp- org-table-range-regexp))
 		   (setq match
 			 (save-match-data
 			   (org-table-convert-refs-to-rc (match-string 0))))
 		   'range)
-		  ((org-at-regexp-p "\\$[a-zA-Z][a-zA-Z0-9]*") 'name)
-		  ((org-at-regexp-p "\\$[0-9]+") 'column)
+		  ((org-in-regexp "\\$[a-zA-Z][a-zA-Z0-9]*") 'name)
+		  ((org-in-regexp "\\$[0-9]+") 'column)
 		  ((not local) nil)
 		  (t (user-error "No reference at point")))
 	    match (and what (or match (match-string 0))))

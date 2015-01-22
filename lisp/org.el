@@ -10700,7 +10700,7 @@ link in a property drawer line."
 	 ;; Exception: open timestamps and links in properties drawers
 	 ;; and comments.
 	 ((memq type '(comment comment-block node-property))
-	  (cond ((org-at-regexp-p org-any-link-re)
+	  (cond ((org-in-regexp org-any-link-re)
 		 (org-open-link-from-string (match-string-no-properties 0)))
 		((or (org-at-timestamp-p t) (org-at-date-range-p t))
 		 (org-follow-timestamp-link))
@@ -22147,13 +22147,13 @@ and :keyword."
     (setq clist (nreverse (delq nil clist)))
     clist))
 
-;; FIXME: Compare with at-regexp-p Do we need both?
 (defun org-in-regexp (re &optional nlines visually)
-  "Check if point is inside a match of regexp.
-Normally only the current line is checked, but you can include NLINES extra
-lines both before and after point into the search.
-If VISUALLY is set, require that the cursor is not after the match but
-really on, so that the block visually is on the match."
+  "Check if point is inside a match of RE.
+
+Normally only the current line is checked, but you can include
+NLINES extra lines after point into the search.  If VISUALLY is
+set, require that the cursor is not after the match but really
+on, so that the block visually is on the match."
   (catch 'exit
     (let ((pos (point))
           (eol (point-at-eol (+ 1 (or nlines 0))))
@@ -22164,18 +22164,8 @@ really on, so that the block visually is on the match."
 	  (if (and (<= (match-beginning 0) pos)
 		   (>= (+ inc (match-end 0)) pos))
 	      (throw 'exit (cons (match-beginning 0) (match-end 0)))))))))
-
-(defun org-at-regexp-p (regexp)
-  "Is point inside a match of REGEXP in the current line?"
-  (catch 'exit
-    (save-excursion
-      (let ((pos (point)) (end (point-at-eol)))
-	(beginning-of-line 1)
-	(while (re-search-forward regexp end t)
-	  (if (and (<= (match-beginning 0) pos)
-		   (>= (match-end 0) pos))
-	      (throw 'exit t)))
-	nil))))
+(define-obsolete-function-alias 'org-at-regexp-p 'org-in-regexp
+  "Org mode 8.3")
 
 (defun org-between-regexps-p (start-re end-re &optional lim-up lim-down)
   "Non-nil when point is between matches of START-RE and END-RE.
@@ -22196,7 +22186,7 @@ position before START-RE (resp. after END-RE)."
       (save-excursion
 	;; Point is on a block when on START-RE or if START-RE can be
 	;; found before it...
-	(and (or (org-at-regexp-p start-re)
+	(and (or (org-in-regexp start-re)
 		 (re-search-backward start-re limit-up t))
 	     (setq beg (match-beginning 0))
 	     ;; ... and END-RE after it...
