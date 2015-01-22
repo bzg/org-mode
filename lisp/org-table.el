@@ -3902,9 +3902,9 @@ With prefix ARG, apply the new formulas to the table."
 				       (substring (match-string 0) 0 -1)
 				       "$100"))
 		   'range)
-		  ((or (org-in-regexp- org-table-range-regexp2)
-		       (org-in-regexp- org-table-translate-regexp)
-		       (org-in-regexp- org-table-range-regexp))
+		  ((or (org-in-regexp org-table-range-regexp2)
+		       (org-in-regexp org-table-translate-regexp)
+		       (org-in-regexp org-table-range-regexp))
 		   (setq match
 			 (save-match-data
 			   (org-table-convert-refs-to-rc (match-string 0))))
