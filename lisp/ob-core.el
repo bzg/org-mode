@@ -230,7 +230,7 @@ not match KEY should be returned."
 Returns non-nil if match-data set"
   (let ((src-at-0-p (save-excursion
 		      (beginning-of-line 1)
-		      (string= "src" (thing-at-point 'word))))
+		      (org-looking-at-p "src")))
 	(first-line-p (= (line-beginning-position) (point-min)))
 	(orig (point)))
     (let ((search-for (cond ((and src-at-0-p first-line-p  "src_"))
