@@ -39,60 +39,64 @@
 
 (ert-deftest test-ob-lob/call-with-header-arguments ()
   "Test the evaluation of a library of babel #+call: line."
-  (org-test-at-id "fab7e291-fde6-45fc-bf6e-a485b8bca2f0"
-    (move-beginning-of-line 1)
-    (forward-line 6)
-    (message (buffer-substring (point-at-bol) (point-at-eol)))
-    (should (string= "testing" (org-babel-lob-execute
-				(org-babel-lob-get-info))))
-    (forward-line 1)
-    (should (string= "testing" (caar (org-babel-lob-execute
-				      (org-babel-lob-get-info)))))
-    (forward-line 1)
-    (should (string= "testing" (org-babel-lob-execute
-    				(org-babel-lob-get-info))))
-    (forward-line 1)
-    (should (string= "testing" (caar (org-babel-lob-execute
-    				      (org-babel-lob-get-info)))))
-    (forward-line 1)
-    (should (string= "testing" (org-babel-lob-execute
-				(org-babel-lob-get-info))))
-    (forward-line 1)
-    (should (string= "testing" (caar (org-babel-lob-execute
-    				      (org-babel-lob-get-info)))))
-    (forward-line 1) (beginning-of-line) (forward-char 27)
-    (should (string= "testing" (org-babel-lob-execute
-				(org-babel-lob-get-info))))
-    (forward-line 1) (beginning-of-line) (forward-char 27)
-    (should (string= "testing" (caar (org-babel-lob-execute
-				      (org-babel-lob-get-info)))))
-    (forward-line 1) (beginning-of-line)
-    (should (= 4 (org-babel-lob-execute (org-babel-lob-get-info))))
-    (forward-line 1)
-    (should (string= "testing" (org-babel-lob-execute
-				(org-babel-lob-get-info))))
-    (forward-line 1)
-    (should (string= "123" (org-babel-lob-execute (org-babel-lob-get-info))))))
+  (cl-letf (((symbol-function 'org-babel-insert-result)
+	     (symbol-function 'ignore)))
+    (org-test-at-id "fab7e291-fde6-45fc-bf6e-a485b8bca2f0"
+      (move-beginning-of-line 1)
+      (forward-line 6)
+      (message (buffer-substring (point-at-bol) (point-at-eol)))
+      (should (string= "testing" (org-babel-lob-execute
+				  (org-babel-lob-get-info))))
+      (forward-line 1)
+      (should (string= "testing" (caar (org-babel-lob-execute
+					(org-babel-lob-get-info)))))
+      (forward-line 1)
+      (should (string= "testing" (org-babel-lob-execute
+				  (org-babel-lob-get-info))))
+      (forward-line 1)
+      (should (string= "testing" (caar (org-babel-lob-execute
+					(org-babel-lob-get-info)))))
+      (forward-line 1)
+      (should (string= "testing" (org-babel-lob-execute
+				  (org-babel-lob-get-info))))
+      (forward-line 1)
+      (should (string= "testing" (caar (org-babel-lob-execute
+					(org-babel-lob-get-info)))))
+      (forward-line 1) (beginning-of-line) (forward-char 27)
+      (should (string= "testing" (org-babel-lob-execute
+				  (org-babel-lob-get-info))))
+      (forward-line 1) (beginning-of-line) (forward-char 27)
+      (should (string= "testing" (caar (org-babel-lob-execute
+					(org-babel-lob-get-info)))))
+      (forward-line 1) (beginning-of-line)
+      (should (= 4 (org-babel-lob-execute (org-babel-lob-get-info))))
+      (forward-line 1)
+      (should (string= "testing" (org-babel-lob-execute
+				  (org-babel-lob-get-info))))
+      (forward-line 1)
+      (should (string= "123" (org-babel-lob-execute (org-babel-lob-get-info)))))))
 
 (ert-deftest test-ob-lob/export-lob-lines ()
   "Test the export of a variety of library babel call lines."
-  (org-test-at-id "72ddeed3-2d17-4c7f-8192-a575d535d3fc"
-    (org-narrow-to-subtree)
-    (let ((buf (current-buffer))
-	  (string (buffer-string)))
-      (with-temp-buffer
-	(org-mode)
-	(insert string)
-	(org-babel-exp-process-buffer buf)
-	(message (buffer-string))
-	(goto-char (point-min))
-	(should (re-search-forward "^: 0" nil t))
-	(should (re-search-forward "call =2= stuck" nil t))
-	(should (re-search-forward
-		 "exported =call_double(it=2)= because" nil t))
-	(should (re-search-forward "^=6= because" nil t))
-	(should (re-search-forward "results 8 should" nil t))
-	(should (re-search-forward "following 2\\*5==10= should" nil t))))))
+  (let ((org-babel-inline-result-wrap "=%s=")
+	(org-export-babel-evaluate t))
+    (org-test-at-id "72ddeed3-2d17-4c7f-8192-a575d535d3fc"
+      (org-narrow-to-subtree)
+      (let ((buf (current-buffer))
+	    (string (buffer-string)))
+	(with-temp-buffer
+	  (org-mode)
+	  (insert string)
+	  (org-babel-exp-process-buffer buf)
+	  (message (buffer-string))
+	  (goto-char (point-min))
+	  (should (re-search-forward "^: 0" nil t))
+	  (should (re-search-forward "call =2= stuck" nil t))
+	  (should (re-search-forward
+		   "exported =call_double(it=2)= because" nil t))
+	  (should (re-search-forward "^=6= because" nil t))
+	  (should (re-search-forward "results 8 should" nil t))
+	  (should (re-search-forward "following 2\\*5==10= should" nil t)))))))
 
 (ert-deftest test-ob-lob/do-not-eval-lob-lines-in-example-blocks-on-export ()
   (require 'ox)

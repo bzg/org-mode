@@ -400,10 +400,10 @@ the optional argument of the caller.
 
 Note: Just export of a property can be done with a macro: {{{property(a)}}}.
 
-#+NAME: src_block_location_shell sect call
+#+NAME: src_block_location_shell-sect-call
 #+CALL: src_block_location_shell()
 
-#+NAME: src_block_location_elisp sect call
+#+NAME: src_block_location_elisp-sect-call
 #+CALL: src_block_location_elisp()
 
 - sect inline call_src_block_location_shell()
@@ -415,19 +415,19 @@ Note: Just export of a property can be done with a macro: {{{property(a)}}}.
     :c:        4
     :END:
 
-#+NAME: src_block_location_shell sub0 call
+#+NAME: src_block_location_shell-sub0-call
 #+CALL: src_block_location_shell()
 
-#+NAME: src_block_location_elisp sub0 call
+#+NAME: src_block_location_elisp-sub0-call
 #+CALL: src_block_location_elisp()
 
 - sub0 inline call_src_block_location_shell()
 - sub0 inline call_src_block_location_elisp()
 
-#+NAME: src_block_location_shell sub1 call
+#+NAME: src_block_location_shell-sub1-call
 #+CALL: src_block_location_shell(c=5, e=6)
 
-#+NAME: src_block_location_elisp sub1 call
+#+NAME: src_block_location_elisp-sub1-call
 #+CALL: src_block_location_elisp(c=5, e=6)
 
 - sub1 inline call_src_block_location_shell(c=5, e=6)

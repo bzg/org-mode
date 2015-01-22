@@ -274,24 +274,28 @@ Paragraph"
   (should
    (equal
     ""
-    (org-test-with-temp-text "Test"
-      (org-export-as
-       (org-export-create-backend
-	:transcoders
-	'((template . (lambda (text info)
-			(org-element-interpret-data
-			 (plist-get info :title))))))))))
+    (let (org-export-filter-body-functions
+	  org-export-filter-final-output-functions)
+      (org-test-with-temp-text "Test"
+	(org-export-as
+	 (org-export-create-backend
+	  :transcoders
+	  '((template . (lambda (text info)
+			  (org-element-interpret-data
+			   (plist-get info :title)))))))))))
   ;; With a blank TITLE keyword.
   (should
    (equal
     ""
-    (org-test-with-temp-text "#+TITLE:\nTest"
-      (org-export-as
-       (org-export-create-backend
-	:transcoders
-	'((template . (lambda (text info)
-			(org-element-interpret-data
-			 (plist-get info :title))))))))))
+    (let (org-export-filter-body-functions
+	  org-export-filter-final-output-functions)
+      (org-test-with-temp-text "#+TITLE:\nTest"
+	(org-export-as
+	 (org-export-create-backend
+	  :transcoders
+	  '((template . (lambda (text info)
+			  (org-element-interpret-data
+			   (plist-get info :title)))))))))))
   ;; With a non-empty TITLE keyword.
   (should
    (equal
@@ -336,9 +340,11 @@ Paragraph"
   ;; Test exclude tags for headlines and inlinetasks.
   (should
    (equal ""
-	  (org-test-with-temp-text "* Head1 :noexp:"
-	    (org-export-as (org-test-default-backend)
-			   nil nil nil '(:exclude-tags ("noexp"))))))
+	  (let (org-export-filter-body-functions
+		org-export-filter-final-output-functions)
+	    (org-test-with-temp-text "* Head1 :noexp:"
+	      (org-export-as (org-test-default-backend)
+			     nil nil nil '(:exclude-tags ("noexp")))))))
   ;; Test include tags for headlines and inlinetasks.
   (should
    (equal "* H2\n** Sub :exp:\n*** Sub Sub\n"
@@ -375,7 +381,9 @@ Paragraph"
   ;; Ignore tasks.
   (should
    (equal ""
-	  (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+	  (let ((org-todo-keywords '((sequence "TODO" "DONE")))
+		org-export-filter-body-functions
+		org-export-filter-final-output-functions)
 	    (org-test-with-temp-text "* TODO Head1"
 	      (org-export-as (org-test-default-backend)
 			     nil nil nil '(:with-tasks nil))))))
@@ -388,10 +396,12 @@ Paragraph"
   ;; Archived tree.
   (should
    (equal ""
-	  (org-test-with-temp-text "* Head1 :archive:"
-	    (let ((org-archive-tag "archive"))
-	      (org-export-as (org-test-default-backend)
-			     nil nil nil '(:with-archived-trees nil))))))
+	  (let (org-export-filter-body-functions
+		org-export-filter-final-output-functions)
+	    (org-test-with-temp-text "* Head1 :archive:"
+	      (let ((org-archive-tag "archive"))
+		(org-export-as (org-test-default-backend)
+			       nil nil nil '(:with-archived-trees nil)))))))
   (should
    (string-match
     "\\* Head1[ \t]+:archive:"
@@ -414,15 +424,19 @@ Paragraph"
 				  nil nil nil '(:with-clocks t)))))
   (should
    (equal ""
-	  (org-test-with-temp-text "CLOCK: [2012-04-29 sun. 10:45]"
-	    (org-export-as (org-test-default-backend)
-			   nil nil nil '(:with-clocks nil)))))
+	  (let (org-export-filter-body-functions
+		org-export-filter-final-output-functions)
+	    (org-test-with-temp-text "CLOCK: [2012-04-29 sun. 10:45]"
+	      (org-export-as (org-test-default-backend)
+			     nil nil nil '(:with-clocks nil))))))
   ;; Drawers.
   (should
    (equal ""
-	  (org-test-with-temp-text ":TEST:\ncontents\n:END:"
-	    (org-export-as (org-test-default-backend)
-			   nil nil nil '(:with-drawers nil)))))
+	  (let (org-export-filter-body-functions
+		org-export-filter-final-output-functions)
+	    (org-test-with-temp-text ":TEST:\ncontents\n:END:"
+	      (org-export-as (org-test-default-backend)
+			     nil nil nil '(:with-drawers nil))))))
   (should
    (equal ":TEST:\ncontents\n:END:\n"
 	  (org-test-with-temp-text ":TEST:\ncontents\n:END:"
@@ -446,9 +460,11 @@ Paragraph"
 			   '(:with-fixed-width t)))))
   (should
    (equal ""
-	  (org-test-with-temp-text ": A"
-	    (org-export-as (org-test-default-backend) nil nil nil
-			   '(:with-fixed-width nil)))))
+	  (let (org-export-filter-body-functions
+		org-export-filter-final-output-functions)
+	    (org-test-with-temp-text ": A"
+	      (org-export-as (org-test-default-backend) nil nil nil
+			     '(:with-fixed-width nil))))))
   ;; Footnotes.
   (should
    (equal "Footnote?"
@@ -467,14 +483,18 @@ Paragraph"
     (should
      (equal
       ""
-      (let ((org-inlinetask-min-level 15))
+      (let ((org-inlinetask-min-level 15)
+	    org-export-filter-body-functions
+	    org-export-filter-final-output-functions)
 	(org-test-with-temp-text "*************** Task"
 	  (org-export-as (org-test-default-backend)
 			 nil nil nil '(:with-inlinetasks nil))))))
     (should
      (equal
       ""
-      (let ((org-inlinetask-min-level 15))
+      (let ((org-inlinetask-min-level 15)
+	    org-export-filter-body-functions
+	    org-export-filter-final-output-functions)
 	(org-test-with-temp-text
 	    "*************** Task\nContents\n*************** END"
 	  (org-export-as (org-test-default-backend)
@@ -515,9 +535,12 @@ Paragraph"
   ;; Statistics cookies.
   (should
    (equal ""
-	  (org-test-with-temp-text "[0/0]"
-	    (org-export-as (org-test-default-backend)
-			   nil nil nil '(:with-statistics-cookies nil)))))
+	  (let (org-export-filter-body-functions
+		org-export-filter-final-output-functions)
+	    (org-trim
+	     (org-test-with-temp-text "[0/0]"
+	       (org-export-as (org-test-default-backend)
+			      nil nil nil '(:with-statistics-cookies nil)))))))
   ;; Tables.
   (should
    (equal "| A |\n"
@@ -526,9 +549,11 @@ Paragraph"
 			   '(:with-tables t)))))
   (should
    (equal ""
-	  (org-test-with-temp-text "| A |"
-	    (org-export-as (org-test-default-backend) nil nil nil
-			   '(:with-tables nil))))))
+	  (let (org-export-filter-body-functions
+		org-export-filter-final-output-functions)
+	    (org-test-with-temp-text "| A |"
+	      (org-export-as (org-test-default-backend) nil nil nil
+			     '(:with-tables nil)))))))
 
 (ert-deftest test-org-export/with-timestamps ()
   "Test `org-export-with-timestamps' specifications."
@@ -543,9 +568,12 @@ Paragraph"
   (should
    (equal
     ""
-    (org-test-with-temp-text "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>"
-      (org-export-as (org-test-default-backend)
-		     nil nil nil '(:with-timestamps nil)))))
+    (let (org-export-filter-body-functions
+	  org-export-filter-final-output-functions)
+      (org-trim
+       (org-test-with-temp-text "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>"
+	 (org-export-as (org-test-default-backend)
+			nil nil nil '(:with-timestamps nil)))))))
   ;; `active' value.
   (should
    (string-match
@@ -571,8 +599,10 @@ Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
   "Test if export process ignores commented trees."
   (should
    (equal ""
-	  (org-test-with-temp-text "* COMMENT Head1"
-	    (org-export-as (org-test-default-backend))))))
+	  (let (org-export-filter-body-functions
+		org-export-filter-final-output-functions)
+	    (org-test-with-temp-text "* COMMENT Head1"
+	      (org-export-as (org-test-default-backend)))))))
 
 (ert-deftest test-org-export/uninterpreted ()
   "Test handling of uninterpreted elements."
@@ -735,9 +765,10 @@ text
     (goto-char (point-at-eol))
     (should (equal (org-export-as (org-test-default-backend)) "text\n")))
   ;; Subtree with a code block calling another block outside.
-  (should
-   (equal ": 3\n"
-	  (org-test-with-temp-text "
+  (let ((org-export-babel-evaluate t))
+    (should
+     (equal ": 3\n"
+	    (org-test-with-temp-text "
 * Head1
 #+BEGIN_SRC emacs-lisp :noweb yes :exports results
 <<test>>
@@ -747,8 +778,8 @@ text
 #+BEGIN_SRC emacs-lisp
 \(+ 1 2)
 #+END_SRC"
-	    (forward-line 1)
-	    (org-export-as (org-test-default-backend) 'subtree))))
+	      (forward-line 1)
+	      (org-export-as (org-test-default-backend) 'subtree)))))
   ;; Body only.
   (let ((backend (org-test-default-backend)))
     (setf (org-export-backend-transcoders backend)
@@ -1940,7 +1971,9 @@ Paragraph[fn:1]"
     (should
      (equal
       ""
-      (let ((org-inlinetask-min-level 3))
+      (let ((org-inlinetask-min-level 3)
+	    org-export-filter-body-functions
+	    org-export-filter-final-output-functions)
 	(org-test-with-temp-text "*** Inlinetask :noexp:\nContents\n*** end"
 	  (org-export-as (org-test-default-backend)
 			 nil nil nil '(:exclude-tags ("noexp")))))))
@@ -1957,7 +1990,9 @@ Paragraph[fn:1]"
     (should
      (equal ""
 	    (let ((org-todo-keywords '((sequence "TODO" "DONE")))
-		  (org-inlinetask-min-level 3))
+		  (org-inlinetask-min-level 3)
+		  org-export-filter-body-functions
+		  org-export-filter-final-output-functions)
 	      (org-test-with-temp-text "*** TODO Inline"
 		(org-export-as (org-test-default-backend)
 			       nil nil nil '(:with-tasks nil))))))))

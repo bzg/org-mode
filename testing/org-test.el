@@ -205,7 +205,8 @@ mode holding TEXT.  If the string \"<point>\" appears in TEXT
 then remove it and place the point there before running BODY,
 otherwise place the point at the beginning of the inserted text."
   (declare (indent 1))
-  `(let ((inside-text (if (stringp ,text) ,text (eval ,text))))
+  `(let ((inside-text (if (stringp ,text) ,text (eval ,text)))
+	 (org-mode-hook nil))
      (with-temp-buffer
        (org-mode)
        (let ((point (string-match "<point>" inside-text)))
@@ -254,6 +255,7 @@ or temporarily substitute the `org-test-with-temp-text' of this
 function with `org-test-with-temp-text-in-file'.  Also consider
 setting `pp-escape-newlines' to nil manually."
   (require 'pp)
+  (require 'ert)
   (let ((back pp-escape-newlines) (current-tblfm))
     (unless tblfm
       (should-not laps)

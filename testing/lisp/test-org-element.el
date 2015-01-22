@@ -677,33 +677,29 @@ Some other text
        (org-element-property :preserve-indent (org-element-at-point))))
     ;; 2. "-n -r -k" combination should number lines, retain labels but
     ;;    not use them in coderefs.
-    (should
-     (org-test-with-temp-text "#+BEGIN_EXAMPLE -n -r -k\nText.\n#+END_EXAMPLE"
-       (let ((element (org-element-at-point)))
-	 (and (org-element-property :number-lines element)
-	      (org-element-property :retain-labels element)
-	      (not (org-element-property :use-labels element))))))
-    (should
-     (org-test-with-temp-text
-	 "#+BEGIN_SRC emacs-lisp -n -r -k\n(+ 1 1)\n#+END_SRC"
-       (let ((element (org-element-at-point)))
-	 (and (org-element-property :number-lines element)
-	      (org-element-property :retain-labels element)
-	      (not (org-element-property :use-labels element))))))
+    (org-test-with-temp-text "#+BEGIN_EXAMPLE -n -r -k\nText.\n#+END_EXAMPLE"
+      (let ((element (org-element-at-point)))
+	(should (org-element-property :number-lines element))
+	(should (org-element-property :retain-labels element))
+	(should-not (org-element-property :use-labels element))))
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp -n -r -k\n(+ 1 1)\n#+END_SRC"
+      (let ((element (org-element-at-point)))
+	(should (org-element-property :number-lines element))
+	(should (org-element-property :retain-labels element))
+	(should-not (org-element-property :use-labels element))))
     ;; 3. "-n -r" combination should number-lines remove labels and not
     ;;    use them in coderefs.
-    (should
-     (org-test-with-temp-text "#+BEGIN_EXAMPLE -n -r\nText.\n#+END_EXAMPLE"
-       (let ((element (org-element-at-point)))
-	 (and (org-element-property :number-lines element)
-	      (not (org-element-property :retain-labels element))
-	      (not (org-element-property :use-labels element))))))
-    (should
-     (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp -n -r\n(+ 1 1)\n#+END_SRC"
-       (let ((element (org-element-at-point)))
-	 (and (org-element-property :number-lines element)
-	      (not (org-element-property :retain-labels element))
-	      (not (org-element-property :use-labels element))))))
+    (org-test-with-temp-text "#+BEGIN_EXAMPLE -n -r\nText.\n#+END_EXAMPLE"
+      (let ((element (org-element-at-point)))
+	(should (org-element-property :number-lines element))
+	(should-not (org-element-property :retain-labels element))
+	(should-not (org-element-property :use-labels element))))
+    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp -n -r\n(+ 1 1)\n#+END_SRC"
+      (let ((element (org-element-at-point)))
+	(should (org-element-property :number-lines element))
+	(should-not (org-element-property :retain-labels element))
+	(should-not (org-element-property :use-labels element))))
     ;; 4. "-n" or "+n" should number lines, retain labels and use them
     ;;    in coderefs.
     (should
@@ -732,32 +728,28 @@ Some other text
 	      (org-element-property :use-labels element)))))
     ;; 5. No switch should not number lines, but retain labels and use
     ;;    them in coderefs.
-    (should
-     (org-test-with-temp-text "#+BEGIN_EXAMPLE\nText.\n#+END_EXAMPLE"
-       (let ((element (org-element-at-point)))
-	 (and (not (org-element-property :number-lines element))
-	      (org-element-property :retain-labels element)
-	      (org-element-property :use-labels element)))))
-    (should
-     (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
-       (let ((element (org-element-at-point)))
-	 (and (not (org-element-property :number-lines element))
-	      (org-element-property :retain-labels element)
-	      (org-element-property :use-labels element)))))
+    (org-test-with-temp-text "#+BEGIN_EXAMPLE\nText.\n#+END_EXAMPLE"
+      (let ((element (org-element-at-point)))
+	(should (not (org-element-property :number-lines element)))
+	(should (org-element-property :retain-labels element))
+	(should (org-element-property :use-labels element))))
+    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
+      (let ((element (org-element-at-point)))
+	(should (not (org-element-property :number-lines element)))
+	(should (org-element-property :retain-labels element))
+	(should (org-element-property :use-labels element))))
     ;; 6. "-r" switch only: do not number lines, remove labels, and
     ;;    don't use labels in coderefs.
-    (should
-     (org-test-with-temp-text "#+BEGIN_EXAMPLE -r\nText.\n#+END_EXAMPLE"
-       (let ((element (org-element-at-point)))
-	 (and (not (org-element-property :number-lines element))
-	      (not (org-element-property :retain-labels element))
-	      (not (org-element-property :use-labels element))))))
-    (should
-     (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp -r\n(+ 1 1)\n#+END_SRC"
-       (let ((element (org-element-at-point)))
-	 (and (not (org-element-property :number-lines element))
-	      (not (org-element-property :retain-labels element))
-	      (not (org-element-property :use-labels element))))))
+    (org-test-with-temp-text "#+BEGIN_EXAMPLE -r\nText.\n#+END_EXAMPLE"
+      (let ((element (org-element-at-point)))
+	(should (not (org-element-property :number-lines element)))
+	(should (not (org-element-property :retain-labels element)))
+	(should (not (org-element-property :use-labels element)))))
+    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp -r\n(+ 1 1)\n#+END_SRC"
+      (let ((element (org-element-at-point)))
+	(should (not (org-element-property :number-lines element)))
+	(should (not (org-element-property :retain-labels element)))
+	(should (not (org-element-property :use-labels element)))))
     ;; 7. Recognize coderefs with user-defined syntax.
     (should
      (equal
@@ -1500,6 +1492,7 @@ e^{i\\pi}+1=0
 			  (org-element-property :path l)
 			  (org-element-property :search-option l)))))))
   ;; ... file-type link with application...
+  (require 'org-docview)
   (should
    (equal
     '("file" "projects.org" "docview")

@@ -269,7 +269,7 @@ this is simple"
 
 (ert-deftest test-org-babel/org-babel-get-inline-src-block-matches ()
   (flet ((test-at-id (id)
-	   (org-test-at-id 
+	   (org-test-at-id
 	    id
 	    (let ((test-point (point)))
 	      (should (fboundp 'org-babel-get-inline-src-block-matches))
@@ -294,7 +294,8 @@ this is simple"
     (test-at-id "d55dada7-de0e-4340-8061-787cccbedee5")))
 
 (ert-deftest test-org-babel/inline-src_blk-default-results-replace-line-1 ()
-  (let ((test-line "src_sh{echo 1}"))
+  (let ((test-line "src_sh{echo 1}")
+	(org-babel-inline-result-wrap "=%s="))
     ;; src_ at bol line 1...
     (org-test-with-temp-text
 	test-line
@@ -331,7 +332,8 @@ this is simple"
 
 (ert-deftest test-org-babel/inline-src_blk-default-results-replace-line-2 ()
   ;; src_ at bol line 2...
-  (let ((test-line " src_emacs-lisp{ \"x\" }"))
+  (let ((test-line " src_emacs-lisp{ \"x\" }")
+	(org-babel-inline-result-wrap "=%s="))
     (org-test-with-temp-text
 	(concat "\n" test-line)
       (should-error (org-ctrl-c-ctrl-c))
@@ -345,7 +347,8 @@ this is simple"
 	       (buffer-substring-no-properties
 		(point-at-bol) (point-at-eol))))))
 
-  (let ((test-line "Some text prior to block src_emacs-lisp{ \"y\" }"))
+  (let ((test-line "Some text prior to block src_emacs-lisp{ \"y\" }")
+	(org-babel-inline-result-wrap "=%s="))
     (org-test-with-temp-text
 	test-line
       (goto-char (point-max))
@@ -362,7 +365,8 @@ this is simple"
       (should-error (org-ctrl-c-ctrl-c)))))
 
 (ert-deftest test-org-babel/inline-src_blk-manual-results-replace ()
-  (let ((test-line " src_emacs-lisp[:results replace]{ \"x\" }"))
+  (let ((test-line " src_emacs-lisp[:results replace]{ \"x\" }")
+	(org-babel-inline-result-wrap "=%s="))
     (org-test-with-temp-text
 	(concat "\n" test-line)
       (should-error (org-ctrl-c-ctrl-c))
@@ -377,7 +381,8 @@ this is simple"
 		(point-at-bol) (point-at-eol))))))
 
   (let ((test-line (concat " Some text prior to block "
-			   "src_emacs-lisp[:results replace]{ \"y\" }")))
+			   "src_emacs-lisp[:results replace]{ \"y\" }"))
+	(org-babel-inline-result-wrap "=%s="))
     (org-test-with-temp-text test-line
       (goto-char (point-max))
       (insert (concat "\n" test-line " end"))
@@ -448,7 +453,8 @@ this is simple"
 			(point-min) (point-max)))))))
 
 (ert-deftest test-org-babel/inline-src_blk-results-scalar ()
-  (let ((test-line "src_emacs-lisp[ :results scalar ]{ \"x\"  }"))
+  (let ((test-line "src_emacs-lisp[ :results scalar ]{ \"x\"  }")
+	(org-babel-inline-result-wrap "=%s="))
     (org-test-with-temp-text
 	test-line
       (org-ctrl-c-ctrl-c)
@@ -457,7 +463,8 @@ this is simple"
 			(point-min) (point-max)))))))
 
 (ert-deftest test-org-babel/inline-src_blk-results-verbatim ()
-  (let ((test-line "src_emacs-lisp[ :results verbatim ]{ \"x\"  }"))
+  (let ((test-line "src_emacs-lisp[ :results verbatim ]{ \"x\"  }")
+	(org-babel-inline-result-wrap "=%s="))
     (org-test-with-temp-text
 	test-line
       (org-ctrl-c-ctrl-c)
@@ -845,7 +852,8 @@ trying to find the :END: marker."
 * next heading"))
 
 (ert-deftest test-org-babel/inline-src_blk-preceded-punct-preceded-by-point ()
-  (let ((test-line ".src_emacs-lisp[ :results verbatim ]{ \"x\"  }"))
+  (let ((test-line ".src_emacs-lisp[ :results verbatim ]{ \"x\"  }")
+	(org-babel-inline-result-wrap "=%s="))
     (org-test-with-temp-text
 	test-line
       (forward-char 1)
