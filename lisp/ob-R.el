@@ -335,10 +335,39 @@ Each member of this list is a list with three members:
 	    device filearg out-file args
 	    (if extra-args "," "") (or extra-args ""))))
 
-(defvar org-babel-R-eoe-indicator "'org_babel_R_eoe'")
-(defvar org-babel-R-eoe-output "[1] \"org_babel_R_eoe\"")
+(defconst org-babel-R-eoe-indicator "'org_babel_R_eoe'")
+(defconst org-babel-R-eoe-output "[1] \"org_babel_R_eoe\"")
 
-(defvar org-babel-R-write-object-command "{function(object,transfer.file){object;invisible(if(inherits(try({tfile<-tempfile();write.table(object,file=tfile,sep=\"\\t\",na=\"nil\",row.names=%s,col.names=%s,quote=FALSE);file.rename(tfile,transfer.file)},silent=TRUE),\"try-error\")){if(!file.exists(transfer.file))file.create(transfer.file)})}}(object=%s,transfer.file=\"%s\")")
+(defconst org-babel-R-write-object-command "{
+    function(object,transfer.file) {
+        object
+        invisible(
+            if (
+                inherits(
+                    try(
+                        {
+                            tfile<-tempfile()
+                            write.table(object, file=tfile, sep=\"\\t\",
+                                        na=\"nil\",row.names=%s,col.names=%s,
+                                        quote=FALSE)
+                            file.rename(tfile,transfer.file)
+                        },
+                        silent=TRUE),
+                    \"try-error\"))
+                {
+                    if(!file.exists(transfer.file))
+                        file.create(transfer.file)
+                }
+            )
+    }
+}(object=%s,transfer.file=\"%s\")"
+  "A template for an R command to evaluate a block of code and write the result to a file.
+
+Has four %s escapes to be filled in:
+1. Row names, \"TRUE\" or \"FALSE\"
+2. Column names, \"TRUE\" or \"FALSE\"
+3. The code to be run (must be an expression, not a statement)
+4. The name of the file to write to")
 
 (defun org-babel-R-evaluate
   (session body result-type result-params column-names-p row-names-p)
