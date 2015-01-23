@@ -8903,6 +8903,9 @@ stamps in the subtree shifted for each clone produced.  If SHIFT
 is nil or the empty string, time stamps will be left alone.  The
 ID property of the original subtree is removed.
 
+In each clone, all the CLOCK entries will be removed.  This
+prevents Org from considering that the clocked times overlap.
+
 If the original subtree did contain time stamps with a repeater,
 the following will happen:
 - the repeater will be removed in each clone
