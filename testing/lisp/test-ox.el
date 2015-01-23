@@ -43,21 +43,18 @@ This back-end simply returns parsed data as Org syntax."
 
 (defmacro org-test-with-parsed-data (data &rest body)
   "Execute body with parsed data available.
-
 DATA is a string containing the data to be parsed.  BODY is the
 body to execute.  Parse tree is available under the `tree'
-variable, and communication channel under `info'.
-
-This function calls `org-export-collect-tree-properties'.  As
-such, `:ignore-list' (for `org-element-map') and
-`:parse-tree' (for `org-export-get-genealogy') properties are
-already filled in `info'."
+variable, and communication channel under `info'."
   (declare (debug (form body)) (indent 1))
   `(org-test-with-temp-text ,data
      (let* ((tree (org-element-parse-buffer))
-	    (info (org-export-collect-tree-properties
-		   tree (org-export-get-environment))))
-       ,@body)))
+	    (info (org-export-get-environment)))
+       (org-export-prune-tree tree info)
+       (org-export-remove-uninterpreted-data tree info)
+       (let ((info (org-combine-plists
+		    info (org-export-collect-tree-properties tree info))))
+	 ,@body))))
 
 
 
