@@ -1160,6 +1160,16 @@
 	  (org-test-with-temp-text "#+TAGS: { A : B C }"
 	    (org-mode-restart)
 	    org-tag-groups-alist)))
+  (should
+   (equal '((:startgrouptag) ("A") (:grouptags) ("B") ("C") (:endgrouptag))
+	  (org-test-with-temp-text "#+TAGS: [ A : B C ]"
+	    (org-mode-restart)
+	    org-tag-alist)))
+  (should
+   (equal '(("A" "B" "C"))
+	  (org-test-with-temp-text "#+TAGS: [ A : B C ]"
+	    (org-mode-restart)
+	    org-tag-groups-alist)))
   ;; FILETAGS keyword.
   (should
    (equal '("A" "B" "C")
@@ -3150,6 +3160,32 @@ Text.
        "#+TAGS: { work : lab }\n* H\n** H1 :work:\n** H2 :lab:"
      (org-match-sparse-tree nil "work")
      (search-forward "H2")
+     (org-invisible-p2)))
+  ;; Match group tags with hard brackets.
+  (should-not
+   (org-test-with-temp-text
+       "#+TAGS: [ work : lab ]\n* H\n** H1 :work:\n** H2 :lab:"
+     (org-match-sparse-tree nil "work")
+     (search-forward "H1")
+     (org-invisible-p2)))
+  (should-not
+   (org-test-with-temp-text
+       "#+TAGS: [ work : lab ]\n* H\n** H1 :work:\n** H2 :lab:"
+     (org-match-sparse-tree nil "work")
+     (search-forward "H2")
+     (org-invisible-p2)))
+  ;; Match regular expressions in tags
+  (should-not
+   (org-test-with-temp-text
+       "#+TAGS: [ Lev : {Lev_[0-9]} ]\n* H\n** H1 :Lev_1:"
+     (org-match-sparse-tree nil "Lev")
+     (search-forward "H1")
+     (org-invisible-p2)))
+  (should
+   (org-test-with-temp-text
+       "#+TAGS: [ Lev : {Lev_[0-9]} ]\n* H\n** H1 :Lev_n:"
+     (org-match-sparse-tree nil "Lev")
+     (search-forward "H1")
      (org-invisible-p2)))
   ;; Match properties.
   (should

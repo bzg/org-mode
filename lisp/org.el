@@ -3483,10 +3483,16 @@ See the manual for details."
 	   (list :tag "Start radio group"
 		 (const :startgroup)
 		 (option (string :tag "Group description")))
+	   (list :tag "Start tag group, non distinct"
+		 (const :startgrouptag)
+		 (option (string :tag "Group description")))
 	   (list :tag "Group tags delimiter"
 		 (const :grouptags))
 	   (list :tag "End radio group"
 		 (const :endgroup)
+		 (option (string :tag "Group description")))
+	   (list :tag "End tag group, non distinct"
+		 (const :endgrouptag)
 		 (option (string :tag "Group description")))
 	   (const :tag "New line" (:newline)))))
 
@@ -5217,6 +5223,8 @@ FILETAGS is a list of tags, as strings."
 		    (case (car tag)
 		      (:startgroup "{")
 		      (:endgroup "}")
+		      (:startgrouptag "[")
+		      (:endgrouptag "]")
 		      (:grouptags ":")
 		      (:newline "\\n")
 		      (otherwise (concat (car tag)
@@ -5237,12 +5245,20 @@ FILETAGS is a list of tags, as strings."
 	 ((equal e "}")
 	  (push '(:endgroup) org-tag-alist)
 	  (setq group-flag nil))
+	 ((equal e "[")
+	  (push '(:startgrouptag) org-tag-alist)
+	  (when (equal (nth 1 tags) ":") (setq group-flag t)))
+	 ((equal e "]")
+	  (push '(:endgrouptag) org-tag-alist)
+	  (setq group-flag nil))
 	 ((equal e ":")
 	  (push '(:grouptags) org-tag-alist)
 	  (setq group-flag 'append))
 	 ((equal e "\\n") (push '(:newline) org-tag-alist))
 	 ((string-match
-	   (org-re "\\`\\([[:alnum:]_@#%]+\\)\\(?:(\\(.\\))\\)?\\'") e)
+	   (org-re (concat "\\`\\([[:alnum:]_@#%]+"
+			   "\\|{.+?}\\)" ; regular expression
+			   "\\(?:(\\(.\\))\\)?\\'")) e)
 	  (let ((tag (match-string 1 e))
 		(key (and (match-beginning 2)
 			  (string-to-char (match-string 2 e)))))
@@ -5250,7 +5266,8 @@ FILETAGS is a list of tags, as strings."
 		   (setcar org-tag-groups-alist
 			   (append (car org-tag-groups-alist) (list tag))))
 		  (group-flag (push (list tag) org-tag-groups-alist)))
-	    (unless (assoc tag org-tag-alist)
+	    ;; Push all tags in groups, no matter if they already exist.
+	    (unless (and (not group-flag) (assoc tag org-tag-alist))
 	      (push (cons tag key) org-tag-alist))))))))
   (setq org-tag-alist (nreverse org-tag-alist)))
 
@@ -14520,9 +14537,9 @@ This replaces every group tag in MATCH with a regexp tag search.
 For example, a group tag \"Work\" defined as { Work : Lab Conf }
 will be replaced like this:
 
-   Work =>  {\\(?:Work\\|Lab\\|Conf\\)}
-  +Work => +{\\(?:Work\\|Lab\\|Conf\\)}
-  -Work => -{\\(?:Work\\|Lab\\|Conf\\)}
+   Work =>  {\\<\\(?:Work\\|Lab\\|Conf\\)\\>}
+  +Work => +{\\<\\(?:Work\\|Lab\\|Conf\\)\\>}
+  -Work => -{\\<\\(?:Work\\|Lab\\|Conf\\)\\>}
 
 Replacing by a regexp preserves the structure of the match.
 E.g., this expansion
@@ -14532,6 +14549,12 @@ E.g., this expansion
 will match anything tagged with \"Lab\" and \"Home\", or tagged
 with \"Conf\" and \"Home\" or tagged with \"Work\" and \"home\".
 
+A group tag in MATCH can contain regular expressions of its own.
+For example, a group tag \"Proj\" defined as { Proj : {P@.+} }
+will be replaced like this:
+
+   Proj => {\\<\\(?:Proj\\)\\>\\|P@.+}
+
 When the optional argument SINGLE-AS-LIST is non-nil, MATCH is
 assumed to be a single group tag, and the function will return
 the list of tags in this group.
@@ -14540,33 +14563,87 @@ When DOWNCASE is non-nil, expand downcased TAGS."
   (if org-group-tags
       (let* ((case-fold-search t)
 	     (stable org-mode-syntax-table)
-	     (tal (or org-tag-groups-alist-for-agenda
-		      org-tag-groups-alist))
-	     (tal (if downcased
-		      (mapcar (lambda(tg) (mapcar 'downcase tg)) tal) tal))
-	     (tml (mapcar 'car tal))
-	     (rtnmatch match) rpl)
-	;; @ and _ are allowed as word-components in tags
+	     (taggroups (or org-tag-groups-alist-for-agenda org-tag-groups-alist))
+	     (taggroups (if downcased
+			    (mapcar (lambda (tg) (mapcar #'downcase tg))
+				    taggroups)
+			  taggroups))
+	     (taggroups-keys (mapcar #'car taggroups))
+	     (return-match (if downcased (downcase match) match))
+	     (count 0)
+	     regexps-in-match tags-in-group regexp-in-group regexp-in-group-escaped)
+	;; @ and _ are allowed as word-components in tags.
 	(modify-syntax-entry ?@ "w" stable)
 	(modify-syntax-entry ?_ "w" stable)
-	(while (and tml
+	;; Temporarily replace regexp-expressions in the match-expression.
+	(while (string-match "{.+?}" return-match)
+	  (incf count)
+	  (push (match-string 0 return-match) regexps-in-match)
+	  (setq return-match (replace-match (format "<%d>" count) t nil return-match)))
+	(while (and taggroups-keys
 		    (with-syntax-table stable
 		      (string-match
 		       (concat "\\(?1:[+-]?\\)\\(?2:\\<"
-			       (regexp-opt tml) "\\>\\)") rtnmatch)))
-	  (let* ((dir (match-string 1 rtnmatch))
-		 (tag (match-string 2 rtnmatch))
+			       (regexp-opt taggroups-keys) "\\>\\)") return-match)))
+	  (let* ((dir (match-string 1 return-match))
+		 (tag (match-string 2 return-match))
 		 (tag (if downcased (downcase tag) tag)))
-	    (setq tml (delete tag tml))
-	    (when (not (get-text-property 0 'grouptag (match-string 2 rtnmatch)))
-	      (setq rpl (append (org-uniquify rpl) (assoc tag tal)))
-	      (setq rpl (concat dir "{\\<" (regexp-opt rpl) "\\>}"))
-	      (if (stringp rpl) (org-add-props rpl '(grouptag t)))
-	      (setq rtnmatch (replace-match rpl t t rtnmatch)))))
+	    (when (not (get-text-property 0 'grouptag (match-string 2 return-match)))
+	      (setq tags-in-group (assoc tag taggroups))
+	      ;; Filter tag-regexps from tags.
+	      (setq regexp-in-group-escaped
+		    (delq nil (mapcar (lambda (x)
+					(if (stringp x)
+					    (and (equal "{" (substring x 0 1))
+						 (equal "}" (substring x -1))
+						 x)
+					  x))
+				      tags-in-group))
+		    regexp-in-group
+		    (mapcar (lambda (x)
+			      (substring x 1 -1))
+			    regexp-in-group-escaped)
+		    tags-in-group
+		    (delq nil (mapcar (lambda (x)
+					(if (stringp x)
+					    (and (not (equal "{" (substring x 0 1)))
+						 (not (equal "}" (substring x -1)))
+						 x)
+					  x))
+				      tags-in-group)))
+	      ;; If single-as-list, do no more in the while-loop.
+	      (if (not single-as-list)
+		  (progn
+		    (when regexp-in-group
+		      (setq regexp-in-group
+			    (concat "\\|"
+				    (mapconcat 'identity regexp-in-group
+					       "\\|"))))
+		    (setq tags-in-group
+			  (concat dir
+				  "{\\<"
+				  (regexp-opt tags-in-group)
+				  "\\>"
+				  regexp-in-group
+				  "}"))
+		    (when (stringp tags-in-group)
+		      (org-add-props tags-in-group '(grouptag t)))
+		    (setq return-match
+			  (replace-match tags-in-group t t return-match)))
+		(setq tags-in-group
+		      (append regexp-in-group-escaped tags-in-group))))
+	    (setq taggroups-keys (delete tag taggroups-keys))))
+	;; Add the regular expressions back into the match-expression again.
+	(while regexps-in-match
+	  (setq return-match (replace-regexp-in-string (format "<%d>" count)
+						       (pop regexps-in-match)
+						       return-match t t))
+	  (decf count))
 	(if single-as-list
-	    (or (reverse rpl) (list rtnmatch))
-	  rtnmatch))
-    (if single-as-list (list (if downcased (downcase match) match))
+	    (if tags-in-group tags-in-group (list return-match))
+	  return-match))
+    (if single-as-list
+	(list (if downcased (downcase match) match))
       match)))
 
 (defun org-op-to-function (op &optional stringp)
@@ -15025,7 +15102,7 @@ Returns the new tags string, or nil to not change the current settings."
 	 ov-start ov-end ov-prefix
 	 (exit-after-next org-fast-tag-selection-single-key)
 	 (done-keywords org-done-keywords)
-	 groups ingroup)
+	 groups ingroup intaggroup)
     (save-excursion
       (beginning-of-line 1)
       (if (looking-at
@@ -15058,24 +15135,33 @@ Returns the new tags string, or nil to not change the current settings."
       (setq tbl fulltable char ?a cnt 0)
       (while (setq e (pop tbl))
 	(cond
-	 ((equal (car e) :startgroup)
+	 ((eq (car e) :startgroup)
 	  (push '() groups) (setq ingroup t)
-	  (when (not (= cnt 0))
+	  (unless (zerop cnt)
 	    (setq cnt 0)
 	    (insert "\n"))
 	  (insert (if (cdr e) (format "%s: " (cdr e)) "") "{ "))
-	 ((equal (car e) :endgroup)
+	 ((eq (car e) :endgroup)
 	  (setq ingroup nil cnt 0)
 	  (insert "}" (if (cdr e) (format " (%s) " (cdr e)) "") "\n"))
+	 ((eq (car e) :startgrouptag)
+	  (setq intaggroup t)
+	  (unless (zerop cnt)
+	    (setq cnt 0)
+	    (insert "\n"))
+	  (insert "[ "))
+	 ((eq (car e) :endgrouptag)
+	  (setq intaggroup nil cnt 0)
+	  (insert "]\n"))
 	 ((equal e '(:newline))
-	  (when (not (= cnt 0))
+	  (unless (zerop cnt)
 	    (setq cnt 0)
 	    (insert "\n")
 	    (setq e (car tbl))
 	    (while (equal (car tbl) '(:newline))
 	      (insert "\n")
 	      (setq tbl (cdr tbl)))))
-	 ((equal e '(:grouptags)) nil)
+	 ((equal e '(:grouptags)) (insert " : "))
 	 (t
 	  (setq tg (copy-sequence (car e)) c2 nil)
 	  (if (cdr e)
@@ -15089,27 +15175,27 @@ Returns the new tags string, or nil to not change the current settings."
 		  (setq char (1+ char)))
 	      (setq c2 c1))
 	    (setq c (or c2 char)))
-	  (if ingroup (push tg (car groups)))
+	  (when ingroup (push tg (car groups)))
 	  (setq tg (org-add-props tg nil 'face
 	  			  (cond
 	  			   ((not (assoc tg table))
 	  			    (org-get-todo-face tg))
 	  			   ((member tg current) c-face)
 	  			   ((member tg inherited) i-face))))
-	  (if (equal (caar tbl) :grouptags)
-	      (org-add-props tg nil 'face 'org-tag-group))
-	  (if (and (= cnt 0) (not ingroup)) (insert "  "))
+	  (when (equal (caar tbl) :grouptags)
+	    (org-add-props tg nil 'face 'org-tag-group))
+	  (when (and (zerop cnt) (not ingroup) (not intaggroup)) (insert " "))
 	  (insert "[" c "] " tg (make-string
 				 (- fwidth 4 (length tg)) ?\ ))
 	  (push (cons tg c) ntable)
-	  (when (= (setq cnt (1+ cnt)) ncol)
+	  (when (= (incf cnt) ncol)
 	    (insert "\n")
-	    (if ingroup (insert "  "))
+	    (when (or ingroup intaggroup) (insert " "))
 	    (setq cnt 0)))))
       (setq ntable (nreverse ntable))
       (insert "\n")
       (goto-char (point-min))
-      (if (not expert) (org-fit-window-to-buffer))
+      (unless expert (org-fit-window-to-buffer))
       (setq rtn
 	    (catch 'exit
 	      (while t
@@ -15139,7 +15225,7 @@ Returns the new tags string, or nil to not change the current settings."
 		  (setq quit-flag t))
 		 ((= c ?\ )
 		  (setq current nil)
-		  (if exit-after-next (setq exit-after-next 'now)))
+		  (when exit-after-next (setq exit-after-next 'now)))
 		 ((= c ?\t)
 		  (condition-case nil
 		      (setq tg (org-icompleting-read
@@ -15153,28 +15239,26 @@ Returns the new tags string, or nil to not change the current settings."
 		    (if (member tg current)
 			(setq current (delete tg current))
 		      (push tg current)))
-		  (if exit-after-next (setq exit-after-next 'now)))
+		  (when exit-after-next (setq exit-after-next 'now)))
 		 ((setq e (rassoc c todo-table) tg (car e))
 		  (with-current-buffer buf
 		    (save-excursion (org-todo tg)))
-		  (if exit-after-next (setq exit-after-next 'now)))
+		  (when exit-after-next (setq exit-after-next 'now)))
 		 ((setq e (rassoc c ntable) tg (car e))
 		  (if (member tg current)
 		      (setq current (delete tg current))
 		    (loop for g in groups do
-			  (if (member tg g)
-			      (mapc (lambda (x)
-				      (setq current (delete x current)))
-				    g)))
+			  (when (member tg g)
+			    (dolist (x g) (setq current (delete x current)))))
 		    (push tg current))
-		  (if exit-after-next (setq exit-after-next 'now))))
+		  (when exit-after-next (setq exit-after-next 'now))))
 
 		;; Create a sorted list
 		(setq current
 		      (sort current
 			    (lambda (a b)
 			      (assoc b (cdr (memq (assoc a ntable) ntable))))))
-		(if (eq exit-after-next 'now) (throw 'exit t))
+		(when (eq exit-after-next 'now) (throw 'exit t))
 		(goto-char (point-min))
 		(beginning-of-line 2)
 		(delete-region (point) (point-at-eol))
