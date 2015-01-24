@@ -2730,13 +2730,13 @@ block but are passed literally to the \"example-block\"."
 	    (t  (cons ch out))))))
      (string-to-list str))
     (when (or in-single in-double)
-      (error "Unterminated string in `org-babel-script-escape'."))
+      (error "Unterminated string in `org-babel-script-escape'"))
     (apply #'string (reverse out))))
 
 (defun org-babel-script-escape (str &optional force)
   "Safely convert tables into elisp lists."
   (unless (stringp str)
-    (error "`org-babel-script-escape' expects a string."))
+    (error "`org-babel-script-escape' expects a string"))
   (let ((escaped
 	 (cond
 	  ((and (> (length str) 2)
