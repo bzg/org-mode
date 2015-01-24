@@ -14530,7 +14530,7 @@ See also `org-scan-tags'.
 			  matcher)))
     (cons match0 matcher)))
 
-(defun org-tags-expand (match &optional single-as-list downcased)
+(defun org-tags-expand (match &optional single-as-list downcased tags-already-expanded)
   "Expand group tags in MATCH.
 
 This replaces every group tag in MATCH with a regexp tag search.
@@ -14571,6 +14571,7 @@ When DOWNCASE is non-nil, expand downcased TAGS."
 	     (taggroups-keys (mapcar #'car taggroups))
 	     (return-match (if downcased (downcase match) match))
 	     (count 0)
+	     (work-already-expanded tags-already-expanded)
 	     regexps-in-match tags-in-group regexp-in-group regexp-in-group-escaped)
 	;; @ and _ are allowed as word-components in tags.
 	(modify-syntax-entry ?@ "w" stable)
@@ -14588,8 +14589,32 @@ When DOWNCASE is non-nil, expand downcased TAGS."
 	  (let* ((dir (match-string 1 return-match))
 		 (tag (match-string 2 return-match))
 		 (tag (if downcased (downcase tag) tag)))
-	    (when (not (get-text-property 0 'grouptag (match-string 2 return-match)))
+	    (unless (or (get-text-property 0 'grouptag (match-string 2 return-match))
+		        (member tag work-already-expanded))
 	      (setq tags-in-group (assoc tag taggroups))
+	      (push tag work-already-expanded)
+	      ;; Recursively expand each tag in the group, if the tag hasn't
+	      ;; already been expanded.  Restore the match-data after all recursive calls.
+	      (save-match-data
+		(let (tags-expanded)
+		  (dolist (x (cdr tags-in-group))
+		    (if (and (member x taggroups-keys)
+			     (not (member x work-already-expanded)))
+			(setq tags-expanded
+			      (delete-dups
+			       (append
+				(org-tags-expand x t downcased
+						 work-already-expanded)
+				tags-expanded)))
+		      (setq tags-expanded
+			    (append (list x) tags-expanded)))
+		    (setq work-already-expanded
+			  (delete-dups
+			   (append tags-expanded
+				   work-already-expanded))))
+		  (setq tags-in-group
+			(delete-dups (cons (car tags-in-group)
+					   tags-expanded)))))
 	      ;; Filter tag-regexps from tags.
 	      (setq regexp-in-group-escaped
 		    (delq nil (mapcar (lambda (x)
