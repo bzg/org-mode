@@ -3761,10 +3761,10 @@ FILTER-ALIST is an alist of filters we need to apply when
 	  (org-agenda-filter-top-headline-apply
 	   org-agenda-top-headline-filter))
 	(when org-agenda-tag-filter
-	  (org-agenda-filter-apply org-agenda-tag-filter 'tag))
+	  (org-agenda-filter-apply org-agenda-tag-filter 'tag t))
 	(when (get 'org-agenda-tag-filter :preset-filter)
 	  (org-agenda-filter-apply
-	   (get 'org-agenda-tag-filter :preset-filter) 'tag))
+	   (get 'org-agenda-tag-filter :preset-filter) 'tag t))
 	(when org-agenda-category-filter
 	  (org-agenda-filter-apply org-agenda-category-filter 'category))
 	(when (get 'org-agenda-category-filter :preset-filter)
@@ -7333,7 +7333,7 @@ in the agenda."
 	  (cat (or cat-filter cat-preset))
 	  (effort (or effort-filter effort-preset))
 	  (re (or re-filter re-preset)))
-      (when tag (org-agenda-filter-apply tag 'tag))
+      (when tag (org-agenda-filter-apply tag 'tag t))
       (when cat (org-agenda-filter-apply cat 'category))
       (when effort (org-agenda-filter-apply effort 'effort))
       (when re  (org-agenda-filter-apply re 'regexp)))
@@ -7455,13 +7455,17 @@ With two prefix arguments, remove the effort filters."
     (org-agenda-filter-show-all-effort))
   (org-agenda-finalize))
 
-(defun org-agenda-filter-by-tag (strip &optional char narrow)
+(defun org-agenda-filter-by-tag (arg &optional char exclude)
   "Keep only those lines in the agenda buffer that have a specific tag.
-The tag is selected with its fast selection letter, as configured.
-With prefix argument STRIP, remove all lines that do have the tag.
-A lisp caller can specify CHAR.  NARROW means that the new tag should be
-used to narrow the search - the interactive user can also press `-' or `+'
-to switch to narrowing."
+The tag is selected with its fast selection letter, as
+configured.  With a single \\[universal-argument] prefix ARG,
+exclude the agenda search.  With a double \\[universal-argument]
+prefix ARG, filter the literal tag.  I.e. don't filter on all its
+group members.
+
+A lisp caller can specify CHAR.  EXCLUDE means that the new tag should be
+used to exclude the search - the interactive user can also press `-' or `+'
+to switch between filtering and excluding."
   (interactive "P")
   (let* ((alist org-tag-alist-for-agenda)
 	 (tag-chars (mapconcat
@@ -7469,24 +7473,26 @@ to switch to narrowing."
 					  (cdr x))
 				     (char-to-string (cdr x))
 				   ""))
-		     alist ""))
+		     org-tag-alist-for-agenda ""))
+	 (valid-char-list (append '(?\t ?\r ?/ ?. ?\s ?q)
+				  (string-to-list tag-chars)))
+	 (exclude (or exclude (equal arg '(4))))
+	 (expand (not (equal arg '(16))))
 	 (inhibit-read-only t)
 	 (current org-agenda-tag-filter)
 	 a n tag)
     (unless char
-      (message
-       "%s by tag [%s ], [TAB], %s[/]:off, [+-]:narrow"
-       (if narrow "Narrow" "Filter") tag-chars
-       (if org-agenda-auto-exclude-function "[RET], " ""))
-      (setq char (read-char-exclusive)))
-    (when (member char '(?+ ?-))
-      ;; Narrowing down
-      (cond ((equal char ?-) (setq strip t narrow t))
-	    ((equal char ?+) (setq strip nil narrow t)))
-      (message
-       "Narrow by tag [%s ], [TAB], [/]:off" tag-chars)
-      (setq char (read-char-exclusive)))
-    (when (equal char ?\t)
+      (while (not (memq char valid-char-list))
+	(message
+	 "%s by tag [%s ], [TAB], %s[/]:off, [+/-]:filter/exclude%s, [q]:quit"
+	 (if exclude "Exclude" "Filter") tag-chars
+	 (if org-agenda-auto-exclude-function "[RET], " "")
+	 (if expand "" ", no grouptag expand"))
+	(setq char (read-char-exclusive))
+	;; Excluding or filtering down
+	(cond ((eq char ?-) (setq exclude t))
+	      ((eq char ?+) (setq exclude nil)))))
+    (when (eq char ?\t)
       (unless (local-variable-p 'org-global-tags-completion-table (current-buffer))
 	(org-set-local 'org-global-tags-completion-table
 		       (org-global-tags-completion-table)))
@@ -7494,7 +7500,7 @@ to switch to narrowing."
 	(setq tag (org-icompleting-read
 		   "Tag: " org-global-tags-completion-table))))
     (cond
-     ((equal char ?\r)
+     ((eq char ?\r)
       (org-agenda-filter-show-all-tag)
       (when org-agenda-auto-exclude-function
 	(setq org-agenda-tag-filter nil)
@@ -7503,25 +7509,26 @@ to switch to narrowing."
 	    (if modifier
 		(push modifier org-agenda-tag-filter))))
 	(if (not (null org-agenda-tag-filter))
-	    (org-agenda-filter-apply org-agenda-tag-filter 'tag))))
-     ((equal char ?/)
+	    (org-agenda-filter-apply org-agenda-tag-filter 'tag expand))))
+     ((eq char ?/)
       (org-agenda-filter-show-all-tag)
       (when (get 'org-agenda-tag-filter :preset-filter)
-	(org-agenda-filter-apply org-agenda-tag-filter 'tag)))
-     ((equal char ?. )
+	(org-agenda-filter-apply org-agenda-tag-filter 'tag expand)))
+     ((eq char ?.)
       (setq org-agenda-tag-filter
 	    (mapcar (lambda(tag) (concat "+" tag))
 		    (org-get-at-bol 'tags)))
-      (org-agenda-filter-apply org-agenda-tag-filter 'tag))
-     ((or (equal char ?\ )
+      (org-agenda-filter-apply org-agenda-tag-filter 'tag expand))
+     ((eq char ?q)) ;If q, abort (even if there is a q-key for a tag...)
+     ((or (eq char ?\s)
 	  (setq a (rassoc char alist))
 	  (and tag (setq a (cons tag nil))))
       (org-agenda-filter-show-all-tag)
       (setq tag (car a))
       (setq org-agenda-tag-filter
-	    (cons (concat (if strip "-" "+") tag)
-		  (if narrow current nil)))
-      (org-agenda-filter-apply org-agenda-tag-filter 'tag))
+	    (cons (concat (if exclude "-" "+") tag)
+		  current))
+      (org-agenda-filter-apply org-agenda-tag-filter 'tag expand))
      (t (error "Invalid tag selection character %c" char)))))
 
 (defun org-agenda-get-represented-tags ()
@@ -7535,13 +7542,15 @@ to switch to narrowing."
 	      (get-text-property (point) 'tags))))
     tags))
 
-(defun org-agenda-filter-by-tag-refine (strip &optional char)
+(defun org-agenda-filter-by-tag-refine (arg &optional char)
   "Refine the current filter.  See `org-agenda-filter-by-tag'."
   (interactive "P")
-  (org-agenda-filter-by-tag strip char 'refine))
+  (org-agenda-filter-by-tag arg char 'refine))
 
-(defun org-agenda-filter-make-matcher (filter type)
-  "Create the form that tests a line for agenda filter."
+(defun org-agenda-filter-make-matcher (filter type &optional expand)
+  "Create the form that tests a line for agenda filter.  Optional
+argument EXPAND can be used for the TYPE tag and will expand the
+tags in the FILTER if any of the tags in FILTER are grouptags."
   (let (f f1)
     (cond
      ;; Tag filter
@@ -7551,26 +7560,11 @@ to switch to narrowing."
 	     (append (get 'org-agenda-tag-filter :preset-filter)
 		     filter)))
       (dolist (x filter)
-	(let ((nfilter (org-agenda-filter-expand-tags filter)) nf nf1
-	      (ffunc
-	       (lambda (nf0 nf01 fltr notgroup op)
-		 (dolist (x fltr)
-		   (if (member x '("-" "+"))
-		       (setq nf01 (if (equal x "-") 'tags '(not tags)))
-		     (setq nf01 (list 'member (downcase (substring x 1))
-				      'tags))
-		     (when (equal (string-to-char x) ?-)
-		       (setq nf01 (list 'not nf01))
-		       (when (not notgroup) (setq op 'and))))
-		   (push nf01 nf0))
-		 (if notgroup
-		     (push (cons 'and nf0) f)
-		   (push (cons (or op 'or) nf0) f)))))
-	  (cond ((equal filter '("+"))
-		 (setq f (list (list 'not 'tags))))
-		((equal nfilter filter)
-		 (funcall ffunc f1 f filter t nil))
-		(t (funcall ffunc nf1 nf nfilter nil nil))))))
+	(let ((op (string-to-char x)))
+	  (if expand (setq x (org-agenda-filter-expand-tags (list x) t))
+	    (setq x (list x)))
+	  (setq f1 (org-agenda-filter-make-matcher-tag-exp x op))
+	  (push f1 f))))
      ;; Category filter
      ((eq type 'category)
       (setq filter
@@ -7602,6 +7596,32 @@ to switch to narrowing."
       (dolist (x filter)
 	(push (org-agenda-filter-effort-form x) f))))
     (cons 'and (nreverse f))))
+
+(defun org-agenda-filter-make-matcher-tag-exp (tags op)
+  "Create the form that tests a line for agenda filter for
+tag-expressions.  Return a match-expression given TAGS.  OP is an
+operator of type CHAR that allows the function to set the right
+switches in the returned form."
+  (let (f f1) ;f = return expression. f1 = working-area
+    (dolist (x tags)
+      (let* ((tag (substring x 1))
+	     (isregexp (and (equal "{" (substring tag 0 1))
+			    (equal "}" (substring tag -1))))
+	     regexp)
+	(cond
+	 (isregexp
+	  (setq regexp (substring tag 1 -1))
+	  (setq f1 (list 'org-match-any-p regexp 'tags)))
+	 (t
+	  (setq f1 (list 'member (downcase tag) 'tags))))
+	(when (eq op ?-)
+	    (setq f1 (list 'not f1))))
+      (push f1 f))
+    ;; Any of the expressions can match if op = +
+    ;; all must match if the operator is -.
+    (if (eq op ?-)
+	(cons 'and f)
+      (cons 'or f))))
 
 (defun org-agenda-filter-effort-form (e)
   "Return the form to compare the effort of the current line with what E says.
@@ -7641,12 +7661,14 @@ When NO-OPERATOR is non-nil, do not add the + operator to returned tags."
 	(reverse rtn))
     filter))
 
-(defun org-agenda-filter-apply (filter type)
-  "Set FILTER as the new agenda filter and apply it."
+(defun org-agenda-filter-apply (filter type &optional expand)
+  "Set FILTER as the new agenda filter and apply it.  Optional
+argument EXPAND can be used for the TYPE tag and will expand the
+tags in the FILTER if any of the tags in FILTER are grouptags."
   ;; Deactivate `org-agenda-entry-text-mode' when filtering
   (if org-agenda-entry-text-mode (org-agenda-entry-text-mode))
   (let (tags cat txt)
-    (setq org-agenda-filter-form (org-agenda-filter-make-matcher filter type))
+    (setq org-agenda-filter-form (org-agenda-filter-make-matcher filter type expand))
     ;; Only set `org-agenda-filtered-by-category' to t when a unique
     ;; category is used as the filter:
     (setq org-agenda-filtered-by-category
@@ -7658,11 +7680,7 @@ When NO-OPERATOR is non-nil, do not add the + operator to returned tags."
       (while (not (eobp))
 	(if (org-get-at-bol 'org-marker)
 	    (progn
-	      (setq tags ; used in eval
-		    (apply 'append
-			   (mapcar (lambda (f)
-				     (org-agenda-filter-expand-tags (list f) t))
-				   (org-get-at-bol 'tags)))
+	      (setq tags (org-get-at-bol 'tags)
 		    cat (org-get-at-eol 'org-category 1)
 		    txt (org-get-at-eol 'txt 1))
 	      (if (not (eval org-agenda-filter-form))
@@ -9973,7 +9991,7 @@ current HH:MM time."
 (defun org-agenda-reapply-filters ()
   "Re-apply all agenda filters."
   (mapcar
-   (lambda(f) (when (car f) (org-agenda-filter-apply (car f) (cadr f))))
+   (lambda(f) (when (car f) (org-agenda-filter-apply (car f) (cadr f) t)))
    `((,org-agenda-tag-filter tag)
      (,org-agenda-category-filter category)
      (,org-agenda-regexp-filter regexp)
