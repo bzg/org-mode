@@ -1674,25 +1674,21 @@ is t, then new columns should be added as needed"
 
   (let ((org-table-formula-create-columns nil))
 
-    ;; need condition-case to trap the out-of-bounds user-error
-    (condition-case
-	nil
-	(org-test-table-target-expect
-	 "
+    (should-error
+     (org-test-table-target-expect
+      "
 | 2 |
 | 4 |
 | 8 |
 "
-	 "
+      "
 | 2 |
 | 4 |
 | 8 |
 "
-	 1
-	 "#+TBLFM: @1$2=5")
-      ('user-error t)
-      ;; Older Emacsen will throw an 'error instead of 'user-error.
-      ('error t)))
+      1
+      "#+TBLFM: @1$2=5")
+     :type (list 'error 'user-error)))
 
   (let ((org-table-formula-create-columns t))
 
