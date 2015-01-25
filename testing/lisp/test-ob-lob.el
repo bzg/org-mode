@@ -39,7 +39,7 @@
 
 (ert-deftest test-ob-lob/call-with-header-arguments ()
   "Test the evaluation of a library of babel #+call: line."
-  (cl-letf (((symbol-function 'org-babel-insert-result)
+  (letf (((symbol-function 'org-babel-insert-result)
 	     (symbol-function 'ignore)))
     (org-test-at-id "fab7e291-fde6-45fc-bf6e-a485b8bca2f0"
       (move-beginning-of-line 1)

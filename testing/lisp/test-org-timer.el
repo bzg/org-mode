@@ -263,13 +263,13 @@ Also, mute output from `message'."
    (test-org-timer/with-temp-text ""
      (org-timer-start)
      (org-timer-set-timer 10))
-   :type 'user-error)
+   :type (list 'error 'user-error))
   ;; Countdown timer is running.
   (should-error
    (test-org-timer/with-temp-text ""
      (org-timer-set-timer 10)
      (org-timer-start))
-   :type 'user-error))
+   :type (list 'error 'user-error)))
 
 (provide 'test-org-timer)
 ;;; test-org-timer.el end here
