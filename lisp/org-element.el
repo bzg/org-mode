@@ -302,6 +302,13 @@ strings and objects.
 This list is checked after translations have been applied.  See
 `org-element-keyword-translation-alist'.")
 
+(defconst org-element--parsed-properties-alist
+  (mapcar (lambda (k) (cons k (intern (concat ":" (downcase k)))))
+	  org-element-parsed-keywords)
+  "Alist of parsed keywords and associated properties.
+This is generated from `org-element-parsed-keywords', which
+see.")
+
 (defconst org-element-dual-keywords '("CAPTION" "RESULTS")
   "List of affiliated keywords which can have a secondary value.
 
@@ -3902,7 +3909,7 @@ containing the secondary string.  It is used to set correctly
 	secondary))))
 
 (defun org-element-map
-  (data types fun &optional info first-match no-recursion with-affiliated)
+    (data types fun &optional info first-match no-recursion with-affiliated)
   "Map a function on selected elements or objects.
 
 DATA is a parse tree, an element, an object, a string, or a list
@@ -3938,7 +3945,7 @@ Assuming TREE is a variable containing an Org buffer parse tree,
 the following example will return a flat list of all `src-block'
 and `example-block' elements in it:
 
-  \(org-element-map tree '(example-block src-block) 'identity)
+  \(org-element-map tree '(example-block src-block) #'identity)
 
 The following snippet will find the first headline with a level
 of 1 and a \"phone\" tag, and will return its beginning position:
@@ -3953,7 +3960,7 @@ of 1 and a \"phone\" tag, and will return its beginning position:
 The next example will return a flat list of all `plain-list' type
 elements in TREE that are not a sub-list themselves:
 
-  \(org-element-map tree 'plain-list 'identity nil nil 'plain-list)
+  \(org-element-map tree 'plain-list #'identity nil nil 'plain-list)
 
 Eventually, this example will return a flat list of all `bold'
 type objects containing a `latex-snippet' type object, even
@@ -3961,112 +3968,100 @@ looking into captions:
 
   \(org-element-map tree 'bold
    \(lambda (b)
-     \(and (org-element-map b 'latex-snippet 'identity nil t) b))
+     \(and (org-element-map b 'latex-snippet #'identity nil t) b))
    nil nil nil t)"
   ;; Ensure TYPES and NO-RECURSION are a list, even of one element.
-  (unless (listp types) (setq types (list types)))
-  (unless (listp no-recursion) (setq no-recursion (list no-recursion)))
-  ;; Recursion depth is determined by --CATEGORY.
-  (let* ((--category
+  (let* ((types (if (listp types) types (list types)))
+	 (no-recursion (if (listp no-recursion) no-recursion
+			 (list no-recursion)))
+	 ;; Recursion depth is determined by --CATEGORY.
+	 (--category
 	  (catch 'found
-	    (let ((category 'greater-elements))
-	      (mapc (lambda (type)
-		      (cond ((or (memq type org-element-all-objects)
-				 (eq type 'plain-text))
-			     ;; If one object is found, the function
-			     ;; has to recurse into every object.
-			     (throw 'found 'objects))
-			    ((not (memq type org-element-greater-elements))
-			     ;; If one regular element is found, the
-			     ;; function has to recurse, at least,
-			     ;; into every element it encounters.
-			     (and (not (eq category 'elements))
-				  (setq category 'elements)))))
-		    types)
-	      category)))
-	 ;; Compute properties for affiliated keywords if necessary.
-	 (--affiliated-alist
-	  (and with-affiliated
-	       (mapcar (lambda (kwd)
-			 (cons kwd (intern (concat ":" (downcase kwd)))))
-		       org-element-affiliated-keywords)))
+	    (let ((category 'greater-elements)
+		  (all-objects (cons 'plain-text org-element-all-objects)))
+	      (dolist (type types category)
+		(cond ((memq type all-objects)
+		       ;; If one object is found, the function has to
+		       ;; recurse into every object.
+		       (throw 'found 'objects))
+		      ((not (memq type org-element-greater-elements))
+		       ;; If one regular element is found, the
+		       ;; function has to recurse, at least, into
+		       ;; every element it encounters.
+		       (and (not (eq category 'elements))
+			    (setq category 'elements))))))))
 	 --acc
 	 --walk-tree
 	 (--walk-tree
-	  (function
-	   (lambda (--data)
-	     ;; Recursively walk DATA.  INFO, if non-nil, is a plist
-	     ;; holding contextual information.
-	     (let ((--type (org-element-type --data)))
-	       (cond
-		((not --data))
-		;; Ignored element in an export context.
-		((and info (memq --data (plist-get info :ignore-list))))
-		;; List of elements or objects.
-		((not --type) (mapc --walk-tree --data))
-		;; Unconditionally enter parse trees.
-		((eq --type 'org-data)
-		 (mapc --walk-tree (org-element-contents --data)))
-		(t
-		 ;; Check if TYPE is matching among TYPES.  If so,
-		 ;; apply FUN to --DATA and accumulate return value
-		 ;; into --ACC (or exit if FIRST-MATCH is non-nil).
-		 (when (memq --type types)
-		   (let ((result (funcall fun --data)))
-		     (cond ((not result))
-			   (first-match (throw '--map-first-match result))
-			   (t (push result --acc)))))
-		 ;; If --DATA has a secondary string that can contain
-		 ;; objects with their type among TYPES, look into it.
-		 (when (and (eq --category 'objects) (not (stringp --data)))
-		   (let ((sec-prop
-			  (assq --type org-element-secondary-value-alist)))
-		     (when sec-prop
-		       (funcall --walk-tree
-				(org-element-property (cdr sec-prop) --data)))))
-		 ;; If --DATA has any affiliated keywords and
-		 ;; WITH-AFFILIATED is non-nil, look for objects in
-		 ;; them.
-		 (when (and with-affiliated
-			    (eq --category 'objects)
-			    (memq --type org-element-all-elements))
-		   (mapc (lambda (kwd-pair)
-			   (let ((kwd (car kwd-pair))
-				 (value (org-element-property
-					 (cdr kwd-pair) --data)))
-			     ;; Pay attention to the type of value.
-			     ;; Preserve order for multiple keywords.
-			     (cond
-			      ((not value))
-			      ((and (member kwd org-element-multiple-keywords)
-				    (member kwd org-element-dual-keywords))
-			       (mapc (lambda (line)
-				       (funcall --walk-tree (cdr line))
-				       (funcall --walk-tree (car line)))
-				     (reverse value)))
-			      ((member kwd org-element-multiple-keywords)
-			       (mapc (lambda (line) (funcall --walk-tree line))
-				     (reverse value)))
-			      ((member kwd org-element-dual-keywords)
-			       (funcall --walk-tree (cdr value))
-			       (funcall --walk-tree (car value)))
-			      (t (funcall --walk-tree value)))))
-			 --affiliated-alist))
-		 ;; Determine if a recursion into --DATA is possible.
-		 (cond
-		  ;; --TYPE is explicitly removed from recursion.
-		  ((memq --type no-recursion))
-		  ;; --DATA has no contents.
-		  ((not (org-element-contents --data)))
-		  ;; Looking for greater elements but --DATA is simply
-		  ;; an element or an object.
-		  ((and (eq --category 'greater-elements)
-			(not (memq --type org-element-greater-elements))))
-		  ;; Looking for elements but --DATA is an object.
-		  ((and (eq --category 'elements)
-			(memq --type org-element-all-objects)))
-		  ;; In any other case, map contents.
-		  (t (mapc --walk-tree (org-element-contents --data)))))))))))
+	  (lambda (--data)
+	    ;; Recursively walk DATA.  INFO, if non-nil, is a plist
+	    ;; holding contextual information.
+	    (let ((--type (org-element-type --data)))
+	      (cond
+	       ((not --data))
+	       ;; Ignored element in an export context.
+	       ((and info (memq --data (plist-get info :ignore-list))))
+	       ;; List of elements or objects.
+	       ((not --type) (mapc --walk-tree --data))
+	       ;; Unconditionally enter parse trees.
+	       ((eq --type 'org-data)
+		(mapc --walk-tree (org-element-contents --data)))
+	       (t
+		;; Check if TYPE is matching among TYPES.  If so,
+		;; apply FUN to --DATA and accumulate return value
+		;; into --ACC (or exit if FIRST-MATCH is non-nil).
+		(when (memq --type types)
+		  (let ((result (funcall fun --data)))
+		    (cond ((not result))
+			  (first-match (throw '--map-first-match result))
+			  (t (push result --acc)))))
+		;; If --DATA has a secondary string that can contain
+		;; objects with their type among TYPES, look into it.
+		(when (and (eq --category 'objects) (not (stringp --data)))
+		  (let ((sec-prop
+			 (assq --type org-element-secondary-value-alist)))
+		    (when sec-prop
+		      (funcall --walk-tree
+			       (org-element-property (cdr sec-prop) --data)))))
+		;; If --DATA has any parsed affiliated keywords and
+		;; WITH-AFFILIATED is non-nil, look for objects in
+		;; them.
+		(when (and with-affiliated
+			   (eq --category 'objects)
+			   (memq --type org-element-all-elements))
+		  (dolist (kwd-pair org-element--parsed-properties-alist)
+		    (let ((kwd (car kwd-pair))
+			  (value (org-element-property (cdr kwd-pair) --data)))
+		      ;; Pay attention to the type of parsed keyword.
+		      ;; In particular, preserve order for multiple
+		      ;; keywords.
+		      (cond
+		       ((not value))
+		       ((member kwd org-element-dual-keywords)
+			(dolist
+			    (line (if (member kwd org-element-multiple-keywords)
+				      (reverse value)
+				    (list value)))
+			  (funcall --walk-tree (cdr line))
+			  (funcall --walk-tree (car line))))
+		       ((member kwd org-element-multiple-keywords)
+			(mapc --walk-tree (reverse value)))
+		       (t (funcall --walk-tree value))))))
+		;; Determine if a recursion into --DATA is possible.
+		(cond
+		 ;; --TYPE is explicitly removed from recursion.
+		 ((memq --type no-recursion))
+		 ;; --DATA has no contents.
+		 ((not (org-element-contents --data)))
+		 ;; Looking for greater elements but --DATA is simply
+		 ;; an element or an object.
+		 ((and (eq --category 'greater-elements)
+		       (not (memq --type org-element-greater-elements))))
+		 ;; Looking for elements but --DATA is an object.
+		 ((and (eq --category 'elements)
+		       (memq --type org-element-all-objects)))
+		 ;; In any other case, map contents.
+		 (t (mapc --walk-tree (org-element-contents --data))))))))))
     (catch '--map-first-match
       (funcall --walk-tree data)
       ;; Return value in a proper order.
