@@ -196,7 +196,7 @@ found in the buffer with no definition in TEMPLATES."
 		       ;; expansions.
 		       (save-excursion (insert value)))
 		      (finalize
-		       (error "Undefined Org macro: %s; aborting."
+		       (error "Undefined Org macro: %s; aborting"
 			      (org-element-property :key object))))))))))))
 
 (defun org-macro-escape-arguments (&rest args)

@@ -19014,7 +19014,7 @@ horizontal and vertical directions."
   (if (display-graphic-p)
       (round (/ (display-pixel-height)
 		(/ (display-mm-height) 25.4)))
-    (error "Attempt to calculate the dpi of a non-graphic display.")))
+    (error "Attempt to calculate the dpi of a non-graphic display")))
 
 ;; This function borrows from Ganesh Swami's latex2png.el
 (defun org-create-formula-image-with-dvipng (string tofile options buffer)

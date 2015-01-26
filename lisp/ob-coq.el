@@ -69,7 +69,7 @@
 If there is not a current inferior-process-buffer in SESSION then
 create one.  Return the initialized session."
   (unless (fboundp 'run-coq)
-    (error "`run-coq' not defined, load coq-inferior.el."))
+    (error "`run-coq' not defined, load coq-inferior.el"))
   (save-window-excursion (run-coq "coqtop"))
   (sit-for 0.1)
   (get-buffer org-babel-coq-buffer))

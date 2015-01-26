@@ -176,14 +176,14 @@ This function is called by `org-babel-execute-src-block'."
 		  (shell-command (format "mv %s %s"
 					 (concat (file-name-sans-extension tex-file) "-1.svg")
 					 out-file)))
-	      (error "SVG file produced but HTML file requested.")))
+	      (error "SVG file produced but HTML file requested")))
 	   ((file-exists-p (concat (file-name-sans-extension tex-file) ".html"))
 	    (if (string-match "\\.html$" out-file)
 		(shell-command "mv %s %s"
 			       (concat (file-name-sans-extension tex-file)
 				       ".html")
 			       out-file)
-	      (error "HTML file produced but SVG file requested.")))))
+	      (error "HTML file produced but SVG file requested")))))
          ((string-match "\\.\\([^\\.]+\\)$" out-file)
           (error "Can not create %s files, please specify a .png or .pdf file or try the :imagemagick header argument"
 		 (match-string 1 out-file))))
