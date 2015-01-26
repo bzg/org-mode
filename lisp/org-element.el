@@ -4038,12 +4038,12 @@ looking into captions:
 		      (cond
 		       ((not value))
 		       ((member kwd org-element-dual-keywords)
-			(dolist
-			    (line (if (member kwd org-element-multiple-keywords)
-				      (reverse value)
-				    (list value)))
-			  (funcall --walk-tree (cdr line))
-			  (funcall --walk-tree (car line))))
+			(if (member kwd org-element-multiple-keywords)
+			    (dolist (line (reverse value))
+			      (funcall --walk-tree (cdr line))
+			      (funcall --walk-tree (car line)))
+			  (funcall --walk-tree (cdr value))
+			  (funcall --walk-tree (car value))))
 		       ((member kwd org-element-multiple-keywords)
 			(mapc --walk-tree (reverse value)))
 		       (t (funcall --walk-tree value))))))
