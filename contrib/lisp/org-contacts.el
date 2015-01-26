@@ -882,7 +882,7 @@ address."
 		  (setq email (org-contacts-strip-link email))
                   (org-contacts-check-mail-address email)
                   (compose-mail (org-contacts-format-email (org-get-heading t) email)))))
-          (error (format "This contact has no mail address set (no %s property)."
+          (error (format "This contact has no mail address set (no %s property)"
                          org-contacts-email-property)))))))
 
 (defun org-contacts-get-icon (&optional pom)
