@@ -885,24 +885,37 @@ parsed as a secondary string, but as a plain string instead.
 
 Assume point is at beginning of the headline."
   (save-excursion
-    (let* ((components (org-heading-components))
-	   (level (nth 1 components))
-	   (todo (nth 2 components))
+    (let* ((begin (point))
+	   (level (prog1 (org-reduced-level (skip-chars-forward "*"))
+		    (skip-chars-forward " \t")))
+	   (todo (and org-todo-regexp
+		      (let (case-fold-search) (looking-at org-todo-regexp))
+		      (progn (goto-char (match-end 0))
+			     (skip-chars-forward " \t")
+			     (match-string 0))))
 	   (todo-type
 	    (and todo (if (member todo org-done-keywords) 'done 'todo)))
-	   (tags (let ((raw-tags (nth 5 components)))
-		   (and raw-tags (org-split-string raw-tags ":"))))
-	   (raw-value (or (nth 4 components) ""))
+	   (priority (and (looking-at "\\[#.\\][ \t]*")
+			  (progn (goto-char (match-end 0))
+				 (aref (match-string 0) 2))))
 	   (commentedp
-	    (let ((case-fold-search nil))
-	      (string-match (format "^%s\\( \\|$\\)" org-comment-string)
-			    raw-value)))
+	    (and (let (case-fold-search) (looking-at org-comment-string))
+		 (goto-char (match-end 0))))
+	   (title-start (point))
+	   (tags (when (re-search-forward
+			(org-re "[ \t]+\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")
+			(line-end-position)
+			'move)
+		   (goto-char (match-beginning 0))
+		   (org-split-string (match-string 1) ":")))
+	   (title-end (point))
+	   (raw-value (org-trim
+		       (buffer-substring-no-properties title-start title-end)))
 	   (archivedp (member org-archive-tag tags))
 	   (footnote-section-p (and org-footnote-section
 				    (string= org-footnote-section raw-value)))
 	   (standard-props (org-element--get-node-properties))
 	   (time-props (org-element--get-time-properties))
-	   (begin (point))
 	   (end (min (save-excursion (org-end-of-subtree t t)) limit))
 	   (pos-after-head (progn (forward-line) (point)))
 	   (contents-begin (save-excursion
@@ -913,14 +926,6 @@ Assume point is at beginning of the headline."
 				     (skip-chars-backward " \r\t\n")
 				     (forward-line)
 				     (point)))))
-      ;; Clean RAW-VALUE from any comment string.
-      (when commentedp
-	(let ((case-fold-search nil))
-	  (setq raw-value
-		(replace-regexp-in-string
-		 (concat (regexp-quote org-comment-string) "\\(?: \\|$\\)")
-		 ""
-		 raw-value))))
       ;; Clean TAGS from archive tag, if any.
       (when archivedp (setq tags (delete org-archive-tag tags)))
       (let ((headline
@@ -935,7 +940,7 @@ Assume point is at beginning of the headline."
 			  :contents-begin contents-begin
 			  :contents-end contents-end
 			  :level level
-			  :priority (nth 3 components)
+			  :priority priority
 			  :tags tags
 			  :todo-keyword todo
 			  :todo-type todo-type
@@ -958,8 +963,17 @@ Assume point is at beginning of the headline."
 	(org-element-put-property
 	 headline :title
 	 (if raw-secondary-p raw-value
-	   (org-element-parse-secondary-string
-	    raw-value (org-element-restriction 'headline) headline)))))))
+	   (let ((title (org-element--parse-objects
+			 (progn (goto-char title-start)
+				(skip-chars-forward " \t")
+				(point))
+			 (progn (goto-char title-end)
+				(skip-chars-backward " \t")
+				(point))
+			 nil
+			 (org-element-restriction 'headline))))
+	     (dolist (datum title title)
+	       (org-element-put-property datum :parent headline)))))))))
 
 (defun org-element-headline-interpreter (headline contents)
   "Interpret HEADLINE element as Org syntax.
@@ -1030,13 +1044,28 @@ string instead.
 Assume point is at beginning of the inline task."
   (save-excursion
     (let* ((begin (point))
-	   (components (org-heading-components))
-	   (todo (nth 2 components))
+	   (level (prog1 (org-reduced-level (skip-chars-forward "*"))
+		    (skip-chars-forward " \t")))
+	   (todo (and org-todo-regexp
+		      (let (case-fold-search) (looking-at org-todo-regexp))
+		      (progn (goto-char (match-end 0))
+			     (skip-chars-forward " \t")
+			     (match-string 0))))
 	   (todo-type (and todo
 			   (if (member todo org-done-keywords) 'done 'todo)))
-	   (tags (let ((raw-tags (nth 5 components)))
-		   (and raw-tags (org-split-string raw-tags ":"))))
-	   (raw-value (or (nth 4 components) ""))
+	   (priority (and (looking-at "\\[#.\\][ \t]*")
+			  (progn (goto-char (match-end 0))
+				 (aref (match-string 0) 2))))
+	   (title-start (point))
+	   (tags (when (re-search-forward
+			(org-re "[ \t]+\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")
+			(line-end-position)
+			'move)
+		   (goto-char (match-beginning 0))
+		   (org-split-string (match-string 1) ":")))
+	   (title-end (point))
+	   (raw-value (org-trim
+		       (buffer-substring-no-properties title-start title-end)))
 	   (task-end (save-excursion
 		       (end-of-line)
 		       (and (re-search-forward org-outline-regexp-bol limit t)
@@ -1061,8 +1090,8 @@ Assume point is at beginning of the inline task."
 			 :end end
 			 :contents-begin contents-begin
 			 :contents-end contents-end
-			 :level (nth 1 components)
-			 :priority (nth 3 components)
+			 :level level
+			 :priority priority
 			 :tags tags
 			 :todo-keyword todo
 			 :todo-type todo-type
@@ -1073,10 +1102,17 @@ Assume point is at beginning of the inline task."
       (org-element-put-property
        inlinetask :title
        (if raw-secondary-p raw-value
-	 (org-element-parse-secondary-string
-	  raw-value
-	  (org-element-restriction 'inlinetask)
-	  inlinetask))))))
+	 (let ((title (org-element--parse-objects
+		       (progn (goto-char title-start)
+			      (skip-chars-forward " \t")
+			      (point))
+		       (progn (goto-char title-end)
+			      (skip-chars-backward " \t")
+			      (point))
+		       nil
+		       (org-element-restriction 'inlinetask))))
+	   (dolist (datum title title)
+	     (org-element-put-property datum :parent inlinetask))))))))
 
 (defun org-element-inlinetask-interpreter (inlinetask contents)
   "Interpret INLINETASK element as Org syntax.
@@ -1189,11 +1225,14 @@ Assume point is at the beginning of the item."
 			:post-affiliated begin))))
       (org-element-put-property
        item :tag
-       (let ((raw-tag (org-list-get-tag begin struct)))
-	 (and raw-tag
-	      (if raw-secondary-p raw-tag
-		(org-element-parse-secondary-string
-		 raw-tag (org-element-restriction 'item) item))))))))
+       (let ((raw (org-list-get-tag begin struct)))
+	 (when raw
+	   (if raw-secondary-p raw
+	     (let ((tag (org-element--parse-objects
+			 (match-beginning 4) (match-end 4) nil
+			 (org-element-restriction 'item))))
+	       (dolist (datum tag tag)
+		 (org-element-put-property datum :parent item))))))))))
 
 (defun org-element-item-interpreter (item contents)
   "Interpret ITEM element as Org syntax.
@@ -3783,7 +3822,7 @@ position of point and CDR is nil."
 		(save-match-data
 		  (org-trim
 		   (buffer-substring-no-properties
-		    (match-end 0) (point-at-eol)))))
+		    (match-end 0) (line-end-position)))))
 	       ;; PARSEDP is non-nil when keyword should have its
 	       ;; value parsed.
 	       (parsedp (member kwd org-element-parsed-keywords))
@@ -3794,12 +3833,17 @@ position of point and CDR is nil."
 		(and dualp
 		     (let ((sec (org-match-string-no-properties 2)))
 		       (if (or (not sec) (not parsedp)) sec
-			 (org-element-parse-secondary-string sec restrict)))))
+			 (org-element--parse-objects
+			  (match-beginning 2) (match-end 2) nil restrict)))))
 	       ;; Attribute a property name to KWD.
 	       (kwd-sym (and kwd (intern (concat ":" (downcase kwd))))))
 	  ;; Now set final shape for VALUE.
 	  (when parsedp
-	    (setq value (org-element-parse-secondary-string value restrict)))
+	    (setq value
+		  (org-element--parse-objects
+		   (match-end 0)
+		   (progn (end-of-line) (skip-chars-backward " \t") (point))
+		   nil restrict)))
 	  (when dualp
 	    (setq value (and (or value dual-value) (cons value dual-value))))
 	  (when (or (member kwd org-element-multiple-keywords)
