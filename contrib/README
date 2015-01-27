@@ -30,7 +30,7 @@ org-eldoc.el             --- Eldoc documentation for SRC blocks
 org-elisp-symbol.el      --- Org links to emacs-lisp symbols
 org-eval-light.el        --- Evaluate in-buffer code on demand
 org-eval.el              --- The <lisp> tag, adapted from Muse
-org-eww.el               --- Store link to url of eww
+org-eww.el               --- Support link/copy/paste from eww to Org-mode
 org-expiry.el            --- Expiry mechanism for Org entries
 org-export-generic.el    --- Export framework for configurable backends
 org-git-link.el          --- Provide org links to specific file version
