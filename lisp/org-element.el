@@ -982,7 +982,7 @@ CONTENTS is the contents of the element."
 			       ?*)
 		  (and todo (concat " " todo))
 		  (and commentedp (concat " " org-comment-string))
-		  (and priority (format " [#%s]" (char-to-string priority)))
+		  (and priority (format " [#%c]" priority))
 		  " "
 		  (if (and org-footnote-section
 			   (org-element-property :footnote-section-p headline))
@@ -1091,8 +1091,7 @@ CONTENTS is the contents of inlinetask."
 		      (format ":%s:" (mapconcat 'identity tag-list ":")))))
 	 (task (concat (make-string level ?*)
 		       (and todo (concat " " todo))
-		       (and priority
-			    (format " [#%s]" (char-to-string priority)))
+		       (and priority (format " [#%c]" priority))
 		       (and title (concat " " title)))))
     (concat task
 	    ;; Align tags.
