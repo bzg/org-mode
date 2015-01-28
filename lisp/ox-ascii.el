@@ -604,28 +604,29 @@ INFO is a plist used as a communication channel."
 	     ;; indentation of current item.  If that's the case,
 	     ;; compute it with the help of `:structure' property from
 	     ;; parent item, if any.
-	     (let ((parent-item
+	     (let ((item
 		    (if (eq (org-element-type element) 'item) element
 		      (loop for parent in genealogy
 			    when (eq (org-element-type parent) 'item)
 			    return parent))))
-	       (if (not parent-item) 0
+	       (if (not item) 0
 		 ;; Compute indentation offset of the current item,
 		 ;; that is the sum of the difference between its
 		 ;; indentation and the indentation of the top item in
 		 ;; the list and current item bullet's length.  Also
 		 ;; remove checkbox length, and tag length (for
 		 ;; description lists) or bullet length.
-		 (let ((struct (org-element-property :structure parent-item))
-		       (beg-item (org-element-property :begin parent-item)))
+		 (let ((struct (org-element-property :structure item))
+		       (beg-item (org-element-property :begin item)))
 		   (+ (- (org-list-get-ind beg-item struct)
 			 (org-list-get-ind
 			  (org-list-get-top-point struct) struct))
-		      (string-width (or (org-ascii--checkbox parent-item info)
+		      (string-width (or (org-ascii--checkbox item info)
 					""))
 		      (string-width
-		       (or (org-list-get-tag beg-item struct)
-			   (org-list-get-bullet beg-item struct)))))))))))))
+		       (let ((tag (org-element-property :tag item)))
+			 (if tag (org-export-data tag info)
+			   (org-element-property :bullet item))))))))))))))
 
 (defun org-ascii--current-justification (element)
   "Return expected justification for ELEMENT's contents.
