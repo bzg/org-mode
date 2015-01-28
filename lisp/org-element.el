@@ -867,10 +867,10 @@ Return value is a plist."
   "Parse a headline.
 
 Return a list whose CAR is `headline' and CDR is a plist
-containing `:raw-value', `:title', `:alt-title', `:begin',
-`:end', `:pre-blank', `:contents-begin' and `:contents-end',
-`:level', `:priority', `:tags', `:todo-keyword',`:todo-type',
-`:scheduled', `:deadline', `:closed', `:archivedp', `:commentedp'
+containing `:raw-value', `:title', `:begin', `:end',
+`:pre-blank', `:contents-begin' and `:contents-end', `:level',
+`:priority', `:tags', `:todo-keyword',`:todo-type', `:scheduled',
+`:deadline', `:closed', `:archivedp', `:commentedp'
 `:footnote-section-p', `:post-blank' and `:post-affiliated'
 keywords.
 
@@ -953,13 +953,6 @@ Assume point is at beginning of the headline."
 			  :post-affiliated begin)
 		    time-props
 		    standard-props))))
-	(let ((alt-title (org-element-property :ALT_TITLE headline)))
-	  (when alt-title
-	    (org-element-put-property
-	     headline :alt-title
-	     (if raw-secondary-p alt-title
-	       (org-element-parse-secondary-string
-		alt-title (org-element-restriction 'headline) headline)))))
 	(org-element-put-property
 	 headline :title
 	 (if raw-secondary-p raw-value

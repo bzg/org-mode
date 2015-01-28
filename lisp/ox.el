@@ -3803,8 +3803,10 @@ fail, the fall-back value is \"???\"."
   "Return alternative title for HEADLINE, as a secondary string.
 INFO is a plist used as a communication channel.  If no optional
 title is defined, fall-back to the regular title."
-  (or (org-element-property :alt-title headline)
-      (org-element-property :title headline)))
+  (let ((alt (org-element-property :ALT_TITLE headline)))
+    (if alt (org-element-parse-secondary-string
+	     alt (org-element-restriction 'headline) headline)
+      (org-element-property :title headline))))
 
 (defun org-export-first-sibling-p (blob info)
   "Non-nil when BLOB is the first sibling in its parent.
