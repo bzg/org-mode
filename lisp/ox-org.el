@@ -78,7 +78,7 @@ setting of `org-html-htmlize-output-type' is 'css."
     (latex-environment . org-org-identity)
     (latex-fragment . org-org-identity)
     (line-break . org-org-identity)
-    (link . org-org-identity)
+    (link . org-org-link)
     (node-property . org-org-identity)
     (template . org-org-template)
     (paragraph . org-org-identity)
@@ -141,6 +141,13 @@ CONTENTS is nil.  INFO is ignored."
 		    '("AUTHOR" "CREATOR" "DATE" "DESCRIPTION" "EMAIL" "KEYWORDS"
 		      "OPTIONS" "TITLE"))
       (org-element-keyword-interpreter keyword nil))))
+
+(defun org-org-link (link contents info)
+  "Transcode LINK object back into Org syntax.
+CONTENTS is the description of the link, as a string, or nil.
+INFO is a plist containing current export state."
+  (or (org-export-custom-protocol-maybe link contents info)
+      (org-element-link-interpreter link contents)))
 
 (defun org-org-template (contents info)
   "Return Org document template with document keywords.
