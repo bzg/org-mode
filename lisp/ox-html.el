@@ -3078,7 +3078,7 @@ holding contextual information."
 		(or (org-element-property :CUSTOM_ID parent)
 		    section-number
 		    (org-export-get-headline-id parent info))
-		contents)))))
+		(or contents ""))))))
 
 ;;;; Radio Target
 
