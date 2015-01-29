@@ -101,6 +101,7 @@
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-every "org" (pred seq))
+(declare-function org-macro-escape-arguments "org-macro" (&rest args))
 
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
