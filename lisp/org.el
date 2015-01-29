@@ -235,8 +235,10 @@ file to byte-code before it is loaded."
     ;; tangle if the org-mode file is newer than the elisp file
     (unless (and (file-exists-p exported-file)
 		 (> (funcall age file) (funcall age exported-file)))
+      ;; Tangle-file traversal returns reversed list of tangled files
+      ;; and we want to evaluate the first target.
       (setq exported-file
-	    (car (org-babel-tangle-file file exported-file "emacs-lisp"))))
+	    (car (last (org-babel-tangle-file file exported-file "emacs-lisp")))))
     (message "%s %s"
 	     (if compile
 		 (progn (byte-compile-file exported-file 'load)
