@@ -91,12 +91,12 @@
 	  (message (buffer-string))
 	  (goto-char (point-min))
 	  (should (re-search-forward "^: 0" nil t))
-	  (should (re-search-forward "call =2= stuck" nil t))
+	  (should (re-search-forward "call {{{results(=2=)}}} stuck" nil t))
 	  (should (re-search-forward
 		   "exported =call_double(it=2)= because" nil t))
-	  (should (re-search-forward "^=6= because" nil t))
+	  (should (re-search-forward "^{{{results(=6=)}}} because" nil t))
 	  (should (re-search-forward "results 8 should" nil t))
-	  (should (re-search-forward "following 2\\*5==10= should" nil t)))))))
+	  (should (re-search-forward "following 2\\*5={{{results(=10=)}}} should" nil t)))))))
 
 (ert-deftest test-ob-lob/do-not-eval-lob-lines-in-example-blocks-on-export ()
   (require 'ox)

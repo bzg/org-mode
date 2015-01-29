@@ -352,7 +352,7 @@ Second
   (push 2 *evaluation-collector*)
 #+end_src
 
-Third src_emacs-lisp{(push 3 *evaluation-collector*)}
+Third src_emacs-lisp{(car (push 3 *evaluation-collector*))}
 
 Fourth
 #+call: foo-for-order-of-evaluation(4)
@@ -406,8 +406,8 @@ Note: Just export of a property can be done with a macro: {{{property(a)}}}.
 #+NAME: src_block_location_elisp-sect-call
 #+CALL: src_block_location_elisp()
 
-- sect inline call_src_block_location_shell()
-- sect inline call_src_block_location_elisp()
+- sect inline call_src_block_location_shell()[:results raw]
+- sect inline call_src_block_location_elisp()[:results raw]
 
 *** subsection
     :PROPERTIES:
@@ -421,8 +421,8 @@ Note: Just export of a property can be done with a macro: {{{property(a)}}}.
 #+NAME: src_block_location_elisp-sub0-call
 #+CALL: src_block_location_elisp()
 
-- sub0 inline call_src_block_location_shell()
-- sub0 inline call_src_block_location_elisp()
+- sub0 inline call_src_block_location_shell()[:results raw]
+- sub0 inline call_src_block_location_elisp()[:results raw]
 
 #+NAME: src_block_location_shell-sub1-call
 #+CALL: src_block_location_shell(c=5, e=6)
@@ -430,8 +430,8 @@ Note: Just export of a property can be done with a macro: {{{property(a)}}}.
 #+NAME: src_block_location_elisp-sub1-call
 #+CALL: src_block_location_elisp(c=5, e=6)
 
-- sub1 inline call_src_block_location_shell(c=5, e=6)
-- sub1 inline call_src_block_location_elisp(c=5, e=6)
+- sub1 inline call_src_block_location_shell(c=5, e=6)[:results raw]
+- sub1 inline call_src_block_location_elisp(c=5, e=6)[:results raw]
 
 **** function definition
 

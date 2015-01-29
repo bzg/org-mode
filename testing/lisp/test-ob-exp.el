@@ -93,7 +93,8 @@ Current buffer is a copy of the original buffer."
   (message \"expanded1\")" ";; noweb-no-start
   <<noweb-example1>>" ";; noweb-2-yes-start
   (message \"expanded2\")
-  (message \"expanded2\")" ";; noweb-tangle-start
+  (message \"expanded2\")"
+  ";; noweb-tangle-start
 <<noweb-example1>>
 <<noweb-example2>>")
     (org-test-at-id "eb1f6498-5bd9-45e0-9c56-50717053e7b7"
@@ -190,9 +191,9 @@ a table."
 (ert-deftest ob-exp/exports-inline ()
   (should
    (string-match
-    (regexp-quote "Here is one in the middle =1= of a line.
-Here is one at the end of a line. =2=
-=3= Here is one at the beginning of a line.")
+    (regexp-quote "Here is one in the middle {{{results(=1=)}}} of a line.
+Here is one at the end of a line. {{{results(=2=)}}}
+{{{results(=3=)}}} Here is one at the beginning of a line.")
     (org-test-at-id "54cb8dc3-298c-4883-a933-029b3c9d4b18"
       (org-narrow-to-subtree)
       (let ((org-babel-inline-result-wrap "=%s="))
@@ -214,13 +215,13 @@ Here is one at the end of a line. =2=
 		     (org-export-execute-babel-code)
 		     (buffer-string))))
     (should
-     (string-match "\\`src_emacs-lisp\\(?:\\[]\\)?{(\\+ 1 1)} =2=$"
+     (string-match "\\`src_emacs-lisp\\(?:\\[]\\)?{(\\+ 1 1)} {{{results(=2=)}}}$"
 		   (org-test-with-temp-text
 		       "src_emacs-lisp[:exports both]{(+ 1 1)}"
 		     (org-export-execute-babel-code)
 		     (buffer-string))))
     (should
-     (string-match "\\`=2=$"
+     (string-match "\\`{{{results(=2=)}}}$"
 		   (org-test-with-temp-text
 		       "src_emacs-lisp[:exports results :results scalar]{(+ 1 1)}"
 		     (org-export-execute-babel-code)
@@ -246,7 +247,7 @@ Here is one at the end of a line. =2=
        (regexp-quote "Here is one in the middle src_sh[]{echo 1} of a line.
 Here is one at the end of a line. src_sh[]{echo 2}
 src_sh[]{echo 3} Here is one at the beginning of a line.
-Here is one that is also evaluated: src_sh[]{echo 4} =4=")
+Here is one that is also evaluated: src_sh[]{echo 4} {{{results(=4=)}}}")
        nil t)
       (org-test-at-id "cd54fc88-1b6b-45b6-8511-4d8fa7fc8076"
 	(org-narrow-to-subtree)
@@ -259,7 +260,7 @@ evaluated."
   (let ((org-babel-inline-result-wrap "=%s=")
 	(org-export-babel-evaluate t))
     (should
-     (string-match "\\`=2=$"
+     (string-match "\\`{{{results(src_emacs-lisp\\[\\]{2})}}}$"
 		   (org-test-with-temp-text
 		       "src_emacs-lisp[:exports results :results code]{(+ 1 1)}"
 		     (org-export-execute-babel-code)
@@ -270,7 +271,7 @@ evaluated."
 be evaluated."
   (let ((org-export-babel-evaluate t))
     (should
-     (string-match "\\`src_emacs-lisp\\(?:\\[]\\)?{2}$"
+     (string-match "{{{results(src_emacs-lisp\\(?:\\[[: a-zA-Z]+]\\)?{2})}}}$"
 		   (org-test-with-temp-text
 		       (concat "src_emacs-lisp[:exports results :results code "
 			       ":results_switches \":exports code\"]{(+ 1 1)}")
@@ -281,7 +282,7 @@ be evaluated."
   (let ((org-export-babel-evaluate t))
     (should
      (string-match (concat "\\`src_emacs-lisp\\(?:\\[]\\)?{(\\+ 1 1)} "
-			   "src_emacs-lisp\\(?:\\[]\\)?{2}$")
+			   "{{{results(src_emacs-lisp\\[ :exports code\\]{2})}}}$")
 		   (org-test-with-temp-text
 		       (concat "src_emacs-lisp[:exports both :results code "
 			       ":results_switches \":exports code\"]{(+ 1 1)}")
@@ -310,7 +311,6 @@ be evaluated."
   (org-test-at-id "cc5fbc20-bca5-437a-a7b8-2b4d7a03f820"
     (org-narrow-to-subtree)
     (let* ((case-fold-search nil)
-	   (org-babel-inline-result-wrap "=%s=")
 	   (result (org-test-with-expanded-babel-code (buffer-string)))
 	   (sect "a:1, b:0, c:3, d:0, e:0")
 	   (sub0 "a:1, b:2, c:4, d:0, e:0")
@@ -321,27 +321,27 @@ be evaluated."
 			    result))
       (should (string-match (concat "_elisp-sect-call\n: elisp " sect "\n")
 			    result))
-      (should (string-match (concat "\n- sect inline =shell " sect "=\n")
+      (should (string-match (concat "\n- sect inline shell " sect "\n")
 			    result))
-      (should (string-match (concat "\n- sect inline =elisp " sect "=\n")
+      (should (string-match (concat "\n- sect inline elisp " sect "\n")
 			    result))
-      ;; entry "subsection", call without arguments
+            ;; entry "subsection", call without arguments
       (should (string-match (concat "_shell-sub0-call\n: shell " sub0 "\n")
 			    result))
       (should (string-match (concat "_elisp-sub0-call\n: elisp " sub0 "\n")
 			    result))
-      (should (string-match (concat "\n- sub0 inline =shell " sub0 "=\n")
+      (should (string-match (concat "\n- sub0 inline shell " sub0 "\n")
 			    result))
-      (should (string-match (concat "\n- sub0 inline =elisp " sub0 "=\n")
+      (should (string-match (concat "\n- sub0 inline elisp " sub0 "\n")
 			    result))
       ;; entry "subsection", call with arguments
       (should (string-match (concat "_shell-sub1-call\n: shell " sub1 "\n")
 			    result))
       (should (string-match (concat "_elisp-sub1-call\n: elisp " sub1 "\n")
 			    result))
-      (should (string-match (concat "\n- sub1 inline =shell " sub1 "=\n")
+      (should (string-match (concat "\n- sub1 inline shell " sub1 "\n")
 			    result))
-      (should (string-match (concat "\n- sub1 inline =elisp " sub1 "=\n")
+      (should (string-match (concat "\n- sub1 inline elisp " sub1 "\n")
 			    result))
       ;; entry "function definition"
       (should (string-match (concat "_location_shell\n: shell " func "\n")
