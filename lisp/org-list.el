@@ -1134,13 +1134,20 @@ This function modifies STRUCT."
 	   ;; Store overlays responsible for visibility status.  We
 	   ;; also need to store their boundaries as they will be
 	   ;; removed from buffer.
-	   (overlays (cons
-		      (mapcar (lambda (ov)
-				(list ov (overlay-start ov) (overlay-end ov)))
-			      (overlays-in beg-A end-A))
-		      (mapcar (lambda (ov)
-				(list ov (overlay-start ov) (overlay-end ov)))
-			      (overlays-in beg-B end-B)))))
+	   (overlays
+	    (cons
+	     (delq nil
+		   (mapcar (lambda (o)
+			     (and (>= (overlay-start o) beg-A)
+				  (<= (overlay-end o) end-A)
+				  (list o (overlay-start o) (overlay-end o))))
+			   (overlays-in beg-A end-A)))
+	     (delq nil
+		   (mapcar (lambda (o)
+			     (and (>= (overlay-start o) beg-B)
+				  (<= (overlay-end o) end-B)
+				  (list o (overlay-start o) (overlay-end o))))
+			   (overlays-in beg-B end-B))))))
       ;; 1. Move effectively items in buffer.
       (goto-char beg-A)
       (delete-region beg-A end-B-no-blank)
@@ -1151,42 +1158,39 @@ This function modifies STRUCT."
       ;;    as empty spaces are not moved there.  In others words,
       ;;    item BEG-A will end with whitespaces that were at the end
       ;;    of BEG-B and the same applies to BEG-B.
-      (mapc (lambda (e)
-	      (let ((pos (car e)))
-		(cond
-		 ((< pos beg-A))
-		 ((memq pos sub-A)
-		  (let ((end-e (nth 6 e)))
-		    (setcar e (+ pos (- end-B-no-blank end-A-no-blank)))
-		    (setcar (nthcdr 6 e)
-			    (+ end-e (- end-B-no-blank end-A-no-blank)))
-		    (when (= end-e end-A) (setcar (nthcdr 6 e) end-B))))
-		 ((memq pos sub-B)
-		  (let ((end-e (nth 6 e)))
-		    (setcar e (- (+ pos beg-A) beg-B))
-		    (setcar (nthcdr 6 e) (+ end-e (- beg-A beg-B)))
-		    (when (= end-e end-B)
-		      (setcar (nthcdr 6 e)
-			      (+ beg-A size-B (- end-A end-A-no-blank))))))
-		 ((< pos beg-B)
-		  (let ((end-e (nth 6 e)))
-		    (setcar e (+ pos (- size-B size-A)))
-		    (setcar (nthcdr 6 e) (+ end-e (- size-B size-A))))))))
-	    struct)
-      (setq struct (sort struct (lambda (e1 e2) (< (car e1) (car e2)))))
+      (dolist (e struct)
+	(let ((pos (car e)))
+	  (cond
+	   ((< pos beg-A))
+	   ((memq pos sub-A)
+	    (let ((end-e (nth 6 e)))
+	      (setcar e (+ pos (- end-B-no-blank end-A-no-blank)))
+	      (setcar (nthcdr 6 e)
+		      (+ end-e (- end-B-no-blank end-A-no-blank)))
+	      (when (= end-e end-A) (setcar (nthcdr 6 e) end-B))))
+	   ((memq pos sub-B)
+	    (let ((end-e (nth 6 e)))
+	      (setcar e (- (+ pos beg-A) beg-B))
+	      (setcar (nthcdr 6 e) (+ end-e (- beg-A beg-B)))
+	      (when (= end-e end-B)
+		(setcar (nthcdr 6 e)
+			(+ beg-A size-B (- end-A end-A-no-blank))))))
+	   ((< pos beg-B)
+	    (let ((end-e (nth 6 e)))
+	      (setcar e (+ pos (- size-B size-A)))
+	      (setcar (nthcdr 6 e) (+ end-e (- size-B size-A))))))))
+      (setq struct (sort struct #'car-less-than-car))
       ;; Restore visibility status, by moving overlays to their new
       ;; position.
-      (mapc (lambda (ov)
-	      (move-overlay
-	       (car ov)
-	       (+ (nth 1 ov) (- (+ beg-B (- size-B size-A)) beg-A))
-	       (+ (nth 2 ov) (- (+ beg-B (- size-B size-A)) beg-A))))
-	    (car overlays))
-      (mapc (lambda (ov)
-	      (move-overlay (car ov)
-			    (+ (nth 1 ov) (- beg-A beg-B))
-			    (+ (nth 2 ov) (- beg-A beg-B))))
-	    (cdr overlays))
+      (dolist (ov (car overlays))
+	(move-overlay
+	 (car ov)
+	 (+ (nth 1 ov) (- (+ beg-B (- size-B size-A)) beg-A))
+	 (+ (nth 2 ov) (- (+ beg-B (- size-B size-A)) beg-A))))
+      (dolist (ov (cdr overlays))
+	(move-overlay (car ov)
+		      (+ (nth 1 ov) (- beg-A beg-B))
+		      (+ (nth 2 ov) (- beg-A beg-B))))
       ;; Return structure.
       struct)))
 
@@ -1470,8 +1474,10 @@ This function returns, destructively, the new list structure."
 			    (point-at-eol)))))
 		     (t dest)))
 	 (org-M-RET-may-split-line nil)
-	 ;; Store visibility.
-	 (visibility (overlays-in item item-end)))
+	 ;; Store inner overlays (to preserve visibility).
+	 (overlays (org-remove-if (lambda (o) (or (< (overlay-start o) item)
+					     (> (overlay-end o) item)))
+				  (overlays-in item item-end))))
     (cond
      ((eq dest 'delete) (org-list-delete-item item struct))
      ((eq dest 'kill)
@@ -1506,13 +1512,12 @@ This function returns, destructively, the new list structure."
 							   new-end
 							 (+ end shift)))))))
 			       moved-items))
-		      (lambda (e1 e2) (< (car e1) (car e2))))))
-      ;; 2. Restore visibility.
-      (mapc (lambda (ov)
-	      (move-overlay ov
-			    (+ (overlay-start ov) (- (point) item))
-			    (+ (overlay-end ov) (- (point) item))))
-	    visibility)
+		      #'car-less-than-car)))
+      ;; 2. Restore inner overlays.
+      (dolist (o overlays)
+	(move-overlay o
+		      (+ (overlay-start o) (- (point) item))
+		      (+ (overlay-end o) (- (point) item))))
       ;; 3. Eventually delete extra copy of the item and clean marker.
       (prog1 (org-list-delete-item (marker-position item) struct)
 	(move-marker item nil)))

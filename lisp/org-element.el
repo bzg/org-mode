@@ -5898,15 +5898,23 @@ end of ELEM-A."
 		    (goto-char (org-element-property :end elem-B))
 		    (skip-chars-backward " \r\t\n")
 		    (point-at-eol)))
-	   ;; Store overlays responsible for visibility status.  We
-	   ;; also need to store their boundaries as they will be
+	   ;; Store inner overlays responsible for visibility status.
+	   ;; We also need to store their boundaries as they will be
 	   ;; removed from buffer.
 	   (overlays
 	    (cons
-	     (mapcar (lambda (ov) (list ov (overlay-start ov) (overlay-end ov)))
-		     (overlays-in beg-A end-A))
-	     (mapcar (lambda (ov) (list ov (overlay-start ov) (overlay-end ov)))
-		     (overlays-in beg-B end-B))))
+	     (delq nil
+		   (mapcar (lambda (o)
+			     (and (>= (overlay-start o) beg-A)
+				  (<= (overlay-end o) end-A)
+				  (list o (overlay-start o) (overlay-end o))))
+			   (overlays-in beg-A end-A)))
+	     (delq nil
+		   (mapcar (lambda (o)
+			     (and (>= (overlay-start o) beg-B)
+				  (<= (overlay-end o) end-B)
+				  (list o (overlay-start o) (overlay-end o))))
+			   (overlays-in beg-B end-B)))))
 	   ;; Get contents.
 	   (body-A (buffer-substring beg-A end-A))
 	   (body-B (delete-and-extract-region beg-B end-B)))
@@ -5917,18 +5925,14 @@ end of ELEM-A."
       (insert body-A)
       ;; Restore ex ELEM-A overlays.
       (let ((offset (- beg-B beg-A)))
-	(mapc (lambda (ov)
-		(move-overlay
-		 (car ov) (+ (nth 1 ov) offset) (+ (nth 2 ov) offset)))
-	      (car overlays))
+	(dolist (o (car overlays))
+	  (move-overlay (car o) (+ (nth 1 o) offset) (+ (nth 2 o) offset)))
 	(goto-char beg-A)
 	(delete-region beg-A end-A)
 	(insert body-B)
 	;; Restore ex ELEM-B overlays.
-	(mapc (lambda (ov)
-		(move-overlay
-		 (car ov) (- (nth 1 ov) offset) (- (nth 2 ov) offset)))
-	      (cdr overlays)))
+	(dolist (o (cdr overlays))
+	  (move-overlay (car o) (- (nth 1 o) offset) (- (nth 2 o) offset))))
       (goto-char (org-element-property :end elem-B)))))
 
 (defun org-element-remove-indentation (s &optional n)
