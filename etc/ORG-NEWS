@@ -190,7 +190,7 @@ keys, to sort a table.
 The ~TOC~ keywords now accepts an optional ~local~ parameter.  See
 manual for details.
 *** Countdown timers can now be paused.
-~org-timer-pause-time~ wil now pause and restart both relative and
+~org-timer-pause-time~ now pauses and restarts both relative and
 countdown timers.
 ** Miscellaneous
 *** Strip all meta data from ITEM special property
