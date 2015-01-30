@@ -80,6 +80,9 @@ it provides more features and covers all export back-ends.  It is also
 accessible from the export dispatcher.
 *** Removed function ~org-timer-cancel-timer~
 ~org-timer-stop~ now stops both relative and countdown timers.
+*** Removed function ~org-end-of-meta-data-and-drawers~
+The function is superseded by ~org-end-of-meta-data~, called with an
+optional argument.
 ** Removed options
 *** ~org-list-empty-line-terminates-plain-lists~ is deprecated
 It will be kept in code base until next release, for backward

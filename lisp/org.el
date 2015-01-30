@@ -24019,24 +24019,28 @@ If there is no such heading, return nil."
     		(forward-char -1))))))
   (point))
 
-(defun org-end-of-meta-data-and-drawers ()
-  "Jump to the first text after meta data and drawers in the current entry.
-This will move over empty lines, lines with planning time stamps,
-clocking lines, and drawers."
+(defun org-end-of-meta-data (&optional full)
+  "Skip planning line and properties drawer in current entry.
+When optional argument FULL is non-nil, also skip empty lines,
+clocking lines and regular drawers at the beginning of the
+entry."
   (org-back-to-heading t)
-  (let ((end (save-excursion (outline-next-heading) (point)))
-	(re (concat "\\(" org-drawer-regexp "\\)"
-		    "\\|" "[ \t]*" org-keyword-time-regexp)))
-    (forward-line 1)
-    (while (re-search-forward re end t)
-      (if (not (match-end 1))
-	  ;; empty or planning line
-	  (forward-line 1)
-	;; a drawer, find the end
-	(re-search-forward "^[ \t]*:END:" end 'move)
-	(forward-line 1)))
-    (and (re-search-forward "[^\n]" nil t) (backward-char 1))
-    (point)))
+  (forward-line)
+  (when (org-looking-at-p org-planning-line-re) (forward-line))
+  (when (looking-at org-property-drawer-re)
+    (goto-char (match-end 0))
+    (forward-line))
+  (when (and full (not (org-at-heading-p)))
+    (catch 'exit
+      (let ((end (save-excursion (outline-next-heading) (point)))
+	    (re (concat "[ \t]*$" "\\|" org-clock-line-re)))
+	(while (not (eobp))
+	  (cond ((org-looking-at-p org-drawer-regexp)
+		 (if (re-search-forward "^[ \t]*:END:[ \t]*$" end t)
+		     (forward-line)
+		   (throw 'exit t)))
+		((org-looking-at-p re) (forward-line))
+		(t (throw 'exit t))))))))
 
 (defun org-forward-heading-same-level (arg &optional invisible-ok)
   "Move forward to the ARG'th subheading at same level as this one.

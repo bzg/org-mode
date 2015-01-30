@@ -1563,6 +1563,54 @@ drops support for Emacs 24.1 and 24.2."
  
 ;;; Navigation
 
+(ert-deftest test-org/end-of-meta-data ()
+  "Test `org-end-of-meta-data' specifications."
+  ;; Skip planning line.
+  (should
+   (org-test-with-temp-text "* Headline\nSCHEDULED: <2014-03-04 tue.>"
+     (org-end-of-meta-data)
+     (eobp)))
+  ;; Skip properties drawer.
+  (should
+   (org-test-with-temp-text
+       "* Headline\nSCHEDULED: <2014-03-04 tue.>\n:PROPERTIES:\n:A: 1\n:END:"
+     (org-end-of-meta-data)
+     (eobp)))
+  ;; Skip both.
+  (should
+   (org-test-with-temp-text "* Headline\n:PROPERTIES:\n:A: 1\n:END:"
+     (org-end-of-meta-data)
+     (eobp)))
+  ;; Nothing to skip, go to first line.
+  (should
+   (org-test-with-temp-text "* Headline\nContents"
+     (org-end-of-meta-data)
+     (looking-at "Contents")))
+  ;; With option argument, skip empty lines, regular drawers and
+  ;; clocking lines.
+  (should
+   (org-test-with-temp-text "* Headline\n\nContents"
+     (org-end-of-meta-data t)
+     (looking-at "Contents")))
+  (should
+   (org-test-with-temp-text "* Headline\nCLOCK:\nContents"
+     (org-end-of-meta-data t)
+     (looking-at "Contents")))
+  (should
+   (org-test-with-temp-text "* Headline\n:LOGBOOK:\nlogging\n:END:\nContents"
+     (org-end-of-meta-data t)
+     (looking-at "Contents")))
+  ;; Special case: do not skip incomplete drawers.
+  (should
+   (org-test-with-temp-text "* Headline\n:LOGBOOK:\nlogging\nContents"
+     (org-end-of-meta-data t)
+     (looking-at ":LOGBOOK:")))
+  ;; Special case: Be careful about consecutive headlines.
+  (should-not
+   (org-test-with-temp-text "* H1\n*H2\nContents"
+     (org-end-of-meta-data t)
+     (looking-at "Contents"))))
+
 (ert-deftest test-org/beginning-of-line ()
   "Test `org-beginning-of-line' specifications."
   ;; Standard test.

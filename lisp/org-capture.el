@@ -1221,7 +1221,7 @@ Of course, if exact position has been required, just put it there."
       ;; we should place the text into this entry
       (if (org-capture-get :prepend)
 	  ;; Skip meta data and drawers
-	  (org-end-of-meta-data-and-drawers)
+	  (org-end-of-meta-data t)
 	;; go to ent of the entry text, before the next headline
 	(outline-next-heading)))
      (t
