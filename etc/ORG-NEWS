@@ -192,6 +192,9 @@ manual for details.
 *** Countdown timers can now be paused.
 ~org-timer-pause-time~ now pauses and restarts both relative and
 countdown timers.
+*** New option ~only-window~ for ~org-agenda-window-setup~
+When ~org-agenda-window-setup~ is set to ~only-window~, the agenda is
+displayed as the sole window of the current frame.
 ** Miscellaneous
 *** Strip all meta data from ITEM special property
 ITEM special property does not contain TODO, priority or tags anymore.

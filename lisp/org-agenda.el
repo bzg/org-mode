@@ -1095,6 +1095,7 @@ Possible values for this option are:
 
 current-window    Show agenda in the current window, keeping all other windows.
 other-window      Use `switch-to-buffer-other-window' to display agenda.
+only-window       Show agenda, deleting all other windows.
 reorganize-frame  Show only two windows on the current frame, the current
                   window and the agenda.
 other-frame       Use `switch-to-buffer-other-frame' to display agenda.
@@ -1105,6 +1106,7 @@ See also the variable `org-agenda-restore-windows-after-quit'."
 	  (const current-window)
 	  (const other-frame)
 	  (const other-window)
+	  (const only-window)
 	  (const reorganize-frame)))
 
 (defcustom org-agenda-window-frame-fractions '(0.5 . 0.75)
@@ -3621,6 +3623,9 @@ FILTER-ALIST is an alist of filters we need to apply when
       (org-switch-to-buffer-other-window abuf))
      ((equal org-agenda-window-setup 'other-frame)
       (switch-to-buffer-other-frame abuf))
+     ((eq org-agenda-window-setup 'only-window)
+      (delete-other-windows)
+      (org-pop-to-buffer-same-window abuf))
      ((equal org-agenda-window-setup 'reorganize-frame)
       (delete-other-windows)
       (org-switch-to-buffer-other-window abuf)))
