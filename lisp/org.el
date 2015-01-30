@@ -13563,13 +13563,7 @@ When optional argument CREATE is non-nil, the function creates
 a drawer to store notes, if necessary.  Returned position ignores
 narrowing."
   (org-with-wide-buffer
-   (org-back-to-heading t)
-   ;; Skip planning info and property drawer.
-   (forward-line)
-   (when (org-looking-at-p org-planning-line-re) (forward-line))
-   (when (looking-at org-property-drawer-re)
-     (goto-char (match-end 0))
-     (forward-line))
+   (org-end-of-meta-data)
    (let ((end (if (org-at-heading-p) (point)
 		(save-excursion (outline-next-heading) (point))))
 	 (drawer (org-log-into-drawer)))
