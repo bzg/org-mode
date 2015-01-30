@@ -1,6 +1,6 @@
 ;;; test-ob-ruby.el --- tests for ob-ruby.el
 
-;; Copyright (c) 2013 Oleh Krehel
+;; Copyright (c) 2013-2015 Oleh Krehel
 ;; Authors: Oleh Krehel
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -28,7 +28,7 @@ s = \"2\"
 s = \"3\"
 puts s
 #+end_src"
-  (org-ctrl-c-ctrl-c)
+  (org-babel-execute-maybe)
   (substring-no-properties
    (buffer-string)))
 		   "#+begin_src ruby :session :results output
@@ -47,7 +47,7 @@ puts s
 s = \"5\"
 puts s
 #+end_src"
-  (org-ctrl-c-ctrl-c)
+  (org-babel-execute-maybe)
   (substring-no-properties
    (buffer-string)))
 		   "#+begin_src ruby :session :results output
@@ -63,7 +63,7 @@ puts s
     (should (equal (org-test-with-temp-text "#+begin_src ruby :session :results output
 puts s
 #+end_src"
-  (org-ctrl-c-ctrl-c)
+  (org-babel-execute-maybe)
   (substring-no-properties
    (buffer-string)))
 		   "#+begin_src ruby :session :results output

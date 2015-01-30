@@ -1,6 +1,6 @@
 ;;; test-ob.el --- tests for ob.el
 
-;; Copyright (c) 2010-2014 Eric Schulte
+;; Copyright (c) 2010-2015 Eric Schulte
 ;; Authors: Eric Schulte, Martyn Jago
 
 ;; This file is not part of GNU Emacs.
@@ -299,18 +299,18 @@ this is simple"
     ;; src_ at bol line 1...
     (org-test-with-temp-text
 	test-line
-      (goto-char (point-min)) (org-ctrl-c-ctrl-c)
+      (goto-char (point-min)) (org-babel-execute-maybe)
       (should (string=
                       (concat test-line " {{{results(=1=)}}}")
        	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
-      (forward-char) (org-ctrl-c-ctrl-c)
+      (forward-char) (org-babel-execute-maybe)
       (should (string=
                       (concat test-line " {{{results(=1=)}}}")
        	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
       (re-search-forward "{{{")
      ;;(should-error (org-ctrl-c-ctrl-c))
       (backward-char 4) ;; last char of block body
-      (org-ctrl-c-ctrl-c)
+      (org-babel-execute-maybe)
       (should (string=
                       (concat test-line " {{{results(=1=)}}}")
        	       (buffer-substring-no-properties (point-at-bol) (point-at-eol)))))
@@ -319,11 +319,11 @@ this is simple"
       (org-test-with-temp-text
 	  test-line
 	(should-error (org-ctrl-c-ctrl-c))
-	(forward-char) (org-ctrl-c-ctrl-c)
+	(forward-char) (org-babel-execute-maybe)
 	(should (string=
 		 (concat test-line " {{{results(=1=)}}}")
 		 (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
-	(re-search-forward "{ 1 ") (org-ctrl-c-ctrl-c)
+	(re-search-forward "{ 1 ") (org-babel-execute-maybe)
 	(should (string=
 		 (concat test-line " {{{results(=1=)}}}")
 		 (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
@@ -342,7 +342,7 @@ this is simple"
       (should-error (org-ctrl-c-ctrl-c))
       (forward-line)
       (should-error (org-ctrl-c-ctrl-c))
-      (forward-char) (org-ctrl-c-ctrl-c)
+      (forward-char) (org-babel-execute-maybe)
       (should (string=
 	       (concat test-line " {{{results(=x=)}}}")
 	       (buffer-substring-no-properties
@@ -353,11 +353,11 @@ this is simple"
 	test-line
       (goto-char (point-max))
       (insert (concat "\n" test-line " end"))
-      (re-search-backward "src") (org-ctrl-c-ctrl-c)
+      (re-search-backward "src") (org-babel-execute-maybe)
       (should (string=
 	       (concat test-line " {{{results(=y=)}}} end")
 	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
-      (re-search-forward "\" ") (org-ctrl-c-ctrl-c)
+      (re-search-forward "\" ") (org-babel-execute-maybe)
       (should (string=
 	       (concat test-line " {{{results(=y=)}}} end")
 	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
@@ -371,10 +371,10 @@ this is simple"
 	(concat "\n" test-line)
       (should-error (org-ctrl-c-ctrl-c))
       (goto-char (point-max))
-      (org-ctrl-c-ctrl-c)
+      (org-babel-execute-maybe)
       (beginning-of-line)
       (should-error (org-ctrl-c-ctrl-c))
-      (forward-char) (org-ctrl-c-ctrl-c)
+      (forward-char) (org-babel-execute-maybe)
       (should (string=
               (concat test-line " {{{results(=x=)}}}")
       	       (buffer-substring-no-properties
@@ -385,11 +385,11 @@ this is simple"
     (org-test-with-temp-text test-line
       (goto-char (point-max))
       (insert (concat "\n" test-line " end"))
-      (re-search-backward "src") (org-ctrl-c-ctrl-c)
+      (re-search-backward "src") (org-babel-execute-maybe)
       (should (string=
               (concat test-line " {{{results(=y=)}}} end")
     	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
-      (re-search-forward "\" ") (org-ctrl-c-ctrl-c)
+      (re-search-forward "\" ") (org-babel-execute-maybe)
       (should (string=
               (concat test-line " {{{results(=y=)}}} end")
     	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
@@ -399,7 +399,7 @@ this is simple"
 (ert-deftest test-org-babel/inline-src_blk-results-silent ()
   (let ((test-line "src_emacs-lisp[ :results silent ]{ \"x\" }"))
     (org-test-with-temp-text test-line
-      (org-ctrl-c-ctrl-c)
+      (org-babel-execute-maybe)
       (should (string= test-line
 		       (buffer-substring-no-properties
 			(point-at-bol) (point-at-eol))))))
@@ -409,11 +409,11 @@ this is simple"
 	test-line
       (goto-char (point-max))
       (insert (concat "\n" test-line " end"))
-      (re-search-backward "src_") (org-ctrl-c-ctrl-c)
+      (re-search-backward "src_") (org-babel-execute-maybe)
       (should (string= (concat test-line " end")
 		       (buffer-substring-no-properties
 			(point-at-bol) (point-at-eol))))
-      (re-search-forward "\" ") (org-ctrl-c-ctrl-c)
+      (re-search-forward "\" ") (org-babel-execute-maybe)
       (should (string= (concat test-line " end")
 		       (buffer-substring-no-properties
 			(point-at-bol) (point-at-eol))))
@@ -423,17 +423,17 @@ this is simple"
 (ert-deftest test-org-babel/inline-src_blk-results-raw ()
   (let ((test-line "src_emacs-lisp[ :results raw ]{ \"x\" }"))
     (org-test-with-temp-text test-line
-      (org-ctrl-c-ctrl-c)
+      (org-babel-execute-maybe)
       (should (string= (concat test-line " x")
 		       (buffer-string)))))
   (let ((test-line (concat " Some text prior to block "
 			   "src_emacs-lisp[ :results raw ]{ \"the\" }")))
     (org-test-with-temp-text (concat test-line " end")
-      (re-search-forward "src_") (org-ctrl-c-ctrl-c)
+      (re-search-forward "src_") (org-babel-execute-maybe)
       (should (string= (concat test-line " the end")
 		       (buffer-substring-no-properties
 			(point-at-bol) (point-at-eol))))
-      (re-search-forward "\" ") (org-ctrl-c-ctrl-c)
+      (re-search-forward "\" ") (org-babel-execute-maybe)
       (should (string= (concat test-line " the the end")
 		       (buffer-substring-no-properties
 			(point-at-bol) (point-at-eol))))
@@ -444,7 +444,7 @@ this is simple"
   (let ((test-line "src_emacs-lisp[ :results file ]{ \"~/test-file\"  }"))
     (org-test-with-temp-text
 	test-line
-      (org-ctrl-c-ctrl-c)
+      (org-babel-execute-maybe)
       (should (string= (concat test-line " {{{results([[file:~/test-file]])}}}")
 		       (buffer-substring-no-properties
 			(point-min) (point-max)))))))
@@ -454,7 +454,7 @@ this is simple"
 	(org-babel-inline-result-wrap "=%s="))
     (org-test-with-temp-text
 	test-line
-      (org-ctrl-c-ctrl-c)
+      (org-babel-execute-maybe)
       (should (string= (concat test-line  " {{{results(=\"x\"=)}}}")
 		       (buffer-substring-no-properties
 			(point-min) (point-max)))))))
@@ -464,7 +464,7 @@ this is simple"
 	(org-babel-inline-result-wrap "=%s="))
     (org-test-with-temp-text
 	test-line
-      (org-ctrl-c-ctrl-c)
+      (org-babel-execute-maybe)
       (should (string= (concat test-line " {{{results(=\"x\"=)}}}")
 		       (buffer-substring-no-properties
 			(point-min) (point-max)))))))
@@ -714,7 +714,7 @@ on two lines
 ;;
 #+end_src"
     (org-babel-next-src-block)
-    (org-ctrl-c-ctrl-c)
+    (org-babel-execute-maybe)
     (should (re-search-forward "\\#\\+results:" nil t))
     (forward-line)
     (should
@@ -726,7 +726,7 @@ on two lines
 \"some text\";;
 #+end_src"
     (org-babel-next-src-block)
-    (org-ctrl-c-ctrl-c)
+    (org-babel-execute-maybe)
     (should (re-search-forward "\\#\\+results:" nil t))
     (forward-line)
     (should
@@ -740,7 +740,7 @@ on two lines
 ;;
 #+end_src"
     (org-babel-next-src-block)
-    (org-ctrl-c-ctrl-c)
+    (org-babel-execute-maybe)
     (re-search-forward "\\#\\+results:" nil t)
     (forward-line)
     (should (string=
@@ -751,7 +751,7 @@ on two lines
 2;;
 #+end_src"
     (org-babel-next-src-block)
-    (org-ctrl-c-ctrl-c)
+    (org-babel-execute-maybe)
     (re-search-forward "\\#\\+results:" nil t)
     (forward-line)
     (should (string=
@@ -767,7 +767,7 @@ The block is actually executed /twice/ to ensure result
 replacement happens correctly."
   (org-test-with-temp-text
       buffer-text
-    (org-babel-next-src-block) (org-ctrl-c-ctrl-c) (org-ctrl-c-ctrl-c)
+    (org-babel-next-src-block) (org-babel-execute-maybe) (org-babel-execute-maybe)
     (should (re-search-forward "\\#\\+results:" nil t))
     (forward-line)
     (should (string= result
@@ -854,7 +854,7 @@ trying to find the :END: marker."
     (org-test-with-temp-text
 	test-line
       (forward-char 1)
-      (org-ctrl-c-ctrl-c)
+      (org-babel-execute-maybe)
       (should (re-search-forward "=\"x\"=" nil t))
       (forward-line))))
 
@@ -864,7 +864,7 @@ trying to find the :END: marker."
 ;;
 #+end_src"
     (org-babel-next-src-block)
-    (org-ctrl-c-ctrl-c)
+    (org-babel-execute-maybe)
     (re-search-forward "\\#\\+results:" nil t)
     (forward-line)
     (should (string=
@@ -875,7 +875,7 @@ trying to find the :END: marker."
 2;;
 #+end_src"
     (org-babel-next-src-block)
-    (org-ctrl-c-ctrl-c)
+    (org-babel-execute-maybe)
     (re-search-forward "\\#\\+results:" nil t)
     (forward-line)
     (should (string=
@@ -891,7 +891,7 @@ The block is actually executed /twice/ to ensure result
 replacement happens correctly."
   (org-test-with-temp-text
       buffer-text
-    (org-babel-next-src-block) (org-ctrl-c-ctrl-c) (org-ctrl-c-ctrl-c)
+    (org-babel-next-src-block) (org-babel-execute-maybe) (org-babel-execute-maybe)
     (should (re-search-forward "\\#\\+results:" nil t))
     (forward-line)
     (should (string= result
