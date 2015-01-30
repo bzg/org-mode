@@ -15363,8 +15363,9 @@ a *different* entry, you cannot use these techniques."
 ;;; Properties API
 
 (defconst org-special-properties
-  '("ALLTAGS" "BLOCKED" "CLOCKSUM" "CLOCKSUM_T" "CLOSED" "DEADLINE" "FILE"
-    "ITEM" "PRIORITY" "SCHEDULED" "TAGS" "TIMESTAMP" "TIMESTAMP_IA" "TODO")
+  '("ALLTAGS" "BLOCKED" "CATEGORY" "CLOCKSUM" "CLOCKSUM_T" "CLOSED" "DEADLINE"
+    "FILE" "ITEM" "PRIORITY" "SCHEDULED" "TAGS" "TIMESTAMP" "TIMESTAMP_IA"
+    "TODO")
   "The special properties valid in Org mode.
 These are properties that are not defined in the property drawer,
 but in some other way.")

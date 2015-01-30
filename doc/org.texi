@@ -5368,7 +5368,6 @@ should not be used as keys in the properties drawer:
 @example
 ALLTAGS      @r{All tags, including inherited ones.}
 BLOCKED      @r{"t" if task is currently blocked by children or siblings.}
-NOBLOCKING   @r{"t" if blocking is disabled for this task.}
 CATEGORY     @r{The category of an entry.}
 CLOCKSUM     @r{The sum of CLOCK intervals in the subtree.  @code{org-clock-sum}}
              @r{must be run first to compute the values in the current buffer.}
