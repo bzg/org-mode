@@ -9488,27 +9488,30 @@ a timestamp can be added there."
 
 (defun org-agenda-insert-diary-make-new-entry (text)
   "Make a new entry with TEXT as the first child of the current subtree.
-Position the point in the line right after the new heading so
-that a timestamp can be added there."
-  (let ((org-show-following-heading t)
-	(org-show-siblings t)
-	(org-show-hierarchy-above t)
-	(org-show-entry-below t)
-	col)
-    (outline-next-heading)
-    (org-back-over-empty-lines)
-    (or (looking-at "[ \t]*$")
-	(progn (insert "\n") (backward-char 1)))
-    (org-insert-heading nil t)
-    (org-do-demote)
-    (setq col (current-column))
-    (insert text "\n")
-    (if org-adapt-indentation (org-indent-to-column col))
-    (let ((org-show-following-heading t)
-	  (org-show-siblings t)
-	  (org-show-hierarchy-above t)
-	  (org-show-entry-below t))
-      (org-show-context))))
+Position the point in the heading's first body line so that
+a timestamp can be added there."
+  (let (col)
+    (org-with-wide-buffer
+     (outline-next-heading)
+     (org-back-over-empty-lines)
+     (or (looking-at "[ \t]*$")
+	 (progn (insert "\n") (backward-char 1)))
+     (org-insert-heading nil t)
+     (org-do-demote)
+     (setq col (current-column))
+     (insert text)
+     (forward-line)
+     (when (org-looking-at-p org-planning-line-re) (forward-line))
+     (when (looking-at org-property-drawer-re)
+       (goto-char (match-end 0))
+       (forward-line))
+     (unless (bolp) (insert "\n"))
+     (when org-adapt-indentation (org-indent-to-column col))
+     (let ((org-show-following-heading t)
+	   (org-show-siblings t)
+	   (org-show-hierarchy-above t)
+	   (org-show-entry-below t))
+       (org-show-context)))))
 
 (defun org-agenda-diary-entry ()
   "Make a diary entry, like the `i' command from the calendar.
