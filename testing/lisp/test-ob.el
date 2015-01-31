@@ -758,6 +758,47 @@ on two lines
 	     ": 2"
 	     (buffer-substring-no-properties (point-at-bol) (point-at-eol))))))
 
+(ert-deftest test-ob/remove-inline-result ()
+  "Test `org-babel-remove-inline-result' honors whitespace."
+  (let*
+      ((inline-sb "src_emacs-lisp{(+ 1 2)}")
+       (inline-res " {{{results(=3=)}}}")
+       (inline-sb-dot (concat inline-sb "."))
+       (inline-sb-res-dot (concat inline-sb inline-res ".")))
+    (org-test-with-temp-text
+	;; Insert inline_src_block followed by dot.
+	inline-sb-dot
+      ;; Insert result before dot.
+      (org-babel-execute-maybe)
+      (should (string= inline-sb-res-dot
+		       (buffer-substring-no-properties
+			(point-at-bol) (point-at-eol))))
+      ;; Delete whitespace and result.
+      (org-babel-remove-inline-result)
+      (should (string= inline-sb-dot
+		       (buffer-substring-no-properties
+			(point-at-bol) (point-at-eol))))
+      ;; Add whitespace and result before dot.
+      (search-forward inline-sb)
+      (insert "     " inline-res)
+      (goto-char (point-at-bol))
+      ;; Remove whitespace and result.
+      (org-babel-remove-inline-result)
+      (should (string= inline-sb-dot
+		       (buffer-substring-no-properties
+			(point-at-bol) (point-at-eol))))
+      ;; Add whitespace before dot.
+      (search-forward inline-sb)
+      (insert "     ")
+      (goto-char (point-at-bol))
+      ;; Add result before whitespace.
+      (org-babel-execute-maybe)
+      ;; Remove result - leave trailing whitespace and dot.
+      (org-babel-remove-inline-result)
+      (should (string= (concat inline-sb "     .")
+		       (buffer-substring-no-properties
+			(point-at-bol) (point-at-eol)))))))
+
 (defun test-ob-verify-result-and-removed-result (result buffer-text)
   "Test helper function to test `org-babel-remove-result'.
 A temp buffer is populated with BUFFER-TEXT, the first block is executed,
