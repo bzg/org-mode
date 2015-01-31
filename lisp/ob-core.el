@@ -2144,12 +2144,12 @@ INFO may provide the values of these header arguments (in the
 		(when (or (org-babel-get-inline-src-block-matches)
 			  (org-babel-get-lob-one-liner-matches))
 		  (goto-char (match-end 0))
+		  (org-babel-remove-inline-result)
 		  (insert " ")
 		  (point))))
-	     (existing-result (if inlinep
-				  (org-babel-remove-inline-result)
-				(org-babel-where-is-src-block-result
-				 t info hash indent)))
+	     (existing-result
+	      (unless inlinep
+		(org-babel-where-is-src-block-result t info hash indent)))
 	     (bad-inline-p
 	      (when inlinep
 		(or
@@ -2322,8 +2322,9 @@ INFO may provide the values of these header arguments (in the
 
 (defun org-babel-remove-inline-result ()
   "Remove the result of the current inline-src-block or babel call.
-The result must be wrapped in a `results' macro to be
-  removed. Extraneous leading whitespace is trimmed."
+The result must be wrapped in a `results' macro to be removed.
+Leading whitespace is trimmed."
+  (interactive)
   (let* ((el (org-element-context))
 	 (post-blank (org-element-property :post-blank el)))
     (when (memq (org-element-type el) '(inline-src-block inline-babel-call))
@@ -2332,9 +2333,8 @@ The result must be wrapped in a `results' macro to be
         (let ((el (org-element-context)))
 	  (when (and (eq (org-element-type el) 'macro)
 		     (string= (org-element-property :key el) "results"))
-	    (delete-region ; And (only) extra leading whitespace.
-	     (- (org-element-property :begin el)
-		(- post-blank 1))
+	    (delete-region ; And leading whitespace.
+	     (- (org-element-property :begin el) post-blank)
 	     (- (org-element-property :end el)
 		(org-element-property :post-blank el)))))))))
 
