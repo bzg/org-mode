@@ -1349,8 +1349,7 @@ With three universal prefix arguments, interactively prompt
 for a todo state to switch to, overriding the existing value
 `org-clock-in-switch-to-state'."
   (interactive "P")
-  (if (equal arg '(4))
-      (org-clock-in (org-clock-select-task))
+  (if (equal arg '(4)) (org-clock-in arg)
     (let ((start-time (if (or org-clock-continuously (equal arg '(16)))
 			  (or org-clock-out-time
 			      (org-current-time org-clock-rounding-minutes t))
