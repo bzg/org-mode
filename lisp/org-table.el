@@ -2758,7 +2758,7 @@ not overwrite the stored one."
 	(org-table--error-on-old-row-references form)
 	;; Insert remote references
 	(setq form (org-table-remote-reference-indirection form))
-	(while (string-match "\\<remote([ \t]*\\([-_a-zA-Z0-9]+\\)[ \t]*,[ \t]*\\([^\n)]+\\))" form)
+	(while (string-match "\\<remote([ \t]*\\([^,)]+\\)[ \t]*,[ \t]*\\([^\n)]+\\))" form)
 	  (setq form
 		(replace-match
 		 (save-match-data
