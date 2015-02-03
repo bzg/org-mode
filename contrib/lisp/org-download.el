@@ -1,12 +1,12 @@
 ;;; org-download.el --- Image drag-and-drop for Emacs org-mode
 
-;; Copyright (C) 2014 Free Software Foundation, Inc.
+;; Copyright (C) 2014-2015 Free Software Foundation, Inc.
 
 ;; Author: Oleh Krehel
 ;; Keywords: images, screenshots, download
 ;; Homepage: http://orgmode.org
 
-;; This file is part of GNU Emacs.
+;; This file is not part of GNU Emacs.
 
 ;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@
 ;;       * or `org-download-image-dir' (if it's not nil).
 ;;         `org-download-image-dir' becomes buffer-local when set,
 ;;         so each file can customize this value, e.g with:
-;;         # -*- mode: Org; org-download-image-dir: ~/Pictures/foo; -*-
+;;         # -*- mode: Org; org-download-image-dir: "~/Pictures/foo"; -*-
 ;;    2. second part is:
 ;;       * `org-download-heading-lvl' is nil => ""
 ;;       * `org-download-heading-lvl' is n => the name of current
@@ -112,6 +112,14 @@ Set this to \"\" if you don't want time stamps."
   :type 'string
   :group 'org-download)
 
+(defcustom org-download-img-regex-list
+  '("<img +src=\"" "<img +\\(class=\"[^\"]+\"\\)? *src=\"")
+  "This regex is used to unalias links that look like images.
+The html to which the links points will be searched for these
+regexes, one by one, until one succeeds.  The found image address
+will be used."
+  :group 'org-download)
+
 (defcustom org-download-screenshot-method "gnome-screenshot -a -f %s"
   "The tool to capture screenshots."
   :type '(choice
@@ -129,10 +137,13 @@ Set this to \"\" if you don't want time stamps."
   "Return the heading of the current entry's LVL level parent."
   (save-excursion
     (let ((cur-lvl (org-current-level)))
+      (if cur-lvl
+          (progn
       (unless (= cur-lvl 1)
         (org-up-heading-all (- (1- (org-current-level)) lvl)))
       (substring-no-properties
-       (org-get-heading)))))
+             (org-get-heading)))
+        ""))))
 
 (defun org-download--dir-1 ()
   "Return the first part of the directory path for `org-download--dir'.
@@ -170,17 +181,22 @@ It's affected by `org-download-timestamp' and `org-download--dir'."
           (car (url-path-and-query
                 (url-generic-parse-url link)))))
         (dir (org-download--dir)))
-    (format "%s/%s%s.%s"
-            dir
+    (when (string-match ".*?\\.\\(?:png\\|jpg\\)\\(.*\\)$" filename)
+      (setq filename (replace-match "" nil nil filename 1)))
+    (abbreviate-file-name
+     (expand-file-name
+      (format "%s%s.%s"
             (file-name-sans-extension filename)
             (format-time-string org-download-timestamp)
-            (file-name-extension filename))))
+              (file-name-extension filename))
+      dir))))
 
 (defun org-download--image (link filename)
   "Save LINK to FILENAME asynchronously and show inline images in current buffer."
   (when (string-match "^file://\\(.*\\)" link)
     (setq link (url-unhex-string (match-string 1 link))))
-  (cond ((file-exists-p link)
+  (cond ((and (not (file-remote-p link))
+              (file-exists-p link))
          (org-download--image/command "cp \"%s\" \"%s\"" link filename))
         ((eq org-download-backend t)
          (org-download--image/url-retrieve link filename))
@@ -241,6 +257,19 @@ The screenshot tool is determined by `org-download-screenshot-method'."
 (defun org-download-image (link)
   "Save image at address LINK to `org-download--dir'."
   (interactive "sUrl: ")
+  (unless (image-type-from-file-name link)
+    (with-current-buffer
+        (url-retrieve-synchronously link t)
+      (let ((regexes org-download-img-regex-list)
+            lnk)
+        (while (and (not lnk) regexes)
+          (goto-char (point-min))
+          (when (re-search-forward (pop regexes) nil t)
+            (backward-char)
+            (setq lnk (read (current-buffer)))))
+        (if lnk
+            (setq link lnk)
+          (error "link %s does not point to an image; unaliasing failed" link)))))
   (let ((filename
          (if (eq org-download-method 'attach)
              (let ((org-download-image-dir (progn (require 'org-attach)
@@ -255,12 +284,14 @@ The screenshot tool is determined by `org-download-screenshot-method'."
       (if (looking-back "^[ \t]+")
           (delete-region (match-beginning 0) (match-end 0))
         (newline))
-      (insert (format "#+DOWNLOADED: %s @ %s\n%s [[%s]]"
+      (insert
+       (format "#+DOWNLOADED: %s @ %s\n%s [[%s]]"
                       link
                       (format-time-string "%Y-%m-%d %H:%M:%S")
                       (if (= org-download-image-width 0)
                           ""
-                        (format "#+attr_html: :width %dpx\n" org-download-image-width))
+                 (format
+                  "#+attr_html: :width %dpx\n" org-download-image-width))
                       filename))
       (org-display-inline-images))))
 
@@ -299,7 +330,7 @@ When TIMES isn't nil, delete only TIMES links."
     (while (and (>= (decf times) 0)
                 (re-search-forward "\\[\\[\\([^]]*\\)\\]\\]" end t))
       (let ((str (match-string-no-properties 1)))
-        (delete-region (match-beginning 0)
+        (delete-region beg
                        (match-end 0))
         (when (file-exists-p str)
           (delete-file str))))))
@@ -307,16 +338,41 @@ When TIMES isn't nil, delete only TIMES links."
 (defun org-download-dnd (uri action)
   "When in `org-mode' and URI points to image, download it.
 Otherwise, pass URI and ACTION back to dnd dispatch."
-  (if (eq major-mode 'org-mode)
+  (cond ((eq major-mode 'org-mode)
       ;; probably shouldn't redirect
       (unless (org-download-image uri)
-        (message "not an image URL"))
+           (message "not an image URL")))
+        ((eq major-mode 'dired-mode)
+         (org-download-dired uri))
     ;; redirect to someone else
+        (t
     (let ((dnd-protocol-alist
            (rassq-delete-all
             'org-download-dnd
             (copy-alist dnd-protocol-alist))))
-      (dnd-handle-one-url nil action uri))))
+           (dnd-handle-one-url nil action uri)))))
+
+(defun org-download-dired (uri)
+  "Download URI to current directory."
+  (raise-frame)
+  (let ((filename (file-name-nondirectory
+                   (car (url-path-and-query
+                         (url-generic-parse-url uri))))))
+    (message "Downloading %s to %s ..."
+             filename
+             (expand-file-name filename))
+    (url-retrieve
+     uri
+     (lambda (status filename)
+       (let ((err (plist-get status :error)))
+         (if err (error
+                  "\"%s\" %s" uri
+                  (downcase (nth 2 (assq (nth 2 err) url-http-codes))))))
+       (let ((coding-system-for-write 'no-conversion))
+         (write-region nil nil filename nil nil nil 'confirm)))
+     (list
+      (expand-file-name filename))
+     t t)))
 
 (defun org-download-enable ()
   "Enable org-download."
