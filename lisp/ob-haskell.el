@@ -177,12 +177,12 @@ constructs (header arguments, no-web syntax etc...) are ignored."
         (save-match-data (setq indentation (length (match-string 1))))
         (replace-match (save-match-data
                          (concat
-                          "#+begin_latex\n\\begin{code}\n"
+                          "#+begin_export latex\n\\begin{code}\n"
                           (if (or preserve-indentp
                                   (string-match "-i" (match-string 2)))
                               (match-string 3)
                             (org-remove-indentation (match-string 3)))
-                          "\n\\end{code}\n#+end_latex\n"))
+                          "\n\\end{code}\n#+end_export\n"))
                        t t)
         (indent-code-rigidly (match-beginning 0) (match-end 0) indentation)))
     (save-excursion

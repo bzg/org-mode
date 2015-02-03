@@ -78,7 +78,6 @@
     (timestamp . org-texinfo-timestamp)
     (verbatim . org-texinfo-verbatim)
     (verse-block . org-texinfo-verse-block))
-  :export-block "TEXINFO"
   :filters-alist
   '((:filter-headline . org-texinfo--filter-section-blank-lines)
     (:filter-parse-tree . org-texinfo--normalize-headlines)

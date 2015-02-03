@@ -9,6 +9,72 @@ See the end of the file for license conditions.
 Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.0
+** Incompatible changes
+*** New syntax for export blocks
+Export blocks are explicetly marked as such at the syntax level to
+disambiguate their parsing from special blocks.  The new syntax is
+
+#+BEGIN_SRC org
+,#+BEGIN_EXPORT backend
+...
+,#+END_EXPORT
+#+END_SRC
+
+instead of
+
+#+BEGIN_SRC org
+,#+BEGIN_backend
+...
+,#+END_backend
+#+END_SRC
+
+As a consequence, =INCLUDE= keywords syntax is modified, e.g.,
+
+#+BEGIN_SRC org
+,#+INCLUDE: "file.org" HTML
+#+END_SRC
+
+becomes
+
+#+BEGIN_SRC org
+,#+INCLUDE: "file.org" export html
+#+END_SRC
+
+
+The following function repairs export blocks and =INCLUDE= keywords
+using previous syntax:
+
+#+BEGIN_SRC emacs-lisp
+(defun org-repair-export-blocks ()
+  "Repair export blocks and INCLUDE keywords in current buffer."
+  (when (eq major-mode 'org-mode)
+    (let ((case-fold-search t)
+          (back-end-re (regexp-opt
+                        '("HTML" "ASCII" "LATEX" "ODT" "MARKDOWN" "MD" "ORG"
+                          "MAN" "BEAMER" "TEXINFO" "GROFF" "KOMA-LETTER")
+                        t)))
+      (org-with-wide-buffer
+       (goto-char (point-min))
+       (let ((block-re (concat "^[ \t]*#\\+BEGIN_" back-end-re)))
+         (save-excursion
+           (while (re-search-forward block-re nil t)
+             (let ((element (save-match-data (org-element-at-point))))
+               (when (eq (org-element-type element) 'special-block)
+                 (save-excursion
+                   (goto-char (org-element-property :end element))
+                   (save-match-data (search-backward "_"))
+                   (forward-char)
+                   (insert "EXPORT")
+                   (delete-region (point) (line-end-position)))
+                 (replace-match "EXPORT \\1" nil nil nil 1))))))
+       (let ((include-re
+              (format "^[ \t]*#\\+INCLUDE: .*?%s[ \t]*$" back-end-re)))
+         (while (re-search-forward include-re nil t)
+           (let ((element (save-match-data (org-element-at-point))))
+             (when (and (eq (org-element-type element) 'keyword)
+                        (string= (org-element-property :key element) "INCLUDE"))
+               (replace-match "EXPORT \\1" nil nil nil 1)))))))))
+#+END_SRC
 
 ** New features
 *** Org linter

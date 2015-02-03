@@ -92,8 +92,7 @@
   (org-re "^\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]")
   "Regular expression matching the definition of a footnote.")
 
-(defconst org-footnote-forbidden-blocks
-  '("ascii" "beamer" "comment" "example" "html" "latex" "odt" "src")
+(defconst org-footnote-forbidden-blocks '("comment" "example" "export" "src")
   "Names of blocks where footnotes are not allowed.")
 
 (defgroup org-footnote nil

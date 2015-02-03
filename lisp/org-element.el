@@ -258,17 +258,6 @@ specially in `org-element--object-lex'.")
   (append org-element-recursive-objects '(paragraph table-row verse-block))
   "List of object or element types that can directly contain objects.")
 
-(defvar org-element-block-name-alist
-  '(("CENTER" . org-element-center-block-parser)
-    ("COMMENT" . org-element-comment-block-parser)
-    ("EXAMPLE" . org-element-example-block-parser)
-    ("QUOTE" . org-element-quote-block-parser)
-    ("SRC" . org-element-src-block-parser)
-    ("VERSE" . org-element-verse-block-parser))
-  "Alist between block names and the associated parsing function.
-Names must be uppercase.  Any block whose name has no association
-is parsed with `org-element-special-block-parser'.")
-
 (defconst org-element-affiliated-keywords
   '("CAPTION" "DATA" "HEADER" "HEADERS" "LABEL" "NAME" "PLOT" "RESNAME" "RESULT"
     "RESULTS" "SOURCE" "SRCNAME" "TBLNAME")
@@ -1600,9 +1589,6 @@ CONTENTS is the contents of the element."
 ;; through the following steps: implement a parser and an interpreter,
 ;; tweak `org-element--current-element' so that it recognizes the new
 ;; type and add that new type to `org-element-all-elements'.
-;;
-;; As a special case, when the newly defined type is a block type,
-;; `org-element-block-name-alist' has to be modified accordingly.
 
 
 ;;;; Babel Call
@@ -1953,42 +1939,43 @@ containing `:begin', `:end', `:type', `:value', `:post-blank' and
 `:post-affiliated' keywords.
 
 Assume point is at export-block beginning."
-  (let* ((case-fold-search t)
-	 (type (progn (looking-at "[ \t]*#\\+BEGIN_\\(\\S-+\\)")
-		      (upcase (org-match-string-no-properties 1)))))
+  (let* ((case-fold-search t))
     (if (not (save-excursion
-	       (re-search-forward
-		(format "^[ \t]*#\\+END_%s[ \t]*$" type) limit t)))
+	       (re-search-forward "^[ \t]*#\\+END_EXPORT[ \t]*$" limit t)))
 	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit affiliated)
-      (let ((contents-end (match-beginning 0)))
-	(save-excursion
-	  (let* ((begin (car affiliated))
-		 (post-affiliated (point))
-		 (contents-begin (progn (forward-line) (point)))
-		 (pos-before-blank (progn (goto-char contents-end)
-					  (forward-line)
-					  (point)))
-		 (end (progn (skip-chars-forward " \r\t\n" limit)
-			     (if (eobp) (point) (line-beginning-position))))
-		 (value (buffer-substring-no-properties contents-begin
-							contents-end)))
-	    (list 'export-block
-		  (nconc
-		   (list :begin begin
-			 :end end
-			 :type type
-			 :value value
-			 :post-blank (count-lines pos-before-blank end)
-			 :post-affiliated post-affiliated)
-		   (cdr affiliated)))))))))
+      (save-excursion
+	(let* ((contents-end (match-beginning 0))
+	       (backend
+		(progn
+		  (looking-at
+		   "[ \t]*#\\+BEGIN_EXPORT\\(?:[ \t]+\\(\\S-+\\)\\)?[ \t]*$")
+		  (match-string-no-properties 1)))
+	       (begin (car affiliated))
+	       (post-affiliated (point))
+	       (contents-begin (progn (forward-line) (point)))
+	       (pos-before-blank (progn (goto-char contents-end)
+					(forward-line)
+					(point)))
+	       (end (progn (skip-chars-forward " \r\t\n" limit)
+			   (if (eobp) (point) (line-beginning-position))))
+	       (value (buffer-substring-no-properties contents-begin
+						      contents-end)))
+	  (list 'export-block
+		(nconc
+		 (list :type backend
+		       :begin begin
+		       :end end
+		       :value value
+		       :post-blank (count-lines pos-before-blank end)
+		       :post-affiliated post-affiliated)
+		 (cdr affiliated))))))))
 
 (defun org-element-export-block-interpreter (export-block _)
   "Interpret EXPORT-BLOCK element as Org syntax."
-  (let ((type (org-element-property :type export-block)))
-    (concat (format "#+BEGIN_%s\n" type)
-	    (org-element-property :value export-block)
-	    (format "#+END_%s" type))))
+  (format "#+BEGIN_EXPORT %s\n%s#+END_EXPORT"
+	  (org-element-property :type export-block)
+	  (org-element-property :value export-block)))
 
 
 ;;;; Fixed-width
@@ -3763,27 +3750,35 @@ element it has to parse."
 	     ;; Keywords.
 	     ((looking-at "[ \t]*#")
 	      (goto-char (match-end 0))
-	      (cond ((looking-at "\\(?: \\|$\\)")
-		     (beginning-of-line)
-		     (org-element-comment-parser limit affiliated))
-		    ((looking-at "\\+BEGIN_\\(\\S-+\\)")
-		     (beginning-of-line)
-		     (let ((parser (assoc (upcase (match-string 1))
-					  org-element-block-name-alist)))
-		       (if parser (funcall (cdr parser) limit affiliated)
-			 (org-element-special-block-parser limit affiliated))))
-		    ((looking-at "\\+CALL:")
-		     (beginning-of-line)
-		     (org-element-babel-call-parser limit affiliated))
-		    ((looking-at "\\+BEGIN:? ")
-		     (beginning-of-line)
-		     (org-element-dynamic-block-parser limit affiliated))
-		    ((looking-at "\\+\\S-+:")
-		     (beginning-of-line)
-		     (org-element-keyword-parser limit affiliated))
-		    (t
-		     (beginning-of-line)
-		     (org-element-paragraph-parser limit affiliated))))
+	      (cond
+	       ((looking-at "\\(?: \\|$\\)")
+		(beginning-of-line)
+		(org-element-comment-parser limit affiliated))
+	       ((looking-at "\\+BEGIN_\\(\\S-+\\)")
+		(beginning-of-line)
+		(funcall (pcase (upcase (match-string 1))
+			   ("CENTER"  #'org-element-center-block-parser)
+			   ("COMMENT" #'org-element-comment-block-parser)
+			   ("EXAMPLE" #'org-element-example-block-parser)
+			   ("EXPORT"  #'org-element-export-block-parser)
+			   ("QUOTE"   #'org-element-quote-block-parser)
+			   ("SRC"     #'org-element-src-block-parser)
+			   ("VERSE"   #'org-element-verse-block-parser)
+			   (_         #'org-element-special-block-parser))
+			 limit
+			 affiliated))
+	       ((looking-at "\\+CALL:")
+		(beginning-of-line)
+		(org-element-babel-call-parser limit affiliated))
+	       ((looking-at "\\+BEGIN:? ")
+		(beginning-of-line)
+		(org-element-dynamic-block-parser limit affiliated))
+	       ((looking-at "\\+\\S-+:")
+		(beginning-of-line)
+		(org-element-keyword-parser limit affiliated))
+	       (t
+		(beginning-of-line)
+		(org-element-paragraph-parser limit affiliated))))
 	     ;; Footnote Definition.
 	     ((looking-at org-footnote-definition-re)
 	      (org-element-footnote-definition-parser limit affiliated))

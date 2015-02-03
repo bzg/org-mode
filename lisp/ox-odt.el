@@ -83,7 +83,6 @@
     (underline . org-odt-underline)
     (verbatim . org-odt-verbatim)
     (verse-block . org-odt-verse-block))
-  :export-block "ODT"
   :filters-alist '((:filter-parse-tree
 		    . (org-odt--translate-latex-fragments
 		       org-odt--translate-description-lists

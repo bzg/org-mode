@@ -2131,15 +2131,16 @@ org ----- results are added inside of a \"src_org{}\" or \"#+BEGIN_SRC
           but Org syntax here will be discarded when exporting the
           file.
 
-html ---- results are added inside of a #+BEGIN_HTML block or
-          html export snippet depending on whether the current
+html ---- results are added inside of a #+BEGIN_EXPORT HTML block
+          or html export snippet depending on whether the current
           source block is inline or not.  This is a good option
           if your code block will output html formatted text.
 
-latex --- results are added inside of a #+BEGIN_LATEX block or
-          latex export snippet depending on whether the current
-          source block is inline or not.  This is a good option
-          if your code block will output latex formatted text.
+latex --- results are added inside of a #+BEGIN_EXPORT LATEX
+          block or latex export snippet depending on whether the
+          current source block is inline or not.  This is a good
+          option if your code block will output latex formatted
+          text.
 
 code ---- the results are extracted in the syntax of the source
           code of the language being evaluated and are added
@@ -2316,10 +2317,10 @@ INFO may provide the values of these header arguments (in the
 			     (concat "#+END_" (car (org-split-string name)))
 			     nil nil (concat "{{{results(@@" name ":") "@@)}}}")))
 		 ((member "html" result-params)
-		  (funcall wrap "#+BEGIN_HTML" "#+END_HTML" nil nil
+		  (funcall wrap "#+BEGIN_EXPORT html" "#+END_EXPORT" nil nil
 			   "{{{results(@@html:" "@@)}}}"))
 		 ((member "latex" result-params)
-		  (funcall wrap "#+BEGIN_LaTeX" "#+END_LaTeX" nil nil
+		  (funcall wrap "#+BEGIN_EXPORT latex" "#+END_EXPORT" nil nil
 			   "{{{results(@@latex:" "@@)}}}"))
 		 ((member "org" result-params)
 		  (goto-char beg) (if (org-at-table-p) (org-cycle))

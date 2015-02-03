@@ -97,7 +97,6 @@
     (underline . org-man-underline)
     (verbatim . org-man-verbatim)
     (verse-block . org-man-verse-block))
-  :export-block "MAN"
   :menu-entry
   '(?M "Export to MAN"
        ((?m "As MAN file" org-man-export-to-man)

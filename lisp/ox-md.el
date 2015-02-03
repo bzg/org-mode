@@ -55,7 +55,6 @@ This variable can be set to either `atx' or `setext'."
 ;;; Define Back-End
 
 (org-export-define-derived-backend 'md 'html
-  :export-block '("MD" "MARKDOWN")
   :filters-alist '((:filter-parse-tree . org-md-separate-elements))
   :menu-entry
   '(?m "Export to Markdown"

@@ -90,7 +90,6 @@
     ;; Pseudo objects and elements.
     (latex-math-block . org-latex-math-block)
     (latex-matrices . org-latex-matrices))
-  :export-block '("LATEX" "TEX")
   :menu-entry
   '(?l "Export to LaTeX"
        ((?L "As LaTeX buffer" org-latex-export-as-latex)
@@ -364,9 +363,9 @@ For example, when this variable is non-nil, a headline like this:
      :CUSTOM_ID: sec:foo
      :END:
   This is section [[#sec:foo]].
-  #+BEGIN_LATEX
+  #+BEGIN_EXPORT latex
   And this is still section \\ref{sec:foo}.
-  #+END_LATEX
+  #+END_EXPORT
 
 will be exported to LaTeX as:
 

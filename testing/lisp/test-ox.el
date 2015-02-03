@@ -1031,10 +1031,10 @@ text
   ;; Inclusion within an html export-block.
   (should
    (equal
-    "#+BEGIN_HTML\n<p>HTML!</p>\n#+END_HTML\n"
+    "#+BEGIN_EXPORT html\n<p>HTML!</p>\n#+END_EXPORT\n"
     (org-test-with-temp-text
 	(format
-	 "#+INCLUDE: \"%s/examples/include.html\" HTML"
+	 "#+INCLUDE: \"%s/examples/include.html\" EXPORT html"
 	 org-test-dir)
       (org-export-expand-include-keyword)
       (buffer-string))))
@@ -1426,15 +1426,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 	    (org-export-define-backend 'test
 	      '((headline . my-headline-test))
 	      :menu-entry '(?k "Test Export" test))
-	    (org-export-backend-menu (org-export-get-backend 'test)))))
-  ;; Export Blocks.
-  (should
-   (equal '(("TEST" . org-element-export-block-parser))
-	  (let (org-export-registered-backends org-element-block-name-alist)
-	    (org-export-define-backend 'test
-	      '((headline . my-headline-test))
-	      :export-block '("test"))
-	    org-element-block-name-alist))))
+	    (org-export-backend-menu (org-export-get-backend 'test))))))
 
 (ert-deftest test-org-export/define-derived-backend ()
   "Test `org-export-define-derived-backend' specifications."

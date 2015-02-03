@@ -4383,8 +4383,7 @@ You need to reload Org or to restart Emacs after customizing this."
 	    (plist :tag "Face property list"))
 	   (option (const verbatim)))))
 
-(defvar org-protecting-blocks
-  '("src" "example" "latex" "ascii" "html" "ditaa" "dot" "r" "R")
+(defvar org-protecting-blocks '("src" "example" "export")
   "Blocks that contain text that is quoted, i.e. not processed as Org syntax.
 This is needed for font-lock setup.")
 
@@ -12296,11 +12295,11 @@ keywords relative to each registered export back-end."
     ("v" "#+BEGIN_VERSE\n?\n#+END_VERSE")
     ("V" "#+BEGIN_VERBATIM\n?\n#+END_VERBATIM")
     ("c" "#+BEGIN_CENTER\n?\n#+END_CENTER")
-    ("l" "#+BEGIN_LaTeX\n?\n#+END_LaTeX")
+    ("l" "#+BEGIN_EXPORT latex\n?\n#+END_EXPORT")
     ("L" "#+LaTeX: ")
-    ("h" "#+BEGIN_HTML\n?\n#+END_HTML")
+    ("h" "#+BEGIN_EXPORT html\n?\n#+END_EXPORT")
     ("H" "#+HTML: ")
-    ("a" "#+BEGIN_ASCII\n?\n#+END_ASCII")
+    ("a" "#+BEGIN_EXPORT ascii\n?\n#+END_EXPORT")
     ("A" "#+ASCII: ")
     ("i" "#+INDEX: ?")
     ("I" "#+INCLUDE: %file ?"))

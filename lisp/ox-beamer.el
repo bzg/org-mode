@@ -232,7 +232,6 @@ Return overlay specification, as a string, or nil."
 ;;; Define Back-End
 
 (org-export-define-derived-backend 'beamer 'latex
-  :export-block "BEAMER"
   :menu-entry
   '(?l 1
        ((?B "As LaTeX buffer (Beamer)" org-beamer-export-as-latex)

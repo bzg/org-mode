@@ -1013,10 +1013,6 @@ BACKEND is a structure with `org-export-backend' type."
   (let ((parent (org-export-backend-parent backend)))
     (when (and parent (not (org-export-get-backend parent)))
       (error "Cannot use unknown \"%s\" back-end as a parent" parent)))
-  ;; Register dedicated export blocks in the parser.
-  (dolist (name (org-export-backend-blocks backend))
-    (add-to-list 'org-element-block-name-alist
-		 (cons name 'org-element-export-block-parser)))
   ;; If a back-end with the same name as BACKEND is already
   ;; registered, replace it with BACKEND.  Otherwise, simply add
   ;; BACKEND to the list of registered back-ends.
@@ -1143,14 +1139,6 @@ back-end.
 BODY can start with pre-defined keyword arguments.  The following
 keywords are understood:
 
-  :export-block
-
-    String, or list of strings, representing block names that
-    will not be parsed.  This is used to specify blocks that will
-    contain raw code specific to the back-end.  These blocks
-    still have to be handled by the relative `export-block' type
-    translator.
-
   :filters-alist
 
     Alist between filters and function, or list of functions,
@@ -1220,23 +1208,19 @@ keywords are understood:
     `org-export-options-alist' for more information about
     structure of the values."
   (declare (indent 1))
-  (let (blocks filters menu-entry options)
+  (let (filters menu-entry options)
     (while (keywordp (car body))
       (let ((keyword (pop body)))
-	(cl-case keyword
-	  (:export-block (let ((names (pop body)))
-			   (setq blocks (if (consp names) (mapcar 'upcase names)
-					  (list (upcase names))))))
+	(pcase keyword
 	  (:filters-alist (setq filters (pop body)))
 	  (:menu-entry (setq menu-entry (pop body)))
 	  (:options-alist (setq options (pop body)))
-	  (t (error "Unknown keyword: %s" keyword)))))
+	  (_ (error "Unknown keyword: %s" keyword)))))
     (org-export-register-backend
      (org-export-create-backend :name backend
 				:transcoders transcoders
 				:options options
 				:filters filters
-				:blocks blocks
 				:menu menu-entry))))
 
 (defun org-export-define-derived-backend (child parent &rest body)
@@ -1247,14 +1231,6 @@ the parent back-end.
 
 BODY can start with pre-defined keyword arguments.  The following
 keywords are understood:
-
-  :export-block
-
-    String, or list of strings, representing block names that
-    will not be parsed.  This is used to specify blocks that will
-    contain raw code specific to the back-end.  These blocks
-    still have to be handled by the relative `export-block' type
-    translator.
 
   :filters-alist
 
@@ -1292,25 +1268,21 @@ The back-end could then be called with, for example:
 
   (org-export-to-buffer \\='my-latex \"*Test my-latex*\")"
   (declare (indent 2))
-  (let (blocks filters menu-entry options transcoders)
+  (let (filters menu-entry options transcoders)
     (while (keywordp (car body))
       (let ((keyword (pop body)))
-	(cl-case keyword
-	  (:export-block (let ((names (pop body)))
-			   (setq blocks (if (consp names) (mapcar 'upcase names)
-					  (list (upcase names))))))
+	(pcase keyword
 	  (:filters-alist (setq filters (pop body)))
 	  (:menu-entry (setq menu-entry (pop body)))
 	  (:options-alist (setq options (pop body)))
 	  (:translate-alist (setq transcoders (pop body)))
-	  (t (error "Unknown keyword: %s" keyword)))))
+	  (_ (error "Unknown keyword: %s" keyword)))))
     (org-export-register-backend
      (org-export-create-backend :name child
 				:parent parent
 				:transcoders transcoders
 				:options options
 				:filters filters
-				:blocks blocks
 				:menu menu-entry))))
 
 
@@ -3304,10 +3276,12 @@ storing and resolving footnotes.  It is created automatically."
 			value)
 		       (prog1 (match-string 1 value)
 			 (setq value (replace-match "" nil nil value)))))
-		 (env (cond ((string-match "\\<example\\>" value)
-			     'literal)
-			    ((string-match "\\<src\\(?: +\\(.*\\)\\)?" value)
-			     'literal)))
+		 (env (cond
+		       ((string-match "\\<example\\>" value) 'literal)
+		       ((string-match "\\<export\\(?: +\\(.*\\)\\)?" value)
+			'literal)
+		       ((string-match "\\<src\\(?: +\\(.*\\)\\)?" value)
+			'literal)))
 		 ;; Minimal level of included file defaults to the child
 		 ;; level of the current headline, if any, or one.  It
 		 ;; only applies is the file is meant to be included as
@@ -3319,12 +3293,11 @@ storing and resolving footnotes.  It is created automatically."
 			     (setq value (replace-match "" nil nil value)))
 			 (get-text-property (point)
 					    :org-include-induced-level))))
-		 (src-args (and (eq env 'literal)
-				(match-string 1 value)))
+		 (args (and (eq env 'literal) (match-string 1 value)))
 		 (block (and (string-match "\\<\\(\\S-+\\)\\>" value)
 			     (match-string 1 value))))
 	    ;; Remove keyword.
-	    (delete-region (point) (progn (forward-line) (point)))
+	    (delete-region (point) (line-beginning-position 2))
 	    (cond
 	     ((not file) nil)
 	     ((not (file-readable-p file))
@@ -3338,10 +3311,8 @@ storing and resolving footnotes.  It is created automatically."
 	      (cond
 	       ((eq env 'literal)
 		(insert
-		 (let ((ind-str (make-string ind ? ))
-		       (arg-str (if (stringp src-args)
-				    (format " %s" src-args)
-				  ""))
+		 (let ((ind-str (make-string ind ?\s))
+		       (arg-str (if (stringp args) (format " %s" args) ""))
 		       (contents
 			(org-escape-code-in-string
 			 (org-export--prepare-file-contents file lines))))
@@ -3349,7 +3320,7 @@ storing and resolving footnotes.  It is created automatically."
 			   ind-str block arg-str contents ind-str block))))
 	       ((stringp block)
 		(insert
-		 (let ((ind-str (make-string ind ? ))
+		 (let ((ind-str (make-string ind ?\s))
 		       (contents
 			(org-export--prepare-file-contents file lines)))
 		   (format "%s#+BEGIN_%s\n%s%s#+END_%s\n"

@@ -93,7 +93,6 @@
     (underline . org-ascii-underline)
     (verbatim . org-ascii-verbatim)
     (verse-block . org-ascii-verse-block))
-  :export-block "ASCII"
   :menu-entry
   '(?t "Export to Plain Text"
        ((?A "As ASCII buffer"

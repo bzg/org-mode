@@ -102,7 +102,6 @@
     (underline . org-html-underline)
     (verbatim . org-html-verbatim)
     (verse-block . org-html-verse-block))
-  :export-block "HTML"
   :filters-alist '((:filter-options . org-html-infojs-install-script)
 		   (:filter-final-output . org-html-final-function))
   :menu-entry

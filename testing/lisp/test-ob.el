@@ -1036,9 +1036,9 @@ content\"
 (ert-deftest test-ob/org-babel-remove-result--results-html ()
   "Test `org-babel-remove-result' with :results html."
   (test-ob-verify-result-and-removed-result
-   "#+BEGIN_HTML
+   "#+BEGIN_EXPORT html
 <head><body></body></head>
-#+END_HTML"
+#+END_EXPORT"
 
    "* org-babel-remove-result
 #+begin_src emacs-lisp :results html
@@ -1050,11 +1050,11 @@ content\"
 (ert-deftest test-ob/org-babel-remove-result--results-latex ()
   "Test `org-babel-remove-result' with :results latex."
   (test-ob-verify-result-and-removed-result
-   "#+BEGIN_LaTeX
+   "#+BEGIN_EXPORT latex
 Line 1
 Line 2
 Line 3
-#+END_LaTeX"
+#+END_EXPORT"
 
    "* org-babel-remove-result
 #+begin_src emacs-lisp :results latex
