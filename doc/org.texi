@@ -8590,9 +8590,9 @@ Remove all filters in the current agenda view.
 @vindex org-agenda-max-tags
 
 Here is a list of options that you can set, either globally, or locally in
-your custom agenda views@pxref{Custom agenda views}.
+your custom agenda views (@pxref{Custom agenda views}).
 
-@table @var
+@table @code
 @item org-agenda-max-entries
 Limit the number of entries.
 @item org-agenda-max-effort
