@@ -1,6 +1,6 @@
 ;;; test-org-element.el --- Tests for org-element.el
 
-;; Copyright (C) 2012, 2013, 2014  Nicolas Goaziou
+;; Copyright (C) 2012-2015  Nicolas Goaziou
 
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 
@@ -1495,8 +1495,8 @@ e^{i\\pi}+1=0
   (require 'org-docview)
   (should
    (equal
-    '("file" "projects.org" "docview")
-    (org-test-with-temp-text "[[docview:projects.org]]"
+    '("file" "projects.org" "emacs")
+    (org-test-with-temp-text "[[file+emacs:projects.org]]"
       (let ((l (org-element-context)))
 	(list (org-element-property :type l)
 	      (org-element-property :path l)

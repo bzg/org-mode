@@ -1,6 +1,6 @@
 ;;; org-element.el --- Parser And Applications for Org syntax
 
-;; Copyright (C) 2012-2014 Free Software Foundation, Inc.
+;; Copyright (C) 2012-2015 Free Software Foundation, Inc.
 
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -259,12 +259,6 @@ specially in `org-element--object-lex'.")
   "Alist between block names and the associated parsing function.
 Names must be uppercase.  Any block whose name has no association
 is parsed with `org-element-special-block-parser'.")
-
-(defconst org-element-link-type-is-file
-  '("file" "file+emacs" "file+sys" "docview")
-  "List of link types equivalent to \"file\".
-Only these types can accept search options and an explicit
-application to open them.")
 
 (defconst org-element-affiliated-keywords
   '("CAPTION" "DATA" "HEADER" "HEADERS" "LABEL" "NAME" "PLOT" "RESNAME" "RESULT"
@@ -3071,22 +3065,16 @@ Assume point is at the beginning of the link."
       (save-excursion
 	(setq post-blank (progn (goto-char link-end) (skip-chars-forward " \t"))
 	      end (point))
-	;; Special "file" type link processing.
-	(when (member type org-element-link-type-is-file)
-	  ;; Extract opening application and search option.
-	  (cond ((string-match "^file\\+\\(.*\\)$" type)
-		 (setq application (match-string 1 type)))
-		((not (string-match "^file" type))
-		 (setq application type)))
+	;; Special "file" type link processing.  Extract opening
+	;; application and search option, if any.  Also normalize URI.
+	(when (string-match "\\`file\\(?:\\+\\(.+\\)\\)?\\'" type)
+	  (setq application (match-string 1 type) type "file")
 	  (when (string-match "::\\(.*\\)\\'" path)
 	    (setq search-option (match-string 1 path)
 		  path (replace-match "" nil nil path)))
-	  ;; Normalize URI.
 	  (when (and (file-name-absolute-p path)
 		     (not (org-string-match-p "\\`[/~]/" path)))
-	    (setq path (concat "//" path)))
-	  ;; Make sure TYPE always reports "file".
-	  (setq type "file"))
+	    (setq path (concat "//" path))))
 	(list 'link
 	      (list :type type
 		    :path path
