@@ -831,7 +831,7 @@ reproducible research compendium.
 Org keeps simple things simple.  When first fired up, it should feel like a
 straightforward, easy to use outliner.  Complexity is not imposed, but a
 large amount of functionality is available when needed.  Org is a toolbox.
-Many users usilize only a (very personal) fraction of Org's capabilities, and
+Many users actually run only a (very personal) fraction of Org's capabilities, and
 know that there is more whenever they need it.
 
 All of this is achieved with strictly plain text files, the most portable and
