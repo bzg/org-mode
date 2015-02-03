@@ -1,7 +1,7 @@
 ;;; org.el --- Outline-based notes management and organizer
 
 ;; Carstens outline-mode for keeping track of everything.
-;; Copyright (C) 2004-2014 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2015 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Maintainer: Carsten Dominik <carsten at orgmode dot org>
@@ -21223,31 +21223,16 @@ number of stars to add."
 	;; Case 2. Started at an item: change items into headlines.
 	;;         One star will be added by `org-list-to-subtree'.
 	((org-at-item-p)
-	 (let* ((stars (make-string
-			;; subtract the star that will be added again by
-			;; `org-list-to-subtree'
-			(if (numberp nstars) (1- nstars)
-			  (or (org-current-level) 0))
-			?*))
-		(add-stars
-		 (cond (nstars "")               ; stars from prefix only
-		       ((equal stars "") "")     ; before first heading
-		       (org-odd-levels-only "*") ; inside heading, odd
-		       (t ""))))                 ; inside heading, oddeven
-	   (while (< (point) end)
-	     (when (org-at-item-p)
-	       ;; Pay attention to cases when region ends before list.
-	       (let* ((struct (org-list-struct))
-		      (list-end (min (org-list-get-bottom-point struct) (1+ end))))
-		 (save-restriction
-		   (narrow-to-region (point) list-end)
-		   (insert
-		    (org-list-to-subtree
-		     (org-list-parse-list t)
-		     '(:istart (concat stars add-stars (funcall get-stars depth))
-			       :icount (concat stars add-stars (funcall get-stars depth)))))))
-	       (setq toggled t))
-	     (forward-line))))
+	 (while (< (point) end)
+	   (when (org-at-item-p)
+	     ;; Pay attention to cases when region ends before list.
+	     (let* ((struct (org-list-struct))
+		    (list-end (min (org-list-get-bottom-point struct) (1+ end))))
+	       (save-restriction
+		 (narrow-to-region (point) list-end)
+		 (insert (org-list-to-subtree (org-list-parse-list t)))))
+	     (setq toggled t))
+	   (forward-line)))
 	;; Case 3. Started at normal text: make every line an heading,
 	;;         skipping headlines and items.
 	(t (let* ((stars
