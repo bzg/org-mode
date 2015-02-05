@@ -2,7 +2,7 @@
 ;;; org-drill.el - Self-testing using spaced repetition
 ;;;
 ;;; Author: Paul Sexton <eeeickythump@gmail.com>
-;;; Version: 2.4.3
+;;; Version: 2.4.4
 ;;; Repository at http://bitbucket.org/eeeickythump/org-drill/
 ;;;
 ;;;
@@ -2439,7 +2439,7 @@ that many days)."
      (timestamp
       (- (org-time-stamp-to-now timestamp)))
      (use-last-interval-p
-      (+ (org-drill-entry-days-overdue)
+      (+ (or (org-drill-entry-days-overdue) 0)
          (read (or (org-entry-get (point) "DRILL_LAST_INTERVAL") "0"))))
      (t nil))))
 
