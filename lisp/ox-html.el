@@ -2734,8 +2734,9 @@ INFO is a plist holding contextual information.  See
 	 (path
 	  (cond
 	   ((member type '("http" "https" "ftp" "mailto"))
-	    (org-link-escape-browser
-	     (org-link-unescape (concat type ":" raw-path))))
+	    (org-html-encode-plain-text
+	     (org-link-escape-browser
+	      (org-link-unescape (concat type ":" raw-path)))))
 	   ((string= type "file")
 	    ;; Treat links to ".org" files as ".html", if needed.
 	    (setq raw-path
@@ -2981,11 +2982,8 @@ contextual information."
 (defun org-html-encode-plain-text (text)
   "Convert plain text characters from TEXT to HTML equivalent.
 Possible conversions are set in `org-html-protect-char-alist'."
-  (mapc
-   (lambda (pair)
-     (setq text (replace-regexp-in-string (car pair) (cdr pair) text t t)))
-   org-html-protect-char-alist)
-  text)
+  (dolist (pair org-html-protect-char-alist text)
+    (setq text (replace-regexp-in-string (car pair) (cdr pair) text t t))))
 
 (defun org-html-plain-text (text info)
   "Transcode a TEXT string from Org to HTML.
