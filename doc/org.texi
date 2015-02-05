@@ -6836,7 +6836,7 @@ countdown timer.  With a prefix argument, first reset the relative timer to
 @orgcmd{M-@key{RET},org-insert-heading}
 Once the timer list is started, you can also use @kbd{M-@key{RET}} to insert
 new timer items.
-@orgcmd{C-c C-x \,,org-timer-pause-or-continue}
+@orgcmd{C-c C-x \\,,org-timer-pause-or-continue}
 Pause the timer, or continue it if it is already paused.
 @orgcmd{C-c C-x _,org-timer-stop}
 Stop the timer.  After this, you can only start a new timer, not continue the
