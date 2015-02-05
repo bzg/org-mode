@@ -9506,7 +9506,9 @@ a timestamp can be added there."
   (let ((col (current-column)))
     (insert text)
     (org-end-of-meta-data)
+    ;; Ensure point is left on a blank line, at proper indentation.
     (unless (bolp) (insert "\n"))
+    (unless (org-looking-at-p "^[ \t]*$") (save-excursion (insert "\n")))
     (when org-adapt-indentation (org-indent-to-column col)))
   (let ((org-show-following-heading t)
 	(org-show-siblings t)
