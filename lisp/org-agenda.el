@@ -3941,9 +3941,9 @@ functions do."
 
 (defun org-agenda-new-marker (&optional pos)
   "Return a new agenda marker.
-Org-mode keeps a list of these markers and resets them when they are
-no longer in use."
-  (let ((m (copy-marker (or pos (point)))))
+Maker is at point, or at POS if non-nil.  Org mode keeps a list of
+these markers and resets them when they are no longer in use."
+  (let ((m (copy-marker (or pos (point)) t)))
     (setq org-agenda-last-marker-time (org-float-time))
     (if org-agenda-buffer
 	(with-current-buffer org-agenda-buffer
@@ -9928,6 +9928,11 @@ The prefix arg is passed through to the command if possible."
 	    (goto-char pos)
 	    (let (org-loop-over-headlines-in-active-region)
 	      (eval cmd))
+	    ;; `post-command-hook' is not run yet.  We make sure any
+	    ;; pending log note is processed.
+	    (when (or (memq 'org-add-log-note (default-value 'post-command-hook))
+		      (memq 'org-add-log-note post-command-hook))
+	      (org-add-log-note))
 	    (setq cnt (1+ cnt))))
 	(when redo-at-end (org-agenda-redo))
 	(unless org-agenda-persistent-marks
