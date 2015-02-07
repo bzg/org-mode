@@ -14189,7 +14189,8 @@ headlines matching this string."
          lspos tags tags-list
 	 (tags-alist (list (cons 0 org-file-tags)))
 	 (llast 0) rtn rtn1 level category i txt
-	 todo marker entry priority)
+	 todo marker entry priority
+	 ts-date ts-date-type ts-date-pair)
     (when (not (or (member action '(agenda sparse-tree)) (functionp action)))
       (setq action (list 'lambda nil action)))
     (save-excursion
@@ -14206,6 +14207,10 @@ headlines matching this string."
 	  (goto-char (setq lspos (match-beginning 0)))
 	  (setq level (org-reduced-level (org-outline-level))
 		category (org-get-category))
+          (when (eq action 'agenda)
+            (setq ts-date-pair (org-agenda-entry-get-agenda-timestamp (point))
+		  ts-date (car ts-date-pair)
+		  ts-date-type (cdr ts-date-pair)))
 	  (setq i llast llast level)
 	  ;; remove tag lists from same and sublevels
 	  (while (>= i level)
@@ -14277,7 +14282,9 @@ headlines matching this string."
 	      (org-add-props txt props
 		'org-marker marker 'org-hd-marker marker 'org-category category
 		'todo-state todo
-		'priority priority 'type "tagsmatch")
+                'ts-date ts-date
+		'priority priority
+                'type (concat "tagsmatch" ts-date-type))
 	      (push txt rtn))
 	     ((functionp action)
 	      (setq org-map-continue-from nil)

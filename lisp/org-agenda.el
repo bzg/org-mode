@@ -5362,6 +5362,40 @@ the documentation of `org-diary'."
 (defvar org-heading-keyword-regexp-format) ; defined in org.el
 (defvar org-agenda-sorting-strategy-selected nil)
 
+(defun org-agenda-entry-get-agenda-timestamp (pom)
+  "Retrieve timestamp information for sorting agenda views.
+Given a point or marker POM, returns a cons cell of the timestamp
+and the timestamp type relevant for the sorting strategy in
+`org-agenda-sorting-strategy-selected'."
+  (let (ts ts-date-type)
+    (save-match-data
+      (cond ((org-em 'scheduled-up 'scheduled-down
+		     org-agenda-sorting-strategy-selected)
+	     (setq ts (org-entry-get pom "SCHEDULED")
+		   ts-date-type " scheduled"))
+	    ((org-em 'deadline-up 'deadline-down
+		     org-agenda-sorting-strategy-selected)
+	     (setq ts (org-entry-get pom "DEADLINE")
+		   ts-date-type " deadline"))
+	    ((org-em 'ts-up 'ts-down
+		     org-agenda-sorting-strategy-selected)
+	     (setq ts (org-entry-get pom "TIMESTAMP")
+		   ts-date-type " timestamp"))
+	    ((org-em 'tsia-up 'tsia-down
+		     org-agenda-sorting-strategy-selected)
+	     (setq ts (org-entry-get pom "TIMESTAMP_IA")
+		   ts-date-type " timestamp_ia"))
+	    ((org-em 'timestamp-up 'timestamp-down
+		     org-agenda-sorting-strategy-selected)
+	     (setq ts (or (org-entry-get pom "SCHEDULED")
+			  (org-entry-get pom "DEADLINE")
+			  (org-entry-get pom "TIMESTAMP")
+			  (org-entry-get pom "TIMESTAMP_IA"))
+		   ts-date-type ""))
+	    (t (setq ts-date-type "")))
+      (cons (when ts (ignore-errors (org-time-string-to-absolute ts)))
+	    ts-date-type))))
+
 (defun org-agenda-get-todos ()
   "Return the TODO information for agenda display."
   (let* ((props (list 'face nil
@@ -5386,7 +5420,8 @@ the documentation of `org-diary'."
 					       "|")
 					      "\\|") "\\)"))
 			  (t org-not-done-regexp))))
-	 marker priority category level tags todo-state ts-date ts-date-type
+	 marker priority category level tags todo-state
+	 ts-date ts-date-type ts-date-pair
 	 ee txt beg end inherited-tags todo-state-end-pos)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
@@ -5406,33 +5441,9 @@ the documentation of `org-diary'."
 	(goto-char (match-beginning 2))
 	(setq marker (org-agenda-new-marker (match-beginning 0))
 	      category (org-get-category)
-	      ts-date (let (ts)
-			(save-match-data
-			  (cond ((org-em 'scheduled-up 'scheduled-down
-					 org-agenda-sorting-strategy-selected)
-				 (setq ts (org-entry-get (point) "SCHEDULED")
-				       ts-date-type " scheduled"))
-				((org-em 'deadline-up 'deadline-down
-					 org-agenda-sorting-strategy-selected)
-				 (setq ts (org-entry-get (point) "DEADLINE")
-				       ts-date-type " deadline"))
-				((org-em 'ts-up 'ts-down
-					 org-agenda-sorting-strategy-selected)
-				 (setq ts (org-entry-get (point) "TIMESTAMP")
-				       ts-date-type " timestamp"))
-				((org-em 'tsia-up 'tsia-down
-					 org-agenda-sorting-strategy-selected)
-				 (setq ts (org-entry-get (point) "TIMESTAMP_IA")
-				       ts-date-type " timestamp_ia"))
-				((org-em 'timestamp-up 'timestamp-down
-					 org-agenda-sorting-strategy-selected)
-				 (setq ts (or (org-entry-get (point) "SCHEDULED")
-					      (org-entry-get (point) "DEADLINE")
-					      (org-entry-get (point) "TIMESTAMP")
-					      (org-entry-get (point) "TIMESTAMP_IA"))
-				       ts-date-type ""))
-				(t (setq ts-date-type "")))
-			  (when ts (ignore-errors (org-time-string-to-absolute ts)))))
+	      ts-date-pair (org-agenda-entry-get-agenda-timestamp (point))
+	      ts-date (car ts-date-pair)
+	      ts-date-type (cdr ts-date-pair)
 	      txt (org-trim (buffer-substring (match-beginning 2) (match-end 0)))
 	      inherited-tags
 	      (or (eq org-agenda-show-inherited-tags 'always)
