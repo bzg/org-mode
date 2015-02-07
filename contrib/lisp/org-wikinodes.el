@@ -316,11 +316,10 @@ with working links."
 
 (defun org-wikinodes-add-to-font-lock-keywords ()
   "Add wikinode CamelCase highlighting to `org-font-lock-extra-keywords'."
-  (let ((m (member '(org-activate-plain-links) org-font-lock-extra-keywords)))
-    (if m
-	(setcdr m (cons '(org-wikinodes-activate-links) (cdr m)))
-      (message
-       "Failed to add wikinodes to `org-font-lock-extra-keywords'."))))
+  (let ((m (member '(org-activate-plain-links (0 'org-link t))
+		   org-font-lock-extra-keywords)))
+    (if m (push '(org-wikinodes-activate-links) (cdr m))
+      (message "Failed to add wikinodes to `org-font-lock-extra-keywords'."))))
 
 (add-hook 'org-font-lock-set-keywords-hook
 	  'org-wikinodes-add-to-font-lock-keywords)
