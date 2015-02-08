@@ -10129,17 +10129,19 @@ They cannot be used within ordinary keywords (starting with @code{#+}) but
 are allowed in @code{#+CAPTION}, @code{#+TITLE}, @code{#+AUTHOR} and
 @code{#+EMAIL}.
 
-In addition to user-defined macros, a set of already defined macros can be
-used: @code{@{@{@{title@}@}@}}, @code{@{@{@{author@}@}@}}, etc., will
-reference information set by the @code{#+TITLE:}, @code{#+AUTHOR:}, and
-similar lines.  Also, @code{@{@{@{time(@var{FORMAT})@}@}@}} and
-@code{@{@{@{modification-time(@var{FORMAT})@}@}@}} refer to current date time
+In addition to user-defined macros, a set of predefined macros can be used:
+@code{@{@{@{title@}@}@}}, @code{@{@{@{author@}@}@}}, @code{@{@{@{date@}@}}
+and @code{@{@{@{email@}@}} are replaced with the information set by the
+respective keywords.  Further, @code{@{@{@{time(@var{FORMAT})@}@}@}} and
+@code{@{@{@{modification-time(@var{FORMAT})@}@}@}} refer to the current date
 and to the modification time of the file being exported, respectively.
 @var{FORMAT} should be a format string understood by
-@code{format-time-string}.
+@code{format-time-string}.  Finally, the filename is available via
+@code{@{@{@{input-file@}@}@}} and properties can be inserted using
+@code{@{@{@{property(@var{PROPERTY-NAME})@}@}@}}.
 
 The surrounding brackets can be made invisible by setting
-@code{org-hide-macro-markers} to @code{t}.
+@code{org-hide-macro-markers} non-@code{nil}.
 
 Macro expansion takes place during the very beginning of the export process.
 
