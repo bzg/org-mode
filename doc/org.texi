@@ -10067,9 +10067,9 @@ to use the obvious defaults.
 
 Finally, you may use a file-link to extract an object as matched by
 @code{org-link-search}@footnote{Note that
-@code{org-link-search-must-match-exact-headline} is locally bound to non-nil.
+@code{org-link-search-must-match-exact-headline} is locally bound to non-@code{nil}.
 Therefore, @code{org-link-search} only matches headlines and named elements.}
-(@pxref{Search options}).  If the @code{:only-contents} property is non-nil,
+(@pxref{Search options}).  If the @code{:only-contents} property is non-@code{nil},
 only the contents of the requested element will be included, omitting
 properties drawer and planning-line if present.  The @code{:lines} keyword
 operates locally with respect to the requested element.  Some examples:
@@ -10759,7 +10759,7 @@ Toggle section-numbers (@code{org-export-with-section-numbers}).  It can also
 be set to a number @samp{n}, so only headlines at that level or above will be
 numbered.  Finally, irrespective of the level of a specific headline, the
 numbering of it can be disabled by setting the @code{UNNUMBERED} property to
-non-nil.  This also affects subheadings.
+non-@code{nil}.  This also affects subheadings.
 
 @item p:
 @vindex org-export-with-planning
@@ -11383,11 +11383,11 @@ Below is a list of options for customizing tables HTML export.
 @table @code
 @vindex org-html-table-align-individual-fields
 @item org-html-table-align-individual-fields
-Non-nil means attach style attributes for alignment to each table field.
+Non-@code{nil} means attach style attributes for alignment to each table field.
 
 @vindex org-html-table-caption-above
 @item org-html-table-caption-above
-When non-nil, place caption string at the beginning of the table.
+When non-@code{nil}, place caption string at the beginning of the table.
 
 @vindex org-html-table-data-tags
 @item org-html-table-data-tags
@@ -11407,7 +11407,7 @@ The opening and ending tags for table rows.
 
 @vindex org-html-table-use-header-tags-for-first-column
 @item org-html-table-use-header-tags-for-first-column
-Non-nil means format column one in tables with header tags.
+Non-@code{nil} means format column one in tables with header tags.
 @end table
 
 @node Images in HTML export
@@ -13123,7 +13123,7 @@ also expected to be written in Texinfo code.
 @end example
 
 @cindex property, COPYING
-Copying material is defined in a dedicated headline with a non-nil
+Copying material is defined in a dedicated headline with a non-@code{nil}
 @code{:COPYING:} property.  The contents are inserted within
 a @code{@@copying} command at the beginning of the document whereas the
 heading itself does not appear in the structure of the document.
@@ -13179,7 +13179,7 @@ a certain threshold (@pxref{Export settings}), that headline becomes a list
 in Texinfo output.
 
 @cindex property, APPENDIX
-As an exception, a headline with a non-nil @code{:APPENDIX:} property becomes
+As an exception, a headline with a non-@code{nil} @code{:APPENDIX:} property becomes
 an appendix, independently on its level and the class used.
 
 @cindex property, DESCRIPTION
@@ -14415,7 +14415,7 @@ Controls the way Emacs windows are rearranged when the edit buffer is created.
 @cindex indentation, in source blocks
 By default, the value is @code{nil}, which means that when code blocks are
 evaluated during export or tangled, they are re-inserted into the code block,
-which may replace sequences of spaces with tab characters.  When non-nil,
+which may replace sequences of spaces with tab characters.  When non-@code{nil},
 whitespace in code blocks will be preserved during export or tangling,
 exactly as it appears.  This variable is especially useful for tangling
 languages such as Python, in which whitespace indentation in the output is
@@ -17718,7 +17718,7 @@ including the following ones :
 
 @table @code
 @item :splice nil/t
-When non-nil, return only table body lines, don't wrap them into a tabular
+When non-@code{nil}, return only table body lines, don't wrap them into a tabular
 environment.  Default is @code{nil}.
 
 @item :fmt fmt
