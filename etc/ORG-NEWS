@@ -198,6 +198,9 @@ countdown timers.
 *** New option ~only-window~ for ~org-agenda-window-setup~
 When ~org-agenda-window-setup~ is set to ~only-window~, the agenda is
 displayed as the sole window of the current frame.
+*** ~{{{date}}}~ macro supports optional formatting argument
+It is now possible to supply and optional formatting argument to
+~{{{date}}}~. See manual for details.
 ** Miscellaneous
 *** Strip all meta data from ITEM special property
 ITEM special property does not contain TODO, priority or tags anymore.

@@ -10130,14 +10130,17 @@ are allowed in @code{#+CAPTION}, @code{#+TITLE}, @code{#+AUTHOR} and
 @code{#+EMAIL}.
 
 In addition to user-defined macros, a set of predefined macros can be used:
-@code{@{@{@{title@}@}@}}, @code{@{@{@{author@}@}@}}, @code{@{@{@{date@}@}}
-and @code{@{@{@{email@}@}} are replaced with the information set by the
-respective keywords.  Further, @code{@{@{@{time(@var{FORMAT})@}@}@}} and
-@code{@{@{@{modification-time(@var{FORMAT})@}@}@}} refer to the current date
-and to the modification time of the file being exported, respectively.
-@var{FORMAT} should be a format string understood by
-@code{format-time-string}.  Finally, the filename is available via
-@code{@{@{@{input-file@}@}@}} and properties can be inserted using
+@code{@{@{@{title@}@}@}}, @code{@{@{@{author@}@}@}}, and
+@code{@{@{@{email@}@}@}} are replaced with the information set by their
+respective keywords.  Further, @code{@{@{@{date(@var{FORMAT})@}@}@}},
+@code{@{@{@{time(@var{FORMAT})@}@}@}} and
+@code{@{@{@{modification-time(@var{FORMAT})@}@}@}} refer to the @code{#+DATE}
+keyword, the current date, and the modification time of the file being
+exported, respectively.  @var{FORMAT} should be a format string understood by
+@code{format-time-string}.  Note that @var{FORMAT} is an optional argument to
+the @code{@{@{@{date@}@}@}} macro, and that it will only be used if
+@code{#+DATE} is a single timestamp.  Finally, the filename is available via
+@code{@{@{@{input-file@}@}@}} and properties can be accessed using
 @code{@{@{@{property(@var{PROPERTY-NAME})@}@}@}}.
 
 The surrounding brackets can be made invisible by setting

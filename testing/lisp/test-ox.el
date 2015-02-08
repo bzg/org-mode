@@ -1104,7 +1104,17 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 	      (format "#+INCLUDE: \"%s/examples/macro-templates.org\"
 {{{included-macro}}}" org-test-dir)
 	    (let ((output (org-export-as (org-test-default-backend))))
-	      (substring output (string-match ".*\n\\'" output)))))))
+	      (substring output (string-match ".*\n\\'" output))))))
+  ;; Date macro takes a optional formatting argument
+  (should
+   (equal "09-02-15\n"
+    (org-test-with-temp-text "{{{date(%d-%m-%y)}}}\n* d :noexport:\n#+DATE: <2015-02-09>"
+      (org-export-as (org-test-default-backend)))))
+  ;; Only single timestamps are formatted
+  (should
+   (equal "<2015-02x-09>\n"
+    (org-test-with-temp-text "{{{date(%d-%m-%y)}}}\n* d :noexport:\n#+DATE: <2015-02x-09>"
+      (org-export-as (org-test-default-backend))))))
 
 (ert-deftest test-org-export/before-processing-hook ()
   "Test `org-export-before-processing-hook'."

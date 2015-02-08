@@ -2865,14 +2865,27 @@ Return code as a string."
 	     (let ((result (funcall filter info backend-name)))
 	       (when result (setq info result)))))
 	 ;; Expand export-specific set of macros: {{{author}}},
-	 ;; {{{date}}}, {{{email}}} and {{{title}}}.  It must be done
-	 ;; once regular macros have been expanded, since document
-	 ;; keywords may contain one of them.
+	 ;; {{{date(FORMAT)}}}, {{{email}}} and {{{title}}}.  It must
+	 ;; be done once regular macros have been expanded, since
+	 ;; document keywords may contain one of them.
 	 (org-macro-replace-all
 	  (list (cons "author"
 		      (org-element-interpret-data (plist-get info :author)))
 		(cons "date"
-		      (org-element-interpret-data (plist-get info :date)))
+		      (let* ((date (plist-get info :date))
+			     (value (or (org-element-interpret-data date) "")))
+			(if (and (not (cdr date))
+				 (eq (org-element-type (car date)) 'timestamp))
+			    (format "(eval (if (org-string-nw-p \"$1\") %s %S))"
+				    (format "(org-timestamp-format '%S \"$1\")"
+					    ;; Remove parent to avoid
+					    ;; read error.
+					    `(timestamp
+					      ,(org-combine-plists
+						(nth 1 (car date))
+						'(:parent nil))))
+				    value)
+			  value)))
 		;; EMAIL is not a parsed keyword: store it as-is.
 		(cons "email" (or (plist-get info :email) ""))
 		(cons "title"
