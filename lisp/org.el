@@ -7707,7 +7707,7 @@ When NEXT is non-nil, check the next line instead."
 	 (save-match-data
 	   (looking-at "[ \t]*$")))))
 
-(defun org-insert-heading (&optional arg invisible-ok)
+(defun org-insert-heading (&optional arg invisible-ok top-level)
   "Insert a new heading or an item with the same depth at point.
 
 If point is at the beginning of a heading or a list item, insert
@@ -7741,10 +7741,13 @@ into a heading.
 
 When INVISIBLE-OK is set, stop at invisible headlines when going
 back.  This is important for non-interactive uses of the
-command."
+command.
+
+When optional argument TOP-LEVEL is non-nil, insert a level 1
+heading, unconditionally."
   (interactive "P")
   (if (org-called-interactively-p 'any) (org-reveal))
-  (let ((itemp (org-in-item-p))
+  (let ((itemp (and (not top-level) (org-in-item-p)))
 	(may-split (org-get-alist-option org-M-RET-may-split-line 'headline))
 	(respect-content (or org-insert-heading-respect-content
 			     (equal arg '(4))))
@@ -7788,7 +7791,7 @@ command."
 				 (org-previous-line-empty-p)
 			       ;; We will decide later
 			       nil))
-	       ;; Get a level string to fall back on
+	       ;; Get a level string to fall back on.
 	       (fix-level
 		(if (org-before-first-heading-p) "*"
 		  (save-excursion
@@ -7799,14 +7802,15 @@ command."
 	       (stars
 		(save-excursion
 		  (condition-case nil
-		      (progn
+		      (if top-level "* "
 			(org-back-to-heading invisible-ok)
 			(when (and (not on-heading)
 				   (featurep 'org-inlinetask)
 				   (integerp org-inlinetask-min-level)
 				   (>= (length (match-string 0))
 				       org-inlinetask-min-level))
-			  ;; Find a heading level before the inline task
+			  ;; Find a heading level before the inline
+			  ;; task.
 			  (while (and (setq level (org-up-heading-safe))
 				      (>= level org-inlinetask-min-level)))
 			  (if (org-at-heading-p)
@@ -7826,14 +7830,15 @@ command."
 	       (blank (if (eq blank-a 'auto) empty-line-p blank-a))
 	       pos hide-previous previous-pos)
 
-	  ;; If we insert after content, move there and clean up whitespace
+	  ;; If we insert after content, move there and clean up
+	  ;; whitespace.
 	  (when (and respect-content
 		     (not (org-looking-at-p org-outline-regexp-bol)))
 	    (if (not (org-before-first-heading-p))
 		(org-end-of-subtree nil t)
 	      (re-search-forward org-outline-regexp-bol)
 	      (beginning-of-line 0))
-	    (skip-chars-backward " \r\n")
+	    (skip-chars-backward " \r\t\n")
 	    (and (not (looking-back "^\\*+"))
 		 (looking-at "[ \t]+") (replace-match ""))
 	    (unless (eobp) (forward-char 1))
@@ -7841,12 +7846,14 @@ command."
 	      (unless (bobp) (backward-char 1))
 	      (insert "\n")))
 
-	  ;; If we are splitting, grab the text that should be moved to the new headline
+	  ;; If we are splitting, grab the text that should be moved
+	  ;; to the new headline.
 	  (when may-split
 	    (if (org-on-heading-p)
-		;; This is a heading, we split intelligently (keeping tags)
+		;; This is a heading: split intelligently (keeping
+		;; tags).
 		(let ((pos (point)))
-		  (goto-char (point-at-bol))
+		  (beginning-of-line)
 		  (unless (looking-at org-complex-heading-regexp)
 		    (error "This should not happen"))
 		  (when (and (match-beginning 4)
@@ -7857,31 +7864,29 @@ command."
 		    (delete-region (point) (match-end 4))
 		    (if (looking-at "[ \t]*$")
 			(replace-match "")
-		      (insert (make-string (length initial-content) ?\ )))
+		      (insert (make-string (length initial-content) ?\s)))
 		    (setq initial-content (org-trim initial-content)))
 		  (goto-char pos))
-	      ;; a normal line
+	      ;; A normal line.
 	      (setq initial-content
-		    (org-trim (buffer-substring (point) (point-at-eol))))
-	      (delete-region (point) (point-at-eol))))
+		    (org-trim
+		     (delete-and-extract-region (point) (line-end-position))))))
 
-	  ;; If we are at the beginning of the line, insert before it.  Else after
+	  ;; If we are at the beginning of the line, insert before it.
+	  ;; Otherwise, after it.
 	  (cond
 	   ((and (bolp) (looking-at "[ \t]*$")))
-	   ((and (bolp) (not (looking-at "[ \t]*$")))
-	    (open-line 1))
-	   (t
-	    (goto-char (point-at-eol))
-	    (insert "\n")))
+	   ((bolp) (open-line 1))
+	   (t (end-of-line)
+	      (insert "\n")))
 
 	  ;; Insert the new heading
 	  (insert stars)
 	  (just-one-space)
 	  (insert initial-content)
-	  (when adjust-empty-lines
-	    (if (or (not blank)
-		    (and blank (not (org-previous-line-empty-p))))
-		(org-N-empty-lines-before-current (if blank 1 0))))
+	  (when (and adjust-empty-lines
+		     (not (and blank (org-previous-line-empty-p))))
+	    (org-N-empty-lines-before-current (if blank 1 0)))
 	  (run-hooks 'org-insert-heading-hook)))))))
 
 (defun org-N-empty-lines-before-current (N)

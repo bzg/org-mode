@@ -900,8 +900,6 @@
 
 (ert-deftest test-org/insert-heading ()
   "Test `org-insert-heading' specifications."
-  ;; FIXME: Test coverage is incomplete yet.
-  ;;
   ;; In an empty buffer, insert a new headline.
   (should
    (equal "* "
@@ -957,6 +955,18 @@
 	  (org-test-with-temp-text "* H1\n** H3\n- item<point>\n** H2"
 	    (let ((org-insert-heading-respect-content nil))
 	      (org-insert-heading '(16)))
+	    (buffer-string))))
+  ;; When optional TOP-LEVEL argument is non-nil, always insert
+  ;; a level 1 heading.
+  (should
+   (equal "* H1\n** H2\n* "
+	  (org-test-with-temp-text "* H1\n** H2<point>"
+	    (org-insert-heading nil nil t)
+	    (buffer-string))))
+  (should
+   (equal "* H1\n- item\n* "
+	  (org-test-with-temp-text "* H1\n- item<point>"
+	    (org-insert-heading nil nil t)
 	    (buffer-string))))
   ;; Corner case: correctly insert a headline after an empty one.
   (should
