@@ -9487,12 +9487,12 @@ Add TEXT as headline, and position the cursor in the second line so that
 a timestamp can be added there."
   (widen)
   (goto-char (point-max))
-  (or (bolp) (insert "\n"))
-  (org-insert-heading)
+  (unless (bolp) (insert "\n"))
+  (org-insert-heading nil t t)
   (insert text)
   (org-end-of-meta-data)
   (unless (bolp) (insert "\n"))
-  (if org-adapt-indentation (org-indent-to-column 2)))
+  (when org-adapt-indentation (org-indent-to-column 2)))
 
 (defun org-agenda-insert-diary-make-new-entry (text)
   "Make a new entry with TEXT as the first child of the current subtree.

@@ -11101,8 +11101,9 @@ visibility around point, thus ignoring
 	     (eq org-link-search-must-match-exact-headline 'query-to-create)
 	     (y-or-n-p "No match - create this as a new heading? "))
 	(goto-char (point-max))
-	(or (bolp) (newline))
-	(insert "* " s "\n")
+	(unless (bolp) (newline))
+	(org-insert-heading nil t t)
+	(insert s "\n")
 	(beginning-of-line 0))
        (t
 	(goto-char pos)
