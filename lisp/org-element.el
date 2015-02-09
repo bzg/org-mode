@@ -564,12 +564,8 @@ The function takes care of setting `:parent' property for NEW."
 
 (defun org-element-copy (datum)
   "Return a copy of DATUM.
-
-DATUM is an element, object or string.  `:parent' property is
-cleared and contents are removed in the process.  If you need to
-preserve contents, use `org-element-extract-element' instead.
-
-If DATUM is nil, return nil."
+DATUM is an element, object, string or nil.  `:parent' property
+is cleared and contents are removed in the process."
   (when datum
     (let ((type (org-element-type datum)))
       (case type
