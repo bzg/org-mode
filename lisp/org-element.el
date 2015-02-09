@@ -412,7 +412,8 @@ still has an entry since one of its properties (`:title') does.")
 ;; high-level functions useful to modify a parse tree.
 ;;
 ;; `org-element-secondary-p' is a predicate used to know if a given
-;; object belongs to a secondary string.
+;; object belongs to a secondary string.  `org-element-copy' returns
+;; an element or object, stripping its parent property in the process.
 
 (defsubst org-element-type (element)
   "Return type of ELEMENT.
@@ -560,6 +561,23 @@ The function takes care of setting `:parent' property for NEW."
     (setcar (cdr old) (nth 1 new))
     ;; Transfer type.
     (setcar old (car new))))
+
+(defun org-element-copy (datum)
+  "Return a copy of DATUM.
+
+DATUM is an element, object or string.  `:parent' property is
+cleared and contents are removed in the process.  If you need to
+preserve contents, use `org-element-extract-element' instead.
+
+If DATUM is nil, return nil."
+  (when datum
+    (let ((type (org-element-type datum)))
+      (case type
+	(org-data (list 'org-data nil))
+	(plain-text (substring-no-properties datum))
+	((nil) (copy-sequence datum))
+	(otherwise
+	 (list type (plist-put (copy-sequence (nth 1 datum)) :parent nil)))))))
 
 
 

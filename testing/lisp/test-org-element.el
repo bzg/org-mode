@@ -285,6 +285,38 @@ Some other text
 	      (org-element-set-element text "b")
 	      (org-element-map tree 'plain-text 'identity nil t))))))
 
+(ert-deftest test-org-element/copy ()
+  "Test `org-element-copy' specifications."
+  ;; Preserve type.
+  (should (eq 'bold
+	      (org-test-with-temp-text "*bold*"
+		(org-element-type (org-element-copy (org-element-context))))))
+  (should (eq 'plain-text
+	      (org-test-with-temp-text "*bold*"
+		(org-element-type
+		 (org-element-map (org-element-parse-buffer) 'plain-text
+		   #'org-element-copy nil t)))))
+  ;; Preserve properties except `:parent'.
+  (should (= 7
+	     (org-test-with-temp-text "*bold*"
+	       (org-element-property
+		:end (org-element-copy (org-element-context))))))
+  (should-not
+   (org-test-with-temp-text "*bold*"
+     (org-element-property
+      :parent (org-element-copy (org-element-context)))))
+  (should-not
+   (org-test-with-temp-text "*bold*"
+     (org-element-property
+      :parent
+      (org-element-map (org-element-parse-buffer) 'plain-text
+	#'org-element-copy nil t))))
+  ;; Copying nil returns nil.
+  (should-not (org-element-copy nil))
+  ;; Return a copy secondary strings.
+  (should (equal '("text") (org-element-copy '("text"))))
+  (should-not (eq '("text") (org-element-copy '("text")))))
+
 
 
 ;;; Test Parsers
