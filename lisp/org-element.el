@@ -249,6 +249,10 @@ specially in `org-element--object-lex'.")
 	 superscript table-cell underline)
   "List of recursive object types.")
 
+(defconst org-element-object-containers
+  (append org-element-recursive-objects '(paragraph table-row verse-block))
+  "List of object or element types that can directly contain objects.")
+
 (defvar org-element-block-name-alist
   '(("CENTER" . org-element-center-block-parser)
     ("COMMENT" . org-element-comment-block-parser)
@@ -4353,30 +4357,18 @@ the current object."
 ;; `org-element--interpret-affiliated-keywords'.
 
 ;;;###autoload
-(defun org-element-interpret-data (data &optional pseudo-objects)
+(defun org-element-interpret-data (data)
   "Interpret DATA as Org syntax.
-
 DATA is a parse tree, an element, an object or a secondary string
-to interpret.
+to interpret.  Return Org syntax as a string."
+  (org-element--interpret-data-1 data nil))
 
-Optional argument PSEUDO-OBJECTS is a list of symbols defining
-new types that should be treated as objects.  An unknown type not
-belonging to this list is seen as a pseudo-element instead.  Both
-pseudo-objects and pseudo-elements are transparent entities, i.e.
-only their contents are interpreted.
-
-Return Org syntax as a string."
-  (org-element--interpret-data-1 data nil pseudo-objects))
-
-(defun org-element--interpret-data-1 (data parent pseudo-objects)
+(defun org-element--interpret-data-1 (data parent)
   "Interpret DATA as Org syntax.
 
 DATA is a parse tree, an element, an object or a secondary string
 to interpret.  PARENT is used for recursive calls.  It contains
-the element or object containing data, or nil.  PSEUDO-OBJECTS
-are list of symbols defining new element or object types.
-Unknown types that don't belong to this list are treated as
-pseudo-elements instead.
+the element or object containing data, or nil.
 
 Return Org syntax as a string."
   (let* ((type (org-element-type data))
@@ -4391,15 +4383,11 @@ Return Org syntax as a string."
 	   ;; Secondary string.
 	   ((not type)
 	    (mapconcat
-	     (lambda (obj)
-	       (org-element--interpret-data-1 obj parent pseudo-objects))
-	     data ""))
+	     (lambda (obj) (org-element--interpret-data-1 obj parent)) data ""))
 	   ;; Full Org document.
 	   ((eq type 'org-data)
-	    (mapconcat
-	     (lambda (obj)
-	       (org-element--interpret-data-1 obj parent pseudo-objects))
-	     (org-element-contents data) ""))
+	    (mapconcat (lambda (obj) (org-element--interpret-data-1 obj parent))
+		       (org-element-contents data) ""))
 	   ;; Plain text: return it.
 	   ((stringp data) data)
 	   ;; Element or object without contents.
@@ -4409,8 +4397,7 @@ Return Org syntax as a string."
 	    (funcall interpret data
 		     ;; Recursively interpret contents.
 		     (mapconcat
-		      (lambda (obj)
-			(org-element--interpret-data-1 obj data pseudo-objects))
+		      (lambda (obj) (org-element--interpret-data-1 obj data))
 		      (org-element-contents
 		       (if (not (memq type '(paragraph verse-block)))
 			   data
@@ -4432,7 +4419,10 @@ Return Org syntax as a string."
       ;; specified, assume its value is 0.
       (let ((post-blank (or (org-element-property :post-blank data) 0)))
 	(if (or (memq type org-element-all-objects)
-		(memq type pseudo-objects))
+		(and parent
+		     (let ((type (org-element-type parent)))
+		       (or (not type)
+			   (memq type org-element-object-containers)))))
 	    (concat results (make-string post-blank ?\s))
 	  (concat
 	   (org-element--interpret-affiliated-keywords data)

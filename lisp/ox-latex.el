@@ -206,9 +206,6 @@
 					  ("kbordermatrix" . "\\\\"))
   "Alist between matrix macros and their row ending.")
 
-(defconst org-latex-pseudo-objects '(latex-math-block)
-  "List of pseudo-object types introduced in the back-end.")
-
 
 
 ;;; User Configurable Variables
@@ -2643,8 +2640,7 @@ contextual information."
 	(format "\\begin{verbatim}\n%s\n\\end{verbatim}"
 		;; Re-create table, without affiliated keywords.
 		(org-trim (org-element-interpret-data
-			   `(table nil ,@(org-element-contents table))
-			   org-latex-pseudo-objects))))
+			   `(table nil ,@(org-element-contents table))))))
        ;; Case 2: Matrix.
        ((or (string= type "math") (string= type "inline-math"))
 	(org-latex--math-table table info))
@@ -2841,9 +2837,7 @@ This function assumes TABLE has `org' as its `:type' property and
 	       (concat
 		(mapconcat
 		 (lambda (cell)
-		   (substring
-		    (org-element-interpret-data cell org-latex-pseudo-objects)
-		    0 -1))
+		   (substring (org-element-interpret-data cell) 0 -1))
 		 (org-element-map row 'table-cell #'identity info) "&")
 		(or (cdr (assoc env org-latex-table-matrix-macros)) "\\\\")
 		"\n")))

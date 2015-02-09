@@ -2277,10 +2277,10 @@ Outside list"
     "#+CAPTION[s1]: l1\n#+CAPTION[s2]: l2\nParagraph\n"))
   ;; Pseudo objects and elements are transparent.
   (should
-   (equal "A B\n"
-	  (org-element-interpret-data
-	   '(paragraph nil (pseudo-object (:post-blank 1) "A") "B")
-	   '(pseudo-object))))
+   (equal "A B"
+	  (org-trim
+	   (org-element-interpret-data
+	    '(paragraph nil (pseudo-object (:post-blank 1) "A") "B")))))
   (should
    (equal "A\n\nB\n"
 	  (org-element-interpret-data
