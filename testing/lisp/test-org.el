@@ -3214,14 +3214,7 @@ Text.
    (org-test-with-temp-text "<%%(org-float t 4 2)>"
      (let* ((ts-orig (org-element-context))
 	    (ts-copy (org-timestamp-split-range ts-orig)))
-       (eq ts-orig ts-copy))))
-  ;; Check that parent is the same when a range was split.
-  (should
-   (org-test-with-temp-text "[2012-03-29 Thu]--[2012-03-30 Fri]"
-     (let* ((ts-orig (org-element-context))
-	    (ts-copy (org-timestamp-split-range ts-orig)))
-       (eq (org-element-property :parent ts-orig)
-	   (org-element-property :parent ts-copy))))))
+       (eq ts-orig ts-copy)))))
 
 (ert-deftest test-org/timestamp-translate ()
   "Test `org-timestamp-translate' specifications."

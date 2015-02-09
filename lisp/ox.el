@@ -2878,12 +2878,7 @@ Return code as a string."
 				 (eq (org-element-type (car date)) 'timestamp))
 			    (format "(eval (if (org-string-nw-p \"$1\") %s %S))"
 				    (format "(org-timestamp-format '%S \"$1\")"
-					    ;; Remove parent to avoid
-					    ;; read error.
-					    `(timestamp
-					      ,(org-combine-plists
-						(nth 1 (car date))
-						'(:parent nil))))
+					    (org-element-copy (car date)))
 				    value)
 			  value)))
 		;; EMAIL is not a parsed keyword: store it as-is.

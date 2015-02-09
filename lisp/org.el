@@ -23427,11 +23427,10 @@ Universal Time."
 TIMESTAMP is a timestamp object. END, when non-nil, means extract
 the end of the range.  Otherwise, extract its start.
 
-Return a new timestamp object sharing the same parent as
-TIMESTAMP."
+Return a new timestamp object."
   (let ((type (org-element-property :type timestamp)))
     (if (memq type '(active inactive diary)) timestamp
-      (let ((split-ts (list 'timestamp (copy-sequence (nth 1 timestamp)))))
+      (let ((split-ts (org-element-copy timestamp)))
 	;; Set new type.
 	(org-element-put-property
 	 split-ts :type (if (eq type 'active-range) 'active 'inactive))
@@ -23445,9 +23444,9 @@ TIMESTAMP."
 	  (dolist (p-cell p-alist)
 	    (org-element-put-property
 	     split-ts
-	     (funcall (if end 'car 'cdr) p-cell)
+	     (funcall (if end #'car #'cdr) p-cell)
 	     (org-element-property
-	      (funcall (if end 'cdr 'car) p-cell) split-ts)))
+	      (funcall (if end #'cdr #'car) p-cell) split-ts)))
 	  ;; Eventually refresh `:raw-value'.
 	  (org-element-put-property split-ts :raw-value nil)
 	  (org-element-put-property
