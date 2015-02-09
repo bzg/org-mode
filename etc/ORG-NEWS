@@ -150,6 +150,7 @@ These functions now support any element or object, not only headlines.
 *** New function: ~org-element-lineage~
 This function deprecates ~org-export-get-genealogy~.  It also provides
 more features.  See docstring for details.
+*** New function: ~org-element-copy~
 *** New filter: ~org-export-filter-body-functions~
 Functions in this filter are applied on the body of the exported
 document, befor wrapping it within the template.
