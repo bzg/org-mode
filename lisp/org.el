@@ -18646,12 +18646,61 @@ Revert to the normal definition outside of these fragments."
       (call-interactively (key-binding (vector last-input-event))))))
 
 (defun org-cdlatex-environment-indent (&optional environment item)
-  "Execute `cdlatex-environment' and indent the inserted environment."
+  "Execute `cdlatex-environment' and indent the inserted environment.
+
+ENVIRONMENT and ITEM are passed to `cdlatex-environment'.
+
+The inserted environment is indented to current indentation
+unless point is at the beginning of the line, in which the
+environment remains unintended."
   (interactive)
-  (cdlatex-environment environment item)
-  (let ((element (org-element-at-point)))
-    (org-indent-region (org-element-property :begin element)
-		       (org-element-property :end element))))
+  ;; cdlatex-environment always return nil.  Therefore, capture output
+  ;; first and determine if an environment was selected.
+  (let* ((beg (point-marker))
+	 (end (copy-marker (point) t))
+	 (inserted (progn
+		     (ignore-errors (cdlatex-environment environment item))
+		     (< beg end)))
+	 ;; Figure out how many lines to move forward after the
+	 ;; environment has been inserted.
+	 (lines (when inserted
+		  (save-excursion
+		    (- (cl-loop while (< beg (point))
+				with x = 0
+				do (forward-line -1)
+				(cl-incf x)
+				finally return x)
+		       (if (progn (goto-char beg)
+				  (and (progn (skip-chars-forward " \t") (eolp))
+				       (progn (skip-chars-backward " \t") (bolp))))
+			   1 0)))))
+	 (env (org-trim (delete-and-extract-region beg end))))
+    (when inserted
+      ;; Get indentation of next line unless at column 0.
+      (let ((ind (if (bolp) 0
+		   (save-excursion
+		     (org-return-indent)
+		     (prog1 (org-get-indentation)
+		       (when (progn (skip-chars-forward " \t") (eolp))
+			 (delete-region beg (point)))))))
+	    (bol (progn (skip-chars-backward " \t") (bolp))))
+	;; Insert a newline before environment unless at column zero
+	;; to "escape" the current line.  Insert a newline if
+	;; something is one the same line as \end{ENVIRONMENT}.
+	(insert
+	 (concat (unless bol "\n") env
+		 (when (and (skip-chars-forward " \t") (not (eolp))) "\n")))
+	(unless (zerop ind)
+	  (save-excursion
+	    (goto-char beg)
+	    (while (< (point) end)
+	      (unless (eolp) (org-indent-line-to ind))
+	      (forward-line))))
+	(goto-char beg)
+	(forward-line lines)
+	(org-indent-line-to ind)))
+    (set-marker beg nil)
+    (set-marker end nil)))
 
 
 ;;;; LaTeX fragments
