@@ -16961,7 +16961,7 @@ user."
 		((nth 4 tl)
 		 (setq futurep t)
 		 (cond ((> month (nth 4 nowdecode)) (nth 5 nowdecode))
-		       ((< month (nth 5 nowdecode)) (1+ (nth 5 nowdecode)))
+		       ((< month (nth 4 nowdecode)) (1+ (nth 5 nowdecode)))
 		       ((< day (nth 3 nowdecode)) (1+ (nth 5 nowdecode)))
 		       (t (nth 5 nowdecode))))
 		(t (nth 5 org-defdecode)))
