@@ -111,7 +111,7 @@ variable, and communication channel under `info'."
     (org-export--parse-option-keyword
      "H:1 num:t \\n:t timestamp:t arch:t author:t creator:t d:t email:t
  *:t e:t ::t f:t pri:t -:t ^:t toc:t |:t tags:t tasks:t <:t todo:t inline:nil
- stat:t")
+ stat:t title:t")
     '(:headline-levels
       1 :preserve-breaks t :section-numbers t :time-stamp-file t
       :with-archived-trees t :with-author t :with-creator t :with-drawers t
@@ -119,7 +119,7 @@ variable, and communication channel under `info'."
       :with-footnotes t :with-inlinetasks nil :with-priority t
       :with-special-strings t :with-statistics-cookies t :with-sub-superscript t
       :with-toc t :with-tables t :with-tags t :with-tasks t :with-timestamps t
-      :with-todo-keywords t)))
+      :with-title t :with-todo-keywords t)))
   ;; Test some special values.
   (should
    (equal

@@ -137,6 +137,7 @@
     (:with-tags nil "tags" org-export-with-tags)
     (:with-tasks nil "tasks" org-export-with-tasks)
     (:with-timestamps nil "<" org-export-with-timestamps)
+    (:with-title nil "title" org-export-with-title)
     (:with-todo-keywords nil "todo" org-export-with-todo-keywords))
   "Alist between export properties and ways to set them.
 
@@ -742,6 +743,15 @@ e.g. \"tasks:nil\"."
 	  (const :tag "Only done tasks" done)
 	  (repeat :tag "Specific TODO keywords"
 		  (string :tag "Keyword"))))
+
+(defcustom org-export-with-title t
+  "Non-nil means print title into the exported file.
+This option can also be set with the OPTIONS keyword,
+e.g. \"title:nil\"."
+  :group 'org-export-general
+  :version "25.1"
+  :package-version '(Org . 8.3)
+  :type 'boolean)
 
 (defcustom org-export-time-stamp-file t
   "Non-nil means insert a time stamp into the exported file.

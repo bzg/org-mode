@@ -1848,9 +1848,10 @@ holding export options."
    (let ((div (assq 'content (plist-get info :html-divs))))
      (format "<%s id=\"%s\">\n" (nth 1 div) (nth 2 div)))
    ;; Document title.
-   (let ((title (plist-get info :title)))
-     (format "<h1 class=\"title\">%s</h1>\n"
-	     (org-export-data (or title "") info)))
+   (when (plist-get info :with-title)
+       (let ((title (plist-get info :title)))
+	 (format "<h1 class=\"title\">%s</h1>\n"
+		 (org-export-data (or title "") info))))
    contents
    (format "</%s>\n" (nth 1 (assq 'content (plist-get info :html-divs))))
    ;; Postamble.

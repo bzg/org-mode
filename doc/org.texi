@@ -10820,6 +10820,11 @@ Toggle inclusion of TODO keywords into exported text
 Toggle inclusion of tables (@code{org-export-with-tables}).
 @end table
 
+@item title:
+@vindex org-export-with-titles
+Toggle inclusion of title (@code{org-export-with-title}).
+@end table
+
 When exporting only a subtree, each of the previous keywords@footnote{With
 the exception of @samp{SETUPFILE}.} can be overridden locally by special node
 properties.  These begin with @samp{EXPORT_}, followed by the name of the

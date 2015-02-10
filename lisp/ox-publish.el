@@ -175,6 +175,7 @@ included.  See the back-end documentation for more information.
   :with-footnotes           `org-export-with-footnotes'
   :with-inlinetasks         `org-export-with-inlinetasks'
   :with-latex               `org-export-with-latex'
+  :with-planning            `org-export-with-planning'
   :with-priority            `org-export-with-priority'
   :with-properties          `org-export-with-properties'
   :with-smart-quotes        `org-export-with-smart-quotes'
@@ -186,7 +187,7 @@ included.  See the back-end documentation for more information.
   :with-tags                `org-export-with-tags'
   :with-tasks               `org-export-with-tasks'
   :with-timestamps          `org-export-with-timestamps'
-  :with-planning            `org-export-with-planning'
+  :with-title               `org-export-with-title'
   :with-todo-keywords       `org-export-with-todo-keywords'
 
 The following properties may be used to control publishing of

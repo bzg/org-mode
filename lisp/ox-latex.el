@@ -1260,7 +1260,8 @@ holding export options."
      ;; Title command.
      (let ((command (plist-get info :latex-title-command)))
        (org-element-normalize-string
-	(cond ((string= "" title) nil)
+	(cond ((not (plist-get info :with-title)) nil)
+	      ((string= "" title) nil)
 	      ((not (stringp command)) nil)
 	      ((string-match "\\(?:[^%]\\|^\\)%s" command)
 	       (format command title))

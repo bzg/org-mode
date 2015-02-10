@@ -164,7 +164,8 @@ as a communication channel."
 			(concat "#+OPTIONS: "
 				(org-element-property :value k)))))
 	       "\n"))
-   (format "#+TITLE: %s\n" (org-export-data (plist-get info :title) info))
+   (and (plist-get info :with-title)
+	(format "#+TITLE: %s\n" (org-export-data (plist-get info :title) info)))
    (and (plist-get info :with-date)
 	(let ((date (org-export-data (org-export-get-date info) info)))
 	  (and (org-string-nw-p date)

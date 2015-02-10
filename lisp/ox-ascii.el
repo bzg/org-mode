@@ -969,7 +969,9 @@ INFO is a plist used as a communication channel."
 	 ;; Links in the title will not be resolved later, so we make
 	 ;; sure their path is located right after them.
 	 (info (org-combine-plists info '(:ascii-links-to-notes nil)))
-	 (title (org-export-data (plist-get info :title) info))
+	 (title (if (plist-get info :with-title)
+		    (org-export-data (plist-get info :title) info)
+		  ""))
 	 (author (and (plist-get info :with-author)
 		      (let ((auth (plist-get info :author)))
 			(and auth (org-export-data auth info)))))

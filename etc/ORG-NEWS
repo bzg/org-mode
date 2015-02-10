@@ -106,6 +106,8 @@ anymore.  The chosen hard coded quoting style conforms to POSIX.
 Setting this option to anything else that the default value (nil)
 would create invalid planning info.  This dangerous option is now
 removed.
+*** Removed option ~org-koma-letter-use-title~
+Use org-export-with-title instead.  See also below.
 ** New features
 *** Additional markup with =#+INCLUDE= keyword
 The content of the included file can now be optionally marked up, for
@@ -202,6 +204,10 @@ displayed as the sole window of the current frame.
 *** ~{{{date}}}~ macro supports optional formatting argument
 It is now possible to supply and optional formatting argument to
 ~{{{date}}}~. See manual for details.
+*** New option ~org-export-with-title~
+It is possible to suppress the title insertion with ~#+OPTIONS:
+title:nil~ or globally using the variable ~org-export-with-title~.
+
 ** Miscellaneous
 *** Strip all meta data from ITEM special property
 ITEM special property does not contain TODO, priority or tags anymore.

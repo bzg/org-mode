@@ -563,7 +563,8 @@ See `org-groff-text-markup-alist' for details."
       (t (format ".AF \"%s\" \n" (or org-groff-organization "")))))
 
    ;; 2. Title
-   (let ((subtitle1 (plist-get attr :subtitle1))
+   (let ((title (if (plist-get info :with-title) title ""))
+	 (subtitle1 (plist-get attr :subtitle1))
          (subtitle2 (plist-get attr :subtitle2)))
 
      (cond

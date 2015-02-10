@@ -338,16 +338,6 @@ This option can also be set with the OPTIONS keyword, e.g.:
   :group 'org-export-koma-letter
   :type 'boolean)
 
-(defcustom org-koma-letter-use-title t
-  "Non-nil means use a title in the letter if present.
-This option can also be set with the OPTIONS keyword,
-e.g. \"title:nil\".
-
-See also `org-koma-letter-prefer-subject' for the handling of
-title versus subject."
-  :group 'org-export-koma-letter
-  :type 'boolean)
-
 (defcustom org-koma-letter-default-class "default-koma-letter"
   "Default class for `org-koma-letter'.
 The value must be a member of `org-latex-classes'."
@@ -383,6 +373,9 @@ was not present."
 (defvar org-koma-letter-special-contents nil
   "Holds special content temporarily.")
 
+(make-obsolete-variable 'org-koma-letter-use-title
+			'org-export-with-title
+			"25.1" 'set)
 
 
 ;;; Define Back-End
@@ -418,7 +411,6 @@ was not present."
     (:with-phone nil "phone" org-koma-letter-use-phone)
     (:with-place nil "place" org-koma-letter-use-place)
     (:with-subject nil "subject" org-koma-letter-subject-format)
-    (:with-title nil "title" org-koma-letter-use-title)
     (:with-title-as-subject nil "title-subject" org-koma-letter-prefer-subject)
     ;; Special properties non-nil when a setting happened in buffer.
     ;; They are used to prioritize in-buffer settings over "lco"

@@ -877,7 +877,8 @@ holding export options."
      "\\begin{document}\n\n"
      ;; 10. Title command.
      (org-element-normalize-string
-      (cond ((string= "" title) nil)
+      (cond ((not (plist-get info :with-title)) nil)
+	    ((string= "" title) nil)
 	    ((not (stringp org-latex-title-command)) nil)
 	    ((string-match "\\(?:[^%]\\|^\\)%s"
 			   org-latex-title-command)
