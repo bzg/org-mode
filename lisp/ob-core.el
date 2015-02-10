@@ -409,12 +409,16 @@ a window into the `org-babel-get-src-block-info' function."
 	      (header-args (nth 2 info)))
 	  (when name            (funcall printf "Name: %s\n"     name))
 	  (when lang            (funcall printf "Lang: %s\n"     lang))
+	  (funcall printf "Properties:\n")
+	  (funcall printf "\t:header-args \t%s\n" (org-entry-get (point) "header-args" t))
+	  (funcall printf "\t:header-args:%s \t%s\n" lang (org-entry-get (point) (concat "header-args:" lang) t))
+
 	  (when (funcall full switches) (funcall printf "Switches: %s\n" switches))
 	  (funcall printf "Header Arguments:\n")
 	  (dolist (pair (sort header-args
 			      (lambda (a b) (string< (symbol-name (car a))
 						     (symbol-name (car b))))))
-	    (when (funcall full (cdr pair))
+	    (when (funcall full (format "%s" (cdr pair)))
 	      (funcall printf "\t%S%s\t%s\n"
 		       (car pair)
 		       (if (> (length (format "%S" (car pair))) 7) "" "\t")
