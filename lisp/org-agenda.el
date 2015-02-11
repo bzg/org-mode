@@ -9640,9 +9640,13 @@ argument, latitude and longitude will be prompted for."
   "Compute the Org-mode agenda for the calendar date displayed at the cursor.
 This is a command that has to be installed in `calendar-mode-map'."
   (interactive)
-  (org-agenda-list nil (calendar-absolute-from-gregorian
-			(calendar-cursor-to-date))
-		   nil))
+  ;; Temporarily disable sticky agenda since user clearly wants to
+  ;; refresh view anyway.
+  (let ((org-agenda-buffer-tmp-name "*Org Agenda(a)*")
+	(org-agenda-sticky nil))
+    (org-agenda-list nil (calendar-absolute-from-gregorian
+			  (calendar-cursor-to-date))
+		     nil)))
 
 (defun org-agenda-convert-date ()
   (interactive)
