@@ -233,6 +233,9 @@ Exact heading search for links now ignore spaces and cookies. This is
 the case for links of the form ~file:projects.org::*task title~, as
 well as links of the form ~file:projects.org::some words~
 when ~org-link-search-must-match-exact-headline~ is not nil.
+*** ~org-latex-hyperref-template~, ~org-latex-title-command~ formatting
+New formatting keys are supported.  See the respective docstrings.
+Note, ~org-latex-hyperref-template~ has a new default value.
 * Version 8.2
 
 ** Incompatible changes
