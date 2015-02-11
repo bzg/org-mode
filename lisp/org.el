@@ -375,16 +375,16 @@ FULL is given."
 (defconst org-clock-string "CLOCK:"
   "String used as prefix for timestamps clocking work hours on an item.")
 
-(defconst org-closed-string "CLOSED:"
+(defvar org-closed-string "CLOSED:"
   "String used as the prefix for timestamps logging closing a TODO entry.")
 
-(defconst org-deadline-string "DEADLINE:"
+(defvar org-deadline-string "DEADLINE:"
   "String to mark deadline entries.
 A deadline is this string, followed by a time stamp.  Should be a word,
 terminated by a colon.  You can insert a schedule keyword and
 a timestamp with \\[org-deadline].")
 
-(defconst org-scheduled-string "SCHEDULED:"
+(defvar org-scheduled-string "SCHEDULED:"
   "String to mark scheduled TODO entries.
 A schedule is this string, followed by a time stamp.  Should be a word,
 terminated by a colon.  You can insert a schedule keyword and
