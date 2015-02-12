@@ -10805,6 +10805,10 @@ Configure export of @LaTeX{} fragments and environments.  It may be set to
 Toggle inclusion of the creation time into exported file
 (@code{org-export-time-stamp-file}).
 
+@item title:
+@vindex org-export-with-title
+Toggle inclusion of title (@code{org-export-with-title}).
+
 @item toc:
 @vindex org-export-with-toc
 Toggle inclusion of the table of contents, or set the level limit
@@ -10819,9 +10823,6 @@ Toggle inclusion of TODO keywords into exported text
 @vindex org-export-with-tables
 Toggle inclusion of tables (@code{org-export-with-tables}).
 
-@item title:
-@vindex org-export-with-titles
-Toggle inclusion of title (@code{org-export-with-title}).
 @end table
 
 When exporting only a subtree, each of the previous keywords@footnote{With
