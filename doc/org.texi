@@ -10732,6 +10732,10 @@ Configure inclusion of creator info into exported file.  It may be set to
 Toggle inclusion of drawers, or list drawers to include
 (@code{org-export-with-drawers}).
 
+@item date:
+@vindex org-export-with-date
+Toggle inclusion of a date into exported file (@code{org-export-with-date}).
+
 @item e:
 @vindex org-export-with-entities
 Toggle inclusion of entities (@code{org-export-with-entities}).
@@ -13864,6 +13868,7 @@ however, override everything.
 @item @code{:select-tags}           @tab @code{org-export-select-tags}
 @item @code{:with-author}           @tab @code{org-export-with-author}
 @item @code{:with-creator}          @tab @code{org-export-with-creator}
+@item @code{:with-date}             @tab @code{org-export-with-date}
 @item @code{:with-drawers}          @tab @code{org-export-with-drawers}
 @item @code{:with-email}            @tab @code{org-export-with-email}
 @item @code{:with-emphasize}        @tab @code{org-export-with-emphasize}
@@ -13879,6 +13884,7 @@ however, override everything.
 @item @code{:with-tags}             @tab @code{org-export-with-tags}
 @item @code{:with-tasks}            @tab @code{org-export-with-tasks}
 @item @code{:with-timestamps}       @tab @code{org-export-with-timestamps}
+@item @code{:with-title}            @tab @code{org-export-with-title}
 @item @code{:with-toc}              @tab @code{org-export-with-toc}
 @item @code{:with-todo-keywords}    @tab @code{org-export-with-todo-keywords}
 @end multitable
