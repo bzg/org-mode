@@ -10818,7 +10818,6 @@ Toggle inclusion of TODO keywords into exported text
 @item |:
 @vindex org-export-with-tables
 Toggle inclusion of tables (@code{org-export-with-tables}).
-@end table
 
 @item title:
 @vindex org-export-with-titles
