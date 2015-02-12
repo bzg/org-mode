@@ -569,11 +569,12 @@ holding export options."
      "@finalout\n"
      "@titlepage\n"
      (when (plist-get info :with-title)
-       (format "@title %s\n" (or (plist-get info :texinfo-printed-title) title))
-       (let ((subtitle (plist-get info :subtitle)))
-	 (and subtitle
-	      (org-element-normalize-string
-	       (replace-regexp-in-string "^" "@subtitle " subtitle)))))
+       (concat
+	(format "@title %s\n" (or (plist-get info :texinfo-printed-title) title ""))
+	(let ((subtitle (plist-get info :subtitle)))
+	  (and subtitle
+	       (org-element-normalize-string
+		(replace-regexp-in-string "^" "@subtitle " subtitle))))))
      (when (plist-get info :with-author)
        (concat
 	;; Primary author.

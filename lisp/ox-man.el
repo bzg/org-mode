@@ -311,7 +311,7 @@ This function shouldn't be used for floats.  See
   "Return complete document string after Man conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (let* ((title (when (plist-get :with-title)
+  (let* ((title (when (plist-get info :with-title)
 		  (org-export-data (plist-get info :title) info)))
         (attr (read (format "(%s)"
                             (mapconcat
