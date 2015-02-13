@@ -1740,9 +1740,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	    (format "<text:span text:style-name=\"%s\">%s</text:span>"
 		    "OrgSuperscript" ",")))
      ;; Transcode footnote reference.
-     (let ((n (org-export-get-footnote-number footnote-reference info)))
+     (let ((n (org-export-get-footnote-number footnote-reference info t)))
        (cond
-	((not (org-export-footnote-first-reference-p footnote-reference info))
+	((not (org-export-footnote-first-reference-p footnote-reference info t))
 	 (funcall --format-footnote-reference n))
 	;; Inline definitions are secondary strings.
 	;; Non-inline footnotes definitions are full Org data.
