@@ -1538,11 +1538,127 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 
 ;;; Footnotes
 
+(ert-deftest test-org-export/footnote-first-reference-p ()
+  "Test `org-export-footnote-first-reference-p' specifications."
+  (should
+   (equal
+    '(t nil)
+    (org-test-with-temp-text "Text[fn:1][fn:1]\n\n[fn:1] Definition"
+      (let (result)
+	(org-export-as
+	 (org-export-create-backend
+	  :transcoders
+	  `(,(cons 'footnote-reference
+		   (lambda (f c i)
+		     (push (org-export-footnote-first-reference-p f info)
+			   result)
+		     ""))
+	    (section . (lambda (s c i) c))
+	    (paragraph . (lambda (p c i) c))))
+	 nil nil nil '(:with-footnotes t))
+	(nreverse result)))))
+  ;; If optional argument BODY-FIRST is non-nil, first find footnote
+  ;; in the main body of the document.  Otherwise, enter footnote
+  ;; definitions when they are encountered.
+  (should
+   (equal
+    '(t nil)
+    (org-test-with-temp-text
+	":BODY:\nText[fn:1][fn:2]\n:END:\n\n[fn:1] Definition[fn:2]\n\n[fn:2] Inner"
+      (let (result)
+	(org-export-as
+	 (org-export-create-backend
+	  :transcoders
+	  `(,(cons 'footnote-reference
+		   (lambda (f c i)
+		     (when (org-element-lineage f '(drawer))
+		       (push (org-export-footnote-first-reference-p f info nil)
+			     result))
+		     ""))
+	    (drawer . (lambda (d c i) c))
+	    (footnote-definition . (lambda (d c i) c))
+	    (section . (lambda (s c i) c))
+	    (paragraph . (lambda (p c i) c))))
+	 nil nil nil '(:with-footnotes t))
+	(nreverse result)))))
+  (should
+   (equal
+    '(t t)
+    (org-test-with-temp-text
+	":BODY:\nText[fn:1][fn:2]\n:END:\n\n[fn:1] Definition[fn:2]\n\n[fn:2] Inner"
+      (let (result)
+	(org-export-as
+	 (org-export-create-backend
+	  :transcoders
+	  `(,(cons 'footnote-reference
+		   (lambda (f c i)
+		     (when (org-element-lineage f '(drawer))
+		       (push (org-export-footnote-first-reference-p f info t)
+			     result))
+		     ""))
+	    (drawer . (lambda (d c i) c))
+	    (footnote-definition . (lambda (d c i) c))
+	    (section . (lambda (s c i) c))
+	    (paragraph . (lambda (p c i) c))))
+	 nil nil nil '(:with-footnotes t))
+	(nreverse result))))))
+
+(ert-deftest test-org-export/get-footnote-number ()
+  "Test `org-export-get-footnote-number' specifications."
+  (should
+   (equal '(1 2 1)
+	  (org-test-with-parsed-data
+	      "Text[fn:1][fn:2][fn:1]\n\n[fn:1] Def\n[fn:2] Def"
+	    (org-element-map tree 'footnote-reference
+	      (lambda (ref) (org-export-get-footnote-number ref info))
+	      info))))
+  ;; Anonymous footnotes all get a new number.
+  (should
+   (equal '(1 2)
+	  (org-test-with-parsed-data
+	      "Text[fn::anon1][fn::anon2]"
+	    (org-element-map tree 'footnote-reference
+	      (lambda (ref) (org-export-get-footnote-number ref info))
+	      info))))
+  ;; Test nested footnotes order.
+  (should
+   (equal
+    '((1 . "fn:1") (2 . "fn:2") (3 . "fn:3") (3 . "fn:3") (4))
+    (org-test-with-parsed-data
+	"Text[fn:1:A[fn:2]] [fn:3].\n\n[fn:2] B [fn:3] [fn::D].\n\n[fn:3] C."
+      (org-element-map tree 'footnote-reference
+	(lambda (ref)
+	  (cons (org-export-get-footnote-number ref info)
+		(org-element-property :label ref)))
+	info))))
+  ;; With a non-nil optional argument, first check body, then footnote
+  ;; definitions.
+  (should
+   (equal
+    '(("fn:1" . 1) ("fn:2" . 2) ("fn:3" . 3) ("fn:3" . 3))
+    (org-test-with-parsed-data
+	"Text[fn:1][fn:2][fn:3]\n\n[fn:1] Def[fn:3]\n[fn:2] Def\n[fn:3] Def"
+      (org-element-map tree 'footnote-reference
+	(lambda (ref)
+	  (cons (org-element-property :label ref)
+		(org-export-get-footnote-number ref info t)))
+	info))))
+  (should
+   (equal
+    '(("fn:1" . 1) ("fn:2" . 3) ("fn:3" . 2) ("fn:3" . 2))
+    (org-test-with-parsed-data
+	"Text[fn:1][fn:2][fn:3]\n\n[fn:1] Def[fn:3]\n[fn:2] Def\n[fn:3] Def"
+      (org-element-map tree 'footnote-reference
+	(lambda (ref)
+	  (cons (org-element-property :label ref)
+		(org-export-get-footnote-number ref info nil)))
+	info)))))
+
 (ert-deftest test-org-export/footnotes ()
-  "Test footnotes specifications."
+  "Miscellaneous tests on footnotes."
   (let ((org-footnote-section nil)
 	(org-export-with-footnotes t))
-    ;; 1. Read every type of footnote.
+    ;; Read every type of footnote.
     (should
      (equal
       '((1 . "A\n") (2 . "B") (3 . "C") (4 . "D"))
@@ -1556,19 +1672,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 		      (car (org-element-contents
 			    (car (org-element-contents def))))))))
 	  info))))
-    ;; 2. Test nested footnotes order.
-    (should
-     (equal
-      '((1 . "fn:1") (2 . "fn:2") (3 . "fn:3") (4))
-      (org-test-with-parsed-data
-	  "Text[fn:1:A[fn:2]] [fn:3].\n\n[fn:2] B [fn:3] [fn::D].\n\n[fn:3] C."
-	(org-element-map tree 'footnote-reference
-	  (lambda (ref)
-	    (when (org-export-footnote-first-reference-p ref info)
-	      (cons (org-export-get-footnote-number ref info)
-		    (org-element-property :label ref))))
-	  info))))
-    ;; 3. Test nested footnote in invisible definitions.
+    ;; Test nested footnote in invisible definitions.
     (org-test-with-temp-text "Text[1]\n\n[1] B [2]\n\n[2] C."
       ;; Hide definitions.
       (narrow-to-region (point) (point-at-eol))
@@ -1580,7 +1684,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 	;; Both footnotes should be seen.
 	(should
 	 (= (length (org-export-collect-footnote-definitions tree info)) 2))))
-    ;; 4. Test footnotes definitions collection.
+    ;; Test footnotes definitions collection.
     (should
      (= 4
 	(org-test-with-parsed-data "Text[fn:1:A[fn:2]] [fn:3].
@@ -1589,7 +1693,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 
 \[fn:3] C."
 	  (length (org-export-collect-footnote-definitions tree info)))))
-    ;; 5. Test export of footnotes defined outside parsing scope.
+    ;; Test export of footnotes defined outside parsing scope.
     (should
      (equal
       "ParagraphOut of scope\n"
@@ -1605,13 +1709,13 @@ Paragraph[fn:1]"
 		      (org-export-backend-transcoders backend)))
 	  (forward-line)
 	  (org-export-as backend 'subtree)))))
-    ;; 6. Footnotes without a definition should throw an error.
+    ;; Footnotes without a definition should throw an error.
     (should-error
      (org-test-with-parsed-data "Text[fn:1]"
        (org-export-get-footnote-definition
 	(org-element-map tree 'footnote-reference 'identity info t) info)))
-    ;; 7. Footnote section should be ignored in TOC and in headlines
-    ;;    numbering.
+    ;; Footnote section should be ignored in TOC and in headlines
+    ;; numbering.
     (should
      (= 1 (let ((org-footnote-section "Footnotes"))
 	    (length (org-test-with-parsed-data "* H1\n* Footnotes\n"

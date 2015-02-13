@@ -3571,38 +3571,6 @@ footnotes.  Unreferenced definitions are ignored."
     (funcall collect-fn (plist-get info :parse-tree))
     (reverse num-alist)))
 
-(defun org-export-footnote-first-reference-p (footnote-reference info)
-  "Non-nil when a footnote reference is the first one for its label.
-
-FOOTNOTE-REFERENCE is the footnote reference being considered.
-INFO is the plist used as a communication channel."
-  (let ((label (org-element-property :label footnote-reference)))
-    ;; Anonymous footnotes are always a first reference.
-    (if (not label) t
-      ;; Otherwise, return the first footnote with the same LABEL and
-      ;; test if it is equal to FOOTNOTE-REFERENCE.
-      (let* (search-refs		; for byte-compiler.
-	     (search-refs
-	      (function
-	       (lambda (data)
-		 (org-element-map data 'footnote-reference
-		   (lambda (fn)
-		     (cond
-		      ((string= (org-element-property :label fn) label)
-		       (throw 'exit fn))
-		      ;; If FN isn't inlined, be sure to traverse its
-		      ;; definition before resuming search.  See
-		      ;; comments in `org-export-get-footnote-number'
-		      ;; for more information.
-		      ((eq (org-element-property :type fn) 'standard)
-		       (funcall search-refs
-				(org-export-get-footnote-definition fn info)))))
-		   ;; Don't enter footnote definitions since it will
-		   ;; happen when their first reference is found.
-		   info 'first-match 'footnote-definition)))))
-	(eq (catch 'exit (funcall search-refs (plist-get info :parse-tree)))
-	    footnote-reference)))))
-
 (defun org-export-get-footnote-definition (footnote-reference info)
   "Return definition of FOOTNOTE-REFERENCE as parsed data.
 INFO is the plist used as a communication channel.  If no such
@@ -3613,52 +3581,100 @@ definition can be found, raise an error."
 	  (org-element-contents footnote-reference))
 	(error "Definition not found for footnote %s" label))))
 
-(defun org-export-get-footnote-number (footnote info)
+(defun org-export--footnote-reference-map (function info &optional body-first)
+  "Apply FUNCTION on every footnote reference in parse tree.
+INFO is a plist containing export state.  By default, as soon as
+a new footnote reference is encountered, FUNCTION is called onto
+its definition.  However, if BODY-FIRST is non-nil, this step is
+delayed until the end of the process."
+  (let* ((definitions)
+	 (seen-refs)
+	 (search-ref)			; For byte-compiler.
+	 (search-ref
+	  (lambda (data delayp)
+	    ;; Search footnote references through DATA, filling
+	    ;; SEEN-REFS along the way.  When DELAYP is non-nil, store
+	    ;; footnote definitions so they can be entered later.
+	    (org-element-map data 'footnote-reference
+	      (lambda (f)
+		(funcall function f)
+		(let ((--label (org-element-property :label f)))
+		  (unless (and --label (member --label seen-refs))
+		    (when --label (push --label seen-refs))
+		    ;; Search for subsequent references in footnote
+		    ;; definition so numbering follows reading logic,
+		    ;; unless DELAYP in non-nil.
+		    (cond
+		     (delayp
+		      (push (org-export-get-footnote-definition f info)
+			    definitions))
+		     ;; Do not force entering inline definitions,
+		     ;; since `org-element-map' already traverses them
+		     ;; at the right time.
+		     ((eq (org-element-property :type f) 'inline))
+		     (t (funcall search-ref
+				 (org-export-get-footnote-definition f info)
+				 nil))))))
+	      info nil
+	      ;; Don't enter footnote definitions since it will happen
+	      ;; when their first reference is found.  Moreover, if
+	      ;; DELAYP is non-nil, make sure we postpone entering
+	      ;; definitions of inline references.
+	      (if delayp '(footnote-definition footnote-reference)
+		'footnote-definition)))))
+    (funcall search-ref (plist-get info :parse-tree) body-first)
+    (funcall search-ref (nreverse definitions) nil)))
+
+(defun org-export-footnote-first-reference-p
+    (footnote-reference info &optional body-first)
+  "Non-nil when a footnote reference is the first one for its label.
+
+FOOTNOTE-REFERENCE is the footnote reference being considered.
+INFO is a plist containing current export state.
+
+By default, as soon as a new footnote reference is encountered,
+other references are searched within its definition.  However, if
+BODY-FIRST is non-nil, this step is delayed after the whole tree
+is checked.  This alters results when references are found in
+footnote definitions."
+  (let ((label (org-element-property :label footnote-reference)))
+    ;; Anonymous footnotes are always a first reference.
+    (or (not label)
+	(catch 'exit
+	  (org-export--footnote-reference-map
+	   (lambda (f)
+	     (let ((l (org-element-property :label f)))
+	       (when (and l label (string= label l))
+		 (throw 'exit (eq footnote-reference f)))))
+	   info body-first)))))
+
+(defun org-export-get-footnote-number (footnote info &optional body-first)
   "Return number associated to a footnote.
 
 FOOTNOTE is either a footnote reference or a footnote definition.
-INFO is the plist used as a communication channel."
-  (let* ((label (org-element-property :label footnote))
-	 seen-refs
-	 search-ref			; For byte-compiler.
-	 (search-ref
-	  (function
-	   (lambda (data)
-	     ;; Search footnote references through DATA, filling
-	     ;; SEEN-REFS along the way.
-	     (org-element-map data 'footnote-reference
-	       (lambda (fn)
-		 (let ((fn-lbl (org-element-property :label fn)))
-		   (cond
-		    ;; Anonymous footnote match: return number.
-		    ((and (not fn-lbl) (eq fn footnote))
-		     (throw 'exit (1+ (length seen-refs))))
-		    ;; Labels match: return number.
-		    ((and label (string= label fn-lbl))
-		     (throw 'exit (1+ (length seen-refs))))
-		    ;; Anonymous footnote: it's always a new one.
-		    ;; Also, be sure to return nil from the `cond' so
-		    ;; `first-match' doesn't get us out of the loop.
-		    ((not fn-lbl) (push 'inline seen-refs) nil)
-		    ;; Label not seen so far: add it so SEEN-REFS.
-		    ;;
-		    ;; Also search for subsequent references in
-		    ;; footnote definition so numbering follows
-		    ;; reading logic.  Note that we don't have to care
-		    ;; about inline definitions, since
-		    ;; `org-element-map' already traverses them at the
-		    ;; right time.
-		    ;;
-		    ;; Once again, return nil to stay in the loop.
-		    ((not (member fn-lbl seen-refs))
-		     (push fn-lbl seen-refs)
-		     (funcall search-ref
-			      (org-export-get-footnote-definition fn info))
-		     nil))))
-	       ;; Don't enter footnote definitions since it will
-	       ;; happen when their first reference is found.
-	       info 'first-match 'footnote-definition)))))
-    (catch 'exit (funcall search-ref (plist-get info :parse-tree)))))
+INFO is the plist containing export state.
+
+By default, as soon as a new footnote reference is encountered,
+counting process moves into its definition.  However, if
+BODY-FIRST is non-nil, this step is delayed until the end of the
+process, leading to a different order when footnotes are nested."
+  (let ((count 0)
+	(seen)
+	(label (org-element-property :label footnote)))
+    (catch 'exit
+      (org-export--footnote-reference-map
+       (lambda (f)
+	 (let ((l (org-element-property :label f)))
+	   (cond
+	    ;; Anonymous footnote match: return number.
+	    ((and (not l) (not label) (eq footnote f)) (throw 'exit (1+ count)))
+	    ;; Labels match: return number.
+	    ((and label l (string= label l)) (throw 'exit (1+ count)))
+	    ;; Otherwise store label and increase counter if label
+	    ;; wasn't encountered yet.
+	    ((not l) (incf count))
+	    ((not (member l seen)) (push l seen) (incf count)))))
+       info body-first))))
 
 
 ;;;; For Headlines
