@@ -16452,17 +16452,16 @@ Return the position where this entry starts, or nil if there is no such entry."
 
 (defun org-time-stamp (arg &optional inactive)
   "Prompt for a date/time and insert a time stamp.
+
 If the user specifies a time like HH:MM or if this command is
 called with at least one prefix argument, the time stamp contains
-the date and the time.  Otherwise, only the date is be included.
+the date and the time.  Otherwise, only the date is included.
 
-All parts of a date not specified by the user is filled in from
-the current date/time.  So if you just press return without
-typing anything, the time stamp will represent the current
-date/time.
+All parts of a date not specified by the user are filled in from
+the timestamp at point, if any, or the current date/time
+otherwise.
 
-If there is already a timestamp at the cursor, it will be
-modified.
+If there is already a timestamp at the cursor, it is replaced.
 
 With two universal prefix arguments, insert an active timestamp
 with the current time without prompting the user.
@@ -16470,57 +16469,58 @@ with the current time without prompting the user.
 When called from lisp, the timestamp is inactive if INACTIVE is
 non-nil."
   (interactive "P")
-  (let* ((ts nil)
-	 (default-time
-	   ;; Default time is either today, or, when entering a range,
-	   ;; the range start.
-	   (if (or (and (org-at-timestamp-p t) (setq ts (match-string 0)))
-		   (save-excursion
-		     (re-search-backward
-		      (concat org-ts-regexp "--?-?\\=") ; 1-3 minuses
-		      (- (point) 20) t)))
-	       (apply 'encode-time (org-parse-time-string (match-string 1)))
-	     (current-time)))
-	 (default-input (and ts (org-get-compact-tod ts)))
-	 (repeater (save-excursion
-	 	     (save-match-data
-	 	       (beginning-of-line)
-	 	       (when (re-search-forward
-			      "\\([.+-]+[0-9]+[hdwmy] ?\\)+" ;;\\(?:[/ ][-+]?[0-9]+[hdwmy]\\)?\\) ?"
-			      (save-excursion (progn (end-of-line) (point))) t)
-			 (match-string 0)))))
-	 org-time-was-given org-end-time-was-given time)
+  (let* ((ts
+	  (cond ((org-at-date-range-p t)
+		 (save-excursion
+		   (goto-char (match-beginning 0))
+		   (looking-at (if inactive org-ts-regexp-both org-ts-regexp)))
+		 (match-string 0))
+		((org-at-timestamp-p t) (match-string 0))))
+	 ;; Default time is either the timestamp at point or today.
+	 ;; When entering a range, only the range start is considered.
+         (default-time (if (not ts) (current-time)
+			 (apply #'encode-time (org-parse-time-string ts))))
+         (default-input (and ts (org-get-compact-tod ts)))
+         (repeater (and ts
+			(string-match "\\([.+-]+[0-9]+[hdwmy] ?\\)+" ts)
+			(match-string 0 ts)))
+	 (time
+	  (and (if (equal arg '(16)) (current-time)
+		 ;; Preserve `this-command' and `last-command'.
+		 (let ((this-command this-command)
+		       (last-command last-command))
+		   (org-read-date
+		    arg 'totime nil nil default-time default-input
+		    inactive)))))
+         org-time-was-given org-end-time-was-given)
     (cond
-     ((and (org-at-timestamp-p t)
-	   (memq last-command '(org-time-stamp org-time-stamp-inactive))
-	   (memq this-command '(org-time-stamp org-time-stamp-inactive)))
+     ((and ts
+           (memq last-command '(org-time-stamp org-time-stamp-inactive))
+           (memq this-command '(org-time-stamp org-time-stamp-inactive)))
       (insert "--")
-      (setq time (let ((this-command this-command))
-		   (org-read-date arg 'totime nil nil
-				  default-time default-input inactive)))
       (org-insert-time-stamp time (or org-time-was-given arg) inactive))
-     ((org-at-timestamp-p t)
-      (setq time (let ((this-command this-command))
-		   (org-read-date arg 'totime nil nil default-time default-input inactive)))
-      (when (org-at-timestamp-p t) ; just to get the match data
-					;	(setq inactive (eq (char-after (match-beginning 0)) ?\[))
-	(replace-match "")
+     (ts
+      ;; Make sure we're on a timestamp.  When in the middle of a date
+      ;; range, move arbitrarily to range end.
+      (unless (org-at-timestamp-p t)
+	(skip-chars-forward "-")
+	(org-at-timestamp-p t))
+      (replace-match "")
+      (setq org-last-changed-timestamp
+	    (org-insert-time-stamp
+	     time (or org-time-was-given arg)
+	     inactive nil nil (list org-end-time-was-given)))
+      (when repeater
+	(backward-char)
+	(insert " " repeater)
 	(setq org-last-changed-timestamp
-	      (org-insert-time-stamp
-	       time (or org-time-was-given arg)
-	       inactive nil nil (list org-end-time-was-given)))
-	(when repeater (goto-char (1- (point))) (insert " " repeater)
-	      (setq org-last-changed-timestamp
-		    (concat (substring org-last-inserted-timestamp 0 -1)
-			    " " repeater ">"))))
+	      (concat (substring org-last-inserted-timestamp 0 -1)
+		      " " repeater ">")))
       (message "Timestamp updated"))
-     ((equal arg '(16))
-      (org-insert-time-stamp (current-time) t inactive))
-     (t
-      (setq time (let ((this-command this-command))
-		   (org-read-date arg 'totime nil nil default-time default-input inactive)))
-      (org-insert-time-stamp time (or org-time-was-given arg) inactive
-			     nil nil (list org-end-time-was-given))))))
+     ((equal arg '(16)) (org-insert-time-stamp time t inactive))
+     (t (org-insert-time-stamp
+	 time (or org-time-was-given arg) inactive nil nil
+	 (list org-end-time-was-given))))))
 
 ;; FIXME: can we use this for something else, like computing time differences?
 (defun org-get-compact-tod (s)
