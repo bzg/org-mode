@@ -1864,10 +1864,9 @@ Initial position of cursor is restored after the changes."
 	 (item-re (org-item-re))
 	 (shift-body-ind
 	  (function
-	   ;; Shift the indentation between END and BEG by DELTA.  If
-	   ;; MAX-IND is non-nil, ensure that no line will be indented
-	   ;; more than that number.  Start from the line before END.
-	   (lambda (end beg delta max-ind)
+	   ;; Shift the indentation between END and BEG by DELTA.
+	   ;; Start from the line before END.
+	   (lambda (end beg delta)
 	     (goto-char end)
 	     (skip-chars-backward " \r\t\n")
 	     (beginning-of-line)
@@ -1880,9 +1879,7 @@ Initial position of cursor is restored after the changes."
 		 (org-inlinetask-goto-beginning))
 		;; Shift only non-empty lines.
 		((org-looking-at-p "^[ \t]*\\S-")
-		 (let ((i (org-get-indentation)))
-		   (org-indent-line-to
-		    (if max-ind (min (+ i delta) max-ind) (+ i delta))))))
+		 (org-indent-line-to (+ (org-get-indentation) delta))))
 	       (forward-line -1)))))
          (modify-item
           (function
@@ -1937,37 +1934,53 @@ Initial position of cursor is restored after the changes."
 	    ;; belongs to: it is the last item (ITEM-UP), whose
 	    ;; ending is further than the position we're
 	    ;; interested in.
-	    (let ((item-up (assoc-default end-pos acc-end '>)))
+	    (let ((item-up (assoc-default end-pos acc-end #'>)))
 	      (push (cons end-pos item-up) end-list)))
 	  (push (cons end-pos pos) acc-end)))
       ;; 2. Slice the items into parts that should be shifted by the
       ;;    same amount of indentation.  Each slice follow the pattern
-      ;;    (END BEG DELTA MAX-IND-OR-NIL).  Slices are returned in
-      ;;    reverse order.
-      (setq all-ends (sort (append (mapcar 'car itm-shift)
-				   (org-uniquify (mapcar 'car end-list)))
-			   '<))
+      ;;    (END BEG DELTA).  Slices are returned in reverse order.
+      (setq all-ends (sort (append (mapcar #'car itm-shift)
+				   (org-uniquify (mapcar #'car end-list)))
+			   #'<)
+	    acc-end (nreverse acc-end))
       (while (cdr all-ends)
 	(let* ((up (pop all-ends))
 	       (down (car all-ends))
 	       (itemp (assq up struct))
-	       (item (if itemp up (cdr (assq up end-list))))
-	       (ind (cdr (assq item itm-shift)))
-	       ;; If we're not at an item, there's a child of the item
-	       ;; point belongs to above.  Make sure this slice isn't
-	       ;; moved within that child by specifying a maximum
-	       ;; indentation.
-	       (max-ind (and (not itemp)
-			     (+ (org-list-get-ind item struct)
-				(length (org-list-get-bullet item struct))
-				org-list-indent-offset))))
-	  (push (list down up ind max-ind) sliced-struct)))
+	       (delta
+		(if itemp (cdr (assq up itm-shift))
+		  ;; If we're not at an item, there's a child of the
+		  ;; item point belongs to above.  Make sure the less
+		  ;; indented line in this slice has the same column
+		  ;; as that child.
+		  (let* ((child (cdr (assq up acc-end)))
+			 (ind (org-list-get-ind child struct))
+			 (min-ind most-positive-fixnum))
+		    (save-excursion
+		      (goto-char up)
+		      (while (< (point) down)
+			;; Ignore empty lines.  Also ignore blocks and
+			;; drawers contents.
+			(unless (org-looking-at-p "[ \t]*$")
+			  (setq min-ind (min (org-get-indentation) min-ind))
+			  (cond
+			   ((and (looking-at "#\\+BEGIN\\(:\\|_\\S-+\\)")
+				 (re-search-forward
+				  (format "^[ \t]*#\\+END%s[ \t]*$"
+					  (match-string 1))
+				  down t)))
+			   ((and (looking-at org-drawer-regexp)
+				 (re-search-forward "^[ \t]*:END:[ \t]*$"
+						    down t)))))
+			(forward-line)))
+		    (- ind min-ind)))))
+	  (push (list down up delta) sliced-struct)))
       ;; 3. Shift each slice in buffer, provided delta isn't 0, from
       ;;    end to beginning.  Take a special action when beginning is
       ;;    at item bullet.
       (dolist (e sliced-struct)
-	(unless (and (zerop (nth 2 e)) (not (nth 3 e)))
-	  (apply shift-body-ind e))
+	(unless (zerop (nth 2 e)) (apply shift-body-ind e))
 	(let* ((beg (nth 1 e))
 	       (cell (assq beg struct)))
 	  (unless (or (not cell) (equal cell (assq beg old-struct)))

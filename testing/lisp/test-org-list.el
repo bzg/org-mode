@@ -743,11 +743,19 @@
 	      (org-list-repair))
 	    (buffer-string))))
   ;; Special case: do not move contents of an item within its child.
+  ;; Yet, preserve indentation differences within contents.
   (should
    (equal "- item\n  - child\n  within item"
 	  (org-test-with-temp-text "- item\n    - child\n    within item"
 	    (let ((org-list-indent-offset 0)) (org-list-repair))
-	    (buffer-string)))))
+	    (buffer-string))))
+  (should
+   (equal
+    "- item\n  - child\n  within item\n    indented"
+    (org-test-with-temp-text
+	"- item\n    - child\n   within item\n     indented"
+      (let ((org-list-indent-offset 0)) (org-list-repair))
+      (buffer-string)))))
 
 
 
