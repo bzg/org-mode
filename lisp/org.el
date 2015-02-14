@@ -20993,7 +20993,7 @@ object (e.g., within a comment).  In these case, you need to use
        ;; In a list, make sure indenting keeps trailing text within.
        ((and indent
 	     (not (eolp))
-	     (org-element-lineage context '(item plain-list) t))
+	     (org-element-lineage context '(item)))
 	(let ((trailing-data
 	       (delete-and-extract-region (point) (line-end-position))))
 	  (newline-and-indent)

@@ -861,6 +861,11 @@
 	  (org-test-with-temp-text "- A <point>B"
 	    (org-return t)
 	    (buffer-string))))
+  (should
+   (equal "- A\n\n- B"
+	  (org-test-with-temp-text "- A\n<point>- B"
+	    (org-return t)
+	    (buffer-string))))
   ;; Special case: on tags part of a headline, add a newline below it
   ;; instead of breaking it.
   (should
