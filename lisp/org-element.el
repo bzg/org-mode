@@ -400,6 +400,15 @@ still has an entry since one of its properties (`:title') does.")
     (item . :tag))
   "Alist between element types and location of secondary value.")
 
+(defconst org-element--pair-square-table
+  (let ((table (make-syntax-table)))
+    (modify-syntax-entry ?\[ "(]" table)
+    (modify-syntax-entry ?\] ")[" table)
+    (dolist (char '(?\{ ?\} ?\( ?\) ?\< ?\>) table)
+      (modify-syntax-entry char " " table)))
+  "Table used internally to pair only square brackets.
+Other brackets are treated as spaces.")
+
 
 
 ;;; Accessors and Setters
@@ -2792,35 +2801,31 @@ When at a footnote reference, return a list whose car is
 `footnote-reference' and cdr a plist with `:label', `:type',
 `:begin', `:end', `:content-begin', `:contents-end' and
 `:post-blank' as keywords.  Otherwise, return nil."
-  (catch 'no-object
-    (when (looking-at org-footnote-re)
-      (save-excursion
-	(let* ((begin (point))
-	       (label
-		(or (org-match-string-no-properties 2)
-		    (org-match-string-no-properties 3)
-		    (and (match-string 1)
-			 (concat "fn:" (org-match-string-no-properties 1)))))
-	       (type (if (or (not label) (match-string 1)) 'inline 'standard))
-	       (inner-begin (match-end 0))
-	       (inner-end
-		(let ((count 1))
-		  (forward-char)
-		  (while (and (> count 0) (re-search-forward "[][]" nil t))
-		    (if (equal (match-string 0) "[") (incf count) (decf count)))
-		  (unless (zerop count) (throw 'no-object nil))
-		  (1- (point))))
-	       (post-blank (progn (goto-char (1+ inner-end))
-				  (skip-chars-forward " \t")))
-	       (end (point)))
-	  (list 'footnote-reference
-		(list :label label
-		      :type type
-		      :begin begin
-		      :end end
-		      :contents-begin (and (eq type 'inline) inner-begin)
-		      :contents-end (and (eq type 'inline) inner-end)
-		      :post-blank post-blank)))))))
+  (when (looking-at org-footnote-re)
+    (let ((closing (with-syntax-table org-element--pair-square-table
+		     (ignore-errors (scan-lists (point) 1 0)))))
+      (when closing
+	(save-excursion
+	  (let* ((begin (point))
+		 (label
+		  (or (org-match-string-no-properties 2)
+		      (org-match-string-no-properties 3)
+		      (and (match-string 1)
+			   (concat "fn:" (org-match-string-no-properties 1)))))
+		 (type (if (or (not label) (match-string 1)) 'inline 'standard))
+		 (inner-begin (match-end 0))
+		 (inner-end (1- closing))
+		 (post-blank (progn (goto-char closing)
+				    (skip-chars-forward " \t")))
+		 (end (point)))
+	    (list 'footnote-reference
+		  (list :label label
+			:type type
+			:begin begin
+			:end end
+			:contents-begin (and (eq type 'inline) inner-begin)
+			:contents-end (and (eq type 'inline) inner-end)
+			:post-blank post-blank))))))))
 
 (defun org-element-footnote-reference-interpreter (footnote-reference contents)
   "Interpret FOOTNOTE-REFERENCE object as Org syntax.
