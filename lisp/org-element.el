@@ -358,7 +358,7 @@ Don't modify it, set `org-element-affiliated-keywords' instead.")
       (inlinetask ,@standard-set-no-line-break)
       (italic ,@standard-set)
       (item ,@standard-set-no-line-break)
-      (keyword ,@standard-set)
+      (keyword ,@(remq 'footnote-reference standard-set))
       ;; Ignore all links excepted plain links in a link description.
       ;; Also ignore radio-targets and line breaks.
       (link bold code entity export-snippet inline-babel-call inline-src-block
