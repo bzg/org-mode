@@ -447,46 +447,76 @@ buffer."
       (incf cnt))
     (format fmt cnt)))
 
+(defun org-footnote--allow-reference-p ()
+  "Non-nil when a footnote reference can be inserted at point."
+  ;; XXX: This is similar to `org-footnote-in-valid-context-p' but
+  ;; more accurate and usually faster, except in some corner cases.
+  ;; It may replace it after doing proper benchmarks as it would be
+  ;; used in fontification.
+  (unless (bolp)
+    (let* ((context (org-element-context))
+	   (type (org-element-type context)))
+      (cond
+       ;; No footnote reference in attributes.
+       ((let ((post (org-element-property :post-affiliated context)))
+	  (and post (< (point) post)))
+	nil)
+       ;; Paragraphs and blank lines at top of document are fine.
+       ((memq type '(nil paragraph)))
+       ;; So are contents of verse blocks.
+       ((eq type 'verse-block)
+	(and (>= (point) (org-element-property :contents-begin context))
+	     (< (point) (org-element-property :contents-end context))))
+       ;; White spaces after an object or blank lines after an element
+       ;; are OK.
+       ((>= (point)
+	    (save-excursion (goto-char (org-element-property :end context))
+			    (skip-chars-backward " \r\t\n")
+			    (if (memq type org-element-all-objects) (point)
+			      (1+ (line-beginning-position 2))))))
+       ;; Other elements are invalid.
+       ((memq type org-element-all-elements) nil)
+       ;; Just before object is fine.
+       ((= (point) (org-element-property :begin context)))
+       ;; Within recursive object too, but not in a link.
+       ((eq type 'link) nil)
+       ((let ((cbeg (org-element-property :contents-begin context))
+	      (cend (org-element-property :contents-end context)))
+	  (and cbeg (>= (point) cbeg) (<= (point) cend))))))))
+
 (defun org-footnote-new ()
   "Insert a new footnote.
 This command prompts for a label.  If this is a label referencing an
 existing label, only insert the label.  If the footnote label is empty
 or new, let the user edit the definition of the footnote."
   (interactive)
-  (unless (org-footnote-in-valid-context-p)
-    (error "Cannot insert a footnote here"))
-  (let* ((lbls (and (not (equal org-footnote-auto-label 'random))
-		    (org-footnote-all-labels)))
-	 (propose (and (not (equal org-footnote-auto-label 'random))
-		       (org-footnote-unique-label lbls)))
+  (unless (org-footnote--allow-reference-p)
+    (user-error "Cannot insert a footnote here"))
+  (let* ((all (org-footnote-all-labels))
 	 (label
 	  (org-footnote-normalize-label
-	   (cond
-	    ((member org-footnote-auto-label '(t plain))
-	     propose)
-	    ((equal org-footnote-auto-label 'random)
-	     (format "fn:%x" (random #x100000000)))
-	    (t
-	     (org-icompleting-read
-	      "Label (leave empty for anonymous): "
-	      (mapcar 'list lbls) nil nil
-	      (if (eq org-footnote-auto-label 'confirm) propose nil)))))))
-    (cond
-     ((bolp) (error "Cannot create a footnote reference at left margin"))
-     ((not label)
-      (insert "[fn:: ]")
-      (backward-char 1))
-     ((member label lbls)
-      (insert "[" label "]")
-      (message "New reference to existing note"))
-     (org-footnote-define-inline
-      (insert "[" label ": ]")
-      (backward-char 1)
-      (org-footnote-auto-adjust-maybe))
-     (t
-      (insert "[" label "]")
-      (org-footnote-create-definition label)
-      (org-footnote-auto-adjust-maybe)))))
+	   (if (eq org-footnote-auto-label 'random)
+	       (format "fn:%x" (random #x100000000))
+	     (let ((propose (org-footnote-unique-label all)))
+	       (if (memq org-footnote-auto-label '(t plain)) propose
+		 (org-icompleting-read
+		  "Label (leave empty for anonymous): "
+		  (mapcar #'list all) nil nil
+		  (and (eq org-footnote-auto-label 'confirm) propose))))))))
+    (cond ((not label)
+	   (insert "[fn:: ]")
+	   (backward-char 1))
+	  ((member label all)
+	   (insert "[" label "]")
+	   (message "New reference to existing note"))
+	  (org-footnote-define-inline
+	   (insert "[" label ": ]")
+	   (backward-char 1)
+	   (org-footnote-auto-adjust-maybe))
+	  (t
+	   (insert "[" label "]")
+	   (org-footnote-create-definition label)
+	   (org-footnote-auto-adjust-maybe)))))
 
 (defvar org-blank-before-new-entry) ; silence byte-compiler
 (defun org-footnote-create-definition (label)
