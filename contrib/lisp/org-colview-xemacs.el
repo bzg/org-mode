@@ -1,6 +1,6 @@
 ;;; org-colview-xemacs.el --- Column View in Org-mode, XEmacs-specific version
 
-;; Copyright (C) 2004-2014
+;; Copyright (C) 2004-2015
 ;;   Carsten Dominik
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
