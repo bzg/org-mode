@@ -2,7 +2,7 @@
 ;;; org-drill.el - Self-testing using spaced repetition
 ;;;
 ;;; Author: Paul Sexton <eeeickythump@gmail.com>
-;;; Version: 2.4.4
+;;; Version: 2.4.5
 ;;; Repository at http://bitbucket.org/eeeickythump/org-drill/
 ;;;
 ;;;
@@ -512,6 +512,11 @@ for review unless they were already reviewed in the recent past?")
   '("LEARN_DATA" "DRILL_LAST_INTERVAL" "DRILL_REPEATS_SINCE_FAIL"
     "DRILL_TOTAL_REPEATS" "DRILL_FAILURE_COUNT" "DRILL_AVERAGE_QUALITY"
     "DRILL_EASE" "DRILL_LAST_QUALITY" "DRILL_LAST_REVIEWED"))
+(defvar org-drill--lapse-very-overdue-entries-p nil
+  "If non-nil, entries more than 90 days overdue are regarded as 'lapsed'.
+This means that when the item is eventually re-tested it will be
+treated as 'failed' (quality 2) for rescheduling purposes,
+regardless of whether the test was successful.")
 
 
 ;;; Make the above settings safe as file-local variables.
@@ -1198,8 +1203,8 @@ See the documentation for `org-drill-get-item-data' for a description of these."
   "If DAYS-AHEAD is supplied it must be a positive integer. The
 item will be scheduled exactly this many days into the future."
   (let ((delta-days (- (time-to-days (current-time))
-                   (time-to-days (or (org-get-scheduled-time (point))
-                                     (current-time)))))
+                       (time-to-days (or (org-get-scheduled-time (point))
+                                         (current-time)))))
         (ofmatrix org-drill-optimal-factor-matrix)
         ;; Entries can have weights, 1 by default. Intervals are divided by the
         ;; item's weight, so an item with a weight of 2 will have all intervals
@@ -1525,7 +1530,7 @@ visual overlay, or with the string TEXT if it is supplied."
 
 (defun org-drill-hide-heading-at-point (&optional text)
   (unless (org-at-heading-p)
-    (error "Point is not on a heading"))
+    (error "Point is not on a heading."))
   (save-excursion
     (let ((beg (point)))
       (end-of-line)
@@ -1708,7 +1713,9 @@ Note: does not actually alter the item."
     (org-back-to-heading t)
     (let ((lim (save-excursion
                  (outline-next-heading) (point))))
-      (org-end-of-meta-data-and-drawers)
+      (if (fboundp 'org-end-of-meta-data-and-drawers)
+          (org-end-of-meta-data-and-drawers) ; function removed Feb 2015
+        (org-end-of-meta-data t))
       (or (>= (point) lim)
           (null (re-search-forward "[[:graph:]]" lim t))))))
 
@@ -2402,14 +2409,13 @@ all the markers used by Org-Drill will be freed."
 ;;; where POS is a marker pointing to the start of the entry, and
 ;;; DUE is a number indicating how many days ago the entry was due.
 ;;; AGE is the number of days elapsed since item creation (nil if unknown).
-;;; if age > 60, sort by age (oldest first)
-;;; if age < 60, sort by due (biggest first)
+;;; if age > lapse threshold (default 90), sort by age (oldest first)
+;;; if age < lapse threshold, sort by due (biggest first)
 
-;;; if (age a) <= 60 and (age b) <= 60, sort by due
-;;; else sort by age
 
 (defun org-drill-order-overdue-entries (overdue-data)
-  (let* ((lapsed-days 60)
+  (let* ((lapsed-days (if org-drill--lapse-very-overdue-entries-p
+                          90 most-positive-fixnum))
          (not-lapsed (remove-if (lambda (a) (> (or (second a) 0) lapsed-days))
                                 overdue-data))
          (lapsed (remove-if-not (lambda (a) (> (or (second a) 0)
@@ -2424,8 +2430,9 @@ all the markers used by Org-Drill will be freed."
 
 
 (defun org-drill--entry-lapsed-p ()
-  (let ((lapsed-days 60))
-    (> (or (org-drill-entry-days-overdue) 0) lapsed-days)))
+  (let ((lapsed-days 90))
+    (and org-drill--lapse-very-overdue-entries-p
+         (> (or (org-drill-entry-days-overdue) 0) lapsed-days))))
 
 
 
