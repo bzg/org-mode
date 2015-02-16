@@ -127,6 +127,12 @@
    (org-eldoc-get-src-header)
    (let ((lang (org-eldoc-get-src-lang)))
      (cond ((or
+             (string= lang "emacs-lisp")
+             (string= lang "elisp")) (if (fboundp 'elisp-eldoc-documentation-function)
+                                         (elisp-eldoc-documentation-function)
+                                       (let (eldoc-documentation-function)
+                                         (eldoc-print-current-symbol-info))))
+           ((or
              (string= lang "c") ;; http://github.com/nflath/c-eldoc
              (string= lang "C")) (when (require 'c-eldoc nil t)
                                    (c-eldoc-print-current-symbol-info)))
