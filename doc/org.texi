@@ -10258,20 +10258,17 @@ format sub- and superscripts in a WYSIWYM way.
 Going beyond symbols and sub- and superscripts, a full formula language is
 needed.  Org mode can contain @LaTeX{} math fragments, and it supports ways
 to process these for several export back-ends.  When exporting to @LaTeX{},
-the code is obviously left as it is.  When exporting to HTML, Org can invoke
-the @uref{http://www.mathjax.org, MathJax library} (@pxref{Math formatting in
-HTML export}) to process and display the math@footnote{If you plan to use
-this regularly or on pages with significant page views, you should install
-@file{MathJax} on your own server in order to limit the load of our server.}.
-It can also process the mathematical expressions into images that can be
-displayed in a browser (see @pxref{Previewing @LaTeX{} fragments}).
+the code is left as it is.  When exporting to HTML, Org can use either
+@uref{http://www.mathjax.org, MathJax} (@pxref{Math formatting in HTML
+export}) or transcode the math into images (see @pxref{Previewing @LaTeX{}
+fragments}).
 
 @LaTeX{} fragments don't need any special marking at all.  The following
 snippets will be identified as @LaTeX{} source code:
 @itemize @bullet
 @item
-Environments of any kind@footnote{When @file{MathJax} is used, only the
-environments recognized by @file{MathJax} will be processed.  When
+Environments of any kind@footnote{When MathJax is used, only the
+environments recognized by MathJax will be processed.  When
 @file{dvipng} program or @file{imagemagick} suite is used to create images,
 any @LaTeX{} environment will be handled.}.  The only requirement is that the
 @code{\begin} statement appears on a new line, at the beginning of the line
@@ -10307,7 +10304,7 @@ either $$ a=+\sqrt@{2@} $$ or \[ a=-\sqrt@{2@} \].
 @vindex org-export-with-latex
 @LaTeX{} processing can be configured with the variable
 @code{org-export-with-latex}.  The default setting is @code{t} which means
-@file{MathJax} for HTML, and no processing for ASCII and @LaTeX{} back-ends.
+MathJax for HTML, and no processing for ASCII and @LaTeX{} back-ends.
 You can also set this variable on a per-file basis using one of these
 lines:
 
@@ -11466,25 +11463,23 @@ You could use @code{http} addresses just as well.
 @cindex imagemagick
 
 @LaTeX{} math snippets (@pxref{@LaTeX{} fragments}) can be displayed in two
-different ways on HTML pages.  The default is to use the
-@uref{http://www.mathjax.org, MathJax system} which should work out of the
-box with Org mode installation because @uref{http://orgmode.org} serves
-@file{MathJax} for Org mode users for small applications and for testing
-purposes.  @b{If you plan to use this regularly or on pages with significant
-page views, you should install@footnote{Installation instructions can be
-found on the MathJax website, see
-@uref{http://www.mathjax.org/resources/docs/?installation.html}.} MathJax on
-your own server in order to limit the load of our server.}  To configure
-@file{MathJax}, use the variable @code{org-html-mathjax-options} or
-insert something like the following into the buffer:
+different ways on HTML pages.  The default is to use
+@uref{http://www.mathjax.org, MathJax} which should work out of the box with
+Org@footnote{By default Org loads MathJax from
+@uref{http://docs.mathjax.org/en/latest/start.html#using-the-mathjax-content-delivery-network-cdn,
+MathJax.org}.  A link to the terms of service of the MathJax CDN can be found
+in the docstring of @code{org-html-mathjax-options}.}.  Some MathJax display
+options can be configured via @code{org-html-mathjax-options}, or in the
+buffer.  For example, with the following settings,
+@smallexample
+#+HTML_MATHJAX: align: left indent: 5em tagside: left font: Neo-Euler
+@end smallexample
+equation labels will be displayed on the left marign and equations will be
+five ems from the left margin.
 
-@example
-#+HTML_MATHJAX: align:"left" mathml:t path:"/MathJax/MathJax.js"
-@end example
-
-@noindent See the docstring of the variable
-@code{org-html-mathjax-options} for the meaning of the parameters in
-this line.
+@noindent See the docstring of
+@code{org-html-mathjax-options} for all supported variables.  The MathJax
+template can be configure via @code{org-html-mathjax-template}.
 
 If you prefer, you can also request that @LaTeX{} fragments are processed
 into small images that will be inserted into the browser page.  Before the

@@ -114,6 +114,11 @@ would create invalid planning info.  This dangerous option is now
 removed.
 *** Removed option ~org-koma-letter-use-title~
 Use org-export-with-title instead.  See also below.
+*** Removed MathML-related options from ~org-html-mathjax-options~
+MathJax automatically chooses the best display technology based on the
+end-users browser.  You may force initial usage of MathML via
+~org-html-mathjax-template~ or by setting the ~path~ property of
+~org-html-mathjax-options~.
 ** New features
 *** Additional markup with =#+INCLUDE= keyword
 The content of the included file can now be optionally marked up, for
@@ -213,7 +218,9 @@ It is now possible to supply and optional formatting argument to
 *** New option ~org-export-with-title~
 It is possible to suppress the title insertion with ~#+OPTIONS:
 title:nil~ or globally using the variable ~org-export-with-title~.
-
+*** New MathJax configuration options.
+Org uses the MathJax CDN by default.  See the manual and the docstring
+of ~org-html-mathjax-options~ for details.
 ** Miscellaneous
 *** Strip all meta data from ITEM special property
 ITEM special property does not contain TODO, priority or tags anymore.
