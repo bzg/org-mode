@@ -3466,6 +3466,57 @@ Text.
   (should-not
    (org-test-with-temp-text "Paragraph" (org-hide-block-toggle-maybe))))
 
+(ert-deftest test-org/show-set-visibility ()
+  "Test `org-show-set-visibility' specifications."
+  ;; Do not throw an error before first heading.
+  (should
+   (org-test-with-temp-text "Preamble\n* Headline"
+     (org-show-set-visibility 'tree)
+     t))
+  ;; Test all visibility spans, both on headline and in entry.
+  (let ((list-visible-lines
+	 (lambda (state headerp)
+	   (org-test-with-temp-text "* Grandmother  (0)
+** Uncle              (1)
+*** Heir              (2)
+** Father             (3)
+   Ancestor text      (4)
+*** Sister            (5)
+    Sibling text      (6)
+*** Self              (7)
+    Match	      (8)
+**** First born	      (9)
+     Child text	      (10)
+**** The other child  (11)
+*** Brother	      (12)
+** Aunt               (13)
+"
+	     (org-cycle t)
+	     (search-forward (if headerp "Self" "Match"))
+	     (org-show-set-visibility state)
+	     (goto-char (point-min))
+	     (let (result (line 0))
+	       (while (not (eobp))
+		 (unless (org-invisible-p2) (push line result))
+		 (incf line)
+		 (forward-line))
+	       (nreverse result))))))
+    (should (equal '(0 7) (funcall list-visible-lines 'minimal t)))
+    (should (equal '(0 7 8) (funcall list-visible-lines 'minimal nil)))
+    (should (equal '(0 7 8 9) (funcall list-visible-lines 'local t)))
+    (should (equal '(0 7 8 9) (funcall list-visible-lines 'local nil)))
+    (should (equal '(0 3 7) (funcall list-visible-lines 'ancestors t)))
+    (should (equal '(0 3 7 8) (funcall list-visible-lines 'ancestors nil)))
+    (should (equal '(0 3 5 7 12) (funcall list-visible-lines 'lineage t)))
+    (should (equal '(0 3 5 7 8 9 12) (funcall list-visible-lines 'lineage nil)))
+    (should (equal '(0 1 3 5 7 12 13) (funcall list-visible-lines 'tree t)))
+    (should (equal '(0 1 3 5 7 8 9 11 12 13)
+		   (funcall list-visible-lines 'tree nil)))
+    (should (equal '(0 1 3 4 5 7 12 13)
+		   (funcall list-visible-lines 'canonical t)))
+    (should (equal '(0 1 3 4 5 7 8 9 11 12 13)
+		   (funcall list-visible-lines 'canonical nil)))))
+
 
 (provide 'test-org)
 

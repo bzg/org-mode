@@ -1165,87 +1165,80 @@ effective."
   :tag "Org Reveal Location"
   :group 'org-structure)
 
-(defconst org-context-choice
-  '(choice
-    (const :tag "Always" t)
-    (const :tag "Never" nil)
-    (repeat :greedy t :tag "Individual contexts"
-	    (cons
-	     (choice :tag "Context"
-		     (const agenda)
-		     (const org-goto)
-		     (const occur-tree)
-		     (const tags-tree)
-		     (const link-search)
-		     (const mark-goto)
-		     (const bookmark-jump)
-		     (const isearch)
-		     (const default))
-	     (boolean))))
-  "Contexts for the reveal options.")
+(defcustom org-show-context-detail '((isearch . lineage)
+				     (bookmark-jump . lineage)
+				     (default . ancestors))
+  "Alist between context and visibility span when revealing a location.
 
-(defcustom org-show-hierarchy-above '((default . t))
-  "Non-nil means show full hierarchy when revealing a location.
-Org-mode often shows locations in an org-mode file which might have
-been invisible before.  When this is set, the hierarchy of headings
-above the exposed location is shown.
-Turning this off for example for sparse trees makes them very compact.
-Instead of t, this can also be an alist specifying this option for different
-contexts.  Valid contexts are
+\\<org-mode-map>Some actions may move point into invisible
+locations.  As a consequence, Org always expose a neighborhood
+around point.  How much is shown depends on the initial action,
+or context.  Valid contexts are
+
   agenda         when exposing an entry from the agenda
-  org-goto       when using the command `org-goto' on key C-c C-j
-  occur-tree     when using the command `org-occur' on key C-c /
+  org-goto       when using the command `org-goto' (\\[org-goto])
+  occur-tree     when using the command `org-occur' (\\[org-sparse-tree] /)
   tags-tree      when constructing a sparse tree based on tags matches
   link-search    when exposing search matches associated with a link
   mark-goto      when exposing the jump goal of a mark
   bookmark-jump  when exposing a bookmark location
   isearch        when exiting from an incremental search
-  default        default for all contexts not set explicitly"
+  default        default for all contexts not set explicitly
+
+Allowed visibility spans are
+
+  minimal        show current headline; if point is not on headline,
+                 also show entry
+
+  local          show current headline, entry and next headline
+
+  ancestors      show current headline and its direct ancestors; if
+                 point is not on headline, also show entry
+
+  lineage        show current headline, its direct ancestors and all
+                 their children; if point is not on headline, also show
+                 entry and first child
+
+  tree           show current headline, its direct ancestors and all
+                 their children; if point is not on headline, also show
+                 entry and all children
+
+  canonical      show current headline, its direct ancestors along with
+                 their entries and children; if point is not located on
+                 the headline, also show current entry and all children
+
+As special cases, a nil or t value means show all contexts in
+`minimal' or `canonical' view, respectively.
+
+Some views can make displayed information very compact, but also
+make it harder to edit the location of the match.  In such
+a case, use the command `org-reveal' (\\[org-reveal]) to show
+more context."
   :group 'org-reveal-location
-  :type org-context-choice)
-
-(defcustom org-show-following-heading '((default . nil))
-  "Non-nil means show following heading when revealing a location.
-Org-mode often shows locations in an org-mode file which might have
-been invisible before.  When this is set, the heading following the
-match is shown.
-Turning this off for example for sparse trees makes them very compact,
-but makes it harder to edit the location of the match.  In such a case,
-use the command \\[org-reveal] to show more context.
-Instead of t, this can also be an alist specifying this option for different
-contexts.  See `org-show-hierarchy-above' for valid contexts."
-  :group 'org-reveal-location
-  :type org-context-choice)
-
-(defcustom org-show-siblings '((default . nil) (isearch t) (bookmark-jump t))
-  "Non-nil means show all sibling heading when revealing a location.
-Org-mode often shows locations in an org-mode file which might have
-been invisible before.  When this is set, the sibling of the current entry
-heading are all made visible.  If `org-show-hierarchy-above' is t,
-the same happens on each level of the hierarchy above the current entry.
-
-By default this is on for the isearch context, off for all other contexts.
-Turning this off for example for sparse trees makes them very compact,
-but makes it harder to edit the location of the match.  In such a case,
-use the command \\[org-reveal] to show more context.
-Instead of t, this can also be an alist specifying this option for different
-contexts.  See `org-show-hierarchy-above' for valid contexts."
-  :group 'org-reveal-location
-  :type org-context-choice
-  :version "24.4"
-  :package-version '(Org . "8.0"))
-
-(defcustom org-show-entry-below '((default . nil))
-  "Non-nil means show the entry below a headline when revealing a location.
-Org-mode often shows locations in an org-mode file which might have
-been invisible before.  When this is set, the text below the headline that is
-exposed is also shown.
-
-By default this is off for all contexts.
-Instead of t, this can also be an alist specifying this option for different
-contexts.  See `org-show-hierarchy-above' for valid contexts."
-  :group 'org-reveal-location
-  :type org-context-choice)
+  :version "25.1"
+  :package-version '(Org . "8.3")
+  :type '(choice
+	  (const :tag "Canonical" t)
+	  (const :tag "Minimal" nil)
+	  (repeat :greedy t :tag "Individual contexts"
+		  (cons
+		   (choice :tag "Context"
+			   (const agenda)
+			   (const org-goto)
+			   (const occur-tree)
+			   (const tags-tree)
+			   (const link-search)
+			   (const mark-goto)
+			   (const bookmark-jump)
+			   (const isearch)
+			   (const default))
+		   (choice :tag "Detail level"
+			   (const minimal)
+			   (const local)
+			   (const ancestors)
+			   (const lineage)
+			   (const tree)
+			   (const canonical))))))
 
 (defcustom org-indirect-buffer-display 'other-window
   "How should indirect tree buffers be displayed?
@@ -7522,11 +7515,9 @@ or nil."
 	 (setq buffer-read-only t)
 	 (if (and (boundp 'org-goto-start-pos)
 		  (integer-or-marker-p org-goto-start-pos))
-	     (let ((org-show-hierarchy-above t)
-		   (org-show-siblings t)
-		   (org-show-following-heading t))
-	       (goto-char org-goto-start-pos)
-	       (and (outline-invisible-p) (org-show-context)))
+	     (progn (goto-char org-goto-start-pos)
+		    (when (outline-invisible-p)
+		      (org-show-set-visibility 'lineage)))
 	   (goto-char (point-min)))
 	 (let (org-special-ctrl-a/e) (org-beginning-of-line))
 	 (message "Select location and press RET")
@@ -8369,7 +8360,7 @@ case."
   (goto-char (point-min))
   ;; First check if there are no even levels
   (when (re-search-forward "^\\(\\*\\*\\)+ " nil t)
-    (org-show-context t)
+    (org-show-set-visibility 'canonical)
     (error "Not all levels are odd in this file.  Conversion not possible"))
   (when (yes-or-no-p "Are you sure you want to globally change levels to odd-even? ")
     (let ((outline-regexp org-outline-regexp)
@@ -11002,9 +10993,8 @@ If the current buffer is in `dired-mode', grep will be used to search
 in all files.  If AVOID-POS is given, ignore matches near that position.
 
 When optional argument STEALTH is non-nil, do not modify
-visibility around point, thus ignoring
-`org-show-hierarchy-above', `org-show-following-heading' and
-`org-show-siblings' variables."
+visibility around point, thus ignoring `org-show-context-detail'
+variable."
   (let ((case-fold-search t)
 	(s0 (mapconcat 'identity (org-split-string s "[ \t\r\n]+") " "))
 	(markers (concat "\\(?:" (mapconcat (lambda (x) (regexp-quote (car x)))
@@ -13929,59 +13919,67 @@ starting point when no match is found."
 
 (defun org-show-context (&optional key)
   "Make sure point and context are visible.
-How much context is shown depends upon the variables
-`org-show-hierarchy-above', `org-show-following-heading',
-`org-show-entry-below' and `org-show-siblings'."
-  (let ((heading-p   (org-at-heading-p t))
-	(hierarchy-p (org-get-alist-option org-show-hierarchy-above key))
-	(following-p (org-get-alist-option org-show-following-heading key))
-	(entry-p     (org-get-alist-option org-show-entry-below key))
-	(siblings-p  (org-get-alist-option org-show-siblings key)))
-    ;; Show heading or entry text
-    (if (and heading-p (not entry-p))
-	(org-flag-heading nil)    ; only show the heading
-      (and (or entry-p (outline-invisible-p) (org-invisible-p2))
-	   (org-show-hidden-entry)))    ; show entire entry
-    (when following-p
-      ;; Show next sibling, or heading below text
+Optional argument KEY, when non-nil, is a symbol.  See
+`org-show-context-detail' for allowed values and how much is to
+be shown."
+  (org-show-set-visibility
+   (cond ((symbolp org-show-context-detail) org-show-context-detail)
+	 ((cdr (assq key org-show-context-detail)))
+	 (t (cdr (assq 'default org-show-context-detail))))))
+
+(defun org-show-set-visibility (detail)
+  "Set visibility around point according to DETAIL.
+DETAIL is either nil, `minimal', `local', `ancestors', `lineage',
+`tree', `canonical' or t.  See `org-show-context-detail' for more
+information."
+  (unless (org-before-first-heading-p)
+    ;; Show current heading and possibly its entry, following headline
+    ;; or all children.
+    (if (and (org-at-heading-p) (not (eq detail 'local)))
+	(org-flag-heading nil)
+      (org-show-entry)
+      (org-with-limited-levels
+       (case detail
+	 ((tree canonical t) (show-children))
+	 ((nil minimal ancestors))
+	 (t (save-excursion
+	      (outline-next-heading)
+	      (org-flag-heading nil))))))
+    ;; Show all siblings.
+    (when (eq detail 'lineage) (org-show-siblings))
+    ;; Show ancestors, possibly with their children.
+    (when (memq detail '(ancestors lineage tree canonical t))
       (save-excursion
-	(and (if heading-p (org-goto-sibling) (outline-next-heading))
-	     (org-flag-heading nil))))
-    (when siblings-p (org-show-siblings))
-    (when hierarchy-p
-      ;; show all higher headings, possibly with siblings
-      (save-excursion
-	(while (and (ignore-errors (progn (org-up-heading-all 1) t))
-		    (not (bobp)))
+	(while (org-up-heading-safe)
 	  (org-flag-heading nil)
-	  (when siblings-p (org-show-siblings)))))))
+	  (when (memq detail '(canonical t)) (org-show-entry))
+	  (when (memq detail '(tree canonical t)) (show-children)))))))
 
 (defvar org-reveal-start-hook nil
   "Hook run before revealing a location.")
 
 (defun org-reveal (&optional siblings)
   "Show current entry, hierarchy above it, and the following headline.
-This can be used to show a consistent set of context around locations
-exposed with `org-show-hierarchy-above' or `org-show-following-heading'
-not t for the search context.
+
+This can be used to show a consistent set of context around
+locations exposed with `org-show-context'.
 
 With optional argument SIBLINGS, on each level of the hierarchy all
 siblings are shown.  This repairs the tree structure to what it would
 look like when opened with hierarchical calls to `org-cycle'.
+
 With double optional argument \\[universal-argument] \\[universal-argument], \
 go to the parent and show the
 entire tree."
   (interactive "P")
   (run-hooks 'org-reveal-start-hook)
-  (let ((org-show-hierarchy-above t)
-	(org-show-following-heading t)
-	(org-show-siblings (if siblings t org-show-siblings)))
-    (org-show-context nil))
-  (when (equal siblings '(16))
-    (save-excursion
-      (when (org-up-heading-safe)
-	(org-show-subtree)
-	(run-hook-with-args 'org-cycle-hook 'subtree)))))
+  (cond ((equal siblings '(4)) (org-show-set-visibility 'canonical))
+	((equal siblings '(16))
+	 (save-excursion
+	   (when (org-up-heading-safe)
+	     (org-show-subtree)
+	     (run-hook-with-args 'org-cycle-hook 'subtree))))
+	(t (org-show-set-visibility 'lineage))))
 
 (defun org-highlight-new-match (beg end)
   "Highlight from BEG to END and mark the highlight is an occur headline."

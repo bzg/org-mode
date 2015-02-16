@@ -10,12 +10,6 @@ Please send Org bug reports to emacs-orgmode@gnu.org.
 
 * Version 8.3
 ** Incompatible changes
-*** Replace disputed keys again when reading a date
-~org-replace-disputed-keys~ has been ignored when reading date since
-version 8.1, but the former behavior is restored again.
-
-Keybinding for reading date can be customized with a new variable
-~org-read-date-minibuffer-local-map~.
 *** Properties drawers syntax changes
 Properties drawers are now required to be located right after
 a headline and its planning line, when applicable.
@@ -54,6 +48,17 @@ them.
                            (min (1+ (match-end 0)) end)))
                   (unless (bolp) (insert "\n"))))))))))))
 #+END_SRC 
+*** New variable to control visibility when revealing a location
+~org-show-following-heading~, ~org-show-siblings~,
+~org-show-entry-below~ and ~org-show-hierarchy-above~ no longer exist.
+Instead, visibility is controlled through a single variable:
+~org-show-context-detail~, which see.
+*** Replace disputed keys again when reading a date
+~org-replace-disputed-keys~ has been ignored when reading date since
+version 8.1, but the former behavior is restored again.
+
+Keybinding for reading date can be customized with a new variable
+~org-read-date-minibuffer-local-map~.
 *** No default title is provided when =TITLE= keyword is missing
 Skipping =TITLE= keyword no longer provides the current file name, or
 buffer name, as the title. Instead, simply ignore the title.

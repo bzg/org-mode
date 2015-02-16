@@ -1562,18 +1562,14 @@ functionality.
 @cindex folding, sparse trees
 @cindex occur, command
 
-@vindex org-show-hierarchy-above
-@vindex org-show-following-heading
-@vindex org-show-siblings
-@vindex org-show-entry-below
+@vindex org-show-context-detail
 An important feature of Org mode is the ability to construct @emph{sparse
 trees} for selected information in an outline tree, so that the entire
 document is folded as much as possible, but the selected information is made
 visible along with the headline structure above it@footnote{See also the
-variables @code{org-show-hierarchy-above}, @code{org-show-following-heading},
-@code{org-show-siblings}, and @code{org-show-entry-below} for detailed
-control on how much context is shown around each match.}.  Just try it out
-and you will see immediately how it works.
+variable @code{org-show-context-detail} to decide how much context is shown
+around each match.}.  Just try it out and you will see immediately how it
+works.
 
 Org mode contains several commands for creating such trees, all these
 commands can be accessed through a dispatcher:
@@ -9333,8 +9329,7 @@ right spot in @code{org-agenda-custom-commands}.  For example:
          ((org-agenda-sorting-strategy '(priority-down))
           (org-agenda-prefix-format "  Mixed: ")))
         ("U" tags-tree "+boss-urgent"
-         ((org-show-following-heading nil)
-          (org-show-hierarchy-above nil)))
+         ((org-show-context-detail 'minimal)))
         ("N" search ""
          ((org-agenda-files '("~org/notes.org"))
           (org-agenda-text-search-extra-files nil)))))
