@@ -816,7 +816,10 @@ with \",*\", \",#+\", \",,*\" and \",,#+\"."
 (defun org-src-mode-configure-edit-buffer ()
   (when (org-bound-and-true-p org-edit-src-from-org-mode)
     (org-add-hook 'kill-buffer-hook
-		  #'(lambda () (delete-overlay org-edit-src-overlay)) nil 'local)
+		  (lambda ()
+		    (when (overlayp org-edit-src-overlay)
+		      (delete-overlay org-edit-src-overlay)))
+		  nil 'local)
     (if (org-bound-and-true-p org-edit-src-allow-write-back-p)
 	(progn
 	  (setq buffer-offer-save t)
