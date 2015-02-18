@@ -192,7 +192,7 @@ This string must include a \"%s\" which will be replaced by the results."
 	  "\\("
 	  org-babel-multi-line-header-regexp
 	  "\\)*"
-	  "\\([^ ()\f\t\n\r\v]+\\)")
+	  "\\([^()\f\t\n\r\v]+\\)")
   "Regular expression matching source name lines with a name.")
 
 (defvar org-babel-src-block-regexp
