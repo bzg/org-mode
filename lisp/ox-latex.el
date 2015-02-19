@@ -1232,12 +1232,12 @@ INFO is a plist used as a communication channel."
       (?t . ,(or (org-export-data (plist-get info :title)  info) ""))
       (?k . ,(org-export-data (org-latex--wrap-latex-math-block
 			       (org-element-parse-secondary-string
-				(plist-get info :keywords) objects)
+				(or (plist-get info :keywords) "") objects)
 			       info)
 			      info))
       (?d . ,(org-export-data (org-latex--wrap-latex-math-block
 			       (org-element-parse-secondary-string
-				(plist-get info :description) objects)
+				(or (plist-get info :description) "") objects)
 			       info)
 			      info))
       (?c . ,(if (plist-get info :with-creator) (plist-get info :creator) ""))
