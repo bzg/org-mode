@@ -16484,6 +16484,8 @@ non-nil."
          (repeater (and ts
 			(string-match "\\([.+-]+[0-9]+[hdwmy] ?\\)+" ts)
 			(match-string 0 ts)))
+	 org-time-was-given
+	 org-end-time-was-given
 	 (time
 	  (and (if (equal arg '(16)) (current-time)
 		 ;; Preserve `this-command' and `last-command'.
@@ -16491,8 +16493,7 @@ non-nil."
 		       (last-command last-command))
 		   (org-read-date
 		    arg 'totime nil nil default-time default-input
-		    inactive)))))
-         org-time-was-given org-end-time-was-given)
+		    inactive))))))
     (cond
      ((and ts
            (memq last-command '(org-time-stamp org-time-stamp-inactive))
