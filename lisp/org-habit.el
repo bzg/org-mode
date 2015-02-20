@@ -200,11 +200,27 @@ This list represents a \"habit\" for the rest of this module."
 	     (count 0))
 	(unless reversed (goto-char end))
 	(while (and (< count maxdays)
-		    (funcall search (format "- State \"%s\".*\\[\\([^]]+\\)\\]"
-					    (regexp-opt org-done-keywords))
+		    (funcall search
+			     (concat
+			      (format "- State \"%s\".*\\[\\([^]]+\\)\\]"
+				      (regexp-opt org-done-keywords))
+			      "\\|"
+			      (org-replace-escapes
+			       (regexp-quote
+				(cdr (assq 'done org-log-note-headings)))
+			       `(("%d" . ,org-ts-regexp-inactive)
+				 ("%D" . ,org-ts-regexp)
+				 ("%s" . "\"\\S-+\"")
+				 ("%S" . "\"\\S-+\"")
+				 ("%t" . ,org-ts-regexp-inactive)
+				 ("%T" . ,org-ts-regexp)
+				 ("%u" . ".*?")
+				 ("%U" . ".*?"))))
 			     limit t))
 	  (push (time-to-days
-		 (org-time-string-to-time (match-string-no-properties 1)))
+		 (org-time-string-to-time
+		  (or (org-match-string-no-properties 1)
+		      (org-match-string-no-properties 2))))
 		closed-dates)
 	  (setq count (1+ count))))
       (list scheduled sr-days deadline dr-days closed-dates))))
