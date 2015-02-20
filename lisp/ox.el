@@ -174,6 +174,14 @@ These keywords are not directly associated to a property.  The
 way they are handled must be hard-coded into
 `org-export--get-inbuffer-options' function.")
 
+(defconst org-export-document-properties
+  (delq nil
+	(mapcar (lambda (option)
+		  (and (member (nth 1 option) org-element-document-properties)
+		       (car option)))
+		org-export-options-alist))
+  "List of properties containing parsed data.")
+
 (defconst org-export-filters-alist
   '((:filter-body . org-export-filter-body-functions)
     (:filter-bold . org-export-filter-bold-functions)
@@ -2066,7 +2074,7 @@ from tree."
 	  (org-element-extract-element first-element))))
     ;; Prune tree and communication channel.
     (funcall walk-data data)
-    (dolist (prop '(:author :date :title))
+    (dolist (prop org-export-document-properties)
       (funcall walk-data (plist-get info prop)))
     ;; Eventually set `:ignore-list'.
     (plist-put info :ignore-list ignore)))
@@ -2078,7 +2086,7 @@ options.  Each uninterpreted element or object is changed back
 into a string.  Contents, if any, are not modified.  The parse
 tree is modified by side effect."
   (org-export--remove-uninterpreted-data-1 data info)
-  (dolist (prop '(:author :date :title))
+  (dolist (prop org-export-document-properties)
     (plist-put info
 	       prop
 	       (org-export--remove-uninterpreted-data-1
