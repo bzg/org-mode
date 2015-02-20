@@ -399,6 +399,8 @@ set using the hh:mm:ss format.
 the number of clones, which removes the repeater from the original
 subtree and creates one shifted, repeating clone.
 *** None-floating tables, graphics and blocks can have captions
+*** New time block for clock tables : ~untilnow~
+It encompasses all past closed clocks.
 ** Miscellaneous
 *** Strip all meta data from ITEM special property
 ITEM special property does not contain TODO, priority or tags anymore.

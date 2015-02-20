@@ -20,13 +20,13 @@ INPUT is a string as expected in a date/time prompt, i.e \"+2d\"
 or \"2/5\".
 
 When optional argument INACTIVE is non-nil, return an inactive
-timestamp. When optional argument WITH-TIME is non-nil, also
+timestamp.  When optional argument WITH-TIME is non-nil, also
 insert hours and minutes.
 
 Return the timestamp as a string."
   (org-element-interpret-data
    (let ((time (decode-time
-                (apply 'encode-time
+                (apply #'encode-time
                        (mapcar (lambda (el) (or el 0))
                                (org-read-date-analyze
                                 input nil (decode-time (current-time))))))))
@@ -64,21 +64,21 @@ OPTIONS is a string of clocktable options.  Caption is ignored in
 contents.  The clocktable doesn't appear in the buffer."
   (save-excursion
     (insert "#+BEGIN: clocktable " options "\n")
-    (insert "#+END: clocktable\n"))
+    (insert "#+END:\n"))
   (unwind-protect
       (save-excursion
-	(org-update-dblock)
+	(let ((org-time-clocksum-format
+	       '(:hours "%d" :require-hours t :minutes ":%02d"
+			:require-minutes t)))
+	  (org-update-dblock))
 	(forward-line)
 	;; Skip caption.
 	(when (looking-at "#\\+CAPTION:") (forward-line))
 	(buffer-substring (point)
-			  (progn (search-forward "#+END: clocktable")
+			  (progn (search-forward "#+END:")
 				 (match-beginning 0))))
     ;; Remove clocktable.
-    (delete-region (point)
-		   (progn (search-forward "#+END: clocktable")
-			  (forward-line)
-			  (point)))))
+    (delete-region (point) (search-forward "#+END:\n"))))
 
 
 
@@ -94,10 +94,13 @@ contents.  The clocktable doesn't appear in the buffer."
     ;; Install Clock lines in "Bar".
     (search-forward "** Bar")
     (forward-line)
+    (insert (org-test-clock-create-clock "-10y 8:00" "-10y 12:00"))
     (insert (org-test-clock-create-clock "-2d 15:00" "-2d 18:00"))
     (insert (org-test-clock-create-clock "-1d 8:00" "-1d 13:00"))
     (insert (org-test-clock-create-clock "-1d 15:00" "-1d 18:00"))
-    (insert (org-test-clock-create-clock ". 15:00"))
+    (insert (org-test-clock-create-clock
+	     (let ((time (decode-time (current-time))))
+	       (format ". %d:%d" (1- (nth 2 time)) (nth 1 time)))))
     ;; Previous two days.
     (goto-char (point-min))
     (forward-line)
@@ -117,7 +120,8 @@ contents.  The clocktable doesn't appear in the buffer."
 "
     (org-test-with-temp-text
      "* Relative times in clocktable\n** Foo\n** Bar\n"
-     (test-org-clock/clocktable ":tstart \"<today-2>\" :tend \"<today>\" :indent nil")))))
+     (test-org-clock/clocktable
+      ":tstart \"<-2d>\" :tend \"<today>\" :indent nil")))))
 (ert-deftest test-org-clock/clocktable2 ()
   "Test clocktable specifications."
   ;; Relative time: Yesterday until now.
@@ -133,7 +137,25 @@ contents.  The clocktable doesn't appear in the buffer."
 "
     (org-test-with-temp-text
      "* Relative times in clocktable\n** Foo\n** Bar\n"
-     (test-org-clock/clocktable ":tstart \"<yesterday>\" :tend \"<tomorrow>\" :indent nil")))))
+     (test-org-clock/clocktable
+      ":tstart \"<yesterday>\" :tend \"<tomorrow>\" :indent nil")))))
+
+(ert-deftest test-org-clock/clocktable-until-now ()
+  "Test clocktable specifications using `untilnow' range."
+  ;; Relative time: Yesterday until now.
+  (should
+   (equal
+    "| Headline                     | Time    |       |
+|------------------------------+---------+-------|
+| *Total time*                 | *25:00* |       |
+|------------------------------+---------+-------|
+| Relative times in clocktable | 25:00   |       |
+| Foo                          |         | 10:00 |
+| Bar                          |         | 15:00 |
+"
+    (org-test-with-temp-text
+     "* Relative times in clocktable\n** Foo\n** Bar\n"
+     (test-org-clock/clocktable ":block untilnow :indent nil")))))
 
 (provide 'test-org-clock)
 ;;; test-org-clock.el end here

@@ -6648,6 +6648,7 @@ be selected:
              thisweek, lastweek, thisweek-@var{N}     @r{a relative week}
              thismonth, lastmonth, thismonth-@var{N}  @r{a relative month}
              thisyear, lastyear, thisyear-@var{N}     @r{a relative year}
+             untilnow
              @r{Use @kbd{S-@key{left}/@key{right}} keys to shift the time interval.}
 :tstart      @r{A time string specifying when to start considering times.}
              @r{Relative times like @code{"<-2w>"} can also be used.  See}

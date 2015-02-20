@@ -441,6 +441,7 @@ This applies when using `org-clock-goto'."
 		 (const lastmonth)
 		 (const thisyear)
 		 (const lastyear)
+		 (const untilnow)
 		 (const :tag "Select range interactively" interactive)))
 
 (defvar org-clock-in-prepare-hook nil
@@ -459,6 +460,28 @@ to add an effort property.")
   "Hook run when selecting the currently clocked-in entry.")
 (defvar org-clock-has-been-used nil
   "Has the clock been used during the current Emacs session?")
+
+(defconst org-clock--oldest-date
+  (let* ((dichotomy
+	  (lambda (min max pred)
+	    (if (funcall pred min) min
+	      (incf min)
+	      (while (> (- max min) 1)
+		(let ((mean (+ (ash min -1) (ash max -1) (logand min max 1))))
+		  (if (funcall pred mean) (setq max mean) (setq min mean)))))
+	    max))
+	 (high
+	  (funcall dichotomy
+		   most-negative-fixnum
+		   0
+		   (lambda (m) (ignore-errors (decode-time (list m 0))))))
+	 (low
+	  (funcall dichotomy
+		   most-negative-fixnum
+		   0
+		   (lambda (m) (ignore-errors (decode-time (list high m)))))))
+    (list high low))
+  "Internal time for oldest date representable on the system.")
 
 ;;; The clock for measuring work time.
 
@@ -1879,9 +1902,9 @@ Use \\[org-clock-remove-overlays] to remove the subtree times."
   (org-clock-remove-overlays)
   (let* ((todayp (equal arg '(4)))
 	 (customp (member arg '((16) today yesterday
-			       thisweek lastweek thismonth
-			       lastmonth thisyear lastyear
-			       interactive)))
+				thisweek lastweek thismonth
+				lastmonth thisyear lastyear
+				untilnow interactive)))
 	 (prop (cond ((not arg) :org-clock-minutes-default)
 		     (todayp :org-clock-minutes-today)
 		     (customp :org-clock-minutes-custom)
@@ -2090,134 +2113,159 @@ buffer and update it."
 
 (defun org-clock-special-range (key &optional time as-strings wstart mstart)
   "Return two times bordering a special time range.
-Key is a symbol specifying the range and can be one of `today', `yesterday',
-`thisweek', `lastweek', `thismonth', `lastmonth', `thisyear', `lastyear'.
-By default, a week starts Monday 0:00 and ends Sunday 24:00.
-The range is determined relative to TIME, which defaults to current time.
-The return value is a cons cell with two internal times like the ones
-returned by `current time' or `encode-time'.
-If AS-STRINGS is non-nil, the returned times will be formatted strings.
-If WSTART is non-nil, use this number to specify the starting day of a
-week (monday is 1).
-If MSTART is non-nil, use this number to specify the starting day of a
-month (1 is the first day of the month).
-If you can combine both, the month starting day will have priority."
-  (if (integerp key) (setq key (intern (number-to-string key))))
+
+KEY is a symbol specifying the range and can be one of `today',
+`yesterday', `thisweek', `lastweek', `thismonth', `lastmonth',
+`thisyear', `lastyear' or `untilnow'.  If set to `interactive',
+user is prompted for range boundaries.  It can be a string or an
+integer.
+
+By default, a week starts Monday 0:00 and ends Sunday 24:00.  The
+range is determined relative to TIME, which defaults to current
+time.
+
+The return value is a list containing two internal times, one for
+the beginning of the range and one for its end, like the ones
+returned by `current time' or `encode-time' and a string used to
+display information.  If AS-STRINGS is non-nil, the returned
+times will be formatted strings.
+
+If WSTART is non-nil, use this number to specify the starting day
+of a week (monday is 1).  If MSTART is non-nil, use this number
+to specify the starting day of a month (1 is the first day of the
+month).  If you can combine both, the month starting day will
+have priority."
   (let* ((tm (decode-time (or time (current-time))))
-	 (s 0) (m (nth 1 tm)) (h (nth 2 tm))
-	 (d (nth 3 tm)) (month (nth 4 tm)) (y (nth 5 tm))
+	 (m (nth 1 tm))
+	 (h (nth 2 tm))
+	 (d (nth 3 tm))
+	 (month (nth 4 tm))
+	 (y (nth 5 tm))
 	 (dow (nth 6 tm))
-	 (ws (or wstart 1))
-	 (ms (or mstart 1))
-	 (skey (symbol-name key))
+	 (skey (format "%s" key))
 	 (shift 0)
-         (q (cond ((>= (nth 4 tm) 10) 4)
-                  ((>= (nth 4 tm) 7) 3)
-                  ((>= (nth 4 tm) 4) 2)
-                  ((>= (nth 4 tm) 1) 1)))
-	 s1 m1 h1 d1 month1 y1 diff ts te fm txt w date
-	 interval tmp shiftedy shiftedm shiftedq)
+	 (q (cond ((>= month 10) 4)
+		  ((>= month 7) 3)
+		  ((>= month 4) 2)
+		  (t 1)))
+	 m1 h1 d1 month1 y1 shiftedy shiftedm shiftedq)
     (cond
-     ((string-match "^[0-9]+$" skey)
-      (setq y (string-to-number skey) m 1 d 1 key 'year))
-     ((string-match "^\\([0-9]+\\)-\\([0-9]\\{1,2\\}\\)$" skey)
+     ((string-match "\\`[0-9]+\\'" skey)
+      (setq y (string-to-number skey) month 1 d 1 key 'year))
+     ((string-match "\\`\\([0-9]+\\)-\\([0-9]\\{1,2\\}\\)\\'" skey)
       (setq y (string-to-number (match-string 1 skey))
 	    month (string-to-number (match-string 2 skey))
-	    d 1 key 'month))
-     ((string-match "^\\([0-9]+\\)-[wW]\\([0-9]\\{1,2\\}\\)$" skey)
+	    d 1
+	    key 'month))
+     ((string-match "\\`\\([0-9]+\\)-[wW]\\([0-9]\\{1,2\\}\\)\\'" skey)
       (require 'cal-iso)
-      (setq y (string-to-number (match-string 1 skey))
-	    w (string-to-number (match-string 2 skey)))
-      (setq date (calendar-gregorian-from-absolute
-		  (calendar-iso-to-absolute (list w 1 y))))
-      (setq d (nth 1 date) month (car date) y (nth 2 date)
-	    dow 1
-	    key 'week))
-     ((string-match "^\\([0-9]+\\)-[qQ]\\([1-4]\\)$" skey)
+      (let ((date (calendar-gregorian-from-absolute
+		   (calendar-iso-to-absolute
+		    (list (string-to-number (match-string 2 skey))
+			  1
+			  (string-to-number (match-string 1 skey)))))))
+	(setq d (nth 1 date)
+	      month (car date)
+	      y (nth 2 date)
+	      dow 1
+	      key 'week)))
+     ((string-match "\\`\\([0-9]+\\)-[qQ]\\([1-4]\\)\\'" skey)
       (require 'cal-iso)
-      (setq y (string-to-number (match-string 1 skey)))
-      (setq q (string-to-number (match-string 2 skey)))
-      (setq date (calendar-gregorian-from-absolute
-		  (calendar-iso-to-absolute (org-quarter-to-date q y))))
-      (setq d (nth 1 date) month (car date) y (nth 2 date)
-            dow 1
-            key 'quarter))
-     ((string-match "^\\([0-9]+\\)-\\([0-9]\\{1,2\\}\\)-\\([0-9]\\{1,2\\}\\)$" skey)
+      (let ((date (calendar-gregorian-from-absolute
+		   (calendar-iso-to-absolute
+		    (org-quarter-to-date
+		     (string-to-number (match-string 2 skey))
+		     (string-to-number (match-string 1 skey)))))))
+	(setq d (nth 1 date)
+	      month (car date)
+	      y (nth 2 date)
+	      dow 1
+	      key 'quarter)))
+     ((string-match
+       "\\`\\([0-9]+\\)-\\([0-9]\\{1,2\\}\\)-\\([0-9]\\{1,2\\}\\)\\'"
+       skey)
       (setq y (string-to-number (match-string 1 skey))
 	    month (string-to-number (match-string 2 skey))
 	    d (string-to-number (match-string 3 skey))
 	    key 'day))
-     ((string-match "\\([-+][0-9]+\\)$" skey)
+     ((string-match "\\([-+][0-9]+\\)\\'" skey)
       (setq shift (string-to-number (match-string 1 skey))
-            key (intern (substring skey 0 (match-beginning 1))))
-      (if (and (memq key '(quarter thisq)) (> shift 0))
-	  (error "Looking forward with quarters isn't implemented"))))
-
+	    key (intern (substring skey 0 (match-beginning 1))))
+      (when (and (memq key '(quarter thisq)) (> shift 0))
+	(error "Looking forward with quarters isn't implemented"))))
     (when (= shift 0)
-      (cond ((eq key 'yesterday) (setq key 'today   shift -1))
-            ((eq key 'lastweek)  (setq key 'week    shift -1))
-            ((eq key 'lastmonth) (setq key 'month   shift -1))
-            ((eq key 'lastyear)  (setq key 'year    shift -1))
-            ((eq key 'lastq)     (setq key 'quarter shift -1))))
-    (cond
-     ((memq key '(day today))
-      (setq d (+ d shift) h 0 m 0 h1 24 m1 0))
-     ((memq key '(week thisweek))
-      (setq diff (+ (* -7 shift) (if (= dow 0) (- 7 ws) (- dow ws)))
-	    m 0 h 0 d (- d diff) d1 (+ 7 d)))
-     ((memq key '(month thismonth))
-      (setq d (or ms 1) h 0 m 0 d1 (or ms 1)
-	    month (+ month shift) month1 (1+ month) h1 0 m1 0))
-     ((memq key '(quarter thisq))
-      ;; Compute if this shift remains in this year.  If not, compute
-      ;; how many years and quarters we have to shift (via floor*) and
-      ;; compute the shifted years, months and quarters.
-      (cond
-       ((< (+ (- q 1) shift) 0) ; shift not in this year
-	(setq interval (* -1 (+ (- q 1) shift)))
-	;; Set tmp to ((years to shift) (quarters to shift)).
-	(setq tmp (org-floor* interval 4))
-	;; Due to the use of floor, 0 quarters actually means 4.
-	(if (= 0 (nth 1 tmp))
-	    (setq shiftedy (- y (nth 0 tmp))
-		  shiftedm 1
-		  shiftedq 1)
-	  (setq shiftedy (- y (+ 1 (nth 0 tmp)))
-		shiftedm (- 13 (* 3 (nth 1 tmp)))
-		shiftedq (- 5 (nth 1 tmp))))
-	(setq d 1 h 0 m 0 d1 1 month shiftedm month1 (+ 3 shiftedm) h1 0 m1 0 y shiftedy))
-       ((> (+ q shift) 0) ; shift is within this year
-	(setq shiftedq (+ q shift))
-	(setq shiftedy y)
-	(setq d 1 h 0 m 0 d1 1 month (+ 1 (* 3 (- (+ q shift) 1)))
-	      month1 (+ 4 (* 3 (- (+ q shift) 1))) h1 0 m1 0))))
-     ((memq key '(year thisyear))
-      (setq m 0 h 0 d 1 month 1 y (+ y shift) y1 (1+ y)))
-     ((eq key 'interactive) nil)
-     (t (user-error "No such time block %s" key)))
-    (setq ts (encode-time s m h d month y)
-	  te (encode-time (or s1 s) (or m1 m) (or h1 h)
-			  (or d1 d) (or month1 month) (or y1 y)))
-    (setq fm (cdr org-time-stamp-formats))
-    (cond
-     ((memq key '(day today))
-      (setq txt (format-time-string "%A, %B %d, %Y" ts)))
-     ((memq key '(week thisweek))
-      (setq txt (format-time-string "week %G-W%V" ts)))
-     ((memq key '(month thismonth))
-      (setq txt (format-time-string "%B %Y" ts)))
-     ((memq key '(year thisyear))
-      (setq txt (format-time-string "the year %Y" ts)))
-     ((memq key '(quarter thisq))
-      (setq txt (concat (org-count-quarter shiftedq)
-			" quarter of " (number-to-string shiftedy)))))
-    (if as-strings
-	(list (format-time-string fm ts) (format-time-string fm te) txt)
-      (if (eq key 'interactive)
-	  (list (org-read-date nil t nil "Range start? ")
-		(org-read-date nil t nil "Range end? ")
-		"(Range interactively set)")
-	(list ts te txt)))))
+      (case key
+	(yesterday (setq key 'today   shift -1))
+	(lastweek  (setq key 'week    shift -1))
+	(lastmonth (setq key 'month   shift -1))
+	(lastyear  (setq key 'year    shift -1))
+	(lastq     (setq key 'quarter shift -1))))
+    ;; Prepare start and end times depending on KEY's type.
+    (case key
+      ((day today) (setq m 0 h 0 h1 24 d (+ d shift)))
+      ((week thisweek)
+       (let* ((ws (or wstart 1))
+	      (diff (+ (* -7 shift) (if (= dow 0) (- 7 ws) (- dow ws)))))
+	 (setq m 0 h 0 d (- d diff) d1 (+ 7 d))))
+      ((month thismonth)
+       (setq h 0 m 0 d (or mstart 1) month (+ month shift) month1 (1+ month)))
+      ((quarter thisq)
+       ;; Compute if this shift remains in this year.  If not, compute
+       ;; how many years and quarters we have to shift (via floor*) and
+       ;; compute the shifted years, months and quarters.
+       (cond
+	((< (+ (- q 1) shift) 0)	; Shift not in this year.
+	 (let* ((interval (* -1 (+ (- q 1) shift)))
+		;; Set tmp to ((years to shift) (quarters to shift)).
+		(tmp (org-floor* interval 4)))
+	   ;; Due to the use of floor, 0 quarters actually means 4.
+	   (if (= 0 (nth 1 tmp))
+	       (setq shiftedy (- y (nth 0 tmp))
+		     shiftedm 1
+		     shiftedq 1)
+	     (setq shiftedy (- y (+ 1 (nth 0 tmp)))
+		   shiftedm (- 13 (* 3 (nth 1 tmp)))
+		   shiftedq (- 5 (nth 1 tmp)))))
+	 (setq m 0 h 0 d 1 month shiftedm month1 (+ 3 shiftedm) y shiftedy))
+	((> (+ q shift) 0)		; Shift is within this year.
+	 (setq shiftedq (+ q shift))
+	 (setq shiftedy y)
+	 (let ((qshift (* 3 (1- (+ q shift)))))
+	   (setq m 0 h 0 d 1 month (+ 1 qshift) month1 (+ 4 qshift))))))
+      ((year thisyear)
+       (setq m 0 h 0 d 1 month 1 y (+ y shift) y1 (1+ y)))
+      ((interactive untilnow))		; Special cases, ignore them.
+      (t (user-error "No such time block %s" key)))
+    ;; Format start and end times according to AS-STRINGS.
+    (let* ((start (case key
+		    (interactive (org-read-date nil t nil "Range start? "))
+		    (untilnow org-clock--oldest-date)
+		    (t (encode-time 0 m h d month y))))
+	   (end (case key
+		  (interactive (org-read-date nil t nil "Range end? "))
+		  (untilnow (current-time))
+		  (t (encode-time 0
+				  (or m1 m)
+				  (or h1 h)
+				  (or d1 d)
+				  (or month1 month)
+				  (or y1 y)))))
+	   (text
+	    (case key
+	      ((day today) (format-time-string "%A, %B %d, %Y" start))
+	      ((week thisweek) (format-time-string "week %G-W%V" start))
+	      ((month thismonth) (format-time-string "%B %Y" start))
+	      ((year thisyear) (format-time-string "the year %Y" start))
+	      ((quarter thisq)
+	       (concat (org-count-quarter shiftedq)
+		       " quarter of " (number-to-string shiftedy)))
+	      (interactive "(Range interactively set)")
+	      (untilnow "now"))))
+      (if (not as-strings) (list start end text)
+	(let ((f (cdr org-time-stamp-formats)))
+	  (list (format-time-string f start)
+		(format-time-string f end)
+		text))))))
 
 (defun org-count-quarter (n)
   (cond
