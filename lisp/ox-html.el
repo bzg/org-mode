@@ -1559,8 +1559,7 @@ Replaces invalid characters with \"_\"."
 (defun org-html-footnote-section (info)
   "Format the footnote section.
 INFO is a plist used as a communication channel."
-  (let* ((fn-alist (org-export-collect-footnote-definitions
-		    (plist-get info :parse-tree) info))
+  (let* ((fn-alist (org-export-collect-footnote-definitions info))
 	 (fn-alist
 	  (loop for (n type raw) in fn-alist collect
 		(cons n (if (eq (org-element-type raw) 'org-data)

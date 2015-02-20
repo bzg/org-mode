@@ -1654,6 +1654,37 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 		(org-export-get-footnote-number ref info nil)))
 	info)))))
 
+(ert-deftest test-org-export/collect-footnote-definitions ()
+  "Test `org-export-collect-footnote-definitions' specifications."
+  (should
+   (= 4
+      (org-test-with-parsed-data "Text[fn:1:A[fn:2]] [fn:3].
+
+\[fn:2] B [fn:3] [fn::D].
+
+\[fn:3] C."
+	(length (org-export-collect-footnote-definitions info)))))
+  ;; With optional argument, first check body, then footnote
+  ;; definitions.
+  (should
+   (equal '("fn:1" "fn:3" "fn:2" nil)
+	  (org-test-with-parsed-data "Text[fn:1:A[fn:2]] [fn:3].
+
+\[fn:2] B [fn:3] [fn::D].
+
+\[fn:3] C."
+	    (mapcar (lambda (e) (nth 1 e))
+		    (org-export-collect-footnote-definitions info t)))))
+  (should-not
+   (equal '("fn:1" "fn:3" "fn:2" nil)
+	  (org-test-with-parsed-data "Text[fn:1:A[fn:2]] [fn:3].
+
+\[fn:2] B [fn:3] [fn::D].
+
+\[fn:3] C."
+	    (mapcar (lambda (e) (nth 1 e))
+		    (org-export-collect-footnote-definitions info))))))
+
 (ert-deftest test-org-export/footnotes ()
   "Miscellaneous tests on footnotes."
   (let ((org-footnote-section nil)
@@ -1683,16 +1714,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 		     tree (org-export-get-environment)))))
 	;; Both footnotes should be seen.
 	(should
-	 (= (length (org-export-collect-footnote-definitions tree info)) 2))))
-    ;; Test footnotes definitions collection.
-    (should
-     (= 4
-	(org-test-with-parsed-data "Text[fn:1:A[fn:2]] [fn:3].
-
-\[fn:2] B [fn:3] [fn::D].
-
-\[fn:3] C."
-	  (length (org-export-collect-footnote-definitions tree info)))))
+	 (= (length (org-export-collect-footnote-definitions info)) 2))))
     ;; Test export of footnotes defined outside parsing scope.
     (should
      (equal

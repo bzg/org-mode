@@ -60,6 +60,7 @@ buffer name, as the title. Instead, simply ignore the title.
 *** Signature changes
 The following functions require an additional argument.  See their
 docstring for more information.
+- ~org-export-collect-footnote-definitions~
 - ~org-html-format-headline-function~
 - ~org-html-format-inlinetask-function~
 - ~org-latex-format-headline-function~

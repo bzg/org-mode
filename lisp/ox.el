@@ -3538,39 +3538,6 @@ applied."
 ;; `org-export-get-footnote-number' provide easier access to
 ;; additional information relative to a footnote reference.
 
-(defun org-export-collect-footnote-definitions (data info)
-  "Return an alist between footnote numbers, labels and definitions.
-
-DATA is the parse tree from which definitions are collected.
-INFO is the plist used as a communication channel.
-
-Definitions are sorted by order of references.  They either
-appear as Org data or as a secondary string for inlined
-footnotes.  Unreferenced definitions are ignored."
-  (let* (num-alist
-	 collect-fn			; for byte-compiler.
-	 (collect-fn
-	  (function
-	   (lambda (data)
-	     ;; Collect footnote number, label and definition in DATA.
-	     (org-element-map data 'footnote-reference
-	       (lambda (fn)
-		 (when (org-export-footnote-first-reference-p fn info)
-		   (let ((def (org-export-get-footnote-definition fn info)))
-		     (push
-		      (list (org-export-get-footnote-number fn info)
-			    (org-element-property :label fn)
-			    def)
-		      num-alist)
-		     ;; Also search in definition for nested footnotes.
-		     (when (eq (org-element-property :type fn) 'standard)
-		       (funcall collect-fn def)))))
-	       ;; Don't enter footnote definitions since it will happen
-	       ;; when their first reference is found.
-	       info nil 'footnote-definition)))))
-    (funcall collect-fn (plist-get info :parse-tree))
-    (reverse num-alist)))
-
 (defun org-export-get-footnote-definition (footnote-reference info)
   "Return definition of FOOTNOTE-REFERENCE as parsed data.
 INFO is the plist used as a communication channel.  If no such
@@ -3624,6 +3591,32 @@ delayed until the end of the process."
 		'footnote-definition)))))
     (funcall search-ref (plist-get info :parse-tree) body-first)
     (funcall search-ref (nreverse definitions) nil)))
+
+(defun org-export-collect-footnote-definitions (info &optional body-first)
+  "Return an alist between footnote numbers, labels and definitions.
+
+INFO is the current export state, as a plist.
+
+Definitions are sorted by order of references.  As soon as a new
+reference is encountered, other references are searched within
+its definition.  However, if BODY-FIRST is non-nil, this step is
+delayed after the whole tree is checked.  This alters results
+when references are found in footnote definitions.
+
+Definitions either appear as Org data or as a secondary string
+for inlined footnotes.  Unreferenced definitions are ignored."
+  (let ((n 0) labels alist)
+    (org-export--footnote-reference-map
+     (lambda (f)
+       ;; Collect footnote number, label and definition.
+       (let ((l (org-element-property :label f))
+	     (d (org-export-get-footnote-definition f info)))
+	 (unless (and l (member l labels))
+	   (incf n)
+	   (push (list n l d) alist))
+	 (when l (push l labels))))
+     info body-first)
+    (nreverse alist)))
 
 (defun org-export-footnote-first-reference-p
     (footnote-reference info &optional body-first)
