@@ -18665,10 +18665,10 @@ environment remains unintended."
 	 ;; environment has been inserted.
 	 (lines (when inserted
 		  (save-excursion
-		    (- (cl-loop while (< beg (point))
+		    (- (loop while (< beg (point))
 				with x = 0
 				do (forward-line -1)
-				(cl-incf x)
+				(incf x)
 				finally return x)
 		       (if (progn (goto-char beg)
 				  (and (progn (skip-chars-forward " \t") (eolp))
