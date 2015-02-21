@@ -345,7 +345,10 @@ of @kbd{C-a} and @kbd{C-e} in headlines.}.  For example:
 * Another top level headline
 @end smallexample
 
-@noindent 
+@noindent Note that a headline named after @code{org-footnote-section},
+which defaults to @samp{Footnotes}, is considered as special.  A subtree with
+this headline will be silently ignored by exporting functions.
+
 Some people find the many stars too noisy and would prefer an
 outline that has whitespace followed by a single star as headline
 starters.  @ref{Clean view}, describes a setup to realize this.
