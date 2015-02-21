@@ -3556,8 +3556,9 @@ definition can be found, raise an error."
 	  (org-element-contents footnote-reference))
 	(error "Definition not found for footnote %s" label))))
 
-(defun org-export--footnote-reference-map (function info &optional body-first)
-  "Apply FUNCTION on every footnote reference in parse tree.
+(defun org-export--footnote-reference-map
+    (function data info &optional body-first)
+  "Apply FUNCTION on every footnote reference in DATA.
 INFO is a plist containing export state.  By default, as soon as
 a new footnote reference is encountered, FUNCTION is called onto
 its definition.  However, if BODY-FIRST is non-nil, this step is
@@ -3597,15 +3598,18 @@ delayed until the end of the process."
 	      ;; definitions of inline references.
 	      (if delayp '(footnote-definition footnote-reference)
 		'footnote-definition)))))
-    (funcall search-ref (plist-get info :parse-tree) body-first)
+    (funcall search-ref data body-first)
     (funcall search-ref (nreverse definitions) nil)))
 
-(defun org-export-collect-footnote-definitions (info &optional body-first)
+(defun org-export-collect-footnote-definitions (info &optional data body-first)
   "Return an alist between footnote numbers, labels and definitions.
 
 INFO is the current export state, as a plist.
 
-Definitions are sorted by order of references.  As soon as a new
+Definitions are collected throughout the whole parse tree, or
+DATA when non-nil.
+
+Sorting is done by order of references.  As soon as a new
 reference is encountered, other references are searched within
 its definition.  However, if BODY-FIRST is non-nil, this step is
 delayed after the whole tree is checked.  This alters results
@@ -3623,15 +3627,18 @@ for inlined footnotes.  Unreferenced definitions are ignored."
 	   (incf n)
 	   (push (list n l d) alist))
 	 (when l (push l labels))))
-     info body-first)
+     (or data (plist-get info :parse-tree)) info body-first)
     (nreverse alist)))
 
 (defun org-export-footnote-first-reference-p
-    (footnote-reference info &optional body-first)
+    (footnote-reference info &optional data body-first)
   "Non-nil when a footnote reference is the first one for its label.
 
 FOOTNOTE-REFERENCE is the footnote reference being considered.
 INFO is a plist containing current export state.
+
+Search is done throughout the whole parse tree, or DATA when
+non-nil.
 
 By default, as soon as a new footnote reference is encountered,
 other references are searched within its definition.  However, if
@@ -3647,13 +3654,16 @@ footnote definitions."
 	     (let ((l (org-element-property :label f)))
 	       (when (and l label (string= label l))
 		 (throw 'exit (eq footnote-reference f)))))
-	   info body-first)))))
+	   (or data (plist-get info :parse-tree)) info body-first)))))
 
-(defun org-export-get-footnote-number (footnote info &optional body-first)
+(defun org-export-get-footnote-number (footnote info &optional data body-first)
   "Return number associated to a footnote.
 
 FOOTNOTE is either a footnote reference or a footnote definition.
 INFO is the plist containing export state.
+
+Number is unique throughout the whole parse tree, or DATA, when
+non-nil.
 
 By default, as soon as a new footnote reference is encountered,
 counting process moves into its definition.  However, if
@@ -3675,7 +3685,7 @@ process, leading to a different order when footnotes are nested."
 	    ;; wasn't encountered yet.
 	    ((not l) (incf count))
 	    ((not (member l seen)) (push l seen) (incf count)))))
-       info body-first))))
+       (or data (plist-get info :parse-tree)) info body-first))))
 
 
 ;;;; For Headlines

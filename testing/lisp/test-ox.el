@@ -1557,6 +1557,30 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 	    (paragraph . (lambda (p c i) c))))
 	 nil nil nil '(:with-footnotes t))
 	(nreverse result)))))
+  ;; Limit check to DATA, when non-nil.
+  (should
+   (equal
+    '(nil t)
+    (org-test-with-parsed-data "Text[fn:1]\n* H\nText[fn:1]\n\n[fn:1] D1"
+      (let (result)
+	(org-element-map tree 'footnote-reference
+	  (lambda (ref)
+	    (push
+	     (org-export-footnote-first-reference-p
+	      ref info (org-element-map tree 'headline #'identity info t))
+	     result))
+	  info)
+	(nreverse result)))))
+  (should
+   (equal
+    '(t nil)
+    (org-test-with-parsed-data "Text[fn:1]\n* H\nText[fn:1]\n\n[fn:1] D1"
+      (let (result)
+	(org-element-map tree 'footnote-reference
+	  (lambda (ref)
+	    (push (org-export-footnote-first-reference-p ref info) result))
+	  info)
+	(nreverse result)))))
   ;; If optional argument BODY-FIRST is non-nil, first find footnote
   ;; in the main body of the document.  Otherwise, enter footnote
   ;; definitions when they are encountered.
@@ -1593,7 +1617,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 	  `(,(cons 'footnote-reference
 		   (lambda (f c i)
 		     (when (org-element-lineage f '(drawer))
-		       (push (org-export-footnote-first-reference-p f info t)
+		       (push (org-export-footnote-first-reference-p f info nil t)
 			     result))
 		     ""))
 	    (drawer . (lambda (d c i) c))
@@ -1631,8 +1655,27 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 	  (cons (org-export-get-footnote-number ref info)
 		(org-element-property :label ref)))
 	info))))
-  ;; With a non-nil optional argument, first check body, then footnote
-  ;; definitions.
+  ;; Limit number to provided DATA, when non-nil.
+  (should
+   (equal
+    '(1)
+    (org-test-with-parsed-data
+	"Text[fn:1]\n* H\nText[fn:2]\n\n[fn:1] D1\n[fn:2] D2"
+      (org-element-map tree 'footnote-reference
+	(lambda (ref)
+	  (org-export-get-footnote-number
+	   ref info (org-element-map tree 'headline #'identity info t)))
+	info))))
+  (should
+   (equal
+    '(1 2)
+    (org-test-with-parsed-data
+	"Text[fn:1]\n* H\nText[fn:2]\n\n[fn:1] D1\n[fn:2]"
+      (org-element-map tree 'footnote-reference
+	(lambda (ref) (org-export-get-footnote-number ref info))
+	info))))
+  ;; With a non-nil BODY-FIRST optional argument, first check body,
+  ;; then footnote definitions.
   (should
    (equal
     '(("fn:1" . 1) ("fn:2" . 2) ("fn:3" . 3) ("fn:3" . 3))
@@ -1641,7 +1684,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
       (org-element-map tree 'footnote-reference
 	(lambda (ref)
 	  (cons (org-element-property :label ref)
-		(org-export-get-footnote-number ref info t)))
+		(org-export-get-footnote-number ref info nil t)))
 	info))))
   (should
    (equal
@@ -1664,8 +1707,23 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 
 \[fn:3] C."
 	(length (org-export-collect-footnote-definitions info)))))
-  ;; With optional argument, first check body, then footnote
-  ;; definitions.
+  ;; Limit number to provided DATA, when non-nil.
+  (should
+   (equal
+    '((1 "fn:2"))
+    (org-test-with-parsed-data
+	"Text[fn:1]\n* H\nText[fn:2]\n\n[fn:1] D1\n[fn:2] D2"
+      (mapcar #'butlast
+	      (org-export-collect-footnote-definitions
+	       info (org-element-map tree 'headline #'identity info t))))))
+  (should
+   (equal
+    '((1 "fn:1") (2 "fn:2"))
+    (org-test-with-parsed-data
+	"Text[fn:1]\n* H\nText[fn:2]\n\n[fn:1] D1\n[fn:2] D2"
+      (mapcar #'butlast (org-export-collect-footnote-definitions info)))))
+  ;; With optional argument BODY-FIRST, first check body, then
+  ;; footnote definitions.
   (should
    (equal '("fn:1" "fn:3" "fn:2" nil)
 	  (org-test-with-parsed-data "Text[fn:1:A[fn:2]] [fn:3].
@@ -1674,7 +1732,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 
 \[fn:3] C."
 	    (mapcar (lambda (e) (nth 1 e))
-		    (org-export-collect-footnote-definitions info t)))))
+		    (org-export-collect-footnote-definitions info nil t)))))
   (should-not
    (equal '("fn:1" "fn:3" "fn:2" nil)
 	  (org-test-with-parsed-data "Text[fn:1:A[fn:2]] [fn:3].
