@@ -197,26 +197,27 @@ This list represents a \"habit\" for the rest of this module."
 	     (reversed org-log-states-order-reversed)
 	     (search (if reversed 're-search-forward 're-search-backward))
 	     (limit (if reversed end (point)))
-	     (count 0))
+	     (count 0)
+	     (re (format
+		  "^[ \t]*-[ \t]+\\(?:%s\\)"
+		  (mapconcat
+		   (lambda (type)
+		     (let ((value (cdr (assq type org-log-note-headings))))
+		       (when value
+			 (org-replace-escapes
+			  (regexp-quote value)
+			  `(("%d" . ,org-ts-regexp-inactive)
+			    ("%D" . ,org-ts-regexp)
+			    ("%s" . "\"\\S-+\"")
+			    ("%S" . "\"\\S-+\"")
+			    ("%t" . ,org-ts-regexp-inactive)
+			    ("%T" . ,org-ts-regexp)
+			    ("%u" . ".*?")
+			    ("%U" . ".*?"))))))
+		   '(state done)
+		   "\\|"))))
 	(unless reversed (goto-char end))
-	(while (and (< count maxdays)
-		    (funcall search
-			     (concat
-			      (format "- State \"%s\".*\\[\\([^]]+\\)\\]"
-				      (regexp-opt org-done-keywords))
-			      "\\|"
-			      (org-replace-escapes
-			       (regexp-quote
-				(cdr (assq 'done org-log-note-headings)))
-			       `(("%d" . ,org-ts-regexp-inactive)
-				 ("%D" . ,org-ts-regexp)
-				 ("%s" . "\"\\S-+\"")
-				 ("%S" . "\"\\S-+\"")
-				 ("%t" . ,org-ts-regexp-inactive)
-				 ("%T" . ,org-ts-regexp)
-				 ("%u" . ".*?")
-				 ("%U" . ".*?"))))
-			     limit t))
+	(while (and (< count maxdays) (funcall search re limit t))
 	  (push (time-to-days
 		 (org-time-string-to-time
 		  (or (org-match-string-no-properties 1)
