@@ -24810,9 +24810,8 @@ ELEMENT is the element at point."
 	  (keyword
 	   (and (member (org-element-property :key element)
 			'("DESCRIPTION" "TITLE"))
-		(< (save-excursion
-		     (beginning-of-line) (search-forward ":") (point))
-		   (point))))
+		(save-excursion
+		  (search-backward ":" (line-beginning-position) t))))
 	  ;; Check is globally allowed in paragraphs verse blocks and
 	  ;; table rows (after affiliated keywords) but some objects
 	  ;; must not be affected.
