@@ -199,23 +199,22 @@ This list represents a \"habit\" for the rest of this module."
 	     (limit (if reversed end (point)))
 	     (count 0)
 	     (re (format
-		  "^[ \t]*-[ \t]+\\(?:%s\\)"
-		  (mapconcat
-		   (lambda (type)
-		     (let ((value (cdr (assq type org-log-note-headings))))
-		       (when value
-			 (org-replace-escapes
-			  (regexp-quote value)
-			  `(("%d" . ,org-ts-regexp-inactive)
-			    ("%D" . ,org-ts-regexp)
-			    ("%s" . "\"\\S-+\"")
-			    ("%S" . "\"\\S-+\"")
-			    ("%t" . ,org-ts-regexp-inactive)
-			    ("%T" . ,org-ts-regexp)
-			    ("%u" . ".*?")
-			    ("%U" . ".*?"))))))
-		   '(state done)
-		   "\\|"))))
+		  "^[ \t]*-[ \t]+\\(?:State \"%s\".*%s%s\\)"
+		  (regexp-opt org-done-keywords)
+		  org-ts-regexp-inactive
+		  (let ((value (cdr (assq 'done org-log-note-headings))))
+		    (if (not value) ""
+		      (concat "\\|"
+			      (org-replace-escapes
+			       (regexp-quote value)
+			       `(("%d" . ,org-ts-regexp-inactive)
+				 ("%D" . ,org-ts-regexp)
+				 ("%s" . "\"\\S-+\"")
+				 ("%S" . "\"\\S-+\"")
+				 ("%t" . ,org-ts-regexp-inactive)
+				 ("%T" . ,org-ts-regexp)
+				 ("%u" . ".*?")
+				 ("%U" . ".*?")))))))))
 	(unless reversed (goto-char end))
 	(while (and (< count maxdays) (funcall search re limit t))
 	  (push (time-to-days
