@@ -2231,18 +2231,28 @@ INFO may provide the values of these header arguments (in the
 			    (if (listp result) result (split-string result "\n" t))))
 		     '(:splicep nil :istart "- " :iend "\n")))
 		   "\n"))
-		 ;; assume the result is a table if it's not a string
-		 ((funcall proper-list-p result)
+		 ;; Try hard to print RESULT as a table.  Give up if
+		 ;; it contains an improper list.
+		 ((and (funcall proper-list-p result)
+		       (org-every (lambda (e)
+				    (or (atom e) (funcall proper-list-p e)))
+				  result))
 		  (goto-char beg)
 		  (insert (concat (orgtbl-to-orgtbl
 				   (if (org-every
-					(lambda (el) (or (listp el) (eq el 'hline)))
+					(lambda (e)
+					  (or (eq e 'hline) (listp e)))
 					result)
-				       result (list result))
-				   '(:fmt (lambda (cell) (format "%s" cell)))) "\n"))
-		  (goto-char beg) (when (org-at-table-p) (org-table-align)))
-		 ((and (listp result) (not (funcall proper-list-p result)))
-		  (insert (format "%s\n" result)))
+				       result
+				     (list result))
+				   nil)
+				  "\n"))
+		  (goto-char beg)
+		  (when (org-at-table-p) (org-table-align))
+		  (goto-char (org-table-end)))
+		 ;; Print verbatim a list that cannot be turned into
+		 ;; a table.
+		 ((listp result) (insert (format "%s\n" result)))
 		 ((member "file" result-params)
 		  (when inlinep
 		    (goto-char inlinep)
@@ -2254,11 +2264,10 @@ INFO may provide the values of these header arguments (in the
 		  (insert (org-macro-escape-arguments
 			   (org-babel-chomp result "\n"))))
 		 (t (goto-char beg) (insert result)))
-		(when (funcall proper-list-p result) (goto-char (org-table-end)))
 		(setq end (point-marker))
 		;; possibly wrap result
 		(cond
-		 (bad-inline-p) ; Do nothing.
+		 (bad-inline-p)		; Do nothing.
 		 ((assoc :wrap (nth 2 info))
 		  (let ((name (or (cdr (assoc :wrap (nth 2 info))) "RESULTS")))
 		    (funcall wrap (concat "#+BEGIN_" name)

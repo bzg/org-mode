@@ -758,6 +758,18 @@ on two lines
 	     ": 2"
 	     (buffer-substring-no-properties (point-at-bol) (point-at-eol))))))
 
+(ert-deftest test-ob/org-babel-insert-result--improper-lists ()
+  "Test `org-babel-insert-result' with improper lists."
+  ;; Do not error when output is an improper list.
+  (should
+   (org-test-with-temp-text
+       "
+<point>#+BEGIN_SRC emacs-lisp
+'((1 . nil) (2 . 3))
+#+END_SRC
+"
+     (org-babel-execute-maybe) t)))
+
 (ert-deftest test-ob/remove-inline-result ()
   "Test `org-babel-remove-inline-result' honors whitespace."
   (let*
