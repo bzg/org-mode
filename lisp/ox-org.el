@@ -146,7 +146,7 @@ CONTENTS is nil.  INFO is ignored."
   "Transcode LINK object back into Org syntax.
 CONTENTS is the description of the link, as a string, or nil.
 INFO is a plist containing current export state."
-  (or (org-export-custom-protocol-maybe link contents info)
+  (or (org-export-custom-protocol-maybe link contents 'org)
       (org-element-link-interpreter link contents)))
 
 (defun org-org-template (contents info)

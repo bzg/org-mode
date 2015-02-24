@@ -314,7 +314,7 @@ a communication channel."
 	(type (org-element-property :type link)))
     (cond
      ;; Link type is handled by a special function.
-     ((org-export-custom-protocol-maybe link contents info))
+     ((org-export-custom-protocol-maybe link contents 'md))
      ((member type '("custom-id" "id"))
       (let ((destination (org-export-resolve-id-link link info)))
 	(if (stringp destination)	; External file.

@@ -2747,7 +2747,7 @@ INFO is a plist holding contextual information.  See
 	 (path (replace-regexp-in-string "&" "&amp;" path)))
     (cond
      ;; Link type is handled by a special function.
-     ((org-export-custom-protocol-maybe link desc info))
+     ((org-export-custom-protocol-maybe link desc 'odt))
      ;; Image file.
      ((and (not desc) (org-export-inline-image-p
 		       link (plist-get info :odt-inline-image-rules)))

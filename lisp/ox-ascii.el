@@ -1525,7 +1525,7 @@ DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information."
   (let ((type (org-element-property :type link)))
     (cond
-     ((org-export-custom-protocol-maybe link desc info))
+     ((org-export-custom-protocol-maybe link desc 'ascii))
      ((string= type "coderef")
       (let ((ref (org-element-property :path link)))
 	(format (org-export-get-coderef-format ref desc)

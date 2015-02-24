@@ -3926,19 +3926,18 @@ meant to be translated with `org-export-data' or alike."
   (save-match-data
     (mapconcat 'identity (org-split-string s "[^a-zA-Z0-9_.-:]+") "-")))
 
-(defun org-export-custom-protocol-maybe (link desc info)
+(defun org-export-custom-protocol-maybe (link desc backend)
   "Try exporting LINK with a dedicated function.
 
-DESC is its description, as a string, or nil.  INFO is the plist
-containing export state.  Return output as a string, or nil if no
-protocol handles LINK.
+DESC is its description, as a string, or nil.  BACKEND is the
+back-end used for export, as a symbol.
 
-A custom protocol is expected to have precedence over regular
-back-end export.  The function ignores links with an implicit
-type (e.g., \"custom-id\")."
-  (let ((type (org-element-property :type link))
-	(backend (let ((b (plist-get info :back-end)))
-		   (and b (org-export-backend-name b)))))
+Return output as a string, or nil if no protocol handles LINK.
+
+A custom protocol has precedence over regular back-end export.
+The function ignores links with an implicit type (e.g.,
+\"custom-id\")."
+  (let ((type (org-element-property :type link)))
     (unless (or (member type '("coderef" "custom-id" "fuzzy" "radio"))
 		(not backend))
       (let ((protocol (nth 2 (assoc type org-link-protocols))))

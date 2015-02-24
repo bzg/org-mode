@@ -691,7 +691,7 @@ used as a communication channel."
 	(path (org-element-property :path link)))
     (cond
      ;; Link type is handled by a special function.
-     ((org-export-custom-protocol-maybe link contents info))
+     ((org-export-custom-protocol-maybe link contents 'beamer))
      ;; Use \hyperlink command for all internal links.
      ((equal type "radio")
       (let ((destination (org-export-resolve-radio-link link info)))

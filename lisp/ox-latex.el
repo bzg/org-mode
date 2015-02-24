@@ -2043,7 +2043,7 @@ INFO is a plist holding contextual information.  See
 		(t raw-path))))
     (cond
      ;; Link type is handled by a special function.
-     ((org-export-custom-protocol-maybe link desc info))
+     ((org-export-custom-protocol-maybe link desc 'latex))
      ;; Image file.
      (imagep (org-latex--inline-image link info))
      ;; Radio link: Transcode target's contents and use them as link's

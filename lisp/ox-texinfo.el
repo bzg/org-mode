@@ -919,7 +919,7 @@ INFO is a plist holding contextual information.  See
 		 (concat "file:" raw-path))
 		(t raw-path))))
     (cond
-     ((org-export-custom-protocol-maybe link desc info))
+     ((org-export-custom-protocol-maybe link desc 'texinfo))
      ((equal type "radio")
       (let ((destination (org-export-resolve-radio-link link info)))
 	(if (not destination) desc

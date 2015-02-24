@@ -2235,11 +2235,12 @@ Paragraph[fn:1]"
        "[[foo:path]]"
        (org-export-create-backend
 	:name 'test
-	:transcoders '((section . (lambda (s c i) c))
-		       (paragraph . (lambda (p c i) c))
-		       (link . (lambda (l c i)
-				 (or (org-export-custom-protocol-maybe l c i)
-				     "failure")))))))))
+	:transcoders
+	'((section . (lambda (s c i) c))
+	  (paragraph . (lambda (p c i) c))
+	  (link . (lambda (l c i)
+		    (or (org-export-custom-protocol-maybe l c 'test)
+			"failure")))))))))
   (should-not
    (string-match
     "success"
@@ -2250,11 +2251,12 @@ Paragraph[fn:1]"
        "[[foo:path]]"
        (org-export-create-backend
 	:name 'no-test
-	:transcoders '((section . (lambda (s c i) c))
-		       (paragraph . (lambda (p c i) c))
-		       (link . (lambda (l c i)
-				 (or (org-export-custom-protocol-maybe l c i)
-				     "failure")))))))))
+	:transcoders
+	'((section . (lambda (s c i) c))
+	  (paragraph . (lambda (p c i) c))
+	  (link . (lambda (l c i)
+		    (or (org-export-custom-protocol-maybe l c 'no-test)
+			"failure")))))))))
   ;; Ignore anonymous back-ends.
   (should-not
    (string-match
@@ -2265,11 +2267,12 @@ Paragraph[fn:1]"
       (org-export-string-as
        "[[foo:path]]"
        (org-export-create-backend
-	:transcoders '((section . (lambda (s c i) c))
-		       (paragraph . (lambda (p c i) c))
-		       (link . (lambda (l c i)
-				 (or (org-export-custom-protocol-maybe l c i)
-				     "failure"))))))))))
+	:transcoders
+	'((section . (lambda (s c i) c))
+	  (paragraph . (lambda (p c i) c))
+	  (link . (lambda (l c i)
+		    (or (org-export-custom-protocol-maybe l c nil)
+			"failure"))))))))))
 
 (ert-deftest test-org-export/get-coderef-format ()
   "Test `org-export-get-coderef-format' specifications."

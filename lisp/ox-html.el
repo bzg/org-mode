@@ -2783,7 +2783,7 @@ INFO is a plist holding contextual information.  See
 	    (if (org-string-nw-p attr) (concat " " attr) ""))))
     (cond
      ;; Link type is handled by a special function.
-     ((org-export-custom-protocol-maybe link desc info))
+     ((org-export-custom-protocol-maybe link desc 'html))
      ;; Image file.
      ((and (plist-get info :html-inline-images)
 	   (org-export-inline-image-p

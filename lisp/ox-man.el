@@ -659,7 +659,7 @@ INFO is a plist holding contextual information.  See
          protocol)
     (cond
      ;; Link type is handled by a special function.
-     ((org-export-custom-protocol-maybe link desc info))
+     ((org-export-custom-protocol-maybe link desc 'man))
      ;; External link with a description part.
      ((and path desc) (format "%s \\fBat\\fP \\fI%s\\fP" path desc))
      ;; External link without a description part.
