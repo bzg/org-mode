@@ -1553,14 +1553,15 @@ original parsed data.  INFO is a plist holding export options."
 		   (timestamp (and (not (cdr date))
 				   (eq (org-element-type (car date)) 'timestamp)
 				   (car date))))
-	      (concat
-	       (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
-		       "OrgSubtitle"
-		       (if (and (plist-get info :odt-use-date-fields) timestamp)
-			   (org-odt--format-timestamp (car date))
-			 (org-export-data (plist-get info :date) info)))
-	       ;; Separator
-	       "<text:p text:style-name=\"OrgSubtitle\"/>"))))))
+	      (when date
+		(concat
+		 (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+			 "OrgSubtitle"
+			 (if (and (plist-get info :odt-use-date-fields) timestamp)
+			     (org-odt--format-timestamp (car date))
+			   (org-export-data date info)))
+		 ;; Separator
+		 "<text:p text:style-name=\"OrgSubtitle\"/>")))))))
       ;; Table of Contents
       (let* ((with-toc (plist-get info :with-toc))
 	     (depth (and with-toc (if (wholenump with-toc)
