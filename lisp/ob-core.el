@@ -2055,7 +2055,7 @@ If the path of the link is a file path it is expanded using
       (funcall echo-res result))))
 
 (defun org-babel-insert-result
-  (result &optional result-params info hash indent lang)
+    (result &optional result-params info hash indent lang)
   "Insert RESULT into the current buffer.
 
 By default RESULT is inserted after the end of the current source
@@ -2198,7 +2198,7 @@ INFO may provide the values of these header arguments (in the
 	      (setq results-switches
 		    (if results-switches (concat " " results-switches) ""))
 	      (let ((wrap (lambda (start finish &optional no-escape no-newlines
-					 inline-start inline-finish)
+				    inline-start inline-finish)
 			    (when inlinep
 			      (setq start inline-start)
 			      (setq finish inline-finish)
@@ -2212,7 +2212,15 @@ INFO may provide the values of these header arguments (in the
 			    (goto-char end)
 			    (unless no-newlines (goto-char (point-at-eol)))
 			    (setq end (point-marker))))
-		    (proper-list-p (lambda (it) (and (listp it) (null (cdr (last it)))))))
+		    (tabulablep
+		     (lambda (r)
+		       ;; Non-nil when result R can be turned into
+		       ;; a table.
+		       (and (listp r)
+			    (null (cdr (last r)))
+			    (org-every
+			     (lambda (e) (or (atom e) (null (cdr (last e)))))
+			     result)))))
 		;; insert results based on type
 		(cond
 		 ;; Do nothing for an empty result.
@@ -2233,10 +2241,7 @@ INFO may provide the values of these header arguments (in the
 		   "\n"))
 		 ;; Try hard to print RESULT as a table.  Give up if
 		 ;; it contains an improper list.
-		 ((and (funcall proper-list-p result)
-		       (org-every (lambda (e)
-				    (or (atom e) (funcall proper-list-p e)))
-				  result))
+		 ((funcall tabulablep result)
 		  (goto-char beg)
 		  (insert (concat (orgtbl-to-orgtbl
 				   (if (org-every
@@ -2299,7 +2304,7 @@ INFO may provide the values of these header arguments (in the
 			   "{{{results(" ")}}}"))
 		 ((and inlinep (member "file" result-params))
 		  (funcall wrap nil nil nil nil "{{{results(" ")}}}"))
-		 ((and (not (funcall proper-list-p result))
+		 ((and (not (funcall tabulablep result))
 		       (not (member "file" result-params)))
 		  (let ((org-babel-inline-result-wrap
 			 ;; Hard code {{{results(...)}}} on top of customization.
