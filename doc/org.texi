@@ -12491,15 +12491,20 @@ You can specify the @LaTeX{}-to-MathML converter by customizing the variables
 @code{org-latex-to-mathml-convert-command} and
 @code{org-latex-to-mathml-jar-file}.
 
-If you prefer to use @file{MathToWeb}@footnote{See
-@uref{http://www.mathtoweb.com/cgi-bin/mathtoweb_home.pl, MathToWeb}} as your
-converter, you can configure the above variables as shown below.
+To use MathToWeb@footnote{See
+@uref{http://www.mathtoweb.com/cgi-bin/mathtoweb_home.pl, MathToWeb}.} as your
+converter, you can configure the above variables as
 
 @lisp
 (setq org-latex-to-mathml-convert-command
       "java -jar %j -unicode -force -df %o %I"
       org-latex-to-mathml-jar-file
       "/path/to/mathtoweb.jar")
+@end lisp
+To use @LaTeX{}ML@footnote{See @uref{http://dlmf.nist.gov/LaTeXML/}.} use
+@lisp
+(setq org-latex-to-mathml-convert-command
+      "latexmlmath \"%i\" --presentationmathml=%o")
 @end lisp
 
 You can use the following commands to quickly verify the reliability of

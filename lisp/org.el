@@ -3970,12 +3970,16 @@ Replace format-specifiers in the command as noted below and use
 `shell-command' to convert LaTeX to MathML.
 %j:     Executable file in fully expanded form as specified by
         `org-latex-to-mathml-jar-file'.
-%I:     Input LaTeX file in fully expanded form
-%o:     Output MathML file
+%I:     Input LaTeX file in fully expanded form.
+%i:     The latex fragment to be converted.
+%o:     Output MathML file.
 This command is used by `org-create-math-formula'.
 
 When using MathToWeb as the converter, set this to
-\"java -jar %j -unicode -force -df %o %I\"."
+\"java -jar %j -unicode -force -df %o %I\".
+
+When using  LaTeXML set this to
+\"latexmlmath \"%i\" --presentationmathml=%o\"."
   :group 'org-latex
   :version "24.1"
   :type '(choice
@@ -18949,6 +18953,7 @@ inspection."
 	       `((?j . ,(shell-quote-argument
 			 (expand-file-name org-latex-to-mathml-jar-file)))
 		 (?I . ,(shell-quote-argument tmp-in-file))
+		 (?i . ,latex-frag)
 		 (?o . ,(shell-quote-argument tmp-out-file)))))
 	 mathml shell-command-output)
     (when (org-called-interactively-p 'any)
@@ -18963,9 +18968,11 @@ inspection."
 	      (when (re-search-forward
 		     (concat
 		      (regexp-quote
-		       "<math xmlns=\"http://www.w3.org/1998/Math/MathML\">")
+		       "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"")
+		      "[^>]*?>"
 		      "\\(.\\|\n\\)*"
-		      (regexp-quote "</math>")) nil t)
+		      "</math>")
+		     nil t)
 		(prog1 (match-string 0) (kill-buffer))))))
     (cond
      (mathml
