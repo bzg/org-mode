@@ -3851,7 +3851,7 @@ contextual information."
 						  (list :value latex-frag)))
 		  ;; Replace now.
 		  (org-element-set-element latex-* replacement))))))
-	info)))
+	info nil nil t)))
   tree)
 
 
