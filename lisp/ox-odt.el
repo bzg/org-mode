@@ -3812,45 +3812,43 @@ contextual information."
 						  nil processing-type)
 				(buffer-substring-no-properties
 				 (point-min) (point-max)))))
-		    (if (not (string-match "file:\\([^]]*\\)" link))
-			(prog1 nil (message "LaTeX Conversion failed."))
-		      link))))
+		    (if (org-string-match-p "file:\\([^]]*\\)" link) link
+		      (message "LaTeX Conversion failed.")))))
 	    (when org-link
-	      ;; Conversion succeeded.  Parse above Org-style link to a
-	      ;; `link' object.
-	      (let* ((link (car (org-element-map (with-temp-buffer
-						   (org-mode)
-						   (insert org-link)
-						   (org-element-parse-buffer))
-				    'link 'identity))))
-		;; Orphan the link.
-		(org-element-put-property link :parent nil)
-		(let* (
-		       (replacement
-			(case (org-element-type latex-*)
-			  ;; Case 1: LaTeX environment.
-			  ;; Mimic a "standalone image or formula" by
-			  ;; enclosing the `link' in a `paragraph'.
-			  ;; Copy over original attributes, captions to
-			  ;; the enclosing paragraph.
-			  (latex-environment
-			   (org-element-adopt-elements
-			    (list 'paragraph
-				  (list :style "OrgFormula"
-					:name (org-element-property :name
-								    latex-*)
-					:caption (org-element-property :caption
-								       latex-*)))
-			    link))
-			  ;; Case 2: LaTeX fragment.
-			  ;; No special action.
-			  (latex-fragment link))))
-		  ;; Note down the object that link replaces.
-		  (org-element-put-property replacement :replaces
-					    (list (org-element-type latex-*)
-						  (list :value latex-frag)))
-		  ;; Replace now.
-		  (org-element-set-element latex-* replacement))))))
+	      ;; Conversion succeeded.  Parse above Org-style link to
+	      ;; a `link' object.
+	      (let* ((link (org-element-map
+			       (org-element-parse-secondary-string
+				org-link 'paragraph)
+			       'link #'identity info t))
+		     (replacement
+		      (case (org-element-type latex-*)
+			;; Case 1: LaTeX environment.  Mimic
+			;; a "standalone image or formula" by
+			;; enclosing the `link' in a `paragraph'.
+			;; Copy over original attributes, captions to
+			;; the enclosing paragraph.
+			(latex-environment
+			 (org-element-adopt-elements
+			  (list 'paragraph
+				(list :style "OrgFormula"
+				      :name
+				      (org-element-property :name latex-*)
+				      :caption
+				      (org-element-property :caption latex-*)))
+			  link))
+			;; Case 2: LaTeX fragment.  No special action.
+			(latex-fragment link))))
+		;; Note down the object that link replaces.
+		(org-element-put-property replacement :replaces
+					  (list (org-element-type latex-*)
+						(list :value latex-frag)))
+		;; Restore blank after initial element or object.
+		(org-element-put-property
+		 replacement :post-blank
+		 (org-element-property :post-blank latex-*))
+		;; Replace now.
+		(org-element-set-element latex-* replacement)))))
 	info nil nil t)))
   tree)
 
