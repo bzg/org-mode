@@ -3801,7 +3801,8 @@ contextual information."
 				 (file-name-nondirectory input-file))))
 		 (display-msg
 		  (case processing-type
-		    ((dvipng imagemagick) (format "Creating LaTeX Image %d..." count))
+		    ((dvipng imagemagick)
+		     (format "Creating LaTeX Image %d..." count))
 		    (mathml (format "Creating MathML snippet %d..." count))))
 		 ;; Get an Org-style link to PNG image or the MathML
 		 ;; file.
@@ -3819,10 +3820,10 @@ contextual information."
 	    (when org-link
 	      ;; Conversion succeeded.  Parse above Org-style link to
 	      ;; a `link' object.
-	      (let* ((link (org-element-map
-			       (org-element-parse-secondary-string
-				org-link '(paragraph link))
-			       'link #'identity info t))
+	      (let* ((link
+		      (org-element-map
+			  (org-element-parse-secondary-string org-link '(link))
+			  'link #'identity info t))
 		     (replacement
 		      (case (org-element-type latex-*)
 			;; Case 1: LaTeX environment.  Mimic
