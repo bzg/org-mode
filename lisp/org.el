@@ -5939,7 +5939,8 @@ by a #."
 	    (add-text-properties (match-beginning 1) (match-end 3)
 				 '(font-lock-fontified t face org-meta-line))
 	    (add-text-properties (match-beginning 6) (+ (match-end 6) 1)
-				 '(font-lock-fontified t face org-block)))
+				 '(font-lock-fontified t face org-block))
+	    t)
 	   ((member dc3 '(" " ""))
 	    (org-remove-flyspell-overlays-in beg (match-end 0))
 	    (add-text-properties
