@@ -3821,7 +3821,7 @@ contextual information."
 	      ;; a `link' object.
 	      (let* ((link (org-element-map
 			       (org-element-parse-secondary-string
-				org-link 'paragraph)
+				org-link '(paragraph link))
 			       'link #'identity info t))
 		     (replacement
 		      (case (org-element-type latex-*)
