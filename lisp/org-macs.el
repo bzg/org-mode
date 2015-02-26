@@ -71,9 +71,10 @@
 (def-edebug-spec org-bound-and-true-p (symbolp))
 
 (defun org-string-nw-p (s)
-  "Is S a string with a non-white character?"
+  "Return S if S is a string containing a non-blank character.
+Otherwise, return nil."
   (and (stringp s)
-       (org-string-match-p "\\S-" s)
+       (org-string-match-p "[^ \r\t\n]" s)
        s))
 
 (defun org-not-nil (v)
