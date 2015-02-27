@@ -18748,77 +18748,119 @@ looks only before point, not after."
   "List of overlays carrying the images of latex fragments.")
 (make-variable-buffer-local 'org-latex-fragment-image-overlays)
 
-(defun org-remove-latex-fragment-image-overlays ()
-  "Remove all overlays with LaTeX fragment images in current buffer."
-  (mapc 'delete-overlay org-latex-fragment-image-overlays)
-  (setq org-latex-fragment-image-overlays nil))
+(defun org-remove-latex-fragment-image-overlays (&optional beg end)
+  "Remove all overlays with LaTeX fragment images in current buffer.
+When optional arguments BEG and END are non-nil, remove all
+overlays between them instead.  Return t when some overlays were
+removed, nil otherwise."
+  (let (removedp)
+    (setq org-latex-fragment-image-overlays
+	  (let ((beg (or beg (point-min)))
+		(end (or end (point-max))))
+	    (org-remove-if
+	     (lambda (o)
+	       (and (>= (overlay-start o) beg)
+		    (<= (overlay-end o) end)
+		    (progn (delete-overlay o)
+			   (or removedp (setq removedp t)))))
+	     org-latex-fragment-image-overlays)))
+    removedp))
 
 (define-obsolete-function-alias
   'org-preview-latex-fragment 'org-toggle-latex-fragment "24.4")
-(defun org-toggle-latex-fragment (&optional subtree)
+(defun org-toggle-latex-fragment (&optional arg)
   "Preview the LaTeX fragment at point, or all locally or globally.
-If the cursor is in a LaTeX fragment, create the image and overlay
-it over the source code.  If there is no fragment at point, display
-all fragments in the current text, from one headline to the next.  With
-prefix SUBTREE, display all fragments in the current subtree.  With a
-double prefix arg \\[universal-argument] \\[universal-argument], or when \
-the cursor is before the first headline,
-display all fragments in the buffer.
-The images can be removed again with \\[org-toggle-latex-fragment]."
+
+If the cursor is on a LaTeX fragment, create the image and overlay
+it over the source code, if there is none.  Remove it otherwise.
+If there is no fragment at point, display all fragments in the
+current section.
+
+With prefix ARG, preview or clear image for all fragments in the
+current subtree or in the whole buffer when used before the first
+headline.  With a double prefix ARG \\[universal-argument] \
+\\[universal-argument] preview or clear images
+for all fragments in the buffer."
   (interactive "P")
   (unless (buffer-file-name (buffer-base-buffer))
     (user-error "Can't preview LaTeX fragment in a non-file buffer"))
-  (if org-latex-fragment-image-overlays
-      (progn (org-remove-latex-fragment-image-overlays)
-	     (message "LaTeX fragments images removed"))
-    (when (display-graphic-p)
-      (org-remove-latex-fragment-image-overlays)
-      (org-with-wide-buffer
-       (let (beg end msg)
-	 (cond
-	  ((equal subtree '(16))
-	   (setq beg (point-min) end (point-max)
-		 msg "Creating images for buffer...%s"))
-	  ((equal subtree '(4))
-	   (org-back-to-heading)
-	   (setq beg (point) end (org-end-of-subtree t)
-		 msg "Creating images for subtree...%s"))
-	  ((let ((context (org-element-context)))
-	     (when (memq (org-element-type context)
-			 '(latex-environment latex-fragment))
-	       (setq beg (org-element-property :begin context)
-		     end (org-element-property :end context)
-		     msg "Creating image...%s"))))
-	  ((org-before-first-heading-p)
-	   (setq beg (point-min) end (point-max)
-		 msg "Creating images for buffer...%s"))
-	  (t
-	   (org-back-to-heading)
-	   (setq beg (point) end (progn (outline-next-heading) (point))
-		 msg "Creating images for entry...%s")))
-	 (message msg "")
-	 (narrow-to-region beg end)
-	 (goto-char beg)
-	 (org-format-latex
-	  (concat org-latex-preview-ltxpng-directory
-		  (file-name-sans-extension
-		   (file-name-nondirectory
-		    (buffer-file-name (buffer-base-buffer)))))
-	  default-directory 'overlays msg 'forbuffer
-	  org-latex-create-formula-image-program)
-	 (message msg "done.  Use `C-c C-x C-l' to remove images."))))))
+  (when (display-graphic-p)
+    (catch 'exit
+      (save-excursion
+	(let ((window-start (window-start)) msg)
+	  (save-restriction
+	    (cond
+	     ((or (equal arg '(16))
+		  (and (equal arg '(4))
+		       (org-with-limited-levels (org-before-first-heading-p))))
+	      (if (org-remove-latex-fragment-image-overlays)
+		  (progn (message "LaTeX fragments images removed from buffer")
+			 (throw 'exit nil))
+		(setq msg "Creating images for buffer...")))
+	     ((equal arg '(4))
+	      (org-with-limited-levels (org-back-to-heading t))
+	      (let ((beg (point))
+		    (end (progn (org-end-of-subtree t) (point))))
+		(if (org-remove-latex-fragment-image-overlays beg end)
+		    (progn
+		      (message "LaTeX fragment images removed from subtree")
+		      (throw 'exit nil))
+		  (setq msg "Creating images for subtree...")
+		  (narrow-to-region beg end))))
+	     ((let ((datum (org-element-context)))
+		(when (memq (org-element-type datum)
+			    '(latex-environment latex-fragment))
+		  (let* ((beg (org-element-property :begin datum))
+			 (end (org-element-property :end datum)))
+		    (if (org-remove-latex-fragment-image-overlays beg end)
+			(progn (message "LaTeX fragment image removed")
+			       (throw 'exit nil))
+		      (narrow-to-region beg end)
+		      (setq msg "Creating image..."))))))
+	     (t
+	      (org-with-limited-levels
+	       (let ((beg (if (org-at-heading-p) (line-beginning-position)
+			    (outline-previous-heading)
+			    (point)))
+		     (end (progn (outline-next-heading) (point))))
+		 (if (org-remove-latex-fragment-image-overlays beg end)
+		     (progn
+		       (message "LaTeX fragment images removed from section")
+		       (throw 'exit nil))
+		   (setq msg "Creating images for section...")
+		   (narrow-to-region beg end))))))
+	    (org-format-latex
+	     (concat org-latex-preview-ltxpng-directory
+		     (file-name-sans-extension
+		      (file-name-nondirectory
+		       (buffer-file-name (buffer-base-buffer)))))
+	     default-directory 'overlays msg 'forbuffer
+	     org-latex-create-formula-image-program))
+	  ;; Work around a bug that doesn't restore window's start
+	  ;; when widening back the buffer.
+	  (set-window-start nil window-start)
+	  (message (concat msg "done")))))))
 
 (defun org-format-latex
     (prefix &optional dir overlays msg forbuffer processing-type)
   "Replace LaTeX fragments with links to an image, and produce images.
+
+When optional argument OVERLAYS is non-nil, display the image on
+top of the fragment instead of replacing it.
+
+PROCESSING-TYPE is the conversion method to use, as a symbol.
+
 Some of the options can be changed using the variable
-`org-format-latex-options'."
+`org-format-latex-options', which see."
   (when (and overlays (fboundp 'clear-image-cache)) (clear-image-cache))
   (unless (eq processing-type 'verbatim)
     (let* ((math-regexp "\\$\\|\\\\[([]\\|^[ \t]*\\\\begin{[A-Za-z0-9*]+}")
 	   (cnt 0)
 	   checkdir-flag)
       (goto-char (point-min))
+      ;; Optimize overlay creation: (info "(elisp) Managing Overlays").
+      (when (and overlays (memq processing-type '(dvipng imagemagick)))
+	(overlay-recenter (point-max)))
       (while (re-search-forward math-regexp nil t)
 	(unless (and overlays
 		     (eq (get-char-property (point) 'org-overlay-type)
@@ -18893,6 +18935,7 @@ Some of the options can be changed using the variable
 			     (overlay-put ov
 					  'org-overlay-type
 					  'org-latex-overlay)
+			     (overlay-put ov 'evaporate t)
 			     (if (featurep 'xemacs)
 				 (progn
 				   (overlay-put ov 'invisible t)
