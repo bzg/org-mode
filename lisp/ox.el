@@ -3620,11 +3620,10 @@ for inlined footnotes.  Unreferenced definitions are ignored."
     (org-export--footnote-reference-map
      (lambda (f)
        ;; Collect footnote number, label and definition.
-       (let ((l (org-element-property :label f))
-	     (d (org-export-get-footnote-definition f info)))
+       (let ((l (org-element-property :label f)))
 	 (unless (and l (member l labels))
 	   (incf n)
-	   (push (list n l d) alist))
+	   (push (list n l (org-export-get-footnote-definition f info)) alist))
 	 (when l (push l labels))))
      (or data (plist-get info :parse-tree)) info body-first)
     (nreverse alist)))
