@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011-2015 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 4.0.0
+;; Version: 4.1.0
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -73,35 +73,21 @@
 
 ;;; Change Log:
 
-;;   [2015-02-26 Th] Version 4.0.0:
+;;   [2015-02-26 Th] Version 4.0.0 and 4.1.0:
 ;;   - Removed command "leave"; rather go back with org-mark-ring-goto
 ;;   - Property "org-index-ref" is no longer used or needed
 ;;   - Renamed column "link" to "id"
 ;;   - Added maintainance options to find duplicate rows, to check ids,
 ;;     update index or remove property org-index-ref from nodes
+;;   - New command point
+;;   - Shortened versin history
 ;;
-;;   [2015-01-31 Sa] Version 3.2.0:
+;;   [2014-12-07 Sa] to [2015-01-31 Sa] Version 3.0.0 to 3.2.0:
 ;;   - Complete sorting of index only occurs in idle-timer
-;;   - Command "add" now updates index, if node is already present
 ;;   - New command "maintain"  with some subcommands
-;;
-;;   [2015-01-20 Mo] Version 3.1.1:
-;;   - Bugfix for delete within occur
-;;
-;;   [2015-01-19 Mo] Version 3.1.0:
 ;;   - Rewrote command "occur" with overlays in an indirect buffer
-;;   - Removed function `org-index-copy-references-from-heading-to-property'
 ;;   - introduced variable org-index-version
-;;
-;;   [2014-12-14 Su] Version 3.0.2:
-;;   - Bugfixes in occur mode
-;;   - New function `org-index-copy-references-from-heading-to-property'
-;;
-;;   [2014-12-10 We] Version 3.0.1:
-;;   - Bugfixes related with assistant
-;;   - Fix for editing of category
-;;
-;;   [2014-12-07 Sa] Version 3.0.0:
+;;   - Command "add" updates index, if node is already present
 ;;   - New commands "add" and "delete" to easily add and remove
 ;;     the current node to or from your index.
 ;;   - New command "example" to create an example index.
@@ -112,70 +98,26 @@
 ;;     "update", "link", "fill", "unhighlight"
 ;;   - New function `org-index-default-keybindings'
 ;;
-;;   [2014-04-26 Sa] Version 2.4.3:
-;;   - Some Bug fixes and enhancements for occur-command
-;;   - Fixes for assistant to create index table
-;;
-;;   [2014-02-01 Sa] Version 2.4.2:
-;;   - Follow mode in occur-buffer
-;;   - Reorder for x-columns
-;;
-;;   [2014-01-02 Th] Version 2.4.0:
-;;   - New command "put" to store a nodes reference in a property
+;;   [2012-12-07 Fr] to [2014-04-26 Sa] Version 2.0.0 to 2.4.3:
 ;;   - New functions org-index-new-line and org-index-get-line
 ;;     offer access to org-index from other lisp programs
-;;   - New flag p, new columns x1,x2 and x3
-;;   - Major Code refactoring
 ;;   - Regression tests with ert
-;;   - Lots of bug fixes
+;;   - Renamed from "org-favtable" to "org-index"
+;;   - Added an assistant to set up the index table
+;;   - occur is now incremental, searching as you type
+;;   - Integrated with org-mark-ring-goto
+;;   - Added full support for ids
+;;   - Renamed the package from "org-reftable" to "org-favtable"
+;;   - Additional columns are required (e.g. "link"). Error messages will
+;;     guide you
+;;   - Ask user explicitly, which command to invoke
+;;   - Renamed the package from "org-refer-by-number" to "org-reftable"
 ;;
-;;   [2013-10-04 Fr] Version 2.3.2:
-;;   - Bug fix: index-table created by assistant is found after
-;;     restart of emacs instead of invoking assistant again
-;;
-;;   [2013-07-20 Sa] Version 2.3.0:
-;;    - Renamed from "org-favtable" to "org-index"
-;;    - Added an assistant to set up the index table
-;;    - occur is now incremental, searching as you type
-;;    - simplified the documentation and help-system
-;;    - Saving keystrokes, as "+g237" is now valid input
-;;    - Many bug fixes
-;;
-;;   [2013-02-28 Th] Version 2.2.0:
-;;    - Allowed shortcuts like "h237" for command "head" with argument "237"
-;;    - Integrated with org-mark-ring-goto
-;;
-;;   [2013-01-25 Fr] Version 2.1.0:
-;;    - Added full support for ids
-;;    - New commands "statistics"
-;;    - Renamed the package from "org-reftable" to "org-favtable"
-;;    - Additional columns are required (e.g. "link"). Error messages will
-;;      guide you
-;;
-;;   [2012-12-07 Fr] Version 2.0.0:
-;;    - The format of the table of favorites has changed ! You need to bring
-;;      your existing table into the new format by hand (which however is
-;;      easy and explained below)
-;;    - Reference table can be sorted after usage count or date of last access
-;;    - Ask user explicitly, which command to invoke
-;;    - Renamed the package from "org-refer-by-number" to "org-reftable"
-;;
-;;   [2012-09-22 Sa] Version 1.5.0:
+;;   [2011-12-10 Sa] to [2012-09-22 Sa] Version Version 1.2.0 to 1.5.0:
 ;;    - New command "sort" to sort a buffer or region by reference number
 ;;    - New commands "highlight" and "unhighlight" to mark references
-;;
-;;   [2012-07-13 Fr] Version 1.4.0:
 ;;    - New command "head" to find a headline with a reference number
-;;
-;;   [2012-04-28 Sa] Version 1.3.0:
 ;;    - New commands occur and multi-occur
-;;    - All commands can now be invoked explicitly
-;;    - New documentation
-;;    - Many bugfixes
-;;
-;;   [2011-12-10 Sa] Version 1.2.0:
-;;    - Fixed a bug, which lead to a loss of newly created reference numbers
-;;    - Introduced single and double prefix arguments
 ;;    - Started this Change Log
 
 ;;; Code:
@@ -189,7 +131,7 @@
   :group 'org-index)
 
 ;; Version of this package
-(defvar org-index-version "4.0.0" "Version of `org-index', format is major.minor.bugfix, where \"major\" is a change in index-table and \"minor\" are new features.")
+(defvar org-index-version "4.1.0" "Version of `org-index', format is major.minor.bugfix, where \"major\" is a change in index-table and \"minor\" are new features.")
 
 ;; Variables to hold the configuration of the index table
 (defvar org-index--maxref nil "Maximum number from reference table (e.g. \"153\").")
@@ -208,7 +150,6 @@
 (defvar org-index-map nil "Keymap for shortcuts for some commands of `org-index'.  Can be activated and filled by org-index-default-keybings.")
 
 ;; Variables to hold context and state
-(defvar org-index--text-to-yank nil "Text, that can be yanked after call (mostly a reference).")
 (defvar org-index--last-ref nil "Last reference created or visited.")
 (defvar org-index--category-before nil "Category of node before.")
 (defvar org-index--active-region nil "Active region, initially.  I.e. what has been marked.")
@@ -224,7 +165,7 @@
 (defvar org-index--aligned nil "Remember for this Emacs session, if table has been aligned at least once.")
 
 ;; static information for this program package
-(defconst org-index--commands '(occur add delete head enter ref help example sort multi-occur highlight maintain) "List of commands available.")
+(defconst org-index--commands '(occur add delete head point enter ref help example sort multi-occur highlight maintain) "List of commands available.")
 (defconst org-index--required-flags '(sort) "Flags that are required.")
 (defconst org-index--single-flags '(sort point-on-add yank-after-add get-category-on-add get-heading-on-add shift-ref-and-date-on-add) "Flags, that may only appear once; these can appear as special-columns.")
 (defconst org-index--multiple-flags '(edit-on-add) "Flags, that might appear multiple times.")
@@ -318,7 +259,7 @@ for its index table and its configuration flags.
 
 For basic usage, subcommands 'add' and 'occur' are most important.
 
-This is version 4.0.0 of org-index.el.
+This is version 4.1.0 of org-index.el.
 \\<org-mode-map>
 The function `org-index' operates on a dedicated table, the index
 table, which lives within its own Org-mode node.  The table and
@@ -348,6 +289,8 @@ of subcommands to choose from:
 
   enter: Enter index table and maybe go to a specific reference;
     use `org-mark-ring-goto' (\\[org-mark-ring-goto]) to go back.
+
+  point: Echo information from index table for node at point.
 
   ref: Create a new reference.
 
@@ -582,6 +525,21 @@ as in interactive calls."
       (recenter))
 
 
+     ((eq command 'point)
+
+      (let (id info)
+        (setq id (org-id-get))
+        (if id
+            (setq info (org-index--on 'id id
+                         (mapcar (lambda (x) (org-index--get-or-set-field x))
+                                 (list 'created 'count 'last-accessed 'ref)))))
+        (if info
+            (progn
+              (setq message-text (apply 'format (cons "Created %s, %s times accessed, last %s" info)))
+              (setq kill-new-text (car (last info))))
+          (setq message-text "This node is not part of index"))))
+
+
      ((eq command 'occur)
 
       (set-buffer org-index--buffer)
@@ -713,10 +671,22 @@ as in interactive calls."
   "Set default keybindings for `org-index'.
 
 Establish the common prefix key `C-c i' Which is followed by the
-first letter of a subcommand, so that `C-c i a' invokes the
-subcommand \"add\". Subcommands available are occur, add, delete,
-head, enter and ref.  Special cases: `C-c i ?' shows help and
-`C-c i i' invokes `org-index' to let you choose."
+first letter of selected subcommands:
+
+  key      binding
+  ---      -------
+
+  i        show complete list of commands
+  o        subcommand occur
+  a        add
+  d        delete
+  h        head
+  e        enter
+  p or .   point
+  r        ref
+  ?        help
+  
+See `org-index' for a description of all subcommands."
   (interactive)
   (define-prefix-command 'org-index-map)
   (global-set-key (kbd "C-c i") 'org-index-map)
@@ -726,7 +696,8 @@ head, enter and ref.  Special cases: `C-c i ?' shows help and
   (define-key org-index-map (kbd "d") (lambda (arg) (interactive "P") (message nil) (org-index 'delete nil arg)))
   (define-key org-index-map (kbd "h") (lambda (arg) (interactive "P") (message nil) (org-index 'head nil arg)))
   (define-key org-index-map (kbd "e") (lambda (arg) (interactive "P") (message nil) (org-index 'enter nil arg)))
-  (define-key org-index-map (kbd "r") (lambda (arg) (interactive "P") (message nil) (org-index 'ref nil arg)))
+  (define-key org-index-map (kbd "p") (lambda (arg) (interactive "P") (message nil) (org-index 'point nil arg)))
+  (define-key org-index-map (kbd ".") (lambda (arg) (interactive "P") (message nil) (org-index 'point nil arg)))
   (define-key org-index-map (kbd "?") (lambda (arg) (interactive "P") (message nil) (org-index 'help nil arg))))
 
 
@@ -792,7 +763,7 @@ Optional argument KEYS-VALUES specifies content of new line."
 
         ;; align table and fontify line
         (org-table-align)
-        (setq org-table--aligned t)
+        (setq org-index--aligned t)
         (font-lock-fontify-region (line-beginning-position) (line-end-position))
         
         ;; get column to yank
@@ -2399,9 +2370,6 @@ If OTHER in separate window."
     ;; construct new reference
     (unless new
       (setq new (format "%s%d%s" org-index--head (1+ org-index--maxref) org-index--tail)))
-
-    ;; remember for org-mark-ring-goto
-    (setq org-index--text-to-yank new)
 
     ;; insert ref or id as last or first line, depending on sort-column
     (goto-char org-index--below-hline)
