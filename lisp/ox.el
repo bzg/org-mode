@@ -2057,8 +2057,7 @@ from tree."
 			 (org-element-property :archivedp data))
 		    ;; If headline is archived but tree below has to
 		    ;; be skipped, remove contents.
-		    (mapc #'org-element-extract-element
-			  (org-element-contents data))
+		    (org-element-set-contents data)
 		  ;; Move into secondary string, if any.
 		  (let ((sec-prop
 			 (cdr (assq type org-element-secondary-value-alist))))
