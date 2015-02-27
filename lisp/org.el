@@ -22962,9 +22962,8 @@ matches in paragraphs or comments, use it."
     (when (derived-mode-p 'message-mode)
       (save-excursion
 	(beginning-of-line)
-	(cond ((or (not (message-in-body-p))
-		   (looking-at orgtbl-line-start-regexp))
-	       (throw 'exit nil))
+	(cond ((not (message-in-body-p)) (throw 'exit nil))
+	      ((org-looking-at-p org-table-line-regexp) (throw 'exit nil))
 	      ((looking-at message-cite-prefix-regexp)
 	       (throw 'exit (match-string-no-properties 0)))
 	      ((looking-at org-outline-regexp)
