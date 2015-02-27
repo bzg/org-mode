@@ -8583,6 +8583,7 @@ It also looks at the text of the entry itself."
 		       (org-agenda-error)))
 	   (buffer (marker-buffer marker))
 	   (pos (marker-position marker)))
+      (unless buffer (user-error "Trying to switch to non-existent buffer"))
       (org-pop-to-buffer-same-window buffer)
       (and delete-other-windows (delete-other-windows))
       (widen)
