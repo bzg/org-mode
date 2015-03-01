@@ -119,7 +119,8 @@
 				       org-ascii-filter-comment-spacing)
 		   (:filter-section . org-ascii-filter-headline-blank-lines))
   :options-alist
-  '((:ascii-bullets nil nil org-ascii-bullets)
+  '((:subtitle "SUBTITLE" nil nil parse)
+    (:ascii-bullets nil nil org-ascii-bullets)
     (:ascii-caption-above nil nil org-ascii-caption-above)
     (:ascii-charset nil nil org-ascii-charset)
     (:ascii-global-margin nil nil org-ascii-global-margin)
@@ -967,9 +968,11 @@ INFO is a plist used as a communication channel."
 	 ;; Links in the title will not be resolved later, so we make
 	 ;; sure their path is located right after them.
 	 (info (org-combine-plists info '(:ascii-links-to-notes nil)))
-	 (title (if (plist-get info :with-title)
-		    (org-export-data (plist-get info :title) info)
-		  ""))
+	 (with-title (plist-get info :with-title))
+	 (title (org-export-data
+		 (when with-title (plist-get info :title)) info))
+	 (subtitle (org-export-data
+		    (when with-title (plist-get info :subtitle)) info))
 	 (author (and (plist-get info :with-author)
 		      (let ((auth (plist-get info :author)))
 			(and auth (org-export-data auth info)))))
@@ -1013,9 +1016,13 @@ INFO is a plist used as a communication channel."
 	     ;; Format TITLE.  It may be filled if it is too wide,
 	     ;; that is wider than the two thirds of the total width.
 	     (title-len (min (apply #'max
-				    (mapcar #'length (org-split-string title "\n")))
+				    (mapcar #'length
+					    (org-split-string
+					     (concat title "\n" subtitle) "\n")))
 			     (/ (* 2 text-width) 3)))
 	     (formatted-title (org-ascii--fill-string title title-len info))
+	     (formatted-subtitle (when (org-string-nw-p subtitle)
+				   (org-ascii--fill-string subtitle title-len info)))
 	     (line
 	      (make-string
 	       (min (+ (max title-len
@@ -1027,6 +1034,7 @@ INFO is a plist used as a communication channel."
 	 (concat line "\n"
 		 (unless utf8p "\n")
 		 (upcase formatted-title)
+		 (and formatted-subtitle (concat "\n" formatted-subtitle))
 		 (cond
 		  ((and (org-string-nw-p author) (org-string-nw-p email))
 		   (concat "\n\n" author "\n" email))

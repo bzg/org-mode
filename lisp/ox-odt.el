@@ -99,6 +99,7 @@
   '((:odt-styles-file "ODT_STYLES_FILE" nil nil t)
     (:description "DESCRIPTION" nil nil newline)
     (:keywords "KEYWORDS" nil nil space)
+    (:subtitle "SUBTITLE" nil nil parse)
     ;; Other variables.
     (:odt-content-template-file nil nil org-odt-content-template-file)
     (:odt-display-outline-level nil nil org-odt-display-outline-level)
@@ -1328,6 +1329,7 @@ CONTENTS is the transcoded contents string.  RAW-DATA is the
 original parsed data.  INFO is a plist holding export options."
   ;; Write meta file.
   (let ((title (org-export-data (plist-get info :title) info))
+	(subtitle (org-export-data (plist-get info :subtitle) info))
 	(author (let ((author (plist-get info :author)))
 		  (if (not author) "" (org-export-data author info))))
 	(email (plist-get info :email))
@@ -1365,6 +1367,10 @@ original parsed data.  INFO is a plist holding export options."
       (format "<meta:keyword>%s</meta:keyword>\n" keywords)
       (format "<dc:subject>%s</dc:subject>\n" description)
       (format "<dc:title>%s</dc:title>\n" title)
+      (when (org-string-nw-p subtitle)
+	(format
+	 "<meta:user-defined meta:name=\"subtitle\">%s</meta:user-defined>\n"
+	 subtitle))
       "\n"
       "  </office:meta>\n" "</office:document-meta>")
      nil (concat org-odt-zip-dir "meta.xml"))
@@ -1510,6 +1516,8 @@ original parsed data.  INFO is a plist holding export options."
       (insert
        (let* ((title (and (plist-get info :with-title)
 			  (org-export-data (plist-get info :title) info)))
+	      (subtitle (when title
+			  (org-export-data (plist-get info :subtitle) info)))
 	      (author (and (plist-get info :with-author)
 			   (let ((auth (plist-get info :author)))
 			     (and auth (org-export-data auth info)))))
@@ -1521,10 +1529,20 @@ original parsed data.  INFO is a plist holding export options."
 	  ;; Title.
 	  (when (org-string-nw-p title)
 	    (concat
-	     (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+	     (format "\n<text:p text:style-name=\"%s\">%s</text:p>\n"
 		     "OrgTitle" (format "\n<text:title>%s</text:title>" title))
 	     ;; Separator.
-	     "\n<text:p text:style-name=\"OrgTitle\"/>"))
+	     "\n<text:p text:style-name=\"OrgTitle\"/>\n"
+	     ;; Subtitle.
+	     (when (org-string-nw-p subtitle)
+	       (concat
+		(format "<text:p text:style-name=\"OrgSubtitle\">\n%s\n</text:p>\n"
+			(concat
+			 "<text:user-defined style:data-style-name=\"N0\" text:name=\"subtitle\">\n"
+			 subtitle
+			 "</text:user-defined>\n"))
+		;; Separator.
+		"<text:p text:style-name=\"OrgSubtitle\"/>\n"))))
 	  (cond
 	   ((and author (not email))
 	    ;; Author only.

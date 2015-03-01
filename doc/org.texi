@@ -10926,6 +10926,17 @@ When the original file is @file{myfile.txt}, the resulting file becomes
 Export to a temporary buffer.  Do not create a file.
 @end table
 
+@subheading ASCII specific export settings
+
+ASCII export introduces a single of keywords, similar to the general options
+settings described in @ref{Export settings}.
+
+@table @samp
+@item SUBTITLE
+@cindex #+SUBTITLE (ASCII)
+The document subtitle.
+@end table
+
 @subheading Header and sectioning structure
 
 In the exported version, the first three outline levels become headlines,
@@ -11063,6 +11074,14 @@ inserted as metadata using @samp{hyperref}.  Document metadata can be
 configured via @code{org-latex-hyperref-template}.  Description can also be
 typeset as part of the front matter via @code{org-latex-title-command}.  You
 can use several @code{#+KEYWORDS} if the description is is long.
+
+@item SUBTITLE
+@cindex #+SUBTITLE (Beamer)
+@vindex org-beamer-subtitle-format
+The document subtitle.  This is typeset using the format string
+@code{org-beamer-subtitle-format}.  It can also access via
+@code{org-latex-hyperref-template} or typeset as part of the front
+matter via @code{org-latex-title-command}.
 @end table
 
 @node Sectioning Frames and Blocks in Beamer
@@ -11352,6 +11371,11 @@ is long.
 @cindex #+LATEX_HEADER (HTML)
 Arbitrary lines appended to the preamble used when transcoding @LaTeX{}
 fragments to images.  See @ref{Math formatting in HTML export} for details.
+
+@item SUBTITLE
+@cindex #+SUBTILE (HTML)
+The document subtitle.  The formatting depends on whether HTML5 in used
+and on the @samp{subtitle} CSS class.
 @end table
 
 These keywords are treated in details in the following sections.
@@ -11700,6 +11724,7 @@ p.author            @r{author information, including email}
 p.date              @r{publishing date}
 p.creator           @r{creator info, about org mode version}
 .title              @r{document title}
+.subtitle           @r{document subtitle}
 .todo               @r{TODO keywords, all not-done states}
 .done               @r{the DONE keywords, all states that count as done}
 .WAITING            @r{each TODO keyword also uses a class named after itself}
@@ -11921,6 +11946,16 @@ inserted as metadata using @samp{hyperref}.  Document metadata can be
 configured via @code{org-latex-hyperref-template}.  Description can also be
 typeset as part of the front matter via @code{org-latex-title-command}.  You
 can use several @code{#+KEYWORDS} if the description is is long.
+
+@item SUBTITLE
+@cindex #+SUBTITLE (@LaTeX{})
+@vindex org-latex-subtitle-separate
+@vindex org-latex-subtitle-format
+The document subtitle.  This is typeset according to
+@code{org-latex-subtitle-format}.  If @code{org-latex-subtitle-separate}
+is non-@code{nil} it is typed as part of the @samp{\title}-macro.  It
+can also access via @code{org-latex-hyperref-template} or typeset as
+part of the front matter via @code{org-latex-title-command}.
 @end table
 
 These keywords are treated in details in the following sections.
@@ -12410,6 +12445,10 @@ document metadata.  You can use several such keywords if the list is long.
 @vindex org-odt-styles-file
 The style file of the document (@code{org-odt-styles-file}).  See
 @ref{Applying custom styles} for details.
+
+@item SUBTITLE
+@cindex SUBTITLE (ODT)
+The document subtitle.
 @end table
 
 @node Extending ODT export
@@ -13321,7 +13360,7 @@ options settings described in @ref{Export settings}.
 @table @samp
 
 @item SUBTITLE
-@cindex #+SUBTITLE
+@cindex #+SUBTITLE (Texinfo)
 The document subtitle.
 
 @item SUBAUTHOR
@@ -13401,7 +13440,6 @@ to define your own class in @code{org-texinfo-classes}, which see.  Set
 @subsubheading Title and copyright page
 
 @cindex #+TEXINFO_PRINTED_TITLE
-@cindex #+SUBTITLE
 The default template includes a title page for hard copy output.  The title
 and author displayed on this page are extracted from, respectively,
 @code{#+TITLE} and @code{#+AUTHOR} keywords (@pxref{Export settings}).  It is
@@ -14207,6 +14245,7 @@ however, override everything.
 @item @code{:beamer-frame-default-options} @tab @code{org-beamer-frame-default-options}
 @item @code{:beamer-outline-frame-options} @tab @code{org-beamer-outline-frame-options}
 @item @code{:beamer-outline-frame-title}   @tab @code{org-beamer-outline-frame-title}
+@item @code{:beamer-subtitle-format}       @tab @code{org-beamer-subtitle-format}
 @end multitable
 
 @subsubheading HTML specific properties
@@ -14292,6 +14331,8 @@ however, override everything.
 @item @code{:latex-listings}                   @tab @code{org-latex-listings}
 @item @code{:latex-minted-langs}               @tab @code{org-latex-minted-langs}
 @item @code{:latex-minted-options}             @tab @code{org-latex-minted-options}
+@item @code{:latex-subtitle-format}            @tab @code{org-latex-subtitle-format}
+@item @code{:latex-subtitle-separate}          @tab @code{org-latex-subtitle-separate}
 @item @code{:latex-table-scientific-notation}  @tab @code{org-latex-table-scientific-notation}
 @item @code{:latex-tables-booktabs}            @tab @code{org-latex-tables-booktabs}
 @item @code{:latex-tables-centered}            @tab @code{org-latex-tables-centered}

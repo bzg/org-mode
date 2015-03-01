@@ -122,6 +122,7 @@
     (:html-preamble nil "html-preamble" org-html-preamble)
     (:html-head "HTML_HEAD" nil org-html-head newline)
     (:html-head-extra "HTML_HEAD_EXTRA" nil org-html-head-extra newline)
+    (:subtitle "SUBTITLE" nil nil parse)
     (:html-head-include-default-style
      nil "html-style" org-html-head-include-default-style)
     (:html-head-include-scripts nil "html-scripts" org-html-head-include-scripts)
@@ -272,7 +273,12 @@ for the JavaScript code in this tag.
 (defconst org-html-style-default
   "<style type=\"text/css\">
  <!--/*--><![CDATA[/*><!--*/
-  .title  { text-align: center; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
   .todo   { font-family: monospace; color: red; }
   .done   { font-family: monospace; color: green; }
   .priority { font-family: monospace; color: orange; }
@@ -1212,6 +1218,7 @@ The second element of each list is a format string to format the
 postamble itself.  This format string can contain these elements:
 
   %t stands for the title.
+  %s stands for the subtitle.
   %a stands for the author's name.
   %e stands for the author's email.
   %d stands for the date.
@@ -1276,6 +1283,7 @@ The second element of each list is a format string to format the
 preamble itself.  This format string can contain these elements:
 
   %t stands for the title.
+  %s stands for the subtitle.
   %a stands for the author's name.
   %e stands for the author's email.
   %d stands for the date.
@@ -1788,6 +1796,7 @@ INFO is a plist used as a communication channel."
   "Return format specification for elements that can be
 used in the preamble or postamble."
   `((?t . ,(org-export-data (plist-get info :title) info))
+    (?s . ,(org-export-data (plist-get info :subtitle) info))
     (?d . ,(org-export-data (org-export-get-date info) info))
     (?T . ,(format-time-string
 	    (plist-get info :html-metadata-timestamp-format)))
@@ -1928,10 +1937,21 @@ holding export options."
      (format "<%s id=\"%s\">\n" (nth 1 div) (nth 2 div)))
    ;; Document title.
    (when (plist-get info :with-title)
-     (let ((title (org-export-data
-		   (or (plist-get info :title) "") info)))
-       (when (org-string-nw-p title)
-	 (format "<h1 class=\"title\">%s</h1>\n" title))))
+     (let ((title (plist-get info :title))
+	   (subtitle (plist-get info :subtitle)))
+       (when title
+	 (format
+	  (if (plist-get info :html-html5-fancy)
+	      "<header>\n<h1 class=\"title\">%s</h1>\n%s</header>"
+	    "<h1 class=\"title\">%s%s</h1>\n")
+	  (org-export-data title info)
+	  (if subtitle
+	      (format
+	       (if (plist-get info :html-html5-fancy)
+		   "<p class=\"subtitle\">%s</p>\n"
+		 "\n<br>\n<span class=\"subtitle\">%s</span>\n")
+	       (org-export-data subtitle info))
+	    "")))))
    contents
    (format "</%s>\n" (nth 1 (assq 'content (plist-get info :html-divs))))
    ;; Postamble.

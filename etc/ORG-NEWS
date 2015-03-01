@@ -356,6 +356,9 @@ keywords and properties.
 *** Viewport support in html export
 Viewport for mobile-optimized website is now automatically inserted
 when exporting to html.  See ~org-html-viewport~ for details.
+*** New ~#+SUBTITLE~ export keyword
+Org can typeset a subtitle in some export backends.  See the manual
+for details.
 ** Miscellaneous
 *** Strip all meta data from ITEM special property
 ITEM special property does not contain TODO, priority or tags anymore.

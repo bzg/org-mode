@@ -133,6 +133,15 @@ You might want to put e.g. \"allowframebreaks=0.9\" here."
   :type '(string :tag "Outline frame options"))
 
 
+(defcustom org-beamer-subtitle-format "\\subtitle{%s}"
+  "Format string used for transcoded subtitle.
+The format string should have at most one \"%s\"-expression,
+which is replaced with the subtitle."
+  :group 'org-export-beamer
+  :version "25.1"
+  :package-version '(Org . "8.3")
+  :type '(string :tag "Format string"))
+
 
 ;;; Internal Variables
 
@@ -233,6 +242,7 @@ Return overlay specification, as a string, or nil."
   :options-alist
   '((:headline-levels nil "H" org-beamer-frame-level)
     (:latex-class "LATEX_CLASS" nil "beamer" t)
+    (:beamer-subtitle-format nil nil org-beamer-subtitle-format)
     (:beamer-column-view-format "COLUMNS" nil org-beamer-column-view-format)
     (:beamer-theme "BEAMER_THEME" nil org-beamer-theme)
     (:beamer-color-theme "BEAMER_COLOR_THEME" nil nil t)
@@ -810,7 +820,12 @@ information."
   "Return complete document string after Beamer conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (let ((title (org-export-data (plist-get info :title) info)))
+  (let ((title (org-export-data (plist-get info :title) info))
+	(subtitle (org-export-data
+		   (org-element-parse-secondary-string
+		    (plist-get info :subtitle)
+		    (org-element-restriction 'keyword))
+		   info)))
     (concat
      ;; 1. Time-stamp.
      (and (plist-get info :time-stamp-file)
@@ -877,6 +892,8 @@ holding export options."
        (format "\\date{%s}\n" (org-export-data date info)))
      ;; 7. Title
      (format "\\title{%s}\n" title)
+     (when (org-string-nw-p subtitle)
+       (concat (format (plist-get info :beamer-subtitle-format) subtitle) "\n"))
      ;; 8. Beamer-header
      (let ((beamer-header (plist-get info :beamer-header)))
        (when beamer-header

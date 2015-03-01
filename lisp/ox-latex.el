@@ -108,8 +108,9 @@
     (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
     (:latex-header "LATEX_HEADER" nil nil newline)
     (:latex-header-extra "LATEX_HEADER_EXTRA" nil nil newline)
-    (:description "DESCRIPTION" nil nil parse)
-    (:keywords "KEYWORDS" nil nil parse)
+    (:description "DESCRIPTION" nil nil newline)
+    (:keywords "KEYWORDS" nil nil space)
+    (:subtitle "SUBTITLE" nil nil space)
     ;; Other variables.
     (:latex-active-timestamp-format nil nil org-latex-active-timestamp-format)
     (:latex-caption-above nil nil org-latex-caption-above)
@@ -135,6 +136,8 @@
     (:latex-listings-options nil nil org-latex-listings-options)
     (:latex-minted-langs nil nil org-latex-minted-langs)
     (:latex-minted-options nil nil org-latex-minted-options)
+    (:latex-subtitle-format nil nil org-latex-subtitle-format)
+    (:latex-subtitle-separate nil nil org-latex-subtitle-separate)
     (:latex-table-scientific-notation nil nil org-latex-table-scientific-notation)
     (:latex-tables-booktabs nil nil org-latex-tables-booktabs)
     (:latex-tables-centered nil nil org-latex-tables-centered)
@@ -388,6 +391,7 @@ This format string may contain these elements:
 
   %a for AUTHOR keyword
   %t for TITLE keyword
+  %s for SUBTITLE keyword
   %k for KEYWORDS line
   %d for DESCRIPTION line
   %c for CREATOR line
@@ -402,6 +406,22 @@ Setting :latex-title-command in publishing projects will take
 precedence over this variable."
   :group 'org-export-latex
   :type '(string :tag "Format string"))
+
+(defcustom org-latex-subtitle-format "\\\\\\medskip\n\\large %s"
+  "Format string used for transcoded subtitle.
+The format string should have at most one \"%s\"-expression,
+which is replaced with the subtitle."
+  :group 'org-export-latex
+  :version "25.1"
+  :package-version '(Org . "8.3")
+  :type '(string :tag "Format string"))
+
+(defcustom org-latex-subtitle-separate nil
+  "Non-nil means the subtitle is not typeset as part of title."
+  :group 'org-export-latex
+  :version "25.1"
+  :package-version '(Org . "8.3")
+  :type 'boolean)
 
 (defcustom org-latex-toc-command "\\tableofcontents\n\n"
   "LaTeX command to set the table of contents, list of figures, etc.
@@ -419,6 +439,7 @@ This format string may contain these elements:
 
   %a for AUTHOR keyword
   %t for TITLE keyword
+  %s for SUBTITLE keyword
   %k for KEYWORDS line
   %d for DESCRIPTION line
   %c for CREATOR line
@@ -1288,8 +1309,18 @@ holding export options."
      ;; Date.
      (let ((date (and (plist-get info :with-date) (org-export-get-date info))))
        (format "\\date{%s}\n" (org-export-data date info)))
-     ;; Title
-     (format "\\title{%s}\n" title)
+     ;; Title and subtitle.
+     (let* ((subtitle (plist-get info :subtitle))
+	    (formatted-subtitle
+	     (when subtitle
+	       (format (plist-get info :latex-subtitle-format)
+		       (org-export-data subtitle info))))
+	    (separate (plist-get info :latex-subtitle-separate)))
+       (concat
+	(format "\\title{%s%s}\n" title
+		(if separate "" formatted-subtitle))
+	(when (and separate subtitle)
+	  (concat formatted-subtitle "\n"))))
      ;; Hyperref options.
      (let ((template (plist-get info :latex-hyperref-template)))
        (and (stringp template)

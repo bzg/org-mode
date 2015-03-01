@@ -92,7 +92,7 @@
     (:texinfo-class "TEXINFO_CLASS" nil org-texinfo-default-class t)
     (:texinfo-header "TEXINFO_HEADER" nil nil newline)
     (:texinfo-post-header "TEXINFO_POST_HEADER" nil nil newline)
-    (:subtitle "SUBTITLE" nil nil newline)
+    (:subtitle "SUBTITLE" nil nil parse)
     (:subauthor "SUBAUTHOR" nil nil newline)
     (:texinfo-dircat "TEXINFO_DIR_CATEGORY" nil nil t)
     (:texinfo-dirtitle "TEXINFO_DIR_TITLE" nil nil t)
@@ -570,9 +570,9 @@ holding export options."
        (concat
 	(format "@title %s\n" (or (plist-get info :texinfo-printed-title) title ""))
 	(let ((subtitle (plist-get info :subtitle)))
-	  (and subtitle
-	       (org-element-normalize-string
-		(replace-regexp-in-string "^" "@subtitle " subtitle))))))
+	  (when subtitle
+	    (format "@subtitle %s\n"
+		    (org-export-data subtitle info))))))
      (when (plist-get info :with-author)
        (concat
 	;; Primary author.

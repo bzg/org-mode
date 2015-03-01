@@ -38,6 +38,12 @@
 ;; See ox.el and ox-html.el for more details on how this exporter
 ;; works (it is derived from ox-html.)
 
+;; TODOs
+;; ------
+;; The title page is formatted using format-spec.  This is error prone
+;; when details are missing and may insert empty tags, like <h2></h2>,
+;; for missing values.
+
 (require 'ox-html)
 (eval-when-compile (require 'cl))
 
@@ -261,6 +267,7 @@ Defaults to styles for the title page."
 
 (defcustom org-deck-title-slide-template
   "<h1>%t</h1>
+<h2>%s</h2>
 <h2>%a</h2>
 <h2>%e</h2>
 <h2>%d</h2>"
