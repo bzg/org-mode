@@ -395,10 +395,10 @@ This alist also applies to secondary string.  For example, an
 still has an entry since one of its properties (`:title') does.")
 
 (defconst org-element-secondary-value-alist
-  '((headline . :title)
-    (inlinetask . :title)
-    (item . :tag))
-  "Alist between element types and location of secondary value.")
+  '((headline :title)
+    (inlinetask :title)
+    (item :tag))
+  "Alist between element types and locations of secondary values.")
 
 (defconst org-element--pair-square-table
   (let ((table (make-syntax-table)))
@@ -473,14 +473,15 @@ Return modified element."
 	(t (nconc element contents))))
 
 (defun org-element-secondary-p (object)
-  "Non-nil when OBJECT belongs to a secondary string.
+  "Non-nil when OBJECT directly belongs to a secondary string.
 Return value is the property name, as a keyword, or nil."
   (let* ((parent (org-element-property :parent object))
-	 (property (cdr (assq (org-element-type parent)
-			      org-element-secondary-value-alist))))
-    (and property
-	 (memq object (org-element-property property parent))
-	 property)))
+	 (properties (cdr (assq (org-element-type parent)
+				org-element-secondary-value-alist))))
+    (catch 'exit
+      (dolist (p properties)
+	(and (memq object (org-element-property p parent))
+	     (throw 'exit p))))))
 
 (defsubst org-element-adopt-elements (parent &rest children)
   "Append elements to the contents of another element.
@@ -598,7 +599,7 @@ is cleared and contents are removed in the process."
 ;; Most of them accepts no argument.  Though, exceptions exist.  Hence
 ;; every element containing a secondary string (see
 ;; `org-element-secondary-value-alist') will accept an optional
-;; argument to toggle parsing of that secondary string.  Moreover,
+;; argument to toggle parsing of these secondary strings.  Moreover,
 ;; `item' parser requires current list's structure as its first
 ;; element.
 ;;
@@ -4064,11 +4065,9 @@ looking into captions:
 		;; If --DATA has a secondary string that can contain
 		;; objects with their type among TYPES, look into it.
 		(when (and (eq --category 'objects) (not (stringp --data)))
-		  (let ((sec-prop
-			 (assq --type org-element-secondary-value-alist)))
-		    (when sec-prop
-		      (funcall --walk-tree
-			       (org-element-property (cdr sec-prop) --data)))))
+		  (dolist (p (cdr (assq --type
+					org-element-secondary-value-alist)))
+		    (funcall --walk-tree (org-element-property p --data))))
 		;; If --DATA has any parsed affiliated keywords and
 		;; WITH-AFFILIATED is non-nil, look for objects in
 		;; them.
