@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011-2015 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 4.1.0
+;; Version: 4.1.1
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -73,6 +73,9 @@
 
 ;;; Change Log:
 
+;;   [2015-03-03 Tu] Version 4.0.1
+;;   - org-mark-ring is now used more consistently
+;;
 ;;   [2015-02-26 Th] Version 4.0.0 and 4.1.0:
 ;;   - Removed command "leave"; rather go back with org-mark-ring-goto
 ;;   - Property "org-index-ref" is no longer used or needed
@@ -421,6 +424,13 @@ as in interactive calls."
     (when (eq command 'sort)
       (setq sort-what (intern (org-completing-read "You may sort:\n  - index  : your index table by various columns\n  - region : the active region by contained reference\n  - buffer : the whole current buffer\nPlease choose what to sort: " (list "index" "region" "buffer") nil t))))
 
+    ;;
+    ;; Arrange for beeing able to return
+    ;;
+
+    (when (memq command '(occur head enter ref example sort maintain))
+      (org-mark-ring-push))
+
     
     ;;
     ;; Enter table
@@ -673,24 +683,25 @@ as in interactive calls."
 Establish the common prefix key `C-c i' Which is followed by the
 first letter of selected subcommands:
 
-  key      binding
-  ---      -------
+  key        action or subcommand
+  ---        --------------------
 
-  i        show complete list of commands
-  o        subcommand occur
-  a        add
-  d        delete
-  h        head
-  e        enter
-  p or .   point
-  r        ref
-  ?        help
+  i or SPC   show complete list of commands
+  o          occur
+  a          add
+  d          delete
+  h          head
+  e          enter
+  p or .     point
+  r          ref
+  ?          help
   
 See `org-index' for a description of all subcommands."
   (interactive)
   (define-prefix-command 'org-index-map)
   (global-set-key (kbd "C-c i") 'org-index-map)
   (define-key org-index-map (kbd "i") (lambda (arg) (interactive "P") (message nil) (org-index nil nil arg)))
+  (define-key org-index-map (kbd "SPC") (lambda (arg) (interactive "P") (message nil) (org-index nil nil arg)))
   (define-key org-index-map (kbd "o") (lambda (arg) (interactive "P") (message nil) (org-index 'occur nil arg)))
   (define-key org-index-map (kbd "a") (lambda (arg) (interactive "P") (message nil) (org-index 'add nil arg)))
   (define-key org-index-map (kbd "d") (lambda (arg) (interactive "P") (message nil) (org-index 'delete nil arg)))
@@ -1453,8 +1464,8 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
       (insert (format "* %s %s\n" firstref title))
       (if temporary
           (insert "
-  Below you find your temporary index table, which will not last longer
-  than your current emacs session.
+  Below you find your temporary index table, which WILL NOT LAST LONGER
+  THAN YOUR CURRENT EMACS SESSION.
 ")
         (insert "
   Below you find your initial index table, which will grow over time.
@@ -1462,25 +1473,28 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
       (insert "
   You may start using it by adding some lines. Just move to
   another heading, invoke `org-index' and choose the command
-  \"add\".  After adding a few nodes, try the command \"occur\"
+  'add'.  After adding a few nodes, try the command 'occur'
   to search among them.
 
-  To gain further insight you may invoke the subcommand \"help\", or
+  To gain further insight you may invoke the subcommand 'help', or
   read the description of `org-index'.
 
   Within the index table below, dhe sequence of columns does not
-  matter. You may reorder them any way you like. Columns are
-  found by their heading. You may also add your own columns.
+  matter. You may reorder them in any way you please. Columns are
+  found by their heading. You may also add your own columns,
+  which should start with a dot (e.g. '.custom').
 
-  Following these explanations there is the item-list
+  Following this explanations you will find the item-list
   `columns-and-flags', which influences the behaviour of
   `org-index'. See the explanations which are part of this list.
 
   This node needs not be a top level node; its name is completely
   at your choice; it is found through its ID only.
-
-  Remark: These lines of explanation can be removed at any time.
 ")
+      (unless temporary
+        (insert "
+  Remark: These lines of explanation can be removed at any time.
+"))
 
       (setq id (org-id-get-create))
       (insert (format "
@@ -1845,7 +1859,7 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
 
        (goto-char org-index--below-hline)
        (org-table-align)
-       (format "Update %d lines." lines)))))
+       (format "Updated %d lines" lines)))))
 
 
 (defun org-index--collect-values-for-add-update (id &optional silent category)
