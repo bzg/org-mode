@@ -432,7 +432,7 @@ Tags
 
 * Tag inheritance::             Tags use the tree structure of the outline
 * Setting tags::                How to assign tags to a headline
-* Tag groups::                  Use one tag to search for several tags
+* Tag hierarchy::               Create a hierarchy of tags
 * Tag searches::                Searching for combinations of tags
 
 Properties and columns
@@ -4877,7 +4877,7 @@ You may specify special faces for specific tags using the option
 @menu
 * Tag inheritance::             Tags use the tree structure of the outline
 * Setting tags::                How to assign tags to a headline
-* Tag groups::                  Use one tag to search for several tags
+* Tag hierarchy::               Create a hierarchy of tags
 * Tag searches::                Searching for combinations of tags
 @end menu
 
@@ -5116,41 +5116,105 @@ instead of @kbd{C-c C-c}).  If you set the variable to the value
 @code{expert}, the special window is not even shown for single-key tag
 selection, it comes up only when you press an extra @kbd{C-c}.
 
-@node Tag groups
-@section Tag groups
+@node Tag hierarchy
+@section Tag hierarchy
 
 @cindex group tags
 @cindex tags, groups
-In a set of mutually exclusive tags, the first tag can be defined as a
-@emph{group tag}.  When you search for a group tag, it will return matches
-for all members in the group.  In an agenda view, filtering by a group tag
-will display headlines tagged with at least one of the members of the
-group.  This makes tag searches and filters even more flexible.
+@cindex tag hierarchy
+Tags can be defined in hierarchies.  A tag can be defined as a @emph{group
+tag} for a set of other tags.  The group tag can be seen as the ``broader
+term'' for its set of tags.  Defining multiple @emph{group tags} and nesting
+them creates a tag hierarchy.
 
-You can set group tags by inserting a colon between the group tag and other
-tags---beware that all whitespaces are mandatory so that Org can parse this
-line correctly:
+One use-case is to create a taxonomy of terms (tags) that can be used to
+classify nodes in a document or set of documents.
+
+When you search for a group tag, it will return matches for all members in
+the group and its subgroup.  In an agenda view, filtering by a group tag will
+display or hide headlines tagged with at least one of the members of the
+group or any of its subgroups.  This makes tag searches and filters even more
+flexible.
+
+You can set group tags by using brackets and inserting a colon between the
+group tag and its related tags---beware that all whitespaces are mandatory so
+that Org can parse this line correctly:
 
 @example
-#+TAGS: @{ @@read : @@read_book @@read_ebook @}
+#+TAGS: [ GTD : Control Persp ]
 @end example
 
-In this example, @samp{@@read} is a @emph{group tag} for a set of three
-tags: @samp{@@read}, @samp{@@read_book} and @samp{@@read_ebook}.
+In this example, @samp{GTD} is the @emph{group tag} and it is related to two
+other tags: @samp{Control}, @samp{Persp}.  Defining @samp{Control} and
+@samp{Persp} as group tags creates an hierarchy of tags:
 
-You can also use the @code{:grouptags} keyword directly when setting
-@code{org-tag-alist}:
+@example
+#+TAGS: [ Control : Context Task ]
+#+TAGS: [ Persp : Vision Goal AOF Project ]
+@end example
+
+That can conceptually be seen as a hierarchy of tags:
+
+@example
+- GTD
+  - Persp
+    - Vision
+    - Goal
+    - AOF
+    - Project
+  - Control
+    - Context
+    - Task
+@end example
+
+You can use the @code{:startgrouptag}, @code{:grouptags} and
+@code{:endgrouptag} keyword directly when setting @code{org-tag-alist}
+directly:
 
 @lisp
-(setq org-tag-alist '((:startgroup . nil)
-                      ("@@read" . nil)
-                      (:grouptags . nil)
-                      ("@@read_book" . nil)
-                      ("@@read_ebook" . nil)
-                      (:endgroup . nil)))
+(setq org-tag-alist '((:startgrouptag)
+                      ("GTD")
+                      (:grouptags)
+                      ("Control")
+                      ("Persp")
+                      (:endgrouptag)
+                      (:startgrouptag)
+                      ("Control")
+                      (:grouptags)
+                      ("Context")
+                      ("Task")
+                      (:endgrouptag)))
 @end lisp
 
-You cannot nest group tags or use a group tag as a tag in another group.
+The tags in a group can be mutually exclusive if using the same group syntax
+as is used for grouping mutually exclusive tags together; using curly
+brackets.
+
+@example
+#+TAGS: @{ Context : @@Home @@Work @@Call @}
+@end example
+
+When setting @code{org-tag-alist} you can use @code{:startgroup} &
+@code{:endgroup} instead of @code{:startgrouptag} & @code{:endgrouptag} to
+make the tags mutually exclusive.
+
+Furthermore; The members of a @emph{group tag} can also be regular
+expression, creating the possibility of more dynamic and rule-based
+tag-structure.  The regular expressions in the group must be marked up within
+@{ @}.  Example use, to expand on the example given above:
+
+@example
+#+TAGS: [ Vision : @{V@.+@} ]
+#+TAGS: [ Goal : @{G@.+@} ]
+#+TAGS: [ AOF : @{AOF@.+@} ]
+#+TAGS: [ Project : @{P@.+@} ]
+@end example
+
+Searching for the tag @samp{Project} will now list all tags also including
+regular expression matches for @samp{P@@.+}.  Similar for tag-searches on
+@samp{Vision}, @samp{Goal} and @samp{AOF}.  This can be good for example if
+tags for a certain project is tagged with a common project-identifier,
+i.e. @samp{P@@2014_OrgTags}.
 
 @kindex C-c C-x q
 @vindex org-group-tags
@@ -8108,7 +8172,7 @@ braces.  For example,
 @samp{:work:} and any tag @i{starting} with @samp{boss}.
 
 @cindex group tags, as regular expressions
-Group tags (@pxref{Tag groups}) are expanded as regular expressions.  E.g.,
+Group tags (@pxref{Tag hierarchy}) are expanded as regular expressions.  E.g.,
 if @samp{:work:} is a group tag for the group @samp{:work:lab:conf:}, then
 searching for @samp{work} will search for @samp{@{\(?:work\|lab\|conf\)@}}
 and searching for @samp{-work} will search for all headlines but those with
