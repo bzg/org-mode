@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011-2015 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 4.1.1
+;; Version: 4.1.2
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -73,8 +73,9 @@
 
 ;;; Change Log:
 
-;;   [2015-03-03 Tu] Version 4.0.1
+;;   [2015-03-05 Th] Version 4.1.1 and 4.1.2
 ;;   - org-mark-ring is now used more consistently
+;;   - Bugfix when going to a heading by ref
 ;;
 ;;   [2015-02-26 Th] Version 4.0.0 and 4.1.0:
 ;;   - Removed command "leave"; rather go back with org-mark-ring-goto
@@ -134,7 +135,7 @@
   :group 'org-index)
 
 ;; Version of this package
-(defvar org-index-version "4.1.0" "Version of `org-index', format is major.minor.bugfix, where \"major\" is a change in index-table and \"minor\" are new features.")
+(defvar org-index-version "4.1.2" "Version of `org-index', format is major.minor.bugfix, where \"major\" is a change in index-table and \"minor\" are new features.")
 
 ;; Variables to hold the configuration of the index table
 (defvar org-index--maxref nil "Maximum number from reference table (e.g. \"153\").")
@@ -262,7 +263,7 @@ for its index table and its configuration flags.
 
 For basic usage, subcommands 'add' and 'occur' are most important.
 
-This is version 4.1.0 of org-index.el.
+This is version 4.1.2 of org-index.el.
 \\<org-mode-map>
 The function `org-index' operates on a dedicated table, the index
 table, which lives within its own Org-mode node.  The table and
@@ -423,27 +424,23 @@ as in interactive calls."
     
     (when (eq command 'sort)
       (setq sort-what (intern (org-completing-read "You may sort:\n  - index  : your index table by various columns\n  - region : the active region by contained reference\n  - buffer : the whole current buffer\nPlease choose what to sort: " (list "index" "region" "buffer") nil t))))
-
-    ;;
-    ;; Arrange for beeing able to return
-    ;;
-
-    (when (memq command '(occur head enter ref example sort maintain))
-      (org-mark-ring-push))
-
+    
     
     ;;
     ;; Enter table
     ;;
+
+    ;; Arrange for beeing able to return
+    (when (and (memq command '(occur head enter ref example sort maintain))
+               (string= major-mode "org-mode")
+               (not (string= (buffer-name) org-index--occur-buffer-name)))
+      (org-mark-ring-push))
 
     ;; These commands will leave user in index table after they are finished
     (when (or (memq command '(enter ref maintain))
               (and (eq command 'sort)
                    (eq sort-what 'index)))
 
-      ;; Support orgmode-standard of going back (buffer and position)
-      (org-mark-ring-push)
-      
       (pop-to-buffer-same-window org-index--buffer)
       (goto-char org-index--point)
       (org-index--unfold-buffer))
@@ -501,6 +498,7 @@ as in interactive calls."
                (org-at-table-p))
           (setq search-id (org-index--get-or-set-field 'id)))
 
+      (setq search-id (or search-id (org-index--id-from-ref search-ref))) 
       (setq message-text
             (if search-id
                 (org-index--do-head search-ref search-id)
@@ -542,10 +540,10 @@ as in interactive calls."
         (if id
             (setq info (org-index--on 'id id
                          (mapcar (lambda (x) (org-index--get-or-set-field x))
-                                 (list 'created 'count 'last-accessed 'ref)))))
+                                 (list 'ref 'count 'created 'last-accessed 'ref)))))
         (if info
             (progn
-              (setq message-text (apply 'format (cons "Created %s, %s times accessed, last %s" info)))
+              (setq message-text (apply 'format (cons "'%s' has been accessed %s times between %s and %s" info)))
               (setq kill-new-text (car (last info))))
           (setq message-text "This node is not part of index"))))
 
@@ -2295,7 +2293,6 @@ If OTHER in separate window."
   "Helper for `org-index--occur', find heading with ref or id; if OTHER, in other window."
   (let ((ref (org-index--get-or-set-field 'ref))
         (id (org-index--get-or-set-field 'id)))
-    (org-mark-ring-push)
     (if id
         (org-index--do-head ref id other)
       (message "Current line has no id."))))
