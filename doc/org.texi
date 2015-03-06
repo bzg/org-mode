@@ -9040,8 +9040,8 @@ Bulk action: act on all marked entries in the agenda.  This will prompt for
 another key to select the action to be applied.  The prefix arg to @kbd{B}
 will be passed through to the @kbd{s} and @kbd{d} commands, to bulk-remove
 these special timestamps.  By default, marks are removed after the bulk.  If
-you want them to persist, set @code{org-agenda-bulk-persistent-marks} to
-@code{t} or hit @kbd{p} at the prompt.
+you want them to persist, set @code{org-agenda-persistent-marks} to @code{t}
+or hit @kbd{p} at the prompt.
 
 @table @kbd
 @item *
