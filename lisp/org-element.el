@@ -2998,7 +2998,7 @@ Assume point is at the beginning of the line break."
 	     (not (eq (char-before) ?\\)))
     (list 'line-break
 	  (list :begin (point)
-		:end (progn (forward-line) (point))
+		:end (line-beginning-position 2)
 		:post-blank 0))))
 
 (defun org-element-line-break-interpreter (line-break contents)
@@ -4514,25 +4514,29 @@ indentation is not done with TAB characters."
 	 (find-min-ind
 	  ;; Return minimal common indentation within BLOB.  This is
 	  ;; done by walking recursively BLOB and updating MIN-IND
-	  ;; along the way.  FIRST-FLAG is non-nil when the first
-	  ;; string hasn't been seen yet.  It is required as this
-	  ;; string is the only one whose indentation doesn't happen
-	  ;; after a newline character.
+	  ;; along the way.  FIRST-FLAG is non-nil when the next
+	  ;; object is expected to be a string that doesn't start with
+	  ;; a newline character.  It happens for strings at the
+	  ;; beginnings of the contents or right after a line break.
 	  (lambda (blob first-flag)
 	    (dolist (object (org-element-contents blob))
-	      (when (and first-flag (stringp object))
+	      (when first-flag
 		(setq first-flag nil)
-		(string-match "\\` *" object)
-		(let ((len (match-end 0)))
-		  ;; An indentation of zero means no string will be
-		  ;; modified.  Quit the process.
-		  (if (zerop len) (throw 'zero (setq min-ind 0))
-		    (setq min-ind (min len min-ind)))))
+		;; Objects cannot start with spaces: in this case,
+		;; indentation is 0.
+		(if (not (stringp object)) (throw 'zero (setq min-ind 0))
+		  (string-match "\\` *" object)
+		  (let ((len (match-end 0)))
+		    ;; An indentation of zero means no string will be
+		    ;; modified.  Quit the process.
+		    (if (zerop len) (throw 'zero (setq min-ind 0))
+		      (setq min-ind (min len min-ind))))))
 	      (cond
 	       ((stringp object)
 		(dolist (line (cdr (org-split-string object " *\n")))
 		  (unless (string= line "")
 		    (setq min-ind (min (org-get-indentation line) min-ind)))))
+	       ((eq (org-element-type object) 'line-break) (setq first-flag t))
 	       ((memq (org-element-type object) org-element-recursive-objects)
 		(funcall find-min-ind object first-flag)))))))
     ;; Find minimal indentation in ELEMENT.
@@ -4542,31 +4546,35 @@ indentation is not done with TAB characters."
       ;; string minus common indentation.
       (let* (build			; For byte compiler.
 	     (build
-	      (function
-	       (lambda (blob first-flag)
-		 ;; Return BLOB with all its strings indentation
-		 ;; shortened from MIN-IND white spaces.  FIRST-FLAG
-		 ;; is non-nil when the first string hasn't been seen
-		 ;; yet.
-		 (setcdr (cdr blob)
-			 (mapcar
-			  #'(lambda (object)
-			      (when (and first-flag (stringp object))
-				(setq first-flag nil)
-				(setq object
-				      (replace-regexp-in-string
-				       (format "\\` \\{%d\\}" min-ind)
-				       "" object)))
-			      (cond
-			       ((stringp object)
-				(replace-regexp-in-string
-				 (format "\n \\{%d\\}" min-ind) "\n" object))
-			       ((memq (org-element-type object)
-				      org-element-recursive-objects)
-				(funcall build object first-flag))
-			       (t object)))
-			  (org-element-contents blob)))
-		 blob))))
+	      (lambda (blob first-flag)
+		;; Return BLOB with all its strings indentation
+		;; shortened from MIN-IND white spaces.  FIRST-FLAG is
+		;; non-nil when the next object is expected to be
+		;; a string that doesn't start with a newline
+		;; character.
+		(setcdr (cdr blob)
+			(mapcar
+			 (lambda (object)
+			   (when first-flag
+			     (setq first-flag nil)
+			     (when (stringp object)
+			       (setq object
+				     (replace-regexp-in-string
+				      (format "\\` \\{%d\\}" min-ind)
+				      "" object))))
+			   (cond
+			    ((stringp object)
+			     (replace-regexp-in-string
+			      (format "\n \\{%d\\}" min-ind) "\n" object))
+			    ((memq (org-element-type object)
+				   org-element-recursive-objects)
+			     (funcall build object first-flag))
+			    ((eq (org-element-type object) 'line-break)
+			     (setq first-flag t)
+			     object)
+			    (t object)))
+			 (org-element-contents blob)))
+		blob)))
 	(funcall build element (not ignore-first))))))
 
 

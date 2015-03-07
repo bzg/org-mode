@@ -3067,12 +3067,18 @@ Text
      '(paragraph nil "  Two spaces\n   Three spaces"))
     '(paragraph nil "Two spaces\n Three spaces")))
   ;; Ignore objects within contents when computing maximum common
-  ;; indentation.
+  ;; indentation.  However, if contents start with an object, common
+  ;; indentation is 0.
   (should
    (equal
     (org-element-normalize-contents
      '(paragraph nil " One " (emphasis nil "space") "\n  Two spaces"))
     '(paragraph nil "One " (emphasis nil "space") "\n Two spaces")))
+  (should
+   (equal
+    (org-element-normalize-contents
+     '(paragraph nil (verbatim nil "V") "No space\n  Two\n   Three"))
+    '(paragraph nil (verbatim nil "V") "No space\n  Two\n   Three")))
   ;; Ignore blank lines.
   (should
    (equal
@@ -3101,7 +3107,19 @@ Text
    (equal
     (org-element-normalize-contents
      '(paragraph nil "No space\n  Two spaces\n   Three spaces") t)
-    '(paragraph nil "No space\nTwo spaces\n Three spaces"))))
+    '(paragraph nil "No space\nTwo spaces\n Three spaces")))
+  (should
+   (equal
+    (org-element-normalize-contents
+     '(paragraph nil (verbatim nil "V") "No space\n  Two\n   Three") t)
+    '(paragraph nil (verbatim nil "V") "No space\nTwo\n Three")))
+  ;; Corner case: do not ignore indentation of string right after
+  ;; a line break.
+  (should
+   (equal
+    (org-element-normalize-contents
+     '(paragraph nil " 1 space" (line-break) "  2 spaces"))
+    '(paragraph nil "1 space" (line-break) " 2 spaces"))))
 
 
 
