@@ -165,6 +165,7 @@ Returns a list with the following elements:
   2: Optional deadline (nil if not present)
   3: If deadline, the repeater for the deadline, otherwise nil
   4: A list of all the past dates this todo was mark closed
+  5: Repeater type as a string
 
 This list represents a \"habit\" for the rest of this module."
   (save-excursion
@@ -174,7 +175,7 @@ This list represents a \"habit\" for the rest of this module."
 	   (scheduled-repeat (org-get-repeat org-scheduled-string))
 	   (end (org-entry-end-position))
 	   (habit-entry (org-no-properties (nth 4 (org-heading-components))))
-	   closed-dates deadline dr-days sr-days)
+	   closed-dates deadline dr-days sr-days sr-type)
       (if scheduled
 	  (setq scheduled (time-to-days scheduled))
 	(error "Habit %s has no scheduled date" habit-entry))
@@ -182,7 +183,9 @@ This list represents a \"habit\" for the rest of this module."
 	(error
 	 "Habit '%s' has no scheduled repeat period or has an incorrect one"
 	 habit-entry))
-      (setq sr-days (org-habit-duration-to-days scheduled-repeat))
+      (setq sr-days (org-habit-duration-to-days scheduled-repeat)
+	    sr-type (progn (string-match "[\\.+]?\\+" scheduled-repeat)
+			   (org-match-string-no-properties 0 scheduled-repeat)))
       (unless (> sr-days 0)
 	(error "Habit %s scheduled repeat period is less than 1d" habit-entry))
       (when (string-match "/\\([0-9]+[dwmy]\\)" scheduled-repeat)
@@ -223,7 +226,7 @@ This list represents a \"habit\" for the rest of this module."
 		      (org-match-string-no-properties 2))))
 		closed-dates)
 	  (setq count (1+ count))))
-      (list scheduled sr-days deadline dr-days closed-dates))))
+      (list scheduled sr-days deadline dr-days closed-dates sr-type))))
 
 (defsubst org-habit-scheduled (habit)
   (nth 0 habit))
@@ -241,6 +244,8 @@ This list represents a \"habit\" for the rest of this module."
       (org-habit-scheduled-repeat habit)))
 (defsubst org-habit-done-dates (habit)
   (nth 4 habit))
+(defsubst org-habit-repeat-type (habit)
+  (nth 5 habit))
 
 (defsubst org-habit-get-priority (habit &optional moment)
   "Determine the relative priority of a habit.
@@ -327,10 +332,27 @@ current time."
 			     (not (< scheduled now)))
 			'(org-habit-clear-face . org-habit-clear-future-face)
 		      (org-habit-get-faces
-		       habit start (and in-the-past-p
-					(if last-done-date
-					    (+ last-done-date s-repeat)
-					  scheduled))
+		       habit start
+		       (and in-the-past-p last-done-date
+			    ;; Compute scheduled time for habit at the
+			    ;; time START was current.
+			    (let ((type (org-habit-repeat-type habit)))
+			      (cond
+			       ((equal type ".+")
+				(+ last-done-date s-repeat))
+			       ((equal type "+")
+				;; Since LAST-DONE-DATE, each done
+				;; mark shifted scheduled date by
+				;; S-REPEAT.
+				(- scheduled (* (length done-dates) s-repeat)))
+			       (t
+				;; Scheduled time was the first time
+				;; past LAST-DONE-STATE which can jump
+				;; to current SCHEDULED time by
+				;; S-REPEAT hops.
+				(- scheduled
+				   (* (/ (- scheduled last-done-date) s-repeat)
+				      s-repeat))))))
 		       donep)))
 	     markedp face)
 	(if donep
