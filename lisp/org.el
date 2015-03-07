@@ -18829,13 +18829,16 @@ for all fragments in the buffer."
 		       (throw 'exit nil))
 		   (setq msg "Creating images for section...")
 		   (narrow-to-region beg end))))))
-	    (org-format-latex
-	     (concat org-latex-preview-ltxpng-directory
-		     (file-name-sans-extension
-		      (file-name-nondirectory
-		       (buffer-file-name (buffer-base-buffer)))))
-	     default-directory 'overlays msg 'forbuffer
-	     org-latex-create-formula-image-program))
+	    (let ((file (buffer-file-name (buffer-base-buffer))))
+	      (org-format-latex
+	       (concat org-latex-preview-ltxpng-directory
+		       (file-name-sans-extension (file-name-nondirectory file)))
+	       ;; Emacs cannot overlay images from remote hosts.
+	       ;; Create it in `temporary-file-directory' instead.
+	       (if (file-remote-p file) temporary-file-directory
+		 default-directory)
+	       'overlays msg 'forbuffer
+	       org-latex-create-formula-image-program)))
 	  ;; Work around a bug that doesn't restore window's start
 	  ;; when widening back the buffer.
 	  (set-window-start nil window-start)
