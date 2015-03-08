@@ -4789,7 +4789,7 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
       (or org-agenda-multi (org-agenda-fit-window-to-buffer))
       (add-text-properties (point-min) (point-max)
 			   `(org-agenda-type todo
-					     org-last-args (,arg)
+					     org-last-args ,arg
 					     org-redo-cmd ,org-agenda-redo-command
 					     org-series-cmd ,org-cmd))
       (org-agenda-finalize)
