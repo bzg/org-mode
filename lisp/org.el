@@ -23482,12 +23482,23 @@ strictly within a source block, use appropriate comment syntax."
 ;; This section contains tools to operate on timestamp objects, as
 ;; returned by, e.g. `org-element-context'.
 
+(defun org-timestamp--to-internal-time (timestamp &optional end)
+  "Encode TIMESTAMP object into Emacs internal time.
+Use end of date range or time range when END is non-nil."
+  (apply #'encode-time
+	 (cons 0
+	       (mapcar
+		(lambda (prop) (or (org-element-property prop timestamp) 0))
+		(if end '(:minute-end :hour-end :day-end :month-end :year-end)
+		  '(:minute-start :hour-start :day-start :month-start
+				  :year-start))))))
+
 (defun org-timestamp-has-time-p (timestamp)
   "Non-nil when TIMESTAMP has a time specified."
   (org-element-property :hour-start timestamp))
 
 (defun org-timestamp-format (timestamp format &optional end utc)
-  "Format a TIMESTAMP element into a string.
+  "Format a TIMESTAMP object into a string.
 
 FORMAT is a format specifier to be passed to
 `format-time-string'.
@@ -23498,21 +23509,13 @@ time-range, if possible.
 When optional argument UTC is non-nil, time will be expressed as
 Universal Time."
   (format-time-string
-   format
-   (apply 'encode-time
-          (cons 0
-                (mapcar
-                 (lambda (prop) (or (org-element-property prop timestamp) 0))
-                 (if end '(:minute-end :hour-end :day-end :month-end :year-end)
-                   '(:minute-start :hour-start :day-start :month-start
-                                   :year-start)))))
-   utc))
+   format (org-timestamp--to-internal-time timestamp end) utc))
 
 (defun org-timestamp-split-range (timestamp &optional end)
-  "Extract a timestamp object from a date or time range.
+  "Extract a TIMESTAMP object from a date or time range.
 
-TIMESTAMP is a timestamp object. END, when non-nil, means extract
-the end of the range.  Otherwise, extract its start.
+END, when non-nil, means extract the end of the range.
+Otherwise, extract its start.
 
 Return a new timestamp object."
   (let ((type (org-element-property :type timestamp)))
