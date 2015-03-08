@@ -781,7 +781,7 @@ contents according to the current headline."
 	    (or (not (plist-get info :with-tags))
 		(eq (plist-get info :with-tags) 'not-in-toc))
 	    'toc))))
-      (org-export-collect-headlines info n keyword) "\n"))))
+      (org-export-collect-headlines info n (and local keyword)) "\n"))))
 
 (defun org-ascii--list-listings (keyword info)
   "Return a list of listings.
