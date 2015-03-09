@@ -239,7 +239,7 @@ Return overlay specification, as a string, or nil."
     (:beamer-font-theme "BEAMER_FONT_THEME" nil nil t)
     (:beamer-inner-theme "BEAMER_INNER_THEME" nil nil t)
     (:beamer-outer-theme "BEAMER_OUTER_THEME" nil nil t)
-    (:beamer-header-extra "BEAMER_HEADER" nil nil newline)
+    (:beamer-header "BEAMER_HEADER" nil nil newline)
     (:beamer-environments-extra nil nil org-beamer-environments-extra)
     (:beamer-frame-default-options nil nil org-beamer-frame-default-options)
     (:beamer-outline-frame-options nil nil org-beamer-outline-frame-options)
@@ -825,8 +825,7 @@ holding export options."
 	     (concat (org-element-normalize-string
 		      (plist-get info :latex-header))
 		     (org-element-normalize-string
-		      (plist-get info :latex-header-extra))
-		     (plist-get info :beamer-header-extra)))))
+		      (plist-get info :latex-header-extra))))))
 	  info)))
      ;; 3. Insert themes.
      (let ((format-theme
@@ -866,16 +865,20 @@ holding export options."
        (format "\\date{%s}\n" (org-export-data date info)))
      ;; 7. Title
      (format "\\title{%s}\n" title)
-     ;; 8. Hyperref options.
+     ;; 8. Beamer-header
+     (let ((beamer-header (plist-get info :beamer-header)))
+       (when beamer-header
+	 (format "%s\n" (plist-get info :beamer-header))))
+     ;; 9. Hyperref options.
      (when (plist-get info :latex-hyperref-p)
        (format "\\hypersetup{\n  pdfkeywords={%s},\n  pdfsubject={%s},\n  pdfcreator={%s}}\n"
 	       (or (plist-get info :keywords) "")
 	       (or (plist-get info :description) "")
 	       (if (not (plist-get info :with-creator)) ""
 		 (plist-get info :creator))))
-     ;; 9. Document start.
+     ;; 10. Document start.
      "\\begin{document}\n\n"
-     ;; 10. Title command.
+     ;; 11. Title command.
      (org-element-normalize-string
       (cond ((not (plist-get info :with-title)) nil)
 	    ((string= "" title) nil)
@@ -884,7 +887,7 @@ holding export options."
 			   org-latex-title-command)
 	     (format org-latex-title-command title))
 	    (t org-latex-title-command)))
-     ;; 11. Table of contents.
+     ;; 12. Table of contents.
      (let ((depth (plist-get info :with-toc)))
        (when depth
 	 (concat
@@ -896,16 +899,16 @@ holding export options."
 	    (format "\\setcounter{tocdepth}{%d}\n" depth))
 	  "\\tableofcontents\n"
 	  "\\end{frame}\n\n")))
-     ;; 12. Document's body.
+     ;; 13. Document's body.
      contents
-     ;; 13. Creator.
+     ;; 14. Creator.
      (let ((creator-info (plist-get info :with-creator)))
        (cond
 	((not creator-info) "")
 	((eq creator-info 'comment)
 	 (format "%% %s\n" (plist-get info :creator)))
 	(t (concat (plist-get info :creator) "\n"))))
-     ;; 14. Document end.
+     ;; 15. Document end.
      "\\end{document}")))
 
 

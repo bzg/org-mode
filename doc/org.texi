@@ -11038,9 +11038,11 @@ Beamer export introduces a number of keywords to insert code in the
 document's header.  Four control appearance of the presentation:
 @code{#+BEAMER_THEME}, @code{#+BEAMER_COLOR_THEME},
 @code{#+BEAMER_FONT_THEME}, @code{#+BEAMER_INNER_THEME} and
-@code{#+BEAMER_OUTER_THEME}.  All of them accept optional arguments
-within square brackets.  The last one, @code{#+BEAMER_HEADER}, is more
-generic and allows you to append any line of code in the header.
+@code{#+BEAMER_OUTER_THEME}.  All of them accept optional arguments within
+square brackets.  The last one, @code{#+BEAMER_HEADER}, is more generic and
+allows you to append any line of code in the header@footnote{Lines are
+appended at the end of the preamble, allowing for any final customization
+such as the inclusion of short titles.}.
 
 @example
 #+BEAMER_THEME: Rochester [height=20pt]
