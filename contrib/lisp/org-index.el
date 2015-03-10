@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011-2015 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 4.1.2
+;; Version: 4.2.0
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -143,7 +143,7 @@
   :group 'org-index)
 
 ;; Version of this package
-(defvar org-index-version "4.1.2" "Version of `org-index', format is major.minor.bugfix, where \"major\" is a change in index-table and \"minor\" are new features.")
+(defvar org-index-version "4.2.0" "Version of `org-index', format is major.minor.bugfix, where \"major\" is a change in index-table and \"minor\" are new features.")
 
 ;; Variables to hold the configuration of the index table
 (defvar org-index--maxref nil "Maximum number from reference table (e.g. '153').")
@@ -269,7 +269,7 @@ for its index table and its configuration flags.
 
 For basic usage, subcommands 'add' and 'occur' are most important.
 
-This is version 4.1.2 of org-index.el.
+This is version 4.2.0 of org-index.el.
 \\<org-mode-map>
 The function `org-index' operates on a dedicated table, the index
 table, which lives within its own Org-mode node.  The table and
