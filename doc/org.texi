@@ -7532,14 +7532,7 @@ For information and examples on how to specify the file and the heading,
 see the documentation string of the variable
 @code{org-archive-location}.
 
-There is also an in-buffer option for setting this variable, for
-example@footnote{For backward compatibility, the following also works:
-If there are several such lines in a file, each specifies the archive
-location for the text below it.  The first such line also applies to any
-text before its definition.  However, using this method is
-@emph{strongly} deprecated as it is incompatible with the outline
-structure of the document.  The correct method for setting multiple
-archive locations in a buffer is using properties.}:
+There is also an in-buffer option for setting this variable, for example:
 
 @cindex #+ARCHIVE
 @example
@@ -7918,10 +7911,16 @@ the following segment of an Org file will be processed and entries
 will be made in the agenda:
 
 @example
-* Birthdays and similar stuff
-#+CATEGORY: Holiday
+* Holidays
+  :PROPERTIES:
+  :CATEGORY: Holiday
+  :END:
 %%(org-calendar-holiday)   ; special function for holiday names
-#+CATEGORY: Ann
+
+* Birthdays
+  :PROPERTIES:
+  :CATEGORY: Ann
+  :END:
 %%(org-anniversary 1956  5 14)@footnote{@code{org-anniversary} is just like @code{diary-anniversary}, but the argument order is always according to ISO and therefore independent of the value of @code{calendar-date-style}.} Arthur Dent is %d years old
 %%(org-anniversary 1869 10  2) Mahatma Gandhi would be %d years old
 @end example
@@ -8338,16 +8337,9 @@ associated with the item.
 
 @cindex category
 @cindex #+CATEGORY
-The category is a broad label assigned to each agenda item.  By default,
-the category is simply derived from the file name, but you can also
-specify it with a special line in the buffer, like this@footnote{For
-backward compatibility, the following also works: if there are several
-such lines in a file, each specifies the category for the text below it.
-The first category also applies to any text before the first CATEGORY
-line.  However, using this method is @emph{strongly} deprecated as it is
-incompatible with the outline structure of the document.  The correct
-method for setting multiple categories in a buffer is using a
-property.}:
+The category is a broad label assigned to each agenda item.  By default, the
+category is simply derived from the file name, but you can also specify it
+with a special line in the buffer, like this:
 
 @example
 #+CATEGORY: Thesis
