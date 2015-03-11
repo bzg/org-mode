@@ -5352,12 +5352,11 @@ Special properties provide an alternative access method to Org mode features,
 like the TODO state or the priority of an entry, discussed in the previous
 chapters.  This interface exists so that you can include these states in
 a column view (@pxref{Column view}), or to use them in queries.  The
-following property names are special and (except for @code{:CATEGORY:})
-should not be used as keys in the properties drawer:
+following property names are special and should not be used as keys in the
+properties drawer:
 
 @cindex property, special, ALLTAGS
 @cindex property, special, BLOCKED
-@cindex property, special, CATEGORY
 @cindex property, special, CLOCKSUM
 @cindex property, special, CLOCKSUM_T
 @cindex property, special, CLOSED
@@ -5373,7 +5372,6 @@ should not be used as keys in the properties drawer:
 @example
 ALLTAGS      @r{All tags, including inherited ones.}
 BLOCKED      @r{"t" if task is currently blocked by children or siblings.}
-CATEGORY     @r{The category of an entry.}
 CLOCKSUM     @r{The sum of CLOCK intervals in the subtree.  @code{org-clock-sum}}
              @r{must be run first to compute the values in the current buffer.}
 CLOCKSUM_T   @r{The sum of CLOCK intervals in the subtree for today.}

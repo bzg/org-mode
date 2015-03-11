@@ -15367,9 +15367,8 @@ a *different* entry, you cannot use these techniques."
 ;;; Properties API
 
 (defconst org-special-properties
-  '("ALLTAGS" "BLOCKED" "CATEGORY" "CLOCKSUM" "CLOCKSUM_T" "CLOSED" "DEADLINE"
-    "FILE" "ITEM" "PRIORITY" "SCHEDULED" "TAGS" "TIMESTAMP" "TIMESTAMP_IA"
-    "TODO")
+  '("ALLTAGS" "BLOCKED" "CLOCKSUM" "CLOCKSUM_T" "CLOSED" "DEADLINE" "FILE"
+    "ITEM" "PRIORITY" "SCHEDULED" "TAGS" "TIMESTAMP" "TIMESTAMP_IA" "TODO")
   "The special properties valid in Org mode.
 These are properties that are not defined in the property drawer,
 but in some other way.")
@@ -15718,7 +15717,7 @@ value higher up the hierarchy."
      ((and inherit
 	   (or (not (eq inherit 'selective)) (org-property-inherit-p property)))
       (org-entry-get-with-inheritance property literal-nil))
-     ((member-ignore-case property org-special-properties)
+     ((member-ignore-case property (cons "CATEGORY" org-special-properties))
       ;; We need a special property.  Use `org-entry-properties' to
       ;; retrieve it, but specify the wanted property.
       (cdr (assoc-string property (org-entry-properties nil property))))
@@ -16270,6 +16269,7 @@ completion."
 	(while (>= n org-highest-priority)
 	  (push (char-to-string n) vals)
 	  (setq n (1- n)))))
+     ((equal property "CATEGORY"))
      ((member property org-special-properties))
      ((setq vals (run-hook-with-args-until-success
 		  'org-property-allowed-value-functions property)))

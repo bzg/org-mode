@@ -2951,6 +2951,12 @@ Text.
 		 (org-test-with-temp-text "* H\nDEADLINE: <2014-03-04 tue.>"
 		   (org-entry-put (point) "DEADLINE" "later")
 		   (buffer-string))))
+  ;; Set "CATEGORY" property
+  (should
+   (string-match "^ *:CATEGORY: cat"
+		 (org-test-with-temp-text "* H"
+		   (org-entry-put (point) "CATEGORY" "cat")
+		   (buffer-string))))
   ;; Regular properties, with or without pre-existing drawer.
   (should
    (string-match "^ *:A: +2$"
@@ -2965,9 +2971,9 @@ Text.
   ;; Special case: two consecutive headlines.
   (should
    (string-match "\\* A\n *:PROPERTIES:"
-    (org-test-with-temp-text "* A\n** B"
-      (org-entry-put (point) "A" "1")
-      (buffer-string)))))
+		 (org-test-with-temp-text "* A\n** B"
+		   (org-entry-put (point) "A" "1")
+		   (buffer-string)))))
 
 
 ;;; Radio Targets
