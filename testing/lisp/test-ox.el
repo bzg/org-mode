@@ -2503,8 +2503,8 @@ Another text. (ref:text)
 	 (org-element-type
 	  (org-export-resolve-fuzzy-link
 	   (org-element-map tree 'link 'identity info t) info)))))
-  ;; Return nil if no match.
-  (should-not
+  ;; Error if no match.
+  (should-error
    (org-test-with-parsed-data "[[target]]"
      (org-export-resolve-fuzzy-link
       (org-element-map tree 'link 'identity info t) info)))

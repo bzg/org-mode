@@ -4023,7 +4023,7 @@ Return value can be an object, an element, or nil:
   will be given to the one with the closest common ancestor, if
   any, or the first one in the parse tree otherwise.
 
-- Otherwise, return nil.
+- Otherwise, throw an error.
 
 Assume LINK type is \"fuzzy\".  White spaces are not
 significant."
@@ -4070,7 +4070,7 @@ significant."
      ;; Last case: link either points to a headline or to nothingness.
      ;; Try to find the source, with priority given to headlines with
      ;; the closest common ancestor.  If such candidate is found,
-     ;; return it, otherwise return nil.
+     ;; return it, otherwise signal an error.
      (t
       (let ((find-headline
 	     (function
@@ -4096,8 +4096,8 @@ significant."
 		       (org-element-lineage parent-hl nil t))))
 	    (let ((foundp (funcall find-headline path parent)))
 	      (when foundp (throw 'exit foundp))))
-	  ;; No destination found: return nil.
-	  (and (not match-title-p) (puthash path nil link-cache))))))))
+	  ;; No destination found: error.
+	  (user-error "Unable to resolve link \"%s\"" raw-path)))))))
 
 (defun org-export-resolve-id-link (link info)
   "Return headline referenced as LINK destination.
