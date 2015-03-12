@@ -257,12 +257,15 @@ may make them unreachable."
 		(src-block
 		 (let* ((match-start (copy-marker (match-beginning 0)))
 			(ind (org-get-indentation))
+			(lang (or (org-element-property :language element)
+				  (error "No language for src block: %s"
+					 (or (org-element-property :name element)
+					     "(unnamed)"))))
 			(headers
-			 (cons
-			  (org-element-property :language element)
-			  (let ((params (org-element-property :parameters
-							      element)))
-			    (and params (org-split-string params "[ \t]+"))))))
+			 (cons lang
+			       (let ((params
+				      (org-element-property :parameters element)))
+				 (and params (org-split-string params "[ \t]+"))))))
 		   ;; Take care of matched block: compute replacement
 		   ;; string.  In particular, a nil REPLACEMENT means
 		   ;; the block should be left as-is while an empty
