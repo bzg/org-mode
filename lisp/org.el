@@ -182,6 +182,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-element-parse-buffer "org-element"
 		  (&optional granularity visible-only))
 (declare-function org-element-type "org-element" (element))
+(declare-function org-element-update-syntax "org-element" ())
 
 (defsubst org-uniquify (list)
   "Non-destructively remove duplicate elements from LIST."
