@@ -870,12 +870,9 @@ holding export options."
        (when beamer-header
 	 (format "%s\n" (plist-get info :beamer-header))))
      ;; 9. Hyperref options.
-     (when (plist-get info :latex-hyperref-p)
-       (format "\\hypersetup{\n  pdfkeywords={%s},\n  pdfsubject={%s},\n  pdfcreator={%s}}\n"
-	       (or (plist-get info :keywords) "")
-	       (or (plist-get info :description) "")
-	       (if (not (plist-get info :with-creator)) ""
-		 (plist-get info :creator))))
+     (let ((template (plist-get info :latex-hyperref-template)))
+       (and (stringp template)
+	    (format-spec template (org-latex--format-spec info))))
      ;; 10. Document start.
      "\\begin{document}\n\n"
      ;; 11. Title command.
