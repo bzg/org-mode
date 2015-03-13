@@ -122,7 +122,9 @@ When nil, Org will create ids using `org-icalendar-create-uid'."
 	      (if a (org-rss-export-to-rss t s v)
 		(org-open-file (org-rss-export-to-rss nil s v)))))))
   :options-alist
-  '((:with-toc nil nil nil) ;; Never include HTML's toc
+  '((:description "DESCRIPTION" nil nil newline)
+    (:keywords "KEYWORDS" nil nil space)
+    (:with-toc nil nil nil) ;; Never include HTML's toc
     (:rss-extension "RSS_EXTENSION" nil org-rss-extension)
     (:rss-image-url "RSS_IMAGE_URL" nil org-rss-image-url)
     (:rss-categories nil nil org-rss-categories))

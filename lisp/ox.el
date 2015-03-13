@@ -102,8 +102,6 @@
     (:date "DATE" nil nil t)
     (:author "AUTHOR" nil user-full-name t)
     (:email "EMAIL" nil user-mail-address t)
-    (:description "DESCRIPTION" nil nil newline)
-    (:keywords "KEYWORDS" nil nil space)
     (:language "LANGUAGE" nil org-export-default-language t)
     (:select-tags "SELECT_TAGS" nil org-export-select-tags split)
     (:exclude-tags "EXCLUDE_TAGS" nil org-export-exclude-tags split)

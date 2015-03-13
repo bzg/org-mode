@@ -51,7 +51,9 @@
 	      (if a (org-deck-export-to-html t s v b)
 		(org-open-file (org-deck-export-to-html nil s v b)))))))
   :options-alist
-  '((:html-link-home "HTML_LINK_HOME" nil nil)
+  '((:description "DESCRIPTION" nil nil newline)
+    (:keywords "KEYWORDS" nil nil space)
+    (:html-link-home "HTML_LINK_HOME" nil nil)
     (:html-link-up "HTML_LINK_UP" nil nil)
     (:deck-postamble "DECK_POSTAMBLE" nil org-deck-postamble newline)
     (:deck-preamble "DECK_PREAMBLE" nil org-deck-preamble newline)
