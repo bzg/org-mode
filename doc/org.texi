@@ -11665,14 +11665,13 @@ pages, configure the variable @code{org-html-use-infojs}.
 @LaTeX{} export can produce an arbitrarily complex LaTeX document of any
 standard or custom document class.  With further processing@footnote{The
 default @LaTeX{} output is designed for processing with @code{pdftex} or
-@LaTeX{}.  It includes packages that are not compatible with @code{xetex} and
-possibly @code{luatex}.  The @LaTeX{} exporter can be configured to support
-alternative TeX engines, see the options
-@code{org-latex-default-packages-alist} and @code{org-latex-packages-alist}.},
-which the @LaTeX{} exporter is able to control, this back-end is able to
-produce PDF output.  Because the @LaTeX{} exporter can be configured to use
-the @code{hyperref} package, the default setup produces fully-linked PDF
-output.
+@code{latex}.  The @LaTeX{} exporter can be configured to support alternative
+TeX engines, see see @code{org-latex-pdf-process}, and alternative packages,
+see @code{org-latex-default-packages-alist} and
+@code{org-latex-packages-alist}.}, which the @LaTeX{} exporter is able to
+control, this back-end is able to produce PDF output.  Because the @LaTeX{}
+exporter can be configured to use the @code{hyperref} package, the default
+setup produces fully-linked PDF output.
 
 As in @LaTeX{}, blank lines are meaningful for this back-end: a paragraph
 will not be started if two contiguous syntactical elements are not separated
