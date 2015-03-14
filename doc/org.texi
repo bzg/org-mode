@@ -16841,8 +16841,9 @@ multiple #+TBLFM lines} in @ref{Editing and debugging formulas}.
 @item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+DATE:,
 @itemx #+OPTIONS:, #+BIND:,
 @itemx #+DESCRIPTION:, #+KEYWORDS:,
-@itemx #+LaTeX_HEADER:, #+LaTeX_HEADER_EXTRA:,
+@itemx #+LATEX_HEADER:, #+LATEX_HEADER_EXTRA:,
 @itemx #+HTML_HEAD:, #+HTML_HEAD_EXTRA:, #+HTML_LINK_UP:, #+HTML_LINK_HOME:,
+@itemx #+ODT_STYLES_FILE:,
 @itemx #+SELECT_TAGS:, #+EXCLUDE_TAGS:
 These lines provide settings for exporting files.  For more details see
 @ref{Export settings}.
