@@ -220,6 +220,9 @@ manner suitable for prepending to a user-specified script."
     (when title (funcall ats (format "set title '%s'" title))) ; title
     (mapc ats lines)					       ; line
     (dolist (el sets) (funcall ats (format "set %s" el)))      ; set
+    ;; Unless specified otherwise, values are TAB separated.
+    (unless (org-string-match-p "^set datafile separator" script)
+      (funcall ats "set datafile separator \"\\t\""))
     (when x-labels			; x labels (xtics)
       (funcall ats
 	       (format "set xtics (%s)"
