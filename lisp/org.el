@@ -16430,19 +16430,10 @@ Return the position where this entry starts, or nil if there is no such entry."
   (interactive "sID: ")
   (let ((id (cond
 	     ((stringp ident) ident)
-	     ((symbol-name ident) (symbol-name ident))
+	     ((symbolp ident) (symbol-name ident))
 	     ((numberp ident) (number-to-string ident))
-	     (t (error "IDENT %s must be a string, symbol or number" ident))))
-	(case-fold-search nil))
-    (save-excursion
-      (save-restriction
-	(widen)
-	(goto-char (point-min))
-	(when (re-search-forward
-	       (concat "^[ \t]*:ID:[ \t]+" (regexp-quote id) "[ \t]*$")
-	       nil t)
-	  (org-back-to-heading t)
-	  (point))))))
+	     (t (error "IDENT %s must be a string, symbol or number" ident)))))
+    (org-with-wide-buffer (org-find-property "ID" id))))
 
 ;;;; Timestamps
 
