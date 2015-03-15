@@ -2706,13 +2706,27 @@ Text.
     (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:B: 2\n:END:"
       (org-entry-delete (point) "A")
       (buffer-string))))
+  ;; Also remove accumulated properties.
+  (should-not
+   (string-match
+    ":A"
+    (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:A+: 2\n:B: 3\n:END:"
+      (org-entry-delete (point) "A")
+      (buffer-string))))
   ;; When last property is removed, remove the property drawer.
   (should-not
    (string-match
     ":PROPERTIES:"
     (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:\nParagraph"
       (org-entry-delete (point) "A")
-      (buffer-string)))))
+      (buffer-string))))
+  ;; Return a non-nil value when some property was removed.
+  (should
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:B: 2\n:END:"
+     (org-entry-delete (point) "A")))
+  (should-not
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:B: 2\n:END:"
+     (org-entry-delete (point) "C"))))
 
 (ert-deftest test-org/entry-get ()
   "Test `org-entry-get' specifications."

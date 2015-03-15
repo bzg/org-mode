@@ -15753,21 +15753,27 @@ If yes, return this value.  If not, return the current value of the variable."
       (symbol-value var))))
 
 (defun org-entry-delete (pom property)
-  "Delete the property PROPERTY from entry at point-or-marker POM."
+  "Delete PROPERTY from entry at point-or-marker POM.
+Accumulated properties, i.e. PROPERTY+, are also removed.  Return
+non-nil when a property was removed."
   (unless (member property org-special-properties)
     (org-with-point-at pom
       (let ((range (org-get-property-block)))
 	(when range
-	  (let ((begin (car range))
-		(end (copy-marker (cdr range))))
+	  (let* ((begin (car range))
+		 (origin (cdr range))
+		 (end (copy-marker origin))
+		 (re (org-re-property
+		      (concat (regexp-quote property) "\\+?") t t)))
 	    (goto-char begin)
-	    (when (re-search-forward (org-re-property property nil t) end t)
-	      (delete-region (match-beginning 0) (line-beginning-position 2))
-	      ;; If drawer is empty, remove it altogether.
-	      (when (= begin end)
-		(delete-region (line-beginning-position 0)
-			       (line-beginning-position 2)))
-	      (set-marker end nil))))))))
+	    (while (re-search-forward re end t)
+	      (delete-region (match-beginning 0) (line-beginning-position 2)))
+	    ;; If drawer is empty, remove it altogether.
+	    (when (= begin end)
+	      (delete-region (line-beginning-position 0)
+			     (line-beginning-position 2)))
+	    ;; Return non-nil if some property was removed.
+	    (prog1 (/= end origin) (set-marker end nil))))))))
 
 ;; Multi-values properties are properties that contain multiple values
 ;; These values are assumed to be single words, separated by whitespace.
