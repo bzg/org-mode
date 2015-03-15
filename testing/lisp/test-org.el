@@ -1313,6 +1313,13 @@
        "* H1\n:PROPERTIES:\n:CUSTOM_ID: custom\n:END:\n* H2\n[[#custom]]"
      (goto-char (point-max))
      (org-open-at-point)
+     (org-looking-at-p "\\* H1")))
+  ;; Ignore false positives.
+  (should-not
+   (org-test-with-temp-text
+       "* H1\n:DRAWER:\n:CUSTOM_ID: custom\n:END:\n* H2\n[[#custom]]<point>"
+     (goto-char (point-max))
+     (let (org-link-search-must-match-exact-headline) (org-open-at-point))
      (org-looking-at-p "\\* H1"))))
 
 ;;;; Fuzzy Links

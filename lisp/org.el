@@ -10999,19 +10999,10 @@ variable."
      ;; First check if there are any special search functions
      ((run-hook-with-args-until-success 'org-execute-file-search-functions s))
      ;; Now try the builtin stuff
-     ((and (equal (string-to-char s0) ?#)
+     ((and (eq (aref s0 0) ?#)
 	   (> (length s0) 1)
-	   (save-excursion
-	     (goto-char (point-min))
-	     (and
-	      (re-search-forward
-	       (concat "^[ \t]*:CUSTOM_ID:[ \t]+"
-		       (regexp-quote (substring s0 1)) "[ \t]*$") nil t)
-	      (setq type 'dedicated
-		    pos (match-beginning 0))))
-	   ;; There is an exact target for this
-	   (goto-char pos)
-	   (org-back-to-heading t)))
+	   (let ((match (org-find-property "CUSTOM_ID" (substring s0 1))))
+	     (and match (goto-char match) (setf type 'dedicated)))))
      ((save-excursion
 	(goto-char (point-min))
 	(and
