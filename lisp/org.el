@@ -16195,6 +16195,26 @@ in the current file."
     (unless (equal (org-entry-get nil property) value)
       (org-entry-put nil property value))))
 
+(defun org-find-property (property &optional value)
+  "Find first entry in buffer that sets PROPERTY.
+
+When optional argument VALUE is non-nil, only consider an entry
+if it contains PROPERTY set to this value.  If PROPERTY should be
+explicitly set to nil, use string \"nil\" for VALUE.
+
+Return position where the entry begins, or nil if there is no
+such entry.  If narrowing is in effect, only search the visible
+part of the buffer."
+  (save-excursion
+    (goto-char (point-min))
+    (let ((case-fold-search t)
+	  (re (org-re-property property nil (not value))))
+      (catch 'exit
+	(while (re-search-forward re nil t)
+	  (when (if value (equal value (org-entry-get (point) property nil t))
+		  (org-entry-get (point) property nil t))
+	    (throw 'exit (progn (org-back-to-heading t) (point)))))))))
+
 (defun org-delete-property (property)
   "In the current entry, delete PROPERTY."
   (interactive

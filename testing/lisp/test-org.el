@@ -2642,6 +2642,54 @@ Text.
 	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:A+: 2\n:END:"
 	    (org-property-values "A")))))
 
+(ert-deftest test-org/find-property ()
+  "Test `org-find-property' specifications."
+  ;; Regular test.
+  (should
+   (= 1
+      (org-test-with-temp-text "* H\n:PROPERTIES:\n:PROP: value\n:END:"
+	(org-find-property "prop"))))
+  ;; Ignore false positives.
+  (should
+   (= 27
+      (org-test-with-temp-text
+	  "* H1\n:DRAWER:\n:A: 1\n:END:\n* H2\n:PROPERTIES:\n:A: 1\n:END:"
+	(org-find-property "A"))))
+  ;; Return first entry found in buffer.
+  (should
+   (= 1
+      (org-test-with-temp-text
+	  "* H1\n:PROPERTIES:\n:A: 1\n:END:\n* H2\n:PROPERTIES:\n:<point>A: 1\n:END:"
+	(org-find-property "A"))))
+  ;; Only search visible part of the buffer.
+  (should
+   (= 31
+      (org-test-with-temp-text
+	  "* H1\n:PROPERTIES:\n:A: 1\n:END:\n* H2\n:PROPERTIES:\n:<point>A: 1\n:END:"
+	(org-narrow-to-subtree)
+	(org-find-property "A"))))
+  ;; With optional argument, only find entries with a specific value.
+  (should-not
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:"
+     (org-find-property "A" "2")))
+  (should
+   (= 31
+      (org-test-with-temp-text
+	  "* H1\n:PROPERTIES:\n:A: 1\n:END:\n* H2\n:PROPERTIES:\n:A: 2\n:END:"
+	(org-find-property "A" "2"))))
+  ;; Use "nil" for explicit nil values.
+  (should
+   (= 31
+      (org-test-with-temp-text
+	  "* H1\n:PROPERTIES:\n:A: 1\n:END:\n* H2\n:PROPERTIES:\n:A: nil\n:END:"
+	(org-find-property "A" "nil"))))
+  ;; Optional argument is matched against real value, including PROP+
+  ;; syntax.
+  (should
+   (= 1
+      (org-test-with-temp-text "* H1\n:PROPERTIES:\n:A: 1\n:A+: 2\n:END:"
+	(org-find-property "A" "1 2")))))
+
 (ert-deftest test-org/entry-delete ()
   "Test `org-entry-delete' specifications."
   ;; Regular test.
