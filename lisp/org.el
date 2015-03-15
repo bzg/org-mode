@@ -16230,24 +16230,21 @@ part of the buffer."
     (message "Property \"%s\" deleted" property)))
 
 (defun org-delete-property-globally (property)
-  "Remove PROPERTY globally, from all entries."
+  "Remove PROPERTY globally, from all entries.
+This function ignores narrowing, if any."
   (interactive
    (let* ((completion-ignore-case t)
 	  (prop (org-icompleting-read
 		 "Globally remove property: "
-		 (mapcar 'list (org-buffer-property-keys)))))
+		 (mapcar #'list (org-buffer-property-keys)))))
      (list prop)))
-  (save-excursion
-    (save-restriction
-      (widen)
-      (goto-char (point-min))
-      (let ((cnt 0))
-	(while (re-search-forward
-		(org-re-property property)
-		nil t)
-	  (setq cnt (1+ cnt))
-	  (delete-region (match-beginning 0) (1+ (point-at-eol))))
-	(message "Property \"%s\" removed from %d entries" property cnt)))))
+  (org-with-wide-buffer
+   (goto-char (point-min))
+   (let ((count 0)
+	 (re (org-re-property (concat (regexp-quote property) "\\+?") t t)))
+     (while (re-search-forward re nil t)
+       (when (org-entry-delete (point) property) (incf count)))
+     (message "Property \"%s\" removed from %d entries" property count))))
 
 (defvar org-columns-current-fmt-compiled) ; defined in org-colview.el
 
