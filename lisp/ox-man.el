@@ -102,7 +102,7 @@
     (verse-block . org-man-verse-block))
   :export-block "MAN"
   :menu-entry
-  '(?m "Export to MAN"
+  '(?M "Export to MAN"
        ((?m "As MAN file" org-man-export-to-man)
 	(?p "As PDF file" org-man-export-to-pdf)
 	(?o "As PDF file and open"
