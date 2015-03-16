@@ -14729,10 +14729,10 @@ Code blocks in the following languages are supported.
 @item Asymptote @tab asymptote @tab Awk @tab awk
 @item Emacs Calc @tab calc @tab C @tab C
 @item C++ @tab C++ @tab Clojure @tab clojure
-@item CSS @tab css @tab ditaa @tab ditaa
-@item Graphviz @tab dot @tab Emacs Lisp @tab emacs-lisp
-@item gnuplot @tab gnuplot @tab Haskell @tab haskell
-@item Java @tab java @tab @tab
+@item CSS @tab css @tab D @tab d
+@item ditaa @tab ditaa @tab Graphviz @tab dot
+@item Emacs Lisp @tab emacs-lisp @tab gnuplot @tab gnuplot
+@item Haskell @tab haskell @tab Java @tab java
 @item Javascript @tab js @tab LaTeX @tab latex
 @item Ledger @tab ledger @tab Lisp @tab lisp
 @item Lilypond @tab lilypond @tab MATLAB @tab matlab
