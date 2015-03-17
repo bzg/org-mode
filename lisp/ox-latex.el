@@ -1325,12 +1325,8 @@ holding export options."
      ;; Document's body.
      contents
      ;; Creator.
-     (let ((creator-info (plist-get info :with-creator)))
-       (cond
-	((not creator-info) "")
-	((eq creator-info 'comment)
-	 (format "%% %s\n" (plist-get info :creator)))
-	(t (concat (plist-get info :creator) "\n"))))
+     (and (plist-get info :with-creator)
+	  (concat (plist-get info :creator) "\n"))
      ;; Document end.
      "\\end{document}")))
 

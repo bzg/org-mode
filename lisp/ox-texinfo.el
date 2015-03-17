@@ -608,10 +608,8 @@ holding export options."
      ;; Document's body.
      contents "\n"
      ;; Creator.
-     (case (plist-get info :with-creator)
-       ((nil) nil)
-       (comment (format "@c %s\n" (plist-get info :creator)))
-       (otherwise (concat (plist-get info :creator) "\n")))
+     (and (plist-get info :with-creator)
+	  (concat (plist-get info :creator) "\n"))
      ;; Document end.
      "@bye")))
 

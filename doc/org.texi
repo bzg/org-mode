@@ -10775,8 +10775,8 @@ Toggle inclusion of CLOCK keywords (@code{org-export-with-clocks}).
 
 @item creator:
 @vindex org-export-with-creator
-Configure inclusion of creator info into exported file.  It may be set to
-@code{comment} (@code{org-export-with-creator}).
+Toggle inclusion of creator info into exported file
+(@code{org-export-with-creator}).
 
 @item d:
 @vindex org-export-with-drawers

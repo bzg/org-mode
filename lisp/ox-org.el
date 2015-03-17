@@ -178,17 +178,14 @@ as a communication channel."
 	(let ((email (org-export-data (plist-get info :email) info)))
 	  (and (org-string-nw-p email)
 	       (format "#+EMAIL: %s\n" email))))
-   (and (eq (plist-get info :with-creator) t)
+   (and (plist-get info :with-creator)
 	(org-string-nw-p (plist-get info :creator))
 	(format "#+CREATOR: %s\n" (plist-get info :creator)))
    (and (org-string-nw-p (plist-get info :keywords))
 	(format "#+KEYWORDS: %s\n" (plist-get info :keywords)))
    (and (org-string-nw-p (plist-get info :description))
 	(format "#+DESCRIPTION: %s\n" (plist-get info :description)))
-   contents
-   (and (eq (plist-get info :with-creator) 'comment)
-	(org-string-nw-p (plist-get info :creator))
-	(format "\n# %s\n" (plist-get info :creator)))))
+   contents))
 
 (defun org-org-section (section contents info)
   "Transcode SECTION element back into Org syntax.

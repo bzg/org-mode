@@ -1097,7 +1097,7 @@ CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   (let ((global-margin (plist-get info :ascii-global-margin)))
     (concat
-     ;; 1. Build title block.
+     ;; Build title block.
      (org-ascii--indent-string
       (concat (org-ascii-template--document-title info)
 	      ;; 2. Table of contents.
@@ -1107,19 +1107,18 @@ holding export options."
 		   (org-ascii--build-toc info (and (wholenump depth) depth))
 		   "\n\n\n"))))
       global-margin)
-     ;; 3. Document's body.
+     ;; Document's body.
      contents
-     ;; 4. Creator.  Ignore `comment' value as there are no comments in
-     ;;    ASCII.  Justify it to the bottom right.
-     (org-ascii--indent-string
-      (let ((creator-info (plist-get info :with-creator))
-	    (text-width (- (plist-get info :ascii-text-width) global-margin)))
-	(unless (or (not creator-info) (eq creator-info 'comment))
-	  (concat
-	   "\n\n\n"
-	   (org-ascii--fill-string
-	    (plist-get info :creator) text-width info 'right))))
-      global-margin))))
+     ;; Creator.  Justify it to the bottom right.
+     (and (plist-get info :with-creator)
+	  (org-ascii--indent-string
+	   (let ((text-width
+		  (- (plist-get info :ascii-text-width) global-margin)))
+	     (concat
+	      "\n\n\n"
+	      (org-ascii--fill-string
+	       (plist-get info :creator) text-width info 'right)))
+	   global-margin)))))
 
 (defun org-ascii--translate (s info)
   "Translate string S according to specified language and charset.

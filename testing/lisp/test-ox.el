@@ -124,13 +124,12 @@ variable, and communication channel under `info'."
   (should
    (equal
     (org-export--parse-option-keyword
-     "arch:headline creator:comment d:(\"TEST\")
- ^:{} toc:1 tags:not-in-toc tasks:todo num:2 <:active")
+     "arch:headline d:(\"TEST\") ^:{} toc:1 tags:not-in-toc tasks:todo num:2 <:active")
     '( :section-numbers
        2
-       :with-archived-trees headline :with-creator comment
-       :with-drawers ("TEST") :with-sub-superscript {} :with-toc 1
-       :with-tags not-in-toc :with-tasks todo :with-timestamps active))))
+       :with-archived-trees headline :with-drawers ("TEST")
+       :with-sub-superscript {} :with-toc 1 :with-tags not-in-toc
+       :with-tasks todo :with-timestamps active))))
 
 (ert-deftest test-org-export/get-inbuffer-options ()
   "Test reading all standard export keywords."
