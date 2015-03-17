@@ -758,7 +758,7 @@ This option can also be set with the OPTIONS keyword,
 e.g. \"title:nil\"."
   :group 'org-export-general
   :version "25.1"
-  :package-version '(Org . 8.3)
+  :package-version '(Org . "8.3")
   :type 'boolean)
 
 (defcustom org-export-time-stamp-file t
