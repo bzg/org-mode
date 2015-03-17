@@ -1329,8 +1329,8 @@ original parsed data.  INFO is a plist holding export options."
 	(author (let ((author (plist-get info :author)))
 		  (if (not author) "" (org-export-data author info))))
 	(email (plist-get info :email))
-	(keywords (plist-get info :keywords))
-	(description (plist-get info :description)))
+	(keywords (or (plist-get info :keywords) ""))
+	(description (or (plist-get info :description) "")))
     (write-region
      (concat
       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
@@ -1359,9 +1359,8 @@ original parsed data.  INFO is a plist holding export options."
 	     (format "<meta:creation-date>%s</meta:creation-date>\n"
 		     iso-date)))))
       (format "<meta:generator>%s</meta:generator>\n"
-	      (let ((creator-info (plist-get info :with-creator)))
-		(if (or (not creator-info) (eq creator-info 'comment)) ""
-		  (plist-get info :creator))))
+	      (if (plist-get info :with-creator)
+		  (plist-get info :creator) ""))
       (format "<meta:keyword>%s</meta:keyword>\n" keywords)
       (format "<dc:subject>%s</dc:subject>\n" description)
       (format "<dc:title>%s</dc:title>\n" title)
