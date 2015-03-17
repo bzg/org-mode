@@ -3983,26 +3983,28 @@ This only applies to links without a description."
 INFO is a plist used as a communication channel.
 
 Return associated line number in source code, or REF itself,
-depending on src-block or example element's switches."
-  (org-element-map (plist-get info :parse-tree) '(example-block src-block)
-    (lambda (el)
-      (with-temp-buffer
-	(insert (org-trim (org-element-property :value el)))
-	(let* ((label-fmt (regexp-quote
-			   (or (org-element-property :label-fmt el)
-			       org-coderef-label-format)))
-	       (ref-re
-		(format "^.*?\\S-.*?\\([ \t]*\\(%s\\)\\)[ \t]*$"
-			(replace-regexp-in-string "%s" ref label-fmt nil t))))
-	  ;; Element containing REF is found.  Resolve it to either
-	  ;; a label or a line number, as needed.
-	  (when (re-search-backward ref-re nil t)
-	    (cond
-	     ((org-element-property :use-labels el) ref)
-	     ((eq (org-element-property :number-lines el) 'continued)
-	      (+ (org-export-get-loc el info) (line-number-at-pos)))
-	     (t (line-number-at-pos)))))))
-    info 'first-match))
+depending on src-block or example element's switches.  Throw an
+error if no block contains REF."
+  (or (org-element-map (plist-get info :parse-tree) '(example-block src-block)
+	(lambda (el)
+	  (with-temp-buffer
+	    (insert (org-trim (org-element-property :value el)))
+	    (let* ((label-fmt (regexp-quote
+			       (or (org-element-property :label-fmt el)
+				   org-coderef-label-format)))
+		   (ref-re
+		    (format "^.*?\\S-.*?\\([ \t]*\\(%s\\)\\)[ \t]*$"
+			    (format label-fmt ref))))
+	      ;; Element containing REF is found.  Resolve it to
+	      ;; either a label or a line number, as needed.
+	      (when (re-search-backward ref-re nil t)
+		(cond
+		 ((org-element-property :use-labels el) ref)
+		 ((eq (org-element-property :number-lines el) 'continued)
+		  (+ (org-export-get-loc el info) (line-number-at-pos)))
+		 (t (line-number-at-pos)))))))
+	info 'first-match)
+      (user-error "Unable to resolve code reference: %s" ref)))
 
 (defun org-export-resolve-fuzzy-link (link info)
   "Return LINK destination.

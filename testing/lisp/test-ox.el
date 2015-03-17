@@ -2372,46 +2372,66 @@ Paragraph[1][2][fn:lbl3:C<<target>>][[test]][[target]]\n[1] A\n\n[2] <<test>>B"
 (ert-deftest test-org-export/resolve-coderef ()
   "Test `org-export-resolve-coderef' specifications."
   (let ((org-coderef-label-format "(ref:%s)"))
-    ;; 1. A link to a "-n -k -r" block returns line number.
-    (org-test-with-parsed-data
-	"#+BEGIN_EXAMPLE -n -k -r\nText (ref:coderef)\n#+END_EXAMPLE"
-      (should (= (org-export-resolve-coderef "coderef" info) 1)))
-    (org-test-with-parsed-data
-	"#+BEGIN_SRC emacs-lisp -n -k -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
-      (should (= (org-export-resolve-coderef "coderef" info) 1)))
-    ;; 2. A link to a "-n -r" block returns line number.
-    (org-test-with-parsed-data
-	"#+BEGIN_EXAMPLE -n -r\nText (ref:coderef)\n#+END_EXAMPLE"
-      (should (= (org-export-resolve-coderef "coderef" info) 1)))
-    (org-test-with-parsed-data
-	"#+BEGIN_SRC emacs-lisp -n -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
-      (should (= (org-export-resolve-coderef "coderef" info) 1)))
-    ;; 3. A link to a "-n" block returns coderef.
-    (org-test-with-parsed-data
-	"#+BEGIN_SRC emacs-lisp -n\n(+ 1 1) (ref:coderef)\n#+END_SRC"
-      (should (equal (org-export-resolve-coderef "coderef" info) "coderef")))
-    (org-test-with-parsed-data
-	"#+BEGIN_EXAMPLE -n\nText (ref:coderef)\n#+END_EXAMPLE"
-      (should (equal (org-export-resolve-coderef "coderef" info) "coderef")))
-    ;; 4. A link to a "-r" block returns line number.
-    (org-test-with-parsed-data
-	"#+BEGIN_SRC emacs-lisp -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
-      (should (= (org-export-resolve-coderef "coderef" info) 1)))
-    (org-test-with-parsed-data
-	"#+BEGIN_EXAMPLE -r\nText (ref:coderef)\n#+END_EXAMPLE"
-      (should (= (org-export-resolve-coderef "coderef" info) 1)))
-    ;; 5. A link to a block without a switch returns coderef.
-    (org-test-with-parsed-data
-	"#+BEGIN_SRC emacs-lisp\n(+ 1 1) (ref:coderef)\n#+END_SRC"
-      (should (equal (org-export-resolve-coderef "coderef" info) "coderef")))
+    ;; A link to a "-n -k -r" block returns line number.
+    (should
+     (= 1
+	(org-test-with-parsed-data
+	    "#+BEGIN_EXAMPLE -n -k -r\nText (ref:coderef)\n#+END_EXAMPLE"
+	  (org-export-resolve-coderef "coderef" info))))
+    (should
+     (= 1
+	(org-test-with-parsed-data
+	    "#+BEGIN_SRC emacs-lisp -n -k -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+	  (org-export-resolve-coderef "coderef" info))))
+    ;; A link to a "-n -r" block returns line number.
+    (should
+     (= 1
+	(org-test-with-parsed-data
+	    "#+BEGIN_EXAMPLE -n -r\nText (ref:coderef)\n#+END_EXAMPLE"
+	  (org-export-resolve-coderef "coderef" info))))
+    (should
+     (= 1
+	(org-test-with-parsed-data
+	    "#+BEGIN_SRC emacs-lisp -n -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+	  (org-export-resolve-coderef "coderef" info))))
+    ;; A link to a "-n" block returns coderef.
+    (should
+     (equal "coderef"
+	    (org-test-with-parsed-data
+		"#+BEGIN_SRC emacs-lisp -n\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+	      (org-export-resolve-coderef "coderef" info))))
+    (should
+     (equal "coderef"
+	    (org-test-with-parsed-data
+		"#+BEGIN_EXAMPLE -n\nText (ref:coderef)\n#+END_EXAMPLE"
+	      (org-export-resolve-coderef "coderef" info))))
+    ;; A link to a "-r" block returns line number.
+    (should
+     (= 1
+	(org-test-with-parsed-data
+	    "#+BEGIN_SRC emacs-lisp -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+	  (org-export-resolve-coderef "coderef" info))))
+    (should
+     (= 1
+	(org-test-with-parsed-data
+	    "#+BEGIN_EXAMPLE -r\nText (ref:coderef)\n#+END_EXAMPLE"
+	  (org-export-resolve-coderef "coderef" info))))
+    ;; A link to a block without a switch returns coderef.
+    (should
+     (equal "coderef"
+	    (org-test-with-parsed-data
+		"#+BEGIN_SRC emacs-lisp\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+	      (org-export-resolve-coderef "coderef" info))))
     (org-test-with-parsed-data
 	"#+BEGIN_EXAMPLE\nText (ref:coderef)\n#+END_EXAMPLE"
       (should (equal (org-export-resolve-coderef "coderef" info) "coderef")))
-    ;; 6. Correctly handle continued line numbers.  A "+n" switch
-    ;;    should resume numbering from previous block with numbered
-    ;;    lines, ignoring blocks not numbering lines in the process.
-    ;;    A "-n" switch resets count.
-    (org-test-with-parsed-data "
+    ;; Correctly handle continued line numbers.  A "+n" switch should
+    ;; resume numbering from previous block with numbered lines,
+    ;; ignoring blocks not numbering lines in the process.  A "-n"
+    ;; switch resets count.
+    (should
+     (equal '(2 1)
+	    (org-test-with-parsed-data "
 #+BEGIN_EXAMPLE -n
 Text.
 #+END_EXAMPLE
@@ -2427,12 +2447,18 @@ Text.
 #+BEGIN_EXAMPLE -n -r
 Another text. (ref:text)
 #+END_EXAMPLE"
-      (should (= (org-export-resolve-coderef "addition" info) 2))
-      (should (= (org-export-resolve-coderef "text" info) 1)))
-    ;; 7. Recognize coderef with user-specified syntax.
-    (org-test-with-parsed-data
-	"#+BEGIN_EXAMPLE -l \"[ref:%s]\"\nText. [ref:text]\n#+END_EXAMPLE"
-      (should (equal (org-export-resolve-coderef "text" info) "text")))))
+	      (list (org-export-resolve-coderef "addition" info)
+		    (org-export-resolve-coderef "text" info)))))
+    ;; Recognize coderef with user-specified syntax.
+    (should
+     (equal "text"
+	    (org-test-with-parsed-data
+		"#+BEGIN_EXAMPLE -l \"[ref:%s]\"\nText. [ref:text]\n#+END_EXAMPLE"
+	      (org-export-resolve-coderef "text" info))))
+    ;; Unresolved coderefs throw an error.
+    (should-error
+     (org-test-with-parsed-data "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
+       (org-export-resolve-coderef "unknown" info)))))
 
 (ert-deftest test-org-export/resolve-fuzzy-link ()
   "Test `org-export-resolve-fuzzy-link' specifications."
