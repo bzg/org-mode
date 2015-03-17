@@ -2518,42 +2518,50 @@ Another text. (ref:text)
 
 (ert-deftest test-org-export/resolve-id-link ()
   "Test `org-export-resolve-id-link' specifications."
-  ;; 1. Regular test for custom-id link.
-  (org-test-with-parsed-data "* Headline1
+  ;; Regular test for custom-id link.
+  (should
+   (equal '("Headline1")
+	  (org-test-with-parsed-data "* Headline1
 :PROPERTIES:
 :CUSTOM_ID: test
 :END:
 * Headline 2
 \[[#test]]"
-    (should
-     (org-export-resolve-id-link
-      (org-element-map tree 'link 'identity info t) info)))
-  ;; 2. Failing test for custom-id link.
-  (org-test-with-parsed-data "* Headline1
+	    (org-element-property
+	     :title
+	     (org-export-resolve-id-link
+	      (org-element-map tree 'link 'identity info t) info)))))
+  ;; Throw an error on failing searches.
+  (should-error
+   (org-test-with-parsed-data "* Headline1
 :PROPERTIES:
 :CUSTOM_ID: test
 :END:
 * Headline 2
 \[[#no-match]]"
-    (should-not
      (org-export-resolve-id-link
       (org-element-map tree 'link 'identity info t) info)))
-  ;; 3. Test for internal id target.
-  (org-test-with-parsed-data "* Headline1
+  ;; Test for internal id target.
+  (should
+   (equal '("Headline1")
+	  (org-test-with-parsed-data "* Headline1
 :PROPERTIES:
 :ID: aaaa
 :END:
 * Headline 2
 \[[id:aaaa]]"
-    (should
-     (org-export-resolve-id-link
-      (org-element-map tree 'link 'identity info t) info)))
-  ;; 4. Test for external id target.
-  (org-test-with-parsed-data "[[id:aaaa]]"
-    (should
-     (org-export-resolve-id-link
-      (org-element-map tree 'link 'identity info t)
-      (org-combine-plists info '(:id-alist (("aaaa" . "external-file"))))))))
+	    (org-element-property
+	     :title
+	     (org-export-resolve-id-link
+	      (org-element-map tree 'link 'identity info t) info)))))
+  ;; Test for external id target.
+  (should
+   (equal
+    "external-file"
+    (org-test-with-parsed-data "[[id:aaaa]]"
+      (org-export-resolve-id-link
+       (org-element-map tree 'link 'identity info t)
+       (org-combine-plists info '(:id-alist (("aaaa" . "external-file")))))))))
 
 (ert-deftest test-org-export/resolve-radio-link ()
   "Test `org-export-resolve-radio-link' specifications."

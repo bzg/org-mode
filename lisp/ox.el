@@ -1371,7 +1371,7 @@ inferior to file-local settings."
 	 (let ((link (org-element-context)))
 	   (when (eq (org-element-type link) 'link)
 	     (let* ((id (org-element-property :path link))
-		    (file (org-id-find-id-file id)))
+		    (file (car (org-id-find id))))
 	       (when file
 		 (push (cons id (file-relative-name file)) alist)))))))
       alist))))
@@ -4105,18 +4105,19 @@ significant."
 INFO is a plist used as a communication channel.
 
 Return value can be the headline element matched in current parse
-tree, a file name or nil.  Assume LINK type is either \"id\" or
-\"custom-id\"."
+tree or a file name.  Assume LINK type is either \"id\" or
+\"custom-id\".  Throw an error if no match is found."
   (let ((id (org-element-property :path link)))
     ;; First check if id is within the current parse tree.
     (or (org-element-map (plist-get info :parse-tree) 'headline
 	  (lambda (headline)
-	    (when (or (string= (org-element-property :ID headline) id)
-		      (string= (org-element-property :CUSTOM_ID headline) id))
+	    (when (or (equal (org-element-property :ID headline) id)
+		      (equal (org-element-property :CUSTOM_ID headline) id))
 	      headline))
 	  info 'first-match)
 	;; Otherwise, look for external files.
-	(cdr (assoc id (plist-get info :id-alist))))))
+	(cdr (assoc id (plist-get info :id-alist)))
+	(user-error "Unable to resolve ID \"%s\"" id))))
 
 (defun org-export-resolve-radio-link (link info)
   "Return radio-target object referenced as LINK destination.
