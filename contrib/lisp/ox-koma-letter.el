@@ -630,7 +630,11 @@ holding export options."
 		    (mapconcat #'symbol-name with-subject ","))))
 	(let* ((title-as-subject (plist-get info :with-title-as-subject))
 	       (subject* (org-string-nw-p
-			  (org-export-data (plist-get info :subject) info)))
+			  (org-export-data
+			   (org-element-parse-secondary-string
+			    (plist-get info :subject)
+			    (org-element-restriction 'keyword))
+			   info)))
 	       (title* (and (plist-get info :with-title)
 			    (org-string-nw-p
 			     (org-export-data (plist-get info :title) info))))
