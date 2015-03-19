@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011-2015 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 4.2.0
+;; Version: 4.2.1
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -33,7 +33,7 @@
 ;;  keywords, references and ids, where each line points to a heading
 ;;  within org or references something outside.  This table is sorted by
 ;;  usage count, so that frequently used lines appear among the first
-;;  results.
+;;  search results.
 ;;
 ;;  References are essentially small numbers (e.g. 'R237' or '--455--'), as
 ;;  created by this package; they are well suited to be used outside of
@@ -73,6 +73,10 @@
 
 ;;; Change Log:
 
+;;   [2015-03-18 We] Version 4.2.1
+;;   - No garbage in kill-ring
+;;   - No recentering after add
+;;
 ;;   [2015-03-08 Su] Version 4.2.0
 ;;   - Reference numbers for subcommands can be passed as a prefix argument
 ;;   - Renamed subcommand 'point' to 'ping'
@@ -143,7 +147,7 @@
   :group 'org-index)
 
 ;; Version of this package
-(defvar org-index-version "4.2.0" "Version of `org-index', format is major.minor.bugfix, where \"major\" is a change in index-table and \"minor\" are new features.")
+(defvar org-index-version "4.2.1" "Version of `org-index', format is major.minor.bugfix, where \"major\" is a change in index-table and \"minor\" are new features.")
 
 ;; Variables to hold the configuration of the index table
 (defvar org-index--maxref nil "Maximum number from reference table (e.g. '153').")
@@ -258,7 +262,7 @@ This package creates and updates an index table of headings or
 keywords, references and ids, where each line points to a heading
 within org or references something outside.  This table is sorted by
 usage count, so that frequently used lines appear among the first
-results.
+search results.
 
 References are essentially small numbers (e.g. 'R237' or '--455--'), as
 created by this package; they are well suited to be used outside of
@@ -269,7 +273,7 @@ for its index table and its configuration flags.
 
 For basic usage, subcommands 'add' and 'occur' are most important.
 
-This is version 4.2.0 of org-index.el.
+This is version 4.2.1 of org-index.el.
 \\<org-mode-map>
 The function `org-index' operates on a dedicated table, the index
 table, which lives within its own Org-mode node.  The table and
@@ -980,8 +984,7 @@ Argument COLUMN and VALUE specify line to get."
       (while (org-at-table-p) (forward-line -1))
       (forward-line)
       (setq start-of-headings (point))
-      (setq org-index--headings-visible (substring-no-properties (org-copy-visible start-of-headings end-of-headings)))
-      (pop kill-ring)
+      (setq org-index--headings-visible (substring-no-properties (org-index--copy-visible start-of-headings end-of-headings)))
       (setq org-index--headings (buffer-substring start-of-headings end-of-headings))
 
       ;; count columns
@@ -1657,7 +1660,7 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
   (let ((line (substring-no-properties (delete-and-extract-region (line-beginning-position) (line-end-position)))))
     ;; create minimum table with fixed-width columns to align and fontiry new line
     (insert (with-temp-buffer
-              (org-mode)
+              (org-set-font-lock-defaults)
               (insert org-index--headings-visible)
               (goto-char (point-min))
               ;; fill columns, so that aligning cannot shrink them
@@ -2468,6 +2471,20 @@ If OTHER in separate window."
       (org-index--do-sort-index (org-index--special-column 'sort))
       (org-table-align)
       (remove-hook 'before-save-hook 'org-index--sort-silent))))
+
+
+(defun org-index--copy-visible (beg end)
+  "Copy the visible parts of the region without adding it to kill-ring; copy of `org-copy-visible'"
+  (let (snippets s)
+    (save-excursion
+      (save-restriction
+	(narrow-to-region beg end)
+	(setq s (goto-char (point-min)))
+	(while (not (= (point) (point-max)))
+	  (goto-char (org-find-invisible))
+	  (push (buffer-substring s (point)) snippets)
+	  (setq s (goto-char (org-find-visible))))))
+    (apply 'concat (nreverse snippets))))
 
 
 (provide 'org-index)
