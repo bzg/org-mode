@@ -453,8 +453,8 @@ was not present."
 (defun org-koma-letter--get-tagged-contents (key)
   "Get contents from a headline tagged with KEY.
 The contents is stored in `org-koma-letter-special-contents'."
-  (cdr (assoc (org-koma-letter--get-value key)
-	      org-koma-letter-special-contents)))
+  (cdr (assoc-string (org-koma-letter--get-value key)
+		     org-koma-letter-special-contents)))
 
 (defun org-koma-letter--get-value (value)
   "Turn value into a string whenever possible.
