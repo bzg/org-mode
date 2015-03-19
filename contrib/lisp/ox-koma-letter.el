@@ -412,6 +412,7 @@ was not present."
     (:with-place nil "place" org-koma-letter-use-place)
     (:with-subject nil "subject" org-koma-letter-subject-format)
     (:with-title-as-subject nil "title-subject" org-koma-letter-prefer-subject)
+    (:with-headline-opening nil nil org-koma-letter-headline-is-opening-maybe)
     ;; Special properties non-nil when a setting happened in buffer.
     ;; They are used to prioritize in-buffer settings over "lco"
     ;; files.  See `org-koma-letter-template'.
@@ -553,19 +554,21 @@ Note that if a headline is tagged with a tag from
 `org-koma-letter-special-tags' it will not be exported, but
 stored in `org-koma-letter-special-contents' and included at the
 appropriate place."
-  (unless (let ((tag (car (org-export-get-tags headline info))))
-	    (and tag
-		 (member-ignore-case
-		  tag (mapcar #'symbol-name (plist-get info :special-tags)))
-		 ;; Store association for later use and bail out.
-		 (push (cons tag contents) org-koma-letter-special-contents)))
-    ;; Opening is not defined yet: use headline's title.
-    (when (and org-koma-letter-headline-is-opening-maybe
-	       (not (org-string-nw-p (plist-get info :opening))))
-      (plist-put info :opening
-		 (org-export-data (org-element-property :title headline) info)))
-    ;; In any case, insert contents in letter's body.
-    contents))
+  (let ((special-tag (org-koma-letter--special-tag headline info)))
+    (if (not special-tag)
+	contents
+      (push (cons special-tag contents) org-koma-letter-special-contents)
+      "")))
+
+(defun org-koma-letter--special-tag (headline info)
+  "Non-nil if HEADLINE is a special headline.
+INFO is a plist holding contextual information.  Return first
+special tag headline."
+  (let ((special-tags (plist-get info :special-tags)))
+    (catch 'exit
+      (dolist (tag (org-export-get-tags headline info))
+	(let ((tag (assoc-string tag special-tags)))
+	  (when tag (throw 'exit tag)))))))
 
 ;;;; Template
 
@@ -641,7 +644,17 @@ holding export options."
    (format "\\begin{letter}{%%\n%s}\n\n"
 	   (org-koma-letter--determine-to-and-from info 'to))
    ;; Opening.
-   (format "\\opening{%s}\n\n" (plist-get info :opening))
+   (format "\\opening{%s}\n\n"
+	   (org-export-data
+	    (or (org-string-nw-p (plist-get info :opening))
+		(when (plist-get info :with-headline-opening)
+		  (org-element-map (plist-get info :parse-tree) 'headline
+		    (lambda (head)
+		      (unless (org-koma-letter--special-tag head info)
+			(org-element-property :title head)))
+		    info t))
+		"")
+	    info))
    ;; Letter body.
    contents
    ;; Closing.
