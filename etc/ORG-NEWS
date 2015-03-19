@@ -124,6 +124,84 @@ end-users browser.  You may force initial usage of MathML via
 ~org-html-mathjax-template~ or by setting the ~path~ property of
 ~org-html-mathjax-options~.
 ** New features
+*** Hierarchies of tags
+The functionality of nesting tags in hierarchies is added to org-mode.
+This is the generalization of what was previously called "Tag groups"
+in the manual.  That term is now changed to "Tag hierarchy".
+
+The following in-buffer definition:
+#+BEGIN_SRC org
+  ,#+TAGS: [ Group : SubOne SubTwo ]
+  ,#+TAGS: [ SubOne : SubOne1 SubOne2 ]
+  ,#+TAGS: [ SubTwo : SubTwo1 SubTwo2 ]
+#+END_SRC
+
+Should be seen as the following tree of tags:
+- Group
+  - SubOne
+    - SubOne1
+    - SubOne2
+  - SubTwo
+    - SubTwo1
+    - SubTwo2
+
+Searching for "Group" should return all tags defined above.  Filtering
+on SubOne filters also it's sub-tags.  Etc.
+
+There is no limit on the depth for the tag hierarchy.
+
+*** Additional syntax for non-unique grouptags
+Additional syntax is defined for grouptags if the tags in the group
+don't have to be distinct on a heading.
+
+Grouptags had to previously be defined with { }.  This syntax is
+already used for exclusive tags and Grouptags need their own,
+non-exclusive syntax.  This behaviour is achieved with [ ].  Note: {
+} can still be used also for Grouptags but then only one of the
+given tags can be used on the headline at the same time.  Example:
+
+[ group : sub1 sub2 ]
+
+#+BEGIN_SRC org
+  ,* Test                                                            :sub1:sub2:
+#+END_SRC
+
+This is a more general case than the already existing syntax for
+grouptags; { }.
+
+*** Define regular expression patterns as tags
+Tags can be defined as grouptags with regular expressions as
+"sub-tags".
+
+The regular expressions in the group must be marked up within { }.
+Example use:
+
+: #+TAGS: [ Project : {P@.+} ]
+
+Searching for the tag Project will now list all tags also including
+regular expression matches for P@.+.  Good for example if tags for a
+certain project is tagged with a common project-identifier,
+i.e. P@2014_OrgTags.
+
+*** Filtering in the agenda on grouptags (Tag hierarchies)
+Filtering in the agenda on grouptags filter all of the related tags.
+Exception if filter is applied with a (double) prefix-argument.
+
+Filtering in the agenda on subcategories does not filter the "above"
+levels anymore.
+
+If a grouptag contains a regular expression the regular expression
+is also used as a filter.
+
+*** Minor refactoring of ~org-agenda-filter-by-tag~
+Now uses the argument arg and optional argument exclude instead of
+strip and narrow.  ARG because the argument has multiple purposes and
+makes more sense than strip now.  The term narrowing is changed to
+exclude.
+
+The main purpose is for the function to make more logical sense when
+filtering on tags now when tags can be structured in hierarchies.
+
 *** New behaviour for `org-toggle-latex-fragment'.
 The new behaviour is the following:
 
