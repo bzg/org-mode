@@ -49,6 +49,7 @@
 ;; on how this exporter works.
 
 (require 'ox-html)
+(eval-when-compile (require 'cl))
 
 (org-export-define-derived-backend 's5 'html
   :menu-entry
