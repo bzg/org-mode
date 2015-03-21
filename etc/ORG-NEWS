@@ -118,6 +118,8 @@ would create invalid planning info.  This dangerous option is now
 removed.
 *** Removed option ~org-koma-letter-use-title~
 Use org-export-with-title instead.  See also below.
+*** Removed option ~org-entities-ascii-explanatory~
+This variable had no effect since Org 8.0.
 *** Removed MathML-related options from ~org-html-mathjax-options~
 MathJax automatically chooses the best display technology based on the
 end-users browser.  You may force initial usage of MathML via

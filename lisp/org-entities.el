@@ -38,32 +38,18 @@
   :tag "Org Entities"
   :group 'org)
 
-(defcustom org-entities-ascii-explanatory nil
-  "Non-nil means replace special entities in ASCII.
-For example, this will replace \"\\nsup\" with \"[not a superset of]\"
-in backends where the corresponding character is not available."
-  :group 'org-entities
-  :version "24.1"
-  :type 'boolean
-  :safe #'booleanp)
-
 (defun org-entities--user-safe-p (v)
-  "Return t if V is a safe value for `org-entities-user'."
-  (or (eq v nil)
+  "Non-nil if V is a safe value for `org-entities-user'."
+  (or (null v)
       (and (listp v)
-	   ;; The stupid `eval' trick is needed because `apply'
-	   ;; doesn't work with the special form `and'.
-	   (eval (cons #'and (mapcar (lambda (v2)
-				       (and (listp v2)
-					    (= (length v2) 7)
-					    (stringp (nth 0 v2))
-					    (stringp (nth 1 v2))
-					    (booleanp (nth 2 v2))
-					    (stringp (nth 3 v2))
-					    (stringp (nth 4 v2))
-					    (stringp (nth 5 v2))
-					    (stringp (nth 6 v2))))
-				     v))))))
+	   (= (length v) 7)
+	   (stringp (nth 0 v))
+	   (stringp (nth 1 v))
+	   (booleanp (nth 2 v))
+	   (stringp (nth 3 v))
+	   (stringp (nth 4 v))
+	   (stringp (nth 5 v))
+	   (stringp (nth 6 v)))))
 
 (defcustom org-entities-user nil
   "User-defined entities used in Org-mode to produce special characters.
@@ -72,15 +58,13 @@ of the entity that can be inserted into an Org file as \\name with the
 appropriate replacements for the different export backends.  The order
 of the fields is the following
 
-name                 As a string, without the leading backslash
-LaTeX replacement    In ready LaTeX, no further processing will take place
-LaTeX mathp          A Boolean, either t or nil.  t if this entity needs
-                     to be in math mode.
+name                 As a string, without the leading backslash.
+LaTeX replacement    In ready LaTeX, no further processing will take place.
+LaTeX mathp          Either t or nil.  When t this entity needs to be in
+                     math mode.
 HTML replacement     In ready HTML, no further processing will take place.
                      Usually this will be an &...; entity.
-ASCII replacement    Plain ASCII, no extensions.  Symbols that cannot be
-                     represented will be left as they are, but see the.
-                     variable `org-entities-ascii-explanatory'.
+ASCII replacement    Plain ASCII, no extensions.
 Latin1 replacement   Use the special characters available in latin1.
 utf-8 replacement    Use the special characters available in utf-8.
 
@@ -540,24 +524,6 @@ For details see `org-entities-user'.")
 This first checks the user list, then the built-in list."
   (or (assoc name org-entities-user)
       (assoc name org-entities)))
-
-(defun org-entity-get-representation (name kind)
-  "Get the correct representation of entity NAME for export type KIND.
-Kind can be any of `latex', `html', `ascii', `latin1', or `utf8'."
-  (let* ((e (org-entity-get name))
-	 (n (cdr (assq kind '((latex . 1) (html . 3) (ascii . 4)
-			      (latin1 . 5) (utf8 . 6)))))
-	 (r (and e n (nth n e))))
-    (if (and e r
-	     (not org-entities-ascii-explanatory)
-	     (memq kind '(ascii latin1 utf8))
-	     (= (string-to-char r) ?\[))
-	(concat "\\" name)
-      r)))
-
-(defsubst org-entity-latex-math-p (name)
-  "Does entity NAME require math mode in LaTeX?"
-  (nth 2 (org-entity-get name)))
 
 ;; Helpfunctions to create a table for orgmode.org/worg/org-symbols.org
 
