@@ -99,46 +99,6 @@ This function is called by `org-babel-execute-src-block'."
 	  (when (file-exists-p out-file) (delete-file out-file))
 	  (with-temp-file out-file
 	    (insert body)))
-	 ((or (string-match "\\.pdf$" out-file) imagemagick)
-	  (with-temp-file tex-file
-	    (require 'ox-latex)
-	    (insert
-	     (org-latex-guess-inputenc
-	      (org-splice-latex-header
-	       org-format-latex-header
-	       (delq
-		nil
-		(mapcar
-		 (lambda (el)
-		   (unless (and (listp el) (string= "hyperref" (cadr el)))
-		     el))
-		 org-latex-default-packages-alist))
-	       org-latex-packages-alist
-	       nil))
-	     (if fit "\n\\usepackage[active, tightpage]{preview}\n" "")
-	     (if border (format "\\setlength{\\PreviewBorder}{%s}" border) "")
-	     (if height (concat "\n" (format "\\pdfpageheight %s" height)) "")
-	     (if width  (concat "\n" (format "\\pdfpagewidth %s" width))   "")
-	     (if headers
-		 (concat "\n"
-			 (if (listp headers)
-			     (mapconcat #'identity headers "\n")
-			   headers) "\n")
-	       "")
-	     (if fit
-		 (concat "\n\\begin{document}\n\\begin{preview}\n" body
-			 "\n\\end{preview}\n\\end{document}\n")
-	       (concat "\n\\begin{document}\n" body "\n\\end{document}\n"))))
-          (when (file-exists-p out-file) (delete-file out-file))
-	  (let ((transient-pdf-file (org-babel-latex-tex-to-pdf tex-file)))
-	    (cond
-	     ((string-match "\\.pdf$" out-file)
-	      (rename-file transient-pdf-file out-file))
-	     (imagemagick
-	      (org-babel-latex-convert-pdf
-	       transient-pdf-file out-file im-in-options im-out-options)
-	      (when (file-exists-p transient-pdf-file)
-		(delete-file transient-pdf-file))))))
 	 ((and (or (string-match "\\.svg$" out-file)
 		   (string-match "\\.html$" out-file))
 	       (executable-find org-babel-latex-htlatex))
@@ -184,6 +144,46 @@ This function is called by `org-babel-execute-src-block'."
 				       ".html")
 			       out-file)
 	      (error "HTML file produced but SVG file requested")))))
+	 ((or (string-match "\\.pdf$" out-file) imagemagick)
+	  (with-temp-file tex-file
+	    (require 'ox-latex)
+	    (insert
+	     (org-latex-guess-inputenc
+	      (org-splice-latex-header
+	       org-format-latex-header
+	       (delq
+		nil
+		(mapcar
+		 (lambda (el)
+		   (unless (and (listp el) (string= "hyperref" (cadr el)))
+		     el))
+		 org-latex-default-packages-alist))
+	       org-latex-packages-alist
+	       nil))
+	     (if fit "\n\\usepackage[active, tightpage]{preview}\n" "")
+	     (if border (format "\\setlength{\\PreviewBorder}{%s}" border) "")
+	     (if height (concat "\n" (format "\\pdfpageheight %s" height)) "")
+	     (if width  (concat "\n" (format "\\pdfpagewidth %s" width))   "")
+	     (if headers
+		 (concat "\n"
+			 (if (listp headers)
+			     (mapconcat #'identity headers "\n")
+			   headers) "\n")
+	       "")
+	     (if fit
+		 (concat "\n\\begin{document}\n\\begin{preview}\n" body
+			 "\n\\end{preview}\n\\end{document}\n")
+	       (concat "\n\\begin{document}\n" body "\n\\end{document}\n"))))
+          (when (file-exists-p out-file) (delete-file out-file))
+	  (let ((transient-pdf-file (org-babel-latex-tex-to-pdf tex-file)))
+	    (cond
+	     ((string-match "\\.pdf$" out-file)
+	      (rename-file transient-pdf-file out-file))
+	     (imagemagick
+	      (org-babel-latex-convert-pdf
+	       transient-pdf-file out-file im-in-options im-out-options)
+	      (when (file-exists-p transient-pdf-file)
+		(delete-file transient-pdf-file))))))
          ((string-match "\\.\\([^\\.]+\\)$" out-file)
           (error "Can not create %s files, please specify a .png or .pdf file or try the :imagemagick header argument"
 		 (match-string 1 out-file))))
