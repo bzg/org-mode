@@ -3940,20 +3940,25 @@ looked after.
 
 Optional argument PARENT, when non-nil, is the element or object
 containing the secondary string.  It is used to set correctly
-`:parent' property within the string."
-  (let ((local-variables (buffer-local-variables)))
-    (with-temp-buffer
-      (dolist (v local-variables)
-	(ignore-errors
-	  (if (symbolp v) (makunbound v)
-	    (org-set-local (car v) (cdr v)))))
-      (insert string)
-      (restore-buffer-modified-p nil)
-      (let ((secondary (org-element--parse-objects
-			(point-min) (point-max) nil restriction)))
-	(when parent
-	  (dolist (o secondary) (org-element-put-property o :parent parent)))
-	secondary))))
+`:parent' property within the string.
+
+If STRING is the empty string or nil, return nil."
+  (cond
+   ((not string) nil)
+   ((equal string "") nil)
+   (t (let ((local-variables (buffer-local-variables)))
+	(with-temp-buffer
+	  (dolist (v local-variables)
+	    (ignore-errors
+	      (if (symbolp v) (makunbound v)
+		(org-set-local (car v) (cdr v)))))
+	  (insert string)
+	  (restore-buffer-modified-p nil)
+	  (let ((data (org-element--parse-objects
+		       (point-min) (point-max) nil restriction)))
+	    (when parent
+	      (dolist (o data) (org-element-put-property o :parent parent)))
+	    data))))))
 
 (defun org-element-map
     (data types fun &optional info first-match no-recursion with-affiliated)
