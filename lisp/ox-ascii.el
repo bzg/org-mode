@@ -1029,11 +1029,9 @@ INFO is a plist used as a communication channel."
 		 (upcase formatted-title)
 		 (cond
 		  ((and (org-string-nw-p author) (org-string-nw-p email))
-		   (concat (if utf8p "\n\n\n" "\n\n") author "\n" email))
-		  ((org-string-nw-p author)
-		   (concat (if utf8p "\n\n\n" "\n\n") author))
-		  ((org-string-nw-p email)
-		   (concat (if utf8p "\n\n\n" "\n\n") email)))
+		   (concat "\n\n" author "\n" email))
+		  ((org-string-nw-p author) (concat "\n\n" author))
+		  ((org-string-nw-p email) (concat "\n\n" email)))
 		 "\n" line
 		 (when (org-string-nw-p date) (concat "\n\n\n" date))
 		 "\n\n\n") text-width 'center)))))
