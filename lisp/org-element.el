@@ -2722,7 +2722,7 @@ a plist with `:begin', `:end', `:latex', `:latex-math-p',
 
 Assume point is at the beginning of the entity."
   (catch 'no-object
-    (when (looking-at "\\\\\\(?:\\(\\.+\\)\\({}\\)?\\|\\(there4\\|sup[123]\\|frac[13][24]\\|[a-zA-Z]+\\)\\($\\|{}\\|[^[:alpha:]]\\)\\)")
+    (when (looking-at "\\\\\\(?:\\(?1:\\.+\\)\\(?2:{}\\)?\\|\\(?1:there4\\|sup[123]\\|frac[13][24]\\|[a-zA-Z]+\\)\\(?2:$\\|{}\\|[^[:alpha:]]\\)\\)")
       (save-excursion
 	(let* ((value (or (org-entity-get (match-string 1))
 			  (throw 'no-object nil)))
