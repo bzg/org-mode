@@ -6135,14 +6135,18 @@ from the minibuffer:
 @kindex M-S-@key{right}
 @kindex M-S-@key{left}
 @kindex @key{RET}
+@kindex M-S-@key{down}
+@kindex M-S-@key{up}
+
 @example
-@key{RET}           @r{Choose date at cursor in calendar.}
-mouse-1        @r{Select date by clicking on it.}
-S-@key{right}/@key{left}     @r{One day forward/backward.}
-S-@key{down}/@key{up}     @r{One week forward/backward.}
-M-S-@key{right}/@key{left}   @r{One month forward/backward.}
-> / <          @r{Scroll calendar forward/backward by one month.}
-M-v / C-v      @r{Scroll calendar forward/backward by 3 months.}
+@key{RET}              @r{Choose date at cursor in calendar.}
+mouse-1            @r{Select date by clicking on it.}
+S-@key{right}/@key{left}   @r{One day forward/backward.}
+S-@key{down}/@key{up}      @r{One week forward/backward.}
+M-S-@key{right}/@key{left} @r{One month forward/backward.}
+> / <              @r{Scroll calendar forward/backward by one month.}
+M-v / C-v          @r{Scroll calendar forward/backward by 3 months.}
+M-S-@key{down}/@key{up}    @r{Scroll calendar forward/backward by one year.}
 @end example
 
 @vindex org-read-date-display-live
