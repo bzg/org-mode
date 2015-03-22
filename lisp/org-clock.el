@@ -2644,7 +2644,7 @@ from the dynamic block definition."
   "Return indentation string according to LEVEL.
 LEVEL is an integer.  Indent by two spaces per level above 1."
   (if (= level 1) ""
-    (concat "\\" (make-string (- (* 2 level) 3) ?.) " ")))
+    (concat "\\_" (make-string (* 2 (1- level)) ?\s))))
 
 (defun org-clocktable-steps (params)
   "Step through the range to make a number of clock tables."

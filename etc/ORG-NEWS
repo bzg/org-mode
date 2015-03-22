@@ -316,18 +316,10 @@ It is now possible to supply and optional formatting argument to
 *** New option ~org-export-with-title~
 It is possible to suppress the title insertion with ~#+OPTIONS:
 title:nil~ or globally using the variable ~org-export-with-title~.
-*** New entities family: "\...."
-"\..." are used to insert up to 20 contiguous spaces in various
+*** New entities family: "\_ "
+"\_ " are used to insert up to 20 contiguous spaces in various
 back-ends.  In particular, this family can be used to introduce
 leading spaces within table cells.
-
-Also, unlike to other entities, these can be used mid-word, e.g.,
-
-  wo\..rd
-
-Curly brackets can still be added before a dot, e.g.,
-
-  This is the end\...{}.
 *** New MathJax configuration options.
 Org uses the MathJax CDN by default.  See the manual and the docstring
 of ~org-html-mathjax-options~ for details.

@@ -515,12 +515,12 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
      ("diamond" "\\diamondsuit" t "&diamond;" "[diamond]" "[diamond]" "◆")
      ("Diamond" "\\diamondsuit" t "&diamond;" "[diamond]" "[diamond]" "◆")
      ("loz" "\\lozenge" t "&loz;" "[lozenge]" "[lozenge]" "⧫"))
-   ;; Add "\...."-entity family for spaces.
-   (let (space-entities html-spaces)
+   ;; Add "\_ "-entity family for spaces.
+   (let (space-entities html-spaces (entity "_"))
      (dotimes (n 20 (nreverse space-entities))
        (let ((n (+ 1 n))
 	     (spaces (make-string n ?\s)))
-	 (push (list (make-string n ?.)
+	 (push (list (setq entity (concat entity " "))
 		     (format "\\hspace*{%sem}" (* n .5))
 		     nil
 		     (setq html-spaces (concat "&ensp;" html-spaces))

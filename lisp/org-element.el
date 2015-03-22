@@ -207,7 +207,7 @@ specially in `org-element--object-lex'.")
 		      "\\$"
 		      ;; Objects starting with "\": line break,
 		      ;; entity, latex fragment.
-		      "\\\\\\(?:[a-zA-Z[(.]\\|\\\\[ \t]*$\\)"
+		      "\\\\\\(?:[a-zA-Z[(]\\|\\\\[ \t]*$\\|_ +\\)"
 		      ;; Objects starting with raw text: inline Babel
 		      ;; source block, inline Babel call.
 		      "\\(?:call\\|src\\)_"))
@@ -2722,7 +2722,7 @@ a plist with `:begin', `:end', `:latex', `:latex-math-p',
 
 Assume point is at the beginning of the entity."
   (catch 'no-object
-    (when (looking-at "\\\\\\(?:\\(?1:\\.+\\)\\(?2:{}\\)?\\|\\(?1:there4\\|sup[123]\\|frac[13][24]\\|[a-zA-Z]+\\)\\(?2:$\\|{}\\|[^[:alpha:]]\\)\\)")
+    (when (looking-at "\\\\\\(?:\\(?1:_ +\\)\\|\\(?1:there4\\|sup[123]\\|frac[13][24]\\|[a-zA-Z]+\\)\\(?2:$\\|{}\\|[^[:alpha:]]\\)\\)")
       (save-excursion
 	(let* ((value (or (org-entity-get (match-string 1))
 			  (throw 'no-object nil)))
