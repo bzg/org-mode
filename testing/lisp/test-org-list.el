@@ -711,7 +711,45 @@
        (goto-char (point-max))
        (org-insert-item)
        (forward-line -1)
-       (looking-at "$")))))
+       (looking-at "$"))))
+  ;; When called before or on the bullet, insert new item before
+  ;; current one.
+  (should
+   (equal "- \n- item"
+	  (org-test-with-temp-text "- item"
+	    (org-insert-item)
+	    (buffer-string))))
+  (should
+   (equal "- \n- item"
+	  (org-test-with-temp-text "- <point>item"
+	    (org-insert-item)
+	    (buffer-string))))
+  ;; When called on tag in a descriptive list, insert new item before
+  ;; current one too.
+  (should
+   (equal "-  :: \n- tag :: item"
+	  (org-test-with-temp-text "- tag <point>:: item"
+	    (org-insert-item)
+	    (buffer-string))))
+  (should
+   (equal "-  :: \n- tag :: item"
+	  (org-test-with-temp-text "- ta<point>g :: item"
+	    (org-insert-item)
+	    (buffer-string))))
+  ;; Further, it splits the line or add a blank new item after it,
+  ;; according to `org-M-RET-may-split-line'.
+  (should
+   (equal "- it\n- em"
+	  (org-test-with-temp-text "- it<point>em"
+	    (let ((org-M-RET-may-split-line  '((default . t))))
+	      (org-insert-item))
+	    (buffer-string))))
+  (should
+   (equal "- item\n- "
+	  (org-test-with-temp-text "- it<point>em"
+	    (let ((org-M-RET-may-split-line  '((default . nil))))
+	      (org-insert-item))
+	    (buffer-string)))))
 
 (ert-deftest test-org-list/repair ()
   "Test `org-list-repair' specifications."

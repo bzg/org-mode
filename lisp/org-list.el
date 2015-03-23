@@ -1273,12 +1273,16 @@ This function modifies STRUCT."
 	   (beforep
 	    (progn
 	      (looking-at org-list-full-item-re)
-	      ;; Do not count tag in a non-descriptive list.
-	      (<= pos (if (and (match-beginning 4)
-			       (save-match-data
-				 (string-match "[.)]" (match-string 1))))
-			  (match-beginning 4)
-			(match-end 0)))))
+	      (<= pos
+		  (cond
+		   ((not (match-beginning 4)) (match-end 0))
+		   ;; Ignore tag in a non-descriptive list.
+		   ((save-match-data (string-match "[.)]" (match-string 1)))
+		    (match-beginning 4))
+		   (t (save-excursion
+			(goto-char (match-end 4))
+			(skip-chars-forward " \t")
+			(point)))))))
 	   (split-line-p (org-get-alist-option org-M-RET-may-split-line 'item))
 	   (blank-nb (org-list-separating-blank-lines-number
 		      pos struct prevs))
