@@ -2032,133 +2032,6 @@ recursively convert DATA using BACKEND translation table."
 	  ;; will probably be used on small trees.
 	  :exported-data (make-hash-table :test 'eq :size 401)))))
 
-(defun org-export-prune-tree (data info)
-  "Prune non exportable elements from DATA.
-DATA is the parse tree to traverse.  INFO is the plist holding
-export info.  Also set `:ignore-list' in INFO to a list of
-objects which should be ignored during export, but not removed
-from tree."
-  (let* (walk-data
-	 ignore
-	 ;; First find trees containing a select tag, if any.
-	 (selected (org-export--selected-trees data info))
-	 (walk-data
-	  (lambda (data)
-	    ;; Prune non-exportable elements and objects from tree.
-	    ;; As a special case, special rows and cells from tables
-	    ;; are stored in IGNORE, as they still need to be accessed
-	    ;; during export.
-	    (let ((type (org-element-type data)))
-	      (if (org-export--skip-p data info selected)
-		  (if (memq type '(table-cell table-row)) (push data ignore)
-		    (org-element-extract-element data))
-		(if (and (eq type 'headline)
-			 (eq (plist-get info :with-archived-trees) 'headline)
-			 (org-element-property :archivedp data))
-		    ;; If headline is archived but tree below has to
-		    ;; be skipped, remove contents.
-		    (org-element-set-contents data)
-		  ;; Move into secondary string, if any.
-		  (let ((sec-prop
-			 (cdr (assq type org-element-secondary-value-alist))))
-		    (when sec-prop
-		      (mapc walk-data (org-element-property sec-prop data))))
-		  ;; Move into recursive objects/elements.
-		  (mapc walk-data (org-element-contents data))))))))
-    ;; If a select tag is active, also ignore the section before the
-    ;; first headline, if any.
-    (when selected
-      (let ((first-element (car (org-element-contents data))))
-	(when (eq (org-element-type first-element) 'section)
-	  (org-element-extract-element first-element))))
-    ;; Prune tree and communication channel.
-    (funcall walk-data data)
-    (dolist (prop org-export-document-properties)
-      (funcall walk-data (plist-get info prop)))
-    ;; Eventually set `:ignore-list'.
-    (plist-put info :ignore-list ignore)))
-
-(defun org-export-remove-uninterpreted-data (data info)
-  "Change uninterpreted elements back into Org syntax.
-DATA is the parse tree.  INFO is a plist containing export
-options.  Each uninterpreted element or object is changed back
-into a string.  Contents, if any, are not modified.  The parse
-tree is modified by side effect."
-  (org-export--remove-uninterpreted-data-1 data info)
-  (dolist (prop org-export-document-properties)
-    (plist-put info
-	       prop
-	       (org-export--remove-uninterpreted-data-1
-		(plist-get info prop)
-		info))))
-
-(defun org-export--remove-uninterpreted-data-1 (data info)
-  "Change uninterpreted elements back into Org syntax.
-DATA is a parse tree or a secondary string.  INFO is a plist
-containing export options.  It is modified by side effect and
-returned by the function."
-  (org-element-map data
-      '(entity bold italic latex-environment latex-fragment strike-through
-	       subscript superscript underline)
-    #'(lambda (blob)
-	(let ((new
-	       (case (org-element-type blob)
-		 ;; ... entities...
-		 (entity
-		  (and (not (plist-get info :with-entities))
-		       (list (concat
-			      (org-export-expand blob nil)
-			      (make-string
-			       (or (org-element-property :post-blank blob) 0)
-			       ?\s)))))
-		 ;; ... emphasis...
-		 ((bold italic strike-through underline)
-		  (and (not (plist-get info :with-emphasize))
-		       (let ((marker (case (org-element-type blob)
-				       (bold "*")
-				       (italic "/")
-				       (strike-through "+")
-				       (underline "_"))))
-			 (append
-			  (list marker)
-			  (org-element-contents blob)
-			  (list (concat
-				 marker
-				 (make-string
-				  (or (org-element-property :post-blank blob)
-				      0)
-				  ?\s)))))))
-		 ;; ... LaTeX environments and fragments...
-		 ((latex-environment latex-fragment)
-		  (and (eq (plist-get info :with-latex) 'verbatim)
-		       (list (org-export-expand blob nil))))
-		 ;; ... sub/superscripts...
-		 ((subscript superscript)
-		  (let ((sub/super-p (plist-get info :with-sub-superscript))
-			(bracketp (org-element-property :use-brackets-p blob)))
-		    (and (or (not sub/super-p)
-			     (and (eq sub/super-p '{}) (not bracketp)))
-			 (append
-			  (list (concat
-				 (if (eq (org-element-type blob) 'subscript)
-				     "_"
-				   "^")
-				 (and bracketp "{")))
-			  (org-element-contents blob)
-			  (list (concat
-				 (and bracketp "}")
-				 (and (org-element-property :post-blank blob)
-				      (make-string
-				       (org-element-property :post-blank blob)
-				       ?\s)))))))))))
-	  (when new
-	    ;; Splice NEW at BLOB location in parse tree.
-	    (dolist (e new (org-element-extract-element blob))
-	      (unless (string= e "") (org-element-insert-before e blob))))))
-    info)
-  ;; Return modified parse tree.
-  data)
-
 (defun org-export-expand (blob contents &optional with-affiliated)
   "Expand a parsed element or object to its original state.
 
@@ -2792,6 +2665,133 @@ The function assumes BUFFER's major mode is `org-mode'."
 	      (overlays-in (point-min) (point-max)))
 	     ov-set)))))
 
+(defun org-export--prune-tree (data info)
+  "Prune non exportable elements from DATA.
+DATA is the parse tree to traverse.  INFO is the plist holding
+export info.  Also set `:ignore-list' in INFO to a list of
+objects which should be ignored during export, but not removed
+from tree."
+  (let* (walk-data
+	 ignore
+	 ;; First find trees containing a select tag, if any.
+	 (selected (org-export--selected-trees data info))
+	 (walk-data
+	  (lambda (data)
+	    ;; Prune non-exportable elements and objects from tree.
+	    ;; As a special case, special rows and cells from tables
+	    ;; are stored in IGNORE, as they still need to be accessed
+	    ;; during export.
+	    (let ((type (org-element-type data)))
+	      (if (org-export--skip-p data info selected)
+		  (if (memq type '(table-cell table-row)) (push data ignore)
+		    (org-element-extract-element data))
+		(if (and (eq type 'headline)
+			 (eq (plist-get info :with-archived-trees) 'headline)
+			 (org-element-property :archivedp data))
+		    ;; If headline is archived but tree below has to
+		    ;; be skipped, remove contents.
+		    (org-element-set-contents data)
+		  ;; Move into secondary string, if any.
+		  (let ((sec-prop
+			 (cdr (assq type org-element-secondary-value-alist))))
+		    (when sec-prop
+		      (mapc walk-data (org-element-property sec-prop data))))
+		  ;; Move into recursive objects/elements.
+		  (mapc walk-data (org-element-contents data))))))))
+    ;; If a select tag is active, also ignore the section before the
+    ;; first headline, if any.
+    (when selected
+      (let ((first-element (car (org-element-contents data))))
+	(when (eq (org-element-type first-element) 'section)
+	  (org-element-extract-element first-element))))
+    ;; Prune tree and communication channel.
+    (funcall walk-data data)
+    (dolist (prop org-export-document-properties)
+      (funcall walk-data (plist-get info prop)))
+    ;; Eventually set `:ignore-list'.
+    (plist-put info :ignore-list ignore)))
+
+(defun org-export--remove-uninterpreted-data (data info)
+  "Change uninterpreted elements back into Org syntax.
+DATA is the parse tree.  INFO is a plist containing export
+options.  Each uninterpreted element or object is changed back
+into a string.  Contents, if any, are not modified.  The parse
+tree is modified by side effect."
+  (org-export--remove-uninterpreted-data-1 data info)
+  (dolist (prop org-export-document-properties)
+    (plist-put info
+	       prop
+	       (org-export--remove-uninterpreted-data-1
+		(plist-get info prop)
+		info))))
+
+(defun org-export--remove-uninterpreted-data-1 (data info)
+  "Change uninterpreted elements back into Org syntax.
+DATA is a parse tree or a secondary string.  INFO is a plist
+containing export options.  It is modified by side effect and
+returned by the function."
+  (org-element-map data
+      '(entity bold italic latex-environment latex-fragment strike-through
+	       subscript superscript underline)
+    (lambda (blob)
+      (let ((new
+	     (case (org-element-type blob)
+	       ;; ... entities...
+	       (entity
+		(and (not (plist-get info :with-entities))
+		     (list (concat
+			    (org-export-expand blob nil)
+			    (make-string
+			     (or (org-element-property :post-blank blob) 0)
+			     ?\s)))))
+	       ;; ... emphasis...
+	       ((bold italic strike-through underline)
+		(and (not (plist-get info :with-emphasize))
+		     (let ((marker (case (org-element-type blob)
+				     (bold "*")
+				     (italic "/")
+				     (strike-through "+")
+				     (underline "_"))))
+		       (append
+			(list marker)
+			(org-element-contents blob)
+			(list (concat
+			       marker
+			       (make-string
+				(or (org-element-property :post-blank blob)
+				    0)
+				?\s)))))))
+	       ;; ... LaTeX environments and fragments...
+	       ((latex-environment latex-fragment)
+		(and (eq (plist-get info :with-latex) 'verbatim)
+		     (list (org-export-expand blob nil))))
+	       ;; ... sub/superscripts...
+	       ((subscript superscript)
+		(let ((sub/super-p (plist-get info :with-sub-superscript))
+		      (bracketp (org-element-property :use-brackets-p blob)))
+		  (and (or (not sub/super-p)
+			   (and (eq sub/super-p '{}) (not bracketp)))
+		       (append
+			(list (concat
+			       (if (eq (org-element-type blob) 'subscript)
+				   "_"
+				 "^")
+			       (and bracketp "{")))
+			(org-element-contents blob)
+			(list (concat
+			       (and bracketp "}")
+			       (and (org-element-property :post-blank blob)
+				    (make-string
+				     (org-element-property :post-blank blob)
+				     ?\s)))))))))))
+	(when new
+	  ;; Splice NEW at BLOB location in parse tree.
+	  (dolist (e new (org-element-extract-element blob))
+	    (unless (string= e "") (org-element-insert-before e blob))))))
+    info)
+  ;; Return modified parse tree.
+  data)
+
 ;;;###autoload
 (defun org-export-as
     (backend &optional subtreep visible-only body-only ext-plist)
@@ -2909,8 +2909,8 @@ Return code as a string."
 	 ;; Prune tree from non-exported elements and transform
 	 ;; uninterpreted elements or objects in both parse tree and
 	 ;; communication channel.
-	 (org-export-prune-tree tree info)
-	 (org-export-remove-uninterpreted-data tree info)
+	 (org-export--prune-tree tree info)
+	 (org-export--remove-uninterpreted-data tree info)
 	 ;; Parse buffer, handle uninterpreted elements or objects,
 	 ;; then call parse-tree filters.
 	 (setq tree

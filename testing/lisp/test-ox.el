@@ -50,8 +50,8 @@ variable, and communication channel under `info'."
   `(org-test-with-temp-text ,data
      (let* ((tree (org-element-parse-buffer))
 	    (info (org-export-get-environment)))
-       (org-export-prune-tree tree info)
-       (org-export-remove-uninterpreted-data tree info)
+       (org-export--prune-tree tree info)
+       (org-export--remove-uninterpreted-data tree info)
        (let ((info (org-combine-plists
 		    info (org-export-collect-tree-properties tree info))))
 	 ,@body))))
