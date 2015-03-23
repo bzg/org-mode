@@ -48,6 +48,7 @@ body to execute.  Parse tree is available under the `tree'
 variable, and communication channel under `info'."
   (declare (debug (form body)) (indent 1))
   `(org-test-with-temp-text ,data
+     (org-export--delete-commented-subtrees)
      (let* ((tree (org-element-parse-buffer))
 	    (info (org-export-get-environment)))
        (org-export--prune-tree tree info)
@@ -187,7 +188,16 @@ variable, and communication channel under `info'."
 			  :options '((:k1 "KEYWORD")
 				     (:k2 "KEYWORD")))))
 	    (org-test-with-temp-text "#+KEYWORD: value"
-	      (org-export--get-inbuffer-options backend))))))
+	      (org-export--get-inbuffer-options backend)))))
+  ;; Keywords in commented subtrees are ignored.
+  (should-not
+   (equal "Me"
+	  (org-test-with-parsed-data "* COMMENT H1\n#+AUTHOR: Me"
+	    (plist-get info :author))))
+  (should-not
+   (equal "Mine"
+	  (org-test-with-parsed-data "* COMMENT H1\n** H2\n#+EMAIL: Mine"
+	    (plist-get info :email)))))
 
 (ert-deftest test-org-export/get-subtree-options ()
   "Test setting options from headline's properties."
@@ -1107,13 +1117,26 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
   ;; Date macro takes a optional formatting argument
   (should
    (equal "09-02-15\n"
-    (org-test-with-temp-text "{{{date(%d-%m-%y)}}}\n* d :noexport:\n#+DATE: <2015-02-09>"
-      (org-export-as (org-test-default-backend)))))
+	  (org-test-with-temp-text "{{{date(%d-%m-%y)}}}\n* d :noexport:\n#+DATE: <2015-02-09>"
+	    (org-export-as (org-test-default-backend)))))
   ;; Only single timestamps are formatted
   (should
    (equal "<2015-02x-09>\n"
-    (org-test-with-temp-text "{{{date(%d-%m-%y)}}}\n* d :noexport:\n#+DATE: <2015-02x-09>"
-      (org-export-as (org-test-default-backend))))))
+	  (org-test-with-temp-text "{{{date(%d-%m-%y)}}}\n* d :noexport:\n#+DATE: <2015-02x-09>"
+	    (org-export-as (org-test-default-backend)))))
+  ;; Throw an error when a macro definition is missing.
+  (should-error
+   (org-test-with-temp-text "{{{missing}}}"
+     (org-export-as (org-test-default-backend))))
+  ;; Macros defined in commented subtrees are ignored.
+  (should-error
+   (org-test-with-temp-text
+       "* COMMENT H\n#+MACRO: macro1\n* H2\nvalue\n{{{macro1}}}"
+     (org-export-as (org-test-default-backend))))
+  (should-error
+   (org-test-with-temp-text
+       "* COMMENT H\n** H2\n#+MACRO: macro1\n* H3\nvalue\n{{{macro1}}}"
+     (org-export-as (org-test-default-backend)))))
 
 (ert-deftest test-org-export/before-processing-hook ()
   "Test `org-export-before-processing-hook'."

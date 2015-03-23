@@ -2665,6 +2665,16 @@ The function assumes BUFFER's major mode is `org-mode'."
 	      (overlays-in (point-min) (point-max)))
 	     ov-set)))))
 
+(defun org-export--delete-commented-subtrees ()
+  "Delete commented subtrees or inlinetasks in the buffer."
+  (org-with-wide-buffer
+   (goto-char (point-min))
+   (let ((regexp (concat org-outline-regexp-bol org-comment-string)))
+     (while (re-search-forward regexp nil t)
+       (delete-region
+	(line-beginning-position)
+	(org-element-property :end (org-element-at-point)))))))
+
 (defun org-export--prune-tree (data info)
   "Prune non exportable elements from DATA.
 DATA is the parse tree to traverse.  INFO is the plist holding
@@ -2855,6 +2865,7 @@ Return code as a string."
 	 (run-hook-with-args 'org-export-before-processing-hook
 			     (org-export-backend-name backend))
 	 (org-export-expand-include-keyword)
+	 (org-export--delete-commented-subtrees)
 	 ;; Update macro templates since #+INCLUDE keywords might have
 	 ;; added some new ones.
 	 (org-macro-initialize-templates)
