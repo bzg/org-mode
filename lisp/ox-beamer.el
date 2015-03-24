@@ -646,15 +646,27 @@ as a communication channel."
   "Transcode an ITEM element into Beamer code.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let ((action (let ((first-element (car (org-element-contents item))))
-		  (and (eq (org-element-type first-element) 'paragraph)
-		       (org-beamer--element-has-overlay-p first-element))))
-	(output (org-export-with-backend 'latex item contents info)))
-    (if (or (not action) (not (string-match "\\\\item" output))) output
-      ;; If the item starts with a paragraph and that paragraph starts
-      ;; with an export snippet specifying an overlay, insert it after
-      ;; \item command.
-      (replace-match (concat "\\\\item" action) nil nil output))))
+  (org-export-with-backend
+   ;; Delegate item export to `latex'.  However, we use `beamer'
+   ;; transcoders for objects in the description tag.
+   (org-export-create-backend
+    :parent 'beamer
+    :transcoders
+    (list
+     (cons
+      'item
+      (lambda (item c i)
+	(let ((action
+	       (let ((first (car (org-element-contents item))))
+		 (and (eq (org-element-type first) 'paragraph)
+		      (org-beamer--element-has-overlay-p first))))
+	      (output (org-latex-item item contents info)))
+	  (if (not (and action (string-match "\\\\item" output))) output
+	    ;; If the item starts with a paragraph and that paragraph
+	    ;; starts with an export snippet specifying an overlay,
+	    ;; append it to the \item command.
+	    (replace-match (concat "\\\\item" action) nil nil output)))))))
+   item contents info))
 
 
 ;;;; Keyword
