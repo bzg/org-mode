@@ -48,7 +48,6 @@ body to execute.  Parse tree is available under the `tree'
 variable, and communication channel under `info'."
   (declare (debug (form body)) (indent 1))
   `(org-test-with-temp-text ,data
-     (org-export--delete-commented-subtrees)
      (let* ((tree (org-element-parse-buffer))
 	    (info (org-export-get-environment)))
        (org-export--prune-tree tree info)
