@@ -1389,6 +1389,11 @@
        (let ((org-link-search-must-match-exact-headline nil)
 	     (org-todo-regexp "TODO"))
 	 (org-open-at-point)))))
+  ;; Heading match ignores COMMENT keyword.
+  (should
+   (org-test-with-temp-text "[[*Test]]\n* COMMENT Test"
+     (org-open-at-point)
+     (looking-at "\\* COMMENT Test")))
   ;; Correctly un-hexify fuzzy links.
   (should
    (org-test-with-temp-text "* With space\n[[*With%20space][With space]]"

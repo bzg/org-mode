@@ -11079,6 +11079,7 @@ variable."
 	      org-outline-regexp-bol
 	      "\\(?:" org-todo-regexp "[ \t]+\\)?"
 	      "\\(?:\\[#.\\][ \t]+\\)?"
+	      "\\(?:" org-comment-string "[ \t]+\\)?"
 	      sep "*"
 	      (mapconcat #'identity
 			 (org-split-string (regexp-quote s))
