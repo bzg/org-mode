@@ -632,7 +632,7 @@ holding export options."
 	       (subject* (org-string-nw-p
 			  (org-export-data
 			   (org-element-parse-secondary-string
-			    (or (plist-get info :subject) "")
+			    (plist-get info :subject)
 			    (org-element-restriction 'keyword))
 			   info)))
 	       (title* (and (plist-get info :with-title)

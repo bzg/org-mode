@@ -1227,17 +1227,17 @@ INFO is a plist used as a communication channel."
 			verbatim))
 	(language (let ((lang (plist-get info :language)))
 		    (or (cdr (assoc lang org-latex-babel-language-alist))
-			lang ""))))
-    `((?a . ,(or (org-export-data (plist-get info :author) info) ""))
-      (?t . ,(or (org-export-data (plist-get info :title)  info) ""))
+			lang))))
+    `((?a . ,(org-export-data (plist-get info :author) info))
+      (?t . ,(org-export-data (plist-get info :title)  info))
       (?k . ,(org-export-data (org-latex--wrap-latex-math-block
 			       (org-element-parse-secondary-string
-				(or (plist-get info :keywords) "") objects)
+				(plist-get info :keywords) objects)
 			       info)
 			      info))
       (?d . ,(org-export-data (org-latex--wrap-latex-math-block
 			       (org-element-parse-secondary-string
-				(or (plist-get info :description) "") objects)
+				(plist-get info :description) objects)
 			       info)
 			      info))
       (?c . ,(plist-get info :creator))
