@@ -1240,7 +1240,7 @@ INFO is a plist used as a communication channel."
 				(or (plist-get info :description) "") objects)
 			       info)
 			      info))
-      (?c . ,(if (plist-get info :with-creator) (plist-get info :creator) ""))
+      (?c . ,(plist-get info :creator))
       (?l . ,language)
       (?L . ,(capitalize language))
       (?D . ,(org-export-get-date info)))))

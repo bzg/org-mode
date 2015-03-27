@@ -1359,9 +1359,7 @@ original parsed data.  INFO is a plist holding export options."
 	     (format "<meta:creation-date>%s</meta:creation-date>\n"
 		     iso-date)))))
       (format "<meta:generator>%s</meta:generator>\n"
-	      (if (plist-get info :with-creator)
-		  (plist-get info :creator)
-		""))
+	      (plist-get info :creator))
       (format "<meta:keyword>%s</meta:keyword>\n" keywords)
       (format "<dc:subject>%s</dc:subject>\n" description)
       (format "<dc:title>%s</dc:title>\n" title)
