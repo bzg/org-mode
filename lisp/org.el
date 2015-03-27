@@ -23838,18 +23838,43 @@ the cursor is already beyond the end of the headline."
 This will call `backward-sentence' or `org-table-beginning-of-field',
 depending on context."
   (interactive "P")
-  (cond
-   ((org-at-table-p) (call-interactively 'org-table-beginning-of-field))
-   (t (call-interactively 'backward-sentence))))
+  (let* ((element (org-element-at-point))
+	 (contents-begin (org-element-property :contents-begin element))
+	 (table (org-element-lineage element '(table) t)))
+    (if (and table
+	     (> (point) contents-begin)
+	     (<= (point) (org-element-property :contents-end table)))
+	(call-interactively #'org-table-beginning-of-field)
+      (save-restriction
+	(when (and contents-begin
+		   (< (point-min) contents-begin)
+		   (> (point) contents-begin))
+	  (narrow-to-region contents-begin
+			    (org-element-property :contents-end element)))
+	(call-interactively #'backward-sentence)))))
 
 (defun org-forward-sentence (&optional arg)
   "Go to end of sentence, or end of table field.
 This will call `forward-sentence' or `org-table-end-of-field',
 depending on context."
   (interactive "P")
-  (cond
-   ((org-at-table-p) (call-interactively 'org-table-end-of-field))
-   (t (call-interactively 'forward-sentence))))
+  (let* ((element (org-element-at-point))
+	 (contents-end (org-element-property :contents-end element))
+	 (table (org-element-lineage element '(table) t)))
+    (if (and table
+	     (>= (point) (org-element-property :contents-begin table))
+	     (< (point) contents-end))
+	(call-interactively #'org-table-end-of-field)
+      (save-restriction
+	(when (and contents-end
+		   (> (point-max) contents-end)
+		   ;; Skip blank lines between elements.
+		   (< (org-element-property :end element)
+		      (save-excursion (goto-char contents-end)
+				      (skip-chars-forward " \r\t\n"))))
+	  (narrow-to-region (org-element-property :contents-begin element)
+			    contents-end))
+	(call-interactively #'forward-sentence)))))
 
 (define-key org-mode-map "\M-a" 'org-backward-sentence)
 (define-key org-mode-map "\M-e" 'org-forward-sentence)

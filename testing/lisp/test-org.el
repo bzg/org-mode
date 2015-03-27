@@ -1744,6 +1744,65 @@ drops support for Emacs 24.1 and 24.2."
        (org-end-of-line)
        (eobp)))))
 
+(ert-deftest test-org/forward-sentence ()
+  "Test `org-forward-sentence' specifications."
+  ;; At the end of a table cell, move to the end of the next one.
+  (should
+   (org-test-with-temp-text "| a<point> | b |"
+     (org-forward-sentence)
+     (looking-at " |$")))
+  ;; Elsewhere in a cell, move to its end.
+  (should
+   (org-test-with-temp-text "| a<point>c | b |"
+     (org-forward-sentence)
+     (looking-at " | b |$")))
+  ;; Otherwise, simply call `forward-sentence'.
+  (should
+   (org-test-with-temp-text "Sentence<point> 1.  Sentence 2."
+     (org-forward-sentence)
+     (looking-at "  Sentence 2.")))
+  (should
+   (org-test-with-temp-text "Sentence<point> 1.  Sentence 2."
+     (org-forward-sentence)
+     (org-forward-sentence)
+     (eobp)))
+  ;; At the end of an element, jump to the next one, without stopping
+  ;; on blank lines in-between.
+  (should
+   (org-test-with-temp-text "Paragraph 1.<point>\n\nParagraph 2."
+     (org-forward-sentence)
+     (eobp))))
+
+(ert-deftest test-org/backward-sentence ()
+  "Test `org-backward-sentence' specifications."
+  ;; At the beginning of a table cell, move to the beginning of the
+  ;; previous one.
+  (should
+   (org-test-with-temp-text "| a | <point>b |"
+     (org-backward-sentence)
+     (looking-at "a | b |$")))
+  ;; Elsewhere in a cell, move to its beginning.
+  (should
+   (org-test-with-temp-text "| a | b<point>c |"
+     (org-backward-sentence)
+     (looking-at "bc |$")))
+  ;; Otherwise, simply call `backward-sentence'.
+  (should
+   (org-test-with-temp-text "Sentence 1.  Sentence<point> 2."
+     (org-backward-sentence)
+     (looking-at "Sentence 2.")))
+  (should
+   (org-test-with-temp-text "Sentence 1.  Sentence<point> 2."
+     (org-backward-sentence)
+     (org-backward-sentence)
+     (bobp)))
+  ;; Make sure to hit the beginning of a sentence on the same line as
+  ;; an item.
+  (should
+   (org-test-with-temp-text "- Line 1\n  line <point>2."
+     (org-backward-sentence)
+     (looking-at "Line 1"))))
+
 (ert-deftest test-org/forward-paragraph ()
   "Test `org-forward-paragraph' specifications."
   ;; At end of buffer, return an error.
