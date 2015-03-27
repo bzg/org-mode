@@ -6458,7 +6458,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
       (catch 'match
 	;; "\_ "-family is left out on purpose.  Only the first one,
 	;; i.e., "\_ ", could be fontified anyway, and it would be
-	;; confusing when adding more underscores.
+	;; confusing when adding a second white space character.
 	(while (re-search-forward
 		"\\\\\\(there4\\|sup[123]\\|frac[13][24]\\|[a-zA-Z]+\\)\\($\\|{}\\|[^[:alpha:]\n]\\)"
 		limit t)
