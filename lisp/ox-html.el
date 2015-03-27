@@ -116,7 +116,6 @@
     (:html-link-up "HTML_LINK_UP" nil org-html-link-up)
     (:html-container "HTML_CONTAINER" nil org-html-container-element)
     (:html-mathjax "HTML_MATHJAX" nil "" space)
-    (:html-html5-fancy nil "html5-fancy" org-html-html5-fancy)
     (:html-link-use-abs-url nil "html-link-use-abs-url" org-html-link-use-abs-url)
     (:html-postamble nil "html-postamble" org-html-postamble)
     (:html-preamble nil "html-preamble" org-html-preamble)
