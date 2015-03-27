@@ -618,11 +618,9 @@ holding export options."
        (format "\\setkomavar{fromaddress}{%s}\n" from-address)))
    ;; Date.
    (format "\\date{%s}\n" (org-export-data (org-export-get-date info) info))
-   ;; Document start
-   "\\begin{document}\n\n"
-   ;; Subject and title
+   ;; Hyperref, document start, and subject and title.
    (let ((with-subject (plist-get info :with-subject)))
-     (when with-subject
+     (when (and with-subject (plist-get info :with-title))
        (concat
 	(unless (eq with-subject t)
 	  (format "\\KOMAoption{subject}{%s}\n"
@@ -639,10 +637,18 @@ holding export options."
 			    (org-string-nw-p
 			     (org-export-data (plist-get info :title) info))))
 	       (subject (if title-as-subject (or subject* title*) subject*))
-	       (title (if title-as-subject (and subject* title*) title*)))
+	       (title (if title-as-subject (and subject* title*) title*))
+	       (hyperref-template (plist-get info :latex-hyperref-template))
+	       (spec (append (list (cons ?t (or title subject "")))
+			     (org-latex--format-spec info))))
 	  (concat
-	   (and subject (format "\\setkomavar{subject}{%s}\n" subject))
-	   (and title (format "\\setkomavar{title}{%s}\n" title))
+	   ;; Hyperref.
+	   (format-spec hyperref-template spec)
+	   ;; Document start.
+	   "\\begin{document}\n\n"
+	   ;; Subject and title.
+	   (when subject (format "\\setkomavar{subject}{%s}\n" subject))
+	   (when title (format "\\setkomavar{title}{%s}\n" title))
 	   (when (or (org-string-nw-p title) (org-string-nw-p subject)) "\n"))))))
    ;; Letter start.
    (format "\\begin{letter}{%%\n%s}\n\n"
