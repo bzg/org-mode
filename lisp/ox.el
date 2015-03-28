@@ -5051,13 +5051,13 @@ Return a list of src-block elements with a caption."
      ;; http://ru.wikipedia.org/wiki/%D0%9A%D0%B0%D0%B2%D1%8B%D1%87%D0%BA%D0%B8#.D0.9A.D0.B0.D0.B2.D1.8B.D1.87.D0.BA.D0.B8.2C_.D0.B8.D1.81.D0.BF.D0.BE.D0.BB.D1.8C.D0.B7.D1.83.D0.B5.D0.BC.D1.8B.D0.B5_.D0.B2_.D1.80.D1.83.D1.81.D1.81.D0.BA.D0.BE.D0.BC_.D1.8F.D0.B7.D1.8B.D0.BA.D0.B5
      ;; http://www.artlebedev.ru/kovodstvo/sections/104/
      (opening-double-quote :utf-8 "«" :html "&laquo;" :latex "{}<<"
-    			   :texinfo "@guillemetleft{}")
+			   :texinfo "@guillemetleft{}")
      (closing-double-quote :utf-8 "»" :html "&raquo;" :latex ">>{}"
-    			   :texinfo "@guillemetright{}")
+			   :texinfo "@guillemetright{}")
      (opening-single-quote :utf-8 "„" :html "&bdquo;" :latex "\\glqq{}"
-    			   :texinfo "@quotedblbase{}")
+			   :texinfo "@quotedblbase{}")
      (closing-single-quote :utf-8 "“" :html "&ldquo;" :latex "\\grqq{}"
-    			   :texinfo "@quotedblleft{}")
+			   :texinfo "@quotedblleft{}")
      (apostrophe :utf-8 "’" :html: "&#39;"))
     ("sv"
      ;; based on https://sv.wikipedia.org/wiki/Citattecken
@@ -5082,28 +5082,77 @@ Valid encodings include `:utf-8', `:html', `:latex' and
 
 If no translation is found, the quote character is left as-is.")
 
-(defconst org-export-smart-quotes-regexps
-  (list
-   ;; Possible opening quote at beginning of string.
-   "\\`\\([\"']\\)\\(\\w\\|\\s.\\|\\s_\\|\\s(\\)"
-   ;; Possible closing quote at beginning of string.
-   "\\`\\([\"']\\)\\(\\s-\\|\\s)\\|\\s.\\)"
-   ;; Possible apostrophe at beginning of string.
-   "\\`\\('\\)\\S-"
-   ;; Opening single and double quotes.
-   "\\(?:\\s-\\|\\s(\\)\\([\"']\\)\\(?:\\w\\|\\s.\\|\\s_\\)"
-   ;; Closing single and double quotes.
-   "\\(?:\\w\\|\\s.\\|\\s_\\)\\([\"']\\)\\(?:\\s-\\|\\s)\\|\\s.\\)"
-   ;; Apostrophe.
-   "\\S-\\('\\)\\S-"
-   ;; Possible opening quote at end of string.
-   "\\(?:\\s-\\|\\s(\\)\\([\"']\\)\\'"
-   ;; Possible closing quote at end of string.
-   "\\(?:\\w\\|\\s.\\|\\s_\\)\\([\"']\\)\\'"
-   ;; Possible apostrophe at end of string.
-   "\\S-\\('\\)\\'")
-  "List of regexps matching a quote or an apostrophe.
-In every regexp, quote or apostrophe matched is put in group 1.")
+(defun org-export--smart-quote-status (s info)
+  "Return smart quote status at the beginning of string S.
+INFO is the current export state, as a plist."
+  (let* ((parent (org-element-property :parent s))
+	 (cache (or (plist-get info :smart-quote-cache)
+		    (let ((table (make-hash-table :test #'eq)))
+		      (plist-put info :smart-quote-cache table)
+		      table)))
+	 (value (gethash parent cache 'missing-data)))
+    (if (not (eq value 'missing-data)) (cdr (assq s value))
+      (let (level1-open level2-open full-status)
+	(org-element-map parent 'plain-text
+	  (lambda (text)
+	    (let ((start 0) current-status)
+	      (while (setq start (string-match "['\"]" text start))
+		(incf start)
+		(push
+		 (cond
+		  ((equal (match-string 0 text) "\"")
+		   (setf level1-open (not level1-open))
+		   (setf level2-open nil)
+		   (if level1-open 'opening-double-quote 'closing-double-quote))
+		  ;; Not already in a level 1 quote: this is an
+		  ;; apostrophe.
+		  ((not level1-open) 'apostrophe)
+		  ;; Apostrophe.
+		  ((org-string-match-p "\\S-'\\S-" text) 'apostrophe)
+		  ;; Apostrophe at the beginning of a string.  Check
+		  ;; white space at the end of the last object.
+		  ((and (org-string-match-p "\\`'\\S-" text)
+			(let ((p (org-export-get-previous-element text info)))
+			  (and p
+			       (if (stringp p)
+				   (not (org-string-match-p "[ \t]\\'" p))
+				 (memq (org-element-property :post-blank p)
+				       '(0 nil))))))
+		   'apostrophe)
+		  ;; Apostrophe at the end of a string.  Check white
+		  ;; space at the beginning of the next object, which
+		  ;; can only happen if that object is a string.
+		  ((and (org-string-match-p "\\S-'\\'" text)
+			(let ((n (org-export-get-next-element text info)))
+			  (and n
+			       (not (and (stringp n)
+					 (org-string-match-p "\\`[ \t]" n))))))
+		   'apostrophe)
+		  ;; Lonesome apostrophe.  Check white space around
+		  ;; both ends.
+		  ((and (equal text "'")
+			(let ((p (org-export-get-previous-element text info)))
+			  (and p
+			       (if (stringp p)
+				   (not (org-string-match-p "[ \t]\\'" p))
+				 (memq (org-element-property :post-blank p)
+				       '(0 nil)))
+			       (let ((n (org-export-get-next-element text info)))
+				 (and n
+				      (not (and (stringp n)
+						(org-string-match-p "\\`[ \t]"
+								    n))))))))
+		   'apostrophe)
+		  ;; Else, consider it as a level 2 quote.
+		  (t (setf level2-open (not level2-open))
+		     (if level2-open 'opening-single-quote
+		       'closing-single-quote)))
+		 current-status))
+	      (when current-status
+		(push (cons text (nreverse current-status)) full-status))))
+	  info nil org-element-recursive-objects)
+	(puthash parent full-status cache)
+	(cdr (assq s full-status))))))
 
 (defun org-export-activate-smart-quotes (s encoding info &optional original)
   "Replace regular quotes with \"smart\" quotes in string S.
@@ -5118,107 +5167,18 @@ process, a non-nil ORIGINAL optional argument will provide that
 original string.
 
 Return the new string."
-  (if (equal s "") ""
-    (let* ((prev (org-export-get-previous-element (or original s) info))
-	   ;; Try to be flexible when computing number of blanks
-	   ;; before object.  The previous object may be a string
-	   ;; introduced by the back-end and not completely parsed.
-	   (pre-blank (and prev
-			   (or (org-element-property :post-blank prev)
-			       ;; A string with missing `:post-blank'
-			       ;; property.
-			       (and (stringp prev)
-				    (string-match " *\\'" prev)
-				    (length (match-string 0 prev)))
-			       ;; Fallback value.
-			       0)))
-	   (next (org-export-get-next-element (or original s) info))
-	   (get-smart-quote
-	    (lambda (q type)
-	      ;; Return smart quote associated to a give quote Q, as
-	      ;; a string.  TYPE is a symbol among `open', `close' and
-	      ;; `apostrophe'.
-	      (let ((key (case type
-			   (apostrophe 'apostrophe)
-			   (open (if (equal "'" q) 'opening-single-quote
-				   'opening-double-quote))
-			   (otherwise (if (equal "'" q) 'closing-single-quote
-					'closing-double-quote)))))
-		(or (plist-get
-		     (cdr (assq key
-				(cdr (assoc (plist-get info :language)
-					    org-export-smart-quotes-alist))))
-		     encoding)
-		    q)))))
-      (if (or (equal "\"" s) (equal "'" s))
-	  ;; Only a quote: no regexp can match.  We have to check both
-	  ;; sides and decide what to do.
-	  (cond ((and (not prev) (not next)) s)
-		((not prev) (funcall get-smart-quote s 'open))
-		((and (not next) (zerop pre-blank))
-		 (funcall get-smart-quote s 'close))
-		((not next) s)
-		((zerop pre-blank) (funcall get-smart-quote s 'apostrophe))
-		(t (funcall get-smart-quote 'open)))
-	;; 1. Replace quote character at the beginning of S.
-	(cond
-	 ;; Apostrophe?
-	 ((and prev (zerop pre-blank)
-	       (string-match (nth 2 org-export-smart-quotes-regexps) s))
-	  (setq s (replace-match
-		   (funcall get-smart-quote (match-string 1 s) 'apostrophe)
-		   nil t s 1)))
-	 ;; Closing quote?
-	 ((and prev (zerop pre-blank)
-	       (string-match (nth 1 org-export-smart-quotes-regexps) s))
-	  (setq s (replace-match
-		   (funcall get-smart-quote (match-string 1 s) 'close)
-		   nil t s 1)))
-	 ;; Opening quote?
-	 ((and (or (not prev) (> pre-blank 0))
-	       (string-match (nth 0 org-export-smart-quotes-regexps) s))
-	  (setq s (replace-match
-		   (funcall get-smart-quote (match-string 1 s) 'open)
-		   nil t s 1))))
-	;; 2. Replace quotes in the middle of the string.
-	(setq s (replace-regexp-in-string
-		 ;; Opening quotes.
-		 (nth 3 org-export-smart-quotes-regexps)
-		 (lambda (text)
-		   (funcall get-smart-quote (match-string 1 text) 'open))
-		 s nil t 1))
-	(setq s (replace-regexp-in-string
-		 ;; Closing quotes.
-		 (nth 4 org-export-smart-quotes-regexps)
-		 (lambda (text)
-		   (funcall get-smart-quote (match-string 1 text) 'close))
-		 s nil t 1))
-	(setq s (replace-regexp-in-string
-		 ;; Apostrophes.
-		 (nth 5 org-export-smart-quotes-regexps)
-		 (lambda (text)
-		   (funcall get-smart-quote (match-string 1 text) 'apostrophe))
-		 s nil t 1))
-	;; 3. Replace quote character at the end of S.
-	(cond
-	 ;; Apostrophe?
-	 ((and next (string-match (nth 8 org-export-smart-quotes-regexps) s))
-	  (setq s (replace-match
-		   (funcall get-smart-quote (match-string 1 s) 'apostrophe)
-		   nil t s 1)))
-	 ;; Closing quote?
-	 ((and (not next)
-	       (string-match (nth 7 org-export-smart-quotes-regexps) s))
-	  (setq s (replace-match
-		   (funcall get-smart-quote (match-string 1 s) 'close)
-		   nil t s 1)))
-	 ;; Opening quote?
-	 ((and next (string-match (nth 6 org-export-smart-quotes-regexps) s))
-	  (setq s (replace-match
-		   (funcall get-smart-quote (match-string 1 s) 'open)
-		   nil t s 1))))
-	;; Return string with smart quotes.
-	s))))
+  (let ((quote-status
+	 (copy-sequence (org-export--smart-quote-status (or original s) info))))
+    (replace-regexp-in-string
+     "['\"]"
+     (lambda (match)
+       (or (plist-get
+	    (cdr (assq (pop quote-status)
+		       (cdr (assoc (plist-get info :language)
+				   org-export-smart-quotes-alist))))
+	    encoding)
+	   match))
+     s nil t)))
 
 ;;;; Topology
 ;;

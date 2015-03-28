@@ -2726,12 +2726,12 @@ Another text. (ref:text)
 
 (ert-deftest test-org-export/activate-smart-quotes ()
   "Test `org-export-activate-smart-quotes' specifications."
-  ;; Opening double quotes: standard test.
+  ;; Double quotes: standard test.
   (should
    (equal
-    '("some &ldquo;paragraph")
+    '("some &ldquo;quoted&rdquo; text")
     (let ((org-export-default-language "en"))
-      (org-test-with-parsed-data "some \"paragraph"
+      (org-test-with-parsed-data "some \"quoted\" text"
 	(org-element-map tree 'plain-text
 	  (lambda (s) (org-export-activate-smart-quotes s :html info))
 	  info)))))
@@ -2747,57 +2747,61 @@ Another text. (ref:text)
   ;; Opening quotes: after an object.
   (should
    (equal
-    '("&ldquo;begin")
+    '("&ldquo;quoted&rdquo; text")
     (let ((org-export-default-language "en"))
-      (org-test-with-parsed-data "=verb= \"begin"
-	(org-element-map tree 'plain-text
-	  (lambda (s) (org-export-activate-smart-quotes s :html info))
-	  info)))))
-  ;; Closing quotes: standard test.
-  (should
-   (equal
-    '("some&rdquo; paragraph")
-    (let ((org-export-default-language "en"))
-      (org-test-with-parsed-data "some\" paragraph"
+      (org-test-with-parsed-data "=verb= \"quoted\" text"
 	(org-element-map tree 'plain-text
 	  (lambda (s) (org-export-activate-smart-quotes s :html info))
 	  info)))))
   ;; Closing quotes: at the end of a paragraph.
   (should
    (equal
-    '("end&rdquo;")
+    '("Quoted &ldquo;text&rdquo;")
     (let ((org-export-default-language "en"))
-      (org-test-with-parsed-data "end\""
+      (org-test-with-parsed-data "Quoted \"text\""
 	(org-element-map tree 'plain-text
 	  (lambda (s) (org-export-activate-smart-quotes s :html info))
 	  info)))))
+  ;; Inner quotes: standard test.
+  (should
+   (equal '("« outer « inner » outer »")
+	  (let ((org-export-default-language "fr"))
+	    (org-test-with-parsed-data "\"outer 'inner' outer\""
+	      (org-element-map tree 'plain-text
+		(lambda (s) (org-export-activate-smart-quotes s :utf-8 info))
+		info)))))
   ;; Apostrophe: standard test.
   (should
-   (equal
-    '("It shouldn&rsquo;t fail")
-    (let ((org-export-default-language "en"))
-      (org-test-with-parsed-data "It shouldn't fail"
-	(org-element-map tree 'plain-text
-	  (lambda (s) (org-export-activate-smart-quotes s :html info))
-	  info)))))
+   (equal '("It « shouldn’t » fail")
+	  (let ((org-export-default-language "fr"))
+	    (org-test-with-parsed-data "It \"shouldn't\" fail"
+	      (org-element-map tree 'plain-text
+		(lambda (s) (org-export-activate-smart-quotes s :utf-8 info))
+		info)))))
+  (should
+   (equal '("It shouldn’t fail")
+	  (let ((org-export-default-language "fr"))
+	    (org-test-with-parsed-data "It shouldn't fail"
+	      (org-element-map tree 'plain-text
+		(lambda (s) (org-export-activate-smart-quotes s :utf-8 info))
+		info)))))
   ;; Apostrophe: before an object.
   (should
    (equal
-    '("a&rsquo;")
-    (let ((org-export-default-language "en"))
-      (org-test-with-parsed-data "a'=b="
+    '("« a’" " »")
+    (let ((org-export-default-language "fr"))
+      (org-test-with-parsed-data "\"a'=b=\""
 	(org-element-map tree 'plain-text
-	  (lambda (s) (org-export-activate-smart-quotes s :html info))
+	  (lambda (s) (org-export-activate-smart-quotes s :utf-8 info))
 	  info)))))
   ;; Apostrophe: after an object.
   (should
-   (equal
-    '("&rsquo;s")
-    (let ((org-export-default-language "en"))
-      (org-test-with-parsed-data "=code='s"
-	(org-element-map tree 'plain-text
-	  (lambda (s) (org-export-activate-smart-quotes s :html info))
-	  info)))))
+   (equal '("« " "’s »")
+	  (let ((org-export-default-language "fr"))
+	    (org-test-with-parsed-data "\"=code='s\""
+	      (org-element-map tree 'plain-text
+		(lambda (s) (org-export-activate-smart-quotes s :utf-8 info))
+		info)))))
   ;; Special case: isolated quotes.
   (should
    (equal '("&ldquo;" "&rdquo;")
