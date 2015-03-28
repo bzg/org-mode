@@ -1477,7 +1477,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 		   (and backend (org-export-get-all-options backend))
 		   org-export-options-alist))
 	 (regexp (format "^[ \t]*#\\+%s:"
-			 (regexp-opt (nconc (delq nil (mapcar 'cadr options))
+			 (regexp-opt (nconc (delq nil (mapcar #'cadr options))
 					    org-export-special-keywords))))
 	 (find-properties
 	  (lambda (keyword)
@@ -1546,7 +1546,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 					      (org-trim val))))
 				    (split `(,@(plist-get plist property)
 					     ,@(org-split-string val)))
-				    ('t val)
+				    ((t) val)
 				    (otherwise
 				     (if (not (plist-member plist property)) val
 				       (plist-get plist property))))))))))))))
