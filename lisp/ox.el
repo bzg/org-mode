@@ -1479,7 +1479,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 		   (and backend (org-export-get-all-options backend))
 		   org-export-options-alist))
 	 (regexp (format "^[ \t]*#\\+%s:"
-			 (regexp-opt (nconc (delq nil (mapcar #'cadr options))
+			 (regexp-opt (nconc (delq nil (mapcar 'cadr options))
 					    org-export-special-keywords))))
 	 (find-properties
 	  (lambda (keyword)
@@ -1496,67 +1496,62 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 	    (org-with-wide-buffer
 	     (goto-char (point-min))
 	     (while (re-search-forward regexp nil t)
-	       (if (org-in-commented-heading-p) (outline-next-heading)
-		 (let ((element (org-element-at-point)))
-		   (when (eq (org-element-type element) 'keyword)
-		     (let ((key (org-element-property :key element))
-			   (val (org-element-property :value element)))
-		       (cond
-			;; Options in `org-export-special-keywords'.
-			((equal key "SETUPFILE")
-			 (let ((file (expand-file-name
-				      (org-remove-double-quotes
-				       (org-trim val)))))
-			   ;; Avoid circular dependencies.
-			   (unless (member file files)
-			     (with-temp-buffer
-			       (insert (org-file-contents file 'noerror))
-			       (let ((org-inhibit-startup t)) (org-mode))
-			       (setq plist
-				     (funcall get-options
-					      (cons file files) plist))))))
-			((equal key "OPTIONS")
-			 (setq plist
-			       (org-combine-plists
-				plist
-				(org-export--parse-option-keyword
-				 val backend))))
-			((equal key "FILETAGS")
-			 (setq plist
-			       (org-combine-plists
-				plist
-				(list :filetags
-				      (org-uniquify
-				       (append (org-split-string val ":")
-					       (plist-get plist :filetags)))))))
-			(t
-			 ;; Options in `org-export-options-alist'.
-			 (dolist (property (funcall find-properties key))
-			   (let ((behaviour (nth 4 (assq property options))))
-			     (setq plist
-				   (plist-put
-				    plist property
-				    ;; Handle value depending on
-				    ;; specified BEHAVIOUR.
-				    (case behaviour
-				      (space
-				       (if (not (plist-get plist property))
-					   (org-trim val)
-					 (concat (plist-get plist property)
-						 " "
-						 (org-trim val))))
-				      (newline
-				       (org-trim
-					(concat (plist-get plist property)
-						"\n"
-						(org-trim val))))
-				      (split `(,@(plist-get plist property)
-					       ,@(org-split-string val)))
-				      ((t) val)
-				      (otherwise
-				       (if (plist-member plist property)
-					   (plist-get plist property)
-					 val))))))))))))))
+	       (let ((element (org-element-at-point)))
+		 (when (eq (org-element-type element) 'keyword)
+		   (let ((key (org-element-property :key element))
+			 (val (org-element-property :value element)))
+		     (cond
+		      ;; Options in `org-export-special-keywords'.
+		      ((equal key "SETUPFILE")
+		       (let ((file (expand-file-name
+				    (org-remove-double-quotes (org-trim val)))))
+			 ;; Avoid circular dependencies.
+			 (unless (member file files)
+			   (with-temp-buffer
+			     (insert (org-file-contents file 'noerror))
+			     (let ((org-inhibit-startup t)) (org-mode))
+			     (setq plist (funcall get-options
+						  (cons file files) plist))))))
+		      ((equal key "OPTIONS")
+		       (setq plist
+			     (org-combine-plists
+			      plist
+			      (org-export--parse-option-keyword val backend))))
+		      ((equal key "FILETAGS")
+		       (setq plist
+			     (org-combine-plists
+			      plist
+			      (list :filetags
+				    (org-uniquify
+				     (append (org-split-string val ":")
+					     (plist-get plist :filetags)))))))
+		      (t
+		       ;; Options in `org-export-options-alist'.
+		       (dolist (property (funcall find-properties key))
+			 (let ((behaviour (nth 4 (assq property options))))
+			   (setq plist
+				 (plist-put
+				  plist property
+				  ;; Handle value depending on specified
+				  ;; BEHAVIOR.
+				  (case behaviour
+				    (space
+				     (if (not (plist-get plist property))
+					 (org-trim val)
+				       (concat (plist-get plist property)
+					       " "
+					       (org-trim val))))
+				    (newline
+				     (org-trim
+				      (concat (plist-get plist property)
+					      "\n"
+					      (org-trim val))))
+				    (split `(,@(plist-get plist property)
+					     ,@(org-split-string val)))
+				    ('t val)
+				    (otherwise
+				     (if (not (plist-member plist property)) val
+				       (plist-get plist property))))))))))))))
 	     ;; Return final value.
 	     plist))))
     ;; Read options in the current buffer.
@@ -2670,6 +2665,16 @@ The function assumes BUFFER's major mode is `org-mode'."
 	      (overlays-in (point-min) (point-max)))
 	     ov-set)))))
 
+(defun org-export--delete-commented-subtrees ()
+  "Delete commented subtrees or inlinetasks in the buffer."
+  (org-with-wide-buffer
+   (goto-char (point-min))
+   (let ((regexp (concat org-outline-regexp-bol org-comment-string)))
+     (while (re-search-forward regexp nil t)
+       (delete-region
+	(line-beginning-position)
+	(org-element-property :end (org-element-at-point)))))))
+
 (defun org-export--prune-tree (data info)
   "Prune non exportable elements from DATA.
 DATA is the parse tree to traverse.  INFO is the plist holding
@@ -2860,6 +2865,7 @@ Return code as a string."
 	 (run-hook-with-args 'org-export-before-processing-hook
 			     (org-export-backend-name backend))
 	 (org-export-expand-include-keyword)
+	 (org-export--delete-commented-subtrees)
 	 ;; Update macro templates since #+INCLUDE keywords might have
 	 ;; added some new ones.
 	 (org-macro-initialize-templates)
