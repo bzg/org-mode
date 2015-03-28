@@ -9894,7 +9894,9 @@ Likewise, regions surrounded by @samp{#+BEGIN_COMMENT}
 Finally, a @samp{COMMENT} keyword at the beginning of an entry, but after any
 other keyword or priority cookie, comments out the entire subtree.  In this
 case, the subtree is not exported and no code block within it is executed
-either.  The command below helps changing the comment status of a headline.
+either@footnotes{For a less drastic behavior, consider using a select tag
+(@pxref{Export settings}) instead.}.  The command below helps changing the
+comment status of a headline.
 
 @table @kbd
 @kindex C-c ;
