@@ -2665,16 +2665,29 @@ The function assumes BUFFER's major mode is `org-mode'."
 	      (overlays-in (point-min) (point-max)))
 	     ov-set)))))
 
-(defun org-export--delete-commented-subtrees ()
-  "Delete commented subtrees or inlinetasks in the buffer."
+(defun org-export--delete-comments ()
+  "Delete commented areas in the buffer.
+Commented areas are comments, comment blocks, commented trees and
+inlinetasks.  Trailing blank lines after a comment or a comment
+block are preserved.  Narrowing, if any, is ignored."
   (org-with-wide-buffer
    (goto-char (point-min))
-   (let ((regexp (concat org-outline-regexp-bol ".*" org-comment-string)))
+   (let ((regexp (concat org-outline-regexp-bol ".*" org-comment-string
+			 "\\|"
+			 "^[ \t]*#\\(?: \\|$\\|\\+begin_comment\\)"))
+	 (case-fold-search t))
      (while (re-search-forward regexp nil t)
        (let ((e (org-element-at-point)))
-	 (when (org-element-property :commentedp e)
-	   (delete-region (org-element-property :begin e)
-			  (org-element-property :end e))))))))
+	 (case (org-element-type e)
+	   ((comment comment-block)
+	    (delete-region (org-element-property :begin e)
+			   (progn (goto-char (org-element-property :end e))
+				  (skip-chars-backward " \r\t\n")
+				  (line-beginning-position 2))))
+	   ((headline inlinetask)
+	    (when (org-element-property :commentedp e)
+	      (delete-region (org-element-property :begin e)
+			     (org-element-property :end e))))))))))
 
 (defun org-export--prune-tree (data info)
   "Prune non exportable elements from DATA.
@@ -2866,7 +2879,7 @@ Return code as a string."
 	 (run-hook-with-args 'org-export-before-processing-hook
 			     (org-export-backend-name backend))
 	 (org-export-expand-include-keyword)
-	 (org-export--delete-commented-subtrees)
+	 (org-export--delete-comments)
 	 ;; Update macro templates since #+INCLUDE keywords might have
 	 ;; added some new ones.
 	 (org-macro-initialize-templates)
