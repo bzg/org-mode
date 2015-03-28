@@ -2669,11 +2669,12 @@ The function assumes BUFFER's major mode is `org-mode'."
   "Delete commented subtrees or inlinetasks in the buffer."
   (org-with-wide-buffer
    (goto-char (point-min))
-   (let ((regexp (concat org-outline-regexp-bol org-comment-string)))
+   (let ((regexp (concat org-outline-regexp-bol ".*" org-comment-string)))
      (while (re-search-forward regexp nil t)
-       (delete-region
-	(line-beginning-position)
-	(org-element-property :end (org-element-at-point)))))))
+       (let ((e (org-element-at-point)))
+	 (when (org-element-property :commentedp e)
+	   (delete-region (org-element-property :begin e)
+			  (org-element-property :end e))))))))
 
 (defun org-export--prune-tree (data info)
   "Prune non exportable elements from DATA.
