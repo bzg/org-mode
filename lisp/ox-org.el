@@ -57,8 +57,6 @@ setting of `org-html-htmlize-output-type' is 'css."
     (center-block . org-org-identity)
     (clock . org-org-identity)
     (code . org-org-identity)
-    (comment . (lambda (&rest args) ""))
-    (comment-block . (lambda (&rest args) ""))
     (diary-sexp . org-org-identity)
     (drawer . org-org-identity)
     (dynamic-block . org-org-identity)

@@ -43,8 +43,6 @@
     (center-block . org-latex-center-block)
     (clock . org-latex-clock)
     (code . org-latex-code)
-    (comment . (lambda (&rest args) ""))
-    (comment-block . (lambda (&rest args) ""))
     (drawer . org-latex-drawer)
     (dynamic-block . org-latex-dynamic-block)
     (entity . org-latex-entity)

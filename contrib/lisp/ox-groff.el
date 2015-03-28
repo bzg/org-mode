@@ -50,8 +50,6 @@
     (center-block . org-groff-center-block)
     (clock . org-groff-clock)
     (code . org-groff-code)
-    (comment . (lambda (&rest args) ""))
-    (comment-block . (lambda (&rest args) ""))
     (drawer . org-groff-drawer)
     (dynamic-block . org-groff-dynamic-block)
     (entity . org-groff-entity)

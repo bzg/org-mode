@@ -49,8 +49,6 @@
     (center-block . org-ascii-center-block)
     (clock . org-ascii-clock)
     (code . org-ascii-code)
-    (comment . (lambda (&rest args) ""))
-    (comment-block . (lambda (&rest args) ""))
     (drawer . org-ascii-drawer)
     (dynamic-block . org-ascii-dynamic-block)
     (entity . org-ascii-entity)

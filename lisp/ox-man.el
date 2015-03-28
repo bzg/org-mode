@@ -55,8 +55,6 @@
     (center-block . org-man-center-block)
     (clock . org-man-clock)
     (code . org-man-code)
-    (comment . (lambda (&rest args) ""))
-    (comment-block . (lambda (&rest args) ""))
     (drawer . org-man-drawer)
     (dynamic-block . org-man-dynamic-block)
     (entity . org-man-entity)
