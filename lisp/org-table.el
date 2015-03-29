@@ -1037,9 +1037,10 @@ Before doing so, re-align the table if necessary."
       (goto-char (match-end 0))))
 
 (defun org-table-beginning-of-field (&optional n)
-  "Move to the end of the current table field.
-If already at or after the end, move to the end of the next table field.
-With numeric argument N, move N-1 fields forward first."
+  "Move to the beginning of the current table field.
+If already at or before the beginning, move to the beginning of the
+previous field.
+With numeric argument N, move N-1 fields backward first."
   (interactive "p")
   (let ((pos (point)))
     (while (> n 1)
@@ -1052,10 +1053,9 @@ With numeric argument N, move N-1 fields forward first."
     (if (>= (point) pos) (org-table-beginning-of-field 2))))
 
 (defun org-table-end-of-field (&optional n)
-  "Move to the beginning of the current table field.
-If already at or before the beginning, move to the beginning of the
-previous field.
-With numeric argument N, move N-1 fields backward first."
+  "Move to the end of the current table field.
+If already at or after the end, move to the end of the next table field.
+With numeric argument N, move N-1 fields forward first."
   (interactive "p")
   (let ((pos (point)))
     (while (> n 1)
