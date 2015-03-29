@@ -153,11 +153,15 @@ variable, and communication channel under `info'."
       (org-export--get-inbuffer-options))
     '(:title ("Some title with spaces"))))
   ;; Test `newline' behaviour.
-  (should
-   (equal
-    (org-test-with-temp-text "#+DESCRIPTION: With\n#+DESCRIPTION: two lines"
-      (org-export--get-inbuffer-options))
-    '(:description "With\ntwo lines")))
+  (let (org-export--registered-backends)
+    (org-export-define-backend 'test nil
+			       :options-alist
+			       '((:description "DESCRIPTION" nil nil newline)))
+    (should
+     (equal
+      (org-test-with-temp-text "#+DESCRIPTION: With\n#+DESCRIPTION: two lines"
+	(org-export--get-inbuffer-options 'test))
+      '(:description "With\ntwo lines"))))
   ;; Test `split' behaviour.
   (should
    (equal
@@ -173,13 +177,12 @@ variable, and communication channel under `info'."
 #+SELECT_TAGS: a
 #+TITLE: a
 #+SETUPFILE: \"%s/examples/setupfile.org\"
-#+DESCRIPTION: l3
 #+LANGUAGE: fr
 #+SELECT_TAGS: c
 #+TITLE: c"
 		org-test-dir)
       (org-export--get-inbuffer-options))
-    '(:description "l1\nl2\nl3":language "fr" :select-tags ("a" "b" "c")
+    '(:language "fr" :select-tags ("a" "b" "c")
 		   :title ("a b c"))))
   ;; More than one property can refer to the same buffer keyword.
   (should
