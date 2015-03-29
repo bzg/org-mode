@@ -8514,6 +8514,11 @@ useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
 			(setq folded (outline-invisible-p)))
 	(ignore-errors (org-forward-heading-same-level (1- n) t))
 	(org-end-of-subtree t t)))
+    ;; Include the end of an inlinetask
+    (when (and (featurep 'org-inlinetask)
+	       (looking-at-p (concat (org-inlinetask-outline-regexp)
+				     "END[ \t]*$")))
+      (end-of-line))
     (setq end (point))
     (goto-char beg0)
     (when (> end beg)
