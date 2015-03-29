@@ -136,8 +136,7 @@ CONTENTS is its contents, as a string or nil.  INFO is ignored."
 CONTENTS is nil.  INFO is ignored."
   (let ((key (org-element-property :key keyword)))
     (unless (member key
-		    '("AUTHOR" "CREATOR" "DATE" "DESCRIPTION" "EMAIL" "KEYWORDS"
-		      "OPTIONS" "TITLE"))
+		    '("AUTHOR" "CREATOR" "DATE" "EMAIL" "OPTIONS" "TITLE"))
       (org-element-keyword-interpreter keyword nil))))
 
 (defun org-org-link (link contents info)
@@ -179,10 +178,6 @@ as a communication channel."
    (and (plist-get info :with-creator)
 	(org-string-nw-p (plist-get info :creator))
 	(format "#+CREATOR: %s\n" (plist-get info :creator)))
-   (and (org-string-nw-p (plist-get info :keywords))
-	(format "#+KEYWORDS: %s\n" (plist-get info :keywords)))
-   (and (org-string-nw-p (plist-get info :description))
-	(format "#+DESCRIPTION: %s\n" (plist-get info :description)))
    contents))
 
 (defun org-org-section (section contents info)
