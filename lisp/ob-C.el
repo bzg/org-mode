@@ -194,7 +194,6 @@ it's header arguments."
 		  nil)))
     (when (stringp includes)
       (setq includes (split-string includes)))
-    (setq includes (append includes '("<string.h>" "<stdio.h>" "<stdlib.h>")))
     (when (stringp defines)
       (let ((y nil)
 	    (result (list t)))

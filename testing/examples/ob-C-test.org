@@ -129,7 +129,7 @@
   | sunday    |    4 |
 
 #+source: inhomogeneous_table
-#+begin_src cpp :var tinomogen=tinomogen :results silent
+#+begin_src cpp :var tinomogen=tinomogen :results silent :includes <string.h> <stdio.h>
 int main()
 {
   int i, j;
