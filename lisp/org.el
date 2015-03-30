@@ -6254,7 +6254,7 @@ takes into consideration inlinetasks."
 
 (defvar org-font-lock-keywords nil)
 
-(defsubst org-re-property (property &optional literal allow-null)
+(defsubst org-re-property (property &optional literal allow-null value)
   "Return a regexp matching a PROPERTY line.
 
 When optional argument LITERAL is non-nil, do not quote PROPERTY.
@@ -6262,14 +6262,22 @@ This is useful when PROPERTY is a regexp.  When ALLOW-NULL is
 non-nil, match properties even without a value.
 
 Match group 3 is set to the value when it exists.  If there is no
-value and ALLOW-NULL is non-nil, it is set to the empty string."
+value and ALLOW-NULL is non-nil, it is set to the empty string.
+
+With optional argument VALUE, match only property lines with
+that value; in this case, ALLOW-NULL is ignored.  VALUE is quoted
+unless LITERAL is non-nil."
   (concat
    "^\\(?4:[ \t]*\\)"
    (format "\\(?1::\\(?2:%s\\):\\)"
 	   (if literal property (regexp-quote property)))
-   (if allow-null
-       "\\(?:\\(?3:$\\)\\|[ \t]+\\(?3:.*?\\)\\)\\(?5:[ \t]*\\)$"
-     "[ \t]+\\(?3:[^ \r\t\n]+.*?\\)\\(?5:[ \t]*\\)$")))
+   (cond (value
+	  (format "[ \t]+\\(?3:%s\\)\\(?5:[ \t]*\\)$"
+		  (if literal value (regexp-quote value))))
+	 (allow-null
+	  "\\(?:\\(?3:$\\)\\|[ \t]+\\(?3:.*?\\)\\)\\(?5:[ \t]*\\)$")
+	 (t
+	  "[ \t]+\\(?3:[^ \r\t\n]+.*?\\)\\(?5:[ \t]*\\)$"))))
 
 (defconst org-property-re
   (org-re-property "\\S-+" 'literal t)
@@ -16323,7 +16331,7 @@ part of the buffer."
   (save-excursion
     (goto-char (point-min))
     (let ((case-fold-search t)
-	  (re (org-re-property property nil (not value))))
+	  (re (org-re-property property nil (not value) value)))
       (catch 'exit
 	(while (re-search-forward re nil t)
 	  (when (if value (equal value (org-entry-get (point) property nil t))
