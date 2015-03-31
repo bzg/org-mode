@@ -9541,33 +9541,40 @@ The refresh happens only for the current tree (not subtree)."
 (defun org-refresh-category-properties ()
   "Refresh category text properties in the buffer."
   (let ((case-fold-search t)
-	(inhibit-read-only t)
-	(def-cat (cond
-		  ((null org-category)
-		   (if buffer-file-name
-		       (file-name-sans-extension
-			(file-name-nondirectory buffer-file-name))
-		     "???"))
-		  ((symbolp org-category) (symbol-name org-category))
-		  (t org-category)))
-	beg end cat pos optionp)
+	(inhibit-read-only t))
     (org-with-silent-modifications
-     (save-excursion
-       (save-restriction
-	 (widen)
-	 (goto-char (point-min))
-	 (put-text-property (point) (point-max) 'org-category def-cat)
-	 (while (re-search-forward
-		 "^[ \t]*\\(\\(?:#\\+\\|:\\)CATEGORY:\\)\\(.*\\)" nil t)
-	   (setq pos (match-end 0)
-		 optionp (equal (char-after (match-beginning 0)) ?#)
-		 cat (org-trim (match-string 2)))
-	   (if optionp
-	       (setq beg (point-at-bol) end (point-max))
-	     (org-back-to-heading t)
-	     (setq beg (point) end (org-end-of-subtree t t)))
-	   (put-text-property beg end 'org-category cat)
-	   (goto-char pos)))))))
+     (org-with-wide-buffer
+      ;; Set buffer-wide category.  Search last #+CATEGORY keyword.
+      ;; This is the default category for the buffer.  If none is
+      ;; found, fall-back to `org-category' or buffer file name.
+      (put-text-property
+       (point-min) (point-max)
+       'org-category
+       (catch 'buffer-category
+	 (goto-char (point-max))
+	 (while (re-search-backward "^[ \t]*#\\+CATEGORY:" (point-min) t)
+	   (let ((element (org-element-at-point)))
+	     (when (eq (org-element-type element) 'keyword)
+	       (throw 'buffer-category
+		      (org-element-property :value element)))))
+	 (cond ((null org-category)
+		(if buffer-file-name
+		    (file-name-sans-extension
+		     (file-name-nondirectory buffer-file-name))
+		  "???"))
+	       ((symbolp org-category) (symbol-name org-category))
+	       (t org-category))))
+      ;; Set sub-tree specific categories.
+      (goto-char (point-min))
+      (let ((regexp (org-re-property "CATEGORY")))
+	(while (re-search-forward regexp nil t)
+	  (let ((value (org-match-string-no-properties 3)))
+	    (when (org-at-property-p)
+	      (put-text-property
+	       (save-excursion (org-back-to-heading t) (point))
+	       (org-end-of-subtree t t)
+	       'org-category
+	       value)))))))))
 
 (defun org-refresh-stats-properties ()
   "Refresh stats text properties in the buffer."
