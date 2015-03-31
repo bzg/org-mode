@@ -2763,13 +2763,7 @@ Text.
    (= 31
       (org-test-with-temp-text
 	  "* H1\n:PROPERTIES:\n:A: 1\n:END:\n* H2\n:PROPERTIES:\n:A: nil\n:END:"
-	(org-find-property "A" "nil"))))
-  ;; Optional argument is matched against real value, including PROP+
-  ;; syntax.
-  (should
-   (= 1
-      (org-test-with-temp-text "* H1\n:PROPERTIES:\n:A: 1\n:A+: 2\n:END:"
-	(org-find-property "A" "1 2")))))
+	(org-find-property "A" "nil")))))
 
 (ert-deftest test-org/entry-delete ()
   "Test `org-entry-delete' specifications."
