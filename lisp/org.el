@@ -16341,7 +16341,7 @@ part of the buffer."
 	  (re (org-re-property property nil (not value) value)))
       (catch 'exit
 	(while (re-search-forward re nil t)
-	  (when (if value (equal value (org-entry-get (point) property nil t))
+	  (when (if value (org-at-property-p)
 		  (org-entry-get (point) property nil t))
 	    (throw 'exit (progn (org-back-to-heading t) (point)))))))))
 
