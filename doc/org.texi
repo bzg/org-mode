@@ -16649,9 +16649,8 @@ all subsequent lines until the next @samp{#+ARCHIVE} line, or the end
 of the file.  The first such line also applies to any entries before it.
 The corresponding variable is @code{org-archive-location}.
 @item #+CATEGORY:
-This line sets the category for the agenda file.  The category applies
-for all subsequent lines until the next @samp{#+CATEGORY} line, or the
-end of the file.  The first such line also applies to any entries before it.
+This line sets the category for the agenda file.  The category applies to the
+whole document.
 @item #+COLUMNS: %25ITEM ...
 @cindex property, COLUMNS
 Set the default format for columns view.  This format applies when
