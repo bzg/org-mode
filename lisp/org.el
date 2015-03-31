@@ -9523,20 +9523,20 @@ the value of the drawer property."
 (defun org-refresh-property (tprop p)
   "Refresh the buffer text property TPROP from the drawer property P.
 The refresh happens only for the current tree (not subtree)."
-  (save-excursion
-    (org-back-to-heading t)
-    ;; tprop is a text property symbol
-    (if (symbolp tprop)
-	(put-text-property
-	 (point) (or (outline-next-heading) (point-max)) tprop p)
-      ;; tprop is an alist with (properties . function) elements
-      (mapc (lambda(al)
-	      (save-excursion
-		(put-text-property
-		 (point-at-bol) (or (outline-next-heading) (point-max))
-		 (car al)
-		 (funcall (cdr al) p))))
-	    tprop))))
+  (unless (org-before-first-heading-p)
+    (save-excursion
+      (org-back-to-heading t)
+      (if (symbolp tprop)
+	  ;; TPROP is a text property symbol
+	  (put-text-property
+	   (point) (or (outline-next-heading) (point-max)) tprop p)
+	;; TPROP is an alist with (properties . function) elements
+	(dolist (al tprop)
+	  (save-excursion
+	    (put-text-property
+	     (line-beginning-position) (or (outline-next-heading) (point-max))
+	     (car al)
+	     (funcall (cdr al) p))))))))
 
 (defun org-refresh-category-properties ()
   "Refresh category text properties in the buffer."
