@@ -162,6 +162,7 @@
     (:html-use-infojs nil nil org-html-use-infojs)
     (:html-use-unicode-chars nil nil org-html-use-unicode-chars)
     (:html-validation-link nil nil org-html-validation-link)
+    (:html-viewport nil nil org-html-viewport)
     (:html-inline-images nil nil org-html-inline-images)
     (:html-table-attributes nil nil org-html-table-default-attributes)
     (:html-table-row-tags nil nil org-html-table-row-tags)
@@ -1403,6 +1404,53 @@ or for publication projects using the :html-head-extra property."
 ;;;###autoload
 (put 'org-html-head-extra 'safe-local-variable 'stringp)
 
+;;;; Template :: Viewport
+
+(defcustom org-html-viewport '((width "device-width")
+			       (initial-scale "1")
+			       (minimum-scale "")
+			       (maximum-scale "")
+			       (user-scalable ""))
+  "Viewport options for mobile-optimized sites.
+
+The following values are recognized
+
+width          Size of the viewport.
+initial-scale  Zoom level when the page is first loaded.
+minimum-scale  Minimum allowed zoom level.
+maximum-scale  Maximum allowed zoom level.
+user-scalable  Whether zoom can be changed.
+
+The viewport meta tag is inserted if this variable is non-nil.
+
+See the following site for a reference:
+https://developer.mozilla.org/en-US/docs/Mozilla/Mobile/Viewport_meta_tag"
+  :group 'org-export-html
+  :version "25.1"
+  :package-version '(Org . "8.3")
+  :type '(list :greedy t
+	       (list :tag "Width of viewport"
+		     (const :format "             " width)
+		     (choice (const :tag "unset" "")
+			     (string)))
+	       (list :tag "Initial scale"
+		     (const :format "             " initial-scale)
+		     (choice (const :tag "unset" "")
+			     (string)))
+	       (list :tag "Minimum scale/zoom"
+		     (const :format "             " minimum-scale)
+		     (choice (const :tag "unset" "")
+			     (string)))
+	       (list :tag "Maximum scale/zoom"
+		     (const :format "             " maximum-scale)
+		     (choice (const :tag "unset" "")
+			     (string)))
+	       (list :tag "User scalable/zoomable"
+		     (const :format "             " user-scalable)
+		     (choice (const :tag "unset" "")
+			     (const "true")
+			     (const "false")))))
+
 ;;;; Todos
 
 (defcustom org-html-todo-kwd-class-prefix ""
@@ -1681,7 +1729,20 @@ INFO is a plist used as a communication channel."
 			       (format " name=\"keywords\" content=\"%s\""
 				       (funcall protect-string keywords))
 			       info)
-	   "\n")))))
+	   "\n"))
+     (let ((viewport-options
+	    (remove-if-not (lambda (cell) (org-string-nw-p (cadr cell)))
+			   (plist-get info :html-viewport))))
+       (and viewport-options
+	    (concat
+	     (org-html-close-tag
+	      "meta"
+	      (format " name=\"viewport\" content=\"%s\""
+		      (mapconcat
+		       (lambda (elm) (format "%s=%s" (car elm) (cadr elm)))
+		       viewport ", "))
+	      info)
+	     "\n"))))))
 
 (defun org-html--build-head (info)
   "Return information for the <head>..</head> of the HTML output.

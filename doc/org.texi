@@ -14260,6 +14260,7 @@ however, override everything.
 @item @code{:html-use-infojs}                 @tab @code{org-html-use-infojs}
 @item @code{:html-use-unicode-chars}          @tab @code{org-html-use-unicode-chars}
 @item @code{:html-validation-link}            @tab @code{org-html-validation-link}
+@item @code{:html-viewport}                   @tab @code{org-html-viewport}
 @item @code{:html-xml-declaration}            @tab @code{org-html-xml-declaration}
 @end multitable
 

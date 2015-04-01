@@ -353,6 +353,9 @@ However, parsed =KEYWORD= is automatically associated to an
 =:EXPORT_KEYWORD:= property, which can be used to override the keyword
 value during a subtree export.  Moreover, macros are expanded in such
 keywords and properties.
+*** Viewport support in html export
+Viewport for mobile-optimized website is now automatically inserted
+when exporting to html.  See ~org-html-viewport~ for details.
 ** Miscellaneous
 *** Strip all meta data from ITEM special property
 ITEM special property does not contain TODO, priority or tags anymore.
