@@ -11005,7 +11005,17 @@ The @LaTeX{} class @emph{Beamer} allows production of high quality
 presentations using @LaTeX{} and pdf processing.  Org mode has special
 support for turning an Org mode file or tree into a Beamer presentation.
 
-@subheading Beamer export commands
+@menu
+* Beamer specific export settings:: Export settings for Beamer export.
+* Beamer export commands:: How to export Beamer documents.
+* Sectioning Frames and Blocks in Beamer:: Blocks and sections in Beamer.
+* Beamer specific syntax:: Syntax specific to Beamer.
+* Editing support:: Helper functions for Org Beamer export.
+* A Beamer Example:: An complete Beamer example.
+@end menu
+
+@node Beamer export commands
+@subsection Beamer export commands
 
 @table @kbd
 @orgcmd{C-c C-e l b,org-beamer-export-to-latex}
@@ -11020,7 +11030,8 @@ Export as @LaTeX{} and then process to PDF.
 Export as @LaTeX{} and then process to PDF, then open the resulting PDF file.
 @end table
 
-@subheading Sectioning, Frames and Blocks
+@node Sectioning Frames and Blocks in Beamer
+@subsection Sectioning, Frames and Blocks in Beamer
 
 Any tree with not-too-deep level nesting should in principle be exportable as
 a Beamer presentation.  Headlines fall into three categories: sectioning
@@ -11111,6 +11122,8 @@ such as the inclusion of short titles.}.
 #+BEAMER_THEME: Rochester [height=20pt]
 #+BEAMER_COLOR_THEME: spruce
 @end example
+@node Beamer specific syntax
+@subsection Beamer specific syntax
 
 Table of contents generated from @code{toc:t} @code{OPTION} keyword are
 wrapped within a @code{frame} environment.  Those generated from a @code{TOC}
@@ -11157,7 +11170,8 @@ the last one inserts optional arguments in current list environment.
 - item 2
 @end example
 
-@subheading Editing support
+@node Editing support
+@subsection Editing support
 
 You can turn on a special minor mode @code{org-beamer-mode} for faster
 editing with:
@@ -11172,7 +11186,8 @@ In @code{org-beamer-mode}, this key offers fast selection of a Beamer
 environment or the @code{BEAMER_COL} property.
 @end table
 
-@subheading An example
+@node A Beamer Example
+@subsection A Beamer example
 
 Here is a simple example Org document that is intended for Beamer export.
 
