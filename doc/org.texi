@@ -10991,8 +10991,8 @@ presentations using @LaTeX{} and pdf processing.  Org mode has special
 support for turning an Org mode file or tree into a Beamer presentation.
 
 @menu
-* Beamer specific export settings:: Export settings for Beamer export.
 * Beamer export commands:: How to export Beamer documents.
+* Beamer specific export settings:: Export settings for Beamer export.
 * Sectioning Frames and Blocks in Beamer:: Blocks and sections in Beamer.
 * Beamer specific syntax:: Syntax specific to Beamer.
 * Editing support:: Helper functions for Org Beamer export.
@@ -11013,6 +11013,56 @@ Export to a temporary buffer.  Do not create a file.
 Export as @LaTeX{} and then process to PDF.
 @item C-c C-e l O
 Export as @LaTeX{} and then process to PDF, then open the resulting PDF file.
+@end table
+
+@node Beamer specific export settings
+@subsection Beamer specific export settings
+
+Beamer export introduces a number of keywords, similar to the general options
+settings described in @ref{Export settings}.
+
+@table @samp
+@item BEAMER_THEME
+@cindex #+BEAMER_THEME
+@vindex org-beamer-theme
+The Beamer theme (@code{org-beamer-theme}).  Options can be specified via
+brackets, for example:
+@smallexample
+#+BEAMER_THEME: Rochester [height=20pt]
+@end smallexample
+
+@item BEAMER_FONT_THEME
+@cindex #+BEAMER_FONT_THEME
+The Beamer font theme.
+
+@item BEAMER_INNER_THEME
+@cindex #+BEAMER_INNER_THEME
+The Beamer inner theme.
+
+@item BEAMER_OUTER_THEME
+@cindex #+BEAMER_OUTER_THEME
+The Beamer outer theme.
+
+@item BEAMER_HEADER
+@cindex #+BEAMER_HEADER
+Arbitrary lines inserted into the preamble, just before the @samp{hyperref}
+settings.
+
+@item DESCRIPTION
+@cindex #+DESCRIPTION (Beamer)
+The document description.  By default these are inserted as metadata using
+@samp{hyperref}.  Document metadata can be configured via
+@code{org-latex-hyperref-template}.  Description can also be typeset as part
+of the front matter via @code{org-latex-title-command}.  You can use several
+@code{#+DESCRIPTION} keywords if the description is is long.
+
+@item KEYWORDS
+@cindex #+KEYWORDS (Beamer)
+The keywords defining the contents of the document.  By default these are
+inserted as metadata using @samp{hyperref}.  Document metadata can be
+configured via @code{org-latex-hyperref-template}.  Description can also be
+typeset as part of the front matter via @code{org-latex-title-command}.  You
+can use several @code{#+KEYWORDS} if the description is is long.
 @end table
 
 @node Sectioning Frames and Blocks in Beamer
@@ -11082,33 +11132,12 @@ Although, it can also be explicitly created, with a special @code{columns}
 value for @code{BEAMER_ENV} property (if it needs to be set up with some
 specific options, for example).
 
-@subheading Beamer specific syntax
-
-Beamer back-end is an extension of @LaTeX{} back-end.  As such, all @LaTeX{}
-specific syntax (e.g., @samp{#+LATEX:} or @samp{#+ATTR_LATEX:}) is
-recognized.  See @ref{@LaTeX{} and PDF export} for more information.
-
-@cindex #+BEAMER_THEME
-@cindex #+BEAMER_COLOR_THEME
-@cindex #+BEAMER_FONT_THEME
-@cindex #+BEAMER_INNER_THEME
-@cindex #+BEAMER_OUTER_THEME
-Beamer export introduces a number of keywords to insert code in the
-document's header.  Four control appearance of the presentation:
-@code{#+BEAMER_THEME}, @code{#+BEAMER_COLOR_THEME},
-@code{#+BEAMER_FONT_THEME}, @code{#+BEAMER_INNER_THEME} and
-@code{#+BEAMER_OUTER_THEME}.  All of them accept optional arguments within
-square brackets.  The last one, @code{#+BEAMER_HEADER}, is more generic and
-allows you to append any line of code in the header@footnote{Lines are
-appended at the end of the preamble, allowing for any final customization
-such as the inclusion of short titles.}.
-
-@example
-#+BEAMER_THEME: Rochester [height=20pt]
-#+BEAMER_COLOR_THEME: spruce
-@end example
 @node Beamer specific syntax
 @subsection Beamer specific syntax
+
+The Beamer back-end is an extension of the @LaTeX{} back-end.  As such, all @LaTeX{}
+specific syntax (e.g., @samp{#+LATEX:} or @samp{#+ATTR_LATEX:}) is
+recognized.  See @ref{@LaTeX{} and PDF export} for more information.
 
 Table of contents generated from @code{toc:t} @code{OPTION} keyword are
 wrapped within a @code{frame} environment.  Those generated from a @code{TOC}
@@ -11220,6 +11249,7 @@ language, but with additional support for tables.
 
 @menu
 * HTML Export commands::        How to invoke HTML export
+* HTML Specific export settings:: Export settings for HTML export.
 * HTML doctypes::               Org can export to various (X)HTML flavors
 * HTML preamble and postamble::  How to insert a preamble and a postamble
 * Quoting HTML tags::           Using direct HTML in Org mode
@@ -11231,6 +11261,7 @@ language, but with additional support for tables.
 * CSS support::                 Changing the appearance of the output
 * JavaScript support::          Info and Folding in a web browser
 @end menu
+
 
 @node HTML Export commands
 @subsection HTML export commands
@@ -11259,6 +11290,71 @@ Export to a temporary buffer.  Do not create a file.
 
 @c @noindent
 @c creates two levels of headings and does the rest as items.
+
+@node HTML Specific export settings
+@subsection HTML Specific export settings
+HTML export introduces a number of keywords, similar to the general options
+settings described in @ref{Export settings}.
+
+@table @samp
+@item DESCRIPTION
+@cindex #+DESCRIPTION (HTML)
+The document description.  This description is inserted as a HTML meta tag.
+You can use several such keywords if the list is long.
+
+@item HTML_DOCTYPE
+@cindex #+HTML_DOCTYPE
+@vindex org-html-doctype
+The document type, e.g. HTML5, (@code{org-html-doctype}).
+
+@item HTML_CONTAINER
+@cindex #+HTML_CONTAINER
+@vindex org-html-container-element
+The container, e.g. @samp{div}, used to wrap sections and elements
+(@code{org-html-container-element}).
+
+@item HTML_LINK_HOME
+@cindex #+HTML_LINK_HOME
+@vindex org-html-link-home
+The home link URL (@code{org-html-link-home}).
+
+@item HTML_LINK_UP
+@cindex #+HTML_LINK_UP
+@vindex org-html-link-up
+The up link URL (@code{org-html-link-up}).
+
+@item HTML_MATHJAX
+@cindex #+HTML_MATHJAX
+@vindex org-html-mathjax-options
+Options for the MathJax (@code{org-html-mathjax-options}).  MathJax is used
+to typeset @LaTeX{} math in HTML documents.  @ref{Math formatting in HTML
+export} contains an example.
+
+@item HTML_HEAD
+@cindex #+HTML_HEAD
+@vindex org-html-head
+Arbitrary lines appended to the end of the head of the document
+(@code{org-html-head}).
+
+@item HTML_HEAD_EXTRA
+@cindex #+HTML_HEAD_EXTRA
+@vindex org-html-head-extra
+Arbitrary lines appended to the end of the header of the document
+(@code{org-html-head-extra}).
+
+@item KEYWORDS
+@cindex #+KEYWORDS (HTML)
+The keywords defining the contents of the document.  This description is
+inserted as a HTML meta tag.  You can use several such keywords if the list
+is long.
+
+@item LATEX_HEADER
+@cindex #+LATEX_HEADER (HTML)
+Arbitrary lines appended to the preamble used when transcoding @LaTeX{}
+fragments to images.  See @ref{Math formatting in HTML export} for details.
+@end table
+
+These keywords are treated in details in the following sections.
 
 @node HTML doctypes
 @subsection HTML doctypes
@@ -11756,6 +11852,7 @@ description.
 
 @menu
 * @LaTeX{} export commands::    How to export to LaTeX and PDF
+* @LaTeX{} specific export settings::  Export settings for @LaTeX{}
 * Header and sectioning::       Setting up the export file structure
 * Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
 * @LaTeX{} specific attributes::  Controlling @LaTeX{} output
@@ -11776,6 +11873,57 @@ Export as @LaTeX{} and then process to PDF.
 @item C-c C-e l o
 Export as @LaTeX{} and then process to PDF, then open the resulting PDF file.
 @end table
+
+@node @LaTeX{} specific export settings
+@subsection @LaTeX{} specific export settings
+The @LaTeX{} exporter introduces a number of keywords, similar to the general
+options settings described in @ref{Export settings}.
+
+@table @samp
+@item DESCRIPTION
+@cindex #+DESCRIPTION (@LaTeX{})
+The document description.  By default these are inserted as metadata using
+@samp{hyperref}.  Document metadata can be configured via
+@code{org-latex-hyperref-template}.  Description can also be typeset as part
+of the front matter via @code{org-latex-title-command}.  You can use several
+@code{#+DESCRIPTION} keywords if the description is is long.
+
+@item LATEX_CLASS
+@cindex #+LATEX_CLASS
+@vindex org-latex-default-class
+@vindex org-latex-classes
+The predefined preamble and headline level mapping to use
+(@code{org-latex-default-class}).  Must be an element in
+@code{org-latex-classes}.
+
+@item LATEX_CLASS_OPTIONS
+@cindex #+LATEX_CLASS_OPTIONS
+Options given to the @LaTeX{} document class.
+
+@item LATEX_HEADER
+@cindex #+LATEX_HEADER
+@vindex org-latex-classes
+Arbitrary lines added to the preamble of the document, before the
+@samp{hyperref} settings.  The location can be controlled via
+@code{org-latex-classes}.
+
+@item LATEX_HEADER_EXTRA
+@cindex #+LATEX_HEADER_EXTRA
+@vindex org-latex-classes
+Arbitrary lines added to the preamble of the document, before the
+@samp{hyperref} settings.  The location can be controlled via
+@code{org-latex-classes}.
+
+@item KEYWORDS
+@cindex #+KEYWORDS (@LaTeX{})
+The keywords defining the contents of the document.  By default these are
+inserted as metadata using @samp{hyperref}.  Document metadata can be
+configured via @code{org-latex-hyperref-template}.  Description can also be
+typeset as part of the front matter via @code{org-latex-title-command}.  You
+can use several @code{#+KEYWORDS} if the description is is long.
+@end table
+
+These keywords are treated in details in the following sections.
 
 @node Header and sectioning
 @subsection Header and sectioning structure
@@ -12188,6 +12336,7 @@ are compatible with LibreOffice 3.4.
 @menu
 * Pre-requisites for ODT export::  What packages ODT exporter relies on
 * ODT export commands::         How to invoke ODT export
+* ODT specific export settings:: Export settings for ODT
 * Extending ODT export::        How to produce @samp{doc}, @samp{pdf} files
 * Applying custom styles::      How to apply custom styles to the output
 * Links in ODT export::         How links will be interpreted and formatted
@@ -12241,6 +12390,29 @@ Export as an OpenDocument Text file and open the resulting file.
 If @code{org-odt-preferred-output-format} is specified, open the converted
 file instead.  @xref{x-export-to-other-formats, , Automatically exporting to
 other formats}.
+@end table
+
+@node ODT specific export settings
+@subsection ODT specific export settings
+The ODT exporter introduces a number of keywords, similar to the general
+options settings described in @ref{Export settings}.
+
+@table @samp
+@item DESCRIPTION
+@cindex #+DESCRIPTION (ODT)
+The document description.  These are inserted as document metadata.  You can
+use several such keywords if the list is long.
+
+@item KEYWORDS
+@cindex #+KEYWORDS (ODT)
+The keywords defining the contents of the document.  These are inserted as
+document metadata.  You can use several such keywords if the list is long.
+
+@item ODT_STYLES_FILE
+@cindex ODT_STYLES_FILE
+@vindex org-odt-styles-file
+The style file of the document (@code{org-odt-styles-file}).  See
+@ref{Applying custom styles} for details.
 @end table
 
 @node Extending ODT export
@@ -13120,6 +13292,7 @@ an Info file.
 
 @menu
 * Texinfo export commands::     How to invoke Texinfo export
+* Texinfo specific export settings:: Export settings for Texinfo
 * Document preamble::           File header, title and copyright page
 * Headings and sectioning structure:: Building document structure
 * Indices::                     Creating indices
@@ -13142,6 +13315,58 @@ Export to Texinfo and then process to an Info file@footnote{By setting
 @code{org-texinfo-info-process}, it is possible to generate other formats,
 including DocBook.}.
 @end table
+
+@node Texinfo specific export settings
+@subsection Texinfo specific export settings
+The Texinfo exporter introduces a number of keywords, similar to the general
+options settings described in @ref{Export settings}.
+
+@table @samp
+
+@item SUBTITLE
+@cindex #+SUBTITLE
+The document subtitle.
+
+@item SUBAUTHOR
+@cindex #+SUBAUTHOR
+The document subauthor.
+
+@item TEXINFO_FILENAME
+@cindex #+TEXINFO_FILENAME
+The Texinfo filename.
+
+@item TEXINFO_CLASS
+@cindex #+TEXINFO_CLASS
+@vindex org-texinfo-default-class
+The class of the document (@code{org-texinfo-default-class}).  This must be a
+member of @code{org-texinfo-classes}.
+
+@item TEXINFO_HEADER
+@cindex #+TEXINFO_HEADER
+Arbitrary lines inserted at the end of the preamble.
+
+@item TEXINFO_POST_HEADER
+@cindex #+TEXINFO_POST_HEADER
+Arbitrary lines inserted at the end of the preamble.
+
+@item TEXINFO_DIR_CATEGORY
+@cindex #+TEXINFO_DIR_CATEGORY
+The directory category of the document.
+
+@item TEXINFO_DIR_TITLE
+@cindex #+TEXINFO_DIR_TITLE
+The directory title of the document.
+
+@item TEXINFO_DIR_DESC
+@cindex #+TEXINFO_DIR_DESC
+The directory description of the document.
+
+@item TEXINFO_PRINTED_TITLE
+@cindex #+TEXINFO_PRINTED_TITLE
+The printed title of the document.
+@end table
+
+These keywords are treated in details in the following sections.
 
 @node Document preamble
 @subsection Document preamble
