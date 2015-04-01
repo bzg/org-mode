@@ -10679,25 +10679,10 @@ A date or a time-stamp@footnote{The variable
 @code{org-export-date-timestamp-format} defines how this time-stamp will be
 exported.}.
 
-@item DESCRIPTION
-@cindex #+DESCRIPTION
-The document description.  Back-ends handle it as they see fit (e.g., for the
-XHTML meta tag), if at all.  The keyword is supported by @LaTeX{} back-ends,
-HTML back-ends, ASCII back-ends, the Texinfo back-end, and the ODT back-end.  You
-can use several such keywords for long descriptions.
-
 @item EMAIL
 @cindex #+EMAIL
 @vindex user-mail-address
 The email address (@code{user-mail-address}).
-
-@item KEYWORDS
-@cindex #+KEYWORDS
-The keywords defining the contents of the document.  Back-ends handle it as
-they see fit (e.g., for the XHTML meta tag), if at all.  The keyword is
-supported by @LaTeX{} back-ends, HTML back-ends, ASCII back-ends, the Texinfo
-back-end, and the ODT back-end.  You can use several such keywords if the list
-is long.
 
 @item LANGUAGE
 @cindex #+LANGUAGE
