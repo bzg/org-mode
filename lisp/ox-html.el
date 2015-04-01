@@ -1109,6 +1109,7 @@ MathJax CDN Terms of Service.
 
     http://www.mathjax.org/mathjax-cdn-terms-of-service.html"
   :group 'org-export-html
+  :package-version '(Org . "8.3")
   :type '(list :greedy t
 	       (list :tag "path   (the path from where to load MathJax.js)"
 		     (const :format "       " path) (string))
