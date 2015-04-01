@@ -12356,10 +12356,7 @@ output.  Check the availability of this program before proceeding further.
 
 @node ODT export commands
 @subsection ODT export commands
-
-@subsubheading Exporting to ODT
 @anchor{x-export-to-odt}
-
 @cindex region, active
 @cindex active region
 @cindex transient-mark-mode
