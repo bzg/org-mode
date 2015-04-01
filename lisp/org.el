@@ -9541,7 +9541,15 @@ The refresh happens only for the current tree (not subtree)."
 (defun org-refresh-category-properties ()
   "Refresh category text properties in the buffer."
   (let ((case-fold-search t)
-	(inhibit-read-only t))
+	(inhibit-read-only t)
+	(default-category
+	  (cond ((null org-category)
+		 (if buffer-file-name
+		     (file-name-sans-extension
+		      (file-name-nondirectory buffer-file-name))
+		   "???"))
+		((symbolp org-category) (symbol-name org-category))
+		(t org-category))))
     (org-with-silent-modifications
      (org-with-wide-buffer
       ;; Set buffer-wide category.  Search last #+CATEGORY keyword.
@@ -9557,13 +9565,7 @@ The refresh happens only for the current tree (not subtree)."
 	     (when (eq (org-element-type element) 'keyword)
 	       (throw 'buffer-category
 		      (org-element-property :value element)))))
-	 (cond ((null org-category)
-		(if buffer-file-name
-		    (file-name-sans-extension
-		     (file-name-nondirectory buffer-file-name))
-		  "???"))
-	       ((symbolp org-category) (symbol-name org-category))
-	       (t org-category))))
+	 default-category))
       ;; Set sub-tree specific categories.
       (goto-char (point-min))
       (let ((regexp (org-re-property "CATEGORY")))
