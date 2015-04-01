@@ -11191,7 +11191,7 @@ environment or the @code{BEAMER_COL} property.
 
 Here is a simple example Org document that is intended for Beamer export.
 
-@smallexample
+@example
 #+TITLE: Example Presentation
 #+AUTHOR: Carsten Dominik
 #+OPTIONS: H:2 toc:t num:t
@@ -11223,7 +11223,7 @@ Here is a simple example Org document that is intended for Beamer export.
 ** Frame 2 (where we will not use columns)
 *** Request
     Please test this stuff!
-@end smallexample
+@end example
 
 @node HTML export
 @section HTML export
