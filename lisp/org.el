@@ -22752,7 +22752,7 @@ ELEMENT."
      (cond
       (contentsp
        (case type
-	 (footnote-definition 0)
+	 ((diary-sexp footnote-definition) 0)
 	 ((headline inlinetask nil)
 	  (if (not org-adapt-indentation) 0
 	    (let ((level (org-current-level)))
@@ -22771,7 +22771,7 @@ ELEMENT."
        (if (save-excursion (beginning-of-line) (looking-at "[ \t]*$"))
 	   (org--get-expected-indentation element t)
 	 0))
-      ((eq type 'footnote-definition) 0)
+      ((memq type '(diary-sexp footnote-definition)) 0)
       ;; First paragraph of a footnote definition or an item.
       ;; Indent like parent.
       ((< (line-beginning-position) start)
@@ -22858,8 +22858,8 @@ Alignment is done according to `org-property-format', which see."
 
 Indentation is done according to the following rules:
 
-  - Footnote definitions, headlines and inline tasks have to
-    start at column 0.
+  - Footnote definitions, diary sexps, headlines and inline tasks
+    have to start at column 0.
 
   - On the very first line of an element, consider, in order, the
     next rules until one matches:

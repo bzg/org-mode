@@ -578,16 +578,21 @@
 
 (ert-deftest test-org/indent-line ()
   "Test `org-indent-line' specifications."
-  ;; Do not indent footnote definitions or headlines.
+  ;; Do not indent diary sexps, footnote definitions or headlines.
   (should
    (zerop
-    (org-test-with-temp-text "* H"
+    (org-test-with-temp-text "%%(org-calendar-holiday)"
       (org-indent-line)
       (org-get-indentation))))
   (should
    (zerop
     (org-test-with-temp-text "[fn:1] fn"
       (let ((org-adapt-indentation t)) (org-indent-line))
+      (org-get-indentation))))
+  (should
+   (zerop
+    (org-test-with-temp-text "* H"
+      (org-indent-line)
       (org-get-indentation))))
   ;; Do not indent before first headline.
   (should
