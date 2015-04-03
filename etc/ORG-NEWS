@@ -48,6 +48,20 @@ them.
                            (min (1+ (match-end 0)) end)))
                   (unless (bolp) (insert "\n"))))))))))))
 #+END_SRC 
+*** =#+CATEGORY= keywords no longer apply partially to document
+It was possible to use several such keywords and have them apply to
+the text below until the next one, but strongly deprecated since Org
+5.14 (2008).
+
+=#+CATEGORY= keywords are now global to the document.  You can use
+node properties to set category for a subtree, e.g.,
+
+#+BEGIN_SRC org
+,* Headline
+   :PROPERTIES:
+   :CATEGORY: some category
+   :END:
+#+END_SRC
 *** New variable to control visibility when revealing a location
 ~org-show-following-heading~, ~org-show-siblings~,
 ~org-show-entry-below~ and ~org-show-hierarchy-above~ no longer exist.
