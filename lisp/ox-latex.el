@@ -2032,7 +2032,7 @@ INFO is a plist holding contextual information.  See
 	 (imagep (org-export-inline-image-p
 		  link (plist-get info :latex-inline-image-rules)))
 	 (path (cond
-		((member type '("http" "https" "ftp" "mailto"))
+		((member type '("http" "https" "ftp" "mailto" "doi"))
 		 (concat type ":" raw-path))
 		((and (string= type "file") (file-name-absolute-p raw-path))
 		 (concat "file:" raw-path))
