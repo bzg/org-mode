@@ -1496,15 +1496,22 @@ drops support for Emacs 24.1 and 24.2."
 
 ;;;; Open at point
 
+(ert-deftest test-org/open-at-point-in-keyword ()
+  "Does `org-open-at-point' open link in a keyword line?"
+  (should
+   (org-test-with-temp-text
+       "#+KEYWORD: <point>[[info:emacs#Top]]"
+     (org-open-at-point) t)))
+
 (ert-deftest test-org/open-at-point-in-property ()
   "Does `org-open-at-point' open link in property drawer?"
   (should
    (org-test-with-temp-text
-    "* Headline
+       "* Headline
 :PROPERTIES:
 :URL: <point>[[info:emacs#Top]]
 :END:"
-    (org-open-at-point) t)))
+     (org-open-at-point) t)))
 
 (ert-deftest test-org/open-at-point-in-comment ()
   "Does `org-open-at-point' open link in a commented line?"

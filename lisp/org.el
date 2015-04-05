@@ -10709,15 +10709,16 @@ link in a property drawer line."
 	      (org-element-lineage
 	       (org-element-context)
 	       '(comment comment-block footnote-definition footnote-reference
-			 headline inlinetask link node-property timestamp)
+			 headline inlinetask keyword link node-property
+			 timestamp)
 	       t))
 	     (type (org-element-type context))
 	     (value (org-element-property :value context)))
 	(cond
 	 ((not context) (user-error "No link found"))
-	 ;; Exception: open timestamps and links in properties drawers
-	 ;; and comments.
-	 ((memq type '(comment comment-block node-property))
+	 ;; Exception: open timestamps and links in properties
+	 ;; drawers, keywords and comments.
+	 ((memq type '(comment comment-block keyword node-property))
 	  (cond ((org-in-regexp org-any-link-re)
 		 (org-open-link-from-string (match-string-no-properties 0)))
 		((or (org-at-timestamp-p t) (org-at-date-range-p t))
