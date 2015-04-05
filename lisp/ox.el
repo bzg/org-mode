@@ -2850,6 +2850,11 @@ Return code as a string."
 				      (and visible-only 'visible-only)
 				      (and body-only 'body-only))))
 		    (org-export--get-buffer-attributes)))
+	     (parsed-keywords
+	      (delq nil
+		    (mapcar (lambda (o) (and (eq (nth 4 o) 'parse) (nth 1 o)))
+			    (append (org-export-get-all-options backend)
+				    org-export-options-alist))))
 	     tree)
 	;; Update communication channel and get parse tree.  Buffer
 	;; isn't parsed directly.  Instead, a temporary copy is
@@ -2864,7 +2869,7 @@ Return code as a string."
 	 ;; Update macro templates since #+INCLUDE keywords might have
 	 ;; added some new ones.
 	 (org-macro-initialize-templates)
-	 (org-macro-replace-all org-macro-templates)
+	 (org-macro-replace-all org-macro-templates nil parsed-keywords)
 	 (org-export-execute-babel-code)
 	 ;; Update radio targets since keyword inclusion might have
 	 ;; added some more.
@@ -2908,7 +2913,8 @@ Return code as a string."
 	   (cons "email" (org-element-interpret-data (plist-get info :email)))
 	   (cons "title" (org-element-interpret-data (plist-get info :title)))
 	   (cons "results" "$1"))
-	  'finalize)
+	  'finalize
+	  parsed-keywords)
 	 ;; Parse buffer.
 	 (setq tree (org-element-parse-buffer nil visible-only))
 	 ;; Prune tree from non-exported elements and transform

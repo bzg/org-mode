@@ -159,7 +159,7 @@ default value.  Return nil if no template was found."
         ;; Return string.
         (format "%s" (or value ""))))))
 
-(defun org-macro-replace-all (templates &optional finalize)
+(defun org-macro-replace-all (templates &optional finalize keywords)
   "Replace all macros in current buffer by their expansion.
 
 TEMPLATES is an alist of templates used for expansion.  See
@@ -169,35 +169,53 @@ If optional arg FINALIZE is non-nil, raise an error if a macro is
 found in the buffer with no definition in TEMPLATES."
   (save-excursion
     (goto-char (point-min))
-    (let (record)
+    (let ((properties-regexp
+	   (format "\\`EXPORT_%s\\+?\\'" (regexp-opt keywords)))
+	  record)
       (while (re-search-forward "{{{[-A-Za-z0-9_]" nil t)
-	(let ((object (org-element-context)))
-	  (when (eq (org-element-type object) 'macro)
-	    (let* ((value (org-macro-expand object templates))
-		   (begin (org-element-property :begin object))
+	(let* ((datum (save-match-data (org-element-context)))
+	       (type (org-element-type datum))
+	       (macro
+		(cond
+		 ((eq type 'macro) datum)
+		 ;; In parsed keywords and associated node properties,
+		 ;; force macro recognition.
+		 ((or (and (eq type 'keyword)
+			   (member (org-element-property :key datum) keywords))
+		      (and (eq type 'node-property)
+			   (org-string-match-p
+			    properties-regexp
+			    (org-element-property :key datum))))
+		  (save-restriction
+		    (narrow-to-region (match-beginning 0) (line-end-position))
+		    (org-element-map (org-element-parse-buffer) 'macro
+		      #'identity nil t))))))
+	  (when macro
+	    (let* ((value (org-macro-expand macro templates))
+		   (begin (org-element-property :begin macro))
 		   (signature (list begin
-				    object
-				    (org-element-property :args object))))
+				    macro
+				    (org-element-property :args macro))))
 	      ;; Avoid circular dependencies by checking if the same
 	      ;; macro with the same arguments is expanded at the same
 	      ;; position twice.
-	      (if (member signature record)
-		  (error "Circular macro expansion: %s"
-			 (org-element-property :key object))
-		(cond (value
-		       (push signature record)
-		       (delete-region
-			begin
-			;; Preserve white spaces after the macro.
-			(progn (goto-char (org-element-property :end object))
-			       (skip-chars-backward " \t")
-			       (point)))
-		       ;; Leave point before replacement in case of recursive
-		       ;; expansions.
-		       (save-excursion (insert value)))
-		      (finalize
-		       (error "Undefined Org macro: %s; aborting"
-			      (org-element-property :key object))))))))))))
+	      (cond ((member signature record)
+		     (error "Circular macro expansion: %s"
+			    (org-element-property :key macro)))
+		    (value
+		     (push signature record)
+		     (delete-region
+		      begin
+		      ;; Preserve white spaces after the macro.
+		      (progn (goto-char (org-element-property :end macro))
+			     (skip-chars-backward " \t")
+			     (point)))
+		     ;; Leave point before replacement in case of
+		     ;; recursive expansions.
+		     (save-excursion (insert value)))
+		    (finalize
+		     (error "Undefined Org macro: %s; aborting"
+			    (org-element-property :key macro)))))))))))
 
 (defun org-macro-escape-arguments (&rest args)
   "Build macro's arguments string from ARGS.

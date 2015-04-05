@@ -1091,6 +1091,25 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
    (equal "#+MACRO: macro1 value\nvalue\n"
 	  (org-test-with-temp-text "#+MACRO: macro1 value\n{{{macro1}}}"
 	    (org-export-as (org-test-default-backend)))))
+  ;; Allow macro in parsed keywords and associated properties.
+  ;; Standard macro expansion.
+  (should
+   (string-match
+    "#\\+K: value"
+    (let ((backend (org-export-create-backend
+		    :parent 'org
+		    :options '((:k "K" nil nil parse)))))
+      (org-test-with-temp-text "#+MACRO: macro value\n#+K: {{{macro}}}"
+	(org-export-as backend)))))
+  (should
+   (string-match
+    ":EXPORT_K: v"
+    (let ((backend (org-export-create-backend
+		    :parent 'org
+		    :options '((:k "K" nil nil parse)))))
+      (org-test-with-temp-text
+	  "#+MACRO: m v\n* H\n:PROPERTIES:\n:EXPORT_K: {{{m}}}\n:END:"
+	(org-export-as backend nil nil nil '(:with-properties t))))))
   ;; Expand specific macros.
   (should
    (equal "me 2012-03-29 me@here Title\n"
