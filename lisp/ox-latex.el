@@ -108,8 +108,8 @@
     (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
     (:latex-header "LATEX_HEADER" nil nil newline)
     (:latex-header-extra "LATEX_HEADER_EXTRA" nil nil newline)
-    (:description "DESCRIPTION" nil nil newline)
-    (:keywords "KEYWORDS" nil nil space)
+    (:description "DESCRIPTION" nil nil parse)
+    (:keywords "KEYWORDS" nil nil parse)
     ;; Other variables.
     (:latex-active-timestamp-format nil nil org-latex-active-timestamp-format)
     (:latex-caption-above nil nil org-latex-caption-above)
@@ -1220,25 +1220,16 @@ INFO is a plist used as a communication channel."
 (defun org-latex--format-spec (info)
   "Create a format-spec for document meta-data.
 INFO is a plist used as a communication channel."
-  (let ((objects '(bold code entity export-snippet inline-babel-call
-			inline-src-block italic latex-fragment
-			latex-math-block link macro strike-through
-			subscript superscript timestamp underline
-			verbatim))
-	(language (let ((lang (plist-get info :language)))
+  (let ((language (let ((lang (plist-get info :language)))
 		    (or (cdr (assoc lang org-latex-babel-language-alist))
 			lang))))
     `((?a . ,(org-export-data (plist-get info :author) info))
-      (?t . ,(org-export-data (plist-get info :title)  info))
+      (?t . ,(org-export-data (plist-get info :title) info))
       (?k . ,(org-export-data (org-latex--wrap-latex-math-block
-			       (org-element-parse-secondary-string
-				(plist-get info :keywords) objects)
-			       info)
+			       (plist-get info :keywords) info)
 			      info))
       (?d . ,(org-export-data (org-latex--wrap-latex-math-block
-			       (org-element-parse-secondary-string
-				(plist-get info :description) objects)
-			       info)
+			       (plist-get info :description) info)
 			      info))
       (?c . ,(plist-get info :creator))
       (?l . ,language)
