@@ -5451,13 +5451,20 @@ changes."
       (let ((up before)
 	    (robust-flag t))
 	(while up
-	  (if (and (memq (org-element-type up)
-			 '(center-block drawer dynamic-block
-					quote-block special-block))
-		   (let ((cbeg (org-element-property :contents-begin up)))
-		     (and cbeg
-			  (<= cbeg beg)
-			  (> (org-element-property :contents-end up) end))))
+	  (if (let ((type (org-element-type up)))
+		(and (or (memq type '(center-block dynamic-block quote-block
+						   special-block))
+			 ;; Drawers named "PROPERTIES" are probably
+			 ;; a properties drawer being edited.  Force
+			 ;; parsing to check if editing is over.
+			 (and (eq type 'drawer)
+			      (not (string=
+				    (org-element-property :drawer-name up)
+				    "PROPERTIES"))))
+		     (let ((cbeg (org-element-property :contents-begin up)))
+		       (and cbeg
+			    (<= cbeg beg)
+			    (> (org-element-property :contents-end up) end)))))
 	      ;; UP is a robust greater element containing changes.
 	      ;; We only need to extend its ending boundaries.
 	      (org-element--cache-shift-positions

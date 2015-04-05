@@ -3488,6 +3488,15 @@ Text
 	   (search-forward "# ")
 	   (delete-char -1)
 	   (search-backward "Para1")
+	   (org-element-type (org-element-at-point))))))
+  ;; Corner case: watch out drawers named "PROPERTIES" as they are
+  ;; fragile, unlike to other drawers.
+  (should
+   (eq 'node-property
+       (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:A<point>\n:END:"
+	 (let ((org-element-use-cache t))
+	   (org-element-at-point)
+	   (insert "+:")
 	   (org-element-type (org-element-at-point)))))))
 
 
