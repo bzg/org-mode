@@ -319,11 +319,6 @@ associated to a hash value with the following:
 This list is checked after translations have been applied.  See
 `org-element-keyword-translation-alist'.")
 
-(defconst org-element-document-properties '("AUTHOR" "DATE" "TITLE")
-  "List of properties associated to the whole document.
-Any keyword in this list will have its value parsed and stored as
-a secondary string.")
-
 (defconst org-element--affiliated-re
   (format "[ \t]*#\\+\\(?:%s\\):\\(?: \\|$\\)"
 	  (concat
@@ -5721,16 +5716,6 @@ Providing it allows for quicker computation."
 	   (if (and cbeg cend (>= pos cbeg)
 		    (or (< pos cend) (and (= pos cend) (eobp))))
 	       (narrow-to-region cbeg cend)
-	     (throw 'objects-forbidden element))))
-	;; At a parsed keyword, objects are located within value.
-	((eq type 'keyword)
-	 (if (not (member (org-element-property :key element)
-			  org-element-document-properties))
-	     (throw 'objects-forbidden element)
-	   (goto-char (org-element-property :begin element))
-	   (search-forward ":")
-	   (if (and (>= pos (point)) (< pos (line-end-position)))
-	       (narrow-to-region (point) (line-end-position))
 	     (throw 'objects-forbidden element))))
 	;; At a planning line, if point is at a timestamp, return it,
 	;; otherwise, return element.
