@@ -142,7 +142,7 @@
     (:latex-title-command nil nil org-latex-title-command)
     (:latex-toc-command nil nil org-latex-toc-command)
     ;; Redefine regular options.
-    (:date "DATE" nil "\\today" t)))
+    (:date "DATE" nil "\\today" parse)))
 
 
 
