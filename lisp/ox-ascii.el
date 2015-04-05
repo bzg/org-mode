@@ -1012,7 +1012,9 @@ INFO is a plist used as a communication channel."
       (let* ((utf8p (eq (plist-get info :ascii-charset) 'utf-8))
 	     ;; Format TITLE.  It may be filled if it is too wide,
 	     ;; that is wider than the two thirds of the total width.
-	     (title-len (min (length title) (/ (* 2 text-width) 3)))
+	     (title-len (min (apply #'max
+				    (mapcar #'length (org-split-string title)))
+			     (/ (* 2 text-width) 3)))
 	     (formatted-title (org-ascii--fill-string title title-len info))
 	     (line
 	      (make-string
