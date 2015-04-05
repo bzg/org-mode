@@ -5360,12 +5360,10 @@ the process stopped before finding the expected result."
 (defconst org-element--cache-sensitive-re
   (concat
    org-outline-regexp-bol "\\|"
+   "\\\\end{[A-Za-z0-9*]+}[ \t]*$" "\\|"
    "^[ \t]*\\(?:"
-   ;; Blocks
    "#\\+\\(?:BEGIN[:_]\\|END\\(?:_\\|:?[ \t]*$\\)\\)" "\\|"
-   ;; LaTeX environments.
-   "\\\\\\(?:begin{[A-Za-z0-9*]+}\\|end{[A-Za-z0-9*]+}[ \t]*$\\)" "\\|"
-   ;; Drawers.
+   "\\\\begin{[A-Za-z0-9*]+}" "\\|"
    ":\\(?:\\w\\|[-_]\\)+:[ \t]*$"
    "\\)")
   "Regexp matching a sensitive line, structure wise.
