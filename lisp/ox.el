@@ -98,9 +98,9 @@
   "Maximum nesting depth for headlines, counting from 0.")
 
 (defconst org-export-options-alist
-  '((:title "TITLE" nil nil space)
-    (:date "DATE" nil nil t)
-    (:author "AUTHOR" nil user-full-name t)
+  '((:title "TITLE" nil nil parse)
+    (:date "DATE" nil nil parse)
+    (:author "AUTHOR" nil user-full-name parse)
     (:email "EMAIL" nil user-mail-address t)
     (:language "LANGUAGE" nil org-export-default-language t)
     (:select-tags "SELECT_TAGS" nil org-export-select-tags split)
@@ -139,7 +139,7 @@
     (:with-todo-keywords nil "todo" org-export-with-todo-keywords))
   "Alist between export properties and ways to set them.
 
-The CAR of the alist is the property name, and the CDR is a list
+The key of the alist is the property name, and the value is a list
 like (KEYWORD OPTION DEFAULT BEHAVIOR) where:
 
 KEYWORD is a string representing a buffer keyword, or nil.  Each
@@ -158,6 +158,9 @@ BEHAVIOR determines how Org should handle multiple keywords for
 	    a newline.
   `split'   Split values at white spaces, and cons them to the
 	    previous list.
+  `parse'   Parse value as a list of strings and Org objects,
+            which can then be transcoded with, e.g.,
+            `org-export-data'.  It implies `space' behavior.
 
 Values set through KEYWORD and OPTION have precedence over
 DEFAULT.
@@ -171,14 +174,6 @@ Properties redefined there have precedence over these.")
 These keywords are not directly associated to a property.  The
 way they are handled must be hard-coded into
 `org-export--get-inbuffer-options' function.")
-
-(defconst org-export-document-properties
-  (delq nil
-	(mapcar (lambda (option)
-		  (and (member (nth 1 option) org-element-document-properties)
-		       (car option)))
-		org-export-options-alist))
-  "List of properties containing parsed data.")
 
 (defconst org-export-filters-alist
   '((:filter-body . org-export-filter-body-functions)
@@ -1406,57 +1401,52 @@ for export.  Return options as a plist."
   ;; same property in communication channel. The name for the property
   ;; is the keyword with "EXPORT_" appended to it.
   (org-with-wide-buffer
-   (let (prop plist)
+   (let (plist
+	 ;; Look for both general keywords and back-end specific
+	 ;; options, with priority given to the latter.
+	 (options (append (and backend (org-export-get-all-options backend))
+			  org-export-options-alist)))
      ;; Make sure point is at a heading.
      (if (org-at-heading-p) (org-up-heading-safe) (org-back-to-heading t))
      ;; Take care of EXPORT_TITLE. If it isn't defined, use headline's
      ;; title (with no todo keyword, priority cookie or tag) as its
      ;; fallback value.
-     (when (setq prop (or (org-entry-get (point) "EXPORT_TITLE")
-			  (progn (looking-at org-complex-heading-regexp)
-				 (org-match-string-no-properties 4))))
+     (let ((title (or (org-entry-get (point) "EXPORT_TITLE")
+		      (progn (looking-at org-complex-heading-regexp)
+			     (org-match-string-no-properties 4)))))
        (setq plist
 	     (plist-put
 	      plist :title
-	      (org-element-parse-secondary-string
-	       prop (org-element-restriction 'keyword)))))
+	      (if (eq (nth 4 (assq :title options)) 'parse)
+		  (org-element-parse-secondary-string
+		   title (org-element-restriction 'keyword))
+		title))))
      ;; EXPORT_OPTIONS are parsed in a non-standard way.
-     (when (setq prop (org-entry-get (point) "EXPORT_OPTIONS"))
-       (setq plist
-	     (nconc plist (org-export--parse-option-keyword prop backend))))
+     (let ((o (org-entry-get (point) "EXPORT_OPTIONS")))
+       (when o
+	 (setq plist
+	       (nconc plist (org-export--parse-option-keyword o backend)))))
      ;; Handle other keywords.  TITLE keyword is excluded as it has
-     ;; been handled already.
+     ;; been handled already.  Then return PLIST.
      (let ((seen '("TITLE")))
-       (mapc
-	(lambda (option)
-	  (let ((property (car option))
-		(keyword (nth 1 option)))
-	    (when (and keyword (not (member keyword seen)))
-	      (let* ((subtree-prop (concat "EXPORT_" keyword))
-		     ;; Export properties are not case-sensitive.
-		     (value (let ((case-fold-search t))
-			      (org-entry-get (point) subtree-prop))))
-		(push keyword seen)
-		(when (and value (not (plist-member plist property)))
-		  (setq plist
-			(plist-put
-			 plist
-			 property
-			 (cond
-			  ;; Parse VALUE if required.
-			  ((member keyword org-element-document-properties)
+       (dolist (option options plist)
+	 (let ((property (car option))
+	       (keyword (nth 1 option)))
+	   (when (and keyword (not (member keyword seen)))
+	     (let* ((subtree-prop (concat "EXPORT_" keyword))
+		    (value (org-entry-get (point) subtree-prop)))
+	       (push keyword seen)
+	       (when (and value (not (plist-member plist property)))
+		 (setq plist
+		       (plist-put
+			plist
+			property
+			(case (nth 4 option)
+			  (parse
 			   (org-element-parse-secondary-string
 			    value (org-element-restriction 'keyword)))
-			  ;; If BEHAVIOR is `split' expected value is
-			  ;; a list of strings, not a string.
-			  ((eq (nth 4 option) 'split) (org-split-string value))
-			  (t value)))))))))
-	;; Look for both general keywords and back-end specific
-	;; options, with priority given to the latter.
-	(append (and backend (org-export-get-all-options backend))
-		org-export-options-alist)))
-     ;; Return value.
-     plist)))
+			  (split (org-split-string value))
+			  (t value)))))))))))))
 
 (defun org-export--get-inbuffer-options (&optional backend)
   "Return current buffer export options, as a plist.
@@ -1524,45 +1514,48 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 		      (t
 		       ;; Options in `org-export-options-alist'.
 		       (dolist (property (funcall find-properties key))
-			 (let ((behaviour (nth 4 (assq property options))))
-			   (setq plist
-				 (plist-put
-				  plist property
-				  ;; Handle value depending on specified
-				  ;; BEHAVIOR.
-				  (case behaviour
-				    (space
-				     (if (not (plist-get plist property))
-					 (org-trim val)
-				       (concat (plist-get plist property)
-					       " "
-					       (org-trim val))))
-				    (newline
-				     (org-trim
-				      (concat (plist-get plist property)
-					      "\n"
-					      (org-trim val))))
-				    (split `(,@(plist-get plist property)
-					     ,@(org-split-string val)))
-				    ((t) val)
-				    (otherwise
-				     (if (not (plist-member plist property)) val
-				       (plist-get plist property))))))))))))))
+			 (setq
+			  plist
+			  (plist-put
+			   plist property
+			   ;; Handle value depending on specified
+			   ;; BEHAVIOR.
+			   (case (nth 4 (assq property options))
+			     (parse
+			      (let ((old (plist-get plist property)))
+				(apply
+				 #'org-element-adopt-elements
+				 old
+				 (org-element-parse-secondary-string
+				  (concat
+				   (and
+				    old
+				    (not (eq (org-element-type (org-last old))
+					     'line-break))
+				    " ")
+				   val)
+				  (org-element-restriction 'keyword)))))
+			     (space
+			      (if (not (plist-get plist property))
+				  (org-trim val)
+				(concat (plist-get plist property)
+					" "
+					(org-trim val))))
+			     (newline
+			      (org-trim
+			       (concat (plist-get plist property)
+				       "\n"
+				       (org-trim val))))
+			     (split `(,@(plist-get plist property)
+				      ,@(org-split-string val)))
+			     ((t) val)
+			     (otherwise
+			      (if (not (plist-member plist property)) val
+				(plist-get plist property)))))))))))))
 	     ;; Return final value.
 	     plist))))
-    ;; Read options in the current buffer.
-    (setq plist (funcall get-options
-			 (and buffer-file-name (list buffer-file-name)) nil))
-    ;; Parse keywords specified in `org-element-document-properties'
-    ;; and return PLIST.
-    (dolist (keyword org-element-document-properties plist)
-      (dolist (property (funcall find-properties keyword))
-	(let ((value (plist-get plist property)))
-	  (when (stringp value)
-	    (setq plist
-		  (plist-put plist property
-			     (org-element-parse-secondary-string
-			      value (org-element-restriction 'keyword))))))))))
+    ;; Read options in the current buffer and return value.
+    (funcall get-options (and buffer-file-name (list buffer-file-name)) nil)))
 
 (defun org-export--get-buffer-attributes ()
   "Return properties related to buffer attributes, as a plist."
@@ -1586,13 +1579,9 @@ process."
 		(plist-put
 		 plist
 		 prop
-		 ;; Evaluate default value provided.  If keyword is
-		 ;; a member of `org-element-document-properties',
-		 ;; parse it as a secondary string before storing it.
+		 ;; Evaluate default value provided.
 		 (let ((value (eval (nth 3 cell))))
-		   (if (and (stringp value)
-			    (member (nth 1 cell)
-				    org-element-document-properties))
+		   (if (eq (nth 4 cell) 'parse)
 		       (org-element-parse-secondary-string
 			value (org-element-restriction 'keyword))
 		     value)))))))))
@@ -2689,23 +2678,24 @@ from tree."
 	    ;; As a special case, special rows and cells from tables
 	    ;; are stored in IGNORE, as they still need to be accessed
 	    ;; during export.
-	    (let ((type (org-element-type data)))
-	      (if (org-export--skip-p data info selected)
-		  (if (memq type '(table-cell table-row)) (push data ignore)
-		    (org-element-extract-element data))
-		(if (and (eq type 'headline)
-			 (eq (plist-get info :with-archived-trees) 'headline)
-			 (org-element-property :archivedp data))
-		    ;; If headline is archived but tree below has to
-		    ;; be skipped, remove contents.
-		    (org-element-set-contents data)
-		  ;; Move into secondary string, if any.
-		  (let ((sec-prop
-			 (cdr (assq type org-element-secondary-value-alist))))
-		    (when sec-prop
-		      (mapc walk-data (org-element-property sec-prop data))))
-		  ;; Move into recursive objects/elements.
-		  (mapc walk-data (org-element-contents data))))))))
+	    (when data
+	      (let ((type (org-element-type data)))
+		(if (org-export--skip-p data info selected)
+		    (if (memq type '(table-cell table-row)) (push data ignore)
+		      (org-element-extract-element data))
+		  (if (and (eq type 'headline)
+			   (eq (plist-get info :with-archived-trees) 'headline)
+			   (org-element-property :archivedp data))
+		      ;; If headline is archived but tree below has to
+		      ;; be skipped, remove contents.
+		      (org-element-set-contents data)
+		    ;; Move into secondary string, if any.
+		    (let ((sec-prop
+			   (cdr (assq type org-element-secondary-value-alist))))
+		      (when sec-prop
+			(mapc walk-data (org-element-property sec-prop data))))
+		    ;; Move into recursive objects/elements.
+		    (mapc walk-data (org-element-contents data)))))))))
     ;; If a select tag is active, also ignore the section before the
     ;; first headline, if any.
     (when selected
@@ -2714,8 +2704,13 @@ from tree."
 	  (org-element-extract-element first-element))))
     ;; Prune tree and communication channel.
     (funcall walk-data data)
-    (dolist (prop org-export-document-properties)
-      (funcall walk-data (plist-get info prop)))
+    (dolist (entry
+	     (append
+	      ;; Priority is given to back-end specific options.
+	      (org-export-get-all-options (plist-get info :back-end))
+	      org-export-options-alist))
+      (when (eq (nth 4 entry) 'parse)
+	(funcall walk-data (plist-get info (car entry)))))
     ;; Eventually set `:ignore-list'.
     (plist-put info :ignore-list ignore)))
 
@@ -2726,12 +2721,14 @@ options.  Each uninterpreted element or object is changed back
 into a string.  Contents, if any, are not modified.  The parse
 tree is modified by side effect."
   (org-export--remove-uninterpreted-data-1 data info)
-  (dolist (prop org-export-document-properties)
-    (plist-put info
-	       prop
-	       (org-export--remove-uninterpreted-data-1
-		(plist-get info prop)
-		info))))
+  (dolist (entry org-export-options-alist)
+    (when (eq (nth 4 entry) 'parse)
+      (let ((p (car entry)))
+	(plist-put info
+		   p
+		   (org-export--remove-uninterpreted-data-1
+		    (plist-get info p)
+		    info))))))
 
 (defun org-export--remove-uninterpreted-data-1 (data info)
   "Change uninterpreted elements back into Org syntax.
@@ -2893,25 +2890,24 @@ Return code as a string."
 	 ;; Expand export-specific set of macros: {{{author}}},
 	 ;; {{{date(FORMAT)}}}, {{{email}}} and {{{title}}}.  It must
 	 ;; be done once regular macros have been expanded, since
-	 ;; document keywords may contain one of them.
+	 ;; parsed keywords may contain one of them.
 	 (org-macro-replace-all
-	  (list (cons "author"
-		      (org-element-interpret-data (plist-get info :author)))
-		(cons "date"
-		      (let* ((date (plist-get info :date))
-			     (value (or (org-element-interpret-data date) "")))
-			(if (and (not (cdr date))
-				 (eq (org-element-type (car date)) 'timestamp))
-			    (format "(eval (if (org-string-nw-p \"$1\") %s %S))"
-				    (format "(org-timestamp-format '%S \"$1\")"
-					    (org-element-copy (car date)))
-				    value)
-			  value)))
-		;; EMAIL is not a parsed keyword: store it as-is.
-		(cons "email" (or (plist-get info :email) ""))
-		(cons "title"
-		      (org-element-interpret-data (plist-get info :title)))
-		(cons "results" "$1"))
+	  (list
+	   (cons "author" (org-element-interpret-data (plist-get info :author)))
+	   (cons "date"
+		 (let* ((date (plist-get info :date))
+			(value (or (org-element-interpret-data date) "")))
+		   (if (and (consp date)
+			    (not (cdr date))
+			    (eq (org-element-type (car date)) 'timestamp))
+		       (format "(eval (if (org-string-nw-p \"$1\") %s %S))"
+			       (format "(org-timestamp-format '%S \"$1\")"
+				       (org-element-copy (car date)))
+			       value)
+		     value)))
+	   (cons "email" (org-element-interpret-data (plist-get info :email)))
+	   (cons "title" (org-element-interpret-data (plist-get info :title)))
+	   (cons "results" "$1"))
 	  'finalize)
 	 ;; Parse buffer.
 	 (setq tree (org-element-parse-buffer nil visible-only))

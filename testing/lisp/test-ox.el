@@ -140,34 +140,39 @@ variable, and communication channel under `info'."
     (org-test-with-temp-text "#+LANGUAGE: fr\n#+CREATOR: Me\n#+EMAIL: email"
       (org-export--get-inbuffer-options))
     '(:language "fr" :creator "Me" :email "email")))
-  ;; Parse document keywords.
-  (should
-   (equal
-    (org-test-with-temp-text "#+AUTHOR: Me"
-      (org-export--get-inbuffer-options))
-    '(:author ("Me"))))
   ;; Test `space' behaviour.
   (should
    (equal
-    (org-test-with-temp-text "#+TITLE: Some title\n#+TITLE: with spaces"
-      (org-export--get-inbuffer-options))
-    '(:title ("Some title with spaces"))))
+    (let ((back-end (org-export-create-backend
+		     :options '((:keyword "KEYWORD" nil nil space)))))
+      (org-test-with-temp-text "#+KEYWORD: With\n#+KEYWORD: spaces"
+	(org-export--get-inbuffer-options back-end)))
+    '(:keyword "With spaces")))
   ;; Test `newline' behaviour.
-  (let (org-export--registered-backends)
-    (org-export-define-backend 'test nil
-			       :options-alist
-			       '((:description "DESCRIPTION" nil nil newline)))
-    (should
-     (equal
-      (org-test-with-temp-text "#+DESCRIPTION: With\n#+DESCRIPTION: two lines"
-	(org-export--get-inbuffer-options 'test))
-      '(:description "With\ntwo lines"))))
+  (should
+   (equal
+    (let ((back-end (org-export-create-backend
+		     :options '((:keyword "KEYWORD" nil nil newline)))))
+      (org-test-with-temp-text "#+KEYWORD: With\n#+KEYWORD: two lines"
+	(org-export--get-inbuffer-options back-end)))
+    '(:keyword "With\ntwo lines")))
   ;; Test `split' behaviour.
   (should
    (equal
     (org-test-with-temp-text "#+SELECT_TAGS: a\n#+SELECT_TAGS: b"
       (org-export--get-inbuffer-options))
     '(:select-tags ("a" "b"))))
+  ;; Test `parse' behaviour.
+  (should
+   (org-element-map
+       (org-test-with-temp-text "#+TITLE: *bold*"
+	 (plist-get (org-export--get-inbuffer-options) :title))
+       'bold #'identity nil t))
+  (should
+   (equal
+    (org-test-with-temp-text "#+TITLE: Some title\n#+TITLE: with spaces"
+      (plist-get (org-export--get-inbuffer-options) :title))
+    '("Some title" " with spaces")))
   ;; Options set through SETUPFILE.
   (should
    (equal
@@ -182,8 +187,7 @@ variable, and communication channel under `info'."
 #+TITLE: c"
 		org-test-dir)
       (org-export--get-inbuffer-options))
-    '(:language "fr" :select-tags ("a" "b" "c")
-		   :title ("a b c"))))
+    '(:language "fr" :select-tags ("a" "b" "c") :title ("a" " b" " c"))))
   ;; More than one property can refer to the same buffer keyword.
   (should
    (equal '(:k2 "value" :k1 "value")
@@ -196,11 +200,11 @@ variable, and communication channel under `info'."
   (should-not
    (equal "Me"
 	  (org-test-with-parsed-data "* COMMENT H1\n#+AUTHOR: Me"
-	    (plist-get info :author))))
+				     (plist-get info :author))))
   (should-not
    (equal "Mine"
 	  (org-test-with-parsed-data "* COMMENT H1\n** H2\n#+EMAIL: Mine"
-	    (plist-get info :email)))))
+				     (plist-get info :email)))))
 
 (ert-deftest test-org-export/get-subtree-options ()
   "Test setting options from headline's properties."
