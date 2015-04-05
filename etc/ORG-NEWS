@@ -90,6 +90,9 @@ The key sequences =C-c C-n= and =C-c C-p= are now bound to
 respectively, rather than the =outline-mode= versions of these
 functions.  The Org version of these functions skips over inline tasks
 (and even-level headlines when ~org-odd-levels-only~ is set).
+*** ~org-element-context~ no longer return objects in keywords
+~org-element-context~ used to return objects on some keywords, i.e.,
+=TITLE=, =DATE= and =AUTHOR=.  It now returns only the keyword.
 ** Removed functions
 *** Removed function ~org-translate-time~
 Use ~org-timestamp-translate~ instead.
@@ -341,6 +344,15 @@ leading spaces within table cells.
 *** New MathJax configuration options.
 Org uses the MathJax CDN by default.  See the manual and the docstring
 of ~org-html-mathjax-options~ for details.
+*** New behaviour in `org-export-options-alist'
+When defining a back-end, it is now possible to specify to give
+`parse' behaviour on a keyword.  It is equivalent to call
+`org-element-parse-secondary-string' on the value.
+
+However, parsed =KEYWORD= is automatically associated to an
+=:EXPORT_KEYWORD:= property, which can be used to override the keyword
+value during a subtree export.  Moreover, macros are expanded in such
+keywords and properties.
 ** Miscellaneous
 *** Strip all meta data from ITEM special property
 ITEM special property does not contain TODO, priority or tags anymore.
