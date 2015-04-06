@@ -722,7 +722,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
   (let* (
 	 ;; Limits of table
 	 (beg (org-table-begin))
-	 (end (org-table-end))
+	 (end (copy-marker (org-table-end)))
 	 ;; Current cursor position
 	 (linepos (org-current-line))
 	 (colpos (org-table-current-column))
@@ -931,14 +931,13 @@ With argument TABLE-TYPE, go to the beginning of a table.el-type table."
 (defun org-table-end (&optional table-type)
   "Find the end of the table and return its position.
 With argument TABLE-TYPE, go to the end of a table.el-type table."
-  (save-excursion
-    (if (not (re-search-forward
-	      (if table-type org-table-any-border-regexp
-		org-table-border-regexp)
-	      nil t))
-	(goto-char (point-max))
-      (goto-char (match-beginning 0)))
-    (point-marker)))
+  (if (save-excursion
+	(re-search-forward
+	 (if table-type org-table-any-border-regexp
+	   org-table-border-regexp)
+	 nil t))
+      (match-beginning 0)
+    (point-max)))
 
 ;;;###autoload
 (defun org-table-justify-field-maybe (&optional new)
@@ -1377,7 +1376,7 @@ However, when FORCE is non-nil, create new columns if necessary."
   (org-table-find-dataline)
   (let* ((col (max 1 (org-table-current-column)))
 	 (beg (org-table-begin))
-	 (end (org-table-end))
+	 (end (copy-marker (org-table-end)))
 	 ;; Current cursor position
 	 (linepos (org-current-line))
 	 (colpos col))
@@ -1448,7 +1447,7 @@ first dline below it is used.  When ABOVE is non-nil, the one above is used."
   (org-table-check-inside-data-field)
   (let* ((col (org-table-current-column))
 	 (beg (org-table-begin))
-	 (end (org-table-end))
+	 (end (copy-marker (org-table-end)))
 	 ;; Current cursor position
 	 (linepos (org-current-line))
 	 (colpos col))
@@ -1493,7 +1492,7 @@ first dline below it is used.  When ABOVE is non-nil, the one above is used."
   (let* ((col (org-table-current-column))
 	 (col1 (if left (1- col) col))
 	 (beg (org-table-begin))
-	 (end (org-table-end))
+	 (end (copy-marker (org-table-end)))
 	 ;; Current cursor position
 	 (linepos (org-current-line))
 	 (colpos (if left (1- col) (1+ col))))
@@ -1904,8 +1903,8 @@ blindly applies a recipe that works for simple tables."
   (require 'table)
   (if (org-at-table.el-p)
       ;; convert to Org-mode table
-      (let ((beg (move-marker (make-marker) (org-table-begin t)))
-	    (end (move-marker (make-marker) (org-table-end t))))
+      (let ((beg (copy-marker (org-table-begin t)))
+	    (end (copy-marker (org-table-end t))))
 	(table-unrecognize-region beg end)
 	(goto-char beg)
 	(while (re-search-forward "^\\([ \t]*\\)\\+-.*\n" end t)
@@ -1913,8 +1912,8 @@ blindly applies a recipe that works for simple tables."
 	(goto-char beg))
     (if (org-at-table-p)
 	;; convert to table.el table
-	(let ((beg (move-marker (make-marker) (org-table-begin)))
-	      (end (move-marker (make-marker) (org-table-end))))
+	(let ((beg (copy-marker (org-table-begin)))
+	      (end (copy-marker (org-table-end))))
 	  ;; first, get rid of all horizontal lines
 	  (goto-char beg)
 	  (while (re-search-forward "^\\([ \t]*\\)|-.*\n" end t)
@@ -3152,7 +3151,7 @@ known that the table will be realigned a little later anyway."
 	;; Get the correct line range to process
 	(if all
 	    (progn
-	      (setq end (move-marker (make-marker) (1+ (org-table-end))))
+	      (setq end (copy-marker (1+ (org-table-end))))
 	      (goto-char (setq beg (org-table-begin)))
 	      (if (re-search-forward org-table-calculate-mark-regexp end t)
 		  ;; This is a table with marked lines, compute selected lines
