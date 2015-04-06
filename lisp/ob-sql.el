@@ -36,6 +36,7 @@
 ;; - engine
 ;; - cmdline
 ;; - dbhost
+;; - dbport
 ;; - dbuser
 ;; - dbpassword
 ;; - database
@@ -68,6 +69,7 @@
   '((engine	       . :any)
     (out-file	       . :any)
     (dbhost	       . :any)
+    (dbport	       . :any)
     (dbuser	       . :any)
     (dbpassword	       . :any)
     (database	       . :any))
@@ -78,11 +80,12 @@
   (org-babel-sql-expand-vars
    body (mapcar #'cdr (org-babel-get-header params :var))))
 
-(defun org-babel-sql-dbstring-mysql (host user password database)
+(defun org-babel-sql-dbstring-mysql (host port user password database)
   "Make MySQL cmd line args for database connection.  Pass nil to omit that arg."
   (combine-and-quote-strings
    (delq nil
 	 (list (when host     (concat "-h" host))
+	       (when port     (format "-P%d" port))
 	       (when user     (concat "-u" user))
 	       (when password (concat "-p" password))
 	       (when database (concat "-D" database))))))
@@ -102,6 +105,7 @@ This function is called by `org-babel-execute-src-block'."
   (let* ((result-params (cdr (assoc :result-params params)))
          (cmdline (cdr (assoc :cmdline params)))
          (dbhost (cdr (assoc :dbhost params)))
+         (dbport (cdr (assq :dbport params)))
          (dbuser (cdr (assoc :dbuser params)))
          (dbpassword (cdr (assoc :dbpassword params)))
          (database (cdr (assoc :database params)))
@@ -126,7 +130,8 @@ This function is called by `org-babel-execute-src-block'."
                                      (org-babel-process-file-name in-file)
                                      (org-babel-process-file-name out-file)))
                     ('mysql (format "mysql %s %s %s < %s > %s"
-				    (org-babel-sql-dbstring-mysql dbhost dbuser dbpassword database)
+				    (org-babel-sql-dbstring-mysql
+				     dbhost dbport dbuser dbpassword database)
 				    (if colnames-p "" "-N")
                                     (or cmdline "")
 				    (org-babel-process-file-name in-file)
