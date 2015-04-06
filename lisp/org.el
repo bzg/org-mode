@@ -7748,8 +7748,7 @@ heading, unconditionally."
 	(may-split (org-get-alist-option org-M-RET-may-split-line 'headline))
 	(respect-content (or org-insert-heading-respect-content
 			     (equal arg '(4))))
-	(initial-content "")
-	(adjust-empty-lines t))
+	(initial-content ""))
 
     (cond
 
@@ -7873,7 +7872,7 @@ heading, unconditionally."
 	  ;; Otherwise, after it.
 	  (cond
 	   ((and (bolp) (looking-at "[ \t]*$")))
-	   ((bolp) (open-line 1))
+	   ((bolp) (save-excursion (insert "\n")))
 	   (t (end-of-line)
 	      (insert "\n")))
 
@@ -7881,9 +7880,15 @@ heading, unconditionally."
 	  (insert stars)
 	  (just-one-space)
 	  (insert initial-content)
-	  (when (and adjust-empty-lines
-		     (not (and blank (org-previous-line-empty-p))))
+	  (unless (and blank (org-previous-line-empty-p))
 	    (org-N-empty-lines-before-current (if blank 1 0)))
+	  ;; Adjust visibility, which may be messed up if we removed
+	  ;; blank lines while previous entry was hidden.
+	  (let ((bol (line-beginning-position)))
+	    (dolist (o (overlays-at (1- bol)))
+	      (when (and (eq (overlay-get o 'invisible) 'outline)
+			 (eq (overlay-end o) bol))
+		(move-overlay o (overlay-start o) (1- bol)))))
 	  (run-hooks 'org-insert-heading-hook)))))))
 
 (defun org-N-empty-lines-before-current (N)
