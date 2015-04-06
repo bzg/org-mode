@@ -16256,28 +16256,16 @@ This is computed according to `org-property-set-functions-alist'."
 (defvar org-last-set-property-value nil)
 (defun org-read-property-name ()
   "Read a property name."
-  (let* ((completion-ignore-case t)
-	 (keys (org-buffer-property-keys nil t t))
-	 (default-prop (or (save-excursion
-			     (save-match-data
-			       (beginning-of-line)
-			       (and (looking-at "^\\s-*:\\([^:\n]+\\):")
-				    (null (string= (match-string 1) "END"))
-				    (match-string 1))))
-			   org-last-set-property))
-	 (property (org-icompleting-read
-		    (concat "Property"
-			    (if default-prop (concat " [" default-prop "]") "")
-			    ": ")
-		    (mapcar 'list keys)
-		    nil nil nil nil
-		    default-prop)))
-    (if (member property keys)
-	property
-      (or (cdr (assoc (downcase property)
-		      (mapcar (lambda (x) (cons (downcase x) x))
-			      keys)))
-	  property))))
+  (let ((completion-ignore-case t)
+	(default-prop (or (and (org-at-property-p)
+			       (org-match-string-no-properties 2))
+			  org-last-set-property)))
+    (org-completing-read
+     (concat "Property"
+	     (if default-prop (concat " [" default-prop "]") "")
+	     ": ")
+     (mapcar #'list (org-buffer-property-keys nil t t))
+     nil nil nil nil default-prop)))
 
 (defun org-set-property-and-value (use-last)
   "Allow to set [PROPERTY]: [value] direction from prompt.
