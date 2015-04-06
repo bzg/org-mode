@@ -15542,7 +15542,9 @@ See `org-property-re' for match data, if applicable."
     (beginning-of-line)
     (and (looking-at org-property-re)
 	 (let ((property-drawer (save-match-data (org-get-property-block))))
-	   (and property-drawer (< (point) (cdr property-drawer)))))))
+	   (and property-drawer
+		(> (point) (car property-drawer))
+		(< (point) (cdr property-drawer)))))))
 
 (defun org-property-action ()
   "Do an action on properties."
