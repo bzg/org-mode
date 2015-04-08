@@ -1697,9 +1697,9 @@ INFO is a plist used as a communication channel."
      (format "<title>%s</title>\n" title)
      (when (plist-get info :time-stamp-file)
        (format-time-string
-	 (concat "<!-- "
-		 (plist-get info :html-metadata-timestamp-format)
-		 " -->\n")))
+	(concat "<!-- "
+		(plist-get info :html-metadata-timestamp-format)
+		" -->\n")))
      (format
       (if (org-html-html5-p info)
 	  (org-html-close-tag "meta" " charset=\"%s\"" info)
@@ -1731,8 +1731,8 @@ INFO is a plist used as a communication channel."
 			       info)
 	   "\n"))
      (let ((viewport-options
-	    (remove-if-not (lambda (cell) (org-string-nw-p (cadr cell)))
-			   (plist-get info :html-viewport))))
+	    (org-remove-if-not (lambda (cell) (org-string-nw-p (cadr cell)))
+			       (plist-get info :html-viewport))))
        (and viewport-options
 	    (concat
 	     (org-html-close-tag
