@@ -1740,7 +1740,7 @@ INFO is a plist used as a communication channel."
 	      (format " name=\"viewport\" content=\"%s\""
 		      (mapconcat
 		       (lambda (elm) (format "%s=%s" (car elm) (cadr elm)))
-		       viewport ", "))
+		       viewport-options ", "))
 	      info)
 	     "\n"))))))
 
