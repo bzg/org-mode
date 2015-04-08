@@ -1013,7 +1013,7 @@ INFO is a plist used as a communication channel."
 	     ;; Format TITLE.  It may be filled if it is too wide,
 	     ;; that is wider than the two thirds of the total width.
 	     (title-len (min (apply #'max
-				    (mapcar #'length (org-split-string title)))
+				    (mapcar #'length (org-split-string title "\n")))
 			     (/ (* 2 text-width) 3)))
 	     (formatted-title (org-ascii--fill-string title title-len info))
 	     (line
