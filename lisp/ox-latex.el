@@ -108,9 +108,9 @@
     (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
     (:latex-header "LATEX_HEADER" nil nil newline)
     (:latex-header-extra "LATEX_HEADER_EXTRA" nil nil newline)
-    (:description "DESCRIPTION" nil nil newline)
-    (:keywords "KEYWORDS" nil nil space)
-    (:subtitle "SUBTITLE" nil nil space)
+    (:description "DESCRIPTION" nil nil parse)
+    (:keywords "KEYWORDS" nil nil parse)
+    (:subtitle "SUBTITLE" nil nil parse)
     ;; Other variables.
     (:latex-active-timestamp-format nil nil org-latex-active-timestamp-format)
     (:latex-caption-above nil nil org-latex-caption-above)

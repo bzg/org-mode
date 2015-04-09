@@ -821,11 +821,7 @@ information."
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   (let ((title (org-export-data (plist-get info :title) info))
-	(subtitle (org-export-data
-		   (org-element-parse-secondary-string
-		    (plist-get info :subtitle)
-		    (org-element-restriction 'keyword))
-		   info)))
+	(subtitle (org-export-data (plist-get info :subtitle) info)))
     (concat
      ;; 1. Time-stamp.
      (and (plist-get info :time-stamp-file)
