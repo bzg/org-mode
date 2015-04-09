@@ -1474,6 +1474,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 	      (dolist (option options properties)
 		(when (equal (nth 1 option) keyword)
 		  (pushnew (car option) properties))))))
+	 to-parse
 	 (get-options
 	  (lambda (&optional files plist)
 	    ;; Recursively read keywords in buffer.  FILES is a list
@@ -1522,19 +1523,18 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 			   ;; BEHAVIOR.
 			   (case (nth 4 (assq property options))
 			     (parse
+			      (unless (memq property to-parse)
+				(push property to-parse))
+			      ;; Even if `parse' implies `space'
+			      ;; behavior, we separate line with "\n"
+			      ;; so as to preserve line-breaks.
+			      ;; However, empty lines are forbidden
+			      ;; since `parse' doesn't allow more than
+			      ;; one paragraph.
 			      (let ((old (plist-get plist property)))
-				(apply
-				 #'org-element-adopt-elements
-				 old
-				 (org-element-parse-secondary-string
-				  (concat
-				   (and
-				    old
-				    (not (eq (org-element-type (org-last old))
-					     'line-break))
-				    " ")
-				   val)
-				  (org-element-restriction 'keyword)))))
+				(cond ((not (org-string-nw-p val)) old)
+				      (old (concat old "\n" val))
+				      (t val))))
 			     (space
 			      (if (not (plist-get plist property))
 				  (org-trim val)
@@ -1552,10 +1552,23 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 			     (otherwise
 			      (if (not (plist-member plist property)) val
 				(plist-get plist property)))))))))))))
-	     ;; Return final value.
 	     plist))))
     ;; Read options in the current buffer and return value.
-    (funcall get-options (and buffer-file-name (list buffer-file-name)) nil)))
+    (let ((options (funcall get-options
+			    (and buffer-file-name (list buffer-file-name))
+			    nil)))
+      ;; Parse properties in TO-PARSE.  Remove newline characters not
+      ;; involved in line breaks to simulate `space' behaviour.
+      ;; Finally return options.
+      (dolist (p to-parse options)
+	(let ((value (org-element-parse-secondary-string
+		      (plist-get options p)
+		      (org-element-restriction 'keyword))))
+	  (org-element-map value 'plain-text
+	    (lambda (s)
+	      (org-element-set-element
+	       s (replace-regexp-in-string "\n" " " s))))
+	  (setq options (plist-put options p value)))))))
 
 (defun org-export--get-buffer-attributes ()
   "Return properties related to buffer attributes, as a plist."

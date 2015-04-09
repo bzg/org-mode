@@ -162,7 +162,8 @@ variable, and communication channel under `info'."
     (org-test-with-temp-text "#+SELECT_TAGS: a\n#+SELECT_TAGS: b"
       (org-export--get-inbuffer-options))
     '(:select-tags ("a" "b"))))
-  ;; Test `parse' behaviour.
+  ;; Test `parse' behaviour.  `parse' implies `space' but preserve
+  ;; line breaks.  Multi-line objects are allowed.
   (should
    (org-element-map
        (org-test-with-temp-text "#+TITLE: *bold*"
@@ -172,7 +173,17 @@ variable, and communication channel under `info'."
    (equal
     (org-test-with-temp-text "#+TITLE: Some title\n#+TITLE: with spaces"
       (plist-get (org-export--get-inbuffer-options) :title))
-    '("Some title" " with spaces")))
+    '("Some title with spaces")))
+  (should
+   (org-element-map
+       (org-test-with-temp-text "#+TITLE: Some title\\\\\n#+TITLE: with spaces"
+	 (plist-get (org-export--get-inbuffer-options) :title))
+       'line-break #'identity nil t))
+  (should
+   (org-element-map
+       (org-test-with-temp-text "#+TITLE: *bold\n#+TITLE: sentence*"
+	 (plist-get (org-export--get-inbuffer-options) :title))
+       'bold #'identity nil t))
   ;; Options set through SETUPFILE.
   (should
    (equal
@@ -187,7 +198,7 @@ variable, and communication channel under `info'."
 #+TITLE: c"
 		org-test-dir)
       (org-export--get-inbuffer-options))
-    '(:language "fr" :select-tags ("a" "b" "c") :title ("a" " b" " c"))))
+    '(:language "fr" :select-tags ("a" "b" "c") :title ("a b c"))))
   ;; More than one property can refer to the same buffer keyword.
   (should
    (equal '(:k2 "value" :k1 "value")
