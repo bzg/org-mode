@@ -5312,7 +5312,7 @@ them."
      ("zh-TW" :html "&#20316;&#32773;" :utf-8 "作者"))
     ("Continued from previous page"
      ("de" :default "Fortsetzung von vorheriger Seite")
-     ("es" :default "Continúa de la página anterior")
+     ("es" :html "Contin&uacute;a de la p&aacute;gina anterior" :ascii "Continua de la pagina anterior" :default "Continúa de la página anterior")
      ("fr" :default "Suite de la page précédente")
      ("it" :default "Continua da pagina precedente")
      ("ja" :default "前ページからの続き")
@@ -5322,7 +5322,7 @@ them."
       :utf-8 "(Продолжение)"))
     ("Continued on next page"
      ("de" :default "Fortsetzung nächste Seite")
-     ("es" :default "Continúa en la siguiente página")
+     ("es" :html "Contin&uacute;a en la siguiente p&aacute;gina" :ascii "Continua en la siguiente pagina" :default "Continúa en la siguiente página")
      ("fr" :default "Suite page suivante")
      ("it" :default "Continua alla pagina successiva")
      ("ja" :default "次ページに続く")
@@ -5357,7 +5357,7 @@ them."
     ("Equation"
      ("da" :default "Ligning")
      ("de" :default "Gleichung")
-     ("es" :html "Ecuaci&oacute;n" :default "Ecuación")
+     ("es" :ascii "Ecuacion" :html "Ecuaci&oacute;n" :default "Ecuación")
      ("et" :html "V&#245;rrand" :utf-8 "Võrrand")
      ("fr" :ascii "Equation" :default "Équation")
      ("ja" :default "方程式")
@@ -5402,7 +5402,7 @@ them."
      ("da" :default "Fodnoter")
      ("de" :html "Fu&szlig;noten" :default "Fußnoten")
      ("eo" :default "Piednotoj")
-     ("es" :html "Nota al pie de p&aacute;gina" :default "Nota al pie de página")
+     ("es" :ascii "Nota al pie de pagina" :html "Nota al pie de p&aacute;gina" :default "Nota al pie de página")
      ("et" :html "Allm&#228;rkused" :utf-8 "Allmärkused")
      ("fi" :default "Alaviitteet")
      ("fr" :default "Notes de bas de page")
@@ -5425,7 +5425,7 @@ them."
     ("List of Listings"
      ("da" :default "Programmer")
      ("de" :default "Programmauflistungsverzeichnis")
-     ("es" :default "Indice de Listados de programas")
+     ("es" :ascii "Indice de Listados de programas" :html "&Iacute;ndice de Listados de programas" :default "Índice de Listados de programas")
      ("et" :default "Loendite nimekiri")
      ("fr" :default "Liste des programmes")
      ("ja" :default "ソースコード目次")
@@ -5437,7 +5437,7 @@ them."
     ("List of Tables"
      ("da" :default "Tabeller")
      ("de" :default "Tabellenverzeichnis")
-     ("es" :default "Indice de tablas")
+     ("es" :ascii "Indice de tablas" :html "&Iacute;ndice de tablas" :default "Índice de tablas")
      ("et" :default "Tabelite nimekiri")
      ("fr" :default "Liste des tableaux")
      ("ja" :default "表目次")
@@ -5464,11 +5464,12 @@ them."
      ("zh-CN" :html "&#20195;&#30721;%d&nbsp;" :utf-8 "代码%d "))
     ("References"
      ("fr" :ascii "References" :default "Références")
-     ("de" :default "Quellen"))
+     ("de" :default "Quellen")
+     ("es" :default "Referencias"))
     ("See section %s"
      ("da" :default "jævnfør afsnit %s")
      ("de" :default "siehe Abschnitt %s")
-     ("es" :default "vea seccion %s")
+     ("es" :ascii "Vea seccion %s" :html "Vea secci&oacute;n %s" :default "Vea sección %s")
      ("et" :html "Vaata peat&#252;kki %s" :utf-8 "Vaata peatükki %s")
      ("fr" :default "cf. section %s")
      ("ja" :default "セクション %s を参照")
@@ -5508,7 +5509,7 @@ them."
      ("da" :default "Indhold")
      ("de" :default "Inhaltsverzeichnis")
      ("eo" :default "Enhavo")
-     ("es" :html "&Iacute;ndice")
+     ("es" :ascii "Indice" :html "&Iacute;ndice" :default "Índice")
      ("et" :default "Sisukord")
      ("fi" :html "Sis&auml;llysluettelo")
      ("fr" :ascii "Sommaire" :default "Table des matières")
@@ -5531,7 +5532,7 @@ them."
     ("Unknown reference"
      ("da" :default "ukendt reference")
      ("de" :default "Unbekannter Verweis")
-     ("es" :default "referencia desconocida")
+     ("es" :default "Referencia desconocida")
      ("et" :default "Tundmatu viide")
      ("fr" :ascii "Destination inconnue" :default "Référence inconnue")
      ("ja" :default "不明な参照先")
