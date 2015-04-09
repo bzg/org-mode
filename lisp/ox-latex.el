@@ -1318,7 +1318,7 @@ holding export options."
 	    (separate (plist-get info :latex-subtitle-separate)))
        (concat
 	(format "\\title{%s%s}\n" title
-		(if separate "" formatted-subtitle))
+		(if separate "" (or formatted-subtitle "")))
 	(when (and separate subtitle)
 	  (concat formatted-subtitle "\n"))))
      ;; Hyperref options.
