@@ -40,7 +40,7 @@
 (defvar Info-current-node)
 
 ;; Install the link type
-(org-add-link-type "info" 'org-info-open)
+(org-add-link-type "info" 'org-info-open 'org-info-export)
 (add-hook 'org-store-link-functions 'org-info-store-link)
 
 ;; Implementation
@@ -80,6 +80,19 @@
 			(user-error "Could not find '%s' node or index entry"
 				    nodename-or-index)))))
     (user-error "Could not open: %s" name)))
+
+(defun org-info-export (path desc format)
+  "Export an info link.
+See `org-add-link-type' for details about PATH, DESC and FORMAT."
+  (when (eq format 'html)
+    (or (string-match "\\(.*\\)[#:]:?\\(.*\\)" path)
+	(string-match "\\(.*\\)" path))
+    (let ((filename (match-string 1 path))
+	  (node (or (match-string 2 path) "Top")))
+      (format "<a href=\"%s.html#%s\">%s</a>"
+	      filename
+	      (replace-regexp-in-string " " "-" node)
+	      (or desc path)))))
 
 (provide 'org-info)
 
