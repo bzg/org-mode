@@ -499,7 +499,8 @@ agenda view showing the flagged items."
 	    (org-mobile-encrypt-and-move file target-path)
 	  (copy-file file target-path 'ok-if-exists))
 	(setq check (shell-command-to-string
-		     (concat org-mobile-checksum-binary " "
+		     (concat (shell-quote-argument org-mobile-checksum-binary)
+			     " "
 			     (shell-quote-argument (expand-file-name file)))))
 	(when (string-match "[a-fA-F0-9]\\{30,40\\}" check)
 	  (push (cons link-name (match-string 0 check))
