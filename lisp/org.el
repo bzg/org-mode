@@ -14290,7 +14290,8 @@ headlines matching this string."
 			  (if (eq org-tags-match-list-sublevels 'indented)
 			      (make-string (1- level) ?.) "")
 			  (org-get-heading))
-			 level category
+			 (make-string level ?\s)
+			 category
 			 tags-list)
 		    priority (org-get-priority txt))
 	      (goto-char lspos)
