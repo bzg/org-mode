@@ -467,6 +467,18 @@ buffer."
        ((eq type 'verse-block)
 	(and (>= (point) (org-element-property :contents-begin context))
 	     (< (point) (org-element-property :contents-end context))))
+       ;; In an headline or inlinetask, point must be either on the
+       ;; heading itself or on the blank lines below.
+       ((memq type '(headline inlinetask))
+	(or (not (org-at-heading-p))
+	    (and (save-excursion (beginning-of-line)
+				 (and (let ((case-fold-search t))
+					(not (looking-at "\\*+ END[ \t]*$")))
+				      (looking-at org-complex-heading-regexp)))
+		 (match-beginning 4)
+		 (>= (point) (match-beginning 4))
+		 (or (not (match-beginning 5))
+		     (< (point) (match-beginning 5))))))
        ;; White spaces after an object or blank lines after an element
        ;; are OK.
        ((>= (point)

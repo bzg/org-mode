@@ -67,6 +67,14 @@
     (org-test-with-temp-text " <point>"
       (let ((org-footnote-auto-label t)) (org-footnote-new))
       (buffer-string))))
+  ;; In an headline or inlinetask, point must be either on the
+  ;; heading itself or on the blank lines below.
+  (should (org-test-with-temp-text "* H<point>" (org-footnote-new) t))
+  (should
+   (org-test-with-temp-text "* H\n <point>\nParagraph" (org-footnote-new) t))
+  (should-error (org-test-with-temp-text "*<point> H" (org-footnote-new) t))
+  (should-error
+   (org-test-with-temp-text "* H <point>:tag:" (org-footnote-new) t))
   ;; Allow new footnotes within recursive objects, but not in links.
   (should
    (string-match-p
