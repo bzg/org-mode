@@ -1621,7 +1621,7 @@ holding contextual information."
 				  (org-string-match-p "\\<local\\>" v)
 				  (format "\\stopcontents[level-%d]" level)))))
 		    info t)))))
-	  (if (and numberedp opt-title
+	  (if (and opt-title
 		   (not (equal opt-title full-text))
 		   (string-match "\\`\\\\\\(.*?[^*]\\){" section-fmt))
 	      (format (replace-match "\\1[%s]" nil nil section-fmt 1)
