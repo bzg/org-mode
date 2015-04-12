@@ -279,6 +279,7 @@ in the output, depending on the parameters.
 *** Extend ~org-export-first-sibling-p~ and ~org-export-last-sibling-p~
 These functions now support any element or object, not only headlines.
 *** New function: ~org-export-table-row-in-header-p~
+*** New function: ~org-export-get-reference~
 *** New function: ~org-element-lineage~
 This function deprecates ~org-export-get-genealogy~.  It also provides
 more features.  See docstring for details.

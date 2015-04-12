@@ -4165,8 +4165,30 @@ has type \"radio\"."
 
 ;;;; For References
 ;;
+;; `org-export-get-reference' associate a unique reference for any
+;; object or element.
+;;
 ;; `org-export-get-ordinal' associates a sequence number to any object
 ;; or element.
+
+(defun org-export-get-reference (datum info)
+  "Return a unique reference for DATUM, as a string.
+DATUM is either an element or an object.  INFO is the current
+export state, as a plist.  Returned reference consists of
+alphanumeric characters only."
+  (let ((type (org-element-type datum))
+	(cache (or (plist-get info :internal-references)
+		   (let ((h (make-hash-table :test #'eq)))
+		     (plist-put info :internal-references h)
+		     h))))
+    (or (gethash datum cache)
+	(puthash datum
+		 (format "org%s%d"
+			 (if type
+			     (replace-regexp-in-string "-" "" (symbol-name type))
+			   "secondarystring")
+			 (incf (gethash type cache 0)))
+		 cache))))
 
 (defun org-export-get-ordinal (element info &optional types predicate)
   "Return ordinal number of an element or object.
