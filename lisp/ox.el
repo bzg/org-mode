@@ -1710,7 +1710,6 @@ Return updated plist."
   ;; properties.
   (nconc
    `(:headline-numbering ,(org-export--collect-headline-numbering data info)
-     :unnumbered-headline-id ,(org-export--collect-unnumbered-headline-id data info)
      :exported-data ,(make-hash-table :test 'eq :size 4001))
    info))
 
@@ -1756,17 +1755,6 @@ for a footnotes section."
 		   when (= idx relative-level) collect (aset numbering idx (1+ n))
 		   when (> idx relative-level) do (aset numbering idx 0))))))
       options)))
-
-(defun org-export--collect-unnumbered-headline-id (data options)
-  "Return numbering of all exportable, unnumbered headlines.
-DATA is the parse tree.  OPTIONS is the plist holding export
-options.  Unnumbered headlines are numbered as a function of
-occurrence."
-  (let ((num 0))
-    (org-element-map data 'headline
-	(lambda (headline)
-	  (unless (org-export-numbered-headline-p headline options)
-	    (list headline (incf num)))))))
 
 (defun org-export--selected-trees (data info)
   "List headlines and inlinetasks with a select tag in their tree.
@@ -3721,9 +3709,6 @@ process, leading to a different order when footnotes are nested."
 ;; `org-export-get-headline-number' returns a number to unnumbered
 ;; headlines (used for internal id).
 ;;
-;; `org-export-get-headline-id' returns the unique internal id of a
-;; headline.
-;;
 ;; `org-export-low-level-p', `org-export-first-sibling-p' and
 ;; `org-export-last-sibling-p' are three useful predicates when it
 ;; comes to fulfill the `:headline-levels' property.
@@ -3756,17 +3741,6 @@ and the last level being considered as high enough, or nil."
     (when (wholenump limit)
       (let ((level (org-export-get-relative-level headline info)))
         (and (> level limit) (- level limit))))))
-
-(defun org-export-get-headline-id (headline info)
-  "Return a unique ID for HEADLINE.
-INFO is a plist holding contextual information."
-  (let ((numbered (org-export-numbered-headline-p headline info)))
-    (concat
-     (if numbered "sec-" "unnumbered-")
-     (mapconcat #'number-to-string
-		(if numbered
-		    (org-export-get-headline-number headline info)
-		  (cdr (assq headline (plist-get info :unnumbered-headline-id)))) "-"))))
 
 (defun org-export-get-headline-number (headline info)
   "Return numbered HEADLINE numbering as a list of numbers.
