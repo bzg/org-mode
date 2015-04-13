@@ -103,6 +103,9 @@ it provides more features and covers all export back-ends.  It is also
 accessible from the export dispatcher.
 *** Removed function ~org-timer-cancel-timer~
 ~org-timer-stop~ now stops both relative and countdown timers.
+*** Removed function ~org-export-solidify-link-text~
+This function, being non-bijective, introduced bug in internal
+references.  Use ~org-export-get-reference~ instead.
 *** Removed function ~org-end-of-meta-data-and-drawers~
 The function is superseded by ~org-end-of-meta-data~, called with an
 optional argument.

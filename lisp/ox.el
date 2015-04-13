@@ -3896,9 +3896,6 @@ meant to be translated with `org-export-data' or alike."
 ;; `org-export-custom-protocol-maybe' handles custom protocol defined
 ;; with `org-add-link-type', which see.
 ;;
-;; `org-export-solidify-link-text' turns a string into a safer version
-;; for links, replacing most non-standard characters with hyphens.
-;;
 ;; `org-export-get-coderef-format' returns an appropriate format
 ;; string for coderefs.
 ;;
@@ -3916,11 +3913,6 @@ meant to be translated with `org-export-data' or alike."
 ;; `org-export-resolve-coderef' associates a reference to a line
 ;; number in the element it belongs, or returns the reference itself
 ;; when the element isn't numbered.
-
-(defun org-export-solidify-link-text (s)
-  "Take link text S and make a safe target out of it."
-  (save-match-data
-    (mapconcat 'identity (org-split-string s "[^a-zA-Z0-9_.-:]+") "-")))
 
 (defun org-export-custom-protocol-maybe (link desc backend)
   "Try exporting LINK with a dedicated function.
