@@ -115,7 +115,6 @@
     (:latex-active-timestamp-format nil nil org-latex-active-timestamp-format)
     (:latex-caption-above nil nil org-latex-caption-above)
     (:latex-classes nil nil org-latex-classes)
-    (:latex-custom-id-labels nil nil org-latex-custom-id-as-label)
     (:latex-default-figure-position nil nil org-latex-default-figure-position)
     (:latex-default-table-environment nil nil org-latex-default-table-environment)
     (:latex-default-table-mode nil nil org-latex-default-table-mode)
@@ -136,6 +135,7 @@
     (:latex-listings-options nil nil org-latex-listings-options)
     (:latex-minted-langs nil nil org-latex-minted-langs)
     (:latex-minted-options nil nil org-latex-minted-options)
+    (:latex-prefer-user-labels nil nil org-latex-prefer-user-labels)
     (:latex-subtitle-format nil nil org-latex-subtitle-format)
     (:latex-subtitle-separate nil nil org-latex-subtitle-separate)
     (:latex-table-scientific-notation nil nil org-latex-table-scientific-notation)
@@ -236,6 +236,61 @@ symbols are: `image', `table', `src-block' and `special-block'."
 	       (const :tag "Tables" table)
 	       (const :tag "Source code" src-block)
 	       (const :tag "Special blocks" special-block))))
+
+(defcustom org-latex-prefer-user-labels nil
+   "Use user-provided labels instead of internal ones when non-nil.
+
+When this variable is non-nil, Org will use the value of
+a headline's CUSTOM_ID property and NAME values as the key for
+the \\label commands generated.
+
+By default, Org generates its own internal labels during LaTeX
+export.  This process ensures that the \\label keys are unique
+and valid, but it means the keys are not available in advance of
+the export process.
+
+Setting this variable gives you control over how Org generates
+labels during LaTeX export, so that you may know their keys in
+advance.  One reason to do this is that it allows you to refer to
+various elements using a single label both in Org's link syntax
+and in embedded LaTeX code.
+
+For example, when this variable is non-nil, a headline like this:
+
+  ** Some section
+     :PROPERTIES:
+     :CUSTOM_ID: sec:foo
+     :END:
+  This is section [[#sec:foo]].
+  #+BEGIN_LATEX
+  And this is still section \\ref{sec:foo}.
+  #+END_LATEX
+
+will be exported to LaTeX as:
+
+  \\subsection{Some section}
+  \\label{sec:foo}
+  This is section \\ref{sec:foo}.
+  And this is still section \\ref{sec:foo}.
+
+Note, however, that setting this variable introduces a limitation
+on the possible values for CUSTOM_ID and NAME.  When this
+variable is non-nil, Org passes their value to \\label unchanged.
+You are responsible for ensuring that the value is a valid LaTeX
+\\label key, and that no other \\label commands with the same key
+appear elsewhere in your document.  (Keys may contain letters,
+numbers, and the following punctuation: '_' '.'  '-' ':'.)  There
+are no such limitations on CUSTOM_ID and NAME when this variable
+is nil.
+
+For headlines that do not define the CUSTOM_ID property or
+elements without a NAME, Org will continue to use its default
+labeling scheme to generate labels and resolve links into proper
+references."
+  :group 'org-export-latex
+  :type 'boolean
+  :version "25.1"
+  :package-version '(Org . "8.3"))
 
 ;;;; Preamble
 
@@ -477,59 +532,6 @@ The function result will be used in the section format string."
   :package-version '(Org . "8.0")
   :type 'function)
 
-(defcustom org-latex-custom-id-as-label nil
-   "Toggle use of CUSTOM_ID properties for generating section labels.
-
-When this variable is non-nil, Org will use the value of a
-headline's CUSTOM_ID property as the key for the \\label command
-for the LaTeX section corresponding to the headline.
-
-By default, Org generates its own internal section labels for all
-headlines during LaTeX export.  This process ensures that the
-\\label keys are unique and valid, but it means the keys are not
-available in advance of the export process.
-
-Setting this variable gives you control over how Org generates
-labels for sections during LaTeX export, so that you may know
-their keys in advance.  One reason to do this is that it allows
-you to refer to headlines using a single label both in Org's link
-syntax and in embedded LaTeX code.
-
-For example, when this variable is non-nil, a headline like this:
-
-  ** Some section
-     :PROPERTIES:
-     :CUSTOM_ID: sec:foo
-     :END:
-  This is section [[#sec:foo]].
-  #+BEGIN_LATEX
-  And this is still section \\ref{sec:foo}.
-  #+END_LATEX
-
-will be exported to LaTeX as:
-
-  \\subsection{Some section}
-  \\label{sec:foo}
-  This is section \\ref{sec:foo}.
-  And this is still section \\ref{sec:foo}.
-
-Note, however, that setting this variable introduces a limitation
-on the possible values for CUSTOM_ID.  When this variable is
-non-nil and a headline defines a CUSTOM_ID value, Org simply
-passes this value to \\label unchanged.  You are responsible for
-ensuring that the value is a valid LaTeX \\label key, and that no
-other \\label commands with the same key appear elsewhere in your
-document.  (Keys may contain letters, numbers, and the following
-punctuation: '_' '.' '-' ':'.)  There are no such limitations on
-CUSTOM_ID when this variable is nil.
-
-For headlines that do not define the CUSTOM_ID property, Org will
-continue to use its default labeling scheme to generate labels
-and resolve links into section references."
-  :group 'org-export-latex
-  :type 'boolean
-  :version "25.1"
-  :package-version '(Org . "8.3"))
 
 ;;;; Footnotes
 
@@ -1043,6 +1045,30 @@ INFO is a plist holding contextual information."
       (let ((type (org-element-type element)))
 	(memq (if (eq type 'link) 'image type) above)))))
 
+(defun org-latex--label (element info &optional force full)
+  "Return an appropriate label for ELEMENT.
+INFO is the current export state, as a plist.
+
+Return nil if ELEMENT has no NAME affiliated keyword or no
+CUSTOM_ID property, unless FORCE is non-nil.  In this case always
+return a unique label.
+
+Eventually, if FULL is non-nil, wrap label within \"\\label{}\"."
+  (let* ((user-label
+	  (org-element-property
+	   (if (memq (org-element-type element) '(headline inlinetask))
+	       :CUSTOM_ID
+	     :name)
+	   element))
+	 (label
+	  (and (or user-label force)
+	       (if (and user-label (plist-get info :latex-prefer-user-labels))
+		   user-label
+		 (org-export-get-reference element info)))))
+    (cond ((not full) label)
+	  (label (format "\\label{%s}\n" label))
+	  (t ""))))
+
 (defun org-latex--caption/label-string (element info)
   "Return caption and label LaTeX string for ELEMENT.
 
@@ -1050,9 +1076,7 @@ INFO is a plist holding contextual information.  If there's no
 caption nor label, return the empty string.
 
 For non-floats, see `org-latex--wrap-label'."
-  (let* ((label
-	  (if (not (org-element-property :name element)) ""
-	    (format "\\label{%s}" (org-export-get-reference element info))))
+  (let* ((label (org-latex--label element info nil t))
 	 (main (org-export-get-caption element))
 	 (short (org-export-get-caption element t))
 	 (caption-from-attr-latex
@@ -1564,13 +1588,9 @@ holding contextual information."
 	   (full-text (funcall (plist-get info :latex-format-headline-function)
 			       todo todo-type priority text tags info))
 	   ;; Associate \label to the headline for internal links.
-	   (headline-label
-	    (format "\\label{%s}\n"
-		    (or (and (plist-get info :latex-custom-id-labels)
-			     (org-element-property :CUSTOM_ID headline))
-			(org-export-get-reference headline info))))
+	   (headline-label (org-latex--label headline info t t))
 	   (pre-blanks
-	    (make-string (org-element-property :pre-blank headline) 10)))
+	    (make-string (org-element-property :pre-blank headline) ?\n)))
       (if (or (not section-fmt) (org-export-low-level-p headline info))
 	  ;; This is a deep sub-tree: export it as a list item.  Also
 	  ;; export as items headlines for which no section format has
@@ -1727,10 +1747,7 @@ holding contextual information."
 		   (org-export-get-tags inlinetask info)))
 	(priority (and (plist-get info :with-priority)
 		       (org-element-property :priority inlinetask)))
-	(contents (concat
-		   (let ((label (org-element-property :CUSTOM_ID inlinetask)))
-		     (and label (format "\\label{%s}\n" label)))
-		   contents)))
+	(contents (concat (org-latex--label inlinetask info) contents)))
     (funcall (plist-get info :latex-format-inlinetask-function)
 	     todo todo-type priority title tags contents info)))
 
@@ -1884,9 +1901,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	  (insert value)
 	  (goto-char (point-min))
 	  (forward-line)
-	  (insert
-	   (format "\\label{%s}\n"
-		   (org-export-get-reference latex-environment info)))
+	  (insert (org-latex--label latex-environment info nil t))
 	  (buffer-string))))))
 
 
@@ -2097,11 +2112,7 @@ INFO is a plist holding contextual information.  See
 	  ;; number.  Otherwise, display description or headline's
 	  ;; title.
 	  (headline
-	   (let* ((custom-label
-		   (and (plist-get info :latex-custom-id-labels)
-			(org-element-property :CUSTOM_ID destination)))
-		  (label (or custom-label
-			     (org-export-get-reference destination info))))
+	   (let ((label (org-latex--label destination info t)))
 	     (if (and (not desc)
 		      (org-export-numbered-headline-p destination info))
 		 (format "\\ref{%s}" label)
@@ -2111,7 +2122,7 @@ INFO is a plist holding contextual information.  See
 			    (org-element-property :title destination) info))))))
           ;; Fuzzy link points to a target.  Do as above.
 	  (otherwise
-	   (let ((ref (org-export-get-reference destination info)))
+	   (let ((ref (org-latex--label destination info t)))
 	     (if (not desc) (format "\\ref{%s}" ref)
 	       (format "\\hyperref[%s]{%s}" ref desc)))))))
      ;; Coderef: replace link with the reference name or the
