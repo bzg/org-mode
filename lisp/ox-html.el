@@ -2838,21 +2838,15 @@ INFO is a plist holding contextual information.  See
 	     ((and home use-abs-url)
 	      (setq raw-path (concat (file-name-as-directory home) raw-path))))
 	    ;; Add search option, if any.  A search option can be
-	    ;; relative to a custom-id or a headline title.  Append
-	    ;; a hash sign to any unresolved option, as it might point
-	    ;; to a target.
+	    ;; relative to a custom-id, a headline title a name,
+	    ;; a target or a radio-target.
 	    (let ((option (org-element-property :search-option link)))
-	      (cond ((not option) raw-path)
-		    ((eq (aref option 0) ?#) (concat raw-path option))
-		    (t
-		     (let ((destination
-			    (org-publish-resolve-external-fuzzy-link
-			     (org-element-property :path link) option)))
-		       (concat raw-path
-			       (if (not destination) (concat "#" option)
-				 (concat "#sec-"
-					 (mapconcat #'number-to-string
-						    destination "-")))))))))
+	      (if (not option) raw-path
+		(concat raw-path
+			"#"
+			(org-publish-resolve-external-link
+			 option
+			 (org-element-property :path link))))))
 	   (t raw-path)))
 	 ;; Extract attributes from parent's paragraph.  HACK: Only do
 	 ;; this for the first link in parent (inner image link for

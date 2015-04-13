@@ -583,7 +583,7 @@ Return output file name."
 		   (body-p (plist-get plist :body-only)))
 	       (org-export-to-file backend output-file
 		 nil nil nil body-p
-		 ;; Add `org-publish-collect-numbering' and
+		 ;; Add `org-publish--collect-references' and
 		 ;; `org-publish-collect-index' to final output
 		 ;; filters.  The latter isn't dependent on
 		 ;; `:makeindex', since we want to keep it up-to-date
@@ -591,7 +591,7 @@ Return output file name."
 		 (org-combine-plists
 		  plist
 		  `(:filter-final-output
-		    ,(cons 'org-publish-collect-numbering
+		    ,(cons 'org-publish--collect-references
 			   (cons 'org-publish-collect-index
 				 (plist-get plist :filter-final-output))))))))
       ;; Remove opened buffer in the process.
@@ -1068,31 +1068,90 @@ publishing directory."
 ;; This part implements tools to resolve [[file.org::*Some headline]]
 ;; links, where "file.org" belongs to the current project.
 
-(defun org-publish-collect-numbering (output backend info)
+(defun org-publish--collect-references (output backend info)
+  "Store headlines references for current published file.
+
+OUPUT is the produced output, as a string.  BACKEND is the export
+back-end used, as a symbol.  INFO is the final export state, as
+a plist.
+
+References are stored as an alist ((TYPE SEARCH) . VALUE) where
+
+  TYPE is a symbol among `headline', `custom-id', `target' and
+  `other'.
+
+  SEARCH is the string a link is expected to match.  It is
+
+    - headline's title, as a string, with all whitespace
+      characters and statistics cookies removed, if TYPE is
+      `headline'.
+
+    - CUSTOM_ID value if TYPE is `custom-id'.
+
+    - target's or radio-target's name if TYPE is `target'.
+
+    - NAME affiliated keyword is TYPE is `other'.
+
+  VALUE is an internal reference used in the document, as
+  a string.
+
+This function is meant to be used as a final out filter.  See
+`org-publish-org-to'."
   (org-publish-cache-set-file-property
-   (plist-get info :input-file) :numbering
-   (mapcar (lambda (entry)
-	     (cons (org-split-string
-		    (replace-regexp-in-string
-		     "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
-		     (org-element-property :raw-value (car entry))))
-		   (cdr entry)))
-	   (plist-get info :headline-numbering)))
+   (plist-get info :input-file) :references
+   (let (refs)
+     (when (hash-table-p (plist-get info :internal-references))
+       (maphash
+	(lambda (k v)
+	  (case (org-element-type k)
+	    ((headline inlinetask)
+	     (push (cons
+		    (cons 'headline
+			  (replace-regexp-in-string
+			   "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]\\|[ \r\t\n]+" ""
+			   (org-element-property :raw-value k)))
+		    v)
+		   refs)
+	     (let ((custom-id (org-element-property :CUSTOM_ID k)))
+	       (when custom-id
+		 (push (cons (cons 'custom-id custom-id) v) refs))))
+	    ((radio-target target)
+	     (push
+	      (cons (cons 'target
+			  (replace-regexp-in-string
+			   "[ \r\t\n]+" "" (org-element-property :value k)))
+		    v)
+	      refs))
+	    ((org-element-property :name k)
+	     (push (cons (cons 'other (org-element-property :name k)) v) refs)))
+	  refs)
+	(plist-get info :internal-references)))
+     refs))
   ;; Return output unchanged.
   output)
 
-(defun org-publish-resolve-external-fuzzy-link (file fuzzy)
-  "Return numbering for headline matching FUZZY search in FILE.
+(defun org-publish-resolve-external-link (search file)
+  "Return reference for elements or objects matching SEARCH in FILE.
 
-Return value is a list of numbers, or nil.  This function allows
-to resolve external fuzzy links like:
+Return value is an internal reference, as a string.
 
-  [[file.org::*fuzzy][description]]"
-  (when org-publish-cache
-    (cdr (assoc (org-split-string
-		 (if (eq (aref fuzzy 0) ?*) (substring fuzzy 1) fuzzy))
-		(org-publish-cache-get-file-property
-		 (expand-file-name file) :numbering nil t)))))
+This function allows to resolve external links like:
+
+  [[file.org::*fuzzy][description]]
+  [[file.org::#custom-id][description]]
+  [[file.org::fuzzy][description]]"
+  (let ((references (org-publish-cache-get-file-property
+		     (expand-file-name file) :references nil t))
+	(search (replace-regexp-in-string "[ \r\t\n]+" "" search)))
+    (cond
+     ((cdr (case (aref search 0)
+	     (?* (assoc (cons 'headline (substring search 1)) references))
+	     (?# (assoc (cons 'custom-id (substring search 1)) references))
+	     (t (or (assoc (cons 'target search) references)
+		    (assoc (cons 'other search) references)
+		    (assoc (cons 'headline search) references))))))
+     (t (message "Unknown cross-reference \"%s\" in file \"%s\"" search file)
+	"MissingReference"))))
 
 
 
