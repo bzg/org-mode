@@ -720,8 +720,7 @@ used as a communication channel."
 	(if (not destination) contents
 	  (format "\\hyperlink%s{%s}{%s}"
 		  (or (org-beamer--element-has-overlay-p link) "")
-		  (org-export-solidify-link-text
-		   (org-element-property :value destination))
+		  (org-export-get-reference destination info)
 		  contents))))
      ((and (member type '("custom-id" "fuzzy" "id"))
 	   (let ((destination (if (string= type "fuzzy")
@@ -743,11 +742,11 @@ used as a communication channel."
 			    label
 			    contents))))
 	       (target
-		(let ((path (org-export-solidify-link-text path)))
-		  (if (not contents) (format "\\ref{%s}" path)
+		(let ((ref (org-export-get-reference destination info)))
+		  (if (not contents) (format "\\ref{%s}" ref)
 		    (format "\\hyperlink%s{%s}{%s}"
 			    (or (org-beamer--element-has-overlay-p link) "")
-			    path
+			    ref
 			    contents))))))))
      ;; Otherwise, use `latex' back-end.
      (t (org-export-with-backend 'latex link contents info)))))
@@ -785,7 +784,8 @@ contextual information."
 	      'option)
 	     ;; Eventually insert contents and close environment.
 	     contents
-	     latex-type))))
+	     latex-type)
+     info)))
 
 
 ;;;; Radio Target
@@ -796,8 +796,7 @@ TEXT is the text of the target.  INFO is a plist holding
 contextual information."
   (format "\\hypertarget%s{%s}{%s}"
 	  (or (org-beamer--element-has-overlay-p radio-target) "")
-	  (org-export-solidify-link-text
-	   (org-element-property :value radio-target))
+	  (org-export-get-reference radio-target info)
 	  text))
 
 
@@ -807,8 +806,7 @@ contextual information."
   "Transcode a TARGET object into Beamer code.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (format "\\label{%s}"
-	  (org-export-solidify-link-text (org-element-property :value target))))
+  (format "\\label{%s}" (org-export-get-reference target info)))
 
 
 ;;;; Template

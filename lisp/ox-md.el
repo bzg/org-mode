@@ -195,11 +195,9 @@ a communication channel."
 		 (let ((char (org-element-property :priority headline)))
 		   (and char (format "[#%c] " char)))))
 	   (anchor
-	    (when (plist-get info :with-toc)
-	      (org-html--anchor
-	       (or (org-element-property :CUSTOM_ID headline)
-		   (org-export-get-headline-id headline info))
-	       nil nil info)))
+	    (and (plist-get info :with-toc)
+		 (org-html--anchor
+		  (org-export-get-reference headline info) nil nil info)))
 	   ;; Headline text without tags.
 	   (heading (concat todo priority title))
 	   (style (plist-get info :md-headline-style)))

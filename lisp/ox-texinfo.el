@@ -459,11 +459,9 @@ anchor name is unique."
     (or (cdr (assq blob cache))
 	(let ((name
 	       (org-texinfo--sanitize-node
-		(case (org-element-type blob)
-		  (headline
-		   (org-export-data (org-export-get-alt-title blob info) info))
-		  ((radio-target target) (org-element-property :value blob))
-		  (otherwise (or (org-element-property :name blob) ""))))))
+		(if (eq (org-element-type blob) 'headline)
+		    (org-export-data (org-export-get-alt-title blob info) info)
+		  (org-export-get-reference blob info)))))
 	  ;; Ensure NAME is unique.
 	  (while (rassoc name cache) (setq name (concat name "x")))
 	  (plist-put info :texinfo-node-cache (cons (cons blob name) cache))
@@ -1205,8 +1203,7 @@ holding contextual information."
 TEXT is the text of the target.  INFO is a plist holding
 contextual information."
   (format "@anchor{%s}%s"
-	  (org-export-solidify-link-text
-	   (org-element-property :value radio-target))
+	  (org-export-get-reference radio-target info)
 	  text))
 
 ;;;; Section
@@ -1345,8 +1342,7 @@ a communication channel."
   "Transcode a TARGET object from Org to Texinfo.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (format "@anchor{%s}"
-	  (org-export-solidify-link-text (org-element-property :value target))))
+  (format "@anchor{%s}" (org-export-get-reference target info)))
 
 ;;;; Timestamp
 

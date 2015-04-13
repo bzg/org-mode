@@ -1073,8 +1073,7 @@ a communication channel."
   "Transcode a TARGET object from Org to Man.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (format "\\fI%s\\fP"
-          (org-export-solidify-link-text (org-element-property :value target))))
+  (format "\\fI%s\\fP" (org-export-get-reference target info)))
 
 
 ;;; Timestamp

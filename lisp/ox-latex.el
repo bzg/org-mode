@@ -1050,25 +1050,25 @@ INFO is a plist holding contextual information.  If there's no
 caption nor label, return the empty string.
 
 For non-floats, see `org-latex--wrap-label'."
-  (let* ((label (org-element-property :name element))
-	 (label-str (if (not (org-string-nw-p label)) ""
-		      (format "\\label{%s}"
-			      (org-export-solidify-link-text label))))
+  (let* ((label
+	  (if (not (org-element-property :name element)) ""
+	    (format "\\label{%s}" (org-export-get-reference element info))))
 	 (main (org-export-get-caption element))
 	 (short (org-export-get-caption element t))
-	 (caption-from-attr-latex (org-export-read-attribute :attr_latex element :caption)))
+	 (caption-from-attr-latex
+	  (org-export-read-attribute :attr_latex element :caption)))
     (cond
      ((org-string-nw-p caption-from-attr-latex)
       (concat caption-from-attr-latex "\n"))
-     ((and (not main) (equal label-str "")) "")
-     ((not main) (concat label-str "\n"))
+     ((and (not main) (equal label "")) "")
+     ((not main) (concat label "\n"))
      ;; Option caption format with short name.
      (short (format "\\caption[%s]{%s%s}\n"
 		    (org-export-data short info)
-		    label-str
+		    label
 		    (org-export-data main info)))
      ;; Standard caption format.
-     (t (format "\\caption{%s%s}\n" label-str (org-export-data main info))))))
+     (t (format "\\caption{%s%s}\n" label (org-export-data main info))))))
 
 (defun org-latex-guess-inputenc (header)
   "Set the coding system in inputenc to what the buffer is.
@@ -1144,15 +1144,16 @@ nil."
 	     options
 	     ","))
 
-(defun org-latex--wrap-label (element output)
+(defun org-latex--wrap-label (element output info)
   "Wrap label associated to ELEMENT around OUTPUT, if appropriate.
-This function shouldn't be used for floats.  See
+INFO is the current export state, as a plist.  This function
+should not be used for floats.  See
 `org-latex--caption/label-string'."
-  (let ((label (org-element-property :name element)))
-    (if (not (and (org-string-nw-p output) (org-string-nw-p label))) output
-      (concat (format "\\phantomsection\n\\label{%s}\n"
-		      (org-export-solidify-link-text label))
-	      output))))
+  (if (not (and (org-string-nw-p output) (org-element-property :name element)))
+      output
+    (concat (format "\\phantomsection\n\\label{%s}\n"
+		    (org-export-get-reference element info))
+	    output)))
 
 (defun org-latex--text-markup (text markup info)
   "Format TEXT depending on MARKUP text markup.
@@ -1372,8 +1373,7 @@ contextual information."
 CONTENTS holds the contents of the center block.  INFO is a plist
 holding contextual information."
   (org-latex--wrap-label
-   center-block
-   (format "\\begin{center}\n%s\\end{center}" contents)))
+   center-block (format "\\begin{center}\n%s\\end{center}" contents) info))
 
 
 ;;;; Clock
@@ -1410,7 +1410,7 @@ holding contextual information."
   (let* ((name (org-element-property :drawer-name drawer))
 	 (output (funcall (plist-get info :latex-format-drawer-function)
 			  name contents)))
-    (org-latex--wrap-label drawer output)))
+    (org-latex--wrap-label drawer output info)))
 
 
 ;;;; Dynamic Block
@@ -1419,7 +1419,7 @@ holding contextual information."
   "Transcode a DYNAMIC-BLOCK element from Org to LaTeX.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information.  See `org-export-data'."
-  (org-latex--wrap-label dynamic-block contents))
+  (org-latex--wrap-label dynamic-block contents info))
 
 
 ;;;; Entity
@@ -1441,7 +1441,8 @@ information."
     (org-latex--wrap-label
      example-block
      (format "\\begin{verbatim}\n%s\\end{verbatim}"
-	     (org-export-format-code-default example-block info)))))
+	     (org-export-format-code-default example-block info))
+     info)))
 
 
 ;;;; Export Block
@@ -1471,7 +1472,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
    fixed-width
    (format "\\begin{verbatim}\n%s\\end{verbatim}"
 	   (org-remove-indentation
-	    (org-element-property :value fixed-width)))))
+	    (org-element-property :value fixed-width)))
+   info))
 
 
 ;;;; Footnote Reference
@@ -1566,7 +1568,7 @@ holding contextual information."
 	    (format "\\label{%s}\n"
 		    (or (and (plist-get info :latex-custom-id-labels)
 			     (org-element-property :CUSTOM_ID headline))
-			(org-export-get-headline-id headline info))))
+			(org-export-get-reference headline info))))
 	   (pre-blanks
 	    (make-string (org-element-property :pre-blank headline) 10)))
       (if (or (not section-fmt) (org-export-low-level-p headline info))
@@ -1669,7 +1671,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
       horizontal-rule
       (format "\\rule{%s}{%s}"
 	      (or (plist-get attr :width) "\\linewidth")
-	      (or (plist-get attr :thickness) "0.5pt"))))))
+	      (or (plist-get attr :thickness) "0.5pt"))
+      info))))
 
 
 ;;;; Inline Src Block
@@ -1871,10 +1874,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode a LATEX-ENVIRONMENT element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (when (plist-get info :with-latex)
-    (let ((label (org-element-property :name latex-environment))
-	  (value (org-remove-indentation
+    (let ((value (org-remove-indentation
 		  (org-element-property :value latex-environment))))
-      (if (not (org-string-nw-p label)) value
+      (if (not (org-element-property :name latex-environment)) value
 	;; Environment is labeled: label must be within the environment
 	;; (otherwise, a reference pointing to that element will count
 	;; the section instead).
@@ -1883,7 +1885,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	  (goto-char (point-min))
 	  (forward-line)
 	  (insert
-	   (format "\\label{%s}\n" (org-export-solidify-link-text label)))
+	   (format "\\label{%s}\n"
+		   (org-export-get-reference latex-environment info)))
 	  (buffer-string))))))
 
 
@@ -2070,8 +2073,7 @@ INFO is a plist holding contextual information.  See
       (let ((destination (org-export-resolve-radio-link link info)))
 	(if (not destination) desc
 	  (format "\\hyperref[%s]{%s}"
-		  (org-export-solidify-link-text
-		   (org-element-property :value destination))
+		  (org-export-get-reference destination info)
 		  desc))))
      ;; Links pointing to a headline: Find destination and build
      ;; appropriate referencing command.
@@ -2099,7 +2101,7 @@ INFO is a plist holding contextual information.  See
 		   (and (plist-get info :latex-custom-id-labels)
 			(org-element-property :CUSTOM_ID destination)))
 		  (label (or custom-label
-			     (org-export-get-headline-id destination info))))
+			     (org-export-get-reference destination info))))
 	     (if (and (not desc)
 		      (org-export-numbered-headline-p destination info))
 		 (format "\\ref{%s}" label)
@@ -2109,9 +2111,9 @@ INFO is a plist holding contextual information.  See
 			    (org-element-property :title destination) info))))))
           ;; Fuzzy link points to a target.  Do as above.
 	  (otherwise
-	   (let ((path (org-export-solidify-link-text path)))
-	     (if (not desc) (format "\\ref{%s}" path)
-	       (format "\\hyperref[%s]{%s}" path desc)))))))
+	   (let ((ref (org-export-get-reference destination info)))
+	     (if (not desc) (format "\\ref{%s}" ref)
+	       (format "\\hyperref[%s]{%s}" ref desc)))))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
@@ -2165,7 +2167,8 @@ contextual information."
 	     latex-type
 	     (or (plist-get attr :options) "")
 	     contents
-	     latex-type))))
+	     latex-type)
+     info)))
 
 
 ;;;; Plain Text
@@ -2393,8 +2396,7 @@ channel."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (org-latex--wrap-label
-   quote-block
-   (format "\\begin{quote}\n%s\\end{quote}" contents)))
+   quote-block (format "\\begin{quote}\n%s\\end{quote}" contents) info))
 
 
 ;;;; Radio Target
@@ -2403,10 +2405,7 @@ holding contextual information."
   "Transcode a RADIO-TARGET object from Org to LaTeX.
 TEXT is the text of the target.  INFO is a plist holding
 contextual information."
-  (format "\\label{%s}%s"
-	  (org-export-solidify-link-text
-	   (org-element-property :value radio-target))
-	  text))
+  (format "\\label{%s}%s" (org-export-get-reference radio-target info) text))
 
 
 ;;;; Section
@@ -3019,8 +3018,7 @@ a communication channel."
   "Transcode a TARGET object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (format "\\label{%s}"
-	  (org-export-solidify-link-text (org-element-property :value target))))
+  (format "\\label{%s}" (org-export-get-reference target info)))
 
 
 ;;;; Timestamp
@@ -3077,7 +3075,8 @@ contextual information."
 	     "^[ \t]*\\\\\\\\$" "\\vspace*{1em}"
 	     (replace-regexp-in-string
 	      "\\([ \t]*\\\\\\\\\\)?[ \t]*\n" "\\\\\n"
-	      contents nil t) nil t) nil t))))
+	      contents nil t) nil t) nil t))
+   info))
 
 
 

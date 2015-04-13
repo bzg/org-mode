@@ -1269,8 +1269,7 @@ INFO is a plist holding contextual information.  See
       (let ((destination (org-export-resolve-radio-link link info)))
         (if (not destination) desc
           (format "\\fI [%s] \\fP"
-                  (org-export-solidify-link-text
-		   (org-element-property :value destination))))))
+		  (org-export-get-reference destination info)))))
 
      ;; Links pointing to a headline: find destination and build
      ;; appropriate referencing command.
@@ -1302,9 +1301,9 @@ INFO is a plist holding contextual information.  See
                             (org-element-property :title destination) info))))))
           ;; Fuzzy link points to a target.  Do as above.
           (otherwise
-           (let ((path (org-export-solidify-link-text path)))
-             (if (not desc) (format "\\fI%s\\fP" path)
-               (format "%s \\fBat\\fP \\fI%s\\fP" desc path)))))))
+           (let ((ref (org-export-get-reference destination info)))
+             (if (not desc) (format "\\fI%s\\fP" ref)
+               (format "%s \\fBat\\fP \\fI%s\\fP" desc ref)))))))
      ;; External link with a description part.
      ((and path desc) (format "%s \\fBat\\fP \\fI%s\\fP" path desc))
      ;; External link without a description part.
@@ -1458,10 +1457,7 @@ holding contextual information."
   "Transcode a RADIO-TARGET object from Org to Groff.
 TEXT is the text of the target.  INFO is a plist holding
 contextual information."
-  (format "%s - %s"
-          (org-export-solidify-link-text
-           (org-element-property :value radio-target))
-          text))
+  (format "%s - %s" (org-export-get-reference radio-target info) text))
 
 ;;; Section
 
@@ -1791,8 +1787,7 @@ a communication channel."
   "Transcode a TARGET object from Org to Groff.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (format "\\fI%s\\fP"
-          (org-export-solidify-link-text (org-element-property :value target))))
+  (format "\\fI%s\\fP" (org-export-get-reference target info)))
 
 ;;; Timestamp
 

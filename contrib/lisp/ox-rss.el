@@ -237,10 +237,7 @@ communication channel."
 	   (hl-home (file-name-as-directory (plist-get info :html-link-home)))
 	   (hl-pdir (plist-get info :publishing-directory))
 	   (hl-perm (org-element-property :RSS_PERMALINK headline))
-	   (anchor
-	    (org-export-solidify-link-text
-	     (or (org-element-property :CUSTOM_ID headline)
-		 (concat "sec-" (mapconcat 'number-to-string hl-number "-")))))
+	   (anchor (org-export-get-reference headline info))
 	   (category (org-rss-plain-text
 		      (or (org-element-property :CATEGORY headline) "") info))
 	   (pubdate0 (org-element-property :PUBDATE headline))
