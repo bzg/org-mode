@@ -2085,7 +2085,7 @@ INFO is a plist holding contextual information.  See
 	   (if desc (format "\\href{%s}{%s}" destination desc)
 	     (format "\\url{%s}" destination)))
 	  ;; Fuzzy link points nowhere.
-	  ('nil
+	  ((nil)
 	   (format (plist-get info :latex-link-with-unknown-path-format)
 		   (or desc
 		       (org-export-data
