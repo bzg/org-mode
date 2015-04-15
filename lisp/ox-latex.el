@@ -1049,16 +1049,17 @@ INFO is a plist holding contextual information."
   "Return an appropriate label for ELEMENT.
 INFO is the current export state, as a plist.
 
-Return nil if ELEMENT has no NAME affiliated keyword or no
-CUSTOM_ID property, unless FORCE is non-nil.  In this case always
-return a unique label.
+Return nil if ELEMENT has no NAME or VALUE affiliated keyword or
+no CUSTOM_ID property, unless FORCE is non-nil.  In this case
+always return a unique label.
 
 Eventually, if FULL is non-nil, wrap label within \"\\label{}\"."
   (let* ((user-label
 	  (org-element-property
-	   (if (memq (org-element-type element) '(headline inlinetask))
-	       :CUSTOM_ID
-	     :name)
+	   (case (org-element-type element)
+	     ((headline inlinetask) :CUSTOM_ID)
+	     (target :value)
+	     (otherwise :name))
 	   element))
 	 (label
 	  (and (or user-label force)
@@ -1176,7 +1177,7 @@ should not be used for floats.  See
   (if (not (and (org-string-nw-p output) (org-element-property :name element)))
       output
     (concat (format "\\phantomsection\n\\label{%s}\n"
-		    (org-export-get-reference element info))
+		    (org-latex--label element info))
 	    output)))
 
 (defun org-latex--text-markup (text markup info)
@@ -2088,7 +2089,7 @@ INFO is a plist holding contextual information.  See
       (let ((destination (org-export-resolve-radio-link link info)))
 	(if (not destination) desc
 	  (format "\\hyperref[%s]{%s}"
-		  (org-export-get-reference destination info)
+		  (org-latex--label destination info)
 		  desc))))
      ;; Links pointing to a headline: Find destination and build
      ;; appropriate referencing command.
@@ -2416,7 +2417,7 @@ holding contextual information."
   "Transcode a RADIO-TARGET object from Org to LaTeX.
 TEXT is the text of the target.  INFO is a plist holding
 contextual information."
-  (format "\\label{%s}%s" (org-export-get-reference radio-target info) text))
+  (format "\\label{%s}%s" (org-latex--label radio-target info) text))
 
 
 ;;;; Section
@@ -3029,7 +3030,7 @@ a communication channel."
   "Transcode a TARGET object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (format "\\label{%s}" (org-export-get-reference target info)))
+  (format "\\label{%s}" (org-latex--label target info)))
 
 
 ;;;; Timestamp
