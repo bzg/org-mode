@@ -9,6 +9,9 @@ See the end of the file for license conditions.
 Please send Org bug reports to emacs-orgmode@gnu.org.
 
 * Version 8.4
+** New features
+*** Org linter
+~org-lint~ can check syntax and report common issues in Org documents.
 ** New functions
 ~org-show-children~ is a faster implementation of
 ~outline-show-children~.
