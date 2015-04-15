@@ -4149,9 +4149,18 @@ alphanumeric characters only."
 		     h))))
     (or (gethash datum cache)
 	(puthash datum
-		 (format "org%s%d"
+		 (format "%s:%d"
 			 (if type
-			     (replace-regexp-in-string "-" "" (symbol-name type))
+			     (case type
+			       (headline "sec")
+			       (paragraph
+				(if (org-element-property :caption datum)
+				    "fig" "paragraph"))
+			       (latex-environment "eq")
+			       (table "tbl")
+			       (otherwise
+				(replace-regexp-in-string "-" ""
+							  (symbol-name type))))
 			   "secondarystring")
 			 (incf (gethash type cache 0)))
 		 cache))))
