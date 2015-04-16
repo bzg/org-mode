@@ -3880,8 +3880,7 @@ dimming them."
 		  e (point-at-eol)
 		  ov (make-overlay b e))
 	    (if invis1
-		(progn (overlay-put ov 'invisible t)
-		       (overlay-put ov 'intangible t))
+		(overlay-put ov 'invisible t)
 	      (overlay-put ov 'face 'org-agenda-dimmed-todo-face))
 	    (overlay-put ov 'org-type 'org-blocked-todo))))))
   (when (org-called-interactively-p 'interactive)
