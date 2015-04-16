@@ -10502,29 +10502,25 @@ from."
 (defun org-icompleting-read (&rest args)
   "Completing-read using `ido-mode' or `iswitchb' speedups if available."
   (org-without-partial-completion
-   (if (and org-completion-use-ido
-            (fboundp 'ido-completing-read)
-            (boundp 'ido-mode) ido-mode
-            (listp (second args)))
-       (let ((ido-enter-matching-directory nil))
-         (apply (if (eq completing-read-function
-                        'completing-read-default)
-                    'ido-completing-read
-                  completing-read-function)
-                (concat (car args))
-                (if (consp (car (nth 1 args)))
-                    (mapcar 'car (nth 1 args))
-                  (nth 1 args))
-                (cddr args)))
-     (if (and org-completion-use-iswitchb
-              (boundp 'iswitchb-mode) iswitchb-mode
-              (listp (second args)))
-         (apply 'org-iswitchb-completing-read (concat (car args))
-                (if (consp (car (nth 1 args)))
-                    (mapcar 'car (nth 1 args))
-                  (nth 1 args))
-                (cddr args))
-       (apply 'completing-read args)))))
+   (let ((ido-enter-matching-directory nil))
+     (apply
+      (cond ((and org-completion-use-ido
+		  (fboundp 'ido-completing-read)
+		  (boundp 'ido-mode) ido-mode
+		  (listp (second args)))
+	     'ido-completing-read)
+	    ((and org-completion-use-iswitchb
+		  (boundp 'iswitchb-mode) iswitchb-mode
+		  (listp (second args)))
+	     'org-iswitchb-completing-read)
+	    (t (or (and (boundp 'completing-read-function)
+			completing-read-function)
+		   'completing-read)))
+      (concat (car args))
+      (if (consp (car (nth 1 args)))
+	  (mapcar 'car (nth 1 args))
+	(nth 1 args))
+      (cddr args)))))
 
 (defun org-extract-attributes (s)
   "Extract the attributes cookie from a string and set as text property."
