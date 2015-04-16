@@ -10443,24 +10443,22 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 
 (defun org-file-complete-link (&optional arg)
   "Create a file link using completion."
-  (let (file link)
-    (setq file (org-iread-file-name "File: "))
-    (let ((pwd (file-name-as-directory (expand-file-name ".")))
-	  (pwd1 (file-name-as-directory (abbreviate-file-name
-					 (expand-file-name ".")))))
-      (cond
-       ((equal arg '(16))
-	(setq link (concat
-		    "file:"
-		    (abbreviate-file-name (expand-file-name file)))))
-       ((string-match (concat "^" (regexp-quote pwd1) "\\(.+\\)") file)
-	(setq link  (concat "file:" (match-string 1 file))))
-       ((string-match (concat "^" (regexp-quote pwd) "\\(.+\\)")
-		      (expand-file-name file))
-	(setq link  (concat
-		     "file:" (match-string 1 (expand-file-name file)))))
-       (t (setq link (concat "file:" file)))))
-    link))
+  (let ((file (org-iread-file-name "File: "))
+	(pwd (file-name-as-directory (expand-file-name ".")))
+	(pwd1 (file-name-as-directory (abbreviate-file-name
+				       (expand-file-name ".")))))
+    (cond ((equal arg '(16))
+	   (concat "file:"
+		   (abbreviate-file-name (expand-file-name file))))
+	  ((string-match
+	    (concat "^" (regexp-quote pwd1) "\\(.+\\)") file)
+	   (concat "file:" (match-string 1 file)))
+	  ((string-match
+	    (concat "^" (regexp-quote pwd) "\\(.+\\)")
+	    (expand-file-name file))
+	   (concat "file:"
+		   (match-string 1 (expand-file-name file))))
+	  (t (concat "file:" file)))))
 
 (defun org-iread-file-name (&rest args)
   "Read-file-name using `ido-mode' speedup if available.
