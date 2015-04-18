@@ -2444,18 +2444,26 @@ holding contextual information."
            (full-text (funcall (plist-get info :html-format-headline-function)
                                todo todo-type priority text tags info))
            (contents (or contents ""))
-           (reference (org-export-get-reference headline info))
-           (extra-id (let ((id (org-element-property :ID headline)))
-		       (if (not id) ""
-			 (org-html--anchor (concat "ID-" id) nil nil info)))))
+	   (ids (delq nil
+                      (list (org-element-property :CUSTOM_ID headline)
+                            (org-export-get-reference headline info)
+                            (org-element-property :ID headline))))
+           (preferred-id (car ids))
+           (extra-ids
+	    (mapconcat
+	     (lambda (id)
+	       (org-html--anchor
+		(if (org-uuidgen-p id) (concat "ID-" id) id)
+		nil nil info))
+	     (cdr ids) "")))
       (if (org-export-low-level-p headline info)
           ;; This is a deep sub-tree: export it as a list item.
           (let* ((type (if numberedp 'ordered 'unordered))
                  (itemized-body
                   (org-html-format-list-item
                    contents type nil info nil
-                   (concat (org-html--anchor reference nil nil info)
-                           extra-id
+                   (concat (org-html--anchor preferred-id nil nil info)
+                           extra-ids
                            full-text))))
             (concat (and (org-export-first-sibling-p headline info)
                          (org-html-begin-plain-list type))
@@ -2474,8 +2482,8 @@ holding contextual information."
                           extra-class)
                   (format "\n<h%d id=\"%s\">%s%s</h%d>\n"
                           level
-                          reference
-                          extra-id
+                          preferred-id
+                          extra-ids
                           (concat
                            (and numberedp
                                 (format
