@@ -14331,6 +14331,7 @@ however, override everything.
 @item @code{:latex-listings}                   @tab @code{org-latex-listings}
 @item @code{:latex-minted-langs}               @tab @code{org-latex-minted-langs}
 @item @code{:latex-minted-options}             @tab @code{org-latex-minted-options}
+@item @code{:latex-prefer-user-labels}         @tab @code{org-latex-prefer-user-labels}
 @item @code{:latex-subtitle-format}            @tab @code{org-latex-subtitle-format}
 @item @code{:latex-subtitle-separate}          @tab @code{org-latex-subtitle-separate}
 @item @code{:latex-table-scientific-notation}  @tab @code{org-latex-table-scientific-notation}
