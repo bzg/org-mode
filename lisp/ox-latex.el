@@ -1069,8 +1069,9 @@ Eventually, if FULL is non-nil, wrap label within \"\\label{}\"."
 		   user-label
 		 (org-export-get-reference datum info)))))
     (cond ((not full) label)
-	  (label (concat (format "\\label{%s}" label)
-			 (and (not (eq type 'target)) "\n")))
+	  (label (format "\\label{%s}%s"
+			 label
+			 (if (eq type 'target) "" "\n")))
 	  (t ""))))
 
 (defun org-latex--caption/label-string (element info)
