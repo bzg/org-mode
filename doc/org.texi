@@ -14310,7 +14310,6 @@ however, override everything.
 @item @code{:latex-caption-above}              @tab @code{org-latex-caption-above}
 @item @code{:latex-classes}                    @tab @code{org-latex-classes}
 @item @code{:latex-class}                      @tab @code{org-latex-default-class}
-@item @code{:latex-custom-id-labels}           @tab @code{org-latex-custom-id-as-label}
 @item @code{:latex-default-figure-position}    @tab @code{org-latex-default-figure-position}
 @item @code{:latex-default-table-environment}  @tab @code{org-latex-default-table-environment}
 @item @code{:latex-default-table-mode}         @tab @code{org-latex-default-table-mode}
