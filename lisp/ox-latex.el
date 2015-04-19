@@ -241,8 +241,8 @@ symbols are: `image', `table', `src-block' and `special-block'."
    "Use user-provided labels instead of internal ones when non-nil.
 
 When this variable is non-nil, Org will use the value of
-a headline's CUSTOM_ID property and NAME values as the key for
-the \\label commands generated.
+CUSTOM_ID property, NAME keyword or Org target as the key for the
+\\label commands generated.
 
 By default, Org generates its own internal labels during LaTeX
 export.  This process ensures that the \\label keys are unique
@@ -1045,29 +1045,32 @@ INFO is a plist holding contextual information."
       (let ((type (org-element-type element)))
 	(memq (if (eq type 'link) 'image type) above)))))
 
-(defun org-latex--label (element info &optional force full)
-  "Return an appropriate label for ELEMENT.
-INFO is the current export state, as a plist.
+(defun org-latex--label (datum info &optional force full)
+  "Return an appropriate label for DATUM.
+DATUM is an element or a `target' type object.  INFO is the
+current export state, as a plist.
 
-Return nil if ELEMENT has no NAME or VALUE affiliated keyword or
-no CUSTOM_ID property, unless FORCE is non-nil.  In this case
-always return a unique label.
+Return nil if element DATUM has no NAME or VALUE affiliated
+keyword or no CUSTOM_ID property, unless FORCE is non-nil.  In
+this case always return a unique label.
 
 Eventually, if FULL is non-nil, wrap label within \"\\label{}\"."
-  (let* ((user-label
+  (let* ((type (org-element-type datum))
+	 (user-label
 	  (org-element-property
-	   (case (org-element-type element)
+	   (case type
 	     ((headline inlinetask) :CUSTOM_ID)
 	     (target :value)
 	     (otherwise :name))
-	   element))
+	   datum))
 	 (label
 	  (and (or user-label force)
 	       (if (and user-label (plist-get info :latex-prefer-user-labels))
 		   user-label
-		 (org-export-get-reference element info)))))
+		 (org-export-get-reference datum info)))))
     (cond ((not full) label)
-	  (label (format "\\label{%s}\n" label))
+	  (label (concat (format "\\label{%s}" label)
+			 (and (not (eq type 'target)) "\n")))
 	  (t ""))))
 
 (defun org-latex--caption/label-string (element info)
@@ -2089,7 +2092,7 @@ INFO is a plist holding contextual information.  See
       (let ((destination (org-export-resolve-radio-link link info)))
 	(if (not destination) desc
 	  (format "\\hyperref[%s]{%s}"
-		  (org-latex--label destination info)
+		  (org-export-get-reference destination info)
 		  desc))))
      ;; Links pointing to a headline: Find destination and build
      ;; appropriate referencing command.
@@ -2417,7 +2420,7 @@ holding contextual information."
   "Transcode a RADIO-TARGET object from Org to LaTeX.
 TEXT is the text of the target.  INFO is a plist holding
 contextual information."
-  (format "\\label{%s}%s" (org-latex--label radio-target info) text))
+  (format "\\label{%s}%s" (org-export-get-reference radio-target info) text))
 
 
 ;;;; Section
