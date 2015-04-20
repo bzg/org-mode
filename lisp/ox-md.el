@@ -362,11 +362,7 @@ a communication channel."
 		 ((member type '("http" "https" "ftp"))
 		  (concat type ":" raw-path))
 		 ((string= type "file")
-		  (let ((path (funcall link-org-files-as-md raw-path)))
-		    (if (not (file-name-absolute-p path)) path
-		      ;; If file path is absolute, prepend it
-		      ;; with "file:" component.
-		      (concat "file:" path))))
+		  (org-export-file-uri (funcall link-org-files-as-md raw-path)))
 		 (t raw-path))))
 	  (if (not contents) (format "<%s>" path)
 	    (format "[%s](%s)" contents path)))))))

@@ -1252,8 +1252,7 @@ INFO is a plist holding contextual information.  See
          (path (cond
                 ((member type '("http" "https" "ftp" "mailto"))
                  (concat type ":" raw-path))
-                ((and (string= type "file") (file-name-absolute-p raw-path))
-                 (concat "file://" raw-path))
+                ((string= type "file") (org-export-file-uri raw-path))
                 (t raw-path))))
     (cond
      ((org-export-custom-protocol-maybe link desc 'groff))

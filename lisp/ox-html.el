@@ -2839,10 +2839,10 @@ INFO is a plist holding contextual information.  See
 	    (setq raw-path
 		  (funcall link-org-files-as-html-maybe raw-path info))
 	    ;; If file path is absolute, prepend it with protocol
-	    ;; component - "file:".
+	    ;; component - "file://".
 	    (cond
 	     ((file-name-absolute-p raw-path)
-	      (setq raw-path (concat "file:" raw-path)))
+	      (setq raw-path (org-export-file-uri raw-path)))
 	     ((and home use-abs-url)
 	      (setq raw-path (concat (file-name-as-directory home) raw-path))))
 	    ;; Add search option, if any.  A search option can be
