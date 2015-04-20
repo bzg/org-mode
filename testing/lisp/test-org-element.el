@@ -1521,10 +1521,9 @@ e^{i\\pi}+1=0
     (org-test-with-temp-text "[[file:projects.org::*task title]]"
       (org-element-map (org-element-parse-buffer) 'link
 	(lambda (l) (list (org-element-property :type l)
-			  (org-element-property :path l)
-			  (org-element-property :search-option l)))))))
+		     (org-element-property :path l)
+		     (org-element-property :search-option l)))))))
   ;; ... file-type link with application...
-  (require 'org-docview)
   (should
    (equal
     '("file" "projects.org" "emacs")
@@ -1539,19 +1538,17 @@ e^{i\\pi}+1=0
    (org-test-with-temp-text-in-file ""
      (let ((file (expand-file-name (buffer-file-name))))
        (insert (format "[[file://%s]]" file))
-       (equal (org-element-property :path (org-element-context))
-	      (concat "//" file)))))
+       (equal (org-element-property :path (org-element-context)) file))))
   (should
    (org-test-with-temp-text-in-file ""
      (let ((file (expand-file-name (buffer-file-name))))
        (insert (format "[[file:%s]]" file))
-       (equal (org-element-property :path (org-element-context))
-	      (concat "//" file)))))
+       (equal (org-element-property :path (org-element-context)) file))))
   (should
    (org-test-with-temp-text-in-file ""
-     (let ((file (file-relative-name (buffer-file-name))))
+     (let ((file (expand-file-name (buffer-file-name))))
        (insert (format "[[file:%s]]" file))
-       (list (org-element-property :path (org-element-context)) file))))
+       (equal (org-element-property :path (org-element-context)) file))))
   ;; ... multi-line link.
   (should
    (equal "//orgmode.org"

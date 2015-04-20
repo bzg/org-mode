@@ -3090,9 +3090,7 @@ Assume point is at the beginning of the link."
 	  (when (string-match "::\\(.*\\)\\'" path)
 	    (setq search-option (match-string 1 path)
 		  path (replace-match "" nil nil path)))
-	  (when (and (file-name-absolute-p path)
-		     (not (org-string-match-p "\\`[/~]/" path)))
-	    (setq path (concat "//" path))))
+	  (setq path (replace-regexp-in-string "\\`/+" "/" path)))
 	(list 'link
 	      (list :type type
 		    :path path
