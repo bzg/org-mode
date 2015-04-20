@@ -209,6 +209,19 @@
 					  ("kbordermatrix" . "\\\\"))
   "Alist between matrix macros and their row ending.")
 
+(defconst org-latex-math-environments-re
+  (format
+   "\\`[ \t]*\\\\begin{%s\\*?}"
+   (regexp-opt
+	   '("equation" "eqnarray" "math" "displaymath"
+	     "align"  "gather" "multline" "flalign"  "alignat"
+	     "xalignat" "xxalignat"
+	     "subequations"
+	     ;; breqn
+	     "dmath" "dseries" "dgroup" "darray"
+	     ;; empheq
+	     "empheq")))
+  "Regexp of LaTeX math environments.")
 
 
 ;;; User Configurable Variables
@@ -1067,7 +1080,18 @@ Eventually, if FULL is non-nil, wrap label within \"\\label{}\"."
 	  (and (or user-label force)
 	       (if (and user-label (plist-get info :latex-prefer-user-labels))
 		   user-label
-		 (org-export-get-reference datum info)))))
+		 (concat (case type
+			   (headline "sec:")
+			   (table "tab:")
+			   (latex-environment
+			    (and (org-string-match-p
+				  org-latex-math-environments-re
+				  (org-element-property :value datum))
+				 "eq:"))
+			   (paragraph
+			    (and (org-element-property :caption datum)
+				 "fig:")))
+			 (org-export-get-reference datum info))))))
     (cond ((not full) label)
 	  (label (format "\\label{%s}%s"
 			 label
