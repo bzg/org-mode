@@ -2657,6 +2657,19 @@ Another text. (ref:text)
        (org-element-map tree 'link
 	 (lambda (link) (org-export-resolve-radio-link link info)) info t)))))
 
+(ert-deftest test-org-export/file-uri ()
+  "Test `org-export-file-uri' specifications."
+  ;; Preserve relative filenames.
+  (should (equal "relative.org" (org-export-file-uri "relative.org")))
+  ;; Local files start with "file:///"
+  (should (equal "file:///local.org" (org-export-file-uri "/local.org")))
+  ;; Remote files start with "file://"
+  (should (equal "file://myself@some.where:papers/last.pdf"
+		 (org-export-file-uri "/myself@some.where:papers/last.pdf")))
+  ;; Expand filename starting with "~".
+  (should (equal (org-export-file-uri "~/file.org")
+		 (concat "file://" (expand-file-name "~/file.org")))))
+
 
 
 ;;; Src-block and example-block

@@ -3913,6 +3913,9 @@ meant to be translated with `org-export-data' or alike."
 ;; `org-export-resolve-coderef' associates a reference to a line
 ;; number in the element it belongs, or returns the reference itself
 ;; when the element isn't numbered.
+;;
+;; `org-export-file-uri' expands a filename as stored in :path value
+;;  of a "file" link into a file URI.
 
 (defun org-export-custom-protocol-maybe (link desc backend)
   "Try exporting LINK with a dedicated function.
@@ -4127,6 +4130,15 @@ has type \"radio\"."
 		 t)
 	     radio))
       info 'first-match)))
+
+(defun org-export-file-uri (filename)
+  "Return file URI associated to FILENAME."
+  (if (not (file-name-absolute-p filename)) filename
+    (concat "file:/"
+	    (and (not (org-file-remote-p filename)) "/")
+	    (if (org-string-match-p "\\`~" filename)
+		(expand-file-name filename)
+	      filename))))
 
 
 ;;;; For References
