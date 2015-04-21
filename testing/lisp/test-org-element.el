@@ -388,16 +388,38 @@ Some other text
   "Test `babel-call' parsing."
   ;; Standard test.
   (should
-   (org-test-with-temp-text "#+CALL: test()"
-     (org-element-map (org-element-parse-buffer) 'babel-call 'identity)))
+   (eq 'babel-call
+       (org-test-with-temp-text "#+CALL: test()"
+	 (org-element-type (org-element-at-point)))))
   ;; Ignore case.
   (should
-   (org-test-with-temp-text "#+call: test()"
-     (org-element-map (org-element-parse-buffer) 'babel-call 'identity)))
+   (eq 'babel-call
+       (org-test-with-temp-text "#+call: test()"
+	 (org-element-type (org-element-at-point)))))
   ;; Handle non-empty blank line at the end of buffer.
   (should
    (org-test-with-temp-text "#+CALL: test()\n "
-     (= (org-element-property :end (org-element-at-point)) (point-max)))))
+     (= (org-element-property :end (org-element-at-point)) (point-max))))
+  ;; Parse call name.
+  (should
+   (equal "test"
+	  (org-test-with-temp-text "#+CALL: test()"
+	    (org-element-property :call (org-element-at-point)))))
+  ;; Parse inside header.
+  (should
+   (equal ":results output"
+	  (org-test-with-temp-text "#+CALL: test[:results output]()"
+	    (org-element-property :inside-header (org-element-at-point)))))
+  ;; Parse arguments.
+  (should
+   (equal "n=4"
+	  (org-test-with-temp-text "#+CALL: test(n=4)"
+	    (org-element-property :arguments (org-element-at-point)))))
+  ;; Parse end header.
+  (should
+   (equal ":results html"
+	  (org-test-with-temp-text "#+CALL: test() :results html"
+	    (org-element-property :end-header (org-element-at-point))))))
 
 
 ;;;; Bold
@@ -1091,10 +1113,39 @@ Some other text
 
 (ert-deftest test-org-element/inline-babel-call-parser ()
   "Test `inline-babel-call' parser."
+  ;; Standard test.
   (should
-   (org-test-with-temp-text "call_test()"
-     (org-element-map
-      (org-element-parse-buffer) 'inline-babel-call 'identity))))
+   (eq 'inline-babel-call
+       (org-test-with-temp-text "call_test()"
+	 (org-element-type (org-element-context)))))
+  (should
+   (eq 'inline-babel-call
+       (org-test-with-temp-text "call_test[:results output](x=2)[:results html]"
+	 (org-element-type (org-element-context)))))
+  ;; Parse call name.
+  (should
+   (equal
+    "test"
+    (org-test-with-temp-text "call_test[:results output](x=2)[:results html]"
+      (org-element-property :call (org-element-context)))))
+  ;; Parse inside header.
+  (should
+   (equal
+    ":results output"
+    (org-test-with-temp-text "call_test[:results output](x=2)[:results html]"
+      (org-element-property :inside-header (org-element-context)))))
+  ;; Parse arguments.
+  (should
+   (equal
+    "x=2"
+    (org-test-with-temp-text "call_test[:results output](x=2)[:results html]"
+      (org-element-property :arguments (org-element-context)))))
+  ;; Parse end header.
+  (should
+   (equal
+    ":results html"
+    (org-test-with-temp-text "call_test[:results output](x=2)[:results html]"
+      (org-element-property :end-header (org-element-context))))))
 
 
 ;;;; Inline Src Block
@@ -2445,17 +2496,17 @@ Outside list"
 		 "#+BEGIN_SPECIAL\nTest\n#+END_SPECIAL\n")))
 
 (ert-deftest test-org-element/babel-call-interpreter ()
-  "Test babel call interpreter."
-  ;; 1. Without argument.
+  "Test Babel call interpreter."
+  ;; Without argument.
   (should (equal (org-test-parse-and-interpret "#+CALL: test()")
 		 "#+CALL: test()\n"))
-  ;; 2. With argument.
+  ;; With argument.
   (should (equal (org-test-parse-and-interpret "#+CALL: test(x=2)")
 		 "#+CALL: test(x=2)\n"))
-  ;; 3. With header arguments.
+  ;; With header arguments.
   (should (equal (org-test-parse-and-interpret
-		  "#+CALL: test[:results output]()[:results html]")
-		 "#+CALL: test[:results output]()[:results html]\n")))
+		  "#+CALL: test[:results output]() :results html")
+		 "#+CALL: test[:results output]() :results html\n")))
 
 (ert-deftest test-org-element/clock-interpreter ()
   "Test clock interpreter."
@@ -2801,12 +2852,12 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
 
 (ert-deftest test-org-element/inline-babel-call-interpreter ()
   "Test inline babel call interpreter."
-  ;; 1. Without arguments.
+  ;; Without arguments.
   (should (equal (org-test-parse-and-interpret "call_test()") "call_test()\n"))
-  ;; 2. With arguments.
+  ;; With arguments.
   (should (equal (org-test-parse-and-interpret "call_test(x=2)")
 		 "call_test(x=2)\n"))
-  ;; 3. With header arguments.
+  ;; With header arguments.
   (should (equal (org-test-parse-and-interpret
 		  "call_test[:results output]()[:results html]")
 		 "call_test[:results output]()[:results html]\n")))
