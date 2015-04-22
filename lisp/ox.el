@@ -285,7 +285,7 @@ containing the back-end used, as a symbol, and either a process
 or the time at which it finished.  It is used to build the menu
 from `org-export-stack'.")
 
-(defvar org-export--registered-backends nil
+(defvar org-export-registered-backends nil
   "List of backends currently available in the exporter.
 This variable is set with `org-export-define-backend' and
 `org-export-define-derived-backend' functions.")
@@ -929,7 +929,7 @@ mode."
   "Return export back-end named after NAME.
 NAME is a symbol.  Return nil if no such back-end is found."
   (catch 'found
-    (dolist (b org-export--registered-backends)
+    (dolist (b org-export-registered-backends)
       (when (eq (org-export-backend-name b) name)
 	(throw 'found b)))))
 
@@ -951,8 +951,8 @@ BACKEND is a structure with `org-export-backend' type."
   ;; registered, replace it with BACKEND.  Otherwise, simply add
   ;; BACKEND to the list of registered back-ends.
   (let ((old (org-export-get-backend (org-export-backend-name backend))))
-    (if old (setcar (memq old org-export--registered-backends) backend)
-      (push backend org-export--registered-backends))))
+    (if old (setcar (memq old org-export-registered-backends) backend)
+      (push backend org-export-registered-backends))))
 
 (defun org-export-barf-if-invalid-backend (backend)
   "Signal an error if BACKEND isn't defined."
@@ -3014,9 +3014,9 @@ locally for the subtree through node properties."
 	      (org-completing-read
 	       "Options category: "
 	       (cons "default"
-		     (mapcar #'(lambda (b)
-				 (symbol-name (org-export-backend-name b)))
-			     org-export--registered-backends))
+		     (mapcar (lambda (b)
+			       (symbol-name (org-export-backend-name b)))
+			     org-export-registered-backends))
 	       nil t))))
 	options keywords)
     ;; Populate OPTIONS and KEYWORDS.
@@ -6132,8 +6132,8 @@ back to standard interface."
 	 ;; if any.
 	 (entries
 	  (sort (sort (delq nil
-			    (mapcar 'org-export-backend-menu
-				    org-export--registered-backends))
+			    (mapcar #'org-export-backend-menu
+				    org-export-registered-backends))
 		      (lambda (a b)
 			(let ((key-a (nth 1 a))
 			      (key-b (nth 1 b)))

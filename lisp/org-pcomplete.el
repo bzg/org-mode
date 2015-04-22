@@ -272,7 +272,7 @@ When completing for #+STARTUP, for example, this function returns
 	    ;; OPTION items from registered back-ends.
 	    (let (items)
 	      (dolist (backend (org-bound-and-true-p
-				org-export--registered-backends))
+				org-export-registered-backends))
 		(dolist (option (org-export-backend-options backend))
 		  (let ((item (nth 2 option)))
 		    (when item (push (concat item ":") items)))))

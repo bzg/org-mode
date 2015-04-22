@@ -1289,13 +1289,13 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
   ;; Translate table.
   (should
    (equal '((headline . my-headline-test))
-	  (let (org-export--registered-backends)
+	  (let (org-export-registered-backends)
 	    (org-export-define-backend 'test '((headline . my-headline-test)))
 	    (org-export-get-all-transcoders 'test))))
   ;; Filters.
   (should
    (equal '((:filter-headline . my-filter))
-	  (let (org-export--registered-backends)
+	  (let (org-export-registered-backends)
 	    (org-export-define-backend 'test
 	      '((headline . my-headline-test))
 	      :filters-alist '((:filter-headline . my-filter)))
@@ -1303,7 +1303,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
   ;; Options.
   (should
    (equal '((:prop value))
-	  (let (org-export--registered-backends)
+	  (let (org-export-registered-backends)
 	    (org-export-define-backend 'test
 	      '((headline . my-headline-test))
 	      :options-alist '((:prop value)))
@@ -1311,7 +1311,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
   ;; Menu.
   (should
    (equal '(?k "Test Export" test)
-	  (let (org-export--registered-backends)
+	  (let (org-export-registered-backends)
 	    (org-export-define-backend 'test
 	      '((headline . my-headline-test))
 	      :menu-entry '(?k "Test Export" test))
@@ -1319,7 +1319,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
   ;; Export Blocks.
   (should
    (equal '(("TEST" . org-element-export-block-parser))
-	  (let (org-export--registered-backends org-element-block-name-alist)
+	  (let (org-export-registered-backends org-element-block-name-alist)
 	    (org-export-define-backend 'test
 	      '((headline . my-headline-test))
 	      :export-block '("test"))
@@ -1329,12 +1329,12 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
   "Test `org-export-define-derived-backend' specifications."
   ;; Error when parent back-end is not defined.
   (should-error
-   (let (org-export--registered-backends)
+   (let (org-export-registered-backends)
      (org-export-define-derived-backend 'test 'parent)))
   ;; Append translation table to parent's.
   (should
    (equal '((:headline . test) (:headline . parent))
-	  (let (org-export--registered-backends)
+	  (let (org-export-registered-backends)
 	    (org-export-define-backend 'parent '((:headline . parent)))
 	    (org-export-define-derived-backend 'test 'parent
 	      :translate-alist '((:headline . test)))
@@ -1343,7 +1343,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
   ;; in parent.
   (should
    (eq 'test
-       (let (org-export--registered-backends)
+       (let (org-export-registered-backends)
 	 (org-export-define-backend 'parent
 	   '((:headline . parent))
 	   :options-alist '((:a nil nil 'parent)))
@@ -1357,35 +1357,35 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
   "Test `org-export-derived-backend-p' specifications."
   ;; Non-nil with direct match.
   (should
-   (let (org-export--registered-backends)
+   (let (org-export-registered-backends)
      (org-export-define-backend 'test '((headline . test)))
      (org-export-derived-backend-p 'test 'test)))
   (should
-   (let (org-export--registered-backends)
+   (let (org-export-registered-backends)
      (org-export-define-backend 'test '((headline . test)))
      (org-export-define-derived-backend 'test2 'test)
      (org-export-derived-backend-p 'test2 'test2)))
   ;; Non-nil with a direct parent.
   (should
-   (let (org-export--registered-backends)
+   (let (org-export-registered-backends)
      (org-export-define-backend 'test '((headline . test)))
      (org-export-define-derived-backend 'test2 'test)
      (org-export-derived-backend-p 'test2 'test)))
   ;; Non-nil with an indirect parent.
   (should
-   (let (org-export--registered-backends)
+   (let (org-export-registered-backends)
      (org-export-define-backend 'test '((headline . test)))
      (org-export-define-derived-backend 'test2 'test)
      (org-export-define-derived-backend 'test3 'test2)
      (org-export-derived-backend-p 'test3 'test)))
   ;; Nil otherwise.
   (should-not
-   (let (org-export--registered-backends)
+   (let (org-export-registered-backends)
      (org-export-define-backend 'test '((headline . test)))
      (org-export-define-backend 'test2 '((headline . test2)))
      (org-export-derived-backend-p 'test2 'test)))
   (should-not
-   (let (org-export--registered-backends)
+   (let (org-export-registered-backends)
      (org-export-define-backend 'test '((headline . test)))
      (org-export-define-backend 'test2 '((headline . test2)))
      (org-export-define-derived-backend 'test3 'test2)
@@ -1404,14 +1404,14 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
   ;; But inherit from all ancestors whenever possible.
   (should
    (equal '((section . ignore) (headline . ignore))
-	  (let (org-export--registered-backends)
+	  (let (org-export-registered-backends)
 	    (org-export-define-backend 'b1 '((headline . ignore)))
 	    (org-export-get-all-transcoders
 	     (org-export-create-backend
 	      :parent 'b1 :transcoders '((section . ignore)))))))
   (should
    (equal '((paragraph . ignore) (section . ignore) (headline . ignore))
-	  (let (org-export--registered-backends)
+	  (let (org-export-registered-backends)
 	    (org-export-define-backend 'b1 '((headline . ignore)))
 	    (org-export-define-derived-backend 'b2 'b1
 	      :translate-alist '((section . ignore)))
@@ -1421,7 +1421,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
   ;; Back-end transcoders overrule inherited ones.
   (should
    (eq 'b
-       (let (org-export--registered-backends)
+       (let (org-export-registered-backends)
 	 (org-export-define-backend 'b1 '((headline . a)))
 	 (cdr (assq 'headline
 		    (org-export-get-all-transcoders
@@ -1441,14 +1441,14 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
   ;; But inherit from all ancestors whenever possible.
   (should
    (equal '((:key2 value2) (:key1 value1))
-	  (let (org-export--registered-backends)
+	  (let (org-export-registered-backends)
 	    (org-export-define-backend 'b1 nil :options-alist '((:key1 value1)))
 	    (org-export-get-all-options
 	     (org-export-create-backend
 	      :parent 'b1 :options '((:key2 value2)))))))
   (should
    (equal '((:key3 value3) (:key2 value2) (:key1 value1))
-	  (let (org-export--registered-backends)
+	  (let (org-export-registered-backends)
 	    (org-export-define-backend 'b1 nil :options-alist '((:key1 value1)))
 	    (org-export-define-derived-backend 'b2 'b1
 	      :options-alist '((:key2 value2)))
@@ -1458,7 +1458,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
   ;; Back-end options overrule inherited ones.
   (should
    (eq 'b
-       (let (org-export--registered-backends)
+       (let (org-export-registered-backends)
 	 (org-export-define-backend 'b1 nil :options-alist '((:key1 . a)))
 	 (cdr (assq :key1
 		    (org-export-get-all-options
@@ -1478,7 +1478,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
   ;; But inherit from all ancestors whenever possible.
   (should
    (equal '((:filter-section . ignore) (:filter-headline . ignore))
-	  (let (org-export--registered-backends)
+	  (let (org-export-registered-backends)
 	    (org-export-define-backend 'b1
 	      nil :filters-alist '((:filter-headline . ignore)))
 	    (org-export-get-all-filters
@@ -1488,7 +1488,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
    (equal '((:filter-paragraph . ignore)
 	    (:filter-section . ignore)
 	    (:filter-headline . ignore))
-	  (let (org-export--registered-backends)
+	  (let (org-export-registered-backends)
 	    (org-export-define-backend 'b1
 	      nil :filters-alist '((:filter-headline . ignore)))
 	    (org-export-define-derived-backend 'b2 'b1
@@ -1499,7 +1499,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
   ;; Back-end filters overrule inherited ones.
   (should
    (eq 'b
-       (let (org-export--registered-backends)
+       (let (org-export-registered-backends)
 	 (org-export-define-backend 'b1 '((:filter-headline . a)))
 	 (cdr (assq :filter-headline
 		    (org-export-get-all-filters
@@ -1519,7 +1519,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
   ;; Otherwise, export using correct transcoder
   (should
    (equal "Success"
-	  (let (org-export--registered-backends)
+	  (let (org-export-registered-backends)
 	    (org-export-define-backend 'test
 	      '((plain-text . (lambda (text contents info) "Failure"))))
 	    (org-export-define-backend 'test2

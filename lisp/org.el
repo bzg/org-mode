@@ -752,7 +752,7 @@ For export specific modules, see also `org-export-backends'."
 	(const :tag "C  wl:                Links to Wanderlust folders/messages" org-wl)
 	(repeat :tag "External packages" :inline t (symbol :tag "Package"))))
 
-(defvar org-export--registered-backends) ; From ox.el.
+(defvar org-export-registered-backends) ; From ox.el.
 (declare-function org-export-derived-backend-p "ox" (backend &rest backends))
 (declare-function org-export-backend-name "ox" (backend))
 (defcustom org-export-backends '(ascii html icalendar latex)
@@ -772,7 +772,7 @@ interface or run the following code, where VAL stands for the new
 value of the variable, after updating it:
 
   \(progn
-    \(setq org-export--registered-backends
+    \(setq org-export-registered-backends
           \(org-remove-if-not
            \(lambda (backend)
              \(let ((name (org-export-backend-name backend)))
@@ -781,9 +781,9 @@ value of the variable, after updating it:
                      \(dolist (b val)
                        \(and (org-export-derived-backend-p b name)
                             \(throw 'parentp t)))))))
-           org-export--registered-backends))
-    \(let ((new-list (mapcar 'org-export-backend-name
-                            org-export--registered-backends)))
+           org-export-registered-backends))
+    \(let ((new-list (mapcar #'org-export-backend-name
+                            org-export-registered-backends)))
       \(dolist (backend val)
         \(cond
          \((not (load (format \"ox-%s\" backend) t t))
@@ -804,7 +804,7 @@ depends on, if any."
 	   ;; Any back-end not required anymore (not present in VAL and not
 	   ;; a parent of any back-end in the new value) is removed from the
 	   ;; list of registered back-ends.
-	   (setq org-export--registered-backends
+	   (setq org-export-registered-backends
 		 (org-remove-if-not
 		  (lambda (backend)
 		    (let ((name (org-export-backend-name backend)))
@@ -813,11 +813,11 @@ depends on, if any."
 			    (dolist (b val)
 			      (and (org-export-derived-backend-p b name)
 				   (throw 'parentp t)))))))
-		  org-export--registered-backends))
+		  org-export-registered-backends))
 	   ;; Now build NEW-LIST of both new back-ends and required
 	   ;; parents.
-	   (let ((new-list (mapcar 'org-export-backend-name
-				   org-export--registered-backends)))
+	   (let ((new-list (mapcar #'org-export-backend-name
+				   org-export-registered-backends)))
 	     (dolist (backend val)
 	       (cond
 		((not (load (format "ox-%s" backend) t t))
@@ -12297,7 +12297,7 @@ Export keywords include options, block names, attributes and
 keywords relative to each registered export back-end."
   (let (keywords)
     (dolist (backend
-	     (org-bound-and-true-p org-export--registered-backends)
+	     (org-bound-and-true-p org-export-registered-backends)
 	     (delq nil keywords))
       ;; Back-end name (for keywords, like #+LATEX:)
       (push (upcase (symbol-name (org-export-backend-name backend))) keywords)
