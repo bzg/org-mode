@@ -1394,8 +1394,8 @@ Optional argument BACKEND is an export back-end, as returned by,
 e.g., `org-export-create-backend'.  It specifies back-end used
 for export.  Return options as a plist."
   ;; For each buffer keyword, create a headline property setting the
-  ;; same property in communication channel. The name for the property
-  ;; is the keyword with "EXPORT_" appended to it.
+  ;; same property in communication channel.  The name for the
+  ;; property is the keyword with "EXPORT_" appended to it.
   (org-with-wide-buffer
    (let (plist
 	 ;; Look for both general keywords and back-end specific
@@ -1404,9 +1404,9 @@ for export.  Return options as a plist."
 			  org-export-options-alist)))
      ;; Make sure point is at a heading.
      (if (org-at-heading-p) (org-up-heading-safe) (org-back-to-heading t))
-     ;; Take care of EXPORT_TITLE. If it isn't defined, use headline's
-     ;; title (with no todo keyword, priority cookie or tag) as its
-     ;; fallback value.
+     ;; Take care of EXPORT_TITLE.  If it isn't defined, use
+     ;; headline's title (with no todo keyword, priority cookie or
+     ;; tag) as its fallback value.
      (let ((title (or (org-entry-get (point) "EXPORT_TITLE")
 		      (progn (looking-at org-complex-heading-regexp)
 			     (org-match-string-no-properties 4)))))
