@@ -1372,24 +1372,20 @@ inferior to file-local settings."
 Optional argument BACKEND is an export back-end, as returned by,
 e.g., `org-export-create-backend'.  It specifies which back-end
 specific items to read, if any."
-  (let* ((all
+  (let ((all
+	 (mapcar
+	  (lambda (o) (cons (nth 2 o) (car o)))
 	  ;; Priority is given to back-end specific options.
 	  (append (and backend (org-export-get-all-options backend))
-		  org-export-options-alist))
-	 plist)
-    (dolist (option all)
-      (let ((property (car option))
-	    (item (nth 2 option)))
-	(when (and item
-		   (not (plist-member plist property))
-		   (string-match (concat "\\(\\`\\|[ \t]\\)"
-					 (regexp-quote item)
-					 ":\\(([^)\n]+)\\|[^ \t\n\r;,.]*\\)")
-				 options))
-	  (setq plist (plist-put plist
-				 property
-				 (car (read-from-string
-				       (match-string 2 options))))))))
+		  org-export-options-alist)))
+	(start)
+	plist)
+    (while (string-match "\\(.+?\\):\\((.*?)\\|\\S-*\\)[ \t\n]*" options start)
+      (setq start (match-end 0))
+      (let ((property (cdr (assoc-string (match-string 1 options) all t))))
+	(when property
+	  (setq plist
+		(plist-put plist property (read (match-string 2 options)))))))
     plist))
 
 (defun org-export--get-subtree-options (&optional backend)

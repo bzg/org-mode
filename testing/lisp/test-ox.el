@@ -114,23 +114,28 @@ variable, and communication channel under `info'."
  *:t e:t ::t f:t pri:t -:t ^:t toc:t |:t tags:t tasks:t <:t todo:t inline:nil
  stat:t title:t")
     '(:headline-levels
-      1 :preserve-breaks t :section-numbers t :time-stamp-file t
+      1 :section-numbers t :preserve-breaks t :time-stamp-file t
       :with-archived-trees t :with-author t :with-creator t :with-drawers t
       :with-email t :with-emphasize t :with-entities t :with-fixed-width t
-      :with-footnotes t :with-inlinetasks nil :with-priority t
-      :with-special-strings t :with-statistics-cookies t :with-sub-superscript t
-      :with-toc t :with-tables t :with-tags t :with-tasks t :with-timestamps t
-      :with-title t :with-todo-keywords t)))
+      :with-footnotes t :with-priority t :with-special-strings t
+      :with-sub-superscript t :with-toc t :with-tables t :with-tags t
+      :with-tasks t :with-timestamps t :with-todo-keywords t
+      :with-inlinetasks nil :with-statistics-cookies t :with-title t)))
   ;; Test some special values.
   (should
    (equal
     (org-export--parse-option-keyword
      "arch:headline d:(\"TEST\") ^:{} toc:1 tags:not-in-toc tasks:todo num:2 <:active")
-    '( :section-numbers
-       2
-       :with-archived-trees headline :with-drawers ("TEST")
-       :with-sub-superscript {} :with-toc 1 :with-tags not-in-toc
-       :with-tasks todo :with-timestamps active))))
+    '(:with-archived-trees
+      headline :with-drawers ("TEST") :with-sub-superscript {} :with-toc 1
+      :with-tags not-in-toc :with-tasks todo :section-numbers 2
+      :with-timestamps active)))
+  ;; Test back-end specific values.
+  (should
+   (equal
+    (org-export--parse-option-keyword
+     "opt:t" (org-export-create-backend :options '((:option nil "opt"))))
+    '(:option t))))
 
 (ert-deftest test-org-export/get-inbuffer-options ()
   "Test reading all standard export keywords."
