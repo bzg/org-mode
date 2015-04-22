@@ -10467,11 +10467,11 @@ See `read-file-name' for a description of parameters."
   (org-without-partial-completion
    (if (and org-completion-use-ido
             (fboundp 'ido-read-file-name)
-            (boundp 'ido-mode) ido-mode
-            (listp (second args)))
+            (org-bound-and-true-p ido-mode)
+            (listp (nth 1 args)))
        (let ((ido-enter-matching-directory nil))
-         (apply 'ido-read-file-name args))
-     (apply (or read-file-name-function 'read-file-name) args))))
+         (apply #'ido-read-file-name args))
+     (apply #'read-file-name args))))
 
 (defun org-completing-read (&rest args)
   "Completing-read with SPACE being a normal character."
