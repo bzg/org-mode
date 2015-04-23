@@ -19119,8 +19119,10 @@ inspection."
 			(make-temp-name (expand-file-name  "ltxmathml-out"))))
 	 (cmd (format-spec
 	       org-latex-to-mathml-convert-command
-	       `((?j . ,(shell-quote-argument
-			 (expand-file-name org-latex-to-mathml-jar-file)))
+	       `((?j . ,(and org-latex-to-mathml-jar-file
+			 (shell-quote-argument
+			  (expand-file-name
+			   org-latex-to-mathml-jar-file))))
 		 (?I . ,(shell-quote-argument tmp-in-file))
 		 (?i . ,latex-frag)
 		 (?o . ,(shell-quote-argument tmp-out-file)))))
