@@ -2152,13 +2152,15 @@ Return value is a string if OP is set to `reference' or a cons
 cell like CAPTION . SHORT-CAPTION) where CAPTION and
 SHORT-CAPTION are strings."
   (assert (memq (org-element-type element) '(link table src-block paragraph)))
-  (let* ((caption-from
+  (let* ((element-or-parent
 	  (case (org-element-type element)
 	    (link (org-export-get-parent-element element))
 	    (t element)))
 	 ;; Get label and caption.
-	 (label (org-export-get-reference element info))
-	 (caption (let ((c (org-export-get-caption caption-from)))
+	 (label (and (or (org-element-property :name element)
+			 (org-element-property :name element-or-parent))
+		     (org-export-get-reference element-or-parent info)))
+	 (caption (let ((c (org-export-get-caption element-or-parent)))
 		    (and c (org-export-data c info))))
 	 ;; FIXME: We don't use short-caption for now
 	 (short-caption nil))
