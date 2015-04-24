@@ -942,8 +942,6 @@ Assume point is at beginning of the headline."
 				     (skip-chars-backward " \r\t\n")
 				     (forward-line)
 				     (point)))))
-      ;; Clean TAGS from archive tag, if any.
-      (when archivedp (setq tags (delete org-archive-tag tags)))
       (let ((headline
 	     (list 'headline
 		   (nconc
@@ -992,10 +990,7 @@ CONTENTS is the contents of the element."
 	 (priority (org-element-property :priority headline))
 	 (title (org-element-interpret-data
 		 (org-element-property :title headline)))
-	 (tags (let ((tag-list (if (org-element-property :archivedp headline)
-				   (cons org-archive-tag
-					 (org-element-property :tags headline))
-				 (org-element-property :tags headline))))
+	 (tags (let ((tag-list (org-element-property :tags headline)))
 		 (and tag-list
 		      (format ":%s:" (mapconcat #'identity tag-list ":")))))
 	 (commentedp (org-element-property :commentedp headline))

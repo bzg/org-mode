@@ -1020,16 +1020,12 @@ Some other text
   (org-test-with-temp-text "* Headline :ARCHIVE:"
     (let ((org-archive-tag "ARCHIVE"))
       (let ((headline (org-element-at-point)))
-	(should (org-element-property :archivedp headline))
-	;; Test tag removal.
-	(should-not (org-element-property :tags headline)))))
+	(should (org-element-property :archivedp headline)))))
   ;; Multiple tags.
   (org-test-with-temp-text "* Headline :test:ARCHIVE:"
     (let ((org-archive-tag "ARCHIVE"))
       (let ((headline (org-element-at-point)))
-	(should (org-element-property :archivedp headline))
-	;; Test tag removal.
-	(should (equal (org-element-property :tags headline) '("test"))))))
+	(should (org-element-property :archivedp headline)))))
   ;; Tag is case-sensitive.
   (should-not
    (org-test-with-temp-text "* Headline :ARCHIVE:"
