@@ -1649,7 +1649,7 @@ INFO is a plist used as a communication channel."
 	  (loop for (n type raw) in fn-alist collect
 		(cons n (if (eq (org-element-type raw) 'org-data)
 			    (org-trim (org-export-data raw info))
-			  (format "<p>%s</p>"
+			  (format "<p class=\"footpara\">%s</p>"
 				  (org-trim (org-export-data raw info))))))))
     (when fn-alist
       (format
@@ -2988,10 +2988,11 @@ CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
   (let* ((parent (org-export-get-parent paragraph))
 	 (parent-type (org-element-type parent))
-	 (style '((footnote-definition " class=\"footpara\"")))
+	 (style '((footnote-definition " class=\"footpara\"")
+		  (org-data . " class=\"footpara\"")))
 	 (attributes (org-html--make-attribute-string
 		      (org-export-read-attribute :attr_html paragraph)))
-	 (extra (or (cadr (assoc parent-type style)) "")))
+	 (extra (or (cadr (assq parent-type style)) "")))
     (cond
      ((and (eq parent-type 'item)
 	   (not (org-export-get-previous-element paragraph info))
