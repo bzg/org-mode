@@ -2989,7 +2989,7 @@ the plist used as a communication channel."
   (let* ((parent (org-export-get-parent paragraph))
 	 (parent-type (org-element-type parent))
 	 (style '((footnote-definition " class=\"footpara\"")
-		  (org-data . " class=\"footpara\"")))
+		  (org-data " class=\"footpara\"")))
 	 (attributes (org-html--make-attribute-string
 		      (org-export-read-attribute :attr_html paragraph)))
 	 (extra (or (cadr (assq parent-type style)) "")))
