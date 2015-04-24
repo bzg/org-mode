@@ -19887,7 +19887,6 @@ boundaries."
 (org-defkey org-mode-map "\C-c\C-xo"    'org-toggle-ordered-property)
 (org-defkey org-mode-map "\C-c\C-xi"    'org-insert-columns-dblock)
 (org-defkey org-mode-map [(control ?c) (control ?x) ?\;] 'org-timer-set-timer)
-(org-defkey org-mode-map [(control ?c) (control ?x) ?\:] 'org-timer-cancel-timer)
 
 (org-defkey org-mode-map "\C-c\C-x."    'org-timer)
 (org-defkey org-mode-map "\C-c\C-x-"    'org-timer-item)
