@@ -152,6 +152,33 @@
 	    (org-footnote-delete "1")
 	    (org-trim (buffer-string))))))
 
+(ert-deftest test-org-footnote/goto-definition ()
+  "Test `org-footnote-goto-definition' specifications."
+  ;; Error on unknown definitions.
+  (should-error
+   (org-test-with-temp-text "No footnote definition"
+     (org-footnote-goto-definition "fn:1")))
+  ;; Error when trying to reach a definition outside narrowed part of
+  ;; buffer.
+  (should-error
+   (org-test-with-temp-text "Some text<point>\n[fn:1] Definition."
+     (narrow-to-region (point-min) (point))
+     (org-footnote-goto-definition "fn:1")))
+  ;; Otherwise, move at the beginning of the definition, including
+  ;; anonymous footnotes.
+  (should
+   (equal
+    " Definition."
+    (org-test-with-temp-text "Some text\n[fn:1] Definition."
+      (org-footnote-goto-definition "fn:1")
+      (buffer-substring (point) (point-max)))))
+  (should
+   (equal
+    "definition]"
+    (org-test-with-temp-text "Some text[fn:label:definition]"
+      (org-footnote-goto-definition "fn:label")
+      (buffer-substring (point) (point-max))))))
+
 (ert-deftest test-org-footnote/normalize-in-org ()
   "Test specifications for `org-footnote-normalize' in an Org buffer."
   ;; 1. With a non-nil `org-footnote-section'.
