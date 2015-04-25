@@ -6781,7 +6781,7 @@ in special contexts.
 
        ;; At an item/headline: delegate to `org-cycle-internal-local'.
        ((and (or (and org-cycle-include-plain-lists (org-at-item-p))
-		 (save-excursion (beginning-of-line 1)
+		 (save-excursion (move-beginning-of-line 1)
 				 (looking-at org-outline-regexp)))
 	     (or (bolp) (not (eq org-cycle-emulate-tab 'exc-hl-bol))))
 	(org-cycle-internal-local))
