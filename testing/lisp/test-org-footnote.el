@@ -164,6 +164,10 @@
    (org-test-with-temp-text "Some text<point>\n[fn:1] Definition."
      (narrow-to-region (point-min) (point))
      (org-footnote-goto-definition "fn:1")))
+  (should-error
+   (org-test-with-temp-text "[fn:1] Definition.\n<point>Some text"
+     (narrow-to-region (point) (point-max))
+     (org-footnote-goto-definition "fn:1")))
   ;; Otherwise, move at the beginning of the definition, including
   ;; anonymous footnotes.
   (should
