@@ -681,41 +681,40 @@ If BUFFER is non-nil, test it instead."
   "Edit definition of footnote reference at point."
   (interactive)
   (let ((context (org-element-context)))
-    (cond ((not (and (eq (org-element-type context) 'footnote-reference)
-		     (< (point)
-			(org-with-wide-buffer
-			 (goto-char (org-element-property :end context))
-			 (skip-chars-backward " \t")
-			 (point)))))
-	   (user-error "Not on a footnote reference"))
-	  ((eq (org-element-property :type context) 'inline)
-	   (user-error "Cannot edit inline footnotes"))
-	  (t
-	   (let* ((label (org-element-property :label context))
-		  (definition
+    (unless (and (eq (org-element-type context) 'footnote-reference)
+		 (< (point)
 		    (org-with-wide-buffer
-		     (org-footnote-goto-definition label)
-		     (beginning-of-line)
-		     (org-element-at-point))))
-	     (org-src--edit-element
-	      definition (format "*Edit footnote [%s]*" label)
-	      #'org-mode
-	      (lambda () (delete-region (point) (search-forward "]")))
-	      (concat
-	       (org-propertize (format "[%s]" label)
-			       'read-only "Cannot edit footnote label"
-			       'front-sticky t
-			       'rear-nonsticky t)
-	       (org-with-wide-buffer
-		(buffer-substring-no-properties
-		 (progn
-		   (goto-char (org-element-property :contents-begin definition))
-		   (skip-chars-backward " \r\t\n")
-		   (point))
-		 (org-element-property :contents-end definition))))
-	      'remote))
-	   ;; Report success.
-	   t))))
+		     (goto-char (org-element-property :end context))
+		     (skip-chars-backward " \t")
+		     (point))))
+      (user-error "Not on a footnote reference"))
+    (let* ((label (org-element-property :label context))
+	   (definition
+	     (org-with-wide-buffer
+	      (org-footnote-goto-definition label)
+	      (beginning-of-line)
+	      (org-element-at-point))))
+      (unless (eq (org-element-type definition) 'footnote-definition)
+	(user-error "Cannot edit remotely inline footnotes"))
+      (org-src--edit-element
+       definition (format "*Edit footnote [%s]*" label)
+       #'org-mode
+       (lambda () (delete-region (point) (search-forward "]")))
+       (concat
+	(org-propertize (format "[%s]" label)
+			'read-only "Cannot edit footnote label"
+			'front-sticky t
+			'rear-nonsticky t)
+	(org-with-wide-buffer
+	 (buffer-substring-no-properties
+	  (progn
+	    (goto-char (org-element-property :contents-begin definition))
+	    (skip-chars-backward " \r\t\n")
+	    (point))
+	  (org-element-property :contents-end definition))))
+       'remote))
+    ;; Report success.
+    t))
 
 (defun org-edit-table.el ()
   "Edit \"table.el\" table at point.
