@@ -20868,6 +20868,7 @@ When in a source code block, call `org-edit-src-code'.
 When in a fixed-width region, call `org-edit-fixed-width-region'.
 When in an export block, call `org-edit-export-block'.
 When at an #+INCLUDE keyword, visit the included file.
+When at a footnote reference, call `org-edit-footnote-reference'
 On a link, call `ffap' to visit the link at point.
 Otherwise, return a user error."
   (interactive "P")
@@ -20908,15 +20909,17 @@ Otherwise, return a user error."
          (call-interactively 'org-table-edit-formulas)))
       ;; Only Org tables contain `table-row' type elements.
       (table-row (call-interactively 'org-table-edit-formulas))
-      ((example-block src-block) (org-edit-src-code))
+      (example-block (org-edit-src-code))
       (export-block (org-edit-export-block))
       (fixed-width (org-edit-fixed-width-region))
       (otherwise
-       ;; No notable element at point.  Though, we may be at a link,
-       ;; which is an object.  Thus, scan deeper.
-       (if (eq (org-element-type (org-element-context element)) 'link)
-	   (call-interactively 'ffap)
-	 (user-error "No special environment to edit here"))))))
+       ;; No notable element at point.  Though, we may be at a link or
+       ;; a footnote reference, which are objects.  Thus, scan deeper.
+       (let ((context (org-element-context element)))
+	 (case (org-element-type context)
+	   (link (call-interactively #'ffap))
+	   (footnote-reference (org-edit-footnote-reference))
+	   (t (user-error "No special environment to edit here"))))))))
 
 (defvar org-table-coordinate-overlays) ; defined in org-table.el
 (defun org-ctrl-c-ctrl-c (&optional arg)

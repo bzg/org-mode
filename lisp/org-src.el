@@ -271,15 +271,30 @@ which see.  BEG and END are buffer positions."
   "Return contents boundaries of ELEMENT.
 Return value is a pair (BEG . END) where BEG and END are buffer
 positions."
-  (let ((blockp (memq (org-element-type element)
-		      '(example-block export-block src-block))))
-    (cons (org-with-wide-buffer
-	   (goto-char (org-element-property :post-affiliated element))
-	   (if blockp (line-beginning-position 2) (point)))
-	  (org-with-wide-buffer
-	   (goto-char (org-element-property :end element))
-	   (skip-chars-backward " \r\t\n")
-	   (line-beginning-position (if blockp 1 2))))))
+  (let ((type (org-element-type element)))
+    (cond
+     ((eq type 'footnote-definition)
+      (cons (org-with-wide-buffer
+	     (goto-char (org-element-property :post-affiliated element))
+	     (search-forward "]"))
+	    (org-element-property :contents-end element)))
+     ((org-element-property :contents-begin element)
+      (cons (org-element-property :contents-begin element)
+	    (org-element-property :contents-end element)))
+     ((memq type '(example-block export-block src-block))
+      (cons (org-with-wide-buffer
+	     (goto-char (org-element-property :post-affiliated element))
+	     (line-beginning-position 2))
+	    (org-with-wide-buffer
+	     (goto-char (org-element-property :end element))
+	     (skip-chars-backward " \r\t\n")
+	     (line-beginning-position 1))))
+     (t
+      (cons (org-element-property :post-affiliated element)
+	    (org-with-wide-buffer
+	     (goto-char (org-element-property :end element))
+	     (skip-chars-backward " \r\t\n")
+	     (line-beginning-position 2)))))))
 
 (defun org-src--make-source-overlay (beg end edit-buffer)
   "Create overlay between BEG and END positions and return it.
@@ -661,6 +676,46 @@ If BUFFER is non-nil, test it instead."
      (message "Invalid value %s for `org-src-window-setup'"
 	      org-src-window-setup)
      (org-pop-to-buffer-same-window buffer))))
+
+(defun org-edit-footnote-reference ()
+  "Edit definition of footnote reference at point."
+  (interactive)
+  (let ((context (org-element-context)))
+    (cond ((not (and (eq (org-element-type context) 'footnote-reference)
+		     (< (point)
+			(org-with-wide-buffer
+			 (goto-char (org-element-property :end context))
+			 (skip-chars-backward " \t")
+			 (point)))))
+	   (user-error "Not on a footnote reference"))
+	  ((eq (org-element-property :type context) 'inline)
+	   (user-error "Cannot edit inline footnotes"))
+	  (t
+	   (let* ((label (org-element-property :label context))
+		  (definition
+		    (org-with-wide-buffer
+		     (org-footnote-goto-definition label)
+		     (beginning-of-line)
+		     (org-element-at-point))))
+	     (org-src--edit-element
+	      definition (format "*Edit footnote [%s]*" label)
+	      #'org-mode
+	      (lambda () (delete-region (point) (search-forward "]")))
+	      (concat
+	       (org-propertize (format "[%s]" label)
+			       'read-only "Cannot edit footnote label"
+			       'front-sticky t
+			       'rear-nonsticky t)
+	       (org-with-wide-buffer
+		(buffer-substring-no-properties
+		 (progn
+		   (goto-char (org-element-property :contents-begin definition))
+		   (skip-chars-backward " \r\t\n")
+		   (point))
+		 (org-element-property :contents-end definition))))
+	      'remote))
+	   ;; Report success.
+	   t))))
 
 (defun org-edit-table.el ()
   "Edit \"table.el\" table at point.
