@@ -194,7 +194,7 @@ issued in the language major mode buffer."
 
 ;;; Internal functions and variables
 
-(defvar org-src--allow-write-back-p t)
+(defvar org-src--allow-write-back t)
 (defvar org-src--beg-marker nil)
 (defvar org-src--block-indentation nil)
 (defvar org-src--code-timer nil)
@@ -327,24 +327,18 @@ Assume point is in the corresponding edit buffer."
 			  0)))
 	(preserve-indentation org-src-preserve-indentation)
 	(contents (org-with-wide-buffer (buffer-string)))
-	(fixed-width-p (eq org-src--type 'fixed-width)))
+	(fixed-width-p (eq org-src--type 'fixed-width))
+	(write-back org-src--allow-write-back))
     (with-temp-buffer
-      (insert contents)
+      (insert (org-no-properties contents))
       (goto-char (point-min))
-      (if fixed-width-p
-	  (progn
-	    (untabify (point-min) (point-max))
-	    (let ((prefix (concat (and (not preserve-indentation)
-				       (make-string indentation ?\s))
-				  ": ")))
-	      (while (not (eobp)) (insert prefix) (forward-line))))
-	(unless preserve-indentation (untabify (point-min) (point-max)))
-	(org-escape-code-in-region (point-min) (point-max))
-	(unless (or preserve-indentation (zerop indentation))
-	  (let ((ind (make-string indentation ?\s)))
-	    (while (not (eobp))
-	      (when (org-looking-at-p "[ \t]*\\S-") (insert ind))
-	      (forward-line)))))
+      (when (functionp write-back) (funcall write-back))
+      (unless (or preserve-indentation (= indentation 0))
+	(let ((ind (make-string indentation ?\s)))
+	  (goto-char (point-min))
+	  (while (not (eobp))
+	    (when (org-looking-at-p "[ \t]*\\S-") (insert ind))
+	    (forward-line))))
       (buffer-string))))
 
 (defun org-src--edit-element (element name &optional major write-back contents)
@@ -352,9 +346,11 @@ Assume point is in the corresponding edit buffer."
 
 MAJOR is the major mode used in the edit buffer.  A nil value is
 equivalent to `fundamental-mode'.  When WRITE-BACK is non-nil,
-assume contents will replace original region.  When CONTENTS is
-non-nil, display them in the edit buffer.  Otherwise, assume they
-are located in property `:value'.
+assume contents will replace original region.  If it is
+a function, it will be applied in the edit buffer before
+returning the contents.  When CONTENTS is non-nil, display them
+in the edit buffer.  Otherwise, assume they are located in
+property `:value'.
 
 Leave point in edit buffer."
   (setq org-src--saved-temp-window-config (current-window-configuration))
@@ -416,7 +412,7 @@ Leave point in edit buffer."
 	(org-set-local 'org-src--block-indentation ind)
 	(org-set-local 'org-src-preserve-indentation preserve-ind)
 	(org-set-local 'org-src--overlay overlay)
-	(org-set-local 'org-src--allow-write-back-p write-back)
+	(org-set-local 'org-src--allow-write-back write-back)
 	;; Start minor mode.
 	(org-src-mode)
 	(when org-edit-src-persistent-message
@@ -545,7 +541,7 @@ There is a mode hook, and keybindings for `org-edit-src-exit' and
 (defun org-src-mode-configure-edit-buffer ()
   (when (org-bound-and-true-p org-src--from-org-mode)
     (org-add-hook 'kill-buffer-hook #'org-src--remove-overlay nil 'local)
-    (if (org-bound-and-true-p org-src--allow-write-back-p)
+    (if (org-bound-and-true-p org-src--allow-write-back)
 	(progn
 	  (setq buffer-offer-save t)
 	  (setq buffer-file-name
@@ -692,7 +688,10 @@ Throw an error when not at an export block."
 	   (mode (org-src--get-lang-mode type)))
       (unless (functionp mode) (error "No such language mode: %s" mode))
       (org-src--edit-element
-       element (org-src--construct-edit-buffer-name (buffer-name) type) mode t))
+       element
+       (org-src--construct-edit-buffer-name (buffer-name) type)
+       mode
+       (lambda () (org-escape-code-in-region (point-min) (point-max)))))
     t))
 
 (defun org-edit-src-code (&optional code edit-buffer-name)
@@ -729,7 +728,13 @@ name of the sub-editing buffer."
        element
        (or edit-buffer-name
 	   (org-src--construct-edit-buffer-name (buffer-name) lang))
-       lang-f (null code) (and code (org-unescape-code-in-string code)))
+       lang-f
+       (and (null code)
+	    (lambda ()
+	      (unless org-src-preserve-indentation
+		(untabify (point-min) (point-max)))
+	      (org-escape-code-in-region (point-min) (point-max))))
+       (and code (org-unescape-code-in-string code)))
       ;; Finalize buffer.
       (org-set-local 'org-coderef-label-format
 		     (or (org-element-property :label-fmt element)
@@ -761,14 +766,14 @@ the area in the Org mode buffer."
      element
      (org-src--construct-edit-buffer-name (buffer-name) "Fixed Width")
      org-edit-fixed-width-region-mode
-     t)
+     (lambda () (while (not (eobp)) (insert ": ") (forward-line))))
     ;; Return success.
     t))
 
 (defun org-edit-src-abort ()
   "Abort editing of the src code and return to the Org buffer."
   (interactive)
-  (let (org-src--allow-write-back-p) (org-edit-src-exit)))
+  (let (org-src--allow-write-back) (org-edit-src-exit)))
 
 (defun org-edit-src-continue (e)
   "Unconditionally return to buffer editing area under point.
@@ -801,18 +806,18 @@ Throw an error if there is no such buffer."
   "Kill current sub-editing buffer and return to source buffer."
   (interactive)
   (unless (org-src-edit-buffer-p) (error "Not in a sub-editing buffer"))
-  (let* ((allow-write-back-p org-src--allow-write-back-p)
+  (let* ((allow-write-back org-src--allow-write-back)
 	 (beg org-src--beg-marker)
 	 (end org-src--end-marker)
 	 (coordinates (org-src--coordinates (point) 1 (point-max)))
-	 (code (and allow-write-back-p (org-src--contents-for-write-back))))
+	 (code (and allow-write-back (org-src--contents-for-write-back))))
     (set-buffer-modified-p nil)
     ;; Switch to source buffer.  Kill sub-editing buffer.
     (let ((edit-buffer (current-buffer)))
       (org-src-switch-to-buffer (marker-buffer beg) 'exit)
       (kill-buffer edit-buffer))
     ;; Insert modified code.  Ensure it ends with a newline character.
-    (when (and allow-write-back-p
+    (when (and allow-write-back
 	       (not (equal (buffer-substring-no-properties beg end) code)))
       (undo-boundary)
       (goto-char beg)
@@ -829,7 +834,7 @@ Throw an error if there is no such buffer."
      ((org-some (lambda (o) (eq (overlay-get o 'invisible) 'org-hide-block))
 		(overlays-at (point)))
       (beginning-of-line 0))
-     (allow-write-back-p (org-src--goto-coordinates coordinates beg end)))
+     (allow-write-back (org-src--goto-coordinates coordinates beg end)))
     ;; Clean up left-over markers and restore window configuration.
     (set-marker beg nil)
     (set-marker end nil)
