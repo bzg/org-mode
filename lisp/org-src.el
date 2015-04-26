@@ -195,6 +195,7 @@ issued in the language major mode buffer."
 ;;; Internal functions and variables
 
 (defvar org-src--allow-write-back t)
+(defvar org-src--remote nil)
 (defvar org-src--beg-marker nil)
 (defvar org-src--block-indentation nil)
 (defvar org-src--code-timer nil)
@@ -341,16 +342,22 @@ Assume point is in the corresponding edit buffer."
 	    (forward-line))))
       (buffer-string))))
 
-(defun org-src--edit-element (element name &optional major write-back contents)
-  "Edit ELEMENT contents in a dedicated buffer.
+(defun org-src--edit-element
+    (element name &optional major write-back contents remote)
+  "Edit ELEMENT contents in a dedicated buffer NAME.
 
 MAJOR is the major mode used in the edit buffer.  A nil value is
-equivalent to `fundamental-mode'.  When WRITE-BACK is non-nil,
-assume contents will replace original region.  If it is
-a function, it will be applied in the edit buffer before
-returning the contents.  When CONTENTS is non-nil, display them
-in the edit buffer.  Otherwise, assume they are located in
-property `:value'.
+equivalent to `fundamental-mode'.
+
+When WRITE-BACK is non-nil, assume contents will replace original
+region.  If it is a function, applied in the edit buffer, from
+point min, before returning the contents.
+
+When CONTENTS is non-nil, display them in the edit buffer.
+Otherwise, assume they are located in property `:value'.
+
+When REMOTE is non-nil, do not try to preserve point or mark when
+moving from the edit area to the source.
 
 Leave point in edit buffer."
   (setq org-src--saved-temp-window-config (current-window-configuration))
@@ -378,8 +385,10 @@ Leave point in edit buffer."
 		       org-src-preserve-indentation)))
 	     ;; Store relative positions of mark (if any) and point
 	     ;; within the edited area.
-	     (point-coordinates (org-src--coordinates (point) beg end))
-	     (mark-coordinates (and (org-region-active-p)
+	     (point-coordinates (and (not remote)
+				     (org-src--coordinates (point) beg end)))
+	     (mark-coordinates (and (not remote)
+				    (org-region-active-p)
 				    (let ((m (mark)))
 				      (and (>= m beg) (>= end m)
 					   (org-src--coordinates m beg end)))))
@@ -409,6 +418,7 @@ Leave point in edit buffer."
 	(org-set-local 'org-src--beg-marker beg)
 	(org-set-local 'org-src--end-marker end)
 	(org-set-local 'org-src--type type)
+	(org-set-local 'org-src--remote remote)
 	(org-set-local 'org-src--block-indentation ind)
 	(org-set-local 'org-src-preserve-indentation preserve-ind)
 	(org-set-local 'org-src--overlay overlay)
@@ -436,7 +446,13 @@ Leave point in edit buffer."
 	  (org-src--goto-coordinates mark-coordinates (point-min) (point-max))
 	  (push-mark (point) 'no-message t)
 	  (setq deactivate-mark nil))
-	(org-src--goto-coordinates point-coordinates (point-min) (point-max)))
+	(if (not remote)
+	    (org-src--goto-coordinates
+	     point-coordinates (point-min) (point-max))
+	  (goto-char (or (text-property-any
+			  (point-min) (point-max) 'read-only nil)
+			 (point-max)))
+	  (skip-chars-forward " \r\t\n")))
       ;; Install idle auto save feature, if necessary.
       (or org-src--code-timer
 	  (zerop org-edit-src-auto-save-idle-delay)
@@ -806,35 +822,38 @@ Throw an error if there is no such buffer."
   "Kill current sub-editing buffer and return to source buffer."
   (interactive)
   (unless (org-src-edit-buffer-p) (error "Not in a sub-editing buffer"))
-  (let* ((allow-write-back org-src--allow-write-back)
-	 (beg org-src--beg-marker)
+  (let* ((beg org-src--beg-marker)
 	 (end org-src--end-marker)
-	 (coordinates (org-src--coordinates (point) 1 (point-max)))
-	 (code (and allow-write-back (org-src--contents-for-write-back))))
+	 (write-back org-src--allow-write-back)
+	 (remote org-src--remote)
+	 (coordinates (and (not remote)
+			   (org-src--coordinates (point) 1 (point-max))))
+	 (code (and write-back (org-src--contents-for-write-back))))
     (set-buffer-modified-p nil)
     ;; Switch to source buffer.  Kill sub-editing buffer.
     (let ((edit-buffer (current-buffer)))
       (org-src-switch-to-buffer (marker-buffer beg) 'exit)
       (kill-buffer edit-buffer))
     ;; Insert modified code.  Ensure it ends with a newline character.
-    (when (and allow-write-back
-	       (not (equal (buffer-substring-no-properties beg end) code)))
-      (undo-boundary)
-      (goto-char beg)
-      (delete-region beg end)
-      (when (org-string-nw-p code)
-	(insert code)
-	(unless (bolp) (insert "\n"))))
+    (org-with-wide-buffer
+     (when (and write-back (not (equal (buffer-substring beg end) code)))
+       (undo-boundary)
+       (goto-char beg)
+       (delete-region beg end)
+       (when (org-string-nw-p code)
+	 (insert code)
+	 (unless (bolp) (insert "\n")))))
     ;; If we are to return to source buffer, put point at an
     ;; appropriate location.  In particular, if block is hidden, move
     ;; to the beginning of the block opening line.
-    (goto-char beg)
-    (cond
-     ;; Block is hidden; move at start of block.
-     ((org-some (lambda (o) (eq (overlay-get o 'invisible) 'org-hide-block))
-		(overlays-at (point)))
-      (beginning-of-line 0))
-     (allow-write-back (org-src--goto-coordinates coordinates beg end)))
+    (unless remote
+      (goto-char beg)
+      (cond
+       ;; Block is hidden; move at start of block.
+       ((org-some (lambda (o) (eq (overlay-get o 'invisible) 'org-hide-block))
+		  (overlays-at (point)))
+	(beginning-of-line 0))
+       (write-back (org-src--goto-coordinates coordinates beg end))))
     ;; Clean up left-over markers and restore window configuration.
     (set-marker beg nil)
     (set-marker end nil)
