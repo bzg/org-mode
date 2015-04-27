@@ -2863,14 +2863,13 @@ Return code as a string."
 			     (org-export-backend-name backend))
 	 (org-export-expand-include-keyword)
 	 (org-export--delete-comments)
-	 ;; Update macro templates since #+INCLUDE keywords might have
-	 ;; added some new ones.
+	 ;; Refresh buffer properties, radio targets and macros after
+	 ;; including files.
+	 (org-set-regexps-and-options)
+	 (org-update-radio-target-regexp)
 	 (org-macro-initialize-templates)
 	 (org-macro-replace-all org-macro-templates nil parsed-keywords)
 	 (org-export-execute-babel-code)
-	 ;; Update radio targets since keyword inclusion might have
-	 ;; added some more.
-	 (org-update-radio-target-regexp)
 	 ;; Run last hook with current back-end's name as argument.
 	 (goto-char (point-min))
 	 (save-excursion
