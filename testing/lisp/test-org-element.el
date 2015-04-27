@@ -1744,10 +1744,29 @@ e^{i\\pi}+1=0
      (let ((elem (org-element-at-point)))
        (and (eq (org-element-type elem) 'paragraph)
 	    (= (point-max) (org-element-property :end elem))))))
+  (should
+   (org-test-with-temp-text "Paragraph\n\begin{equation}"
+     (let ((elem (org-element-at-point)))
+       (and (eq (org-element-type elem) 'paragraph)
+	    (= (point-max) (org-element-property :end elem))))))
+  ;; Stop at affiliated keywords.
+  (should
+   (org-test-with-temp-text "Paragraph\n#+NAME: test\n| table |"
+     (let ((elem (org-element-at-point)))
+       (and (eq (org-element-type elem) 'paragraph)
+	    (not (org-element-property :name elem))
+	    (= (org-element-property :end elem) (line-beginning-position 2))))))
+  (should
+   (org-test-with-temp-text
+       "Paragraph\n#+CAPTION[with short caption]: test\n| table |"
+     (let ((elem (org-element-at-point)))
+       (and (eq (org-element-type elem) 'paragraph)
+	    (not (org-element-property :name elem))
+	    (= (org-element-property :end elem) (line-beginning-position 2))))))
   ;; Do not steal affiliated keywords from container.
   (should
-   (org-test-with-temp-text "#+ATTR_LATEX: test\n- item 1"
-     (let ((elem (progn (search-forward "item") (org-element-at-point))))
+   (org-test-with-temp-text "#+ATTR_LATEX: test\n- item<point> 1"
+     (let ((elem (org-element-at-point)))
        (and (eq (org-element-type elem) 'paragraph)
 	    (not (org-element-property :attr_latex elem))
 	    (/= (org-element-property :begin elem) 1)))))
