@@ -274,10 +274,10 @@ positions."
   (let ((type (org-element-type element)))
     (cond
      ((eq type 'footnote-definition)
-      (cons (org-with-wide-buffer
-	     (goto-char (org-element-property :post-affiliated element))
-	     (search-forward "]"))
-	    (org-element-property :contents-end element)))
+      (let ((beg (org-with-wide-buffer
+		  (goto-char (org-element-property :post-affiliated element))
+		  (search-forward "]"))))
+	(cons beg (or (org-element-property :contents-end element) beg))))
      ((org-element-property :contents-begin element)
       (cons (org-element-property :contents-begin element)
 	    (org-element-property :contents-end element)))
@@ -705,13 +705,14 @@ If BUFFER is non-nil, test it instead."
 			'read-only "Cannot edit footnote label"
 			'front-sticky t
 			'rear-nonsticky t)
-	(org-with-wide-buffer
-	 (buffer-substring-no-properties
-	  (progn
-	    (goto-char (org-element-property :contents-begin definition))
-	    (skip-chars-backward " \r\t\n")
-	    (point))
-	  (org-element-property :contents-end definition))))
+	(and (org-element-property :contents-begin definition)
+	     (org-with-wide-buffer
+	      (buffer-substring-no-properties
+	       (progn
+		 (goto-char (org-element-property :contents-begin definition))
+		 (skip-chars-backward " \r\t\n")
+		 (point))
+	       (org-element-property :contents-end definition)))))
        'remote))
     ;; Report success.
     t))
