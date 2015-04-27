@@ -2007,6 +2007,15 @@ location with a prefix argument, offer the same menu as @kbd{C-c C-x f}.
 @item C-c C-o  @r{or} mouse-1/2
 Footnote labels are also links to the corresponding definition/reference, and
 you can use the usual commands to follow these links.
+
+@vindex org-edit-footnote-reference
+@kindex C-c '
+@item C-c '
+@item C-c '
+Edit the footnote definition corresponding to the reference at point in a
+seperate window.  This may be useful if editing footnotes in a narrowed
+buffer.  The window can be closed by pressing @kbd{C-c '}.
+
 @end table
 
 @node Orgstruct mode
