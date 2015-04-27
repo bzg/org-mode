@@ -1651,7 +1651,7 @@ holding contextual information."
 		    info t)))))
 	  (if (and opt-title
 		   (not (equal opt-title full-text))
-		   (string-match "\\`\\\\\\(.*?[^*]\\){" section-fmt))
+		   (string-match "\\`\\\\\\(.+?\\){" section-fmt))
 	      (format (replace-match "\\1[%s]" nil nil section-fmt 1)
 		      ;; Replace square brackets with parenthesis
 		      ;; since square brackets are not supported in
