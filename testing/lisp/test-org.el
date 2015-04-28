@@ -3009,6 +3009,13 @@ Text.
    (equal "cat"
 	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:CATEGORY: cat\n:END:"
 	    (cdr (assoc "CATEGORY" (org-entry-properties nil "CATEGORY"))))))
+  (should
+   (equal "cat2"
+	  (org-test-with-temp-text
+	      (concat "* H\n:PROPERTIES:\n:CATEGORY: cat1\n:END:"
+		      "\n"
+		      "** H2\n:PROPERTIES:\n:CATEGORY: cat2\n:END:<point>")
+	    (cdr (assoc "CATEGORY" (org-entry-properties nil "CATEGORY"))))))
   ;; Get standard properties.
   (should
    (equal "1"

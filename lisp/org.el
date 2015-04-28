@@ -9565,7 +9565,7 @@ The refresh happens only for the current tree (not subtree)."
 	    (when (org-at-property-p)
 	      (put-text-property
 	       (save-excursion (org-back-to-heading t) (point))
-	       (org-end-of-subtree t t)
+	       (save-excursion (org-end-of-subtree t t) (point))
 	       'org-category
 	       value)))))))))
 
