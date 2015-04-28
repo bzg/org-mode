@@ -461,7 +461,7 @@ then run `org-babel-switch-to-session'."
     (colnames	. ((nil no yes)))
     (comments	. ((no link yes org both noweb)))
     (dir	. :any)
-    (eval	. ((yes no-export strip-export eval never query)))
+    (eval	. ((yes no no-export strip-export eval never query)))
     (exports	. ((code results both none)))
     (epilogue   . :any)
     (file	. :any)
