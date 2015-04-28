@@ -10836,7 +10836,7 @@ link in a property drawer line."
 			(shell-command cmd buf)
 			(when (featurep 'midnight)
 			  (setq clean-buffer-list-kill-buffer-names
-				(cons buf
+				(cons (buffer-name buf)
 				      clean-buffer-list-kill-buffer-names))))
 		    (user-error "Abort"))))
 	       ((equal type "elisp")
