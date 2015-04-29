@@ -548,27 +548,26 @@ There is a mode hook, and keybindings for `org-edit-src-exit' and
 \\[org-edit-src-abort]"
 	"Exit with \\[org-edit-src-exit] or abort with \
 \\[org-edit-src-abort]"))))
-  ;; Possibly set-up various auto-save features (for the edit buffer
+  ;; Possibly activate various auto-save features (for the edit buffer
   ;; or the source buffer).
   (when org-edit-src-turn-on-auto-save
     (setq buffer-auto-save-file-name
 	  (concat (make-temp-name "org-src-")
 		  (format-time-string "-%Y-%d-%m")
 		  ".txt")))
-  ;; Install idle auto save feature, if necessary.
-  (or org-src--auto-save-timer
-      (zerop org-edit-src-auto-save-idle-delay)
-      (setq org-src--auto-save-timer
-	    (run-with-idle-timer
-	     org-edit-src-auto-save-idle-delay t
-	     (lambda ()
-	       (let ((edit-buffers (org-remove-if-not #'org-src-edit-buffer-p
-						      (buffer-list))))
-		 (if edit-bufffers
-		     (dolist (b edit-bufffers)
-		       (when (buffer-modified-p) (org-edit-src-save)))
-		   (cancel-timer org-src--auto-save-timer)
-		   (setq org-src--auto-save-timer nil))))))))
+  (unless (or org-src--auto-save-timer (zerop org-edit-src-auto-save-idle-delay))
+    (setq org-src--auto-save-timer
+	  (run-with-idle-timer
+	   org-edit-src-auto-save-idle-delay t
+	   (lambda ()
+	     (let (edit-flag)
+	       (dolist (b (buffer-list))
+		 (when (org-src-edit-buffer-p)
+		   (unless edit-flag (setq edit-flag t))
+		   (when (buffer-modified-p) (org-edit-src-save))))
+	       (unless edit-flag
+		 (cancel-timer org-src--auto-save-timer)
+		 (setq org-src--auto-save-timer nil))))))))
 
 (defun org-src-mode-configure-edit-buffer ()
   (when (org-bound-and-true-p org-src--from-org-mode)
