@@ -198,7 +198,7 @@ issued in the language major mode buffer."
 (defvar org-src--remote nil)
 (defvar org-src--beg-marker nil)
 (defvar org-src--block-indentation nil)
-(defvar org-src--code-timer nil)
+(defvar org-src--auto-save-timer nil)
 (defvar org-src--end-marker nil)
 (defvar org-src--from-org-mode nil)
 (defvar org-src--overlay nil)
@@ -440,21 +440,6 @@ Leave point in edit buffer."
 	(org-set-local 'org-src--allow-write-back write-back)
 	;; Start minor mode.
 	(org-src-mode)
-	(when org-edit-src-persistent-message
-	  (org-set-local
-	   'header-line-format
-	   (substitute-command-keys
-	    (if write-back
-		"Edit, then exit with \\[org-edit-src-exit] or abort with \
-\\[org-edit-src-abort]"
-	      "Exit with \\[org-edit-src-exit] or abort with \
-\\[org-edit-src-abort]"))))
-	;; Possibly start `auto-save-mode'.
-	(when org-edit-src-turn-on-auto-save
-	  (setq buffer-auto-save-file-name
-		(concat (make-temp-name "org-src-")
-			(format-time-string "-%Y-%d-%m")
-			".txt")))
 	;; Move mark and point in edit buffer to the corresponding
 	;; location.
 	(when mark-coordinates
@@ -467,21 +452,7 @@ Leave point in edit buffer."
 	  (goto-char (or (text-property-any
 			  (point-min) (point-max) 'read-only nil)
 			 (point-max)))
-	  (skip-chars-forward " \r\t\n")))
-      ;; Install idle auto save feature, if necessary.
-      (or org-src--code-timer
-	  (zerop org-edit-src-auto-save-idle-delay)
-	  (setq org-src--code-timer
-		(run-with-idle-timer
-		 org-edit-src-auto-save-idle-delay t
-		 (lambda ()
-		   (cond
-		    ((org-src-edit-buffer-p)
-		     (when (buffer-modified-p) (org-edit-src-save)))
-		    ((not (org-some (lambda (b) (org-src-edit-buffer-p b))
-				    (buffer-list)))
-		     (cancel-timer org-src--code-timer)
-		     (setq org-src--code-timer nil))))))))))
+	  (skip-chars-forward " \r\t\n"))))))
 
 
 
@@ -567,7 +538,37 @@ This minor mode is turned on in two situations:
 - when editing a source code snippet with \"C-c '\".
 - When formatting a source code snippet for export with htmlize.
 There is a mode hook, and keybindings for `org-edit-src-exit' and
-`org-edit-src-save'")
+`org-edit-src-save'"
+  (when org-edit-src-persistent-message
+    (org-set-local
+     'header-line-format
+     (substitute-command-keys
+      (if write-back
+	  "Edit, then exit with \\[org-edit-src-exit] or abort with \
+\\[org-edit-src-abort]"
+	"Exit with \\[org-edit-src-exit] or abort with \
+\\[org-edit-src-abort]"))))
+  ;; Possibly set-up various auto-save features (for the edit buffer
+  ;; or the source buffer).
+  (when org-edit-src-turn-on-auto-save
+    (setq buffer-auto-save-file-name
+	  (concat (make-temp-name "org-src-")
+		  (format-time-string "-%Y-%d-%m")
+		  ".txt")))
+  ;; Install idle auto save feature, if necessary.
+  (or org-src--auto-save-timer
+      (zerop org-edit-src-auto-save-idle-delay)
+      (setq org-src--auto-save-timer
+	    (run-with-idle-timer
+	     org-edit-src-auto-save-idle-delay t
+	     (lambda ()
+	       (let ((edit-buffers (org-remove-if-not #'org-src-edit-buffer-p
+						      (buffer-list))))
+		 (if edit-bufffers
+		     (dolist (b edit-bufffers)
+		       (when (buffer-modified-p) (org-edit-src-save)))
+		   (cancel-timer org-src--auto-save-timer)
+		   (setq org-src--auto-save-timer nil))))))))
 
 (defun org-src-mode-configure-edit-buffer ()
   (when (org-bound-and-true-p org-src--from-org-mode)
