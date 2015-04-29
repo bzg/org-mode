@@ -3782,7 +3782,7 @@ FILTER-ALIST is an alist of filters we need to apply when
   "Make highest priority lines bold, and lowest italic."
   (interactive)
   (mapc (lambda (o) (if (eq (overlay-get o 'org-type) 'org-priority)
-			(delete-overlay o)))
+		   (delete-overlay o)))
 	(overlays-in (point-min) (point-max)))
   (save-excursion
     (let (b e p ov h l)
@@ -3800,16 +3800,17 @@ FILTER-ALIST is an alist of filters we need to apply when
 	      ov (make-overlay b e))
 	(overlay-put
 	 ov 'face
-	 (cons (cond ((org-face-from-face-or-color
-		       'priority nil
-		       (cdr (assoc p org-priority-faces))))
-		     ((and (listp org-agenda-fontify-priorities)
-			   (org-face-from-face-or-color
-			    'priority nil
-			    (cdr (assoc p org-agenda-fontify-priorities)))))
-		     ((equal p l) 'italic)
-		     ((equal p h) 'bold))
-	       'org-priority))
+	 (let ((special-face
+		(cond ((org-face-from-face-or-color
+			'priority nil
+			(cdr (assoc p org-priority-faces))))
+		      ((and (listp org-agenda-fontify-priorities)
+			    (org-face-from-face-or-color
+			     'priority nil
+			     (cdr (assoc p org-agenda-fontify-priorities)))))
+		      ((equal p l) 'italic)
+		      ((equal p h) 'bold))))
+	   (if special-face (list special-face 'org-priority) 'org-priority)))
 	(overlay-put ov 'org-type 'org-priority)))))
 
 (defvar org-depend-tag-blocked)
