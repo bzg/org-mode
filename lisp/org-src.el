@@ -543,7 +543,7 @@ There is a mode hook, and keybindings for `org-edit-src-exit' and
     (org-set-local
      'header-line-format
      (substitute-command-keys
-      (if write-back
+      (if org-src--allow-write-back
 	  "Edit, then exit with \\[org-edit-src-exit] or abort with \
 \\[org-edit-src-abort]"
 	"Exit with \\[org-edit-src-exit] or abort with \
