@@ -187,14 +187,6 @@ This string must include a \"%s\" which will be replaced by the results."
   "^[ \t]*#\\+headers?:[ \t]*\\([^\n]*\\)$"
   "Regular expression used to match multi-line header arguments.")
 
-(defvar org-babel-src-name-w-name-regexp
-  (concat org-babel-src-name-regexp
-	  "\\("
-	  org-babel-multi-line-header-regexp
-	  "\\)*"
-	  "\\([^()\f\t\n\r\v]+\\)")
-  "Regular expression matching source name lines with a name.")
-
 (defvar org-babel-src-block-regexp
   (concat
    ;; (1) indentation                 (2) lang
@@ -271,8 +263,8 @@ Returns a list
 		  (org-babel-merge-params
 		   (nth 2 info)
 		   (org-babel-parse-header-arguments (match-string 1)))))
-	  (when (looking-at org-babel-src-name-w-name-regexp)
-	    (setq name (org-no-properties (match-string 3)))))
+	  (when (looking-at (org-babel-named-src-block-regexp-for-name))
+	    (setq name (org-match-string-no-properties 9))))
       ;; inline source block
       (when (org-babel-get-inline-src-block-matches)
 	(setq head (match-beginning 0))
@@ -1775,10 +1767,10 @@ to `org-babel-named-src-block-regexp'."
   (when file (find-file file))
   (save-excursion
     (goto-char (point-min))
-    (let (names)
-      (while (ignore-errors
-	       (org-next-block 1 nil org-babel-src-name-w-name-regexp))
-	(push (match-string 3) names))
+    (let ((re (org-babel-named-src-block-regexp-for-name))
+	  names)
+      (while (ignore-errors (org-next-block 1 nil re))
+	(push (org-match-string-no-properties 9) names))
       names)))
 
 ;;;###autoload
