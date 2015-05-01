@@ -164,7 +164,7 @@ specially in `org-element--object-lex'.")
 		;; double-checked.
 		"#\\(?: \\|$\\|\\+\\(?:"
 		"BEGIN_\\S-+" "\\|"
-		"\\S-+\\(?:\\[.*\\]\\)?:\\(?: \\|$\\)\\)\\)"
+		"\\S-+\\(?:\\[.*\\]\\)?:[ \t]*\\)\\)"
 		"\\|"
 		;; Drawers (any type) and fixed-width areas.  Drawers
 		;; need to be double-checked.
@@ -324,7 +324,7 @@ This list is checked after translations have been applied.  See
 `org-element-keyword-translation-alist'.")
 
 (defconst org-element--affiliated-re
-  (format "[ \t]*#\\+\\(?:%s\\):\\(?: \\|$\\)"
+  (format "[ \t]*#\\+\\(?:%s\\):[ \t]*"
 	  (concat
 	   ;; Dual affiliated keywords.
 	   (format "\\(?1:%s\\)\\(?:\\[\\(.*\\)\\]\\)?"
@@ -334,8 +334,7 @@ This list is checked after translations have been applied.  See
 	   (format "\\(?1:%s\\)"
 		   (regexp-opt
 		    (org-remove-if
-		     #'(lambda (keyword)
-			 (member keyword org-element-dual-keywords))
+		     (lambda (k) (member k org-element-dual-keywords))
 		     org-element-affiliated-keywords)))
 	   "\\|"
 	   ;; Export attributes.
