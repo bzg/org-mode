@@ -203,7 +203,6 @@ issued in the language major mode buffer."
 (defvar org-src--from-org-mode nil)
 (defvar org-src--overlay nil)
 (defvar org-src--saved-temp-window-config nil)
-(defvar org-src--type nil)
 (defvar org-src--babel-info nil)
 
 (defun org-src--construct-edit-buffer-name (org-buffer-name lang)
@@ -337,13 +336,9 @@ END."
 (defun org-src--contents-for-write-back ()
   "Return buffer contents in a format appropriate for write back.
 Assume point is in the corresponding edit buffer."
-  (let ((indentation (+ (or org-src--block-indentation 0)
-			(if (memq org-src--type '(example-block src-block))
-			    org-edit-src-content-indentation
-			  0)))
+  (let ((indentation (or org-src--block-indentation 0))
 	(preserve-indentation org-src-preserve-indentation)
 	(contents (org-with-wide-buffer (buffer-string)))
-	(fixed-width-p (eq org-src--type 'fixed-width))
 	(write-back org-src--allow-write-back))
     (with-temp-buffer
       (insert (org-no-properties contents))
@@ -432,7 +427,6 @@ Leave point in edit buffer."
 	(org-set-local 'org-src--from-org-mode org-mode-p)
 	(org-set-local 'org-src--beg-marker beg)
 	(org-set-local 'org-src--end-marker end)
-	(org-set-local 'org-src--type type)
 	(org-set-local 'org-src--remote remote)
 	(org-set-local 'org-src--block-indentation ind)
 	(org-set-local 'org-src-preserve-indentation preserve-ind)
@@ -809,7 +803,12 @@ name of the sub-editing buffer."
        (and (null code)
 	    (lambda ()
 	      (unless org-src-preserve-indentation
-		(untabify (point-min) (point-max)))
+		(untabify (point-min) (point-max))
+		(when (> org-edit-src-content-indentation 0)
+		  (let ((ind (make-string org-edit-src-content-indentation ?\s)))
+		    (while (not (eobp))
+		      (unless (looking-at "[ \t]*$") (insert ind))
+		      (forward-line)))))
 	      (org-escape-code-in-region (point-min) (point-max))))
        (and code (org-unescape-code-in-string code)))
       ;; Finalize buffer.
