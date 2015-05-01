@@ -155,7 +155,7 @@ other-frame       Use `switch-to-buffer-other-frame' to display edit buffer.
 	  (const reorganize-frame)))
 
 (defvar org-src-mode-hook nil
-  "Hook  run after Org switched a source code snippet to its Emacs mode.
+  "Hook run after Org switched a source code snippet to its Emacs mode.
 \\<org-mode-map>
 This hook will run:
 - when editing a source code snippet with \\[org-edit-special]
@@ -772,13 +772,13 @@ Throw an error when not at an export block."
 
 (defun org-edit-src-code (&optional code edit-buffer-name)
   "Edit the source or example block at point.
-
+\\<org-src-mode-map>
 The code is copied to a separate buffer and the appropriate mode
-is turned on.  When done, exit with \\[org-edit-src-exit].  This
-will remove the original code in the Org buffer, and replace it
-with the edited version.  See `org-src-window-setup' to configure
-the display of windows containing the Org buffer and the code
-buffer.
+is turned on.  When done, exit with \\[org-edit-src-exit].  This \
+will remove the
+original code in the Org buffer, and replace it with the edited
+version.  See `org-src-window-setup' to configure the display of
+windows containing the Org buffer and the code buffer.
 
 When optional argument CODE is a string, edit it in a dedicated
 buffer instead.
