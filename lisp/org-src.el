@@ -309,15 +309,14 @@ END."
 		 (let ((map (make-sparse-keymap)))
 		   (define-key map [mouse-1] 'org-edit-src-continue)
 		   map))
-    ;; TODO: The below line doesn't work for two reasons:
-    ;; - It should be 'read-only
-    ;; - 'read-only apparently doesn't work on overlays (also empirically tested):
-    ;;    <https://lists.gnu.org/archive/html/emacs-devel/2008-01/msg01598.html>
-    ;; If this feature is to be kept, it should be implemented via text
-    ;; properties, which will require fiddling around in more places
-    ;; (such as when the contents are copied back into the buffer after
-    ;; editing is complete.)
-    (overlay-put overlay :read-only "Leave me alone")
+    (let ((read-only
+	   (list
+	    (lambda (&rest _)
+	      (user-error
+	       "Cannot modify an area being edited in a dedicated buffer")))))
+      (overlay-put overlay 'modification-hooks read-only)
+      (overlay-put overlay 'insert-in-front-hooks read-only)
+      (overlay-put overlay 'insert-behind-hooks read-only))
     overlay))
 
 (defun org-src--remove-overlay ()
@@ -872,11 +871,14 @@ Throw an error if there is no such buffer."
     (with-current-buffer (org-src--source-buffer)
       (undo-boundary)
       (goto-char beg)
+      ;; Temporarily disable read-only features of OVERLAY in order to
+      ;; insert new contents.
+      (delete-overlay overlay)
       (delete-region beg end)
       (when (org-string-nw-p edited-code) (insert edited-code))
       (unless (bolp) (insert "\n"))
-      (move-overlay overlay beg (point))
-      (save-buffer))))
+      (save-buffer)
+      (move-overlay overlay beg (point)))))
 
 (defun org-edit-src-exit ()
   "Kill current sub-editing buffer and return to source buffer."
