@@ -24344,19 +24344,42 @@ respect customization of `org-odd-levels-only'."
 
 (defun org-next-block (arg &optional backward block-regexp)
   "Jump to the next block.
-With a prefix argument ARG, jump forward ARG many source blocks.
+
+With a prefix argument ARG, jump forward ARG many blocks.
+
 When BACKWARD is non-nil, jump to the previous block.
-When BLOCK-REGEXP is non-nil, use this regexp to find blocks."
+
+When BLOCK-REGEXP is non-nil, use this regexp to find blocks.
+Match data is set according to this regexp when the function
+returns.
+
+Return point at beginning of the opening line of found block.
+Throw an error if no block is found."
   (interactive "p")
-  (let ((re (or block-regexp org-block-regexp))
-	(re-search-fn (or (and backward 're-search-backward)
-			  're-search-forward)))
-    (if (looking-at re) (forward-char 1))
-    (condition-case nil
-	(funcall re-search-fn re nil nil arg)
-      (error (user-error "No %s code blocks"
-			 (if backward "previous" "further" ))))
-    (goto-char (match-beginning 0)) (org-show-context)))
+  (let ((re (or block-regexp "^[ \t]*#\\+BEGIN"))
+	(case-fold-search t)
+	(search-fn (if backward #'re-search-backward #'re-search-forward))
+	(count (or arg 1))
+	(origin (point))
+	last-element)
+    (if backward (beginning-of-line) (end-of-line))
+    (while (and (> count 0) (funcall search-fn re nil t))
+      (let ((element (save-excursion
+		       (goto-char (match-beginning 0))
+		       (save-match-data (org-element-at-point)))))
+	(when (and (memq (org-element-type element)
+			 '(center-block comment-block dynamic-block
+					example-block export-block quote-block
+					special-block src-block verse-block))
+		   (<= (match-beginning 0)
+		       (org-element-property :post-affiliated element)))
+	  (setq last-element element)
+	  (decf count))))
+    (if (= count 0)
+	(prog1 (goto-char (org-element-property :post-affiliated last-element))
+	  (org-show-context))
+      (goto-char origin)
+      (user-error "No %s code blocks" (if backward "previous" "further")))))
 
 (defun org-previous-block (arg &optional block-regexp)
   "Jump to the previous block.
