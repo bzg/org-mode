@@ -592,9 +592,13 @@ to raise errors for all languages.")
 (defvar org-babel-after-execute-hook nil
   "Hook for functions to be called after `org-babel-execute-src-block'")
 
-(defun org-babel-named-src-block-regexp-for-name (name)
-  "This generates a regexp used to match a src block named NAME."
-  (concat org-babel-src-name-regexp (regexp-quote name)
+(defun org-babel-named-src-block-regexp-for-name (&optional name)
+  "This generates a regexp used to match a src block named NAME.
+If NAME is nil, match any name.  Matched name is then put in
+match group 9.  Other match groups are defined in
+`org-babel-src-block-regexp'."
+  (concat org-babel-src-name-regexp
+	  (concat (if name (regexp-quote name) "\\(?9:.*?\\)") "[ \t]*" )
 	  "\\(?:\n[ \t]*#\\+\\S-+:.*\\)*?"
 	  "\n"
 	  (substring org-babel-src-block-regexp 1)))
