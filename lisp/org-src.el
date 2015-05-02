@@ -266,34 +266,35 @@ which see.  BEG and END are buffer positions."
       (org-move-to-column (max (+ (current-column) (cdr coord)) 0))
       (point)))))
 
-(defun org-src--element-contents-area (element)
-  "Return contents boundaries of ELEMENT.
-Return value is a pair (BEG . END) where BEG and END are buffer
-positions."
-  (let ((type (org-element-type element)))
+(defun org-src--contents-area (datum)
+  "Return contents boundaries of DATUM.
+DATUM is an element or object.  Return a pair (BEG . END) where
+BEG and END are buffer positions."
+  (let ((type (org-element-type datum)))
     (cond
      ((eq type 'footnote-definition)
       (let ((beg (org-with-wide-buffer
-		  (goto-char (org-element-property :post-affiliated element))
+		  (goto-char (org-element-property :post-affiliated datum))
 		  (search-forward "]"))))
-	(cons beg (or (org-element-property :contents-end element) beg))))
-     ((org-element-property :contents-begin element)
-      (cons (org-element-property :contents-begin element)
-	    (org-element-property :contents-end element)))
+	(cons beg (or (org-element-property :contents-end datum) beg))))
+     ((org-element-property :contents-begin datum)
+      (cons (org-element-property :contents-begin datum)
+	    (org-element-property :contents-end datum)))
      ((memq type '(example-block export-block src-block))
       (cons (org-with-wide-buffer
-	     (goto-char (org-element-property :post-affiliated element))
+	     (goto-char (org-element-property :post-affiliated datum))
 	     (line-beginning-position 2))
 	    (org-with-wide-buffer
-	     (goto-char (org-element-property :end element))
+	     (goto-char (org-element-property :end datum))
 	     (skip-chars-backward " \r\t\n")
 	     (line-beginning-position 1))))
-     (t
-      (cons (org-element-property :post-affiliated element)
+     ((memq type '(fixed-width table))
+      (cons (org-element-property :post-affiliated datum)
 	    (org-with-wide-buffer
-	     (goto-char (org-element-property :end element))
+	     (goto-char (org-element-property :end datum))
 	     (skip-chars-backward " \r\t\n")
-	     (line-beginning-position 2)))))))
+	     (line-beginning-position 2))))
+     (t (error "Unsupported element or object: %s" type)))))
 
 (defun org-src--make-source-overlay (beg end edit-buffer)
   "Create overlay between BEG and END positions and return it.
@@ -323,14 +324,18 @@ END."
   "Remove overlay from current source buffer."
   (when (overlayp org-src--overlay) (delete-overlay org-src--overlay)))
 
-(defun org-src--on-element-p (element)
-  "Non-nil when point is on ELEMENT."
-  (and (>= (point) (org-element-property :begin element))
+(defun org-src--on-datum-p (datum)
+  "Non-nil when point is on DATUM.
+DATUM is an element or an object.  Consider blank lines or white
+spaces after it as being outside."
+  (and (>= (point) (org-element-property :begin datum))
        (<= (point)
 	   (org-with-wide-buffer
-	    (goto-char (org-element-property :end element))
+	    (goto-char (org-element-property :end datum))
 	    (skip-chars-backward " \r\t\n")
-	    (line-end-position)))))
+	    (if (memq (org-element-type datum) org-element-all-elements)
+		(line-end-position)
+	      (point))))))
 
 (defun org-src--contents-for-write-back ()
   "Return buffer contents in a format appropriate for write back.
@@ -352,28 +357,30 @@ Assume point is in the corresponding edit buffer."
       (buffer-string))))
 
 (defun org-src--edit-element
-    (element name &optional major write-back contents remote)
-  "Edit ELEMENT contents in a dedicated buffer NAME.
+    (datum name &optional major write-back contents remote)
+  "Edit DATUM contents in a dedicated buffer NAME.
 
 MAJOR is the major mode used in the edit buffer.  A nil value is
 equivalent to `fundamental-mode'.
 
 When WRITE-BACK is non-nil, assume contents will replace original
-region.  If it is a function, applied in the edit buffer, from
-point min, before returning the contents.
+region.  Moreover, if it is a function, apply it in the edit
+buffer, from point min, before returning the contents.
 
 When CONTENTS is non-nil, display them in the edit buffer.
-Otherwise, assume they are located in property `:value'.
+Otherwise, show DATUM contents as specified by
+`org-src--contents-area'.
 
 When REMOTE is non-nil, do not try to preserve point or mark when
 moving from the edit area to the source.
 
 Leave point in edit buffer."
   (setq org-src--saved-temp-window-config (current-window-configuration))
-  (let* ((area (org-src--element-contents-area element))
+  (let* ((area (org-src--contents-area datum))
 	 (beg (copy-marker (car area)))
 	 (end (copy-marker (cdr area) t))
-	 (old-edit-buffer (org-src--edit-buffer beg end)))
+	 (old-edit-buffer (org-src--edit-buffer beg end))
+	 (contents (or contents (buffer-substring-no-properties beg end))))
     (if (and old-edit-buffer
 	     (or (not org-src-ask-before-returning-to-edit-buffer)
 		 (y-or-n-p "Return to existing edit buffer ([n] will revert changes)? ")))
@@ -384,13 +391,13 @@ Leave point in edit buffer."
 	(with-current-buffer old-edit-buffer (org-src--remove-overlay))
 	(kill-buffer old-edit-buffer))
       (let* ((org-mode-p (derived-mode-p 'org-mode))
-	     (type (org-element-type element))
+	     (type (org-element-type datum))
 	     (ind (org-with-wide-buffer
-		   (goto-char (org-element-property :begin element))
+		   (goto-char (org-element-property :begin datum))
 		   (org-get-indentation)))
 	     (preserve-ind
 	      (and (memq type '(example-block src-block))
-		   (or (org-element-property :preserve-indent element)
+		   (or (org-element-property :preserve-indent datum)
 		       org-src-preserve-indentation)))
 	     ;; Store relative positions of mark (if any) and point
 	     ;; within the edited area.
@@ -408,7 +415,7 @@ Leave point in edit buffer."
 	;; Switch to edit buffer.
 	(org-src-switch-to-buffer buffer 'edit)
 	;; Insert contents.
-	(insert (or contents (org-element-property :value element)))
+	(insert contents)
 	(remove-text-properties (point-min) (point-max)
 				'(display nil invisible nil intangible nil))
 	(unless preserve-ind (org-do-remove-indentation))
@@ -435,17 +442,21 @@ Leave point in edit buffer."
 	(org-src-mode)
 	;; Move mark and point in edit buffer to the corresponding
 	;; location.
-	(when mark-coordinates
-	  (org-src--goto-coordinates mark-coordinates (point-min) (point-max))
-	  (push-mark (point) 'no-message t)
-	  (setq deactivate-mark nil))
-	(if (not remote)
-	    (org-src--goto-coordinates
-	     point-coordinates (point-min) (point-max))
-	  (goto-char (or (text-property-any
-			  (point-min) (point-max) 'read-only nil)
-			 (point-max)))
-	  (skip-chars-forward " \r\t\n"))))))
+	(if remote
+	    (progn
+	      ;; Put point at first non read-only character after
+	      ;; leading blank.
+	      (goto-char
+	       (or (text-property-any (point-min) (point-max) 'read-only nil)
+		   (point-max)))
+	      (skip-chars-forward " \r\t\n"))
+	  ;; Set mark and point.
+	  (when mark-coordinates
+	    (org-src--goto-coordinates mark-coordinates (point-min) (point-max))
+	    (push-mark (point) 'no-message t)
+	    (setq deactivate-mark nil))
+	  (org-src--goto-coordinates
+	   point-coordinates (point-min) (point-max)))))))
 
 
 
@@ -679,39 +690,52 @@ If BUFFER is non-nil, test it instead."
 (defun org-edit-footnote-reference ()
   "Edit definition of footnote reference at point."
   (interactive)
-  (let ((context (org-element-context)))
+  (let* ((context (org-element-context))
+	 (label (org-element-property :label context)))
     (unless (and (eq (org-element-type context) 'footnote-reference)
-		 (< (point)
-		    (org-with-wide-buffer
-		     (goto-char (org-element-property :end context))
-		     (skip-chars-backward " \t")
-		     (point))))
+		 (org-src--on-datum-p context))
       (user-error "Not on a footnote reference"))
-    (let* ((label (org-element-property :label context))
-	   (definition
-	     (org-with-wide-buffer
-	      (org-footnote-goto-definition label)
-	      (beginning-of-line)
-	      (org-element-at-point))))
-      (unless (eq (org-element-type definition) 'footnote-definition)
-	(user-error "Cannot edit remotely inline footnotes"))
+    (unless label (user-error "Cannot edit remotely anonymous footnotes"))
+    (let* ((definition (org-with-wide-buffer
+			(org-footnote-goto-definition label)
+			(org-element-context)))
+	   (inline (eq (org-element-type definition) 'footnote-reference))
+	   (contents
+	    (let ((c (org-with-wide-buffer
+		      (org-trim (buffer-substring-no-properties
+				 (org-element-property :begin definition)
+				 (org-element-property :end definition))))))
+	      (add-text-properties
+	       0
+	       (progn (string-match (if inline "\\`\\[fn:.*?:" "\\`.*?\\]") c)
+		      (match-end 0))
+	       '(read-only "Cannot edit footnote label" front-sticky t
+			   rear-nonsticky t)
+	       c)
+	      (when inline
+		(let ((l (length c)))
+		  (add-text-properties
+		   (1- l) l
+		   '(read-only "Cannot edit past footnote reference"
+			       front-sticky nil rear-nonsticky nil)
+		   c)))
+	      c)))
       (org-src--edit-element
-       definition (format "*Edit footnote [%s]*" label)
+       definition
+       (format "*Edit footnote [%s]*" label)
        #'org-mode
-       (lambda () (delete-region (point) (search-forward "]")))
-       (concat
-	(org-propertize (format "[%s]" label)
-			'read-only "Cannot edit footnote label"
-			'front-sticky t
-			'rear-nonsticky t)
-	(and (org-element-property :contents-begin definition)
-	     (org-with-wide-buffer
-	      (buffer-substring-no-properties
-	       (progn
-		 (goto-char (org-element-property :contents-begin definition))
-		 (skip-chars-backward " \r\t\n")
-		 (point))
-	       (org-element-property :contents-end definition)))))
+       `(lambda ()
+	  (if ,(not inline) (delete-region (point) (search-forward "]"))
+	    (delete-region (point) (search-forward ":" nil t 2))
+	    (delete-region (1- (point-max)) (point-max))
+	    (when (re-search-forward "\n[ \t]*\n" nil t)
+	      (user-error "Inline definitions cannot contain blank lines"))
+	    ;; If footnote reference belongs to a table, make sure to
+	    ;; remove any newline characters in order to preserve
+	    ;; table's structure.
+	    (when ,(org-element-lineage definition '(table-cell))
+	      (while (search-forward "\n" nil t) (delete-char -1)))))
+       contents
        'remote))
     ;; Report success.
     t))
@@ -729,7 +753,7 @@ Throw an error when not at such a table."
   (let ((element (org-element-at-point)))
     (unless (and (eq (org-element-type element) 'table)
 		 (eq (org-element-property :type element) 'table.el)
-		 (org-src--on-element-p element))
+		 (org-src--on-datum-p element))
       (user-error "Not in a table.el table"))
     (org-src--edit-element
      element
@@ -752,7 +776,7 @@ Throw an error when not at an export block."
   (interactive)
   (let ((element (org-element-at-point)))
     (unless (and (eq (org-element-type element) 'export-block)
-		 (org-src--on-element-p element))
+		 (org-src--on-datum-p element))
       (user-error "Not in an export block"))
     (let* ((type (downcase (org-element-property :type element)))
 	   (mode (org-src--get-lang-mode type)))
@@ -783,7 +807,7 @@ name of the sub-editing buffer."
   (let* ((element (org-element-at-point))
 	 (type (org-element-type element)))
     (unless (and (memq type '(example-block src-block))
-		 (org-src--on-element-p element))
+		 (org-src--on-datum-p element))
       (user-error "Not in a source or example block"))
     (let* ((lang
 	    (if (eq type 'src-block) (org-element-property :language element)
@@ -835,7 +859,7 @@ the area in the Org mode buffer."
   (interactive)
   (let ((element (org-element-at-point)))
     (unless (and (eq (org-element-type element) 'fixed-width)
-		 (org-src--on-element-p element))
+		 (org-src--on-datum-p element))
       (user-error "Not in a fixed-width area"))
     (org-src--edit-element
      element
@@ -875,8 +899,9 @@ Throw an error if there is no such buffer."
       ;; insert new contents.
       (delete-overlay overlay)
       (delete-region beg end)
-      (when (org-string-nw-p edited-code) (insert edited-code))
-      (unless (bolp) (insert "\n"))
+      (let ((expecting-bol (bolp)))
+	(insert edited-code)
+	(when (and expecting-bol (not (bolp))) (insert "\n")))
       (save-buffer)
       (move-overlay overlay beg (point)))))
 
@@ -902,9 +927,9 @@ Throw an error if there is no such buffer."
        (undo-boundary)
        (goto-char beg)
        (delete-region beg end)
-       (when (org-string-nw-p code)
+       (let ((expecting-bol (bolp)))
 	 (insert code)
-	 (unless (bolp) (insert "\n")))))
+	 (when (and expecting-bol (not (bolp))) (insert "\n")))))
     ;; If we are to return to source buffer, put point at an
     ;; appropriate location.  In particular, if block is hidden, move
     ;; to the beginning of the block opening line.
