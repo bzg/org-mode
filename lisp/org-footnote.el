@@ -641,8 +641,20 @@ offer additional commands in a menu."
 	 ;; definition.
 	 ((not label)
 	  (goto-char (org-element-property :contents-begin context)))
-	 ;; A definition exists: move to it.
-	 ((ignore-errors (org-footnote-goto-definition label)))
+	 ;; A definition exists: move to it, if possible, or offer to
+	 ;; widen buffer to reach it.
+	 ((let ((definition (org-footnote-get-definition label)))
+	    (when definition
+	      (let ((begin (nth 1 definition)))
+		(catch 'do-nothing
+		  (cond ((and (>= begin (point-min)) (<= begin (point-max))))
+			((yes-or-no-p "Definition outside scope.  Widen? ")
+			 (widen))
+			(t (throw 'do-nothing nil)))
+		  (goto-char begin)
+		  (search-forward label)
+		  (forward-char)
+		  t)))))
 	 ;; No definition exists: offer to create it.
 	 ((yes-or-no-p (format "No definition for %s.  Create one? " label))
 	  (org-footnote-create-definition label)))))
