@@ -341,20 +341,25 @@ If no footnote is found, return nil."
 (defun org-footnote-get-definition (label)
   "Return label, boundaries and definition of the footnote LABEL."
   (let* ((label (regexp-quote (org-footnote-normalize-label label)))
-	 (re (format "^\\[%s\\]\\|.\\[%s:" label label))
-	 pos)
-    (save-excursion
-      (save-restriction
-	(when (or (re-search-forward re nil t)
-		  (and (goto-char (point-min))
-		       (re-search-forward re nil t))
-		  (and (progn (widen) t)
-		       (goto-char (point-min))
-		       (re-search-forward re nil t)))
-	  (let ((refp (org-footnote-at-reference-p)))
-	    (cond
-	     ((and (nth 3 refp) refp))
-	     ((org-footnote-at-definition-p)))))))))
+	 (re (format "^\\[%s\\]\\|.\\[%s:" label label)))
+    (org-with-wide-buffer
+     (goto-char (point-min))
+     (catch 'found
+       (while (re-search-forward re nil t)
+	 (let* ((datum (progn (backward-char) (org-element-context)))
+		(type (org-element-type datum)))
+	   (when (memq type '(footnote-definition footnote-reference))
+	     (throw 'found
+		    (list label
+			  (org-element-property :begin datum)
+			  (org-element-property :end datum)
+			  (replace-regexp-in-string
+			   "[ \t\n]*\\'"
+			   ""
+			   (buffer-substring-no-properties
+			    (org-element-property :contents-begin datum)
+			    (org-element-property :contents-end datum))))))))
+       nil))))
 
 (defun org-footnote-goto-definition (label)
   "Move point to the definition of the footnote LABEL.
