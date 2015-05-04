@@ -350,15 +350,18 @@ If no footnote is found, return nil."
 		(type (org-element-type datum)))
 	   (when (memq type '(footnote-definition footnote-reference))
 	     (throw 'found
-		    (list label
-			  (org-element-property :begin datum)
-			  (org-element-property :end datum)
-			  (replace-regexp-in-string
-			   "[ \t\n]*\\'"
-			   ""
-			   (buffer-substring-no-properties
-			    (org-element-property :contents-begin datum)
-			    (org-element-property :contents-end datum))))))))
+		    (list
+		     label
+		     (org-element-property :begin datum)
+		     (org-element-property :end datum)
+		     (let ((cbeg (org-element-property :contents-begin datum)))
+		       (if (not cbeg) ""
+			 (replace-regexp-in-string
+			  "[ \t\n]*\\'"
+			  ""
+			  (buffer-substring-no-properties
+			   cbeg
+			   (org-element-property :contents-end datum))))))))))
        nil))))
 
 (defun org-footnote-goto-definition (label)
