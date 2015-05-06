@@ -1482,11 +1482,11 @@ See also `test-org-table/copy-field'."
 
 
 <colgroup>
-<col  class=\"left\" />
+<col  class=\"org-left\" />
 </colgroup>
 <tbody>
 <tr>
-<td class=\"left\">a</td>
+<td class=\"org-left\">a</td>
 </tr>
 </tbody>
 </table>"))
