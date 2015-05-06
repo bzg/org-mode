@@ -1144,6 +1144,11 @@ This function allows to resolve external links like:
   [[file.org::*fuzzy][description]]
   [[file.org::#custom-id][description]]
   [[file.org::fuzzy][description]]"
+  (unless org-publish-cache
+    (user-error
+     "Reference \"%s\" in file \"%s\" cannot be resolved without publishing"
+     search
+     file))
   (let ((references (org-publish-cache-get-file-property
 		     (expand-file-name file) :references nil t)))
     (cond
