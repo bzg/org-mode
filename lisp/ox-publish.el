@@ -1107,9 +1107,10 @@ This function is meant to be used as a final out filter.  See
 	    ((headline inlinetask)
 	     (push (cons
 		    (cons 'headline
-			  (replace-regexp-in-string
-			   "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]\\|[ \r\t\n]+" ""
-			   (org-element-property :raw-value k)))
+			  (org-split-string
+			   (replace-regexp-in-string
+			    "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
+			    (org-element-property :raw-value k))))
 		    v)
 		   refs)
 	     (let ((custom-id (org-element-property :CUSTOM_ID k)))
@@ -1118,12 +1119,15 @@ This function is meant to be used as a final out filter.  See
 	    ((radio-target target)
 	     (push
 	      (cons (cons 'target
-			  (replace-regexp-in-string
-			   "[ \r\t\n]+" "" (org-element-property :value k)))
+			  (org-split-string (org-element-property :value k)))
 		    v)
 	      refs))
 	    ((org-element-property :name k)
-	     (push (cons (cons 'other (org-element-property :name k)) v) refs)))
+	     (push
+	      (cons
+	       (cons 'other (org-split-string (org-element-property :name k)))
+	       v)
+	      refs)))
 	  refs)
 	(plist-get info :internal-references)))
      refs))
@@ -1141,15 +1145,17 @@ This function allows to resolve external links like:
   [[file.org::#custom-id][description]]
   [[file.org::fuzzy][description]]"
   (let ((references (org-publish-cache-get-file-property
-		     (expand-file-name file) :references nil t))
-	(search (replace-regexp-in-string "[ \r\t\n]+" "" search)))
+		     (expand-file-name file) :references nil t)))
     (cond
      ((cdr (case (aref search 0)
-	     (?* (assoc (cons 'headline (substring search 1)) references))
+	     (?* (assoc (cons 'headline (org-split-string (substring search 1)))
+			references))
 	     (?# (assoc (cons 'custom-id (substring search 1)) references))
-	     (t (or (assoc (cons 'target search) references)
-		    (assoc (cons 'other search) references)
-		    (assoc (cons 'headline search) references))))))
+	     (t
+	      (let ((s (org-split-string search)))
+		(or (assoc (cons 'target s) references)
+		    (assoc (cons 'other s) references)
+		    (assoc (cons 'headline s) references)))))))
      (t (message "Unknown cross-reference \"%s\" in file \"%s\"" search file)
 	"MissingReference"))))
 
