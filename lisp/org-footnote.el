@@ -364,26 +364,33 @@ If no footnote is found, return nil."
 			   (org-element-property :contents-end datum))))))))))
        nil))))
 
-(defun org-footnote-goto-definition (label)
+(defun org-footnote-goto-definition (label &optional location)
   "Move point to the definition of the footnote LABEL.
-Return a non-nil value when a definition has been found."
+
+LOCATION, when non-nil specifies the buffer position of the
+definition.
+
+Throw an error if there is no definition or if it cannot be
+reached from current narrowed part of buffer.  Return a non-nil
+value if point was successfully moved."
   (interactive "sLabel: ")
-  (let ((def-start (nth 1 (org-footnote-get-definition label))))
+  (let ((def-start (or location (nth 1 (org-footnote-get-definition label)))))
     (cond
      ((not def-start)
       (user-error "Cannot find definition of footnote %s" label))
-     ((or (> def-start (point-max))
-	  (< def-start (point-min)))
-      (user-error "Footnote definition outside of narrowed part of buffer"))
-     (t
-      (org-mark-ring-push)
-      (goto-char def-start)
-      (looking-at (format "\\[%s[]:]" label))
-      (goto-char (match-end 0))
-      (org-show-context 'link-search)
-      (when (derived-mode-p 'org-mode)
-	(message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'."))
-      t))))
+     ((or (> def-start (point-max)) (< def-start (point-min)))
+      (user-error "Definition is outside narrowed part of buffer")))
+    (org-mark-ring-push)
+    (goto-char def-start)
+    (looking-at (format "\\[%s[]:]" label))
+    (goto-char (match-end 0))
+    (org-show-context 'link-search)
+    (when (derived-mode-p 'org-mode)
+      (message
+       (substitute-command-keys
+	"Edit definition and go back with `\\[org-mark-ring-goto]' or, if \
+unique, with `\\[org-ctrl-c-ctrl-c]'.")))
+    t))
 
 (defun org-footnote-goto-previous-reference (label)
   "Find the first closest (to point) reference of footnote with label LABEL."
