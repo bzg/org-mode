@@ -536,51 +536,62 @@ or new, let the user edit the definition of the footnote."
 		  (mapcar #'list all) nil nil
 		  (and (eq org-footnote-auto-label 'confirm) propose))))))))
     (cond ((not label)
-	   (insert "[fn:: ]")
+	   (insert "[fn::]")
 	   (backward-char 1))
 	  ((member label all)
 	   (insert "[" label "]")
 	   (message "New reference to existing note"))
 	  (org-footnote-define-inline
-	   (insert "[" label ": ]")
+	   (insert "[" label ":]")
 	   (backward-char 1)
 	   (org-footnote-auto-adjust-maybe))
 	  (t
 	   (insert "[" label "]")
-	   (org-footnote-create-definition label)
-	   (org-footnote-auto-adjust-maybe)))))
+	   (let ((l (copy-marker (org-footnote-create-definition label))))
+	     (org-footnote-auto-adjust-maybe)
+	     (or (ignore-errors (org-footnote-goto-definition label l))
+		 ;; Since definition was created outside current
+		 ;; scope, edit it remotely.
+		 (progn (set-marker l nil)
+			(org-edit-footnote-reference))))))))
 
-(defvar org-blank-before-new-entry) ; silence byte-compiler
+(defvar org-blank-before-new-entry) ; Silence byte-compiler.
 (defun org-footnote-create-definition (label)
-  "Start the definition of a footnote with label LABEL."
-  (interactive "sLabel: ")
+  "Start the definition of a footnote with label LABEL.
+Return buffer position at the beginning of the definition.  In an
+Org buffer, this function doesn't move point."
   (let ((label (org-footnote-normalize-label label))
-	electric-indent-mode) ;; Prevent wrong indentation
+	electric-indent-mode)		; Prevent wrong indentation.
     (cond
-     ;; In an Org file.
+     ;; In an Org document.
      ((derived-mode-p 'org-mode)
       ;; If `org-footnote-section' is defined, find it, or create it
       ;; at the end of the buffer.
-      (when org-footnote-section
-	(goto-char (point-min))
-	(let ((re (concat "^\\*+[ \t]+" org-footnote-section "[ \t]*$")))
-	  (unless (or (re-search-forward re nil t)
-		      (and (progn (widen) t)
-			   (re-search-forward re nil t)))
-	    (goto-char (point-max))
-	    (skip-chars-backward " \t\r\n")
-	    (unless (bolp) (newline))
-	    ;; Insert new section.  Separate it from the previous one
-	    ;; with a blank line, unless `org-blank-before-new-entry'
-	    ;; explicitly says no.
-	    (when (and (cdr (assq 'heading org-blank-before-new-entry))
-		       (zerop (save-excursion (org-back-over-empty-lines))))
-	      (insert "\n"))
-	    (insert "* " org-footnote-section "\n"))))
-      ;; Move to the end of this entry (which may be
-      ;; `org-footnote-section' or the current one).
-      (org-footnote-goto-local-insertion-point)
-      (org-show-context 'link-search))
+      (org-with-wide-buffer
+       (cond
+	((not org-footnote-section)
+	 (org-footnote--goto-local-insertion-point))
+	((save-excursion
+	   (goto-char (point-min))
+	   (re-search-forward
+	    (concat "^\\*+[ \t]+" (regexp-quote org-footnote-section) "[ \t]*$")
+	    nil t))
+	 (goto-char (match-end 0))
+	 (forward-line)
+	 (unless (bolp) (insert "\n")))
+	(t
+	 (goto-char (point-max))
+	 (unless (bolp) (insert "\n"))
+	 ;; Insert new section.  Separate it from the previous one
+	 ;; with a blank line, unless `org-blank-before-new-entry'
+	 ;; explicitly says no.
+	 (when (and (cdr (assq 'heading org-blank-before-new-entry))
+		    (zerop (save-excursion (org-back-over-empty-lines))))
+	   (insert "\n"))
+	 (insert "* " org-footnote-section "\n")))
+       (when (zerop (org-back-over-empty-lines)) (insert "\n"))
+       (insert "[" label "] \n")
+       (line-beginning-position 0)))
      (t
       ;; In a non-Org file.  Search for footnote tag, or create it if
       ;; specified (at the end of buffer, or before signature if in
@@ -615,16 +626,11 @@ or new, let the user edit the definition of the footnote."
 	(skip-chars-backward " \t\r\n")
 	(delete-region (point) max)
 	(unless (bolp) (newline))
-	(set-marker max nil))))
-    ;; Insert footnote label.
-    (when (zerop (org-back-over-empty-lines)) (newline))
-    (insert "[" label "] \n")
-    (backward-char)
-    ;; Only notify user about next possible action when in an Org
-    ;; buffer, as the bindings may have different meanings otherwise.
-    (when (derived-mode-p 'org-mode)
-      (message
-       "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'."))))
+	(set-marker max nil))
+      (when (zerop (org-back-over-empty-lines)) (insert "\n"))
+      (insert "[" label "] \n")
+      (backward-char)
+      (line-beginning-position)))))
 
 ;;;###autoload
 (defun org-footnote-action (&optional special)
@@ -651,30 +657,22 @@ offer additional commands in a menu."
 	 ;; definition.
 	 ((not label)
 	  (goto-char (org-element-property :contents-begin context)))
-	 ;; A definition exists: move to it, if possible, or offer to
-	 ;; widen buffer to reach it.
-	 ((let ((definition (org-footnote-get-definition label)))
-	    (when definition
-	      (let ((begin (nth 1 definition)))
-		(catch 'do-nothing
-		  (cond ((and (>= begin (point-min)) (<= begin (point-max))))
-			((yes-or-no-p "Definition outside scope.  Widen? ")
-			 (widen))
-			(t (throw 'do-nothing nil)))
-		  (goto-char begin)
-		  (search-forward label)
-		  (forward-char)
-		  t)))))
+	 ;; Check if a definition exists: then move to it.
+	 ((let ((p (nth 1 (org-footnote-get-definition label))))
+	    (when p (org-footnote-goto-definition label p))))
 	 ;; No definition exists: offer to create it.
 	 ((yes-or-no-p (format "No definition for %s.  Create one? " label))
-	  (org-footnote-create-definition label)))))
+	  (let ((p (org-footnote-create-definition label)))
+	    (or (ignore-errors (org-footnote-goto-definition label p))
+		;; Since definition was created outside current scope,
+		;; edit it remotely.
+		(org-edit-footnote-reference)))))))
      ((eq type 'footnote-definition)
       (org-footnote-goto-previous-reference
        (org-element-property :label context)))
-     ((or special
-	  (zerop (current-column))
-	  (not (org-footnote-in-valid-context-p)))
-      (message "Footnotes: [s]ort  |  [r]enumber fn:N  |  [S]=r+s |->[n]umeric  |  [d]elete")
+     ((or special (not (org-footnote--allow-reference-p)))
+      (message "Footnotes: [s]ort  |  [r]enumber fn:N  |  [S]=r+s  |  \
+->[n]umeric  |  [d]elete")
       (let ((c (read-char-exclusive)))
 	(cond
 	 ((eq c ?s) (org-footnote-normalize 'sort))
