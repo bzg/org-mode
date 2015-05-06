@@ -3215,13 +3215,13 @@ items."
 	       (when nobr (setq first (org-list-item-trim-br first)))
 	       ;; Insert descriptive term if TYPE is `descriptive'.
 	       (when (eq type 'descriptive)
-		 (let* ((complete (string-match "^\\(.*\\)[ \t]+::" first))
+		 (let* ((complete
+			 (string-match "^\\(.*\\)[ \t]+::[ \t]*" first))
 			(term (if complete
 				  (save-match-data
 				    (org-trim (match-string 1 first)))
 				"???"))
-			(desc (if complete
-				  (org-trim (substring first (match-end 0)))
+			(desc (if complete (substring first (match-end 0))
 				first)))
 		   (setq first (concat (eval dtstart) term (eval dtend)
 				       (eval ddstart) desc))))
