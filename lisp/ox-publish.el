@@ -1144,25 +1144,27 @@ This function allows to resolve external links like:
   [[file.org::*fuzzy][description]]
   [[file.org::#custom-id][description]]
   [[file.org::fuzzy][description]]"
-  (unless org-publish-cache
-    (user-error
-     "Reference \"%s\" in file \"%s\" cannot be resolved without publishing"
-     search
-     file))
-  (let ((references (org-publish-cache-get-file-property
-		     (expand-file-name file) :references nil t)))
-    (cond
-     ((cdr (case (aref search 0)
-	     (?* (assoc (cons 'headline (org-split-string (substring search 1)))
-			references))
-	     (?# (assoc (cons 'custom-id (substring search 1)) references))
-	     (t
-	      (let ((s (org-split-string search)))
-		(or (assoc (cons 'target s) references)
-		    (assoc (cons 'other s) references)
-		    (assoc (cons 'headline s) references)))))))
-     (t (message "Unknown cross-reference \"%s\" in file \"%s\"" search file)
-	"MissingReference"))))
+  (if (not org-publish-cache)
+      (progn
+	(message "Reference \"%s\" in file \"%s\" cannot be resolved without \
+publishing"
+		 search
+		 file)
+	"MissingReference")
+    (let ((references (org-publish-cache-get-file-property
+		       (expand-file-name file) :references nil t)))
+      (cond
+       ((cdr (case (aref search 0)
+	       (?* (assoc (cons 'headline (org-split-string (substring search 1)))
+			  references))
+	       (?# (assoc (cons 'custom-id (substring search 1)) references))
+	       (t
+		(let ((s (org-split-string search)))
+		  (or (assoc (cons 'target s) references)
+		      (assoc (cons 'other s) references)
+		      (assoc (cons 'headline s) references)))))))
+       (t (message "Unknown cross-reference \"%s\" in file \"%s\"" search file)
+	  "MissingReference")))))
 
 
 
