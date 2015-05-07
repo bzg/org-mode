@@ -1181,11 +1181,11 @@ Assume point is at the beginning of the item."
     (looking-at org-list-full-item-re)
     (let* ((begin (point))
 	   (bullet (org-match-string-no-properties 1))
-	   (checkbox (let ((box (org-match-string-no-properties 3)))
+	   (checkbox (let ((box (match-string 3)))
 		       (cond ((equal "[ ]" box) 'off)
 			     ((equal "[X]" box) 'on)
 			     ((equal "[-]" box) 'trans))))
-	   (counter (let ((c (org-match-string-no-properties 2)))
+	   (counter (let ((c (match-string 2)))
 		      (save-match-data
 			(cond
 			 ((not c) nil)
@@ -1195,8 +1195,7 @@ Assume point is at the beginning of the item."
 			 ((string-match "[0-9]+" c)
 			  (string-to-number (match-string 0 c)))))))
 	   (end (progn (goto-char (nth 6 (assq (point) struct)))
-		       (unless (bolp) (forward-line))
-		       (point)))
+		       (if (bolp) (point) (line-beginning-position 2))))
 	   (contents-begin
 	    (progn (goto-char
 		    ;; Ignore tags in un-ordered lists: they are just
@@ -1205,30 +1204,27 @@ Assume point is at the beginning of the item."
 			     (save-match-data (string-match "[.)]" bullet)))
 			(match-beginning 4)
 		      (match-end 0)))
-		   (skip-chars-forward " \r\t\n" limit)
-		   ;; If first line isn't empty, contents really start
-		   ;; at the text after item's meta-data.
-		   (if (= (point-at-bol) begin) (point) (point-at-bol))))
-	   (contents-end (progn (goto-char end)
-				(skip-chars-backward " \r\t\n")
-				(forward-line)
-				(point)))
+		   (skip-chars-forward " \r\t\n" end)
+		   (cond ((= (point) end) nil)
+			 ;; If first line isn't empty, contents really
+			 ;; start at the text after item's meta-data.
+			 ((= (line-beginning-position) begin) (point))
+			 (t (line-beginning-position)))))
+	   (contents-end (and contents-begin
+			      (progn (goto-char end)
+				     (skip-chars-backward " \r\t\n")
+				     (line-beginning-position 2))))
 	   (item
 	    (list 'item
 		  (list :bullet bullet
 			:begin begin
 			:end end
-			;; CONTENTS-BEGIN and CONTENTS-END may be
-			;; mixed up in the case of an empty item
-			;; separated from the next by a blank line.
-			;; Thus ensure the former is always the
-			;; smallest.
-			:contents-begin (min contents-begin contents-end)
-			:contents-end (max contents-begin contents-end)
+			:contents-begin contents-begin
+			:contents-end contents-end
 			:checkbox checkbox
 			:counter counter
 			:structure struct
-			:post-blank (count-lines contents-end end)
+			:post-blank (count-lines (or contents-end begin) end)
 			:post-affiliated begin))))
       (org-element-put-property
        item :tag
