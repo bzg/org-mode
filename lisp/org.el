@@ -22747,7 +22747,8 @@ ELEMENT is an element containing point.  CONTENTSP is non-nil
 when indentation is to be computed according to contents of
 ELEMENT."
   (let ((type (org-element-type element))
-	(start (org-element-property :begin element)))
+	(start (org-element-property :begin element))
+	(post-affiliated (org-element-property :post-affiliated element)))
     (org-with-wide-buffer
      (cond
       (contentsp
@@ -22757,14 +22758,8 @@ ELEMENT."
 	  (if (not org-adapt-indentation) 0
 	    (let ((level (org-current-level)))
 	      (if level (1+ level) 0))))
-	 (item
-	  (org-list-item-body-column
-	   (org-element-property :post-affiliated element)))
-	 (plain-list
-	  (save-excursion
-	    (goto-char (org-element-property :post-affiliated element))
-	    (org-get-indentation)))
-	 (otherwise
+	 ((item plain-list) (org-list-item-body-column post-affiliated))
+	 (t
 	  (goto-char start)
 	  (org-get-indentation))))
       ((memq type '(headline inlinetask nil))
@@ -22825,6 +22820,11 @@ ELEMENT."
 	  ((< (line-beginning-position) start)
 	   (org--get-expected-indentation
 	    (org-element-property :parent element) t))
+	  ;; Line above is the beginning of an element, i.e., point
+	  ;; was originally on the blank lines between element's start
+	  ;; and contents.
+	  ((= (line-beginning-position) post-affiliated)
+	   (org--get-expected-indentation element t))
 	  ;; POS is after contents in a greater element.  Indent like
 	  ;; the beginning of the element.
 	  ;;
@@ -22835,7 +22835,11 @@ ELEMENT."
 		(let ((cend (org-element-property :contents-end element)))
 		  (and cend (<= cend pos))))
 	   (if (memq type '(footnote-definition item plain-list))
-	       (org--get-expected-indentation (org-element-at-point) nil)
+	       (let ((last (org-element-at-point)))
+		 (org--get-expected-indentation
+		  last
+		  (memq (org-element-type last)
+			'(footnote-definition item plain-list))))
 	     (goto-char start)
 	     (org-get-indentation)))
 	  ;; In any other case, indent like the current line.

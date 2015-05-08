@@ -635,8 +635,9 @@
 	(let ((org-adapt-indentation t)) (org-indent-line))
 	(org-get-indentation))))
   ;; On blank lines at the end of a list, indent like last element
-  ;; within it if the line is still in the list.  Otherwise, indent
-  ;; like the whole list.
+  ;; within it if the line is still in the list.  If the last element
+  ;; is an item, indent like its contents.  Otherwise, indent like the
+  ;; whole list.
   (should
    (= 4
       (org-test-with-temp-text "* H\n- A\n  - AA\n"
@@ -649,6 +650,12 @@
       (goto-char (point-max))
       (let ((org-adapt-indentation t)) (org-indent-line))
       (org-get-indentation))))
+  (should
+   (= 4
+      (org-test-with-temp-text "* H\n- A\n  - \n"
+	(goto-char (point-max))
+	(let ((org-adapt-indentation t)) (org-indent-line))
+	(org-get-indentation))))
   ;; Likewise, on a blank line at the end of a footnote definition,
   ;; indent at column 0 if line belongs to the definition.  Otherwise,
   ;; indent like the definition itself.
