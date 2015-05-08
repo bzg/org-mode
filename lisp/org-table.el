@@ -56,7 +56,7 @@ This can be used to add additional functionality after the table is sent
 to the receiver position, otherwise, if table is not sent, the functions
 are not run.")
 
-(defvar org-table-TBLFM-begin-regexp "|\n[ \t]*#\\+TBLFM: ")
+(defvar org-table-TBLFM-begin-regexp "^[ \t]*|.*\n[ \t]*#\\+TBLFM: ")
 
 (defcustom orgtbl-optimized (eq org-enable-table-editor 'optimized)
   "Non-nil means use the optimized table editor version for `orgtbl-mode'.
@@ -3327,33 +3327,31 @@ with the prefix ARG."
   (interactive "P")
   (unless (org-at-TBLFM-p) (user-error "Not at a #+TBLFM line"))
   (let ((formula (buffer-substring
-		  (point-at-bol)
-		  (point-at-eol)))
-	s e)
+		  (line-beginning-position)
+		  (line-end-position))))
     (save-excursion
       ;; Insert a temporary formula at right after the table
       (goto-char (org-table-TBLFM-begin))
-      (setq s (set-marker (make-marker) (point)))
-      (insert (concat formula "\n"))
-      (setq e (set-marker (make-marker) (point)))
-      ;; Recalculate the table
-      (beginning-of-line 0)		; move to the inserted line
-      (skip-chars-backward " \r\n\t")
-      (if (org-at-table-p)
+      (let ((s (point-marker)))
+	(insert formula "\n")
+	(let ((e (point-marker)))
+	  ;; Recalculate the table.
+	  (beginning-of-line 0)		; move to the inserted line
+	  (skip-chars-backward " \r\n\t")
 	  (unwind-protect
-	      (org-call-with-arg 'org-table-recalculate (or arg t))
-	    ;; delete the formula inserted temporarily
-	    (delete-region s e))))))
+	      (org-call-with-arg #'org-table-recalculate (or arg t))
+	    ;; Delete the formula inserted temporarily.
+	    (delete-region s e)
+	    (set-marker s nil)
+	    (set-marker e nil)))))))
 
 (defun org-table-TBLFM-begin ()
   "Find the beginning of the TBLFM lines and return its position.
 Return nil when the beginning of TBLFM line was not found."
   (save-excursion
     (when (progn (forward-line 1)
-	      (re-search-backward
-	       org-table-TBLFM-begin-regexp
-	       nil t))
-	  (point-at-bol 2))))
+		 (re-search-backward org-table-TBLFM-begin-regexp nil t))
+      (line-beginning-position 2))))
 
 (defun org-table-expand-lhs-ranges (equations)
   "Expand list of formulas.

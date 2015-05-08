@@ -4577,12 +4577,12 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 		  (&optional also-non-dangling-p prompt last-valid))
 
 (defun org-at-TBLFM-p (&optional pos)
-  "Return t when point (or POS) is in #+TBLFM line."
+  "Non-nil when point (or POS) is in #+TBLFM line."
   (save-excursion
-    (let ((pos pos)))
     (goto-char (or pos (point)))
-    (beginning-of-line 1)
-    (looking-at org-TBLFM-regexp)))
+    (beginning-of-line)
+    (and (eq (org-element-type (org-element-at-point)) 'table)
+	 (looking-at org-TBLFM-regexp))))
 
 (defvar org-clock-start-time)
 (defvar org-clock-marker (make-marker)
