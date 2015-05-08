@@ -2315,9 +2315,7 @@ Used as a fall back file for org-capture.el, for templates that
 do not specify a target file."
   :group 'org-refile
   :group 'org-capture
-  :type '(choice
-	  (const :tag "Default from remember-data-file" nil)
-	  file))
+  :type 'file)
 
 (defcustom org-goto-interface 'outline
   "The default interface to be used for `org-goto'.

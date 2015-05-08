@@ -966,12 +966,15 @@ Store them in the capture property list."
 (defun org-capture-expand-file (file)
   "Expand functions and symbols for FILE.
 When FILE is a function, call it.  When it is a form, evaluate
-it.  When it is a variable, retrieve the value.  Return whatever we get."
+it.  When it is a variable, retrieve the value.  When it is
+a string, return it.  However, if it is the empty string, return
+`org-default-notes-file' instead."
   (cond
+   ((equal file "") org-default-notes-file)
    ((org-string-nw-p file) file)
    ((functionp file) (funcall file))
    ((and (symbolp file) (boundp file)) (symbol-value file))
-   ((and file (consp file)) (eval file))
+   ((consp file) (eval file))
    (t file)))
 
 (defun org-capture-target-buffer (file)
