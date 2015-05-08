@@ -10347,9 +10347,10 @@ Text within the usual @LaTeX{} math delimiters.  To avoid conflicts with
 currency specifications, single @samp{$} characters are only recognized as
 math delimiters if the enclosed text contains at most two line breaks, is
 directly attached to the @samp{$} characters with no whitespace in between,
-and if the closing @samp{$} is followed by whitespace, punctuation or a dash.
-For the other delimiters, there is no such restriction, so when in doubt, use
-@samp{\(...\)} as inline math delimiters.
+and if the closing @samp{$} is followed by whitespace or punctuation
+(parentheses and quotes are considered to be punctuation in this
+context).  For the other delimiters, there is no such restriction, so when in
+doubt, use @samp{\(...\)} as inline math delimiters.
 @end itemize
 
 @noindent For example:
