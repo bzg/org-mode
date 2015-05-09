@@ -1441,24 +1441,50 @@ e^{i\\pi}+1=0
 (ert-deftest test-org-element/latex-fragment-parser ()
   "Test `latex-fragment' parser."
   (should
-   (org-test-with-temp-text "$a$"
-     (org-element-map (org-element-parse-buffer) 'latex-fragment 'identity)))
+   (eq 'latex-fragment
+       (org-test-with-temp-text "$a$"
+	 (org-element-type (org-element-context)))))
   (should
-   (org-test-with-temp-text "$$a$$"
-     (org-element-map (org-element-parse-buffer) 'latex-fragment 'identity)))
+   (eq 'latex-fragment
+       (org-test-with-temp-text "$a$!"
+	 (org-element-type (org-element-context)))))
   (should
-   (org-test-with-temp-text "\\(a\\)"
-     (org-element-map (org-element-parse-buffer) 'latex-fragment 'identity)))
+   (eq 'latex-fragment
+       (org-test-with-temp-text "$a$,"
+	 (org-element-type (org-element-context)))))
   (should
-   (org-test-with-temp-text "\\[a\\]"
-     (org-element-map
-	 (org-element-parse-buffer) 'latex-fragment 'identity)))
+   (eq 'latex-fragment
+       (org-test-with-temp-text "$a$\""
+	 (org-element-type (org-element-context)))))
+  (should
+   (eq 'latex-fragment
+       (org-test-with-temp-text "$a$)"
+	 (org-element-type (org-element-context)))))
+  (should
+   (eq 'latex-fragment
+       (org-test-with-temp-text "$a$ "
+	 (org-element-type (org-element-context)))))
+  (should-not
+   (eq 'latex-fragment
+       (org-test-with-temp-text "$a$a"
+	 (org-element-type (org-element-context)))))
+  (should
+   (eq 'latex-fragment
+       (org-test-with-temp-text "$$a$$"
+	 (org-element-type (org-element-context)))))
+  (should
+   (eq 'latex-fragment
+       (org-test-with-temp-text "\\(a\\)"
+	 (org-element-type (org-element-context)))))
+  (should
+   (eq 'latex-fragment
+       (org-test-with-temp-text "\\[a\\]"
+	 (org-element-type (org-element-context)))))
   ;; Test fragment at the beginning of an item.
   (should
    (eq 'latex-fragment
-       (org-test-with-temp-text "- $x$"
-	 (progn (search-forward "$")
-		(org-element-type (org-element-context)))))))
+       (org-test-with-temp-text "- $<point>x$"
+	 (org-element-type (org-element-context))))))
 
 
 ;;;; Line Break
