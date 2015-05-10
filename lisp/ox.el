@@ -3104,22 +3104,25 @@ storing and resolving footnotes.  It is created automatically."
 	  (let* ((value (org-element-property :value element))
 		 (ind (org-get-indentation))
 		 location
-		 (file (and (string-match
-			     "^\\(\".+?\"\\|\\S-+\\)\\(?:\\s-+\\|$\\)" value)
-			    (prog1
-				(save-match-data
-				  (let ((matched (match-string 1 value)))
-				    (when (string-match "\\(::\\(.*?\\)\\)\"?\\'" matched)
-				      (setq location (match-string 2 matched))
-				      (setq matched
-					    (replace-match "" nil nil matched 1)))
-				    (expand-file-name
-				     (org-remove-double-quotes
-				      matched)
-				     dir)))
-			      (setq value (replace-match "" nil nil value)))))
+		 (file
+		  (and (string-match
+			"^\\(\".+?\"\\|\\S-+\\)\\(?:\\s-+\\|$\\)" value)
+		       (prog1
+			   (save-match-data
+			     (let ((matched (match-string 1 value)))
+			       (when (string-match "\\(::\\(.*?\\)\\)\"?\\'"
+						   matched)
+				 (setq location (match-string 2 matched))
+				 (setq matched
+				       (replace-match "" nil nil matched 1)))
+			       (expand-file-name
+				(org-remove-double-quotes
+				 matched)
+				dir)))
+			 (setq value (replace-match "" nil nil value)))))
 		 (only-contents
-		  (and (string-match ":only-contents *\\([^: \r\t\n]\\S-*\\)?" value)
+		  (and (string-match ":only-contents *\\([^: \r\t\n]\\S-*\\)?"
+				     value)
 		       (prog1 (org-not-nil (match-string 1 value))
 			 (setq value (replace-match "" nil nil value)))))
 		 (lines
@@ -3141,7 +3144,8 @@ storing and resolving footnotes.  It is created automatically."
 		       (if (string-match ":minlevel +\\([0-9]+\\)" value)
 			   (prog1 (string-to-number (match-string 1 value))
 			     (setq value (replace-match "" nil nil value)))
-			 (get-text-property (point) :org-include-induced-level))))
+			 (get-text-property (point)
+					    :org-include-induced-level))))
 		 (src-args (and (eq env 'literal)
 				(match-string 1 value)))
 		 (block (and (string-match "\\<\\(\\S-+\\)\\>" value)
@@ -3187,22 +3191,23 @@ storing and resolving footnotes.  It is created automatically."
 			       file location only-contents lines)
 			    lines)))
 		     (org-mode)
-                     (insert (org-export--prepare-file-contents
-			      file lines ind minlevel
-			      (or (gethash file file-prefix)
-				  (puthash file (incf current-prefix) file-prefix))
-			      footnotes)))
+                     (insert
+		      (org-export--prepare-file-contents
+		       file lines ind minlevel
+		       (or (gethash file file-prefix)
+			   (puthash file (incf current-prefix) file-prefix))
+		       footnotes)))
 		   (org-export-expand-include-keyword
 		    (cons (list file lines) included)
 		    (file-name-directory file)
 		    footnotes)
 		   (buffer-string)))))
-	      ;; Expand footnotes after all files have been
-	      ;; included.  Footnotes are stored at end of buffer.
+	      ;; Expand footnotes after all files have been included.
+	      ;; Footnotes are stored at end of buffer.
 	      (unless included
 		(org-with-wide-buffer
 		 (goto-char (point-max))
-		 (maphash (lambda (ref def) (insert (format "\n[%s] %s\n" ref def)))
+		 (maphash (lambda (k v) (insert (format "\n[%s] %s\n" k v)))
 			  footnotes)))))))))))
 
 (defun org-export--inclusion-absolute-lines (file location only-contents lines)
@@ -3225,7 +3230,7 @@ Return a string of lines to be included in the format expected by
 	(let ((org-link-search-must-match-exact-headline t))
 	  (org-link-search location))
       (error
-       (error (format "%s for %s::%s" (error-message-string err) file location))))
+       (error "%s for %s::%s" (error-message-string err) file location)))
     (let* ((element (org-element-at-point))
 	   (contents-begin
 	    (and only-contents (org-element-property :contents-begin element))))
@@ -3285,7 +3290,8 @@ Return the new label."
 			(insert (format "%d-" id)))
 		      (1- (search-forward "]")))))
 
-(defun org-export--prepare-file-contents (file &optional lines ind minlevel id footnotes)
+(defun org-export--prepare-file-contents
+    (file &optional lines ind minlevel id footnotes)
   "Prepare contents of FILE for inclusion and return it as a string.
 
 When optional argument LINES is a string specifying a range of
@@ -3365,7 +3371,7 @@ the included document.
 	       ;; sections.
 	       (org-map-entries
 		(lambda () (if (< offset 0) (delete-char (abs offset))
-			     (insert (make-string offset ?*)))))))))))
+			(insert (make-string offset ?*)))))))))))
     ;; Append ID to all footnote references and definitions, so they
     ;; become file specific and cannot collide with footnotes in other
     ;; included files.  Further, collect relevant footnotes outside of
@@ -3378,7 +3384,8 @@ the included document.
 	  (let ((reference (org-element-context)))
 	    (when (eq (org-element-type reference) 'footnote-reference)
 	      (let* ((label (org-element-property :label reference))
-		     (digit-label (and label (org-string-match-p "\\`[0-9]+\\'" label))))
+		     (digit-label
+		      (and label (org-string-match-p "\\`[0-9]+\\'" label))))
 		;; Update the footnote-reference at point and collect
 		;; the new label, which is only used for footnotes
 		;; outsides LINES.
@@ -3386,20 +3393,28 @@ the included document.
 		  ;; If label is akin to [1] convert it to [fn:ID-1].
 		  ;; Otherwise add "ID-" after "fn:".
 		  (let ((new-label (org-export--update-footnote-label
-				    (org-element-property :begin reference) digit-label id)))
+				    (org-element-property :begin reference)
+				    digit-label id)))
 		    (unless (eq (org-element-property :type reference) 'inline)
 		      (org-with-wide-buffer
 		       (let* ((definition (org-footnote-get-definition label))
 			      (beginning (nth 1 definition)))
 			 (unless definition
-			   (error "Definition not found for footnote %s in file %s" label file))
-			 (if (or (< beginning marker-min) (> beginning marker-max))
-			     ;; Store since footnote-definition is outside of LINES.
+			   (error
+			    "Definition not found for footnote %s in file %s"
+			    label file))
+			 (if (or (< beginning marker-min)
+				 (> beginning marker-max))
+			     ;; Store since footnote-definition is
+			     ;; outside of LINES.
 			     (puthash new-label
-				      (org-element-normalize-string (nth 3 definition))
+				      (org-element-normalize-string
+				       (nth 3 definition))
 				      footnotes)
-			   ;; Update label of definition since it is included directly.
-			   (org-export--update-footnote-label beginning digit-label id)))))))))))
+			   ;; Update label of definition since it is
+			   ;; included directly.
+			   (org-export--update-footnote-label
+			    beginning digit-label id)))))))))))
 	(set-marker marker-min nil)
 	(set-marker marker-max nil)))
     (org-element-normalize-string (buffer-string))))
@@ -3514,9 +3529,10 @@ the communication channel used for export, as a plist."
 	  (funcall
 	   transcoder data contents
 	   (org-combine-plists
-	    info (list :back-end backend
-		       :translate-alist all-transcoders
-		       :exported-data (make-hash-table :test 'eq :size 401)))))))))
+	    info (list
+		  :back-end backend
+		  :translate-alist all-transcoders
+		  :exported-data (make-hash-table :test #'eq :size 401)))))))))
 
 
 ;;;; For Export Snippets
