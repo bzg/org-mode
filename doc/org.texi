@@ -10230,7 +10230,7 @@ This macro refers to the filename of the exported file, if any.
 @itemx @{@{@{property(@var{PROPERTY-NAME},@var{SEARCH-OPTION})@}@}@}
 @cindex property, macro
 This macro returns the value of property @var{PROPERTY-NAME} in current
-entry.  If @var{SEARCH-OPTION} (@pxref(Search options}) refers to a remote
+entry.  If @var{SEARCH-OPTION} (@pxref{Search options}) refers to a remote
 entry, it will be used instead.
 @end table
 
