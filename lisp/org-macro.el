@@ -166,7 +166,10 @@ TEMPLATES is an alist of templates used for expansion.  See
 `org-macro-templates' for a buffer-local default value.
 
 If optional arg FINALIZE is non-nil, raise an error if a macro is
-found in the buffer with no definition in TEMPLATES."
+found in the buffer with no definition in TEMPLATES.
+
+Optional argument KEYWORDS, when non-nil is a list of keywords,
+as strings, where macro expansion is allowed."
   (save-excursion
     (goto-char (point-min))
     (let ((properties-regexp
