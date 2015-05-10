@@ -340,6 +340,10 @@ displayed as the sole window of the current frame.
 *** ~{{{date}}}~ macro supports optional formatting argument
 It is now possible to supply and optional formatting argument to
 ~{{{date}}}~. See manual for details.
+*** ~{{{property}}}~ macro supports optional search argument
+It is now possible to supply an optional search option to
+~{{{property}}}~ in order to retrieve remote properties optional.  See
+manual for details.
 *** New option ~org-export-with-title~
 It is possible to suppress the title insertion with ~#+OPTIONS:
 title:nil~ or globally using the variable ~org-export-with-title~.
