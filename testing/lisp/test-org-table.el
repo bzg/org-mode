@@ -1722,6 +1722,47 @@ is t, then new columns should be added as needed"
      1
      "#+TBLFM: $3=15")))
 
+(ert-deftest test-org-table/duration ()
+  "Test durations in table formulas."
+  ;; Durations in cells.
+  (should
+   (string-match "| 2:12 | 1:47 | 03:59:00 |"
+		 (org-test-with-temp-text "
+       | 2:12 | 1:47 | |
+       <point>#+TBLFM: @1$3=$1+$2;T"
+		   (org-table-calc-current-TBLFM)
+		   (buffer-string))))
+  (should
+   (string-match "| 3:02:20 | -2:07:00 | 0.92 |"
+		 (org-test-with-temp-text "
+       | 3:02:20 | -2:07:00 | |
+       <point>#+TBLFM: @1$3=$1+$2;t"
+		   (org-table-calc-current-TBLFM)
+		   (buffer-string))))
+  ;; Durations set through properties.
+  (should
+   (string-match "| 16:00:00 |"
+		 (org-test-with-temp-text "* H
+  :PROPERTIES:
+  :time_constant: 08:00:00
+  :END:
+
+  |  |
+  <point>#+TBLFM: $1=2*$PROP_time_constant;T"
+		   (org-table-calc-current-TBLFM)
+		   (buffer-string))))
+  (should
+   (string-match "| 16.00 |"
+		 (org-test-with-temp-text "* H
+  :PROPERTIES:
+  :time_constant: 08:00:00
+  :END:
+
+  |  |
+  <point>#+TBLFM: $1=2*$PROP_time_constant;t"
+		   (org-table-calc-current-TBLFM)
+		   (buffer-string)))))
+
 (provide 'test-org-table)
 
 ;;; test-org-table.el ends here

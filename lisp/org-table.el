@@ -3417,25 +3417,33 @@ borders of the table using the @< @> $< $> makers."
 
 (defun org-table-formula-substitute-names (f)
   "Replace $const with values in string F."
-  (let ((start 0) a (f1 f) (pp (/= (string-to-char f) ?')))
-    ;; First, check for column names
-    (while (setq start (string-match org-table-column-name-regexp f start))
-      (setq start (1+ start))
-      (setq a (assoc (match-string 1 f) org-table-column-names))
-      (setq f (replace-match (concat "$" (cdr a)) t t f)))
-    ;; Parameters and constants
-    (setq start 0)
-    (while (setq start (string-match "\\$\\([a-zA-Z][_a-zA-Z0-9]*\\)\\|\\(\\<remote([^)]*)\\)" f start))
-      (if (match-end 2)
-	  (setq start (match-end 2))
-	(setq start (1+ start))
-	(if (setq a (save-match-data
-		      (org-table-get-constant (match-string 1 f))))
-	    (setq f (replace-match
-		     (concat (if pp "(") a (if pp ")")) t t f)))))
-    (if org-table-formula-debug
-	(put-text-property 0 (length f) :orig-formula f1 f))
-    f))
+  (let ((start 0)
+	(pp (/= (string-to-char f) ?'))
+	(duration (org-string-match-p ";.*[Tt].*\\'" f))
+	(new (replace-regexp-in-string	; Check for column names.
+	      org-table-column-name-regexp
+	      (lambda (m)
+		(concat "$" (cdr (assoc (match-string 1 m)
+					org-table-column-names))))
+	      f t t)))
+    ;; Parameters and constants.
+    (while (setq start
+		 (string-match
+		  "\\$\\([a-zA-Z][_a-zA-Z0-9]*\\)\\|\\(\\<remote([^)]*)\\)"
+		  new start))
+      (if (match-end 2) (setq start (match-end 2))
+	(incf start)
+	;; When a duration is expected, convert value on the fly.
+	(let ((value
+	       (save-match-data
+		 (let ((v (org-table-get-constant (match-string 1 new))))
+		   (if (and (org-string-nw-p v) duration)
+		       (org-table-time-string-to-seconds v)
+		     v)))))
+	  (when value
+	    (setq new (replace-match
+		       (concat (and pp "(") value (and pp ")")) t t new))))))
+    (if org-table-formula-debug (org-propertize new :orig-formula f)) new))
 
 (defun org-table-get-constant (const)
   "Find the value for a parameter or constant in a formula.
