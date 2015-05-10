@@ -123,7 +123,17 @@ function installs the following ones: \"property\",
 		(push cell templates))))))
     ;; Install hard-coded macros.
     (mapc update-templates
-	  (list (cons "property" "(eval (org-entry-get nil \"$1\" 'selective))")
+	  (list (cons "property"
+		      "(eval (save-excursion
+        (let ((l \"$2\"))
+          (when (org-string-nw-p l)
+            (condition-case _
+                (let ((org-link-search-must-match-exact-headline t))
+                  (org-link-search l nil nil t))
+              (error
+               (error \"Macro property failed: cannot find location %s\"
+                      l)))))
+        (org-entry-get nil \"$1\" 'selective)))")
 		(cons "time" "(eval (format-time-string \"$1\"))")))
     (let ((visited-file (buffer-file-name (buffer-base-buffer))))
       (when (and visited-file (file-exists-p visited-file))

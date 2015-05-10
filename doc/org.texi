@@ -10174,7 +10174,6 @@ an index} for more information.
 
 
 
-
 @node Macro replacement
 @section Macro replacement
 @cindex macro replacement, during export
@@ -10194,23 +10193,46 @@ escaped with another backslash character.}.
 
 These references, called macros, can be inserted anywhere Org markup is
 recognized: paragraphs, headlines, verse blocks, tables cells and lists.
-They cannot be used within ordinary keywords (starting with @code{#+}) but
-are allowed in @code{#+CAPTION}, @code{#+TITLE}, @code{#+AUTHOR} and
-@code{#+EMAIL}.
+They can also be used in keywords accepting Org syntax, e.g.,
+@code{#+CAPTION}, @code{#+TITLE}, @code{#+AUTHOR}, @code{#+DATE} and some
+others, export back-end specific, ones.
 
 In addition to user-defined macros, a set of predefined macros can be used:
-@code{@{@{@{title@}@}@}}, @code{@{@{@{author@}@}@}}, and
-@code{@{@{@{email@}@}@}} are replaced with the information set by their
-respective keywords.  Further, @code{@{@{@{date(@var{FORMAT})@}@}@}},
-@code{@{@{@{time(@var{FORMAT})@}@}@}} and
-@code{@{@{@{modification-time(@var{FORMAT})@}@}@}} refer to the @code{#+DATE}
-keyword, the current date, and the modification time of the file being
-exported, respectively.  @var{FORMAT} should be a format string understood by
-@code{format-time-string}.  Note that @var{FORMAT} is an optional argument to
-the @code{@{@{@{date@}@}@}} macro, and that it will only be used if
-@code{#+DATE} is a single timestamp.  Finally, the filename is available via
-@code{@{@{@{input-file@}@}@}} and properties can be accessed using
-@code{@{@{@{property(@var{PROPERTY-NAME})@}@}@}}.
+
+@table @code
+@item @{@{@{title@}@}@}
+@itemx @{@{@{author@}@}@}
+@itemx @{@{@{email@}@}@}
+@cindex title, macro
+@cindex author, macro
+@cindex email, macro
+These macros are replaced with the information available at the time of
+export.
+
+@item @{@{@{date@}@}@}
+@itemx @{@{@{date(@var{FORMAT})@}@}@}
+@itemx @{@{@{time(@var{FORMAT})@}@}@}
+@itemx @{@{@{modification-time(@var{FORMAT})@}@}@}
+@cindex date, macro
+@cindex time, macro
+@cindex modification time, macro
+These macros refer to the @code{#+DATE} keyword, the current date, and the
+modification time of the file being exported, respectively.  @samp{FORMAT}
+should be a format string understood by @code{format-time-string}.  Note that
+@var{FORMAT} is an optional argument to the @code{@{@{@{date@}@}@}} macro,
+and that it will only be used if @code{#+DATE} is a single timestamp.
+
+@item @{@{@{input-file@}@}@}
+@cindex input file, macro
+This macro refers to the filename of the exported file, if any.
+
+@item @{@{@{property(@var{PROPERTY-NAME})@}@}@}
+@itemx @{@{@{property(@var{PROPERTY-NAME},@var{SEARCH-OPTION})@}@}@}
+@cindex property, macro
+This macro returns the value of property @var{PROPERTY-NAME} in current
+entry.  If @var{SEARCH-OPTION} (@pxref(Search options}) refers to a remote
+entry, it will be used instead.
+@end table
 
 The surrounding brackets can be made invisible by setting
 @code{org-hide-macro-markers} non-@code{nil}.
@@ -13637,7 +13659,7 @@ length, using @code{:columns} attribute.
 Here is a thorough example.  @inforef{GNU Sample Texts,,texinfo} for an
 equivalent Texinfo code.
 
-@smallexample
+@example
 #+MACRO: version 2.0
 #+MACRO: updated last updated 4 March 2014
 
@@ -13655,7 +13677,7 @@ equivalent Texinfo code.
 #+TEXINFO_DIR_DESC: Invoking sample
 
 #+TEXINFO_PRINTED_TITLE: GNU Sample
-#+SUBTITLE: for version 2.0, last updated 4 March 2014
+#+SUBTITLE: for version @{@{@{version@}@}@}, @{@{@{updated@}@}@}
 
 * Copying 
   :PROPERTIES:
@@ -13697,7 +13719,7 @@ equivalent Texinfo code.
   :PROPERTIES:
   :INDEX:    cp
   :END:
-@end smallexample
+@end example
 
 @node iCalendar export
 @section iCalendar export
