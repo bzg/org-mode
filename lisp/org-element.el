@@ -3062,7 +3062,7 @@ Assume point is at the beginning of the link."
 	 ((string-match "\\`(\\(.*\\))\\'" raw-link)
 	  (setq type "coderef" path (match-string 1 raw-link)))
 	 ;; Custom-id type: PATH is the name of the custom id.
-	 ((= (aref raw-link 0) ?#)
+	 ((= (string-to-char raw-link) ?#)
 	  (setq type "custom-id" path (substring raw-link 1)))
 	 ;; Fuzzy type: Internal link either matches a target, an
 	 ;; headline name or nothing.  PATH is the target or
