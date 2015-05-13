@@ -20477,10 +20477,15 @@ Everywhere else, drag the line at point down."
    "Hidden subtree, open with TAB or use subtree command M-S-<left>/<right>"))
 
 (defun org-metaleft (&optional arg)
-  "Promote heading or move table column to left.
-Calls `org-do-promote' or `org-table-move-column', depending on context.
-With no specific context, calls the Emacs default `backward-word'.
-See the individual commands for more information."
+  "Promote heading, list item at point or move table column left.
+
+Calls `org-do-promote', `org-outdent-item' or `org-table-move-column',
+depending on context.  With no specific context, calls the Emacs
+default `backward-word'.  See the individual commands for more
+information.
+
+This function runs the hook `org-metaleft-hook' as a first step,
+and returns at first non-nil value."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-metaleft-hook))
@@ -20506,10 +20511,17 @@ See the individual commands for more information."
    (t (call-interactively 'backward-word))))
 
 (defun org-metaright (&optional arg)
-  "Demote a subtree, a list item or move table column to right.
+  "Demote heading, list item at point or move table column right.
+
 In front of a drawer or a block keyword, indent it correctly.
+
+Calls `org-do-demote', `org-indent-item', `org-table-move-column',
+`org-indnet-drawer' or `org-indent-block' depending on context.
 With no specific context, calls the Emacs default `forward-word'.
-See the individual commands for more information."
+See the individual commands for more information.
+
+This function runs the hook `org-metaright-hook' as a first step,
+and returns at first non-nil value."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-metaright-hook))
