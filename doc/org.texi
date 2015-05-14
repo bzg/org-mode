@@ -15030,7 +15030,7 @@ Code blocks in the following languages are supported.
 @multitable @columnfractions 0.25 0.25 0.25 0.25
 @item @b{Language} @tab @b{Identifier} @tab @b{Language} @tab @b{Identifier}
 @item Asymptote @tab asymptote @tab Awk @tab awk
-@item @tab C @tab C @tab C++ @tab C++ 
+@item C @tab C @tab C++ @tab C++ 
 @item Clojure @tab clojure @tab CSS @tab css 
 @item D @tab d @tab ditaa @tab ditaa 
 @item Graphviz @tab dot @tab Emacs Calc @tab calc
