@@ -15028,7 +15028,7 @@ i}.
 Code blocks in the following languages are supported.
 
 @multitable @columnfractions 0.25 0.25 0.25 0.25
-@item @b{Language} @tab @b{Identifier} @tab @b{Language} @tab @b{Identifier}
+@headitem @b{Language} @tab @b{Identifier} @tab @b{Language} @tab @b{Identifier}
 @item Asymptote @tab asymptote @tab Awk @tab awk
 @item C @tab C @tab C++ @tab C++ 
 @item Clojure @tab clojure @tab CSS @tab css 
