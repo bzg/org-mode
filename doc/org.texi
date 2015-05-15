@@ -10217,7 +10217,7 @@ export.
 @cindex time, macro
 @cindex modification time, macro
 These macros refer to the @code{#+DATE} keyword, the current date, and the
-modification time of the file being exported, respectively.  @samp{FORMAT}
+modification time of the file being exported, respectively.  @var{FORMAT}
 should be a format string understood by @code{format-time-string}.  Note that
 @var{FORMAT} is an optional argument to the @code{@{@{@{date@}@}@}} macro,
 and that it will only be used if @code{#+DATE} is a single timestamp.
