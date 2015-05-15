@@ -10589,7 +10589,6 @@ minibuffer.  From there one can still switch back to regular menu by pressing
 @key{?}.} from which it is possible to select an export format and to toggle
 export options.
 
-@c @quotation
 @table @asis
 @orgcmd{C-c C-e,org-export-dispatch}
 
@@ -10598,7 +10597,6 @@ prefix argument, repeat the last export command on the current buffer while
 preserving toggled options.  If the current buffer hasn't changed and subtree
 export was activated, the command will affect that same subtree.
 @end table
-@c @end quotation
 
 Normally the entire buffer is exported, but if there is an active region
 only that part of the buffer will be exported.
@@ -15059,10 +15057,8 @@ enabled for evaluation (by default only @code{emacs-lisp} is enabled).  This
 variable can be set using the customization interface or by adding code like
 the following to your emacs configuration.
 
-@quotation
 The following disables @code{emacs-lisp} evaluation and enables evaluation of
 @code{R} code blocks.
-@end quotation
 
 @lisp
 (org-babel-do-load-languages
@@ -15074,9 +15070,7 @@ The following disables @code{emacs-lisp} evaluation and enables evaluation of
 It is also possible to enable support for a language by loading the related
 elisp file with @code{require}.
 
-@quotation
 The following adds support for evaluating @code{clojure} code blocks.
-@end quotation
 
 @lisp
 (require 'ob-clojure)
