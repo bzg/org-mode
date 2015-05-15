@@ -21185,16 +21185,36 @@ will not happen if point is in a table or on a \"dead\"
 object (e.g., within a comment).  In these case, you need to use
 `org-open-at-point' directly."
   (interactive)
-  (if (and (save-excursion
-	     (beginning-of-line)
-	     (looking-at org-todo-line-regexp))
-	   (match-beginning 3)
-	   (>= (point) (match-beginning 3)))
-      ;; Point is on headline tags.  Do not break them: add a newline
-      ;; after the headline instead.
-      (progn (org-show-entry)
-	     (end-of-line)
-	     (if indent (newline-and-indent) (newline)))
+  (if (and (not (bolp))
+	   (save-excursion (beginning-of-line)
+			   (looking-at org-complex-heading-regexp)))
+      ;; At headline.
+      (let ((tags-column (when (match-beginning 5)
+			   (save-excursion (goto-char (match-beginning 5))
+					   (current-column))))
+	    ;; Test if before or after headline title.
+	    (string (when (not (or (< (point)
+				      (or (match-end 3)
+					  (match-end 2)
+					  (save-excursion
+					    (goto-char (match-beginning 4))
+					    (skip-chars-backward " \t")
+					    (point))))
+				   (and (match-beginning 5)
+					(>= (point) (match-beginning 5)))))
+		      ;; Point is on headline keywords, tags or cookies.  Do not break
+		      ;; them: add a newline after the headline instead.
+		      (org-string-nw-p
+		       (delete-and-extract-region (point) (match-end 4))))))
+	;; Adjust alignment of tags.
+	(when (and tags-column string)
+	  (org-align-tags-here (if org-auto-align-tags
+				   org-tags-column
+				 tags-column)))
+	(end-of-line)
+	(org-show-entry)
+	(if indent (newline-and-indent) (newline))
+	(and string (save-excursion (insert (org-trim string)))))
     (let* ((context (if org-return-follows-link (org-element-context)
 		      (org-element-at-point)))
 	   (type (org-element-type context)))

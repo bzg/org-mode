@@ -93,6 +93,9 @@ functions.  The Org version of these functions skips over inline tasks
 *** ~org-element-context~ no longer return objects in keywords
 ~org-element-context~ used to return objects on some keywords, i.e.,
 =TITLE=, =DATE= and =AUTHOR=.  It now returns only the keyword.
+*** Behavior of ~org-return~ changed
+If point is before or after the headline title, insert newline without
+changing the headline.
 ** Removed functions
 *** Removed function ~org-translate-time~
 Use ~org-timestamp-translate~ instead.
