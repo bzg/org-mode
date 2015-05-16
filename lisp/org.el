@@ -19832,6 +19832,7 @@ boundaries."
 (org-defkey org-mode-map [remap comment-dwim] 'org-comment-dwim)
 (org-defkey org-mode-map [remap forward-paragraph] 'org-forward-paragraph)
 (org-defkey org-mode-map [remap backward-paragraph] 'org-backward-paragraph)
+(org-defkey org-mode-map "\M-^"     'org-delete-indentation)
 (org-defkey org-mode-map "\C-m"     'org-return)
 (org-defkey org-mode-map "\C-j"     'org-return-indent)
 (org-defkey org-mode-map "\C-c?"    'org-table-field-info)
@@ -21158,6 +21159,39 @@ This command does many different things, depending on context:
 	(call-interactively 'show-branches))
     (let ((org-note-abort t))
       (funcall org-finish-function))))
+
+(defun org-delete-indentation (&optional ARG)
+  "Join current line to previous and fix whitespace at join.
+
+If previous line is a headline add to headline title.  Otherwise
+the function calls `delete-indentation'.
+
+With argument, join this line to following line."
+  (interactive "*P")
+  (if (save-excursion
+	(if ARG (beginning-of-line)
+	  (forward-line -1))
+	(looking-at org-complex-heading-regexp))
+      ;; At headline.
+      (let ((tags-column (when (match-beginning 5)
+			   (save-excursion (goto-char (match-beginning 5))
+					   (current-column))))
+	    (string (concat " " (progn (when ARG (forward-line 1))
+				       (org-trim (delete-and-extract-region
+						  (line-beginning-position)
+						  (line-end-position)))))))
+	(unless (bobp) (delete-region (point) (1- (point))))
+	(goto-char (or (match-end 4)
+		       (match-beginning 5)
+		       (match-end 0)))
+	(skip-chars-backward " \t")
+	(save-excursion (insert string))
+	;; Adjust alignment of tags.
+	(when tags-column
+	  (org-align-tags-here (if org-auto-align-tags
+				   org-tags-column
+				 tags-column))))
+    (delete-indentation ARG)))
 
 (defun org-open-line (n)
   "Insert a new row in tables, call `open-line' elsewhere.

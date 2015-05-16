@@ -376,6 +376,9 @@ for details.
 Calling ~org-edit-footnote-reference~ (C-c ') on a footnote reference
 allows to edit its definition, as long as it is not anonymous, in
 a dedicated buffer.  It works even if buffer is currently narrowed.
+*** New function ~org-delete-indentation~ bound to ~M-^~
+Work as ~delete-indentation~ unless at heading, in which case text is
+added to headline text.
 ** Miscellaneous
 *** Strip all meta data from ITEM special property
 ITEM special property does not contain TODO, priority or tags anymore.

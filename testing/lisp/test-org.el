@@ -833,6 +833,36 @@
 
 ;;; Editing
 
+(ert-deftest test-org/delete-indentation ()
+  "Test `org-delete-indentation' specifications."
+  ;; Regular test.
+  (should (equal "foo bar"
+		(org-test-with-temp-text
+		    "foo \n bar<point>"
+		  (org-delete-indentation)
+		  (buffer-string))))
+  ;; With optional argument.
+  (should (equal "foo bar"
+		(org-test-with-temp-text
+		    "foo<point> \n bar"
+		  (org-delete-indentation t)
+		  (buffer-string))))
+  ;; At headline text should be appended to the headline text.
+  (should
+   (equal"* foo bar :tag:"
+	 (let (org-auto-align-tags)
+	   (org-test-with-temp-text
+	       "* foo :tag:\n bar<point>"
+	     (org-delete-indentation)
+	     (buffer-string)))))
+  (should
+   (equal "* foo bar :tag:"
+	  (let (org-auto-align-tags)
+	    (org-test-with-temp-text
+		"* foo <point>:tag:\n bar"
+	      (org-delete-indentation t)
+	      (buffer-string))))))
+
 (ert-deftest test-org/return ()
   "Test `org-return' specifications."
   ;; Regular test.
