@@ -283,7 +283,8 @@ This checks for the existence of a \".git\" directory in that directory."
 	(cd dir)
 	(let ((have-annex
 	       (and org-attach-git-annex-cutoff
-		    (file-exists-p (expand-file-name "annex" git-dir)))))
+		    (or (file-exists-p (expand-file-name "annex" git-dir))
+			(file-exists-p (expand-file-name ".git/annex" git-dir))))))
 	  (dolist (new-or-modified
 		   (split-string
 		    (shell-command-to-string
