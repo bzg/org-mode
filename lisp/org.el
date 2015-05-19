@@ -24391,7 +24391,7 @@ Throw an error if no block is found."
 	  (decf count))))
     (if (= count 0)
 	(prog1 (goto-char (org-element-property :post-affiliated last-element))
-	  (org-show-context))
+	  (save-match-data (org-show-context)))
       (goto-char origin)
       (user-error "No %s code blocks" (if backward "previous" "further")))))
 
