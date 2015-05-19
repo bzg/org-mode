@@ -63,8 +63,8 @@
     (useDingbats	 . :any)
     (horizontal		 . :any)
     (results             . ((file list vector table scalar verbatim)
-			    (raw org html latex code pp wrap)
-			    (replace silent append prepend)
+			    (raw html latex org code pp drawer)
+			    (replace silent none append prepend)
 			    (output value graphics))))
   "R-specific header arguments.")
 
