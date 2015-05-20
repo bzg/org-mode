@@ -2472,7 +2472,7 @@ When `full-file-path', include the full file path."
   "Non-nil means complete the outline path in hierarchical steps.
 When Org-mode uses the refile interface to select an outline path
 \(see variable `org-refile-use-outline-path'), the completion of
-the path can be done is a single go, or if can be done in steps down
+the path can be done in a single go, or it can be done in steps down
 the headline hierarchy.  Going in steps is probably the best if you
 do not use a special completion package like `ido' or `icicles'.
 However, when using these packages, going in one step can be very
