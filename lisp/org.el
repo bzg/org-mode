@@ -21227,15 +21227,16 @@ object (e.g., within a comment).  In these case, you need to use
 			   (save-excursion (goto-char (match-beginning 5))
 					   (current-column))))
 	    ;; Test if before or after headline title.
-	    (string (when (not (or (< (point)
-				      (or (match-end 3)
-					  (match-end 2)
-					  (save-excursion
-					    (goto-char (match-beginning 4))
-					    (skip-chars-backward " \t")
-					    (point))))
-				   (and (match-beginning 5)
-					(>= (point) (match-beginning 5)))))
+	    (string (when (and (match-end 4)
+			       (not (or (< (point)
+					   (or (match-end 3)
+					       (match-end 2)
+					       (save-excursion
+						 (goto-char (match-beginning 4))
+						 (skip-chars-backward " \t")
+						 (point))))
+					(and (match-beginning 5)
+					     (>= (point) (match-beginning 5))))))
 		      ;; Point is on headline keywords, tags or cookies.  Do not break
 		      ;; them: add a newline after the headline instead.
 		      (org-string-nw-p
