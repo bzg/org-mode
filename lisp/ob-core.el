@@ -459,6 +459,7 @@ then run `org-babel-switch-to-session'."
     (epilogue   . :any)
     (file	. :any)
     (file-desc  . :any)
+    (file-ext   . :any)
     (hlines	. ((no yes)))
     (mkdirp	. ((yes no)))
     (no-expand)
