@@ -268,32 +268,39 @@ which see.  BEG and END are buffer positions."
 
 (defun org-src--contents-area (datum)
   "Return contents boundaries of DATUM.
-DATUM is an element or object.  Return a pair (BEG . END) where
-BEG and END are buffer positions."
+DATUM is an element or object.  Return a list (BEG END CONTENTS)
+where BEG and END are buffer positions and CONTENTS is a string."
   (let ((type (org-element-type datum)))
     (cond
      ((eq type 'footnote-definition)
       (let ((beg (org-with-wide-buffer
 		  (goto-char (org-element-property :post-affiliated datum))
-		  (search-forward "]"))))
-	(cons beg (or (org-element-property :contents-end datum) beg))))
+		  (search-forward "]")))
+	    (end (or (org-element-property :contents-end datum) beg)))
+	(list beg end (buffer-substring-no-properties beg end))))
      ((org-element-property :contents-begin datum)
-      (cons (org-element-property :contents-begin datum)
-	    (org-element-property :contents-end datum)))
+      (list (org-element-property :contents-begin datum)
+	    (org-element-property :contents-end datum)
+	    (buffer-substring-no-properties beg end)))
      ((memq type '(example-block export-block src-block))
-      (cons (org-with-wide-buffer
+      (list (org-with-wide-buffer
 	     (goto-char (org-element-property :post-affiliated datum))
 	     (line-beginning-position 2))
 	    (org-with-wide-buffer
 	     (goto-char (org-element-property :end datum))
 	     (skip-chars-backward " \r\t\n")
-	     (line-beginning-position 1))))
+	     (line-beginning-position 1))
+	    (org-element-property :value datum)))
      ((memq type '(fixed-width table))
-      (cons (org-element-property :post-affiliated datum)
-	    (org-with-wide-buffer
-	     (goto-char (org-element-property :end datum))
-	     (skip-chars-backward " \r\t\n")
-	     (line-beginning-position 2))))
+      (let ((beg (org-element-property :post-affiliated datum))
+	    (end (org-with-wide-buffer
+		  (goto-char (org-element-property :end datum))
+		  (skip-chars-backward " \r\t\n")
+		  (line-beginning-position 2))))
+	(list beg
+	      end
+	      (if (eq type 'fixed-width) (org-element-property :value datum)
+		(buffer-substring-no-properties beg end)))))
      (t (error "Unsupported element or object: %s" type)))))
 
 (defun org-src--make-source-overlay (beg end edit-buffer)
@@ -377,10 +384,10 @@ moving from the edit area to the source.
 Leave point in edit buffer."
   (setq org-src--saved-temp-window-config (current-window-configuration))
   (let* ((area (org-src--contents-area datum))
-	 (beg (copy-marker (car area)))
-	 (end (copy-marker (cdr area) t))
+	 (beg (copy-marker (nth 0 area)))
+	 (end (copy-marker (nth 1 area) t))
 	 (old-edit-buffer (org-src--edit-buffer beg end))
-	 (contents (or contents (buffer-substring-no-properties beg end))))
+	 (contents (or contents (nth 2 area))))
     (if (and old-edit-buffer
 	     (or (not org-src-ask-before-returning-to-edit-buffer)
 		 (y-or-n-p "Return to existing edit buffer ([n] will revert changes)? ")))
