@@ -273,10 +273,10 @@ where BEG and END are buffer positions and CONTENTS is a string."
   (let ((type (org-element-type datum)))
     (cond
      ((eq type 'footnote-definition)
-      (let ((beg (org-with-wide-buffer
-		  (goto-char (org-element-property :post-affiliated datum))
-		  (search-forward "]")))
-	    (end (or (org-element-property :contents-end datum) beg)))
+      (let* ((beg (org-with-wide-buffer
+		   (goto-char (org-element-property :post-affiliated datum))
+		   (search-forward "]")))
+	     (end (or (org-element-property :contents-end datum) beg)))
 	(list beg end (buffer-substring-no-properties beg end))))
      ((org-element-property :contents-begin datum)
       (list (org-element-property :contents-begin datum)
