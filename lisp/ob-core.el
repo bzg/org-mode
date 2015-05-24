@@ -653,7 +653,8 @@ block."
 	 (cache-current-p
 	  (save-excursion ;; return cached result
 	    (goto-char (org-babel-where-is-src-block-result nil info))
-	    (end-of-line 1) (forward-char 1)
+	    (forward-line)
+	    (skip-chars-forward " \t")
 	    (let ((result (org-babel-read-result)))
 	      (message (replace-regexp-in-string
 			"%" "%%" (format "%S" result))) result)))

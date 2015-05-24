@@ -20,6 +20,22 @@
 
 ;;; Code:
 
+(ert-deftest test-org-babel/indented-cached-org-bracket-link ()
+  "When the result of a source block is a cached indented link it
+should still return the link."
+  (should
+   (let ((default-directory temporary-file-directory))
+     (org-test-with-temp-text
+      "
+* Test
+  #+<point>BEGIN_SRC emacs-lisp :file test.txt :cache yes
+    (message \"test\")
+  #+END_SRC"
+      ;; Execute twice as the first time creates the cache.
+      (org-babel-execute-src-block)
+      (string= (concat default-directory "test.txt")
+	       (org-babel-execute-src-block))))))
+
 (ert-deftest test-org-babel/multi-line-header-regexp ()
   (should(equal "^[ \t]*#\\+headers?:[ \t]*\\([^\n]*\\)$"
 		org-babel-multi-line-header-regexp))
