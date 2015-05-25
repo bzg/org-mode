@@ -279,9 +279,9 @@ where BEG and END are buffer positions and CONTENTS is a string."
 	     (end (or (org-element-property :contents-end datum) beg)))
 	(list beg end (buffer-substring-no-properties beg end))))
      ((org-element-property :contents-begin datum)
-      (list (org-element-property :contents-begin datum)
-	    (org-element-property :contents-end datum)
-	    (buffer-substring-no-properties beg end)))
+      (let ((beg (org-element-property :contents-begin datum))
+	    (end (org-element-property :contents-end datum)))
+	(list beg end (buffer-substring-no-properties beg end))))
      ((memq type '(example-block export-block src-block))
       (list (org-with-wide-buffer
 	     (goto-char (org-element-property :post-affiliated datum))
