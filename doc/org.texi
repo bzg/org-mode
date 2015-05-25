@@ -13618,9 +13618,9 @@ This paragraph is preceded by...
 @subsection Texinfo specific attributes
 
 @cindex #+ATTR_TEXINFO
-@samp{texinfo} back-end understands several attributes in plain lists and
-tables.  They must be specified using an @code{#+ATTR_TEXINFO} keyword,
-written just above the list or table.
+@samp{texinfo} back-end understands several attributes in plain lists, tables
+and images.  They must be specified using an @code{#+ATTR_TEXINFO} keyword,
+written just above the list, table or table.
 
 @subsubheading Plain lists
 
@@ -13649,6 +13649,18 @@ length, using @code{:columns} attribute.
 @example
 #+ATTR_TEXINFO: :columns .5 .5
 | a cell | another cell |
+@end example
+
+@subsubheading Images
+
+Images are links to files with a supported image extension and no
+description.  Image scaling is set with @code{:width} and @code{:height}
+attributes.  You can also use @code{:alt} to specify alternate text, as
+Texinfo code.
+
+@example
+#+ATTR_TEXINFO: :width 1in :alt Alternate @@i@{text@}
+[[ridt.pdf]]
 @end example
 
 @node An example

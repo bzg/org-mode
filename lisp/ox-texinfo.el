@@ -385,6 +385,11 @@ Specified coding system will be matched against these strings.
 If two strings share the same prefix (e.g. \"ISO-8859-1\" and
 \"ISO-8859-15\"), the most specific one has to be listed first.")
 
+(defconst org-texinfo-inline-image-rules
+  (list (cons "file"
+	      (regexp-opt '("eps" "pdf" "png" "jpg" "jpeg" "gif" "svg"))))
+  "Rules characterizing image files that can be inlined.")
+
 
 ;;; Internal Functions
 
@@ -917,6 +922,8 @@ INFO is a plist holding contextual information.  See
 		(t raw-path))))
     (cond
      ((org-export-custom-protocol-maybe link desc 'texinfo))
+     ((org-export-inline-image-p link org-texinfo-inline-image-rules)
+      (org-texinfo--inline-image link info))
      ((equal type "radio")
       (let ((destination (org-export-resolve-radio-link link info)))
 	(if (not destination) desc
@@ -982,6 +989,48 @@ INFO is a plist holding contextual information.  See
      ;; No path, only description.  Try to do something useful.
      (t
       (format (plist-get info :texinfo-link-with-unknown-path-format) desc)))))
+
+(defun org-texinfo--inline-image (link info)
+  "Return Texinfo code for an inline image.
+LINK is the link pointing to the inline image.  INFO is the
+current state of the export, as a plist."
+  (let* ((parent (org-export-get-parent-element link))
+	 (caption (org-export-get-caption parent))
+	 (shortcaption (org-export-get-caption parent t))
+	 (filename
+	  (file-name-sans-extension
+	   (let ((raw-path (org-element-property :path link)))
+	     (if (not (file-name-absolute-p raw-path)) raw-path
+	       (expand-file-name raw-path)))))
+	 (attributes (org-export-read-attribute :attr_texinfo parent))
+	 (height (or (plist-get attributes :height) ""))
+	 (width (or (plist-get attributes :width) ""))
+	 (alt (or (plist-get attributes :alt) ""))
+	 (image (format "@image{%s,%s,%s,%s}" filename width height alt)))
+    (if (not (or caption shortcaption)) image
+      (let ((label (org-element-property :name parent))
+	    (b (org-export-create-backend
+		:parent 'texinfo
+		:transcoders '((footnote-reference . ignore)
+			       (inline-src-block . ignore)
+			       (link . (lambda (object c i) c))
+			       (radio-target . (lambda (object c i) c))
+			       (target . ignore)
+			       (verbatim . ignore)))))
+	(format "@float %s%s\n%s\n%s%s@end float"
+		(org-export-translate "Figure" :utf-8 info)
+		(if label (concat "," label) "")
+		image
+		(if caption
+		    (concat "@caption{"
+			    (org-export-data-with-backend caption b info)
+			    "}\n")
+		  "")
+		(if shortcaption
+		    (concat "@shortcaption{"
+			    (org-export-data-with-backend shortcaption b info)
+			    "}\n")
+		  ""))))))
 
 
 ;;;; Menu

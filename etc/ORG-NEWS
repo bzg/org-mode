@@ -379,6 +379,8 @@ a dedicated buffer.  It works even if buffer is currently narrowed.
 *** New function ~org-delete-indentation~ bound to ~M-^~
 Work as ~delete-indentation~ unless at heading, in which case text is
 added to headline text.
+*** Support for images in Texinfo back-end
+~Texinfo~ back-end now handles images.  See manual for details.
 ** Miscellaneous
 *** Strip all meta data from ITEM special property
 ITEM special property does not contain TODO, priority or tags anymore.
