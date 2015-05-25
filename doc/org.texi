@@ -13620,7 +13620,7 @@ This paragraph is preceded by...
 @cindex #+ATTR_TEXINFO
 @samp{texinfo} back-end understands several attributes in plain lists, tables
 and images.  They must be specified using an @code{#+ATTR_TEXINFO} keyword,
-written just above the list, table or table.
+written just above the list, table or image.
 
 @subsubheading Plain lists
 
