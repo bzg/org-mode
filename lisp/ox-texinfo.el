@@ -928,7 +928,11 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      ((string= key "KINDEX") (format "@kindex %s" value))
      ((string= key "PINDEX") (format "@pindex %s" value))
      ((string= key "TINDEX") (format "@tindex %s" value))
-     ((string= key "VINDEX") (format "@vindex %s" value)))))
+     ((string= key "VINDEX") (format "@vindex %s" value))
+     ((string= key "TOC")
+      (cond ((org-string-match-p "\\<tables\\>" value)
+	     (concat "@listoffloats "
+		     (org-export-translate "Table" :utf-8 info))))))))
 
 ;;;; Line Break
 
@@ -1343,10 +1347,19 @@ contextual information."
     (let* ((col-width (org-export-read-attribute :attr_texinfo table :columns))
 	   (columns
 	    (if col-width (format "@columnfractions %s" col-width)
-	      (org-texinfo-table-column-widths table info))))
-      (format "@multitable %s\n%s@end multitable"
-	      columns
-	      contents))))
+	      (org-texinfo-table-column-widths table info)))
+	   (caption (org-export-get-caption table))
+	   (shortcaption (org-export-get-caption table t))
+	   (table-str (format "@multitable %s\n%s@end multitable"
+			      columns
+			      contents)))
+      (if (not (or caption shortcaption)) table-str
+	(org-texinfo--wrap-float table-str
+				 info
+				 (org-export-translate "Table" :utf-8 info)
+				 (org-element-property :name table)
+				 caption
+				 shortcaption)))))
 
 (defun org-texinfo-table-column-widths (table info)
   "Determine the largest table cell in each column to process alignment.
