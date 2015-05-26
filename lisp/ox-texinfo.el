@@ -80,9 +80,9 @@
     (verse-block . org-texinfo-verse-block))
   :export-block "TEXINFO"
   :filters-alist
-  '((:filter-headline . org-texinfo-filter-section-blank-lines)
+  '((:filter-headline . org-texinfo--filter-section-blank-lines)
     (:filter-parse-tree . org-texinfo--normalize-headlines)
-    (:filter-section . org-texinfo-filter-section-blank-lines))
+    (:filter-section . org-texinfo--filter-section-blank-lines))
   :menu-entry
   '(?i "Export to Texinfo"
        ((?t "As TEXI file" org-texinfo-export-to-texinfo)
@@ -393,7 +393,7 @@ If two strings share the same prefix (e.g. \"ISO-8859-1\" and
 
 ;;; Internal Functions
 
-(defun org-texinfo-filter-section-blank-lines (headline back-end info)
+(defun org-texinfo--filter-section-blank-lines (headline back-end info)
   "Filter controlling number of blank lines after a section."
   (let ((blanks (make-string 2 ?\n)))
     (replace-regexp-in-string "\n\\(?:\n[ \t]*\\)*\\'" blanks headline)))
@@ -476,8 +476,6 @@ anchor name is unique."
 	  (plist-put info :texinfo-node-cache (cons (cons blob name) cache))
 	  name))))
 
-;;;; Menu sanitizing
-
 (defun org-texinfo--sanitize-node (title)
   "Bend string TITLE to node line requirements.
 Trim string and collapse multiple whitespace characters as they
@@ -488,8 +486,6 @@ are not significant.  Also remove the following characters: @
    (replace-regexp-in-string
     "\\`(\\(.*)\\)" "[\\1"
     (org-trim (replace-regexp-in-string "[ \t]\\{2,\\}" " " title)))))
-
-;;;; Content sanitizing
 
 (defun org-texinfo--sanitize-content (text)
   "Escape special characters in string TEXT.
