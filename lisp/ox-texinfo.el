@@ -997,40 +997,50 @@ current state of the export, as a plist."
   (let* ((parent (org-export-get-parent-element link))
 	 (caption (org-export-get-caption parent))
 	 (shortcaption (org-export-get-caption parent t))
+	 (path  (org-element-property :path link))
 	 (filename
 	  (file-name-sans-extension
-	   (let ((raw-path (org-element-property :path link)))
-	     (if (not (file-name-absolute-p raw-path)) raw-path
-	       (expand-file-name raw-path)))))
+	   (if (file-name-absolute-p path) (expand-file-name path) path)))
+	 (extension (file-name-extension path))
 	 (attributes (org-export-read-attribute :attr_texinfo parent))
 	 (height (or (plist-get attributes :height) ""))
 	 (width (or (plist-get attributes :width) ""))
 	 (alt (or (plist-get attributes :alt) ""))
-	 (image (format "@image{%s,%s,%s,%s}" filename width height alt)))
+	 (image (format "@image{%s,%s,%s,%s,%s}"
+			filename width height alt extension)))
     (if (not (or caption shortcaption)) image
-      (let ((label (org-element-property :name parent))
-	    (b (org-export-create-backend
-		:parent 'texinfo
-		:transcoders '((footnote-reference . ignore)
-			       (inline-src-block . ignore)
-			       (link . (lambda (object c i) c))
-			       (radio-target . (lambda (object c i) c))
-			       (target . ignore)
-			       (verbatim . ignore)))))
-	(format "@float %s%s\n%s\n%s%s@end float"
+      (let* ((label (org-element-property :name parent))
+	     (backend
+	      (org-export-create-backend
+	       :parent 'texinfo
+	       :transcoders '((link . (lambda (object c i) c))
+			      (radio-target . (lambda (object c i) c))
+			      (target . ignore))))
+	     (short-backend
+	      (org-export-create-backend
+	       :parent 'texinfo
+	       :transcoders '((footnote-reference . ignore)
+			      (inline-src-block . ignore)
+			      (link . (lambda (object c i) c))
+			      (radio-target . (lambda (object c i) c))
+			      (target . ignore)
+			      (verbatim . ignore))))
+	     (shortcaption-str
+	      (if (and shortcaption caption)
+		  (format "@shortcaption{%s}\n"
+			  (org-export-data-with-backend
+			   shortcaption short-backend info))
+		""))
+	     (caption (org-export-data-with-backend
+		       (or caption shortcaption)
+		       (if (equal shortcaption-str "") short-backend backend)
+		       info)))
+	(format "@float %s%s\n%s\n@caption{%s}\n%s@end float"
 		(org-export-translate "Figure" :utf-8 info)
 		(if label (concat "," label) "")
 		image
-		(if caption
-		    (concat "@caption{"
-			    (org-export-data-with-backend caption b info)
-			    "}\n")
-		  "")
-		(if shortcaption
-		    (concat "@shortcaption{"
-			    (org-export-data-with-backend shortcaption b info)
-			    "}\n")
-		  ""))))))
+		caption
+		shortcaption-str)))))
 
 
 ;;;; Menu
