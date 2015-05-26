@@ -7123,7 +7123,7 @@ The region to be covered depends on STATE when called through
 `org-cycle-hook'.  Lisp program can use t for STATE to get the
 entire buffer covered.  Note that an empty line is only shown if there
 are at least `org-cycle-separator-lines' empty lines before the headline."
-  (when (not (= org-cycle-separator-lines 0))
+  (when (/= org-cycle-separator-lines 0)
     (save-excursion
       (let* ((n (abs org-cycle-separator-lines))
 	     (re (cond
@@ -7132,30 +7132,26 @@ are at least `org-cycle-separator-lines' empty lines before the headline."
 		  (t (let ((ns (number-to-string (- n 2))))
 		       (concat "^\\(?:[ \t]*\n\\)\\{" ns "," ns "\\}"
 			       "[ \t]*\\(\n[ \t]*\n\\*+\\) ")))))
-	     beg end b e)
+	     beg end)
 	(cond
 	 ((memq state '(overview contents t))
 	  (setq beg (point-min) end (point-max)))
 	 ((memq state '(children folded))
-	  (setq beg (point) end (progn (org-end-of-subtree t t)
-				       (beginning-of-line 2)
-				       (point)))))
+	  (setq beg (point)
+		end (progn (org-end-of-subtree t t)
+			   (line-beginning-position 2)))))
 	(when beg
 	  (goto-char beg)
 	  (while (re-search-forward re end t)
 	    (unless (get-char-property (match-end 1) 'invisible)
-	      (setq e (match-end 1))
-	      (if (< org-cycle-separator-lines 0)
-		  (setq b (save-excursion
-			    (goto-char (match-beginning 0))
-			    (org-back-over-empty-lines)
-			    (if (save-excursion
-				  (goto-char (max (point-min) (1- (point))))
-				  (org-at-heading-p))
-				(1- (point))
-			      (point))))
-		(setq b (match-beginning 1)))
-	      (outline-flag-region b e nil)))))))
+	      (let ((e (match-end 1))
+		    (b (if (>= org-cycle-separator-lines 0)
+			   (match-beginning 1)
+			 (save-excursion
+			   (goto-char (match-beginning 0))
+			   (skip-chars-backward " \t\n")
+			   (line-end-position)))))
+		(outline-flag-region b e nil))))))))
   ;; Never hide empty lines at the end of the file.
   (save-excursion
     (goto-char (point-max))
