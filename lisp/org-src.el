@@ -577,14 +577,16 @@ See also `org-src-mode-hook'."
 	  (run-with-idle-timer
 	   org-edit-src-auto-save-idle-delay t
 	   (lambda ()
-	     (let (edit-flag)
-	       (dolist (b (buffer-list))
-		 (when (org-src-edit-buffer-p)
-		   (unless edit-flag (setq edit-flag t))
-		   (when (buffer-modified-p) (org-edit-src-save))))
-	       (unless edit-flag
-		 (cancel-timer org-src--auto-save-timer)
-		 (setq org-src--auto-save-timer nil))))))))
+	     (save-excursion
+	       (let (edit-flag)
+		 (dolist (b (buffer-list))
+		   (with-current-buffer b
+		     (when (org-src-edit-buffer-p)
+		       (unless edit-flag (setq edit-flag t))
+		       (when (buffer-modified-p) (org-edit-src-save)))))
+		 (unless edit-flag
+		   (cancel-timer org-src--auto-save-timer)
+		   (setq org-src--auto-save-timer nil)))))))))
 
 (defun org-src-mode-configure-edit-buffer ()
   (when (org-bound-and-true-p org-src--from-org-mode)
