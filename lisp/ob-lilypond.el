@@ -62,12 +62,15 @@ org-babel-lilypond-play-midi-post-tangle determines whether to automate the
 playing of the resultant midi file.  If the value is nil,
 the midi file is not automatically played.  Default value is t")
 
-(defconst org-babel-lilypond-ly-command
-  "Command to execute lilypond on your system.")
-(defconst org-babel-lilypond-pdf-command
-  "Command to show a PDF file on your system.")
-(defconst org-babel-lilypond-midi-command
-  "Command to play a MIDI file on your system.")
+(defvar org-babel-lilypond-ly-command ""
+  "Command to execute lilypond on your system.
+Do not set it directly.  Customize `org-babel-lilypond-commands' instead.")
+(defvar org-babel-lilypond-pdf-command ""
+  "Command to show a PDF file on your system.
+Do not set it directly.  Customize `org-babel-lilypond-commands' instead.")
+(defvar org-babel-lilypond-midi-command ""
+  "Command to play a MIDI file on your system.
+Do not set it directly.  Customize `org-babel-lilypond-commands' instead.")
 (defcustom org-babel-lilypond-commands
   (cond
    ((eq system-type 'darwin)
@@ -96,33 +99,27 @@ you can leave the string empty on this case."
      org-babel-lilypond-midi-command (nth 2 value))))
 
 (defvar org-babel-lilypond-gen-png nil
-  "Image generation (png) can be turned on by default by setting
-ORG-BABEL-LILYPOND-GEN-PNG to t")
+  "Non-nil means image generation (PNG) is turned on by default.")
 
 (defvar org-babel-lilypond-gen-svg nil
-  "Image generation (SVG) can be turned on by default by setting
-ORG-BABEL-LILYPOND-GEN-SVG to t")
+  "Non-nil means image generation (SVG) is be turned on by default.")
 
 (defvar org-babel-lilypond-gen-html nil
-  "HTML generation can be turned on by default by setting
-ORG-BABEL-LILYPOND-GEN-HTML to t")
+  "Non-nil means HTML generation is turned on by default.")
 
 (defvar org-babel-lilypond-gen-pdf nil
-  "PDF generation can be turned on by default by setting
-ORG-BABEL-LILYPOND-GEN-PDF to t")
+  "Non-nil means PDF generation is be turned on by default.")
 
 (defvar org-babel-lilypond-use-eps nil
-  "You can force the compiler to use the EPS backend by setting
-ORG-BABEL-LILYPOND-USE-EPS to t")
+  "Non-nil forces the compiler to use the EPS backend.")
 
 (defvar org-babel-lilypond-arrange-mode nil
-  "Arrange mode is turned on by setting ORG-BABEL-LILYPOND-ARRANGE-MODE
-to t.  In Arrange mode the following settings are altered
-from default...
+  "Non-nil turns Arrange mode on.
+In Arrange mode the following settings are altered from default:
 :tangle yes,    :noweb yes
 :results silent :comments yes.
 In addition lilypond block execution causes tangling of all lilypond
-blocks")
+blocks.")
 
 (defun org-babel-expand-body:lilypond (body params)
   "Expand BODY according to PARAMS, return the expanded body."
