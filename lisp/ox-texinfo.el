@@ -932,7 +932,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      ((string= key "TOC")
       (cond ((org-string-match-p "\\<tables\\>" value)
 	     (concat "@listoffloats "
-		     (org-export-translate "Table" :utf-8 info))))))))
+		     (org-export-translate "Table" :utf-8 info)))
+	    ((org-string-match-p "\\<listings\\>" value)
+	     (concat "@listoffloats "
+		     (org-export-translate "Listing" :utf-8 info))))))))
 
 ;;;; Line Break
 
@@ -1305,11 +1308,22 @@ as a communication channel."
   "Transcode a SRC-BLOCK element from Org to Texinfo.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let ((lispp (org-string-match-p "lisp"
+  (let* ((lisp (org-string-match-p "lisp"
 				   (org-element-property :language src-block)))
-	(code (org-texinfo--sanitize-content
-	       (org-export-format-code-default src-block info))))
-    (format (if lispp "@lisp\n%s@end lisp" "@example\n%s@end example") code)))
+	 (code (org-texinfo--sanitize-content
+		(org-export-format-code-default src-block info)))
+	 (value (format
+		 (if lisp "@lisp\n%s@end lisp" "@example\n%s@end example")
+		 code))
+	 (caption (org-export-get-caption src-block))
+	 (shortcaption (org-export-get-caption src-block t)))
+    (if (not (or caption shortcaption)) value
+      (org-texinfo--wrap-float value
+			       info
+			       (org-export-translate "Listing" :utf-8 info)
+			       (org-element-property :name src-block)
+			       caption
+			       shortcaption))))
 
 ;;;; Statistics Cookie
 

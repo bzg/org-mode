@@ -5460,6 +5460,19 @@ them."
       :utf-8 "Список таблиц")
      ("sv" :default "Tabeller")
      ("zh-CN" :html "&#34920;&#26684;&#30446;&#24405;" :utf-8 "表格目录"))
+    ("Listing"
+     ("da" :default "Program")
+     ("de" :default "Programmlisting")
+     ("es" :default "Listado de programa")
+     ("et" :default "Loend")
+     ("fr" :default "Programme" :html "Programme")
+     ("ja" :default "ソースコード")
+     ("no" :default "Dataprogram")
+     ("nb" :default "Dataprogram")
+     ("pt_BR" :default "Listagem")
+     ("ru" :html "&#1056;&#1072;&#1089;&#1087;&#1077;&#1095;&#1072;&#1090;&#1082;&#1072;"
+      :utf-8 "Распечатка")
+     ("zh-CN" :html "&#20195;&#30721;" :utf-8 "代码"))
     ("Listing %d:"
      ("da" :default "Program %d")
      ("de" :default "Programmlisting %d")
