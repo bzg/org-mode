@@ -492,6 +492,44 @@ are not significant.  Also remove the following characters: @
 Special characters are: @ { }"
   (replace-regexp-in-string "[@{}]" "@\\&" text))
 
+(defun org-texinfo--wrap-float (value info &optional type label caption short)
+  "Wrap string VALUE within a @float command.
+INFO is the current export state, as a plist.  TYPE is float
+type, as a string.  LABEL is the cross reference label for the
+float, as a string.  CAPTION and SHORT are, respectively, the
+caption and shortcaption used for the float, as secondary
+strings (e.g., returned by `org-export-get-caption')."
+  (let* ((backend
+	  (org-export-create-backend
+	   :parent 'texinfo
+	   :transcoders '((link . (lambda (object c i) c))
+			  (radio-target . (lambda (object c i) c))
+			  (target . ignore))))
+	 (short-backend
+	  (org-export-create-backend
+	   :parent 'texinfo
+	   :transcoders '((footnote-reference . ignore)
+			  (inline-src-block . ignore)
+			  (link . (lambda (object c i) c))
+			  (radio-target . (lambda (object c i) c))
+			  (target . ignore)
+			  (verbatim . ignore))))
+	 (short-str
+	  (if (and short caption)
+	      (format "@shortcaption{%s}\n"
+		      (org-export-data-with-backend short short-backend info))
+	    ""))
+	 (caption-str
+	  (if (or short caption)
+	      (format "@caption{%s}\n"
+		      (org-export-data-with-backend
+		       (or caption short)
+		       (if (equal short-str "") short-backend backend)
+		       info))
+	    "")))
+    (format "@float %s%s\n%s\n%s%s@end float"
+	    type (if label (concat "," label) "") value caption-str short-str)))
+
 ;;; Template
 
 (defun org-texinfo-template (contents info)
@@ -1005,38 +1043,12 @@ current state of the export, as a plist."
 	 (image (format "@image{%s,%s,%s,%s,%s}"
 			filename width height alt extension)))
     (if (not (or caption shortcaption)) image
-      (let* ((label (org-element-property :name parent))
-	     (backend
-	      (org-export-create-backend
-	       :parent 'texinfo
-	       :transcoders '((link . (lambda (object c i) c))
-			      (radio-target . (lambda (object c i) c))
-			      (target . ignore))))
-	     (short-backend
-	      (org-export-create-backend
-	       :parent 'texinfo
-	       :transcoders '((footnote-reference . ignore)
-			      (inline-src-block . ignore)
-			      (link . (lambda (object c i) c))
-			      (radio-target . (lambda (object c i) c))
-			      (target . ignore)
-			      (verbatim . ignore))))
-	     (shortcaption-str
-	      (if (and shortcaption caption)
-		  (format "@shortcaption{%s}\n"
-			  (org-export-data-with-backend
-			   shortcaption short-backend info))
-		""))
-	     (caption (org-export-data-with-backend
-		       (or caption shortcaption)
-		       (if (equal shortcaption-str "") short-backend backend)
-		       info)))
-	(format "@float %s%s\n%s\n@caption{%s}\n%s@end float"
-		(org-export-translate "Figure" :utf-8 info)
-		(if label (concat "," label) "")
-		image
-		caption
-		shortcaption-str)))))
+      (org-texinfo--wrap-float image
+			       info
+			       (org-export-translate "Figure" :utf-8 info)
+			       (org-element-property :name parent)
+			       caption
+			       shortcaption))))
 
 
 ;;;; Menu
