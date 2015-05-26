@@ -195,15 +195,16 @@ issued in the language major mode buffer."
 ;;; Internal functions and variables
 
 (defvar org-src--allow-write-back t)
-(defvar org-src--remote nil)
+(defvar org-src--auto-save-timer nil)
+(defvar org-src--babel-info nil)
 (defvar org-src--beg-marker nil)
 (defvar org-src--block-indentation nil)
-(defvar org-src--auto-save-timer nil)
 (defvar org-src--end-marker nil)
 (defvar org-src--from-org-mode nil)
 (defvar org-src--overlay nil)
+(defvar org-src--preserve-indentation nil)
+(defvar org-src--remote nil)
 (defvar org-src--saved-temp-window-config nil)
-(defvar org-src--babel-info nil)
 
 (defun org-src--construct-edit-buffer-name (org-buffer-name lang)
   "Construct the buffer name for a source editing buffer."
@@ -348,7 +349,7 @@ spaces after it as being outside."
   "Return buffer contents in a format appropriate for write back.
 Assume point is in the corresponding edit buffer."
   (let ((indentation (or org-src--block-indentation 0))
-	(preserve-indentation org-src-preserve-indentation)
+	(preserve-indentation org-src--preserve-indentation)
 	(contents (org-with-wide-buffer (buffer-string)))
 	(write-back org-src--allow-write-back))
     (with-temp-buffer
@@ -442,7 +443,7 @@ Leave point in edit buffer."
 	(org-set-local 'org-src--end-marker end)
 	(org-set-local 'org-src--remote remote)
 	(org-set-local 'org-src--block-indentation ind)
-	(org-set-local 'org-src-preserve-indentation preserve-ind)
+	(org-set-local 'org-src--preserve-indentation preserve-ind)
 	(org-set-local 'org-src--overlay overlay)
 	(org-set-local 'org-src--allow-write-back write-back)
 	;; Start minor mode.
@@ -834,7 +835,7 @@ name of the sub-editing buffer."
        lang-f
        (and (null code)
 	    (lambda ()
-	      (unless org-src-preserve-indentation
+	      (unless org-src--preserve-indentation
 		(untabify (point-min) (point-max))
 		(when (> org-edit-src-content-indentation 0)
 		  (let ((ind (make-string org-edit-src-content-indentation ?\s)))
