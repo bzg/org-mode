@@ -50,6 +50,17 @@
   '((:results . "latex") (:exports . "results"))
   "Default arguments to use when evaluating a LaTeX source block.")
 
+(defconst org-babel-header-args:latex
+  '((border	  . :any)
+    (fit          . :any)
+    (iminoptions  . :any)
+    (imoutoptions . :any)
+    (packages     . :any)
+    (pdfheight    . :any)
+    (pdfpng       . :any)
+    (pdfwidth     . :any))
+  "LaTeX-specific header arguments.")
+
 (defcustom org-babel-latex-htlatex "htlatex"
   "The htlatex command to enable conversion of latex to SVG or HTML."
   :group 'org-babel
