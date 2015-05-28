@@ -15056,8 +15056,9 @@ Code blocks in the following languages are supported.
 @item Processing.js @tab processing @tab Python @tab python 
 @item R @tab R @tab Ruby @tab ruby 
 @item Sass @tab sass @tab Scheme @tab scheme 
-@item GNU Screen @tab screen @tab shell @tab sh 
-@item SQL @tab sql @tab SQLite @tab sqlite
+@item GNU Screen @tab screen @tab Sed @tab sed
+@item shell @tab sh @tab SQL @tab sql
+@item SQLite @tab sqlite @tab @tab
 @end multitable
 
 Language-specific documentation is available for some languages.  If
