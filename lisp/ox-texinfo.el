@@ -1036,6 +1036,8 @@ INFO is a plist holding contextual information.  See
 LINK is the link pointing to the inline image.  INFO is the
 current state of the export, as a plist."
   (let* ((parent (org-export-get-parent-element link))
+	 (label (and (org-element-property :name parent)
+		     (org-texinfo--get-node parent info)))
 	 (caption (org-export-get-caption parent))
 	 (shortcaption (org-export-get-caption parent t))
 	 (path  (org-element-property :path link))
@@ -1049,13 +1051,15 @@ current state of the export, as a plist."
 	 (alt (or (plist-get attributes :alt) ""))
 	 (image (format "@image{%s,%s,%s,%s,%s}"
 			filename width height alt extension)))
-    (if (not (or caption shortcaption)) image
-      (org-texinfo--wrap-float image
-			       info
-			       (org-export-translate "Figure" :utf-8 info)
-			       (org-element-property :name parent)
-			       caption
-			       shortcaption))))
+    (cond ((or caption shortcaption)
+	   (org-texinfo--wrap-float image
+				    info
+				    (org-export-translate "Figure" :utf-8 info)
+				    label
+				    caption
+				    shortcaption))
+	  (label (concat "@anchor{" label "}\n" image))
+	  (t image))))
 
 
 ;;;; Menu
