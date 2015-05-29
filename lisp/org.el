@@ -4101,6 +4101,7 @@ Org mode to function properly:
 - inputenc, fontenc:  for basic font and character selection
 - fixltx2e: Important patches of LaTeX itself
 - graphicx: for including images
+- grffile: allow periods and spaces in graphics file names
 - longtable: For multipage tables
 - float, wrapfig: for figure placement
 - rotating: for sideways figures and tables
