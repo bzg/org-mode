@@ -1325,7 +1325,7 @@ contextual information."
       (org-texinfo--wrap-float value
 			       info
 			       (org-export-translate "Listing" :utf-8 info)
-			       (org-element-property :name src-block)
+			       (org-export-get-reference src-block info)
 			       caption
 			       shortcaption))))
 
@@ -1375,7 +1375,7 @@ contextual information."
 	(org-texinfo--wrap-float table-str
 				 info
 				 (org-export-translate "Table" :utf-8 info)
-				 (org-element-property :name table)
+				 (org-export-get-reference table info)
 				 caption
 				 shortcaption)))))
 
