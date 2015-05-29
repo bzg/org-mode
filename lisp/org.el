@@ -4802,7 +4802,7 @@ Otherwise, these types are allowed:
 (make-variable-buffer-local 'org-not-done-regexp)
 (defvar org-not-done-heading-regexp nil
   "Matches a TODO headline that is not done.")
-(make-variable-buffer-local 'org-not-done-regexp)
+(make-variable-buffer-local 'org-not-done-heading-regexp)
 (defvar org-todo-line-regexp nil
   "Matches a headline and puts TODO state into group 2 if present.")
 (make-variable-buffer-local 'org-todo-line-regexp)
