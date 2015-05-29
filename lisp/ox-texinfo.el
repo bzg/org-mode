@@ -1593,6 +1593,7 @@ Return INFO file name or an error if it couldn't be produced."
       ;; before applying it.  Output is redirected to "*Org INFO
       ;; Texinfo Output*" buffer.
       (let ((outbuf (get-buffer-create "*Org INFO Texinfo Output*")))
+	(with-current-buffer outbuf (compilation-mode))
 	(dolist (command org-texinfo-info-process)
 	  (shell-command
 	   (replace-regexp-in-string
