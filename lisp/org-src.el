@@ -834,15 +834,17 @@ name of the sub-editing buffer."
 	   (org-src--construct-edit-buffer-name (buffer-name) lang))
        lang-f
        (and (null code)
-	    (lambda ()
-	      (unless org-src--preserve-indentation
-		(untabify (point-min) (point-max))
-		(when (> org-edit-src-content-indentation 0)
-		  (let ((ind (make-string org-edit-src-content-indentation ?\s)))
-		    (while (not (eobp))
-		      (unless (looking-at "[ \t]*$") (insert ind))
-		      (forward-line)))))
-	      (org-escape-code-in-region (point-min) (point-max))))
+	    `(lambda ()
+	       (unless ,(or org-src-preserve-indentation
+			    (org-element-property :preserve-indent element))
+		 (untabify (point-min) (point-max))
+		 (when (> org-edit-src-content-indentation 0)
+		   (let ((ind (make-string org-edit-src-content-indentation
+					   ?\s)))
+		     (while (not (eobp))
+		       (unless (looking-at "[ \t]*$") (insert ind))
+		       (forward-line)))))
+	       (org-escape-code-in-region (point-min) (point-max))))
        (and code (org-unescape-code-in-string code)))
       ;; Finalize buffer.
       (org-set-local 'org-coderef-label-format
