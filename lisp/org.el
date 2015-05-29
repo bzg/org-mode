@@ -4076,6 +4076,7 @@ header, or they will be appended."
     ("T1"   "fontenc"   t)
     (""     "fixltx2e"  nil)
     (""     "graphicx"  t)
+    (""     "grffile"   t)
     (""     "longtable" nil)
     (""     "float"     nil)
     (""     "wrapfig"   nil)
