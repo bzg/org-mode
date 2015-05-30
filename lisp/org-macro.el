@@ -44,14 +44,20 @@
 
 ;;; Code:
 (require 'org-macs)
+(require 'org-compat)
 
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-context "org-element" (&optional element))
+(declare-function org-element-map "org-element"
+		  (data types fun &optional info first-match no-recursion
+			with-affiliated))
+(declare-function org-element-parse-buffer "org-element"
+		  (&optional granularity visible-only))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
-(declare-function org-remove-double-quotes "org" (s))
-(declare-function org-mode "org" ())
 (declare-function org-file-contents "org" (file &optional noerror))
+(declare-function org-mode "org" ())
+(declare-function org-remove-double-quotes "org" (s))
 (declare-function org-with-wide-buffer "org-macs" (&rest body))
 
 ;;; Variables

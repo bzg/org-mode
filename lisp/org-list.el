@@ -134,6 +134,7 @@
 (declare-function org-export-string-as "ox"
 		  (string backend &optional body-only ext-plist))
 
+(declare-function org-element-update-syntax "org-element" ())
 
 
 

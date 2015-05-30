@@ -34,15 +34,26 @@
 (require 'org-compat)
 (require 'ob-keys)
 (require 'ob-comint)
-(eval-when-compile
-  (require 'cl))
+(eval-when-compile (require 'cl))
 
-(declare-function org-do-remove-indentation "org" (&optional n))
-(declare-function org-get-indentation "org" (&optional line))
-(declare-function org-switch-to-buffer-other-window "org" (&rest args))
-(declare-function org-pop-to-buffer-same-window
-		  "org-compat" (&optional buffer-or-name norecord label))
 (declare-function org-base-buffer "org" (buffer))
+(declare-function org-do-remove-indentation "org" (&optional n))
+(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-context "org-element" (&optional element))
+(declare-function org-element-lineage "org-element"
+		  (blob &optional types with-self))
+(declare-function org-element-property "org-element" (property element))
+(declare-function org-element-type "org-element" (element))
+(declare-function org-footnote-goto-definition "org-footnote"
+		  (label &optional location))
+(declare-function org-get-indentation "org" (&optional line))
+(declare-function org-pop-to-buffer-same-window "org-compat"
+		  (&optional buffer-or-name norecord label))
+(declare-function org-some "org" (pred seq))
+(declare-function org-switch-to-buffer-other-window "org" (&rest args))
+(declare-function org-trim "org" (s))
+
+(defvar org-element-all-elements)
 
 (defcustom org-edit-src-turn-on-auto-save nil
   "Non-nil means turn `auto-save-mode' on when editing a source block.

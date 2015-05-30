@@ -38,9 +38,12 @@
 (require 'org-compat)
 
 (declare-function message-point-in-header-p "message" ())
+(declare-function org-at-comment-p "org" ())
+(declare-function org-at-heading-p "org" (&optional ignored))
 (declare-function org-back-over-empty-lines "org" ())
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-combine-plists "org" (&rest plists))
+(declare-function org-edit-footnote-reference "org-src" ())
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
@@ -49,23 +52,25 @@
 (declare-function org-icompleting-read "org" (&rest args))
 (declare-function org-id-uuid "org-id" ())
 (declare-function org-in-block-p "org" (names))
-(declare-function org-at-comment-p "org" ())
 (declare-function org-in-regexp "org" (re &optional nlines visually))
 (declare-function org-in-verbatim-emphasis "org" ())
 (declare-function org-inside-LaTeX-fragment-p "org" ())
 (declare-function org-inside-latex-macro-p "org" ())
 (declare-function org-mark-ring-push "org" (&optional pos buffer))
 (declare-function org-show-context "org" (&optional key))
+(declare-function org-skip-whitespace "org" ())
+(declare-function org-skip-whitespace "org" ())
 (declare-function org-trim "org" (s))
-(declare-function org-skip-whitespace "org" ())
 (declare-function outline-next-heading "outline")
-(declare-function org-skip-whitespace "org" ())
 
-(defvar org-outline-regexp-bol)		; defined in org.el
-(defvar org-odd-levels-only)		; defined in org.el
-(defvar org-bracket-link-regexp)	; defined in org.el
 (defvar message-cite-prefix-regexp)	; defined in message.el
 (defvar message-signature-separator)	; defined in message.el
+(defvar org-bracket-link-regexp)	; defined in org.el
+(defvar org-complex-heading-regexp)	; defined in org.el
+(defvar org-element-all-elements)	; defined in org-element.el
+(defvar org-element-all-objects)	; defined in org-element.el
+(defvar org-odd-levels-only)		; defined in org.el
+(defvar org-outline-regexp-bol)		; defined in org.el
 
 (defconst org-footnote-re
   ;; Only [1]-like footnotes are closed in this regexp, as footnotes
