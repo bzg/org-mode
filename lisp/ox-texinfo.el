@@ -996,22 +996,25 @@ INFO is a plist holding contextual information.  See
 		    (t (org-export-data
 			(org-element-property :title destination) info)))))
 	  (otherwise
-	   (let ((topic
-		  (or desc
-		      (if (and (eq (org-element-type destination) 'headline)
-			       (not (org-export-numbered-headline-p
-				     destination info)))
-			  (org-export-data
-			   (org-element-property :title destination) info))
-		      (let ((n (org-export-get-ordinal destination info)))
-			(cond
-			 ((not n) nil)
-			 ((integerp n) n)
-			 (t (mapconcat #'number-to-string n ".")))))))
-	     (when topic
-	       (format "@ref{%s,,%s}"
-		       (org-texinfo--get-node destination info)
-		       topic)))))))
+	   (format "@ref{%s,,%s}"
+		   (org-texinfo--get-node destination info)
+		   (cond
+		    (desc)
+		    ;; No description is provided: first try to
+		    ;; associate destination to a number.
+		    ((let ((n (org-export-get-ordinal destination info)))
+		       (cond ((not n) nil)
+			     ((integerp n) n)
+			     (t (mapconcat #'number-to-string n ".")))))
+		    ;; Then grab title of headline containing
+		    ;; DESTINATION.
+		    ((let ((h (org-element-lineage destination '(headline) t)))
+		       (and h
+			    (org-export-data
+			     (org-element-property :title destination) info))))
+		    ;; Eventually, just return "Top" to refer to the
+		    ;; beginning of the info file.
+		    (t "Top")))))))
      ((equal type "info")
       (let* ((info-path (split-string path "[:#]"))
 	     (info-manual (car info-path))
