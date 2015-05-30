@@ -990,12 +990,11 @@ INFO is a plist holding contextual information.  See
 		   (cond
 		    (desc)
 		    ((org-export-numbered-headline-p destination info)
-		     (org-export-data
-		      (org-element-property :title destination) info))
-		    (t
 		     (mapconcat
 		      #'number-to-string
-		      (org-export-get-headline-number destination info) ".")))))
+		      (org-export-get-headline-number destination info) "."))
+		    (t (org-export-data
+			(org-element-property :title destination) info)))))
 	  (otherwise
 	   (let ((topic
 		  (or desc
