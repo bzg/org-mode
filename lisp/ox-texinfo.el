@@ -1015,7 +1015,7 @@ INFO is a plist holding contextual information.  See
      ((equal type "info")
       (let* ((info-path (split-string path "[:#]"))
 	     (info-manual (car info-path))
-	     (info-node (or (cadr info-path) "top"))
+	     (info-node (or (cadr info-path) "Top"))
 	     (title (or desc "")))
 	(format "@ref{%s,%s,,%s,}" info-node title info-manual)))
      ((string= type "mailto")
