@@ -76,6 +76,7 @@
 (require 'calendar)
 (require 'find-func)
 (require 'format-spec)
+(autoload 'format-spec "format-spec")	; Silence "make single".
 
 (or (equal this-command 'eval-buffer)
     (condition-case nil
