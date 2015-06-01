@@ -19200,14 +19200,14 @@ share a good deal of logic."
    "latex" "needed to convert LaTeX fragments to images")
   (funcall
    (case (or type org-latex-create-formula-image-program)
-     ('dvipng
+     (dvipng
       (org-check-external-command
        "dvipng" "needed to convert LaTeX fragments to images")
-      'org-create-formula-image-with-dvipng)
-     ('imagemagick
+      #'org-create-formula-image-with-dvipng)
+     (imagemagick
       (org-check-external-command
        "convert" "you need to install imagemagick")
-      'org-create-formula-image-with-imagemagick)
+      #'org-create-formula-image-with-imagemagick)
      (t (error
          "Invalid value of `org-latex-create-formula-image-program'")))
    string tofile options buffer))
