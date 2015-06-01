@@ -12124,31 +12124,26 @@ this is used for the GOTO interface."
   (let ((thetable collection)
 	(org-completion-use-ido nil)	   ; does not work with ido.
 	(org-completion-use-iswitchb nil)) ; or iswitchb
-    (apply
-     'org-icompleting-read prompt
-     (lambda (string predicate &optional flag)
-       (let (rtn r f (l (length string)))
-	 (cond
-	  ((eq flag nil)
-	   ;; try completion
-	   (try-completion string thetable))
-	  ((eq flag t)
-	   ;; all-completions
-	   (setq rtn (all-completions string thetable predicate))
-	   (mapcar
-	    (lambda (x)
-	      (setq r (substring x l))
-	      (if (string-match " ([^)]*)$" x)
-		  (setq f (match-string 0 x))
-		(setq f ""))
-	      (if (string-match "/" r)
-		  (concat string (substring r 0 (match-end 0)) f)
-		x))
-	    rtn))
-	  ((eq flag 'lambda)
-	   ;; exact match?
-	   (assoc string thetable)))))
-     args)))
+    (apply #'org-icompleting-read
+	   prompt
+	   collection
+	   (lambda (string predicate &optional flag)
+	     (cond
+	      ((eq flag nil) (try-completion string thetable))
+	      ((eq flag t)
+	       (let ((l (length string)))
+		 (mapcar (lambda (x)
+			   (let ((r (substring x l))
+				 (f (if (string-match " ([^)]*)$" x)
+					(match-string 0 x)
+				      "")))
+			     (if (string-match "/" r)
+				 (concat string (substring r 0 (match-end 0)) f)
+			       x)))
+			 (all-completions string thetable predicate))))
+	      ;; Exact match?
+	      ((eq flag 'lambda) (assoc string thetable))))
+	   args)))
 
 ;;;; Dynamic blocks
 
