@@ -65,12 +65,13 @@ the value of the timer."
   :group 'org-time
   :type 'string)
 
-(defcustom org-timer-default-timer 0
-  "The default timer when a timer is set.
+(defcustom org-timer-default-timer "0"
+  "The default timer when a timer is set, in minutes or hh:mm:ss format.
 When 0, the user is prompted for a value."
   :group 'org-time
-  :version "24.1"
-  :type 'number)
+  :version "25.1"
+  :package-version '(Org . "8.3")
+  :type 'string)
 
 (defcustom org-timer-display 'mode-line
   "When a timer is running, org-mode can display it in the mode
@@ -402,14 +403,14 @@ VALUE can be `on', `off', or `pause'."
 
 ;;;###autoload
 (defun org-timer-set-timer (&optional opt)
-  "Prompt for a duration and set a timer.
+  "Prompt for a duration in minutes or hh:mm:ss and set a timer.
 
 If `org-timer-default-timer' is not zero, suggest this value as
 the default duration for the timer.  If a timer is already set,
 prompt the user if she wants to replace it.
 
 Called with a numeric prefix argument, use this numeric value as
-the duration of the timer.
+the duration of the timer in minutes.
 
 Called with a `C-u' prefix arguments, use `org-timer-default-timer'
 without prompting the user for a duration.
@@ -429,18 +430,19 @@ using three `C-u' prefix arguments."
 	 (minutes (or (and (not (equal opt '(64)))
 			   effort-minutes
 			   (number-to-string effort-minutes))
-		     (and (numberp opt) (number-to-string opt))
-		     (and (listp opt) (not (null opt))
-			  (number-to-string org-timer-default-timer))
-		     (read-from-minibuffer
-		      "How many minutes left? "
-		      (if (not (eq org-timer-default-timer 0))
-			  (number-to-string org-timer-default-timer))))))
+		      (and (numberp opt) (number-to-string opt))
+		      (and (consp opt) org-timer-default-timer)
+		      (and (stringp opt) opt)
+		      (read-from-minibuffer
+		       "How much time left? (minutes or h:mm:ss) "
+		       (and (not (string-equal org-timer-default-timer "0"))
+			    org-timer-default-timer)))))
+    (when (string-match "\\`[0-9]+\\'" minutes)
+      (setq minutes (concat minutes ":00")))
     (if (not (string-match "[0-9]+" minutes))
 	(org-timer-show-remaining-time)
-      (let* ((mins (string-to-number (match-string 0 minutes)))
-	     (secs (* mins 60))
-	     (hl (org-timer--get-timer-title)))
+      (let ((secs (org-timer-hms-to-secs (org-timer-fix-incomplete minutes)))
+	    (hl (org-timer--get-timer-title)))
 	(if (or (not org-timer-countdown-timer)
 		(equal opt '(16))
 		(y-or-n-p "Replace current timer? "))
