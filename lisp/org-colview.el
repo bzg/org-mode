@@ -1125,7 +1125,8 @@ display, or in the #+COLUMNS line of the current buffer."
     (org-trim rtn)))
 
 (defun org-columns-compile-format (fmt)
-  "Turn a column format string into an alist of specifications.
+  "Turn a column format string FMT into an alist of specifications.
+
 The alist has one entry for each column in the format.  The elements of
 that list are:
 property     the property
@@ -1135,7 +1136,9 @@ operator     the operator if any
 format       the output format for computed results, derived from operator
 printf       a printf format for computed values
 fun          the lisp function to compute summary values, derived from operator
-calc         function to get values from base elements"
+calc         function to get values from base elements
+
+This function updates `org-columns-current-fmt-compiled'."
   (let ((start 0) width prop title op op-match f printf fun calc)
     (setq org-columns-current-fmt-compiled nil)
     (while (string-match
