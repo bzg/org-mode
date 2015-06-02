@@ -691,7 +691,7 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	     (cache
 	      (org-map-entries
 	       (lambda ()
-		 (cons (org-current-line)
+		 (cons (point)
 		       (mapcar
 			(lambda (p)
 			  (cons p (org-entry-get nil p 'selective t)))
@@ -711,7 +711,7 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 			   truncate-lines))
 	  (setq truncate-lines t)
 	  (dolist (x cache)
-	    (org-goto-line (car x))
+	    (goto-char (car x))
 	    (org-columns-display-here (cdr x))))))))
 
 (eval-when-compile (defvar org-columns-time))
