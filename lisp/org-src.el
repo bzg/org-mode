@@ -519,9 +519,9 @@ Escaping happens when a line starts with \"*\", \"#+\", \",*\" or
 \",#+\" by appending a comma to it."
   (interactive "r")
   (save-excursion
-    (goto-char beg)
-    (while (re-search-forward "^[ \t]*,?\\(\\*\\|#\\+\\)" end t)
-      (replace-match ",\\1" nil nil nil 1))))
+    (goto-char end)
+    (while (re-search-backward "^[ \t]*,?\\(\\*\\|#\\+\\)" beg t)
+      (save-excursion (replace-match ",\\1" nil nil nil 1)))))
 
 (defun org-escape-code-in-string (s)
   "Escape lines in string S.
@@ -535,9 +535,9 @@ Un-escaping happens by removing the first comma on lines starting
 with \",*\", \",#+\", \",,*\" and \",,#+\"."
   (interactive "r")
   (save-excursion
-    (goto-char beg)
-    (while (re-search-forward "^[ \t]*,?\\(,\\)\\(?:\\*\\|#\\+\\)" end t)
-      (replace-match "" nil nil nil 1))))
+    (goto-char end)
+    (while (re-search-backward "^[ \t]*,?\\(,\\)\\(?:\\*\\|#\\+\\)" beg t)
+      (save-excursion (replace-match "" nil nil nil 1)))))
 
 (defun org-unescape-code-in-string (s)
   "Un-escape lines in string S.
