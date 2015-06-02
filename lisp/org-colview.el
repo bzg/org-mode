@@ -1357,60 +1357,73 @@ and tailing newline characters."
   (org-columns-remove-overlays)
   (move-marker org-columns-begin-marker (point))
   (let ((org-columns-time (time-to-number-of-days (current-time)))
-	cache maxwidths m p a d fmt)
-    (cond
-     ((and (boundp 'org-agenda-overriding-columns-format)
-	   org-agenda-overriding-columns-format)
-      (setq fmt org-agenda-overriding-columns-format))
-     ((setq m (org-get-at-bol 'org-hd-marker))
-      (setq fmt (or (org-entry-get m "COLUMNS" t)
-		    (with-current-buffer (marker-buffer m)
-		      org-columns-default-format))))
-     ((and (boundp 'org-columns-current-fmt)
-	   (local-variable-p 'org-columns-current-fmt)
-	   org-columns-current-fmt)
-      (setq fmt org-columns-current-fmt))
-     ((setq m (next-single-property-change (point-min) 'org-hd-marker))
-      (setq m (get-text-property m 'org-hd-marker))
-      (setq fmt (or (org-entry-get m "COLUMNS" t)
-		    (with-current-buffer (marker-buffer m)
-		      org-columns-default-format)))))
-    (setq fmt (or fmt org-columns-default-format))
+	(fmt
+	 (cond
+	  ((org-bound-and-true-p org-agenda-overriding-columns-format))
+	  ((let ((m (org-get-at-bol 'org-hd-marker)))
+	     (and m
+		  (or (org-entry-get m "COLUMNS" t)
+		      (with-current-buffer (marker-buffer m)
+			org-columns-default-format)))))
+	  ((and (local-variable-p 'org-columns-current-fmt)
+		org-columns-current-fmt))
+	  ((let ((m (next-single-property-change (point-min) 'org-hd-marker)))
+	     (and m
+		  (let ((m (get-text-property m 'org-hd-marker)))
+		    (or (org-entry-get m "COLUMNS" t)
+			(with-current-buffer (marker-buffer m)
+			  org-columns-default-format))))))
+	  (t org-columns-default-format))))
     (org-set-local 'org-columns-current-fmt fmt)
     (org-columns-compile-format fmt)
     (when org-agenda-columns-compute-summary-properties
       (org-agenda-colview-compute org-columns-current-fmt-compiled))
     (save-excursion
-      ;; Get and cache the properties
+      ;; Collect properties for each headline in current view.
       (goto-char (point-min))
-      (while (not (eobp))
-	(when (setq m (or (org-get-at-bol 'org-hd-marker)
-			  (org-get-at-bol 'org-marker)))
-	  (setq p (org-entry-properties m))
-
-	  (when (or (not (setq a (assoc-string org-effort-property p t)))
-		    (not (string-match "\\S-" (or (cdr a) ""))))
-	    ;; OK, the property is not defined.  Use appointment duration?
-	    (when (and org-agenda-columns-add-appointments-to-effort-sum
-		       (setq d (get-text-property (point) 'duration)))
-	      (setq d (org-minutes-to-clocksum-string d))
-	      (put-text-property 0 (length d) 'face 'org-warning d)
-	      (push (cons org-effort-property d) p)))
-	  (push (cons (org-current-line) p) cache))
-	(beginning-of-line 2))
-      (when cache
-	(setq maxwidths (org-columns-get-autowidth-alist fmt cache))
-	(org-set-local 'org-columns-current-maxwidths maxwidths)
-	(org-columns-display-here-title)
-	(when (org-set-local 'org-columns-flyspell-was-active
-			     (org-bound-and-true-p flyspell-mode))
-	  (flyspell-mode 0))
-	(mapc (lambda (x)
-		(org-goto-line (car x))
-		(org-columns-display-here (cdr x)))
-	      cache)
-	(when org-agenda-columns-show-summaries
-	  (org-agenda-colview-summarize cache))))))
+      (let (cache)
+	(let ((names (mapcar #'car org-columns-current-fmt-compiled)) m)
+	  (while (not (eobp))
+	    (when (setq m (or (org-get-at-bol 'org-hd-marker)
+			      (org-get-at-bol 'org-marker)))
+	      (push
+	       (cons
+		(line-beginning-position)
+		(org-with-point-at m
+		  (mapcar
+		   (lambda (name)
+		     (let ((value (org-entry-get (point) name 'selective t)))
+		       (cons
+			name
+			(if (and org-agenda-columns-add-appointments-to-effort-sum
+				 (not value)
+				 (eq (compare-strings name nil nil
+						      org-effort-property nil nil
+						      t)
+				     t)
+				 ;; Effort property is not defined.  Try
+				 ;; to use appointment duration.
+				 (get-text-property (point) 'duration))
+			    (org-propertize
+			     (org-minutes-to-clocksum-string
+			      (get-text-property (point) 'duration))
+			     'face 'org-warning)
+			  value))))
+		   names)))
+	       cache))
+	    (forward-line)))
+	(when cache
+	  (org-set-local 'org-columns-current-maxwidths
+			 (org-columns-get-autowidth-alist fmt cache))
+	  (org-columns-display-here-title)
+	  (when (org-set-local 'org-columns-flyspell-was-active
+			       (org-bound-and-true-p flyspell-mode))
+	    (flyspell-mode 0))
+	  (dolist (x cache)
+	    (goto-char (car x))
+	    (org-columns-display-here (cdr x)))
+	  (when org-agenda-columns-show-summaries
+	    (org-agenda-colview-summarize cache)))))))
 
 (defun org-agenda-colview-summarize (cache)
   "Summarize the summarizable columns in column view in the agenda.
