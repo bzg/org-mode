@@ -15827,13 +15827,13 @@ for inheritance when a \"nil\" value can supersede a non-nil
 value higher up the hierarchy."
   (org-with-point-at pom
     (cond
-     ((and inherit
-	   (or (not (eq inherit 'selective)) (org-property-inherit-p property)))
-      (org-entry-get-with-inheritance property literal-nil))
      ((member-ignore-case property (cons "CATEGORY" org-special-properties))
       ;; We need a special property.  Use `org-entry-properties' to
       ;; retrieve it, but specify the wanted property.
       (cdr (assoc-string property (org-entry-properties nil property))))
+     ((and inherit
+	   (or (not (eq inherit 'selective)) (org-property-inherit-p property)))
+      (org-entry-get-with-inheritance property literal-nil))
      (t
       (let ((range (org-get-property-block)))
 	(when range
