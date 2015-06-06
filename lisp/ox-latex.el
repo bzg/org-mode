@@ -703,7 +703,7 @@ When nil, no transformation is made."
 ;;;; Text markup
 
 (defcustom org-latex-text-markup-alist '((bold . "\\textbf{%s}")
-					 (code . verb)
+					 (code . protectedtexttt)
 					 (italic . "\\emph{%s}")
 					 (strike-through . "\\sout{%s}")
 					 (underline . "\\uline{%s}")
@@ -723,6 +723,8 @@ to typeset and try to protect special characters.
 If no association can be found for a given markup, text will be
 returned as-is."
   :group 'org-export-latex
+  :version "25.1"
+  :package-version '(Org . "8.3")
   :type 'alist
   :options '(bold code italic strike-through underline verbatim))
 
@@ -1208,44 +1210,39 @@ should not be used for floats.  See
 		    (org-latex--label element info))
 	    output)))
 
+(defun org-latex--protect-text (text)
+  "Protect special characters in string TEXT and return it."
+  (replace-regexp-in-string
+   "--\\|[\\{}$%&_#~^]"
+   (lambda (m)
+     (cond ((equal m "--") "-{}-")
+	   ((equal m "\\") "\\textbackslash{}")
+	   ((equal m "~") "\\textasciitilde{}")
+	   ((equal m "^") "\\textasciicircum{}")
+	   (t (concat "\\" m))))
+   text nil t))
+
 (defun org-latex--text-markup (text markup info)
   "Format TEXT depending on MARKUP text markup.
 INFO is a plist used as a communication channel.  See
 `org-latex-text-markup-alist' for details."
   (let ((fmt (cdr (assq markup (plist-get info :latex-text-markup-alist)))))
-    (cond
-     ;; No format string: Return raw text.
-     ((not fmt) text)
-     ;; Handle the `verb' special case: Find an appropriate separator
-     ;; and use "\\verb" command.
-     ((eq 'verb fmt)
-      (let ((separator (org-latex--find-verb-separator text)))
-	(concat "\\verb" separator
-		(replace-regexp-in-string "\n" " " text)
-		separator)))
-     ;; Handle the `protectedtexttt' special case: Protect some
-     ;; special chars and use "\texttt{%s}" format string.
-     ((eq 'protectedtexttt fmt)
-      (let ((start 0)
-	    (trans '(("\\" . "\\textbackslash{}")
-		     ("~" . "\\textasciitilde{}")
-		     ("^" . "\\textasciicircum{}")))
-	    (rtn "")
-	    char)
-	(while (string-match "[\\{}$%&_#~^]" text)
-	  (setq char (match-string 0 text))
-	  (if (> (match-beginning 0) 0)
-	      (setq rtn (concat rtn (substring text 0 (match-beginning 0)))))
-	  (setq text (substring text (1+ (match-beginning 0))))
-	  (setq char (or (cdr (assoc char trans)) (concat "\\" char))
-		rtn (concat rtn char)))
-	(setq text (concat rtn text)
-	      fmt "\\texttt{%s}")
-	(while (string-match "--" text)
-	  (setq text (replace-match "-{}-" t t text)))
-	(format fmt text)))
-     ;; Else use format string.
-     (t (format fmt text)))))
+    (case fmt
+      ;; No format string: Return raw text.
+      ((nil) text)
+      ;; Handle the `verb' special case: Find an appropriate separator
+      ;; and use "\\verb" command.
+      (verb
+       (let ((separator (org-latex--find-verb-separator text)))
+	 (concat "\\verb" separator
+		 (replace-regexp-in-string "\n" " " text)
+		 separator)))
+      ;; Handle the `protectedtexttt' special case: Protect some
+      ;; special chars and use "\texttt{%s}" format string.
+      (protectedtexttt
+       (format "\\texttt{%s}" (org-latex--protect-text text)))
+      ;; Else use format string.
+      (t (format fmt text)))))
 
 (defun org-latex--delayed-footnotes-definitions (element info)
   "Return footnotes definitions in ELEMENT as a string.
@@ -1731,11 +1728,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode an INLINE-SRC-BLOCK element from Org to LaTeX.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let* ((code (org-element-property :value inline-src-block))
-	 (separator (org-latex--find-verb-separator code)))
+  (let* ((code (org-element-property :value inline-src-block)))
     (case (plist-get info :latex-listings)
       ;; Do not use a special package: transcode it verbatim.
-      ((nil) (concat "\\verb" separator code separator))
+      ((nil) (format "\\texttt{%s}" (org-latex--protect-text code)))
       ;; Use minted package.
       (minted
        (let* ((org-lang (org-element-property :language inline-src-block))
