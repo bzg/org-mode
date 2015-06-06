@@ -10512,10 +10512,6 @@ Should be called like `completing-read'."
 			  (org-bound-and-true-p iswitchb-mode))
 		     #'org-iswitchb-completing-read)
 		    (t #'completing-read))
-	      (pop args)
-	      (if (org-some #'consp (car args))
-		  (mapcar #'car (pop args))
-		(pop args))
 	      args)))))
 
 (defun org-extract-attributes (s)
@@ -12126,7 +12122,6 @@ this is used for the GOTO interface."
 	(org-completion-use-iswitchb nil)) ; or iswitchb
     (apply #'org-icompleting-read
 	   prompt
-	   collection
 	   (lambda (string predicate &optional flag)
 	     (cond
 	      ((eq flag nil) (try-completion string thetable))
