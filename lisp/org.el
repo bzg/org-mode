@@ -13738,7 +13738,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	(setq lines nil))
       (when lines
 	(with-current-buffer (marker-buffer org-log-note-marker)
-	  (save-excursion
+	  (org-with-wide-buffer
 	    (goto-char org-log-note-marker)
 	    (move-marker org-log-note-marker nil)
 	    ;; Make sure point is at the beginning of an empty line.
