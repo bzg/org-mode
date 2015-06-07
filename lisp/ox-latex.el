@@ -1728,7 +1728,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode an INLINE-SRC-BLOCK element from Org to LaTeX.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let* ((code (org-element-property :value inline-src-block)))
+  (let* ((code (org-element-property :value inline-src-block))
+	 (separator (org-latex--find-verb-separator code)))
     (case (plist-get info :latex-listings)
       ;; Do not use a special package: transcode it verbatim.
       ((nil) (format "\\texttt{%s}" (org-latex--protect-text code)))
