@@ -94,30 +94,37 @@
 (defvar org-ts-regexp-both)
 (defvar org-drawer-regexp)
 
-(declare-function outline-invisible-p "outline" (&optional pos))
-(declare-function outline-flag-region "outline" (from to flag))
-(declare-function outline-next-heading "outline" ())
-(declare-function outline-previous-heading "outline" ())
-
-(declare-function org-at-heading-p "org" (&optional ignored))
-(declare-function org-before-first-heading-p "org" ())
+(declare-function org-at-heading-p "org" (&optional invisible-ok))
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
+(declare-function org-before-first-heading-p "org" ())
 (declare-function org-combine-plists "org" (&rest plists))
 (declare-function org-count "org" (cl-item cl-seq))
 (declare-function org-current-level "org" ())
+(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-context "org-element" (&optional element))
+(declare-function org-element-lineage "org-element"
+		  (blob &optional types with-self))
+(declare-function org-element-property "org-element" (property element))
+(declare-function org-element-type "org-element" (element))
+(declare-function org-element-update-syntax "org-element" ())
 (declare-function org-entry-get "org"
 		  (pom property &optional inherit literal-nil))
+(declare-function org-export-string-as "ox"
+		  (string backend &optional body-only ext-plist))
 (declare-function org-fix-tags-on-the-fly "org" ())
 (declare-function org-get-indentation "org" (&optional line))
 (declare-function org-icompleting-read "org" (&rest args))
 (declare-function org-in-block-p "org" (names))
 (declare-function org-in-regexp "org" (re &optional nlines visually))
+(declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
+(declare-function org-inlinetask-goto-end "org-inlinetask" ())
+(declare-function org-inlinetask-in-task-p "org-inlinetask" ())
+(declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 (declare-function org-level-increment "org" ())
 (declare-function org-narrow-to-subtree "org" ())
-(declare-function org-at-heading-p "org" (&optional invisible-ok))
 (declare-function org-previous-line-empty-p "org" ())
-(declare-function org-remove-if "org" (predicate seq))
 (declare-function org-reduced-level "org" (L))
+(declare-function org-remove-if "org" (predicate seq))
 (declare-function org-show-subtree "org" ())
 (declare-function org-sort-remove-invisible "org" (S))
 (declare-function org-time-string-to-seconds "org" (s))
@@ -125,16 +132,10 @@
 (declare-function org-timer-item "org-timer" (&optional arg))
 (declare-function org-trim "org" (s))
 (declare-function org-uniquify "org" (list))
-
-(declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
-(declare-function org-inlinetask-goto-end "org-inlinetask" ())
-(declare-function org-inlinetask-in-task-p "org-inlinetask" ())
-(declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
-
-(declare-function org-export-string-as "ox"
-		  (string backend &optional body-only ext-plist))
-
-(declare-function org-element-update-syntax "org-element" ())
+(declare-function outline-flag-region "outline" (from to flag))
+(declare-function outline-invisible-p "outline" (&optional pos))
+(declare-function outline-next-heading "outline" ())
+(declare-function outline-previous-heading "outline" ())
 
 
 
