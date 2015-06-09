@@ -1333,7 +1333,8 @@ CONTENTS is the contents of the element."
 		  (goto-char origin)))))
 	   ;; At some text line.  Check if it ends any previous item.
 	   (t
-	    (let ((ind (progn (skip-chars-forward " \t") (current-column))))
+	    (let ((ind (save-excursion (skip-chars-forward " \t")
+				       (current-column))))
 	      (when (<= ind top-ind)
 		(skip-chars-backward " \r\t\n")
 		(forward-line))
@@ -1342,10 +1343,10 @@ CONTENTS is the contents of the element."
 		  (setcar (nthcdr 6 item) (line-beginning-position))
 		  (push item struct)
 		  (unless items
-		    (throw 'exit (sort struct 'car-less-than-car))))))
+		    (throw 'exit (sort struct #'car-less-than-car))))))
 	    ;; Skip blocks (any type) and drawers contents.
 	    (cond
-	     ((and (looking-at "#\\+BEGIN\\(:\\|_\\S-+\\)")
+	     ((and (looking-at "[ \t]*#\\+BEGIN\\(:\\|_\\S-+\\)")
 		   (re-search-forward
 		    (format "^[ \t]*#\\+END%s[ \t]*$" (match-string 1))
 		    limit t)))
