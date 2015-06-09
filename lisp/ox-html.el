@@ -1701,7 +1701,6 @@ INFO is a plist used as a communication channel."
 					     'mime-charset))
 		     "iso-8859-1")))
     (concat
-     (format "<title>%s</title>\n" title)
      (when (plist-get info :time-stamp-file)
        (format-time-string
 	(concat "<!-- "
@@ -1714,6 +1713,20 @@ INFO is a plist used as a communication channel."
 	 "meta" " http-equiv=\"Content-Type\" content=\"text/html;charset=%s\""
 	 info))
       charset) "\n"
+     (let ((viewport-options
+	    (org-remove-if-not (lambda (cell) (org-string-nw-p (cadr cell)))
+			       (plist-get info :html-viewport))))
+       (and viewport-options
+	    (concat
+	     (org-html-close-tag
+	      "meta"
+	      (format " name=\"viewport\" content=\"%s\""
+		      (mapconcat
+		       (lambda (elm) (format "%s=%s" (car elm) (cadr elm)))
+		       viewport-options ", "))
+	      info)
+	     "\n")))
+     (format "<title>%s</title>\n" title)
      (org-html-close-tag "meta" " name=\"generator\" content=\"Org-mode\"" info)
      "\n"
      (and (org-string-nw-p author)
@@ -1736,20 +1749,7 @@ INFO is a plist used as a communication channel."
 			       (format " name=\"keywords\" content=\"%s\""
 				       (funcall protect-string keywords))
 			       info)
-	   "\n"))
-     (let ((viewport-options
-	    (org-remove-if-not (lambda (cell) (org-string-nw-p (cadr cell)))
-			       (plist-get info :html-viewport))))
-       (and viewport-options
-	    (concat
-	     (org-html-close-tag
-	      "meta"
-	      (format " name=\"viewport\" content=\"%s\""
-		      (mapconcat
-		       (lambda (elm) (format "%s=%s" (car elm) (cadr elm)))
-		       viewport-options ", "))
-	      info)
-	     "\n"))))))
+	   "\n")))))
 
 (defun org-html--build-head (info)
   "Return information for the <head>..</head> of the HTML output.
