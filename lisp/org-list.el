@@ -2460,130 +2460,122 @@ in subtree, ignoring drawers."
 
 (defun org-update-checkbox-count (&optional all)
   "Update the checkbox statistics in the current section.
+
 This will find all statistic cookies like [57%] and [6/12] and
 update them with the current numbers.
 
 With optional prefix argument ALL, do this for the whole buffer."
   (interactive "P")
-  (save-excursion
-    (let ((cookie-re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
-	  (box-re "^[ \t]*\\([-+*]\\|\\([0-9]+\\|[A-Za-z]\\)[.)]\\)[ \t]+\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Za-z]\\)\\][ \t]*\\)?\\(\\[[- X]\\]\\)")
+  (org-with-wide-buffer
+   (let* ((cookie-re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
+	  (box-re "^[ \t]*\\([-+*]\\|\\([0-9]+\\|[A-Za-z]\\)[.)]\\)[ \t]+\
+\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Za-z]\\)\\][ \t]*\\)?\\(\\[[- X]\\]\\)")
 	  (recursivep
 	   (or (not org-checkbox-hierarchical-statistics)
 	       (string-match "\\<recursive\\>"
 			     (or (org-entry-get nil "COOKIE_DATA") ""))))
-	  (bounds (if all
-		      (cons (point-min) (point-max))
-		    (cons (or (ignore-errors (org-back-to-heading t) (point))
-			      (point-min))
-			  (save-excursion (outline-next-heading) (point)))))
+	  (within-inlinetask (and (not all)
+				  (featurep 'org-inlinetask)
+				  (org-inlinetask-in-task-p)))
+	  (end (cond (all (point-max))
+		     (within-inlinetask
+		      (save-excursion (outline-next-heading) (point)))
+		     (t (save-excursion
+			  (org-with-limited-levels (outline-next-heading))
+			  (point)))))
 	  (count-boxes
-	   (function
-	    ;; Return number of checked boxes and boxes of all types
-	    ;; in all structures in STRUCTS.  If RECURSIVEP is
-	    ;; non-nil, also count boxes in sub-lists.  If ITEM is
-	    ;; nil, count across the whole structure, else count only
-	    ;; across subtree whose ancestor is ITEM.
-	    (lambda (item structs recursivep)
-	      (let ((c-on 0) (c-all 0))
-		(mapc
-		 (lambda (s)
-		   (let* ((pre (org-list-prevs-alist s))
-			  (par (org-list-parents-alist s))
-			  (items
-			   (cond
-			    ((and recursivep item) (org-list-get-subtree item s))
-			    (recursivep (mapcar #'car s))
-			    (item (org-list-get-children item s par))
-			    (t (org-list-get-all-items
-				(org-list-get-top-point s) s pre))))
-			  (cookies (delq nil (mapcar
-					      (lambda (e)
-						(org-list-get-checkbox e s))
-					      items))))
-		     (setq c-all (+ (length cookies) c-all)
-			   c-on (+ (org-count "[X]" cookies) c-on))))
-		 structs)
-		(cons c-on c-all)))))
-	  (backup-end 1)
-	  cookies-list structs-bak)
-      (goto-char (car bounds))
-      ;; 1. Build an alist for each cookie found within BOUNDS.  The
-      ;;    key will be position at beginning of cookie and values
-      ;;    ending position, format of cookie, and a cell whose car is
-      ;;    number of checked boxes to report, and cdr total number of
-      ;;    boxes.
-      (while (re-search-forward cookie-re (cdr bounds) t)
-	(catch 'skip
-	  (save-excursion
-	    (push
-	     (list
-	      (match-beginning 1)	; cookie start
-	      (match-end 1)		; cookie end
-	      (match-string 2)		; percent?
-	      (cond			; boxes count
-	       ;; Cookie is at an heading, but specifically for todo,
-	       ;; not for checkboxes: skip it.
-	       ((and (org-at-heading-p)
-		     (string-match "\\<todo\\>"
-				   (downcase
-				    (or (org-entry-get nil "COOKIE_DATA") ""))))
-		(throw 'skip nil))
-	       ;; Cookie is at an heading, but all lists before next
-	       ;; heading already have been read.  Use data collected
-	       ;; in STRUCTS-BAK.  This should only happen when
-	       ;; heading has more than one cookie on it.
-	       ((and (org-at-heading-p)
-		     (<= (save-excursion (outline-next-heading) (point))
-			 backup-end))
-		(funcall count-boxes nil structs-bak recursivep))
-	       ;; Cookie is at a fresh heading.  Grab structure of
-	       ;; every list containing a checkbox between point and
-	       ;; next headline, and save them in STRUCTS-BAK.
-	       ((org-at-heading-p)
-		(setq backup-end (save-excursion
-				   (outline-next-heading) (point))
-		      structs-bak nil)
-		(while (org-list-search-forward box-re backup-end 'move)
-		  (let* ((struct (org-list-struct))
-			 (bottom (org-list-get-bottom-point struct)))
-		    (push struct structs-bak)
-		    (goto-char bottom)))
-		(funcall count-boxes nil structs-bak recursivep))
-	       ;; Cookie is at an item, and we already have list
-	       ;; structure stored in STRUCTS-BAK.
-	       ((and (org-at-item-p)
-		     (< (point-at-bol) backup-end)
-		     ;; Only lists in no special context are stored.
-		     (not (nth 2 (org-list-context))))
-		(funcall count-boxes (point-at-bol) structs-bak recursivep))
-	       ;; Cookie is at an item, but we need to compute list
-	       ;; structure.
-	       ((org-at-item-p)
-		(let ((struct (org-list-struct)))
-		  (setq backup-end (org-list-get-bottom-point struct)
-			structs-bak (list struct)))
-		(funcall count-boxes (point-at-bol) structs-bak recursivep))
-	       ;; Else, cookie found is at a wrong place.  Skip it.
-	       (t (throw 'skip nil))))
-	     cookies-list))))
-      ;; 2. Apply alist to buffer, in reverse order so positions stay
-      ;;    unchanged after cookie modifications.
-      (mapc (lambda (cookie)
-	      (let* ((beg (car cookie))
-		     (end (nth 1 cookie))
-		     (percentp (nth 2 cookie))
-		     (checked (car (nth 3 cookie)))
-		     (total (cdr (nth 3 cookie)))
-		     (new (if percentp
-			      (format "[%d%%]" (/ (* 100 checked)
-						  (max 1 total)))
-			    (format "[%d/%d]" checked total))))
-		(goto-char beg)
-		(insert new)
-		(delete-region (point) (+ (point) (- end beg)))
-		(when org-auto-align-tags (org-fix-tags-on-the-fly))))
+	   (lambda (item structs recursivep)
+	     ;; Return number of checked boxes and boxes of all types
+	     ;; in all structures in STRUCTS.  If RECURSIVEP is
+	     ;; non-nil, also count boxes in sub-lists.  If ITEM is
+	     ;; nil, count across the whole structure, else count only
+	     ;; across subtree whose ancestor is ITEM.
+	     (let ((c-on 0) (c-all 0))
+	       (dolist (s structs (list c-on c-all))
+		 (let* ((pre (org-list-prevs-alist s))
+			(par (org-list-parents-alist s))
+			(items
+			 (cond
+			  ((and recursivep item) (org-list-get-subtree item s))
+			  (recursivep (mapcar #'car s))
+			  (item (org-list-get-children item s par))
+			  (t (org-list-get-all-items
+			      (org-list-get-top-point s) s pre))))
+			(cookies (delq nil (mapcar
+					    (lambda (e)
+					      (org-list-get-checkbox e s))
+					    items))))
+		   (incf c-all (length cookies))
+		   (incf c-on (org-count "[X]" cookies)))))))
+	  cookies-list cache)
+     ;; Move to start.
+     (cond (all (goto-char (point-min)))
+	   (within-inlinetask (org-back-to-heading t))
+	   (t (org-with-limited-levels (outline-previous-heading))))
+     ;; Build an alist for each cookie found.  The key is the position
+     ;; at beginning of cookie and values ending position, format of
+     ;; cookie, number of checked boxes to report and total number of
+     ;; boxes.
+     (while (re-search-forward cookie-re end t)
+       (let ((context (save-excursion (backward-char)
+				      (save-match-data (org-element-context)))))
+	 (when (eq (org-element-type context) 'statistics-cookie)
+	   (push
+	    (append
+	     (list (match-beginning 1) (match-end 1) (match-end 2))
+	     (let* ((container
+		     (org-element-lineage
+		      context
+		      '(drawer center-block dynamic-block inlinetask plain-list
+			       quote-block special-block verse-block)))
+		    (beg (if container (org-element-property :begin container)
+			   (save-excursion
+			     (org-with-limited-levels (outline-previous-heading))
+			     (point)))))
+	       (or (cdr (assq beg cache))
+		   (save-excursion
+		     (goto-char beg)
+		     (let ((end
+			    (if container (org-element-property :end container)
+			      (save-excursion
+				(org-with-limited-levels (outline-next-heading))
+				(point))))
+			   structs)
+		       (while (re-search-forward box-re end t)
+			 (let ((element (org-element-at-point)))
+			   (when (eq (org-element-type element) 'item)
+			     (push (org-element-property :structure element)
+				   structs)
+			     (goto-char (org-element-property
+					 :end
+					 (org-element-property :parent
+							       element))))))
+		       ;; Cache count for cookies applying to the same
+		       ;; area.  Then return it.
+		       (let ((count
+			      (funcall count-boxes
+				       (and (eq (org-element-type container)
+						'plain-list)
+					    (org-element-property
+					     :contents-begin container))
+				       structs
+				       recursivep)))
+			 (push (cons beg count) cache)
+			 count))))))
 	    cookies-list))))
+     ;; Apply alist to buffer.
+     (dolist (cookie cookies-list)
+       (let* ((beg (car cookie))
+	      (end (nth 1 cookie))
+	      (percent (nth 2 cookie))
+	      (checked (nth 3 cookie))
+	      (total (nth 4 cookie)))
+	 (goto-char beg)
+	 (insert
+	  (if percent (format "[%d%%]" (/ (* 100 checked) (max 1 total)))
+	    (format "[%d/%d]" checked total)))
+	 (delete-region (point) (+ (point) (- end beg)))
+	 (when org-auto-align-tags (org-fix-tags-on-the-fly)))))))
 
 (defun org-get-checkbox-statistics-face ()
   "Select the face for checkbox statistics.
