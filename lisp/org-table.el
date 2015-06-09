@@ -2790,15 +2790,19 @@ not overwrite the stored one."
 		     (string-match (regexp-quote form) formrpl)))
 	      (setq form (replace-match formrpl t t form))
 	    (user-error "Spreadsheet error: invalid reference \"%s\"" form)))
-	;; Insert simple ranges
-	(while (string-match "\\$\\([0-9]+\\)\\.\\.\\$\\([0-9]+\\)"  form)
+	;; Insert simple ranges, i.e. included in the current row.
+	(while (string-match
+		"\\$\\(\\([-+]\\)?[0-9]+\\)\\.\\.\\$\\(\\([-+]\\)?[0-9]+\\)"
+		form)
 	  (setq form
 		(replace-match
 		 (save-match-data
 		   (org-table-make-reference
-		    (org-sublist
-		     fields (string-to-number (match-string 1 form))
-		     (string-to-number (match-string 2 form)))
+		    (org-sublist fields
+				 (+ (if (match-end 2) n0 0)
+				    (string-to-number (match-string 1 form)))
+				 (+ (if (match-end 4) n0 0)
+				    (string-to-number (match-string 3 form))))
 		    keep-empty numbers lispp))
 		 t t form)))
 	(setq form0 form)
