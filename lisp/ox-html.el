@@ -2801,7 +2801,6 @@ images, set it to:
 
 (defun org-html-link (link desc info)
   "Transcode a LINK object from Org to HTML.
-
 DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
@@ -2908,7 +2907,8 @@ INFO is a plist holding contextual information.  See
 			(org-element-property :raw-link link) info))))
 	  ;; Link points to a headline.
 	  (headline
-	   (let ((href (org-export-get-reference destination info))
+	   (let ((href (or (org-element-property :CUSTOM_ID destination)
+			   (org-export-get-reference destination info)))
 		 ;; What description to use?
 		 (desc
 		  ;; Case 1: Headline is numbered and LINK has no
