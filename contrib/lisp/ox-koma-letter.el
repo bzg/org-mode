@@ -616,33 +616,36 @@ holding export options."
    ;; Date.
    (format "\\date{%s}\n" (org-export-data (org-export-get-date info) info))
    ;; Hyperref, document start, and subject and title.
-   (let ((with-subject (plist-get info :with-subject)))
-     (when (and with-subject (plist-get info :with-title))
-       (concat
-	(unless (eq with-subject t)
-	  (format "\\KOMAoption{subject}{%s}\n"
-		  (if (symbolp with-subject) with-subject
-		    (mapconcat #'symbol-name with-subject ","))))
-	(let* ((title-as-subject (plist-get info :with-title-as-subject))
-	       (subject* (org-string-nw-p
-			  (org-export-data (plist-get info :subject) info)))
-	       (title* (and (plist-get info :with-title)
-			    (org-string-nw-p
-			     (org-export-data (plist-get info :title) info))))
-	       (subject (if title-as-subject (or subject* title*) subject*))
-	       (title (if title-as-subject (and subject* title*) title*))
-	       (hyperref-template (plist-get info :latex-hyperref-template))
-	       (spec (append (list (cons ?t (or title subject "")))
-			     (org-latex--format-spec info))))
-	  (concat
-	   ;; Hyperref.
-	   (format-spec hyperref-template spec)
-	   ;; Document start.
-	   "\\begin{document}\n\n"
-	   ;; Subject and title.
-	   (when subject (format "\\setkomavar{subject}{%s}\n" subject))
-	   (when title (format "\\setkomavar{title}{%s}\n" title))
-	   (when (or (org-string-nw-p title) (org-string-nw-p subject)) "\n"))))))
+   (let* ((with-subject (plist-get info :with-subject))
+	  (title-as-subject (and with-subject
+				 (plist-get info :with-title-as-subject)))
+	  (subject* (org-string-nw-p
+		     (org-export-data (plist-get info :subject) info)))
+	  (title* (and (plist-get info :with-title)
+		       (org-string-nw-p
+			(org-export-data (plist-get info :title) info))))
+	  (subject (cond ((not with-subject) nil)
+			 (title-as-subject (or subject* title*))
+			 (t subject*)))
+	  (title (cond ((not with-title) nil)
+		       (title-as-subject (and subject* title*))
+		       (t title*)))
+	  (hyperref-template (plist-get info :latex-hyperref-template))
+	  (spec (append (list (cons ?t (or title subject "")))
+			(org-latex--format-spec info))))
+     (concat
+      (when (and with-subject (not (eq with-subject t)))
+	(format "\\KOMAoption{subject}{%s}\n"
+		(if (symbolp with-subject) with-subject
+		  (mapconcat #'symbol-name with-subject ","))))
+      ;; Hyperref.
+      (format-spec hyperref-template spec)
+      ;; Document start.
+      "\\begin{document}\n\n"
+      ;; Subject and title.
+      (when subject (format "\\setkomavar{subject}{%s}\n" subject))
+      (when title (format "\\setkomavar{title}{%s}\n" title))
+      (when (or (org-string-nw-p title) (org-string-nw-p subject)) "\n")))
    ;; Letter start.
    (format "\\begin{letter}{%%\n%s}\n\n"
 	   (org-koma-letter--determine-to-and-from info 'to))
