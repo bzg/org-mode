@@ -352,12 +352,9 @@ A headline is only used if #+OPENING is not set.  See also
   :type 'boolean)
 
 (defcustom org-koma-letter-prefer-subject nil
-  "Non-nil means title should be interpret as subject if subject is missing.
+  "Non-nil means title should be interpreted as subject if subject is missing.
 This option can also be set with the OPTIONS keyword,
-e.g. \"title-subject:t\".
-
-This may be useful for older documents where the SUBJECT keyword
-was not present."
+e.g. \"title-subject:t\"."
     :group 'org-export-koma-letter
     :type 'boolean)
 
