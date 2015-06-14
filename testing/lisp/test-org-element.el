@@ -3586,7 +3586,21 @@ Text
 	 (let ((org-element-use-cache t))
 	   (org-element-at-point)
 	   (insert "+:")
-	   (org-element-type (org-element-at-point)))))))
+	   (org-element-type (org-element-at-point))))))
+  ;; Properly handle elements not altered by modifications but whose
+  ;; parents were removed from cache.
+  (should
+   (org-test-with-temp-text
+       "Paragraph\n\n\n\n#+begin_center\n<point>contents\n#+end_center"
+     (let ((org-element-use-cache t)
+	   (parent-end (point-max)))
+       (org-element-at-point)
+       (save-excursion (search-backward "Paragraph")
+		       (forward-line 2)
+		       (insert "\n  "))
+       (eq (org-element-property
+	    :end (org-element-property :parent (org-element-at-point)))
+	   (+ parent-end 3))))))
 
 
 (provide 'test-org-element)

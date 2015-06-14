@@ -4688,7 +4688,7 @@ This cache is used in `org-element-context'.")
 
 A request is a vector with the following pattern:
 
- \[NEXT BEG END OFFSET OUTREACH PARENT PHASE]
+ \[NEXT BEG END OFFSET PARENT PHASE]
 
 Processing a synchronization request consists of three phases:
 
@@ -4699,7 +4699,7 @@ Processing a synchronization request consists of three phases:
 During phase 0, NEXT is the key of the first element to be
 removed, BEG and END is buffer position delimiting the
 modifications.  Elements starting between them (inclusive) are
-removed and so are those contained within OUTREACH.  PARENT, when
+removed.  So are elements whose parent is removed.  PARENT, when
 non-nil, is the parent of the first element to be removed.
 
 During phase 1, NEXT is the key of the next known element in
@@ -5041,7 +5041,7 @@ updated before current modification are actually submitted."
 	  (clrhash org-element--cache-sync-keys))))))
 
 (defun org-element--cache-process-request
-  (request next threshold time-limit future-change)
+    (request next threshold time-limit future-change)
   "Process synchronization REQUEST for all entries before NEXT.
 
 REQUEST is a vector, built by `org-element--cache-submit-request'.
@@ -5061,54 +5061,61 @@ not registered yet in the cache are going to happen.  See
 Throw `interrupt' if the process stops before completing the
 request."
   (catch 'quit
-    (when (= (aref request 6) 0)
+    (when (= (aref request 5) 0)
       ;; Phase 0.
       ;;
       ;; Delete all elements starting after BEG, but not after buffer
-      ;; position END or past element with key NEXT.
+      ;; position END or past element with key NEXT.  Also delete
+      ;; elements contained within a previously removed element
+      ;; (stored in `last-container').
       ;;
       ;; At each iteration, we start again at tree root since
       ;; a deletion modifies structure of the balanced tree.
       (catch 'end-phase
-        (let ((beg (aref request 0))
-              (end (aref request 2))
-	      (outreach (aref request 4)))
-          (while t
-            (when (org-element--cache-interrupt-p time-limit)
-	      (throw 'interrupt nil))
-            ;; Find first element in cache with key BEG or after it.
-            (let ((node (org-element--cache-root)) data data-key)
-              (while node
-                (let* ((element (avl-tree--node-data node))
-                       (key (org-element--cache-key element)))
-                  (cond
-                   ((org-element--cache-key-less-p key beg)
-                    (setq node (avl-tree--node-right node)))
-                   ((org-element--cache-key-less-p beg key)
-                    (setq data element
-                          data-key key
-                          node (avl-tree--node-left node)))
-                   (t (setq data element
-                            data-key key
-                            node nil)))))
-	      (if data
-		  (let ((pos (org-element-property :begin data)))
-		    (if (if (or (not next)
-				(org-element--cache-key-less-p data-key next))
-			    (<= pos end)
-			  (let ((up data))
-			    (while (and up (not (eq up outreach)))
-			      (setq up (org-element-property :parent up)))
-			    up))
-			(org-element--cache-remove data)
-		      (aset request 0 data-key)
-		      (aset request 1 pos)
-		      (aset request 6 1)
-		      (throw 'end-phase nil)))
-		;; No element starting after modifications left in
-		;; cache: further processing is futile.
-		(throw 'quit t)))))))
-    (when (= (aref request 6) 1)
+        (while t
+	  (when (org-element--cache-interrupt-p time-limit)
+	    (throw 'interrupt nil))
+	  ;; Find first element in cache with key BEG or after it.
+	  (let ((beg (aref request 0))
+		(end (aref request 2))
+		(node (org-element--cache-root))
+		data data-key last-container)
+	    (while node
+	      (let* ((element (avl-tree--node-data node))
+		     (key (org-element--cache-key element)))
+		(cond
+		 ((org-element--cache-key-less-p key beg)
+		  (setq node (avl-tree--node-right node)))
+		 ((org-element--cache-key-less-p beg key)
+		  (setq data element
+			data-key key
+			node (avl-tree--node-left node)))
+		 (t (setq data element
+			  data-key key
+			  node nil)))))
+	    (if data
+		(let ((pos (org-element-property :begin data)))
+		  (if (if (or (not next)
+			      (org-element--cache-key-less-p data-key next))
+			  (<= pos end)
+			(and last-container
+			     (let ((up data))
+			       (while (and up (not (eq up last-container)))
+				 (setq up (org-element-property :parent up)))
+			       up)))
+		      (progn (when (and (not last-container)
+					(> (org-element-property :end data)
+					   end))
+			       (setq last-container data))
+			     (org-element--cache-remove data))
+		    (aset request 0 data-key)
+		    (aset request 1 pos)
+		    (aset request 5 1)
+		    (throw 'end-phase nil)))
+	      ;; No element starting after modifications left in
+	      ;; cache: further processing is futile.
+	      (throw 'quit t))))))
+    (when (= (aref request 5) 1)
       ;; Phase 1.
       ;;
       ;; Phase 0 left a hole in the cache.  Some elements after it
@@ -5142,7 +5149,7 @@ request."
 	  (let ((next-request (nth 1 org-element--cache-sync-requests)))
 	    (aset next-request 0 key)
 	    (aset next-request 1 (aref request 1))
-	    (aset next-request 6 1))
+	    (aset next-request 5 1))
 	  (throw 'quit t)))
       ;; Next element will start at its beginning position plus
       ;; offset, since it hasn't been shifted yet.  Therefore, LIMIT
@@ -5154,11 +5161,11 @@ request."
 	       ;; Changes are going to happen around this element and
 	       ;; they will trigger another phase 1 request.  Skip the
 	       ;; current one.
-	       (aset request 6 2))
+	       (aset request 5 2))
 	      (t
 	       (let ((parent (org-element--parse-to limit t time-limit)))
-		 (aset request 5 parent)
-		 (aset request 6 2))))))
+		 (aset request 4 parent)
+		 (aset request 5 2))))))
     ;; Phase 2.
     ;;
     ;; Shift all elements starting from key START, but before NEXT, by
@@ -5172,7 +5179,7 @@ request."
     ;; request is updated.
     (let ((start (aref request 0))
 	  (offset (aref request 3))
-	  (parent (aref request 5))
+	  (parent (aref request 4))
 	  (node (org-element--cache-root))
 	  (stack (list nil))
 	  (leftp t)
@@ -5192,7 +5199,7 @@ request."
 	      ;; Handle interruption request.  Update current request.
 	      (when (or exit-flag (org-element--cache-interrupt-p time-limit))
 		(aset request 0 key)
-		(aset request 5 parent)
+		(aset request 4 parent)
 		(throw 'interrupt nil))
 	      ;; Shift element.
 	      (unless (zerop offset)
@@ -5493,7 +5500,7 @@ change, as an integer."
   (let ((next (car org-element--cache-sync-requests))
 	delete-to delete-from)
     (if (and next
-	     (zerop (aref next 6))
+	     (zerop (aref next 5))
 	     (> (setq delete-to (+ (aref next 2) (aref next 3))) end)
 	     (<= (setq delete-from (aref next 1)) end))
 	;; Current changes can be merged with first sync request: we
@@ -5504,7 +5511,7 @@ change, as an integer."
 	  ;; boundaries of robust parents, if any.  Otherwise, find
 	  ;; first element to remove and update request accordingly.
 	  (if (> beg delete-from)
-	      (let ((up (aref next 5)))
+	      (let ((up (aref next 4)))
 		(while up
 		  (org-element--cache-shift-positions
 		   up offset '(:contents-end :end))
@@ -5513,7 +5520,7 @@ change, as an integer."
 	      (when first
 		(aset next 0 (org-element--cache-key first))
 		(aset next 1 (org-element-property :begin first))
-		(aset next 5 (org-element-property :parent first))))))
+		(aset next 4 (org-element-property :parent first))))))
       ;; Ensure cache is correct up to END.  Also make sure that NEXT,
       ;; if any, is no longer a 0-phase request, thus ensuring that
       ;; phases are properly ordered.  We need to provide OFFSET as
@@ -5529,21 +5536,13 @@ change, as an integer."
 		     ;; When changes happen before the first known
 		     ;; element, re-parent and shift the rest of the
 		     ;; cache.
-		     ((> beg end) (vector key beg nil offset nil nil 1))
+		     ((> beg end) (vector key beg nil offset nil 1))
 		     ;; Otherwise, we find the first non robust
 		     ;; element containing END.  All elements between
 		     ;; FIRST and this one are to be removed.
-		     ;;
-		     ;; Among them, some could be located outside the
-		     ;; synchronized part of the cache, in which case
-		     ;; comparing buffer positions to find them is
-		     ;; useless.  Instead, we store the element
-		     ;; containing them in the request itself.  All
-		     ;; its children will be removed.
 		     ((let ((first-end (org-element-property :end first)))
 			(and (> first-end end)
-			     (vector key beg first-end offset first
-				     (org-element-property :parent first) 0))))
+			     (vector key beg first-end offset first 0))))
 		     (t
 		      (let* ((element (org-element--cache-find end))
 			     (end (org-element-property :end element))
@@ -5552,8 +5551,7 @@ change, as an integer."
 				    (>= (org-element-property :begin up) beg))
 			  (setq end (org-element-property :end up)
 				element up))
-			(vector key beg end offset element
-				(org-element-property :parent first) 0)))))
+			(vector key beg end offset element 0)))))
 		  org-element--cache-sync-requests)
 	  ;; No element to remove.  No need to re-parent either.
 	  ;; Simply shift additional elements, if any, by OFFSET.
