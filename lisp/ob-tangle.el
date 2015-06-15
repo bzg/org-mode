@@ -385,47 +385,35 @@ that the appropriate major-mode is set.  SPEC has the form:
        (org-fill-template org-babel-tangle-comment-format-end link-data)))))
 
 (defun org-babel-tangle-collect-blocks (&optional language tangle-file)
-  "Collect source blocks in the current Org-mode file.
+  "Collect source blocks in the current Org file.
 Return an association list of source-code block specifications of
 the form used by `org-babel-spec-to-string' grouped by language.
 Optional argument LANGUAGE can be used to limit the collected
 source code blocks by language.  Optional argument TANGLE-FILE
 can be used to limit the collected code blocks by target file."
-  (let ((block-counter 1) (current-heading "") blocks by-lang)
+  (let ((counter 0) last-heading-pos blocks)
     (org-babel-map-src-blocks (buffer-file-name)
-      ((lambda (new-heading)
-	 (if (not (string= new-heading current-heading))
-	     (progn
-	       (setq block-counter 1)
-	       (setq current-heading new-heading))
-	   (setq block-counter (+ 1 block-counter))))
-       (replace-regexp-in-string "[ \t]" "-"
-				 (condition-case nil
-				     (or (nth 4 (org-heading-components))
-					 "(dummy for heading without text)")
-				   (error (buffer-file-name)))))
-      (let* ((info (org-babel-get-src-block-info 'light))
-	     (src-lang (nth 0 info))
-	     (src-tfile (cdr (assoc :tangle (nth 2 info)))))
-        (unless (or (org-in-commented-heading-p)
-		    (string= (cdr (assoc :tangle (nth 2 info))) "no")
-		    (and tangle-file (not (equal tangle-file src-tfile))))
-          (unless (and language (not (string= language src-lang)))
-	    ;; Add the spec for this block to blocks under it's language
-	    (setq by-lang (cdr (assoc src-lang blocks)))
-	    (setq blocks (delq (assoc src-lang blocks) blocks))
-	    (setq blocks (cons
-			  (cons src-lang
-				(cons
-				 (org-babel-tangle-single-block
-				  block-counter)
-				 by-lang)) blocks))))))
-    ;; Ensure blocks are in the correct order
-    (setq blocks
-          (mapcar
-	   (lambda (by-lang) (cons (car by-lang) (reverse (cdr by-lang))))
-	   blocks))
-    blocks))
+      (let ((current-heading-pos
+	     (org-with-wide-buffer
+	      (org-with-limited-levels (outline-previous-heading)))))
+	(cond ((eq last-heading-pos current-heading-pos) (incf counter))
+	      ((= counter 1))
+	      (t (setq counter 1))))
+      (unless (org-in-commented-heading-p)
+	(let* ((info (org-babel-get-src-block-info 'light))
+	       (src-lang (nth 0 info))
+	       (src-tfile (cdr (assq :tangle (nth 2 info)))))
+	  (unless (or (string= (cdr (assq :tangle (nth 2 info))) "no")
+		      (and tangle-file (not (equal tangle-file src-tfile)))
+		      (and language (not (string= language src-lang))))
+	    ;; Add the spec for this block to blocks under its
+	    ;; language.
+	    (let ((by-lang (assoc src-lang blocks))
+		  (block (org-babel-tangle-single-block counter)))
+	      (if by-lang (setcdr by-lang (cons block (cdr by-lang)))
+		(push (cons src-lang (list block)) blocks)))))))
+    ;; Ensure blocks are in the correct order.
+    (mapcar (lambda (b) (cons (car b) (nreverse (cdr b)))) blocks)))
 
 (defun org-babel-tangle-single-block
   (block-counter &optional only-this-block)
