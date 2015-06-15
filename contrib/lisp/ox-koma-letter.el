@@ -617,11 +617,12 @@ holding export options."
    (format "\\date{%s}\n" (org-export-data (org-export-get-date info) info))
    ;; Hyperref, document start, and subject and title.
    (let* ((with-subject (plist-get info :with-subject))
+	  (with-title (plist-get info :with-title))
 	  (title-as-subject (and with-subject
 				 (plist-get info :with-title-as-subject)))
 	  (subject* (org-string-nw-p
 		     (org-export-data (plist-get info :subject) info)))
-	  (title* (and (plist-get info :with-title)
+	  (title* (and with-title
 		       (org-string-nw-p
 			(org-export-data (plist-get info :title) info))))
 	  (subject (cond ((not with-subject) nil)
