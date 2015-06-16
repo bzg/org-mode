@@ -332,13 +332,10 @@ The value is either the label specified in \"BEAMER_opt\"
 property, or a fallback value built from headline's number.  This
 function assumes HEADLINE will be treated as a frame."
   (let ((opt (org-element-property :BEAMER_OPT headline)))
-    (if (and (org-string-nw-p opt)
+    (if (and (stringp opt)
 	     (string-match "\\(?:^\\|,\\)label=\\(.*?\\)\\(?:$\\|,\\)" opt))
 	(match-string 1 opt)
-      (format "sec-%s"
-	      (mapconcat 'number-to-string
-			 (org-export-get-headline-number headline info)
-			 "-")))))
+      (concat "sec:" (org-export-get-reference headline info)))))
 
 (defun org-beamer--frame-level (headline info)
   "Return frame level in subtree containing HEADLINE.
