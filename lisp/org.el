@@ -9687,16 +9687,16 @@ type.  For a simple example of an export function, see `org-bbdb.el'."
 (defun org-store-link (arg)
   "\\<org-mode-map>Store an org-link to the current location.
 This link is added to `org-stored-links' and can later be inserted
-into an org-buffer with \\[org-insert-link].
+into an Org buffer with \\[org-insert-link].
 
-For some link types, a prefix arg is interpreted.
-For links to Usenet articles, arg negates `org-gnus-prefer-web-links'.
-For file links, arg negates `org-context-in-file-links'.
+For some link types, a prefix ARG is interpreted.
+For links to Usenet articles, ARG negates `org-gnus-prefer-web-links'.
+For file links, ARG negates `org-context-in-file-links'.
 
-A double prefix arg force skipping storing functions that are not
+A double prefix ARG force skipping storing functions that are not
 part of Org's core.
 
-A triple prefix arg force storing a link for each line in the
+A triple prefix ARG force storing a link for each line in the
 active region."
   (interactive "P")
   (org-load-modules-maybe)
@@ -10006,44 +10006,37 @@ according to FMT (default from `org-email-link-description-format')."
 
 (defun org-make-link-string (link &optional description)
   "Make a link with brackets, consisting of LINK and DESCRIPTION."
-  (unless (string-match "\\S-" link)
-    (error "Empty link"))
-  (when (and description
-	     (stringp description)
-	     (not (string-match "\\S-" description)))
-    (setq description nil))
-  (when (stringp description)
-    ;; Remove brackets from the description, they are fatal.
-    (while (string-match "\\[" description)
-      (setq description (replace-match "{" t t description)))
-    (while (string-match "\\]" description)
-      (setq description (replace-match "}" t t description))))
-  (when (equal link description)
-    ;; No description needed, it is identical
-    (setq description nil))
-  (when (and (not description)
-	     (not (string-match (org-image-file-name-regexp) link))
-	     (not (equal link (org-link-escape link))))
-    (setq description (org-extract-attributes link)))
-  (setq link
-	(cond ((string-match (org-image-file-name-regexp) link) link)
-	      ((string-match org-link-types-re link)
-	       (concat (match-string 1 link)
-		       (org-link-escape (substring link (match-end 1)))))
-	      (t (org-link-escape link))))
-  (concat "[[" link "]"
-	  (if description (concat "[" description "]") "")
-	  "]"))
+  (unless (org-string-nw-p link) (error "Empty link"))
+  (let ((uri (cond ((string-match org-link-types-re link)
+		    (concat (match-string 1 link)
+			    (org-link-escape (substring link (match-end 1)))))
+		   ;; For readability, url-encode internal links only
+		   ;; when absolutely needed (i.e, when they contain
+		   ;; square brackets).  File links however, are
+		   ;; encoded since, e.g., spaces are significant.
+		   ((or (file-name-absolute-p link)
+			(org-string-match-p "\\`\\.\\.?/\\|[][]" link))
+		    (org-link-escape link))
+		   (t link)))
+	(description
+	 (and (org-string-nw-p description)
+	      ;; Remove brackets from description, as they are fatal.
+	      (replace-regexp-in-string
+	       "[][]" (lambda (m) (if (equal "[" m) "{" "}"))
+	       (org-trim description)))))
+    (format "[[%s]%s]"
+	    uri
+	    (if description (format "[%s]" description) ""))))
 
 (defconst org-link-escape-chars
-  ;;%20 %5B %5D
-  '(?\  ?\[ ?\])
+  ;;%20 %5B %5D %25
+  '(?\s ?\[ ?\] ?%)
   "List of characters that should be escaped in a link when stored to Org.
 This is the list that is used for internal purposes.")
 
 (defconst org-link-escape-chars-browser
   ;;%20 %22
-  '(?\  ?\")
+  '(?\s ?\")
   "List of characters to be escaped before handing over to the browser.
 If you consider using this constant then you probably want to use
 the function `org-link-escape-browser' instead.  See there why
@@ -10057,28 +10050,20 @@ Optional argument TABLE is a list with characters that should be
 escaped.  When nil, `org-link-escape-chars' is used.
 If optional argument MERGE is set, merge TABLE into
 `org-link-escape-chars'."
-  ;; Don't escape chars in internal links
-  (if (string-match "^\\*[[:alnum:]]+" text)
-      text
-    (cond
-     ((and table merge)
-      (mapc (lambda (defchr)
-	      (unless (member defchr table)
-		(setq table (cons defchr table))))
-	    org-link-escape-chars))
-     ((null table)
-      (setq table org-link-escape-chars)))
+  (let ((characters-to-encode
+	 (cond ((null table) org-link-escape-chars)
+	       (merge (append org-link-escape-chars table))
+	       (t table))))
     (mapconcat
-     (lambda (char)
-       (if (or (member char table)
-	       (and (or (< char 32) (= char ?\%) (> char 126))
-		    org-url-hexify-p))
-	   (mapconcat (lambda (sequence-element)
-			(format "%%%.2X" sequence-element))
-		      (or (encode-coding-char char 'utf-8)
-			  (error "Unable to percent escape character: %s"
-				 (char-to-string char))) "")
-	 (char-to-string char))) text "")))
+     (lambda (c)
+       (if (or (memq c characters-to-encode)
+	       (and org-url-hexify-p (or (< c 32) (> c 126))))
+	   (mapconcat (lambda (e) (format "%%%.2X" e))
+		      (or (encode-coding-char c 'utf-8)
+			  (error "Unable to percent escape character: %c" c))
+		      "")
+	 (char-to-string c)))
+     text "")))
 
 (defun org-link-escape-browser (text)
   "Escape some characters before handing over to the browser.
@@ -10511,19 +10496,6 @@ Should be called like `completing-read'."
 		     #'org-iswitchb-completing-read)
 		    (t #'completing-read))
 	      args)))))
-
-(defun org-extract-attributes (s)
-  "Extract the attributes cookie from a string and set as text property."
-  (let (a attr (start 0) key value)
-    (save-match-data
-      (when (string-match "{{\\([^}]+\\)}}$" s)
-	(setq a (match-string 1 s) s (substring s 0 (match-beginning 0)))
-	(while (string-match "\\([a-zA-Z]+\\)=\"\\([^\"]*\\)\"" a start)
-	  (setq key (match-string 1 a) value (match-string 2 a)
-		start (match-end 0)
-		attr (plist-put attr (intern key) value))))
-      (org-add-props s nil 'org-attr attr))
-    s))
 
 ;;; Opening/following a link
 
@@ -19527,7 +19499,9 @@ boundaries."
 			    (not (cdr (org-element-contents parent)))))
 		      (org-string-match-p file-extension-re
 					  (org-element-property :path link)))
-	     (let ((file (expand-file-name (org-element-property :path link))))
+	     (let ((file (expand-file-name
+			  (org-link-unescape
+			   (org-element-property :path link)))))
 	       (when (file-exists-p file)
 		 (let ((width
 			;; Apply `org-image-actual-width' specifications.
@@ -19549,13 +19523,13 @@ boundaries."
 			     (when paragraph
 			       (save-excursion
 				 (goto-char (org-element-property :begin paragraph))
-				   (when
-				       (re-search-forward
-					"^[ \t]*#\\+attr_.*?: +.*?:width +\\(\\S-+\\)"
-					(org-element-property
-					 :post-affiliated paragraph)
-					t)
-				     (string-to-number (match-string 1))))))
+				 (when
+				     (re-search-forward
+				      "^[ \t]*#\\+attr_.*?: +.*?:width +\\(\\S-+\\)"
+				      (org-element-property
+				       :post-affiliated paragraph)
+				      t)
+				   (string-to-number (match-string 1))))))
 			   ;; Otherwise, fall-back to provided number.
 			   (car org-image-actual-width)))
 			 ((numberp org-image-actual-width)
@@ -19566,9 +19540,9 @@ boundaries."
 		   (if (and (car-safe old) refresh)
 		       (image-refresh (overlay-get (cdr old) 'display))
 		     (let ((image (create-image file
-						  (and width 'imagemagick)
-						  nil
-						  :width width)))
+						(and width 'imagemagick)
+						nil
+						:width width)))
 		       (when image
 			 (let* ((link
 				 ;; If inline image is the description

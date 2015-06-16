@@ -4031,7 +4031,7 @@ Return value can be an object, an element, or nil:
 
 Assume LINK type is \"fuzzy\".  White spaces are not
 significant."
-  (let* ((raw-path (org-element-property :path link))
+  (let* ((raw-path (org-link-unescape (org-element-property :path link)))
 	 (match-title-p (eq (string-to-char raw-path) ?*))
 	 ;; Split PATH at white spaces so matches are space
 	 ;; insensitive.

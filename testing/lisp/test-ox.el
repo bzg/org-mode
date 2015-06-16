@@ -2545,7 +2545,12 @@ Another text. (ref:text)
        (org-test-with-parsed-data "[[hl]]\n* hl"
 	 (org-element-type
 	  (org-export-resolve-fuzzy-link
-	   (org-element-map tree 'link 'identity info t) info))))))
+	   (org-element-map tree 'link 'identity info t) info)))))
+  ;; Handle url-encoded fuzzy links.
+  (should
+   (org-test-with-parsed-data "* A B\n[[A%20B]]"
+     (org-export-resolve-fuzzy-link
+      (org-element-map tree 'link #'identity info t) info))))
 
 (ert-deftest test-org-export/resolve-id-link ()
   "Test `org-export-resolve-id-link' specifications."
