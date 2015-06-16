@@ -105,7 +105,9 @@ key     Selection key for `org-beamer-select-environment'
 open    The opening template for the environment, with the following escapes
         %a   the action/overlay specification
         %A   the default action/overlay specification
-        %o   the options argument of the template
+        %R   the raw BEAMER_act value
+        %o   the options argument, with square brackets
+        %O   the raw BEAMER_opt value
         %h   the headline text
         %r   the raw headline text (i.e. without any processing)
         %H   if there is headline text, that raw text in {} braces
@@ -493,9 +495,10 @@ used as a communication channel."
 		(t (user-error "Wrong block type at a headline named \"%s\""
 			       raw-title))))
 	 (title (org-export-data (org-element-property :title headline) info))
-	 (options (let ((options (org-element-property :BEAMER_OPT headline)))
-		    (if (not options) ""
-		      (org-beamer--normalize-argument options 'option))))
+	 (raw-options (org-element-property :BEAMER_OPT headline))
+	 (options (if raw-options
+		      (org-beamer--normalize-argument raw-options 'option)
+		    ""))
 	 ;; Start a "columns" environment when explicitly requested or
 	 ;; when there is no previous headline or the previous
 	 ;; headline do not have a BEAMER_column property.
@@ -547,15 +550,18 @@ used as a communication channel."
 	  ;; overlay specification and the default one is nil.
 	  (let ((action (org-element-property :BEAMER_ACT headline)))
 	    (cond
-	     ((not action) (list (cons "a" "") (cons "A" "")))
+	     ((not action) (list (cons "a" "") (cons "A" "") (cons "R" "")))
 	     ((string-match "\\`\\[.*\\]\\'" action)
 	      (list
 	       (cons "A" (org-beamer--normalize-argument action 'defaction))
-	       (cons "a" "")))
+	       (cons "a" "")
+	       (cons "R" action)))
 	     (t
 	      (list (cons "a" (org-beamer--normalize-argument action 'action))
-		    (cons "A" "")))))
+		    (cons "A" "")
+		    (cons "R" action)))))
 	  (list (cons "o" options)
+		(cons "O" (or raw-options ""))
 		(cons "h" title)
 		(cons "r" raw-title)
 		(cons "H" (if (equal raw-title "") ""
