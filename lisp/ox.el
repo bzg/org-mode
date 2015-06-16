@@ -4023,85 +4023,61 @@ Return value can be an object, an element, or nil:
   \(i.e. #+NAME: path) of an element, return that element.
 
 - If LINK path exactly matches any headline name, return that
-  element.  If more than one headline share that name, priority
-  will be given to the one with the closest common ancestor, if
-  any, or the first one in the parse tree otherwise.
+  element.
 
 - Otherwise, throw an error.
 
 Assume LINK type is \"fuzzy\".  White spaces are not
 significant."
   (let* ((raw-path (org-link-unescape (org-element-property :path link)))
-	 (match-title-p (eq (string-to-char raw-path) ?*))
+	 (headline-only (eq (string-to-char raw-path) ?*))
 	 ;; Split PATH at white spaces so matches are space
 	 ;; insensitive.
 	 (path (org-split-string
-		(if match-title-p (substring raw-path 1) raw-path)))
-	 ;; Cache for destinations that are not position dependent.
+		(if headline-only (substring raw-path 1) raw-path)))
 	 (link-cache
 	  (or (plist-get info :resolve-fuzzy-link-cache)
-	      (plist-get (setq info (plist-put info :resolve-fuzzy-link-cache
-					       (make-hash-table :test 'equal)))
+	      (plist-get (plist-put info
+				    :resolve-fuzzy-link-cache
+				    (make-hash-table :test #'equal))
 			 :resolve-fuzzy-link-cache)))
 	 (cached (gethash path link-cache 'not-found)))
-    (cond
-     ;; Destination is not position dependent: use cached value.
-     ((and (not match-title-p) (not (eq cached 'not-found))) cached)
-     ;; First try to find a matching "<<path>>" unless user specified
-     ;; he was looking for a headline (path starts with a "*"
-     ;; character).
-     ((and (not match-title-p)
-	   (let ((match (org-element-map (plist-get info :parse-tree) 'target
-			  (lambda (blob)
-			    (and (equal (org-split-string
-					 (org-element-property :value blob))
-					path)
-				 blob))
-			  info 'first-match)))
-	     (and match (puthash path match link-cache)))))
-     ;; Then try to find an element with a matching "#+NAME: path"
-     ;; affiliated keyword.
-     ((and (not match-title-p)
-	   (let ((match (org-element-map (plist-get info :parse-tree)
-			    org-element-all-elements
-			  (lambda (el)
-			    (let ((name (org-element-property :name el)))
-			      (when (and name
-					 (equal (org-split-string name) path))
-				el)))
-			  info 'first-match)))
-	     (and match (puthash path match link-cache)))))
-     ;; Last case: link either points to a headline or to nothingness.
-     ;; Try to find the source, with priority given to headlines with
-     ;; the closest common ancestor.  If such candidate is found,
-     ;; return it, otherwise signal an error.
-     (t
-      (let ((find-headline
-	     (function
-	      ;; Return first headline whose `:raw-value' property is
-	      ;; NAME in parse tree DATA, or nil.  Statistics cookies
-	      ;; are ignored.
-	      (lambda (name data)
-		(org-element-map data 'headline
-		  (lambda (headline)
-		    (when (equal (org-split-string
-				  (replace-regexp-in-string
-				   "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
-				   (org-element-property :raw-value headline)))
-				 name)
-		      headline))
-		  info 'first-match)))))
-	;; Search among headlines sharing an ancestor with link, from
-	;; closest to farthest.
-	(catch 'exit
-	  (dolist (parent
-		   (let ((parent-hl (org-export-get-parent-headline link)))
-		     (if (not parent-hl) (list (plist-get info :parse-tree))
-		       (org-element-lineage parent-hl nil t))))
-	    (let ((foundp (funcall find-headline path parent)))
-	      (when foundp (throw 'exit foundp))))
-	  ;; No destination found: error.
-	  (user-error "Unable to resolve link \"%s\"" raw-path)))))))
+    (if (not (eq cached 'not-found)) cached
+      (let ((ast (plist-get info :parse-tree)))
+	(puthash
+	 path
+	 (cond
+	  ;; First try to find a matching "<<path>>" unless user
+	  ;; specified he was looking for a headline (path starts with
+	  ;; a "*" character).
+	  ((and (not headline-only)
+		(org-element-map ast 'target
+		  (lambda (datum)
+		    (and (equal (org-split-string
+				 (org-element-property :value datum))
+				path)
+			 datum))
+		  info 'first-match)))
+	  ;; Then try to find an element with a matching "#+NAME: path"
+	  ;; affiliated keyword.
+	  ((and (not headline-only)
+		(org-element-map ast org-element-all-elements
+		  (lambda (datum)
+		    (let ((name (org-element-property :name datum)))
+		      (and name (equal (org-split-string name) path) datum)))
+		  info 'first-match)))
+	  ;; Try to find a matching headline.
+	  ((org-element-map ast 'headline
+	     (lambda (h)
+	       (and (equal (org-split-string
+			    (replace-regexp-in-string
+			     "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
+			     (org-element-property :raw-value h)))
+			   path)
+		    h))
+	     info 'first-match))
+	  (t (user-error "Unable to resolve link \"%s\"" raw-path)))
+	 link-cache)))))
 
 (defun org-export-resolve-id-link (link info)
   "Return headline referenced as LINK destination.

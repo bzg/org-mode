@@ -2391,14 +2391,7 @@ Paragraph[1][2][fn:lbl3:C<<target>>][[test]][[target]]\n[1] A\n\n[2] <<test>>B"
    (org-test-with-parsed-data "* Head [100%]\n[[Head]]"
      (org-element-map tree 'link
        (lambda (link) (org-export-resolve-fuzzy-link link info))
-       info t)))
-  ;; Headline match is position dependent.
-  (should-not
-   (apply
-    'eq
-    (org-test-with-parsed-data "* H1\n[[*H1]]\n* H1\n[[*H1]]"
-      (org-element-map tree 'link
-	(lambda (link) (org-export-resolve-fuzzy-link link info)) info)))))
+       info t))))
 
 (ert-deftest test-org-export/resolve-coderef ()
   "Test `org-export-resolve-coderef' specifications."
