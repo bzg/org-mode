@@ -10104,15 +10104,13 @@ be replaced with `url-encode-url' which is available since Emacs
       text)))
 
 (defun org-link-unescape (str)
-  "Unhex hexified Unicode strings as returned from the JavaScript function
-encodeURIComponent.  E.g. `%C3%B6' is the german o-Umlaut."
-  (unless (and (null str) (string= "" str))
-    (let ((pos 0) (case-fold-search t) unhexed)
-      (while (setq pos (string-match "\\(%[0-9a-f][0-9a-f]\\)+" str pos))
-	(setq unhexed (org-link-unescape-compound (match-string 0 str)))
-	(setq str (replace-match unhexed t t str))
-	(setq pos (+ pos (length unhexed))))))
-  str)
+  "Unhex hexified Unicode parts in string STR.
+E.g. `%C3%B6' becomes the german o-Umlaut.  This is the
+reciprocal of `org-link-escape', which see."
+  (if (org-string-nw-p str)
+      (replace-regexp-in-string
+       "\\(%[0-9A-Za-z]\\{2\\}\\)+" #'org-link-unescape-compound str t t)
+    str))
 
 (defun org-link-unescape-compound (hex)
   "Unhexify Unicode hex-chars.  E.g. `%C3%B6' is the German o-Umlaut.
