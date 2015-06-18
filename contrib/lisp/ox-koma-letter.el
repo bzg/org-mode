@@ -465,27 +465,27 @@ return a string or nil."
 	  (t value))))
 
 (defun org-koma-letter--special-contents-as-macro
-  (keywords &optional keep-newlines no-tag)
-  "Process KEYWORDS  members of `org-koma-letter-special-contents'.
+    (keywords &optional keep-newlines no-tag)
+  "Process KEYWORDS members of `org-koma-letter-special-contents'.
 KEYWORDS is a list of symbols.  Return them as a string to be
 formatted.
 
 The function is used for inserting content of special headings
 such as PS.
 
-If KEEP-NEWLINES is t newlines will not be removed.  If NO-TAG is
-t the content in `org-koma-letter-special-contents' will not be
-wrapped in a macro named whatever the members of KEYWORDS are
-called."
+If KEEP-NEWLINES is non-nil leading and trailing newlines are not
+removed.  If NO-TAG is non-nil the content in
+`org-koma-letter-special-contents' are not wrapped in a macro
+named whatever the members of KEYWORDS are called."
   (mapconcat
-   #'(lambda (keyword)
-       (let* ((name (org-koma-letter--get-value keyword))
-	      (value (org-koma-letter--get-tagged-contents name)))
-	 (when value
-	   (if no-tag (if keep-newlines value (org-trim value))
-	     (format "\\%s{%s}\n"
-		     name
-		     (if keep-newlines value (org-trim value)))))))
+   (lambda (keyword)
+     (let* ((name (org-koma-letter--get-value keyword))
+	    (value (org-koma-letter--get-tagged-contents name)))
+       (cond ((not value) nil)
+	     (no-tag (if keep-newlines value (org-trim value)))
+	     (t (format "\\%s{%s}\n"
+			name
+			(if keep-newlines value (org-trim value)))))))
    keywords
    ""))
 
