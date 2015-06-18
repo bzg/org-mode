@@ -381,7 +381,7 @@ e.g. \"title-subject:t\"."
   :options-alist
   '((:latex-class "LATEX_CLASS" nil org-koma-letter-default-class t)
     (:lco "LCO" nil org-koma-letter-class-option-file)
-    (:author "AUTHOR" nil (org-koma-letter--get-value org-koma-letter-author) t)
+    (:author "AUTHOR" nil (org-koma-letter--get-value org-koma-letter-author) parse)
     (:author-changed-in-buffer-p "AUTHOR" nil nil t)
     (:from-address "FROM_ADDRESS" nil org-koma-letter-from-address newline)
     (:phone-number "PHONE_NUMBER" nil org-koma-letter-phone-number)
@@ -389,8 +389,8 @@ e.g. \"title-subject:t\"."
     (:to-address "TO_ADDRESS" nil nil newline)
     (:place "PLACE" nil org-koma-letter-place)
     (:subject "SUBJECT" nil nil parse)
-    (:opening "OPENING" nil org-koma-letter-opening)
-    (:closing "CLOSING" nil org-koma-letter-closing)
+    (:opening "OPENING" nil org-koma-letter-opening parse)
+    (:closing "CLOSING" nil org-koma-letter-closing parse)
     (:signature "SIGNATURE" nil org-koma-letter-signature newline)
     (:special-headings nil "special-headings"
 		       org-koma-letter-prefer-special-headings)
@@ -665,7 +665,7 @@ holding export options."
    ;; Letter body.
    contents
    ;; Closing.
-   (format "\n\\closing{%s}\n" (plist-get info :closing))
+   (format "\n\\closing{%s}\n" (org-export-data (plist-get info :closing) info))
    (org-koma-letter--special-contents-as-macro
     (plist-get info :with-after-closing))
    ;; Letter end.
