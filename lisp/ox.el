@@ -2978,14 +2978,10 @@ Return code as a string."
 BACKEND is either an export back-end, as returned by, e.g.,
 `org-export-create-backend', or a symbol referring to
 a registered back-end."
-  (if (not (org-region-active-p))
-      (user-error "No active region to replace")
-    (let* ((beg (region-beginning))
-	   (end (region-end))
-	   (str (buffer-substring beg end)) rpl)
-      (setq rpl (org-export-string-as str backend t))
-      (delete-region beg end)
-      (insert rpl))))
+  (unless (org-region-active-p) (user-error "No active region to replace"))
+  (insert
+   (org-export-string-as
+    (delete-and-extract-region (region-beginning) (region-end)) backend t)))
 
 ;;;###autoload
 (defun org-export-insert-default-template (&optional backend subtreep)
