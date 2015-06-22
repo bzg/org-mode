@@ -8739,7 +8739,12 @@ the following will happen:
 - the start days in the repeater in the original entry will be shifted
   to past the last clone.
 In this way you can spell out a number of instances of a repeating task,
-and still retain the repeater to cover future instances of the task."
+and still retain the repeater to cover future instances of the task.
+
+As described above, N+1 clones are produced when the original
+subtree has a repeater.  Setting N to 0, then, can be used to
+remove the repeater from a subtree and create a shifted clone
+with the original repeater."
   (interactive "nNumber of clones to produce: ")
   (let ((shift
 	 (or shift
@@ -8757,8 +8762,8 @@ and still retain the repeater to cover future instances of the task."
 	(org-clock-re (format "^[ \t]*%s.*$" org-clock-string))
 	beg end template task idprop
 	shift-n shift-what doshift nmin nmax)
-    (if (not (and (integerp n) (> n 0)))
-	(user-error "Invalid number of replications %s" n))
+    (unless (wholenump n)
+      (user-error "Invalid number of replications %s" n))
     (if (and (setq doshift (and (stringp shift) (string-match "\\S-" shift)))
 	     (not (string-match "\\`[ \t]*\\+?\\([0-9]+\\)\\([hdwmy]\\)[ \t]*\\'"
 				shift)))

@@ -392,6 +392,10 @@ of tables and lists of listings can be inserted in the document with
 *** Countdown timer support hh:mm:ss format
 In addition to setting countdown timers in minutes, they can also be
 set using the hh:mm:ss format.
+*** Extend ~org-clone-subtree-with-time-shift~
+~org-clone-subtree-with-time-shift~ now accepts 0 as an argument for
+the number of clones, which removes the repeater from the original
+subtree and creates one shifted, repeating clone.
 ** Miscellaneous
 *** Strip all meta data from ITEM special property
 ITEM special property does not contain TODO, priority or tags anymore.

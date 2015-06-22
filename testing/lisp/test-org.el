@@ -1067,6 +1067,52 @@
      (org-insert-todo-heading-respect-content)
      (and (eobp) (org-at-heading-p)))))
 
+(ert-deftest test-org/clone-with-time-shift ()
+  "Test `org-clone-subtree-with-time-shift'."
+  ;; Clone non-repeating once.
+  (should
+   (equal "\
+* H1\n<2015-06-21>
+* H1\n<2015-06-23>
+"
+	  (org-test-with-temp-text "* H1\n<2015-06-21 Sun>"
+	    (org-clone-subtree-with-time-shift 1 "+2d")
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)\\( \\+[0-9][hdmwy]\\)?>" "" (buffer-string)
+	     nil nil 1))))
+  ;; Clone repeating once.
+  (should
+   (equal "\
+* H1\n<2015-06-21>
+* H1\n<2015-06-23>
+* H1\n<2015-06-25 +1w>
+"
+	  (org-test-with-temp-text "* H1\n<2015-06-21 Sun +1w>"
+	    (org-clone-subtree-with-time-shift 1 "+2d")
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)\\( \\+[0-9][hdmwy]\\)?>" "" (buffer-string)
+	     nil nil 1))))
+  ;; Clone non-repeating zero times.
+  (should
+   (equal "\
+* H1\n<2015-06-21>
+"
+	  (org-test-with-temp-text "* H1\n<2015-06-21 Sun>"
+	    (org-clone-subtree-with-time-shift 0 "+2d")
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)\\( \\+[0-9][hdmwy]\\)?>" "" (buffer-string)
+	     nil nil 1))))
+  ;; Clone repeating "zero" times.
+  (should
+   (equal "\
+* H1\n<2015-06-21>
+* H1\n<2015-06-23 +1w>
+"
+	  (org-test-with-temp-text "* H1\n<2015-06-21 Sun +1w>"
+	    (org-clone-subtree-with-time-shift 0 "+2d")
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)\\( \\+[0-9][hdmwy]\\)?>" "" (buffer-string)
+	     nil nil 1)))))
 
 
 ;;; Fixed-Width Areas
