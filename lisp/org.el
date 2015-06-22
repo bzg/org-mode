@@ -15642,7 +15642,8 @@ strings."
 	      (when specific (throw 'exit props)))
 	    (when (or (not specific) (string= specific "PRIORITY"))
 	      (when (looking-at org-priority-regexp)
-		(push (cons "PRIORITY" (org-match-string-no-properties 2)) props))
+		(push (cons "PRIORITY" (org-match-string-no-properties 2))
+		      props))
 	      (when specific (throw 'exit props)))
 	    (when (or (not specific) (string= specific "FILE"))
 	      (push (cons "FILE" (buffer-file-name (buffer-base-buffer)))
@@ -15689,10 +15690,16 @@ strings."
 		      (member specific '("TIMESTAMP" "TIMESTAMP_IA")))
 	      (let ((find-ts
 		     (lambda (end ts)
-		       (let ((regexp (if (or (string= specific "TIMESTAMP")
-					     (assoc "TIMESTAMP_IA" ts))
-					 org-ts-regexp
-				       org-ts-regexp-both)))
+		       (let ((regexp (cond
+				      ((string= specific "TIMESTAMP")
+				       org-ts-regexp)
+				      ((string= specific "TIMESTAMP_IA")
+				       org-ts-regexp-inactive)
+				      ((assoc "TIMESTAMP_IA" ts)
+				       org-ts-regexp)
+				      ((assoc "TIMESTAMP" ts)
+				       org-ts-regexp-inactive)
+				      (t org-ts-regexp-both))))
 			 (catch 'next
 			   (while (re-search-forward regexp end t)
 			     (backward-char)

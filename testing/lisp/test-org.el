@@ -3164,6 +3164,23 @@ Text.
 		      "\n"
 		      "** H2\n:PROPERTIES:\n:CATEGORY: cat2\n:END:<point>")
 	    (cdr (assoc "CATEGORY" (org-entry-properties nil "CATEGORY"))))))
+  ;; Get "TIMESTAMP" and "TIMESTAMP_IA" properties.
+  (should
+   (equal "<2012-03-29 thu.>"
+    (org-test-with-temp-text "* Entry\n<2012-03-29 thu.>"
+      (cdr (assoc "TIMESTAMP" (org-entry-properties))))))
+  (should
+   (equal "[2012-03-29 thu.]"
+    (org-test-with-temp-text "* Entry\n[2012-03-29 thu.]"
+      (cdr (assoc "TIMESTAMP_IA" (org-entry-properties))))))
+  (should
+   (equal "<2012-03-29 thu.>"
+    (org-test-with-temp-text "* Entry\n[2014-03-04 tue.]<2012-03-29 thu.>"
+      (cdr (assoc "TIMESTAMP" (org-entry-properties nil "TIMESTAMP"))))))
+  (should
+   (equal "[2014-03-04 tue.]"
+    (org-test-with-temp-text "* Entry\n<2012-03-29 thu.>[2014-03-04 tue.]"
+      (cdr (assoc "TIMESTAMP_IA" (org-entry-properties nil "TIMESTAMP_IA"))))))
   ;; Get standard properties.
   (should
    (equal "1"
