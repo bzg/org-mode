@@ -489,18 +489,18 @@ objects, or a strings.
 
 The function takes care of setting `:parent' property for CHILD.
 Return parent element."
-  ;; Link every child to PARENT. If PARENT is nil, it is a secondary
-  ;; string: parent is the list itself.
-  (mapc (lambda (child)
-	  (org-element-put-property child :parent (or parent children)))
-	children)
-  ;; Add CHILDREN at the end of PARENT contents.
-  (when parent
-    (apply 'org-element-set-contents
-	   parent
-	   (nconc (org-element-contents parent) children)))
-  ;; Return modified PARENT element.
-  (or parent children))
+  (if (not children) parent
+    ;; Link every child to PARENT. If PARENT is nil, it is a secondary
+    ;; string: parent is the list itself.
+    (dolist (child children)
+      (org-element-put-property child :parent (or parent children)))
+    ;; Add CHILDREN at the end of PARENT contents.
+    (when parent
+      (apply #'org-element-set-contents
+	     parent
+	     (nconc (org-element-contents parent) children)))
+    ;; Return modified PARENT element.
+    (or parent children)))
 
 (defun org-element-extract-element (element)
   "Extract ELEMENT from parse tree.
@@ -572,6 +572,13 @@ The function takes care of setting `:parent' property for NEW."
     (setcar (cdr old) (nth 1 new))
     ;; Transfer type.
     (setcar old (car new))))
+
+(defun org-element-create (type &optional props &rest children)
+  "Create a new element of type TYPE.
+Optional argument PROPS, when non-nil, is a plist defining the
+properties of the element.  CHILDREN can be elements, objects or
+strings."
+  (apply #'org-element-adopt-elements (list type props) children))
 
 (defun org-element-copy (datum)
   "Return a copy of DATUM.
