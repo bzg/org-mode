@@ -1488,11 +1488,16 @@ contextual information."
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (when (org-string-nw-p (org-element-property :value example-block))
-    (org-latex--wrap-label
-     example-block
-     (format "\\begin{verbatim}\n%s\\end{verbatim}"
-	     (org-export-format-code-default example-block info))
-     info)))
+    (let ((environment (or (org-export-read-attribute
+			    :attr_latex example-block :environment)
+			   "verbatim")))
+      (org-latex--wrap-label
+       example-block
+       (format "\\begin{%s}\n%s\\end{%s}"
+	       environment
+	       (org-export-format-code-default example-block info)
+	       environment)
+       info))))
 
 
 ;;;; Export Block

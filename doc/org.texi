@@ -12072,7 +12072,8 @@ All lines between these markers are exported literally
 @cindex #+ATTR_LATEX
 
 @LaTeX{} understands attributes specified in an @code{ATTR_LATEX} line.  They
-affect tables, images, plain lists, special blocks and source blocks.
+affect tables, images, plain lists, source blocks, example blocks and special
+blocks.
 
 @subsubheading Tables in @LaTeX{} export
 @cindex tables, in @LaTeX{} export
@@ -12289,6 +12290,23 @@ counterpart to @code{org-latex-listings-options} and
   (defun Fib (n)                          ; Count rabbits.
     (if (< n 2) n (+ (Fib (- n 1)) (Fib (- n 2)))))
 #+END_SRC
+@end example
+
+@subsubheading Example blocks in @LaTeX{} export
+@cindex example blocks, in @LaTeX{} export
+@cindex verbatim blocks, in @LaTeX{} export
+
+By default, when exporting to @LaTeX{}, example blocks contents are wrapped
+in a @samp{verbatim} environment.  It is possible to use a different
+environment globally using an appropriate export filter (@pxref{Advanced
+configuration}).  You can also change this per block using
+@code{:environment} parameter.
+
+@example
+#+ATTR_LATEX: :environment myverbatim
+#+BEGIN_EXAMPLE
+This sentence is false.
+#+END_EXAMPLE
 @end example
 
 @subsubheading Special blocks in @LaTeX{} export
