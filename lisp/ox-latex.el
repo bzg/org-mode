@@ -1553,8 +1553,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      "\\footnotemark")
     ;; Otherwise, define it with \footnote command.
     (t
-     (let ((def (org-latex--wrap-latex-math-block
-		 (org-export-get-footnote-definition footnote-reference info) info)))
+     (let ((def (org-export-get-footnote-definition footnote-reference info)))
        (concat
 	(format "\\footnote{%s}" (org-trim (org-export-data def info)))
 	;; Retrieve all footnote references within the footnote and
