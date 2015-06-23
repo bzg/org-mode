@@ -13943,23 +13943,22 @@ where @code{TYPE} is the type targeted by the filter.  Valid types are:
 @tab planning
 @item property-drawer
 @tab quote-block
-@tab quote-section
-@item radio-target
-@tab section
+@tab radio-target
+@item section
 @tab special-block
-@item src-block
-@tab statistics-cookie
+@tab src-block
+@item statistics-cookie
 @tab strike-through
-@item subscript
-@tab superscript
+@tab subscript
+@item superscript
 @tab table
-@item table-cell
-@tab table-row
+@tab table-cell
+@item table-row
 @tab target
-@item timestamp
-@tab underline
+@tab timestamp
+@item underline
 @tab verbatim
-@item verse-block
+@tab verse-block
 @end multitable
 
 For example, the following snippet allows me to use non-breaking spaces in
