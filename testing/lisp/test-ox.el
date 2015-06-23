@@ -1826,38 +1826,43 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 			    (car (org-element-contents def))))))))
 	  info))))
     ;; Test nested footnote in invisible definitions.
-    (org-test-with-temp-text "Text[1]\n\n[1] B [2]\n\n[2] C."
-      ;; Hide definitions.
-      (narrow-to-region (point) (point-at-eol))
-      (let* ((tree (org-element-parse-buffer))
-	     (info (org-combine-plists
-		    `(:parse-tree ,tree)
-		    (org-export-collect-tree-properties
-		     tree (org-export-get-environment)))))
-	;; Both footnotes should be seen.
-	(should
-	 (= (length (org-export-collect-footnote-definitions info)) 2))))
+    (should
+     (= 2
+	(org-test-with-temp-text "Text[1]\n\n[1] B [2]\n\n[2] C."
+	  (narrow-to-region (point) (line-end-position))
+	  (catch 'exit
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders
+	      '((section
+		 .
+		 (lambda (s c i)
+		   (throw 'exit (length
+				 (org-export-collect-footnote-definitions
+				  i))))))))))))
     ;; Test export of footnotes defined outside parsing scope.
     (should
      (equal
       "ParagraphOut of scope\n"
       (org-test-with-temp-text "[fn:1] Out of scope
 * Title
-Paragraph[fn:1]"
+<point>Paragraph[fn:1]"
 	(let ((backend (org-test-default-backend)))
 	  (setf (org-export-backend-transcoders backend)
-		(cons (cons 'footnote-reference
-			    (lambda (fn contents info)
-			      (org-element-interpret-data
-			       (org-export-get-footnote-definition fn info))))
-		      (org-export-backend-transcoders backend)))
-	  (forward-line)
+		(append
+		 (list (cons 'footnote-reference
+			     (lambda (fn contents info)
+			       (org-element-interpret-data
+				(org-export-get-footnote-definition fn info))))
+		       (cons 'footnote-definition #'ignore)
+		       (cons 'headline #'ignore))
+		 (org-export-backend-transcoders backend)))
 	  (org-export-as backend 'subtree)))))
     ;; Footnotes without a definition should throw an error.
     (should-error
      (org-test-with-parsed-data "Text[fn:1]"
        (org-export-get-footnote-definition
-	(org-element-map tree 'footnote-reference 'identity info t) info)))
+	(org-element-map tree 'footnote-reference #'identity info t) info)))
     ;; Footnote section should be ignored in TOC and in headlines
     ;; numbering.
     (should
