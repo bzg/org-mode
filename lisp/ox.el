@@ -2920,27 +2920,34 @@ Return code as a string."
 				    org-export-options-alist))))
 	     tree)
 	;; Update communication channel and get parse tree.  Buffer
-	;; isn't parsed directly.  Instead, a temporary copy is
-	;; created, where include keywords, macros are expanded and
-	;; code blocks are evaluated.
+	;; isn't parsed directly.  Instead, all buffer modifications
+	;; and consequent parsing are undertaken in a temporary copy.
 	(org-export-with-buffer-copy
 	 ;; Run first hook with current back-end's name as argument.
 	 (run-hook-with-args 'org-export-before-processing-hook
 			     (org-export-backend-name backend))
+	 ;; Include files, delete comments and expand macros.
 	 (org-export-expand-include-keyword)
 	 (org-export--delete-comments)
-	 ;; Refresh buffer properties, radio targets and macros after
-	 ;; including files.
-	 (org-set-regexps-and-options)
-	 (org-update-radio-target-regexp)
 	 (org-macro-initialize-templates)
 	 (org-macro-replace-all org-macro-templates nil parsed-keywords)
+	 ;; Refresh buffer properties and radio targets after
+	 ;; potentially invasive previous changes.  Likewise, do it
+	 ;; again after executing Babel code.
+	 (org-set-regexps-and-options)
+	 (org-update-radio-target-regexp)
 	 (org-export-execute-babel-code)
+	 (org-set-regexps-and-options)
+	 (org-update-radio-target-regexp)
 	 ;; Run last hook with current back-end's name as argument.
+	 ;; Update buffer properties and radio targets one last time
+	 ;; before parsing.
 	 (goto-char (point-min))
 	 (save-excursion
 	   (run-hook-with-args 'org-export-before-parsing-hook
 			       (org-export-backend-name backend)))
+	 (org-set-regexps-and-options)
+	 (org-update-radio-target-regexp)
 	 ;; Update communication channel with environment.  Also
 	 ;; install user's and developer's filters.
 	 (setq info
