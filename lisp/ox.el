@@ -1364,52 +1364,45 @@ for export.  Return options as a plist."
   ;; same property in communication channel.  The name for the
   ;; property is the keyword with "EXPORT_" appended to it.
   (org-with-wide-buffer
-   (let (plist
+   ;; Make sure point is at a heading.
+   (if (org-at-heading-p) (org-up-heading-safe) (org-back-to-heading t))
+   (let ((plist
+	  ;; EXPORT_OPTIONS are parsed in a non-standard way.  Take
+	  ;; care of them right from the start.
+	  (let ((o (org-entry-get (point) "EXPORT_OPTIONS")))
+	    (and o (org-export--parse-option-keyword o backend))))
+	 ;; Take care of EXPORT_TITLE.  If it isn't defined, use
+	 ;; headline's title (with no todo keyword, priority cookie or
+	 ;; tag) as its fallback value.
+	 (cache (list
+		 (cons "TITLE"
+		       (or (org-entry-get (point) "EXPORT_TITLE")
+			   (progn (looking-at org-complex-heading-regexp)
+				  (org-match-string-no-properties 4))))))
 	 ;; Look for both general keywords and back-end specific
 	 ;; options, with priority given to the latter.
 	 (options (append (and backend (org-export-get-all-options backend))
 			  org-export-options-alist)))
-     ;; Make sure point is at a heading.
-     (if (org-at-heading-p) (org-up-heading-safe) (org-back-to-heading t))
-     ;; Take care of EXPORT_TITLE.  If it isn't defined, use
-     ;; headline's title (with no todo keyword, priority cookie or
-     ;; tag) as its fallback value.
-     (let ((title (or (org-entry-get (point) "EXPORT_TITLE")
-		      (progn (looking-at org-complex-heading-regexp)
-			     (org-match-string-no-properties 4)))))
-       (setq plist
-	     (plist-put
-	      plist :title
-	      (if (eq (nth 4 (assq :title options)) 'parse)
-		  (org-element-parse-secondary-string
-		   title (org-element-restriction 'keyword))
-		title))))
-     ;; EXPORT_OPTIONS are parsed in a non-standard way.
-     (let ((o (org-entry-get (point) "EXPORT_OPTIONS")))
-       (when o
-	 (setq plist
-	       (nconc plist (org-export--parse-option-keyword o backend)))))
-     ;; Handle other keywords.  TITLE keyword is excluded as it has
-     ;; been handled already.  Then return PLIST.
-     (let ((seen '("TITLE")))
-       (dolist (option options plist)
-	 (let ((property (car option))
-	       (keyword (nth 1 option)))
-	   (when (and keyword (not (member keyword seen)))
-	     (let* ((subtree-prop (concat "EXPORT_" keyword))
-		    (value (org-entry-get (point) subtree-prop)))
-	       (push keyword seen)
-	       (when (and value (not (plist-member plist property)))
-		 (setq plist
-		       (plist-put
-			plist
-			property
-			(case (nth 4 option)
-			  (parse
-			   (org-element-parse-secondary-string
-			    value (org-element-restriction 'keyword)))
-			  (split (org-split-string value))
-			  (t value)))))))))))))
+     ;; Handle other keywords.  Then return PLIST.
+     (dolist (option options plist)
+       (let ((property (car option))
+	     (keyword (nth 1 option)))
+	 (when keyword
+	   (let ((value
+		  (or (cdr (assoc keyword cache))
+		      (let ((v (org-entry-get (point)
+					      (concat "EXPORT_" keyword))))
+			(push (cons keyword v) cache) v))))
+	     (when value
+	       (setq plist
+		     (plist-put plist
+				property
+				(case (nth 4 option)
+				  (parse
+				   (org-element-parse-secondary-string
+				    value (org-element-restriction 'keyword)))
+				  (split (org-split-string value))
+				  (t value))))))))))))
 
 (defun org-export--get-inbuffer-options (&optional backend)
   "Return current buffer export options, as a plist.
