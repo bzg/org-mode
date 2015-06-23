@@ -16390,7 +16390,7 @@ argument.  The first example shows how to attach a attribute-line via @code{:pos
 @example
 #+name: attr_wrap
 #+begin_src sh :var data="" :var width="\\textwidth" :results output
-  echo "#+ATTR_LATEX :width $width"
+  echo "#+ATTR_LATEX: :width $width"
   echo "$data"
 #+end_src
 
