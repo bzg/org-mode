@@ -3647,7 +3647,7 @@ FILTER-ALIST is an alist of filters we need to apply when
 			    (list `(tag . ,org-agenda-tag-filter)
 				  `(re . ,org-agenda-regexp-filter)
 				  `(effort . ,org-agenda-effort-filter)
-				  `(car . ,org-agenda-category-filter))))))
+				  `(cat . ,org-agenda-category-filter))))))
     (if (org-agenda-use-sticky-p)
 	(progn
 	  (put 'org-agenda-tag-filter :preset-filter nil)
