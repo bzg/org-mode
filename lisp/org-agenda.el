@@ -3642,10 +3642,12 @@ FILTER-ALIST is an alist of filters we need to apply when
 
 (defun org-agenda-prepare (&optional name)
   (let ((filter-alist (if org-agenda-persistent-filter
-			  (list `(tag . ,org-agenda-tag-filter)
-				`(re . ,org-agenda-regexp-filter)
-				`(effort . ,org-agenda-effort-filter)
-				`(car . ,org-agenda-category-filter)))))
+			  (with-current-buffer
+			      (get-buffer-create org-agenda-buffer-name)
+			    (list `(tag . ,org-agenda-tag-filter)
+				  `(re . ,org-agenda-regexp-filter)
+				  `(effort . ,org-agenda-effort-filter)
+				  `(car . ,org-agenda-category-filter))))))
     (if (org-agenda-use-sticky-p)
 	(progn
 	  (put 'org-agenda-tag-filter :preset-filter nil)
