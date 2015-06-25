@@ -1590,8 +1590,7 @@ The template may still contain \"%?\" for cursor positioning."
     (unless template (setq template "") (message "No template") (ding)
 	    (sit-for 1))
     (save-window-excursion
-      (delete-other-windows)
-      (org-pop-to-buffer-same-window (get-buffer-create "*Capture*"))
+      (org-switch-to-buffer-other-window (get-buffer-create "*Capture*"))
       (erase-buffer)
       (insert template)
       (goto-char (point-min))
