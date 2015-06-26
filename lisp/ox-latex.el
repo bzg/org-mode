@@ -2228,10 +2228,10 @@ contextual information."
 	     ;; However, if special strings are used, be careful not
 	     ;; to protect "\" in "\-" constructs.
 	     (replace-regexp-in-string
-	      (concat "[%$#&{}_~^]\\|\\\\" (and specialp "\\(?:[^-]\\|$\\)"))
+	      (concat "[%$#&{}_~^]\\|\\\\" (and specialp "\\([^-]\\|$\\)"))
 	      (lambda (m)
-		(case (aref m 0)
-		  (?\\ "$\\\\backslash$")
+		(case (string-to-char m)
+		  (?\\ "$\\\\backslash$\\1")
 		  (?~ "\\\\textasciitilde{}")
 		  (?^ "\\\\^{}")
 		  (t "\\\\\\&")))
