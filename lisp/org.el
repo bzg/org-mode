@@ -13478,23 +13478,27 @@ WHAT entry will also be removed."
 	      (skip-chars-forward " \t")
 	      ;; Check if we have to remove something.
 	      (dolist (type (if what (cons what remove) remove))
-		(when (save-excursion
-			(re-search-forward
-			 (case type
-			   (closed org-closed-time-regexp)
-			   (deadline org-deadline-time-regexp)
-			   (scheduled org-scheduled-time-regexp)
-			   (otherwise (error "Invalid planning type: %s" type)))
-			 (line-end-position) t))
-		  (replace-match "")
-		  (when (looking-at "--+<[^>]+>") (replace-match ""))
-		  (when (and (not what) (eq type 'closed))
-		    (save-excursion
-		      (beginning-of-line)
-		      (if (looking-at "[ \t]*$")
-			  (delete-region (point) (1+ (point-at-eol)))))))
+		(save-excursion
+		  (when (re-search-forward
+			 (concat
+			  " *"
+			  (case type
+			    (closed org-closed-time-regexp)
+			    (deadline org-deadline-time-regexp)
+			    (scheduled org-scheduled-time-regexp)
+			    (otherwise
+			     (error "Invalid planning type: %s" type))))
+			 (line-end-position) t)
+		    (replace-match "")
+		    (when (looking-at "--+<[^>]+>") (replace-match ""))
+		    (when (and (not what) (eq type 'closed))
+		      (save-excursion
+			(beginning-of-line)
+			(when (looking-at "[ \t]*$")
+			  (delete-region (point)
+					 (line-beginning-position 2)))))))
 		;; Remove leading white spaces.
-		(when (and (not (bolp)) (looking-at "[ \t]+")) (replace-match ""))))
+		(when (looking-at "[ \t]+") (replace-match ""))))
 	     ((not what) (throw 'exit nil)) ; Nothing to do.
 	     (t (insert-before-markers "\n")
 		(backward-char 1)

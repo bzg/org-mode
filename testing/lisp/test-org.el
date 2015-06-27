@@ -2858,6 +2858,165 @@ Text.
 	 "* Headline\n*** Inlinetask\n*** END\n<point>DEADLINE: <2014-03-04 tue.>"
        (let ((org-inlinetask-min-level 3)) (org-at-planning-p))))))
 
+(ert-deftest test-org/add-planning-info ()
+  "Test `org-add-planning-info'."
+  ;; Create deadline when `org-adapt-indentation' is non-nil.
+  (should
+   (equal "* H\n  DEADLINE: <2015-06-25>\nParagraph"
+	  (org-test-with-temp-text "* H\nParagraph<point>"
+	    (let ((org-adapt-indentation t))
+	      (org-add-planning-info 'deadline "<2015-06-25 Thu>"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
+	     nil nil 1))))
+  ;; Create deadline when `org-adapt-indentation' is nil.
+  (should
+   (equal "* H\nDEADLINE: <2015-06-25>\nParagraph"
+	  (org-test-with-temp-text "* H\nParagraph<point>"
+	    (let ((org-adapt-indentation nil))
+	      (org-add-planning-info 'deadline "<2015-06-25 Thu>"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
+	     nil nil 1))))
+  ;; Update deadline when `org-adapt-indentation' is non-nil.
+  (should
+   (equal "* H\n  DEADLINE: <2015-06-25>\nParagraph"
+	  (org-test-with-temp-text "\
+* H
+  DEADLINE: <2015-06-24 Wed>
+Paragraph<point>"
+	    (let ((org-adapt-indentation t))
+	      (org-add-planning-info 'deadline "<2015-06-25 Thu>"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
+	     nil nil 1))))
+  ;; Update deadline when `org-adapt-indentation' is nil.
+  (should
+   (equal "* H\nDEADLINE: <2015-06-25>\nParagraph"
+	  (org-test-with-temp-text "\
+* H
+DEADLINE: <2015-06-24 Wed>
+Paragraph<point>"
+	    (let ((org-adapt-indentation nil))
+	      (org-add-planning-info 'deadline "<2015-06-25 Thu>"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
+	     nil nil 1))))
+  ;; Schedule when `org-adapt-indentation' is non-nil.
+  (should
+   (equal "* H\n  SCHEDULED: <2015-06-25>\nParagraph"
+	  (org-test-with-temp-text "* H\nParagraph<point>"
+	    (let ((org-adapt-indentation t))
+	      (org-add-planning-info 'scheduled "<2015-06-25 Thu>"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
+	     nil nil 1))))
+  ;; Schedule when `org-adapt-indentation' is nil.
+  (should
+   (equal "* H\nSCHEDULED: <2015-06-25>\nParagraph"
+	  (org-test-with-temp-text "* H\nParagraph<point>"
+	    (let ((org-adapt-indentation nil))
+	      (org-add-planning-info 'scheduled "<2015-06-25 Thu>"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
+	     nil nil 1))))
+  ;; Add deadline when scheduled.
+  (should
+   (equal "\
+* H
+  DEADLINE: <2015-06-25> SCHEDULED: <2015-06-24>
+Paragraph"
+	  (org-test-with-temp-text "\
+* H
+  SCHEDULED: <2015-06-24 Wed>
+Paragraph<point>"
+	    (let ((org-adapt-indentation t))
+	      (org-add-planning-info 'deadline "<2015-06-25 Thu>"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
+	     nil nil 1))))
+  ;; Remove middle entry.
+  (should
+   (equal "\
+* H
+  CLOSED: [2015-06-24] SCHEDULED: <2015-06-24>
+Paragraph"
+	  (org-test-with-temp-text "\
+* H
+  CLOSED: [2015-06-24 Wed] DEADLINE: <2015-06-25 Thu> SCHEDULED: <2015-06-24 Wed>
+Paragraph<point>"
+	    (let ((org-adapt-indentation t))
+	      (org-add-planning-info nil nil 'deadline))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)[]>]" "" (buffer-string)
+	     nil nil 1))))
+  ;; Remove last entry and then middle entry (order should not
+  ;; matter).
+  (should
+   (equal "\
+* H
+  CLOSED: [2015-06-24]
+Paragraph"
+	  (org-test-with-temp-text "\
+* H
+  CLOSED: [2015-06-24 Wed] DEADLINE: <2015-06-25 Thu> SCHEDULED: <2015-06-24 Wed>
+Paragraph<point>"
+	    (let ((org-adapt-indentation t))
+	      (org-add-planning-info nil nil 'scheduled 'deadline))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)[]>]" "" (buffer-string)
+	     nil nil 1))))
+  ;; Remove closed when `org-adapt-indentation' is non-nil.
+  (should
+   (equal "* H\n  DEADLINE: <2015-06-25>\nParagraph"
+	  (org-test-with-temp-text "\
+* H
+  CLOSED: [2015-06-25 Thu] DEADLINE: <2015-06-25 Thu>
+Paragraph<point>"
+	    (let ((org-adapt-indentation t))
+	      (org-add-planning-info nil nil 'closed))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
+	     nil nil 1))))
+  ;; Remove closed when `org-adapt-indentation' is nil.
+  (should
+   (equal "* H\nDEADLINE: <2015-06-25>\nParagraph"
+	  (org-test-with-temp-text "\
+* H
+CLOSED: [2015-06-25 Thu] DEADLINE: <2015-06-25 Thu>
+Paragraph<point>"
+	    (let ((org-adapt-indentation nil))
+	      (org-add-planning-info nil nil 'closed))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
+	     nil nil 1))))
+  ;; Remove closed entry and delete empty line.
+  (should
+   (equal "\
+* H
+Paragraph"
+	  (org-test-with-temp-text "\
+* H
+  CLOSED: [2015-06-24 Wed]
+Paragraph<point>"
+	    (let ((org-adapt-indentation t))
+	      (org-add-planning-info nil nil 'closed))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
+	     nil nil 1))))
+  ;; Remove one entry and update another.
+  (should
+   (equal "* H\n  DEADLINE: <2015-06-25>\nParagraph"
+	  (org-test-with-temp-text "\
+* H
+  SCHEDULED: <2015-06-23 Tue> DEADLINE: <2015-06-24 Wed>
+Paragraph<point>"
+	    (let ((org-adapt-indentation t))
+	      (org-add-planning-info 'deadline "<2015-06-25 Thu>" 'scheduled))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
+	     nil nil 1)))))
+
 
 ;;; Property API
 
