@@ -3330,8 +3330,7 @@ Text
   ;; Do not find objects in table rules.
   (should
    (eq 'table-row
-       (org-test-with-temp-text "| a | b |\n+---+---+\n| c | d |"
-	 (forward-line)
+       (org-test-with-temp-text "| a | b |\n|-<point>--|---|\n| c | d |"
 	 (org-element-type (org-element-context)))))
   ;; Find objects in parsed affiliated keywords.
   (should

@@ -2493,9 +2493,11 @@ Assume point is at the beginning of the table."
     (let* ((case-fold-search t)
 	   (table-begin (point))
 	   (type (if (looking-at "[ \t]*|") 'org 'table.el))
+           (end-re (format "^[ \t]*\\($\\|[^| \t%s]\\)"
+			   (if (eq type 'org) "" "+")))
 	   (begin (car affiliated))
 	   (table-end
-	    (if (re-search-forward org-table-any-border-regexp limit 'm)
+	    (if (re-search-forward end-re limit 'move)
 		(goto-char (match-beginning 0))
 	      (point)))
 	   (tblfm (let (acc)
@@ -2560,7 +2562,7 @@ containing `:begin', `:end', `:contents-begin', `:contents-end',
 				(end-of-line)
 				(skip-chars-backward " \t")
 				(point))))
-	   (end (progn (forward-line) (point))))
+	   (end (line-beginning-position 2)))
       (list 'table-row
 	    (list :type type
 		  :begin begin
