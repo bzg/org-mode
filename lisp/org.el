@@ -20779,7 +20779,7 @@ this numeric value."
 With an optional prefix numeric argument INC, decrement using
 this numeric value."
   (interactive "p")
-  (org-increase-number-at-point (- inc)))
+  (org-increase-number-at-point (- (or inc 1))))
 
 (defun org-ctrl-c-ret ()
   "Call `org-table-hline-and-move' or `org-insert-heading' dep. on context."
