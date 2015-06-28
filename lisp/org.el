@@ -4499,7 +4499,9 @@ Normal means, no org-mode-specific context."
 If TABLE-TYPE is non-nil, also check for table.el-type tables.
 If `org-enable-table-editor' is nil, return nil unconditionally."
   (and org-enable-table-editor
-       (save-excursion (beginning-of-line) (looking-at "[ \t]*[|+]"))
+       (save-excursion
+	 (beginning-of-line)
+	 (org-looking-at-p (if table-type "[ \t]*[|+]" "[ \t]*|")))
        (let ((element (org-element-lineage (org-element-at-point) '(table) t)))
 	 (and element
 	      (or table-type (eq (org-element-property :type element) 'org))))))
