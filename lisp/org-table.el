@@ -723,7 +723,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 	 (colpos (org-table-current-column))
 	 (winstart (window-start))
 	 (winstartline (org-current-line (min winstart (1- (point-max)))))
-	 lines (new "") lengths l typenums ty fields maxfields i
+	 lines lengths l typenums ty fields maxfields i
 	 column
 	 (indent "") cnt frac
 	 rfmt hfmt
@@ -796,7 +796,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
     (setq emptystrings (make-list maxfields ""))
     ;; Check for special formatting.
     (setq i -1)
-    (while (< (setq i (1+ i)) maxfields)   ;; Loop over all columns
+    (while (< (setq i (1+ i)) maxfields) ;; Loop over all columns
       (setq column (mapcar (lambda (x) (or (nth i x) "")) fields))
       ;; Check if there is an explicit width specified
       (setq fmax nil)
@@ -820,7 +820,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 		  (setq f1 (min fmax (or (string-match org-bracket-link-regexp xx) fmax)))
 		  (unless (> f1 1)
 		    (user-error "Cannot narrow field starting with wide link \"%s\""
-			   (match-string 0 xx)))
+				(match-string 0 xx)))
 		  (setq f2 (length xx))
 		  (if (= (org-string-width xx)
 			 f2)
@@ -882,16 +882,15 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
     (setq rfmt (concat rfmt "\n")
 	  hfmt (concat (substring hfmt 0 -1) "|\n"))
 
-    (setq new (mapconcat
-	       (lambda (l)
-		 (if l (apply 'format rfmt
-			      (append (pop fields) emptystrings))
-		   hfmt))
-	       lines ""))
     (move-marker org-table-aligned-begin-marker (point))
-    (insert new)
-    ;; Replace the old one
-    (delete-region (point) end)
+    ;; Replace modified lines only.
+    (dolist (l lines)
+      (let ((line (if l (apply #'format rfmt (append (pop fields) emptystrings))
+		    hfmt)))
+	(if (equal (buffer-substring (point) (line-beginning-position 2)) line)
+	    (forward-line)
+	  (insert line)
+	  (delete-region (point) (line-beginning-position 2)))))
     (move-marker end nil)
     (move-marker org-table-aligned-end-marker (point))
     (when (and orgtbl-mode (not (derived-mode-p 'org-mode)))
