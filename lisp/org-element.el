@@ -2492,7 +2492,7 @@ Assume point is at the beginning of the table."
   (save-excursion
     (let* ((case-fold-search t)
 	   (table-begin (point))
-	   (type (if (org-at-table.el-p) 'table.el 'org))
+	   (type (if (looking-at "[ \t]*|") 'org 'table.el))
 	   (begin (car affiliated))
 	   (table-end
 	    (if (re-search-forward org-table-any-border-regexp limit 'm)
@@ -3787,7 +3787,8 @@ element it has to parse."
 	     ((looking-at "%%(")
 	      (org-element-diary-sexp-parser limit affiliated))
 	     ;; Table.
-	     ((org-at-table-p t) (org-element-table-parser limit affiliated))
+	     ((looking-at "[ \t]*\\(|\\|\\+\\(-+\\+\\)+[ \t]*$\\)")
+	      (org-element-table-parser limit affiliated))
 	     ;; List.
 	     ((looking-at (org-item-re))
 	      (org-element-plain-list-parser
