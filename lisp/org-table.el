@@ -912,27 +912,21 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 (defun org-table-begin (&optional table-type)
   "Find the beginning of the table and return its position.
 With argument TABLE-TYPE, go to the beginning of a table.el-type table."
-  (save-excursion
-    (if (not (re-search-backward
-	      (if table-type org-table-any-border-regexp
-		org-table-border-regexp)
-	      nil t))
-	(progn (goto-char (point-min)) (point))
-      (goto-char (match-beginning 0))
-      (beginning-of-line 2)
-      (point))))
+  (let ((table (org-element-lineage (org-element-at-point) '(table) t)))
+    (and table (org-element-property :post-affiliated table))))
 
 ;;;###autoload
 (defun org-table-end (&optional table-type)
   "Find the end of the table and return its position.
 With argument TABLE-TYPE, go to the end of a table.el-type table."
-  (if (save-excursion
-	(re-search-forward
-	 (if table-type org-table-any-border-regexp
-	   org-table-border-regexp)
-	 nil t))
-      (match-beginning 0)
-    (point-max)))
+  (let ((table (org-element-lineage (org-element-at-point) '(table) t)))
+    (and table
+	 (let ((type (org-element-property :type table)))
+	   (if (eq type 'org) (org-element-property :contents-end table)
+	     (save-excursion
+	       (goto-char (org-element-property :end table))
+	       (skip-chars-backward " \t\n")
+	       (line-beginning-position 2)))))))
 
 ;;;###autoload
 (defun org-table-justify-field-maybe (&optional new)

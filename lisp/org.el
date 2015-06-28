@@ -4494,56 +4494,49 @@ Normal means, no org-mode-specific context."
   (orgtbl-mode 1))
 
 (defun org-at-table-p (&optional table-type)
-  "Return t if the cursor is inside an org-type table.
-If TABLE-TYPE is non-nil, also check for table.el-type tables."
-  (if org-enable-table-editor
-      (save-excursion
-	(beginning-of-line 1)
-	(looking-at (if table-type org-table-any-line-regexp
-		      org-table-line-regexp)))
-    nil))
+  "Non-nil if the cursor is inside an Org table.
+If TABLE-TYPE is non-nil, also check for table.el-type tables.
+If `org-enable-table-editor' is nil, return nil unconditionally."
+  (and org-enable-table-editor
+       (save-excursion (beginning-of-line) (looking-at "[ \t]*[|+]"))
+       (let ((element (org-element-lineage (org-element-at-point) '(table) t)))
+	 (and element
+	      (or table-type (eq (org-element-property :type element) 'org))))))
 (defsubst org-table-p () (org-at-table-p))
 
 (defun org-at-table.el-p ()
-  "Return t if and only if we are at a table.el table."
-  (and (org-at-table-p 'any)
-       (save-excursion
-	 (goto-char (org-table-begin 'any))
-	 (looking-at org-table1-hline-regexp))))
+  "Non-nil when point is at a table.el table."
+  (and (save-excursion (beginning-of-line) (looking-at "[ \t]*[|+]"))
+       (let ((element (org-element-at-point)))
+	 (and (eq (org-element-type element) 'table)
+	      (eq (org-element-property :type element) 'table.el)))))
 
 (defun org-table-recognize-table.el ()
   "If there is a table.el table nearby, recognize it and move into it."
-  (if org-table-tab-recognizes-table.el
-      (if (org-at-table.el-p)
-	  (progn
-	    (beginning-of-line 1)
-	    (if (looking-at org-table-dataline-regexp)
-		nil
-	      (if (looking-at org-table1-hline-regexp)
-		  (progn
-		    (beginning-of-line 2)
-		    (if (looking-at org-table-any-border-regexp)
-			(beginning-of-line -1)))))
-	    (if (re-search-forward "|" (org-table-end t) t)
-		(progn
-		  (require 'table)
-		  (if (table--at-cell-p (point))
-		      t
-		    (message "recognizing table.el table...")
-		    (table-recognize-table)
-		    (message "recognizing table.el table...done")))
-	      (error "This should not happen"))
-	    t)
-	nil)
-    nil))
+  (when (and org-table-tab-recognizes-table.el (org-at-table.el-p))
+    (beginning-of-line)
+    (unless (or (looking-at org-table-dataline-regexp)
+		(not (looking-at org-table1-hline-regexp)))
+      (forward-line)
+      (when (looking-at org-table-any-border-regexp)
+	(forward-line -2)))
+    (if (re-search-forward "|" (org-table-end t) t)
+	(progn
+	  (require 'table)
+	  (if (table--at-cell-p (point)) t
+	    (message "recognizing table.el table...")
+	    (table-recognize-table)
+	    (message "recognizing table.el table...done")))
+      (error "This should not happen"))))
 
 (defun org-at-table-hline-p ()
-  "Return t if the cursor is inside a hline in a table."
-  (if org-enable-table-editor
-      (save-excursion
-	(beginning-of-line 1)
-	(looking-at org-table-hline-regexp))
-    nil))
+  "Non-nil when point is inside a hline in a table.
+Assume point is already in a table.  If `org-enable-table-editor'
+is nil, return nil unconditionally."
+  (and org-enable-table-editor
+       (save-excursion
+	 (beginning-of-line)
+	 (looking-at org-table-hline-regexp))))
 
 (defun org-table-map-tables (function &optional quietly)
   "Apply FUNCTION to the start of all tables in the buffer."
@@ -21535,17 +21528,8 @@ on context.  See the individual commands for more information."
   (interactive "P")
   (org-check-before-invisible-edit 'insert)
   (or (run-hook-with-args-until-success 'org-metareturn-hook)
-      (let* ((element (org-element-at-point))
-             (type (org-element-type element)))
-        (when (eq type 'table-row)
-          (setq element (org-element-property :parent element))
-          (setq type 'table))
-        (if (and (eq type 'table)
-                 (eq (org-element-property :type element) 'org)
-                 (>= (point) (org-element-property :contents-begin element))
-                 (< (point) (org-element-property :contents-end element)))
-            (call-interactively 'org-table-wrap-region)
-          (call-interactively 'org-insert-heading)))))
+      (call-interactively (if (org-at-table-p) #'org-table-wrap-region
+			    #'org-insert-heading))))
 
 ;;; Menu entries
 
