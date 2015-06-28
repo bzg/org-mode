@@ -330,11 +330,6 @@ Automatically means when TAB or RET or C-c C-c are pressed in the line."
   :group 'org-table-calculation
   :type 'boolean)
 
-(defcustom org-table-error-on-row-ref-crossing-hline t
-  "OBSOLETE VARIABLE, please see `org-table-relative-ref-may-cross-hline'."
-  :group 'org-table
-  :type 'boolean)
-
 (defcustom org-table-relative-ref-may-cross-hline t
   "Non-nil means relative formula references may cross hlines.
 Here are the allowed values:
