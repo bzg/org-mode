@@ -38,6 +38,17 @@
   (require 'cl))
 (require 'org)
 
+(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-contents "org-element" (element))
+(declare-function org-element-extract-element "org-element" (element))
+(declare-function org-element-interpret-data "org-element" (data))
+(declare-function org-element-lineage "org-element"
+		  (blob &optional types with-self))
+(declare-function org-element-map "org-element"
+		  (data types fun
+			&optional info first-match no-recursion with-affiliated))
+(declare-function org-element-property "org-element" (property element))
+
 (declare-function org-export-string-as "ox"
 		  (string backend &optional body-only ext-plist))
 (declare-function org-export-create-backend "ox")
