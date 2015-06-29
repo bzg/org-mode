@@ -158,7 +158,8 @@ specially in `org-element--object-lex'.")
 		;; Empty lines.
 		"$" "\\|"
 		;; Tables (any type).
-		"\\(?:|\\|\\+-[-+]\\)" "\\|"
+		"|" "\\|"
+		"\\+\\(?:-+\\+\\)+[ \t]*$" "\\|"
 		;; Comments, keyword-like or block-like constructs.
 		;; Blocks and keywords with dual values need to be
 		;; double-checked.
