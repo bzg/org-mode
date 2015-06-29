@@ -2890,20 +2890,23 @@ When nil, only the date will be recorded."
     (refile . "Refiled on %t")
     (clock-out . ""))
   "Headings for notes added to entries.
-The value is an alist, with the car being a symbol indicating the note
-context, and the cdr is the heading to be used.  The heading may also be the
-empty string.
-%t in the heading will be replaced by a time stamp.
-%T will be an active time stamp instead the default inactive one
-%d will be replaced by a short-format time stamp.
-%D will be replaced by an active short-format time stamp.
-%s will be replaced by the new TODO state, in double quotes.
-%S will be replaced by the old TODO state, in double quotes.
-%u will be replaced by the user name.
-%U will be replaced by the full user name.
 
-In fact, it is not a good idea to change the `state' entry, because
-agenda log mode depends on the format of these entries."
+The value is an alist, with the car being a symbol indicating the
+note context, and the cdr is the heading to be used.  The heading
+may also be the empty string.  The following placeholders can be
+used:
+
+  %t  a time stamp.
+  %T  an active time stamp instead the default inactive one
+  %d  a short-format time stamp.
+  %D  an active short-format time stamp.
+  %s  the new TODO state or time stamp (inactive), in double quotes.
+  %S  the old TODO state or time stamp (inactive), in double quotes.
+  %u  the user name.
+  %U  full user name.
+
+In fact, it is not a good idea to change the `state' entry,
+because Agenda Log mode depends on the format of these entries."
   :group  'org-todo
   :group  'org-progress
   :type '(list :greedy t
@@ -13694,12 +13697,23 @@ EXTRA is additional text that will be inserted into the notes buffer."
 		     (cons "%D" (format-time-string
 				 (org-time-stamp-format nil nil)
 				 org-log-note-effective-time))
-		     (cons "%s" (if org-log-note-state
-				    (concat "\"" org-log-note-state "\"")
-				  ""))
-		     (cons "%S" (if org-log-note-previous-state
-				    (concat "\"" org-log-note-previous-state "\"")
-				  "\"\"")))))
+		     (cons "%s" (cond
+				 ((not org-log-note-state) "")
+				 ((org-string-match-p org-ts-regexp
+						      org-log-note-state)
+				  (format "\"[%s]\""
+					  (substring org-log-note-state 1 -1)))
+				 (t (format "\"%s\"" org-log-note-state))))
+		     (cons "%S"
+			   (cond
+			    ((not org-log-note-previous-state) "")
+			    ((org-string-match-p org-ts-regexp
+						 org-log-note-previous-state)
+			     (format "\"[%s]\""
+				     (substring
+				      org-log-note-previous-state 1 -1)))
+			    (t (format "\"%s\""
+				       org-log-note-previous-state)))))))
 	(when lines (setq note (concat note " \\\\")))
 	(push note lines))
       (when (or current-prefix-arg org-note-abort)
