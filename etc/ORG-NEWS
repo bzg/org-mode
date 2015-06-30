@@ -398,6 +398,7 @@ set using the hh:mm:ss format.
 ~org-clone-subtree-with-time-shift~ now accepts 0 as an argument for
 the number of clones, which removes the repeater from the original
 subtree and creates one shifted, repeating clone.
+*** None-floating tables, graphics and blocks can have captions
 ** Miscellaneous
 *** Strip all meta data from ITEM special property
 ITEM special property does not contain TODO, priority or tags anymore.

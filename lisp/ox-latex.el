@@ -1109,21 +1109,37 @@ caption nor label, return the empty string.
 For non-floats, see `org-latex--wrap-label'."
   (let* ((label (org-latex--label element info nil t))
 	 (main (org-export-get-caption element))
+	 (attr (org-export-read-attribute :attr_latex element))
+	 (type (org-element-type element))
+	 (nonfloat (or (and (plist-member attr :float)
+			    (not (plist-get attr :float))
+			    main)
+		       (and (eq type 'src-block)
+			    (not (plist-get attr :float))
+			    (memq (plist-get info :latex-listings)
+				  '(nil minted)))))
 	 (short (org-export-get-caption element t))
-	 (caption-from-attr-latex
-	  (org-export-read-attribute :attr_latex element :caption)))
+	 (caption-from-attr-latex (plist-get attr :caption)))
     (cond
      ((org-string-nw-p caption-from-attr-latex)
       (concat caption-from-attr-latex "\n"))
      ((and (not main) (equal label "")) "")
      ((not main) (concat label "\n"))
      ;; Option caption format with short name.
-     (short (format "\\caption[%s]{%s%s}\n"
-		    (org-export-data short info)
-		    label
-		    (org-export-data main info)))
-     ;; Standard caption format.
-     (t (format "\\caption{%s%s}\n" label (org-export-data main info))))))
+     (t
+      (format (if nonfloat "\\captionof{%s}%s{%s%s}\n"
+		"\\caption%s%s{%s%s}\n")
+	      (if nonfloat
+		  (case type
+		    (paragraph "figure")
+		    (src-block (if (plist-get info :latex-listings)
+				   "listing"
+				 "figure"))
+		    (t (symbol-name type)))
+		"")
+	      (if short (format "[%s]" (org-export-data short info)) "")
+	      label
+	      (org-export-data main info))))))
 
 (defun org-latex-guess-inputenc (header)
   "Set the coding system in inputenc to what the buffer is.
@@ -1975,14 +1991,16 @@ used as a communication channel."
 	 ;; Retrieve latex attributes from the element around.
 	 (attr (org-export-read-attribute :attr_latex parent))
 	 (float (let ((float (plist-get attr :float)))
-		  (cond ((and (not float) (plist-member attr :float)) nil)
-			((string= float "wrap") 'wrap)
+		  (cond ((string= float "wrap") 'wrap)
 			((string= float "sideways") 'sideways)
 			((string= float "multicolumn") 'multicolumn)
 			((or float
 			     (org-element-property :caption parent)
 			     (org-string-nw-p (plist-get attr :caption)))
-			 'figure))))
+			 (if (and (plist-member attr :float) (not float))
+			     'nonfloat
+			   'figure))
+			((and (not float) (plist-member attr :float)) nil))))
 	 (placement
 	  (let ((place (plist-get attr :placement)))
 	    (cond
@@ -2087,6 +2105,13 @@ used as a communication channel."
 		      (if caption-above-p caption "")
 		      comment-include image-code
 		      (if caption-above-p "" caption)))
+      (nonfloat
+       (format "\\begin{center}
+%s%s
+%s\\end{center}"
+	       (if caption-above-p caption "")
+	       image-code
+	       (if caption-above-p "" caption)))
       (otherwise image-code))))
 
 (defun org-latex-link (link desc info)
@@ -2501,15 +2526,15 @@ contextual information."
        ((not listings)
 	(let* ((caption-str (org-latex--caption/label-string src-block info))
 	       (float-env
-		(cond ((and (not float) (plist-member attributes :float)) "%s")
-		      ((string= "multicolumn" float)
+		(cond ((string= "multicolumn" float)
 		       (format "\\begin{figure*}[%s]\n%s%%s\n%s\\end{figure*}"
 			       (plist-get info :latex-default-figure-position)
 			       (if caption-above-p caption-str "")
 			       (if caption-above-p "" caption-str)))
-		      ((or caption float)
-		       (format "\\begin{figure}[H]\n%%s\n%s\\end{figure}"
-			       caption-str))
+		      (caption (concat
+				(if caption-above-p caption-str "")
+				"%s"
+				(if caption-above-p "" (concat "\n" caption-str))))
 		      (t "%s"))))
 	  (format
 	   float-env
@@ -2529,23 +2554,14 @@ contextual information."
 	(let* ((caption-str (org-latex--caption/label-string src-block info))
 	       (float-env
 		(cond
-		 ((and (not float) (plist-member attributes :float) caption)
-		  (let ((caption
-			 (replace-regexp-in-string
-			  "\\\\caption" "\\captionof{listing}" caption-str
-			  t t)))
-		    (concat (and caption-above-p caption)
-			    "%%s"
-			    (and (not caption-above-p) (concat "\n" caption)))))
-		 ((and (not float) (plist-member attributes :float)) "%s")
 		 ((string= "multicolumn" float)
 		  (format "\\begin{listing*}\n%s%%s\n%s\\end{listing*}"
 			  (if caption-above-p caption-str "")
 			  (if caption-above-p "" caption-str)))
-		 ((or caption float)
-		  (format "\\begin{listing}[H]\n%s%%s\n%s\\end{listing}"
-			  (if caption-above-p caption-str "")
-			  (if caption-above-p "" caption-str)))
+		 (caption
+		  (concat (if caption-above-p caption-str "")
+			  "%s"
+			  (if caption-above-p "" (concat "\n" caption-str))))
 		 (t "%s")))
 	       (options (plist-get info :latex-minted-options))
 	       (body
@@ -2867,6 +2883,12 @@ This function assumes TABLE has `org' as its `:type' property and
 			  (if caption-above-p caption "")
 			  (when centerp "\\centering\n")
 			  fontsize))
+		 ((and (not float-env) caption)
+		  (concat
+		   (and centerp "\\begin{center}\n" )
+		   (if caption-above-p caption "")
+		   (cond ((and fontsize centerp) fontsize)
+			 (fontsize (concat "{" fontsize)))))
 		 (centerp (concat "\\begin{center}\n" fontsize))
 		 (fontsize (concat "{" fontsize)))
 		(cond ((equal "tabu" table-env)
@@ -2884,8 +2906,13 @@ This function assumes TABLE has `org' as its `:type' property and
 				 table-env)))
 		(cond
 		 (float-env
-		  (concat (if caption-above-p "" caption)
+		  (concat (if caption-above-p "" (concat "\n" caption))
 			  (format "\n\\end{%s}" float-env)))
+		 ((and (not float-env) caption)
+		  (concat
+		   (if caption-above-p "" (concat "\n" caption))
+		   (and centerp "\n\\end{center}")
+		   (and fontsize (not centerp) "}")))
 		 (centerp "\n\\end{center}")
 		 (fontsize "}")))))))
 
