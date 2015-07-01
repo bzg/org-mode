@@ -2200,7 +2200,8 @@ INFO is a plist used as a communication channel."
 		    (org-export-get-tags headline info))))
     (format "<a href=\"#%s\">%s</a>"
 	    ;; Label.
-	    (org-export-get-reference headline info)
+	    (or (org-element-property :CUSTOM_ID headline)
+		(org-export-get-reference headline info))
 	    ;; Body.
 	    (concat
 	     (and (not (org-export-low-level-p headline info))
