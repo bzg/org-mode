@@ -1633,7 +1633,7 @@ containing `:call', `:inside-header', `:arguments',
 		       (if (eobp) (point) (line-beginning-position))))
 	   (valid-value
 	    (string-match
-	     "\\([^()\n]+?\\)\\(?:\\[\\(.*?\\)\\]\\)?(\\(.*?\\))[ \t]*\\(.*\\)"
+	     "\\([^()\n]+?\\)\\(?:\\[\\(.*?\\)\\]\\)?(\\(.*\\))[ \t]*\\(.*\\)"
 	     value)))
       (list 'babel-call
 	    (nconc

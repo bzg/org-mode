@@ -410,10 +410,14 @@ Some other text
    (equal ":results output"
 	  (org-test-with-temp-text "#+CALL: test[:results output]()"
 	    (org-element-property :inside-header (org-element-at-point)))))
-  ;; Parse arguments.
+  ;; Parse arguments, which can be nested.
   (should
    (equal "n=4"
 	  (org-test-with-temp-text "#+CALL: test(n=4)"
+	    (org-element-property :arguments (org-element-at-point)))))
+  (should
+   (equal "test()"
+	  (org-test-with-temp-text "#+CALL: test(test())"
 	    (org-element-property :arguments (org-element-at-point)))))
   ;; Parse end header.
   (should
