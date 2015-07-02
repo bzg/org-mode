@@ -795,7 +795,7 @@ the minted package to `org-latex-packages-alist', for example
 using customize, or with
 
   \(require 'ox-latex)
-  \(add-to-list 'org-latex-packages-alist '(\"\" \"minted\"))
+  \(add-to-list 'org-latex-packages-alist '(\"newfloat\" \"minted\"))
 
 In addition, it is necessary to install pygments
 \(http://pygments.org), and to configure the variable
