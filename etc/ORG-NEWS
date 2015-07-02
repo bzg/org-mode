@@ -427,6 +427,8 @@ when ~org-link-search-must-match-exact-headline~ is not nil.
 *** ~org-latex-hyperref-template~, ~org-latex-title-command~ formatting
 New formatting keys are supported.  See the respective docstrings.
 Note, ~org-latex-hyperref-template~ has a new default value.
+*** ~float.sty~ has been removed from ~org-latex-default-packages-alist~
+If you require this package add it to ~org-latex-packages-alist~.
 * Version 8.2
 
 ** Incompatible changes

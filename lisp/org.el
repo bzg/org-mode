@@ -4075,7 +4075,6 @@ header, or they will be appended."
     (""     "graphicx"  t)
     (""     "grffile"   t)
     (""     "longtable" nil)
-    (""     "float"     nil)
     (""     "wrapfig"   nil)
     (""     "rotating"  nil)
     ("normalem" "ulem"  t)
@@ -4100,7 +4099,7 @@ Org mode to function properly:
 - graphicx: for including images
 - grffile: allow periods and spaces in graphics file names
 - longtable: For multipage tables
-- float, wrapfig: for figure placement
+- wrapfig: for figure placement
 - rotating: for sideways figures and tables
 - ulem: for underline and strike-through
 - amsmath: for subscript and superscript and math environments
