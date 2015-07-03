@@ -15798,6 +15798,31 @@ strings."
 	  ;; Return value.
 	  (append (get-text-property beg 'org-summaries) props))))))
 
+(defun org-property--local-values (property literal-nil)
+  "Return value for PROPERTY in current entry.
+Value is a list whose care is the base value for PROPERTY and cdr
+a list of accumulated values.  Return nil if neither is found in
+the entry.  Also return nil when PROPERTY is set to \"nil\",
+unless LITERAL-NIL is non-nil."
+  (let ((range (org-get-property-block)))
+    (when range
+      (goto-char (car range))
+      (let* ((case-fold-search t)
+	     (end (cdr range))
+	     (value
+	      ;; Base value.
+	      (save-excursion
+		(let ((v (and (re-search-forward
+			       (org-re-property property nil t) end t)
+			      (org-match-string-no-properties 3))))
+		  (list (if literal-nil v (org-not-nil v)))))))
+	;; Find additional values.
+	(let* ((property+ (org-re-property (concat property "+") nil t)))
+	  (while (re-search-forward property+ end t)
+	    (push (org-match-string-no-properties 3) value)))
+	;; Return final values.
+	(and (not (equal value '(nil))) (nreverse value))))))
+
 (defun org-entry-get (pom property &optional inherit literal-nil)
   "Get value of PROPERTY for entry or content at point-or-marker POM.
 
@@ -15825,35 +15850,9 @@ value higher up the hierarchy."
 	   (or (not (eq inherit 'selective)) (org-property-inherit-p property)))
       (org-entry-get-with-inheritance property literal-nil))
      (t
-      (let ((range (org-get-property-block)))
-	(when range
-	  (let* ((case-fold-search t)
-		 (end (cdr range))
-		 (props
-		  (let ((global
-			 (or (assoc-string property org-file-properties t)
-			     (assoc-string property org-global-properties t)
-			     (assoc-string
-			      property org-global-properties-fixed t))))
-		    ;; Make sure to not re-use GLOBAL as
-		    ;; `org--update-property-plist' would alter it by
-		    ;; side-effect.
-		    (and global (list (cons property (cdr global))))))
-		 (find-value
-		  (lambda (key)
-		    (when (re-search-forward (org-re-property key nil t) end t)
-		      (setq props
-			    (org--update-property-plist
-			     key (org-match-string-no-properties 3) props))))))
-	    (goto-char (car range))
-	    ;; Find base value.
-	    (save-excursion (funcall find-value property))
-	    ;; Find additional values.
-	    (let ((property+ (concat property "+")))
-	      (while (funcall find-value property+)))
-	    ;; Return final value.
-	    (let ((val (cdr (assoc-string property props t))))
-	      (if literal-nil val (org-not-nil val))))))))))
+      (let* ((local (org-property--local-values property literal-nil))
+	     (value (and local (mapconcat #'identity (delq nil local) " "))))
+	(if literal-nil value (org-not-nil value)))))))
 
 (defun org-property-or-variable-value (var &optional inherit)
   "Check if there is a property fixing the value of VAR.
@@ -15961,21 +15960,32 @@ If the value found is \"nil\", return nil to show that the property
 should be considered as undefined (this is the meaning of nil here).
 However, if LITERAL-NIL is set, return the string value \"nil\" instead."
   (move-marker org-entry-property-inherited-from nil)
-  (let (value)
-    (org-with-wide-buffer
+  (org-with-wide-buffer
+   (let (value)
      (catch 'exit
        (while t
-	 (when (setq value (org-entry-get nil property nil literal-nil))
-	   (org-back-to-heading t)
-	   (move-marker org-entry-property-inherited-from (point))
-	   (throw 'exit nil))
-	 (or (org-up-heading-safe) (throw 'exit nil)))))
-    (unless value
-      (setq value
-	    (cdr (or (assoc-string property org-file-properties t)
-		     (assoc-string property org-global-properties t)
-		     (assoc-string property org-global-properties-fixed t)))))
-    (if literal-nil value (org-not-nil value))))
+	 (let ((v (org-property--local-values property literal-nil)))
+	   (when v
+	     (setq value
+		   (concat (mapconcat #'identity (delq nil v) " ")
+			   (and value " ")
+			   value)))
+	   (cond
+	    ((car v)
+	     (org-back-to-heading t)
+	     (move-marker org-entry-property-inherited-from (point))
+	     (throw 'exit nil))
+	    ((org-up-heading-safe))
+	    (t
+	     (let ((global
+		    (cdr (or (assoc-string property org-file-properties t)
+			     (assoc-string property org-global-properties t)
+			     (assoc-string property org-global-properties-fixed t)))))
+	       (cond ((not global))
+		     (value (setq value (concat global " " value)))
+		     (t (setq value global))))
+	     (throw 'exit nil))))))
+     (if literal-nil value (org-not-nil value)))))
 
 (defvar org-property-changed-functions nil
   "Hook called when the value of a property has changed.

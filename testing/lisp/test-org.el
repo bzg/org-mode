@@ -3201,7 +3201,8 @@ Paragraph<point>"
   (should-not
    (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:"
      (org-entry-get (point) "B" nil t)))
-  ;; Handle inheritance, when allowed.
+  ;; Handle inheritance, when allowed.  Include extended values and
+  ;; possibly global values.
   (should
    (equal
     "1"
@@ -3216,7 +3217,25 @@ Paragraph<point>"
   (should-not
    (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:\n** <point>H2"
      (let ((org-use-property-inheritance nil))
-       (org-entry-get (point) "A" 'selective)))))
+       (org-entry-get (point) "A" 'selective))))
+  (should
+   (equal
+    "1 2"
+    (org-test-with-temp-text
+	"* H\n:PROPERTIES:\n:A: 1\n:END:\n** H2\n:PROPERTIES:\n:A+: 2\n:END:"
+      (org-entry-get (point-max) "A" t))))
+  (should
+   (equal "1"
+	  (org-test-with-temp-text
+	      "#+PROPERTY: A 0\n* H\n:PROPERTIES:\n:A: 1\n:END:"
+	    (org-mode-restart)
+	    (org-entry-get (point-max) "A" t))))
+  (should
+   (equal "0 1"
+	  (org-test-with-temp-text
+	      "#+PROPERTY: A 0\n* H\n:PROPERTIES:\n:A+: 1\n:END:"
+	    (org-mode-restart)
+	    (org-entry-get (point-max) "A" t)))))
 
 (ert-deftest test-org/entry-properties ()
   "Test `org-entry-properties' specifications."
