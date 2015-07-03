@@ -4115,9 +4115,9 @@ you might be loading some other package that conflicts with one
 of the default packages.  Each element is either a cell or
 a string.
 
-A cell is of the format:
+A cell is of the format
 
-  \( \"options\" \"package\" SNIPPET-FLAG).
+  \(\"options\" \"package\" SNIPPET-FLAG)
 
 If SNIPPET-FLAG is non-nil, the package also needs to be included
 when compiling LaTeX snippets into images for inclusion into
@@ -4128,7 +4128,8 @@ A string will be inserted as-is in the header of the document."
   :group 'org-export-latex
   :set 'org-set-packages-alist
   :get 'org-get-packages-alist
-  :version "24.1"
+  :version "25.1"
+  :package-version '(Org . "8.3")
   :type '(repeat
 	  (choice
 	   (list :tag "options/package pair"
