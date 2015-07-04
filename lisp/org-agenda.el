@@ -2070,7 +2070,7 @@ When nil, `q' will kill the single agenda buffer."
       (setq org-agenda-sticky new-value)
       (org-agenda-kill-all-agenda-buffers)
       (and (org-called-interactively-p 'interactive)
-	   (message "Sticky agenda was %s"
+	   (message "Sticky agenda %s"
 		    (if org-agenda-sticky "enabled" "disabled"))))))
 
 (defvar org-agenda-buffer nil
