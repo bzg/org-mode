@@ -4068,7 +4068,6 @@ header, or they will be appended."
 (defcustom org-latex-default-packages-alist
   '(("AUTO" "inputenc"  t)
     ("T1"   "fontenc"   t)
-    (""     "fixltx2e"  nil)
     (""     "graphicx"  t)
     (""     "grffile"   t)
     (""     "longtable" nil)
@@ -4089,7 +4088,6 @@ The packages in this list are needed by one part or another of
 Org mode to function properly:
 
 - inputenc, fontenc:  for basic font and character selection
-- fixltx2e: Important patches of LaTeX itself
 - graphicx: for including images
 - grffile: allow periods and spaces in graphics file names
 - longtable: For multipage tables
