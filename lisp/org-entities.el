@@ -296,11 +296,7 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
      ("pound" "\\pounds{}" nil "&pound;" "pound" "£" "£")
      ("yen" "\\textyen{}" nil "&yen;" "yen" "¥" "¥")
      ("euro" "\\texteuro{}" nil "&euro;" "EUR" "EUR" "€")
-     ("EUR" "\\EUR{}" nil "&euro;" "EUR" "EUR" "€")
-     ("EURdig" "\\EURdig{}" nil "&euro;" "EUR" "EUR" "€")
-     ("EURhv" "\\EURhv{}" nil "&euro;" "EUR" "EUR" "€")
-     ("EURcr" "\\EURcr{}" nil "&euro;" "EUR" "EUR" "€")
-     ("EURtm" "\\EURtm{}" nil "&euro;" "EUR" "EUR" "€")
+     ("EUR" "\\texteuro{}" nil "&euro;" "EUR" "EUR" "€")
 
      "** Property Marks"
      ("copy" "\\textcopyright{}" nil "&copy;" "(c)" "©" "©")

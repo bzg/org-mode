@@ -4080,7 +4080,6 @@ header, or they will be appended."
     ("normalem" "ulem"  t)
     (""     "amsmath"   t)
     (""     "textcomp"  t)
-    (""     "marvosym"  t)
     (""     "wasysym"   t)
     (""     "amssymb"   t)
     (""     "capt-of"   nil)
@@ -4102,7 +4101,7 @@ Org mode to function properly:
 - rotating: for sideways figures and tables
 - ulem: for underline and strike-through
 - amsmath: for subscript and superscript and math environments
-- textcomp, marvosymb, wasysym, amssymb: for various symbols used
+- textcomp, wasysym, amssymb: for various symbols used
   for interpreting the entities in `org-entities'.  You can skip
   some of these packages if you don't use any of their symbols.
 - capt-of: for captions outside of floats
