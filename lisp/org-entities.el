@@ -495,9 +495,9 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
      "** Smilies"
      ("smile" "\\smile" t "&smile;" ":-)" ":-)" "⌣")
      ("frown" "\\frown" t "&frown;" ":-(" ":-(" "⌢")
-     ("smiley" "\\smiley{}" nil "&#9786;" ":-)" ":-)" "☺")
-     ("blacksmile" "\\blacksmiley{}" nil "&#9787;" ":-)" ":-)" "☻")
-     ("sad" "\\frownie{}" nil "&#9785;" ":-(" ":-(" "☹")
+     ("smiley" "\\ddot\\smile" t "&#9786;" ":-)" ":-)" "☺")
+     ("blacksmile" "\\ddot\\smile" t "&#9787;" ":-)" ":-)" "☻")
+     ("sad" "\\ddot\\frown" t "&#9785;" ":-(" ":-(" "☹")
 
      "** Suits"
      ("clubs" "\\clubsuit" t "&clubs;" "[clubs]" "[clubs]" "♣")
