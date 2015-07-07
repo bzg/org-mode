@@ -338,6 +338,8 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
      ("vee" "\\vee" t "&or;" "[logical or]" "[logical or]" "∨")
      ("cap" "\\cap" t "&cap;" "[intersection]" "[intersection]" "∩")
      ("cup" "\\cup" t "&cup;" "[union]" "[union]" "∪")
+     ("smile" "\\smile" t "&smile;" "[cup product]" "[cup product]" "⌣")
+     ("frown" "\\frown" t "&frown;" "[Cap product]" "[cap product]" "⌢")
      ("int" "\\int" t "&int;" "[integral]" "[integral]" "∫")
      ("therefore" "\\therefore" t "&there4;" "[therefore]" "[therefore]" "∴")
      ("there4" "\\therefore" t "&there4;" "[therefore]" "[therefore]" "∴")
@@ -493,8 +495,6 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
      ("rlm" "" nil "&rlm;" "" "" "‏")
 
      "** Smilies"
-     ("smile" "\\smile" t "&smile;" ":-)" ":-)" "⌣")
-     ("frown" "\\frown" t "&frown;" ":-(" ":-(" "⌢")
      ("smiley" "\\ddot\\smile" t "&#9786;" ":-)" ":-)" "☺")
      ("blacksmile" "\\ddot\\smile" t "&#9787;" ":-)" ":-)" "☻")
      ("sad" "\\ddot\\frown" t "&#9785;" ":-(" ":-(" "☹")
