@@ -4084,8 +4084,7 @@ header, or they will be appended."
     (""     "wasysym"   t)
     (""     "amssymb"   t)
     (""     "capt-of"   nil)
-    (""     "hyperref"  nil)
-    "\\tolerance=1000")
+    (""     "hyperref"  nil))
   "Alist of default packages to be inserted in the header.
 
 Change this only if one of the packages here causes an
