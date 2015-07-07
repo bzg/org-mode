@@ -498,6 +498,7 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
      ("smiley" "\\ddot\\smile" t "&#9786;" ":-)" ":-)" "☺")
      ("blacksmile" "\\ddot\\smile" t "&#9787;" ":-)" ":-)" "☻")
      ("sad" "\\ddot\\frown" t "&#9785;" ":-(" ":-(" "☹")
+     ("frowny" "\\ddot\\frown" t "&#9785;" ":-(" ":-(" "☹")
 
      "** Suits"
      ("clubs" "\\clubsuit" t "&clubs;" "[clubs]" "[clubs]" "♣")
