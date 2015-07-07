@@ -429,8 +429,10 @@ when ~org-link-search-must-match-exact-headline~ is not nil.
 *** ~org-latex-hyperref-template~, ~org-latex-title-command~ formatting
 New formatting keys are supported.  See the respective docstrings.
 Note, ~org-latex-hyperref-template~ has a new default value.
-*** ~float.sty~ has been removed from ~org-latex-default-packages-alist~
-If you require this package add it to ~org-latex-packages-alist~.
+*** ~float, wasysym, marvosym~ are removed from ~org-latex-default-packages-alist~
+If you require any of these package add them to your preamble via
+~org-latex-packages-alist~. Org also uses default LaTeX ~\tolerance~
+now.
 * Version 8.2
 
 ** Incompatible changes
@@ -1506,7 +1508,7 @@ See http://orgmode.org/elpa/
    | =C-c C-x E=     | =E=    | [[doc::org-inc-effort][org-inc-effort]]              |
    |                 | =#=    | [[doc::org-toggle-comment][org-toggle-comment]]          |
    |                 | =:=    | [[doc::org-columns][org-columns]]                 |
-   |                 | =W=    | Set =APPT_WARNTIME=         |
+   |                 | =W=    | Set =APPT_WARNTIME=          |
    | =k=             |        | [[doc::org-agenda-capture][org-agenda-capture]]          |
    | C-c ,           | ,      | [[doc::org-priority][org-priority]]                |
 
