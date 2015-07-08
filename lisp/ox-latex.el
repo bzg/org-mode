@@ -1064,6 +1064,21 @@ during latex export it will output
 (defconst org-latex-compilers '("pdflatex" "xelatex" "lualatex")
   "Known LaTeX programs.")
 
+(defcustom org-latex-bib-compiler "bibtex"
+  "Command used to process a LaTeX files bibliography.
+
+The shorthand %bib in `org-latex-pdf-process' is replaced with
+this value.
+
+A better approach is to use a compiler suit such as `latexmk'.
+"
+  :group 'org-export-latex
+  :type '(choice (const :tag "BibTeX" "bibtex")
+		 (const :tag "Biber" "biber")
+		 (string :tag "Other process"))
+  :version "25.1"
+  :package-version '(Org . "9.0"))
+
 (defcustom org-latex-pdf-process
   '("%latex -interaction nonstopmode -output-directory %o %f"
     "%latex -interaction nonstopmode -output-directory %o %f"
@@ -1073,7 +1088,8 @@ This is a list of strings, each of them will be given to the
 shell as a command.  %f in the command will be replaced by the
 full file name, %b by the file base name (i.e. without directory
 and extension parts), %o by the base directory of the file,
-and %latex is the LaTeX compiler (see `org-latex-compiler').
+%latex is the LaTeX compiler (see `org-latex-compiler'), and %bib
+is the BibTeX-like compiler (see `org-latex-bib-compiler').
 
 The reason why this is a list is that it usually takes several
 runs of `pdflatex', maybe mixed with a call to `bibtex'.  Org
@@ -1101,7 +1117,7 @@ file name as its single argument."
 		  "%latex -interaction nonstopmode -output-directory %o %f"))
 	  (const :tag "latex,bibtex,latex,latex"
 		 ("%latex -interaction nonstopmode -output-directory %o %f"
-		  "bibtex %b"
+		  "%bib %b"
 		  "%latex -interaction nonstopmode -output-directory %o %f"
 		  "%latex -interaction nonstopmode -output-directory %o %f"))
 	  (const :tag "texi2dvi"
@@ -3494,13 +3510,15 @@ Return PDF file name or an error if it couldn't be produced."
 	  (dolist (command org-latex-pdf-process)
 	    (shell-command
 	     (replace-regexp-in-string
-	      "%latex" (shell-quote-argument compiler)
+	      "%bib" (shell-quote-argument org-latex-bib-compiler)
 	      (replace-regexp-in-string
-	       "%b" (shell-quote-argument base-name)
+	       "%latex" (shell-quote-argument compiler)
 	       (replace-regexp-in-string
-		"%f" (shell-quote-argument full-name)
+		"%b" (shell-quote-argument base-name)
 		(replace-regexp-in-string
-		 "%o" (shell-quote-argument out-dir) command t t) t t) t t) t)
+		 "%f" (shell-quote-argument full-name)
+		 (replace-regexp-in-string
+		  "%o" (shell-quote-argument out-dir) command t t) t t) t t) t) t)
 	     outbuf))
 	  ;; Collect standard errors from output buffer.
 	  (setq warnings (and (not snippet)
