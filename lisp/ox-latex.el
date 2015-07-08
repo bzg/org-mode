@@ -204,6 +204,94 @@
     ("uk" . "ukrainian"))
   "Alist between language code and corresponding Babel option.")
 
+(defconst org-latex-polyglossia-language-alist
+  '(("am" "amharic")
+    ("ast" "asturian")
+    ("ar" "arabic")
+    ("bo" "tibetan")
+    ("bn" "bengali")
+    ("bg" "bulgarian")
+    ("br" "breton")
+    ("bt-br" "brazilian")
+    ("ca" "catalan")
+    ("cop" "coptic")
+    ("cs" "czech")
+    ("cy" "welsh")
+    ("da" "danish")
+    ("de" "german" "german")
+    ("de-at" "german" "austrian")
+    ("de-de" "german" "german")
+    ("dv" "divehi")
+    ("el" "greek")
+    ("en" "english" "usmax")
+    ("en-au" "english" "australian")
+    ("en-gb" "english" "uk")
+    ("en-nz" "english" "newzealand")
+    ("en-us" "english" "usmax")
+    ("eo" "esperanto")
+    ("es" "spanish")
+    ("et" "estonian")
+    ("eu" "basque")
+    ("fa" "farsi")
+    ("fi" "finnish")
+    ("fr" "french")
+    ("fu" "friulan")
+    ("ga" "irish")
+    ("gd" "scottish")
+    ("gl" "galician")
+    ("he" "hebrew")
+    ("hi" "hindi")
+    ("hr" "croatian")
+    ("hu" "magyar")
+    ("hy" "armenian")
+    ("id" "bahasai")
+    ("ia" "interlingua")
+    ("is" "icelandic")
+    ("it" "italian")
+    ("kn" "kannada")
+    ("la" "latin" "modern")
+    ("la-modern" "latin" "modern")
+    ("la-classic" "latin" "classic")
+    ("la-medieval" "latin" "medieval")
+    ("lo" "lao")
+    ("lt" "lithuanian")
+    ("lv" "latvian")
+    ("mr" "maranthi")
+    ("ml" "malayalam")
+    ("nl" "dutch")
+    ("nb" "norsk")
+    ("nn" "nynorsk")
+    ("nko" "nko")
+    ("no" "norsk")
+    ("oc" "occitan")
+    ("pl" "polish")
+    ("pms" "piedmontese")
+    ("pt" "portuges")
+    ("rm" "romansh")
+    ("ro" "romanian")
+    ("ru" "russian")
+    ("sa" "sanskrit")
+    ("hsb" "usorbian")
+    ("dsb" "lsorbian")
+    ("sk" "slovak")
+    ("sl" "slovenian")
+    ("se" "samin")
+    ("sq" "albanian")
+    ("sr" "serbian")
+    ("sv" "swedish")
+    ("syr" "syriac")
+    ("ta" "tamil")
+    ("te" "telugu")
+    ("th" "thai")
+    ("tk" "turkmen")
+    ("tr" "turkish")
+    ("uk" "ukrainian")
+    ("ur" "urdu")
+    ("vi" "vietnamese"))
+  "Alist between language code and corresponding Polyglossia option")
+
+
+
 (defconst org-latex-table-matrix-macros '(("bordermatrix" . "\\cr")
 					  ("qbordermatrix" . "\\cr")
 					  ("kbordermatrix" . "\\\\"))
@@ -1195,6 +1283,57 @@ Return the new header."
 		    ", ")
 	 t nil header 1)))))
 
+(defun org-latex-guess-polyglossia-language (header info)
+  "Set the Polyglossia language according to the LANGUAGE keyword.
+
+HEADER is the LaTeX header string.  INFO is the plist used as
+a communication channel.
+
+Insertion of guessed language only happens when the Polyglossia
+package has been explicitly loaded.
+
+The argument to Polyglossia may be \"AUTO\" which is then
+replaced with the language of the document or
+`org-export-default-language'.  Note, the language is really set
+using \setdefaultlanguage and not as an option to the package.
+
+Return the new header."
+  (let ((language (plist-get info :language))
+	result)
+    ;; If no language is set or Polyglossia is not loaded, return
+    ;; HEADER as-is.
+    (if (or (not (org-string-nw-p language))
+	    (not (string-match
+		  "\\\\usepackage\\(?:\\[\\([^]]+?\\)\\]\\){polyglossia}\n" header)))
+	header
+      (let* ((options (org-string-nw-p (match-string 1 header)))
+	     (languages (when options
+			  (save-match-data
+			    ;; Reverse as the last loaded language is
+			    ;; the main language.
+			    (reverse
+			     (delete-dups
+			      (org-split-string
+			       (replace-regexp-in-string
+				"AUTO" language options t)
+			       ",[ \t]*"))))))
+	     (main-language-set-p
+	      (string-match-p "\\\\setmainlanguage{.*?}" header)))
+	(replace-match
+	 (concat "\\usepackage{polyglossia}\n"
+		 (loop for l in languages concat
+		       (let ((lang (or (assoc l org-latex-polyglossia-language-alist)
+				       l)))
+			 (format (if main-language-set-p
+				     "\\setotherlanguage%s{%s}\n"
+				   (progn (setq main-language-set-p t)
+					  "\\setmainlanguage%s{%s}\n"))
+				 (if (and (listp lang) (eq 3 (length lang)))
+				     (format "[variant=%s]" (nth 2 lang))
+				   "")
+				 (nth 1 lang)))))
+	 t t header 0)))))
+
 (defun org-latex--find-verb-separator (s)
   "Return a character not used in string S.
 This is used to choose a separator for constructs like \\verb."
@@ -1349,16 +1488,18 @@ holding export options."
 		     class-options header t nil 1)))))
        (if (not document-class-string)
 	   (user-error "Unknown LaTeX class `%s'" class)
-	 (org-latex-guess-babel-language
-	  (org-latex-guess-inputenc
-	   (org-element-normalize-string
-	    (org-splice-latex-header
-	     document-class-string
-	     org-latex-default-packages-alist
-	     org-latex-packages-alist nil
-	     (concat (org-element-normalize-string
-		      (plist-get info :latex-header))
-		     (plist-get info :latex-header-extra)))))
+	 (org-latex-guess-polyglossia-language
+	  (org-latex-guess-babel-language
+	   (org-latex-guess-inputenc
+	    (org-element-normalize-string
+	     (org-splice-latex-header
+	      document-class-string
+	      org-latex-default-packages-alist
+	      org-latex-packages-alist nil
+	      (concat (org-element-normalize-string
+		       (plist-get info :latex-header))
+		      (plist-get info :latex-header-extra)))))
+	   info)
 	  info)))
      ;; Possibly limit depth for headline numbering.
      (let ((sec-num (plist-get info :section-numbers)))
