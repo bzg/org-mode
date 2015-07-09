@@ -40,11 +40,6 @@
 ;; it in org-mode, because the Byte compiler evaluates (featurep 'xemacs)
 ;; at compilation time and can therefore optimize code better.
 (defconst org-xemacs-p (featurep 'xemacs))
-(defconst org-format-transports-properties-p
-  (let ((x "a"))
-    (add-text-properties 0 1 '(test t) x)
-    (get-text-property 0 'test (format "%s" x)))
-  "Does format transport text properties?")
 
 (defun org-compatible-face (inherits specs)
   "Make a compatible face specification.

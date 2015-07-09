@@ -352,7 +352,7 @@
 	    (buffer-string))))
   (should
    (equal "#+name: table\n| a |\n"
-	  (org-test-with-temp-text "#+name: table\n| a |"
+	  (org-test-with-temp-text "#+name: table\n| a |\n"
 	    (org-fill-paragraph)
 	    (buffer-string))))
   ;; At a paragraph, preserve line breaks.
