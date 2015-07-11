@@ -17561,7 +17561,8 @@ The variable `date' is bound by the calendar when this is called."
     (if (org-diary-sexp-entry (match-string 1 s) "" date)
 	daynr
       (+ daynr 1000)))
-   ((and daynr (string-match "\\+[0-9]+[hdwmy]" s))
+   ((and daynr (string-match "\\+\\([0-9]+\\)[hdwmy]" s)
+	 (> (string-to-number (match-string 1 s)) 0))
     (org-closest-date s (if (and (boundp 'daynr) (integerp daynr)) daynr
 			  (time-to-days (current-time))) (match-string 0 s)
 			  prefer show-all))
@@ -17677,9 +17678,10 @@ When SHOW-ALL is nil, only return the current occurrence of a time stamp."
 
       (if (<= cday sday) (throw 'exit sday))
 
-      (if (string-match "\\(\\+[0-9]+\\)\\([hdwmy]\\)" change)
-	  (setq dn (string-to-number (match-string 1 change))
-		dw (cdr (assoc (match-string 2 change) a1)))
+      (when (string-match "\\(\\+[0-9]+\\)\\([hdwmy]\\)" change)
+	(setq dn (string-to-number (match-string 1 change))
+	      dw (cdr (assoc (match-string 2 change) a1))))
+      (unless (and dn (> dn 0))
 	(user-error "Invalid change specifier: %s" change))
       (if (eq dw 'week) (setq dw 'day dn (* 7 dn)))
       (cond
