@@ -334,8 +334,7 @@ for the JavaScript code in this tag.
   td.org-left   { text-align: left;   }
   td.org-center { text-align: center; }
   dt { font-weight: bold; }
-  .footpara:nth-child(2) { display: inline; }
-  .footpara { display: block; }
+  .footpara { display: inline; }
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
@@ -1649,7 +1648,7 @@ INFO is a plist used as a communication channel."
 	  (loop for (n type raw) in fn-alist collect
 		(cons n (if (eq (org-element-type raw) 'org-data)
 			    (org-trim (org-export-data raw info))
-			  (format "<p class=\"footpara\">%s</p>"
+			  (format "<div class=\"footpara\">%s</div>"
 				  (org-trim (org-export-data raw info))))))))
     (when fn-alist
       (format
