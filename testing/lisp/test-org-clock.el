@@ -85,12 +85,21 @@ contents.  The clocktable doesn't appear in the buffer."
 ;;; Clocktable
 
 (defun test-org-clock/clocktable (string)
-  (let ((org-clock-total-time-cell-format "*%s*"))
+  (let* ((org-clock-total-time-cell-format "*%s*")
+	 (time (decode-time (current-time)))
+	 (oclock (format "%d:00" (nth 2 time)))
+	 (hour-before
+	  (let ((old (decode-time
+		      (apply #'encode-time
+			     (append (list 0 0 (1- (nth 2 time)))
+				     (nthcdr 3 time))))))
+	    (concat (and (= (nth 2 time) 0) "-1d ")
+		    (format "%d:00" (nth 2 old))))))
     ;; Install Clock lines in "Foo".
     (search-forward "** Foo")
     (forward-line)
     (insert (org-test-clock-create-clock "-2d 8:00" "-2d 13:00"))
-    (insert (org-test-clock-create-clock ". 8:00" "13:00"))
+    (insert (org-test-clock-create-clock hour-before oclock))
     ;; Install Clock lines in "Bar".
     (search-forward "** Bar")
     (forward-line)
@@ -98,13 +107,11 @@ contents.  The clocktable doesn't appear in the buffer."
     (insert (org-test-clock-create-clock "-2d 15:00" "-2d 18:00"))
     (insert (org-test-clock-create-clock "-1d 8:00" "-1d 13:00"))
     (insert (org-test-clock-create-clock "-1d 15:00" "-1d 18:00"))
-    (insert (org-test-clock-create-clock
-	     (let ((time (decode-time (current-time))))
-	       (format ". %d:%d" (1- (nth 2 time)) (nth 1 time)))))
-    ;; Previous two days.
+    (insert (org-test-clock-create-clock hour-before))
     (goto-char (point-min))
     (forward-line)
     (test-org-clock-clocktable-contents-at-point string)))
+
 (ert-deftest test-org-clock/clocktable1 ()
   "Test clocktable specifications."
   ;; Relative time: Previous two days.
@@ -112,28 +119,29 @@ contents.  The clocktable doesn't appear in the buffer."
    (equal
     "| Headline                     | Time    |       |
 |------------------------------+---------+-------|
-| *Total time*                 | *16:00* |       |
+| *Total time*                 | *17:00* |       |
 |------------------------------+---------+-------|
-| Relative times in clocktable | 16:00   |       |
-| Foo                          |         |  5:00 |
+| Relative times in clocktable | 17:00   |       |
+| Foo                          |         |  6:00 |
 | Bar                          |         | 11:00 |
 "
     (org-test-with-temp-text
      "* Relative times in clocktable\n** Foo\n** Bar\n"
      (test-org-clock/clocktable
       ":tstart \"<-2d>\" :tend \"<today>\" :indent nil")))))
+
 (ert-deftest test-org-clock/clocktable2 ()
   "Test clocktable specifications."
   ;; Relative time: Yesterday until now.
   (should
    (equal
-    "| Headline                     | Time    |      |
-|------------------------------+---------+------|
-| *Total time*                 | *13:00* |      |
-|------------------------------+---------+------|
-| Relative times in clocktable | 13:00   |      |
-| Foo                          |         | 5:00 |
-| Bar                          |         | 8:00 |
+    "| Headline                     | Time   |      |
+|------------------------------+--------+------|
+| *Total time*                 | *9:00* |      |
+|------------------------------+--------+------|
+| Relative times in clocktable | 9:00   |      |
+| Foo                          |        | 1:00 |
+| Bar                          |        | 8:00 |
 "
     (org-test-with-temp-text
      "* Relative times in clocktable\n** Foo\n** Bar\n"
@@ -147,10 +155,10 @@ contents.  The clocktable doesn't appear in the buffer."
    (equal
     "| Headline                     | Time    |       |
 |------------------------------+---------+-------|
-| *Total time*                 | *25:00* |       |
+| *Total time*                 | *21:00* |       |
 |------------------------------+---------+-------|
-| Relative times in clocktable | 25:00   |       |
-| Foo                          |         | 10:00 |
+| Relative times in clocktable | 21:00   |       |
+| Foo                          |         |  6:00 |
 | Bar                          |         | 15:00 |
 "
     (org-test-with-temp-text
