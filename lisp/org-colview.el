@@ -158,94 +158,99 @@ This is the compiled version of the format.")
 (defun org-columns-display-here (&optional props dateline)
   "Overlay the current line with column display."
   (interactive)
-  (let* ((fmt org-columns-current-fmt-compiled)
-	 (beg (point-at-bol))
-	 (level-face (save-excursion
-		       (beginning-of-line 1)
-		       (and (looking-at "\\(\\**\\)\\(\\* \\)")
-			    (org-get-level-face 2))))
-	 (ref-face (or level-face
-		       (and (eq major-mode 'org-agenda-mode)
-			    (get-text-property (point-at-bol) 'face))
-		       'default))
-	 (color (list :foreground (face-attribute ref-face :foreground)))
-	 (font (list :height (face-attribute 'default :height)
-		     :family (face-attribute 'default :family)))
-	 (face (list color font 'org-column ref-face))
-	 (face1 (list color font 'org-agenda-column-dateline ref-face))
-	 (cphr (get-text-property (point-at-bol) 'org-complex-heading-regexp))
-	 pom property ass width f fc string fm ov column val modval s2 title calc)
-    ;; Check if the entry is in another buffer.
-    (unless props
-      (if (eq major-mode 'org-agenda-mode)
-	  (setq pom (or (org-get-at-bol 'org-hd-marker)
-			(org-get-at-bol 'org-marker))
-		props (if pom (org-entry-properties pom) nil))
-	(setq props (org-entry-properties nil))))
-    ;; Walk the format
-    (while (setq column (pop fmt))
-      (setq property (car column)
-	    title (nth 1 column)
-	    ass (assoc-string property props t)
-	    width (or (cdr
-		       (assoc-string property org-columns-current-maxwidths t))
-		      (nth 2 column)
-		      (length property))
-	    f (format "%%-%d.%ds | " width width)
-	    fm (nth 4 column)
-	    fc (nth 5 column)
-	    calc (nth 7 column)
-	    val (or (cdr ass) "")
-	    modval (cond ((and org-columns-modify-value-for-display-function
-			       (functionp
-				org-columns-modify-value-for-display-function))
-			  (funcall org-columns-modify-value-for-display-function
-				   title val))
-			 ((equal property "ITEM")
-			  (org-columns-compact-links val))
-			 (fc (org-columns-number-to-string
-			      (org-columns-string-to-number val fm) fm fc))
-			 ((and calc (functionp calc)
-			       (not (string= val ""))
-			       (not (get-text-property 0 'org-computed val)))
-			  (org-columns-number-to-string
-			   (funcall calc (org-columns-string-to-number
-					  val fm)) fm))))
-      (setq s2 (org-columns-add-ellipses (or modval val) width))
-      (setq string (format f s2))
-      ;; Create the overlay
+  (save-excursion
+    (beginning-of-line)
+    (let* ((level-face (and (looking-at "\\(\\**\\)\\(\\* \\)")
+			    (org-get-level-face 2)))
+	   (ref-face (or level-face
+			 (and (eq major-mode 'org-agenda-mode)
+			      (org-get-at-bol 'face))
+			 'default))
+	   (color (list :foreground (face-attribute ref-face :foreground)))
+	   (font (list :height (face-attribute 'default :height)
+		       :family (face-attribute 'default :family)))
+	   (face (list color font 'org-column ref-face))
+	   (face1 (list color font 'org-agenda-column-dateline ref-face))
+	   (pom (and (eq major-mode 'org-agenda-mode)
+		     (or (org-get-at-bol 'org-hd-marker)
+			 (org-get-at-bol 'org-marker))))
+	   (props (cond (props)
+			((eq major-mode 'org-agenda-mode)
+			 (and pom (org-entry-properties pom)))
+			(t (org-entry-properties)))))
+      ;; Each column is an overlay on top of a character.  So there has
+      ;; to be at least as many characters available on the line as
+      ;; columns to display.
+      (let ((columns (length org-columns-current-fmt-compiled))
+	    (chars (- (line-end-position) (line-beginning-position))))
+	(when (> columns chars)
+	  (save-excursion
+	    (end-of-line)
+	    (let ((inhibit-read-only t))
+	      (insert (make-string (- columns chars) ?\s))))))
+      ;; Walk the format.  Create and install the overlay for the
+      ;; current column on the next character.
+      (dolist (column org-columns-current-fmt-compiled)
+	(let* ((property (car column))
+	       (title (nth 1 column))
+	       (ass (assoc-string property props t))
+	       (width
+		(or
+		 (cdr (assoc-string property org-columns-current-maxwidths t))
+		 (nth 2 column)
+		 (length property)))
+	       (f (format "%%-%d.%ds | " width width))
+	       (fm (nth 4 column))
+	       (fc (nth 5 column))
+	       (calc (nth 7 column))
+	       (val (or (cdr ass) ""))
+	       (modval
+		(cond
+		 ((and org-columns-modify-value-for-display-function
+		       (functionp
+			org-columns-modify-value-for-display-function))
+		  (funcall org-columns-modify-value-for-display-function
+			   title val))
+		 ((equal property "ITEM") (org-columns-compact-links val))
+		 (fc (org-columns-number-to-string
+		      (org-columns-string-to-number val fm) fm fc))
+		 ((and calc (functionp calc)
+		       (not (string= val ""))
+		       (not (get-text-property 0 'org-computed val)))
+		  (org-columns-number-to-string
+		   (funcall calc (org-columns-string-to-number val fm)) fm))))
+	       (string
+		(format f (org-columns-add-ellipses (or modval val) width)))
+	       (ov (org-columns-new-overlay
+		    (point) (1+ (point)) string (if dateline face1 face))))
+	  (overlay-put ov 'keymap org-columns-map)
+	  (overlay-put ov 'org-columns-key property)
+	  (overlay-put ov 'org-columns-value (cdr ass))
+	  (overlay-put ov 'org-columns-value-modified modval)
+	  (overlay-put ov 'org-columns-pom pom)
+	  (overlay-put ov 'org-columns-format f)
+	  (overlay-put ov 'line-prefix "")
+	  (overlay-put ov 'wrap-prefix "")
+	  (forward-char)))
+      ;; Make the rest of the line disappear.
+      (let ((ov (org-columns-new-overlay (point) (line-end-position))))
+	(overlay-put ov 'invisible t)
+	(overlay-put ov 'keymap org-columns-map)
+	(overlay-put ov 'line-prefix "")
+	(overlay-put ov 'wrap-prefix ""))
+      (let ((ov (make-overlay (1- (line-end-position))
+			      (line-beginning-position 2))))
+	(overlay-put ov 'keymap org-columns-map)
+	(push ov org-columns-overlays))
       (org-with-silent-modifications
-       (setq ov (org-columns-new-overlay
-		 beg (setq beg (1+ beg)) string (if dateline face1 face)))
-       (overlay-put ov 'keymap org-columns-map)
-       (overlay-put ov 'org-columns-key property)
-       (overlay-put ov 'org-columns-value (cdr ass))
-       (overlay-put ov 'org-columns-value-modified modval)
-       (overlay-put ov 'org-columns-pom pom)
-       (overlay-put ov 'org-columns-format f)
-       (overlay-put ov 'line-prefix "")
-       (overlay-put ov 'wrap-prefix ""))
-      (if (or (not (char-after beg))
-	      (equal (char-after beg) ?\n))
-	  (let ((inhibit-read-only t))
-	    (save-excursion
-	      (goto-char beg)
-	      (org-unmodified (insert " ")))))) ;; FIXME: add props and remove later?
-    ;; Make the rest of the line disappear.
-    (org-unmodified
-     (setq ov (org-columns-new-overlay beg (point-at-eol)))
-     (overlay-put ov 'invisible t)
-     (overlay-put ov 'keymap org-columns-map)
-     (overlay-put ov 'line-prefix "")
-     (overlay-put ov 'wrap-prefix "")
-     (push ov org-columns-overlays)
-     (setq ov (make-overlay (1- (point-at-eol)) (1+ (point-at-eol))))
-     (overlay-put ov 'keymap org-columns-map)
-     (push ov org-columns-overlays)
-     (let ((inhibit-read-only t))
-       (put-text-property (max (point-min) (1- (point-at-bol)))
-			  (min (point-max) (1+ (point-at-eol)))
-			  'read-only "Type `e' to edit property")))))
+       (let ((inhibit-read-only t))
+	 (put-text-property
+	  (line-end-position 0)
+	  (line-beginning-position 2)
+	  'read-only
+	  (substitute-command-keys
+	   "Type \\<org-columns-map>\\[org-columns-edit-value] \
+to edit property")))))))
 
 (defun org-columns-add-ellipses (string width)
   "Truncate STRING with WIDTH characters, with ellipses."
