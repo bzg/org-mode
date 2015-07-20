@@ -1435,28 +1435,29 @@ https://developer.mozilla.org/en-US/docs/Mozilla/Mobile/Viewport_meta_tag"
   :group 'org-export-html
   :version "25.1"
   :package-version '(Org . "8.3")
-  :type '(list :greedy t
-	       (list :tag "Width of viewport"
-		     (const :format "             " width)
-		     (choice (const :tag "unset" "")
-			     (string)))
-	       (list :tag "Initial scale"
-		     (const :format "             " initial-scale)
-		     (choice (const :tag "unset" "")
-			     (string)))
-	       (list :tag "Minimum scale/zoom"
-		     (const :format "             " minimum-scale)
-		     (choice (const :tag "unset" "")
-			     (string)))
-	       (list :tag "Maximum scale/zoom"
-		     (const :format "             " maximum-scale)
-		     (choice (const :tag "unset" "")
-			     (string)))
-	       (list :tag "User scalable/zoomable"
-		     (const :format "             " user-scalable)
-		     (choice (const :tag "unset" "")
-			     (const "true")
-			     (const "false")))))
+  :type '(choice (const :tag "Disable" nil)
+		 (list :tag "Enable"
+		       (list :tag "Width of viewport"
+			     (const :format "             " width)
+			     (choice (const :tag "unset" "")
+				     (string)))
+		       (list :tag "Initial scale"
+			     (const :format "             " initial-scale)
+			     (choice (const :tag "unset" "")
+				     (string)))
+		       (list :tag "Minimum scale/zoom"
+			     (const :format "             " minimum-scale)
+			     (choice (const :tag "unset" "")
+				     (string)))
+		       (list :tag "Maximum scale/zoom"
+			     (const :format "             " maximum-scale)
+			     (choice (const :tag "unset" "")
+				     (string)))
+		       (list :tag "User scalable/zoomable"
+			     (const :format "             " user-scalable)
+			     (choice (const :tag "unset" "")
+				     (const "true")
+				     (const "false"))))))
 
 ;;;; Todos
 
