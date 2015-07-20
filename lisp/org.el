@@ -7535,9 +7535,12 @@ or nil."
     (while (if isearch-forward
                (search-forward string bound noerror)
              (search-backward string bound noerror))
-      (when (let ((context (mapcar 'car (save-match-data (org-context)))))
-	      (and (member :headline context)
-		   (not (member :tags context))))
+      (when (save-match-data
+	      (and (save-excursion
+		     (beginning-of-line)
+		     (looking-at org-complex-heading-regexp))
+		   (or (not (match-beginning 5))
+		       (< (point) (match-beginning 5)))))
 	(throw 'return (point))))))
 
 (defun org-goto-local-auto-isearch ()
