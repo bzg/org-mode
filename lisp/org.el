@@ -23816,7 +23816,7 @@ beyond the end of the headline."
     (when special
       (cond
        ((and (looking-at org-complex-heading-regexp)
-	     (= (char-after (match-end 1)) ?\ ))
+	     (eq (char-after (match-end 1)) ?\s))
 	(setq refpos (min (1+ (or (match-end 3) (match-end 2) (match-end 1)))
 			  (point-at-eol)))
 	(goto-char

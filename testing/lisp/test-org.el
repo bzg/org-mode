@@ -1815,7 +1815,15 @@ drops support for Emacs 24.1 and 24.2."
        (org-end-of-line)
        (and (progn (org-beginning-of-line) (looking-at "Headline"))
 	    (progn (org-beginning-of-line) (bolp))
-	    (progn (org-beginning-of-line) (looking-at "Headline")))))))
+	    (progn (org-beginning-of-line) (looking-at "Headline"))))))
+  ;; Special case: Do not error when the buffer contains only a single
+  ;; asterisk.
+  (should
+   (org-test-with-temp-text "*<point>"
+     (let ((org-special-ctrl-a/e t)) (org-beginning-of-line))))
+  (should
+   (org-test-with-temp-text "*<point>"
+     (let ((org-special-ctrl-a/e nil)) (org-beginning-of-line)))))
 
 (ert-deftest test-org/end-of-line ()
   "Test `org-end-of-line' specifications."
