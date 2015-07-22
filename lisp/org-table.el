@@ -4765,7 +4765,8 @@ This may be either a string or a function of two arguments:
     (when (and backend (symbolp backend) (not (org-export-get-backend backend)))
       (user-error "Unknown :backend value"))
     (when (or (not backend) (plist-get params :raw)) (require 'ox-org))
-    (org-trim
+    ;; Remove final newline.
+    (substring
      (org-export-string-as
       ;; Return TABLE as Org syntax.  Tolerate non-string cells.
       (with-output-to-string
@@ -4820,7 +4821,8 @@ This may be either a string or a function of two arguments:
 	 (table-cell . ,(org-table--to-generic-cell params))
 	 ;; Section.  Return contents to avoid garbage around table.
 	 (section . (lambda (s c i) c))))
-      'body-only (org-combine-plists params '(:with-tables t))))))
+      'body-only (org-combine-plists params '(:with-tables t)))
+     0 -1)))
 
 (defun org-table--generic-apply (value name &optional with-cons &rest args)
   (cond ((null value) nil)
