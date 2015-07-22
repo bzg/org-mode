@@ -195,9 +195,9 @@ and images in a multipart/related part."
      html-images)))
 
 (defun org-mime-htmlize (&optional arg)
-  "Export a portion of an email body composed using `mml-mode' to
-  html using `org-mode'.  If called with an active region only
-  export that region, otherwise export the entire body."
+  "Export to HTML an email body composed using `mml-mode'.
+If called with an active region only export that region,
+otherwise export the entire body."
   (interactive "P")
   (require 'ox-org)
   (require 'ox-html)
