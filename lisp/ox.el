@@ -5905,9 +5905,6 @@ of subtree at point.
 When optional argument PUB-DIR is set, use it as the publishing
 directory.
 
-When optional argument VISIBLE-ONLY is non-nil, don't export
-contents of hidden elements.
-
 Return file name as a string."
   (let* ((visited-file (buffer-file-name (buffer-base-buffer)))
 	 (base-name
