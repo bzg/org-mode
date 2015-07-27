@@ -895,7 +895,7 @@ XEmacs user should have this variable set to nil, because
 (defcustom org-loop-over-headlines-in-active-region nil
   "Shall some commands act upon headlines in the active region?
 
-When set to `t', some commands will be performed in all headlines
+When set to t, some commands will be performed in all headlines
 within the active region.
 
 When set to `start-level', some commands will be performed in all
@@ -1802,7 +1802,7 @@ See the manual for examples."
   "Non-nil means Org will display descriptive links.
 E.g. [[http://orgmode.org][Org website]] will be displayed as
 \"Org Website\", hiding the link itself and just displaying its
-description.  When set to `nil', Org will display the full links
+description.  When set to nil, Org will display the full links
 literally.
 
 You can interactively set the value of this variable by calling
@@ -7824,7 +7824,7 @@ heading, unconditionally."
 	      (re-search-forward org-outline-regexp-bol)
 	      (beginning-of-line 0))
 	    (skip-chars-backward " \r\t\n")
-	    (and (not (looking-back "^\\*+"))
+	    (and (not (looking-back "^\\*+" (line-beginning-position)))
 		 (looking-at "[ \t]+") (replace-match ""))
 	    (unless (eobp) (forward-char 1))
 	    (when (looking-at "^\\*")
@@ -8900,7 +8900,8 @@ When sorting is done, call `org-after-sorting-entries-or-items-hook'."
 	 (when (equal (marker-buffer org-clock-marker) (current-buffer))
 	   (save-excursion
 	     (goto-char org-clock-marker)
-	     (looking-back "^.*") (match-string-no-properties 0))))
+             (buffer-substring-no-properties (line-beginning-position)
+                                             (point)))))
         start beg end stars re re2
         txt what tmp)
     ;; Find beginning and end of region to sort
@@ -11790,7 +11791,7 @@ refiling operation has put the subtree.
 With a numeric prefix argument of `2', refile to the running clock.
 
 With a numeric prefix argument of `3', emulate `org-refile-keep'
-being set to `t' and copy to the target location, don't move it.
+being set to t and copy to the target location, don't move it.
 Beware that keeping refiled entries may result in duplicated ID
 properties.
 
@@ -12293,7 +12294,7 @@ This is a list of abbreviation keys and values.  The value gets inserted
 if you type `<' followed by the key and then press the completion key,
 usually `TAB'.  %file will be replaced by a file name after prompting
 for the file using completion.  The cursor will be placed at the position
-of the `?` in the template.
+of the `?' in the template.
 There are two templates for each key, the first uses the original Org syntax,
 the second uses Emacs Muse-like syntax tags.  These Muse-like tags become
 the default when the /org-mtags.el/ module has been loaded.  See also the
@@ -15996,7 +15997,7 @@ and the new value.")
 (defun org-entry-put (pom property value)
   "Set PROPERTY to VALUE for entry at point-or-marker POM.
 
-If the value is `nil', it is converted to the empty string.  If
+If the value is nil, it is converted to the empty string.  If
 it is not a string, an error is raised.
 
 PROPERTY can be any regular property (see
@@ -16939,6 +16940,9 @@ user."
 (defun org-read-date-analyze (ans org-def org-defdecode)
   "Analyze the combined answer of the date prompt."
   ;; FIXME: cleanup and comment
+  ;; Pass `current-time' result to `decode-time' (instead of calling
+  ;; without arguments) so that only `current-time' has to be
+  ;; overriden in tests.
   (let ((nowdecode (decode-time (current-time)))
 	delta deltan deltaw deltadef year month day
 	hour minute second wday pm h2 m2 tl wday1
@@ -17116,6 +17120,9 @@ user."
      (deltan
       (setq futurep nil)
       (unless deltadef
+	;; Pass `current-time' result to `decode-time' (instead of
+	;; calling without arguments) so that only `current-time' has
+	;; to be overriden in tests.
 	(let ((now (decode-time (current-time))))
 	  (setq day (nth 3 now) month (nth 4 now) year (nth 5 now))))
       (cond ((member deltaw '("d" "")) (setq day (+ day deltan)))
@@ -18208,7 +18215,7 @@ If no number is found, the return value is 0."
 (defcustom org-image-actual-width t
   "Should we use the actual width of images when inlining them?
 
-When set to `t', always use the image width.
+When set to t, always use the image width.
 
 When set to a number, use imagemagick (when available) to set
 the image's width to this value.
@@ -18235,7 +18242,7 @@ This requires Emacs >= 24.1, build with imagemagick support."
 
 (defcustom org-agenda-inhibit-startup nil
   "Inhibit startup when preparing agenda buffers.
-When this variable is `t', the initialization of the Org agenda
+When this variable is t, the initialization of the Org agenda
 buffers is inhibited: e.g. the visibility state is not set, the
 tables are not re-aligned, etc."
   :type 'boolean
@@ -19777,7 +19784,7 @@ boundaries."
 (org-defkey org-mode-map "\C-c\M-f" 'org-next-block)
 (org-defkey org-mode-map "\C-c\M-b" 'org-previous-block)
 (org-defkey org-mode-map "\C-c$"    'org-archive-subtree)
-(org-defkey org-mode-map "\C-c\C-x\C-s" 'org-advertized-archive-subtree)
+(org-defkey org-mode-map "\C-c\C-x\C-s" 'org-archive-subtree)
 (org-defkey org-mode-map "\C-c\C-x\C-a" 'org-archive-subtree-default)
 (org-defkey org-mode-map "\C-c\C-xd" 'org-insert-drawer)
 (org-defkey org-mode-map "\C-c\C-xa" 'org-toggle-archive-tag)
@@ -21030,7 +21037,7 @@ This command does many different things, depending on context:
 	  (item
 	   ;; At an item: a double C-u set checkbox to "[-]"
 	   ;; unconditionally, whereas a single one will toggle its
-	   ;; presence.  Without an universal argument, if the item
+	   ;; presence.  Without a universal argument, if the item
 	   ;; has a checkbox, toggle it.  Otherwise repair the list.
 	   (let* ((box (org-element-property :checkbox context))
 		  (struct (org-element-property :structure context))
@@ -21684,7 +21691,7 @@ on context.  See the individual commands for more information."
     ("Archive"
      ["Archive (default method)" org-archive-subtree-default (org-in-subtree-not-table-p)]
      "--"
-     ["Move Subtree to Archive file" org-advertized-archive-subtree (org-in-subtree-not-table-p)]
+     ["Move Subtree to Archive file" org-archive-subtree (org-in-subtree-not-table-p)]
      ["Toggle ARCHIVE tag" org-toggle-archive-tag (org-in-subtree-not-table-p)]
      ["Move subtree to Archive sibling" org-archive-to-archive-sibling (org-in-subtree-not-table-p)]
      )
@@ -22763,8 +22770,9 @@ the agenda) or the current time of the day."
       (when (and tp (string-match "\\([0-9][0-9]\\):\\([0-9][0-9]\\)" tp))
 	(setq hod (string-to-number (match-string 1 tp))
 	      mod (string-to-number (match-string 2 tp))))
-      (or tp (setq hod (nth 2 (decode-time (current-time)))
-		   mod (nth 1 (decode-time (current-time))))))
+      (or tp (let ((now (decode-time)))
+	       (setq hod (nth 2 now)
+		     mod (nth 1 now)))))
     (cond
      ((eq major-mode 'calendar-mode)
       (setq date (calendar-cursor-to-date)

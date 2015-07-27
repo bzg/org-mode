@@ -627,7 +627,7 @@ The function must accept two parameters:
 The function should return the string to be exported.
 
 For example, the variable could be set to the following function
-in order to mimic default behaviour:
+in order to mimic default behavior:
 
 The default value simply returns the value of CONTENTS."
   :group 'org-export-html
@@ -761,7 +761,7 @@ t              Synonym for `mathjax'."
 When `org-mode' is exporting an `org-mode' file to HTML, links to
 non-html files are directly put into a href tag in HTML.
 However, links to other Org-mode files (recognized by the
-extension `.org.) should become links to the corresponding html
+extension `.org') should become links to the corresponding html
 file, assuming that the linked `org-mode' file will also be
 converted to HTML.
 When nil, the links still point to the plain `.org' file."
@@ -1809,7 +1809,7 @@ used in the preamble or postamble."
     (?C . ,(let ((file (plist-get info :input-file)))
 	     (format-time-string
 	      (plist-get info :html-metadata-timestamp-format)
-	      (if file (nth 5 (file-attributes file)) (current-time)))))
+	      (when file (nth 5 (file-attributes file))))))
     (?v . ,(or (plist-get info :html-validation-link) ""))))
 
 (defun org-html--build-pre/postamble (type info)

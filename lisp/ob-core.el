@@ -2160,8 +2160,8 @@ INFO may provide the values of these header arguments (in the
 		 (and (member "list" result-params) "`:results list'"))))
 	     (results-switches
 	      (cdr (assoc :results_switches (nth 2 info))))
-	     (visible-beg (copy-marker (point-min)))
-	     (visible-end (copy-marker (point-max)))
+	     (visible-beg (point-min-marker))
+	     (visible-end (point-max-marker))
 	     ;; When results exist outside of the current visible
 	     ;; region of the buffer, be sure to widen buffer to
 	     ;; update them.
@@ -2845,7 +2845,7 @@ block but are passed literally to the \"example-block\"."
 (defun org-babel-read (cell &optional inhibit-lisp-eval)
   "Convert the string value of CELL to a number if appropriate.
 Otherwise if CELL looks like lisp (meaning it starts with a
-\"(\", \"'\", \"`\" or a \"[\") then read and evaluate it as
+\"(\", \"'\", \"\\=`\" or a \"[\") then read and evaluate it as
 lisp, otherwise return it unmodified as a string.  Optional
 argument INHIBIT-LISP-EVAL inhibits lisp evaluation for
 situations in which is it not appropriate."

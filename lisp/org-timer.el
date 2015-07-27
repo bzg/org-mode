@@ -231,6 +231,9 @@ it in the buffer."
 	   (abs (floor (org-timer-seconds))))))
 
 (defun org-timer-seconds ()
+  ;; Pass `current-time' result to `org-float-time' (instead of
+  ;; calling without arguments) so that only `current-time' has to be
+  ;; overriden in tests.
   (if org-timer-countdown-timer
       (- (org-float-time org-timer-start-time)
 	 (org-float-time (or org-timer-pause-time (current-time))))
