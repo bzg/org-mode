@@ -193,10 +193,13 @@ it in the buffer."
 
 (defvar org-timer-timer-is-countdown nil)
 (defun org-timer-seconds ()
+  ;; Pass `current-time' result to `org-float-time'
+  ;; (instead of calling without arguments) so that only
+  ;; `current-time' has to be overriden in tests.
   (if org-timer-timer-is-countdown
       (- (org-float-time org-timer-start-time)
-	 (org-float-time))
-    (- (org-float-time org-timer-pause-time)
+	 (org-float-time (current-time)))
+    (- (org-float-time (or org-timer-pause-time (current-time)))
        (org-float-time org-timer-start-time))))
 
 ;;;###autoload
