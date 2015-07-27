@@ -418,6 +418,10 @@ Pass BUFFER to the XEmacs version of `move-to-column'."
 (unless (fboundp 'user-error)
   (defalias 'user-error 'error))
 
+;; `font-lock-ensure' is only available from 24.4.50 on
+(unless (fboundp 'font-lock-ensure)
+  (defalias 'font-lock-ensure 'font-lock-fontify-buffer))
+
 (defmacro org-no-popups (&rest body)
   "Suppress popup windows.
 Let-bind some variables to nil around BODY to achieve the desired
@@ -473,11 +477,6 @@ LIMIT."
 	      (goto-char pos)
 	      (looking-at (concat "\\(?:"  regexp "\\)\\'")))))
       (not (null pos)))))
-
-(defalias 'org-font-lock-ensure
-  (if (fboundp 'org-font-lock-ensure)
-      #'font-lock-ensure
-    (lambda (_beg _end) (font-lock-fontify-buffer))))
 
 (defun org-floor* (x &optional y)
   "Return a list of the floor of X and the fractional part of X.

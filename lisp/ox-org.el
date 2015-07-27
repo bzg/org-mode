@@ -254,7 +254,7 @@ Return output file name."
 	   (work-buffer (or visitingp (find-file-noselect filename)))
 	   newbuf)
       (with-current-buffer work-buffer
-        (org-font-lock-ensure)
+        (font-lock-ensure)
         (show-all)
         (org-show-block-all)
         (setq newbuf (htmlize-buffer)))
