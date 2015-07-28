@@ -116,6 +116,9 @@ references.  Use ~org-export-get-reference~ instead.
 *** Removed function ~org-end-of-meta-data-and-drawers~
 The function is superseded by ~org-end-of-meta-data~, called with an
 optional argument.
+*** Removed functions ~org-table-colgroup-line-p~, ~org-table-cookie-line-p~
+These functions were left-over from pre 8.0 era.  They are not correct
+anymore.  Since they are not needed, they have no replacement.
 ** Removed options
 *** ~org-list-empty-line-terminates-plain-lists~ is deprecated
 It will be kept in code base until next release, for backward

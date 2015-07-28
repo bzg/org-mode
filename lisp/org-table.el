@@ -441,37 +441,6 @@ prevents it from hanging emacs."
    "\\(" "@?[-0-9I$&]+" "\\|" "[a-zA-Z]\\{1,2\\}\\([0-9]+\\|&\\)" "\\|" "\\$[a-zA-Z0-9]+" "\\)")
   "Match a range for reference display.")
 
-(defun org-table-colgroup-line-p (line)
-  "Is this a table line colgroup information?"
-  (save-match-data
-    (and (string-match "[<>]\\|&[lg]t;" line)
-	 (string-match "\\`[ \t]*|[ \t]*/[ \t]*\\(|[ \t<>0-9|lgt&;]+\\)\\'"
-		       line)
-	 (not (delq
-	       nil
-	       (mapcar
-		(lambda (s)
-		  (not (member s '("" "<" ">" "<>" "&lt;" "&gt;" "&lt;&gt;"))))
-		(org-split-string (match-string 1 line) "[ \t]*|[ \t]*")))))))
-
-(defun org-table-cookie-line-p (line)
-  "Is this a table line with only alignment/width cookies?"
-  (save-match-data
-    (and (string-match "[<>]\\|&[lg]t;" line)
-	 (or (string-match
-	      "\\`[ \t]*|[ \t]*/[ \t]*\\(|[ \t<>0-9|lrcgt&;]+\\)\\'" line)
-	     (string-match "\\(\\`[ \t<>lrc0-9|gt&;]+\\'\\)" line))
-	 (not (delq nil (mapcar
-			 (lambda (s)
-			   (not (or (equal s "")
-				    (string-match
-				     "\\`<\\([lrc]?[0-9]+\\|[lrc]\\)>\\'" s)
-				    (string-match
-				     "\\`&lt;\\([lrc]?[0-9]+\\|[lrc]\\)&gt;\\'"
-				     s))))
-			 (org-split-string (match-string 1 line)
-					   "[ \t]*|[ \t]*")))))))
-
 (defconst org-table-translate-regexp
   (concat "\\(" "@[-0-9I$]+" "\\|" "[a-zA-Z]\\{1,2\\}\\([0-9]+\\|&\\)" "\\)")
   "Match a reference that needs translation, for reference display.")
