@@ -1,4 +1,4 @@
-;;; org-table.el --- The table editor for Org-mode
+;;; org-table.el --- The table editor for Org mode
 
 ;; Copyright (C) 2004-2015 Free Software Foundation, Inc.
 
@@ -24,10 +24,10 @@
 ;;
 ;;; Commentary:
 
-;; This file contains the table editor and spreadsheet for Org-mode.
+;; This file contains the table editor and spreadsheet for Org mode.
 
 ;; Watch out:  Here we are talking about two different kind of tables.
-;; Most of the code is for the tables created with the Org-mode table editor.
+;; Most of the code is for the tables created with the Org mode table editor.
 ;; Sometimes, we talk about tables created and edited with the table.el
 ;; Emacs package.  We call the former org-type tables, and the latter
 ;; table.el-type tables.
