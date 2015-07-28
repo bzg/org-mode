@@ -14907,102 +14907,104 @@ When JUST-ALIGN is non-nil, only align tags."
   (interactive "P")
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
       (let ((cl (if (eq org-loop-over-headlines-in-active-region 'start-level)
-		    'region-start-level 'region))
-	    org-loop-over-headlines-in-active-region)
-	(org-map-entries
-	 ;; We don't use ARG and JUST-ALIGN here because these args
-	 ;; are not useful when looping over headlines.
-	 `(org-set-tags)
-	 org-loop-over-headlines-in-active-region
-	 cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
+                    'region-start-level 'region))
+            org-loop-over-headlines-in-active-region)
+        (org-map-entries
+         ;; We don't use ARG and JUST-ALIGN here because these args
+         ;; are not useful when looping over headlines.
+         `(org-set-tags)
+         org-loop-over-headlines-in-active-region
+         cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
     (let* ((re org-outline-regexp-bol)
-	   (current (unless arg (org-get-tags-string)))
-	   (col (current-column))
-	   (org-setting-tags t)
-	   table current-tags inherited-tags ; computed below when needed
-	   tags p0 c0 c1 rpl di tc level)
+           (current (unless arg (org-get-tags-string)))
+           (col (current-column))
+           (org-setting-tags t)
+           ;; computed below when needed
+           tags
+           level)
       (if arg
-	  (save-excursion
-	    (goto-char (point-min))
-	    (let ((buffer-invisibility-spec (org-inhibit-invisibility)))
-	      (while (re-search-forward re nil t)
-		(org-set-tags nil t)
-		(end-of-line 1)))
-	    (message "All tags realigned to column %d" org-tags-column))
-	(if just-align
-	    (setq tags current)
-	  ;; Get a new set of tags from the user
-	  (save-excursion
-	    (setq table (append org-tag-persistent-alist
-				(or org-tag-alist (org-get-buffer-tags))
-				(and
-				 org-complete-tags-always-offer-all-agenda-tags
-				 (org-global-tags-completion-table
-				  (org-agenda-files))))
-		  org-last-tags-completion-table table
-		  current-tags (org-split-string current ":")
-		  inherited-tags (nreverse
-				  (nthcdr (length current-tags)
-					  (nreverse (org-get-tags-at))))
-		  tags
-		  (if (or (eq t org-use-fast-tag-selection)
-			  (and org-use-fast-tag-selection
-			       (delq nil (mapcar 'cdr table))))
-		      (org-fast-tag-selection
-		       current-tags inherited-tags table
-		       (if org-fast-tag-selection-include-todo
-			   org-todo-key-alist))
-		    (let ((org-add-colon-after-tag-completion (< 1 (length table))))
-		      (org-trim
-		       (org-icompleting-read "Tags: "
-					     'org-tags-completion-function
-					     nil nil current 'org-tags-history))))))
-	  (while (string-match "[-+&]+" tags)
-	    ;; No boolean logic, just a list
-	    (setq tags (replace-match ":" t t tags))))
+          (save-excursion
+            (goto-char (point-min))
+            (let ((buffer-invisibility-spec (org-inhibit-invisibility)))
+              (while (re-search-forward re nil t)
+                (org-set-tags nil t)
+                (end-of-line 1)))
+            (message "All tags realigned to column %d" org-tags-column))
+        (if just-align
+            (setq tags current)
+          ;; Get a new set of tags from the user
+          (save-excursion
+            (let* ((table (setq org-last-tags-completion-table
+                                (append org-tag-persistent-alist
+                                        (or org-tag-alist (org-get-buffer-tags))
+                                        (and
+                                         org-complete-tags-always-offer-all-agenda-tags
+                                         (org-global-tags-completion-table
+                                          (org-agenda-files))))))
+                   (current-tags (org-split-string current ":"))
+                   (inherited-tags (nreverse
+                                    (nthcdr (length current-tags)
+                                            (nreverse (org-get-tags-at))))))
+              (setq tags
+                    (if (or (eq t org-use-fast-tag-selection)
+                            (and org-use-fast-tag-selection
+                                 (delq nil (mapcar 'cdr table))))
+                        (org-fast-tag-selection
+                         current-tags inherited-tags table
+                         (if org-fast-tag-selection-include-todo
+                             org-todo-key-alist))
+                      (let ((org-add-colon-after-tag-completion (< 1 (length table))))
+                        (org-trim
+                         (org-icompleting-read "Tags: "
+                                               'org-tags-completion-function
+                                               nil nil current 'org-tags-history)))))))
+          (while (string-match "[-+&]+" tags)
+            ;; No boolean logic, just a list
+            (setq tags (replace-match ":" t t tags))))
 
-	(setq tags (replace-regexp-in-string "[,]" ":" tags))
+        (setq tags (replace-regexp-in-string "[,]" ":" tags))
 
-	(if org-tags-sort-function
-	    (setq tags (mapconcat 'identity
-				  (sort (org-split-string
-					 tags (org-re "[^[:alnum:]_@#%]+"))
-					org-tags-sort-function) ":")))
+        (if org-tags-sort-function
+            (setq tags (mapconcat 'identity
+                                  (sort (org-split-string
+                                         tags (org-re "[^[:alnum:]_@#%]+"))
+                                        org-tags-sort-function) ":")))
 
-	(if (string-match "\\`[\t ]*\\'" tags)
-	    (setq tags "")
-	  (unless (string-match ":$" tags) (setq tags (concat tags ":")))
-	  (unless (string-match "^:" tags) (setq tags (concat ":" tags))))
+        (if (string-match "\\`[\t ]*\\'" tags)
+            (setq tags "")
+          (unless (string-match ":$" tags) (setq tags (concat tags ":")))
+          (unless (string-match "^:" tags) (setq tags (concat ":" tags))))
 
-	;; Insert new tags at the correct column
-	(beginning-of-line 1)
-	(setq level (or (and (looking-at org-outline-regexp)
-			     (- (match-end 0) (point) 1))
-			1))
-	(cond
-	 ((and (equal current "") (equal tags "")))
-	 ((re-search-forward
-	   (concat "\\([ \t]*" (regexp-quote current) "\\)[ \t]*$")
-	   (point-at-eol) t)
-	  (if (equal tags "")
-	      (setq rpl "")
-	    (goto-char (match-beginning 0))
-	    (setq c0 (current-column)
-		  ;; compute offset for the case of org-indent-mode active
-		  di (if (org-bound-and-true-p org-indent-mode)
-			 (* (1- org-indent-indentation-per-level) (1- level))
-		       0)
-		  p0 (if (equal (char-before) ?*) (1+ (point)) (point))
-		  tc (+ org-tags-column (if (> org-tags-column 0) (- di) di))
-		  c1 (max (1+ c0) (if (> tc 0) tc (- (- tc) (string-width tags))))
-		  rpl (concat (make-string (max 0 (- c1 c0)) ?\ ) tags)))
-	  (replace-match rpl t t)
-	  (and (not (featurep 'xemacs)) c0 indent-tabs-mode (tabify p0 (point)))
-	  tags)
-	 (t (error "Tags alignment failed")))
-	(org-move-to-column col)
-	(unless just-align
-	  (run-hooks 'org-after-tags-change-hook))))))
+        ;; Insert new tags at the correct column
+        (beginning-of-line 1)
+        (setq level (or (and (looking-at org-outline-regexp)
+                             (- (match-end 0) (point) 1))
+                        1))
+        (cond
+          ((and (equal current "") (equal tags "")))
+          ((re-search-forward
+            (concat "\\([ \t]*" (regexp-quote current) "\\)[ \t]*$")
+            (point-at-eol) t)
+           (let (c0 p0 c1 rpl di tc)
+             (if (equal tags "")
+                 (setq rpl "")
+               (goto-char (match-beginning 0))
+               (setq c0 (current-column)
+                     ;; compute offset for the case of org-indent-mode active
+                     di (if (org-bound-and-true-p org-indent-mode)
+                            (* (1- org-indent-indentation-per-level) (1- level))
+                          0)
+                     p0 (if (equal (char-before) ?*) (1+ (point)) (point))
+                     tc (+ org-tags-column (if (> org-tags-column 0) (- di) di))
+                     c1 (max (1+ c0) (if (> tc 0) tc (- (- tc) (string-width tags))))
+                     rpl (concat (make-string (max 0 (- c1 c0)) ?\ ) tags)))
+             (replace-match rpl t t)
+             (and (not (featurep 'xemacs)) c0 indent-tabs-mode (tabify p0 (point)))
+             tags))
+          (t (error "Tags alignment failed")))
+        (org-move-to-column col)
+        (unless just-align
+          (run-hooks 'org-after-tags-change-hook))))))
 
 (defun org-change-tag-in-region (beg end tag off)
   "Add or remove TAG for each entry in the region.
