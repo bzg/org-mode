@@ -403,7 +403,7 @@ prevents it from hanging emacs."
 (defconst org-table-calculate-mark-regexp "^[ \t]*| *[!$^_#*] *\\(|\\|$\\)"
   "Detects a table line marked for automatic recalculation.")
 (defconst org-table-border-regexp "^[ \t]*[^| \t]"
-  "Searching from within a table (any type) this finds the first line outside the table.")
+  "Regexp matching any line outside an Org table.")
 (defvar org-table-last-highlighted-reference nil)
 (defvar org-table-formula-history nil)
 
@@ -860,22 +860,37 @@ edit.  Full value is:\n")
 ;;;###autoload
 (defun org-table-begin (&optional table-type)
   "Find the beginning of the table and return its position.
-With argument TABLE-TYPE, go to the beginning of a table.el-type table."
-  (let ((table (org-element-lineage (org-element-at-point) '(table) t)))
-    (and table (org-element-property :post-affiliated table))))
+With a non-nil optional argument TABLE-TYPE, return the beginning
+of a table.el-type table.  This function assumes point is on
+a table."
+  (cond (table-type
+	 (org-element-property :post-affiliated (org-element-at-point)))
+	((save-excursion
+	   (and (re-search-backward org-table-border-regexp nil t)
+		(line-beginning-position 2))))
+	(t (point-min))))
 
 ;;;###autoload
 (defun org-table-end (&optional table-type)
   "Find the end of the table and return its position.
-With argument TABLE-TYPE, go to the end of a table.el-type table."
-  (let ((table (org-element-lineage (org-element-at-point) '(table) t)))
-    (and table
-	 (let ((type (org-element-property :type table)))
-	   (if (eq type 'org) (org-element-property :contents-end table)
-	     (save-excursion
-	       (goto-char (org-element-property :end table))
-	       (skip-chars-backward " \t\n")
-	       (line-beginning-position 2)))))))
+With a non-nil optional argument TABLE-TYPE, return the end of
+a table.el-type table.  This function assumes point is on
+a table."
+  (save-excursion
+    (cond (table-type
+	   (goto-char (org-element-property :end (org-element-at-point)))
+	   (skip-chars-backward " \t\n")
+	   (line-beginning-position 2))
+	  ((re-search-forward org-table-border-regexp nil t)
+	   (match-beginning 0))
+	  ;; When the line right after the table is the last line in
+	  ;; the buffer with trailing spaces but no final newline
+	  ;; character, trailing spaces, be sure to catch the correct
+	  ;; ending at its beginning.  In any other case, ending is
+	  ;; expected to be at point max.
+	  (t (goto-char (point-max))
+	     (skip-chars-backward " \t")
+	     (if (bolp) (point) (line-end-position))))))
 
 ;;;###autoload
 (defun org-table-justify-field-maybe (&optional new)
