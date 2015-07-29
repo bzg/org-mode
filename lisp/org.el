@@ -4570,8 +4570,8 @@ is nil, return nil unconditionally."
   (save-excursion
     (goto-char (or pos (point)))
     (beginning-of-line)
-    (and (eq (org-element-type (org-element-at-point)) 'table)
-	 (looking-at org-TBLFM-regexp))))
+    (and (let ((case-fold-search t)) (looking-at org-TBLFM-regexp))
+	 (eq (org-element-type (org-element-at-point)) 'table))))
 
 (defvar org-clock-start-time)
 (defvar org-clock-marker (make-marker)
