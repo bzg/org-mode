@@ -401,6 +401,9 @@ subtree and creates one shifted, repeating clone.
 *** None-floating tables, graphics and blocks can have captions
 *** New time block for clock tables : ~untilnow~
 It encompasses all past closed clocks.
+*** Support for the ~polyglossia~ LaTeX package
+See the docstring of ~org-latex-classes~ and
+~org-latex-guess-polyglossia-language~ for details.
 ** Miscellaneous
 *** Strip all meta data from ITEM special property
 ITEM special property does not contain TODO, priority or tags anymore.
