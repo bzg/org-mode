@@ -1,6 +1,6 @@
 ;;; org-capture.el --- Fast note taking in Org-mode
 
-;; Copyright (C) 2010-2014 Free Software Foundation, Inc.
+;; Copyright (C) 2010-2015 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -53,7 +53,7 @@
 
 (declare-function org-datetree-find-date-create "org-datetree"
 		  (date &optional keep-restriction))
-(declare-function org-table-get-specials "org-table" ())
+(declare-function org-table-analyze "org-table" ())
 (declare-function org-table-goto-line "org-table" (N))
 (declare-function org-pop-to-buffer-same-window "org-compat"
 		  (&optional buffer-or-name norecord label))
@@ -64,6 +64,7 @@
 (defvar org-remember-default-headline)
 (defvar org-remember-templates)
 (defvar org-table-hlines)
+(defvar org-table-current-begin-pos)
 (defvar dired-buffers)
 
 (defvar org-capture-clock-was-started nil
@@ -1161,17 +1162,16 @@ may have been stored before."
      ((and table-line-pos
 	   (string-match "\\(I+\\)\\([-+][0-9]\\)" table-line-pos))
       ;; we have a complex line specification
-      (goto-char (point-min))
-      (let ((nh (- (match-end 1) (match-beginning 1)))
-	    (delta (string-to-number (match-string 2 table-line-pos)))
-	    ll)
+      (let ((ll (ignore-errors
+		  (save-match-data (org-table-analyze))
+		  (aref org-table-hlines
+			(- (match-end 1) (match-beginning 1)))))
+	    (delta (string-to-number (match-string 2 table-line-pos))))
 	;; The user wants a special position in the table
-	(org-table-get-specials)
-	(setq ll (ignore-errors (aref org-table-hlines nh)))
-	(unless ll (error "Invalid table line specification \"%s\""
-			  table-line-pos))
-	(setq ll (+ ll delta (if (< delta 0) 0 -1)))
-	(org-goto-line ll)
+	(unless ll
+	  (error "Invalid table line specification \"%s\"" table-line-pos))
+	(goto-char org-table-current-begin-pos)
+	(forward-line (+ ll delta (if (< delta 0) 0 -1)))
 	(org-table-insert-row 'below)
 	(beginning-of-line 1)
 	(delete-region (point) (1+ (point-at-eol)))
