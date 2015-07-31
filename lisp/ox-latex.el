@@ -1467,21 +1467,10 @@ INFO is a plist used as a communication channel."
       (?L . ,(capitalize language))
       (?D . ,(org-export-get-date info)))))
 
-
-;;; Template
-
-(defun org-latex-template (contents info)
-  "Return complete document string after LaTeX conversion.
-CONTENTS is the transcoded contents string.  INFO is a plist
-holding export options."
-  (let ((title (org-export-data (plist-get info :title) info))
-	(spec (org-latex--format-spec info)))
-    (concat
-     ;; Time-stamp.
-     (and (plist-get info :time-stamp-file)
-	  (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
-     ;; Document class and packages.
-     (let* ((class (plist-get info :latex-class))
+(defun org-latex--make-header (info)
+  "Return a formatted LaTeX header.
+INFO is a plist used as a communication channel."
+  (let* ((class (plist-get info :latex-class))
 	    (class-options (plist-get info :latex-class-options))
 	    (header (nth 1 (assoc class (plist-get info :latex-classes))))
 	    (document-class-string
@@ -1504,7 +1493,23 @@ holding export options."
 		       (plist-get info :latex-header))
 		      (plist-get info :latex-header-extra)))))
 	   info)
-	  info)))
+	  info))))
+
+
+;;; Template
+
+(defun org-latex-template (contents info)
+  "Return complete document string after LaTeX conversion.
+CONTENTS is the transcoded contents string.  INFO is a plist
+holding export options."
+  (let ((title (org-export-data (plist-get info :title) info))
+	(spec (org-latex--format-spec info)))
+    (concat
+     ;; Time-stamp.
+     (and (plist-get info :time-stamp-file)
+	  (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
+     ;; Document class and packages.
+     (org-latex--make-header info)
      ;; Possibly limit depth for headline numbering.
      (let ((sec-num (plist-get info :section-numbers)))
        (when (integerp sec-num)
