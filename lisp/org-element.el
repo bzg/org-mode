@@ -1,4 +1,4 @@
-;;; org-element.el --- Parser And Applications for Org syntax
+;;; org-element.el --- Parser for Org Syntax         -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012-2015 Free Software Foundation, Inc.
 
@@ -116,7 +116,6 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
 (require 'org)
 (require 'avl-tree)
 
@@ -674,8 +673,8 @@ Assume point is at the beginning of the block."
 		       :post-affiliated post-affiliated)
 		 (cdr affiliated))))))))
 
-(defun org-element-center-block-interpreter (center-block contents)
-  "Interpret CENTER-BLOCK element as Org syntax.
+(defun org-element-center-block-interpreter (_ contents)
+  "Interpret a center-block element as Org syntax.
 CONTENTS is the contents of the element."
   (format "#+BEGIN_CENTER\n%s#+END_CENTER" contents))
 
@@ -1169,7 +1168,7 @@ CONTENTS is the contents of inlinetask."
 
 ;;;; Item
 
-(defun org-element-item-parser (limit struct &optional raw-secondary-p)
+(defun org-element-item-parser (_ struct &optional raw-secondary-p)
   "Parse an item.
 
 STRUCT is the structure of the plain list.
@@ -1407,8 +1406,8 @@ Assume point is at the beginning of the list."
 		   :post-affiliated contents-begin)
 	     (cdr affiliated))))))
 
-(defun org-element-plain-list-interpreter (plain-list contents)
-  "Interpret PLAIN-LIST element as Org syntax.
+(defun org-element-plain-list-interpreter (_ contents)
+  "Interpret plain-list element as Org syntax.
 CONTENTS is the contents of the element."
   (with-temp-buffer
     (insert contents)
@@ -1447,8 +1446,8 @@ Assume point is at the beginning of the property drawer."
 		    :post-blank (count-lines before-blank end)
 		    :post-affiliated begin))))))
 
-(defun org-element-property-drawer-interpreter (property-drawer contents)
-  "Interpret PROPERTY-DRAWER element as Org syntax.
+(defun org-element-property-drawer-interpreter (_ contents)
+  "Interpret property-drawer element as Org syntax.
 CONTENTS is the properties within the drawer."
   (format ":PROPERTIES:\n%s:END:" contents))
 
@@ -1497,18 +1496,16 @@ Assume point is at the beginning of the block."
 			 :post-affiliated post-affiliated)
 		   (cdr affiliated)))))))))
 
-(defun org-element-quote-block-interpreter (quote-block contents)
-  "Interpret QUOTE-BLOCK element as Org syntax.
+(defun org-element-quote-block-interpreter (_ contents)
+  "Interpret quote-block element as Org syntax.
 CONTENTS is the contents of the element."
   (format "#+BEGIN_QUOTE\n%s#+END_QUOTE" contents))
 
 
 ;;;; Section
 
-(defun org-element-section-parser (limit)
+(defun org-element-section-parser (_)
   "Parse a section.
-
-LIMIT bounds the search.
 
 Return a list whose CAR is `section' and CDR is a plist
 containing `:begin', `:end', `:contents-begin', `contents-end',
@@ -1520,8 +1517,7 @@ containing `:begin', `:end', `:contents-begin', `contents-end',
 	  (end (progn (org-with-limited-levels (outline-next-heading))
 		      (point)))
 	  (pos-before-blank (progn (skip-chars-backward " \r\t\n")
-				   (forward-line)
-				   (point))))
+				   (line-beginning-position 2))))
       (list 'section
 	    (list :begin begin
 		  :end end
@@ -1530,8 +1526,8 @@ containing `:begin', `:end', `:contents-begin', `contents-end',
 		  :post-blank (count-lines pos-before-blank end)
 		  :post-affiliated begin)))))
 
-(defun org-element-section-interpreter (section contents)
-  "Interpret SECTION element as Org syntax.
+(defun org-element-section-interpreter (_ contents)
+  "Interpret section element as Org syntax.
 CONTENTS is the contents of the element."
   contents)
 
@@ -1651,9 +1647,8 @@ containing `:call', `:inside-header', `:arguments',
 		   :post-affiliated post-affiliated)
 	     (cdr affiliated))))))
 
-(defun org-element-babel-call-interpreter (babel-call contents)
-  "Interpret BABEL-CALL element as Org syntax.
-CONTENTS is nil."
+(defun org-element-babel-call-interpreter (babel-call _)
+  "Interpret BABEL-CALL element as Org syntax."
   (concat "#+CALL: "
 	  (org-element-property :call babel-call)
 	  (let ((h (org-element-property :inside-header babel-call)))
@@ -1699,9 +1694,8 @@ Return a list whose CAR is `clock' and CDR is a plist containing
 		  :post-blank post-blank
 		  :post-affiliated begin)))))
 
-(defun org-element-clock-interpreter (clock contents)
-  "Interpret CLOCK element as Org syntax.
-CONTENTS is nil."
+(defun org-element-clock-interpreter (clock _)
+  "Interpret CLOCK element as Org syntax."
   (concat org-clock-string " "
 	  (org-element-timestamp-interpreter
 	   (org-element-property :value clock) nil)
@@ -1760,7 +1754,7 @@ Assume point is at comment beginning."
 		   :post-affiliated post-affiliated)
 	     (cdr affiliated))))))
 
-(defun org-element-comment-interpreter (comment contents)
+(defun org-element-comment-interpreter (comment _)
   "Interpret COMMENT element as Org syntax.
 CONTENTS is nil."
   (replace-regexp-in-string "^" "# " (org-element-property :value comment)))
@@ -1807,9 +1801,8 @@ Assume point is at comment block beginning."
 			 :post-affiliated post-affiliated)
 		   (cdr affiliated)))))))))
 
-(defun org-element-comment-block-interpreter (comment-block contents)
-  "Interpret COMMENT-BLOCK element as Org syntax.
-CONTENTS is nil."
+(defun org-element-comment-block-interpreter (comment-block _)
+  "Interpret COMMENT-BLOCK element as Org syntax."
   (format "#+BEGIN_COMMENT\n%s#+END_COMMENT"
 	  (org-element-normalize-string
 	   (org-remove-indentation
@@ -1846,9 +1839,8 @@ containing `:begin', `:end', `:value', `:post-blank' and
 		   :post-affiliated post-affiliated)
 	     (cdr affiliated))))))
 
-(defun org-element-diary-sexp-interpreter (diary-sexp contents)
-  "Interpret DIARY-SEXP as Org syntax.
-CONTENTS is nil."
+(defun org-element-diary-sexp-interpreter (diary-sexp _)
+  "Interpret DIARY-SEXP as Org syntax."
   (org-element-property :value diary-sexp))
 
 
@@ -1930,9 +1922,8 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
 			 :post-affiliated post-affiliated)
 		   (cdr affiliated)))))))))
 
-(defun org-element-example-block-interpreter (example-block contents)
-  "Interpret EXAMPLE-BLOCK element as Org syntax.
-CONTENTS is nil."
+(defun org-element-example-block-interpreter (example-block _)
+  "Interpret EXAMPLE-BLOCK element as Org syntax."
   (let ((switches (org-element-property :switches example-block))
 	(value (org-element-property :value example-block)))
     (concat "#+BEGIN_EXAMPLE" (and switches (concat " " switches)) "\n"
@@ -1990,9 +1981,8 @@ Assume point is at export-block beginning."
 			 :post-affiliated post-affiliated)
 		   (cdr affiliated)))))))))
 
-(defun org-element-export-block-interpreter (export-block contents)
-  "Interpret EXPORT-BLOCK element as Org syntax.
-CONTENTS is nil."
+(defun org-element-export-block-interpreter (export-block _)
+  "Interpret EXPORT-BLOCK element as Org syntax."
   (let ((type (org-element-property :type export-block)))
     (concat (format "#+BEGIN_%s\n" type)
 	    (org-element-property :value export-block)
@@ -2041,9 +2031,8 @@ Assume point is at the beginning of the fixed-width area."
 		   :post-affiliated post-affiliated)
 	     (cdr affiliated))))))
 
-(defun org-element-fixed-width-interpreter (fixed-width contents)
-  "Interpret FIXED-WIDTH element as Org syntax.
-CONTENTS is nil."
+(defun org-element-fixed-width-interpreter (fixed-width _)
+  "Interpret FIXED-WIDTH element as Org syntax."
   (let ((value (org-element-property :value fixed-width)))
     (and value
 	 (replace-regexp-in-string
@@ -2078,9 +2067,8 @@ keywords."
 		   :post-affiliated post-affiliated)
 	     (cdr affiliated))))))
 
-(defun org-element-horizontal-rule-interpreter (horizontal-rule contents)
-  "Interpret HORIZONTAL-RULE element as Org syntax.
-CONTENTS is nil."
+(defun org-element-horizontal-rule-interpreter (&rest _)
+  "Interpret HORIZONTAL-RULE element as Org syntax."
   "-----")
 
 
@@ -2120,9 +2108,8 @@ containing `:key', `:value', `:begin', `:end', `:post-blank' and
 		   :post-affiliated post-affiliated)
 	     (cdr affiliated))))))
 
-(defun org-element-keyword-interpreter (keyword contents)
-  "Interpret KEYWORD element as Org syntax.
-CONTENTS is nil."
+(defun org-element-keyword-interpreter (keyword _)
+  "Interpret KEYWORD element as Org syntax."
   (format "#+%s: %s"
 	  (org-element-property :key keyword)
 	  (org-element-property :value keyword)))
@@ -2178,9 +2165,8 @@ Assume point is at the beginning of the latex environment."
 		       :post-affiliated code-begin)
 		 (cdr affiliated))))))))
 
-(defun org-element-latex-environment-interpreter (latex-environment contents)
-  "Interpret LATEX-ENVIRONMENT element as Org syntax.
-CONTENTS is nil."
+(defun org-element-latex-environment-interpreter (latex-environment _)
+  "Interpret LATEX-ENVIRONMENT element as Org syntax."
   (org-element-property :value latex-environment))
 
 
@@ -2212,9 +2198,8 @@ containing `:key', `:value', `:begin', `:end', `:post-blank' and
 		:post-blank 0
 		:post-affiliated begin))))
 
-(defun org-element-node-property-interpreter (node-property contents)
-  "Interpret NODE-PROPERTY element as Org syntax.
-CONTENTS is nil."
+(defun org-element-node-property-interpreter (node-property _)
+  "Interpret NODE-PROPERTY element as Org syntax."
   (format org-property-format
 	  (format ":%s:" (org-element-property :key node-property))
 	  (or (org-element-property :value node-property) "")))
@@ -2289,8 +2274,8 @@ Assume point is at the beginning of the paragraph."
 		   :post-affiliated contents-begin)
 	     (cdr affiliated))))))
 
-(defun org-element-paragraph-interpreter (paragraph contents)
-  "Interpret PARAGRAPH element as Org syntax.
+(defun org-element-paragraph-interpreter (_ contents)
+  "Interpret paragraph element as Org syntax.
 CONTENTS is the contents of the element."
   contents)
 
@@ -2333,11 +2318,10 @@ containing `:closed', `:deadline', `:scheduled', `:begin',
 		  :post-blank post-blank
 		  :post-affiliated begin)))))
 
-(defun org-element-planning-interpreter (planning contents)
-  "Interpret PLANNING element as Org syntax.
-CONTENTS is nil."
+(defun org-element-planning-interpreter (planning _)
+  "Interpret PLANNING element as Org syntax."
   (mapconcat
-   'identity
+   #'identity
    (delq nil
 	 (list (let ((deadline (org-element-property :deadline planning)))
 		 (when deadline
@@ -2449,9 +2433,8 @@ Assume point is at the beginning of the block."
 			 :post-affiliated post-affiliated)
 		   (cdr affiliated)))))))))
 
-(defun org-element-src-block-interpreter (src-block contents)
-  "Interpret SRC-BLOCK element as Org syntax.
-CONTENTS is nil."
+(defun org-element-src-block-interpreter (src-block _)
+  "Interpret SRC-BLOCK element as Org syntax."
   (let ((lang (org-element-property :language src-block))
 	(switches (org-element-property :switches src-block))
 	(params (org-element-property :parameters src-block))
@@ -2542,10 +2525,8 @@ CONTENTS is a string, if table's type is `org', or nil."
 
 ;;;; Table Row
 
-(defun org-element-table-row-parser (limit)
+(defun org-element-table-row-parser (_)
   "Parse table row at point.
-
-LIMIT bounds the search.
 
 Return a list whose CAR is `table-row' and CDR is a plist
 containing `:begin', `:end', `:contents-begin', `:contents-end',
@@ -2555,9 +2536,7 @@ containing `:begin', `:end', `:contents-begin', `:contents-end',
 	   (begin (point))
 	   ;; A table rule has no contents.  In that case, ensure
 	   ;; CONTENTS-BEGIN matches CONTENTS-END.
-	   (contents-begin (and (eq type 'standard)
-				(search-forward "|")
-				(point)))
+	   (contents-begin (and (eq type 'standard) (search-forward "|")))
 	   (contents-end (and (eq type 'standard)
 			      (progn
 				(end-of-line)
@@ -2620,8 +2599,8 @@ Assume point is at beginning of the block."
 			 :post-affiliated post-affiliated)
 		   (cdr affiliated)))))))))
 
-(defun org-element-verse-block-interpreter (verse-block contents)
-  "Interpret VERSE-BLOCK element as Org syntax.
+(defun org-element-verse-block-interpreter (_ contents)
+  "Interpret verse-block element as Org syntax.
 CONTENTS is verse block contents."
   (format "#+BEGIN_VERSE\n%s#+END_VERSE" contents))
 
@@ -2669,8 +2648,8 @@ Assume point is at the first star marker."
 		    :contents-end contents-end
 		    :post-blank post-blank))))))
 
-(defun org-element-bold-interpreter (bold contents)
-  "Interpret BOLD object as Org syntax.
+(defun org-element-bold-interpreter (_ contents)
+  "Interpret bold object as Org syntax.
 CONTENTS is the contents of the object."
   (format "*%s*" contents))
 
@@ -2699,9 +2678,8 @@ Assume point is at the first tilde marker."
 		    :end end
 		    :post-blank post-blank))))))
 
-(defun org-element-code-interpreter (code contents)
-  "Interpret CODE object as Org syntax.
-CONTENTS is nil."
+(defun org-element-code-interpreter (code _)
+  "Interpret CODE object as Org syntax."
   (format "~%s~" (org-element-property :value code)))
 
 
@@ -2740,9 +2718,8 @@ Assume point is at the beginning of the entity."
 		      :use-brackets-p bracketsp
 		      :post-blank post-blank)))))))
 
-(defun org-element-entity-interpreter (entity contents)
-  "Interpret ENTITY object as Org syntax.
-CONTENTS is nil."
+(defun org-element-entity-interpreter (entity _)
+  "Interpret ENTITY object as Org syntax."
   (concat "\\"
 	  (org-element-property :name entity)
 	  (when (org-element-property :use-brackets-p entity) "{}")))
@@ -2779,9 +2756,8 @@ Assume point is at the beginning of the snippet."
 		      :end end
 		      :post-blank post-blank)))))))
 
-(defun org-element-export-snippet-interpreter (export-snippet contents)
-  "Interpret EXPORT-SNIPPET object as Org syntax.
-CONTENTS is nil."
+(defun org-element-export-snippet-interpreter (export-snippet _)
+  "Interpret EXPORT-SNIPPET object as Org syntax."
   (format "@@%s:%s@@"
 	  (org-element-property :back-end export-snippet)
 	  (org-element-property :value export-snippet)))
@@ -2864,9 +2840,8 @@ Assume point is at the beginning of the babel call."
 		    :value value
 		    :post-blank post-blank))))))
 
-(defun org-element-inline-babel-call-interpreter (inline-babel-call contents)
-  "Interpret INLINE-BABEL-CALL object as Org syntax.
-CONTENTS is nil."
+(defun org-element-inline-babel-call-interpreter (inline-babel-call _)
+  "Interpret INLINE-BABEL-CALL object as Org syntax."
   (concat "call_"
 	  (org-element-property :call inline-babel-call)
 	  (let ((h (org-element-property :inside-header inline-babel-call)))
@@ -2905,9 +2880,8 @@ Assume point is at the beginning of the inline src block."
 		    :end end
 		    :post-blank post-blank))))))
 
-(defun org-element-inline-src-block-interpreter (inline-src-block contents)
-  "Interpret INLINE-SRC-BLOCK object as Org syntax.
-CONTENTS is nil."
+(defun org-element-inline-src-block-interpreter (inline-src-block _)
+  "Interpret INLINE-SRC-BLOCK object as Org syntax."
   (let ((language (org-element-property :language inline-src-block))
 	(arguments (org-element-property :parameters inline-src-block))
 	(body (org-element-property :value inline-src-block)))
@@ -2943,8 +2917,8 @@ Assume point is at the first slash marker."
 		    :contents-end contents-end
 		    :post-blank post-blank))))))
 
-(defun org-element-italic-interpreter (italic contents)
-  "Interpret ITALIC object as Org syntax.
+(defun org-element-italic-interpreter (_ contents)
+  "Interpret italic object as Org syntax.
 CONTENTS is the contents of the object."
   (format "/%s/" contents))
 
@@ -2989,9 +2963,8 @@ Assume point is at the beginning of the LaTeX fragment."
 		    :end end
 		    :post-blank post-blank))))))
 
-(defun org-element-latex-fragment-interpreter (latex-fragment contents)
-  "Interpret LATEX-FRAGMENT object as Org syntax.
-CONTENTS is nil."
+(defun org-element-latex-fragment-interpreter (latex-fragment _)
+  "Interpret LATEX-FRAGMENT object as Org syntax."
   (org-element-property :value latex-fragment))
 
 ;;;; Line Break
@@ -3011,9 +2984,8 @@ Assume point is at the beginning of the line break."
 		:end (line-beginning-position 2)
 		:post-blank 0))))
 
-(defun org-element-line-break-interpreter (line-break contents)
-  "Interpret LINE-BREAK object as Org syntax.
-CONTENTS is nil."
+(defun org-element-line-break-interpreter (&rest _)
+  "Interpret LINE-BREAK object as Org syntax."
   "\\\\\n")
 
 
@@ -3032,7 +3004,7 @@ Assume point is at the beginning of the link."
   (catch 'no-object
     (let ((begin (point))
 	  end contents-begin contents-end link-end post-blank path type
-	  raw-link link search-option application)
+	  raw-link search-option application)
       (cond
        ;; Type 1: Text targeted from a radio target.
        ((and org-target-link-regexp
@@ -3177,9 +3149,8 @@ Assume point is at the macro."
 		    :end end
 		    :post-blank post-blank))))))
 
-(defun org-element-macro-interpreter (macro contents)
-  "Interpret MACRO object as Org syntax.
-CONTENTS is nil."
+(defun org-element-macro-interpreter (macro _)
+  "Interpret MACRO object as Org syntax."
   (org-element-property :value macro))
 
 
@@ -3211,8 +3182,8 @@ Assume point is at the radio target."
 		    :post-blank post-blank
 		    :value value))))))
 
-(defun org-element-radio-target-interpreter (target contents)
-  "Interpret TARGET object as Org syntax.
+(defun org-element-radio-target-interpreter (_ contents)
+  "Interpret target object as Org syntax.
 CONTENTS is the contents of the object."
   (concat "<<<" contents ">>>"))
 
@@ -3241,9 +3212,8 @@ Assume point is at the beginning of the statistics-cookie."
 		    :value value
 		    :post-blank post-blank))))))
 
-(defun org-element-statistics-cookie-interpreter (statistics-cookie contents)
-  "Interpret STATISTICS-COOKIE object as Org syntax.
-CONTENTS is nil."
+(defun org-element-statistics-cookie-interpreter (statistics-cookie _)
+  "Interpret STATISTICS-COOKIE object as Org syntax."
   (org-element-property :value statistics-cookie))
 
 
@@ -3274,8 +3244,8 @@ Assume point is at the first plus sign marker."
 		    :contents-end contents-end
 		    :post-blank post-blank))))))
 
-(defun org-element-strike-through-interpreter (strike-through contents)
-  "Interpret STRIKE-THROUGH object as Org syntax.
+(defun org-element-strike-through-interpreter (_ contents)
+  "Interpret strike-through object as Org syntax.
 CONTENTS is the contents of the object."
   (format "+%s+" contents))
 
@@ -3375,8 +3345,8 @@ and `:post-blank' keywords."
 		:contents-end contents-end
 		:post-blank 0))))
 
-(defun org-element-table-cell-interpreter (table-cell contents)
-  "Interpret TABLE-CELL element as Org syntax.
+(defun org-element-table-cell-interpreter (_ contents)
+  "Interpret table-cell element as Org syntax.
 CONTENTS is the contents of the cell, or nil."
   (concat  " " contents " |"))
 
@@ -3404,9 +3374,8 @@ Assume point is at the target."
 		    :value value
 		    :post-blank post-blank))))))
 
-(defun org-element-target-interpreter (target contents)
-  "Interpret TARGET object as Org syntax.
-CONTENTS is nil."
+(defun org-element-target-interpreter (target _)
+  "Interpret TARGET object as Org syntax."
   (format "<<%s>>" (org-element-property :value target)))
 
 
@@ -3521,9 +3490,8 @@ Assume point is at the beginning of the timestamp."
 		     repeater-props
 		     warning-props))))))
 
-(defun org-element-timestamp-interpreter (timestamp contents)
-  "Interpret TIMESTAMP object as Org syntax.
-CONTENTS is nil."
+(defun org-element-timestamp-interpreter (timestamp _)
+  "Interpret TIMESTAMP object as Org syntax."
   (let* ((repeat-string
 	  (concat
 	   (case (org-element-property :repeater-type timestamp)
@@ -3549,7 +3517,7 @@ CONTENTS is nil."
 	  ;; the repeater string, if any.
 	  (lambda (time activep &optional with-time-p hour-end minute-end)
 	    (let ((ts (format-time-string
-		       (funcall (if with-time-p 'cdr 'car)
+		       (funcall (if with-time-p #'cdr #'car)
 				org-time-stamp-formats)
 		       time)))
 	      (when (and hour-end minute-end)
@@ -3645,8 +3613,8 @@ Assume point is at the first underscore marker."
 		    :contents-end contents-end
 		    :post-blank post-blank))))))
 
-(defun org-element-underline-interpreter (underline contents)
-  "Interpret UNDERLINE object as Org syntax.
+(defun org-element-underline-interpreter (_ contents)
+  "Interpret underline object as Org syntax.
 CONTENTS is the contents of the object."
   (format "_%s_" contents))
 
@@ -3675,9 +3643,8 @@ Assume point is at the first equal sign marker."
 		    :end end
 		    :post-blank post-blank))))))
 
-(defun org-element-verbatim-interpreter (verbatim contents)
-  "Interpret VERBATIM object as Org syntax.
-CONTENTS is nil."
+(defun org-element-verbatim-interpreter (verbatim _)
+  "Interpret VERBATIM object as Org syntax."
   (format "=%s=" (org-element-property :value verbatim)))
 
 
@@ -4057,94 +4024,93 @@ looking into captions:
 			 (list no-recursion)))
 	 ;; Recursion depth is determined by --CATEGORY.
 	 (--category
-	  (catch 'found
+	  (catch :--found
 	    (let ((category 'greater-elements)
 		  (all-objects (cons 'plain-text org-element-all-objects)))
 	      (dolist (type types category)
 		(cond ((memq type all-objects)
-		       ;; If one object is found, the function has to
-		       ;; recurse into every object.
-		       (throw 'found 'objects))
+		       ;; If one object is found, the function has
+		       ;; to recurse into every object.
+		       (throw :--found 'objects))
 		      ((not (memq type org-element-greater-elements))
 		       ;; If one regular element is found, the
 		       ;; function has to recurse, at least, into
 		       ;; every element it encounters.
 		       (and (not (eq category 'elements))
 			    (setq category 'elements))))))))
-	 --acc
-	 --walk-tree
-	 (--walk-tree
-	  (lambda (--data)
-	    ;; Recursively walk DATA.  INFO, if non-nil, is a plist
-	    ;; holding contextual information.
-	    (let ((--type (org-element-type --data)))
-	      (cond
-	       ((not --data))
-	       ;; Ignored element in an export context.
-	       ((and info (memq --data (plist-get info :ignore-list))))
-	       ;; List of elements or objects.
-	       ((not --type) (mapc --walk-tree --data))
-	       ;; Unconditionally enter parse trees.
-	       ((eq --type 'org-data)
-		(mapc --walk-tree (org-element-contents --data)))
-	       (t
-		;; Check if TYPE is matching among TYPES.  If so,
-		;; apply FUN to --DATA and accumulate return value
-		;; into --ACC (or exit if FIRST-MATCH is non-nil).
-		(when (memq --type types)
-		  (let ((result (funcall fun --data)))
-		    (cond ((not result))
-			  (first-match (throw '--map-first-match result))
-			  (t (push result --acc)))))
-		;; If --DATA has a secondary string that can contain
-		;; objects with their type among TYPES, look into it.
-		(when (and (eq --category 'objects) (not (stringp --data)))
-		  (dolist (p (cdr (assq --type
-					org-element-secondary-value-alist)))
-		    (funcall --walk-tree (org-element-property p --data))))
-		;; If --DATA has any parsed affiliated keywords and
-		;; WITH-AFFILIATED is non-nil, look for objects in
-		;; them.
-		(when (and with-affiliated
-			   (eq --category 'objects)
-			   (memq --type org-element-all-elements))
-		  (dolist (kwd-pair org-element--parsed-properties-alist)
-		    (let ((kwd (car kwd-pair))
-			  (value (org-element-property (cdr kwd-pair) --data)))
-		      ;; Pay attention to the type of parsed keyword.
-		      ;; In particular, preserve order for multiple
-		      ;; keywords.
-		      (cond
-		       ((not value))
-		       ((member kwd org-element-dual-keywords)
-			(if (member kwd org-element-multiple-keywords)
-			    (dolist (line (reverse value))
-			      (funcall --walk-tree (cdr line))
-			      (funcall --walk-tree (car line)))
-			  (funcall --walk-tree (cdr value))
-			  (funcall --walk-tree (car value))))
-		       ((member kwd org-element-multiple-keywords)
-			(mapc --walk-tree (reverse value)))
-		       (t (funcall --walk-tree value))))))
-		;; Determine if a recursion into --DATA is possible.
-		(cond
-		 ;; --TYPE is explicitly removed from recursion.
-		 ((memq --type no-recursion))
-		 ;; --DATA has no contents.
-		 ((not (org-element-contents --data)))
-		 ;; Looking for greater elements but --DATA is simply
-		 ;; an element or an object.
-		 ((and (eq --category 'greater-elements)
-		       (not (memq --type org-element-greater-elements))))
-		 ;; Looking for elements but --DATA is an object.
-		 ((and (eq --category 'elements)
-		       (memq --type org-element-all-objects)))
-		 ;; In any other case, map contents.
-		 (t (mapc --walk-tree (org-element-contents --data))))))))))
-    (catch '--map-first-match
-      (funcall --walk-tree data)
-      ;; Return value in a proper order.
-      (nreverse --acc))))
+	 --acc)
+    (letrec ((--walk-tree
+	      (lambda (--data)
+		;; Recursively walk DATA.  INFO, if non-nil, is a plist
+		;; holding contextual information.
+		(let ((--type (org-element-type --data)))
+		  (cond
+		   ((not --data))
+		   ;; Ignored element in an export context.
+		   ((and info (memq --data (plist-get info :ignore-list))))
+		   ;; List of elements or objects.
+		   ((not --type) (mapc --walk-tree --data))
+		   ;; Unconditionally enter parse trees.
+		   ((eq --type 'org-data)
+		    (mapc --walk-tree (org-element-contents --data)))
+		   (t
+		    ;; Check if TYPE is matching among TYPES.  If so,
+		    ;; apply FUN to --DATA and accumulate return value
+		    ;; into --ACC (or exit if FIRST-MATCH is non-nil).
+		    (when (memq --type types)
+		      (let ((result (funcall fun --data)))
+			(cond ((not result))
+			      (first-match (throw :--map-first-match result))
+			      (t (push result --acc)))))
+		    ;; If --DATA has a secondary string that can contain
+		    ;; objects with their type among TYPES, look inside.
+		    (when (and (eq --category 'objects) (not (stringp --data)))
+		      (dolist (p (cdr (assq --type
+					    org-element-secondary-value-alist)))
+			(funcall --walk-tree (org-element-property p --data))))
+		    ;; If --DATA has any parsed affiliated keywords and
+		    ;; WITH-AFFILIATED is non-nil, look for objects in
+		    ;; them.
+		    (when (and with-affiliated
+			       (eq --category 'objects)
+			       (memq --type org-element-all-elements))
+		      (dolist (kwd-pair org-element--parsed-properties-alist)
+			(let ((kwd (car kwd-pair))
+			      (value (org-element-property (cdr kwd-pair) --data)))
+			  ;; Pay attention to the type of parsed
+			  ;; keyword.  In particular, preserve order for
+			  ;; multiple keywords.
+			  (cond
+			   ((not value))
+			   ((member kwd org-element-dual-keywords)
+			    (if (member kwd org-element-multiple-keywords)
+				(dolist (line (reverse value))
+				  (funcall --walk-tree (cdr line))
+				  (funcall --walk-tree (car line)))
+			      (funcall --walk-tree (cdr value))
+			      (funcall --walk-tree (car value))))
+			   ((member kwd org-element-multiple-keywords)
+			    (mapc --walk-tree (reverse value)))
+			   (t (funcall --walk-tree value))))))
+		    ;; Determine if a recursion into --DATA is possible.
+		    (cond
+		     ;; --TYPE is explicitly removed from recursion.
+		     ((memq --type no-recursion))
+		     ;; --DATA has no contents.
+		     ((not (org-element-contents --data)))
+		     ;; Looking for greater elements but --DATA is
+		     ;; simply an element or an object.
+		     ((and (eq --category 'greater-elements)
+			   (not (memq --type org-element-greater-elements))))
+		     ;; Looking for elements but --DATA is an object.
+		     ((and (eq --category 'elements)
+			   (memq --type org-element-all-objects)))
+		     ;; In any other case, map contents.
+		     (t (mapc --walk-tree (org-element-contents --data))))))))))
+      (catch :--map-first-match
+	(funcall --walk-tree data)
+	;; Return value in a proper order.
+	(nreverse --acc)))))
 (put 'org-element-map 'lisp-indent-function 2)
 
 ;; The following functions are internal parts of the parser.
@@ -4356,7 +4322,7 @@ the current object."
 		    (org-element-adopt-elements
 		     acc
 		     (replace-regexp-in-string
-		      "\t" (make-string tab-width ? )
+		      "\t" (make-string tab-width ?\s)
 		      (buffer-substring-no-properties (point) obj-beg))))))
 	  ;; 2. Object...
 	  (let ((obj-end (org-element-property :end next-object))
@@ -4376,7 +4342,7 @@ the current object."
 	      (org-element-adopt-elements
 	       acc
 	       (replace-regexp-in-string
-		"\t" (make-string tab-width ? )
+		"\t" (make-string tab-width ?\s)
 		(buffer-substring-no-properties (point) end)))))
       ;; Result.
       acc)))
@@ -4398,73 +4364,73 @@ the current object."
   "Interpret DATA as Org syntax.
 DATA is a parse tree, an element, an object or a secondary string
 to interpret.  Return Org syntax as a string."
-  (org-element--interpret-data-1 data nil))
-
-(defun org-element--interpret-data-1 (data parent)
-  "Interpret DATA as Org syntax.
-
-DATA is a parse tree, an element, an object or a secondary string
-to interpret.  PARENT is used for recursive calls.  It contains
-the element or object containing data, or nil.
-
-Return Org syntax as a string."
-  (let* ((type (org-element-type data))
-	 ;; Find interpreter for current object or element.  If it
-	 ;; doesn't exist (e.g. this is a pseudo object or element),
-	 ;; return contents, if any.
-	 (interpret
-	  (let ((fun (intern (format "org-element-%s-interpreter" type))))
-	    (if (fboundp fun) fun (lambda (data contents) contents))))
-	 (results
-	  (cond
-	   ;; Secondary string.
-	   ((not type)
-	    (mapconcat
-	     (lambda (obj) (org-element--interpret-data-1 obj parent)) data ""))
-	   ;; Full Org document.
-	   ((eq type 'org-data)
-	    (mapconcat (lambda (obj) (org-element--interpret-data-1 obj parent))
-		       (org-element-contents data) ""))
-	   ;; Plain text: return it.
-	   ((stringp data) data)
-	   ;; Element or object without contents.
-	   ((not (org-element-contents data)) (funcall interpret data nil))
-	   ;; Element or object with contents.
-	   (t
-	    (funcall interpret data
-		     ;; Recursively interpret contents.
-		     (mapconcat
-		      (lambda (obj) (org-element--interpret-data-1 obj data))
-		      (org-element-contents
-		       (if (not (memq type '(paragraph verse-block)))
-			   data
-			 ;; Fix indentation of elements containing
-			 ;; objects.  We ignore `table-row' elements
-			 ;; as they are one line long anyway.
-			 (org-element-normalize-contents
-			  data
-			  ;; When normalizing first paragraph of an
-			  ;; item or a footnote-definition, ignore
-			  ;; first line's indentation.
-			  (and (eq type 'paragraph)
-			       (equal data (car (org-element-contents parent)))
-			       (memq (org-element-type parent)
-				     '(footnote-definition item))))))
-		      ""))))))
-    (if (memq type '(org-data plain-text nil)) results
-      ;; Build white spaces.  If no `:post-blank' property is
-      ;; specified, assume its value is 0.
-      (let ((post-blank (or (org-element-property :post-blank data) 0)))
-	(if (or (memq type org-element-all-objects)
-		(and parent
-		     (let ((type (org-element-type parent)))
-		       (or (not type)
-			   (memq type org-element-object-containers)))))
-	    (concat results (make-string post-blank ?\s))
-	  (concat
-	   (org-element--interpret-affiliated-keywords data)
-	   (org-element-normalize-string results)
-	   (make-string post-blank ?\n)))))))
+  (letrec ((fun
+	    (lambda (--data parent)
+	      (let* ((type (org-element-type --data))
+		     ;; Find interpreter for current object or
+		     ;; element.  If it doesn't exist (e.g. this is
+		     ;; a pseudo object or element), return contents,
+		     ;; if any.
+		     (interpret
+		      (let ((fun (intern
+				  (format "org-element-%s-interpreter" type))))
+			(if (fboundp fun) fun (lambda (_ contents) contents))))
+		     (results
+		      (cond
+		       ;; Secondary string.
+		       ((not type)
+			(mapconcat (lambda (obj) (funcall fun obj parent))
+				   --data ""))
+		       ;; Full Org document.
+		       ((eq type 'org-data)
+			(mapconcat (lambda (obj) (funcall fun obj parent))
+				   (org-element-contents --data) ""))
+		       ;; Plain text: return it.
+		       ((stringp --data) --data)
+		       ;; Element or object without contents.
+		       ((not (org-element-contents --data))
+			(funcall interpret --data nil))
+		       ;; Element or object with contents.
+		       (t
+			(funcall
+			 interpret
+			 --data
+			 ;; Recursively interpret contents.
+			 (mapconcat
+			  (lambda (obj) (funcall fun obj --data))
+			  (org-element-contents
+			   (if (not (memq type '(paragraph verse-block)))
+			       --data
+			     ;; Fix indentation of elements containing
+			     ;; objects.  We ignore `table-row'
+			     ;; elements as they are one line long
+			     ;; anyway.
+			     (org-element-normalize-contents
+			      --data
+			      ;; When normalizing first paragraph of
+			      ;; an item or a footnote-definition,
+			      ;; ignore first line's indentation.
+			      (and (eq type 'paragraph)
+				   (equal --data
+					  (car (org-element-contents parent)))
+				   (memq (org-element-type parent)
+					 '(footnote-definition item))))))
+			  ""))))))
+		(if (memq type '(org-data plain-text nil)) results
+		  ;; Build white spaces.  If no `:post-blank' property
+		  ;; is specified, assume its value is 0.
+		  (let ((blank (or (org-element-property :post-blank --data) 0)))
+		    (if (or (memq type org-element-all-objects)
+			    (and parent
+				 (let ((type (org-element-type parent)))
+				   (or (not type)
+				       (memq type org-element-object-containers)))))
+			(concat results (make-string blank ?\s))
+		      (concat
+		       (org-element--interpret-affiliated-keywords --data)
+		       (org-element-normalize-string results)
+		       (make-string blank ?\n)))))))))
+    (funcall fun data nil)))
 
 (defun org-element--interpret-affiliated-keywords (element)
   "Return ELEMENT's affiliated keywords as Org syntax.
@@ -4543,72 +4509,76 @@ indentation to compute maximal common indentation.
 Return the normalized element that is element with global
 indentation removed from its contents.  The function assumes that
 indentation is not done with TAB characters."
-  (let* ((min-ind most-positive-fixnum)
-	 find-min-ind			; For byte-compiler.
-	 (find-min-ind
-	  ;; Return minimal common indentation within BLOB.  This is
-	  ;; done by walking recursively BLOB and updating MIN-IND
-	  ;; along the way.  FIRST-FLAG is non-nil when the next
-	  ;; object is expected to be a string that doesn't start with
-	  ;; a newline character.  It happens for strings at the
-	  ;; beginnings of the contents or right after a line break.
-	  (lambda (blob first-flag)
-	    (dolist (object (org-element-contents blob))
-	      (when first-flag
-		(setq first-flag nil)
-		;; Objects cannot start with spaces: in this case,
-		;; indentation is 0.
-		(if (not (stringp object)) (throw 'zero (setq min-ind 0))
-		  (string-match "\\` *" object)
-		  (let ((len (match-end 0)))
-		    ;; An indentation of zero means no string will be
-		    ;; modified.  Quit the process.
-		    (if (zerop len) (throw 'zero (setq min-ind 0))
-		      (setq min-ind (min len min-ind))))))
-	      (cond
-	       ((stringp object)
-		(dolist (line (cdr (org-split-string object " *\n")))
-		  (unless (string= line "")
-		    (setq min-ind (min (org-get-indentation line) min-ind)))))
-	       ((eq (org-element-type object) 'line-break) (setq first-flag t))
-	       ((memq (org-element-type object) org-element-recursive-objects)
-		(funcall find-min-ind object first-flag)))))))
-    ;; Find minimal indentation in ELEMENT.
-    (catch 'zero (funcall find-min-ind element (not ignore-first)))
+  (letrec ((find-min-ind
+	    ;; Return minimal common indentation within BLOB.  This is
+	    ;; done by walking recursively BLOB and updating MIN-IND
+	    ;; along the way.  FIRST-FLAG is non-nil when the next
+	    ;; object is expected to be a string that doesn't start
+	    ;; with a newline character.  It happens for strings at
+	    ;; the beginnings of the contents or right after a line
+	    ;; break.
+	    (lambda (blob first-flag min-ind)
+	      (catch 'zero
+		(dolist (object (org-element-contents blob) min-ind)
+		  (when first-flag
+		    (setq first-flag nil)
+		    ;; Objects cannot start with spaces: in this case,
+		    ;; indentation is 0.
+		    (if (not (stringp object)) (throw 'zero 0)
+		      (string-match "\\` *" object)
+		      (let ((len (match-end 0)))
+			;; An indentation of zero means no string will
+			;; be modified.  Quit the process.
+			(if (zerop len) (throw 'zero 0)
+			  (setq min-ind (min len min-ind))))))
+		  (cond
+		   ((stringp object)
+		    (dolist (line (cdr (org-split-string object " *\n")))
+		      (unless (string= line "")
+			(setq min-ind
+			      (min (org-get-indentation line) min-ind)))))
+		   ((eq (org-element-type object) 'line-break)
+		    (setq first-flag t))
+		   ((memq (org-element-type object)
+			  org-element-recursive-objects)
+		    (setq min-ind
+			  (funcall find-min-ind
+				   object first-flag min-ind))))))))
+	   (min-ind (funcall find-min-ind
+			     element (not ignore-first) most-positive-fixnum)))
     (if (or (zerop min-ind) (= min-ind most-positive-fixnum)) element
       ;; Build ELEMENT back, replacing each string with the same
       ;; string minus common indentation.
-      (let* (build			; For byte compiler.
-	     (build
-	      (lambda (blob first-flag)
-		;; Return BLOB with all its strings indentation
-		;; shortened from MIN-IND white spaces.  FIRST-FLAG is
-		;; non-nil when the next object is expected to be
-		;; a string that doesn't start with a newline
-		;; character.
-		(setcdr (cdr blob)
-			(mapcar
-			 (lambda (object)
-			   (when first-flag
-			     (setq first-flag nil)
-			     (when (stringp object)
-			       (setq object
-				     (replace-regexp-in-string
-				      (format "\\` \\{%d\\}" min-ind)
-				      "" object))))
-			   (cond
-			    ((stringp object)
-			     (replace-regexp-in-string
-			      (format "\n \\{%d\\}" min-ind) "\n" object))
-			    ((memq (org-element-type object)
-				   org-element-recursive-objects)
-			     (funcall build object first-flag))
-			    ((eq (org-element-type object) 'line-break)
-			     (setq first-flag t)
-			     object)
-			    (t object)))
-			 (org-element-contents blob)))
-		blob)))
+      (letrec ((build
+		(lambda (datum first-flag)
+		  ;; Return DATUM with all its strings indentation
+		  ;; shortened from MIN-IND white spaces.
+		  ;; FIRST-FLAG is non-nil when the next object is
+		  ;; expected to be a string that doesn't start with
+		  ;; a newline character.
+		  (setcdr (cdr datum)
+			  (mapcar
+			   (lambda (object)
+			     (when first-flag
+			       (setq first-flag nil)
+			       (when (stringp object)
+				 (setq object
+				       (replace-regexp-in-string
+					(format "\\` \\{%d\\}" min-ind)
+					"" object))))
+			     (cond
+			      ((stringp object)
+			       (replace-regexp-in-string
+				(format "\n \\{%d\\}" min-ind) "\n" object))
+			      ((memq (org-element-type object)
+				     org-element-recursive-objects)
+			       (funcall build object first-flag))
+			      ((eq (org-element-type object) 'line-break)
+			       (setq first-flag t)
+			       object)
+			      (t object)))
+			   (org-element-contents datum)))
+		  datum)))
 	(funcall build element (not ignore-first))))))
 
 
