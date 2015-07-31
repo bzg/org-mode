@@ -1658,125 +1658,90 @@ row.  It will then use COMPARE-FUNC to compare entries.  If GETKEY-FUNC
 is specified interactively, the comparison will be either a string or
 numeric compare based on the type of the first key in the table."
   (interactive "P")
-  (let ((thiscol (org-table-current-column))
-	(otc org-table-overlay-coordinates)
-	beg end column)
-    (when (equal thiscol 0)
-      (if (org-called-interactively-p 'any)
-	  (setq thiscol (read-number "Use column N for sorting: "))
-	(setq thiscol 1))
-      (org-table-goto-column thiscol))
-    (org-table-check-inside-data-field)
-    (save-excursion
+  (when (org-region-active-p) (goto-char (region-beginning)))
+  ;; Point must be either within a field or before a data line.
+  (save-excursion
+    (skip-chars-backward " \t")
+    (when (bolp) (search-forward "|" (line-end-position) t))
+    (org-table-check-inside-data-field))
+  ;; Set appropriate case sensitivity and column used for sorting.
+  (let ((column (let ((c (org-table-current-column)))
+		  (cond ((> c 0) c)
+			((org-called-interactively-p 'any)
+			 (read-number "Use column N for sorting: "))
+			(t 1))))
+	(sorting-type
+	 (or sorting-type
+	     (read-char-exclusive "Sort Table: [a]lphabetic, [n]umeric, \
+\[t]ime, [f]unc.  A/N/T/F means reversed: "))))
+    (save-restriction
+      ;; Narrow buffer to appropriate sorting area.
       (if (org-region-active-p)
-	  (progn
-	    (setq beg (region-beginning) end (region-end))
-	    (goto-char beg)
-	    (setq column (org-table-current-column))
-	    (setq beg (line-beginning-position))
-	    (goto-char end)
-	    (setq end (copy-marker (line-beginning-position 2))))
-	(let ((tbeg (org-table-begin))
-	      (tend (org-table-end))
-	      (pos (point)))
-	  (setq column (org-table-current-column))
-	  (setq beg
-		(if (re-search-backward org-table-hline-regexp tbeg t)
-		    (line-beginning-position 2)
-		  tbeg))
-	  (goto-char pos)
-	  (setq end
-		(copy-marker
-		 (if (re-search-forward org-table-hline-regexp tend t)
-		     (match-beginning 0)
-		   tend))))))
-    (let ((thisline (count-lines beg (line-beginning-position))))
-      (untabify beg end)
-      (goto-char beg)
-      (org-table-goto-column column)
-      (let ((lines
-	     (org-table--do-sort
-	      (mapcar (lambda (line)
-			(cons (org-sort-remove-invisible
-			       (nth (1- column)
-				    (org-split-string line "[ \t]*|[ \t]*")))
-			      line))
-		      (org-split-string (buffer-substring beg end) "\n"))
-	      "Table" with-case sorting-type getkey-func compare-func)))
-	(when org-table-overlay-coordinates
-	  (org-table-toggle-coordinate-overlays))
-	(delete-region beg end)
-	(move-marker end nil)
-	(insert (mapconcat #'cdr lines "\n") "\n")
-	(goto-char beg)
-	(forward-line thisline)
-	(org-table-goto-column thiscol)
-	(when otc (org-table-toggle-coordinate-overlays))
-	(message "%d lines sorted, based on column %d"
-		 (length lines)
-		 column)))))
-
-(defun org-table--do-sort (table what &optional with-case sorting-type getkey-func compare-func)
-  "Sort TABLE of WHAT according to SORTING-TYPE.
-The user will be prompted for the SORTING-TYPE if the call to this
-function does not specify it.
-WHAT is only for the prompt, to indicate what is being sorted.
-The sorting key will be extracted from the car of the elements of
-the table. If WITH-CASE is non-nil, the sorting will be case-sensitive.
-
-If the SORTING-TYPE is ?f or ?F, then GETKEY-FUNC specifies
-a function to be called to extract the key.  It must return either
-a string or a number that should serve as the sorting key for that
-row.  It will then use COMPARE-FUNC to compare entries.  If GETKEY-FUNC
-is specified interactively, the comparison will be either a string or
-numeric compare based on the type of the first key in the table."
-  (unless sorting-type
-    (message
-     "Sort %s: [a]lphabetic, [n]umeric, [t]ime, [f]unc.  A/N/T/F means reversed:"
-     what)
-    (setq sorting-type (read-char-exclusive)))
-  (let (extractfun comparefun tempfun)
-    ;; Define the appropriate functions
-    (case sorting-type
-      ((?n ?N)
-       (setq extractfun #'string-to-number
-	     comparefun (if (= sorting-type ?n) #'< #'>)))
-      ((?a ?A)
-       (setq extractfun (if with-case (lambda(x) (org-sort-remove-invisible x))
-			  (lambda(x) (downcase (org-sort-remove-invisible x))))
-	     comparefun (if (= sorting-type ?a) #'string< #'org-string>)))
-      ((?t ?T)
-       (setq extractfun
-	     (lambda (x)
-	       (cond ((or (string-match org-ts-regexp x)
-			  (string-match org-ts-regexp-both x))
-		      (org-float-time
-		       (org-time-string-to-time (match-string 0 x))))
-		     ((string-match "[0-9]\\{1,2\\}:[0-9]\\{2\\}" x)
-		      (org-hh:mm-string-to-minutes x))
-		     (t 0)))
-	     comparefun (if (= sorting-type ?t) #'< #'>)))
-      ((?f ?F)
-       (setq tempfun (or getkey-func
-			 (intern (org-icompleting-read
-				  "Sort using function: "
-				  obarray #'fboundp t nil nil))))
-       (let ((extract-string-p (stringp (funcall tempfun (caar table)))))
-	 (setq extractfun (if (and extract-string-p (not with-case))
-			      (lambda (x) (downcase (funcall tempfun x)))
-			    tempfun))
-	 (setq comparefun (cond (compare-func
-				 (if (= sorting-type ?f) compare-func
-				   (lambda (a b) (funcall compare-func b a))))
-				(extract-string-p
-				 (if (= sorting-type ?f) #'string<
-				   #'org-string>))
-				(t (if (= sorting-type ?f) #'< #'>))))))
-      (t (error "Invalid sorting type `%c'" sorting-type)))
-
-    (sort (mapcar (lambda (x) (cons (funcall extractfun (car x)) (cdr x)))
-		  table)
-	  (lambda (a b) (funcall comparefun (car a) (car b))))))
+	  (progn (goto-char (region-beginning))
+		 (narrow-to-region
+		  (point)
+		  (save-excursion (goto-char (region-end))
+				  (line-beginning-position 2))))
+	(let ((start (org-table-begin))
+	      (end (org-table-end)))
+	  (narrow-to-region
+	   (save-excursion
+	     (if (re-search-backward org-table-hline-regexp start t)
+		 (line-beginning-position 2)
+	       start))
+	   (if (save-excursion (re-search-forward org-table-hline-regexp end t))
+	       (match-beginning 0)
+	     end))))
+      ;; Determine arguments for `sort-subr'.  Also record original
+      ;; position.  `org-table-save-field' cannot help here since
+      ;; sorting is too much destructive.
+      (let* ((sort-fold-case (not with-case))
+	     (coordinates
+	      (cons (count-lines (point-min) (line-beginning-position))
+		    (current-column)))
+	     (extract-key-from-field
+	      ;; Function to be called on the contents of the field
+	      ;; used for sorting in the current row.
+	      (case sorting-type
+		((?n ?N) #'string-to-number)
+		((?a ?A) #'org-sort-remove-invisible)
+		((?t ?T)
+		 (lambda (f)
+		   (cond ((string-match org-ts-regexp-both f)
+			  (org-float-time
+			   (org-time-string-to-time (match-string 0 f))))
+			 ((string-match "[0-9]\\{1,2\\}:[0-9]\\{2\\}" f)
+			  (org-hh:mm-string-to-minutes f))
+			 (t 0))))
+		((?f ?F)
+		 (or getkey-func
+		     (and (org-called-interactively-p 'any)
+			  (intern
+			   (completing-read "Sort using function: "
+					    obarray #'fboundp t)))
+		     (error "Missing key extractor to sort rows")))
+		(t (user-error "Invalid sorting type `%c'" sorting-type))))
+	     (predicate
+	      (case sorting-type
+		((?n ?N ?t ?T) #'<)
+		((?a ?A) #'string<)
+		((?f ?F) compare-func))))
+	(goto-char (point-min))
+	(sort-subr (memq sorting-type '(?A ?N ?T ?F))
+		   (lambda ()
+		     (forward-line)
+		     (while (and (not (eobp))
+				 (not (looking-at org-table-dataline-regexp)))
+		       (forward-line)))
+		   #'end-of-line
+		   (lambda ()
+		     (funcall extract-key-from-field
+			      (org-trim (org-table-get-field column))))
+		   nil
+		   predicate)
+	;; Move back to initial field.
+	(forward-line (car coordinates))
+	(move-to-column (cdr coordinates))))))
 
 ;;;###autoload
 (defun org-table-cut-region (beg end)

@@ -1604,7 +1604,7 @@ See also `test-org-table/copy-field'."
 	    (org-table-sort-lines t ?a)
 	    (buffer-string))))
   (should
-   (equal "| C |\n| b |\n| a |\n"
+   (equal "| b |\n| a |\n| C |\n"
 	  (org-test-with-temp-text "| <point>a |\n| C |\n| b |\n"
 	    (org-table-sort-lines nil ?A)
 	    (buffer-string))))
