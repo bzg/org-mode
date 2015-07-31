@@ -2573,7 +2573,8 @@ With optional prefix argument ALL, do this for the whole buffer."
 	      (total (nth 4 cookie)))
 	 (goto-char beg)
 	 (insert
-	  (if percent (format "[%d%%]" (/ (* 100 checked) (max 1 total)))
+	  (if percent (format "[%d%%]" (floor (* 100.0 checked)
+					      (max 1 total)))
 	    (format "[%d/%d]" checked total)))
 	 (delete-region (point) (+ (point) (- end beg)))
 	 (when org-auto-align-tags (org-fix-tags-on-the-fly)))))))
