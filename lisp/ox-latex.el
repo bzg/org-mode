@@ -1302,40 +1302,42 @@ replaced with the language of the document or
 using \setdefaultlanguage and not as an option to the package.
 
 Return the new header."
-  (let ((language (plist-get info :language))
-	result)
+  (let ((language (plist-get info :language)))
     ;; If no language is set or Polyglossia is not loaded, return
     ;; HEADER as-is.
-    (if (or (not (org-string-nw-p language))
+    (if (or (not (stringp language))
 	    (not (string-match
-		  "\\\\usepackage\\(?:\\[\\([^]]+?\\)\\]\\){polyglossia}\n" header)))
+		  "\\\\usepackage\\(?:\\[\\([^]]+?\\)\\]\\){polyglossia}\n"
+		  header)))
 	header
       (let* ((options (org-string-nw-p (match-string 1 header)))
-	     (languages (when options
-			  (save-match-data
-			    ;; Reverse as the last loaded language is
-			    ;; the main language.
-			    (reverse
-			     (delete-dups
-			      (org-split-string
-			       (replace-regexp-in-string
-				"AUTO" language options t)
-			       ",[ \t]*"))))))
-	     (main-language-set-p
+	     (languages (and options
+			     ;; Reverse as the last loaded language is
+			     ;; the main language.
+			     (nreverse
+			      (delete-dups
+			       (save-match-data
+				 (org-split-string
+				  (replace-regexp-in-string
+				   "AUTO" language options t)
+				  ",[ \t]*"))))))
+	     (main-language-set
 	      (string-match-p "\\\\setmainlanguage{.*?}" header)))
 	(replace-match
 	 (concat "\\usepackage{polyglossia}\n"
-		 (loop for l in languages concat
-		       (let ((lang (or (assoc l org-latex-polyglossia-language-alist)
-				       l)))
-			 (format (if main-language-set-p
-				     "\\setotherlanguage%s{%s}\n"
-				   (progn (setq main-language-set-p t)
-					  "\\setmainlanguage%s{%s}\n"))
-				 (if (and (listp lang) (eq 3 (length lang)))
-				     (format "[variant=%s]" (nth 2 lang))
-				   "")
-				 (nth 1 lang)))))
+		 (mapconcat
+		  (lambda (l)
+		    (let ((l (or (assoc l org-latex-polyglossia-language-alist)
+				 l)))
+		      (format (if main-language-set "\\setotherlanguage%s{%s}\n"
+				(setq main-language-set t)
+				"\\setmainlanguage%s{%s}\n")
+			      (if (and (consp l) (= (length l) 3))
+				  (format "[variant=%s]" (nth 2 l))
+				"")
+			      (nth 1 l))))
+		  languages
+		  ""))
 	 t t header 0)))))
 
 (defun org-latex--find-verb-separator (s)
