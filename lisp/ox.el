@@ -3297,7 +3297,7 @@ Return a string of lines to be included in the format expected by
       (let ((org-inhibit-startup t)) (org-mode)))
     (condition-case err
 	;; Enforce consistent search.
-	(let ((org-link-search-must-match-exact-headline t))
+	(let ((org-link-search-must-match-exact-headline nil))
 	  (org-link-search location))
       (error
        (error "%s for %s::%s" (error-message-string err) file location)))

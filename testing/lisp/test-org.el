@@ -886,7 +886,8 @@
   ;; is non-nil.
   (should
    (org-test-with-temp-text "Link [[target<point>]] <<target>>"
-     (let ((org-return-follows-link t)) (org-return))
+     (let ((org-return-follows-link t)
+	   (org-link-search-must-match-exact-headline nil)) (org-return))
      (org-looking-at-p "<<target>>")))
   (should-not
    (org-test-with-temp-text "Link [[target<point>]] <<target>>"
@@ -1422,10 +1423,18 @@
 #+BEGIN_SRC emacs-lisp
 \(+ 1 1)                  (ref:sc)
 #+END_SRC
-\[[(sc)]]"
-     (goto-char (point-max))
+\[[(sc)]]<point>"
      (org-open-at-point)
-     (looking-at "(ref:sc)"))))
+     (looking-at "(ref:sc)")))
+  ;; Find coderef even with alternate label format.
+  (should
+   (org-test-with-temp-text "
+#+BEGIN_SRC emacs-lisp -l \"{ref:%s}\"
+\(+ 1 1)                  {ref:sc}
+#+END_SRC
+\[[(sc)]]<point>"
+     (org-open-at-point)
+     (looking-at "{ref:sc}"))))
 
 ;;;; Custom ID
 
@@ -1433,16 +1442,14 @@
   "Test custom ID links specifications."
   (should
    (org-test-with-temp-text
-       "* H1\n:PROPERTIES:\n:CUSTOM_ID: custom\n:END:\n* H2\n[[#custom]]"
-     (goto-char (point-max))
+       "* H1\n:PROPERTIES:\n:CUSTOM_ID: custom\n:END:\n* H2\n[[#custom]]<point>"
      (org-open-at-point)
      (org-looking-at-p "\\* H1")))
-  ;; Ignore false positives.
-  (should-not
+  ;; Throw an error on false positives.
+  (should-error
    (org-test-with-temp-text
        "* H1\n:DRAWER:\n:CUSTOM_ID: custom\n:END:\n* H2\n[[#custom]]<point>"
-     (goto-char (point-max))
-     (let (org-link-search-must-match-exact-headline) (org-open-at-point))
+     (org-open-at-point)
      (org-looking-at-p "\\* H1"))))
 
 ;;;; Fuzzy Links
@@ -1454,27 +1461,24 @@
   "Test fuzzy links specifications."
   ;; Fuzzy link goes in priority to a matching target.
   (should
-   (org-test-with-temp-text "#+NAME: Test\n|a|b|\n<<Test>>\n* Test\n[[Test]]"
-     (goto-line 5)
-     (org-open-at-point)
+   (org-test-with-temp-text
+       "#+NAME: Test\n|a|b|\n<<Test>>\n* Test\n<point>[[Test]]"
+     (let ((org-link-search-must-match-exact-headline nil)) (org-open-at-point))
      (looking-at "<<Test>>")))
   ;; Then fuzzy link points to an element with a given name.
   (should
-   (org-test-with-temp-text "Test\n#+NAME: Test\n|a|b|\n* Test\n[[Test]]"
-     (goto-line 5)
-     (org-open-at-point)
+   (org-test-with-temp-text "Test\n#+NAME: Test\n|a|b|\n* Test\n<point>[[Test]]"
+     (let ((org-link-search-must-match-exact-headline nil)) (org-open-at-point))
      (looking-at "#\\+NAME: Test")))
   ;; A target still lead to a matching headline otherwise.
   (should
-   (org-test-with-temp-text "* Head1\n* Head2\n*Head3\n[[Head2]]"
-     (goto-line 4)
-     (org-open-at-point)
+   (org-test-with-temp-text "* Head1\n* Head2\n*Head3\n<point>[[Head2]]"
+     (let ((org-link-search-must-match-exact-headline nil)) (org-open-at-point))
      (looking-at "\\* Head2")))
   ;; With a leading star in link, enforce heading match.
   (should
-   (org-test-with-temp-text "* Test\n<<Test>>\n[[*Test]]"
-     (goto-line 3)
-     (org-open-at-point)
+   (org-test-with-temp-text "* Test\n<<Test>>\n<point>[[*Test]]"
+     (let ((org-link-search-must-match-exact-headline nil)) (org-open-at-point))
      (looking-at "\\* Test")))
   ;; With a leading star in link, enforce exact heading match, even
   ;; with `org-link-search-must-match-exact-headline' set to nil.
@@ -1482,7 +1486,16 @@
    (org-test-with-temp-text "* Test 1\nFoo Bar\n<point>[[*Test]]"
      (let ((org-link-search-must-match-exact-headline nil))
        (org-open-at-point))))
-  ;; Heading match should not care about spaces, cookies, todo
+  ;; Handle non-nil `org-link-search-must-match-exact-headline'.
+  (should
+   (org-test-with-temp-text "* Test\nFoo Bar\n<point>[[Test]]"
+     (let ((org-link-search-must-match-exact-headline t)) (org-open-at-point))
+     (looking-at "\\* Test")))
+  (should
+   (org-test-with-temp-text "* Test\nFoo Bar\n<point>[[*Test]]"
+     (let ((org-link-search-must-match-exact-headline t)) (org-open-at-point))
+     (looking-at "\\* Test")))
+  ;; Heading match should not care about spaces, cookies, TODO
   ;; keywords, priorities, and tags.
   (should
    (let ((first-line

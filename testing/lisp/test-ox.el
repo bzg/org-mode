@@ -911,40 +911,40 @@ text
    (equal
     "#+BEGIN_EXAMPLE\nSmall Org file with an include keyword.\n#+END_EXAMPLE\n"
     (org-test-with-temp-text
-     (format "#+INCLUDE: \"%s/examples/include.org\" :lines \"1-2\" EXAMPLE"
-	     org-test-dir)
-     (org-export-expand-include-keyword)
-     (buffer-string))))
+	(format "#+INCLUDE: \"%s/examples/include.org\" :lines \"1-2\" EXAMPLE"
+		org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))))
   ;; Inclusion within a src-block.
   (should
    (equal
     "#+BEGIN_SRC emacs-lisp\n(+ 2 1)\n#+END_SRC\n"
     (org-test-with-temp-text
-     (format
-      "#+INCLUDE: \"%s/examples/include.org\" :lines \"4-5\" SRC emacs-lisp"
-      org-test-dir)
-     (org-export-expand-include-keyword)
-     (buffer-string))))
+	(format
+	 "#+INCLUDE: \"%s/examples/include.org\" :lines \"4-5\" SRC emacs-lisp"
+	 org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))))
   ;; Inclusion within an html export-block.
   (should
    (equal
     "#+BEGIN_HTML\n<p>HTML!</p>\n#+END_HTML\n"
     (org-test-with-temp-text
-     (format
-      "#+INCLUDE: \"%s/examples/include.html\" HTML"
-      org-test-dir)
-     (org-export-expand-include-keyword)
-     (buffer-string))))
+	(format
+	 "#+INCLUDE: \"%s/examples/include.html\" HTML"
+	 org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))))
   ;; Inclusion within an center paragraph
   (should
    (equal
     "#+BEGIN_CENTER\nSuccess!\n#+END_CENTER\n"
     (org-test-with-temp-text
-     (format
-      "#+INCLUDE: \"%s/examples/include2.org\" CENTER"
-      org-test-dir)
-     (org-export-expand-include-keyword)
-     (buffer-string))))
+	(format
+	 "#+INCLUDE: \"%s/examples/include2.org\" CENTER"
+	 org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))))
   ;; Footnotes labels are local to each included file.
   (should
    (= 6
@@ -1016,15 +1016,15 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
    (equal
     "body\n"
     (org-test-with-temp-text
-     (concat
-      (format "#+INCLUDE: \"%s/examples/include.org::*Heading\" " org-test-dir)
-      ":only-contents t")
+	(concat
+	 (format "#+INCLUDE: \"%s/examples/include.org::*Heading\" " org-test-dir)
+	 ":only-contents t")
       (org-export-expand-include-keyword)
       (buffer-string))))
   ;; Headings can be included via CUSTOM_ID.
   (should
    (org-test-with-temp-text
-	(format "#+INCLUDE: \"%s/examples/include.org::#ah\"" org-test-dir)
+       (format "#+INCLUDE: \"%s/examples/include.org::#ah\"" org-test-dir)
      (org-export-expand-include-keyword)
      (goto-char (point-min))
      (looking-at "* Another heading")))
@@ -1039,7 +1039,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
   ;; Including non-existing elements should result in an error.
   (should-error
    (org-test-with-temp-text
-	(format "#+INCLUDE: \"%s/examples/include.org::*non-existing heading\"" org-test-dir)
+       (format "#+INCLUDE: \"%s/examples/include.org::*non-existing heading\"" org-test-dir)
      (org-export-expand-include-keyword)))
   ;; Lines work relatively to an included element.
   (should
