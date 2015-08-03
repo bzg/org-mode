@@ -2939,16 +2939,16 @@ and column2 are table column numbers."
 		(last-column (max c1 c2)))
 	    (if corners-only (list first-row first-column last-row last-column)
 	      ;; Copy the range values into a list.
-	      (forward-line (- r1 thisline))
+	      (forward-line (- first-row thisline))
 	      (while (not (looking-at org-table-dataline-regexp))
 		(forward-line)
-		(incf r1))
-	      (org-table-goto-column c1)
+		(incf first-row))
+	      (org-table-goto-column first-column)
 	      (let ((beg (point)))
-		(forward-line (- r2 r1))
+		(forward-line (- last-row first-row))
 		(while (not (looking-at org-table-dataline-regexp))
 		  (forward-line -1))
-		(org-table-goto-column c2)
+		(org-table-goto-column last-column)
 		(let ((end (point)))
 		  (when highlight
 		    (org-table-highlight-rectangle
