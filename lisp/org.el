@@ -10759,7 +10759,7 @@ link in a property drawer line."
 			(funcall dedicated-function
 				 (concat path
 					 (and option (concat "::" option))))
-		      (apply 'org-open-file
+		      (apply #'org-open-file
 			     path
 			     (cond (arg)
 				   ((equal app "emacs") 'emacs)
@@ -10833,10 +10833,13 @@ link in a property drawer line."
 				  path)
 			       ,(cond ((equal arg '(4)) 'occur)
 				      ((equal arg '(16)) 'org-occur))
-			       ,(org-element-property :begin link))))
+			       ;; Prevent fuzzy links from matching
+			       ;; themselves.
+			       ,(and (equal type "fuzzy")
+				     (+ 2
+					(org-element-property :begin link))))))
 		    (condition-case nil
-			(let ((org-link-search-inhibit-query t))
-			  (eval cmd))
+			(let ((org-link-search-inhibit-query t)) (eval cmd))
 		      (error (progn (widen) (eval cmd)))))))
 	       (t (browse-url-at-point))))))
 	 ;; On a footnote reference or at a footnote definition's label.
@@ -11129,9 +11132,20 @@ Search is case-insensitive and ignores white spaces."
 	 ((catch :fuzzy-match
 	    (goto-char (point-min))
 	    (while (re-search-forward s-multi-re nil t)
-	      (unless (and avoid-pos
-			   (>= (match-beginning 0) avoid-pos)
-			   (< (match-end 0) avoid-pos))
+	      ;; Skip match if it contains AVOID-POS or it is included
+	      ;; in a link with a description but outside the
+	      ;; description.
+	      (unless (or (and avoid-pos
+			       (<= (match-beginning 0) avoid-pos)
+			       (> (match-end 0) avoid-pos))
+			  (and (save-match-data
+				 (org-in-regexp org-bracket-link-regexp))
+			       (match-beginning 3)
+			       (or (> (match-beginning 3) (point))
+				   (<= (match-end 3) (point)))
+			       (org-element-lineage
+				(save-match-data (org-element-context))
+				'(link) t)))
 		(goto-char (match-beginning 0))
 		(setq type 'fuzzy)
 		(throw :fuzzy-match t)))
