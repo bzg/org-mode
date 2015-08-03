@@ -1660,6 +1660,14 @@ drops support for Emacs 24.1 and 24.2."
      (prog1 (with-current-buffer "*info*" (looking-at "\nOrg Mode Manual"))
        (kill-buffer "*info*")))))
 
+(ert-deftest test-org/open-at-point/radio-target ()
+  "Test `org-open-at-point' on radio targets."
+  (should
+   (org-test-with-temp-text "<<<target>>> <point>target"
+     (org-update-radio-target-regexp)
+     (org-open-at-point)
+     (eq (org-element-type (org-element-context)) 'radio-target))))
+
 
 ;;; Node Properties
 

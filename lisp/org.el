@@ -10827,17 +10827,21 @@ link in a property drawer line."
 		  (if (not arg) (org-mark-ring-push)
 		    (switch-to-buffer-other-window
 		     (org-get-buffer-for-internal-link (current-buffer))))
-		  (let ((cmd `(org-link-search
-			       ,(if (member type '("custom-id" "coderef"))
-				    (org-element-property :raw-link link)
-				  path)
-			       ,(cond ((equal arg '(4)) 'occur)
-				      ((equal arg '(16)) 'org-occur))
-			       ;; Prevent fuzzy links from matching
-			       ;; themselves.
-			       ,(and (equal type "fuzzy")
-				     (+ 2
-					(org-element-property :begin link))))))
+		  (let ((cmd
+			 (if (equal type "radio")
+			     `(org-search-radio-target
+			       ,(org-element-property :path link))
+			   `(org-link-search
+			     ,(if (member type '("custom-id" "coderef"))
+				  (org-element-property :raw-link link)
+				path)
+			     ,(cond ((equal arg '(4)) 'occur)
+				    ((equal arg '(16)) 'org-occur))
+			     ;; Prevent fuzzy links from matching
+			     ;; themselves.
+			     ,(and (equal type "fuzzy")
+				   (+ 2
+				      (org-element-property :begin link)))))))
 		    (condition-case nil
 			(let ((org-link-search-inhibit-query t)) (eval cmd))
 		      (error (progn (widen) (eval cmd)))))))
@@ -10973,6 +10977,26 @@ In case this is needed, a function in this hook can also restore
 the window configuration before `org-open-at-point' was called using:
 
     (set-window-configuration org-window-config-before-follow-link)")
+
+(defun org-search-radio-target (target)
+  "Search a radio target matching TARGET in current buffer.
+White spaces are not significant."
+  (let ((re (format "<<<%s>>>"
+		    (mapconcat #'regexp-quote
+			       (org-split-string target "[ \t\n]+")
+			       "[ \t]+\\(?:\n[ \t]*\\)?")))
+	(origin (point)))
+    (goto-char (point-min))
+    (catch :radio-match
+      (while (re-search-forward re nil t)
+	(backward-char)
+	(let ((object (org-element-context)))
+	  (when (eq (org-element-type object) 'radio-target)
+	    (goto-char (org-element-property :begin object))
+	    (org-show-context 'link-search)
+	    (throw :radio-match nil))))
+      (goto-char origin)
+      (user-error "No match for radio target: %s" target))))
 
 (defun org-link-search (s &optional type avoid-pos stealth)
   "Search for a search string S.
