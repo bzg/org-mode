@@ -405,7 +405,7 @@ VALUE can be `on', `off', or `pause'."
 (defun org-timer-set-timer (&optional opt)
   "Prompt for a duration in minutes or hh:mm:ss and set a timer.
 
-If `org-timer-default-timer' is not zero, suggest this value as
+If `org-timer-default-timer' is not \"0\", suggest this value as
 the default duration for the timer.  If a timer is already set,
 prompt the user if she wants to replace it.
 
@@ -426,17 +426,21 @@ using three `C-u' prefix arguments."
   (when (and org-timer-start-time
 	     (not org-timer-countdown-timer))
     (user-error "Relative timer is running.  Stop first"))
-  (let* ((effort-minutes (ignore-errors (org-get-at-eol 'effort-minutes 1)))
+  (let* ((default-timer
+	   ;; `org-timer-default-timer' used to be a number, don't choke:
+	   (if (numberp org-timer-default-timer)
+	       (number-to-string org-timer-default-timer)
+	     org-timer-default-timer))
+	 (effort-minutes (ignore-errors (org-get-at-eol 'effort-minutes 1)))
 	 (minutes (or (and (not (equal opt '(64)))
 			   effort-minutes
 			   (number-to-string effort-minutes))
 		      (and (numberp opt) (number-to-string opt))
-		      (and (consp opt) org-timer-default-timer)
+		      (and (consp opt) default-timer)
 		      (and (stringp opt) opt)
 		      (read-from-minibuffer
 		       "How much time left? (minutes or h:mm:ss) "
-		       (and (not (string-equal org-timer-default-timer "0"))
-			    org-timer-default-timer)))))
+		       (and (not (string-equal default-timer "0")) default-timer)))))
     (when (string-match "\\`[0-9]+\\'" minutes)
       (setq minutes (concat minutes ":00")))
     (if (not (string-match "[0-9]+" minutes))
