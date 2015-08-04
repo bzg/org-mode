@@ -15037,14 +15037,12 @@ Org mode file.  Code blocks defined in the ``Library of Babel'' can be called
 remotely as if they were in the current Org mode buffer (see @ref{Evaluating
 code blocks} for information on the syntax of remote code block evaluation).
 
-
 The central repository of code blocks in the ``Library of Babel'' is housed
-in an Org mode file located in the @samp{contrib} directory of Org mode.
+in an Org mode file located in the @samp{doc} directory of Org mode.
 
 Users can add code blocks they believe to be generally useful to their
 ``Library of Babel.''  The code blocks can be stored in any Org mode file and
 then loaded into the library with @code{org-babel-lob-ingest}.
-
 
 @kindex C-c C-v i
 Code blocks located in any Org mode file can be loaded into the ``Library of
