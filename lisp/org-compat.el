@@ -236,7 +236,7 @@ ignored in this case."
   (or window (selected-window)))
 
 (defun org-number-sequence (from &optional to inc)
-  "Call `number-sequence or emulate it."
+  "Call `number-sequence' or emulate it."
   (if (fboundp 'number-sequence)
       (number-sequence from to inc)
     (if (or (not to) (= from to))
@@ -397,12 +397,8 @@ Pass BUFFER to the XEmacs version of `move-to-column'."
 	 (when focus-follows-mouse
 	   (set-mouse-position frame (1- (frame-width frame)) 0)))))
 
-(defun org-float-time (&optional time)
-  "Convert time value TIME to a floating point number.
-TIME defaults to the current time."
-  (if (featurep 'xemacs)
-      (time-to-seconds (or time (current-time)))
-    (float-time time)))
+(defalias 'org-float-time
+  (if (featurep 'xemacs) 'time-to-seconds 'float-time))
 
 ;; `user-error' is only available from 24.2.50 on
 (unless (fboundp 'user-error)

@@ -191,7 +191,7 @@ Changing this variable requires a restart of Emacs to get activated."
   (interactive)
   (end-of-line)
   (skip-chars-backward "\t ")
-  (when (org-looking-back ":[A-Za-z]+:")
+  (when (org-looking-back ":[A-Za-z]+:" (line-beginning-position))
     (skip-chars-backward ":A-Za-z")
     (skip-chars-backward "\t ")))
 
@@ -644,7 +644,7 @@ This means, between the beginning of line and the point."
 					'org-mode-restart))))
      ((or (eolp)
 	  (and (looking-at "\\(  \\|\t\\)\\(+:[0-9a-zA-Z_:]+\\)?\\(  \\|\t\\)+$")
-	       (org-looking-back "  \\|\t")))
+	       (org-looking-back "  \\|\t" (- (point) 2))))
       (org-mouse-popup-global-menu))
      ((funcall get-context :checkbox)
       (popup-menu
@@ -1007,7 +1007,7 @@ This means, between the beginning of line and the point."
 	(let ((endmarker (with-current-buffer buffer
 			   (org-end-of-subtree nil t)
 			   (unless (eobp) (forward-char 1))
-			   (copy-marker (point)))))
+			   (point-marker))))
 	  (org-with-remote-undo buffer
 	    (with-current-buffer buffer
 	      (widen)
@@ -1017,7 +1017,7 @@ This means, between the beginning of line and the point."
 		(and (outline-next-heading)
 		     (org-flag-heading nil)))   ; show the next heading
 	      (org-back-to-heading)
-	      (setq marker (copy-marker (point)))
+	      (setq marker (point-marker))
 	      (goto-char (max (point-at-bol) (- (point-at-eol) anticol)))
 	      (funcall command)
 	      (message "_cmd: %S" org-mouse-cmd)

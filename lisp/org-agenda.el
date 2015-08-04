@@ -5748,7 +5748,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
    (let ((calendar-date-style 'european)	(european-calendar-style t))
      (diary-date day month year mark))))
 
-;; Define the` org-class' function
+;; Define the `org-class' function
 (defun org-class (y1 m1 d1 y2 m2 d2 dayname &rest skip-weeks)
   "Entry applies if date is between dates on DAYNAME, but skips SKIP-WEEKS.
 DAYNAME is a number between 0 (Sunday) and 6 (Saturday).
@@ -6653,7 +6653,7 @@ The modified list may contain inherited tags, and tags matched by
 
 LIST is the list of agenda items formatted by `org-agenda-list'.
 NDAYS is the span of the current agenda view.
-TODAYP is `t' when the current agenda view is on today."
+TODAYP is t when the current agenda view is on today."
   (catch 'exit
     (cond ((not org-agenda-use-time-grid) (throw 'exit list))
 	  ((and todayp (member 'today (car org-agenda-time-grid))))

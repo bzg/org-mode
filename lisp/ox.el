@@ -496,7 +496,7 @@ t           Allow export of math snippets."
   "The last level which is still exported as a headline.
 
 Inferior levels will usually produce itemize or enumerate lists
-when exported, but back-end behaviour may differ.
+when exported, but back-end behavior may differ.
 
 This option can also be set with the OPTIONS keyword,
 e.g. \"H:2\"."
@@ -1514,7 +1514,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 			    (and buffer-file-name (list buffer-file-name))
 			    nil)))
       ;; Parse properties in TO-PARSE.  Remove newline characters not
-      ;; involved in line breaks to simulate `space' behaviour.
+      ;; involved in line breaks to simulate `space' behavior.
       ;; Finally return options.
       (dolist (p to-parse options)
 	(let ((value (org-element-parse-secondary-string

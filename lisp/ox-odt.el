@@ -276,7 +276,8 @@ This style is much the same as that of \"OrgFixedWidthBlock\"
 except that the foreground and background colors are set
 according to the default face identified by the `htmlfontify'.")
 
-(defvar hfy-optimisations)
+(defvar hfy-optimizations)
+(define-obsolete-variable-alias 'hfy-optimisations 'hfy-optimizations "25.1")
 (defvar org-odt-embedded-formulas-count 0)
 (defvar org-odt-embedded-images-count 0)
 (defvar org-odt-image-size-probe-method
@@ -861,7 +862,7 @@ TABLE-CELL-STYLE-SELECTOR := `use-first-row-styles'       |
                              `use-banding-rows-styles'    |
                              `use-banding-columns-styles' |
                              `use-first-row-styles'
-ON-OR-OFF                 := `t' | `nil'
+ON-OR-OFF                 := t | nil
 
 For example, with the following configuration
 
@@ -3146,8 +3147,8 @@ and prefix with \"OrgSrc\".  For example,
 			       (" " "<text:s/>")
 			       ("	" "<text:tab/>")))
 	 (hfy-face-to-css 'org-odt-hfy-face-to-css)
-	 (hfy-optimisations-1 (copy-sequence hfy-optimisations))
-	 (hfy-optimisations (add-to-list 'hfy-optimisations-1
+	 (hfy-optimizations-1 (copy-sequence hfy-optimizations))
+	 (hfy-optimizations (add-to-list 'hfy-optimizations-1
 					 'body-text-only))
 	 (hfy-begin-span-handler
 	  (lambda (style text-block text-id text-begins-block-p)
