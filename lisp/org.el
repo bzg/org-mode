@@ -10827,22 +10827,24 @@ link in a property drawer line."
 		  (if (not arg) (org-mark-ring-push)
 		    (switch-to-buffer-other-window
 		     (org-get-buffer-for-internal-link (current-buffer))))
-		  (let ((cmd
-			 (if (equal type "radio")
-			     `(org-search-radio-target
-			       ,(org-element-property :path link))
-			   `(org-link-search
-			     ,(if (member type '("custom-id" "coderef"))
-				  (org-element-property :raw-link link)
-				path)
+		  (let ((destination
+			 (org-with-wide-buffer
+			  (if (equal type "radio")
+			      (org-search-radio-target
+			       (org-element-property :path link))
+			    (org-link-search
+			     (if (member type '("custom-id" "coderef"))
+				 (org-element-property :raw-link link)
+			       path)
 			     ;; Prevent fuzzy links from matching
 			     ;; themselves.
-			     ,(and (equal type "fuzzy")
-				   (+ 2
-				      (org-element-property :begin link)))))))
-		    (condition-case nil
-			(let ((org-link-search-inhibit-query t)) (eval cmd))
-		      (error (progn (widen) (eval cmd)))))))
+			     (and (equal type "fuzzy")
+				  (+ 2 (org-element-property :begin link)))))
+			  (point))))
+		    (unless (and (<= (point-min) destination)
+				 (>= (point-max) destination))
+		      (widen))
+		    (goto-char destination))))
 	       (t (browse-url-at-point))))))
 	 ;; On a footnote reference or at a footnote definition's label.
 	 ((or (eq type 'footnote-reference)
