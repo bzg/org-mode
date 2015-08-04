@@ -22292,13 +22292,12 @@ The return value is a list of lines, without newlines at the end."
 
 (defun org-split-string (string &optional separators)
   "Splits STRING into substrings at SEPARATORS.
+SEPARATORS is a regular expression.
 No empty strings are returned if there are matches at the beginning
 and end of string."
-  (let ((rexp (or separators "[ \f\t\n\r\v]+"))
-	(start 0)
-	notfirst
-	(list nil))
-    (while (and (string-match rexp string
+  ;; FIXME: why not use (split-string STRING SEPARATORS t)?
+  (let ((start 0) notfirst list)
+    (while (and (string-match (or separators "[ \f\t\n\r\v]+") string
 			      (if (and notfirst
 				       (= start (match-beginning 0))
 				       (< start (length string)))
@@ -22308,14 +22307,10 @@ and end of string."
       (or (eq (match-beginning 0) 0)
 	  (and (eq (match-beginning 0) (match-end 0))
 	       (eq (match-beginning 0) start))
-	  (setq list
-		(cons (substring string start (match-beginning 0))
-		      list)))
+	  (push (substring string start (match-beginning 0)) list))
       (setq start (match-end 0)))
     (or (eq start (length string))
-	(setq list
-	      (cons (substring string start)
-		    list)))
+	(push (substring string start) list))
     (nreverse list)))
 
 (defun org-quote-vert (s)
