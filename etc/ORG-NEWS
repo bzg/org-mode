@@ -241,6 +241,22 @@ exclude.
 The main purpose is for the function to make more logical sense when
 filtering on tags now when tags can be structured in hierarchies.
 
+*** Babel: support for sed scripts
+
+Thanks to Bjarte Johansen for this feature.
+
+*** Babel: support for Processing language
+
+New ob-processing.el library.
+
+This library implements necessary functions for implementing editing
+of Processing code blocks, viewing the resulting sketches in an
+external viewer, and HTML export of the sketches.
+
+Check the documentation for more.
+
+Thanks to Jarmo Hurri for this feature.
+
 *** New behaviour for `org-toggle-latex-fragment'
 The new behaviour is the following:
 
@@ -441,6 +457,8 @@ Note, ~org-latex-hyperref-template~ has a new default value.
 If you require any of these package add them to your preamble via
 ~org-latex-packages-alist~. Org also uses default LaTeX ~\tolerance~
 now.
+
+*** When exporting, throw an error on unresolved id/fuzzy links and code refs
 * Version 8.2
 
 ** Incompatible changes
