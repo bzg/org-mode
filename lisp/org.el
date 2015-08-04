@@ -10835,8 +10835,6 @@ link in a property drawer line."
 			     ,(if (member type '("custom-id" "coderef"))
 				  (org-element-property :raw-link link)
 				path)
-			     ,(cond ((equal arg '(4)) 'occur)
-				    ((equal arg '(16)) 'org-occur))
 			     ;; Prevent fuzzy links from matching
 			     ;; themselves.
 			     ,(and (equal type "fuzzy")
@@ -10998,7 +10996,7 @@ White spaces are not significant."
       (goto-char origin)
       (user-error "No match for radio target: %s" target))))
 
-(defun org-link-search (s &optional type avoid-pos stealth)
+(defun org-link-search (s &optional avoid-pos stealth)
   "Search for a search string S.
 
 If S starts with \"#\", it triggers a custom ID search.
@@ -11012,24 +11010,22 @@ a regular expression.  In Org mode files, this will create an
 to list matches.  If the current buffer is in `dired-mode', grep
 will be used to search in all files.
 
-When optional argument TYPE is `org-occur', call this function on
-a regexp matching S.  If it is `occur', call Emacs' `occur'
-function instead.
-
 When AVOID-POS is given, ignore matches near that position.
 
 When optional argument STEALTH is non-nil, do not modify
 visibility around point, thus ignoring `org-show-context-detail'
 variable.
 
-Search is case-insensitive and ignores white spaces."
+Search is case-insensitive and ignores white spaces.  Return type
+of matched result, with is either `dedicated' or `fuzzy'."
   (unless (org-string-nw-p s) (error "Invalid search string \"%s\"" s))
   (let* ((case-fold-search t)
 	 (origin (point))
 	 (normalized (replace-regexp-in-string "\n[ \t]*" " " s))
 	 (words (org-split-string s "[ \t\n]+"))
 	 (s-multi-re (mapconcat #'regexp-quote words "[ \t]+\\(?:\n[ \t]*\\)?"))
-	 (s-single-re (mapconcat #'regexp-quote words "[ \t]+")))
+	 (s-single-re (mapconcat #'regexp-quote words "[ \t]+"))
+	 type)
     (cond
      ;; Check if there are any special search functions.
      ((run-hook-with-args-until-success 'org-execute-file-search-functions s))
@@ -11066,10 +11062,8 @@ Search is case-insensitive and ignores white spaces."
 	  (error "No match for coderef: %s" coderef))))
      ((string-match "\\`/\\(.*\\)/\\'" normalized)
       ;; Look for a regular expression.
-      (cond
-       ((derived-mode-p 'org-mode)
-	(org-occur (match-string 1 s)))
-       (t (org-do-occur (match-string 1 s)))))
+      (funcall (if (derived-mode-p 'org-mode) #'org-occur #'org-do-occur)
+	       (match-string 1 s)))
      ;; Fuzzy links.
      (t
       (let* ((starred (eq (string-to-char normalized) ?*))
@@ -11150,9 +11144,7 @@ Search is case-insensitive and ignores white spaces."
 	 (headline-search
 	  (goto-char origin)
 	  (error "No match for fuzzy expression: %s" normalized))
-	 ;; Regular text search or occur, depending on TYPE.
-	 ((eq type 'org-occur) (org-occur s-multi-re))
-	 ((eq type 'occur) (org-do-occur s-multi-re 'cleanup))
+	 ;; Regular text search.
 	 ((catch :fuzzy-match
 	    (goto-char (point-min))
 	    (while (re-search-forward s-multi-re nil t)
