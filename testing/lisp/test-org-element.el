@@ -1628,17 +1628,22 @@ e^{i\\pi}+1=0
        (equal (org-element-property :path (org-element-context)) file))))
   ;; ... multi-line link.
   (should
-   (equal "//orgmode.org"
-	  (org-test-with-temp-text "[[http://orgmode.\norg]]"
+   (equal "ls *.org"
+	  (org-test-with-temp-text "[[shell:ls\n*.org]]"
 	    (org-element-property :path (org-element-context)))))
   ;; Plain link.
   (should
    (org-test-with-temp-text "A link: http://orgmode.org"
      (org-element-map (org-element-parse-buffer) 'link 'identity)))
-  ;; Angular link.
+  ;; Angular link.  Follow RFC 3986.
   (should
-   (org-test-with-temp-text "A link: <http://orgmode.org>"
-     (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))
+   (eq 'link
+       (org-test-with-temp-text "A link: <point><http://orgmode.org>"
+	 (org-element-type (org-element-context)))))
+  (should
+   (equal "//orgmode.org"
+       (org-test-with-temp-text "A link: <point><http://orgmode\n.org>"
+	 (org-element-property :path (org-element-context)))))
   ;; Link abbreviation.
   (should
    (equal "http"

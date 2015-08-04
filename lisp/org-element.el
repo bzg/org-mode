@@ -3045,53 +3045,73 @@ Assume point is at the beginning of the link."
 	      contents-end (match-end 1)))
        ;; Type 2: Standard link, i.e. [[http://orgmode.org][homepage]]
        ((looking-at org-bracket-link-regexp)
-	(setq contents-begin (match-beginning 3)
-	      contents-end (match-end 3)
-	      link-end (match-end 0)
-	      ;; RAW-LINK is the original link.  Expand any
-	      ;; abbreviation in it.
-	      raw-link (org-translate-link
+	(setq contents-begin (match-beginning 3))
+	(setq contents-end (match-end 3))
+	(setq link-end (match-end 0))
+	;; RAW-LINK is the original link.  Expand any
+	;; abbreviation in it.
+	;;
+	;; Also treat any newline character and associated
+	;; indentation as a single space character.  This is not
+	;; compatible with RFC 3986, which requires to ignore
+	;; them altogether.  However, doing so would require
+	;; users to encode spaces on the fly when writing links
+	;; (e.g., insert [[shell:ls%20*.org]] instead of
+	;; [[shell:ls *.org]], which defeats Org's focus on
+	;; simplicity.
+	(setq raw-link (org-translate-link
 			(org-link-expand-abbrev
-			 (org-match-string-no-properties 1))))
-	;; Determine TYPE of link and set PATH accordingly.
+			 (replace-regexp-in-string
+			  "[ \t]*\n[ \t]*" " "
+			  (org-match-string-no-properties 1)))))
+	;; Determine TYPE of link and set PATH accordingly.  According
+	;; to RFC 3986, remove whitespaces from URI in external links.
+	;; In internal ones, treat indentation as a single space.
 	(cond
 	 ;; File type.
 	 ((or (file-name-absolute-p raw-link)
 	      (string-match "\\`\\.\\.?/" raw-link))
-	  (setq type "file" path raw-link))
+	  (setq type "file")
+	  (setq path raw-link))
 	 ;; Explicit type (http, irc, bbdb...).  See `org-link-types'.
 	 ((string-match org-link-types-re raw-link)
-	  (setq type (match-string 1 raw-link)
-		;; According to RFC 3986, extra whitespace should be
-		;; ignored when a URI is extracted.
-		path (replace-regexp-in-string
-		      "[ \t]*\n[ \t]*" "" (substring raw-link (match-end 0)))))
+	  (setq type (match-string 1 raw-link))
+	  (setq path (substring raw-link (match-end 0))))
 	 ;; Id type: PATH is the id.
-	 ((string-match "\\`id:\\([-a-f0-9]+\\)" raw-link)
+	 ((string-match "\\`id:\\([-a-f0-9]+\\)\\'" raw-link)
 	  (setq type "id" path (match-string 1 raw-link)))
 	 ;; Code-ref type: PATH is the name of the reference.
-	 ((string-match "\\`(\\(.*\\))\\'" raw-link)
-	  (setq type "coderef" path (match-string 1 raw-link)))
+	 ((and (org-string-match-p "\\`(" raw-link)
+	       (org-string-match-p ")\\'" raw-link))
+	  (setq type "coderef")
+	  (setq path (substring raw-link 1 -1)))
 	 ;; Custom-id type: PATH is the name of the custom id.
 	 ((= (string-to-char raw-link) ?#)
-	  (setq type "custom-id" path (substring raw-link 1)))
+	  (setq type "custom-id")
+	  (setq path (substring raw-link 1)))
 	 ;; Fuzzy type: Internal link either matches a target, an
 	 ;; headline name or nothing.  PATH is the target or
 	 ;; headline's name.
-	 (t (setq type "fuzzy" path raw-link))))
+	 (t
+	  (setq type "fuzzy")
+	  (setq path raw-link))))
        ;; Type 3: Plain link, e.g., http://orgmode.org
        ((looking-at org-plain-link-re)
 	(setq raw-link (org-match-string-no-properties 0)
 	      type (org-match-string-no-properties 1)
 	      link-end (match-end 0)
 	      path (org-match-string-no-properties 2)))
-       ;; Type 4: Angular link, e.g., <http://orgmode.org>
+       ;; Type 4: Angular link, e.g., <http://orgmode.org>.  Unlike to
+       ;; bracket links, follow RFC 3986 and remove any extra
+       ;; whitespace in URI.
        ((looking-at org-angle-link-re)
-	(setq raw-link (buffer-substring-no-properties
-			(match-beginning 1) (match-end 2))
-	      type (org-match-string-no-properties 1)
-	      link-end (match-end 0)
-	      path (org-match-string-no-properties 2)))
+	(setq type (org-match-string-no-properties 1))
+	(setq link-end (match-end 0))
+	(setq raw-link
+	      (buffer-substring-no-properties
+	       (match-beginning 1) (match-end 2)))
+	(setq path (replace-regexp-in-string
+		    "[ \t]*\n[ \t]*" "" (org-match-string-no-properties 2))))
        (t (throw 'no-object nil)))
       ;; In any case, deduce end point after trailing white space from
       ;; LINK-END variable.

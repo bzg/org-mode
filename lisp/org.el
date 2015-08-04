@@ -5712,10 +5712,7 @@ This should be called after the variable `org-link-types' has changed."
 		  "\\([^" org-non-link-chars " ]"
 		  "[^\t\n\r]*\\)")
 	  org-angle-link-re
-	  (concat "<" types-re ":"
-		  "\\([^" org-non-link-chars " ]"
-		  "[^" org-non-link-chars "]*"
-		  "\\)>")
+	  (format "<%s:\\(\n?\\(?:[^>\n]+\n?\\)*\\)>" types-re)
 	  org-plain-link-re
 	  (concat
 	   "\\<" types-re ":"
@@ -5998,7 +5995,8 @@ by a #."
 	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	(add-text-properties (match-beginning 0) (match-end 0)
 			     (list 'mouse-face 'highlight
-				   'keymap org-mouse-map))
+				   'keymap org-mouse-map
+				   'font-lock-multiline t))
 	(org-rear-nonsticky-at (match-end 0))
 	t)))
 
