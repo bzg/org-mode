@@ -3976,12 +3976,13 @@ Replace format-specifiers in the command as noted below and use
 %I:     Input LaTeX file in fully expanded form.
 %i:     The latex fragment to be converted.
 %o:     Output MathML file.
+
 This command is used by `org-create-math-formula'.
 
-When using MathToWeb as the converter, set this to
+When using MathToWeb as the converter, set this option to
 \"java -jar %j -unicode -force -df %o %I\".
 
-When using  LaTeXML set this to
+When using LaTeXML set this option to
 \"latexmlmath \"%i\" --presentationmathml=%o\"."
   :group 'org-latex
   :version "24.1"
