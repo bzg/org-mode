@@ -11074,7 +11074,7 @@ of matched result, with is either `dedicated' or `fuzzy'."
 				       starred))))
 	(cond
 	 ;; Look for targets, only if not in a headline search.
-	 ((and (not headline-search)
+	 ((and (not starred)
 	       (let ((target (format "<<%s>>" s-multi-re)))
 		 (catch :target-match
 		   (goto-char (point-min))
@@ -11088,7 +11088,7 @@ of matched result, with is either `dedicated' or `fuzzy'."
 		   nil))))
 	 ;; Look for elements named after S, only if not in a headline
 	 ;; search.
-	 ((and (not headline-search)
+	 ((and (not starred)
 	       (let ((name (format "^[ \t]*#\\+NAME: +%s[ \t]*$" s-single-re)))
 		 (catch :name-match
 		   (goto-char (point-min))
@@ -11132,7 +11132,7 @@ of matched result, with is either `dedicated' or `fuzzy'."
 	  (setq type 'dedicated))
 	 ;; Offer to create non-existent headline depending on
 	 ;; `org-link-search-must-match-exact-headline'.
-	 ((and headline-search
+	 ((and (derived-mode-p 'org-mode)
 	       (not org-link-search-inhibit-query)
 	       (eq org-link-search-must-match-exact-headline 'query-to-create)
 	       (yes-or-no-p "No match - create this as a new heading? "))
@@ -11143,7 +11143,8 @@ of matched result, with is either `dedicated' or `fuzzy'."
 	  (beginning-of-line 0))
 	 ;; Only headlines are looked after.  No need to process
 	 ;; further: throw an error.
-	 (headline-search
+	 ((and (derived-mode-p 'org-mode)
+	       (or starred org-link-search-must-match-exact-headline))
 	  (goto-char origin)
 	  (error "No match for fuzzy expression: %s" normalized))
 	 ;; Regular text search.
