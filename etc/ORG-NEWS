@@ -84,6 +84,7 @@ docstring for more information.
 - ~org-html-format-inlinetask-function~
 - ~org-latex-format-headline-function~
 - ~org-latex-format-inlinetask-function~
+- ~org-link-search~
 *** Default bindings of =C-c C-n= and =C-c C-p= changed
 The key sequences =C-c C-n= and =C-c C-p= are now bound to
 ~org-next-visible-heading~ and ~org-next-visible-heading~
