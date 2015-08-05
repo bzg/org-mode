@@ -497,7 +497,9 @@ as `org-src-fontify-natively' is non-nil."
 	  (delete-region (point-min) (point-max))
 	  (insert string " ") ;; so there's a final property change
 	  (unless (eq major-mode lang-mode) (funcall lang-mode))
-	  (font-lock-ensure)
+	  ;; Avoid `font-lock-ensure', which does not display fonts in
+	  ;; source block.
+	  (font-lock-fontify-buffer)
 	  (setq pos (point-min))
 	  (while (setq next (next-single-property-change pos 'face))
 	    (put-text-property
