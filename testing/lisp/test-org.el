@@ -1242,6 +1242,49 @@
      (goto-char (point-max))
      (org-in-commented-heading-p t))))
 
+(ert-deftest test-org/entry-blocked-p ()
+  ;; Check other dependencies.
+  (should
+   (org-test-with-temp-text "* TODO Blocked\n** DONE one\n** TODO two"
+     (let ((org-enforce-todo-dependencies t)
+	   (org-blocker-hook
+	    '(org-block-todo-from-children-or-siblings-or-parent)))
+       (org-entry-blocked-p))))
+  (should-not
+   (org-test-with-temp-text "* TODO Blocked\n** DONE one\n** DONE two"
+     (let ((org-enforce-todo-dependencies t)
+	   (org-blocker-hook
+	    '(org-block-todo-from-children-or-siblings-or-parent)))
+       (org-entry-blocked-p))))
+  ;; Entry without a TODO keyword or with a DONE keyword cannot be
+  ;; blocked.
+  (should-not
+   (org-test-with-temp-text "* Blocked\n** TODO one"
+     (let ((org-enforce-todo-dependencies t)
+	   (org-blocker-hook
+	    '(org-block-todo-from-children-or-siblings-or-parent)))
+       (org-entry-blocked-p))))
+  (should-not
+   (org-test-with-temp-text "* DONE Blocked\n** TODO one"
+     (let ((org-enforce-todo-dependencies t)
+	   (org-blocker-hook
+	    '(org-block-todo-from-children-or-siblings-or-parent)))
+       (org-entry-blocked-p))))
+  ;; Follow :ORDERED: specifications.
+  (should
+   (org-test-with-temp-text
+       "* H\n:PROPERTIES:\n:ORDERED: t\n:END:\n** TODO one\n** <point>TODO two"
+     (let ((org-enforce-todo-dependencies t)
+	   (org-blocker-hook
+	    '(org-block-todo-from-children-or-siblings-or-parent)))
+       (org-entry-blocked-p))))
+  (should-not
+   (org-test-with-temp-text
+       "* H\n:PROPERTIES:\n:ORDERED: t\n:END:\n** <point>TODO one\n** DONE two"
+     (let ((org-enforce-todo-dependencies t)
+	   (org-blocker-hook
+	    '(org-block-todo-from-children-or-siblings-or-parent)))
+       (org-entry-blocked-p)))))
 
 
 ;;; Keywords
@@ -3340,22 +3383,17 @@ Paragraph<point>"
   ;; Get "BLOCKED" property.
   (should
    (equal "t"
-	  (org-test-with-temp-text "* Blocked\n** DONE one\n** TODO two"
+	  (org-test-with-temp-text "* TODO Blocked\n** DONE one\n** TODO two"
 	    (let ((org-enforce-todo-dependencies t)
 		  (org-blocker-hook
 		   '(org-block-todo-from-children-or-siblings-or-parent)))
 	      (cdr (assoc "BLOCKED" (org-entry-properties nil "BLOCKED")))))))
   (should
-   (equal "t"
-	  (org-test-with-temp-text "* Blocked\n** DONE one\n** TODO two"
+   (equal ""
+	  (org-test-with-temp-text "* TODO Blocked\n** DONE one\n** DONE two"
 	    (let ((org-enforce-todo-dependencies t)
 		  (org-blocker-hook
 		   '(org-block-todo-from-children-or-siblings-or-parent)))
-	      (cdr (assoc "BLOCKED" (org-entry-properties)))))))
-  (should
-   (equal ""
-	  (org-test-with-temp-text "* Blocked\n** DONE one\n** DONE two"
-	    (let ((org-enforce-todo-dependencies t))
 	      (cdr (assoc "BLOCKED" (org-entry-properties nil "BLOCKED")))))))
   ;; Get "CLOSED", "DEADLINE" and "SCHEDULED" properties.
   (should
@@ -3420,20 +3458,20 @@ Paragraph<point>"
   ;; Get "TIMESTAMP" and "TIMESTAMP_IA" properties.
   (should
    (equal "<2012-03-29 thu.>"
-    (org-test-with-temp-text "* Entry\n<2012-03-29 thu.>"
-      (cdr (assoc "TIMESTAMP" (org-entry-properties))))))
+	  (org-test-with-temp-text "* Entry\n<2012-03-29 thu.>"
+	    (cdr (assoc "TIMESTAMP" (org-entry-properties))))))
   (should
    (equal "[2012-03-29 thu.]"
-    (org-test-with-temp-text "* Entry\n[2012-03-29 thu.]"
-      (cdr (assoc "TIMESTAMP_IA" (org-entry-properties))))))
+	  (org-test-with-temp-text "* Entry\n[2012-03-29 thu.]"
+	    (cdr (assoc "TIMESTAMP_IA" (org-entry-properties))))))
   (should
    (equal "<2012-03-29 thu.>"
-    (org-test-with-temp-text "* Entry\n[2014-03-04 tue.]<2012-03-29 thu.>"
-      (cdr (assoc "TIMESTAMP" (org-entry-properties nil "TIMESTAMP"))))))
+	  (org-test-with-temp-text "* Entry\n[2014-03-04 tue.]<2012-03-29 thu.>"
+	    (cdr (assoc "TIMESTAMP" (org-entry-properties nil "TIMESTAMP"))))))
   (should
    (equal "[2014-03-04 tue.]"
-    (org-test-with-temp-text "* Entry\n<2012-03-29 thu.>[2014-03-04 tue.]"
-      (cdr (assoc "TIMESTAMP_IA" (org-entry-properties nil "TIMESTAMP_IA"))))))
+	  (org-test-with-temp-text "* Entry\n<2012-03-29 thu.>[2014-03-04 tue.]"
+	    (cdr (assoc "TIMESTAMP_IA" (org-entry-properties nil "TIMESTAMP_IA"))))))
   ;; Get standard properties.
   (should
    (equal "1"
