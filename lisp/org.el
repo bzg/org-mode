@@ -6530,7 +6530,7 @@ PRIORITY is a character."
 If TAG is a number, get the corresponding match group."
   (let ((tag (if (wholenump tag) (match-string tag) tag)))
     (or (org-face-from-face-or-color
-	 'tag 'org-tag (cdr (assoc kwd org-tag-faces)))
+	 'tag 'org-tag (cdr (assoc tag org-tag-faces)))
 	'org-tag)))
 
 (defun org-font-lock-add-priority-faces (limit)
