@@ -6541,13 +6541,13 @@ When FACE-OR-COLOR is not a string, just return it."
 		       'org-priority)
 	     'font-lock-fontified t)))))
 
-(defun org-get-tag-face (kwd)
-  "Get the right face for a TODO keyword KWD.
-If KWD is a number, get the corresponding match group."
-  (if (numberp kwd) (setq kwd (match-string kwd)))
-  (or (org-face-from-face-or-color
-       'tag 'org-tag (cdr (assoc kwd org-tag-faces)))
-      'org-tag))
+(defun org-get-tag-face (tag)
+  "Get the right face for TAG.
+If TAG is a number, get the corresponding match group."
+  (let ((tag (if (wholenump tag) (match-string tag) tag)))
+    (or (org-face-from-face-or-color
+	 'tag 'org-tag (cdr (assoc kwd org-tag-faces)))
+	'org-tag)))
 
 (defun org-unfontify-region (beg end &optional maybe_loudly)
   "Remove fontification and activation overlays from links."
