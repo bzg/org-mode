@@ -6500,6 +6500,14 @@ needs to be inserted at a specific position in the font-lock sequence.")
    ((eq n 2) org-f)
    (t (if org-level-color-stars-only nil org-f))))
 
+(defun org-face-from-face-or-color (context inherit face-or-color)
+  "Create a face list that inherits INHERIT, but sets the foreground color.
+When FACE-OR-COLOR is not a string, just return it."
+  (if (stringp face-or-color)
+      (list :inherit inherit
+	    (cdr (assoc context org-faces-easy-properties))
+	    face-or-color)
+    face-or-color))
 
 (defun org-get-todo-face (kwd)
   "Get the right face for a TODO keyword KWD.
@@ -6510,14 +6518,28 @@ If KWD is a number, get the corresponding match group."
       (and (member kwd org-done-keywords) 'org-done)
       'org-todo))
 
-(defun org-face-from-face-or-color (context inherit face-or-color)
-  "Create a face list that inherits INHERIT, but sets the foreground color.
-When FACE-OR-COLOR is not a string, just return it."
-  (if (stringp face-or-color)
-      (list :inherit inherit
-	    (cdr (assoc context org-faces-easy-properties))
-	    face-or-color)
-    face-or-color))
+(defun org-get-priority-face (priority)
+  "Get the right face for PRIORITY.
+PRIORITY is a character."
+  (or (org-face-from-face-or-color
+       'priority 'org-priority (cdr (assq priority org-priority-faces)))
+      'org-priority))
+
+(defun org-get-tag-face (tag)
+  "Get the right face for TAG.
+If TAG is a number, get the corresponding match group."
+  (let ((tag (if (wholenump tag) (match-string tag) tag)))
+    (or (org-face-from-face-or-color
+	 'tag 'org-tag (cdr (assoc kwd org-tag-faces)))
+	'org-tag)))
+
+(defun org-font-lock-add-priority-faces (limit)
+  "Add the special priority faces."
+  (while (re-search-forward "^\\*+ .*?\\(\\[#\\(.\\)\\]\\)" limit t)
+    (add-text-properties
+     (match-beginning 1) (match-end 1)
+     (list 'face (org-get-priority-face (string-to-char (match-string 2)))
+	   'font-lock-fontified t))))
 
 (defun org-font-lock-add-tag-faces (limit)
   "Add the special tag faces."
@@ -6527,27 +6549,6 @@ When FACE-OR-COLOR is not a string, just return it."
 			   (list 'face (org-get-tag-face 1)
 				 'font-lock-fontified t))
       (backward-char 1))))
-
-(defun org-font-lock-add-priority-faces (limit)
-  "Add the special priority faces."
-  (while (re-search-forward "\\[#\\([A-Z0-9]\\)\\]" limit t)
-    (when (save-match-data (org-at-heading-p))
-      (add-text-properties
-       (match-beginning 0) (match-end 0)
-       (list 'face (or (org-face-from-face-or-color
-			'priority 'org-priority
-			(cdr (assoc (char-after (match-beginning 1))
-				    org-priority-faces)))
-		       'org-priority)
-	     'font-lock-fontified t)))))
-
-(defun org-get-tag-face (tag)
-  "Get the right face for TAG.
-If TAG is a number, get the corresponding match group."
-  (let ((tag (if (wholenump tag) (match-string tag) tag)))
-    (or (org-face-from-face-or-color
-	 'tag 'org-tag (cdr (assoc kwd org-tag-faces)))
-	'org-tag)))
 
 (defun org-unfontify-region (beg end &optional maybe_loudly)
   "Remove fontification and activation overlays from links."

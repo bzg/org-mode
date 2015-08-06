@@ -150,7 +150,6 @@ This is the compiled version of the format.")
   "Create a new column overlay and add it to the list."
   (let ((ov (make-overlay beg end)))
     (overlay-put ov 'face (or face 'secondary-selection))
-    (remove-text-properties 0 (length string) '(face nil) string)
     (org-overlay-display ov string face)
     (push ov org-columns-overlays)
     ov))
@@ -206,9 +205,7 @@ This is the compiled version of the format.")
 	       (val (or (cdr ass) ""))
 	       (modval
 		(cond
-		 ((and org-columns-modify-value-for-display-function
-		       (functionp
-			org-columns-modify-value-for-display-function))
+		 ((functionp org-columns-modify-value-for-display-function)
 		  (funcall org-columns-modify-value-for-display-function
 			   title val))
 		 ((equal property "ITEM") (org-columns-compact-links val))
@@ -220,7 +217,23 @@ This is the compiled version of the format.")
 		  (org-columns-number-to-string
 		   (funcall calc (org-columns-string-to-number val fm)) fm))))
 	       (string
-		(format f (org-columns-add-ellipses (or modval val) width)))
+		(format f
+			(let ((v (org-columns-add-ellipses
+				  (or modval val) width)))
+			  (cond
+			   ((equal property "PRIORITY")
+			    (propertize v 'face (org-get-priority-face val)))
+			   ((equal property "TAGS")
+			    (if (not org-tags-special-faces-re)
+				(propertize v 'face 'org-tag)
+			      (replace-regexp-in-string
+			       org-tags-special-faces-re
+			       (lambda (m)
+				 (propertize m 'face (org-get-tag-face m)))
+			       v nil nil 1)))
+			   ((equal property "TODO")
+			    (propertize v 'face (org-get-todo-face val)))
+			   (t v)))))
 	       (ov (org-columns-new-overlay
 		    (point) (1+ (point)) string (if dateline face1 face))))
 	  (overlay-put ov 'keymap org-columns-map)
