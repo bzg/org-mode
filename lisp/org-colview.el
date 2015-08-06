@@ -206,7 +206,9 @@ This is the compiled version of the format.")
 	       (val (or (cdr ass) ""))
 	       (modval
 		(cond
-		 ((functionp org-columns-modify-value-for-display-function)
+		 ((and org-columns-modify-value-for-display-function
+		       (functionp
+			org-columns-modify-value-for-display-function))
 		  (funcall org-columns-modify-value-for-display-function
 			   title val))
 		 ((equal property "ITEM") (org-columns-compact-links val))
@@ -220,13 +222,7 @@ This is the compiled version of the format.")
 	       (string
 		(format f (org-columns-add-ellipses (or modval val) width)))
 	       (ov (org-columns-new-overlay
-		    (point) (1+ (point))
-		    string
-		    (cond
-		     ((equal property "TODO")
-		      (list (org-get-todo-face val) (if dateline face1 face)))
-		     (dateline face1)
-		     (t face)))))
+		    (point) (1+ (point)) string (if dateline face1 face))))
 	  (overlay-put ov 'keymap org-columns-map)
 	  (overlay-put ov 'org-columns-key property)
 	  (overlay-put ov 'org-columns-value (cdr ass))
