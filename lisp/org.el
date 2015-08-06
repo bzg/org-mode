@@ -12840,16 +12840,15 @@ changes because there are unchecked boxes in this entry."
       t))) ; do not block
 
 (defun org-entry-blocked-p ()
-  "Is the current entry blocked?"
-  (org-with-silent-modifications
-   (if (org-entry-get nil "NOBLOCKING")
-       nil ;; Never block this entry
-     (not (run-hook-with-args-until-failure
-	   'org-blocker-hook
-	   (list :type 'todo-state-change
-		 :position (point)
-		 :from 'todo
-		 :to 'done))))))
+  "Non-nil if entry at point is blocked."
+  (and (not (org-entry-get nil "NOBLOCKING"))
+       (member (org-entry-get nil "TODO") org-not-done-keywords)
+       (not (run-hook-with-args-until-failure
+	     'org-blocker-hook
+	     (list :type 'todo-state-change
+		   :position (point)
+		   :from 'todo
+		   :to 'done)))))
 
 (defun org-update-statistics-cookies (all)
   "Update the statistics cookie, either from TODO or from checkboxes.
