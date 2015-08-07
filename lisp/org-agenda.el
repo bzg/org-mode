@@ -8593,7 +8593,9 @@ It also looks at the text of the entry itself."
 			   (symbol-value var))))))
 
 (defun org-agenda-switch-to (&optional delete-other-windows)
-  "Go to the Org-mode file which contains the item at point."
+  "Go to the Org mode file which contains the item at point.
+When optional argument DELETE-OTHER-WINDOWS is non-nil, the
+displayed Org file fills the frame."
   (interactive)
   (if (and org-return-follows-link
 	   (not (org-get-at-bol 'org-marker))
@@ -8605,17 +8607,11 @@ It also looks at the text of the entry itself."
 	   (pos (marker-position marker)))
       (unless buffer (user-error "Trying to switch to non-existent buffer"))
       (org-pop-to-buffer-same-window buffer)
-      (and delete-other-windows (delete-other-windows))
+      (when delete-other-windows (delete-other-windows))
       (widen)
       (goto-char pos)
-      (org-back-to-heading t)
       (when (derived-mode-p 'org-mode)
 	(org-show-context 'agenda)
-	(save-excursion
-	  (and (outline-next-heading)
-	       (org-flag-heading nil))) ; show the next heading
-	(when (outline-invisible-p)
-	  (show-entry))                 ; display invisible text
 	(run-hooks 'org-agenda-after-show-hook)))))
 
 (defun org-agenda-goto-mouse (ev)
