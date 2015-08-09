@@ -3320,7 +3320,7 @@ Paragraph<point>"
    (equal "* H"
 	  (org-test-with-temp-text "* TODO H"
 	    (cdr (assoc "ITEM" (org-entry-properties))))))
-  ;; Get "TODO" property.
+  ;; Get "TODO" property.  TODO keywords are case sensitive.
   (should
    (equal "TODO"
 	  (org-test-with-temp-text "* TODO H"
@@ -3331,6 +3331,9 @@ Paragraph<point>"
 	    (cdr (assoc "TODO" (org-entry-properties))))))
   (should-not
    (org-test-with-temp-text "* H"
+     (assoc "TODO" (org-entry-properties nil "TODO"))))
+  (should-not
+   (org-test-with-temp-text "* todo H"
      (assoc "TODO" (org-entry-properties nil "TODO"))))
   ;; Get "PRIORITY" property.
   (should
