@@ -10676,9 +10676,9 @@ link in a property drawer line."
 	      ;; the closest one.
 	      (org-element-lineage
 	       (org-element-context)
-	       '(comment comment-block footnote-definition footnote-reference
-			 headline inlinetask keyword link node-property
-			 timestamp)
+	       '(clock comment comment-block footnote-definition
+		       footnote-reference headline inlinetask keyword link
+		       node-property timestamp)
 	       t))
 	     (type (org-element-type context))
 	     (value (org-element-property :value context)))
@@ -10710,6 +10710,13 @@ link in a property drawer line."
 		  (org-open-at-point))
 	      (require 'org-attach)
 	      (org-attach-reveal 'if-exists))))
+	 ;; On a clock line, make sure point is on the timestamp
+	 ;; before opening it.
+	 ((and (eq type 'clock)
+	       value
+	       (>= (point) (org-element-property :begin value))
+	       (<= (point) (org-element-property :end value)))
+	  (org-follow-timestamp-link))
 	 ;; Do nothing on white spaces after an object, unless point
 	 ;; is right after it.
 	 ((> (point)
