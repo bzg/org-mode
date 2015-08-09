@@ -2560,14 +2560,14 @@ This function assumes the table is already analyzed (i.e., using
 	  (cond
 	   ((cdr (assoc ref org-table-named-field-locations)))
 	   ((string-match "\\`@\\([1-9][0-9]*\\)\\$\\([1-9][0-9]*\\)\\'" ref)
-	    (cons (condition-case nil
+	    (list (condition-case nil
 		      (aref org-table-dlines
 			    (string-to-number (match-string 1 ref)))
 		    (error (user-error "Invalid row number in %s" ref)))
 		  (string-to-number (match-string 2 ref))))
 	   (t (user-error "Unknown field: %s" ref))))
 	 (line (car coordinates))
-	 (column (cdr coordinates))
+	 (column (nth 1 coordinates))
 	 (create-new-column (if (functionp create-column-p)
 				(funcall create-column-p column)
 			      create-column-p)))
