@@ -813,7 +813,7 @@
 		 (org-test-with-temp-text "* [%]\n- [X] item"
 		   (org-update-checkbox-count)
 		   (buffer-string))))
-  ;; From a list.
+  ;; From a list or a sub-list.
   (should
    (string-match "\\[0/1\\]"
 		 (org-test-with-temp-text "- [/]\n  - [ ] item"
@@ -829,6 +829,12 @@
 		 (org-test-with-temp-text "- [%]\n  - [X] item"
 		   (org-update-checkbox-count)
 		   (buffer-string))))
+  (should
+   (string-match
+    "\\[1/1\\]"
+    (org-test-with-temp-text "- [ ] item 1\n- [ ] item 2 [/]\n  - [X] sub 1"
+      (org-update-checkbox-count)
+      (buffer-string))))
   ;; Count do not apply to sub-lists unless count is not hierarchical.
   ;; This state can be achieved with COOKIE_DATA node property set to
   ;; "recursive".

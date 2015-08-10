@@ -2527,17 +2527,20 @@ With optional prefix argument ALL, do this for the whole buffer."
 	     (let* ((container
 		     (org-element-lineage
 		      context
-		      '(drawer center-block dynamic-block inlinetask plain-list
+		      '(drawer center-block dynamic-block inlinetask item
 			       quote-block special-block verse-block)))
-		    (beg (if container (org-element-property :begin container)
+		    (beg (if container
+			     (org-element-property :contents-begin container)
 			   (save-excursion
-			     (org-with-limited-levels (outline-previous-heading))
+			     (org-with-limited-levels
+			      (outline-previous-heading))
 			     (point)))))
 	       (or (cdr (assq beg cache))
 		   (save-excursion
 		     (goto-char beg)
 		     (let ((end
-			    (if container (org-element-property :end container)
+			    (if container
+				(org-element-property :contents-end container)
 			      (save-excursion
 				(org-with-limited-levels (outline-next-heading))
 				(point))))
@@ -2556,9 +2559,9 @@ With optional prefix argument ALL, do this for the whole buffer."
 		       (let ((count
 			      (funcall count-boxes
 				       (and (eq (org-element-type container)
-						'plain-list)
+						'item)
 					    (org-element-property
-					     :contents-begin container))
+					     :begin container))
 				       structs
 				       recursivep)))
 			 (push (cons beg count) cache)
