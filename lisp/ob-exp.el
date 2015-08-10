@@ -384,7 +384,7 @@ replaced with its value."
 	    (nth 1 info))))
   (org-fill-template
    (if (eq type 'inline)
-       org-babel-exp-inline-code-template 
+       org-babel-exp-inline-code-template
        org-babel-exp-code-template)
    `(("lang"  . ,(nth 0 info))
      ("body"  . ,(org-escape-code-in-string (nth 1 info)))

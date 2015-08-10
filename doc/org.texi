@@ -8638,7 +8638,7 @@ be accumulated.  You can add a filter preset through the option
 @orgcmd{_,org-agenda-filter-by-effort}
 @vindex org-agenda-effort-filter-preset
 @vindex org-sort-agenda-noeffort-is-high
-Filter the agenda view with respect to effort estimates.  
+Filter the agenda view with respect to effort estimates.
 You first need to set up allowed efforts globally, for example
 @lisp
 (setq org-global-properties
@@ -14372,7 +14372,7 @@ however, override everything.
 
 @subsubheading @LaTeX{} specific properties
 
-@multitable {@code{:latex-link-with-unknown-path-format}} {@code{org-latex-link-with-unknown-path-format}} 
+@multitable {@code{:latex-link-with-unknown-path-format}} {@code{org-latex-link-with-unknown-path-format}}
 @item @code{:latex-active-timestamp-format}    @tab @code{org-latex-active-timestamp-format}
 @item @code{:latex-caption-above}              @tab @code{org-latex-caption-above}
 @item @code{:latex-classes}                    @tab @code{org-latex-classes}
@@ -15063,22 +15063,22 @@ Code blocks in the following languages are supported.
 @multitable @columnfractions 0.25 0.25 0.25 0.25
 @headitem @b{Language} @tab @b{Identifier} @tab @b{Language} @tab @b{Identifier}
 @item Asymptote @tab asymptote @tab Awk @tab awk
-@item C @tab C @tab C++ @tab C++ 
-@item Clojure @tab clojure @tab CSS @tab css 
-@item D @tab d @tab ditaa @tab ditaa 
+@item C @tab C @tab C++ @tab C++
+@item Clojure @tab clojure @tab CSS @tab css
+@item D @tab d @tab ditaa @tab ditaa
 @item Graphviz @tab dot @tab Emacs Calc @tab calc
 @item Emacs Lisp @tab emacs-lisp @tab Fortran @tab fortran
-@item gnuplot @tab gnuplot @tab Haskell @tab haskell 
-@item Java @tab java @tab Javascript @tab js 
-@item LaTeX @tab latex @tab Ledger @tab ledger 
-@item Lisp @tab lisp @tab Lilypond @tab lilypond 
-@item MATLAB @tab matlab @tab Mscgen @tab mscgen 
-@item Objective Caml @tab ocaml @tab Octave @tab octave 
-@item Org mode @tab org @tab Oz @tab oz 
-@item Perl @tab perl @tab Plantuml @tab plantuml 
-@item Processing.js @tab processing @tab Python @tab python 
-@item R @tab R @tab Ruby @tab ruby 
-@item Sass @tab sass @tab Scheme @tab scheme 
+@item gnuplot @tab gnuplot @tab Haskell @tab haskell
+@item Java @tab java @tab Javascript @tab js
+@item LaTeX @tab latex @tab Ledger @tab ledger
+@item Lisp @tab lisp @tab Lilypond @tab lilypond
+@item MATLAB @tab matlab @tab Mscgen @tab mscgen
+@item Objective Caml @tab ocaml @tab Octave @tab octave
+@item Org mode @tab org @tab Oz @tab oz
+@item Perl @tab perl @tab Plantuml @tab plantuml
+@item Processing.js @tab processing @tab Python @tab python
+@item R @tab R @tab Ruby @tab ruby
+@item Sass @tab sass @tab Scheme @tab scheme
 @item GNU Screen @tab screen @tab Sed @tab sed
 @item shell @tab sh @tab SQL @tab sql
 @item SQLite @tab sqlite @tab @tab

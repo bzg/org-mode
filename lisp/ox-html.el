@@ -1088,10 +1088,10 @@ linebreaks    Let MathJax perform automatic linebreaks.  Valid values
 indent        If align is not center, how far from the left/right side?
               Valid values are \"left\" and \"right\"
 multlinewidth The width of the multline environment.
-autonumber    How to number equations.  Valid values are \"None\", 
+autonumber    How to number equations.  Valid values are \"None\",
               \"all\" and \"AMS Math\".
 tagindent     The amount tags are indented.
-tagside       Which side to show tags/labels on.  Valid values are 
+tagside       Which side to show tags/labels on.  Valid values are
               \"left\" and \"right\"
 
 You can also customize this for each buffer, using something like
@@ -1116,14 +1116,14 @@ MathJax CDN Terms of Service.
 	       (list :tag "align  (alignment of displayed equations)"
 		     (const :format "       " align) (string))
 	       (list :tag "font (used to display math)"
-	       	     (const :format "            " font)
-	       	     (choice (const "TeX")
-	       		     (const "STIX-Web")
-	       		     (const "Asana-Math")
-	       		     (const "Neo-Euler")
-	       		     (const "Gyre-Pagella")
-	       		     (const "Gyre-Termes")
-	       		     (const "Latin-Modern")))
+		     (const :format "            " font)
+		     (choice (const "TeX")
+			     (const "STIX-Web")
+			     (const "Asana-Math")
+			     (const "Neo-Euler")
+			     (const "Gyre-Pagella")
+			     (const "Gyre-Termes")
+			     (const "Latin-Modern")))
 	       (list :tag "linebreaks (automatic line-breaking)"
 		     (const :format "      " linebreaks)
 		     (choice (const "true")
