@@ -18713,7 +18713,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		   (if (org-at-heading-p t)
 		       (add-text-properties (point-at-bol) (org-end-of-subtree t) pa))))
 	       (goto-char (point-min))
-	       (setq re (format "^\\* .*\\<%s\\>" org-comment-string))
+	       (setq re (format "^\\*+ .*\\<%s\\>" org-comment-string))
 	       (while (re-search-forward re nil t)
 		 (when (save-match-data (org-in-commented-heading-p t))
 		   (add-text-properties
