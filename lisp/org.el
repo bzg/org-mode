@@ -5714,7 +5714,8 @@ This should be called after the variable `org-link-types' has changed."
 		  "\\([^" org-non-link-chars " ]"
 		  "[^\t\n\r]*\\)")
 	  org-angle-link-re
-	  (format "<%s:\\(\n?\\(?:[^>\n]+\n?\\)*\\)>" types-re)
+	  (format "<%s:\\([^>\n]*\\(?:\n[ \t]*[^> \t\n][^>\n]*\\)*\\)>"
+		  types-re)
 	  org-plain-link-re
 	  (concat
 	   "\\<" types-re ":"
