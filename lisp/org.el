@@ -13147,7 +13147,14 @@ Returns the new TODO keyword, or nil if no state change should occur."
 	 (match-string 2))))
 
 (defun org-at-date-range-p (&optional inactive-ok)
-  "Is the cursor inside a date range?"
+  "Non-nil if point is inside a date range.
+
+When optional argument INACTIVE-OK is non-nil, also consider
+inactive time ranges.
+
+When this function returns a non-nil value, match data is set
+according to `org-tr-regexp-both' or `org-tr-regexp', depending
+on INACTIVE-OK."
   (interactive)
   (save-excursion
     (catch 'exit
@@ -17864,7 +17871,14 @@ With prefix ARG, change that many days."
     (org-timestamp-change (- (prefix-numeric-value arg)) 'day) 'updown))
 
 (defun org-at-timestamp-p (&optional inactive-ok)
-  "Determine if the cursor is in or at a timestamp."
+  "Non-nil if point is inside a timestamp.
+
+When optional argument INACTIVE-OK is non-nil, also consider
+inactive timestamps.
+
+When this function returns a non-nil value, match data is set
+according to `org-ts-regexp3' or `org-ts-regexp2', depending on
+INACTIVE-OK."
   (interactive)
   (let* ((tsr (if inactive-ok org-ts-regexp3 org-ts-regexp2))
 	 (pos (point))
