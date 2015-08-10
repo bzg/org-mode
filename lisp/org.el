@@ -13039,7 +13039,7 @@ This hook runs even if there is no statistics cookie present, in which case
         org-log-repeat nil
         org-todo-log-states nil)
   (dolist (w (org-split-string value))
-    (let* (a)
+    (let (a)
       (cond
        ((setq a (assoc w org-startup-options))
         (and (member (nth 1 a) '(org-log-done org-log-repeat))
