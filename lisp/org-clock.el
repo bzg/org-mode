@@ -2419,7 +2419,8 @@ the currently selected interval size."
 	;; Just from the current file
 	(save-restriction
 	  ;; get the right range into the restriction
-	  (org-agenda-prepare-buffers (list (buffer-file-name)))
+	  (org-agenda-prepare-buffers (list (or (buffer-file-name)
+						(current-buffer))))
 	  (cond
 	   ((not scope))  ; use the restriction as it is now
 	   ((eq scope 'file) (widen))
