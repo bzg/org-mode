@@ -5299,8 +5299,8 @@ This will extract info from a string like \"WAIT(w@/!)\"."
 (defun org-assign-fast-keys (alist)
   "Assign fast keys to a keyword-key alist.
 Respect keys that are already there."
-  (let (new (alt ?0))
-    (dolist (e alist)
+  (let (new e (alt ?0))
+    (while (setq e (pop alist))
       (if (or (memq (car e) '(:newline :grouptags :endgroup :startgroup))
 	      (cdr e)) ;; Key already assigned.
 	  (push e new)
@@ -13076,7 +13076,7 @@ Returns the new TODO keyword, or nil if no state change should occur."
 	 (expert nil)
 	 (fwidth (+ maxlen 3 1 3))
 	 (ncol (/ (- (window-width) 4) fwidth))
-	 tg cnt c tbl
+	 tg cnt e c tbl
 	 groups ingroup)
     (save-excursion
       (save-window-excursion
@@ -13086,7 +13086,7 @@ Returns the new TODO keyword, or nil if no state change should occur."
 	(erase-buffer)
 	(org-set-local 'org-done-keywords done-keywords)
 	(setq tbl fulltable cnt 0)
-	(dolist (e tbl)
+	(while (setq e (pop tbl))
 	  (cond
 	   ((equal e '(:startgroup))
 	    (push '() groups) (setq ingroup t)
@@ -14452,7 +14452,7 @@ See also `org-scan-tags'.
 	(re (org-re "^&?\\([-+:]\\)?\\({[^}]+}\\|LEVEL\\([<=>]\\{1,2\\}\\)\\([0-9]+\\)\\|\\(\\(?:[[:alnum:]_]+\\(?:\\\\-\\)*\\)+\\)\\([<>=]\\{1,2\\}\\)\\({[^}]+}\\|\"[^\"]*\"\\|-?[.0-9]+\\(?:[eE][-+]?[0-9]+\\)?\\)\\|[[:alnum:]_@#%]+\\)"))
 	minus tag mm
 	tagsmatch todomatch tagsmatcher todomatcher kwd matcher
-	orterms orlist re-p str-p level-p level-op time-p
+	orterms term orlist re-p str-p level-p level-op time-p
 	prop-p pn pv po gv rest (start 0) (ss 0))
     ;; Expand group tags
     (setq match (org-tags-expand match))
@@ -14481,7 +14481,7 @@ See also `org-scan-tags'.
     (if (or (not tagsmatch) (not (string-match "\\S-" tagsmatch)))
 	(setq tagsmatcher t)
       (setq orterms (org-split-string tagsmatch "|") orlist nil)
-      (dolist (term orterms)
+      (while (setq term (pop orterms))
 	(while (and (equal (substring term -1) "\\") orterms)
 	  (setq term (concat term "|" (pop orterms)))) ; repair bad split
 	(while (string-match re term)
@@ -15172,7 +15172,7 @@ Returns the new tags string, or nil to not change the current settings."
 	 (ncol (/ (- (window-width) 4) fwidth))
 	 (i-face 'org-done)
 	 (c-face 'org-todo)
-	 tg cnt c char c1 c2 ntable tbl rtn
+	 tg cnt e c char c1 c2 ntable tbl rtn
 	 ov-start ov-end ov-prefix
 	 (exit-after-next org-fast-tag-selection-single-key)
 	 (done-keywords org-done-keywords)
@@ -15207,7 +15207,7 @@ Returns the new tags string, or nil to not change the current settings."
       (org-fast-tag-show-exit exit-after-next)
       (org-set-current-tags-overlay current ov-prefix)
       (setq tbl fulltable char ?a cnt 0)
-      (dolist (e tbl)
+      (while (setq e (pop tbl))
 	(cond
 	 ((eq (car e) :startgroup)
 	  (push '() groups) (setq ingroup t)
@@ -18564,7 +18564,7 @@ If the current buffer does not, find the first agenda file."
 	 file)
     (unless files (user-error "No agenda files"))
     (catch 'exit
-      (dolist (file files)
+      (while (setq file (pop files))
 	(if (equal (file-truename file) tcf)
 	    (when (car files)
 	      (find-file (car files))
