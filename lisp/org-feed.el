@@ -407,7 +407,7 @@ it can be a list structured like an entry in `org-feed-alist'."
 	  ;; Normalize the visibility of the inbox tree
 	  (goto-char inbox-pos)
 	  (hide-subtree)
-	  (show-children)
+	  (org-show-children)
 	  (org-cycle-hide-drawers 'children)
 
 	  ;; Hooks and messages

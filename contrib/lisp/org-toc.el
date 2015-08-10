@@ -197,7 +197,7 @@ specified, then make `org-toc-recenter' use this value."
       (setq ov (make-overlay beg end)))
     ;; change the folding status of this headline
     (cond ((or (null status) (eq status 'folded))
-	   (show-children)
+	   (org-show-children)
 	   (message "CHILDREN")
 	   (overlay-put ov 'status 'children))
 	  ((eq status 'children)
@@ -441,7 +441,7 @@ current table of contents to it."
 	    (setq ov (make-overlay (match-beginning 0)
 				   (match-end 0))))
 	  (cond ((eq (cdr hlcfg0) 'children)
-		 (show-children)
+		 (org-show-children)
 		 (message "CHILDREN")
 		 (overlay-put ov 'status 'children))
 		((eq (cdr hlcfg0) 'branches)

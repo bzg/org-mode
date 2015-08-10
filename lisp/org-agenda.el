@@ -8686,7 +8686,7 @@ if it was hidden in the outline."
       (message "Remote: show with default settings"))
      ((= more 2)
       (show-entry)
-      (show-children)
+      (org-show-children)
       (save-excursion
 	(org-back-to-heading)
 	(run-hook-with-args 'org-cycle-hook 'children))

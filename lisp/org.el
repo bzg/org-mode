@@ -6904,7 +6904,7 @@ in special contexts.
       (if (org-at-item-p)
 	  (org-list-set-item-visibility (point-at-bol) struct 'children)
 	(org-show-entry)
-	(org-with-limited-levels (show-children))
+	(org-with-limited-levels (org-show-children))
 	;; FIXME: This slows down the func way too much.
 	;; How keep drawers hidden in subtree anyway?
 	;; (when (memq 'org-cycle-hide-drawers org-cycle-hook)
@@ -7006,7 +7006,7 @@ With a numeric prefix, show all headlines up to that level."
 	       (hide-subtree))
 	      ((equal state "children")
 	       (org-show-hidden-entry)
-	       (show-children))
+	       (org-show-children))
 	      ((equal state "content")
 	       (save-excursion
 		 (save-restriction
@@ -7055,7 +7055,7 @@ With numerical argument N, show content up to level N."
 			 t)
 		  (looking-at org-outline-regexp))
 	(if (integerp arg)
-	    (show-children (1- arg))
+	    (org-show-children (1- arg))
 	  (show-branches))
 	(if (bobp) (throw 'exit nil))))))
 
@@ -8459,7 +8459,7 @@ case."
     (if folded
 	(hide-subtree)
       (org-show-entry)
-      (show-children)
+      (org-show-children)
       (org-cycle-hide-drawers 'children))
     (org-clean-visibility-after-subtree-move)
     ;; move back to the initial column we were at
@@ -9216,6 +9216,7 @@ buffer.  It will also recognize item context in multiline items."
 		  org-shifttab
 		  org-shifttab
 		  org-shiftup
+		  org-show-children
 		  org-show-subtree
 		  org-sort
 		  org-up-element
@@ -9223,8 +9224,7 @@ buffer.  It will also recognize item context in multiline items."
 		  outline-next-visible-heading
 		  outline-previous-visible-heading
 		  outline-promote
-		  outline-up-heading
-		  show-children))
+		  outline-up-heading))
     (let ((f (or (car-safe cell) cell))
 	  (disable-when-heading-prefix (cdr-safe cell)))
       (when (fboundp f)
@@ -13981,7 +13981,7 @@ information."
       (org-show-entry)
       (org-with-limited-levels
        (case detail
-	 ((tree canonical t) (show-children))
+	 ((tree canonical t) (org-show-children))
 	 ((nil minimal ancestors))
 	 (t (save-excursion
 	      (outline-next-heading)
@@ -13994,7 +13994,7 @@ information."
 	(while (org-up-heading-safe)
 	  (org-flag-heading nil)
 	  (when (memq detail '(canonical t)) (org-show-entry))
-	  (when (memq detail '(tree canonical t)) (show-children)))))))
+	  (when (memq detail '(tree canonical t)) (org-show-children)))))))
 
 (defvar org-reveal-start-hook nil
   "Hook run before revealing a location.")
@@ -19702,6 +19702,7 @@ boundaries."
   'org-next-visible-heading)
 (define-key org-mode-map [remap outline-previous-visible-heading]
   'org-previous-visible-heading)
+(define-key org-mode-map [remap show-children] 'org-show-children)
 
 ;; Outline functions from `outline-mode-prefix-map' that can not
 ;; be remapped in Org:
@@ -19714,13 +19715,10 @@ boundaries."
 
 ;; | Outline function                   | key binding | Org replacement          |
 ;; |------------------------------------+-------------+--------------------------|
-;; | `outline-next-visible-heading'     | `C-c C-n'   | better: skip inlinetasks |
-;; | `outline-previous-visible-heading' | `C-c C-p'   | better: skip inlinetasks |
 ;; | `outline-up-heading'               | `C-c C-u'   | still same function      |
 ;; | `outline-move-subtree-up'          | overridden  | better: org-shiftup      |
 ;; | `outline-move-subtree-down'        | overridden  | better: org-shiftdown    |
 ;; | `show-entry'                       | overridden  | no replacement           |
-;; | `show-children'                    | `C-c C-i'   | visibility cycling       |
 ;; | `show-branches'                    | `C-c C-k'   | still same function      |
 ;; | `show-subtree'                     | overridden  | visibility cycling       |
 ;; | `show-all'                         | overridden  | no replacement           |
@@ -24886,6 +24884,40 @@ modified."
 		      (org-do-remove-indentation)))))
 	      (reverse contents))))))
     (funcall unindent-tree (org-element-contents parse-tree))))
+
+(defun org-show-children (&optional level)
+  "Show all direct subheadings of this heading.
+Prefix arg LEVEL is how many levels below the current level should be shown.
+Default is enough to cause the following heading to appear."
+  (save-excursion
+    (org-back-to-heading t)
+    (let* ((current-level (funcall outline-level))
+           (max-level (org-get-valid-level
+                       current-level (if level (prefix-numeric-value level) 1)))
+           (end (save-excursion (org-end-of-subtree t t)))
+           (regexp-fmt "^\\*\\{%d,%s\\}\\(?: \\|$\\)")
+           (past-first-child nil)
+	   ;; Make sure to skip inlinetasks.
+           (re (format regexp-fmt
+		       current-level
+		       (cond
+			((not (featurep 'org-inlinetask)) "")
+			(org-odd-levels-only (- (* 2 org-inlinetask-min-level)
+						3))
+			(t (1- org-inlinetask-min-level))))))
+      ;; Display parent heading.
+      (outline-flag-region (line-end-position 0) (line-end-position) nil)
+      (forward-line)
+      ;; Display children.  First child may be deeper than expected
+      ;; MAX-LEVEL.  Since we want to display it anyway, adjust
+      ;; MAX-LEVEL accordingly.
+      (while (re-search-forward re end t)
+        (unless past-first-child
+          (setq re (format regexp-fmt
+			   current-level
+			   (max (funcall outline-level) max-level)))
+          (setq past-first-child t))
+        (outline-flag-region (line-end-position 0) (line-end-position) nil)))))
 
 (defun org-show-subtree ()
   "Show everything after this heading at deeper levels."
