@@ -16638,13 +16638,10 @@ with the current time without prompting the user.
 When called from lisp, the timestamp is inactive if INACTIVE is
 non-nil."
   (interactive "P")
-  (let* ((ts
-	  (cond ((org-at-date-range-p t)
-		 (save-excursion
-		   (goto-char (match-beginning 0))
-		   (looking-at (if inactive org-ts-regexp-both org-ts-regexp)))
-		 (match-string 0))
-		((org-at-timestamp-p t) (match-string 0))))
+  (let* ((ts (cond
+	      ((org-at-date-range-p t)
+	       (match-string (if (< (point) (- (match-beginning 2) 2)) 1 2)))
+	      ((org-at-timestamp-p t) (match-string 0))))
 	 ;; Default time is either the timestamp at point or today.
 	 ;; When entering a range, only the range start is considered.
          (default-time (if (not ts) (current-time)
