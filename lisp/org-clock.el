@@ -2403,7 +2403,8 @@ the currently selected interval size."
 	(setq scope (org-agenda-files t))
 	(setq scope (org-add-archive-files scope)))
        ((eq scope 'file-with-archives)
-	(setq scope (org-add-archive-files (list (buffer-file-name)))
+	(setq scope (and buffer-file-name
+			 (org-add-archive-files (list buffer-file-name)))
 	      one-file-with-archives t)))
       (setq scope-is-list (and scope (listp scope)))
       (if scope-is-list
