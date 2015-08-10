@@ -18558,18 +18558,15 @@ un-expanded file names."
 If the current buffer visits an agenda file, find the next one in the list.
 If the current buffer does not, find the first agenda file."
   (interactive)
-  (let* ((fs (org-agenda-files t))
-	 (files (append fs (list (car fs))))
-	 (tcf (if buffer-file-name (file-truename buffer-file-name)))
+  (let* ((fs (or (org-agenda-files t)
+		 (user-error "No agenda files")))
+	 (files (copy-sequence fs))
+	 (tcf (and buffer-file-name (file-truename buffer-file-name)))
 	 file)
-    (unless files (user-error "No agenda files"))
-    (catch 'exit
-      (while (setq file (pop files))
-	(if (equal (file-truename file) tcf)
-	    (when (car files)
-	      (find-file (car files))
-	      (throw 'exit t))))
-      (find-file (car fs)))
+    (when tcf
+      (while (and (setq file (pop files))
+		  (not (equal (file-truename file) tcf)))))
+    (find-file (car (or files fs)))
     (if (buffer-base-buffer) (org-pop-to-buffer-same-window (buffer-base-buffer)))))
 
 (defun org-agenda-file-to-front (&optional to-end)
