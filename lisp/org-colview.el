@@ -147,7 +147,7 @@ This is the compiled version of the format.")
     ["Quit" org-columns-quit t]))
 
 (defun org-columns--value (property pos)
-  "Return value for PROPERTY at buffer position POS"
+  "Return value for PROPERTY at buffer position POS."
   (or (cdr (assoc-string property (get-text-property pos 'org-summaries) t))
       (org-entry-get pos property 'selective t)))
 
