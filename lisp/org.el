@@ -15861,7 +15861,7 @@ strings."
 	    (push (cons "CATEGORY" (org-get-category beg)) props)
 	    (when (string= specific "CATEGORY") (throw 'exit props)))
 	  ;; Return value.
-	  (append (get-text-property beg 'org-summaries) props))))))
+	  props)))))
 
 (defun org-property--local-values (property literal-nil)
   "Return value for PROPERTY in current entry.

@@ -146,6 +146,11 @@ This is the compiled version of the format.")
     "--"
     ["Quit" org-columns-quit t]))
 
+(defun org-columns--value (property pos)
+  "Return value for PROPERTY at buffer position POS"
+  (or (cdr (assoc-string property (get-text-property pos 'org-summaries) t))
+      (org-entry-get pos property 'selective t)))
+
 (defun org-columns-new-overlay (beg end &optional string face)
   "Create a new column overlay and add it to the list."
   (let ((ov (make-overlay beg end)))
@@ -710,10 +715,9 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	      (org-map-entries
 	       (lambda ()
 		 (cons (point)
-		       (mapcar
-			(lambda (p)
-			  (cons p (org-entry-get nil p 'selective t)))
-			column-names)))
+		       (mapcar (lambda (p)
+				 (cons p (org-columns--value p (point))))
+			       column-names)))
 	       nil nil (and org-columns-skip-archived-trees 'archive))))
 	(when cache
 	  (org-set-local 'org-columns-current-maxwidths
@@ -1410,7 +1414,7 @@ and tailing newline characters."
 		(org-with-point-at m
 		  (mapcar
 		   (lambda (name)
-		     (let ((value (org-entry-get (point) name 'selective t)))
+		     (let ((value (org-columns--value name (point))))
 		       (cons
 			name
 			(if (and org-agenda-columns-add-appointments-to-effort-sum
