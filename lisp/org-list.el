@@ -2550,10 +2550,13 @@ With optional prefix argument ALL, do this for the whole buffer."
 			   (when (eq (org-element-type element) 'item)
 			     (push (org-element-property :structure element)
 				   structs)
-			     (goto-char (org-element-property
-					 :end
-					 (org-element-property :parent
-							       element))))))
+			     ;; Skip whole list since we have its
+			     ;; structure anyway.
+			     (while (setq element (org-element-lineage
+						   element '(plain-list)))
+			       (goto-char
+				(min (org-element-property :end element)
+				     end))))))
 		       ;; Cache count for cookies applying to the same
 		       ;; area.  Then return it.
 		       (let ((count
