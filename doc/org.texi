@@ -10216,16 +10216,20 @@ export.
 
 @item @{@{@{date@}@}@}
 @itemx @{@{@{date(@var{FORMAT})@}@}@}
+@cindex date, macro
+This macro refers to the @code{#+DATE} keyword. @var{FORMAT} is an optional
+argument to the @code{@{@{@{date@}@}@}} macro that will be used only if
+@code{#+DATE} is a single timestamp.  @var{FORMAT} should be a format string
+understood by @code{format-time-string}.
+
 @itemx @{@{@{time(@var{FORMAT})@}@}@}
 @itemx @{@{@{modification-time(@var{FORMAT})@}@}@}
-@cindex date, macro
 @cindex time, macro
 @cindex modification time, macro
-These macros refer to the @code{#+DATE} keyword, the current date, and the
-modification time of the file being exported, respectively.  @var{FORMAT}
-should be a format string understood by @code{format-time-string}.  Note that
-@var{FORMAT} is an optional argument to the @code{@{@{@{date@}@}@}} macro,
-and that it will only be used if @code{#+DATE} is a single timestamp.
+These macros refer to the date and time when the document is exported and to
+the modification date and time of the file being exported, respectively.
+@var{FORMAT} should be a format string understood by
+@code{format-time-string}.
 
 @item @{@{@{input-file@}@}@}
 @cindex input file, macro
