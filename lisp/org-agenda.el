@@ -3867,7 +3867,7 @@ dimming them."
       (goto-char (point-min))
       (while (let ((pos (text-property-not-all
 			 (point) (point-max) 'todo-state nil)))
-	       (when pos (goto-char (1+ pos))))
+	       (when pos (goto-char pos)))
 	(setq org-blocked-by-checkboxes nil)
 	(let ((marker (org-get-at-bol 'org-hd-marker)))
 	  (when (and (markerp marker)
@@ -3885,7 +3885,8 @@ dimming them."
 				     (line-end-position))))
 	      (if really-invisible (overlay-put ov 'invisible t)
 		(overlay-put ov 'face 'org-agenda-dimmed-todo-face))
-	      (overlay-put ov 'org-type 'org-blocked-todo)))))))
+	      (overlay-put ov 'org-type 'org-blocked-todo))))
+	(forward-line))))
   (when (org-called-interactively-p 'interactive)
     (message "Dim or hide blocked tasks...done")))
 
