@@ -893,6 +893,12 @@
    (org-test-with-temp-text "Link [[target<point>]] <<target>>"
      (let ((org-return-follows-link nil)) (org-return))
      (org-looking-at-p "<<target>>")))
+  ;; Link in heading should also be opened when
+  ;; `org-return-follows-link` is non-nil.
+  (should
+   (org-test-with-temp-text "* [[b][a<point>]]\n* b"
+     (let ((org-return-follows-link t)) (org-return))
+     (org-looking-at-p "* b")))
   ;; However, do not open link when point is in a table.
   (should
    (org-test-with-temp-text "| [[target<point>]] |\n| between |\n| <<target>> |"
