@@ -201,11 +201,7 @@ return the value of the last statement in BODY, as elisp."
 			      org-babel-ruby-pp-wrapper-method
 			    org-babel-ruby-wrapper-method)
 			  body (org-babel-process-file-name tmp-file 'noquote)))
-		 (let ((raw (org-babel-eval-read-file tmp-file)))
-                   (if (or (member "code" result-params)
-                           (member "pp" result-params))
-                       raw
-                     (org-babel-ruby-table-or-string raw))))))
+		 (org-babel-eval-read-file tmp-file))))
     ;; comint session evaluation
     (case result-type
       (output
