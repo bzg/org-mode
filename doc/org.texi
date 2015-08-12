@@ -10222,7 +10222,7 @@ argument to the @code{@{@{@{date@}@}@}} macro that will be used only if
 @code{#+DATE} is a single timestamp.  @var{FORMAT} should be a format string
 understood by @code{format-time-string}.
 
-@itemx @{@{@{time(@var{FORMAT})@}@}@}
+@item @{@{@{time(@var{FORMAT})@}@}@}
 @itemx @{@{@{modification-time(@var{FORMAT})@}@}@}
 @cindex time, macro
 @cindex modification time, macro
