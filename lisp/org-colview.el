@@ -680,11 +680,14 @@ around it."
     fmt))
 
 (defun org-columns-goto-top-level ()
-  (when (condition-case nil (org-back-to-heading) (error nil))
-    (org-entry-get nil "COLUMNS" t))
-  (if (marker-position org-entry-property-inherited-from)
-      (move-marker org-columns-top-level-marker org-entry-property-inherited-from)
-    (move-marker org-columns-top-level-marker (point))))
+  "Move to the beginning of the column view area.
+Also sets `org-columns-top-level-marker' to the new position."
+  (goto-char
+   (move-marker
+    org-columns-top-level-marker
+    (cond ((org-before-first-heading-p) (point-min))
+	  ((org-entry-get nil "COLUMNS" t) org-entry-property-inherited-from)
+	  (t (org-back-to-heading) (point))))))
 
 ;;;###autoload
 (defun org-columns (&optional columns-fmt-string)
@@ -703,9 +706,8 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
   (save-excursion
     (save-restriction
       (narrow-to-region
-       org-columns-top-level-marker
-       (or (ignore-errors (org-end-of-subtree t t)) (point-max)))
-      (goto-char (point-min))
+       (point)
+       (if (org-at-heading-p) (org-end-of-subtree t t) (point-max)))
       (when (assoc "CLOCKSUM" org-columns-current-fmt-compiled)
 	(org-clock-sum))
       (when (assoc "CLOCKSUM_T" org-columns-current-fmt-compiled)
