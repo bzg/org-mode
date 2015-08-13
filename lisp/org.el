@@ -21313,30 +21313,21 @@ object (e.g., within a comment).  In these case, you need to use
      ((and (not (bolp))
 	   (save-excursion (beginning-of-line)
 			   (looking-at org-complex-heading-regexp)))
-      ;; At headline.
-      (let ((tags-column (when (match-beginning 5)
-			   (save-excursion (goto-char (match-beginning 5))
-					   (current-column))))
-	    ;; Test if before or after headline title.
-	    (string (when (and (match-end 4)
-			       (not (or (< (point)
-					   (or (match-end 3)
-					       (match-end 2)
-					       (save-excursion
-						 (goto-char (match-beginning 4))
-						 (skip-chars-backward " \t")
-						 (point))))
-					(and (match-beginning 5)
-					     (>= (point) (match-beginning 5))))))
-		      ;; Point is on headline keywords, tags or cookies.  Do not break
-		      ;; them: add a newline after the headline instead.
-		      (org-string-nw-p
-		       (delete-and-extract-region (point) (match-end 4))))))
-	;; Adjust alignment of tags.
-	(when (and tags-column string)
-	  (org-align-tags-here (if org-auto-align-tags
-				   org-tags-column
-				 tags-column)))
+      ;; At headline.  Split line.  However, if point is on keyword,
+      ;; priority cookie or tags, do not break any of them: add
+      ;; a newline after the headline instead.
+      (let ((tags-column (and (match-beginning 5)
+			      (save-excursion (goto-char (match-beginning 5))
+					      (current-column))))
+	    (string
+	     (when (and (match-end 4)
+			(>= (point)
+			    (or (match-end 3) (match-end 2) (1+ (match-end 1))))
+			(<= (point) (match-end 4)))
+	       (delete-and-extract-region (point) (match-end 4)))))
+	(when (and tags-column string)	; Adjust tag alignment.
+	  (org-align-tags-here
+	   (if org-auto-align-tags org-tags-column tags-column)))
 	(end-of-line)
 	(org-show-entry)
 	(if indent (newline-and-indent) (newline))

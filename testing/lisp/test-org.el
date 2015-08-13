@@ -946,6 +946,12 @@
    (equal "\n* h"
 	  (org-test-with-temp-text "<point>* h"
 	    (org-return)
+	    (buffer-string))))
+  ;; Refuse to leave invalid headline in buffer.
+  (should
+   (equal "* h\n"
+	  (org-test-with-temp-text "*<point> h"
+	    (org-return)
 	    (buffer-string)))))
 
 (ert-deftest test-org/meta-return ()
