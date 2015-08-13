@@ -21287,66 +21287,58 @@ will not happen if point is in a table or on a \"dead\"
 object (e.g., within a comment).  In these case, you need to use
 `org-open-at-point' directly."
   (interactive)
-  (if (and (not (bolp))
+  (let* ((context (if org-return-follows-link (org-element-context)
+		    (org-element-at-point)))
+	 (type (org-element-type context)))
+    (cond
+     ;; In a table, call `org-table-next-row'.
+     ((or (and (eq type 'table)
+	       (>= (point) (org-element-property :contents-begin context))
+	       (< (point) (org-element-property :contents-end context)))
+	  (org-element-lineage context '(table-row table-cell) t))
+      (org-table-justify-field-maybe)
+      (call-interactively #'org-table-next-row))
+     ;; On a link or a timestamp but not on white spaces after it,
+     ;; call `org-open-line' if `org-return-follows-link' allows it.
+     ((and org-return-follows-link
+	   (memq type '(link timestamp))
+	   (< (point)
+	      (save-excursion (goto-char (org-element-property :end context))
+			      (skip-chars-backward " \t")
+			      (point))))
+      (call-interactively #'org-open-at-point))
+     ;; Insert newline in heading, but preserve tags.
+     ((and (not (bolp))
 	   (save-excursion (beginning-of-line)
 			   (looking-at org-complex-heading-regexp)))
-      ;; At headline.
-      (let ((tags-column (when (match-beginning 5)
-			   (save-excursion (goto-char (match-beginning 5))
-					   (current-column))))
-	    ;; Test if before or after headline title.
-	    (string (when (and (match-end 4)
-			       (not (or (< (point)
-					   (or (match-end 3)
-					       (match-end 2)
-					       (save-excursion
-						 (goto-char (match-beginning 4))
-						 (skip-chars-backward " \t")
-						 (point))))
-					(and (match-beginning 5)
-					     (>= (point) (match-beginning 5))))))
-		      ;; Point is on headline keywords, tags or cookies.  Do not break
-		      ;; them: add a newline after the headline instead.
-		      (org-string-nw-p
-		       (delete-and-extract-region (point) (match-end 4))))))
-	;; Adjust alignment of tags.
-	(when (and tags-column string)
-	  (org-align-tags-here (if org-auto-align-tags
-				   org-tags-column
-				 tags-column)))
+      ;; At headline.  Split line.  However, if point is on keyword,
+      ;; priority cookie or tags, do not break any of them: add
+      ;; a newline after the headline instead.
+      (let ((tags-column (and (match-beginning 5)
+			      (save-excursion (goto-char (match-beginning 5))
+					      (current-column))))
+	    (string
+	     (when (and (match-end 4)
+			(>= (point)
+			    (or (match-end 3) (match-end 2) (1+ (match-end 1))))
+			(<= (point) (match-end 4)))
+	       (delete-and-extract-region (point) (match-end 4)))))
+	(when (and tags-column string)	; Adjust tag alignment.
+	  (org-align-tags-here
+	   (if org-auto-align-tags org-tags-column tags-column)))
 	(end-of-line)
 	(org-show-entry)
 	(if indent (newline-and-indent) (newline))
-	(and string (save-excursion (insert (org-trim string)))))
-    (let* ((context (if org-return-follows-link (org-element-context)
-		      (org-element-at-point)))
-	   (type (org-element-type context)))
-      (cond
-       ;; In a table, call `org-table-next-row'.
-       ((or (and (eq type 'table)
-		 (>= (point) (org-element-property :contents-begin context))
-		 (< (point) (org-element-property :contents-end context)))
-	    (org-element-lineage context '(table-row table-cell) t))
-	(org-table-justify-field-maybe)
-	(call-interactively #'org-table-next-row))
-       ;; On a link or a timestamp but not on white spaces after it,
-       ;; call `org-open-line' if `org-return-follows-link' allows it.
-       ((and org-return-follows-link
-	     (memq type '(link timestamp))
-	     (< (point)
-		(save-excursion (goto-char (org-element-property :end context))
-				(skip-chars-backward " \t")
-				(point))))
-	(call-interactively #'org-open-at-point))
-       ;; In a list, make sure indenting keeps trailing text within.
-       ((and indent
-	     (not (eolp))
-	     (org-element-lineage context '(item)))
-	(let ((trailing-data
-	       (delete-and-extract-region (point) (line-end-position))))
-	  (newline-and-indent)
-	  (save-excursion (insert trailing-data))))
-       (t (if indent (newline-and-indent) (newline)))))))
+	(when string (save-excursion (insert (org-trim string))))))
+     ;; In a list, make sure indenting keeps trailing text within.
+     ((and indent
+	   (not (eolp))
+	   (org-element-lineage context '(item)))
+      (let ((trailing-data
+	     (delete-and-extract-region (point) (line-end-position))))
+	(newline-and-indent)
+	(save-excursion (insert trailing-data))))
+     (t (if indent (newline-and-indent) (newline))))))
 
 (defun org-return-indent ()
   "Goto next table row or insert a newline and indent.
