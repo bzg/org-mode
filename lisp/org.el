@@ -15315,7 +15315,8 @@ Returns the new tags string, or nil to not change the current settings."
 				"Tag: "
 				(or buffer-tags
 				    (with-current-buffer buf
-				      (org-get-buffer-tags)))))
+				      (setq buffer-tags
+					    (org-get-buffer-tags))))))
 		    (quit (setq tg "")))
 		  (when (string-match "\\S-" tg)
 		    (add-to-list 'buffer-tags (list tg))
