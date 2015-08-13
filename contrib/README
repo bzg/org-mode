@@ -39,6 +39,7 @@ org-interactive-query.el --- Interactive modification of tags query
 org-invoice.el           --- Help manage client invoices in OrgMode
 org-learn.el             --- SuperMemo's incremental learning algorithm
 org-license.el		 --- Insert free licenses to your org documents
+org-link-edit.el	 --- Slurp and barf with Org links
 org-mac-iCal.el          --- Imports events from iCal.app to the Emacs diary
 org-mac-link.el          --- Grab links and URLs from various Mac applications
 org-mairix.el 	         --- Hook mairix search into Org for different MUAs
