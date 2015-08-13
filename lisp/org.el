@@ -11131,18 +11131,18 @@ of matched result, with is either `dedicated' or `fuzzy'."
 				      "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]"
 				      wspaceopt
 				      "\\)"))
-		      (sep (concat "\\(?:" wspace "+\\|" cookie "+\\)"))
+		      (sep (concat "\\(?:\\(?:" wspace "\\|" cookie "\\)+\\)"))
 		      (re (concat
 			   org-outline-regexp-bol
 			   "\\(?:" org-todo-regexp "[ \t]+\\)?"
 			   "\\(?:\\[#.\\][ \t]+\\)?"
 			   "\\(?:" org-comment-string "[ \t]+\\)?"
-			   sep "*"
+			   sep "?"
 			   (let ((title (mapconcat #'regexp-quote
 						   words
-						   (concat sep "+"))))
+						   sep)))
 			     (if starred (substring title 1) title))
-			   sep "*"
+			   sep "?"
 			   (org-re "\\(?:[ \t]+:[[:alnum:]_@#%%:]+:\\)?")
 			   "[ \t]*$")))
 		 (goto-char (point-min))
