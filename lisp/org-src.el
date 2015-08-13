@@ -283,37 +283,35 @@ which see.  BEG and END are buffer positions."
 DATUM is an element or object.  Return a list (BEG END CONTENTS)
 where BEG and END are buffer positions and CONTENTS is a string."
   (let ((type (org-element-type datum)))
-    (cond
-     ((eq type 'footnote-definition)
-      (let* ((beg (org-with-wide-buffer
-		   (goto-char (org-element-property :post-affiliated datum))
-		   (search-forward "]")))
-	     (end (or (org-element-property :contents-end datum) beg)))
-	(list beg end (buffer-substring-no-properties beg end))))
-     ((org-element-property :contents-begin datum)
-      (let ((beg (org-element-property :contents-begin datum))
-	    (end (org-element-property :contents-end datum)))
-	(list beg end (buffer-substring-no-properties beg end))))
-     ((memq type '(example-block export-block src-block))
-      (list (org-with-wide-buffer
-	     (goto-char (org-element-property :post-affiliated datum))
-	     (line-beginning-position 2))
-	    (org-with-wide-buffer
-	     (goto-char (org-element-property :end datum))
-	     (skip-chars-backward " \r\t\n")
-	     (line-beginning-position 1))
-	    (org-element-property :value datum)))
-     ((memq type '(fixed-width table))
-      (let ((beg (org-element-property :post-affiliated datum))
-	    (end (org-with-wide-buffer
-		  (goto-char (org-element-property :end datum))
-		  (skip-chars-backward " \r\t\n")
-		  (line-beginning-position 2))))
-	(list beg
-	      end
-	      (if (eq type 'fixed-width) (org-element-property :value datum)
-		(buffer-substring-no-properties beg end)))))
-     (t (error "Unsupported element or object: %s" type)))))
+    (org-with-wide-buffer
+     (cond
+      ((eq type 'footnote-definition)
+       (let* ((beg (progn
+		     (goto-char (org-element-property :post-affiliated datum))
+		     (search-forward "]")))
+	      (end (or (org-element-property :contents-end datum) beg)))
+	 (list beg end (buffer-substring-no-properties beg end))))
+      ((org-element-property :contents-begin datum)
+       (let ((beg (org-element-property :contents-begin datum))
+	     (end (org-element-property :contents-end datum)))
+	 (list beg end (buffer-substring-no-properties beg end))))
+      ((memq type '(example-block export-block src-block))
+       (list (progn (goto-char (org-element-property :post-affiliated datum))
+		    (line-beginning-position 2))
+	     (progn (goto-char (org-element-property :end datum))
+		    (skip-chars-backward " \r\t\n")
+		    (line-beginning-position 1))
+	     (org-element-property :value datum)))
+      ((memq type '(fixed-width table))
+       (let ((beg (org-element-property :post-affiliated datum))
+	     (end (progn (goto-char (org-element-property :end datum))
+			 (skip-chars-backward " \r\t\n")
+			 (line-beginning-position 2))))
+	 (list beg
+	       end
+	       (if (eq type 'fixed-width) (org-element-property :value datum)
+		 (buffer-substring-no-properties beg end)))))
+      (t (error "Unsupported element or object: %s" type))))))
 
 (defun org-src--make-source-overlay (beg end edit-buffer)
   "Create overlay between BEG and END positions and return it.
