@@ -950,7 +950,7 @@ If necessary, clock-out of the currently active clock."
       (when drawer
 	(org-with-wide-buffer
 	 (let ((drawer-re (format "^[ \t]*:%s:[ \t]*$"
-				  (regexp-quote (or drawer "LOGBOOK"))))
+				  (regexp-quote (if (stringp drawer) drawer "LOGBOOK"))))
 	       (beg (save-excursion (outline-back-to-heading t) (point))))
 	   (catch 'exit
 	     (while (re-search-backward drawer-re beg t)
