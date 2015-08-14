@@ -719,6 +719,7 @@ If BUFFER is non-nil, test it instead."
     (unless label (user-error "Cannot edit remotely anonymous footnotes"))
     (let* ((definition (org-with-wide-buffer
 			(org-footnote-goto-definition label)
+			(backward-char)
 			(org-element-context)))
 	   (inline (eq (org-element-type definition) 'footnote-reference))
 	   (contents
@@ -756,7 +757,9 @@ If BUFFER is non-nil, test it instead."
 	    ;; table's structure.
 	    (when ,(org-element-lineage definition '(table-cell))
 	      (while (search-forward "\n" nil t) (delete-char -1)))))
-       contents
+       (concat contents
+	       (and (not (org-element-property :contents-begin definition))
+		    " "))
        'remote))
     ;; Report success.
     t))
