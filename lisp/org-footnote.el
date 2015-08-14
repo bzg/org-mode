@@ -661,6 +661,13 @@ offer additional commands in a menu."
   (let* ((context (and (not special) (org-element-context)))
 	 (type (org-element-type context)))
     (cond
+     ;; On white space after element, insert a new footnote.
+     ((> (point)
+	 (save-excursion
+	   (goto-char (org-element-property :end context))
+	   (skip-chars-backward " \t")
+	   (point)))
+      (org-footnote-new))
      ((eq type 'footnote-reference)
       (let ((label (org-element-property :label context)))
 	(cond
