@@ -921,8 +921,8 @@ mode."
 ;; Eventually `org-export-barf-if-invalid-backend' returns an error
 ;; when a given back-end hasn't been registered yet.
 
-(defstruct (org-export-backend (:constructor org-export-create-backend)
-			       (:copier nil))
+(cl-defstruct (org-export-backend (:constructor org-export-create-backend)
+				  (:copier nil))
   name parent transcoders options filters blocks menu)
 
 (defun org-export-get-backend (name)
@@ -1153,7 +1153,7 @@ keywords are understood:
   (let (blocks filters menu-entry options)
     (while (keywordp (car body))
       (let ((keyword (pop body)))
-	(case keyword
+	(cl-case keyword
 	  (:export-block (let ((names (pop body)))
 			   (setq blocks (if (consp names) (mapcar 'upcase names)
 					  (list (upcase names))))))
@@ -1225,7 +1225,7 @@ The back-end could then be called with, for example:
   (let (blocks filters menu-entry options transcoders)
     (while (keywordp (car body))
       (let ((keyword (pop body)))
-	(case keyword
+	(cl-case keyword
 	  (:export-block (let ((names (pop body)))
 			   (setq blocks (if (consp names) (mapcar 'upcase names)
 					  (list (upcase names))))))
@@ -1397,7 +1397,7 @@ for export.  Return options as a plist."
 	       (setq plist
 		     (plist-put plist
 				property
-				(case (nth 4 option)
+				(cl-case (nth 4 option)
 				  (parse
 				   (org-element-parse-secondary-string
 				    value (org-element-restriction 'keyword)))
@@ -1428,7 +1428,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 		(let (properties)
 		  (dolist (option options properties)
 		    (when (equal (nth 1 option) keyword)
-		      (pushnew (car option) properties))))))
+		      (cl-pushnew (car option) properties))))))
 	     (get-options
 	      (lambda (&optional files)
 		;; Recursively read keywords in buffer.  FILES is
@@ -1477,7 +1477,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 			       plist property
 			       ;; Handle value depending on specified
 			       ;; BEHAVIOR.
-			       (case (nth 4 (assq property options))
+			       (cl-case (nth 4 (assq property options))
 				 (parse
 				  (unless (memq property to-parse)
 				    (push property to-parse))
@@ -1684,11 +1684,12 @@ for a footnotes section."
 		 (1- (org-export-get-relative-level headline options))))
 	    (cons
 	     headline
-	     (loop for n across numbering
-		   for idx from 0 to org-export-max-depth
-		   when (< idx relative-level) collect n
-		   when (= idx relative-level) collect (aset numbering idx (1+ n))
-		   when (> idx relative-level) do (aset numbering idx 0))))))
+	     (cl-loop
+	      for n across numbering
+	      for idx from 0 to org-export-max-depth
+	      when (< idx relative-level) collect n
+	      when (= idx relative-level) collect (aset numbering idx (1+ n))
+	      when (> idx relative-level) do (aset numbering idx 0))))))
       options)))
 
 (defun org-export--selected-trees (data info)
@@ -1702,8 +1703,8 @@ INFO is a plist holding export options."
 		(cond
 		 ((memq type '(headline inlinetask))
 		  (let ((tags (org-element-property :tags data)))
-		    (if (loop for tag in (plist-get info :select-tags)
-			      thereis (member tag tags))
+		    (if (cl-loop for tag in (plist-get info :select-tags)
+				 thereis (member tag tags))
 			;; When a select tag is found, mark full
 			;; genealogy and every headline within the
 			;; tree as acceptable.
@@ -1730,7 +1731,7 @@ INFO is a plist holding export options."
 OPTIONS is the plist holding export options.  SELECTED, when
 non-nil, is a list of headlines or inlinetasks belonging to
 a tree with a select tag."
-  (case (org-element-type blob)
+  (cl-case (org-element-type blob)
     (clock (not (plist-get options :with-clocks)))
     (drawer
      (let ((with-drawers-p (plist-get options :with-drawers)))
@@ -1757,8 +1758,8 @@ a tree with a select tag."
 	(and (eq (org-element-type blob) 'inlinetask)
 	     (not (plist-get options :with-inlinetasks)))
 	;; Ignore subtrees with an exclude tag.
-	(loop for k in (plist-get options :exclude-tags)
-	      thereis (member k tags))
+	(cl-loop for k in (plist-get options :exclude-tags)
+		 thereis (member k tags))
 	;; When a select tag is present in the buffer, ignore any tree
 	;; without it.
 	(and selected (not (memq blob selected)))
@@ -1800,7 +1801,7 @@ a tree with a select tag."
 			 (lambda (obj)
 			   (or (not (stringp obj)) (org-string-nw-p obj)))
 			 options t))))
-       (case (plist-get options :with-timestamps)
+       (cl-case (plist-get options :with-timestamps)
 	 ((nil) t)
 	 (active
 	  (not (memq (org-element-property :type blob) '(active active-range))))
@@ -2585,7 +2586,7 @@ block are preserved.  Narrowing, if any, is ignored."
 	 (case-fold-search t))
      (while (re-search-forward regexp nil t)
        (let ((e (org-element-at-point)))
-	 (case (org-element-type e)
+	 (cl-case (org-element-type e)
 	   ((comment comment-block)
 	    (delete-region (org-element-property :begin e)
 			   (progn (goto-char (org-element-property :end e))
@@ -2676,7 +2677,7 @@ returned by the function."
 	       subscript superscript underline)
     (lambda (blob)
       (let ((new
-	     (case (org-element-type blob)
+	     (cl-case (org-element-type blob)
 	       ;; ... entities...
 	       (entity
 		(and (not (plist-get info :with-entities))
@@ -2688,7 +2689,7 @@ returned by the function."
 	       ;; ... emphasis...
 	       ((bold italic strike-through underline)
 		(and (not (plist-get info :with-emphasize))
-		     (let ((marker (case (org-element-type blob)
+		     (let ((marker (cl-case (org-element-type blob)
 				     (bold "*")
 				     (italic "/")
 				     (strike-through "+")
@@ -2755,7 +2756,7 @@ not, are considered."
       (let* ((definitions)
 	     (push-definition
 	      (lambda (datum)
-		(case (org-element-type datum)
+		(cl-case (org-element-type datum)
 		  (footnote-definition
 		   (push (save-restriction
 			   (narrow-to-region (org-element-property :begin datum)
@@ -3117,7 +3118,7 @@ locally for the subtree through node properties."
 			  (< (+ width (length (car items)) 1) fill-column))
 		(let ((item (pop items)))
 		  (insert " " item)
-		  (incf width (1+ (length item))))))
+		  (cl-incf width (1+ (length item))))))
 	    (insert "\n")))))
     ;; Then the rest of keywords, in the order specified in either
     ;; `org-export-options-alist' or respective export back-ends.
@@ -3263,7 +3264,7 @@ storing and resolving footnotes.  It is created automatically."
 		      (org-export--prepare-file-contents
 		       file lines ind minlevel
 		       (or (gethash file file-prefix)
-			   (puthash file (incf current-prefix) file-prefix))
+			   (puthash file (cl-incf current-prefix) file-prefix))
 		       footnotes)))
 		   (org-export-expand-include-keyword
 		    (cons (list file lines) included)
@@ -3337,7 +3338,7 @@ Return a string of lines to be included in the format expected by
 		(save-excursion
 		  (+ start-line
 		     (let ((counter 0))
-		       (while (< (point) end) (incf counter) (forward-line))
+		       (while (< (point) end) (cl-incf counter) (forward-line))
 		       counter))))))))
 
 (defun org-export--update-footnote-label (ref-begin digit-label id)
@@ -3724,7 +3725,7 @@ for inlined footnotes.  Unreferenced definitions are ignored."
        ;; Collect footnote number, label and definition.
        (let ((l (org-element-property :label f)))
 	 (unless (and l (member l labels))
-	   (incf n)
+	   (cl-incf n)
 	   (push (list n l (org-export-get-footnote-definition f info)) alist))
 	 (when l (push l labels))))
      (or data (plist-get info :parse-tree)) info body-first)
@@ -3783,8 +3784,8 @@ process, leading to a different order when footnotes are nested."
 	    ((and label l (string= label l)) (throw 'exit (1+ count)))
 	    ;; Otherwise store label and increase counter if label
 	    ;; wasn't encountered yet.
-	    ((not l) (incf count))
-	    ((not (member l seen)) (push l seen) (incf count)))))
+	    ((not l) (cl-incf count))
+	    ((not (member l seen)) (push l seen) (cl-incf count)))))
        (or data (plist-get info :parse-tree)) info body-first))))
 
 
@@ -4230,7 +4231,7 @@ alphanumeric characters only."
 			 (if type
 			     (replace-regexp-in-string "-" "" (symbol-name type))
 			   "secondarystring")
-			 (incf (gethash type cache 0)))
+			 (cl-incf (gethash type cache 0)))
 		 cache))))
 
 (defun org-export-get-ordinal (element info &optional types predicate)
@@ -4263,7 +4264,7 @@ objects of the same type."
 	  (org-element-lineage
 	   element
 	   '(footnote-definition footnote-reference headline item table))))
-  (case (org-element-type element)
+  (cl-case (org-element-type element)
     ;; Special case 1: A headline returns its number as a list.
     (headline (org-export-get-headline-number element info))
     ;; Special case 2: An item returns its number as a list.
@@ -4283,8 +4284,8 @@ objects of the same type."
 	 (lambda (el)
 	   (cond
 	    ((eq element el) (1+ counter))
-	    ((not predicate) (incf counter) nil)
-	    ((funcall predicate el info) (incf counter) nil)))
+	    ((not predicate) (cl-incf counter) nil)
+	    ((funcall predicate el info) (cl-incf counter) nil)))
 	 info 'first-match)))))
 
 
@@ -4374,7 +4375,7 @@ reference on that line (string)."
      (org-element-normalize-string
       (mapconcat
        (lambda (loc)
-	 (incf line)
+	 (cl-incf line)
 	 (if (not (string-match with-ref-re loc)) loc
 	   ;; Ref line: remove ref, and signal its position in REFS.
 	   (push (cons line (match-string 3 loc)) refs)
@@ -4407,7 +4408,7 @@ be nil.  It can be obtained through the use of
     (org-element-normalize-string
      (mapconcat
       (lambda (--loc)
-	(incf --line)
+	(cl-incf --line)
 	(let ((--ref (cdr (assq --line ref-alist))))
 	  (funcall fun --loc (and num-lines (+ num-lines --line)) --ref)))
       --locs "\n"))))
@@ -4432,7 +4433,7 @@ code."
       (let* ((refs (and (org-element-property :retain-labels element)
 			(cdr code-info)))
 	     ;; Handle line numbering.
-	     (num-start (case (org-element-property :number-lines element)
+	     (num-start (cl-case (org-element-property :number-lines element)
 			  (continued (org-export-get-loc element info))
 			  (new 0)))
 	     (num-fmt
@@ -4530,7 +4531,7 @@ A table has a header when it contains at least two row groups."
 	       (cond
 		((> rowgroup 1) t)
 		((and row-flag (eq (org-element-property :type row) 'rule))
-		 (incf rowgroup) (setq row-flag nil))
+		 (cl-incf rowgroup) (setq row-flag nil))
 		((and (not row-flag) (eq (org-element-property :type row)
 					 'standard))
 		 (setq row-flag t) nil)))
@@ -4590,7 +4591,7 @@ header."
 		 (lambda (row)
 		   (if (eq (org-element-property :type row) 'rule)
 		       (setq row-flag nil)
-		     (unless row-flag (incf group) (setq row-flag t)))
+		     (unless row-flag (cl-incf group) (setq row-flag t)))
 		   (when (eq table-row row) (puthash table-row group cache)))
 		 info 'first-match))))))
 
@@ -4690,14 +4691,14 @@ Possible values are `left', `right' and `center'."
 			    (org-element-contents
 			     (elt (org-element-contents row) column))
 			    info)))
-		(incf total-cells)
+		(cl-incf total-cells)
 		;; Treat an empty cell as a number if it follows
 		;; a number.
 		(if (not (or (string-match org-table-number-regexp value)
 			     (and (string= value "") previous-cell-number-p)))
 		    (setq previous-cell-number-p nil)
 		  (setq previous-cell-number-p t)
-		  (incf number-cells))))))
+		  (cl-incf number-cells))))))
 	  ;; Return value.  Alignment specified by cookies has
 	  ;; precedence over alignment deduced from cell's contents.
 	  (aset align-vector
@@ -4870,7 +4871,7 @@ special columns and separators."
 	(lambda (row)
 	  (cond ((eq row table-row) number)
 		((eq (org-element-property :type row) 'standard)
-		 (incf number) nil)))
+		 (cl-incf number) nil)))
 	info 'first-match))))
 
 (defun org-export-table-dimensions (table info)
@@ -4886,10 +4887,10 @@ rows (resp. columns)."
     (org-element-map table 'table-row
       (lambda (row)
 	(when (eq (org-element-property :type row) 'standard)
-	  (incf rows)
+	  (cl-incf rows)
 	  (unless first-row (setq first-row row)))) info)
     ;; Set number of columns.
-    (org-element-map first-row 'table-cell (lambda (_) (incf columns)) info)
+    (org-element-map first-row 'table-cell (lambda (_) (cl-incf columns)) info)
     ;; Return value.
     (cons rows columns)))
 
@@ -4909,7 +4910,7 @@ function returns nil for other cells."
 	    (let ((col-count 0))
 	      (org-element-map table-row 'table-cell
 		(lambda (cell)
-		  (if (eq cell table-cell) col-count (incf col-count) nil))
+		  (if (eq cell table-cell) col-count (cl-incf col-count) nil))
 		info 'first-match))))))
 
 (defun org-export-get-table-cell-at (address table info)
@@ -4929,12 +4930,12 @@ return nil."
 	    (lambda (row)
 	      (cond ((eq (org-element-property :type row) 'rule) nil)
 		    ((= row-count row-pos) row)
-		    (t (incf row-count) nil)))
+		    (t (cl-incf row-count) nil)))
 	    info 'first-match))
 	'table-cell
       (lambda (cell)
 	(if (= column-count column-pos) cell
-	  (incf column-count) nil))
+	  (cl-incf column-count) nil))
       info 'first-match)))
 
 
@@ -5168,7 +5169,7 @@ INFO is the current export state, as a plist."
 	  (lambda (text)
 	    (let ((start 0) current-status)
 	      (while (setq start (string-match "['\"]" text start))
-		(incf start)
+		(cl-incf start)
 		(push
 		 (cond
 		  ((equal (match-string 0 text) "\"")
@@ -5305,7 +5306,7 @@ all of them."
 	      ((null n) (throw 'exit obj))
 	      ((not (wholenump n)) (push obj prev))
 	      ((zerop n) (throw 'exit prev))
-	      (t (decf n) (push obj prev)))))))
+	      (t (cl-decf n) (push obj prev)))))))
 
 (defun org-export-get-next-element (blob info &optional n)
   "Return next element or object.
@@ -5331,7 +5332,7 @@ them."
 	      ((null n) (throw 'exit obj))
 	      ((not (wholenump n)) (push obj next))
 	      ((zerop n) (throw 'exit (nreverse next)))
-	      (t (decf n) (push obj next)))))))
+	      (t (cl-decf n) (push obj next)))))))
 
 
 ;;;; Translation
@@ -6128,7 +6129,7 @@ When ARG is \\[universal-argument] \\[universal-argument], display the asynchron
 	 (optns (cdr input)))
     (unless (memq 'subtree optns)
       (move-marker org-export-dispatch-last-position nil))
-    (case action
+    (cl-case action
       ;; First handle special hard-coded actions.
       (template (org-export-insert-default-template nil optns))
       (stack (org-export-stack))
@@ -6267,7 +6268,7 @@ back to standard interface."
 			   (concat
 			    (mapconcat
 			     (lambda (sub-entry)
-			       (incf index)
+			       (cl-incf index)
 			       (format
 				(if (zerop (mod index 2)) "    [%s] %-26s"
 				  "[%s] %s\n")
@@ -6338,7 +6339,7 @@ back to standard interface."
        standard-prompt allowed-keys entries options first-key expertp))))
 
 (defun org-export--dispatch-action
-  (prompt allowed-keys entries options first-key expertp)
+    (prompt allowed-keys entries options first-key expertp)
   "Read a character from command input and act accordingly.
 
 PROMPT is the displayed prompt, as a string.  ALLOWED-KEYS is
@@ -6356,7 +6357,7 @@ options as CDR."
     (while (and (setq key (read-char-exclusive prompt))
 		(not expertp)
 		(memq key '(14 16 ?\s ?\d)))
-      (case key
+      (cl-case key
 	(14 (if (not (pos-visible-in-window-p (point-max)))
 		(ignore-errors (scroll-up 1))
 	      (message "End of buffer")
@@ -6393,8 +6394,8 @@ options as CDR."
      ;; Toggle options: C-b (2) C-v (22) C-s (19) C-f (6) C-a (1).
      ((memq key '(2 22 19 6 1))
       (org-export--dispatch-ui
-       (let ((option (case key (2 'body) (22 'visible) (19 'subtree)
-			   (6 'force) (1 'async))))
+       (let ((option (cl-case key (2 'body) (22 'visible) (19 'subtree)
+			      (6 'force) (1 'async))))
 	 (if (memq option options) (remq option options)
 	   (cons option options)))
        first-key expertp))
@@ -6406,7 +6407,7 @@ options as CDR."
 	     ;; Publishing actions are hard-coded.  Send a special
 	     ;; signal to `org-export-dispatch'.
 	     ((eq first-key ?P)
-	      (case key
+	      (cl-case key
 		(?f 'publish-current-file)
 		(?p 'publish-current-project)
 		(?x 'publish-choose-project)
