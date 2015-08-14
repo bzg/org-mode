@@ -387,7 +387,7 @@ value if point was successfully moved."
       (user-error "Definition is outside narrowed part of buffer")))
     (org-mark-ring-push)
     (goto-char def-start)
-    (looking-at (format "\\[%s[]:]" label))
+    (looking-at (format "\\[%s[]:] ?" label))
     (goto-char (match-end 0))
     (org-show-context 'link-search)
     (when (derived-mode-p 'org-mode)
@@ -552,13 +552,19 @@ or new, let the user edit the definition of the footnote."
 	   (org-footnote-auto-adjust-maybe))
 	  (t
 	   (insert "[" label "]")
-	   (org-footnote-create-definition label)
-	   (org-footnote-auto-adjust-maybe)
-	   (if (ignore-errors (org-footnote-goto-definition label))
-	       (forward-char)
-	     ;; Definition was created outside current scope: edit it
-	     ;; remotely.
-	     (org-edit-footnote-reference))))))
+	   (let ((p (org-footnote-create-definition label)))
+	     ;; `org-footnote-goto-definition' needs to be called
+	     ;; after `org-footnote-auto-adjust-maybe'.  Otherwise
+	     ;; both label and location of the definition are lost.
+	     ;; On the contrary, it needs to be called before
+	     ;; `org-edit-footnote-reference' so that the remote
+	     ;; editing buffer can display the correct label.
+	     (if (ignore-errors (org-footnote-goto-definition label p))
+		 (org-footnote-auto-adjust-maybe)
+	       ;; Definition was created outside current scope: edit
+	       ;; it remotely.
+	       (org-footnote-auto-adjust-maybe)
+	       (org-edit-footnote-reference)))))))
 
 (defvar org-blank-before-new-entry) ; Silence byte-compiler.
 (defun org-footnote-create-definition (label)
@@ -655,6 +661,13 @@ offer additional commands in a menu."
   (let* ((context (and (not special) (org-element-context)))
 	 (type (org-element-type context)))
     (cond
+     ;; On white space after element, insert a new footnote.
+     ((> (point)
+	 (save-excursion
+	   (goto-char (org-element-property :end context))
+	   (skip-chars-backward " \t")
+	   (point)))
+      (org-footnote-new))
      ((eq type 'footnote-reference)
       (let ((label (org-element-property :label context)))
 	(cond
