@@ -1624,11 +1624,7 @@ this variable on for the duration of the command."
 The value is an alist, with `heading' and `plain-list-item' as CAR,
 and a boolean flag as CDR.  The cdr may also be the symbol `auto', in
 which case Org will look at the surrounding headings/items and try to
-make an intelligent decision whether to insert a blank line or not.
-
-For plain lists, if `org-list-empty-line-terminates-plain-lists' is set,
-the setting here is ignored and no empty line is inserted to avoid breaking
-the list structure."
+make an intelligent decision whether to insert a blank line or not."
   :group 'org-edit-structure
   :type '(list
 	  (cons (const heading)

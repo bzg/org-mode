@@ -259,14 +259,6 @@ spaces instead of one after the bullet in each item of the list."
 	  (const :tag "never" nil)
 	  (regexp)))
 
-(define-obsolete-variable-alias 'org-empty-line-terminates-plain-lists
-  'org-list-empty-line-terminates-plain-lists "24.4") ;; Since 8.0
-(defcustom org-list-empty-line-terminates-plain-lists nil
-  "Non-nil means an empty line ends all plain list levels.
-Otherwise, two of them will be necessary."
-  :group 'org-plain-lists
-  :type 'boolean)
-
 (defcustom org-list-automatic-rules '((checkbox . t)
 				      (indent . t))
   "Non-nil means apply set of rules when acting on lists.
@@ -383,10 +375,8 @@ specifically, type `block' is determined by the variable
 
 ;;; Predicates and regexps
 
-(defconst org-list-end-re (if org-list-empty-line-terminates-plain-lists "^[ \t]*\n"
-			    "^[ \t]*\n[ \t]*\n")
-  "Regex corresponding to the end of a list.
-It depends on `org-list-empty-line-terminates-plain-lists'.")
+(defconst org-list-end-re "^[ \t]*\n[ \t]*\n"
+  "Regex matching the end of a plain list.")
 
 (defconst org-list-full-item-re
   (concat "^[ \t]*\\(\\(?:[-+*]\\|\\(?:[0-9]+\\|[A-Za-z]\\)[.)]\\)\\(?:[ \t]+\\|$\\)\\)"
@@ -1222,7 +1212,7 @@ some heuristics to guess the result."
 				    (point))))))))
       (cond
        ;; Trivial cases where there should be none.
-       ((or org-list-empty-line-terminates-plain-lists (not insert-blank-p)) 0)
+       ((not insert-blank-p) 0)
        ;; When `org-blank-before-new-entry' says so, it is 1.
        ((eq insert-blank-p t) 1)
        ;; `plain-list-item' is 'auto.  Count blank lines separating

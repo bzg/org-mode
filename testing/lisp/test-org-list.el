@@ -481,9 +481,12 @@
     (should (equal (buffer-string)
 		   "- item 2\n- item 1\n  - sub-item 1")))
   ;; Preserve blank lines.
-  (org-test-with-temp-text "- item 1\n\n- item 2"
-    (let ((org-list-empty-line-terminates-plain-lists nil)) (org-move-item-down))
-    (should (equal (buffer-string) "- item 2\n\n- item 1")))
+  (should
+   (equal
+    "- item 2\n\n- item 1"
+    (org-test-with-temp-text "- item 1\n\n- item 2"
+      (org-move-item-down)
+      (buffer-string))))
   ;; Error when trying to move the last item...
   (org-test-with-temp-text "- item 1\n- item 2"
     (forward-line)
@@ -565,10 +568,13 @@
     (should (equal (buffer-string)
 		   "- item 2\n  - sub-item 2\n- item 1")))
   ;; Preserve blank lines.
-  (org-test-with-temp-text "- item 1\n\n- item 2"
-    (search-forward "- item 2")
-    (let ((org-list-empty-line-terminates-plain-lists nil)) (org-move-item-up))
-    (should (equal (buffer-string) "- item 2\n\n- item 1")))
+  (should
+   (equal
+    "- item 2\n\n- item 1"
+    (org-test-with-temp-text "- item 1\n\n- item 2"
+      (search-forward "- item 2")
+      (org-move-item-up)
+      (buffer-string))))
   ;; Error when trying to move the first item...
   (org-test-with-temp-text "- item 1\n- item 2"
     (should-error (org-move-item-up)))
@@ -630,20 +636,10 @@
   "Test item insertion."
   ;; Blank lines specifications.
   ;;
-  ;; Non-nil `org-blank-before-new-entry': insert a blank line, unless
-  ;; `org-list-empty-line-terminates-plain-lists' is non-nil.
+  ;; Non-nil `org-blank-before-new-entry': insert a blank line.
   (should
    (org-test-with-temp-text "- a"
-     (let ((org-list-empty-line-terminates-plain-lists nil)
-	   (org-blank-before-new-entry '((plain-list-item . t))))
-       (end-of-line)
-       (org-insert-item)
-       (forward-line -1)
-       (looking-at "$"))))
-  (should-not
-   (org-test-with-temp-text "- a"
-     (let ((org-list-empty-line-terminates-plain-lists t)
-	   (org-blank-before-new-entry '((plain-list-item . t))))
+     (let ((org-blank-before-new-entry '((plain-list-item . t))))
        (end-of-line)
        (org-insert-item)
        (forward-line -1)
@@ -651,8 +647,7 @@
   ;; Nil `org-blank-before-new-entry': do not insert a blank line.
   (should-not
    (org-test-with-temp-text "- a"
-     (let ((org-list-empty-line-terminates-plain-lists nil)
-	   (org-blank-before-new-entry '((plain-list-item . nil))))
+     (let ((org-blank-before-new-entry '((plain-list-item . nil))))
        (end-of-line)
        (org-insert-item)
        (forward-line -1)
@@ -661,8 +656,7 @@
   ;; line already in the sole item, do not insert one.
   (should-not
    (org-test-with-temp-text "- a"
-     (let ((org-list-empty-line-terminates-plain-lists nil)
-	   (org-blank-before-new-entry '((plain-list-item . auto))))
+     (let ((org-blank-before-new-entry '((plain-list-item . auto))))
        (end-of-line)
        (org-insert-item)
        (forward-line -1)
@@ -670,45 +664,37 @@
   ;; `org-blank-before-new-entry' set to `auto': if there's a blank
   ;; line in the sole item, insert another one.
   (should
-   (org-test-with-temp-text "- a\n\n  b"
-     (let ((org-list-empty-line-terminates-plain-lists nil)
-	   (org-blank-before-new-entry '((plain-list-item . auto))))
-       (goto-char (point-max))
+   (org-test-with-temp-text "- a\n\n  b<point>"
+     (let ((org-blank-before-new-entry '((plain-list-item . auto))))
        (org-insert-item)
        (forward-line -1)
        (looking-at "$"))))
   ;; `org-blank-before-new-entry' set to `auto': if the user specified
   ;; a blank line, preserve it.
   (should
-   (org-test-with-temp-text "- a\n\n"
-     (let ((org-list-empty-line-terminates-plain-lists nil)
-	   (org-blank-before-new-entry '((plain-list-item . auto))))
-       (goto-char (point-max))
+   (org-test-with-temp-text "- a\n\n<point>"
+     (let ((org-blank-before-new-entry '((plain-list-item . auto))))
        (org-insert-item)
        (forward-line -1)
        (looking-at "$"))))
   ;; `org-blank-before-new-entry' set to `auto': if some items in list
   ;; are already separated by blank lines, insert one.
   (should
-   (org-test-with-temp-text "- a\n\n- b"
-     (let ((org-list-empty-line-terminates-plain-lists nil)
-	   (org-blank-before-new-entry '((plain-list-item . auto))))
-       (goto-char (point-max))
+   (org-test-with-temp-text "- a\n\n- b<point>"
+     (let ((org-blank-before-new-entry '((plain-list-item . auto))))
        (org-insert-item)
        (forward-line -1)
        (looking-at "$"))))
   (should
    (org-test-with-temp-text "- a\n\n- b"
-     (let ((org-list-empty-line-terminates-plain-lists nil)
-	   (org-blank-before-new-entry '((plain-list-item . auto))))
+     (let ((org-blank-before-new-entry '((plain-list-item . auto))))
        (org-insert-item)
        (forward-line)
        (looking-at "$"))))
   (should
-   (org-test-with-temp-text "- a\n  #+BEGIN_EXAMPLE\n\n  x\n  #+END_EXAMPLE"
-     (let ((org-list-empty-line-terminates-plain-lists nil)
-	   (org-blank-before-new-entry '((plain-list-item . auto))))
-       (goto-char (point-max))
+   (org-test-with-temp-text
+       "- a\n  #+BEGIN_EXAMPLE\n\n  x\n  #+END_EXAMPLE<point>"
+     (let ((org-blank-before-new-entry '((plain-list-item . auto))))
        (org-insert-item)
        (forward-line -1)
        (looking-at "$"))))
