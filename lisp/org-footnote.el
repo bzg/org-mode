@@ -552,13 +552,19 @@ or new, let the user edit the definition of the footnote."
 	   (org-footnote-auto-adjust-maybe))
 	  (t
 	   (insert "[" label "]")
-	   (org-footnote-create-definition label)
-	   (org-footnote-auto-adjust-maybe)
-	   (if (ignore-errors (org-footnote-goto-definition label))
-	       (forward-char)
-	     ;; Definition was created outside current scope: edit it
-	     ;; remotely.
-	     (org-edit-footnote-reference))))))
+	   (let ((p (org-footnote-create-definition label)))
+	     ;; `org-footnote-goto-definition' needs to be called
+	     ;; after `org-footnote-auto-adjust-maybe'.  Otherwise
+	     ;; both label and location of the definition are lost.
+	     ;; On the contrary, it needs to be called before
+	     ;; `org-edit-footnote-reference' so that the remote
+	     ;; editing buffer can display the correct label.
+	     (if (ignore-errors (org-footnote-goto-definition label p))
+		 (org-footnote-auto-adjust-maybe)
+	       ;; Definition was created outside current scope: edit
+	       ;; it remotely.
+	       (org-footnote-auto-adjust-maybe)
+	       (org-edit-footnote-reference)))))))
 
 (defvar org-blank-before-new-entry) ; Silence byte-compiler.
 (defun org-footnote-create-definition (label)
