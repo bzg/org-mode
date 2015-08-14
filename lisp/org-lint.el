@@ -548,7 +548,7 @@ Use :header-args: instead"
 				   (not
 				    (ignore-errors
 				      (let ((org-link-search-inhibit-query t))
-					(org-link-search search nil nil t)))))
+					(org-link-search search nil t)))))
 			  (list (org-element-property :post-affiliated k)
 				(format
 				 "Invalid search part \"%s\" in INCLUDE keyword"
