@@ -1,4 +1,4 @@
-;;; test-ox.el --- Tests for ox.el
+;;; test-ox.el --- Tests for ox.el                   -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012-2015  Nicolas Goaziou
 
@@ -28,18 +28,14 @@
   "Return a default export back-end.
 This back-end simply returns parsed data as Org syntax."
   (org-export-create-backend
-   :transcoders (let (transcode-table)
-		  (dolist (type (append org-element-all-elements
-					org-element-all-objects)
-				transcode-table)
-		    (push
-		     (cons type
-			   (lambda (obj contents info)
-			     (funcall
-			      (intern (format "org-element-%s-interpreter"
-					      type))
-			      obj contents)))
-		     transcode-table)))))
+   :transcoders
+   (mapcar (lambda (type)
+	     (cons type
+		   (lambda (o c _)
+		     (funcall
+		      (intern (format "org-element-%s-interpreter" type))
+		      o c))))
+	   (append org-element-all-elements org-element-all-objects))))
 
 (defmacro org-test-with-parsed-data (data &rest body)
   "Execute body with parsed data available.
@@ -1541,18 +1537,20 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 	  (let ((test-back-end
 		 (org-export-create-backend
 		  :transcoders
-		  '((headline . (lambda (headline contents info)
-				  (org-export-data
-				   (org-element-property :title headline)
-				   info)))
-		    (plain-text . (lambda (text info) "Success"))))))
+		  (list (cons 'headline
+			      (lambda (headline contents info)
+				(org-export-data
+				 (org-element-property :title headline)
+				 info)))
+			(cons 'plain-text (lambda (text info) "Success"))))))
 	    (org-export-string-as
 	     "* Test"
 	     (org-export-create-backend
 	      :transcoders
-	      '((headline . (lambda (headline contents info)
-			      (org-export-with-backend
-			       test-back-end headline contents info))))))))))
+	      (list (cons 'headline
+			  (lambda (headline contents info)
+			    (org-export-with-backend
+			     test-back-end headline contents info))))))))))
 
 (ert-deftest test-org-export/data-with-backend ()
   "Test `org-export-data-with-backend' specifications."
@@ -1618,7 +1616,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 	  :transcoders
 	  `(,(cons 'footnote-reference
 		   (lambda (f c i)
-		     (push (org-export-footnote-first-reference-p f info)
+		     (push (org-export-footnote-first-reference-p f i)
 			   result)
 		     ""))
 	    (section . (lambda (s c i) c))
@@ -1664,7 +1662,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 	  `(,(cons 'footnote-reference
 		   (lambda (f c i)
 		     (when (org-element-lineage f '(drawer))
-		       (push (org-export-footnote-first-reference-p f info nil)
+		       (push (org-export-footnote-first-reference-p f i nil)
 			     result))
 		     ""))
 	    (drawer . (lambda (d c i) c))
@@ -1685,7 +1683,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 	  `(,(cons 'footnote-reference
 		   (lambda (f c i)
 		     (when (org-element-lineage f '(drawer))
-		       (push (org-export-footnote-first-reference-p f info nil t)
+		       (push (org-export-footnote-first-reference-p f i nil t)
 			     result))
 		     ""))
 	    (drawer . (lambda (d c i) c))
