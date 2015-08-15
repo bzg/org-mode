@@ -69,7 +69,7 @@
 ;;
 ;;  The latest tested version of this file can always be found at:
 ;;
-;;    http://orgmode.org/w/org-mode.git?p=org-mode.git;a=blob_plain;f=contrib/lisp/org-index.el;hb=HEAD
+;;    http://orgmode.org/cgit.cgi/org-mode.git/plain/contrib/lisp/org-index.el
 
 ;;; Change Log:
 
