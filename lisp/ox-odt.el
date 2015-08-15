@@ -1765,8 +1765,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	((not
 	  (org-export-footnote-first-reference-p footnote-reference info nil t))
 	 (funcall --format-footnote-reference n))
-	;; Inline definitions are secondary strings.
-	;; Non-inline footnotes definitions are full Org data.
 	(t
 	 (let* ((raw (org-export-get-footnote-definition
 		      footnote-reference info))
@@ -1784,7 +1782,11 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 						 "OrgFootnoteCenter"
 						 "OrgFootnoteQuotations")))))
 			      info))))
-		   (if (eq (org-element-type raw) 'org-data) def
+		   ;; Inline definitions are secondary strings.  We
+		   ;; need to wrap them within a paragraph.
+		   (if (org-element-map raw org-element-all-elements
+			 #'identity info t)
+		       def
 		     (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
 			     "Footnote" def)))))
 	   (funcall --format-footnote-definition n def))))))))
