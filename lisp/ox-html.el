@@ -161,7 +161,6 @@
     (:html-todo-kwd-class-prefix nil nil org-html-todo-kwd-class-prefix)
     (:html-toplevel-hlevel nil nil org-html-toplevel-hlevel)
     (:html-use-infojs nil nil org-html-use-infojs)
-    (:html-use-unicode-chars nil nil org-html-use-unicode-chars)
     (:html-validation-link nil nil org-html-validation-link)
     (:html-viewport nil nil org-html-viewport)
     (:html-inline-images nil nil org-html-inline-images)
@@ -603,13 +602,6 @@ returned as-is."
 (defcustom org-html-indent nil
   "Non-nil means to indent the generated HTML.
 Warning: non-nil may break indentation of source code blocks."
-  :group 'org-export-html
-  :version "24.4"
-  :package-version '(Org . "8.0")
-  :type 'boolean)
-
-(defcustom org-html-use-unicode-chars nil
-  "Non-nil means to use unicode characters instead of HTML entities."
   :group 'org-export-html
   :version "24.4"
   :package-version '(Org . "8.0")
@@ -3500,9 +3492,6 @@ contextual information."
     (set-auto-mode t)
     (if (plist-get info :html-indent)
 	(indent-region (point-min) (point-max)))
-    (when (plist-get info :html-use-unicode-chars)
-      (require 'mm-url)
-      (mm-url-decode-entities))
     (buffer-substring-no-properties (point-min) (point-max))))
 
 

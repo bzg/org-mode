@@ -14365,7 +14365,6 @@ however, override everything.
 @item @code{:html-todo-kwd-class-prefix}      @tab @code{org-html-todo-kwd-class-prefix}
 @item @code{:html-toplevel-hlevel}            @tab @code{org-html-toplevel-hlevel}
 @item @code{:html-use-infojs}                 @tab @code{org-html-use-infojs}
-@item @code{:html-use-unicode-chars}          @tab @code{org-html-use-unicode-chars}
 @item @code{:html-validation-link}            @tab @code{org-html-validation-link}
 @item @code{:html-viewport}                   @tab @code{org-html-viewport}
 @item @code{:html-xml-declaration}            @tab @code{org-html-xml-declaration}
