@@ -1784,11 +1784,12 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 			      info))))
 		   ;; Inline definitions are secondary strings.  We
 		   ;; need to wrap them within a paragraph.
-		   (if (org-element-map raw org-element-all-elements
-			 #'identity info t)
+		   (if (memq (org-element-type (car (org-element-contents raw)))
+			     org-element-all-elements)
 		       def
-		     (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
-			     "Footnote" def)))))
+		     (format
+		      "\n<text:p text:style-name=\"Footnote\">%s</text:p>"
+		      def)))))
 	   (funcall --format-footnote-definition n def))))))))
 
 
