@@ -332,6 +332,15 @@ more features.  See docstring for details.
 Functions in this filter are applied on the body of the exported
 document, befor wrapping it within the template.
 
+*** New :environment parameter when exporting example blocks to LaTeX
+
+: #+ATTR_LATEX: :environment myverbatim
+: #+BEGIN_EXAMPLE
+: This sentence is false.
+: #+END_EXAMPLE
+
+will be exported using =@samp(myverbatim)= instead of =@samp(verbatim)=.
+
 *** Various improvements on radio tables
 
 Radio tables feature now relies on Org's export framework ("ox.el").
