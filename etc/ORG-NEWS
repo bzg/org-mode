@@ -61,7 +61,7 @@ is now commented out, i.e. no #+OPTIONS line will be parsed or taken
 into account when exporting.
 
 If you want to exclude a headline from export while using its contents
-for setting options, use =org-export-exclude-tags= instead.
+for setting options, use =:noexport:= (see =org-export-exclude-tags=.)
 
 *** =#+CATEGORY= keywords no longer apply partially to document
 
