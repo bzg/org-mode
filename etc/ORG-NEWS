@@ -554,6 +554,11 @@ Special ~comment~ value is no longer allowed.  It is possible to use a
 body filter to add comments about the creator at the end of the
 document instead.
 
+*** Removed option =org-html-use-unicode-chars=
+
+Setting this to non-nil was problematic as it converted characters
+everywhere in the buffer, possibly corrupting URLs.
+
 *** Removed option =org-babel-sh-command=
 
 This undocumented option defaulted to the value of =shell-file-name=
