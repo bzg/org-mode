@@ -701,7 +701,7 @@ Using header arguments
 Specific header arguments
 
 * var::                         Pass arguments to code blocks
-* Results::                     Specify the type of results and how they will
+* results::                     Specify the type of results and how they will
                                 be collected and handled
 * file::                        Specify a path for file output
 * file-desc::                   Specify a description for file results
@@ -15339,7 +15339,7 @@ argument in lowercase letters.  The following header arguments are defined:
 
 @menu
 * var::                         Pass arguments to code blocks
-* Results::                     Specify the type of results and how they will
+* results::                     Specify the type of results and how they will
                                 be collected and handled
 * file::                        Specify a path for file output
 * file-desc::                   Specify a description for file results
@@ -15633,7 +15633,7 @@ Emacs Lisp, as shown in the following example.
 : (a b c)
 @end example
 
-@node Results
+@node results
 @subsubsection @code{:results}
 @cindex @code{:results}, src header argument
 
@@ -16470,7 +16470,7 @@ block body before execution.  Also see @ref{prologue}.
 The way in which results are handled depends on whether a session is invoked,
 as well as on whether @code{:results value} or @code{:results output} is
 used.  The following table shows the table possibilities.  For a full listing
-of the possible results header arguments see @ref{Results}.
+of the possible results header arguments see @ref{results}.
 
 @multitable @columnfractions 0.26 0.33 0.41
 @item @tab @b{Non-session} @tab @b{Session}
