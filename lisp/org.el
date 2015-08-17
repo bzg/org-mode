@@ -17485,12 +17485,13 @@ both scheduled and deadline timestamps."
 	(regexp (org-re-timestamp org-ts-type))
 	(callback
 	 `(lambda ()
-	    (and ,(if (memq org-ts-type '(active inactive all))
-		      '(eq (org-element-type (org-element-context)) 'timestamp)
-		    '(org-at-planning-p))
-		 (time-less-p
-		  (org-time-string-to-time (match-string 1))
-		  (org-time-string-to-time date))))))
+	    (let ((match (match-string 1)))
+	      (and ,(if (memq org-ts-type '(active inactive all))
+			'(eq (org-element-type (org-element-context)) 'timestamp)
+		      '(org-at-planning-p))
+		   (time-less-p
+		    (org-time-string-to-time match)
+		    (org-time-string-to-time date)))))))
     (message "%d entries before %s"
 	     (org-occur regexp nil callback) date)))
 
@@ -17501,12 +17502,13 @@ both scheduled and deadline timestamps."
 	(regexp (org-re-timestamp org-ts-type))
 	(callback
 	 `(lambda ()
-	    (and ,(if (memq org-ts-type '(active inactive all))
-		      '(eq (org-element-type (org-element-context)) 'timestamp)
-		    '(org-at-planning-p))
-		 (not (time-less-p
-		       (org-time-string-to-time (match-string 1))
-		       (org-time-string-to-time date)))))))
+	    (let ((match (match-string 1)))
+	      (and ,(if (memq org-ts-type '(active inactive all))
+			'(eq (org-element-type (org-element-context)) 'timestamp)
+		      '(org-at-planning-p))
+		   (not (time-less-p
+			 (org-time-string-to-time match)
+			 (org-time-string-to-time date))))))))
     (message "%d entries after %s"
 	     (org-occur regexp nil callback) date)))
 
