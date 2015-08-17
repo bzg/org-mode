@@ -176,8 +176,8 @@ specially in `org-element--object-lex'.")
 		;; Clock lines.
 		(regexp-quote org-clock-string) "\\|"
 		;; Lists.
-		(let ((term (case org-plain-list-ordered-item-terminator
-			      (?\) ")") (?. "\\.") (otherwise "[.)]")))
+		(let ((term (pcase org-plain-list-ordered-item-terminator
+			      (?\) ")") (?. "\\.") (_ "[.)]")))
 		      (alpha (and org-list-allow-alphabetical "\\|[A-Za-z]")))
 		  (concat "\\(?:[-+*]\\|\\(?:[0-9]+" alpha "\\)" term "\\)"
 			  "\\(?:[ \t]\\|$\\)"))
@@ -586,11 +586,11 @@ DATUM is an element, object, string or nil.  `:parent' property
 is cleared and contents are removed in the process."
   (when datum
     (let ((type (org-element-type datum)))
-      (case type
-	(org-data (list 'org-data nil))
-	(plain-text (substring-no-properties datum))
-	((nil) (copy-sequence datum))
-	(otherwise
+      (pcase type
+	(`org-data (list 'org-data nil))
+	(`plain-text (substring-no-properties datum))
+	(`nil (copy-sequence datum))
+	(_
 	 (list type (plist-put (copy-sequence (nth 1 datum)) :parent nil)))))))
 
 
@@ -1265,10 +1265,11 @@ CONTENTS is the contents of the element."
     (concat
      bullet
      (and counter (format "[@%d] " counter))
-     (case checkbox
-       (on "[X] ")
-       (off "[ ] ")
-       (trans "[-] "))
+     (pcase checkbox
+       (`on "[X] ")
+       (`off "[ ] ")
+       (`trans "[-] ")
+       (_ nil))
      (and tag (format "%s :: " tag))
      (when contents
        (let ((contents (replace-regexp-in-string
@@ -2946,12 +2947,13 @@ Assume point is at the beginning of the LaTeX fragment."
 				    '(?\s ?\t ?\n ?, ?.)))
 			 (looking-at "\\(\\s.\\|\\s-\\|\\s(\\|\\s)\\|\\s\"\\|$\\)")
 			 (point)))
-		(case (char-after (1+ (point)))
+		(pcase (char-after (1+ (point)))
 		  (?\( (search-forward "\\)" nil t))
 		  (?\[ (search-forward "\\]" nil t))
-		  (otherwise
+		  (_
 		   ;; Macro.
-		   (and (looking-at "\\\\[a-zA-Z]+\\*?\\(\\(\\[[^][\n{}]*\\]\\)\\|\\({[^{}\n]*}\\)\\)*")
+		   (and (looking-at "\\\\[a-zA-Z]+\\*?\\(\\(\\[[^][\n{}]*\\]\\)\
+\\|\\({[^{}\n]*}\\)\\)*")
 			(match-end 0))))))
 	     (post-blank (if (not after-fragment) (throw 'no-object nil)
 			   (goto-char after-fragment)
@@ -3440,8 +3442,8 @@ Assume point is at the beginning of the timestamp."
 			    (t 'cumulate)))
 		    :repeater-value (string-to-number (match-string 2 raw-value))
 		    :repeater-unit
-		    (case (string-to-char (match-string 3 raw-value))
-		      (?h 'hour) (?d 'day) (?w 'week) (?m 'month) (t 'year)))))
+		    (pcase (string-to-char (match-string 3 raw-value))
+		      (?h 'hour) (?d 'day) (?w 'week) (?m 'month) (_ 'year)))))
 	     (warning-props
 	      (and (not diaryp)
 		   (string-match "\\(-\\)?-\\([0-9]+\\)\\([hdwmy]\\)" raw-value)
@@ -3449,8 +3451,8 @@ Assume point is at the beginning of the timestamp."
 		    :warning-type (if (match-string 1 raw-value) 'first 'all)
 		    :warning-value (string-to-number (match-string 2 raw-value))
 		    :warning-unit
-		    (case (string-to-char (match-string 3 raw-value))
-		      (?h 'hour) (?d 'day) (?w 'week) (?m 'month) (t 'year)))))
+		    (pcase (string-to-char (match-string 3 raw-value))
+		      (?h 'hour) (?d 'day) (?w 'week) (?m 'month) (_ 'year)))))
 	     year-start month-start day-start hour-start minute-start year-end
 	     month-end day-end hour-end minute-end)
 	;; Parse date-start.
@@ -3494,21 +3496,20 @@ Assume point is at the beginning of the timestamp."
   "Interpret TIMESTAMP object as Org syntax."
   (let* ((repeat-string
 	  (concat
-	   (case (org-element-property :repeater-type timestamp)
-	     (cumulate "+") (catch-up "++") (restart ".+"))
+	   (pcase (org-element-property :repeater-type timestamp)
+	     (`cumulate "+") (`catch-up "++") (`restart ".+"))
 	   (let ((val (org-element-property :repeater-value timestamp)))
 	     (and val (number-to-string val)))
-	   (case (org-element-property :repeater-unit timestamp)
-	     (hour "h") (day "d") (week "w") (month "m") (year "y"))))
+	   (pcase (org-element-property :repeater-unit timestamp)
+	     (`hour "h") (`day "d") (`week "w") (`month "m") (`year "y"))))
 	 (warning-string
 	  (concat
-	   (case (org-element-property :warning-type timestamp)
-	     (first "--")
-	     (all "-"))
+	   (pcase (org-element-property :warning-type timestamp)
+	     (`first "--") (`all "-"))
 	   (let ((val (org-element-property :warning-value timestamp)))
 	     (and val (number-to-string val)))
-	   (case (org-element-property :warning-unit timestamp)
-	     (hour "h") (day "d") (week "w") (month "m") (year "y"))))
+	   (pcase (org-element-property :warning-unit timestamp)
+	     (`hour "h") (`day "d") (`week "w") (`month "m") (`year "y"))))
 	 (build-ts-string
 	  ;; Build an Org timestamp string from TIME.  ACTIVEP is
 	  ;; non-nil when time stamp is active.  If WITH-TIME-P is
@@ -3536,8 +3537,8 @@ Assume point is at the beginning of the timestamp."
 	      ;; Return value.
 	      ts)))
 	 (type (org-element-property :type timestamp)))
-    (case type
-      ((active inactive)
+    (pcase type
+      ((or `active `inactive)
        (let* ((minute-start (org-element-property :minute-start timestamp))
 	      (minute-end (org-element-property :minute-end timestamp))
 	      (hour-start (org-element-property :hour-start timestamp))
@@ -3557,7 +3558,7 @@ Assume point is at the beginning of the timestamp."
 	  (and hour-start minute-start)
 	  (and time-range-p hour-end)
 	  (and time-range-p minute-end))))
-      ((active-range inactive-range)
+      ((or `active-range `inactive-range)
        (let ((minute-start (org-element-property :minute-start timestamp))
 	     (minute-end (org-element-property :minute-end timestamp))
 	     (hour-start (org-element-property :hour-start timestamp))
@@ -3583,7 +3584,7 @@ Assume point is at the beginning of the timestamp."
 				(org-element-property :year-end timestamp))
 		   (eq type 'active-range)
 		   (and hour-end minute-end)))))
-      (otherwise (org-element-property :raw-value timestamp)))))
+      (_ (org-element-property :raw-value timestamp)))))
 
 
 ;;;; Underline
@@ -4131,17 +4132,17 @@ otherwise.  Modes can be either `first-section', `item',
 `node-property', `planning', `property-drawer', `section',
 `table-row' or nil."
   (if parentp
-      (case type
-	(headline 'section)
-	(plain-list 'item)
-	(property-drawer 'node-property)
-	(section 'planning)
-	(table 'table-row))
-    (case type
-      (item 'item)
-      (node-property 'node-property)
-      (planning 'property-drawer)
-      (table-row 'table-row))))
+      (pcase type
+	(`headline 'section)
+	(`plain-list 'item)
+	(`property-drawer 'node-property)
+	(`section 'planning)
+	(`table 'table-row))
+    (pcase type
+      (`item 'item)
+      (`node-property 'node-property)
+      (`planning 'property-drawer)
+      (`table-row 'table-row))))
 
 (defun org-element--parse-elements
   (beg end mode structure granularity visible-only acc)
@@ -4240,7 +4241,7 @@ to an appropriate container (e.g., a paragraph)."
 		    (and (memq 'inline-src-block restriction)
 			 (org-element-inline-src-block-parser)))
 		   (t
-		    (case (char-after)
+		    (pcase (char-after)
 		      (?^ (and (memq 'superscript restriction)
 			       (org-element-superscript-parser)))
 		      (?_ (or (and (memq 'subscript restriction)
@@ -4292,7 +4293,7 @@ to an appropriate container (e.g., a paragraph)."
 			     (and (memq 'statistics-cookie restriction)
 				  (org-element-statistics-cookie-parser)))))
 		      ;; This is probably a plain link.
-		      (otherwise (and (or (memq 'link restriction)
+		      (_ (and (or (memq 'link restriction)
 					  (memq 'plain-link restriction))
 				      (org-element-link-parser)))))))
 	    (or (eobp) (forward-char))))
@@ -4914,10 +4915,10 @@ the cache."
 	  (setq node nil
 		lower element
 		upper element)))))
-    (case side
-      (both (cons lower upper))
-      ((nil) lower)
-      (otherwise upper))))
+    (pcase side
+      (`both (cons lower upper))
+      (`nil lower)
+      (_ upper))))
 
 (defun org-element--cache-put (element &optional data)
   "Store ELEMENT in current buffer's cache, if allowed.
@@ -5421,12 +5422,12 @@ that range.  See `after-change-functions' for more information."
 	 ;; to both previous and current state.  We make a special
 	 ;; case for headline editing: if a headline is modified but
 	 ;; not removed, do not extend.
-	 (when (case org-element--cache-change-warning
-		 ((t) t)
-		 (headline
+	 (when (pcase org-element--cache-change-warning
+		 (`t t)
+		 (`headline
 		  (not (and (org-with-limited-levels (org-at-heading-p))
 			    (= (line-end-position) bottom))))
-		 (otherwise
+		 (_
 		  (let ((case-fold-search t))
 		    (re-search-forward
 		     org-element--cache-sensitive-re bottom t))))
