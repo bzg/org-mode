@@ -1473,6 +1473,10 @@ CSS classes, then this prefix can be very useful."
   (let ((dt (downcase (plist-get info :html-doctype))))
 	(member dt '("html5" "xhtml5" "<!doctype html>"))))
 
+(defun org-html-html5-fancy-p (info)
+  (and (plist-get info :html-html5-fancy)
+       (org-html-html5-p info)))
+
 (defun org-html-close-tag (tag attr info)
   (concat "<" tag " " attr
 	  (if (org-html-xhtml-p info) " />" ">")))
@@ -1503,8 +1507,7 @@ attributes with a nil value will be omitted from the result."
 INFO is a plist used as a communication channel.  When optional
 arguments CAPTION and LABEL are given, use them for caption and
 \"id\" attribute."
-  (let ((html5-fancy (and (org-html-html5-p info)
-			  (plist-get info :html-html5-fancy))))
+  (let ((html5-fancy (org-html-html5-fancy-p info)))
     (format (if html5-fancy "\n<figure%s>%s%s\n</figure>"
 	      "\n<div%s class=\"figure\">%s%s\n</div>")
 	    ;; ID.
@@ -1929,16 +1932,17 @@ holding export options."
    ;; Document title.
    (when (plist-get info :with-title)
      (let ((title (plist-get info :title))
-	   (subtitle (plist-get info :subtitle)))
+	   (subtitle (plist-get info :subtitle))
+	   (html5-fancy (org-html-html5-fancy-p info)))
        (when title
 	 (format
-	  (if (plist-get info :html-html5-fancy)
+	  (if html5-fancy
 	      "<header>\n<h1 class=\"title\">%s</h1>\n%s</header>"
 	    "<h1 class=\"title\">%s%s</h1>\n")
 	  (org-export-data title info)
 	  (if subtitle
 	      (format
-	       (if (plist-get info :html-html5-fancy)
+	       (if html5-fancy
 		   "<p class=\"subtitle\">%s</p>\n"
 		 "\n<br>\n<span class=\"subtitle\">%s</span>\n")
 	       (org-export-data subtitle info))
@@ -2133,8 +2137,7 @@ of contents as a string, or nil if it is empty."
 			 (org-html--toc-text toc-entries)
 			 "</div>\n")))
 	(if scope toc
-	  (let ((outer-tag (if (and (org-html-html5-p info)
-				    (plist-get info :html-html5-fancy))
+	  (let ((outer-tag (if (org-html-html5-fancy-p info)
 			       "nav"
 			     "div")))
 	    (concat (format "<%s id=\"table-of-contents\">\n" outer-tag)
@@ -3181,8 +3184,7 @@ CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (let* ((block-type (org-element-property :type special-block))
 	 (contents (or contents ""))
-	 (html5-fancy (and (org-html-html5-p info)
-			   (plist-get info :html-html5-fancy)
+	 (html5-fancy (and (org-html-html5-fancy-p info)
 			   (member block-type org-html-html5-elements)))
 	 (attributes (org-export-read-attribute :attr_html special-block)))
     (unless html5-fancy
