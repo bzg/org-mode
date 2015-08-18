@@ -13925,6 +13925,7 @@ that the match should indeed be shown."
 	  ;; hide everything
 	  (org-overview))
       (while (re-search-forward regexp nil t)
+	(backward-char) ;; FIXME: Match timestamps at the end of a headline
 	(when (or (not callback)
 		  (save-match-data (funcall callback)))
 	  (setq cnt (1+ cnt))
@@ -17448,7 +17449,6 @@ days.  If the prefix is a raw \\[universal-argument] prefix, all deadlines are s
 	 (regexp (concat "\\<" org-deadline-string " *<\\([^>]+\\)>"))
 	 (callback
 	  (lambda () (org-deadline-close (match-string 1) org-warn-days))))
-
     (message "%d deadlines past-due or due within %d days"
 	     (org-occur regexp nil callback)
 	     org-warn-days)))
