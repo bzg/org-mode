@@ -13338,11 +13338,12 @@ can either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 	    (user-error "No deadline information to update"))))
        (t
 	(org-add-planning-info 'deadline time 'closed)
-	(when (and old-date org-log-redeadline
-		   (not (equal old-date
-			       (substring org-last-inserted-timestamp 1 -1))))
-	  (org-add-log-setup 'redeadline nil old-date 'findpos
-			     org-log-redeadline))
+	(when (and old-date
+		   org-log-redeadline
+		   (not (equal old-date org-last-inserted-timestamp)))
+	  (org-add-log-setup
+	   'redeadline org-last-inserted-timestamp nil old-date 'findpos
+	   org-log-redeadline))
 	(when repeater
 	  (save-excursion
 	    (org-back-to-heading t)
@@ -13409,11 +13410,12 @@ either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 	    (user-error "No scheduled information to update"))))
        (t
 	(org-add-planning-info 'scheduled time 'closed)
-	(when (and old-date org-log-reschedule
-		   (not (equal old-date
-			       (substring org-last-inserted-timestamp 1 -1))))
-	  (org-add-log-setup 'reschedule nil old-date 'findpos
-			     org-log-reschedule))
+	(when (and old-date
+		   org-log-reschedule
+		   (not (equal old-date org-last-inserted-timestamp)))
+	  (org-add-log-setup
+	   'reschedule org-last-inserted-timestamp nil old-date 'findpos
+	   org-log-reschedule))
 	(when repeater
 	  (save-excursion
 	    (org-back-to-heading t)
