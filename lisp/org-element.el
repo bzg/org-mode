@@ -3033,11 +3033,10 @@ Assume point is at the beginning of the link."
 	;; (e.g., insert [[shell:ls%20*.org]] instead of
 	;; [[shell:ls *.org]], which defeats Org's focus on
 	;; simplicity.
-	(setq raw-link (org-translate-link
-			(org-link-expand-abbrev
-			 (replace-regexp-in-string
-			  "[ \t]*\n[ \t]*" " "
-			  (org-match-string-no-properties 1)))))
+	(setq raw-link (org-link-expand-abbrev
+			(replace-regexp-in-string
+			 "[ \t]*\n[ \t]*" " "
+			 (org-match-string-no-properties 1))))
 	;; Determine TYPE of link and set PATH accordingly.  According
 	;; to RFC 3986, remove whitespaces from URI in external links.
 	;; In internal ones, treat indentation as a single space.
@@ -3090,36 +3089,51 @@ Assume point is at the beginning of the link."
       ;; In any case, deduce end point after trailing white space from
       ;; LINK-END variable.
       (save-excursion
-	(setq post-blank (progn (goto-char link-end) (skip-chars-forward " \t"))
-	      end (point))
-	;; Special "file" type link processing.  Extract opening
-	;; application and search option, if any.  Also normalize URI.
-	(when (string-match "\\`file\\(?:\\+\\(.+\\)\\)?\\'" type)
-	  (setq application (match-string 1 type) type "file")
-	  (when (string-match "::\\(.*\\)\\'" path)
-	    (setq search-option (match-string 1 path)
-		  path (replace-match "" nil nil path)))
-	  (setq path (replace-regexp-in-string "\\`/+" "/" path)))
-	(list 'link
-	      (list :type type
-		    :path path
-		    :raw-link (or raw-link path)
-		    :application application
-		    :search-option search-option
-		    :begin begin
-		    :end end
-		    :contents-begin contents-begin
-		    :contents-end contents-end
-		    :post-blank post-blank))))))
+	(setq post-blank
+	      (progn (goto-char link-end) (skip-chars-forward " \t")))
+	(setq end (point)))
+      ;; Special "file" type link processing.  Extract opening
+      ;; application and search option, if any.  Also normalize URI.
+      (when (string-match "\\`file\\(?:\\+\\(.+\\)\\)?\\'" type)
+	(setq application (match-string 1 type) type "file")
+	(when (string-match "::\\(.*\\)\\'" path)
+	  (setq search-option (match-string 1 path))
+	  (setq path (replace-match "" nil nil path)))
+	(setq path (replace-regexp-in-string "\\`/+" "/" path)))
+      ;; Translate link, if `org-link-translation-function' is set.
+      (let ((trans (and (functionp org-link-translation-function)
+			(funcall org-link-translation-function type path))))
+	(setq type (car trans))
+	(setq path (cdr trans)))
+      (list 'link
+	    (list :type type
+		  :path path
+		  :raw-link (or raw-link path)
+		  :application application
+		  :search-option search-option
+		  :begin begin
+		  :end end
+		  :contents-begin contents-begin
+		  :contents-end contents-end
+		  :post-blank post-blank)))))
 
 (defun org-element-link-interpreter (link contents)
   "Interpret LINK object as Org syntax.
 CONTENTS is the contents of the object, or nil."
   (let ((type (org-element-property :type link))
-	(raw-link (org-element-property :raw-link link)))
-    (if (string= type "radio") raw-link
+	(path (org-element-property :path link)))
+    (if (string= type "radio") path
       (format "[[%s]%s]"
-	      raw-link
+	      (cond ((string= type "coderef") (format "(%s)" path))
+		    ((string= type "custom-id") (concat "#" path))
+		    ((string= type "file")
+		     (let ((app (org-element-property :application link))
+			   (opt (org-element-property :search-option link)))
+		       (concat type (and app (concat "+" app)) ":"
+			       path
+			       (and opt (concat "::" opt)))))
+		    ((string= type "fuzzy") path)
+		    (t (concat type ":" path)))
 	      (if contents (format "[%s]" contents) "")))))
 
 
