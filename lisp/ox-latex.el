@@ -610,12 +610,18 @@ This format string may contain these elements:
 If you need to use a \"%\" character, you need to escape it
 like that: \"%%\".
 
+As a special case, a nil value prevents template from being
+inserted.
+
 Setting :latex-hyperref-template in publishing projects will take
 precedence over this variable."
   :group 'org-export-latex
   :version "25.1"
   :package-version '(Org . "8.3")
-  :type '(string :tag "Format string"))
+  :type '(choice (const :tag "No template" nil)
+		 (string :tag "Format string")))
+(define-obsolete-variable-alias
+  'org-latex-with-hyperref 'org-latex-hyperref-template "25.1")
 
 ;;;; Headline
 
