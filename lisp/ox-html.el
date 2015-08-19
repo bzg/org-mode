@@ -1473,7 +1473,9 @@ CSS classes, then this prefix can be very useful."
   (let ((dt (downcase (plist-get info :html-doctype))))
 	(member dt '("html5" "xhtml5" "<!doctype html>"))))
 
-(defun org-html-html5-fancy-p (info)
+(defun org-html--html5-fancy-p (info)
+  "Non-nil when exporting to HTML5 with fancy elements.
+INFO is the current state of the export process, as a plist."
   (and (plist-get info :html-html5-fancy)
        (org-html-html5-p info)))
 
@@ -1507,7 +1509,7 @@ attributes with a nil value will be omitted from the result."
 INFO is a plist used as a communication channel.  When optional
 arguments CAPTION and LABEL are given, use them for caption and
 \"id\" attribute."
-  (let ((html5-fancy (org-html-html5-fancy-p info)))
+  (let ((html5-fancy (org-html--html5-fancy-p info)))
     (format (if html5-fancy "\n<figure%s>%s%s\n</figure>"
 	      "\n<div%s class=\"figure\">%s%s\n</div>")
 	    ;; ID.
@@ -1933,7 +1935,7 @@ holding export options."
    (when (plist-get info :with-title)
      (let ((title (plist-get info :title))
 	   (subtitle (plist-get info :subtitle))
-	   (html5-fancy (org-html-html5-fancy-p info)))
+	   (html5-fancy (org-html--html5-fancy-p info)))
        (when title
 	 (format
 	  (if html5-fancy
@@ -2137,7 +2139,7 @@ of contents as a string, or nil if it is empty."
 			 (org-html--toc-text toc-entries)
 			 "</div>\n")))
 	(if scope toc
-	  (let ((outer-tag (if (org-html-html5-fancy-p info)
+	  (let ((outer-tag (if (org-html--html5-fancy-p info)
 			       "nav"
 			     "div")))
 	    (concat (format "<%s id=\"table-of-contents\">\n" outer-tag)
@@ -3184,7 +3186,7 @@ CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (let* ((block-type (org-element-property :type special-block))
 	 (contents (or contents ""))
-	 (html5-fancy (and (org-html-html5-fancy-p info)
+	 (html5-fancy (and (org-html--html5-fancy-p info)
 			   (member block-type org-html-html5-elements)))
 	 (attributes (org-export-read-attribute :attr_html special-block)))
     (unless html5-fancy
