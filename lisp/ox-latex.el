@@ -123,7 +123,6 @@
     (:latex-format-drawer-function nil nil org-latex-format-drawer-function)
     (:latex-format-headline-function nil nil org-latex-format-headline-function)
     (:latex-format-inlinetask-function nil nil org-latex-format-inlinetask-function)
-    (:latex-hyperref-p nil "texht" org-latex-with-hyperref t)
     (:latex-hyperref-template nil nil org-latex-hyperref-template t)
     (:latex-image-default-height nil nil org-latex-image-default-height)
     (:latex-image-default-option nil nil org-latex-image-default-option)
@@ -591,11 +590,6 @@ the toc:nil option, not to those generated with #+TOC keyword."
   :group 'org-export-latex
   :type 'string)
 
-(defcustom org-latex-with-hyperref t
-  "Toggle insertion of `org-latex-hyperref-template' in the preamble."
-  :group 'org-export-latex
-  :type 'boolean)
-
 (defcustom org-latex-hyperref-template
   "\\hypersetup{\n pdfauthor={%a},\n pdftitle={%t},\n pdfkeywords={%k},
  pdfsubject={%d},\n pdfcreator={%c}, \n pdflang={%L}}\n"
@@ -616,12 +610,18 @@ This format string may contain these elements:
 If you need to use a \"%\" character, you need to escape it
 like that: \"%%\".
 
+As a special case, a nil value prevents template from being
+inserted.
+
 Setting :latex-hyperref-template in publishing projects will take
 precedence over this variable."
   :group 'org-export-latex
   :version "25.1"
   :package-version '(Org . "8.3")
-  :type '(string :tag "Format string"))
+  :type '(choice (const :tag "No template" nil)
+		 (string :tag "Format string")))
+(define-obsolete-variable-alias
+  'org-latex-with-hyperref 'org-latex-hyperref-template "25.1")
 
 ;;;; Headline
 
@@ -1547,10 +1547,9 @@ holding export options."
 	(when (and separate subtitle)
 	  (concat formatted-subtitle "\n"))))
      ;; Hyperref options.
-     (when (plist-get info :latex-hyperref-p)
-       (let ((template (plist-get info :latex-hyperref-template)))
-	 (and (stringp template)
-	      (format-spec template spec))))
+     (let ((template (plist-get info :latex-hyperref-template)))
+       (and (stringp template)
+            (format-spec template spec)))
      ;; Document start.
      "\\begin{document}\n\n"
      ;; Title command.
