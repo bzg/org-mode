@@ -3103,8 +3103,9 @@ Assume point is at the beginning of the link."
       ;; Translate link, if `org-link-translation-function' is set.
       (let ((trans (and (functionp org-link-translation-function)
 			(funcall org-link-translation-function type path))))
-	(setq type (car trans))
-	(setq path (cdr trans)))
+	(when trans
+	  (setq type (car trans))
+	 (setq path (cdr trans))))
       (list 'link
 	    (list :type type
 		  :path path
