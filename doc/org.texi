@@ -11100,11 +11100,8 @@ settings.
 
 @item DESCRIPTION
 @cindex #+DESCRIPTION (Beamer)
-@vindex org-latex-hyperref-template (Beamer)
-@vindex org-latex-with-hyperref (Beamer)
 The document description.  By default these are inserted as metadata using
-@samp{hyperref}.  A non-@code{nil} value for @code{org-latex-with-hyperref}
-will insert the document metadata, which can then be configured via
+@samp{hyperref}.  Document metadata can be configured via
 @code{org-latex-hyperref-template}.  Description can also be typeset as part
 of the front matter via @code{org-latex-title-command}.  You can use several
 @code{#+DESCRIPTION} keywords if the description is is long.
@@ -11112,12 +11109,10 @@ of the front matter via @code{org-latex-title-command}.  You can use several
 @item KEYWORDS
 @cindex #+KEYWORDS (Beamer)
 The keywords defining the contents of the document.  By default these are
-inserted as metadata using @samp{hyperref}.  A non-@code{nil} value for
-@code{org-latex-with-hyperref} will insert the document metadata, which can
-then be configured via @code{org-latex-hyperref-template}.  Description can
-also be typeset as part of the front matter via
-@code{org-latex-title-command}.  You can use several @code{#+KEYWORDS} if the
-description is is long.
+inserted as metadata using @samp{hyperref}.  Document metadata can be
+configured via @code{org-latex-hyperref-template}.  Description can also be
+typeset as part of the front matter via @code{org-latex-title-command}.  You
+can use several @code{#+KEYWORDS} if the description is is long.
 
 @item SUBTITLE
 @cindex #+SUBTITLE (Beamer)
@@ -11951,11 +11946,8 @@ options settings described in @ref{Export settings}.
 @table @samp
 @item DESCRIPTION
 @cindex #+DESCRIPTION (@LaTeX{})
-@vindex org-latex-hyperref-template (@LaTeX{})
-@vindex org-latex-with-hyperref (@LaTeX{})
 The document description.  By default these are inserted as metadata using
-@samp{hyperref}.  A non-@code{nil} value for @code{org-latex-with-hyperref}
-will insert the document metadata, which can then be configured via
+@samp{hyperref}.  Document metadata can be configured via
 @code{org-latex-hyperref-template}.  Description can also be typeset as part
 of the front matter via @code{org-latex-title-command}.  You can use several
 @code{#+DESCRIPTION} keywords if the description is is long.
@@ -11989,22 +11981,20 @@ Arbitrary lines added to the preamble of the document, before the
 @item KEYWORDS
 @cindex #+KEYWORDS (@LaTeX{})
 The keywords defining the contents of the document.  By default these are
-inserted as metadata using @samp{hyperref}.  A non-@code{nil} value for
-@code{org-latex-with-hyperref} will insert the document metadata, which can
-then be configured via @code{org-latex-hyperref-template}.  Description can
-also be typeset as part of the front matter via
-@code{org-latex-title-command}.  You can use several @code{#+KEYWORDS} if the
-description is is long.
+inserted as metadata using @samp{hyperref}.  Document metadata can be
+configured via @code{org-latex-hyperref-template}.  Description can also be
+typeset as part of the front matter via @code{org-latex-title-command}.  You
+can use several @code{#+KEYWORDS} if the description is is long.
 
 @item SUBTITLE
 @cindex #+SUBTITLE (@LaTeX{})
 @vindex org-latex-subtitle-separate
 @vindex org-latex-subtitle-format
 The document subtitle.  This is typeset according to
-@code{org-latex-subtitle-format}.  If @code{org-latex-subtitle-separate} is
-non-@code{nil}, it is typed as part of the @samp{\title}-macro.  It can also
-be accessed via @code{org-latex-hyperref-template} or typeset as part of the
-front matter via @code{org-latex-title-command}.
+@code{org-latex-subtitle-format}.  If @code{org-latex-subtitle-separate}
+is non-@code{nil} it is typed as part of the @samp{\title}-macro.  It
+can also access via @code{org-latex-hyperref-template} or typeset as
+part of the front matter via @code{org-latex-title-command}.
 @end table
 
 These keywords are treated in details in the following sections.
