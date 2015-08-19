@@ -10565,14 +10565,9 @@ If the link is in hidden text, expose it."
 
 (defun org-translate-link (s)
   "Translate a link string if a translation function has been defined."
-  (if (and org-link-translation-function
-	   (fboundp org-link-translation-function)
-	   (string-match "\\([a-zA-Z0-9]+\\):\\(.*\\)" s))
-      (progn
-	(setq s (funcall org-link-translation-function
-			 (match-string 1 s) (match-string 2 s)))
-	(concat (car s) ":" (cdr s)))
-    s))
+  (with-temp-buffer
+    (insert (org-trim s))
+    (org-trim (org-element-interpret-data (org-element-context)))))
 
 (defun org-translate-link-from-planner (type path)
   "Translate a link from Emacs Planner syntax so that Org can follow it.
