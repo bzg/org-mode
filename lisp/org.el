@@ -13342,7 +13342,7 @@ can either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 		   org-log-redeadline
 		   (not (equal old-date org-last-inserted-timestamp)))
 	  (org-add-log-setup
-	   'redeadline org-last-inserted-timestamp nil old-date 'findpos
+	   'redeadline org-last-inserted-timestamp old-date 'findpos
 	   org-log-redeadline))
 	(when repeater
 	  (save-excursion
@@ -13414,7 +13414,7 @@ either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 		   org-log-reschedule
 		   (not (equal old-date org-last-inserted-timestamp)))
 	  (org-add-log-setup
-	   'reschedule org-last-inserted-timestamp nil old-date 'findpos
+	   'reschedule org-last-inserted-timestamp old-date 'findpos
 	   org-log-reschedule))
 	(when repeater
 	  (save-excursion
