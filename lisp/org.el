@@ -4,11 +4,9 @@
 ;; Copyright (C) 2004-2015 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
-;; Maintainer: Bastien Guerry <bzg at gnu dot org>
-;; URL: http://orgmode.org
-;; Version: 8.3.1
+;; Maintainer: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
-;; Package-Requires: ((emacs "23.2"))
+;; Homepage: http://orgmode.org
 ;;
 ;; This file is part of GNU Emacs.
 ;;
