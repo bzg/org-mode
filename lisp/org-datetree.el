@@ -39,7 +39,8 @@ property (any value), the date tree will become a subtree under that entry,
 so the base level will be properly adjusted.")
 
 (defcustom org-datetree-add-timestamp nil
-  "When non-nil, add a time stamp when create a datetree entry."
+  "When non-nil, add a time stamp matching date of entry.
+Added time stamp is active unless value is `inactive'."
   :group 'org-capture
   :version "24.3"
   :type '(choice
@@ -131,28 +132,30 @@ tree can be found."
       (org-datetree-insert-line year month day)))))
 
 (defun org-datetree-insert-line (year &optional month day)
-  (let ((pos (point)) ts-type)
-    (skip-chars-backward " \t\n")
-    (delete-region (point) pos)
-    (insert "\n" (make-string org-datetree-base-level ?*) " \n")
-    (backward-char 1)
-    (if month (org-do-demote))
-    (if day (org-do-demote))
-    (insert (format "%d" year))
-    (when month
-      (insert (format "-%02d" month))
-      (if day
-	  (insert (format "-%02d %s"
-			  day (format-time-string
-			       "%A" (encode-time 0 0 0 day month year))))
-	(insert (format " %s"
-			(format-time-string
-			 "%B" (encode-time 0 0 0 1 month year))))))
-    (when (and day (setq ts-type org-datetree-add-timestamp))
+  (delete-region (save-excursion (skip-chars-backward " \t\n") (point)) (point))
+  (insert "\n" (make-string org-datetree-base-level ?*) " \n")
+  (backward-char)
+  (when month (org-do-demote))
+  (when day (org-do-demote))
+  (insert (format "%d" year))
+  (when month
+    (insert
+     (format "-%02d" month)
+     (if day
+	 (format "-%02d %s"
+		 day
+		 (format-time-string "%A" (encode-time 0 0 0 day month year)))
+       (format " %s"
+	       (format-time-string "%B" (encode-time 0 0 0 1 month year))))))
+  (when (and day org-datetree-add-timestamp)
+    (save-excursion
       (insert "\n")
       (org-indent-line)
-      (org-insert-time-stamp (encode-time 0 0 0 day month year) nil ts-type))
-    (beginning-of-line 1)))
+      (org-insert-time-stamp
+       (encode-time 0 0 0 day month year)
+       nil
+       (eq org-datetree-add-timestamp 'inactive))))
+  (beginning-of-line))
 
 (defun org-datetree-file-entry-under (txt date)
   "Insert a node TXT into the date tree under DATE."
