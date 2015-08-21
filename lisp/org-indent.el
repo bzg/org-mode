@@ -292,24 +292,14 @@ stopped."
     (org-with-wide-buffer
      (goto-char beg)
      (beginning-of-line)
-     ;; 1. Initialize prefix at BEG.  This is done by storing two
-     ;;    variables: INLINE-PF and PF, representing respectively
-     ;;    length of current `line-prefix' when line is inside an
-     ;;    inline task or not.
+     ;; Initialize prefix at BEG, according to current entry's level.
      (let* ((case-fold-search t)
 	    (limited-re (org-get-limited-outline-regexp))
-	    (pf (save-excursion
-		  (and (ignore-errors (let ((outline-regexp limited-re))
-					(org-back-to-heading t)))
-		       (- (match-end 0) (match-beginning 0) 1))))
-	    (pf-inline (and (featurep 'org-inlinetask)
-			    (org-inlinetask-in-task-p)
-			    (+ (* org-indent-indentation-per-level
-				  (1- (org-inlinetask-get-task-level))) 2)))
+	    (level (or (org-current-level) 0))
 	    (time-limit (and delay (time-add (current-time) delay))))
-       ;; 2. For each line, set `line-prefix' and `wrap-prefix'
-       ;;    properties depending on the type of line (headline,
-       ;;    inline task, item or other).
+       ;; For each line, set `line-prefix' and `wrap-prefix'
+       ;; properties depending on the type of line (headline, inline
+       ;; task, item or other).
        (org-with-silent-modifications
 	(while (and (<= (point) end) (not (eobp)))
 	  (cond
@@ -327,31 +317,18 @@ stopped."
 	    (throw 'interrupt (point)))
 	   ;; Headline or inline task.
 	   ((looking-at org-outline-regexp)
-	    (let* ((nstars (- (match-end 0) (match-beginning 0) 1)))
-	      (cond
-	       ;; Headline: new value for PF.
-	       ((looking-at limited-re)
-		(org-indent-set-line-properties nstars 0 t)
-		(setq pf nstars))
-	       ;; End of inline task: PF-INLINE is now nil.
-	       ((looking-at "\\*+ end[ \t]*$")
-		(org-indent-set-line-properties nstars 0 'inlinetask)
-		(setq pf-inline nil))
-	       ;; Start of inline task.  Determine if it contains
-	       ;; text, or if it is only one line long.  Set
-	       ;; PF-INLINE accordingly.
-	       (t (org-indent-set-line-properties nstars 0 'inlinetask)
-		  (setq pf-inline (and (org-inlinetask-in-task-p) nstars))))))
+	    (let* ((nstars (- (match-end 0) (match-beginning 0) 1))
+		   (type (or (org-looking-at-p limited-re) 'inlinetask)))
+	      (org-indent-set-line-properties nstars 0 type)
+	      ;; At an headline, define new value for LEVEL.
+	      (unless (eq type 'inlinetask) (setq level nstars))))
 	   ;; List item: `wrap-prefix' is set where body starts.
 	   ((org-at-item-p)
-	    (let* ((line (or pf-inline pf 0))
-		   (wrap (org-list-item-body-column (point))))
-	      (org-indent-set-line-properties
-	       (or pf-inline pf 0)
-	       (org-list-item-body-column (point)))))
-	   ;; Normal line: use PF-INLINE, PF or nil as prefixes.
-	   (t (org-indent-set-line-properties
-	       (or pf-inline pf 0) (org-get-indentation))))))))))
+	    (org-indent-set-line-properties
+	     level (org-list-item-body-column (point))))
+	   ;; Regular line.
+	   (t
+	    (org-indent-set-line-properties level (org-get-indentation))))))))))
 
 (defun org-indent-notify-modified-headline (beg end)
   "Set `org-indent-modified-headline-flag' depending on context.
