@@ -4755,6 +4755,8 @@ Otherwise, these types are allowed:
    (let ((case-fold-search nil)
 	 (re (concat org-outline-regexp-bol ".*:" org-archive-tag ":")))
      (goto-char beg)
+     ;; Include headline point is currently on.
+     (beginning-of-line)
      (while (and (< (point) end) (re-search-forward re end t))
        (when (member org-archive-tag (org-get-tags))
 	 (org-flag-subtree t)
