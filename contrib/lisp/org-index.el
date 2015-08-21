@@ -1,9 +1,9 @@
-;;; org-index.el --- A personal index for org and beyond
+;;; org-index.el --- A personal index for org and more
 
 ;; Copyright (C) 2011-2015 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 4.2.1
+;; Version: 4.3.0
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -30,17 +30,17 @@
 ;;  Fast search for selected org headings and things outside of org.
 ;;
 ;;  This package creates and updates an index table of headings or
-;;  keywords, references and ids, where each line points to a heading
-;;  within org or references something outside.  This table is sorted by
-;;  usage count, so that frequently used lines appear among the first
+;;  keywords, references and ids. Each line points to a heading within
+;;  org or references something outside.  This index table can be sorted
+;;  by usage count, so that frequently used lines appear first among the
 ;;  search results.
 ;;
-;;  References are essentially small numbers (e.g. 'R237' or '--455--'), as
+;;  References are decorated numbers (e.g. 'R237' or '--455--'), as
 ;;  created by this package; they are well suited to be used outside of
-;;  org, e.g. in folder names, issue trackers or on printed documents.
+;;  org, e.g. in folder names, ticket systems or on printed documents.
 ;;
-;;  On first invocation org-index will guide you to create a dedicated node
-;;  for its index table and its configuration flags.
+;;  On first invocation org-index will help to create a dedicated node
+;;  for its index table.
 ;;
 ;;  For basic usage, subcommands 'add' and 'occur' are most important.
 ;;
@@ -58,6 +58,10 @@
 ;;    table.  The variable org-index-id will be persisted within your
 ;;    customization file (typically .emacs).
 ;;
+;;  - Optionally customize some settings (group org-index):
+;;
+;;    M-x org-customize
+;;
 ;;
 ;; Further reading:
 ;;
@@ -69,46 +73,41 @@
 ;;
 ;;  The latest tested version of this file can always be found at:
 ;;
-;;    http://orgmode.org/cgit.cgi/org-mode.git/plain/contrib/lisp/org-index.el
+;;    http://orgmode.org/w/org-mode.git?p=org-mode.git;a=blob_plain;f=contrib/lisp/org-index.el;hb=HEAD
 
 ;;; Change Log:
 
+;;   [2015-08-20 Th] Version 4.3.0
+;;   - Configuration is done now via standard customize
+;;   - New sorting strategy 'mixed'
+;;   - Silenced some compiler warnings
+;;
 ;;   [2015-03-18 We] Version 4.2.1
 ;;   - No garbage in kill-ring
 ;;   - No recentering after add
 ;;
 ;;   [2015-03-08 Su] Version 4.2.0
 ;;   - Reference numbers for subcommands can be passed as a prefix argument
-;;   - Renamed subcommand 'point' to 'ping'
 ;;   - New variable org-index-default-keybindings-list with a list of
 ;;     default keybindings for org-index-default-keybindings
 ;;   - Added new column level
 ;;   - removed flags get-category-on-add and get-heading-on-add
 ;;
-;;   [2015-03-05 Th] Version 4.1.1 and 4.1.2
-;;   - org-mark-ring is now used more consistently
-;;   - Bugfix when going to a heading by ref
-;;
-;;   [2015-02-26 Th] Version 4.0.0 and 4.1.0:
+;;   [2015-02-26 Th] to [2015-03-05 Th] Version 4.0.0 to 4.1.2
 ;;   - Removed command "leave"; rather go back with org-mark-ring-goto
-;;   - Property "org-index-ref" is no longer used or needed
 ;;   - Renamed column "link" to "id"
 ;;   - Added maintainance options to find duplicate rows, to check ids,
 ;;     update index or remove property org-index-ref from nodes
-;;   - New command point
 ;;   - Shortened versin history
 ;;
 ;;   [2014-12-07 Sa] to [2015-01-31 Sa] Version 3.0.0 to 3.2.0:
 ;;   - Complete sorting of index only occurs in idle-timer
 ;;   - New command "maintain"  with some subcommands
 ;;   - Rewrote command "occur" with overlays in an indirect buffer
-;;   - introduced variable org-index-version
 ;;   - Command "add" updates index, if node is already present
 ;;   - New commands "add" and "delete" to easily add and remove
 ;;     the current node to or from your index.
 ;;   - New command "example" to create an example index.
-;;   - Moved flags to a list within the same node as the index table;
-;;     this breaks compatibility to prior versions of the package.
 ;;   - Several new flags that are explained within index node.
 ;;   - Removed commands "reuse", "missing", "put", "goto",
 ;;     "update", "link", "fill", "unhighlight"
@@ -139,15 +138,83 @@
 ;;; Code:
 
 (require 'org-table)
-(require 'cl)
+(require 'cl-lib)
+
+;; Version of this package
+(defvar org-index-version "4.3.0" "Version of `org-index', format is major.minor.bugfix, where \"major\" is a change in index-table and \"minor\" are new features.")
+
+;; customizable options
+(defgroup org-index nil
+  "Options concerning the optional index for org."
+  :tag "Org Index"
+  :group 'org)
 
 (defcustom org-index-id nil
   "Id of the Org-mode node, which contains the index table."
-  :group 'org
   :group 'org-index)
 
-;; Version of this package
-(defvar org-index-version "4.2.1" "Version of `org-index', format is major.minor.bugfix, where \"major\" is a change in index-table and \"minor\" are new features.")
+(defcustom org-index-sort-by 'mixed
+  "Strategy for sorting index table (and whence entries in occur).
+Valid values are:
+
+last-access  Sort index by date and time of last access; show
+             more recent entries first.
+count  Sort by usage count; more often used entries first.
+mixed  First, show all index entries, which have been 
+       used today; sort them by last access. Then show 
+       older entries sorted by usage count."
+  :group 'org-index
+  :set (lambda (s v)
+         (set-default s v)
+         (if (and org-index-id
+                  (functionp 'org-index--sort-silent))
+             (org-index--sort-silent)))
+  :type '(choice
+	  (const last-accessed)
+	  (const count)
+	  (const mixed)))
+
+(defcustom org-index-yank-after-add 'ref
+  "Specifies which column should be yanked after adding a new index row.
+Valid values are some columns of index table."
+  :group 'org-index
+  :type '(choice
+	  (const ref)
+	  (const category)
+	  (const keywords)))
+
+(defcustom org-index-point-on-add 'keywords
+  "Specifies in which column point will land when adding a new index row.
+Valid values are some columns of index table."
+  :group 'org-index
+  :type '(choice
+	  (const category)
+	  (const keywords)))
+
+(defcustom org-index-copy-heading-to-keywords t
+  "When adding a new node to index: Copy heading to keywords-column ?"
+  :group 'org-index
+  :type '(choice (const :tag "Yes" t)
+                 (const :tag "No" nil)))
+
+(defcustom org-index-strip-ref-and-date-from-heading t
+  "When adding a headline as keywords for a new index row: remove 
+leading reference or timestamps ?
+
+This can be useful, if you have the habit of adding refs and
+dates to the start of your headings; then, if you change your
+heading and want to update your index, you do not need to remove
+those pieces."
+  :group 'org-index
+  :type '(choice (const :tag "Yes" t)
+                 (const :tag "No" nil)))
+
+(defcustom org-index-edit-on-add '(category keywords)
+  "List of columns to edit when adding a new row."
+  :group 'org-index
+  :type '(repeat (choice
+                  (const category)
+                  (const keywords))))
 
 ;; Variables to hold the configuration of the index table
 (defvar org-index--maxref nil "Maximum number from reference table (e.g. '153').")
@@ -157,14 +224,12 @@
 (defvar org-index--ref-regex nil "Regular expression to match a reference.")
 (defvar org-index--ref-format nil "Format, that can print a reference.")
 (defvar org-index--columns nil "Columns of index-table.")
-(defvar org-index--special-columns nil "Columns with flags, that may appear only once.")
-(defvar org-index--flagged-columns nil "Columns with flags, that may appear multiple times.")
 (defvar org-index--buffer nil "Buffer of index table.")
 (defvar org-index--point nil "Position at start of headline of index table.")
 (defvar org-index--below-hline nil "Position of first cell in first line below hline.")
 (defvar org-index--headings nil "Headlines of index-table as a string.")
 (defvar org-index--headings-visible nil "Visible part of headlines of index-table as a string.")
-(defvar org-index--keymap nil "Keymap for shortcuts for some commands of `org-index'. Filled and activated by `org-index-default-keybings'.")
+(defvar org-index--keymap nil "Keymap for shortcuts for some commands of `org-index'.  Filled and activated by `org-index-default-keybings'.")
 
 ;; Variables to hold context and state
 (defvar org-index--last-ref nil "Last reference created or visited.")
@@ -183,54 +248,11 @@
 
 ;; static information for this program package
 (defconst org-index--commands '(occur add delete head ping enter ref help example sort multi-occur highlight maintain) "List of commands available.")
-(defconst org-index--required-flags '(sort) "Flags that are required.")
-(defconst org-index--single-flags '(sort point-on-add yank-after-add shift-ref-and-date-on-add) "Flags, that may only appear once; these can appear as special-columns.")
-(defconst org-index--multiple-flags '(edit-on-add) "Flags, that might appear multiple times.")
-(defconst org-index--all-flags (append org-index--single-flags org-index--multiple-flags) "All flags.")
 (defconst org-index--required-headings '(ref id created last-accessed count) "All required headings.")
 (defconst org-index--valid-headings (append org-index--required-headings '(keywords category level)) "All valid headings.")
 (defconst org-index--occur-buffer-name "*org-index-occur*" "Name of occur buffer.")
 (defconst org-index--sort-idle-delay 300 "Delay in seconds after which buffer will sorted.")
-(defvar org-index-default-keybindings-list '(("a" . 'add) ("i " . nil) ("o" . 'occur) ("a" . 'add) ("d" . 'delete) ("h" . 'head) ("e" . 'enter) ("p." . 'ping) ("r" . 'ref) ("?" . 'help)) "One-letter short cuts for selected subcommands of `org-index', put in effect by `org-index-default-keybindings'")
-(defconst org-index--sample-flags
-"
-  - columns-and-flags :: associate columns of index table with flags. Do not remove.
-    - ref
-      - yank-after-add
-    - category
-      - edit-on-add
-    - keywords
-      - edit-on-add
-      - point-on-add
-    - count
-      - sort
-    - last-accessed
-    - created
-    - id
-    - all-columns-explained :: All columns of the index table and their meaning.
-      - ref :: The reference number; will be generated automatically.
-      - id :: id of the node, that this line represents
-      - created :: When has this entry been created ?
-      - last-accessed :: When has this entry been accessed last ?
-      - count :: How many times has this entry been picked ?
-      - keywords :: Optional column, suggested to keep a list of keywords,
-        which may match your input during occur. While adding a line to your index,
-        this column will be filled with the nodes heading.
-      - category :: (optional) column to store the category of newly added nodes.
-      - level :: Nesting level of node
-      - Any name starting with a dot (`.') :: No predefined meaning,
-        depends on its flags.
-    - all-flags-explained :: All flags, that can be associated with columns.
-      - sort :: Sort whole table according to this column.
-      - yank-after-add :: This column will be yanked after picking this line during
-        occur.
-      - edit-on-add :: This field will be presented for editing, when adding
-        a new line to your index.
-      - point-on-add :: Point will land here, when adding a new line, e.g. with
-        command ref.
-      - shift-ref-and-date-on-add :: Remove leading reference and timestamp on add."
-"A sample string of flags.")
-
+(defvar org-index-default-keybindings-list '(("a" . 'add) ("i " . nil) ("o" . 'occur) ("a" . 'add) ("d" . 'delete) ("h" . 'head) ("e" . 'enter) ("p." . 'ping) ("r" . 'ref) ("?" . 'help)) "One-letter short cuts for selected subcommands of `org-index', put in effect by `org-index-default-keybindings'.")
 
 (defmacro org-index--on (column value &rest body)
   "Execute the forms in BODY with point on index line whose COLUMN is VALUE.
@@ -241,18 +263,19 @@ if VALUE cannot be found."
         (foundvar (make-symbol "found"))
         (retvar (make-symbol "ret")))
     `(save-current-buffer
-       (set-buffer org-index--buffer)
-       (setq ,pointvar (point))
-       (setq ,foundvar nil)
-       (setq ,retvar nil)
+       (let ((,pointvar (point))
+             ,foundvar
+             ,retvar)
 
-       (setq ,foundvar (org-index--go ,column ,value))
-       (when ,foundvar
-         (setq ,retvar (progn ,@body)))
+         (set-buffer org-index--buffer)
+
+         (setq ,foundvar (org-index--go ,column ,value))
+         (when ,foundvar
+           (setq ,retvar (progn ,@body)))
        
-       (goto-char ,pointvar)
+         (goto-char ,pointvar)
        
-       ,retvar)))
+         ,retvar))))
 
 
 (defun org-index (&optional command search-ref arg)
@@ -260,20 +283,20 @@ if VALUE cannot be found."
 
 This package creates and updates an index table of headings or
 keywords, references and ids, where each line points to a heading
-within org or references something outside.  This table is sorted by
-usage count, so that frequently used lines appear among the first
+within org or references something outside.  This table can be sorted
+by usage count, so that frequently used lines appear among the first
 search results.
 
-References are essentially small numbers (e.g. 'R237' or '--455--'), as
+References are decorated numbers (e.g. 'R237' or '--455--'), as
 created by this package; they are well suited to be used outside of
-org, e.g. in folder names, issue trackers or on printed documents.
+org, e.g. in folder names, ticket systems or on printed documents.
 
-On first invocation `org-index' will guide you to create a dedicated node
-for its index table and its configuration flags.
+On first invocation org-index will help to create a dedicated node
+for its index table.
 
 For basic usage, subcommands 'add' and 'occur' are most important.
 
-This is version 4.2.1 of org-index.el.
+This is version 4.3.0 of org-index.el.
 \\<org-mode-map>
 The function `org-index' operates on a dedicated table, the index
 table, which lives within its own Org-mode node.  The table and
@@ -328,11 +351,9 @@ of subcommands to choose from:
 If you invoke `org-index' for the first time, an assistant will be
 invoked, that helps you to create your own, commented index.
 
-Use `org-index-default-keybindings' to establish convenient
-keyboard shortcuts.
-
-See the commented list of flags within your index node for ways to
-modify the behaviour of org-index.
+Invoke `org-customize' to tweak the behaviour of org-index.
+Call `org-index-default-keybindings' from within your init-file
+to establish convenient keyboard shortcuts.
 
 A numeric prefix argument is used as a reference number for
 commands, that need one (e.g. 'head').
@@ -369,7 +390,7 @@ as in interactive calls."
     ;;
 
     ;; lets assume, that it has been sorted this way (we try hard to make sure)
-    (unless org-index--last-sort (setq org-index--last-sort (org-index--special-column 'sort)))
+    (unless org-index--last-sort (setq org-index--last-sort org-index-sort-by))
     ;; rearrange for index beeing sorted into default sort order after 300 secs of idle time
     (unless org-index--sort-timer
       (setq org-index--sort-timer
@@ -514,7 +535,7 @@ as in interactive calls."
                (org-at-table-p))
           (setq search-id (org-index--get-or-set-field 'id)))
 
-      (setq search-id (or search-id (org-index--id-from-ref search-ref))) 
+      (setq search-id (or search-id (org-index--id-from-ref search-ref)))
       (setq message-text
             (if search-id
                 (org-index--do-head search-ref search-id)
@@ -609,8 +630,8 @@ as in interactive calls."
         (setq org-index--last-ref new)
 
         ;; goto point-field or first empty one or first field
-        (if (org-index--special-column 'point-on-add)
-            (org-table-goto-column (org-index--column-num (org-index--special-column 'point-on-add)))
+        (if org-index-point-on-add
+            (org-table-goto-column (org-index--column-num org-index-point-on-add))
           (unless (catch 'empty
                     (dotimes (col org-index--numcols)
                       (org-table-goto-column (+ col 1))
@@ -625,7 +646,7 @@ as in interactive calls."
 
      ((eq command 'sort)
 
-      (let ((columns (list "ref" "count" "created" "last-accessed" "id"))
+      (let ((sorts (list "count" "last-accessed" "mixed" "id" "ref"))
             sort groups-and-counts)
 
         (cond
@@ -634,20 +655,11 @@ as in interactive calls."
                 (intern
                  (org-icompleting-read
                   "Please choose column to sort index table: "
-                  (append (copy-list columns) (list "group-by"))
-                  nil t nil nil (symbol-name (org-index--special-column 'sort)))))
+                  (cl-copy-list sorts)
+                  nil t nil nil (symbol-name org-index-sort-by))))
 
-          (when (eq sort 'group-by)
-              (setq sort
-                    (intern
-                     (org-icompleting-read
-                      "Please choose column to group index table by: "
-                      columns
-                      nil t nil nil (symbol-name (org-index--special-column 'sort)))))
-              (setq groups-and-counts (org-index--collect-sort-groups sort)))
-
-          (org-index--do-sort-index sort (first groups-and-counts))
-          (org-table-goto-column (org-index--column-num sort))
+          (org-index--do-sort-index sort)
+          (org-table-goto-column (org-index--column-num (if (eq sort 'mixed) 'last-access sort)))
           ;; When saving index, it should again be sorted correctly
           (with-current-buffer org-index--buffer
             (add-hook 'before-save-hook 'org-index--sort-silent t))
@@ -659,7 +671,7 @@ as in interactive calls."
                              "; %d groups with equal %s and a total of %d lines have been found"
                            ""))
                  (symbol-name sort)
-                 (org-index--special-column 'sort)
+                 org-index-sort-by
                  org-index--sort-idle-delay
                  (second groups-and-counts)
                  (symbol-name sort)
@@ -813,7 +825,7 @@ Optional argument KEYS-VALUES specifies content of new line."
         (org-index--align-and-fontify-current-line)
         
         ;; get column to yank
-        (setq yank (org-index--get-or-set-field (org-index--special-column 'yank-after-add)))
+        (setq yank (org-index--get-or-set-field org-index-yank-after-add))
 
         (cons ref yank)))))
 
@@ -974,9 +986,9 @@ Argument COLUMN and VALUE specify line to get."
           (org-index--go-below-hline)
           (setq org-index--aligned t)
           (set-buffer-modified-p is-modified)))
-      
+
       (org-index--go-below-hline)
-      (setq org-index--below-hline (point-marker))
+      (setq org-index--below-hline (point))
       (beginning-of-line)
 
       ;; get headings to display during occur
@@ -1001,7 +1013,6 @@ Argument COLUMN and VALUE specify line to get."
 
       ;; parse list of flags
       (goto-char org-index--point)
-      (org-index--parse-flags)
 
       ;; Retrieve any decorations around the number within the first nonempty ref-field
       (goto-char org-index--below-hline)
@@ -1025,6 +1036,14 @@ Argument COLUMN and VALUE specify line to get."
                                          (regexp-quote org-index--tail)))
       (setq org-index--ref-format (concat org-index--head "%d" org-index--tail))
 
+      ;; check if the table still seems to be sorted mixed
+      (goto-char org-index--below-hline)
+      (when (eq org-index-sort-by 'mixed)
+          (org-index--go-below-hline)
+          (if (string< (org-index--get-or-set-field 'last-accessed)
+                       (org-index--get-mixed-time))
+              (org-index--do-sort-index org-index-sort-by)))
+      
       ;; Go through table to find maximum number and do some checking
       (let ((ref 0))
 
@@ -1057,7 +1076,7 @@ Argument COLUMN and VALUE specify line to get."
 (defun org-index--do-maintain ()
   "Choose among and perform some tasks to maintain index."
   (let ((check-what) (max-mini-window-height 1.0) message-text)
-    (setq check-what (intern (org-completing-read "These checks and fixes are available:\n  - statistics : compute statistics about index table\n  - check      : check ids by visiting their nodes\n  - duplicates : check index for duplicate rows (any column)\n  - clean      : remove obsolete property org-index-id\n  - update     : update content of index lines, with an id \nPlease choose: " (list "statistics" "check" "duplicates" "clean" "update") nil t nil nil "statistics")))
+    (setq check-what (intern (org-completing-read "These checks and fixes are available:\n  - statistics : compute statistics about index table\n  - check      : check ids by visiting their nodes\n  - duplicates : check index for duplicate rows (ref or id)\n  - clean      : remove obsolete property org-index-id\n  - update     : update content of index lines, with an id \nPlease choose: " (list "statistics" "check" "duplicates" "clean" "update") nil t nil nil "statistics")))
     (message nil)
     
     (cond
@@ -1069,7 +1088,7 @@ Argument COLUMN and VALUE specify line to get."
       (setq message-text (org-index--do-statistics)))
 
      ((eq check-what 'duplicates)
-      (setq message-text "Finding duplcates can be done by sorting your index appropriately: Choose 'group-by' and select a column; rows will then be sorted together, if they have the same value within the coosen column."))
+      (setq message-text (org-index--find-duplicates)))
 
      ((eq check-what 'clean)
       (let ((lines 0))
@@ -1082,30 +1101,42 @@ Argument COLUMN and VALUE specify line to get."
         (setq message-text (format "Removed property 'org-index-ref' from %d lines" lines))))
      
      ((eq check-what 'update)
-      (if (y-or-n-p "Updating your index will overwrite certain columns with content from the associated heading and category.  If unsure, you may try this for a single, already existing line of your index by doing `add' from within your index.  Are you SURE to proceed for ALL INDEX LINES ? ")
+      (if (y-or-n-p "Updating your index will overwrite certain columns with content from the associated heading and category.  If unsure, you may try this for a single, already existing line of your index by invoking `add'.  Are you SURE to proceed for ALL INDEX LINES ? ")
           (setq message-text (org-index--update-all-lines))
         (setq message-text "Canceled."))))
     message-text))
 
 
-(defun org-index--do-sort-index (sort &optional groups)
-  "Sort index table according to SORT, optinally with GROUPS."
+(defun org-index--get-mixed-time ()
+  "Get timestamp for sorting order mixed."
+  (format-time-string
+   (org-time-stamp-format t t)
+   (apply 'encode-time (append '(0 0 0) (nthcdr 3 (decode-time))))))
+
+
+(defun org-index--do-sort-index (sort)
+  "Sort index table according to SORT."
 
   (let ((is-modified (buffer-modified-p))
         top
         bottom
         ref-field
-        count-field)
+        count-field
+        mixed-time)
 
     (unless buffer-read-only
 
-      (message "Sorting table for %s..." (symbol-name sort))
+      (message "Sorting index table for %s..." (symbol-name sort))
       (undo-boundary)
 
       (let ((message-log-max nil)) ; we have just issued a message, dont need those of sort-subr
 
+        ;; if needed for mixed sort
+        (if (eq sort 'mixed)
+            (setq mixed-time (org-index--get-mixed-time)))
+
         ;; get boundaries of table
-        (goto-char org-index--below-hline)
+        (org-index--go-below-hline)
         (forward-line 0)
         (setq top (point))
         (while (org-at-table-p) (forward-line))
@@ -1129,11 +1160,7 @@ Argument COLUMN and VALUE specify line to get."
                      'forward-line
                      'end-of-line
                      (lambda ()
-                       (concat
-                        (if groups
-                            (format "%06d-" (cdr (assoc (org-index--get-or-set-field sort) groups)))
-                          "")
-                        (org-index--get-sort-key sort t)))
+                       (org-index--get-sort-key sort t mixed-time))
                      nil
                      'string<)
           (goto-char (point-min))
@@ -1142,30 +1169,6 @@ Argument COLUMN and VALUE specify line to get."
           (set-buffer-modified-p is-modified)))
 
         (setq org-index--last-sort sort))))
-
-
-(defun org-index--collect-sort-groups (sort)
-  "Collect groups to SORT for."
-  (let ((count-groups 0) (count-lines 0)
-        groups key key-value)
-    
-    (org-index--on
-        nil nil
-        (while (org-at-table-p)
-          (setq key (org-index--get-or-set-field sort))
-          (setq key-value (assoc key groups))
-          (if key-value
-              (progn
-                (incf (cdr key-value)))
-            (setq groups (cons (cons key 1) groups)))
-          (forward-line)))
-
-    (mapc (lambda (x) (when (> (cdr x) 1)
-                   (incf count-groups)
-                   (incf count-lines (cdr x))))
-          groups)
-
-    (list groups count-groups count-lines)))
 
 
 (defun org-index--do-sort-lines (what)
@@ -1243,21 +1246,7 @@ Argument COLUMN and VALUE specify line to get."
           (error "Heading of column cannot be empty"))
       (if (and (not (string= (substring field 0 1) "."))
                (not (member (intern field) org-index--valid-headings)))
-
-          (if (string= field "link")
-              ;; Ask user to migrate his index to new version (since [2015-02-11 Mi])
-              (progn
-                ;; pop to index buffer
-                (pop-to-buffer-same-window org-index--buffer)
-                (goto-char org-index--below-hline)
-                (org-reveal t)
-                ;; go to column
-                (while (org-at-table-p)
-                  (forward-line -1))
-                (forward-line)
-                (org-table-goto-column (+ 1 col))
-                (error "Column 'link' should be named 'id' with recent versions of org-index,\nplease adjust your table (cursor is already positioned right)"))
-            (error "Column name '%s' is not a valid heading (custom headings may start with a dot, e.g. '.foo')" field)))
+          (error "Column name '%s' is not a valid heading (custom headings may start with a dot, e.g. '.foo')" field))
 
       (setq field-symbol (intern field))
 
@@ -1275,74 +1264,6 @@ Argument COLUMN and VALUE specify line to get."
           (unless (cdr (assoc head org-index--columns))
             (org-index--report-index-error "No column has heading '%s'" head)))
         org-index--required-headings))
-
-
-(defun org-index--parse-flags ()
-  "Parse list of flags in index table."
-
-  (let (parent parent-is-comment child)
-
-    ;; reset configuration variables
-    (setq org-index--special-columns nil)
-    (setq org-index--flagged-columns nil)
-
-    (org-index--goto-list "columns-and-flags" t)
-    (forward-line 1)
-
-    ;; outer loop over columns
-    (while (and (setq parent (org-index--parse-list-item))
-                parent
-                (> (cdr (assoc :indent parent)) 0))
-
-      (setq parent-is-comment (member (cdr (assoc :text parent)) '("all-columns-explained" "all-flags-explained")))
-
-      ;; check, that we have a valid heading
-      (unless (or parent-is-comment
-                  (assoc (cdr (assoc :sym parent)) org-index--columns))
-        (when (string= "link" (cdr (assoc :text parent)))
-          (pop-to-buffer-same-window org-index--buffer)
-          (org-reveal t)
-          (error "Flag 'link' should be named 'id' with recent versions of org-index,\nplease adjust this flag (cursor is already positioned right)"))
-        (org-index--report-index-error "'%s' appears within flags, but not as a index column.  " (cdr (assoc :text parent))))
-
-      ;; inner loop over children
-      (while (and (forward-line 1)
-                  (setq child (org-index--parse-list-item))
-                  child
-                  (> (cdr (assoc :indent child))
-                     (cdr (assoc :indent parent))))
-
-        (unless parent-is-comment
-          ;; check, that we have a valid flag
-          (unless (memq (cdr (assoc :sym child)) org-index--all-flags)
-            (org-index--report-index-error "'%s' is not a valid flag" (cdr (assoc :text child))))
-
-          ;; process flag with respect to current index-column
-          (if (memq (cdr (assoc :sym child)) org-index--single-flags)
-              ;; Check, that none of org-index--single-flags appears twice
-              (if (assoc (cdr (assoc :sym child)) org-index--special-columns)
-                  (org-index--report-index-error
-                   "More than one column is marked with flag '%s'" (cdr (assoc :text child)))
-                ;; add it to list
-                (setq org-index--special-columns (cons (cons (cdr (assoc :sym child)) (cdr (assoc :sym parent)))
-                                                       org-index--special-columns))))
-
-          ;; all flags are stored in org-index--flagged-columns
-          (let ((l (assoc (cdr (assoc :sym child)) org-index--flagged-columns))) ;; list of flag and columns, that carry this flag
-            (unless l
-              ;; no list of columns with this flag is present, create one
-              (setq org-index--flagged-columns
-                    (cons (cons (cdr (assoc :sym child)) nil)
-                          org-index--flagged-columns))
-              (setq l (car org-index--flagged-columns)))
-            ;; prepend this column to list of columns with this flag
-            (setcdr l (cons (cdr (assoc :sym parent)) (cdr l)))))))
-
-    ;; check, that all needed flags have been specified
-    (mapc (lambda (x)
-            (unless (assoc x org-index--special-columns)
-              (org-index--report-index-error "Required flag '%s' does not appear" (substring (symbol-name x) 1))))
-          org-index--required-flags)))
 
 
 (defun org-index--goto-list (name &optional required non-top)
@@ -1498,7 +1419,8 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
       (if temporary
           (insert "
   Below you find your temporary index table, which WILL NOT LAST LONGER
-  THAN YOUR CURRENT EMACS SESSION.
+  THAN YOUR CURRENT EMACS SESSION; please use it only to compare it to
+  your existing index.
 ")
         (insert "
   Below you find your initial index table, which will grow over time.
@@ -1512,14 +1434,13 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
   To gain further insight you may invoke the subcommand 'help', or
   read the description of `org-index'.
 
-  Within the index table below, dhe sequence of columns does not
-  matter. You may reorder them in any way you please. Columns are
-  found by their heading. You may also add your own columns,
-  which should start with a dot (e.g. '.custom').
+  Within the index table below, the sequence of columns does not
+  matter. You may reorder them in any way you please.
+  You may also add your own columns, which should start 
+  with a dot (e.g. '.my-column').
 
-  Following this explanations you will find the item-list
-  `columns-and-flags', which influences the behaviour of
-  `org-index'. See the explanations which are part of this list.
+  Invoke `org-customize' to tweak the behaviour of org-index
+  (see group org-index).
 
   This node needs not be a top level node; its name is completely
   at your choice; it is found through its ID only.
@@ -1531,8 +1452,6 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
 
       (setq id (org-id-get-create))
       (insert (format "
-%s
-
 
   | ref |  category | keywords | count | last-accessed | created | id |
   |     |           |          |       |               |         | <4>  |
@@ -1540,7 +1459,6 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
   | %s  |           | %s       |       |               | %s      | %s   |
 
 "
-                      org-index--sample-flags
                       firstref
                       "This node"
                       (with-temp-buffer (org-insert-time-stamp nil nil t))
@@ -1658,16 +1576,21 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
 (defun org-index--align-and-fontify-current-line ()
   "Make current line blend well among others."
   (let ((line (substring-no-properties (delete-and-extract-region (line-beginning-position) (line-end-position)))))
-    ;; create minimum table with fixed-width columns to align and fontiry new line
+    ;; create minimum table with fixed-width columns to align and fontify new line
     (insert (with-temp-buffer
               (org-set-font-lock-defaults)
               (insert org-index--headings-visible)
-              (goto-char (point-min))
               ;; fill columns, so that aligning cannot shrink them
+              (goto-char (point-min))
               (search-forward "|")
-              (replace-string " " "." nil (point) (line-end-position))
-              (replace-string ".|." " | " nil (line-beginning-position) (line-end-position))
-              (replace-string "|." "| " nil (line-beginning-position) (line-end-position))
+              (while (search-forward " " (line-end-position) t)
+                (replace-match "." nil t))
+              (goto-char (point-min))
+              (while (search-forward ".|." (line-end-position) t)
+                (replace-match " | " nil t))
+              (goto-char (point-min))
+              (while (search-forward "|." (line-end-position) t)
+                (replace-match "| " nil t))
               (goto-char (point-max))
               (insert line)
               (forward-line 0)
@@ -1704,8 +1627,8 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
       (forward-line -1))))
 
 
-(defun org-index--get-sort-key (&optional sort with-ref)
-  "Get value for sorting from column SORT, optional WITH-REF."
+(defun org-index--get-sort-key (&optional sort with-ref mixed-time)
+  "Get value for sorting from column SORT, optional WITH-REF; if mixes use MIXED-TIME."
   (let (ref
         ref-field
         key)
@@ -1721,20 +1644,21 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
       (setq ref (format
                  "%06d"
                  (string-to-number
-                  (or (match-string 1 ref-field)
-                      "0")))))
+                  (match-string 1 ref-field)))))
 
     (setq key
           (cond
            ((eq sort 'count)
             (format "%08d" (string-to-number (or (org-index--get-or-set-field 'count) ""))))
+           ((eq sort 'mixed)
+            (let ((last-accessed (org-index--get-or-set-field 'last-accessed)))
+              (unless mixed-time (setq mixed-time (org-index--get-mixed-time)))
+              (concat
+               (if (string< mixed-time last-accessed) last-accessed mixed-time)
+               (format "%08d" (string-to-number (or (org-index--get-or-set-field 'count) ""))))))
            ((eq sort 'ref)
             ref)
-           ((eq sort 'id)
-            (org-index--get-or-set-field sort))
-           ((eq sort 'last-accessed)
-            (org-index--get-or-set-field sort))
-           ((eq sort 'created)
+           ((memq sort '(id last-accessed created))
             (org-index--get-or-set-field sort))
            (t (error "This is a bug: unmatched case '%s'" sort))))
 
@@ -1760,38 +1684,74 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
     (cdr (assoc key org-index--columns))))
 
 
-(defun org-index--special-column (key)
-  "Return column (not a number) for special column KEY."
-  (cdr (assoc key org-index--special-columns)))
-
-
-(defun org-index--flag-p (flag column)
-  "Check if COLUMN has FLAG set."
-  (unless (memq flag org-index--all-flags)
-    (error (format "Internal error: unknown flag %s" (symbol-name flag))))
-  (memq column (assoc flag org-index--flagged-columns)))
-
-
 (defun org-index--make-guarded-search (ref &optional dont-quote)
   "Make robust search string from REF; DONT-QUOTE it, if requested."
   (concat "\\_<" (if dont-quote ref (regexp-quote ref)) "\\_>"))
 
 
-(defun org-index--do-statistics ()
-  "Compute statistics about index table."
-  (let ((total 0)
-        ref-field ref min max message)
+(defun org-index--find-duplicates ()
+  "Find duplicate references or ids in index table."
+  (let (ref-duplicates id-duplicates message)
+
+    (setq ref-duplicates (org-index--find-duplicates-helper 'ref))
+    (setq id-duplicates (org-index--find-duplicates-helper 'id))
+    (goto-char org-index--below-hline)
+    (if (or ref-duplicates id-duplicates)
+        (progn
+          ;; show results
+          (pop-to-buffer-same-window
+           (get-buffer-create "*org-index-duplicates*"))
+          (when ref-duplicates
+            (insert "These references appear more than once:\n")
+            (mapc (lambda (x) (insert "  " x "\n")) ref-duplicates)
+            (insert "\n\n"))
+          (when id-duplicates
+            (insert "These ids appear more than once:\n")
+            (mapc (lambda (x) (insert "  " x "\n")) id-duplicates))
+
+          "Some references or ids are duplicates")
+      "No duplicate references or ids found")))
 
 
-    ;; go through table and remove all refs, that we see
+(defun org-index--find-duplicates-helper (column)
+  "Helper for `org-index--find-duplicates': Go through table and count given COLUMN."
+  (let (counts duplicates field found)
+
+    ;; go through table
     (goto-char org-index--below-hline)
     (while (org-at-table-p)
 
-      ;; get ref-field and number
+      ;; get column
+      (setq field (org-index--get-or-set-field column))
+
+      ;; and increment
+      (setq found (assoc field counts))
+      (if found
+          (incf (cdr found))
+        (setq counts (cons (cons field 1) counts)))
+
+      (forward-line))
+
+    (mapc (lambda (x) (if (and (> (cdr x) 1)
+                          (car x))
+                     (setq duplicates (cons (car x) duplicates)))) counts)
+    
+    duplicates))
+
+
+(defun org-index--do-statistics ()
+  "Compute statistics about index table."
+  (let ((total 0)
+        ref ref-field min max message)
+
+    ;; go through table
+    (goto-char org-index--below-hline)
+    (while (org-at-table-p)
+
+      ;; get ref
       (setq ref-field (org-index--get-or-set-field 'ref))
-      (if (and ref-field
-               (string-match org-index--ref-regex ref-field))
-          (setq ref (string-to-number (match-string 1 ref-field))))
+      (string-match org-index--ref-regex ref-field)
+      (setq ref (string-to-number (match-string 1 ref-field)))
 
       ;; record min and max
       (if (or (not min) (< ref min)) (setq min ref))
@@ -1807,9 +1767,7 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
                                (format org-index--ref-format max)
                                (1+ (- max min))
                                total
-                               (truncate (* 100 (/ (float total) (1+ (- max min)))))
-                                                              
-))
+                               (truncate (* 100 (/ (float total) (1+ (- max min)))))))
 
     (goto-char org-index--below-hline)
     message))
@@ -1831,7 +1789,7 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
           (setq ref (org-index--get-or-set-field 'ref))
           (setq args (org-index--collect-values-for-add-update-remote id))
           (org-index--write-fields-for-add-update args)
-          (setq yank (org-index--get-or-set-field (org-index--special-column 'yank-after-add)))
+          (setq yank (org-index--get-or-set-field org-index-yank-after-add))
            
           (cons (format "Updated index line %s" ref) yank))
 
@@ -1850,7 +1808,7 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
             (org-index--on
                 'ref ref
                 (org-index--write-fields-for-add-update args)
-                (setq yank (org-index--get-or-set-field (org-index--special-column 'yank-after-add))))
+                (setq yank (org-index--get-or-set-field org-index-yank-after-add)))
            
             (cons (format "Updated index line %s" ref) yank))
 
@@ -1928,25 +1886,27 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
     (dolist (col-num org-index--columns)
     
       (setq content "")
-    
-      (if (eq (car col-num) 'keywords)
-          (setq content (nth 4 (org-heading-components))))
-    
+
+      (when (eq (car col-num) 'keywords)
+        (if org-index-copy-heading-to-keywords
+            (setq content (nth 4 (org-heading-components))))
+
+        ;; Shift ref and timestamp ?
+        (if org-index-strip-ref-and-date-from-heading
+            (dotimes (i 2)
+              (if (or (string-match (concat "^\\s-*" org-index--ref-regex) content)
+                      (string-match (concat org-ts-regexp-both) content))
+                  (setq content (substring content (match-end 0)))))))
+      
       (if (eq (car col-num) 'category)
           (setq content (or category org-index--category-before)))
 
       (if (eq (car col-num) 'level)
           (setq content (number-to-string (org-outline-level))))
     
-      ;; Shift ref and timestamp ?
-      (if (org-index--flag-p 'shift-ref-and-date-on-add (car col-num))
-          (dotimes (i 2)
-            (if (or (string-match (concat "^\\s-*" org-index--ref-regex) content)
-                    (string-match (concat org-ts-regexp-both) content))
-                (setq content (substring content (match-end 0))))))
     
       (if (and (not silent)    ; do not edit, if heading has already been added
-               (org-index--flag-p 'edit-on-add (car col-num)))
+               (memq (car col-num) org-index-edit-on-add))
           (setq content (read-from-minibuffer
                          (format "Edit text for column '%s': " (symbol-name (car col-num)))
                          content)))
@@ -2077,8 +2037,10 @@ If OTHER in separate window."
         show-headings                  ; true, if headings should be shown
         help-overlay                   ; Overlay with help text
         last-point                     ; Last position before end of search
-        key                            ; input from user
-        key-sequence)                  ; as a sequence
+        initial-frame                  ; Frame when starting occur
+        key                            ; input from user in various forms
+        key-sequence
+        key-sequence-raw)
 
     
     ;; make and show buffer
@@ -2086,6 +2048,8 @@ If OTHER in separate window."
         (kill-buffer org-index--occur-buffer-name))
     (setq occur-buffer (make-indirect-buffer org-index--buffer org-index--occur-buffer-name))
     (pop-to-buffer-same-window occur-buffer)
+    (setq initial-frame (selected-frame))
+
     ;; avoid modifying direct buffer
     (setq buffer-read-only t)
     (toggle-truncate-lines 1)
@@ -2097,7 +2061,7 @@ If OTHER in separate window."
     (setq org-index--occur-tail-overlay nil)
     
     ;; narrow to table rows and one line before
-    (goto-char (marker-position org-index--below-hline))
+    (goto-char org-index--below-hline)
     (forward-line 0)
     (setq begin (point))
     (forward-line -1)
@@ -2114,7 +2078,7 @@ If OTHER in separate window."
                      (concat
                       (org-index--wrap
                        (concat
-                        "Normal keys add to search word; <space> or <comma> start additional word; <backspace> erases last char, <C-backspace> last word; <return> jumps to heading, <tab> jumps to heading in other window; all other keys end search.\n"))
+                        "Normal keys add to search word; <space> or <comma> start additional word; <backspace> erases last char, <C-backspace> last word; <return> jumps to heading, <tab> jumps to heading in other window, <S-return> to matching line in index; all other keys end search.\n"))
                       org-index--headings)))
     
     ;; insert overlays for help text and to cover unsearched lines
@@ -2129,14 +2093,25 @@ If OTHER in separate window."
       (if in-c-backspace
           (setq key "<backspace>")
         (setq search-text (mapconcat 'identity (reverse (cons word words)) ","))
-        ;; read key
-        (setq key-sequence
-              (vector (read-key
+
+        ;; read key, if selected frame has not changed
+        (if (eq initial-frame (selected-frame))
+            (progn
+              (setq key-sequence
+                    (let ((echo-keystrokes 0))
+                      (read-key-sequence
                        (format "%s%s%s"
                                prompt
                                search-text
-                               (if (string= search-text "") "" " ")))))
-        (setq key (key-description key-sequence)))
+                               (if (string= search-text "") "" " "))
+                       nil nil t t)))
+              (setq key (key-description key-sequence))
+              (setq key-sequence-raw (this-single-command-raw-keys)))
+          (setq done t)
+          (setq key-sequence nil)
+          (setq key nil)
+          (setq key-sequence-raw nil)))
+
 
       (cond
 
@@ -2184,8 +2159,9 @@ If OTHER in separate window."
        ((member key (list "SPC" ",")) ; space or comma: enter an additional search word
 
         ;; push current word and clear, no need to change display
-        (setq words (cons word words))
-        (setq word ""))
+        (unless (string= word "")
+          (setq words (cons word words))
+          (setq word "")))
 
 
        ((string= key "?") ; question mark: toggle display of headlines and help
@@ -2224,7 +2200,7 @@ If OTHER in separate window."
 
     ;; put back input event, that caused the loop to end
     (unless (string= key "C-g")
-      (setq unread-command-events (listify-key-sequence key-sequence))
+      (setq unread-command-events (listify-key-sequence key-sequence-raw))
       (message key))
     
     ;; postprocessing
@@ -2429,7 +2405,7 @@ If OTHER in separate window."
     (setq line (downcase (buffer-substring (line-beginning-position) (line-beginning-position 2))))
     (catch 'not-found
       (dolist (w words)
-        (or (search w line)
+        (or (cl-search w line)
             (throw 'not-found nil)))
       t)))
 
@@ -2445,7 +2421,7 @@ If OTHER in separate window."
 
     ;; insert ref or id as last or first line, depending on sort-column
     (goto-char org-index--below-hline)
-    (if (eq (org-index--special-column 'sort) 'count)
+    (if (eq org-index-sort-by 'count)
         (progn
           (while (org-at-table-p)
             (forward-line))
@@ -2468,13 +2444,13 @@ If OTHER in separate window."
     (org-index--verify-id)
     (org-index--parse-table)
     (org-index--on nil nil
-      (org-index--do-sort-index (org-index--special-column 'sort))
+      (org-index--do-sort-index org-index-sort-by)
       (org-table-align)
       (remove-hook 'before-save-hook 'org-index--sort-silent))))
 
 
 (defun org-index--copy-visible (beg end)
-  "Copy the visible parts of the region without adding it to kill-ring; copy of `org-copy-visible'"
+  "Copy the visible parts of the region between BEG and END without adding it to `kill-ring'; copy of `org-copy-visible'."
   (let (snippets s)
     (save-excursion
       (save-restriction
