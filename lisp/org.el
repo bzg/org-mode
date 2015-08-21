@@ -10834,7 +10834,7 @@ link in a property drawer line."
 				 (call-interactively (read cmd))))
 		    (user-error "Abort"))))
 	       ((equal type "id")
-		(require 'ord-id)
+		(require 'org-id)
 		(funcall (nth 1 (assoc "id" org-link-protocols)) path))
 	       ((member type '("coderef" "custom-id" "fuzzy" "radio"))
 		(unless (run-hook-with-args-until-success
