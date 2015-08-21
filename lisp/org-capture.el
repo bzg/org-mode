@@ -929,7 +929,12 @@ Store them in the capture property list."
 	      (time-to-days prompt-time)))
 	   (t
 	    ;; current date, possibly corrected for late night workers
-	    (org-today))))))
+	    (org-today)))))
+	;; If `org-datetree-add-timestamp' is non-nil, point is not
+	;; located on a headline.  However `file+datetree' expects
+	;; a node where to paste captured tree.  Thus, we make sure to
+	;; move to day heading.
+	(org-back-to-heading t))
 
        ((eq (car target) 'file+function)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
