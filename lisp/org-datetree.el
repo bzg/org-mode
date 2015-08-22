@@ -54,23 +54,22 @@ Added time stamp is active unless value is `inactive'."
 If KEEP-RESTRICTION is non-nil, do not widen the buffer.
 When it is nil, the buffer will be widened to make sure an existing date
 tree can be found."
-  (let ((year (nth 2 date))
-	(month (car date))
-	(day (nth 1 date)))
-    (org-set-local 'org-datetree-base-level 1)
-    (or keep-restriction (widen))
-    (goto-char (point-min))
-    (save-restriction
-      (when (re-search-forward "^[ \t]*:DATE_TREE:[ \t]+\\S-" nil t)
-	(org-back-to-heading t)
+  (org-set-local 'org-datetree-base-level 1)
+  (or keep-restriction (widen))
+  (save-restriction
+    (let ((prop (org-find-property "DATE_TREE")))
+      (when prop
+	(goto-char prop)
 	(org-set-local 'org-datetree-base-level
-		       (org-get-valid-level (funcall outline-level) 1))
-	(org-narrow-to-subtree))
-      (goto-char (point-min))
+		       (org-get-valid-level (org-current-level) 1))
+	(org-narrow-to-subtree)))
+    (goto-char (point-min))
+    (let ((year (nth 2 date))
+	  (month (car date))
+	  (day (nth 1 date)))
       (org-datetree-find-year-create year)
       (org-datetree-find-month-create year month)
-      (org-datetree-find-day-create year month day)
-      (goto-char (prog1 (point) (widen))))))
+      (org-datetree-find-day-create year month day))))
 
 (defun org-datetree-find-year-create (year)
   "Find the YEAR datetree or create it."
