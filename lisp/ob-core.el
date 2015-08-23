@@ -1438,17 +1438,16 @@ specified in the properties of the current outline entry."
 (defvar org-src-preserve-indentation) ;; declare defcustom from org-src
 (defun org-babel-parse-src-block-match ()
   "Parse the results from a match of the `org-babel-src-block-regexp'."
-  (let* ((block-indentation (length (match-string 1)))
-	 (lang (org-no-properties (match-string 2)))
+  (let* ((block-indentation (string-width (match-string 1)))
+	 (lang (org-match-string-no-properties 2))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
 	 (switches (match-string 3))
-         (body (org-no-properties
-		(let* ((body (match-string 5))
-		       (sub-length (- (length body) 1)))
-		  (if (and (> sub-length 0)
-			   (string= "\n" (substring body sub-length)))
-		      (substring body 0 sub-length)
-		    (or body "")))))
+         (body (let* ((body (org-match-string-no-properties 5))
+		      (sub-length (- (length body) 1)))
+		 (if (and (> sub-length 0)
+			  (string= "\n" (substring body sub-length)))
+		     (substring body 0 sub-length)
+		   (or body ""))))
 	 (preserve-indentation (or org-src-preserve-indentation
 				   (save-match-data
 				     (string-match "-i\\>" switches)))))
@@ -1972,8 +1971,8 @@ following the source block."
 	(goto-char end)
 	(unless beg
 	  (if (looking-at "[\n\r]") (forward-char 1) (insert "\n")))
+	(when (wholenump indent) (indent-to indent))
 	(insert (concat
-		 (when (wholenump indent) (make-string indent ? ))
 		 "#+" org-babel-results-keyword
 		 (when hash
 		   (if org-babel-hash-show-time
@@ -1984,7 +1983,7 @@ following the source block."
 		 (when name (concat " " name)) "\n"))
 	(unless beg (insert "\n") (backward-char))
 	(beginning-of-line 0)
-	(if hash (org-babel-hide-hash))
+	(when hash (org-babel-hide-hash))
 	(point)))))
 
 (defvar org-block-regexp)
