@@ -1289,16 +1289,33 @@ echo \"$data\"
 (ert-deftest test-ob/preserve-results-indentation ()
   "Preserve indentation when executing a src block."
   (should
-   (equal '(2 2)
-	  (org-test-with-temp-text
-	      "  #+begin_src emacs-lisp\n  (+ 1 1)\n  #+end_src"
-	    (org-babel-execute-src-block)
-	    (buffer-string)
-	    (let ((case-fold-search t)) (search-forward "#+results:"))
-	    ;; Check if both #+RESULTS: keyword and actual results are
-	    ;; indented by 2 columns.
-	    (list (org-get-indentation)
-		  (progn (forward-line) (org-get-indentation)))))))
+   (equal
+    '(2 2)
+    (org-test-with-temp-text "  #+begin_src emacs-lisp\n(+ 1 1)\n  #+end_src"
+      (org-babel-execute-src-block)
+      (let ((case-fold-search t)) (search-forward "RESULTS"))
+      (list (org-get-indentation)
+	    (progn (forward-line) (org-get-indentation))))))
+  (should
+   (equal
+    '(2 2)
+    (org-test-with-temp-text
+	"  #+name: block\n  #+begin_src emacs-lisp\n(+ 1 1)\n  #+end_src"
+      (org-babel-execute-src-block)
+      (let ((case-fold-search t)) (search-forward "RESULTS"))
+      (list (org-get-indentation)
+	    (progn (forward-line) (org-get-indentation))))))
+  ;; Don't get fooled by TAB-based indentation.
+  (should
+   (equal
+    '(6 6)
+    (org-test-with-temp-text
+	"\t  #+begin_src emacs-lisp\n\t  (+ 1 1)\n\t  #+end_src"
+      (setq tab-width 4)
+      (org-babel-execute-src-block)
+      (let ((case-fold-search t)) (search-forward "RESULTS"))
+      (list (org-get-indentation)
+	    (progn (forward-line) (org-get-indentation)))))))
 
 (ert-deftest test-ob/safe-header-args ()
   "Detect safe and unsafe header args."
