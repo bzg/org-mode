@@ -1369,14 +1369,14 @@ for export.  Return options as a plist."
    (let ((plist
 	  ;; EXPORT_OPTIONS are parsed in a non-standard way.  Take
 	  ;; care of them right from the start.
-	  (let ((o (org-entry-get (point) "EXPORT_OPTIONS")))
+	  (let ((o (org-entry-get (point) "EXPORT_OPTIONS" 'selective)))
 	    (and o (org-export--parse-option-keyword o backend))))
 	 ;; Take care of EXPORT_TITLE.  If it isn't defined, use
 	 ;; headline's title (with no todo keyword, priority cookie or
 	 ;; tag) as its fallback value.
 	 (cache (list
 		 (cons "TITLE"
-		       (or (org-entry-get (point) "EXPORT_TITLE")
+		       (or (org-entry-get (point) "EXPORT_TITLE" 'selective)
 			   (progn (looking-at org-complex-heading-regexp)
 				  (org-match-string-no-properties 4))))))
 	 ;; Look for both general keywords and back-end specific
@@ -1391,7 +1391,8 @@ for export.  Return options as a plist."
 	   (let ((value
 		  (or (cdr (assoc keyword cache))
 		      (let ((v (org-entry-get (point)
-					      (concat "EXPORT_" keyword))))
+					      (concat "EXPORT_" keyword)
+					      'selective)))
 			(push (cons keyword v) cache) v))))
 	     (when value
 	       (setq plist
@@ -5907,7 +5908,7 @@ Return file name as a string."
 		    (org-entry-get
 		     (save-excursion
 		       (ignore-errors (org-back-to-heading) (point)))
-		     "EXPORT_FILE_NAME" t))
+		     "EXPORT_FILE_NAME" 'selective))
 	       ;; File name may be extracted from buffer's associated
 	       ;; file, if any.
 	       (and visited-file (file-name-nondirectory visited-file))
