@@ -7169,7 +7169,9 @@ in the file.  Otherwise, restriction will be to the current subtree."
 
 (defun org-agenda-maybe-redo ()
   "If there is any window showing the agenda view, update it."
-  (let ((w (get-buffer-window org-agenda-buffer-name t))
+  (let ((w (get-buffer-window (or org-agenda-this-buffer-name
+				  org-agenda-buffer-name)
+			      t))
 	(w0 (selected-window)))
     (when w
       (select-window w)
