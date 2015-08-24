@@ -9417,11 +9417,13 @@ buffer, display it in another window."
   "Where in `org-agenda-diary-file' should new entries be added?
 Valid values:
 
-date-tree    in the date tree, as child of the date
-top-level    as top-level entries at the end of the file."
+date-tree         in the date tree, as first child of the date
+date-tree-last    in the date tree, as last child of the date
+top-level         as top-level entries at the end of the file."
   :group 'org-agenda
   :type '(choice
-	  (const :tag "in a date tree" date-tree)
+	  (const :tag "first in a date tree" date-tree)
+	  (const :tag "last in a date tree" date-tree-last)
 	  (const :tag "as top level at end of file" top-level)))
 
 (defcustom org-agenda-insert-diary-extract-time nil
@@ -9525,14 +9527,20 @@ a timestamp can be added there."
   (when org-adapt-indentation (org-indent-to-column 2)))
 
 (defun org-agenda-insert-diary-make-new-entry (text)
-  "Make a new entry with TEXT as the first child of the current subtree.
+  "Make a new entry with TEXT as a child of the current subtree.
 Position the point in the heading's first body line so that
 a timestamp can be added there."
-  (outline-next-heading)
-  (org-back-over-empty-lines)
-  (unless (looking-at "[ \t]*$") (save-excursion (insert "\n")))
-  (org-insert-heading nil t)
-  (org-do-demote)
+  (cond
+   ((eq org-agenda-insert-diary-strategy 'date-tree-last)
+    (end-of-line)
+    (org-insert-heading '(4) t)
+    (org-do-demote))
+   (t
+    (outline-next-heading)
+    (org-back-over-empty-lines)
+    (unless (looking-at "[ \t]*$") (save-excursion (insert "\n")))
+    (org-insert-heading nil t)
+    (org-do-demote)))
   (let ((col (current-column)))
     (insert text)
     (org-end-of-meta-data)
