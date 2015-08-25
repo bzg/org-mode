@@ -2731,7 +2731,7 @@ returned by the function."
 	  ;; Splice NEW at BLOB location in parse tree.
 	  (dolist (e new (org-element-extract-element blob))
 	    (unless (string= e "") (org-element-insert-before e blob))))))
-    info)
+    info nil nil t)
   ;; Return modified parse tree.
   data)
 
