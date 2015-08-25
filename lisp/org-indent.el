@@ -255,7 +255,7 @@ When optional argument HEADING is non-nil, assume line is at
 a heading.  Moreover, if is is `inlinetask', the first star will
 have `org-warning' face."
   (let* ((stars (if (<= level 1) ""
-		  (make-string (* org-indent-indentation-per-level
+		  (make-string (* (1- org-indent-indentation-per-level)
 				  (1- level))
 			       ?*)))
 	 (line
@@ -267,7 +267,8 @@ have `org-warning' face."
 	   (heading (org-add-props stars nil 'face 'org-hide))
 	   (t (concat (org-add-props (concat stars (make-string level ?*))
 			  nil 'face 'org-indent)
-		      (char-to-string org-indent-boundary-char)))))
+		      (and (> level 0)
+			   (char-to-string org-indent-boundary-char))))))
 	 (wrap
 	  (org-add-props
 	      (concat stars
