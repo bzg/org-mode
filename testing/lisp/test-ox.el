@@ -762,6 +762,29 @@ Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
 				      (plist-get i :title) i)))
 		(section . (lambda (s c i) c))))
 	     nil nil nil '(:with-sub-superscript nil)))))
+  ;; Handle uninterpreted objects in captions.
+  (should
+   (equal "adummy\n"
+	  (org-test-with-temp-text "#+CAPTION: a_b\nParagraph"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders
+	      '((subscript . (lambda (s c i) "dummy"))
+		(paragraph . (lambda (p c i)
+			       (org-export-data (org-export-get-caption p) i)))
+		(section . (lambda (s c i) c))))
+	     nil nil nil '(:with-sub-superscript t)))))
+  (should
+   (equal "a_b\n"
+	  (org-test-with-temp-text "#+CAPTION: a_b\nParagraph"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders
+	      '((subscript . (lambda (s c i) "dummy"))
+		(paragraph . (lambda (p c i)
+			       (org-export-data (org-export-get-caption p) i)))
+		(section . (lambda (s c i) c))))
+	     nil nil nil '(:with-sub-superscript nil)))))
   ;; Special case: multiples uninterpreted objects in a row.
   (should
    (equal "a_b_c_d\n"
