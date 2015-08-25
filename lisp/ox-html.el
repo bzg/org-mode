@@ -2305,7 +2305,7 @@ contextual information."
   "Transcode a CENTER-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (format "<div class=\"center\">\n%s</div>" contents))
+  (format "<div class=\"org-center\">\n%s</div>" contents))
 
 ;;;; Clock
 
