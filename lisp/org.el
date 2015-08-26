@@ -16221,11 +16221,15 @@ COLUMN formats in the current buffer."
    (forward-line)
    (when (org-looking-at-p org-planning-line-re) (forward-line))
    (unless (org-looking-at-p org-property-drawer-re)
-     (let ((inhibit-read-only t))
-       (unless (bolp) (insert "\n"))
-       (let ((begin (point)))
-	 (insert ":PROPERTIES:\n:END:\n")
-	 (org-indent-region begin (point)))))))
+     ;; Make sure we start editing a line from current entry, not from
+     ;; next one.  It prevents extending text properties or overlays
+     ;; belonging to the latter.
+     (when (bolp) (backward-char))
+     (let ((begin (1+ (point)))
+	   (inhibit-read-only t))
+       (insert "\n:PROPERTIES:\n:END:")
+       (when (eobp) (insert "\n"))
+       (org-indent-region begin (point))))))
 
 (defun org-insert-drawer (&optional arg drawer)
   "Insert a drawer at point.
