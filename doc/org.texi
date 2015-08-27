@@ -14950,7 +14950,7 @@ The @code{org-babel-tangle-jump-to-org} function provides this jumping from
 code to Org-mode functionality.  Two header arguments are required for
 jumping to work, first the @code{padline} (@ref{padline}) option must be set
 to true (the default setting), second the @code{comments} (@ref{comments})
-header argument must be set to @code{links}, which will insert comments into
+header argument must be set to @code{link}, which will insert comments into
 the source code buffer which point back to the original Org-mode file.
 
 @node Evaluating code blocks
