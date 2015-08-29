@@ -193,12 +193,12 @@ This option can also be set with the PLACE keyword."
 
 This option can also be set with the OPENING keyword.  Moreover,
 when:
-  (1) this value is the empty string;
-  (2) there's no OPENING keyword or it is empty;
-  (3) `org-koma-letter-headline-is-opening-maybe' is non-nil;
-  (4) the letter contains a headline without a special
+  (1) Either `org-koma-letter-prefer-special-headings' is non-nil
+      or the CLOSING keyword is empty
+  (2) `org-koma-letter-headline-is-opening-maybe' is non-nil;
+  (3) the letter contains a headline without a special
       tag (e.g. \"to\" or \"ps\");
-then the opening will be implicitly set as the headline title."
+then the opening will be implicitly set as the untagged headline title."
   :group 'org-export-koma-letter
   :type 'string)
 
@@ -206,12 +206,13 @@ then the opening will be implicitly set as the headline title."
   "Letter's closing, as a string.
 This option can also be set with the CLOSING keyword.  Moreover,
 when:
-  (1) there's no CLOSING keyword or it is empty;
+  (1) Either `org-koma-letter-prefer-special-headings' is non-nil
+      or the CLOSING keyword is empty;
   (2) `org-koma-letter-headline-is-opening-maybe' is non-nil;
   (3) the letter contains a headline with the special
-      tag closing;
+      tag \"closing\";
 then the opening will be set as the title of the closing special
-heading."
+heading title."
   :group 'org-export-koma-letter
   :type 'string)
 
@@ -219,12 +220,15 @@ heading."
   "Signature, as a string.
 This option can also be set with the SIGNATURE keyword.
 Moreover, when:
-  (1) there's no CLOSING keyword or it is empty;
+  (1) Either `org-koma-letter-prefer-special-headings' is non-nil
+      or there is no CLOSING keyword or the CLOSING keyword is empty;
   (2) `org-koma-letter-headline-is-opening-maybe' is non-nil;
   (3) the letter contains a headline with the special
-      tag closing;
+      tag \"closing\";
 then the signature will be  set as the content of the
-closing special heading."
+closing special heading.
+
+Note if the content is empty the signature will not be set."
   :group 'org-export-koma-letter
   :type 'string)
 
@@ -359,9 +363,9 @@ The value must be a member of `org-latex-classes'."
   :type 'string)
 
 (defcustom org-koma-letter-headline-is-opening-maybe t
-  "Non-nil means a headline may be used as an opening.
-A headline is only used if #+OPENING is not set.  See also
-`org-koma-letter-opening'."
+  "Non-nil means a headline may be used as an opening and closing.
+See also `org-koma-letter-opening' and
+`org-koma-letter-closing'."
   :group 'org-export-koma-letter
   :type 'boolean)
 
@@ -581,6 +585,26 @@ special tag headline."
 	(let ((tag (assoc-string tag special-tags)))
 	  (when tag (throw 'exit tag)))))))
 
+(defun org-koma-letter--keyword-or-headline (plist-key pred info)
+  "Return the correct version of opening or closing.
+PLIST-KEY should be a key in info, typically :opening
+or :closing.  PRED is a predicate run on headline to determine
+which title to use which takes two arguments, a headline element
+and an info plist.  INFO is a plist holding contextual
+information.  Return the preferred candidate for the exported of
+PLIST-KEY."
+  (let* ((keyword-candidate (plist-get info plist-key))
+	 (headline-candidate (when (and (plist-get info :with-headline-opening)
+					(or (plist-get info :special-headings)
+					    (not keyword-candidate)))
+			       (org-element-map (plist-get info :parse-tree)
+				   'headline
+				 (lambda (head)
+				   (when (funcall pred head info)
+				     (org-element-property :title head)))
+				 info t))))
+    (org-export-data (or headline-candidate keyword-candidate "") info)))
+
 ;;;; Template
 
 (defun org-koma-letter-template (contents info)
@@ -646,29 +670,16 @@ holding export options."
 	   (org-koma-letter--determine-to-and-from info 'to))
    ;; Opening.
    (format "\\opening{%s}\n\n"
-	   (org-export-data
-	    (or (org-string-nw-p (plist-get info :opening))
-		(when (plist-get info :with-headline-opening)
-		  (org-element-map (plist-get info :parse-tree) 'headline
-		    (lambda (head)
-		      (unless (org-koma-letter--special-tag head info)
-			(org-element-property :title head)))
-		    info t))
-		"")
+	   (org-koma-letter--keyword-or-headline
+	    :opening (lambda (h i) (not (org-koma-letter--special-tag h i)))
 	    info))
    ;; Letter body.
    contents
    ;; Closing.
-   (format "\n\\closing{%s}\n"
-	   (org-export-data
-	    (or (org-string-nw-p (plist-get info :closing))
-		(when (plist-get info :with-headline-opening)
-		  (org-element-map (plist-get info :parse-tree) 'headline
-		    (lambda (head)
-		      (when (eq (org-koma-letter--special-tag head info)
-				'closing)
-			(org-element-property :title head)))
-		    info t)))
+   (format "\\closing{%s}\n"
+	   (org-koma-letter--keyword-or-headline
+	    :closing (lambda (h i) (eq (org-koma-letter--special-tag h i)
+				'closing))
 	    info))
    (org-koma-letter--special-contents-as-macro
     (plist-get info :with-after-closing))
