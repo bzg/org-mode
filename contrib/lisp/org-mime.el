@@ -285,7 +285,7 @@ otherwise export the entire body."
 
 (defun org-mime-compose (body fmt file &optional to subject headers)
   (require 'message)
-  (message-mail to subject headers nil)
+  (compose-mail to subject headers nil)
   (message-goto-body)
   (let ((bhook
 	 (lambda (body fmt)
