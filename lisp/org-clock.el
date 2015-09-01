@@ -556,6 +556,13 @@ of a different task.")
   (mapc (lambda (m) (org-check-and-save-marker m beg end))
 	org-clock-history))
 
+(defun org-clock-drawer-name ()
+  "Return clock drawer's name for current entry, or nil."
+  (let ((drawer (org-clock-into-drawer)))
+    (cond ((integerp drawer) (org-log-into-drawer))
+	  ((stringp drawer) drawer)
+	  (t nil))))
+
 (defun org-clocking-buffer ()
   "Return the clocking buffer if we are currently clocking a task or nil."
   (marker-buffer org-clock-marker))
@@ -1451,10 +1458,7 @@ line and position cursor in that line."
     (let* ((beg (line-beginning-position 2))
 	   (end (save-excursion (outline-next-heading) (point)))
 	   (org-clock-into-drawer (org-clock-into-drawer))
-	   (drawer (cond
-		    ((not org-clock-into-drawer) nil)
-		    ((stringp org-clock-into-drawer) org-clock-into-drawer)
-		    (t "LOGBOOK"))))
+	   (drawer (org-clock-drawer-name)))
       ;; Look for a running clock if FIND-UNCLOSED in non-nil.
       (when find-unclosed
 	(let ((open-clock-re
@@ -1646,18 +1650,19 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 
 (add-hook 'org-clock-out-hook 'org-clock-remove-empty-clock-drawer)
 
-(defun org-clock-remove-empty-clock-drawer nil
-  "Remove empty clock drawer in the current subtree."
-  (let ((clock-drawer (org-log-into-drawer))
-	(end (save-excursion (org-end-of-subtree t t))))
-    (when clock-drawer
-      (save-excursion
-	(org-back-to-heading t)
-	(while (and (< (point) end)
-		    (search-forward clock-drawer end t))
-	  (goto-char (match-beginning 0))
-	  (org-remove-empty-drawer-at (point))
-	  (forward-line 1))))))
+(defun org-clock-remove-empty-clock-drawer ()
+  "Remove empty clock drawers in current subtree."
+  (save-excursion
+    (org-back-to-heading t)
+    (org-map-tree
+     (lambda ()
+       (let ((drawer (org-clock-drawer-name))
+	     (case-fold-search t))
+	 (when drawer
+	   (let ((re (format "^[ \t]*:%s:[ \t]*$" (regexp-quote drawer)))
+		 (end (save-excursion (outline-next-heading))))
+	     (while (re-search-forward re end t)
+	       (org-remove-empty-drawer-at (point))))))))))
 
 (defun org-clock-timestamps-up (&optional n)
   "Increase CLOCK timestamps at cursor.
