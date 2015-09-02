@@ -2821,6 +2821,21 @@ Another text. (ref:text)
 	      (org-element-map tree 'plain-text
 		(lambda (s) (org-export-activate-smart-quotes s :utf-8 info))
 		info)))))
+  ;; Inner quotes: close to special symbols.
+  (should
+   (equal '("« outer (« inner ») outer »")
+	  (let ((org-export-default-language "fr"))
+	    (org-test-with-parsed-data "\"outer ('inner') outer\""
+	      (org-element-map tree 'plain-text
+		(lambda (s) (org-export-activate-smart-quotes s :utf-8 info))
+		info)))))
+  (should
+   (equal '("« « inner » »")
+	  (let ((org-export-default-language "fr"))
+	    (org-test-with-parsed-data "\"'inner'\""
+	      (org-element-map tree 'plain-text
+		(lambda (s) (org-export-activate-smart-quotes s :utf-8 info))
+		info)))))
   ;; Apostrophe: standard test.
   (should
    (equal '("It « shouldn’t » fail")
