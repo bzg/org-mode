@@ -300,6 +300,7 @@ requirements) is loaded."
 		 (const :tag "Shen" shen)
 		 (const :tag "Sql" sql)
 		 (const :tag "Sqlite" sqlite)
+		 (const :tag "Stan" stan)
 		 (const :tag "ebnf2ps" ebnf2ps))
 		:value-type (boolean :tag "Activate" :value t)))
 
