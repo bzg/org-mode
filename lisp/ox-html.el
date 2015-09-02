@@ -2811,17 +2811,16 @@ INFO is a plist holding contextual information.  See
 		 (org-trim (plist-get info :html-link-home))))
 	 (use-abs-url (plist-get info :html-link-use-abs-url))
 	 (link-org-files-as-html-maybe
-	  (function
-	   (lambda (raw-path info)
-	     "Treat links to `file.org' as links to `file.html', if needed.
-           See `org-html-link-org-files-as-html'."
-	     (cond
-	      ((and (plist-get info :html-link-org-files-as-html)
-		    (string= ".org"
-			     (downcase (file-name-extension raw-path "."))))
-	       (concat (file-name-sans-extension raw-path) "."
-		       (plist-get info :html-extension)))
-	      (t raw-path)))))
+	  (lambda (raw-path info)
+	    ;; Treat links to `file.org' as links to `file.html', if
+	    ;; needed.  See `org-html-link-org-files-as-html'.
+	    (cond
+	     ((and (plist-get info :html-link-org-files-as-html)
+		   (string= ".org"
+			    (downcase (file-name-extension raw-path "."))))
+	      (concat (file-name-sans-extension raw-path) "."
+		      (plist-get info :html-extension)))
+	     (t raw-path))))
 	 (type (org-element-property :type link))
 	 (raw-path (org-element-property :path link))
 	 ;; Ensure DESC really exists, or set it to nil.
@@ -2829,9 +2828,8 @@ INFO is a plist holding contextual information.  See
 	 (path
 	  (cond
 	   ((member type '("http" "https" "ftp" "mailto"))
-	    (org-html-encode-plain-text
-	     (org-link-escape-browser
-	      (org-link-unescape (concat type ":" raw-path)))))
+	    (org-link-escape-browser
+	     (org-link-unescape (concat type ":" raw-path))))
 	   ((string= type "file")
 	    ;; Treat links to ".org" files as ".html", if needed.
 	    (setq raw-path
@@ -2950,21 +2948,25 @@ INFO is a plist holding contextual information.  See
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
-      (let ((fragment (concat "coderef-" path)))
+      (let ((fragment (concat "coderef-" (org-html-encode-plain-text path))))
 	(format "<a href=\"#%s\"%s%s>%s</a>"
 		fragment
-		(org-trim
-		 (format (concat "class=\"coderef\""
-				 " onmouseover=\"CodeHighlightOn(this, '%s');\""
-				 " onmouseout=\"CodeHighlightOff(this, '%s');\"")
-			 fragment fragment))
+		(format "class=\"coderef\" onmouseover=\"CodeHighlightOn(this, \
+'%s');\" onmouseout=\"CodeHighlightOff(this, '%s');\""
+			fragment fragment)
 		attributes
 		(format (org-export-get-coderef-format path desc)
 			(org-export-resolve-coderef path info)))))
      ;; External link with a description part.
-     ((and path desc) (format "<a href=\"%s\"%s>%s</a>" path attributes desc))
+     ((and path desc) (format "<a href=\"%s\"%s>%s</a>"
+			      (org-html-encode-plain-text path)
+			      attributes
+			      desc))
      ;; External link without a description part.
-     (path (format "<a href=\"%s\"%s>%s</a>" path attributes path))
+     (path (format "<a href=\"%s\"%s>%s</a>"
+		   (org-html-encode-plain-text path)
+		   attributes
+		   path))
      ;; No path, only description.  Try to do something useful.
      (t (format "<i>%s</i>" desc)))))
 
