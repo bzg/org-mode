@@ -5165,62 +5165,65 @@ INFO is the current export state, as a plist."
 		      table)))
 	 (value (gethash parent cache 'missing-data)))
     (if (not (eq value 'missing-data)) (cdr (assq s value))
-      (let (level1-open level2-open full-status)
+      (let (level1-open full-status)
 	(org-element-map parent 'plain-text
 	  (lambda (text)
 	    (let ((start 0) current-status)
 	      (while (setq start (string-match "['\"]" text start))
-		(cl-incf start)
 		(push
 		 (cond
 		  ((equal (match-string 0 text) "\"")
 		   (setf level1-open (not level1-open))
-		   (setf level2-open nil)
 		   (if level1-open 'opening-double-quote 'closing-double-quote))
 		  ;; Not already in a level 1 quote: this is an
 		  ;; apostrophe.
 		  ((not level1-open) 'apostrophe)
-		  ;; Apostrophe.
-		  ((org-string-match-p "\\S-'\\S-" text) 'apostrophe)
-		  ;; Apostrophe at the beginning of a string.  Check
-		  ;; white space at the end of the last object.
-		  ((and (org-string-match-p "\\`'\\S-" text)
-			(let ((p (org-export-get-previous-element text info)))
-			  (and p
-			       (if (stringp p)
-				   (not (org-string-match-p "[ \t]\\'" p))
-				 (memq (org-element-property :post-blank p)
-				       '(0 nil))))))
-		   'apostrophe)
-		  ;; Apostrophe at the end of a string.  Check white
-		  ;; space at the beginning of the next object, which
-		  ;; can only happen if that object is a string.
-		  ((and (org-string-match-p "\\S-'\\'" text)
-			(let ((n (org-export-get-next-element text info)))
-			  (and n
-			       (not (and (stringp n)
-					 (org-string-match-p "\\`[ \t]" n))))))
-		   'apostrophe)
-		  ;; Lonesome apostrophe.  Check white space around
-		  ;; both ends.
-		  ((and (equal text "'")
-			(let ((p (org-export-get-previous-element text info)))
-			  (and p
-			       (if (stringp p)
-				   (not (org-string-match-p "[ \t]\\'" p))
-				 (memq (org-element-property :post-blank p)
-				       '(0 nil)))
-			       (let ((n (org-export-get-next-element text info)))
-				 (and n
-				      (not (and (stringp n)
-						(org-string-match-p "\\`[ \t]"
-								    n))))))))
-		   'apostrophe)
-		  ;; Else, consider it as a level 2 quote.
-		  (t (setf level2-open (not level2-open))
-		     (if level2-open 'opening-single-quote
-		       'closing-single-quote)))
-		 current-status))
+		  ;; Extract previous char and next char.  As
+		  ;; a special case, they can also be set to `blank',
+		  ;; `no-blank' or nil.  Then determine if current
+		  ;; match is allowed as an opening quote or a closing
+		  ;; quote.
+		  (t
+		   (let* ((previous
+			   (if (> start 0) (substring text (1- start) start)
+			     (let ((p (org-export-get-previous-element
+				       text info)))
+			       (cond ((not p) nil)
+				     ((stringp p) (substring p (1- (length p))))
+				     ((memq (org-element-property :post-blank p)
+					    '(0 nil))
+				      'no-blank)
+				     (t 'blank)))))
+			  (next
+			   (if (< (1+ start) (length text))
+			       (substring text (1+ start) (+ start 2))
+			     (let ((n (org-export-get-next-element text info)))
+			       (cond ((not n) nil)
+				     ((stringp n) (substring n 0 1))
+				     (t 'no-blank)))))
+			  (allow-open
+			   (and (if (stringp previous)
+				    (string-match "\\s\"\\|\\s-\\|\\s("
+						  previous)
+				  (memq previous '(blank nil)))
+				(if (stringp next)
+				    (string-match "\\w\\|\\s.\\|\\s_" next)
+				  (eq next 'no-blank))))
+			  (allow-close
+			   (and (if (stringp previous)
+				    (string-match "\\w\\|\\s.\\|\\s_" previous)
+				  (eq previous 'no-blank))
+				(if (stringp next)
+				    (string-match "\\s-\\|\\s)\\|\\s.\\|\\s\""
+						  next)
+				  (memq next '(blank nil))))))
+		     (cond
+		      ((and allow-open allow-close) (error "Should not happen"))
+		      (allow-open 'opening-single-quote)
+		      (allow-close 'closing-single-quote)
+		      (t 'apostrophe)))))
+		 current-status)
+		(cl-incf start))
 	      (when current-status
 		(push (cons text (nreverse current-status)) full-status))))
 	  info nil org-element-recursive-objects)
