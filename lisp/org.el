@@ -13530,25 +13530,33 @@ WHAT entry will also be removed."
 	      (dolist (type (if what (cons what remove) remove))
 		(save-excursion
 		  (when (re-search-forward
-			 (concat
-			  " *"
-			  (case type
-			    (closed org-closed-time-regexp)
-			    (deadline org-deadline-time-regexp)
-			    (scheduled org-scheduled-time-regexp)
-			    (otherwise
-			     (error "Invalid planning type: %s" type))))
+			 (case type
+			   (closed org-closed-time-regexp)
+			   (deadline org-deadline-time-regexp)
+			   (scheduled org-scheduled-time-regexp)
+			   (otherwise
+			    (error "Invalid planning type: %s" type)))
 			 (line-end-position) t)
-		    (replace-match "")
-		    (when (looking-at "--+<[^>]+>") (replace-match ""))
-		    (when (and (not what) (eq type 'closed))
-		      (save-excursion
-			(beginning-of-line)
-			(when (looking-at "[ \t]*$")
-			  (delete-region (point)
-					 (line-beginning-position 2)))))))
-		;; Remove leading white spaces.
-		(when (looking-at "[ \t]+") (replace-match ""))))
+		    ;; Delete until next keyword or end of line.
+		    (delete-region
+		     (match-beginning 0)
+		     (if (re-search-forward org-keyword-time-not-clock-regexp
+					    (line-end-position)
+					    t)
+			 (match-beginning 0)
+		       (line-end-position))))))
+	      ;; If there is nothing more to add and no more keyword
+	      ;; is left, remove the line completely.
+	      (if (and (org-looking-at-p "[ \t]*$") (not what))
+		  (delete-region (line-beginning-position)
+				 (line-beginning-position 2))
+		;; If we removed last keyword, do not leave trailing
+		;; white space at the end of line.
+		(let ((p (point)))
+		  (save-excursion
+		    (end-of-line)
+		    (unless (= (skip-chars-backward " \t" p) 0)
+		      (delete-region (point) (line-end-position)))))))
 	     ((not what) (throw 'exit nil)) ; Nothing to do.
 	     (t (insert-before-markers "\n")
 		(backward-char 1)
