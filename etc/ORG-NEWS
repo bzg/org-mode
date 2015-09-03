@@ -15,6 +15,25 @@ Please send Org bug reports to emacs-orgmode@gnu.org.
 *** New option ~date-tree-last~ for ~org-agenda-insert-diary-strategy~
 When ~org-agenda-insert-diary-strategy~ is set to ~date-tree-last~, diary
 entries are added to last in the date tree.
+*** Babel: support for Stan language
+New ob-stan.el library.
+
+Evaluating a Stan block can produce two different results.
+
+1. Dump the source code contents to a file.
+
+   This file can then be used as a variable in other blocks, which
+   allows interfaces like RStan to use the model.
+
+2. Compile the contents to a model file.
+
+   This provides access to the CmdStan interface.  To use this, set
+   ~org-babel-stan-cmdstan-directory~ and provide a ~:file~ argument
+   that does not end in ".stan".
+
+For more information and usage examples, visit
+http://orgmode.org/worg/org-contrib/babel/languages/ob-doc-stan.html
+
 ** New functions
 ~org-show-children~ is a faster implementation of
 ~outline-show-children~.
