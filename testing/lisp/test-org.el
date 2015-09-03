@@ -3062,12 +3062,34 @@ Paragraph<point>"
 	    (replace-regexp-in-string
 	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
 	     nil nil 1))))
+  (should
+   (equal "* H\n  Paragraph"
+	  (org-test-with-temp-text "\
+* H
+  CLOSED: [2015-06-25 Thu]
+  Paragraph<point>"
+	    (let ((org-adapt-indentation t))
+	      (org-add-planning-info nil nil 'closed))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
+	     nil nil 1))))
   ;; Remove closed when `org-adapt-indentation' is nil.
   (should
    (equal "* H\nDEADLINE: <2015-06-25>\nParagraph"
 	  (org-test-with-temp-text "\
 * H
 CLOSED: [2015-06-25 Thu] DEADLINE: <2015-06-25 Thu>
+Paragraph<point>"
+	    (let ((org-adapt-indentation nil))
+	      (org-add-planning-info nil nil 'closed))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
+	     nil nil 1))))
+  (should
+   (equal "* H\nParagraph"
+	  (org-test-with-temp-text "\
+* H
+  CLOSED: [2015-06-25 Thu]
 Paragraph<point>"
 	    (let ((org-adapt-indentation nil))
 	      (org-add-planning-info nil nil 'closed))
