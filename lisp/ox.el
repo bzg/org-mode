@@ -3371,20 +3371,20 @@ lines, include only those lines.
 Optional argument IND, when non-nil, is an integer specifying the
 global indentation of returned contents.  Since its purpose is to
 allow an included file to stay in the same environment it was
-created \(i.e. a list item), it doesn't apply past the first
+created (e.g., a list item), it doesn't apply past the first
 headline encountered.
 
 Optional argument MINLEVEL, when non-nil, is an integer
 specifying the level that any top-level headline in the included
 file should have.
+
 Optional argument ID is an integer that will be inserted before
 each footnote definition and reference if FILE is an Org file.
 This is useful to avoid conflicts when more than one Org file
 with footnotes is included in a document.
 
 Optional argument FOOTNOTES is a hash-table to store footnotes in
-the included document.
-"
+the included document."
   (with-temp-buffer
     (insert-file-contents file)
     (when lines
@@ -3413,7 +3413,7 @@ the included document.
     (delete-region (point) (point-max))
     ;; If IND is set, preserve indentation of include keyword until
     ;; the first headline encountered.
-    (when ind
+    (when (and ind (> ind 0))
       (unless (eq major-mode 'org-mode)
 	(let ((org-inhibit-startup t)) (org-mode)))
       (goto-char (point-min))
@@ -3435,21 +3435,23 @@ the included document.
        (let ((levels (org-map-entries
 		      (lambda () (org-reduced-level (org-current-level))))))
 	 (when levels
-	   (let ((offset (- minlevel (apply 'min levels))))
+	   (let ((offset (- minlevel (apply #'min levels))))
 	     (unless (zerop offset)
 	       (when org-odd-levels-only (setq offset (* offset 2)))
 	       ;; Only change stars, don't bother moving whole
 	       ;; sections.
 	       (org-map-entries
-		(lambda () (if (< offset 0) (delete-char (abs offset))
-			(insert (make-string offset ?*)))))))))))
+		(lambda ()
+		  (if (< offset 0) (delete-char (abs offset))
+		    (insert (make-string offset ?*)))))))))))
     ;; Append ID to all footnote references and definitions, so they
     ;; become file specific and cannot collide with footnotes in other
     ;; included files.  Further, collect relevant footnotes outside of
     ;; LINES.
     (when id
       (let ((marker-min (point-min-marker))
-	    (marker-max (point-max-marker)))
+	    (marker-max (point-max-marker))
+	    seen)
 	(goto-char (point-min))
 	(while (re-search-forward org-footnote-re nil t)
 	  (let ((reference (org-element-context)))
@@ -3466,7 +3468,10 @@ the included document.
 		  (let ((new-label (org-export--update-footnote-label
 				    (org-element-property :begin reference)
 				    digit-label id)))
-		    (unless (eq (org-element-property :type reference) 'inline)
+		    (unless (or (eq (org-element-property :type reference)
+				    'inline)
+				(member label seen))
+		      (push label seen)
 		      (org-with-wide-buffer
 		       (let* ((definition (org-footnote-get-definition label))
 			      (beginning (nth 1 definition)))
@@ -3475,7 +3480,7 @@ the included document.
 			    "Definition not found for footnote %s in file %s"
 			    label file))
 			 (if (or (< beginning marker-min)
-				 (> beginning marker-max))
+				 (>= beginning marker-max))
 			     ;; Store since footnote-definition is
 			     ;; outside of LINES.
 			     (puthash new-label
