@@ -970,7 +970,7 @@ text
       (length
        (delete-dups
 	(let ((contents "
-Footnotes[fn:1], [fn:test] and [fn:inline:anonymous footnote].
+Footnotes[fn:1], [fn:test], [fn:test] and [fn:inline:anonymous footnote].
 \[fn:1] Footnote 1
 \[fn:test] Footnote \"test\""))
 	  (org-test-with-temp-text-in-file contents
@@ -983,8 +983,7 @@ Footnotes[fn:1], [fn:test] and [fn:inline:anonymous footnote].
 		    (org-export-expand-include-keyword)
 		    (org-element-map (org-element-parse-buffer)
 			'footnote-reference
-		      (lambda (ref)
-			(org-element-property :label ref)))))))))))))
+		      (lambda (r) (org-element-property :label r)))))))))))))
   ;; Footnotes labels are not local to each include keyword.
   (should
    (= 4
