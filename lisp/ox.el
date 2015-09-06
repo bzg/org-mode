@@ -3356,9 +3356,9 @@ Return the new label."
   (goto-char (1+ ref-begin))
   (buffer-substring (point)
 		    (progn
-		      (if digit-label (insert (format "fn:%d-" id))
+		      (if digit-label (insert (format "fn:--%d-" id))
 			(forward-char 3)
-			(insert (format "%d-" id)))
+			(insert (format "-%d-" id)))
 		      (1- (search-forward "]")))))
 
 (defun org-export--prepare-file-contents
@@ -3463,8 +3463,8 @@ the included document."
 		;; the new label, which is only used for footnotes
 		;; outsides LINES.
 		(when label
-		  ;; If label is akin to [1] convert it to [fn:ID-1].
-		  ;; Otherwise add "ID-" after "fn:".
+		  ;; If label is akin to [1] convert it to
+		  ;; [fn:--ID-1].  Otherwise add "-ID-" after "fn:".
 		  (let ((new-label (org-export--update-footnote-label
 				    (org-element-property :begin reference)
 				    digit-label id)))
