@@ -326,7 +326,7 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
      ("deg" "\\textdegree{}" nil "&deg;" "degree" "°" "°")
      ("prime" "\\prime" t "&prime;" "'" "'" "′")
      ("Prime" "\\prime{}\\prime" t "&Prime;" "''" "''" "″")
-     ("infin" "\\propto" t "&infin;" "[infinity]" "[infinity]" "∞")
+     ("infin" "\\infty" t "&infin;" "[infinity]" "[infinity]" "∞")
      ("infty" "\\infty" t "&infin;" "[infinity]" "[infinity]" "∞")
      ("prop" "\\propto" t "&prop;" "[proportional to]" "[proportional to]" "∝")
      ("propto" "\\propto" t "&prop;" "[proportional to]" "[proportional to]" "∝")
