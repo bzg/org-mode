@@ -3342,24 +3342,6 @@ Return a string of lines to be included in the format expected by
 		       (while (< (point) end) (cl-incf counter) (forward-line))
 		       counter))))))))
 
-(defun org-export--update-footnote-label (ref-begin digit-label id)
-  "Prefix footnote-label at point REF-BEGIN in buffer with ID.
-
-REF-BEGIN corresponds to the property `:begin' of objects of type
-footnote-definition and footnote-reference.
-
-If DIGIT-LABEL is non-nil the label is assumed to be of the form
-\[N] where N is one or more numbers.
-
-Return the new label."
-  (goto-char (1+ ref-begin))
-  (buffer-substring (point)
-		    (progn
-		      (if digit-label (insert (format "fn:--%d-" id))
-			(forward-char 3)
-			(insert (format "-%d-" id)))
-		      (1- (search-forward "]")))))
-
 (defun org-export--prepare-file-contents
     (file &optional lines ind minlevel id footnotes)
   "Prepare contents of FILE for inclusion and return it as a string.
@@ -3445,51 +3427,55 @@ the included document."
 		    (insert (make-string offset ?*)))))))))))
     ;; Append ID to all footnote references and definitions, so they
     ;; become file specific and cannot collide with footnotes in other
-    ;; included files.  Further, collect relevant footnotes outside of
-    ;; LINES.
+    ;; included files.  Further, collect relevant footnote definitions
+    ;; outside of LINES, in order to reintroduce them later.
     (when id
       (let ((marker-min (point-min-marker))
 	    (marker-max (point-max-marker))
-	    seen)
+	    (get-new-label
+	     (lambda (label)
+	       ;; Generate new label from LABEL.  If LABEL is akin to
+	       ;; [1] convert it to [fn:--ID-1].  Otherwise add "-ID-"
+	       ;; after "fn:".
+	       (if (org-string-match-p "\\`[0-9]+\\'" label)
+		   (format "fn:--%d-%s" id label)
+		 (format "fn:-%d-%s" id (substring label 3)))))
+	    (set-new-label
+	     (lambda (f old new)
+	       ;; Replace OLD label with NEW in footnote F.
+	       (save-excursion
+		 (goto-char (1+ (org-element-property :begin f)))
+		 (looking-at (regexp-quote old))
+		 (replace-match new))))
+	    (seen-alist))
 	(goto-char (point-min))
 	(while (re-search-forward org-footnote-re nil t)
-	  (let ((reference (org-element-context)))
-	    (when (eq (org-element-type reference) 'footnote-reference)
-	      (let* ((label (org-element-property :label reference))
-		     (digit-label
-		      (and label (org-string-match-p "\\`[0-9]+\\'" label))))
+	  (let ((footnote (save-excursion
+			    (backward-char)
+			    (org-element-context))))
+	    (when (memq (org-element-type footnote)
+			'(footnote-definition footnote-reference))
+	      (let* ((label (org-element-property :label footnote)))
 		;; Update the footnote-reference at point and collect
 		;; the new label, which is only used for footnotes
 		;; outsides LINES.
 		(when label
-		  ;; If label is akin to [1] convert it to
-		  ;; [fn:--ID-1].  Otherwise add "-ID-" after "fn:".
-		  (let ((new-label (org-export--update-footnote-label
-				    (org-element-property :begin reference)
-				    digit-label id)))
-		    (unless (or (eq (org-element-property :type reference)
-				    'inline)
-				(member label seen))
-		      (push label seen)
-		      (org-with-wide-buffer
-		       (let* ((definition (org-footnote-get-definition label))
-			      (beginning (nth 1 definition)))
-			 (unless definition
-			   (error
-			    "Definition not found for footnote %s in file %s"
-			    label file))
-			 (if (or (< beginning marker-min)
-				 (>= beginning marker-max))
+		  (let ((seen (cdr (assoc label seen-alist))))
+		    (if seen (funcall set-new-label footnote label seen)
+		      (let ((new (funcall get-new-label label)))
+			(push (cons label new) seen-alist)
+			(org-with-wide-buffer
+			 (let* ((def (org-footnote-get-definition label))
+				(beg (nth 1 def)))
+			   (when (and def
+				      (or (< beg marker-min)
+					  (>= beg marker-max)))
 			     ;; Store since footnote-definition is
 			     ;; outside of LINES.
-			     (puthash new-label
-				      (org-element-normalize-string
-				       (nth 3 definition))
-				      footnotes)
-			   ;; Update label of definition since it is
-			   ;; included directly.
-			   (org-export--update-footnote-label
-			    beginning digit-label id)))))))))))
+			     (puthash new
+				      (org-element-normalize-string (nth 3 def))
+				      footnotes))))
+			(funcall set-new-label footnote label new)))))))))
 	(set-marker marker-min nil)
 	(set-marker marker-max nil)))
     (org-element-normalize-string (buffer-string))))
