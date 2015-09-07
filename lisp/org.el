@@ -8043,18 +8043,17 @@ See also `org-promote'."
   (org-fix-position-after-promote))
 
 (defun org-demote-subtree ()
-  "Demote the entire subtree.  See `org-demote'.
-See also `org-promote'."
+  "Demote the entire subtree.
+See `org-demote' and `org-promote'."
   (interactive)
   (save-excursion
     (org-with-limited-levels (org-map-tree 'org-demote)))
   (org-fix-position-after-promote))
 
-
 (defun org-do-promote ()
   "Promote the current heading higher up the tree.
-If the region is active in `transient-mark-mode', promote all headings
-in the region."
+If the region is active in `transient-mark-mode', promote all
+headings in the region."
   (interactive)
   (save-excursion
     (if (org-region-active-p)
@@ -8064,8 +8063,8 @@ in the region."
 
 (defun org-do-demote ()
   "Demote the current heading lower down the tree.
-If the region is active in `transient-mark-mode', demote all headings
-in the region."
+If the region is active in `transient-mark-mode', demote all
+headings in the region."
   (interactive)
   (save-excursion
     (if (org-region-active-p)
@@ -8074,7 +8073,7 @@ in the region."
   (org-fix-position-after-promote))
 
 (defun org-fix-position-after-promote ()
-  "Make sure that after pro/demotion cursor position is right."
+  "Fix cursor position and indentation after demoting/promoting."
   (let ((pos (point)))
     (when (save-excursion
 	    (beginning-of-line 1)
