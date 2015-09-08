@@ -1,6 +1,6 @@
 ;;; org-mac-link.el --- Insert org-mode links to items selected in various Mac apps
 ;;
-;; Copyright (c) 2010-2014 Free Software Foundation, Inc.
+;; Copyright (c) 2010-2015 Free Software Foundation, Inc.
 ;;
 ;; Author: Anthony Lander <anthony.lander@gmail.com>
 ;;      John Wiegley <johnw@gnu.org>
@@ -18,6 +18,10 @@
 ;; Author: Mike McLean <mike.mclean@pobox.com>
 ;; Add support for Microsoft Outlook for Mac as Org mode links
 ;;
+;; Version: 1.3
+;; Author: Alan Schmitt <alan.schmitt@polytechnique.org>
+;; Consistently use `org-mac-paste-applescript-links'
+;; 
 ;; This file is not part of GNU Emacs.
 ;;
 ;; This program is free software; you can redistribute it and/or modify
@@ -299,15 +303,7 @@ The links are of the form <link>::split::<name>."
 (defun org-mac-firefox-get-frontmost-url ()
   (interactive)
   (message "Applescript: Getting Firefox url...")
-  (let* ((url-and-title (org-as-mac-firefox-get-frontmost-url))
-         (split-link (split-string url-and-title "::split::"))
-         (URL (car split-link))
-         (description (cadr split-link))
-         (org-link))
-    (when (not (string= URL ""))
-      (setq org-link (org-make-link-string URL description)))
-    (kill-new org-link)
-    org-link))
+  (org-mac-paste-applescript-links (org-as-mac-firefox-get-frontmost-url)))
 
 (defun org-mac-firefox-insert-frontmost-url ()
   (interactive)
@@ -345,15 +341,7 @@ The links are of the form <link>::split::<name>."
 (defun org-mac-vimperator-get-frontmost-url ()
   (interactive)
   (message "Applescript: Getting Vimperator url...")
-  (let* ((url-and-title (org-as-mac-vimperator-get-frontmost-url))
-         (split-link (split-string url-and-title "::split::"))
-         (URL (car split-link))
-         (description (cadr split-link))
-         (org-link))
-    (when (not (string= URL ""))
-      (setq org-link (org-make-link-string URL description)))
-    (kill-new org-link)
-    org-link))
+  (org-mac-paste-applescript-links (org-as-mac-vimperator-get-frontmost-url)))
 
 (defun org-mac-vimperator-insert-frontmost-url ()
   (interactive)
@@ -383,15 +371,7 @@ The links are of the form <link>::split::<name>."
 (defun org-mac-chrome-get-frontmost-url ()
   (interactive)
   (message "Applescript: Getting Chrome url...")
-  (let* ((url-and-title (org-as-mac-chrome-get-frontmost-url))
-         (split-link (split-string url-and-title "::split::"))
-         (URL (car split-link))
-         (description (cadr split-link))
-         (org-link))
-    (when (not (string= URL ""))
-      (setq org-link (org-make-link-string URL description)))
-    (kill-new org-link)
-    org-link))
+  (org-mac-paste-applescript-links (org-as-mac-chrome-get-frontmost-url)))
 
 (defun org-mac-chrome-insert-frontmost-url ()
   (interactive)
@@ -557,15 +537,7 @@ The links are of the form <link>::split::<name>."
 (defun org-mac-skim-get-page ()
   (interactive)
   (message "Applescript: Getting Skim page link...")
-  (let* ((link-and-descr (as-get-skim-page-link))
-         (split-link (split-string link-and-descr "::split::"))
-         (link (car split-link))
-         (description (cadr split-link))
-         (org-link))
-    (when (not (string= link ""))
-      (setq org-link (org-make-link-string link description)))
-    (kill-new org-link)
-    org-link))
+  (org-mac-paste-applescript-links (as-get-skim-page-link)))
 
 (defun org-mac-skim-insert-page ()
   (interactive)
@@ -640,27 +612,12 @@ The Org-syntax text will be pushed to the kill ring, and also returned."
   (interactive "sLink to (s)elected or (f)lagged messages: ")
   (setq select-or-flag (or select-or-flag "s"))
   (message "Org Mac Outlook: searching mailboxes...")
-  (let* ((as-link-list
-          (if (string= select-or-flag "s")
-              (org-as-get-selected-outlook-mail)
-	    (if (string= select-or-flag "f")
-		(org-sh-get-flagged-outlook-mail)
-	      (error "Please select \"s\" or \"f\""))))
-         (link-list
-          (mapcar
-           (lambda (x) (if (string-match "\\`\"\\(.*\\)\"\\'" x) (setq x (match-string 1 x))) x)
-           (split-string as-link-list "[\r\n]+")))
-         split-link URL description orglink orglink-insert rtn orglink-list)
-    (while link-list
-      (setq split-link (split-string (pop link-list) "::split::"))
-      (setq URL (car split-link))
-      (setq description (cadr split-link))
-      (when (not (string= URL ""))
-        (setq orglink (org-make-link-string URL description))
-        (push orglink orglink-list)))
-    (setq rtn (mapconcat 'identity orglink-list "\n"))
-    (kill-new rtn)
-    rtn))
+  (org-mac-paste-applescript-links
+   (if (string= select-or-flag "s")
+	(org-as-get-selected-outlook-mail)
+      (if (string= select-or-flag "f")
+	  (org-sh-get-flagged-outlook-mail)
+	(error "Please select \"s\" or \"f\"")))))
 
 (defun org-mac-outlook-message-insert-selected ()
   "Insert a link to the messages currently selected in Microsoft Outlook.app.
@@ -734,25 +691,7 @@ selected items in DEVONthink Pro Office.app and make links out of
 it/them. This function will push the Org-syntax text to the kill
 ring, and also return it."
   (message "Org Mac DEVONthink: looking for selected items...")
-  (let* ((as-link-list (org-as-get-selected-devonthink-item))
-         (link-list (if as-link-list
-                        (mapcar
-                         (lambda (x) (if (string-match "\\`\"\\(.*\\)\"\\'" x)
-					 (setq x (match-string 1 x)))
-			   x)
-                         (split-string as-link-list "[\r\n]+"))
-                      nil))
-         orglink-list)
-    (while link-list
-      (let* ((current-item (pop link-list)))
-        (message "current item: %s" current-item)
-        (when (and current-item (not (string= current-item "")))
-          (let* ((split-link (split-string current-item "::split::"))
-                 (orglink (org-make-link-string
-			   (url-encode-url (car split-link))
-			   (cadr split-link))))
-            (push orglink orglink-list)))))
-    (kill-new (mapconcat 'identity orglink-list "\n"))))
+  (org-mac-paste-applescript-links (org-as-get-selected-devonthink-item)))
 
 (defun org-mac-devonthink-item-insert-selected ()
   "Insert a link to the item(s) currently selected in DEVONthink Pro Office.
