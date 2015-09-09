@@ -108,34 +108,62 @@ variable, and communication channel under `info'."
 (ert-deftest test-org-export/parse-option-keyword ()
   "Test reading all standard #+OPTIONS: items."
   (should
-   (equal
-    (org-export--parse-option-keyword
-     "H:1 num:t \\n:t timestamp:t arch:t author:t creator:t d:t email:t
- *:t e:t ::t f:t pri:t -:t ^:t toc:t |:t tags:t tasks:t <:t todo:t inline:nil
- stat:t title:t")
-    '(:headline-levels
-      1 :section-numbers t :preserve-breaks t :time-stamp-file t
-      :with-archived-trees t :with-author t :with-creator t :with-drawers t
-      :with-email t :with-emphasize t :with-entities t :with-fixed-width t
-      :with-footnotes t :with-priority t :with-special-strings t
-      :with-sub-superscript t :with-toc t :with-tables t :with-tags t
-      :with-tasks t :with-timestamps t :with-todo-keywords t
-      :with-inlinetasks nil :with-statistics-cookies t :with-title t)))
+   (let ((options
+	  (org-export--parse-option-keyword
+	   "H:1 num:t \\n:t timestamp:t arch:t author:t creator:t d:t email:t \
+*:t e:t ::t f:t pri:t -:t ^:t toc:t |:t tags:t tasks:t <:t todo:t inline:nil \
+stat:t title:t")))
+     (and (eq (plist-get options :headline-levels) 1)
+	  (eq (plist-get options :section-numbers) t)
+	  (eq (plist-get options :preserve-breaks) t)
+	  (eq (plist-get options :time-stamp-file) t)
+	  (eq (plist-get options :with-archived-trees) t)
+	  (eq (plist-get options :with-author) t)
+	  (eq (plist-get options :with-drawers) t)
+	  (eq (plist-get options :with-email) t)
+	  (eq (plist-get options :with-emphasize) t)
+	  (eq (plist-get options :with-entities) t)
+	  (eq (plist-get options :with-fixed-width) t)
+	  (eq (plist-get options :with-footnotes) t)
+	  (eq (plist-get options :with-priority) t)
+	  (eq (plist-get options :with-special-strings) t)
+	  (eq (plist-get options :with-sub-superscript) t)
+	  (eq (plist-get options :with-toc) t)
+	  (eq (plist-get options :with-tables) t)
+	  (eq (plist-get options :with-tags) t)
+	  (eq (plist-get options :with-tasks) t)
+	  (eq (plist-get options :with-timestamps) t)
+	  (eq (plist-get options :with-todo-keywords) t)
+	  (eq (plist-get options :with-inlinetasks) nil)
+	  (eq (plist-get options :with-statistics-cookies) t)
+	  (eq (plist-get options :with-title) t))))
   ;; Test some special values.
   (should
-   (equal
-    (org-export--parse-option-keyword
-     "arch:headline d:(\"TEST\") ^:{} toc:1 tags:not-in-toc tasks:todo num:2 <:active")
-    '(:with-archived-trees
-      headline :with-drawers ("TEST") :with-sub-superscript {} :with-toc 1
-      :with-tags not-in-toc :with-tasks todo :section-numbers 2
-      :with-timestamps active)))
+   (let ((options
+	  (org-export--parse-option-keyword
+	   "arch:headline d:(\"TEST\") ^:{} toc:1 tags:not-in-toc tasks:todo \
+num:2 <:active")))
+     (and (eq (plist-get options :with-archived-trees) 'headline)
+	  (eq (plist-get options :with-sub-superscript) '{})
+	  (eq (plist-get options :with-toc) 1)
+	  (eq (plist-get options :with-tags) 'not-in-toc)
+	  (eq (plist-get options :with-tasks) 'todo)
+	  (eq (plist-get options :section-numbers) 2)
+	  (eq (plist-get options :with-timestamps) 'active)
+	  (equal (plist-get options :with-drawers) '("TEST")))))
   ;; Test back-end specific values.
   (should
    (equal
     (org-export--parse-option-keyword
      "opt:t" (org-export-create-backend :options '((:option nil "opt"))))
-    '(:option t))))
+    '(:option t)))
+  ;; More than one property can refer to the same option item.
+  (should
+   (equal '(:opt1 t :opt2 t)
+	  (org-export--parse-option-keyword
+	   "opt:t"
+	   (org-export-create-backend
+	    :options '((:opt1 nil "opt") (:opt2 nil "opt")))))))
 
 (ert-deftest test-org-export/get-inbuffer-options ()
   "Test reading all standard export keywords."
