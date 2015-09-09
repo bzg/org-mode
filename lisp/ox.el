@@ -4086,7 +4086,7 @@ error if no block contains REF."
 
 INFO is a plist holding contextual information.
 
-Return value can be an object, an element, or nil:
+Return value can be an object or an element:
 
 - If LINK path matches a target object (i.e. <<path>>) return it.
 
