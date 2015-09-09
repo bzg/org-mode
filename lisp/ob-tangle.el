@@ -242,7 +242,7 @@ used to limit the exported source code blocks by language."
 			 (base-name (cond
 				     ((string= "yes" tangle)
 				      (file-name-sans-extension
-				       (buffer-file-name)))
+				       (nth 1 spec)))
 				     ((string= "no" tangle) nil)
 				     ((> (length tangle) 0) tangle)))
 			 (file-name (when base-name
@@ -427,7 +427,7 @@ list to be used by `org-babel-tangle' directly."
 	 (start-line
 	  (save-restriction (widen)
 			    (+ 1 (line-number-at-pos (point)))))
-	 (file (buffer-file-name))
+	 (file (buffer-file-name (buffer-base-buffer)))
 	 (src-lang (nth 0 info))
 	 (params (nth 2 info))
 	 (extra (nth 3 info))
