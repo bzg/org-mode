@@ -169,6 +169,12 @@
   :group 'org-mac-link
   :type 'boolean)
 
+(defcustom org-mac-grab-Acrobat-app-p t
+  "Add menu option [A]crobat to grab page links from Acrobat.app."
+  :tag "Grab Acrobat.app page links"
+  :group 'org-mac-link
+  :type 'boolean)
+
 (defgroup org-mac-flagged-mail nil
   "Options foring linking to flagged Mail.app messages."
   :tag "Org Mail.app"
@@ -211,7 +217,8 @@ When done, go grab the link, and insert it at point."
 	    ("v" "imperator" org-mac-vimperator-insert-frontmost-url ,org-mac-grab-Firefox+Vimperator-p)
 	    ("c" "hrome" org-mac-chrome-insert-frontmost-url ,org-mac-grab-Chrome-app-p)
 	    ("t" "ogether" org-mac-together-insert-selected ,org-mac-grab-Together-app-p)
-	    ("S" "kim" org-mac-skim-insert-page ,org-mac-grab-Skim-app-p)))
+	    ("S" "kim" org-mac-skim-insert-page ,org-mac-grab-Skim-app-p)
+	    ("A" "crobat" org-mac-acrobat-insert-page ,org-mac-grab-Acrobat-app-p)))
          (menu-string (make-string 0 ?x))
          input)
 
@@ -542,6 +549,57 @@ The links are of the form <link>::split::<name>."
 (defun org-mac-skim-insert-page ()
   (interactive)
   (insert (org-mac-skim-get-page)))
+
+;; Handle links from Adobe Acrobat Pro.app
+;;
+;; Original code & idea by Christopher Suckling (org-mac-protocol)
+;;
+;; The URI format is path_to_pdf_file::page_number
+
+(org-add-link-type "acrobat" 'org-mac-acrobat-open)
+
+(defun org-mac-acrobat-open (uri)
+  "Visit page of pdf in Acrobat"
+  (let* ((page (when (string-match "::\\(.+\\)\\'" uri)
+                 (match-string 1 uri)))
+         (document (substring uri 0 (match-beginning 0))))
+    (do-applescript
+     (concat
+      "tell application \"Adobe Acrobat Pro\"\n"
+      "  activate\n"
+      "  set theDoc to \"" document "\"\n"
+      "  set thePage to " page "\n"
+      "  open theDoc\n"
+      "  tell PDF Window 1\n"
+      "    goto page thePage\n"
+      "  end tell\n"
+      "end tell"))))
+
+;; The applescript returns link in the format
+;; "adobe:path_to_pdf_file::page_number::split::document_title, p.page_label"
+
+(defun org-mac-as-get-acrobat-page-link ()
+  (do-applescript
+   (concat
+    "tell application \"Adobe Acrobat Pro\"\n"
+    "  set theDoc to active doc\n"
+    "  set theWindow to (PDF Window 1 of theDoc)\n"
+    "  set thePath to (file alias of theDoc)\n"
+    "  set theTitle to (name of theWindow)\n"
+    "  set thePage to (page number of theWindow)\n"
+    "  set theLabel to (label text of (page thePage of theWindow))\n"
+    "end tell\n"
+    "set theResult to \"acrobat:\" & thePath & \"::\" & thePage & \"::split::\" & theTitle & \", p.\" & theLabel\n"
+    "return theResult as string\n")))
+
+(defun org-mac-acrobat-get-page ()
+  (interactive)
+  (message "Applescript: Getting Acrobat page link...")
+  (org-mac-paste-applescript-links (org-mac-as-get-acrobat-page-link)))
+
+(defun org-mac-acrobat-insert-page ()
+  (interactive)
+  (insert (org-mac-acrobat-get-page)))
 
 
 ;; Handle links from Microsoft Outlook.app
