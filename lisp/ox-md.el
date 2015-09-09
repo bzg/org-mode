@@ -301,12 +301,11 @@ channel."
 CONTENTS is the link's description.  INFO is a plist used as
 a communication channel."
   (let ((link-org-files-as-md
-	 (function
-	  (lambda (raw-path)
-	    ;; Treat links to `file.org' as links to `file.md'.
-	    (if (string= ".org" (downcase (file-name-extension raw-path ".")))
-		(concat (file-name-sans-extension raw-path) ".md")
-	      raw-path))))
+	 (lambda (raw-path)
+	   ;; Treat links to `file.org' as links to `file.md'.
+	   (if (string= ".org" (downcase (file-name-extension raw-path ".")))
+	       (concat (file-name-sans-extension raw-path) ".md")
+	     raw-path)))
 	(type (org-element-property :type link)))
     (cond
      ;; Link type is handled by a special function.
@@ -344,18 +343,20 @@ a communication channel."
 		(org-export-resolve-coderef ref info))))
      ((equal type "radio") contents)
      ((equal type "fuzzy")
-      (let ((destination (org-export-resolve-fuzzy-link link info)))
-	(if (org-string-nw-p contents) contents
-	  (when destination
-	    (let ((number (org-export-get-ordinal destination info)))
-	      (if number
-		  (if (atom number) (number-to-string number)
-		    (mapconcat #'number-to-string number "."))
-		;; Unnumbered headline.
-		(and (eq 'headline (org-element-type destination))
-		     ;; BUG: shouldn't headlines have a form like [ref](name) in md?
-		     (org-export-data
-		      (org-element-property :title destination) info))))))))
+      (let* ((destination (org-export-resolve-fuzzy-link link info))
+	     (description
+	      (or (org-string-nw-p contents)
+		  (let ((number (org-export-get-ordinal destination info)))
+		    (cond
+		     ((not number)
+		      (and (eq 'headline (org-element-type destination))
+			   (org-export-data
+			    (org-element-property :title destination) info)))
+		     ((atom number) (number-to-string number))
+		     (t (mapconcat #'number-to-string number ".")))))))
+	(format "[%s](%s)"
+		description
+		(org-export-get-reference destination info))))
      (t (let* ((raw-path (org-element-property :path link))
 	       (path
 		(cond
