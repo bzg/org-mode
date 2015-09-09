@@ -354,7 +354,7 @@ a communication channel."
 			    (org-element-property :title destination) info)))
 		     ((atom number) (number-to-string number))
 		     (t (mapconcat #'number-to-string number ".")))))))
-	(format "[%s](%s)"
+	(format "[%s](#%s)"
 		description
 		(org-export-get-reference destination info))))
      (t (let* ((raw-path (org-element-property :path link))
