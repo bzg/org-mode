@@ -2784,17 +2784,10 @@ INFO is a plist holding contextual information.  See
 			     (org-export-resolve-fuzzy-link link info)
 			   (org-export-resolve-id-link link info))))
 	(case (org-element-type destination)
-	  ;; Case 1: Fuzzy link points nowhere.
-	  ('nil
-	   (format "<text:span text:style-name=\"%s\">%s</text:span>"
-		   "Emphasis"
-		   (or desc
-		       (org-export-data (org-element-property :raw-link link)
-					info))))
-	  ;; Case 2: Fuzzy link points to a headline.
+	  ;; Fuzzy link points to a headline.  If there's
+	  ;; a description, create a hyperlink.  Otherwise, try to
+	  ;; provide a meaningful description.
 	  (headline
-	   ;; If there's a description, create a hyperlink.
-	   ;; Otherwise, try to provide a meaningful description.
 	   (if (not desc) (org-odt-link--infer-description destination info)
 	     (let ((label
 		    (or (and (string= type "custom-id")
@@ -2803,15 +2796,15 @@ INFO is a plist holding contextual information.  See
 	       (format
 		"<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
 		label desc))))
-	  ;; Case 3: Fuzzy link points to a target.
+	  ;; Fuzzy link points to a target.  If there's a description,
+	  ;; create a hyperlink.  Otherwise, try to provide
+	  ;; a meaningful description.
 	  (target
-	   ;; If there's a description, create a hyperlink.
-	   ;; Otherwise, try to provide a meaningful description.
 	   (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
 		   (org-export-get-reference destination info)
 		   (or desc (org-export-get-ordinal destination info))))
-	  ;; Case 4: Fuzzy link points to some element (e.g., an
-	  ;; inline image, a math formula or a table).
+	  ;; Fuzzy link points to some element (e.g., an inline image,
+	  ;; a math formula or a table).
 	  (otherwise
 	   (let ((label-reference
 		  (ignore-errors
