@@ -2628,15 +2628,12 @@ from tree."
 			;; If headline is archived but tree below has
 			;; to be skipped, remove contents.
 			(org-element-set-contents data)
-		      ;; Move into secondary string, if any.
-		      (let ((sec-prop
-			     (cdr (assq type
-					org-element-secondary-value-alist))))
-			(when sec-prop
-			  (mapc walk-data
-				(org-element-property sec-prop data))))
 		      ;; Move into recursive objects/elements.
-		      (mapc walk-data (org-element-contents data)))))))))
+		      (mapc walk-data (org-element-contents data)))
+		    ;; Move into secondary string, if any.
+		    (dolist (p (cdr (assq type
+					  org-element-secondary-value-alist)))
+		      (mapc walk-data (org-element-property p data)))))))))
     ;; If a select tag is active, also ignore the section before the
     ;; first headline, if any.
     (when selected
