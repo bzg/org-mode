@@ -7352,8 +7352,11 @@ in the agenda."
 (defvar org-agenda-filtered-by-category nil)
 
 (defun org-agenda-filter-by-category (strip)
-  "Keep only those lines in the agenda buffer that have a specific category.
-The category is that of the current line."
+  "Filter lines in the agenda buffer that have a specific category.
+The category is that of the current line.
+Without prefix argument, keep only the lines of that category.
+With a prefix argument, exclude the lines of that category.
+"
   (interactive "P")
   (if (and org-agenda-filtered-by-category
 	   org-agenda-category-filter)

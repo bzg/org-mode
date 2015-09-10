@@ -8616,9 +8616,10 @@ selected.
 @vindex org-agenda-category-filter-preset
 
 Filter the current agenda view with respect to the category of the item at
-point.  Pressing @code{<} another time will remove this filter.  You can add
-a filter preset through the option @code{org-agenda-category-filter-preset}
-(see below.)
+point.  Pressing @code{<} another time will remove this filter.  When called
+with a prefix argument exclude the category of the item at point from the
+agenda.  You can add a filter preset through the option
+@code{org-agenda-category-filter-preset} (see below.)
 
 @orgcmd{^,org-agenda-filter-by-top-headline}
 Filter the current agenda view and only display the siblings and the parent
