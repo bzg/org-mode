@@ -7366,7 +7366,7 @@ With a prefix argument, exclude the lines of that category.
        ((and cat strip)
         (org-agenda-filter-apply
          (push (concat "-" cat) org-agenda-category-filter) 'category))
-       ((and cat)
+       (cat
         (org-agenda-filter-apply
          (setq org-agenda-category-filter
 	       (list (concat "+" cat))) 'category))
