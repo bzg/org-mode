@@ -595,11 +595,11 @@ Paragraph"
 			   nil nil nil '(:with-properties ("B"))))))
   ;; Statistics cookies.
   (should
-   (equal ""
+   (equal "* Stats"
 	  (let (org-export-filter-body-functions
 		org-export-filter-final-output-functions)
 	    (org-trim
-	     (org-test-with-temp-text "[0/0]"
+	     (org-test-with-temp-text "* Stats [0/0]"
 	       (org-export-as (org-test-default-backend)
 			      nil nil nil '(:with-statistics-cookies nil)))))))
   ;; Tables.
