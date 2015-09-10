@@ -3849,8 +3849,9 @@ position of point and CDR is nil."
 		(and dualp
 		     (let ((sec (org-match-string-no-properties 2)))
 		       (if (or (not sec) (not parsedp)) sec
-			 (org-element--parse-objects
-			  (match-beginning 2) (match-end 2) nil restrict)))))
+			 (save-match-data
+			   (org-element--parse-objects
+			    (match-beginning 2) (match-end 2) nil restrict))))))
 	       ;; Attribute a property name to KWD.
 	       (kwd-sym (and kwd (intern (concat ":" (downcase kwd))))))
 	  ;; Now set final shape for VALUE.
