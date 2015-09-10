@@ -77,6 +77,23 @@
       (should (string-match (regexp-quote "simple") expanded))
       (should (string-match (regexp-quote "length 14") expanded)))))
 
+(ert-deftest ob-tangle/comment-links-at-left-margin ()
+    "Test commenting of links at left margin."
+  (should
+   (string-match
+    (regexp-quote "# [[http://orgmode.org][Org mode]]")
+    (org-test-with-temp-text-in-file
+	"[[http://orgmode.org][Org mode]]
+#+header: :comments org :tangle \"test-ob-tangle.sh\"
+#+begin_src sh
+echo 1
+#+end_src"
+      (unwind-protect
+	  (progn (org-babel-tangle)
+		 (with-temp-buffer (insert-file-contents "test-ob-tangle.sh")
+				   (buffer-string)))
+	(delete-file "test-ob-tangle.sh"))))))
+
 (provide 'test-ob-tangle)
 
 ;;; test-ob-tangle.el ends here

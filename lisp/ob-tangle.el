@@ -362,13 +362,17 @@ that the appropriate major-mode is set.  SPEC has the form:
 			   (when (and comments (not (string= comments "no"))
 				      (> (length text) 0))
 			     (if org-babel-tangle-uncomment-comments
-				 ;; just plain comments with no processing
+				 ;; Plain comments: no processing.
 				 (insert text)
-			       ;; ensure comments are made to be
-			       ;; comments, and add a trailing newline
+			       ;; Ensure comments are made to be
+			       ;; comments, and add a trailing
+			       ;; newline.  Also ignore invisible
+			       ;; characters when commenting.
 			       (comment-region
-				(point) (progn (insert text) (point)))
-			       (end-of-line nil)
+				(point)
+				(progn (insert (org-no-properties text))
+				       (point)))
+			       (end-of-line)
 			       (insert "\n"))))))
     (when comment (funcall insert-comment comment))
     (when link-p
