@@ -14847,7 +14847,8 @@ of code block evaluation, @emph{both} the code and the results of code block
 evaluation, or @emph{none}.  For most languages, the default exports code.
 However, for some languages (e.g., @code{ditaa}) the default exports the
 results of code block evaluation.  For information on exporting code block
-bodies, see @ref{Literal examples}.
+bodies, see @ref{Literal examples}.  For information on exporting
+parts of Org documents, see @ref{Exporting}.
 
 The @code{:exports} header argument can be used to specify export
 behavior (note that these arguments are only relevant for code blocks, not
