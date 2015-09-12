@@ -10596,8 +10596,7 @@ toggle export options@footnote{It is also possible to use a less intrusive
 interface by setting @code{org-export-dispatch-use-expert-ui} to a
 non-@code{nil} value.  In that case, only a prompt is visible from the
 minibuffer.  From there one can still switch back to regular menu by pressing
-@key{?}.} from which it is possible to select an export format and to toggle
-export options.
+@key{?}.}.
 
 @table @asis
 @orgcmd{C-c C-e,org-export-dispatch}
