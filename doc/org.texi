@@ -10600,8 +10600,7 @@ toggle export options@footnote{It is also possible to use a less intrusive
 interface by setting @code{org-export-dispatch-use-expert-ui} to a
 non-@code{nil} value.  In that case, only a prompt is visible from the
 minibuffer.  From there one can still switch back to regular menu by pressing
-@key{?}.} from which it is possible to select an export format and to toggle
-export options.
+@key{?}.}.
 
 @table @asis
 @orgcmd{C-c C-e,org-export-dispatch}
@@ -14851,7 +14850,8 @@ of code block evaluation, @emph{both} the code and the results of code block
 evaluation, or @emph{none}.  For most languages, the default exports code.
 However, for some languages (e.g., @code{ditaa}) the default exports the
 results of code block evaluation.  For information on exporting code block
-bodies, see @ref{Literal examples}.
+bodies, see @ref{Literal examples}.  For information on exporting
+parts of Org documents, see @ref{Exporting}.
 
 The @code{:exports} header argument can be used to specify export
 behavior (note that these arguments are only relevant for code blocks, not
@@ -14972,10 +14972,9 @@ and/or the name of the evaluated code block.  The default value of
 @code{org-babel-results-keyword}.
 
 By default, the evaluation facility is only enabled for Lisp code blocks
-specified as @code{emacs-lisp}.  However, source code blocks in many languages
-can be evaluated within Org mode (see @ref{Languages} for a list of supported
-languages and @ref{Structure of code blocks} for information on the syntax
-used to define a code block).
+specified as @code{emacs-lisp}.  See @ref{Languages} to enable other
+supported languages.  See @ref{Structure of code blocks} for information on
+the syntax used to define a code block.
 
 @kindex C-c C-c
 There are a number of ways to evaluate code blocks.  The simplest is to press
