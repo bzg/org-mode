@@ -144,6 +144,7 @@
     (:latex-text-markup-alist nil nil org-latex-text-markup-alist)
     (:latex-title-command nil nil org-latex-title-command)
     (:latex-toc-command nil nil org-latex-toc-command)
+    (:latex-compiler "LATEX_COMPILER" nil org-latex-compiler)
     ;; Redefine regular options.
     (:date "DATE" nil "\\today" parse)))
 
@@ -1039,15 +1040,40 @@ during latex export it will output
 
 ;;;; Compilation
 
+(defcustom org-latex-compiler-file-string "%% Indented LaTeX compiler: %s\n"
+  "LaTeX program format-string."
+  :group 'org-export-latex
+  :type '(choice
+	  (const :tag "Comment" "%% Indented LaTeX compiler: %s\n")
+	  (const :tag "latex-mode file variable" "%% -*- latex-run-command: %s -*-\n")
+	  (const :tag "AUCTeX file variable" "%% -*- LaTeX-command: %s -*-\n")
+	  (string :tag "custom format" "%% %s"))
+  :version "25.1"
+  :package-version '(Org . "9.0"))
+
+(defcustom org-latex-compiler "pdflatex"
+  "LaTeX program to use.  Must be an element in `org-latex-compilers'."
+  :group 'org-export-latex
+  :type '(choice
+	  (const :tag "pdfLaTeX" "pdflatex")
+	  (const :tag "XeLaTeX"  "xelatex")
+	  (const :tag "LuaLaTeX" "lualatex"))
+  :version "25.1"
+  :package-version '(Org . "9.0"))
+
+(defconst org-latex-compilers '("pdflatex" "xelatex" "lualatex")
+  "Known LaTeX programs.")
+
 (defcustom org-latex-pdf-process
-  '("pdflatex -interaction nonstopmode -output-directory %o %f"
-    "pdflatex -interaction nonstopmode -output-directory %o %f"
-    "pdflatex -interaction nonstopmode -output-directory %o %f")
+  '("%latex -interaction nonstopmode -output-directory %o %f"
+    "%latex -interaction nonstopmode -output-directory %o %f"
+    "%latex -interaction nonstopmode -output-directory %o %f")
   "Commands to process a LaTeX file to a PDF file.
 This is a list of strings, each of them will be given to the
 shell as a command.  %f in the command will be replaced by the
 full file name, %b by the file base name (i.e. without directory
-and extension parts) and %o by the base directory of the file.
+and extension parts), %o by the base directory of the file,
+and %latex is the LaTeX compiler (see `org-latex-compiler').
 
 The reason why this is a list is that it usually takes several
 runs of `pdflatex', maybe mixed with a call to `bibtex'.  Org
@@ -1055,18 +1081,8 @@ does not have a clever mechanism to detect which of these
 commands have to be run to get to a stable result, and it also
 does not do any error checking.
 
-By default, Org uses 3 runs of `pdflatex' to do the processing.
-If you have texi2dvi on your system and if that does not cause
-the infamous egrep/locale bug:
-
-     http://lists.gnu.org/archive/html/bug-texinfo/2010-03/msg00031.html
-
-then `texi2dvi' is the superior choice as it automates the LaTeX
-build process by calling the \"correct\" combinations of
-auxiliary programs.  Org does offer `texi2dvi' as one of the
-customize options.  Alternatively, `rubber' and `latexmk' also
-provide similar functionality.  The latter supports `biber' out
-of the box.
+Consider a smart LaTeX compiler such as `texi2dvi' or `latexmk',
+which calls the \"correct\" combinations of auxiliary programs.
 
 Alternatively, this may be a Lisp function that does the
 processing, so you could use this to apply the machinery of
@@ -1076,36 +1092,22 @@ file name as its single argument."
   :type '(choice
 	  (repeat :tag "Shell command sequence"
 		  (string :tag "Shell command"))
-	  (const :tag "2 runs of pdflatex"
-		 ("pdflatex -interaction nonstopmode -output-directory %o %f"
-		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
-	  (const :tag "3 runs of pdflatex"
-		 ("pdflatex -interaction nonstopmode -output-directory %o %f"
-		   "pdflatex -interaction nonstopmode -output-directory %o %f"
-		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
-	  (const :tag "pdflatex,bibtex,pdflatex,pdflatex"
-		 ("pdflatex -interaction nonstopmode -output-directory %o %f"
-		   "bibtex %b"
-		   "pdflatex -interaction nonstopmode -output-directory %o %f"
-		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
-	  (const :tag "2 runs of xelatex"
-		 ("xelatex -interaction nonstopmode -output-directory %o %f"
-		  "xelatex -interaction nonstopmode -output-directory %o %f"))
-	  (const :tag "3 runs of xelatex"
-		 ("xelatex -interaction nonstopmode -output-directory %o %f"
-		  "xelatex -interaction nonstopmode -output-directory %o %f"
-		  "xelatex -interaction nonstopmode -output-directory %o %f"))
-	  (const :tag "xelatex,bibtex,xelatex,xelatex"
-		 ("xelatex -interaction nonstopmode -output-directory %o %f"
+	  (const :tag "2 runs of latex"
+		 ("%latex -interaction nonstopmode -output-directory %o %f"
+		  "%latex -interaction nonstopmode -output-directory %o %f"))
+	  (const :tag "3 runs of latex"
+		 ("%latex -interaction nonstopmode -output-directory %o %f"
+		  "%latex -interaction nonstopmode -output-directory %o %f"
+		  "%latex -interaction nonstopmode -output-directory %o %f"))
+	  (const :tag "latex,bibtex,latex,latex"
+		 ("%latex -interaction nonstopmode -output-directory %o %f"
 		  "bibtex %b"
-		  "xelatex -interaction nonstopmode -output-directory %o %f"
-		  "xelatex -interaction nonstopmode -output-directory %o %f"))
+		  "%latex -interaction nonstopmode -output-directory %o %f"
+		  "%latex -interaction nonstopmode -output-directory %o %f"))
 	  (const :tag "texi2dvi"
-		 ("texi2dvi -p -b -V %f"))
-	  (const :tag "rubber"
-		 ("rubber -d --into %o %f"))
+		 ("LATEX=\"%latex\" texi2dvi -p -b -V %f"))
 	  (const :tag "latexmk"
-		 ("latexmk -g -pdf %f"))
+		 ("latexmk -g -pdflatex=\"%latex\" %f"))
 	  (function)))
 
 (defcustom org-latex-logfiles-extensions
@@ -1346,6 +1348,30 @@ Return the new header."
 		  ""))
 	 t t header 0)))))
 
+(defun org-latex--remove-packages (pkg-alist info)
+  "Remove packages based on the current LaTeX program.
+
+If the fourth argument of an element is set in pkg-alist, and it
+is not a member of the LaTeX program of the document, the packages
+is removed.  See also `org-latex-compiler'.
+
+Return modified pkg-alist."
+  (let ((compiler (or (plist-get info :latex-compiler) "")))
+    (if (member-ignore-case compiler org-latex-compilers)
+	(delq nil
+	      (mapcar
+	       (lambda (pkg)
+		 (unless (and
+			  (listp pkg)
+			  (let ((third (nth 3 pkg)))
+			    (and third
+				 (not (member-ignore-case
+				       compile
+				       (if (listp third) third (list third)))))))
+		   pkg))
+	       pkg-alist))
+      pkg-alist)))
+
 (defun org-latex--find-verb-separator (s)
   "Return a character not used in string S.
 This is used to choose a separator for constructs like \\verb."
@@ -1495,8 +1521,9 @@ INFO is a plist used as a communication channel."
 	    (org-element-normalize-string
 	     (org-splice-latex-header
 	      document-class-string
-	      org-latex-default-packages-alist
-	      org-latex-packages-alist nil
+	      (org-latex--remove-packages org-latex-default-packages-alist info)
+	      (org-latex--remove-packages org-latex-packages-alist info)
+	      nil
 	      (concat (org-element-normalize-string
 		       (plist-get info :latex-header))
 		      (plist-get info :latex-header-extra)))))
@@ -1516,6 +1543,11 @@ holding export options."
      ;; Time-stamp.
      (and (plist-get info :time-stamp-file)
 	  (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
+     ;; LaTeX program.
+     (let ((compiler (plist-get info :latex-compiler)))
+       (and (org-string-nw-p org-latex-compiler-file-string)
+	    (string-match-p (regexp-opt org-latex-compilers) (or compiler ""))
+	    (format org-latex-compiler-file-string compiler)))
      ;; Document class and packages.
      (org-latex--make-header info)
      ;; Possibly limit depth for headline numbering.
@@ -3432,6 +3464,14 @@ create a log buffer and do not bother removing log files.
 Return PDF file name or an error if it couldn't be produced."
   (let* ((base-name (file-name-sans-extension (file-name-nondirectory texfile)))
 	 (full-name (file-truename texfile))
+	 (compiler (or (with-temp-buffer
+			 (save-excursion (insert-file-contents full-name))
+			 (when (and (search-forward-regexp
+				     (regexp-opt org-latex-compilers) (line-end-position 2) t)
+				    (progn (beginning-of-line)
+					   (looking-at-p "%")))
+			   (match-string 0)))
+		       "pdflatex"))
 	 (out-dir (file-name-directory texfile))
 	 ;; Properly set working directory for compilation.
 	 (default-directory (if (file-name-absolute-p texfile)
@@ -3454,11 +3494,13 @@ Return PDF file name or an error if it couldn't be produced."
 	  (dolist (command org-latex-pdf-process)
 	    (shell-command
 	     (replace-regexp-in-string
-	      "%b" (shell-quote-argument base-name)
+	      "%latex" (shell-quote-argument compiler)
 	      (replace-regexp-in-string
-	       "%f" (shell-quote-argument full-name)
+	       "%b" (shell-quote-argument base-name)
 	       (replace-regexp-in-string
-		"%o" (shell-quote-argument out-dir) command t t) t t) t t)
+		"%f" (shell-quote-argument full-name)
+		(replace-regexp-in-string
+		 "%o" (shell-quote-argument out-dir) command t t) t t) t t) t)
 	     outbuf))
 	  ;; Collect standard errors from output buffer.
 	  (setq warnings (and (not snippet)

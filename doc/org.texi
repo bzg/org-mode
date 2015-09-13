@@ -11899,16 +11899,14 @@ pages, configure the variable @code{org-html-use-infojs}.
 @cindex @LaTeX{} export
 @cindex PDF export
 
-@LaTeX{} export can produce an arbitrarily complex LaTeX document of any
-standard or custom document class.  With further processing@footnote{The
-default @LaTeX{} output is designed for processing with @code{pdftex} or
-@code{latex}.  The @LaTeX{} exporter can be configured to support alternative
-TeX engines, see see @code{org-latex-pdf-process}, and alternative packages,
-see @code{org-latex-default-packages-alist} and
-@code{org-latex-packages-alist}.}, which the @LaTeX{} exporter is able to
-control, this back-end is able to produce PDF output.  Because the @LaTeX{}
-exporter can be configured to use the @code{hyperref} package, the default
-setup produces fully-linked PDF output.
+The @LaTeX{} exporter can produce an arbitrarily complex @LaTeX{} document of
+any standard or custom document class@footnote{The @LaTeX{} exporter can be
+configured to support alternative @LaTeX{} engines (see
+@code{org-latex-compiler}), build sequences (see
+@code{org-latex-pdf-process}), and packages, (see
+@code{org-latex-default-packages-alist} and
+@code{org-latex-packages-alist}).}.  The Org @LaTeX{} exporter is geared
+towards producing fully-linked PDF output.
 
 As in @LaTeX{}, blank lines are meaningful for this back-end: a paragraph
 will not be started if two contiguous syntactical elements are not separated
@@ -11942,6 +11940,19 @@ Export as @LaTeX{} and then process to PDF.
 Export as @LaTeX{} and then process to PDF, then open the resulting PDF file.
 @end table
 
+@vindex org-latex-compiler
+@vindex org-latex-bibtex-compiler
+@vindex org-latex-default-packages-alist
+The exporter supports several @LaTeX{} engines, namely @samp{pdflatex},
+@samp{xelatex} and @samp{lualatex}.  The default @LaTeX{} compiler can be set
+via @code{org-latex-compiler} or the @code{#+LATEX_COMPILER} keyword.  It is
+possible to only load some packages with certain compilers (see the docstring
+of @code{org-latex-default-packages-alist}).  The bibliography compiler may
+also be set via @code{org-latex-bibtex-compiler}@footnote{You cannot set the
+bibliography compiler on a file basis via a keyword.  However, ``smart''
+@LaTeX{} compilation systems, such as @samp{latexmk}, are usually able to
+select the correct bibliography compiler.}.
+
 @node @LaTeX{} specific export settings
 @subsection @LaTeX{} specific export settings
 The @LaTeX{} exporter introduces a number of keywords, similar to the general
@@ -11967,6 +11978,11 @@ The predefined preamble and headline level mapping to use
 @item LATEX_CLASS_OPTIONS
 @cindex #+LATEX_CLASS_OPTIONS
 Options given to the @LaTeX{} document class.
+
+@item LATEX_COMPILER
+@cindex #+LATEX_COMPILER
+@vindex org-latex-compiler
+The compiler used to produce the PDF (@code{org-latex-compiler}).
 
 @item LATEX_HEADER
 @cindex #+LATEX_HEADER
@@ -14381,6 +14397,7 @@ however, override everything.
 @item @code{:latex-caption-above}              @tab @code{org-latex-caption-above}
 @item @code{:latex-classes}                    @tab @code{org-latex-classes}
 @item @code{:latex-class}                      @tab @code{org-latex-default-class}
+@item @code{:latex-compiler}                   @tab @code{org-latex-compiler}
 @item @code{:latex-default-figure-position}    @tab @code{org-latex-default-figure-position}
 @item @code{:latex-default-table-environment}  @tab @code{org-latex-default-table-environment}
 @item @code{:latex-default-table-mode}         @tab @code{org-latex-default-table-mode}

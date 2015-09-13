@@ -4080,8 +4080,8 @@ header, or they will be appended."
 	  (default-value var)))
 
 (defcustom org-latex-default-packages-alist
-  '(("AUTO" "inputenc"  t)
-    ("T1"   "fontenc"   t)
+  '(("AUTO" "inputenc"  t ("pdflatex"))
+    ("T1"   "fontenc"   t ("pdflatex"))
     (""     "graphicx"  t)
     (""     "grffile"   t)
     (""     "longtable" nil)
