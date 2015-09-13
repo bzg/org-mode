@@ -3502,24 +3502,26 @@ Return PDF file name or an error if it couldn't be produced."
        ((functionp org-latex-pdf-process)
 	(funcall org-latex-pdf-process (shell-quote-argument texfile)))
        ;; A list is provided: Replace %b, %f and %o with appropriate
-       ;; values in each command before applying it.  Output is
-       ;; redirected to "*Org PDF LaTeX Output*" buffer.
+       ;; values in each command before applying it.  Note that while
+       ;; "%latex" and "%bibtex" is used in `org-latex-pdf-process',
+       ;; they are replaced with "%L" and "%B" to adhere to
+       ;; format-spec.  Output is redirected to "*Org PDF LaTeX
+       ;; Output*" buffer.
        ((consp org-latex-pdf-process)
 	(let ((outbuf (and (not snippet)
-			   (get-buffer-create "*Org PDF LaTeX Output*"))))
-	  (dolist (command org-latex-pdf-process)
-	    (shell-command
-	     (replace-regexp-in-string
-	      "%bib" (shell-quote-argument org-latex-bib-compiler)
-	      (replace-regexp-in-string
-	       "%latex" (shell-quote-argument compiler)
-	       (replace-regexp-in-string
-		"%b" (shell-quote-argument base-name)
-		(replace-regexp-in-string
-		 "%f" (shell-quote-argument full-name)
-		 (replace-regexp-in-string
-		  "%o" (shell-quote-argument out-dir) command t t) t t) t t) t) t)
-	     outbuf))
+			   (get-buffer-create "*Org PDF LaTeX Output*")))
+	      (spec (list (cons ?B  (shell-quote-argument org-latex-bib-compiler))
+			  (cons ?L (shell-quote-argument compiler))
+			  (cons ?b (shell-quote-argument base-name))
+			  (cons ?f (shell-quote-argument full-name))
+			  (cons ?o (shell-quote-argument out-dir)))))
+	  (mapc (lambda (command)
+		  (shell-command (format-spec command spec) outbuf))
+		(mapcar (lambda (command)
+			  (replace-regexp-in-string "%\\(latex\\|bibtex\\)\\>"
+						    (lambda (str) (upcase (substring str 0 2)))
+						    command))
+			org-latex-pdf-process))
 	  ;; Collect standard errors from output buffer.
 	  (setq warnings (and (not snippet)
 			      (org-latex--collect-warnings outbuf)))))
