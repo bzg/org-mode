@@ -15,6 +15,10 @@ Please send Org bug reports to emacs-orgmode@gnu.org.
 *** New option ~date-tree-last~ for ~org-agenda-insert-diary-strategy~
 When ~org-agenda-insert-diary-strategy~ is set to ~date-tree-last~, diary
 entries are added to last in the date tree.
+*** New ~vbar~ entity
+~\vbar~ or ~\vbar{}~ will be exported unconditionnally as a =|=,
+unlike to existing ~\vert~, which is expanded as ~&vert;~ when using
+a HTML derived export back-end.
 *** Babel: support for Stan language
 New ob-stan.el library.
 

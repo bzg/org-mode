@@ -267,6 +267,7 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
      "** Misc. (often used)"
      ("circ" "\\^{}" nil "&circ;" "^" "^" "ˆ")
      ("vert" "\\vert{}" t "&vert;" "|" "|" "|")
+     ("vbar" "|" nil "|" "|" "|" "|")
      ("brvbar" "\\textbrokenbar{}" nil "&brvbar;" "|" "¦" "¦")
      ("S" "\\S" nil "&sect;" "paragraph" "§" "§")
      ("sect" "\\S" nil "&sect;" "paragraph" "§" "§")
