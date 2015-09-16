@@ -611,7 +611,7 @@ Use :header-args: instead"
 		    reports))
 	     (t
 	      (unless (let ((args (funcall extract-placeholders template)))
-			(equal (number-sequence 1 (org-last args)) args))
+			(equal (number-sequence 1 (or (org-last args) 0)) args))
 		(push (list (org-element-property :post-affiliated k)
 			    (format "Unused placeholders in macro \"%s\""
 				    name))
@@ -630,19 +630,21 @@ Use :header-args: instead"
 		(push (list (org-element-property :begin macro)
 			    (format "Undefined macro \"%s\"" name))
 		      reports)
-	      (let ((spurious-args
-		     (nthcdr (apply #'max
-				    (funcall extract-placeholders template))
-			     (org-element-property :args macro))))
-		(when spurious-args
-		  (push (list (org-element-property :begin macro)
-			      (format "Unused argument%s in macro \"%s\": %s"
-				      (if (> (length spurious-args) 1) "s" "")
-				      name
-				      (mapconcat (lambda (a) (format "\"%s\"" a))
-						 spurious-args
-						 ", ")))
-			reports))))))))
+	      (let ((arg-numbers (funcall extract-placeholders template)))
+		(when arg-numbers
+		  (let ((spurious-args
+			 (nthcdr (apply #'max arg-numbers)
+				 (org-element-property :args macro))))
+		    (when spurious-args
+		      (push
+		       (list (org-element-property :begin macro)
+			     (format "Unused argument%s in macro \"%s\": %s"
+				     (if (> (length spurious-args) 1) "s" "")
+				     name
+				     (mapconcat (lambda (a) (format "\"%s\"" a))
+						spurious-args
+						", ")))
+		       reports))))))))))
     reports))
 
 (defun org-lint-undefined-footnote-reference (ast)
