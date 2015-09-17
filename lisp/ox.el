@@ -883,7 +883,7 @@ output is restricted to body only, \"s\" when it is restricted to
 the current subtree, \"v\" when only visible elements are
 considered for export, \"f\" when publishing functions should be
 passed the FORCE argument and \"a\" when the export should be
-asynchronous).  Also, \[?] allows to switch back to standard
+asynchronous).  Also, [?] allows to switch back to standard
 mode."
   :group 'org-export-general
   :version "24.4"
@@ -1129,19 +1129,19 @@ keywords are understood:
       or
 
       \\='(?l \"Export to LaTeX\"
-           \(?p \"As PDF file\" org-latex-export-to-pdf)
-           \(?o \"As PDF file and open\"
-               \(lambda (a s v b)
-                 \(if a (org-latex-export-to-pdf t s v b)
-                   \(org-open-file
-                    \(org-latex-export-to-pdf nil s v b)))))))
+           (?p \"As PDF file\" org-latex-export-to-pdf)
+           (?o \"As PDF file and open\"
+               (lambda (a s v b)
+                 (if a (org-latex-export-to-pdf t s v b)
+                   (org-open-file
+                    (org-latex-export-to-pdf nil s v b)))))))
 
       or the following, which will be added to the previous
       sub-menu,
 
       \\='(?l 1
-          \((?B \"As TEX buffer (Beamer)\" org-beamer-export-as-latex)
-           \(?P \"As PDF file (Beamer)\" org-beamer-export-to-pdf)))
+          ((?B \"As TEX buffer (Beamer)\" org-beamer-export-as-latex)
+           (?P \"As PDF file (Beamer)\" org-beamer-export-to-pdf)))
 
   :options-alist
 
@@ -1215,12 +1215,12 @@ keywords are understood:
 As an example, here is how one could define \"my-latex\" back-end
 as a variant of `latex' back-end with a custom template function:
 
-  \(org-export-define-derived-backend \\='my-latex \\='latex
+  (org-export-define-derived-backend \\='my-latex \\='latex
      :translate-alist \\='((template . my-latex-template-fun)))
 
 The back-end could then be called with, for example:
 
-  \(org-export-to-buffer \\='my-latex \"*Test my-latex*\")"
+  (org-export-to-buffer \\='my-latex \"*Test my-latex*\")"
   (declare (indent 2))
   (let (blocks filters menu-entry options transcoders contents)
     (while (keywordp (car body))
@@ -1679,7 +1679,7 @@ DATA is the parse tree.  OPTIONS is the plist holding export
 options.
 
 Return an alist whose key is a headline and value is its
-associated numbering \(in the shape of a list of numbers\) or nil
+associated numbering \(in the shape of a list of numbers) or nil
 for a footnotes section."
   (let ((numbering (make-vector org-export-max-depth 0)))
     (org-element-map data 'headline
@@ -4039,7 +4039,7 @@ PATH is the link path.  DESC is its description."
 Optional argument is a set of RULES defining inline images.  It
 is an alist where associations have the following shape:
 
-  \(TYPE . REGEXP)
+  (TYPE . REGEXP)
 
 Applying a rule means apply REGEXP against LINK's path when its
 type is TYPE.  The function will return a non-nil value if any of
@@ -4095,7 +4095,7 @@ Return value can be an object or an element:
 - If LINK path matches a target object (i.e. <<path>>) return it.
 
 - If LINK path exactly matches the name affiliated keyword
-  \(i.e. #+NAME: path) of an element, return that element.
+  (i.e. #+NAME: path) of an element, return that element.
 
 - If LINK path exactly matches any headline name, return that
   element.
@@ -5790,10 +5790,10 @@ no argument.  It is always called within the current process,
 from BUFFER, with point at its beginning.  Export back-ends can
 use it to set a major mode there, e.g,
 
-  \(defun org-latex-export-as-latex
-    \(&optional async subtreep visible-only body-only ext-plist)
-    \(interactive)
-    \(org-export-to-buffer \\='latex \"*Org LATEX Export*\"
+  (defun org-latex-export-as-latex
+    (&optional async subtreep visible-only body-only ext-plist)
+    (interactive)
+    (org-export-to-buffer \\='latex \"*Org LATEX Export*\"
       async subtreep visible-only body-only ext-plist (lambda () (LaTeX-mode))))
 
 This function returns BUFFER."
@@ -5850,13 +5850,13 @@ argument and happens asynchronously when ASYNC is non-nil.  It
 has to return a file name, or nil.  Export back-ends can use this
 to send the output file through additional processing, e.g,
 
-  \(defun org-latex-export-to-latex
-    \(&optional async subtreep visible-only body-only ext-plist)
-    \(interactive)
-    \(let ((outfile (org-export-output-file-name \".tex\" subtreep)))
-      \(org-export-to-file \\='latex outfile
+  (defun org-latex-export-to-latex
+    (&optional async subtreep visible-only body-only ext-plist)
+    (interactive)
+    (let ((outfile (org-export-output-file-name \".tex\" subtreep)))
+      (org-export-to-file \\='latex outfile
         async subtreep visible-only body-only ext-plist
-        \(lambda (file) (org-latex-compile file)))
+        (lambda (file) (org-latex-compile file)))
 
 The function returns either a file name returned by POST-PROCESS,
 or FILE."
@@ -6186,7 +6186,7 @@ is nil when this menu hasn't been selected yet.
 
 EXPERTP, when non-nil, triggers expert UI.  In that case, no help
 buffer is provided, but indications about currently active
-options are given in the prompt.  Moreover, \[?] allows to switch
+options are given in the prompt.  Moreover, [?] allows to switch
 back to standard interface."
   (let* ((fontify-key
 	  (lambda (key &optional access-key)
@@ -6238,8 +6238,8 @@ back to standard interface."
 	    (concat
 	     ;; Options are hard-coded.
 	     (format "[%s] Body only:    %s           [%s] Visible only:     %s
-\[%s] Export scope: %s       [%s] Force publishing: %s
-\[%s] Async export: %s\n\n"
+[%s] Export scope: %s       [%s] Force publishing: %s
+[%s] Async export: %s\n\n"
 		     (funcall fontify-key "C-b" t)
 		     (funcall fontify-value
 			      (if (memq 'body options) "On " "Off"))

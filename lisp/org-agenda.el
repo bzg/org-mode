@@ -4642,7 +4642,8 @@ in `org-agenda-text-search-extra-files'."
 					     (goto-char (1- end))
 					     (throw :skip t)))
 			      (if todo-only
-				  (cons (concat "^\*+[ \t]+" org-not-done-regexp)
+				  (cons (concat "^\\*+[ \t]+"
+                                                org-not-done-regexp)
 					regexps+)
 				regexps+))
 			(goto-char beg)

@@ -153,9 +153,9 @@ If nil it will default to `buffer-file-coding-system'."
 If #+TEXINFO_CLASS is set in the buffer, use its value and the
 associated information.  Here is the structure of each cell:
 
-  \(class-name
+  (class-name
     header-string
-    \(numbered-section . unnumbered-section)
+    (numbered-section . unnumbered-section)
     ...)
 
 
@@ -1655,7 +1655,7 @@ none."
 		  (re-search-forward "requires a sectioning" nil t))
 	    (setq errors (concat errors " [invalid section command]")))
 	  (when (save-excursion
-		  (re-search-forward "\\[unexpected\]" nil t))
+		  (re-search-forward "\\[unexpected\ ]" nil t))
 	    (setq errors (concat errors " [unexpected error]")))
 	  (when (save-excursion
 		  (re-search-forward "misplaced " nil t))

@@ -3392,7 +3392,7 @@ formulas that use a range of rows or columns, it may often be better
 to anchor the formula with \"I\" row markers, or to offset from the
 borders of the table using the @< @> $< $> makers."
   (let (n nmax len char (start 0))
-    (while (string-match "\\([@$]\\)\\(<+\\|>+\\)\\|\\(remote([^\)]+)\\)"
+    (while (string-match "\\([@$]\\)\\(<+\\|>+\\)\\|\\(remote([^)]+)\\)"
 			 s start)
       (if (match-end 3)
 	  (setq start (match-end 3))
