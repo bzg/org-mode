@@ -1175,14 +1175,15 @@ table of contents as a string, or nil."
   ;; /TOC/, as otherwise there will be duplicated anchors one in TOC
   ;; and one in the document body.
   ;;
-  ;; FIXME: Are there any other objects that need to be suppressed
-  ;; within TOC?
+  ;; Likewise, links, footnote references and regular targets are also
+  ;; suppressed.
   (let* ((headlines (org-export-collect-headlines info depth scope))
 	 (backend (org-export-create-backend
 		   :parent (org-export-backend-name (plist-get info :back-end))
-		   :transcoders (mapcar
-				 (lambda (type) (cons type (lambda (d c i) c)))
-				 (list 'radio-target)))))
+		   :transcoders '((footnote-reference . ignore)
+				  (link . (lambda (object c i) c))
+				  (radio-target . (lambda (object c i) c))
+				  (target . ignore)))))
     (when headlines
       (org-odt--format-toc
        (and (not scope) (org-export-translate "Table of Contents" :utf-8 info))
