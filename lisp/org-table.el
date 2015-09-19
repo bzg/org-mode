@@ -47,12 +47,18 @@
 (declare-function org-element-map "org-element"
 		  (data types fun
 			&optional info first-match no-recursion with-affiliated))
+(declare-function org-element-parse-buffer "org-element"
+		  (&optional granularity visible-only))
 (declare-function org-element-property "org-element" (property element))
+(declare-function org-element-type "org-element" (element))
 
-(declare-function org-export-string-as "ox"
-		  (string backend &optional body-only ext-plist))
-(declare-function org-export-create-backend "ox")
-(declare-function org-export-get-backend "ox" (name))
+(declare-function org-export-create-backend "org-export" (&rest rest))
+(declare-function org-export-data-with-backend "org-export" (arg1 arg2 arg3))
+(declare-function org-export-first-sibling-p "org-export" (arg1 arg2))
+(declare-function org-export-get-backend "org-export" (arg1))
+(declare-function org-export-get-environment "org-export" (&optional arg1 arg2 arg3))
+(declare-function org-export-table-has-special-column-p "org-export" (arg1))
+(declare-function org-export-table-row-is-special-p "org-export" (arg1 arg2))
 
 (declare-function calc-eval "calc" (str &optional separator &rest args))
 
