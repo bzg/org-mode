@@ -1453,7 +1453,11 @@ See also `test-org-table/copy-field'."
     "a\nb"
     (let ((org-export-filter-table-cell-functions (list (lambda (c b i) "filter"))))
       (orgtbl-to-generic (org-table-to-lisp "| a |\n|---|\n| b |")
-			 '(:hline nil))))))
+			 '(:hline nil)))))
+  ;; Macros, even if unknown, are returned as-is.
+  (should
+   (equal "{{{macro}}}"
+	  (orgtbl-to-generic (org-table-to-lisp "| {{{macro}}} |") nil))))
 
 (ert-deftest test-org-table/to-latex ()
   "Test `orgtbl-to-latex' specifications."
