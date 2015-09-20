@@ -196,8 +196,9 @@ a communication channel."
 		   (and char (format "[#%c] " char)))))
 	   (anchor
 	    (and (plist-get info :with-toc)
-		 (org-html--anchor
-		  (org-export-get-reference headline info) nil nil info)))
+		 (format "<a id=\"%s\"></a>"
+			 (or (org-element-property :CUSTOM_ID headline)
+			     (org-export-get-reference headline info)))))
 	   ;; Headline text without tags.
 	   (heading (concat todo priority title))
 	   (style (plist-get info :md-headline-style)))
@@ -213,7 +214,7 @@ a communication channel."
 			  (car (last (org-export-get-headline-number
 				      headline info))))
 			 "."))))
-	  (concat bullet (make-string (- 4 (length bullet)) ? ) heading tags
+	  (concat bullet (make-string (- 4 (length bullet)) ?\s) heading tags
 		  "\n\n"
 		  (and contents
 		       (replace-regexp-in-string "^" "    " contents)))))
@@ -224,7 +225,8 @@ a communication channel."
 		"\n\n"
 		contents))
        ;; Use "atx" style.
-       (t (concat (make-string level ?#) " " heading tags anchor "\n\n" contents))))))
+       (t (concat (make-string level ?#) " " heading tags anchor "\n\n"
+		  contents))))))
 
 
 ;;;; Horizontal Rule
