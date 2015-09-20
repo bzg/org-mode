@@ -106,6 +106,8 @@ Return an alist containing all macro templates found."
 				      (org-remove-double-quotes val))))
 			   (unless (member file files)
 			     (with-temp-buffer
+			       (setq default-directory
+				     (file-name-directory file))
 			       (org-mode)
 			       (insert (org-file-contents file 'noerror))
 			       (setq templates

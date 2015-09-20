@@ -5208,6 +5208,7 @@ Return value contains the following keys: `archive', `category',
 				(org-remove-double-quotes value)))))
 		   (when (and f (file-readable-p f) (not (member f files)))
 		     (with-temp-buffer
+		       (setq default-directory (file-name-directory f))
 		       (insert-file-contents f)
 		       (setq alist
 			     ;; Fake Org mode to benefit from cache
