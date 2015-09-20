@@ -312,23 +312,41 @@ a communication channel."
     (cond
      ;; Link type is handled by a special function.
      ((org-export-custom-protocol-maybe link contents 'md))
-     ((member type '("custom-id" "id"))
-      (let ((destination (org-export-resolve-id-link link info)))
-	(if (stringp destination)	; External file.
-	    (let ((path (funcall link-org-files-as-md destination)))
-	      (if (not contents) (format "<%s>" path)
-		(format "[%s](%s)" contents path)))
-	  (concat
-	   (and contents (concat contents " "))
-	   (format "(%s)"
-		   (format (org-export-translate "See section %s" :html info)
-			   (if (org-export-numbered-headline-p destination info)
-			       (mapconcat #'number-to-string
-					  (org-export-get-headline-number
-					   destination info)
-					  ".")
-			     (org-export-data
-			      (org-element-property :title destination) info))))))))
+     ((member type '("custom-id" "id" "fuzzy"))
+      (let ((destination (if (string= type "fuzzy")
+			     (org-export-resolve-fuzzy-link link info)
+			   (org-export-resolve-id-link link info))))
+	(case (org-element-type destination)
+	  (plain-text			; External file.
+	   (let ((path (funcall link-org-files-as-md destination)))
+	     (if (not contents) (format "<%s>" path)
+	       (format "[%s](%s)" contents path))))
+	  (headline
+	   (format
+	    "[%s](#%s)"
+	    ;; Description.
+	    (cond ((org-string-nw-p contents))
+		  ((org-export-numbered-headline-p destination info)
+		   (mapconcat #'number-to-string
+			      (org-export-get-headline-number destination info)
+			      "."))
+		  (t (org-export-data (org-element-property :title destination)
+				      info)))
+	    ;; Reference.
+	    (or (org-element-property :CUSTOM_ID destination)
+		(org-export-get-reference destination info))))
+	  (t
+	   (let ((description
+		  (or (org-string-nw-p contents)
+		      (let ((number (org-export-get-ordinal destination info)))
+			(cond
+			 ((not number) nil)
+			 ((atom number) (number-to-string number))
+			 (t (mapconcat #'number-to-string number ".")))))))
+	     (when description
+	       (format "[%s](#%s)"
+		       description
+		       (org-export-get-reference destination info))))))))
      ((org-export-inline-image-p link org-html-inline-image-rules)
       (let ((path (let ((raw-path (org-element-property :path link)))
 		    (if (not (file-name-absolute-p raw-path)) raw-path
@@ -344,21 +362,6 @@ a communication channel."
 	(format (org-export-get-coderef-format ref contents)
 		(org-export-resolve-coderef ref info))))
      ((equal type "radio") contents)
-     ((equal type "fuzzy")
-      (let* ((destination (org-export-resolve-fuzzy-link link info))
-	     (description
-	      (or (org-string-nw-p contents)
-		  (let ((number (org-export-get-ordinal destination info)))
-		    (cond
-		     ((not number)
-		      (and (eq 'headline (org-element-type destination))
-			   (org-export-data
-			    (org-element-property :title destination) info)))
-		     ((atom number) (number-to-string number))
-		     (t (mapconcat #'number-to-string number ".")))))))
-	(format "[%s](#%s)"
-		description
-		(org-export-get-reference destination info))))
      (t (let* ((raw-path (org-element-property :path link))
 	       (path
 		(cond
