@@ -6238,8 +6238,8 @@ back to standard interface."
 	    (concat
 	     ;; Options are hard-coded.
 	     (format "[%s] Body only:    %s           [%s] Visible only:     %s
-[%s] Export scope: %s       [%s] Force publishing: %s
-[%s] Async export: %s\n\n"
+\[%s] Export scope: %s       [%s] Force publishing: %s
+\[%s] Async export: %s\n\n"
 		     (funcall fontify-key "C-b" t)
 		     (funcall fontify-value
 			      (if (memq 'body options) "On " "Off"))

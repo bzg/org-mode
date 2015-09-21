@@ -4041,8 +4041,8 @@ images at the same place."
 
 (defcustom org-format-latex-header "\\documentclass{article}
 \\usepackage[usenames]{color}
-[PACKAGES]
-[DEFAULT-PACKAGES]
+\[PACKAGES]
+\[DEFAULT-PACKAGES]
 \\pagestyle{empty}             % do not remove
 % The settings below are copied from fullpage.sty
 \\setlength{\\textwidth}{\\paperwidth}
@@ -7441,7 +7441,7 @@ a block.  Return a non-nil value when toggling is successful."
 (defconst org-goto-help
   "Browse buffer copy, to find location or copy text.%s
 RET=jump to location             C-g=quit and return to previous location
-[Up]/[Down]=next/prev headline   TAB=cycle visibility   [/] org-occur")
+\[Up]/[Down]=next/prev headline   TAB=cycle visibility   [/] org-occur")
 
 (defvar org-goto-start-pos) ; dynamically scoped parameter
 
@@ -24087,7 +24087,7 @@ no special treatment.  In particular, a simple \\[universal-argument] prefix \
 will just
 plainly yank the text as it is.
 
-[1] The test checks if the first non-white line is a heading
+\[1] The test checks if the first non-white line is a heading
     and if there are no other headings with fewer stars."
   (interactive "P")
   (org-yank-generic 'yank arg))
