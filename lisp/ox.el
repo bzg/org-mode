@@ -1094,7 +1094,7 @@ keywords are understood:
     Menu entry for the export dispatcher.  It should be a list
     like:
 
-      '(KEY DESCRIPTION-OR-ORDINAL ACTION-OR-MENU)
+      (KEY DESCRIPTION-OR-ORDINAL ACTION-OR-MENU)
 
     where :
 
@@ -1118,17 +1118,17 @@ keywords are understood:
       If it is an alist, associations should follow the
       pattern:
 
-        '(KEY DESCRIPTION ACTION)
+        (KEY DESCRIPTION ACTION)
 
       where KEY, DESCRIPTION and ACTION are described above.
 
     Valid values include:
 
-      '(?m \"My Special Back-end\" my-special-export-function)
+       (?m \"My Special Back-end\" my-special-export-function)
 
       or
 
-      '(?l \"Export to LaTeX\"
+       (?l \"Export to LaTeX\"
            \(?p \"As PDF file\" org-latex-export-to-pdf)
            \(?o \"As PDF file and open\"
                \(lambda (a s v b)
@@ -1139,7 +1139,7 @@ keywords are understood:
       or the following, which will be added to the previous
       sub-menu,
 
-      '(?l 1
+       (?l 1
           \((?B \"As TEX buffer (Beamer)\" org-beamer-export-as-latex)
            \(?P \"As PDF file (Beamer)\" org-beamer-export-to-pdf)))
 
@@ -1215,12 +1215,12 @@ keywords are understood:
 As an example, here is how one could define \"my-latex\" back-end
 as a variant of `latex' back-end with a custom template function:
 
-  \(org-export-define-derived-backend 'my-latex 'latex
-     :translate-alist '((template . my-latex-template-fun)))
+  \(org-export-define-derived-backend \\='my-latex \\='latex
+     :translate-alist \\='((template . my-latex-template-fun)))
 
 The back-end could then be called with, for example:
 
-  \(org-export-to-buffer 'my-latex \"*Test my-latex*\")"
+  \(org-export-to-buffer \\='my-latex \"*Test my-latex*\")"
   (declare (indent 2))
   (let (blocks filters menu-entry options transcoders contents)
     (while (keywordp (car body))
@@ -5757,7 +5757,7 @@ and `org-export-to-file' for more specialized functions."
                                       (kill-buffer proc-buffer))))
                            (org-export-add-to-stack proc-buffer nil p)
                            (ding)
-                           (message "Process '%s' exited abnormally" p))
+                           (message "Process `%s' exited abnormally" p))
                        (unless org-export-async-debug
                          (delete-file ,,temp-file)))))))))))))
 
@@ -5793,7 +5793,7 @@ use it to set a major mode there, e.g,
   \(defun org-latex-export-as-latex
     \(&optional async subtreep visible-only body-only ext-plist)
     \(interactive)
-    \(org-export-to-buffer 'latex \"*Org LATEX Export*\"
+    \(org-export-to-buffer \\='latex \"*Org LATEX Export*\"
       async subtreep visible-only body-only ext-plist (lambda () (LaTeX-mode))))
 
 This function returns BUFFER."
@@ -5854,7 +5854,7 @@ to send the output file through additional processing, e.g,
     \(&optional async subtreep visible-only body-only ext-plist)
     \(interactive)
     \(let ((outfile (org-export-output-file-name \".tex\" subtreep)))
-      \(org-export-to-file 'latex outfile
+      \(org-export-to-file \\='latex outfile
         async subtreep visible-only body-only ext-plist
         \(lambda (file) (org-latex-compile file)))
 
