@@ -873,7 +873,7 @@ you can reuse them:
 For example:
 
 \(setq org-html-table-row-tags
-      (cons '(cond (top-row-p \"<tr class=\\\"tr-top\\\">\")
+      (cons \\='(cond (top-row-p \"<tr class=\\\"tr-top\\\">\")
                    (bottom-row-p \"<tr class=\\\"tr-bottom\\\">\")
                    (t (if (= (mod row-number 2) 1)
 			  \"<tr class=\\\"tr-odd\\\">\"
@@ -997,7 +997,7 @@ org-info.js for your website."
     (content   "div" "content")
     (postamble "div" "postamble"))
   "Alist of the three section elements for HTML export.
-The car of each entry is one of 'preamble, 'content or 'postamble.
+The car of each entry is one of `preamble', `content' or `postamble'.
 The cdrs of each entry are the ELEMENT_TYPE and ID for each
 section of the exported document.
 
@@ -1176,7 +1176,7 @@ MathJax CDN Terms of Service.
 (defcustom org-html-postamble 'auto
   "Non-nil means insert a postamble in HTML export.
 
-When set to 'auto, check against the
+When set to `auto', check against the
 `org-export-with-author/email/creator/date' variables to set the
 content of the postamble.  When set to a string, use this string
 as the postamble.  When t, insert a string as defined by the
@@ -1811,7 +1811,7 @@ used in the preamble or postamble."
 
 (defun org-html--build-pre/postamble (type info)
   "Return document preamble or postamble as a string, or nil.
-TYPE is either 'preamble or 'postamble, INFO is a plist used as a
+TYPE is either `preamble' or `postamble', INFO is a plist used as a
 communication channel."
   (let ((section (plist-get info (intern (format ":html-%s" type))))
 	(spec (org-html-format-spec info)))
@@ -2781,7 +2781,7 @@ Bind `org-html-standalone-image-predicate' to constrain paragraph
 further.  For example, to check for only captioned standalone
 images, set it to:
 
-  \(lambda (paragraph) (org-element-property :caption paragraph))"
+  (lambda (paragraph) (org-element-property :caption paragraph))"
   (let ((paragraph (case (org-element-type element)
 		     (paragraph element)
 		     (link (org-export-get-parent element)))))

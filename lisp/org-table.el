@@ -284,9 +284,9 @@ relies on the variables to be present in the list."
 
 (defcustom org-table-duration-custom-format 'hours
   "Format for the output of calc computations like $1+$2;t.
-The default value is 'hours, and will output the results as a
-number of hours.  Other allowed values are 'seconds, 'minutes and
-'days, and the output will be a fraction of seconds, minutes or
+The default value is `hours', and will output the results as a
+number of hours.  Other allowed values are `seconds', `minutes' and
+`days', and the output will be a fraction of seconds, minutes or
 days."
   :group 'org-table-calculation
   :version "24.1"
@@ -329,7 +329,7 @@ The car of each element is a name of a constant, without the `$' before it.
 The cdr is the value as a string.  For example, if you'd like to use the
 speed of light in a formula, you would configure
 
-  (setq org-table-formula-constants '((\"c\" . \"299792458.\")))
+  (setq org-table-formula-constants \\='((\"c\" . \"299792458.\")))
 
 and then use it in an equation like `$1*$c'.
 
@@ -343,7 +343,9 @@ Constants can also be defined on a per-file basis using a line like
 
 (defcustom org-table-allow-automatic-line-recalculation t
   "Non-nil means lines marked with |#| or |*| will be recomputed automatically.
-Automatically means when TAB or RET or C-c C-c are pressed in the line."
+\\<org-mode-map>\
+Automatically means when TAB or RET or \\[org-ctrl-c-ctrl-c] \
+are pressed in the line."
   :group 'org-table-calculation
   :type 'boolean)
 
@@ -561,9 +563,9 @@ slightly, to make sure a beginning of line in the first line is included.
 SEPARATOR specifies the field separator in the lines.  It can have the
 following values:
 
-'(4)     Use the comma as a field separator
-'(16)    Use a TAB as field separator
-'(64)    Prompt for a regular expression as field separator
+(4)     Use the comma as a field separator
+(16)    Use a TAB as field separator
+(64)    Prompt for a regular expression as field separator
 integer  When a number, use that many spaces as field separator
 regexp   When a regular expression, use it to match the separator
 nil      When nil, the command tries to be smart and figure out the
@@ -3035,7 +3037,7 @@ search, as a string."
 KEEP-EMPTY indicated to keep empty fields, default is to skip them.
 NUMBERS indicates that everything should be converted to numbers.
 LISPP non-nil means to return something appropriate for a Lisp
-list, 'literal is for the format specifier L."
+list, `literal' is for the format specifier L."
   ;; Calc nan (not a number) is used for the conversion of the empty
   ;; field to a reference for several reasons: (i) It is accepted in a
   ;; Calc formula (e. g. "" or "()" would result in a Calc error).
@@ -3390,7 +3392,7 @@ formulas that use a range of rows or columns, it may often be better
 to anchor the formula with \"I\" row markers, or to offset from the
 borders of the table using the @< @> $< $> makers."
   (let (n nmax len char (start 0))
-    (while (string-match "\\([@$]\\)\\(<+\\|>+\\)\\|\\(remote([^\)]+)\\)"
+    (while (string-match "\\([@$]\\)\\(<+\\|>+\\)\\|\\(remote([^)]+)\\)"
 			 s start)
       (if (match-end 3)
 	  (setq start (match-end 3))
@@ -3555,8 +3557,10 @@ Parameters get priority."
     (when (eq org-table-use-standard-references t)
       (org-table-fedit-toggle-ref-type))
     (org-goto-line startline)
-    (message "Edit formulas, finish with `C-c C-c' or `C-c ' '.  \
-See menu for more commands.")))
+    (message
+     (substitute-command-keys "\\<org-mode-map>\
+Edit formulas, finish with `\\[org-ctrl-c-ctrl-c]' or `\\[org-edit-special]'.  \
+See menu for more commands."))))
 
 (defun org-table-fedit-post-command ()
   (when (not (memq this-command '(lisp-complete-symbol)))

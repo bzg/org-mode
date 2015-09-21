@@ -404,6 +404,10 @@ Pass BUFFER to the XEmacs version of `move-to-column'."
 (unless (fboundp 'user-error)
   (defalias 'user-error 'error))
 
+;; ‘format-message’ is available only from 25 on
+(unless (fboundp 'format-message)
+  (defalias 'format-message 'format))
+
 ;; `font-lock-ensure' is only available from 24.4.50 on
 (unless (fboundp 'font-lock-ensure)
   (defalias 'font-lock-ensure 'font-lock-fontify-buffer))

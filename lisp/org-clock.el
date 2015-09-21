@@ -94,9 +94,10 @@ Return value is either a string, an integer, or nil."
 
 (defcustom org-clock-out-when-done t
   "When non-nil, clock will be stopped when the clocked entry is marked DONE.
+\\<org-mode-map>\
 DONE here means any DONE-like state.
 A nil value means clock will keep running until stopped explicitly with
-`C-c C-x C-o', or until the clock is started in a different item.
+`\\[org-clock-out]', or until the clock is started in a different item.
 Instead of t, this can also be a list of TODO states that should trigger
 clocking out."
   :group 'org-clock
@@ -400,8 +401,8 @@ nil          current clock is not displayed"
 (defcustom org-clock-frame-title-format '(t org-mode-line-string)
   "The value for `frame-title-format' when clocking in.
 
-When `org-clock-clocked-in-display' is set to 'frame-title
-or 'both, clocking in will replace `frame-title-format' with
+When `org-clock-clocked-in-display' is set to `frame-title'
+or `both', clocking in will replace `frame-title-format' with
 this value.  Clocking out will restore `frame-title-format'.
 
 `org-frame-title-string' is a format string using the same
@@ -778,8 +779,9 @@ Notification is shown only once."
 	  (unless org-clock-notification-was-shown
 	    (setq org-clock-notification-was-shown t)
 	    (org-notify
-	     (format "Task '%s' should be finished by now. (%s)"
-		     org-clock-heading org-clock-effort) org-clock-sound))
+	     (format-message "Task `%s' should be finished by now. (%s)"
+                             org-clock-heading org-clock-effort)
+             org-clock-sound))
 	(setq org-clock-notification-was-shown nil)))))
 
 (defun org-notify (notification &optional play-sound)
@@ -994,7 +996,7 @@ was started."
 		(org-clock-jump-to-current-clock clock))
 	      (unless org-clock-resolve-expert
 		(with-output-to-temp-buffer "*Org Clock*"
-		  (princ "Select a Clock Resolution Command:
+		  (princ (format-message "Select a Clock Resolution Command:
 
 i/q      Ignore this question; the same as keeping all the idle time.
 
@@ -1004,7 +1006,7 @@ k/K      Keep X minutes of the idle time (default is all).  If this
          clocked back in at the present time.
 
 g/G      Indicate that you \"got back\" X minutes ago.  This is quite
-         different from 'k': it clocks you out from the beginning of
+         different from `k': it clocks you out from the beginning of
          the idle period and clock you back in X minutes ago.
 
 s/S      Subtract the idle time from the current clock.  This is the
@@ -1016,7 +1018,7 @@ C        Cancel the open timer altogether.  It will be as though you
 j/J      Jump to the current clock, to make manual adjustments.
 
 For all these options, using uppercase makes your final state
-to be CLOCKED OUT.")))
+to be CLOCKED OUT."))))
 	      (org-fit-window-to-buffer (get-buffer-window "*Org Clock*"))
 	      (let (char-pressed)
 		(when (featurep 'xemacs)
@@ -1293,7 +1295,7 @@ make this the default behavior.)"
 		   (looking-at
 		    (concat "^[ \t]*" org-clock-string
 			    " \\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}"
-			    " *\\sw+\.? +[012][0-9]:[0-5][0-9]\\)\\][ \t]*$")))
+			    " *\\sw+.? +[012][0-9]:[0-5][0-9]\\)\\][ \t]*$")))
 	      (message "Matched %s" (match-string 1))
 	      (setq ts (concat "[" (match-string 1) "]"))
 	      (goto-char (match-end 1))
@@ -1678,7 +1680,7 @@ Optional argument N tells to change by that many units."
 
 (defun org-clock-timestamps-change (updown &optional n)
   "Change CLOCK timestamps synchronously at cursor.
-UPDOWN tells whether to change 'up or 'down.
+UPDOWN tells whether to change `up' or `down'.
 Optional argument N tells to change by that many units."
   (setq org-ts-what nil)
   (when (org-at-timestamp-p t)

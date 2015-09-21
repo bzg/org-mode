@@ -54,7 +54,7 @@
 (defcustom org-export-babel-evaluate t
   "Switch controlling code evaluation during export.
 When set to nil no code will be evaluated as part of the export
-process.  When set to 'inline-only, only inline code blocks will
+process.  When set to `inline-only', only inline code blocks will
 be executed."
   :group 'org-babel
   :version "24.1"
@@ -99,7 +99,7 @@ be executed."
 
 (defun org-babel-exp-src-block (&rest headers)
   "Process source block for export.
-Depending on the 'export' headers argument, replace the source
+Depending on the `export' headers argument, replace the source
 code block like this:
 
 both ---- display the code and the results

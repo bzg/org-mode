@@ -110,6 +110,7 @@
 
 (defcustom org-confirm-babel-evaluate t
   "Confirm before evaluation.
+\\<org-mode-map>\
 Require confirmation before interactively evaluating code
 blocks in Org-mode buffers.  The default value of this variable
 is t, meaning confirmation is required for any code block
@@ -122,10 +123,11 @@ execution or nil if no prompt is required.
 
 Warning: Disabling confirmation may result in accidental
 evaluation of potentially harmful code.  It may be advisable
-remove code block execution from C-c C-c as further protection
+remove code block execution from \\[org-ctrl-c-ctrl-c] \
+as further protection
 against accidental code block evaluation.  The
 `org-babel-no-eval-on-ctrl-c-ctrl-c' variable can be used to
-remove code block execution from the C-c C-c keybinding."
+remove code block execution from the \\[org-ctrl-c-ctrl-c] keybinding."
   :group 'org-babel
   :version "24.1"
   :type '(choice boolean function))
@@ -133,7 +135,8 @@ remove code block execution from the C-c C-c keybinding."
 (put 'org-confirm-babel-evaluate 'safe-local-variable (lambda (x) (eq x t)))
 
 (defcustom org-babel-no-eval-on-ctrl-c-ctrl-c nil
-  "Remove code block evaluation from the C-c C-c key binding."
+  "\\<org-mode-map>\
+Remove code block evaluation from the \\[org-ctrl-c-ctrl-c] key binding."
   :group 'org-babel
   :version "24.1"
   :type 'boolean)
@@ -511,7 +514,7 @@ The list can have entries of the following forms:
   "Return a function that determines whether a list of header args are safe.
 
 Intended usage is:
-\(put 'org-babel-default-header-args 'safe-local-variable
+\(put \\='org-babel-default-header-args \\='safe-local-variable
  (org-babel-header-args-safe-p org-babel-safe-header-args)
 
 This allows org-babel languages to extend the list of safe values for
@@ -555,7 +558,7 @@ be saved in the second match data.")
 
 (defvar org-babel-result-w-name-regexp
   (concat org-babel-result-regexp
-	  "\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)"))
+	  "\\([^ ()\f\t\n\r\v]+\\)\\((\\(.*\\))\\|\\)"))
 
 (defvar org-babel-min-lines-for-block-output 10
   "The minimum number of lines for block output.
@@ -1309,8 +1312,9 @@ the `org-mode-hook'."
 
 (defun org-babel-hash-at-point (&optional point)
   "Return the value of the hash at POINT.
+\\<org-mode-map>\
 The hash is also added as the last element of the kill ring.
-This can be called with C-c C-c."
+This can be called with \\[org-ctrl-c-ctrl-c]."
   (interactive)
   (let ((hash (car (delq nil (mapcar
 			      (lambda (ol) (overlay-get ol 'babel-hash))
@@ -1597,7 +1601,7 @@ shown below.
 
 ;; row and column names
 (defun org-babel-del-hlines (table)
-  "Remove all 'hlines from TABLE."
+  "Remove all `hlines' from TABLE."
   (remq 'hline table))
 
 (defun org-babel-get-colnames (table)
@@ -1750,7 +1754,7 @@ If the point is not on a source block then return nil."
     (if point
         ;; taken from `org-open-at-point'
         (progn (org-mark-ring-push) (goto-char point) (org-show-context))
-      (message "source-code block '%s' not found in this buffer" name))))
+      (message "source-code block `%s' not found in this buffer" name))))
 
 (defun org-babel-find-named-block (name)
   "Find a named source-code block.
@@ -1784,7 +1788,7 @@ to `org-babel-named-src-block-regexp'."
     (if point
         ;; taken from `org-open-at-point'
         (progn (goto-char point) (org-show-context))
-      (message "result '%s' not found in this buffer" name))))
+      (message "result `%s' not found in this buffer" name))))
 
 (defun org-babel-find-named-result (name &optional point)
   "Find a named result.
@@ -2405,7 +2409,7 @@ file's directory then expand relative links."
   'org-babel-examplify-region "25.1")
 
 (defun org-babel-examplify-region (beg end &optional results-switches)
-  "Comment out region using the inline '==' or ': ' org example quote."
+  "Comment out region using the inline `==' or `: ' org example quote."
   (interactive "*r")
   (let ((chars-between (lambda (b e)
 			 (not (string-match "^[\\s]*$"
@@ -2620,7 +2624,7 @@ CONTEXT may be one of :tangle, :export or :eval."
   "Expand Noweb references in the body of the current source code block.
 
 For example the following reference would be replaced with the
-body of the source-code block named 'example-block'.
+body of the source-code block named `example-block'.
 
 <<example-block>>
 
@@ -2633,7 +2637,7 @@ This function must be called from inside of the buffer containing
 the source-code block which holds BODY.
 
 In addition the following syntax can be used to insert the
-results of evaluating the source-code block named 'example-block'.
+results of evaluating the source-code block named `example-block'.
 
 <<example-block()>>
 
@@ -2670,7 +2674,7 @@ block but are passed literally to the \"example-block\"."
       (setq index (point))
       (while (and (re-search-forward (org-babel-noweb-wrap) nil t))
 	(save-match-data (setf source-name (match-string 1)))
-	(save-match-data (setq evaluate (string-match "\(.*\)" source-name)))
+	(save-match-data (setq evaluate (string-match "(.*)" source-name)))
 	(save-match-data
 	  (setq prefix
 		(buffer-substring (match-beginning 0)
@@ -2844,7 +2848,7 @@ block but are passed literally to the \"example-block\"."
 (defun org-babel-read (cell &optional inhibit-lisp-eval)
   "Convert the string value of CELL to a number if appropriate.
 Otherwise if CELL looks like lisp (meaning it starts with a
-\"(\", \"'\", \"\\=`\" or a \"[\") then read and evaluate it as
+\"(\", \"\\='\", \"\\=`\" or a \"[\") then read and evaluate it as
 lisp, otherwise return it unmodified as a string.  Optional
 argument INHIBIT-LISP-EVAL inhibits lisp evaluation for
 situations in which is it not appropriate."
