@@ -284,9 +284,9 @@ relies on the variables to be present in the list."
 
 (defcustom org-table-duration-custom-format 'hours
   "Format for the output of calc computations like $1+$2;t.
-The default value is 'hours, and will output the results as a
-number of hours.  Other allowed values are 'seconds, 'minutes and
-'days, and the output will be a fraction of seconds, minutes or
+The default value is `hours', and will output the results as a
+number of hours.  Other allowed values are `seconds', `minutes' and
+`days', and the output will be a fraction of seconds, minutes or
 days."
   :group 'org-table-calculation
   :version "24.1"
@@ -329,7 +329,7 @@ The car of each element is a name of a constant, without the `$' before it.
 The cdr is the value as a string.  For example, if you'd like to use the
 speed of light in a formula, you would configure
 
-  (setq org-table-formula-constants '((\"c\" . \"299792458.\")))
+  (setq org-table-formula-constants \\='((\"c\" . \"299792458.\")))
 
 and then use it in an equation like `$1*$c'.
 
@@ -3037,7 +3037,7 @@ search, as a string."
 KEEP-EMPTY indicated to keep empty fields, default is to skip them.
 NUMBERS indicates that everything should be converted to numbers.
 LISPP non-nil means to return something appropriate for a Lisp
-list, 'literal is for the format specifier L."
+list, `literal' is for the format specifier L."
   ;; Calc nan (not a number) is used for the conversion of the empty
   ;; field to a reference for several reasons: (i) It is accepted in a
   ;; Calc formula (e. g. "" or "()" would result in a Calc error).

@@ -104,10 +104,10 @@ t        : Disable auto-save-mode for the current buffer
 nil      : Leave auto-save-mode enabled.
            This may cause data to be written to disk unencrypted!
 
-'ask     : Ask user whether or not to disable auto-save-mode
+`ask'    : Ask user whether or not to disable auto-save-mode
            for the current buffer.
 
-'encrypt : Leave auto-save-mode enabled for the current buffer,
+`encrypt': Leave auto-save-mode enabled for the current buffer,
            but automatically re-encrypt all decrypted entries
            *before* auto-saving.
            NOTE: This only works for entries which have a tag

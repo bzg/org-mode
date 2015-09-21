@@ -331,9 +331,9 @@ FORMAT can be either a format string or a function which is called with VAL."
 
 (defun org-babel-C-val-to-base-type (val)
   "Determine the base type of VAL which may be
-'integerp if all base values are integers
-'floatp if all base values are either floating points or integers
-'stringp otherwise."
+`integerp' if all base values are integers
+`floatp' if all base values are either floating points or integers
+`stringp' otherwise."
   (cond
    ((integerp val) 'integerp)
    ((floatp val) 'floatp)

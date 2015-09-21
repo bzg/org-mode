@@ -184,8 +184,8 @@ var of the same value."
 
 (defun org-babel-sh-evaluate (session body &optional params stdin cmdline)
   "Pass BODY to the Shell process in BUFFER.
-If RESULT-TYPE equals 'output then return a list of the outputs
-of the statements in BODY, if RESULT-TYPE equals 'value then
+If RESULT-TYPE equals `output' then return a list of the outputs
+of the statements in BODY, if RESULT-TYPE equals `value' then
 return the value of the last statement in BODY."
   (let ((results
          (cond

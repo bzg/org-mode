@@ -514,7 +514,7 @@ The list can have entries of the following forms:
   "Return a function that determines whether a list of header args are safe.
 
 Intended usage is:
-\(put 'org-babel-default-header-args 'safe-local-variable
+\(put \\='org-babel-default-header-args \\='safe-local-variable
  (org-babel-header-args-safe-p org-babel-safe-header-args)
 
 This allows org-babel languages to extend the list of safe values for
@@ -1601,7 +1601,7 @@ shown below.
 
 ;; row and column names
 (defun org-babel-del-hlines (table)
-  "Remove all 'hlines from TABLE."
+  "Remove all `hlines' from TABLE."
   (remq 'hline table))
 
 (defun org-babel-get-colnames (table)

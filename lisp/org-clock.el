@@ -1680,7 +1680,7 @@ Optional argument N tells to change by that many units."
 
 (defun org-clock-timestamps-change (updown &optional n)
   "Change CLOCK timestamps synchronously at cursor.
-UPDOWN tells whether to change 'up or 'down.
+UPDOWN tells whether to change `up' or `down'.
 Optional argument N tells to change by that many units."
   (setq org-ts-what nil)
   (when (org-at-timestamp-p t)

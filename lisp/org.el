@@ -14460,7 +14460,7 @@ must be bound around the form's evaluation: todo, the TODO keyword
 at the entry (or nil of none); and tags-list, the list of all tags
 at the entry including inherited ones.  Additionally, the category
 of the entry (if any) must be specified as the text property
-'org-category on the headline.
+`org-category' on the headline.
 
 See also `org-scan-tags'.
 "

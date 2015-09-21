@@ -153,7 +153,7 @@ before assigned to the variables.  So make sure to quote values you do
 *not* want evaluated, for example
 
    (setq org-agenda-exporter-settings
-         '((ps-print-color-p 'black-white)))"
+         \\='((ps-print-color-p \\='black-white)))"
   :group 'org-agenda-export
   :type '(repeat
 	  (list
@@ -1794,7 +1794,7 @@ When non-nil, this must be the number of minutes, e.g. 60 for one hour."
 (defcustom org-agenda-show-inherited-tags t
   "Non-nil means show inherited tags in each agenda line.
 
-When this option is set to 'always, it take precedences over
+When this option is set to `always', it take precedences over
 `org-agenda-use-tag-inheritance' and inherited tags are shown
 in every agenda.
 
@@ -1803,8 +1803,8 @@ shown when they are available, i.e. when the value of
 `org-agenda-use-tag-inheritance' has been taken into account.
 
 This can be set to a list of agenda types in which the agenda
-must display the inherited tags.  Available types are 'todo,
-'agenda, 'search and 'timeline.
+must display the inherited tags.  Available types are `todo',
+`agenda', `search' and `timeline'.
 
 When set to nil, never show inherited tags in agenda lines."
   :group 'org-agenda-line-format
@@ -1825,10 +1825,10 @@ controlled by `org-use-tag-inheritance'.  In other agenda types,
 agenda entries.  Still, you may want the agenda to be aware of
 the inherited tags anyway, e.g. for later tag filtering.
 
-Allowed value are 'todo, 'search, 'timeline and 'agenda.
+Allowed value are `todo', `search', `timeline' and `agenda'.
 
 This variable has no effect if `org-agenda-show-inherited-tags'
-is set to 'always.  In that case, the agenda is aware of those
+is set to `always'.  In that case, the agenda is aware of those
 tags.
 
 The default value sets tags in every agenda type.  Setting this
@@ -7127,7 +7127,7 @@ their type."
 (defun org-agenda-set-restriction-lock (&optional type)
   "Set restriction lock for agenda, to current subtree or file.
 Restriction will be the file if TYPE is `file', or if type is the
-universal prefix '(4), or if the cursor is before the first headline
+universal prefix \\='(4), or if the cursor is before the first headline
 in the file.  Otherwise, restriction will be to the current subtree."
   (interactive "P")
   (org-agenda-remove-restriction-lock 'noupdate)
@@ -7198,7 +7198,7 @@ in the file.  Otherwise, restriction will be to the current subtree."
 (defun org-agenda-check-type (error &rest types)
   "Check if agenda buffer is of allowed type.
 If ERROR is non-nil, throw an error, otherwise just return nil.
-Allowed types are 'agenda 'timeline 'todo 'tags 'search."
+Allowed types are `agenda' `timeline' `todo' `tags' `search'."
   (if (not org-agenda-type)
       (error "No Org agenda currently displayed")
     (if (memq org-agenda-type types)
@@ -8528,8 +8528,10 @@ If this information is not given, the function uses the tree at point."
 (defun org-agenda-refile (&optional goto rfloc no-update)
   "Refile the item at point.
 
-When GOTO is 0 or '(64) or \\[universal-argument] \\[universal-argument] \\[universal-argument], clear the refile cache.
-When GOTO is '(16) or \\[universal-argument] \\[universal-argument], go to the location of the last refiled item.
+When GOTO is 0 or \\='(64) or a triple \\[universal-argument] prefix argument,
+clear the refile cache.
+When GOTO is \\='(16) or a double \\[universal-argument] prefix argument,
+go to the location of the last refiled item.
 RFLOC can be a refile location obtained in a different way.
 When NO-UPDATE is non-nil, don't redo the agenda buffer."
   (interactive "P")

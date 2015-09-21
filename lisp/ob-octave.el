@@ -168,8 +168,8 @@ create.  Return the initialized session."
 (defun org-babel-octave-evaluate
   (session body result-type &optional matlabp)
   "Pass BODY to the octave process in SESSION.
-If RESULT-TYPE equals 'output then return the outputs of the
-statements in BODY, if RESULT-TYPE equals 'value then return the
+If RESULT-TYPE equals `output' then return the outputs of the
+statements in BODY, if RESULT-TYPE equals `value' then return the
 value of the last statement in BODY, as elisp."
   (if session
       (org-babel-octave-evaluate-session session body result-type matlabp)

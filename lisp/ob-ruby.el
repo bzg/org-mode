@@ -187,8 +187,8 @@ end
 (defun org-babel-ruby-evaluate
   (buffer body &optional result-type result-params)
   "Pass BODY to the Ruby process in BUFFER.
-If RESULT-TYPE equals 'output then return a list of the outputs
-of the statements in BODY, if RESULT-TYPE equals 'value then
+If RESULT-TYPE equals `output' then return a list of the outputs
+of the statements in BODY, if RESULT-TYPE equals `value' then
 return the value of the last statement in BODY, as elisp."
   (if (not buffer)
       ;; external process evaluation
