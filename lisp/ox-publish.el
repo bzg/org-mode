@@ -67,7 +67,7 @@ produced.")
 
 (defcustom org-publish-project-alist nil
   "Association list to control publishing behavior.
-Each element of the alist is a publishing “project”.  The CAR of
+Each element of the alist is a publishing project.  The CAR of
 each element is a string, uniquely identifying the project.  The
 CDR of each element is in one of the following forms:
 
