@@ -94,9 +94,10 @@ Return value is either a string, an integer, or nil."
 
 (defcustom org-clock-out-when-done t
   "When non-nil, clock will be stopped when the clocked entry is marked DONE.
+\\<org-mode-map>\
 DONE here means any DONE-like state.
 A nil value means clock will keep running until stopped explicitly with
-`C-c C-x C-o', or until the clock is started in a different item.
+`\\[org-clock-out]', or until the clock is started in a different item.
 Instead of t, this can also be a list of TODO states that should trigger
 clocking out."
   :group 'org-clock

@@ -110,6 +110,7 @@
 
 (defcustom org-confirm-babel-evaluate t
   "Confirm before evaluation.
+\\<org-mode-map>\
 Require confirmation before interactively evaluating code
 blocks in Org-mode buffers.  The default value of this variable
 is t, meaning confirmation is required for any code block
@@ -122,10 +123,11 @@ execution or nil if no prompt is required.
 
 Warning: Disabling confirmation may result in accidental
 evaluation of potentially harmful code.  It may be advisable
-remove code block execution from C-c C-c as further protection
+remove code block execution from \\[org-ctrl-c-ctrl-c] \
+as further protection
 against accidental code block evaluation.  The
 `org-babel-no-eval-on-ctrl-c-ctrl-c' variable can be used to
-remove code block execution from the C-c C-c keybinding."
+remove code block execution from the \\[org-ctrl-c-ctrl-c] keybinding."
   :group 'org-babel
   :version "24.1"
   :type '(choice boolean function))
@@ -133,7 +135,8 @@ remove code block execution from the C-c C-c keybinding."
 (put 'org-confirm-babel-evaluate 'safe-local-variable (lambda (x) (eq x t)))
 
 (defcustom org-babel-no-eval-on-ctrl-c-ctrl-c nil
-  "Remove code block evaluation from the C-c C-c key binding."
+  "\\<org-mode-map>\
+Remove code block evaluation from the \\[org-ctrl-c-ctrl-c] key binding."
   :group 'org-babel
   :version "24.1"
   :type 'boolean)
@@ -1309,8 +1312,9 @@ the `org-mode-hook'."
 
 (defun org-babel-hash-at-point (&optional point)
   "Return the value of the hash at POINT.
+\\<org-mode-map>\
 The hash is also added as the last element of the kill ring.
-This can be called with C-c C-c."
+This can be called with \\[org-ctrl-c-ctrl-c]."
   (interactive)
   (let ((hash (car (delq nil (mapcar
 			      (lambda (ol) (overlay-get ol 'babel-hash))

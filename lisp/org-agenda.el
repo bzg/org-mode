@@ -1292,12 +1292,14 @@ given here."
 
 (defcustom org-agenda-log-mode-items '(closed clock)
   "List of items that should be shown in agenda log mode.
+\\<org-agenda-mode-map>\
 This list may contain the following symbols:
 
   closed    Show entries that have been closed on that day.
   clock     Show entries that have received clocked time on that day.
   state     Show all logged state changes.
-Note that instead of changing this variable, you can also press `C-u l' in
+Note that instead of changing this variable, you can also press \
+`\\[universal-argument] \\[org-agenda-log-mode]' in
 the agenda to display all available LOG items temporarily."
   :group 'org-agenda-daily/weekly
   :type '(set :greedy t (const closed) (const clock) (const state)))
@@ -1975,7 +1977,8 @@ estimate."
   :type 'boolean)
 
 (defcustom org-agenda-auto-exclude-function nil
-  "A function called with a tag to decide if it is filtered on '/ RET'.
+  "A function called with a tag to decide if it is filtered on \
+\\<org-agenda-mode-map>`\\[org-agenda-filter-by-tag] RET'.
 The sole argument to the function, which is called once for each
 possible tag, is a string giving the name of the tag.  The
 function should return either nil if the tag should be included
@@ -4681,7 +4684,12 @@ in `org-agenda-text-search-extra-files'."
 	(add-text-properties pos (1- (point)) (list 'face 'org-warning))
 	(setq pos (point))
 	(unless org-agenda-multi
-	  (insert "Press `[', `]' to add/sub word, `{', `}' to add/sub regexp, `C-u r' to edit\n")
+	  (insert (substitute-command-keys "\
+Press `\\[org-agenda-manipulate-query-add]', \
+`\\[org-agenda-manipulate-query-subtract]' to add/sub word, \
+`\\[org-agenda-manipulate-query-add-re]', \
+`\\[org-agenda-manipulate-query-subtract-re]' to add/sub regexp, \
+`\\[universal-argument] \\[org-agenda-redo]' to edit\n"))
 	  (add-text-properties pos (1- (point))
 			       (list 'face 'org-agenda-structure))))
       (org-agenda-mark-header-line (point-min))
@@ -4775,7 +4783,8 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
 		 org-select-this-todo-keyword))
 	(setq pos (point))
 	(unless org-agenda-multi
-	  (insert "Available with `N r': (0)[ALL]")
+	  (insert (substitute-command-keys "Available with \
+`N \\[org-agenda-redo]': (0)[ALL]"))
 	  (let ((n 0) s)
 	    (mapc (lambda (x)
 		    (setq s (format "(%d)%s" (setq n (1+ n)) x))
@@ -4870,7 +4879,9 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
 	(add-text-properties pos (1- (point)) (list 'face 'org-warning))
 	(setq pos (point))
 	(unless org-agenda-multi
-	  (insert "Press `C-u r' to search again with new search string\n"))
+	  (insert (substitute-command-keys
+		   "Press `\\[universal-argument] \\[org-agenda-redo]' \
+to search again with new search string\n")))
 	(add-text-properties pos (1- (point)) (list 'face 'org-agenda-structure)))
       (org-agenda-mark-header-line (point-min))
       (when rtnall
@@ -8169,7 +8180,8 @@ so that the date SD will be in that range."
   "Toggle log mode in an agenda buffer.
 With argument SPECIAL, show all possible log items, not only the ones
 configured in `org-agenda-log-mode-items'.
-With a double `C-u' prefix arg, show *only* log items, nothing else."
+With a double \\[universal-argument] prefix arg, show *only* \
+log items, nothing else."
   (interactive "P")
   (org-agenda-check-type t 'agenda 'timeline)
   (setq org-agenda-show-log
@@ -10062,7 +10074,8 @@ tag and (if present) the flagging note."
 	(replace-match "\n" t t))
       (goto-char (point-min))
       (select-window win)
-      (message "Flagging note pushed to kill ring.  Press [?] again to remove tag and note"))))
+      (message (substitute-command-keys "Flagging note pushed to kill ring.  \
+Press \\[org-agenda-show-the-flagging-note] again to remove tag and note")))))
 
 (defun org-agenda-remove-flag (marker)
   "Remove the FLAGGED tag and any flagging note in the entry."

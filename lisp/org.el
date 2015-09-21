@@ -849,6 +849,7 @@ depends on, if any."
 
 (defcustom org-support-shift-select nil
   "Non-nil means make shift-cursor commands select text when possible.
+\\<org-mode-map>\
 
 In Emacs 23, when `shift-select-mode' is on, shifted cursor keys
 start selecting a region, or enlarge regions started in this way.
@@ -875,10 +876,13 @@ if the cursor is exactly on the bullet.
 If you set this variable to the symbol `always', then the keys
 will not be special in headlines, property lines, and item lines,
 to make shift selection work there as well.  If this is what you
-want, you can use the following alternative commands: `C-c C-t'
-and `C-c ,' to change TODO state and priority, `C-u C-u C-c C-t'
-can be used to switch TODO sets, `C-c -' to cycle item bullet
-types, and properties can be edited by hand or in column view.
+want, you can use the following alternative commands:
+`\\[org-todo]' and `\\[org-priority]' \
+to change TODO state and priority,
+`\\[universal-argument] \\[universal-argument] \\[org-todo]' \
+can be used to switch TODO sets,
+`\\[org-ctrl-c-minus]' to cycle item bullet types,
+and properties can be edited by hand or in column view.
 
 However, when the cursor is on a timestamp, shift-cursor commands
 will still edit the time stamp - this is just too good to give up.
@@ -1677,10 +1681,12 @@ changed by an edit command."
 
 (defcustom org-remove-highlights-with-change t
   "Non-nil means any change to the buffer will remove temporary highlights.
+\\<org-mode-map>\
 Such highlights are created by `org-occur' and `org-clock-display'.
-When nil, `C-c C-c' needs to be used to get rid of the highlights.
+When nil, `\\[org-ctrl-c-ctrl-c]' needs to be used \
+to get rid of the highlights.
 The highlights created by `org-toggle-latex-fragment' always need
-`C-c C-x C-l' to be removed."
+`\\[org-toggle-latex-fragment]' to be removed."
   :group 'org-sparse-trees
   :group 'org-time
   :type 'boolean)
@@ -2435,12 +2441,15 @@ of the subtree."
 
 (defcustom org-refile-use-cache nil
   "Non-nil means cache refile targets to speed up the process.
+\\<org-mode-map>\
 The cache for a particular file will be updated automatically when
 the buffer has been killed, or when any of the marker used for flagging
 refile targets no longer points at a live buffer.
 If you have added new entries to a buffer that might themselves be targets,
-you need to clear the cache manually by pressing `C-0 C-c C-w' or, if you
-find that easier, `C-u C-u C-u C-c C-w'."
+you need to clear the cache manually by pressing `C-0 \\[org-refile]' or,
+if you find that easier, \
+`\\[universal-argument] \\[universal-argument] \\[universal-argument] \
+\\[org-refile]'."
   :group 'org-refile
   :version "24.1"
   :type 'boolean)
@@ -2623,7 +2632,8 @@ more information."
 		 (const type)))
 
 (defcustom org-use-fast-todo-selection t
-  "Non-nil means use the fast todo selection scheme with C-c C-t.
+  "\\<org-mode-map>\
+Non-nil means use the fast todo selection scheme with \\[org-todo].
 This variable describes if and under what circumstances the cycling
 mechanism for TODO keywords will be replaced by a single-key, direct
 selection scheme.
@@ -2631,8 +2641,9 @@ selection scheme.
 When nil, fast selection is never used.
 
 When the symbol `prefix', it will be used when `org-todo' is called
-with a prefix argument,  i.e. `C-u C-c C-t' in an Org-mode buffer, and
-`C-u t' in an agenda buffer.
+with a prefix argument,  i.e. `\\[universal-argument] \\[org-todo]' \
+in an Org-mode buffer, and
+`\\[universal-argument] t' in an agenda buffer.
 
 When t, fast selection is used by default.  In this case, the prefix
 argument forces cycling instead.
@@ -3098,6 +3109,7 @@ as an argument and return the numeric priority."
 
 (defcustom org-time-stamp-rounding-minutes '(0 5)
   "Number of minutes to round time stamps to.
+\\<org-mode-map>\
 These are two values, the first applies when first creating a time stamp.
 The second applies when changing it with the commands `S-up' and `S-down'.
 When changing the time stamp, this means that it will change in steps
@@ -3107,7 +3119,8 @@ When a setting is 0 or 1, insert the time unmodified.  Useful rounding
 numbers should be factors of 60, so for example 5, 10, 15.
 
 When this is larger than 1, you can still force an exact time stamp by using
-a double prefix argument to a time stamp command like `C-c .' or `C-c !',
+a double prefix argument to a time stamp command like \
+`\\[org-time-stamp]' or `\\[org-time-stamp-inactive],
 and by using a prefix arg to `S-up/down' to specify the exact number
 of minutes to shift."
   :group 'org-time
@@ -3854,7 +3867,8 @@ regular expression will be included."
 (defcustom org-agenda-text-search-extra-files nil
   "List of extra files to be searched by text search commands.
 These files will be searched in addition to the agenda files by the
-commands `org-search-view' (`C-c a s') and `org-occur-in-agenda-files'.
+commands `org-search-view' (`\\[org-agenda] s') \
+and `org-occur-in-agenda-files'.
 Note that these files will only be searched for text search commands,
 not for the other agenda views like todo lists, tag searches or the weekly
 agenda.  This variable is intended to list notes and possibly archive files
@@ -6657,11 +6671,12 @@ in special contexts.
   1. OVERVIEW: Show only top-level headlines.
   2. CONTENTS: Show all headlines of all levels, but no body text.
   3. SHOW ALL: Show everything.
-  When called with two `C-u C-u' prefixes, switch to the startup visibility,
+  With a double \\[universal-argument] prefix argument, \
+switch to the startup visibility,
   determined by the variable `org-startup-folded', and by any VISIBILITY
   properties in the buffer.
-  When called with three `C-u C-u C-u' prefixed, show the entire buffer,
-  including any drawers.
+  With a triple \\[universal-argument] prefix argument, \
+show the entire buffer, including any drawers.
 
 - When inside a table, re-align the table and move to the next field.
 
@@ -6690,7 +6705,7 @@ in special contexts.
 
 - Special case: if point is at the beginning of the buffer and there is
   no headline in line 1, this function will act as if called with prefix arg
-  (C-u TAB, same as S-TAB) also when called without prefix arg.
+  (\\[universal-argument] TAB, same as S-TAB) also when called without prefix arg.
   But only if also the variable `org-cycle-global-at-bob' is t."
   (interactive "P")
   (org-load-modules-maybe)
@@ -6741,7 +6756,8 @@ in special contexts.
        ;; Table: enter it or move to the next field.
        ((org-at-table-p 'any)
 	(if (org-at-table.el-p)
-	    (message "Use C-c ' to edit table.el tables")
+	    (message (substitute-command-keys "\\<org-mode-map>\
+Use \\[org-edit-special] to edit table.el tables"))
 	  (if arg (org-table-edit-field t)
 	    (org-table-justify-field-maybe)
 	    (call-interactively 'org-table-next-field))))
@@ -21203,7 +21219,8 @@ This command does many different things, depending on context:
 	   ;; a `table.el' type, just give up.  At a table row or
 	   ;; cell, maybe recalculate line but always align table.
 	   (if (eq (org-element-property :type context) 'table.el)
-	       (message "Use C-c ' to edit table.el tables")
+	       (message (substitute-command-keys "\\<org-mode-map>\
+Use \\[org-edit-special] to edit table.el tables"))
 	     (let ((org-enable-table-editor t))
 	       (if (or (eq type 'table)
 		       ;; Check if point is at a TBLFM line.

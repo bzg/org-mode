@@ -343,7 +343,9 @@ Constants can also be defined on a per-file basis using a line like
 
 (defcustom org-table-allow-automatic-line-recalculation t
   "Non-nil means lines marked with |#| or |*| will be recomputed automatically.
-Automatically means when TAB or RET or C-c C-c are pressed in the line."
+\\<org-mode-map>\
+Automatically means when TAB or RET or \\[org-ctrl-c-ctrl-c] \
+are pressed in the line."
   :group 'org-table-calculation
   :type 'boolean)
 
@@ -3555,8 +3557,10 @@ Parameters get priority."
     (when (eq org-table-use-standard-references t)
       (org-table-fedit-toggle-ref-type))
     (org-goto-line startline)
-    (message "Edit formulas, finish with `C-c C-c' or `C-c ' '.  \
-See menu for more commands.")))
+    (message
+     (substitute-command-keys "\\<org-mode-map>\
+Edit formulas, finish with `\\[org-ctrl-c-ctrl-c]' or `\\[org-edit-special]'.  \
+See menu for more commands."))))
 
 (defun org-table-fedit-post-command ()
   (when (not (memq this-command '(lisp-complete-symbol)))
