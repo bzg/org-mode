@@ -7262,8 +7262,7 @@ touched.  Also, exit the agenda even if it is in column view."
 
 (defun org-agenda-kill-all-agenda-buffers ()
   "Kill all buffers in `org-agenda-mode'.
-This is used when toggling sticky agendas.
-You can also explicitly invoke it with `C-c a C-k'."
+This is used when toggling sticky agendas."
   (interactive)
   (let (blist)
     (dolist (buf (buffer-list))
