@@ -116,9 +116,10 @@ Assume BACKEND is `md'."
        e :post-blank
        (if (and (eq (org-element-type e) 'paragraph)
 		(eq (org-element-type (org-element-property :parent e)) 'item)
-		(eq (org-element-type (org-export-get-next-element e info))
-		    'plain-list)
-		(not (org-export-get-previous-element e info)))
+		(not (org-export-get-previous-element e info))
+		(let ((next (org-export-get-next-element e info)))
+		  (and (eq (org-element-type next) 'plain-list)
+		       (not (org-export-get-next-element next info)))))
 	   0
 	 1))))
   ;; Return updated tree.
