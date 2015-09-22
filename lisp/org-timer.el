@@ -49,7 +49,7 @@
 (defvar org-timer-countdown-timer nil
   "Current countdown timer.
 This is a timer object if there is an active countdown timer,
-'paused' if there is a paused countdown timer, and nil
+`paused' if there is a paused countdown timer, and nil
 otherwise.")
 
 (defvar org-timer-countdown-timer-title nil
@@ -183,10 +183,10 @@ With prefix arg STOP, stop it entirely."
     ;; pause timer
     (when org-timer-countdown-timer
       (cancel-timer org-timer-countdown-timer)
-      (setq org-timer-countdown-timer 'pause))
+      (setq org-timer-countdown-timer 'paused))
     (run-hooks 'org-timer-pause-hook)
     (setq org-timer-pause-time (current-time))
-    (org-timer-set-mode-line 'pause)
+    (org-timer-set-mode-line 'paused)
     (message "Timer paused at %s" (org-timer-value-string)))))
 
 (defun org-timer-stop ()
@@ -331,7 +331,7 @@ If the integer is negative, the string will start with \"-\"."
 
 (defun org-timer-set-mode-line (value)
   "Set the mode-line display for relative or countdown timer.
-VALUE can be `on', `off', or `pause'."
+VALUE can be `on', `off', or `paused'."
   (when (or (eq org-timer-display 'mode-line)
 	    (eq org-timer-display 'both))
     (or global-mode-string (setq global-mode-string '("")))
@@ -357,7 +357,7 @@ VALUE can be `on', `off', or `pause'."
       (setq frame-title-format
 	    (delq 'org-timer-mode-line-string frame-title-format)))
     (force-mode-line-update))
-   ((equal value 'pause)
+   ((equal value 'paused)
     (when org-timer-mode-line-timer
       (cancel-timer org-timer-mode-line-timer)
       (setq org-timer-mode-line-timer nil)))
