@@ -163,13 +163,12 @@ With prefix arg STOP, stop it entirely."
     (let ((start-secs (org-float-time org-timer-start-time))
 	  (pause-secs (org-float-time org-timer-pause-time)))
       (if org-timer-countdown-timer
-	  (progn
-	    (let ((new-secs (- start-secs pause-secs)))
-	      (setq org-timer-countdown-timer
-		    (org-timer--run-countdown-timer
-		     new-secs org-timer-countdown-timer-title))
-	      (setq org-timer-start-time
-		    (time-add (current-time) (seconds-to-time new-secs)))))
+	  (let ((new-secs (- start-secs pause-secs)))
+	    (setq org-timer-countdown-timer
+		  (org-timer--run-countdown-timer
+		   new-secs org-timer-countdown-timer-title))
+	    (setq org-timer-start-time
+		  (time-add (current-time) (seconds-to-time new-secs))))
 	(setq org-timer-start-time
 	      ;; Pass `current-time' result to `org-float-time'
 	      ;; (instead of calling without arguments) so that only
@@ -450,23 +449,22 @@ using three `C-u' prefix arguments."
 	(org-timer-show-remaining-time)
       (let ((secs (org-timer-hms-to-secs (org-timer-fix-incomplete minutes)))
 	    (hl (org-timer--get-timer-title)))
-	(if (or (not org-timer-countdown-timer)
-		(equal opt '(16))
-		(y-or-n-p "Replace current timer? "))
-	    (progn
-	      (when (timerp org-timer-countdown-timer)
-		(cancel-timer org-timer-countdown-timer))
-	      (setq org-timer-countdown-timer-title
-		    (org-timer--get-timer-title))
-	      (setq org-timer-countdown-timer
-		    (org-timer--run-countdown-timer
-		     secs org-timer-countdown-timer-title))
-	      (run-hooks 'org-timer-set-hook)
-	      (setq org-timer-start-time
-		    (time-add (current-time) (seconds-to-time secs)))
-	      (setq org-timer-pause-time nil)
-	      (org-timer-set-mode-line 'on))
-	  (message "No timer set"))))))
+	(if (and org-timer-countdown-timer
+		 (not (or (equal opt '(16))
+			  (y-or-n-p "Replace current timer? "))))
+	    (message "No timer set")
+	  (when (timerp org-timer-countdown-timer)
+	    (cancel-timer org-timer-countdown-timer))
+	  (setq org-timer-countdown-timer-title
+		(org-timer--get-timer-title))
+	  (setq org-timer-countdown-timer
+		(org-timer--run-countdown-timer
+		 secs org-timer-countdown-timer-title))
+	  (run-hooks 'org-timer-set-hook)
+	  (setq org-timer-start-time
+		(time-add (current-time) (seconds-to-time secs)))
+	  (setq org-timer-pause-time nil)
+	  (org-timer-set-mode-line 'on))))))
 
 (defun org-timer--run-countdown-timer (secs title)
   "Start countdown timer that will last SECS.
