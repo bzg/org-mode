@@ -4860,7 +4860,7 @@ This may be either a string or a function of two arguments:
     ;; and filters.
     (let ((output (org-export-data-with-backend data custom-backend info)))
       ;; Remove final newline.
-      (if (org-string-nw-p output) (substring output 0 -1) ""))))
+      (if (org-string-nw-p output) (substring-no-properties output 0 -1) ""))))
 
 (defun org-table--generic-apply (value name &optional with-cons &rest args)
   (cond ((null value) nil)
