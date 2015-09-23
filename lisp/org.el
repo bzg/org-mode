@@ -24917,9 +24917,8 @@ modified."
 
 (defun org-show-children (&optional level)
   "Show all direct subheadings of this heading.
-Optional argument LEVEL is how many levels below the current
-level should be shown.  Default is enough to cause the following
-heading to appear."
+Prefix arg LEVEL is how many levels below the current level should be shown.
+Default is enough to cause the following heading to appear."
   (save-excursion
     (org-back-to-heading t)
     (let* ((current-level (funcall outline-level))
