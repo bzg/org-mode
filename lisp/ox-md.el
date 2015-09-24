@@ -107,7 +107,8 @@ to this rule:
   1. Preserve blank lines between sibling items in a plain list,
 
   2. In an item, remove any blank line before the very first
-     paragraph and the next sub-list.
+     paragraph and the next sub-list when the latter ends the
+     current item.
 
 Assume BACKEND is `md'."
   (org-element-map tree (remq 'item org-element-all-elements)
@@ -116,7 +117,7 @@ Assume BACKEND is `md'."
        e :post-blank
        (if (and (eq (org-element-type e) 'paragraph)
 		(eq (org-element-type (org-element-property :parent e)) 'item)
-		(not (org-export-get-previous-element e info))
+		(org-export-first-sibling-p e info)
 		(let ((next (org-export-get-next-element e info)))
 		  (and (eq (org-element-type next) 'plain-list)
 		       (not (org-export-get-next-element next info)))))
