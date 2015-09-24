@@ -1454,6 +1454,8 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 			     ;; Avoid circular dependencies.
 			     (unless (member file files)
 			       (with-temp-buffer
+				 (setq default-directory
+				   (file-name-directory file))
 				 (insert (org-file-contents file 'noerror))
 				 (let ((org-inhibit-startup t)) (org-mode))
 				 (funcall get-options (cons file files))))))
@@ -1584,6 +1586,8 @@ an alist where associations are (VARIABLE-NAME VALUE)."
 					  (org-remove-double-quotes val))))
 			       (unless (member file files)
 				 (with-temp-buffer
+				   (setq default-directory
+					 (file-name-directory file))
 				   (let ((org-inhibit-startup t)) (org-mode))
 				   (insert (org-file-contents file 'noerror))
 				   (setq alist
