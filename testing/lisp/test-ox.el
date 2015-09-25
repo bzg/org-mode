@@ -2726,6 +2726,8 @@ Another text. (ref:text)
   ;; Remote files start with "file://"
   (should (equal "file://myself@some.where:papers/last.pdf"
 		 (org-export-file-uri "/myself@some.where:papers/last.pdf")))
+  (should (equal "file://localhost/etc/fstab"
+		 (org-export-file-uri "//localhost/etc/fstab")))
   ;; Expand filename starting with "~".
   (should (equal (org-export-file-uri "~/file.org")
 		 (concat "file://" (expand-file-name "~/file.org")))))
