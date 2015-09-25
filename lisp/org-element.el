@@ -3125,13 +3125,13 @@ Assume point is at the beginning of the link."
 	(when (string-match "::\\(.*\\)\\'" path)
 	  (setq search-option (match-string 1 path))
 	  (setq path (replace-match "" nil nil path)))
-	(setq path (replace-regexp-in-string "\\`/+" "/" path)))
+	(setq path (replace-regexp-in-string "\\`///+" "/" path)))
       ;; Translate link, if `org-link-translation-function' is set.
       (let ((trans (and (functionp org-link-translation-function)
 			(funcall org-link-translation-function type path))))
 	(when trans
 	  (setq type (car trans))
-	 (setq path (cdr trans))))
+	  (setq path (cdr trans))))
       (list 'link
 	    (list :type type
 		  :path path

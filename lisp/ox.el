@@ -4199,12 +4199,10 @@ has type \"radio\"."
 
 (defun org-export-file-uri (filename)
   "Return file URI associated to FILENAME."
-  (if (not (file-name-absolute-p filename)) filename
-    (concat "file:/"
-	    (and (not (org-file-remote-p filename)) "/")
-	    (if (org-string-match-p "\\`~" filename)
-		(expand-file-name filename)
-	      filename))))
+  (cond ((org-string-match-p "\\`//" filename) (concat "file:" filename))
+	((not (file-name-absolute-p filename)) filename)
+	((org-file-remote-p filename) (concat "file:/" filename))
+	(t (concat "file://" (expand-file-name filename)))))
 
 
 ;;;; For References
