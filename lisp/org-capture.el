@@ -1006,7 +1006,7 @@ may have been stored before."
   (org-switch-to-buffer-other-window
    (org-capture-get-indirect-buffer (org-capture-get :buffer) "CAPTURE"))
   (widen)
-  (show-all)
+  (outline-show-all)
   (goto-char (org-capture-get :pos))
   (org-set-local 'org-capture-target-marker
 		 (point-marker))

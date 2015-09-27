@@ -265,7 +265,7 @@ LINE is the erroneous line"
     (setq case-fold-search nil)
     (if (search-forward line nil t)
         (progn
-          (show-all)
+          (outline-show-all)
           (set-mark (point))
           (goto-char (- (point) (length line))))
       (goto-char temp))))

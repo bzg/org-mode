@@ -539,6 +539,18 @@ Implements `file-equal-p' for older emacsen and XEmacs."
       (buffer-narrowed-p)
     (/= (- (point-max) (point-min)) (buffer-size))))
 
+;; As of Emacs 25.1, `outline-mode` functions are under the 'outline-'
+;; prefix.
+(when (< emacs-major-version 25)
+  (defalias 'outline-show-all 'show-all)
+  (defalias 'outline-hide-subtree 'hide-subtree)
+  (defalias 'outline-show-subtree 'show-subtree)
+  (defalias 'outline-show-branches 'show-branches)
+  (defalias 'outline-show-children 'show-children)
+  (defalias 'outline-show-entry 'show-entry)
+  (defalias 'outline-hide-entry 'hide-entry)
+  (defalias 'outline-hide-sublevels 'hide-sublevels))
+
 (defmacro org-with-silent-modifications (&rest body)
   (if (fboundp 'with-silent-modifications)
       `(with-silent-modifications ,@body)

@@ -548,7 +548,7 @@ Where possible, use the standard interface for changing this line."
       (condition-case nil (org-no-warnings (next-line 1)) (error nil))
       (setq hidep (org-at-heading-p 1)))
     (eval form)
-    (and hidep (hide-entry))))
+    (and hidep (outline-hide-entry))))
 
 (defun org-columns-previous-allowed-value ()
   "Switch to the previous allowed value for this column."

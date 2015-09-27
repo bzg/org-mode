@@ -317,7 +317,7 @@ this heading."
 		     org-odd-levels-only
 		   tr-org-odd-levels-only)))
 	    (goto-char (point-min))
-	    (show-all)
+	    (outline-show-all)
 	    (if (and heading (not (and datetree-date (not datetree-subheading-p))))
 		(progn
 		  (if (re-search-forward
@@ -332,7 +332,7 @@ this heading."
 		    (insert (if datetree-date "" "\n") heading "\n")
 		    (end-of-line 0))
 		  ;; Make the subtree visible
-		  (show-subtree)
+		  (outline-show-subtree)
 		  (if org-archive-reversed-order
 		      (progn
 			(org-back-to-heading t)
@@ -454,7 +454,7 @@ sibling does not exist, it will be created at the end of the subtree."
 	 (format-time-string
 	  (substring (cdr org-time-stamp-formats) 1 -1)))
 	(outline-up-heading 1 t)
-	(hide-subtree)
+	(outline-hide-subtree)
 	(org-cycle-show-empty-lines 'folded)
 	(goto-char pos)))
     (org-reveal)
@@ -565,7 +565,7 @@ the children that do not contain any open TODO items."
 	(save-excursion
 	  (org-back-to-heading t)
 	  (setq set (org-toggle-tag org-archive-tag))
-	  (when set (hide-subtree)))
+	  (when set (outline-hide-subtree)))
 	(and set (beginning-of-line 1))
 	(message "Subtree %s" (if set "archived" "unarchived"))))))
 

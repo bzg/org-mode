@@ -37,7 +37,7 @@
 (defvar org-babel-call-process-region-original nil)
 (defvar org-src-lang-modes)
 (defvar org-babel-library-of-babel)
-(declare-function show-all "outline" ())
+(declare-function outline-show-all "outline" ())
 (declare-function org-every "org" (pred seq))
 (declare-function org-remove-indentation "org" (code &optional n))
 (declare-function org-reduce "org" (CL-FUNC CL-SEQ &rest CL-KEYS))

@@ -191,7 +191,7 @@ See `org-crypt-disable-auto-save'."
           (insert encrypted-text)
           (when folded
             (goto-char start-heading)
-            (hide-subtree))
+            (outline-hide-subtree))
           nil)))))
 
 (defun org-decrypt-entry ()
