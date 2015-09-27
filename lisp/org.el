@@ -7844,7 +7844,7 @@ heading, unconditionally."
 	      (re-search-forward org-outline-regexp-bol)
 	      (beginning-of-line 0))
 	    (skip-chars-backward " \r\t\n")
-	    (and (not (looking-back "^\\*+" (line-beginning-position)))
+	    (and (not (org-looking-back "^\\*+" (line-beginning-position)))
 		 (looking-at "[ \t]+") (replace-match ""))
 	    (unless (eobp) (forward-char 1))
 	    (when (looking-at "^\\*")
@@ -16770,7 +16770,7 @@ So these are more for recording a certain time/date."
     (org-defkey map (kbd ".")
                 (lambda () (interactive)
 		  ;; Are we at the beginning of the prompt?
-		  (if (looking-back "^[^:]+: ")
+		  (if (org-looking-back "^[^:]+: " (line-beginning-position))
 		      (org-eval-in-calendar '(calendar-goto-today))
 		    (insert "."))))
     (org-defkey map (kbd "C-.")
@@ -18063,7 +18063,8 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like \"--2d\"."
 	    (message "No clock to adjust")
 	  (cond ((save-excursion ; fix previous clock?
 		   (re-search-backward org-ts-regexp0 nil t)
-		   (org-looking-back (concat org-clock-string " \\[")))
+		   (org-looking-back (concat org-clock-string " \\[")
+				     (line-beginning-position)))
 		 (setq fixnext 1 clrgx (concat org-ts-regexp0 "\\] =>.*$")))
 		((save-excursion ; fix next clock?
 		   (re-search-backward org-ts-regexp0 nil t)
