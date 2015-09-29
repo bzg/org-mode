@@ -1382,7 +1382,7 @@ Return modified pkg-alist."
 			  (let ((third (nth 3 pkg)))
 			    (and third
 				 (not (member-ignore-case
-				       compile
+				       compiler
 				       (if (listp third) third (list third)))))))
 		   pkg))
 	       pkg-alist))
