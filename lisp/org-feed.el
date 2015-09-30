@@ -615,7 +615,7 @@ containing the properties `:guid' and `:item-full-text'."
 		       (match-beginning 0)))
 	(setq item (buffer-substring beg end)
 	      guid (if (string-match "<guid\\>.*?>\\(.*?\\)</guid>" item)
-		       (org-match-string-no-properties 1 item)))
+		       (xml-substitute-special (org-match-string-no-properties 1 item))))
 	(setq entry (list :guid guid :item-full-text item))
 	(push entry entries)
 	(widen)
