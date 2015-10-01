@@ -18975,10 +18975,12 @@ removed, nil otherwise."
 		(end (or end (point-max))))
 	    (org-remove-if
 	     (lambda (o)
-	       (and (>= (overlay-start o) beg)
-		    (<= (overlay-end o) end)
-		    (progn (delete-overlay o)
-			   (or removedp (setq removedp t)))))
+	       (cond ((not (overlay-buffer o)) (delete-overlay o) t)
+		     ((and (>= (overlay-start o) beg)
+			   (<= (overlay-end o) end))
+		      (delete-overlay o)
+		      (unless removedp (setq removedp t)))
+		     (t nil)))
 	     org-latex-fragment-image-overlays)))
     removedp))
 
