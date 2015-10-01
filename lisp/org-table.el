@@ -4782,6 +4782,8 @@ This may be either a string or a function of two arguments:
   example \"%s\\\\times10^{%s}\".  This may also be a property
   list with column numbers and format strings or functions.
   :fmt will still be applied after :efmt."
+  ;; Make sure `org-export-create-backend' is available.
+  (require 'ox)
   (let* ((backend (plist-get params :backend))
 	 (custom-backend
 	  ;; Build a custom back-end according to PARAMS.  Before
