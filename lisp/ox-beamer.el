@@ -824,7 +824,7 @@ holding export options."
   (let ((title (org-export-data (plist-get info :title) info))
 	(subtitle (org-export-data (plist-get info :subtitle) info)))
     (concat
-     ;; 1. Time-stamp.
+     ;; Time-stamp.
      (and (plist-get info :time-stamp-file)
 	  (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
      ;; 2. Document class and packages.
@@ -851,7 +851,7 @@ holding export options."
 		     (org-element-normalize-string
 		      (plist-get info :latex-header-extra))))))
 	  info)))
-     ;; 3. Insert themes.
+     ;; LaTeX compiler
      (let ((format-theme
 	    (function
 	     (lambda (prop command)
@@ -871,11 +871,11 @@ holding export options."
 		    (:beamer-inner-theme "\\useinnertheme")
 		    (:beamer-outer-theme "\\useoutertheme"))
 		  ""))
-     ;; 4. Possibly limit depth for headline numbering.
+     ;; Possibly limit depth for headline numbering.
      (let ((sec-num (plist-get info :section-numbers)))
        (when (integerp sec-num)
 	 (format "\\setcounter{secnumdepth}{%d}\n" sec-num)))
-     ;; 5. Author.
+     ;; Author.
      (let ((author (and (plist-get info :with-author)
 			(let ((auth (plist-get info :author)))
 			  (and auth (org-export-data auth info)))))
@@ -884,14 +884,14 @@ holding export options."
        (cond ((and author email (not (string= "" email)))
 	      (format "\\author{%s\\thanks{%s}}\n" author email))
 	     ((or author email) (format "\\author{%s}\n" (or author email)))))
-     ;; 6. Date.
+     ;; Date.
      (let ((date (and (plist-get info :with-date) (org-export-get-date info))))
        (format "\\date{%s}\n" (org-export-data date info)))
-     ;; 7. Title
+     ;; Title
      (format "\\title{%s}\n" title)
      (when (org-string-nw-p subtitle)
        (concat (format (plist-get info :beamer-subtitle-format) subtitle) "\n"))
-     ;; 8. Beamer-header
+     ;; Beamer-header
      (let ((beamer-header (plist-get info :beamer-header)))
        (when beamer-header
 	 (format "%s\n" (plist-get info :beamer-header))))
@@ -899,9 +899,9 @@ holding export options."
      (let ((template (plist-get info :latex-hyperref-template)))
        (and (stringp template)
 	    (format-spec template (org-latex--format-spec info))))
-     ;; 10. Document start.
+     ;; Document start.
      "\\begin{document}\n\n"
-     ;; 11. Title command.
+     ;; Title command.
      (org-element-normalize-string
       (cond ((not (plist-get info :with-title)) nil)
 	    ((string= "" title) nil)
@@ -910,7 +910,7 @@ holding export options."
 			   org-latex-title-command)
 	     (format org-latex-title-command title))
 	    (t org-latex-title-command)))
-     ;; 12. Table of contents.
+     ;; Table of contents.
      (let ((depth (plist-get info :with-toc)))
        (when depth
 	 (concat
@@ -922,13 +922,13 @@ holding export options."
 	    (format "\\setcounter{tocdepth}{%d}\n" depth))
 	  "\\tableofcontents\n"
 	  "\\end{frame}\n\n")))
-     ;; 13. Document's body.
+     ;; Document's body.
      contents
-     ;; 14. Creator.
+     ;; Creator.
      (if (plist-get info :with-creator)
 	 (concat (plist-get info :creator) "\n")
        "")
-     ;; 15. Document end.
+     ;; Document end.
      "\\end{document}")))
 
 
