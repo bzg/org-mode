@@ -185,6 +185,8 @@ Return a list whose CAR is the tangled file name."
 
 (defun org-babel-tangle-publish (_ filename pub-dir)
   "Tangle FILENAME and place the results in PUB-DIR."
+  (unless (file-exists-p pub-dir)
+    (make-directory pub-dir t))
   (mapc (lambda (el) (copy-file el pub-dir t)) (org-babel-tangle-file filename)))
 
 ;;;###autoload
