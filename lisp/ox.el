@@ -5054,105 +5054,115 @@ Return a list of src-block elements with a caption."
      ;; one may use: »...«, "...", ›...‹, or '...'.
      ;; http://sproget.dk/raad-og-regler/retskrivningsregler/retskrivningsregler/a7-40-60/a7-58-anforselstegn/
      ;; LaTeX quotes require Babel!
-     (opening-double-quote :utf-8 "»" :html "&raquo;" :latex ">>"
-			   :texinfo "@guillemetright{}")
-     (closing-double-quote :utf-8 "«" :html "&laquo;" :latex "<<"
-			   :texinfo "@guillemetleft{}")
-     (opening-single-quote :utf-8 "›" :html "&rsaquo;" :latex "\\frq{}"
-			   :texinfo "@guilsinglright{}")
-     (closing-single-quote :utf-8 "‹" :html "&lsaquo;" :latex "\\flq{}"
-			   :texinfo "@guilsingleft{}")
+     (primary-opening
+      :utf-8 "»" :html "&raquo;" :latex ">>" :texinfo "@guillemetright{}")
+     (primary-closing
+      :utf-8 "«" :html "&laquo;" :latex "<<" :texinfo "@guillemetleft{}")
+     (secondary-opening
+      :utf-8 "›" :html "&rsaquo;" :latex "\\frq{}" :texinfo "@guilsinglright{}")
+     (secondary-closing
+      :utf-8 "‹" :html "&lsaquo;" :latex "\\flq{}" :texinfo "@guilsingleft{}")
      (apostrophe :utf-8 "’" :html "&rsquo;"))
     ("de"
-     (opening-double-quote :utf-8 "„" :html "&bdquo;" :latex "\"`"
-			   :texinfo "@quotedblbase{}")
-     (closing-double-quote :utf-8 "“" :html "&ldquo;" :latex "\"'"
-			   :texinfo "@quotedblleft{}")
-     (opening-single-quote :utf-8 "‚" :html "&sbquo;" :latex "\\glq{}"
-			   :texinfo "@quotesinglbase{}")
-     (closing-single-quote :utf-8 "‘" :html "&lsquo;" :latex "\\grq{}"
-			   :texinfo "@quoteleft{}")
+     (primary-opening
+      :utf-8 "„" :html "&bdquo;" :latex "\"`" :texinfo "@quotedblbase{}")
+     (primary-closing
+      :utf-8 "“" :html "&ldquo;" :latex "\"'" :texinfo "@quotedblleft{}")
+     (secondary-opening
+      :utf-8 "‚" :html "&sbquo;" :latex "\\glq{}" :texinfo "@quotesinglbase{}")
+     (secondary-closing
+      :utf-8 "‘" :html "&lsquo;" :latex "\\grq{}" :texinfo "@quoteleft{}")
      (apostrophe :utf-8 "’" :html "&rsquo;"))
     ("en"
-     (opening-double-quote :utf-8 "“" :html "&ldquo;" :latex "``" :texinfo "``")
-     (closing-double-quote :utf-8 "”" :html "&rdquo;" :latex "''" :texinfo "''")
-     (opening-single-quote :utf-8 "‘" :html "&lsquo;" :latex "`" :texinfo "`")
-     (closing-single-quote :utf-8 "’" :html "&rsquo;" :latex "'" :texinfo "'")
+     (primary-opening :utf-8 "“" :html "&ldquo;" :latex "``" :texinfo "``")
+     (primary-closing :utf-8 "”" :html "&rdquo;" :latex "''" :texinfo "''")
+     (secondary-opening :utf-8 "‘" :html "&lsquo;" :latex "`" :texinfo "`")
+     (secondary-closing :utf-8 "’" :html "&rsquo;" :latex "'" :texinfo "'")
      (apostrophe :utf-8 "’" :html "&rsquo;"))
     ("es"
-     (opening-double-quote :utf-8 "«" :html "&laquo;" :latex "\\guillemotleft{}"
-			   :texinfo "@guillemetleft{}")
-     (closing-double-quote :utf-8 "»" :html "&raquo;" :latex "\\guillemotright{}"
-			   :texinfo "@guillemetright{}")
-     (opening-single-quote :utf-8 "“" :html "&ldquo;" :latex "``" :texinfo "``")
-     (closing-single-quote :utf-8 "”" :html "&rdquo;" :latex "''" :texinfo "''")
+     (primary-opening
+      :utf-8 "«" :html "&laquo;" :latex "\\guillemotleft{}"
+      :texinfo "@guillemetleft{}")
+     (primary-closing
+      :utf-8 "»" :html "&raquo;" :latex "\\guillemotright{}"
+      :texinfo "@guillemetright{}")
+     (secondary-opening :utf-8 "“" :html "&ldquo;" :latex "``" :texinfo "``")
+     (secondary-closing :utf-8 "”" :html "&rdquo;" :latex "''" :texinfo "''")
      (apostrophe :utf-8 "’" :html "&rsquo;"))
     ("fr"
-     (opening-double-quote :utf-8 "« " :html "&laquo;&nbsp;" :latex "\\og "
-			   :texinfo "@guillemetleft{}@tie{}")
-     (closing-double-quote :utf-8 " »" :html "&nbsp;&raquo;" :latex "\\fg{}"
-			   :texinfo "@tie{}@guillemetright{}")
-     (opening-single-quote :utf-8 "« " :html "&laquo;&nbsp;" :latex "\\og "
-			   :texinfo "@guillemetleft{}@tie{}")
-     (closing-single-quote :utf-8 " »" :html "&nbsp;&raquo;" :latex "\\fg{}"
-			   :texinfo "@tie{}@guillemetright{}")
+     (primary-opening
+      :utf-8 "« " :html "&laquo;&nbsp;" :latex "\\og "
+      :texinfo "@guillemetleft{}@tie{}")
+     (primary-closing
+      :utf-8 " »" :html "&nbsp;&raquo;" :latex "\\fg{}"
+      :texinfo "@tie{}@guillemetright{}")
+     (secondary-opening
+      :utf-8 "« " :html "&laquo;&nbsp;" :latex "\\og "
+      :texinfo "@guillemetleft{}@tie{}")
+     (secondary-closing :utf-8 " »" :html "&nbsp;&raquo;" :latex "\\fg{}"
+			:texinfo "@tie{}@guillemetright{}")
      (apostrophe :utf-8 "’" :html "&rsquo;"))
     ("no"
      ;; https://nn.wikipedia.org/wiki/Sitatteikn
-     (opening-double-quote :utf-8 "«" :html "&laquo;" :latex "\\guillemotleft{}"
-			   :texinfo "@guillemetleft{}")
-     (closing-double-quote :utf-8 "»" :html "&raquo;" :latex "\\guillemotright{}"
-			   :texinfo "@guillemetright{}")
-     (opening-single-quote :utf-8 "‘" :html "&lsquo;" :latex "`" :texinfo "`")
-     (closing-single-quote :utf-8 "’" :html "&rsquo;" :latex "'" :texinfo "'")
+     (primary-opening
+      :utf-8 "«" :html "&laquo;" :latex "\\guillemotleft{}"
+      :texinfo "@guillemetleft{}")
+     (primary-closing
+      :utf-8 "»" :html "&raquo;" :latex "\\guillemotright{}"
+      :texinfo "@guillemetright{}")
+     (secondary-opening :utf-8 "‘" :html "&lsquo;" :latex "`" :texinfo "`")
+     (secondary-closing :utf-8 "’" :html "&rsquo;" :latex "'" :texinfo "'")
      (apostrophe :utf-8 "’" :html "&rsquo;"))
     ("nb"
      ;; https://nn.wikipedia.org/wiki/Sitatteikn
-     (opening-double-quote :utf-8 "«" :html "&laquo;" :latex "\\guillemotleft{}"
-			   :texinfo "@guillemetleft{}")
-     (closing-double-quote :utf-8 "»" :html "&raquo;" :latex "\\guillemotright{}"
-			   :texinfo "@guillemetright{}")
-     (opening-single-quote :utf-8 "‘" :html "&lsquo;" :latex "`" :texinfo "`")
-     (closing-single-quote :utf-8 "’" :html "&rsquo;" :latex "'" :texinfo "'")
+     (primary-opening
+      :utf-8 "«" :html "&laquo;" :latex "\\guillemotleft{}"
+      :texinfo "@guillemetleft{}")
+     (primary-closing
+      :utf-8 "»" :html "&raquo;" :latex "\\guillemotright{}"
+      :texinfo "@guillemetright{}")
+     (secondary-opening :utf-8 "‘" :html "&lsquo;" :latex "`" :texinfo "`")
+     (secondary-closing :utf-8 "’" :html "&rsquo;" :latex "'" :texinfo "'")
      (apostrophe :utf-8 "’" :html "&rsquo;"))
     ("nn"
      ;; https://nn.wikipedia.org/wiki/Sitatteikn
-     (opening-double-quote :utf-8 "«" :html "&laquo;" :latex "\\guillemotleft{}"
-			   :texinfo "@guillemetleft{}")
-     (closing-double-quote :utf-8 "»" :html "&raquo;" :latex "\\guillemotright{}"
-			   :texinfo "@guillemetright{}")
-     (opening-single-quote :utf-8 "‘" :html "&lsquo;" :latex "`" :texinfo "`")
-     (closing-single-quote :utf-8 "’" :html "&rsquo;" :latex "'" :texinfo "'")
+     (primary-opening
+      :utf-8 "«" :html "&laquo;" :latex "\\guillemotleft{}"
+      :texinfo "@guillemetleft{}")
+     (primary-closing
+      :utf-8 "»" :html "&raquo;" :latex "\\guillemotright{}"
+      :texinfo "@guillemetright{}")
+     (secondary-opening :utf-8 "‘" :html "&lsquo;" :latex "`" :texinfo "`")
+     (secondary-closing :utf-8 "’" :html "&rsquo;" :latex "'" :texinfo "'")
      (apostrophe :utf-8 "’" :html "&rsquo;"))
     ("ru"
      ;; http://ru.wikipedia.org/wiki/%D0%9A%D0%B0%D0%B2%D1%8B%D1%87%D0%BA%D0%B8#.D0.9A.D0.B0.D0.B2.D1.8B.D1.87.D0.BA.D0.B8.2C_.D0.B8.D1.81.D0.BF.D0.BE.D0.BB.D1.8C.D0.B7.D1.83.D0.B5.D0.BC.D1.8B.D0.B5_.D0.B2_.D1.80.D1.83.D1.81.D1.81.D0.BA.D0.BE.D0.BC_.D1.8F.D0.B7.D1.8B.D0.BA.D0.B5
      ;; http://www.artlebedev.ru/kovodstvo/sections/104/
-     (opening-double-quote :utf-8 "«" :html "&laquo;" :latex "{}<<"
-			   :texinfo "@guillemetleft{}")
-     (closing-double-quote :utf-8 "»" :html "&raquo;" :latex ">>{}"
-			   :texinfo "@guillemetright{}")
-     (opening-single-quote :utf-8 "„" :html "&bdquo;" :latex "\\glqq{}"
-			   :texinfo "@quotedblbase{}")
-     (closing-single-quote :utf-8 "“" :html "&ldquo;" :latex "\\grqq{}"
-			   :texinfo "@quotedblleft{}")
+     (primary-opening :utf-8 "«" :html "&laquo;" :latex "{}<<"
+		      :texinfo "@guillemetleft{}")
+     (primary-closing :utf-8 "»" :html "&raquo;" :latex ">>{}"
+		      :texinfo "@guillemetright{}")
+     (secondary-opening
+      :utf-8 "„" :html "&bdquo;" :latex "\\glqq{}" :texinfo "@quotedblbase{}")
+     (secondary-closing
+      :utf-8 "“" :html "&ldquo;" :latex "\\grqq{}" :texinfo "@quotedblleft{}")
      (apostrophe :utf-8 "’" :html: "&#39;"))
     ("sv"
      ;; based on https://sv.wikipedia.org/wiki/Citattecken
-     (opening-double-quote :utf-8 "”" :html "&rdquo;" :latex "’’" :texinfo "’’")
-     (closing-double-quote :utf-8 "”" :html "&rdquo;" :latex "’’" :texinfo "’’")
-     (opening-single-quote :utf-8 "’" :html "&rsquo;" :latex "’" :texinfo "`")
-     (closing-single-quote :utf-8 "’" :html "&rsquo;" :latex "’" :texinfo "'")
-     (apostrophe :utf-8 "’" :html "&rsquo;"))
-    )
+     (primary-opening :utf-8 "”" :html "&rdquo;" :latex "’’" :texinfo "’’")
+     (primary-closing :utf-8 "”" :html "&rdquo;" :latex "’’" :texinfo "’’")
+     (secondary-opening :utf-8 "’" :html "&rsquo;" :latex "’" :texinfo "`")
+     (secondary-closing :utf-8 "’" :html "&rsquo;" :latex "’" :texinfo "'")
+     (apostrophe :utf-8 "’" :html "&rsquo;")))
   "Smart quotes translations.
 
 Alist whose CAR is a language string and CDR is an alist with
 quote type as key and a plist associating various encodings to
 their translation as value.
 
-A quote type can be any symbol among `opening-double-quote',
-`closing-double-quote', `opening-single-quote',
-`closing-single-quote' and `apostrophe'.
+A quote type can be any symbol among `primary-opening',
+`primary-closing', `secondary-opening', `secondary-closing' and
+`apostrophe'.
 
 Valid encodings include `:utf-8', `:html', `:latex' and
 `:texinfo'.
@@ -5178,7 +5188,7 @@ INFO is the current export state, as a plist."
 		 (cond
 		  ((equal (match-string 0 text) "\"")
 		   (setf level1-open (not level1-open))
-		   (if level1-open 'opening-double-quote 'closing-double-quote))
+		   (if level1-open 'primary-opening 'primary-closing))
 		  ;; Not already in a level 1 quote: this is an
 		  ;; apostrophe.
 		  ((not level1-open) 'apostrophe)
@@ -5223,8 +5233,8 @@ INFO is the current export state, as a plist."
 				  (memq next '(blank nil))))))
 		     (cond
 		      ((and allow-open allow-close) (error "Should not happen"))
-		      (allow-open 'opening-single-quote)
-		      (allow-close 'closing-single-quote)
+		      (allow-open 'secondary-opening)
+		      (allow-close 'secondary-closing)
 		      (t 'apostrophe)))))
 		 current-status)
 		(setq start (1+ start)))
