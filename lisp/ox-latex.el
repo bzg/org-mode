@@ -1523,8 +1523,8 @@ INFO is a plist used as a communication channel."
       (?L . ,(capitalize language))
       (?D . ,(org-export-get-date info)))))
 
-(defun org-latex--make-header (info)
-  "Return a formatted LaTeX header.
+(defun org-latex--make-preamble (info)
+  "Return a formatted LaTeX preamble.
 INFO is a plist used as a communication channel."
   (let* ((class (plist-get info :latex-class))
 	    (class-options (plist-get info :latex-class-options))
@@ -1543,14 +1543,24 @@ INFO is a plist used as a communication channel."
 	    (org-element-normalize-string
 	     (org-splice-latex-header
 	      document-class-string
-	      (org-latex--remove-packages org-latex-default-packages-alist info)
-	      (org-latex--remove-packages org-latex-packages-alist info)
+	      (org-latex--remove-packages
+	       org-latex-default-packages-alist info)
+	      (org-latex--remove-packages
+	       org-latex-packages-alist info)
 	      nil
-	      (concat (org-element-normalize-string
-		       (plist-get info :latex-header))
-		      (plist-get info :latex-header-extra)))))
+	      (mapconcat 'org-element-normalize-string
+			 (list (plist-get info :latex-header)
+			       (plist-get info :latex-header-extra)) ""))))
 	   info)
 	  info))))
+
+(defun org-latex--insert-compiler (info)
+  "Insert LaTeX_compiler info into the document.
+INFO is a plist used as a communication channel."
+  (let ((compiler (plist-get info :latex-compiler)))
+       (and (org-string-nw-p org-latex-compiler-file-string)
+	    (string-match-p (regexp-opt org-latex-compilers) (or compiler ""))
+	    (format org-latex-compiler-file-string compiler))))
 
 
 ;;; Template
@@ -1566,12 +1576,9 @@ holding export options."
      (and (plist-get info :time-stamp-file)
 	  (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
      ;; LaTeX compiler.
-     (let ((compiler (plist-get info :latex-compiler)))
-       (and (org-string-nw-p org-latex-compiler-file-string)
-	    (string-match-p (regexp-opt org-latex-compilers) (or compiler ""))
-	    (format org-latex-compiler-file-string compiler)))
+     (org-latex--insert-compiler info)
      ;; Document class and packages.
-     (org-latex--make-header info)
+     (org-latex--make-preamble info)
      ;; Possibly limit depth for headline numbering.
      (let ((sec-num (plist-get info :section-numbers)))
        (when (integerp sec-num)
