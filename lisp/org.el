@@ -4123,11 +4123,14 @@ a string.
 
 A cell is of the format
 
-  (\"options\" \"package\" SNIPPET-FLAG)
+  (\"options\" \"package\" SNIPPET-FLAG COMPILERS)
 
 If SNIPPET-FLAG is non-nil, the package also needs to be included
 when compiling LaTeX snippets into images for inclusion into
-non-LaTeX output.
+non-LaTeX output.  COMPILERS is a list of compilers that should
+include the package, see `org-latex-compiler'.  If the document
+compiler is not in the list, and the list is non-nil, the package
+will not be inserted in the final document.
 
 A string will be inserted as-is in the header of the document."
   :group 'org-latex

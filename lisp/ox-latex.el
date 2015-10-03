@@ -1041,7 +1041,8 @@ during latex export it will output
 ;;;; Compilation
 
 (defcustom org-latex-compiler-file-string "%% Indented LaTeX compiler: %s\n"
-  "LaTeX program format-string."
+  "LaTeX compiler format-string.
+See also `org-latex-compiler'."
   :group 'org-export-latex
   :type '(choice
 	  (const :tag "Comment" "%% Indented LaTeX compiler: %s\n")
@@ -1052,26 +1053,31 @@ during latex export it will output
   :package-version '(Org . "9.0"))
 
 (defcustom org-latex-compiler "pdflatex"
-  "LaTeX program to use.  Must be an element in `org-latex-compilers'."
+  "LaTeX compiler to use.
+
+Must be an element in `orgg-latex-compilers' or the empty quote.
+Can also be set in buffers via #+LATEX_COMPILER.  See also
+`org-latex-compiler-file-string'."
   :group 'org-export-latex
   :type '(choice
 	  (const :tag "pdfLaTeX" "pdflatex")
 	  (const :tag "XeLaTeX"  "xelatex")
-	  (const :tag "LuaLaTeX" "lualatex"))
+	  (const :tag "LuaLaTeX" "lualatex")
+	  (const :tag "Unset" ""))
   :version "25.1"
   :package-version '(Org . "9.0"))
 
 (defconst org-latex-compilers '("pdflatex" "xelatex" "lualatex")
-  "Known LaTeX programs.")
+  "Known LaTeX compilers.
+See also `org-latex-compiler'.")
 
 (defcustom org-latex-bib-compiler "bibtex"
-  "Command used to process a LaTeX files bibliography.
+  "Command to process a LaTeX file's bibliography.
 
 The shorthand %bib in `org-latex-pdf-process' is replaced with
 this value.
 
-A better approach is to use a compiler suit such as `latexmk'.
-"
+A better approach is to use a compiler suit such as `latexmk'."
   :group 'org-export-latex
   :type '(choice (const :tag "BibTeX" "bibtex")
 		 (const :tag "Biber" "biber")
@@ -1365,10 +1371,10 @@ Return the new header."
 	 t t header 0)))))
 
 (defun org-latex--remove-packages (pkg-alist info)
-  "Remove packages based on the current LaTeX program.
+  "Remove packages based on the current LaTeX compiler.
 
 If the fourth argument of an element is set in pkg-alist, and it
-is not a member of the LaTeX program of the document, the packages
+is not a member of the LaTeX compiler of the document, the packages
 is removed.  See also `org-latex-compiler'.
 
 Return modified pkg-alist."
@@ -1559,7 +1565,7 @@ holding export options."
      ;; Time-stamp.
      (and (plist-get info :time-stamp-file)
 	  (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
-     ;; LaTeX program.
+     ;; LaTeX compiler.
      (let ((compiler (plist-get info :latex-compiler)))
        (and (org-string-nw-p org-latex-compiler-file-string)
 	    (string-match-p (regexp-opt org-latex-compilers) (or compiler ""))
