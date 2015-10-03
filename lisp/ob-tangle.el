@@ -179,7 +179,7 @@ Return a list whose CAR is the tangled file name."
 	(save-window-excursion
 	  (find-file file)
 	  (setq to-be-removed (current-buffer))
-	  (org-babel-tangle nil target-file lang))
+	  (mapcar #'expand-file-name (org-babel-tangle nil target-file lang)))
       (unless visited-p
 	(kill-buffer to-be-removed)))))
 
