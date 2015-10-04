@@ -497,7 +497,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
    `("Main Menu"
      ["Show Overview" org-mouse-show-overview t]
      ["Show Headlines" org-mouse-show-headlines t]
-     ["Show All" show-all t]
+     ["Show All" outline-show-all t]
      ["Remove Highlights" org-remove-occur-highlights
       :visible org-occur-highlights]
      "--"
@@ -586,7 +586,7 @@ This means, between the beginning of line and the point."
     (:end				; insert text here
      (skip-chars-backward " \t")
      (kill-region (point) (point-at-eol))
-     (unless (org-looking-back org-mouse-punctuation)
+     (unless (org-looking-back org-mouse-punctuation (line-beginning-position))
        (insert (concat org-mouse-punctuation " ")))))
   (insert text)
   (beginning-of-line))
@@ -644,7 +644,8 @@ This means, between the beginning of line and the point."
 					'org-mode-restart))))
      ((or (eolp)
 	  (and (looking-at "\\(  \\|\t\\)\\(+:[0-9a-zA-Z_:]+\\)?\\(  \\|\t\\)+$")
-	       (org-looking-back "  \\|\t" (- (point) 2))))
+	       (org-looking-back "  \\|\t" (- (point) 2)
+				 (line-beginning-position))))
       (org-mouse-popup-global-menu))
      ((funcall get-context :checkbox)
       (popup-menu

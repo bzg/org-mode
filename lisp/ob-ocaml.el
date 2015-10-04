@@ -83,9 +83,9 @@
 				   (mapcar #'org-babel-trim (reverse raw)))))))
 	 (raw (org-babel-trim clean))
 	 (result-params (cdr (assoc :result-params params)))
-	 (parsed 
-	  (string-match 
-	   "\\(\\(.*\n\\)*\\)[^:\n]+ : \\([^=\n]+\\) =\\(\n\\| \\)\\(.+\\)$" 
+	 (parsed
+	  (string-match
+	   "\\(\\(.*\n\\)*\\)[^:\n]+ : \\([^=\n]+\\) =\\(\n\\| \\)\\(.+\\)$"
 	   raw))
 	 (output (match-string 1 raw))
 	 (type (match-string 3 raw))

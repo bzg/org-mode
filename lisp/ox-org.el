@@ -298,7 +298,7 @@ Return output file name."
 	   newbuf)
       (with-current-buffer work-buffer
         (font-lock-ensure)
-        (show-all)
+        (outline-show-all)
         (org-show-block-all)
         (setq newbuf (htmlize-buffer)))
       (with-current-buffer newbuf

@@ -8408,7 +8408,7 @@ When called with a prefix argument, include all archive files as well."
 	(and (outline-next-heading)
 	     (org-flag-heading nil)))	; show the next heading
       (when (outline-invisible-p)
-	(show-entry))			; display invisible text
+	(outline-show-entry))			; display invisible text
       (recenter (/ (window-height) 2))
       (org-back-to-heading t)
       (if (re-search-forward org-complex-heading-regexp nil t)
@@ -8665,7 +8665,7 @@ folded."
 	  (select-window org-agenda-show-window)
 	  (ignore-errors (scroll-up)))
       (org-agenda-goto t)
-      (if arg (org-show-entry) (show-subtree))
+      (if arg (org-show-entry) (outline-show-subtree))
       (setq org-agenda-show-window (selected-window)))
     (select-window win)))
 
@@ -8697,7 +8697,7 @@ if it was hidden in the outline."
     (set-window-start (selected-window) (point-at-bol))
     (cond
      ((= more 0)
-      (hide-subtree)
+      (outline-hide-subtree)
       (save-excursion
 	(org-back-to-heading)
 	(run-hook-with-args 'org-cycle-hook 'folded))
@@ -8705,26 +8705,26 @@ if it was hidden in the outline."
      ((and (org-called-interactively-p 'any) (= more 1))
       (message "Remote: show with default settings"))
      ((= more 2)
-      (show-entry)
+      (outline-show-entry)
       (org-show-children)
       (save-excursion
 	(org-back-to-heading)
 	(run-hook-with-args 'org-cycle-hook 'children))
       (message "Remote: CHILDREN"))
      ((= more 3)
-      (show-subtree)
+      (outline-show-subtree)
       (save-excursion
 	(org-back-to-heading)
 	(run-hook-with-args 'org-cycle-hook 'subtree))
       (message "Remote: SUBTREE"))
      ((= more 4)
-      (show-subtree)
+      (outline-show-subtree)
       (save-excursion
 	(org-back-to-heading)
 	(org-cycle-hide-drawers 'subtree '("LOGBOOK")))
       (message "Remote: SUBTREE AND LOGBOOK"))
      ((> more 4)
-      (show-subtree)
+      (outline-show-subtree)
       (message "Remote: SUBTREE AND ALL DRAWERS")))
     (select-window win)))
 

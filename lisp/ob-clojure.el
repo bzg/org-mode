@@ -99,7 +99,7 @@
       (slime
        (require 'slime)
        (with-temp-buffer
-    	 (insert expanded)
+	 (insert expanded)
 	 (setq result
 	       (slime-eval
 		`(swank:eval-and-grab-output

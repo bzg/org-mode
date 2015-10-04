@@ -6743,7 +6743,7 @@ show the entire buffer, including any drawers.
 	(org-unlogged-message "Startup visibility, plus VISIBILITY properties"))
 
        ((equal arg '(64))
-	(show-all)
+	(outline-show-all)
 	(org-unlogged-message "Entire buffer visible, including drawers"))
 
        ;; Try cdlatex TAB completion
@@ -6842,7 +6842,7 @@ Use \\[org-edit-special] to edit table.el tables"))
 	   (eq org-cycle-global-status 'contents))
       ;; We just showed the table of contents - now show everything
       (run-hook-with-args 'org-pre-cycle-hook 'all)
-      (show-all)
+      (outline-show-all)
       (unless ga (org-unlogged-message "SHOW ALL"))
       (setq org-cycle-global-status 'all)
       (run-hook-with-args 'org-cycle-hook 'all))
@@ -6976,8 +6976,8 @@ With a numeric prefix, show all headlines up to that level."
 	 (if (derived-mode-p 'org-mode) org-cycle-include-plain-lists nil)))
     (cond
      ((integerp arg)
-      (show-all)
-      (hide-sublevels arg)
+      (outline-show-all)
+      (outline-hide-sublevels arg)
       (setq org-cycle-global-status 'contents))
      ((equal arg '(4))
       (org-set-startup-visibility)
@@ -6994,7 +6994,7 @@ With a numeric prefix, show all headlines up to that level."
     (org-content))
    ((or (eq org-startup-folded 'showeverything)
 	(eq org-startup-folded nil))
-    (show-all)))
+    (outline-show-all)))
   (unless (eq org-startup-folded 'showeverything)
     (if org-hide-block-startup (org-hide-block-all))
     (org-set-visibility-according-to-property 'no-cleanup)
@@ -7013,11 +7013,11 @@ With a numeric prefix, show all headlines up to that level."
 	 (let ((state (match-string 3)))
 	   (save-excursion
 	     (org-back-to-heading t)
-	     (hide-subtree)
+	     (outline-hide-subtree)
 	     (org-reveal)
 	     (cond
 	      ((equal state "folded")
-	       (hide-subtree))
+	       (outline-hide-subtree))
 	      ((equal state "children")
 	       (org-show-hidden-entry)
 	       (org-show-children))
@@ -7027,7 +7027,7 @@ With a numeric prefix, show all headlines up to that level."
 		   (org-narrow-to-subtree)
 		   (org-content))))
 	      ((member state '("all" "showall"))
-	       (show-subtree)))))))
+	       (outline-show-subtree)))))))
      (unless no-cleanup
        (org-cycle-hide-archived-subtrees 'all)
        (org-cycle-hide-drawers 'all)
@@ -7051,7 +7051,7 @@ results."
 		 (progn
 		   (goto-char (match-beginning 0))
 		   (funcall outline-level))))))
-      (and level (hide-sublevels level)))))
+      (and level (outline-hide-sublevels level)))))
 
 (defun org-content (&optional arg)
   "Show all headlines in the buffer, like a table of contents.
@@ -7070,7 +7070,7 @@ With numerical argument N, show content up to level N."
 		  (looking-at org-outline-regexp))
 	(if (integerp arg)
 	    (org-show-children (1- arg))
-	  (show-branches))
+	  (outline-show-branches))
 	(if (bobp) (throw 'exit nil))))))
 
 (defun org-optimize-window-after-visibility-change (state)
@@ -7121,7 +7121,7 @@ This function is the default value of the hook `org-cycle-hook'."
 	    (if (and (not (outline-invisible-p))
 		     (save-excursion
 		       (goto-char (point-at-eol)) (outline-invisible-p)))
-		(hide-entry))))
+		(outline-hide-entry))))
 	(org-cycle-show-empty-lines 'overview)
 	(org-cycle-hide-drawers 'overview)))))
 
@@ -7285,7 +7285,7 @@ DATA should have been made by `org-outline-overlay-data'."
     (save-excursion
       (save-restriction
 	(widen)
-	(show-all)
+	(outline-show-all)
 	(mapc (lambda (c)
 		(outline-flag-region (car c) (cdr c) t))
 	      data)))))
@@ -7670,7 +7670,7 @@ frame is not changed."
     (if (featurep 'xemacs)
         (save-excursion (org-mode) (turn-on-font-lock)))
     (narrow-to-region beg end)
-    (show-all)
+    (outline-show-all)
     (goto-char pos)
     (run-hook-with-args 'org-cycle-hook 'all)
     (and (window-live-p cwin) (select-window cwin))))
@@ -7839,7 +7839,7 @@ heading, unconditionally."
 	      (re-search-forward org-outline-regexp-bol)
 	      (beginning-of-line 0))
 	    (skip-chars-backward " \r\t\n")
-	    (and (not (looking-back "^\\*+" (line-beginning-position)))
+	    (and (not (org-looking-back "^\\*+" (line-beginning-position)))
 		 (looking-at "[ \t]+") (replace-match ""))
 	    (unless (eobp) (forward-char 1))
 	    (when (looking-at "^\\*")
@@ -8470,7 +8470,7 @@ case."
       (insert (make-string (- ne-ins ne-beg) ?\n)))
     (move-marker ins-point nil)
     (if folded
-	(hide-subtree)
+	(outline-hide-subtree)
       (org-show-entry)
       (org-show-children)
       (org-cycle-hide-drawers 'children))
@@ -8641,7 +8641,7 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
 	      (eq org-subtree-clip (current-kill 0))
 	      org-subtree-clip-folded)
 	 ;; The tree was folded before it was killed/copied
-	 (hide-subtree))
+	 (outline-hide-subtree))
      (and for-yank (goto-char newend))
      (and remove (setq kill-ring (cdr kill-ring))))))
 
@@ -8940,7 +8940,7 @@ When sorting is done, call `org-after-sorting-entries-or-items-hook'."
 		       (point))
 	    what "children")
       (goto-char start)
-      (show-subtree)
+      (outline-show-subtree)
       (outline-next-heading))
      (t
       ;; we will sort the top-level entries in this file
@@ -8956,7 +8956,7 @@ When sorting is done, call `org-after-sorting-entries-or-items-hook'."
       (setq end (point-max))
       (setq what "top-level")
       (goto-char start)
-      (show-all)))
+      (outline-show-all)))
 
     (setq beg (point))
     (when (>= beg end) (goto-char start) (user-error "Nothing to sort"))
@@ -12965,7 +12965,7 @@ statistics everywhere."
 	    		(and (listp org-provide-todo-statistics)
 			     (stringp (car org-provide-todo-statistics))
 	    		     (or (member kwd org-provide-todo-statistics)
-	    			 (member kwd org-done-keywords)))
+				 (member kwd org-done-keywords)))
 			(and (listp org-provide-todo-statistics)
 			     (listp (car org-provide-todo-statistics))
 			     (or (member kwd (car org-provide-todo-statistics))
@@ -12974,7 +12974,7 @@ statistics everywhere."
 	    	    (setq cnt-all (1+ cnt-all))
 	    	  (if (eq org-provide-todo-statistics t)
 	    	      (and kwd (setq cnt-all (1+ cnt-all)))))
-	    	(when (or (and (member org-provide-todo-statistics '(t all-headlines))
+		(when (or (and (member org-provide-todo-statistics '(t all-headlines))
 			       (member kwd org-done-keywords))
 			  (and (listp org-provide-todo-statistics)
 			       (listp (car org-provide-todo-statistics))
@@ -16765,7 +16765,7 @@ So these are more for recording a certain time/date."
     (org-defkey map (kbd ".")
                 (lambda () (interactive)
 		  ;; Are we at the beginning of the prompt?
-		  (if (looking-back "^[^:]+: ")
+		  (if (org-looking-back "^[^:]+: " (line-beginning-position))
 		      (org-eval-in-calendar '(calendar-goto-today))
 		    (insert "."))))
     (org-defkey map (kbd "C-.")
@@ -18058,7 +18058,8 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like \"--2d\"."
 	    (message "No clock to adjust")
 	  (cond ((save-excursion ; fix previous clock?
 		   (re-search-backward org-ts-regexp0 nil t)
-		   (org-looking-back (concat org-clock-string " \\[")))
+		   (org-looking-back (concat org-clock-string " \\[")
+				     (line-beginning-position)))
 		 (setq fixnext 1 clrgx (concat org-ts-regexp0 "\\] =>.*$")))
 		((save-excursion ; fix next clock?
 		   (re-search-backward org-ts-regexp0 nil t)
@@ -19728,12 +19729,12 @@ boundaries."
 ;; Outline functions from `outline-mode-prefix-map'
 ;; that can be remapped in Org:
 (define-key org-mode-map [remap outline-mark-subtree] 'org-mark-subtree)
-(define-key org-mode-map [remap show-subtree] 'org-show-subtree)
+(define-key org-mode-map [remap outline-show-subtree] 'org-show-subtree)
 (define-key org-mode-map [remap outline-forward-same-level]
   'org-forward-heading-same-level)
 (define-key org-mode-map [remap outline-backward-same-level]
   'org-backward-heading-same-level)
-(define-key org-mode-map [remap show-branches]
+(define-key org-mode-map [remap outline-show-branches]
   'org-kill-note-or-show-branches)
 (define-key org-mode-map [remap outline-promote] 'org-promote-subtree)
 (define-key org-mode-map [remap outline-demote] 'org-demote-subtree)
@@ -19854,7 +19855,7 @@ boundaries."
 
 ;; All the other keys
 
-(org-defkey org-mode-map "\C-c\C-a" 'show-all)  ; in case allout messed up.
+(org-defkey org-mode-map "\C-c\C-a" 'outline-show-all)  ; in case allout messed up.
 (org-defkey org-mode-map "\C-c\C-r" 'org-reveal)
 (if (boundp 'narrow-map)
     (org-defkey narrow-map "s" 'org-narrow-to-subtree)
@@ -20240,7 +20241,7 @@ The detailed reaction depends on the user option `org-catch-invisible-edits'."
 	      (if invisible-before-point
 		  (goto-char (previous-single-char-property-change
 			      (point) 'invisible)))
-	      (show-subtree))
+	      (outline-show-subtree))
 	    (cond
 	     ((eq org-catch-invisible-edits 'show)
 	      ;; That's it, we do the edit after showing
@@ -21253,8 +21254,8 @@ Use \\[org-edit-special] to edit table.el tables"))
   (interactive)
   (if (not org-finish-function)
       (progn
-	(hide-subtree)
-	(call-interactively 'show-branches))
+	(outline-hide-subtree)
+	(call-interactively 'outline-show-branches))
     (let ((org-note-abort t))
       (funcall org-finish-function))))
 
@@ -21730,7 +21731,7 @@ on context.  See the individual commands for more information."
      ["Cycle Global Visibility" org-shifttab :active (not (org-at-table-p))]
      ["Sparse Tree..." org-sparse-tree t]
      ["Reveal Context" org-reveal t]
-     ["Show All" show-all t]
+     ["Show All" outline-show-all t]
      "--"
      ["Subtree to indirect buffer" org-tree-to-indirect-buffer t])
     "--"
@@ -24126,7 +24127,7 @@ interactive command with similar behavior."
 	     (or (looking-at org-outline-regexp)
 		 (re-search-forward org-outline-regexp-bol end t))
 	     (while (and (< (point) end) (looking-at org-outline-regexp))
-	       (hide-subtree)
+	       (outline-hide-subtree)
 	       (org-cycle-show-empty-lines 'folded)
 	       (condition-case nil
 		   (outline-forward-same-level 1)
