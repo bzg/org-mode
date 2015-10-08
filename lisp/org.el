@@ -22268,29 +22268,39 @@ leave it alone.  If it is larger than ind, set it to the target."
       l)))
 
 (defun org-remove-indentation (code &optional n)
-  "Remove the maximum common indentation from the lines in CODE.
-N may optionally be the number of spaces to remove."
+  "Remove maximum common indentation in string CODE and return it.
+N may optionally be the number of columns to remove.  Return CODE
+as-is if removal failed."
   (with-temp-buffer
     (insert code)
-    (org-do-remove-indentation n)
-    (buffer-string)))
+    (if (org-do-remove-indentation n) (buffer-string) code)))
 
 (defun org-do-remove-indentation (&optional n)
-  "Remove the maximum common indentation from the buffer."
-  (untabify (point-min) (point-max))
-  (let ((min 10000) re)
-    (if n
-	(setq min n)
-      (goto-char (point-min))
-      (while (re-search-forward "^ *[^ \n]" nil t)
-	(setq min (min min (1- (- (match-end 0) (match-beginning 0)))))))
-    (unless (or (= min 0) (= min 10000))
-      (setq re (format "^ \\{%d\\}" min))
-      (goto-char (point-min))
-      (while (re-search-forward re nil t)
-	(replace-match "")
-	(end-of-line 1))
-      min)))
+  "Remove the maximum common indentation from the buffer.
+When optional argument N is a positive integer, remove exactly
+that much characters from indentation, if possible.  Return nil
+if it fails."
+  (catch :exit
+    (goto-char (point-min))
+    ;; Find maximum common indentation, if not specified.
+    (let ((n (or n
+		 (let ((min-ind (point-max)))
+		   (save-excursion
+		     (while (re-search-forward "^[ \t]*\\S-" nil t)
+		       (let ((ind (1- (current-column))))
+			 (if (zerop ind) (throw :exit nil)
+			   (setq min-ind (min min-ind ind))))))
+		   min-ind))))
+      (if (zerop n) (throw :exit nil)
+	;; Remove exactly N indentation, but give up if not possible.
+	(while (not (eobp))
+	  (let ((ind (progn (skip-chars-forward " \t") (current-column))))
+	    (cond ((eolp) (delete-region (line-beginning-position) (point)))
+		  ((< ind n) (throw :exit nil))
+		  (t (org-indent-line-to (- ind n))))
+	    (forward-line)))
+	;; Signal success.
+	t))))
 
 (defun org-fill-template (template alist)
   "Find each %key of ALIST in TEMPLATE and replace it."
