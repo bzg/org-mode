@@ -851,13 +851,12 @@ name of the sub-editing buffer."
 	    `(lambda ()
 	       (unless ,(or org-src-preserve-indentation
 			    (org-element-property :preserve-indent element))
-		 (untabify (point-min) (point-max))
 		 (when (> org-edit-src-content-indentation 0)
-		   (let ((ind (make-string org-edit-src-content-indentation
-					   ?\s)))
-		     (while (not (eobp))
-		       (unless (looking-at "[ \t]*$") (insert ind))
-		       (forward-line)))))
+		   (while (not (eobp))
+		     (unless (looking-at "[ \t]*$")
+		       (indent-line-to (+ (org-get-indentation)
+					  org-edit-src-content-indentation)))
+		     (forward-line))))
 	       (org-escape-code-in-region (point-min) (point-max))))
        (and code (org-unescape-code-in-string code)))
       ;; Finalize buffer.

@@ -98,5 +98,40 @@ blah
 #+end_src
 ")))))
 
+(ert-deftest test-org-src/preserve-tabs ()
+  "Editing block preserve tab characters."
+  ;; With `org-src-preserve-indentation' set to nil.
+  (should
+   (equal "
+#+begin_src emacs-lisp
+  This is a tab: 	.
+#+end_src"
+	  (org-test-with-temp-text
+	      "
+#+begin_src emacs-lisp
+<point>This is a tab: 	.
+#+end_src"
+	    (let ((org-edit-src-content-indentation 2)
+		  (org-src-preserve-indentation nil))
+	      (org-edit-special)
+	      (org-edit-src-exit)
+	      (buffer-string)))))
+  ;; With `org-src-preserve-indentation' set to t.
+  (should
+   (equal "
+#+begin_src emacs-lisp
+This is a tab: 	.
+#+end_src"
+	  (org-test-with-temp-text
+	      "
+#+begin_src emacs-lisp
+<point>This is a tab: 	.
+#+end_src"
+	    (let ((org-edit-src-content-indentation 2)
+		  (org-src-preserve-indentation t))
+	      (org-edit-special)
+	      (org-edit-src-exit)
+	      (buffer-string))))))
+
 (provide 'test-org-src)
 ;;; test-org-src.el ends here
