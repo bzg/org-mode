@@ -4353,7 +4353,7 @@ reference on that line (string)."
 		 (if (or org-src-preserve-indentation
 			 (org-element-property :preserve-indent element))
 		     value
-		   (org-element-remove-indentation value)))))
+		   (org-remove-indentation value)))))
 	 ;; Get format used for references.
 	 (label-fmt (regexp-quote
 		     (or (org-element-property :label-fmt element)

@@ -43,12 +43,18 @@ details.
 ** New functions
 ~org-show-children~ is a faster implementation of
 ~outline-show-children~.
+** Removed functions
+*** ~org-element-remove-indentation~ in an obsolete alias for ~org-remove-indentation~
 ** Removed options
 *** Remove ~org-list-empty-line-terminates-plain-lists~
 Two consecutive blank lines always terminate all levels of current
 plain list.
 *** ~fixltx2e~ is removed from ~org-latex-default-packages-alist~
 fixltx2e is obsolete, see LaTeX News 22.
+** Miscellaneous
+*** Function ~org-remove-indentation~ changes.
+The new algorithm doesn't remove TAB characters not used for
+indentation.
 * Version 8.3
 
 ** Incompatible changes

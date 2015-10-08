@@ -1898,7 +1898,7 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
 		 (post-affiliated (point))
 		 (block-ind (progn (skip-chars-forward " \t") (current-column)))
 		 (contents-begin (progn (forward-line) (point)))
-		 (value (org-element-remove-indentation
+		 (value (org-remove-indentation
 			 (org-unescape-code-in-string
 			  (buffer-substring-no-properties
 			   contents-begin contents-end))
@@ -1933,7 +1933,7 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
 	      (if (or org-src-preserve-indentation
 		      (org-element-property :preserve-indent example-block))
 		  value
-		(org-element-remove-indentation value))))
+		(org-remove-indentation value))))
 	    "#+END_EXAMPLE")))
 
 
@@ -2404,7 +2404,7 @@ Assume point is at the beginning of the block."
 		 ;; Indentation.
 		 (block-ind (progn (skip-chars-forward " \t") (current-column)))
 		 ;; Retrieve code.
-		 (value (org-element-remove-indentation
+		 (value (org-remove-indentation
 			 (org-unescape-code-in-string
 			  (buffer-substring-no-properties
 			   (progn (forward-line) (point)) contents-end))
@@ -5954,35 +5954,9 @@ end of ELEM-A."
 	  (move-overlay (car o) (- (nth 1 o) offset) (- (nth 2 o) offset))))
       (goto-char (org-element-property :end elem-B)))))
 
-(defun org-element-remove-indentation (s &optional n)
-  "Remove maximum common indentation in string S and return it.
-When optional argument N is a positive integer, remove exactly
-that much characters from indentation, if possible, or return
-S as-is otherwise.  Unlike to `org-remove-indentation', this
-function doesn't call `untabify' on S."
-  (catch 'exit
-    (with-temp-buffer
-      (insert s)
-      (goto-char (point-min))
-      ;; Find maximum common indentation, if not specified.
-      (setq n (or n
-                  (let ((min-ind (point-max)))
-		    (save-excursion
-		      (while (re-search-forward "^[ \t]*\\S-" nil t)
-			(let ((ind (1- (current-column))))
-			  (if (zerop ind) (throw 'exit s)
-			    (setq min-ind (min min-ind ind))))))
-		    min-ind)))
-      (if (zerop n) s
-	;; Remove exactly N indentation, but give up if not possible.
-	(while (not (eobp))
-	  (let ((ind (progn (skip-chars-forward " \t") (current-column))))
-	    (cond ((eolp) (delete-region (line-beginning-position) (point)))
-		  ((< ind n) (throw 'exit s))
-		  (t (org-indent-line-to (- ind n))))
-	    (forward-line)))
-	(buffer-string)))))
-
+;; For backward-compatibility with Org < 8.4
+(define-obsolete-function-alias
+  'org-element-remove-indentation 'org-remove-indentation "25.1")
 
 
 (provide 'org-element)
