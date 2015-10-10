@@ -2532,14 +2532,17 @@ Another text. (ref:text)
 		    (org-export-resolve-coderef "text" info)))))
     ;; Recognize coderef with user-specified syntax.
     (should
-     (equal "text"
-	    (org-test-with-parsed-data
-		"#+BEGIN_EXAMPLE -l \"[ref:%s]\"\nText. [ref:text]\n#+END_EXAMPLE"
-	      (org-export-resolve-coderef "text" info))))
-    ;; Unresolved coderefs throw an error.
-    (should-error
-     (org-test-with-parsed-data "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
-       (org-export-resolve-coderef "unknown" info)))))
+     (equal
+      "text"
+      (org-test-with-parsed-data
+	  "#+BEGIN_EXAMPLE -l \"[ref:%s]\"\nText. [ref:text]\n#+END_EXAMPLE"
+	(org-export-resolve-coderef "text" info))))
+    ;; Unresolved coderefs raise a `org-link-broken' signal.
+    (should
+     (condition-case nil
+	 (org-test-with-parsed-data "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
+	   (org-export-resolve-coderef "unknown" info))
+       (org-link-broken t)))))
 
 (ert-deftest test-org-export/resolve-fuzzy-link ()
   "Test `org-export-resolve-fuzzy-link' specifications."
@@ -2584,11 +2587,13 @@ Another text. (ref:text)
 	 (org-element-type
 	  (org-export-resolve-fuzzy-link
 	   (org-element-map tree 'link 'identity info t) info)))))
-  ;; Error if no match.
-  (should-error
+  ;; Raise a `org-link-broken' signal if no match.
+  (should
    (org-test-with-parsed-data "[[target]]"
-     (org-export-resolve-fuzzy-link
-      (org-element-map tree 'link 'identity info t) info)))
+     (condition-case nil
+	 (org-export-resolve-fuzzy-link
+	  (org-element-map tree 'link #'identity info t) info)
+       (org-link-broken t))))
   ;; Match fuzzy link even when before first headline.
   (should
    (eq 'headline
@@ -2617,16 +2622,18 @@ Another text. (ref:text)
 	     :title
 	     (org-export-resolve-id-link
 	      (org-element-map tree 'link 'identity info t) info)))))
-  ;; Throw an error on failing searches.
-  (should-error
+  ;; Raise a `org-link-broken' signal on failing searches.
+  (should
    (org-test-with-parsed-data "* Headline1
 :PROPERTIES:
 :CUSTOM_ID: test
 :END:
 * Headline 2
 \[[#no-match]]"
-     (org-export-resolve-id-link
-      (org-element-map tree 'link 'identity info t) info)))
+     (condition-case nil
+	 (org-export-resolve-id-link
+	  (org-element-map tree 'link #'identity info t) info)
+       (org-link-broken t))))
   ;; Test for internal id target.
   (should
    (equal '("Headline1")

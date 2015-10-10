@@ -10820,6 +10820,12 @@ process the headline, skipping its contents
 Toggle inclusion of author name into exported file
 (@code{org-export-with-author}).
 
+@item broken-links:
+@vindex org-export-with-broken-links
+Decide whether to raise an error or not when encountering a broken internal
+link.  When set to @code{mark}, signal the problem clearly in the output
+(@code{org-export-with-broken-links}).
+
 @item c:
 @vindex org-export-with-clocks
 Toggle inclusion of CLOCK keywords (@code{org-export-with-clocks}).
@@ -14291,6 +14297,8 @@ however, override everything.
 @item @code{:section-numbers}       @tab @code{org-export-with-section-numbers}
 @item @code{:select-tags}           @tab @code{org-export-select-tags}
 @item @code{:with-author}           @tab @code{org-export-with-author}
+@item @code{:with-broken-links}     @tab @code{org-export-with-broken-links}
+@item @code{:with-clocks}           @tab @code{org-export-with-clocks}
 @item @code{:with-creator}          @tab @code{org-export-with-creator}
 @item @code{:with-date}             @tab @code{org-export-with-date}
 @item @code{:with-drawers}          @tab @code{org-export-with-drawers}

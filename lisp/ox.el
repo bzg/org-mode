@@ -112,6 +112,7 @@
     (:time-stamp-file nil "timestamp" org-export-time-stamp-file)
     (:with-archived-trees nil "arch" org-export-with-archived-trees)
     (:with-author nil "author" org-export-with-author)
+    (:with-broken-links nil "broken-links" org-export-with-broken-links)
     (:with-clocks nil "c" org-export-with-clocks)
     (:with-creator nil "creator" org-export-with-creator)
     (:with-date nil "date" org-export-with-date)
@@ -796,6 +797,27 @@ is nil.  You can also allow them through local buffer variables."
   :version "24.4"
   :package-version '(Org . "8.0")
   :type 'boolean)
+
+(defcustom org-export-with-broken-links nil
+  "Non-nil means do not raise an error on broken links.
+
+When this variable is non-nil, broken links are ignored, without
+stopping the export process.  If it is set to `mark', broken
+links are marked as such in the output, with a string like
+
+  [BROKEN LINK: path]
+
+where PATH is the un-resolvable reference.
+
+This option can also be set with the OPTIONS keyword, e.g.,
+\"broken-links:mark\"."
+  :group 'org-export-general
+  :version "25.1"
+  :package-version '(Org . "8.4")
+  :type '(choice
+	  (const :tag "Ignore broken links" t)
+	  (const :tag "Mark broken links in output" mark)
+	  (const :tag "Raise an error" nil)))
 
 (defcustom org-export-snippet-translation-alist nil
   "Alist between export snippets back-ends and exporter back-ends.
@@ -1851,91 +1873,106 @@ string.  INFO is a plist holding export options.
 
 Return a string."
   (or (gethash data (plist-get info :exported-data))
-      (let* ((type (org-element-type data))
-	     (results
-	      (cond
-	       ;; Ignored element/object.
-	       ((memq data (plist-get info :ignore-list)) nil)
-	       ;; Plain text.
-	       ((eq type 'plain-text)
-		(org-export-filter-apply-functions
-		 (plist-get info :filter-plain-text)
-		 (let ((transcoder (org-export-transcoder data info)))
-		   (if transcoder (funcall transcoder data info) data))
-		 info))
-	       ;; Secondary string.
-	       ((not type)
-		(mapconcat (lambda (obj) (org-export-data obj info)) data ""))
-	       ;; Element/Object without contents or, as a special
-	       ;; case, headline with archive tag and archived trees
-	       ;; restricted to title only.
-	       ((or (not (org-element-contents data))
-		    (and (eq type 'headline)
-			 (eq (plist-get info :with-archived-trees) 'headline)
-			 (org-element-property :archivedp data)))
-		(let ((transcoder (org-export-transcoder data info)))
-		  (or (and (functionp transcoder)
-			   (funcall transcoder data nil info))
-		      ;; Export snippets never return a nil value so
-		      ;; that white spaces following them are never
-		      ;; ignored.
-		      (and (eq type 'export-snippet) ""))))
-	       ;; Element/Object with contents.
-	       (t
-		(let ((transcoder (org-export-transcoder data info)))
-		  (when transcoder
-		    (let* ((greaterp (memq type org-element-greater-elements))
-			   (objectp
-			    (and (not greaterp)
-				 (memq type org-element-recursive-objects)))
-			   (contents
-			    (mapconcat
-			     (lambda (element) (org-export-data element info))
-			     (org-element-contents
-			      (if (or greaterp objectp) data
-				;; Elements directly containing
-				;; objects must have their indentation
-				;; normalized first.
-				(org-element-normalize-contents
-				 data
-				 ;; When normalizing contents of the
-				 ;; first paragraph in an item or
-				 ;; a footnote definition, ignore
-				 ;; first line's indentation: there is
-				 ;; none and it might be misleading.
-				 (when (eq type 'paragraph)
-				   (let ((parent (org-export-get-parent data)))
-				     (and
-				      (eq (car (org-element-contents parent))
-					  data)
-				      (memq (org-element-type parent)
-					    '(footnote-definition item))))))))
-			     "")))
-		      (funcall transcoder data
-			       (if (not greaterp) contents
-				 (org-element-normalize-string contents))
-			       info))))))))
-	;; Final result will be memoized before being returned.
-	(puthash
-	 data
-	 (cond
-	  ((not results) "")
-	  ((memq type '(org-data plain-text nil)) results)
-	  ;; Append the same white space between elements or objects
-	  ;; as in the original buffer, and call appropriate filters.
-	  (t
-	   (let ((results
+      ;; Handle broken links according to
+      ;; `org-export-with-broken-links'.
+      (cl-macrolet
+	  ((broken-link-handler
+	    (&rest body)
+	    `(condition-case err
+		 (progn ,@body)
+	       (org-link-broken
+		(pcase (plist-get info :with-broken-links)
+		  (`nil (user-error "Unable to resolve link: %S" (nth 1 err)))
+		  (`mark (org-export-data
+			  (format "[BROKEN LINK: %s]" (nth 1 err)) info))
+		  (_ nil))))))
+	(let* ((type (org-element-type data))
+	       (results
+		(cond
+		 ;; Ignored element/object.
+		 ((memq data (plist-get info :ignore-list)) nil)
+		 ;; Plain text.
+		 ((eq type 'plain-text)
 		  (org-export-filter-apply-functions
-		   (plist-get info (intern (format ":filter-%s" type)))
-		   (let ((post-blank (or (org-element-property :post-blank data)
-					 0)))
-		     (if (memq type org-element-all-elements)
-			 (concat (org-element-normalize-string results)
-				 (make-string post-blank ?\n))
-		       (concat results (make-string post-blank ?\s))))
-		   info)))
-	     results)))
-	 (plist-get info :exported-data)))))
+		   (plist-get info :filter-plain-text)
+		   (let ((transcoder (org-export-transcoder data info)))
+		     (if transcoder (funcall transcoder data info) data))
+		   info))
+		 ;; Secondary string.
+		 ((not type)
+		  (mapconcat (lambda (obj) (org-export-data obj info)) data ""))
+		 ;; Element/Object without contents or, as a special
+		 ;; case, headline with archive tag and archived trees
+		 ;; restricted to title only.
+		 ((or (not (org-element-contents data))
+		      (and (eq type 'headline)
+			   (eq (plist-get info :with-archived-trees) 'headline)
+			   (org-element-property :archivedp data)))
+		  (let ((transcoder (org-export-transcoder data info)))
+		    (or (and (functionp transcoder)
+			     (broken-link-handler
+			      (funcall transcoder data nil info)))
+			;; Export snippets never return a nil value so
+			;; that white spaces following them are never
+			;; ignored.
+			(and (eq type 'export-snippet) ""))))
+		 ;; Element/Object with contents.
+		 (t
+		  (let ((transcoder (org-export-transcoder data info)))
+		    (when transcoder
+		      (let* ((greaterp (memq type org-element-greater-elements))
+			     (objectp
+			      (and (not greaterp)
+				   (memq type org-element-recursive-objects)))
+			     (contents
+			      (mapconcat
+			       (lambda (element) (org-export-data element info))
+			       (org-element-contents
+				(if (or greaterp objectp) data
+				  ;; Elements directly containing
+				  ;; objects must have their indentation
+				  ;; normalized first.
+				  (org-element-normalize-contents
+				   data
+				   ;; When normalizing contents of the
+				   ;; first paragraph in an item or
+				   ;; a footnote definition, ignore
+				   ;; first line's indentation: there is
+				   ;; none and it might be misleading.
+				   (when (eq type 'paragraph)
+				     (let ((parent (org-export-get-parent data)))
+				       (and
+					(eq (car (org-element-contents parent))
+					    data)
+					(memq (org-element-type parent)
+					      '(footnote-definition item))))))))
+			       "")))
+			(broken-link-handler
+			 (funcall transcoder data
+				  (if (not greaterp) contents
+				    (org-element-normalize-string contents))
+				  info)))))))))
+	  ;; Final result will be memoized before being returned.
+	  (puthash
+	   data
+	   (cond
+	    ((not results) "")
+	    ((memq type '(org-data plain-text nil)) results)
+	    ;; Append the same white space between elements or objects
+	    ;; as in the original buffer, and call appropriate filters.
+	    (t
+	     (let ((results
+		    (org-export-filter-apply-functions
+		     (plist-get info (intern (format ":filter-%s" type)))
+		     (let ((post-blank (or (org-element-property :post-blank data)
+					   0)))
+		       (if (memq type org-element-all-elements)
+			   (concat (org-element-normalize-string results)
+				   (make-string post-blank ?\n))
+			 (concat results (make-string post-blank ?\s))))
+		     info)))
+	       results)))
+	   (plist-get info :exported-data))))))
 
 (defun org-export-data-with-backend (data backend info)
   "Convert DATA into BACKEND format.
@@ -3990,11 +4027,11 @@ meant to be translated with `org-export-data' or alike."
 ;;
 ;; `org-export-resolve-fuzzy-link' searches destination of fuzzy links
 ;; (i.e. links with "fuzzy" as type) within the parsed tree, and
-;; returns an appropriate unique identifier when found, or nil.
+;; returns an appropriate unique identifier.
 ;;
 ;; `org-export-resolve-id-link' returns the first headline with
 ;; specified id or custom-id in parse tree, the path to the external
-;; file with the id or nil when neither was found.
+;; file with the id.
 ;;
 ;; `org-export-resolve-coderef' associates a reference to a line
 ;; number in the element it belongs, or returns the reference itself
@@ -4002,6 +4039,12 @@ meant to be translated with `org-export-data' or alike."
 ;;
 ;; `org-export-file-uri' expands a filename as stored in :path value
 ;;  of a "file" link into a file URI.
+;;
+;; Broken links raise a `org-link-broken' error, which is caught by
+;; `org-export-data' for further processing, depending on
+;; `org-export-with-broken-links' value.
+
+(define-error 'org-link-broken "Unable to resolve link; aborting")
 
 (defun org-export-custom-protocol-maybe (link desc backend)
   "Try exporting LINK with a dedicated function.
@@ -4083,7 +4126,7 @@ error if no block contains REF."
 		  (+ (org-export-get-loc el info) (line-number-at-pos)))
 		 (t (line-number-at-pos)))))))
 	info 'first-match)
-      (user-error "Unable to resolve code reference: %s" ref)))
+      (signal 'org-link-broken (list ref))))
 
 (defun org-export-resolve-fuzzy-link (link info)
   "Return LINK destination.
@@ -4151,7 +4194,7 @@ significant."
 			   path)
 		    h))
 	     info 'first-match))
-	  (t (user-error "Unable to resolve link \"%s\"" raw-path)))
+	  (t (signal 'org-link-broken (list raw-path))))
 	 link-cache)))))
 
 (defun org-export-resolve-id-link (link info)
@@ -4172,7 +4215,7 @@ tree or a file name.  Assume LINK type is either \"id\" or
 	  info 'first-match)
 	;; Otherwise, look for external files.
 	(cdr (assoc id (plist-get info :id-alist)))
-	(user-error "Unable to resolve ID \"%s\"" id))))
+	(signal 'org-link-broken (list id)))))
 
 (defun org-export-resolve-radio-link (link info)
   "Return radio-target object referenced as LINK destination.

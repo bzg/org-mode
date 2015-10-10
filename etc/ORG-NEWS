@@ -18,6 +18,9 @@ The variable only applies to ~+~ repeaters, not ~.+~ nor ~++~.
 *** New option ~date-tree-last~ for ~org-agenda-insert-diary-strategy~
 When ~org-agenda-insert-diary-strategy~ is set to ~date-tree-last~, diary
 entries are added to last in the date tree.
+*** New option ~org-export-with-broken-links~
+This option tells the export process how to behave when encountering
+a broken internal link.  See its docstring for more information.
 *** New ~vbar~ entity
 ~\vbar~ or ~\vbar{}~ will be exported unconditionnally as a =|=,
 unlike to existing ~\vert~, which is expanded as ~&vert;~ when using
