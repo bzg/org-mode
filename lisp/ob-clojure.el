@@ -44,7 +44,8 @@
   (require 'cl))
 
 (declare-function nrepl-dict-get "ext:nrepl-client" (dict key))
-(declare-function nrepl-sync-request:eval "ext:nrepl-client" (input &optional ns session))
+(declare-function nrepl-sync-request:eval "ext:nrepl-client"
+		  (input connection session &optional ns))
 (declare-function slime-eval "ext:slime" (sexp &optional package))
 
 (defvar org-babel-tangle-lang-exts)
@@ -91,7 +92,8 @@
        (let ((result-params (cdr (assoc :result-params params))))
 	 (setq result
 	       (nrepl-dict-get
-		(nrepl-sync-request:eval expanded)
+		(nrepl-sync-request:eval
+		 expanded (cider-current-connection) (cider-current-session))
 		(if (or (member "output" result-params)
 			(member "pp" result-params))
 		    "out"
