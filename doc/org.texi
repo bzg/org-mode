@@ -14841,13 +14841,13 @@ can be used to map arbitrary language names to existing major modes.
 Controls the way Emacs windows are rearranged when the edit buffer is created.
 @item org-src-preserve-indentation
 @cindex indentation, in source blocks
-By default, the value is @code{nil}, which means that when code blocks are
-evaluated during export or tangled, they are re-inserted into the code block,
-which may replace sequences of spaces with tab characters.  When non-@code{nil},
-whitespace in code blocks will be preserved during export or tangling,
-exactly as it appears.  This variable is especially useful for tangling
-languages such as Python, in which whitespace indentation in the output is
-critical.
+By default, the value is @code{nil}, which means that code blocks evaluated
+during export or tangled are indented according to context, possibly altering
+leading sequences of spaces and tab characters in the process.  When
+non-@code{nil}, indentation is relative to left column, and therefore, not
+modified during export or tangling.  This variable is especially useful for
+tangling languages such as Python, in which whitespace indentation in the
+output is critical.
 @item org-src-ask-before-returning-to-edit-buffer
 By default, Org will ask before returning to an open edit buffer.  Set this
 variable to @code{nil} to switch without asking.
