@@ -43,6 +43,8 @@
 (eval-when-compile
   (require 'cl))
 
+(declare-function cider-current-connection "ext:cider-client" (&optional type))
+(declare-function cider-current-session "ext:cider-client" ())
 (declare-function nrepl-dict-get "ext:nrepl-client" (dict key))
 (declare-function nrepl-sync-request:eval "ext:nrepl-client"
 		  (input connection session &optional ns))
