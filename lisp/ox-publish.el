@@ -672,47 +672,45 @@ See `org-publish-projects'."
   "Publish all files belonging to the PROJECTS alist.
 If `:auto-sitemap' is set, publish the sitemap too.  If
 `:makeindex' is set, also produce a file theindex.org."
-  (mapc
-   (lambda (project)
-     ;; Each project uses its own cache file:
-     (org-publish-initialize-cache (car project))
-     (let* ((project-plist (cdr project))
-	    (exclude-regexp (plist-get project-plist :exclude))
-	    (sitemap-p (plist-get project-plist :auto-sitemap))
-	    (sitemap-filename (or (plist-get project-plist :sitemap-filename)
-				  "sitemap.org"))
-	    (sitemap-function (or (plist-get project-plist :sitemap-function)
-				  'org-publish-org-sitemap))
-	    (org-publish-sitemap-date-format
-	     (or (plist-get project-plist :sitemap-date-format)
-		 org-publish-sitemap-date-format))
-	    (org-publish-sitemap-file-entry-format
-	     (or (plist-get project-plist :sitemap-file-entry-format)
-		 org-publish-sitemap-file-entry-format))
-	    (preparation-function
-	     (plist-get project-plist :preparation-function))
-	    (completion-function (plist-get project-plist :completion-function))
-	    (files (org-publish-get-base-files project exclude-regexp))
-	    (theindex
-	     (expand-file-name "theindex.org"
-			       (plist-get project-plist :base-directory))))
-       (when preparation-function (run-hooks 'preparation-function))
-       (if sitemap-p (funcall sitemap-function project sitemap-filename))
-       ;; Publish all files from PROJECT excepted "theindex.org".  Its
-       ;; publishing will be deferred until "theindex.inc" is
-       ;; populated.
-       (dolist (file files)
-	 (unless (equal file theindex)
-	   (org-publish-file file project t)))
-       ;; Populate "theindex.inc", if needed, and publish
-       ;; "theindex.org".
-       (when (plist-get project-plist :makeindex)
-	 (org-publish-index-generate-theindex
-	  project (plist-get project-plist :base-directory))
-	 (org-publish-file theindex project t))
-       (when completion-function (run-hooks 'completion-function))
-       (org-publish-write-cache-file)))
-   (org-publish-expand-projects projects)))
+  (dolist (project (org-publish-expand-projects projects))
+    (let ((preparation-function
+	   (plist-get project-plist :preparation-function)))
+      (when preparation-function (run-hooks 'preparation-function)))
+    ;; Each project uses its own cache file.
+    (org-publish-initialize-cache (car project))
+    (let* ((project-plist (cdr project))
+	   (exclude-regexp (plist-get project-plist :exclude))
+	   (sitemap-p (plist-get project-plist :auto-sitemap))
+	   (sitemap-filename (or (plist-get project-plist :sitemap-filename)
+				 "sitemap.org"))
+	   (sitemap-function (or (plist-get project-plist :sitemap-function)
+				 'org-publish-org-sitemap))
+	   (org-publish-sitemap-date-format
+	    (or (plist-get project-plist :sitemap-date-format)
+		org-publish-sitemap-date-format))
+	   (org-publish-sitemap-file-entry-format
+	    (or (plist-get project-plist :sitemap-file-entry-format)
+		org-publish-sitemap-file-entry-format))
+	   (files (org-publish-get-base-files project exclude-regexp))
+	   (theindex
+	    (expand-file-name "theindex.org"
+			      (plist-get project-plist :base-directory))))
+      (when sitemap-p (funcall sitemap-function project sitemap-filename))
+      ;; Publish all files from PROJECT excepted "theindex.org".  Its
+      ;; publishing will be deferred until "theindex.inc" is
+      ;; populated.
+      (dolist (file files)
+	(unless (equal file theindex) (org-publish-file file project t)))
+      ;; Populate "theindex.inc", if needed, and publish
+      ;; "theindex.org".
+      (when (plist-get project-plist :makeindex)
+	(org-publish-index-generate-theindex
+	 project (plist-get project-plist :base-directory))
+	(org-publish-file theindex project t))
+      (let ((completion-function
+	     (plist-get project-plist :completion-function)))
+	(when completion-function (run-hooks 'completion-function)))
+      (org-publish-write-cache-file))))
 
 (defun org-publish-org-sitemap (project &optional sitemap-filename)
   "Create a sitemap of pages in set defined by PROJECT.
