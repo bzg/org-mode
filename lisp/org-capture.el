@@ -792,7 +792,10 @@ already gone.  Any prefix argument will be passed to the refile command."
      "Refiling from a capture buffer makes only sense for `entry'-type templates"))
   (let ((pos (point))
 	(base (buffer-base-buffer (current-buffer)))
-	(org-refile-for-capture t))
+	(org-refile-for-capture t)
+	(kill-buffer (org-capture-get :kill-buffer 'local)))
+    (org-capture-put :kill-buffer nil)
+    (org-capture-finalize)
     (save-window-excursion
       (with-current-buffer (or base (current-buffer))
 	(save-excursion
@@ -800,7 +803,7 @@ already gone.  Any prefix argument will be passed to the refile command."
 	    (widen)
 	    (goto-char pos)
 	    (call-interactively 'org-refile)))))
-    (org-capture-finalize)))
+    (when kill-buffer (kill-buffer base))))
 
 (defun org-capture-kill ()
   "Abort the current capture process."
