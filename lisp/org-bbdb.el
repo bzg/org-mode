@@ -397,6 +397,58 @@ This is used by Org to re-create the anniversary hash table."
         ))
     text))
 
+;;; Return list of anniversaries for today and the next n-1 (default: n=7) days.
+;;; This is meant to be used in an org file instead of org-bbdb-anniversaries:
+;;;
+;;; %%(org-bbdb-anniversaries-future)
+;;;
+;;; or
+;;;
+;;; %%(org-bbdb-anniversaries-future 3)
+;;;
+;;; to override the 7-day default.
+
+(defun org-bbdb-date-list (date n)
+  "Return a list of dates in (m d y) format from the given 'date' to n-1 days hence."
+  (let ((abs (calendar-absolute-from-gregorian date))
+        ret)
+    (dotimes (i n (nreverse ret))
+	       (push (calendar-gregorian-from-absolute (+ abs i)) ret))))
+
+;;;###autoload
+(defun org-bbdb-anniversaries-future (&optional n)
+  "Return list of anniversaries for today and the next n-1 days (default n=7)."
+  (let ((n (or n 7)))
+    (when (<= n 0)
+      (error "The (optional) argument of `org-bbdb-anniversaries-future' must be positive"))
+    (let (
+	  ;; List of relevant dates.
+	  (dates (org-bbdb-date-list date n))
+	  ;; Function to annotate text of each element of l with the anniversary date d.
+	  (annotate-descriptions
+	   (lambda (d l)
+	     (mapcar (lambda (x)
+		       ;; The assumption here is that x is a bbdb link of the form
+		       ;; [[bbdb:name][description]].
+		       ;; This function rather arbitrarily modifies the description
+		       ;; by adding the date to it in a fixed format.
+		       (string-match "]]" x)
+		       (replace-match (format " -- %d-%02d-%02d\\&" (third d) (first d) (second d))
+				      nil nil x))
+		     l))))
+      ;; Map a function that generates anniversaries for each date over the dates
+      ;; and nconc the results into a single list. When it is no longer necessary
+      ;; to support older versions of emacs, this can be done with a cl-mapcan;
+      ;; for now, we use the (apply #'nconc ...) method for compatibility.
+      (apply #'nconc
+	     (lambda (d)
+		   (let ((date d))
+		     ;; Rebind 'date' so that org-bbdb-anniversaries will be
+		     ;; fooled into giving us the list for the given date
+		     ;; and then annotate the descriptions for that date.
+		     (funcall annotate-descriptions d (org-bbdb-anniversaries))))
+		 dates))))
+
 (defun org-bbdb-complete-link ()
   "Read a bbdb link with name completion."
   (require 'bbdb-com)

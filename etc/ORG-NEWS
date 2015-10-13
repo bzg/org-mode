@@ -40,6 +40,9 @@ http://orgmode.org/worg/org-contrib/babel/languages/ob-doc-stan.html
 *** New =#+latex_compiler= keyword to set LaTeX compiler.
 PDFLaTeX, XeLaTeX, and LuaLaTeX are supported.  See the manual for
 details.
+*** org-bbdb-anniversaries-future
+Used like org-bbdb-anniversaries, it provides a few days warning
+for upcoming anniversaries (default: 7 days).
 ** New functions
 ~org-show-children~ is a faster implementation of
 ~outline-show-children~.

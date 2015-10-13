@@ -8046,6 +8046,20 @@ hash with anniversaries.  However, from then on things will be very fast---much
 faster in fact than a long list of @samp{%%(diary-anniversary)} entries
 in an Org or Diary file.
 
+If you would like to see upcoming anniversaries with a bit of forewarning,
+you can use the following instead:
+
+@example
+* Anniversaries
+  :PROPERTIES:
+  :CATEGORY: Anniv
+  :END:
+%%(org-bbdb-anniversaries-future 3)
+@end example
+
+That will give you three days' warning: on the anniversary date itself and the
+two days prior. The argument is optional: if omitted, it defaults to 7.
+
 @subsubheading Appointment reminders
 @cindex @file{appt.el}
 @cindex appointment reminders
