@@ -2179,11 +2179,11 @@ have priority."
 	      key 'week)))
      ((string-match "\\`\\([0-9]+\\)-[qQ]\\([1-4]\\)\\'" skey)
       (require 'cal-iso)
+      (setq q (string-to-number (match-string 2 skey)))
       (let ((date (calendar-gregorian-from-absolute
 		   (calendar-iso-to-absolute
 		    (org-quarter-to-date
-		     (string-to-number (match-string 2 skey))
-		     (string-to-number (match-string 1 skey)))))))
+		     q (string-to-number (match-string 1 skey)))))))
 	(setq d (nth 1 date)
 	      month (car date)
 	      y (nth 2 date)
