@@ -337,7 +337,10 @@ function assumes HEADLINE will be treated as a frame."
     (if (and (stringp opt)
 	     (string-match "\\(?:^\\|,\\)label=\\(.*?\\)\\(?:$\\|,\\)" opt))
 	(match-string 1 opt)
-      (format "{sec:%s}" (org-export-get-reference headline info)))))
+      (or (and (plist-get info :latex-prefer-user-labels)
+	       (org-element-property :CUSTOM_ID headline))
+	  (format "{sec:%s}"
+		  (org-export-get-reference headline info))))))
 
 (defun org-beamer--frame-level (headline info)
   "Return frame level in subtree containing HEADLINE.
