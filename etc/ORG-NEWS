@@ -6,7 +6,7 @@ ORG NEWS -- history of user-visible changes.           -*- org -*-
 Copyright (C) 2012-2015 Free Software Foundation, Inc.
 See the end of the file for license conditions.
 
-Please send Org bug reports to emacs-orgmode@gnu.org.
+Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 8.4
 ** New features
@@ -55,6 +55,7 @@ plain list.
 *** ~fixltx2e~ is removed from ~org-latex-default-packages-alist~
 fixltx2e is obsolete, see LaTeX News 22.
 ** Miscellaneous
+*** Beamer export back-ends uses ~org-latex-prefer-user-labels~
 *** ~:preparation-function~ called earlier during publishing 
 Functions in this list are called before any file is associated to the
 current projet.  Thus, they can be used to generate to be published
