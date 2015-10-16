@@ -1221,17 +1221,28 @@ Contents
       ;; Planning info.
       (should
        (org-test-with-temp-text "
-*************** Task
+*************** Task<point>
 DEADLINE: <2012-03-29 thu.>
 *************** END"
-	 (forward-line)
 	 (org-element-property :deadline (org-element-at-point))))
+      (should
+       (eq 'planning
+	   (org-test-with-temp-text "
+*************** Task
+<point>DEADLINE: <2012-03-29 thu.>
+*************** END"
+	     (org-element-type (org-element-at-point)))))
       (should-not
        (org-test-with-temp-text "
-*************** Task
+*************** Task<point>
 DEADLINE: <2012-03-29 thu.>"
-	 (forward-line)
 	 (org-element-property :deadline (org-element-at-point))))
+      (should-not
+       (eq 'planning
+	   (org-test-with-temp-text "
+*************** Task
+<point>DEADLINE: <2012-03-29 thu.>"
+	     (org-element-type (org-element-at-point)))))
       ;; Priority.
       (should
        (eq
