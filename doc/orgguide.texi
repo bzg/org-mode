@@ -503,7 +503,7 @@ blank lines.  An example:
       + I really like Miranda Otto.
    Important actors in this film are:
    - @b{Elijah Wood} :: He plays Frodo
-   - @b{Sean Austin} :: He plays Sam, Frodo's friend.
+   - @b{Sean Astin} :: He plays Sam, Frodo's friend.
 @end group
 @end smallexample
 
