@@ -4150,6 +4150,7 @@ otherwise.  Modes can be either `first-section', `item',
   (if parentp
       (pcase type
 	(`headline 'section)
+	(`inlinetask 'planning)
 	(`plain-list 'item)
 	(`property-drawer 'node-property)
 	(`section 'planning)
