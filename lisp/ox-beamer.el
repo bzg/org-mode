@@ -331,16 +331,21 @@ channel."
 INFO is a plist used as a communication channel.
 
 The value is either the label specified in \"BEAMER_opt\"
-property, or a fallback value built from headline's number.  This
-function assumes HEADLINE will be treated as a frame."
-  (let ((opt (org-element-property :BEAMER_OPT headline)))
-    (if (and (stringp opt)
-	     (string-match "\\(?:^\\|,\\)label=\\(.*?\\)\\(?:$\\|,\\)" opt))
-	(match-string 1 opt)
-      (or (and (plist-get info :latex-prefer-user-labels)
-	       (org-element-property :CUSTOM_ID headline))
-	  (format "{sec:%s}"
-		  (org-export-get-reference headline info))))))
+property, the custom ID, if there is one and
+`:latex-prefer-user-labels' property has a non nil value, or
+a unique internal label.  This function assumes HEADLINE will be
+treated as a frame."
+  (cond
+   ((let ((opt (org-element-property :BEAMER_OPT headline)))
+      (and (stringp opt)
+	   (string-match "\\(?:^\\|,\\)label=\\(.*?\\)\\(?:$\\|,\\)" opt)
+	   (let ((label (match-string 1 opt)))
+	     (if (string-match-p "\\`{.*}\\'" label)
+		 (substring label 1 -1)
+	       label)))))
+   ((and (plist-get info :latex-prefer-user-labels)
+	 (org-element-property :CUSTOM_ID headline)))
+   (t (format "sec:%s" (org-export-get-reference headline info)))))
 
 (defun org-beamer--frame-level (headline info)
   "Return frame level in subtree containing HEADLINE.
@@ -444,8 +449,13 @@ used as a communication channel."
 				  (or (string-match "\\(^\\|,\\)label=" beamer-opt)
 				      (string-match "allowframebreaks" beamer-opt)))
 		       (list
-			(format "label=%s"
-				(org-beamer--get-label headline info)))))))
+			(let ((label (org-beamer--get-label headline info)))
+			  ;; Labels containing colons need to be
+			  ;; wrapped within braces.
+			  (format (if (org-string-match-p ":" label)
+				      "label={%s}"
+				    "label=%s")
+				  label)))))))
 	      ;; Change options list into a string.
 	      (org-beamer--normalize-argument
 	       (mapconcat
