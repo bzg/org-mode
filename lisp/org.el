@@ -17651,28 +17651,30 @@ days in order to avoid rounding problems."
   (org-float-time (org-time-string-to-time s)))
 
 (defun org-time-string-to-absolute (s &optional daynr prefer show-all buffer pos)
-  "Convert a time stamp to an absolute day number.
-If there is a specifier for a cyclic time stamp, get the closest
-date to DAYNR.
-PREFER and SHOW-ALL are passed through to `org-closest-date'.
-The variable `date' is bound by the calendar when this is called."
+  "Convert time stamp S to an absolute day number.
+
+If DAYNR in non-nil, and there is a specifier for a cyclic time
+stamp, get the closest date to DAYNR.  If PREFER is
+`past' (respectively `future') return a date past (respectively
+after) or equal to DAYNR.
+
+POS is the location of time stamp S, as a buffer position.
+
+The variable `date' is bound by the calendar when this is
+called."
   (cond
    ((and daynr (string-match "\\`%%\\((.*)\\)" s))
     (if (org-diary-sexp-entry (match-string 1 s) "" date)
 	daynr
       (+ daynr 1000)))
-   ((and daynr (string-match "\\+\\([0-9]+\\)[hdwmy]" s)
-	 (> (string-to-number (match-string 1 s)) 0))
-    (org-closest-date s (if (and (boundp 'daynr) (integerp daynr)) daynr
-			  (time-to-days (current-time))) (match-string 0 s)
-			  prefer show-all))
+   ((and daynr show-all) (org-closest-date s daynr prefer))
    (t (time-to-days
        (condition-case errdata
-	   (apply 'encode-time (org-parse-time-string s))
+	   (apply #'encode-time (org-parse-time-string s))
 	 (error (error "Bad timestamp `%s'%s\nError was: %s"
-		       s (if (not (and buffer pos))
-			     ""
-			   (format-message " at %d in buffer `%s'" pos buffer))
+		       s
+		       (if (not (and buffer pos)) ""
+			 (format-message " at %d in buffer `%s'" pos buffer))
 		       (cdr errdata))))))))
 
 (defun org-days-to-iso-week (days)
@@ -17752,87 +17754,98 @@ This uses the icalendar.el library."
     (delete-file tmpfile)
     rtn))
 
-(defun org-closest-date (start current change prefer show-all)
-  "Find the date closest to CURRENT that is consistent with START and CHANGE.
-When PREFER is `past', return a date that is either CURRENT or past.
-When PREFER is `future', return a date that is either CURRENT or future.
-When SHOW-ALL is nil, only return the current occurrence of a time stamp."
-  ;; Make the proper lists from the dates
-  (catch 'exit
-    (let ((a1 '(("h" . hour)
-		("d" . day)
-		("w" . week)
-		("m" . month)
-		("y" . year)))
-	  (shour (nth 2 (org-parse-time-string start)))
-	  dn dw sday cday n1 n2 n0
-	  d m y y1 y2 date1 date2 nmonths nm ny m2)
+(defun org-closest-date (start current prefer)
+  "Return closest date to CURRENT starting from START.
 
-      (setq start (org-date-to-gregorian start)
-	    current (org-date-to-gregorian
-		     (if show-all
-			 current
-		       (time-to-days (current-time))))
-	    sday (calendar-absolute-from-gregorian start)
-	    cday  (calendar-absolute-from-gregorian current))
+CURRENT and START are both time stamps.
 
-      (if (<= cday sday) (throw 'exit sday))
+When PREFER is `past', return a date that is either CURRENT or
+past.  When PREFER is `future', return a date that is either
+CURRENT or future.
 
-      (when (string-match "\\(\\+[0-9]+\\)\\([hdwmy]\\)" change)
-	(setq dn (string-to-number (match-string 1 change))
-	      dw (cdr (assoc (match-string 2 change) a1))))
-      (unless (and dn (> dn 0))
-	(user-error "Invalid change specifier: %s" change))
-      (if (eq dw 'week) (setq dw 'day dn (* 7 dn)))
-      (cond
-       ((eq dw 'hour)
-	(let ((missing-hours
-	       (mod (+ (- (* 24 (- cday sday)) shour) org-extend-today-until)
-		    dn)))
-	  (setq n1 (if (zerop missing-hours) cday
-		     (- cday (1+ (floor (/ missing-hours 24)))))
-		n2 (+ cday (floor (/ (- dn missing-hours) 24))))))
-       ((eq dw 'day)
-	(setq n1 (+ sday (* dn (floor (/ (- cday sday) dn))))
-	      n2 (+ n1 dn)))
-       ((eq dw 'year)
-	(setq d (nth 1 start) m (car start) y1 (nth 2 start) y2 (nth 2 current))
-	(setq y1 (+ (* (floor (/ (- y2 y1) dn)) dn) y1))
-	(setq date1 (list m d y1)
-	      n1 (calendar-absolute-from-gregorian date1)
-	      date2 (list m d (+ y1 (* (if (< n1 cday) 1 -1) dn)))
-	      n2 (calendar-absolute-from-gregorian date2)))
-       ((eq dw 'month)
-	;; approx number of month between the two dates
-	(setq nmonths (floor (/ (- cday sday) 30.436875)))
-	;; How often does dn fit in there?
-	(setq d (nth 1 start) m (car start) y (nth 2 start)
-	      nm (* dn (max 0 (1- (floor (/ nmonths dn)))))
-	      m (+ m nm)
-	      ny (floor (/ m 12))
-	      y (+ y ny)
-	      m (- m (* ny 12)))
-	(while (> m 12) (setq m (- m 12) y (1+ y)))
-	(setq n1 (calendar-absolute-from-gregorian (list m d y)))
-	(setq m2 (+ m dn) y2 y)
-	(if (> m2 12) (setq y2 (1+ y2) m2 (- m2 12)))
-	(setq n2 (calendar-absolute-from-gregorian (list m2 d y2)))
-	(while (<= n2 cday)
-	  (setq n1 n2 m m2 y y2)
-	  (setq m2 (+ m dn) y2 y)
-	  (if (> m2 12) (setq y2 (1+ y2) m2 (- m2 12)))
-	  (setq n2 (calendar-absolute-from-gregorian (list m2 d y2))))))
-      ;; Make sure n1 is the earlier date
-      (setq n0 n1  n1 (min n1 n2)  n2 (max n0 n2))
-      (if show-all
-	  (cond
-	   ((eq prefer 'past)   (if (= cday n2) n2 n1))
-	   ((eq prefer 'future) (if (= cday n1) n1 n2))
-	   (t (if (> (abs (- cday n1)) (abs (- cday n2))) n2 n1)))
-	(cond
-	 ((eq prefer 'past)   (if (= cday n2) n2 n1))
-	 ((eq prefer 'future) (if (= cday n1) n1 n2))
-	 (t (if (= cday n1) n1 n2)))))))
+Only time stamps with a simple repeater (i.e., neither \"++\" nor
+\".+\") are modified.  Any other time stamp stay unchanged.  In
+any case, return value is an absolute day number."
+  (if (not (string-match "[^.+]\\+\\([0-9]+\\)\\([hdwmy]\\)" start))
+      ;; No valid repeater.  Do not shift time stamp.
+      (time-to-days (apply #'encode-time (org-parse-time-string start)))
+    (let ((value (string-to-number (match-string 1 start)))
+	  (type (match-string 2 start)))
+      (if (= 0 value)
+	  ;; Repeater with a 0-value is considered as void.
+	  (time-to-days (apply #'encode-time (org-parse-time-string start)))
+	(let* ((base (org-date-to-gregorian start))
+	       (target (org-date-to-gregorian current))
+	       (sday (calendar-absolute-from-gregorian base))
+	       (cday (calendar-absolute-from-gregorian target))
+	       n1 n2)
+	  ;; If START is already past CURRENT, just return START.
+	  (if (<= cday sday) sday
+	    ;; Compute closest date before (N1) and closest date past
+	    ;; (N2) CURRENT.
+	    (pcase type
+	      ("h"
+	       (let ((missing-hours
+		      (mod (+ (- (* 24 (- cday sday))
+				 (nth 2 (org-parse-time-string start)))
+			      org-extend-today-until)
+			   value)))
+		 (setf n1 (if (= missing-hours 0) cday
+			    (- cday (1+ (/ missing-hours 24)))))
+		 (setf n2 (+ cday (/ (- value missing-hours) 24)))))
+	      ((or "d" "w")
+	       (let ((value (if (equal type "w") (* 7 value) value)))
+		 (setf n1 (+ sday (* value (/ (- cday sday) value))))
+		 (setf n2 (+ n1 value))))
+	      ("m"
+	       (let* ((add-months
+		       (lambda (date n)
+			 ;; Add N months to gregorian DATE, i.e.,
+			 ;; a list (MONTH DAY YEAR).  Return a valid
+			 ;; gregorian date.
+			 (let ((m (+ (nth 0 date) n)))
+			   (list (mod m 12)
+				 (nth 1 date)
+				 (+ (/ m 12) (nth 2 date))))))
+		      (months		; Complete months to TARGET.
+		       (* (/ (+ (* 12 (- (nth 2 target) (nth 2 base)))
+				(- (nth 0 target) (nth 0 base))
+				;; If START's day is greater than
+				;; TARGET's, remove incomplete month.
+				(if (> (nth 1 target) (nth 1 base)) 0 -1))
+			     value)
+			  value))
+		      (before (funcall add-months base months)))
+		 (setf n1 (calendar-absolute-from-gregorian before))
+		 (setf n2
+		       (calendar-absolute-from-gregorian
+			(funcall add-months before value)))))
+	      (_
+	       (let* ((d (nth 1 base))
+		      (m (nth 0 base))
+		      (y (nth 2 base))
+		      (years		; Complete years to TARGET.
+		       (* (/ (- (nth 2 target)
+				y
+				;; If START's month and day are
+				;; greater than TARGET's, remove
+				;; incomplete year.
+				(if (or (> (nth 0 target) m)
+					(and (= (nth 0 target) m)
+					     (> (nth 1 target) d)))
+				    0
+				  1))
+			     value)
+			  value))
+		      (before (list m d (+ y years))))
+		 (setf n1 (calendar-absolute-from-gregorian before))
+		 (setf n2 (calendar-absolute-from-gregorian
+			   (list m d (+ (nth 2 before) value)))))))
+	    ;; Handle PREFER parameter, if any.
+	    (cond
+	     ((eq prefer 'past)   (if (= cday n2) n2 n1))
+	     ((eq prefer 'future) (if (= cday n1) n1 n2))
+	     (t (if (> (abs (- cday n1)) (abs (- cday n2))) n2 n1)))))))))
 
 (defun org-date-to-gregorian (date)
   "Turn any specification of DATE into a Gregorian date for the calendar."
