@@ -6055,7 +6055,7 @@ specification like [h]h:mm."
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
-	(unless (org-at-planning-p) (throw :skip nil))
+	(unless (save-match-data (org-at-planning-p)) (throw :skip nil))
 	(org-agenda-skip)
 	(setq s (match-string 1)
 	      txt nil
@@ -6201,7 +6201,7 @@ an hour specification like [h]h:mm."
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
-	(unless (org-at-planning-p) (throw :skip nil))
+	(unless (save-match-data (org-at-planning-p)) (throw :skip nil))
 	(org-agenda-skip)
 	(setq s (match-string 1)
 	      txt nil
