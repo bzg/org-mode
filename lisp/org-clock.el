@@ -1499,10 +1499,7 @@ line and position cursor in that line."
 	(cond
 	 ((null positions)
 	  ;; Skip planning line and property drawer, if any.
-	  (when (org-looking-at-p org-planning-line-re) (forward-line))
-	  (when (looking-at org-property-drawer-re)
-	    (goto-char (match-end 0))
-	    (forward-line))
+	  (org-end-of-meta-data)
 	  (unless (bolp) (insert "\n"))
 	  ;; Create a new drawer if necessary.
 	  (when (and org-clock-into-drawer
@@ -1515,15 +1512,13 @@ line and position cursor in that line."
 	      (org-flag-drawer t)
 	      (forward-line))))
 	 ;; When a clock drawer needs to be created because of the
-	 ;; number of clock items, collect all clocks in the section
-	 ;; and wrap them within the drawer.
-	 ((and (wholenump org-clock-into-drawer)
-	       (>= (1+ count) org-clock-into-drawer))
+	 ;; number of clock items or simply if it is missing, collect
+	 ;; all clocks in the section and wrap them within the drawer.
+	 ((or drawer
+	      (and (wholenump org-clock-into-drawer)
+		   (>= (1+ count) org-clock-into-drawer)))
 	  ;; Skip planning line and property drawer, if any.
-	  (when (org-looking-at-p org-planning-line-re) (forward-line))
-	  (when (looking-at org-property-drawer-re)
-	    (goto-char (match-end 0))
-	    (forward-line))
+	  (org-end-of-meta-data)
 	  (let ((beg (point)))
 	    (insert
 	     (mapconcat
