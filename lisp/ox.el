@@ -4044,10 +4044,11 @@ meant to be translated with `org-export-data' or alike."
 ;; `org-export-data' for further processing, depending on
 ;; `org-export-with-broken-links' value.
 
-(if (version< emacs-version "24.4")	; `define-error' is 24.4+.
-    (put 'org-link-broken 'error-conditions
-	 (copy-sequence (cons 'org-link-broken (get 'error 'error-conditions))))
-  (define-error 'org-link-broken "Unable to resolve link; aborting"))
+;; FIXME: Remove this when support for Emacsen < 24.4 is dropped.
+(if (fboundp 'define-error)
+    (define-error 'org-link-broken "Unable to resolve link; aborting")
+  (put 'org-link-broken 'error-conditions
+       (copy-sequence (cons 'org-link-broken (get 'error 'error-conditions)))))
 
 (defun org-export-custom-protocol-maybe (link desc backend)
   "Try exporting LINK with a dedicated function.
