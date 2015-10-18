@@ -21334,25 +21334,23 @@ will not happen if point is in a table or on a \"dead\"
 object (e.g., within a comment).  In these case, you need to use
 `org-open-at-point' directly."
   (interactive)
-  (let* ((context (if org-return-follows-link (org-element-context)
-		    (org-element-at-point)))
-	 (type (org-element-type context)))
+  (let ((context (if org-return-follows-link (org-element-context)
+		   (org-element-at-point))))
     (cond
      ;; In a table, call `org-table-next-row'.
-     ((or (and (eq type 'table)
+     ((or (and (eq (org-element-type context) 'table)
 	       (>= (point) (org-element-property :contents-begin context))
 	       (< (point) (org-element-property :contents-end context)))
 	  (org-element-lineage context '(table-row table-cell) t))
       (org-table-justify-field-maybe)
       (call-interactively #'org-table-next-row))
-     ;; On a link or a timestamp but not on white spaces after it,
-     ;; call `org-open-line' if `org-return-follows-link' allows it.
+     ;; On a link or a timestamp, call `org-open-line' if
+     ;; `org-return-follows-link' allows it.  Tolerate fuzzy
+     ;; locations, e.g., in a comment, as `org-open-line'.
      ((and org-return-follows-link
-	   (memq type '(link timestamp))
-	   (< (point)
-	      (save-excursion (goto-char (org-element-property :end context))
-			      (skip-chars-backward " \t")
-			      (point))))
+	   (or (org-at-timestamp-p t)
+	       (org-at-date-range-p t)
+	       (org-in-regexp org-any-link-re)))
       (call-interactively #'org-open-at-point))
      ;; Insert newline in heading, but preserve tags.
      ((and (not (bolp))
