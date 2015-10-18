@@ -473,6 +473,36 @@ Paragraph"
       (let ((org-archive-tag "archive"))
 	(org-export-as (org-test-default-backend)
 		       nil nil nil '(:with-archived-trees t))))))
+  ;; Broken links.  Depending on `org-export-with-broken-links', raise
+  ;; an error, ignore link or mark is as broken in output.
+  (should-error
+   (org-test-with-temp-text "[[#broken][link]]"
+     (let ((backend
+	    (org-export-create-backend
+	     :transcoders
+	     '((section . (lambda (_e c _i) c))
+	       (paragraph . (lambda (_e c _i) c))
+	       (link . (lambda (l c i) (org-export-resolve-id-link l i)))))))
+       (org-export-as backend nil nil nil '(:with-broken-links nil)))))
+  (should
+   (org-test-with-temp-text "[[#broken][link]]"
+     (let ((backend
+	    (org-export-create-backend
+	     :transcoders
+	     '((section . (lambda (_e c _i) c))
+	       (paragraph . (lambda (_e c _i) c))
+	       (link . (lambda (l c i) (org-export-resolve-id-link l i)))))))
+       (org-export-as backend nil nil nil '(:with-broken-links t)))))
+  (should
+   (org-test-with-temp-text "[[#broken][link]]"
+     (let ((backend
+	    (org-export-create-backend
+	     :transcoders
+	     '((section . (lambda (_e c _i) c))
+	       (paragraph . (lambda (_e c _i) c))
+	       (link . (lambda (l c i) (org-export-resolve-id-link l i)))))))
+       (org-string-nw-p
+	(org-export-as backend nil nil nil '(:with-broken-links mark))))))
   ;; Clocks.
   (should
    (string-match "CLOCK: \\[2012-04-29 .* 10:45\\]"
