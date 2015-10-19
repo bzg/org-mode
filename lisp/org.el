@@ -13245,12 +13245,15 @@ This function is run automatically after each state change to a DONE state."
 	(setq type (if (match-end 1) org-scheduled-string
 		     (if (match-end 3) org-deadline-string "Plain:"))
 	      ts (match-string (if (match-end 2) 2 (if (match-end 4) 4 0))))
-	(when (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)" ts)
-	  (setq	n (string-to-number (match-string 2 ts))
+	(if (not (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)" ts))
+	    (org-remove-timestamp-with-keyword org-scheduled-string)
+	  (setq n (string-to-number (match-string 2 ts))
 		what (match-string 3 ts))
 	  (if (equal what "w") (setq n (* n 7) what "d"))
-	  (if (and (equal what "h") (not (string-match "[0-9]\\{1,2\\}:[0-9]\\{2\\}" ts)))
-	      (user-error "Cannot repeat in Repeat in %d hour(s) because no hour has been set" n))
+	  (if (and (equal what "h")
+		   (not (string-match "[0-9]\\{1,2\\}:[0-9]\\{2\\}" ts)))
+	      (user-error
+	       "Cannot repeat in Repeat in %d hour(s) because no hour has been set" n))
 	  ;; Preparation, see if we need to modify the start date for the change
 	  (when (match-end 1)
 	    (setq time (save-match-data (org-time-string-to-time ts)))
@@ -13277,7 +13280,8 @@ This function is run automatically after each state change to a DONE state."
 	      (org-at-timestamp-p t)
 	      (setq ts (match-string 1))
 	      (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)" ts))))
-	  (save-excursion (org-timestamp-change n (cdr (assoc what whata)) nil t))
+	  (save-excursion
+	    (org-timestamp-change n (cdr (assoc what whata)) nil t))
 	  (setq msg (concat msg type " " org-last-changed-timestamp " "))))
       (setq org-log-post-message msg)
       (message "%s" msg))))
