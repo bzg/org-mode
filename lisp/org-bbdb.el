@@ -441,13 +441,14 @@ This is used by Org to re-create the anniversary hash table."
       ;; to support older versions of emacs, this can be done with a cl-mapcan;
       ;; for now, we use the (apply #'nconc ...) method for compatibility.
       (apply #'nconc
-	     (lambda (d)
-		   (let ((date d))
-		     ;; Rebind 'date' so that org-bbdb-anniversaries will be
-		     ;; fooled into giving us the list for the given date
-		     ;; and then annotate the descriptions for that date.
-		     (funcall annotate-descriptions d (org-bbdb-anniversaries))))
-		 dates))))
+	     (mapcar
+	      (lambda (d)
+		(let ((date d))
+		  ;; Rebind 'date' so that org-bbdb-anniversaries will be
+		  ;; fooled into giving us the list for the given date
+		  ;; and then annotate the descriptions for that date.
+		  (funcall annotate-descriptions d (org-bbdb-anniversaries))))
+	      dates)))))
 
 (defun org-bbdb-complete-link ()
   "Read a bbdb link with name completion."
