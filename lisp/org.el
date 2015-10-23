@@ -16772,7 +16772,9 @@ So these are more for recording a certain time/date."
     (org-defkey map (kbd ".")
                 (lambda () (interactive)
 		  ;; Are we at the beginning of the prompt?
-		  (if (org-looking-back "^[^:]+: " (line-beginning-position))
+		  (if (org-looking-back "^[^:]+: "
+					(let ((inhibit-field-text-motion t))
+					  (line-beginning-position)))
 		      (org-eval-in-calendar '(calendar-goto-today))
 		    (insert "."))))
     (org-defkey map (kbd "C-.")
