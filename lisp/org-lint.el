@@ -981,7 +981,7 @@ Use :header-args: instead"
 		(string-to-number (aref (cadr b) 0))))
 	   :right-align t)
 	  ("Trust" 5 t)
-	  ("Warning" 0 nil)])
+	  ("Warning" 0 t)])
   (tabulated-list-init-header))
 
 (defun org-lint--generate-reports (buffer checkers)
