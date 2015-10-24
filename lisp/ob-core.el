@@ -2551,7 +2551,8 @@ parameters when merging lists."
 	       (setq params (cons pair (assq-delete-all (car pair) params)))))
 	    (:exports
 	     (setq exports (funcall e-merge exports-exclusive-groups
-				    exports (split-string (cdr pair)))))
+				    exports
+				    (split-string (or (cdr pair) "")))))
 	    (:tangle ;; take the latest -- always overwrite
 	     (setq tangle (or (list (cdr pair)) tangle)))
 	    (:noweb
