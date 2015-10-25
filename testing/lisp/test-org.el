@@ -301,17 +301,6 @@
     '(3 29 2012)
     (calendar-gregorian-from-absolute
      (org-closest-date "<2012-03-29 +0d>" "<2014-03-04>" nil))))
-  ;; Time stamps with a special repeater type are returned unchanged.
-  (should
-   (equal
-    '(3 29 2012)
-    (calendar-gregorian-from-absolute
-     (org-closest-date "<2012-03-29 .+1d>" "<2014-03-04>" nil))))
-  (should
-   (equal
-    '(3 29 2012)
-    (calendar-gregorian-from-absolute
-     (org-closest-date "<2012-03-29 ++1d>" "<2014-03-04>" nil))))
   ;; if PREFER is set to `past' always return a date before, or equal
   ;; to CURRENT.
   (should
