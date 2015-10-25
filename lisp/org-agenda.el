@@ -6132,19 +6132,25 @@ specification like [h]h:mm."
 		      (setq timestr
 			    (concat (substring s (match-beginning 1)) " "))
 		    (setq timestr 'time))
-		  (setq txt (org-agenda-format-item
-			     (cond ((= diff 0) dl0)
-				   ((> diff 0)
-				    (if (functionp dl1)
-					(funcall dl1 diff date)
-				      (format dl1 diff)))
-				   (t
-				    (if (functionp dl2)
-					(funcall dl2 diff date)
-				      (format dl2 (if (string= dl2 dl1)
-						      diff (abs diff))))))
-			     head level category tags
-			     (if (not (= diff 0)) nil timestr)))))
+		  (setq txt
+			(org-agenda-format-item
+			 ;; For past deadlines, make sure to report
+			 ;; time difference since date S, not since
+			 ;; closest repeater.
+			 (let ((diff (if (> d1 (org-today)) diff
+				       (- (org-time-string-to-absolute s) d1))))
+			   (cond ((= diff 0) dl0)
+				 ((> diff 0)
+				  (if (functionp dl1)
+				      (funcall dl1 diff date)
+				    (format dl1 diff)))
+				 (t
+				  (if (functionp dl2)
+				      (funcall dl2 diff date)
+				    (format dl2 (if (string= dl2 dl1)
+						    diff (abs diff)))))))
+			 head level category tags
+			 (if (not (= diff 0)) nil timestr)))))
 	      (when txt
 		(setq face (org-agenda-deadline-face dfrac))
 		(org-add-props txt props
@@ -6187,12 +6193,12 @@ an hour specification like [h]h:mm."
 		     org-scheduled-time-hour-regexp
 		   org-scheduled-time-regexp))
 	 (todayp (org-agenda-todayp date)) ; DATE bound by calendar
-	 (d1 (calendar-absolute-from-gregorian date))  ; DATE bound by calendar
+	 (d1 (calendar-absolute-from-gregorian date)) ; DATE bound by calendar
 	 mm
 	 (deadline-position-alist
 	  (mapcar (lambda (a) (and (setq mm (get-text-property
-					     0 'org-hd-marker a))
-				   (cons (marker-position mm) a)))
+					0 'org-hd-marker a))
+			      (cons (marker-position mm) a)))
 		  deadline-results))
 	 d2 diff pos pos1 category level tags donep
 	 ee txt head pastschedp todo-state face timestr s habitp show-all
@@ -6314,10 +6320,15 @@ an hour specification like [h]h:mm."
 			  (concat (substring s (match-beginning 1)) " "))
 		  (setq timestr 'time))
 		(setq txt (org-agenda-format-item
-			   (if (= diff 0)
-			       (car org-agenda-scheduled-leaders)
-			     (format (nth 1 org-agenda-scheduled-leaders)
-				     (- 1 diff)))
+			   ;; For past scheduled dates, make sure to
+			   ;; report time difference since date S, not
+			   ;; since closest repeater.
+			   (let ((diff
+				  (if (<= (org-today) d1) diff
+				    (- (org-time-string-to-absolute s) d1))))
+			     (if (= diff 0) (car org-agenda-scheduled-leaders)
+			       (format (nth 1 org-agenda-scheduled-leaders)
+				       (- 1 diff))))
 			   head level category tags
 			   (if (not (= diff 0)) nil timestr)
 			   nil habitp))))
