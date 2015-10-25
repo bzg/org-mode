@@ -17769,11 +17769,11 @@ When PREFER is `past', return a date that is either CURRENT or
 past.  When PREFER is `future', return a date that is either
 CURRENT or future.
 
-Only time stamps with a simple repeater (i.e., neither \"++\" nor
-\".+\") are modified.  Any other time stamp stay unchanged.  In
-any case, return value is an absolute day number."
-  (if (not (string-match "[^.+]\\+\\([0-9]+\\)\\([hdwmy]\\)" start))
-      ;; No valid repeater.  Do not shift time stamp.
+Only time stamps with a repeater are modified.  Any other time
+stamp stay unchanged.  In any case, return value is an absolute
+day number."
+  (if (not (string-match "\\+\\([0-9]+\\)\\([hdwmy]\\)" start))
+      ;; No repeater.  Do not shift time stamp.
       (time-to-days (apply #'encode-time (org-parse-time-string start)))
     (let ((value (string-to-number (match-string 1 start)))
 	  (type (match-string 2 start)))

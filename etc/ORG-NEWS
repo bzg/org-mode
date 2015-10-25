@@ -9,9 +9,6 @@ See the end of the file for license conditions.
 Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 8.4
-** Incompatible changes
-*** ~org-agenda-repeating-timestamp-show-all~ is more selective
-The variable only applies to ~+~ repeaters, not ~.+~ nor ~++~.
 ** New features
 *** Org linter
 ~org-lint~ can check syntax and report common issues in Org documents.
