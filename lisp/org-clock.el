@@ -1457,7 +1457,7 @@ When FIND-UNCLOSED is non-nil, first check if there is an unclosed clock
 line and position cursor in that line."
   (org-back-to-heading t)
   (catch 'exit
-    (let* ((beg (line-beginning-position 2))
+    (let* ((beg (line-beginning-position))
 	   (end (save-excursion (outline-next-heading) (point)))
 	   (org-clock-into-drawer (org-clock-into-drawer))
 	   (drawer (org-clock-drawer-name)))
