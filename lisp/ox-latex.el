@@ -924,7 +924,8 @@ into previewing problems, please consult
     (gnuplot "Gnuplot")
     (ocaml "Caml") (caml "Caml")
     (sql "SQL") (sqlite "sql")
-    (makefile "make"))
+    (makefile "make")
+    (R "r"))
   "Alist mapping languages to their listing language counterpart.
 The key is a symbol, the major mode symbol without the \"-mode\".
 The value is the string that should be inserted as the language
