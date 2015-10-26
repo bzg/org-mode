@@ -1056,7 +1056,7 @@ See also `org-latex-compiler'."
 (defcustom org-latex-compiler "pdflatex"
   "LaTeX compiler to use.
 
-Must be an element in `orgg-latex-compilers' or the empty quote.
+Must be an element in `org-latex-compilers' or the empty quote.
 Can also be set in buffers via #+LATEX_COMPILER.  See also
 `org-latex-compiler-file-string'."
   :group 'org-export-latex
