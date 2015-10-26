@@ -1,4 +1,4 @@
-;;; ob-fortran.el --- org-babel functions for fortran
+;;; ob-fortran.el --- Babel Functions for Fortran    -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2011-2015 Free Software Foundation, Inc.
 
@@ -50,17 +50,15 @@
          (tmp-bin-file (org-babel-temp-file "fortran-bin-" org-babel-exeext))
          (cmdline (cdr (assoc :cmdline params)))
          (flags (cdr (assoc :flags params)))
-         (full-body (org-babel-expand-body:fortran body params))
-         (compile
-	  (progn
-	    (with-temp-file tmp-src-file (insert full-body))
-	    (org-babel-eval
-	     (format "%s -o %s %s %s"
-		     org-babel-fortran-compiler
-		     (org-babel-process-file-name tmp-bin-file)
-		     (mapconcat 'identity
-				(if (listp flags) flags (list flags)) " ")
-		     (org-babel-process-file-name tmp-src-file)) ""))))
+         (full-body (org-babel-expand-body:fortran body params)))
+    (with-temp-file tmp-src-file (insert full-body))
+    (org-babel-eval
+     (format "%s -o %s %s %s"
+	     org-babel-fortran-compiler
+	     (org-babel-process-file-name tmp-bin-file)
+	     (mapconcat 'identity
+			(if (listp flags) flags (list flags)) " ")
+	     (org-babel-process-file-name tmp-src-file)) "")
     (let ((results
            (org-babel-trim
             (org-remove-indentation
@@ -114,12 +112,12 @@ it's header arguments."
 	body)
     (format "program main\n%s\nend program main\n" body)))
 
-(defun org-babel-prep-session:fortran (session params)
+(defun org-babel-prep-session:fortran (_session _params)
   "This function does nothing as fortran is a compiled language with no
 support for sessions"
   (error "Fortran is a compiled languages -- no support for sessions"))
 
-(defun org-babel-load-session:fortran (session body params)
+(defun org-babel-load-session:fortran (_session _body _params)
   "This function does nothing as fortran is a compiled language with no
 support for sessions"
   (error "Fortran is a compiled languages -- no support for sessions"))

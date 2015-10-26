@@ -1,4 +1,4 @@
-;;; ob-org.el --- org-babel functions for org code block evaluation
+;;; ob-org.el --- Babel Functions for Org Code Blocks -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2010-2015 Free Software Foundation, Inc.
 
@@ -61,7 +61,7 @@ This function is called by `org-babel-execute-src-block'."
      ((member "ascii" result-params) (org-export-string-as body 'ascii t))
      (t body))))
 
-(defun org-babel-prep-session:org (session params)
+(defun org-babel-prep-session:org (_session _params)
   "Return an error because org does not support sessions."
   (error "Org does not support sessions"))
 

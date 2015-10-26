@@ -1,4 +1,4 @@
-;;; org-macro.el --- Macro Replacement Code for Org Mode
+;;; org-macro.el --- Macro Replacement Code for Org  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013-2015 Free Software Foundation, Inc.
 
@@ -78,42 +78,42 @@ directly, use instead:
 (defun org-macro--collect-macros ()
   "Collect macro definitions in current buffer and setup files.
 Return an alist containing all macro templates found."
-  (let* (collect-macros			; For byte-compiler.
-	 (collect-macros
-	  (lambda (files templates)
-	    ;; Return an alist of macro templates.  FILES is a list of
-	    ;; setup files names read so far, used to avoid circular
-	    ;; dependencies.  TEMPLATES is the alist collected so far.
-	    (let ((case-fold-search t))
-	      (org-with-wide-buffer
-	       (goto-char (point-min))
-	       (while (re-search-forward
-		       "^[ \t]*#\\+\\(MACRO\\|SETUPFILE\\):" nil t)
-		 (let ((element (org-element-at-point)))
-		   (when (eq (org-element-type element) 'keyword)
-		     (let ((val (org-element-property :value element)))
-		       (if (equal (org-element-property :key element) "MACRO")
-			   ;; Install macro in TEMPLATES.
-			   (when (string-match
-				  "^\\(.*?\\)\\(?:\\s-+\\(.*\\)\\)?\\s-*$" val)
-			     (let* ((name (match-string 1 val))
-				    (template (or (match-string 2 val) ""))
-				    (old-cell (assoc name templates)))
-			       (if old-cell (setcdr old-cell template)
-				 (push (cons name template) templates))))
-			 ;; Enter setup file.
-			 (let ((file (expand-file-name
-				      (org-remove-double-quotes val))))
-			   (unless (member file files)
-			     (with-temp-buffer
-			       (setq default-directory
-				     (file-name-directory file))
-			       (org-mode)
-			       (insert (org-file-contents file 'noerror))
-			       (setq templates
-				     (funcall collect-macros (cons file files)
-					      templates)))))))))))
-	      templates))))
+  (letrec ((collect-macros
+	    (lambda (files templates)
+	      ;; Return an alist of macro templates.  FILES is a list
+	      ;; of setup files names read so far, used to avoid
+	      ;; circular dependencies.  TEMPLATES is the alist
+	      ;; collected so far.
+	      (let ((case-fold-search t))
+		(org-with-wide-buffer
+		 (goto-char (point-min))
+		 (while (re-search-forward
+			 "^[ \t]*#\\+\\(MACRO\\|SETUPFILE\\):" nil t)
+		   (let ((element (org-element-at-point)))
+		     (when (eq (org-element-type element) 'keyword)
+		       (let ((val (org-element-property :value element)))
+			 (if (equal (org-element-property :key element) "MACRO")
+			     ;; Install macro in TEMPLATES.
+			     (when (string-match
+				    "^\\(.*?\\)\\(?:\\s-+\\(.*\\)\\)?\\s-*$" val)
+			       (let* ((name (match-string 1 val))
+				      (template (or (match-string 2 val) ""))
+				      (old-cell (assoc name templates)))
+				 (if old-cell (setcdr old-cell template)
+				   (push (cons name template) templates))))
+			   ;; Enter setup file.
+			   (let ((file (expand-file-name
+					(org-remove-double-quotes val))))
+			     (unless (member file files)
+			       (with-temp-buffer
+				 (setq default-directory
+				       (file-name-directory file))
+				 (org-mode)
+				 (insert (org-file-contents file 'noerror))
+				 (setq templates
+				       (funcall collect-macros (cons file files)
+						templates)))))))))))
+		templates))))
     (funcall collect-macros nil nil)))
 
 (defun org-macro-initialize-templates ()

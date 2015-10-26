@@ -1,4 +1,4 @@
-;;; org-colview.el --- Column View in Org-mode
+;;; org-colview.el --- Column View in Org            -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004-2015 Free Software Foundation, Inc.
 
@@ -42,6 +42,8 @@
 
 (defvar org-columns-overlays nil
   "Holds the list of current column overlays.")
+
+(defvar org-columns-time)
 
 (defvar org-columns-current-fmt nil
   "Local variable, holds the currently active column format.")
@@ -394,12 +396,12 @@ If yes, throw an error indicating that changing it does not make sense."
 	       (get-char-property 0 'org-computed val))
       (error "This value is computed from the entry's children"))))
 
-(defun org-columns-todo (&optional arg)
+(defun org-columns-todo (&optional _arg)
   "Change the TODO state during column view."
   (interactive "P")
   (org-columns-edit-value "TODO"))
 
-(defun org-columns-set-tags-or-toggle (&optional arg)
+(defun org-columns-set-tags-or-toggle (&optional _arg)
   "Toggle checkbox at point, or set tags for current headline."
   (interactive "P")
   (if (string-match "\\`\\[[ xX-]\\]\\'"
@@ -738,8 +740,6 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	    (goto-char (car x))
 	    (org-columns-display-here (cdr x))))))))
 
-(eval-when-compile (defvar org-columns-time))
-
 (defvar org-columns-compile-map
   '(("none" none +)
     (":" add_times +)
@@ -777,7 +777,7 @@ function    called with a list of values as argument to calculate
 calc        function called on every element before summarizing.  This is
 	    optional and should only be specified if needed")
 
-(defun org-columns-new (&optional prop title width op fmt fun &rest rest)
+(defun org-columns-new (&optional prop title width _op fmt fun &rest _rest)
   "Insert a new column, to the left of the current column."
   (interactive)
   (let ((editp (and prop
@@ -1125,16 +1125,14 @@ display, or in the #+COLUMNS line of the current buffer."
 
 (defun org-columns-uncompile-format (cfmt)
   "Turn the compiled columns format back into a string representation."
-  (let ((rtn "") e s prop title op op-match width fmt printf fun calc ee map)
+  (let ((rtn "") e s prop title op width fmt printf ee map)
     (while (setq e (pop cfmt))
       (setq prop (car e)
 	    title (nth 1 e)
 	    width (nth 2 e)
 	    op (nth 3 e)
 	    fmt (nth 4 e)
-	    printf (nth 5 e)
-	    fun (nth 6 e)
-	    calc (nth 7 e))
+	    printf (nth 5 e))
       (setq map (copy-sequence org-columns-compile-map))
       (while (setq ee (pop map))
 	(if (equal fmt (nth 1 ee))
@@ -1459,7 +1457,7 @@ This will add overlays to the date lines, to show the summary for each day."
 				  nil '+ nil)
 			  x))
 		      org-columns-current-fmt-compiled))
-	 line c c1 stype calc sumfunc props lsum entries prop v title)
+	 line c c1 stype calc sumfunc props lsum entries prop v)
     (catch 'exit
       (when (delq nil (mapcar 'cadr fmt))
 	;; OK, at least one summation column, it makes sense to try this
@@ -1483,7 +1481,6 @@ This will add overlays to the date lines, to show the summary for each day."
 		    (mapcar
 		     (lambda (f)
 		       (setq prop (car f)
-			     title (nth 1 f)
 			     stype (nth 4 f)
 			     sumfunc (nth 6 f)
 			     calc (or (nth 7 f) 'identity))

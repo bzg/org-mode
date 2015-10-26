@@ -1,4 +1,4 @@
-;;; ob-R.el --- org-babel functions for R code evaluation
+;;; ob-R.el --- Babel Functions for R                -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
@@ -139,7 +139,7 @@ This function is used when the table contains a header.")
 
 This function is used when the table does not contain a header.")
 
-(defun org-babel-expand-body:R (body params &optional graphics-file)
+(defun org-babel-expand-body:R (body params &optional &graphics-file)
   "Expand BODY according to PARAMS, return the expanded body."
   (mapconcat 'identity
 	     (append

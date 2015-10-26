@@ -1,4 +1,4 @@
-;;; ob-coq.el --- org-babel functions for Coq
+;;; ob-coq.el --- Babel Functions for Coq            -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2010-2015 Free Software Foundation, Inc.
 

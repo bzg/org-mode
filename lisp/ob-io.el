@@ -1,4 +1,4 @@
-;;; ob-io.el --- org-babel functions for Io evaluation
+;;; ob-io.el --- Babel Functions for Io              -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012-2015 Free Software Foundation, Inc.
 
@@ -47,7 +47,6 @@ called by `org-babel-execute-src-block'"
   (message "executing Io source code block")
   (let* ((processed-params (org-babel-process-params params))
          (session (org-babel-io-initiate-session (nth 0 processed-params)))
-         (vars (nth 1 processed-params))
          (result-params (nth 2 processed-params))
          (result-type (cdr (assoc :result-type params)))
          (full-body (org-babel-expand-body:generic
@@ -93,11 +92,11 @@ in BODY as elisp."
                  (org-babel-script-escape raw)))))))
 
 
-(defun org-babel-prep-session:io (session params)
+(defun org-babel-prep-session:io (_session _params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (error "Sessions are not (yet) supported for Io"))
 
-(defun org-babel-io-initiate-session (&optional session)
+(defun org-babel-io-initiate-session (&optional _session)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session.  Sessions are not
 supported in Io."

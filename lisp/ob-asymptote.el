@@ -1,4 +1,4 @@
-;;; ob-asymptote.el --- org-babel functions for asymptote evaluation
+;;; ob-asymptote.el --- Babel Functions for Asymptote -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
@@ -55,8 +55,7 @@
 (defun org-babel-execute:asymptote (body params)
   "Execute a block of Asymptote code.
 This function is called by `org-babel-execute-src-block'."
-  (let* ((result-params (split-string (or (cdr (assoc :results params)) "")))
-         (out-file (cdr (assoc :file params)))
+  (let* ((out-file (cdr (assoc :file params)))
          (format (or (and out-file
                           (string-match ".+\\.\\(.+\\)" out-file)
                           (match-string 1 out-file))
@@ -79,7 +78,7 @@ This function is called by `org-babel-execute-src-block'."
     (message cmd) (shell-command cmd)
     nil)) ;; signal that output has already been written to file
 
-(defun org-babel-prep-session:asymptote (session params)
+(defun org-babel-prep-session:asymptote (_session _params)
   "Return an error if the :session header argument is set.
 Asymptote does not support sessions"
   (error "Asymptote does not support sessions"))

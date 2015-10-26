@@ -1,4 +1,4 @@
-;;; org-src.el --- Source code examples in Org
+;;; org-src.el --- Source code examples in Org       -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2004-2015 Free Software Foundation, Inc.
 ;;

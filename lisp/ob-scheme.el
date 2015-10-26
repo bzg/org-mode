@@ -1,4 +1,4 @@
-;;; ob-scheme.el --- org-babel functions for Scheme
+;;; ob-scheme.el --- Babel Functions for Scheme      -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2010-2015 Free Software Foundation, Inc.
 

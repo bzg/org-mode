@@ -1,4 +1,4 @@
-;;; ob-lisp.el --- org-babel functions for common lisp evaluation
+;;; ob-lisp.el --- Babel Functions for Common Lisp   -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 

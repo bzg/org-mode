@@ -1,4 +1,4 @@
-;;; ob-ebnf.el --- org-babel functions for ebnf evaluation
+;;; ob-ebnf.el --- Babel Functions for EBNF          -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013 Free Software Foundation, Inc.
 
@@ -58,9 +58,7 @@ called by `org-babel-execute-src-block'"
 	   (dest-dir (file-name-directory dest-file))
 	   (dest-root (file-name-sans-extension
 		       (file-name-nondirectory dest-file)))
-           (dest-ext  (file-name-extension dest-file))
 	   (style (cdr (assoc :style params)))
-	   (current-dir default-directory)
 	   (result nil))
       (with-temp-buffer
 	(when style (ebnf-push-style style))

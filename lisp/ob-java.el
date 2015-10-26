@@ -1,4 +1,4 @@
-;;; ob-java.el --- org-babel functions for java evaluation
+;;; ob-java.el --- Babel Functions for Java          -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2011-2015 Free Software Foundation, Inc.
 
@@ -58,12 +58,10 @@ parameters may be used, like javac -verbose"
 	 (src-file (concat classname ".java"))
 	 (cmpflag (or (cdr (assoc :cmpflag params)) ""))
 	 (cmdline (or (cdr (assoc :cmdline params)) ""))
-	 (full-body (org-babel-expand-body:generic body params))
-	 (compile
-	  (progn (with-temp-file src-file (insert full-body))
-		 (org-babel-eval
-		  (concat org-babel-java-compiler
-			  " " cmpflag " " src-file) ""))))
+	 (full-body (org-babel-expand-body:generic body params)))
+    (with-temp-file src-file (insert full-body))
+    (org-babel-eval
+     (concat org-babel-java-compiler " " cmpflag " " src-file) "")
     ;; created package-name directories if missing
     (unless (or (not packagename) (file-exists-p packagename))
       (make-directory packagename 'parents))

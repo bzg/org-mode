@@ -1,4 +1,4 @@
-;;; ob-ocaml.el --- org-babel functions for ocaml evaluation
+;;; ob-ocaml.el --- Babel Functions for Ocaml        -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
@@ -60,8 +60,7 @@
 
 (defun org-babel-execute:ocaml (body params)
   "Execute a block of Ocaml code with Babel."
-  (let* ((vars (mapcar #'cdr (org-babel-get-header params :var)))
-         (full-body (org-babel-expand-body:generic
+  (let* ((full-body (org-babel-expand-body:generic
 		     body params
 		     (org-babel-variable-assignments:ocaml params)))
          (session (org-babel-prep-session:ocaml
@@ -82,30 +81,29 @@
 					 (progn (setq out t) nil))))
 				   (mapcar #'org-babel-trim (reverse raw)))))))
 	 (raw (org-babel-trim clean))
-	 (result-params (cdr (assoc :result-params params)))
-	 (parsed
-	  (string-match
-	   "\\(\\(.*\n\\)*\\)[^:\n]+ : \\([^=\n]+\\) =\\(\n\\| \\)\\(.+\\)$"
+	 (result-params (cdr (assoc :result-params params))))
+    (string-match
+     "\\(\\(.*\n\\)*\\)[^:\n]+ : \\([^=\n]+\\) =\\(\n\\| \\)\\(.+\\)$"
+     raw)
+    (let ((output (match-string 1 raw))
+	  (type (match-string 3 raw))
+	  (value (match-string 5 raw)))
+      (org-babel-reassemble-table
+       (org-babel-result-cond result-params
+	 (cond
+	  ((member "verbatim" result-params) raw)
+	  ((member "output" result-params) output)
+	  (t raw))
+	 (if (and value type)
+	     (org-babel-ocaml-parse-output value type)
 	   raw))
-	 (output (match-string 1 raw))
-	 (type (match-string 3 raw))
-	 (value (match-string 5 raw)))
-    (org-babel-reassemble-table
-     (org-babel-result-cond result-params
-       (cond
-	((member "verbatim" result-params) raw)
-	((member "output" result-params) output)
-	(t raw))
-       (if (and value type)
-	   (org-babel-ocaml-parse-output value type)
-	 raw))
-     (org-babel-pick-name
-      (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
-     (org-babel-pick-name
-      (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params))))))
+       (org-babel-pick-name
+	(cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
+       (org-babel-pick-name
+	(cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))))
 
 (defvar tuareg-interactive-buffer-name)
-(defun org-babel-prep-session:ocaml (session params)
+(defun org-babel-prep-session:ocaml (session _params)
   "Prepare SESSION according to the header arguments in PARAMS."
   (require 'tuareg)
   (let ((tuareg-interactive-buffer-name (if (and (not (string= session "none"))

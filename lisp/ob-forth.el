@@ -1,4 +1,4 @@
-;;; ob-forth.el --- org-babel functions for Forth
+;;; ob-forth.el --- Babel Functions for Forth        -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014 Free Software Foundation, Inc.
 

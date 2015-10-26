@@ -1,4 +1,4 @@
-;;; ob-picolisp.el --- org-babel functions for picolisp evaluation
+;;; ob-picolisp.el --- Babel Functions for Picolisp  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2010-2015 Free Software Foundation, Inc.
 
@@ -81,8 +81,8 @@
 (defun org-babel-expand-body:picolisp (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let ((vars (mapcar #'cdr (org-babel-get-header params :var)))
-        (result-params (cdr (assoc :result-params params)))
-        (print-level nil) (print-length nil))
+        (print-level nil)
+	(print-length nil))
     (if (> (length vars) 0)
         (concat "(prog (let ("
                 (mapconcat
@@ -104,7 +104,6 @@
 	 ;; Set the session if the session variable is non-nil.
 	 (session (org-babel-picolisp-initiate-session session-name))
 	 ;; Either OUTPUT or VALUE which should behave as described above.
-	 (result-type (cdr (assoc :result-type params)))
 	 (result-params (cdr (assoc :result-params params)))
 	 ;; Expand the body with `org-babel-expand-body:picolisp'.
 	 (full-body (org-babel-expand-body:picolisp body params))

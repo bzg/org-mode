@@ -1,4 +1,4 @@
-;;; ob-processing.el --- Babel functions for evaluation of processing
+;;; ob-processing.el --- Babel functions for processing -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2015 Free Software Foundation, Inc.
 
@@ -134,7 +134,7 @@ This function is called by `org-babel-execute-src-block'."
 	      sketch-canvas-id
 	      "\"></canvas>"))))
 
-(defun org-babel-prep-session:processing (session params)
+(defun org-babel-prep-session:processing (_session _params)
   "Return an error if the :session header argument is set.
 Processing does not support sessions"
   (error "Processing does not support sessions"))

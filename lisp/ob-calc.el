@@ -1,4 +1,4 @@
-;;; ob-calc.el --- org-babel functions for calc code evaluation
+;;; ob-calc.el --- Babel Functions for Calc          -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2010-2015 Free Software Foundation, Inc.
 
@@ -39,7 +39,7 @@
 (defvar org-babel-default-header-args:calc nil
   "Default arguments for evaluating an calc source block.")
 
-(defun org-babel-expand-body:calc (body params)
+(defun org-babel-expand-body:calc (body _params)
   "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defvar org--var-syms) ; Dynamically scoped from org-babel-execute:calc

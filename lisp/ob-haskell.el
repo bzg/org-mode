@@ -1,4 +1,4 @@
-;;; ob-haskell.el --- org-babel functions for haskell evaluation
+;;; ob-haskell.el --- Babel Functions for Haskell    -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
@@ -62,7 +62,6 @@
 (defun org-babel-execute:haskell (body params)
   "Execute a block of Haskell code."
   (let* ((session (cdr (assoc :session params)))
-         (vars (mapcar #'cdr (org-babel-get-header params :var)))
          (result-type (cdr (assoc :result-type params)))
          (full-body (org-babel-expand-body:generic
 		     body params
@@ -96,7 +95,7 @@
       (match-string 1 string)
     string))
 
-(defun org-babel-haskell-initiate-session (&optional session params)
+(defun org-babel-haskell-initiate-session (&optional _session _params)
   "Initiate a haskell session.
 If there is not a current inferior-process-buffer in SESSION
 then create one.  Return the initialized session."

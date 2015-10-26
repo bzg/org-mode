@@ -1,4 +1,4 @@
-;;; ob-clojure.el --- org-babel functions for clojure evaluation
+;;; ob-clojure.el --- Babel Functions for Clojure    -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 

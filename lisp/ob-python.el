@@ -1,4 +1,4 @@
-;;; ob-python.el --- org-babel functions for python evaluation
+;;; ob-python.el --- Babel Functions for Python      -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
@@ -216,7 +216,7 @@ then create.  Return the initialized session."
 		  (assq-delete-all session org-babel-python-buffers)))
       session)))
 
-(defun org-babel-python-initiate-session (&optional session params)
+(defun org-babel-python-initiate-session (&optional session _params)
   "Create a session named SESSION according to PARAMS."
   (unless (string= session "none")
     (org-babel-python-session-buffer

@@ -1,4 +1,4 @@
-;;; org-footnote.el --- Footnote support in Org and elsewhere
+;;; org-footnote.el --- Footnote support in Org      -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 ;;
@@ -566,6 +566,7 @@ or new, let the user edit the definition of the footnote."
 	       (org-footnote-auto-adjust-maybe)
 	       (org-edit-footnote-reference)))))))
 
+(defvar electric-indent-mode)
 (defvar org-blank-before-new-entry) ; Silence byte-compiler.
 (defun org-footnote-create-definition (label)
   "Start the definition of a footnote with label LABEL.

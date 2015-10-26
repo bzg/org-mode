@@ -1,4 +1,4 @@
-;;; ob-emacs-lisp.el --- org-babel functions for emacs-lisp code evaluation
+;;; ob-emacs-lisp.el --- Babel Functions for Emacs-lisp Code -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 

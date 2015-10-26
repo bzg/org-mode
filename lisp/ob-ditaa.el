@@ -1,4 +1,4 @@
-;;; ob-ditaa.el --- org-babel functions for ditaa evaluation
+;;; ob-ditaa.el --- Babel Functions for ditaa        -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
@@ -81,11 +81,9 @@ Do not leave leading or trailing spaces in this string."
 (defun org-babel-execute:ditaa (body params)
   "Execute a block of Ditaa code with org-babel.
 This function is called by `org-babel-execute-src-block'."
-  (let* ((result-params (split-string (or (cdr (assoc :results params)) "")))
-	 (out-file (let ((el (cdr (assoc :file params))))
-                     (or el
-                         (error
-                          "ditaa code block requires :file header argument"))))
+  (let* ((out-file (or (cdr (assoc :file params))
+		       (error
+			"ditaa code block requires :file header argument")))
 	 (cmdline (cdr (assoc :cmdline params)))
 	 (java (cdr (assoc :java params)))
 	 (in-file (org-babel-temp-file "ditaa-"))
@@ -115,7 +113,7 @@ This function is called by `org-babel-execute-src-block'."
     (when pdf-cmd (message pdf-cmd) (shell-command pdf-cmd))
     nil)) ;; signal that output has already been written to file
 
-(defun org-babel-prep-session:ditaa (session params)
+(defun org-babel-prep-session:ditaa (_session _params)
   "Return an error because ditaa does not support sessions."
   (error "Ditaa does not support sessions"))
 

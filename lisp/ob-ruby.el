@@ -1,4 +1,4 @@
-;;; ob-ruby.el --- org-babel functions for ruby evaluation
+;;; ob-ruby.el --- Babel Functions for Ruby          -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
@@ -144,7 +144,7 @@ Emacs-lisp table, otherwise return the results as a string."
                 res)
       res)))
 
-(defun org-babel-ruby-initiate-session (&optional session params)
+(defun org-babel-ruby-initiate-session (&optional session _params)
   "Initiate a ruby session.
 If there is not a current inferior-process-buffer in SESSION
 then create one.  Return the initialized session."

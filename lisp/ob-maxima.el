@@ -1,4 +1,4 @@
-;;; ob-maxima.el --- org-babel functions for maxima evaluation
+;;; ob-maxima.el --- Babel Functions for Maxima      -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
@@ -98,7 +98,7 @@ This function is called by `org-babel-execute-src-block'."
 	  (org-babel-import-elisp-from-file tmp-file))))))
 
 
-(defun org-babel-prep-session:maxima (session params)
+(defun org-babel-prep-session:maxima (_session _params)
   (error "Maxima does not support sessions"))
 
 (defun org-babel-maxima-var-to-maxima (pair)

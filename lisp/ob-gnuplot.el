@@ -1,4 +1,4 @@
-;;; ob-gnuplot.el --- org-babel functions for gnuplot evaluation
+;;; ob-gnuplot.el --- Babel Functions for Gnuplot    -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
@@ -109,7 +109,6 @@ code."
 			 (or (cdr (assoc (intern (downcase ext))
 					 *org-babel-gnuplot-terms*))
 			     ext)))))
-           (cmdline (cdr (assoc :cmdline params)))
            (title (cdr (assoc :title params)))
            (lines (cdr (assoc :line params)))
            (sets (cdr (assoc :set params)))
@@ -118,8 +117,7 @@ code."
            (timefmt (cdr (assoc :timefmt params)))
            (time-ind (or (cdr (assoc :timeind params))
                          (when timefmt 1)))
-	   (add-to-body (lambda (text) (setq body (concat text "\n" body))))
-           output)
+	   (add-to-body (lambda (text) (setq body (concat text "\n" body)))))
       ;; append header argument settings to body
       (when title (funcall add-to-body (format "set title '%s'" title)))
       (when lines (mapc (lambda (el) (funcall add-to-body el)) lines))
@@ -173,7 +171,6 @@ This function is called by `org-babel-execute-src-block'."
   (require 'gnuplot)
   (let ((session (cdr (assoc :session params)))
         (result-type (cdr (assoc :results params)))
-        (out-file (cdr (assoc :file params)))
         (body (org-babel-expand-body:gnuplot body params))
 	output)
     (save-window-excursion
@@ -206,10 +203,12 @@ This function is called by `org-babel-execute-src-block'."
          (var-lines (org-babel-variable-assignments:gnuplot params)))
     (message "%S" session)
     (org-babel-comint-in-buffer session
-      (mapc (lambda (var-line)
-              (insert var-line) (comint-send-input nil t)
-              (org-babel-comint-wait-for-output session)
-              (sit-for .1) (goto-char (point-max))) var-lines))
+      (dolist (var-line  var-lines)
+	(insert var-line)
+	(comint-send-input nil t)
+	(org-babel-comint-wait-for-output session)
+	(sit-for .1)
+	(goto-char (point-max))))
     session))
 
 (defun org-babel-load-session:gnuplot (session body params)
@@ -228,7 +227,7 @@ This function is called by `org-babel-execute-src-block'."
    (org-babel-gnuplot-process-vars params)))
 
 (defvar gnuplot-buffer)
-(defun org-babel-gnuplot-initiate-session (&optional session params)
+(defun org-babel-gnuplot-initiate-session (&optional session _params)
   "Initiate a gnuplot session.
 If there is not a current inferior-process-buffer in SESSION
 then create one.  Return the initialized session.  The current

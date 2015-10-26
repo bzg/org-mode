@@ -1,4 +1,4 @@
-;;; ob-ref.el --- org-babel functions for referencing external data
+;;; ob-ref.el --- Babel Functions for Referencing External Data -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
@@ -130,7 +130,7 @@ the variable."
       (save-excursion
 	(let ((case-fold-search t)
 	      type args new-refere new-header-args new-referent result
-	      lob-info split-file split-ref index index-row index-col id)
+	      lob-info split-file split-ref index id)
 	  ;; if ref is indexed grab the indices -- beware nested indices
 	  (when (and (string-match "\\[\\([^\\[]+\\)\\]$" ref)
 		     (let ((str (substring ref 0 (match-beginning 0))))

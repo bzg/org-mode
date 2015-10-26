@@ -1,4 +1,4 @@
-;;; org-indent.el --- Dynamic indentation for  Org-mode
+;;; org-indent.el --- Dynamic indentation for Org    -*- lexical-binding: t; -*-
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
@@ -348,7 +348,7 @@ headline."
 	      (or (and (org-at-heading-p) (< beg (match-end 0)))
 		  (re-search-forward org-outline-regexp-bol end t)))))))
 
-(defun org-indent-refresh-maybe (beg end dummy)
+(defun org-indent-refresh-maybe (beg end _)
   "Refresh indentation properties in an adequate portion of buffer.
 BEG and END are the positions of the beginning and end of the
 range of inserted text.  DUMMY is an unused argument.

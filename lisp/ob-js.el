@@ -1,4 +1,4 @@
-;;; ob-js.el --- org-babel functions for Javascript
+;;; ob-js.el --- Babel Functions for Javascript      -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2010-2015 Free Software Foundation, Inc.
 

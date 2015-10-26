@@ -1,4 +1,4 @@
-;;; ob-octave.el --- org-babel functions for octave and matlab evaluation
+;;; ob-octave.el --- Babel Functions for Octave and Matlab -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2010-2015 Free Software Foundation, Inc.
 
@@ -75,10 +75,7 @@ end")
 	  (funcall (intern (format "org-babel-%s-initiate-session"
 				   (if matlabp "matlab" "octave")))
 		   (cdr (assoc :session params)) params))
-         (vars (mapcar #'cdr (org-babel-get-header params :var)))
-         (result-params (cdr (assoc :result-params params)))
          (result-type (cdr (assoc :result-type params)))
-	 (out-file (cdr (assoc :file params)))
 	 (full-body
 	  (org-babel-expand-body:generic
 	   body params (org-babel-variable-assignments:octave params)))
@@ -148,7 +145,7 @@ If there is not a current inferior-process-buffer in SESSION then
 create.  Return the initialized session."
   (org-babel-octave-initiate-session session params 'matlab))
 
-(defun org-babel-octave-initiate-session (&optional session params matlabp)
+(defun org-babel-octave-initiate-session (&optional session _params matlabp)
   "Create an octave inferior process buffer.
 If there is not a current inferior-process-buffer in SESSION then
 create.  Return the initialized session."
