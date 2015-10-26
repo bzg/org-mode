@@ -6137,7 +6137,7 @@ specification like [h]h:mm."
 			 ;; For past deadlines, make sure to report
 			 ;; time difference since date S, not since
 			 ;; closest repeater.
-			 (let ((diff (if (> d1 (org-today)) diff
+			 (let ((diff (if (< (org-today) d1) diff
 				       (- (org-time-string-to-absolute s) d1))))
 			   (cond ((= diff 0) dl0)
 				 ((> diff 0)
@@ -6150,7 +6150,7 @@ specification like [h]h:mm."
 				    (format dl2 (if (string= dl2 dl1)
 						    diff (abs diff)))))))
 			 head level category tags
-			 (if (not (= diff 0)) nil timestr)))))
+			 (and (= diff 0) timestr)))))
 	      (when txt
 		(setq face (org-agenda-deadline-face dfrac))
 		(org-add-props txt props
@@ -6324,13 +6324,13 @@ an hour specification like [h]h:mm."
 			   ;; report time difference since date S, not
 			   ;; since closest repeater.
 			   (let ((diff
-				  (if (<= (org-today) d1) diff
+				  (if (< (org-today) d1) diff
 				    (- (org-time-string-to-absolute s) d1))))
 			     (if (= diff 0) (car org-agenda-scheduled-leaders)
 			       (format (nth 1 org-agenda-scheduled-leaders)
 				       (- 1 diff))))
 			   head level category tags
-			   (if (not (= diff 0)) nil timestr)
+			   (and (= diff 0) timestr)
 			   nil habitp))))
 	    (when txt
 	      (setq face
