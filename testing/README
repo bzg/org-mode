@@ -36,6 +36,16 @@ The options in the above command are explained below.
 | --eval  | reloads Org-mode and allows evaluation of code blocks by the tests           |
 | -f      | actually runs the tests using the `org-test-run-batch-tests' function        |
 
+* Trigger testing with 'make test'
+
+Target =test= can be used to trigger a test run.
+
+#+BEGIN_SRC sh :dir (expand-file-name "..")
+make test
+#+END_SRC
+
+See ../mk/default.mk for details.
+
 * Interactive testing from within Emacs
 
 To run the Org-mode test suite from a current Emacs instance simply
