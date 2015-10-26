@@ -1,4 +1,4 @@
-;;; ob-shen.el --- org-babel functions for Shen
+;;; ob-shen.el --- Babel Functions for Shen          -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2010-2015 Free Software Foundation, Inc.
 
@@ -63,14 +63,13 @@
   "Execute a block of Shen code with org-babel.
 This function is called by `org-babel-execute-src-block'"
   (require 'inf-shen)
-  (let* ((result-type (cdr (assoc :result-type params)))
-	 (result-params (cdr (assoc :result-params params)))
+  (let* ((result-params (cdr (assoc :result-params params)))
          (full-body (org-babel-expand-body:shen body params)))
     (let ((results
            (with-temp-buffer
              (insert full-body)
              (call-interactively #'shen-eval-defun))))
-      (org-babel-result-cond result-params 
+      (org-babel-result-cond result-params
         results
         (condition-case nil (org-babel-script-escape results)
           (error results))))))

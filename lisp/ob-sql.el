@@ -1,4 +1,4 @@
-;;; ob-sql.el --- org-babel functions for sql evaluation
+;;; ob-sql.el --- Babel Functions for SQL            -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
@@ -217,7 +217,7 @@ This function is called by `org-babel-execute-src-block'."
    vars)
   body)
 
-(defun org-babel-prep-session:sql (session params)
+(defun org-babel-prep-session:sql (_session _params)
   "Raise an error because Sql sessions aren't implemented."
   (error "SQL sessions not yet implemented"))
 

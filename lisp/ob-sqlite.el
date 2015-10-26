@@ -1,4 +1,4 @@
-;;; ob-sqlite.el --- org-babel functions for sqlite database interaction
+;;; ob-sqlite.el --- Babel Functions for SQLite Databases -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2010-2015 Free Software Foundation, Inc.
 
@@ -68,8 +68,7 @@ This function is called by `org-babel-execute-src-block'."
 	(others (delq nil (mapcar
 			   (lambda (arg) (car (assoc arg params)))
 			   (list :header :echo :bail :column
-				 :csv :html :line :list))))
-	exit-code)
+				 :csv :html :line :list)))))
     (unless db (error "ob-sqlite: can't evaluate without a database"))
     (with-temp-buffer
       (insert
@@ -150,7 +149,7 @@ This function is called by `org-babel-execute-src-block'."
       (cons (car table) (cons 'hline (cdr table)))
     table))
 
-(defun org-babel-prep-session:sqlite (session params)
+(defun org-babel-prep-session:sqlite (_session _params)
   "Raise an error because support for SQLite sessions isn't implemented.
 Prepare SESSION according to the header arguments specified in PARAMS."
   (error "SQLite sessions not yet implemented"))

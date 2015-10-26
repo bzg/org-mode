@@ -1,4 +1,4 @@
-;;; ob-table.el --- support for calling org-babel functions from tables
+;;; ob-table.el --- Support for Calling Babel Functions from Tables -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 

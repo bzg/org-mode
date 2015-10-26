@@ -1,4 +1,4 @@
-;;; ob-stan.el --- org-babel functions for Stan
+;;; ob-stan.el --- Babel Functions for Stan          -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2015 Free Software Foundation, Inc.
 
@@ -76,7 +76,7 @@ Otherwise, write the Stan code directly to the named file."
 	(call-process-shell-command (concat "make " file))))
     nil))		; Signal that output has been written to file.
 
-(defun org-babel-prep-session:stan (session params)
+(defun org-babel-prep-session:stan (_session _params)
   "Return an error because Stan does not support sessions."
   (user-error "Stan does not support sessions"))
 
