@@ -54,6 +54,7 @@
 (declare-function org-trim "org" (s))
 
 (defvar org-element-all-elements)
+(defvar org-inhibit-startup)
 
 (defcustom org-edit-src-turn-on-auto-save nil
   "Non-nil means turn `auto-save-mode' on when editing a source block.

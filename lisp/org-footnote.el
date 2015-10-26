@@ -70,6 +70,7 @@
 (defvar org-element-all-elements)	; defined in org-element.el
 (defvar org-element-all-objects)	; defined in org-element.el
 (defvar org-odd-levels-only)		; defined in org.el
+(defvar org-outline-regexp)		; defined in org.el
 (defvar org-outline-regexp-bol)		; defined in org.el
 
 (defconst org-footnote-re
