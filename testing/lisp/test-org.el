@@ -1311,6 +1311,40 @@
 	    '(org-block-todo-from-children-or-siblings-or-parent)))
        (org-entry-blocked-p)))))
 
+(ert-deftest test-org/format-outline-path ()
+  (should
+   (string= (org-format-outline-path (list "one" "two" "three"))
+	    "one/two/three"))
+  ;; Empty path.
+  (should
+   (string= (org-format-outline-path '())
+	    ""))
+  ;; Empty path and prefix.
+  (should
+   (string= (org-format-outline-path '() nil ">>")
+	    ">>"))
+  ;; Trailing whitespace in headings.
+  (should
+   (string= (org-format-outline-path (list "one\t" "tw o " "three  "))
+	    "one/tw o/three"))
+  ;; Non-default prefix and separators.
+  (should
+   (string= (org-format-outline-path (list "one" "two" "three") nil ">>" "|")
+	    ">>|one|two|three"))
+  ;; Truncate.
+  (should
+   (string= (org-format-outline-path (list "one" "two" "three" "four") 10)
+	    "one/two/.."))
+  ;; Give a very narrow width.
+  (should
+   (string= (org-format-outline-path (list "one" "two" "three" "four") 2)
+	    "on"))
+  ;; Give a prefix that extends beyond the width.
+  (should
+   (string= (org-format-outline-path (list "one" "two" "three" "four") 10
+				     ">>>>>>>>>>")
+	    ">>>>>>>>..")))
+
 
 ;;; Keywords
 
