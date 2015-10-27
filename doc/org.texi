@@ -8832,6 +8832,7 @@ agenda and timeline views.
 @c
 @orgcmd{v a,org-agenda-archives-mode}
 @xorgcmd{v A,org-agenda-archives-mode 'files}
+@cindex Archives mode
 Toggle Archives mode.  In Archives mode, trees that are marked
 @code{ARCHIVED} are also scanned when producing the agenda.  When you use the
 capital @kbd{A}, even all archive files are included.  To exit archives mode,
