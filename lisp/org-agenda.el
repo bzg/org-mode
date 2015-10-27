@@ -4011,13 +4011,12 @@ This check for agenda markers in all agenda buffers currently active."
 
 (defun org-agenda-get-day-face (date)
   "Return the face DATE should be displayed with."
-  (or (and (functionp org-agenda-day-face-function)
-	   (funcall org-agenda-day-face-function date))
-      (cond ((org-agenda-todayp date)
-	     'org-agenda-date-today)
-	    ((member (calendar-day-of-week date) org-agenda-weekend-days)
-	     'org-agenda-date-weekend)
-	    (t 'org-agenda-date))))
+  (cond ((and (functionp org-agenda-day-face-function)
+	      (funcall org-agenda-day-face-function date)))
+	((org-agenda-today-p date) 'org-agenda-date-today)
+	((memq (calendar-day-of-week date) org-agenda-weekend-days)
+	 'org-agenda-date-weekend)
+	(t 'org-agenda-date)))
 
 ;;; Agenda timeline
 
@@ -6044,7 +6043,7 @@ specification like [h]h:mm."
 	 (regexp (if with-hour
 		     org-deadline-time-hour-regexp
 		   org-deadline-time-regexp))
-	 (todayp (org-agenda-todayp date)) ; DATE bound by calendar
+	 (todayp (org-agenda-today-p date)) ; DATE bound by calendar
 	 (d1 (calendar-absolute-from-gregorian date)) ; DATE bound by calendar
 	 (dl0 (car org-agenda-deadline-leaders))
 	 (dl1 (nth 1 org-agenda-deadline-leaders))
@@ -8855,7 +8854,7 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 	 (buffer (marker-buffer marker))
 	 (pos (marker-position marker))
 	 (hdmarker (org-get-at-bol 'org-hd-marker))
-	 (todayp (org-agenda-todayp (org-get-at-bol 'day)))
+	 (todayp (org-agenda-today-p (org-get-at-bol 'day)))
 	 (inhibit-read-only t)
 	 org-agenda-headline-snapshot-before-repeat newhead just-one)
     (org-with-remote-undo buffer
@@ -10213,12 +10212,15 @@ to override `appt-message-warning-time'."
 	(message "No event to add")
       (message "Added %d event%s for today" cnt (if (> cnt 1) "s" "")))))
 
-(defun org-agenda-todayp (date)
-  "Does DATE mean today, when considering `org-extend-today-until'?"
-  (let ((today (org-today))
-	(date (if (and date (listp date)) (calendar-absolute-from-gregorian date)
-		date)))
-    (eq date today)))
+(defun org-agenda-today-p (date)
+  "Non nil when DATE means today.
+DATE is either a list of the form (month day year) or a number of
+days as returned by `calendar-absolute-from-gregorian' or
+`org-today'.  This function considers `org-extend-today-until'
+when defining today."
+  (eq (org-today)
+      (if (consp date) (calendar-absolute-from-gregorian date) date)))
+(define-obsolete-function-alias 'org-agenda-todayp 'org-agenda-today-p "25.1")
 
 (defun org-agenda-todo-yesterday (&optional arg)
   "Like `org-agenda-todo' but the time of change will be 23:59 of yesterday."

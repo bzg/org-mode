@@ -50,7 +50,10 @@ for upcoming anniversaries (default: 7 days).
 ~org-show-children~ is a faster implementation of
 ~outline-show-children~.
 ** Removed functions
-*** ~org-element-remove-indentation~ in an obsolete alias for ~org-remove-indentation~
+*** ~org-agenda-todayp~ is deprecated.
+Use ~org-agenda-today-p~ instead.
+*** ~org-element-remove-indentation~ is deprecated.
+Use ~org-remove-indentation~ instead.
 ** Removed options
 *** Remove ~org-list-empty-line-terminates-plain-lists~
 Two consecutive blank lines always terminate all levels of current
