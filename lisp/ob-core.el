@@ -639,15 +639,13 @@ block."
 		   (match-beginning 0))))
 	 (info (if info
 		   (copy-tree info)
-		 (org-babel-get-src-block-info)))
-	 (merged-params (org-babel-merge-params (nth 2 info) params)))
-    (when (org-babel-check-evaluate
-	   (let ((i info)) (setf (nth 2 i) merged-params) i))
-      (let* ((params (if params
-			 (org-babel-process-params merged-params)
-		       (nth 2 info)))
+		 (org-babel-get-src-block-info))))
+    (cl-callf org-babel-merge-params (nth 2 info) params)
+    (when (org-babel-check-evaluate info)
+      (cl-callf org-babel-process-params (nth 2 info))
+      (let* ((params (nth 2 info))
 	     (cachep (and (not arg) (cdr (assoc :cache params))
-			   (string= "yes" (cdr (assoc :cache params)))))
+			  (string= "yes" (cdr (assoc :cache params)))))
 	     (new-hash (when cachep (org-babel-sha1-hash info)))
 	     (old-hash (when cachep (org-babel-current-result-hash)))
 	     (cache-current-p (and (not arg) new-hash
@@ -661,8 +659,7 @@ block."
 	    (let ((result (org-babel-read-result)))
 	      (message (replace-regexp-in-string
 			"%" "%%" (format "%S" result))) result)))
-	 ((org-babel-confirm-evaluate
-	   (let ((i info)) (setf (nth 2 i) merged-params) i))
+	 ((org-babel-confirm-evaluate info)
 	  (let* ((lang (nth 0 info))
 		 (result-params (cdr (assoc :result-params params)))
 		 (body (setf (nth 1 info)
