@@ -121,7 +121,7 @@
   (mapcar
    (lambda (pair) (format "let %s = %s;;" (car pair)
 			  (org-babel-ocaml-elisp-to-ocaml (cdr pair))))
-   (mapcar #'cdr (org-babel-get-header params :var))))
+   (org-babel--get-vars params)))
 
 (defun org-babel-ocaml-elisp-to-ocaml (val)
   "Return a string of ocaml code which evaluates to VAL."

@@ -94,7 +94,7 @@ code."
 		 (if tablep val (mapcar 'list val)))
 	       (org-babel-temp-file "gnuplot-") params)
 	  val))))
-     (mapcar #'cdr (org-babel-get-header params :var)))))
+     (org-babel--get-vars params))))
 
 (defun org-babel-expand-body:gnuplot (body params)
   "Expand BODY according to PARAMS, return the expanded body."

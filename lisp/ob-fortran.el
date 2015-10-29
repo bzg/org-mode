@@ -78,7 +78,7 @@
 (defun org-babel-expand-body:fortran (body params)
   "Expand a block of fortran or fortran code with org-babel according to
 it's header arguments."
-  (let ((vars (mapcar #'cdr (org-babel-get-header params :var)))
+  (let ((vars (org-babel--get-vars params))
         (main-p (not (string= (cdr (assoc :main params)) "no")))
         (includes (or (cdr (assoc :includes params))
                       (org-babel-read (org-entry-get nil "includes" t))))
@@ -107,7 +107,7 @@ it's header arguments."
 (defun org-babel-fortran-ensure-main-wrap (body params)
   "Wrap body in a \"program ... end program\" block if none exists."
   (if (string-match "^[ \t]*program[ \t]*.*" (capitalize body))
-      (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
+      (let ((vars (org-babel--get-vars params)))
 	(if vars (error "Cannot use :vars if `program' statement is present"))
 	body)
     (format "program main\n%s\nend program main\n" body)))

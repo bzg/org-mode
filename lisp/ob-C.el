@@ -181,8 +181,8 @@ it's header arguments."
 (defun org-babel-C-expand-C (body params)
   "Expand a block of C or C++ code with org-babel according to
 it's header arguments."
-  (let ((vars (mapcar #'cdr (org-babel-get-header params :var)))
-	(colnames (cdar (org-babel-get-header params :colname-names)))
+  (let ((vars (org-babel--get-vars params))
+	(colnames (cdr (assq :colname-names params)))
 	(main-p (not (string= (cdr (assoc :main params)) "no")))
 	(includes (org-babel-read
 		   (or (cdr (assoc :includes params))
@@ -230,8 +230,8 @@ it's header arguments."
 (defun org-babel-C-expand-D (body params)
   "Expand a block of D code with org-babel according to
 it's header arguments."
-  (let ((vars (mapcar #'cdr (org-babel-get-header params :var)))
-	(colnames (cdar (org-babel-get-header params :colname-names)))
+  (let ((vars (org-babel--get-vars params))
+	(colnames (cdr (assq :colname-names params)))
 	(main-p (not (string= (cdr (assoc :main params)) "no")))
 	(imports (or (cdr (assoc :imports params))
 		     (org-babel-read (org-entry-get nil "imports" t)))))

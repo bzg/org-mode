@@ -80,7 +80,7 @@
                  (regexp-quote (format "%S" (car pair)))
                  (if (stringp (cdr pair))
                      (cdr pair) (format "%S" (cdr pair)))
-                 body))) (mapcar #'cdr (org-babel-get-header params :var)))
+                 body))) (org-babel--get-vars params))
   (org-babel-trim body))
 
 (defun org-babel-execute:latex (body params)

@@ -209,7 +209,7 @@ This function is called by `org-babel-execute-src-block'."
 
 (defun org-babel-variable-assignments:R (params)
   "Return list of R statements assigning the block's variables."
-  (let ((vars (mapcar 'cdr (org-babel-get-header params :var))))
+  (let ((vars (org-babel--get-vars params)))
     (mapcar
      (lambda (pair)
        (org-babel-R-assign-elisp

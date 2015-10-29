@@ -78,7 +78,7 @@
 (defun org-babel-expand-body:sql (body params)
   "Expand BODY according to the values of PARAMS."
   (org-babel-sql-expand-vars
-   body (mapcar #'cdr (org-babel-get-header params :var))))
+   body (org-babel--get-vars params)))
 
 (defun org-babel-sql-dbstring-mysql (host port user password database)
   "Make MySQL cmd line args for database connection.  Pass nil to omit that arg."

@@ -54,6 +54,8 @@ for upcoming anniversaries (default: 7 days).
 Use ~org-agenda-today-p~ instead.
 *** ~org-element-remove-indentation~ is deprecated.
 Use ~org-remove-indentation~ instead.
+*** ~org-babel-get-header~ is removed.
+Use ~org-babel--get-vars~ or ~assq~ instead.
 ** Removed options
 *** Remove ~org-list-empty-line-terminates-plain-lists~
 Two consecutive blank lines always terminate all levels of current

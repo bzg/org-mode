@@ -74,7 +74,7 @@ called by `org-babel-execute-src-block'"
 					    (cadr pair)
 					    (org-babel-awk-var-to-awk
 					     (cddr pair))))
-				  (org-babel-get-header params :var))
+				  (org-babel--get-vars params))
 			  (list in-file))
 			 " ")))
     (org-babel-reassemble-table

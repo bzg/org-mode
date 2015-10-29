@@ -142,7 +142,7 @@ Processing does not support sessions"
 (defun org-babel-variable-assignments:processing (params)
   "Return list of processing statements assigning the block's variables."
   (mapcar #'org-babel-processing-var-to-processing
-	  (mapcar #'cdr (org-babel-get-header params :var))))
+	  (org-babel--get-vars params)))
 
 (defun org-babel-processing-var-to-processing (pair)
   "Convert an elisp value into a Processing variable.

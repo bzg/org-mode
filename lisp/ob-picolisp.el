@@ -80,7 +80,7 @@
 
 (defun org-babel-expand-body:picolisp (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (mapcar #'cdr (org-babel-get-header params :var)))
+  (let ((vars (org-babel--get-vars params))
         (print-level nil)
 	(print-length nil))
     (if (> (length vars) 0)

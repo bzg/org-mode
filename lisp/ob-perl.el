@@ -63,7 +63,7 @@ This function is called by `org-babel-execute-src-block'."
   (mapcar
    (lambda (pair)
      (org-babel-perl--var-to-perl (cdr pair) (car pair)))
-   (mapcar #'cdr (org-babel-get-header params :var))))
+   (org-babel--get-vars params)))
 
 ;; helper functions
 

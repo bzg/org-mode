@@ -130,7 +130,7 @@ then create one.  Return the initialized session."
 	    (format "let %s = %s"
 		    (car pair)
 		    (org-babel-haskell-var-to-haskell (cdr pair))))
-	  (mapcar #'cdr (org-babel-get-header params :var))))
+	  (org-babel--get-vars params)))
 
 (defun org-babel-haskell-var-to-haskell (var)
   "Convert an elisp value VAR into a haskell variable.

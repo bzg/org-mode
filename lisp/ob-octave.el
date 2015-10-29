@@ -111,7 +111,7 @@ end")
      (format "%s=%s;"
 	     (car pair)
 	     (org-babel-octave-var-to-octave (cdr pair))))
-   (mapcar #'cdr (org-babel-get-header params :var))))
+   (org-babel--get-vars params)))
 
 (defalias 'org-babel-variable-assignments:matlab
   'org-babel-variable-assignments:octave)

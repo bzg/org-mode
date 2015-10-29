@@ -134,7 +134,7 @@ specifying a variable of the same value."
   (mapcar
    (lambda (pair) (format "var %s=%s;"
 			  (car pair) (org-babel-js-var-to-js (cdr pair))))
-   (mapcar #'cdr (org-babel-get-header params :var))))
+   (org-babel--get-vars params)))
 
 (defun org-babel-js-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION

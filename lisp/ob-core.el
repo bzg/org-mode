@@ -212,14 +212,14 @@ This string must include a \"%s\" which will be replaced by the results."
    "{\\([^\f\n\r\v]+?\\)}\\)")
   "Regexp used to identify inline src-blocks.")
 
-(defun org-babel-get-header (params key &optional others)
-  "Select only header argument of type KEY from a list.
-Optional argument OTHERS indicates that only the header that do
-not match KEY should be returned."
-  (delq nil
-	(mapcar
-	 (lambda (p) (when (funcall (if others #'not #'identity) (eq (car p) key)) p))
-	 params)))
+(defun org-babel--get-vars (params)
+  "Return the babel variable assignments in PARAMS.
+
+PARAMS is a quasi-alist of header args, whcih may contain
+multiple entries for the key `:var'.  This function returns a
+list of the cdr of all the `:var' entries."
+  (mapcar #'cdr
+	  (org-remove-if (lambda (x) (not (eq (car x) :var))) params)))
 
 (defun org-babel-get-inline-src-block-matches ()
   "Set match data if within body of an inline source block.
@@ -1571,7 +1571,7 @@ shown below.
 				   (if (consp (cdr el))
 				       (cdr el)
 				     (org-babel-ref-parse (cdr el))))
-				 (org-babel-get-header params :var)))
+				 (org-babel--get-vars params)))
 	 (vars-and-names (if (and (assoc :colname-names params)
 				  (assoc :rowname-names params))
 			     (list processed-vars)

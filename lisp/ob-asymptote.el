@@ -86,7 +86,7 @@ Asymptote does not support sessions"
 (defun org-babel-variable-assignments:asymptote (params)
   "Return list of asymptote statements assigning the block's variables."
   (mapcar #'org-babel-asymptote-var-to-asymptote
-	  (mapcar #'cdr (org-babel-get-header params :var))))
+	  (org-babel--get-vars params)))
 
 (defun org-babel-asymptote-var-to-asymptote (pair)
   "Convert an elisp value into an Asymptote variable.

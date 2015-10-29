@@ -41,7 +41,7 @@
   "Default header inserted during export of org blocks.")
 
 (defun org-babel-expand-body:org (body params)
-  (dolist (var (mapcar #'cdr (org-babel-get-header params :var)))
+  (dolist (var (org-babel--get-vars params))
     (setq body (replace-regexp-in-string
 		(regexp-quote (format "$%s" (car var)))
 		(format "%s" (cdr var))

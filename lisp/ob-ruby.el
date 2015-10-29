@@ -121,7 +121,7 @@ This function is called by `org-babel-execute-src-block'."
      (format "%s=%s"
 	     (car pair)
 	     (org-babel-ruby-var-to-ruby (cdr pair))))
-   (mapcar #'cdr (org-babel-get-header params :var))))
+   (org-babel--get-vars params)))
 
 (defun org-babel-ruby-var-to-ruby (var)
   "Convert VAR into a ruby variable.
