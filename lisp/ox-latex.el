@@ -1,4 +1,4 @@
-;;; ox-latex.el --- LaTeX Back-End for Org Export Engine
+;;; ox-latex.el --- LaTeX Back-End for Org Export Engine -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2011-2015 Free Software Foundation, Inc.
 
@@ -830,8 +830,7 @@ returned as-is."
 
 ;;;; Drawers
 
-(defcustom org-latex-format-drawer-function
-  (lambda (name contents) contents)
+(defcustom org-latex-format-drawer-function (lambda (_ contents) contents)
   "Function called to format a drawer in LaTeX code.
 
 The function must accept two parameters:
@@ -1645,7 +1644,7 @@ holding export options."
 
 ;;;; Bold
 
-(defun org-latex-bold (bold contents info)
+(defun org-latex-bold (_bold contents info)
   "Transcode BOLD from Org to LaTeX.
 CONTENTS is the text with bold markup.  INFO is a plist holding
 contextual information."
@@ -1664,7 +1663,7 @@ holding contextual information."
 
 ;;;; Clock
 
-(defun org-latex-clock (clock contents info)
+(defun org-latex-clock (clock _contents info)
   "Transcode a CLOCK element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
@@ -1680,7 +1679,7 @@ information."
 
 ;;;; Code
 
-(defun org-latex-code (code contents info)
+(defun org-latex-code (code _contents info)
   "Transcode a CODE object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
@@ -1710,7 +1709,7 @@ holding contextual information.  See `org-export-data'."
 
 ;;;; Entity
 
-(defun org-latex-entity (entity contents info)
+(defun org-latex-entity (entity _contents _info)
   "Transcode an ENTITY object from Org to LaTeX.
 CONTENTS are the definition itself.  INFO is a plist holding
 contextual information."
@@ -1719,7 +1718,7 @@ contextual information."
 
 ;;;; Example Block
 
-(defun org-latex-example-block (example-block contents info)
+(defun org-latex-example-block (example-block _contents info)
   "Transcode an EXAMPLE-BLOCK element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
@@ -1738,7 +1737,7 @@ information."
 
 ;;;; Export Block
 
-(defun org-latex-export-block (export-block contents info)
+(defun org-latex-export-block (export-block _contents _info)
   "Transcode a EXPORT-BLOCK element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (when (member (org-element-property :type export-block) '("LATEX" "TEX"))
@@ -1747,7 +1746,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Export Snippet
 
-(defun org-latex-export-snippet (export-snippet contents info)
+(defun org-latex-export-snippet (export-snippet _contents _info)
   "Transcode a EXPORT-SNIPPET object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (when (eq (org-export-snippet-backend export-snippet) 'latex)
@@ -1756,7 +1755,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Fixed Width
 
-(defun org-latex-fixed-width (fixed-width contents info)
+(defun org-latex-fixed-width (fixed-width _contents info)
   "Transcode a FIXED-WIDTH element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (org-latex--wrap-label
@@ -1769,7 +1768,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Footnote Reference
 
-(defun org-latex-footnote-reference (footnote-reference contents info)
+(defun org-latex-footnote-reference (footnote-reference _contents info)
   "Transcode a FOOTNOTE-REFERENCE element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (concat
@@ -1927,7 +1926,7 @@ holding contextual information."
 		    (concat headline-label pre-blanks contents))))))))
 
 (defun org-latex-format-headline-default-function
-  (todo todo-type priority text tags info)
+    (todo _todo-type priority text tags info)
   "Default format function for a headline.
 See `org-latex-format-headline-function' for details."
   (concat
@@ -1942,7 +1941,7 @@ See `org-latex-format-headline-function' for details."
 
 ;;;; Horizontal Rule
 
-(defun org-latex-horizontal-rule (horizontal-rule contents info)
+(defun org-latex-horizontal-rule (horizontal-rule _contents info)
   "Transcode an HORIZONTAL-RULE object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((attr (org-export-read-attribute :attr_latex horizontal-rule))
@@ -1964,7 +1963,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Inline Src Block
 
-(defun org-latex-inline-src-block (inline-src-block contents info)
+(defun org-latex-inline-src-block (inline-src-block _contents info)
   "Transcode an INLINE-SRC-BLOCK element from Org to LaTeX.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
@@ -2019,7 +2018,7 @@ holding contextual information."
 	     todo todo-type priority title tags contents info)))
 
 (defun org-latex-format-inlinetask-default-function
-  (todo todo-type priority title tags contents info)
+  (todo _todo-type priority title tags contents info)
   "Default format function for a inlinetasks.
 See `org-latex-format-inlinetask-function' for details."
   (let ((full-title
@@ -2044,7 +2043,7 @@ See `org-latex-format-inlinetask-function' for details."
 
 ;;;; Italic
 
-(defun org-latex-italic (italic contents info)
+(defun org-latex-italic (_italic contents info)
   "Transcode ITALIC from Org to LaTeX.
 CONTENTS is the text with italic markup.  INFO is a plist holding
 contextual information."
@@ -2116,7 +2115,7 @@ contextual information."
 
 ;;;; Keyword
 
-(defun org-latex-keyword (keyword contents info)
+(defun org-latex-keyword (keyword _contents info)
   "Transcode a KEYWORD element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((key (org-element-property :key keyword))
@@ -2154,7 +2153,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Latex Environment
 
-(defun org-latex-latex-environment (latex-environment contents info)
+(defun org-latex-latex-environment (latex-environment _contents info)
   "Transcode a LATEX-ENVIRONMENT element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (when (plist-get info :with-latex)
@@ -2174,7 +2173,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Latex Fragment
 
-(defun org-latex-latex-fragment (latex-fragment contents info)
+(defun org-latex-latex-fragment (latex-fragment _contents _info)
   "Transcode a LATEX-FRAGMENT object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((value (org-element-property :value latex-fragment)))
@@ -2189,7 +2188,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Line Break
 
-(defun org-latex-line-break (line-break contents info)
+(defun org-latex-line-break (_line-break _contents _info)
   "Transcode a LINE-BREAK object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   "\\\\\n")
@@ -2415,7 +2414,7 @@ INFO is a plist holding contextual information.  See
 
 ;;;; Node Property
 
-(defun org-latex-node-property (node-property contents info)
+(defun org-latex-node-property (node-property _contents _info)
   "Transcode a NODE-PROPERTY element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
@@ -2427,7 +2426,7 @@ information."
 
 ;;;; Paragraph
 
-(defun org-latex-paragraph (paragraph contents info)
+(defun org-latex-paragraph (_paragraph contents _info)
   "Transcode a PARAGRAPH element from Org to LaTeX.
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
@@ -2498,7 +2497,7 @@ contextual information."
 
 ;;;; Planning
 
-(defun org-latex-planning (planning contents info)
+(defun org-latex-planning (planning _contents info)
   "Transcode a PLANNING element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
@@ -2532,7 +2531,7 @@ information."
 
 ;;;; Property Drawer
 
-(defun org-latex-property-drawer (property-drawer contents info)
+(defun org-latex-property-drawer (_property-drawer contents _info)
   "Transcode a PROPERTY-DRAWER element from Org to LaTeX.
 CONTENTS holds the contents of the drawer.  INFO is a plist
 holding contextual information."
@@ -2593,7 +2592,7 @@ it."
     info)
   data)
 
-(defun org-latex-matrices (matrices contents info)
+(defun org-latex-matrices (matrices contents _info)
   "Transcode a MATRICES element from Org to LaTeX.
 CONTENTS is a string.  INFO is a plist used as a communication
 channel."
@@ -2603,7 +2602,7 @@ channel."
 	    (t "\\[\n%s\\]"))
 	  contents))
 
-(defun org-latex-matrices-tree-filter (tree backend info)
+(defun org-latex-matrices-tree-filter (tree _backend info)
   (org-latex--wrap-latex-matrices tree info))
 
 ;;;; Pseudo Object: LaTeX Math Block
@@ -2660,15 +2659,15 @@ containing export options.  Modify DATA by side-effect and return it."
     ;; Return updated DATA.
     data))
 
-(defun org-latex-math-block-tree-filter (tree backend info)
+(defun org-latex-math-block-tree-filter (tree _backend info)
   (org-latex--wrap-latex-math-block tree info))
 
-(defun org-latex-math-block-options-filter (info backend)
+(defun org-latex-math-block-options-filter (info _backend)
   (dolist (prop '(:author :date :title) info)
     (plist-put info prop
 	       (org-latex--wrap-latex-math-block (plist-get info prop) info))))
 
-(defun org-latex-math-block (math-block contents info)
+(defun org-latex-math-block (_math-block contents _info)
   "Transcode a MATH-BLOCK object from Org to LaTeX.
 CONTENTS is a string.  INFO is a plist used as a communication
 channel."
@@ -2696,7 +2695,7 @@ contextual information."
 
 ;;;; Section
 
-(defun org-latex-section (section contents info)
+(defun org-latex-section (_section contents _info)
   "Transcode a SECTION element from Org to LaTeX.
 CONTENTS holds the contents of the section.  INFO is a plist
 holding contextual information."
@@ -2722,7 +2721,7 @@ holding contextual information."
 
 ;;;; Src Block
 
-(defun org-latex-src-block (src-block contents info)
+(defun org-latex-src-block (src-block _contents info)
   "Transcode a SRC-BLOCK element from Org to LaTeX.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
@@ -2811,7 +2810,7 @@ contextual information."
 							  "\n")))))
 		   (org-export-format-code
 		    (car code-info)
-		    (lambda (loc num ref)
+		    (lambda (loc _num ref)
 		      (concat
 		       loc
 		       (when ref
@@ -2874,21 +2873,21 @@ contextual information."
 				   (org-split-string (car code-info) "\n")))))
 	      (org-export-format-code
 	       (car code-info)
-	       (lambda (loc num ref)
+	       (lambda (loc _num ref)
 		 (concat
 		  loc
 		  (when ref
 		    ;; Ensure references are flushed to the right,
 		    ;; separated with 6 spaces from the widest line of
 		    ;; code
-		    (concat (make-string (+ (- max-width (length loc)) 6) ? )
+		    (concat (make-string (+ (- max-width (length loc)) 6) ?\s)
 			    (format "(%s)" ref)))))
 	       nil (and retain-labels (cdr code-info))))))))))))
 
 
 ;;;; Statistics Cookie
 
-(defun org-latex-statistics-cookie (statistics-cookie contents info)
+(defun org-latex-statistics-cookie (statistics-cookie _contents _info)
   "Transcode a STATISTICS-COOKIE object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (replace-regexp-in-string
@@ -2897,7 +2896,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Strike-Through
 
-(defun org-latex-strike-through (strike-through contents info)
+(defun org-latex-strike-through (_strike-through contents info)
   "Transcode STRIKE-THROUGH from Org to LaTeX.
 CONTENTS is the text with strike-through markup.  INFO is a plist
 holding contextual information."
@@ -2910,8 +2909,7 @@ holding contextual information."
   "Transcode a subscript or superscript object.
 OBJECT is an Org object.  INFO is a plist used as a communication
 channel."
-  (let ((type (org-element-type object))
-	(output ""))
+  (let ((output ""))
     (org-element-map (org-element-contents object)
 	(cons 'plain-text org-element-all-objects)
       (lambda (obj)
@@ -2943,7 +2941,7 @@ channel."
 	    output
 	    (and (> (length output) 1) "}"))))
 
-(defun org-latex-subscript (subscript contents info)
+(defun org-latex-subscript (subscript _contents info)
   "Transcode a SUBSCRIPT object from Org to LaTeX.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
@@ -2952,7 +2950,7 @@ contextual information."
 
 ;;;; Superscript
 
-(defun org-latex-superscript (superscript contents info)
+(defun org-latex-superscript (superscript _contents info)
   "Transcode a SUPERSCRIPT object from Org to LaTeX.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
@@ -3302,7 +3300,7 @@ a communication channel."
 
 ;;;; Target
 
-(defun org-latex-target (target contents info)
+(defun org-latex-target (target _contents info)
   "Transcode a TARGET object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
@@ -3311,7 +3309,7 @@ information."
 
 ;;;; Timestamp
 
-(defun org-latex-timestamp (timestamp contents info)
+(defun org-latex-timestamp (timestamp _contents info)
   "Transcode a TIMESTAMP object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
@@ -3327,7 +3325,7 @@ information."
 
 ;;;; Underline
 
-(defun org-latex-underline (underline contents info)
+(defun org-latex-underline (_underline contents info)
   "Transcode UNDERLINE from Org to LaTeX.
 CONTENTS is the text with underline markup.  INFO is a plist
 holding contextual information."
@@ -3336,7 +3334,7 @@ holding contextual information."
 
 ;;;; Verbatim
 
-(defun org-latex-verbatim (verbatim contents info)
+(defun org-latex-verbatim (verbatim _contents info)
   "Transcode a VERBATIM object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
@@ -3529,13 +3527,12 @@ Return PDF file name or an error if it couldn't be produced."
 			  (cons ?b (shell-quote-argument base-name))
 			  (cons ?f (shell-quote-argument full-name))
 			  (cons ?o (shell-quote-argument out-dir)))))
-	  (mapc (lambda (command)
-		  (shell-command (format-spec command spec) outbuf))
-		(mapcar (lambda (command)
-			  (replace-regexp-in-string "%\\(latex\\|bibtex\\)\\>"
-						    (lambda (str) (upcase (substring str 0 2)))
-						    command))
-			org-latex-pdf-process))
+	  (dolist (command org-latex-pdf-process)
+	    (let ((c (replace-regexp-in-string
+		      "%\\(latex\\|bibtex\\)\\>"
+		      (lambda (str) (upcase (substring str 0 2)))
+		      command)))
+	      (shell-command (format-spec c spec) outbuf)))
 	  ;; Collect standard errors from output buffer.
 	  (setq warnings (and (not snippet)
 			      (org-latex--collect-warnings outbuf)))))
