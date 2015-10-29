@@ -1,4 +1,4 @@
-;;; ox-html.el --- HTML Back-End for Org Export Engine
+;;; ox-html.el --- HTML Back-End for Org Export Engine -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2011-2015 Free Software Foundation, Inc.
 
@@ -43,6 +43,11 @@
 (declare-function org-pop-to-buffer-same-window
 		  "org-compat" (&optional buffer-or-name norecord label))
 (declare-function mm-url-decode-entities "mm-url" ())
+
+(defvar htmlize-css-name-prefix)
+(defvar htmlize-output-type)
+(defvar htmlize-output-type)
+(defvar htmlize-css-name-prefix)
 
 ;;; Define Back-End
 
@@ -492,7 +497,7 @@ Option settings will replace the %MANAGER-OPTIONS cookie."
   :package-version '(Org . "8.0")
   :type 'string)
 
-(defun org-html-infojs-install-script (exp-plist backend)
+(defun org-html-infojs-install-script (exp-plist _backend)
   "Install script in export options when appropriate.
 EXP-PLIST is a plist containing export options.  BACKEND is the
 export back-end currently used."
@@ -609,7 +614,7 @@ Warning: non-nil may break indentation of source code blocks."
 
 ;;;; Drawers
 
-(defcustom org-html-format-drawer-function (lambda (name contents) contents)
+(defcustom org-html-format-drawer-function (lambda (_name contents) contents)
   "Function called to format a drawer in HTML code.
 
 The function must accept two parameters:
@@ -1569,7 +1574,7 @@ ELEMENT is either a src block or an example block."
 	    (or (plist-get attr :height) (org-count-lines code))
 	    code)))
 
-(defun org-html--has-caption-p (element &optional info)
+(defun org-html--has-caption-p (element &optional _info)
   "Non-nil when ELEMENT has a caption affiliated keyword.
 INFO is a plist used as a communication channel.  This function
 is meant to be used as a predicate for `org-export-get-ordinal' or
@@ -1628,7 +1633,7 @@ produce code that uses these same face definitions."
 
 (defun org-html--make-string (n string)
   "Build a string by concatenating N times STRING."
-  (let (out) (dotimes (i n out) (setq out (concat string out)))))
+  (let (out) (dotimes (_ n out) (setq out (concat string out)))))
 
 (defun org-html-fix-class-name (kwd)	; audit callers of this function
   "Turn todo keyword KWD into a valid class name.
@@ -1643,7 +1648,7 @@ Replaces invalid characters with \"_\"."
 INFO is a plist used as a communication channel."
   (let* ((fn-alist (org-export-collect-footnote-definitions info))
 	 (fn-alist
-	  (loop for (n type raw) in fn-alist collect
+	  (loop for (n _type raw) in fn-alist collect
 		(cons n (if (eq (org-element-type raw) 'org-data)
 			    (org-trim (org-export-data raw info))
 			  (format "<div class=\"footpara\">%s</div>"
@@ -1773,20 +1778,17 @@ INFO is a plist used as a communication channel."
 		 '(latex-fragment latex-environment) 'identity info t))
     (let ((template (plist-get info :html-mathjax-template))
 	  (options (plist-get info :html-mathjax-options))
-	  (in-buffer (or (plist-get info :html-mathjax) ""))
-	  name val x)
-      (mapc
-       (lambda (e)
-	 (setq name (car e) val (nth 1 e))
-	 (if (string-match (concat "\\<" (symbol-name name) ":") in-buffer)
-	     (setq val (car (read-from-string
-			     (substring in-buffer (match-end 0))))))
-	 (if (not (stringp val)) (setq val (format "%s" val)))
-	 (while (string-match (concat "%" (upcase (symbol-name name))) template)
-	   (setq template (replace-match val t t template))))
-       options)
-      ;; Return the modified template.
-      (org-element-normalize-string template))))
+	  (in-buffer (or (plist-get info :html-mathjax) "")))
+      (dolist (e options (org-element-normalize-string template))
+	(let ((name (car e))
+	      (val (nth 1 e)))
+	  (when (string-match (concat "\\<" (symbol-name name) ":") in-buffer)
+	    (setq val
+		  (car (read-from-string (substring in-buffer (match-end 0))))))
+	  (unless (stringp val) (setq val (format "%s" val)))
+	  (while (string-match (concat "%" (upcase (symbol-name name)))
+			       template)
+	    (setq template (replace-match val t t template))))))))
 
 (defun org-html-format-spec (info)
   "Return format specification for elements that can be
@@ -1825,7 +1827,6 @@ communication channel."
 		       (author (cdr (assq ?a spec)))
 		       (email (cdr (assq ?e spec)))
 		       (creator (cdr (assq ?c spec)))
-		       (timestamp (cdr (assq ?T spec)))
 		       (validation-link (cdr (assq ?v spec))))
 		   (concat
 		    (when (and (plist-get info :with-date)
@@ -1984,7 +1985,7 @@ INFO is a plist used as a communication channel."
 
 ;;;; Priority
 
-(defun org-html--priority (priority info)
+(defun org-html--priority (priority _info)
   "Format a priority into HTML.
 PRIORITY is the character code of the priority or nil.  INFO is
 a plist containing export options."
@@ -2164,8 +2165,7 @@ and value is its relative level, as an integer."
 	      (level (cdr entry)))
 	  (concat
 	   (let* ((cnt (- level prev-level))
-		  (times (if (> cnt 0) (1- cnt) (- cnt)))
-		  rtn)
+		  (times (if (> cnt 0) (1- cnt) (- cnt))))
 	     (setq prev-level level)
 	     (concat
 	      (org-html--make-string
@@ -2292,7 +2292,7 @@ of tables as a string, or nil if it is empty."
 
 ;;;; Bold
 
-(defun org-html-bold (bold contents info)
+(defun org-html-bold (_bold contents info)
   "Transcode BOLD from Org to HTML.
 CONTENTS is the text with bold markup.  INFO is a plist holding
 contextual information."
@@ -2301,7 +2301,7 @@ contextual information."
 
 ;;;; Center Block
 
-(defun org-html-center-block (center-block contents info)
+(defun org-html-center-block (_center-block contents _info)
   "Transcode a CENTER-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
@@ -2309,7 +2309,7 @@ holding contextual information."
 
 ;;;; Clock
 
-(defun org-html-clock (clock contents info)
+(defun org-html-clock (clock _contents _info)
   "Transcode a CLOCK element from Org to HTML.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
@@ -2325,7 +2325,7 @@ channel."
 
 ;;;; Code
 
-(defun org-html-code (code contents info)
+(defun org-html-code (code _contents info)
   "Transcode CODE from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
@@ -2344,7 +2344,7 @@ holding contextual information."
 
 ;;;; Dynamic Block
 
-(defun org-html-dynamic-block (dynamic-block contents info)
+(defun org-html-dynamic-block (_dynamic-block contents _info)
   "Transcode a DYNAMIC-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information.  See `org-export-data'."
@@ -2352,7 +2352,7 @@ holding contextual information.  See `org-export-data'."
 
 ;;;; Entity
 
-(defun org-html-entity (entity contents info)
+(defun org-html-entity (entity _contents _info)
   "Transcode an ENTITY object from Org to HTML.
 CONTENTS are the definition itself.  INFO is a plist holding
 contextual information."
@@ -2360,7 +2360,7 @@ contextual information."
 
 ;;;; Example Block
 
-(defun org-html-example-block (example-block contents info)
+(defun org-html-example-block (example-block _contents info)
   "Transcode a EXAMPLE-BLOCK element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
@@ -2371,7 +2371,7 @@ information."
 
 ;;;; Export Snippet
 
-(defun org-html-export-snippet (export-snippet contents info)
+(defun org-html-export-snippet (export-snippet _contents _info)
   "Transcode a EXPORT-SNIPPET object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
@@ -2380,7 +2380,7 @@ information."
 
 ;;;; Export Block
 
-(defun org-html-export-block (export-block contents info)
+(defun org-html-export-block (export-block _contents _info)
   "Transcode a EXPORT-BLOCK element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (when (string= (org-element-property :type export-block) "HTML")
@@ -2388,7 +2388,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Fixed Width
 
-(defun org-html-fixed-width (fixed-width contents info)
+(defun org-html-fixed-width (fixed-width _contents _info)
   "Transcode a FIXED-WIDTH element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (format "<pre class=\"example\">\n%s</pre>"
@@ -2398,7 +2398,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Footnote Reference
 
-(defun org-html-footnote-reference (footnote-reference contents info)
+(defun org-html-footnote-reference (footnote-reference _contents info)
   "Transcode a FOOTNOTE-REFERENCE element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (concat
@@ -2427,8 +2427,6 @@ holding contextual information."
   (unless (org-element-property :footnote-section-p headline)
     (let* ((numberedp (org-export-numbered-headline-p headline info))
            (numbers (org-export-get-headline-number headline info))
-           (section-number (and numbers
-				(mapconcat #'number-to-string numbers "-")))
            (level (+ (org-export-get-relative-level headline info)
                      (1- (plist-get info :html-toplevel-hlevel))))
            (todo (and (plist-get info :with-todo-keywords)
@@ -2500,7 +2498,7 @@ holding contextual information."
                   (org-html--container headline info)))))))
 
 (defun org-html-format-headline-default-function
-  (todo todo-type priority text tags info)
+    (todo _todo-type priority text tags info)
   "Default format function for a headline.
 See `org-html-format-headline-function' for details."
   (let ((todo (org-html--todo todo info))
@@ -2519,14 +2517,14 @@ See `org-html-format-headline-function' for details."
 
 ;;;; Horizontal Rule
 
-(defun org-html-horizontal-rule (horizontal-rule contents info)
+(defun org-html-horizontal-rule (_horizontal-rule _contents info)
   "Transcode an HORIZONTAL-RULE  object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (org-html-close-tag "hr" nil info))
 
 ;;;; Inline Src Block
 
-(defun org-html-inline-src-block (inline-src-block contents info)
+(defun org-html-inline-src-block (inline-src-block _contents info)
   "Transcode an INLINE-SRC-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
@@ -2568,7 +2566,7 @@ See `org-html-format-inlinetask-function' for details."
 
 ;;;; Italic
 
-(defun org-html-italic (italic contents info)
+(defun org-html-italic (_italic contents info)
   "Transcode ITALIC from Org to HTML.
 CONTENTS is the text with italic markup.  INFO is a plist holding
 contextual information."
@@ -2639,7 +2637,7 @@ contextual information."
 
 ;;;; Keyword
 
-(defun org-html-keyword (keyword contents info)
+(defun org-html-keyword (keyword _contents info)
   "Transcode a KEYWORD element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((key (org-element-property :key keyword))
@@ -2693,7 +2691,7 @@ a plist containing export properties."
 			nil processing-type)
       (buffer-string))))
 
-(defun org-html-latex-environment (latex-environment contents info)
+(defun org-html-latex-environment (latex-environment _contents info)
   "Transcode a LATEX-ENVIRONMENT element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((processing-type (plist-get info :with-latex))
@@ -2716,7 +2714,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Latex Fragment
 
-(defun org-html-latex-fragment (latex-fragment contents info)
+(defun org-html-latex-fragment (latex-fragment _contents info)
   "Transcode a LATEX-FRAGMENT object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((latex-frag (org-element-property :value latex-fragment))
@@ -2733,7 +2731,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Line Break
 
-(defun org-html-line-break (line-break contents info)
+(defun org-html-line-break (_line-break _contents info)
   "Transcode a LINE-BREAK object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (concat (org-html-close-tag "br" nil info) "\n"))
@@ -2972,7 +2970,7 @@ INFO is a plist holding contextual information.  See
 
 ;;;; Node Property
 
-(defun org-html-node-property (node-property contents info)
+(defun org-html-node-property (node-property _contents _info)
   "Transcode a NODE-PROPERTY element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
@@ -3050,12 +3048,11 @@ lists."
     (unordered "</ul>")
     (descriptive "</dl>")))
 
-(defun org-html-plain-list (plain-list contents info)
+(defun org-html-plain-list (plain-list contents _info)
   "Transcode a PLAIN-LIST element from Org to HTML.
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
-  (let* (arg1 ;; (assoc :counter (org-element-map plain-list 'item
-	 (type (org-element-property :type plain-list)))
+  (let ((type (org-element-property :type plain-list)))
     (format "%s\n%s%s"
 	    (org-html-begin-plain-list type)
 	    contents (org-html-end-plain-list type))))
@@ -3064,13 +3061,10 @@ contextual information."
 
 (defun org-html-convert-special-strings (string)
   "Convert special characters in STRING to HTML."
-  (let ((all org-html-special-string-regexps)
-	e a re rpl start)
-    (while (setq a (pop all))
-      (setq re (car a) rpl (cdr a) start 0)
-      (while (string-match re string start)
-	(setq string (replace-match rpl t nil string))))
-    string))
+  (dolist (a org-html-special-string-regexps string)
+    (let ((re (car a))
+	  (rpl (cdr a)))
+      (setq string (replace-regexp-in-string re rpl string t)))))
 
 (defun org-html-encode-plain-text (text)
   "Convert plain text characters from TEXT to HTML equivalent.
@@ -3104,7 +3098,7 @@ contextual information."
 
 ;; Planning
 
-(defun org-html-planning (planning contents info)
+(defun org-html-planning (planning _contents _info)
   "Transcode a PLANNING element from Org to HTML.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
@@ -3131,7 +3125,7 @@ channel."
 
 ;;;; Property Drawer
 
-(defun org-html-property-drawer (property-drawer contents info)
+(defun org-html-property-drawer (_property-drawer contents _info)
   "Transcode a PROPERTY-DRAWER element from Org to HTML.
 CONTENTS holds the contents of the drawer.  INFO is a plist
 holding contextual information."
@@ -3140,7 +3134,7 @@ holding contextual information."
 
 ;;;; Quote Block
 
-(defun org-html-quote-block (quote-block contents info)
+(defun org-html-quote-block (_quote-block contents _info)
   "Transcode a QUOTE-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
@@ -3206,7 +3200,7 @@ holding contextual information."
 
 ;;;; Src Block
 
-(defun org-html-src-block (src-block contents info)
+(defun org-html-src-block (src-block _contents info)
   "Transcode a SRC-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
@@ -3228,7 +3222,7 @@ contextual information."
 
 ;;;; Statistics Cookie
 
-(defun org-html-statistics-cookie (statistics-cookie contents info)
+(defun org-html-statistics-cookie (statistics-cookie _contents _info)
   "Transcode a STATISTICS-COOKIE object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((cookie-value (org-element-property :value statistics-cookie)))
@@ -3236,7 +3230,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Strike-Through
 
-(defun org-html-strike-through (strike-through contents info)
+(defun org-html-strike-through (_strike-through contents info)
   "Transcode STRIKE-THROUGH from Org to HTML.
 CONTENTS is the text with strike-through markup.  INFO is a plist
 holding contextual information."
@@ -3247,7 +3241,7 @@ holding contextual information."
 
 ;;;; Subscript
 
-(defun org-html-subscript (subscript contents info)
+(defun org-html-subscript (_subscript contents _info)
   "Transcode a SUBSCRIPT object from Org to HTML.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
@@ -3255,7 +3249,7 @@ contextual information."
 
 ;;;; Superscript
 
-(defun org-html-superscript (superscript contents info)
+(defun org-html-superscript (_superscript contents _info)
   "Transcode a SUPERSCRIPT object from Org to HTML.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
@@ -3328,14 +3322,16 @@ communication channel."
 	      '("<thead>" . "\n</thead>"))
 	     ;; Case 2: Row is from first and only row group.
 	     (t '("<tbody>" . "\n</tbody>")))))
+      ;; Silence byte-compiler.
+      bottom-row-p top-row-p row-number
       (concat
        ;; Begin a rowgroup?
        (when start-rowgroup-p (car rowgroup-tags))
-       ;; Actual table row
-       (concat "\n" (eval (car (plist-get info :html-table-row-tags)))
+       ;; Actual table row.
+       (concat "\n" (eval (car (plist-get info :html-table-row-tags)) t)
 	       contents
 	       "\n"
-	       (eval (cdr (plist-get info :html-table-row-tags))))
+	       (eval (cdr (plist-get info :html-table-row-tags)) t))
        ;; End a rowgroup?
        (when end-rowgroup-p (cdr rowgroup-tags))))))
 
@@ -3353,7 +3349,7 @@ INFO is a plist used as a communication channel."
     (if (not special-column-p) (org-element-contents table-row)
       (cdr (org-element-contents table-row)))))
 
-(defun org-html-table--table.el-table (table info)
+(defun org-html-table--table.el-table (table _info)
   "Format table.el tables into HTML.
 INFO is a plist used as a communication channel."
   (when (eq (org-element-property :type table) 'table.el)
@@ -3430,7 +3426,7 @@ contextual information."
 
 ;;;; Target
 
-(defun org-html-target (target contents info)
+(defun org-html-target (target _contents info)
   "Transcode a TARGET object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
@@ -3439,7 +3435,7 @@ information."
 
 ;;;; Timestamp
 
-(defun org-html-timestamp (timestamp contents info)
+(defun org-html-timestamp (timestamp _contents info)
   "Transcode a TIMESTAMP object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
@@ -3449,7 +3445,7 @@ information."
 
 ;;;; Underline
 
-(defun org-html-underline (underline contents info)
+(defun org-html-underline (_underline contents info)
   "Transcode UNDERLINE from Org to HTML.
 CONTENTS is the text with underline markup.  INFO is a plist
 holding contextual information."
@@ -3459,7 +3455,7 @@ holding contextual information."
 
 ;;;; Verbatim
 
-(defun org-html-verbatim (verbatim contents info)
+(defun org-html-verbatim (verbatim _contents info)
   "Transcode VERBATIM from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
@@ -3468,7 +3464,7 @@ information."
 
 ;;;; Verse Block
 
-(defun org-html-verse-block (verse-block contents info)
+(defun org-html-verse-block (_verse-block contents info)
   "Transcode a VERSE-BLOCK element from Org to HTML.
 CONTENTS is verse block contents.  INFO is a plist holding
 contextual information."
@@ -3483,15 +3479,14 @@ contextual information."
   ;; non-breaking space.
   (while (string-match "^[ \t]+" contents)
     (let* ((num-ws (length (match-string 0 contents)))
-	   (ws (let (out) (dotimes (i num-ws out)
-			    (setq out (concat out "&#xa0;"))))))
+	   (ws (org-html--make-string num-ws "&#xa0;")))
       (setq contents (replace-match ws nil t contents))))
   (format "<p class=\"verse\">\n%s</p>" contents))
 
 
 ;;; Filter Functions
 
-(defun org-html-final-function (contents backend info)
+(defun org-html-final-function (contents _backend info)
   "Filter to indent the HTML and convert HTML entities."
   (with-temp-buffer
     (insert contents)
