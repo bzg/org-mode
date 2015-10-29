@@ -1477,6 +1477,18 @@ echo \"$data\"
   (should (equal "foo\\\"bar"
 		 (org-babel-script-escape "\"foo\\\\\\\"bar\""))))
 
+(ert-deftest ob/process-params-no-duplicates ()
+    (should (equal (org-babel-process-params '((:colname-names . 1)
+                                               (:rowname-names . 1)
+                                               (:result-params . 1)
+                                               (:result-type . 1)
+                                               (:var . "\"foo\"")))
+                   '((:var)
+		     (:colname-names . 1)
+		     (:rowname-names . 1)
+		     (:result-params . 1)
+		     (:result-type . value)))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
