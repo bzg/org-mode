@@ -1,4 +1,4 @@
-;;; ox-beamer.el --- Beamer Back-End for Org Export Engine
+;;; ox-beamer.el --- Beamer Back-End for Org Export Engine -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2007-2015 Free Software Foundation, Inc.
 
@@ -274,7 +274,7 @@ Return overlay specification, as a string, or nil."
 
 ;;;; Bold
 
-(defun org-beamer-bold (bold contents info)
+(defun org-beamer-bold (bold contents _info)
   "Transcode BLOCK object into Beamer code.
 CONTENTS is the text being bold.  INFO is a plist used as
 a communication channel."
@@ -285,7 +285,7 @@ a communication channel."
 
 ;;;; Export Block
 
-(defun org-beamer-export-block (export-block contents info)
+(defun org-beamer-export-block (export-block contents _info)
   "Transcode an EXPORT-BLOCK element into Beamer code.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
@@ -295,7 +295,7 @@ channel."
 
 ;;;; Export Snippet
 
-(defun org-beamer-export-snippet (export-snippet contents info)
+(defun org-beamer-export-snippet (export-snippet _contents info)
   "Transcode an EXPORT-SNIPPET object into Beamer code.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
@@ -680,7 +680,7 @@ contextual information."
     (list
      (cons
       'item
-      (lambda (item c i)
+      (lambda (item _c _i)
 	(let ((action
 	       (let ((first (car (org-element-contents item))))
 		 (and (eq (org-element-type first) 'paragraph)
@@ -724,8 +724,7 @@ channel."
   "Transcode a LINK object into Beamer code.
 CONTENTS is the description part of the link.  INFO is a plist
 used as a communication channel."
-  (let ((type (org-element-property :type link))
-	(path (org-element-property :path link)))
+  (let ((type (org-element-property :type link)))
     (cond
      ;; Link type is handled by a special function.
      ((org-export-custom-protocol-maybe link contents 'beamer))
@@ -817,7 +816,7 @@ contextual information."
 
 ;;;; Target
 
-(defun org-beamer-target (target contents info)
+(defun org-beamer-target (target _contents info)
   "Transcode a TARGET object into Beamer code.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
