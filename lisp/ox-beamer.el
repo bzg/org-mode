@@ -285,7 +285,7 @@ a communication channel."
 
 ;;;; Export Block
 
-(defun org-beamer-export-block (export-block contents _info)
+(defun org-beamer-export-block (export-block _contents _info)
   "Transcode an EXPORT-BLOCK element into Beamer code.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
