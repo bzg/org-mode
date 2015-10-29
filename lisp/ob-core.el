@@ -1597,7 +1597,10 @@ shown below.
       (cons :result-type  (cond ((member "output" result-params) 'output)
 				((member "value" result-params) 'value)
 				(t 'value))))
-     (org-babel-get-header params :var 'other))))
+     (org-remove-if
+      (lambda (x) (memq (car x) '(:colname-names :rowname-names :result-params
+						 :result-type :var)))
+      params))))
 
 ;; row and column names
 (defun org-babel-del-hlines (table)
