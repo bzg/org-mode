@@ -1568,9 +1568,9 @@ shown below.
 (defun org-babel-process-params (params)
   "Expand variables in PARAMS and add summary parameters."
   (let* ((processed-vars (mapcar (lambda (el)
-				   (if (consp (cdr el))
-				       (cdr el)
-				     (org-babel-ref-parse (cdr el))))
+				   (if (consp el)
+				       el
+				     (org-babel-ref-parse el)))
 				 (org-babel--get-vars params)))
 	 (vars-and-names (if (and (assoc :colname-names params)
 				  (assoc :rowname-names params))
