@@ -556,6 +556,16 @@ Implements `file-equal-p' for older emacsen and XEmacs."
     `(org-unmodified ,@body)))
 (def-edebug-spec org-with-silent-modifications (body))
 
+;; Remove this when support for Emacs < 24.4 is dropped.
+(defun org-define-error (name message)
+  "Define NAME as a new error signal.
+MESSAGE is a string that will be output to the echo area if such
+an error is signaled without being caught by a `condition-case'.
+Implements `define-error' for older emacsen."
+  (if (fboundp 'define-error) (define-error name message)
+    (put name 'error-conditions
+	 (copy-sequence (cons name (get 'error 'error-conditions))))))
+
 (provide 'org-compat)
 
 ;;; org-compat.el ends here
