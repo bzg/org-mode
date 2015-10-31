@@ -11749,6 +11749,7 @@ such as the file name.
 SEPARATOR is inserted between the different parts of the path,
 the default is \"/\"."
   (setq width (or width 79))
+  (setq path (delq nil path))
   (unless (> width 0)
     (user-error "Argument `width' must be positive"))
   (setq separator (or separator "/"))
@@ -11758,7 +11759,7 @@ the default is \"/\"."
 		 (mapconcat
 		  (lambda (s) (replace-regexp-in-string "[ \t]+\\'" "" s))
 		  (loop for head in path
-			for n upto (length path)
+			for n from 0
 			collect (org-add-props
 				    head nil 'face
 				    (nth (% n org-n-level-faces) org-level-faces)))
