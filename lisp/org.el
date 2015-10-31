@@ -11751,6 +11751,7 @@ such as the file name.
 SEPARATOR is inserted between the different parts of the path,
 the default is \"/\"."
   (setq width (or width 79))
+  (setq path (delq nil path))
   (unless (> width 0)
     (user-error "Argument `width' must be positive"))
   (setq separator (or separator "/"))

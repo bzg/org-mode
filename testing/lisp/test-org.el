@@ -1319,6 +1319,9 @@
   (should
    (string= (org-format-outline-path '())
 	    ""))
+  (should
+   (string= (org-format-outline-path '(nil))
+	    ""))
   ;; Empty path and prefix.
   (should
    (string= (org-format-outline-path '() nil ">>")
