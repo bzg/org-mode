@@ -1,4 +1,4 @@
-;;; ox-md.el --- Markdown Back-End for Org Export Engine
+;;; ox-md.el --- Markdown Back-End for Org Export Engine -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012-2015 Free Software Foundation, Inc.
 
@@ -95,7 +95,7 @@ This variable can be set to either `atx' or `setext'."
 
 ;;; Filters
 
-(defun org-md-separate-elements (tree backend info)
+(defun org-md-separate-elements (tree _backend info)
   "Fix blank lines between elements.
 
 TREE is the parse tree being exported.  BACKEND is the export
@@ -132,7 +132,7 @@ Assume BACKEND is `md'."
 
 ;;;; Bold
 
-(defun org-md-bold (bold contents info)
+(defun org-md-bold (_bold contents _info)
   "Transcode BOLD object into Markdown format.
 CONTENTS is the text within bold markup.  INFO is a plist used as
 a communication channel."
@@ -141,7 +141,7 @@ a communication channel."
 
 ;;;; Code and Verbatim
 
-(defun org-md-verbatim (verbatim contents info)
+(defun org-md-verbatim (verbatim _contents _info)
   "Transcode VERBATIM object into Markdown format.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
@@ -156,7 +156,7 @@ channel."
 
 ;;;; Example Block, Src Block and export Block
 
-(defun org-md-example-block (example-block contents info)
+(defun org-md-example-block (example-block _contents info)
   "Transcode EXAMPLE-BLOCK element into Markdown format.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
@@ -233,7 +233,7 @@ a communication channel."
 
 ;;;; Horizontal Rule
 
-(defun org-md-horizontal-rule (horizontal-rule contents info)
+(defun org-md-horizontal-rule (_horizontal-rule _contents _info)
   "Transcode HORIZONTAL-RULE element into Markdown format.
 CONTENTS is the horizontal rule contents.  INFO is a plist used
 as a communication channel."
@@ -242,7 +242,7 @@ as a communication channel."
 
 ;;;; Italic
 
-(defun org-md-italic (italic contents info)
+(defun org-md-italic (_italic contents _info)
   "Transcode ITALIC object into Markdown format.
 CONTENTS is the text within italic markup.  INFO is a plist used
 as a communication channel."
@@ -291,7 +291,7 @@ channel."
 
 ;;;; Line Break
 
-(defun org-md-line-break (line-break contents info)
+(defun org-md-line-break (_line-break _contents _info)
   "Transcode LINE-BREAK object into Markdown format.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
@@ -378,7 +378,7 @@ a communication channel."
 
 ;;;; Node Property
 
-(defun org-md-node-property (node-property contents info)
+(defun org-md-node-property (node-property _contents _info)
   "Transcode a NODE-PROPERTY element into Markdown syntax.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
@@ -390,7 +390,7 @@ information."
 
 ;;;; Paragraph
 
-(defun org-md-paragraph (paragraph contents info)
+(defun org-md-paragraph (paragraph contents _info)
   "Transcode PARAGRAPH element into Markdown format.
 CONTENTS is the paragraph contents.  INFO is a plist used as
 a communication channel."
@@ -403,7 +403,7 @@ a communication channel."
 
 ;;;; Plain List
 
-(defun org-md-plain-list (plain-list contents info)
+(defun org-md-plain-list (_plain-list contents _info)
   "Transcode PLAIN-LIST element into Markdown format.
 CONTENTS is the plain-list contents.  INFO is a plist used as
 a communication channel."
@@ -438,7 +438,7 @@ contextual information."
 
 ;;;; Property Drawer
 
-(defun org-md-property-drawer (property-drawer contents info)
+(defun org-md-property-drawer (_property-drawer contents _info)
   "Transcode a PROPERTY-DRAWER element into Markdown format.
 CONTENTS holds the contents of the drawer.  INFO is a plist
 holding contextual information."
@@ -448,7 +448,7 @@ holding contextual information."
 
 ;;;; Quote Block
 
-(defun org-md-quote-block (quote-block contents info)
+(defun org-md-quote-block (_quote-block contents _info)
   "Transcode QUOTE-BLOCK element into Markdown format.
 CONTENTS is the quote-block contents.  INFO is a plist used as
 a communication channel."
@@ -459,7 +459,7 @@ a communication channel."
 
 ;;;; Section
 
-(defun org-md-section (section contents info)
+(defun org-md-section (_section contents _info)
   "Transcode SECTION element into Markdown format.
 CONTENTS is the section contents.  INFO is a plist used as
 a communication channel."
@@ -476,7 +476,7 @@ holding export options."
   ;; footnotes with at least a blank line.
   (org-trim (org-html-inner-template (concat "\n" contents "\n") info)))
 
-(defun org-md-template (contents info)
+(defun org-md-template (contents _info)
   "Return complete document string after Markdown conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist used
 as a communication channel."
