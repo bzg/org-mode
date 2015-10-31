@@ -914,10 +914,26 @@
 	   (org-link-search-must-match-exact-headline nil))
        (org-return))
      (org-looking-at-p "<<target>>")))
+  (should-not
+   (org-test-with-temp-text "Link [[target]]<point> <<target>>"
+     (let ((org-return-follows-link t)
+	   (org-link-search-must-match-exact-headline nil))
+       (org-return))
+     (org-looking-at-p "<<target>>")))
   ;; When `org-return-follows-link' is non-nil, tolerate links and
   ;; timestamps in comments, node properties, etc.
   (should
    (org-test-with-temp-text "# Comment [[target<point>]]\n <<target>>"
+     (let ((org-return-follows-link t)
+	   (org-link-search-must-match-exact-headline nil))
+       (org-return))
+     (org-looking-at-p "<<target>>")))
+  (should-not
+   (org-test-with-temp-text "# Comment [[target<point>]]\n <<target>>"
+     (let ((org-return-follows-link nil)) (org-return))
+     (org-looking-at-p "<<target>>")))
+  (should-not
+   (org-test-with-temp-text "# Comment [[target]]<point>\n <<target>>"
      (let ((org-return-follows-link t)
 	   (org-link-search-must-match-exact-headline nil))
        (org-return))
@@ -1603,7 +1619,7 @@
 #+BEGIN_SRC emacs-lisp
 \(+ 1 1)                  (ref:sc)
 #+END_SRC
-\[[(sc)]]<point>"
+\[[(sc)<point>]]"
      (org-open-at-point)
      (looking-at "(ref:sc)")))
   ;; Find coderef even with alternate label format.
@@ -1612,7 +1628,7 @@
 #+BEGIN_SRC emacs-lisp -l \"{ref:%s}\"
 \(+ 1 1)                  {ref:sc}
 #+END_SRC
-\[[(sc)]]<point>"
+\[[(sc)<point>]]"
      (org-open-at-point)
      (looking-at "{ref:sc}"))))
 
@@ -1622,13 +1638,13 @@
   "Test custom ID links specifications."
   (should
    (org-test-with-temp-text
-       "* H1\n:PROPERTIES:\n:CUSTOM_ID: custom\n:END:\n* H2\n[[#custom]]<point>"
+       "* H1\n:PROPERTIES:\n:CUSTOM_ID: custom\n:END:\n* H2\n[[#custom<point>]]"
      (org-open-at-point)
      (org-looking-at-p "\\* H1")))
   ;; Throw an error on false positives.
   (should-error
    (org-test-with-temp-text
-       "* H1\n:DRAWER:\n:CUSTOM_ID: custom\n:END:\n* H2\n[[#custom]]<point>"
+       "* H1\n:DRAWER:\n:CUSTOM_ID: custom\n:END:\n* H2\n[[#custom<point>]]"
      (org-open-at-point)
      (org-looking-at-p "\\* H1"))))
 
@@ -1702,8 +1718,7 @@
      (looking-at "\\* COMMENT Test")))
   ;; Correctly un-hexify fuzzy links.
   (should
-   (org-test-with-temp-text "* With space\n[[*With%20space][With space]]"
-     (goto-char (point-max))
+   (org-test-with-temp-text "* With space\n[[*With%20space][With space<point>]]"
      (org-open-at-point)
      (bobp))))
 

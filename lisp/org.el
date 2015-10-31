@@ -10707,7 +10707,8 @@ link in a property drawer line."
 	 ((memq type '(comment comment-block keyword node-property))
 	  (cond ((org-in-regexp org-any-link-re)
 		 (org-open-link-from-string (match-string-no-properties 0)))
-		((or (org-at-timestamp-p t) (org-at-date-range-p t))
+		((or (org-in-regexp org-ts-regexp-both nil t)
+		     (org-in-regexp org-tsr-regexp-both nil t))
 		 (org-follow-timestamp-link))
 		(t (user-error "No link found"))))
 	 ;; On a headline or an inlinetask, but not on a timestamp,
@@ -10735,13 +10736,12 @@ link in a property drawer line."
 	       (>= (point) (org-element-property :begin value))
 	       (<= (point) (org-element-property :end value)))
 	  (org-follow-timestamp-link))
-	 ;; Do nothing on white spaces after an object, unless point
-	 ;; is right after it.
-	 ((> (point)
-	     (save-excursion
-	       (goto-char (org-element-property :end context))
-	       (skip-chars-backward " \t")
-	       (point)))
+	 ;; Do nothing on white spaces after an object.
+	 ((>= (point)
+	      (save-excursion
+		(goto-char (org-element-property :end context))
+		(skip-chars-backward " \t")
+		(point)))
 	  (user-error "No link found"))
 	 ((eq type 'timestamp) (org-follow-timestamp-link))
 	 ;; On tags within a headline or an inlinetask.
@@ -21380,13 +21380,13 @@ object (e.g., within a comment).  In these case, you need to use
 	  (org-element-lineage context '(table-row table-cell) t))
       (org-table-justify-field-maybe)
       (call-interactively #'org-table-next-row))
-     ;; On a link or a timestamp, call `org-open-line' if
+     ;; On a link or a timestamp, call `org-open-at-point' if
      ;; `org-return-follows-link' allows it.  Tolerate fuzzy
-     ;; locations, e.g., in a comment, as `org-open-line'.
+     ;; locations, e.g., in a comment, as `org-open-at-point'.
      ((and org-return-follows-link
-	   (or (org-at-timestamp-p t)
-	       (org-at-date-range-p t)
-	       (org-in-regexp org-any-link-re)))
+	   (or (org-in-regexp org-ts-regexp-both nil t)
+	       (org-in-regexp org-tsr-regexp-both nil  t)
+	       (org-in-regexp org-any-link-re nil t)))
       (call-interactively #'org-open-at-point))
      ;; Insert newline in heading, but preserve tags.
      ((and (not (bolp))
