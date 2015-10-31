@@ -22535,23 +22535,27 @@ and :keyword."
     (setq clist (nreverse (delq nil clist)))
     clist))
 
-(defun org-in-regexp (re &optional nlines visually)
-  "Check if point is inside a match of RE.
+(defun org-in-regexp (regexp &optional nlines visually)
+  "Check if point is inside a match of REGEXP.
 
 Normally only the current line is checked, but you can include
-NLINES extra lines after point into the search.  If VISUALLY is
+NLINES extra lines around point into the search.  If VISUALLY is
 set, require that the cursor is not after the match but really
-on, so that the block visually is on the match."
-  (catch 'exit
+on, so that the block visually is on the match.
+
+Return nil or a cons cell (BEG . END) where BEG and END are,
+respectively, the positions at the beginning and the end of the
+match."
+  (catch :exit
     (let ((pos (point))
-          (eol (point-at-eol (+ 1 (or nlines 0))))
-	  (inc (if visually 1 0)))
+          (eol (line-end-position (if nlines (1+ nlines) 1))))
       (save-excursion
 	(beginning-of-line (- 1 (or nlines 0)))
-	(while (re-search-forward re eol t)
-	  (if (and (<= (match-beginning 0) pos)
-		   (>= (+ inc (match-end 0)) pos))
-	      (throw 'exit (cons (match-beginning 0) (match-end 0)))))))))
+	(while (and (re-search-forward regexp eol t)
+		    (<= (match-beginning 0) pos))
+	  (let ((end (match-end 0)))
+	    (when (or (> end pos) (and (= end pos) (not visually)))
+	      (throw :exit (cons (match-beginning 0) (match-end 0))))))))))
 (define-obsolete-function-alias 'org-at-regexp-p 'org-in-regexp
   "Org mode 8.3")
 
