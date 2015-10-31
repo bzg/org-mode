@@ -5307,6 +5307,16 @@ function from a program - use `org-agenda-get-day-entries' instead."
 
 ;;; Agenda entry finders
 
+(defun org-agenda--timestamp-to-absolute (&rest args)
+  "Call `org-time-string-to-absolute' with ARGS.
+However, throw `:skip' whenever an error is raised."
+  (condition-case e
+      (apply #'org-time-string-to-absolute args)
+    (org-diary-sexp-no-match (throw :skip nil))
+    (error
+     (message "%s; Skipping entry" (error-message-string e))
+     (throw :skip nil))))
+
 (defun org-agenda-get-day-entries (file date &rest args)
   "Does the work for `org-diary' and `org-agenda'.
 FILE is the path to a file to be checked for entries.  DATE is date like
@@ -5608,7 +5618,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	(and (org-at-date-range-p) (throw :skip nil))
 	(org-agenda-skip)
 	(if (and (match-end 1)
-		 (not (= d1 (org-time-string-to-absolute
+		 (not (= d1 (org-agenda--timestamp-to-absolute
 			     (match-string 1) d1 nil show-all
 			     (current-buffer) b0))))
 	    (throw :skip nil))
@@ -6062,7 +6072,7 @@ specification like [h]h:mm."
 	      show-all (or (eq org-agenda-repeating-timestamp-show-all t)
 			   (member todo-state
 				   org-agenda-repeating-timestamp-show-all))
-	      d2 (org-time-string-to-absolute
+	      d2 (org-agenda--timestamp-to-absolute
 		  s d1 'past show-all (current-buffer) pos)
 	      diff (- d2 d1))
 	(setq suppress-prewarning
@@ -6083,7 +6093,7 @@ specification like [h]h:mm."
 		 ((eq org-agenda-skip-deadline-prewarning-if-scheduled
 		      'pre-scheduled)
 		  ;; Set prewarning to no earlier than scheduled.
-		  (min (- d2 (org-time-string-to-absolute
+		  (min (- d2 (org-agenda--timestamp-to-absolute
 			      ds d1 'past show-all (current-buffer) pos))
 		       org-deadline-warning-days))
 		 ;; Set prewarning to deadline.
@@ -6136,7 +6146,8 @@ specification like [h]h:mm."
 			 ;; time difference since date S, not since
 			 ;; closest repeater.
 			 (let ((diff (if (< (org-today) d1) diff
-				       (- (org-time-string-to-absolute s) d1))))
+				       (- (org-agenda--timestamp-to-absolute s)
+					  d1))))
 			   (cond ((= diff 0) dl0)
 				 ((> diff 0)
 				  (if (functionp dl1)
@@ -6214,9 +6225,9 @@ scheduled items with an hour specification like [h]h:mm."
 	       ;; contains a repeater and SHOW-ALL is non-nil,
 	       ;; LAST-REPEAT is the repeat closest to CURRENT.
 	       ;; Otherwise, LAST-REPEAT is equal to SCHEDULE.
-	       (last-repeat (org-time-string-to-absolute
+	       (last-repeat (org-agenda--timestamp-to-absolute
 			     s current 'past show-all (current-buffer) pos))
-	       (schedule (org-time-string-to-absolute s))
+	       (schedule (org-agenda--timestamp-to-absolute s current))
 	       (diff (- last-repeat current))
 	       (warntime (get-text-property (point) 'org-appt-warntime))
 	       (pastschedp (< schedule (org-today)))
@@ -6237,7 +6248,7 @@ scheduled items with an hour specification like [h]h:mm."
 		    ;; DEADLINE has a repeater, compare last schedule
 		    ;; repeat and last deadline repeat.
 		    (min (- last-repeat
-			    (org-time-string-to-absolute
+			    (org-agenda--timestamp-to-absolute
 			     deadline current 'past show-all
 			     (current-buffer)
 			     (save-excursion

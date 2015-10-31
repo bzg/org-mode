@@ -17646,6 +17646,8 @@ days in order to avoid rounding problems."
   "Convert a timestamp string to a number of seconds."
   (org-float-time (org-time-string-to-time s)))
 
+(org-define-error 'org-diary-sexp-no-match "Unable to match diary sexp")
+
 (defun org-time-string-to-absolute (s &optional daynr prefer show-all buffer pos)
   "Convert time stamp S to an absolute day number.
 
@@ -17654,15 +17656,22 @@ stamp, get the closest date to DAYNR.  If PREFER is
 `past' (respectively `future') return a date past (respectively
 after) or equal to DAYNR.
 
-POS is the location of time stamp S, as a buffer position.
+POS is the location of time stamp S, as a buffer position in
+BUFFER.
 
-The variable `date' is bound by the calendar when this is
-called."
+Diary sexp timestamps are matched against DAYNR, when non-nil.
+If matching fails or DAYNR is nil, `org-diary-sexp-no-match' is
+signalled."
   (cond
-   ((and daynr (string-match "\\`%%\\((.*)\\)" s))
-    (if (org-diary-sexp-entry (match-string 1 s) "" date)
+   ((string-match "\\`%%\\((.*)\\)" s)
+    ;; Sexp timestamp: try to match DAYNR, if available, since we're
+    ;; only able to match individual dates.  If it fails, raise an
+    ;; error.
+    (if (and daynr
+	     (org-diary-sexp-entry
+	      (match-string 1 s) "" (calendar-gregorian-from-absolute daynr)))
 	daynr
-      (+ daynr 1000)))
+      (signal 'org-diary-sexp-no-match (list s))))
    ((and daynr show-all) (org-closest-date s daynr prefer))
    (t (time-to-days
        (condition-case errdata
