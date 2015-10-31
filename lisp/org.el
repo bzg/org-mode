@@ -11760,7 +11760,7 @@ the default is \"/\"."
 		 (mapconcat
 		  (lambda (s) (replace-regexp-in-string "[ \t]+\\'" "" s))
 		  (loop for head in path
-			for n upto (length path)
+			for n from 0
 			collect (org-add-props
 				    head nil 'face
 				    (nth (% n org-n-level-faces) org-level-faces)))
