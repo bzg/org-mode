@@ -6052,131 +6052,124 @@ specification like [h]h:mm."
 	 (regexp (if with-hour
 		     org-deadline-time-hour-regexp
 		   org-deadline-time-regexp))
-	 (todayp (org-agenda-today-p date)) ; DATE bound by calendar
-	 (d1 (calendar-absolute-from-gregorian date)) ; DATE bound by calendar
-	 (dl0 (car org-agenda-deadline-leaders))
-	 (dl1 (nth 1 org-agenda-deadline-leaders))
-	 (dl2 (or (nth 2 org-agenda-deadline-leaders) dl1))
-	 d2 diff dfrac wdays pos pos1 category level
-	 tags suppress-prewarning ee txt head face s todo-state
-	 show-all upcomingp donep timestr warntime inherited-tags ts-date)
+	 (todayp (org-agenda-today-p date)) ; DATE bound by calendar.
+	 (current (calendar-absolute-from-gregorian date))
+	 deadline-items)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
 	(unless (save-match-data (org-at-planning-p)) (throw :skip nil))
 	(org-agenda-skip)
-	(setq s (match-string 1)
-	      txt nil
-	      pos (1- (match-beginning 1))
-	      todo-state (save-match-data (org-get-todo-state))
-	      show-all (or (eq org-agenda-repeating-timestamp-show-all t)
-			   (member todo-state
-				   org-agenda-repeating-timestamp-show-all))
-	      d2 (org-agenda--timestamp-to-absolute
-		  s d1 'past show-all (current-buffer) pos)
-	      diff (- d2 d1))
-	(setq suppress-prewarning
-	      (let ((ds (and org-agenda-skip-deadline-prewarning-if-scheduled
-			     (let ((item (buffer-substring (point-at-bol)
-							   (point-at-eol))))
-			       (save-match-data
-				 (and (string-match
-				       org-scheduled-time-regexp item)
-				      (match-string 1 item)))))))
-		(cond
-		 ((not ds) nil)
-		 ;; The current item has a scheduled date (in ds), so
-		 ;; evaluate its prewarning lead time.
-		 ((integerp org-agenda-skip-deadline-prewarning-if-scheduled)
-		  ;; Use global prewarning-restart lead time.
-		  org-agenda-skip-deadline-prewarning-if-scheduled)
-		 ((eq org-agenda-skip-deadline-prewarning-if-scheduled
-		      'pre-scheduled)
-		  ;; Set prewarning to no earlier than scheduled.
-		  (min (- d2 (org-agenda--timestamp-to-absolute
-			      ds d1 'past show-all (current-buffer) pos))
-		       org-deadline-warning-days))
-		 ;; Set prewarning to deadline.
-		 (t 0))))
-	(setq wdays (if suppress-prewarning
-			(let ((org-deadline-warning-days suppress-prewarning))
-			  (org-get-wdays s))
-		      (org-get-wdays s))
-	      dfrac (- 1 (/ (* 1.0 diff) (max wdays 1)))
-	      upcomingp (and todayp (> diff 0)))
-	;; When to show a deadline in the calendar:
-	;; If the expiration is within wdays warning time.
-	;; Past-due deadlines are only shown on the current date
-	(if (and (or (and (<= diff wdays)
-			  (and todayp (not org-agenda-only-exact-dates)))
-		     (= diff 0)))
-	    (save-excursion
-	      ;; (setq todo-state (org-get-todo-state))
-	      (setq donep (member todo-state org-done-keywords))
-	      (if (and donep
-		       (or org-agenda-skip-deadline-if-done
-			   (not (= diff 0))))
-		  (setq txt nil)
-		(setq category (org-get-category)
-		      warntime (get-text-property (point) 'org-appt-warntime))
-		(if (not (re-search-backward "^\\*+[ \t]+" nil t))
-		    (throw :skip nil)
-		  (goto-char (match-end 0))
-		  (setq pos1 (match-beginning 0))
-		  (setq level (make-string (org-reduced-level (org-outline-level)) ? ))
-		  (setq inherited-tags
-			(or (eq org-agenda-show-inherited-tags 'always)
-			    (and (listp org-agenda-show-inherited-tags)
-				 (memq 'agenda org-agenda-show-inherited-tags))
-			    (and (eq org-agenda-show-inherited-tags t)
-				 (or (eq org-agenda-use-tag-inheritance t)
-				     (memq 'agenda org-agenda-use-tag-inheritance))))
-			tags (org-get-tags-at pos1 (not inherited-tags)))
-		  (setq head (buffer-substring
-			      (point)
-			      (progn (skip-chars-forward "^\r\n")
-				     (point))))
-		  (if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
-		      (setq timestr
-			    (concat (substring s (match-beginning 1)) " "))
-		    (setq timestr 'time))
-		  (setq txt
-			(org-agenda-format-item
-			 ;; For past deadlines, make sure to report
-			 ;; time difference since date S, not since
-			 ;; closest repeater.
-			 (let ((diff (if (< (org-today) d1) diff
-				       (- (org-agenda--timestamp-to-absolute s)
-					  d1))))
-			   (cond ((= diff 0) dl0)
-				 ((> diff 0)
-				  (if (functionp dl1)
-				      (funcall dl1 diff date)
-				    (format dl1 diff)))
-				 (t
-				  (if (functionp dl2)
-				      (funcall dl2 diff date)
-				    (format dl2 (if (string= dl2 dl1)
-						    diff (abs diff)))))))
-			 head level category tags
-			 (and (= diff 0) timestr)))))
-	      (when txt
-		(setq face (org-agenda-deadline-face dfrac))
-		(org-add-props txt props
-		  'org-marker (org-agenda-new-marker pos)
-		  'warntime warntime
-		  'level level
-		  'ts-date d2
-		  'org-hd-marker (org-agenda-new-marker pos1)
-		  'priority (+ (- diff)
-			       (org-get-priority txt))
-		  'todo-state todo-state
-		  'type (if upcomingp "upcoming-deadline" "deadline")
-		  'date (if upcomingp date d2)
-		  'face (if donep 'org-agenda-done face)
-		  'undone-face face 'done-face 'org-agenda-done)
-		(push txt ee))))))
-    (nreverse ee)))
+	(let* ((s (match-string 1))
+	       (pos (1- (match-beginning 1)))
+	       (todo-state (save-match-data (org-get-todo-state)))
+	       (donep (member todo-state org-done-keywords))
+	       (show-all (or (eq org-agenda-repeating-timestamp-show-all t)
+			     (member todo-state
+				     org-agenda-repeating-timestamp-show-all)))
+	       ;; DEADLINE is the current scheduled date.  When it
+	       ;; contains a repeater and SHOW-ALL is non-nil,
+	       ;; LAST-REPEAT is the repeat closest to CURRENT.
+	       ;; Otherwise, LAST-REPEAT is equal to DEADLINE.
+	       (last-repeat (org-agenda--timestamp-to-absolute
+			     s current 'past show-all (current-buffer) pos))
+	       (deadline (org-agenda--timestamp-to-absolute s current))
+	       (diff (- last-repeat current))
+	       (suppress-prewarning
+		(let ((scheduled
+		       (and org-agenda-skip-deadline-prewarning-if-scheduled
+			    (org-entry-get nil "SCHEDULED"))))
+		  (cond
+		   ((not scheduled) nil)
+		   ;; The current item has a scheduled date, so
+		   ;; evaluate its prewarning lead time.
+		   ((integerp org-agenda-skip-deadline-prewarning-if-scheduled)
+		    ;; Use global prewarning-restart lead time.
+		    org-agenda-skip-deadline-prewarning-if-scheduled)
+		   ((eq org-agenda-skip-deadline-prewarning-if-scheduled
+			'pre-scheduled)
+		    ;; Set pre-warning to no earlier than SCHEDULED.
+		    (min (- last-repeat
+			    (org-agenda--timestamp-to-absolute
+			     scheduled current 'past show-all
+			     (current-buffer)
+			     (save-excursion
+			       (beginning-of-line)
+			       (1+ (search-forward org-deadline-string)))))
+			 org-deadline-warning-days))
+		   ;; Set pre-warning to deadline.
+		   (t 0))))
+	       (wdays (if suppress-prewarning
+			  (let ((org-deadline-warning-days suppress-prewarning))
+			    (org-get-wdays s))
+			(org-get-wdays s))))
+	  ;; When to show a deadline in the calendar: if the
+	  ;; expiration is within WDAYS warning time.  Past-due
+	  ;; deadlines are only shown on the current date
+	  (unless (or (and (<= diff wdays)
+			   (and todayp (not org-agenda-only-exact-dates)))
+		      (= diff 0))
+	    (throw :skip nil))
+	  ;; Skip done tasks if `org-agenda-skip-deadline-if-done' is
+	  ;; non-nil or if it isn't applicable to CURRENT deadline.
+	  (when (and donep
+		     (or org-agenda-skip-deadline-if-done
+			 (/= deadline current)))
+	    (throw :skip nil))
+	  (save-excursion
+	    (re-search-backward "^\\*+[ \t]+" nil t)
+	    (goto-char (match-end 0))
+	    (let* ((category (org-get-category))
+		   (level
+		    (make-string (org-reduced-level (org-outline-level)) ?\s))
+		   (head (buffer-substring (point) (line-end-position)))
+		   (inherited-tags
+		    (or (eq org-agenda-show-inherited-tags 'always)
+			(and (listp org-agenda-show-inherited-tags)
+			     (memq 'agenda org-agenda-show-inherited-tags))
+			(and (eq org-agenda-show-inherited-tags t)
+			     (or (eq org-agenda-use-tag-inheritance t)
+				 (memq 'agenda
+				       org-agenda-use-tag-inheritance)))))
+		   (tags (org-get-tags-at nil (not inherited-tags)))
+		   (timestr
+		    (if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
+			(concat (substring s (match-beginning 1)) " ")
+		      'time))
+		   (item
+		    (org-agenda-format-item
+		     ;; For past deadlines, make sure to report time
+		     ;; difference since date S, not since closest
+		     ;; repeater.
+		     (let ((diff (if (< (org-today) current) diff
+				   (- deadline current))))
+		       (if (= diff 0) (car org-agenda-deadline-leaders)
+			 (let ((future (nth 1 org-agenda-deadline-leaders))
+			       (past (nth 2 org-agenda-deadline-leaders)))
+			   (cond ((> diff 0) (format future diff))
+				 ((string= future past) (format past diff))
+				 (t (format past (abs diff)))))))
+		     head level category tags
+		     (and (= diff 0) timestr)))
+		   (face (org-agenda-deadline-face
+			  (- 1 (/ (float (- deadline current)) (max wdays 1)))))
+		   (upcomingp (and todayp (> diff 0)))
+		   (warntime (get-text-property (point) 'org-appt-warntime)))
+	      (org-add-props item props
+		'org-marker (org-agenda-new-marker pos)
+		'org-hd-marker (org-agenda-new-marker (line-beginning-position))
+		'warntime warntime
+		'level level
+		'ts-date deadline
+		'priority (- (org-get-priority item) diff)
+		'todo-state todo-state
+		'type (if upcomingp "upcoming-deadline" "deadline")
+		'date (if upcomingp date deadline)
+		'face (if donep 'org-agenda-done face)
+		'undone-face face
+		'done-face 'org-agenda-done)
+	      (push item deadline-items))))))
+    (nreverse deadline-items)))
 
 (defun org-agenda-deadline-face (fraction)
   "Return the face to displaying a deadline item.
@@ -6218,6 +6211,7 @@ scheduled items with an hour specification like [h]h:mm."
 	(let* ((s (match-string 1))
 	       (pos (1- (match-beginning 1)))
 	       (todo-state (save-match-data (org-get-todo-state)))
+	       (donep (member todo-state org-done-keywords))
 	       (show-all (or (eq org-agenda-repeating-timestamp-show-all t)
 			     (member todo-state
 				     org-agenda-repeating-timestamp-show-all)))
@@ -6281,90 +6275,86 @@ scheduled items with an hour specification like [h]h:mm."
 	  ;; Skip done habits, or tasks if
 	  ;; `org-agenda-skip-deadline-if-done' is non-nil or if it
 	  ;; was scheduled in the past anyway.
-	  (let ((donep (member todo-state org-done-keywords)))
-	    (when (and donep
-		       (or org-agenda-skip-scheduled-if-done
-			   (/= schedule current)
-			   habitp))
-	      (throw :skip nil))
-	    ;; Skip entry if it already appears as a deadline, per
-	    ;; `org-agenda-skip-scheduled-if-deadline-is-shown'.  This
-	    ;; doesn't apply to habits.
-	    (when (pcase org-agenda-skip-scheduled-if-deadline-is-shown
-		    ((guard
-		      (or (not (assq (line-beginning-position 0) deadline-pos))
-			  habitp))
-		     nil)
-		    (`repeated-after-deadline
-		     (>= last-repeat
-			 (time-to-days (org-get-deadline-time (point)))))
-		    (`not-today pastschedp)
-		    (`t t)
-		    (_ nil))
-	      (throw :skip nil))
-	    ;; Skip habits if `org-habit-show-habits' is nil, or if we
-	    ;; only show them for today.
-	    (when (and habitp
-		       (or (not (bound-and-true-p org-habit-show-habits))
-			   (and (not todayp)
-				(bound-and-true-p
-				 org-habit-show-habits-only-for-today))))
-	      (throw :skip nil))
-	    (save-excursion
-	      (re-search-backward "^\\*+[ \t]+" nil t)
-	      (goto-char (match-end 0))
-	      (let* ((category (org-get-category))
-		     (inherited-tags
-		      (or (eq org-agenda-show-inherited-tags 'always)
-			  (and (listp org-agenda-show-inherited-tags)
-			       (memq 'agenda org-agenda-show-inherited-tags))
-			  (and (eq org-agenda-show-inherited-tags t)
-			       (or (eq org-agenda-use-tag-inheritance t)
-				   (memq 'agenda
-					 org-agenda-use-tag-inheritance)))))
-		     (tags (org-get-tags-at nil (not inherited-tags)))
-		     (level
-		      (make-string (org-reduced-level (org-outline-level))
-				   ?\s))
-		     (head (buffer-substring (point) (line-end-position)))
-		     (timestr
-		      (if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
-			  (concat (substring s (match-beginning 1)) " ")
-			'time))
-		     (item (org-agenda-format-item
-			    ;; For past scheduled dates, make sure to
-			    ;; report time difference since SCHEDULE,
-			    ;; not since closest repeater.
-			    (let ((diff (if (< (org-today) current) diff
-					  (- schedule current))))
-			      (if (= diff 0) (car org-agenda-scheduled-leaders)
-				(format (nth 1 org-agenda-scheduled-leaders)
-					(- 1 diff))))
-			    head level category tags
-			    (and (= diff 0) timestr)
-			    nil habitp)))
-		(when item
-		  (let ((face (cond ((and (not habitp) pastschedp)
-				     'org-scheduled-previously)
-				    (todayp 'org-scheduled-today)
-				    (t 'org-scheduled)))
-			(habitp (and habitp (org-habit-parse-todo))))
-		    (org-add-props item props
-		      'undone-face face
-		      'face (if donep 'org-agenda-done face)
-		      'org-marker (org-agenda-new-marker pos)
-		      'org-hd-marker (org-agenda-new-marker
-				      (line-beginning-position))
-		      'type (if pastschedp "past-scheduled" "scheduled")
-		      'date (if pastschedp schedule date)
-		      'ts-date schedule
-		      'warntime warntime
-		      'level level
-		      'priority (if habitp (org-habit-get-priority habitp)
-				  (+ 94 (- 5 diff) (org-get-priority item)))
-		      'org-habit-p habitp
-		      'todo-state todo-state))
-		  (push item scheduled-items))))))))
+	  (when (and donep
+		     (or org-agenda-skip-scheduled-if-done
+			 (/= schedule current)
+			 habitp))
+	    (throw :skip nil))
+	  ;; Skip entry if it already appears as a deadline, per
+	  ;; `org-agenda-skip-scheduled-if-deadline-is-shown'.  This
+	  ;; doesn't apply to habits.
+	  (when (pcase org-agenda-skip-scheduled-if-deadline-is-shown
+		  ((guard
+		    (or (not (assq (line-beginning-position 0) deadline-pos))
+			habitp))
+		   nil)
+		  (`repeated-after-deadline
+		   (>= last-repeat
+		       (time-to-days (org-get-deadline-time (point)))))
+		  (`not-today pastschedp)
+		  (`t t)
+		  (_ nil))
+	    (throw :skip nil))
+	  ;; Skip habits if `org-habit-show-habits' is nil, or if we
+	  ;; only show them for today.
+	  (when (and habitp
+		     (or (not (bound-and-true-p org-habit-show-habits))
+			 (and (not todayp)
+			      (bound-and-true-p
+			       org-habit-show-habits-only-for-today))))
+	    (throw :skip nil))
+	  (save-excursion
+	    (re-search-backward "^\\*+[ \t]+" nil t)
+	    (goto-char (match-end 0))
+	    (let* ((category (org-get-category))
+		   (inherited-tags
+		    (or (eq org-agenda-show-inherited-tags 'always)
+			(and (listp org-agenda-show-inherited-tags)
+			     (memq 'agenda org-agenda-show-inherited-tags))
+			(and (eq org-agenda-show-inherited-tags t)
+			     (or (eq org-agenda-use-tag-inheritance t)
+				 (memq 'agenda
+				       org-agenda-use-tag-inheritance)))))
+		   (tags (org-get-tags-at nil (not inherited-tags)))
+		   (level
+		    (make-string (org-reduced-level (org-outline-level)) ?\s))
+		   (head (buffer-substring (point) (line-end-position)))
+		   (timestr
+		    (if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
+			(concat (substring s (match-beginning 1)) " ")
+		      'time))
+		   (item (org-agenda-format-item
+			  ;; For past scheduled dates, make sure to
+			  ;; report time difference since SCHEDULE,
+			  ;; not since closest repeater.
+			  (let ((diff (if (< (org-today) current) diff
+					(- schedule current))))
+			    (if (= diff 0) (car org-agenda-scheduled-leaders)
+			      (format (nth 1 org-agenda-scheduled-leaders)
+				      (- 1 diff))))
+			  head level category tags
+			  (and (= diff 0) timestr)
+			  nil habitp))
+		   (face (cond ((and (not habitp) pastschedp)
+				'org-scheduled-previously)
+			       (todayp 'org-scheduled-today)
+			       (t 'org-scheduled)))
+		   (habitp (and habitp (org-habit-parse-todo))))
+	      (org-add-props item props
+		'undone-face face
+		'face (if donep 'org-agenda-done face)
+		'org-marker (org-agenda-new-marker pos)
+		'org-hd-marker (org-agenda-new-marker (line-beginning-position))
+		'type (if pastschedp "past-scheduled" "scheduled")
+		'date (if pastschedp schedule date)
+		'ts-date schedule
+		'warntime warntime
+		'level level
+		'priority (if habitp (org-habit-get-priority habitp)
+			    (+ 94 (- 5 diff) (org-get-priority item)))
+		'org-habit-p habitp
+		'todo-state todo-state)
+	      (push item scheduled-items))))))
     (nreverse scheduled-items)))
 
 (defun org-agenda-get-blocks ()
