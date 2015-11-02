@@ -3150,96 +3150,93 @@ item, and depth of the current sub-list, starting at 0.
 Obviously, `counter' is only available for parameters applying to
 items."
   (interactive)
-  (let* ((p params)
-	 (splicep (plist-get p :splice))
-	 (ostart (plist-get p :ostart))
-	 (oend (plist-get p :oend))
-	 (ustart (plist-get p :ustart))
-	 (uend (plist-get p :uend))
-	 (dstart (plist-get p :dstart))
-	 (dend (plist-get p :dend))
-	 (dtstart (plist-get p :dtstart))
-	 (dtend (plist-get p :dtend))
-	 (ddstart (plist-get p :ddstart))
-	 (ddend (plist-get p :ddend))
-	 (istart (plist-get p :istart))
-	 (icount (plist-get p :icount))
-	 (iend (plist-get p :iend))
-	 (isep (plist-get p :isep))
-	 (lsep (plist-get p :lsep))
-	 (csep (plist-get p :csep))
-	 (cbon (plist-get p :cbon))
-	 (cboff (plist-get p :cboff))
-	 (cbtrans (plist-get p :cbtrans))
-	 (nobr (plist-get p :nobr))
-	 export-sublist			; for byte-compiler
-	 (export-item
-	  (function
-	   ;; Export an item ITEM of type TYPE, at DEPTH.  First
-	   ;; string in item is treated in a special way as it can
-	   ;; bring extra information that needs to be processed.
-	   (lambda (item type depth)
-	     (let* ((counter (pop item))
-		    (fmt (concat
-			  (cond
-			   ((eq type 'descriptive)
-			    ;; Stick DTSTART to ISTART by
-			    ;; left-trimming the latter.
-			    (concat (let ((s (eval istart)))
-				      (or (and (string-match "[ \t\n\r]+\\'" s)
-					       (replace-match "" t t s))
-					  istart))
-				    "%s" (eval ddend)))
-			   ((and counter (eq type 'ordered))
-			    (concat (eval icount) "%s"))
-			   (t (concat (eval istart) "%s")))
-			  (eval iend)))
-		    (first (car item)))
-	       ;; Replace checkbox if any is found.
-	       (cond
-		((string-match "\\[CBON\\]" first)
-		 (setq first (replace-match cbon t t first)))
-		((string-match "\\[CBOFF\\]" first)
-		 (setq first (replace-match cboff t t first)))
-		((string-match "\\[CBTRANS\\]" first)
-		 (setq first (replace-match cbtrans t t first))))
-	       ;; Replace line breaks if required
-	       (when nobr (setq first (org-list-item-trim-br first)))
-	       ;; Insert descriptive term if TYPE is `descriptive'.
-	       (when (eq type 'descriptive)
-		 (let* ((complete
-			 (string-match "^\\(.*\\)[ \t]+::[ \t]*" first))
-			(term (if complete
-				  (save-match-data
-				    (org-trim (match-string 1 first)))
-				"???"))
-			(desc (if complete (substring first (match-end 0))
-				first)))
-		   (setq first (concat (eval dtstart) term (eval dtend)
-				       (eval ddstart) desc))))
-	       (setcar item first)
-	       (format fmt
-		       (mapconcat (lambda (e)
-				    (if (stringp e) e
-				      (funcall export-sublist e (1+ depth))))
-				  item (or (eval csep) "")))))))
-	 (export-sublist
-	  (function
-	   ;; Export sublist SUB at DEPTH.
-	   (lambda (sub depth)
-	     (let* ((type (car sub))
-		    (items (cdr sub))
-		    (fmt (concat (cond
-				  (splicep "%s")
-				  ((eq type 'ordered)
-				   (concat (eval ostart) "%s" (eval oend)))
-				  ((eq type 'descriptive)
-				   (concat (eval dstart) "%s" (eval dend)))
-				  (t (concat (eval ustart) "%s" (eval uend))))
-				 (eval lsep))))
-	       (format fmt (mapconcat (lambda (e)
-					(funcall export-item e type depth))
-				      items (or (eval isep) ""))))))))
+  (letrec ((p params)
+	   (splicep (plist-get p :splice))
+	   (ostart (plist-get p :ostart))
+	   (oend (plist-get p :oend))
+	   (ustart (plist-get p :ustart))
+	   (uend (plist-get p :uend))
+	   (dstart (plist-get p :dstart))
+	   (dend (plist-get p :dend))
+	   (dtstart (plist-get p :dtstart))
+	   (dtend (plist-get p :dtend))
+	   (ddstart (plist-get p :ddstart))
+	   (ddend (plist-get p :ddend))
+	   (istart (plist-get p :istart))
+	   (icount (plist-get p :icount))
+	   (iend (plist-get p :iend))
+	   (isep (plist-get p :isep))
+	   (lsep (plist-get p :lsep))
+	   (csep (plist-get p :csep))
+	   (cbon (plist-get p :cbon))
+	   (cboff (plist-get p :cboff))
+	   (cbtrans (plist-get p :cbtrans))
+	   (nobr (plist-get p :nobr))
+	   (export-item
+	    ;; Export an item ITEM of type TYPE, at DEPTH.  First
+	    ;; string in item is treated in a special way as it can
+	    ;; bring extra information that needs to be processed.
+	    (lambda (item type depth)
+	      (let* ((counter (pop item))
+		     (fmt (concat
+			   (cond
+			    ((eq type 'descriptive)
+			     ;; Stick DTSTART to ISTART by
+			     ;; left-trimming the latter.
+			     (concat (let ((s (eval istart)))
+				       (or (and (string-match "[ \t\n\r]+\\'" s)
+						(replace-match "" t t s))
+					   istart))
+				     "%s" (eval ddend)))
+			    ((and counter (eq type 'ordered))
+			     (concat (eval icount) "%s"))
+			    (t (concat (eval istart) "%s")))
+			   (eval iend)))
+		     (first (car item)))
+		;; Replace checkbox if any is found.
+		(cond
+		 ((string-match "\\[CBON\\]" first)
+		  (setq first (replace-match cbon t t first)))
+		 ((string-match "\\[CBOFF\\]" first)
+		  (setq first (replace-match cboff t t first)))
+		 ((string-match "\\[CBTRANS\\]" first)
+		  (setq first (replace-match cbtrans t t first))))
+		;; Replace line breaks if required
+		(when nobr (setq first (org-list-item-trim-br first)))
+		;; Insert descriptive term if TYPE is `descriptive'.
+		(when (eq type 'descriptive)
+		  (let* ((complete
+			  (string-match "^\\(.*\\)[ \t]+::[ \t]*" first))
+			 (term (if complete
+				   (save-match-data
+				     (org-trim (match-string 1 first)))
+				 "???"))
+			 (desc (if complete (substring first (match-end 0))
+				 first)))
+		    (setq first (concat (eval dtstart) term (eval dtend)
+					(eval ddstart) desc))))
+		(setcar item first)
+		(format fmt
+			(mapconcat (lambda (e)
+				     (if (stringp e) e
+				       (funcall export-sublist e (1+ depth))))
+				   item (or (eval csep) ""))))))
+	   (export-sublist
+	    (lambda (sub depth)
+	      ;; Export sublist SUB at DEPTH.
+	      (let* ((type (car sub))
+		     (items (cdr sub))
+		     (fmt (concat (cond
+				   (splicep "%s")
+				   ((eq type 'ordered)
+				    (concat (eval ostart) "%s" (eval oend)))
+				   ((eq type 'descriptive)
+				    (concat (eval dstart) "%s" (eval dend)))
+				   (t (concat (eval ustart) "%s" (eval uend))))
+				  (eval lsep))))
+		(format fmt (mapconcat (lambda (e)
+					 (funcall export-item e type depth))
+				       items (or (eval isep) "")))))))
     (concat (funcall export-sublist list 0) "\n")))
 
 (defun org-list-to-latex (list &optional _params)
