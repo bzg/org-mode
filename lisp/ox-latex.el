@@ -1480,22 +1480,20 @@ just outside of it."
        (org-export-data
 	(org-export-get-footnote-definition ref info) info))))
    ;; Find every footnote reference in ELEMENT.
-   (let* (all-refs
-	  search-refs			; For byte-compiler.
-	  (search-refs
-	   (function
-	    (lambda (data)
-	      ;; Return a list of all footnote references never seen
-	      ;; before in DATA.
-	      (org-element-map data 'footnote-reference
-		(lambda (ref)
-		  (when (org-export-footnote-first-reference-p ref info)
-		    (push ref all-refs)
-		    (when (eq (org-element-property :type ref) 'standard)
-		      (funcall search-refs
-			       (org-export-get-footnote-definition ref info)))))
-		info)
-	      (reverse all-refs)))))
+   (letrec ((all-refs)
+	    (search-refs
+	     (lambda (data)
+	       ;; Return a list of all footnote references never seen
+	       ;; before in DATA.
+	       (org-element-map data 'footnote-reference
+		 (lambda (ref)
+		   (when (org-export-footnote-first-reference-p ref info)
+		     (push ref all-refs)
+		     (when (eq (org-element-property :type ref) 'standard)
+		       (funcall search-refs
+				(org-export-get-footnote-definition ref info)))))
+		 info)
+	       (reverse all-refs))))
      (funcall search-refs element))
    ""))
 
