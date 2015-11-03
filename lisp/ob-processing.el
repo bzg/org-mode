@@ -179,17 +179,16 @@ a variable of the same value."
 
 DATA is a list.  Return type as a symbol.
 
-The type is `String' if any element in DATA is
-a string.  Otherwise, it is either `float', if some elements are
-floats, or `int'."
-  (let* ((type 'int)
-	 find-type			; For byte-compiler.
-	 (find-type
-	  (lambda (row)
-	    (dolist (e row type)
-	      (cond ((listp e) (setq type (funcall find-type e)))
-		    ((stringp e) (throw 'exit 'String))
-		    ((floatp e) (setq type 'float)))))))
+The type is `String' if any element in DATA is a string.
+Otherwise, it is either `float', if some elements are floats, or
+`int'."
+  (letrec ((type 'int)
+	   (find-type
+	    (lambda (row)
+	      (dolist (e row type)
+		(cond ((listp e) (setq type (funcall find-type e)))
+		      ((stringp e) (throw 'exit 'String))
+		      ((floatp e) (setq type 'float)))))))
     (catch 'exit (funcall find-type data))))
 
 (provide 'ob-processing)
