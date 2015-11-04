@@ -16166,11 +16166,36 @@ used.
 
 The @code{:cache} header argument controls the use of in-buffer caching of
 the results of evaluating code blocks.  It can be used to avoid re-evaluating
-unchanged code blocks.  Note that the @code{:cache} header argument will not
-attempt to cache results when the @code{:session} header argument is used,
-because the results of the code block execution may be stored in the session
-outside of the Org mode buffer.  The @code{:cache} header argument can have
-one of two values: @code{yes} or @code{no}.
+unchanged code blocks.  When the cache is active, a source block is not
+re-evaluated if a result for it is present in the buffer and neither the
+header arguments (including the value of @code{:var} references) nor the text
+of the block itself has changed since the result was computed.  The feature
+helps avoid re-running long calculations.  However, there are edge cases and
+you should not rely on the cache to behave reliably in all circumstances.
+
+The caching feature works best when a babel block is a pure function of its
+arguments (@pxref{var}).  That is, the function always returns the same
+results when given the same arguments, and does not touch external resources
+(like the filesystem or the language’s RNG) in any way.@footnote{The
+documentation of the knitr reproducible research package for the R language
+has some good discussion of issues that may arise when using the cache in
+such a context.  See @uref{http://yihui.name/knitr/demo/cache/}, especially
+the sections ``Even more stuff for cache?'' and ``Reproducibility with RNG''.
+(Obviously, you will have to abstract away from the knitr implementation
+details which the documentation also discusses.)}
+
+Note that the @code{:cache} header argument will attempt to cache results
+when the @code{:session} header argument is used, even though the results of
+the code block execution stored in the session may lead to unexpected
+results.
+
+Noweb references (@pxref{Noweb reference syntax}) are currently not expanded
+when calculating whether the text of the code block has changed.  Perhaps in
+principle they ought to be, but this could introduce unexpected complexity.
+See @uref{http://thread.gmane.org/gmane.emacs.orgmode/79046}.
+
+The @code{:cache} header argument can have one of two values: @code{yes} or
+@code{no}.
 
 @itemize @bullet
 @item @code{no}
