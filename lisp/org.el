@@ -10441,7 +10441,9 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 
     (unless (string-match "\\S-" desc) (setq desc nil))
     (if remove (apply 'delete-region remove))
-    (insert (org-make-link-string link desc))))
+    (insert (org-make-link-string link desc))
+    ;; Redisplay so as the new link has proper invisible characters.
+    (sit-for 0)))
 
 (defun org-link-try-special-completion (type)
   "If there is completion support for link type TYPE, offer it."
