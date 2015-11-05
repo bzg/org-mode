@@ -1,4 +1,4 @@
-;;; ox-org.el --- Org Back-End for Org Export Engine
+;;; ox-org.el --- Org Back-End for Org Export Engine -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013-2015 Free Software Foundation, Inc.
 
@@ -26,6 +26,7 @@
 
 (require 'ox)
 (declare-function htmlize-buffer "htmlize" (&optional buffer))
+(defvar htmlize-output-type)
 
 (defgroup org-export-org nil
   "Options for exporting Org mode files to Org."
@@ -109,7 +110,7 @@ setting of `org-html-htmlize-output-type' is `css'."
 	      (if a (org-org-export-to-org t s v b)
 		(org-open-file (org-org-export-to-org nil s v b))))))))
 
-(defun org-org-identity (blob contents info)
+(defun org-org-identity (blob contents _info)
   "Transcode BLOB element or object back into Org syntax.
 CONTENTS is its contents, as a string or nil.  INFO is ignored."
   (let ((case-fold-search t))
@@ -131,7 +132,7 @@ CONTENTS is its contents, as a string or nil.  INFO is ignored."
 			      (org-export-get-relative-level headline info))
     (org-element-headline-interpreter headline contents)))
 
-(defun org-org-keyword (keyword contents info)
+(defun org-org-keyword (keyword _contents _info)
   "Transcode KEYWORD element back into Org syntax.
 CONTENTS is nil.  INFO is ignored."
   (let ((key (org-element-property :key keyword)))
@@ -139,7 +140,7 @@ CONTENTS is nil.  INFO is ignored."
 		    '("AUTHOR" "CREATOR" "DATE" "EMAIL" "OPTIONS" "TITLE"))
       (org-element-keyword-interpreter keyword nil))))
 
-(defun org-org-link (link contents info)
+(defun org-org-link (link contents _info)
   "Transcode LINK object back into Org syntax.
 CONTENTS is the description of the link, as a string, or nil.
 INFO is a plist containing current export state."
