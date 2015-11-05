@@ -1338,23 +1338,8 @@ inferior to file-local settings."
    ;; ... and from subtree, when appropriate.
    (and subtreep (org-export--get-subtree-options backend))
    ;; Eventually add misc. properties.
-   (list
-    :back-end
-    backend
-    :translate-alist (org-export-get-all-transcoders backend)
-    :id-alist
-    ;; Collect id references.
-    (let (alist)
-      (org-with-wide-buffer
-       (goto-char (point-min))
-       (while (re-search-forward "\\[\\[id:\\S-+?\\]" nil t)
-	 (let ((link (org-element-context)))
-	   (when (eq (org-element-type link) 'link)
-	     (let* ((id (org-element-property :path link))
-		    (file (car (org-id-find id))))
-	       (when file
-		 (push (cons id (file-relative-name file)) alist)))))))
-      alist))))
+   (list :back-end backend
+	 :translate-alist (org-export-get-all-transcoders backend))))
 
 (defun org-export--parse-option-keyword (options &optional backend)
   "Parse an OPTIONS line and return values as a plist.
@@ -1659,8 +1644,11 @@ Following tree properties are set or updated:
 		   of level 2 should be considered as a level
 		   1 headline in the context.
 
-`:headline-numbering' Alist of all headlines as key an the
+`:headline-numbering' Alist of all headlines as key and the
 		      associated numbering as value.
+
+`:id-alist' Alist of all ID references as key and associated file
+            as value.
 
 Return updated plist."
   ;; Install the parse tree in the communication channel.
@@ -1673,10 +1661,22 @@ Return updated plist."
 		   (- 1 (org-export--get-min-level data info))))
   ;; Properties order doesn't matter: get the rest of the tree
   ;; properties.
-  (nconc
-   `(:headline-numbering ,(org-export--collect-headline-numbering data info)
-     :exported-data ,(make-hash-table :test 'eq :size 4001))
-   info))
+  (setq info
+	(plist-put info
+		   :headline-numbering
+		   (org-export--collect-headline-numbering data info)))
+  (setq info
+	(plist-put info
+		   :exported-data (make-hash-table :test #'eq :size 4001)))
+  (plist-put info
+	     :id-alist
+	     ;; Collect id references.
+	     (org-element-map data 'link
+	       (lambda (l)
+		 (and (string= (org-element-property :type l) "id")
+		      (let* ((id (org-element-property :path l))
+			     (file (car (org-id-find id))))
+			(and file (cons id (file-relative-name file)))))))))
 
 (defun org-export--get-min-level (data options)
   "Return minimum exportable headline's level in DATA.
