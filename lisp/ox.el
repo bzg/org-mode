@@ -2943,7 +2943,8 @@ Return code as a string."
       ;; attributes, unavailable in its copy.
       (let* ((org-export-current-backend (org-export-backend-name backend))
 	     (info (org-combine-plists
-		    (org-export--get-export-attributes)
+		    (org-export--get-export-attributes
+		     backend subtreep visible-only body-only)
 		    (org-export--get-buffer-attributes)))
 	     (parsed-keywords
 	      (delq nil
@@ -3031,9 +3032,7 @@ Return code as a string."
 		(plist-get info :filter-parse-tree) tree info))
 	 ;; Now tree is complete, compute its properties and add them
 	 ;; to communication channel.
-	 (setq info
-	       (org-combine-plists
-		info (org-export--collect-tree-properties tree info)))
+	 (setq info (org-export--collect-tree-properties tree info))
 	 ;; Eventually transcode TREE.  Wrap the resulting string into
 	 ;; a template.
 	 (let* ((body (org-element-normalize-string
