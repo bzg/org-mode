@@ -1281,7 +1281,7 @@ The back-end could then be called with, for example:
 ;;    `org-export-options-alist' variable.
 ;;
 ;; 2. Tree properties are extracted directly from the parsed tree,
-;;    just before export, by `org-export-collect-tree-properties'.
+;;    just before export, by `org-export--collect-tree-properties'.
 
 ;;;; Environment Options
 ;;
@@ -1628,7 +1628,7 @@ BLOB is the element or object considered."
 ;;
 ;; Tree properties are information extracted from parse tree.  They
 ;; are initialized at the beginning of the transcoding process by
-;; `org-export-collect-tree-properties'.
+;; `org-export--collect-tree-properties'.
 ;;
 ;; Dedicated functions focus on computing the value of specific tree
 ;; properties during initialization.  Thus,
@@ -1639,7 +1639,7 @@ BLOB is the element or object considered."
 ;; `org-export--collect-headline-numbering' builds an alist between
 ;; headlines and their numbering.
 
-(defun org-export-collect-tree-properties (data info)
+(defun org-export--collect-tree-properties (data info)
   "Extract tree properties from parse tree.
 
 DATA is the parse tree from which information is retrieved.  INFO
@@ -3040,7 +3040,7 @@ Return code as a string."
 	 ;; to communication channel.
 	 (setq info
 	       (org-combine-plists
-		info (org-export-collect-tree-properties tree info)))
+		info (org-export--collect-tree-properties tree info)))
 	 ;; Eventually transcode TREE.  Wrap the resulting string into
 	 ;; a template.
 	 (let* ((body (org-element-normalize-string

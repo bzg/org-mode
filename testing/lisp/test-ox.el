@@ -52,7 +52,7 @@ variable, and communication channel under `info'."
        (org-export--prune-tree tree info)
        (org-export--remove-uninterpreted-data tree info)
        (let ((info (org-combine-plists
-		    info (org-export-collect-tree-properties tree info))))
+		    info (org-export--collect-tree-properties tree info))))
 	 ,@body))))
 
 
