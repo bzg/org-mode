@@ -1,4 +1,4 @@
-;;; ox-publish.el --- Publish Related Org Mode Files as a Website
+;;; ox-publish.el --- Publish Related Org Mode Files as a Website -*- lexical-binding: t; -*-
 ;; Copyright (C) 2006-2015 Free Software Foundation, Inc.
 
 ;; Author: David O'Toole <dto@gnu.org>
@@ -38,7 +38,7 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 (require 'format-spec)
 (require 'ox)
 
@@ -341,7 +341,7 @@ You could use brackets to delimit on what part the link will be.
   (concat "X" (if (fboundp 'sha1) (sha1 filename) (md5 filename))))
 
 (defun org-publish-needed-p
-  (filename &optional pub-dir pub-func true-pub-dir base-dir)
+  (filename &optional pub-dir pub-func _true-pub-dir base-dir)
   "Non-nil if FILENAME should be published in PUB-DIR using PUB-FUNC.
 TRUE-PUB-DIR is where the file will truly end up.  Currently we
 are not using this - maybe it can eventually be used to check if
@@ -358,7 +358,7 @@ still decide about that independently."
     rtn))
 
 (defun org-publish-update-timestamp
-  (filename &optional pub-dir pub-func base-dir)
+  (filename &optional pub-dir pub-func _base-dir)
   "Update publishing timestamp for file FILENAME.
 If there is no timestamp, create one."
   (let ((key (org-publish-timestamp-filename filename pub-dir pub-func))
@@ -367,10 +367,9 @@ If there is no timestamp, create one."
 
 (defun org-publish-remove-all-timestamps ()
   "Remove all files in the timestamp directory."
-  (let ((dir org-publish-timestamp-directory)
-	files)
+  (let ((dir org-publish-timestamp-directory))
     (when (and (file-exists-p dir) (file-directory-p dir))
-      (mapc 'delete-file (directory-files dir 'full "[^.]\\'"))
+      (mapc #'delete-file (directory-files dir 'full "[^.]\\'"))
       (org-publish-reset-cache))))
 
 
@@ -436,37 +435,35 @@ This splices all the components into the list."
     retval))
 
 (defun org-publish-get-base-files-1
-  (base-dir &optional recurse match skip-file skip-dir)
+    (base-dir &optional recurse match skip-file skip-dir)
   "Set `org-publish-temp-files' with files from BASE-DIR directory.
 If RECURSE is non-nil, check BASE-DIR recursively.  If MATCH is
 non-nil, restrict this list to the files matching the regexp
 MATCH.  If SKIP-FILE is non-nil, skip file matching the regexp
 SKIP-FILE.  If SKIP-DIR is non-nil, don't check directories
 matching the regexp SKIP-DIR when recursing through BASE-DIR."
-  (mapc (lambda (f)
-	  (let ((fd-p (file-directory-p f))
-		(fnd (file-name-nondirectory f)))
-	    (if (and fd-p recurse
-		     (not (string-match "^\\.+$" fnd))
-		     (if skip-dir (not (string-match skip-dir fnd)) t))
-		(org-publish-get-base-files-1
-		 f recurse match skip-file skip-dir)
-	      (unless (or fd-p ;; this is a directory
-			  (and skip-file (string-match skip-file fnd))
-			  (not (file-exists-p (file-truename f)))
-			  (not (string-match match fnd)))
-
-		(pushnew f org-publish-temp-files)))))
-	(let ((all-files (if (not recurse) (directory-files base-dir t match)
-			   ;; If RECURSE is non-nil, we want all files
-			   ;; matching MATCH and sub-directories.
-			   (org-remove-if-not
-			    (lambda (file)
-			      (or (file-directory-p file)
-				  (and match (string-match match file))))
-			    (directory-files base-dir t)))))
-	  (if (not org-publish-sitemap-requested) all-files
-	    (sort all-files 'org-publish-compare-directory-files)))))
+  (let ((all-files (if (not recurse) (directory-files base-dir t match)
+		     ;; If RECURSE is non-nil, we want all files
+		     ;; matching MATCH and sub-directories.
+		     (org-remove-if-not
+		      (lambda (file)
+			(or (file-directory-p file)
+			    (and match (string-match match file))))
+		      (directory-files base-dir t)))))
+    (dolist (f (if (not org-publish-sitemap-requested) all-files
+		 (sort all-files #'org-publish-compare-directory-files)))
+      (let ((fd-p (file-directory-p f))
+	    (fnd (file-name-nondirectory f)))
+	(if (and fd-p recurse
+		 (not (string-match "^\\.+$" fnd))
+		 (if skip-dir (not (string-match skip-dir fnd)) t))
+	    (org-publish-get-base-files-1
+	     f recurse match skip-file skip-dir)
+	  (unless (or fd-p		; This is a directory.
+		      (and skip-file (string-match skip-file fnd))
+		      (not (file-exists-p (file-truename f)))
+		      (not (string-match match fnd)))
+	    (pushnew f org-publish-temp-files)))))))
 
 (defun org-publish-get-base-files (project &optional exclude-regexp)
   "Return a list of all files in PROJECT.
@@ -508,19 +505,16 @@ matching filenames."
       (setq org-publish-sitemap-sort-folders nil))
 
     (setq org-publish-temp-files nil)
-    (if org-publish-sitemap-requested
-	(pushnew (expand-file-name (concat base-dir sitemap-filename))
-		  org-publish-temp-files))
+    (when org-publish-sitemap-requested
+      (pushnew (expand-file-name (concat base-dir sitemap-filename))
+	       org-publish-temp-files))
     (org-publish-get-base-files-1 base-dir recurse match
 				  ;; FIXME distinguish exclude regexp
 				  ;; for skip-file and skip-dir?
 				  exclude-regexp exclude-regexp)
-    (mapc (lambda (f)
-	    (pushnew
-	     (expand-file-name (concat base-dir f))
-	     org-publish-temp-files))
-	  include-list)
-    org-publish-temp-files))
+    (dolist (f include-list org-publish-temp-files)
+      (pushnew (expand-file-name (concat base-dir f))
+	       org-publish-temp-files))))
 
 (defun org-publish-get-project-from-filename (filename &optional up)
   "Return the project that FILENAME belongs to."
@@ -541,9 +535,7 @@ matching filenames."
 	    (when
 		(or (and i
 			 (member filename
-				 (mapcar (lambda (file)
-					   (expand-file-name file b))
-					 i)))
+				 (dolist (file i) (expand-file-name file b))))
 		    (and (not (and e (string-match e filename)))
 			 (string-match xm filename)))
 	      (setq project-name (car prj))
@@ -597,7 +589,7 @@ Return output file name."
       ;; Remove opened buffer in the process.
       (unless visitingp (kill-buffer work-buffer)))))
 
-(defun org-publish-attachment (plist filename pub-dir)
+(defun org-publish-attachment (_plist filename pub-dir)
   "Publish a file with no transformation of any kind.
 
 FILENAME is the filename of the Org file to be published.  PLIST
@@ -733,7 +725,6 @@ Default for SITEMAP-FILENAME is `sitemap.org'."
 	 (sitemap-sans-extension
 	  (plist-get project-plist :sitemap-sans-extension))
 	 (visiting (find-buffer-visiting sitemap-filename))
-	 (ifn (file-name-nondirectory sitemap-filename))
 	 file sitemap-buffer)
     (with-current-buffer
 	(let ((org-inhibit-startup t))
@@ -742,8 +733,7 @@ Default for SITEMAP-FILENAME is `sitemap.org'."
       (erase-buffer)
       (insert (concat "#+TITLE: " sitemap-title "\n\n"))
       (while (setq file (pop files))
-	(let ((fn (file-name-nondirectory file))
-	      (link (file-relative-name file dir))
+	(let ((link (file-relative-name file dir))
 	      (oldlocal localdir))
 	  (when sitemap-sans-extension
 	    (setq link (file-name-sans-extension link)))
@@ -884,7 +874,7 @@ publishing will be done asynchronously, in another process."
     (cond
      ((not project))
      (async
-      (org-export-async-start (lambda (results) nil)
+      (org-export-async-start (lambda (_) nil)
 	`(let ((org-publish-use-timestamps-flag
 		,(and (not force) org-publish-use-timestamps-flag)))
 	   ;; Expand components right now as external process may not
@@ -905,7 +895,7 @@ optional argument ASYNC, publishing will be done asynchronously,
 in another process."
   (interactive "P")
   (if async
-      (org-export-async-start (lambda (results) nil)
+      (org-export-async-start (lambda (_) nil)
 	`(progn
 	   (when ',force (org-publish-remove-all-timestamps))
 	   (let ((org-publish-use-timestamps-flag
@@ -927,7 +917,7 @@ asynchronously, in another process."
   (interactive "P")
   (let ((file (buffer-file-name (buffer-base-buffer))))
     (if async
-	(org-export-async-start (lambda (results) nil)
+	(org-export-async-start (lambda (_) nil)
 	  `(let ((org-publish-use-timestamps-flag
 		  (if ',force nil ,org-publish-use-timestamps-flag)))
 	     (org-publish-file ,file)))
@@ -953,7 +943,7 @@ the project."
 
 ;;; Index generation
 
-(defun org-publish-collect-index (output backend info)
+(defun org-publish-collect-index (output _backend info)
   "Update index for a file in cache.
 
 OUTPUT is the output from transcoding current file.  BACKEND is
@@ -1067,7 +1057,7 @@ publishing directory."
 ;; This part implements tools to resolve [[file.org::*Some headline]]
 ;; links, where "file.org" belongs to the current project.
 
-(defun org-publish--collect-references (output backend info)
+(defun org-publish--collect-references (output _backend info)
   "Store headlines references for current published file.
 
 OUPUT is the produced output, as a string.  BACKEND is the export
@@ -1228,7 +1218,7 @@ If FREE-CACHE, empty the cache."
   (setq org-publish-cache nil))
 
 (defun org-publish-cache-file-needs-publishing
-  (filename &optional pub-dir pub-func base-dir)
+    (filename &optional pub-dir pub-func _base-dir)
   "Check the timestamp of the last publishing of FILENAME.
 Return non-nil if the file needs publishing.  Also check if
 any included files have been more recently published, so that
@@ -1256,17 +1246,14 @@ the file including them will be republished as well."
 			      (org-remove-double-quotes
 			       (match-string 1 value)))))))
 	    (when included-file
-	      (add-to-list 'included-files-ctime
-			   (org-publish-cache-ctime-of-src
-			    (expand-file-name included-file))
-			   t)))))
+	      (push (org-publish-cache-ctime-of-src
+		     (expand-file-name included-file))
+		    included-files-ctime)))))
       (unless visiting (kill-buffer buf)))
-    (if (null pstamp) t
-      (let ((ctime (org-publish-cache-ctime-of-src filename)))
-	(or (< pstamp ctime)
-	    (when included-files-ctime
-	      (not (null (delq nil (mapcar (lambda (ct) (< ctime ct))
-					   included-files-ctime))))))))))
+    (or (null pstamp)
+	(let ((ctime (org-publish-cache-ctime-of-src filename)))
+	  (or (< pstamp ctime)
+	      (cl-some (lambda (ct) (< ctime ct)) included-files-ctime))))))
 
 (defun org-publish-cache-set-file-property
   (filename property value &optional project-name)
