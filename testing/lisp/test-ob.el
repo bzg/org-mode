@@ -87,32 +87,6 @@ should still return the link."
 	     org-babel-src-block-regexp
 	     (replace-regexp-in-string body "" test-block)))))
 
-(ert-deftest test-org-babel/get-header ()
-  (should (not (org-babel-get-header
-		org-babel-default-header-args :doesnt-exist)))
-  (should(equal '((:session . "none"))
-		(org-babel-get-header
-		 org-babel-default-header-args :session)))
-  (should(equal '((:session . "none"))
-		(org-babel-get-header
-		 org-babel-default-header-args :session nil)))
-  (should (not (org-babel-get-header
-		org-babel-default-header-args :SESSION)))
-  (should (equal '((:tangle . "no"))
-		 (org-babel-get-header
-		  org-babel-default-header-args :tangle)))
-  ;; with OTHERS option
-  (should (equal org-babel-default-header-args
-		 (org-babel-get-header
-		  org-babel-default-header-args :doesnt-exist 'others)))
-  (should (equal org-babel-default-header-args
-		 (org-babel-get-header
-		  org-babel-default-header-args nil 'others)))
-  (should (null
-	   (assoc :noweb
-		  (org-babel-get-header
-		   org-babel-default-header-args :noweb 'others)))))
-
 (ert-deftest test-org-babel/default-inline-header-args ()
   (should(equal
 	  '((:session . "none")
