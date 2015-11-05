@@ -4528,6 +4528,10 @@ If `org-enable-table-editor' is nil, return nil unconditionally."
 	    (table-recognize-table)
 	    (message "recognizing table.el table...done")))
       (error "This should not happen"))))
+;;; This function is not used by org core since commit 6d1e3082, Feb 2010
+(make-obsolete 'org-table-recognize-table.el
+	       "please notify the org mailing list if you use this function."
+	       "Org 9.0")
 
 (defun org-at-table-hline-p ()
   "Non-nil when point is inside a hline in a table.
