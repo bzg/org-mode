@@ -1336,10 +1336,7 @@ inferior to file-local settings."
    ;; ... from in-buffer settings...
    (org-export--get-inbuffer-options backend)
    ;; ... and from subtree, when appropriate.
-   (and subtreep (org-export--get-subtree-options backend))
-   ;; Eventually add misc. properties.
-   (list :back-end backend
-	 :translate-alist (org-export-get-all-transcoders backend))))
+   (and subtreep (org-export--get-subtree-options backend))))
 
 (defun org-export--parse-option-keyword (options &optional backend)
   "Parse an OPTIONS line and return values as a plist.
@@ -1537,6 +1534,20 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 	       s (replace-regexp-in-string "\n" " " s))))
 	  (setq plist (plist-put plist p value)))))))
 
+(defun org-export--get-export-attributes
+    (&optional backend subtreep visible-only body-only)
+  "Return properties related to export process, as a plist.
+Optional arguments BACKEND, SUBTREEP, VISIBLE-ONLY and BODY-ONLY
+are like the arguments with the same names of function
+`org-export-as'."
+  (list :export-options (delq nil
+			      (list (and subtreep 'subtree)
+				    (and visible-only 'visible-only)
+				    (and body-only 'body-only)))
+	:back-end backend
+	:translate-alist (org-export-get-all-transcoders backend)
+	:exported-data (make-hash-table :test #'eq :size 4001)))
+
 (defun org-export--get-buffer-attributes ()
   "Return properties related to buffer attributes, as a plist."
   (list :input-buffer (buffer-name (buffer-base-buffer))
@@ -1636,9 +1647,6 @@ is a list holding export options.
 
 Following tree properties are set or updated:
 
-`:exported-data' Hash table used to memoize results from
-                 `org-export-data'.
-
 `:headline-offset' Offset between true level of headlines and
 		   local level.  An offset of -1 means a headline
 		   of level 2 should be considered as a level
@@ -1659,24 +1667,18 @@ Return updated plist."
 	(plist-put info
 		   :headline-offset
 		   (- 1 (org-export--get-min-level data info))))
-  ;; Properties order doesn't matter: get the rest of the tree
-  ;; properties.
-  (setq info
-	(plist-put info
-		   :headline-numbering
-		   (org-export--collect-headline-numbering data info)))
-  (setq info
-	(plist-put info
-		   :exported-data (make-hash-table :test #'eq :size 4001)))
-  (plist-put info
-	     :id-alist
-	     ;; Collect id references.
-	     (org-element-map data 'link
-	       (lambda (l)
-		 (and (string= (org-element-property :type l) "id")
-		      (let* ((id (org-element-property :path l))
-			     (file (car (org-id-find id))))
-			(and file (cons id (file-relative-name file)))))))))
+  ;; From now on, properties order doesn't matter: get the rest of the
+  ;; tree properties.
+  (org-combine-plists
+   info
+   (list :headline-numbering (org-export--collect-headline-numbering data info)
+	 :id-alist
+	 (org-element-map data 'link
+	   (lambda (l)
+	     (and (string= (org-element-property :type l) "id")
+		  (let* ((id (org-element-property :path l))
+			 (file (car (org-id-find id))))
+		    (and file (cons id (file-relative-name file))))))))))
 
 (defun org-export--get-min-level (data options)
   "Return minimum exportable headline's level in DATA.
@@ -2948,11 +2950,7 @@ Return code as a string."
       ;; attributes, unavailable in its copy.
       (let* ((org-export-current-backend (org-export-backend-name backend))
 	     (info (org-combine-plists
-		    (list :export-options
-			  (delq nil
-				(list (and subtreep 'subtree)
-				      (and visible-only 'visible-only)
-				      (and body-only 'body-only))))
+		    (org-export--get-export-attributes)
 		    (org-export--get-buffer-attributes)))
 	     (parsed-keywords
 	      (delq nil
