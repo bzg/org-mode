@@ -20162,23 +20162,23 @@ overwritten, and the table is not marked as requiring realignment."
    ((and
      (org-table-p)
      (progn
-       ;; check if we blank the field, and if that triggers align
+       ;; Check if we blank the field, and if that triggers align.
        (and (featurep 'org-table) org-table-auto-blank-field
 	    (memq last-command
 		  '(org-cycle org-return org-shifttab org-ctrl-c-ctrl-c))
-	    (if (or (equal (char-after) ?\ ) (looking-at "[^|\n]*  |"))
-		;; got extra space, this field does not determine column width
+	    (if (or (eq (char-after) ?\s) (looking-at "[^|\n]*  |"))
+		;; Got extra space, this field does not determine
+		;; column width.
 		(let (org-table-may-need-update) (org-table-blank-field))
-	      ;; no extra space, this field may determine column width
+	      ;; No extra space, this field may determine column
+	      ;; width.
 	      (org-table-blank-field)))
        t)
      (eq N 1)
-     (looking-at "[^|\n]*  |"))
-    (let (org-table-may-need-update)
-      (goto-char (1- (match-end 0)))
-      (backward-delete-char 1)
-      (goto-char (match-beginning 0))
-      (self-insert-command N)))
+     (looking-at "[^|\n]* \\( \\)|"))
+    ;; There is room for insertion without re-aligning the table.
+    (delete-region (match-beginning 1) (match-end 1))
+    (self-insert-command N))
    (t
     (setq org-table-may-need-update t)
     (self-insert-command N)
