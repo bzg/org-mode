@@ -4502,7 +4502,7 @@ If `org-enable-table-editor' is nil, return nil unconditionally."
    (or (not (derived-mode-p 'org-mode))
        (let ((e (org-element-lineage (org-element-at-point) '(table) t)))
 	 (and e (or table-type (eq (org-element-property :type e) 'org)))))))
-(defsubst org-table-p () (org-at-table-p))
+(define-obsolete-function-alias 'org-table-p 'org-at-table-p "Org 9.0")
 
 (defun org-at-table.el-p ()
   "Non-nil when point is at a table.el table."
@@ -20160,7 +20160,7 @@ overwritten, and the table is not marked as requiring realignment."
      (t (let (org-use-speed-commands)
 	  (call-interactively 'org-self-insert-command)))))
    ((and
-     (org-table-p)
+     (org-at-table-p)
      (progn
        ;; Check if we blank the field, and if that triggers align.
        (and (featurep 'org-table) org-table-auto-blank-field
@@ -20258,7 +20258,7 @@ because, in this case the deletion might narrow the column."
   (interactive "p")
   (save-match-data
     (org-check-before-invisible-edit 'delete-backward)
-    (if (and (org-table-p)
+    (if (and (org-at-table-p)
 	     (eq N 1)
 	     (string-match "|" (buffer-substring (point-at-bol) (point)))
 	     (looking-at ".*?|"))
@@ -20286,7 +20286,7 @@ because, in this case the deletion might narrow the column."
   (interactive "p")
   (save-match-data
     (org-check-before-invisible-edit 'delete)
-    (if (and (org-table-p)
+    (if (and (org-at-table-p)
 	     (not (bolp))
 	     (not (= (char-after) ?|))
 	     (eq N 1))
