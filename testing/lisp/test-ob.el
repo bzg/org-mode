@@ -1493,6 +1493,52 @@ echo \"$data\"
 		     (:result-params . 1)
 		     (:result-type . value)))))
 
+(defun org-test-babel-confirm-evaluate (eval-value)
+  (org-test-with-temp-text (format "#+begin_src emacs-lisp :eval %s
+  nil
+#+end_src" eval-value)
+	(goto-char (point-min))
+	(let ((info (org-babel-get-src-block-info)))
+	   (org-babel-check-confirm-evaluate info))))
+
+(ert-deftest ob/check-eval ()
+  (let ((org-confirm-babel-evaluate t))
+    ;; Non-export tests
+    (dolist (pair '(("no" . nil)
+		    ("never" . nil)
+		    ("query" . query)
+		    ("yes" . query)))
+      (should (eq (org-test-babel-confirm-evaluate (car pair)) (cdr pair))))
+    ;; Export tests
+    (let ((org-babel-exp-reference-buffer t))
+      (dolist (pair '(("no" . nil)
+		      ("never" . nil)
+		      ("query" . query)
+		      ("yes" . query)
+		      ("never-export" . nil)
+		      ("no-export" . nil)
+		      ("query-export" . query)))
+	(message (car pair))
+	(should (eq (org-test-babel-confirm-evaluate (car pair)) (cdr pair))))))
+  (let ((org-confirm-babel-evaluate nil))
+    ;; Non-export tests
+    (dolist (pair '(("no" . nil)
+		    ("never" . nil)
+		    ("query" . query)
+		    ("yes" . t)))
+      (should (eq (org-test-babel-confirm-evaluate (car pair)) (cdr pair))))
+    ;; Export tests
+    (let ((org-babel-exp-reference-buffer t))
+      (dolist (pair '(("no" . nil)
+		      ("never" . nil)
+		      ("query" . query)
+		      ("yes" . t)
+		      ("never-export" . nil)
+		      ("no-export" . nil)
+		      ("query-export" . query)))
+	(message (car pair))
+	(should (eq (org-test-babel-confirm-evaluate (car pair)) (cdr pair)))))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here

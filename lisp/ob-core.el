@@ -284,57 +284,50 @@ Returns a list
 This is used by Babel to resolve references in source blocks.
 Its value is dynamically bound during export.")
 
-(defmacro org-babel-check-confirm-evaluate (info &rest body)
-  "Evaluate BODY with special execution confirmation variables set.
+(defun org-babel-check-confirm-evaluate (info)
+  "Check whether INFO allows code block evaluation.
 
-Specifically; NOEVAL will indicate if evaluation is allowed,
-QUERY will indicate if a user query is required, CODE-BLOCK will
-hold the language of the code block, and BLOCK-NAME will hold the
-name of the code block."
-  (declare (indent defun))
-  (org-with-gensyms
-      (lang block-body headers name head eval eval-no export eval-no-export)
-    `(let* ((,lang           (nth 0 ,info))
-	    (,block-body     (nth 1 ,info))
-	    (,headers        (nth 2 ,info))
-	    (,name           (nth 4 ,info))
-	    (,head           (nth 6 ,info))
-	    (,eval           (or (cdr  (assoc :eval   ,headers))
-				 (when (assoc :noeval ,headers) "no")))
-	    (,eval-no        (or (equal ,eval "no")
-				 (equal ,eval "never")))
-	    (,export         org-babel-exp-reference-buffer)
-	    (,eval-no-export (and ,export (or (equal ,eval "no-export")
-					      (equal ,eval "never-export"))))
-	    (noeval          (or ,eval-no ,eval-no-export))
-	    (query           (or (equal ,eval "query")
-				 (and ,export (equal ,eval "query-export"))
-				 (if (functionp org-confirm-babel-evaluate)
-				     (save-excursion
-				       (goto-char ,head)
-				       (funcall org-confirm-babel-evaluate
-						,lang ,block-body))
-				   org-confirm-babel-evaluate)))
-	    (code-block      (if ,info (format  " %s "  ,lang) " "))
-	    (block-name      (if ,name (format " (%s) " ,name) " ")))
-       ,@body)))
+Returns nil if evaluation is disallowed, t if it is
+unconditionally allowed, and the symbol `query' if the user
+should be asked whether to allow evaluation."
+  (let* ((headers (nth 2 info))
+	 (eval (or (cdr  (assq :eval headers))
+		   (when (assq :noeval headers) "no")))
+	 (eval-no (member eval '("no" "never")))
+	 (export org-babel-exp-reference-buffer)
+	 (eval-no-export (and export (member eval '("no-export" "never-export"))))
+	 (noeval (or eval-no eval-no-export))
+	 (query (or (equal eval "query")
+		    (and export (equal eval "query-export"))
+		    (if (functionp org-confirm-babel-evaluate)
+			(save-excursion
+			  (goto-char (nth 6 info))
+			  (funcall org-confirm-babel-evaluate
+				   ;; language, code block body
+				   (nth 0 info) (nth 1 info)))
+		      org-confirm-babel-evaluate))))
+    (cond
+     (noeval nil)
+     (query 'query)
+     (t t))))
 
-(defsubst org-babel-check-evaluate (info)
+(defun org-babel-check-evaluate (info)
   "Check if code block INFO should be evaluated.
-Do not query the user."
-  (org-babel-check-confirm-evaluate info
-    (not (when noeval
-	   (message "Evaluation of this%scode-block%sis disabled."
-                    code-block block-name)))))
 
- ;; dynamically scoped for asynchronous export
+Do not query the user, but do display an informative message if
+evaluation is blocked.  Returns non-nil if evaluation is not blocked."
+  (let ((evalp (org-babel-check-confirm-evaluate info)))
+    (when (null evalp)
+      (message "Evaluation of this %s code-block%sis disabled."
+	       (nth 0 info)
+	       (let ((name (nth 4 info))) (if name (format " (%s) " name) ""))))
+    evalp))
+
+;; Dynamically scoped for asynchronous export.
 (defvar org-babel-confirm-evaluate-answer-no)
 
-(defsubst org-babel-confirm-evaluate (info)
+(defun org-babel-confirm-evaluate (info)
   "Confirm evaluation of the code block INFO.
-
-If the variable `org-babel-confirm-evaluate-answer-no' is bound
-to a non-nil value, auto-answer with \"no\".
 
 This query can also be suppressed by setting the value of
 `org-confirm-babel-evaluate' to nil, in which case all future
@@ -342,17 +335,27 @@ interactive code block evaluations will proceed without any
 confirmation from the user.
 
 Note disabling confirmation may result in accidental evaluation
-of potentially harmful code."
-  (org-babel-check-confirm-evaluate info
-    (not (when query
-	   (unless
-	       (and (not (org-bound-and-true-p
-			  org-babel-confirm-evaluate-answer-no))
-		    (yes-or-no-p
-		     (format "Evaluate this%scode block%son your system? "
-			     code-block block-name)))
-	     (message "Evaluation of this%scode-block%sis aborted."
-                      code-block block-name))))))
+of potentially harmful code.
+
+The variable `org-babel-confirm-evaluate-answer-no' is used by
+the async export process, which requires a non-interactive
+environment, to override this check."
+  (let* ((evalp (org-babel-check-confirm-evaluate info))
+	 (lang (nth 0 info))
+	 (name (nth 4 info))
+	 (name-string (if name (format " (%s) " name) "")))
+    (pcase evalp
+      (`nil nil)
+      (`t t)
+      (`query (unless
+		  (and (not (org-bound-and-true-p
+			     org-babel-confirm-evaluate-answer-no))
+		       (yes-or-no-p
+			(format "Evaluate this %s code block%son your system? "
+				lang name-string)))
+		(message "Evaluation of this %s code-block%sis aborted."
+			 lang name-string)))
+      (x (error "Unexepcted value `%s' from `org-babel-check-confirm-evaluate'" x)))))
 
 ;;;###autoload
 (defun org-babel-execute-safely-maybe ()
