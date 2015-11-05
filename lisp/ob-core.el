@@ -1993,6 +1993,39 @@ following the source block."
 	(when hash (org-babel-hide-hash))
 	(point)))))
 
+(defun org-babel-read-element (element)
+  "Read ELEMENT into emacs-lisp.
+Return nil if ELEMENT cannot be read."
+  (org-with-wide-buffer
+   (goto-char (org-element-property :post-affiliated element))
+   (pcase (org-element-type element)
+     (`fixed-width
+      (let ((v (org-babel-trim (org-element-property :value element))))
+	(or (org-babel-number-p v) v)))
+     (`table (org-babel-read-table))
+     (`plain-list (org-babel-read-list))
+     ((or `example-block `export-block)
+      (org-remove-indentation (org-element-property :value element)))
+     (`paragraph
+      ;; Treat paragraphs containing a single link specially.
+      (skip-chars-forward " \t")
+      (if (and (looking-at org-bracket-link-regexp)
+	       (save-excursion
+		 (goto-char (match-end 0))
+		 (skip-chars-forward " \r\t\n")
+		 (<= (org-element-property :end element)
+		     (point))))
+	  (org-babel-read-link)
+	(buffer-substring-no-properties
+	 (org-element-property :contents-begin element)
+	 (org-element-property :contents-end element))))
+     ((or `center-block `paragraph `quote-block `verse-block `special-block)
+      (org-remove-indentation
+       (buffer-substring-no-properties
+	(org-element-property :contents-begin element)
+	(org-element-property :contents-end element))))
+     (_ nil))))
+
 (defvar org-block-regexp)
 (defun org-babel-read-result ()
   "Read the result at `point' into emacs-lisp."

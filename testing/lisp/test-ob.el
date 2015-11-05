@@ -602,21 +602,25 @@ on two lines
     (should (string= (org-babel-execute-src-block)
 		     "A literal example\non two lines\n for me."))))
 
-(ert-deftest test-ob/resolve-code-blocks-before-data-blocks ()
-  (org-test-with-temp-text "
-#+name: foo
-: bar
+(ert-deftest test-ob/ignore-reference-in-commented-headings ()
+  (should
+   (= 2
+      (org-test-with-temp-text
+	  "
+* COMMENT H1
+#+NAME: n
+: 1
 
-#+name: foo
-#+begin_src emacs-lisp
-  \"baz\"
-#+end_src
+* H2
+#+NAME: n
+: 2
 
-#+begin_src emacs-lisp :var foo=foo
-  foo
-#+end_src"
-    (org-babel-next-src-block 2)
-    (should (string= (org-babel-execute-src-block) "baz"))))
+* Code
+
+<point>#+BEGIN_SRC emacs-lisp :var x=n
+x
+#+END_SRC"
+	(org-babel-execute-src-block)))))
 
 (ert-deftest test-ob/do-not-resolve-to-partial-names-data ()
   (org-test-with-temp-text "
