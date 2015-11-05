@@ -81,7 +81,7 @@ not change the current one."
 	(split-window-vertically)
 	(org-switch-to-buffer-other-window (get-buffer-create " *Org tags*")))
       (erase-buffer)
-      (org-set-local 'org-done-keywords done-keywords)
+      (setq-local org-done-keywords done-keywords)
       (insert "Query:    " current "\n")
       (org-agenda-query-op-line op)
       (insert "\n\n")

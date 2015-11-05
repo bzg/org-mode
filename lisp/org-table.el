@@ -724,13 +724,11 @@ This is being used to correctly align a single field after TAB or RET.")
 (defvar org-table-last-column-widths nil
   "List of max width of fields in each column.
 This is being used to correctly align a single field after TAB or RET.")
-(defvar org-table-formula-debug nil
+(defvar-local org-table-formula-debug nil
   "Non-nil means debug table formulas.
 When nil, simply write \"#ERROR\" in corrupted fields.")
-(make-variable-buffer-local 'org-table-formula-debug)
-(defvar org-table-overlay-coordinates nil
+(defvar-local org-table-overlay-coordinates nil
   "Overlay coordinates after each align of a table.")
-(make-variable-buffer-local 'org-table-overlay-coordinates)
 
 (defvar org-last-recalc-line nil)
 (defvar org-table-do-narrow t)   ; for dynamic scoping
@@ -2025,9 +2023,9 @@ it can be edited in place."
 			      '(invisible t org-cwidth t display t
 					  intangible t))
       (goto-char p)
-      (org-set-local 'org-finish-function 'org-table-finish-edit-field)
-      (org-set-local 'org-window-configuration cw)
-      (org-set-local 'org-field-marker pos)
+      (setq-local org-finish-function 'org-table-finish-edit-field)
+      (setq-local org-window-configuration cw)
+      (setq-local org-field-marker pos)
       (message "Edit and finish with C-c C-c")))))
 
 (defun org-table-finish-edit-field ()
@@ -3526,10 +3524,10 @@ Parameters get priority."
     ;; Keep global-font-lock-mode from turning on font-lock-mode
     (let ((font-lock-global-modes '(not fundamental-mode)))
       (fundamental-mode))
-    (org-set-local 'font-lock-global-modes (list 'not major-mode))
-    (org-set-local 'org-pos pos)
-    (org-set-local 'org-window-configuration wc)
-    (org-set-local 'org-selected-window sel-win)
+    (setq-local font-lock-global-modes (list 'not major-mode))
+    (setq-local org-pos pos)
+    (setq-local org-window-configuration wc)
+    (setq-local org-selected-window sel-win)
     (use-local-map org-table-fedit-map)
     (org-add-hook 'post-command-hook #'org-table-fedit-post-command t t)
     (easy-menu-add org-table-fedit-menu)
@@ -3704,7 +3702,7 @@ minutes or seconds."
 (defun org-table-fedit-toggle-ref-type ()
   "Convert all references in the buffer from B3 to @3$2 and back."
   (interactive)
-  (org-set-local 'org-table-buffer-is-an (not org-table-buffer-is-an))
+  (setq-local org-table-buffer-is-an (not org-table-buffer-is-an))
   (org-table-fedit-convert-buffer
    (if org-table-buffer-is-an
        'org-table-convert-refs-to-an 'org-table-convert-refs-to-rc))
@@ -4110,9 +4108,8 @@ FACE, when non-nil, for the highlight."
     (mapc 'delete-overlay org-table-rectangle-overlays)
     (setq org-table-rectangle-overlays nil)))
 
-(defvar org-table-coordinate-overlays nil
+(defvar-local org-table-coordinate-overlays nil
   "Collects the coordinate grid overlays, so that they can be removed.")
-(make-variable-buffer-local 'org-table-coordinate-overlays)
 
 (defun org-table-overlay-coordinates ()
   "Add overlays to the table at point, to show row/column coordinates."
@@ -4229,12 +4226,12 @@ FACE, when non-nil, for the highlight."
       ;; FIXME: maybe it should use emulation-mode-map-alists?
       (and c (setq minor-mode-map-alist
                    (cons c (delq c minor-mode-map-alist)))))
-    (org-set-local (quote org-table-may-need-update) t)
+    (setq-local org-table-may-need-update t)
     (org-add-hook 'before-change-functions 'org-before-change-function
                   nil 'local)
-    (org-set-local 'org-old-auto-fill-inhibit-regexp
+    (setq-local org-old-auto-fill-inhibit-regexp
                    auto-fill-inhibit-regexp)
-    (org-set-local 'auto-fill-inhibit-regexp
+    (setq-local auto-fill-inhibit-regexp
                    (if auto-fill-inhibit-regexp
                        (concat orgtbl-line-start-regexp "\\|"
                                auto-fill-inhibit-regexp)

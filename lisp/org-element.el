@@ -3964,7 +3964,7 @@ If STRING is the empty string or nil, return nil."
 	  (dolist (v local-variables)
 	    (ignore-errors
 	      (if (symbolp v) (makunbound v)
-		(org-set-local (car v) (cdr v)))))
+		(set (make-local-variable (car v)) (cdr v)))))
 	  (insert string)
 	  (restore-buffer-modified-p nil)
 	  (let ((data (org-element--parse-objects
@@ -5591,14 +5591,14 @@ buffers."
     (with-current-buffer buffer
       (when (and org-element-use-cache
 		 (or (derived-mode-p 'org-mode) orgstruct-mode))
-	(org-set-local 'org-element--cache
-		       (avl-tree-create #'org-element--cache-compare))
-	(org-set-local 'org-element--cache-objects (make-hash-table :test #'eq))
-	(org-set-local 'org-element--cache-sync-keys
+	(setq-local org-element--cache
+		    (avl-tree-create #'org-element--cache-compare))
+	(setq-local org-element--cache-objects (make-hash-table :test #'eq))
+	(setq-local org-element--cache-sync-keys
 		       (make-hash-table :weakness 'key :test #'eq))
-	(org-set-local 'org-element--cache-change-warning nil)
-	(org-set-local 'org-element--cache-sync-requests nil)
-	(org-set-local 'org-element--cache-sync-timer nil)
+	(setq-local org-element--cache-change-warning nil)
+	(setq-local org-element--cache-sync-requests nil)
+	(setq-local org-element--cache-sync-timer nil)
 	(add-hook 'before-change-functions
 		  #'org-element--cache-before-change nil t)
 	(add-hook 'after-change-functions

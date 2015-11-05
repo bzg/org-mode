@@ -1441,7 +1441,7 @@ original parsed data.  INFO is a plist holding export options."
       ;; currently the zip command zips up the entire temp directory so
       ;; that any auto-generated files created under the hood ends up in
       ;; the resulting odt file.
-      (set (make-local-variable 'backup-inhibited) t)
+      (setq-local backup-inhibited t)
 
       ;; Outline numbering is retained only upto LEVEL.
       ;; To disable outline numbering pass a LEVEL of 0.

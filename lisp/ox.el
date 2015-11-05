@@ -1326,7 +1326,7 @@ inferior to file-local settings."
   ;; First install #+BIND variables since these must be set before
   ;; global options are read.
   (dolist (pair (org-export--list-bound-variables))
-    (org-set-local (car pair) (nth 1 pair)))
+    (set (make-local-variable (car pair)) (nth 1 pair)))
   ;; Get and prioritize export options...
   (org-combine-plists
    ;; ... from global variables...
@@ -6106,8 +6106,8 @@ files or buffers, only the display.
 	'(:eval
 	  (format "  %-12s | %6s | %s" "Back-End" "Age" "Source")))
   (org-add-hook 'post-command-hook 'org-export-stack-refresh nil t)
-  (set (make-local-variable 'revert-buffer-function)
-       'org-export-stack-refresh))
+  (setq-local revert-buffer-function
+	      'org-export-stack-refresh))
 
 
 

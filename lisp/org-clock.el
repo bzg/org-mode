@@ -1769,9 +1769,8 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
 	(message "No running clock, this is the most recently clocked task"))
     (run-hooks 'org-clock-goto-hook)))
 
-(defvar org-clock-file-total-minutes nil
+(defvar-local org-clock-file-total-minutes nil
   "Holds the file total time in minutes, after a call to `org-clock-sum'.")
-(make-variable-buffer-local 'org-clock-file-total-minutes)
 
 (defun org-clock-sum-today (&optional headline-filter)
   "Sum the times for each subtree for today."
@@ -1943,8 +1942,7 @@ Use \\[org-clock-remove-overlays] to remove the subtree times."
 		     " (%d hours and %d minutes)")
 	     h m)))
 
-(defvar org-clock-overlays nil)
-(make-variable-buffer-local 'org-clock-overlays)
+(defvar-local org-clock-overlays nil)
 
 (defun org-clock-put-overlay (time)
   "Put an overlays on the current line, displaying TIME.

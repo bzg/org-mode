@@ -63,9 +63,8 @@
 ;;; Code:
 
 (defvar org-inhibit-highlight-removal nil) ; dynamically scoped param
-(defvar org-table-formula-constants-local nil
+(defvar-local org-table-formula-constants-local nil
   "Local version of `org-table-formula-constants'.")
-(make-variable-buffer-local 'org-table-formula-constants-local)
 
 ;;;; Require other packages
 
@@ -1764,10 +1763,9 @@ calls `table-recognize-table'."
   :tag "Org Link"
   :group 'org)
 
-(defvar org-link-abbrev-alist-local nil
+(defvar-local org-link-abbrev-alist-local nil
   "Buffer-local version of `org-link-abbrev-alist', which see.
 The value of this is taken from the #+LINK lines.")
-(make-variable-buffer-local 'org-link-abbrev-alist-local)
 
 (defcustom org-link-abbrev-alist nil
   "Alist of link abbreviations.
@@ -2587,9 +2585,8 @@ taken from the (otherwise obsolete) variable `org-todo-interpretation'."
 		   (repeat
 		    (string :tag "Keyword"))))))
 
-(defvar org-todo-keywords-1 nil
+(defvar-local org-todo-keywords-1 nil
   "All TODO and DONE keywords active in a buffer.")
-(make-variable-buffer-local 'org-todo-keywords-1)
 (defvar org-todo-keywords-for-agenda nil)
 (defvar org-done-keywords-for-agenda nil)
 (defvar org-todo-keyword-alist-for-agenda nil)
@@ -2597,25 +2594,16 @@ taken from the (otherwise obsolete) variable `org-todo-interpretation'."
   "Alist of all tags from all agenda files.")
 (defvar org-tag-groups-alist-for-agenda nil
   "Alist of all groups tags from all current agenda files.")
-(defvar org-tag-groups-alist nil)
-(make-variable-buffer-local 'org-tag-groups-alist)
+(defvar-local org-tag-groups-alist nil)
 (defvar org-agenda-contributing-files nil)
-(defvar org-not-done-keywords nil)
-(make-variable-buffer-local 'org-not-done-keywords)
-(defvar org-done-keywords nil)
-(make-variable-buffer-local 'org-done-keywords)
-(defvar org-todo-heads nil)
-(make-variable-buffer-local 'org-todo-heads)
-(defvar org-todo-sets nil)
-(make-variable-buffer-local 'org-todo-sets)
-(defvar org-todo-log-states nil)
-(make-variable-buffer-local 'org-todo-log-states)
-(defvar org-todo-kwd-alist nil)
-(make-variable-buffer-local 'org-todo-kwd-alist)
-(defvar org-todo-key-alist nil)
-(make-variable-buffer-local 'org-todo-key-alist)
-(defvar org-todo-key-trigger nil)
-(make-variable-buffer-local 'org-todo-key-trigger)
+(defvar-local org-not-done-keywords nil)
+(defvar-local org-done-keywords nil)
+(defvar-local org-todo-heads nil)
+(defvar-local org-todo-sets nil)
+(defvar-local org-todo-log-states nil)
+(defvar-local org-todo-kwd-alist nil)
+(defvar-local org-todo-key-alist nil)
+(defvar-local org-todo-key-trigger nil)
 
 (defcustom org-todo-interpretation 'sequence
   "Controls how TODO keywords are interpreted.
@@ -3530,9 +3518,7 @@ tags in that file can be created dynamically (there are none).
 
   (add-hook \\='org-capture-mode-hook
             (lambda ()
-              (set (make-local-variable
-                    \\='org-complete-tags-always-offer-all-agenda-tags)
-                   t)))"
+              (setq-local org-complete-tags-always-offer-all-agenda-tags t)))"
   :group 'org-tags
   :version "24.1"
   :type 'boolean)
@@ -3809,18 +3795,17 @@ You can set buffer-local values for the same purpose in the variable
 	  (cons (string :tag "Property")
 		(string :tag "Value"))))
 
-(defvar org-file-properties nil
+(defvar-local org-file-properties nil
   "List of property/value pairs that can be inherited by any entry.
 Valid for the current buffer.
 This variable is populated from #+PROPERTY lines.")
-(make-variable-buffer-local 'org-file-properties)
 
 (defgroup org-agenda nil
   "Options concerning agenda views in Org-mode."
   :tag "Org Agenda"
   :group 'org)
 
-(defvar org-category nil
+(defvar-local org-category nil
   "Variable used by org files to set a category for agenda display.
 Such files should use a file variable to set it, for example
 
@@ -3832,7 +3817,6 @@ or contain a special line
 
 If the file does not specify a category, then file's base name
 is used instead.")
-(make-variable-buffer-local 'org-category)
 (put 'org-category 'safe-local-variable (lambda (x) (or (symbolp x) (stringp x))))
 
 (defcustom org-agenda-files nil
@@ -4799,36 +4783,29 @@ Otherwise, these types are allowed:
 
 ;;; Variables for pre-computed regular expressions, all buffer local
 
-(defvar org-todo-regexp nil
+(defvar-local org-todo-regexp nil
   "Matches any of the TODO state keywords.")
-(make-variable-buffer-local 'org-todo-regexp)
-(defvar org-not-done-regexp nil
+(defvar-local org-not-done-regexp nil
   "Matches any of the TODO state keywords except the last one.")
-(make-variable-buffer-local 'org-not-done-regexp)
-(defvar org-not-done-heading-regexp nil
+(defvar-local org-not-done-heading-regexp nil
   "Matches a TODO headline that is not done.")
-(make-variable-buffer-local 'org-not-done-heading-regexp)
-(defvar org-todo-line-regexp nil
+(defvar-local org-todo-line-regexp nil
   "Matches a headline and puts TODO state into group 2 if present.")
-(make-variable-buffer-local 'org-todo-line-regexp)
-(defvar org-complex-heading-regexp nil
+(defvar-local org-complex-heading-regexp nil
   "Matches a headline and puts everything into groups:
 group 1: the stars
 group 2: The todo keyword, maybe
 group 3: Priority cookie
 group 4: True headline
 group 5: Tags")
-(make-variable-buffer-local 'org-complex-heading-regexp)
-(defvar org-complex-heading-regexp-format nil
+(defvar-local org-complex-heading-regexp-format nil
   "Printf format to make regexp to match an exact headline.
 This regexp will match the headline of any node which has the
 exact headline text that is put into the format, but may have any
 TODO state, priority and tags.")
-(make-variable-buffer-local 'org-complex-heading-regexp-format)
-(defvar org-todo-line-tags-regexp nil
+(defvar-local org-todo-line-tags-regexp nil
   "Matches a headline and puts TODO state into group 2 if present.
 Also put tags into group 4 if tags are present.")
-(make-variable-buffer-local 'org-todo-line-tags-regexp)
 
 (defconst org-plain-time-of-day-regexp
   (concat
@@ -4973,20 +4950,20 @@ related expressions."
        (cdr (assq 'tags alist)) (cdr (assq 'filetags alist)))
       (unless tags-only
 	;; File properties.
-	(org-set-local 'org-file-properties (cdr (assq 'property alist)))
+	(setq-local org-file-properties (cdr (assq 'property alist)))
 	;; Archive location.
 	(let ((archive (cdr (assq 'archive alist))))
-	  (when archive (org-set-local 'org-archive-location archive)))
+	  (when archive (setq-local org-archive-location archive)))
 	;; Category.
 	(let ((cat (org-string-nw-p (cdr (assq 'category alist)))))
 	  (when cat
-	    (org-set-local 'org-category (intern cat))
-	    (org-set-local 'org-file-properties
-			   (org--update-property-plist
-			    "CATEGORY" cat org-file-properties))))
+	    (setq-local org-category (intern cat))
+	    (setq-local org-file-properties
+			(org--update-property-plist
+			 "CATEGORY" cat org-file-properties))))
 	;; Columns.
 	(let ((column (cdr (assq 'columns alist))))
-	  (when column (org-set-local 'org-columns-default-format column)))
+	  (when column (setq-local org-columns-default-format column)))
 	;; Constants.
 	(setq org-table-formula-constants-local (cdr (assq 'constants alist)))
 	;; Link abbreviations.
@@ -4995,13 +4972,13 @@ related expressions."
 	;; Priorities.
 	(let ((priorities (cdr (assq 'priorities alist))))
 	  (when priorities
-	    (org-set-local 'org-highest-priority (nth 0 priorities))
-	    (org-set-local 'org-lowest-priority (nth 1 priorities))
-	    (org-set-local 'org-default-priority (nth 2 priorities))))
+	    (setq-local org-highest-priority (nth 0 priorities))
+	    (setq-local org-lowest-priority (nth 1 priorities))
+	    (setq-local org-default-priority (nth 2 priorities))))
 	;; Scripts.
 	(let ((scripts (assq 'scripts alist)))
 	  (when scripts
-	    (org-set-local 'org-use-sub-superscripts (cdr scripts))))
+	    (setq-local org-use-sub-superscripts (cdr scripts))))
 	;; Startup options.
 	(let ((startup (cdr (assq 'startup alist))))
 	  (dolist (option startup)
@@ -5009,19 +4986,19 @@ related expressions."
 	      (when entry
 		(let ((var (nth 1 entry))
 		      (val (nth 2 entry)))
-		  (if (not (nth 3 entry)) (org-set-local var val)
+		  (if (not (nth 3 entry)) (set (make-local-variable var) val)
 		    (unless (listp (symbol-value var))
-		      (org-set-local var nil))
+		      (set (make-local-variable var) nil))
 		    (add-to-list var val)))))))
 	;; TODO keywords.
-	(org-set-local 'org-todo-kwd-alist nil)
-	(org-set-local 'org-todo-key-alist nil)
-	(org-set-local 'org-todo-key-trigger nil)
-	(org-set-local 'org-todo-keywords-1 nil)
-	(org-set-local 'org-done-keywords nil)
-	(org-set-local 'org-todo-heads nil)
-	(org-set-local 'org-todo-sets nil)
-	(org-set-local 'org-todo-log-states nil)
+	(setq-local org-todo-kwd-alist nil)
+	(setq-local org-todo-key-alist nil)
+	(setq-local org-todo-key-trigger nil)
+	(setq-local org-todo-keywords-1 nil)
+	(setq-local org-done-keywords nil)
+	(setq-local org-todo-heads nil)
+	(setq-local org-todo-sets nil)
+	(setq-local org-todo-log-states nil)
 	(let ((todo-sequences
 	       (or (nreverse (cdr (assq 'todo alist)))
 		   (let ((d (default-value 'org-todo-keywords)))
@@ -5221,8 +5198,8 @@ Return value contains the following keys: `archive', `category',
 TAGS is a list of tags and tag group symbols, as strings.
 FILETAGS is a list of tags, as strings."
   ;; Process the file tags.
-  (org-set-local 'org-file-tags
-		 (mapcar #'org-add-prop-inherited filetags))
+  (setq-local org-file-tags
+	      (mapcar #'org-add-prop-inherited filetags))
   ;; Provide default tags if no local tags are found.
   (when (and (not tags) org-tag-alist)
     (setq tags
@@ -5239,8 +5216,8 @@ FILETAGS is a list of tags, as strings."
 					      (format "(%c)" (cdr tag)))))))
 		  org-tag-alist)))
   ;; Process the tags.
-  (org-set-local 'org-tag-groups-alist nil)
-  (org-set-local 'org-tag-alist nil)
+  (setq-local org-tag-groups-alist nil)
+  (setq-local org-tag-alist nil)
   (let (group-flag)
     (while tags
       (let ((e (car tags)))
@@ -5444,9 +5421,9 @@ The following commands are available:
   (add-to-invisibility-spec '(org-cwidth))
   (add-to-invisibility-spec '(org-hide-block . t))
   (when (featurep 'xemacs)
-    (org-set-local 'line-move-ignore-invisible t))
-  (org-set-local 'outline-regexp org-outline-regexp)
-  (org-set-local 'outline-level 'org-outline-level)
+    (setq-local line-move-ignore-invisible t))
+  (setq-local outline-regexp org-outline-regexp)
+  (setq-local outline-level 'org-outline-level)
   (setq bidi-paragraph-direction 'left-to-right)
   (when (and org-ellipsis
              (fboundp 'set-display-table-slot) (boundp 'buffer-display-table)
@@ -5466,7 +5443,7 @@ The following commands are available:
     ;; tag faces set outside customize.... force initialization.
     (org-set-tag-faces 'org-tag-faces org-tag-faces))
   ;; Calc embedded
-  (org-set-local 'calc-embedded-open-mode "# ")
+  (setq-local calc-embedded-open-mode "# ")
   ;; Modify a few syntax entries
   (modify-syntax-entry ?@ "w")
   (modify-syntax-entry ?\" "\"")
@@ -5474,10 +5451,10 @@ The following commands are available:
   (modify-syntax-entry ?~ "_")
   (if org-startup-truncated (setq truncate-lines t))
   (when org-startup-indented (require 'org-indent) (org-indent-mode 1))
-  (org-set-local 'font-lock-unfontify-region-function
-		 'org-unfontify-region)
+  (setq-local font-lock-unfontify-region-function
+	      'org-unfontify-region)
   ;; Activate before-change-function
-  (org-set-local 'org-table-may-need-update t)
+  (setq-local org-table-may-need-update t)
   (org-add-hook 'before-change-functions 'org-before-change-function nil
 		'local)
   ;; Check for running clock before killing a buffer
@@ -5487,8 +5464,8 @@ The following commands are available:
   ;; Initialize radio targets.
   (org-update-radio-target-regexp)
   ;; Indentation.
-  (org-set-local 'indent-line-function 'org-indent-line)
-  (org-set-local 'indent-region-function 'org-indent-region)
+  (setq-local indent-line-function 'org-indent-line)
+  (setq-local indent-region-function 'org-indent-region)
   ;; Filling and auto-filling.
   (org-setup-filling)
   ;; Comments.
@@ -5496,15 +5473,15 @@ The following commands are available:
   ;; Initialize cache.
   (org-element-cache-reset)
   ;; Beginning/end of defun
-  (org-set-local 'beginning-of-defun-function 'org-backward-element)
-  (org-set-local 'end-of-defun-function
-		 (lambda ()
-		   (if (not (org-at-heading-p))
-		       (org-forward-element)
-		     (org-forward-element)
-		     (forward-char -1))))
+  (setq-local beginning-of-defun-function 'org-backward-element)
+  (setq-local end-of-defun-function
+	      (lambda ()
+		(if (not (org-at-heading-p))
+		    (org-forward-element)
+		  (org-forward-element)
+		  (forward-char -1))))
   ;; Next error for sparse trees
-  (org-set-local 'next-error-function 'org-occur-next-match)
+  (setq-local next-error-function 'org-occur-next-match)
   ;; Make sure dependence stuff works reliably, even for users who set it
   ;; too late :-(
   (if org-enforce-todo-dependencies
@@ -5519,15 +5496,15 @@ The following commands are available:
 		 'org-block-todo-from-checkboxes))
 
   ;; Align options lines
-  (org-set-local
-   'align-mode-rules-list
+  (setq-local
+   align-mode-rules-list
    '((org-in-buffer-settings
       (regexp . "^[ \t]*#\\+[A-Z_]+:\\(\\s-*\\)\\S-+")
       (modes . '(org-mode)))))
 
   ;; Imenu
-  (org-set-local 'imenu-create-index-function
-		 'org-imenu-get-tree)
+  (setq-local imenu-create-index-function
+	      'org-imenu-get-tree)
 
   ;; Make isearch reveal context
   (if (or (featurep 'xemacs)
@@ -5535,21 +5512,20 @@ The following commands are available:
       ;; Emacs 21 and XEmacs make use of the hook
       (org-add-hook 'isearch-mode-end-hook 'org-isearch-end 'append 'local)
     ;; Emacs 22 deals with this through a special variable
-    (org-set-local 'outline-isearch-open-invisible-function
-		   (lambda (&rest ignore) (org-show-context 'isearch))))
+    (setq-local outline-isearch-open-invisible-function
+		(lambda (&rest ignore) (org-show-context 'isearch))))
 
   ;; Setup the pcomplete hooks
-  (set (make-local-variable 'pcomplete-command-completion-function)
-       'org-pcomplete-initial)
-  (set (make-local-variable 'pcomplete-command-name-function)
-       'org-command-at-point)
-  (set (make-local-variable 'pcomplete-default-completion-function)
-       'ignore)
-  (set (make-local-variable 'pcomplete-parse-arguments-function)
-       'org-parse-arguments)
-  (set (make-local-variable 'pcomplete-termination-string) "")
-  (when (>= emacs-major-version 23)
-    (set (make-local-variable 'buffer-face-mode-face) 'org-default))
+  (setq-local pcomplete-command-completion-function
+	      'org-pcomplete-initial)
+  (setq-local pcomplete-command-name-function
+	      'org-command-at-point)
+  (setq-local pcomplete-default-completion-function
+	      'ignore)
+  (setq-local pcomplete-parse-arguments-function
+	      'org-parse-arguments)
+  (setq-local pcomplete-termination-string "")
+  (setq-local buffer-face-mode-face 'org-default)
 
   ;; If empty file that did not turn on org-mode automatically, make it to.
   (if (and org-insert-mode-line-in-empty-file
@@ -6093,9 +6069,8 @@ by a #."
 	  (org-display-custom-time (match-beginning 1) (match-end 1)))
 	t)))
 
-(defvar org-target-link-regexp nil
+(defvar-local org-target-link-regexp nil
   "Regular expression matching radio targets in plain text.")
-(make-variable-buffer-local 'org-target-link-regexp)
 
 (defconst org-target-regexp (let ((border "[^<>\n\r \t]"))
 			      (format "<<\\(%s\\|%s[^<>\n\r]*%s\\)>>"
@@ -6189,8 +6164,8 @@ Also refresh fontification if needed."
 (defun org-compute-latex-and-related-regexp ()
   "Compute regular expression for LaTeX, entities and sub/superscript.
 Result depends on variable `org-highlight-latex-and-related'."
-  (org-set-local
-   'org-latex-and-related-regexp
+  (setq-local
+   org-latex-and-related-regexp
    (let* ((re-sub
 	   (cond ((not (memq 'script org-highlight-latex-and-related)) nil)
 		 ((eq org-use-sub-superscripts '{})
@@ -6418,15 +6393,15 @@ needs to be inserted at a specific position in the font-lock sequence.")
     (setq org-font-lock-extra-keywords (delq nil org-font-lock-extra-keywords))
     (run-hooks 'org-font-lock-set-keywords-hook)
     ;; Now set the full font-lock-keywords
-    (org-set-local 'org-font-lock-keywords org-font-lock-extra-keywords)
-    (org-set-local 'font-lock-defaults
-		   '(org-font-lock-keywords t nil nil backward-paragraph))
+    (setq-local org-font-lock-keywords org-font-lock-extra-keywords)
+    (setq-local font-lock-defaults
+		'(org-font-lock-keywords t nil nil backward-paragraph))
     (kill-local-variable 'font-lock-keywords) nil))
 
 (defun org-toggle-pretty-entities ()
   "Toggle the composition display of entities as UTF8 characters."
   (interactive)
-  (org-set-local 'org-pretty-entities (not org-pretty-entities))
+  (setq-local org-pretty-entities (not org-pretty-entities))
   (org-restart-font-lock)
   (if org-pretty-entities
       (message "Entities are now displayed as UTF8 characters")
@@ -6435,9 +6410,8 @@ needs to be inserted at a specific position in the font-lock sequence.")
       (org-decompose-region (point-min) (point-max))
       (message "Entities are now displayed as plain text"))))
 
-(defvar org-custom-properties-overlays nil
+(defvar-local org-custom-properties-overlays nil
   "List of overlays used for custom properties.")
-(make-variable-buffer-local 'org-custom-properties-overlays)
 
 (defun org-toggle-custom-properties-visibility ()
   "Display or hide properties in `org-custom-properties'."
@@ -6643,11 +6617,9 @@ and subscripts."
 
 ;;; Cycling
 
-(defvar org-cycle-global-status nil)
-(make-variable-buffer-local 'org-cycle-global-status)
+(defvar-local org-cycle-global-status nil)
 (put 'org-cycle-global-status 'org-state t)
-(defvar org-cycle-subtree-status nil)
-(make-variable-buffer-local 'org-cycle-subtree-status)
+(defvar-local org-cycle-subtree-status nil)
 (put 'org-cycle-subtree-status 'org-state t)
 
 (defvar org-inlinetask-min-level)
@@ -7295,9 +7267,8 @@ DATA should have been made by `org-outline-overlay-data'."
 
 ;;; Folding of blocks
 
-(defvar org-hide-block-overlays nil
+(defvar-local org-hide-block-overlays nil
   "Overlays hiding blocks.")
-(make-variable-buffer-local 'org-hide-block-overlays)
 
 (defun org-block-map (function &optional start end)
   "Call FUNCTION at the head of all source blocks in the current buffer.
@@ -9151,8 +9122,7 @@ defined by Org-mode)."
   "Unconditionally turn on `orgstruct-mode'."
   (orgstruct-mode 1))
 
-(defvar org-fb-vars nil)
-(make-variable-buffer-local 'org-fb-vars)
+(defvar-local org-fb-vars nil)
 (defun orgstruct++-mode (&optional arg)
   "Toggle `orgstruct-mode', the enhanced version of it.
 In addition to setting orgstruct-mode, this also exports all
@@ -9163,8 +9133,8 @@ buffer.  It will also recognize item context in multiline items."
   (if (< arg 1)
       (progn (orgstruct-mode -1)
 	     (mapc (lambda(v)
-		     (org-set-local (car v)
-				    (if (eq (car-safe (cadr v)) 'quote) (cadadr v) (cadr v))))
+		     (set (make-local-variable (car v))
+			  (if (eq (car-safe (cadr v)) 'quote) (cadadr v) (cadr v))))
 		   org-fb-vars))
     (orgstruct-mode 1)
     (setq org-fb-vars nil)
@@ -9178,13 +9148,13 @@ buffer.  It will also recognize item context in multiline items."
 		(symbol-name (car x)))
 	   (setq var (car x) val (nth 1 x))
 	   (push (list var `(quote ,(eval var))) org-fb-vars)
-	   (org-set-local var (if (eq (car-safe val) 'quote) (nth 1 val) val))))
+	   (set (make-local-variable var)
+		(if (eq (car-safe val) 'quote) (nth 1 val) val))))
        org-local-vars)
-      (org-set-local 'orgstruct-is-++ t))))
+      (setq-local orgstruct-is-++ t))))
 
-(defvar orgstruct-is-++ nil
+(defvar-local orgstruct-is-++ nil
   "Is `orgstruct-mode' in ++ version in the current-buffer?")
-(make-variable-buffer-local 'orgstruct-is-++)
 
 ;;;###autoload
 (defun turn-on-orgstruct++ ()
@@ -13088,7 +13058,7 @@ Returns the new TODO keyword, or nil if no state change should occur."
 	    (set-buffer (get-buffer-create " *Org todo*"))
 	  (org-switch-to-buffer-other-window (get-buffer-create " *Org todo*")))
 	(erase-buffer)
-	(org-set-local 'org-done-keywords done-keywords)
+	(setq-local org-done-keywords done-keywords)
 	(setq tbl fulltable cnt 0)
 	(while (setq e (pop tbl))
 	  (cond
@@ -13737,7 +13707,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
 		      "this entry")
 		     (t (error "This should not happen")))))
     (if org-log-note-extra (insert org-log-note-extra))
-    (org-set-local 'org-finish-function 'org-store-log-note)
+    (setq-local org-finish-function 'org-store-log-note)
     (run-hooks 'org-log-buffer-setup-hook)))
 
 (defvar org-note-abort nil) ; dynamically scoped
@@ -13901,10 +13871,9 @@ D      Show deadlines and scheduled items between a date range."
       ((?r ?R ?/) (call-interactively 'org-occur))
       (otherwise (user-error "No such sparse tree command \"%c\"" answer)))))
 
-(defvar org-occur-highlights nil
+(defvar-local org-occur-highlights nil
   "List of overlays used for occur matches.")
-(make-variable-buffer-local 'org-occur-highlights)
-(defvar org-occur-parameters nil
+(defvar-local org-occur-parameters nil
   "Parameters of the active org-occur calls.
 This is a list, each call to org-occur pushes as cons cell,
 containing the regular expression and the callback, onto the list.
@@ -13914,7 +13883,6 @@ will only contain one set of parameters.  When the highlights are
 removed (for example with `C-c C-c', or with the next edit (depending
 on `org-remove-highlights-with-change'), this variable is emptied
 as well.")
-(make-variable-buffer-local 'org-occur-parameters)
 
 (defun org-occur (regexp &optional keep-previous callback)
   "Make a compact tree which shows all matches of REGEXP.
@@ -15227,7 +15195,7 @@ Returns the new tags string, or nil to not change the current settings."
 	(set-window-buffer (split-window-vertically) (get-buffer-create " *Org tags*"))
 	(org-switch-to-buffer-other-window " *Org tags*"))
       (erase-buffer)
-      (org-set-local 'org-done-keywords done-keywords)
+      (setq-local org-done-keywords done-keywords)
       (org-fast-tag-insert "Inherited" inherited i-face "\n")
       (org-fast-tag-insert "Current" current c-face "\n\n")
       (org-fast-tag-show-exit exit-after-next)
@@ -18563,7 +18531,7 @@ the buffer and restores the previous window configuration."
   (if (stringp org-agenda-files)
       (let ((cw (current-window-configuration)))
 	(find-file org-agenda-files)
-	(org-set-local 'org-window-configuration cw)
+	(setq-local org-window-configuration cw)
 	(org-add-hook 'after-save-hook
 		      (lambda ()
 			(set-window-configuration
@@ -18984,9 +18952,8 @@ looks only before point, not after."
     (org-in-regexp
      "\\\\[a-zA-Z]+\\*?\\(\\(\\[[^][\n{}]*\\]\\)\\|\\({[^{}\n]*}\\)\\)*")))
 
-(defvar org-latex-fragment-image-overlays nil
+(defvar-local org-latex-fragment-image-overlays nil
   "List of overlays carrying the images of latex fragments.")
-(make-variable-buffer-local 'org-latex-fragment-image-overlays)
 
 (defun org-remove-latex-fragment-image-overlays (&optional beg end)
   "Remove all overlays with LaTeX fragment images in current buffer.
@@ -19593,8 +19560,7 @@ SNIPPETS-P indicates if this is run to create snippet images for HTML."
 
 ;; Image display
 
-(defvar org-inline-image-overlays nil)
-(make-variable-buffer-local 'org-inline-image-overlays)
+(defvar-local org-inline-image-overlays nil)
 
 (defun org-toggle-inline-images (&optional include-linked)
   "Toggle the display of inline images.
@@ -23281,20 +23247,20 @@ assumed to be significant there."
   (require 'org-element)
   ;; Prevent auto-fill from inserting unwanted new items.
   (when (boundp 'fill-nobreak-predicate)
-    (org-set-local
-     'fill-nobreak-predicate
+    (setq-local
+     fill-nobreak-predicate
      (org-uniquify
       (append fill-nobreak-predicate
 	      '(org-fill-line-break-nobreak-p
 		org-fill-paragraph-with-timestamp-nobreak-p)))))
   (let ((paragraph-ending (substring org-element-paragraph-separate 1)))
-    (org-set-local 'paragraph-start paragraph-ending)
-    (org-set-local 'paragraph-separate paragraph-ending))
-  (org-set-local 'fill-paragraph-function 'org-fill-paragraph)
-  (org-set-local 'auto-fill-inhibit-regexp nil)
-  (org-set-local 'adaptive-fill-function 'org-adaptive-fill-function)
-  (org-set-local 'normal-auto-fill-function 'org-auto-fill-function)
-  (org-set-local 'comment-line-break-function 'org-comment-line-break-function))
+    (setq-local paragraph-start paragraph-ending)
+    (setq-local paragraph-separate paragraph-ending))
+  (setq-local fill-paragraph-function 'org-fill-paragraph)
+  (setq-local auto-fill-inhibit-regexp nil)
+  (setq-local adaptive-fill-function 'org-adaptive-fill-function)
+  (setq-local normal-auto-fill-function 'org-auto-fill-function)
+  (setq-local comment-line-break-function 'org-comment-line-break-function))
 
 (defun org-fill-line-break-nobreak-p ()
   "Non-nil when a new line at point would create an Org line break."
@@ -23683,12 +23649,12 @@ region only contains such lines."
 
 (defun org-setup-comments-handling ()
   (interactive)
-  (org-set-local 'comment-use-syntax nil)
-  (org-set-local 'comment-start "# ")
-  (org-set-local 'comment-start-skip "^\\s-*#\\(?: \\|$\\)")
-  (org-set-local 'comment-insert-comment-function 'org-insert-comment)
-  (org-set-local 'comment-region-function 'org-comment-or-uncomment-region)
-  (org-set-local 'uncomment-region-function 'org-comment-or-uncomment-region))
+  (setq-local comment-use-syntax nil)
+  (setq-local comment-start "# ")
+  (setq-local comment-start-skip "^\\s-*#\\(?: \\|$\\)")
+  (setq-local comment-insert-comment-function 'org-insert-comment)
+  (setq-local comment-region-function 'org-comment-or-uncomment-region)
+  (setq-local uncomment-region-function 'org-comment-or-uncomment-region))
 
 (defun org-insert-comment ()
   "Insert an empty comment above current line.
@@ -25052,9 +25018,8 @@ when non-nil, is a regexp matching keywords names."
 
 ;;; Imenu support
 
-(defvar org-imenu-markers nil
+(defvar-local org-imenu-markers nil
   "All markers currently used by Imenu.")
-(make-variable-buffer-local 'org-imenu-markers)
 
 (defun org-imenu-new-marker (&optional pos)
   "Return a new marker for use by Imenu, and remember the marker."

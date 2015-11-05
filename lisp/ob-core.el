@@ -2705,8 +2705,8 @@ block but are passed literally to the \"example-block\"."
 		     (org-babel-trim (buffer-string)))))
 	 index source-name evaluate prefix)
     (with-temp-buffer
-      (org-set-local 'org-babel-noweb-wrap-start ob-nww-start)
-      (org-set-local 'org-babel-noweb-wrap-end ob-nww-end)
+      (setq-local org-babel-noweb-wrap-start ob-nww-start)
+      (setq-local org-babel-noweb-wrap-end ob-nww-end)
       (insert body) (goto-char (point-min))
       (setq index (point))
       (while (and (re-search-forward (org-babel-noweb-wrap) nil t))

@@ -195,11 +195,10 @@ Changing this variable requires a restart of Emacs to get activated."
     (skip-chars-backward ":A-Za-z")
     (skip-chars-backward "\t ")))
 
-(defvar org-mouse-context-menu-function nil
+(defvar-local org-mouse-context-menu-function nil
   "Function to create the context menu.
 The value of this variable is the function invoked by
 `org-mouse-context-menu' as the context menu.")
-(make-variable-buffer-local 'org-mouse-context-menu-function)
 
 (defun org-mouse-show-context-menu (event prefix)
   "Invoke the context menu.

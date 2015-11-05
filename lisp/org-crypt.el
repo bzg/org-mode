@@ -164,7 +164,7 @@ See `org-crypt-disable-auto-save'."
   (if (and (string= crypt-key (get-text-property 0 'org-crypt-key str))
 	   (string= (sha1 str) (get-text-property 0 'org-crypt-checksum str)))
       (get-text-property 0 'org-crypt-text str)
-    (set (make-local-variable 'epg-context) (epg-make-context nil t t))
+    (setq-local epg-context (epg-make-context nil t t))
     (epg-encrypt-string epg-context str (epg-list-keys epg-context crypt-key))))
 
 (defun org-encrypt-entry ()
@@ -173,7 +173,7 @@ See `org-crypt-disable-auto-save'."
   (require 'epg)
   (save-excursion
     (org-back-to-heading t)
-    (set (make-local-variable 'epg-context) (epg-make-context nil t t))
+    (setq-local epg-context (epg-make-context nil t t))
     (let ((start-heading (point)))
       (forward-line)
       (when (not (looking-at "-----BEGIN PGP MESSAGE-----"))
@@ -209,7 +209,7 @@ See `org-crypt-disable-auto-save'."
 	(forward-line)
 	(when (looking-at "-----BEGIN PGP MESSAGE-----")
 	  (org-crypt-check-auto-save)
-          (set (make-local-variable 'epg-context) (epg-make-context nil t t))
+          (setq-local epg-context (epg-make-context nil t t))
 	  (let* ((end (save-excursion
 			(search-forward "-----END PGP MESSAGE-----")
 			(forward-line)

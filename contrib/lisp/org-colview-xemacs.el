@@ -33,6 +33,10 @@
 (eval-when-compile (require 'cl))
 (require 'org)
 
+(defsubst org-colview-xemacs-set-local (var value)
+  "Make VAR local in current buffer and set it to VALUE."
+  (set (make-local-variable var) value))
+
 (declare-function org-agenda-redo "org-agenda" ())
 
 
@@ -445,16 +449,16 @@ This is the compiled version of the format.")
         (let ((ext (make-extent nil nil)))
           (set-extent-endpoints ext 0 (length title) title)
           (set-extent-face ext (list 'bold 'underline 'org-columns-space1))
-          (org-set-local 'org-previous-header-line-format
-			 (specifier-specs top-gutter))
-          (org-set-local 'org-columns-current-widths (nreverse widths))
+          (org-colview-xemacs-set-local 'org-previous-header-line-format
+					(specifier-specs top-gutter))
+          (org-colview-xemacs-set-local 'org-columns-current-widths (nreverse widths))
           (set-specifier top-gutter (make-gutter-specifier
 				     (cons (current-buffer) title))))
       (setq title (concat
                    (org-add-props " " nil 'display '(space :align-to 0))
                    (org-add-props title nil 'face '(:weight bold :underline t))))
-      (org-set-local 'org-previous-header-line-format header-line-format)
-      (org-set-local 'org-columns-current-widths (nreverse widths))
+      (org-colview-xemacs-set-local 'org-previous-header-line-format header-line-format)
+      (org-colview-xemacs-set-local 'org-columns-current-widths (nreverse widths))
       (setq org-columns-full-header-line-format title)
       (setq org-columns-previous-hscroll -1)
       (org-add-hook 'post-command-hook 'org-columns-hscoll-title nil 'local))))
@@ -805,7 +809,7 @@ around it."
     (when (condition-case nil (org-back-to-heading) (error nil))
       (setq fmt (org-entry-get nil "COLUMNS" t)))
     (setq fmt (or fmt org-columns-default-format))
-    (org-set-local 'org-columns-current-fmt fmt)
+    (org-colview-xemacs-set-local 'org-columns-current-fmt fmt)
     (org-columns-compile-format fmt)
     (if (marker-position org-entry-property-inherited-from)
 	(move-marker org-columns-top-level-marker
@@ -846,12 +850,12 @@ around it."
 	  (push (cons (org-current-line) (org-entry-properties)) cache)))
       (when cache
 	(setq maxwidths (org-columns-get-autowidth-alist fmt cache))
-	(org-set-local 'org-columns-current-maxwidths maxwidths)
+	(org-colview-xemacs-set-local 'org-columns-current-maxwidths maxwidths)
 	(org-columns-display-here-title)
 	(unless (local-variable-p 'org-colview-initial-truncate-line-value
 				  (current-buffer))
-	  (org-set-local 'org-colview-initial-truncate-line-value
-			 truncate-lines))
+	  (org-colview-xemacs-set-local 'org-colview-initial-truncate-line-value
+					truncate-lines))
 	(setq truncate-lines t)
 	(mapc (lambda (x)
 		(org-goto-line (car x))
@@ -1004,7 +1008,7 @@ This is either in the COLUMNS property of the node starting the current column
 display, or in the #+COLUMNS line of the current buffer."
   (let (fmt (cnt 0))
     (setq fmt (org-columns-uncompile-format org-columns-current-fmt-compiled))
-    (org-set-local 'org-columns-current-fmt fmt)
+    (org-colview-xemacs-set-local 'org-columns-current-fmt fmt)
     (if (marker-position org-columns-top-level-marker)
 	(save-excursion
 	  (goto-char org-columns-top-level-marker)
@@ -1021,7 +1025,7 @@ display, or in the #+COLUMNS line of the current buffer."
 	      (or (org-at-heading-p t) (outline-next-heading))
 	      (let ((inhibit-read-only t))
 		(insert-before-markers "#+COLUMNS: " fmt "\n")))
-	    (org-set-local 'org-columns-default-format fmt))))))
+	    (org-colview-xemacs-set-local 'org-columns-default-format fmt))))))
 
 (defvar org-agenda-overriding-columns-format nil
   "When set, overrides any other format definition for the agenda.
@@ -1513,7 +1517,7 @@ and tailing newline characters."
      ((and (boundp 'org-agenda-overriding-columns-format)
 	   org-agenda-overriding-columns-format)
       (setq fmt org-agenda-overriding-columns-format)
-      (org-set-local 'org-agenda-overriding-columns-format fmt))
+      (org-colview-xemacs-set-local 'org-agenda-overriding-columns-format fmt))
      ((setq m (org-get-at-bol 'org-hd-marker))
       (setq fmt (or (org-entry-get m "COLUMNS" t)
 		    (with-current-buffer (marker-buffer m)
@@ -1528,7 +1532,7 @@ and tailing newline characters."
 		    (with-current-buffer (marker-buffer m)
 		      org-columns-default-format)))))
     (setq fmt (or fmt org-columns-default-format))
-    (org-set-local 'org-columns-current-fmt fmt)
+    (org-colview-xemacs-set-local 'org-columns-current-fmt fmt)
     (org-columns-compile-format fmt)
     (when org-agenda-columns-compute-summary-properties
       (org-agenda-colview-compute org-columns-current-fmt-compiled))
@@ -1552,7 +1556,7 @@ and tailing newline characters."
 	(beginning-of-line 2))
       (when cache
 	(setq maxwidths (org-columns-get-autowidth-alist fmt cache))
-	(org-set-local 'org-columns-current-maxwidths maxwidths)
+	(org-colview-xemacs-set-local 'org-columns-current-maxwidths maxwidths)
 	(org-columns-display-here-title)
 	(mapc (lambda (x)
 		(org-goto-line (car x))
@@ -1629,7 +1633,7 @@ This will add overlays to the date lines, to show the summary for each day."
 			 (cons prop lsum))))
 		     fmt))
 	      (org-columns-display-here props)
-	      (org-set-local 'org-agenda-columns-active t)))
+	      (org-colview-xemacs-set-local 'org-agenda-columns-active t)))
 	  (if (bobp) (throw 'exit t))
 	  (beginning-of-line 0))))))
 

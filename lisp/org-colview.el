@@ -45,19 +45,15 @@
 
 (defvar org-columns-time)
 
-(defvar org-columns-current-fmt nil
+(defvar-local org-columns-current-fmt nil
   "Local variable, holds the currently active column format.")
-(make-variable-buffer-local 'org-columns-current-fmt)
-(defvar org-columns-current-fmt-compiled nil
+(defvar-local org-columns-current-fmt-compiled nil
   "Local variable, holds the currently active column format.
 This is the compiled version of the format.")
-(make-variable-buffer-local 'org-columns-current-fmt-compiled)
-(defvar org-columns-current-widths nil
+(defvar-local org-columns-current-widths nil
   "Loval variable, holds the currently widths of fields.")
-(make-variable-buffer-local 'org-columns-current-widths)
-(defvar org-columns-current-maxwidths nil
+(defvar-local org-columns-current-maxwidths nil
   "Loval variable, holds the currently active maximum column widths.")
-(make-variable-buffer-local 'org-columns-current-maxwidths)
 (defvar org-columns-begin-marker (make-marker)
   "Points to the position where last a column creation command was called.")
 (defvar org-columns-top-level-marker (make-marker)
@@ -317,8 +313,8 @@ for the duration of the command.")
 		 (org-add-props " " nil 'display '(space :align-to 0))
 		 ;;(org-add-props title nil 'face '(:weight bold :underline t :inherit default))))
 		 (org-add-props title nil 'face 'org-column-title)))
-    (org-set-local 'org-previous-header-line-format header-line-format)
-    (org-set-local 'org-columns-current-widths (nreverse widths))
+    (setq-local org-previous-header-line-format header-line-format)
+    (setq-local org-columns-current-widths (nreverse widths))
     (setq org-columns-full-header-line-format title)
     (setq org-columns-previous-hscroll -1)
 					;    (org-columns-hscoll-title)
@@ -677,7 +673,7 @@ around it."
     (when (condition-case nil (org-back-to-heading) (error nil))
       (setq fmt-as-property (org-entry-get nil "COLUMNS" t)))
     (setq fmt (or fmt-string fmt-as-property org-columns-default-format))
-    (org-set-local 'org-columns-current-fmt fmt)
+    (setq-local org-columns-current-fmt fmt)
     (org-columns-compile-format fmt)
     fmt))
 
@@ -724,16 +720,16 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 			       column-names)))
 	       nil nil (and org-columns-skip-archived-trees 'archive))))
 	(when cache
-	  (org-set-local 'org-columns-current-maxwidths
+	  (setq-local org-columns-current-maxwidths
 			 (org-columns-get-autowidth-alist
 			  org-columns-current-fmt
 			  cache))
 	  (org-columns-display-here-title)
-	  (when (org-set-local 'org-columns-flyspell-was-active
+	  (when (setq-local org-columns-flyspell-was-active
 			       (org-bound-and-true-p flyspell-mode))
 	    (flyspell-mode 0))
 	  (unless (local-variable-p 'org-colview-initial-truncate-line-value)
-	    (org-set-local 'org-colview-initial-truncate-line-value
+	    (setq-local org-colview-initial-truncate-line-value
 			   truncate-lines))
 	  (setq truncate-lines t)
 	  (dolist (x cache)
@@ -883,7 +879,7 @@ This is either in the COLUMNS property of the node starting the current column
 display, or in the #+COLUMNS line of the current buffer."
   (let (fmt (cnt 0))
     (setq fmt (org-columns-uncompile-format org-columns-current-fmt-compiled))
-    (org-set-local 'org-columns-current-fmt fmt)
+    (setq-local org-columns-current-fmt fmt)
     (if (marker-position org-columns-top-level-marker)
 	(save-excursion
 	  (goto-char org-columns-top-level-marker)
@@ -900,7 +896,7 @@ display, or in the #+COLUMNS line of the current buffer."
 	      (or (org-at-heading-p t) (outline-next-heading))
 	      (let ((inhibit-read-only t))
 		(insert-before-markers "#+COLUMNS: " fmt "\n")))
-	    (org-set-local 'org-columns-default-format fmt))))))
+	    (setq-local org-columns-default-format fmt))))))
 
 (defun org-columns-get-autowidth-alist (s cache)
   "Derive the maximum column widths from the format and the cache."
@@ -1396,7 +1392,7 @@ and tailing newline characters."
 			(with-current-buffer (marker-buffer m)
 			  org-columns-default-format))))))
 	  (t org-columns-default-format))))
-    (org-set-local 'org-columns-current-fmt fmt)
+    (setq-local org-columns-current-fmt fmt)
     (org-columns-compile-format fmt)
     (when org-agenda-columns-compute-summary-properties
       (org-agenda-colview-compute org-columns-current-fmt-compiled))
@@ -1435,10 +1431,10 @@ and tailing newline characters."
 	       cache))
 	    (forward-line)))
 	(when cache
-	  (org-set-local 'org-columns-current-maxwidths
+	  (setq-local org-columns-current-maxwidths
 			 (org-columns-get-autowidth-alist fmt cache))
 	  (org-columns-display-here-title)
-	  (when (org-set-local 'org-columns-flyspell-was-active
+	  (when (setq-local org-columns-flyspell-was-active
 			       (org-bound-and-true-p flyspell-mode))
 	    (flyspell-mode 0))
 	  (dolist (x cache)
@@ -1517,7 +1513,7 @@ This will add overlays to the date lines, to show the summary for each day."
 			 (cons prop lsum))))
 		     fmt))
 	      (org-columns-display-here props 'dateline)
-	      (org-set-local 'org-agenda-columns-active t)))
+	      (setq-local org-agenda-columns-active t)))
 	  (if (bobp) (throw 'exit t))
 	  (beginning-of-line 0))))))
 

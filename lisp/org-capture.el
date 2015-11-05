@@ -433,8 +433,8 @@ for a capture buffer.")
 
 Turning on this mode runs the normal hook `org-capture-mode-hook'."
   nil " Rem" org-capture-mode-map
-  (org-set-local
-   'header-line-format
+  (setq-local
+   header-line-format
    (substitute-command-keys
     "\\<org-capture-mode-map>Capture buffer.  Finish \\[org-capture-finalize], \
 refile \\[org-capture-refile], abort \\[org-capture-kill].")))
@@ -615,7 +615,7 @@ of the day at point (if any) or the current HH:MM time."
 			(org-capture-put :interrupted-clock
 					 (copy-marker org-clock-marker)))
 		    (org-clock-in)
-		    (org-set-local 'org-capture-clock-was-started t))
+		    (setq-local org-capture-clock-was-started t))
 		(error
 		 "Could not start the clock in this capture buffer")))
 	  (if (org-capture-get :immediate-finish)
@@ -996,7 +996,7 @@ a string, return it.  However, if it is the empty string, return
 (defun org-capture-steal-local-variables (buffer)
   "Install Org-mode local variables of BUFFER."
   (mapc (lambda (v)
-	  (ignore-errors (org-set-local (car v) (cdr v))))
+	  (ignore-errors (set (make-local-variable (car v)) (cdr v))))
 	(buffer-local-variables buffer)))
 
 (defun org-capture-place-template (&optional inhibit-wconf-store)
@@ -1011,9 +1011,8 @@ may have been stored before."
   (widen)
   (outline-show-all)
   (goto-char (org-capture-get :pos))
-  (org-set-local 'org-capture-target-marker
-		 (point-marker))
-  (org-set-local 'outline-level 'org-outline-level)
+  (setq-local org-capture-target-marker (point-marker))
+  (setq-local outline-level 'org-outline-level)
   (let* ((template (org-capture-get :template))
 	 (type (org-capture-get :type)))
     (case type
@@ -1023,7 +1022,7 @@ may have been stored before."
       (item (org-capture-place-item))
       (checkitem (org-capture-place-item))))
   (org-capture-mode 1)
-  (org-set-local 'org-capture-current-plist org-capture-plist))
+  (setq-local org-capture-current-plist org-capture-plist))
 
 (defun org-capture-place-entry ()
   "Place the template as a new Org entry."

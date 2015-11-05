@@ -119,10 +119,9 @@ will be added.  Returns the resulting property list."
 Pass PARAMS through to `orgtbl-to-generic' when exporting TABLE."
   (with-temp-file
       data-file
-    (make-local-variable 'org-plot-timestamp-fmt)
-    (setq org-plot-timestamp-fmt (or
-				  (plist-get params :timefmt)
-				  "%Y-%m-%d-%H:%M:%S"))
+    (setq-local org-plot-timestamp-fmt (or
+					(plist-get params :timefmt)
+					"%Y-%m-%d-%H:%M:%S"))
     (insert (orgtbl-to-generic
 	     table
 	     (org-combine-plists

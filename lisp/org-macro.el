@@ -62,7 +62,7 @@
 
 ;;; Variables
 
-(defvar org-macro-templates nil
+(defvar-local org-macro-templates nil
   "Alist containing all macro templates in current buffer.
 Associations are in the shape of (NAME . TEMPLATE) where NAME
 stands for macro's name and template for its replacement value,
@@ -70,8 +70,6 @@ both as strings.  This is an internal variable.  Do not set it
 directly, use instead:
 
   #+MACRO: name template")
-(make-variable-buffer-local 'org-macro-templates)
-
 
 ;;; Functions
 

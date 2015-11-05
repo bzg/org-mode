@@ -210,8 +210,8 @@ The following patterns are replaced in the string:
 
 (defadvice visit-tags-table (after org-ctags-load-tag-list activate compile)
   (when (and org-ctags-enabled-p tags-file-name)
-    (set (make-local-variable 'org-ctags-tag-list)
-         (org-ctags-all-tags-in-current-tags-table))))
+    (setq-local org-ctags-tag-list
+		(org-ctags-all-tags-in-current-tags-table))))
 
 
 (defun org-ctags-enable ()
@@ -499,8 +499,8 @@ its subdirectories contain large numbers of taggable files."
                      (expand-file-name (concat dir-name "/*")))))
       (cond
        ((eql 0 exitcode)
-        (set (make-local-variable 'org-ctags-tag-list)
-             (org-ctags-all-tags-in-current-tags-table)))
+        (setq-local org-ctags-tag-list
+		    (org-ctags-all-tags-in-current-tags-table)))
        (t
         ;; This seems to behave differently on Linux, so just ignore
         ;; error codes for now
