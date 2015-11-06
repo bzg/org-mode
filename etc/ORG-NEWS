@@ -8,6 +8,47 @@ See the end of the file for license conditions.
 
 Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
+* Version 9.0
+
+** New functions
+
+*** ~org-next-line-empty-p~ is introduced
+It replaces the deprecated ~next~ argument to ~org-previous-line-empty-p~.
+
+** Removed functions
+
+*** ~org-image-file-name-regexp~ is deprecated
+Use ~image-file-name-regexp~ instead.
+The never-used-in-core ~extensions~ argument has been dropped.
+
+*** ~org-on-heading-p~ is deprecated
+A comment to this effect was in the source code since 7.8.03, but
+now a byte-compiler warning will be generated as well.
+
+*** Various reimplementations of cl-lib functions are deprecated
+The affected functions are:
+- ~org-count~
+- ~org-remove-if~
+- ~org-remove-if-not~
+- ~org-reduce~
+- ~org-every~
+- ~org-some~
+
+Additionally, ~org-sublist~ is deprecated in favor of ~cl-subseq~.  Note
+the differences in indexing conventions: ~org-sublist~ is 1-based and
+end-inclusive; ~cl-subseq~ is 0-based and end-exclusive.
+
+*** ~org-table-recognize-table.el~ is deprecated
+It was not called by any org code since 2010.
+
+*** ~org-table-p~ is deprecated
+Use ~org-at-table-p~ instead.
+
+** Miscellaneous
+
+*** ~org-babel-check-confirm-evaluate~ is now a function instead of a macro
+The calling convention has changed.
+
 * Version 8.4
 ** New features
 *** Org linter
