@@ -41,6 +41,7 @@
 
 (eval-when-compile
   (require 'cl))
+(require 'cl-lib)
 
 (declare-function org-inlinetask-get-task-level "org-inlinetask" ())
 (declare-function org-inlinetask-in-task-p "org-inlinetask" ())
@@ -209,7 +210,7 @@ When no more buffer is being watched, the agent suppress itself."
   (when org-indent-agent-resume-timer
     (cancel-timer org-indent-agent-resume-timer))
   (setq org-indent-agentized-buffers
-	(org-remove-if-not #'buffer-live-p org-indent-agentized-buffers))
+	(cl-remove-if-not #'buffer-live-p org-indent-agentized-buffers))
   (cond
    ;; Job done:  kill agent.
    ((not org-indent-agentized-buffers) (cancel-timer org-indent-agent-timer))

@@ -25,6 +25,7 @@
 ;;; Code:
 (eval-when-compile
   (require 'cl))
+(require 'cl-lib)
 (require 'ob-eval)
 (require 'org-macs)
 (require 'org-compat)
@@ -38,9 +39,7 @@
 (defvar org-src-lang-modes)
 (defvar org-babel-library-of-babel)
 (declare-function outline-show-all "outline" ())
-(declare-function org-every "org" (pred seq))
 (declare-function org-remove-indentation "org" (code &optional n))
-(declare-function org-reduce "org" (CL-FUNC CL-SEQ &rest CL-KEYS))
 (declare-function org-mark-ring-push "org" (&optional pos buffer))
 (declare-function tramp-compat-make-temp-file "tramp-compat"
                   (filename &optional dir-flag))
@@ -90,7 +89,6 @@
 (declare-function org-list-struct "org-list" ())
 (declare-function org-list-prevs-alist "org-list" (struct))
 (declare-function org-list-get-list-end "org-list" (item struct prevs))
-(declare-function org-remove-if "org" (predicate seq))
 (declare-function org-completing-read "org" (&rest args))
 (declare-function org-escape-code-in-region "org-src" (beg end))
 (declare-function org-unescape-code-in-string "org-src" (s))
@@ -100,7 +98,6 @@
 (declare-function org-element-type "org-element" (element))
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-property "org-element" (property element))
-(declare-function org-every "org" (pred seq))
 (declare-function org-macro-escape-arguments "org-macro" (&rest args))
 
 (defgroup org-babel nil
@@ -219,7 +216,7 @@ PARAMS is a quasi-alist of header args, whcih may contain
 multiple entries for the key `:var'.  This function returns a
 list of the cdr of all the `:var' entries."
   (mapcar #'cdr
-	  (org-remove-if (lambda (x) (not (eq (car x) :var))) params)))
+	  (cl-remove-if-not (lambda (x) (eq (car x) :var)) params)))
 
 (defun org-babel-get-inline-src-block-matches ()
   "Set match data if within body of an inline source block.
@@ -526,7 +523,7 @@ their `org-babel-default-header-args:foo' variable.
 For the format of SAFE-LIST, see `org-babel-safe-header-args'."
   `(lambda (value)
      (and (listp value)
-	  (org-every
+	  (cl-every
 	   (lambda (pair)
 	     (and (consp pair)
 		  (org-babel-one-header-arg-safe-p pair ,safe-list)))
@@ -812,7 +809,7 @@ arguments and pop open the results in a preview buffer."
 	(let ((header (car arg-pair))
 	      (args (cdr arg-pair)))
 	  (setq results
-		(cons arg-pair (org-remove-if
+		(cons arg-pair (cl-remove-if
 				(lambda (pair) (equal header (car pair)))
 				results))))))
     results))
@@ -1525,7 +1522,7 @@ instances of \"[ \t]:\" set ALTS to '((32 9) . 58)."
   (let ((last= (lambda (str) (= ch (aref str (1- (length str))))))
 	(first= (lambda (str) (= ch (aref str 0)))))
     (reverse
-     (org-reduce (lambda (acc el)
+     (cl-reduce (lambda (acc el)
 		   (let ((head (car acc)))
 		     (if (and head (or (funcall last= head) (funcall first= el)))
 			 (cons (concat head el) (cdr acc))
@@ -1597,7 +1594,7 @@ shown below.
       (cons :result-type  (cond ((member "output" result-params) 'output)
 				((member "value" result-params) 'value)
 				(t 'value))))
-     (org-remove-if
+     (cl-remove-if
       (lambda (x) (memq (car x) '(:colname-names :rowname-names :result-params
 						 :result-type :var)))
       params))))
@@ -2254,7 +2251,7 @@ INFO may provide the values of these header arguments (in the
 		       ;; a table.
 		       (and (listp r)
 			    (null (cdr (last r)))
-			    (org-every
+			    (cl-every
 			     (lambda (e) (or (atom e) (null (cdr (last e)))))
 			     result)))))
 		;; insert results based on type
@@ -2280,7 +2277,7 @@ INFO may provide the values of these header arguments (in the
 		 ((funcall tabulablep result)
 		  (goto-char beg)
 		  (insert (concat (orgtbl-to-orgtbl
-				   (if (org-every
+				   (if (cl-every
 					(lambda (e)
 					  (or (eq e 'hline) (listp e)))
 					result)
@@ -2621,9 +2618,9 @@ parameters when merging lists."
 	(lambda (param)
 	  (when (assoc param params)
 	    (setf (cdr (assoc param params))
-		  (org-remove-if (lambda (pair) (equal (car pair) name))
+		  (cl-remove-if (lambda (pair) (equal (car pair) name))
 				 (cdr (assoc param params))))
-	    (setf params (org-remove-if (lambda (pair) (and (equal (car pair) param)
+	    (setf params (cl-remove-if (lambda (pair) (and (equal (car pair) param)
 						       (null (cdr pair))))
 					params))))
 	(list :colname-names :rowname-names)))

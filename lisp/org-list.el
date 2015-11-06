@@ -78,6 +78,7 @@
 
 (eval-when-compile
   (require 'cl))
+(require 'cl-lib)
 (require 'org-macs)
 (require 'org-compat)
 
@@ -98,7 +99,6 @@
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-before-first-heading-p "org" ())
 (declare-function org-combine-plists "org" (&rest plists))
-(declare-function org-count "org" (cl-item cl-seq))
 (declare-function org-current-level "org" ())
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-context "org-element" (&optional element))
@@ -124,7 +124,6 @@
 (declare-function org-narrow-to-subtree "org" ())
 (declare-function org-previous-line-empty-p "org" ())
 (declare-function org-reduced-level "org" (L))
-(declare-function org-remove-if "org" (predicate seq))
 (declare-function org-show-subtree "org" ())
 (declare-function org-sort-remove-invisible "org" (S))
 (declare-function org-time-string-to-seconds "org" (s))
@@ -1471,7 +1470,7 @@ This function returns, destructively, the new list structure."
 		     (t dest)))
 	 (org-M-RET-may-split-line nil)
 	 ;; Store inner overlays (to preserve visibility).
-	 (overlays (org-remove-if (lambda (o) (or (< (overlay-start o) item)
+	 (overlays (cl-remove-if (lambda (o) (or (< (overlay-start o) item)
 					     (> (overlay-end o) item)))
 				  (overlays-in item item-end))))
     (cond
@@ -2400,7 +2399,7 @@ in subtree, ignoring drawers."
 	       (parents (org-list-parents-alist struct))
 	       (prevs (org-list-prevs-alist struct))
 	       (bottom (copy-marker (org-list-get-bottom-point struct)))
-	       (items-to-toggle (org-remove-if
+	       (items-to-toggle (cl-remove-if
 				 (lambda (e) (or (< e lim-up) (> e lim-down)))
 				 (mapcar #'car struct))))
 	  (mapc (lambda (e) (org-list-set-checkbox
@@ -2497,7 +2496,7 @@ With optional prefix argument ALL, do this for the whole buffer."
 					      (org-list-get-checkbox e s))
 					    items))))
 		   (incf c-all (length cookies))
-		   (incf c-on (org-count "[X]" cookies)))))))
+		   (incf c-on (cl-count "[X]" cookies :test #'equal)))))))
 	  cookies-list cache)
      ;; Move to start.
      (cond (all (goto-char (point-min)))
@@ -2675,7 +2674,7 @@ Return t if successful."
 		   ;; of the subtree mustn't have a child.
 		   (let ((last-item (caar
 				     (reverse
-				      (org-remove-if
+				      (cl-remove-if
 				       (lambda (e) (>= (car e) end))
 				       struct)))))
 		     (org-list-has-child-p last-item struct))))

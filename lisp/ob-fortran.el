@@ -29,10 +29,10 @@
 ;;; Code:
 (require 'ob)
 (require 'cc-mode)
+(require 'cl-lib)
 
 (declare-function org-entry-get "org"
 		  (pom property &optional inherit literal-nil))
-(declare-function org-every "org" (pred seq))
 (declare-function org-remove-indentation "org" (code &optional n))
 
 (defvar org-babel-tangle-lang-exts)
@@ -145,7 +145,7 @@ of the same value."
       (format "character(len=%d), parameter ::  %S = '%s'\n"
               (length val) var val))
      ;; val is a matrix
-     ((and (listp val) (org-every #'listp val))
+     ((and (listp val) (cl-every #'listp val))
       (format "real, parameter :: %S(%d,%d) = transpose( reshape( %s , (/ %d, %d /) ) )\n"
 	      var (length val) (length (car val))
 	      (org-babel-fortran-transform-list val)

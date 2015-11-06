@@ -21,6 +21,8 @@
 
 ;;; Code:
 
+(require 'cl-lib)
+
 (unless (featurep 'ox)
   (signal 'missing-test-dependency "org-export"))
 
@@ -1148,7 +1150,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
       (buffer-string))))
   ;; Adjacent INCLUDE-keywords should have the same :minlevel if unspecified.
   (should
-   (org-every (lambda (level) (zerop (1- level)))
+   (cl-every (lambda (level) (zerop (1- level)))
 	      (org-test-with-temp-text
 		  (concat
 		   (format "#+INCLUDE: \"%s/examples/include.org::#ah\"\n" org-test-dir)
@@ -2066,7 +2068,7 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 :UNNUMBERED: nil
 :END:
 *** H3"
-     (org-every
+     (cl-every
       (lambda (h) (not (org-export-numbered-headline-p h info)))
       (org-element-map tree 'headline #'identity info)))))
 

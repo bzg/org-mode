@@ -35,6 +35,7 @@
 (require 'ob-keys)
 (require 'ob-comint)
 (eval-when-compile (require 'cl))
+(require 'cl-lib)
 
 (declare-function org-base-buffer "org" (buffer))
 (declare-function org-do-remove-indentation "org" (&optional n))
@@ -49,7 +50,6 @@
 (declare-function org-get-indentation "org" (&optional line))
 (declare-function org-pop-to-buffer-same-window "org-compat"
 		  (&optional buffer-or-name norecord label))
-(declare-function org-some "org" (pred seq))
 (declare-function org-switch-to-buffer-other-window "org" (&rest args))
 (declare-function org-trim "org" (s))
 
@@ -963,7 +963,7 @@ Throw an error if there is no such buffer."
       (goto-char beg)
       (cond
        ;; Block is hidden; move at start of block.
-       ((org-some (lambda (o) (eq (overlay-get o 'invisible) 'org-hide-block))
+       ((cl-some (lambda (o) (eq (overlay-get o 'invisible) 'org-hide-block))
 		  (overlays-at (point)))
 	(beginning-of-line 0))
        (write-back (org-src--goto-coordinates coordinates beg end))))

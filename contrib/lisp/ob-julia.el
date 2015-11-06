@@ -38,7 +38,6 @@
 (declare-function ess-make-buffer-current "ext:ess-inf" ())
 (declare-function ess-eval-buffer "ext:ess-inf" (vis))
 (declare-function org-number-sequence "org-compat" (from &optional to inc))
-(declare-function org-remove-if-not "org" (predicate seq))
 
 (defconst org-babel-header-args:julia
   '((width		 . :any)
@@ -150,9 +149,9 @@ This function is called by `org-babel-execute-src-block'."
 (defun org-babel-julia-assign-elisp (name value colnames-p rownames-p)
   "Construct julia code assigning the elisp VALUE to a variable named NAME."
   (if (listp value)
-      (let ((max (apply #'max (mapcar #'length (org-remove-if-not
+      (let ((max (apply #'max (mapcar #'length (cl-remove-if-not
 						#'sequencep value))))
-	    (min (apply #'min (mapcar #'length (org-remove-if-not
+	    (min (apply #'min (mapcar #'length (cl-remove-if-not
 						#'sequencep value))))
 	    (transition-file (org-babel-temp-file "julia-import-")))
         ;; ensure VALUE has an orgtbl structure (depth of at least 2)

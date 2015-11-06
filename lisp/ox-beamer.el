@@ -30,6 +30,7 @@
 ;;; Code:
 
 (eval-when-compile (require 'cl))
+(require 'cl-lib)
 (require 'ox-latex)
 
 ;; Install a default set-up for Beamer export.
@@ -955,7 +956,7 @@ value."
     (save-excursion
       (org-back-to-heading t)
       ;; Filter out Beamer-related tags and install environment tag.
-      (let ((tags (org-remove-if (lambda (x) (string-match "^B_" x))
+      (let ((tags (cl-remove-if (lambda (x) (string-match "^B_" x))
 				 (org-get-tags)))
 	    (env-tag (and (org-string-nw-p value) (concat "B_" value))))
 	(org-set-tags-to (if env-tag (cons env-tag tags) tags))

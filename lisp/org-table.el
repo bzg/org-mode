@@ -36,6 +36,7 @@
 
 (eval-when-compile
   (require 'cl))
+(require 'cl-lib)
 (require 'org)
 
 (declare-function org-element-at-point "org-element" ())
@@ -2790,11 +2791,12 @@ not overwrite the stored one."
 		(replace-match
 		 (save-match-data
 		   (org-table-make-reference
-		    (org-sublist fields
-				 (+ (if (match-end 2) n0 0)
-				    (string-to-number (match-string 1 form)))
-				 (+ (if (match-end 4) n0 0)
-				    (string-to-number (match-string 3 form))))
+		    (cl-subseq fields
+			       (+ (if (match-end 2) n0 0)
+				  (string-to-number (match-string 1 form))
+				  -1)
+			       (+ (if (match-end 4) n0 0)
+				  (string-to-number (match-string 3 form))))
 		    keep-empty numbers lispp))
 		 t t form)))
 	(setq form0 form)

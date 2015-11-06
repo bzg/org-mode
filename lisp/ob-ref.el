@@ -50,14 +50,12 @@
 
 ;;; Code:
 (require 'ob-core)
-(eval-when-compile
-  (require 'cl))
+(require 'cl-lib)
 
 (declare-function org-at-item-p "org-list" ())
 (declare-function org-at-table-p "org" (&optional table-type))
 (declare-function org-babel-lob-execute "ob-lob" (info))
 (declare-function org-babel-lob-get-info "ob-lob" nil)
-(declare-function org-count "org" (cl-item cl-seq))
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
@@ -69,7 +67,6 @@
 (declare-function org-narrow-to-subtree "org" ())
 (declare-function org-pop-to-buffer-same-window "org-compat"
 		  (&optional buffer-or-name norecord label))
-(declare-function org-remove-if-not "org" (predicate seq))
 (declare-function org-show-context "org" (&optional key))
 
 
@@ -139,7 +136,7 @@ the variable."
 	  ;; if ref is indexed grab the indices -- beware nested indices
 	  (when (and (string-match "\\[\\([^\\[]+\\)\\]$" ref)
 		     (let ((str (substring ref 0 (match-beginning 0))))
-		       (= (org-count ?( str) (org-count ?) str))))
+		       (= (cl-count ?( str) (cl-count ?) str))))
 	    (setq index (match-string 1 ref))
 	    (setq ref (substring ref 0 (match-beginning 0))))
 	  ;; assign any arguments to pass to source block

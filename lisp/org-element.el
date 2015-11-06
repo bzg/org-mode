@@ -118,6 +118,7 @@
 
 (require 'org)
 (require 'avl-tree)
+(require 'cl-lib)
 
 
 
@@ -333,7 +334,7 @@ This list is checked after translations have been applied.  See
 	   ;; Regular affiliated keywords.
 	   (format "\\(?1:%s\\)"
 		   (regexp-opt
-		    (org-remove-if
+		    (cl-remove-if
 		     (lambda (k) (member k org-element-dual-keywords))
 		     org-element-affiliated-keywords)))
 	   "\\|"

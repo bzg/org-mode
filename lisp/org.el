@@ -68,6 +68,8 @@
 
 ;;;; Require other packages
 
+(require 'cl-lib)
+
 (eval-when-compile
   (require 'cl)
   (require 'gnus-sum))
@@ -766,7 +768,7 @@ value of the variable, after updating it:
 
   (progn
     (setq org-export-registered-backends
-          (org-remove-if-not
+          (cl-remove-if-not
            (lambda (backend)
              (let ((name (org-export-backend-name backend)))
                (or (memq name val)
@@ -798,7 +800,7 @@ depends on, if any."
 	   ;; a parent of any back-end in the new value) is removed from the
 	   ;; list of registered back-ends.
 	   (setq org-export-registered-backends
-		 (org-remove-if-not
+		 (cl-remove-if-not
 		  (lambda (backend)
 		    (let ((name (org-export-backend-name backend)))
 		      (or (memq name val)
@@ -11320,9 +11322,9 @@ If the file does not exist, an error is thrown."
 		   buffer-file-name
 		 (substitute-in-file-name (expand-file-name path))))
 	 (file-apps (append org-file-apps (org-default-apps)))
-	 (apps (org-remove-if
+	 (apps (cl-remove-if
 		'org-file-apps-entry-match-against-dlink-p file-apps))
-	 (apps-dlink (org-remove-if-not
+	 (apps-dlink (cl-remove-if-not
 		      'org-file-apps-entry-match-against-dlink-p file-apps))
 	 (remp (and (assq 'remote apps) (org-file-remote-p file)))
 	 (dirp (unless remp (file-directory-p file)))
@@ -18960,7 +18962,7 @@ removed, nil otherwise."
     (setq org-latex-fragment-image-overlays
 	  (let ((beg (or beg (point-min)))
 		(end (or end (point-max))))
-	    (org-remove-if
+	    (cl-remove-if
 	     (lambda (o)
 	       (cond ((not (overlay-buffer o)) (delete-overlay o) t)
 		     ((and (>= (overlay-start o) beg)
@@ -22668,59 +22670,6 @@ The function returns the new ALIST."
     (setq list (delete (pop elts) list)))
   list)
 
-(defun org-count (cl-item cl-seq)
-  "Count the number of occurrences of ITEM in SEQ.
-Taken from `count' in cl-seq.el with all keyword arguments removed."
-  (let ((cl-end (length cl-seq)) (cl-start 0) (cl-count 0)  cl-x)
-    (when (consp cl-seq) (setq cl-seq (nthcdr cl-start cl-seq)))
-    (while (< cl-start cl-end)
-      (setq cl-x (if (consp cl-seq) (pop cl-seq) (aref cl-seq cl-start)))
-      (if (equal cl-item cl-x) (setq cl-count (1+ cl-count)))
-      (setq cl-start (1+ cl-start)))
-    cl-count))
-
-(defun org-remove-if (predicate seq)
-  "Remove everything from SEQ that fulfills PREDICATE."
-  (let (res e)
-    (while seq
-      (setq e (pop seq))
-      (if (not (funcall predicate e)) (push e res)))
-    (nreverse res)))
-
-(defun org-remove-if-not (predicate seq)
-  "Remove everything from SEQ that does not fulfill PREDICATE."
-  (let (res e)
-    (while seq
-      (setq e (pop seq))
-      (if (funcall predicate e) (push e res)))
-    (nreverse res)))
-
-(defun org-reduce (cl-func cl-seq &rest cl-keys)
-  "Reduce two-argument FUNCTION across SEQ.
-Taken from `reduce' in cl-seq.el with all keyword arguments but
-\":initial-value\" removed."
-  (let ((cl-accum (cond ((memq :initial-value cl-keys)
-                         (cadr (memq :initial-value cl-keys)))
-                        (cl-seq (pop cl-seq))
-                        (t (funcall cl-func)))))
-    (while cl-seq
-      (setq cl-accum (funcall cl-func cl-accum (pop cl-seq))))
-    cl-accum))
-
-(defun org-every (pred seq)
-  "Return true if PREDICATE is true of every element of SEQ.
-Adapted from `every' in cl.el."
-  (catch 'org-every
-    (mapc (lambda (e) (unless (funcall pred e) (throw 'org-every nil))) seq)
-    t))
-
-(defun org-some (pred seq)
-  "Return true if PREDICATE is true of any element of SEQ.
-Adapted from `some' in cl.el."
-  (catch 'org-some
-    (mapc (lambda (e) (when (funcall pred e) (throw 'org-some t))) seq)
-    nil))
-
 (defun org-back-over-empty-lines ()
   "Move backwards over whitespace, to the beginning of the first empty line.
 Returns the number of empty lines passed."
@@ -22798,13 +22747,10 @@ so values can contain further %-escapes if they are define later in TABLE."
 
 (defun org-sublist (list start end)
   "Return a section of LIST, from START to END.
+
 Counting starts at 1."
-  (let (rtn (c start))
-    (setq list (nthcdr (1- start) list))
-    (while (and list (<= c end))
-      (push (pop list) rtn)
-      (setq c (1+ c)))
-    (nreverse rtn)))
+  (cl-subseq list (1- start) end))
+(make-obsolete 'org-sublist "cl-subseq (note the 0-based counting)." "Org 9.0")
 
 (defun org-find-base-buffer-visiting (file)
   "Like `find-buffer-visiting' but always return the base buffer and

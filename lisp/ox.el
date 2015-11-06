@@ -2828,7 +2828,7 @@ not, are considered."
 	;; Filter out definitions referenced neither in the original
 	;; tree nor in the external definitions.
 	(let* ((directly-referenced
-		(org-remove-if-not
+		(cl-remove-if-not
 		 (lambda (d)
 		   (member (org-element-property :label d) referenced-labels))
 		 definitions))
@@ -2836,7 +2836,7 @@ not, are considered."
 		(append (funcall collect-labels directly-referenced)
 			referenced-labels)))
 	  (setq definitions
-		(org-remove-if-not
+		(cl-remove-if-not
 		 (lambda (d)
 		   (member (org-element-property :label d) all-labels))
 		 definitions)))
@@ -3865,7 +3865,7 @@ INFO is a plist holding contextual information."
 (defun org-export-numbered-headline-p (headline info)
   "Return a non-nil value if HEADLINE element should be numbered.
 INFO is a plist used as a communication channel."
-  (unless (org-some
+  (unless (cl-some
 	   (lambda (head) (org-not-nil (org-element-property :UNNUMBERED head)))
 	   (org-element-lineage headline nil t))
     (let ((sec-num (plist-get info :section-numbers))
@@ -3902,7 +3902,7 @@ Any tag belonging to this list will also be removed.
 
 When optional argument INHERITED is non-nil, tags can also be
 inherited from parent headlines and FILETAGS keywords."
-  (org-remove-if
+  (cl-remove-if
    (lambda (tag) (or (member tag (plist-get info :select-tags))
 		(member tag (plist-get info :exclude-tags))
 		(member tag tags)))
@@ -6037,7 +6037,7 @@ stack."
 	       ;; Clear stack from exited processes, dead buffers or
 	       ;; non-existent files.
 	       (setq org-export-stack-contents
-		     (org-remove-if-not
+		     (cl-remove-if-not
 		      (lambda (el)
 			(if (processp (nth 2 el))
 			    (buffer-live-p (process-buffer (nth 2 el)))
@@ -6052,7 +6052,7 @@ If optional argument SOURCE is non-nil, remove it instead."
   (interactive)
   (let ((source (or source (org-export--stack-source-at-point))))
     (setq org-export-stack-contents
-	  (org-remove-if (lambda (el) (equal (car el) source))
+	  (cl-remove-if (lambda (el) (equal (car el) source))
 			 org-export-stack-contents))))
 
 (defun org-export-stack-view (&optional in-emacs)

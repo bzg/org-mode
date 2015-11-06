@@ -593,7 +593,7 @@ description."
 (defun org-contacts-remove-ignored-property-values (ignore-list list)
   "Remove all ignore-list's elements from list and you can use
    regular expressions in the ignore list."
-    (org-remove-if (lambda (el)
+    (cl-remove-if (lambda (el)
 		     (org-find-if (lambda (x)
 				    (string-match-p x el))
 				  ignore-list))

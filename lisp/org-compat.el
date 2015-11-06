@@ -566,6 +566,14 @@ Implements `define-error' for older emacsen."
     (put name 'error-conditions
 	 (copy-sequence (cons name (get 'error 'error-conditions))))))
 
+;;; Functions from cl-lib that Org used to have its own implementation of
+(define-obsolete-function-alias 'org-count 'cl-count "Org 9.0")
+(define-obsolete-function-alias 'org-remove-if 'cl-remove-if "Org 9.0")
+(define-obsolete-function-alias 'org-remove-if-not 'cl-remove-if-not "Org 9.0")
+(define-obsolete-function-alias 'org-reduce 'cl-reduce "Org 9.0")
+(define-obsolete-function-alias 'org-every 'cl-every "Org 9.0")
+(define-obsolete-function-alias 'org-some 'cl-some "Org 9.0")
+
 (provide 'org-compat)
 
 ;;; org-compat.el ends here

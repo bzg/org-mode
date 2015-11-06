@@ -32,6 +32,7 @@
 ;;; Code:
 
 (eval-when-compile (require 'cl))
+(require 'cl-lib)
 (require 'ox-ascii)
 (declare-function org-bbdb-anniv-export-ical "org-bbdb" nil)
 
@@ -834,7 +835,7 @@ external process."
       ;; Asynchronous export is not interactive, so we will not call
       ;; `org-check-agenda-file'.  Instead we remove any non-existent
       ;; agenda file from the list.
-      (let ((files (org-remove-if-not 'file-exists-p (org-agenda-files t))))
+      (let ((files (cl-remove-if-not #'file-exists-p (org-agenda-files t))))
 	(org-export-async-start
 	    (lambda (results)
 	      (dolist (f results) (org-export-add-to-stack f 'icalendar)))
@@ -865,7 +866,7 @@ The file is stored under the name chosen in
 `org-icalendar-combined-agenda-file'."
   (interactive)
   (if async
-      (let ((files (org-remove-if-not #'file-exists-p (org-agenda-files t))))
+      (let ((files (cl-remove-if-not #'file-exists-p (org-agenda-files t))))
 	(org-export-async-start
 	    (lambda (_)
 	      (org-export-add-to-stack

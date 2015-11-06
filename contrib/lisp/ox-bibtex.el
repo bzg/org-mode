@@ -169,7 +169,7 @@ to `org-bibtex-citation-p' predicate."
       (outline-previous-visible-heading 1)
       t)))
 
-(let ((jump-fn (car (org-remove-if-not #'fboundp '(ebib org-bibtex-goto-citation)))))
+(let ((jump-fn (car (cl-remove-if-not #'fboundp '(ebib org-bibtex-goto-citation)))))
   (org-add-link-type "cite" jump-fn))
 
 

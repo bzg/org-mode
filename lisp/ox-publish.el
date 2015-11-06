@@ -445,7 +445,7 @@ matching the regexp SKIP-DIR when recursing through BASE-DIR."
   (let ((all-files (if (not recurse) (directory-files base-dir t match)
 		     ;; If RECURSE is non-nil, we want all files
 		     ;; matching MATCH and sub-directories.
-		     (org-remove-if-not
+		     (cl-remove-if-not
 		      (lambda (file)
 			(or (file-directory-p file)
 			    (and match (string-match match file))))

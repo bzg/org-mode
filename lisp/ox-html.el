@@ -34,6 +34,7 @@
 (require 'ox-publish)
 (require 'format-spec)
 (eval-when-compile (require 'cl) (require 'table nil 'noerror))
+(require 'cl-lib)
 
 
 ;;; Function Declarations
@@ -1716,7 +1717,7 @@ INFO is a plist used as a communication channel."
 	 info))
       charset) "\n"
      (let ((viewport-options
-	    (org-remove-if-not (lambda (cell) (org-string-nw-p (cadr cell)))
+	    (cl-remove-if-not (lambda (cell) (org-string-nw-p (cadr cell)))
 			       (plist-get info :html-viewport))))
        (and viewport-options
 	    (concat

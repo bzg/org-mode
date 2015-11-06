@@ -28,7 +28,7 @@
 
 ;;; Code:
 (require 'ob)
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 
 (declare-function orgtbl-to-tsv "org-table" (table params))
 (declare-function R "ext:essd-r" (&optional start-args))
@@ -38,8 +38,6 @@
 (declare-function ess-wait-for-process "ext:ess-inf"
 		  (proc &optional sec-prompt wait force-redisplay))
 (declare-function org-number-sequence "org-compat" (from &optional to inc))
-(declare-function org-remove-if-not "org" (predicate seq))
-(declare-function org-every "org" (pred seq))
 
 (defconst org-babel-header-args:R
   '((width		 . :any)
@@ -234,7 +232,7 @@ This function is called by `org-babel-execute-src-block'."
 (defun org-babel-R-assign-elisp (name value colnames-p rownames-p)
   "Construct R code assigning the elisp VALUE to a variable named NAME."
   (if (listp value)
-      (let* ((lengths (mapcar 'length (org-remove-if-not 'sequencep value)))
+      (let* ((lengths (mapcar 'length (cl-remove-if-not 'sequencep value)))
 	     (max (if lengths (apply 'max lengths) 0))
 	     (min (if lengths (apply 'min lengths) 0)))
         ;; Ensure VALUE has an orgtbl structure (depth of at least 2).

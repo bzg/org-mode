@@ -771,7 +771,7 @@ Use :header-args: instead"
     (lambda (h)
       (and (org-element-property :footnote-section-p h)
 	   (org-element-map (org-element-contents h)
-	       (org-remove-if
+	       (cl-remove-if
 		(lambda (e)
 		  (memq e '(comment comment-block footnote-definition
 				    property-drawer section)))
@@ -1085,7 +1085,7 @@ CHECKERS is the list of checkers used."
   (interactive)
   (let ((c (org-lint--current-checker)))
     (setf tabulated-list-entries
-	  (org-remove-if (lambda (e) (equal c (org-lint--current-checker e)))
+	  (cl-remove-if (lambda (e) (equal c (org-lint--current-checker e)))
 			 tabulated-list-entries))
     (tabulated-list-print)))
 
@@ -1124,7 +1124,7 @@ ARG can also be a list of checker names, as symbols, to run."
 		    "Checker category: "
 		    (mapcar #'org-lint-checker-categories org-lint--checkers)
 		    nil t)))
-	      (org-remove-if-not
+	      (cl-remove-if-not
 	       (lambda (c)
 		 (assoc-string (org-lint-checker-categories c) category))
 	       org-lint--checkers)))
@@ -1139,7 +1139,7 @@ ARG can also be a list of checker names, as symbols, to run."
 		   (when (string= (org-lint-checker-name c) name)
 		     (throw 'exit c)))))))
 	   ((pred consp)
-	    (org-remove-if-not (lambda (c) (memq (org-lint-checker-name c) arg))
+	    (cl-remove-if-not (lambda (c) (memq (org-lint-checker-name c) arg))
 			       org-lint--checkers))
 	   (_ (user-error "Invalid argument `%S' for `org-lint'" arg)))))
     (if (not (org-called-interactively-p))
