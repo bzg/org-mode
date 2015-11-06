@@ -44,6 +44,10 @@ It was not called by any org code since 2010.
 *** ~org-table-p~ is deprecated
 Use ~org-at-table-p~ instead.
 
+*** ~org-babel-get-header~ is removed
+
+Use ~assq~ or ~org-babel--get-vars~ instead, as applicable.
+
 ** Miscellaneous
 
 *** ~org-babel-check-confirm-evaluate~ is now a function instead of a macro
@@ -105,7 +109,7 @@ plain list.
 fixltx2e is obsolete, see LaTeX News 22.
 ** Miscellaneous
 *** Beamer export back-ends uses ~org-latex-prefer-user-labels~
-*** ~:preparation-function~ called earlier during publishing 
+*** ~:preparation-function~ called earlier during publishing
 Functions in this list are called before any file is associated to the
 current projet.  Thus, they can be used to generate to be published
 Org files.
