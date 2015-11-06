@@ -7666,14 +7666,26 @@ frame is not changed."
 
 ;;; Inserting headlines
 
-(defun org-previous-line-empty-p (&optional next)
-  "Is the previous line a blank line?
-When NEXT is non-nil, check the next line instead."
+(defun org--line-empty-p (n)
+  "Is the Nth next line empty?
+
+Counts the current line as N = 1 and the previous line as N = 0;
+see `beginning-of-line'."
   (save-excursion
     (and (not (bobp))
-	 (or (beginning-of-line (if next 2 0)) t)
+	 (or (beginning-of-line n) t)
 	 (save-match-data
 	   (looking-at "[ \t]*$")))))
+
+(defun org-previous-line-empty-p ()
+  "Is the previous line a blank line?
+When NEXT is non-nil, check the next line instead."
+  (org--line-empty-p 0))
+
+(defun org-next-line-empty-p ()
+  "Is the previous line a blank line?
+When NEXT is non-nil, check the next line instead."
+  (org--line-empty-p 2))
 
 (defun org-insert-heading (&optional arg invisible-ok top-level)
   "Insert a new heading or an item with the same depth at point.
@@ -7788,7 +7800,7 @@ heading, unconditionally."
 					 (org-backward-heading-same-level
 					  1 invisible-ok))
 				       (= (point) (match-beginning 0)))
-				     (not (org-previous-line-empty-p t)))
+				     (not (org-next-line-empty-p)))
 			  (setq empty-line-p (or empty-line-p
 						 (org-previous-line-empty-p))))
 			(match-string 0))
