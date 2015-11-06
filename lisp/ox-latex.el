@@ -2177,10 +2177,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((value (org-element-property :value latex-fragment)))
     ;; Trim math markers since the fragment is enclosed within
     ;; a latex-math-block object anyway.
-    (cond ((string-match "\\`\\(\\$\\{1,2\\}\\)\\([^\000]*\\)\\1\\'" value)
-	   (match-string 2 value))
-	  ((string-match "\\`\\\\(\\([^\000]*\\)\\\\)\\'" value)
-	   (match-string 1 value))
+    (cond ((string-match-p "\\`\\$[^$]" value) (substring value 1 -1))
+	  ((string-prefix-p "\\(" value) (substring value 2 -2))
 	  (t value))))
 
 
@@ -2613,16 +2611,15 @@ channel."
 DATA is a parse tree or a secondary string.  INFO is a plist
 containing export options.  Modify DATA by side-effect and return it."
   (let ((valid-object-p
-	 (function
-	  ;; Non-nil when OBJ can be added to the latex math block.
-	  (lambda (obj)
-	    (case (org-element-type obj)
-	      (entity (org-element-property :latex-math-p obj))
-	      (latex-fragment
-	       (let ((value (org-element-property :value obj)))
-		 (or (org-string-match-p "\\`\\\\([^\000]*\\\\)\\'" value)
-		     (org-string-match-p "\\`\\$[^\000]*\\$\\'" value))))
-	      ((subscript superscript) t))))))
+	 ;; Non-nil when OBJ can be added to the latex math block.
+	 (lambda (obj)
+	   (pcase (org-element-type obj)
+	     (`entity (org-element-property :latex-math-p obj))
+	     (`latex-fragment
+	      (let ((value (org-element-property :value obj)))
+		(or (string-prefix-p "\\(" value)
+		    (string-match-p "\\`\\$[^$]" value))))
+	     ((or `subscript `superscript) t)))))
     (org-element-map data '(entity latex-fragment subscript superscript)
       (lambda (object)
 	;; Skip objects already wrapped.
