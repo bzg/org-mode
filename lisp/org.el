@@ -8116,13 +8116,7 @@ even level numbers will become the next higher odd number."
 	    ((> change 0) (1+ (* 2 (/ (+ level (* 2 change)) 2))))
 	    ((< change 0) (max 1 (1+ (* 2 (/ (+ level (* 2 change)) 2))))))
     (max 1 (+ level (or change 0)))))
-
-(if (boundp 'define-obsolete-function-alias)
-    (if (or (featurep 'xemacs) (< emacs-major-version 23))
-	(define-obsolete-function-alias 'org-get-legal-level
-	  'org-get-valid-level)
-      (define-obsolete-function-alias 'org-get-legal-level
-	'org-get-valid-level "23.1")))
+(define-obsolete-function-alias 'org-get-legal-level 'org-get-valid-level "23.1")
 
 (defun org-promote ()
   "Promote the current heading higher up the tree."
