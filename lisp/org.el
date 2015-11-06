@@ -19625,7 +19625,7 @@ boundaries."
     (org-with-wide-buffer
      (goto-char (or beg (point-min)))
      (let ((case-fold-search t)
-	   (file-extension-re (org-image-file-name-regexp)))
+	   (file-extension-re (image-file-name-regexp)))
        (while (re-search-forward "[][]\\[\\(?:file\\|[./~]\\)" end t)
 	 (let ((link (save-match-data (org-element-context))))
 	   ;; Check if we're at an inline image.
@@ -22773,26 +22773,15 @@ not an indirect buffer."
 	(or (buffer-base-buffer buf) buf)
       nil)))
 
-(defun org-image-file-name-regexp (&optional extensions)
-  "Return regexp matching the file names of images.
-If EXTENSIONS is given, only match these."
-  (if (and (not extensions) (fboundp 'image-file-name-regexp))
-      (image-file-name-regexp)
-    (let ((image-file-name-extensions
-	   (or extensions
-	       '("png" "jpeg" "jpg" "gif" "tiff" "tif"
-		 "xbm" "xpm" "pbm" "pgm" "ppm"))))
-      (concat "\\."
-	      (regexp-opt (nconc (mapcar 'upcase
-					 image-file-name-extensions)
-				 image-file-name-extensions)
-			  t)
-	      "\\'"))))
+(define-obsolete-function-alias 'org-image-file-name-regexp 'image-file-name-regexp
+  "Org 9.0")
 
-(defun org-file-image-p (file &optional extensions)
+;;; TODO: Only called once, from ox-odt which should probably use
+;;; org-export-inline-image-p or something.
+(defun org-file-image-p (file)
   "Return non-nil if FILE is an image."
   (save-match-data
-    (string-match (org-image-file-name-regexp extensions) file)))
+    (string-match (image-file-name-regexp) file)))
 
 (defun org-get-cursor-date (&optional with-time)
   "Return the date at cursor in as a time.

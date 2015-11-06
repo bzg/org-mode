@@ -339,8 +339,8 @@ by most recent first"
    org-screenshot-rotation-index -1
    org-screenshot-file-list
    (let ((files (directory-files org-screenshot-image-directory
-                                 t (org-image-file-name-regexp) t)))
-     (mapcar 'file-name-nondirectory 
+                                 t (image-file-name-regexp) t)))
+     (mapcar 'file-name-nondirectory
              (sort files
                    (lambda (file1 file2)
                      (let ((mtime1 (nth 5 (file-attributes file1)))
@@ -365,7 +365,7 @@ other direction"
          (link-re 
           ;; taken from `org-display-inline-images'
           (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([^]\n]+?"
-                  (substring (org-image-file-name-regexp) 0 -2)
+                  (substring (image-file-name-regexp) 0 -2)
                   "\\)\\]"))
          newfile oldfile)
     (save-excursion 
@@ -497,7 +497,7 @@ entered, at which point event will be unread"
   (let ((files-in-buffer)
 	dired-buffer
 	had-any
-	(image-re (org-image-file-name-regexp))
+	(image-re (image-file-name-regexp))
 	beg end)
     (save-excursion
       (save-restriction
@@ -505,7 +505,7 @@ entered, at which point event will be unread"
 	(setq beg (or beg (point-min)) end (or end (point-max)))
 	(goto-char beg)
 	(let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([^]\n]+?"
-			  (substring (org-image-file-name-regexp) 0 -2)
+			  (substring (image-file-name-regexp) 0 -2)
 			  "\\)\\]"))
 	      (case-fold-search t)
 	      old file ov img type attrwidth width)
