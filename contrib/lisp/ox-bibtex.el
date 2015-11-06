@@ -92,7 +92,7 @@
 
 ;; Initialization
 
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 
 ;;; Internal Functions
 
@@ -136,7 +136,7 @@ contains a list of strings to be passed as options to
 
 (defun org-bibtex-citation-p (object)
   "Non-nil when OBJECT is a citation."
-  (case (org-element-type object)
+  (cl-case (org-element-type object)
     (link (equal (org-element-property :type object) "cite"))
     (latex-fragment
      (string-match "\\`\\\\cite{" (org-element-property :value object)))))

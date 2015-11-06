@@ -30,7 +30,7 @@
 
 ;;; Code:
 (require 'ob)
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 
 (declare-function orgtbl-to-csv "org-table" (table params))
 (declare-function julia "ext:ess-julia" (&optional start-args))
@@ -228,7 +228,7 @@ current code buffer."
 If RESULT-TYPE equals 'output then return standard output as a
 string.  If RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
-  (case result-type
+  (cl-case result-type
     (value
      (let ((tmp-file (org-babel-temp-file "julia-")))
        (org-babel-eval org-babel-julia-command
@@ -250,7 +250,7 @@ last statement in BODY, as elisp."
 If RESULT-TYPE equals 'output then return standard output as a
 string.  If RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
-  (case result-type
+  (cl-case result-type
     (value
      (with-temp-buffer
        (insert (org-babel-chomp body))
