@@ -7816,7 +7816,7 @@ heading, unconditionally."
 	  ;; If we are splitting, grab the text that should be moved
 	  ;; to the new headline.
 	  (when may-split
-	    (if (org-on-heading-p)
+	    (if (org-at-heading-p)
 		;; This is a heading: split intelligently (keeping
 		;; tags).
 		(let ((pos (point)))
@@ -24135,8 +24135,10 @@ This version does not only check the character property, but also
 
 (defun org-at-heading-p (&optional ignored)
   (outline-on-heading-p t))
-;; Compatibility alias with Org versions < 7.8.03
-(defalias 'org-on-heading-p 'org-at-heading-p)
+;;; Though the function was obsoleted in 7.8.03, the byte-compiler
+;;; warning was only added in Org 9.0, which should be taken into
+;;; account when deciding when to remove the alias.
+(define-obsolete-function-alias 'org-on-heading-p 'org-at-heading-p "Org 7.8.03")
 
 (defun org-in-commented-heading-p (&optional no-inheritance)
   "Non-nil if point is under a commented heading.
