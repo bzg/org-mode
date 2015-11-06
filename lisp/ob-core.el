@@ -2016,7 +2016,7 @@ Return nil if ELEMENT cannot be read."
 	(buffer-substring-no-properties
 	 (org-element-property :contents-begin element)
 	 (org-element-property :contents-end element))))
-     ((or `center-block `paragraph `quote-block `verse-block `special-block)
+     ((or `center-block `quote-block `verse-block `special-block)
       (org-remove-indentation
        (buffer-substring-no-properties
 	(org-element-property :contents-begin element)
