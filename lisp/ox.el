@@ -347,7 +347,7 @@ e.g. \"arch:nil\"."
 	  (const :tag "Not at all" nil)
 	  (const :tag "Headline only" headline)
 	  (const :tag "Entirely" t))
-  :safe (lambda (x) (memq x 't nil headline)))
+  :safe (lambda (x) (memq x '(t nil headline))))
 
 (defcustom org-export-with-author t
   "Non-nil means insert author name into the exported file.
