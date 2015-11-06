@@ -1081,7 +1081,8 @@ holding export options."
 		   ;; full-fledged definitions.
 		   (org-trim
 		    (let ((def (nth 2 ref)))
-		      (if (eq (org-element-type def) 'org-data)
+		      (if (org-element-map def org-element-all-elements
+			    #'identity info 'first-match)
 			  ;; Full-fledged definition: footnote ID is
 			  ;; inserted inside the first parsed
 			  ;; paragraph (FIRST), if any, to be sure
