@@ -4738,9 +4738,9 @@ Otherwise, these types are allowed:
              (end (if globalp (point-max) (org-end-of-subtree t))))
 	(org-hide-archived-subtrees beg end)
 	(goto-char beg)
-	(if (looking-at (concat ".*:" org-archive-tag ":"))
-	    (message "%s" (substitute-command-keys
-			   "Subtree is archived and stays closed.  Use \\[org-force-cycle-archived] to cycle it anyway.")))))))
+	(when (looking-at-p (concat ".*:" org-archive-tag ":"))
+	  (message "%s" (substitute-command-keys
+			 "Subtree is archived and stays closed.  Use \\[org-force-cycle-archived] to cycle it anyway.")))))))
 
 (defun org-force-cycle-archived ()
   "Cycle subtree even if it is archived."
@@ -5752,28 +5752,26 @@ This should be called after the variable `org-link-types' has changed."
     (while (and (not rtn) (re-search-forward org-emph-re limit t))
       (let* ((border (char-after (match-beginning 3)))
 	     (bre (regexp-quote (char-to-string border))))
-	(if (and (not (= border (char-after (match-beginning 4))))
-		 (not (save-match-data
-			(string-match (concat bre ".*" bre)
-				      (replace-regexp-in-string
-				       "\n" " "
-				       (substring (match-string 2) 1 -1))))))
-	    (progn
-	      (setq rtn t)
-	      (setq a (assoc (match-string 3) org-emphasis-alist))
-	      (font-lock-prepend-text-property (match-beginning 2) (match-end 2)
-					       'face
-					       (nth 1 a))
-	      (and (nth 2 a)
-		   (org-remove-flyspell-overlays-in
-		    (match-beginning 0) (match-end 0)))
-	      (add-text-properties (match-beginning 2) (match-end 2)
-				   '(font-lock-multiline t org-emphasis t))
-	      (when org-hide-emphasis-markers
-		(add-text-properties (match-end 4) (match-beginning 5)
-				     '(invisible org-link))
-		(add-text-properties (match-beginning 3) (match-end 3)
-				     '(invisible org-link))))))
+	(when (and (not (= border (char-after (match-beginning 4))))
+		   (not (string-match-p (concat bre ".*" bre)
+					(replace-regexp-in-string
+					 "\n" " "
+					 (substring (match-string 2) 1 -1)))))
+	  (setq rtn t)
+	  (setq a (assoc (match-string 3) org-emphasis-alist))
+	  (font-lock-prepend-text-property (match-beginning 2) (match-end 2)
+					   'face
+					   (nth 1 a))
+	  (and (nth 2 a)
+	       (org-remove-flyspell-overlays-in
+		(match-beginning 0) (match-end 0)))
+	  (add-text-properties (match-beginning 2) (match-end 2)
+			       '(font-lock-multiline t org-emphasis t))
+	  (when org-hide-emphasis-markers
+	    (add-text-properties (match-end 4) (match-beginning 5)
+				 '(invisible org-link))
+	    (add-text-properties (match-beginning 3) (match-end 3)
+				 '(invisible org-link)))))
       (goto-char (1+ (match-beginning 0))))
     rtn))
 
@@ -7154,10 +7152,8 @@ open and agenda-wise Org files."
   (let ((files (mapcar 'expand-file-name (org-agenda-files))))
     (dolist (buf (buffer-list))
       (with-current-buffer buf
-	(if (and (derived-mode-p 'org-mode) (buffer-file-name))
-	    (let ((file (expand-file-name (buffer-file-name))))
-	      (unless (member file files)
-		(push file files))))))
+	(when (and (derived-mode-p 'org-mode) (buffer-file-name))
+	  (cl-pushnew (expand-file-name (buffer-file-name)) files))))
     files))
 
 (defsubst org-entry-beginning-position ()
@@ -8664,9 +8660,9 @@ called immediately, to move the markers with the entries."
   "Check if MARKER is between BEG and END.
 If yes, remember the marker and the distance to BEG."
   (when (and (marker-buffer marker)
-	     (equal (marker-buffer marker) (current-buffer)))
-    (if (and (>= marker beg) (< marker end))
-	(push (cons marker (- marker beg)) org-markers-to-move))))
+	     (equal (marker-buffer marker) (current-buffer))
+	     (>= marker beg) (< marker end))
+    (push (cons marker (- marker beg)) org-markers-to-move)))
 
 (defun org-reinstall-markers-in-region (beg)
   "Move all remembered markers to their position relative to BEG."
@@ -12436,13 +12432,14 @@ nil or a string to be used for the todo mark." )
     (org-back-to-heading t)
     (let ((bound1 (point))
 	  (bound0 (save-excursion (outline-next-heading) (point))))
-      (when (re-search-forward
-	     (concat "\\(" org-scheduled-time-regexp "\\)\\|\\("
-		     org-deadline-time-regexp "\\)\\|\\("
-		     org-ts-regexp "\\)")
-	     bound0 t)
-	(if (re-search-backward "[ \t]+\\(?:[.+]\\)?\\+\\([0-9]+\\)[hdwmy]" bound1 t)
-	    (replace-match "0" t nil nil 1))))))
+      (when (and (re-search-forward
+		  (concat "\\(" org-scheduled-time-regexp "\\)\\|\\("
+			  org-deadline-time-regexp "\\)\\|\\("
+			  org-ts-regexp "\\)")
+		  bound0 t)
+		 (re-search-backward "[ \t]+\\(?:[.+]\\)?\\+\\([0-9]+\\)[hdwmy]"
+				     bound1 t))
+	(replace-match "0" t nil nil 1)))))
 
 (defun org-todo (&optional arg)
   "Change the TODO state of an item.
@@ -12932,8 +12929,9 @@ statistics everywhere."
 				 (and (member kwd org-done-keywords)
 				      (member kwd (cadr org-provide-todo-statistics))))))
 	    	    (setq cnt-all (1+ cnt-all))
-	    	  (if (eq org-provide-todo-statistics t)
-	    	      (and kwd (setq cnt-all (1+ cnt-all)))))
+	    	  (and (eq org-provide-todo-statistics t)
+		       kwd
+		       (setq cnt-all (1+ cnt-all))))
 		(when (or (and (member org-provide-todo-statistics '(t all-headlines))
 			       (member kwd org-done-keywords))
 			  (and (listp org-provide-todo-statistics)
@@ -14229,8 +14227,10 @@ headlines matching this string."
 	       (re-search-forward re nil t))
 	(setq org-map-continue-from nil)
 	(catch :skip
-	  (setq todo (if (match-end 1) (org-match-string-no-properties 2))
-		tags (if (match-end 4) (org-match-string-no-properties 4)))
+	  (setq todo
+		;; TODO: is the 1-2 difference a bug?
+		(when (match-end 1) (org-match-string-no-properties 2))
+		tags (when (match-end 4) (org-match-string-no-properties 4)))
 	  (goto-char (setq lspos (match-beginning 0)))
 	  (setq level (org-reduced-level (org-outline-level))
 		category (org-get-category))
@@ -24099,11 +24099,9 @@ interactive command with similar behavior."
 	 (setq level (org-outline-level)))
        (goto-char end)
        (skip-chars-forward " \t\r\n\v\f")
-       (if (or (eobp)
-	       (and (bolp) (looking-at org-outline-regexp)
-		    (<= (org-outline-level) level)))
-	   nil				; Nothing would be swallowed
-	 t)))))				; something would swallow
+       (not (or (eobp)
+		(and (bolp) (looking-at-p org-outline-regexp)
+		     (<= (org-outline-level) level))))))))
 
 (define-key org-mode-map "\C-y" 'org-yank)
 
