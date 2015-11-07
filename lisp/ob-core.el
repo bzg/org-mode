@@ -340,19 +340,21 @@ environment, to override this check."
   (let* ((evalp (org-babel-check-confirm-evaluate info))
 	 (lang (nth 0 info))
 	 (name (nth 4 info))
-	 (name-string (if name (format " (%s) " name) "")))
+	 (name-string (if name (format " (%s) " name) " ")))
     (pcase evalp
       (`nil nil)
       (`t t)
-      (`query (unless
-		  (and (not (org-bound-and-true-p
-			     org-babel-confirm-evaluate-answer-no))
-		       (yes-or-no-p
-			(format "Evaluate this %s code block%son your system? "
-				lang name-string)))
+      (`query (or
+	       (and (not (org-bound-and-true-p
+			  org-babel-confirm-evaluate-answer-no))
+		    (yes-or-no-p
+		     (format "Evaluate this %s code block%son your system? "
+			     lang name-string)))
+	       (progn
 		(message "Evaluation of this %s code-block%sis aborted."
-			 lang name-string)))
-      (x (error "Unexepcted value `%s' from `org-babel-check-confirm-evaluate'" x)))))
+			 lang name-string)
+		nil)))
+      (x (error "Unexpected value `%s' from `org-babel-check-confirm-evaluate'" x)))))
 
 ;;;###autoload
 (defun org-babel-execute-safely-maybe ()
