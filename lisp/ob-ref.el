@@ -193,10 +193,12 @@ the variable."
 		     (when (org-babel-ref-goto-headline-id ref)
 		       (throw :found (org-babel-ref-headline-body)))
 		     ;; Check the Library of Babel.
-		     (let ((lob-info (cdr (assq (intern ref) org-babel-library-of-babel))))
-		       (when lob-info
-			 (throw :found (org-babel-execute-src-block nil lob-info params))))
-		     (t (error "Reference `%s' not found in this buffer" ref)))))
+		     (let ((info (cdr (assq (intern ref)
+					    org-babel-library-of-babel))))
+		       (when info
+			 (throw :found
+				(org-babel-execute-src-block nil info params))))
+		     (error "Reference `%s' not found in this buffer" ref))))
 	     (cond
 	      ((symbolp result) (format "%S" result))
 	      ((and index (listp result))
