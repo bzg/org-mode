@@ -1011,7 +1011,6 @@ may have been stored before."
   (widen)
   (outline-show-all)
   (goto-char (org-capture-get :pos))
-  (setq-local org-capture-target-marker (point-marker))
   (setq-local outline-level 'org-outline-level)
   (let* ((template (org-capture-get :template))
 	 (type (org-capture-get :type)))
