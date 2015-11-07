@@ -402,8 +402,8 @@ This splices all the components into the list."
     (when (or org-publish-sitemap-sort-files org-publish-sitemap-sort-folders)
       ;; First we sort files:
       (when org-publish-sitemap-sort-files
-	(case org-publish-sitemap-sort-files
-	  (alphabetically
+	(pcase org-publish-sitemap-sort-files
+	  (`alphabetically
 	   (let* ((adir (file-directory-p a))
 		  (aorg (and (string-match "\\.org$" a) (not adir)))
 		  (bdir (file-directory-p b))
@@ -415,13 +415,14 @@ This splices all the components into the list."
 	     (setq retval (if org-publish-sitemap-ignore-case
 			      (not (string-lessp (upcase B) (upcase A)))
 			    (not (string-lessp B A))))))
-	  ((anti-chronologically chronologically)
+	  ((or `anti-chronologically `chronologically)
 	   (let* ((adate (org-publish-find-date a))
 		  (bdate (org-publish-find-date b))
 		  (A (+ (lsh (car adate) 16) (cadr adate)))
 		  (B (+ (lsh (car bdate) 16) (cadr bdate))))
 	     (setq retval
-		   (if (eq org-publish-sitemap-sort-files 'chronologically) (<= A B)
+		   (if (eq org-publish-sitemap-sort-files 'chronologically)
+		       (<= A B)
 		     (>= A B)))))))
       ;; Directory-wise wins:
       (when org-publish-sitemap-sort-folders
@@ -463,7 +464,7 @@ matching the regexp SKIP-DIR when recursing through BASE-DIR."
 		      (and skip-file (string-match skip-file fnd))
 		      (not (file-exists-p (file-truename f)))
 		      (not (string-match match fnd)))
-	    (pushnew f org-publish-temp-files)))))))
+	    (cl-pushnew f org-publish-temp-files)))))))
 
 (defun org-publish-get-base-files (project &optional exclude-regexp)
   "Return a list of all files in PROJECT.
@@ -506,15 +507,15 @@ matching filenames."
 
     (setq org-publish-temp-files nil)
     (when org-publish-sitemap-requested
-      (pushnew (expand-file-name (concat base-dir sitemap-filename))
-	       org-publish-temp-files))
+      (cl-pushnew (expand-file-name (concat base-dir sitemap-filename))
+		  org-publish-temp-files))
     (org-publish-get-base-files-1 base-dir recurse match
 				  ;; FIXME distinguish exclude regexp
 				  ;; for skip-file and skip-dir?
 				  exclude-regexp exclude-regexp)
     (dolist (f include-list org-publish-temp-files)
-      (pushnew (expand-file-name (concat base-dir f))
-	       org-publish-temp-files))))
+      (cl-pushnew (expand-file-name (concat base-dir f))
+		  org-publish-temp-files))))
 
 (defun org-publish-get-project-from-filename (filename &optional up)
   "Return the project that FILENAME belongs to."
@@ -1016,10 +1017,11 @@ publishing directory."
 	    ;; Compute the first difference between last entry and
 	    ;; current one: it tells the level at which new items
 	    ;; should be added.
-	    (let* ((rank (if (equal entry last-entry) (1- (length entry))
-			   (loop for n from 0 to (length entry)
-				 unless (equal (nth n entry) (nth n last-entry))
-				 return n)))
+	    (let* ((rank
+		    (if (equal entry last-entry) (1- (length entry))
+		      (cl-loop for n from 0 to (length entry)
+			       unless (equal (nth n entry) (nth n last-entry))
+			       return n)))
 		   (len (length (nthcdr rank entry))))
 	      ;; For each term after the first difference, create
 	      ;; a new sub-list with the term as body.  Moreover,
@@ -1034,11 +1036,11 @@ publishing directory."
 		      (format
 		       "[[%s][%s]]"
 		       ;; Destination.
-		       (case (car target)
-			 ('nil (format "file:%s" file))
-			 (id (format "id:%s" (cdr target)))
-			 (custom-id (format "file:%s::#%s" file (cdr target)))
-			 (otherwise (format "file:%s::*%s" file (cdr target))))
+		       (pcase (car target)
+			 (`nil (format "file:%s" file))
+			 (`id (format "id:%s" (cdr target)))
+			 (`custom-id (format "file:%s::#%s" file (cdr target)))
+			 (_ (format "file:%s::*%s" file (cdr target))))
 		       ;; Description.
 		       (car (last entry)))))
 		  "\n"))))
@@ -1092,8 +1094,8 @@ This function is meant to be used as a final out filter.  See
      (when (hash-table-p (plist-get info :internal-references))
        (maphash
 	(lambda (k v)
-	  (case (org-element-type k)
-	    ((headline inlinetask)
+	  (pcase (org-element-type k)
+	    ((or `headline `inlinetask)
 	     (push (cons
 		    (cons 'headline
 			  (org-split-string
@@ -1104,19 +1106,18 @@ This function is meant to be used as a final out filter.  See
 		   refs)
 	     (let ((custom-id (org-element-property :CUSTOM_ID k)))
 	       (when custom-id
-		 (push (cons (cons 'custom-id custom-id) v) refs))))
-	    ((radio-target target)
+		 (push (cons (cons 'custom-id custom-id) v)
+		       refs))))
+	    ((or `radio-target `target)
 	     (push
 	      (cons (cons 'target
 			  (org-split-string (org-element-property :value k)))
 		    v)
 	      refs))
-	    ((org-element-property :name k)
-	     (push
-	      (cons
-	       (cons 'other (org-split-string (org-element-property :name k)))
-	       v)
-	      refs)))
+	    ((and (let name (org-element-property :name k))
+		  (guard name))
+	     (push (cons (cons 'other (org-split-string name)) v)
+		   refs)))
 	  refs)
 	(plist-get info :internal-references)))
      refs))
@@ -1143,11 +1144,11 @@ publishing"
     (let ((references (org-publish-cache-get-file-property
 		       (expand-file-name file) :references nil t)))
       (cond
-       ((cdr (case (aref search 0)
+       ((cdr (pcase (aref search 0)
 	       (?* (assoc (cons 'headline (org-split-string (substring search 1)))
 			  references))
 	       (?# (assoc (cons 'custom-id (substring search 1)) references))
-	       (t
+	       (_
 		(let ((s (org-split-string search)))
 		  (or (assoc (cons 'target s) references)
 		      (assoc (cons 'other s) references)
