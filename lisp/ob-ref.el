@@ -162,44 +162,41 @@ the variable."
 	   (goto-char (point-min))
 	   (let* ((params (append args '((:results . "silent"))))
 		  (regexp (org-babel-named-data-regexp-for-name ref))
-		  lob-info
 		  (result
-		   (cond
-		    ;; Check for code blocks or named data.
-		    ((catch :found
-		       (while (re-search-forward regexp nil t)
-			 ;; Ignore COMMENTed headings and orphaned
-			 ;; affiliated keywords.
-			 (unless (org-in-commented-heading-p)
-			   (let ((e (org-element-at-point)))
-			     (when (equal (org-element-property :name e) ref)
-			       (goto-char
-				(org-element-property :post-affiliated e))
-			       (pcase (org-element-type e)
-				 (`babel-call
-				  (throw :found
-					 (org-babel-lob-execute
-					  (org-babel-lob-get-info))))
-				 (`src-block
-				  (throw :found
-					 (org-babel-execute-src-block
-					  nil nil
-					  (and
-					   (not org-babel-update-intermediate)
-					   params))))
-				 ((and (let v (org-babel-read-element e))
-				       (guard v))
-				  (throw :found v))
-				 (_ (error "Reference not found")))))))
-		       nil))
-		    ;; Check for local or global headlines by ID.
-		    ((org-babel-ref-goto-headline-id ref)
-		     (org-babel-ref-headline-body))
-		    ;; Check the Library of Babel.
-		    ((setq lob-info
-			   (cdr (assq (intern ref) org-babel-library-of-babel)))
-		     (org-babel-execute-src-block nil lob-info params))
-		    (t (error "Reference `%s' not found in this buffer" ref)))))
+		   (catch :found
+		     ;; Check for code blocks or named data.
+		     (while (re-search-forward regexp nil t)
+		       ;; Ignore COMMENTed headings and orphaned
+		       ;; affiliated keywords.
+		       (unless (org-in-commented-heading-p)
+			 (let ((e (org-element-at-point)))
+			   (when (equal (org-element-property :name e) ref)
+			     (goto-char
+			      (org-element-property :post-affiliated e))
+			     (pcase (org-element-type e)
+			       (`babel-call
+				(throw :found
+				       (org-babel-lob-execute
+					(org-babel-lob-get-info))))
+			       (`src-block
+				(throw :found
+				       (org-babel-execute-src-block
+					nil nil
+					(and
+					 (not org-babel-update-intermediate)
+					 params))))
+			       ((and (let v (org-babel-read-element e))
+				     (guard v))
+				(throw :found v))
+			       (_ (error "Reference not found")))))))
+		     ;; Check for local or global headlines by ID.
+		     (when (org-babel-ref-goto-headline-id ref)
+		       (throw :found (org-babel-ref-headline-body)))
+		     ;; Check the Library of Babel.
+		     (let ((lob-info (cdr (assq (intern ref) org-babel-library-of-babel))))
+		       (when lob-info
+			 (throw :found (org-babel-execute-src-block nil lob-info params))))
+		     (t (error "Reference `%s' not found in this buffer" ref)))))
 	     (cond
 	      ((symbolp result) (format "%S" result))
 	      ((and index (listp result))
