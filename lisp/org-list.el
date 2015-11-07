@@ -2950,89 +2950,83 @@ will be parsed as:
   (3 \"last item\"))
 
 Point is left at list end."
-  (defvar parse-item)                   ;FIXME: Or use `cl-labels' or `letrec'.
-  (let* ((struct (org-list-struct))
-	 (prevs (org-list-prevs-alist struct))
-	 (parents (org-list-parents-alist struct))
-	 (top (org-list-get-top-point struct))
-	 (bottom (org-list-get-bottom-point struct))
-	 out
-	 (get-text
-	  (function
-	   ;; Return text between BEG and END, trimmed, with
-	   ;; checkboxes replaced.
-	   (lambda (beg end)
-	     (let ((text (org-trim (buffer-substring beg end))))
-	       (if (string-match "\\`\\[\\([-X ]\\)\\]" text)
-		   (replace-match
-		    (let ((box (match-string 1 text)))
-		      (cond
-		       ((equal box " ") "CBOFF")
-		       ((equal box "-") "CBTRANS")
-		       (t "CBON")))
-		    t nil text 1)
-		 text)))))
-	 (parse-sublist
-	  (function
-	   ;; Return a list whose car is list type and cdr a list of
-	   ;; items' body.
-	   (lambda (e)
-	     (cons (org-list-get-list-type (car e) struct prevs)
-		   (mapcar parse-item e)))))
-	 (parse-item
-	  (function
-	   ;; Return a list containing counter of item, if any, text
-	   ;; and any sublist inside it.
-	   (lambda (e)
-	     (let ((start (save-excursion
-			    (goto-char e)
-			    (looking-at "[ \t]*\\S-+\\([ \t]+\\[@\\(start:\\)?\\([0-9]+\\|[a-zA-Z]\\)\\]\\)?[ \t]*")
-			    (match-end 0)))
-		   ;; Get counter number.  For alphabetic counter, get
-		   ;; its position in the alphabet.
-		   (counter (let ((c (org-list-get-counter e struct)))
-			      (cond
-			       ((not c) nil)
-			       ((string-match "[A-Za-z]" c)
-				(- (string-to-char (upcase (match-string 0 c)))
-				   64))
-			       ((string-match "[0-9]+" c)
-				(string-to-number (match-string 0 c))))))
-		   (childp (org-list-has-child-p e struct))
-		   (end (org-list-get-item-end e struct)))
-	       ;; If item has a child, store text between bullet and
-	       ;; next child, then recursively parse all sublists.  At
-	       ;; the end of each sublist, check for the presence of
-	       ;; text belonging to the original item.
-	       (if childp
-		   (let* ((children (org-list-get-children e struct parents))
-			  (body (list (funcall get-text start childp))))
-		     (while children
-		       (let* ((first (car children))
-			      (sub (org-list-get-all-items first struct prevs))
-			      (last-c (car (last sub)))
-			      (last-end (org-list-get-item-end last-c struct)))
-			 (push (funcall parse-sublist sub) body)
-			 ;; Remove children from the list just parsed.
-			 (setq children (cdr (member last-c children)))
-			 ;; There is a chunk of text belonging to the
-			 ;; item if last child doesn't end where next
-			 ;; child starts or where item ends.
-			 (unless (= (or (car children) end) last-end)
-			   (push (funcall get-text
-					  last-end (or (car children) end))
-				 body))))
-		     (cons counter (nreverse body)))
-		 (list counter (funcall get-text start end))))))))
+  (letrec ((struct (org-list-struct))
+	   (prevs (org-list-prevs-alist struct))
+	   (parents (org-list-parents-alist struct))
+	   (top (org-list-get-top-point struct))
+	   (bottom (org-list-get-bottom-point struct))
+	   (get-text
+	    ;; Return text between BEG and END, trimmed, with
+	    ;; checkboxes replaced.
+	    (lambda (beg end)
+	      (let ((text (org-trim (buffer-substring beg end))))
+		(if (string-match "\\`\\[\\([-X ]\\)\\]" text)
+		    (replace-match
+		     (let ((box (match-string 1 text)))
+		       (cond
+			((equal box " ") "CBOFF")
+			((equal box "-") "CBTRANS")
+			(t "CBON")))
+		     t nil text 1)
+		  text))))
+	   (parse-sublist
+	    ;; Return a list whose car is list type and cdr a list of
+	    ;; items' body.
+	    (lambda (e)
+	      (cons (org-list-get-list-type (car e) struct prevs)
+		    (mapcar parse-item e))))
+	   (parse-item
+	    ;; Return a list containing counter of item, if any, text
+	    ;; and any sublist inside it.
+	    (lambda (e)
+	      (let ((start (save-excursion
+			     (goto-char e)
+			     (looking-at "[ \t]*\\S-+\\([ \t]+\\[@\\(start:\\)?\\([0-9]+\\|[a-zA-Z]\\)\\]\\)?[ \t]*")
+			     (match-end 0)))
+		    ;; Get counter number.  For alphabetic counter, get
+		    ;; its position in the alphabet.
+		    (counter (let ((c (org-list-get-counter e struct)))
+			       (cond
+				((not c) nil)
+				((string-match "[A-Za-z]" c)
+				 (- (string-to-char (upcase (match-string 0 c)))
+				    64))
+				((string-match "[0-9]+" c)
+				 (string-to-number (match-string 0 c))))))
+		    (childp (org-list-has-child-p e struct))
+		    (end (org-list-get-item-end e struct)))
+		;; If item has a child, store text between bullet and
+		;; next child, then recursively parse all sublists.
+		;; At the end of each sublist, check for the presence
+		;; of text belonging to the original item.
+		(if childp
+		    (let* ((children (org-list-get-children e struct parents))
+			   (body (list (funcall get-text start childp))))
+		      (while children
+			(let* ((first (car children))
+			       (sub (org-list-get-all-items first struct prevs))
+			       (last-c (car (last sub)))
+			       (last-end (org-list-get-item-end last-c struct)))
+			  (push (funcall parse-sublist sub) body)
+			  ;; Remove children from the list just parsed.
+			  (setq children (cdr (member last-c children)))
+			  ;; There is a chunk of text belonging to the
+			  ;; item if last child doesn't end where next
+			  ;; child starts or where item ends.
+			  (unless (= (or (car children) end) last-end)
+			    (push (funcall get-text
+					   last-end (or (car children) end))
+				  body))))
+		      (cons counter (nreverse body)))
+		  (list counter (funcall get-text start end)))))))
     ;; Store output, take care of cursor position and deletion of
     ;; list, then return output.
-    (setq out (funcall parse-sublist (org-list-get-all-items top struct prevs)))
-    (goto-char top)
-    (when delete
-      (delete-region top bottom)
-      (when (and (not (looking-at "[ \t]*$")) (looking-at org-list-end-re))
-	(replace-match "")))
-    out))
+    (prog1 (funcall parse-sublist (org-list-get-all-items top struct prevs))
+      (goto-char top)
+      (when delete
+	(delete-region top bottom)
+	(when (and (not (looking-at "[ \t]*$")) (looking-at org-list-end-re))
+	  (replace-match ""))))))
 
 (defun org-list-make-subtree ()
   "Convert the plain list at point into a subtree."
@@ -3142,14 +3136,12 @@ Valid parameters PARAMS are:
 
 :nobr       Non-nil means remove line breaks in lists items.
 
-Alternatively, each parameter can also be a form returning
-a string.  These sexp can use keywords `counter' and `depth',
-representing respectively counter associated to the current
-item, and depth of the current sub-list, starting at 0.
-Obviously, `counter' is only available for parameters applying to
-items."
+Alternatively, each parameter can also be a function returning
+a string.  This function is called with one argument, the depth
+of the current sub-list, starting at 0."
   (interactive)
-  (letrec ((p params)
+  (letrec ((gval (lambda (v d) (if (functionp v) (funcall v d) v)))
+	   (p params)
 	   (splicep (plist-get p :splice))
 	   (ostart (plist-get p :ostart))
 	   (oend (plist-get p :oend))
@@ -3182,15 +3174,15 @@ items."
 			    ((eq type 'descriptive)
 			     ;; Stick DTSTART to ISTART by
 			     ;; left-trimming the latter.
-			     (concat (let ((s (eval istart)))
+			     (concat (let ((s (funcall gval istart depth)))
 				       (or (and (string-match "[ \t\n\r]+\\'" s)
 						(replace-match "" t t s))
 					   istart))
-				     "%s" (eval ddend)))
+				     "%s" (funcall gval ddend depth)))
 			    ((and counter (eq type 'ordered))
-			     (concat (eval icount) "%s"))
-			    (t (concat (eval istart) "%s")))
-			   (eval iend)))
+			     (concat (funcall gval icount depth) "%s"))
+			    (t (concat (funcall gval istart depth) "%s")))
+			   (funcall gval iend depth)))
 		     (first (car item)))
 		;; Replace checkbox if any is found.
 		(cond
@@ -3212,30 +3204,42 @@ items."
 				 "???"))
 			 (desc (if complete (substring first (match-end 0))
 				 first)))
-		    (setq first (concat (eval dtstart) term (eval dtend)
-					(eval ddstart) desc))))
+		    (setq first (concat (funcall gval dtstart depth)
+					term
+					(funcall gval dtend depth)
+					(funcall gval ddstart depth)
+					desc))))
 		(setcar item first)
 		(format fmt
 			(mapconcat (lambda (e)
 				     (if (stringp e) e
 				       (funcall export-sublist e (1+ depth))))
-				   item (or (eval csep) ""))))))
+				   item (or (funcall gval csep depth) ""))))))
 	   (export-sublist
 	    (lambda (sub depth)
 	      ;; Export sublist SUB at DEPTH.
 	      (let* ((type (car sub))
 		     (items (cdr sub))
-		     (fmt (concat (cond
-				   (splicep "%s")
-				   ((eq type 'ordered)
-				    (concat (eval ostart) "%s" (eval oend)))
-				   ((eq type 'descriptive)
-				    (concat (eval dstart) "%s" (eval dend)))
-				   (t (concat (eval ustart) "%s" (eval uend))))
-				  (eval lsep))))
-		(format fmt (mapconcat (lambda (e)
-					 (funcall export-item e type depth))
-				       items (or (eval isep) "")))))))
+		     (fmt
+		      (concat
+		       (cond
+			(splicep "%s")
+			((eq type 'ordered)
+			 (concat (funcall gval ostart depth)
+				 "%s"
+				 (funcall gval oend depth)))
+			((eq type 'descriptive)
+			 (concat (funcall gval dstart)
+				 "%s"
+				 (funcall gval dend depth)))
+			(t (concat (funcall gval ustart depth)
+				   "%s"
+				   (funcall gval uend depth))))
+		       (funcall gval lsep depth))))
+		(format fmt (mapconcat
+			     (lambda (e) (funcall export-item e type depth))
+			     items
+			     (or (funcall gval isep depth) "")))))))
     (concat (funcall export-sublist list 0) "\n")))
 
 (defun org-list-to-latex (list &optional _params)
@@ -3263,35 +3267,33 @@ syntax.  Return converted list as a string."
   "Convert LIST into an Org subtree.
 LIST is as returned by `org-list-parse-list'.  PARAMS is a property list
 with overruling parameters for `org-list-to-generic'."
-  (defvar get-stars) (defvar org--blankp)
   (let* ((rule (cdr (assq 'heading org-blank-before-new-entry)))
 	 (level (org-reduced-level (or (org-current-level) 0)))
-	 (org--blankp (or (eq rule t)
+	 (blankp (or (eq rule t)
 		     (and (eq rule 'auto)
 			  (save-excursion
 			    (outline-previous-heading)
 			    (org-previous-line-empty-p)))))
-	 (get-stars ;FIXME: Can't rename without renaming it in org.el as well!
-	  (function
-	   ;; Return the string for the heading, depending on depth D
-	   ;; of current sub-list.
-	   (lambda (d)
-	     (let ((oddeven-level (+ level d 1)))
-	       (concat (make-string (if org-odd-levels-only
-					(1- (* 2 oddeven-level))
-				      oddeven-level)
-				    ?*)
-		       " "))))))
+	 (get-stars
+	  ;; Return the string for the heading, depending on depth
+	  ;; D of current sub-list.
+	  (lambda (d)
+	    (let ((oddeven-level (+ level d 1)))
+	      (concat (make-string (if org-odd-levels-only
+				       (1- (* 2 oddeven-level))
+				     oddeven-level)
+				   ?*)
+		      " ")))))
     (org-list-to-generic
      list
      (org-combine-plists
-      '(:splice t
-        :dtstart " " :dtend " "
-        :istart (funcall get-stars depth)
-        :icount (funcall get-stars depth)
-        :isep (if org--blankp "\n\n" "\n")
-        :csep (if org--blankp "\n\n" "\n")
-        :cbon "DONE" :cboff "TODO" :cbtrans "TODO")
+      `(:splice t
+		:dtstart " " :dtend " "
+		:istart ,get-stars
+		:icount ,get-stars
+		:isep ,(if blankp "\n\n" "\n")
+		:csep ,(if blankp "\n\n" "\n")
+		:cbon "DONE" :cboff "TODO" :cbtrans "TODO")
       params))))
 
 (provide 'org-list)
