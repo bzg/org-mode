@@ -58,7 +58,10 @@
     (packages     . :any)
     (pdfheight    . :any)
     (pdfpng       . :any)
-    (pdfwidth     . :any))
+    (pdfwidth     . :any)
+    (headers      . :any)
+    (packages     . :any)
+    (buffer       . ((yes no))))
   "LaTeX-specific header arguments.")
 
 (defcustom org-babel-latex-htlatex "htlatex"
