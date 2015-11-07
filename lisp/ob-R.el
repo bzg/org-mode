@@ -444,7 +444,8 @@ last statement in BODY, as elisp."
 	      (mapcar
 	       (lambda (line) ;; cleanup extra prompts left in output
 		 (if (string-match
-		      "^\\([ ]*[>+\\.][ ]?\\)+\\([[0-9]+\\|[ ]\\)" line)
+		      "^\\([>+.]\\([ ][>.+]\\)*[ ]\\)"
+		      (car (split-string line "\n")))
 		     (substring line (match-end 1))
 		   line))
 	       (org-babel-comint-with-output (session org-babel-R-eoe-output)
