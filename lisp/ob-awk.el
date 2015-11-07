@@ -71,9 +71,9 @@ called by `org-babel-execute-src-block'"
 				"-f" code-file cmd-line)
 			  (mapcar (lambda (pair)
 				    (format "-v %s='%s'"
-					    (cadr pair)
+					    (car pair)
 					    (org-babel-awk-var-to-awk
-					     (cddr pair))))
+					     (cdr pair))))
 				  (org-babel--get-vars params))
 			  (list in-file))
 			 " ")))
