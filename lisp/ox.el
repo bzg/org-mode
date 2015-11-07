@@ -856,7 +856,7 @@ This option can also be set with the OPTIONS keyword, e.g.,
 \"broken-links:mark\"."
   :group 'org-export-general
   :version "25.1"
-  :package-version '(Org . "8.4")
+  :package-version '(Org . "9.0")
   :type '(choice
 	  (const :tag "Ignore broken links" t)
 	  (const :tag "Mark broken links in output" mark)

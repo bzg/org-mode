@@ -5956,7 +5956,7 @@ end of ELEM-A."
 	  (move-overlay (car o) (- (nth 1 o) offset) (- (nth 2 o) offset))))
       (goto-char (org-element-property :end elem-B)))))
 
-;; For backward-compatibility with Org < 8.4
+;; For backward-compatibility with Org <= 8.3
 (define-obsolete-function-alias
   'org-element-remove-indentation 'org-remove-indentation "25.1")
 
