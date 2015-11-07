@@ -4442,49 +4442,61 @@ Normal means, no org-mode-specific context."
 (defvar mark-active)
 
 ;; Various packages
-(declare-function calendar-iso-to-absolute    "cal-iso"    (date))
-(declare-function calendar-forward-day          "cal-move"   (arg))
-(declare-function calendar-goto-date            "cal-move"   (date))
-(declare-function calendar-goto-today           "cal-move"   ())
-(declare-function calendar-iso-from-absolute    "cal-iso"    (date))
-(defvar calc-embedded-close-formula)
-(defvar calc-embedded-open-formula)
-(declare-function cdlatex-tab "ext:cdlatex" ())
+(declare-function calc-eval "calc" (str &optional separator &rest args))
+(declare-function calendar-forward-day "cal-move" (arg))
+(declare-function calendar-goto-date "cal-move" (date))
+(declare-function calendar-goto-today "cal-move" ())
+(declare-function calendar-iso-from-absolute "cal-iso" (date))
+(declare-function calendar-iso-to-absolute "cal-iso" (date))
 (declare-function cdlatex-compute-tables "ext:cdlatex" ())
-(declare-function dired-get-filename "dired" (&optional localp no-error-if-not-filep))
-(defvar font-lock-unfontify-region-function)
-(declare-function iswitchb-read-buffer "iswitchb"
-                  (prompt &optional default require-match start matches-set))
-(defvar iswitchb-temp-buflist)
-(declare-function org-gnus-follow-link "org-gnus" (&optional group article))
-(defvar org-agenda-tags-todo-honor-ignore-options)
-(declare-function org-agenda-skip "org-agenda" ())
-(declare-function
- org-agenda-format-item "org-agenda"
- (extra txt &optional level category tags dotime noprefix remove-re habitp))
-(declare-function org-agenda-new-marker "org-agenda" (&optional pos))
-(declare-function org-agenda-change-all-lines "org-agenda"
+(declare-function cdlatex-tab "ext:cdlatex" ())
+(declare-function dired-get-filename
+		  "dired"
+		  (&optional localp no-error-if-not-filep))
+(declare-function iswitchb-read-buffer
+		  "iswitchb"
+		  (prompt &optional default require-match start matches-set))
+(declare-function org-agenda-change-all-lines
+		  "org-agenda"
 		  (newhead hdmarker &optional fixface just-this))
-(declare-function org-agenda-set-restriction-lock "org-agenda" (&optional type))
-(declare-function org-agenda-maybe-redo "org-agenda" ())
-(declare-function org-agenda-save-markers-for-cut-and-paste "org-agenda"
-		  (beg end))
-(declare-function org-agenda-copy-local-variable "org-agenda" (var))
 (declare-function org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item
-		  "org-agenda" (&optional end))
-(declare-function org-inlinetask-remove-END-maybe "org-inlinetask" ())
-(declare-function org-inlinetask-in-task-p "org-inlinetask" ())
+		  "org-agenda"
+		  (&optional end))
+(declare-function org-agenda-copy-local-variable "org-agenda" (var))
+(declare-function org-agenda-format-item
+		  "org-agenda"
+		  (extra txt &optional level category tags dotime noprefix
+			 remove-re habitp))
+(declare-function org-agenda-maybe-redo "org-agenda" ())
+(declare-function org-agenda-new-marker "org-agenda" (&optional pos))
+(declare-function org-agenda-save-markers-for-cut-and-paste
+		  "org-agenda"
+		  (beg end))
+(declare-function org-agenda-set-restriction-lock "org-agenda" (&optional type))
+(declare-function org-agenda-skip "org-agenda" ())
+(declare-function org-attach-reveal "org-attach" (&optional if-exists))
+(declare-function org-gnus-follow-link "org-gnus" (&optional group article))
+(declare-function org-indent-mode "org-indent" (&optional arg))
 (declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
 (declare-function org-inlinetask-goto-end "org-inlinetask" ())
-(declare-function org-indent-mode "org-indent" (&optional arg))
-(declare-function parse-time-string "parse-time" (string))
-(declare-function org-attach-reveal "org-attach" (&optional if-exists))
+(declare-function org-inlinetask-in-task-p "org-inlinetask" ())
+(declare-function org-inlinetask-remove-END-maybe "org-inlinetask" ())
 (declare-function orgtbl-send-table "org-table" (&optional maybe))
+(declare-function parse-time-string "parse-time" (string))
+(declare-function speedbar-line-directory "speedbar" (&optional depth))
+(declare-function table--at-cell-p
+		  "table"
+		  (position &optional object at-column))
+
+(defvar align-mode-rules-list)
+(defvar calc-embedded-close-formula)
+(defvar calc-embedded-open-formula)
+(defvar calc-embedded-open-mode)
+(defvar font-lock-unfontify-region-function)
+(defvar iswitchb-temp-buflist)
+(defvar org-agenda-tags-todo-honor-ignore-options)
 (defvar remember-data-file)
 (defvar texmathp-why)
-(declare-function speedbar-line-directory "speedbar" (&optional depth))
-(declare-function table--at-cell-p "table" (position &optional object at-column))
-(declare-function calc-eval "calc" (str &optional separator &rest args))
 
 ;;;###autoload
 (defun turn-on-orgtbl ()
@@ -9121,6 +9133,8 @@ defined by Org-mode)."
   "Unconditionally turn on `orgstruct-mode'."
   (orgstruct-mode 1))
 
+(defvar-local orgstruct-is-++ nil
+  "Is `orgstruct-mode' in ++ version in the current-buffer?")
 (defvar-local org-fb-vars nil)
 (defun orgstruct++-mode (&optional arg)
   "Toggle `orgstruct-mode', the enhanced version of it.
@@ -9151,9 +9165,6 @@ buffer.  It will also recognize item context in multiline items."
 		(if (eq (car-safe val) 'quote) (nth 1 val) val))))
        org-local-vars)
       (setq-local orgstruct-is-++ t))))
-
-(defvar-local orgstruct-is-++ nil
-  "Is `orgstruct-mode' in ++ version in the current-buffer?")
 
 ;;;###autoload
 (defun turn-on-orgstruct++ ()
