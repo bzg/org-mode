@@ -20987,21 +20987,21 @@ Otherwise, return a user error."
   (let ((element (org-element-at-point)))
     (assert (not buffer-read-only) nil
 	    "Buffer is read-only: %s" (buffer-name))
-    (case (org-element-type element)
-      (src-block
+    (pcase (org-element-type element)
+      (`src-block
        (if (not arg) (org-edit-src-code)
-         (let* ((info (org-babel-get-src-block-info))
-                (lang (nth 0 info))
-                (params (nth 2 info))
-                (session (cdr (assq :session params))))
-           (if (not session) (org-edit-src-code)
-             ;; At a src-block with a session and function called with
-             ;; an ARG: switch to the buffer related to the inferior
-             ;; process.
-             (switch-to-buffer
+	 (let* ((info (org-babel-get-src-block-info))
+		(lang (nth 0 info))
+		(params (nth 2 info))
+		(session (cdr (assq :session params))))
+	   (if (not session) (org-edit-src-code)
+	     ;; At a src-block with a session and function called with
+	     ;; an ARG: switch to the buffer related to the inferior
+	     ;; process.
+	     (switch-to-buffer
 	      (funcall (intern (concat "org-babel-prep-session:" lang))
 		       session params))))))
-      (keyword
+      (`keyword
        (if (member (org-element-property :key element) '("INCLUDE" "SETUPFILE"))
            (org-open-link-from-string
 	    (format "[[%s]]"
@@ -21015,23 +21015,24 @@ Otherwise, return a user error."
 			      (match-string 0 value))
 			     (t (user-error "No valid file specified")))))))
          (user-error "No special environment to edit here")))
-      (table
+      (`table
        (if (eq (org-element-property :type element) 'table.el)
            (org-edit-table.el)
          (call-interactively 'org-table-edit-formulas)))
       ;; Only Org tables contain `table-row' type elements.
-      (table-row (call-interactively 'org-table-edit-formulas))
-      (example-block (org-edit-src-code))
-      (export-block (org-edit-export-block))
-      (fixed-width (org-edit-fixed-width-region))
-      (otherwise
+      (`table-row (call-interactively 'org-table-edit-formulas))
+      (`example-block (org-edit-src-code))
+      (`export-block (org-edit-export-block))
+      (`fixed-width (org-edit-fixed-width-region))
+      (_
        ;; No notable element at point.  Though, we may be at a link or
        ;; a footnote reference, which are objects.  Thus, scan deeper.
        (let ((context (org-element-context element)))
-	 (case (org-element-type context)
-	   (link (call-interactively #'ffap))
-	   (footnote-reference (org-edit-footnote-reference))
-	   (t (user-error "No special environment to edit here"))))))))
+	 (pcase (org-element-type context)
+	   (`footnote-reference (org-edit-footnote-reference))
+	   (`inline-src-block (org-edit-inline-src-code))
+	   (`link (call-interactively #'ffap))
+	   (_ (user-error "No special environment to edit here"))))))))
 
 (defvar org-table-coordinate-overlays) ; defined in org-table.el
 (defun org-ctrl-c-ctrl-c (&optional arg)

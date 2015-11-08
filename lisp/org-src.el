@@ -292,6 +292,12 @@ where BEG and END are buffer positions and CONTENTS is a string."
 		     (search-forward "]")))
 	      (end (or (org-element-property :contents-end datum) beg)))
 	 (list beg end (buffer-substring-no-properties beg end))))
+      ((eq type 'inline-src-block)
+       (let ((beg (progn (goto-char (org-element-property :begin datum))
+			 (search-forward "{" (line-end-position) t)))
+	     (end (progn (goto-char (org-element-property :end datum))
+			 (search-backward "}" (line-beginning-position) t))))
+	 (list beg end (buffer-substring-no-properties beg end))))
       ((org-element-property :contents-begin datum)
        (let ((beg (org-element-property :contents-begin datum))
 	     (end (org-element-property :contents-end datum)))
@@ -869,6 +875,44 @@ name of the sub-editing buffer."
 	(let ((edit-prep-func (intern (concat "org-babel-edit-prep:" lang))))
 	  (when (fboundp edit-prep-func)
 	    (funcall edit-prep-func babel-info))))
+      t)))
+
+(defun org-edit-inline-src-code ()
+  "Edit inline source code at point."
+  (interactive)
+  (let ((context (org-element-context)))
+    (unless (and (eq (org-element-type context) 'inline-src-block)
+		 (org-src--on-datum-p context))
+      (user-error "Not on inline source code"))
+    (let* ((lang (org-element-property :language context))
+	   (lang-f (org-src--get-lang-mode lang))
+	   (babel-info (org-babel-get-src-block-info 'light))
+	   (ind (save-excursion
+		  (goto-char (org-element-property :begin context))
+		  (search-forward "{" (line-end-position) t)
+		  (current-column)))
+	   deactivate-mark)
+      (unless (functionp lang-f) (error "No such language mode: %s" lang-f))
+      (org-src--edit-element
+       context
+       (org-src--construct-edit-buffer-name (buffer-name) lang)
+       lang-f
+       (lambda ()
+	 ;; Inline src blocks are limited to one line.
+	 (while (re-search-forward "\n[ \t]*" nil t) (replace-match " "))
+	 ;; Trim contents.
+	 (goto-char (point-min))
+	 (skip-chars-forward " \t")
+	 (delete-region (point-min) (point))
+	 (goto-char (point-max))
+	 (skip-chars-backward " \t")
+	 (delete-region (point) (point-max))))
+      ;; Finalize buffer.
+      (setq-local org-src--babel-info babel-info)
+      (setq-local org-src--preserve-indentation t)
+      (let ((edit-prep-func (intern (concat "org-babel-edit-prep:" lang))))
+	(when (fboundp edit-prep-func) (funcall edit-prep-func babel-info)))
+      ;; Return success.
       t)))
 
 (defun org-edit-fixed-width-region ()
