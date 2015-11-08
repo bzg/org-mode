@@ -269,9 +269,8 @@
              (org-babel-lilypond-attempt-to-open-pdf org-babel-lilypond-file t)))
     (delete-file pdf-file)
     (kill-buffer (file-name-nondirectory pdf-file))
-    (should (equal
-             "No pdf file generated so can't display!"
-             (org-babel-lilypond-attempt-to-open-pdf pdf-file)))
+    (should (string-prefix-p "No pdf file generated"
+			     (org-babel-lilypond-attempt-to-open-pdf pdf-file)))
     (setq org-babel-lilypond-display-pdf-post-tangle post-tangle)))
 
 (ert-deftest ob-lilypond/ly-attempt-to-play-midi ()
@@ -292,8 +291,8 @@
              (org-babel-lilypond-attempt-to-play-midi org-babel-lilypond-file t)))
     (delete-file midi-file)
     (kill-buffer (file-name-nondirectory midi-file))
-    (should (equal
-             "No midi file generated so can't play!"
+    (should (string-prefix-p
+             "No midi file generated"
              (org-babel-lilypond-attempt-to-play-midi midi-file)))
     (setq org-babel-lilypond-play-midi-post-tangle post-tangle)))
 
