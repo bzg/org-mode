@@ -5980,8 +5980,7 @@ Return file name as a string."
   (let* ((visited-file (buffer-file-name (buffer-base-buffer)))
 	 (base-name
 	  ;; File name may come from EXPORT_FILE_NAME subtree
-	  ;; property, assuming point is at beginning of said
-	  ;; sub-tree.
+	  ;; property.
 	  (file-name-sans-extension
 	   (or (and subtreep (org-entry-get nil "EXPORT_FILE_NAME" 'selective))
 	       ;; File name may be extracted from buffer's associated
