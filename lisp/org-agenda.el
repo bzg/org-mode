@@ -3159,7 +3159,7 @@ Parameters are alternating variable names and values that will be bound
 before running the agenda command."
   (org-eval-in-environment (org-make-parameter-alist parameters)
     (let (org-agenda-sticky)
-      (if (> (length cmd-key) 2)
+      (if (> (length cmd-key) 1)
 	  (org-tags-view nil cmd-key)
 	(org-agenda nil cmd-key))))
   (set-buffer org-agenda-buffer-name)
