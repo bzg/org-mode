@@ -887,10 +887,6 @@ name of the sub-editing buffer."
     (let* ((lang (org-element-property :language context))
 	   (lang-f (org-src--get-lang-mode lang))
 	   (babel-info (org-babel-get-src-block-info 'light))
-	   (ind (save-excursion
-		  (goto-char (org-element-property :begin context))
-		  (search-forward "{" (line-end-position) t)
-		  (current-column)))
 	   deactivate-mark)
       (unless (functionp lang-f) (error "No such language mode: %s" lang-f))
       (org-src--edit-element
