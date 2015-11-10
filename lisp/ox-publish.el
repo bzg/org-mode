@@ -1060,7 +1060,7 @@ publishing directory."
 ;; links, where "file.org" belongs to the current project.
 
 (defun org-publish--collect-references (output _backend info)
-  "Store headlines references for current published file.
+  "Store references for current published file.
 
 OUPUT is the produced output, as a string.  BACKEND is the export
 back-end used, as a symbol.  INFO is the final export state, as
@@ -1086,7 +1086,7 @@ References are stored as an alist ((TYPE SEARCH) . VALUE) where
   VALUE is an internal reference used in the document, as
   a string.
 
-This function is meant to be used as a final out filter.  See
+This function is meant to be used as a final output filter.  See
 `org-publish-org-to'."
   (org-publish-cache-set-file-property
    (plist-get info :input-file) :references
@@ -1095,6 +1095,7 @@ This function is meant to be used as a final out filter.  See
        (maphash
 	(lambda (k v)
 	  (pcase (org-element-type k)
+	    (`nil nil)
 	    ((or `headline `inlinetask)
 	     (push (cons
 		    (cons 'headline
@@ -1106,8 +1107,7 @@ This function is meant to be used as a final out filter.  See
 		   refs)
 	     (let ((custom-id (org-element-property :CUSTOM_ID k)))
 	       (when custom-id
-		 (push (cons (cons 'custom-id custom-id) v)
-		       refs))))
+		 (push (cons (cons 'custom-id custom-id) v) refs))))
 	    ((or `radio-target `target)
 	     (push
 	      (cons (cons 'target
