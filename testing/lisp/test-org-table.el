@@ -1767,6 +1767,27 @@ is t, then new columns should be added as needed"
 		   (org-table-calc-current-TBLFM)
 		   (buffer-string)))))
 
+(ert-deftest test-org-table/end-on-hline ()
+  "Test with a table ending on a hline."
+  (should
+   (equal
+    (org-test-with-temp-text
+	"
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
+|   |   |   |
+|---+---+---|
+<point>#+TBLFM: @3$2..@3$>=vsum(@1..@2)"
+      (org-table-calc-current-TBLFM)
+      (buffer-string))
+    "
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
+|   | 7 | 9 |
+|---+---+---|
+#+TBLFM: @3$2..@3$>=vsum(@1..@2)")))
+
+
 (provide 'test-org-table)
 
 ;;; test-org-table.el ends here
