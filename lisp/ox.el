@@ -1774,35 +1774,39 @@ for a footnotes section."
   "List headlines and inlinetasks with a select tag in their tree.
 DATA is parsed data as returned by `org-element-parse-buffer'.
 INFO is a plist holding export options."
-  (letrec ((selected-trees)
-	   (walk-data
-	    (lambda (data genealogy)
-	      (let ((type (org-element-type data)))
-		(cond
-		 ((memq type '(headline inlinetask))
-		  (let ((tags (org-element-property :tags data)))
-		    (if (cl-loop for tag in (plist-get info :select-tags)
-				 thereis (member tag tags))
-			;; When a select tag is found, mark full
-			;; genealogy and every headline within the
-			;; tree as acceptable.
-			(setq selected-trees
-			      (append
-			       genealogy
-			       (org-element-map data '(headline inlinetask)
-				 #'identity)
-			       selected-trees))
-		      ;; If at a headline, continue searching in tree,
-		      ;; recursively.
-		      (when (eq type 'headline)
-			(dolist (el (org-element-contents data))
-			  (funcall walk-data el (cons data genealogy)))))))
-		 ((or (eq type 'org-data)
-		      (memq type org-element-greater-elements))
-		  (dolist (el (org-element-contents data))
-		    (funcall walk-data el genealogy))))))))
-    (funcall walk-data data nil)
-    selected-trees))
+  (let ((select (plist-get info :select-tags)))
+    (if (cl-some (lambda (tag) (member tag select)) (plist-get info :filetags))
+	;; If FILETAGS contains a select tag, every headline or
+	;; inlinetask is returned.
+	(org-element-map data '(headline inlinetask) #'identity)
+      (letrec ((selected-trees)
+	       (walk-data
+		(lambda (data genealogy)
+		  (let ((type (org-element-type data)))
+		    (cond
+		     ((memq type '(headline inlinetask))
+		      (let ((tags (org-element-property :tags data)))
+			(if (cl-some (lambda (tag) (member tag select)) tags)
+			    ;; When a select tag is found, mark full
+			    ;; genealogy and every headline within the
+			    ;; tree as acceptable.
+			    (setq selected-trees
+				  (append
+				   genealogy
+				   (org-element-map data '(headline inlinetask)
+				     #'identity)
+				   selected-trees))
+			  ;; If at a headline, continue searching in
+			  ;; tree, recursively.
+			  (when (eq type 'headline)
+			    (dolist (el (org-element-contents data))
+			      (funcall walk-data el (cons data genealogy)))))))
+		     ((or (eq type 'org-data)
+			  (memq type org-element-greater-elements))
+		      (dolist (el (org-element-contents data))
+			(funcall walk-data el genealogy))))))))
+	(funcall walk-data data nil)
+	selected-trees))))
 
 (defun org-export--skip-p (blob options selected)
   "Non-nil when element or object BLOB should be skipped during export.
@@ -1831,7 +1835,7 @@ a tree with a select tag."
 	   (todo (org-element-property :todo-keyword blob))
 	   (todo-type (org-element-property :todo-type blob))
 	   (archived (plist-get options :with-archived-trees))
-	   (tags (org-element-property :tags blob)))
+	   (tags (org-export-get-tags blob options nil t)))
        (or
 	(and (eq (org-element-type blob) 'inlinetask)
 	     (not (plist-get options :with-inlinetasks)))
@@ -3942,18 +3946,13 @@ INFO is a plist used as a communication channel."
 ELEMENT has either an `headline' or an `inlinetask' type.  INFO
 is a plist used as a communication channel.
 
-Select tags (see `org-export-select-tags') and exclude tags (see
-`org-export-exclude-tags') are removed from the list.
-
 When non-nil, optional argument TAGS should be a list of strings.
 Any tag belonging to this list will also be removed.
 
 When optional argument INHERITED is non-nil, tags can also be
 inherited from parent headlines and FILETAGS keywords."
   (cl-remove-if
-   (lambda (tag) (or (member tag (plist-get info :select-tags))
-		(member tag (plist-get info :exclude-tags))
-		(member tag tags)))
+   (lambda (tag) (member tag tags))
    (if (not inherited) (org-element-property :tags element)
      ;; Build complete list of inherited tags.
      (let ((current-tag-list (org-element-property :tags element)))

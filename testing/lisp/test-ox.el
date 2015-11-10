@@ -406,27 +406,39 @@ Paragraph"
 	    (org-test-with-temp-text "* Head1 :noexp:"
 	      (org-export-as (org-test-default-backend)
 			     nil nil nil '(:exclude-tags ("noexp")))))))
+  (should
+   (equal "#+FILETAGS: noexp\n"
+	  (let (org-export-filter-body-functions
+		org-export-filter-final-output-functions)
+	    (org-test-with-temp-text "#+FILETAGS: noexp\n* Head1"
+	      (org-export-as (org-test-default-backend)
+			     nil nil nil '(:exclude-tags ("noexp")))))))
   ;; Test include tags for headlines and inlinetasks.
   (should
-   (equal "* H2\n** Sub :exp:\n*** Sub Sub\n"
-	  (org-test-with-temp-text "* H1\n* H2\n** Sub :exp:\n*** Sub Sub\n* H3"
+   (equal (org-test-with-temp-text "* H1\n* H2\n** Sub :exp:\n*** Sub Sub\n* H3"
 	    (let ((org-tags-column 0))
 	      (org-export-as (org-test-default-backend)
-			     nil nil nil '(:select-tags ("exp")))))))
+			     nil nil nil '(:select-tags ("exp")))))
+	  "* H2\n** Sub :exp:\n*** Sub Sub\n"))
   ;; If there is an include tag, ignore the section before the first
   ;; headline, if any.
   (should
-   (equal "* H1 :exp:\nBody\n"
-	  (org-test-with-temp-text "First section\n* H1 :exp:\nBody"
+   (equal (org-test-with-temp-text "First section\n* H1 :exp:\nBody"
 	    (let ((org-tags-column 0))
 	      (org-export-as (org-test-default-backend)
-			     nil nil nil '(:select-tags ("exp")))))))
+			     nil nil nil '(:select-tags ("exp")))))
+	  "* H1 :exp:\nBody\n"))
+  (should
+   (equal (org-test-with-temp-text "#+FILETAGS: exp\nFirst section\n* H1\nBody"
+	    (org-export-as (org-test-default-backend)
+			   nil nil nil '(:select-tags ("exp"))))
+	  "* H1\nBody\n"))
   (should-not
-   (equal "* H1 :exp:\n"
-	  (org-test-with-temp-text "* H1 :exp:\nBody"
+   (equal (org-test-with-temp-text "* H1 :exp:\nBody"
 	    (let ((org-tags-column 0))
 	      (org-export-as (org-test-default-backend)
-			     nil nil nil '(:select-tags ("exp")))))))
+			     nil nil nil '(:select-tags ("exp")))))
+	  "* H1 :exp:\n"))
   ;; Test mixing include tags and exclude tags.
   (should
    (string-match
@@ -2099,49 +2111,31 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 
 (ert-deftest test-org-export/get-tags ()
   "Test `org-export-get-tags' specifications."
-  (let ((org-export-exclude-tags '("noexport"))
-	(org-export-select-tags '("export")))
-    ;; Standard test: tags which are not a select tag, an exclude tag,
-    ;; or specified as optional argument shouldn't be ignored.
-    (should
-     (org-test-with-parsed-data "* Headline :tag:"
-       (org-export-get-tags (org-element-map tree 'headline 'identity info t)
-			    info)))
-    ;; Exclude tags are removed.
-    (should-not
-     (org-test-with-parsed-data "* Headline :noexport:"
-       (org-export-get-tags (org-element-map tree 'headline 'identity info t)
-			    info)))
-    ;; Select tags are removed.
-    (should-not
-     (org-test-with-parsed-data "* Headline :export:"
-       (org-export-get-tags (org-element-map tree 'headline 'identity info t)
-			    info)))
-    (should
-     (equal
-      '("tag")
-      (org-test-with-parsed-data "* Headline :tag:export:"
-	(org-export-get-tags (org-element-map tree 'headline 'identity info t)
-			     info))))
-    ;; Tags provided in the optional argument are also ignored.
-    (should-not
-     (org-test-with-parsed-data "* Headline :ignore:"
-       (org-export-get-tags (org-element-map tree 'headline 'identity info t)
-			    info '("ignore"))))
-    ;; Allow tag inheritance.
-    (should
-     (equal
-      '(("tag") ("tag"))
-      (org-test-with-parsed-data "* Headline :tag:\n** Sub-heading"
-	(org-element-map tree 'headline
-	  (lambda (hl) (org-export-get-tags hl info nil t)) info))))
-    ;; Tag inheritance checks FILETAGS keywords.
-    (should
-     (equal
-      '(("a" "b" "tag"))
-      (org-test-with-parsed-data "#+FILETAGS: :a:b:\n* Headline :tag:"
-	(org-element-map tree 'headline
-	  (lambda (hl) (org-export-get-tags hl info nil t)) info))))))
+  ;; Standard test: tags which are not a select tag, an exclude tag,
+  ;; or specified as optional argument shouldn't be ignored.
+  (should
+   (org-test-with-parsed-data "* Headline :tag:"
+     (org-export-get-tags (org-element-map tree 'headline 'identity info t)
+			  info)))
+  ;; Tags provided in the optional argument are ignored.
+  (should-not
+   (org-test-with-parsed-data "* Headline :ignore:"
+     (org-export-get-tags (org-element-map tree 'headline 'identity info t)
+			  info '("ignore"))))
+  ;; Allow tag inheritance.
+  (should
+   (equal
+    '(("tag") ("tag"))
+    (org-test-with-parsed-data "* Headline :tag:\n** Sub-heading"
+      (org-element-map tree 'headline
+	(lambda (hl) (org-export-get-tags hl info nil t)) info))))
+  ;; Tag inheritance checks FILETAGS keywords.
+  (should
+   (equal
+    '(("a" "b" "tag"))
+    (org-test-with-parsed-data "#+FILETAGS: :a:b:\n* Headline :tag:"
+      (org-element-map tree 'headline
+	(lambda (hl) (org-export-get-tags hl info nil t)) info)))))
 
 (ert-deftest test-org-export/get-node-property ()
   "Test`org-export-get-node-property' specifications."
