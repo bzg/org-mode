@@ -2529,24 +2529,27 @@ This function sets up the following dynamically scoped variables:
 	(push 'hline types) ; Add an imaginary extra hline to the end.
 	(setq org-table-current-line-types (apply #'vector (nreverse types)))
 	(setq org-table-dlines (apply #'vector (cons nil (nreverse dlines))))
-	(setq org-table-hlines (apply #'vector (cons nil (nreverse hlines))))
-	(forward-line -1)
-	(let* ((last-dline (car dlines))
-	       (fields (org-split-string
-			(buffer-substring (line-beginning-position)
-					  (line-end-position))
-			"[ \t]*|[ \t]*"))
-	       (nfields (length fields))
-	       al al2)
-	  (setq org-table-current-ncol nfields)
+	(setq org-table-hlines (apply #'vector (cons nil (nreverse hlines)))))
+      ;; Get the number of columns from the first data line in table.
+      (goto-char beg)
+      (forward-line (aref org-table-dlines 0))
+      (let* ((fields
+	      (org-split-string
+	       (buffer-substring (line-beginning-position) (line-end-position))
+	       "[ \t]*|[ \t]*"))
+	     (nfields (length fields))
+	     al al2)
+	(setq org-table-current-ncol nfields)
+	(let ((last-dline
+	       (aref org-table-dlines (1- (length org-table-dlines)))))
 	  (dotimes (i nfields)
 	    (let ((column (1+ i)))
 	      (push (list (format "LR%d" column) last-dline column) al)
-	      (push (cons (format "LR%d" column) (nth i fields)) al2)))
-	  (setq org-table-named-field-locations
-		(append org-table-named-field-locations al))
-	  (setq org-table-local-parameters
-		(append org-table-local-parameters al2)))))))
+	      (push (cons (format "LR%d" column) (nth i fields)) al2))))
+	(setq org-table-named-field-locations
+	      (append org-table-named-field-locations al))
+	(setq org-table-local-parameters
+	      (append org-table-local-parameters al2))))))
 
 (defun org-table-goto-field (ref &optional create-column-p)
   "Move point to a specific field in the current table.
