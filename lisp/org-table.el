@@ -2537,7 +2537,7 @@ This function sets up the following dynamically scoped variables:
 	(setq org-table-hlines (apply #'vector (cons nil (nreverse hlines)))))
       ;; Get the number of columns from the first data line in table.
       (goto-char beg)
-      (forward-line (aref org-table-dlines 0))
+      (forward-line (aref org-table-dlines 1))
       (let* ((fields
 	      (org-split-string
 	       (buffer-substring (line-beginning-position) (line-end-position))
