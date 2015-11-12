@@ -1286,8 +1286,9 @@ is always the old value."
 	   (dline (org-table-current-dline))
 	   (ref (format "@%d$%d" dline col))
 	   (ref1 (org-table-convert-refs-to-an ref))
+	   ;; Prioritize field formulas over column formulas.
 	   (fequation (or (assoc name eql) (assoc ref eql)))
-	   (cequation (assoc (int-to-string col) eql))
+	   (cequation (assoc (format "$%d" col) eql))
 	   (eqn (or fequation cequation)))
       (let ((p (and eqn (get-text-property 0 :orig-eqn (car eqn)))))
 	(when p (setq eqn p)))
@@ -2289,31 +2290,31 @@ When NAMED is non-nil, look for a named equation."
 ;;;###autoload
 (defun org-table-get-stored-formulas (&optional noerror)
   "Return an alist with the stored formulas directly after current table."
-  (interactive) ;; FIXME interactive?
-  (let ((case-fold-search t) scol eq eq-alist strings string seen)
-    (save-excursion
-      (goto-char (org-table-end))
-      (when (looking-at "\\([ \t]*\n\\)*[ \t]*#\\+tblfm: *\\(.*\\)")
-	(setq strings (org-split-string (org-match-string-no-properties 2)
-					" *:: *"))
-	(while (setq string (pop strings))
-	  (when (string-match "\\`\\(@[-+I<>0-9.$@]+\\|@?[0-9]+\\|\\$\\([a-zA-Z0-9]+\\|[<>]+\\)\\) *= *\\(.*[^ \t]\\)" string)
-	    (setq scol (if (match-end 2)
-			   (match-string 2 string)
-			 (match-string 1 string))
-		  scol (if (member (string-to-char scol) '(?< ?>))
-			   (concat "$" scol) scol)
-		  eq (match-string 3 string)
-		  eq-alist (cons (cons scol eq) eq-alist))
-	    (if (member scol seen)
-		(if noerror
-		    (progn
-		      (message "Double definition `$%s=' in TBLFM line, please fix by hand" scol)
-		      (ding)
-		      (sit-for 2))
-		  (user-error "Double definition `$%s=' in TBLFM line, please fix by hand" scol))
-	      (push scol seen))))))
-    (nreverse eq-alist)))
+  (save-excursion
+    (goto-char (org-table-end))
+    (let ((case-fold-search t))
+      (when (looking-at "\\([ \t]*\n\\)*[ \t]*#\\+TBLFM: *\\(.*\\)")
+	(let ((strings (org-split-string (org-match-string-no-properties 2)
+					 " *:: *"))
+	      eq-alist seen)
+	  (dolist (string strings (nreverse eq-alist))
+	    (when (string-match "\\`\\(@[-+I<>0-9.$@]+\\|@?[0-9]+\\|\
+\\$\\([a-zA-Z0-9]+\\|[<>]+\\)\\) *= *\\(.*[^ \t]\\)" string)
+	      (let* ((lhs (match-string 1 string))
+		     (rhs (match-string 3 string)))
+		(push (cons lhs rhs) eq-alist)
+		(cond
+		 ((not (member lhs seen)) (push lhs seen))
+		 (noerror
+		  (message
+		   "Double definition `%s=' in TBLFM line, please fix by hand"
+		   lhs)
+		  (ding)
+		  (sit-for 2))
+		 (t
+		  (user-error
+		   "Double definition `%s=' in TBLFM line, please fix by hand"
+		   lhs)))))))))))
 
 (defun org-table-fix-formulas (key replace &optional limit delta remove)
   "Modify the equations after the table structure has been edited.
@@ -2907,7 +2908,9 @@ When CORNERS-ONLY is set, only return the corners of the range as
 a list (line1 column1 line2 column2) where line1 and line2 are
 line numbers relative to beginning of table, or TBEG, and column1
 and column2 are table column numbers."
-  (let* ((desc (if (eq (string-to-char desc) ?@) desc (concat "@" desc)))
+  (let* ((desc (if (org-string-match-p "\\`\\$[0-9]+\\.\\.\\$[0-9]+\\'" desc)
+		   (replace-regexp-in-string "\\$" "@0$" desc)
+		 desc))
 	 (col (or col (org-table-current-column)))
 	 (tbeg (or tbeg (org-table-begin)))
 	 (thisline (count-lines tbeg (line-beginning-position))))
@@ -3122,7 +3125,7 @@ known that the table will be realigned a little later anyway."
 	   (log-first-time (current-time))
 	   (log-last-time log-first-time)
 	   (cnt 0)
-	   beg end eqlnum eqlname)
+	   beg end eqlcol eqlfield)
       ;; Insert constants in all formulas
       (when eqlist
 	(org-table-save-field
@@ -3148,15 +3151,16 @@ existing formula for column %s"
 			(org-table-formula-substitute-names
 			 (org-table-formula-handle-first/last-rc (cdr x)))))
 		eqlist))
-	 ;; Split the equation list.
+	 ;; Split the equation list between column formulas and field
+	 ;; formulas.
 	 (dolist (eq eqlist)
-	   (if (<= (string-to-char (car eq)) ?9)
-	       (push eq eqlnum)
-	     (push eq eqlname)))
-	 (setq eqlnum (nreverse eqlnum))
+	   (if (org-string-match-p "\\`\\$[0-9]+\\'" (car eq))
+	       (push eq eqlcol)
+	     (push eq eqlfield)))
+	 (setq eqlcol (nreverse eqlcol))
 	 ;; Expand ranges in lhs of formulas
-	 (setq eqlname (org-table-expand-lhs-ranges (nreverse eqlname)))
-	 ;; Get the correct line range to process
+	 (setq eqlfield (org-table-expand-lhs-ranges (nreverse eqlfield)))
+	 ;; Get the correct line range to process.
 	 (if all
 	     (progn
 	       (setq end (copy-marker (org-table-end)))
@@ -3172,7 +3176,7 @@ existing formula for column %s"
 		      (re-search-forward org-table-dataline-regexp end t))
 		 (setq beg (match-beginning 0)))
 		;; Just leave BEG where it is.
-		(t nil)))
+		(t (setq beg (line-beginning-position)))))
 	   (setq beg (line-beginning-position)
 		 end (copy-marker (line-beginning-position 2))))
 	 (goto-char beg)
@@ -3182,7 +3186,7 @@ existing formula for column %s"
 	 (let ((current-line (count-lines org-table-current-begin-pos
 					  (line-beginning-position)))
 	       seen-fields)
-	   (dolist (eq eqlname)
+	   (dolist (eq eqlfield)
 	     (let* ((name (car eq))
 		    (location (assoc name org-table-named-field-locations))
 		    (eq-line (or (nth 1 location)
@@ -3221,14 +3225,15 @@ existing formula for column %s"
 		 (move-marker org-last-recalc-line (line-beginning-position))
 	       (setq org-last-recalc-line
 		     (copy-marker (line-beginning-position))))
-	     (dolist (entry eqlnum)
+	     (dolist (entry eqlcol)
 	       (goto-char org-last-recalc-line)
-	       (org-table-goto-column (string-to-number (car entry)) nil 'force)
+	       (org-table-goto-column
+		(string-to-number (substring (car entry) 1)) nil 'force)
 	       (unless (get-text-property (point) :org-untouchable)
 		 (org-table-eval-formula
 		  nil (cdr entry) 'noalign 'nocst 'nostore 'noanalysis)))))
 	 ;; Evaluate the field formulas.
-	 (dolist (eq eqlname)
+	 (dolist (eq eqlfield)
 	   (let ((reference (car eq))
 		 (formula (cdr eq)))
 	     (setq log-last-time
@@ -3353,18 +3358,24 @@ Return nil when the beginning of TBLFM line was not found."
 
 (defun org-table-expand-lhs-ranges (equations)
   "Expand list of formulas.
-If some of the RHS in the formulas are ranges or a row reference, expand
-them to individual field equations for each field."
+If some of the RHS in the formulas are ranges or a row reference,
+expand them to individual field equations for each field.  This
+function assumes the table is already analyzed (i.e., using
+`org-table-analyze')."
   (let (res)
     (dolist (e equations (nreverse res))
       (let ((lhs (car e))
 	    (rhs (cdr e)))
 	(cond
-	 ((string-match "\\`@-?[-+0-9]+\\$-?[0-9]+\\'" lhs)
+	 ((org-string-match-p "\\`@-?[-+0-9]+\\$-?[0-9]+\\'" lhs)
 	  ;; This just refers to one fixed field.
 	  (push e res))
-	 ((string-match "\\`[a-zA-Z][_a-zA-Z0-9]*\\'" lhs)
+	 ((org-string-match-p "\\`[a-zA-Z][_a-zA-Z0-9]*\\'" lhs)
 	  ;; This just refers to one fixed named field.
+	  (push e res))
+	 ((org-string-match-p "\\`\\$[0-9]+\\'" lhs)
+	  ;; Column formulas are treated specially and are not
+	  ;; expanded.
 	  (push e res))
 	 ((string-match "\\`@[0-9]+\\'" lhs)
 	  (dotimes (ic org-table-current-ncol)
@@ -5380,29 +5391,22 @@ For example \"remote($1, @>$2)\" => \"remote(year_2013, @>$1)\".
 This indirection works only with the format @ROW$COLUMN.  The
 format \"B3\" is not supported because it can not be
 distinguished from a plain table name or ID."
-  (let ((start 0))
-    (while (string-match (concat
-			  ;; Same as in `org-table-eval-formula'.
-			  "\\<remote([ \t]*\\("
-			  ;; Allow "$1", "@<", "$-1", "@<<$1" etc.
-			  "[@$][^ \t,]+"
-			  ;; Same as in `org-table-eval-formula'.
-			  "\\)[ \t]*,[ \t]*\\([^\n)]+\\))")
-			 form
-			 start)
-      ;; The position of the character as far as possible to the right
-      ;; that will not be replaced and particularly not be shifted by
-      ;; `replace-match'.
-      (setq start (match-beginning 1))
-      ;; Substitute the remote reference with the value found in the
-      ;; field.
-      (setq form
-	    (replace-match
-	     (save-match-data
-	       (org-table-get-range (org-table-formula-handle-first/last-rc
-				     (match-string 1 form))))
-	     t t form 1))))
-  form)
+  (let ((regexp
+	 ;; Same as in `org-table-eval-formula'.
+	 (concat "\\<remote([ \t]*\\("
+		 ;; Allow "$1", "@<", "$-1", "@<<$1" etc.
+		 "[@$][^ \t,]+"
+		 "\\)[ \t]*,[ \t]*\\([^\n)]+\\))")))
+    (replace-regexp-in-string
+     regexp
+     (lambda (m)
+       (save-match-data
+	 (let ((eq (org-table-formula-handle-first/last-rc (match-string 1 m))))
+	   (org-table-get-range
+	    (if (org-string-match-p "\\`\\$[0-9]+\\'" eq)
+		(concat "@0" eq)
+	      eq)))))
+     form t t 1)))
 
 (defmacro org-define-lookup-function (mode)
   (let ((mode-str (symbol-name mode))
