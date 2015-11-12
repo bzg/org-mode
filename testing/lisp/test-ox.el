@@ -1622,6 +1622,68 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
 
 
 
+;;; Comments
+
+(ert-deftest test-org-export/comments ()
+  "Test comments handling during export.
+In particular, structure of the document mustn't be altered after
+comments removal."
+  (should
+   (equal (org-test-with-temp-text "
+Para1
+# Comment
+
+# Comment
+Para2"
+	    (org-export-as (org-test-default-backend)))
+	  "Para1\n\nPara2\n"))
+  (should
+   (equal (org-test-with-temp-text "
+Para1
+# Comment
+Para2"
+	    (org-export-as (org-test-default-backend)))
+	  "Para1\n\nPara2\n"))
+  (should
+   (equal (org-test-with-temp-text "
+\[fn:1] Para1
+# Inside definition
+
+
+# Outside definition
+Para2"
+	    (org-export-as (org-test-default-backend)))
+	  "[fn:1] Para1\n\n\nPara2\n"))
+  (should
+   (equal (org-test-with-temp-text "
+\[fn:1] Para1
+
+# Inside definition
+
+# Inside definition
+
+Para2"
+	    (org-export-as (org-test-default-backend)))
+	  "[fn:1] Para1\n\nPara2\n"))
+  (should
+   (equal (org-test-with-temp-text "
+\[fn:1] Para1
+# Inside definition
+
+Para2"
+	    (org-export-as (org-test-default-backend)))
+	  "[fn:1] Para1\n\nPara2\n"))
+  (should
+   (equal (org-test-with-temp-text "
+\[fn:1] Para1
+
+# Inside definition
+Para2"
+	    (org-export-as (org-test-default-backend)))
+	  "[fn:1] Para1\n\nPara2\n")))
+
+
+
 ;;; Export Snippets
 
 (ert-deftest test-org-export/export-snippet ()
