@@ -2669,25 +2669,45 @@ The function assumes BUFFER's major mode is `org-mode'."
   "Delete commented areas in the buffer.
 Commented areas are comments, comment blocks, commented trees and
 inlinetasks.  Trailing blank lines after a comment or a comment
-block are preserved.  Narrowing, if any, is ignored."
+block are removed, as long as it doesn't alter the structure of
+the document.  Narrowing, if any, is ignored."
   (org-with-wide-buffer
    (goto-char (point-min))
-   (let ((regexp (concat org-outline-regexp-bol ".*" org-comment-string
-			 "\\|"
-			 "^[ \t]*#\\(?: \\|$\\|\\+begin_comment\\)"))
-	 (case-fold-search t))
+   (let* ((case-fold-search t)
+	  (comment-re "^[ \t]*#\\(?: \\|$\\|\\+end_comment\\)")
+	  (regexp (concat org-outline-regexp-bol ".*" org-comment-string "\\|"
+			  comment-re)))
      (while (re-search-forward regexp nil t)
-       (let ((e (org-element-at-point)))
-	 (cl-case (org-element-type e)
-	   ((comment comment-block)
-	    (delete-region (org-element-property :begin e)
-			   (progn (goto-char (org-element-property :end e))
-				  (skip-chars-backward " \r\t\n")
-				  (line-beginning-position 2))))
-	   ((headline inlinetask)
-	    (when (org-element-property :commentedp e)
-	      (delete-region (org-element-property :begin e)
-			     (org-element-property :end e))))))))))
+       (let ((element (org-element-at-point)))
+	 (pcase (org-element-type element)
+	   ((or `headline `inlinetask)
+	    (when (org-element-property :commentedp element)
+	      (delete-region (org-element-property :begin element)
+			     (org-element-property :end element))))
+	   ((or `comment `comment-block)
+	    (let* ((parent (org-element-property :parent element))
+		   (start (org-element-property :begin element))
+		   (end (org-element-property :end element))
+		   ;; We remove trailing blank lines.  Doing so could
+		   ;; modify the structure of the document.  Therefore
+		   ;; we ensure that any comment between elements is
+		   ;; replaced with one empty line, so as to keep them
+		   ;; separated.
+		   (add-blank?
+		    (save-excursion
+		      (goto-char start)
+		      (not (or (bobp)
+			       (eq (org-element-property :contents-begin parent)
+				   start)
+			       (eq (org-element-property :contents-end parent)
+				   end)
+			       (progn
+				 (forward-line -1)
+				 (or (org-looking-at-p "^[ \t]*$")
+				     (org-with-limited-levels
+				      (org-at-heading-p)))))))))
+	      (delete-region start end)
+	      (when add-blank? (insert "\n"))))))))))
 
 (defun org-export--prune-tree (data info)
   "Prune non exportable elements from DATA.
