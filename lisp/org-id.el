@@ -1,4 +1,4 @@
-;;; org-id.el --- Global identifiers for Org-mode entries
+;;; org-id.el --- Global identifiers for Org entries -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2008-2015 Free Software Foundation, Inc.
 ;;
@@ -278,7 +278,7 @@ If necessary, the ID is created."
       (move-marker pom nil))))
 
 ;;;###autoload
-(defun org-id-get-with-outline-drilling (&optional targets)
+(defun org-id-get-with-outline-drilling ()
   "Use an outline-cycling interface to retrieve the ID of an entry.
 This only finds entries in the current buffer, using `org-get-location'.
 It returns the ID of the entry.  If necessary, the ID is created."
