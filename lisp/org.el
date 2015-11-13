@@ -24870,7 +24870,7 @@ should be shown.  Default is enough to cause the following
 heading to appear."
   (interactive "p")
   ;; If `orgstruct-mode' is active, use the slower version.
-  (if orgstruct-mode (call-interactively #'show-children)
+  (if orgstruct-mode (call-interactively #'outline-show-children)
     (save-excursion
       (org-back-to-heading t)
       (let* ((current-level (funcall outline-level))
