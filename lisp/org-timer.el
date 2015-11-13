@@ -1,4 +1,4 @@
-;;; org-timer.el --- Timer code for Org mode
+;;; org-timer.el --- Timer code for Org mode         -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2008-2015 Free Software Foundation, Inc.
 
@@ -447,8 +447,7 @@ using three `C-u' prefix arguments."
       (setq minutes (concat minutes ":00")))
     (if (not (string-match "[0-9]+" minutes))
 	(org-timer-show-remaining-time)
-      (let ((secs (org-timer-hms-to-secs (org-timer-fix-incomplete minutes)))
-	    (hl (org-timer--get-timer-title)))
+      (let ((secs (org-timer-hms-to-secs (org-timer-fix-incomplete minutes))))
 	(if (and org-timer-countdown-timer
 		 (not (or (equal opt '(16))
 			  (y-or-n-p "Replace current timer? "))))
