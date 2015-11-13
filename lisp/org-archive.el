@@ -1,4 +1,4 @@
-;;; org-archive.el --- Archiving for Org-mode
+;;; org-archive.el --- Archiving for Org             -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004-2015 Free Software Foundation, Inc.
 
@@ -159,21 +159,24 @@ archive file is."
 
 (defun org-all-archive-files ()
   "Get a list of all archive files used in the current buffer."
-  (let (file files)
-    (save-excursion
-      (save-restriction
-	(goto-char (point-min))
-	(while (re-search-forward
-		"^[ \t]*\\(#\\+\\|:\\)ARCHIVE:[ \t]+\\(.*\\)"
-		nil t)
-	  (setq file (org-extract-archive-file
-		      (org-match-string-no-properties 2)))
-	  (and file (> (length file) 0) (file-exists-p file)
-	       (add-to-list 'files file)))))
+  (let ((case-fold-search t)
+	files)
+    (org-with-wide-buffer
+     (goto-char (point-min))
+     (while (re-search-forward
+	     "^[ \t]*\\(#\\+\\|:\\)ARCHIVE:[ \t]+\\(.*\\)"
+	     nil t)
+       (when (save-match-data
+	       (if (eq (match-string 1) ":") (org-at-property-p)
+		 (eq (org-element-type (org-element-at-point)) 'keyword)))
+	 (let ((file (org-extract-archive-file
+		      (org-match-string-no-properties 2))))
+	   (when (and (org-string-nw-p file) (file-exists-p file))
+	     (push file files))))))
     (setq files (nreverse files))
-    (setq file (org-extract-archive-file))
-    (and file (> (length file) 0) (file-exists-p file)
-	 (add-to-list 'files file))
+    (let ((file (org-extract-archive-file)))
+      (when (and (org-string-nw-p file) (file-exists-p file))
+	(push file files)))
     files))
 
 (defun org-extract-archive-file (&optional location)
@@ -226,8 +229,7 @@ this heading."
      ((equal find-done '(16)) (org-archive-all-old))
      (t
       ;; Save all relevant TODO keyword-relatex variables
-      (let ((tr-org-todo-line-regexp org-todo-line-regexp) ; keep despite compiler
-	    (tr-org-todo-keywords-1 org-todo-keywords-1)
+      (let ((tr-org-todo-keywords-1 org-todo-keywords-1)
 	    (tr-org-todo-kwd-alist org-todo-kwd-alist)
 	    (tr-org-done-keywords org-done-keywords)
 	    (tr-org-todo-regexp org-todo-regexp)
@@ -239,10 +241,9 @@ this heading."
 	    (file (abbreviate-file-name
 		   (or (buffer-file-name (buffer-base-buffer))
 		       (error "No file associated to buffer"))))
-	    (olpath (mapconcat 'identity (org-get-outline-path) "/"))
 	    (time (format-time-string
 		   (substring (cdr org-time-stamp-formats) 1 -1)))
-	    category todo priority ltags itags atags
+	    ltags itags atags
 	    ;; end of variables that will be used for saving context
 	    location afile heading buffer level newfile-p infile-p visiting
 	    datetree-date datetree-subheading-p)
@@ -276,12 +277,7 @@ this heading."
 	(save-excursion
 	  (org-back-to-heading t)
 	  ;; Get context information that will be lost by moving the tree
-	  (setq category (org-get-category nil 'force-refresh)
-		todo (and (looking-at org-todo-line-regexp)
-			  (match-string 2))
-		priority (org-get-priority
-			  (if (match-end 3) (match-string 3) ""))
-		ltags (org-get-tags)
+	  (setq ltags (org-get-tags)
 		itags (org-delete-all ltags (org-get-tags-at))
 		atags (org-get-tags-at))
 	  (setq ltags (mapconcat 'identity ltags " ")
@@ -467,7 +463,7 @@ If the cursor is not on a headline, try all level 1 trees.  If
 it is on a headline, try all direct children.
 When TAG is non-nil, don't move trees, but mark them with the ARCHIVE tag."
   (org-archive-all-matches
-   (lambda (beg end)
+   (lambda (_beg end)
      (unless (re-search-forward org-not-done-heading-regexp end t)
        "no open TODO items"))
    tag))
@@ -478,7 +474,7 @@ If the cursor is not on a headline, try all level 1 trees.  If
 it is on a headline, try all direct children.
 When TAG is non-nil, don't move trees, but mark them with the ARCHIVE tag."
   (org-archive-all-matches
-   (lambda (beg end)
+   (lambda (_beg end)
      (let (ts)
        (and (re-search-forward org-ts-regexp end t)
 	    (setq ts (match-string 0))
