@@ -540,7 +540,7 @@ Implements `file-equal-p' for older emacsen and XEmacs."
     (/= (- (point-max) (point-min)) (buffer-size))))
 
 ;; As of Emacs 25.1, `outline-mode` functions are under the 'outline-'
-;; prefix.
+;; prefix and `find-tag` is replaced with `xref-find-definition`.
 (when (< emacs-major-version 25)
   (defalias 'outline-show-all 'show-all)
   (defalias 'outline-hide-subtree 'hide-subtree)
@@ -548,7 +548,8 @@ Implements `file-equal-p' for older emacsen and XEmacs."
   (defalias 'outline-show-branches 'show-branches)
   (defalias 'outline-show-entry 'show-entry)
   (defalias 'outline-hide-entry 'hide-entry)
-  (defalias 'outline-hide-sublevels 'hide-sublevels))
+  (defalias 'outline-hide-sublevels 'hide-sublevels)
+  (defalias 'xref-find-definitions 'find-tag))
 
 (defmacro org-with-silent-modifications (&rest body)
   (if (fboundp 'with-silent-modifications)
