@@ -1,4 +1,4 @@
-;;; org-habit.el --- The habit tracking code for Org-mode
+;;; org-habit.el --- The habit tracking code for Org -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
@@ -286,7 +286,6 @@ Habits are assigned colors on the following basis:
 	    schedule's repeat period."
   (let* ((scheduled (or scheduled-days (org-habit-scheduled habit)))
 	 (s-repeat (org-habit-scheduled-repeat habit))
-	 (scheduled-end (+ scheduled (1- s-repeat)))
 	 (d-repeat (org-habit-deadline-repeat habit))
 	 (deadline (if scheduled-days
 		       (+ scheduled-days (- d-repeat s-repeat))
@@ -386,7 +385,7 @@ current time."
 
 (defun org-habit-insert-consistency-graphs (&optional line)
   "Insert consistency graph for any habitual tasks."
-  (let ((inhibit-read-only t) l c
+  (let ((inhibit-read-only t)
 	(buffer-invisibility-spec '(org-link))
 	(moment (time-subtract (current-time)
 			       (list 0 (* 3600 org-extend-today-until) 0))))
