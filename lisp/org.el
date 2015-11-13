@@ -111,16 +111,6 @@ sure that we are at the beginning of the line.")
   "Matches a headline, putting stars and text into groups.
 Stars are put in group 1 and the trimmed body in group 2.")
 
-;; Emacs 22 calendar compatibility:  Make sure the new variables are available
-(unless (boundp 'calendar-view-holidays-initially-flag)
-  (org-defvaralias 'calendar-view-holidays-initially-flag
-    'view-calendar-holidays-initially))
-(unless (boundp 'calendar-view-diary-initially-flag)
-  (org-defvaralias 'calendar-view-diary-initially-flag
-    'view-diary-entries-initially))
-(unless (boundp 'diary-fancy-buffer)
-  (org-defvaralias 'diary-fancy-buffer 'fancy-diary-buffer))
-
 (declare-function cdlatex-environment "ext:cdlatex" (environment item))
 (declare-function org-add-archive-files "org-archive" (files))
 (declare-function org-agenda-entry-get-agenda-timestamp "org-agenda" (pom))
