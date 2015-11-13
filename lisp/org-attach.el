@@ -1,4 +1,4 @@
-;;; org-attach.el --- Manage file attachments to org-mode tasks
+;;; org-attach.el --- Manage file attachments to Org tasks -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2008-2015 Free Software Foundation, Inc.
 
@@ -208,25 +208,23 @@ using the entry ID will be invoked to access the unique directory for the
 current entry.
 If the directory does not exist and CREATE-IF-NOT-EXISTS-P is non-nil,
 the directory and (if necessary) the corresponding ID will be created."
-  (let (attach-dir uuid inherit)
+  (let (attach-dir uuid)
     (setq org-attach-inherited (org-entry-get nil "ATTACH_DIR_INHERIT"))
     (cond
      ((setq attach-dir (org-entry-get nil "ATTACH_DIR"))
       (org-attach-check-absolute-path attach-dir))
      ((and org-attach-allow-inheritance
-	   (setq inherit (org-entry-get nil "ATTACH_DIR_INHERIT" t)))
+	   (org-entry-get nil "ATTACH_DIR_INHERIT" t))
       (setq attach-dir
-	    (save-excursion
-	      (save-restriction
-		(widen)
-		(if (marker-position org-entry-property-inherited-from)
-		    (goto-char org-entry-property-inherited-from)
-		  (org-back-to-heading t))
-		(let (org-attach-allow-inheritance)
-		  (org-attach-dir create-if-not-exists-p)))))
+	    (org-with-wide-buffer
+	     (if (marker-position org-entry-property-inherited-from)
+		 (goto-char org-entry-property-inherited-from)
+	       (org-back-to-heading t))
+	     (let (org-attach-allow-inheritance)
+	       (org-attach-dir create-if-not-exists-p))))
       (org-attach-check-absolute-path attach-dir)
       (setq org-attach-inherited t))
-     (t ; use the ID
+     (t					; use the ID
       (org-attach-check-absolute-path nil)
       (setq uuid (org-id-get (point) create-if-not-exists-p))
       (when (or uuid create-if-not-exists-p)
