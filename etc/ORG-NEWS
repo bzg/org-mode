@@ -59,7 +59,7 @@ Use ~org-agenda-today-p~ instead.
 *** ~org-element-remove-indentation~ is deprecated.
 Use ~org-remove-indentation~ instead.
 *** ~org-babel-get-header~ is removed.
-Use ~org-babel--get-vars~ or ~assq~ instead.
+Use ~org-babel--get-vars~ or ~assq~ instead, as applicable.
 
 *** ~org-image-file-name-regexp~ is deprecated
 Use ~image-file-name-regexp~ instead.
@@ -87,10 +87,6 @@ It was not called by any org code since 2010.
 
 *** ~org-table-p~ is deprecated
 Use ~org-at-table-p~ instead.
-
-*** ~org-babel-get-header~ is removed
-
-Use ~assq~ or ~org-babel--get-vars~ instead, as applicable.
 
 ** Removed options
 *** Remove ~org-list-empty-line-terminates-plain-lists~
