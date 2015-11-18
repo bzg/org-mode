@@ -1187,47 +1187,41 @@ This function updates `org-columns-current-fmt-compiled'."
 
 ;;; Dynamic block for Column view
 
-(defvar org-heading-regexp) ; defined in org.el
-(defvar org-heading-keyword-regexp-format) ; defined in org.el
 (defun org-columns-capture-view (&optional maxlevel skip-empty-rows)
   "Get the column view of the current buffer or subtree.
-The first optional argument MAXLEVEL sets the level limit.  A
-second optional argument SKIP-EMPTY-ROWS tells whether to skip
+The first optional argument MAXLEVEL sets the level limit.
+A second optional argument SKIP-EMPTY-ROWS tells whether to skip
 empty rows, an empty row being one where all the column view
-specifiers except ITEM are empty.  This function returns a list
+specifiers but ITEM are empty.  This function returns a list
 containing the title row and all other rows.  Each row is a list
 of fields."
   (save-excursion
-    (let* ((title (mapcar 'cadr org-columns-current-fmt-compiled))
-	   (re-archive (concat ".*:" org-archive-tag ":"))
-	   (n (length title)) row tbl)
+    (let* ((title (mapcar #'cadr org-columns-current-fmt-compiled))
+	   (has-item? (member "ITEM" title))
+	   (n (length title))
+	   tbl)
       (goto-char (point-min))
-      (while (re-search-forward org-heading-regexp nil t)
+      (while (re-search-forward org-outline-regexp-bol nil t)
 	(catch 'next
 	  (when (and (or (null maxlevel)
-			 (>= maxlevel
-			     (if org-odd-levels-only
-				 (/ (1+ (length (match-string 1))) 2)
-			       (length (match-string 1)))))
+			 (>= maxlevel (org-reduced-level (org-outline-level))))
 		     (get-char-property (match-beginning 0) 'org-columns-key))
 	    (when (or (org-in-commented-heading-p t)
-		      (save-excursion
-			(beginning-of-line)
-			(looking-at re-archive)))
+		      (member org-archive-tag (org-get-tags)))
 	      (org-end-of-subtree t)
 	      (throw 'next t))
-	    (setq row nil)
-	    (loop for i from 0 to (1- n) do
-		  (push
-		   (org-quote-vert
-		    (or (get-char-property (+ (match-beginning 0) i) 'org-columns-value-modified)
-			(get-char-property (+ (match-beginning 0) i) 'org-columns-value)
-			""))
-		   row))
-	    (setq row (nreverse row))
-	    (unless (and skip-empty-rows
-			 (eq 1 (length (delete "" (delete-dups (copy-sequence row))))))
-	      (push row tbl)))))
+	    (let (row)
+	      (dotimes (i n)
+		(let ((col (+ (line-beginning-position) i)))
+		  (push (org-quote-vert
+			 (or (get-char-property col 'org-columns-value-modified)
+			     (get-char-property col 'org-columns-value)
+			     ""))
+			row)))
+	      (unless (and skip-empty-rows
+			   (let ((r (delete-dups (remove "" row))))
+			     (or (null r) (and has-item? (= (length r) 1)))))
+		(push (nreverse row) tbl))))))
       (append (list title 'hline) (nreverse tbl)))))
 
 ;;;###autoload
