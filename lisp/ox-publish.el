@@ -1229,7 +1229,7 @@ If FREE-CACHE, empty the cache."
   (setq org-publish-cache nil))
 
 (defun org-publish-cache-file-needs-publishing
-  (filename &optional pub-dir pub-func base-dir)
+    (filename &optional pub-dir pub-func base-dir)
   "Check the timestamp of the last publishing of FILENAME.
 Return non-nil if the file needs publishing.  Also check if
 any included files have been more recently published, so that
@@ -1254,8 +1254,10 @@ the file including them will be republished as well."
 		       (let ((value (org-element-property :value element)))
 			 (and value
 			      (string-match "^\\(\".+?\"\\|\\S-+\\)" value)
-			      (org-remove-double-quotes
-			       (match-string 1 value)))))))
+			      ;; Ignore search suffix.
+			      (car (split-string
+				    (org-remove-double-quotes
+				     (match-string 1 value)))))))))
 	    (when included-file
 	      (add-to-list 'included-files-ctime
 			   (org-publish-cache-ctime-of-src
