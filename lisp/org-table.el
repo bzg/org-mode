@@ -2192,17 +2192,19 @@ When NAMED is non-nil, look for a named equation."
 					       (line-beginning-position))
 				  (org-table-current-column))
 			    org-table-named-field-locations)))
-	 (ref (format "@%d$%d" (org-table-current-dline)
+	 (ref (format "@%d$%d"
+		      (org-table-current-dline)
 		      (org-table-current-column)))
 	 (refass (assoc ref stored-list))
 	 (nameass (assoc name stored-list))
-	 (scol (if named
-		   (if (and name (not (string-match "^LR[0-9]+$" name)))
-		       name
-		     ref)
-		 (int-to-string (org-table-current-column))))
-	 (dummy (and (or nameass refass) (not named)
-		     (not (y-or-n-p "Replace existing field formula with column formula? " ))
+	 (scol (cond
+		((not named) (format "$%d" (org-table-current-column)))
+		((and name (not (string-match "\\`LR[0-9]+\\'" name))) name)
+		(t ref)))
+	 (dummy (and (or nameass refass)
+		     (not named)
+		     (not (y-or-n-p "Replace existing field formula with \
+column formula? " ))
 		     (message "Formula not replaced")))
 	 (name (or name ref))
 	 (org-table-may-need-update nil)
@@ -2215,9 +2217,8 @@ When NAMED is non-nil, look for a named equation."
 	      (t (org-table-formula-from-user
 		  (read-string
 		   (org-table-formula-to-user
-		    (format "%s formula %s%s="
+		    (format "%s formula %s="
 			    (if named "Field" "Column")
-			    (if (member (string-to-char scol) '(?$ ?@)) "" "$")
 			    scol))
 		   (if stored (org-table-formula-to-user stored) "")
 		   'org-table-formula-history
@@ -2243,23 +2244,21 @@ When NAMED is non-nil, look for a named equation."
 
 (defun org-table-store-formulas (alist)
   "Store the list of formulas below the current table."
-  (setq alist (sort alist 'org-table-formula-less-p))
-  (let ((case-fold-search t))
-    (save-excursion
-      (goto-char (org-table-end))
+  (save-excursion
+    (goto-char (org-table-end))
+    (let ((case-fold-search t))
       (if (looking-at "\\([ \t]*\n\\)*[ \t]*\\(#\\+tblfm:\\)\\(.*\n?\\)")
 	  (progn
-	    ;; don't overwrite TBLFM, we might use text properties to store stuff
+	    ;; Don't overwrite TBLFM, we might use text properties to
+	    ;; store stuff.
 	    (goto-char (match-beginning 3))
 	    (delete-region (match-beginning 3) (match-end 0)))
 	(org-indent-line)
 	(insert (or (match-string 2) "#+TBLFM:")))
       (insert " "
-	      (mapconcat (lambda (x)
-			   (concat
-			    (if (equal (string-to-char (car x)) ?@) "" "$")
-			    (car x) "=" (cdr x)))
-			 alist "::")
+	      (mapconcat (lambda (x) (concat (car x) "=" (cdr x)))
+			 (sort alist #'org-table-formula-less-p)
+			 "::")
 	      "\n"))))
 
 (defsubst org-table-formula-make-cmp-string (a)
