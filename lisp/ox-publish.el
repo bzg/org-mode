@@ -1244,8 +1244,10 @@ the file including them will be republished as well."
 		       (let ((value (org-element-property :value element)))
 			 (and value
 			      (string-match "^\\(\".+?\"\\|\\S-+\\)" value)
-			      (org-remove-double-quotes
-			       (match-string 1 value)))))))
+			      ;; Ignore search suffix.
+			      (car (split-string
+				    (org-remove-double-quotes
+				     (match-string 1 value)))))))))
 	    (when included-file
 	      (push (org-publish-cache-ctime-of-src
 		     (expand-file-name included-file))
