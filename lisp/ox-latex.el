@@ -1025,17 +1025,44 @@ block-specific options, you may use the following syntax:
   "Alist mapping languages to language-specific LaTeX environments.
 
 It is used during export of src blocks by the listings and minted
-latex packages.  For example,
+latex packages.  The environment may be a simple string, composed of
+only letters and numbers.  In this case, the string is directly the
+name of the latex environment to use.  The environment may also be
+a format string.  In this case the format string will be directly
+exported.  This format string may contain these elements:
+
+  %s for the formatted source
+  %c for the caption
+  %f for the float attribute
+  %l for an appropriate label 
+
+For example,
 
   (setq org-latex-custom-lang-environments
-     '((python \"pythoncode\")))
+     '((python \"pythoncode\")
+       (ocaml \"\\\\begin{listing}
+\\\\begin{minted}{ocaml}
+%s\\\\end{minted}
+\\\\caption{%c}
+\\\\label{%l}\")))
 
-would have the effect that if org encounters begin_src python
-during latex export it will output
+would have the effect that if Org encounters a Python source block
+during LaTeX export it will produce
 
   \\begin{pythoncode}
   <src block body>
-  \\end{pythoncode}")
+  \\end{pythoncode}
+
+and if Org encounters an Ocaml source block during LaTeX export it
+will produce
+
+  \\begin{listing}
+  \\begin{minted}{ocaml}
+  <src block body>
+  \\end{minted}
+  \\caption{<caption>}
+  \\label{<label>}
+  \\end{listing}")
 
 
 ;;;; Compilation
@@ -2756,13 +2783,20 @@ contextual information."
 			   (org-export-format-code-default src-block info))))))
        ;; Case 2.  Custom environment.
        (custom-env
-	(let ((caption-str (org-latex--caption/label-string src-block info)))
-	  (format "\\begin{%s}\n%s\\end{%s}\n"
-		  custom-env
-		  (concat (and caption-above-p caption-str)
-			  (org-export-format-code-default src-block info)
-			  (and (not caption-above-p) caption-str))
-		  custom-env)))
+	(let ((caption-str (org-latex--caption/label-string src-block info))
+              (formatted-src (org-export-format-code-default src-block info)))
+          (if (org-string-match-p "\\`[a-zA-Z0-9]+\\'" custom-env)
+	      (format "\\begin{%s}\n%s\\end{%s}\n"
+		      custom-env
+		      (concat (and caption-above-p caption-str)
+			      formatted-src
+			      (and (not caption-above-p) caption-str))
+		      custom-env)
+	    (format-spec custom-env
+			 `((?s . ,formatted-src)
+			   (?c . ,caption)
+			   (?f . ,float)
+			   (?l . ,(org-latex--label src-block info)))))))
        ;; Case 3.  Use minted package.
        ((eq listings 'minted)
 	(let* ((caption-str (org-latex--caption/label-string src-block info))
