@@ -7633,26 +7633,18 @@ tags in the FILTER if any of the tags in FILTER are grouptags."
 tag-expressions.  Return a match-expression given TAGS.  OP is an
 operator of type CHAR that allows the function to set the right
 switches in the returned form."
-  (let (f f1) ;f = return expression. f1 = working-area
-    (dolist (x tags)
+  (let (form)
+    ;; Any of the expressions can match if OP is +, all must match if
+    ;; the operator is -.
+    (dolist (x tags (cons (if (eq op ?-) 'and 'or) form))
       (let* ((tag (substring x 1))
-	     (isregexp (and (equal "{" (substring tag 0 1))
-			    (equal "}" (substring tag -1))))
-	     regexp)
-	(cond
-	 (isregexp
-	  (setq regexp (substring tag 1 -1))
-	  (setq f1 (list 'org-match-any-p regexp 'tags)))
-	 (t
-	  (setq f1 (list 'member (downcase tag) 'tags))))
-	(when (eq op ?-)
-	    (setq f1 (list 'not f1))))
-      (push f1 f))
-    ;; Any of the expressions can match if op = +
-    ;; all must match if the operator is -.
-    (if (eq op ?-)
-	(cons 'and f)
-      (cons 'or f))))
+	     (f (cond
+		 ((string= "" tag) '(not tags))
+		 ((and (string-match-p "\\`{" tag) (string-match-p "}\\'" tag))
+		  ;; TAG is a regexp.
+		  (list 'org-match-any-p (substring tag 1 -1) 'tags))
+		 (t (list 'member (downcase tag) 'tags))))))
+      (push (if (eq op ?-) (list 'not f) f) form))))
 
 (defun org-agenda-filter-effort-form (e)
   "Return the form to compare the effort of the current line with what E says.
