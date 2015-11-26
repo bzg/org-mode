@@ -29,6 +29,9 @@
 (require 'ob-table)
 
 (declare-function org-babel-in-example-or-verbatim "ob-exp" nil)
+(declare-function org-element-context "org-element" (&optional element))
+(declare-function org-element-property "org-element" (property element))
+(declare-function org-element-type "org-element" (element))
 
 (defvar org-babel-library-of-babel nil
   "Library of source-code blocks.
@@ -95,31 +98,22 @@ if so then run the appropriate source block from the Library."
 ;;;###autoload
 (defun org-babel-lob-get-info ()
   "Return a Library of Babel function call as a string."
-  (let ((case-fold-search t)
-	(nonempty (lambda (a b)
-		    (let ((it (match-string a)))
-		      (if (= (length it) 0) (match-string b) it)))))
-    (save-excursion
-      (beginning-of-line 1)
-      (when (looking-at org-babel-lob-one-liner-regexp)
-	(append
-	 (mapcar #'org-no-properties
-		 (list
-		  (format "%s%s(%s)%s"
-			  (funcall nonempty 3 12)
-			  (if (not (= 0 (length (funcall nonempty 5 14))))
-			      (concat "[" (funcall nonempty 5 14) "]") "")
-			  (or (funcall nonempty 7 16) "")
-			  (or (funcall nonempty 8 19) ""))
-		  (funcall nonempty 9 18)))
-	 (list (length (if (= (length (match-string 12)) 0)
-			   (match-string 2) (match-string 11)))
-	       (save-excursion
-		 (forward-line -1)
-		 (save-match-data
-		   (and (looking-at (concat org-babel-src-name-regexp
-					    "\\([^\n]*\\)$"))
-			(org-no-properties (match-string 1)))))))))))
+  (when (save-excursion
+	  (beginning-of-line)
+	  (let ((case-fold-search t))
+	    (looking-at org-babel-lob-one-liner-regexp)))
+    (let ((context (save-match-data (org-element-context))))
+      (when (memq (org-element-type context) '(babel-call inline-babel-call))
+	(list (format "%s%s(%s)"
+		      (org-element-property :call context)
+		      (let ((in (org-element-property :inside-header context)))
+			(if in (format "[%s]" in) ""))
+		      (or (org-element-property :arguments context) ""))
+	      (org-element-property :end-header context)
+	      (length (if (= (length (match-string 12)) 0)
+			  (match-string-no-properties 2)
+			(match-string-no-properties 11)))
+	      (org-element-property :name context))))))
 
 (defvar org-babel-default-header-args:emacs-lisp) ; Defined in ob-emacs-lisp.el
 (defun org-babel-lob-execute (info)
