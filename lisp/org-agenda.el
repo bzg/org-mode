@@ -7629,10 +7629,10 @@ tags in the FILTER if any of the tags in FILTER are grouptags."
     (cons 'and (nreverse f))))
 
 (defun org-agenda-filter-make-matcher-tag-exp (tags op)
-  "Create the form that tests a line for agenda filter for
-tag-expressions.  Return a match-expression given TAGS.  OP is an
-operator of type CHAR that allows the function to set the right
-switches in the returned form."
+  "Return a form associated to tag-expression TAGS.
+Build a form testing a line for agenda filter for
+tag-expressions.  OP is an operator of type CHAR that allows the
+function to set the right switches in the returned form."
   (let (form)
     ;; Any of the expressions can match if OP is +, all must match if
     ;; the operator is -.
@@ -7643,8 +7643,8 @@ switches in the returned form."
 		 ((and (string-match-p "\\`{" tag) (string-match-p "}\\'" tag))
 		  ;; TAG is a regexp.
 		  (list 'org-match-any-p (substring tag 1 -1) 'tags))
-		 (t (list 'member (downcase tag) 'tags))))))
-      (push (if (eq op ?-) (list 'not f) f) form))))
+		 (t (list 'member (downcase tag) 'tags)))))
+	(push (if (eq op ?-) (list 'not f) f) form)))))
 
 (defun org-agenda-filter-effort-form (e)
   "Return the form to compare the effort of the current line with what E says.
