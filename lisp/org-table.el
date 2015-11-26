@@ -2297,10 +2297,19 @@ column formula? " ))
 					 " *:: *"))
 	      eq-alist seen)
 	  (dolist (string strings (nreverse eq-alist))
-	    (when (string-match "\\`\\(@[-+I<>0-9.$@]+\\|@?[0-9]+\\|\
-\\$\\([a-zA-Z0-9]+\\|[<>]+\\)\\) *= *\\(.*[^ \t]\\)" string)
-	      (let* ((lhs (match-string 1 string))
-		     (rhs (match-string 3 string)))
+	    (when (string-match "\\`\\(@[-+I<>0-9.$@]+\\|\\$\\([_a-zA-Z0-9]+\\|\
+[<>]+\\)\\) *= *\\(.*[^ \t]\\)"
+				string)
+	      (let ((lhs
+		     (let ((m (match-string 1 string)))
+		       (cond
+			((not (match-end 2)) m)
+			;; Is it a column reference?
+			((org-string-match-p "\\`$\\([0-9]+\\|[<>]+\\)\\'" m) m)
+			;; Since named columns are not possible in
+			;; LHS, assume this is a named field.
+			(t (match-string 2 string)))))
+		    (rhs (match-string 3 string)))
 		(push (cons lhs rhs) eq-alist)
 		(cond
 		 ((not (member lhs seen)) (push lhs seen))
