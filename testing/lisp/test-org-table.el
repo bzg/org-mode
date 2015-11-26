@@ -1787,6 +1787,38 @@ is t, then new columns should be added as needed"
 |---+---+---|
 #+TBLFM: @3$2..@3$>=vsum(@1..@2)")))
 
+(ert-deftest test-org-table/named-field ()
+  "Test formula with a named field."
+  (should
+   (org-string-match-p
+    "| +| +1 +|"
+    (org-test-with-temp-text "
+|   |      |
+| ^ | name |
+<point>#+TBLFM: $name=1"
+      (org-table-calc-current-TBLFM)
+      (buffer-string))))
+  (should
+   (org-string-match-p
+    "| +| +1 +|"
+    (org-test-with-temp-text "
+| _ | name |
+|   |      |
+<point>#+TBLFM: $name=1"
+      (org-table-calc-current-TBLFM)
+      (buffer-string)))))
+
+(ert-deftest test-org-table/named-column ()
+  "Test formula with a named field."
+  (should
+   (org-string-match-p
+    "| +| +1 +| +1 +|"
+    (org-test-with-temp-text "
+| ! | name |   |
+|   |    1 |   |
+<point>#+TBLFM: @2$3=$name"
+      (org-table-calc-current-TBLFM)
+      (buffer-string)))))
 
 (provide 'test-org-table)
 
