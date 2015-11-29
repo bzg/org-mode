@@ -104,6 +104,15 @@ Org files.
 The new algorithm doesn't remove TAB characters not used for
 indentation.
 
+*** Secure placeholders in capture templates
+Placeholders in capture templates are no longer expanded recursively.
+However, ~%(...)~ constructs are expanded very late, so you can still
+fill the contents of the S-exp with the replacement text of other
+placeholders.
+
+Only ~%(...)~ placeholders initially present are expanded.  This
+prevents evaluating potentially malicious code when another placehold,
+e.g., ~%i~ expands to a S-exp.
 *** ~org-babel-check-confirm-evaluate~ is now a function instead of a macro
 The calling convention has changed.
 
