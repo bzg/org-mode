@@ -667,9 +667,9 @@ If `:auto-sitemap' is set, publish the sitemap too.  If
 `:makeindex' is set, also produce a file \"theindex.org\"."
   (dolist (project (org-publish-expand-projects projects))
     (let ((project-plist (cdr project)))
-      (let ((preparation-function
-	     (plist-get project-plist :preparation-function)))
-	(when preparation-function (run-hooks 'preparation-function)))
+      (let ((f (plist-get project-plist :preparation-function)))
+	(cond ((consp f) (mapc #'funcall f))
+	      ((functionp f) (funcall f))))
       ;; Each project uses its own cache file.
       (org-publish-initialize-cache (car project))
       (when  (plist-get project-plist :auto-sitemap)
@@ -701,9 +701,9 @@ If `:auto-sitemap' is set, publish the sitemap too.  If
 	  (org-publish-index-generate-theindex
 	   project (plist-get project-plist :base-directory))
 	  (org-publish-file theindex project t)))
-      (let ((completion-function
-	     (plist-get project-plist :completion-function)))
-	(when completion-function (run-hooks 'completion-function)))
+      (let ((f (plist-get project-plist :completion-function)))
+	(cond ((consp f) (mapc #'funcall f))
+	      ((functionp f) (funcall f))))
       (org-publish-write-cache-file))))
 
 (defun org-publish-org-sitemap (project &optional sitemap-filename)
