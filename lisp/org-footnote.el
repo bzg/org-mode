@@ -533,7 +533,7 @@ or new, let the user edit the definition of the footnote."
 	 (label
 	  (org-footnote-normalize-label
 	   (if (eq org-footnote-auto-label 'random)
-	       (format "fn:%x" (random #x100000000))
+	       (format "fn:%x" (random most-positive-fixnum))
 	     (let ((propose (org-footnote-unique-label all)))
 	       (if (memq org-footnote-auto-label '(t plain)) propose
 		 (org-icompleting-read
