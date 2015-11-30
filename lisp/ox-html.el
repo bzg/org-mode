@@ -1911,10 +1911,12 @@ holding export options."
    (org-html-doctype info)
    "\n"
    (concat "<html"
-	   (when (org-html-xhtml-p info)
-	     (format
-	      " xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"%s\" xml:lang=\"%s\""
-	      (plist-get info :language) (plist-get info :language)))
+	   (cond ((org-html-xhtml-p info)
+		  (format
+		   " xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"%s\" xml:lang=\"%s\""
+		   (plist-get info :language) (plist-get info :language)))
+		 ((org-html-html5-p info)
+		  (format " lang=\"%s\"" (plist-get info :language))))
 	   ">\n")
    "<head>\n"
    (org-html--build-meta-info info)
