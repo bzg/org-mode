@@ -1711,9 +1711,9 @@ INFO is a plist used as a communication channel."
 		" -->\n")))
      (format
       (if (org-html-html5-p info)
-	  (org-html-close-tag "meta" " charset=\"%s\"" info)
+	  (org-html-close-tag "meta" "charset=\"%s\"" info)
 	(org-html-close-tag
-	 "meta" " http-equiv=\"Content-Type\" content=\"text/html;charset=%s\""
+	 "meta" "http-equiv=\"Content-Type\" content=\"text/html;charset=%s\""
 	 info))
       charset) "\n"
      (let ((viewport-options
@@ -1723,33 +1723,33 @@ INFO is a plist used as a communication channel."
 	    (concat
 	     (org-html-close-tag
 	      "meta"
-	      (format " name=\"viewport\" content=\"%s\""
+	      (format "name=\"viewport\" content=\"%s\""
 		      (mapconcat
 		       (lambda (elm) (format "%s=%s" (car elm) (cadr elm)))
 		       viewport-options ", "))
 	      info)
 	     "\n")))
      (format "<title>%s</title>\n" title)
-     (org-html-close-tag "meta" " name=\"generator\" content=\"Org-mode\"" info)
+     (org-html-close-tag "meta" "name=\"generator\" content=\"Org-mode\"" info)
      "\n"
      (and (org-string-nw-p author)
 	  (concat
 	   (org-html-close-tag "meta"
-			       (format " name=\"author\" content=\"%s\""
+			       (format "name=\"author\" content=\"%s\""
 				       (funcall protect-string author))
 			       info)
 	   "\n"))
      (and (org-string-nw-p description)
 	  (concat
 	   (org-html-close-tag "meta"
-			       (format " name=\"description\" content=\"%s\"\n"
+			       (format "name=\"description\" content=\"%s\"\n"
 				       (funcall protect-string description))
 			       info)
 	   "\n"))
      (and (org-string-nw-p keywords)
 	  (concat
 	   (org-html-close-tag "meta"
-			       (format " name=\"keywords\" content=\"%s\""
+			       (format "name=\"keywords\" content=\"%s\""
 				       (funcall protect-string keywords))
 			       info)
 	   "\n")))))
@@ -1766,7 +1766,7 @@ INFO is a plist used as a communication channel."
     (when (and (plist-get info :html-htmlized-css-url)
 	       (eq org-html-htmlize-output-type 'css))
       (org-html-close-tag "link"
-			  (format " rel=\"stylesheet\" href=\"%s\" type=\"text/css\""
+			  (format "rel=\"stylesheet\" href=\"%s\" type=\"text/css\""
 				  (plist-get info :html-htmlized-css-url))
 			  info))
     (when (plist-get info :html-head-include-scripts) org-html-scripts))))
