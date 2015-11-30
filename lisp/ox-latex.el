@@ -1021,7 +1021,7 @@ block-specific options, you may use the following syntax:
 	   (string :tag "Minted option name ")
 	   (string :tag "Minted option value"))))
 
-(defvar org-latex-custom-lang-environments nil
+(defcustom org-latex-custom-lang-environments nil
   "Alist mapping languages to language-specific LaTeX environments.
 
 It is used during export of src blocks by the listings and minted
@@ -1062,7 +1062,14 @@ will produce
   \\end{minted}
   \\caption{<caption>}
   \\label{<label>}
-  \\end{listing}")
+  \\end{listing}"
+  :group 'org-export-latex
+  :type '(repeat
+	  (list
+	   (symbol :tag "Language name                    ")
+	   (string :tag "Environment name or format string")))
+  :version "25.1"
+  :package-version '(Org . "9.0"))
 
 
 ;;;; Compilation
