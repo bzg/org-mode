@@ -18302,22 +18302,25 @@ insert radio list templates in HTML, @LaTeX{} and Texinfo modes by calling
 
 Here are the differences with radio tables:
 
+@cindex #+ORGLST
 @itemize @minus
 @item
 Orgstruct mode must be active.
 @item
 Use the @code{ORGLST} keyword instead of @code{ORGTBL}.
 @item
-The available translation functions for radio lists don't take
-parameters.
-@item
 @kbd{C-c C-c} will work when pressed on the first item of the list.
 @end itemize
+
+Built-in translators functions are : @code{org-list-to-latex},
+@code{org-list-to-html} and @code{org-list-to-texinfo}.  They all use the
+generic translator @code{org-list-to-generic}.  Please check its
+documentation for a list of supported parameters, which can be used to
+control more accurately how the list should be rendered.
 
 Here is a @LaTeX{} example.  Let's say that you have this in your
 @LaTeX{} file:
 
-@cindex #+ORGLST
 @example
 % BEGIN RECEIVE ORGLST to-buy
 % END RECEIVE ORGLST to-buy

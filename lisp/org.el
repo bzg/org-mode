@@ -21612,7 +21612,7 @@ number of stars to add."
 		    (list-end (min (org-list-get-bottom-point struct) (1+ end))))
 	       (save-restriction
 		 (narrow-to-region (point) list-end)
-		 (insert (org-list-to-subtree (org-list-parse-list t)))))
+		 (insert (org-list-to-subtree (org-list-to-lisp t)))))
 	     (setq toggled t))
 	   (forward-line)))
 	;; Case 3. Started at normal text: make every line an heading,

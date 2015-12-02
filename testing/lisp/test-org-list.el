@@ -908,6 +908,204 @@
      (forward-line 3)
      (org-list-send-list))))
 
+(ert-deftest test-org-list/to-generic ()
+  "Test `org-list-to-generic' specifications."
+  ;; Test `:ustart' and `:uend' parameters.
+  (should
+   (equal
+    "begin\na"
+    (org-test-with-temp-text "- a"
+      (org-list-to-generic (org-list-to-lisp) '(:ustart "begin")))))
+  (should-not
+   (equal
+    "begin\na"
+    (org-test-with-temp-text "1. a"
+      (org-list-to-generic (org-list-to-lisp) '(:ustart "begin")))))
+  (should
+   (equal
+    "a\nend"
+    (org-test-with-temp-text "- a"
+      (org-list-to-generic (org-list-to-lisp) '(:uend "end")))))
+  (should-not
+   (equal
+    "a\nend"
+    (org-test-with-temp-text "1. a"
+      (org-list-to-generic (org-list-to-lisp) '(:uend "end")))))
+  (should
+   (equal
+    "begin l1\na\nbegin l2\nb\nend l2\nend l1"
+    (org-test-with-temp-text "- a\n  - b"
+      (org-list-to-generic
+       (org-list-to-lisp)
+       (list :ustart (lambda (l)  (format "begin l%d" l))
+	     :uend (lambda (l)  (format "end l%d" l)))))))
+  ;; Test `:ostart' and `:oend' parameters.
+  (should
+   (equal
+    "begin\na"
+    (org-test-with-temp-text "1. a"
+      (org-list-to-generic (org-list-to-lisp) '(:ostart "begin")))))
+  (should-not
+   (equal
+    "begin\na"
+    (org-test-with-temp-text "- a"
+      (org-list-to-generic (org-list-to-lisp) '(:ostart "begin")))))
+  (should
+   (equal
+    "a\nend"
+    (org-test-with-temp-text "1. a"
+      (org-list-to-generic (org-list-to-lisp) '(:oend "end")))))
+  (should-not
+   (equal
+    "a\nend"
+    (org-test-with-temp-text "- a"
+      (org-list-to-generic (org-list-to-lisp) '(:oend "end")))))
+  (should
+   (equal
+    "begin l1\na\nbegin l2\nb\nend l2\nend l1"
+    (org-test-with-temp-text "1. a\n  1. b"
+      (org-list-to-generic
+       (org-list-to-lisp)
+       (list :ostart (lambda (l)  (format "begin l%d" l))
+	     :oend (lambda (l)  (format "end l%d" l)))))))
+  ;; Test `:dstart' and `:dend' parameters.
+  (should
+   (equal
+    "begin\ntaga"
+    (org-test-with-temp-text "- tag :: a"
+      (org-list-to-generic (org-list-to-lisp) '(:dstart "begin")))))
+  (should-not
+   (equal
+    "begin\na"
+    (org-test-with-temp-text "- a"
+      (org-list-to-generic (org-list-to-lisp) '(:dstart "begin")))))
+  (should
+   (equal
+    "taga\nend"
+    (org-test-with-temp-text "- tag :: a"
+      (org-list-to-generic (org-list-to-lisp) '(:dend "end")))))
+  (should-not
+   (equal
+    "a\nend"
+    (org-test-with-temp-text "- a"
+      (org-list-to-generic (org-list-to-lisp) '(:dend "end")))))
+  (should
+   (equal
+    "begin l1\ntag1a\nbegin l2\ntag2b\nend l2\nend l1"
+    (org-test-with-temp-text "- tag1 :: a\n  - tag2 :: b"
+      (org-list-to-generic
+       (org-list-to-lisp)
+       (list :dstart (lambda (l)  (format "begin l%d" l))
+	     :dend (lambda (l)  (format "end l%d" l)))))))
+  ;; Test `:dtstart', `:dtend', `:ddstart' and `:ddend' parameters.
+  (should
+   (equal
+    ">tag<a"
+    (org-test-with-temp-text "- tag :: a"
+      (org-list-to-generic (org-list-to-lisp) '(:dtstart ">" :dtend "<")))))
+  (should
+   (equal
+    "tag>a<"
+    (org-test-with-temp-text "- tag :: a"
+      (org-list-to-generic (org-list-to-lisp) '(:ddstart ">" :ddend "<")))))
+  ;; Test `:istart' and `:iend' parameters.
+  (should
+   (equal
+    "starta"
+    (org-test-with-temp-text "- a"
+      (org-list-to-generic (org-list-to-lisp) '(:istart "start")))))
+  (should
+   (equal
+    "level1 a\nlevel2 b"
+    (org-test-with-temp-text "- a\n  - b"
+      (org-list-to-generic (org-list-to-lisp)
+			   '(:istart (lambda (l) (format "level%d "l)))))))
+  (should
+   (equal
+    "a\nblevel2level1"
+    (org-test-with-temp-text "- a\n  - b"
+      (org-list-to-generic (org-list-to-lisp)
+			   '(:iend (lambda (l) (format "level%d" l)))))))
+  ;; Test `:icount' parameter.
+  (should
+   (equal
+    "counta"
+    (org-test-with-temp-text "1. [@3] a"
+      (org-list-to-generic (org-list-to-lisp) '(:icount "count")))))
+  (should-not
+   (equal
+    "counta"
+    (org-test-with-temp-text "1. a"
+      (org-list-to-generic (org-list-to-lisp) '(:icount "count")))))
+  (should
+   (equal
+    "counta"
+    (org-test-with-temp-text "1. [@3] a"
+      (org-list-to-generic (org-list-to-lisp)
+			   '(:icount "count" :istart "start")))))
+  (should
+   (equal
+    "level:1, counter:3 a"
+    (org-test-with-temp-text "1. [@3] a"
+      (org-list-to-generic
+       (org-list-to-lisp)
+       '(:icount (lambda (l c) (format "level:%d, counter:%d " l c)))))))
+  ;; Test `:isep' parameter.
+  (should
+   (equal
+    "a\n--\nb"
+    (org-test-with-temp-text "- a\n- b"
+      (org-list-to-generic (org-list-to-lisp) '(:isep "--")))))
+  (should-not
+   (equal
+    "a\n--\nb"
+    (org-test-with-temp-text "- a\n  - b"
+      (org-list-to-generic (org-list-to-lisp) '(:isep "--")))))
+  (should
+   (equal
+    "a\n- 1 -\nb"
+    (org-test-with-temp-text "- a\n- b"
+      (org-list-to-generic (org-list-to-lisp)
+			   '(:isep (lambda (l) (format "- %d -" l)))))))
+  ;; Test `:cbon', `:cboff', `:cbtrans'
+  (should
+   (equal
+    "!a"
+    (org-test-with-temp-text "- [X] a"
+      (org-list-to-generic (org-list-to-lisp) '(:cbon "!")))))
+  (should-not
+   (equal
+    "!a"
+    (org-test-with-temp-text "- [X] a"
+      (org-list-to-generic (org-list-to-lisp) '(:cboff "!" :cbtrans "!")))))
+  (should
+   (equal
+    "!a"
+    (org-test-with-temp-text "- [ ] a"
+      (org-list-to-generic (org-list-to-lisp) '(:cboff "!")))))
+  (should-not
+   (equal
+    "!a"
+    (org-test-with-temp-text "- [ ] a"
+      (org-list-to-generic (org-list-to-lisp) '(:cbon "!" :cbtrans "!")))))
+  (should
+   (equal
+    "!a"
+    (org-test-with-temp-text "- [-] a"
+      (org-list-to-generic (org-list-to-lisp) '(:cbtrans "!")))))
+  (should-not
+   (equal
+    "!a"
+    (org-test-with-temp-text "- [-] a"
+      (org-list-to-generic (org-list-to-lisp) '(:cbon "!" :cboff "!")))))
+  ;; Test `:splice' parameter.
+  (should
+   (equal
+    "a"
+    (org-test-with-temp-text "- a"
+      (org-list-to-generic (org-list-to-lisp)
+			   '(:ustart "begin" :uend "end" :splice t))))))
+
 (ert-deftest test-org-list/to-html ()
   "Test `org-list-to-html' specifications."
   (should

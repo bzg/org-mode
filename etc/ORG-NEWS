@@ -44,6 +44,11 @@ http://orgmode.org/worg/org-contrib/babel/languages/ob-doc-stan.html
 *** New =#+latex_compiler= keyword to set LaTeX compiler.
 PDFLaTeX, XeLaTeX, and LuaLaTeX are supported.  See the manual for
 details.
+*** Rewrite of radio lists
+Radio lists, i.e, Org plain lists in foreign buffers, have been
+rewritten to be on par with Radio tables.  You can use a large set of
+parameters to control how a given list should be rendered.  See manual
+for details.
 *** org-bbdb-anniversaries-future
 Used like org-bbdb-anniversaries, it provides a few days warning
 for upcoming anniversaries (default: 7 days).
@@ -65,6 +70,8 @@ Use ~org-babel--get-vars~ or ~assq~ instead, as applicable.
 Use ~image-file-name-regexp~ instead.
 The never-used-in-core ~extensions~ argument has been dropped.
 
+*** ~org-list-parse-list~ is deprecated
+Use ~org-list-to-lisp~ instead.
 *** ~org-on-heading-p~ is deprecated
 A comment to this effect was in the source code since 7.8.03, but
 now a byte-compiler warning will be generated as well.

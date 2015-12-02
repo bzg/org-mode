@@ -84,8 +84,8 @@
 (declare-function org-babel-lob-execute-maybe "ob-lob" ())
 (declare-function org-number-sequence "org-compat" (from &optional to inc))
 (declare-function org-at-item-p "org-list" ())
-(declare-function org-list-parse-list "org-list" (&optional delete))
 (declare-function org-list-to-generic "org-list" (LIST PARAMS))
+(declare-function org-list-to-lisp "org-list" (&optional delete))
 (declare-function org-list-struct "org-list" ())
 (declare-function org-list-prevs-alist "org-list" (struct))
 (declare-function org-list-get-list-end "org-list" (item struct prevs))
@@ -2060,7 +2060,7 @@ Return nil if ELEMENT cannot be read."
 (defun org-babel-read-list ()
   "Read the list at `point' into emacs-lisp."
   (mapcar (lambda (el) (org-babel-read el 'inhibit-lisp-eval))
-	  (mapcar #'cadr (cdr (org-list-parse-list)))))
+	  (cdr (org-list-to-lisp))))
 
 (defvar org-link-types-re)
 (defun org-babel-read-link ()
@@ -2270,8 +2270,10 @@ INFO may provide the values of these header arguments (in the
 		    (org-list-to-generic
 		     (cons 'unordered
 			   (mapcar
-			    (lambda (el) (list nil (if (stringp el) el (format "%S" el))))
-			    (if (listp result) result (split-string result "\n" t))))
+			    (lambda (e)
+			      (list (if (stringp e) e (format "%S" e))))
+			    (if (listp result) result
+			      (split-string result "\n" t))))
 		     '(:splicep nil :istart "- " :iend "\n")))
 		   "\n"))
 		 ;; Try hard to print RESULT as a table.  Give up if
