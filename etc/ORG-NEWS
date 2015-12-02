@@ -77,6 +77,25 @@ using previous syntax:
 #+END_SRC
 
 ** New features
+*** New org-protocol key=value syntax
+
+Org-protocol can now handle query-style parameters such as:
+
+#+begin_example
+org-protocol://store-link?url=http:%2F%2Flocalhost%2Findex.html&title=The%20title
+org-protocol://capture?template=x&title=Hello&body=World&url=http:%2F%2Fexample.com
+#+end_example
+
+Old-style links such as
+: org-protocol://store-link:/http:%2F%2Flocalhost%2Findex.html/The%20title
+continue to be supported.
+
+If you have defined your own handler functions for
+~org-protocol-protocol-alist~, change them to accept either a property
+list (for new-style links) or a string (for old-style links).  Use
+~org-protocol-parse-parameters~ to convert old-style links into
+property lists.
+
 *** Org linter
 ~org-lint~ can check syntax and report common issues in Org documents.
 *** New option ~date-tree-last~ for ~org-agenda-insert-diary-strategy~
