@@ -5284,7 +5284,7 @@ INFO is the current export state, as a plist."
 			     (let ((p (org-export-get-previous-element
 				       text info)))
 			       (cond ((not p) nil)
-				     ((stringp p) (substring p (1- (length p))))
+				     ((stringp p) (substring p -1))
 				     ((memq (org-element-property :post-blank p)
 					    '(0 nil))
 				      'no-blank)
