@@ -433,29 +433,28 @@ Where possible, use the standard interface for changing this line."
      ((equal key "CLOCKSUM")
       (error "This special column cannot be edited"))
      ((equal key "ITEM")
-      (setq eval '(org-with-point-at pom
+      (setq eval `(org-with-point-at ,pom
 		    (org-edit-headline))))
      ((equal key "TODO")
-      (setq eval '(org-with-point-at
-		      pom
+      (setq eval `(org-with-point-at ,pom
 		    (call-interactively 'org-todo))))
      ((equal key "PRIORITY")
-      (setq eval '(org-with-point-at pom
+      (setq eval `(org-with-point-at ,pom
 		    (call-interactively 'org-priority))))
      ((equal key "TAGS")
-      (setq eval '(org-with-point-at pom
+      (setq eval `(org-with-point-at ,pom
 		    (let ((org-fast-tag-selection-single-key
 			   (if (eq org-fast-tag-selection-single-key 'expert)
 			       t org-fast-tag-selection-single-key)))
 		      (call-interactively 'org-set-tags)))))
      ((equal key "DEADLINE")
-      (setq eval '(org-with-point-at pom
+      (setq eval `(org-with-point-at ,pom
 		    (call-interactively 'org-deadline))))
      ((equal key "SCHEDULED")
-      (setq eval '(org-with-point-at pom
+      (setq eval `(org-with-point-at ,pom
 		    (call-interactively 'org-schedule))))
      ((equal key "BEAMER_env")
-      (setq eval '(org-with-point-at pom
+      (setq eval `(org-with-point-at ,pom
 		    (call-interactively 'org-beamer-select-environment))))
      (t
       (setq allowed (org-property-get-allowed-values pom key 'table))
@@ -467,9 +466,8 @@ Where possible, use the standard interface for changing this line."
 	(setq nval (read-string "Edit: " value)))
       (setq nval (org-trim nval))
       (when (not (equal nval value))
-	(setq eval '(org-entry-put pom key nval)))))
+	(setq eval `(org-entry-put ,pom ,key ,nval)))))
     (when eval
-
       (cond
        ((equal major-mode 'org-agenda-mode)
 	(org-columns-eval eval)
