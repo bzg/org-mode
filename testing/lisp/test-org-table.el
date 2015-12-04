@@ -1820,6 +1820,21 @@ is t, then new columns should be added as needed"
       (org-table-calc-current-TBLFM)
       (buffer-string)))))
 
+(ert-deftest test-org-table/tab-indent ()
+  "Test named fields with tab indentation."
+  (should
+   (org-string-match-p
+    "| # | 111 |"
+    (org-test-with-temp-text
+	"
+	| ! |  sum |      | a |  b |   c |
+	|---+------+------+---+----+-----|
+	| # | 1011 | 1000 | 1 | 10 | 100 |
+	<point>#+TBLFM: $2=$a+$b+$c
+"
+      (org-table-calc-current-TBLFM)
+      (buffer-string)))))
+
 (provide 'test-org-table)
 
 ;;; test-org-table.el ends here
