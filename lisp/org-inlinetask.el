@@ -189,17 +189,16 @@ Return point."
 	   (inlinetask-re (org-inlinetask-outline-regexp))
 	   (task-end-re (concat inlinetask-re "END[ \t]*$")))
       (cond
-       ((looking-at task-end-re) (forward-line))
+       ((looking-at task-end-re))
        ((looking-at inlinetask-re)
 	(forward-line)
 	(cond
-	 ((looking-at task-end-re) (forward-line))
+	 ((looking-at task-end-re))
 	 ((looking-at inlinetask-re))
 	 ((org-inlinetask-in-task-p)
-	  (re-search-forward inlinetask-re nil t)
-	  (forward-line))))
-       (t (re-search-forward inlinetask-re nil t)
-	  (forward-line)))
+	  (re-search-forward inlinetask-re nil t))))
+       (t (re-search-forward inlinetask-re nil t)))
+      (end-of-line)
       (point))))
 
 (defun org-inlinetask-get-task-level ()
