@@ -200,24 +200,21 @@ extracted will be filled again."
 (defun org-footnote-in-valid-context-p ()
   "Is point in a context where footnotes are allowed?"
   (save-match-data
-    (and
-     (not (org-at-comment-p))
-     (not (org-in-verbatim-emphasis))
-     ;; Avoid forbidden blocks.
-     (not (org-in-block-p org-footnote-forbidden-blocks))
-     ;; Avoid literal example.
-     (not (save-excursion
-	    (beginning-of-line)
-	    (looking-at "[ \t]*:[ \t]+")))
-     ;; The latex fragment check seems expensive, so save it for last.
-     ;; See <http://mid.gmane.org/loom.20151204T081351-244@post.gmane.org>.
-     (not (org-inside-LaTeX-fragment-p))
-     ;; Avoid cited text and headers in message-mode.
-     (not (and (derived-mode-p 'message-mode)
-	       (or (save-excursion
-		     (beginning-of-line)
-		     (looking-at message-cite-prefix-regexp))
-		   (message-point-in-header-p)))))))
+    (not (or (org-at-comment-p)
+	     (org-inside-LaTeX-fragment-p)
+	     ;; Avoid literal example.
+	     (org-in-verbatim-emphasis)
+	     (save-excursion
+	       (beginning-of-line)
+	       (looking-at "[ \t]*:[ \t]+"))
+	     ;; Avoid cited text and headers in message-mode.
+	     (and (derived-mode-p 'message-mode)
+		  (or (save-excursion
+			(beginning-of-line)
+			(looking-at message-cite-prefix-regexp))
+		      (message-point-in-header-p)))
+	     ;; Avoid forbidden blocks.
+	     (org-in-block-p org-footnote-forbidden-blocks)))))
 
 (defun org-footnote-at-reference-p ()
   "Is the cursor at a footnote reference?
