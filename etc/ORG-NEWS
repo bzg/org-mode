@@ -113,13 +113,15 @@ indentation.
 
 *** Secure placeholders in capture templates
 Placeholders in capture templates are no longer expanded recursively.
-However, ~%(...)~ constructs are expanded very late, so you can still
-fill the contents of the S-exp with the replacement text of other
-placeholders.
+However, ~%(...)~ constructs are expanded very late, so you can fill
+the contents of the S-exp with the replacement text of non-interactive
+placeholders.  As before, interactive ones are still expanded as the
+very last step, so the previous statement doesn't apply to them.
 
-Only ~%(...)~ placeholders initially present are expanded.  This
-prevents evaluating potentially malicious code when another placehold,
-e.g., ~%i~ expands to a S-exp.
+Note that only ~%(...)~ placeholders initially present in the
+template, or introduced using a file placeholder, i.e., ~%[...]~ are
+expanded.  This prevents evaluating potentially malicious code when
+another placeholder, e.g., ~%i~ expands to a S-exp.
 *** ~org-babel-check-confirm-evaluate~ is now a function instead of a macro
 The calling convention has changed.
 
