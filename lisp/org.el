@@ -9410,30 +9410,31 @@ Possible values in the list of contexts are `table', `headline', and `item'."
 		    (org-in-item-p)))
       (goto-char pos))))
 
+(defconst org-unique-local-variables
+  '(org-element--cache
+    org-element--cache-objects
+    org-element--cache-sync-keys
+    org-element--cache-sync-requests
+    org-element--cache-sync-timer)
+  "List of local variables that cannot be transferred to another buffer.")
+
 (defun org-get-local-variables ()
   "Return a list of all local variables in an Org mode buffer."
-  (let ((varlist
-	 (prog1 (with-current-buffer (get-buffer-create "*Org tmp*")
-		  (erase-buffer)
-		  (org-mode)
-		  (buffer-local-variables))
-	   (kill-buffer "*Org tmp*"))))
-    (delq nil
-          (mapcar
-           (lambda (x)
-	     (let* ((binding (if (symbolp x) (list x) (list (car x) (cdr x))))
-		    (name (car binding)))
-	       (and (not (get name 'org-state))
-		    ;; Ignore internal local variables, since those
-		    ;; are likely variables that are not meant to be
-		    ;; copied.
-		    (not (string-match-p "--" (symbol-name name)))
-		    (string-match-p
-		     "\\`\\(org-\\|orgtbl-\\|outline-\\|comment-\\|\
-paragraph-\\|auto-fill\\|normal-auto-fill\\|fill-paragraph\\|indent-\\)"
-		     (symbol-name name))
-		    x)))
-           varlist))))
+  (delq nil
+	(mapcar
+	 (lambda (x)
+	   (let* ((binding (if (symbolp x) (list x) (list (car x) (cdr x))))
+		  (name (car binding)))
+	     (and (not (get name 'org-state))
+		  (not (memq name org-unique-local-variables))
+		  (string-match-p
+		   "\\`\\(org-\\|orgtbl-\\|outline-\\|comment-\\|paragraph-\\|\
+auto-fill\\|normal-auto-fill\\|fill-paragraph\\|indent-\\)"
+		   (symbol-name name))
+		  x)))
+	 (with-temp-buffer
+	   (org-mode)
+	   (buffer-local-variables)))))
 
 (defun org-clone-local-variables (from-buffer &optional regexp)
   "Clone local variables from FROM-BUFFER.
@@ -9441,9 +9442,7 @@ Optional argument REGEXP selects variables to clone."
   (dolist (pair (buffer-local-variables from-buffer))
     (let ((name (car pair)))
       (when (and (symbolp name)
-		 ;; Ignore internal local variables, since those are
-		 ;; likely variables that are not meant to be copied.
-		 (not (string-match-p "--" (symbol-name name)))
+		 (not (memq name org-unique-local-variables))
 		 (or (null regexp) (string-match regexp (symbol-name name))))
 	(set (make-local-variable name) (cdr pair))))))
 
