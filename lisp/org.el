@@ -5442,7 +5442,7 @@ The following commands are available:
      org-display-table 4
      (vconcat (mapcar
 	       (lambda (c) (make-glyph-code c (and (not (stringp org-ellipsis))
-						   org-ellipsis)))
+					      org-ellipsis)))
 	       (if (stringp org-ellipsis) org-ellipsis "..."))))
     (setq buffer-display-table org-display-table))
   (org-set-regexps-and-options)
@@ -5457,14 +5457,10 @@ The following commands are available:
   (modify-syntax-entry ?\" "\"")
   (modify-syntax-entry ?\\ "_")
   (modify-syntax-entry ?~ "_")
-  (when org-startup-truncated (setq truncate-lines t))
-  (when org-startup-indented (require 'org-indent) (org-indent-mode 1))
-  (setq-local font-lock-unfontify-region-function
-	      'org-unfontify-region)
+  (setq-local font-lock-unfontify-region-function 'org-unfontify-region)
   ;; Activate before-change-function
   (setq-local org-table-may-need-update t)
-  (org-add-hook 'before-change-functions 'org-before-change-function nil
-		'local)
+  (org-add-hook 'before-change-functions 'org-before-change-function nil 'local)
   ;; Check for running clock before killing a buffer
   (org-add-hook 'kill-buffer-hook 'org-check-running-clock nil 'local)
   ;; Initialize macros templates.
@@ -5511,8 +5507,7 @@ The following commands are available:
       (modes . '(org-mode)))))
 
   ;; Imenu
-  (setq-local imenu-create-index-function
-	      'org-imenu-get-tree)
+  (setq-local imenu-create-index-function 'org-imenu-get-tree)
 
   ;; Make isearch reveal context
   (if (or (featurep 'xemacs)
@@ -5524,35 +5519,31 @@ The following commands are available:
 		(lambda (&rest ignore) (org-show-context 'isearch))))
 
   ;; Setup the pcomplete hooks
-  (setq-local pcomplete-command-completion-function
-	      'org-pcomplete-initial)
-  (setq-local pcomplete-command-name-function
-	      'org-command-at-point)
-  (setq-local pcomplete-default-completion-function
-	      'ignore)
-  (setq-local pcomplete-parse-arguments-function
-	      'org-parse-arguments)
+  (setq-local pcomplete-command-completion-function 'org-pcomplete-initial)
+  (setq-local pcomplete-command-name-function 'org-command-at-point)
+  (setq-local pcomplete-default-completion-function 'ignore)
+  (setq-local pcomplete-parse-arguments-function 'org-parse-arguments)
   (setq-local pcomplete-termination-string "")
   (setq-local buffer-face-mode-face 'org-default)
 
-  ;; If empty file that did not turn on org-mode automatically, make it to.
+  ;; If empty file that did not turn on Org mode automatically, make
+  ;; it to.
   (when (and org-insert-mode-line-in-empty-file
 	     (org-called-interactively-p 'any)
 	     (= (point-min) (point-max)))
     (insert "#    -*- mode: org -*-\n\n"))
   (unless org-inhibit-startup
     (org-unmodified
-     (and org-startup-with-beamer-mode (org-beamer-mode))
+     (when org-startup-with-beamer-mode (org-beamer-mode))
      (when org-startup-align-all-tables
-       (org-table-map-tables 'org-table-align 'quietly))
-     (when org-startup-with-inline-images
-       (org-display-inline-images))
-     (when org-startup-with-latex-preview
-       (org-toggle-latex-fragment))
-     (unless org-inhibit-startup-visibility-stuff
-       (org-set-startup-visibility))
+       (org-table-map-tables #'org-table-align t))
+     (when org-startup-with-inline-images (org-display-inline-images))
+     (when org-startup-with-latex-preview (org-toggle-latex-fragment))
+     (unless org-inhibit-startup-visibility-stuff (org-set-startup-visibility))
+     (when org-startup-truncated (setq truncate-lines t))
+     (when org-startup-indented (require 'org-indent) (org-indent-mode 1))
      (org-refresh-effort-properties)))
-  ;; Try to set org-hide correctly
+  ;; Try to set `org-hide' face correctly.
   (let ((foreground (org-find-invisible-foreground)))
     (when foreground
       (set-face-foreground 'org-hide foreground))))
