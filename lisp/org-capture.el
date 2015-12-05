@@ -1659,6 +1659,7 @@ The template may still contain \"%?\" for cursor positioning."
 		  (?k (insert v-k))
 		  (?K (insert v-K))
 		  (?l (insert v-l))
+		  (?n (insert v-n))
 		  (?t (insert v-t))
 		  (?T (insert v-T))
 		  (?u (insert v-u))
