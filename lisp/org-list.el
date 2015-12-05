@@ -1050,7 +1050,7 @@ that value."
 	    (let ((seq 0) (pos item) counter)
 	      (while (and (not (setq counter (org-list-get-counter pos struct)))
 			  (setq pos (org-list-get-prev-item pos struct prevs)))
-		(incf seq))
+		(cl-incf seq))
 	      (if (not counter) (1+ seq)
 		(cond
 		 ((string-match "[A-Za-z]" counter)
@@ -2514,8 +2514,8 @@ With optional prefix argument ALL, do this for the whole buffer."
 					    (lambda (e)
 					      (org-list-get-checkbox e s))
 					    items))))
-		   (incf c-all (length cookies))
-		   (incf c-on (cl-count "[X]" cookies :test #'equal)))))))
+		   (cl-incf c-all (length cookies))
+		   (cl-incf c-on (cl-count "[X]" cookies :test #'equal)))))))
 	  cookies-list cache)
      ;; Move to start.
      (cond (all (goto-char (point-min)))
