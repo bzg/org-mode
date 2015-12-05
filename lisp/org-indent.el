@@ -69,7 +69,7 @@ Delay used when the buffer to initialize is current.")
 Delay used when the buffer to initialize isn't current.")
 (defvar org-indent-agent-resume-delay '(0 0 100000)
   "Minimal time for other idle processes before switching back to agent.")
-(defvar org-indent-initial-marker nil
+(defvar org-indent--initial-marker nil
   "Position of initialization before interrupt.
 This is used locally in each buffer being initialized.")
 (defvar org-hide-leading-stars-before-indent-mode nil
@@ -140,7 +140,7 @@ during idle time."
    (org-indent-mode
     ;; mode was turned on.
     (setq-local indent-tabs-mode nil)
-    (setq-local org-indent-initial-marker (copy-marker 1))
+    (setq-local org-indent--initial-marker (copy-marker 1))
     (when org-indent-mode-turns-off-org-adapt-indentation
       (setq-local org-adapt-indentation nil))
     (when org-indent-mode-turns-on-hiding-stars
@@ -170,8 +170,8 @@ during idle time."
     (kill-local-variable 'org-adapt-indentation)
     (setq org-indent-agentized-buffers
 	  (delq (current-buffer) org-indent-agentized-buffers))
-    (when (markerp org-indent-initial-marker)
-      (set-marker org-indent-initial-marker nil))
+    (when (markerp org-indent--initial-marker)
+      (set-marker org-indent--initial-marker nil))
     (when (boundp 'org-hide-leading-stars-before-indent-mode)
       (setq-local org-hide-leading-stars
 		  org-hide-leading-stars-before-indent-mode))
@@ -234,13 +234,13 @@ a time value."
        (let ((interruptp
 	      ;; Always nil unless interrupted.
 	      (catch 'interrupt
-		(and org-indent-initial-marker
-		     (marker-position org-indent-initial-marker)
-		     (org-indent-add-properties org-indent-initial-marker
+		(and org-indent--initial-marker
+		     (marker-position org-indent--initial-marker)
+		     (org-indent-add-properties org-indent--initial-marker
 						(point-max)
 						delay)
 		     nil))))
-	 (move-marker org-indent-initial-marker interruptp)
+	 (move-marker org-indent--initial-marker interruptp)
 	 ;; Job is complete: un-agentize buffer.
 	 (unless interruptp
 	   (setq org-indent-agentized-buffers

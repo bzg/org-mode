@@ -47,19 +47,18 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl-lib)
 (require 'org)
 
+(declare-function org-at-encrypted-entry-p "org-crypt" ())
 (declare-function org-datetree-find-date-create "org-datetree"
 		  (date &optional keep-restriction))
-(declare-function org-table-analyze "org-table" ())
-(declare-function org-table-goto-line "org-table" (N))
+(declare-function org-decrypt-entry "org-crypt" ())
+(declare-function org-encrypt-entry "org-crypt" ())
 (declare-function org-pop-to-buffer-same-window "org-compat"
 		  (&optional buffer-or-name norecord label))
-(declare-function org-at-encrypted-entry-p "org-crypt" ())
-(declare-function org-encrypt-entry "org-crypt" ())
-(declare-function org-decrypt-entry "org-crypt" ())
+(declare-function org-table-analyze "org-table" ())
+(declare-function org-table-goto-line "org-table" (N))
 
 (defvar org-remember-default-headline)
 (defvar org-remember-templates)
@@ -1004,12 +1003,6 @@ a string, return it.  However, if it is the empty string, return
       (progn (org-capture-put :new-buffer t)
 	     (find-file-noselect (expand-file-name file org-directory)))))
 
-(defun org-capture-steal-local-variables (buffer)
-  "Install Org-mode local variables of BUFFER."
-  (mapc (lambda (v)
-	  (ignore-errors (set (make-local-variable (car v)) (cdr v))))
-	(buffer-local-variables buffer)))
-
 (defun org-capture-place-template (&optional inhibit-wconf-store)
   "Insert the template at the target location, and display the buffer.
 When `inhibit-wconf-store', don't store the window configuration, as it
@@ -1603,7 +1596,7 @@ The template may still contain \"%?\" for cursor positioning."
       ;; is to support completion in interactive prompts
       (insert template)
       (goto-char (point-min))
-      (org-capture-steal-local-variables buffer)
+      (org-clone-local-variables buffer "\\`org-")
       (setq buffer-file-name nil)
       (setq mark-active nil)
 

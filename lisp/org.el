@@ -9421,37 +9421,40 @@ Possible values in the list of contexts are `table', `headline', and `item'."
 
 (defun org-get-local-variables ()
   "Return a list of all local variables in an Org mode buffer."
-  (let (varlist)
-    (with-current-buffer (get-buffer-create "*Org tmp*")
-      (erase-buffer)
-      (org-mode)
-      (setq varlist (buffer-local-variables)))
-    (kill-buffer "*Org tmp*")
+  (let ((varlist
+	 (prog1 (with-current-buffer (get-buffer-create "*Org tmp*")
+		  (erase-buffer)
+		  (org-mode)
+		  (buffer-local-variables))
+	   (kill-buffer "*Org tmp*"))))
     (delq nil
           (mapcar
            (lambda (x)
-             (setq x
-                   (if (symbolp x)
-                       (list x)
-                     (list (car x) (cdr x))))
-             (if (and (not (get (car x) 'org-state))
-                      (string-match
-                       "^\\(org-\\|orgtbl-\\|outline-\\|comment-\\|paragraph-\\|auto-fill\\|normal-auto-fill\\|fill-paragraph\\|indent-\\)"
-                       (symbol-name (car x))))
-                 x nil))
+	     (let* ((binding (if (symbolp x) (list x) (list (car x) (cdr x))))
+		    (name (car binding)))
+	       (and (not (get name 'org-state))
+		    ;; Ignore internal local variables, since those
+		    ;; are likely variables that are not meant to be
+		    ;; copied.
+		    (not (string-match-p "--" (symbol-name name)))
+		    (string-match-p
+		     "\\`\\(org-\\|orgtbl-\\|outline-\\|comment-\\|\
+paragraph-\\|auto-fill\\|normal-auto-fill\\|fill-paragraph\\|indent-\\)"
+		     (symbol-name name))
+		    x)))
            varlist))))
 
 (defun org-clone-local-variables (from-buffer &optional regexp)
   "Clone local variables from FROM-BUFFER.
 Optional argument REGEXP selects variables to clone."
-  (mapc
-   (lambda (pair)
-     (and (symbolp (car pair))
-	  (or (null regexp)
-	      (string-match regexp (symbol-name (car pair))))
-	  (set (make-local-variable (car pair))
-	       (cdr pair))))
-   (buffer-local-variables from-buffer)))
+  (dolist (pair (buffer-local-variables from-buffer))
+    (let ((name (car pair)))
+      (when (and (symbolp name)
+		 ;; Ignore internal local variables, since those are
+		 ;; likely variables that are not meant to be copied.
+		 (not (string-match-p "--" (symbol-name name)))
+		 (or (null regexp) (string-match regexp (symbol-name name))))
+	(set (make-local-variable name) (cdr pair))))))
 
 ;;;###autoload
 (defun org-run-like-in-org-mode (cmd)
