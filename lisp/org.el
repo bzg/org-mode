@@ -11947,7 +11947,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 			  (bookmark-set bookmark-name))))
 		  ;; If we are refiling for capture, make sure that the
 		  ;; last-capture pointers point here
-		  (when (org-bound-and-true-p org-refile-for-capture)
+		  (when (org-bound-and-true-p org-capture-is-refiling)
 		    (let ((bookmark-name (plist-get org-bookmark-names-plist
 						    :last-capture-marker)))
 		      (when bookmark-name

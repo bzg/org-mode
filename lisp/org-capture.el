@@ -1,4 +1,4 @@
-;;; org-capture.el --- Fast note taking in Org-mode
+;;; org-capture.el --- Fast note taking in Org-mode  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2010-2015 Free Software Foundation, Inc.
 
@@ -76,6 +76,9 @@
 ;; The following variable is scoped dynamically by org-protocol
 ;; to indicate that the link properties have already been stored
 (defvar org-capture-link-is-already-stored nil)
+
+(defvar org-capture-is-refiling nil
+  "Non-nil when capture process is refiling an entry.")
 
 (defgroup org-capture nil
   "Options concerning capturing new entries."
@@ -800,7 +803,7 @@ already gone.  Any prefix argument will be passed to the refile command."
      "Refiling from a capture buffer makes only sense for `entry'-type templates"))
   (let ((pos (point))
 	(base (buffer-base-buffer (current-buffer)))
-	(org-refile-for-capture t)
+	(org-capture-is-refiling t)
 	(kill-buffer (org-capture-get :kill-buffer 'local)))
     (org-capture-put :kill-buffer nil)
     (org-capture-finalize)
@@ -1020,14 +1023,12 @@ may have been stored before."
   (outline-show-all)
   (goto-char (org-capture-get :pos))
   (setq-local outline-level 'org-outline-level)
-  (let* ((template (org-capture-get :template))
-	 (type (org-capture-get :type)))
-    (case type
-      ((nil entry) (org-capture-place-entry))
-      (table-line (org-capture-place-table-line))
-      (plain (org-capture-place-plain-text))
-      (item (org-capture-place-item))
-      (checkitem (org-capture-place-item))))
+  (pcase (org-capture-get :type)
+    ((or `nil `entry) (org-capture-place-entry))
+    (`table-line (org-capture-place-table-line))
+    (`plain (org-capture-place-plain-text))
+    (`item (org-capture-place-item))
+    (`checkitem (org-capture-place-item)))
   (org-capture-mode 1)
   (setq-local org-capture-current-plist org-capture-plist))
 
@@ -1036,13 +1037,14 @@ may have been stored before."
   (let* ((txt (org-capture-get :template))
 	 (reversed (org-capture-get :prepend))
 	 (target-entry-p (org-capture-get :target-entry-p))
-	 level beg end file)
+	 level beg end)
 
     (and (org-capture-get :exact-position)
 	 (goto-char (org-capture-get :exact-position)))
     (cond
      ((not target-entry-p)
-      ;; Insert as top-level entry, either at beginning or at end of file
+      ;; Insert as top-level entry, either at beginning or at end of
+      ;; file.
       (setq level 1)
       (if reversed
 	  (progn (goto-char (point-min))
@@ -1141,7 +1143,7 @@ may have been stored before."
   (let* ((txt (org-capture-get :template))
 	 (target-entry-p (org-capture-get :target-entry-p))
 	 (table-line-pos (org-capture-get :table-line-pos))
-	 ind beg end)
+	 beg end)
     (cond
      ((org-capture-get :exact-position)
       (goto-char (org-capture-get :exact-position)))
@@ -1384,10 +1386,8 @@ Point will remain at the first line after the inserted text."
   "Go to the target location of a capture template.
 The user is queried for the template."
   (interactive)
-  (let* (org-select-template-temp-major-mode
-	 (entry (org-capture-select-template template-key)))
-    (unless entry
-      (error "No capture template selected"))
+  (let ((entry (org-capture-select-template template-key)))
+    (unless entry (error "No capture template selected"))
     (org-capture-set-plist entry)
     (org-capture-set-target-location)
     (org-pop-to-buffer-same-window (org-capture-get :buffer))
@@ -1544,7 +1544,6 @@ The template may still contain \"%?\" for cursor positioning."
 	  (if (< (nth 2 dct) org-extend-today-until)
 	      (encode-time 0 59 23 (1- (nth 3 dct)) (nth 4 dct) (nth 5 dct))
 	    ct))
-	 (plist-p org-store-link-plist)
 	 (v-c (and (> (length kill-ring) 0) (current-kill 0)))
 	 (v-x (or (org-get-x-clipboard 'PRIMARY)
 		  (org-get-x-clipboard 'CLIPBOARD)
@@ -1587,8 +1586,7 @@ The template may still contain \"%?\" for cursor positioning."
 	 (v-f (or (org-capture-get :original-file-nondirectory) ""))
 	 (v-F (or (org-capture-get :original-file) ""))
 	 (org-startup-folded nil)
-	 (org-inhibit-startup t)
-	 strings)
+	 (org-inhibit-startup t))
 
     (setq org-store-link-plist (plist-put org-store-link-plist :annotation v-a))
     (setq org-store-link-plist (plist-put org-store-link-plist :initial v-i))
