@@ -76,8 +76,6 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
 (require 'cl-lib)
 (require 'org-macs)
 (require 'org-compat)
@@ -89,11 +87,13 @@
 (defvar org-closed-string)
 (defvar org-deadline-string)
 (defvar org-description-max-indent)
+(defvar org-drawer-regexp)
+(defvar org-element-all-objects)
+(defvar org-inhibit-startup)
 (defvar org-odd-levels-only)
 (defvar org-scheduled-string)
 (defvar org-ts-regexp)
 (defvar org-ts-regexp-both)
-(defvar org-drawer-regexp)
 
 (declare-function org-at-heading-p "org" (&optional invisible-ok))
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
@@ -102,15 +102,33 @@
 (declare-function org-current-level "org" ())
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-context "org-element" (&optional element))
-(declare-function org-element-lineage "org-element"
-		  (blob &optional types with-self))
+(declare-function org-element-interpret-data "org-element" (data))
+(declare-function
+ org-element-lineage "org-element" (blob &optional types with-self))
+(declare-function org-element-macro-interpreter "org-element" (macro ##))
+(declare-function
+ org-element-map "org-element"
+ (data types fun &optional info first-match no-recursion with-affiliated))
+(declare-function org-element-normalize-string "org-element" (s))
+(declare-function org-element-parse-buffer "org-element"
+		  (&optional granularity visible-only))
 (declare-function org-element-property "org-element" (property element))
+(declare-function org-element-put-property "org-element"
+		  (element property value))
+(declare-function org-element-set-element "org-element" (old new))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-element-update-syntax "org-element" ())
 (declare-function org-entry-get "org"
 		  (pom property &optional inherit literal-nil))
-(declare-function org-export-string-as "ox"
-		  (string backend &optional body-only ext-plist))
+(declare-function org-export-create-backend "org-export" (&rest rest))
+(declare-function org-export-data-with-backend "org-export" (data backend info))
+(declare-function org-export-get-backend "org-export" (name))
+(declare-function org-export-get-environment "org-export"
+		  (&optional backend subtreep ext-plist))
+(declare-function org-export-get-next-element "org-export"
+		  (blob info &optional n))
+(declare-function org-export-with-backend "org-export"
+		  (backend data &optional contents info))
 (declare-function org-fix-tags-on-the-fly "org" ())
 (declare-function org-get-indentation "org" (&optional line))
 (declare-function org-icompleting-read "org" (&rest args))
@@ -124,6 +142,7 @@
 (declare-function org-narrow-to-subtree "org" ())
 (declare-function org-previous-line-empty-p "org" ())
 (declare-function org-reduced-level "org" (L))
+(declare-function org-remove-indentation "org" (code &optional n))
 (declare-function org-show-subtree "org" ())
 (declare-function org-sort-remove-invisible "org" (S))
 (declare-function org-time-string-to-seconds "org" (s))
