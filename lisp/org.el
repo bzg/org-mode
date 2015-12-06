@@ -9431,7 +9431,7 @@ Possible values in the list of contexts are `table', `headline', and `item'."
 		   "\\`\\(org-\\|orgtbl-\\|outline-\\|comment-\\|paragraph-\\|\
 auto-fill\\|normal-auto-fill\\|fill-paragraph\\|indent-\\)"
 		   (symbol-name name))
-		  x)))
+		  binding)))
 	 (with-temp-buffer
 	   (org-mode)
 	   (buffer-local-variables)))))
