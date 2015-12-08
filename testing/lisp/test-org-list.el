@@ -1104,7 +1104,10 @@
     "a"
     (org-test-with-temp-text "- a"
       (org-list-to-generic (org-list-to-lisp)
-			   '(:ustart "begin" :uend "end" :splice t))))))
+			   '(:ustart "begin" :uend "end" :splice t)))))
+  ;; No error on empty lists.
+  (should
+   (org-test-with-temp-text "-" (org-list-to-generic (org-list-to-lisp) nil))))
 
 (ert-deftest test-org-list/to-html ()
   "Test `org-list-to-html' specifications."

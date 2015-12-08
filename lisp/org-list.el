@@ -3349,7 +3349,7 @@ PARAMS is a plist used to tweak the behavior of the transcoder."
 				    (org-element-interpret-data tag))
 				  dtend))
 		     (and tag ddstart)
-		     (if (equal contents "") "" (substring contents 0 -1))
+		     (if (= (length contents) 0) "" (substring contents 0 -1))
 		     (and tag ddend))
 		  (org-export-with-backend backend item contents info))))
 	   ;; Remove final newline.
