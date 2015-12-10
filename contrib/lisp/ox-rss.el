@@ -31,10 +31,11 @@
 ;; `org-rss-export-as-rss' (temporary buffer) and `org-rss-export-to-rss'
 ;; (as a ".xml" file).
 ;;
-;; This backend understands two new option keywords:
+;; This backend understands three new option keywords:
 ;;
 ;; #+RSS_EXTENSION: xml
 ;; #+RSS_IMAGE_URL: http://myblog.org/mypicture.jpg
+;; #+RSS_FEED_URL: http://myblog.org/feeds/blog.xml
 ;;
 ;; It uses #+HTML_LINK_HOME: to set the base url of the feed.
 ;;
@@ -127,6 +128,7 @@ When nil, Org will create ids using `org-icalendar-create-uid'."
     (:with-toc nil nil nil) ;; Never include HTML's toc
     (:rss-extension "RSS_EXTENSION" nil org-rss-extension)
     (:rss-image-url "RSS_IMAGE_URL" nil org-rss-image-url)
+    (:rss-feed-url "RSS_FEED_URL" nil nil t)
     (:rss-categories nil nil org-rss-categories))
   :filters-alist '((:filter-final-output . org-rss-final-function))
   :translate-alist '((headline . org-rss-headline)
@@ -331,10 +333,11 @@ as a communication channel."
 	 (image (url-encode-url (plist-get info :rss-image-url)))
 	 (ifile (plist-get info :input-file))
 	 (publink
-	  (concat (file-name-as-directory blogurl)
-		  (file-name-nondirectory
-		   (file-name-sans-extension ifile))
-		  "." rssext)))
+	  (or (plist-get info :rss-feed-url)
+	      (concat (file-name-as-directory blogurl)
+		      (file-name-nondirectory
+		       (file-name-sans-extension ifile))
+		      "." rssext))))
     (format
      "\n<title>%s</title>
 <atom:link href=\"%s\" rel=\"self\" type=\"application/rss+xml\" />
