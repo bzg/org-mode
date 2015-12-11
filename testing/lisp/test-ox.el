@@ -820,6 +820,16 @@ Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
 			     (paragraph . (lambda (p c i) c))
 			     (section . (lambda (s c i) c))))
 	     nil nil nil '(:with-sub-superscript {})))))
+  (should
+   (equal "a_entity\n"
+	  (org-test-with-temp-text "a_\\alpha"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders '((entity . (lambda (e c i) "entity"))
+			     (subscript . (lambda (s c i) "dummy"))
+			     (paragraph . (lambda (p c i) c))
+			     (section . (lambda (s c i) c))))
+	     nil nil nil '(:with-sub-superscript nil)))))
   ;; Also handle uninterpreted objects in title.
   (should
    (equal "a_b"
