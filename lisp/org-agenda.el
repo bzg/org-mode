@@ -7255,7 +7255,7 @@ agenda."
 	     (not (one-window-p))
 	     (delete-window))))
       (if bury
-	  (bury-buffer buf)
+	  (bury-buffer)
 	(kill-buffer buf)
 	(setq org-agenda-archives-mode nil
 	      org-agenda-buffer nil)))))
