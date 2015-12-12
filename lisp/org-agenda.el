@@ -7244,8 +7244,7 @@ agenda."
 (defun org-agenda--quit (&optional bury)
   (if org-agenda-columns-active
       (org-columns-quit)
-    (let ((buf (current-buffer))
-	  (wconf org-agenda-pre-window-conf)
+    (let ((wconf org-agenda-pre-window-conf)
 	  (org-agenda-last-indirect-window
 	   (and (eq org-indirect-buffer-display 'other-window)
 		org-agenda-last-indirect-buffer
@@ -7267,8 +7266,8 @@ agenda."
 	     (not (one-window-p))
 	     (delete-window))))
       (if bury
-	  (bury-buffer buf)
-	(kill-buffer buf)
+	  (bury-buffer)
+	(kill-buffer)
 	(setq org-agenda-archives-mode nil
 	      org-agenda-buffer nil)))))
 
