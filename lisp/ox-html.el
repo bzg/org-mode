@@ -2846,12 +2846,17 @@ INFO is a plist holding contextual information.  See
 	    ;; relative to a custom-id, a headline title a name,
 	    ;; a target or a radio-target.
 	    (let ((option (org-element-property :search-option link)))
-	      (if (not option) raw-path
-		(concat raw-path
-			"#"
-			(org-publish-resolve-external-link
-			 option
-			 (org-element-property :path link))))))
+	      (cond ((not option) raw-path)
+		    ;; Since HTML back-end use custom-id value as-is,
+		    ;; resolving is them is trivial.
+		    ((eq (string-to-char option) ?#)
+		     (concat raw-path "#" option))
+		    (t
+		     (concat raw-path
+			     "#"
+			     (org-publish-resolve-external-link
+			      option
+			      (org-element-property :path link)))))))
 	   (t raw-path)))
 	 ;; Extract attributes from parent's paragraph.  HACK: Only do
 	 ;; this for the first link in parent (inner image link for
