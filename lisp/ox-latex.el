@@ -1514,7 +1514,7 @@ just outside of it."
        (org-export-data
 	(org-export-get-footnote-definition ref info) info))))
    ;; Find every footnote reference in ELEMENT.
-   (letrec ((all-refs)
+   (letrec ((all-refs nil)
 	    (search-refs
 	     (lambda (data)
 	       ;; Return a list of all footnote references never seen

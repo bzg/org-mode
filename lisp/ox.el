@@ -1779,7 +1779,7 @@ INFO is a plist holding export options."
 	;; If FILETAGS contains a select tag, every headline or
 	;; inlinetask is returned.
 	(org-element-map data '(headline inlinetask) #'identity)
-      (letrec ((selected-trees)
+      (letrec ((selected-trees nil)
 	       (walk-data
 		(lambda (data genealogy)
 		  (let ((type (org-element-type data)))
@@ -2715,7 +2715,7 @@ DATA is the parse tree to traverse.  INFO is the plist holding
 export info.  Also set `:ignore-list' in INFO to a list of
 objects which should be ignored during export, but not removed
 from tree."
-  (letrec ((ignore)
+  (letrec ((ignore nil)
 	   ;; First find trees containing a select tag, if any.
 	   (selected (org-export--selected-trees data info))
 	   (walk-data
@@ -2939,7 +2939,7 @@ not, are considered."
 	 ;; Otherwise add each definition at the end of the section where
 	 ;; it is first referenced.
 	 (t
-	  (letrec ((seen)
+	  (letrec ((seen nil)
 		   (insert-definitions
 		    (lambda (data)
 		      ;; Insert definitions in the same section as
@@ -3760,8 +3760,8 @@ INFO is a plist containing export state.  By default, as soon as
 a new footnote reference is encountered, FUNCTION is called onto
 its definition.  However, if BODY-FIRST is non-nil, this step is
 delayed until the end of the process."
-  (letrec ((definitions)
-	   (seen-refs)
+  (letrec ((definitions nil)
+	   (seen-refs nil)
 	   (search-ref
 	    (lambda (data delayp)
 	      ;; Search footnote references through DATA, filling
