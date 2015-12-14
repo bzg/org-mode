@@ -21,7 +21,11 @@
 ;; Version: 1.3
 ;; Author: Alan Schmitt <alan.schmitt@polytechnique.org>
 ;; Consistently use `org-mac-paste-applescript-links'
-;; 
+;;
+;; Version 1.4
+;; Author: Mike McLean <mike.mclean@pobox.com>
+;; Make the path to Microsoft Outlook a `defcustom'
+;;
 ;; This file is not part of GNU Emacs.
 ;;
 ;; This program is free software; you can redistribute it and/or modify
@@ -112,6 +116,12 @@
   :tag "Grab Microsoft Outlook.app links"
   :group 'org-mac-link
   :type 'boolean)
+
+(defcustom org-mac-outlook-path "/Applications/Microsoft Outlook.app"
+  "The path to the installed copy of Microsoft Outlook.app. Do not escape spaces as the AppleScript call will quote this string."
+  :tag "Path to Microsoft Outlook"
+  :group 'org-mac-link
+  :type 'string)
 
 (defcustom org-mac-grab-devonthink-app-p t
   "Add menu option [d]EVONthink to grab links from DEVONthink Pro Office.app."
@@ -610,7 +620,7 @@ The links are of the form <link>::split::<name>."
   "Open a message in Outlook"
   (do-applescript
    (concat
-    "tell application \"/Applications/Microsoft Office 2011/Microsoft Outlook.app\"\n"
+    "tell application \"" org-mac-outlook-path "\"\n"
     (format "open message id %s\n" (substring-no-properties msgid))
     "activate\n"
     "end tell")))
@@ -619,7 +629,7 @@ The links are of the form <link>::split::<name>."
   "AppleScript to create links to selected messages in Microsoft Outlook.app."
   (do-applescript
    (concat
-    "tell application \"/Applications/Microsoft Office 2011/Microsoft Outlook.app\"\n"
+    "tell application \"" org-mac-outlook-path "\"\n"
     "set msgCount to count current messages\n"
     "if (msgCount < 1) then\n"
     "return\n"
