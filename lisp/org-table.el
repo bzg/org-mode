@@ -5295,7 +5295,7 @@ characters width of the plot.  ASK may also be the
     (org-table-store-formulas
      (cons
       (cons
-       (number-to-string (1+ col))
+       (concat "$" (number-to-string (1+ col)))
        (format "'(%s $%s %s %s %s)"
 	       "orgtbl-ascii-draw" col min max length))
       (org-table-get-stored-formulas)))
