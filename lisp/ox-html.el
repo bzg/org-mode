@@ -2849,8 +2849,7 @@ INFO is a plist holding contextual information.  See
 	      (cond ((not option) raw-path)
 		    ;; Since HTML back-end use custom-id value as-is,
 		    ;; resolving is them is trivial.
-		    ((eq (string-to-char option) ?#)
-		     (concat raw-path "#" option))
+		    ((eq (string-to-char option) ?#) (concat raw-path option))
 		    (t
 		     (concat raw-path
 			     "#"
