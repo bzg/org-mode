@@ -26,6 +26,10 @@
 ;; Author: Mike McLean <mike.mclean@pobox.com>
 ;; Make the path to Microsoft Outlook a `defcustom'
 ;;
+;; Version 1.5
+;; Author: Mike McLean <mike.mclean@pobox.com>
+;; Add Support for Evernote
+;;
 ;; This file is not part of GNU Emacs.
 ;;
 ;; This program is free software; you can redistribute it and/or modify
@@ -66,6 +70,7 @@
 ;; Skim.app - Grab a link to the selected page in the topmost pdf document
 ;; Microsoft Outlook.app - Grab a link to the selected message in the message list
 ;; DEVONthink Pro Office.app - Grab a link to the selected DEVONthink item(s); open DEVONthink item by reference
+;; Evernote.app - Grab a link to the selected Evernote item(s); open Evernote item by ID
 ;;
 ;;
 ;; Installation:
@@ -195,6 +200,23 @@
   :group 'org-mac-flagged-mail
   :type 'string)
 
+(defcustom org-mac-grab-Evernote-app-p
+  (< 0 (length (shell-command-to-string
+                "mdfind kMDItemCFBundleIdentifier == 'com.evernote.Evernote'")))
+  "Add menu option [e]vernote to grab note links from Evernote.app."
+  :tag "Grab Evernote.app note links"
+  :group 'org-mac-link
+  :type 'boolean)
+
+(defcustom org-mac-evernote-path (replace-regexp-in-string (rx (* (any " \t\n")) eos)
+                                                           ""
+                                                           (shell-command-to-string
+                                                            "mdfind kMDItemCFBundleIdentifier == 'com.evernote.Evernote'"))
+  "The path to the installed copy of Evernote.app. Do not escape spaces as the AppleScript call will quote this string."
+  :tag "Path to Evernote"
+  :group 'org-mac-link
+  :type 'string)
+
 
 ;; In mac.c, removed in Emacs 23.
 (declare-function do-applescript "org-mac-message" (script))
@@ -226,6 +248,7 @@ When done, go grab the link, and insert it at point."
 	    ("f" "irefox" org-mac-firefox-insert-frontmost-url ,org-mac-grab-Firefox-app-p)
 	    ("v" "imperator" org-mac-vimperator-insert-frontmost-url ,org-mac-grab-Firefox+Vimperator-p)
 	    ("c" "hrome" org-mac-chrome-insert-frontmost-url ,org-mac-grab-Chrome-app-p)
+            ("e" "evernote" org-mac-evernote-note-insert-selected ,org-mac-grab-Evernote-app-p)
 	    ("t" "ogether" org-mac-together-insert-selected ,org-mac-grab-Together-app-p)
 	    ("S" "kim" org-mac-skim-insert-page ,org-mac-grab-Skim-app-p)
 	    ("A" "crobat" org-mac-acrobat-insert-page ,org-mac-grab-Acrobat-app-p)))
@@ -720,6 +743,55 @@ after heading."
 	(insert "\n")
 	(org-insert-heading nil t)
 	(insert org-heading "\n" (org-mac-outlook-message-get-links "f"))))))
+
+;; Handle links from Evernote.app
+
+(org-add-link-type "mac-evernote" 'org-mac-evernote-note-open)
+
+(defun org-mac-evernote-note-open (noteid)
+  "Open a note in Evernote"
+  (do-applescript
+   (concat
+    "tell application \"" org-mac-evernote-path "\"\n"
+    "    set theNotes to get every note of every notebook where its local id is \"" (substring-no-properties noteid) "\"\n"
+    "    repeat with _note in theNotes\n"
+    "        if length of _note is not 0 then\n"
+    "            set _selectedNote to _note\n"
+    "        end if\n"
+    "    end repeat\n"
+    "    open note window with item 1 of _selectedNote\n"
+    "    activate\n"
+    "end tell")))
+
+(defun org-as-get-selected-evernote-notes ()
+  "AppleScript to create links to selected notes in Evernote.app."
+  (do-applescript
+   (concat
+    "tell application \"" org-mac-evernote-path "\"\n"
+     "    set noteCount to count selection\n"
+     "    if (noteCount < 1) then\n"
+     "        return\n"
+     "    end if\n"
+     "    set theLinkList to {}\n"
+     "    set theSelection to selection\n"
+     "    repeat with theNote in theSelection\n"
+     "        set theTitle to title of theNote\n"
+     "        set theID to local id of theNote\n"
+     "        set theURL to \"mac-evernote:\" & theID\n"
+     "        set theLink to theURL & \"::split::\" & theTitle & \"\n\"\n"
+     "        copy theLink to end of theLinkList\n"
+     "    end repeat\n"
+     "    return theLinkList as string\n"
+     "end tell\n")))
+
+(defun org-mac-evernote-note-insert-selected ()
+  "Insert a link to the notes currently selected in Evernote.app.
+This will use AppleScript to get the note id and the title of the
+note(s) in Evernote.app and make a link out of it/them."
+  (interactive)
+  (message "Org Mac Evernote: searching notes...")
+(insert (org-mac-paste-applescript-links
+	 (org-as-get-selected-evernote-notes))))
 
 
 ;; Handle links from DEVONthink Pro Office.app
