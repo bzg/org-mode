@@ -66,7 +66,7 @@
          (session (org-babel-prep-session:ocaml
 		   (cdr (assoc :session params)) params))
          (raw (org-babel-comint-with-output
-		  (session org-babel-ocaml-eoe-output t full-body)
+		  (session org-babel-ocaml-eoe-output nil full-body)
 		(insert
 		 (concat
 		  (org-babel-chomp full-body) ";;\n"
