@@ -1922,16 +1922,9 @@ The Org homepage[fn:1] now looks a lot better than it used to.
 @end example
 
 Org mode extends the number-based syntax to @emph{named} footnotes and
-optional inline definition.  Using plain numbers as markers (as
-@file{footnote.el} does) is supported for backward compatibility, but not
-encouraged because of possible conflicts with @LaTeX{} snippets (@pxref{Embedded
-@LaTeX{}}).  Here are the valid references:
+optional inline definition.  Here are the valid references:
 
 @table @code
-@item [1]
-A plain numeric footnote marker.  Compatible with @file{footnote.el}, but not
-recommended because something like @samp{[1]} could easily be part of a code
-snippet.
 @item [fn:name]
 A named footnote reference, where @code{name} is a unique label word, or, for
 simplicity of automatic creation, a number.

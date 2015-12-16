@@ -151,7 +151,7 @@ specially in `org-element--object-lex'.")
 		;; Headlines, inlinetasks.
 		org-outline-regexp "\\|"
 		;; Footnote definitions.
-		"\\[\\(?:[0-9]+\\|fn:[-_[:word:]]+\\)\\]" "\\|"
+		"\\[fn:[-_[:word:]]+\\]" "\\|"
 		;; Diary sexps.
 		"%%(" "\\|"
 		"[ \t]*\\(?:"
@@ -199,7 +199,12 @@ specially in `org-element--object-lex'.")
 		      ;; Objects starting with "[": regular link,
 		      ;; footnote reference, statistics cookie,
 		      ;; timestamp (inactive).
-		      "\\[\\(?:fn:\\|\\(?:[0-9]\\|\\(?:%\\|/[0-9]*\\)\\]\\)\\|\\[\\)"
+		      (concat "\\[\\(?:"
+			      "fn:" "\\|"
+			      "\\[" "\\|"
+			      "[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}" "\\|"
+			      "[0-9]*\\(?:%\\|/[0-9]*\\)\\]"
+			      "\\)")
 		      ;; Objects starting with "@": export snippets.
 		      "@@"
 		      ;; Objects starting with "{": macro.
@@ -836,7 +841,7 @@ Assume point is at the beginning of the footnote definition."
 (defun org-element-footnote-definition-interpreter (footnote-definition contents)
   "Interpret FOOTNOTE-DEFINITION element as Org syntax.
 CONTENTS is the contents of the footnote-definition."
-  (concat (format "[%s]" (org-element-property :label footnote-definition))
+  (concat (format "[fn:%s]" (org-element-property :label footnote-definition))
 	  " "
 	  contents))
 
@@ -2767,14 +2772,10 @@ When at a footnote reference, return a list whose car is
       (when closing
 	(save-excursion
 	  (let* ((begin (point))
-		 (label
-		  (or (org-match-string-no-properties 2)
-		      (org-match-string-no-properties 3)
-		      (and (match-string 1)
-			   (concat "fn:" (org-match-string-no-properties 1)))))
-		 (type (if (or (not label) (match-string 1)) 'inline 'standard))
+		 (label (match-string-no-properties 1))
 		 (inner-begin (match-end 0))
 		 (inner-end (1- closing))
+		 (type (if (match-end 2) 'inline 'standard))
 		 (post-blank (progn (goto-char closing)
 				    (skip-chars-forward " \t")))
 		 (end (point)))
@@ -2790,9 +2791,9 @@ When at a footnote reference, return a list whose car is
 (defun org-element-footnote-reference-interpreter (footnote-reference contents)
   "Interpret FOOTNOTE-REFERENCE object as Org syntax.
 CONTENTS is its definition, when inline, or nil."
-  (format "[%s]"
-	  (concat (or (org-element-property :label footnote-reference) "fn:")
-		  (and contents (concat ":" contents)))))
+  (format "[fn:%s%s]"
+	  (or (org-element-property :label footnote-reference) "")
+	  (if contents (concat ":" contents) "")))
 
 
 ;;;; Inline Babel Call

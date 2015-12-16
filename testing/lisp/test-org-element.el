@@ -938,11 +938,6 @@ Some other text
    (org-test-with-temp-text "Text[fn:label]"
      (org-element-map
 	 (org-element-parse-buffer) 'footnote-reference 'identity)))
-  ;; Parse a normalized reference.
-  (should
-   (org-test-with-temp-text "Text[1]"
-     (org-element-map
-	 (org-element-parse-buffer) 'footnote-reference 'identity)))
   ;; Parse an inline reference.
   (should
    (org-test-with-temp-text "Text[fn:test:def]"
@@ -2893,17 +2888,15 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
 
 (ert-deftest test-org-element/footnote-reference-interpreter ()
   "Test footnote reference interpreter."
-  ;; 1. Regular reference.
+  ;; Regular reference.
   (should (equal (org-test-parse-and-interpret "Text[fn:1]") "Text[fn:1]\n"))
-  ;; 2. Normalized reference.
-  (should (equal (org-test-parse-and-interpret "Text[1]") "Text[1]\n"))
-  ;; 3. Named reference.
+  ;; Named reference.
   (should (equal (org-test-parse-and-interpret "Text[fn:label]")
 		 "Text[fn:label]\n"))
-  ;; 4. Inline reference.
+  ;; Inline reference.
   (should (equal (org-test-parse-and-interpret "Text[fn:label:def]")
 		 "Text[fn:label:def]\n"))
-  ;; 5. Anonymous reference.
+  ;; Anonymous reference.
   (should (equal (org-test-parse-and-interpret "Text[fn::def]")
 		 "Text[fn::def]\n")))
 

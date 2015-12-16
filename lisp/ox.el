@@ -3351,7 +3351,7 @@ storing and resolving footnotes.  It is created automatically."
 	      (unless included
 		(org-with-wide-buffer
 		 (goto-char (point-max))
-		 (maphash (lambda (k v) (insert (format "\n[%s] %s\n" k v)))
+		 (maphash (lambda (k v) (insert (format "\n[fn:%s] %s\n" k v)))
 			  footnotes)))))))))))
 
 (defun org-export--inclusion-absolute-lines (file location only-contents lines)
@@ -3472,7 +3472,7 @@ the included document."
       (unless (eq major-mode 'org-mode)
 	(let ((org-inhibit-startup t)) (org-mode)))
       (goto-char (point-min))
-      (let ((ind-str (make-string ind ? )))
+      (let ((ind-str (make-string ind ?\s)))
 	(while (not (or (eobp) (looking-at org-outline-regexp-bol)))
 	  ;; Do not move footnote definitions out of column 0.
 	  (unless (and (looking-at org-footnote-definition-re)
@@ -3508,17 +3508,14 @@ the included document."
 	    (marker-max (point-max-marker))
 	    (get-new-label
 	     (lambda (label)
-	       ;; Generate new label from LABEL.  If LABEL is akin to
-	       ;; [1] convert it to [fn:--ID-1].  Otherwise add "-ID-"
-	       ;; after "fn:".
-	       (if (org-string-match-p "\\`[0-9]+\\'" label)
-		   (format "fn:--%d-%s" id label)
-		 (format "fn:-%d-%s" id (substring label 3)))))
+	       ;; Generate new label from LABEL by prefixing it with
+	       ;; "-ID-".
+	       (format "-%d-%s" id label)))
 	    (set-new-label
 	     (lambda (f old new)
 	       ;; Replace OLD label with NEW in footnote F.
 	       (save-excursion
-		 (goto-char (1+ (org-element-property :begin f)))
+		 (goto-char (+ (org-element-property :begin f) 4))
 		 (looking-at (regexp-quote old))
 		 (replace-match new))))
 	    (seen-alist))

@@ -1054,7 +1054,7 @@ text
       (length
        (delete-dups
 	(let ((contents "
-Footnotes[fn:1], [fn:test], [fn:test] and [fn:inline:anonymous footnote].
+Footnotes[fn:1], [fn:test], [fn:test] and [fn:inline:inline footnote].
 \[fn:1] Footnote 1
 \[fn:test] Footnote \"test\""))
 	  (org-test-with-temp-text-in-file contents
@@ -1070,13 +1070,12 @@ Footnotes[fn:1], [fn:test], [fn:test] and [fn:inline:anonymous footnote].
 		      (lambda (r) (org-element-property :label r)))))))))))))
   ;; Footnotes labels are not local to each include keyword.
   (should
-   (= 4
+   (= 3
       (length
        (delete-dups
 	(let ((contents "
-Footnotes[fn:1], [fn:test], [2] and [fn:inline:anonymous footnote].
+Footnotes[fn:1], [fn:test] and [fn:inline:inline footnote].
 \[fn:1] Footnote 1
-\[2] Footnote 2
 \[fn:test] Footnote \"test\""))
 	  (org-test-with-temp-text-in-file contents
 	    (let ((file (buffer-file-name)))
@@ -1089,26 +1088,24 @@ Footnotes[fn:1], [fn:test], [2] and [fn:inline:anonymous footnote].
   ;; Footnotes are supported by :lines-like elements and unnecessary
   ;; footnotes are dropped.
   (should
-   (= 4
+   (= 3
       (length
        (delete-dups
 	(let ((contents "
 * foo
 Footnotes[fn:1]
 * bar
-Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote]
+Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 
 \[fn:1] Footnote 1
 \[fn:2] Footnote 1
 * Footnotes
 \[fn:test] Footnote \"test\"
-\[3] Footnote 3
 "))
 	  (org-test-with-temp-text-in-file contents
 	    (let ((file (buffer-file-name)))
 	      (org-test-with-temp-text
-		  (format "#+INCLUDE: \"%s::*bar\"
-" file)
+		  (format "#+INCLUDE: \"%s::*bar\"\n" file)
 		(org-export-expand-include-keyword)
 		(org-element-map (org-element-parse-buffer)
 		    'footnote-definition
@@ -1119,7 +1116,8 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
     "body\n"
     (org-test-with-temp-text
 	(concat
-	 (format "#+INCLUDE: \"%s/examples/include.org::*Heading\" " org-test-dir)
+	 (format "#+INCLUDE: \"%s/examples/include.org::*Heading\" "
+		 org-test-dir)
 	 ":only-contents t")
       (org-export-expand-include-keyword)
       (buffer-string))))
@@ -1135,27 +1133,32 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
    (equal
     "| 1 |\n"
     (org-test-with-temp-text
-	(format "#+INCLUDE: \"%s/examples/include.org::tbl\" :only-contents t" org-test-dir)
+	(format "#+INCLUDE: \"%s/examples/include.org::tbl\" :only-contents t"
+		org-test-dir)
       (org-export-expand-include-keyword)
       (buffer-string))))
   ;; Including non-existing elements should result in an error.
   (should-error
    (org-test-with-temp-text
-       (format "#+INCLUDE: \"%s/examples/include.org::*non-existing heading\"" org-test-dir)
+       (format "#+INCLUDE: \"%s/examples/include.org::*non-existing heading\""
+	       org-test-dir)
      (org-export-expand-include-keyword)))
   ;; Lines work relatively to an included element.
   (should
    (equal
     "2\n3\n"
     (org-test-with-temp-text
-	(format "#+INCLUDE: \"%s/examples/include.org::#ah\" :only-contents t :lines \"2-3\"" org-test-dir)
+	(format "#+INCLUDE: \"%s/examples/include.org::#ah\" :only-contents t \
+:lines \"2-3\""
+		org-test-dir)
       (org-export-expand-include-keyword)
       (buffer-string))))
   ;; Properties should be dropped from headlines.
   (should
    (equal
     (org-test-with-temp-text
-	(format "#+INCLUDE: \"%s/examples/include.org::#ht\" :only-contents t" org-test-dir)
+	(format "#+INCLUDE: \"%s/examples/include.org::#ht\" :only-contents t"
+		org-test-dir)
       (org-export-expand-include-keyword)
       (buffer-string))
     (org-test-with-temp-text
@@ -1167,7 +1170,8 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
    (equal
     ":LOGBOOK:\ndrawer\n:END:\ncontent\n"
     (org-test-with-temp-text
-	(format "#+INCLUDE: \"%s/examples/include.org::#dh\" :only-contents t" org-test-dir)
+	(format "#+INCLUDE: \"%s/examples/include.org::#dh\" :only-contents t"
+		org-test-dir)
       (org-export-expand-include-keyword)
       (buffer-string))))
   ;; Adjacent INCLUDE-keywords should have the same :minlevel if unspecified.
@@ -1175,8 +1179,10 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
    (cl-every (lambda (level) (zerop (1- level)))
 	      (org-test-with-temp-text
 		  (concat
-		   (format "#+INCLUDE: \"%s/examples/include.org::#ah\"\n" org-test-dir)
-		   (format "#+INCLUDE: \"%s/examples/include.org::*Heading\"" org-test-dir))
+		   (format "#+INCLUDE: \"%s/examples/include.org::#ah\"\n"
+			   org-test-dir)
+		   (format "#+INCLUDE: \"%s/examples/include.org::*Heading\""
+			   org-test-dir))
 		(org-export-expand-include-keyword)
 		(org-element-map (org-element-parse-buffer) 'headline
 		  (lambda (head) (org-element-property :level head))))))
@@ -1184,30 +1190,37 @@ Footnotes[fn:2], foot[fn:test], digit only[3], and [fn:inline:anonymous footnote
   (should-not
    (equal
     (org-test-with-temp-text
-	(format "#+INCLUDE: \"%s/examples/include2.org\" src emacs-lisp" org-test-dir)
+	(format "#+INCLUDE: \"%s/examples/include2.org\" src emacs-lisp"
+		org-test-dir)
       (org-export-expand-include-keyword)
       (buffer-string))
     (org-test-with-temp-text
-	(format "#+INCLUDE: \"%s/examples/include2.org\" src emacs-lisp :minlevel 1" org-test-dir)
+	(format
+	 "#+INCLUDE: \"%s/examples/include2.org\" src emacs-lisp :minlevel 1"
+	 org-test-dir)
       (org-export-expand-include-keyword)
       (buffer-string))))
   ;; INCLUDE assigns the relative :minlevel conditional on narrowing.
   (should
    (org-test-with-temp-text-in-file
-       (format "* h1\n<point>#+INCLUDE: \"%s/examples/include.org::#ah\"" org-test-dir)
+       (format "* h1\n<point>#+INCLUDE: \"%s/examples/include.org::#ah\""
+	       org-test-dir)
      (narrow-to-region (point) (point-max))
      (org-export-expand-include-keyword)
      (eq 1 (org-current-level))))
   ;; If :minlevel is present do not alter it.
   (should
    (org-test-with-temp-text
-       (format "* h1\n<point>#+INCLUDE: \"%s/examples/include.org::#ah\" :minlevel 3" org-test-dir)
+       (format
+	"* h1\n<point>#+INCLUDE: \"%s/examples/include.org::#ah\" :minlevel 3"
+	org-test-dir)
      (narrow-to-region (point) (point-max))
      (org-export-expand-include-keyword)
      (eq 3 (org-current-level)))))
 
 (ert-deftest test-org-export/expand-macro ()
   "Test macro expansion in an Org buffer."
+  (require 'ox-org)
   ;; Standard macro expansion.
   (should
    (equal "#+MACRO: macro1 value\nvalue\n"
@@ -1873,7 +1886,7 @@ Para2"
   ;; Test nested footnotes order.
   (should
    (equal
-    '((1 . "fn:1") (2 . "fn:2") (3 . "fn:3") (3 . "fn:3") (4))
+    '((1 . "1") (2 . "2") (3 . "3") (3 . "3") (4))
     (org-test-with-parsed-data
 	"Text[fn:1:A[fn:2]] [fn:3].\n\n[fn:2] B [fn:3] [fn::D].\n\n[fn:3] C."
       (org-element-map tree 'footnote-reference
@@ -1904,7 +1917,7 @@ Para2"
   ;; then footnote definitions.
   (should
    (equal
-    '(("fn:1" . 1) ("fn:2" . 2) ("fn:3" . 3) ("fn:3" . 3))
+    '(("1" . 1) ("2" . 2) ("3" . 3) ("3" . 3))
     (org-test-with-parsed-data
 	"Text[fn:1][fn:2][fn:3]\n\n[fn:1] Def[fn:3]\n[fn:2] Def\n[fn:3] Def"
       (org-element-map tree 'footnote-reference
@@ -1914,7 +1927,7 @@ Para2"
 	info))))
   (should
    (equal
-    '(("fn:1" . 1) ("fn:2" . 3) ("fn:3" . 2) ("fn:3" . 2))
+    '(("1" . 1) ("2" . 3) ("3" . 2) ("3" . 2))
     (org-test-with-parsed-data
 	"Text[fn:1][fn:2][fn:3]\n\n[fn:1] Def[fn:3]\n[fn:2] Def\n[fn:3] Def"
       (org-element-map tree 'footnote-reference
@@ -1936,7 +1949,7 @@ Para2"
   ;; Limit number to provided DATA, when non-nil.
   (should
    (equal
-    '((1 "fn:2"))
+    '((1 "2"))
     (org-test-with-parsed-data
 	"Text[fn:1]\n* H\nText[fn:2]\n\n[fn:1] D1\n[fn:2] D2"
       (mapcar #'butlast
@@ -1944,14 +1957,14 @@ Para2"
 	       info (org-element-map tree 'headline #'identity info t))))))
   (should
    (equal
-    '((1 "fn:1") (2 "fn:2"))
+    '((1 "1") (2 "2"))
     (org-test-with-parsed-data
 	"Text[fn:1]\n* H\nText[fn:2]\n\n[fn:1] D1\n[fn:2] D2"
       (mapcar #'butlast (org-export-collect-footnote-definitions info)))))
   ;; With optional argument BODY-FIRST, first check body, then
   ;; footnote definitions.
   (should
-   (equal '("fn:1" "fn:3" "fn:2" nil)
+   (equal '("1" "3" "2" nil)
 	  (org-test-with-parsed-data "Text[fn:1:A[fn:2]] [fn:3].
 
 \[fn:2] B [fn:3] [fn::D].
@@ -1960,7 +1973,7 @@ Para2"
 	    (mapcar (lambda (e) (nth 1 e))
 		    (org-export-collect-footnote-definitions info nil t)))))
   (should-not
-   (equal '("fn:1" "fn:3" "fn:2" nil)
+   (equal '("1" "3" "2" nil)
 	  (org-test-with-parsed-data "Text[fn:1:A[fn:2]] [fn:3].
 
 \[fn:2] B [fn:3] [fn::D].
@@ -1976,9 +1989,9 @@ Para2"
     ;; Read every type of footnote.
     (should
      (equal
-      '((1 . "A\n") (2 . "B") (3 . "C") (4 . "D"))
+      '((1 . "A\n") (2 . "C") (3 . "D"))
       (org-test-with-parsed-data
-	  "Text[fn:1] [1] [fn:label:C] [fn::D]\n\n[fn:1] A\n\n[1] B"
+	  "Text[fn:1] [fn:label:C] [fn::D]\n\n[fn:1] A\n"
 	(org-element-map tree 'footnote-reference
 	  (lambda (ref)
 	    (let ((def (org-export-get-footnote-definition ref info)))
@@ -1990,7 +2003,7 @@ Para2"
     ;; Test nested footnote in invisible definitions.
     (should
      (= 2
-	(org-test-with-temp-text "Text[1]\n\n[1] B [2]\n\n[2] C."
+	(org-test-with-temp-text "Text[fn:1]\n\n[fn:1] B [fn:2]\n\n[fn:2] C."
 	  (narrow-to-region (point) (line-end-position))
 	  (catch 'exit
 	    (org-export-as
@@ -2497,7 +2510,10 @@ Para2"
 		 (org-export-resolve-fuzzy-link link info) info)) info t))))
   ;; Link to a target in a footnote should return footnote's number.
   (org-test-with-parsed-data "
-Paragraph[1][2][fn:lbl3:C<<target>>][[test]][[target]]\n[1] A\n\n[2] <<test>>B"
+Paragraph[fn:1][fn:2][fn:lbl3:C<<target>>][[test]][[target]]
+\[fn:1] A
+
+\[fn:2] <<test>>B"
     (should
      (equal '(2 3)
 	    (org-element-map tree 'link
