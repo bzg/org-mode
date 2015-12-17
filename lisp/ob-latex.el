@@ -53,6 +53,7 @@
 (defconst org-babel-header-args:latex
   '((border	  . :any)
     (fit          . :any)
+    (imagemagick  . ((nil t)))
     (iminoptions  . :any)
     (imoutoptions . :any)
     (packages     . :any)
