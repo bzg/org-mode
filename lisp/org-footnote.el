@@ -389,31 +389,35 @@ references.  In such cases, LABEL is nil.
 References are sorted according to a deep-reading order."
   (org-with-wide-buffer
    (goto-char (point-min))
-   (let ((regexp (format ".\\[fn:[-_[:word:]]%s[]:]" (if anonymous "*" "+")))
+   (let ((regexp (if anonymous org-footnote-re "\\[fn:[-_[:word:]]+[]:]"))
 	 references nested)
      (save-excursion
        (while (re-search-forward regexp nil t)
-	 (backward-char)
-	 (let ((context (org-element-context)))
-	   (when (eq (org-element-type context) 'footnote-reference)
-	     (let* ((label (org-element-property :label context))
-		    (begin (org-element-property :begin context))
-		    (size
-		     (and (eq (org-element-property :type context) 'inline)
-			  (- (org-element-property :contents-end context)
-			     (org-element-property :contents-begin context)))))
-	       (let ((d (org-element-lineage context '(footnote-definition))))
-		 (push (list label (copy-marker begin) (not d) size)
-		       references)
-		 (when d
-		   ;; Nested references are stored in alist NESTED.
-		   ;; Associations there follow the pattern
-		   ;;
-		   ;;   (DEFINITION-LABEL . REFERENCES)
-		   (let* ((def-label (org-element-property :label d))
-			  (labels (assoc def-label nested)))
-		     (if labels (push label (cdr labels))
-		       (push (list def-label label) nested))))))))))
+	 ;; Ignore definitions.
+	 (unless (and (eq (char-before) ?\])
+		      (= (line-beginning-position) (match-beginning 0)))
+	   ;; Ensure point is within the reference before parsing it.
+	   (backward-char)
+	   (let ((object (org-element-context)))
+	     (when (eq (org-element-type object) 'footnote-reference)
+	       (let* ((label (org-element-property :label object))
+		      (begin (org-element-property :begin object))
+		      (size
+		       (and (eq (org-element-property :type object) 'inline)
+			    (- (org-element-property :contents-end object)
+			       (org-element-property :contents-begin object)))))
+		 (let ((d (org-element-lineage object '(footnote-definition))))
+		   (push (list label (copy-marker begin) (not d) size)
+			 references)
+		   (when d
+		     ;; Nested references are stored in alist NESTED.
+		     ;; Associations there follow the pattern
+		     ;;
+		     ;;   (DEFINITION-LABEL . REFERENCES)
+		     (let* ((def-label (org-element-property :label d))
+			    (labels (assoc def-label nested)))
+		       (if labels (push label (cdr labels))
+			 (push (list def-label label) nested)))))))))))
      ;; Sort the list of references.  Nested footnotes have priority
      ;; over top-level ones.
      (letrec ((ordered nil)
