@@ -172,10 +172,12 @@ If `org-store-link' was called with a prefix arg the meaning of
 	   (subject (copy-sequence (mail-header-subject header)))
 	   (to (cdr (assq 'To (mail-header-extra header))))
 	   newsgroups x-no-archive desc link)
-      (when (eq (car (gnus-find-method-for-group gnus-newsgroup-name))
-		  'nnvirtual)
-	(setq group (car (nnvirtual-map-article
-			  (gnus-summary-article-number)))))
+      (cl-case  (car (gnus-find-method-for-group gnus-newsgroup-name))
+	(nnvirtual
+	 (setq group (car (nnvirtual-map-article
+			   (gnus-summary-article-number)))))
+	(nnir
+	 (setq group (nnir-article-group (gnus-summary-article-number)))))
       ;; Remove text properties of subject string to avoid Emacs bug
       ;; #3506
       (set-text-properties 0 (length subject) nil subject)

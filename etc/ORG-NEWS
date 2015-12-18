@@ -122,6 +122,9 @@ Note that only ~%(...)~ placeholders initially present in the
 template, or introduced using a file placeholder, i.e., ~%[...]~ are
 expanded.  This prevents evaluating potentially malicious code when
 another placeholder, e.g., ~%i~ expands to a S-exp.
+*** Links stored by ~org-gnus-store-link~ in nnir groups
+Since gnus nnir groups are temporary, ~org-gnus-store-link~ now refers
+to the article's original group.
 *** ~org-babel-check-confirm-evaluate~ is now a function instead of a macro
 The calling convention has changed.
 
