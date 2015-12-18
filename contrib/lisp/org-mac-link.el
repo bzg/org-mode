@@ -256,7 +256,7 @@ When done, go grab the link, and insert it at point."
          input)
 
     ;; Create the menu string for the keymap
-    (mapc '(lambda (descriptor)
+    (mapc (lambda (descriptor)
             (when (elt descriptor 3)
               (setf menu-string (concat menu-string
 					"[" (elt descriptor 0) "]"
@@ -267,7 +267,7 @@ When done, go grab the link, and insert it at point."
     ;; Prompt the user, and grab the link
     (message menu-string)
     (setq input (read-char-exclusive))
-    (mapc '(lambda (descriptor)
+    (mapc (lambda (descriptor)
             (let ((key (elt (elt descriptor 0) 0))
                   (active (elt descriptor 3))
                   (grab-function (elt descriptor 2)))
