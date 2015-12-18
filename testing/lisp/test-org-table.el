@@ -1835,6 +1835,18 @@ is t, then new columns should be added as needed"
       (org-table-calc-current-TBLFM)
       (buffer-string)))))
 
+(ert-deftest test-org-table/first-rc ()
+  "Test \"$<\" constructs in formulas."
+  (should
+   (org-string-match-p
+    "| 1 | 2 |"
+    (org-test-with-temp-text
+	"|   | 2 |
+<point>#+TBLFM: $<=1"
+      (org-table-calc-current-TBLFM)
+      (buffer-string)))))
+
+
 (provide 'test-org-table)
 
 ;;; test-org-table.el ends here

@@ -3129,44 +3129,39 @@ known that the table will be realigned a little later anyway."
     (org-table-analyze)
     (let* ((eqlist (sort (org-table-get-stored-formulas)
 			 (lambda (a b) (string< (car a) (car b)))))
-	   (eqlist1 (copy-sequence eqlist))
 	   (inhibit-redisplay (not debug-on-error))
 	   (line-re org-table-dataline-regexp)
 	   (log-first-time (current-time))
 	   (log-last-time log-first-time)
 	   (cnt 0)
 	   beg end eqlcol eqlfield)
-      ;; Insert constants in all formulas
+      ;; Insert constants in all formulas.
       (when eqlist
 	(org-table-save-field
-	 (setq eqlist
-	       (mapcar
-		(lambda (x)
-		  (when (string-match "\\`@-?I+" (car x))
-		    (user-error "Can't assign to hline relative reference"))
-		  (when (string-match "\\`$[<>]" (car x))
-		    (let ((old-lhs (car x)))
-		      (setq x
-			    (cons
-			     (substring
-			      (org-table-formula-handle-first/last-rc old-lhs)
-			      1)
-			     (cdr x)))
-		      (when (assoc (car x) eqlist1)
-			(user-error "\"%s=\" formula tries to overwrite \
-existing formula for column %s"
-				    old-lhs
-				    (car x)))))
-		  (cons (org-table-formula-handle-first/last-rc (car x))
-			(org-table-formula-substitute-names
-			 (org-table-formula-handle-first/last-rc (cdr x)))))
-		eqlist))
-	 ;; Split the equation list between column formulas and field
-	 ;; formulas.
+	 ;; Expand equations, then split the equation list between
+	 ;; column formulas and field formulas.
 	 (dolist (eq eqlist)
-	   (if (org-string-match-p "\\`\\$[0-9]+\\'" (car eq))
-	       (push eq eqlcol)
-	     (push eq eqlfield)))
+	   (let* ((rhs (org-table-formula-substitute-names
+			(org-table-formula-handle-first/last-rc (cdr eq))))
+		  (old-lhs (car eq))
+		  (lhs
+		   (org-table-formula-handle-first/last-rc
+		    (cond
+		     ((string-match "\\`@-?I+" old-lhs)
+		      (user-error "Can't assign to hline relative reference"))
+		     ((string-match "\\`$[<>]" old-lhs)
+		      (let ((new (org-table-formula-handle-first/last-rc
+				  old-lhs)))
+			(when (assoc new eqlist)
+			  (user-error "\"%s=\" formula tries to overwrite \
+existing formula for column %s"
+				      old-lhs
+				      new))
+			new))
+		     (t old-lhs)))))
+	     (if (org-string-match-p "\\`\\$[0-9]+\\'" lhs)
+		 (push (cons lhs rhs) eqlcol)
+	       (push (cons lhs rhs) eqlfield))))
 	 (setq eqlcol (nreverse eqlcol))
 	 ;; Expand ranges in lhs of formulas
 	 (setq eqlfield (org-table-expand-lhs-ranges (nreverse eqlfield)))
