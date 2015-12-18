@@ -23,7 +23,8 @@ a broken internal link.  See its docstring for more information.
 ~\vbar~ or ~\vbar{}~ will be exported unconditionnally as a =|=,
 unlike to existing ~\vert~, which is expanded as ~&vert;~ when using
 a HTML derived export back-end.
-*** Babel: support for Stan language
+*** Babel
+**** Support for Stan language
 New ob-stan.el library.
 
 Evaluating a Stan block can produce two different results.
@@ -41,6 +42,19 @@ Evaluating a Stan block can produce two different results.
 
 For more information and usage examples, visit
 http://orgmode.org/worg/org-contrib/babel/languages/ob-doc-stan.html
+**** Support for Oracle databases via ~sqlplus~
+=ob-sql= library supports running SQL blocks against an Oracle
+database using ~sqlplus~.  Use with properties like this (all
+mandatory):
+
+#+BEGIN_EXAMPLE
+ :engine oracle
+ :dbhost <host.com>
+ :dbport <1521>
+ :dbuser <username>
+ :database <database>
+ :dbpassword <secret>
+#+END_EXAMPLE
 *** New =#+latex_compiler= keyword to set LaTeX compiler.
 PDFLaTeX, XeLaTeX, and LuaLaTeX are supported.  See the manual for
 details.

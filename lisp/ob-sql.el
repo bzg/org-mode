@@ -99,6 +99,10 @@ Pass nil to omit that arg."
 	       (when user (concat "-U" user))
 	       (when database (concat "-d" database))))))
 
+(defun org-babel-sql-dbstring-oracle (host port user password database)
+  "Make Oracle command line args for database connection."
+  (format "%s/%s@%s:%s/%s" user password host port database))
+
 (defun org-babel-execute:sql (body params)
   "Execute a block of Sql code with Babel.
 This function is called by `org-babel-execute-src-block'."
@@ -143,11 +147,29 @@ This function is called by `org-babel-execute-src-block'."
 				  (org-babel-process-file-name in-file)
 				  (org-babel-process-file-name out-file)
 				  (or cmdline "")))
+                    ('oracle (format
+                              "sqlplus -s %s < %s > %s"
+                              (org-babel-sql-dbstring-oracle dbhost dbport dbuser dbpassword database)
+                              (org-babel-process-file-name in-file)
+			      (org-babel-process-file-name out-file)))
                     (t (error "No support for the %s SQL engine" engine)))))
     (with-temp-file in-file
       (insert
        (case (intern engine)
 	 ('dbi "/format partbox\n")
+         ('oracle "SET PAGESIZE 50000
+SET NEWPAGE 0
+SET TAB OFF
+SET SPACE 0
+SET LINESIZE 9999
+SET ECHO OFF
+SET FEEDBACK OFF
+SET VERIFY OFF
+SET HEADING ON
+SET MARKUP HTML OFF SPOOL OFF
+SET COLSEP '|'
+
+")
 	 (t ""))
        (org-babel-expand-body:sql body params)))
     (message command)
