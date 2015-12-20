@@ -1,4 +1,4 @@
-;;; org-clock.el --- The time clocking code for Org-mode
+;;; org-clock.el --- The time clocking code for Org mode -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004-2015 Free Software Foundation, Inc.
 
@@ -24,7 +24,7 @@
 ;;
 ;;; Commentary:
 
-;; This file contains the time clocking code for Org-mode
+;; This file contains the time clocking code for Org mode
 
 ;;; Code:
 
@@ -554,8 +554,8 @@ of a different task.")
   (org-check-and-save-marker org-clock-hd-marker beg end)
   (org-check-and-save-marker org-clock-default-task beg end)
   (org-check-and-save-marker org-clock-interrupted-task beg end)
-  (mapc (lambda (m) (org-check-and-save-marker m beg end))
-	org-clock-history))
+  (dolist (m org-clock-history)
+    (org-check-and-save-marker m beg end)))
 
 (defun org-clock-drawer-name ()
   "Return clock drawer's name for current entry, or nil."
@@ -580,8 +580,8 @@ of a different task.")
   (interactive)
   (let (och chl sel-list rpl (i 0) s)
     ;; Remove successive dups from the clock history to consider
-    (mapc (lambda (c) (if (not (equal c (car och))) (push c och)))
-	  org-clock-history)
+    (dolist (c org-clock-history)
+      (unless (equal c (car och)) (push c och)))
     (setq och (reverse och) chl (length och))
     (if (zerop chl)
 	(user-error "No recent clock")
@@ -602,17 +602,15 @@ of a different task.")
 	  (setq s (org-clock-insert-selection-line ?c org-clock-marker))
 	  (push s sel-list))
 	(insert (org-add-props "Recent Tasks\n" nil 'face 'bold))
-	(mapc
-	 (lambda (m)
-	   (when (marker-buffer m)
-	     (setq i (1+ i)
-		   s (org-clock-insert-selection-line
-		      (if (< i 10)
-			  (+ i ?0)
-			(+ i (- ?A 10))) m))
-	     (if (fboundp 'int-to-char) (setf (car s) (int-to-char (car s))))
-	     (push s sel-list)))
-	 och)
+	(dolist (m och)
+	  (when (marker-buffer m)
+	    (setq i (1+ i)
+		  s (org-clock-insert-selection-line
+		     (if (< i 10)
+			 (+ i ?0)
+		       (+ i (- ?A 10))) m))
+	    (if (fboundp 'int-to-char) (setf (car s) (int-to-char (car s))))
+	    (push s sel-list)))
 	(run-hooks 'org-clock-before-select-task-hook)
 	(goto-char (point-min))
 	;; Set min-height relatively to circumvent a possible but in
@@ -632,25 +630,22 @@ of a different task.")
 And return a cons cell with the selection character integer and the marker
 pointing to it."
   (when (marker-buffer marker)
-    (let (file cat task heading prefix)
+    (let (cat task heading prefix)
       (with-current-buffer (org-base-buffer (marker-buffer marker))
-	(save-excursion
-	  (save-restriction
-	    (widen)
-	    (ignore-errors
-	      (goto-char marker)
-	      (setq file (buffer-file-name (marker-buffer marker))
-		    cat (org-get-category)
-		    heading (org-get-heading 'notags)
-		    prefix (save-excursion
-			     (org-back-to-heading t)
-			     (looking-at org-outline-regexp)
-			     (match-string 0))
-		    task (substring
-			  (org-fontify-like-in-org-mode
-			   (concat prefix heading)
-			   org-odd-levels-only)
-			  (length prefix)))))))
+	(org-with-wide-buffer
+	  (ignore-errors
+	    (goto-char marker)
+	    (setq cat (org-get-category)
+		  heading (org-get-heading 'notags)
+		  prefix (save-excursion
+			   (org-back-to-heading t)
+			   (looking-at org-outline-regexp)
+			   (match-string 0))
+		  task (substring
+			(org-fontify-like-in-org-mode
+			 (concat prefix heading)
+			 org-odd-levels-only)
+			(length prefix))))))
       (when (and cat task)
 	(insert (format "[%c] %-12s  %s\n" i cat task))
 	(cons i marker)))))
@@ -1164,13 +1159,12 @@ so long."
 	  (org-clock-resolve
 	   (cons org-clock-marker
 		 org-clock-start-time)
-	   (function
-	    (lambda (clock)
-	      (format "Clocked in & idle for %.1f mins"
-		      (/ (org-float-time
-			  (time-subtract (current-time)
-					 org-clock-user-idle-start))
-			 60.0))))
+	   (lambda (_)
+	     (format "Clocked in & idle for %.1f mins"
+		     (/ (org-float-time
+			 (time-subtract (current-time)
+					org-clock-user-idle-start))
+			60.0)))
 	   org-clock-user-idle-start)))))
 
 (defvar org-clock-current-task nil "Task currently clocked in.")
@@ -1488,7 +1482,8 @@ line and position cursor in that line."
 		  (throw 'exit t)))))))
       (goto-char beg)
       (let ((clock-re (concat "^[ \t]*" org-clock-string))
-	    (count 0) positions first)
+	    (count 0)
+	    positions)
 	;; Count the CLOCK lines and store their positions.
 	(save-excursion
 	  (while (re-search-forward clock-re end t)
@@ -1641,7 +1636,7 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 		     (eq org-log-done 'note)
 		     org-clock-out-when-done)
 		(setq h (delq 'org-clock-remove-empty-clock-drawer h)))
-	    (mapc (lambda (f) (funcall f)) h))
+	    (mapc #'funcall h))
 	  (unless (org-clocking-p)
 	    (setq org-clock-current-task nil)))))))
 
@@ -1971,13 +1966,13 @@ will be easy to remove."
     (push ov org-clock-overlays)))
 
 ;;;###autoload
-(defun org-clock-remove-overlays (&optional beg end noremove)
+(defun org-clock-remove-overlays (&optional _beg _end noremove)
   "Remove the occur highlights from the buffer.
-BEG and END are ignored.  If NOREMOVE is nil, remove this function
-from the `before-change-functions' in the current buffer."
+If NOREMOVE is nil, remove this function from the
+`before-change-functions' in the current buffer."
   (interactive)
   (unless org-inhibit-highlight-removal
-    (mapc 'delete-overlay org-clock-overlays)
+    (mapc #'delete-overlay org-clock-overlays)
     (setq org-clock-overlays nil)
     (unless noremove
       (remove-hook 'before-change-functions
@@ -2367,22 +2362,19 @@ the currently selected interval size."
 	   (block (plist-get params :block))
 	   (ts (plist-get params :tstart))
 	   (te (plist-get params :tend))
-	   (link (plist-get params :link))
-	   (maxlevel (or (plist-get params :maxlevel) 3))
 	   (ws (plist-get params :wstart))
 	   (ms (plist-get params :mstart))
 	   (step (plist-get params :step))
-	   (timestamp (plist-get params :timestamp))
 	   (formatter (or (plist-get params :formatter)
 			  org-clock-clocktable-formatter
 			  'org-clocktable-write-default))
-	   cc range-text ipos pos one-file-with-archives
-	   scope-is-list tbls level)
+	   cc ipos one-file-with-archives scope-is-list tbls level)
       ;; Check if we need to do steps
       (when block
 	;; Get the range text for the header
 	(setq cc (org-clock-special-range block nil t ws ms)
-	      ts (car cc) te (nth 1 cc) range-text (nth 2 cc)))
+	      ts (car cc)
+	      te (nth 1 cc)))
       (when step
 	;; Write many tables, in steps
 	(unless (or block (and ts te))
@@ -2393,7 +2385,6 @@ the currently selected interval size."
       (setq ipos (point)) ; remember the insertion position
 
       ;; Get the right scope
-      (setq pos (point))
       (cond
        ((and scope (listp scope) (symbolp (car scope)))
 	(setq scope (eval scope)))
@@ -2469,8 +2460,6 @@ from the dynamic block definition."
 	 (multifile (plist-get params :multifile))
 	 (block (plist-get params :block))
 	 (sort (plist-get params :sort))
-	 (ts (plist-get params :tstart))
-	 (te (plist-get params :tend))
 	 (header (plist-get  params :header))
 	 (narrow (plist-get params :narrow))
 	 (ws (or (plist-get params :wstart) 1))
@@ -2710,10 +2699,11 @@ LEVEL is an integer.  Indent by two spaces per level above 1."
 	 (step (cdr (assoc step0 '((day . 86400) (week . 604800)))))
 	 (stepskip0 (plist-get p1 :stepskip0))
 	 (block (plist-get p1 :block))
-	 cc range-text step-time tsb)
+	 cc step-time tsb)
     (when block
       (setq cc (org-clock-special-range block nil t ws ms)
-	    ts (car cc) te (nth 1 cc) range-text (nth 2 cc)))
+	    ts (car cc)
+	    te (nth 1 cc)))
     (cond
      ((numberp ts)
       ;; If ts is a number, it's an absolute day number from org-agenda.
@@ -2769,7 +2759,7 @@ file time (in minutes) as 1st and 2nd elements.  The third element
 of this list will be a list of headline entries.  Each entry has the
 following structure:
 
-  (LEVEL HEADLINE TIMESTAMP TIME)
+  \(LEVEL HEADLINE TIMESTAMP TIME)
 
 LEVEL:     The level of the headline, as an integer.  This will be
            the reduced leve, so 1,2,3,... even if only odd levels
@@ -2793,14 +2783,14 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
 	 (tags (plist-get params :tags))
 	 (properties (plist-get params :properties))
 	 (inherit-property-p (plist-get params :inherit-props))
-	 todo-only
-	 (matcher (if tags (cdr (org-make-tags-matcher tags))))
-	 cc range-text st p time level hdl props tsp tbl)
+	 (matcher (and tags (cdr (org-make-tags-matcher tags))))
+	 cc st p time level hdl props tsp tbl)
 
     (setq org-clock-file-total-minutes nil)
     (when block
       (setq cc (org-clock-special-range block nil t ws ms)
-	    ts (car cc) te (nth 1 cc) range-text (nth 2 cc)))
+	    ts (car cc)
+	    te (nth 1 cc)))
     (when (integerp ts) (setq ts (calendar-gregorian-from-absolute ts)))
     (when (integerp te) (setq te (calendar-gregorian-from-absolute te)))
     (when (and ts (listp ts))
@@ -2997,11 +2987,10 @@ The details of what will be saved are regulated by the variable
 	;; load history
 	(when stored-clock-history
 	  (save-window-excursion
-	    (mapc (lambda (task)
-		    (if (file-exists-p (car task))
-			(org-clock-history-push (cdr task)
-						(find-file (car task)))))
-		  stored-clock-history)))
+	    (dolist (task stored-clock-history)
+	      (when (file-exists-p (car task))
+		(org-clock-history-push (cdr task)
+					(find-file (car task)))))))
 	;; resume clock
 	(when (and resume-clock org-clock-persist
 		   (file-exists-p (car resume-clock))
