@@ -1906,14 +1906,13 @@ or on a per-file basis by using
 @section Footnotes
 @cindex footnotes
 
-Org mode supports the creation of footnotes.  In contrast to the
-@file{footnote.el} package, Org mode's footnotes are designed for work on
-a larger document, not only for one-off documents like emails.
+Org mode supports the creation of footnotes.
 
 A footnote is started by a footnote marker in square brackets in column 0, no
 indentation allowed.  It ends at the next footnote definition, headline, or
 after two consecutive empty lines.  The footnote reference is simply the
-marker in square brackets, inside text.  For example:
+marker in square brackets, inside text.  Markers always start with
+@code{fn:}.  For example:
 
 @example
 The Org homepage[fn:1] now looks a lot better than it used to.
@@ -1928,10 +1927,10 @@ optional inline definition.  Here are the valid references:
 @item [fn:name]
 A named footnote reference, where @code{name} is a unique label word, or, for
 simplicity of automatic creation, a number.
-@item [fn:: This is the inline definition of this footnote]
+@item [fn::This is the inline definition of this footnote]
 A @LaTeX{}-like anonymous footnote where the definition is given directly at the
 reference point.
-@item [fn:name: a definition]
+@item [fn:name:a definition]
 An inline definition of a footnote, which also specifies a name for the note.
 Since Org allows multiple references to the same note, you can then use
 @code{[fn:name]} to create additional references.
@@ -1978,9 +1977,7 @@ r   @r{Renumber the simple @code{fn:N} footnotes.  Automatic renumbering}
 S   @r{Short for first @code{r}, then @code{s} action.}
 n   @r{Normalize the footnotes by collecting all definitions (including}
     @r{inline definitions) into a special section, and then numbering them}
-    @r{in sequence.  The references will then also be numbers.  This is}
-    @r{meant to be the final step before finishing a document (e.g., sending}
-    @r{off an email).}
+    @r{in sequence.  The references will then also be numbers.}
 d   @r{Delete the footnote at point, and all definitions of and references}
     @r{to it.}
 @end example
@@ -2005,9 +2002,8 @@ you can use the usual commands to follow these links.
 @kindex C-c '
 @item C-c '
 @item C-c '
-Edit the footnote definition corresponding to the reference at point in a
-seperate window.  This may be useful if editing footnotes in a narrowed
-buffer.  The window can be closed by pressing @kbd{C-c '}.
+Edit the footnote definition corresponding to the reference at point in
+a seperate window.  The window can be closed by pressing @kbd{C-c '}.
 
 @end table
 
