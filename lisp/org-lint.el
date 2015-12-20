@@ -68,8 +68,10 @@
 ;;   - orphaned affiliated keywords
 ;;   - obsolete affiliated keywords
 ;;   - missing language in src blocks
+;;   - missing back-end in export blocks
 ;;   - invalid Babel call blocks
 ;;   - NAME values with a colon
+;;   - deprecated export block syntax
 ;;   - deprecated Babel header properties
 ;;   - wrong header arguments in src blocks
 ;;   - misuse of CATEGORY keyword
@@ -80,6 +82,7 @@
 ;;   - links to non-existent local files
 ;;   - SETUPFILE keywords with non-existent file parameter
 ;;   - INCLUDE keywords with wrong link parameter
+;;   - obsolete markup in INCLUDE keyword
 ;;   - unknown items in OPTIONS keyword
 ;;   - spurious macro arguments or invalid macro templates
 ;;   - special properties in properties drawer
@@ -143,14 +146,23 @@
     :description "Report obsolete affiliated keywords"
     :categories '(obsolete))
    (make-org-lint-checker
+    :name 'deprecated-export-blocks
+    :description "Report deprecated export block syntax"
+    :categories '(obsolete export)
+    :trust 'low)
+   (make-org-lint-checker
     :name 'deprecated-header-syntax
     :description "Report deprecated Babel header syntax"
-    :categories '(babel obsolete)
+    :categories '(obsolete babel)
     :trust 'low)
    (make-org-lint-checker
     :name 'missing-language-in-src-block
     :description "Report missing language in src blocks"
     :categories '(babel))
+   (make-org-lint-checker
+    :name 'missing-backend-in-export-block
+    :description "Report missing back-end in export blocks"
+    :categories '(export))
    (make-org-lint-checker
     :name 'invalid-babel-call-block
     :description "Report invalid Babel call blocks"
@@ -201,6 +213,11 @@
     :name 'wrong-include-link-parameter
     :description "Report INCLUDE keywords with misleading link parameter"
     :categories '(export)
+    :trust 'low)
+   (make-org-lint-checker
+    :name 'obsolete-include-markup
+    :description "Report obsolete markup in INCLUDE keyword"
+    :categories '(obsolete export)
     :trust 'low)
    (make-org-lint-checker
     :name 'unknown-options-item
@@ -368,6 +385,20 @@ called with one argument, the key used for comparison."
 	   reports))))
     reports))
 
+(defun org-lint-deprecated-export-blocks (ast)
+  (let ((deprecated '("ASCII" "BEAMER" "HTML" "LATEX" "MAN" "MARKDOWN" "MD"
+		      "ODT" "ORG" "TEXINFO")))
+    (org-element-map ast 'special-block
+      (lambda (b)
+	(let ((type (org-element-property :type b)))
+	  (when (member-ignore-case type deprecated)
+	    (list
+	     (org-element-property :post-affiliated b)
+	     (format
+	      "Deprecated syntax for export block.  Use \"BEGIN_EXPORT %s\" \
+instead"
+	      type))))))))
+
 (defun org-lint-deprecated-header-syntax (ast)
   (let* ((deprecated-babel-properties
 	  (mapcar (lambda (arg) (symbol-name (car arg)))
@@ -400,6 +431,13 @@ Use :header-args: instead"
       (unless (org-element-property :language b)
 	(list (org-element-property :post-affiliated b)
 	      "Missing language in source block")))))
+
+(defun org-lint-missing-backend-in-export-block (ast)
+  (org-element-map ast 'export-block
+    (lambda (b)
+      (unless (org-element-property :type b)
+	(list (org-element-property :post-affiliated b)
+	      "Missing back-end in export block")))))
 
 (defun org-lint-invalid-babel-call-block (ast)
   (org-element-map ast 'babel-call
@@ -554,6 +592,25 @@ Use :header-args: instead"
 				 "Invalid search part \"%s\" in INCLUDE keyword"
 				 search))))
 		    (unless visiting (kill-buffer buffer))))))))))))
+
+(defun org-lint-obsolete-include-markup (ast)
+  (let ((regexp (format "\\`\\(?:\".+\"\\|\\S-+\\)[ \t]+%s"
+			(regexp-opt
+			 '("ASCII" "BEAMER" "HTML" "LATEX" "MAN" "MARKDOWN" "MD"
+			   "ODT" "ORG" "TEXINFO")
+			 t))))
+    (org-element-map ast 'keyword
+      (lambda (k)
+	(when (equal (org-element-property :key k) "INCLUDE")
+	  (let ((case-fold-search t)
+		(value (org-element-property :value k)))
+	    (when (string-match regexp value)
+	      (let ((markup (match-string-no-properties 1 value)))
+		(list (org-element-property :post-affiliated k)
+		      (format "Obsolete markup \"%s\" in INCLUDE keyword.  \
+Use \"export %s\" instead"
+			      markup
+			      markup))))))))))
 
 (defun org-lint-unknown-options-item (ast)
   (let ((allowed (delq nil
