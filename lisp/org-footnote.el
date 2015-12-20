@@ -117,20 +117,6 @@ you will need to run the following command after the change:
 	  (string :tag "Collect footnotes under heading")
 	  (const :tag "Define footnotes locally" nil)))
 
-(defcustom org-footnote-tag-for-non-org-mode-files "Footnotes:"
-  "Tag marking the beginning of footnote section.
-The Org footnote engine can be used in arbitrary text files as well
-as in Org-mode.  Outside Org mode, new footnotes are always placed at
-the end of the file.  When you normalize the notes, any line containing
-only this tag will be removed, a new one will be inserted at the end
-of the file, followed by the collected and normalized footnotes.
-
-If you don't want any tag in such buffers, set this variable to nil."
-  :group 'org-footnote
-  :type '(choice
-	  (string :tag "Collect footnotes under tag")
-	  (const :tag "Don't use a tag" nil)))
-
 (defcustom org-footnote-define-inline nil
   "Non-nil means define footnotes inline, at reference location.
 When nil, footnotes will be defined in a special section near
@@ -697,79 +683,25 @@ or new, let the user edit the definition of the footnote."
 
 (defun org-footnote-create-definition (label)
   "Start the definition of a footnote with label LABEL.
-Return buffer position at the beginning of the definition.  In an
-Org buffer, this function doesn't move point."
+Return buffer position at the beginning of the definition.  This
+function doesn't move point."
   (let ((label (org-footnote-normalize-label label))
 	electric-indent-mode)		; Prevent wrong indentation.
-    (cond
-     ;; In an Org document.
-     ((derived-mode-p 'org-mode)
-      ;; If `org-footnote-section' is defined, find it, or create it
-      ;; at the end of the buffer.
-      (org-with-wide-buffer
-       (cond
-	((not org-footnote-section)
-	 (org-footnote--goto-local-insertion-point))
-	((save-excursion
-	   (goto-char (point-min))
-	   (re-search-forward
-	    (concat "^\\*+[ \t]+" (regexp-quote org-footnote-section) "[ \t]*$")
-	    nil t))
-	 (goto-char (match-end 0))
-	 (forward-line)
-	 (unless (bolp) (insert "\n")))
-	(t
-	 (goto-char (point-max))
-	 (unless (bolp) (insert "\n"))
-	 ;; Insert new section.  Separate it from the previous one
-	 ;; with a blank line, unless `org-blank-before-new-entry'
-	 ;; explicitly says no.
-	 (when (and (cdr (assq 'heading org-blank-before-new-entry))
-		    (zerop (save-excursion (org-back-over-empty-lines))))
-	   (insert "\n"))
-	 (insert "* " org-footnote-section "\n")))
-       (when (zerop (org-back-over-empty-lines)) (insert "\n"))
-       (insert "[fn:" label "] \n")
-       (line-beginning-position 0)))
-     (t
-      ;; In a non-Org file.  Search for footnote tag, or create it if
-      ;; specified (at the end of buffer, or before signature if in
-      ;; Message mode).  Set point after any definition already there.
-      (let ((tag (and org-footnote-tag-for-non-org-mode-files
-		      (concat "^" (regexp-quote
-				   org-footnote-tag-for-non-org-mode-files)
-			      "[ \t]*$")))
-	    (max (if (and (derived-mode-p 'message-mode)
-			  (goto-char (point-max))
-			  (re-search-backward
-			   message-signature-separator nil t))
-		     (progn
-		       ;; Ensure one blank line separates last
-		       ;; footnote from signature.
-		       (beginning-of-line)
-		       (open-line 2)
-		       (point-marker))
-		   (point-max-marker))))
-	(set-marker-insertion-type max t)
-	(goto-char max)
-	;; Check if the footnote tag is defined but missing.  In this
-	;; case, insert it, before any footnote or one blank line
-	;; after any previous text.
-	(when (and tag (not (re-search-backward tag nil t)))
-	  (skip-chars-backward " \t\r\n")
-	  (while (re-search-backward org-footnote-definition-re nil t))
-	  (unless (bolp) (newline 2))
-	  (insert org-footnote-tag-for-non-org-mode-files "\n\n"))
-	;; Remove superfluous white space and clear marker.
-	(goto-char max)
-	(skip-chars-backward " \t\r\n")
-	(delete-region (point) max)
-	(unless (bolp) (newline))
-	(set-marker max nil))
-      (when (zerop (org-back-over-empty-lines)) (insert "\n"))
-      (insert "[fn:" label "] \n")
-      (backward-char)
-      (line-beginning-position)))))
+    (org-with-wide-buffer
+     (cond
+      ((not org-footnote-section) (org-footnote--goto-local-insertion-point))
+      ((save-excursion
+	 (goto-char (point-min))
+	 (re-search-forward
+	  (concat "^\\*+[ \t]+" (regexp-quote org-footnote-section) "[ \t]*$")
+	  nil t))
+       (goto-char (match-end 0))
+       (forward-line)
+       (unless (bolp) (insert "\n")))
+      (t (org-footnote--clear-footnote-section)))
+     (when (zerop (org-back-over-empty-lines)) (insert "\n"))
+     (insert "[fn:" label "] \n")
+     (line-beginning-position 0))))
 
 (defun org-footnote-delete-references (label)
   "Delete every reference to footnote LABEL.
