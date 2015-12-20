@@ -1,4 +1,4 @@
-;;; org-bbdb.el --- Support for links to BBDB entries from within Org-mode
+;;; org-bbdb.el --- Support for links to BBDB entries -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004-2015 Free Software Foundation, Inc.
 
@@ -94,8 +94,7 @@
 ;;; Code:
 
 (require 'org)
-(eval-when-compile
-  (require 'cl))
+(require 'cl-lib)
 
 ;; Declare external functions and variables
 
@@ -106,6 +105,7 @@
 (declare-function bbdb-name "ext:bbdb-com" (string elidep))
 (declare-function bbdb-completing-read-record "ext:bbdb-com"
 		  (prompt &optional omit-records))
+(declare-function bbdb-record-field "ext:bbdb" (recond field))
 (declare-function bbdb-record-getprop "ext:bbdb" (record property))
 (declare-function bbdb-record-name "ext:bbdb" (record))
 (declare-function bbdb-records "ext:bbdb"
@@ -208,7 +208,7 @@ date year)."
            (name (bbdb-record-name rec))
 	   (company (if (fboundp 'bbdb-record-getprop)
                         (bbdb-record-getprop rec 'company)
-                      (car (bbdb-record-get-field rec 'organization))))
+                      (car (bbdb-record-field rec 'organization))))
 	   (link (concat "bbdb:" name)))
       (org-store-link-props :type "bbdb" :name name :company company
 			    :link link :description name)
@@ -230,10 +230,9 @@ italicized, in all other cases it is left unchanged."
 (defun org-bbdb-open (name)
   "Follow a BBDB link to NAME."
   (require 'bbdb-com)
-  (let ((inhibit-redisplay (not debug-on-error))
-	(bbdb-electric-p nil))
+  (let ((inhibit-redisplay (not debug-on-error)))
     (if (fboundp 'bbdb-name)
-        (org-bbdb-open-old name)
+	(org-bbdb-open-old name)
       (org-bbdb-open-new name))))
 
 (defun org-bbdb-open-old (name)
@@ -335,7 +334,7 @@ The anniversaries are assumed to be stored `org-bbdb-anniversary-field'."
                      org-bbdb-anniv-hash))))))
   (setq org-bbdb-updated-p nil))
 
-(defun org-bbdb-updated (rec)
+(defun org-bbdb-updated (_rec)
   "Record the fact that BBDB has been updated.
 This is used by Org to re-create the anniversary hash table."
   (setq org-bbdb-updated-p t))
@@ -408,12 +407,11 @@ This is used by Org to re-create the anniversary hash table."
 ;;;
 ;;; to override the 7-day default.
 
-(defun org-bbdb-date-list (date n)
-  "Return a list of dates in (m d y) format from the given 'date' to n-1 days hence."
-  (let ((abs (calendar-absolute-from-gregorian date))
-        ret)
-    (dotimes (i n (nreverse ret))
-	       (push (calendar-gregorian-from-absolute (+ abs i)) ret))))
+(defun org-bbdb-date-list (d n)
+  "Return a list of dates in (m d y) format from the given date D to n-1 days hence."
+  (let ((abs (calendar-absolute-from-gregorian d)))
+    (mapcar (lambda (i) (calendar-gregorian-from-absolute (+ abs i)))
+	    (number-sequence 0 (1- n)))))
 
 ;;;###autoload
 (defun org-bbdb-anniversaries-future (&optional n)
