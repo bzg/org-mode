@@ -1,4 +1,4 @@
-;;; org-bibtex.el --- Org links to BibTeX entries
+;;; org-bibtex.el --- Org links to BibTeX entries    -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2007-2015 Free Software Foundation, Inc.
 ;;
@@ -109,10 +109,11 @@
 
 (require 'org)
 (require 'bibtex)
-(eval-when-compile
-  (require 'cl))
+(require 'cl-lib)
 (require 'org-compat)
 
+(defvar org-agenda-overriding-header)
+(defvar org-agenda-search-view-always-boolean)
 (defvar org-bibtex-description nil) ; dynamically scoped from org.el
 (defvar org-id-locations)
 
@@ -325,29 +326,27 @@ and `org-exclude-tags-from-inheritence'."
 
 (defun org-bibtex-headline ()
   "Return a bibtex entry of the given headline as a string."
-  (let* ((val (lambda (key lst) (cdr (assoc key lst))))
-	 (to (lambda (string) (intern (concat ":" string))))
-	 (from (lambda (key) (substring (symbol-name key) 1)))
-	 flatten ; silent compiler warning
-	 (flatten (lambda (&rest lsts)
-		    (apply #'append (mapcar
-				     (lambda (e)
-				       (if (listp e) (apply flatten e) (list e)))
-				     lsts))))
-	 (notes (buffer-string))
-	 (id (org-bibtex-get org-bibtex-key-property))
-	 (type (org-bibtex-get org-bibtex-type-property-name))
-	 (tags (when org-bibtex-tags-are-keywords
-		 (delq nil
-		       (mapcar
-			(lambda (tag)
-			  (unless (member tag
-					  (append org-bibtex-tags
-						  org-bibtex-no-export-tags))
-			    tag))
-			(if org-bibtex-inherit-tags
-			    (org-get-tags-at)
-			  (org-get-local-tags-at)))))))
+  (letrec ((val (lambda (key lst) (cdr (assoc key lst))))
+	   (to (lambda (string) (intern (concat ":" string))))
+	   (from (lambda (key) (substring (symbol-name key) 1)))
+	   (flatten (lambda (&rest lsts)
+		      (apply #'append (mapcar
+				       (lambda (e)
+					 (if (listp e) (apply flatten e) (list e)))
+				       lsts))))
+	   (id (org-bibtex-get org-bibtex-key-property))
+	   (type (org-bibtex-get org-bibtex-type-property-name))
+	   (tags (when org-bibtex-tags-are-keywords
+		   (delq nil
+			 (mapcar
+			  (lambda (tag)
+			    (unless (member tag
+					    (append org-bibtex-tags
+						    org-bibtex-no-export-tags))
+			      tag))
+			  (if org-bibtex-inherit-tags
+			      (org-get-tags-at)
+			    (org-get-local-tags-at)))))))
     (when type
       (let ((entry (format
 		    "@%s{%s,\n%s\n}\n" type id
@@ -562,7 +561,7 @@ Headlines are exported using `org-bibtex-headline'."
            (let ((bibtex-entries
                   (remove nil (org-map-entries
                                (lambda ()
-                                 (condition-case foo
+                                 (condition-case nil
                                      (org-bibtex-headline)
                                    (error (throw 'bib (point)))))))))
              (with-temp-file filename
@@ -612,7 +611,7 @@ If nonew is t, add data to the headline of the entry at point."
     (org-bibtex-put org-bibtex-type-property-name
 		    (substring (symbol-name type) 1))
     (org-bibtex-fleshout type arg)
-    (mapc (lambda (tag) (org-toggle-tag tag 'on)) org-bibtex-tags)))
+    (dolist (tag org-bibtex-tags) (org-toggle-tag tag 'on))))
 
 (defun org-bibtex-create-in-current-entry (&optional arg)
   "Add bibliographical data to the current entry.
@@ -686,14 +685,12 @@ Return the number of saved entries."
 	(:type     nil)
 	(:key      (org-bibtex-put org-bibtex-key-property (cdr pair)))
 	(:keywords (if org-bibtex-tags-are-keywords
-		       (mapc
-			(lambda (kw)
-			  (funcall
-			   togtag
-			   (replace-regexp-in-string
-			    "[^[:alnum:]_@#%]" ""
-			    (replace-regexp-in-string "[ \t]+" "_" kw))))
-			(split-string (cdr pair) ", *"))
+		       (dolist (kw (split-string (cdr pair) ", *"))
+			 (funcall
+			  togtag
+			  (replace-regexp-in-string
+			   "[^[:alnum:]_@#%]" ""
+			   (replace-regexp-in-string "[ \t]+" "_" kw))))
 		     (org-bibtex-put (car pair) (cdr pair))))
 	(otherwise (org-bibtex-put (car pair)  (cdr pair)))))
     (mapc togtag org-bibtex-tags)))
