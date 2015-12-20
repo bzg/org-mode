@@ -1117,11 +1117,11 @@ special meaning are written with all capitals.
 @end table
 
 Moreover, Org uses @i{option keywords} (like @code{#+TITLE} to set the title)
-and @i{environment keywords} (like @code{#+BEGIN_HTML} to start a @code{HTML}
-environment).  They are written in uppercase in the manual to enhance its
-readability, but you can use lowercase in your Org files@footnote{Easy
-templates insert lowercase keywords and Babel dynamically inserts
-@code{#+results}.}.
+and @i{environment keywords} (like @code{#+BEGIN_EXPORT html} to start
+a @code{HTML} environment).  They are written in uppercase in the manual to
+enhance its readability, but you can use lowercase in your Org
+files@footnote{Easy templates insert lowercase keywords and Babel dynamically
+inserts @code{#+results}.}.
 
 @subsubheading Keybindings and commands
 @kindex C-c a
@@ -10122,8 +10122,9 @@ include your @file{.emacs} file, you could use:
 
 @noindent
 The first parameter names the the file to include.  The optional second and
-third parameter specify the markup (i.e., @samp{example} or @samp{src}), and,
-if the markup is @samp{src}, the language for formatting the contents.
+third parameter specify the markup (i.e., @samp{example}, @samp{export} or
+@samp{src}), and, if the markup is either @samp{export} or @samp{src}, the
+language for formatting the contents.
 
 If markup is requested, the included content will be placed within an
 appropriate block@footnote{While you can request paragraphs (@samp{verse},
@@ -10170,10 +10171,10 @@ operates locally with respect to the requested element.  Some examples:
 
 @example
 #+INCLUDE: "./paper.org::#theory" :only-contents t
-   @r{Include the body of the heading with the custom id @code{theory}}
+   @r{Include the body of the heading with the custom id @samp{theory}}
 #+INCLUDE: "./paper.org::mytable"  @r{Include named element.}
 #+INCLUDE: "./paper.org::*conclusion" :lines 1-20
-   @r{Include the first 20 lines of the headline named conclusion.}
+   @r{Include the first 20 lines of the headline named @samp{conclusion}.}
 @end example
 
 @table @kbd
@@ -10550,7 +10551,7 @@ is normal.
 
 Org syntax includes pre-defined blocks (@pxref{Paragraphs} and @ref{Literal
 examples}).  It is also possible to create blocks containing raw code
-targeted at a specific back-end (e.g., @samp{#+BEGIN_LATEX}).
+targeted at a specific back-end (e.g., @samp{#+BEGIN_EXPORT latex}).
 
 Any other block is a @emph{special block}.  Its name is case-sensitive.
 
@@ -11014,15 +11015,15 @@ You can insert text that will only appear when using @code{ASCII} back-end
 with the following constructs:
 
 @cindex #+ASCII
-@cindex #+BEGIN_ASCII
+@cindex #+BEGIN_EXPORT ascii
 @example
 Text @@@@ascii:and additional text@@@@ within a paragraph.
 
 #+ASCII: Some text
 
-#+BEGIN_ASCII
+#+BEGIN_EXPORT ascii
 All lines in this block will appear only when using this back-end.
-#+END_ASCII
+#+END_EXPORT
 @end example
 
 @subheading ASCII specific attributes
@@ -11234,11 +11235,11 @@ possible to specify options, enclosed within square brackets.
 Beamer specific code can be inserted with the following constructs:
 
 @cindex #+BEAMER
-@cindex #+BEGIN_BEAMER
+@cindex #+BEGIN_EXPORT beamer
 @example
 #+BEAMER: \pause
 
-#+BEGIN_BEAMER
+#+BEGIN_EXPORT beamer
 All lines in this block will appear only when using this back-end.
 #+END_BEAMER
 
@@ -11573,18 +11574,18 @@ should only appear in HTML export, mark it with @samp{@@@@html:} as in
 that should be copied verbatim to the exported file use either
 
 @cindex #+HTML
-@cindex #+BEGIN_HTML
+@cindex #+BEGIN_EXPORT html
 @example
 #+HTML: Literal HTML code for export
 @end example
 
 @noindent or
-@cindex #+BEGIN_HTML
+@cindex #+BEGIN_EXPORT html
 
 @example
-#+BEGIN_HTML
+#+BEGIN_EXPORT html
 All lines between these markers are exported literally
-#+END_HTML
+#+END_EXPORT
 @end example
 
 
@@ -12106,15 +12107,15 @@ inserted into the @LaTeX{} file.  Furthermore, you can add special code that
 should only be present in @LaTeX{} export with the following constructs:
 
 @cindex #+LATEX
-@cindex #+BEGIN_LATEX
+@cindex #+BEGIN_EXPORT latex
 @example
 Code within @@@@latex:some code@@@@ a paragraph.
 
 #+LATEX: Literal @LaTeX{} code for export
 
-#+BEGIN_LATEX
+#+BEGIN_EXPORT latex
 All lines between these markers are exported literally
-#+END_LATEX
+#+END_EXPORT
 @end example
 
 @node @LaTeX{} specific attributes
@@ -13195,18 +13196,18 @@ custom @samp{PageBreak} style as shown below.
 
 @item Embedding a block of OpenDocument XML
 
-You can add a large block of OpenDocument XML using the
-@code{#+BEGIN_ODT}@dots{}@code{#+END_ODT} construct.
+You can add a large block of OpenDocument XML using the @code{#+BEGIN_EXPORT
+odt}@dots{}@code{#+END_EXPORT} construct.
 
 For example, to create a one-off paragraph that uses bold text, do the
 following:
 
 @example
-#+BEGIN_ODT
+#+BEGIN_EXPORT odt
 <text:p text:style-name="Text_20_body_20_bold">
 This paragraph is specially formatted and uses bold text.
 </text:p>
-#+END_ODT
+#+END_EXPORT
 @end example
 
 @end enumerate
@@ -13669,17 +13670,17 @@ It is possible to insert raw Texinfo code using any of the following
 constructs
 
 @cindex #+TEXINFO
-@cindex #+BEGIN_TEXINFO
+@cindex #+BEGIN_EXPORT texinfo
 @example
 Richard @@@@texinfo:@@sc@{@@@@Stallman@@@@texinfo:@}@@@@ commence' GNU.
 
 #+TEXINFO: @@need800
 This paragraph is preceded by...
 
-#+BEGIN_TEXINFO
+#+BEGIN_EXPORT texinfo
 @@auindex Johnson, Mark
 @@auindex Lakoff, George
-#+END_TEXINFO
+#+END_EXPORT
 @end example
 
 @node Texinfo specific attributes
@@ -16908,16 +16909,16 @@ keystrokes are typed on a line by itself.
 The following template selectors are currently supported.
 
 @multitable @columnfractions 0.1 0.9
-@item @kbd{s} @tab @code{#+BEGIN_SRC     ... #+END_SRC}
+@item @kbd{s} @tab @code{#+BEGIN_SRC ... #+END_SRC}
 @item @kbd{e} @tab @code{#+BEGIN_EXAMPLE ... #+END_EXAMPLE}
-@item @kbd{q} @tab @code{#+BEGIN_QUOTE   ... #+END_QUOTE}
-@item @kbd{v} @tab @code{#+BEGIN_VERSE   ... #+END_VERSE}
-@item @kbd{c} @tab @code{#+BEGIN_CENTER  ... #+END_CENTER}
-@item @kbd{l} @tab @code{#+BEGIN_LaTeX   ... #+END_LaTeX}
-@item @kbd{L} @tab @code{#+LaTeX:}
-@item @kbd{h} @tab @code{#+BEGIN_HTML    ... #+END_HTML}
+@item @kbd{q} @tab @code{#+BEGIN_QUOTE ... #+END_QUOTE}
+@item @kbd{v} @tab @code{#+BEGIN_VERSE ... #+END_VERSE}
+@item @kbd{c} @tab @code{#+BEGIN_CENTER ... #+END_CENTER}
+@item @kbd{l} @tab @code{#+BEGIN_EXPORT latex ... #+END_EXPORT}
+@item @kbd{L} @tab @code{#+LATEX:}
+@item @kbd{h} @tab @code{#+BEGIN_EXPORT html ... #+END_EXPORT}
 @item @kbd{H} @tab @code{#+HTML:}
-@item @kbd{a} @tab @code{#+BEGIN_ASCII   ... #+END_ASCII}
+@item @kbd{a} @tab @code{#+BEGIN_EXPORT ascii ... #+END_EXPORT}
 @item @kbd{A} @tab @code{#+ASCII:}
 @item @kbd{i} @tab @code{#+INDEX:} line
 @item @kbd{I} @tab @code{#+INCLUDE:} line
