@@ -159,9 +159,7 @@ to `org-bibtex-citation-p' predicate."
 (defun org-bibtex-goto-citation (&optional citation)
   "Visit a citation given its ID."
   (interactive)
-  (let ((citation (or citation
-		      (org-icompleting-read "Citation: "
-					    (obe-citations)))))
+  (let ((citation (or citation (completing-read "Citation: " (obe-citations)))))
     (find-file (or org-bibtex-file
 		   (error "`org-bibtex-file' has not been configured")))
     (goto-char (point-min))

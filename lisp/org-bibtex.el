@@ -441,7 +441,7 @@ With optional argument OPTIONAL, also prompt for optional fields."
 				(lambda (f) (when (org-bibtex-get (funcall name f)) f))
 				field)))))
           (setf field (or present (funcall keyword
-					   (org-icompleting-read
+					   (completing-read
 					    "Field: " (mapcar name field)))))))
       (let ((name (funcall name field)))
         (unless (org-bibtex-get name)
@@ -592,7 +592,7 @@ With prefix argument OPTIONAL also prompt for optional fields."
 With a prefix arg, query for optional fields as well.
 If nonew is t, add data to the headline of the entry at point."
   (interactive "P")
-  (let* ((type (org-icompleting-read
+  (let* ((type (completing-read
 		"Type: " (mapcar (lambda (type)
 				   (substring (symbol-name (car type)) 1))
 				 org-bibtex-types)

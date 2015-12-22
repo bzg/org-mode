@@ -4744,8 +4744,8 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
 	 rtn rtnall files file pos)
     (when (equal arg '(4))
       (setq org-select-this-todo-keyword
-	    (org-icompleting-read "Keyword (or KWD1|K2D2|...): "
-				  (mapcar 'list kwds) nil nil)))
+	    (completing-read "Keyword (or KWD1|K2D2|...): "
+			     (mapcar #'list kwds) nil nil)))
     (and (equal 0 arg) (setq org-select-this-todo-keyword nil))
     (catch 'exit
       (if org-agenda-sticky
@@ -7532,7 +7532,7 @@ to switch between filtering and excluding."
 	(setq-local org-global-tags-completion-table
 		    (org-global-tags-completion-table)))
       (let ((completion-ignore-case t))
-	(setq tag (org-icompleting-read
+	(setq tag (completing-read
 		   "Tag: " org-global-tags-completion-table))))
     (cond
      ((eq char ?\r)
@@ -9904,16 +9904,16 @@ The prefix arg is passed through to the command if possible."
 		redo-at-end t))
 
 	 ((equal action ?t)
-	  (setq state (org-icompleting-read
+	  (setq state (completing-read
 		       "Todo state: "
 		       (with-current-buffer (marker-buffer (car entries))
-			 (mapcar 'list org-todo-keywords-1))))
+			 (mapcar #'list org-todo-keywords-1))))
 	  (setq cmd `(let ((org-inhibit-blocking t)
 			   (org-inhibit-logging 'note))
 		       (org-agenda-todo ,state))))
 
 	 ((memq action '(?- ?+))
-	  (setq tag (org-icompleting-read
+	  (setq tag (completing-read
 		     (format "Tag to %s: " (if (eq action ?+) "add" "remove"))
 		     (with-current-buffer (marker-buffer (car entries))
 		       (delq nil
@@ -9968,8 +9968,8 @@ The prefix arg is passed through to the command if possible."
 
 	 ((equal action ?f)
 	  (setq cmd (list (intern
-			   (org-icompleting-read "Function: "
-						 obarray 'fboundp t nil nil)))))
+			   (completing-read "Function: "
+					    obarray 'fboundp t nil nil)))))
 
 	 (t (user-error "Invalid bulk action")))
 

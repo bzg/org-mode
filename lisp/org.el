@@ -8946,16 +8946,16 @@ When sorting is done, call `org-after-sorting-entries-or-items-hook'."
       (unless getkey-func
 	(and (= (downcase sorting-type) ?f)
 	     (setq getkey-func
-		   (org-icompleting-read "Sort using function: "
-					 obarray 'fboundp t nil nil))
+		   (completing-read "Sort using function: "
+				    obarray 'fboundp t nil nil))
 	     (setq getkey-func (intern getkey-func))))
 
       (and (= (downcase sorting-type) ?r)
 	   (not property)
            (setq property
-                 (org-icompleting-read "Property: "
-				       (mapcar 'list (org-buffer-property-keys t))
-				       nil t))))
+                 (completing-read "Property: "
+				  (mapcar #'list (org-buffer-property-keys t))
+				  nil t))))
 
     (when (member sorting-type '(?k ?K)) (org-clock-sum))
     (message "Sorting entries...")
@@ -10462,42 +10462,14 @@ See `read-file-name' for a description of parameters."
 	 (copy-keymap minibuffer-local-completion-map)))
     (org-defkey minibuffer-local-completion-map " " 'self-insert-command)
     (org-defkey minibuffer-local-completion-map "?" 'self-insert-command)
-    (org-defkey minibuffer-local-completion-map (kbd "C-c !") 'org-time-stamp-inactive)
-    (apply 'org-icompleting-read args)))
+    (org-defkey minibuffer-local-completion-map (kbd "C-c !")
+		'org-time-stamp-inactive)
+    (apply #'completing-read args)))
 
-(defun org-completing-read-no-i (&rest args)
-  (let (org-completion-use-ido org-completion-use-iswitchb)
-    (apply 'org-completing-read args)))
-
-(defun org-iswitchb-completing-read (prompt choices &rest args)
-  "Use iswitch as a completing-read replacement to choose from choices.
-PROMPT is a string to prompt with.  CHOICES is a list of strings to choose
-from."
-  (let* ((iswitchb-use-virtual-buffers nil)
-	 (iswitchb-make-buflist-hook
-	  (lambda ()
-	    (setq iswitchb-temp-buflist choices))))
-    (iswitchb-read-buffer prompt)))
-
-(defun org-icompleting-read (&rest args)
-  "Completing-read using `ido-mode' or `iswitchb' speedups if available.
-Should be called like `completing-read'."
-  (org-without-partial-completion
-   (if (not (listp (nth 1 args)))
-       ;; Ido only supports lists as the COLLECTION argument.  Use
-       ;; default completion function when second argument is not
-       ;; a list.
-       (apply #'completing-read args)
-     (let ((ido-enter-matching-directory nil))
-       (apply (cond ((and org-completion-use-ido
-			  (fboundp 'ido-completing-read)
-			  (org-bound-and-true-p ido-mode))
-		     #'ido-completing-read)
-		    ((and org-completion-use-iswitchb
-			  (org-bound-and-true-p iswitchb-mode))
-		     #'org-iswitchb-completing-read)
-		    (t #'completing-read))
-	      args)))))
+(define-obsolete-function-alias
+  'org-completing-read-no-i 'completing-read "Org 9.0")
+(define-obsolete-function-alias
+  'org-icompleting-read 'completing-read "Org 9.0")
 
 ;;; Opening/following a link
 
@@ -12008,12 +11980,11 @@ this is used for the GOTO interface."
   (unless org-refile-target-table
     (user-error "No refile targets"))
   (let* ((cbuf (current-buffer))
-	 (partial-completion-mode nil)
 	 (cfn (buffer-file-name (buffer-base-buffer cbuf)))
 	 (cfunc (if (and org-refile-use-outline-path
 			 org-outline-path-complete-in-steps)
-		    'org-olpath-completing-read
-		  'org-icompleting-read))
+		    #'org-olpath-completing-read
+		  #'completing-read))
 	 (extra (if org-refile-use-outline-path "/" ""))
 	 (cbnex (concat (buffer-name) extra))
 	 (filename (and cfn (expand-file-name cfn)))
@@ -12115,10 +12086,8 @@ this is used for the GOTO interface."
 
 (defun org-olpath-completing-read (prompt collection &rest args)
   "Read an outline path like a file name."
-  (let ((thetable collection)
-	(org-completion-use-ido nil)	   ; does not work with ido.
-	(org-completion-use-iswitchb nil)) ; or iswitchb
-    (apply #'org-icompleting-read
+  (let ((thetable collection))
+    (apply #'completing-read
 	   prompt
 	   (lambda (string predicate &optional flag)
 	     (cond
@@ -12541,8 +12510,8 @@ When called through ELisp, arg is also interpreted in the following way:
 				   (or (not org-use-fast-todo-selection)
 				       (not org-todo-key-trigger)))
 			      ;; Read a state with completion
-			      (org-icompleting-read
-			       "State: " (mapcar 'list org-todo-keywords-1)
+			      (completing-read
+			       "State: " (mapcar #'list org-todo-keywords-1)
 			       nil t))
 			     ((eq arg 'right)
 			      (if this
@@ -13262,8 +13231,9 @@ of `org-todo-keywords-1'."
 	(kwd-re
 	 (cond ((null arg) org-not-done-regexp)
 	       ((equal arg '(4))
-		(let ((kwd (org-icompleting-read "Keyword (or KWD1|KWD2|...): "
-						 (mapcar 'list org-todo-keywords-1))))
+		(let ((kwd
+		       (completing-read "Keyword (or KWD1|KWD2|...): "
+					(mapcar #'list org-todo-keywords-1))))
 		  (concat "\\("
 			  (mapconcat 'identity (org-split-string kwd "|") "\\|")
 			  "\\)\\>")))
@@ -13849,10 +13819,10 @@ D      Show deadlines and scheduled items between a date range."
       (?T (org-show-todo-tree '(4)))
       (?m (call-interactively 'org-match-sparse-tree))
       ((?p ?P)
-       (let* ((kwd (org-icompleting-read
-		    "Property: " (mapcar 'list (org-buffer-property-keys))))
-	      (value (org-icompleting-read
-		      "Value: " (mapcar 'list (org-property-values kwd)))))
+       (let* ((kwd (completing-read
+		    "Property: " (mapcar #'list (org-buffer-property-keys))))
+	      (value (completing-read
+		      "Value: " (mapcar #'list (org-property-values kwd)))))
 	 (unless (string-match "\\`{.*}\\'" value)
 	   (setq value (concat "\"" value "\"")))
 	 (org-match-sparse-tree arg (concat kwd "=" value))))
@@ -15054,7 +15024,7 @@ This works in the agenda, and also in an org-mode buffer."
 		     (delq nil (append (org-get-buffer-tags)
 				       (org-global-tags-completion-table))))
 		  (org-global-tags-completion-table))))
-	   (org-icompleting-read
+	   (completing-read
 	    "Tag: " 'org-tags-completion-function nil nil nil
 	    'org-tags-history))
 	 (progn
@@ -15286,7 +15256,7 @@ Returns the new tags string, or nil to not change the current settings."
 		  (when exit-after-next (setq exit-after-next 'now)))
 		 ((= c ?\t)
 		  (condition-case nil
-		      (setq tg (org-icompleting-read
+		      (setq tg (completing-read
 				"Tag: "
 				(or buffer-tags
 				    (with-current-buffer buf
@@ -16400,7 +16370,7 @@ part of the buffer."
 	  (props (if cat props0
 		   (delete `("CATEGORY" . ,(org-get-category)) props0)))
 	  (prop (if (< 1 (length props))
-		    (org-icompleting-read "Property: " props nil t)
+		    (completing-read "Property: " props nil t)
 		  (caar props))))
      (list prop)))
   (if (not property)
@@ -16413,7 +16383,7 @@ part of the buffer."
 This function ignores narrowing, if any."
   (interactive
    (let* ((completion-ignore-case t)
-	  (prop (org-icompleting-read
+	  (prop (completing-read
 		 "Globally remove property: "
 		 (mapcar #'list (org-buffer-property-keys)))))
      (list prop)))
@@ -18448,9 +18418,9 @@ Set `org-completion-use-ido' to make it use ido instead."
     (unless (or org-completion-use-ido org-completion-use-iswitchb)
       (setq org-completion-use-iswitchb t))
     (org-pop-to-buffer-same-window
-     (org-icompleting-read "Org buffer: "
-			   (mapcar 'list (mapcar 'buffer-name blist))
-			   nil t))))
+     (completing-read "Org buffer: "
+		      (mapcar #'list (mapcar #'buffer-name blist))
+		      nil t))))
 
 ;;; Define some older names previously used for this functionality
 ;;;###autoload

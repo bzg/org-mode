@@ -47,7 +47,6 @@
 (declare-function tramp-file-name-user "tramp" (vec))
 (declare-function tramp-file-name-host "tramp" (vec))
 (declare-function with-parsed-tramp-file-name "tramp" (filename var &rest body))
-(declare-function org-icompleting-read "org" (&rest args))
 (declare-function org-edit-src-code "org-src" (&optional code edit-buffer-name))
 (declare-function org-edit-src-exit "org-src"  ())
 (declare-function org-open-at-point "org" (&optional in-emacs reference-buffer))
@@ -850,7 +849,7 @@ arguments and pop open the results in a preview buffer."
 		   org-babel-common-header-args-w-values
 		   (when (boundp lang-headers) (eval lang-headers))))
 	 (header-arg (or header-arg
-			 (org-icompleting-read
+			 (completing-read
 			  "Header Arg: "
 			  (mapcar
 			   (lambda (header-spec) (symbol-name (car header-spec)))
@@ -863,7 +862,7 @@ arguments and pop open the results in a preview buffer."
 		     ((listp vals)
 		      (mapconcat
 		       (lambda (group)
-			 (let ((arg (org-icompleting-read
+			 (let ((arg (completing-read
 				     "Value: "
 				     (cons "default"
 					   (mapcar #'symbol-name group)))))
@@ -1729,7 +1728,7 @@ If the point is not on a source block then return nil."
    (let ((completion-ignore-case t)
 	 (case-fold-search t)
 	 (under-point (thing-at-point 'line)))
-     (list (org-icompleting-read
+     (list (completing-read
 	    "source-block name: " (org-babel-src-block-names) nil t
 	    (cond
 	     ;; noweb
@@ -1784,8 +1783,8 @@ to `org-babel-named-src-block-regexp'."
   "Go to a named result."
   (interactive
    (let ((completion-ignore-case t))
-     (list (org-icompleting-read "source-block name: "
-				 (org-babel-result-names) nil t))))
+     (list (completing-read "Source-block name: "
+			    (org-babel-result-names) nil t))))
   (let ((point (org-babel-find-named-result name)))
     (if point
         ;; taken from `org-open-at-point'
@@ -1888,7 +1887,7 @@ region is not active then the point is demarcated."
 	   (move-end-of-line 2))
          (sort (if (org-region-active-p) (list (mark) (point)) (list (point))) #'>))
       (let ((start (point))
-	    (lang (org-icompleting-read
+	    (lang (completing-read
 		   "Lang: "
 		   (mapcar #'symbol-name
 			   (delete-dups

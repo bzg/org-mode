@@ -602,7 +602,7 @@ Where possible, use the standard interface for changing this line."
      (t
       (setq allowed (org-property-get-allowed-values pom key 'table))
       (if allowed
-	  (setq nval (org-icompleting-read
+	  (setq nval (completing-read
 		      "Value: " allowed nil
 		      (not (get-text-property 0 'org-unrestricted
 					      (caar allowed)))))
@@ -910,7 +910,7 @@ interactive function `org-columns-new'.
 				       org-columns-current-fmt-compiled
 				       t)))
 	cell)
-    (setq prop (org-icompleting-read
+    (setq prop (completing-read
 		"Property: " (mapcar 'list (org-buffer-property-keys t nil t))
 		nil nil prop))
     (setq title (read-string (concat "Column title [" prop "]: ") (or title prop)))
@@ -918,9 +918,9 @@ interactive function `org-columns-new'.
     (if (string-match "\\S-" width)
 	(setq width (string-to-number width))
       (setq width nil))
-    (setq fmt (org-icompleting-read "Summary [none]: "
-				    (mapcar (lambda (x) (list (symbol-name (cadr x)))) org-columns-compile-map)
-				    nil t))
+    (setq fmt (completing-read "Summary [none]: "
+			       (mapcar (lambda (x) (list (symbol-name (cadr x)))) org-columns-compile-map)
+			       nil t))
     (setq fmt (intern fmt)
 	  fun (cdr (assoc fmt (mapcar 'cdr org-columns-compile-map))))
     (if (eq fmt 'none) (setq fmt nil))
@@ -1486,7 +1486,7 @@ and tailing newline characters."
   (interactive)
   (when (featurep 'xemacs) (org-columns-quit))
   (let ((defaults '(:name "columnview" :hlines 1))
-	(id (org-icompleting-read
+	(id (completing-read
 	     "Capture columns (local, global, entry with :ID: property) [local]: "
 	     (append '(("global") ("local"))
 		     (mapcar 'list (org-property-values "ID"))))))

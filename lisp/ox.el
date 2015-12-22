@@ -6198,7 +6198,7 @@ When ARG is \\[universal-argument] \\[universal-argument], display the asynchron
       (publish-current-project
        (org-publish-current-project (memq 'force optns) (memq 'async optns)))
       (publish-choose-project
-       (org-publish (assoc (org-icompleting-read
+       (org-publish (assoc (completing-read
 			    "Publish project: "
 			    org-publish-project-alist nil t)
 			   org-publish-project-alist)

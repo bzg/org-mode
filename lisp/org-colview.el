@@ -459,7 +459,7 @@ Where possible, use the standard interface for changing this line."
      (t
       (setq allowed (org-property-get-allowed-values pom key 'table))
       (if allowed
-	  (setq nval (org-icompleting-read
+	  (setq nval (completing-read
 		      "Value: " allowed nil
 		      (not (get-text-property 0 'org-unrestricted
 					      (caar allowed)))))
@@ -777,15 +777,15 @@ calc        function called on every element before summarizing.  This is
   (let ((editp (and prop
 		    (assoc-string prop org-columns-current-fmt-compiled t)))
 	cell)
-    (setq prop (org-icompleting-read
-		"Property: " (mapcar 'list (org-buffer-property-keys t nil t))
+    (setq prop (completing-read
+		"Property: " (mapcar #'list (org-buffer-property-keys t nil t))
 		nil nil prop))
     (setq title (read-string (concat "Column title [" prop "]: ") (or title prop)))
     (setq width (read-string "Column width: " (if width (number-to-string width))))
     (if (string-match "\\S-" width)
 	(setq width (string-to-number width))
       (setq width nil))
-    (setq fmt (org-icompleting-read
+    (setq fmt (completing-read
 	       "Summary [none]: "
 	       (mapcar (lambda (x) (list (symbol-name (cadr x))))
 		       org-columns-compile-map)
@@ -1340,10 +1340,10 @@ and tailing newline characters."
   "Create a dynamic block capturing a column view table."
   (interactive)
   (let ((defaults '(:name "columnview" :hlines 1))
-	(id (org-icompleting-read
+	(id (completing-read
 	     "Capture columns (local, global, entry with :ID: property) [local]: "
 	     (append '(("global") ("local"))
-		     (mapcar 'list (org-property-values "ID"))))))
+		     (mapcar #'list (org-property-values "ID"))))))
     (if (equal id "") (setq id 'local))
     (if (equal id "global") (setq id 'global))
     (setq defaults (append defaults (list :id id)))

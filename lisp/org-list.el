@@ -131,7 +131,6 @@
 		  (backend data &optional contents info))
 (declare-function org-fix-tags-on-the-fly "org" ())
 (declare-function org-get-indentation "org" (&optional line))
-(declare-function org-icompleting-read "org" (&rest args))
 (declare-function org-in-block-p "org" (names))
 (declare-function org-in-regexp "org" (re &optional nlines visually))
 (declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
@@ -2869,8 +2868,8 @@ ignores hidden links."
 	 (getkey-func
 	  (or getkey-func
 	      (and (= (downcase sorting-type) ?f)
-		   (intern (org-icompleting-read "Sort using function: "
-						 obarray 'fboundp t nil nil))))))
+		   (intern (completing-read "Sort using function: "
+					    obarray 'fboundp t nil nil))))))
     (message "Sorting items...")
     (save-restriction
       (narrow-to-region start end)

@@ -864,8 +864,8 @@ When optional argument FORCE is non-nil, force publishing all
 files in PROJECT.  With a non-nil optional argument ASYNC,
 publishing will be done asynchronously, in another process."
   (interactive
-   (list (assoc (org-icompleting-read "Publish project: "
-				      org-publish-project-alist nil t)
+   (list (assoc (completing-read "Publish project: "
+				 org-publish-project-alist nil t)
 		org-publish-project-alist)
 	 current-prefix-arg))
   (let ((project (if (not (stringp project)) project

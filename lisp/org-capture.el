@@ -1760,7 +1760,7 @@ The template may still contain \"%?\" for cursor positioning."
 			(member key '("u" "U"))
 			nil nil (list org-end-time-was-given))))
 		    (_
-		     (push (org-completing-read-no-i
+		     (push (completing-read
 			    (concat (or prompt "Enter string")
 				    (and default (format " [%s]" default))
 				    ": ")
