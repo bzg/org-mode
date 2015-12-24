@@ -7245,6 +7245,7 @@ agenda."
   (if org-agenda-columns-active
       (org-columns-quit)
     (let ((wconf org-agenda-pre-window-conf)
+	  (buf (current-buffer))
 	  (org-agenda-last-indirect-window
 	   (and (eq org-indirect-buffer-display 'other-window)
 		org-agenda-last-indirect-buffer
@@ -7266,8 +7267,12 @@ agenda."
 	     (not (one-window-p))
 	     (delete-window))))
       (if bury
-	  (bury-buffer)
-	(kill-buffer)
+	  ;; Set the agenda buffer as the current buffer instead of
+	  ;; passing it as an argument to `bury-buffer' so that
+	  ;; `bury-buffer' removes it from the window.
+	  (with-current-buffer buf
+	    (bury-buffer))
+	(kill-buffer buf)
 	(setq org-agenda-archives-mode nil
 	      org-agenda-buffer nil)))))
 
