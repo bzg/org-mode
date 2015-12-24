@@ -175,7 +175,6 @@ SET COLSEP '|'
 ")
 	 (_ ""))
        (org-babel-expand-body:sql body params)))
-    (message command)
     (org-babel-eval command "")
     (org-babel-result-cond result-params
       (with-temp-buffer
