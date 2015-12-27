@@ -7303,8 +7303,8 @@ Link type                        |  Available keywords
 ---------------------------------+----------------------------------------------
 bbdb                             |  %:name %:company
 irc                              |  %:server %:port %:nick
-vm, vm-imap, wl, mh, mew, rmail  |  %:type %:subject %:message-id
-                                 |  %:from %:fromname %:fromaddress
+vm, vm-imap, wl, mh, mew, rmail, |  %:type %:subject %:message-id
+gnus                             |  %:from %:fromname %:fromaddress
                                  |  %:to   %:toname   %:toaddress
                                  |  %:date @r{(message date header field)}
                                  |  %:date-timestamp @r{(date as active timestamp)}

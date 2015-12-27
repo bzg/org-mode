@@ -9922,16 +9922,24 @@ active region."
 	 (car org-stored-links))))))
 
 (defun org-store-link-props (&rest plist)
-  "Store link properties, extract names and addresses."
-  (let (x adr)
-    (when (setq x (plist-get plist :from))
-      (setq adr (mail-extract-address-components x))
+  "Store link properties, extract names, addresses and dates."
+  (when x
+    (let ((adr (mail-extract-address-components x)))
       (setq plist (plist-put plist :fromname (car adr)))
-      (setq plist (plist-put plist :fromaddress (nth 1 adr))))
-    (when (setq x (plist-get plist :to))
-      (setq adr (mail-extract-address-components x))
-      (setq plist (plist-put plist :toname (car adr)))
-      (setq plist (plist-put plist :toaddress (nth 1 adr)))))
+      (setq plist (plist-put plist :fromaddress (nth 1 adr)))))
+  (let ((x (plist-get plist :to)))
+    (when x
+      (let ((adr (mail-extract-address-components x)))
+	(setq plist (plist-put plist :toname (car adr)))
+	(setq plist (plist-put plist :toaddress (nth 1 adr))))))
+  (let ((x (ignore-errors (date-to-time (plist-get plist :date)))))
+    (when x
+      (setq plist (plist-put plist :date-timestamp
+			     (format-time-string
+			      (org-time-stamp-format t) x)))
+      (setq plist (plist-put plist :date-timestamp-inactive
+			     (format-time-string
+			      (org-time-stamp-format t t) x)))))
   (let ((from (plist-get plist :from))
 	(to (plist-get plist :to)))
     (when (and from to org-from-is-user-regexp)

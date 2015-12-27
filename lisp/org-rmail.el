@@ -65,19 +65,10 @@
 	       (to (mail-fetch-field "to"))
 	       (subject (mail-fetch-field "subject"))
 	       (date (mail-fetch-field "date"))
-	       (date-ts (and date (format-time-string
-				   (org-time-stamp-format t)
-				   (date-to-time date))))
-	       (date-ts-ia (and date (format-time-string
-				      (org-time-stamp-format t t)
-				      (date-to-time date))))
 	       desc link)
 	  (org-store-link-props
-	   :type "rmail" :from from :to to
+	   :type "rmail" :from from :to to :date date
 	   :subject subject :message-id message-id)
-	  (when date
-	    (org-add-link-props :date date :date-timestamp date-ts
-				:date-timestamp-inactive date-ts-ia))
 	  (setq message-id (org-remove-angle-brackets message-id))
 	  (setq desc (org-email-link-description))
 	  (setq link (concat "rmail:" folder "#" message-id))

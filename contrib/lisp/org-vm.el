@@ -77,12 +77,6 @@
              (message-id (vm-su-message-id message))
              (link-type (if (vm-imap-folder-p) "vm-imap" "vm"))
 	     (date (vm-get-header-contents message "Date"))
-	     (date-ts (and date (format-time-string
-				 (org-time-stamp-format t)
-				 (date-to-time date))))
-	     (date-ts-ia (and date (format-time-string
-				    (org-time-stamp-format t t)
-				    (date-to-time date))))
 	     folder desc link)
         (if (vm-imap-folder-p)
 	    (let ((spec (vm-imap-find-spec-for-buffer (current-buffer))))
@@ -95,10 +89,7 @@
                 (setq folder (replace-match "" t t folder)))))
         (setq message-id (org-remove-angle-brackets message-id))
 	(org-store-link-props :type link-type :from from :to to :subject subject
-			      :message-id message-id)
-	(when date
-	  (org-add-link-props :date date :date-timestamp date-ts
-			      :date-timestamp-inactive date-ts-ia))
+			      :message-id message-id :date date)
 	(setq desc (org-email-link-description))
 	(setq link (concat (concat link-type ":") folder "#" message-id))
 	(org-add-link-props :link link :description desc)
