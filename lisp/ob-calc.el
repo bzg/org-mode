@@ -89,7 +89,9 @@
 	     (split-string (org-babel-expand-body:calc body params) "[\n\r]"))))
   (save-excursion
     (with-current-buffer (get-buffer "*Calculator*")
-      (calc-eval (calc-top 1)))))
+      (prog1
+        (calc-eval (calc-top 1))
+        (calc-pop 1)))))
 
 (defun org-babel-calc-maybe-resolve-var (el)
   (if (consp el)
