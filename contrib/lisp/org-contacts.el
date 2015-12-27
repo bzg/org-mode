@@ -159,12 +159,14 @@ The following replacements are available:
   :group 'org-contacts)
 
 (defcustom org-contacts-matcher
-  (mapconcat 'identity (list org-contacts-email-property
-			     org-contacts-alias-property
-			     org-contacts-tel-property
-			     org-contacts-address-property
-			     org-contacts-birthday-property)
-			     "<>\"\"|")
+  (mapconcat #'identity
+	     (mapcar (lambda (x) (concat x "<>\"\""))
+		     (list org-contacts-email-property
+			   org-contacts-alias-property
+			   org-contacts-tel-property
+			   org-contacts-address-property
+			   org-contacts-birthday-property))
+	     "|")
   "Matching rule for finding heading that are contacts.
 This can be a tag name, or a property check."
   :type 'string
