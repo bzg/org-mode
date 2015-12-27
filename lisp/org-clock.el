@@ -2762,7 +2762,7 @@ following structure:
   \(LEVEL HEADLINE TIMESTAMP TIME)
 
 LEVEL:     The level of the headline, as an integer.  This will be
-           the reduced leve, so 1,2,3,... even if only odd levels
+           the reduced level, so 1,2,3,... even if only odd levels
            are being used.
 HEADLINE:  The text of the headline.  Depending on PARAMS, this may
            already be formatted like a link.
