@@ -9923,10 +9923,11 @@ active region."
 
 (defun org-store-link-props (&rest plist)
   "Store link properties, extract names, addresses and dates."
-  (when x
-    (let ((adr (mail-extract-address-components x)))
-      (setq plist (plist-put plist :fromname (car adr)))
-      (setq plist (plist-put plist :fromaddress (nth 1 adr)))))
+  (let ((x (plist-get plist :from)))
+    (when x
+      (let ((adr (mail-extract-address-components x)))
+	(setq plist (plist-put plist :fromname (car adr)))
+	(setq plist (plist-put plist :fromaddress (nth 1 adr))))))
   (let ((x (plist-get plist :to)))
     (when x
       (let ((adr (mail-extract-address-components x)))
