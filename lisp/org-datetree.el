@@ -34,9 +34,10 @@
 
 (defvar org-datetree-base-level 1
   "The level at which years should be placed in the date tree.
-This is normally one, but if the buffer has an entry with a DATE_TREE
-property (any value), the date tree will become a subtree under that entry,
-so the base level will be properly adjusted.")
+This is normally one, but if the buffer has an entry with a
+DATE_TREE (or WEEK_TREE for ISO week entries) property (any
+value), the date tree will become a subtree under that entry, so
+the base level will be properly adjusted.")
 
 (defcustom org-datetree-add-timestamp nil
   "When non-nil, add a time stamp matching date of entry.
@@ -78,11 +79,55 @@ tree can be found."
        "^\\*+[ \t]+%d-%02d-\\([0123][0-9]\\) \\w+$"
        year month day))))
 
-(defun org-datetree--find-create (regex year &optional month day)
+;;;###autoload
+(defun org-datetree-find-iso-week-create (date &optional keep-restriction)
+  "Find or create an ISO week entry for DATE.
+Compared to `org-datetree-find-date-create' this function creates
+entries ordered by week instead of months.
+If KEEP-RESTRICTION is non-nil, do not widen the buffer.  When it
+is nil, the buffer will be widened to make sure an existing date
+tree can be found."
+  (org-set-local 'org-datetree-base-level 1)
+  (or keep-restriction (widen))
+  (save-restriction
+    (let ((prop (org-find-property "WEEK_TREE")))
+      (when prop
+	(goto-char prop)
+	(org-set-local 'org-datetree-base-level
+		       (org-get-valid-level (org-current-level) 1))
+	(org-narrow-to-subtree)))
+    (goto-char (point-min))
+    (require 'cal-iso)
+    (let* ((year (calendar-extract-year date))
+	   (month (calendar-extract-month date))
+	   (day (calendar-extract-day date))
+	   (time (encode-time 0 0 0 day month year))
+	   (iso-date (calendar-iso-from-absolute
+		      (calendar-absolute-from-gregorian date)))
+	   (weekyear (nth 2 iso-date))
+	   (week (nth 0 iso-date))
+	   (weekday (nth 1 iso-date)))
+      ;; ISO 8601 week format is %G-W%V(-%u)
+      (org-datetree--find-create
+       "^\\*+[ \t]+\\([12][0-9]\\{3\\}\\)\\(\\s-*?\
+\\([ \t]:[[:alnum:]:_@#%%]+:\\)?\\s-*$\\)"
+       weekyear nil nil
+       (format-time-string "%G" time))
+      (org-datetree--find-create
+       "^\\*+[ \t]+%d-W\\([0-5][0-9]\\)$"
+       weekyear week nil
+       (format-time-string "%G-W%V" time))
+      ;; For the actual day we use the regular date instead of ISO week.
+      (org-datetree--find-create
+       "^\\*+[ \t]+%d-%02d-\\([0123][0-9]\\) \\w+$"
+       year month day))))
+
+(defun org-datetree--find-create (regex year &optional month day insert)
   "Find the datetree matched by REGEX for YEAR, MONTH, or DAY.
 REGEX is passed to `format' with YEAR, MONTH, and DAY as
 arguments.  Match group 1 is compared against the specified date
-component."
+component.  If INSERT is non-nil and there is no match then it is
+inserted into the buffer."
   (when (or month day)
     (org-narrow-to-subtree))
   (let ((re (format regex year month day))
@@ -95,25 +140,27 @@ component."
      ((not match)
       (goto-char (point-max))
       (unless (bolp) (insert "\n"))
-      (org-datetree-insert-line year month day))
+      (org-datetree-insert-line year month day insert))
      ((= (string-to-number (match-string 1)) (or day month year))
       (beginning-of-line))
      (t
       (beginning-of-line)
-      (org-datetree-insert-line year month day)))))
+      (org-datetree-insert-line year month day insert)))))
 
-(defun org-datetree-insert-line (year &optional month day)
+(defun org-datetree-insert-line (year &optional month day text)
   (delete-region (save-excursion (skip-chars-backward " \t\n") (point)) (point))
   (insert "\n" (make-string org-datetree-base-level ?*) " \n")
   (backward-char)
   (when month (org-do-demote))
   (when day (org-do-demote))
-  (insert (format "%d" year))
-  (when month
-    (insert
-     (if day
-	 (format-time-string "-%m-%d %A" (encode-time 0 0 0 day month year))
-       (format-time-string "-%m %B" (encode-time 0 0 0 1 month year)))))
+  (if text
+      (insert text)
+    (insert (format "%d" year))
+    (when month
+      (insert
+       (if day
+	   (format-time-string "-%m-%d %A" (encode-time 0 0 0 day month year))
+	 (format-time-string "-%m %B" (encode-time 0 0 0 1 month year))))))
   (when (and day org-datetree-add-timestamp)
     (save-excursion
       (insert "\n")
