@@ -76,7 +76,6 @@ using previous syntax:
                (replace-match "EXPORT \\1" nil nil nil 1)))))))))
 #+END_SRC
 
-** Incompatible changes
 *** Footnotes
 **** [1]-like constructs are not valid footnotes
 Using =[1]= as a footnote was already discouraged in the manual, since
