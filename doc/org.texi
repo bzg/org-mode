@@ -7176,6 +7176,13 @@ one matched.}.
 @item (file+datetree+prompt "path/to/file")
 Will create a heading in a date tree, but will prompt for the date.
 
+@item (file+weektree "path/to/file")
+Will create a heading in a week tree for today's date.  Week trees are sorted
+by week and not by month unlike datetrees.
+
+@item (file+weektree+prompt "path/to/file")
+Will create a heading in a week tree, but will prompt for the date.
+
 @item (file+function "path/to/file" function-finding-location)
 A function to find the right location in the file.
 

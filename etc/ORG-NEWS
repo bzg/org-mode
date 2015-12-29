@@ -167,6 +167,19 @@ for details.
 *** org-bbdb-anniversaries-future
 Used like org-bbdb-anniversaries, it provides a few days warning
 for upcoming anniversaries (default: 7 days).
+*** Support for ISO week trees
+ISO week trees are an alternative date tree format that orders entries
+by ISO week and not by month.
+
+For example:
+
+: * 2015
+: ** 2015-W35
+: ** 2015-W36
+: *** 2015-08-31 Monday
+
+They are supported in org-capture via ~file+weektree~ and
+~file+weektree+prompt~ target specifications.
 ** New functions
 *** ~org-show-children~ 
 It is a faster implementation of ~outline-show-children~.
