@@ -348,13 +348,13 @@ to rename."
 
 Return an alist where associations follow the pattern
 
-  \(LABEL MARKER TOP-LEVEL? SIZE)
+  \(LABEL MARKER TOP-LEVEL SIZE)
 
 with
 
   LABEL     the label of the of the definition,
   MARKER    a marker pointing to its beginning,
-  TOP-LEVEL a boolean nil when the footnote is contained within
+  TOP-LEVEL a boolean, nil when the footnote is contained within
             another one,
   SIZE      the length of the inline definition, in characters,
             or nil for non-inline references.
