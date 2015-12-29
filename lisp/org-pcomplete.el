@@ -40,7 +40,7 @@
 (declare-function org-get-buffer-tags "org" ())
 (declare-function org-get-tags "org" ())
 (declare-function org-buffer-property-keys "org"
-		  (&optional include-specials include-defaults include-columns))
+		  (&optional specials defaults columns ignore-malformed))
 (declare-function org-entry-properties "org" (&optional pom which specific))
 
 ;;;; Customization variables
