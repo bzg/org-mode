@@ -64,70 +64,42 @@ tree can be found."
 		    (org-get-valid-level (org-current-level) 1))
 	(org-narrow-to-subtree)))
     (goto-char (point-min))
-    (let ((year (nth 2 date))
-	  (month (car date))
-	  (day (nth 1 date)))
-      (org-datetree-find-year-create year)
-      (org-datetree-find-month-create year month)
-      (org-datetree-find-day-create year month day))))
+    (let ((year (calendar-extract-year date))
+	  (month (calendar-extract-month date))
+	  (day (calendar-extract-day date)))
+      (org-datetree--find-create
+       "^\\*+[ \t]+\\([12][0-9]\\{3\\}\\)\\(\\s-*?\
+\\([ \t]:[[:alnum:]:_@#%%]+:\\)?\\s-*$\\)"
+       year)
+      (org-datetree--find-create
+       "^\\*+[ \t]+%d-\\([01][0-9]\\) \\w+$"
+       year month)
+      (org-datetree--find-create
+       "^\\*+[ \t]+%d-%02d-\\([0123][0-9]\\) \\w+$"
+       year month day))))
 
-(defun org-datetree-find-year-create (year)
-  "Find the YEAR datetree or create it."
-  (let ((re "^\\*+[ \t]+\\([12][0-9]\\{3\\}\\)\\(\\s-*?\\([ \t]:[[:alnum:]:_@#%]+:\\)?\\s-*$\\)")
+(defun org-datetree--find-create (regex year &optional month day)
+  "Find the datetree matched by REGEX for YEAR, MONTH, or DAY.
+REGEX is passed to `format' with YEAR, MONTH, and DAY as
+arguments.  Match group 1 is compared against the specified date
+component."
+  (when (or month day)
+    (org-narrow-to-subtree))
+  (let ((re (format regex year month day))
 	match)
     (goto-char (point-min))
     (while (and (setq match (re-search-forward re nil t))
 		(goto-char (match-beginning 1))
-		(< (string-to-number (match-string 1)) year)))
+		(< (string-to-number (match-string 1)) (or day month year))))
     (cond
      ((not match)
       (goto-char (point-max))
-      (or (bolp) (newline))
-      (org-datetree-insert-line year))
-     ((= (string-to-number (match-string 1)) year)
-      (goto-char (point-at-bol)))
-     (t
-      (beginning-of-line 1)
-      (org-datetree-insert-line year)))))
-
-(defun org-datetree-find-month-create (year month)
-  "Find the datetree for YEAR and MONTH or create it."
-  (org-narrow-to-subtree)
-  (let ((re (format "^\\*+[ \t]+%d-\\([01][0-9]\\) \\w+$" year))
-	match)
-    (goto-char (point-min))
-    (while (and (setq match (re-search-forward re nil t))
-		(goto-char (match-beginning 1))
-		(< (string-to-number (match-string 1)) month)))
-    (cond
-     ((not match)
-      (goto-char (point-max))
-      (or (bolp) (newline))
-      (org-datetree-insert-line year month))
-     ((= (string-to-number (match-string 1)) month)
-      (goto-char (point-at-bol)))
-     (t
-      (beginning-of-line 1)
-      (org-datetree-insert-line year month)))))
-
-(defun org-datetree-find-day-create (year month day)
-  "Find the datetree for YEAR, MONTH and DAY or create it."
-  (org-narrow-to-subtree)
-  (let ((re (format "^\\*+[ \t]+%d-%02d-\\([0123][0-9]\\) \\w+$" year month))
-	match)
-    (goto-char (point-min))
-    (while (and (setq match (re-search-forward re nil t))
-		(goto-char (match-beginning 1))
-		(< (string-to-number (match-string 1)) day)))
-    (cond
-     ((not match)
-      (goto-char (point-max))
-      (or (bolp) (newline))
+      (unless (bolp) (insert "\n"))
       (org-datetree-insert-line year month day))
-     ((= (string-to-number (match-string 1)) day)
-      (goto-char (point-at-bol)))
+     ((= (string-to-number (match-string 1)) (or day month year))
+      (beginning-of-line))
      (t
-      (beginning-of-line 1)
+      (beginning-of-line)
       (org-datetree-insert-line year month day)))))
 
 (defun org-datetree-insert-line (year &optional month day)
@@ -139,13 +111,9 @@ tree can be found."
   (insert (format "%d" year))
   (when month
     (insert
-     (format "-%02d" month)
      (if day
-	 (format "-%02d %s"
-		 day
-		 (format-time-string "%A" (encode-time 0 0 0 day month year)))
-       (format " %s"
-	       (format-time-string "%B" (encode-time 0 0 0 1 month year))))))
+	 (format-time-string "-%m-%d %A" (encode-time 0 0 0 day month year))
+       (format-time-string "-%m %B" (encode-time 0 0 0 1 month year)))))
   (when (and day org-datetree-add-timestamp)
     (save-excursion
       (insert "\n")

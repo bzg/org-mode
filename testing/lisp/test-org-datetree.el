@@ -55,6 +55,15 @@
       (let ((org-datetree-add-timestamp nil))
 	(org-datetree-find-date-create '(3 29 2012)))
       (org-trim (buffer-string)))))
+  ;; Sort new entry in right place.
+  (should
+   (string-match
+    "\\`\\* 2012\n\\*\\* 2012-02 .*\n\\*\\*\\* 2012-02-01 .*\n\n\\*\\* 2012-03 .*\n\\*\\*\\* 2012-03-29 .*\\'"
+    (org-test-with-temp-text "* 2012\n** 2012-03 month\n*** 2012-03-29 day"
+      (let ((org-datetree-add-timestamp nil))
+	(org-datetree-find-date-create '(3 29 2012))
+	(org-datetree-find-date-create '(2 1 2012)))
+      (org-trim (buffer-string)))))
   ;; When `org-datetree-add-timestamp' is non-nil, insert a timestamp
   ;; in entry.  When set to `inactive', insert an inactive one.
   (should
