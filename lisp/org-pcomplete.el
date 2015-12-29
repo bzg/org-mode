@@ -359,7 +359,7 @@ This needs more work, to handle headings with lots of spaces in them."
 	     (concat x ": "))
 	   (let ((lst (pcomplete-uniqify-list
 		       (copy-sequence
-			(org-buffer-property-keys nil t t)))))
+			(org-buffer-property-keys nil t t t)))))
 	     (dolist (prop (org-entry-properties))
 	       (setq lst (delete (car prop) lst)))
 	     lst))

@@ -16121,7 +16121,8 @@ decreases scheduled or deadline date by one day."
 	  (org-indent-line)))))
     (run-hook-with-args 'org-property-changed-functions property value)))
 
-(defun org-buffer-property-keys (&optional specials defaults columns)
+(defun org-buffer-property-keys
+    (&optional specials defaults columns ignore-malformed)
   "Get all property keys in the current buffer.
 
 When SPECIALS is non-nil, also list the special properties that
@@ -16132,7 +16133,10 @@ special meaning internally: ARCHIVE, CATEGORY, SUMMARY,
 DESCRIPTION, LOCATION, and LOGGING and others.
 
 When COLUMNS in non-nil, also include property names given in
-COLUMN formats in the current buffer."
+COLUMN formats in the current buffer.
+
+When IGNORE-MALFORMED is non-nil, malformed drawer repair will not be
+automatically performed, such drawers will be silently ignored."
   (let ((case-fold-search t)
 	(props (append
 		(and specials org-special-properties)
@@ -16144,7 +16148,8 @@ COLUMN formats in the current buffer."
        (let ((range (org-get-property-block)))
 	 (catch 'skip
 	   (unless range
-	     (when (and (not (org-before-first-heading-p))
+	     (when (and (not ignore-malformed)
+			(not (org-before-first-heading-p))
 			(y-or-n-p (format "Malformed drawer at %d, repair?"
 					  (line-beginning-position))))
 	       (org-get-property-block nil t))
