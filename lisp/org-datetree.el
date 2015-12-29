@@ -87,14 +87,14 @@ entries ordered by week instead of months.
 If KEEP-RESTRICTION is non-nil, do not widen the buffer.  When it
 is nil, the buffer will be widened to make sure an existing date
 tree can be found."
-  (org-set-local 'org-datetree-base-level 1)
+  (setq-local org-datetree-base-level 1)
   (or keep-restriction (widen))
   (save-restriction
     (let ((prop (org-find-property "WEEK_TREE")))
       (when prop
 	(goto-char prop)
-	(org-set-local 'org-datetree-base-level
-		       (org-get-valid-level (org-current-level) 1))
+	(setq-local org-datetree-base-level
+		    (org-get-valid-level (org-current-level) 1))
 	(org-narrow-to-subtree)))
     (goto-char (point-min))
     (require 'cal-iso)
