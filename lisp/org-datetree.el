@@ -1,4 +1,4 @@
-;;; org-datetree.el --- Create date entries in a tree
+;;; org-datetree.el --- Create date entries in a tree -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2015 Free Software Foundation, Inc.
 
@@ -105,8 +105,7 @@ tree can be found."
 	   (iso-date (calendar-iso-from-absolute
 		      (calendar-absolute-from-gregorian date)))
 	   (weekyear (nth 2 iso-date))
-	   (week (nth 0 iso-date))
-	   (weekday (nth 1 iso-date)))
+	   (week (nth 0 iso-date)))
       ;; ISO 8601 week format is %G-W%V(-%u)
       (org-datetree--find-create
        "^\\*+[ \t]+\\([12][0-9]\\{3\\}\\)\\(\\s-*?\
@@ -186,44 +185,42 @@ before running this command, even though the command tries to be smart."
   (interactive)
   (goto-char (point-min))
   (let ((dre (concat "\\<" org-deadline-string "\\>[ \t]*\\'"))
-	(sre (concat "\\<" org-scheduled-string "\\>[ \t]*\\'"))
-	dct ts tmp date year month day pos hdl-pos)
+	(sre (concat "\\<" org-scheduled-string "\\>[ \t]*\\'")))
     (while (re-search-forward org-ts-regexp nil t)
       (catch 'next
-	(setq ts (match-string 0))
-	(setq tmp (buffer-substring
-		   (max (point-at-bol) (- (match-beginning 0)
-					  org-ds-keyword-length))
-		   (match-beginning 0)))
-	(if (or (string-match "-\\'" tmp)
-		(string-match dre tmp)
-		(string-match sre tmp))
+	(let ((tmp (buffer-substring
+		    (max (line-beginning-position)
+			 (- (match-beginning 0) org-ds-keyword-length))
+		    (match-beginning 0))))
+	  (when (or (string-match "-\\'" tmp)
+		    (string-match dre tmp)
+		    (string-match sre tmp))
 	    (throw 'next nil))
-	(setq dct (decode-time (org-time-string-to-time (match-string 0)))
-	      date (list (nth 4 dct) (nth 3 dct) (nth 5 dct))
-	      year (nth 2 date)
-	      month (car date)
-	      day (nth 1 date)
-	      pos (point))
-	(org-back-to-heading t)
-	(setq hdl-pos (point))
-	(unless (org-up-heading-safe)
-	  ;; No parent, we are not in a date tree
-	  (goto-char pos)
-	  (throw 'next nil))
-	(unless (looking-at "\\*+[ \t]+[0-9]+-[0-1][0-9]-[0-3][0-9]")
-	  ;; Parent looks wrong, we are not in a date tree
-	  (goto-char pos)
-	  (throw 'next nil))
-	(when (looking-at (format "\\*+[ \t]+%d-%02d-%02d" year month day))
-	  ;; At correct date already, do nothing
-	  (progn (goto-char pos) (throw 'next nil)))
-	;; OK, we need to refile this entry
-	(goto-char hdl-pos)
-	(org-cut-subtree)
-	(save-excursion
-	  (save-restriction
-	    (org-datetree-file-entry-under (current-kill 0) date)))))))
+	  (let* ((dct (decode-time (org-time-string-to-time (match-string 0))))
+		 (date (list (nth 4 dct) (nth 3 dct) (nth 5 dct)))
+		 (year (nth 2 date))
+		 (month (car date))
+		 (day (nth 1 date))
+		 (pos (point))
+		 (hdl-pos (progn (org-back-to-heading t) (point))))
+	    (unless (org-up-heading-safe)
+	      ;; No parent, we are not in a date tree.
+	      (goto-char pos)
+	      (throw 'next nil))
+	    (unless (looking-at "\\*+[ \t]+[0-9]+-[0-1][0-9]-[0-3][0-9]")
+	      ;; Parent looks wrong, we are not in a date tree.
+	      (goto-char pos)
+	      (throw 'next nil))
+	    (when (looking-at (format "\\*+[ \t]+%d-%02d-%02d" year month day))
+	      ;; At correct date already, do nothing.
+	      (goto-char pos)
+	      (throw 'next nil))
+	    ;; OK, we need to refile this entry.
+	    (goto-char hdl-pos)
+	    (org-cut-subtree)
+	    (save-excursion
+	      (save-restriction
+		(org-datetree-file-entry-under (current-kill 0) date)))))))))
 
 (provide 'org-datetree)
 
