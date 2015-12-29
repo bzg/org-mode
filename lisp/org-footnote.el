@@ -38,7 +38,9 @@
 (declare-function org-at-heading-p "org" (&optional ignored))
 (declare-function org-back-over-empty-lines "org" ())
 (declare-function org-edit-footnote-reference "org-src" ())
+(declare-function org-element-at-point "org-element" ())
 (declare-function org-element-context "org-element" (&optional element))
+(declare-function org-element-lineage "org-element" (blob &optional types with-self))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-end-of-subtree "org"  (&optional invisible-ok to-heading))
@@ -181,12 +183,6 @@ extracted will be filled again."
 	     (save-excursion
 	       (beginning-of-line)
 	       (looking-at "[ \t]*:[ \t]+"))
-	     ;; Avoid cited text and headers in message-mode.
-	     (and (derived-mode-p 'message-mode)
-		  (or (save-excursion
-			(beginning-of-line)
-			(looking-at message-cite-prefix-regexp))
-		      (message-point-in-header-p)))
 	     ;; Avoid forbidden blocks.
 	     (org-in-block-p org-footnote-forbidden-blocks)))))
 
@@ -251,20 +247,14 @@ otherwise."
 	  (let ((label (org-match-string-no-properties 1))
 		(beg (match-beginning 0))
 		(beg-def (match-end 0))
-		;; In message-mode, do not search after signature.
-		(end (let ((bound (and (derived-mode-p 'message-mode)
-				       (save-excursion
-					 (goto-char (point-max))
-					 (re-search-backward
-					  message-signature-separator nil t)))))
-		       (if (progn
-			     (end-of-line)
-			     (re-search-forward
-			      (concat org-outline-regexp-bol "\\|"
-				      org-footnote-definition-re "\\|"
-				      "^\\([ \t]*\n\\)\\{2,\\}") bound 'move))
-			   (match-beginning 0)
-			 (point)))))
+		(end (if (progn
+			   (end-of-line)
+			   (re-search-forward
+			    (concat org-outline-regexp-bol "\\|"
+				    org-footnote-definition-re "\\|"
+				    "^\\([ \t]*\n\\)\\{2,\\}") nil 'move))
+			 (match-beginning 0)
+		       (point))))
 	    (list label beg end
 		  (org-trim (buffer-substring-no-properties beg-def end)))))))))
 
@@ -630,7 +620,7 @@ buffer."
   (let ((current (or current (org-footnote-all-labels))))
     (let ((count 1))
       (while (member (number-to-string count) current)
-	(incf count))
+	(cl-incf count))
       (number-to-string count))))
 
 
@@ -712,7 +702,7 @@ Return the number of footnotes removed."
       (while (setq ref (org-footnote-get-next-reference label))
 	(goto-char (nth 1 ref))
 	(delete-region (nth 1 ref) (nth 2 ref))
-	(incf nref))
+	(cl-incf nref))
       nref)))
 
 (defun org-footnote-delete-definitions (label)
@@ -730,7 +720,7 @@ Return the number of footnotes removed."
 	    (skip-chars-backward " \r\t\n")
 	    (unless (bolp) (forward-line))
 	    (delete-region (point) (nth 2 full-def))
-	    (incf ndef))))
+	    (cl-incf ndef))))
       ndef)))
 
 (defun org-footnote-delete (&optional label)
@@ -778,7 +768,7 @@ If LABEL is non-nil, delete that footnote instead."
 	       (references (cl-remove-if-not
 			    (lambda (r) (string-match-p "\\`[0-9]+\\'" (car r)))
 			    references))
-	       (alist (mapcar (lambda (l) (cons l (number-to-string (incf c))))
+	       (alist (mapcar (lambda (l) (cons l (number-to-string (cl-incf c))))
 			      (delete-dups (mapcar #'car references)))))
 	  (org-with-wide-buffer
 	   ;; Re-number references.
@@ -791,7 +781,7 @@ If LABEL is non-nil, delete that footnote instead."
 	     (replace-match (or (cdr (assoc (match-string 1) alist))
 				;; Un-referenced definitions get
 				;; higher numbers.
-				(number-to-string (incf c)))
+				(number-to-string (cl-incf c)))
 			    nil nil nil 1))))
       (dolist (r references) (set-marker (nth 1 r) nil)))))
 
@@ -851,9 +841,9 @@ to `org-footnote-section'.  Inline definitions are ignored."
 		      ;; In order to differentiate anonymous
 		      ;; references from regular ones, set their
 		      ;; labels to integers, not strings.
-		      (anonymous (setcar cell (incf n)))
+		      (anonymous (setcar cell (cl-incf n)))
 		      ((cdr (assoc label translations)))
-		      (t (let ((l (number-to-string (incf n))))
+		      (t (let ((l (number-to-string (cl-incf n))))
 			   (push (cons label l) translations)
 			   l)))))
 	       (goto-char (nth 1 cell))	; Move to reference's start.
