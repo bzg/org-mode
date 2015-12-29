@@ -172,8 +172,8 @@
       (let ((org-datetree-add-timestamp 'inactive))
 	(org-datetree-find-iso-week-create '(12 31 2014)))
       (org-trim (buffer-string)))))
-  ;; Insert at top level, unless some node has DATE_WEEK_TREE
-  ;; property.  In this case, date tree becomes one of its sub-trees.
+  ;; Insert at top level, unless some node has WEEK_TREE property.  In
+  ;; this case, date tree becomes one of its sub-trees.
   (should
    (string-match
     "\\* 2015"
@@ -183,9 +183,9 @@
       (org-trim (buffer-string)))))
   (should
    (string-match
-    "\\*\\* H1.1\n:PROPERTIES:\n:DATE_WEEK_TREE: t\n:END:\n\\*\\*\\* 2015"
+    "\\*\\* H1.1\n:PROPERTIES:\n:WEEK_TREE: t\n:END:\n\\*\\*\\* 2015"
     (org-test-with-temp-text
-	"* H1\n** H1.1\n:PROPERTIES:\n:DATE_WEEK_TREE: t\n:END:\n* H2"
+	"* H1\n** H1.1\n:PROPERTIES:\n:WEEK_TREE: t\n:END:\n* H2"
       (let ((org-datetree-add-timestamp nil))
 	(org-datetree-find-iso-week-create '(12 31 2014)))
       (org-trim (buffer-string)))))
