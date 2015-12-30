@@ -1134,7 +1134,23 @@ Some other text
    (equal
     ":results html"
     (org-test-with-temp-text "call_test[:results output](x=2)[:results html]"
-      (org-element-property :end-header (org-element-context))))))
+      (org-element-property :end-header (org-element-context)))))
+  ;; Handle multi-line babel calls.
+  (should
+   (eq 'inline-babel-call
+       (org-test-with-temp-text
+	   "call_test[:results\noutput](x=2)[:results html]"
+	 (org-element-type (org-element-context)))))
+  (should
+   (eq 'inline-babel-call
+       (org-test-with-temp-text
+	   "call_test[:results output](x=2\ny=3)[:results html]"
+	 (org-element-type (org-element-context)))))
+  (should
+   (eq 'inline-babel-call
+       (org-test-with-temp-text
+	   "call_test[:results output](x=2)[:results\nhtml]"
+	 (org-element-type (org-element-context))))))
 
 
 ;;;; Inline Src Block
@@ -1169,7 +1185,20 @@ Some other text
   ;; Test parsing at the beginning of an item.
   (should
    (org-test-with-temp-text "- src_emacs-lisp{(+ 1 1)}"
-     (org-element-map (org-element-parse-buffer) 'inline-src-block 'identity))))
+     (org-element-map (org-element-parse-buffer) 'inline-src-block 'identity)))
+  ;; Test parsing multi-line source blocks.
+  (should
+   (eq 'inline-src-block
+       (org-test-with-temp-text "src_emacs-lisp{(+ 1\n  1)}"
+	 (org-element-type (org-element-context)))))
+  (should
+   (eq 'inline-src-block
+       (org-test-with-temp-text "src_emacs-lisp[\n:foo bar]{(+ 1 1)}"
+	 (org-element-type (org-element-context)))))
+  (should
+   (eq 'inline-src-block
+       (org-test-with-temp-text "src_emacs-lisp[:foo\nbar]{(+ 1 1)}"
+	 (org-element-type (org-element-context))))))
 
 
 ;;;; Inlinetask
