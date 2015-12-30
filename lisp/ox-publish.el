@@ -1240,14 +1240,18 @@ the file including them will be republished as well."
 	(while (re-search-forward "^[ \t]*#\\+INCLUDE:" nil t)
 	  (let* ((element (org-element-at-point))
 		 (included-file
-		  (and (eq (org-element-type element) 'keyword)
-		       (let ((value (org-element-property :value element)))
-			 (and value
-			      (string-match "^\\(\".+?\"\\|\\S-+\\)" value)
-			      ;; Ignore search suffix.
-			      (car (split-string
-				    (org-remove-double-quotes
-				     (match-string 1 value)))))))))
+                  (and (eq (org-element-type element) 'keyword)
+                       (let ((value (org-element-property :value element)))
+                         (and value
+                              (string-match
+			       "\\`\\(\".+?\"\\|\\S-+\\)\\(?:\\s-+\\|$\\)"
+			       value)
+                              (let ((m (match-string 1 value)))
+                                (org-remove-double-quotes
+				 ;; Ignore search suffix.
+                                 (if (string-match "\\(::\\(.*?\\)\\)\"?\\'" m)
+                                     (substring m 0 (match-beginning 0))
+                                   m))))))))
 	    (when included-file
 	      (push (org-publish-cache-ctime-of-src
 		     (expand-file-name included-file))
