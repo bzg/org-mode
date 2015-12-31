@@ -1,9 +1,9 @@
-;;; org-index.el --- A personal adaptive index for org
+;;; org-index.el --- A personal index for org
 
 ;; Copyright (C) 2011-2015 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 5.0.1
+;; Version: 5.0.2
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -27,7 +27,7 @@
 
 ;; Purpose:
 ;;
-;;  Fast index search for selected org nodes and things outside of org.
+;;  Fast search for selected org nodes and things outside of org.
 ;;
 ;;  org-index creates and updates an index table with keywords; each line
 ;;  either points to a heading in org, references something outside or
@@ -49,6 +49,9 @@
 ;;
 ;; Setup:
 ;;
+;;  - Place this file in a directory from your load-path,
+;;    e.g. org-mode/contrib/lisp.
+;;
 ;;  - Add these lines to your .emacs:
 ;;
 ;;    (require 'org-index)
@@ -63,21 +66,23 @@
 ;;    group org-index).
 ;;
 ;;
-;; Further reading:
+;; Further information:
 ;;
-;;  See the documentation of `org-index', which can also be read
-;;  by invoking `org-index' and choosing the help-command.
+;;  - Watch the screencast at http://2484.de/org-index.html.
+;;
+;;  - See the documentation of `org-index', which can also be read
+;;    by invoking `org-index' and choosing the help-command.
 ;;
 ;;
 ;; Updates:
 ;;
 ;;  The latest published version of this file can always be found at:
 ;;
-;;    http://orgmode.org/w/org-mode.git?p=org-mode.git;a=blob_plain;f=contrib/lisp/org-index.el;hb=HEAD
+;;    http://orgmode.org/w/?p=org-mode.git;a=blob_plain;f=contrib/lisp/org-index.el;hb=HEAD
 
 ;;; Change Log:
 
-;;   [2015-12-25 Fr] Version 5.0.1
+;;   [2015-12-29 Tu] Version 5.0.2
 ;;   - New commands yank, column and edit
 ;;   - New column tags
 ;;   - All columns are now required
@@ -85,6 +90,7 @@
 ;;   - Subcommand enter has been renamed to index
 ;;   - Subcommands kill and edit can be invoked from an occur buffer
 ;;   - Many Bugfixes
+;;   - Added link to screencast
 ;;
 ;;   [2015-08-20 Th] Version 4.3.0
 ;;   - Configuration is done now via standard customize
@@ -151,7 +157,7 @@
 (require 'widget)
 
 ;; Version of this package
-(defvar org-index-version "5.0.1" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
+(defvar org-index-version "5.0.2" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
 
 ;; customizable options
 (defgroup org-index nil
@@ -177,6 +183,7 @@ mixed  First, show all index entries, which have been
   :set (lambda (s v)
          (set-default s v)
          (if (and org-index-id
+                  org-index--buffer
                   (functionp 'org-index--sort-silent))
              (org-index--sort-silent)))
   :initialize 'custom-initialize-default
@@ -331,7 +338,7 @@ for its index table.
 To start building up your index, use subcommands 'add', 'ref' and
 'yank' to create entries and use 'occur' to find them.
 
-This is version 5.0.1 of org-index.el.
+This is version 5.0.2 of org-index.el.
 
 
 The function `org-index' is the only interactive function of this
@@ -1115,7 +1122,7 @@ Argument COLUMN and VALUE specify line to get."
     "Special input routine for command index."
 
     ;; Accept single char commands or switch to reading a sequence of digits
-    (let (char prompt search-ref search-id)
+    (let (char prompt search-ref search-id search-fingerprint)
     
       ;; start with short prompt but give more help on next iteration
       (setq prompt "Please specify, where to go in index (0-9.,space,backspace,return or ? for help): ")
@@ -1489,41 +1496,6 @@ Argument COLUMN and VALUE specify line to get."
           (unless (cdr (assoc head org-index--columns))
             (org-index--report-index-error "No column has heading '%s'" head)))
         org-index--valid-headings))
-
-
-(defun org-index--parse-list-item ()
-  "Parse a list item into an assoc array (indent, checkbox, text, value)."
-
-  ;; matche full list-item, maybe with checkbox and double-colon
-  (if (looking-at org-list-full-item-re)
-
-      ;; retrieve interesting parts of list item from match data
-      (let (indent checkbox text value next-line)
-
-        (setq indent
-              (- (save-excursion (goto-char (match-beginning 1)) (current-column)) ; first column
-                 (save-match-data (org-current-level)) ; indent-level
-                 1))
-        (setq checkbox (match-string 3))
-        (setq text (match-string 4))
-        (set (if text 'value 'text) (buffer-substring (match-end 0) (line-end-position))) ; regexp did not capture this
-
-        ;; peek ahead, if item continues on next line
-        (forward-line 1)
-        (if (looking-at org-list-full-item-re)
-            (forward-line -1) ; already at next item; go back
-          (setq next-line (buffer-substring (line-beginning-position) (line-end-position))))
-        
-        ;; clean up strings
-        (mapc (lambda (x)
-                (if (stringp (symbol-value x))
-                    (set x (org-trim (substring-no-properties (symbol-value x))))))
-              '(text value next-line))
-
-        (if next-line (setq text (concat text " " next-line))) ; append next line if
-        
-        (list (cons :indent indent) (cons :text text) (cons :value value) (cons :sym (intern text))))
-    nil))
 
 
 (defun org-index--create-missing-index (&rest reasons)
@@ -2381,9 +2353,10 @@ If OTHER in separate window."
           (org-show-entry)
           (recenter)
           (unless (string= (org-id-get) id)
-            (error "Could not find node with id %s" id))
+            (setq message "Could not go to node with id %s (narrowed ?)" id))
           (setq message "Found headline"))
-      (setq message (format "Did not find headline %s" ref)))))
+      (setq message (format "Did not find node with %s" id)))
+    message))
 
 
 (defun org-index--do-occur ()
