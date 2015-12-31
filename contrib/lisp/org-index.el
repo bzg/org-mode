@@ -176,8 +176,8 @@ Valid values are:
 last-access  Sort index by date and time of last access; show
              more recent entries first.
 count  Sort by usage count; more often used entries first.
-mixed  First, show all index entries, which have been 
-       used today; sort them by last access. Then show 
+mixed  First, show all index entries, which have been
+       used today; sort them by last access.  Then show
        older entries sorted by usage count."
   :group 'org-index
   :set (lambda (s v)
@@ -216,8 +216,7 @@ Valid values are some columns of index table."
                  (const :tag "No" nil)))
 
 (defcustom org-index-strip-ref-and-date-from-heading t
-  "When adding a headline as keywords for a new index row: remove 
-leading reference or timestamps ?
+  "When adding a node to index: strip leading ref or timestamps ?
 
 This can be useful, if you have the habit of adding refs and
 dates to the start of your headings; then, if you change your
@@ -281,10 +280,10 @@ those pieces."
 (defvar org-index--last-sort nil "Last column, the index has been sorted after.")
 (defvar org-index--sort-timer nil "Timer to sort index in correct order.")
 (defvar org-index--aligned nil "Remember for this Emacs session, if table has been aligned at least once.")
-(defvar org-index--edit-widgets nil "List of widgets used to edit")
-(defvar org-index--context-index nil "Position and line used for index in edit buffer")
-(defvar org-index--context-occur nil "Position and line used for occur in edit buffer")
-(defvar org-index--context-node nil "Buffer and position for node in edit buffer")
+(defvar org-index--edit-widgets nil "List of widgets used to edit.")
+(defvar org-index--context-index nil "Position and line used for index in edit buffer.")
+(defvar org-index--context-occur nil "Position and line used for occur in edit buffer.")
+(defvar org-index--context-node nil "Buffer and position for node in edit buffer.")
 
 ;; static information for this program package
 (defconst org-index--commands '(occur add kill head ping index ref yank column edit help example sort multi-occur highlight maintain) "List of commands available.")
@@ -867,7 +866,7 @@ Optional argument KEYS-VALUES specifies content of new line."
 
 
 (defun org-index--do-edit ()
-  "Perform command edit"
+  "Perform command edit."
   (let ((maxlen 0) cols-vals buffer-keymap field-keymap keywords-pos val)
 
     (org-index--check-can-edit-or-kill "edit")
@@ -955,7 +954,7 @@ Optional argument KEYS-VALUES specifies content of new line."
         (unless (string= (cdr org-index--context-index)
                          (org-index--line-in-canonical-form))
           (switch-to-buffer org-index--edit-buffer-name)
-          (error "Index table has changed: Cannot find line, that this buffer is editing.")))
+          (error "Index table has changed: Cannot find line, that this buffer is editing")))
 
       (pop-to-buffer-same-window org-index--buffer)
       (goto-char (car org-index--context-index))
@@ -983,7 +982,7 @@ Optional argument KEYS-VALUES specifies content of new line."
                     (insert line)
                     (put-text-property (line-beginning-position) (line-end-position)
                                        'org-index-lbp (cdr org-index--context-index))))
-              (error "Occur buffer and index buffer do not match any longer."))
+              (error "Occur buffer and index buffer do not match any longer"))
           (message "Occur buffer has gone, cannot switch back."))
       (setq org-index--context-occur nil))
 
@@ -1609,7 +1608,7 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
 
   Within the index table below, the sequence of columns does not
   matter. You may reorder them in any way you like.  You may also
-  add your own columns, which should start with a dot 
+  add your own columns, which should start with a dot
   (e.g. '.my-column').
 
   Invoke `org-customize' to tweak the behaviour of org-index
@@ -1974,7 +1973,8 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
 
 
 (defun org-index--do-add-or-update (&optional create-ref tag-with-ref)
-  "For current node or current line in index, add a new line to index table or update existing."
+  "For current node or current line in index, add or update in index table.
+CREATE-REF and TAG-WITH-REF if given."
 
   (let* (id id-from-index ref args yank)
 
@@ -2209,8 +2209,7 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
       ;; At a headline
       (setq id (org-entry-get (point) "ID"))
       (setq ref (org-index--ref-from-id id))
-      (setq pos-in-index (org-index--on 'id id
-                           (setq point-in-index (point))))
+      (setq pos-in-index (org-index--on 'id id (point)))
       (unless pos-in-index (error "This node is not in index")))
 
     ;; Remark: Current buffer is not certain here, but we have all the information to delete
@@ -2242,7 +2241,7 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
           (delete-region (line-beginning-position) (line-beginning-position 2))
           ;; correct positions
           (while (org-at-table-p)
-            (put-text-property (line-beginning-position) (line-end-position) 'org-index-lbp 
+            (put-text-property (line-beginning-position) (line-end-position) 'org-index-lbp
                                (- (get-text-property (point) 'org-index-lbp) chars-deleted-index))
             (forward-line))
           (setq text-deleted-from (cons "occur" text-deleted-from))))
@@ -2286,7 +2285,7 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
 
 
 (defun org-index--delete-ref-from-heading (ref)
-  "Delete given REF from current heading"
+  "Delete given REF from current heading."
   (save-excursion
     (end-of-line)
     (let ((end (point)))
@@ -2297,7 +2296,7 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
 
 
 (defun org-index--delete-any-ref-from-tags ()
-  "Delete any reference from list of tags"
+  "Delete any reference from list of tags."
   (let (new-tags)
     (mapc (lambda (tag)
             (unless (string-match org-index--ref-regex tag)
@@ -2353,7 +2352,7 @@ If OTHER in separate window."
           (org-show-entry)
           (recenter)
           (unless (string= (org-id-get) id)
-            (setq message "Could not go to node with id %s (narrowed ?)" id))
+            (setq message (format "Could not go to node with id %s (narrowed ?)" id)))
           (setq message "Found headline"))
       (setq message (format "Did not find node with %s" id)))
     message))
@@ -2614,7 +2613,7 @@ If OTHER in separate window."
               (propertize "Search is done;    `?' toggles help and headlines.\n" 'face 'org-agenda-dimmed-todo-face))
              (concat
               (org-index--wrap
-               (propertize 
+               (propertize
                 (format
                  (concat "Search is done."
                          (if (< lines-collected lines-wanted)
@@ -2694,7 +2693,7 @@ If OTHER in separate window."
       (goto-char pos)
       (setq there (org-index--line-in-canonical-form)))
     (unless (string= here there)
-      (error "Occur buffer has become stale."))))
+      (error "Occur buffer has become stale"))))
 
 
 (defun org-index--line-in-canonical-form ()
