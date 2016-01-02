@@ -21615,10 +21615,11 @@ number of stars to add."
 	   (when (org-at-item-p)
 	     ;; Pay attention to cases when region ends before list.
 	     (let* ((struct (org-list-struct))
-		    (list-end (min (org-list-get-bottom-point struct) (1+ end))))
+		    (list-end
+		     (min (org-list-get-bottom-point struct) (1+ end))))
 	       (save-restriction
 		 (narrow-to-region (point) list-end)
-		 (insert (org-list-to-subtree (org-list-to-lisp t)))))
+		 (insert (org-list-to-subtree (org-list-to-lisp t)) "\n")))
 	     (setq toggled t))
 	   (forward-line)))
 	;; Case 3. Started at normal text: make every line an heading,
