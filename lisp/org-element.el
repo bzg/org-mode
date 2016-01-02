@@ -1968,7 +1968,7 @@ Assume point is at export-block beginning."
 						      contents-end)))
 	  (list 'export-block
 		(nconc
-		 (list :type backend
+		 (list :type (and backend (upcase backend))
 		       :begin begin
 		       :end end
 		       :value value

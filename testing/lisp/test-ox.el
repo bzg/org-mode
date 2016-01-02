@@ -1743,6 +1743,34 @@ Para2"
 
 
 
+;;; Export blocks
+
+(ert-deftest test-org-export/export-block ()
+  "Test export blocks transcoding."
+  (should
+   (equal "Success!\n"
+	  (org-test-with-temp-text
+	      "#+BEGIN_EXPORT backend\nSuccess!\n#+END_EXPORT"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders '((export-block . (lambda (b _c _i)
+					       (org-element-property :value b)))
+			     (section . (lambda (_s c _i) c))))))))
+  (should
+   (equal "Success!\n"
+	  (org-test-with-temp-text
+	      "#+BEGIN_EXPORT backend\nSuccess!\n#+END_EXPORT"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders
+	      (list
+	       (cons 'export-block
+		     (lambda (b _c _i)
+		       (and (equal (org-element-property :type b) "BACKEND")
+			    (org-element-property :value b))))
+	       (cons 'section (lambda (_s c _i) c)))))))))
+
+
 ;;; Export Snippets
 
 (ert-deftest test-org-export/export-snippet ()
