@@ -39,8 +39,9 @@
 (declare-function org-link-escape "org" (text &optional table))
 (declare-function org-open-link-from-string "org" (s &optional arg reference-buffer))
 (declare-function org-store-link "org" (arg))
-(declare-function org-up-heading-safe "org" ())
 (declare-function outline-previous-heading "outline" ())
+
+(defvar org-link-types-re)
 
 (defcustom org-babel-tangle-lang-exts
   '(("emacs-lisp" . "el")
