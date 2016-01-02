@@ -1,6 +1,6 @@
 ;;; test-org-pcomplete.el --- test pcomplete integration
 
-;; Copyright (C) 2015  Alexey Lebedeff
+;; Copyright (C) 2015-2016  Alexey Lebedeff
 ;; Authors: Alexey Lebedeff
 
 ;; This file is not part of GNU Emacs.
@@ -25,7 +25,7 @@
 ;;; Code:
 
 (ert-deftest test-org-pcomplete/prop ()
-  "Test property completion behaviour in an Org buffer"
+  "Test property completion."
   ;; Drawer where we are currently completing property name is
   ;; malformed in any case, it'll become valid only after successful
   ;; completion.  We expect that this completion process will finish
@@ -37,6 +37,21 @@
     (org-test-with-temp-text "* a\n:PROPERTIES:\n:pna<point>\n:END:\n* b\n:PROPERTIES:\n:pname: pvalue\n:END:\n"
       (flet ((y-or-n-p (prompt) (error "Should not be called")))
 	(pcomplete))
+      (buffer-string)))))
+
+(ert-deftest test-org-pcomplete/keyword ()
+  "Test keyword and block completion."
+  (should
+   (equal
+    "#+startup: "
+    (org-test-with-temp-text "#+start<point>"
+      (pcomplete)
+      (buffer-string))))
+  (should
+   (equal
+    "#+begin_center"
+    (org-test-with-temp-text "#+begin_ce<point>"
+      (pcomplete)
       (buffer-string)))))
 
 (provide 'test-org-pcomplete)
