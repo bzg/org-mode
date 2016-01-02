@@ -342,11 +342,12 @@ Flag will be non-nil if command is going to modify or delete an
 headline."
   (when org-indent-mode
     (setq org-indent-modified-headline-flag
-	  (save-excursion
-	    (goto-char beg)
-	    (save-match-data
-	      (or (and (org-at-heading-p) (< beg (match-end 0)))
-		  (re-search-forward org-outline-regexp-bol end t)))))))
+	  (org-with-wide-buffer
+	   (goto-char beg)
+	   (save-match-data
+	     (or (and (org-at-heading-p) (< beg (match-end 0)))
+		 (re-search-forward
+		  (org-with-limited-levels org-outline-regexp-bol) end t)))))))
 
 (defun org-indent-refresh-maybe (beg end dummy)
   "Refresh indentation properties in an adequate portion of buffer.
@@ -358,19 +359,21 @@ This function is meant to be called by `after-change-functions'."
     (save-match-data
       ;; If a headline was modified or inserted, set properties until
       ;; next headline.
-      (if (or org-indent-modified-headline-flag
-	      (save-excursion
-		(goto-char beg)
-		(beginning-of-line)
-		(re-search-forward org-outline-regexp-bol end t)))
-	  (let ((end (save-excursion
-		       (goto-char end)
-		       (org-with-limited-levels (outline-next-heading))
-		       (point))))
-	    (setq org-indent-modified-headline-flag nil)
-	    (org-indent-add-properties beg end))
-	;; Otherwise, only set properties on modified area.
-	(org-indent-add-properties beg end)))))
+      (org-with-wide-buffer
+       (if (or org-indent-modified-headline-flag
+	       (save-excursion
+		 (goto-char beg)
+		 (beginning-of-line)
+		 (re-search-forward
+		  (org-with-limited-levels org-outline-regexp-bol) end t)))
+	   (let ((end (save-excursion
+			(goto-char end)
+			(org-with-limited-levels (outline-next-heading))
+			(point))))
+	     (setq org-indent-modified-headline-flag nil)
+	     (org-indent-add-properties beg end))
+	 ;; Otherwise, only set properties on modified area.
+	 (org-indent-add-properties beg end))))))
 
 (provide 'org-indent)
 
