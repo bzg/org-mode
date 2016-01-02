@@ -94,6 +94,32 @@ echo 1
 				   (buffer-string)))
 	(delete-file "test-ob-tangle.sh"))))))
 
+(ert-deftest ob-tangle/comment-links-numbering ()
+  "Test numbering of source blocks when commenting with links."
+  (should
+   (org-test-with-temp-text-in-file
+       "* H
+#+header: :tangle \"test-ob-tangle.el\" :comments link
+#+begin_src emacs-lisp
+1
+#+end_src
+
+#+header: :tangle \"test-ob-tangle.el\" :comments link
+#+begin_src emacs-lisp
+2
+#+end_src"
+     (unwind-protect
+	 (progn
+	   (org-babel-tangle)
+	   (with-temp-buffer
+	     (insert-file-contents "test-ob-tangle.el")
+	     (buffer-string)
+	     (goto-char (point-min))
+	     (and (search-forward "[H:1]]" nil t)
+		  (search-forward "[H:2]]" nil t))))
+       (delete-file "test-ob-tangle.el")))))
+
+
 (provide 'test-ob-tangle)
 
 ;;; test-ob-tangle.el ends here
