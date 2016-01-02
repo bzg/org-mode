@@ -80,9 +80,9 @@
 ;; `org-koma-letter-special-tags-after-closing' used as macros and the
 ;; content of the headline is the argument.
 ;;
-;; Headlines with two and from may also be used rather than the
-;; keyword approach described above.  If both a keyword and a headline
-;; with information is present precedence is determined by
+;; Headlines with to and from may also be used rather than the keyword
+;; approach described above.  If both a keyword and a headline with
+;; information is present precedence is determined by
 ;; `org-koma-letter-prefer-special-headings'.
 ;;
 ;; You need an appropriate association in `org-latex-classes' in order
