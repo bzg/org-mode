@@ -1889,10 +1889,14 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
 (defun org-clock-display (&optional arg)
   "Show subtree times in the entire buffer.
 
-With one universal prefix argument, show the total time for
-today.  With two universal prefix arguments, show the total time
-for a custom range, entered at the prompt.  With three universal
-prefix arguments, show the total time in the echo area.
+By default, show the total time for the range defined in
+`org-clock-display-default-range'.  With \\[universal-argument] \
+prefix, show
+the total time for today instead.  With \\[universal-argument] \
+\\[universal-argument] prefix, use
+a custom range, entered at the prompt.  With \\[universal-argument] \
+\\[universal-argument] \\[universal-argument]
+prefix, display the total time in the echo area.
 
 Use \\[org-clock-remove-overlays] to remove the subtree times."
   (interactive "P")
