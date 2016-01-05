@@ -1702,7 +1702,7 @@ The template may still contain \"%?\" for cursor positioning."
 		       (key (match-string 2)))
 		  (delete-region (match-beginning 0) (match-end 0))
 		  (pcase key
-		    ((or `"G" `"g")
+		    ((or "G" "g")
 		     (let* ((org-last-tags-completion-table
 			     (org-global-tags-completion-table
 			      (cond ((equal key "G") (org-agenda-files))
@@ -1725,7 +1725,7 @@ The template may still contain \"%?\" for cursor positioning."
 			 (and (org-at-heading-p)
 			      (let ((org-ignore-region t))
 				(org-set-tags nil 'align))))))
-		    (`"C"
+		    ("C"
 		     (cond
 		      ((= (length clipboards) 1) (insert (car clipboards)))
 		      ((> (length clipboards) 1)
@@ -1733,7 +1733,7 @@ The template may still contain \"%?\" for cursor positioning."
 					    (car clipboards)
 					    '(clipboards . 1)
 					    (car clipboards))))))
-		    (`"L"
+		    ("L"
 		     (cond ((= (length clipboards) 1)
 			    (org-insert-link 0 (car clipboards)))
 			   ((> (length clipboards) 1)
@@ -1743,7 +1743,7 @@ The template may still contain \"%?\" for cursor positioning."
 					  (car clipboards)
 					  '(clipboards . 1)
 					  (car clipboards))))))
-		    (`"p" (org-set-property prompt nil))
+		    ("p" (org-set-property prompt nil))
 		    ((guard key)
 		     ;; These are the date/time related ones.
 		     (let* ((upcase? (equal (upcase key) key))
