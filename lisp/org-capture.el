@@ -60,6 +60,7 @@
 (declare-function org-table-analyze "org-table" ())
 (declare-function org-table-goto-line "org-table" (N))
 
+(defvar org-end-time-was-given)
 (defvar org-remember-default-headline)
 (defvar org-remember-templates)
 (defvar org-table-hlines)
