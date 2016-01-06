@@ -40,7 +40,6 @@ becomes
 ,#+INCLUDE: "file.org" export html
 #+END_SRC
 
-
 The following function repairs export blocks and =INCLUDE= keywords
 using previous syntax:
 
@@ -75,6 +74,10 @@ using previous syntax:
                         (string= (org-element-property :key element) "INCLUDE"))
                (replace-match "EXPORT \\1" nil nil nil 1)))))))))
 #+END_SRC
+
+Moreover, ~:export-block~ keyword used in ~org-export-define-backend~
+and ~org-export-define-derived-backend~ is no longer used and needs to
+be removed.
 
 *** Footnotes
 **** [1]-like constructs are not valid footnotes
