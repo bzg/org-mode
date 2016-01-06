@@ -11935,7 +11935,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 		  (unless (bolp) (newline))
 		  (org-paste-subtree level nil nil t)
 		  (when org-log-refile
-		    (org-add-log-setup 'refile nil nil 'findpos org-log-refile)
+		    (org-add-log-setup 'refile nil nil org-log-refile)
 		    (unless (eq org-log-refile 'note)
 		      (save-excursion (org-add-log-note))))
 		  (and org-auto-align-tags
@@ -12651,10 +12651,10 @@ When called through ELisp, arg is also interpreted in the following way:
 		;; It is now done, and it was not done before
 		(org-add-planning-info 'closed (org-current-effective-time))
 		(when (and (not dolog) (eq 'note org-log-done))
-		  (org-add-log-setup 'done org-state this 'findpos 'note)))
+		  (org-add-log-setup 'done org-state this 'note)))
 	      (when (and org-state dolog)
 		;; This is a non-nil state, and we need to log it
-		(org-add-log-setup 'state org-state this 'findpos dolog)))
+		(org-add-log-setup 'state org-state this dolog)))
 	    ;; Fixup tag positioning
 	    (org-todo-trigger-tag-changes org-state)
 	    (and org-auto-align-tags (not org-setting-tags) (org-set-tags nil t))
@@ -13195,9 +13195,10 @@ This function is run automatically after each state change to a DONE state."
 	      ;; make sure we take a note, not only a time stamp
 	      (setq org-log-note-how 'note))
 	  ;; Set up for taking a record
-	  (org-add-log-setup 'state (or done-word (car org-done-keywords))
+	  (org-add-log-setup 'state
+			     (or done-word (car org-done-keywords))
 			     org-last-state
-			     'findpos org-log-repeat)))
+			     org-log-repeat)))
       (org-back-to-heading t)
       (org-add-planning-info nil nil 'closed)
       (setq re (concat "\\(" org-scheduled-time-regexp "\\)\\|\\("
@@ -13298,8 +13299,7 @@ can either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
       (cond
        ((equal arg '(4))
 	(when (and old-date org-log-redeadline)
-	  (org-add-log-setup 'deldeadline nil old-date 'findpos
-			     org-log-redeadline))
+	  (org-add-log-setup 'deldeadline nil old-date org-log-redeadline))
 	(org-remove-timestamp-with-keyword org-deadline-string)
 	(message "Item no longer has a deadline."))
        ((equal arg '(16))
@@ -13327,8 +13327,7 @@ can either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 		   org-log-redeadline
 		   (not (equal old-date org-last-inserted-timestamp)))
 	  (org-add-log-setup
-	   'redeadline org-last-inserted-timestamp old-date 'findpos
-	   org-log-redeadline))
+	   'redeadline org-last-inserted-timestamp old-date org-log-redeadline))
 	(when repeater
 	  (save-excursion
 	    (org-back-to-heading t)
@@ -13370,8 +13369,7 @@ either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
        ((equal arg '(4))
 	(progn
 	  (when (and old-date org-log-reschedule)
-	    (org-add-log-setup 'delschedule nil old-date 'findpos
-			       org-log-reschedule))
+	    (org-add-log-setup 'delschedule nil old-date org-log-reschedule))
 	  (org-remove-timestamp-with-keyword org-scheduled-string)
 	  (message "Item is no longer scheduled.")))
        ((equal arg '(16))
@@ -13399,8 +13397,7 @@ either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 		   org-log-reschedule
 		   (not (equal old-date org-last-inserted-timestamp)))
 	  (org-add-log-setup
-	   'reschedule org-last-inserted-timestamp old-date 'findpos
-	   org-log-reschedule))
+	   'reschedule org-last-inserted-timestamp old-date org-log-reschedule))
 	(when repeater
 	  (save-excursion
 	    (org-back-to-heading t)
@@ -13564,7 +13561,7 @@ WHAT entry will also be removed."
 	   (unless (eolp) (insert " "))
 	   ts))))))
 
-(defvar org-log-note-marker (make-marker))
+(defvar org-log-note-buffer nil)
 (defvar org-log-note-purpose nil)
 (defvar org-log-note-state nil)
 (defvar org-log-note-previous-state nil)
@@ -13584,7 +13581,7 @@ The auto-repeater uses this.")
   "Add a note to the current entry.
 This is done in the same way as adding a state change note."
   (interactive)
-  (org-add-log-setup 'note nil nil 'findpos nil))
+  (org-add-log-setup 'note))
 
 (defun org-log-beginning (&optional create)
   "Return expected start of log notes in current entry.
@@ -13623,31 +13620,19 @@ narrowing."
 	 (forward-line)))))
    (if (bolp) (point) (line-beginning-position 2))))
 
-(defun org-add-log-setup (&optional purpose state prev-state findpos how extra)
+(defun org-add-log-setup (&optional purpose state prev-state how extra)
   "Set up the post command hook to take a note.
 If this is about to TODO state change, the new state is expected in STATE.
-When FINDPOS is non-nil, find the correct position for the note in
-the current entry.  If not, assume that it can be inserted at point.
 HOW is an indicator what kind of note should be created.
 EXTRA is additional text that will be inserted into the notes buffer."
-  (org-with-wide-buffer
-   (when findpos
-     (goto-char (org-log-beginning t))
-     (unless org-log-states-order-reversed
-       (org-skip-over-state-notes)
-       (skip-chars-backward " \t\n\r")
-       (forward-line)))
-   (move-marker org-log-note-marker (point))
-   ;; Preserve position even if a property drawer is inserted in the
-   ;; process.
-   (set-marker-insertion-type org-log-note-marker t)
-   (setq org-log-note-purpose purpose
-	 org-log-note-state state
-	 org-log-note-previous-state prev-state
-	 org-log-note-how how
-	 org-log-note-extra extra
-	 org-log-note-effective-time (org-current-effective-time))
-   (add-hook 'post-command-hook 'org-add-log-note 'append)))
+  (setq org-log-note-buffer (current-buffer)
+	org-log-note-purpose purpose
+	org-log-note-state state
+	org-log-note-previous-state prev-state
+	org-log-note-how how
+	org-log-note-extra extra
+	org-log-note-effective-time (org-current-effective-time))
+  (add-hook 'post-command-hook 'org-add-log-note 'append))
 
 (defun org-skip-over-state-notes ()
   "Skip past the list of State notes in an entry."
@@ -13673,13 +13658,12 @@ EXTRA is additional text that will be inserted into the notes buffer."
 		       (org-list-get-item-end (point) struct)))))))
 
 (defun org-add-log-note (&optional purpose)
-  "Pop up a window for taking a note, and add this note later at point."
+  "Pop up a window for taking a note, and add this note later."
   (remove-hook 'post-command-hook 'org-add-log-note)
   (setq org-log-note-window-configuration (current-window-configuration))
   (delete-other-windows)
   (move-marker org-log-note-return-to (point))
-  (org-pop-to-buffer-same-window (marker-buffer org-log-note-marker))
-  (goto-char org-log-note-marker)
+  (org-pop-to-buffer-same-window org-log-note-buffer)
   (org-switch-to-buffer-other-window "*Org Note*")
   (erase-buffer)
   (if (memq org-log-note-how '(time state))
@@ -13714,93 +13698,94 @@ EXTRA is additional text that will be inserted into the notes buffer."
 (defvar org-note-abort nil) ; dynamically scoped
 (defun org-store-log-note ()
   "Finish taking a log note, and insert it to where it belongs."
-  (let ((txt (buffer-string)))
-    (kill-buffer (current-buffer))
-    (let ((note (cdr (assq org-log-note-purpose org-log-note-headings))) lines)
-      (while (string-match "\\`# .*\n[ \t\n]*" txt)
-	(setq txt (replace-match "" t t txt)))
-      (when (string-match "\\s-+\\'" txt)
-	(setq txt (replace-match "" t t txt)))
-      (setq lines (org-split-string txt "\n"))
-      (when (and note (string-match "\\S-" note))
-	(setq note
-	      (org-replace-escapes
-	       note
-	       (list (cons "%u" (user-login-name))
-		     (cons "%U" user-full-name)
-		     (cons "%t" (format-time-string
-				 (org-time-stamp-format 'long 'inactive)
-				 org-log-note-effective-time))
-		     (cons "%T" (format-time-string
-				 (org-time-stamp-format 'long nil)
-				 org-log-note-effective-time))
-		     (cons "%d" (format-time-string
-				 (org-time-stamp-format nil 'inactive)
-				 org-log-note-effective-time))
-		     (cons "%D" (format-time-string
-				 (org-time-stamp-format nil nil)
-				 org-log-note-effective-time))
-		     (cons "%s" (cond
-				 ((not org-log-note-state) "")
-				 ((org-string-match-p org-ts-regexp
-						      org-log-note-state)
-				  (format "\"[%s]\""
-					  (substring org-log-note-state 1 -1)))
-				 (t (format "\"%s\"" org-log-note-state))))
-		     (cons "%S"
-			   (cond
-			    ((not org-log-note-previous-state) "")
-			    ((org-string-match-p org-ts-regexp
-						 org-log-note-previous-state)
-			     (format "\"[%s]\""
-				     (substring
-				      org-log-note-previous-state 1 -1)))
-			    (t (format "\"%s\""
-				       org-log-note-previous-state)))))))
-	(when lines (setq note (concat note " \\\\")))
-	(push note lines))
-      (when (or current-prefix-arg org-note-abort)
-	(when (org-log-into-drawer)
-	  (org-remove-empty-drawer-at org-log-note-marker))
-	(setq lines nil))
-      (when lines
-	(with-current-buffer (marker-buffer org-log-note-marker)
-	  (org-with-wide-buffer
-	    (goto-char org-log-note-marker)
-	    (move-marker org-log-note-marker nil)
-	    ;; Make sure point is at the beginning of an empty line.
-	    (cond ((not (bolp)) (let ((inhibit-read-only t)) (insert "\n")))
-		  ((looking-at "[ \t]*\\S-") (save-excursion (insert "\n"))))
-	    ;; In an existing list, add a new item at the top level.
-	    ;; Otherwise, indent line like a regular one.
-	    (let ((itemp (org-in-item-p)))
-	      (if itemp
-		  (org-indent-line-to
-		   (let ((struct (save-excursion
-				   (goto-char itemp) (org-list-struct))))
-		     (org-list-get-ind (org-list-get-top-point struct) struct)))
-		(org-indent-line)))
-	    (insert (org-list-bullet-string "-") (pop lines))
-	    (let ((ind (org-list-item-body-column (line-beginning-position))))
-	      (dolist (line lines)
-		(insert "\n")
-		(org-indent-line-to ind)
-		(insert line)))
-	    (message "Note stored")
-	    (org-back-to-heading t)
-	    (org-cycle-hide-drawers 'children))
-	  ;; Fix `buffer-undo-list' when `org-store-log-note' is called
-	  ;; from within `org-add-log-note' because `buffer-undo-list'
-	  ;; is then modified outside of `org-with-remote-undo'.
-	  (when (eq this-command 'org-agenda-todo)
-	    (setcdr buffer-undo-list (cddr buffer-undo-list)))))))
-  ;; Don't add undo information when called from `org-agenda-todo'
+  (let ((txt (prog1 (buffer-string)
+	       (kill-buffer)))
+	(note (cdr (assq org-log-note-purpose org-log-note-headings)))
+	lines)
+    (while (string-match "\\`# .*\n[ \t\n]*" txt)
+      (setq txt (replace-match "" t t txt)))
+    (when (string-match "\\s-+\\'" txt)
+      (setq txt (replace-match "" t t txt)))
+    (setq lines (org-split-string txt "\n"))
+    (when (org-string-nw-p note)
+      (setq note
+	    (org-replace-escapes
+	     note
+	     (list (cons "%u" (user-login-name))
+		   (cons "%U" user-full-name)
+		   (cons "%t" (format-time-string
+			       (org-time-stamp-format 'long 'inactive)
+			       org-log-note-effective-time))
+		   (cons "%T" (format-time-string
+			       (org-time-stamp-format 'long nil)
+			       org-log-note-effective-time))
+		   (cons "%d" (format-time-string
+			       (org-time-stamp-format nil 'inactive)
+			       org-log-note-effective-time))
+		   (cons "%D" (format-time-string
+			       (org-time-stamp-format nil nil)
+			       org-log-note-effective-time))
+		   (cons "%s" (cond
+			       ((not org-log-note-state) "")
+			       ((org-string-match-p org-ts-regexp
+						    org-log-note-state)
+				(format "\"[%s]\""
+					(substring org-log-note-state 1 -1)))
+			       (t (format "\"%s\"" org-log-note-state))))
+		   (cons "%S"
+			 (cond
+			  ((not org-log-note-previous-state) "")
+			  ((org-string-match-p org-ts-regexp
+					       org-log-note-previous-state)
+			   (format "\"[%s]\""
+				   (substring
+				    org-log-note-previous-state 1 -1)))
+			  (t (format "\"%s\""
+				     org-log-note-previous-state)))))))
+      (when lines (setq note (concat note " \\\\")))
+      (push note lines))
+    (when (and lines (not (or current-prefix-arg org-note-abort)))
+      (with-current-buffer org-log-note-buffer
+	(org-with-wide-buffer
+	 ;; Find location for the new note.
+	 (goto-char (org-log-beginning t))
+	 (unless org-log-states-order-reversed
+	   (org-skip-over-state-notes)
+	   (skip-chars-backward " \t\n\r")
+	   (forward-line))
+	 ;; Make sure point is at the beginning of an empty line.
+	 (cond ((not (bolp)) (let ((inhibit-read-only t)) (insert "\n")))
+	       ((looking-at "[ \t]*\\S-") (save-excursion (insert "\n"))))
+	 ;; In an existing list, add a new item at the top level.
+	 ;; Otherwise, indent line like a regular one.
+	 (let ((itemp (org-in-item-p)))
+	   (if itemp
+	       (org-indent-line-to
+		(let ((struct (save-excursion
+				(goto-char itemp) (org-list-struct))))
+		  (org-list-get-ind (org-list-get-top-point struct) struct)))
+	     (org-indent-line)))
+	 (insert (org-list-bullet-string "-") (pop lines))
+	 (let ((ind (org-list-item-body-column (line-beginning-position))))
+	   (dolist (line lines)
+	     (insert "\n")
+	     (org-indent-line-to ind)
+	     (insert line)))
+	 (message "Note stored")
+	 (org-back-to-heading t)
+	 (org-cycle-hide-drawers 'children))
+	;; Fix `buffer-undo-list' when `org-store-log-note' is called
+	;; from within `org-add-log-note' because `buffer-undo-list'
+	;; is then modified outside of `org-with-remote-undo'.
+	(when (eq this-command 'org-agenda-todo)
+	  (setcdr buffer-undo-list (cddr buffer-undo-list))))))
+  ;; Don't add undo information when called from `org-agenda-todo'.
   (let ((buffer-undo-list (eq this-command 'org-agenda-todo)))
     (set-window-configuration org-log-note-window-configuration)
     (with-current-buffer (marker-buffer org-log-note-return-to)
       (goto-char org-log-note-return-to))
     (move-marker org-log-note-return-to nil)
-    (and org-log-post-message (message "%s" org-log-post-message))))
+    (when org-log-post-message (message "%s" org-log-post-message))))
 
 (defun org-remove-empty-drawer-at (pos)
   "Remove an empty drawer at position POS.

@@ -1598,8 +1598,9 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	  (move-marker org-clock-marker nil)
 	  (move-marker org-clock-hd-marker nil)
 	  (when org-log-note-clock-out
-	    (org-add-log-setup 'clock-out nil nil nil nil
-			       (concat "# Task: " (org-get-heading t) "\n\n")))
+	    (org-add-log-setup
+	     'clock-out nil nil nil
+	     (concat "# Task: " (org-get-heading t) "\n\n")))
 	  (when org-clock-mode-line-timer
 	    (cancel-timer org-clock-mode-line-timer)
 	    (setq org-clock-mode-line-timer nil))
@@ -1629,18 +1630,7 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	  (message (concat "Clock stopped at %s after "
 			   (org-minutes-to-clocksum-string (+ (* 60 h) m)) "%s")
 		   te (if remove " => LINE REMOVED" ""))
-	  (let ((h org-clock-out-hook)
-		(clock-drawer (org-clock-into-drawer)))
-	    ;; If a closing note needs to be stored in the drawer
-	    ;; where clocks are stored, let's temporarily disable
-	    ;; `org-clock-remove-empty-clock-drawer'.
-	    (if (and clock-drawer
-		     (not (stringp clock-drawer))
-		     (org-log-into-drawer)
-		     (eq org-log-done 'note)
-		     org-clock-out-when-done)
-		(setq h (delq 'org-clock-remove-empty-clock-drawer h)))
-	    (mapc #'funcall h))
+	  (run-hooks 'org-clock-out-hook)
 	  (unless (org-clocking-p)
 	    (setq org-clock-current-task nil)))))))
 
