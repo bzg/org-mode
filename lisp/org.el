@@ -7595,7 +7595,7 @@ frame is not changed."
 	(while (> (setq level (org-outline-level)) arg)
 	  (org-up-heading-safe)))
       (setq beg (point)
-	    heading (org-get-heading))
+	    heading (org-get-heading 'no-tags))
       (org-end-of-subtree t t)
       (when (org-at-heading-p) (backward-char 1))
       (setq end (point)))
