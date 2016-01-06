@@ -15532,6 +15532,12 @@ but in some other way.")
   "Some properties that are used by Org mode for various purposes.
 Being in this list makes sure that they are offered for completion.")
 
+(defun org--valid-property-p (property)
+  "Non nil when string PROPERTY is a valid property name."
+  (not
+   (or (equal property "")
+       (org-string-match-p "\\s-" property))))
+
 (defun org--update-property-plist (key val props)
   "Associate KEY to VAL in alist PROPS.
 Modifications are made by side-effect.  Return new alist."
@@ -16052,8 +16058,9 @@ and the new value.")
 (defun org-entry-put (pom property value)
   "Set PROPERTY to VALUE for entry at point-or-marker POM.
 
-If the value is nil, it is converted to the empty string.  If
-it is not a string, an error is raised.
+If the value is nil, it is converted to the empty string.  If it
+is not a string, an error is raised.  Also raise an error on
+invalid property names.
 
 PROPERTY can be any regular property (see
 `org-special-properties').  It can also be \"TODO\",
@@ -16063,7 +16070,9 @@ For the last two properties, VALUE may have any of the special
 values \"earlier\" and \"later\".  The function then increases or
 decreases scheduled or deadline date by one day."
   (cond ((null value) (setq value ""))
-	((not (stringp value)) (error "Properties values should be strings")))
+	((not (stringp value)) (error "Properties values should be strings"))
+	((not (org--valid-property-p property))
+	 (user-error "Invalid property name: \"%s\"" property)))
   (org-with-point-at pom
     (if (or (not (featurep 'org-inlinetask)) (org-inlinetask-in-task-p))
 	(org-back-to-heading t)
@@ -16351,21 +16360,29 @@ When use-default, don't even ask, just use the last
 
 (defun org-set-property (property value)
   "In the current entry, set PROPERTY to VALUE.
+
 When called interactively, this will prompt for a property name, offering
 completion on existing and default properties.  And then it will prompt
 for a value, offering completion either on allowed values (via an inherited
 xxx_ALL property) or on existing values in other instances of this property
-in the current file."
+in the current file.
+
+Throw an error when trying to set a property with an invalid name."
   (interactive (list nil nil))
-  (let* ((property (or property (org-read-property-name)))
-	 (value (or value (org-read-property-value property)))
-	 (fn (cdr (assoc property org-properties-postprocess-alist))))
-    (setq org-last-set-property property)
-    (setq org-last-set-property-value (concat property ": " value))
-    ;; Possibly postprocess the inserted value:
-    (when fn (setq value (funcall fn value)))
-    (unless (equal (org-entry-get nil property) value)
-      (org-entry-put nil property value))))
+  (let ((property (or property (org-read-property-name))))
+    ;; `org-entry-put' also makes the following check, but this one
+    ;; avoids polluting `org-last-set-property' and
+    ;; `org-last-set-property-value' needlessly.
+    (unless (org--valid-property-p)
+      (user-error "Invalid property name: \"%s\"" property))
+    (let ((value (or value (org-read-property-value property)))
+	  (fn (cdr (assoc-string property org-properties-postprocess-alist t))))
+      (setq org-last-set-property property)
+      (setq org-last-set-property-value (concat property ": " value))
+      ;; Possibly postprocess the inserted value:
+      (when fn (setq value (funcall fn value)))
+      (unless (equal (org-entry-get nil property) value)
+	(org-entry-put nil property value)))))
 
 (defun org-find-property (property &optional value)
   "Find first entry in buffer that sets PROPERTY.
