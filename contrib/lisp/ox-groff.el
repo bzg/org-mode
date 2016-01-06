@@ -92,7 +92,6 @@
     (underline . org-groff-underline)
     (verbatim . org-groff-verbatim)
     (verse-block . org-groff-verse-block))
-  :export-block "GROFF"
   :menu-entry
   '(?g "Export to GROFF"
        ((?g "As GROFF file" org-groff-export-to-groff)

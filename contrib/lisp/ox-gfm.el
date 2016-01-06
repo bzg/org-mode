@@ -51,7 +51,6 @@
 ;;; Define Back-End
 
 (org-export-define-derived-backend 'gfm 'md
-  :export-block '("GFM" "GITHUB FLAVORED MARKDOWN")
   :filters-alist '((:filter-parse-tree . org-md-separate-elements))
   :menu-entry
   '(?g "Export to Github Flavored Markdown"
