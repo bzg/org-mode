@@ -38,9 +38,13 @@
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-table-goto-line "org-table" (n))
+
+(defvar org-clock-stored-history nil
+  "Clock history, populated by `org-clock-load', which see.")
+(defvar org-frame-title-format-backup frame-title-format)
 (defvar org-time-stamp-formats)
 (defvar org-ts-what)
-(defvar org-frame-title-format-backup frame-title-format)
+
 
 (defgroup org-clock nil
   "Options concerning clocking working time in Org-mode."
@@ -2962,7 +2966,7 @@ The details of what will be saved are regulated by the variable
 	  (when (and (memq org-clock-persist '(t history))
 		     org-clock-history)
 	    (insert
-	     "(setq stored-clock-history '("
+	     "(setq org-clock-stored-history '("
 	     (mapconcat
 	      (lambda (m)
 		(when (and (setq b (marker-buffer m))
@@ -2981,21 +2985,20 @@ The details of what will be saved are regulated by the variable
   (when (and org-clock-persist (not org-clock-loaded))
     (let ((filename (expand-file-name org-clock-persist-file))
 	  (org-clock-in-resume 'auto-restart)
-	  resume-clock stored-clock-history)
+	  resume-clock)
       (if (not (file-readable-p filename))
 	  (message "Not restoring clock data; %s not found"
 		   org-clock-persist-file)
 	(message "%s" "Restoring clock data")
 	(setq org-clock-loaded t)
+	;; Load history.
 	(load-file filename)
-	;; load history
-	(when stored-clock-history
-	  (save-window-excursion
-	    (dolist (task stored-clock-history)
-	      (when (file-exists-p (car task))
-		(org-clock-history-push (cdr task)
-					(find-file (car task)))))))
-	;; resume clock
+	(save-window-excursion
+	  (dolist (task org-clock-stored-history)
+	    (when (file-exists-p (car task))
+	      (org-clock-history-push (cdr task)
+				      (find-file (car task))))))
+	;; Resume clock.
 	(when (and resume-clock org-clock-persist
 		   (file-exists-p (car resume-clock))
 		   (or (not org-clock-persist-query-resume)
