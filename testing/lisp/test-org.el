@@ -3587,6 +3587,13 @@ Paragraph<point>"
   (should-error
    (org-test-with-temp-text "* H\n:PROPERTIES:\n:test: 1\n:END:"
      (org-entry-put 1 "test" 2)))
+  ;; Error when property name is invalid.
+  (should-error
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:test: 1\n:END:"
+     (org-entry-put 1 "no space" "value")))
+  (should-error
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:test: 1\n:END:"
+     (org-entry-put 1 "" "value")))
   ;; Set "TODO" property.
   (should
    (string-match (regexp-quote " TODO H")
