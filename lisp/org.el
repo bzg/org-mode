@@ -16373,7 +16373,7 @@ Throw an error when trying to set a property with an invalid name."
     ;; `org-entry-put' also makes the following check, but this one
     ;; avoids polluting `org-last-set-property' and
     ;; `org-last-set-property-value' needlessly.
-    (unless (org--valid-property-p)
+    (unless (org--valid-property-p property)
       (user-error "Invalid property name: \"%s\"" property))
     (let ((value (or value (org-read-property-value property)))
 	  (fn (cdr (assoc-string property org-properties-postprocess-alist t))))
