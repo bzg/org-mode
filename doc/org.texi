@@ -1123,15 +1123,15 @@ enhance its readability, but you can use lowercase in your Org
 files@footnote{Easy templates insert lowercase keywords and Babel dynamically
 inserts @code{#+results}.}.
 
-@subsubheading Keybindings and commands
+@subsubheading Key bindings and commands
 @kindex C-c a
 @findex org-agenda
 @kindex C-c c
 @findex org-capture
 
-The manual suggests a few global keybindings, in particular @kbd{C-c a} for
+The manual suggests a few global key bindings, in particular @kbd{C-c a} for
 @code{org-agenda} and @kbd{C-c c} for @code{org-capture}.  These are only
-suggestions, but the rest of the manual assumes that these keybindings are in
+suggestions, but the rest of the manual assumes that these key bindings are in
 place in order to list commands by key access.
 
 Also, the manual lists both the keys and the corresponding commands for
@@ -6567,7 +6567,7 @@ the agenda (@pxref{Weekly/daily agenda}) to show which tasks have been
 worked on or closed during a day.
 
 @strong{Important:} note that both @code{org-clock-out} and
-@code{org-clock-in-last} can have a global keybinding and will not
+@code{org-clock-in-last} can have a global key binding and will not
 modify the window disposition.
 
 @node The clock table
@@ -6984,7 +6984,7 @@ suggestion.}  for capturing new material.
 
 @table @kbd
 @orgcmd{C-c c,org-capture}
-Call the command @code{org-capture}.  Note that this keybinding is global and
+Call the command @code{org-capture}.  Note that this key binding is global and
 not active by default: you need to install it.  If you have templates
 @cindex date tree
 defined @pxref{Capture templates}, it will offer these templates for
@@ -16758,8 +16758,8 @@ In an Org mode buffer, the following key bindings are active:
 @item @kbd{C-c C-v x} @ @ @r{or} @ @ @kbd{C-c C-v C-x} @tab @code{org-babel-do-key-sequence-in-edit-buffer}
 @end multitable
 
-@c When possible these keybindings were extended to work when the control key is
-@c kept pressed, resulting in the following additional keybindings.
+@c When possible these key bindings were extended to work when the control key is
+@c kept pressed, resulting in the following additional key bindings.
 
 @c @multitable @columnfractions 0.25 0.75
 @c @item @kbd{C-c C-v C-a} @tab @code{org-babel-sha1-hash}
