@@ -13561,7 +13561,8 @@ WHAT entry will also be removed."
 	   (unless (eolp) (insert " "))
 	   ts))))))
 
-(defvar org-log-note-buffer nil)
+(defvar org-log-note-marker (make-marker)
+  "Marker pointing at the entry where the note is to be inserted.")
 (defvar org-log-note-purpose nil)
 (defvar org-log-note-state nil)
 (defvar org-log-note-previous-state nil)
@@ -13570,8 +13571,7 @@ WHAT entry will also be removed."
 (defvar org-log-note-return-to (make-marker))
 (defvar org-log-note-effective-time nil
   "Remembered current time so that dynamically scoped
-`org-extend-today-until' affects tha timestamps in state change
-log")
+`org-extend-today-until' affects timestamps in state change log")
 
 (defvar org-log-post-message nil
   "Message to be displayed after a log note has been stored.
@@ -13628,8 +13628,8 @@ narrowing."
 If this is about to TODO state change, the new state is expected in STATE.
 HOW is an indicator what kind of note should be created.
 EXTRA is additional text that will be inserted into the notes buffer."
-  (setq org-log-note-buffer (current-buffer)
-	org-log-note-purpose purpose
+  (move-marker org-log-note-marker (point))
+  (setq org-log-note-purpose purpose
 	org-log-note-state state
 	org-log-note-previous-state prev-state
 	org-log-note-how how
@@ -13666,7 +13666,8 @@ EXTRA is additional text that will be inserted into the notes buffer."
   (setq org-log-note-window-configuration (current-window-configuration))
   (delete-other-windows)
   (move-marker org-log-note-return-to (point))
-  (org-pop-to-buffer-same-window org-log-note-buffer)
+  (org-pop-to-buffer-same-window (marker-buffer org-log-note-marker))
+  (goto-char org-log-note-marker)
   (org-switch-to-buffer-other-window "*Org Note*")
   (erase-buffer)
   (if (memq org-log-note-how '(time state))
@@ -13748,9 +13749,11 @@ EXTRA is additional text that will be inserted into the notes buffer."
       (when lines (setq note (concat note " \\\\")))
       (push note lines))
     (when (and lines (not (or current-prefix-arg org-note-abort)))
-      (with-current-buffer org-log-note-buffer
+      (with-current-buffer (marker-buffer org-log-note-marker)
 	(org-with-wide-buffer
 	 ;; Find location for the new note.
+	 (goto-char org-log-note-marker)
+	 (set-marker org-log-note-marker nil)
 	 (goto-char (org-log-beginning t))
 	 ;; Make sure point is at the beginning of an empty line.
 	 (cond ((not (bolp)) (let ((inhibit-read-only t)) (insert "\n")))
