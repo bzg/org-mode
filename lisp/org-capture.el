@@ -1,6 +1,6 @@
 ;;; org-capture.el --- Fast note taking in Org-mode  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2010-2015 Free Software Foundation, Inc.
+;; Copyright (C) 2010-2016 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -1543,42 +1543,35 @@ Lisp programs can force the template by setting KEYS to a string."
 (defun org-capture-fill-template (&optional template initial annotation)
   "Fill a template and return the filled template as a string.
 The template may still contain \"%?\" for cursor positioning."
-  (setq template (or template (org-capture-get :template)))
-  (when (stringp initial)
-    (setq initial (org-no-properties initial)))
-  (let* ((buffer (org-capture-get :buffer))
+  (let* ((template (or template (org-capture-get :template)))
+	 (buffer (org-capture-get :buffer))
 	 (file (buffer-file-name (or (buffer-base-buffer buffer) buffer)))
-	 (ct (org-capture-get :default-time))
-	 (dct (decode-time ct))
-	 (ct1
-	  (if (< (nth 2 dct) org-extend-today-until)
-	      (encode-time 0 59 23 (1- (nth 3 dct)) (nth 4 dct) (nth 5 dct))
-	    ct))
-	 (v-c (and (> (length kill-ring) 0) (current-kill 0)))
+	 (time (let* ((c (or (org-capture-get :default-time) (current-time)))
+		      (d (decode-time c)))
+		 (if (< (nth 2 d) org-extend-today-until)
+		     (encode-time 0 59 23 (1- (nth 3 d)) (nth 4 d) (nth 5 d))
+		   c)))
+	 (v-t (format-time-string (org-time-stamp-format nil) time))
+	 (v-T (format-time-string (org-time-stamp-format t) time))
+	 (v-u (format-time-string (org-time-stamp-format nil t) time))
+	 (v-U (format-time-string (org-time-stamp-format t t) time))
+	 (v-c (and kill-ring (current-kill 0)))
 	 (v-x (or (org-get-x-clipboard 'PRIMARY)
 		  (org-get-x-clipboard 'CLIPBOARD)
 		  (org-get-x-clipboard 'SECONDARY)))
-	 (v-t (format-time-string (car org-time-stamp-formats) ct1))
-	 (v-T (format-time-string (cdr org-time-stamp-formats) ct1))
-	 (v-u (concat "[" (substring v-t 1 -1) "]"))
-	 (v-U (concat "[" (substring v-T 1 -1) "]"))
 	 ;; `initial' and `annotation' might have been passed.  But if
 	 ;; the property list has them, we prefer those values.
 	 (v-i (or (plist-get org-store-link-plist :initial)
-		  initial
+		  (and (stringp initial) (org-no-properties initial))
 		  (org-capture-get :initial)
 		  ""))
-	 (v-a (or (plist-get org-store-link-plist :annotation)
-		  annotation
-		  (org-capture-get :annotation)
-		  ""))
-	 ;; Is the link empty?  Then we do not want it...
-	 (v-a (if (equal v-a "[[]]") "" v-a))
-	 (clipboards (remq nil (list v-i
-				     (org-get-x-clipboard 'PRIMARY)
-				     (org-get-x-clipboard 'CLIPBOARD)
-				     (org-get-x-clipboard 'SECONDARY)
-				     v-c)))
+	 (v-a
+	  (let ((a (or (plist-get org-store-link-plist :annotation)
+		       annotation
+		       (org-capture-get :annotation)
+		       "")))
+	    ;; Is the link empty?  Then we do not want it...
+	    (if (equal a "[[]]") "" a)))
 	 (l-re "\\[\\[\\(.*?\\)\\]\\(\\[.*?\\]\\)?\\]")
 	 (v-A (if (and v-a (string-match l-re v-a))
 		  (replace-match "[[\\1][%^{Link description}]]" nil nil v-a)
@@ -1595,12 +1588,15 @@ The template may still contain \"%?\" for cursor positioning."
 		   org-clock-heading)))
 	 (v-f (or (org-capture-get :original-file-nondirectory) ""))
 	 (v-F (or (org-capture-get :original-file) ""))
-	 (org-startup-folded nil)
-	 (org-inhibit-startup t))
+	 (clipboards (delq nil
+			   (list v-i
+				 (org-get-x-clipboard 'PRIMARY)
+				 (org-get-x-clipboard 'CLIPBOARD)
+				 (org-get-x-clipboard 'SECONDARY)
+				 v-c))))
 
     (setq org-store-link-plist (plist-put org-store-link-plist :annotation v-a))
     (setq org-store-link-plist (plist-put org-store-link-plist :initial v-i))
-    (setq initial v-i)
 
     (unless template
       (setq template "")
@@ -1609,13 +1605,10 @@ The template may still contain \"%?\" for cursor positioning."
     (save-window-excursion
       (org-switch-to-buffer-other-window (get-buffer-create "*Capture*"))
       (erase-buffer)
-      ;; Turn on org-mode in temp buffer, set local variables.  This
-      ;; is to support completion in interactive prompts
-      (insert template)
-      (goto-char (point-min))
-      (org-clone-local-variables buffer "\\`org-")
       (setq buffer-file-name nil)
       (setq mark-active nil)
+      (insert template)
+      (goto-char (point-min))
 
       ;; %[] insert contents of a file.
       (save-excursion
@@ -1633,7 +1626,7 @@ The template may still contain \"%?\" for cursor positioning."
 				       error))))))))
 
       ;; Mark %() embedded elisp for later evaluation.
-      (org-capture--expand-embedded-elisp 'mark)
+      (org-capture-expand-embedded-elisp 'mark)
 
       ;; Expand non-interactive templates.
       (let ((regexp "%\\(:[-a-za-z]+\\|<\\([^>\n]+\\)>\\|[aAcfFikKlntTuUx]\\)"))
@@ -1646,42 +1639,48 @@ The template may still contain \"%?\" for cursor positioning."
 	      (unless (org-capture-escaped-%)
 		(goto-char pos)
 		(delete-region pos end)
-		(pcase (string-to-char value)
-		  (?<
-		   ;; The current time.
-		   (insert (format-time-string time-string)))
-		  (?:
-		   ;; From the property list.
-		   (insert (or (plist-get org-store-link-plist (intern value))
-			       "")))
-		  (?i (let ((lead (buffer-substring-no-properties
-				   (line-beginning-position) pos)))
-			(insert (mapconcat #'identity
-					   (split-string initial "\n")
-					   (concat "\n" lead)))))
-		  (?a (insert v-a))
-		  (?A (insert v-A))
-		  (?c (insert v-c))
-		  (?f (insert v-f))
-		  (?F (insert v-F))
-		  (?k (insert v-k))
-		  (?K (insert v-K))
-		  (?l (insert v-l))
-		  (?n (insert v-n))
-		  (?t (insert v-t))
-		  (?T (insert v-T))
-		  (?u (insert v-u))
-		  (?U (insert v-U))
-		  (?x (insert v-x)))
+		(let ((replacement
+		       (pcase (string-to-char value)
+			 (?< (format-time-string time-string))
+			 (?:
+			  (or (plist-get org-store-link-plist (intern value))
+			      ""))
+			 (?i (let ((lead (buffer-substring-no-properties
+					  (line-beginning-position) pos)))
+			       (mapconcat #'identity
+					  (split-string v-i "\n")
+					  (concat "\n" lead))))
+			 (?a v-a)
+			 (?A v-A)
+			 (?c v-c)
+			 (?f v-f)
+			 (?F v-F)
+			 (?k v-k)
+			 (?K v-K)
+			 (?l v-l)
+			 (?n v-n)
+			 (?t v-t)
+			 (?T v-T)
+			 (?u v-u)
+			 (?U v-U)
+			 (?x v-x))))
+		  (insert
+		   (if (org-capture-inside-embedded-elisp-p)
+		       (replace-regexp-in-string
+			"\"" "\\\\\"" replacement nil t)
+		     replacement)))
 		(set-marker pos nil)
 		(set-marker end nil))))))
 
       ;; Expand %() embedded Elisp.  Limit to Sexp originally marked.
-      (org-capture--expand-embedded-elisp)
+      (org-capture-expand-embedded-elisp)
 
       ;; Expand interactive templates.  This is the last step so that
-      ;; template is mostly expanded when prompting happens.
+      ;; template is mostly expanded when prompting happens.  Turn on
+      ;; Org mode and set local variables.  This is to support
+      ;; completion in interactive prompts.
       (let ((org-inhibit-startup t)) (org-mode))
+      (org-clone-local-variables buffer "\\`org-")
       (let (strings)			; Stores interactive answers.
 	(save-excursion
 	  (let ((regexp "%\\^\\(?:{\\([^}]*\\)}\\)?\\([CgGLptTuU]\\)?"))
@@ -1781,7 +1780,7 @@ The template may still contain \"%?\" for cursor positioning."
       (delete-region (point) (point-max))
       (insert "\n")
 
-      ;; Return the expanded template and kill the temporary buffer.
+      ;; Return the expanded template and kill the capture buffer.
       (untabify (point-min) (point-max))
       (set-buffer-modified-p nil)
       (prog1 (buffer-substring-no-properties (point-min) (point-max))
@@ -1797,7 +1796,7 @@ placeholder to check."
       (delete-char (/ (1+ n) 2))
       (= (% n 2) 1))))
 
-(defun org-capture--expand-embedded-elisp (&optional mark)
+(defun org-capture-expand-embedded-elisp (&optional mark)
   "Evaluate embedded elisp %(sexp) and replace with the result.
 When optional MARK argument is non-nil, mark Sexp with a text
 property (`org-embedded-elisp') for later evaluation.  Only
@@ -1805,25 +1804,30 @@ marked Sexp are evaluated when this argument is nil."
   (save-excursion
     (goto-char (point-min))
     (while (re-search-forward "%(" nil t)
-      (unless (org-capture-escaped-%)
-	(if mark
-	    (put-text-property
-	     (match-beginning 0) (match-end 0) 'org-embedded-elisp t)
-	  (when (get-text-property (match-beginning 0) 'org-embedded-elisp)
-	    (goto-char (match-beginning 0))
-	    (let ((template-start (point)))
-	      (forward-char 1)
-	      (let* ((sexp (read (current-buffer)))
-		     (result (org-eval
-			      (org-capture--expand-keyword-in-embedded-elisp
-			       sexp))))
-		(delete-region template-start (point))
-		(when result
-		  (if (stringp result)
-		      (insert result)
-		    (error
-		     "Capture template sexp `%s' must evaluate to string or nil"
-		     sexp)))))))))))
+      (cond
+       ((get-text-property (match-beginning 0) 'org-embedded-elisp)
+	(goto-char (match-beginning 0))
+	(let ((template-start (point)))
+	  (forward-char 1)
+	  (let* ((sexp (read (current-buffer)))
+		 (result (org-eval
+			  (org-capture--expand-keyword-in-embedded-elisp
+			   sexp))))
+	    (delete-region template-start (point))
+	    (cond
+	     ((not result) nil)
+	     ((stringp result) (insert result))
+	     (t (error
+		 "Capture template sexp `%s' must evaluate to string or nil"
+		 sexp))))))
+       ((not mark) nil)
+       ;; Only mark valid and non-escaped sexp.
+       ((org-capture-escaped-%) nil)
+       (t
+	(let ((end (with-syntax-table emacs-lisp-mode-syntax-table
+		     (ignore-errors (scan-sexps (1- (point)) 1)))))
+	  (when end
+	    (put-text-property (- (point) 2) end 'org-embedded-elisp t))))))))
 
 (defun org-capture--expand-keyword-in-embedded-elisp (attr)
   "Recursively replace capture link keywords in ATTR sexp.
@@ -1840,20 +1844,10 @@ Such keywords are prefixed with \"%:\".  See
 	(t attr)))
 
 (defun org-capture-inside-embedded-elisp-p ()
-  "Return non-nil if point is inside of embedded elisp %(sexp)."
-  (let (beg end)
-    (with-syntax-table emacs-lisp-mode-syntax-table
-      (save-excursion
-	;; `looking-at' and `search-backward' below do not match the "%(" if
-	;; point is in its middle
-	(when (equal (char-before) ?%)
-	  (backward-char))
-	(save-match-data
-	  (when (or (looking-at "%(") (search-backward "%(" nil t))
-	    (setq beg (point))
-	    (setq end (progn (forward-char) (forward-sexp) (1- (point)))))))
-      (when (and beg end)
-	(and (<= (point) end) (>= (point) beg))))))
+  "Non-nil if point is inside of embedded elisp %(sexp).
+Assume sexps have been marked with
+`org-capture-expand-embedded-elisp' beforehand."
+  (get-text-property (point) 'org-embedded-elisp))
 
 ;;;###autoload
 (defun org-capture-import-remember-templates ()
