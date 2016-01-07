@@ -13589,13 +13589,13 @@ When optional argument CREATE is non-nil, the function creates
 a drawer to store notes, if necessary.  Returned position ignores
 narrowing."
   (org-with-wide-buffer
-   (org-end-of-meta-data)
-   (let ((end (if (org-at-heading-p) (point)
-		(save-excursion (outline-next-heading) (point))))
-	 (drawer (org-log-into-drawer)))
+   (let ((drawer (org-log-into-drawer)))
      (cond
       (drawer
+       (org-end-of-meta-data)
        (let ((regexp (concat "^[ \t]*:" (regexp-quote drawer) ":[ \t]*$"))
+	     (end (if (org-at-heading-p) (point)
+		    (save-excursion (outline-next-heading) (point))))
 	     (case-fold-search t))
 	 (catch 'exit
 	   ;; Try to find existing drawer.
@@ -13613,10 +13613,13 @@ narrowing."
 	       (insert ":" drawer ":\n:END:\n")
 	       (org-indent-region beg (point)))
 	     (end-of-line -1)))))
-      (org-log-state-notes-insert-after-drawers
-       (while (and (looking-at org-drawer-regexp)
-		   (progn (goto-char (match-end 0))
-			  (re-search-forward org-property-end-re end t)))
+      (t
+       (when org-log-state-notes-insert-after-drawers (org-end-of-meta-data t))
+       (skip-chars-forward " \t\n")
+       (beginning-of-line)
+       (unless org-log-states-order-reversed
+	 (org-skip-over-state-notes)
+	 (skip-chars-backward " \t\n")
 	 (forward-line)))))
    (if (bolp) (point) (line-beginning-position 2))))
 
@@ -13749,10 +13752,6 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	(org-with-wide-buffer
 	 ;; Find location for the new note.
 	 (goto-char (org-log-beginning t))
-	 (unless org-log-states-order-reversed
-	   (org-skip-over-state-notes)
-	   (skip-chars-backward " \t\n\r")
-	   (forward-line))
 	 ;; Make sure point is at the beginning of an empty line.
 	 (cond ((not (bolp)) (let ((inhibit-read-only t)) (insert "\n")))
 	       ((looking-at "[ \t]*\\S-") (save-excursion (insert "\n"))))
