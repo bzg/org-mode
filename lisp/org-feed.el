@@ -24,11 +24,11 @@
 ;;
 ;;; Commentary:
 ;;
-;;  This module allows to create and change entries in an Org-mode
-;;  file triggered by items in an RSS feed.  The basic functionality is
-;;  geared toward simply adding new items found in a feed as outline nodes
-;;  to an Org file.  Using hooks, arbitrary actions can be triggered for
-;;  new or changed items.
+;;  This module allows to create and change entries in an Org mode
+;;  file triggered by items in an RSS feed.  The basic functionality
+;;  is geared toward simply adding new items found in a feed as
+;;  outline nodes to an Org file.  Using hooks, arbitrary actions can
+;;  be triggered for new or changed items.
 ;;
 ;;  Selecting feeds and target locations
 ;;  ------------------------------------
@@ -77,10 +77,8 @@
 ;;  org-feed.el needs to keep track of which feed items have been handled
 ;;  before, so that they will not be handled again.  For this, org-feed.el
 ;;  stores information in a special drawer, FEEDSTATUS, under the heading
-;;  that received the input of the feed.  You should add FEEDSTATUS
-;;  to your list of drawers in the files that receive feed input:
+;;  that received the input of the feed.
 ;;
-;;       #+DRAWERS: PROPERTIES CLOCK LOGBOOK RESULTS FEEDSTATUS
 ;;
 ;;  Acknowledgments
 ;;  ---------------
@@ -101,8 +99,8 @@
 (declare-function xml-substitute-special "xml" (string))
 
 (declare-function org-capture-escaped-% "org-capture" ())
+(declare-function org-capture-expand-embedded-elisp "org-capture" (&optional mark))
 (declare-function org-capture-inside-embedded-elisp-p "org-capture" ())
-(declare-function org-capture-expand-embedded-elisp "org-capture" ())
 
 (defgroup org-feed  nil
   "Options concerning RSS feeds as inputs for Org files."
