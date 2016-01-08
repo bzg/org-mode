@@ -1613,17 +1613,19 @@ The template may still contain \"%?\" for cursor positioning."
       ;; %[] insert contents of a file.
       (save-excursion
 	(while (re-search-forward "%\\[\\(.+\\)\\]" nil t)
-	  (unless (org-capture-escaped-%)
-	    (let ((start (match-beginning 0))
-		  (end (match-end 0))
-		  (filename (expand-file-name (match-string 1))))
-	      (goto-char start)
-	      (delete-region start end)
+	  (let ((filename (expand-file-name (match-string 1)))
+		(beg (copy-marker (match-beginning 0)))
+		(end (copy-marker (match-end 0))))
+	    (unless (org-capture-escaped-%)
+	      (delete-region beg end)
+	      (set-marker beg nil)
+	      (set-marker end nil)
 	      (condition-case error
 		  (insert-file-contents filename)
-		(error (insert (format "%%![couldn not insert %s: %s]"
-				       filename
-				       error))))))))
+		(error
+		 (insert (format "%%![couldn not insert %s: %s]"
+				 filename
+				 error))))))))
 
       ;; Mark %() embedded elisp for later evaluation.
       (org-capture-expand-embedded-elisp 'mark)
@@ -1632,13 +1634,17 @@ The template may still contain \"%?\" for cursor positioning."
       (let ((regexp "%\\(:[-a-za-z]+\\|<\\([^>\n]+\\)>\\|[aAcfFikKlntTuUx]\\)"))
 	(save-excursion
 	  (while (re-search-forward regexp nil t)
+	    ;; `org-capture-escaped-%' may modify buffer and cripple
+	    ;; match-data.  Use markers instead.  Ditto for other
+	    ;; templates.
 	    (let ((pos (copy-marker (match-beginning 0)))
 		  (end (copy-marker (match-end 0)))
 		  (value (match-string 1))
 		  (time-string (match-string 2)))
 	      (unless (org-capture-escaped-%)
-		(goto-char pos)
 		(delete-region pos end)
+		(set-marker pos nil)
+		(set-marker end nil)
 		(let ((replacement
 		       (pcase (string-to-char value)
 			 (?< (format-time-string time-string))
@@ -1646,7 +1652,7 @@ The template may still contain \"%?\" for cursor positioning."
 			  (or (plist-get org-store-link-plist (intern value))
 			      ""))
 			 (?i (let ((lead (buffer-substring-no-properties
-					  (line-beginning-position) pos)))
+					  (line-beginning-position) (point))))
 			       (mapconcat #'identity
 					  (split-string v-i "\n")
 					  (concat "\n" lead))))
@@ -1668,9 +1674,7 @@ The template may still contain \"%?\" for cursor positioning."
 		   (if (org-capture-inside-embedded-elisp-p)
 		       (replace-regexp-in-string
 			"\"" "\\\\\"" replacement nil t)
-		     replacement)))
-		(set-marker pos nil)
-		(set-marker end nil))))))
+		     replacement))))))))
 
       ;; Expand %() embedded Elisp.  Limit to Sexp originally marked.
       (org-capture-expand-embedded-elisp)
@@ -1685,21 +1689,24 @@ The template may still contain \"%?\" for cursor positioning."
 	(save-excursion
 	  (let ((regexp "%\\^\\(?:{\\([^}]*\\)}\\)?\\([CgGLptTuU]\\)?"))
 	    (while (re-search-forward regexp nil t)
-	      (unless (org-capture-escaped-%)
-		(let* ((items
-			(and (match-end 1)
-			     (save-match-data
-			       (split-string (match-string-no-properties 1)
-					     "|"))))
-		       (prompt (nth 0 items))
-		       (default (nth 1 items))
-		       (completions (nthcdr 2 items))
-		       (histvar
-			(intern
-			 (concat "org-capture-template-prompt-history::"
-				 (or prompt ""))))
-		       (key (match-string 2)))
-		  (delete-region (match-beginning 0) (match-end 0))
+	      (let* ((items (and (match-end 1)
+				 (save-match-data
+				   (split-string (match-string-no-properties 1)
+						 "|"))))
+		     (key (match-string 2))
+		     (beg (copy-marker (match-beginning 0)))
+		     (end (copy-marker (match-end 0)))
+		     (prompt (nth 0 items))
+		     (default (nth 1 items))
+		     (completions (nthcdr 2 items))
+		     (histvar
+		      (intern
+		       (concat "org-capture-template-prompt-history::"
+			       (or prompt "")))))
+		(unless (org-capture-escaped-%)
+		  (delete-region beg end)
+		  (set-marker beg nil)
+		  (set-marker end nil)
 		  (pcase key
 		    ((or "G" "g")
 		     (let* ((org-last-tags-completion-table

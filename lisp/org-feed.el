@@ -534,33 +534,40 @@ If that property is already present, nothing changes."
         ;; Mark %() embedded elisp for later evaluation.
         (org-capture-expand-embedded-elisp 'mark)
 
-        ;; Simple %-escapes
+        ;; Simple %-escapes.  `org-capture-escaped-%' may modify
+	;; buffer and cripple match-data.  Use markers instead.
         (while (re-search-forward "%\\([a-zA-Z]+\\)" nil t)
-          (unless (org-capture-escaped-%)
-            (let ((replacement
-                   (pcase (match-string-no-properties 1)
-                     ("h" v-h)
-                     ("t" v-t)
-                     ("T" v-T)
-                     ("u" v-u)
-                     ("U" v-U)
-                     ("a" v-a)
-                     (name
-                      (let ((v (plist-get entry (intern (concat ":" name)))))
-                        (save-excursion
-                          (save-match-data
-                            (beginning-of-line)
-                            (if (looking-at
-                                 (concat "^\\([ \t]*\\)%" name "[ \t]*$"))
-                                (org-feed-make-indented-block
-				 v (org-get-indentation))
-			      v))))))))
-	      (when replacement
-		(replace-match
-		 ;; Escape string delimiters within embedded lisp.
-		 (if (org-capture-inside-embedded-elisp-p)
-		     (replace-regexp-in-string "\"" "\\\\\"" replacement nil t)
-		   replacement))))))
+          (let ((key (match-string 1))
+		(beg (copy-marker (match-beginning 0)))
+		(end (copy-marker (match-end 0))))
+	    (unless (org-capture-escaped-%)
+	      (delete-region beg end)
+	      (set-marker beg nil)
+	      (set-marker end nil)
+	      (let ((replacement
+		     (pcase key
+		       ("h" v-h)
+		       ("t" v-t)
+		       ("T" v-T)
+		       ("u" v-u)
+		       ("U" v-U)
+		       ("a" v-a)
+		       (name
+			(let ((v (plist-get entry (intern (concat ":" name)))))
+			  (save-excursion
+			    (save-match-data
+			      (beginning-of-line)
+			      (if (looking-at
+				   (concat "^\\([ \t]*\\)%" name "[ \t]*$"))
+				  (org-feed-make-indented-block
+				   v (org-get-indentation))
+				v))))))))
+		(when replacement
+		  (insert
+		   ;; Escape string delimiters within embedded lisp.
+		   (if (org-capture-inside-embedded-elisp-p)
+		       (replace-regexp-in-string "\"" "\\\\\"" replacement nil t)
+		     replacement)))))))
 
         ;; %() embedded elisp
         (org-capture-expand-embedded-elisp)
