@@ -1,4 +1,4 @@
-;;; org-feed.el --- Add RSS feed items to Org files
+;;; org-feed.el --- Add RSS feed items to Org files  -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2009-2016 Free Software Foundation, Inc.
 ;;
@@ -312,7 +312,7 @@ it can be a list structured like an entry in `org-feed-alist'."
 	  (parse-entry (or (nth 1 (memq :parse-entry feed))
 			   'org-feed-parse-rss-entry))
 	  feed-buffer inbox-pos new-formatted
-	  entries old-status status new changed guid-alist e guid olds)
+	  entries old-status status new changed guid-alist guid olds)
       (setq feed-buffer (org-feed-get-feed url))
       (unless (and feed-buffer (bufferp (get-buffer feed-buffer)))
 	(error "Cannot get feed %s" name))
@@ -474,8 +474,7 @@ This will find DRAWER and extract the alist."
   "Write the feed STATUS to DRAWER in entry at POS."
   (save-excursion
     (goto-char pos)
-    (let ((end (save-excursion (org-end-of-subtree t t)))
-	  guid)
+    (let ((end (save-excursion (org-end-of-subtree t t))))
       (if (re-search-forward (concat "^[ \t]*:" drawer ":[ \t]*\n")
 			     end t)
 	  (progn
