@@ -252,9 +252,8 @@ to dead or no buffer."
 
 (defun org-contacts-db ()
   "Return the latest Org Contacts Database."
-  (let* (todo-only
-	 (contacts-matcher
-	  (cdr (org-make-tags-matcher org-contacts-matcher)))
+  (let* ((org--matcher-tags-todo-only nil)
+	 (contacts-matcher (cdr (org-make-tags-matcher org-contacts-matcher)))
 	 result)
     (when (org-contacts-db-need-update-p)
       (let ((progress-reporter
@@ -288,10 +287,9 @@ to dead or no buffer."
 		(error "File %s is not in `org-mode'" file))
 	      (setf result
 		    (append result
-			    (org-scan-tags
-			     'org-contacts-at-point
-			     contacts-matcher
-			     todo-only)))))
+			    (org-scan-tags 'org-contacts-at-point
+					   contacts-matcher
+					   org--matcher-tags-todo-only)))))
 	  (progress-reporter-update progress-reporter (setq i (1+ i))))
 	(setf org-contacts-db result
 	      org-contacts-last-update (current-time))

@@ -240,20 +240,20 @@ See `org-crypt-disable-auto-save'."
 (defun org-encrypt-entries ()
   "Encrypt all top-level entries in the current buffer."
   (interactive)
-  (let (todo-only)
+  (let ((org--matcher-tags-todo-only nil))
     (org-scan-tags
      'org-encrypt-entry
      (cdr (org-make-tags-matcher org-crypt-tag-matcher))
-     todo-only)))
+     org--matcher-tags-todo-only)))
 
 (defun org-decrypt-entries ()
   "Decrypt all entries in the current buffer."
   (interactive)
-  (let (todo-only)
+  (let ((org--matcher-tags-todo-only nil))
     (org-scan-tags
      'org-decrypt-entry
      (cdr (org-make-tags-matcher org-crypt-tag-matcher))
-     todo-only)))
+     org--matcher-tags-todo-only)))
 
 (defun org-at-encrypted-entry-p ()
   "Is the current entry encrypted?"

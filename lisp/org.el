@@ -14127,6 +14127,7 @@ Can be set by the action argument to `org-scan-tags' and `org-map-entries'.")
 
 (defvar org-scanner-tags nil
   "The current tag list while the tags scanner is running.")
+
 (defvar org-trust-scanner-tags nil
   "Should `org-get-tags-at' use the tags for the scanner.
 This is for internal dynamical scoping only.
@@ -14138,6 +14139,8 @@ obtain a list of properties.  Building the tags list for each entry in such
 a file becomes an N^2 operation - but with this variable set, it scales
 as N.")
 
+(defvar org--matcher-tags-todo-only nil)
+
 (defun org-scan-tags (action matcher todo-only &optional start-level)
   "Scan headline tags with inheritance and produce output ACTION.
 
@@ -14146,11 +14149,14 @@ or `agenda' to produce an entry list for an agenda view.  It can also be
 a Lisp form or a function that should be called at each matched headline, in
 this case the return value is a list of all return values from these calls.
 
-MATCHER is a Lisp form to be evaluated, testing if a given set of tags
-qualifies a headline for inclusion.  When TODO-ONLY is non-nil,
-only lines with a not-done TODO keyword are included in the output.
-This should be the same variable that was scoped into
-and set by `org-make-tags-matcher' when it constructed MATCHER.
+MATCHER is a function accepting three arguments, returning
+a non-nil value whenever a given set of tags qualifies a headline
+for inclusion.  See `org-make-tags-matcher' for more information.
+As a special case, it can also be set to t (respectively nil) in
+order to match all (respectively none) headline.
+
+When TODO-ONLY is non-nil, only lines with a not-done TODO
+keyword are included in the output.
 
 START-LEVEL can be a string with asterisks, reducing the scope to
 headlines matching this string."
@@ -14229,18 +14235,20 @@ headlines matching this string."
 	  (when (and tags org-use-tag-inheritance
 		     (or (not (eq t org-use-tag-inheritance))
 			 org-tags-exclude-from-inheritance))
-	    ;; selective inheritance, remove uninherited ones
+	    ;; Selective inheritance, remove uninherited ones.
 	    (setcdr (car tags-alist)
 		    (org-remove-uninherited-tags (cdar tags-alist))))
 	  (when (and
 
 		 ;; eval matcher only when the todo condition is OK
 		 (and (or (not todo-only) (member todo org-not-done-keywords))
-		      (let ((case-fold-search t) (org-trust-scanner-tags t))
-			(eval matcher)))
+		      (if (functionp matcher)
+			  (let ((case-fold-search t) (org-trust-scanner-tags t))
+			    (funcall matcher todo tags-list level))
+			matcher))
 
-		 ;; Call the skipper, but return t if it does not skip,
-		 ;; so that the `and' form continues evaluating
+		 ;; Call the skipper, but return t if it does not
+		 ;; skip, so that the `and' form continues evaluating.
 		 (progn
 		   (unless (eq action 'sparse-tree) (org-agenda-skip))
 		   t)
@@ -14328,7 +14336,9 @@ If optional argument TODO-ONLY is non-nil, only select lines that are
 also TODO lines."
   (interactive "P")
   (org-agenda-prepare-buffers (list (current-buffer)))
-  (org-scan-tags 'sparse-tree (cdr (org-make-tags-matcher match)) todo-only))
+  (let ((org--matcher-tags-todo-only todo-only))
+    (org-scan-tags 'sparse-tree (cdr (org-make-tags-matcher match))
+		   org--matcher-tags-todo-only)))
 
 (defalias 'org-tags-sparse-tree 'org-match-sparse-tree)
 
@@ -14370,160 +14380,151 @@ instead of the agenda files."
 (defun org-make-tags-matcher (match)
   "Create the TAGS/TODO matcher form for the selection string MATCH.
 
-The variable `todo-only' is scoped dynamically into this function.
-It will be set to t if the matcher restricts matching to TODO entries,
-otherwise will not be touched.
+Returns a cons of the selection string MATCH and a function
+implementing the matcher.
 
-Returns a cons of the selection string MATCH and the constructed
-lisp form implementing the matcher.  The matcher is to be evaluated
-at an Org entry, with point on the headline, and returns t if the
-entry matches the selection string MATCH.  The returned lisp form
-references two variables with information about the entry, which
-must be bound around the form's evaluation: todo, the TODO keyword
-at the entry (or nil of none); and tags-list, the list of all tags
-at the entry including inherited ones.  Additionally, the category
-of the entry (if any) must be specified as the text property
-`org-category' on the headline.
+The matcher is to be called at an Org entry, with point on the
+headline, and returns non-nil if the entry matches the selection
+string MATCH.  It must be called with three arguments: the TODO
+keyword at the entry (or nil if none), the list of all tags at
+the entry including inherited ones and the reduced level of the
+headline.  Additionally, the category of the entry, if any, must
+be specified as the text property `org-category' on the headline.
 
-See also `org-scan-tags'.
-"
-  (declare (special todo-only))
-  (unless (boundp 'todo-only)
-    (error "`org-make-tags-matcher' expects todo-only to be scoped in"))
+This function sets the variable `org--matcher-tags-todo-only' to
+a non-nil value if the matcher restricts matching to TODO
+entries, otherwise it is not touched.
+
+See also `org-scan-tags'."
   (unless match
     ;; Get a new match request, with completion against the global
-    ;; tags table and the local tags in current buffer
+    ;; tags table and the local tags in current buffer.
     (let ((org-last-tags-completion-table
 	   (org-uniquify
 	    (delq nil (append (org-get-buffer-tags)
 			      (org-global-tags-completion-table))))))
-      (setq match (org-completing-read-no-i
-		   "Match: " 'org-tags-completion-function nil nil nil
-		   'org-tags-history))))
+      (setq match
+	    (completing-read
+	     "Match: "
+	     'org-tags-completion-function nil nil nil 'org-tags-history))))
 
-  ;; Parse the string and create a lisp form
   (let ((match0 match)
 	(re (org-re "^&?\\([-+:]\\)?\\({[^}]+}\\|LEVEL\\([<=>]\\{1,2\\}\\)\\([0-9]+\\)\\|\\(\\(?:[[:alnum:]_]+\\(?:\\\\-\\)*\\)+\\)\\([<>=]\\{1,2\\}\\)\\({[^}]+}\\|\"[^\"]*\"\\|-?[.0-9]+\\(?:[eE][-+]?[0-9]+\\)?\\)\\|[[:alnum:]_@#%]+\\)"))
-	minus tag mm
-	tagsmatch todomatch tagsmatcher todomatcher kwd matcher
-	orterms term orlist re-p str-p level-p level-op time-p
-	prop-p pn pv po gv rest (start 0) (ss 0))
-    ;; Expand group tags
+	(start 0)
+	tagsmatch todomatch tagsmatcher todomatcher)
+
+    ;; Expand group tags.
     (setq match (org-tags-expand match))
 
     ;; Check if there is a TODO part of this match, which would be the
-    ;; part after a "/".  TO make sure that this slash is not part of
-    ;; a property value to be matched against, we also check that there
-    ;; is no " after that slash.
-    ;; First, find the last slash
-    (while (string-match "/+" match ss)
-      (setq start (match-beginning 0) ss (match-end 0)))
+    ;; part after a "/".  To make sure that this slash is not part of
+    ;; a property value to be matched against, we also check that
+    ;; there is no / after that slash.  First, find the last slash.
+    (let ((s 0))
+      (while (string-match "/+" match s)
+	(setq start (match-beginning 0))
+	(setq s (match-end 0))))
     (if (and (string-match "/+" match start)
-	     (not (save-match-data (string-match "\"" match start))))
-	;; match contains also a todo-matching request
+	     (not (string-match-p "\"" match start)))
+	;; Match contains also a TODO-matching request.
 	(progn
-	  (setq tagsmatch (substring match 0 (match-beginning 0))
-		todomatch (substring match (match-end 0)))
-	  (when (string-match "^!" todomatch)
-	    (setq todo-only t todomatch (substring todomatch 1)))
-	  (when (string-match "^\\s-*$" todomatch)
+	  (setq tagsmatch (substring match 0 (match-beginning 0)))
+	  (setq todomatch (substring match (match-end 0)))
+	  (when (string-match "\\`!" todomatch)
+	    (setq org--matcher-tags-todo-only t)
+	    (setq todomatch (substring todomatch 1)))
+	  (when (string-match "\\`\\s-*\\'" todomatch)
 	    (setq todomatch nil)))
-      ;; only matching tags
-      (setq tagsmatch match todomatch nil))
+      ;; Only matching tags.
+      (setq tagsmatch match)
+      (setq todomatch nil))
 
-    ;; Make the tags matcher
-    (if (or (not tagsmatch) (not (string-match "\\S-" tagsmatch)))
+    ;; Make the tags matcher.
+    (if (not (org-string-nw-p tagsmatch))
 	(setq tagsmatcher t)
-      (setq orterms (org-split-string tagsmatch "|") orlist nil)
-      (while (setq term (pop orterms))
-	(while (and (equal (substring term -1) "\\") orterms)
-	  (setq term (concat term "|" (pop orterms)))) ; repair bad split
-	(while (string-match re term)
-	  (setq rest (substring term (match-end 0))
-		minus (and (match-end 1)
-			   (equal (match-string 1 term) "-"))
-		tag (save-match-data (replace-regexp-in-string
-				      "\\\\-" "-"
-				      (match-string 2 term)))
-		re-p (equal (string-to-char tag) ?{)
-		level-p (match-end 4)
-		prop-p (match-end 5)
-		mm (cond
-		    (re-p `(org-match-any-p ,(substring tag 1 -1) tags-list))
-		    (level-p
-		     (setq level-op (org-op-to-function (match-string 3 term)))
-		     `(,level-op level ,(string-to-number
-					 (match-string 4 term))))
-		    (prop-p
-		     (setq pn (match-string 5 term)
-			   po (match-string 6 term)
-			   pv (match-string 7 term)
-			   re-p (equal (string-to-char pv) ?{)
-			   str-p (equal (string-to-char pv) ?\")
-			   time-p (save-match-data
-				    (string-match "^\"[[<].*[]>]\"$" pv))
-			   pv (if (or re-p str-p) (substring pv 1 -1) pv))
-		     (when time-p (setq pv (org-matcher-time pv)))
-		     (setq po (org-op-to-function po (if time-p 'time str-p)))
-		     (cond
-		      ((equal pn "CATEGORY")
-		       (setq gv '(get-text-property (point) 'org-category)))
-		      ((equal pn "TODO")
-		       (setq gv 'todo))
-		      (t
-		       (setq gv `(org-cached-entry-get nil ,pn))))
-		     (if re-p
-			 (if (eq po 'org<>)
-			     `(not (string-match ,pv (or ,gv "")))
-			   `(string-match ,pv (or ,gv "")))
-		       (if str-p
-			   `(,po (or ,gv "") ,pv)
-			 `(,po (string-to-number (or ,gv ""))
-			       ,(string-to-number pv) ))))
-		    (t `(member ,tag tags-list)))
-		mm (if minus (list 'not mm) mm)
-		term rest)
-	  (push mm tagsmatcher))
-	(push (if (> (length tagsmatcher) 1)
-		  (cons 'and tagsmatcher)
-		(car tagsmatcher))
-	      orlist)
-	(setq tagsmatcher nil))
-      (setq tagsmatcher (if (> (length orlist) 1) (cons 'or orlist) (car orlist)))
-      (setq tagsmatcher
-	    (list 'progn '(setq org-cached-props nil) tagsmatcher)))
-    ;; Make the todo matcher
-    (if (or (not todomatch) (not (string-match "\\S-" todomatch)))
-	(setq todomatcher t)
-      (setq orterms (org-split-string todomatch "|") orlist nil)
-      (dolist (term orterms)
-	(while (string-match re term)
-	  (setq minus (and (match-end 1)
-			   (equal (match-string 1 term) "-"))
-		kwd (match-string 2 term)
-		re-p (equal (string-to-char kwd) ?{)
-		term (substring term (match-end 0))
-		mm (if re-p
-		       `(string-match  ,(substring kwd 1 -1) todo)
-		     (list 'equal 'todo kwd))
-		mm (if minus (list 'not mm) mm))
-	  (push mm todomatcher))
-	(push (if (> (length todomatcher) 1)
-		  (cons 'and todomatcher)
-		(car todomatcher))
-	      orlist)
-	(setq todomatcher nil))
-      (setq todomatcher (if (> (length orlist) 1)
-			    (cons 'or orlist) (car orlist))))
+      (let ((orlist nil)
+	    (orterms (org-split-string tagsmatch "|"))
+	    term)
+	(while (setq term (pop orterms))
+	  (while (and (equal (substring term -1) "\\") orterms)
+	    (setq term (concat term "|" (pop orterms)))) ;repair bad split.
+	  (while (string-match re term)
+	    (let* ((rest (substring term (match-end 0)))
+		   (minus (and (match-end 1)
+			       (equal (match-string 1 term) "-")))
+		   (tag (save-match-data
+			  (replace-regexp-in-string
+			   "\\\\-" "-" (match-string 2 term))))
+		   (regexp (eq (string-to-char tag) ?{))
+		   (levelp (match-end 4))
+		   (propp (match-end 5))
+		   (mm
+		    (cond
+		     (regexp `(org-match-any-p ,(substring tag 1 -1) tags-list))
+		     (levelp
+		      `(,(org-op-to-function (match-string 3 term))
+			level
+			,(string-to-number (match-string 4 term))))
+		     (propp
+		      (let* ((gv (pcase (upcase (match-string 5 term))
+				   ("CATEGORY"
+				    '(get-text-property (point) 'org-category))
+				   ("TODO" 'todo)
+				   (p `(org-cached-entry-get nil ,p))))
+			     (pv (match-string 7 term))
+			     (regexp (eq (string-to-char pv) ?{))
+			     (strp (eq (string-to-char pv) ?\"))
+			     (timep (string-match-p "^\"[[<].*[]>]\"$" pv))
+			     (po (org-op-to-function (match-string 6 term)
+						     (if timep 'time strp))))
+			(setq pv (if (or regexp strp) (substring pv 1 -1) pv))
+			(when timep (setq pv (org-matcher-time pv)))
+			(cond ((and regexp (eq po 'org<>))
+			       `(not (string-match ,pv (or ,gv ""))))
+			      (regexp `(string-match ,pv (or ,gv "")))
+			      (strp `(,po (or ,gv "") ,pv))
+			      (t
+			       `(,po
+				 (string-to-number (or ,gv ""))
+				 ,(string-to-number pv))))))
+		     (t `(member ,tag tags-list)))))
+	      (push (if minus `(not ,mm) mm) tagsmatcher)
+	      (setq term rest)))
+	  (push (if (> (length tagsmatcher) 1)
+		    (cons 'and tagsmatcher)
+		  (car tagsmatcher))
+		orlist)
+	  (setq tagsmatcher nil))
+	(setq tagsmatcher
+	      `(progn (setq org-cached-props nil) ,(cons 'or orlist)))))
 
-    ;; Return the string and lisp forms of the matcher
-    (setq matcher (if todomatcher
-		      (list 'and tagsmatcher todomatcher)
-		    tagsmatcher))
-    (when todo-only
-      (setq matcher (list 'and '(member todo org-not-done-keywords)
-			  matcher)))
-    (cons match0 matcher)))
+    ;; Make the TODO matcher.
+    (if (not (org-string-nw-p todomatch))
+	(setq todomatcher t)
+      (let ((orlist nil))
+	(dolist (term (org-split-string todomatch "|"))
+	  (while (string-match re term)
+	    (let* ((minus (and (match-end 1)
+			       (equal (match-string 1 term) "-")))
+		   (kwd (match-string 2 term))
+		   (regexp (eq (string-to-char kwd) ?{))
+		   (mm (if regexp `(string-match ,(substring kwd 1 -1) todo)
+			 `(equal todo ,kwd))))
+	      (push (if minus `(not ,mm) mm) todomatcher))
+	    (setq term (substring term (match-end 0))))
+	  (push (if (> (length todomatcher) 1)
+		    (cons 'and todomatcher)
+		  (car todomatcher))
+		orlist)
+	  (setq todomatcher nil))
+	(setq todomatcher (cons 'or orlist))))
+
+    ;; Return the string and function of the matcher.
+    (let ((matcher (if todomatcher `(and ,tagsmatcher ,todomatcher)
+		     tagsmatcher)))
+      (when org--matcher-tags-todo-only
+	(setq matcher `(and (member todo org-not-done-keywords) ,matcher)))
+      (cons match0 `(lambda (todo tags-list level) ,matcher)))))
 
 (defun org-tags-expand (match &optional single-as-list downcased tags-already-expanded)
   "Expand group tags in MATCH.
@@ -15412,7 +15413,7 @@ a *different* entry, you cannot use these techniques."
 	   org-done-keywords-for-agenda
 	   org-todo-keyword-alist-for-agenda
 	   org-tag-alist-for-agenda
-	   todo-only)
+	   org--matcher-tags-todo-only)
 
       (cond
        ((eq match t)   (setq matcher t))
@@ -15445,7 +15446,9 @@ a *different* entry, you cannot use these techniques."
 	      (progn
 		(org-agenda-prepare-buffers
 		 (and buffer-file-name (list buffer-file-name)))
-		(setq res (org-scan-tags func matcher todo-only start-level)))
+		(setq res
+		      (org-scan-tags
+		       func matcher org--matcher-tags-todo-only start-level)))
 	    ;; Get the right scope
 	    (cond
 	     ((and scope (listp scope) (symbolp (car scope)))
@@ -15466,7 +15469,11 @@ a *different* entry, you cannot use these techniques."
 		  (save-restriction
 		    (widen)
 		    (goto-char (point-min))
-		    (setq res (append res (org-scan-tags func matcher todo-only))))))))))
+		    (setq res
+			  (append
+			   res
+			   (org-scan-tags
+			    func matcher org--matcher-tags-todo-only))))))))))
       res)))
 
 ;;; Properties API

@@ -2800,12 +2800,12 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
     (if te (setq te (org-matcher-time te)))
     (save-excursion
       (org-clock-sum ts te
-		     (unless (null matcher)
-		       (lambda ()
-			 (let* ((tags-list (org-get-tags-at))
-				(org-scanner-tags tags-list)
-				(org-trust-scanner-tags t))
-			   (eval matcher)))))
+		     (when matcher
+		       `(lambda ()
+			  (let* ((tags-list (org-get-tags-at))
+				 (org-scanner-tags tags-list)
+				 (org-trust-scanner-tags t))
+			    (funcall ,matcher nil tags-list nil)))))
       (goto-char (point-min))
       (setq st t)
       (while (or (and (bobp) (prog1 st (setq st nil))
@@ -2832,7 +2832,7 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
 			    (replace-regexp-in-string
 			     org-bracket-link-regexp
 			     (lambda (m) (or (match-string 3 m)
-					     (match-string 1 m)))
+					(match-string 1 m)))
 			     (match-string 2)))))
 		    tsp (when timestamp
 			  (setq props (org-entry-properties (point)))
