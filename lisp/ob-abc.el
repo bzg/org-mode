@@ -1,6 +1,6 @@
 ;;; ob-abc.el --- Org Babel Functions for ABC -*- lexical-binding: t; -*-
 
-;; Copyright (C) Free Software Foundation
+;; Copyright (C) 2013-2015 Free Software Foundation, Inc.
 
 ;; Author: William Waites
 ;; Keywords: literate programming, music
