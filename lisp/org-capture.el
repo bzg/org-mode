@@ -1672,8 +1672,7 @@ The template may still contain \"%?\" for cursor positioning."
 			 (?x v-x))))
 		  (insert
 		   (if (org-capture-inside-embedded-elisp-p)
-		       (replace-regexp-in-string
-			"\"" "\\\\\"" replacement nil t)
+		       (replace-regexp-in-string "\"" "\\\\\"" replacement)
 		     replacement))))))))
 
       ;; Expand %() embedded Elisp.  Limit to Sexp originally marked.

@@ -565,7 +565,7 @@ If that property is already present, nothing changes."
 		  (insert
 		   ;; Escape string delimiters within embedded lisp.
 		   (if (org-capture-inside-embedded-elisp-p)
-		       (replace-regexp-in-string "\"" "\\\\\"" replacement nil t)
+		       (replace-regexp-in-string "\"" "\\\\\"" replacement)
 		     replacement)))))))
 
         ;; %() embedded elisp
