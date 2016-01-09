@@ -188,17 +188,14 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (defun org-babel-do-load-languages (sym value)
   "Load the languages defined in `org-babel-load-languages'."
   (set-default sym value)
-  (mapc (lambda (pair)
-	  (let ((active (cdr pair)) (lang (symbol-name (car pair))))
-	    (if active
-		(progn
-		  (require (intern (concat "ob-" lang))))
-	      (progn
-		(funcall 'fmakunbound
-			 (intern (concat "org-babel-execute:" lang)))
-		(funcall 'fmakunbound
-			 (intern (concat "org-babel-expand-body:" lang)))))))
-	org-babel-load-languages))
+  (dolist (pair org-babel-load-languages)
+    (let ((active (cdr pair)) (lang (symbol-name (car pair))))
+      (if active
+	  (require (intern (concat "ob-" lang)))
+	(funcall 'fmakunbound
+		 (intern (concat "org-babel-execute:" lang)))
+	(funcall 'fmakunbound
+		 (intern (concat "org-babel-expand-body:" lang)))))))
 
 (declare-function org-babel-tangle-file "ob-tangle" (file &optional target-file lang))
 ;;;###autoload
@@ -645,10 +642,9 @@ After a match, group 1 contains the repeat expression.")
 (defun org-load-modules-maybe (&optional force)
   "Load all extensions listed in `org-modules'."
   (when (or force (not org-modules-loaded))
-    (mapc (lambda (ext)
-	    (condition-case nil (require ext)
-	      (error (message "Problems while trying to load feature `%s'" ext))))
-	  org-modules)
+    (dolist (ext org-modules)
+      (condition-case nil (require ext)
+	(error (message "Problems while trying to load feature `%s'" ext))))
     (setq org-modules-loaded t)))
 
 (defun org-set-modules (var value)
@@ -830,12 +826,10 @@ depends on, if any."
 	      (const :tag "C  taskjuggler Export buffer to TaskJuggler format" taskjuggler)))
 
 (eval-after-load 'ox
-  '(mapc
-    (lambda (backend)
-      (condition-case nil (require (intern (format "ox-%s" backend)))
-	(error (message "Problems while trying to load export back-end `%s'"
-			backend))))
-    org-export-backends))
+  '(dolist (backend org-export-backends)
+     (condition-case nil (require (intern (format "ox-%s" backend)))
+       (error (message "Problems while trying to load export back-end `%s'"
+		       backend)))))
 
 (defcustom org-support-shift-select nil
   "Non-nil means make shift-cursor commands select text when possible.
@@ -5545,10 +5539,8 @@ The following commands are available:
 
 (defvar org-mode-transpose-word-syntax-table
   (let ((st (make-syntax-table text-mode-syntax-table)))
-    (mapc (lambda(c) (modify-syntax-entry
-		      (string-to-char (car c)) "w p" st))
-	  org-emphasis-alist)
-    st))
+    (dolist (c org-emphasis-alist st)
+      (modify-syntax-entry (string-to-char (car c)) "w p" st))))
 
 (when (fboundp 'abbrev-table-put)
   (abbrev-table-put org-mode-abbrev-table
@@ -6888,8 +6880,8 @@ Use \\[org-edit-special] to edit table.el tables"))
 	      (let* ((struct (org-list-struct))
 		     (prevs (org-list-prevs-alist struct))
 		     (end (org-list-get-bottom-point struct)))
-		(mapc (lambda (e) (org-list-set-item-visibility e struct 'folded))
-		      (org-list-get-all-items (point) struct prevs))
+		(dolist (e (org-list-get-all-items (point) struct prevs))
+		  (org-list-set-item-visibility e struct 'folded))
 		(goto-char (if (< end eos) end eos)))))))
       (org-unlogged-message "CHILDREN")
       (save-excursion
@@ -7039,13 +7031,11 @@ This function is the default value of the hook `org-cycle-hook'."
 
 (defun org-remove-empty-overlays-at (pos)
   "Remove outline overlays that do not contain non-white stuff."
-  (mapc
-   (lambda (o)
-     (and (eq 'outline (overlay-get o 'invisible))
-	  (not (string-match "\\S-" (buffer-substring (overlay-start o)
-						      (overlay-end o))))
-	  (delete-overlay o)))
-   (overlays-at pos)))
+  (dolist (o (overlays-at pos))
+    (and (eq 'outline (overlay-get o 'invisible))
+	 (not (string-match "\\S-" (buffer-substring (overlay-start o)
+						     (overlay-end o))))
+	 (delete-overlay o))))
 
 (defun org-clean-visibility-after-subtree-move ()
   "Fix visibility issues after moving a subtree."
@@ -7267,7 +7257,7 @@ Optional arguments START and END can be used to limit the range."
 (defun org-show-block-all ()
   "Unfold all blocks in the current buffer."
   (interactive)
-  (mapc 'delete-overlay org-hide-block-overlays)
+  (mapc #'delete-overlay org-hide-block-overlays)
   (setq org-hide-block-overlays nil))
 
 (defun org-hide-block-toggle-maybe ()
@@ -8649,9 +8639,8 @@ If yes, remember the marker and the distance to BEG."
 
 (defun org-reinstall-markers-in-region (beg)
   "Move all remembered markers to their position relative to BEG."
-  (mapc (lambda (x)
-	  (move-marker (car x) (+ beg (cdr x))))
-	org-markers-to-move)
+  (dolist (x org-markers-to-move)
+    (move-marker (car x) (+ beg (cdr x))))
   (setq org-markers-to-move nil))
 
 (defun org-narrow-to-subtree ()
@@ -9110,25 +9099,23 @@ buffer.  It will also recognize item context in multiline items."
   (setq arg (prefix-numeric-value (or arg (if orgstruct-mode -1 1))))
   (if (< arg 1)
       (progn (orgstruct-mode -1)
-	     (mapc (lambda(v)
-		     (set (make-local-variable (car v))
-			  (if (eq (car-safe (cadr v)) 'quote) (cadadr v) (cadr v))))
-		   org-fb-vars))
+	     (dolist (v org-fb-vars)
+	       (set (make-local-variable (car v))
+		    (if (eq (car-safe (cadr v)) 'quote) (cadadr v) (cadr v)))))
     (orgstruct-mode 1)
     (setq org-fb-vars nil)
     (unless org-local-vars
       (setq org-local-vars (org-get-local-variables)))
     (let (var val)
-      (mapc
-       (lambda (x)
-	 (when (string-match
-		"^\\(paragraph-\\|auto-fill\\|normal-auto-fill\\|fill-paragraph\\|fill-prefix\\|indent-\\)"
-		(symbol-name (car x)))
-	   (setq var (car x) val (nth 1 x))
-	   (push (list var `(quote ,(eval var))) org-fb-vars)
-	   (set (make-local-variable var)
-		(if (eq (car-safe val) 'quote) (nth 1 val) val))))
-       org-local-vars)
+      (dolist (x org-local-vars)
+	(when (string-match
+	       "^\\(paragraph-\\|auto-fill\\|normal-auto-fill\\|fill-paragraph\
+\\|fill-prefix\\|indent-\\)"
+	       (symbol-name (car x)))
+	  (setq var (car x) val (nth 1 x))
+	  (push (list var `(quote ,(eval var))) org-fb-vars)
+	  (set (make-local-variable var)
+	       (if (eq (car-safe val) 'quote) (nth 1 val) val))))
       (setq-local orgstruct-is-++ t))))
 
 ;;;###autoload
@@ -10846,21 +10833,21 @@ there is one, return it."
 	    (setq link (car links)))
 	   ((and (integerp nth) (>= (length links) (if have-zero (1+ nth) nth)))
 	    (setq link (nth (if have-zero nth (1- nth)) links)))
-	   (t ; we have to select a link
+	   (t				; we have to select a link
 	    (save-excursion
 	      (save-window-excursion
 		(delete-other-windows)
 		(with-output-to-temp-buffer "*Select Link*"
-		  (mapc (lambda (l)
-			  (if (not (string-match org-bracket-link-regexp l))
-			      (princ (format "[%c]  %s\n" (incf cnt)
-					     (org-remove-angle-brackets l)))
-			    (if (match-end 3)
-				(princ (format "[%c]  %s (%s)\n" (incf cnt)
-					       (match-string 3 l) (match-string 1 l)))
-			      (princ (format "[%c]  %s\n" (incf cnt)
-					     (match-string 1 l))))))
-			links))
+		  (dolist (l links)
+		    (cond
+		     ((not (string-match org-bracket-link-regexp l))
+		      (princ (format "[%c]  %s\n" (incf cnt)
+				     (org-remove-angle-brackets l))))
+		     ((match-end 3)
+		      (princ (format "[%c]  %s (%s)\n" (incf cnt)
+				     (match-string 3 l) (match-string 1 l))))
+		     (t (princ (format "[%c]  %s\n" (incf cnt)
+				       (match-string 1 l)))))))
 		(org-fit-window-to-buffer (get-buffer-window "*Select Link*"))
 		(message "Select link to open, RET to open all:")
 		(setq c (read-char-exclusive))
@@ -11493,7 +11480,7 @@ on the system \"/user@host:\"."
 
 (defun org-refile-cache-clear ()
   "Clear the refile cache and disable all the markers."
-  (mapc (lambda (m) (move-marker m nil)) org-refile-markers)
+  (dolist (m org-refile-markers) (move-marker m nil))
   (setq org-refile-markers nil)
   (setq org-refile-cache nil)
   (message "Refile cache has been cleared"))
@@ -13960,7 +13947,7 @@ BEG and END are ignored.  If NOREMOVE is nil, remove this function
 from the `before-change-functions' in the current buffer."
   (interactive)
   (unless org-inhibit-highlight-removal
-    (mapc 'delete-overlay org-occur-highlights)
+    (mapc #'delete-overlay org-occur-highlights)
     (setq org-occur-highlights nil)
     (setq org-occur-parameters nil)
     (unless noremove
@@ -18385,13 +18372,11 @@ changes from another.  I believe the procedure must be like this:
     (user-error "Abort"))
   (save-excursion
     (save-window-excursion
-      (mapc
-       (lambda (b)
-	 (when (and (with-current-buffer b (derived-mode-p 'org-mode))
-		    (with-current-buffer b buffer-file-name))
-	   (org-pop-to-buffer-same-window b)
-	   (revert-buffer t 'no-confirm)))
-       (buffer-list))
+      (dolist (b (buffer-list))
+	(when (and (with-current-buffer b (derived-mode-p 'org-mode))
+		   (with-current-buffer b buffer-file-name))
+	  (org-pop-to-buffer-same-window b)
+	  (revert-buffer t 'no-confirm)))
       (when (and (featurep 'org-id) org-id-track-globally)
 	(org-id-locations-load)))))
 
@@ -19693,7 +19678,7 @@ boundaries."
 (defun org-remove-inline-images ()
   "Remove inline display of images."
   (interactive)
-  (mapc 'delete-overlay org-inline-image-overlays)
+  (mapc #'delete-overlay org-inline-image-overlays)
   (setq org-inline-image-overlays nil))
 
 ;;;; Key bindings
@@ -19785,9 +19770,8 @@ boundaries."
 
 ;; Babel keys
 (define-key org-mode-map org-babel-key-prefix org-babel-map)
-(mapc (lambda (pair)
-        (define-key org-babel-map (car pair) (cdr pair)))
-      org-babel-key-bindings)
+(dolist (pair org-babel-key-bindings)
+  (define-key org-babel-map (car pair) (cdr pair)))
 
 ;;; Extra keys for tty access.
 ;;  We only set them when really needed because otherwise the
@@ -20057,10 +20041,10 @@ boundaries."
       (user-error "Speed commands are not activated, customize `org-use-speed-commands'")
     (with-output-to-temp-buffer "*Help*"
       (princ "User-defined Speed commands\n===========================\n")
-      (mapc 'org-print-speed-command org-speed-commands-user)
+      (mapc #'org-print-speed-command org-speed-commands-user)
       (princ "\n")
       (princ "Built-in Speed commands\n=======================\n")
-      (mapc 'org-print-speed-command org-speed-commands-default))
+      (mapc #'org-print-speed-command org-speed-commands-default))
     (with-current-buffer "*Help*"
       (setq truncate-lines t))))
 
@@ -21140,7 +21124,7 @@ This command does many different things, depending on context:
 	   (let ((org-inhibit-startup-visibility-stuff t)
 		 (org-startup-align-all-tables nil))
 	     (when (boundp 'org-table-coordinate-overlays)
-	       (mapc 'delete-overlay org-table-coordinate-overlays)
+	       (mapc #'delete-overlay org-table-coordinate-overlays)
 	       (setq org-table-coordinate-overlays nil))
 	     (org-save-outline-visibility 'use-markers (org-mode-restart)))
 	   (message "Local setup has been refreshed"))
@@ -21164,9 +21148,10 @@ This command does many different things, depending on context:
 				 (t "[X]"))))
 	     (cond
 	      (arg
-	       (mapc (lambda (pos) (org-list-set-checkbox pos struct new-box))
-		     (org-list-get-all-items
-		      begin struct (org-list-prevs-alist struct))))
+	       (dolist (pos
+			(org-list-get-all-items
+			 begin struct (org-list-prevs-alist struct)))
+		 (org-list-set-checkbox pos struct new-box)))
 	      ((and first-box (eq (point) begin))
 	       ;; For convenience, when point is at bol on the first
 	       ;; item of the list and no argument is provided, simply
@@ -21983,7 +21968,7 @@ Your bug report will be posted to the Org-mode mailing list.
 
 (defun org-require-autoloaded-modules ()
   (interactive)
-  (mapc 'require
+  (mapc #'require
 	'(org-agenda org-archive org-attach org-clock org-colview org-id
 		     org-table org-timer)))
 
@@ -22556,14 +22541,13 @@ block from point."
       (let ((case-fold-search t)
 	    (lim-up (save-excursion (outline-previous-heading)))
 	    (lim-down (save-excursion (outline-next-heading))))
-	(mapc (lambda (name)
-		(let ((n (regexp-quote name)))
-		  (when (org-between-regexps-p
-			 (concat "^[ \t]*#\\+begin_" n)
-			 (concat "^[ \t]*#\\+end_" n)
-			 lim-up lim-down)
-		    (throw 'exit n))))
-	      names))
+	(dolist (name names)
+	  (let ((n (regexp-quote name)))
+	    (when (org-between-regexps-p
+		   (concat "^[ \t]*#\\+begin_" n)
+		   (concat "^[ \t]*#\\+end_" n)
+		   lim-up lim-down)
+	      (throw 'exit n)))))
       nil)))
 
 (defun org-occur-in-agenda-files (regexp &optional _nlines)
@@ -22640,16 +22624,13 @@ merge (a 1) and (a 3) into (a 1 3).
 
 The function returns the new ALIST."
   (let (rtn)
-    (mapc
-     (lambda (e)
-       (let (n)
-	 (if (not (assoc (car e) rtn))
-	     (push e rtn)
-	   (setq n (cons (car e) (append (cdr (assoc (car e) rtn)) (cdr e))))
-	   (setq rtn (assq-delete-all (car e) rtn))
-	   (push n rtn))))
-     alist)
-    rtn))
+    (dolist (e alist rtn)
+      (let (n)
+	(if (not (assoc (car e) rtn))
+	    (push e rtn)
+	  (setq n (cons (car e) (append (cdr (assoc (car e) rtn)) (cdr e))))
+	  (setq rtn (assq-delete-all (car e) rtn))
+	  (push n rtn))))))
 
 (defun org-delete-all (elts list)
   "Remove all elements in ELTS from LIST."
@@ -24815,13 +24796,10 @@ modified."
   (interactive)
   (unless (eq major-mode 'org-mode)
     (user-error "Cannot un-indent a buffer not in Org mode"))
-  (let* ((parse-tree (org-element-parse-buffer 'greater-element))
-	 unindent-tree			; For byte-compiler.
-	 (unindent-tree
-	  (function
-	   (lambda (contents)
-	     (mapc
-	      (lambda (element)
+  (letrec ((parse-tree (org-element-parse-buffer 'greater-element))
+	   (unindent-tree
+	    (lambda (contents)
+	      (dolist (element (reverse contents))
 		(if (memq (org-element-type element) '(headline section))
 		    (funcall unindent-tree (org-element-contents element))
 		  (save-excursion
@@ -24829,8 +24807,7 @@ modified."
 		      (narrow-to-region
 		       (org-element-property :begin element)
 		       (org-element-property :end element))
-		      (org-do-remove-indentation)))))
-	      (reverse contents))))))
+		      (org-do-remove-indentation))))))))
     (funcall unindent-tree (org-element-contents parse-tree))))
 
 (defun org-show-children (&optional level)
@@ -24947,7 +24924,7 @@ when non-nil, is a regexp matching keywords names."
 
 (defun org-imenu-get-tree ()
   "Produce the index for Imenu."
-  (mapc (lambda (x) (move-marker x nil)) org-imenu-markers)
+  (dolist (x org-imenu-markers) (move-marker x nil))
   (setq org-imenu-markers nil)
   (let* ((n org-imenu-depth)
 	 (re (concat "^" (org-get-limited-outline-regexp)))
