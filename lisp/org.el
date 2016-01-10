@@ -10916,7 +10916,7 @@ numeric or double prefix to guide the search function.
 In case this is needed, a function in this hook can also restore
 the window configuration before `org-open-at-point' was called using:
 
-    (set-window-configuration org-window-config-before-follow-link)")
+    \(set-window-configuration org-window-config-before-follow-link)")
 
 (defun org-search-radio-target (target)
   "Search a radio target matching TARGET in current buffer.
@@ -12911,10 +12911,10 @@ an entry to DONE when all children are done, and back to TODO when new
 entries are set to a TODO status.  Note that this hook is only called
 when there is a statistics cookie in the headline!
 
- (defun org-summary-todo (n-done n-not-done)
+ \(defun org-summary-todo (n-done n-not-done)
    \"Switch entry to DONE when all subentries are done, to TODO otherwise.\"
-   (let (org-log-done org-log-states)   ; turn off logging
-     (org-todo (if (= n-not-done 0) \"DONE\" \"TODO\"))))
+   \(let (org-log-done org-log-states)   ; turn off logging
+     \(org-todo (if (= n-not-done 0) \"DONE\" \"TODO\"))))
 ")
 
 (defvar org-todo-statistics-hook nil
@@ -13755,8 +13755,8 @@ D      Show deadlines and scheduled items between a date range."
   (setq type (or type org-sparse-tree-default-date-type))
   (setq org-ts-type type)
   (message "Sparse tree: [/]regexp [t]odo [T]odo-kwd [m]atch [p]roperty
-             [d]eadlines [b]efore-date [a]fter-date [D]ates range
-             [c]ycle through date types: %s"
+             \[d]eadlines [b]efore-date [a]fter-date [D]ates range
+             \[c]ycle through date types: %s"
 	   (case type
 	     (all "all timestamps")
 	     (scheduled "only scheduled")
