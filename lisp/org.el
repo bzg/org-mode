@@ -13143,9 +13143,9 @@ This function is run automatically after each state change to a DONE state."
 	    (cond
 	     ((not (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)" ts))
 	      ;; Time-stamps without a repeater are usually skipped.
-	      ;; However, a SCHEDULED or DEADLINE time-stamp without
-	      ;; one is removed, as it is considered outdated.
-	      (unless (equal type "Plain:")
+	      ;; However, a SCHEDULED time-stamp without one is
+	      ;; removed, as it is considered as no longer relevant.
+	      (when (equal type org-scheduled-string)
 		(org-remove-timestamp-with-keyword type)))
 	     (t
 	      (let ((n (string-to-number (match-string 2 ts)))

@@ -169,6 +169,11 @@ for details.
 *** org-bbdb-anniversaries-future
 Used like org-bbdb-anniversaries, it provides a few days warning
 for upcoming anniversaries (default: 7 days).
+*** Clear non-repeated SCHEDULED upon repeating a task
+If the task is repeated, and therefore done at least one, scheduling
+information is no longer relevant.  It is therefore removed.
+
+See [[git:481719fbd5751aaa9c672b762cb43aea8ee986b0][commit message]] for more information.
 *** Support for ISO week trees
 ISO week trees are an alternative date tree format that orders entries
 by ISO week and not by month.

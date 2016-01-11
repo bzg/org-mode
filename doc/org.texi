@@ -6429,7 +6429,9 @@ You may have both scheduling and deadline information for a specific task.
 If the repeater is set for the scheduling information only, you probably want
 the repeater to be ignored after the deadline.  If so, set the variable
 @code{org-agenda-skip-scheduled-if-deadline-is-shown} to
-@code{repeated-after-deadline}.  If you want both scheduling and deadline
+@code{repeated-after-deadline}.  However, any scheduling information without
+a repeater is no longer relevant once the task is done, and thus, removed
+upon repeating the task.  If you want both scheduling and deadline
 information to repeat after the same interval, set the same repeater for both
 timestamps.
 
