@@ -7705,7 +7705,7 @@ tags in the FILTER if any of the tags in FILTER are grouptags."
 	    (progn
 	      (setq tags (org-get-at-bol 'tags)
 		    cat (org-get-at-eol 'org-category 1)
-		    txt (org-get-at-eol 'txt 1))
+		    txt (org-get-at-bol 'txt))
 	      (if (not (eval org-agenda-filter-form))
 		  (org-agenda-filter-hide-line type))
 	      (beginning-of-line 2))
