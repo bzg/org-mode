@@ -2646,12 +2646,14 @@ from the dynamic block definition."
 	 ((eq formula '%)
 	  ;; compute the column where the % numbers need to go
 	  (setq pcol (+ 2
+			(length properties)
 			(if multifile 1 0)
 			(if level-p 1 0)
 			(if timestamp 1 0)
 			(min maxlevel (or ntcol 100))))
 	  ;; compute the column where the total time is
 	  (setq tcol (+ 2
+			(length properties)
 			(if multifile 1 0)
 			(if level-p 1 0)
 			(if timestamp 1 0)))
