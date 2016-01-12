@@ -13566,7 +13566,7 @@ narrowing."
 	       (org-indent-region beg (point)))
 	     (end-of-line -1)))))
       (t
-       (when org-log-state-notes-insert-after-drawers (org-end-of-meta-data t))
+       (org-end-of-meta-data org-log-state-notes-insert-after-drawers)
        (skip-chars-forward " \t\n")
        (beginning-of-line)
        (unless org-log-states-order-reversed
