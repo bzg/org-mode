@@ -44,31 +44,35 @@
    (equal (format-time-string (org-time-stamp-format nil nil))
 	  (org-feed-format-entry nil "%t" nil)))
   (should
-   (equal "<2016-01-02 Sat>"
-	  (org-feed-format-entry
-	   '(:pubDate "Sat, 02 Jan 2016 12:00:00 +0000") "%t" nil)))
+   (string-match-p
+    "<2016-01-02 \\S-+>"
+    (org-feed-format-entry
+     '(:pubDate "Sat, 02 Jan 2016 12:00:00 +0000") "%t" nil)))
   (should
    (equal (format-time-string (org-time-stamp-format t nil))
 	  (org-feed-format-entry nil "%T" nil)))
   (should
-   (equal "<2016-01-02 Sat 12:00>"
-	  (org-feed-format-entry
-	   '(:pubDate "Sat, 02 Jan 2016 12:00:00 +0000") "%T" nil)))
+   (string-match-p
+    "<2016-01-02 \\S-+ 12:00>"
+    (org-feed-format-entry
+     '(:pubDate "Sat, 02 Jan 2016 12:00:00 +0000") "%T" nil)))
   ;; %u and %U placeholders.
   (should
    (equal (format-time-string (org-time-stamp-format nil t))
 	  (org-feed-format-entry nil "%u" nil)))
   (should
-   (equal "[2016-01-02 Sat]"
-	  (org-feed-format-entry
-	   '(:pubDate "Sat, 02 Jan 2016 12:00:00 +0000") "%u" nil)))
+   (string-match-p
+    "[2016-01-02 \\S-+]"
+    (org-feed-format-entry
+     '(:pubDate "Sat, 02 Jan 2016 12:00:00 +0000") "%u" nil)))
   (should
    (equal (format-time-string (org-time-stamp-format t t))
 	  (org-feed-format-entry nil "%U" nil)))
   (should
-   (equal "[2016-01-02 Sat 12:00]"
-	  (org-feed-format-entry
-	   '(:pubDate "Sat, 02 Jan 2016 12:00:00 +0000") "%U" nil)))
+   (string-match-p
+    "[2016-01-02 \\S-+ 12:00]"
+    (org-feed-format-entry
+     '(:pubDate "Sat, 02 Jan 2016 12:00:00 +0000") "%U" nil)))
   ;; %h placeholder.  Make sure sexp placeholders are not expanded
   ;; when they are inserted through this one.
   (should
