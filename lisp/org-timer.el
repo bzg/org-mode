@@ -35,7 +35,6 @@
 
 ;;; Code:
 
-(require 'org)
 (require 'org-clock)
 
 (declare-function org-agenda-error "org-agenda" ())

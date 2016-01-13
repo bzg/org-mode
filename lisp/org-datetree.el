@@ -50,8 +50,8 @@ Added time stamp is active unless value is `inactive'."
 	  (const :tag "Add an active time stamp" active)))
 
 ;;;###autoload
-(defun org-datetree-find-date-create (date &optional keep-restriction)
-  "Find or create an entry for DATE.
+(defun org-datetree-find-date-create (d &optional keep-restriction)
+  "Find or create an entry for date D.
 If KEEP-RESTRICTION is non-nil, do not widen the buffer.
 When it is nil, the buffer will be widened to make sure an existing date
 tree can be found."
@@ -65,9 +65,9 @@ tree can be found."
 		    (org-get-valid-level (org-current-level) 1))
 	(org-narrow-to-subtree)))
     (goto-char (point-min))
-    (let ((year (calendar-extract-year date))
-	  (month (calendar-extract-month date))
-	  (day (calendar-extract-day date)))
+    (let ((year (calendar-extract-year d))
+	  (month (calendar-extract-month d))
+	  (day (calendar-extract-day d)))
       (org-datetree--find-create
        "^\\*+[ \t]+\\([12][0-9]\\{3\\}\\)\\(\\s-*?\
 \\([ \t]:[[:alnum:]:_@#%%]+:\\)?\\s-*$\\)"
@@ -80,8 +80,8 @@ tree can be found."
        year month day))))
 
 ;;;###autoload
-(defun org-datetree-find-iso-week-create (date &optional keep-restriction)
-  "Find or create an ISO week entry for DATE.
+(defun org-datetree-find-iso-week-create (d &optional keep-restriction)
+  "Find or create an ISO week entry for date D.
 Compared to `org-datetree-find-date-create' this function creates
 entries ordered by week instead of months.
 If KEEP-RESTRICTION is non-nil, do not widen the buffer.  When it
@@ -98,12 +98,12 @@ tree can be found."
 	(org-narrow-to-subtree)))
     (goto-char (point-min))
     (require 'cal-iso)
-    (let* ((year (calendar-extract-year date))
-	   (month (calendar-extract-month date))
-	   (day (calendar-extract-day date))
+    (let* ((year (calendar-extract-year d))
+	   (month (calendar-extract-month d))
+	   (day (calendar-extract-day d))
 	   (time (encode-time 0 0 0 day month year))
 	   (iso-date (calendar-iso-from-absolute
-		      (calendar-absolute-from-gregorian date)))
+		      (calendar-absolute-from-gregorian d)))
 	   (weekyear (nth 2 iso-date))
 	   (week (nth 0 iso-date)))
       ;; ISO 8601 week format is %G-W%V(-%u)
@@ -170,9 +170,9 @@ inserted into the buffer."
        (eq org-datetree-add-timestamp 'inactive))))
   (beginning-of-line))
 
-(defun org-datetree-file-entry-under (txt date)
-  "Insert a node TXT into the date tree under DATE."
-  (org-datetree-find-date-create date)
+(defun org-datetree-file-entry-under (txt d)
+  "Insert a node TXT into the date tree under date D."
+  (org-datetree-find-date-create d)
   (let ((level (org-get-valid-level (funcall outline-level) 1)))
     (org-end-of-subtree t t)
     (org-back-over-empty-lines)
