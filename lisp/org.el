@@ -2272,17 +2272,17 @@ For more examples, see the system specific constants
   :group 'org)
 
 (defcustom org-directory "~/org"
-  "Directory with org files.
+  "Directory with Org files.
 This is just a default location to look for Org files.  There is no need
-at all to put your files into this directory.  It is only used in the
+at all to put your files into this directory.  It is used in the
 following situations:
 
 1. When a capture template specifies a target file that is not an
    absolute path.  The path will then be interpreted relative to
    `org-directory'
-2. When a capture note is filed away in an interactive way (when exiting the
-   note buffer with `C-1 C-c C-c'.  The user is prompted for an org file,
-   with `org-directory' as the default path."
+2. When the value of variable `org-agenda-files' is a single file, any
+   relative paths in this file will be taken as relative to
+   `org-directory'."
   :group 'org-refile
   :group 'org-capture
   :type 'directory)
