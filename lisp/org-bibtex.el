@@ -555,8 +555,10 @@ Headlines are exported using `org-bibtex-headline'."
   (interactive
    (list (read-file-name
 	  "Bibtex file: " nil nil nil
-	  (file-name-nondirectory
-	   (concat (file-name-sans-extension (buffer-file-name)) ".bib")))))
+	  (let ((file (buffer-file-name (buffer-base-buffer))))
+	    (and file
+		 (file-name-nondirectory
+		  (concat (file-name-sans-extension file) ".bib")))))))
   (let ((error-point
          (catch 'bib
            (let ((bibtex-entries
