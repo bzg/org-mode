@@ -27,6 +27,10 @@
 
 (ert-deftest test-org-capture/fill-template ()
   "Test `org-capture-fill-template' specifications."
+
+  ;; When working on these tests consider to also change
+  ;; `test-org-feed/fill-template'.
+
   ;; %(sexp) placeholder.
   (should
    (equal "success!\n"
@@ -37,19 +41,19 @@
 	  (org-capture-fill-template "%<%Y>")))
   ;; %t and %T placeholders.
   (should
-   (equal (concat (format-time-string (car org-time-stamp-formats)) "\n")
+   (equal (concat (format-time-string (org-time-stamp-format nil nil)) "\n")
 	  (org-capture-fill-template "%t")))
   (should
-   (equal (concat (format-time-string (cdr org-time-stamp-formats)) "\n")
+   (equal (concat (format-time-string (org-time-stamp-format t nil)) "\n")
 	  (org-capture-fill-template "%T")))
   ;; %u and %U placeholders.
   (should
-   (string-match-p
-    (format-time-string (substring (car org-time-stamp-formats) 1 -1))
+   (equal
+    (concat (format-time-string (org-time-stamp-format nil t)) "\n")
     (org-capture-fill-template "%u")))
   (should
-   (string-match-p
-    (format-time-string (substring (cdr org-time-stamp-formats) 1 -1))
+   (equal
+    (concat (format-time-string (org-time-stamp-format t t)) "\n")
     (org-capture-fill-template "%U")))
   ;; %i placeholder.  Make sure sexp placeholders are not expanded
   ;; when they are inserted through this one.
@@ -57,11 +61,12 @@
    (equal "success!\n"
 	  (let ((org-store-link-plist nil))
 	    (org-capture-fill-template "%i" "success!"))))
-  (should-not
-   (equal "failure!\n"
+  (should
+   (equal "%(concat \"no \" \"evaluation\")\n"
 	  (let ((org-store-link-plist nil))
-	    (org-capture-fill-template "%i" "%(concat \"failure\" \"!\")"))))
-  ;; Test %-escaping with / character.
+	    (org-capture-fill-template
+	     "%i" "%(concat \"no \" \"evaluation\")"))))
+  ;; Test %-escaping with \ character.
   (should
    (equal "%i\n"
 	  (let ((org-store-link-plist nil))
@@ -73,7 +78,21 @@
   (should
    (equal "\\%i\n"
 	  (let ((org-store-link-plist nil))
-	    (org-capture-fill-template "\\\\\\%i" "success!")))))
+	    (org-capture-fill-template "\\\\\\%i" "success!"))))
+  ;; More than one placeholder in the same template.
+  (should
+   (equal "success! success! success! success!\n"
+	  (let ((org-store-link-plist nil))
+	    (org-capture-fill-template "%i %i %i %i" "success!"))))
+  ;; %(sexp) placeholder with an input containing the traps %, " and )
+  ;; all at once which is complicated to parse.
+  (should
+   (equal
+    "5 % Less (See Item \"3)\" Somewhere)\n"
+    (let ((org-store-link-plist nil))
+      (org-capture-fill-template
+       "%(capitalize \"%i\")"
+       "5 % less (see item \"3)\" somewhere)")))))
 
 
 
