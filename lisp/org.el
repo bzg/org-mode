@@ -14429,8 +14429,7 @@ See also `org-scan-tags'."
       (setq todomatch nil))
 
     ;; Make the tags matcher.
-    (if (not (org-string-nw-p tagsmatch))
-	(setq tagsmatcher t)
+    (when (org-string-nw-p tagsmatch)
       (let ((orlist nil)
 	    (orterms (org-split-string tagsmatch "|"))
 	    term)
@@ -14479,17 +14478,12 @@ See also `org-scan-tags'."
 		     (t `(member ,tag tags-list)))))
 	      (push (if minus `(not ,mm) mm) tagsmatcher)
 	      (setq term rest)))
-	  (push (if (> (length tagsmatcher) 1)
-		    (cons 'and tagsmatcher)
-		  (car tagsmatcher))
-		orlist)
+	  (push `(and ,@tagsmatcher) orlist)
 	  (setq tagsmatcher nil))
-	(setq tagsmatcher
-	      `(progn (setq org-cached-props nil) ,(cons 'or orlist)))))
+	(setq tagsmatcher `(progn (setq org-cached-props nil) (or ,@orlist)))))
 
     ;; Make the TODO matcher.
-    (if (not (org-string-nw-p todomatch))
-	(setq todomatcher t)
+    (when (org-string-nw-p todomatch)
       (let ((orlist nil))
 	(dolist (term (org-split-string todomatch "|"))
 	  (while (string-match re term)
