@@ -796,6 +796,12 @@ CONTENTS is the contents of the element."
 
 ;;;; Footnote Definition
 
+(defconst org-element--footnote-separator
+  (concat org-outline-regexp-bol "\\|"
+	  org-footnote-definition-re "\\|"
+	  "^\\([ \t]*\n\\)\\{2,\\}")
+  "Regexp used as a footnote definition separator.")
+
 (defun org-element-footnote-definition-parser (limit affiliated)
   "Parse a footnote definition.
 
@@ -814,21 +820,29 @@ Assume point is at the beginning of the footnote definition."
 			 (org-match-string-no-properties 1)))
 	   (begin (car affiliated))
 	   (post-affiliated (point))
-	   (ending (save-excursion
-		     (if (progn
-			   (end-of-line)
-			   (re-search-forward
-			    (concat org-outline-regexp-bol "\\|"
-				    org-footnote-definition-re "\\|"
-				    "^\\([ \t]*\n\\)\\{2,\\}") limit 'move))
-			 (match-beginning 0)
-		       (point))))
-	   (contents-begin (progn
-			     (search-forward "]")
-			     (skip-chars-forward " \r\t\n" ending)
-			     (cond ((= (point) ending) nil)
-				   ((= (line-beginning-position) begin) (point))
-				   (t (line-beginning-position)))))
+	   (ending
+	    (save-excursion
+	      (end-of-line)
+	      (cond
+	       ((not
+		 (re-search-forward org-element--footnote-separator limit t))
+		limit)
+	       ((eq (char-after (match-beginning 0)) ?\[)
+		;; At a new footnote definition, make sure we end
+		;; before any affiliated keyword above.
+		(forward-line -1)
+		(while (and (> (point) post-affiliated)
+			    (org-looking-at-p org-element--affiliated-re))
+		  (forward-line -1))
+		(line-beginning-position 2))
+	       (t (match-beginning 0)))))
+	   (contents-begin
+	    (progn
+	      (search-forward "]")
+	      (skip-chars-forward " \r\t\n" ending)
+	      (cond ((= (point) ending) nil)
+		    ((= (line-beginning-position) post-affiliated) (point))
+		    (t (line-beginning-position)))))
 	   (contents-end (and contents-begin ending))
 	   (end (progn (goto-char ending)
 		       (skip-chars-forward " \r\t\n" limit)
