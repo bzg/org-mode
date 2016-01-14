@@ -2169,20 +2169,25 @@ If NLAST is a number, only the NLAST fields will actually be summed."
 Assumes that table is already analyzed.  If KEY is given, return
 the key to this formula.  Otherwise return the formula preceded
 with \"=\" or \":=\"."
-  (let* ((col (org-table-current-column))
-	 (name (car (rassoc (list (count-lines org-table-current-begin-pos
-					       (line-beginning-position))
-				  col)
-			    org-table-named-field-locations)))
-	 (scol (format "$%d" col))
-	 (ref (format "@%d$%d" (org-table-current-dline) col))
-	 (stored-list (org-table-get-stored-formulas noerror))
-	 (ass (or (assoc name stored-list)
-		  (assoc ref stored-list)
-		  (assoc scol stored-list))))
-    (cond (key (car ass))
-	  (ass (concat (if (string-match "^[0-9]+$" (car ass)) "=" ":=")
-		       (cdr ass))))))
+  (let* ((line (count-lines org-table-current-begin-pos
+			    (line-beginning-position)))
+	 (row (org-table-line-to-dline line)))
+    (cond
+     (row
+      (let* ((col (org-table-current-column))
+	     (name (car (rassoc (list line col)
+				org-table-named-field-locations)))
+	     (scol (format "$%d" col))
+	     (ref (format "@%d$%d" (org-table-current-dline) col))
+	     (stored-list (org-table-get-stored-formulas noerror))
+	     (ass (or (assoc name stored-list)
+		      (assoc ref stored-list)
+		      (assoc scol stored-list))))
+	(cond (key (car ass))
+	      (ass (concat (if (string-match "^[0-9]+$" (car ass)) "=" ":=")
+			   (cdr ass))))))
+     (noerror nil)
+     (t (error "No formula active for the current field")))))
 
 (defun org-table-get-formula (&optional equation named)
   "Read a formula from the minibuffer, offer stored formula as default.
