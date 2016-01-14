@@ -927,9 +927,9 @@ a table."
 	   (match-beginning 0))
 	  ;; When the line right after the table is the last line in
 	  ;; the buffer with trailing spaces but no final newline
-	  ;; character, trailing spaces, be sure to catch the correct
-	  ;; ending at its beginning.  In any other case, ending is
-	  ;; expected to be at point max.
+	  ;; character, be sure to catch the correct ending at its
+	  ;; beginning.  In any other case, ending is expected to be
+	  ;; at point max.
 	  (t (goto-char (point-max))
 	     (skip-chars-backward " \t")
 	     (if (bolp) (point) (line-end-position))))))
@@ -2169,20 +2169,25 @@ If NLAST is a number, only the NLAST fields will actually be summed."
 Assumes that table is already analyzed.  If KEY is given, return
 the key to this formula.  Otherwise return the formula preceded
 with \"=\" or \":=\"."
-  (let* ((col (org-table-current-column))
-	 (name (car (rassoc (list (count-lines org-table-current-begin-pos
-					       (line-beginning-position))
-				  col)
-			    org-table-named-field-locations)))
-	 (scol (int-to-string col))
-	 (ref (format "@%d$%d" (org-table-current-dline) col))
-	 (stored-list (org-table-get-stored-formulas noerror))
-	 (ass (or (assoc name stored-list)
-		  (assoc ref stored-list)
-		  (assoc scol stored-list))))
-    (cond (key (car ass))
-	  (ass (concat (if (string-match "^[0-9]+$" (car ass)) "=" ":=")
-		       (cdr ass))))))
+  (let* ((line (count-lines org-table-current-begin-pos
+			    (line-beginning-position)))
+	 (row (org-table-line-to-dline line)))
+    (cond
+     (row
+      (let* ((col (org-table-current-column))
+	     (name (car (rassoc (list line col)
+				org-table-named-field-locations)))
+	     (scol (format "$%d" col))
+	     (ref (format "@%d$%d" (org-table-current-dline) col))
+	     (stored-list (org-table-get-stored-formulas noerror))
+	     (ass (or (assoc name stored-list)
+		      (assoc ref stored-list)
+		      (assoc scol stored-list))))
+	(cond (key (car ass))
+	      (ass (concat (if (string-match "^[0-9]+$" (car ass)) "=" ":=")
+			   (cdr ass))))))
+     (noerror nil)
+     (t (error "No formula active for the current field")))))
 
 (defun org-table-get-formula (&optional equation named)
   "Read a formula from the minibuffer, offer stored formula as default.
@@ -2235,12 +2240,16 @@ When NAMED is non-nil, look for a named equation."
 	(org-table-store-formulas stored-list))
     eq))
 
-(defun org-table-store-formulas (alist)
-  "Store the list of formulas below the current table."
+(defun org-table-store-formulas (alist &optional location)
+  "Store the list of formulas below the current table.
+If optional argument LOCATION is a buffer position, insert it at
+LOCATION instead."
   (save-excursion
-    (goto-char (org-table-end))
+    (if location
+	(progn (goto-char location) (beginning-of-line))
+      (goto-char (org-table-end)))
     (let ((case-fold-search t))
-      (if (looking-at "\\([ \t]*\n\\)*[ \t]*\\(#\\+tblfm:\\)\\(.*\n?\\)")
+      (if (looking-at "\\([ \t]*\n\\)*[ \t]*\\(#\\+TBLFM:\\)\\(.*\n?\\)")
 	  (progn
 	    ;; Don't overwrite TBLFM, we might use text properties to
 	    ;; store stuff.
@@ -2280,10 +2289,15 @@ When NAMED is non-nil, look for a named equation."
     (and as bs (string< as bs))))
 
 ;;;###autoload
-(defun org-table-get-stored-formulas (&optional noerror)
-  "Return an alist with the stored formulas directly after current table."
+(defun org-table-get-stored-formulas (&optional noerror location)
+  "Return an alist with the stored formulas directly after current table.
+By default, only return active formulas, i.e., formulas located
+on the first line after the table.  However, if optional argument
+LOCATION is a buffer position, consider the formulas there."
   (save-excursion
-    (goto-char (org-table-end))
+    (if location
+	(progn (goto-char location) (beginning-of-line))
+      (goto-char (org-table-end)))
     (let ((case-fold-search t))
       (when (looking-at "\\([ \t]*\n\\)*[ \t]*#\\+TBLFM: *\\(.*\\)")
 	(let ((strings (org-split-string (org-match-string-no-properties 2)
@@ -2657,7 +2671,6 @@ not overwrite the stored one."
   (or suppress-analysis (org-table-analyze))
   (if (equal arg '(16))
       (let ((eq (org-table-current-field-formula)))
-	(or eq (user-error "No equation active for current field"))
 	(org-table-get-field nil eq)
 	(org-table-align)
 	(setq org-table-may-need-update t))
@@ -3518,62 +3531,70 @@ Parameters get priority."
      :style toggle :selected org-table-buffer-is-an]))
 
 (defvar org-pos)
+(defvar org-table--fedit-source nil
+  "Position of the TBLFM line being edited.")
 
 ;;;###autoload
 (defun org-table-edit-formulas ()
   "Edit the formulas of the current table in a separate buffer."
   (interactive)
-  (when (save-excursion (beginning-of-line)
-			(let ((case-fold-search t)) (looking-at "[ \t]*#\\+TBLFM")))
-    (beginning-of-line 0))
-  (unless (org-at-table-p) (user-error "Not at a table"))
-  (org-table-analyze)
-  (let ((key (org-table-current-field-formula 'key 'noerror))
-	(eql (sort (org-table-get-stored-formulas 'noerror)
-		   #'org-table-formula-less-p))
-	(pos (point-marker))
-	(startline 1)
-	(wc (current-window-configuration))
-	(sel-win (selected-window))
-	(titles '((column . "# Column Formulas\n")
-		  (field . "# Field and Range Formulas\n")
-		  (named . "# Named Field Formulas\n"))))
-    (org-switch-to-buffer-other-window "*Edit Formulas*")
-    (erase-buffer)
-    ;; Keep global-font-lock-mode from turning on font-lock-mode
-    (let ((font-lock-global-modes '(not fundamental-mode)))
-      (fundamental-mode))
-    (setq-local font-lock-global-modes (list 'not major-mode))
-    (setq-local org-pos pos)
-    (setq-local org-window-configuration wc)
-    (setq-local org-selected-window sel-win)
-    (use-local-map org-table-fedit-map)
-    (org-add-hook 'post-command-hook #'org-table-fedit-post-command t t)
-    (easy-menu-add org-table-fedit-menu)
-    (setq startline (org-current-line))
-    (dolist (entry eql)
-      (let* ((type (cond
-		    ((string-match "\\`$[<>]" (car entry)) 'column)
-		    ((equal (string-to-char (car entry)) ?@) 'field)
-		    ((string-match "\\'[0-9]" (car entry)) 'column)
-		    (t 'named)))
-	     (title (assq type titles)))
-	(when title
-	  (unless (bobp) (insert "\n"))
-	  (insert (org-add-props (cdr title) nil 'face font-lock-comment-face))
-	  (setq titles (remove title titles)))
-	(when (equal key (car entry)) (setq startline (org-current-line)))
-	(let ((s (concat (if (member (string-to-char (car entry)) '(?@ ?$)) "" "$")
-			 (car entry) " = " (cdr entry) "\n")))
-	  (remove-text-properties 0 (length s) '(face nil) s)
-	  (insert s))))
-    (when (eq org-table-use-standard-references t)
-      (org-table-fedit-toggle-ref-type))
-    (org-goto-line startline)
-    (message
-     (substitute-command-keys "\\<org-mode-map>\
+  (let ((at-tblfm (org-at-TBLFM-p)))
+    (unless (or at-tblfm (org-at-table-p))
+      (user-error "Not at a table"))
+    (save-excursion
+      ;; Move point within the table before analyzing it.
+      (when at-tblfm (re-search-backward "^[ \t]*|"))
+      (org-table-analyze))
+    (let ((key (org-table-current-field-formula 'key 'noerror))
+	  (eql (sort (org-table-get-stored-formulas t (and at-tblfm (point)))
+		     #'org-table-formula-less-p))
+	  (pos (point-marker))
+	  (source (copy-marker (line-beginning-position)))
+	  (startline 1)
+	  (wc (current-window-configuration))
+	  (sel-win (selected-window))
+	  (titles '((column . "# Column Formulas\n")
+		    (field . "# Field and Range Formulas\n")
+		    (named . "# Named Field Formulas\n"))))
+      (org-switch-to-buffer-other-window "*Edit Formulas*")
+      (erase-buffer)
+      ;; Keep global-font-lock-mode from turning on font-lock-mode
+      (let ((font-lock-global-modes '(not fundamental-mode)))
+	(fundamental-mode))
+      (setq-local font-lock-global-modes (list 'not major-mode))
+      (setq-local org-pos pos)
+      (setq-local org-table--fedit-source source)
+      (setq-local org-window-configuration wc)
+      (setq-local org-selected-window sel-win)
+      (use-local-map org-table-fedit-map)
+      (org-add-hook 'post-command-hook #'org-table-fedit-post-command t t)
+      (easy-menu-add org-table-fedit-menu)
+      (setq startline (org-current-line))
+      (dolist (entry eql)
+	(let* ((type (cond
+		      ((string-match "\\`$\\([0-9]+\\|[<>]+\\)\\'" (car entry))
+		       'column)
+		      ((equal (string-to-char (car entry)) ?@) 'field)
+		      (t 'named)))
+	       (title (assq type titles)))
+	  (when title
+	    (unless (bobp) (insert "\n"))
+	    (insert
+	     (org-add-props (cdr title) nil 'face font-lock-comment-face))
+	    (setq titles (remove title titles)))
+	  (when (equal key (car entry)) (setq startline (org-current-line)))
+	  (let ((s (concat
+		    (if (memq (string-to-char (car entry)) '(?@ ?$)) "" "$")
+		    (car entry) " = " (cdr entry) "\n")))
+	    (remove-text-properties 0 (length s) '(face nil) s)
+	    (insert s))))
+      (when (eq org-table-use-standard-references t)
+	(org-table-fedit-toggle-ref-type))
+      (org-goto-line startline)
+      (message
+       (substitute-command-keys "\\<org-mode-map>\
 Edit formulas, finish with `\\[org-ctrl-c-ctrl-c]' or `\\[org-edit-special]'.  \
-See menu for more commands."))))
+See menu for more commands.")))))
 
 (defun org-table-fedit-post-command ()
   (when (not (memq this-command '(lisp-complete-symbol)))
@@ -3817,32 +3838,31 @@ a translation reference."
 With prefix ARG, apply the new formulas to the table."
   (interactive "P")
   (org-table-remove-rectangle-highlight)
-  (if org-table-use-standard-references
-      (progn
-	(org-table-fedit-convert-buffer 'org-table-convert-refs-to-rc)
-	(setq org-table-buffer-is-an nil)))
-  (let ((pos org-pos) (sel-win org-selected-window) eql var form)
+  (when org-table-use-standard-references
+    (org-table-fedit-convert-buffer 'org-table-convert-refs-to-rc)
+    (setq org-table-buffer-is-an nil))
+  (let ((pos org-pos)
+	(sel-win org-selected-window)
+	(source org-table--fedit-source)
+	eql)
     (goto-char (point-min))
     (while (re-search-forward
 	    "^\\(@[-+I<>0-9.$@]+\\|@?[0-9]+\\|\\$\\([a-zA-Z0-9]+\\|[<>]+\\)\\) *= *\\(.*\\(\n[ \t]+.*$\\)*\\)"
 	    nil t)
-      (setq var (if (match-end 2) (match-string 2) (match-string 1))
-	    form (match-string 3))
-      (setq form (org-trim form))
-      (when (not (equal form ""))
-	(while (string-match "[ \t]*\n[ \t]*" form)
-	  (setq form (replace-match " " t t form)))
-	(when (assoc var eql)
-	  (user-error "Double formulas for %s" var))
-	(push (cons var form) eql)))
-    (setq org-pos nil)
+      (let ((var (match-string 1))
+	    (form (org-trim (match-string 3))))
+	(unless (equal form "")
+	  (while (string-match "[ \t]*\n[ \t]*" form)
+	    (setq form (replace-match " " t t form)))
+	  (when (assoc var eql)
+	    (user-error "Double formulas for %s" var))
+	  (push (cons var form) eql))))
     (set-window-configuration org-window-configuration)
     (select-window sel-win)
-    (goto-char pos)
-    (unless (org-at-table-p)
-      (user-error "Lost table position - cannot install formulas"))
+    (goto-char source)
     (org-table-store-formulas eql)
-    (move-marker pos nil)
+    (set-marker pos nil)
+    (set-marker source nil)
     (kill-buffer "*Edit Formulas*")
     (if arg
 	(org-table-recalculate 'all)
