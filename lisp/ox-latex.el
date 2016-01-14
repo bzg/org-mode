@@ -1034,13 +1034,14 @@ exported.  This format string may contain these elements:
   %c for the caption
   %f for the float attribute
   %l for an appropriate label 
+  %o for the LaTeX attributes
 
 For example,
 
   (setq org-latex-custom-lang-environments
      '((python \"pythoncode\")
        (ocaml \"\\\\begin{listing}
-\\\\begin{minted}{ocaml}
+\\\\begin{minted}[%o]{ocaml}
 %s\\\\end{minted}
 \\\\caption{%c}
 \\\\label{%l}\")))
@@ -1056,7 +1057,7 @@ and if Org encounters an Ocaml source block during LaTeX export it
 will produce
 
   \\begin{listing}
-  \\begin{minted}{ocaml}
+  \\begin{minted}[<attr_latex options>]{ocaml}
   <src block body>
   \\end{minted}
   \\caption{<caption>}
@@ -2802,7 +2803,8 @@ contextual information."
 			 `((?s . ,formatted-src)
 			   (?c . ,caption)
 			   (?f . ,float)
-			   (?l . ,(org-latex--label src-block info)))))))
+			   (?l . ,(org-latex--label src-block info))
+			   (?o . ,(or (plist-get attributes :options) "")))))))
        ;; Case 3.  Use minted package.
        ((eq listings 'minted)
 	(let* ((caption-str (org-latex--caption/label-string src-block info))
