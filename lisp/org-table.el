@@ -3559,9 +3559,9 @@ Parameters get priority."
     (setq startline (org-current-line))
     (dolist (entry eql)
       (let* ((type (cond
-		    ((string-match "\\`$[<>]" (car entry)) 'column)
+		    ((string-match "\\`$\\([0-9]+\\|[<>]+\\)\\'" (car entry))
+		     'column)
 		    ((equal (string-to-char (car entry)) ?@) 'field)
-		    ((string-match "\\'[0-9]" (car entry)) 'column)
 		    (t 'named)))
 	     (title (assq type titles)))
 	(when title
@@ -3832,10 +3832,9 @@ With prefix ARG, apply the new formulas to the table."
     (while (re-search-forward
 	    "^\\(@[-+I<>0-9.$@]+\\|@?[0-9]+\\|\\$\\([a-zA-Z0-9]+\\|[<>]+\\)\\) *= *\\(.*\\(\n[ \t]+.*$\\)*\\)"
 	    nil t)
-      (setq var (if (match-end 2) (match-string 2) (match-string 1))
-	    form (match-string 3))
-      (setq form (org-trim form))
-      (when (not (equal form ""))
+      (setq var (match-string 1))
+      (setq form (org-trim (match-string 3)))
+      (unless (equal form "")
 	(while (string-match "[ \t]*\n[ \t]*" form)
 	  (setq form (replace-match " " t t form)))
 	(when (assoc var eql)
