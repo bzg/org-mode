@@ -927,9 +927,9 @@ a table."
 	   (match-beginning 0))
 	  ;; When the line right after the table is the last line in
 	  ;; the buffer with trailing spaces but no final newline
-	  ;; character, trailing spaces, be sure to catch the correct
-	  ;; ending at its beginning.  In any other case, ending is
-	  ;; expected to be at point max.
+	  ;; character, be sure to catch the correct ending at its
+	  ;; beginning.  In any other case, ending is expected to be
+	  ;; at point max.
 	  (t (goto-char (point-max))
 	     (skip-chars-backward " \t")
 	     (if (bolp) (point) (line-end-position))))))
