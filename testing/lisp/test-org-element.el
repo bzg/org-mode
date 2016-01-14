@@ -926,7 +926,18 @@ Some other text
   ;; Handle non-empty blank line at the end of buffer.
   (should
    (org-test-with-temp-text "[fn:1] Definition\n "
-     (= (org-element-property :end (org-element-at-point)) (point-max)))))
+     (= (org-element-property :end (org-element-at-point)) (point-max))))
+  ;; Footnote with attributes.
+  (should
+   (= 1
+      (org-test-with-temp-text "#+attr_latex: :offset 0in\n[fn:1] A footnote."
+	(length
+	 (org-element-map (org-element-parse-buffer) 'footnote-definition
+	   #'identity)))))
+  (should
+   (org-test-with-temp-text "[fn:1] 1\n\n#+attr_latex: :offset 0in\n[fn:2] 2"
+     (goto-char (org-element-property :end (org-element-at-point)))
+     (looking-at "#"))))
 
 
 ;;;; Footnotes Reference.
