@@ -12386,6 +12386,7 @@ nil or a string to be used for the todo mark." )
 				     bound1 t))
 	(replace-match "0" t nil nil 1)))))
 
+(defvar org-state) ;; dynamically scoped into this function
 (defun org-todo (&optional arg)
   "Change the TODO state of an item.
 The state of an item is given by a keyword at the start of the heading,
