@@ -18720,10 +18720,14 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		   (append org-tag-alist-for-agenda
 			   org-tag-alist
 			   org-tag-persistent-alist)))
+	    ;; Merge current file's tag groups into global
+	    ;; `org-tag-groups-alist-for-agenda'.
 	    (when org-group-tags
-	      (setq org-tag-groups-alist-for-agenda
-		    (org-uniquify-alist
-		     (append org-tag-groups-alist-for-agenda org-tag-groups-alist))))
+	      (dolist (alist org-tag-groups-alist)
+		(let ((old (assoc (car alist) org-tag-groups-alist-for-agenda)))
+		  (if old
+		      (setcdr old (org-uniquify (append (cdr old) (cdr alist))))
+		    (push alist org-tag-groups-alist-for-agenda)))))
 	    (org-with-silent-modifications
 	     (save-excursion
 	       (remove-text-properties (point-min) (point-max) pall)
