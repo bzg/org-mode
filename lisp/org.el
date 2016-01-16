@@ -6240,14 +6240,14 @@ done, nil otherwise."
     (font-lock-mode 1)))
 
 (defun org-activate-tags (limit)
-  (if (re-search-forward (org-re "^\\*+.*[ \t]\\(:[[:alnum:]_@#%:]+:\\)[ \r\n]") limit t)
-      (progn
-	(org-remove-flyspell-overlays-in (match-beginning 1) (match-end 1))
-	(add-text-properties (match-beginning 1) (match-end 1)
-			     (list 'mouse-face 'highlight
-				   'keymap org-mouse-map))
-	(org-rear-nonsticky-at (match-end 1))
-	t)))
+  (when (re-search-forward
+	 (org-re "^\\*+.*[ \t]\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$") limit t)
+    (org-remove-flyspell-overlays-in (match-beginning 1) (match-end 1))
+    (add-text-properties (match-beginning 1) (match-end 1)
+			 (list 'mouse-face 'highlight
+			       'keymap org-mouse-map))
+    (org-rear-nonsticky-at (match-end 1))
+    t))
 
 (defun org-outline-level ()
   "Compute the outline level of the heading at point.
