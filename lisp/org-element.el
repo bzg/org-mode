@@ -5741,10 +5741,14 @@ Providing it allows for quicker computation."
 	;; At an headline or inlinetask, objects are in title.
 	((memq type '(headline inlinetask))
 	 (goto-char (org-element-property :begin element))
-	 (skip-chars-forward "*")
-	 (if (and (> pos (point)) (< pos (line-end-position)))
-	     (narrow-to-region (point) (line-end-position))
-	   (throw 'objects-forbidden element)))
+	 (looking-at org-complex-heading-regexp)
+	 (let ((end (match-end 4)))
+	   (if (not end) (throw 'objects-forbidden element)
+	     (goto-char (match-beginning 4))
+	     (when (let (case-fold-search) (looking-at org-comment-string))
+	       (goto-char (match-end 0)))
+	     (if (>= (point) end) (throw 'objects-forbidden element)
+	       (narrow-to-region (point) end)))))
 	;; At a paragraph, a table-row or a verse block, objects are
 	;; located within their contents.
 	((memq type '(paragraph table-row verse-block))

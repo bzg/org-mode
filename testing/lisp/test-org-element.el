@@ -3409,6 +3409,15 @@ Text
   (should
    (eq 'link
        (org-test-with-temp-text "[fn::[[<point>http://orgmode.org]]]"
+	 (org-element-type (org-element-context)))))
+  ;; Special case: tags looking like a link.
+  (should-not
+   (eq 'link
+       (org-test-with-temp-text "* Headline :file<point>:tags:"
+	 (org-element-type (org-element-context)))))
+  (should
+   (eq 'link
+       (org-test-with-temp-text "* Headline :file<point>:tags: :real:tag:"
 	 (org-element-type (org-element-context))))))
 
 

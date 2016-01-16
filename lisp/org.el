@@ -6192,7 +6192,8 @@ done, nil otherwise."
     (font-lock-mode 1)))
 
 (defun org-activate-tags (limit)
-  (when (re-search-forward (org-re "^\\*+.*[ \t]\\(:[[:alnum:]_@#%:]+:\\)[ \r\n]") limit t)
+  (when (re-search-forward
+	 (org-re "^\\*+.*[ \t]\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$") limit t)
     (org-remove-flyspell-overlays-in (match-beginning 1) (match-end 1))
     (add-text-properties (match-beginning 1) (match-end 1)
 			 (list 'mouse-face 'highlight
