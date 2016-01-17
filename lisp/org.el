@@ -6174,7 +6174,9 @@ done, nil otherwise."
 	    (cl-some
 	     (lambda (f)
 	       (memq f '(org-code org-verbatim underline org-special-keyword)))
-	     (face-at-point nil t))
+	     (save-excursion
+	       (goto-char (1+ (match-beginning 0)))
+	       (face-at-point nil t)))
 	  (let ((offset (if (memq (char-after (1+ (match-beginning 0)))
 				  '(?_ ?^))
 			    1
