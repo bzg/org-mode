@@ -6254,6 +6254,8 @@ There are four matching groups:
 (defvar org-font-lock-hook nil
   "Functions to be called for special font lock stuff.")
 
+(defvar org-font-lock-extra-keywords nil) ;Dynamically scoped.
+
 (defvar org-font-lock-set-keywords-hook nil
   "Functions that can manipulate `org-font-lock-extra-keywords'.
 This is called after `org-font-lock-extra-keywords' is defined, but before
