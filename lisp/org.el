@@ -6170,9 +6170,11 @@ done, nil otherwise."
   (when (org-string-nw-p org-latex-and-related-regexp)
     (catch 'found
       (while (re-search-forward org-latex-and-related-regexp limit t)
-	(unless (memq (car-safe (get-text-property (1+ (match-beginning 0))
-						   'face))
-		      '(org-code org-verbatim underline))
+	(unless
+	    (cl-some
+	     (lambda (f)
+	       (memq f '(org-code org-verbatim underline org-special-keyword)))
+	     (face-at-point nil t))
 	  (let ((offset (if (memq (char-after (1+ (match-beginning 0)))
 				  '(?_ ?^))
 			    1
