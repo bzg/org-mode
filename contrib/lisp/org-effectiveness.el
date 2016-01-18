@@ -77,6 +77,13 @@ many TODO pending"
     (goto-char (point-min))
     (message "Number of Canceled: %d" (count-matches "* CANCEL+ED"))))
 
+(defun org-effectiveness-count-task()
+  "Print a message with the number of tasks and subtasks in the current buffer"
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (message "Number of tasks: %d" (count-matches "^*"))))
+
 (defun org-effectiveness()
   "Returns the effectiveness in the current org buffer"
   (interactive)
