@@ -187,6 +187,12 @@ For example:
 
 They are supported in org-capture via ~file+weektree~ and
 ~file+weektree+prompt~ target specifications.
+*** Attributes support in custom language environments for LaTeX export 
+Custom language environments for LaTeX export can now define the
+string to be inserted during export, using attributes to indicate the
+position of the elements. See variable ~org-latex-custom-lang-environments~
+for more details.
+
 ** New functions
 *** ~org-show-children~ 
 It is a faster implementation of ~outline-show-children~.
