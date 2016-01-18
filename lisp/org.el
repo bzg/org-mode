@@ -5497,13 +5497,8 @@ The following commands are available:
   (setq-local imenu-create-index-function 'org-imenu-get-tree)
 
   ;; Make isearch reveal context
-  (if (or (featurep 'xemacs)
-	  (not (boundp 'outline-isearch-open-invisible-function)))
-      ;; Emacs 21 and XEmacs make use of the hook
-      (org-add-hook 'isearch-mode-end-hook 'org-isearch-end 'append 'local)
-    ;; Emacs 22 deals with this through a special variable
-    (setq-local outline-isearch-open-invisible-function
-		(lambda (&rest _) (org-show-context 'isearch))))
+  (setq-local outline-isearch-open-invisible-function
+	      (lambda (&rest _) (org-show-context 'isearch)))
 
   ;; Setup the pcomplete hooks
   (setq-local pcomplete-command-completion-function 'org-pcomplete-initial)
@@ -24923,29 +24918,6 @@ when non-nil, is a regexp matching keywords names."
 	  (regexp-opt kwds)
 	  (and extra (concat (and kwds "\\|") extra))
 	  "\\):[ \t]*\\(.*\\)"))
-
-;; Make isearch reveal the necessary context
-(defun org-isearch-end ()
-  "Reveal context after isearch exits."
-  (when isearch-success ; only if search was successful
-    (if (featurep 'xemacs)
-	;; Under XEmacs, the hook is run in the correct place,
-	;; we directly show the context.
-	(org-show-context 'isearch)
-      ;; In Emacs the hook runs *before* restoring the overlays.
-      ;; So we have to use a one-time post-command-hook to do this.
-      ;; (Emacs 22 has a special variable, see function `org-mode')
-      (unless (and (boundp 'isearch-mode-end-hook-quit)
-		   isearch-mode-end-hook-quit)
-	;; Only when the isearch was not quitted.
-	(org-add-hook 'post-command-hook 'org-isearch-post-command
-		      'append 'local)))))
-
-(defun org-isearch-post-command ()
-  "Remove self from hook, and show context."
-  (remove-hook 'post-command-hook 'org-isearch-post-command 'local)
-  (org-show-context 'isearch))
-
 
 ;;;; Integration with and fixes for other packages
 
