@@ -116,6 +116,13 @@ many TODO pending"
    (setq count (count-matches (concat "CANCEL+ED.*\n.*" date)))
    (message "CANCELEDS: %d" count))
 
+(defun org-effectiveness-ntasks-in-date(date &optional notmessage)
+  (interactive "sGive me a date: " date)
+  (save-excursion
+    (goto-char (point-min))
+    (let ((tasks (float (count-matches (concat "^*.*\n.*" date)))))
+      (message "%d" tasks))))
+
 (defun org-effectiveness-in-date(date &optional notmessage)
   (interactive "sGive me a date: " date)
   (save-excursion
@@ -263,6 +270,30 @@ many TODO pending"
   	(str ""))
     (while (or (> eyear year) (and (= eyear year) (>= emonth month)))
       (setq str (org-effectiveness-in-date (concat (number-to-string year) "-" (org-effectiveness-month-to-string month)) 1))
+      (switch-to-buffer "*org-effectiveness*")
+      (org-effectiveness-ascii-bar (string-to-number str) (format "%s-%s" year month))
+      (switch-to-buffer buffer)
+      (if (eq month 12)
+  	  (progn 
+  	    (setq year (+ 1 year))
+  	    (setq month 1))
+  	(setq month (+ 1 month)))))
+  (switch-to-buffer "*org-effectiveness*"))
+
+
+(defun org-effectiveness-plot-ascii-ntasks (startdate enddate)
+  (interactive "sGive me the start date: \nsGive me the end date: " startdate enddate)
+  (setq dates (org-effectiveness-check-dates startdate enddate))
+  (let ((syear (cadr (assoc 'startyear dates)))
+	(smonth (cadr (assoc 'startmonth dates)))
+  	(year (cadr (assoc 'startyear dates)))
+	(month (cadr (assoc 'startmonth dates)))
+	(emonth (cadr (assoc 'endmonth dates)))
+	(eyear (cadr (assoc 'endyear dates)))
+	(buffer (current-buffer))
+  	(str ""))
+    (while (or (> eyear year) (and (= eyear year) (>= emonth month)))
+      (setq str (org-effectiveness-ntasks-in-date (concat (number-to-string year) "-" (org-effectiveness-month-to-string month)) 1))
       (switch-to-buffer "*org-effectiveness*")
       (org-effectiveness-ascii-bar (string-to-number str) (format "%s-%s" year month))
       (switch-to-buffer buffer)
