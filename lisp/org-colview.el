@@ -607,7 +607,7 @@ an integer, select that value."
        (t (setq nval (car allowed)))))
     (cond
      ((equal major-mode 'org-agenda-mode)
-      (org-columns-eval '(org-entry-put pom key nval))
+      (org-columns-eval `(org-entry-put ,pom ,key ,nval))
       ;; The following let preserves the current format, and makes sure
       ;; that in only a single file things need to be updated.
       (let* ((org-agenda-overriding-columns-format org-columns-current-fmt)
@@ -618,13 +618,13 @@ an integer, select that value."
 	(org-agenda-columns)))
      (t
       (let ((inhibit-read-only t))
-	(remove-text-properties (1- bol) eol '(read-only t))
+	(remove-text-properties (max (1- bol) (point-min)) eol '(read-only t))
 	(unwind-protect
 	    (progn
 	      (setq org-columns-overlays
 		    (org-delete-all line-overlays org-columns-overlays))
 	      (mapc 'delete-overlay line-overlays)
-	      (org-columns-eval '(org-entry-put pom key nval)))
+	      (org-columns-eval `(org-entry-put ,pom ,key ,nval)))
 	  (org-columns-display-here)))
       (org-move-to-column col)
       (and (nth 3 (assoc-string key org-columns-current-fmt-compiled t))
