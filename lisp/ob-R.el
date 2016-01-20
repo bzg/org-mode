@@ -397,7 +397,7 @@ last statement in BODY, as elisp."
 	(org-babel-result-cond result-params
 	  (with-temp-buffer
 	    (insert-file-contents tmp-file)
-	    (buffer-string))
+	    (org-babel-chomp (buffer-string) "\n"))
 	  (org-babel-import-elisp-from-file tmp-file '(16)))
 	column-names-p)))
     (output (org-babel-eval org-babel-R-command body))))
@@ -431,7 +431,7 @@ last statement in BODY, as elisp."
 	(org-babel-result-cond result-params
 	  (with-temp-buffer
 	    (insert-file-contents tmp-file)
-	    (buffer-string))
+	    (org-babel-chomp (buffer-string) "\n"))
 	  (org-babel-import-elisp-from-file tmp-file '(16)))
 	column-names-p)))
     (output
