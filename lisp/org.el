@@ -15256,7 +15256,7 @@ Returns the new tags string, or nil to not change the current settings."
 					    (org-get-buffer-tags))))))
 		    (quit (setq tg "")))
 		  (when (string-match "\\S-" tg)
-		    (add-to-list 'buffer-tags (list tg))
+		    (cl-pushnew (list tg) buffer-tags :test #'equal)
 		    (if (member tg current)
 			(setq current (delete tg current))
 		      (push tg current)))
