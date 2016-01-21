@@ -874,7 +874,7 @@ This macro also protects the current active clock from being altered."
 	   (org-clock-effort)
 	   (org-clock-marker (car ,clock))
 	   (org-clock-hd-marker (save-excursion
-				  (outline-back-to-heading t)
+				  (org-back-to-heading t)
 				  (point-marker))))
        ,@forms)))
 (def-edebug-spec org-with-clock (form body))
@@ -959,7 +959,7 @@ If necessary, clock-out of the currently active clock."
 	(org-with-wide-buffer
 	 (let ((drawer-re (format "^[ \t]*:%s:[ \t]*$"
 				  (regexp-quote (if (stringp drawer) drawer "LOGBOOK"))))
-	       (beg (save-excursion (outline-back-to-heading t) (point))))
+	       (beg (save-excursion (org-back-to-heading t) (point))))
 	   (catch 'exit
 	     (while (re-search-backward drawer-re beg t)
 	       (let ((element (org-element-at-point)))

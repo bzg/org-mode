@@ -7137,7 +7137,7 @@ open and agenda-wise Org files."
 
 (defsubst org-entry-beginning-position ()
   "Return the beginning position of the current entry."
-  (save-excursion (outline-back-to-heading t) (point)))
+  (save-excursion (org-back-to-heading t) (point)))
 
 (defsubst org-entry-end-position ()
   "Return the end position of the current entry."
