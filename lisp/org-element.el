@@ -459,10 +459,11 @@ Return modified element."
     element))
 
 (defsubst org-element-set-contents (element &rest contents)
-  "Set ELEMENT contents to CONTENTS."
-  (cond ((not element) (list contents))
+  "Set ELEMENT's contents to CONTENTS.
+Return ELEMENT."
+  (cond ((null element) contents)
 	((not (symbolp (car element))) contents)
-	((cdr element) (setcdr (cdr element) contents))
+	((cdr element) (setcdr (cdr element) contents) element)
 	(t (nconc element contents))))
 
 (defun org-element-secondary-p (object)
