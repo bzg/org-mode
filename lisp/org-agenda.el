@@ -4615,7 +4615,7 @@ in `org-agenda-text-search-extra-files'."
 				  (> (org-reduced-level (org-outline-level))
 				     org-agenda-search-view-max-outline-level)
 				  (forward-line -1)
-				  (outline-back-to-heading t)))
+				  (org-back-to-heading t)))
 		      (skip-chars-forward "* ")
 		      (setq beg (point-at-bol)
 			    beg1 (point)
