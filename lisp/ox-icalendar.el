@@ -904,8 +904,8 @@ This function assumes major mode for current buffer is
        (org-icalendar--vcalendar
 	org-icalendar-combined-name
 	user-full-name
-	org-icalendar-combined-description
 	(or (org-string-nw-p org-icalendar-timezone) (cadr (current-time-zone)))
+	org-icalendar-combined-description
 	contents)))
     (run-hook-with-args 'org-icalendar-after-save-hook file)))
 
