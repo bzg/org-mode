@@ -26,7 +26,7 @@
   (signal 'missing-test-dependency "Support for R code blocks"))
 
 (ert-deftest test-ob-R/simple-session ()
-  (let ((ess-ask-for-ess-directory nil))
+  (let (ess-ask-for-ess-directory ess-history-file)
     (org-test-with-temp-text
      "#+begin_src R :session R\n  paste(\"Yep!\")\n#+end_src\n"
      (should (string= "Yep!" (org-babel-execute-src-block))))))
@@ -80,21 +80,23 @@ x
 		   (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob-R/results-file ()
-  (org-test-with-temp-text "#+NAME: TESTSRC
+  (let (ess-ask-for-ess-directory ess-history-file)
+    (org-test-with-temp-text
+     "#+NAME: TESTSRC
 #+BEGIN_SRC R :results file
   a <- file.path(\"junk\", \"test.org\")
   a
 #+END_SRC"
-    (goto-char (point-min)) (org-babel-execute-maybe)
-    (org-babel-goto-named-result "TESTSRC") (forward-line 1)
-    (should (string= "[[file:junk/test.org]]"
-		     (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
-    (goto-char (point-min)) (forward-line 1)
-    (insert "#+header: :session\n")
-    (goto-char (point-min)) (org-babel-execute-maybe)
-    (org-babel-goto-named-result "TESTSRC") (forward-line 1)
-    (should (string= "[[file:junk/test.org]]"
-		     (buffer-substring-no-properties (point-at-bol) (point-at-eol))))))
+     (goto-char (point-min)) (org-babel-execute-maybe)
+     (org-babel-goto-named-result "TESTSRC") (forward-line 1)
+     (should (string= "[[file:junk/test.org]]"
+		      (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+     (goto-char (point-min)) (forward-line 1)
+     (insert "#+header: :session\n")
+     (goto-char (point-min)) (org-babel-execute-maybe)
+     (org-babel-goto-named-result "TESTSRC") (forward-line 1)
+     (should (string= "[[file:junk/test.org]]"
+		      (buffer-substring-no-properties (point-at-bol) (point-at-eol)))))))
 (provide 'test-ob-R)
 
 ;;; test-ob-R.el ends here
