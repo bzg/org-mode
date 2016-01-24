@@ -19093,11 +19093,12 @@ Some of the options can be changed using the variable
 		(cl-case processing-type
 		  (mathjax
 		   ;; Prepare for MathJax processing.
-		   (if (eq (char-after beg) ?$)
-		       (save-excursion
-			 (delete-region beg end)
-			 (insert "\\(" (substring value 1 -1) "\\)"))
-		     (goto-char end)))
+		   (if (not (string-match "\\`\\$\\$?" value))
+		       (goto-char end)
+		     (delete-region beg end)
+		     (if (string= (match-string 0 value) "$$")
+			 (insert "\\[" (substring value 2 -2) "\\]")
+		       (insert "\\(" (substring value 1 -1) "\\)"))))
 		  ((dvipng imagemagick)
 		   ;; Process to an image.
 		   (cl-incf cnt)
