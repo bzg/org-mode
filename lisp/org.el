@@ -5851,11 +5851,9 @@ prompted for."
   "Add link properties for plain links."
   (let (f hl)
     (when (and (re-search-forward (concat org-plain-link-re) limit t)
-	       (not (member 'org-tag
-			    (get-text-property (cond
-                                                ((= 1 (match-beginning 0)) 1)
-                                                (t (1- (match-beginning 0))))
-                                               'face)))
+	       (not (memq 'org-tag
+			  (get-text-property
+			   (max (1- (match-beginning 0)) (point-min)) 'face)))
 	       (not (org-in-src-block-p)))
       (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
       (setq f (get-text-property (match-beginning 0) 'face))
