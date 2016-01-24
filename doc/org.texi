@@ -13468,9 +13468,9 @@ These keywords are treated in details in the following sections.
 When processing a document, @samp{texinfo} back-end generates a minimal file
 header along with a title page, a copyright page, and a menu.  You control
 the latter through the structure of the document (@pxref{Headings and
-sectioning structure}).  Various keywords allow to tweak the other parts.  It
-is also possible to give directions to install the document in the @samp{Top}
-node.
+sectioning structure}).  Various keywords allow you to tweak the other parts.
+It is also possible to give directions to install the document in the
+@samp{Top} node.
 
 @subsubheading File header
 

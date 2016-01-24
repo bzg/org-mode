@@ -415,9 +415,9 @@ Other brackets are treated as spaces.")
 ;; Provide four accessors: `org-element-type', `org-element-property'
 ;; `org-element-contents' and `org-element-restriction'.
 ;;
-;; Setter functions allow to modify elements by side effect.  There is
-;; `org-element-put-property', `org-element-set-contents'.  These
-;; low-level functions are useful to build a parse tree.
+;; Setter functions allow modification of elements by side effect.
+;; There is `org-element-put-property', `org-element-set-contents'.
+;; These low-level functions are useful to build a parse tree.
 ;;
 ;; `org-element-adopt-element', `org-element-set-element',
 ;; `org-element-extract-element' and `org-element-insert-before' are
@@ -3933,8 +3933,8 @@ position of point and CDR is nil."
 ;; `org-element-parse-secondary-string', which parses objects within
 ;; a given string.
 ;;
-;; The (almost) almighty `org-element-map' allows to apply a function
-;; on elements or objects matching some type, and accumulate the
+;; The (almost) almighty `org-element-map' allows applying a function
+;; on elements or objects matching some type, and accumulating the
 ;; resulting values.  In an export situation, it also skips unneeded
 ;; parts of the parse tree.
 
