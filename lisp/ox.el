@@ -865,7 +865,7 @@ This option can also be set with the OPTIONS keyword, e.g.,
 (defcustom org-export-snippet-translation-alist nil
   "Alist between export snippets back-ends and exporter back-ends.
 
-This variable allows to provide shortcuts for export snippets.
+This variable allows providing shortcuts for export snippets.
 
 For example, with a value of \\='((\"h\" . \"html\")), the
 HTML back-end will recognize the contents of \"@@h:<b>@@\" as
@@ -953,7 +953,7 @@ output is restricted to body only, \"s\" when it is restricted to
 the current subtree, \"v\" when only visible elements are
 considered for export, \"f\" when publishing functions should be
 passed the FORCE argument and \"a\" when the export should be
-asynchronous).  Also, [?] allows to switch back to standard
+asynchronous).  Also, [?] allows switching back to standard
 mode."
   :group 'org-export-general
   :version "24.4"
@@ -3858,8 +3858,8 @@ process, leading to a different order when footnotes are nested."
 ;; level, relatively to the lower headline level in the parsed tree.
 ;;
 ;; `org-export-get-headline-number' returns the section number of an
-;; headline, while `org-export-number-to-roman' allows to convert it
-;; to roman numbers.  With an optional argument,
+;; headline, while `org-export-number-to-roman' allows it to be
+;; converted to roman numbers.  With an optional argument,
 ;; `org-export-get-headline-number' returns a number to unnumbered
 ;; headlines (used for internal id).
 ;;
@@ -4309,8 +4309,8 @@ Otherwise, only provided element's type is considered.
 Optional argument PREDICATE is a function returning a non-nil
 value if the current element or object should be counted in.  It
 accepts two arguments: the element or object being considered and
-the plist used as a communication channel.  This allows to count
-only a certain type of objects (i.e. inline images).
+the plist used as a communication channel.  This allows counting
+only a certain type of object (i.e. inline images).
 
 Return value is a list of numbers if ELEMENT is a headline or an
 item.  It is nil for keywords.  It represents the footnote number
@@ -5718,7 +5718,7 @@ to `:default' encoding.  If it fails, return S."
 ;; returned results in the current process.
 ;;
 ;; At a higher level, `org-export-to-buffer' and `org-export-to-file'
-;; allow to export to a buffer or a file, asynchronously or not.
+;; allow exporting to a buffer or a file, asynchronously or not.
 ;;
 ;; `org-export-output-file-name' is an auxiliary function meant to be
 ;; used with `org-export-to-file'.  With a given extension, it tries
@@ -6239,7 +6239,7 @@ is nil when this menu hasn't been selected yet.
 
 EXPERTP, when non-nil, triggers expert UI.  In that case, no help
 buffer is provided, but indications about currently active
-options are given in the prompt.  Moreover, [?] allows to switch
+options are given in the prompt.  Moreover, [?] allows switching
 back to standard interface."
   (let* ((fontify-key
 	  (lambda (key &optional access-key)

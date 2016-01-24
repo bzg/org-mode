@@ -1129,7 +1129,7 @@ This function is meant to be used as a final output filter.  See
 
 Return value is an internal reference, as a string.
 
-This function allows to resolve external links like:
+This function allows the resolution of external links like:
 
   [[file.org::*fuzzy][description]]
   [[file.org::#custom-id][description]]
