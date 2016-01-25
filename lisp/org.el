@@ -5849,7 +5849,7 @@ prompted for."
 
 (defun org-activate-plain-links (limit)
   "Add link properties for plain links."
-  (when (and (re-search-forward (concat org-plain-link-re) limit t)
+  (when (and (re-search-forward org-plain-link-re limit t)
 	     (not (org-in-src-block-p)))
     (let ((face (get-text-property (max (1- (match-beginning 0)) (point-min))
 				   'face))
