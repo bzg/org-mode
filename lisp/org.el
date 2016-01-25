@@ -5854,7 +5854,7 @@ prompted for."
     (let ((face (get-text-property (max (1- (match-beginning 0)) (point-min))
 				   'face))
 	  (link (org-match-string-no-properties 0)))
-      (when (if (consp face) (memq 'org-tag face) (eq 'org-tag face))
+      (unless (if (consp face) (memq 'org-tag face) (eq 'org-tag face))
 	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	(add-text-properties (match-beginning 0) (match-end 0)
 			     (list 'mouse-face 'highlight
