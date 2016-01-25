@@ -317,6 +317,8 @@ name of the code block."
 				   org-confirm-babel-evaluate)))
 	    (code-block      (if ,info (format  " %s "  ,lang) " "))
 	    (block-name      (if ,name (format " (%s) " ,name) " ")))
+       ;; Silence byte-compiler is `body' doesn't use those vars.
+       (ignore noeval query)
        ,@body)))
 
 (defsubst org-babel-check-evaluate (info)
@@ -613,6 +615,8 @@ multiple blocks are being executed (e.g., in chained execution
 through use of the :var header argument) this marker points to
 the outer-most code block.")
 
+(defvar *this*)
+
 ;;;###autoload
 (defun org-babel-execute-src-block (&optional arg info params)
   "Execute the current source code block.
@@ -660,7 +664,8 @@ block."
 	    (skip-chars-forward " \t")
 	    (let ((result (org-babel-read-result)))
 	      (message (replace-regexp-in-string
-			"%" "%%" (format "%S" result))) result)))
+			"%" "%%" (format "%S" result)))
+	      result)))
 	 ((org-babel-confirm-evaluate
 	   (let ((i info)) (setf (nth 2 i) merged-params) i))
 	  (let* ((lang (nth 0 info))
@@ -756,7 +761,7 @@ org-babel-expand-body:lang function."
 	       "\n")))
 
 ;;;###autoload
-(defun org-babel-expand-src-block (&optional arg info params)
+(defun org-babel-expand-src-block (&optional _arg info params)
   "Expand the current source code block.
 Expand according to the source code block's header
 arguments and pop open the results in a preview buffer."
@@ -809,8 +814,7 @@ arguments and pop open the results in a preview buffer."
   (let ((results (copy-sequence original)))
     (dolist (new-list others)
       (dolist (arg-pair new-list)
-	(let ((header (car arg-pair))
-	      (args (cdr arg-pair)))
+	(let ((header (car arg-pair)))
 	  (setq results
 		(cons arg-pair (org-remove-if
 				(lambda (pair) (equal header (car pair)))
@@ -903,7 +907,7 @@ arguments and pop open the results in a preview buffer."
 (add-hook 'org-tab-first-hook 'org-babel-header-arg-expand)
 
 ;;;###autoload
-(defun org-babel-load-in-session (&optional arg info)
+(defun org-babel-load-in-session (&optional _arg info)
   "Load the body of the current source-code block.
 Evaluate the header arguments for the source block before
 entering the session.  After loading the body this pops open the
@@ -972,7 +976,7 @@ with a prefix argument then this is passed on to
 (defvar org-src-window-setup)
 
 ;;;###autoload
-(defun org-babel-switch-to-session-with-code (&optional arg info)
+(defun org-babel-switch-to-session-with-code (&optional arg _info)
   "Switch to code buffer and display session."
   (interactive "P")
   (let ((swap-windows
@@ -1098,7 +1102,13 @@ end-body --------- point at the end of the body"
 		   (body (match-string 5))
 		   (beg-body (match-beginning 5))
 		   (end-body (match-end 5)))
-	       ,@body
+               ;; Silence byte-compiler in case `body' doesn't use all
+               ;; those variables.
+               (ignore full-block beg-block end-block lang
+                       beg-lang end-lang switches beg-switches
+                       end-switches header-args beg-header-args
+                       end-header-args body beg-body end-body)
+               ,@body
 	       (goto-char end-block)))))
        (unless visited-p (kill-buffer to-be-removed))
        (goto-char point))))
@@ -1625,7 +1635,7 @@ Note: this function removes any hlines in TABLE."
 	 (rownames (funcall (lambda ()
 			      (let ((tp table))
 				(mapcar
-				 (lambda (row)
+				 (lambda (_row)
 				   (prog1
 				       (pop (car tp))
 				     (setq tp (cdr tp))))
@@ -1803,7 +1813,8 @@ buffer or nil if no such result exists."
       (catch 'is-a-code-block
 	(when (re-search-forward
 	       (concat org-babel-result-regexp
-		       "[ \t]" (regexp-quote name) "[ \t]*[\n\f\v\r]") nil t)
+		       "[ \t]" (regexp-quote name) "[ \t]*[\n\f\v\r]")
+               nil t)
 	  (when (and (string= "name" (downcase (match-string 1)))
 		     (or (beginning-of-line 1)
 			 (looking-at org-babel-src-block-regexp)
