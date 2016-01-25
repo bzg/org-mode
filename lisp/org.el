@@ -5849,25 +5849,20 @@ prompted for."
 
 (defun org-activate-plain-links (limit)
   "Add link properties for plain links."
-  (let (f hl)
-    (when (and (re-search-forward (concat org-plain-link-re) limit t)
-	       (not (memq 'org-tag
-			  (get-text-property
-			   (max (1- (match-beginning 0)) (point-min)) 'face)))
-	       (not (org-in-src-block-p)))
-      (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
-      (setq f (get-text-property (match-beginning 0) 'face))
-      (setq hl (org-match-string-no-properties 0))
-      (if (or (eq f 'org-tag)
-	      (and (listp f) (memq 'org-tag f)))
-	  nil
+  (when (and (re-search-forward (concat org-plain-link-re) limit t)
+	     (not (org-in-src-block-p)))
+    (let ((face (get-text-property (max (1- (match-beginning 0)) (point-min))
+				   'face))
+	  (link (org-match-string-no-properties 0)))
+      (when (if (consp face) (memq 'org-tag face) (eq 'org-tag face))
+	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	(add-text-properties (match-beginning 0) (match-end 0)
 			     (list 'mouse-face 'highlight
 				   'face 'org-link
-				   'htmlize-link `(:uri ,hl)
+				   'htmlize-link `(:uri ,link)
 				   'keymap org-mouse-map))
-	(org-rear-nonsticky-at (match-end 0)))
-      t)))
+	(org-rear-nonsticky-at (match-end 0))
+	t))))
 
 (defun org-activate-code (limit)
   (if (re-search-forward "^[ \t]*\\(:\\(?: .*\\|$\\)\n?\\)" limit t)
