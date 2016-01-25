@@ -625,7 +625,7 @@ is cleared and contents are removed in the process."
 ;; cannot contain other greater elements of their own type.
 ;;
 ;; Beside implementing a parser and an interpreter, adding a new
-;; greater element requires to tweak `org-element--current-element'.
+;; greater element requires tweaking `org-element--current-element'.
 ;; Moreover, the newly defined type must be added to both
 ;; `org-element-all-elements' and `org-element-greater-elements'.
 
