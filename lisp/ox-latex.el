@@ -3578,7 +3578,10 @@ Return PDF file name or an error if it couldn't be produced."
 	;; Check for process failure.  Provide collected errors if
 	;; possible.
 	(if (or (not (file-exists-p pdffile))
-		(time-less-p (nth 5 (file-attributes pdffile)) time))
+		;; Only compare times up to whole seconds as some filesystems
+		;; (e.g. HFS+) do not retain any finer granularity.
+		(time-less-p (org-sublist (nth 5 (file-attributes pdffile)) 1 2)
+			     (org-sublist time 1 2)))
 	    (error (format "PDF file %s wasn't produced" pdffile))
 	  ;; Else remove log files, when specified, and signal end of
 	  ;; process to user, along with any error encountered.
