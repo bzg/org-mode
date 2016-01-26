@@ -317,7 +317,7 @@ name of the code block."
 				   org-confirm-babel-evaluate)))
 	    (code-block      (if ,info (format  " %s "  ,lang) " "))
 	    (block-name      (if ,name (format " (%s) " ,name) " ")))
-       ;; Silence byte-compiler is `body' doesn't use those vars.
+       ;; Silence byte-compiler if `body' doesn't use those vars.
        (ignore noeval query)
        ,@body)))
 
