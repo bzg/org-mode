@@ -3198,7 +3198,7 @@ Text
    (equal
     (org-element-normalize-contents
      '(paragraph nil "  Two spaces\n\n \n  Two spaces"))
-    '(paragraph nil "Two spaces\n\n \nTwo spaces")))
+    '(paragraph nil "Two spaces\n\n\nTwo spaces")))
   (should
    (equal
     '(paragraph nil " Two spaces\n" (verbatim nil "V") "\n Two spaces")

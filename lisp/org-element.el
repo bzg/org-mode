@@ -4340,17 +4340,13 @@ the list of objects itself."
     (save-restriction
       (narrow-to-region beg end)
       (goto-char (point-min))
-      (let ((tab (make-string tab-width ?\s))
-	    next-object contents)
+      (let (next-object contents)
 	(while (and (not (eobp))
 		    (setq next-object (org-element--object-lex restriction)))
 	  ;; Text before any object.  Untabify it.
 	  (let ((obj-beg (org-element-property :begin next-object)))
 	    (unless (= (point) obj-beg)
-	      (let ((text
-		     (replace-regexp-in-string
-		      "\t" tab
-		      (buffer-substring-no-properties (point) obj-beg))))
+	      (let ((text (buffer-substring-no-properties (point) obj-beg)))
 		(push (if acc (org-element-put-property text :parent acc) text)
 		      contents))))
 	  ;; Object...
@@ -4369,8 +4365,7 @@ the list of objects itself."
 	    (goto-char obj-end)))
 	;; Text after last object.  Untabify it.
 	(unless (eobp)
-	  (let ((text (replace-regexp-in-string
-		       "\t" tab (buffer-substring-no-properties (point) end))))
+	  (let ((text (buffer-substring-no-properties (point) end)))
 	    (push (if acc (org-element-put-property text :parent acc) text)
 		  contents)))
 	;; Result.  Set appropriate parent.
@@ -4540,8 +4535,7 @@ If optional argument IGNORE-FIRST is non-nil, ignore first line's
 indentation to compute maximal common indentation.
 
 Return the normalized element that is element with global
-indentation removed from its contents.  The function assumes that
-indentation is not done with TAB characters."
+indentation removed from its contents."
   (letrec ((find-min-ind
 	    ;; Return minimal common indentation within BLOB.  This is
 	    ;; done by walking recursively BLOB and updating MIN-IND
@@ -4552,67 +4546,78 @@ indentation is not done with TAB characters."
 	    ;; break.
 	    (lambda (blob first-flag min-ind)
 	      (catch 'zero
-		(dolist (object (org-element-contents blob) min-ind)
+		(dolist (datum (org-element-contents blob) min-ind)
 		  (when first-flag
 		    (setq first-flag nil)
-		    ;; Objects cannot start with spaces: in this case,
-		    ;; indentation is 0.
-		    (if (not (stringp object)) (throw 'zero 0)
-		      (string-match "\\` *" object)
-		      (let ((len (match-end 0)))
-			;; An indentation of zero means no string will
-			;; be modified.  Quit the process.
-			(if (zerop len) (throw 'zero 0)
-			  (setq min-ind (min len min-ind))))))
+		    (cond
+		     ;; Objects cannot start with spaces: in this
+		     ;; case, indentation is 0.
+		     ((not (stringp datum)) (throw 'zero 0))
+		     ((not (string-match
+			    "\\`\\([ \t]+\\)\\([^ \t\n]\\|\n\\|\\'\\)" datum))
+		      (throw 'zero 0))
+		     ((equal (match-string 2 datum) "\n")
+		      (put-text-property
+		       (match-beginning 1) (match-end 1) 'org-ind 'empty datum))
+		     (t
+		      (let ((i (string-width (match-string 1 datum))))
+			(put-text-property
+			 (match-beginning 1) (match-end 1) 'org-ind i datum)
+			(setq min-ind (min i min-ind))))))
 		  (cond
-		   ((stringp object)
-		    (dolist (line (cdr (org-split-string object " *\n")))
-		      (unless (string= line "")
-			(setq min-ind
-			      (min (org-get-indentation line) min-ind)))))
-		   ((eq (org-element-type object) 'line-break)
+		   ((stringp datum)
+		    (let ((s 0))
+		      (while (string-match
+			      "\n\\([ \t]+\\)\\([^ \t\n]\\|\n\\|\\'\\)" datum s)
+			(setq s (match-end 1))
+			(if (equal (match-string 2 datum) "\n")
+			    (put-text-property
+			     (match-beginning 1) (match-end 1)
+			     'org-ind 'empty
+			     datum)
+			  (let ((i (string-width (match-string 1 datum))))
+			    (put-text-property
+			     (match-beginning 1) (match-end 1) 'org-ind i datum)
+			    (setq min-ind (min i min-ind)))))))
+		   ((eq (org-element-type datum) 'line-break)
 		    (setq first-flag t))
-		   ((memq (org-element-type object)
-			  org-element-recursive-objects)
+		   ((memq (org-element-type datum) org-element-recursive-objects)
 		    (setq min-ind
-			  (funcall find-min-ind
-				   object first-flag min-ind))))))))
+			  (funcall find-min-ind datum first-flag min-ind))))))))
 	   (min-ind (funcall find-min-ind
 			     element (not ignore-first) most-positive-fixnum)))
     (if (or (zerop min-ind) (= min-ind most-positive-fixnum)) element
       ;; Build ELEMENT back, replacing each string with the same
       ;; string minus common indentation.
       (letrec ((build
-		(lambda (datum first-flag)
+		(lambda (datum)
 		  ;; Return DATUM with all its strings indentation
 		  ;; shortened from MIN-IND white spaces.
-		  ;; FIRST-FLAG is non-nil when the next object is
-		  ;; expected to be a string that doesn't start with
-		  ;; a newline character.
-		  (setcdr (cdr datum)
-			  (mapcar
-			   (lambda (object)
-			     (when first-flag
-			       (setq first-flag nil)
-			       (when (stringp object)
-				 (setq object
-				       (replace-regexp-in-string
-					(format "\\` \\{%d\\}" min-ind)
-					"" object))))
-			     (cond
-			      ((stringp object)
-			       (replace-regexp-in-string
-				(format "\n \\{%d\\}" min-ind) "\n" object))
-			      ((memq (org-element-type object)
-				     org-element-recursive-objects)
-			       (funcall build object first-flag))
-			      ((eq (org-element-type object) 'line-break)
-			       (setq first-flag t)
-			       object)
-			      (t object)))
-			   (org-element-contents datum)))
+		  (setcdr
+		   (cdr datum)
+		   (mapcar
+		    (lambda (object)
+		      (cond
+		       ((stringp object)
+			(with-temp-buffer
+			  (insert object)
+			  (let ((s (point-min)))
+			    (while (setq s (text-property-not-all
+					    s (point-max) 'org-ind nil))
+			      (goto-char s)
+			      (let ((i (get-text-property s 'org-ind)))
+				(delete-region s (progn
+						   (skip-chars-forward " \t")
+						   (point)))
+				(when (integerp i) (indent-to (- i min-ind))))))
+			  (buffer-string)))
+		       ((memq (org-element-type object)
+			      org-element-recursive-objects)
+			(funcall build object))
+		       (t object)))
+		    (org-element-contents datum)))
 		  datum)))
-	(funcall build element (not ignore-first))))))
+	(funcall build element)))))
 
 
 
