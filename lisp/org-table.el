@@ -3927,13 +3927,13 @@ With prefix ARG, apply the new formulas to the table."
 (defvar org-show-positions nil)
 
 (defun org-table-show-reference (&optional local)
-  "Show the location/value of the $ expression at point."
+  "Show the location/value of the $ expression at point.
+When LOCAL is non-nil, show references for the table at point."
   (interactive)
   (org-table-remove-rectangle-highlight)
   (when local (org-table-analyze))
   (catch 'exit
     (let ((pos (if local (point) org-pos))
-	  (table-start (if local org-table-current-begin-pos (org-table-begin)))
 	  (face2 'highlight)
 	  (org-inhibit-highlight-removal t)
 	  (win (selected-window))
@@ -3986,73 +3986,75 @@ With prefix ARG, apply the new formulas to the table."
 						(marker-buffer pos)))))
       (goto-char pos)
       (org-table-force-dataline)
-      (when dest
-	(setq name (substring dest 1))
+      (let ((table-start
+	     (if local org-table-current-begin-pos (org-table-begin))))
+	(when dest
+	  (setq name (substring dest 1))
+	  (cond
+	   ((org-string-match-p "\\`\\$[a-zA-Z][a-zA-Z0-9]*" dest)
+	    (org-table-goto-field dest))
+	   ((org-string-match-p "\\`@\\([1-9][0-9]*\\)\\$\\([1-9][0-9]*\\)\\'"
+				dest)
+	    (org-table-goto-field dest))
+	   (t (org-table-goto-column (string-to-number name))))
+	  (move-marker pos (point))
+	  (org-table-highlight-rectangle nil nil face2))
 	(cond
-	 ((org-string-match-p "\\`\\$[a-zA-Z][a-zA-Z0-9]*" dest)
-	  (org-table-goto-field dest))
-	 ((org-string-match-p "\\`@\\([1-9][0-9]*\\)\\$\\([1-9][0-9]*\\)\\'"
-			      dest)
-	  (org-table-goto-field dest))
-	 (t (org-table-goto-column (string-to-number name))))
-	(move-marker pos (point))
-	(org-table-highlight-rectangle nil nil face2))
-      (cond
-       ((equal dest match))
-       ((not match))
-       ((eq what 'range)
-	(ignore-errors (org-table-get-range match table-start nil 'highlight)))
-       ((setq e (assoc var org-table-named-field-locations))
-	(org-table-goto-field var)
-	(org-table-highlight-rectangle)
-	(message "Named field, column %d of line %d" (nth 2 e) (nth 1 e)))
-       ((setq e (assoc var org-table-column-names))
-	(org-table-goto-column (string-to-number (cdr e)))
-	(org-table-highlight-rectangle)
-	(goto-char table-start)
-	(if (re-search-forward (concat "^[ \t]*| *! *.*?| *\\(" var "\\) *|")
-			       (org-table-end) t)
-	    (progn
-	      (goto-char (match-beginning 1))
-	      (org-table-highlight-rectangle)
-	      (message "Named column (column %s)" (cdr e)))
-	  (user-error "Column name not found")))
-       ((eq what 'column)
-	;; Column number.
-	(org-table-goto-column (string-to-number (substring match 1)))
-	(org-table-highlight-rectangle)
-	(message "Column %s" (substring match 1)))
-       ((setq e (assoc var org-table-local-parameters))
-	(goto-char table-start)
-	(if (re-search-forward (concat "^[ \t]*| *\\$ *.*?| *\\(" var "=\\)") nil t)
-	    (progn
-	      (goto-char (match-beginning 1))
-	      (org-table-highlight-rectangle)
-	      (message "Local parameter."))
-	  (user-error "Parameter not found")))
-       ((not var) (user-error "No reference at point"))
-       ((setq e (assoc var org-table-formula-constants-local))
-	(message "Local Constant: $%s=%s in #+CONSTANTS line."
-		 var (cdr e)))
-       ((setq e (assoc var org-table-formula-constants))
-	(message "Constant: $%s=%s in `org-table-formula-constants'."
-		 var (cdr e)))
-       ((setq e (and (fboundp 'constants-get) (constants-get var)))
-	(message "Constant: $%s=%s, from `constants.el'%s."
-		 var e (format " (%s units)" constants-unit-system)))
-       (t (user-error "Undefined name $%s" var)))
-      (goto-char pos)
-      (when (and org-show-positions
-		 (not (memq this-command '(org-table-fedit-scroll
-					   org-table-fedit-scroll-down))))
-	(push pos org-show-positions)
-	(push table-start org-show-positions)
-	(let ((min (apply 'min org-show-positions))
-	      (max (apply 'max org-show-positions)))
-	  (set-window-start (selected-window) min)
-	  (goto-char max)
-	  (or (pos-visible-in-window-p max)
-	      (set-window-start (selected-window) max))))
+	 ((equal dest match))
+	 ((not match))
+	 ((eq what 'range)
+	  (ignore-errors (org-table-get-range match table-start nil 'highlight)))
+	 ((setq e (assoc var org-table-named-field-locations))
+	  (org-table-goto-field var)
+	  (org-table-highlight-rectangle)
+	  (message "Named field, column %d of line %d" (nth 2 e) (nth 1 e)))
+	 ((setq e (assoc var org-table-column-names))
+	  (org-table-goto-column (string-to-number (cdr e)))
+	  (org-table-highlight-rectangle)
+	  (goto-char table-start)
+	  (if (re-search-forward (concat "^[ \t]*| *! *.*?| *\\(" var "\\) *|")
+				 (org-table-end) t)
+	      (progn
+		(goto-char (match-beginning 1))
+		(org-table-highlight-rectangle)
+		(message "Named column (column %s)" (cdr e)))
+	    (user-error "Column name not found")))
+	 ((eq what 'column)
+	  ;; Column number.
+	  (org-table-goto-column (string-to-number (substring match 1)))
+	  (org-table-highlight-rectangle)
+	  (message "Column %s" (substring match 1)))
+	 ((setq e (assoc var org-table-local-parameters))
+	  (goto-char table-start)
+	  (if (re-search-forward (concat "^[ \t]*| *\\$ *.*?| *\\(" var "=\\)") nil t)
+	      (progn
+		(goto-char (match-beginning 1))
+		(org-table-highlight-rectangle)
+		(message "Local parameter."))
+	    (user-error "Parameter not found")))
+	 ((not var) (user-error "No reference at point"))
+	 ((setq e (assoc var org-table-formula-constants-local))
+	  (message "Local Constant: $%s=%s in #+CONSTANTS line."
+		   var (cdr e)))
+	 ((setq e (assoc var org-table-formula-constants))
+	  (message "Constant: $%s=%s in `org-table-formula-constants'."
+		   var (cdr e)))
+	 ((setq e (and (fboundp 'constants-get) (constants-get var)))
+	  (message "Constant: $%s=%s, from `constants.el'%s."
+		   var e (format " (%s units)" constants-unit-system)))
+	 (t (user-error "Undefined name $%s" var)))
+	(goto-char pos)
+	(when (and org-show-positions
+		   (not (memq this-command '(org-table-fedit-scroll
+					     org-table-fedit-scroll-down))))
+	  (push pos org-show-positions)
+	  (push table-start org-show-positions)
+	  (let ((min (apply 'min org-show-positions))
+		(max (apply 'max org-show-positions)))
+	    (set-window-start (selected-window) min)
+	    (goto-char max)
+	    (or (pos-visible-in-window-p max)
+		(set-window-start (selected-window) max)))))
       (select-window win))))
 
 (defun org-table-force-dataline ()
