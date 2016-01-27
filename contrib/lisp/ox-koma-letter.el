@@ -41,13 +41,14 @@
 ;;   - PHONE_NUMBER: see `org-koma-letter-phone-number',
 ;;   - SIGNATURE: see `org-koma-letter-signature',
 ;;   - PLACE: see `org-koma-letter-place',
+;;   - LOCATION: see `org-koma-letter-location',
 ;;   - TO_ADDRESS:  If unspecified this is set to "\mbox{}".
 ;;
-;; TO_ADDRESS and FROM_ADDRESS can also be specified using heading
-;; with the special tags specified in
-;; `org-koma-letter-special-tags-in-letter', namely "to" and "from".
-;; LaTeX line breaks are not necessary if using these headings.  If
-;; both a headline and a keyword specify a to or from address the
+;; TO_ADDRESS, FROM_ADDRESS, LOCATION, CLOSING, and SIGNATURE can also
+;; be specified using "special headings" with the special tags
+;; specified in `org-koma-letter-special-tags-in-letter'.  LaTeX line
+;; breaks are not necessary for TO_ADDRESS, FROM_ADDRESS and LOCATION.
+;; If both a headline and a keyword specify a to or from address the
 ;; value is determined in accordance with
 ;; `org-koma-letter-prefer-special-headings'.
 ;;
@@ -58,6 +59,7 @@
 ;;   - phone (see `org-koma-letter-use-phone')
 ;;   - email (see `org-koma-letter-use-email')
 ;;   - place (see `org-koma-letter-use-place')
+;;   - location (see `org-koma-letter-use-location')
 ;;   - subject, a list of format options
 ;;     (see `org-koma-letter-subject-format')
 ;;   - after-closing-order, a list of the ordering of headings with
@@ -185,6 +187,24 @@ This option can also be set with the PHONE_NUMBER keyword."
 (defcustom org-koma-letter-place ""
   "Place from which the letter is sent, as a string.
 This option can also be set with the PLACE keyword."
+  :group 'org-export-koma-letter
+  :type 'string)
+
+(defcustom org-koma-letter-location ""
+  "Sender's extension field, as a string.
+
+This option can also be set with the LOCATION keyword.
+Moreover, when:
+  (1) Either `org-koma-letter-prefer-special-headings' is non-nil
+      or there is no LOCATION keyword or the LOCATION keyword is
+      empty;
+  (2) the letter contains a headline with the special
+      tag \"location\";
+then the location will be set as the content of the location
+special heading.
+
+The location field is typically printed right of the address
+field (See Figure 4.9. in the English manual of 2015-10-03)."
   :group 'org-export-koma-letter
   :type 'string)
 
@@ -356,6 +376,13 @@ This option can also be set with the OPTIONS keyword, e.g.:
   :group 'org-export-koma-letter
   :type 'boolean)
 
+(defcustom org-koma-letter-use-location t
+  "Non-nil prints the contents of the letter's extension below the header.
+This option can also be set with the OPTIONS keyword, e.g.:
+\"location:nil\"."
+  :group 'org-export-koma-letter
+  :type 'boolean)
+
 (defcustom org-koma-letter-default-class "default-koma-letter"
   "Default class for `org-koma-letter'.
 The value must be a member of `org-latex-classes'."
@@ -376,7 +403,7 @@ e.g. \"title-subject:t\"."
     :group 'org-export-koma-letter
     :type 'boolean)
 
-(defconst org-koma-letter-special-tags-in-letter '(to from closing)
+(defconst org-koma-letter-special-tags-in-letter '(to from closing location)
   "Header tags related to the letter itself.")
 
 (defconst org-koma-letter-special-tags-after-closing '(after_closing ps encl cc)
@@ -409,6 +436,7 @@ e.g. \"title-subject:t\"."
     (:email "EMAIL" nil (org-koma-letter--get-value org-koma-letter-email) t)
     (:to-address "TO_ADDRESS" nil nil newline)
     (:place "PLACE" nil org-koma-letter-place)
+    (:location "LOCATION" nil org-koma-letter-location)
     (:subject "SUBJECT" nil nil parse)
     (:opening "OPENING" nil org-koma-letter-opening parse)
     (:closing "CLOSING" nil org-koma-letter-closing parse)
@@ -425,6 +453,7 @@ e.g. \"title-subject:t\"."
     (:with-foldmarks nil "foldmarks" org-koma-letter-use-foldmarks)
     (:with-phone nil "phone" org-koma-letter-use-phone)
     (:with-place nil "place" org-koma-letter-use-place)
+    (:with-location nil "location" org-koma-letter-use-location)
     (:with-subject nil "subject" org-koma-letter-subject-format)
     (:with-title-as-subject nil "title-subject" org-koma-letter-prefer-subject)
     (:with-headline-opening nil nil org-koma-letter-headline-is-opening-maybe)
@@ -436,12 +465,14 @@ e.g. \"title-subject:t\"."
     (:inbuffer-email "EMAIL" nil 'koma-letter:empty)
     (:inbuffer-phone-number "PHONE_NUMBER" nil 'koma-letter:empty)
     (:inbuffer-place "PLACE" nil 'koma-letter:empty)
+    (:inbuffer-location "LOCATION" nil 'koma-letter:empty)
     (:inbuffer-signature "SIGNATURE" nil 'koma-letter:empty)
     (:inbuffer-with-backaddress nil "backaddress" 'koma-letter:empty)
     (:inbuffer-with-email nil "email" 'koma-letter:empty)
     (:inbuffer-with-foldmarks nil "foldmarks" 'koma-letter:empty)
     (:inbuffer-with-phone nil "phone" 'koma-letter:empty)
-    (:inbuffer-with-place nil "place" 'koma-letter:empty))
+    (:inbuffer-with-place nil "place" 'koma-letter:empty)
+    (:inbuffer-with-location nil "location" 'koma-letter:empty))
   :translate-alist '((export-block . org-koma-letter-export-block)
 		     (export-snippet . org-koma-letter-export-snippet)
 		     (headline . org-koma-letter-headline)
@@ -756,6 +787,22 @@ a communication channel."
 	 (format "\\setkomavar{place}{%s}\n"
 		 (if (plist-get info :with-place) (plist-get info :place)
 		   ""))))
+     ;; Location.
+     (let ((heading-val
+	    (org-koma-letter--add-latex-newlines
+	     (org-export-data
+	      (org-koma-letter--get-tagged-contents 'location)
+	      info)))
+	   (with-location-set (funcall check-scope 'with-location))
+	   (location-set (funcall check-scope 'location))
+	   (location (plist-get info :location)))
+       (when (or (and with-location-set (or location-set heading-val))
+		 (and (eq scope 'buffer) (or with-location-set location-set heading-val))
+		 (format "\\setkomavar{location}{%s}\n"
+			 (if (plist-get info :with-location)
+			     (if (plist-get info :special-headings) (or heading-val location "")
+			       (or option location ""))
+			   "")))))
      ;; Folding marks.
      (and (funcall check-scope 'with-foldmarks)
           (let ((foldmarks (plist-get info :with-foldmarks)))
