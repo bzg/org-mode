@@ -186,7 +186,7 @@ found in the buffer with no definition in TEMPLATES.
 
 Optional argument KEYWORDS, when non-nil is a list of keywords,
 as strings, where macro expansion is allowed."
-  (save-excursion
+  (org-with-wide-buffer
     (goto-char (point-min))
     (let ((properties-regexp
 	   (format "\\`EXPORT_%s\\+?\\'" (regexp-opt keywords)))
