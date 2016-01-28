@@ -1568,6 +1568,7 @@ Return INFO file name or an error if it couldn't be produced."
   (let* ((base-name (file-name-sans-extension (file-name-nondirectory file)))
 	 (full-name (file-truename file))
 	 (out-dir (file-name-directory file))
+	 (time (current-time))
 	 ;; Properly set working directory for compilation.
 	 (default-directory (if (file-name-absolute-p file)
 				(file-name-directory full-name)
@@ -1594,7 +1595,12 @@ Return INFO file name or an error if it couldn't be produced."
       (let ((infofile (concat out-dir base-name ".info")))
 	;; Check for process failure.  Provide collected errors if
 	;; possible.
-	(if (not (file-exists-p infofile))
+	(if (or (not (file-exists-p infofile))
+		;; Only compare times up to whole seconds as some
+		;; filesystems (e.g. HFS+) do not retain any finer
+		;; granularity.
+		(time-less-p (cl-subseq (nth 5 (file-attributes infofile)) 0 2)
+			     (cl-subseq time 0 2)))
 	    (error "INFO file %s wasn't produced%s" infofile
 		   (if errors (concat ": " errors) ""))
 	  ;; Else remove log files, when specified, and signal end of

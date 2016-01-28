@@ -1130,6 +1130,7 @@ Return PDF file name or an error if it couldn't be produced."
   (let* ((base-name (file-name-sans-extension (file-name-nondirectory file)))
 	 (full-name (file-truename file))
 	 (out-dir (file-name-directory file))
+	 (time (current-time))
 	 ;; Properly set working directory for compilation.
 	 (default-directory (if (file-name-absolute-p file)
 				(file-name-directory full-name)
@@ -1146,25 +1147,29 @@ Return PDF file name or an error if it couldn't be produced."
        ;; redirected to "*Org PDF Groff Output*" buffer.
        ((consp org-man-pdf-process)
 	(let ((outbuf (get-buffer-create "*Org PDF Groff Output*")))
-	  (mapc
-	   (lambda (command)
-	     (shell-command
+	  (dolist (command org-man-pdf-process)
+	    (shell-command
+	     (replace-regexp-in-string
+	      "%b" (shell-quote-argument base-name)
 	      (replace-regexp-in-string
-	       "%b" (shell-quote-argument base-name)
+	       "%f" (shell-quote-argument full-name)
 	       (replace-regexp-in-string
-		"%f" (shell-quote-argument full-name)
-		(replace-regexp-in-string
-		 "%o" (shell-quote-argument out-dir) command t t) t t) t t)
-	      outbuf))
-	   org-man-pdf-process)
+		"%o" (shell-quote-argument out-dir) command t t) t t) t t)
+	     outbuf))
 	  ;; Collect standard errors from output buffer.
 	  (setq errors (org-man-collect-errors outbuf))))
        (t (error "No valid command to process to PDF")))
       (let ((pdffile (concat out-dir base-name ".pdf")))
 	;; Check for process failure.  Provide collected errors if
 	;; possible.
-	(if (not (file-exists-p pdffile))
-	    (error "PDF file %s wasn't produced%s" pdffile
+	(if (or (not (file-exists-p pdffile))
+		;; Only compare times up to whole seconds as some
+		;; filesystems (e.g. HFS+) do not retain any finer
+		;; granularity.
+		(time-less-p (cl-subseq (nth 5 (file-attributes pdffile)) 0 2)
+			     (cl-subseq time 0 2)))
+	    (error "PDF file %s wasn't produced%s"
+		   pdffile
 		   (if errors (concat ": " errors) ""))
 	  ;; Else remove log files, when specified, and signal end of
 	  ;; process to user, along with any error encountered.
