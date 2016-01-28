@@ -1275,19 +1275,25 @@ the current subtree."
 
 (defun org-babel-current-result-hash (&optional info)
   "Return the current in-buffer hash."
-  (org-babel-where-is-src-block-result nil info)
-  (org-no-properties (match-string 5)))
+  (let ((result (org-babel-where-is-src-block-result nil info)))
+    (when result
+      (org-with-wide-buffer
+       (goto-char result)
+       (looking-at org-babel-result-regexp)
+       (match-string-no-properties 5)))))
 
 (defun org-babel-set-current-result-hash (hash info)
   "Set the current in-buffer hash to HASH."
-  (org-babel-where-is-src-block-result nil info)
-  (save-excursion (goto-char (match-beginning 5))
-		  (mapc #'delete-overlay (overlays-at (point)))
-		  (forward-char org-babel-hash-show)
-		  (mapc #'delete-overlay (overlays-at (point)))
-		  (replace-match hash nil nil nil 5)
-		  (goto-char (point-at-bol))
-		  (org-babel-hide-hash)))
+  (org-with-wide-buffer
+   (goto-char (org-babel-where-is-src-block-result nil info))
+   (looking-at org-babel-result-regexp)
+   (goto-char (match-beginning 5))
+   (mapc #'delete-overlay (overlays-at (point)))
+   (forward-char org-babel-hash-show)
+   (mapc #'delete-overlay (overlays-at (point)))
+   (replace-match hash nil nil nil 5)
+   (beginning-of-line)
+   (org-babel-hide-hash)))
 
 (defun org-babel-hide-hash ()
   "Hide the hash in the current results line.
@@ -1796,25 +1802,23 @@ to `org-babel-named-src-block-regexp'."
         (progn (goto-char point) (org-show-context))
       (message "result `%s' not found in this buffer" name))))
 
-(defun org-babel-find-named-result (name &optional point)
+(defun org-babel-find-named-result (name)
   "Find a named result.
 Return the location of the result named NAME in the current
 buffer or nil if no such result exists."
   (save-excursion
-    (let ((case-fold-search t))
-      (goto-char (or point (point-min)))
-      (catch 'is-a-code-block
-	(when (re-search-forward
-	       (concat org-babel-result-regexp
-		       "[ \t]" (regexp-quote name) "[ \t]*[\n\f\v\r]")
-               nil t)
-	  (when (and (string= "name" (downcase (match-string 1)))
-		     (or (beginning-of-line 1)
-			 (looking-at org-babel-src-block-regexp)
-			 (looking-at org-babel-multi-line-header-regexp)
-			 (looking-at org-babel-lob-one-liner-regexp)))
-	    (throw 'is-a-code-block (org-babel-find-named-result name (point))))
-	  (beginning-of-line 0) (point))))))
+    (goto-char (point-min))
+    (let ((case-fold-search t)
+	  (re (format "^[ \t]*#\\+%s.*?:[ \t]*%s[ \t]*$"
+		      org-babel-results-keyword
+		      (regexp-quote name))))
+      (catch :found
+	(while (re-search-forward re nil t)
+	  (let ((element (org-element-at-point)))
+	    (when (or (eq (org-element-type element) 'keyword)
+		      (< (point)
+			 (org-element-property :post-affiliated element)))
+	      (throw :found (line-beginning-position)))))))))
 
 (defun org-babel-result-names (&optional file)
   "Returns the names of results in FILE or the current buffer."
@@ -1935,12 +1939,12 @@ following the source block."
 	found ;; was there a result (before we potentially insert one)
 	(or
 	 inlinep
+	 ;; named results:
+	 ;; - if it does not need to be rebuilt, then don't set END
+	 ;; - if it does need to be rebuilt then do set END
 	 (and
-	  ;; named results:
-	  ;; - return t if it is found, else return nil
-	  ;; - if it does not need to be rebuilt, then don't set end
-	  ;; - if it does need to be rebuilt then do set end
-	  name (setq beg (org-babel-find-named-result name))
+	  name
+	  (setq beg (org-babel-find-named-result name))
 	  (prog1 beg
 	    (goto-char beg)
 	    (setq ind (org-get-indentation))

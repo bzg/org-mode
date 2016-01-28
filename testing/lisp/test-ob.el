@@ -1567,6 +1567,31 @@ echo \"$data\"
 	      (org-babel-update-block-body "      2")
 	      (buffer-string))))))
 
+(ert-deftest test-ob/find-named-result ()
+  "Test `org-babel-find-named-result' specifications."
+  (should
+   (= 1
+      (org-test-with-temp-text "#+results: foo\n: result"
+	(org-babel-find-named-result "foo"))))
+  (should-not
+   (org-test-with-temp-text "#+results: foo\n: result"
+     (org-babel-find-named-result "bar")))
+  (should-not
+   (org-test-with-temp-text "#+results: foobar\n: result"
+     (org-babel-find-named-result "foo")))
+  ;; Search is case insensitive.
+  (should
+   (org-test-with-temp-text "#+RESULTS: FOO\n: result"
+     (org-babel-find-named-result "foo")))
+  ;; Handle hash in results keyword.
+  (should
+   (org-test-with-temp-text "#+results[hash]: FOO\n: result"
+     (org-babel-find-named-result "foo")))
+  ;; Accept orphaned affiliated keywords.
+  (should
+   (org-test-with-temp-text "#+results: foo"
+     (org-babel-find-named-result "foo"))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
