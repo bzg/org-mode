@@ -91,29 +91,29 @@ Detect if this is context for a Library Of Babel source block and
 if so then run the appropriate source block from the Library."
   (interactive)
   (let ((info (org-babel-lob-get-info)))
-    (if (and (nth 0 info) (not (org-babel-in-example-or-verbatim)))
-	(progn (org-babel-lob-execute info) t)
-      nil)))
+    (when info
+      (org-babel-lob-execute info)
+      t)))
 
 ;;;###autoload
-(defun org-babel-lob-get-info ()
-  "Return a Library of Babel function call as a string."
-  (when (save-excursion
-	  (beginning-of-line)
-	  (let ((case-fold-search t))
-	    (looking-at org-babel-lob-one-liner-regexp)))
-    (let ((context (save-match-data (org-element-context))))
-      (when (memq (org-element-type context) '(babel-call inline-babel-call))
-	(list (format "%s%s(%s)"
-		      (org-element-property :call context)
-		      (let ((in (org-element-property :inside-header context)))
-			(if in (format "[%s]" in) ""))
-		      (or (org-element-property :arguments context) ""))
-	      (org-element-property :end-header context)
-	      (length (if (= (length (match-string 12)) 0)
-			  (match-string-no-properties 2)
-			(match-string-no-properties 11)))
-	      (org-element-property :name context))))))
+(defun org-babel-lob-get-info (&optional datum)
+  "Return a Library of Babel function call as a string.
+Return nil when not on an appropriate location.  Build string
+from `inline-babel-call' or `babel-call' DATUM, when provided."
+  (let ((context (or datum (org-element-context))))
+    (when (memq (org-element-type context) '(babel-call inline-babel-call))
+      (list (format "%s%s(%s)"
+		    (org-element-property :call context)
+		    (let ((in (org-element-property :inside-header context)))
+		      (if in (format "[%s]" in) ""))
+		    (or (org-element-property :arguments context) ""))
+	    (org-element-property :end-header context)
+	    (string-width		;Indentation.
+	     (org-with-wide-buffer
+	      (goto-char (org-element-property :begin context))
+	      (buffer-substring-no-properties
+	       (line-beginning-position) (point))))
+	    (org-element-property :name context)))))
 
 (defvar org-babel-default-header-args:emacs-lisp) ; Defined in ob-emacs-lisp.el
 (defun org-babel-lob-execute (info)

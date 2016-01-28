@@ -53,6 +53,7 @@
 (declare-function with-parsed-tramp-file-name "tramp" (filename var &rest body))
 (declare-function org-edit-src-code "org-src" (&optional code edit-buffer-name))
 (declare-function org-edit-src-exit "org-src"  ())
+(declare-function org-in-regexp "org" (regexp &optional nlines visually))
 (declare-function org-open-at-point "org" (&optional in-emacs reference-buffer))
 (declare-function org-save-outline-visibility "org-macs" (use-markers &rest body))
 (declare-function org-outline-overlay-data "org" (&optional use-markers))
@@ -78,7 +79,6 @@
 (declare-function orgtbl-to-generic "org-table" (table params))
 (declare-function orgtbl-to-orgtbl "org-table" (table params))
 (declare-function org-babel-tangle-comment-links "ob-tangle" (&optional info))
-(declare-function org-babel-lob-get-info "ob-lob" nil)
 (declare-function org-babel-ref-split-args "ob-ref" (arg-string))
 (declare-function org-babel-ref-parse "ob-ref" (assignment))
 (declare-function org-babel-ref-resolve "ob-ref" (ref))
@@ -1744,33 +1744,24 @@ If the point is not on a source block then return nil."
   (interactive
    (let ((completion-ignore-case t)
 	 (case-fold-search t)
-	 (under-point (thing-at-point 'line)))
+	 (all-block-names (org-babel-src-block-names)))
      (list (completing-read
-	    "source-block name: " (org-babel-src-block-names) nil t
-	    (cond
-	     ;; noweb
-	     ((string-match (org-babel-noweb-wrap) under-point)
-	      (let ((block-name (match-string 1 under-point)))
-		(string-match "[^(]*" block-name)
-		(match-string 0 block-name)))
-	     ;; #+call:
-	     ((string-match org-babel-lob-one-liner-regexp under-point)
-	      (let ((source-info (car (org-babel-lob-get-info))))
-		(if (string-match "^\\([^\\[]+?\\)\\(\\[.*\\]\\)?(" source-info)
-		    (let ((source-name (match-string 1 source-info)))
-		      source-name))))
-	     ;; #+results:
-	     ((string-match (concat "#\\+" org-babel-results-keyword
-				    "\\:\s+\\([^\\(]*\\)") under-point)
-	      (match-string 1 under-point))
-	     ;; symbol-at-point
-	     ((and (thing-at-point 'symbol))
-	      (org-babel-find-named-block (thing-at-point 'symbol))
-	      (thing-at-point 'symbol))
-	     (""))))))
+	    "source-block name: " all-block-names nil t
+	    (let* ((context (org-element-context))
+		   (type (org-element-type context)))
+	      (cond
+	       ((and (memq type '(inline-src-block src-block)) ;<<noweb>>
+		     (org-in-regexp (org-babel-noweb-wrap))))
+	       ((memq type '(babel-call inline-babel-call)) ;#+CALL:
+		(org-element-property :call context))
+	       ((org-element-property :results context)) ;#+RESULTS:
+	       ((let ((symbol (thing-at-point 'symbol))) ;Symbol.
+		  (and (member-ignore-case symbol all-block-names)
+		       symbol)))
+	       (t "")))))))
   (let ((point (org-babel-find-named-block name)))
     (if point
-        ;; taken from `org-open-at-point'
+        ;; Taken from `org-open-at-point'.
         (progn (org-mark-ring-push) (goto-char point) (org-show-context))
       (message "source-code block `%s' not found in this buffer" name))))
 

@@ -32,7 +32,7 @@
 (defvar org-babel-ref-split-regexp)
 (defvar org-list-forbidden-blocks)
 
-(declare-function org-babel-lob-get-info "ob-lob" ())
+(declare-function org-babel-lob-get-info "ob-lob" (&optional datum))
 (declare-function org-babel-eval-wipe-error-buffer "ob-eval" ())
 (declare-function org-between-regexps-p "org"
 		  (start-re end-re &optional lim-up lim-down))
@@ -214,7 +214,7 @@ may make them unreachable."
 		       (delete-region begin end)
 		       (insert replacement)))))
 		((babel-call inline-babel-call)
-		 (let* ((lob-info (org-babel-lob-get-info))
+		 (let* ((lob-info (org-babel-lob-get-info element))
 			(results
 			 (org-babel-exp-do-export
 			  (list "emacs-lisp" "results"

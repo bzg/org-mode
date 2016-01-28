@@ -55,7 +55,7 @@
 (declare-function org-at-item-p "org-list" ())
 (declare-function org-at-table-p "org" (&optional table-type))
 (declare-function org-babel-lob-execute "ob-lob" (info))
-(declare-function org-babel-lob-get-info "ob-lob" nil)
+(declare-function org-babel-lob-get-info "ob-lob" (&optional datum))
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
@@ -177,7 +177,7 @@ the variable."
 			       (`babel-call
 				(throw :found
 				       (org-babel-lob-execute
-					(org-babel-lob-get-info))))
+					(org-babel-lob-get-info e))))
 			       (`src-block
 				(throw :found
 				       (org-babel-execute-src-block
