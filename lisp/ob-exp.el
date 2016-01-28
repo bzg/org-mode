@@ -228,10 +228,10 @@ may make them unreachable."
 					  (org-no-properties
 					   (concat
 					    ":var results="
-					    (mapconcat 'identity
-						       (butlast lob-info 2)
+					    (mapconcat #'identity
+						       (butlast lob-info)
 						       " ")))))))
-				"" (nth 3 lob-info) (nth 2 lob-info))
+				"" (nth 2 lob-info))
 			  'lob))
 			(rep (org-fill-template
 			      org-babel-exp-call-line-template

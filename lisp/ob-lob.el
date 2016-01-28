@@ -108,32 +108,26 @@ from `inline-babel-call' or `babel-call' DATUM, when provided."
 		      (if in (format "[%s]" in) ""))
 		    (or (org-element-property :arguments context) ""))
 	    (org-element-property :end-header context)
-	    (string-width		;Indentation.
-	     (org-with-wide-buffer
-	      (goto-char (org-element-property :begin context))
-	      (buffer-substring-no-properties
-	       (line-beginning-position) (point))))
 	    (org-element-property :name context)))))
 
 (defvar org-babel-default-header-args:emacs-lisp) ; Defined in ob-emacs-lisp.el
 (defun org-babel-lob-execute (info)
   "Execute the lob call specified by INFO."
   (let* ((mkinfo (lambda (p)
-		   (list "emacs-lisp" "results" p nil
-			 (nth 3 info) ;; name
-			 (nth 2 info))))
-	 (pre-params (apply #'org-babel-merge-params
-			    org-babel-default-header-args
-			    org-babel-default-header-args:emacs-lisp
-			    (append
-			     (org-babel-params-from-properties)
-			     (list
-			      (org-babel-parse-header-arguments
-			       (org-no-properties
-				(concat
-				 ":var results="
-				 (mapconcat #'identity (butlast info 2)
-					    " "))))))))
+		   ;; Make plist P compatible with
+		   ;; `org-babel-get-src-block-info'.
+		   (list "emacs-lisp" "results" p nil (nth 2 info))))
+	 (pre-params
+	  (apply #'org-babel-merge-params
+		 org-babel-default-header-args
+		 org-babel-default-header-args:emacs-lisp
+		 (append
+		  (org-babel-params-from-properties)
+		  (list
+		   (org-babel-parse-header-arguments
+		    (org-no-properties
+		     (concat ":var results="
+			     (mapconcat #'identity (butlast info) " "))))))))
 	 (pre-info (funcall mkinfo pre-params))
 	 (cache-p (and (cdr (assoc :cache pre-params))
 		       (string= "yes" (cdr (assoc :cache pre-params)))))

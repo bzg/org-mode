@@ -53,6 +53,7 @@
 (declare-function with-parsed-tramp-file-name "tramp" (filename var &rest body))
 (declare-function org-edit-src-code "org-src" (&optional code edit-buffer-name))
 (declare-function org-edit-src-exit "org-src"  ())
+(declare-function org-get-indentation "org" (&optional line))
 (declare-function org-in-regexp "org" (regexp &optional nlines visually))
 (declare-function org-open-at-point "org" (&optional in-emacs reference-buffer))
 (declare-function org-save-outline-visibility "org-macs" (use-markers &rest body))
@@ -62,6 +63,7 @@
 (declare-function org-split-string "org" (string &optional separators))
 (declare-function org-entry-get "org"
 		  (pom property &optional inherit literal-nil))
+(declare-function org-indent-line "org" ())
 (declare-function org-make-options-regexp "org" (kwds &optional extra))
 (declare-function org-do-remove-indentation "org" (&optional n))
 (declare-function org-next-block "org" (arg &optional backward block-regexp))
@@ -252,15 +254,13 @@ references; a process which could likely result in the execution
 of other code blocks.
 
 Returns a list
- (language body header-arguments-alist switches name indent block-head)."
+ (language body header-arguments-alist switches name block-head)."
   (let ((case-fold-search t) head info name indent)
     ;; full code block
     (if (setq head (org-babel-where-is-src-block-head))
 	(save-excursion
 	  (goto-char head)
 	  (setq info (org-babel-parse-src-block-match))
-	  (setq indent (car (last info)))
-	  (setq info (butlast info))
 	  (while (and (= 0 (forward-line -1))
 		      (looking-at org-babel-multi-line-header-regexp))
 	    (setf (nth 2 info)
@@ -278,7 +278,7 @@ Returns a list
       (setf (nth 2 info) (org-babel-process-params (nth 2 info))))
     (when info
       (setf (nth 2 info) (org-babel-generate-file-param name (nth 2 info))))
-    (when info (append info (list name indent head)))))
+    (when info (append info (list name head)))))
 
 (defvar org-babel-exp-reference-buffer nil
   "Buffer containing original contents of the exported buffer.
@@ -302,7 +302,7 @@ should be asked whether to allow evaluation."
 		    (and export (equal eval "query-export"))
 		    (if (functionp org-confirm-babel-evaluate)
 			(save-excursion
-			  (goto-char (nth 6 info))
+			  (goto-char (nth 5 info))
 			  (funcall org-confirm-babel-evaluate
 				   ;; language, code block body
 				   (nth 0 info) (nth 1 info)))
@@ -640,7 +640,7 @@ block."
   (interactive)
   (let* ((org-babel-current-src-block-location
 	  (or org-babel-current-src-block-location
-	      (nth 6 info)
+	      (nth 5 info)
 	      (org-babel-where-is-src-block-head)
 	      ;; inline src block
 	      (and (org-babel-get-inline-src-block-matches)
@@ -683,7 +683,6 @@ block."
 		  (or (org-bound-and-true-p
 		       org-babel-call-process-region-original)
 		      (symbol-function 'call-process-region)))
-		 (indent (nth 5 info))
 		 result cmd)
 	    (unwind-protect
 		(let ((call-process-region
@@ -740,7 +739,7 @@ block."
 			  (setq result-params
 				(remove "file" result-params)))))
 		    (org-babel-insert-result
-		     result result-params info new-hash indent lang))
+		     result result-params info new-hash lang))
                   (run-hooks 'org-babel-after-execute-hook)
 		  result)
 	      (setq call-process-region
@@ -850,7 +849,7 @@ arguments and pop open the results in a preview buffer."
   (interactive)
   (let* ((info (org-babel-get-src-block-info 'light))
 	 (lang (car info))
-	 (begin (nth 6 info))
+	 (begin (nth 5 info))
 	 (lang-headers (intern (concat "org-babel-header-args:" lang)))
 	 (headers (org-babel-combine-header-arg-lists
 		   org-babel-common-header-args-w-values
@@ -1453,8 +1452,7 @@ specified in the properties of the current outline entry."
 (defvar org-src-preserve-indentation) ;; declare defcustom from org-src
 (defun org-babel-parse-src-block-match ()
   "Parse the results from a match of the `org-babel-src-block-regexp'."
-  (let* ((block-indentation (string-width (match-string 1)))
-	 (lang (org-match-string-no-properties 2))
+  (let* ((lang (org-match-string-no-properties 2))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
 	 (switches (match-string 3))
          (body (let* ((body (org-match-string-no-properties 5))
@@ -1480,8 +1478,7 @@ specified in the properties of the current outline entry."
 		  (org-babel-params-from-properties lang)
 		  (list (org-babel-parse-header-arguments
 			 (org-no-properties (or (match-string 4) ""))))))
-	  switches
-	  block-indentation)))
+	  switches)))
 
 (defun org-babel-parse-inline-src-block-match ()
   "Parse the results from a match of the `org-babel-inline-src-block-regexp'."
@@ -1877,7 +1874,7 @@ region is not active then the point is demarcated."
            (save-excursion
              (goto-char place)
              (let ((lang (nth 0 info))
-                   (indent (make-string (nth 5 info) ? )))
+                   (indent (make-string (org-get-indentation) ?\s)))
 	       (when (string-match "^[[:space:]]*$"
 				   (buffer-substring (point-at-bol)
 						     (point-at-eol)))
@@ -1916,7 +1913,7 @@ region is not active then the point is demarcated."
 	(goto-char start) (move-end-of-line 1)))))
 
 (defvar org-babel-lob-one-liner-regexp)
-(defun org-babel-where-is-src-block-result (&optional insert info hash indent)
+(defun org-babel-where-is-src-block-result (&optional insert info hash)
   "Find where the current source block results begin.
 Return the point at the beginning of the result of the current
 source block.  Specifically at the beginning of the results line.
@@ -1931,7 +1928,7 @@ following the source block."
 		      (match-end 0)))
 	   (name (nth 4 (or info (org-babel-get-src-block-info 'light))))
 	   (head (unless on-lob-line (org-babel-where-is-src-block-head)))
-	   found beg end)
+	   found beg end ind)
       (when head (goto-char head))
       (org-with-wide-buffer
        (setq
@@ -1945,10 +1942,18 @@ following the source block."
 	  ;; - if it does need to be rebuilt then do set end
 	  name (setq beg (org-babel-find-named-result name))
 	  (prog1 beg
-	    (when (and hash (not (string= hash (match-string 5))))
-	      (goto-char beg) (setq end beg) ;; beginning of result
-	      (forward-line 1)
-	      (delete-region end (org-babel-result-end)) nil)))
+	    (goto-char beg)
+	    (setq ind (org-get-indentation))
+	    (when hash
+	      (looking-at org-babel-result-regexp)
+	      (unless (string= (match-string 5) hash)
+		(setq end beg)
+		(let ((element (org-element-at-point)))
+		  (delete-region
+		   (org-element-property :begin element)
+		   (progn (goto-char (org-element-property :end element))
+			  (skip-chars-backward " \t\n")
+			  (line-beginning-position 2))))))))
 	 (and
 	  ;; unnamed results:
 	  ;; - return t if it is found, else return nil
@@ -1965,6 +1970,7 @@ following the source block."
 			(beginning-of-line 1)
 			(cond
 			 ((looking-at (concat org-babel-result-regexp "\n"))
+			  (setq ind (org-get-indentation))
 			  (throw 'non-comment t))
 			 ((and (looking-at "^[ \t]*#")
 			       (not (looking-at
@@ -1985,7 +1991,11 @@ following the source block."
 	(goto-char end)
 	(unless beg
 	  (if (looking-at "[\n\r]") (forward-char 1) (insert "\n")))
-	(when (wholenump indent) (indent-to indent))
+	(if ind (indent-to ind)
+	  ;; Open line to properly indent.
+	  (save-excursion (insert "\n"))
+	  (org-indent-line)
+	  (delete-char 1))
 	(insert (concat
 		 "#+" org-babel-results-keyword
 		 (when hash
@@ -2097,8 +2107,7 @@ If the path of the link is a file path it is expanded using
       ;; scalar result
       (funcall echo-res result))))
 
-(defun org-babel-insert-result
-    (result &optional result-params info hash indent lang)
+(defun org-babel-insert-result (result &optional result-params info hash lang)
   "Insert RESULT into the current buffer.
 
 By default RESULT is inserted after the end of the current source
@@ -2197,7 +2206,7 @@ INFO may provide the values of these header arguments (in the
 		  (point))))
 	     (existing-result
 	      (unless inlinep
-		(org-babel-where-is-src-block-result t info hash indent)))
+		(org-babel-where-is-src-block-result t info hash)))
 	     (bad-inline-p
 	      (when inlinep
 		(or
@@ -2215,7 +2224,7 @@ INFO may provide the values of these header arguments (in the
 	     (outside-scope-p (and existing-result
 				   (or (> visible-beg existing-result)
 				       (<= visible-end existing-result))))
-	     beg end)
+	     beg end indent)
 	(when (and (stringp result)  ; ensure results end in a newline
 		   (not inlinep)
 		   (> (length result) 0)
