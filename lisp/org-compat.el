@@ -409,8 +409,10 @@ Pass BUFFER to the XEmacs version of `move-to-column'."
   (defalias 'format-message 'format))
 
 ;; `font-lock-ensure' is only available from 24.4.50 on
-(unless (fboundp 'font-lock-ensure)
-  (defalias 'font-lock-ensure 'font-lock-fontify-buffer))
+(defalias 'org-font-lock-ensure
+  (if (fboundp 'font-lock-ensure)
+      #'font-lock-ensure
+    (lambda (&optional _beg _end) (font-lock-fontify-buffer))))
 
 (defmacro org-no-popups (&rest body)
   "Suppress popup windows.
