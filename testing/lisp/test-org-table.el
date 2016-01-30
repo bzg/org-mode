@@ -1852,7 +1852,6 @@ is t, then new columns should be added as needed"
   ;; First value: Make sure that an integer input value is converted to a
   ;; float before division. Further values: Show some float input value
   ;; ranges corresponding to the same bar width.
-  ;; TODO Fix ranges in `orgtbl-ascii-draw'.
   (should
    (equal
     (org-test-with-temp-text
@@ -1861,16 +1860,16 @@ is t, then new columns should be added as needed"
 |----------+---------|
 |       19 | replace |
 |----------+---------|
-| -0.00001 | replace |
-|  0.00000 | replace |
-|  0.99999 | replace |
-|  1.00000 | replace |
-|  1.99999 | replace |
-| 23.00000 | replace |
-| 23.99999 | replace |
-| 24.00000 | replace |
-| 24.00000 | replace |
-| 24.00001 | replace |
+| -0.50001 | replace |
+| -0.49999 | replace |
+|  0.49999 | replace |
+|  0.50001 | replace |
+|  1.49999 | replace |
+| 22.50001 | replace |
+| 23.49999 | replace |
+| 23.50001 | replace |
+| 24.49999 | replace |
+| 24.50001 | replace |
 <point>#+TBLFM: $2 = '(orgtbl-ascii-draw $1 0 24 3 \" 12345678\")"
       (org-table-calc-current-TBLFM)
       (buffer-string))
@@ -1879,16 +1878,16 @@ is t, then new columns should be added as needed"
 |----------+-----------|
 |       19 | 883       |
 |----------+-----------|
-| -0.00001 | too small |
-|  0.00000 |           |
-|  0.99999 |           |
-|  1.00000 | 1         |
-|  1.99999 | 1         |
-| 23.00000 | 887       |
-| 23.99999 | 887       |
-| 24.00000 | 888       |
-| 24.00000 | 888       |
-| 24.00001 | too large |
+| -0.50001 | too small |
+| -0.49999 |           |
+|  0.49999 |           |
+|  0.50001 | 1         |
+|  1.49999 | 1         |
+| 22.50001 | 887       |
+| 23.49999 | 887       |
+| 23.50001 | 888       |
+| 24.49999 | 888       |
+| 24.50001 | too large |
 #+TBLFM: $2 = '(orgtbl-ascii-draw $1 0 24 3 \" 12345678\")"))
   ;; Draw bars with a bullet. The bullet does not count in the parameter
   ;; WIDTH of `orgtbl-ascii-draw'.

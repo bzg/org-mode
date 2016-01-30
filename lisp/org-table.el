@@ -5256,26 +5256,26 @@ supported.  It is also possible to use the following ones:
 
 (defun orgtbl-ascii-draw (value min max &optional width characters)
   "Draw an ascii bar in a table.
-VALUE is a the value to plot, the width of the bar to draw.  A
-value equal to MIN will be displayed as empty (zero width bar).
-A value equal to MAX will draw a bar filling all the WIDTH.
-WIDTH is the expected width in characters of the column.
-CHARACTERS is a string that will compose the bar, with shades of
-grey from pure white to pure black.  It defaults to a 10
-characters string of regular ascii characters."
-  (let* ((characters (or characters " .:;c!lhVHW"))
-	 (width (or width 12))
-	 (value (if (numberp value) value (string-to-number value)))
-	 (value (* (/ (- (+ value 0.0) min) (- max min)) width)))
-    (cond
-     ((< value     0) "too small")
-     ((> value width) "too large")
-     (t
-      (let ((len (1- (length characters))))
-	(concat
-	 (make-string (floor value) (elt characters len))
-	 (string (elt characters
-		      (floor (* (- value (floor value)) len))))))))))
+VALUE is the value to plot, it determines the width of the bar to draw.
+MIN is the value that will be displayed as empty (zero width bar).
+MAX is the value that will draw a bar filling all the WIDTH.
+WIDTH is the span in characters from MIN to MAX.
+CHARACTERS is a string that will compose the bar, with shades of grey
+from pure white to pure black.  It defaults to a 10 characters string
+of regular ascii characters."
+  (let* ((width      (ceiling (or width 12)))
+	 (characters (or characters " .:;c!lhVHW"))
+	 (len        (1- (length characters)))
+	 (value      (float (if (numberp value)
+				value (string-to-number value))))
+	 (relative   (/ (- value min) (- max min)))
+	 (steps      (round (* relative width len))))
+    (cond ((< steps             0) "too small")
+	  ((> steps (* width len)) "too large")
+	  (t (let* ((int-division (/ steps len))
+		    (remainder    (- steps (* int-division len))))
+	       (concat (make-string int-division (elt characters len))
+		       (string (elt characters remainder))))))))
 
 ;;;###autoload
 (defun orgtbl-ascii-plot (&optional ask)
