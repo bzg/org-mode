@@ -29,10 +29,13 @@
 (require 'org-src)
 
 (declare-function make-directory "files" (dir &optional parents))
+(declare-function org-at-heading-p "org" (&optional ignored))
 (declare-function org-babel-update-block-body "org" (new-body))
 (declare-function org-back-to-heading "org" (invisible-ok))
 (declare-function org-before-first-heading-p "org" ())
 (declare-function org-edit-special "org" (&optional arg))
+(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-type "org-element" (element))
 (declare-function org-fill-template "org" (template alist))
 (declare-function org-heading-components "org" ())
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
@@ -545,7 +548,7 @@ which enable the original code blocks to be found."
       (prog1 counter (message "Detangled %d code blocks" counter)))))
 
 (defun org-babel-tangle-jump-to-org ()
-  "Jump from a tangled code file to the related Org-mode file."
+  "Jump from a tangled code file to the related Org mode file."
   (interactive)
   (let ((mid (point))
 	start body-start end done
@@ -554,9 +557,8 @@ which enable the original code blocks to be found."
       (save-excursion
 	(while (and (re-search-backward org-bracket-link-analytic-regexp nil t)
 		    (not ; ever wider searches until matching block comments
-		     (and (setq start (point-at-eol))
-			  (setq body-start (save-excursion
-					     (forward-line 2) (point-at-bol)))
+		     (and (setq start (line-beginning-position))
+			  (setq body-start (line-beginning-position 2))
 			  (setq link (match-string 0))
 			  (setq path (match-string 3))
 			  (setq block-name (match-string 5))
@@ -565,29 +567,33 @@ which enable the original code blocks to be found."
 			      (re-search-forward
 			       (concat " " (regexp-quote block-name)
 				       " ends here") nil t)
-			      (setq end (point-at-bol))))))))
+			      (setq end (line-beginning-position))))))))
 	(unless (and start (< start mid) (< mid end))
 	  (error "Not in tangled code"))
-        (setq body (org-babel-trim (buffer-substring start end))))
+        (setq body (buffer-substring body-start end)))
       (when (string-match "::" path)
         (setq path (substring path 0 (match-beginning 0))))
-      (find-file path) (setq target-buffer (current-buffer))
-      (goto-char start) (org-open-link-from-string link)
+      (find-file path)
+      (setq target-buffer (current-buffer))
+      ;; Go to the beginning of the relative block in Org file.
+      (org-open-link-from-string link)
       (if (string-match "[^ \t\n\r]:\\([[:digit:]]+\\)" block-name)
-          (org-babel-next-src-block
-           (string-to-number (match-string 1 block-name)))
+          (let ((n (string-to-number (match-string 1 block-name))))
+	    (if (org-before-first-heading-p) (goto-char (point-min))
+	      (org-back-to-heading t))
+	    ;; Do not skip the first block if it begins at point min.
+	    (cond ((or (org-at-heading-p)
+		       (not (eq (org-element-type (org-element-at-point))
+				'src-block)))
+		   (org-babel-next-src-block n))
+		  ((= n 1))
+		  (t (org-babel-next-src-block (1- n)))))
         (org-babel-goto-named-src-block block-name))
-      ;; position at the beginning of the code block body
       (goto-char (org-babel-where-is-src-block-head))
+      ;; Preserve location of point within the source code in tangled
+      ;; code file.
       (forward-line 1)
-      ;; Use org-edit-special to isolate the code.
-      (org-edit-special)
-      ;; Then move forward the correct number of characters in the
-      ;; code buffer.
       (forward-char (- mid body-start))
-      ;; And return to the Org-mode buffer with the point in the right
-      ;; place.
-      (org-edit-src-exit)
       (setq target-char (point)))
     (org-src-switch-to-buffer target-buffer t)
     (prog1 body (goto-char target-char))))
