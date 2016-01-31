@@ -39,6 +39,7 @@
 (defvar org-babel-library-of-babel)
 (declare-function outline-show-all "outline" ())
 (declare-function org-every "org" (pred seq))
+(declare-function org-get-indentation "org" (&optional line))
 (declare-function org-remove-indentation "org" (code &optional n))
 (declare-function org-reduce "org" (CL-FUNC CL-SEQ &rest CL-KEYS))
 (declare-function org-mark-ring-push "org" (&optional pos buffer))
@@ -99,6 +100,7 @@
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-element-at-point "org-element" ())
+(declare-function org-element-normalize-string "org-element" (s))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-every "org" (pred seq))
 (declare-function org-macro-escape-arguments "org-macro" (&rest args))
@@ -1709,13 +1711,17 @@ to the table for reinsertion to org-mode."
             (org-babel-put-colnames table colnames) table))
     table))
 
-(defun org-babel-where-is-src-block-head ()
+(defun org-babel-where-is-src-block-head (&optional src-block)
   "Find where the current source block begins.
+
+If optional argument SRC-BLOCK is `src-block' type element, find
+its current beginning instead.
+
 Return the point at the beginning of the current source block.
 Specifically at the beginning of the #+BEGIN_SRC line.  Also set
 match-data relatively to `org-babel-src-block-regexp', which see.
 If the point is not on a source block then return nil."
-  (let ((element (org-element-at-point)))
+  (let ((element (or src-block (org-element-at-point))))
     (when (eq (org-element-type element) 'src-block)
       (let ((end (org-element-property :end element)))
 	(org-with-wide-buffer
@@ -2460,12 +2466,30 @@ file's directory then expand relative links."
 
 (defun org-babel-update-block-body (new-body)
   "Update the body of the current code block to NEW-BODY."
-  (if (not (org-babel-where-is-src-block-head))
-      (error "Not in a source block")
-    (save-match-data
-      (replace-match (concat (org-babel-trim (org-remove-indentation new-body))
-			     "\n") nil t nil 5))
-    (indent-rigidly (match-beginning 5) (match-end 5) 2)))
+  (let ((element (org-element-at-point)))
+    (unless (eq (org-element-type element) 'src-block)
+      (error "Not in a source block"))
+    (goto-char (org-babel-where-is-src-block-head element))
+    (let* ((ind (org-get-indentation))
+	   (body-start (line-beginning-position 2))
+	   (body (org-element-normalize-string
+		  (if (or org-src-preserve-indentation
+			  (org-element-property :preserve-indent element))
+		      new-body
+		    (with-temp-buffer
+		      (insert (org-remove-indentation new-body))
+		      (indent-rigidly
+		       (point-min)
+		       (point-max)
+		       (+ ind org-edit-src-content-indentation))
+		      (buffer-string))))))
+      (delete-region body-start
+		     (org-with-wide-buffer
+		      (goto-char (org-element-property :end element))
+		      (skip-chars-backward " \t\n")
+		      (line-beginning-position)))
+      (goto-char body-start)
+      (insert body))))
 
 (defun org-babel-merge-params (&rest plists)
   "Combine all parameter association lists in PLISTS.
