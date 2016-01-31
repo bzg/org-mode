@@ -4920,7 +4920,7 @@ This function assumes `org-element--cache' is a valid AVL tree."
   "Non-nil when cache is active in current buffer."
   (and org-element-use-cache
        org-element--cache
-       (or (derived-mode-p 'org-mode) orgstruct-mode)))
+       (derived-mode-p 'org-mode)))
 
 (defun org-element--cache-find (pos &optional side)
   "Find element in cache starting at POS or before.
@@ -5632,8 +5632,7 @@ buffers."
   (interactive "P")
   (dolist (buffer (if all (buffer-list) (list (current-buffer))))
     (with-current-buffer buffer
-      (when (and org-element-use-cache
-		 (or (derived-mode-p 'org-mode) orgstruct-mode))
+      (when (and org-element-use-cache (derived-mode-p 'org-mode))
 	(org-set-local 'org-element--cache
 		       (avl-tree-create #'org-element--cache-compare))
 	(org-set-local 'org-element--cache-objects (make-hash-table :test #'eq))
