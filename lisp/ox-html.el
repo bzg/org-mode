@@ -2963,10 +2963,8 @@ INFO is a plist holding contextual information.  See
 			      attributes
 			      desc))
      ;; External link without a description part.
-     (path (format "<a href=\"%s\"%s>%s</a>"
-		   (org-html-encode-plain-text path)
-		   attributes
-		   path))
+     (path (let ((path (org-html-encode-plain-text path)))
+	     (format "<a href=\"%s\"%s>%s</a>" path attributes path)))
      ;; No path, only description.  Try to do something useful.
      (t (format "<i>%s</i>" desc)))))
 
