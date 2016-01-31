@@ -33,10 +33,13 @@
   (if (memq system-type '(windows-nt cygwin))
       ".exe"
     nil))
+
 ;; dynamically scoped for tramp
 (defvar org-babel-call-process-region-original nil)
-(defvar org-src-lang-modes)
 (defvar org-babel-library-of-babel)
+(defvar org-edit-src-content-indentation)
+(defvar org-src-lang-modes)
+
 (declare-function outline-show-all "outline" ())
 (declare-function org-every "org" (pred seq))
 (declare-function org-get-indentation "org" (&optional line))
