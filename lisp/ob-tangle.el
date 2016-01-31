@@ -42,6 +42,7 @@
 (declare-function org-link-escape "org" (text &optional table))
 (declare-function org-open-link-from-string "org" (s &optional arg reference-buffer))
 (declare-function org-store-link "org" (arg))
+(declare-function org-string-nw-p "org" (s))
 (declare-function outline-previous-heading "outline" ())
 
 (defvar org-link-types-re)
@@ -367,8 +368,9 @@ that the appropriate major-mode is set.  SPEC has the form:
                                       (if (stringp le) le (format "%S" le)))))
 			    '(start-line file link source-name)))
 	 (insert-comment (lambda (text)
-			   (when (and comments (not (string= comments "no"))
-				      (> (length text) 0))
+			   (when (and comments
+				      (not (string= comments "no"))
+				      (org-string-nw-p text))
 			     (if org-babel-tangle-uncomment-comments
 				 ;; Plain comments: no processing.
 				 (insert text)
