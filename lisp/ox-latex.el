@@ -2895,7 +2895,6 @@ contextual information."
 	       `(("captionpos" ,(if caption-above-p "t" "b")))
 	       (cond ((assoc "numbers" lst-opt) nil)
 		     ((not num-start) '(("numbers" "none")))
-		     ((zerop num-start) '(("numbers" "left")))
 		     (t `(("firstnumber" ,(number-to-string (1+ num-start)))
 			  ("numbers" "left"))))))
 	     (let ((local-options (plist-get attributes :options)))
