@@ -170,7 +170,8 @@
     (:html-viewport nil nil org-html-viewport)
     (:html-inline-images nil nil org-html-inline-images)
     (:html-table-attributes nil nil org-html-table-default-attributes)
-    (:html-table-row-tags nil nil org-html-table-row-tags)
+    (:html-table-row-open-tag nil nil org-html-table-row-open-tag)
+    (:html-table-row-close-tag nil nil org-html-table-row-close-tag)
     (:html-xml-declaration nil nil org-html-xml-declaration)
     (:infojs-opt "INFOJS_OPT" nil nil)
     ;; Redefine regular options.
@@ -859,43 +860,50 @@ See also the variable `org-html-table-align-individual-fields'."
   :group 'org-export-html
   :type '(cons (string :tag "Opening tag") (string :tag "Closing tag")))
 
-(defcustom org-html-table-row-tags '("<tr>" . "</tr>")
-  "The opening and ending tags for table rows.
+(defcustom org-html-table-row-open-tag "<tr>"
+  "The opening tag for table rows.
 This is customizable so that alignment options can be specified.
-Instead of strings, these can be Lisp forms that will be
+Instead of strings, these can be a Lisp function that will be
 evaluated for each row in order to construct the table row tags.
 
-During evaluation, these variables will be dynamically bound so that
-you can reuse them:
+The function will be called with these arguments:
 
-       `row-number': row number (0 is the first row)
-  `rowgroup-number': group number of current row
- `start-rowgroup-p': non-nil means the row starts a group
-   `end-rowgroup-p': non-nil means the row ends a group
-        `top-row-p': non-nil means this is the top row
-     `bottom-row-p': non-nil means this is the bottom row
+         `number': row number (0 is the first row)
+   `group-number': group number of current row
+  `start-group-p': non-nil means the row starts a group
+    `end-group-p': non-nil means the row ends a group
+           `topp': non-nil means this is the top row
+        `bottomp': non-nil means this is the bottom row
 
 For example:
 
-\(setq org-html-table-row-tags
-      (cons \\='(cond (top-row-p \"<tr class=\\\"tr-top\\\">\")
-                   (bottom-row-p \"<tr class=\\\"tr-bottom\\\">\")
-                   (t (if (= (mod row-number 2) 1)
-			  \"<tr class=\\\"tr-odd\\\">\"
-			\"<tr class=\\\"tr-even\\\">\")))
-	    \"</tr>\"))
+  \(setq org-html-table-row-open-tag
+        \(lambda (number group-number start-group-p end-group-p topp bottomp)
+           \(cond (topp \"<tr class=\\\"tr-top\\\">\")
+                 \(bottomp \"<tr class=\\\"tr-bottom\\\">\")
+                 \(t (if (= (mod number 2) 1)
+                        \"<tr class=\\\"tr-odd\\\">\"
+                      \"<tr class=\\\"tr-even\\\">\")))))
 
 will use the \"tr-top\" and \"tr-bottom\" classes for the top row
 and the bottom row, and otherwise alternate between \"tr-odd\" and
 \"tr-even\" for odd and even rows."
   :group 'org-export-html
-  :type '(cons
-	  (choice :tag "Opening tag"
-		  (string :tag "Specify")
-		  (sexp))
-	  (choice :tag "Closing tag"
-		  (string :tag "Specify")
-		  (sexp))))
+  :type '(choice :tag "Opening tag"
+		 (string :tag "Specify")
+		 (function)))
+
+(defcustom org-html-table-row-close-tag "</tr>"
+  "The closing tag for table rows.
+This is customizable so that alignment options can be specified.
+Instead of strings, this can be a Lisp function that will be
+evaluated for each row in order to construct the table row tags.
+
+See documentation of `org-html-table-row-open-tag'."
+  :group 'org-export-html
+  :type '(choice :tag "Closing tag"
+		 (string :tag "Specify")
+		 (function)))
 
 (defcustom org-html-table-align-individual-fields t
   "Non-nil means attach style attributes for alignment to each table field.
@@ -3302,42 +3310,45 @@ communication channel."
   ;; Rules are ignored since table separators are deduced from
   ;; borders of the current row.
   (when (eq (org-element-property :type table-row) 'standard)
-    (let* ((rowgroup-number (org-export-table-row-group table-row info))
-	   (row-number (org-export-table-row-number table-row info))
-	   (start-rowgroup-p
+    (let* ((group (org-export-table-row-group table-row info))
+	   (number (org-export-table-row-number table-row info))
+	   (start-group-p
 	    (org-export-table-row-starts-rowgroup-p table-row info))
-	   (end-rowgroup-p
+	   (end-group-p
 	    (org-export-table-row-ends-rowgroup-p table-row info))
-	   ;; `top-row-p' and `end-rowgroup-p' are not used directly
-	   ;; but should be set so that `org-html-table-row-tags' can
-	   ;; use them (see the docstring of this variable.)
-	   (top-row-p (and (equal start-rowgroup-p '(top))
-			   (equal end-rowgroup-p '(below top))))
-	   (bottom-row-p (and (equal start-rowgroup-p '(above))
-			      (equal end-rowgroup-p '(bottom above))))
-	   (rowgroup-tags
+	   (topp (and (equal start-group-p '(top))
+		      (equal end-group-p '(below top))))
+	   (bottomp (and (equal start-group-p '(above))
+			 (equal end-group-p '(bottom above))))
+           (row-open-tag
+            (pcase (plist-get info :html-table-row-open-tag)
+              ((and accessor (pred functionp))
+               (funcall accessor
+			number group start-group-p end-group-p topp bottomp))
+	      (accessor accessor)))
+           (row-close-tag
+            (pcase (plist-get info :html-table-row-close-tag)
+              ((and accessor (pred functionp))
+               (funcall accessor
+			number group start-group-p end-group-p topp bottomp))
+	      (accessor accessor)))
+	   (group-tags
 	    (cond
-	     ;; Case 1: Row belongs to second or subsequent rowgroups.
-	     ((not (= 1 rowgroup-number))
-	      '("<tbody>" . "\n</tbody>"))
-	     ;; Case 2: Row is from first rowgroup.  Table has >=1 rowgroups.
+	     ;; Row belongs to second or subsequent groups.
+	     ((not (= 1 group)) '("<tbody>" . "\n</tbody>"))
+	     ;; Row is from first group.  Table has >=1 groups.
 	     ((org-export-table-has-header-p
 	       (org-export-get-parent-table table-row) info)
 	      '("<thead>" . "\n</thead>"))
-	     ;; Case 2: Row is from first and only row group.
+	     ;; Row is from first and only group.
 	     (t '("<tbody>" . "\n</tbody>")))))
-      ;; Silence byte-compiler.
-      bottom-row-p top-row-p row-number
-      (concat
-       ;; Begin a rowgroup?
-       (when start-rowgroup-p (car rowgroup-tags))
-       ;; Actual table row.
-       (concat "\n" (eval (car (plist-get info :html-table-row-tags)) t)
-	       contents
-	       "\n"
-	       (eval (cdr (plist-get info :html-table-row-tags)) t))
-       ;; End a rowgroup?
-       (when end-rowgroup-p (cdr rowgroup-tags))))))
+      (concat (and start-group-p (car group-tags))
+	      (concat "\n"
+		      row-open-tag
+		      contents
+		      "\n"
+		      row-close-tag)
+	      (and end-group-p (cdr group-tags))))))
 
 ;;;; Table
 
