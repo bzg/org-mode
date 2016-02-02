@@ -18364,6 +18364,23 @@ changes from another.  I believe the procedure must be like this:
 
 ;;;; Agenda files
 
+;;;###autoload
+(defun org-switchb (&optional arg)
+  "Switch between Org buffers.
+
+With \\[universal-argument] prefix, restrict available buffers to files.
+
+With \\[universal-argument] \\[universal-argument] \
+prefix, restrict available buffers to agenda files."
+  (interactive "P")
+  (let ((blist (org-buffer-list
+		(cond ((equal arg '(4))  'files)
+		      ((equal arg '(16)) 'agenda)))))
+    (org-pop-to-buffer-same-window
+     (completing-read "Org buffer: "
+		      (mapcar #'list (mapcar #'buffer-name blist))
+		      nil t))))
+
 (defun org-buffer-list (&optional predicate exclude-tmp)
   "Return a list of Org buffers.
 PREDICATE can be `export', `files' or `agenda'.
