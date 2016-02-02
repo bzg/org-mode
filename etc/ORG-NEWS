@@ -194,19 +194,19 @@ position of the elements. See variable ~org-latex-custom-lang-environments~
 for more details.
 
 ** New functions
+*** ~org-next-line-empty-p~
+It replaces the deprecated ~next~ argument to ~org-previous-line-empty-p~.
 *** ~org-show-children~ 
 It is a faster implementation of ~outline-show-children~.
 
-*** ~org-next-line-empty-p~
-It replaces the deprecated ~next~ argument to ~org-previous-line-empty-p~.
 ** Removed functions
 *** ~org-agenda-todayp~ is deprecated.
 Use ~org-agenda-today-p~ instead.
-*** ~org-element-remove-indentation~ is deprecated.
-Use ~org-remove-indentation~ instead.
 *** ~org-babel-get-header~ is removed.
 Use ~org-babel--get-vars~ or ~assq~ instead, as applicable.
 
+*** ~org-element-remove-indentation~ is deprecated.
+Use ~org-remove-indentation~ instead.
 *** ~org-image-file-name-regexp~ is deprecated
 Use ~image-file-name-regexp~ instead.
 The never-used-in-core ~extensions~ argument has been dropped.
@@ -216,6 +216,12 @@ Use ~org-list-to-lisp~ instead.
 *** ~org-on-heading-p~ is deprecated
 A comment to this effect was in the source code since 7.8.03, but
 now a byte-compiler warning will be generated as well.
+
+*** ~org-table-p~ is deprecated
+Use ~org-at-table-p~ instead.
+
+*** ~org-table-recognize-table.el~ is deprecated
+It was not called by any org code since 2010.
 
 *** Various reimplementations of cl-lib functions are deprecated
 The affected functions are:
@@ -230,13 +236,11 @@ Additionally, ~org-sublist~ is deprecated in favor of ~cl-subseq~.  Note
 the differences in indexing conventions: ~org-sublist~ is 1-based and
 end-inclusive; ~cl-subseq~ is 0-based and end-exclusive.
 
-*** ~org-table-recognize-table.el~ is deprecated
-It was not called by any org code since 2010.
-
-*** ~org-table-p~ is deprecated
-Use ~org-at-table-p~ instead.
-
 ** Removed options
+*** Remove all options related to ~ido~ or ~iswitchb~
+This includes ~org-completion-use-iswitchb~ and ~org-completion-use-ido~.
+Instead Org uses regular functions, e.g., ~completion-read~ so as to
+let those libraries operate.
 *** Remove ~org-list-empty-line-terminates-plain-lists~
 Two consecutive blank lines always terminate all levels of current
 plain list.
