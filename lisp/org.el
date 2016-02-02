@@ -14464,9 +14464,12 @@ See also `org-scan-tags'."
 	  (setq todomatcher nil))
 	(setq todomatcher (cons 'or orlist))))
 
-    ;; Return the string and function of the matcher.
-    (let ((matcher (if todomatcher `(and ,tagsmatcher ,todomatcher)
-		     tagsmatcher)))
+    ;; Return the string and function of the matcher.  If no
+    ;; tags-specific or todo-specific matcher exists, match
+    ;; everything.
+    (let ((matcher (if (and tagsmatcher todomatcher)
+		       `(and ,tagsmatcher ,todomatcher)
+		     (or tagsmatcher todomatcher t))))
       (when org--matcher-tags-todo-only
 	(setq matcher `(and (member todo org-not-done-keywords) ,matcher)))
       (cons match0 `(lambda (todo tags-list level) ,matcher)))))
