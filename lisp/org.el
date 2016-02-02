@@ -4383,37 +4383,6 @@ You need to reload Org or to restart Emacs after customizing this."
   "Blocks that contain text that is quoted, i.e. not processed as Org syntax.
 This is needed for font-lock setup.")
 
-;;; Miscellaneous options
-
-(defgroup org-completion nil
-  "Completion in Org-mode."
-  :tag "Org Completion"
-  :group 'org)
-
-(defcustom org-completion-use-ido nil
-  "Non-nil means use ido completion wherever possible.
-Note that `ido-mode' must be active for this variable to be relevant.
-If you decide to turn this variable on, you might well want to turn off
-`org-outline-path-complete-in-steps'.
-See also `org-completion-use-iswitchb'."
-  :group 'org-completion
-  :type 'boolean)
-
-(defcustom org-completion-use-iswitchb nil
-  "Non-nil means use iswitchb completion wherever possible.
-Note that `iswitchb-mode' must be active for this variable to be relevant.
-If you decide to turn this variable on, you might well want to turn off
-`org-outline-path-complete-in-steps'.
-Note that this variable has only an effect if `org-completion-use-ido' is nil."
-  :group 'org-completion
-  :type 'boolean)
-
-(defcustom org-completion-fallback-command 'hippie-expand
-  "The expansion command called by \\[pcomplete] in normal context.
-Normal means, no org-mode-specific context."
-  :group 'org-completion
-  :type 'function)
-
 ;;; Functions and variables from their packages
 ;;  Declared here to avoid compiler warnings
 
@@ -10398,7 +10367,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 
 (defun org-file-complete-link (&optional arg)
   "Create a file link using completion."
-  (let ((file (org-iread-file-name "File: "))
+  (let ((file (read-file-name "File: "))
 	(pwd (file-name-as-directory (expand-file-name ".")))
 	(pwd1 (file-name-as-directory (abbreviate-file-name
 				       (expand-file-name ".")))))
@@ -10415,20 +10384,6 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 		   (match-string 1 (expand-file-name file))))
 	  (t (concat "file:" file)))))
 
-(defvar ido-enter-matching-directory)
-(defun org-iread-file-name (&rest args)
-  "Read-file-name using `ido-mode' speedup if available.
-ARGS are arguments that may be passed to `ido-read-file-name' or `read-file-name'.
-See `read-file-name' for a description of parameters."
-  (org-without-partial-completion
-   (if (and org-completion-use-ido
-            (fboundp 'ido-read-file-name)
-            (org-bound-and-true-p ido-mode)
-            (listp (nth 1 args)))
-       (let ((ido-enter-matching-directory nil))
-         (apply #'ido-read-file-name args))
-     (apply #'read-file-name args))))
-
 (defun org-completing-read (&rest args)
   "Completing-read with SPACE being a normal character."
   (let ((enable-recursive-minibuffers t)
@@ -10444,6 +10399,8 @@ See `read-file-name' for a description of parameters."
   'org-completing-read-no-i 'completing-read "Org 9.0")
 (define-obsolete-function-alias
   'org-icompleting-read 'completing-read "Org 9.0")
+(define-obsolete-function-alias
+  'org-iread-file-name 'read-file-name "Org 9.0")
 
 ;;; Opening/following a link
 
@@ -11766,7 +11723,7 @@ RFLOC can be a refile location obtained in a different way.
 MSG is a string to replace \"Refile\" in the default prompt with
 another verb.  E.g. `org-copy' sets this parameter to \"Copy\".
 
-See also `org-refile-use-outline-path' and `org-completion-use-ido'.
+See also `org-refile-use-outline-path'.
 
 If you are using target caching (see `org-refile-use-cache'), you
 have to clear the target cache in order to find new targets.
@@ -15596,12 +15553,11 @@ When INCREMENT is non-nil, set the property to the next allowed value."
 		      (car (nth (1- rpl) allowed))
 		    (org-completing-read "Effort: " allowed nil))))
 	       (t
-		(let (org-completion-use-ido org-completion-use-iswitchb)
-		  (org-completing-read
-		   (concat "Effort " (if (and cur (string-match "\\S-" cur))
-					 (concat "[" cur "]") "")
-			   ": ")
-		   existing nil nil "" nil cur))))))
+		(org-completing-read
+		 (concat "Effort " (if (and cur (string-match "\\S-" cur))
+				       (concat "[" cur "]") "")
+			 ": ")
+		 existing nil nil "" nil cur)))))
     (unless (equal (org-entry-get nil prop) val)
       (org-entry-put nil prop val))
     (org-refresh-property
@@ -16277,10 +16233,9 @@ This is computed according to `org-property-set-functions-alist'."
 		  (funcall set-function prompt allowed nil
 			   (not (get-text-property 0 'org-unrestricted
 						   (caar allowed))))
-		(let (org-completion-use-ido org-completion-use-iswitchb)
-		  (funcall set-function prompt
-			   (mapcar 'list (org-property-values property))
-			   nil nil "" nil cur)))))
+		(funcall set-function prompt
+			 (mapcar 'list (org-property-values property))
+			 nil nil "" nil cur))))
     (org-trim val)))
 
 (defvar org-last-set-property nil)
@@ -18408,33 +18363,6 @@ changes from another.  I believe the procedure must be like this:
 	(org-id-locations-load)))))
 
 ;;;; Agenda files
-
-;;;###autoload
-(defun org-switchb (&optional arg)
-  "Switch between Org buffers.
-With one prefix argument, restrict available buffers to files.
-With two prefix arguments, restrict available buffers to agenda files.
-
-Defaults to `iswitchb' for buffer name completion.
-Set `org-completion-use-ido' to make it use ido instead."
-  (interactive "P")
-  (let ((blist (cond ((equal arg '(4))  (org-buffer-list 'files))
-                     ((equal arg '(16)) (org-buffer-list 'agenda))
-                     (t                 (org-buffer-list))))
-	(org-completion-use-iswitchb org-completion-use-iswitchb)
-	(org-completion-use-ido org-completion-use-ido))
-    (unless (or org-completion-use-ido org-completion-use-iswitchb)
-      (setq org-completion-use-iswitchb t))
-    (org-pop-to-buffer-same-window
-     (completing-read "Org buffer: "
-		      (mapcar #'list (mapcar #'buffer-name blist))
-		      nil t))))
-
-;;; Define some older names previously used for this functionality
-;;;###autoload
-(defalias 'org-ido-switchb 'org-switchb)
-;;;###autoload
-(defalias 'org-iswitchb 'org-switchb)
 
 (defun org-buffer-list (&optional predicate exclude-tmp)
   "Return a list of Org buffers.
