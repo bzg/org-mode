@@ -137,7 +137,7 @@ This function is used when the table contains a header.")
 
 This function is used when the table does not contain a header.")
 
-(defun org-babel-expand-body:R (body params &optional &graphics-file)
+(defun org-babel-expand-body:R (body params &optional graphics-file)
   "Expand BODY according to PARAMS, return the expanded body."
   (mapconcat 'identity
 	     (append
