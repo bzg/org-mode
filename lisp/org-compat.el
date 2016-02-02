@@ -333,7 +333,9 @@ Works on both Emacs and XEmacs."
 Pass COLUMN and FORCE to `move-to-column'.
 Pass BUFFER to the XEmacs version of `move-to-column'."
   (let ((buffer-invisibility-spec
-	 (remove '(org-filtered) buffer-invisibility-spec)))
+	 (if (listp buffer-invisibility-spec)
+	     (remove '(org-filtered) buffer-invisibility-spec)
+	   buffer-invisibility-spec)))
     (if (featurep 'xemacs)
 	(org-xemacs-without-invisibility
 	 (move-to-column column force buffer))
