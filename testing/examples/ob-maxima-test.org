@@ -45,11 +45,11 @@ print(a+1);
   :PROPERTIES:
   :ID:       400ee228-6b12-44fd-8097-7986f0f0db43
   :END:
-#+tblname: test_tbl_col
+#+name: test_tbl_col
 | 1.0 |
 | 2.0 |
 
-#+tblname: test_tbl_row
+#+name: test_tbl_row
 | 1.0 | 2.0 |
 
 #+begin_src maxima :var s=test_tbl_col :results silent :results verbatim
@@ -61,7 +61,7 @@ print(s+1.0);
 #+end_src
 
 Matrix
-#+tblname: test_tbl_mtr
+#+name: test_tbl_mtr
 | 1.0 | 1.0 |
 
 #+begin_src maxima :var s=test_tbl_mtr :results silent :results verbatim

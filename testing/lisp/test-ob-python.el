@@ -40,7 +40,7 @@ return x
 		   (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob-python/colnames-yes-header-argument-again ()
-  (org-test-with-temp-text "#+tblname: less-cols
+  (org-test-with-temp-text "#+name: less-cols
 | a |
 |---|
 | b |
@@ -71,7 +71,7 @@ return x
 		   (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob-python/colnames-no-header-argument-again ()
-  (org-test-with-temp-text "#+tblname: less-cols
+  (org-test-with-temp-text "#+name: less-cols
 | a |
 |---|
 | b |

@@ -598,11 +598,11 @@ x
 
 (ert-deftest test-ob/do-not-resolve-to-partial-names-data ()
   (org-test-with-temp-text "
-#+tblname: base_plus
+#+name: base_plus
 | 1 |
 | 2 |
 
-#+tblname: base
+#+name: base
 | 3 |
 | 4 |
 
