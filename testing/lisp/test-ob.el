@@ -1592,6 +1592,118 @@ echo \"$data\"
    (org-test-with-temp-text "#+results: foo"
      (org-babel-find-named-result "foo"))))
 
+(ert-deftest test-ob/where-is-src-block-result ()
+  "Test `org-babel-where-is-src-block-result' specifications."
+  ;; Find anonymous results.
+  (should
+   (equal "#+RESULTS:"
+	  (org-test-with-temp-text
+	      "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC\n\n#+RESULTS:\n: 2"
+	    (goto-char (org-babel-where-is-src-block-result))
+	    (buffer-substring-no-properties (point) (line-end-position)))))
+  ;; Find named results.  Those have priority over anonymous ones.
+  (should
+   (equal "#+RESULTS: example"
+	  (org-test-with-temp-text
+	      "
+<point>#+NAME: example
+#+BEGIN_SRC emacs-lisp
+\(+ 1 1)
+#+END_SRC
+
+#+RESULTS: example
+: 2"
+	    (goto-char (org-babel-where-is-src-block-result))
+	    (buffer-substring-no-properties (point) (line-end-position)))))
+  (should
+   (equal "#+RESULTS: example"
+	  (org-test-with-temp-text
+	      "
+<point>#+NAME: example
+#+BEGIN_SRC emacs-lisp
+\(+ 1 1)
+#+END_SRC
+
+#+RESULTS:
+: fake
+
+#+RESULTS: example
+: 2"
+	    (goto-char (org-babel-where-is-src-block-result))
+	    (buffer-substring-no-properties (point) (line-end-position)))))
+  ;; Return nil when no result is found.
+  (should-not
+   (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
+     (org-babel-where-is-src-block-result)))
+  ;; When optional argument INSERT is non-nil, add RESULTS keyword
+  ;; whenever no RESULTS can be found.
+  (should
+   (equal
+    "#+RESULTS:"
+    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
+      (let ((org-babel-results-keyword "RESULTS"))
+	(goto-char (org-babel-where-is-src-block-result t)))
+      (buffer-substring-no-properties (point) (line-end-position)))))
+  ;; Insert a named RESULTS keyword if possible.
+  (should
+   (equal
+    "#+RESULTS: e"
+    (org-test-with-temp-text
+	"#+NAME: e\n#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
+      (let ((org-babel-results-keyword "RESULTS"))
+	(goto-char (org-babel-where-is-src-block-result t)))
+      (buffer-substring-no-properties (point) (line-end-position)))))
+  ;; When optional argument HASH is provided, clear RESULTS keyword
+  ;; and related contents if they do not match it.
+  (should
+   (equal
+    "#+RESULTS[bbbb]:"
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC\n\n#+RESULTS[aaaa]:\n: 3"
+      (let ((org-babel-results-keyword "RESULTS"))
+	(goto-char (org-babel-where-is-src-block-result nil nil "bbbb")))
+      (org-trim (buffer-substring-no-properties (point) (point-max))))))
+  (should
+   (equal
+    "#+RESULTS[bbbb]:"
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC\n\n#+RESULTS[aaaa]:"
+      (let ((org-babel-results-keyword "RESULTS"))
+	(goto-char (org-babel-where-is-src-block-result nil nil "bbbb")))
+      (org-trim (buffer-substring-no-properties (point) (point-max))))))
+  ;; RESULTS keyword may not be the last affiliated keyword.
+  (should
+   (equal
+    "#+RESULTS[bbbb]:"
+    (org-test-with-temp-text
+	"
+<point>#+BEGIN_SRC emacs-lisp
+\(+ 1 1)
+#+END_SRC
+
+#+RESULTS[aaaa]:
+#+NAME: e
+: 3"
+      (let ((org-babel-results-keyword "RESULTS"))
+	(goto-char (org-babel-where-is-src-block-result nil nil "bbbb")))
+      (org-trim (buffer-substring-no-properties (point) (point-max))))))
+  ;; HASH does nothing if no RESULTS can be found.  However, if INSERT
+  ;; is also non-nil, RESULTS keyword is inserted along with the
+  ;; expected hash.
+  (should
+   (equal
+    "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
+    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
+      (org-babel-where-is-src-block-result nil nil "bbbb")
+      (buffer-string))))
+  (should
+   (equal
+    "#+RESULTS[bbbb]:"
+    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
+      (let ((org-babel-results-keyword "RESULTS"))
+	(goto-char (org-babel-where-is-src-block-result t nil "bbbb")))
+      (org-trim (buffer-substring-no-properties (point) (point-max)))))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here

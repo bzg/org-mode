@@ -1917,103 +1917,126 @@ region is not active then the point is demarcated."
 			(funcall (if lower-case-p 'downcase 'upcase) "#+end_src\n")))
 	(goto-char start) (move-end-of-line 1)))))
 
-(defvar org-babel-lob-one-liner-regexp)
-(defun org-babel-where-is-src-block-result (&optional insert info hash)
+(defun org-babel--insert-results-keyword (name hash)
+  "Insert RESULTS keyword with NAME value at point.
+If NAME is nil, results are anonymous.  HASH is a string used as
+the results hash, or nil.  Leave point before the keyword."
+  (save-excursion (insert "\n"))	;open line to indent.
+  (org-indent-line)
+  (delete-char 1)
+  (insert (concat "#+" org-babel-results-keyword
+		  (cond ((not hash) nil)
+			(org-babel-hash-show-time
+			 (format "[%s %s]"
+				 (format-time-string "<%Y-%m-%d %H:%M:%S>")
+				 hash))
+			(t (format "[%s]" hash)))
+		  ":"
+		  (when name (concat " " name))
+		  "\n\n"))
+  (beginning-of-line -1)
+  (when hash (org-babel-hide-hash)))
+
+(defun org-babel--clear-results-maybe (hash)
+  "Clear results when hash doesn't match HASH.
+
+When results hash does not match HASH, remove RESULTS keyword at
+point, along with related contents.  Do nothing if HASH is nil.
+
+Return a non-nil value if results were cleared.  In this case,
+leave point where new results should be inserted."
+  (when hash
+    (looking-at org-babel-result-regexp)
+    (unless (string= (match-string 1) hash)
+      (let* ((e (org-element-at-point))
+	     (post (copy-marker (org-element-property :post-affiliated e))))
+	;; Delete contents.
+	(delete-region post
+		       (save-excursion
+			 (goto-char (org-element-property :end e))
+			 (skip-chars-backward " \t\n")
+			 (line-beginning-position 2)))
+	;; Delete RESULT keyword.  However, if RESULTS keyword is
+	;; orphaned, ignore this part.  The deletion above already
+	;; took care of it.
+	(unless (= (point) post)
+	  (delete-region (line-beginning-position)
+			 (line-beginning-position 2)))
+	(goto-char post)
+	(set-marker post nil)))
+    t))
+
+(defun org-babel-where-is-src-block-result (&optional insert _info hash)
   "Find where the current source block results begin.
+
 Return the point at the beginning of the result of the current
-source block.  Specifically at the beginning of the results line.
-If no result exists for this block then create a results line
-following the source block."
-  (save-excursion
-    (let* ((case-fold-search t)
-	   (on-lob-line (save-excursion
-			  (beginning-of-line 1)
-			  (looking-at org-babel-lob-one-liner-regexp)))
-	   (inlinep (when (org-babel-get-inline-src-block-matches)
-		      (match-end 0)))
-	   (name (nth 4 (or info (org-babel-get-src-block-info 'light))))
-	   (head (unless on-lob-line (org-babel-where-is-src-block-head)))
-	   found beg end ind)
-      (when head (goto-char head))
+source block, specifically at the beginning of the results line.
+
+If no result exists for this block return nil, unless optional
+argument INSERT is non-nil.  In this case, create a results line
+following the source block and return the position at its
+beginning.
+
+If optional argument HASH is a string, remove contents related to
+RESULTS keyword if its hash is different.  Then update the latter
+to HASH."
+  (let ((context (org-element-context)))
+    (catch :found
       (org-with-wide-buffer
-       (setq
-	found ;; was there a result (before we potentially insert one)
-	(or
-	 inlinep
-	 ;; named results:
-	 ;; - if it does not need to be rebuilt, then don't set END
-	 ;; - if it does need to be rebuilt then do set END
-	 (and
-	  name
-	  (setq beg (org-babel-find-named-result name))
-	  (prog1 beg
-	    (goto-char beg)
-	    (setq ind (org-get-indentation))
-	    (when hash
-	      (looking-at org-babel-result-regexp)
-	      (unless (string= (match-string 1) hash)
-		(setq end beg)
-		(let ((element (org-element-at-point)))
-		  (delete-region
-		   (org-element-property :begin element)
-		   (progn (goto-char (org-element-property :end element))
-			  (skip-chars-backward " \t\n")
-			  (line-beginning-position 2))))))))
-	 (and
-	  ;; unnamed results:
-	  ;; - return t if it is found, else return nil
-	  ;; - if it is found, and the hash doesn't match, delete and set end
-	  (or on-lob-line (re-search-forward "^[ \t]*#\\+end_src" nil t))
-	  (progn (end-of-line 1)
-		 (if (eobp) (insert "\n") (forward-char 1))
-		 (setq end (point))
-		 (and
-		  (not name)
-		  (progn ;; unnamed results line already exists
-		    (catch 'non-comment
-		      (while (re-search-forward "[^ \f\t\n\r\v]" nil t)
-			(beginning-of-line 1)
-			(cond
-			 ((looking-at (concat org-babel-result-regexp "\n"))
-			  (setq ind (org-get-indentation))
-			  (throw 'non-comment t))
-			 ((and (looking-at "^[ \t]*#")
-			       (not (looking-at
-				     org-babel-lob-one-liner-regexp)))
-			  (end-of-line 1))
-			 (t (throw 'non-comment nil))))))
-		  (let ((this-hash (match-string 1)))
-		    (prog1 (point)
-		      ;; must remove and rebuild if hash!=old-hash
-		      (if (and hash (not (string= hash this-hash)))
-			  (progn
-			    (setq end (point-at-bol))
-			    (forward-line 1)
-			    (delete-region end (org-babel-result-end))
-			    (setq beg end))
-			(setq end nil))))))))))
-      (if (not (and insert end)) found
-	(goto-char end)
-	(unless beg
-	  (if (looking-at "[\n\r]") (forward-char 1) (insert "\n")))
-	(if ind (indent-to ind)
-	  ;; Open line to properly indent.
-	  (save-excursion (insert "\n"))
-	  (org-indent-line)
-	  (delete-char 1))
-	(insert (concat
-		 "#+" org-babel-results-keyword
-		 (when hash
-		   (if org-babel-hash-show-time
-		       (concat
-			"["(format-time-string "<%Y-%m-%d %H:%M:%S>")" "hash"]")
-		     (concat "["hash"]")))
-		 ":"
-		 (when name (concat " " name)) "\n"))
-	(unless beg (insert "\n") (backward-char))
-	(beginning-of-line 0)
-	(when hash (org-babel-hide-hash))
-	(point)))))
+       (pcase (org-element-type context)
+	 ((or `inline-babel-call `inline-src-block)
+	  ;; Results for inline objects are located right after them.
+	  ;; There is no RESULTS line to insert either.
+	  (goto-char (org-element-property :end context))
+	  (skip-chars-backward " \t")
+	  (throw :found (point)))
+	 ((or `babel-call `src-block)
+	  (let* ((name (org-element-property :name context))
+		 (named-results (and name (org-babel-find-named-result name))))
+	    (goto-char (or named-results (org-element-property :end context)))
+	    (cond
+	     ;; Existing results named after the current source.
+	     (named-results
+	      (when (org-babel--clear-results-maybe hash)
+		(org-babel--insert-results-keyword name hash))
+	      (throw :found (point)))
+	     ;; Named results expect but none to be found.
+	     (name)
+	     ;; No possible anonymous results at the very end of
+	     ;; buffer.
+	     ((eobp))
+	     ;; Check if next element is an anonymous result below
+	     ;; the current block.
+	     ((let* ((next (org-element-at-point))
+		     (end (save-excursion
+			    (goto-char
+			     (org-element-property :post-affiliated next))
+			    (line-end-position)))
+		     (empty-result-re (concat org-babel-result-regexp "$"))
+		     (case-fold-search t))
+		(re-search-forward empty-result-re end t))
+	      (beginning-of-line)
+	      (when (org-babel--clear-results-maybe hash)
+		(org-babel--insert-results-keyword nil hash))
+	      (throw :found (point))))))
+	 ;; Ignore other elements.
+	 (_ (throw :found nil))))
+      ;; No result found.  Insert a RESULTS keyword below element, if
+      ;; appropriate.  In this case, ensure there is an empty line
+      ;; after the previous element.
+      (when insert
+	(save-excursion
+	  (goto-char (min (org-element-property :end context) (point-max)))
+	  (skip-chars-backward " \t\n")
+	  (forward-line)
+	  (cond ((not (bolp)) (insert "\n\n"))
+		((or (eobp)
+		     (= (org-element-property :post-blank context) 0))
+		 (insert "\n"))
+		(t (forward-line)))
+	  (org-babel--insert-results-keyword
+	   (org-element-property :name context) hash)
+	  (point))))))
 
 (defun org-babel-read-element (element)
   "Read ELEMENT into emacs-lisp.
