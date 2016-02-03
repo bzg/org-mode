@@ -35,7 +35,6 @@
       ".exe"
     nil))
 
-;; dynamically scoped for tramp
 (defvar org-babel-call-process-region-original nil)
 (defvar org-babel-library-of-babel)
 (defvar org-edit-src-content-indentation)
@@ -549,22 +548,24 @@ For the format of SAFE-LIST, see `org-babel-safe-header-args'."
 (put 'org-babel-default-inline-header-args 'safe-local-variable
      (org-babel-header-args-safe-fn org-babel-safe-header-args))
 
-(defvar org-babel-data-names '("tblname" "results" "name"))
+(defconst org-babel-name-regexp
+  (format "^[ \t]*#\\+%s:[ \t]*"
+	  ;; FIXME: TBLNAME is for backward compatibility.
+	  (regexp-opt '("NAME" "TBLNAME")))
+  "Regexp matching a NAME keyword.")
 
-(defvar org-babel-result-regexp
-  (concat "^[ \t]*#\\+"
-	  (regexp-opt org-babel-data-names t)
-	  "\\(\\[\\("
-	  ;; FIXME The string below is `org-ts-regexp'
-	  "<\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^\r\n>]*?\\)>"
-	  " \\)?\\([[:alnum:]]+\\)\\]\\)?\\:[ \t]*")
+(defconst org-babel-result-regexp
+  (format "^[ \t]*#\\+%s\\(?:\\[\\(?:%S\\)?\\([[:alnum:]]+\\)\\]\\)?:[ \t]*"
+	  org-babel-results-keyword
+	  "<\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^\r\n>]*?\\)>")
   "Regular expression used to match result lines.
 If the results are associated with a hash key then the hash will
-be saved in the second match data.")
+be saved in match group 1.")
 
-(defvar org-babel-result-w-name-regexp
-  (concat org-babel-result-regexp
-	  "\\([^ ()\f\t\n\r\v]+\\)\\((\\(.*\\))\\|\\)"))
+(defconst org-babel-result-w-name-regexp
+  (concat org-babel-result-regexp "\\(?9:[^ \t\n\r\v\f]+\\)")
+  "Regexp matching a RESULTS keyword with a name.
+Name is saved in match group 9.")
 
 (defvar org-babel-min-lines-for-block-output 10
   "The minimum number of lines for block output.
@@ -608,7 +609,7 @@ match group 9.  Other match groups are defined in
 
 (defun org-babel-named-data-regexp-for-name (name)
   "This generates a regexp used to match data named NAME."
-  (concat org-babel-result-regexp (regexp-quote name) "\\([ \t]\\|$\\)"))
+  (concat org-babel-name-regexp (regexp-quote name) "[ \t]*$"))
 
 ;;; functions
 (defvar call-process-region)
@@ -1280,18 +1281,18 @@ the current subtree."
       (org-with-wide-buffer
        (goto-char result)
        (looking-at org-babel-result-regexp)
-       (match-string-no-properties 5)))))
+       (match-string-no-properties 1)))))
 
 (defun org-babel-set-current-result-hash (hash info)
   "Set the current in-buffer hash to HASH."
   (org-with-wide-buffer
    (goto-char (org-babel-where-is-src-block-result nil info))
    (looking-at org-babel-result-regexp)
-   (goto-char (match-beginning 5))
+   (goto-char (match-beginning 1))
    (mapc #'delete-overlay (overlays-at (point)))
    (forward-char org-babel-hash-show)
    (mapc #'delete-overlay (overlays-at (point)))
-   (replace-match hash nil nil nil 5)
+   (replace-match hash nil nil nil 1)
    (beginning-of-line)
    (org-babel-hide-hash)))
 
@@ -1302,11 +1303,11 @@ will remain visible."
   (add-to-invisibility-spec '(org-babel-hide-hash . t))
   (save-excursion
     (when (and (re-search-forward org-babel-result-regexp nil t)
-               (match-string 5))
-      (let* ((start (match-beginning 5))
+               (match-string 1))
+      (let* ((start (match-beginning 1))
              (hide-start (+ org-babel-hash-show start))
-             (end (match-end 5))
-             (hash (match-string 5))
+             (end (match-end 1))
+             (hash (match-string 1))
              ov1 ov2)
         (setq ov1 (make-overlay start hide-start))
         (setq ov2 (make-overlay hide-start end))
@@ -1826,7 +1827,7 @@ buffer or nil if no such result exists."
     (when file (find-file file)) (goto-char (point-min))
     (let ((case-fold-search t) names)
       (while (re-search-forward org-babel-result-w-name-regexp nil t)
-	(setq names (cons (match-string 4) names)))
+	(setq names (cons (match-string-no-properties 9) names)))
       names)))
 
 ;;;###autoload
@@ -1950,7 +1951,7 @@ following the source block."
 	    (setq ind (org-get-indentation))
 	    (when hash
 	      (looking-at org-babel-result-regexp)
-	      (unless (string= (match-string 5) hash)
+	      (unless (string= (match-string 1) hash)
 		(setq end beg)
 		(let ((element (org-element-at-point)))
 		  (delete-region
@@ -1981,7 +1982,7 @@ following the source block."
 				     org-babel-lob-one-liner-regexp)))
 			  (end-of-line 1))
 			 (t (throw 'non-comment nil))))))
-		  (let ((this-hash (match-string 5)))
+		  (let ((this-hash (match-string 1)))
 		    (prog1 (point)
 		      ;; must remove and rebuild if hash!=old-hash
 		      (if (and hash (not (string= hash this-hash)))
