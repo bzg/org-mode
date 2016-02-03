@@ -2142,30 +2142,23 @@ See `org-file-apps'.")
 
 (defconst org-file-apps-defaults-macosx
   '((remote . emacs)
-    (t . "open %s")
     (system . "open %s")
     ("ps.gz"  . "gv %s")
     ("eps.gz" . "gv %s")
     ("dvi"    . "xdvi %s")
-    ("fig"    . "xfig %s"))
+    ("fig"    . "xfig %s")
+    (t . "open %s"))
   "Default file applications on a MacOS X system.
 The system \"open\" is known as a default, but we use X11 applications
 for some files for which the OS does not have a good default.
 See `org-file-apps'.")
 
 (defconst org-file-apps-defaults-windowsnt
-  (list
-   '(remote . emacs)
-   (cons t
-	 (list (if (featurep 'xemacs)
-		   'mswindows-shell-execute
-		 'w32-shell-execute)
-	       "open" 'file))
-   (cons 'system
-	 (list (if (featurep 'xemacs)
-		   'mswindows-shell-execute
-		 'w32-shell-execute)
-	       "open" 'file)))
+  (list '(remote . emacs)
+	(cons 'system (lambda (file _path)
+			(with-no-warnings (w32-shell-execute "open" file))))
+	(cons t (lambda (file _path)
+		  (with-no-warnings (w32-shell-execute "open" file)))))
   "Default file applications on a Windows NT system.
 The system \"open\" is used for most files.
 See `org-file-apps'.")
@@ -2176,7 +2169,8 @@ See `org-file-apps'.")
     ("\\.x?html?\\'" . default)
     ("\\.pdf\\'" . default))
   "External applications for opening `file:path' items in a document.
-Org-mode uses system defaults for different file types, but
+\\<org-mode-map>\
+Org mode uses system defaults for different file types, but
 you can use this variable to set the application for a given file
 extension.  The entries in this list are cons cells where the car identifies
 files and the cdr the corresponding command.  Possible values for the
@@ -2194,7 +2188,7 @@ file identifier are
                  use groups here, use shy groups.
 
                  Example: (\"\\.x?html\\\\='\" . \"firefox %s\")
-                          (\"\\(?:xhtml\\|html\\)\" . \"firefox %s\")
+                          \(\"\\(?:xhtml\\|html\\)\" . \"firefox %s\")
                           to open *.html and *.xhtml with firefox.
 
                - Regular expression which contains (non-shy) groups:
@@ -2206,8 +2200,8 @@ file identifier are
                  that does not use any of the group matches, this case is
                  handled identically to the second one (i.e. match against
                  file name only).
-                 In a custom lisp form, you can access the group matches with
-                 (match-string n link).
+                 In a custom function, you can access the group matches with
+                 \(match-string n link).
 
                  Example: (\"\\.pdf::\\(\\d+\\)\\\\='\" . \"evince -p %1 %s\")
                      to open [[file:document.pdf::5]] with evince at page 5.
@@ -2220,29 +2214,32 @@ file identifier are
                so all files Emacs knows how to handle.  Using this with
                command `emacs' will open most files in Emacs.  Beware that this
                will also open html files inside Emacs, unless you add
-               (\"html\" . default) to the list as well.
- t             Default for files not matched by any of the other options.
+               \(\"html\" . default) to the list as well.
  `system'      The system command to open files, like `open' on Windows
                and Mac OS X, and mailcap under GNU/Linux.  This is the command
-               that will be selected if you call `C-c C-o' with a double
+               that will be selected if you call \\[org-open-at-point] with a double
                \\[universal-argument] \\[universal-argument] prefix.
+ t             Default for files not matched by any of the other options.
 
 Possible values for the command are:
  `emacs'       The file will be visited by the current Emacs process.
  `default'     Use the default application for this file type, which is the
                association for t in the list, most likely in the system-specific
-               part.
-               This can be used to overrule an unwanted setting in the
+               part.  This can be used to overrule an unwanted setting in the
                system-specific variable.
  `system'      Use the system command for opening files, like \"open\".
                This command is specified by the entry whose car is `system'.
                Most likely, the system-specific version of this variable
                does define this command, but you can overrule/replace it
                here.
+`mailcap'      Use command specified in the mailcaps.
  string        A command to be executed by a shell; %s will be replaced
                by the path to the file.
- sexp          A Lisp form which will be evaluated.  The file path will
-               be available in the Lisp variable `file'.
+
+ function      A Lisp function, which will be called with two arguments:
+               the file path and the original link string, without the
+               \"file:\" prefix.
+
 For more examples, see the system specific constants
 `org-file-apps-defaults-macosx'
 `org-file-apps-defaults-windowsnt'
@@ -2262,7 +2259,7 @@ For more examples, see the system specific constants
 			(const :tag "Use default" default)
 			(const :tag "Use the system command" system)
 			(string :tag "Command")
-			(sexp :tag "Lisp form")))))
+			(function :tag "Function")))))
 
 (defcustom org-doi-server-url "http://dx.doi.org/"
   "The URL of the DOI server."
@@ -11238,32 +11235,29 @@ If the file does not exist, an error is thrown."
 		 file))
 	 (a-m-a-p (assq 'auto-mode apps))
 	 (dfile (downcase file))
-	 ;; reconstruct the original file: link from the PATH, LINE and SEARCH args
-	 (link (cond ((and (eq line nil)
-			   (eq search nil))
-		      file)
-		     (line
-		      (concat file "::" (number-to-string line)))
-		     (search
-		      (concat file "::" search))))
+	 ;; Reconstruct the original link from the PATH, LINE and
+	 ;; SEARCH args.
+	 (link (cond (line (concat file "::" (number-to-string line)))
+		     (search (concat file "::" search))
+		     (t file)))
 	 (dlink (downcase link))
 	 (old-buffer (current-buffer))
 	 (old-pos (point))
 	 (old-mode major-mode)
-	 ext cmd link-match-data)
-    (if (string-match "^.*\\.\\([a-zA-Z0-9]+\\.gz\\)$" dfile)
-	(setq ext (match-string 1 dfile))
-      (when (string-match "^.*\\.\\([a-zA-Z0-9]+\\)$" dfile)
-	(setq ext (match-string 1 dfile))))
+	 (ext
+	  (and (string-match "\\`.*?\\.\\([a-zA-Z0-9]+\\(\\.gz\\)?\\)\\'" dfile)
+	       (match-string 1 dfile)))
+	 cmd link-match-data)
     (cond
      ((member in-emacs '((16) system))
-      (setq cmd (cdr (assoc 'system apps))))
+      (setq cmd (cdr (assq 'system apps))))
      (in-emacs (setq cmd 'emacs))
      (t
-      (setq cmd (or (and remp (cdr (assoc 'remote apps)))
-		    (and dirp (cdr (assoc 'directory apps)))
-					; first, try matching against apps-dlink
-					; if we get a match here, store the match data for later
+      (setq cmd (or (and remp (cdr (assq 'remote apps)))
+		    (and dirp (cdr (assq 'directory apps)))
+		    ;; First, try matching against apps-dlink if we
+		    ;; get a match here, store the match data for
+		    ;; later.
 		    (let ((match (assoc-default dlink apps-dlink
 						'string-match)))
 		      (if match
@@ -11276,7 +11270,7 @@ If the file does not exist, an error is thrown."
 		    (assoc-default dfile (org-apps-regexp-alist apps a-m-a-p)
 				   'string-match)
 		    (cdr (assoc ext apps))
-		    (cdr (assoc t apps))))))
+		    (cdr (assq t apps))))))
     (when (eq cmd 'system)
       (setq cmd (cdr (assoc 'system apps))))
     (when (eq cmd 'default)
@@ -11325,18 +11319,18 @@ If the file does not exist, an error is thrown."
 	  (eq cmd 'emacs))
       (funcall (cdr (assq 'file org-link-frame-setup)) file)
       (widen)
-      (if line (progn (org-goto-line line)
-		      (when (derived-mode-p 'org-mode)
-			(org-reveal)))
-	(when search (org-link-search search))))
-     ((consp cmd)
+      (cond (line (org-goto-line line)
+		  (when (derived-mode-p 'org-mode) (org-reveal)))
+	    (search (org-link-search search))))
+     ((functionp cmd)
       (save-match-data
 	(set-match-data link-match-data)
-	(eval cmd `((file . ,(convert-standard-filename file))))))
+	(funcall cmd file link)))
      (t (funcall (cdr (assq 'file org-link-frame-setup)) file)))
-    (and (derived-mode-p 'org-mode) (eq old-mode 'org-mode)
-	 (or (not (equal old-buffer (current-buffer)))
-	     (not (equal old-pos (point))))
+    (and (derived-mode-p 'org-mode)
+	 (eq old-mode 'org-mode)
+	 (or (not (eq old-buffer (current-buffer)))
+	     (not (eq old-pos (point))))
 	 (org-mark-ring-push old-pos old-buffer))))
 
 (defun org-file-apps-entry-match-against-dlink-p (entry)

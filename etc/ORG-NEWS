@@ -94,6 +94,17 @@ consider using =footnote.el= library, shipped with Emacs.
 
 In particular, ~org-footnote-tag-for-non-org-mode-files~ no longer
 exists.
+*** ~org-file-apps~ no longer accepts S-expressions as commands
+The variable now accepts functions of two arguments instead of plain
+S-expressions.  Replacing a S-expresion with an appropriate function
+is straightforward.  For example
+
+: ("pdf" . (foo))
+
+becomes
+
+: ("pdf" . (lambda (file link) (foo)))
+
 ** New features
 *** New org-protocol key=value syntax
 
