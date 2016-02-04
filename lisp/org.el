@@ -11326,6 +11326,14 @@ If the file does not exist, an error is thrown."
       (save-match-data
 	(set-match-data link-match-data)
 	(funcall cmd file link)))
+     ((consp cmd)
+      ;; FIXME: Remove this check when most default installations of
+      ;; Emacs have at least Org 9.0.
+      ;; Heads-up instead of silently fall back to
+      ;; `org-link-frame-setup' for an old usage of `org-file-apps'
+      ;; with sexp instead of a function for `cmd'.
+      (user-error
+       "Please see Org News for version 9.0 about `org-file-apps'"))
      (t (funcall (cdr (assq 'file org-link-frame-setup)) file)))
     (and (derived-mode-p 'org-mode)
 	 (eq old-mode 'org-mode)
