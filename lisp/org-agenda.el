@@ -2319,7 +2319,6 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "_" 'org-agenda-filter-by-effort)
 (org-defkey org-agenda-mode-map "=" 'org-agenda-filter-by-regexp)
 (org-defkey org-agenda-mode-map "|" 'org-agenda-filter-remove-all)
-(org-defkey org-agenda-mode-map "\\" 'org-agenda-filter-by-tag-refine)
 (org-defkey org-agenda-mode-map "~" 'org-agenda-limit-interactively)
 (org-defkey org-agenda-mode-map "<" 'org-agenda-filter-by-category)
 (org-defkey org-agenda-mode-map "^" 'org-agenda-filter-by-top-headline)
@@ -7584,12 +7583,6 @@ to switch between filtering and excluding."
 	      (get-text-property (point) 'tags))))
     tags))
 
-(defun org-agenda-filter-by-tag-refine (arg &optional char)
-  "Refine the current filter.  See `org-agenda-filter-by-tag'."
-  (interactive "P")
-  (org-agenda-filter-by-tag arg char))
-(make-obsolete 'org-agenda-filter-by-tag-refine
-	       "use `org-agenda-filter-by-tag' instead." "8.3.4")
 
 (defun org-agenda-filter-make-matcher (filter type &optional expand)
   "Create the form that tests a line for agenda filter.  Optional

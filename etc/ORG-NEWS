@@ -211,6 +211,8 @@ It replaces the deprecated ~next~ argument to ~org-previous-line-empty-p~.
 It is a faster implementation of ~outline-show-children~.
 
 ** Removed functions
+*** ~org-agenda-filter-by-tag-refine~ has been removed.
+Use ~org-agenda-filter-by-tag~ instead.
 *** ~org-agenda-todayp~ is deprecated.
 Use ~org-agenda-today-p~ instead.
 *** ~org-babel-get-header~ is removed.
