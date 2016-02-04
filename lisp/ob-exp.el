@@ -108,7 +108,7 @@ code ---- the default, display the code inside the block but do
           not process
 
 results - just like none only the block is run on export ensuring
-          that it's results are present in the org-mode buffer
+          that its results are present in the org-mode buffer
 
 none ---- do not display either code or results upon export
 

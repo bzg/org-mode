@@ -3417,7 +3417,7 @@ contextual information."
 		      (when (org-export-table-cell-starts-colgroup-p
 			     table-cell info)
 			"\n<colgroup>")
-		      ;; Add a column.  Also specify it's alignment.
+		      ;; Add a column.  Also specify its alignment.
 		      (format "\n%s"
 			      (org-html-close-tag
 			       "col" (concat " " (format alignspec alignment)) info))
