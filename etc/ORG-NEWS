@@ -289,13 +289,13 @@ to the article's original group.
 
 *** ~org-babel-check-confirm-evaluate~ is now a function instead of a macro
 The calling convention has changed.
-
 *** HTML export table row customization changes
 Variable ~org-html-table-row-tags~ has been split into
 ~org-html-table-row-open-tag~ and ~org-html-table-row-close-tag~.
 Both new variables can be either a string or a function which will be
 called with 6 parameters.
 
+*** =ITEM= special property returns headline without stars
 * Version 8.3
 
 ** Incompatible changes

@@ -15622,11 +15622,10 @@ strings."
 	    (when (or (not specific) (string= specific "ITEM"))
 	      (when (looking-at org-complex-heading-regexp)
 		(push (cons "ITEM"
-			    (concat
-			     (org-match-string-no-properties 1)
-			     (let ((title (org-match-string-no-properties 4)))
-			       (when (org-string-nw-p title)
-				 (concat " " (org-remove-tabs title))))))
+			    (let ((title (match-string-no-properties 4)))
+			      (if (org-string-nw-p title)
+				  (org-remove-tabs title)
+				"")))
 		      props))
 	      (when specific (throw 'exit props)))
 	    (when (or (not specific) (string= specific "TODO"))

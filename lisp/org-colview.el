@@ -162,7 +162,8 @@ This is the compiled version of the format.")
   (interactive)
   (save-excursion
     (beginning-of-line)
-    (let* ((level-face (and (looking-at "\\(\\**\\)\\(\\* \\)")
+    (let* ((level (org-current-level))
+	   (level-face (and (looking-at "\\(\\**\\)\\(\\* \\)")
 			    (org-get-level-face 2)))
 	   (ref-face (or level-face
 			 (and (eq major-mode 'org-agenda-mode)
@@ -211,7 +212,10 @@ This is the compiled version of the format.")
 		 ((functionp org-columns-modify-value-for-display-function)
 		  (funcall org-columns-modify-value-for-display-function
 			   title val))
-		 ((equal property "ITEM") (org-columns-compact-links val))
+		 ((equal property "ITEM")
+		  (concat (make-string level ?*)
+			  " "
+			  (org-columns-compact-links val)))
 		 (fc (org-columns-number-to-string
 		      (org-columns-string-to-number val fm) fm fc))
 		 ((and calc (functionp calc)

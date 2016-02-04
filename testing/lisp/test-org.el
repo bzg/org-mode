@@ -3622,11 +3622,11 @@ Paragraph<point>"
   "Test `org-entry-properties' specifications."
   ;; Get "ITEM" property.
   (should
-   (equal "* H"
+   (equal "H"
 	  (org-test-with-temp-text "* TODO H"
 	    (cdr (assoc "ITEM" (org-entry-properties nil "ITEM"))))))
   (should
-   (equal "* H"
+   (equal "H"
 	  (org-test-with-temp-text "* TODO H"
 	    (cdr (assoc "ITEM" (org-entry-properties))))))
   ;; Get "TODO" property.  TODO keywords are case sensitive.
