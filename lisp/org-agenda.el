@@ -7568,7 +7568,9 @@ to switch between filtering and excluding."
 (defun org-agenda-filter-by-tag-refine (arg &optional char)
   "Refine the current filter.  See `org-agenda-filter-by-tag'."
   (interactive "P")
-  (org-agenda-filter-by-tag arg char 'refine))
+  (org-agenda-filter-by-tag arg char))
+(make-obsolete 'org-agenda-filter-by-tag-refine
+	       "use `org-agenda-filter-by-tag' instead." "8.3.4")
 
 (defun org-agenda-filter-make-matcher (filter type &optional expand)
   "Create the form that tests a line for agenda filter.  Optional
