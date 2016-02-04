@@ -1254,7 +1254,7 @@ PARAMS is a property list of parameters:
 	(skip-empty-rows (plist-get params :skip-empty-rows))
 	(columns-fmt (plist-get params :format))
 	(case-fold-search t)
-	tbl id idpos nfields tmp recalc line
+	tbl id idpos nfields recalc line
 	id-as-string view-file view-pos)
     (when (setq id (plist-get params :id))
       (setq id-as-string (cond ((numberp id) (number-to-string id))
@@ -1290,19 +1290,40 @@ PARAMS is a property list of parameters:
     (move-marker pos nil)
     (when tbl
       (when (plist-get params :hlines)
-	(setq tmp nil)
-	(while tbl
-	  (if (eq (car tbl) 'hline)
-	      (push (pop tbl) tmp)
-	    (if (string-match "\\` *\\(\\*+\\)" (caar tbl))
+	(let (tmp)
+	  (while tbl
+	    (if (eq (car tbl) 'hline)
+		(push (pop tbl) tmp)
+	      (when (string-match "\\` *\\(\\*+\\)" (caar tbl))
 		(if (and (not (eq (car tmp) 'hline))
 			 (or (eq hlines t)
 			     (and (numberp hlines)
 				  (<= (- (match-end 1) (match-beginning 1))
 				      hlines))))
 		    (push 'hline tmp)))
-	    (push (pop tbl) tmp)))
-	(setq tbl (nreverse tmp)))
+	      (push (pop tbl) tmp)))
+	  (setq tbl (nreverse tmp))))
+      ;; Remove stars.  Add indentation entities, if required.
+      (let ((index (cl-position
+		    "ITEM"
+		    (mapcar #'cadr org-columns-current-fmt-compiled)
+		    :test #'equal)))
+	(when index
+	  (dolist (row tbl)
+	    (unless (eq row 'hline)
+	      (let ((item (nth index row)))
+		(setf (nth index row)
+		      (replace-regexp-in-string
+		       "\\`\\(\\*+\\) +"
+		       (if (plist-get params :indent)
+			   (lambda (m)
+			     (let ((l (org-reduced-level
+				       (length (match-string 1 m)))))
+			       (if (= l 1) ""
+				 (concat "\\\\_"
+					 (make-string (* 2 (1- l)) ?\s)))))
+			 "")
+		       item)))))))
       (when vlines
 	(setq tbl (mapcar (lambda (x)
 			    (if (eq 'hline x) x (cons "" x)))

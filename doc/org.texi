@@ -5798,6 +5798,8 @@ When set to a number, don't capture entries below this level.
 @item :skip-empty-rows
 When set to @code{t}, skip rows where the only non-empty specifier of the
 column view is @code{ITEM}.
+@item :indent
+When non-@code{nil}, indent each @code{ITEM} field according to its level.
 
 @end table
 

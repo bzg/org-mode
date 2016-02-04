@@ -203,7 +203,11 @@ Custom language environments for LaTeX export can now define the
 string to be inserted during export, using attributes to indicate the
 position of the elements. See variable ~org-latex-custom-lang-environments~
 for more details.
+*** Accept ~:indent~ parameter when capturing column view
+When defining a "columnview" dynamic block, it is now possible to add
+an :indent parameter, much like the one in the clock table.
 
+On the other hand, stars no longer appear in an ITEM field.
 ** New functions
 *** ~org-next-line-empty-p~
 It replaces the deprecated ~next~ argument to ~org-previous-line-empty-p~.
