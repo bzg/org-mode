@@ -2012,10 +2012,10 @@ contextual information."
 			     (downcase org-lang)))
 	      (options (org-latex--make-option-string
 			(plist-get info :latex-minted-options))))
-	 (concat (format "\\mint%s{%s}"
+	 (format "\\mintinline%s{%s}{%s}"
 			 (if (string= options "") "" (format "[%s]" options))
-			 mint-lang)
-		 separator code separator)))
+			 mint-lang
+			 code)))
       ;; Use listings package.
       (otherwise
        ;; Maybe translate language's name.
