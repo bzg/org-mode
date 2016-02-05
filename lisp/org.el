@@ -17419,14 +17419,15 @@ both scheduled and deadline timestamps."
 (defun org-check-before-date (d)
   "Check if there are deadlines or scheduled entries before date D."
   (interactive (list (org-read-date)))
-  (let ((case-fold-search nil)
-	(regexp (org-re-timestamp org-ts-type))
-	(callback
-	 `(lambda ()
+  (let* ((case-fold-search nil)
+	 (regexp (org-re-timestamp org-ts-type))
+	 (ts-type org-ts-type)
+	 (callback
+	  (lambda ()
 	    (let ((match (match-string 1)))
-	      (and ,(if (memq org-ts-type '(active inactive all))
-			'(eq (org-element-type (org-element-context)) 'timestamp)
-		      '(org-at-planning-p))
+	      (and (if (memq ts-type '(active inactive all))
+		       (eq (org-element-type (org-element-context)) 'timestamp)
+		     (org-at-planning-p))
 		   (time-less-p
 		    (org-time-string-to-time match)
 		    (org-time-string-to-time d)))))))
@@ -17437,14 +17438,15 @@ both scheduled and deadline timestamps."
 (defun org-check-after-date (d)
   "Check if there are deadlines or scheduled entries after date D."
   (interactive (list (org-read-date)))
-  (let ((case-fold-search nil)
-	(regexp (org-re-timestamp org-ts-type))
-	(callback
-	 `(lambda ()
+  (let* ((case-fold-search nil)
+	 (regexp (org-re-timestamp org-ts-type))
+	 (ts-type org-ts-type)
+	 (callback
+	  (lambda ()
 	    (let ((match (match-string 1)))
-	      (and ,(if (memq org-ts-type '(active inactive all))
-			'(eq (org-element-type (org-element-context)) 'timestamp)
-		      '(org-at-planning-p))
+	      (and (if (memq ts-type '(active inactive all))
+		       (eq (org-element-type (org-element-context)) 'timestamp)
+		     (org-at-planning-p))
 		   (not (time-less-p
 			 (org-time-string-to-time match)
 			 (org-time-string-to-time d))))))))
