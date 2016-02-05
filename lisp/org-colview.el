@@ -162,8 +162,7 @@ This is the compiled version of the format.")
   (interactive)
   (save-excursion
     (beginning-of-line)
-    (let* ((level (or (org-current-level) 0))
-	   (level-face (and (looking-at "\\(\\**\\)\\(\\* \\)")
+    (let* ((level-face (and (looking-at "\\(\\**\\)\\(\\* \\)")
 			    (org-get-level-face 2)))
 	   (ref-face (or level-face
 			 (and (eq major-mode 'org-agenda-mode)
@@ -212,10 +211,7 @@ This is the compiled version of the format.")
 		 ((functionp org-columns-modify-value-for-display-function)
 		  (funcall org-columns-modify-value-for-display-function
 			   title val))
-		 ((equal property "ITEM")
-		  (concat (make-string level ?*)
-			  " "
-			  (org-columns-compact-links val)))
+		 ((equal property "ITEM") (org-columns-compact-links val))
 		 (fc (org-columns-number-to-string
 		      (org-columns-string-to-number val fm) fm fc))
 		 ((and calc (functionp calc)
@@ -717,22 +713,28 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	      (org-map-entries
 	       (lambda ()
 		 (cons (point)
-		       (mapcar (lambda (p)
-				 (cons p (org-columns--value p (point))))
-			       column-names)))
+		       (mapcar
+			(lambda (p)
+			  (cons p
+				(let ((v (org-columns--value p (point))))
+				  (if (not (equal "ITEM" p)) v
+				    (concat (make-string (org-current-level) ?*)
+					    " "
+					    v)))))
+			column-names)))
 	       nil nil (and org-columns-skip-archived-trees 'archive))))
 	(when cache
 	  (setq-local org-columns-current-maxwidths
-			 (org-columns-get-autowidth-alist
-			  org-columns-current-fmt
-			  cache))
+		      (org-columns-get-autowidth-alist
+		       org-columns-current-fmt
+		       cache))
 	  (org-columns-display-here-title)
 	  (when (setq-local org-columns-flyspell-was-active
-			       (org-bound-and-true-p flyspell-mode))
+			    (org-bound-and-true-p flyspell-mode))
 	    (flyspell-mode 0))
 	  (unless (local-variable-p 'org-colview-initial-truncate-line-value)
 	    (setq-local org-colview-initial-truncate-line-value
-			   truncate-lines))
+			truncate-lines))
 	  (setq truncate-lines t)
 	  (dolist (x cache)
 	    (goto-char (car x))
@@ -1430,29 +1432,34 @@ and tailing newline characters."
 		     (let ((value (org-columns--value name (point))))
 		       (cons
 			name
-			(if (and org-agenda-columns-add-appointments-to-effort-sum
-				 (not value)
-				 (eq (compare-strings name nil nil
-						      org-effort-property nil nil
-						      t)
-				     t)
-				 ;; Effort property is not defined.  Try
-				 ;; to use appointment duration.
-				 (get-text-property (point) 'duration))
-			    (org-propertize
-			     (org-minutes-to-clocksum-string
-			      (get-text-property (point) 'duration))
-			     'face 'org-warning)
-			  value))))
+			(cond
+			 ((and org-agenda-columns-add-appointments-to-effort-sum
+			       (not value)
+			       (eq (compare-strings name nil nil
+						    org-effort-property nil nil
+						    t)
+				   t)
+			       ;; Effort property is not defined.  Try ;
+			       ;; to use appointment duration. ;
+			       (get-text-property (point) 'duration))
+			  (org-propertize
+			   (org-minutes-to-clocksum-string
+			    (get-text-property (point) 'duration))
+			   'face 'org-warning))
+			 ((equal "ITEM" name)
+			  (concat (make-string (org-current-level) ?*)
+				  " "
+				  value))
+			 (t value)))))
 		   names)))
 	       cache))
 	    (forward-line)))
 	(when cache
 	  (setq-local org-columns-current-maxwidths
-			 (org-columns-get-autowidth-alist fmt cache))
+		      (org-columns-get-autowidth-alist fmt cache))
 	  (org-columns-display-here-title)
 	  (when (setq-local org-columns-flyspell-was-active
-			       (org-bound-and-true-p flyspell-mode))
+			    (org-bound-and-true-p flyspell-mode))
 	    (flyspell-mode 0))
 	  (dolist (x cache)
 	    (goto-char (car x))
