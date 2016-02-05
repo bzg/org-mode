@@ -162,7 +162,7 @@ This is the compiled version of the format.")
   (interactive)
   (save-excursion
     (beginning-of-line)
-    (let* ((level (org-current-level))
+    (let* ((level (or (org-current-level) 0))
 	   (level-face (and (looking-at "\\(\\**\\)\\(\\* \\)")
 			    (org-get-level-face 2)))
 	   (ref-face (or level-face
