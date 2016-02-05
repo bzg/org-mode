@@ -19087,8 +19087,8 @@ Register new overlay in `org-latex-fragment-image-overlays'."
     (overlay-put ov 'evaporate t)
     (overlay-put ov
 		 'modification-hooks
-		 (list (lambda (o flag beg end &optional l)
-			 (unless flag
+		 (list (lambda (o after _beg _end &optional _l)
+			 (unless after
 			   (org-remove-latex-fragment-image-overlays
 			    (overlay-start o) (overlay-end o))))))
     (if (featurep 'xemacs)
