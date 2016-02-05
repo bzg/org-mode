@@ -18977,29 +18977,38 @@ looks only before point, not after."
     (org-in-regexp
      "\\\\[a-zA-Z]+\\*?\\(\\(\\[[^][\n{}]*\\]\\)\\|\\({[^{}\n]*}\\)\\)*")))
 
-(defvar org-latex-fragment-image-overlays nil
-  "List of overlays carrying the images of latex fragments.")
-(make-variable-buffer-local 'org-latex-fragment-image-overlays)
+(defun org--format-latex-make-overlay (beg end image)
+  "Build an overlay between BEG and END using IMAGE file."
+  (let ((ov (make-overlay beg end)))
+    (overlay-put ov 'org-overlay-type 'org-latex-overlay)
+    (overlay-put ov 'evaporate t)
+    (overlay-put ov
+		 'modification-hooks
+		 (list (lambda (o _flag _beg _end &optional _l)
+			 (delete-overlay o))))
+    (if (featurep 'xemacs)
+	(progn
+	  (overlay-put ov 'invisible t)
+	  (overlay-put ov 'end-glyph (make-glyph (vector 'png :file image))))
+      (overlay-put ov
+		   'display
+		   (list 'image :type 'png :file image :ascent 'center)))))
+
+(defun org--list-latex-overlays (&optional beg end)
+  "List all Org LaTeX overlays in current buffer.
+Limit to overlays between BEG and END when those are provided."
+  (org-remove-if-not
+   (lambda (o) (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay))
+   (overlays-in (or beg (point-min)) (or end (point-max)))))
 
 (defun org-remove-latex-fragment-image-overlays (&optional beg end)
   "Remove all overlays with LaTeX fragment images in current buffer.
 When optional arguments BEG and END are non-nil, remove all
-overlays between them instead.  Return t when some overlays were
-removed, nil otherwise."
-  (let (removedp)
-    (setq org-latex-fragment-image-overlays
-	  (let ((beg (or beg (point-min)))
-		(end (or end (point-max))))
-	    (org-remove-if
-	     (lambda (o)
-	       (cond ((not (overlay-buffer o)) (delete-overlay o) t)
-		     ((and (>= (overlay-start o) beg)
-			   (<= (overlay-end o) end))
-		      (delete-overlay o)
-		      (unless removedp (setq removedp t)))
-		     (t nil)))
-	     org-latex-fragment-image-overlays)))
-    removedp))
+overlays between them instead.  Return a non-nil value when some
+overlays were removed, nil otherwise."
+  (let ((overlays (org--list-latex-overlays beg end)))
+    (mapc #'delete-overlay overlays)
+    overlays))
 
 (define-obsolete-function-alias
   'org-preview-latex-fragment 'org-toggle-latex-fragment "24.4")
@@ -19078,27 +19087,6 @@ for all fragments in the buffer."
 	  ;; when widening back the buffer.
 	  (set-window-start nil window-start)
 	  (message (concat msg "done")))))))
-
-(defun org--format-latex-make-overlay (beg end image)
-  "Build an overlay between BEG and END using IMAGE file.
-Register new overlay in `org-latex-fragment-image-overlays'."
-  (let ((ov (make-overlay beg end)))
-    (overlay-put ov 'org-overlay-type 'org-latex-overlay)
-    (overlay-put ov 'evaporate t)
-    (overlay-put ov
-		 'modification-hooks
-		 (list (lambda (o after _beg _end &optional _l)
-			 (unless after
-			   (org-remove-latex-fragment-image-overlays
-			    (overlay-start o) (overlay-end o))))))
-    (if (featurep 'xemacs)
-	(progn
-	  (overlay-put ov 'invisible t)
-	  (overlay-put ov 'end-glyph (make-glyph (vector 'png :file image))))
-      (overlay-put ov
-		   'display
-		   (list 'image :type 'png :file image :ascent 'center)))
-    (push ov org-latex-fragment-image-overlays)))
 
 (defun org-format-latex
     (prefix &optional dir overlays msg forbuffer processing-type)
@@ -22510,11 +22498,12 @@ and :keyword."
       (if (looking-at org-radio-target-regexp)
 	  (push (org-point-in-group p 0 :radio-target) clist))
       (goto-char p))
-     ((setq o (car (delq nil
-			 (mapcar
-			  (lambda (x)
-			    (if (memq x org-latex-fragment-image-overlays) x))
-			  (overlays-at (point))))))
+     ((setq o (org-some
+	       (lambda (o)
+		 (and (eq (overlay-get o 'org-overlay-type)
+			  'org-latex-overlay)
+		      o))
+	       (overlays-at (point))))
       (push (list :latex-fragment
 		  (overlay-start o) (overlay-end o)) clist)
       (push (list :latex-preview
