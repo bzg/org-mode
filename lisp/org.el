@@ -18999,6 +18999,27 @@ for all fragments in the buffer."
 	  (set-window-start nil window-start)
 	  (message (concat msg "done")))))))
 
+(defun org--format-latex-make-overlay (beg end image)
+  "Build an overlay between BEG and END using IMAGE file.
+Register new overlay in `org-latex-fragment-image-overlays'."
+  (let ((ov (make-overlay beg end)))
+    (overlay-put ov 'org-overlay-type 'org-latex-overlay)
+    (overlay-put ov 'evaporate t)
+    (overlay-put ov
+		 'modification-hooks
+		 (list (lambda (o flag beg end &optional l)
+			 (unless flag
+			   (org-remove-latex-fragment-image-overlays
+			    (overlay-start o) (overlay-end o))))))
+    (if (featurep 'xemacs)
+	(progn
+	  (overlay-put ov 'invisible t)
+	  (overlay-put ov 'end-glyph (make-glyph (vector 'png :file image))))
+      (overlay-put ov
+		   'display
+		   (list 'image :type 'png :file image :ascent 'center)))
+    (push ov org-latex-fragment-image-overlays)))
+
 (defun org-format-latex
     (prefix &optional dir overlays msg forbuffer processing-type)
   "Replace LaTeX fragments with links to an image, and produce images.
@@ -19090,25 +19111,7 @@ Some of the options can be changed using the variable
 			     (when (eq (overlay-get o 'org-overlay-type)
 				       'org-latex-overlay)
 			       (delete-overlay o)))
-			   (let ((ov (make-overlay beg end)))
-			     (overlay-put ov
-					  'org-overlay-type
-					  'org-latex-overlay)
-			     (overlay-put ov 'evaporate t)
-			     (if (featurep 'xemacs)
-				 (progn
-				   (overlay-put ov 'invisible t)
-				   (overlay-put
-				    ov 'end-glyph
-				    (make-glyph
-				     (vector 'png :file movefile))))
-			       (overlay-put
-				ov 'display
-				(list 'image
-				      :type 'png
-				      :file movefile
-				      :ascent 'center)))
-			     (push ov org-latex-fragment-image-overlays))
+			   (org--format-latex-make-overlay beg end movefile)
 			   (goto-char end))
 		       (delete-region beg end)
 		       (insert
