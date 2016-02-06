@@ -131,6 +131,17 @@ When set to `query', ask the user instead."
 	  (const :tag "Always delete attachments" t)
 	  (const :tag "Query the user" query)))
 
+(defcustom org-attach-annex-auto-get 'ask
+  "Confirmation preference for automatically getting annex files.
+If \\='ask, prompt using `y-or-n-p'.  If t, always get.  If nil, never get."
+  :group 'org-attach
+  :package-version '(Org . "9")
+  :version "25.1"
+  :type '(choice
+	  (const :tag "confirm with `y-or-n-p'" ask)
+	  (const :tag "always get from annex if necessary" t)
+	  (const :tag "never get from annex" nil)))
+
 ;;;###autoload
 (defun org-attach ()
   "The dispatcher for attachment commands.
@@ -270,29 +281,53 @@ the ATTACH_DIR property) their own attachment directory."
   (org-entry-put nil "ATTACH_DIR_INHERIT" "t")
   (message "Children will inherit attachment directory"))
 
+(defun org-attach-use-annex ()
+  "Return non-nil if git annex can be used."
+  (let ((git-dir (vc-git-root (expand-file-name org-attach-directory))))
+    (and org-attach-git-annex-cutoff
+         (or (file-exists-p (expand-file-name "annex" git-dir))
+             (file-exists-p (expand-file-name ".git/annex" git-dir))))))
+
+(defun org-attach-annex-get-maybe (path)
+  "Call git annex get PATH (via shell) if using git annex.
+Signals an error if the file content is not available and it was not retrieved."
+  (when (and (org-attach-use-annex)
+	     (not
+	      (string-equal
+	       "found"
+	       (shell-command-to-string
+		(format "git annex find --format=found --in=here %s"
+			(shell-quote-argument path))))))
+    (let ((should-get
+	   (if (eq org-attach-annex-auto-get 'ask)
+	       (y-or-n-p (format "Run git annex get %s? " path))
+	     org-attach-annex-auto-get)))
+      (if should-get
+	  (progn (message "Running git annex get \"%s\"." path)
+		 (call-process "git" nil nil nil "annex" "get" path))
+	(error "File %s stored in git annex but it is not available, and was not retrieved"
+	       path)))))
+
 (defun org-attach-commit ()
   "Commit changes to git if `org-attach-directory' is properly initialized.
 This checks for the existence of a \".git\" directory in that directory."
   (let* ((dir (expand-file-name org-attach-directory))
 	 (git-dir (vc-git-root dir))
+	 (use-annex (org-attach-use-annex))
 	 (changes 0))
     (when (and git-dir (executable-find "git"))
       (with-temp-buffer
 	(cd dir)
-	(let ((have-annex
-	       (and org-attach-git-annex-cutoff
-		    (or (file-exists-p (expand-file-name "annex" git-dir))
-			(file-exists-p (expand-file-name ".git/annex" git-dir))))))
-	  (dolist (new-or-modified
-		   (split-string
-		    (shell-command-to-string
-		     "git ls-files -zmo --exclude-standard") "\0" t))
-	    (if (and have-annex
-		     (>= (nth 7 (file-attributes new-or-modified))
-			 org-attach-git-annex-cutoff))
-		(call-process "git" nil nil nil "annex" "add" new-or-modified)
-	      (call-process "git" nil nil nil "add" new-or-modified))
-	    (incf changes)))
+        (dolist (new-or-modified
+                 (split-string
+                  (shell-command-to-string
+                   "git ls-files -zmo --exclude-standard") "\0" t))
+          (if (and use-annex
+                   (>= (nth 7 (file-attributes new-or-modified))
+                       org-attach-git-annex-cutoff))
+              (call-process "git" nil nil nil "annex" "add" new-or-modified)
+            (call-process "git" nil nil nil "add" new-or-modified))
+	    (incf changes))
 	(dolist (deleted
 		 (split-string
 		  (shell-command-to-string "git ls-files -z --deleted") "\0" t))
@@ -465,8 +500,10 @@ If IN-EMACS is non-nil, force opening in Emacs."
 	 (file (if (= (length files) 1)
 		   (car files)
 		 (completing-read "Open attachment: "
-				  (mapcar #'list files) nil t))))
-    (org-open-file (expand-file-name file attach-dir) in-emacs)))
+				  (mapcar #'list files) nil t)))
+         (path (expand-file-name file attach-dir)))
+    (org-attach-annex-get-maybe path)
+    (org-open-file path in-emacs)))
 
 (defun org-attach-open-in-emacs ()
   "Open attachment, force opening in Emacs.

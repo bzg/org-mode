@@ -158,4 +158,6 @@ cleandocs:
 	-$(FIND) doc -name \*~ -exec $(RM) {} \;
 
 cleantest:
+# git annex makes files 444, change to user writable so we can delete them
+	if [ -d $(testdir) ] ; then chmod u+w -R $(testdir) ; fi
 	$(RMR) $(testdir)
