@@ -1074,12 +1074,12 @@ will produce
 
 ;;;; Compilation
 
-(defcustom org-latex-compiler-file-string "%% Indented LaTeX compiler: %s\n"
+(defcustom org-latex-compiler-file-string "%% Intended LaTeX compiler: %s\n"
   "LaTeX compiler format-string.
 See also `org-latex-compiler'."
   :group 'org-export-latex
   :type '(choice
-	  (const :tag "Comment" "%% Indented LaTeX compiler: %s\n")
+	  (const :tag "Comment" "%% Intended LaTeX compiler: %s\n")
 	  (const :tag "latex-mode file variable" "%% -*- latex-run-command: %s -*-\n")
 	  (const :tag "AUCTeX file variable" "%% -*- LaTeX-command: %s -*-\n")
 	  (string :tag "custom format" "%% %s"))
