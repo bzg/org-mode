@@ -261,7 +261,7 @@ Returns a list
 	  (setq info (org-babel-parse-src-block-match))
 	  (setq indent (car (last info)))
 	  (setq info (butlast info))
-	  (while (and (forward-line -1)
+	  (while (and (= 0 (forward-line -1))
 		      (looking-at org-babel-multi-line-header-regexp))
 	    (setf (nth 2 info)
 		  (org-babel-merge-params
