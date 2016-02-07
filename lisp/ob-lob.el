@@ -28,7 +28,6 @@
 (require 'ob-core)
 (require 'ob-table)
 
-(declare-function org-babel-in-example-or-verbatim "ob-exp" nil)
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))

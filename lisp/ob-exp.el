@@ -30,7 +30,6 @@
 
 (defvar org-babel-lob-one-liner-regexp)
 (defvar org-babel-ref-split-regexp)
-(defvar org-list-forbidden-blocks)
 
 (declare-function org-babel-lob-get-info "ob-lob" (&optional datum))
 (declare-function org-babel-eval-wipe-error-buffer "ob-eval" ())
@@ -300,19 +299,6 @@ may make them unreachable."
 		   (set-marker match-start nil))))
 	      (set-marker begin nil)
 	      (set-marker end nil))))))))
-
-(defun org-babel-in-example-or-verbatim ()
-  "Return true if point is in example or verbatim code.
-Example and verbatim code include escaped portions of
-an org-mode buffer code that should be treated as normal
-org-mode text."
-  (or (save-match-data
-	(save-excursion
-	  (goto-char (point-at-bol))
-	  (looking-at "[ \t]*:[ \t]")))
-      (org-in-verbatim-emphasis)
-      (org-in-block-p org-list-forbidden-blocks)
-      (org-between-regexps-p "^[ \t]*#\\+begin_src" "^[ \t]*#\\+end_src")))
 
 (defun org-babel-exp-do-export (info type &optional hash)
   "Return a string with the exported content of a code block.

@@ -502,9 +502,10 @@ echo \"[[file:./cv.cls]]\"
 			(forward-line 1)))
       (goto-char (point-min))
       (next-result)
-      (should (org-babel-in-example-or-verbatim))
+      (should (eq (org-element-type (org-element-at-point)) 'fixed-width))
       (next-result)
-      (should (not (org-babel-in-example-or-verbatim))))))
+      (should-not
+       (eq (org-element-type (org-element-at-point)) 'fixed-width)))))
 
 (ert-deftest test-ob/no-defaut-value-for-var ()
   "Test that the absence of a default value for a variable DOES THROW
