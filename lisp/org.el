@@ -11325,15 +11325,22 @@ If the file does not exist, an error is thrown."
      ((functionp cmd)
       (save-match-data
 	(set-match-data link-match-data)
-	(funcall cmd file link)))
+	(condition-case nil
+	    (funcall cmd file link)
+	  ;; FIXME: Remove this check when most default installations
+	  ;; of Emacs have at least Org 9.0.
+	  ((debug wrong-number-of-arguments wrong-type-argument
+	    invalid-function)
+	   (user-error "Please see Org News for version 9.0 about \
+`org-file-apps'--Lisp error: %S" cmd)))))
      ((consp cmd)
       ;; FIXME: Remove this check when most default installations of
       ;; Emacs have at least Org 9.0.
       ;; Heads-up instead of silently fall back to
       ;; `org-link-frame-setup' for an old usage of `org-file-apps'
       ;; with sexp instead of a function for `cmd'.
-      (user-error
-       "Please see Org News for version 9.0 about `org-file-apps'"))
+      (user-error "Please see Org News for version 9.0 about \
+`org-file-apps'--Error: Deprecated usage of %S" cmd))
      (t (funcall (cdr (assq 'file org-link-frame-setup)) file)))
     (and (derived-mode-p 'org-mode)
 	 (eq old-mode 'org-mode)
