@@ -718,8 +718,11 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 			  (cons p
 				(let ((v (org-columns--value p (point))))
 				  (if (not (equal "ITEM" p)) v
-				    (concat (make-string (org-current-level) ?*)
-					    " "
+				    (concat (make-string
+					     (1- (org-current-level))
+					     (if org-hide-leading-stars
+						 ?\s ?*))
+					    "* "
 					    v)))))
 			column-names)))
 	       nil nil (and org-columns-skip-archived-trees 'archive))))
