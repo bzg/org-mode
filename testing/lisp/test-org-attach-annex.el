@@ -1,4 +1,4 @@
-;;; test-org-attach.el --- Tests for Org Attach
+;;; test-org-annex-attach.el --- Tests for Org Attach with git-annex
 ;;
 ;; Copyright (c) 2016 Erik Hetzner
 ;; Authors: Erik Hetzner
@@ -19,6 +19,7 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Code:
+(org-test-for-executable "git-annex")
 (require 'org-attach)
 (require 'cl-lib)
 
@@ -32,7 +33,6 @@
 	   ,@body))))
 
 (ert-deftest test-org-attach/use-annex ()
-  (org-test-for-executable "git-annex")
   (test-org-attach-annex/with-annex
    (let ((org-attach-git-annex-cutoff 1))
      (should (org-attach-use-annex)))
@@ -50,7 +50,6 @@
        (delete-directory tmpdir 'recursive))))
 
 (ert-deftest test-org-attach/get-maybe ()
-  (org-test-for-executable "git-annex")
   (test-org-attach-annex/with-annex
    (let ((path (expand-file-name "test-file"))
 	 (annex-dup (make-temp-file "org-annex-test" t)))
@@ -94,4 +93,4 @@
 	   (should (string-equal "hello world\n" (buffer-string))))
 	 (should (eq called 'was-called)))))))
 
-;;; test-org-attach.el ends here
+;;; test-org-attach-annex.el ends here
