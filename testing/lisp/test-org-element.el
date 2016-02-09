@@ -699,19 +699,6 @@ Some other text
 	  (org-test-with-temp-text
 	      "#+BEGIN_EXAMPLE\n,* Headline\n ,#+keyword\nText\n#+END_EXAMPLE"
 	    (org-element-property :value (org-element-at-point)))))
-  ;; Remove block indentation according to block boundaries, unless
-  ;; block contents are less indented than block boundaries.
-  (should
-   (equal " L1\nL2\n"
-	  (org-test-with-temp-text " #+BEGIN_EXAMPLE\n  L1\n L2\n #+END_EXAMPLE"
-	    (let ((org-src-preserve-indentation t))
-	      (org-element-property :value (org-element-at-point))))))
-  (should
-   (equal
-    "  L1\n L2\n"
-    (org-test-with-temp-text "  #+BEGIN_EXAMPLE\n  L1\n L2\n  #+END_EXAMPLE"
-      (let ((org-src-preserve-indentation t))
-	(org-element-property :value (org-element-at-point))))))
   ;; Handle non-empty blank line at the end of buffer.
   (should
    (org-test-with-temp-text "#+BEGIN_EXAMPLE\nC\n#+END_EXAMPLE\n "
@@ -2058,19 +2045,6 @@ Outside list"
 	  (org-test-with-temp-text
 	      "#+BEGIN_SRC org\n,* Headline\n ,#+keyword\nText\n#+END_SRC"
 	    (org-element-property :value (org-element-at-point)))))
-  ;; Remove block indentation according to block boundaries, unless
-  ;; block contents are less indented than block boundaries.
-  (should
-   (equal " L1\nL2\n"
-	  (org-test-with-temp-text " #+BEGIN_SRC org\n  L1\n L2\n #+END_SRC"
-	    (let ((org-src-preserve-indentation t))
-	      (org-element-property :value (org-element-at-point))))))
-  (should
-   (equal
-    "  L1\n L2\n"
-    (org-test-with-temp-text "  #+BEGIN_SRC org\n  L1\n L2\n  #+END_SRC"
-      (let ((org-src-preserve-indentation t))
-	(org-element-property :value (org-element-at-point))))))
   ;; Handle non-empty blank line at the end of buffer.
   (should
    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\nC\n#+END_SRC\n "

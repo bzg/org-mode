@@ -1900,13 +1900,10 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
 		 ;; Standard block parsing.
 		 (begin (car affiliated))
 		 (post-affiliated (point))
-		 (block-ind (progn (skip-chars-forward " \t") (current-column)))
-		 (contents-begin (progn (forward-line) (point)))
-		 (value (org-remove-indentation
-			 (org-unescape-code-in-string
-			  (buffer-substring-no-properties
-			   contents-begin contents-end))
-			 block-ind))
+		 (contents-begin (line-beginning-position 2))
+		 (value (org-unescape-code-in-string
+			 (buffer-substring-no-properties
+			  contents-begin contents-end)))
 		 (pos-before-blank (progn (goto-char contents-end)
 					  (forward-line)
 					  (point)))
@@ -2406,14 +2403,10 @@ Assume point is at the beginning of the block."
 		  (or (not switches)
 		      (and retain-labels
 			   (not (string-match "-k\\>" switches)))))
-		 ;; Indentation.
-		 (block-ind (progn (skip-chars-forward " \t") (current-column)))
 		 ;; Retrieve code.
-		 (value (org-remove-indentation
-			 (org-unescape-code-in-string
-			  (buffer-substring-no-properties
-			   (progn (forward-line) (point)) contents-end))
-			 block-ind))
+		 (value (org-unescape-code-in-string
+			 (buffer-substring-no-properties
+			  (line-beginning-position 2) contents-end)))
 		 (pos-before-blank (progn (goto-char contents-end)
 					  (forward-line)
 					  (point)))
