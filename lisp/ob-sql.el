@@ -181,7 +181,7 @@ SET COLSEP '|'
 	(progn (insert-file-contents-literally out-file) (buffer-string)))
       (with-temp-buffer
 	(cond
-	 ((memq (intern engine) '(dbi myslq postgresql))
+	 ((memq (intern engine) '(dbi mysql postgresql))
 	  ;; Add header row delimiter after column-names header in first line
 	  (cond
 	   (colnames-p
