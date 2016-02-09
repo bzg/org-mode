@@ -1380,7 +1380,8 @@ original parsed data.  INFO is a plist holding export options."
   ;; Copy styles.xml.  Also dump htmlfontify styles, if there is any.
   ;; Write styles file.
   (let* ((styles-file (plist-get info :odt-styles-file))
-	 (styles-file (and styles-file (read (org-trim styles-file))))
+	 (styles-file (and (org-string-nw-p styles-file)
+			   (read (org-trim styles-file))))
 	 ;; Non-availability of styles.xml is not a critical
 	 ;; error. For now, throw an error.
 	 (styles-file (or styles-file
