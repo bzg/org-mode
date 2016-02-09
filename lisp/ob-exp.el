@@ -186,9 +186,7 @@ may make them unreachable."
 			   (point)))))
 	      (case type
 		(inline-src-block
-		 (let* ((head (match-beginning 0))
-			(info (append (org-babel-parse-inline-src-block-match)
-				      (list nil nil head)))
+		 (let* ((info (org-babel-get-src-block-info nil element))
 			(params (nth 2 info)))
 		   (setf (nth 1 info)
 			 (if (and (cdr (assoc :noweb params))
@@ -402,7 +400,7 @@ inhibit insertion of results into the buffer."
 		  (nth 1 info)))
 	  (info (copy-sequence info))
 	  (org-babel-current-src-block-location (point-marker)))
-      ;; skip code blocks which we can't evaluate
+      ;; Skip code blocks which we can't evaluate.
       (when (fboundp (intern (concat "org-babel-execute:" lang)))
 	(org-babel-eval-wipe-error-buffer)
 	(prog1 nil
@@ -413,22 +411,19 @@ inhibit insertion of results into the buffer."
 		   (org-babel-merge-params
 		    (nth 2 info)
 		    `((:results . ,(if silent "silent" "replace")))))))
-	  (cond
-	   ((equal type 'block)
-	    (org-babel-execute-src-block nil info))
-	   ((equal type 'inline)
-	    ;; position the point on the inline source block allowing
-	    ;; `org-babel-insert-result' to check that the block is
-	    ;; inline
-	    (re-search-backward "[ \f\t\n\r\v]" nil t)
-	    (re-search-forward org-babel-inline-src-block-regexp nil t)
-	    (re-search-backward "src_" nil t)
-	    (org-babel-execute-src-block nil info))
-	   ((equal type 'lob)
-	    (save-excursion
-	      (re-search-backward org-babel-lob-one-liner-regexp nil t)
-	      (let (org-confirm-babel-evaluate)
-		(org-babel-execute-src-block nil info))))))))))
+	  (pcase type
+	    (`block (org-babel-execute-src-block nil info))
+	    (`inline
+	      ;; Position the point on the inline source block
+	      ;; allowing `org-babel-insert-result' to check that the
+	      ;; block is inline.
+	      (goto-char (nth 5 info))
+	      (org-babel-execute-src-block nil info))
+	    (`lob
+	     (save-excursion
+	       (re-search-backward org-babel-lob-one-liner-regexp nil t)
+	       (let (org-confirm-babel-evaluate)
+		 (org-babel-execute-src-block nil info))))))))))
 
 
 (provide 'ob-exp)

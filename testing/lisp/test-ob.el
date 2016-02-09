@@ -536,7 +536,7 @@ duplicate results block."
    (string= "#+begin_src emacs-lisp\n  'foo\n#+end_src"
 	    (org-test-with-temp-text "#+begin_src org :results silent
   ,#+begin_src emacs-lisp
-  ,  'foo
+    'foo
   ,#+end_src
 #+end_src"
 	      (let ((org-edit-src-content-indentation 2)

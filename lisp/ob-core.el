@@ -245,39 +245,73 @@ Returns non-nil if match-data set"
 	t
       nil)))
 
-(defun org-babel-get-src-block-info (&optional light)
-  "Get information on the current source block.
+(defun org-babel-get-src-block-info (&optional light datum)
+  "Extract information from a source block or inline source block.
 
 Optional argument LIGHT does not resolve remote variable
 references; a process which could likely result in the execution
 of other code blocks.
 
-Returns a list
- (language body header-arguments-alist switches name block-head)."
-  (let ((case-fold-search t) head info name indent)
-    ;; full code block
-    (if (setq head (org-babel-where-is-src-block-head))
-	(save-excursion
-	  (goto-char head)
-	  (setq info (org-babel-parse-src-block-match))
-	  (while (and (= 0 (forward-line -1))
-		      (looking-at org-babel-multi-line-header-regexp))
-	    (setf (nth 2 info)
-		  (org-babel-merge-params
-		   (nth 2 info)
-		   (org-babel-parse-header-arguments (match-string 1)))))
-	  (when (looking-at (org-babel-named-src-block-regexp-for-name))
-	    (setq name (org-match-string-no-properties 9))))
-      ;; inline source block
-      (when (org-babel-get-inline-src-block-matches)
-	(setq head (match-beginning 0))
-	(setq info (org-babel-parse-inline-src-block-match))))
-    ;; resolve variable references and add summary parameters
-    (when (and info (not light))
-      (setf (nth 2 info) (org-babel-process-params (nth 2 info))))
-    (when info
-      (setf (nth 2 info) (org-babel-generate-file-param name (nth 2 info))))
-    (when info (append info (list name head)))))
+By default, consider the block at point.  However, when optional
+argument DATUM is provided, extract information from that parsed
+object instead.
+
+Return nil if point is not on a source block.  Otherwise, return
+a list with the following pattern:
+
+  \(language body header-arguments-alist switches name block-head)"
+  (let* ((datum (or datum (org-element-context)))
+	 (type (org-element-type datum))
+	 (inline (eq type 'inline-src-block)))
+    (when (memq type '(inline-src-block src-block))
+      (let* ((lang (org-element-property :language datum))
+	     (lang-headers (intern
+			    (concat "org-babel-default-header-args:" lang)))
+	     (name (org-element-property :name datum))
+	     (info
+	      (list
+	       lang
+	       ;; Normalize contents.  In particular, remove spurious
+	       ;; indentation and final newline character.
+	       (let* ((value (org-element-property :value datum))
+		      (body (if (and (> (length value) 1)
+				     (string-match-p "\n\\'" value))
+				(substring value 0 -1)
+			      value)))
+		 (cond (inline
+			 ;; Newline characters and indentation in an
+			 ;; inline src-block are not meaningful, since
+			 ;; they could come from some paragraph
+			 ;; filling.  Treat them as a white space.
+			 (replace-regexp-in-string "\n[ \t]*" " " body))
+		       ((or org-src-preserve-indentation
+			    (org-element-property :preserve-indent datum))
+			body)
+		       (t (org-remove-indentation body))))
+	       (apply #'org-babel-merge-params
+		      (if inline org-babel-default-inline-header-args
+			org-babel-default-header-args)
+		      (and (boundp lang-headers) (symbol-value lang-headers))
+		      (append
+		       ;; If DATUM is provided, make sure we get node
+		       ;; properties applicable to its location within
+		       ;; the document.
+		       (org-with-wide-buffer
+			(when datum
+			  (goto-char (org-element-property :begin datum)))
+			(org-babel-params-from-properties lang))
+		       (mapcar #'org-babel-parse-header-arguments
+			       (cons
+				(org-element-property :parameters datum)
+				(org-element-property :header datum)))))
+	       (or (org-element-property :switches datum) "")
+	       name
+	       (org-element-property (if inline :begin :post-affiliated)
+				     datum))))
+	(unless light
+	  (setf (nth 2 info) (org-babel-process-params (nth 2 info))))
+	(setf (nth 2 info) (org-babel-generate-file-param name (nth 2 info)))
+	info))))
 
 (defvar org-babel-exp-reference-buffer nil
   "Buffer containing original contents of the exported buffer.
@@ -642,13 +676,8 @@ block."
   (let* ((org-babel-current-src-block-location
 	  (or org-babel-current-src-block-location
 	      (nth 5 info)
-	      (org-babel-where-is-src-block-head)
-	      ;; inline src block
-	      (and (org-babel-get-inline-src-block-matches)
-		   (match-beginning 0))))
-	 (info (if info
-		   (copy-tree info)
-		 (org-babel-get-src-block-info))))
+	      (org-babel-where-is-src-block-head)))
+	 (info (if info (copy-tree info) (org-babel-get-src-block-info))))
     (cl-callf org-babel-merge-params (nth 2 info) params)
     (when (org-babel-check-evaluate info)
       (cl-callf org-babel-process-params (nth 2 info))
@@ -1455,52 +1484,6 @@ specified in the properties of the current outline entry."
 	   (org-entry-get org-babel-current-src-block-location
 			  (concat "header-args:" lang)
 			  'inherit))))))
-
-(defvar org-src-preserve-indentation) ;; declare defcustom from org-src
-(defun org-babel-parse-src-block-match ()
-  "Parse the results from a match of the `org-babel-src-block-regexp'."
-  (let* ((lang (org-match-string-no-properties 2))
-         (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
-	 (switches (match-string 3))
-         (body (let* ((body (org-match-string-no-properties 5))
-		      (sub-length (- (length body) 1)))
-		 (if (and (> sub-length 0)
-			  (string= "\n" (substring body sub-length)))
-		     (substring body 0 sub-length)
-		   (or body ""))))
-	 (preserve-indentation (or org-src-preserve-indentation
-				   (save-match-data
-				     (string-match "-i\\>" switches)))))
-    (list lang
-          ;; get block body less properties, protective commas, and indentation
-          (with-temp-buffer
-            (save-match-data
-              (insert (org-unescape-code-in-string body))
-	      (unless preserve-indentation (org-do-remove-indentation))
-              (buffer-string)))
-	  (apply #'org-babel-merge-params
-		 org-babel-default-header-args
-		 (when (boundp lang-headers) (eval lang-headers))
-		 (append
-		  (org-babel-params-from-properties lang)
-		  (list (org-babel-parse-header-arguments
-			 (org-no-properties (or (match-string 4) ""))))))
-	  switches)))
-
-(defun org-babel-parse-inline-src-block-match ()
-  "Parse the results from a match of the `org-babel-inline-src-block-regexp'."
-  (let* ((lang (org-no-properties (match-string 2)))
-         (lang-headers (intern (concat "org-babel-default-header-args:" lang))))
-    (list lang
-          (org-unescape-code-in-string (org-no-properties (match-string 5)))
-          (apply #'org-babel-merge-params
-		 org-babel-default-inline-header-args
-		 (if (boundp lang-headers) (eval lang-headers) nil)
-		 (append
-		  (org-babel-params-from-properties lang)
-		  (list (org-babel-parse-header-arguments
-			 (org-no-properties (or (match-string 4) ""))))))
-	  nil)))
 
 (defun org-babel-balanced-split (string alts)
   "Split STRING on instances of ALTS.

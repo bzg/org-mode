@@ -193,7 +193,6 @@ an = sign.
 
 * inline source block
   :PROPERTIES:
-  :results:  silent
   :ID:       54cb8dc3-298c-4883-a933-029b3c9d4b18
   :END:
 Here is one in the middle src_sh{echo 1} of a line.
@@ -203,7 +202,6 @@ src_sh{echo 3} Here is one at the beginning of a line.
 * exported inline source block
 :PROPERTIES:
 :ID:       cd54fc88-1b6b-45b6-8511-4d8fa7fc8076
-:results:  silent
 :exports:  code
 :END:
 Here is one in the middle src_sh{echo 1} of a line.
