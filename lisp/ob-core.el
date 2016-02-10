@@ -223,18 +223,6 @@ list of the cdr of all the `:var' entries."
   (mapcar #'cdr
 	  (cl-remove-if-not (lambda (x) (eq (car x) :var)) params)))
 
-(defvar org-babel-inline-lob-one-liner-regexp)
-(defun org-babel-get-lob-one-liner-matches ()
-  "Set match data if on line of an lob one liner.
-Returns non-nil if match-data set"
-  (save-excursion
-    (let ((datum (org-element-context)))
-      (when (eq (org-element-type datum) 'inline-babel-call)
-	(goto-char (org-element-property :begin datum))))
-    (if (looking-at org-babel-inline-lob-one-liner-regexp)
-	t
-      nil)))
-
 (defun org-babel-get-src-block-info (&optional light datum)
   "Extract information from a source block or inline source block.
 
