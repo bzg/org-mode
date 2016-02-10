@@ -55,6 +55,14 @@ where the Org file lives."
   :group 'org-attach
   :type 'directory)
 
+(defcustom org-attach-commit t
+  "If non-nil commit attachments with git.
+This is only done if the Org file is in a git repository."
+  :group 'org-attach
+  :type 'boolean
+  :version "25.1"
+  :package-version '(Org . "9.0"))
+
 (defcustom org-attach-git-annex-cutoff (* 32 1024)
   "If non-nil, files larger than this will be annexed instead of stored."
   :group 'org-attach
@@ -373,7 +381,8 @@ METHOD may be `cp', `mv', `ln', or `lns' default taken from
        ((eq method 'cp)	(copy-file file fname))
        ((eq method 'ln) (add-name-to-file file fname))
        ((eq method 'lns) (make-symbolic-link file fname)))
-      (org-attach-commit)
+      (when org-attach-commit
+	(org-attach-commit))
       (org-attach-tag)
       (cond ((eq org-attach-store-link-p 'attached)
 	     (org-attach-store-link fname))

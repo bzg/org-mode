@@ -209,6 +209,9 @@ an :indent parameter, much like the one in the clock table.
 
 On the other hand, stars no longer appear in an ITEM field.
 *** Preview LaTeX snippets in buffers not visiting files
+*** New option ~org-attach-commit~
+When non-nil, commit attachments with git, assuming the document is in
+a git repository.
 ** New functions
 *** ~org-next-line-empty-p~
 It replaces the deprecated ~next~ argument to ~org-previous-line-empty-p~.
