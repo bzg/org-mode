@@ -2443,11 +2443,12 @@ Assume point is at the beginning of the block."
 	    ((or org-src-preserve-indentation
 		 (org-element-property :preserve-indent src-block))
 	     val)
-	    ((zerop org-edit-src-content-indentation) val)
+	    ((zerop org-edit-src-content-indentation)
+	     (org-remove-indentation val))
 	    (t
 	     (let ((ind (make-string org-edit-src-content-indentation ?\s)))
 	       (replace-regexp-in-string
-		"\\(^\\)[ \t]*\\S-" ind val nil nil 1)))))))
+		"^" ind (org-remove-indentation val))))))))
     (concat (format "#+BEGIN_SRC%s\n"
 		    (concat (and lang (concat " " lang))
 			    (and switches (concat " " switches))
