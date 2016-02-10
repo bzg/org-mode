@@ -39,6 +39,7 @@
 (defvar org-babel-library-of-babel)
 (defvar org-edit-src-content-indentation)
 (defvar org-src-lang-modes)
+(defvar org-src-preserve-indentation)
 
 (declare-function outline-show-all "outline" ())
 (declare-function org-get-indentation "org" (&optional line))
@@ -212,74 +213,6 @@ multiple entries for the key `:var'.  This function returns a
 list of the cdr of all the `:var' entries."
   (mapcar #'cdr
 	  (cl-remove-if-not (lambda (x) (eq (car x) :var)) params)))
-
-(defun org-babel-get-src-block-info (&optional light datum)
-  "Extract information from a source block or inline source block.
-
-Optional argument LIGHT does not resolve remote variable
-references; a process which could likely result in the execution
-of other code blocks.
-
-By default, consider the block at point.  However, when optional
-argument DATUM is provided, extract information from that parsed
-object instead.
-
-Return nil if point is not on a source block.  Otherwise, return
-a list with the following pattern:
-
-  \(language body header-arguments-alist switches name block-head)"
-  (let* ((datum (or datum (org-element-context)))
-	 (type (org-element-type datum))
-	 (inline (eq type 'inline-src-block)))
-    (when (memq type '(inline-src-block src-block))
-      (let* ((lang (org-element-property :language datum))
-	     (lang-headers (intern
-			    (concat "org-babel-default-header-args:" lang)))
-	     (name (org-element-property :name datum))
-	     (info
-	      (list
-	       lang
-	       ;; Normalize contents.  In particular, remove spurious
-	       ;; indentation and final newline character.
-	       (let* ((value (org-element-property :value datum))
-		      (body (if (and (> (length value) 1)
-				     (string-match-p "\n\\'" value))
-				(substring value 0 -1)
-			      value)))
-		 (cond (inline
-			 ;; Newline characters and indentation in an
-			 ;; inline src-block are not meaningful, since
-			 ;; they could come from some paragraph
-			 ;; filling.  Treat them as a white space.
-			 (replace-regexp-in-string "\n[ \t]*" " " body))
-		       ((or org-src-preserve-indentation
-			    (org-element-property :preserve-indent datum))
-			body)
-		       (t (org-remove-indentation body))))
-	       (apply #'org-babel-merge-params
-		      (if inline org-babel-default-inline-header-args
-			org-babel-default-header-args)
-		      (and (boundp lang-headers) (symbol-value lang-headers))
-		      (append
-		       ;; If DATUM is provided, make sure we get node
-		       ;; properties applicable to its location within
-		       ;; the document.
-		       (org-with-wide-buffer
-			(when datum
-			  (goto-char (org-element-property :begin datum)))
-			(org-babel-params-from-properties lang))
-		       (mapcar #'org-babel-parse-header-arguments
-			       (cons
-				(org-element-property :parameters datum)
-				(org-element-property :header datum)))))
-	       (or (org-element-property :switches datum) "")
-	       name
-	       (org-element-property (if inline :begin :post-affiliated)
-				     datum))))
-	(unless light
-	  (setf (nth 2 info) (org-babel-process-params (nth 2 info))))
-	(setf (nth 2 info) (org-babel-generate-file-param name (nth 2 info)))
-	info))))
 
 (defvar org-babel-exp-reference-buffer nil
   "Buffer containing original contents of the exported buffer.
@@ -623,6 +556,74 @@ through use of the :var header argument) this marker points to
 the outer-most code block.")
 
 (defvar *this*)
+
+(defun org-babel-get-src-block-info (&optional light datum)
+  "Extract information from a source block or inline source block.
+
+Optional argument LIGHT does not resolve remote variable
+references; a process which could likely result in the execution
+of other code blocks.
+
+By default, consider the block at point.  However, when optional
+argument DATUM is provided, extract information from that parsed
+object instead.
+
+Return nil if point is not on a source block.  Otherwise, return
+a list with the following pattern:
+
+  \(language body header-arguments-alist switches name block-head)"
+  (let* ((datum (or datum (org-element-context)))
+	 (type (org-element-type datum))
+	 (inline (eq type 'inline-src-block)))
+    (when (memq type '(inline-src-block src-block))
+      (let* ((lang (org-element-property :language datum))
+	     (lang-headers (intern
+			    (concat "org-babel-default-header-args:" lang)))
+	     (name (org-element-property :name datum))
+	     (info
+	      (list
+	       lang
+	       ;; Normalize contents.  In particular, remove spurious
+	       ;; indentation and final newline character.
+	       (let* ((value (org-element-property :value datum))
+		      (body (if (and (> (length value) 1)
+				     (string-match-p "\n\\'" value))
+				(substring value 0 -1)
+			      value)))
+		 (cond (inline
+			 ;; Newline characters and indentation in an
+			 ;; inline src-block are not meaningful, since
+			 ;; they could come from some paragraph
+			 ;; filling.  Treat them as a white space.
+			 (replace-regexp-in-string "\n[ \t]*" " " body))
+		       ((or org-src-preserve-indentation
+			    (org-element-property :preserve-indent datum))
+			body)
+		       (t (org-remove-indentation body))))
+	       (apply #'org-babel-merge-params
+		      (if inline org-babel-default-inline-header-args
+			org-babel-default-header-args)
+		      (and (boundp lang-headers) (symbol-value lang-headers))
+		      (append
+		       ;; If DATUM is provided, make sure we get node
+		       ;; properties applicable to its location within
+		       ;; the document.
+		       (org-with-wide-buffer
+			(when datum
+			  (goto-char (org-element-property :begin datum)))
+			(org-babel-params-from-properties lang))
+		       (mapcar #'org-babel-parse-header-arguments
+			       (cons
+				(org-element-property :parameters datum)
+				(org-element-property :header datum)))))
+	       (or (org-element-property :switches datum) "")
+	       name
+	       (org-element-property (if inline :begin :post-affiliated)
+				     datum))))
+	(unless light
+	  (setf (nth 2 info) (org-babel-process-params (nth 2 info))))
+	(setf (nth 2 info) (org-babel-generate-file-param name (nth 2 info)))
+	info))))
 
 ;;;###autoload
 (defun org-babel-execute-src-block (&optional arg info params)
