@@ -2011,7 +2011,13 @@ Return nil if ELEMENT cannot be read."
 	(or (org-babel-number-p v) v)))
      (`table (org-babel-read-table))
      (`plain-list (org-babel-read-list))
-     ((or `example-block `export-block)
+     (`example-block
+      (let ((v (org-element-property :value element)))
+	(if (or org-src-preserve-indentation
+		(org-element-property :preserve-indent element))
+	    v
+	  (org-remove-indentation v))))
+     (`export-block
       (org-remove-indentation (org-element-property :value element)))
      (`paragraph
       ;; Treat paragraphs containing a single link specially.
@@ -2033,46 +2039,28 @@ Return nil if ELEMENT cannot be read."
 	(org-element-property :contents-end element))))
      (_ nil))))
 
-(defvar org-block-regexp)
 (defun org-babel-read-result ()
-  "Read the result at `point' into emacs-lisp."
-  (let ((case-fold-search t) result-string)
-    (cond
-     ((org-at-table-p) (org-babel-read-table))
-     ((org-at-item-p) (org-babel-read-list))
-     ((looking-at org-bracket-link-regexp) (org-babel-read-link))
-     ((looking-at org-block-regexp) (org-remove-indentation (match-string 4)))
-     ((or (looking-at "^[ \t]*: ") (looking-at "^[ \t]*:$"))
-      (setq result-string
-	    (org-babel-trim
-	     (mapconcat (lambda (line)
-                          (or (and (> (length line) 1)
-				   (string-match "^[ \t]*: ?\\(.+\\)" line)
-				   (match-string 1 line))
-			      ""))
-			(split-string
-			 (buffer-substring
-                          (point) (org-babel-result-end)) "[\r\n]+")
-			"\n")))
-      (or (org-babel-number-p result-string) result-string))
-     ((looking-at org-babel-result-regexp)
-      (save-excursion (forward-line 1) (org-babel-read-result))))))
+  "Read the result at point into emacs-lisp."
+  (and (not (save-excursion
+	      (beginning-of-line)
+	      (looking-at-p "[ \t]*$")))
+       (org-babel-read-element (org-element-at-point))))
 
 (defun org-babel-read-table ()
-  "Read the table at `point' into emacs-lisp."
+  "Read the table at point into emacs-lisp."
   (mapcar (lambda (row)
             (if (and (symbolp row) (equal row 'hline)) row
               (mapcar (lambda (el) (org-babel-read el 'inhibit-lisp-eval)) row)))
           (org-table-to-lisp)))
 
 (defun org-babel-read-list ()
-  "Read the list at `point' into emacs-lisp."
+  "Read the list at point into emacs-lisp."
   (mapcar (lambda (el) (org-babel-read el 'inhibit-lisp-eval))
 	  (cdr (org-list-to-lisp))))
 
 (defvar org-link-types-re)
 (defun org-babel-read-link ()
-  "Read the link at `point' into emacs-lisp.
+  "Read the link at point into emacs-lisp.
 If the path of the link is a file path it is expanded using
 `expand-file-name'."
   (let* ((case-fold-search t)
