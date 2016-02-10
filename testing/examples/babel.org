@@ -283,26 +283,6 @@ this is simple
    :END:
 has length 14
 
-* org-babel-get-inline-src-block-matches
-  :PROPERTIES:
-  :results:  silent
-  :ID:       0D0983D4-DE33-400A-8A05-A225A567BC74
-  :END:
-src_sh{echo "One"} block at start of line
- One spaced block in  src_sh{ echo "middle" } of line
-src_sh{echo 2} blocks on the src_emacs-lisp{"same"} line
- Inline block with src_sh[:results silent]{ echo "parameters" }.
-
-* org-babel-get-inline-src-block-matches (with empty args)
-  :PROPERTIES:
-  :results:  silent
-  :ID:       d55dada7-de0e-4340-8061-787cccbedee5
-  :END:
-src_sh[]{echo "One"} block at start of line
- One spaced block in  src_sh[]{ echo "middle" } of line
-src_sh[]{echo 2} blocks on the src_emacs-lisp[]{"same"} line
- Inline block with src_sh[:results silent]{ echo "parameters" }.
-
 * exporting a code block with a name
   :PROPERTIES:
   :ID:       b02ddd8a-eeb8-42ab-8664-8a759e6f43d9

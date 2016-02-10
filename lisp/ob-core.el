@@ -223,16 +223,6 @@ list of the cdr of all the `:var' entries."
   (mapcar #'cdr
 	  (cl-remove-if-not (lambda (x) (eq (car x) :var)) params)))
 
-(defun org-babel-get-inline-src-block-matches ()
-  "Set match data if within body of an inline source block.
-Returns non-nil if match-data set"
- (save-excursion
-    (let ((datum (org-element-context)))
-      (when (eq (org-element-type datum) 'inline-src-block)
-	(goto-char (org-element-property :begin datum))
-	(when (looking-at org-babel-inline-src-block-regexp)
-	  t )))))
-
 (defvar org-babel-inline-lob-one-liner-regexp)
 (defun org-babel-get-lob-one-liner-matches ()
   "Set match data if on line of an lob one liner.
@@ -410,8 +400,8 @@ environment, to override this check."
   "Execute BODY if point is in a source block and return t.
 
 Otherwise do nothing and return nil."
-  `(if (or (org-babel-where-is-src-block-head)
-           (org-babel-get-inline-src-block-matches))
+  `(if (memq (org-element-type (org-element-context))
+	     '(inline-src-block src-block))
        (progn
 	 ,@body
 	 t)
@@ -2208,13 +2198,15 @@ INFO may provide the values of these header arguments (in the
 	result)
     (save-excursion
       (let* ((inlinep
-	      (save-excursion
-		(when (or (org-babel-get-inline-src-block-matches)
-			  (org-babel-get-lob-one-liner-matches))
-		  (goto-char (match-end 0))
-		  (org-babel-remove-inline-result)
-		  (insert " ")
-		  (point))))
+	      (let ((context (org-element-context)))
+		(when (memq (org-element-type context)
+			    '(inline-babel-call inline-src-block))
+		  (save-excursion
+		    (goto-char (org-element-property :end context))
+		    (skip-chars-backward " \t\n")
+		    (org-babel-remove-inline-result context)
+		    (insert " ")
+		    (point)))))
 	     (existing-result
 	      (unless inlinep
 		(org-babel-where-is-src-block-result t info hash)))
@@ -2404,23 +2396,23 @@ INFO may provide the values of these header arguments (in the
 	   (if keep-keyword (1+ (match-end 0)) (1- (match-beginning 0)))
 	   (progn (forward-line 1) (org-babel-result-end))))))))
 
-(defun org-babel-remove-inline-result ()
+(defun org-babel-remove-inline-result (&optional datum)
   "Remove the result of the current inline-src-block or babel call.
 The result must be wrapped in a `results' macro to be removed.
 Leading whitespace is trimmed."
   (interactive)
-  (let* ((el (org-element-context))
+  (let* ((el (or datum (org-element-context)))
 	 (post-blank (org-element-property :post-blank el)))
     (when (memq (org-element-type el) '(inline-src-block inline-babel-call))
       (org-with-wide-buffer
-        (goto-char (org-element-property :end el))
-        (let ((el (org-element-context)))
-	  (when (and (eq (org-element-type el) 'macro)
-		     (string= (org-element-property :key el) "results"))
-	    (delete-region ; And leading whitespace.
-	     (- (org-element-property :begin el) post-blank)
-	     (- (org-element-property :end el)
-		(org-element-property :post-blank el)))))))))
+       (goto-char (org-element-property :end el))
+       (let ((el (org-element-context)))
+	 (when (and (eq (org-element-type el) 'macro)
+		    (string= (org-element-property :key el) "results"))
+	   (delete-region		; And leading whitespace.
+	    (- (org-element-property :begin el) post-blank)
+	    (- (org-element-property :end el)
+	       (org-element-property :post-blank el)))))))))
 
 (defun org-babel-remove-result-one-or-many (x)
   "Remove the result of the current source block.

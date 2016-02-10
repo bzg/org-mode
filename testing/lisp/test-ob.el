@@ -279,32 +279,6 @@ at the beginning of a line."
  :results silent]{(+ 6 1)}"
 	(org-babel-execute-src-block)))))
 
-(ert-deftest test-ob/org-babel-get-inline-src-block-matches ()
-  (flet ((test-at-id (id)
-	   (org-test-at-id
-	    id
-	    (let ((test-point (point)))
-	      (should (fboundp 'org-babel-get-inline-src-block-matches))
-	      (should (re-search-forward "src_" nil t)) ;; 1
-	      (should (org-babel-get-inline-src-block-matches))
-	      (should (re-search-forward " b" nil (point-at-bol))) ;; 1
-	      (should-not (org-babel-get-inline-src-block-matches))
-	      (should (re-search-forward "in" nil t)) ;; 2
-	      (should-not (org-babel-get-inline-src-block-matches))
-	      (should (re-search-forward "echo" nil t)) ;; 2
-	      (should (org-babel-get-inline-src-block-matches))
-	      (should (re-search-forward "blocks" nil t)) ;; 3
-	      (backward-char 7) ;; 3
-	      (should (org-babel-get-inline-src-block-matches))
-	      (forward-char 1) ;;3
-	      (should-not (org-babel-get-inline-src-block-matches))
-	      (should (re-search-forward ":results" nil t)) ;; 4
-	      (should (org-babel-get-inline-src-block-matches))
-	      (end-of-line)
-	      (should-not (org-babel-get-inline-src-block-matches))))))
-    (test-at-id "0D0983D4-DE33-400A-8A05-A225A567BC74")
-    (test-at-id "d55dada7-de0e-4340-8061-787cccbedee5")))
-
 (ert-deftest test-ob/inline-src_blk-default-results-replace-line-1 ()
   (let ((test-line "src_sh{echo 1}")
 	(org-babel-inline-result-wrap "=%s="))
