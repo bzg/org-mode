@@ -304,17 +304,18 @@ may make them unreachable."
   "Return a string with the exported content of a code block.
 The function respects the value of the :exports header argument."
   (let ((silently (lambda () (let ((session (cdr (assoc :session (nth 2 info)))))
-			       (when (not (and session (equal "none" session)))
-				 (org-babel-exp-results info type 'silent)))))
+			  (unless (equal "none" session)
+			    (org-babel-exp-results info type 'silent)))))
 	(clean (lambda () (if (eq type 'inline)
-			      (org-babel-remove-inline-result)
-			    (org-babel-remove-result info)))))
-    (case (intern (or (cdr (assoc :exports (nth 2 info))) "code"))
-      ('none (funcall silently) (funcall clean) "")
-      ('code (funcall silently) (funcall clean) (org-babel-exp-code info type))
-      ('results (org-babel-exp-results info type nil hash) "")
-      ('both (org-babel-exp-results info type nil hash)
-	     (org-babel-exp-code info type)))))
+			 (org-babel-remove-inline-result)
+		       (org-babel-remove-result info)))))
+    (pcase (or (cdr (assq :exports (nth 2 info))) "code")
+      ("none" (funcall silently) (funcall clean) "")
+      ("code" (funcall silently) (funcall clean) (org-babel-exp-code info type))
+      ("results" (org-babel-exp-results info type nil hash) "")
+      ("both"
+       (org-babel-exp-results info type nil hash)
+       (org-babel-exp-code info type)))))
 
 (defcustom org-babel-exp-code-template
   "#+BEGIN_SRC %lang%switches%flags\n%body\n#+END_SRC"
