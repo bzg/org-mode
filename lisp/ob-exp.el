@@ -217,9 +217,9 @@ may make them unreachable."
 					   (concat
 					    ":var results="
 					    (mapconcat #'identity
-						       (butlast lob-info)
+						       (butlast lob-info 2)
 						       " ")))))))
-				"" (nth 2 lob-info))
+				"" (nth 2 lob-info) (nth 3 lob-info))
 			  'lob))
 			(rep (org-fill-template
 			      org-babel-exp-call-line-template
@@ -412,7 +412,7 @@ inhibit insertion of results into the buffer."
 	      (org-babel-execute-src-block nil info))
 	    (`lob
 	     (save-excursion
-	      (goto-char (org-element-property :begin (org-element-context)))
+	      (goto-char (nth 5 info))
 	      (let (org-confirm-babel-evaluate)
 		(org-babel-execute-src-block nil info))))))))))
 

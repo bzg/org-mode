@@ -82,15 +82,19 @@ if so then run the appropriate source block from the Library."
   "Return a Library of Babel function call as a string.
 Return nil when not on an appropriate location.  Build string
 from `inline-babel-call' or `babel-call' DATUM, when provided."
-  (let ((context (or datum (org-element-context))))
-    (when (memq (org-element-type context) '(babel-call inline-babel-call))
+  (let* ((context (or datum (org-element-context)))
+	 (type (org-element-type context)))
+    (when (memq type '(babel-call inline-babel-call))
       (list (format "%s%s(%s)"
 		    (org-element-property :call context)
 		    (let ((in (org-element-property :inside-header context)))
 		      (if in (format "[%s]" in) ""))
 		    (or (org-element-property :arguments context) ""))
 	    (org-element-property :end-header context)
-	    (org-element-property :name context)))))
+	    (org-element-property :name context)
+	    (org-element-property
+	     (if (eq type 'babel-call) :post-affiliated :begin)
+	     datum)))))
 
 (defvar org-babel-default-header-args:emacs-lisp) ; Defined in ob-emacs-lisp.el
 (defun org-babel-lob-execute (info)
@@ -98,7 +102,8 @@ from `inline-babel-call' or `babel-call' DATUM, when provided."
   (let* ((mkinfo (lambda (p)
 		   ;; Make plist P compatible with
 		   ;; `org-babel-get-src-block-info'.
-		   (list "emacs-lisp" "results" p nil (nth 2 info))))
+		   (list
+		    "emacs-lisp" "results" p nil (nth 2 info) (nth 3 info))))
 	 (pre-params
 	  (apply #'org-babel-merge-params
 		 org-babel-default-header-args
@@ -109,7 +114,7 @@ from `inline-babel-call' or `babel-call' DATUM, when provided."
 		   (org-babel-parse-header-arguments
 		    (org-no-properties
 		     (concat ":var results="
-			     (mapconcat #'identity (butlast info) " "))))))))
+			     (mapconcat #'identity (butlast info 2) " "))))))))
 	 (pre-info (funcall mkinfo pre-params))
 	 (cache-p (and (cdr (assoc :cache pre-params))
 		       (string= "yes" (cdr (assoc :cache pre-params)))))
