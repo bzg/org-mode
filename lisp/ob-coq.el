@@ -35,10 +35,11 @@
 (declare-function run-coq "ext:coq-inferior.el" (cmd))
 (declare-function coq-proc "ext:coq-inferior.el" ())
 
+(defvar coq-program-name "coqtop"
+  "Name of the coq toplevel to run.")
+
 (defvar org-babel-coq-buffer "*coq*"
   "Buffer in which to evaluate coq code blocks.")
-
-(defvar org-babel-coq-eoe "org-babel-coq-eoe")
 
 (defun org-babel-coq-clean-prompt (string)
   (if (string-match "^[^[:space:]]+ < " string)
@@ -70,7 +71,7 @@ If there is not a current inferior-process-buffer in SESSION then
 create one.  Return the initialized session."
   (unless (fboundp 'run-coq)
     (error "`run-coq' not defined, load coq-inferior.el"))
-  (save-window-excursion (run-coq "coqtop"))
+  (save-window-excursion (run-coq coq-program-name))
   (sit-for 0.1)
   (get-buffer org-babel-coq-buffer))
 
