@@ -204,16 +204,6 @@ This string must include a \"%s\" which will be replaced by the results."
    "\\([^\000]*?\n\\)??[ \t]*#\\+end_src")
   "Regexp used to identify code blocks.")
 
-(defvar org-babel-inline-src-block-regexp
-  (concat
-   ;; (1) replacement target (2) lang
-   "\\(?:^\\|[^-[:alnum:]]?\\)\\(src_\\([^ \f\t\n\r\v[]+\\)"
-   ;; (3,4) (unused, headers)
-   "\\(\\|\\[[ \t]*\\(.*?\\)\\]\\)"
-   ;; (5) body
-   "{\\([^\f\n\r\v]+?\\)}\\)")
-  "Regexp used to identify inline src-blocks.")
-
 (defun org-babel--get-vars (params)
   "Return the babel variable assignments in PARAMS.
 
@@ -1124,81 +1114,91 @@ end-body --------- point at the end of the body"
 
 ;;;###autoload
 (defmacro org-babel-map-inline-src-blocks (file &rest body)
-  "Evaluate BODY forms on each inline source-block in FILE.
+  "Evaluate BODY forms on each inline source block in FILE.
 If FILE is nil evaluate BODY forms on source blocks in current
 buffer."
-  (declare (indent 1))
-  (let ((tempvar (make-symbol "file")))
+  (declare (indent 1) (debug (form body)))
+  (org-with-gensyms (datum end point tempvar to-be-removed visitedp)
     `(let* ((case-fold-search t)
 	    (,tempvar ,file)
-	    (visited-p (or (null ,tempvar)
+	    (,visitedp (or (null ,tempvar)
 			   (get-file-buffer (expand-file-name ,tempvar))))
-	    (point (point)) to-be-removed)
+	    (,point (point))
+	    ,to-be-removed)
        (save-window-excursion
 	 (when ,tempvar (find-file ,tempvar))
-	 (setq to-be-removed (current-buffer))
+	 (setq ,to-be-removed (current-buffer))
 	 (goto-char (point-min))
-	 (while (re-search-forward org-babel-inline-src-block-regexp nil t)
-	   (when (org-babel-active-location-p)
-	     (goto-char (match-beginning 1))
-	     (save-match-data ,@body))
-	   (goto-char (match-end 0))))
-       (unless visited-p (kill-buffer to-be-removed))
-       (goto-char point))))
-(def-edebug-spec org-babel-map-inline-src-blocks (form body))
-
-(defvar org-babel-lob-one-liner-regexp)
+	 (while (re-search-forward "src_\\S-" nil t)
+	   (let ((,datum (save-match-data (org-element-context))))
+	     (when (eq (org-element-type ,datum) 'inline-src-block)
+	       (goto-char (match-beginning 0))
+	       (let ((,end (copy-marker (org-element-property :end ,datum))))
+		 ,@body
+		 (goto-char ,end)
+		 (set-marker ,end nil))))))
+       (unless ,visitedp (kill-buffer ,to-be-removed))
+       (goto-char ,point))))
 
 ;;;###autoload
 (defmacro org-babel-map-call-lines (file &rest body)
   "Evaluate BODY forms on each call line in FILE.
 If FILE is nil evaluate BODY forms on source blocks in current
 buffer."
-  (declare (indent 1))
-  (let ((tempvar (make-symbol "file")))
-    `(let* ((,tempvar ,file)
-	    (visited-p (or (null ,tempvar)
+  (declare (indent 1) (debug (form body)))
+  (org-with-gensyms (datum end point tempvar to-be-removed visitedp)
+    `(let* ((case-fold-search t)
+	    (,tempvar ,file)
+	    (,visitedp (or (null ,tempvar)
 			   (get-file-buffer (expand-file-name ,tempvar))))
-	    (point (point)) to-be-removed)
+	    (,point (point))
+	    ,to-be-removed)
        (save-window-excursion
 	 (when ,tempvar (find-file ,tempvar))
-	 (setq to-be-removed (current-buffer))
+	 (setq ,to-be-removed (current-buffer))
 	 (goto-char (point-min))
-	 (while (re-search-forward org-babel-lob-one-liner-regexp nil t)
-	   (when (org-babel-active-location-p)
-	     (goto-char (match-beginning 1))
-	     (save-match-data ,@body))
-	   (goto-char (match-end 0))))
-       (unless visited-p (kill-buffer to-be-removed))
-       (goto-char point))))
-(def-edebug-spec org-babel-map-call-lines (form body))
+	 (while (re-search-forward "call_\\S-\\|^[ \t]*#\\+CALL:" nil t)
+	   (let ((,datum (save-match-data (org-element-context))))
+	     (when (memq (org-element-type ,datum)
+			 '(babel-call inline-babel-call))
+	       (goto-char (match-beginning 0))
+	       (let ((,end (copy-marker (org-element-property :end ,datum))))
+		 ,@body
+		 (goto-char ,end)
+		 (set-marker ,end nil))))))
+       (unless ,visitedp (kill-buffer ,to-be-removed))
+       (goto-char ,point))))
 
 ;;;###autoload
 (defmacro org-babel-map-executables (file &rest body)
-  (declare (indent 1))
-  (let ((tempvar (make-symbol "file"))
-	(rx (make-symbol "rx")))
-    `(let* ((,tempvar ,file)
-	    (,rx (concat "\\(" org-babel-src-block-regexp
-			 "\\|" org-babel-inline-src-block-regexp
-			 "\\|" org-babel-lob-one-liner-regexp "\\)"))
-	    (visited-p (or (null ,tempvar)
+  "Evaluate BODY forms on each active Babel code in FILE.
+If FILE is nil evaluate BODY forms on source blocks in current
+buffer."
+  (declare (indent 1) (debug (form body)))
+  (org-with-gensyms (datum end point tempvar to-be-removed visitedp)
+    `(let* ((case-fold-search t)
+	    (,tempvar ,file)
+	    (,visitedp (or (null ,tempvar)
 			   (get-file-buffer (expand-file-name ,tempvar))))
-	    (point (point)) to-be-removed)
+	    (,point (point))
+	    ,to-be-removed)
        (save-window-excursion
 	 (when ,tempvar (find-file ,tempvar))
-	 (setq to-be-removed (current-buffer))
+	 (setq ,to-be-removed (current-buffer))
 	 (goto-char (point-min))
-	 (while (re-search-forward ,rx nil t)
-	   (when (org-babel-active-location-p)
-	     (goto-char (match-beginning 1))
-	     (when (looking-at org-babel-inline-src-block-regexp)
-	       (forward-char 1))
-	     (save-match-data ,@body))
-	   (goto-char (match-end 0))))
-       (unless visited-p (kill-buffer to-be-removed))
-       (goto-char point))))
-(def-edebug-spec org-babel-map-executables (form body))
+	 (while (re-search-forward
+		 "\\(call\\|src\\)_\\|^[ \t]*#\\+\\(BEGIN_SRC\\|CALL:\\)" nil t)
+	   (let ((,datum (save-match-data (org-element-context))))
+	     (when (memq (org-element-type ,datum)
+			 '(babel-call inline-babel-call inline-src-block
+				      src-block))
+	       (goto-char (match-beginning 0))
+	       (let ((,end (copy-marker (org-element-property :end ,datum))))
+		 ,@body
+		 (goto-char ,end)
+		 (set-marker ,end nil))))))
+       (unless ,visitedp (kill-buffer ,to-be-removed))
+       (goto-char ,point))))
 
 ;;;###autoload
 (defun org-babel-execute-buffer (&optional arg)
@@ -1209,7 +1209,8 @@ the current buffer."
   (org-babel-eval-wipe-error-buffer)
   (org-save-outline-visibility t
     (org-babel-map-executables nil
-      (if (looking-at org-babel-lob-one-liner-regexp)
+      (if (memq (org-element-type (org-element-context))
+		'(babel-call inline-babel-call))
           (org-babel-lob-execute-maybe)
         (org-babel-execute-src-block arg)))))
 

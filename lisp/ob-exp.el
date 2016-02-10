@@ -28,7 +28,6 @@
 (eval-when-compile
   (require 'cl))
 
-(defvar org-babel-lob-one-liner-regexp)
 (defvar org-babel-ref-split-regexp)
 
 (declare-function org-babel-lob-get-info "ob-lob" (&optional datum))
@@ -164,19 +163,11 @@ may make them unreachable."
     (save-excursion
       (let ((case-fold-search t)
 	    (org-babel-exp-reference-buffer reference-buffer)
-	    (regexp (concat org-babel-inline-src-block-regexp "\\|"
-			    org-babel-lob-one-liner-regexp "\\|"
-			    "^[ \t]*#\\+BEGIN_SRC")))
+	    (regexp "\\(call\\|src\\)_\\|^[ \t]*#\\+\\(BEGIN_SRC\\|CALL:\\)"))
 	(goto-char (point-min))
 	(while (re-search-forward regexp nil t)
 	  (unless (save-match-data (org-in-commented-heading-p))
-	    (let* ((element (save-excursion
-			      ;; If match is inline, point is at its
-			      ;; end.  Move backward so
-			      ;; `org-element-context' can get the
-			      ;; object, not the following one.
-			      (backward-char)
-			      (save-match-data (org-element-context))))
+	    (let* ((element (save-match-data (org-element-context)))
 		   (type (org-element-type element))
 		   (begin (copy-marker (org-element-property :begin element)))
 		   (end (copy-marker
@@ -385,7 +376,7 @@ replaced with its value."
 
 (defun org-babel-exp-results (info type &optional silent hash)
   "Evaluate and return the results of the current code block for export.
-Results are prepared in a manner suitable for export by org-mode.
+Results are prepared in a manner suitable for export by Org mode.
 This function is called by `org-babel-exp-do-export'.  The code
 block will be evaluated.  Optional argument SILENT can be used to
 inhibit insertion of results into the buffer."
@@ -421,9 +412,9 @@ inhibit insertion of results into the buffer."
 	      (org-babel-execute-src-block nil info))
 	    (`lob
 	     (save-excursion
-	       (re-search-backward org-babel-lob-one-liner-regexp nil t)
-	       (let (org-confirm-babel-evaluate)
-		 (org-babel-execute-src-block nil info))))))))))
+	      (goto-char (org-element-property :begin (org-element-context)))
+	      (let (org-confirm-babel-evaluate)
+		(org-babel-execute-src-block nil info))))))))))
 
 
 (provide 'ob-exp)

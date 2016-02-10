@@ -123,7 +123,6 @@ the variable."
 		     (point))
      (point-max))))
 
-(defvar org-babel-lob-one-liner-regexp)
 (defvar org-babel-library-of-babel)
 (defun org-babel-ref-resolve (ref)
   "Resolve the reference REF and return its value."
