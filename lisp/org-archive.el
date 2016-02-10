@@ -560,7 +560,7 @@ the children that do not contain any open TODO items."
 	(save-excursion
 	  (org-back-to-heading t)
 	  (setq set (org-toggle-tag org-archive-tag))
-	  (when set (outline-hide-subtree)))
+	  (when set (org-flag-subtree t)))
 	(and set (beginning-of-line 1))
 	(message "Subtree %s" (if set "archived" "unarchived"))))))
 
