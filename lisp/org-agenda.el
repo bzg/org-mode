@@ -2047,6 +2047,8 @@ The buffer is still writable when this hook is called.")
 (defvar org-agenda-force-single-file nil)
 (defvar org-agenda-bulk-marked-entries nil
   "List of markers that refer to marked entries in the agenda.")
+(defvar org-agenda-current-date nil
+  "Active date when building the agenda.")
 
 ;;; Multiple agenda buffers support
 
@@ -5340,6 +5342,7 @@ the documentation of `org-diary'."
 	(unless (derived-mode-p 'org-mode)
 	  (error "Agenda file %s is not in `org-mode'" file))
 	(setq org-agenda-buffer (or org-agenda-buffer buffer))
+	(setf org-agenda-current-date date)
 	(save-excursion
 	  (save-restriction
 	    (if (eq buffer org-agenda-restrict)

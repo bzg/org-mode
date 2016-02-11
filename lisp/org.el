@@ -17637,11 +17637,11 @@ D may be an absolute day number, or a calendar-type list (month day year)."
   (when (numberp d) (setq d (calendar-gregorian-from-absolute d)))
   (encode-time 0 0 0 (nth 1 d) (car d) (nth 2 d)))
 
+(defvar org-agenda-current-date)
 (defun org-calendar-holiday ()
   "List of holidays, for Diary display in Org mode."
-  (declare (special date))
   (require 'holidays)
-  (let ((hl (calendar-check-holidays date)))
+  (let ((hl (calendar-check-holidays org-agenda-current-date)))
     (and hl (mapconcat #'identity hl "; "))))
 
 (defun org-diary-sexp-entry (sexp entry d)
