@@ -1204,7 +1204,7 @@ containing the title row and all other rows.  Each row is a list
 of fields."
   (save-excursion
     (let* ((title (mapcar #'cadr org-columns-current-fmt-compiled))
-	   (has-item? (member "ITEM" title))
+	   (has-item? (assoc-string "ITEM" org-columns-current-fmt-compiled t))
 	   (n (length title))
 	   tbl)
       (goto-char (point-min))
@@ -1252,7 +1252,6 @@ PARAMS is a property list of parameters:
 	  When t, skip rows where all specifiers other than ITEM are empty.
 :format   When non-nil, specify the column view format to use."
   (let ((pos (point-marker))
-	(hlines (plist-get params :hlines))
 	(vlines (plist-get params :vlines))
 	(maxlevel (plist-get params :maxlevel))
 	(content-lines (org-split-string (plist-get params :content) "\n"))
@@ -1283,52 +1282,54 @@ PARAMS is a property list of parameters:
     (with-current-buffer (if view-file
 			     (get-file-buffer view-file)
 			   (current-buffer))
-      (save-excursion
-	(save-restriction
-	  (widen)
-	  (goto-char (or view-pos (point)))
-	  (org-columns columns-fmt)
-	  (setq tbl (org-columns-capture-view maxlevel skip-empty-rows))
-	  (setq nfields (length (car tbl)))
-	  (org-columns-quit))))
+      (org-with-wide-buffer
+       (goto-char (or view-pos (point)))
+       (org-columns columns-fmt)
+       (setq tbl (org-columns-capture-view maxlevel skip-empty-rows))
+       (setq nfields (length (car tbl)))
+       (org-columns-quit)))
     (goto-char pos)
     (move-marker pos nil)
     (when tbl
-      (when (plist-get params :hlines)
-	(let (tmp)
-	  (while tbl
-	    (if (eq (car tbl) 'hline)
-		(push (pop tbl) tmp)
-	      (when (string-match "\\` *\\(\\*+\\)" (caar tbl))
-		(if (and (not (eq (car tmp) 'hline))
-			 (or (eq hlines t)
-			     (and (numberp hlines)
-				  (<= (- (match-end 1) (match-beginning 1))
-				      hlines))))
-		    (push 'hline tmp)))
-	      (push (pop tbl) tmp)))
-	  (setq tbl (nreverse tmp))))
-      ;; Remove stars.  Add indentation entities, if required.
-      (let ((index (cl-position
-		    "ITEM"
-		    (mapcar #'cadr org-columns-current-fmt-compiled)
-		    :test #'equal)))
-	(when index
-	  (dolist (row tbl)
-	    (unless (eq row 'hline)
-	      (let ((item (nth index row)))
-		(setf (nth index row)
-		      (replace-regexp-in-string
-		       "\\`\\(\\*+\\) +"
-		       (if (plist-get params :indent)
-			   (lambda (m)
-			     (let ((l (org-reduced-level
-				       (length (match-string 1 m)))))
-			       (if (= l 1) ""
-				 (concat "\\\\_"
-					 (make-string (* 2 (1- l)) ?\s)))))
-			 "")
-		       item)))))))
+      ;; Normalize headings in the table.  Remove stars, add
+      ;; indentation entities, if required, and possibly precede some
+      ;; of them with a horizontal rule.
+      (let ((item-index
+	     (let ((p (assoc-string "ITEM" org-columns-current-fmt-compiled t)))
+	       (and p (cl-position p
+				   org-columns-current-fmt-compiled
+				   :test #'equal))))
+	    (hlines (plist-get params :hlines))
+	    (indent (plist-get params :indent)))
+	(when item-index
+	  (let (new-table)
+	    ;; Copy header and first rule.
+	    (push (pop tbl) new-table)
+	    (push (pop tbl) new-table)
+	    (while tbl
+	      (let ((row (car tbl)))
+		(if (eq row 'hline)
+		    (push (pop tbl) new-table)
+		  (let* ((item (nth item-index row))
+			 (level (and (string-match "\\`\\( *\\*+\\) +" item)
+				     ;; Leading white spaces are
+				     ;; actually stars made invisible
+				     ;; (see `org-columns') so they
+				     ;; add up to heading level.
+				     (org-reduced-level
+				      (- (match-end 1) (match-beginning 1))))))
+		    (when (and (not (eq (car new-table) 'hline))
+			       (or (eq hlines t)
+				   (and (numberp hlines) (<= level hlines))))
+		      (push 'hline new-table))
+		    (setf (nth item-index row)
+			  (replace-match
+			   (if (or (not indent) (= level 1)) ""
+			     (concat "\\\\_"
+				     (make-string (* 2 (1- level)) ?\s)))
+			   nil nil item))
+		    (push (pop tbl) new-table)))))
+	    (setq tbl (nreverse new-table)))))
       (when vlines
 	(setq tbl (mapcar (lambda (x)
 			    (if (eq 'hline x) x (cons "" x)))
