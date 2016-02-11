@@ -5735,15 +5735,15 @@ Providing it allows for quicker computation."
     (org-with-wide-buffer
      (let* ((pos (point))
 	    (element (or element (org-element-at-point)))
-	    (type (org-element-type element)))
+	    (type (org-element-type element))
+	    (post (org-element-property :post-affiliated element)))
        ;; If point is inside an element containing objects or
        ;; a secondary string, narrow buffer to the container and
        ;; proceed with parsing.  Otherwise, return ELEMENT.
        (cond
 	;; At a parsed affiliated keyword, check if we're inside main
 	;; or dual value.
-	((let ((post (org-element-property :post-affiliated element)))
-	   (and post (< pos post)))
+	((and post (< pos post))
 	 (beginning-of-line)
 	 (let ((case-fold-search t)) (looking-at org-element--affiliated-re))
 	 (cond
@@ -5762,7 +5762,8 @@ Providing it allows for quicker computation."
 	;; At an item, objects can only be located within tag, if any.
 	((eq type 'item)
 	 (let ((tag (org-element-property :tag element)))
-	   (if (not tag) (throw 'objects-forbidden element)
+	   (if (or (not tag) (/= (line-beginning-position) post))
+	       (throw 'objects-forbidden element)
 	     (beginning-of-line)
 	     (search-forward tag (line-end-position))
 	     (goto-char (match-beginning 0))
