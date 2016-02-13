@@ -28,15 +28,12 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 (require 'org)
 
 (declare-function org-agenda-redo "org-agenda" ())
 (declare-function org-agenda-do-context-action "org-agenda" ())
 (declare-function org-clock-sum-today "org-clock" (&optional headline-filter))
-
-(when (featurep 'xemacs)
-  (error "Do not load this file into XEmacs, use `org-colview-xemacs.el' from the contrib/ directory"))
 
 ;;; Column View
 
@@ -647,13 +644,6 @@ around it."
       (mapcar (lambda (x) (format-time-string fmt (apply 'encode-time x)))
 	      (list time-before time time-after)))))
 
-(defun org-verify-version (task)
-  (cond
-   ((eq task 'columns)
-    (if (or (featurep 'xemacs)
-	    (< emacs-major-version 22))
-	(error "Emacs 22 is required for the columns feature")))))
-
 (defun org-columns-open-link (&optional arg)
   (interactive "P")
   (let ((value (get-char-property (point) 'org-columns-value)))
@@ -690,7 +680,6 @@ Also sets `org-columns-top-level-marker' to the new position."
   "Turn on column view on an org-mode file.
 When COLUMNS-FMT-STRING is non-nil, use it as the column format."
   (interactive)
-  (org-verify-version 'columns)
   (org-columns-remove-overlays)
   (move-marker org-columns-begin-marker (point))
   (org-columns-goto-top-level)
@@ -1394,7 +1383,6 @@ and tailing newline characters."
 (defun org-agenda-columns ()
   "Turn on or update column view in the agenda."
   (interactive)
-  (org-verify-version 'columns)
   (org-columns-remove-overlays)
   (move-marker org-columns-begin-marker (point))
   (let ((org-columns-time (time-to-number-of-days (current-time)))
