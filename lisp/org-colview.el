@@ -35,6 +35,21 @@
 (declare-function org-agenda-do-context-action "org-agenda" ())
 (declare-function org-clock-sum-today "org-clock" (&optional headline-filter))
 
+;;; Configuration
+
+(defcustom org-columns-modify-value-for-display-function nil
+  "Function that modifies values for display in column view.
+For example, it can be used to cut out a certain part from a time stamp.
+The function must take 2 arguments:
+
+column-title    The title of the column (*not* the property name)
+value           The value that should be modified.
+
+The function should return the value that should be displayed,
+or nil if the normal value should be used."
+  :group 'org-properties
+  :type '(choice (const nil) (function)))
+
 ;;; Column View
 
 (defvar org-columns-overlays nil
