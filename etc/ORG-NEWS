@@ -208,6 +208,7 @@ When defining a "columnview" dynamic block, it is now possible to add
 an :indent parameter, much like the one in the clock table.
 
 On the other hand, stars no longer appear in an ITEM field.
+*** Preview LaTeX snippets in buffers not visiting files
 ** New functions
 *** ~org-next-line-empty-p~
 It replaces the deprecated ~next~ argument to ~org-previous-line-empty-p~.

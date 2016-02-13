@@ -18956,8 +18956,6 @@ headline.  With a double prefix ARG \\[universal-argument] \
 \\[universal-argument] preview or clear images
 for all fragments in the buffer."
   (interactive "P")
-  (unless (buffer-file-name (buffer-base-buffer))
-    (user-error "Can't preview LaTeX fragment in a non-file buffer"))
   (when (display-graphic-p)
     (catch 'exit
       (save-excursion
@@ -19005,11 +19003,11 @@ for all fragments in the buffer."
 		   (narrow-to-region beg end))))))
 	    (let ((file (buffer-file-name (buffer-base-buffer))))
 	      (org-format-latex
-	       (concat org-latex-preview-ltxpng-directory
-		       (file-name-sans-extension (file-name-nondirectory file)))
+	       (concat org-latex-preview-ltxpng-directory "org-ltxpng")
 	       ;; Emacs cannot overlay images from remote hosts.
 	       ;; Create it in `temporary-file-directory' instead.
-	       (if (file-remote-p file) temporary-file-directory
+	       (if (or (not file) (file-remote-p file))
+		   temporary-file-directory
 		 default-directory)
 	       'overlays msg 'forbuffer
 	       org-latex-create-formula-image-program)))
