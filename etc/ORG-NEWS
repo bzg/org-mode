@@ -208,6 +208,8 @@ When defining a "columnview" dynamic block, it is now possible to add
 an :indent parameter, much like the one in the clock table.
 
 On the other hand, stars no longer appear in an ITEM field.
+*** New variable : ~org-agenda-view-columns-initially~
+The variable used to be a ~defvar~, it is now a ~defcustom~.
 *** Preview LaTeX snippets in buffers not visiting files
 *** New option ~org-attach-commit~
 When non-nil, commit attachments with git, assuming the document is in

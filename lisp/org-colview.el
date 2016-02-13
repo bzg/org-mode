@@ -1387,9 +1387,7 @@ and tailing newline characters."
 
 ;;; Column view in the agenda
 
-(defvar org-agenda-view-columns-initially nil
-  "When set, switch to columns view immediately after creating the agenda.")
-
+(defvar org-agenda-view-columns-initially)
 (defvar org-agenda-columns-show-summaries) ; defined in org-agenda.el
 (defvar org-agenda-columns-compute-summary-properties); defined in org-agenda.el
 (defvar org-agenda-columns-add-appointments-to-effort-sum); as well

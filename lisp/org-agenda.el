@@ -1950,6 +1950,14 @@ category, you can use:
   :tag "Org Agenda Column View"
   :group 'org-agenda)
 
+(defcustom org-agenda-view-columns-initially nil
+  "When non-nil, switch to columns view right after creating the agenda."
+  :group 'org-agenda-column-view
+  :type 'boolean
+  :version "25.1"
+  :package-version '(Org . "9.0")
+  :safe #'booleanp)
+
 (defcustom org-agenda-columns-show-summaries t
   "Non-nil means show summaries for columns displayed in the agenda view."
   :group 'org-agenda-column-view
