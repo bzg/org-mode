@@ -1113,6 +1113,11 @@ link string and return the pure link target."
             (setq colonpos (string-match ":" link))
             (if startpos (substring link (1+ colonpos)) link)))))
 
+;; Add the link type supported by org-contacts-strip-link
+;; so everything is in order for its use in Org files
+(org-add-link-type "tel")
+
+
 (defun org-contacts-split-property (string &optional separators omit-nulls)
   "Custom version of `split-string'.
 Split a property STRING into sub-strings bounded by matches
