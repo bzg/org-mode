@@ -5703,14 +5703,15 @@ today.
 @orgcmd{C-c C-x C-c,org-columns}
 @vindex org-columns-default-format
 Turn on column view.  If the cursor is before the first headline in the file,
-column view is turned on for the entire file, using the @code{#+COLUMNS}
-definition.  If the cursor is somewhere inside the outline, this command
-searches the hierarchy, up from point, for a @code{:COLUMNS:} property that
-defines a format.  When one is found, the column view table is established
-for the tree starting at the entry that contains the @code{:COLUMNS:}
-property.  If no such property is found, the format is taken from the
-@code{#+COLUMNS} line or from the variable @code{org-columns-default-format},
-and column view is established for the current entry and its subtree.
+or the function called with the universal prefix argument, column view is
+turned on for the entire file, using the @code{#+COLUMNS} definition.  If the
+cursor is somewhere inside the outline, this command searches the hierarchy,
+up from point, for a @code{:COLUMNS:} property that defines a format.  When
+one is found, the column view table is established for the tree starting at
+the entry that contains the @code{:COLUMNS:} property.  If no such property
+is found, the format is taken from the @code{#+COLUMNS} line or from the
+variable @code{org-columns-default-format}, and column view is established
+for the current entry and its subtree.
 @orgcmd{r,org-columns-redo}
 Recreate the column view, to include recent changes made in the buffer.
 @orgcmd{g,org-columns-redo}

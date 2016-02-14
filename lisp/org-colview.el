@@ -701,10 +701,18 @@ Also sets `org-columns-top-level-marker' to the new position."
 	  (t (org-back-to-heading) (point))))))
 
 ;;;###autoload
-(defun org-columns (&optional columns-fmt-string)
-  "Turn on column view on an org-mode file.
+(defun org-columns (&optional global columns-fmt-string)
+  "Turn on column view on an Org mode file.
+
+Column view applies to the whole buffer if point is before the
+first headline.  Otherwise, it applies to the first ancestor
+setting \"COLUMNS\" property.  If there is none, it defaults to
+the current headline.  With a \\[universal-argument] prefix \
+argument, turn on column
+view for the whole buffer unconditionally.
+
 When COLUMNS-FMT-STRING is non-nil, use it as the column format."
-  (interactive)
+  (interactive "P")
   (org-columns-remove-overlays)
   (move-marker org-columns-begin-marker (point))
   (org-columns-goto-top-level)
@@ -715,9 +723,8 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
   (unless org-columns-inhibit-recalculation (org-columns-compute-all))
   (save-excursion
     (save-restriction
-      (narrow-to-region
-       (point)
-       (if (org-at-heading-p) (org-end-of-subtree t t) (point-max)))
+      (when (and (not global) (org-at-heading-p))
+	(narrow-to-region (point) (org-end-of-subtree t t)))
       (when (assoc-string "CLOCKSUM" org-columns-current-fmt-compiled t)
 	(org-clock-sum))
       (when (assoc-string "CLOCKSUM_T" org-columns-current-fmt-compiled t)
