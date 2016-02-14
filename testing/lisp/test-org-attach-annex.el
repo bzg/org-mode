@@ -24,7 +24,7 @@
 (require 'cl-lib)
 
 (defmacro test-org-attach-annex/with-annex (&rest body)
-  `(let ((tmpdir (make-temp-file "org-annex-test" t)))
+  `(let ((tmpdir (make-temp-file "org-annex-test" t "/")))
      (unwind-protect
 	 (let ((default-directory tmpdir)
 	       (org-attach-directory tmpdir))
@@ -41,7 +41,7 @@
      (should-not (org-attach-use-annex))))
 
   ;; test with non annex directory
-  (let ((tmpdir (make-temp-file "org-annex-test" t)))
+  (let ((tmpdir (make-temp-file "org-annex-test" t "/")))
      (unwind-protect
 	 (let ((default-directory tmpdir)
 	       (org-attach-directory tmpdir))
@@ -52,7 +52,7 @@
 (ert-deftest test-org-attach/get-maybe ()
   (test-org-attach-annex/with-annex
    (let ((path (expand-file-name "test-file"))
-	 (annex-dup (make-temp-file "org-annex-test" t)))
+	 (annex-dup (make-temp-file "org-annex-test" t "/")))
      (with-temp-buffer
        (insert "hello world\n")
        (write-file path))
