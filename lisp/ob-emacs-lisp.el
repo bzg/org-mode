@@ -72,6 +72,8 @@
          (org-babel-pick-name (cdr (assoc :rowname-names params))
                               (cdr (assoc :rownames params))))))))
 
+(org-babel-make-language-alias "elisp" "emacs-lisp")
+
 (provide 'ob-emacs-lisp)
 
 

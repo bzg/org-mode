@@ -3161,6 +3161,26 @@ plus the parameter value."
   (and (member "graphics" (cdr (assq :result-params params)))
        (cdr (assq :file params))))
 
+(defun org-babel-make-language-alias (new old)
+  "Make source blocks of type NEW aliases for those of type OLD.
+
+NEW and OLD should be strings.  This function should be called
+after the babel API for OLD-type source blocks is fully defined.
+
+Callers of this function will probably want to add an entry to
+`org-src-lang-modes' as well."
+  (dolist (fn '("execute" "expand-body" "prep-session"
+		"variable-assignments" "load-session"))
+    (let ((sym (intern-soft (concat "org-babel-" fn ":" old))))
+      (when (and sym (fboundp sym))
+	(defalias (intern (concat "org-babel-" fn ":" new)) sym))))
+  ;; Technically we don't need a `dolist' for just one variable, but
+  ;; we keep it for symmetry/ease of future expansion.
+  (dolist (var '("default-header-args"))
+    (let ((sym (intern-soft (concat "org-babel-" var ":" old))))
+      (when (and sym (boundp sym))
+	(defvaralias (intern (concat "org-babel-" var ":" new)) sym)))))
+
 (provide 'ob-core)
 
 ;; Local variables:
