@@ -35,7 +35,6 @@
       ".exe"
     nil))
 
-(defvar org-babel-call-process-region-original nil)
 (defvar org-babel-library-of-babel)
 (defvar org-edit-src-content-indentation)
 (defvar org-src-lang-modes)
@@ -547,7 +546,6 @@ match group 9.  Other match groups are defined in
   (concat org-babel-name-regexp (regexp-quote name) "[ \t]*$"))
 
 ;;; functions
-(defvar call-process-region)
 (defvar org-babel-current-src-block-location nil
   "Marker pointing to the src block currently being executed.
 This may also point to a call line or an inline code block.  If
@@ -678,71 +676,52 @@ block."
 		 (default-directory
 		   (or (and dir (file-name-as-directory (expand-file-name dir)))
 		       default-directory))
-		 (org-babel-call-process-region-original ;; for tramp handler
-		  (or (org-bound-and-true-p
-		       org-babel-call-process-region-original)
-		      (symbol-function 'call-process-region)))
-		 result cmd)
-	    (unwind-protect
-		(let ((call-process-region
-		       (lambda (&rest args)
-			 (apply 'org-babel-tramp-handle-call-process-region
-				args))))
-		  (let ((lang-check
-			 (lambda (f)
-			   (let ((f (intern (concat "org-babel-execute:" f))))
-			     (when (fboundp f) f)))))
-		    (setq cmd
-			  (or (funcall lang-check lang)
-			      (funcall lang-check
-				       (symbol-name
-					(cdr (assoc lang org-src-lang-modes))))
-			      (error "No org-babel-execute function for %s!"
-				     lang))))
-		  (message "executing %s code block%s..."
-			   (capitalize lang)
-			   (if (nth 4 info) (format " (%s)" (nth 4 info)) ""))
-		  (if (member "none" result-params)
-		      (progn
-			(funcall cmd body params)
-			(message "result silenced")
-			(setq result nil))
-		    (setq result
-			  (let ((result (funcall cmd body params)))
-                            (if (and (eq (cdr (assoc :result-type params))
-                                         'value)
-                                     (or (member "vector" result-params)
-                                         (member "table" result-params))
-                                     (not (listp result)))
-                                (list (list result)) result)))
-		    ;; If non-empty result and :file then write to :file.
-		    (when (cdr (assoc :file params))
-		      (when result
-			(with-temp-file (cdr (assoc :file params))
-			  (insert
-			   (org-babel-format-result
-			    result (cdr (assoc :sep (nth 2 info)))))))
-		      (setq result (cdr (assoc :file params))))
-		    ;; Possibly perform post process provided its appropriate.
-		    (when (cdr (assoc :post params))
-		      (let ((*this* (if (cdr (assoc :file params))
-					(org-babel-result-to-file
-					 (cdr (assoc :file params))
-					 (when (assoc :file-desc params)
-					   (or (cdr (assoc :file-desc params))
-					       result)))
-				      result)))
-			(setq result (org-babel-ref-resolve
-				      (cdr (assoc :post params))))
-			(when (cdr (assoc :file params))
-			  (setq result-params
-				(remove "file" result-params)))))
-		    (org-babel-insert-result
-		     result result-params info new-hash lang))
-                  (run-hooks 'org-babel-after-execute-hook)
-		  result)
-	      (setq call-process-region
-		    'org-babel-call-process-region-original)))))))))
+		 (cmd (intern (concat "org-babel-execute:" lang)))
+		 result)
+	    (unless (fboundp cmd)
+	      (error "No org-babel-execute function for %s!" lang))
+	    (message "executing %s code block%s..."
+		     (capitalize lang)
+		     (if (nth 4 info) (format " (%s)" (nth 4 info)) ""))
+	    (if (member "none" result-params)
+		(progn
+		  (funcall cmd body params)
+		  (message "result silenced")
+		  (setq result nil))
+	      (setq result
+		    (let ((result (funcall cmd body params)))
+		      (if (and (eq (cdr (assoc :result-type params))
+				   'value)
+			       (or (member "vector" result-params)
+				   (member "table" result-params))
+			       (not (listp result)))
+			  (list (list result)) result)))
+	      ;; If non-empty result and :file then write to :file.
+	      (when (cdr (assoc :file params))
+		(when result
+		  (with-temp-file (cdr (assoc :file params))
+		    (insert
+		     (org-babel-format-result
+		      result (cdr (assoc :sep (nth 2 info)))))))
+		(setq result (cdr (assoc :file params))))
+	      ;; Possibly perform post process provided its appropriate.
+	      (when (cdr (assoc :post params))
+		(let ((*this* (if (cdr (assoc :file params))
+				  (org-babel-result-to-file
+				   (cdr (assoc :file params))
+				   (when (assoc :file-desc params)
+				     (or (cdr (assoc :file-desc params))
+					 result)))
+				result)))
+		  (setq result (org-babel-ref-resolve
+				(cdr (assoc :post params))))
+		  (when (cdr (assoc :file params))
+		    (setq result-params
+			  (remove "file" result-params)))))
+	      (org-babel-insert-result
+	       result result-params info new-hash lang))
+	    (run-hooks 'org-babel-after-execute-hook)
+	    result)))))))
 
 (defun org-babel-expand-body:generic (body params &optional var-lines)
   "Expand BODY with PARAMS.
@@ -2982,25 +2961,6 @@ character of the string."
   (org-babel-chomp
    (org-reverse-string
     (org-babel-chomp (org-reverse-string string) regexp)) regexp))
-
-(defun org-babel-tramp-handle-call-process-region
-  (start end program &optional delete buffer display &rest args)
-  "Use Tramp to handle `call-process-region'.
-Fixes a bug in `tramp-handle-call-process-region'."
-  (if (and (featurep 'tramp) (file-remote-p default-directory))
-      (let ((tmpfile (tramp-compat-make-temp-file "")))
-	(write-region start end tmpfile)
-	(when delete (delete-region start end))
-	(unwind-protect
-	    ;;	(apply 'call-process program tmpfile buffer display args)
-            ;; bug in tramp
-	    (apply 'process-file program tmpfile buffer display args)
-	  (delete-file tmpfile)))
-    ;; org-babel-call-process-region-original is the original emacs
-    ;; definition.  It is in scope from the let binding in
-    ;; org-babel-execute-src-block
-    (apply org-babel-call-process-region-original
-           start end program delete buffer display args)))
 
 (defun org-babel-local-file-name (file)
   "Return the local name component of FILE."
