@@ -150,6 +150,10 @@ RM	= rm -f
 # How to remove files recursively
 RMR	= rm -fr
 
+# How to change file permissions
+# currently only needed for git-annex due to its "lockdown" feature
+CHMOD   = chmod
+
 # How to copy the lisp files and elc files to their destination.
 # CP	= cp -p	# try this if you have no install
 CP	= install -m 644 -p
