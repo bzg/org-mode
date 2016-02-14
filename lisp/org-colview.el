@@ -1181,51 +1181,70 @@ This function updates `org-columns-current-fmt-compiled'."
 	  (nreverse org-columns-current-fmt-compiled))))
 
 
+
 ;;; Dynamic block for Column view
 
-(defun org-columns-capture-view (&optional maxlevel skip-empty-rows)
-  "Get the column view of the current buffer or subtree.
-The first optional argument MAXLEVEL sets the level limit.
-A second optional argument SKIP-EMPTY-ROWS tells whether to skip
+(defun org-columns--capture-view (maxlevel skip-empty format local)
+  "Get the column view of the current buffer.
+
+MAXLEVEL sets the level limit.  SKIP-EMPTY tells whether to skip
 empty rows, an empty row being one where all the column view
-specifiers but ITEM are empty.  This function returns a list
-containing the title row and all other rows.  Each row is a list
-of fields."
-  (save-excursion
-    (let* ((title (mapcar #'cadr org-columns-current-fmt-compiled))
-	   (has-item? (assoc-string "ITEM" org-columns-current-fmt-compiled t))
-	   (n (length title))
-	   tbl)
-      (goto-char (point-min))
-      (while (re-search-forward org-outline-regexp-bol nil t)
-	(catch 'next
-	  (when (and (or (null maxlevel)
-			 (>= maxlevel (org-reduced-level (org-outline-level))))
-		     (get-char-property (match-beginning 0) 'org-columns-key))
-	    (when (or (org-in-commented-heading-p t)
-		      (member org-archive-tag (org-get-tags)))
-	      (org-end-of-subtree t)
-	      (throw 'next t))
-	    (let (row)
-	      (dotimes (i n)
-		(let ((col (+ (line-beginning-position) i)))
-		  (push (org-quote-vert
-			 (or (get-char-property col 'org-columns-value-modified)
-			     (get-char-property col 'org-columns-value)
-			     ""))
-			row)))
-	      (unless (and skip-empty-rows
-			   (let ((r (delete-dups (remove "" row))))
-			     (or (null r) (and has-item? (= (length r) 1)))))
-		(push (nreverse row) tbl))))))
-      (append (list title 'hline) (nreverse tbl)))))
+specifiers but ITEM are empty.  FORMAT is a format string for
+columns, or nil.  When LOCAL is non-nil, only capture headings in
+current subtree.
+
+This function returns a list containing the title row and all
+other rows.  Each row is a list of fields, as strings, or
+`hline'."
+  (org-columns (not local) format)
+  (goto-char org-columns-top-level-marker)
+  (let ((columns (length org-columns-current-fmt-compiled))
+	(has-item (assoc-string "ITEM" org-columns-current-fmt-compiled t))
+	table)
+    (org-map-entries
+     (lambda ()
+       (when (get-char-property (point) 'org-columns-key)
+	 (let (row)
+	   (dotimes (i columns)
+	     (let* ((col (+ (line-beginning-position) i))
+		    (p (get-char-property col 'org-columns-key)))
+	       (push (org-quote-vert
+		      (get-char-property col
+					 (if (string= (upcase p) "ITEM")
+					     'org-columns-value
+					   'org-columns-value-modified)))
+		     row)))
+	   (unless (and skip-empty
+			(let ((r (delete-dups (remove "" row))))
+			  (or (null r) (and has-item (= (length r) 1)))))
+	     (push (cons (org-reduced-level (org-current-level)) (nreverse row))
+		   table)))))
+     (and maxlevel (format "LEVEL<=%d" maxlevel))
+     (and local 'tree)
+     'archive 'comment)
+    (org-columns-quit)
+    ;; Add column titles and a horizontal rule in front of the table.
+    (cons (mapcar #'cadr org-columns-current-fmt-compiled)
+	  (cons 'hline (nreverse table)))))
+
+(defun org-columns--clean-item (item)
+  "Remove sensitive contents from string ITEM.
+This includes objects that may not be duplicated within
+a document, e.g., a target, or those forbidden in tables, e.g.,
+an inline src-block."
+  (let ((data (org-element-parse-secondary-string
+	       item (org-element-restriction 'headline))))
+    (org-element-map data
+	'(footnote-reference inline-babel-call inline-src-block target
+			     radio-target statistics-cookie)
+      #'org-element-extract-element)
+    (org-no-properties (org-element-interpret-data data))))
 
 ;;;###autoload
 (defun org-dblock-write:columnview (params)
   "Write the column view table.
 PARAMS is a property list of parameters:
 
-:width    enforce same column widths with <N> specifiers.
 :id       the :ID: property of the entry where the columns view
 	  should be built.  When the symbol `local', call locally.
 	  When `global' call column view with the cursor at the beginning
@@ -1235,125 +1254,103 @@ PARAMS is a property list of parameters:
 	  using `org-id-find'.
 :hlines   When t, insert a hline before each item.  When a number, insert
 	  a hline before each level <= that number.
+:indent   When non-nil, indent each ITEM field according to its level.
 :vlines   When t, make each column a colgroup to enforce vertical lines.
 :maxlevel When set to a number, don't capture headlines below this level.
 :skip-empty-rows
 	  When t, skip rows where all specifiers other than ITEM are empty.
+:width    apply widths specified in columns format using <N> specifiers.
 :format   When non-nil, specify the column view format to use."
-  (let ((pos (point-marker))
-	(vlines (plist-get params :vlines))
-	(maxlevel (plist-get params :maxlevel))
-	(content-lines (org-split-string (plist-get params :content) "\n"))
-	(skip-empty-rows (plist-get params :skip-empty-rows))
-	(columns-fmt (plist-get params :format))
-	(case-fold-search t)
-	tbl id idpos nfields recalc line
-	id-as-string view-file view-pos)
-    (when (setq id (plist-get params :id))
-      (setq id-as-string (cond ((numberp id) (number-to-string id))
-			       ((symbolp id) (symbol-name id))
-			       ((stringp id) id)
-			       (t "")))
-      (cond ((not id) nil)
-	    ((eq id 'global) (setq view-pos (point-min)))
-	    ((eq id 'local))
-	    ((string-match "^file:\\(.*\\)" id-as-string)
-	     (setq view-file (match-string 1 id-as-string)
-		   view-pos 1)
-	     (unless (file-exists-p view-file)
-	       (error "No such file: \"%s\"" id-as-string)))
-	    ((setq idpos (org-find-entry-with-id id))
-	     (setq view-pos idpos))
-	    ((setq idpos (org-id-find id))
-	     (setq view-file (car idpos))
-	     (setq view-pos (cdr idpos)))
-	    (t (error "Cannot find entry with :ID: %s" id))))
-    (with-current-buffer (if view-file
-			     (get-file-buffer view-file)
-			   (current-buffer))
-      (org-with-wide-buffer
-       (goto-char (or view-pos (point)))
-       (org-columns columns-fmt)
-       (setq tbl (org-columns-capture-view maxlevel skip-empty-rows))
-       (setq nfields (length (car tbl)))
-       (org-columns-quit)))
-    (goto-char pos)
-    (move-marker pos nil)
-    (when tbl
-      ;; Normalize headings in the table.  Remove stars, add
-      ;; indentation entities, if required, and possibly precede some
-      ;; of them with a horizontal rule.
+  (let ((table
+	 (let ((id (plist-get params :id))
+	       view-file view-pos)
+	   (pcase id
+	     (`global nil)
+	     ((or `local `nil) (setq view-pos (point)))
+	     ((and (let id-string (format "%s" id))
+		   (guard (string-match "^file:\\(.*\\)" id-string)))
+	      (setq view-file (match-string-no-properties 1 id-string))
+	      (unless (file-exists-p view-file)
+		(user-error "No such file: %S" id-string)))
+	     ((and (let idpos (org-find-entry-with-id id)) idpos)
+	      (setq view-pos idpos))
+	     ((let `(,filename . ,position) (org-id-find id))
+	      (setq view-file filename)
+	      (setq view-pos position))
+	     (_ (user-error "Cannot find entry with :ID: %s" id)))
+	   (with-current-buffer (if view-file (get-file-buffer view-file)
+				  (current-buffer))
+	     (org-with-wide-buffer
+	      (when view-pos (goto-char view-pos))
+	      (org-columns--capture-view (plist-get params :maxlevel)
+					 (plist-get params :skip-empty-rows)
+					 (plist-get params :format)
+					 view-pos))))))
+    (when table
+      ;; Prune level information from the table.  Also normalize
+      ;; headings: remove stars, add indentation entities, if
+      ;; required, and possibly precede some of them with a horizontal
+      ;; rule.
       (let ((item-index
 	     (let ((p (assoc-string "ITEM" org-columns-current-fmt-compiled t)))
 	       (and p (cl-position p
 				   org-columns-current-fmt-compiled
 				   :test #'equal))))
 	    (hlines (plist-get params :hlines))
-	    (indent (plist-get params :indent)))
-	(when item-index
-	  (let (new-table)
-	    ;; Copy header and first rule.
-	    (push (pop tbl) new-table)
-	    (push (pop tbl) new-table)
-	    (while tbl
-	      (let ((row (car tbl)))
-		(if (eq row 'hline)
-		    (push (pop tbl) new-table)
-		  (let* ((item (nth item-index row))
-			 (level (and (string-match "\\`\\( *\\*+\\) +" item)
-				     ;; Leading white spaces are
-				     ;; actually stars made invisible
-				     ;; (see `org-columns') so they
-				     ;; add up to heading level.
-				     (org-reduced-level
-				      (- (match-end 1) (match-beginning 1))))))
-		    (when (and (not (eq (car new-table) 'hline))
-			       (or (eq hlines t)
-				   (and (numberp hlines) (<= level hlines))))
-		      (push 'hline new-table))
-		    (setf (nth item-index row)
-			  (replace-match
-			   (if (or (not indent) (= level 1)) ""
-			     (concat "\\\\_"
-				     (make-string (* 2 (1- level)) ?\s)))
-			   nil nil item))
-		    (push (pop tbl) new-table)))))
-	    (setq tbl (nreverse new-table)))))
-      (when vlines
-	(setq tbl (mapcar (lambda (x)
-			    (if (eq 'hline x) x (cons "" x)))
-			  tbl))
-	(setq tbl (append tbl (list (cons "/" (make-list nfields "<>"))))))
-      (when content-lines
-	(while (string-match "^#" (car content-lines))
-	  (insert (pop content-lines) "\n")))
-      (setq pos (point))
-      (insert (org-listtable-to-string tbl))
+	    (indent (plist-get params :indent))
+	    new-table)
+	;; Copy header and first rule.
+	(push (pop table) new-table)
+	(push (pop table) new-table)
+	(dolist (row table (setq table (nreverse new-table)))
+	  (let ((level (car row)))
+	    (when (and (not (eq (car new-table) 'hline))
+		       (or (eq hlines t)
+			   (and (numberp hlines) (<= level hlines))))
+	      (push 'hline new-table))
+	    (when item-index
+	      (let ((item (org-columns--clean-item (nth item-index (cdr row)))))
+		(setf (nth item-index (cdr row))
+		      (if (and indent (> level 1))
+			  (concat "\\_" (make-string (* 2 (1- level)) ?\s) item)
+			item))))
+	    (push (cdr row) new-table))))
       (when (plist-get params :width)
-	(insert "\n|" (mapconcat (lambda (x) (format "<%d>" (max 3 x)))
-				 org-columns-current-maxwidths "|")))
-      (while (setq line (pop content-lines))
-	(when (string-match "^#" line)
-	  (insert "\n" line)
-	  (when (string-match "^[ \t]*#\\+tblfm" line)
-	    (setq recalc t))))
-      (if recalc
-	  (progn (goto-char pos) (org-table-recalculate 'all))
-	(goto-char pos)
+	(setq table
+	      (append table
+		      (list
+		       (mapcar (lambda (spec)
+				 (let ((w (nth 2 spec)))
+				   (if w (format "<%d>" (max 3 w)) "")))
+			       org-columns-current-fmt-compiled)))))
+      (when (plist-get params :vlines)
+	(setq table
+	      (let ((size (length org-columns-current-fmt-compiled)))
+		(append (mapcar (lambda (x) (if (eq 'hline x) x (cons "" x)))
+				table)
+			(list (cons "/" (make-list size "<>")))))))
+      (let ((content-lines (org-split-string (plist-get params :content) "\n"))
+	    recalc)
+	;; Insert affiliated keywords before the table.
+	(when content-lines
+	  (while (string-match-p "\\`[ \t]*#\\+" (car content-lines))
+	    (insert (pop content-lines) "\n")))
+	(save-excursion
+	  ;; Insert table at point.
+	  (insert
+	   (mapconcat (lambda (row)
+			(if (eq row 'hline) "|-|"
+			  (format "|%s|" (mapconcat #'identity row "|"))))
+		      table
+		      "\n"))
+	  ;; Insert TBLFM lines following table.
+	  (let ((case-fold-search t))
+	    (dolist (line content-lines)
+	      (when (string-match-p "\\`[ \t]*#\\+TBLFM:" line)
+		(insert "\n" line)
+		(unless recalc (setq recalc t))))))
+	(when recalc (org-table-recalculate 'all t))
 	(org-table-align)))))
-
-(defun org-listtable-to-string (tbl)
-  "Convert a listtable TBL to a string that contains the Org-mode table.
-The table still need to be aligned.  The resulting string has no leading
-and tailing newline characters."
-  (mapconcat
-   (lambda (x)
-     (cond
-      ((listp x)
-       (concat "|" (mapconcat 'identity x "|") "|"))
-      ((eq x 'hline) "|-|")
-      (t (error "Garbage in listtable: %s" x))))
-   tbl "\n"))
 
 ;;;###autoload
 (defun org-insert-columns-dblock ()
@@ -1370,6 +1367,8 @@ and tailing newline characters."
     (org-create-dblock defaults)
     (org-update-dblock)))
 
+
+
 ;;; Column view in the agenda
 
 ;;;###autoload
