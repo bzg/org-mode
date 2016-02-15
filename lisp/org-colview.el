@@ -1039,19 +1039,6 @@ display, or in the #+COLUMNS line of the current buffer."
     (move-to-column col))
   (message "Recomputing columns...done"))
 
-(defun org-columns-not-in-agenda ()
-  (if (eq major-mode 'org-agenda-mode)
-      (error "This command is only allowed in Org-mode buffers")))
-
-(defun org-string-to-number (s)
-  "Convert string to number, and interpret hh:mm:ss."
-  (if (not (string-match ":" s))
-      (string-to-number s)
-    (let ((l (nreverse (org-split-string s ":"))) (sum 0.0))
-      (while l
-	(setq sum (+ (string-to-number (pop l)) (/ sum 60))))
-      sum)))
-
 ;;;###autoload
 (defun org-columns-number-to-string (n fmt &optional printf)
   "Convert a computed column number N to a string value.
