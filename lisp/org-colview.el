@@ -916,13 +916,11 @@ display, or in the #+COLUMNS line of the current buffer."
   "Compute all columns that have operators defined."
   (org-with-silent-modifications
    (remove-text-properties (point-min) (point-max) '(org-summaries t)))
-  (let ((columns org-columns-current-fmt-compiled)
-	(org-columns-time (time-to-number-of-days (current-time)))
-	col)
-    (while (setq col (pop columns))
-      (when (nth 3 col)
-	(save-excursion
-	  (org-columns-compute (car col)))))))
+  (let ((org-columns-time (time-to-number-of-days (current-time))))
+    (dolist (spec org-columns-current-fmt-compiled)
+      (pcase spec
+	(`(,property ,_ ,_ ,operator . ,_)
+	 (when operator (save-excursion (org-columns-compute property))))))))
 
 (defun org-columns-update (property)
   "Recompute PROPERTY, and update the columns display for it."
@@ -1056,9 +1054,11 @@ display, or in the #+COLUMNS line of the current buffer."
 
 ;;;###autoload
 (defun org-columns-number-to-string (n fmt &optional printf)
-  "Convert a computed column number to a string value, according to FMT."
+  "Convert a computed column number N to a string value.
+FMT is a symbol describing the summary type.  Optional argument
+PRINTF, when non-nil, is a format string used to print N."
   (cond
-   ((memq fmt '(estimate)) (org-estimate-print n printf))
+   ((eq fmt 'estimate) (org-estimate-print n printf))
    ((not (numberp n)) "")
    ((memq fmt '(add_times max_times min_times mean_times))
     (org-hours-to-clocksum-string n))
@@ -1067,20 +1067,21 @@ display, or in the #+COLUMNS line of the current buffer."
 	  ((> n 1.) "[-]")
 	  (t "[ ]")))
    ((memq fmt '(checkbox-n-of-m checkbox-percent))
-    (let* ((n1 (floor n)) (n2 (floor (+ .5 (* 1000000 (- n n1))))))
-      (org-nofm-to-completion n1 (+ n2 n1) (eq fmt 'checkbox-percent))))
+    (let* ((n1 (floor n))
+	   (n2 (+ (floor (+ .5 (* 1000000 (- n n1)))) n1)))
+      (cond ((not (eq fmt 'checkbox-percent)) (format "[%d/%d]" n1 n2))
+	    ((or (= n1 0) (= n2 0)) "[0%]")
+	    (t (format "[%d%%]" (round (* 100.0 n1) n2))))))
    (printf (format printf n))
-   ((eq fmt 'currency)
-    (format "%.2f" n))
+   ((eq fmt 'currency) (format "%.2f" n))
    ((memq fmt '(min_age max_age mean_age))
-    (org-format-time-period n))
+    (let* ((days (floor n))
+	   (frac-hours (* 24 (- n days)))
+	   (hours (floor frac-hours))
+	   (minutes (floor (* 60 (- frac-hours hours))))
+	   (seconds (floor (* 60 (- (* 60 (- frac-hours hours)) minutes)))))
+      (format "%dd %02dh %02dm %02ds" days hours minutes seconds)))
    (t (number-to-string n))))
-
-(defun org-nofm-to-completion (n m &optional percent)
-  (if (not percent)
-      (format "[%d/%d]" n m)
-    (format "[%d%%]" (round (* 100.0 n) m))))
-
 
 (defun org-columns-string-to-number (s fmt)
   "Convert a column value to a number that can be used for column computing."
@@ -1526,17 +1527,6 @@ This will add overlays to the date lines, to show the summary for each day."
 						t))
 			  (equal (nth 4 a) (nth 4 fm)))
 		     (org-columns-compute (car fm)))))))))))
-
-(defun org-format-time-period (interval)
-  "Convert time in fractional days to days/hours/minutes/seconds."
-  (if (numberp interval)
-      (let* ((days (floor interval))
-	     (frac-hours (* 24 (- interval days)))
-	     (hours (floor frac-hours))
-	     (minutes (floor (* 60 (- frac-hours hours))))
-	     (seconds (floor (* 60 (- (* 60 (- frac-hours hours)) minutes)))))
-	(format "%dd %02dh %02dm %02ds" days hours minutes seconds))
-    ""))
 
 (defun org-estimate-mean-and-var (v)
   "Return the mean and variance of an estimate."
