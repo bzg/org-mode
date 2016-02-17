@@ -5636,7 +5636,12 @@ optional.  The individual parts have the following meaning:
                 @{:min@}    @r{Smallest time value in column.}
                 @{:max@}    @r{Largest time value.}
                 @{:mean@}   @r{Arithmetic mean of time values.}
-                @{@@min@}    @r{Minimum age (in days/hours/mins/seconds).}
+                @{@@min@}    @r{Minimum age (in
+                days/hours/mins/seconds@footnote{Days, hours, minutes and
+                seconds are represented with, respectively, @samp{d},
+                @samp{h}, @samp{m} and @samp{s} suffixes, e.g., @samp{13h
+                10s}.  Alternatively, an age can be defined as a duration
+                since a given time-stamp (@pxref{Timestamps}).}).}
                 @{@@max@}    @r{Maximum age (in days/hours/mins/seconds).}
                 @{@@mean@}   @r{Arithmetic mean of ages (in days/hours/mins/seconds).}
                 @{est+@}    @r{Add @samp{low-high} estimates.}

@@ -60,7 +60,8 @@ or nil if the normal value should be used."
 (defvar org-columns-overlays nil
   "Holds the list of current column overlays.")
 
-(defvar org-columns-time)
+(defvar org-columns--time 0.0
+  "Number of seconds since the epoch, as a floating point number.")
 
 (defvar-local org-columns-current-fmt nil
   "Local variable, holds the currently active column format.")
@@ -73,6 +74,10 @@ This is the compiled version of the format.")
   "Points to the position where last a column creation command was called.")
 (defvar org-columns-top-level-marker (make-marker)
   "Points to the position where current columns region starts.")
+
+(defconst org-columns--fractional-duration-re
+  (concat "[0-9.]+ *" (regexp-opt (mapcar #'car org-effort-durations)))
+  "Regexp matching a duration.")
 
 (defvar org-columns-map (make-sparse-keymap)
   "The keymap valid in column display.")
@@ -471,7 +476,7 @@ Where possible, use the standard interface for changing this line."
 	 (bol (point-at-bol)) (eol (point-at-eol))
 	 (pom (or (get-text-property bol 'org-hd-marker)
 		  (point)))	     ; keep despite of compiler waring
-	 (org-columns-time (time-to-number-of-days (current-time)))
+	 (org-columns--time (float-time (current-time)))
 	 nval eval allowed)
     (cond
      ((equal key "CLOCKSUM")
@@ -718,39 +723,39 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
   (org-columns-goto-top-level)
   ;; Initialize `org-columns-current-fmt' and
   ;; `org-columns-current-fmt-compiled'.
-  (let ((org-columns-time (time-to-number-of-days (current-time))))
-    (org-columns-get-format columns-fmt-string))
-  (unless org-columns-inhibit-recalculation (org-columns-compute-all))
-  (save-excursion
-    (save-restriction
-      (when (and (not global) (org-at-heading-p))
-	(narrow-to-region (point) (org-end-of-subtree t t)))
-      (when (assoc-string "CLOCKSUM" org-columns-current-fmt-compiled t)
-	(org-clock-sum))
-      (when (assoc-string "CLOCKSUM_T" org-columns-current-fmt-compiled t)
-	(org-clock-sum-today))
-      (let ((cache
-	     ;; Collect contents of columns ahead of time so as to
-	     ;; compute their maximum width.
-	     (org-map-entries
-	      (lambda () (cons (point) (org-columns--collect-values)))
-	      nil nil (and org-columns-skip-archived-trees 'archive))))
-	(when cache
-	  (setq-local org-columns-current-maxwidths
-		      (org-columns--autowidth-alist cache))
-	  (org-columns--display-here-title)
-	  (when (setq-local org-columns-flyspell-was-active
-			    (org-bound-and-true-p flyspell-mode))
-	    (flyspell-mode 0))
-	  (unless (local-variable-p 'org-colview-initial-truncate-line-value)
-	    (setq-local org-colview-initial-truncate-line-value
-			truncate-lines))
-	  (setq truncate-lines t)
-	  (dolist (entry cache)
-	    (goto-char (car entry))
-	    (org-columns--display-here (cdr entry))))))))
+  (let ((org-columns--time (float-time (current-time))))
+    (org-columns-get-format columns-fmt-string)
+    (unless org-columns-inhibit-recalculation (org-columns-compute-all))
+    (save-excursion
+      (save-restriction
+	(when (and (not global) (org-at-heading-p))
+	  (narrow-to-region (point) (org-end-of-subtree t t)))
+	(when (assoc-string "CLOCKSUM" org-columns-current-fmt-compiled t)
+	  (org-clock-sum))
+	(when (assoc-string "CLOCKSUM_T" org-columns-current-fmt-compiled t)
+	  (org-clock-sum-today))
+	(let ((cache
+	       ;; Collect contents of columns ahead of time so as to
+	       ;; compute their maximum width.
+	       (org-map-entries
+		(lambda () (cons (point) (org-columns--collect-values)))
+		nil nil (and org-columns-skip-archived-trees 'archive))))
+	  (when cache
+	    (setq-local org-columns-current-maxwidths
+			(org-columns--autowidth-alist cache))
+	    (org-columns--display-here-title)
+	    (when (setq-local org-columns-flyspell-was-active
+			      (org-bound-and-true-p flyspell-mode))
+	      (flyspell-mode 0))
+	    (unless (local-variable-p 'org-colview-initial-truncate-line-value)
+	      (setq-local org-colview-initial-truncate-line-value
+			  truncate-lines))
+	    (setq truncate-lines t)
+	    (dolist (entry cache)
+	      (goto-char (car entry))
+	      (org-columns--display-here (cdr entry)))))))))
 
-(defvar org-columns-compile-map
+(defconst org-columns-compile-map
   '(("none" none +)
     (":" add_times +)
     ("+" add_numbers +)
@@ -760,17 +765,13 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
     ("X%" checkbox-percent +)
     ("max" max_numbers max)
     ("min" min_numbers min)
-    ("mean" mean_numbers
-     (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
+    ("mean" mean_numbers (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
     (":max" max_times max)
     (":min" min_times min)
-    (":mean" mean_times
-     (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
-    ("@min" min_age min (lambda (x) (- org-columns-time x)))
-    ("@max" max_age max (lambda (x) (- org-columns-time x)))
-    ("@mean" mean_age
-     (lambda (&rest x) (/ (apply '+ x) (float (length x))))
-     (lambda (x) (- org-columns-time x)))
+    (":mean" mean_times (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
+    ("@min" min_age min)
+    ("@max" max_age max)
+    ("@mean" mean_age (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
     ("est+" estimate org-estimate-combine))
   "Operator <-> format,function,calc  map.
 Used to compile/uncompile columns format and completing read in
@@ -916,7 +917,7 @@ display, or in the #+COLUMNS line of the current buffer."
   "Compute all columns that have operators defined."
   (org-with-silent-modifications
    (remove-text-properties (point-min) (point-max) '(org-summaries t)))
-  (let ((org-columns-time (time-to-number-of-days (current-time))))
+  (let ((org-columns--time (float-time (current-time))))
     (dolist (spec org-columns-current-fmt-compiled)
       (pcase spec
 	(`(,property ,_ ,_ ,operator . ,_)
@@ -1062,46 +1063,40 @@ PRINTF, when non-nil, is a format string used to print N."
    (printf (format printf n))
    ((eq fmt 'currency) (format "%.2f" n))
    ((memq fmt '(min_age max_age mean_age))
-    (let* ((days (floor n))
-	   (frac-hours (* 24 (- n days)))
-	   (hours (floor frac-hours))
-	   (minutes (floor (* 60 (- frac-hours hours))))
-	   (seconds (floor (* 60 (- (* 60 (- frac-hours hours)) minutes)))))
-      (format "%dd %02dh %02dm %02ds" days hours minutes seconds)))
+    (format-seconds "%dd %.2hh %mm %ss" n))
    (t (number-to-string n))))
 
 (defun org-columns-string-to-number (s fmt)
-  "Convert a column value to a number that can be used for column computing."
-  (if s
-      (cond
-       ((memq fmt '(min_age max_age mean_age))
-        (cond ((string= s "") org-columns-time)
-              ((string-match
-                "\\([0-9]+\\)d \\([0-9]+\\)h \\([0-9]+\\)m \\([0-9]+\\)s"
-                s)
-               (+ (* 60 (+ (* 60 (+ (* 24 (string-to-number (match-string 1 s)))
-                                    (string-to-number (match-string 2 s))))
-                           (string-to-number (match-string 3 s))))
-                  (string-to-number (match-string 4 s))))
-              (t (time-to-number-of-days (apply 'encode-time
-                                                (org-parse-time-string s t))))))
-       ((string-match ":" s)
-        (let ((l (nreverse (org-split-string s ":"))) (sum 0.0))
-          (while l
-            (setq sum (+ (string-to-number (pop l)) (/ sum 60))))
-          sum))
-       ((memq fmt '(checkbox checkbox-n-of-m checkbox-percent))
-        (if (equal s "[X]") 1. 0.000001))
-       ((memq fmt '(estimate)) (org-string-to-estimate s))
-       ((string-match (concat "\\([0-9.]+\\) *\\("
-			      (regexp-opt (mapcar 'car org-effort-durations))
-			      "\\)") s)
-	(setq s (concat "0:" (org-duration-string-to-minutes s t)))
-        (let ((l (nreverse (org-split-string s ":"))) (sum 0.0))
-          (while l
-            (setq sum (+ (string-to-number (pop l)) (/ sum 60))))
-          sum))
-       (t (string-to-number s)))))
+  "Convert a column value S to a number.
+FMT is a symbol describing the summary type."
+  (cond
+   ((not s) nil)
+   ((memq fmt '(min_age max_age mean_age))
+    (cond
+     ((string= s "") org-columns--time)
+     ((string-match "\\`\\(?: *\\([0-9]+\\)d\\)?\\(?: *\\([0-9]+\\)h\\)?\
+\\(?: *\\([0-9]+\\)m\\)?\\(?: *\\([0-9]+\\)s\\)?\\'" s)
+      (let ((d (if (match-end 1) (string-to-number (match-string 1 s)) 0))
+	    (h (if (match-end 2) (string-to-number (match-string 2 s)) 0))
+	    (m (if (match-end 3) (string-to-number (match-string 3 s)) 0))
+	    (s (if (match-end 4) (string-to-number (match-string 4 s)) 0)))
+	(+ (* 60 (+ (* 60 (+ (* 24 d) h)) m)) s)))
+     (t
+      (- org-columns--time
+	 (float-time (apply #'encode-time (org-parse-time-string s)))))))
+   ((string-match-p ":" s)		;Interpret HH:MM:SS.
+    (let ((sum 0.0))
+      (dolist (n (nreverse (split-string s ":")) sum)
+	(setq sum (+ (string-to-number n) (/ sum 60))))))
+   ((memq fmt '(checkbox checkbox-n-of-m checkbox-percent))
+    (if (equal s "[X]") 1. 0.000001))
+   ((eq fmt 'estimate) (org-string-to-estimate s))
+   ((string-match-p org-columns--fractional-duration-re s)
+    (let ((s (concat "0:" (org-duration-string-to-minutes s t)))
+	  (sum 0.0))
+      (dolist (n (nreverse (split-string s ":")) sum)
+	(setq sum (+ (string-to-number n) (/ sum 60))))))
+   (t (string-to-number s))))
 
 (defun org-columns-uncompile-format (cfmt)
   "Turn the compiled columns format back into a string representation."
@@ -1365,7 +1360,7 @@ PARAMS is a property list of parameters:
   (interactive)
   (org-columns-remove-overlays)
   (move-marker org-columns-begin-marker (point))
-  (let ((org-columns-time (time-to-number-of-days (current-time)))
+  (let ((org-columns--time (float-time (current-time)))
 	(fmt
 	 (cond
 	  ((org-bound-and-true-p org-agenda-overriding-columns-format))
