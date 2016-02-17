@@ -770,7 +770,7 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
     ("@min" min_age min)
     ("@max" max_age max)
     ("@mean" mean_age (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
-    ("est+" estimate org-estimate-combine))
+    ("est+" estimate org-columns--estimate-combine))
   "Operator <-> format,function map.
 Used to compile/uncompile columns format and completing read in
 interactive function `org-columns-new'.
@@ -970,19 +970,21 @@ display, or in the #+COLUMNS line of the current buffer."
 			     level last-level)
 	      level (org-outline-level)
 	      val (org-entry-get nil property)
-	      valflag (and val (string-match "\\S-" val)))
+	      valflag (org-string-nw-p val))
 	(cond
 	 ((< level last-level)
 	  ;; Put the sum of lower levels here as a property.  If
-	  ;; values are estimate, use an appropriate sum function.
-	  (setq sum (funcall
-		     (if (eq fun 'org-estimate-combine) #'org-estimate-combine
-		       #'+)
-		     (if (and (/= last-level inminlevel)
-			      (aref lvals last-level))
-			 (apply fun (aref lvals last-level)) 0)
-		     (if (aref lvals inminlevel)
-			 (apply fun (aref lvals inminlevel)) 0))
+	  ;; values are estimates, use an appropriate sum function.
+	  (setq sum (funcall (if (eq fun 'org-columns--estimate-combine)
+				 #'org-columns--estimate-combine
+			       #'+)
+			     (if (and (/= last-level inminlevel)
+				      (aref lvals last-level))
+				 (apply fun (aref lvals last-level))
+			       0)
+			     (if (aref lvals inminlevel)
+				 (apply fun (aref lvals inminlevel))
+			       0))
 		flag (or (aref lflag last-level) ; any valid entries from children?
 			 (aref lflag inminlevel)) ; or inline tasks?
 		str (org-columns-number-to-string sum format printf)
@@ -1037,7 +1039,9 @@ display, or in the #+COLUMNS line of the current buffer."
 FMT is a symbol describing the summary type.  Optional argument
 PRINTF, when non-nil, is a format string used to print N."
   (cond
-   ((eq fmt 'estimate) (org-estimate-print n printf))
+   ((eq fmt 'estimate)
+    (let ((fmt (or printf "%.0f")))
+      (mapconcat (lambda (n) (format fmt n)) (if (consp n) n (list n n)) "-")))
    ((not (numberp n)) "")
    ((memq fmt '(add_times max_times min_times mean_times))
     (org-hours-to-clocksum-string n))
@@ -1056,6 +1060,22 @@ PRINTF, when non-nil, is a format string used to print N."
    ((memq fmt '(min_age max_age mean_age))
     (format-seconds "%dd %.2hh %mm %ss" n))
    (t (number-to-string n))))
+
+(defun org-columns--estimate-combine (&rest estimates)
+  "Combine a list of estimates, using mean and variance.
+The mean and variance of the result will be the sum of the means
+and variances (respectively) of the individual estimates."
+  (let ((mean 0)
+        (var 0))
+    (dolist (e estimates)
+      (pcase e
+	(`(,low ,high)
+	 (let ((m (/ (+ low high) 2.0)))
+	   (cl-incf mean m)
+	   (cl-incf var (- (/ (+ (* low low) (* high high)) 2.0) (* m m)))))
+	(value (cl-incf mean value))))
+    (let ((sd (sqrt var)))
+      (list (- mean sd) (+ mean sd)))))
 
 (defun org-columns-string-to-number (s fmt)
   "Convert a column value S to a number.
@@ -1081,7 +1101,11 @@ FMT is a symbol describing the summary type."
 	(setq sum (+ (string-to-number n) (/ sum 60))))))
    ((memq fmt '(checkbox checkbox-n-of-m checkbox-percent))
     (if (equal s "[X]") 1. 0.000001))
-   ((eq fmt 'estimate) (org-string-to-estimate s))
+   ((eq fmt 'estimate)
+    (if (not (string-match "\\(.*\\)-\\(.*\\)" s))
+	(string-to-number s)
+      (list (string-to-number (match-string 1 s))
+	    (string-to-number (match-string 2 s)))))
    ((string-match-p org-columns--fractional-duration-re s)
     (let ((s (concat "0:" (org-duration-string-to-minutes s t)))
 	  (sum 0.0))
@@ -1495,47 +1519,6 @@ This will add overlays to the date lines, to show the summary for each day."
 			  (equal (nth 4 a) (nth 4 fm)))
 		     (org-columns-compute (car fm)))))))))))
 
-(defun org-estimate-mean-and-var (v)
-  "Return the mean and variance of an estimate."
-  (let* ((v (cond ((consp v) v)
-		  ((numberp v) (list v v))
-		  (t (error "Invalid estimate type"))))
-	 (low (float (car v)))
-         (high (float (cadr v)))
-         (mean (/ (+ low high) 2.0))
-         (var (/ (+ (expt (- mean low) 2.0) (expt (- high mean) 2.0)) 2.0)))
-    (list  mean var)))
-
-(defun org-estimate-combine (&rest el)
-  "Combine a list of estimates, using mean and variance.
-The mean and variance of the result will be the sum of the means
-and variances (respectively) of the individual estimates."
-  (let ((mean 0)
-        (var 0))
-    (mapc (lambda (e)
-	    (let ((stats (org-estimate-mean-and-var e)))
-	      (setq mean (+ mean (car stats)))
-	      (setq var (+ var (cadr stats)))))
-	  el)
-    (let ((stdev (sqrt var)))
-      (list (- mean stdev) (+ mean stdev)))))
-
-(defun org-estimate-print (e &optional fmt)
-  "Prepare a string representation of an estimate.
-This formats these numbers as two numbers with a \"-\" between them."
-  (let ((fmt (or fmt "%.0f"))
-	(e (cond ((consp e) e)
-		 ((numberp e) (list e e))
-		 (t (error "Invalid estimate type")))))
-    (format "%s" (mapconcat (lambda (n) (format fmt n)) e "-"))))
-
-(defun org-string-to-estimate (s)
-  "Convert a string to an estimate.
-The string should be two numbers joined with a \"-\"."
-  (if (string-match "\\(.*\\)-\\(.*\\)" s)
-      (list (string-to-number (match-string 1 s))
-	    (string-to-number(match-string 2 s)))
-    (list (string-to-number s) (string-to-number s))))
 
 (provide 'org-colview)
 

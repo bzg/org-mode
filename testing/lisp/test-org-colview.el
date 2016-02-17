@@ -452,6 +452,37 @@
 :A: 5d 3h
 :END:"
       (let ((org-columns-default-format "%A{@min}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  ;; {est+} gives a low-high estimate using mean and standard
+  ;; deviation.
+  (should
+   (equal
+    "3-17"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 0-10
+:END:
+** S1
+:PROPERTIES:
+:A: 0-10
+:END:"
+      (let ((org-columns-default-format "%A{est+}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  ;; When using {est+} summary, a single number is understood as
+  ;; a degenerate range.
+  (should
+   (equal
+    "4-4"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 4
+:END:
+"
+      (let ((org-columns-default-format "%A{est+}")) (org-columns))
       (get-char-property (point) 'org-columns-value-modified)))))
 
 
