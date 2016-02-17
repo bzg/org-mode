@@ -21,6 +21,8 @@
 
 ;;; Column view
 
+(require 'cl-lib)
+
 (ert-deftest test-org-colview/columns-scope ()
   "Test `org-columns' scope."
   ;; Before the first headline, view all document.
@@ -118,6 +120,339 @@
 		  (org-columns-ellipses "…"))
 	      (org-columns))
 	    (org-trim (get-char-property (point) 'display))))))
+
+(ert-deftest test-org-colview/columns-summary ()
+  "Test `org-columns' summary types."
+  ;; {+} and {+;format} add numbers.
+  (should
+   (equal
+    "3"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 1
+:END:
+** S1
+:PROPERTIES:
+:A: 2
+:END:"
+      (let ((org-columns-default-format "%A{+}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  (should
+   (equal
+    "3.0"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 1
+:END:
+** S1
+:PROPERTIES:
+:A: 2
+:END:"
+      (let ((org-columns-default-format "%A{+;%.1f}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  ;; {$} is a shortcut for {+;%.2f}.
+  (should
+   (equal
+    "3.60"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 1.50
+:END:
+** S1
+:PROPERTIES:
+:A: 2.10
+:END:"
+      (let ((org-columns-default-format "%A{$}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  ;; {:} sums times.  Plain numbers are hours.
+  (should
+   (equal
+    "4:10"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 1:30
+:END:
+** S1
+:PROPERTIES:
+:A: 2:40
+:END:"
+      (let ((org-columns-default-format "%A{:}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  (should
+   (equal
+    "3:30"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 1:30
+:END:
+** S1
+:PROPERTIES:
+:A: 2
+:END:"
+      (let ((org-columns-default-format "%A{:}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  ;; {X}, {X/} and {X%} indicate checkbox status.
+  (should
+   (equal
+    "[ ]"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: [ ]
+:END:
+** S1
+:PROPERTIES:
+:A: [ ]
+:END:"
+      (let ((org-columns-default-format "%A{X}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  (should
+   (equal
+    "[-]"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: [ ]
+:END:
+** S1
+:PROPERTIES:
+:A: [X]
+:END:"
+      (let ((org-columns-default-format "%A{X}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  (should
+   (equal
+    "[X]"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: [X]
+:END:
+** S1
+:PROPERTIES:
+:A: [X]
+:END:"
+      (let ((org-columns-default-format "%A{X}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  (should
+   (equal
+    "[1/2]"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: [ ]
+:END:
+** S1
+:PROPERTIES:
+:A: [X]
+:END:"
+      (let ((org-columns-default-format "%A{X/}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  (should
+   (equal
+    "[50%]"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: [ ]
+:END:
+** S1
+:PROPERTIES:
+:A: [X]
+:END:"
+      (let ((org-columns-default-format "%A{X%}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  ;; {min} is the smallest number in column, {max} the largest one.
+  ;; {mean} is the arithmetic mean of numbers in column.
+  (should
+   (equal
+    "42"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 99
+:END:
+** S1
+:PROPERTIES:
+:A: 42
+:END:"
+      (let ((org-columns-default-format "%A{min}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  (should
+   (equal
+    "99"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 99
+:END:
+** S1
+:PROPERTIES:
+:A: 42
+:END:"
+      (let ((org-columns-default-format "%A{max}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  (should
+   (equal
+    "51.0"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 60
+:END:
+** S1
+:PROPERTIES:
+:A: 42
+:END:"
+      (let ((org-columns-default-format "%A{mean}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  ;; {:min}, {:max} and {:mean} apply to time values.
+  (should
+   (equal
+    "1:20"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 4:40
+:END:
+** S1
+:PROPERTIES:
+:A: 1:20
+:END:"
+      (let ((org-columns-default-format "%A{:min}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  (should
+   (equal
+    "4:40"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 4:40
+:END:
+** S1
+:PROPERTIES:
+:A: 1:20
+:END:"
+      (let ((org-columns-default-format "%A{:max}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  (should
+   (equal
+    "3:00"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 4:40
+:END:
+** S1
+:PROPERTIES:
+:A: 1:20
+:END:"
+      (let ((org-columns-default-format "%A{:mean}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  ;; {@min}, {@max} and {@mean} apply to ages.
+  (should
+   (equal
+    (org-columns-number-to-string
+     (float-time
+      (time-subtract
+       (current-time)
+       (apply #'encode-time (org-parse-time-string "<2014-03-04 Tue>"))))
+     'min_age)
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: <2012-03-29 Thu>
+:END:
+** S1
+:PROPERTIES:
+:A: <2014-03-04 Tue>
+:END:"
+      (let ((org-columns-default-format "%A{@min}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  (should
+   (equal
+    (org-columns-number-to-string
+     (float-time
+      (time-subtract
+       (current-time)
+       (apply #'encode-time (org-parse-time-string "<2012-03-29 Thu>"))))
+     'max_age)
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: <2012-03-29 Thu>
+:END:
+** S1
+:PROPERTIES:
+:A: <2014-03-04 Tue>
+:END:"
+      (let ((org-columns-default-format "%A{@max}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  (should
+   (equal
+    (org-columns-number-to-string
+     (/ (+ (float-time
+	    (time-subtract
+	     (current-time)
+	     (apply #'encode-time (org-parse-time-string "<2014-03-04 Tue>"))))
+	   (float-time
+	    (time-subtract
+	     (current-time)
+	     (apply #'encode-time (org-parse-time-string "<2012-03-29 Thu>")))))
+	2)
+     'mean_age)
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: <2012-03-29 Thu>
+:END:
+** S1
+:PROPERTIES:
+:A: <2014-03-04 Tue>
+:END:"
+      (let ((org-columns-default-format "%A{@mean}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  ;; @min, @max and @mean also accept regular duration in
+  ;; a "?d ?h ?m ?s" format.
+  (should
+   (equal
+    "1d 10h 0m 0s"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 1d 10h
+:END:
+** S1
+:PROPERTIES:
+:A: 5d 3h
+:END:"
+      (let ((org-columns-default-format "%A{@min}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified)))))
 
 
 
