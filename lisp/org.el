@@ -19905,7 +19905,7 @@ boundaries."
 (org-defkey org-mode-map "\C-c\C-xe"    'org-set-effort)
 (org-defkey org-mode-map "\C-c\C-xE"    'org-inc-effort)
 (org-defkey org-mode-map "\C-c\C-xo"    'org-toggle-ordered-property)
-(org-defkey org-mode-map "\C-c\C-xi"    'org-insert-columns-dblock)
+(org-defkey org-mode-map "\C-c\C-xi"    'org-columns-insert-dblock)
 (org-defkey org-mode-map [(control ?c) (control ?x) ?\;] 'org-timer-set-timer)
 
 (org-defkey org-mode-map "\C-c\C-x."    'org-timer)
@@ -21757,7 +21757,7 @@ on context.  See the individual commands for more information."
      "--"
      ["Set property" org-set-property (not (org-before-first-heading-p))]
      ["Column view of properties" org-columns t]
-     ["Insert Column View DBlock" org-insert-columns-dblock t])
+     ["Insert Column View DBlock" org-columns-insert-dblock t])
     ("Dates and Scheduling"
      ["Timestamp" org-time-stamp (not (org-before-first-heading-p))]
      ["Timestamp (inactive)" org-time-stamp-inactive (not (org-before-first-heading-p))]

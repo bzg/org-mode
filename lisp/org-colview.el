@@ -1322,19 +1322,23 @@ PARAMS is a property list of parameters:
 	(org-table-align)))))
 
 ;;;###autoload
-(defun org-insert-columns-dblock ()
+(defun org-columns-insert-dblock ()
   "Create a dynamic block capturing a column view table."
   (interactive)
-  (let ((defaults '(:name "columnview" :hlines 1))
-	(id (completing-read
+  (let ((id (completing-read
 	     "Capture columns (local, global, entry with :ID: property) [local]: "
 	     (append '(("global") ("local"))
 		     (mapcar #'list (org-property-values "ID"))))))
-    (if (equal id "") (setq id 'local))
-    (if (equal id "global") (setq id 'global))
-    (setq defaults (append defaults (list :id id)))
-    (org-create-dblock defaults)
-    (org-update-dblock)))
+    (org-create-dblock
+     (list :name "columnview"
+	   :hlines 1
+	   :id (cond ((string= id "global") 'global)
+		     ((member id '("" "local")) 'local)
+		     (id)))))
+  (org-update-dblock))
+
+(define-obsolete-function-alias 'org-insert-columns-dblock
+  'org-columns-insert-dblock "Org 9.0")
 
 
 

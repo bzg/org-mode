@@ -308,8 +308,9 @@ Variable ~org-html-table-row-tags~ has been split into
 ~org-html-table-row-open-tag~ and ~org-html-table-row-close-tag~.
 Both new variables can be either a string or a function which will be
 called with 6 parameters.
-
 *** =ITEM= special property returns headline without stars
+*** Rename ~org-insert-columns-dblock~ into ~org-columns-insert-dblock~
+The previous name is, for the time being, kept as an obsolete alias.
 * Version 8.3
 
 ** Incompatible changes
