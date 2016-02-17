@@ -172,7 +172,7 @@ VALUE is the real value of the property, as a string.
 This function assumes `org-columns-current-fmt-compiled' is
 initialized."
   (pcase (assoc-string property org-columns-current-fmt-compiled t)
-    (`(,_ ,_ ,_ ,_ ,fmt ,printf ,_ ,calc)
+    (`(,_ ,_ ,_ ,_ ,fmt ,printf ,_)
      (cond
       ((and (functionp org-columns-modify-value-for-display-function)
 	    (funcall
@@ -186,11 +186,6 @@ initialized."
 	       (org-columns-compact-links value)))
       (printf (org-columns-number-to-string
 	       (org-columns-string-to-number value fmt) fmt printf))
-      ((and (functionp calc)
-	    (not (string= value ""))
-	    (not (get-text-property 0 'org-computed value)))
-       (org-columns-number-to-string
-	(funcall calc (org-columns-string-to-number value fmt)) fmt))
       (value)))))
 
 (defun org-columns--collect-values (&optional agenda)
@@ -773,7 +768,7 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
     ("@max" max_age max)
     ("@mean" mean_age (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
     ("est+" estimate org-estimate-combine))
-  "Operator <-> format,function,calc  map.
+  "Operator <-> format,function map.
 Used to compile/uncompile columns format and completing read in
 interactive function `org-columns-new'.
 
@@ -784,9 +779,7 @@ format      symbol describing summary type selected interactively in
 	    `org-columns-number-to-string' and
 	    `org-columns-string-to-number'
 function    called with a list of values as argument to calculate
-	    the summary value
-calc        function called on every element before summarizing.  This is
-	    optional and should only be specified if needed")
+	    the summary value")
 
 (defun org-columns-new (&optional prop title width _op fmt fun &rest _rest)
   "Insert a new column, to the left of the current column."
@@ -958,7 +951,6 @@ display, or in the #+COLUMNS line of the current buffer."
 	 (format (nth 4 ass))
 	 (printf (nth 5 ass))
 	 (fun (nth 6 ass))
-	 (calc (or (nth 7 ass) 'identity))
 	 (beg org-columns-top-level-marker)
 	 (inminlevel org-inlinetask-min-level)
 	 (last-level org-inlinetask-min-level)
@@ -1004,10 +996,7 @@ display, or in the #+COLUMNS line of the current buffer."
 	    (org-entry-put nil property (if flag str val)))
 	  ;; add current to current level accumulator
 	  (when (or flag valflag)
-	    (push (if flag
-		      sum
-		    (funcall calc (org-columns-string-to-number
-				   (if flag str val) format)))
+	    (push (if flag sum (org-columns-string-to-number val format))
 		  (aref lvals level))
 	    (aset lflag level t))
 	  ;; clear accumulators for deeper levels
@@ -1017,8 +1006,7 @@ display, or in the #+COLUMNS line of the current buffer."
 	 ((>= level last-level)
 	  ;; add what we have here to the accumulator for this level
 	  (when valflag
-	    (push (funcall calc (org-columns-string-to-number val format))
-		  (aref lvals level))
+	    (push (org-columns-string-to-number val format) (aref lvals level))
 	    (aset lflag level t)))
 	 (t (error "This should not happen")))))))
 
@@ -1133,33 +1121,31 @@ operator     the operator if any
 format       the output format for computed results, derived from operator
 printf       a printf format for computed values
 fun          the lisp function to compute summary values, derived from operator
-calc         function to get values from base elements
 
 This function updates `org-columns-current-fmt-compiled'."
-  (let ((start 0) width prop title op op-match f printf fun calc)
-    (setq org-columns-current-fmt-compiled nil)
+  (setq org-columns-current-fmt-compiled nil)
+  (let ((start 0))
     (while (string-match
-	    (org-re "%\\([0-9]+\\)?\\([[:alnum:]_-]+\\)\\(?:(\\([^)]+\\))\\)?\\(?:{\\([^}]+\\)}\\)?\\s-*")
+	    "%\\([0-9]+\\)?\\([[:alnum:]_-]+\\)\\(?:(\\([^)]+\\))\\)?\
+\\(?:{\\([^}]+\\)}\\)?\\s-*"
 	    fmt start)
-      (setq start (match-end 0)
-	    width (match-string 1 fmt)
-	    prop (match-string 2 fmt)
-	    title (or (match-string 3 fmt) prop)
-	    op (match-string 4 fmt)
-	    f nil
-	    printf nil
-	    fun '+
-	    calc nil)
-      (if width (setq width (string-to-number width)))
-      (when (and op (string-match ";" op))
-	(setq printf (substring op (match-end 0))
-	      op (substring op 0 (match-beginning 0))))
-      (when (setq op-match (assoc op org-columns-compile-map))
-	(setq f (cadr op-match)
-	      fun (caddr op-match)
-	      calc (cadddr op-match)))
-      (push (list prop title width op f printf fun calc)
-	    org-columns-current-fmt-compiled))
+      (setq start (match-end 0))
+      (let* ((width (and (match-end 1) (string-to-number (match-string 1 fmt))))
+	     (prop (match-string 2 fmt))
+	     (title (or (match-string 3 fmt) prop))
+	     (op (match-string 4 fmt))
+	     (f nil)
+	     (printf nil)
+	     (fun '+))
+	(when (and op (string-match ";" op))
+	  (setq printf (substring op (match-end 0)))
+	  (setq op (substring op 0 (match-beginning 0))))
+	(let ((op-match (assoc op org-columns-compile-map)))
+	  (when op-match
+	    (setq f (nth 1 op-match))
+	    (setq fun (nth 2 op-match))))
+	(push (list prop title width op f printf fun)
+	      org-columns-current-fmt-compiled)))
     (setq org-columns-current-fmt-compiled
 	  (nreverse org-columns-current-fmt-compiled))))
 
@@ -1450,20 +1436,14 @@ This will add overlays to the date lines, to show the summary for each day."
 		     (list prop date date)))
 		  (`(,prop ,_ ,_ ,_ nil . ,_)
 		   (list prop "" ""))
-		  (`(,prop ,_ ,_ ,_ ,stype ,_ ,sumfunc ,calc)
+		  (`(,prop ,_ ,_ ,_ ,stype ,_ ,sumfunc)
 		   (let (lsum)
 		     (dolist (entry entries (setq lsum (delq nil lsum)))
 		       ;; Use real values for summary, not those
 		       ;; prepared for display.
 		       (let ((v (nth 1 (assoc-string prop entry t))))
 			 (when v
-			   (let ((n (org-columns-string-to-number v stype)))
-			     (push
-			      (if (or (get-text-property 0 'org-computed v)
-				      (not calc))
-				  n
-				(funcall calc n))
-			      lsum)))))
+			   (push (org-columns-string-to-number v stype) lsum))))
 		     (setq lsum
 			   (let ((l (length lsum)))
 			     (cond ((> l 1)
@@ -1473,8 +1453,6 @@ This will add overlays to the date lines, to show the summary for each day."
 				    (org-columns-number-to-string
 				     (car lsum) stype))
 				   (t ""))))
-		     (unless (memq calc '(identity nil))
-		       (put-text-property 0 (length lsum) 'org-computed t lsum))
 		     (put-text-property 0 (length lsum) 'face 'bold lsum)
 		     (list prop lsum lsum)))))
 	      fmt)
