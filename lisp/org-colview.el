@@ -244,6 +244,23 @@ WIDTH as an integer greater than 0."
     (push ov org-columns-overlays)
     ov))
 
+(defun org-columns--overlay-text (value fmt width property original)
+  "Return text "
+  (format fmt
+          (let ((v (org-columns-add-ellipses value width)))
+            (pcase (upcase property)
+              ("PRIORITY"
+               (propertize v 'face (org-get-priority-face original)))
+              ("TAGS"
+               (if (not org-tags-special-faces-re)
+                   (propertize v 'face 'org-tag)
+                 (replace-regexp-in-string
+                  org-tags-special-faces-re
+                  (lambda (m) (propertize m 'face (org-get-tag-face m)))
+                  v nil nil 1)))
+              ("TODO" (propertize v 'face (org-get-todo-face original)))
+              (_ v)))))
+
 (defun org-columns--display-here (columns &optional dateline)
   "Overlay the current line with column display.
 COLUMNS is an alist (PROPERTY VALUE DISPLAYED).  Optional
@@ -284,26 +301,11 @@ argument DATELINE is non-nil when the face used should be
 		    (fmt (format (if (= (point) limit) "%%-%d.%ds |"
 				   "%%-%d.%ds | ")
 				 width width))
-		    (text
-		     (format
-		      fmt
-		      (let ((v (org-columns-add-ellipses value width)))
-			(pcase (upcase property)
-			  ("PRIORITY"
-			   (propertize v 'face (org-get-priority-face original)))
-			  ("TAGS"
-			   (if (not org-tags-special-faces-re)
-			       (propertize v 'face 'org-tag)
-			     (replace-regexp-in-string
-			      org-tags-special-faces-re
-			      (lambda (m)
-				(propertize m 'face (org-get-tag-face m)))
-			      v nil nil 1)))
-			  ("TODO"
-			   (propertize v 'face (org-get-todo-face original)))
-			  (_ v)))))
 		    (ov (org-columns-new-overlay
-			 (point) (1+ (point)) text (if dateline face1 face))))
+			 (point) (1+ (point))
+			 (org-columns--overlay-text
+			  value fmt width property original)
+			 (if dateline face1 face))))
 	       (overlay-put ov 'keymap org-columns-map)
 	       (overlay-put ov 'org-columns-key property)
 	       (overlay-put ov 'org-columns-value original)
@@ -922,21 +924,30 @@ display, or in the #+COLUMNS line of the current buffer."
 (defun org-columns-update (property)
   "Recompute PROPERTY, and update the columns display for it."
   (org-columns-compute property)
-  (let (fmt val pos)
-    (save-excursion
-      (mapc (lambda (ov)
-	      (when (equal (overlay-get ov 'org-columns-key) property)
-		(setq pos (overlay-start ov))
-		(goto-char pos)
-		(when (setq val (cdr (assoc-string
-				      property
-				      (get-text-property
-				       (point-at-bol) 'org-summaries)
-				      t)))
-		  (setq fmt (overlay-get ov 'org-columns-format))
-		  (overlay-put ov 'org-columns-value val)
-		  (overlay-put ov 'display (format fmt val)))))
-	    org-columns-overlays))))
+  (org-with-wide-buffer
+   (let ((p (upcase property)))
+     (dolist (ov org-columns-overlays)
+       (when (let ((key (overlay-get ov 'org-columns-key)))
+	       (and key (equal (upcase key) p) (overlay-start ov)))
+	 (goto-char (overlay-start ov))
+	 (let ((value (cdr
+		       (assoc-string
+			property
+			(get-text-property (line-beginning-position)
+					   'org-summaries)
+			t))))
+	   (when value
+	     (let ((displayed (org-columns--displayed-value property value))
+		   (format (overlay-get ov 'org-columns-format))
+		   (width (cdr (assoc-string property
+					     org-columns-current-maxwidths
+					     t))))
+	       (overlay-put ov 'org-columns-value value)
+	       (overlay-put ov 'org-columns-value-modified displayed)
+	       (overlay-put ov
+			    'display
+			    (org-columns--overlay-text
+			     displayed format width property value))))))))))
 
 (defvar org-inlinetask-min-level
   (if (featurep 'org-inlinetask) org-inlinetask-min-level 15))

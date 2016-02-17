@@ -485,6 +485,58 @@
       (let ((org-columns-default-format "%A{est+}")) (org-columns))
       (get-char-property (point) 'org-columns-value-modified)))))
 
+(ert-deftest test-org-colview/columns-update ()
+  "Test `org-columns-update' specifications."
+  ;; Update display.
+  (should
+   (equal
+    "12    |"
+    (org-test-with-temp-text
+	"* H
+:PROPERTIES:
+:A: 1
+:END:
+"
+      (let ((org-columns-default-format "%5A")) (org-columns))
+      (search-forward "1")
+      (insert "2")
+      (org-columns-update "A")
+      (get-char-property (point-min) 'display))))
+  ;; Update stored values.
+  (should
+   (equal
+    '("12" "12")
+    (org-test-with-temp-text
+	"* H
+:PROPERTIES:
+:A: 1
+:END:
+"
+      (let ((org-columns-default-format "%5A")) (org-columns))
+      (search-forward "1")
+      (insert "2")
+      (org-columns-update "A")
+      (list (get-char-property (point-min) 'org-columns-value)
+	    (get-char-property (point-min) 'org-columns-value-modified)))))
+  ;; Ensure additional processing is done (e.g., ellipses, special
+  ;; keywords fontification...).
+  (should
+   (equal
+    "ve.. |"
+    (org-test-with-temp-text
+	"* H
+:PROPERTIES:
+:A: text
+:END:
+"
+      (let ((org-columns-default-format "%4A")
+	    (org-columns-ellipses ".."))
+	(org-columns))
+      (search-forward ":A: ")
+      (insert "very long ")
+      (org-columns-update "A")
+      (get-char-property (point-min) 'display)))))
+
 
 
 ;;; Dynamic block
