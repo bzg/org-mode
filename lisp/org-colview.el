@@ -274,41 +274,44 @@ argument DATELINE is non-nil when the face used should be
 	      (insert (make-string (- columns chars) ?\s))))))
       ;; Display columns.  Create and install the overlay for the
       ;; current column on the next character.
-      (dolist (column columns)
-	(pcase column
-	  (`(,property ,original ,value)
-	   (let* ((width
-		   (cdr
-		    (assoc-string property org-columns-current-maxwidths t)))
-		  (fmt (format "%%-%d.%ds | " width width))
-		  (text
-		   (format
-		    fmt
-		    (let ((v (org-columns-add-ellipses value width)))
-		      (pcase (upcase property)
-			("PRIORITY"
-			 (propertize v 'face (org-get-priority-face original)))
-			("TAGS"
-			 (if (not org-tags-special-faces-re)
-			     (propertize v 'face 'org-tag)
-			   (replace-regexp-in-string
-			    org-tags-special-faces-re
-			    (lambda (m)
-			      (propertize m 'face (org-get-tag-face m)))
-			    v nil nil 1)))
-			("TODO"
-			 (propertize v 'face (org-get-todo-face original)))
-			(_ v)))))
-		  (ov (org-columns-new-overlay
-		       (point) (1+ (point)) text (if dateline face1 face))))
-	     (overlay-put ov 'keymap org-columns-map)
-	     (overlay-put ov 'org-columns-key property)
-	     (overlay-put ov 'org-columns-value original)
-	     (overlay-put ov 'org-columns-value-modified value)
-	     (overlay-put ov 'org-columns-format fmt)
-	     (overlay-put ov 'line-prefix "")
-	     (overlay-put ov 'wrap-prefix "")
-	     (forward-char)))))
+      (let ((limit (+ (- (length columns) 1) (line-beginning-position))))
+	(dolist (column columns)
+	  (pcase column
+	    (`(,property ,original ,value)
+	     (let* ((width
+		     (cdr
+		      (assoc-string property org-columns-current-maxwidths t)))
+		    (fmt (format (if (= (point) limit) "%%-%d.%ds |"
+				   "%%-%d.%ds | ")
+				 width width))
+		    (text
+		     (format
+		      fmt
+		      (let ((v (org-columns-add-ellipses value width)))
+			(pcase (upcase property)
+			  ("PRIORITY"
+			   (propertize v 'face (org-get-priority-face original)))
+			  ("TAGS"
+			   (if (not org-tags-special-faces-re)
+			       (propertize v 'face 'org-tag)
+			     (replace-regexp-in-string
+			      org-tags-special-faces-re
+			      (lambda (m)
+				(propertize m 'face (org-get-tag-face m)))
+			      v nil nil 1)))
+			  ("TODO"
+			   (propertize v 'face (org-get-todo-face original)))
+			  (_ v)))))
+		    (ov (org-columns-new-overlay
+			 (point) (1+ (point)) text (if dateline face1 face))))
+	       (overlay-put ov 'keymap org-columns-map)
+	       (overlay-put ov 'org-columns-key property)
+	       (overlay-put ov 'org-columns-value original)
+	       (overlay-put ov 'org-columns-value-modified value)
+	       (overlay-put ov 'org-columns-format fmt)
+	       (overlay-put ov 'line-prefix "")
+	       (overlay-put ov 'wrap-prefix "")
+	       (forward-char))))))
       ;; Make the rest of the line disappear.
       (let ((ov (org-columns-new-overlay (point) (line-end-position))))
 	(overlay-put ov 'invisible t)
@@ -363,11 +366,11 @@ for the duration of the command.")
 		 (cdr (assoc-string property org-columns-current-maxwidths t)))
 		(fmt (format "%%-%d.%ds | " width width)))
 	   (setq title (concat title (format fmt (or name property))))))))
-    (setq title
-	  (concat (org-add-props " " nil 'display '(space :align-to 0))
-		  (org-add-props title nil 'face 'org-column-title)))
     (setq-local org-previous-header-line-format header-line-format)
-    (setq org-columns-full-header-line-format title)
+    (setq org-columns-full-header-line-format
+	  (concat
+	   (org-add-props " " nil 'display '(space :align-to 0))
+	   (org-add-props (substring title 0 -1) nil 'face 'org-column-title)))
     (setq org-columns-previous-hscroll -1)
     (org-add-hook 'post-command-hook 'org-columns-hscoll-title nil 'local)))
 
