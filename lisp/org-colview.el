@@ -960,16 +960,16 @@ display, or in the #+COLUMNS line of the current buffer."
   "Summarize the values of property PROPERTY hierarchically."
   (interactive)
   (let* ((lmax (if (org-bound-and-true-p org-inlinetask-min-level)
-		   (1+ org-inlinetask-min-level)
-		 30))			;Hard-code deepest level.
-	 (lvals (make-vector lmax nil))
+		   org-inlinetask-min-level
+		 29))			;Hard-code deepest level.
+	 (lvals (make-vector (1+ lmax) nil))
 	 (spec (assoc-string property org-columns-current-fmt-compiled t))
 	 (format (nth 4 spec))
 	 (printf (nth 5 spec))
 	 (fun (nth 6 spec))
 	 (level 0)
-	 (inminlevel org-inlinetask-min-level)
-	 (last-level org-inlinetask-min-level))
+	 (inminlevel lmax)
+	 (last-level lmax))
     (org-with-wide-buffer
      ;; Find the region to compute.
      (goto-char org-columns-top-level-marker)
@@ -1016,7 +1016,7 @@ display, or in the #+COLUMNS line of the current buffer."
 	       (push (or summary (org-columns-string-to-number value format))
 		     (aref lvals level)))
 	     ;; Clear accumulators for deeper levels.
-	     (cl-loop for l from (1+ level) to (1- lmax) do
+	     (cl-loop for l from (1+ level) to lmax do
 		      (aset lvals l nil))))
 	  (value-set
 	   ;; Add what we have here to the accumulator for this level.
