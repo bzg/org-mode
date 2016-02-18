@@ -1950,9 +1950,18 @@ to HASH."
 	 ((or `inline-babel-call `inline-src-block)
 	  ;; Results for inline objects are located right after them.
 	  ;; There is no RESULTS line to insert either.
-	  (goto-char (org-element-property :end context))
-	  (skip-chars-backward " \t")
-	  (throw :found (point)))
+	  (let ((end (org-element-property :end context))
+		(limit (org-element-property
+			:contents-end (org-element-property :parent context))))
+	    (goto-char end)
+	    (skip-chars-forward " \t\n" limit)
+	    (throw :found
+		   (and (< (point) limit)
+			(let ((result (org-element-context)))
+			  (and (eq (org-element-type result) 'macro)
+			       (string= (org-element-property :key result)
+					"results")
+			       (point)))))))
 	 ((or `babel-call `src-block)
 	  (let* ((name (org-element-property :name context))
 		 (named-results (and name (org-babel-find-named-result name))))
@@ -2175,28 +2184,18 @@ INFO may provide the values of these header arguments (in the
 	(message (replace-regexp-in-string "%" "%%" (format "%S" result)))
 	result)
     (save-excursion
-      (let* ((inlinep
-	      (let ((context (org-element-context)))
-		(when (memq (org-element-type context)
-			    '(inline-babel-call inline-src-block))
-		  (save-excursion
-		    (goto-char (org-element-property :end context))
-		    (skip-chars-backward " \t\n")
-		    (org-babel-remove-inline-result context)
-		    (insert " ")
-		    (point)))))
-	     (existing-result
-	      (unless inlinep
-		(org-babel-where-is-src-block-result t info hash)))
+      (let* ((inline (let ((context (org-element-context)))
+		       (and (memq (org-element-type context)
+				  '(inline-babel-call inline-src-block))
+			    context)))
+	     (existing-result (org-babel-where-is-src-block-result t nil hash))
 	     (bad-inline-p
-	      (when inlinep
-		(or
-		 (and (member "table" result-params) "`:results table'")
-		 (and (listp result) "list result")
-		 (and (org-string-match-p "\n." result) "multiline result")
-		 (and (member "list" result-params) "`:results list'"))))
-	     (results-switches
-	      (cdr (assoc :results_switches (nth 2 info))))
+	      (and inline
+		   (or (and (member "table" result-params) "`:results table'")
+		       (and (listp result) "list result")
+		       (and (string-match-p "\n." result) "multiline result")
+		       (and (member "list" result-params) "`:results list'"))))
+	     (results-switches (cdr (assq :results_switches (nth 2 info))))
 	     (visible-beg (point-min-marker))
 	     (visible-end (point-max-marker))
 	     ;; When results exist outside of the current visible
@@ -2206,34 +2205,47 @@ INFO may provide the values of these header arguments (in the
 				   (or (> visible-beg existing-result)
 				       (<= visible-end existing-result))))
 	     beg end indent)
-	(when (and (stringp result)  ; ensure results end in a newline
-		   (not inlinep)
-		   (> (length result) 0)
-		   (not (or (string-equal (substring result -1) "\n")
-			    (string-equal (substring result -1) "\r"))))
+	;; Ensure non-inline results end in a newline.
+	(when (and (org-string-nw-p result)
+		   (not inline)
+		   (not (string-equal (substring result -1) "\n")))
 	  (setq result (concat result "\n")))
 	(unwind-protect
 	    (progn
 	      (when outside-scope-p (widen))
-	      (if (not existing-result)
-		  (setq beg (or inlinep (point)))
-		(goto-char existing-result)
-		(save-excursion
-		  (re-search-forward "#" nil t)
-		  (setq indent (- (current-column) 1)))
-		(forward-line 1)
-		(setq beg (point))
-		(cond
-		 ((member "replace" result-params)
-		  (delete-region (point) (org-babel-result-end)))
-		 ((member "append" result-params)
-		  (goto-char (org-babel-result-end)) (setq beg (point-marker)))
-		 ((member "prepend" result-params)))) ; already there
+	      (if existing-result (goto-char existing-result)
+		(goto-char (org-element-property :end inline))
+		(skip-chars-backward " \t"))
+	      (unless inline
+		(setq indent (org-get-indentation))
+		(forward-line 1))
+	      (setq beg (point))
+	      (cond
+	       ((and inline existing-result)
+		;; Do not call `org-babel-remove-inline-result' since
+		;; we are going to replace existing results and
+		;; preserve leading white spaces.
+		(delete-region
+		 (point)
+		 (progn
+		   (goto-char (org-element-property :end (org-element-context)))
+		   (skip-chars-backward " \t")
+		   (point))))
+	       (inline
+		 ;; Make sure new results are separated from the
+		 ;; source code by one space.
+		 (insert " ")
+		 (setq beg (point)))
+	       ((member "replace" result-params)
+		(delete-region (point) (org-babel-result-end)))
+	       ((member "append" result-params)
+		(goto-char (org-babel-result-end)) (setq beg (point-marker)))
+	       ((member "prepend" result-params))) ; already there
 	      (setq results-switches
 		    (if results-switches (concat " " results-switches) ""))
 	      (let ((wrap (lambda (start finish &optional no-escape no-newlines
 				    inline-start inline-finish)
-			    (when inlinep
+			    (when inline
 			      (setq start inline-start)
 			      (setq finish inline-finish)
 			      (setq no-newlines t))
@@ -2295,13 +2307,10 @@ INFO may provide the values of these header arguments (in the
 		 ;; a table.
 		 ((listp result) (insert (format "%s\n" result)))
 		 ((member "file" result-params)
-		  (when inlinep
-		    (goto-char inlinep)
+		  (when inline
 		    (setq result (org-macro-escape-arguments result)))
 		  (insert result))
-		 ((and inlinep
-		       (not (member "raw" result-params)))
-		  (goto-char inlinep)
+		 ((and inline (not (member "raw" result-params)))
 		  (insert (org-macro-escape-arguments
 			   (org-babel-chomp result "\n"))))
 		 (t (goto-char beg) (insert result)))
@@ -2338,18 +2347,20 @@ INFO may provide the values of these header arguments (in the
 		  (goto-char beg) (if (org-at-table-p) (org-cycle))
 		  (funcall wrap ":RESULTS:" ":END:" 'no-escape nil
 			   "{{{results(" ")}}}"))
-		 ((and inlinep (member "file" result-params))
+		 ((and inline (member "file" result-params))
 		  (funcall wrap nil nil nil nil "{{{results(" ")}}}"))
 		 ((and (not (funcall tabulablep result))
 		       (not (member "file" result-params)))
 		  (let ((org-babel-inline-result-wrap
 			 ;; Hard code {{{results(...)}}} on top of customization.
-			 (format "{{{results(%s)}}}" org-babel-inline-result-wrap)))
-		    (org-babel-examplify-region beg end results-switches)
+			 (format "{{{results(%s)}}}"
+				 org-babel-inline-result-wrap)))
+		    (org-babel-examplify-region beg end results-switches inline)
 		    (setq end (point))))))
-	      ;; possibly indent the results to match the #+results line
-	      (when (and (not inlinep) (numberp indent) indent (> indent 0)
-			 ;; in this case `table-align' does the work for us
+	      ;; Possibly indent results in par with #+results line.
+	      (when (and (not inline) (numberp indent) (> indent 0)
+			 ;; In this case `table-align' does the work
+			 ;; for us.
 			 (not (and (listp result)
 				   (member "append" result-params))))
 		(indent-rigidly beg end indent))
@@ -2377,20 +2388,26 @@ INFO may provide the values of these header arguments (in the
 (defun org-babel-remove-inline-result (&optional datum)
   "Remove the result of the current inline-src-block or babel call.
 The result must be wrapped in a `results' macro to be removed.
-Leading whitespace is trimmed."
+Leading white space is trimmed."
   (interactive)
-  (let* ((el (or datum (org-element-context)))
-	 (post-blank (org-element-property :post-blank el)))
+  (let* ((el (or datum (org-element-context))))
     (when (memq (org-element-type el) '(inline-src-block inline-babel-call))
       (org-with-wide-buffer
        (goto-char (org-element-property :end el))
-       (let ((el (org-element-context)))
-	 (when (and (eq (org-element-type el) 'macro)
-		    (string= (org-element-property :key el) "results"))
+       (skip-chars-backward " \t")
+       (let ((result (save-excursion
+		       (skip-chars-forward
+			" \t\n"
+			(org-element-property
+			 :contents-end (org-element-property :parent el)))
+		       (org-element-context))))
+	 (when (and (eq (org-element-type result) 'macro)
+		    (string= (org-element-property :key result) "results"))
 	   (delete-region		; And leading whitespace.
-	    (- (org-element-property :begin el) post-blank)
-	    (- (org-element-property :end el)
-	       (org-element-property :post-blank el)))))))))
+	    (point)
+	    (progn (goto-char (org-element-property :end result))
+		   (skip-chars-backward " \t\n")
+		   (point)))))))))
 
 (defun org-babel-remove-result-one-or-many (x)
   "Remove the result of the current source block.
@@ -2444,25 +2461,17 @@ file's directory then expand relative links."
   'org-babel-examplize-region
   'org-babel-examplify-region "25.1")
 
-(defun org-babel-examplify-region (beg end &optional results-switches)
+(defun org-babel-examplify-region (beg end &optional results-switches inline)
   "Comment out region using the inline `==' or `: ' org example quote."
   (interactive "*r")
-  (let ((chars-between (lambda (b e)
-			 (not (string-match "^[\\s]*$"
-					    (buffer-substring b e)))))
-	(maybe-cap (lambda (str) (if org-babel-capitalize-example-region-markers
-				(upcase str) str)))
-	(beg-bol (save-excursion (goto-char beg) (point-at-bol)))
-	(end-bol (save-excursion (goto-char end) (point-at-bol)))
-	(end-eol (save-excursion (goto-char end) (point-at-eol))))
-    (if (and (not (= end end-bol))
-	     (or (funcall chars-between beg-bol beg)
-		 (funcall chars-between end end-eol)))
+  (let ((maybe-cap
+	 (lambda (str)
+	   (if org-babel-capitalize-example-region-markers (upcase str) str))))
+    (if inline
 	(save-excursion
 	  (goto-char beg)
 	  (insert (format org-babel-inline-result-wrap
-			  (prog1 (buffer-substring beg end)
-			    (delete-region beg end)))))
+			  (delete-and-extract-region beg end))))
       (let ((size (count-lines beg end)))
 	(save-excursion
 	  (cond ((= size 0))	      ; do nothing for an empty result

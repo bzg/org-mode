@@ -314,8 +314,21 @@ at the beginning of a line."
 		 (concat test-line " {{{results(=1=)}}}")
 		 (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
 	(forward-char 6)
-	(should-error (org-ctrl-c-ctrl-c))
-	))))
+	(should-error (org-ctrl-c-ctrl-c))))
+    ;; Results on a subsequent line are replaced.
+    (should
+     (equal
+      "src_emacs-lisp{(+ 1 2)}\n  {{{results(=3=)}}}"
+      (org-test-with-temp-text "src_emacs-lisp{(+ 1 2)}\n  {{{results(=2=)}}}"
+	(let ((org-babel-inline-result-wrap "=%s=")) (org-babel-execute-maybe))
+	(buffer-string))))
+    ;; Also handle results at the beginning of a line.
+    (should
+     (equal
+      "src_emacs-lisp{(+ 1 2)}\n{{{results(=3=)}}}"
+      (org-test-with-temp-text "src_emacs-lisp{(+ 1 2)}\n{{{results(=2=)}}}"
+	(let ((org-babel-inline-result-wrap "=%s=")) (org-babel-execute-maybe))
+	(buffer-string))))))
 
 (ert-deftest test-ob/inline-src_blk-default-results-replace-line-2 ()
   ;; src_ at bol line 2...
