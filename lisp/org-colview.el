@@ -44,6 +44,7 @@
 (defvar org-agenda-columns-compute-summary-properties)
 (defvar org-agenda-columns-show-summaries)
 (defvar org-agenda-view-columns-initially)
+(defvar org-inlinetask-min-level)
 
 ;;; Configuration
 
@@ -954,82 +955,74 @@ display, or in the #+COLUMNS line of the current buffer."
 			    (org-columns--overlay-text
 			     displayed format width property value))))))))))
 
-(defvar org-inlinetask-min-level
-  (if (featurep 'org-inlinetask) org-inlinetask-min-level 15))
-
 ;;;###autoload
 (defun org-columns-compute (property)
-  "Sum the values of property PROPERTY hierarchically, for the entire buffer."
+  "Summarize the values of property PROPERTY hierarchically."
   (interactive)
-  (let* ((re org-outline-regexp-bol)
-	 (lmax 30)		    ; Does anyone use deeper levels???
+  (let* ((lmax (if (org-bound-and-true-p org-inlinetask-min-level)
+		   (1+ org-inlinetask-min-level)
+		 30))			;Hard-code deepest level.
 	 (lvals (make-vector lmax nil))
-	 (lflag (make-vector lmax nil))
+	 (spec (assoc-string property org-columns-current-fmt-compiled t))
+	 (format (nth 4 spec))
+	 (printf (nth 5 spec))
+	 (fun (nth 6 spec))
 	 (level 0)
-	 (ass (assoc-string property org-columns-current-fmt-compiled t))
-	 (format (nth 4 ass))
-	 (printf (nth 5 ass))
-	 (fun (nth 6 ass))
-	 (beg org-columns-top-level-marker)
 	 (inminlevel org-inlinetask-min-level)
-	 (last-level org-inlinetask-min-level)
-	 val valflag flag end sumpos sum-alist sum str str1 useval)
-    (save-excursion
-      ;; Find the region to compute
-      (goto-char beg)
-      (setq end (condition-case nil (org-end-of-subtree t) (error (point-max))))
-      (goto-char end)
-      ;; Walk the tree from the back and do the computations
-      (while (re-search-backward re beg t)
-	(setq sumpos (match-beginning 0)
-	      last-level (if (not (or (zerop level) (eq level inminlevel)))
-			     level last-level)
-	      level (org-outline-level)
-	      val (org-entry-get nil property)
-	      valflag (org-string-nw-p val))
-	(cond
-	 ((< level last-level)
-	  ;; Put the sum of lower levels here as a property.  If
-	  ;; values are estimates, use an appropriate sum function.
-	  (setq sum (funcall (if (eq fun 'org-columns--estimate-combine)
-				 #'org-columns--estimate-combine
-			       #'+)
-			     (if (and (/= last-level inminlevel)
-				      (aref lvals last-level))
-				 (apply fun (aref lvals last-level))
-			       0)
-			     (if (aref lvals inminlevel)
-				 (apply fun (aref lvals inminlevel))
-			       0))
-		flag (or (aref lflag last-level) ; any valid entries from children?
-			 (aref lflag inminlevel)) ; or inline tasks?
-		str (org-columns-number-to-string sum format printf)
-		str1 (org-add-props (copy-sequence str) nil 'org-computed t 'face 'bold)
-		useval (if flag str1 (if valflag val ""))
-		sum-alist (get-text-property sumpos 'org-summaries))
-	  (let ((old (assoc-string property sum-alist t)))
-	    (if old (setcdr old useval)
-	      (push (cons property useval) sum-alist)
-	      (org-with-silent-modifications
-	       (add-text-properties sumpos (1+ sumpos)
-				    (list 'org-summaries sum-alist)))))
-	  (when (and val (not (equal val (if flag str val))))
-	    (org-entry-put nil property (if flag str val)))
-	  ;; add current to current level accumulator
-	  (when (or flag valflag)
-	    (push (if flag sum (org-columns-string-to-number val format))
-		  (aref lvals level))
-	    (aset lflag level t))
-	  ;; clear accumulators for deeper levels
-	  (loop for l from (1+ level) to (1- lmax) do
-		(aset lvals l nil)
-		(aset lflag l nil)))
-	 ((>= level last-level)
-	  ;; add what we have here to the accumulator for this level
-	  (when valflag
-	    (push (org-columns-string-to-number val format) (aref lvals level))
-	    (aset lflag level t)))
-	 (t (error "This should not happen")))))))
+	 (last-level org-inlinetask-min-level))
+    (org-with-wide-buffer
+     ;; Find the region to compute.
+     (goto-char org-columns-top-level-marker)
+     (goto-char (condition-case nil (org-end-of-subtree t) (error (point-max))))
+     ;; Walk the tree from the back and do the computations.
+     (while (re-search-backward
+	     org-outline-regexp-bol org-columns-top-level-marker t)
+       (unless (or (= level 0) (eq level inminlevel))
+	 (setq last-level level))
+       (setq level (org-reduced-level (org-outline-level)))
+       (let* ((pos (match-beginning 0))
+	      (value (org-entry-get nil property))
+	      (value-set (org-string-nw-p value)))
+	 (cond
+	  ((< level last-level)
+	   ;; Collect values from lower levels and inline tasks here
+	   ;; and summarize them using FUN.  Store them as text
+	   ;; property.
+	   (let* ((summary
+		   (let ((all (append (and (/= last-level inminlevel)
+					   (aref lvals last-level))
+				      (aref lvals inminlevel))))
+		     (and all (apply fun all))))
+		  (str (and summary (org-columns-number-to-string
+				     summary format printf))))
+	     (let* ((summaries-alist (get-text-property pos 'org-summaries))
+		    (old (assoc-string property summaries-alist t))
+		    (new (cond
+			  (summary (propertize str 'org-computed t 'face 'bold))
+			  (value-set value)
+			  (t ""))))
+	       (if old (setcdr old new)
+		 (push (cons property new) summaries-alist)
+		 (org-with-silent-modifications
+		  (add-text-properties pos (1+ pos)
+				       (list 'org-summaries summaries-alist)))))
+	     ;; When PROPERTY is set in current node, but its value
+	     ;; doesn't match the one computed, use the latter
+	     ;; instead.
+	     (when (and value str (not (equal value str)))
+	       (org-entry-put nil property str))
+	     ;; Add current to current level accumulator.
+	     (when (or summary value-set)
+	       (push (or summary (org-columns-string-to-number value format))
+		     (aref lvals level)))
+	     ;; Clear accumulators for deeper levels.
+	     (cl-loop for l from (1+ level) to (1- lmax) do
+		      (aset lvals l nil))))
+	  (value-set
+	   ;; Add what we have here to the accumulator for this level.
+	   (push (org-columns-string-to-number value format)
+		 (aref lvals level)))
+	  (t nil)))))))
 
 (defun org-columns-redo ()
   "Construct the column display again."

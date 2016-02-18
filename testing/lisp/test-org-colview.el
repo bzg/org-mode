@@ -535,7 +535,30 @@
       (search-forward ":A: ")
       (insert "very long ")
       (org-columns-update "A")
-      (get-char-property (point-min) 'display)))))
+      (get-char-property (point-min) 'display))))
+  ;; Values obtained from inline tasks are at the same level as those
+  ;; obtained from children of the current node.
+  (when (featurep 'org-inlinetask)
+    (should
+     (equal
+      "2"
+      (org-test-with-temp-text
+	  "* H
+*************** Inline task
+:PROPERTIES:
+:A: 2
+:END:
+*************** END
+** Children
+:PROPERTIES:
+:A: 3
+:END:
+"
+	(let ((org-columns-default-format "%A{min}")
+	      (org-columns-ellipses "..")
+	      (org-inlinetask-min-level 15))
+	  (org-columns))
+	(get-char-property (point-min) 'org-columns-value))))))
 
 
 
