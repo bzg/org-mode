@@ -1188,7 +1188,7 @@ Paragraph"
       (org-babel-execute-src-block))
     (should-not (re-search-forward "^#\\+RESULTS:" nil t))
     (widen)
-    (should (should (re-search-forward "^: 3" nil t)))))
+    (should (re-search-forward "^: 3" nil t))))
 
 (ert-deftest test-ob/specific-colnames ()
   "Test passing specific column names."
