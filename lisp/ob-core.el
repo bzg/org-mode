@@ -1938,7 +1938,8 @@ source block, specifically at the beginning of the results line.
 If no result exists for this block return nil, unless optional
 argument INSERT is non-nil.  In this case, create a results line
 following the source block and return the position at its
-beginning.
+beginning.  In the case of inline code, remove the results part
+instead.
 
 If optional argument HASH is a string, remove contents related to
 RESULTS keyword if its hash is different.  Then update the latter
@@ -1950,18 +1951,25 @@ to HASH."
 	 ((or `inline-babel-call `inline-src-block)
 	  ;; Results for inline objects are located right after them.
 	  ;; There is no RESULTS line to insert either.
-	  (let ((end (org-element-property :end context))
-		(limit (org-element-property
+	  (let ((limit (org-element-property
 			:contents-end (org-element-property :parent context))))
-	    (goto-char end)
+	    (goto-char (org-element-property :end context))
 	    (skip-chars-forward " \t\n" limit)
 	    (throw :found
-		   (and (< (point) limit)
-			(let ((result (org-element-context)))
-			  (and (eq (org-element-type result) 'macro)
-			       (string= (org-element-property :key result)
-					"results")
-			       (point)))))))
+		   (and
+		    (< (point) limit)
+		    (let ((result (org-element-context)))
+		      (and (eq (org-element-type result) 'macro)
+			   (string= (org-element-property :key result)
+				    "results")
+			   (if (not insert) (point)
+			     (delete-region
+			      (point)
+			      (progn
+				(goto-char (org-element-property :end result))
+				(skip-chars-backward " \t")
+				(point)))
+			     (point))))))))
 	 ((or `babel-call `src-block)
 	  (let* ((name (org-element-property :name context))
 		 (named-results (and name (org-babel-find-named-result name))))
@@ -2184,7 +2192,9 @@ INFO may provide the values of these header arguments (in the
 	(message (replace-regexp-in-string "%" "%%" (format "%S" result)))
 	result)
     (save-excursion
-      (let* ((inline (let ((context (org-element-context)))
+      (let* ((visible-beg (point-min-marker))
+	     (visible-end (copy-marker (point-max) t))
+	     (inline (let ((context (org-element-context)))
 		       (and (memq (org-element-type context)
 				  '(inline-babel-call inline-src-block))
 			    context)))
@@ -2196,14 +2206,13 @@ INFO may provide the values of these header arguments (in the
 		       (and (string-match-p "\n." result) "multiline result")
 		       (and (member "list" result-params) "`:results list'"))))
 	     (results-switches (cdr (assq :results_switches (nth 2 info))))
-	     (visible-beg (point-min-marker))
-	     (visible-end (point-max-marker))
 	     ;; When results exist outside of the current visible
 	     ;; region of the buffer, be sure to widen buffer to
 	     ;; update them.
-	     (outside-scope-p (and existing-result
-				   (or (> visible-beg existing-result)
-				       (<= visible-end existing-result))))
+	     (outside-scope (and existing-results
+				 (buffer-narrowed-p)
+				 (or (> visible-beg existing-result)
+				     (<= visible-end existing-result))))
 	     beg end indent)
 	;; Ensure non-inline results end in a newline.
 	(when (and (org-string-nw-p result)
@@ -2212,7 +2221,7 @@ INFO may provide the values of these header arguments (in the
 	  (setq result (concat result "\n")))
 	(unwind-protect
 	    (progn
-	      (when outside-scope-p (widen))
+	      (when outside-scope (widen))
 	      (if existing-result (goto-char existing-result)
 		(goto-char (org-element-property :end inline))
 		(skip-chars-backward " \t"))
@@ -2221,21 +2230,12 @@ INFO may provide the values of these header arguments (in the
 		(forward-line 1))
 	      (setq beg (point))
 	      (cond
-	       ((and inline existing-result)
-		;; Do not call `org-babel-remove-inline-result' since
-		;; we are going to replace existing results and
-		;; preserve leading white spaces.
-		(delete-region
-		 (point)
-		 (progn
-		   (goto-char (org-element-property :end (org-element-context)))
-		   (skip-chars-backward " \t")
-		   (point))))
 	       (inline
 		 ;; Make sure new results are separated from the
 		 ;; source code by one space.
-		 (insert " ")
-		 (setq beg (point)))
+		 (unless existing-result
+		   (insert " ")
+		   (setq beg (point))))
 	       ((member "replace" result-params)
 		(delete-region (point) (org-babel-result-end)))
 	       ((member "append" result-params)
@@ -2369,7 +2369,7 @@ INFO may provide the values of these header arguments (in the
 		      (message "Code block returned no value.")
 		    (message "Code block produced no output."))
 		(message "Code block evaluation complete.")))
-	  (when outside-scope-p (narrow-to-region visible-beg visible-end))
+	  (when outside-scope (narrow-to-region visible-beg visible-end))
 	  (set-marker visible-beg nil)
 	  (set-marker visible-end nil))))))
 
