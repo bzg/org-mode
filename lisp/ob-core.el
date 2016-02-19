@@ -2177,201 +2177,201 @@ INFO may provide the values of these header arguments (in the
 :wrap --- the effect is similar to `latex' in RESULT-PARAMS but
           using the argument supplied to specify the export block
           or snippet type."
-
-  (if (stringp result)
-      (progn
-        (setq result (org-no-properties result))
-        (when (member "file" result-params)
-	  (setq result (org-babel-result-to-file
-			result (when (assoc :file-desc (nth 2 info))
-				 (or (cdr (assoc :file-desc (nth 2 info)))
-				     result))))))
-    (unless (listp result) (setq result (format "%S" result))))
+  (cond ((stringp result)
+	 (setq result (org-no-properties result))
+	 (when (member "file" result-params)
+	   (setq result (org-babel-result-to-file
+			 result (when (assoc :file-desc (nth 2 info))
+				  (or (cdr (assoc :file-desc (nth 2 info)))
+				      result))))))
+	((listp result))
+	(t (setq result (format "%S" result))))
   (if (and result-params (member "silent" result-params))
-      (progn
-	(message (replace-regexp-in-string "%" "%%" (format "%S" result)))
-	result)
-    (save-excursion
-      (let* ((visible-beg (point-min-marker))
-	     (visible-end (copy-marker (point-max) t))
-	     (inline (let ((context (org-element-context)))
-		       (and (memq (org-element-type context)
-				  '(inline-babel-call inline-src-block))
-			    context)))
-	     (existing-result (org-babel-where-is-src-block-result t nil hash))
-	     (bad-inline-p
-	      (and inline
-		   (or (and (member "table" result-params) "`:results table'")
-		       (and (listp result) "list result")
-		       (and (string-match-p "\n." result) "multiline result")
-		       (and (member "list" result-params) "`:results list'"))))
-	     (results-switches (cdr (assq :results_switches (nth 2 info))))
-	     ;; When results exist outside of the current visible
-	     ;; region of the buffer, be sure to widen buffer to
-	     ;; update them.
-	     (outside-scope (and existing-results
-				 (buffer-narrowed-p)
-				 (or (> visible-beg existing-result)
-				     (<= visible-end existing-result))))
-	     beg end indent)
-	;; Ensure non-inline results end in a newline.
-	(when (and (org-string-nw-p result)
-		   (not inline)
-		   (not (string-equal (substring result -1) "\n")))
-	  (setq result (concat result "\n")))
-	(unwind-protect
-	    (progn
-	      (when outside-scope (widen))
-	      (if existing-result (goto-char existing-result)
-		(goto-char (org-element-property :end inline))
-		(skip-chars-backward " \t"))
-	      (unless inline
-		(setq indent (org-get-indentation))
-		(forward-line 1))
-	      (setq beg (point))
-	      (cond
-	       (inline
-		 ;; Make sure new results are separated from the
-		 ;; source code by one space.
-		 (unless existing-result
-		   (insert " ")
-		   (setq beg (point))))
-	       ((member "replace" result-params)
-		(delete-region (point) (org-babel-result-end)))
-	       ((member "append" result-params)
-		(goto-char (org-babel-result-end)) (setq beg (point-marker)))
-	       ((member "prepend" result-params))) ; already there
-	      (setq results-switches
-		    (if results-switches (concat " " results-switches) ""))
-	      (let ((wrap (lambda (start finish &optional no-escape no-newlines
-				    inline-start inline-finish)
-			    (when inline
-			      (setq start inline-start)
-			      (setq finish inline-finish)
-			      (setq no-newlines t))
-			    (goto-char end)
-			    (insert (concat finish (unless no-newlines "\n")))
-			    (goto-char beg)
-			    (insert (concat start (unless no-newlines "\n")))
-			    (unless no-escape
-			      (org-escape-code-in-region (min (point) end) end))
-			    (goto-char end)
-			    (unless no-newlines (goto-char (point-at-eol)))
-			    (setq end (point-marker))))
-		    (tabulablep
-		     (lambda (r)
-		       ;; Non-nil when result R can be turned into
-		       ;; a table.
-		       (and (listp r)
-			    (null (cdr (last r)))
-			    (cl-every
-			     (lambda (e) (or (atom e) (null (cdr (last e)))))
-			     result)))))
-		;; insert results based on type
+      (progn (message (replace-regexp-in-string "%" "%%" (format "%S" result)))
+	     result)
+    (let ((inline (let ((context (org-element-context)))
+		    (and (memq (org-element-type context)
+			       '(inline-babel-call inline-src-block))
+			 context))))
+      (when inline
+	(let ((warning
+	       (or (and (member "table" result-params) "`:results table'")
+		   (and (listp result) "list result")
+		   (and (string-match-p "\n." result) "multiline result")
+		   (and (member "list" result-params) "`:results list'"))))
+	  (when warning
+	    (user-error "Inline error: %s cannot be used" warning))))
+      (save-excursion
+	(let* ((visible-beg (point-min-marker))
+	       (visible-end (copy-marker (point-max) t))
+	       (inline (let ((context (org-element-context)))
+			 (and (memq (org-element-type context)
+				    '(inline-babel-call inline-src-block))
+			      context)))
+	       (existing-result (org-babel-where-is-src-block-result t nil hash))
+	       (results-switches (cdr (assq :results_switches (nth 2 info))))
+	       ;; When results exist outside of the current visible
+	       ;; region of the buffer, be sure to widen buffer to
+	       ;; update them.
+	       (outside-scope (and existing-result
+				   (buffer-narrowed-p)
+				   (or (> visible-beg existing-result)
+				       (<= visible-end existing-result))))
+	       beg end indent)
+	  ;; Ensure non-inline results end in a newline.
+	  (when (and (org-string-nw-p result)
+		     (not inline)
+		     (not (string-equal (substring result -1) "\n")))
+	    (setq result (concat result "\n")))
+	  (unwind-protect
+	      (progn
+		(when outside-scope (widen))
+		(if existing-result (goto-char existing-result)
+		  (goto-char (org-element-property :end inline))
+		  (skip-chars-backward " \t"))
+		(unless inline
+		  (setq indent (org-get-indentation))
+		  (forward-line 1))
+		(setq beg (point))
 		(cond
-		 ;; Do nothing for an empty result.
-		 ((null result))
-		 ;; Illegal inline result or params.
-		 (bad-inline-p
-		  (error "Inline error: %s cannot be used" bad-inline-p))
-		 ;; insert a list if preferred
-		 ((member "list" result-params)
-		  (insert
-		   (org-babel-trim
-		    (org-list-to-generic
-		     (cons 'unordered
-			   (mapcar
-			    (lambda (e)
-			      (list (if (stringp e) e (format "%S" e))))
-			    (if (listp result) result
-			      (split-string result "\n" t))))
-		     '(:splicep nil :istart "- " :iend "\n")))
-		   "\n"))
-		 ;; Try hard to print RESULT as a table.  Give up if
-		 ;; it contains an improper list.
-		 ((funcall tabulablep result)
-		  (goto-char beg)
-		  (insert (concat (orgtbl-to-orgtbl
-				   (if (cl-every
-					(lambda (e)
-					  (or (eq e 'hline) (listp e)))
-					result)
-				       result
-				     (list result))
-				   nil)
-				  "\n"))
-		  (goto-char beg)
-		  (when (org-at-table-p) (org-table-align))
-		  (goto-char (org-table-end)))
-		 ;; Print verbatim a list that cannot be turned into
-		 ;; a table.
-		 ((listp result) (insert (format "%s\n" result)))
-		 ((member "file" result-params)
-		  (when inline
-		    (setq result (org-macro-escape-arguments result)))
-		  (insert result))
-		 ((and inline (not (member "raw" result-params)))
-		  (insert (org-macro-escape-arguments
-			   (org-babel-chomp result "\n"))))
-		 (t (goto-char beg) (insert result)))
-		(setq end (point-marker))
-		;; possibly wrap result
-		(cond
-		 (bad-inline-p)		; Do nothing.
-		 ((assoc :wrap (nth 2 info))
-		  (let ((name (or (cdr (assoc :wrap (nth 2 info))) "RESULTS")))
-		    (funcall wrap (concat "#+BEGIN_" name)
-			     (concat "#+END_" (car (org-split-string name)))
-			     nil nil (concat "{{{results(@@" name ":") "@@)}}}")))
-		 ((member "html" result-params)
-		  (funcall wrap "#+BEGIN_EXPORT html" "#+END_EXPORT" nil nil
-			   "{{{results(@@html:" "@@)}}}"))
-		 ((member "latex" result-params)
-		  (funcall wrap "#+BEGIN_EXPORT latex" "#+END_EXPORT" nil nil
-			   "{{{results(@@latex:" "@@)}}}"))
-		 ((member "org" result-params)
-		  (goto-char beg) (if (org-at-table-p) (org-cycle))
-		  (funcall wrap "#+BEGIN_SRC org" "#+END_SRC" nil nil
-			   "{{{results(src_org{" "})}}}"))
-		 ((member "code" result-params)
-		  (let ((lang (or lang "none")))
-		    (funcall wrap (format "#+BEGIN_SRC %s%s" lang results-switches)
-			     "#+END_SRC" nil nil
-			     (format "{{{results(src_%s[%s]{" lang results-switches)
-			     "})}}}")))
-		 ((member "raw" result-params)
-		  (goto-char beg) (if (org-at-table-p) (org-cycle)))
-		 ((or (member "drawer" result-params)
-		      ;; Stay backward compatible with <7.9.2
-		      (member "wrap" result-params))
-		  (goto-char beg) (if (org-at-table-p) (org-cycle))
-		  (funcall wrap ":RESULTS:" ":END:" 'no-escape nil
-			   "{{{results(" ")}}}"))
-		 ((and inline (member "file" result-params))
-		  (funcall wrap nil nil nil nil "{{{results(" ")}}}"))
-		 ((and (not (funcall tabulablep result))
-		       (not (member "file" result-params)))
-		  (let ((org-babel-inline-result-wrap
-			 ;; Hard code {{{results(...)}}} on top of customization.
-			 (format "{{{results(%s)}}}"
-				 org-babel-inline-result-wrap)))
-		    (org-babel-examplify-region beg end results-switches inline)
-		    (setq end (point))))))
-	      ;; Possibly indent results in par with #+results line.
-	      (when (and (not inline) (numberp indent) (> indent 0)
-			 ;; In this case `table-align' does the work
-			 ;; for us.
-			 (not (and (listp result)
-				   (member "append" result-params))))
-		(indent-rigidly beg end indent))
-	      (if (null result)
-		  (if (member "value" result-params)
-		      (message "Code block returned no value.")
-		    (message "Code block produced no output."))
-		(message "Code block evaluation complete.")))
-	  (when outside-scope (narrow-to-region visible-beg visible-end))
-	  (set-marker visible-beg nil)
-	  (set-marker visible-end nil))))))
+		 (inline
+		   ;; Make sure new results are separated from the
+		   ;; source code by one space.
+		   (unless existing-result
+		     (insert " ")
+		     (setq beg (point))))
+		 ((member "replace" result-params)
+		  (delete-region (point) (org-babel-result-end)))
+		 ((member "append" result-params)
+		  (goto-char (org-babel-result-end)) (setq beg (point-marker)))
+		 ((member "prepend" result-params))) ; already there
+		(setq results-switches
+		      (if results-switches (concat " " results-switches) ""))
+		(let ((wrap (lambda (start finish &optional no-escape no-newlines
+				      inline-start inline-finish)
+			      (when inline
+				(setq start inline-start)
+				(setq finish inline-finish)
+				(setq no-newlines t))
+			      (goto-char end)
+			      (insert (concat finish (unless no-newlines "\n")))
+			      (goto-char beg)
+			      (insert (concat start (unless no-newlines "\n")))
+			      (unless no-escape
+				(org-escape-code-in-region (min (point) end) end))
+			      (goto-char end)
+			      (unless no-newlines (goto-char (point-at-eol)))
+			      (setq end (point-marker))))
+		      (tabulablep
+		       (lambda (r)
+			 ;; Non-nil when result R can be turned into
+			 ;; a table.
+			 (and (listp r)
+			      (null (cdr (last r)))
+			      (cl-every
+			       (lambda (e) (or (atom e) (null (cdr (last e)))))
+			       result)))))
+		  ;; insert results based on type
+		  (cond
+		   ;; Do nothing for an empty result.
+		   ((null result))
+		   ;; Insert a list if preferred.
+		   ((member "list" result-params)
+		    (insert
+		     (org-babel-trim
+		      (org-list-to-generic
+		       (cons 'unordered
+			     (mapcar
+			      (lambda (e)
+				(list (if (stringp e) e (format "%S" e))))
+			      (if (listp result) result
+				(split-string result "\n" t))))
+		       '(:splicep nil :istart "- " :iend "\n")))
+		     "\n"))
+		   ;; Try hard to print RESULT as a table.  Give up if
+		   ;; it contains an improper list.
+		   ((funcall tabulablep result)
+		    (goto-char beg)
+		    (insert (concat (orgtbl-to-orgtbl
+				     (if (cl-every
+					  (lambda (e)
+					    (or (eq e 'hline) (listp e)))
+					  result)
+					 result
+				       (list result))
+				     nil)
+				    "\n"))
+		    (goto-char beg)
+		    (when (org-at-table-p) (org-table-align))
+		    (goto-char (org-table-end)))
+		   ;; Print verbatim a list that cannot be turned into
+		   ;; a table.
+		   ((listp result) (insert (format "%s\n" result)))
+		   ((member "file" result-params)
+		    (when inline
+		      (setq result (org-macro-escape-arguments result)))
+		    (insert result))
+		   ((and inline (not (member "raw" result-params)))
+		    (insert (org-macro-escape-arguments
+			     (org-babel-chomp result "\n"))))
+		   (t (goto-char beg) (insert result)))
+		  (setq end (point-marker))
+		  ;; possibly wrap result
+		  (cond
+		   ((assoc :wrap (nth 2 info))
+		    (let ((name (or (cdr (assoc :wrap (nth 2 info))) "RESULTS")))
+		      (funcall wrap (concat "#+BEGIN_" name)
+			       (concat "#+END_" (car (org-split-string name)))
+			       nil nil (concat "{{{results(@@" name ":") "@@)}}}")))
+		   ((member "html" result-params)
+		    (funcall wrap "#+BEGIN_EXPORT html" "#+END_EXPORT" nil nil
+			     "{{{results(@@html:" "@@)}}}"))
+		   ((member "latex" result-params)
+		    (funcall wrap "#+BEGIN_EXPORT latex" "#+END_EXPORT" nil nil
+			     "{{{results(@@latex:" "@@)}}}"))
+		   ((member "org" result-params)
+		    (goto-char beg) (if (org-at-table-p) (org-cycle))
+		    (funcall wrap "#+BEGIN_SRC org" "#+END_SRC" nil nil
+			     "{{{results(src_org{" "})}}}"))
+		   ((member "code" result-params)
+		    (let ((lang (or lang "none")))
+		      (funcall wrap (format "#+BEGIN_SRC %s%s" lang results-switches)
+			       "#+END_SRC" nil nil
+			       (format "{{{results(src_%s[%s]{" lang results-switches)
+			       "})}}}")))
+		   ((member "raw" result-params)
+		    (goto-char beg) (if (org-at-table-p) (org-cycle)))
+		   ((or (member "drawer" result-params)
+			;; Stay backward compatible with <7.9.2
+			(member "wrap" result-params))
+		    (goto-char beg) (if (org-at-table-p) (org-cycle))
+		    (funcall wrap ":RESULTS:" ":END:" 'no-escape nil
+			     "{{{results(" ")}}}"))
+		   ((and inline (member "file" result-params))
+		    (funcall wrap nil nil nil nil "{{{results(" ")}}}"))
+		   ((and (not (funcall tabulablep result))
+			 (not (member "file" result-params)))
+		    (let ((org-babel-inline-result-wrap
+			   ;; Hard code {{{results(...)}}} on top of customization.
+			   (format "{{{results(%s)}}}"
+				   org-babel-inline-result-wrap)))
+		      (org-babel-examplify-region beg end results-switches inline)
+		      (setq end (point))))))
+		;; Possibly indent results in par with #+results line.
+		(when (and (not inline) (numberp indent) (> indent 0)
+			   ;; In this case `table-align' does the work
+			   ;; for us.
+			   (not (and (listp result)
+				     (member "append" result-params))))
+		  (indent-rigidly beg end indent))
+		(if (null result)
+		    (if (member "value" result-params)
+			(message "Code block returned no value.")
+		      (message "Code block produced no output."))
+		  (message "Code block evaluation complete.")))
+	    (when outside-scope (narrow-to-region visible-beg visible-end))
+	    (set-marker visible-beg nil)
+	    (set-marker visible-end nil)))))))
 
 (defun org-babel-remove-result (&optional info keep-keyword)
   "Remove the result of the current source block."
