@@ -1978,7 +1978,7 @@ INFO is a plist used as a communication channel."
   (when todo
     (format "<span class=\"%s %s%s\">%s</span>"
 	    (if (member todo org-done-keywords) "done" "todo")
-	    (plist-get info :html-todo-kwd-class-prefix)
+	    (or (plist-get info :html-todo-kwd-class-prefix) "")
 	    (org-html-fix-class-name todo)
 	    todo)))
 
