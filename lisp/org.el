@@ -4726,7 +4726,6 @@ Otherwise, these types are allowed:
 
 ;; Declare Column View Code
 
-(declare-function org-columns-number-to-string "org-colview" (n operator &optional printf))
 (declare-function org-columns-get-format-and-top-level "org-colview" ())
 (declare-function org-columns-compute "org-colview" (property))
 
@@ -15600,8 +15599,7 @@ strings."
 	      (let ((clocksum (get-text-property (point) :org-clock-minutes)))
 		(when clocksum
 		  (push (cons "CLOCKSUM"
-			      (org-columns-number-to-string
-			       (/ clocksum 60.0) ":"))
+			      (org-minutes-to-clocksum-string clocksum))
 			props)))
 	      (when specific (throw 'exit props)))
 	    (when (or (not specific) (string= specific "CLOCKSUM_T"))
@@ -15609,8 +15607,7 @@ strings."
 						  :org-clock-minutes-today)))
 		(when clocksumt
 		  (push (cons "CLOCKSUM_T"
-			      (org-columns-number-to-string
-			       (/ clocksumt 60.0) ":"))
+			      (org-minutes-to-clocksum-string clocksumt))
 			props)))
 	      (when specific (throw 'exit props)))
 	    (when (or (not specific) (string= specific "ITEM"))

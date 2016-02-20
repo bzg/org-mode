@@ -202,22 +202,18 @@ VALUE is the real value of the property, as a string.
 
 This function assumes `org-columns-current-fmt-compiled' is
 initialized."
-  (pcase (assoc-string property org-columns-current-fmt-compiled t)
-    (`(,_ ,_ ,_ ,operator ,printf ,_)
-     (cond
-      ((and (functionp org-columns-modify-value-for-display-function)
-	    (funcall
-	     org-columns-modify-value-for-display-function
-	     (nth 1 (assoc-string property org-columns-current-fmt-compiled t))
-	     value)))
-      ((equal (upcase property) "ITEM")
-       (concat (make-string (1- (org-current-level))
-			    (if org-hide-leading-stars ?\s ?*))
-	       "* "
-	       (org-columns-compact-links value)))
-      (printf (org-columns-number-to-string
-	       (org-columns-string-to-number value operator) operator printf))
-      (value)))))
+  (cond
+   ((and (functionp org-columns-modify-value-for-display-function)
+	 (funcall
+	  org-columns-modify-value-for-display-function
+	  (nth 1 (assoc-string property org-columns-current-fmt-compiled t))
+	  value)))
+   ((equal (upcase property) "ITEM")
+    (concat (make-string (1- (org-current-level))
+			 (if org-hide-leading-stars ?\s ?*))
+	    "* "
+	    (org-columns-compact-links value)))
+   (value)))
 
 (defun org-columns--collect-values (&optional agenda)
   "Collect values for columns on the current line.
@@ -1249,70 +1245,6 @@ and variances (respectively) of the individual estimates."
       (format "%s-%s"
 	      (format (or printf "%.0f") (- mean sd))
 	      (format (or printf "%.0f") (+ mean sd))))))
-
-;;;###autoload
-(defun org-columns-number-to-string (n operator &optional printf)
-  "Convert a computed column number N to a string value.
-operator is a string describing the summary type.  Optional argument
-PRINTF, when non-nil, is a format string used to print N."
-  (cond
-   ((equal operator "est+")
-    (let ((fmt (or printf "%.0f")))
-      (mapconcat (lambda (n) (format fmt n)) (if (consp n) n (list n n)) "-")))
-   ((not (numberp n)) "")
-   ((member operator '(":" ":max" ":min" ":mean"))
-    (org-hours-to-clocksum-string n))
-   ((equal operator "X")
-    (cond ((= n (floor n)) "[X]")
-	  ((> n 1.) "[-]")
-	  (t "[ ]")))
-   ((member operator '("X/" "X%"))
-    (let* ((n1 (floor n))
-	   (n2 (+ (floor (+ .5 (* 1000000 (- n n1)))) n1)))
-      (cond ((not (equal operator "X%")) (format "[%d/%d]" n1 n2))
-	    ((or (= n1 0) (= n2 0)) "[0%]")
-	    (t (format "[%d%%]" (round (* 100.0 n1) n2))))))
-   (printf (format printf n))
-   ((equal operator "$") (format "%.2f" n))
-   ((member operator '("@min" "@max" "@mean"))
-    (format-seconds "%dd %.2hh %mm %ss" n))
-   (t (number-to-string n))))
-
-(defun org-columns-string-to-number (s operator)
-  "Convert a column value S to a number.
-OPERATOR is a string describing the summary type."
-  (cond
-   ((not s) nil)
-   ((member operator '("@min" "@max" "@mean"))
-    (cond
-     ((string= s "") org-columns--time)
-     ((string-match "\\`\\(?: *\\([0-9]+\\)d\\)?\\(?: *\\([0-9]+\\)h\\)?\
-\\(?: *\\([0-9]+\\)m\\)?\\(?: *\\([0-9]+\\)s\\)?\\'" s)
-      (let ((d (if (match-end 1) (string-to-number (match-string 1 s)) 0))
-	    (h (if (match-end 2) (string-to-number (match-string 2 s)) 0))
-	    (m (if (match-end 3) (string-to-number (match-string 3 s)) 0))
-	    (s (if (match-end 4) (string-to-number (match-string 4 s)) 0)))
-	(+ (* 60 (+ (* 60 (+ (* 24 d) h)) m)) s)))
-     (t
-      (- org-columns--time
-	 (float-time (apply #'encode-time (org-parse-time-string s)))))))
-   ((string-match-p ":" s)		;Interpret HH:MM:SS.
-    (let ((sum 0.0))
-      (dolist (n (nreverse (split-string s ":")) sum)
-	(setq sum (+ (string-to-number n) (/ sum 60))))))
-   ((member operator '("X" "X/" "X%"))
-    (if (equal s "[X]") 1. 0.000001))
-   ((equal operator "est+")
-    (if (not (string-match "\\(.*\\)-\\(.*\\)" s))
-	(string-to-number s)
-      (list (string-to-number (match-string 1 s))
-	    (string-to-number (match-string 2 s)))))
-   ((string-match-p org-columns--duration-re s)
-    (let ((s (concat "0:" (org-duration-string-to-minutes s t)))
-	  (sum 0.0))
-      (dolist (n (nreverse (split-string s ":")) sum)
-	(setq sum (+ (string-to-number n) (/ sum 60))))))
-   (t (string-to-number s))))
 
 
 

@@ -373,12 +373,8 @@
   ;; {@min}, {@max} and {@mean} apply to ages.
   (should
    (equal
-    (org-columns-number-to-string
-     (float-time
-      (time-subtract
-       (current-time)
-       (apply #'encode-time (org-parse-time-string "<2014-03-04 Tue>"))))
-     "@min")
+    (let ((org-columns--time (float-time (current-time))))
+      (org-columns--summary-min-age (list "<2014-03-04 Tue>") nil))
     (org-test-with-temp-text
 	"* H
 ** S1
@@ -393,12 +389,8 @@
       (get-char-property (point) 'org-columns-value-modified))))
   (should
    (equal
-    (org-columns-number-to-string
-     (float-time
-      (time-subtract
-       (current-time)
-       (apply #'encode-time (org-parse-time-string "<2012-03-29 Thu>"))))
-     "@max")
+    (let ((org-columns--time (float-time (current-time))))
+      (org-columns--summary-max-age (list "<2012-03-29 Thu>") nil))
     (org-test-with-temp-text
 	"* H
 ** S1
@@ -413,17 +405,9 @@
       (get-char-property (point) 'org-columns-value-modified))))
   (should
    (equal
-    (org-columns-number-to-string
-     (/ (+ (float-time
-	    (time-subtract
-	     (current-time)
-	     (apply #'encode-time (org-parse-time-string "<2014-03-04 Tue>"))))
-	   (float-time
-	    (time-subtract
-	     (current-time)
-	     (apply #'encode-time (org-parse-time-string "<2012-03-29 Thu>")))))
-	2)
-     "@mean")
+    (let ((org-columns--time (float-time (current-time))))
+      (org-columns--summary-mean-age
+       (list "<2012-03-29 Thu>" "<2014-03-04 Tue>") nil))
     (org-test-with-temp-text
 	"* H
 ** S1
