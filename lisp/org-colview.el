@@ -178,7 +178,7 @@ VALUE is the real value of the property, as a string.
 This function assumes `org-columns-current-fmt-compiled' is
 initialized."
   (pcase (assoc-string property org-columns-current-fmt-compiled t)
-    (`(,_ ,_ ,_ ,operator ,_ ,printf ,_)
+    (`(,_ ,_ ,_ ,operator ,printf ,_)
      (cond
       ((and (functionp org-columns-modify-value-for-display-function)
 	    (funcall
@@ -762,33 +762,29 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	      (org-columns--display-here (cdr entry)))))))))
 
 (defconst org-columns-compile-map
-  '(("none" none +)
-    (":" add_times +)
-    ("+" add_numbers +)
-    ("$" currency +)
-    ("X" checkbox +)
-    ("X/" checkbox-n-of-m +)
-    ("X%" checkbox-percent +)
-    ("max" max_numbers max)
-    ("min" min_numbers min)
-    ("mean" mean_numbers (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
-    (":max" max_times max)
-    (":min" min_times min)
-    (":mean" mean_times (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
-    ("@min" min_age min)
-    ("@max" max_age max)
-    ("@mean" mean_age (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
-    ("est+" estimate org-columns--estimate-combine))
-  "Operator <-> format,function map.
+  '(("none" . +)
+    (":" . +)
+    ("+" . +)
+    ("$" . +)
+    ("X" . +)
+    ("X/" . +)
+    ("X%" . +)
+    ("max" . max)
+    ("min" . min)
+    ("mean" . (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
+    (":max" . max)
+    (":min" . min)
+    (":mean" . (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
+    ("@min" . min)
+    ("@max" . max)
+    ("@mean" . (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
+    ("est+" . org-columns--estimate-combine))
+  "Map operators to summarize functions.
 Used to compile/uncompile columns format and completing read in
 interactive function `org-columns-new'.
 
 operator    string used in #+COLUMNS definition describing the
 	    summary type
-format      symbol describing summary type selected interactively in
-	    `org-columns-new' and internally in
-	    `org-columns-number-to-string' and
-	    `org-columns-string-to-number'
 function    called with a list of values as argument to calculate
 	    the summary value")
 
@@ -815,7 +811,7 @@ function    called with a list of values as argument to calculate
 	       (mapcar (lambda (x) (list (car x))) org-columns-compile-map)
 	       nil t)))
 	 (summarize (or summarize
-			(nth 2 (assoc operator org-columns-compile-map))))
+			(cdr (assoc operator org-columns-compile-map))))
 	 (edit (and prop
 		    (assoc-string prop org-columns-current-fmt-compiled t))))
     (if edit
@@ -967,8 +963,8 @@ display, or in the #+COLUMNS line of the current buffer."
 	 (lvals (make-vector (1+ lmax) nil))
 	 (spec (assoc-string property org-columns-current-fmt-compiled t))
 	 (operator (nth 3 spec))
-	 (printf (nth 5 spec))
-	 (fun (nth 6 spec))
+	 (printf (nth 4 spec))
+	 (fun (nth 5 spec))
 	 (level 0)
 	 (inminlevel lmax)
 	 (last-level lmax))
@@ -1131,7 +1127,7 @@ COMPILED is an alist, as returned by
   (mapconcat
    (lambda (spec)
      (pcase spec
-       (`(,prop ,title ,width ,op ,_ ,printf ,_)
+       (`(,prop ,title ,width ,op ,printf ,_)
 	(concat "%"
 		(and width (number-to-string width))
 		prop
@@ -1146,13 +1142,12 @@ COMPILED is an alist, as returned by
 
 The alist has one entry for each column in the format.  The elements of
 that list are:
-property     the property
-title        the title field for the columns
-width        the column width in characters, can be nil for automatic
-operator     the operator if any
-format       the output format for computed results, derived from operator
-printf       a printf format for computed values
-fun          the lisp function to compute summary values, derived from operator
+property    the property name
+title       the title field for the columns
+width       the column width in characters, can be nil for automatic
+operator    the summary operator if any
+printf      a printf format for computed values
+fun         the lisp function to compute summary values, derived from operator
 
 This function updates `org-columns-current-fmt-compiled'."
   (setq org-columns-current-fmt-compiled nil)
@@ -1172,9 +1167,8 @@ This function updates `org-columns-current-fmt-compiled'."
 	  (setq printf (substring op (match-end 0)))
 	  (setq op (substring op 0 (match-beginning 0))))
 	(let ((op-match (assoc op org-columns-compile-map)))
-	  (when op-match
-	    (setq fun (nth 2 op-match))))
-	(push (list prop title width op nil printf fun)
+	  (when op-match (setq fun (cdr op-match))))
+	(push (list prop title width op printf fun)
 	      org-columns-current-fmt-compiled)))
     (setq org-columns-current-fmt-compiled
 	  (nreverse org-columns-current-fmt-compiled))))
@@ -1470,7 +1464,7 @@ This will add overlays to the date lines, to show the summary for each day."
 		     (list prop date date)))
 		  (`(,prop ,_ ,_ nil . ,_)
 		   (list prop "" ""))
-		  (`(,prop ,_ ,_ ,operator ,_ ,_ ,sumfunc)
+		  (`(,prop ,_ ,_ ,operator ,_ ,sumfunc)
 		   (let (lsum)
 		     (dolist (entry entries (setq lsum (delq nil lsum)))
 		       ;; Use real values for summary, not those
