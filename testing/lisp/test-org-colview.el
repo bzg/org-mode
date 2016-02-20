@@ -436,6 +436,42 @@
 :END:"
       (let ((org-columns-default-format "%A{@mean}")) (org-columns))
       (get-char-property (point) 'org-columns-value-modified))))
+  ;; If a time value is expressed as a duration, return a duration.
+  ;; If any of them follows H:MM:SS pattern, use it too.
+  (should
+   (equal
+    "1d 4:20"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 3d 3h
+:END:
+** S1
+:PROPERTIES:
+:A: 1:20
+:END:"
+      (let ((org-columns-default-format "%A{:}")
+	    (org-time-clocksum-use-fractional nil)
+	    (org-time-clocksum-format
+	     '(:days "%dd " :hours "%d" :minutes ":%02d")))
+	(org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  (should
+   (equal
+    "6:00:10"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 4:40:10
+:END:
+** S1
+:PROPERTIES:
+:A: 1:20
+:END:"
+      (let ((org-columns-default-format "%A{:}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
   ;; @min, @max and @mean also accept regular duration in
   ;; a "?d ?h ?m ?s" format.
   (should
@@ -445,11 +481,11 @@
 	"* H
 ** S1
 :PROPERTIES:
-:A: 1d 10h
+:A: 1d 10h 0m 0s
 :END:
 ** S1
 :PROPERTIES:
-:A: 5d 3h
+:A: 5d 3h 0m 0s
 :END:"
       (let ((org-columns-default-format "%A{@min}")) (org-columns))
       (get-char-property (point) 'org-columns-value-modified))))
