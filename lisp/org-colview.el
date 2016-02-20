@@ -178,7 +178,7 @@ VALUE is the real value of the property, as a string.
 This function assumes `org-columns-current-fmt-compiled' is
 initialized."
   (pcase (assoc-string property org-columns-current-fmt-compiled t)
-    (`(,_ ,_ ,_ ,_ ,fmt ,printf ,_)
+    (`(,_ ,_ ,_ ,operator ,_ ,printf ,_)
      (cond
       ((and (functionp org-columns-modify-value-for-display-function)
 	    (funcall
@@ -191,7 +191,7 @@ initialized."
 	       "* "
 	       (org-columns-compact-links value)))
       (printf (org-columns-number-to-string
-	       (org-columns-string-to-number value fmt) fmt printf))
+	       (org-columns-string-to-number value operator) operator printf))
       (value)))))
 
 (defun org-columns--collect-values (&optional agenda)
@@ -610,14 +610,14 @@ an integer, select that value."
 	 (bol (point-at-bol)) (eol (point-at-eol))
 	 (pom (or (get-text-property bol 'org-hd-marker)
 		  (point)))	     ; keep despite of compiler waring
-	 (allowed (or (org-property-get-allowed-values pom key)
-		      (and (memq
-			    (nth 4 (assoc-string key
-						 org-columns-current-fmt-compiled
-						 t))
-			    '(checkbox checkbox-n-of-m checkbox-percent))
-			   '("[ ]" "[X]"))
-		      (org-colview-construct-allowed-dates value)))
+	 (allowed
+	  (or (org-property-get-allowed-values pom key)
+	      (and (member (nth 3 (assoc-string key
+						org-columns-current-fmt-compiled
+						t))
+			   '("X" "X/" "X%"))
+		   '("[ ]" "[X]"))
+	      (org-colview-construct-allowed-dates value)))
 	 nval)
     (when (integerp nth)
       (setq nth (1- nth))
@@ -792,37 +792,39 @@ format      symbol describing summary type selected interactively in
 function    called with a list of values as argument to calculate
 	    the summary value")
 
-(defun org-columns-new (&optional prop title width _op fmt fun &rest _rest)
+(defun org-columns-new (&optional prop title width operator _f _p summarize)
   "Insert a new column, to the left of the current column."
   (interactive)
-  (let ((editp (and prop
-		    (assoc-string prop org-columns-current-fmt-compiled t)))
-	cell)
-    (setq prop (completing-read
-		"Property: " (mapcar #'list (org-buffer-property-keys t nil t))
-		nil nil prop))
-    (setq title (read-string (concat "Column title [" prop "]: ") (or title prop)))
-    (setq width (read-string "Column width: " (if width (number-to-string width))))
-    (if (string-match "\\S-" width)
-	(setq width (string-to-number width))
-      (setq width nil))
-    (setq fmt (completing-read
+  (let* ((prop (or prop (completing-read
+			 "Property: "
+			 (mapcar #'list (org-buffer-property-keys t nil t)))))
+	 (title (or title
+		    (read-string (format "Column title [%s]: " prop) prop)))
+	 (width
+	  ;; WIDTH may be nil, but if PROP is provided, assume this is
+	  ;; the expected width.
+	  (if prop width
+	    ;; Use `read-string' instead of `read-number' to allow
+	    ;; empty width.
+	    (let ((w (read-string "Column width: ")))
+	      (and (org-string-nw-p w) (string-to-number w)))))
+	 (operator
+	  (or operator
+	      (completing-read
 	       "Summary [none]: "
-	       (mapcar (lambda (x) (list (symbol-name (cadr x))))
-		       org-columns-compile-map)
-	       nil t))
-    (setq fmt (intern fmt)
-	  fun (cdr (assoc fmt (mapcar 'cdr org-columns-compile-map))))
-    (if (eq fmt 'none) (setq fmt nil))
-    (if editp
+	       (mapcar (lambda (x) (list (car x))) org-columns-compile-map)
+	       nil t)))
+	 (summarize (or summarize
+			(nth 2 (assoc operator org-columns-compile-map))))
+	 (edit (and prop
+		    (assoc-string prop org-columns-current-fmt-compiled t))))
+    (if edit
 	(progn
-	  (setcar editp prop)
-	  (setcdr editp (list title width nil fmt nil fun)))
-      (setq cell (nthcdr (1- (current-column))
-			 org-columns-current-fmt-compiled))
-      (setcdr cell (cons (list prop title width nil fmt nil
-			       (car fun) (cadr fun))
-			 (cdr cell))))
+	  (setcar edit prop)
+	  (setcdr edit (list title width nil operator nil summarize)))
+      (let ((cell (nthcdr (1- (current-column))
+			  org-columns-current-fmt-compiled)))
+	(push (list prop title width nil operator nil summarize) (cdr cell))))
     (org-columns-store-format)
     (org-columns-redo)))
 
@@ -964,7 +966,7 @@ display, or in the #+COLUMNS line of the current buffer."
 		 29))			;Hard-code deepest level.
 	 (lvals (make-vector (1+ lmax) nil))
 	 (spec (assoc-string property org-columns-current-fmt-compiled t))
-	 (format (nth 4 spec))
+	 (operator (nth 3 spec))
 	 (printf (nth 5 spec))
 	 (fun (nth 6 spec))
 	 (level 0)
@@ -994,7 +996,7 @@ display, or in the #+COLUMNS line of the current buffer."
 				      (aref lvals inminlevel))))
 		     (and all (apply fun all))))
 		  (str (and summary (org-columns-number-to-string
-				     summary format printf))))
+				     summary operator printf))))
 	     (let* ((summaries-alist (get-text-property pos 'org-summaries))
 		    (old (assoc-string property summaries-alist t))
 		    (new (cond
@@ -1013,14 +1015,14 @@ display, or in the #+COLUMNS line of the current buffer."
 	       (org-entry-put nil property str))
 	     ;; Add current to current level accumulator.
 	     (when (or summary value-set)
-	       (push (or summary (org-columns-string-to-number value format))
+	       (push (or summary (org-columns-string-to-number value operator))
 		     (aref lvals level)))
 	     ;; Clear accumulators for deeper levels.
 	     (cl-loop for l from (1+ level) to lmax do
 		      (aset lvals l nil))))
 	  (value-set
 	   ;; Add what we have here to the accumulator for this level.
-	   (push (org-columns-string-to-number value format)
+	   (push (org-columns-string-to-number value operator)
 		 (aref lvals level)))
 	  (t nil)))))))
 
@@ -1043,30 +1045,30 @@ display, or in the #+COLUMNS line of the current buffer."
   (message "Recomputing columns...done"))
 
 ;;;###autoload
-(defun org-columns-number-to-string (n fmt &optional printf)
+(defun org-columns-number-to-string (n operator &optional printf)
   "Convert a computed column number N to a string value.
-FMT is a symbol describing the summary type.  Optional argument
+operator is a string describing the summary type.  Optional argument
 PRINTF, when non-nil, is a format string used to print N."
   (cond
-   ((eq fmt 'estimate)
+   ((equal operator "est+")
     (let ((fmt (or printf "%.0f")))
       (mapconcat (lambda (n) (format fmt n)) (if (consp n) n (list n n)) "-")))
    ((not (numberp n)) "")
-   ((memq fmt '(add_times max_times min_times mean_times))
+   ((member operator '(":" ":max" ":min" ":mean"))
     (org-hours-to-clocksum-string n))
-   ((eq fmt 'checkbox)
+   ((equal operator "X")
     (cond ((= n (floor n)) "[X]")
 	  ((> n 1.) "[-]")
 	  (t "[ ]")))
-   ((memq fmt '(checkbox-n-of-m checkbox-percent))
+   ((member operator '("X/" "X%"))
     (let* ((n1 (floor n))
 	   (n2 (+ (floor (+ .5 (* 1000000 (- n n1)))) n1)))
-      (cond ((not (eq fmt 'checkbox-percent)) (format "[%d/%d]" n1 n2))
+      (cond ((not (equal operator "X%")) (format "[%d/%d]" n1 n2))
 	    ((or (= n1 0) (= n2 0)) "[0%]")
 	    (t (format "[%d%%]" (round (* 100.0 n1) n2))))))
    (printf (format printf n))
-   ((eq fmt 'currency) (format "%.2f" n))
-   ((memq fmt '(min_age max_age mean_age))
+   ((equal operator "$") (format "%.2f" n))
+   ((member operator '("@min" "@max" "@mean"))
     (format-seconds "%dd %.2hh %mm %ss" n))
    (t (number-to-string n))))
 
@@ -1086,12 +1088,12 @@ and variances (respectively) of the individual estimates."
     (let ((sd (sqrt var)))
       (list (- mean sd) (+ mean sd)))))
 
-(defun org-columns-string-to-number (s fmt)
+(defun org-columns-string-to-number (s operator)
   "Convert a column value S to a number.
-FMT is a symbol describing the summary type."
+OPERATOR is a string describing the summary type."
   (cond
    ((not s) nil)
-   ((memq fmt '(min_age max_age mean_age))
+   ((member operator '("@min" "@max" "@mean"))
     (cond
      ((string= s "") org-columns--time)
      ((string-match "\\`\\(?: *\\([0-9]+\\)d\\)?\\(?: *\\([0-9]+\\)h\\)?\
@@ -1108,9 +1110,9 @@ FMT is a symbol describing the summary type."
     (let ((sum 0.0))
       (dolist (n (nreverse (split-string s ":")) sum)
 	(setq sum (+ (string-to-number n) (/ sum 60))))))
-   ((memq fmt '(checkbox checkbox-n-of-m checkbox-percent))
+   ((member operator '("X" "X/" "X%"))
     (if (equal s "[X]") 1. 0.000001))
-   ((eq fmt 'estimate)
+   ((equal operator "est+")
     (if (not (string-match "\\(.*\\)-\\(.*\\)" s))
 	(string-to-number s)
       (list (string-to-number (match-string 1 s))
@@ -1122,28 +1124,22 @@ FMT is a symbol describing the summary type."
 	(setq sum (+ (string-to-number n) (/ sum 60))))))
    (t (string-to-number s))))
 
-(defun org-columns-uncompile-format (cfmt)
-  "Turn the compiled columns format back into a string representation."
-  (let ((rtn "") e s prop title op width fmt printf ee map)
-    (while (setq e (pop cfmt))
-      (setq prop (car e)
-	    title (nth 1 e)
-	    width (nth 2 e)
-	    op (nth 3 e)
-	    fmt (nth 4 e)
-	    printf (nth 5 e))
-      (setq map (copy-sequence org-columns-compile-map))
-      (while (setq ee (pop map))
-	(if (equal fmt (nth 1 ee))
-	    (setq op (car ee) map nil)))
-      (if (and op printf) (setq op (concat op ";" printf)))
-      (if (equal title prop) (setq title nil))
-      (setq s (concat "%" (if width (number-to-string width))
-		      prop
-		      (if title (concat "(" title ")"))
-		      (if op (concat "{" op "}"))))
-      (setq rtn (concat rtn " " s)))
-    (org-trim rtn)))
+(defun org-columns-uncompile-format (compiled)
+  "Turn the compiled columns format back into a string representation.
+COMPILED is an alist, as returned by
+`org-columns-compile-format', which see."
+  (mapconcat
+   (lambda (spec)
+     (pcase spec
+       (`(,prop ,title ,width ,op ,_ ,printf ,_)
+	(concat "%"
+		(and width (number-to-string width))
+		prop
+		(and title (not (equal prop title)) (format "(%s)" title))
+		(cond ((not op) nil)
+		      (printf (format "{%s;%s}" op printf))
+		      (t (format "{%s}" op)))))))
+   compiled " "))
 
 (defun org-columns-compile-format (fmt)
   "Turn a column format string FMT into an alist of specifications.
@@ -1170,7 +1166,6 @@ This function updates `org-columns-current-fmt-compiled'."
 	     (prop (match-string 2 fmt))
 	     (title (or (match-string 3 fmt) prop))
 	     (op (match-string 4 fmt))
-	     (f nil)
 	     (printf nil)
 	     (fun '+))
 	(when (and op (string-match ";" op))
@@ -1178,9 +1173,8 @@ This function updates `org-columns-current-fmt-compiled'."
 	  (setq op (substring op 0 (match-beginning 0))))
 	(let ((op-match (assoc op org-columns-compile-map)))
 	  (when op-match
-	    (setq f (nth 1 op-match))
 	    (setq fun (nth 2 op-match))))
-	(push (list prop title width op f printf fun)
+	(push (list prop title width op nil printf fun)
 	      org-columns-current-fmt-compiled)))
     (setq org-columns-current-fmt-compiled
 	  (nreverse org-columns-current-fmt-compiled))))
@@ -1447,7 +1441,7 @@ This will add overlays to the date lines, to show the summary for each day."
 	      org-columns-current-fmt-compiled))
 	entries)
     ;; Ensure there's at least one summation column.
-    (when (cl-some (lambda (spec) (nth 4 spec)) fmt)
+    (when (cl-some (lambda (spec) (nth 3 spec)) fmt)
       (goto-char (point-max))
       (while (not (bobp))
 	(when (or (get-text-property (point) 'org-date-line)
@@ -1474,24 +1468,25 @@ This will add overlays to the date lines, to show the summary for each day."
 				(line-beginning-position)
 				(line-end-position))))
 		     (list prop date date)))
-		  (`(,prop ,_ ,_ ,_ nil . ,_)
+		  (`(,prop ,_ ,_ nil . ,_)
 		   (list prop "" ""))
-		  (`(,prop ,_ ,_ ,_ ,stype ,_ ,sumfunc)
+		  (`(,prop ,_ ,_ ,operator ,_ ,_ ,sumfunc)
 		   (let (lsum)
 		     (dolist (entry entries (setq lsum (delq nil lsum)))
 		       ;; Use real values for summary, not those
 		       ;; prepared for display.
 		       (let ((v (nth 1 (assoc-string prop entry t))))
 			 (when v
-			   (push (org-columns-string-to-number v stype) lsum))))
+			   (push (org-columns-string-to-number v operator)
+				 lsum))))
 		     (setq lsum
 			   (let ((l (length lsum)))
 			     (cond ((> l 1)
 				    (org-columns-number-to-string
-				     (apply sumfunc lsum) stype))
+				     (apply sumfunc lsum) operator))
 				   ((= l 1)
 				    (org-columns-number-to-string
-				     (car lsum) stype))
+				     (car lsum) operator))
 				   (t ""))))
 		     (put-text-property 0 (length lsum) 'face 'bold lsum)
 		     (list prop lsum lsum)))))
@@ -1504,29 +1499,24 @@ This will add overlays to the date lines, to show the summary for each day."
   "Compute the relevant columns in the contributing source buffers."
   (let ((files org-agenda-contributing-files)
 	(org-columns-begin-marker (make-marker))
-	(org-columns-top-level-marker (make-marker))
-	f fm a b)
-    (while (setq f (pop files))
-      (setq b (find-buffer-visiting f))
-      (with-current-buffer (or (buffer-base-buffer b) b)
-	(save-excursion
-	  (save-restriction
-	    (widen)
-	    (org-with-silent-modifications
-	     (remove-text-properties (point-min) (point-max) '(org-summaries t)))
-	    (goto-char (point-min))
-	    (org-columns-get-format-and-top-level)
-	    (while (setq fm (pop fmt))
-	      (cond ((equal (car fm) "CLOCKSUM")
-		     (org-clock-sum))
-		    ((equal (car fm) "CLOCKSUM_T")
-		     (org-clock-sum-today))
-		    ((and (nth 4 fm)
-			  (setq a (assoc-string (car fm)
-						org-columns-current-fmt-compiled
-						t))
-			  (equal (nth 4 a) (nth 4 fm)))
-		     (org-columns-compute (car fm)))))))))))
+	(org-columns-top-level-marker (make-marker)))
+    (dolist (f files)
+      (let ((b (find-buffer-visiting f)))
+	(with-current-buffer (or (buffer-base-buffer b) b)
+	  (org-with-wide-buffer
+	   (org-with-silent-modifications
+	    (remove-text-properties (point-min) (point-max) '(org-summaries t)))
+	   (goto-char (point-min))
+	   (org-columns-get-format-and-top-level)
+	   (dolist (spec fmt)
+	     (let ((prop (car spec)))
+	       (cond
+		((equal (upcase prop) "CLOCKSUM") (org-clock-sum))
+		((equal (upcase prop) "CLOCKSUM_T") (org-clock-sum-today))
+		((and (nth 3 spec)
+		      (let ((a (assoc prop org-columns-current-fmt-compiled)))
+			(equal (nth 3 a) (nth 3 spec))))
+		 (org-columns-compute prop)))))))))))
 
 
 (provide 'org-colview)

@@ -378,7 +378,7 @@
       (time-subtract
        (current-time)
        (apply #'encode-time (org-parse-time-string "<2014-03-04 Tue>"))))
-     'min_age)
+     "@min")
     (org-test-with-temp-text
 	"* H
 ** S1
@@ -398,7 +398,7 @@
       (time-subtract
        (current-time)
        (apply #'encode-time (org-parse-time-string "<2012-03-29 Thu>"))))
-     'max_age)
+     "@max")
     (org-test-with-temp-text
 	"* H
 ** S1
@@ -423,7 +423,7 @@
 	     (current-time)
 	     (apply #'encode-time (org-parse-time-string "<2012-03-29 Thu>")))))
 	2)
-     'mean_age)
+     "@mean")
     (org-test-with-temp-text
 	"* H
 ** S1

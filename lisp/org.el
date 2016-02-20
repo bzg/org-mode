@@ -4726,7 +4726,7 @@ Otherwise, these types are allowed:
 
 ;; Declare Column View Code
 
-(declare-function org-columns-number-to-string "org-colview" (n fmt &optional printf))
+(declare-function org-columns-number-to-string "org-colview" (n operator &optional printf))
 (declare-function org-columns-get-format-and-top-level "org-colview" ())
 (declare-function org-columns-compute "org-colview" (property))
 
@@ -15601,7 +15601,7 @@ strings."
 		(when clocksum
 		  (push (cons "CLOCKSUM"
 			      (org-columns-number-to-string
-			       (/ (float clocksum) 60.) 'add_times))
+			       (/ clocksum 60.0) ":"))
 			props)))
 	      (when specific (throw 'exit props)))
 	    (when (or (not specific) (string= specific "CLOCKSUM_T"))
@@ -15610,7 +15610,7 @@ strings."
 		(when clocksumt
 		  (push (cons "CLOCKSUM_T"
 			      (org-columns-number-to-string
-			       (/ (float clocksumt) 60.) 'add_times))
+			       (/ clocksumt 60.0) ":"))
 			props)))
 	      (when specific (throw 'exit props)))
 	    (when (or (not specific) (string= specific "ITEM"))
