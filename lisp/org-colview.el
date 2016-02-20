@@ -46,6 +46,7 @@
 (defvar org-agenda-view-columns-initially)
 (defvar org-inlinetask-min-level)
 
+
 ;;; Configuration
 
 (defcustom org-columns-modify-value-for-display-function nil
@@ -61,6 +62,8 @@ or nil if the normal value should be used."
   :group 'org-properties
   :type '(choice (const nil) (function)))
 
+
+
 ;;; Column View
 
 (defvar org-columns-overlays nil
@@ -87,6 +90,33 @@ This is the compiled version of the format.")
 
 (defvar org-columns-map (make-sparse-keymap)
   "The keymap valid in column display.")
+
+(defconst org-columns-compile-map
+  '(("none" . +)
+    (":" . +)
+    ("+" . +)
+    ("$" . +)
+    ("X" . +)
+    ("X/" . +)
+    ("X%" . +)
+    ("max" . max)
+    ("min" . min)
+    ("mean" . (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
+    (":max" . max)
+    (":min" . min)
+    (":mean" . (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
+    ("@min" . min)
+    ("@max" . max)
+    ("@mean" . (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
+    ("est+" . org-columns--estimate-combine))
+  "Map operators to summarize functions.
+Used to compile/uncompile columns format and completing read in
+interactive function `org-columns-new'.
+
+operator    string used in #+COLUMNS definition describing the
+	    summary type
+function    called with a list of values as argument to calculate
+	    the summary value")
 
 (defun org-columns-content ()
   "Switch to contents view while in columns view."
@@ -761,33 +791,6 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	      (goto-char (car entry))
 	      (org-columns--display-here (cdr entry)))))))))
 
-(defconst org-columns-compile-map
-  '(("none" . +)
-    (":" . +)
-    ("+" . +)
-    ("$" . +)
-    ("X" . +)
-    ("X/" . +)
-    ("X%" . +)
-    ("max" . max)
-    ("min" . min)
-    ("mean" . (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
-    (":max" . max)
-    (":min" . min)
-    (":mean" . (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
-    ("@min" . min)
-    ("@max" . max)
-    ("@mean" . (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
-    ("est+" . org-columns--estimate-combine))
-  "Map operators to summarize functions.
-Used to compile/uncompile columns format and completing read in
-interactive function `org-columns-new'.
-
-operator    string used in #+COLUMNS definition describing the
-	    summary type
-function    called with a list of values as argument to calculate
-	    the summary value")
-
 (defun org-columns-new (&optional prop title width operator _f _p summarize)
   "Insert a new column, to the left of the current column."
   (interactive)
@@ -915,16 +918,6 @@ display, or in the #+COLUMNS line of the current buffer."
 		(insert-before-markers "#+COLUMNS: " fmt "\n")))
 	    (setq-local org-columns-default-format fmt))))))
 
-(defun org-columns-compute-all ()
-  "Compute all columns that have operators defined."
-  (org-with-silent-modifications
-   (remove-text-properties (point-min) (point-max) '(org-summaries t)))
-  (let ((org-columns--time (float-time (current-time))))
-    (dolist (spec org-columns-current-fmt-compiled)
-      (pcase spec
-	(`(,property ,_ ,_ ,operator . ,_)
-	 (when operator (save-excursion (org-columns-compute property))))))))
-
 (defun org-columns-update (property)
   "Recompute PROPERTY, and update the columns display for it."
   (org-columns-compute property)
@@ -952,6 +945,80 @@ display, or in the #+COLUMNS line of the current buffer."
 			    'display
 			    (org-columns--overlay-text
 			     displayed format width property value))))))))))
+
+(defun org-columns-redo ()
+  "Construct the column display again."
+  (interactive)
+  (message "Recomputing columns...")
+  (let ((line (org-current-line))
+	(col (current-column)))
+    (save-excursion
+      (if (marker-position org-columns-begin-marker)
+	  (goto-char org-columns-begin-marker))
+      (org-columns-remove-overlays)
+      (if (derived-mode-p 'org-mode)
+	  (call-interactively 'org-columns)
+	(org-agenda-redo)
+	(call-interactively 'org-agenda-columns)))
+    (org-goto-line line)
+    (move-to-column col))
+  (message "Recomputing columns...done"))
+
+(defun org-columns-uncompile-format (compiled)
+  "Turn the compiled columns format back into a string representation.
+COMPILED is an alist, as returned by
+`org-columns-compile-format', which see."
+  (mapconcat
+   (lambda (spec)
+     (pcase spec
+       (`(,prop ,title ,width ,op ,printf ,_)
+	(concat "%"
+		(and width (number-to-string width))
+		prop
+		(and title (not (equal prop title)) (format "(%s)" title))
+		(cond ((not op) nil)
+		      (printf (format "{%s;%s}" op printf))
+		      (t (format "{%s}" op)))))))
+   compiled " "))
+
+(defun org-columns-compile-format (fmt)
+  "Turn a column format string FMT into an alist of specifications.
+
+The alist has one entry for each column in the format.  The elements of
+that list are:
+property    the property name
+title       the title field for the columns
+width       the column width in characters, can be nil for automatic
+operator    the summary operator if any
+printf      a printf format for computed values
+fun         the lisp function to compute summary values, derived from operator
+
+This function updates `org-columns-current-fmt-compiled'."
+  (setq org-columns-current-fmt-compiled nil)
+  (let ((start 0))
+    (while (string-match
+	    "%\\([0-9]+\\)?\\([[:alnum:]_-]+\\)\\(?:(\\([^)]+\\))\\)?\
+\\(?:{\\([^}]+\\)}\\)?\\s-*"
+	    fmt start)
+      (setq start (match-end 0))
+      (let* ((width (and (match-end 1) (string-to-number (match-string 1 fmt))))
+	     (prop (match-string 2 fmt))
+	     (title (or (match-string 3 fmt) prop))
+	     (op (match-string 4 fmt))
+	     (printf nil)
+	     (fun '+))
+	(when (and op (string-match ";" op))
+	  (setq printf (substring op (match-end 0)))
+	  (setq op (substring op 0 (match-beginning 0))))
+	(let ((op-match (assoc op org-columns-compile-map)))
+	  (when op-match (setq fun (cdr op-match))))
+	(push (list prop title width op printf fun)
+	      org-columns-current-fmt-compiled)))
+    (setq org-columns-current-fmt-compiled
+	  (nreverse org-columns-current-fmt-compiled))))
+
+
+;;;; Column View Summary
 
 ;;;###autoload
 (defun org-columns-compute (property)
@@ -1022,23 +1089,31 @@ display, or in the #+COLUMNS line of the current buffer."
 		 (aref lvals level)))
 	  (t nil)))))))
 
-(defun org-columns-redo ()
-  "Construct the column display again."
-  (interactive)
-  (message "Recomputing columns...")
-  (let ((line (org-current-line))
-	(col (current-column)))
-    (save-excursion
-      (if (marker-position org-columns-begin-marker)
-	  (goto-char org-columns-begin-marker))
-      (org-columns-remove-overlays)
-      (if (derived-mode-p 'org-mode)
-	  (call-interactively 'org-columns)
-	(org-agenda-redo)
-	(call-interactively 'org-agenda-columns)))
-    (org-goto-line line)
-    (move-to-column col))
-  (message "Recomputing columns...done"))
+(defun org-columns-compute-all ()
+  "Compute all columns that have operators defined."
+  (org-with-silent-modifications
+   (remove-text-properties (point-min) (point-max) '(org-summaries t)))
+  (let ((org-columns--time (float-time (current-time))))
+    (dolist (spec org-columns-current-fmt-compiled)
+      (pcase spec
+	(`(,property ,_ ,_ ,operator . ,_)
+	 (when operator (save-excursion (org-columns-compute property))))))))
+
+(defun org-columns--estimate-combine (&rest estimates)
+  "Combine a list of estimates, using mean and variance.
+The mean and variance of the result will be the sum of the means
+and variances (respectively) of the individual estimates."
+  (let ((mean 0)
+        (var 0))
+    (dolist (e estimates)
+      (pcase e
+	(`(,low ,high)
+	 (let ((m (/ (+ low high) 2.0)))
+	   (cl-incf mean m)
+	   (cl-incf var (- (/ (+ (* low low) (* high high)) 2.0) (* m m)))))
+	(value (cl-incf mean value))))
+    (let ((sd (sqrt var)))
+      (list (- mean sd) (+ mean sd)))))
 
 ;;;###autoload
 (defun org-columns-number-to-string (n operator &optional printf)
@@ -1067,22 +1142,6 @@ PRINTF, when non-nil, is a format string used to print N."
    ((member operator '("@min" "@max" "@mean"))
     (format-seconds "%dd %.2hh %mm %ss" n))
    (t (number-to-string n))))
-
-(defun org-columns--estimate-combine (&rest estimates)
-  "Combine a list of estimates, using mean and variance.
-The mean and variance of the result will be the sum of the means
-and variances (respectively) of the individual estimates."
-  (let ((mean 0)
-        (var 0))
-    (dolist (e estimates)
-      (pcase e
-	(`(,low ,high)
-	 (let ((m (/ (+ low high) 2.0)))
-	   (cl-incf mean m)
-	   (cl-incf var (- (/ (+ (* low low) (* high high)) 2.0) (* m m)))))
-	(value (cl-incf mean value))))
-    (let ((sd (sqrt var)))
-      (list (- mean sd) (+ mean sd)))))
 
 (defun org-columns-string-to-number (s operator)
   "Convert a column value S to a number.
@@ -1119,59 +1178,6 @@ OPERATOR is a string describing the summary type."
       (dolist (n (nreverse (split-string s ":")) sum)
 	(setq sum (+ (string-to-number n) (/ sum 60))))))
    (t (string-to-number s))))
-
-(defun org-columns-uncompile-format (compiled)
-  "Turn the compiled columns format back into a string representation.
-COMPILED is an alist, as returned by
-`org-columns-compile-format', which see."
-  (mapconcat
-   (lambda (spec)
-     (pcase spec
-       (`(,prop ,title ,width ,op ,printf ,_)
-	(concat "%"
-		(and width (number-to-string width))
-		prop
-		(and title (not (equal prop title)) (format "(%s)" title))
-		(cond ((not op) nil)
-		      (printf (format "{%s;%s}" op printf))
-		      (t (format "{%s}" op)))))))
-   compiled " "))
-
-(defun org-columns-compile-format (fmt)
-  "Turn a column format string FMT into an alist of specifications.
-
-The alist has one entry for each column in the format.  The elements of
-that list are:
-property    the property name
-title       the title field for the columns
-width       the column width in characters, can be nil for automatic
-operator    the summary operator if any
-printf      a printf format for computed values
-fun         the lisp function to compute summary values, derived from operator
-
-This function updates `org-columns-current-fmt-compiled'."
-  (setq org-columns-current-fmt-compiled nil)
-  (let ((start 0))
-    (while (string-match
-	    "%\\([0-9]+\\)?\\([[:alnum:]_-]+\\)\\(?:(\\([^)]+\\))\\)?\
-\\(?:{\\([^}]+\\)}\\)?\\s-*"
-	    fmt start)
-      (setq start (match-end 0))
-      (let* ((width (and (match-end 1) (string-to-number (match-string 1 fmt))))
-	     (prop (match-string 2 fmt))
-	     (title (or (match-string 3 fmt) prop))
-	     (op (match-string 4 fmt))
-	     (printf nil)
-	     (fun '+))
-	(when (and op (string-match ";" op))
-	  (setq printf (substring op (match-end 0)))
-	  (setq op (substring op 0 (match-beginning 0))))
-	(let ((op-match (assoc op org-columns-compile-map)))
-	  (when op-match (setq fun (cdr op-match))))
-	(push (list prop title width op printf fun)
-	      org-columns-current-fmt-compiled)))
-    (setq org-columns-current-fmt-compiled
-	  (nreverse org-columns-current-fmt-compiled))))
 
 
 
