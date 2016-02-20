@@ -11,7 +11,7 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 * Version 9.0
 ** Incompatible changes
 *** New syntax for export blocks
-Export blocks are explicetly marked as such at the syntax level to
+Export blocks are explicitly marked as such at the syntax level to
 disambiguate their parsing from special blocks.  The new syntax is
 
 #+BEGIN_SRC org
