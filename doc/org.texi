@@ -5626,22 +5626,26 @@ optional.  The individual parts have the following meaning:
                 @{+@}       @r{Sum numbers in this column.}
                 @{+;%.1f@}  @r{Like @samp{+}, but format result with @samp{%.1f}.}
                 @{$@}       @r{Currency, short for @samp{+;%.2f}.}
-                @{:@}       @r{Sum times, HH:MM, plain numbers are hours.}
-                @{X@}       @r{Checkbox status, @samp{[X]} if all children are @samp{[X]}.}
-                @{X/@}      @r{Checkbox status, @samp{[n/m]}.}
-                @{X%@}      @r{Checkbox status, @samp{[n%]}.}
                 @{min@}     @r{Smallest number in column.}
                 @{max@}     @r{Largest number.}
                 @{mean@}    @r{Arithmetic mean of numbers.}
+                @{X@}       @r{Checkbox status, @samp{[X]} if all children are @samp{[X]}.}
+                @{X/@}      @r{Checkbox status, @samp{[n/m]}.}
+                @{X%@}      @r{Checkbox status, @samp{[n%]}.}
+                @{:@}       @r{Sum times, HH:MM, plain numbers are
+                hours@footnote{A time can also be a duration, using effort
+                modifiers defined in @code{org-effort-durations}, e.g.,
+                @samp{3d 1h}.  If any value in the column is as such, the
+                summary will also be an effort duration.}.}
                 @{:min@}    @r{Smallest time value in column.}
                 @{:max@}    @r{Largest time value.}
                 @{:mean@}   @r{Arithmetic mean of time values.}
-                @{@@min@}    @r{Minimum age (in
-                days/hours/mins/seconds@footnote{Days, hours, minutes and
-                seconds are represented with, respectively, @samp{d},
-                @samp{h}, @samp{m} and @samp{s} suffixes, e.g., @samp{13h
-                10s}.  Alternatively, an age can be defined as a duration
-                since a given time-stamp (@pxref{Timestamps}).}).}
+                @{@@min@}    @r{Minimum age@footnote{An age is defined as
+                a duration since a given time-stamp (@pxref{Timestamps}).  It
+                can  also be expressed as days, hours, minutes and seconds,
+                identified by @samp{d}, @samp{h}, @samp{m} and @samp{s}
+                suffixes, all mandatory, e.g., @samp{0d 13h 0m 10s}.} (in
+                days/hours/mins/seconds).}
                 @{@@max@}    @r{Maximum age (in days/hours/mins/seconds).}
                 @{@@mean@}   @r{Arithmetic mean of ages (in days/hours/mins/seconds).}
                 @{est+@}    @r{Add @samp{low-high} estimates.}
@@ -5671,6 +5675,10 @@ full job more realistically, at 10--15 days.
 
 Numbers are right-aligned when a format specifier with an explicit width like
 @code{%5d} or @code{%5.1f} is used.
+
+@vindex org-columns-summary-types
+You can also define custom summary types by setting
+@code{org-columns-summary-types}, which see.
 
 Here is an example for a complete columns definition, along with allowed
 values.

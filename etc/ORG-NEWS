@@ -214,6 +214,9 @@ When called with a prefix argument, ~org-columns~ apply to the whole
 buffer unconditionally.
 **** New variable : ~org-agenda-view-columns-initially~
 The variable used to be a ~defvar~, it is now a ~defcustom~.
+**** Allow custom summaries
+It is now possible to add new summary types, or override those
+provided by Org by customizing ~org-columns-summary-types~, which see.
 *** Preview LaTeX snippets in buffers not visiting files
 *** New option ~org-attach-commit~
 When non-nil, commit attachments with git, assuming the document is in

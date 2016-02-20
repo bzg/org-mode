@@ -62,6 +62,32 @@ or nil if the normal value should be used."
   :group 'org-properties
   :type '(choice (const nil) (function)))
 
+(defcustom org-columns-summary-types nil
+  "Alist between operators and summarize functions.
+
+Each association follows the pattern (LABEL . SUMMARIZE) where
+
+  LABEL is a string used in #+COLUMNS definition describing the
+  summary type.  It can contain any character but \"}\".  It is
+  case-sensitive.
+
+  SUMMARIZE is a function called with two arguments.  The first
+  argument is a non-empty list of values, as non-empty strings.
+  The second one is a format string or nil.  It has to return
+  a string summarizing the list of values.
+
+Note that the return value can become one value for an higher
+order summary, so the function is expected to handle its own
+output.
+
+Types defined in this variable take precedence over those defined
+in `org-columns-summary-types-default', which see."
+  :group 'org-properties
+  :version "25.1"
+  :package-version '(Org . "9.0")
+  :type '(alist :key-type (string :tag "       Label")
+		:value-type (function :tag "Summarize")))
+
 
 
 ;;; Column View
@@ -87,7 +113,7 @@ This is the compiled version of the format.")
 (defvar org-columns-map (make-sparse-keymap)
   "The keymap valid in column display.")
 
-(defconst org-columns-compile-map
+(defconst org-columns-summary-types-default
   '(("+"     . org-columns--summary-sum)
     ("$"     . org-columns--summary-currencies)
     ("X"     . org-columns--summary-checkbox)
@@ -105,13 +131,7 @@ This is the compiled version of the format.")
     ("@min"  . org-columns--summary-min-age)
     ("est+"  . org-columns--summary-estimate))
   "Map operators to summarize functions.
-Used to compile/uncompile columns format and completing read in
-interactive function `org-columns-new'.
-
-operator    string used in #+COLUMNS definition describing the
-	    summary type
-function    called with a list of values as argument to calculate
-	    the summary value")
+See `org-columns-summary-types' for details.")
 
 (defun org-columns-content ()
   "Switch to contents view while in columns view."
@@ -803,12 +823,17 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	      (org-string-nw-p
 	       (completing-read
 		"Summary: "
-		(mapcar (lambda (x) (list (car x))) org-columns-compile-map)
+		(delete-dups
+		 (mapcar (lambda (x) (list (car x)))
+			 (append org-columns-summary-types
+				 org-columns-summary-types-default)))
 		nil t))))
-	 (summarize (or summarize
-			(cdr (assoc operator org-columns-compile-map))))
-	 (edit (and prop
-		    (assoc-string prop org-columns-current-fmt-compiled t))))
+	 (summarize
+	  (or summarize
+	      (cdr (or (assoc operator org-columns-summary-types)
+		       (assoc operator org-columns-summary-types-default)))))
+	 (edit
+	  (and prop (assoc-string prop org-columns-current-fmt-compiled t))))
     (if edit
 	(progn
 	  (setcar edit prop)
@@ -996,15 +1021,23 @@ This function updates `org-columns-current-fmt-compiled'."
       (let* ((width (and (match-end 1) (string-to-number (match-string 1 fmt))))
 	     (prop (match-string 2 fmt))
 	     (title (or (match-string 3 fmt) prop))
-	     (op (match-string 4 fmt))
-	     (printf nil)
-	     (fun '+))
-	(when (and op (string-match ";" op))
-	  (setq printf (substring op (match-end 0)))
-	  (setq op (substring op 0 (match-beginning 0))))
-	(let ((op-match (assoc op org-columns-compile-map)))
-	  (when op-match (setq fun (cdr op-match))))
-	(push (list prop title width op printf fun)
+	     (operator (match-string 4 fmt)))
+	(push (if (not operator) (list prop title width nil nil nil)
+		(let (printf)
+		  (when (string-match ";" operator)
+		    (setq printf (substring operator (match-end 0)))
+		    (setq operator (substring operator 0 (match-beginning 0))))
+		  (let* ((summary-type
+			  (or (assoc operator org-columns-summary-types)
+			      (assoc operator org-columns-summary-types-default)))
+			 (summarize
+			  (cond
+			   ((not summary-type)
+			    (user-error "Unknown summary operator: %S" operator))
+			   ((cdr summary-type))
+			   (t (user-error "Missing summary function for type: %S"
+					  operator)))))
+		    (list prop title width operator printf summarize))))
 	      org-columns-current-fmt-compiled)))
     (setq org-columns-current-fmt-compiled
 	  (nreverse org-columns-current-fmt-compiled))))

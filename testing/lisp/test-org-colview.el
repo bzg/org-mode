@@ -503,6 +503,24 @@
 :END:
 "
       (let ((org-columns-default-format "%A{est+}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  ;; Test custom summary types.
+  (should
+   (equal
+    "1|2"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 1
+:END:
+** S1
+:PROPERTIES:
+:A: 2
+:END:"
+      (let ((org-columns-summary-types
+	     '(("custom" . (lambda (s _) (mapconcat #'identity s "|")))))
+	    (org-columns-default-format "%A{custom}")) (org-columns))
       (get-char-property (point) 'org-columns-value-modified)))))
 
 (ert-deftest test-org-colview/columns-update ()
