@@ -534,7 +534,7 @@
 	    (list (get-char-property (point) 'org-columns-key)
 		  (get-char-property (1+ (point)) 'org-columns-key)))))
   (should
-   (equal '("ITEM" "FOO" "ITEM")
+   (equal '("ITEM" "FOO" "BAR")
 	  (org-test-with-temp-text "* H"
 	    (let ((org-columns-default-format "%ITEM %BAR")) (org-columns))
 	    (forward-char)

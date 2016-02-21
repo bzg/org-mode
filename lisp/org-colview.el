@@ -837,12 +837,9 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	 (summarize (and prop operator (org-columns--summarize operator)))
 	 (edit
 	  (and prop (assoc-string prop org-columns-current-fmt-compiled t))))
-    (cond (edit (setcdr edit (list title width operator nil summarize)))
-	  ((= (current-column) 0)
-	   (push (list prop title width operator nil summarize)
-		 org-columns-current-fmt-compiled))
-	  (t (push (list prop title width operator nil summarize)
-		   (nthcdr (current-column) org-columns-current-fmt-compiled))))
+    (if edit (setcdr edit (list title width operator nil summarize))
+      (push (list prop title width operator nil summarize)
+	    (nthcdr (current-column) org-columns-current-fmt-compiled)))
     (org-columns-store-format)
     (org-columns-redo)))
 
