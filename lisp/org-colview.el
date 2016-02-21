@@ -807,42 +807,42 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	      (goto-char (car entry))
 	      (org-columns--display-here (cdr entry)))))))))
 
-(defun org-columns-new (&optional prop title width operator _f _p summarize)
+(defun org-columns-new (&optional prop title width operator &rest _)
   "Insert a new column, to the left of the current column."
   (interactive)
-  (let* ((prop (or prop (completing-read
+  (let* ((automatic (org-string-nw-p prop))
+	 (prop (or prop (completing-read
 			 "Property: "
 			 (mapcar #'list (org-buffer-property-keys t nil t)))))
-	 (title (or title
-		    (read-string (format "Column title [%s]: " prop) prop)))
+	 (title (if automatic title
+		  (read-string (format "Column title [%s]: " prop) prop)))
 	 (width
 	  ;; WIDTH may be nil, but if PROP is provided, assume this is
 	  ;; the expected width.
-	  (if prop width
+	  (if automatic width
 	    ;; Use `read-string' instead of `read-number' to allow
 	    ;; empty width.
 	    (let ((w (read-string "Column width: ")))
 	      (and (org-string-nw-p w) (string-to-number w)))))
 	 (operator
-	  (or operator
-	      (org-string-nw-p
-	       (completing-read
-		"Summary: "
-		(delete-dups
-		 (mapcar (lambda (x) (list (car x)))
-			 (append org-columns-summary-types
-				 org-columns-summary-types-default)))
-		nil t))))
-	 (summarize (or summarize (org-columns--summarize operator)))
+	  (if automatic operator
+	    (org-string-nw-p
+	     (completing-read
+	      "Summary: "
+	      (delete-dups
+	       (mapcar (lambda (x) (list (car x)))
+		       (append org-columns-summary-types
+			       org-columns-summary-types-default)))
+	      nil t))))
+	 (summarize (and prop operator (org-columns--summarize operator)))
 	 (edit
 	  (and prop (assoc-string prop org-columns-current-fmt-compiled t))))
-    (if edit
-	(progn
-	  (setcar edit prop)
-	  (setcdr edit (list title width nil operator nil summarize)))
-      (let ((cell (nthcdr (1- (current-column))
-			  org-columns-current-fmt-compiled)))
-	(push (list prop title width nil operator nil summarize) (cdr cell))))
+    (cond (edit (setcdr edit (list title width operator nil summarize)))
+	  ((= (current-column) 0)
+	   (push (list prop title width operator nil summarize)
+		 org-columns-current-fmt-compiled))
+	  (t (push (list prop title width operator nil summarize)
+		   (nthcdr (current-column) org-columns-current-fmt-compiled))))
     (org-columns-store-format)
     (org-columns-redo)))
 

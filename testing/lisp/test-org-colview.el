@@ -523,6 +523,42 @@
 	    (org-columns-default-format "%A{custom}")) (org-columns))
       (get-char-property (point) 'org-columns-value-modified)))))
 
+(ert-deftest test-org-colview/columns-new ()
+  "Test `org-columns-new' specifications."
+  ;; Insert new column at the left of the current one.
+  (should
+   (equal '("FOO" "ITEM")
+	  (org-test-with-temp-text "* H"
+	    (let ((org-columns-default-format "%ITEM")) (org-columns))
+	    (org-columns-new "FOO")
+	    (list (get-char-property (point) 'org-columns-key)
+		  (get-char-property (1+ (point)) 'org-columns-key)))))
+  (should
+   (equal '("ITEM" "FOO" "ITEM")
+	  (org-test-with-temp-text "* H"
+	    (let ((org-columns-default-format "%ITEM %BAR")) (org-columns))
+	    (forward-char)
+	    (org-columns-new "FOO")
+	    (list (get-char-property (1- (point)) 'org-columns-key)
+		  (get-char-property (point) 'org-columns-key)
+		  (get-char-property (1+ (point)) 'org-columns-key)))))
+  ;; Update #+COLUMNS: keyword if needed.
+  (should
+   (equal "#+COLUMNS: %FOO %ITEM"
+	  (org-test-with-temp-text "#+COLUMNS: %ITEM\n<point>* H"
+	    (let ((org-columns-default-format "%ITEM")) (org-columns))
+	    (org-columns-new "FOO")
+	    (goto-char (point-min))
+	    (buffer-substring-no-properties (point) (line-end-position)))))
+  (should
+   (equal "#+COLUMNS: %ITEM %FOO %BAR"
+	  (org-test-with-temp-text "#+COLUMNS: %ITEM %BAR\n<point>* H"
+	    (let ((org-columns-default-format "%ITEM %BAR")) (org-columns))
+	    (forward-char)
+	    (org-columns-new "FOO")
+	    (goto-char (point-min))
+	    (buffer-substring-no-properties (point) (line-end-position))))))
+
 (ert-deftest test-org-colview/columns-update ()
   "Test `org-columns-update' specifications."
   ;; Update display.
