@@ -291,6 +291,11 @@ WIDTH as an integer greater than 0."
     (push ov org-columns-overlays)
     ov))
 
+(defun org-columns--summarize (operator)
+  "Return summary function associated to string OPERATOR."
+  (cdr (or (assoc operator org-columns-summary-types)
+	   (assoc operator org-columns-summary-types-default))))
+
 (defun org-columns--overlay-text (value fmt width property original)
   "Return text "
   (format fmt
@@ -828,10 +833,7 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 			 (append org-columns-summary-types
 				 org-columns-summary-types-default)))
 		nil t))))
-	 (summarize
-	  (or summarize
-	      (cdr (or (assoc operator org-columns-summary-types)
-		       (assoc operator org-columns-summary-types-default)))))
+	 (summarize (or summarize (org-columns--summarize operator)))
 	 (edit
 	  (and prop (assoc-string prop org-columns-current-fmt-compiled t))))
     (if edit
@@ -1027,16 +1029,10 @@ This function updates `org-columns-current-fmt-compiled'."
 		  (when (string-match ";" operator)
 		    (setq printf (substring operator (match-end 0)))
 		    (setq operator (substring operator 0 (match-beginning 0))))
-		  (let* ((summary-type
-			  (or (assoc operator org-columns-summary-types)
-			      (assoc operator org-columns-summary-types-default)))
-			 (summarize
-			  (cond
-			   ((not summary-type)
-			    (user-error "Unknown summary operator: %S" operator))
-			   ((cdr summary-type))
-			   (t (user-error "Missing summary function for type: %S"
-					  operator)))))
+		  (let* ((summarize
+			  (or (org-columns--summarize operator)
+			      (user-error "Cannot find %S summary function"
+					  operator))))
 		    (list prop title width operator printf summarize))))
 	      org-columns-current-fmt-compiled)))
     (setq org-columns-current-fmt-compiled
@@ -1536,7 +1532,8 @@ This will add overlays to the date lines, to show the summary for each day."
 		(pcase spec
 		  (`(,property ,title ,width . ,_)
 		   (if (member-ignore-case property '("CLOCKSUM" "CLOCKSUM_T"))
-		       (list property title width ":" 'add_times nil '+ nil)
+		       (let ((summarize (org-columns--summarize ":")))
+			 (list property title width ":" nil summarize))
 		     spec))))
 	      org-columns-current-fmt-compiled))
 	entries)
