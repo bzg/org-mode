@@ -16356,7 +16356,7 @@ then applies it to the property in the column format's scope."
     (user-error "Not at a property"))
   (let ((prop (org-match-string-no-properties 2)))
     (org-columns-get-format-and-top-level)
-    (unless (nth 3 (assoc prop org-columns-current-fmt-compiled))
+    (unless (nth 3 (assoc-string prop org-columns-current-fmt-compiled t))
       (user-error "No operator defined for property %s" prop))
     (org-columns-compute prop)))
 
