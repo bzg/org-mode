@@ -299,8 +299,10 @@ integers greater than 0."
 
 (defun org-columns--summarize (operator)
   "Return summary function associated to string OPERATOR."
-  (cdr (or (assoc operator org-columns-summary-types)
-	   (assoc operator org-columns-summary-types-default))))
+  (if (not operator) nil
+    (cdr (or (assoc operator org-columns-summary-types)
+	     (assoc operator org-columns-summary-types-default)
+	     (error "Unknown %S operator" operator)))))
 
 (defun org-columns--overlay-text (value fmt width property original)
   "Return text "
@@ -811,7 +813,7 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	      (goto-char (car entry))
 	      (org-columns--display-here (cdr entry)))))))))
 
-(defun org-columns-new (&optional prop title width operator &rest _)
+(defun org-columns-new (&optional prop title width operator _)
   "Insert a new column, to the left of the current column."
   (interactive)
   (let* ((automatic (org-string-nw-p prop))
@@ -838,11 +840,10 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 		       (append org-columns-summary-types
 			       org-columns-summary-types-default)))
 	      nil t))))
-	 (summarize (and prop operator (org-columns--summarize operator)))
 	 (edit
 	  (and prop (assoc-string prop org-columns-current-fmt-compiled t))))
-    (if edit (setcdr edit (list title width operator nil summarize))
-      (push (list prop title width operator nil summarize)
+    (if edit (setcdr edit (list title width operator nil))
+      (push (list prop title width operator nil)
 	    (nthcdr (current-column) org-columns-current-fmt-compiled)))
     (org-columns-store-format)
     (org-columns-redo)))
@@ -987,7 +988,7 @@ COMPILED is an alist, as returned by
   (mapconcat
    (lambda (spec)
      (pcase spec
-       (`(,prop ,title ,width ,op ,printf ,_)
+       (`(,prop ,title ,width ,op ,printf)
 	(concat "%"
 		(and width (number-to-string width))
 		prop
@@ -1007,7 +1008,6 @@ title       the title field for the columns, as a string
 width       the column width in characters, can be nil for automatic width
 operator    the summary operator, as a string, or nil
 printf      a printf format for computed values, as a string, or nil
-fun         the lisp function to compute summary values, derived from operator
 
 This function updates `org-columns-current-fmt-compiled'."
   (setq org-columns-current-fmt-compiled nil)
@@ -1021,16 +1021,12 @@ This function updates `org-columns-current-fmt-compiled'."
 	     (prop (match-string-no-properties 2 fmt))
 	     (title (or (match-string-no-properties 3 fmt) prop))
 	     (operator (match-string-no-properties 4 fmt)))
-	(push (if (not operator) (list (upcase prop) title width nil nil nil)
+	(push (if (not operator) (list (upcase prop) title width nil nil)
 		(let (printf)
 		  (when (string-match ";" operator)
 		    (setq printf (substring operator (match-end 0)))
 		    (setq operator (substring operator 0 (match-beginning 0))))
-		  (let* ((summary
-			  (or (org-columns--summarize operator)
-			      (user-error "Cannot find %S summary function"
-					  operator))))
-		    (list (upcase prop) title width operator printf summary))))
+		  (list (upcase prop) title width operator printf)))
 	      org-columns-current-fmt-compiled)))
     (setq org-columns-current-fmt-compiled
 	  (nreverse org-columns-current-fmt-compiled))))
@@ -1105,8 +1101,8 @@ format instead.  Otherwise, use H:M format."
 		 29))			;Hard-code deepest level.
 	 (lvals (make-vector (1+ lmax) nil))
 	 (spec (assoc-string property org-columns-current-fmt-compiled t))
+	 (operator (nth 3 spec))
 	 (printf (nth 4 spec))
-	 (summarize (nth 5 spec))
 	 (level 0)
 	 (inminlevel lmax)
 	 (last-level lmax))
@@ -1132,7 +1128,8 @@ format instead.  Otherwise, use H:M format."
 		   (let ((all (append (and (/= last-level inminlevel)
 					   (aref lvals last-level))
 				      (aref lvals inminlevel))))
-		     (and all (funcall summarize all printf)))))
+		     (and all (funcall (org-columns--summarize operator)
+				       all printf)))))
 	     (let* ((summaries-alist (get-text-property pos 'org-summaries))
 		    (old (assoc-string property summaries-alist t))
 		    (new
@@ -1166,7 +1163,7 @@ format instead.  Otherwise, use H:M format."
   (let ((org-columns--time (float-time (current-time))))
     (dolist (spec org-columns-current-fmt-compiled)
       (pcase spec
-	(`(,property ,_ ,_ ,operator . ,_)
+	(`(,property ,_ ,_ ,operator ,_)
 	 (when operator (save-excursion (org-columns-compute property))))))))
 
 (defun org-columns--summary-sum (values printf)
@@ -1528,8 +1525,7 @@ This will add overlays to the date lines, to show the summary for each day."
 		(pcase spec
 		  (`(,property ,title ,width . ,_)
 		   (if (member property '("CLOCKSUM" "CLOCKSUM_T"))
-		       (let ((summarize (org-columns--summarize ":")))
-			 (list property title width ":" nil summarize))
+		       (list property title width ":" nil)
 		     spec))))
 	      org-columns-current-fmt-compiled))
 	entries)
@@ -1561,9 +1557,10 @@ This will add overlays to the date lines, to show the summary for each day."
 				(line-beginning-position)
 				(line-end-position))))
 		     (list "ITEM" date date)))
-		  (`(,prop ,_ ,_ nil . ,_) (list prop "" ""))
-		  (`(,prop ,_ ,_ ,_ ,printf ,summarize)
-		   (let* ((values
+		  (`(,prop ,_ ,_ nil ,_) (list prop "" ""))
+		  (`(,prop ,_ ,_ ,operator ,printf)
+		   (let* ((summarize (org-columns--summarize operator))
+			  (values
 			   ;; Use real values for summary, not those
 			   ;; prepared for display.
 			   (delq nil
