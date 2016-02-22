@@ -914,29 +914,35 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
     (backward-char 1)))
 
 (defun org-columns-store-format ()
-  "Store the text version of the current columns format in appropriate place.
-This is either in the COLUMNS property of the node starting the current column
-display, or in the #+COLUMNS line of the current buffer."
-  (let (fmt (cnt 0))
-    (setq fmt (org-columns-uncompile-format org-columns-current-fmt-compiled))
+  "Store the text version of the current columns format.
+The format is stored either in the COLUMNS property of the node
+starting the current column display, or in a #+COLUMNS line of
+the current buffer."
+  (let ((fmt (org-columns-uncompile-format org-columns-current-fmt-compiled)))
     (setq-local org-columns-current-fmt fmt)
-    (if (marker-position org-columns-top-level-marker)
-	(save-excursion
-	  (goto-char org-columns-top-level-marker)
-	  (if (and (org-at-heading-p)
-		   (org-entry-get nil "COLUMNS"))
-	      (org-entry-put nil "COLUMNS" fmt)
-	    (goto-char (point-min))
-	    ;; Overwrite all #+COLUMNS lines....
-	    (while (re-search-forward "^[ \t]*#\\+COLUMNS:.*" nil t)
-	      (setq cnt (1+ cnt))
-	      (replace-match (concat "#+COLUMNS: " fmt) t t))
-	    (unless (> cnt 0)
-	      (goto-char (point-min))
-	      (or (org-at-heading-p t) (outline-next-heading))
-	      (let ((inhibit-read-only t))
-		(insert-before-markers "#+COLUMNS: " fmt "\n")))
-	    (setq-local org-columns-default-format fmt))))))
+    (when (marker-position org-columns-top-level-marker)
+      (org-with-wide-buffer
+       (goto-char org-columns-top-level-marker)
+       (if (and (org-at-heading-p) (org-entry-get nil "COLUMNS"))
+	   (org-entry-put nil "COLUMNS" fmt)
+	 (goto-char (point-min))
+	 (let ((case-fold-search t))
+	   ;; Try to replace the first COLUMNS keyword available.
+	   (catch :found
+	     (while (re-search-forward "^[ \t]*#\\+COLUMNS:\\(.*\\)" nil t)
+	       (let ((element (save-match-data (org-element-at-point))))
+		 (when (and (eq (org-element-type element) 'keyword)
+			    (equal (org-element-property :key element)
+				   "COLUMNS"))
+		   (replace-match (concat " " fmt) t t nil 1)
+		   (throw :found nil))))
+	     ;; No COLUMNS keyword in the buffer.  Insert one at the
+	     ;; beginning, right before the first heading, if any.
+	     (goto-char (point-min))
+	     (unless (org-at-heading-p t) (outline-next-heading))
+	     (let ((inhibit-read-only t))
+	       (insert-before-markers "#+COLUMNS: " fmt "\n"))))
+	 (setq-local org-columns-default-format fmt))))))
 
 (defun org-columns-update (property)
   "Recompute PROPERTY, and update the columns display for it."
