@@ -226,9 +226,9 @@ initialized."
    ((and (functionp org-columns-modify-value-for-display-function)
 	 (funcall
 	  org-columns-modify-value-for-display-function
-	  (nth 1 (assoc-string property org-columns-current-fmt-compiled t))
+	  (nth 1 (assoc property org-columns-current-fmt-compiled))
 	  value)))
-   ((equal (upcase property) "ITEM")
+   ((equal property "ITEM")
     (concat (make-string (1- (org-current-level))
 			 (if org-hide-leading-stars ?\s ?*))
 	    "* "
@@ -249,14 +249,13 @@ initialized."
   (mapcar
    (lambda (spec)
      (let* ((p (car spec))
-	    (v (or (cdr (assoc-string
-			 p (get-text-property (point) 'org-summaries) t))
+	    (v (or (cdr (assoc p (get-text-property (point) 'org-summaries)))
 		   (org-entry-get (point) p 'selective t)
 		   (and agenda
 			;; Effort property is not defined.  Try to use
 			;; appointment duration.
 			org-agenda-columns-add-appointments-to-effort-sum
-			(string= (upcase p) (upcase org-effort-property))
+			(string= p (upcase org-effort-property))
 			(get-text-property (point) 'duration)
 			(org-propertize
 			 (org-minutes-to-clocksum-string
@@ -279,7 +278,7 @@ WIDTH as an integer greater than 0."
 	  ;; by checking all possible values for PROPERTY.
 	  (let ((width (length name)))
 	    (dolist (entry cache (cons property width))
-	      (let ((value (nth 2 (assoc-string property (cdr entry) t))))
+	      (let ((value (nth 2 (assoc property (cdr entry)))))
 		(setq width (max (length value) width)))))))))
    org-columns-current-fmt-compiled))
 
@@ -300,7 +299,7 @@ WIDTH as an integer greater than 0."
   "Return text "
   (format fmt
           (let ((v (org-columns-add-ellipses value width)))
-            (pcase (upcase property)
+            (pcase property
               ("PRIORITY"
                (propertize v 'face (org-get-priority-face original)))
               ("TAGS"
@@ -347,9 +346,7 @@ argument DATELINE is non-nil when the face used should be
 	(dolist (column columns)
 	  (pcase column
 	    (`(,property ,original ,value)
-	     (let* ((width
-		     (cdr
-		      (assoc-string property org-columns-current-maxwidths t)))
+	     (let* ((width (cdr (assoc property org-columns-current-maxwidths)))
 		    (fmt (format (if (= (point) limit) "%%-%d.%ds |"
 				   "%%-%d.%ds | ")
 				 width width))
@@ -416,8 +413,7 @@ for the duration of the command.")
     (dolist (column org-columns-current-fmt-compiled)
       (pcase column
 	(`(,property ,name . ,_)
-	 (let* ((width
-		 (cdr (assoc-string property org-columns-current-maxwidths t)))
+	 (let* ((width (cdr (assoc property org-columns-current-maxwidths)))
 		(fmt (format "%%-%d.%ds | " width width)))
 	   (setq title (concat title (format fmt (or name property))))))))
     (setq-local org-previous-header-line-format header-line-format)
@@ -658,9 +654,7 @@ an integer, select that value."
 		  (point)))	     ; keep despite of compiler waring
 	 (allowed
 	  (or (org-property-get-allowed-values pom key)
-	      (and (member (nth 3 (assoc-string key
-						org-columns-current-fmt-compiled
-						t))
+	      (and (member (nth 3 (assoc key org-columns-current-fmt-compiled))
 			   '("X" "X/" "X%"))
 		   '("[ ]" "[X]"))
 	      (org-colview-construct-allowed-dates value)))
@@ -782,9 +776,9 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
       (save-restriction
 	(when (and (not global) (org-at-heading-p))
 	  (narrow-to-region (point) (org-end-of-subtree t t)))
-	(when (assoc-string "CLOCKSUM" org-columns-current-fmt-compiled t)
+	(when (assoc "CLOCKSUM" org-columns-current-fmt-compiled)
 	  (org-clock-sum))
-	(when (assoc-string "CLOCKSUM_T" org-columns-current-fmt-compiled t)
+	(when (assoc "CLOCKSUM_T" org-columns-current-fmt-compiled)
 	  (org-clock-sum-today))
 	(let ((cache
 	       ;; Collect contents of columns ahead of time so as to
@@ -871,9 +865,7 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
   (let* ((n (current-column))
 	 (entry (nth n org-columns-current-fmt-compiled))
 	 (width (or (nth 2 entry)
-		    (cdr (assoc-string (car entry)
-				       org-columns-current-maxwidths
-				       t)))))
+		    (cdr (assoc (car entry) org-columns-current-maxwidths)))))
     (setq width (max 1 (+ width arg)))
     (setcar (nthcdr 2 entry) width)
     (org-columns-store-format)
@@ -941,7 +933,7 @@ display, or in the #+COLUMNS line of the current buffer."
    (let ((p (upcase property)))
      (dolist (ov org-columns-overlays)
        (when (let ((key (overlay-get ov 'org-columns-key)))
-	       (and key (equal (upcase key) p) (overlay-start ov)))
+	       (and key (equal key p) (overlay-start ov)))
 	 (goto-char (overlay-start ov))
 	 (let ((value (cdr
 		       (assoc-string
@@ -1002,11 +994,11 @@ COMPILED is an alist, as returned by
 
 The alist has one entry for each column in the format.  The elements of
 that list are:
-property    the property name
-title       the title field for the columns
-width       the column width in characters, can be nil for automatic
-operator    the summary operator if any
-printf      a printf format for computed values
+property    the property name, as an upper-case string
+title       the title field for the columns, as a string
+width       the column width in characters, can be nil for automatic width
+operator    the summary operator, as a string, or nil
+printf      a printf format for computed values, as a string, or nil
 fun         the lisp function to compute summary values, derived from operator
 
 This function updates `org-columns-current-fmt-compiled'."
@@ -1018,19 +1010,19 @@ This function updates `org-columns-current-fmt-compiled'."
 	    fmt start)
       (setq start (match-end 0))
       (let* ((width (and (match-end 1) (string-to-number (match-string 1 fmt))))
-	     (prop (match-string 2 fmt))
-	     (title (or (match-string 3 fmt) prop))
-	     (operator (match-string 4 fmt)))
-	(push (if (not operator) (list prop title width nil nil nil)
+	     (prop (match-string-no-properties 2 fmt))
+	     (title (or (match-string-no-properties 3 fmt) prop))
+	     (operator (match-string-no-properties 4 fmt)))
+	(push (if (not operator) (list (upcase prop) title width nil nil nil)
 		(let (printf)
 		  (when (string-match ";" operator)
 		    (setq printf (substring operator (match-end 0)))
 		    (setq operator (substring operator 0 (match-beginning 0))))
-		  (let* ((summarize
+		  (let* ((summary
 			  (or (org-columns--summarize operator)
 			      (user-error "Cannot find %S summary function"
 					  operator))))
-		    (list prop title width operator printf summarize))))
+		    (list (upcase prop) title width operator printf summary))))
 	      org-columns-current-fmt-compiled)))
     (setq org-columns-current-fmt-compiled
 	  (nreverse org-columns-current-fmt-compiled))))
@@ -1291,7 +1283,7 @@ other rows.  Each row is a list of fields, as strings, or
   (org-columns (not local) format)
   (goto-char org-columns-top-level-marker)
   (let ((columns (length org-columns-current-fmt-compiled))
-	(has-item (assoc-string "ITEM" org-columns-current-fmt-compiled t))
+	(has-item (assoc "ITEM" org-columns-current-fmt-compiled))
 	table)
     (org-map-entries
      (lambda ()
@@ -1302,7 +1294,7 @@ other rows.  Each row is a list of fields, as strings, or
 		    (p (get-char-property col 'org-columns-key)))
 	       (push (org-quote-vert
 		      (get-char-property col
-					 (if (string= (upcase p) "ITEM")
+					 (if (string= p "ITEM")
 					     'org-columns-value
 					   'org-columns-value-modified)))
 		     row)))
@@ -1384,7 +1376,7 @@ PARAMS is a property list of parameters:
       ;; required, and possibly precede some of them with a horizontal
       ;; rule.
       (let ((item-index
-	     (let ((p (assoc-string "ITEM" org-columns-current-fmt-compiled t)))
+	     (let ((p (assoc "ITEM" org-columns-current-fmt-compiled)))
 	       (and p (cl-position p
 				   org-columns-current-fmt-compiled
 				   :test #'equal))))
@@ -1528,7 +1520,7 @@ This will add overlays to the date lines, to show the summary for each day."
 	      (lambda (spec)
 		(pcase spec
 		  (`(,property ,title ,width . ,_)
-		   (if (member-ignore-case property '("CLOCKSUM" "CLOCKSUM_T"))
+		   (if (member property '("CLOCKSUM" "CLOCKSUM_T"))
 		       (let ((summarize (org-columns--summarize ":")))
 			 (list property title width ":" nil summarize))
 		     spec))))
@@ -1555,24 +1547,22 @@ This will add overlays to the date lines, to show the summary for each day."
 	     (mapcar
 	      (lambda (spec)
 		(pcase spec
-		  (`(,(and prop (guard (equal (upcase prop) "ITEM"))) . ,_)
+		  (`("ITEM" . ,_)
 		   ;; Replace ITEM with current date.  Preserve
 		   ;; properties for fontification.
 		   (let ((date (buffer-substring
 				(line-beginning-position)
 				(line-end-position))))
-		     (list prop date date)))
-		  (`(,prop ,_ ,_ nil . ,_)
-		   (list prop "" ""))
+		     (list "ITEM" date date)))
+		  (`(,prop ,_ ,_ nil . ,_) (list prop "" ""))
 		  (`(,prop ,_ ,_ ,_ ,printf ,summarize)
 		   (let* ((values
 			   ;; Use real values for summary, not those
 			   ;; prepared for display.
 			   (delq nil
 				 (mapcar
-				  (lambda (entry)
-				    (org-string-nw-p
-				     (nth 1 (assoc-string prop entry t))))
+				  (lambda (e)
+				    (org-string-nw-p (nth 1 (assoc prop e))))
 				  entries)))
 			  (final (if values (funcall summarize values printf)
 				   "")))
@@ -1600,8 +1590,8 @@ This will add overlays to the date lines, to show the summary for each day."
 	   (dolist (spec fmt)
 	     (let ((prop (car spec)))
 	       (cond
-		((equal (upcase prop) "CLOCKSUM") (org-clock-sum))
-		((equal (upcase prop) "CLOCKSUM_T") (org-clock-sum-today))
+		((equal prop "CLOCKSUM") (org-clock-sum))
+		((equal prop "CLOCKSUM_T") (org-clock-sum-today))
 		((and (nth 3 spec)
 		      (let ((a (assoc prop org-columns-current-fmt-compiled)))
 			(equal (nth 3 a) (nth 3 spec))))

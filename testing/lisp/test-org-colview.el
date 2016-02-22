@@ -542,7 +542,7 @@
 	    (list (get-char-property (1- (point)) 'org-columns-key)
 		  (get-char-property (point) 'org-columns-key)
 		  (get-char-property (1+ (point)) 'org-columns-key)))))
-  ;; Update #+COLUMNS: keyword if needed.
+  ;; Update #+COLUMNS keyword if needed.
   (should
    (equal "#+COLUMNS: %FOO %ITEM"
 	  (org-test-with-temp-text "#+COLUMNS: %ITEM\n<point>* H"
@@ -556,6 +556,15 @@
 	    (let ((org-columns-default-format "%ITEM %BAR")) (org-columns))
 	    (forward-char)
 	    (org-columns-new "FOO")
+	    (goto-char (point-min))
+	    (buffer-substring-no-properties (point) (line-end-position)))))
+  ;; Mind case when updating #+COLUMNS.
+  (should
+   (equal "#+COLUMNS: %ITEM %Foo %BAR"
+	  (org-test-with-temp-text "#+COLUMNS: %ITEM %BAR\n<point>* H"
+	    (let ((org-columns-default-format "%ITEM %BAR")) (org-columns))
+	    (forward-char)
+	    (org-columns-new "Foo")
 	    (goto-char (point-min))
 	    (buffer-substring-no-properties (point) (line-end-position))))))
 
@@ -575,6 +584,21 @@
       (search-forward "1")
       (insert "2")
       (org-columns-update "A")
+      (get-char-property (point-min) 'display))))
+  ;; Update is case-insensitive.
+  (should
+   (equal
+    "12    |"
+    (org-test-with-temp-text
+	"* H
+:PROPERTIES:
+:A: 1
+:END:
+"
+      (let ((org-columns-default-format "%5A")) (org-columns))
+      (search-forward "1")
+      (insert "2")
+      (org-columns-update "a")
       (get-char-property (point-min) 'display))))
   ;; Update stored values.
   (should
