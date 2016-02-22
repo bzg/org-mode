@@ -75,27 +75,27 @@
    (= 9
       (org-test-with-temp-text "* H"
 	(let ((org-columns-default-format "%9ITEM")) (org-columns))
-	(cdar org-columns-current-maxwidths))))
+	(aref org-columns-current-maxwidths 0))))
   ;; Otherwise, use the width of the largest value in the column.
   (should
    (= 2
       (org-test-with-temp-text
 	  "* H\n:PROPERTIES:\n:P: X\n:END:\n** H2\n:PROPERTIES:\n:P: XX\n:END:"
 	(let ((org-columns-default-format "%P")) (org-columns))
-	(cdar org-columns-current-maxwidths))))
+	(aref org-columns-current-maxwidths 0))))
   ;; If the title is wider than the widest value, use title width
   ;; instead.
   (should
    (= 4
       (org-test-with-temp-text "* H"
 	(let ((org-columns-default-format "%ITEM")) (org-columns))
-	(cdar org-columns-current-maxwidths))))
+	(aref org-columns-current-maxwidths 0))))
   ;; Special case: stars do count for ITEM.
   (should
    (= 6
       (org-test-with-temp-text "* Head"
 	(let ((org-columns-default-format "%ITEM")) (org-columns))
-	(cdar org-columns-current-maxwidths))))
+	(aref org-columns-current-maxwidths 0))))
   ;; Special case: width takes into account link narrowing in ITEM.
   (should
    (equal
@@ -103,7 +103,7 @@
     (org-test-with-temp-text "* [[http://orgmode.org][123]]"
       (let ((org-columns-default-format "%ITEM")) (org-columns))
       (cons (get-char-property (point) 'org-columns-value-modified)
-	    (cdar org-columns-current-maxwidths)))))
+	    (aref org-columns-current-maxwidths 0)))))
   ;; When a value is too wide for the current column, add ellipses.
   ;; Take into consideration length of `org-columns-ellipses'.
   (should

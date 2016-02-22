@@ -100,13 +100,17 @@ in `org-columns-summary-types-default', which see."
 
 (defvar-local org-columns-current-fmt nil
   "Local variable, holds the currently active column format.")
+
 (defvar-local org-columns-current-fmt-compiled nil
   "Local variable, holds the currently active column format.
 This is the compiled version of the format.")
+
 (defvar-local org-columns-current-maxwidths nil
-  "Loval variable, holds the currently active maximum column widths.")
+  "Currently active maximum column widths, as a vector.")
+
 (defvar org-columns-begin-marker (make-marker)
   "Points to the position where last a column creation command was called.")
+
 (defvar org-columns-top-level-marker (make-marker)
   "Points to the position where current columns region starts.")
 
@@ -265,22 +269,25 @@ initialized."
        (list p v (org-columns--displayed-value p v))))
    org-columns-current-fmt-compiled))
 
-(defun org-columns--autowidth-alist (cache)
-  "Derive the maximum column widths from the format and the cache.
-Return an alist (PROPERTY . WIDTH), with PROPERTY as a string and
-WIDTH as an integer greater than 0."
-  (mapcar
-   (lambda (spec)
-     (pcase spec
-       (`(,property ,name ,width . ,_)
-	(if width (cons property width)
-	  ;; No width is specified in the columns format.  Compute it
-	  ;; by checking all possible values for PROPERTY.
-	  (let ((width (length name)))
-	    (dolist (entry cache (cons property width))
-	      (let ((value (nth 2 (assoc property (cdr entry)))))
-		(setq width (max (length value) width)))))))))
-   org-columns-current-fmt-compiled))
+(defun org-columns--set-widths (cache)
+  "Compute the maximum column widths from the format and CACHE.
+This function sets `org-columns-current-maxwidths' as a vector of
+integers greater than 0."
+  (setq org-columns-current-maxwidths
+	(apply #'vector
+	       (mapcar
+		(lambda (spec)
+		  (pcase spec
+		    (`(,_ ,_ ,(and width (pred wholenump)) . ,_) width)
+		    (`(,property ,name . ,_)
+		     ;; No width is specified in the columns format.
+		     ;; Compute it by checking all possible values for
+		     ;; PROPERTY.
+		     (let ((width (length name)))
+		       (dolist (entry cache width)
+			 (let ((value (nth 2 (assoc property (cdr entry)))))
+			   (setq width (max (length value) width))))))))
+		org-columns-current-fmt-compiled))))
 
 (defun org-columns-new-overlay (beg end &optional string face)
   "Create a new column overlay and add it to the list."
@@ -342,12 +349,13 @@ argument DATELINE is non-nil when the face used should be
 	      (insert (make-string (- columns chars) ?\s))))))
       ;; Display columns.  Create and install the overlay for the
       ;; current column on the next character.
-      (let ((limit (+ (- (length columns) 1) (line-beginning-position))))
+      (let ((i 0)
+	    (last (1- (length columns))))
 	(dolist (column columns)
 	  (pcase column
 	    (`(,property ,original ,value)
-	     (let* ((width (cdr (assoc property org-columns-current-maxwidths)))
-		    (fmt (format (if (= (point) limit) "%%-%d.%ds |"
+	     (let* ((width (aref org-columns-current-maxwidths i))
+		    (fmt (format (if (= i last) "%%-%d.%ds |"
 				   "%%-%d.%ds | ")
 				 width width))
 		    (ov (org-columns-new-overlay
@@ -362,7 +370,8 @@ argument DATELINE is non-nil when the face used should be
 	       (overlay-put ov 'org-columns-format fmt)
 	       (overlay-put ov 'line-prefix "")
 	       (overlay-put ov 'wrap-prefix "")
-	       (forward-char))))))
+	       (forward-char))))
+	  (cl-incf i)))
       ;; Make the rest of the line disappear.
       (let ((ov (org-columns-new-overlay (point) (line-end-position))))
 	(overlay-put ov 'invisible t)
@@ -409,13 +418,15 @@ for the duration of the command.")
 (defun org-columns--display-here-title ()
   "Overlay the newline before the current line with the table title."
   (interactive)
-  (let ((title ""))
+  (let ((title "")
+	(i 0))
     (dolist (column org-columns-current-fmt-compiled)
       (pcase column
 	(`(,property ,name . ,_)
-	 (let* ((width (cdr (assoc property org-columns-current-maxwidths)))
+	 (let* ((width (aref org-columns-current-maxwidths i))
 		(fmt (format "%%-%d.%ds | " width width)))
-	   (setq title (concat title (format fmt (or name property))))))))
+	   (setq title (concat title (format fmt (or name property)))))))
+      (cl-incf i))
     (setq-local org-previous-header-line-format header-line-format)
     (setq org-columns-full-header-line-format
 	  (concat
@@ -787,8 +798,7 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 		(lambda () (cons (point) (org-columns--collect-values)))
 		nil nil (and org-columns-skip-archived-trees 'archive))))
 	  (when cache
-	    (setq-local org-columns-current-maxwidths
-			(org-columns--autowidth-alist cache))
+	    (org-columns--set-widths cache)
 	    (org-columns--display-here-title)
 	    (when (setq-local org-columns-flyspell-was-active
 			      (org-bound-and-true-p flyspell-mode))
@@ -864,8 +874,7 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
   (interactive "p")
   (let* ((n (current-column))
 	 (entry (nth n org-columns-current-fmt-compiled))
-	 (width (or (nth 2 entry)
-		    (cdr (assoc (car entry) org-columns-current-maxwidths)))))
+	 (width (aref org-columns-current-maxwidths n)))
     (setq width (max 1 (+ width arg)))
     (setcar (nthcdr 2 entry) width)
     (org-columns-store-format)
@@ -944,9 +953,8 @@ display, or in the #+COLUMNS line of the current buffer."
 	   (when value
 	     (let ((displayed (org-columns--displayed-value property value))
 		   (format (overlay-get ov 'org-columns-format))
-		   (width (cdr (assoc-string property
-					     org-columns-current-maxwidths
-					     t))))
+		   (width
+		    (aref org-columns-current-maxwidths (current-column))))
 	       (overlay-put ov 'org-columns-value value)
 	       (overlay-put ov 'org-columns-value-modified displayed)
 	       (overlay-put ov
@@ -1501,8 +1509,7 @@ PARAMS is a property list of parameters:
 		    cache)))
 	  (forward-line))
 	(when cache
-	  (setq-local org-columns-current-maxwidths
-		      (org-columns--autowidth-alist cache))
+	  (org-columns--set-widths cache)
 	  (org-columns--display-here-title)
 	  (when (setq-local org-columns-flyspell-was-active
 			    (org-bound-and-true-p flyspell-mode))
