@@ -614,10 +614,10 @@ Return output file name."
 
 (defun org-publish-file (filename &optional project no-cache)
   "Publish file FILENAME from PROJECT.
-If NO-CACHE is not nil, do not initialize org-publish-cache and
-write it to disk.  This is needed, since this function is used to
-publish single files, when entire projects are published.
-See `org-publish-projects'."
+If NO-CACHE is not nil, do not initialize `org-publish-cache'.
+This is needed, since this function is used to publish single
+files, when entire projects are published (see
+`org-publish-projects')."
   (let* ((project
 	  (or project
 	      (or (org-publish-get-project-from-filename filename)
@@ -659,7 +659,9 @@ See `org-publish-projects'."
 	  (run-hook-with-args 'org-publish-after-publishing-hook
 			      filename
 			      output))))
-    (unless no-cache (org-publish-write-cache-file))))
+    ;; Make sure to write cache to file after successfully publishing
+    ;; a file, so as to minimize impact of a publishing failure.
+    (org-publish-write-cache-file)))
 
 (defun org-publish-projects (projects)
   "Publish all files belonging to the PROJECTS alist.
