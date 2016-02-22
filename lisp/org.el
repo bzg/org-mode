@@ -9102,6 +9102,7 @@ buffer.  It will also recognize item context in multiline items."
 		  org-ctrl-c-minus
 		  org-ctrl-c-star
 		  org-cycle
+		  org-force-cycle-archived
 		  org-forward-heading-same-level
 		  org-insert-heading
 		  org-insert-heading-respect-content
