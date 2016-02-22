@@ -24345,7 +24345,7 @@ respect customization of `org-odd-levels-only'."
    (outline-next-visible-heading arg)))
 
 (defun org-previous-visible-heading (arg)
-  "Move to the next visible heading.
+  "Move to the previous visible heading.
 
 This function wraps `outline-previous-visible-heading' with
 `org-with-limited-levels' in order to skip over inline tasks and
