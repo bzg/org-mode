@@ -289,7 +289,7 @@ integers greater than 0."
 			   (setq width (max (length value) width))))))))
 		org-columns-current-fmt-compiled))))
 
-(defun org-columns-new-overlay (beg end &optional string face)
+(defun org-columns--new-overlay (beg end &optional string face)
   "Create a new column overlay and add it to the list."
   (let ((ov (make-overlay beg end)))
     (overlay-put ov 'face (or face 'secondary-selection))
@@ -361,7 +361,7 @@ DATELINE is non-nil when the face used should be
 		    (fmt (format (if (= i last) "%%-%d.%ds |"
 				   "%%-%d.%ds | ")
 				 width width))
-		    (ov (org-columns-new-overlay
+		    (ov (org-columns--new-overlay
 			 (point) (1+ (point))
 			 (org-columns--overlay-text
 			  value fmt width property original)
@@ -377,7 +377,7 @@ DATELINE is non-nil when the face used should be
 	       (forward-char))))
 	  (cl-incf i)))
       ;; Make the rest of the line disappear.
-      (let ((ov (org-columns-new-overlay (point) (line-end-position))))
+      (let ((ov (org-columns--new-overlay (point) (line-end-position))))
 	(overlay-put ov 'invisible t)
 	(overlay-put ov 'keymap org-columns-map)
 	(overlay-put ov 'line-prefix "")
