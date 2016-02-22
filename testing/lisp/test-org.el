@@ -1531,6 +1531,46 @@ SCHEDULED: <2014-03-04 tue.>"
 	    (let (org-odd-levels-only)
 	      (org-map-entries #'point "yes&no"))))))
 
+(ert-deftest test-org/edit-headline ()
+  "Test `org-edit-headline' specifications."
+  (should
+   (equal "* B"
+	  (org-test-with-temp-text "* A"
+	    (org-edit-headline "B")
+	    (buffer-string))))
+  ;; Handle empty headings.
+  (should
+   (equal "* "
+	  (org-test-with-temp-text "* A"
+	    (org-edit-headline "")
+	    (buffer-string))))
+  (should
+   (equal "* A"
+	  (org-test-with-temp-text "* "
+	    (org-edit-headline "A")
+	    (buffer-string))))
+  ;; Handle TODO keywords and priority cookies.
+  (should
+   (equal "* TODO B"
+	  (org-test-with-temp-text "* TODO A"
+	    (org-edit-headline "B")
+	    (buffer-string))))
+  (should
+   (equal "* [#A] B"
+	  (org-test-with-temp-text "* [#A] A"
+	    (org-edit-headline "B")
+	    (buffer-string))))
+  (should
+   (equal "* TODO [#A] B"
+	  (org-test-with-temp-text "* TODO [#A] A"
+	    (org-edit-headline "B")
+	    (buffer-string))))
+  ;; Handle tags.
+  (equal "* B :tag:"
+	 (org-test-with-temp-text "* A :tag:"
+	   (let ((org-tags-column 4)) (org-edit-headline "B"))
+	   (buffer-string))))
+
 
 
 ;;; Keywords

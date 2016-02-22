@@ -7866,6 +7866,22 @@ This is a list with the following elements:
     (org-back-to-heading t)
     (buffer-substring (point-at-bol 2) (org-end-of-subtree t))))
 
+(defun org-edit-headline (&optional heading)
+  "Edit the current headline.
+Set it to HEADING when provided."
+  (interactive)
+  (org-with-wide-buffer
+   (org-back-to-heading t)
+   (when (looking-at org-complex-heading-regexp)
+     (let* ((old (match-string-no-properties 4))
+	    (new (org-trim (or heading (read-string "Edit: " old)))))
+       (unless (equal old new)
+	 (if old (replace-match new t t nil 4)
+	   (goto-char (or (match-end 3) (match-end 2) (match-end 1)))
+	   (insert " " new))
+	 (org-set-tags nil t)
+	 (when (looking-at "[ \t]*$") (replace-match "")))))))
+
 (defun org-insert-heading-after-current ()
   "Insert a new heading with same level as current, after current subtree."
   (interactive)

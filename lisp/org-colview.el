@@ -600,25 +600,6 @@ Where possible, use the standard interface for changing this line."
 	(org-move-to-column col)
 	(org-columns-update key))))))
 
-(defun org-edit-headline () ; FIXME: this is not columns specific.  Make interactive?????  Use from agenda????
-  "Edit the current headline, the part without TODO keyword, TAGS."
-  (org-back-to-heading)
-  (when (looking-at org-todo-line-regexp)
-    (let ((pos (point))
-	  (pre (buffer-substring (match-beginning 0) (match-beginning 3)))
-	  (txt (match-string 3))
-	  (post "")
-	  txt2)
-      (if (string-match (org-re "[ \t]+:[[:alnum:]:_@#%]+:[ \t]*$") txt)
-	  (setq post (match-string 0 txt)
-		txt (substring txt 0 (match-beginning 0))))
-      (setq txt2 (read-string "Edit: " txt))
-      (when (not (equal txt txt2))
-	(goto-char pos)
-	(insert pre txt2 post)
-	(delete-region (point) (point-at-eol))
-	(org-set-tags nil t)))))
-
 (defun org-columns-edit-allowed ()
   "Edit the list of allowed values for the current property."
   (interactive)
