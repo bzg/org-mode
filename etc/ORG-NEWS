@@ -217,6 +217,9 @@ The variable used to be a ~defvar~, it is now a ~defcustom~.
 **** Allow custom summaries
 It is now possible to add new summary types, or override those
 provided by Org by customizing ~org-columns-summary-types~, which see.
+**** Allow multiple summaries for any property
+Columns can now summarize the same property using different summary
+types.
 *** Preview LaTeX snippets in buffers not visiting files
 *** New option ~org-attach-commit~
 When non-nil, commit attachments with git, assuming the document is in

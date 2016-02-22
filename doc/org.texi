@@ -5621,7 +5621,9 @@ optional.  The individual parts have the following meaning:
 @var{title}           @r{The header text for the column.  If omitted, the property}
                 @r{name is used.}
 @{@var{summary-type}@}  @r{The summary type.  If specified, the column values for}
-                @r{parent nodes are computed from the children.}
+                @r{parent nodes are computed from the children@footnote{If
+                more than one summary type apply to the property, the parent
+                values are computed according to the first of them.}.}
                 @r{Supported summary types are:}
                 @{+@}       @r{Sum numbers in this column.}
                 @{+;%.1f@}  @r{Like @samp{+}, but format result with @samp{%.1f}.}
@@ -5650,11 +5652,6 @@ optional.  The individual parts have the following meaning:
                 @{@@mean@}   @r{Arithmetic mean of ages (in days/hours/mins/seconds).}
                 @{est+@}    @r{Add @samp{low-high} estimates.}
 @end example
-
-@noindent
-Be aware that you can only have one summary type for any property you
-include.  Subsequent columns referencing the same property will all display the
-same summary information.
 
 The @code{est+} summary type requires further explanation.  It is used for
 combining estimates, expressed as @samp{low-high} ranges or plain numbers.

@@ -219,20 +219,18 @@ See `org-columns-summary-types' for details.")
     "--"
     ["Quit" org-columns-quit t]))
 
-(defun org-columns--displayed-value (property value)
-  "Return displayed value for PROPERTY in current entry.
+(defun org-columns--displayed-value (spec value)
+  "Return displayed value for specification SPEC in current entry.
 
-VALUE is the real value of the property, as a string.
-
-This function assumes `org-columns-current-fmt-compiled' is
-initialized."
+SPEC is a column format specification as stored in
+`org-columns-current-fmt-compiled'.  VALUE is the real value to
+display, as a string."
   (cond
    ((and (functionp org-columns-modify-value-for-display-function)
-	 (funcall
-	  org-columns-modify-value-for-display-function
-	  (nth 1 (assoc property org-columns-current-fmt-compiled))
-	  value)))
-   ((equal property "ITEM")
+	 (funcall org-columns-modify-value-for-display-function
+		  (nth 1 spec)
+		  value)))
+   ((equal (car spec) "ITEM")
     (concat (make-string (1- (org-current-level))
 			 (if org-hide-leading-stars ?\s ?*))
 	    "* "
@@ -245,28 +243,30 @@ initialized."
 When optional argument AGENDA is non-nil, assume the value is
 meant for the agenda, i.e., caller is `org-agenda-columns'.
 
-Return a list of triplets (PROPERTY VALUE DISPLAYED) suitable for
+Return a list of triplets (SPEC VALUE DISPLAYED) suitable for
 `org-columns--display-here'.
 
 This function assumes `org-columns-current-fmt-compiled' is
 initialized."
   (mapcar
    (lambda (spec)
-     (let* ((p (car spec))
-	    (v (or (cdr (assoc p (get-text-property (point) 'org-summaries)))
-		   (org-entry-get (point) p 'selective t)
-		   (and agenda
-			;; Effort property is not defined.  Try to use
-			;; appointment duration.
-			org-agenda-columns-add-appointments-to-effort-sum
-			(string= p (upcase org-effort-property))
-			(get-text-property (point) 'duration)
-			(org-propertize
-			 (org-minutes-to-clocksum-string
-			  (get-text-property (point) 'duration))
-			 'face 'org-warning))
-		   "")))
-       (list p v (org-columns--displayed-value p v))))
+     (pcase spec
+       (`(,p . ,_)
+	(let* ((v (or (cdr
+		       (assoc spec (get-text-property (point) 'org-summaries)))
+		      (org-entry-get (point) p 'selective t)
+		      (and agenda
+			   ;; Effort property is not defined.  Try to
+			   ;; use appointment duration.
+			   org-agenda-columns-add-appointments-to-effort-sum
+			   (string= p (upcase org-effort-property))
+			   (get-text-property (point) 'duration)
+			   (org-propertize
+			    (org-minutes-to-clocksum-string
+			     (get-text-property (point) 'duration))
+			    'face 'org-warning))
+		      "")))
+	  (list spec v (org-columns--displayed-value spec v))))))
    org-columns-current-fmt-compiled))
 
 (defun org-columns--set-widths (cache)
@@ -279,13 +279,13 @@ integers greater than 0."
 		(lambda (spec)
 		  (pcase spec
 		    (`(,_ ,_ ,(and width (pred wholenump)) . ,_) width)
-		    (`(,property ,name . ,_)
+		    (`(,_ ,name . ,_)
 		     ;; No width is specified in the columns format.
 		     ;; Compute it by checking all possible values for
 		     ;; PROPERTY.
 		     (let ((width (length name)))
 		       (dolist (entry cache width)
-			 (let ((value (nth 2 (assoc property (cdr entry)))))
+			 (let ((value (nth 2 (assoc spec (cdr entry)))))
 			   (setq width (max (length value) width))))))))
 		org-columns-current-fmt-compiled))))
 
@@ -323,8 +323,8 @@ integers greater than 0."
 
 (defun org-columns--display-here (columns &optional dateline)
   "Overlay the current line with column display.
-COLUMNS is an alist (PROPERTY VALUE DISPLAYED).  Optional
-argument DATELINE is non-nil when the face used should be
+COLUMNS is an alist (SPEC VALUE DISPLAYED).  Optional argument
+DATELINE is non-nil when the face used should be
 `org-agenda-column-dateline'."
   (save-excursion
     (beginning-of-line)
@@ -355,8 +355,9 @@ argument DATELINE is non-nil when the face used should be
 	    (last (1- (length columns))))
 	(dolist (column columns)
 	  (pcase column
-	    (`(,property ,original ,value)
-	     (let* ((width (aref org-columns-current-maxwidths i))
+	    (`(,spec ,original ,value)
+	     (let* ((property (car spec))
+		    (width (aref org-columns-current-maxwidths i))
 		    (fmt (format (if (= i last) "%%-%d.%ds |"
 				   "%%-%d.%ds | ")
 				 width width))
@@ -367,6 +368,7 @@ argument DATELINE is non-nil when the face used should be
 			 (if dateline face1 face))))
 	       (overlay-put ov 'keymap org-columns-map)
 	       (overlay-put ov 'org-columns-key property)
+	       (overlay-put ov 'org-columns-spec spec)
 	       (overlay-put ov 'org-columns-value original)
 	       (overlay-put ov 'org-columns-value-modified value)
 	       (overlay-put ov 'org-columns-format fmt)
@@ -942,26 +944,26 @@ display, or in the #+COLUMNS line of the current buffer."
   (org-with-wide-buffer
    (let ((p (upcase property)))
      (dolist (ov org-columns-overlays)
-       (when (let ((key (overlay-get ov 'org-columns-key)))
-	       (and key (equal key p) (overlay-start ov)))
-	 (goto-char (overlay-start ov))
-	 (let ((value (cdr
-		       (assoc-string
-			property
-			(get-text-property (line-beginning-position)
-					   'org-summaries)
-			t))))
-	   (when value
-	     (let ((displayed (org-columns--displayed-value property value))
-		   (format (overlay-get ov 'org-columns-format))
-		   (width
-		    (aref org-columns-current-maxwidths (current-column))))
-	       (overlay-put ov 'org-columns-value value)
-	       (overlay-put ov 'org-columns-value-modified displayed)
-	       (overlay-put ov
-			    'display
-			    (org-columns--overlay-text
-			     displayed format width property value))))))))))
+       (let ((key (overlay-get ov 'org-columns-key)))
+	 (when (and key (equal key p) (overlay-start ov))
+	   (goto-char (overlay-start ov))
+	   (let* ((spec (overlay-get ov 'org-columns-spec))
+		  (value
+		   (or (cdr (assoc spec
+				   (get-text-property (line-beginning-position)
+						      'org-summaries)))
+		       (org-entry-get (point) key))))
+	     (when value
+	       (let ((displayed (org-columns--displayed-value spec value))
+		     (format (overlay-get ov 'org-columns-format))
+		     (width
+		      (aref org-columns-current-maxwidths (current-column))))
+		 (overlay-put ov 'org-columns-value value)
+		 (overlay-put ov 'org-columns-value-modified displayed)
+		 (overlay-put ov
+			      'display
+			      (org-columns--overlay-text
+			       displayed format width property value)))))))))))
 
 (defun org-columns-redo ()
   "Construct the column display again."
@@ -1092,20 +1094,21 @@ format instead.  Otherwise, use H:M format."
 	  (hms-flag (format-seconds "%h:%.2m:%.2s" seconds))
 	  (t (format-seconds "%h:%.2m" seconds)))))
 
-;;;###autoload
-(defun org-columns-compute (property)
-  "Summarize the values of property PROPERTY hierarchically."
-  (interactive)
+(defun org-columns--compute-spec (spec &optional update)
+  "Update tree according to SPEC.
+SPEC is a column format specification.  When optional argument
+UPDATE is non-nil, summarized values can replace existing ones in
+properties drawers."
   (let* ((lmax (if (org-bound-and-true-p org-inlinetask-min-level)
 		   org-inlinetask-min-level
 		 29))			;Hard-code deepest level.
 	 (lvals (make-vector (1+ lmax) nil))
-	 (spec (assoc-string property org-columns-current-fmt-compiled t))
-	 (operator (nth 3 spec))
-	 (printf (nth 4 spec))
 	 (level 0)
 	 (inminlevel lmax)
-	 (last-level lmax))
+	 (last-level lmax)
+	 (property (car spec))
+	 (printf (nth 4 spec))
+	 (summarize (org-columns--summarize (nth 3 spec))))
     (org-with-wide-buffer
      ;; Find the region to compute.
      (goto-char org-columns-top-level-marker)
@@ -1122,49 +1125,63 @@ format instead.  Otherwise, use H:M format."
 	 (cond
 	  ((< level last-level)
 	   ;; Collect values from lower levels and inline tasks here
-	   ;; and summarize them using SUMMARIZE.  Store them as text
-	   ;; property.
+	   ;; and summarize them using SUMMARIZE.  Store them in text
+	   ;; property `org-summaries', in alist whose key is SPEC.
 	   (let* ((summary
-		   (let ((all (append (and (/= last-level inminlevel)
-					   (aref lvals last-level))
-				      (aref lvals inminlevel))))
-		     (and all (funcall (org-columns--summarize operator)
-				       all printf)))))
-	     (let* ((summaries-alist (get-text-property pos 'org-summaries))
-		    (old (assoc-string property summaries-alist t))
-		    (new
-		     (cond
-		      (summary (propertize summary 'org-computed t 'face 'bold))
-		      (value-set value)
-		      (t ""))))
-	       (if old (setcdr old new)
-		 (push (cons property new) summaries-alist)
-		 (org-with-silent-modifications
-		  (add-text-properties pos (1+ pos)
-				       (list 'org-summaries summaries-alist)))))
-	     ;; When PROPERTY is set in current node, but its value
-	     ;; doesn't match the one computed, use the latter
-	     ;; instead.
-	     (when (and value summary (not (equal value summary)))
-	       (org-entry-put nil property summary))
+		   (and summarize
+			(let ((values (append (and (/= last-level inminlevel)
+						   (aref lvals last-level))
+					      (aref lvals inminlevel))))
+			  (and values (funcall summarize values printf))))))
+	     ;; Leaf values are not summaries: do not mark them.
+	     (when summary
+	       (let* ((summaries-alist (get-text-property pos 'org-summaries))
+		      (old (assoc spec summaries-alist)))
+		 (if old (setcdr old summary)
+		   (push (cons spec summary) summaries-alist)
+		   (org-with-silent-modifications
+		    (add-text-properties
+		     pos (1+ pos) (list 'org-summaries summaries-alist)))))
+	       ;; When PROPERTY exists in current node, even if empty,
+	       ;; but its value doesn't match the one computed, use
+	       ;; the latter instead.
+	       (when (and update value (not (equal value summary)))
+		 (org-entry-put (point) property summary)))
 	     ;; Add current to current level accumulator.
 	     (when (or summary value-set)
 	       (push (or summary value) (aref lvals level)))
 	     ;; Clear accumulators for deeper levels.
-	     (cl-loop for l from (1+ level) to lmax do
-		      (aset lvals l nil))))
+	     (cl-loop for l from (1+ level) to lmax do (aset lvals l nil))))
 	  (value-set (push value (aref lvals level)))
 	  (t nil)))))))
+
+;;;###autoload
+(defun org-columns-compute (property)
+  "Summarize the values of PROPERTY hierarchically.
+Also update existing values for PROPERTY according to the first
+column specification."
+  (interactive)
+  (let ((main-flag t)
+	(upcase-prop (upcase property)))
+    (dolist (spec org-columns-current-fmt-compiled)
+      (pcase spec
+	(`(,(pred (equal upcase-prop)) . ,_)
+	 (org-columns--compute-spec spec main-flag)
+	 ;; Only the first summary can update the property value.
+	 (when main-flag (setq main-flag nil)))))))
 
 (defun org-columns-compute-all ()
   "Compute all columns that have operators defined."
   (org-with-silent-modifications
    (remove-text-properties (point-min) (point-max) '(org-summaries t)))
-  (let ((org-columns--time (float-time (current-time))))
+  (let ((org-columns--time (float-time (current-time)))
+	seen)
     (dolist (spec org-columns-current-fmt-compiled)
-      (pcase spec
-	(`(,property ,_ ,_ ,operator ,_)
-	 (when operator (save-excursion (org-columns-compute property))))))))
+      (let ((property (car spec)))
+	;; Property value is updated only the first time a given
+	;; property is encountered.
+	(org-columns--compute-spec spec (not (member property seen)))
+	(push property seen)))))
 
 (defun org-columns--summary-sum (values printf)
   "Compute the sum of VALUES.
@@ -1556,9 +1573,9 @@ This will add overlays to the date lines, to show the summary for each day."
 		   (let ((date (buffer-substring
 				(line-beginning-position)
 				(line-end-position))))
-		     (list "ITEM" date date)))
-		  (`(,prop ,_ ,_ nil ,_) (list prop "" ""))
-		  (`(,prop ,_ ,_ ,operator ,printf)
+		     (list spec date date)))
+		  (`(,_ ,_ ,_ nil ,_) (list spec "" ""))
+		  (`(,_ ,_ ,_ ,operator ,printf)
 		   (let* ((summarize (org-columns--summarize operator))
 			  (values
 			   ;; Use real values for summary, not those
@@ -1566,13 +1583,13 @@ This will add overlays to the date lines, to show the summary for each day."
 			   (delq nil
 				 (mapcar
 				  (lambda (e)
-				    (org-string-nw-p (nth 1 (assoc prop e))))
+				    (org-string-nw-p (nth 1 (assoc spec e))))
 				  entries)))
 			  (final (if values (funcall summarize values printf)
 				   "")))
 		     (unless (equal final "")
 		       (put-text-property 0 (length final) 'face 'bold final))
-		     (list prop final final)))))
+		     (list spec final final)))))
 	      fmt)
 	     'dateline)
 	    (setq-local org-agenda-columns-active t)))

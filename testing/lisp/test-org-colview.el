@@ -504,7 +504,7 @@
 "
       (let ((org-columns-default-format "%A{est+}")) (org-columns))
       (get-char-property (point) 'org-columns-value-modified))))
-  ;; Test custom summary types.
+  ;; Allow custom summary types.
   (should
    (equal
     "1|2"
@@ -521,7 +521,65 @@
       (let ((org-columns-summary-types
 	     '(("custom" . (lambda (s _) (mapconcat #'identity s "|")))))
 	    (org-columns-default-format "%A{custom}")) (org-columns))
-      (get-char-property (point) 'org-columns-value-modified)))))
+      (get-char-property (point) 'org-columns-value-modified))))
+  ;; Allow multiple summary types applied to the same property.
+  (should
+   (equal
+    '("42" "99")
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 99
+:END:
+** S1
+:PROPERTIES:
+:A: 42
+:END:"
+      (let ((org-columns-default-format "%A{min} %A{max}")) (org-columns))
+      (list (get-char-property (point) 'org-columns-value-modified)
+	    (get-char-property (1+ (point)) 'org-columns-value-modified)))))
+  ;; Allow mixing both summarized and non-summarized columns for
+  ;; a property.  However, the first column takes precedence and
+  ;; updates the value.
+  (should
+   (equal
+    '("1000" "42")
+    (org-test-with-temp-text
+	"* H
+:PROPERTIES:
+:A: 1000
+:END:
+** S1
+:PROPERTIES:
+:A: 99
+:END:
+** S1
+:PROPERTIES:
+:A: 42
+:END:"
+      (let ((org-columns-default-format "%A %A{min}")) (org-columns))
+      (list (get-char-property (point) 'org-columns-value-modified)
+	    (get-char-property (1+ (point)) 'org-columns-value-modified)))))
+  (should
+   (equal
+    '("42" "42")
+    (org-test-with-temp-text
+	"* H
+:PROPERTIES:
+:A: 1000
+:END:
+** S1
+:PROPERTIES:
+:A: 99
+:END:
+** S1
+:PROPERTIES:
+:A: 42
+:END:"
+      (let ((org-columns-default-format "%A{min} %A")) (org-columns))
+      (list (get-char-property (point) 'org-columns-value-modified)
+	    (get-char-property (1+ (point)) 'org-columns-value-modified))))))
 
 (ert-deftest test-org-colview/columns-new ()
   "Test `org-columns-new' specifications."
@@ -616,6 +674,60 @@
       (org-columns-update "A")
       (list (get-char-property (point-min) 'org-columns-value)
 	    (get-char-property (point-min) 'org-columns-value-modified)))))
+  ;; When multiple columns are using the same property, value is
+  ;; updated according to the specifications of the first one.
+  (should
+   (equal
+    "2"
+    (org-test-with-temp-text
+	"* H
+:PROPERTIES:
+:A: 1
+:END:
+** S
+:PROPERTIES:
+:A: 2
+:END:"
+      (let ((org-columns-default-format "%A{min} %A")) (org-columns))
+      (org-columns-update "A")
+      (org-entry-get nil "A"))))
+  (should
+   (equal
+    "1"
+    (org-test-with-temp-text
+	"* H
+:PROPERTIES:
+:A: 1
+:END:
+** S
+:PROPERTIES:
+:A: 2
+:END:"
+      (let ((org-columns-default-format "%A %A{min}")) (org-columns))
+      (org-columns-update "A")
+      (org-entry-get nil "A"))))
+  ;; Ensure modifications propagate in upper levels even when multiple
+  ;; summary types apply to the same property.
+  (should
+   (equal
+    '("1" "22")
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: 1
+:END:
+** S2
+:PROPERTIES:
+:A: <point>2
+:END:"
+      (save-excursion
+	(goto-char (point-min))
+	(let ((org-columns-default-format "%A{min} %A{max}")) (org-columns)))
+      (insert "2")
+      (org-columns-update "A")
+      (list (get-char-property 1 'org-columns-value)
+	    (get-char-property 2 'org-columns-value-modified)))))
   ;; Ensure additional processing is done (e.g., ellipses, special
   ;; keywords fontification...).
   (should
@@ -656,7 +768,19 @@
 	      (org-columns-ellipses "..")
 	      (org-inlinetask-min-level 15))
 	  (org-columns))
-	(get-char-property (point-min) 'org-columns-value))))))
+	(get-char-property (point-min) 'org-columns-value)))))
+  ;; Handle `org-columns-modify-value-for-display-function', even with
+  ;; multiple titles for the same property.
+  (should
+   (equal '("foo" "bar")
+	  (org-test-with-temp-text "* H"
+	    (let ((org-columns-default-format "%ITEM %ITEM(Name)")
+		  (org-columns-modify-value-for-display-function
+		   (lambda (title value)
+		     (pcase title ("ITEM" "foo") ("Name" "bar") (_ "baz")))))
+	      (org-columns))
+	    (list (get-char-property 1 'org-columns-value-modified)
+		  (get-char-property 2 'org-columns-value-modified))))))
 
 
 
