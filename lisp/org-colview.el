@@ -598,8 +598,12 @@ Where possible, use the standard interface for changing this line."
 	   (remove-text-properties
 	    (max (point-min) (1- bol)) eol '(read-only t)))
 	  (org-columns-eval eval))
-	(org-move-to-column col)
-	(org-columns-update key))))))
+	;; Some properties can modify headline (e.g., "TODO"), and
+	;; possible shuffle overlays.  Make sure they are still all at
+	;; the right place on the current line.
+	(let ((org-columns-inhibit-recalculation)) (org-columns-redo))
+	(org-columns-update key)
+	(org-move-to-column col))))))
 
 (defun org-columns-edit-allowed ()
   "Edit the list of allowed values for the current property."
@@ -643,58 +647,57 @@ When PREVIOUS is set, go to the previous value.  When NTH is
 an integer, select that value."
   (interactive)
   (org-columns-check-computed)
-  (let* ((col (current-column))
+  (let* ((column (current-column))
 	 (key (get-char-property (point) 'org-columns-key))
 	 (value (get-char-property (point) 'org-columns-value))
-	 (bol (point-at-bol)) (eol (point-at-eol))
-	 (pom (or (get-text-property bol 'org-hd-marker)
-		  (point)))	     ; keep despite of compiler waring
+	 (pom (or (get-text-property (line-beginning-position) 'org-hd-marker)
+		  (point)))
 	 (allowed
-	  (or (org-property-get-allowed-values pom key)
-	      (and (member (nth 3 (assoc key org-columns-current-fmt-compiled))
-			   '("X" "X/" "X%"))
-		   '("[ ]" "[X]"))
-	      (org-colview-construct-allowed-dates value)))
-	 nval)
-    (when (integerp nth)
-      (setq nth (1- nth))
-      (if (= nth -1) (setq nth 9)))
-    (when (equal key "ITEM")
-      (error "Cannot edit item headline from here"))
+	  (let ((all
+		 (or (org-property-get-allowed-values pom key)
+		     (pcase (nth column org-columns-current-fmt-compiled)
+		       (`(,_ ,_ ,_ ,(or "X" "X/" "X%") ,_) '("[ ]" "[X]")))
+		     (org-colview-construct-allowed-dates value))))
+	    (if previous (reverse all) all))))
+    (when (equal key "ITEM") (error "Cannot edit item headline from here"))
     (unless (or allowed (member key '("SCHEDULED" "DEADLINE" "CLOCKSUM")))
       (error "Allowed values for this property have not been defined"))
-    (if (member key '("SCHEDULED" "DEADLINE" "CLOCKSUM"))
-	(setq nval (if previous 'earlier 'later))
-      (if previous (setq allowed (reverse allowed)))
+    (let* ((l (length allowed))
+	   (new
+	    (cond
+	     ((member key '("SCHEDULED" "DEADLINE" "CLOCKSUM"))
+	      (if previous 'earlier 'later))
+	     ((integerp nth)
+	      (when (> (abs nth) l)
+		(user-error "Only %d allowed values for property `%s'" l key))
+	      (nth (mod (1- nth) l) allowed))
+	     ((member value allowed)
+	      (when (= l 1) (error "Only one allowed value for this property"))
+	      (or (nth 1 (member value allowed)) (car allowed)))
+	     (t (car allowed))))
+	   (sexp `(org-entry-put ,pom ,key ,new)))
       (cond
-       (nth
-	(setq nval (nth nth allowed))
-	(if (not nval)
-	    (error "There are only %d allowed values for property `%s'"
-		   (length allowed) key)))
-       ((member value allowed)
-	(setq nval (or (car (cdr (member value allowed)))
-		       (car allowed)))
-	(if (equal nval value)
-	    (error "Only one allowed value for this property")))
-       (t (setq nval (car allowed)))))
-    (cond
-     ((equal major-mode 'org-agenda-mode)
-      (org-columns-eval `(org-entry-put ,pom ,key ,nval))
-      ;; The following let preserves the current format, and makes sure
-      ;; that in only a single file things need to be updated.
-      (let* ((org-agenda-overriding-columns-format org-columns-current-fmt)
-	     (buffer (marker-buffer pom))
-	     (org-agenda-contributing-files
-	      (list (with-current-buffer buffer
-		      (buffer-file-name (buffer-base-buffer))))))
-	(org-agenda-columns)))
-     (t
-      (let ((inhibit-read-only t))
-	(remove-text-properties (max (1- bol) (point-min)) eol '(read-only t))
-	(org-columns-eval `(org-entry-put ,pom ,key ,nval)))
-      (org-move-to-column col)
-      (org-columns-update key)))))
+       ((equal major-mode 'org-agenda-mode)
+	(org-columns-eval sexp)
+	;; The following let preserves the current format, and makes
+	;; sure that in only a single file things need to be updated.
+	(let* ((org-agenda-overriding-columns-format org-columns-current-fmt)
+	       (buffer (marker-buffer pom))
+	       (org-agenda-contributing-files
+		(list (with-current-buffer buffer
+			(buffer-file-name (buffer-base-buffer))))))
+	  (org-agenda-columns)))
+       (t
+	(let ((inhibit-read-only t))
+	  (remove-text-properties (line-end-position 0) (line-end-position)
+				  '(read-only t))
+	  (org-columns-eval sexp))
+	;; Some properties can modify headline (e.g., "TODO"), and
+	;; possible shuffle overlays.  Make sure they are still all at
+	;; the right place on the current line.
+	(let ((org-columns-inhibit-recalculation)) (org-columns-redo))
+	(org-columns-update key)
+	(org-move-to-column column))))))
 
 (defun org-colview-construct-allowed-dates (s)
   "Construct a list of three dates around the date in S.

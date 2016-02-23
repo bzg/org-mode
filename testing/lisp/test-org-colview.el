@@ -959,6 +959,127 @@
 	    ;; explanation.
 	    (org-entry-get (point) "A")))))
 
+(ert-deftest test-org-colview/columns-next-allowed-value ()
+  "Test `org-columns-next-allowed-value' specifications."
+  ;; Cannot shift "ITEM" property.
+  (should-error
+   (org-test-with-temp-text "* H"
+     (let ((org-columns-default-format "%ITEM")) (org-columns))
+     (org-columns-next-allowed-value)))
+  ;; Throw an error when allowed values are not defined.
+  (should-error
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:"
+     (let ((org-columns-default-format "%A")) (org-columns))
+     (org-columns-next-allowed-value)))
+  ;; Throw an error when there's only one value to select.
+  (should-error
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:A_ALL: 1\n:END:"
+     (let ((org-columns-default-format "%A")) (org-columns))
+     (org-columns-next-allowed-value)))
+  ;; By default select the next allowed value.  Where there is no more
+  ;; value, start again from first possible one.
+  (should
+   (equal "2"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A: 1\n:A_ALL: 1 2 3\n:END:"
+	    (let ((org-columns-default-format "%A")) (org-columns))
+	    (org-columns-next-allowed-value)
+	    (org-entry-get (point) "A"))))
+  (should
+   (equal "3"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A: 2\n:A_ALL: 1 2 3\n:END:"
+	    (let ((org-columns-default-format "%A")) (org-columns))
+	    (org-columns-next-allowed-value)
+	    (org-entry-get (point) "A"))))
+  (should
+   (equal "1"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A: 3\n:A_ALL: 1 2 3\n:END:"
+	    (let ((org-columns-default-format "%A")) (org-columns))
+	    (org-columns-next-allowed-value)
+	    (org-entry-get (point) "A"))))
+  ;; PREVIOUS argument moves backward.
+  (should
+   (equal "1"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A: 2\n:A_ALL: 1 2 3\n:END:"
+	    (let ((org-columns-default-format "%A")) (org-columns))
+	    (org-columns-next-allowed-value 'previous)
+	    (org-entry-get (point) "A"))))
+  (should
+   (equal "2"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A: 3\n:A_ALL: 1 2 3\n:END:"
+	    (let ((org-columns-default-format "%A")) (org-columns))
+	    (org-columns-next-allowed-value 'previous)
+	    (org-entry-get (point) "A"))))
+  (should
+   (equal "3"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A: 1\n:A_ALL: 1 2 3\n:END:"
+	    (let ((org-columns-default-format "%A")) (org-columns))
+	    (org-columns-next-allowed-value 'previous)
+	    (org-entry-get (point) "A"))))
+  ;; Select Nth element with optional argument NTH.
+  (should
+   (equal "1"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A: 2\n:A_ALL: 1 2 3\n:END:"
+	    (let ((org-columns-default-format "%A")) (org-columns))
+	    (org-columns-next-allowed-value nil 1)
+	    (org-entry-get (point) "A"))))
+  ;; If NTH is negative, go backwards, 0 being the last one and -1 the
+  ;; penultimate.
+  (should
+   (equal "3"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A: 2\n:A_ALL: 1 2 3\n:END:"
+	    (let ((org-columns-default-format "%A")) (org-columns))
+	    (org-columns-next-allowed-value nil 0)
+	    (org-entry-get (point) "A"))))
+  (should
+   (equal "2"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A: 2\n:A_ALL: 1 2 3\n:END:"
+	    (let ((org-columns-default-format "%A")) (org-columns))
+	    (org-columns-next-allowed-value nil -1)
+	    (org-entry-get (point) "A"))))
+  ;; Throw an error if NTH is greater than the number of allowed
+  ;; values.
+  (should-error
+   (org-test-with-temp-text
+       "* H\n:PROPERTIES:\n:A: 2\n:A_ALL: 1 2 3\n:END:"
+     (let ((org-columns-default-format "%A")) (org-columns))
+     (org-columns-next-allowed-value nil 4)
+     (org-entry-get (point) "A")))
+  ;; Pathological case: when shifting the value alters the current
+  ;; heading, make sure all columns are still at their correct
+  ;; location.
+  (should
+   (equal '("H" "" "" "" "TODO")
+	  (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+	    (org-test-with-temp-text "* H"
+	      (let ((org-columns-default-format "%ITEM %A %B %C %TODO"))
+		(org-columns)
+		(forward-char 4)
+		(org-columns-next-allowed-value)
+		(list (get-char-property (- (point) 4) 'org-columns-value)
+		      (get-char-property (- (point) 3) 'org-columns-value)
+		      (get-char-property (- (point) 2) 'org-columns-value)
+		      (get-char-property (- (point) 1) 'org-columns-value)
+		      (get-char-property (point) 'org-columns-value)))))))
+  (should
+   (equal '("H" "VERYLONGTODO")
+	  (let ((org-todo-keywords '((sequence "TODO" "VERYLONGTODO"))))
+	    (org-test-with-temp-text "* TODO H"
+	      (let ((org-columns-default-format "%ITEM %TODO"))
+		(org-columns)
+		(forward-char)
+		(org-columns-next-allowed-value)
+		(list (get-char-property (- (point) 1) 'org-columns-value)
+		      (get-char-property (point) 'org-columns-value))))))))
+
 
 
 ;;; Dynamic block
