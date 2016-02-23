@@ -811,38 +811,48 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	      (goto-char (car entry))
 	      (org-columns--display-here (cdr entry)))))))))
 
-(defun org-columns-new (&optional prop title width operator _)
-  "Insert a new column, to the left of the current column."
+(defun org-columns-new (&optional spec &rest attributes)
+  "Insert a new column, to the left of the current column.
+Interactively fill attributes for new column.  When column format
+specification SPEC is provided, edit it instead.
+
+When optional argument attributes can be a list of columns
+specifications attributes to create the new column
+non-interactively.  See `org-columns-compile-format' for
+details."
   (interactive)
-  (let* ((automatic (org-string-nw-p prop))
-	 (prop (or prop (completing-read
+  (let ((new (or attributes
+		 (let ((prop
+			(completing-read
 			 "Property: "
-			 (mapcar #'list (org-buffer-property-keys t nil t)))))
-	 (title (if automatic title
-		  (read-string (format "Column title [%s]: " prop) prop)))
-	 (width
-	  ;; WIDTH may be nil, but if PROP is provided, assume this is
-	  ;; the expected width.
-	  (if automatic width
-	    ;; Use `read-string' instead of `read-number' to allow
-	    ;; empty width.
-	    (let ((w (read-string "Column width: ")))
-	      (and (org-string-nw-p w) (string-to-number w)))))
-	 (operator
-	  (if automatic operator
-	    (org-string-nw-p
-	     (completing-read
-	      "Summary: "
-	      (delete-dups
-	       (mapcar (lambda (x) (list (car x)))
-		       (append org-columns-summary-types
-			       org-columns-summary-types-default)))
-	      nil t))))
-	 (edit
-	  (and prop (assoc-string prop org-columns-current-fmt-compiled t))))
-    (if edit (setcdr edit (list title width operator nil))
-      (push (list prop title width operator nil)
-	    (nthcdr (current-column) org-columns-current-fmt-compiled)))
+			 (mapcar #'list (org-buffer-property-keys t nil t))
+			 nil nil (nth 0 spec))))
+		   (list prop
+			 (read-string (format "Column title [%s]: " prop)
+				      (nth 1 spec))
+			 ;; Use `read-string' instead of `read-number'
+			 ;; to allow empty width.
+			 (let ((w (read-string
+				   "Column width: "
+				   (and (nth 2 spec)
+					(number-to-string (nth 2 spec))))))
+			   (and (org-string-nw-p w) (string-to-number w)))
+			 (org-string-nw-p
+			  (completing-read
+			   "Summary: "
+			   (delete-dups
+			    (cons '("")	;Allow empty operator.
+				  (mapcar (lambda (x) (list (car x)))
+					  (append
+					   org-columns-summary-types
+					   org-columns-summary-types-default))))
+			   nil t (nth 3 spec)))
+			 (org-string-nw-p
+			  (read-string "Format: " (nth 4 spec))))))))
+    (if spec
+	(progn (setcar spec (car new))
+	       (setcdr spec (cdr new)))
+      (push new (nthcdr (current-column) org-columns-current-fmt-compiled)))
     (org-columns-store-format)
     (org-columns-redo)))
 
@@ -864,9 +874,7 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 (defun org-columns-edit-attributes ()
   "Edit the attributes of the current column."
   (interactive)
-  (let* ((n (current-column))
-	 (info (nth n org-columns-current-fmt-compiled)))
-    (apply 'org-columns-new info)))
+  (org-columns-new (nth (current-column) org-columns-current-fmt-compiled)))
 
 (defun org-columns-widen (arg)
   "Make the column wider by ARG characters."

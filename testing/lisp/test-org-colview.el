@@ -630,7 +630,7 @@
    (equal '("FOO" "ITEM")
 	  (org-test-with-temp-text "* H"
 	    (let ((org-columns-default-format "%ITEM")) (org-columns))
-	    (org-columns-new "FOO")
+	    (org-columns-new nil "FOO" "FOO" nil nil nil)
 	    (list (get-char-property (point) 'org-columns-key)
 		  (get-char-property (1+ (point)) 'org-columns-key)))))
   (should
@@ -638,7 +638,7 @@
 	  (org-test-with-temp-text "* H"
 	    (let ((org-columns-default-format "%ITEM %BAR")) (org-columns))
 	    (forward-char)
-	    (org-columns-new "FOO")
+	    (org-columns-new nil "FOO" "FOO" nil nil nil)
 	    (list (get-char-property (1- (point)) 'org-columns-key)
 		  (get-char-property (point) 'org-columns-key)
 		  (get-char-property (1+ (point)) 'org-columns-key)))))
@@ -647,7 +647,7 @@
    (equal "#+COLUMNS: %FOO %ITEM"
 	  (org-test-with-temp-text "#+COLUMNS: %ITEM\n<point>* H"
 	    (let ((org-columns-default-format "%ITEM")) (org-columns))
-	    (org-columns-new "FOO")
+	    (org-columns-new nil "FOO" "FOO" nil nil nil)
 	    (goto-char (point-min))
 	    (buffer-substring-no-properties (point) (line-end-position)))))
   (should
@@ -655,7 +655,7 @@
 	  (org-test-with-temp-text "#+COLUMNS: %ITEM %BAR\n<point>* H"
 	    (let ((org-columns-default-format "%ITEM %BAR")) (org-columns))
 	    (forward-char)
-	    (org-columns-new "FOO")
+	    (org-columns-new nil "FOO" "FOO" nil nil nil)
 	    (goto-char (point-min))
 	    (buffer-substring-no-properties (point) (line-end-position)))))
   ;; Mind case when updating #+COLUMNS.
@@ -664,7 +664,7 @@
 	  (org-test-with-temp-text "#+COLUMNS: %ITEM %BAR\n<point>* H"
 	    (let ((org-columns-default-format "%ITEM %BAR")) (org-columns))
 	    (forward-char)
-	    (org-columns-new "Foo")
+	    (org-columns-new nil "Foo" "Foo" nil nil nil)
 	    (goto-char (point-min))
 	    (buffer-substring-no-properties (point) (line-end-position)))))
   (should
@@ -672,7 +672,7 @@
 	  (org-test-with-temp-text "#+columns: %ITEM %BAR\n<point>* H"
 	    (let ((org-columns-default-format "%ITEM %BAR")) (org-columns))
 	    (forward-char)
-	    (org-columns-new "Foo")
+	    (org-columns-new nil "Foo" "Foo" nil nil nil)
 	    (goto-char (point-min))
 	    (buffer-substring-no-properties (point) (line-end-position)))))
   ;; Also update :COLUMNS: properties.
@@ -680,14 +680,14 @@
    (equal "%FOO %ITEM"
 	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:COLUMNS: %ITEM\n:END:"
 	    (let ((org-columns-default-format "%ITEM")) (org-columns))
-	    (org-columns-new "FOO")
+	    (org-columns-new nil "FOO" "FOO" nil nil nil)
 	    (org-entry-get nil "COLUMNS"))))
   ;; If no keyword nor any property is available, insert one.
   (should
    (string-match-p (regexp-quote "#+COLUMNS: %FOO %ITEM")
 		   (org-test-with-temp-text "* H"
 		     (let ((org-columns-default-format "%ITEM")) (org-columns))
-		     (org-columns-new "FOO")
+		     (org-columns-new nil "FOO" "FOO" nil nil nil)
 		     (buffer-string)))))
 
 (ert-deftest test-org-colview/columns-update ()
