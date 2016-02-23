@@ -896,7 +896,16 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
     (setcar cell (car (cdr cell)))
     (setcdr cell (cons e (cdr (cdr cell))))
     (org-columns-store-format)
-    (org-columns-redo)
+    ;; Do not compute again properties, since we're just moving
+    ;; columns around.  It can put a property value a bit off when
+    ;; switching between an non-computed and a computed value for the
+    ;; same property, e.g. from "%A %A{+}" to "%A{+} %A".
+    ;;
+    ;; In this case, the value needs to be updated since the first
+    ;; column related to a property determines how its value is
+    ;; computed.  However, (correctly) updating the value could be
+    ;; surprising, so we leave it as-is nonetheless.
+    (let ((org-columns-inhibit-recalculation t)) (org-columns-redo))
     (forward-char 1)))
 
 (defun org-columns-move-left ()

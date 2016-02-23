@@ -846,6 +846,119 @@
 	    (list (get-char-property 1 'org-columns-value-modified)
 		  (get-char-property 2 'org-columns-value-modified))))))
 
+(ert-deftest test-org-colview/columns-move-left ()
+  "Test `org-columns-move-left' specifications."
+  ;; Error when trying to move the left-most column.
+  (should-error
+   (org-test-with-temp-text "* H"
+     (let ((org-columns-default-format "%ITEM")) (org-columns))
+     (org-columns-move-left)))
+  ;; Otherwise, move column to left and update display.
+  (should
+   (equal '("2" "1")
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:B: 2\n:END:"
+	    (let ((org-columns-default-format "%A %B")) (org-columns))
+	    (forward-char)
+	    (org-columns-move-left)
+	    (list (get-char-property (point) 'org-columns-value)
+		  (get-char-property (1+ (point)) 'org-columns-value)))))
+  ;; Handle multiple columns with the same property.
+  (should
+   (equal '("2" "1")
+	  (org-test-with-temp-text
+	      "* H
+** S1
+:PROPERTIES:
+:A: 1
+:END:
+** S1
+:PROPERTIES:
+:A: 2
+:END:"
+	    (let ((org-columns-default-format "%ITEM %A{min} %A{max}"))
+	      (org-columns))
+	    (forward-char 2)
+	    (org-columns-move-left)
+	    (list (get-char-property (point) 'org-columns-value)
+		  (get-char-property (1+ (point)) 'org-columns-value)))))
+  ;; Special case: do not update values even if move entails changing
+  ;; them.
+  (should
+   (equal "1"
+	  (org-test-with-temp-text
+	      "* H
+:PROPERTIES:
+:A: 1
+:END:
+** S1
+:PROPERTIES:
+:A: 99
+:END:"
+	    (let ((org-columns-default-format "%A %A{max}"))
+	      (org-columns))
+	    (forward-char)
+	    (org-columns-move-left)
+	    ;; Since the first column matching a given property
+	    ;; determines how a value is computed, the following
+	    ;; should return "99" instead.  However, this behavior is
+	    ;; in practice surprising so we just ignore the value
+	    ;; change.  It can be computed later.
+	    (org-entry-get (point) "A")))))
+
+(ert-deftest test-org-colview/columns-move-right ()
+  "Test `org-columns-move-right' specifications."
+  ;; Error when trying to move the right-most column.
+  (should-error
+   (org-test-with-temp-text "* H"
+     (let ((org-columns-default-format "%ITEM")) (org-columns))
+     (org-columns-move-right)))
+  ;; Otherwise, move column to left and update display.
+  (should
+   (equal '("2" "1")
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:B: 2\n:END:"
+	    (let ((org-columns-default-format "%A %B")) (org-columns))
+	    (org-columns-move-right)
+	    (list (get-char-property (1- (point)) 'org-columns-value)
+		  (get-char-property (point) 'org-columns-value)))))
+  ;; Handle multiple columns with the same property.
+  (should
+   (equal '("2" "1")
+	  (org-test-with-temp-text
+	      "* H
+** S1
+:PROPERTIES:
+:A: 1
+:END:
+** S1
+:PROPERTIES:
+:A: 2
+:END:"
+	    (let ((org-columns-default-format "%ITEM %A{min} %A{max}"))
+	      (org-columns))
+	    (forward-char)
+	    (org-columns-move-right)
+	    (list (get-char-property (1- (point)) 'org-columns-value)
+		  (get-char-property (point) 'org-columns-value)))))
+  ;; Special case: do not update values even if move entails changing
+  ;; them.
+  (should
+   (equal "1"
+	  (org-test-with-temp-text
+	      "* H
+:PROPERTIES:
+:A: 1
+:END:
+** S1
+:PROPERTIES:
+:A: 99
+:END:"
+	    (let ((org-columns-default-format "%A %A{max}"))
+	      (org-columns))
+	    (org-columns-move-right)
+	    ;; See `test-org-colview/columns-move-left' for an
+	    ;; explanation.
+	    (org-entry-get (point) "A")))))
+
 
 
 ;;; Dynamic block
