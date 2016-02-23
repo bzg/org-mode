@@ -248,26 +248,26 @@ Return a list of triplets (SPEC VALUE DISPLAYED) suitable for
 
 This function assumes `org-columns-current-fmt-compiled' is
 initialized."
-  (mapcar
-   (lambda (spec)
-     (pcase spec
-       (`(,p . ,_)
-	(let* ((v (or (cdr
-		       (assoc spec (get-text-property (point) 'org-summaries)))
-		      (org-entry-get (point) p 'selective t)
-		      (and agenda
-			   ;; Effort property is not defined.  Try to
-			   ;; use appointment duration.
-			   org-agenda-columns-add-appointments-to-effort-sum
-			   (string= p (upcase org-effort-property))
-			   (get-text-property (point) 'duration)
-			   (org-propertize
-			    (org-minutes-to-clocksum-string
-			     (get-text-property (point) 'duration))
-			    'face 'org-warning))
-		      "")))
-	  (list spec v (org-columns--displayed-value spec v))))))
-   org-columns-current-fmt-compiled))
+  (let ((summaries (get-text-property (point) 'org-summaries)))
+    (mapcar
+     (lambda (spec)
+       (pcase spec
+	 (`(,p . ,_)
+	  (let* ((v (or (cdr (assoc spec summaries))
+			(org-entry-get (point) p 'selective t)
+			(and agenda
+			     ;; Effort property is not defined.  Try
+			     ;; to use appointment duration.
+			     org-agenda-columns-add-appointments-to-effort-sum
+			     (string= p (upcase org-effort-property))
+			     (get-text-property (point) 'duration)
+			     (org-propertize
+			      (org-minutes-to-clocksum-string
+			       (get-text-property (point) 'duration))
+			      'face 'org-warning))
+			"")))
+	    (list spec v (org-columns--displayed-value spec v))))))
+     org-columns-current-fmt-compiled)))
 
 (defun org-columns--set-widths (cache)
   "Compute the maximum column widths from the format and CACHE.
