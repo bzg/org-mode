@@ -504,12 +504,12 @@ for the duration of the command.")
      "Modification not yet reflected in Agenda buffer, use `r' to refresh")))
 
 (defun org-columns-check-computed ()
-  "Check if this column value is computed.
-If yes, throw an error indicating that changing it does not make sense."
-  (let ((val (get-char-property (point) 'org-columns-value)))
-    (when (and (stringp val)
-	       (get-char-property 0 'org-computed val))
-      (error "This value is computed from the entry's children"))))
+  "Throw an error if current column value is computed."
+  (let ((spec (nth (current-column) org-columns-current-fmt-compiled)))
+    (and
+     (nth 3 spec)
+     (assoc spec (get-text-property (line-beginning-position) 'org-summaries))
+     (error "This value is computed from the entry's children"))))
 
 (defun org-columns-todo (&optional _arg)
   "Change the TODO state during column view."
