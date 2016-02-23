@@ -38,7 +38,9 @@
 (declare-function org-element-interpret-data "org-element" (data))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated))
 (declare-function org-element-parse-secondary-string "org-element" (string restriction &optional parent))
+(declare-function org-element-property "org-element" (property element))
 (declare-function org-element-restriction "org-element" (element))
+(declare-function org-element-type "org-element" (element))
 
 (defvar org-agenda-columns-add-appointments-to-effort-sum)
 (defvar org-agenda-columns-compute-summary-properties)
