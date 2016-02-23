@@ -498,7 +498,8 @@ for the duration of the command.")
    (org-columns-remove-overlays)
    (let ((inhibit-read-only t))
      (remove-text-properties (point-min) (point-max) '(read-only t))))
-  (when (eq major-mode 'org-agenda-mode)
+  (if (not (eq major-mode 'org-agenda-mode))
+      (setq org-columns-current-fmt nil)
     (setq org-agenda-columns-active nil)
     (message
      "Modification not yet reflected in Agenda buffer, use `r' to refresh")))
@@ -728,14 +729,28 @@ around it."
     fmt))
 
 (defun org-columns-get-format (&optional fmt-string)
+  "Return columns format specifications.
+When optional argument FMT-STRING is non-nil, use it as the
+current specifications.  This function also sets
+`org-columns-current-fmt-compiled' and
+`org-columns-current-fmt'."
   (interactive)
-  (let (fmt-as-property fmt)
-    (when (condition-case nil (org-back-to-heading) (error nil))
-      (setq fmt-as-property (org-entry-get nil "COLUMNS" t)))
-    (setq fmt (or fmt-string fmt-as-property org-columns-default-format))
-    (setq-local org-columns-current-fmt fmt)
-    (org-columns-compile-format fmt)
-    fmt))
+  (let ((format
+	 (or fmt-string
+	     (org-entry-get nil "COLUMNS" t)
+	     (org-with-wide-buffer
+	      (goto-char (point-min))
+	      (catch :found
+		(let ((case-fold-search t))
+		  (while (re-search-forward "^[ \t]*#\\+COLUMNS: .+$" nil t)
+		    (let ((element (org-element-at-point)))
+		      (when (eq (org-element-type element) 'keyword)
+			(throw :found (org-element-property :value element)))))
+		  nil)))
+	     org-columns-default-format)))
+    (setq org-columns-current-fmt format)
+    (org-columns-compile-format format)
+    format))
 
 (defun org-columns-goto-top-level ()
   "Move to the beginning of the column view area.
@@ -956,18 +971,16 @@ the current buffer."
   "Construct the column display again."
   (interactive)
   (message "Recomputing columns...")
-  (let ((line (org-current-line))
-	(col (current-column)))
-    (save-excursion
-      (if (marker-position org-columns-begin-marker)
-	  (goto-char org-columns-begin-marker))
-      (org-columns-remove-overlays)
-      (if (derived-mode-p 'org-mode)
-	  (call-interactively 'org-columns)
-	(org-agenda-redo)
-	(call-interactively 'org-agenda-columns)))
-    (org-goto-line line)
-    (move-to-column col))
+  (org-with-wide-buffer
+   (when (marker-position org-columns-begin-marker)
+     (goto-char org-columns-begin-marker))
+   (org-columns-remove-overlays)
+   (if (derived-mode-p 'org-mode)
+       ;; Since we already know the columns format, provide it instead
+       ;; of computing again.
+       (call-interactively #'org-columns org-columns-current-fmt)
+     (org-agenda-redo)
+     (call-interactively #'org-agenda-columns)))
   (message "Recomputing columns...done"))
 
 (defun org-columns-uncompile-format (compiled)

@@ -23,6 +23,48 @@
 
 (require 'cl-lib)
 
+(ert-deftest test-org-colview/get-format ()
+  "Test `org-columns-get-format' specifications."
+  ;; Without any clue, use `org-columns-default-format'.
+  (should
+   (equal "%A"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-columns-default-format "%A"))
+	      (org-columns-get-format)))))
+  ;; If COLUMNS keyword is set, use it.
+  (should
+   (equal "%B"
+	  (org-test-with-temp-text "#+COLUMNS: %B\n* H"
+	    (let ((org-columns-default-format "%A"))
+	      (org-columns-get-format)))))
+  (should
+   (equal "%B"
+	  (org-test-with-temp-text "#+columns: %B\n* H"
+	    (let ((org-columns-default-format "%A"))
+	      (org-columns-get-format)))))
+  (should
+   (equal "%B"
+	  (org-test-with-temp-text "* H\n#+COLUMNS: %B"
+	    (let ((org-columns-default-format "%A"))
+	      (org-columns-get-format)))))
+  ;; When :COLUMNS: property is set somewhere in the tree, use it over
+  ;; the previous ways.
+  (should
+   (equal
+    "%C"
+    (org-test-with-temp-text
+	"#+COLUMNS: %B\n* H\n:PROPERTIES:\n:COLUMNS: %C\n:END:\n** S\n<point>"
+      (let ((org-columns-default-format "%A"))
+	(org-columns-get-format)))))
+  ;; When optional argument is provided, prefer it.
+  (should
+   (equal
+    "%D"
+    (org-test-with-temp-text
+	"#+COLUMNS: %B\n* H\n:PROPERTIES:\n:COLUMNS: %C\n:END:\n** S\n<point>"
+      (let ((org-columns-default-format "%A"))
+	(org-columns-get-format "%D"))))))
+
 (ert-deftest test-org-colview/columns-scope ()
   "Test `org-columns' scope."
   ;; Before the first headline, view all document.
