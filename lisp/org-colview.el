@@ -370,7 +370,6 @@ DATELINE is non-nil when the face used should be
 			 (if dateline face1 face))))
 	       (overlay-put ov 'keymap org-columns-map)
 	       (overlay-put ov 'org-columns-key property)
-	       (overlay-put ov 'org-columns-spec spec)
 	       (overlay-put ov 'org-columns-value original)
 	       (overlay-put ov 'org-columns-value-modified value)
 	       (overlay-put ov 'org-columns-format fmt)
@@ -972,7 +971,7 @@ the current buffer."
        (let ((key (overlay-get ov 'org-columns-key)))
 	 (when (and key (equal key p) (overlay-start ov))
 	   (goto-char (overlay-start ov))
-	   (let* ((spec (overlay-get ov 'org-columns-spec))
+	   (let* ((spec (nth (current-column) org-columns-current-fmt-compiled))
 		  (value
 		   (or (cdr (assoc spec
 				   (get-text-property (line-beginning-position)
