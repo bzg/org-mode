@@ -864,17 +864,18 @@ details."
 (defun org-columns-delete ()
   "Delete the column at point from columns view."
   (interactive)
-  (let* ((n (current-column))
-	 (title (nth 1 (nth n org-columns-current-fmt-compiled))))
-    (when (y-or-n-p
-	   (format "Are you sure you want to remove column \"%s\"? " title))
+  (let ((spec (nth (current-column) org-columns-current-fmt-compiled)))
+    (when (y-or-n-p (format "Are you sure you want to remove column %S? "
+			    (nth 1 spec)))
       (setq org-columns-current-fmt-compiled
-	    (delq (nth n org-columns-current-fmt-compiled)
-		  org-columns-current-fmt-compiled))
+	    (delq spec org-columns-current-fmt-compiled))
       (org-columns-store-format)
-      (org-columns-redo)
-      (if (>= (current-column) (length org-columns-current-fmt-compiled))
-	  (backward-char 1)))))
+      ;; This may leave a now wrong value in a node property.  However
+      ;; updating it may prove counter-intuitive.  See comments in
+      ;; `org-columns-move-right' for details.
+      (let ((org-columns-inhibit-recalculation t)) (org-columns-redo))
+      (when (>= (current-column) (length org-columns-current-fmt-compiled))
+	(backward-char)))))
 
 (defun org-columns-edit-attributes ()
   "Edit the attributes of the current column."
@@ -890,7 +891,7 @@ details."
     (setq width (max 1 (+ width arg)))
     (setcar (nthcdr 2 entry) width)
     (org-columns-store-format)
-    (org-columns-redo)))
+    (let ((org-columns-inhibit-recalculation t)) (org-columns-redo))))
 
 (defun org-columns-narrow (arg)
   "Make the column narrower by ARG characters."
