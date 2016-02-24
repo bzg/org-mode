@@ -22860,11 +22860,7 @@ ELEMENT."
 		(let ((cend (org-element-property :contents-end element)))
 		  (and cend (<= cend pos))))
 	   (if (memq type '(footnote-definition item plain-list))
-	       (let ((last (org-element-at-point)))
-		 (org--get-expected-indentation
-		  last
-		  (memq (org-element-type last)
-			'(footnote-definition item plain-list))))
+	       (org--get-expected-indentation (org-element-at-point) t)
 	     (goto-char start)
 	     (org-get-indentation)))
 	  ;; In any other case, indent like the current line.

@@ -718,20 +718,23 @@
   ;; whole list.
   (should
    (= 4
-      (org-test-with-temp-text "* H\n- A\n  - AA\n"
-	(goto-char (point-max))
+      (org-test-with-temp-text "* H\n- A\n  - AA\n<point>"
 	(let ((org-adapt-indentation t)) (org-indent-line))
 	(org-get-indentation))))
   (should
    (zerop
-    (org-test-with-temp-text "* H\n- A\n  - AA\n\n\n\n"
-      (goto-char (point-max))
+    (org-test-with-temp-text "* H\n- A\n  - AA\n\n\n\n<point>"
       (let ((org-adapt-indentation t)) (org-indent-line))
       (org-get-indentation))))
   (should
    (= 4
-      (org-test-with-temp-text "* H\n- A\n  - \n"
-	(goto-char (point-max))
+      (org-test-with-temp-text "* H\n- A\n  - \n<point>"
+	(let ((org-adapt-indentation t)) (org-indent-line))
+	(org-get-indentation))))
+  (should
+   (= 4
+      (org-test-with-temp-text
+	  "* H\n  - \n    #+BEGIN_SRC emacs-lisp\n  t\n    #+END_SRC\n<point>"
 	(let ((org-adapt-indentation t)) (org-indent-line))
 	(org-get-indentation))))
   ;; Likewise, on a blank line at the end of a footnote definition,
