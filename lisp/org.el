@@ -25048,17 +25048,16 @@ when non-nil, is a regexp matching keywords names."
 		 (if (derived-mode-p 'org-mode)
 		     (org-show-context 'org-goto))))))
 
-(defun org-link-display-format (link)
-  "Replace a link with its the description.
+(defun org-link-display-format (s)
+  "Replace links in string S with their description.
 If there is no description, use the link target."
   (save-match-data
-    (if (string-match org-bracket-link-analytic-regexp link)
-	(replace-match (if (match-end 5)
-			   (match-string 5 link)
-			 (concat (match-string 1 link)
-				 (match-string 3 link)))
-		       nil t link)
-      link)))
+    (replace-regexp-in-string
+     org-bracket-link-analytic-regexp
+     (lambda (m)
+       (if (match-end 5) (match-string 5 m)
+	 (concat (match-string 1 m) (match-string 3 m))))
+     s nil t)))
 
 (defun org-toggle-link-display ()
   "Toggle the literal or descriptive display of links."
