@@ -1969,9 +1969,7 @@ to HASH."
 		      (point-max))))
 	     ;; Check if next element is an anonymous result below
 	     ;; the current block.
-	     ((let* ((next (save-excursion
-			     (skip-chars-forward " \t\n")
-			     (org-element-at-point)))
+	     ((let* ((next (org-element-at-point))
 		     (end (save-excursion
 			    (goto-char
 			     (org-element-property :post-affiliated next))
