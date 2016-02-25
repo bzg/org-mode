@@ -11605,6 +11605,13 @@ on the system \"/user@host:\"."
 			   org-refile-cache))))
       (and set (org-refile-cache-check-set set) set)))))
 
+(defvar org-outline-path-cache nil
+  "Alist between buffer positions and outline paths.
+It value is an alist (POSITION . PATH) where POSITION is the
+buffer position at the beginning of an entry and PATH is a list
+of strings describing the outline path for that entry, in reverse
+order.")
+
 (defun org-refile-get-targets (&optional default-buffer excluded-entries)
   "Produce a table with refile targets."
   (let ((case-fold-search nil)
@@ -11701,13 +11708,6 @@ on the system \"/user@host:\"."
   (while (string-match "/" s)
     (setq s (replace-match "\\" t t s)))
   s)
-
-(defvar org-outline-path-cache nil
-  "Alist between buffer positions and outline paths.
-It value is an alist (POSITION . PATH) where POSITION is the
-buffer position at the beginning of an entry and PATH is a list
-of strings describing the outline path for that entry, in reverse
-order.")
 
 (defun org--get-outline-path-1 (&optional use-cache)
   "Return outline path to current headline.
