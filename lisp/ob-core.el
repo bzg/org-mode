@@ -1962,11 +1962,16 @@ to HASH."
 	     ;; Named results expect but none to be found.
 	     (name)
 	     ;; No possible anonymous results at the very end of
-	     ;; buffer.
-	     ((eobp))
+	     ;; buffer or outside CONTEXT parent.
+	     ((eq (point)
+		  (or (org-element-property
+		       :contents-end (org-element-property :parent context))
+		      (point-max))))
 	     ;; Check if next element is an anonymous result below
 	     ;; the current block.
-	     ((let* ((next (org-element-at-point))
+	     ((let* ((next (save-excursion
+			     (skip-chars-forward " \t\n")
+			     (org-element-at-point)))
 		     (end (save-excursion
 			    (goto-char
 			     (org-element-property :post-affiliated next))

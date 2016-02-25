@@ -1623,6 +1623,10 @@ echo \"$data\"
   (should-not
    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
      (org-babel-where-is-src-block-result)))
+  (should-not
+   (org-test-with-temp-text
+       "- item\n  #+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC\n\n"
+     (org-babel-where-is-src-block-result)))
   ;; When optional argument INSERT is non-nil, add RESULTS keyword
   ;; whenever no RESULTS can be found.
   (should
