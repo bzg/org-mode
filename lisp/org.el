@@ -11610,12 +11610,11 @@ on the system \"/user@host:\"."
   (let ((case-fold-search nil)
 	;; otherwise org confuses "TODO" as a kw and "Todo" as a word
 	(entries (or org-refile-targets '((nil . (:level . 1)))))
-	targets tgs txt re files desc descre fast-path-p level pos0)
+	targets tgs files desc descre)
     (message "Getting targets...")
     (with-current-buffer (or default-buffer (current-buffer))
       (dolist (entry entries)
 	(setq files (car entry) desc (cdr entry))
-	(setq fast-path-p nil)
 	(cond
 	 ((null files) (setq files (list (current-buffer))))
 	 ((eq files 'org-agenda-files)
@@ -11639,7 +11638,6 @@ on the system \"/user@host:\"."
 					    (cdr desc)))
 			       "\\}[ \t]")))
 	 ((eq (car desc) :maxlevel)
-	  (setq fast-path-p t)
 	  (setq descre (concat "^\\*\\{1," (number-to-string
 					    (if org-odd-levels-only
 						(1- (* 2 (cdr desc)))
@@ -11647,58 +11645,53 @@ on the system \"/user@host:\"."
 			       "\\}[ \t]")))
 	 (t (error "Bad refiling target description %s" desc)))
 	(dolist (f files)
-	  (with-current-buffer
-	      (if (bufferp f) f (org-get-agenda-file-buffer f))
+	  (with-current-buffer (if (bufferp f) f (org-get-agenda-file-buffer f))
 	    (or
 	     (setq tgs (org-refile-cache-get (buffer-file-name) descre))
 	     (progn
-	       (if (bufferp f) (setq f (buffer-file-name
-					(buffer-base-buffer f))))
+	       (when (bufferp f)
+		 (setq f (buffer-file-name (buffer-base-buffer f))))
 	       (setq f (and f (expand-file-name f)))
-	       (if (eq org-refile-use-outline-path 'file)
-		   (push (list (file-name-nondirectory f) f nil nil) tgs))
-	       (save-excursion
-		 (save-restriction
-		   (widen)
-		   (goto-char (point-min))
-		   (while (re-search-forward descre nil t)
-		     (goto-char (setq pos0 (point-at-bol)))
-		     (catch 'next
-		       (when org-refile-target-verify-function
-			 (save-match-data
-			   (or (funcall org-refile-target-verify-function)
-			       (throw 'next t))))
-		       (when (and (looking-at org-complex-heading-regexp)
-				  (not (member (match-string 4) excluded-entries))
-				  (match-string 4))
-			 (setq level (org-reduced-level
-				      (- (match-end 1) (match-beginning 1)))
-			       txt (org-link-display-format (match-string 4))
-			       txt (replace-regexp-in-string "\\( *[[0-9]+/?[0-9]*%?]\\)+$" "" txt)
-			       re (format org-complex-heading-regexp-format
-					  (regexp-quote (match-string 4))))
-			 (when org-refile-use-outline-path
-			   (setq txt (mapconcat
-				      'org-protect-slash
-				      (append
-				       (if (eq org-refile-use-outline-path
-					       'file)
-					   (list (file-name-nondirectory
-						  (buffer-file-name
-						   (buffer-base-buffer))))
-					 (if (eq org-refile-use-outline-path
-						 'full-file-path)
-					     (list (buffer-file-name
-						    (buffer-base-buffer)))))
-				       (org-get-outline-path fast-path-p
-							     level txt)
-				       (list txt))
-				      "/")))
-			 (push (list txt f re (org-refile-marker (point)))
-			       tgs)))
-		     (when (= (point) pos0)
-		       ;; verification function has not moved point
-		       (goto-char (point-at-eol))))))))
+	       (when (eq org-refile-use-outline-path 'file)
+		 (push (list (file-name-nondirectory f) f nil nil) tgs))
+	       (org-with-wide-buffer
+		(goto-char (point-min))
+		(setq org-outline-path-cache nil)
+		(while (re-search-forward descre nil t)
+		  (beginning-of-line)
+		  (looking-at org-complex-heading-regexp)
+		  (let ((begin (point))
+			(heading (org-match-string-no-properties 4)))
+		    (unless (or (and
+				 org-refile-target-verify-function
+				 (not
+				  (funcall org-refile-target-verify-function)))
+				(not heading)
+				(member heading excluded-entries))
+		      (let ((re (format org-complex-heading-regexp-format
+					(regexp-quote heading)))
+			    (target
+			     (org-link-display-format
+			      (if (not org-refile-use-outline-path)
+				  (org-match-string-no-properties 4)
+				(mapconcat
+				 #'org-protect-slash
+				 (append
+				  (case org-refile-use-outline-path
+				    (file (list (file-name-nondirectory
+						 (buffer-file-name
+						  (buffer-base-buffer)))))
+				    (full-file-path
+				     (list (buffer-file-name
+					    (buffer-base-buffer))))
+				    (t nil))
+				  (org-get-outline-path t))
+				 "/")))))
+			(push (list target f re (org-refile-marker (point)))
+			      tgs)))
+		    (when (= (point) begin)
+		      ;; Verification function has not moved point.
+		      (end-of-line)))))))
 	    (when org-refile-use-cache
 	      (org-refile-cache-put tgs (buffer-file-name) descre))
 	    (setq targets (append tgs targets))))))
@@ -11710,36 +11703,56 @@ on the system \"/user@host:\"."
     (setq s (replace-match "\\" t t s)))
   s)
 
-(defvar org-olpa (make-vector 20 nil))
+(defvar org-outline-path-cache nil
+  "Alist between buffer positions and outline paths.
+It value is an alist (POSITION . PATH) where POSITION is the
+buffer position at the beginning of an entry and PATH is a list
+of strings describing the outline path for that entry, in reverse
+order.")
 
-(defun org-get-outline-path (&optional fastp level heading)
-  "Return the outline path to the current entry, as a list.
+(defun org--get-outline-path-1 (&optional use-cache)
+  "Return outline path to current headline.
 
-The parameters FASTP, LEVEL, and HEADING are for use by a scanner
-routine which makes outline path derivations for an entire file,
-avoiding backtracing.  Refile target collection makes use of that."
-  (if fastp
-      (progn
-	(if (> level 19)
-	    (error "Outline path failure, more than 19 levels"))
-	(loop for i from level upto 19 do
-	      (aset org-olpa i nil))
-	(prog1
-	    (delq nil (append org-olpa nil))
-	  (aset org-olpa level heading)))
-    (let (rtn case-fold-search)
-      (save-excursion
-	(save-restriction
-	  (widen)
-	  (while (org-up-heading-safe)
-	    (when (looking-at org-complex-heading-regexp)
-	      (push (org-trim
-		     (replace-regexp-in-string
-		      ;; Remove statistical/checkboxes cookies
-		      "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
-		      (org-match-string-no-properties 4)))
-		    rtn)))
-	  rtn)))))
+Outline path is a list of strings, in reverse order.  When
+optional argument USE-CACHE is non-nil, make use of a cache.  See
+`org-get-outline-path' for delails.
+
+Assume buffer is widened."
+  (org-back-to-heading t)
+  (or (and use-cache (cdr (assq (point) org-outline-path-cache)))
+      (let ((p (point))
+	    (heading (progn (looking-at org-complex-heading-regexp)
+			    (org-trim
+			     ;; Remove statistical/checkboxes cookies.
+			     (replace-regexp-in-string
+			      "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
+			      (org-match-string-no-properties 4))))))
+	(if (org-up-heading-safe)
+	    (let ((path (cons heading (org--get-outline-path-1 use-cache))))
+	      (when use-cache
+		(push (cons p path) org-outline-path-cache))
+	      path)
+	  ;; This is a new root node.  Since we assume we are moving
+	  ;; forward, we can drop previous cache so as to limit number
+	  ;; of associations there.
+	  (let ((path (list heading)))
+	    (when use-cache (setq org-outline-path-cache (list (cons p path))))
+	    path)))))
+
+(defun org-get-outline-path (&optional use-cache)
+  "Return the outline path to the current entry.
+
+When optional argument USE-CACHE is non-nil, cache outline paths
+between calls to this function so as to avoid backtracking.  This
+argument is useful when planning to find more than one outline
+path in the same document.  In that case, there are two
+conditions to satisfy:
+  - `org-outline-path-cache' is set to nil before starting the
+    process;
+  - outline paths are computed by increasing buffer positions.
+
+Return value is a list of strings."
+  (org-with-wide-buffer (reverse (org--get-outline-path-1 use-cache))))
 
 (defun org-format-outline-path (path &optional width prefix separator)
   "Format the outline path PATH for display.

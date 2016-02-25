@@ -1311,7 +1311,39 @@
 	    '(org-block-todo-from-children-or-siblings-or-parent)))
        (org-entry-blocked-p)))))
 
+(ert-deftest test-org/get-outline-path ()
+  "Test `org-get-outline-path' specifications."
+  (should
+   (equal '("H")
+	  (org-test-with-temp-text "* H"
+	    (org-get-outline-path))))
+  (should
+   (equal '("H" "S")
+	  (org-test-with-temp-text "* H\n** S<point>"
+	    (org-get-outline-path))))
+  ;; Find path even when point is not on a headline.
+  (should
+   (equal '("H" "S")
+	  (org-test-with-temp-text "* H\n** S\nText<point>"
+	    (org-get-outline-path))))
+  ;; Using cache is transparent to the user.
+  (should
+   (equal '("H" "S")
+	  (org-test-with-temp-text "* H\n** S<point>"
+	    (setq org-outline-path-cache nil)
+	    (org-get-outline-path t))))
+  ;; Do not corrupt cache when finding outline path in distant part of
+  ;; the buffer.
+  (should
+   (equal '("H2" "S2")
+	  (org-test-with-temp-text "* H\n** S\n* H2\n** S2"
+	    (setq org-outline-path-cache nil)
+	    (org-get-outline-path t)
+	    (search-forward "S2")
+	    (org-get-outline-path t)))))
+
 (ert-deftest test-org/format-outline-path ()
+  "Test `org-format-outline-path' specifications."
   (should
    (string= (org-format-outline-path (list "one" "two" "three"))
 	    "one/two/three"))
