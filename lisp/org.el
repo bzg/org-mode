@@ -11672,8 +11672,7 @@ on the system \"/user@host:\"."
 					(regexp-quote heading)))
 			    (target
 			     (org-link-display-format
-			      (if (not org-refile-use-outline-path)
-				  (org-match-string-no-properties 4)
+			      (if (not org-refile-use-outline-path) heading
 				(mapconcat
 				 #'org-protect-slash
 				 (append
