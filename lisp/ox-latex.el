@@ -1033,7 +1033,7 @@ exported.  This format string may contain these elements:
   %s for the formatted source
   %c for the caption
   %f for the float attribute
-  %l for an appropriate label 
+  %l for an appropriate label
   %o for the LaTeX attributes
 
 For example,
