@@ -299,22 +299,23 @@ the ATTACH_DIR property) their own attachment directory."
 (defun org-attach-annex-get-maybe (path)
   "Call git annex get PATH (via shell) if using git annex.
 Signals an error if the file content is not available and it was not retrieved."
-  (when (and (org-attach-use-annex)
-	     (not
-	      (string-equal
-	       "found"
-	       (shell-command-to-string
-		(format "git annex find --format=found --in=here %s"
-			(shell-quote-argument path))))))
-    (let ((should-get
-	   (if (eq org-attach-annex-auto-get 'ask)
-	       (y-or-n-p (format "Run git annex get %s? " path))
-	     org-attach-annex-auto-get)))
-      (if should-get
-	  (progn (message "Running git annex get \"%s\"." path)
-		 (call-process "git" nil nil nil "annex" "get" path))
-	(error "File %s stored in git annex but it is not available, and was not retrieved"
-	       path)))))
+  (let ((path-relative (file-relative-name path)))
+    (when (and (org-attach-use-annex)
+	       (not
+		(string-equal
+		 "found"
+		 (shell-command-to-string
+		  (format "git annex find --format=found --in=here %s"
+			  (shell-quote-argument path-relative))))))
+      (let ((should-get
+	     (if (eq org-attach-annex-auto-get 'ask)
+		 (y-or-n-p (format "Run git annex get %s? " path-relative))
+	       org-attach-annex-auto-get)))
+	(if should-get
+	    (progn (message "Running git annex get \"%s\"." path-relative)
+		   (call-process "git" nil nil nil "annex" "get" path-relative))
+	  (error "File %s stored in git annex but it is not available, and was not retrieved"
+		 path))))))
 
 (defun org-attach-commit ()
   "Commit changes to git if `org-attach-directory' is properly initialized.
