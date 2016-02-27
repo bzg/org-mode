@@ -1280,7 +1280,7 @@ For non-floats, see `org-latex--wrap-label'."
      ((org-string-nw-p caption-from-attr-latex)
       (concat caption-from-attr-latex "\n"))
      ((and (not main) (equal label "")) "")
-     ((not main) (concat label "\n"))
+     ((not main) label)
      ;; Option caption format with short name.
      (t
       (format (if nonfloat "\\captionof{%s}%s{%s%s}\n"
