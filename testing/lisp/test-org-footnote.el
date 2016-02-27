@@ -433,6 +433,18 @@ Text[fn:1][fn:4]
 \[fn:4] Def 4
 "
       (let ((org-footnote-section nil)) (org-footnote-sort))
+      (buffer-string))))
+  ;; Insert un-referenced definitions at the end.
+  (should
+   (equal
+    "Text[fn:9]
+
+\[fn:9] B
+
+\[fn:1] A
+"
+    (org-test-with-temp-text "Text[fn:9]\n\n[fn:1] A\n[fn:9] B"
+      (let ((org-footnote-section nil)) (org-footnote-sort))
       (buffer-string)))))
 
 (ert-deftest test-org-footnote/renumber-fn:N ()
@@ -541,6 +553,13 @@ Text[fn:1][fn:4]
       (let ((org-footnote-section nil)
 	    (org-footnote-fill-after-inline-note-extraction t))
 	(org-footnote-normalize))
+      (buffer-string))))
+  ;; Insert un-referenced definitions at the end.
+  (should
+   (equal
+    "Test[fn:1]\nNext\n\n[fn:1] def\n\n[fn:2] A\n"
+    (org-test-with-temp-text "Test[fn::def]\nNext\n[fn:unref] A"
+      (let ((org-footnote-section nil)) (org-footnote-normalize))
       (buffer-string)))))
 
 

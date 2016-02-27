@@ -817,7 +817,12 @@ to `org-footnote-section'.  Inline definitions are ignored."
 		   (insert "\n"
 			   (or (cdr (assoc label definitions))
 			       (format "[fn:%s] DEFINITION NOT FOUND." label))
-			   "\n")))))))
+			   "\n"))))
+	     ;; Insert un-referenced footnote definitions at the end.
+	     (let ((unreferenced
+		    (cl-remove-if (lambda (d) (member (car d) inserted))
+				  definitions)))
+	       (dolist (d unreferenced) (insert "\n" (cdr d) "\n"))))))
       ;; Clear dangling markers in the buffer.
       (dolist (r references) (set-marker (nth 1 r) nil)))))
 
@@ -896,7 +901,17 @@ to `org-footnote-section'.  Inline definitions are ignored."
 			      (t
 			       (replace-regexp-in-string
 				"\\`\\[fn:\\(.*?\\)\\]" new stored nil nil 1)))
-			     "\n"))))))))
+			     "\n")))))
+	     ;; Insert un-referenced footnote definitions at the end.
+	     (let ((unreferenced
+		    (cl-remove-if (lambda (d) (member (car d) inserted))
+				  definitions)))
+	       (dolist (d unreferenced)
+		 (insert "\n"
+			 (replace-regexp-in-string org-footnote-definition-re
+						   (format "[fn:%d]" (incf n))
+						   (cdr d))
+			 "\n"))))))
       ;; Clear dangling markers.
       (dolist (r references) (set-marker (nth 1 r) nil)))))
 
