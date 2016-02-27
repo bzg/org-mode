@@ -1400,7 +1400,7 @@ PARAMS is a property list of parameters:
 	      (setq view-file (match-string-no-properties 1 id-string))
 	      (unless (file-exists-p view-file)
 		(user-error "No such file: %S" id-string)))
-	     ((and (let idpos (org-find-entry-with-id id)) idpos)
+	     ((and (let idpos (org-find-entry-with-id id)) (guard idpos))
 	      (setq view-pos idpos))
 	     ((let `(,filename . ,position) (org-id-find id))
 	      (setq view-file filename)

@@ -1201,6 +1201,48 @@
 ** H2.1"
       (let ((org-columns-default-format "%ITEM")) (org-update-dblock))
       (buffer-substring-no-properties (point) (outline-next-heading)))))
+  (should
+   (equal
+    "#+BEGIN: columnview :hlines 1 :id \"id\"
+| ITEM |
+|------|
+| H2   |
+| H2.1 |
+#+END:
+"
+    (org-test-with-temp-text
+	"
+* H
+<point>#+BEGIN: columnview :hlines 1 :id \"id\"
+#+END:
+* H2
+:PROPERTIES:
+:ID: id
+:END:
+** H2.1"
+      (let ((org-columns-default-format "%ITEM")) (org-update-dblock))
+      (buffer-substring-no-properties (point) (outline-next-heading)))))
+  (should
+   (equal
+    "#+BEGIN: columnview :hlines 1 :id id
+| ITEM |
+|------|
+| H2   |
+| H2.1 |
+#+END:
+"
+    (org-test-with-temp-text
+	"
+* H
+<point>#+BEGIN: columnview :hlines 1 :id id
+#+END:
+* H2
+:PROPERTIES:
+:ID: id
+:END:
+** H2.1"
+      (let ((org-columns-default-format "%ITEM")) (org-update-dblock))
+      (buffer-substring-no-properties (point) (outline-next-heading)))))
   ;; Test `:indent' parameter.
   (should
    (equal
