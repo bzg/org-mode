@@ -908,9 +908,10 @@ to `org-footnote-section'.  Inline definitions are ignored."
 				  definitions)))
 	       (dolist (d unreferenced)
 		 (insert "\n"
-			 (replace-regexp-in-string org-footnote-definition-re
-						   (format "[fn:%d]" (incf n))
-						   (cdr d))
+			 (replace-regexp-in-string
+			  org-footnote-definition-re
+			  (format "[fn:%d]" (cl-incf n))
+			  (cdr d))
 			 "\n"))))))
       ;; Clear dangling markers.
       (dolist (r references) (set-marker (nth 1 r) nil)))))
