@@ -1340,7 +1340,12 @@
 	    (setq org-outline-path-cache nil)
 	    (org-get-outline-path t)
 	    (search-forward "S2")
-	    (org-get-outline-path t)))))
+	    (org-get-outline-path t))))
+  ;; Do not choke on empty headlines.
+  (should
+   (org-test-with-temp-text "* "
+     (setq org-outline-path-cache nil)
+     (org-get-outline-path t))))
 
 (ert-deftest test-org/format-outline-path ()
   "Test `org-format-outline-path' specifications."

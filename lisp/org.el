@@ -11714,18 +11714,20 @@ order.")
 
 Outline path is a list of strings, in reverse order.  When
 optional argument USE-CACHE is non-nil, make use of a cache.  See
-`org-get-outline-path' for delails.
+`org-get-outline-path' for details.
 
 Assume buffer is widened."
   (org-back-to-heading t)
   (or (and use-cache (cdr (assq (point) org-outline-path-cache)))
       (let ((p (point))
-	    (heading (progn (looking-at org-complex-heading-regexp)
-			    (org-trim
-			     ;; Remove statistical/checkboxes cookies.
-			     (replace-regexp-in-string
-			      "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
-			      (org-match-string-no-properties 4))))))
+	    (heading (progn
+		       (looking-at org-complex-heading-regexp)
+		       (if (not (match-end 4)) ""
+			 ;; Remove statistics cookies.
+			 (org-trim
+			  (replace-regexp-in-string
+			   "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
+			   (org-match-string-no-properties 4)))))))
 	(if (org-up-heading-safe)
 	    (let ((path (cons heading (org--get-outline-path-1 use-cache))))
 	      (when use-cache
