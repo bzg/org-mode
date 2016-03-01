@@ -1410,39 +1410,67 @@
 
 (ert-deftest test-org/get-outline-path ()
   "Test `org-get-outline-path' specifications."
+  ;; Top-level headlines have no outline path.
+  (should-not
+   (org-test-with-temp-text "* H"
+     (org-get-outline-path)))
+  ;; Otherwise, outline path is the path leading to the headline.
   (should
    (equal '("H")
-	  (org-test-with-temp-text "* H"
-	    (org-get-outline-path))))
-  (should
-   (equal '("H" "S")
 	  (org-test-with-temp-text "* H\n** S<point>"
 	    (org-get-outline-path))))
   ;; Find path even when point is not on a headline.
   (should
-   (equal '("H" "S")
+   (equal '("H")
 	  (org-test-with-temp-text "* H\n** S\nText<point>"
 	    (org-get-outline-path))))
-  ;; Using cache is transparent to the user.
+  ;; TODO keywords, tags and statistics cookies are ignored.
+  (should
+   (equal '("H")
+	  (org-test-with-temp-text "* TODO H [0/1] :tag:\n** S<point>"
+	    (org-get-outline-path))))
+  ;; Links are replaced with their description or their path.
+  (should
+   (equal '("Org")
+	  (org-test-with-temp-text
+	      "* [[http://orgmode.org][Org]]\n** S<point>"
+	    (org-get-outline-path))))
+  (should
+   (equal '("http://orgmode.org")
+	  (org-test-with-temp-text
+	      "* [[http://orgmode.org]]\n** S<point>"
+	    (org-get-outline-path))))
+  ;; When WITH-SELF is non-nil, include current heading.
+  (should
+   (equal '("H")
+	  (org-test-with-temp-text "* H"
+	    (org-get-outline-path t))))
   (should
    (equal '("H" "S")
+	  (org-test-with-temp-text "* H\n** S\nText<point>"
+	    (org-get-outline-path t))))
+  ;; Using cache is transparent to the user.
+  (should
+   (equal '("H")
 	  (org-test-with-temp-text "* H\n** S<point>"
 	    (setq org-outline-path-cache nil)
-	    (org-get-outline-path t))))
+	    (org-get-outline-path nil t))))
   ;; Do not corrupt cache when finding outline path in distant part of
   ;; the buffer.
   (should
-   (equal '("H2" "S2")
-	  (org-test-with-temp-text "* H\n** S\n* H2\n** S2"
+   (equal '("H2")
+	  (org-test-with-temp-text "* H\n** S<point>\n* H2\n** S2"
 	    (setq org-outline-path-cache nil)
-	    (org-get-outline-path t)
+	    (org-get-outline-path nil t)
 	    (search-forward "S2")
-	    (org-get-outline-path t))))
+	    (org-get-outline-path nil t))))
   ;; Do not choke on empty headlines.
   (should
-   (org-test-with-temp-text "* "
-     (setq org-outline-path-cache nil)
-     (org-get-outline-path t))))
+   (org-test-with-temp-text "* H\n** <point>"
+     (org-get-outline-path)))
+  (should
+   (org-test-with-temp-text "* \n** H<point>"
+     (org-get-outline-path))))
 
 (ert-deftest test-org/format-outline-path ()
   "Test `org-format-outline-path' specifications."

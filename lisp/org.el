@@ -11564,21 +11564,20 @@ order.")
 		      (let ((re (format org-complex-heading-regexp-format
 					(regexp-quote heading)))
 			    (target
-			     (org-link-display-format
-			      (if (not org-refile-use-outline-path) heading
-				(mapconcat
-				 #'org-protect-slash
-				 (append
-				  (pcase org-refile-use-outline-path
-				    (`file (list (file-name-nondirectory
-						  (buffer-file-name
-						   (buffer-base-buffer)))))
-				    (`full-file-path
-				     (list (buffer-file-name
-					    (buffer-base-buffer))))
-				    (_ nil))
-				  (org-get-outline-path t))
-				 "/")))))
+			     (if (not org-refile-use-outline-path) heading
+			       (mapconcat
+				#'org-protect-slash
+				(append
+				 (pcase org-refile-use-outline-path
+				   (`file (list (file-name-nondirectory
+						 (buffer-file-name
+						  (buffer-base-buffer)))))
+				   (`full-file-path
+				    (list (buffer-file-name
+					   (buffer-base-buffer))))
+				   (_ nil))
+				 (org-get-outline-path t t))
+				"/"))))
 			(push (list target f re (org-refile-marker (point)))
 			      tgs)))
 		    (when (= (point) begin)
@@ -11602,8 +11601,7 @@ Outline path is a list of strings, in reverse order.  When
 optional argument USE-CACHE is non-nil, make use of a cache.  See
 `org-get-outline-path' for details.
 
-Assume buffer is widened."
-  (org-back-to-heading t)
+Assume buffer is widened and point is on a headline."
   (or (and use-cache (cdr (assq (point) org-outline-path-cache)))
       (let ((p (point))
 	    (heading (progn
@@ -11611,9 +11609,10 @@ Assume buffer is widened."
 		       (if (not (match-end 4)) ""
 			 ;; Remove statistics cookies.
 			 (org-trim
-			  (replace-regexp-in-string
-			   "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
-			   (org-match-string-no-properties 4)))))))
+			  (org-link-display-format
+			   (replace-regexp-in-string
+			    "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
+			    (org-match-string-no-properties 4))))))))
 	(if (org-up-heading-safe)
 	    (let ((path (cons heading (org--get-outline-path-1 use-cache))))
 	      (when use-cache
@@ -11626,8 +11625,15 @@ Assume buffer is widened."
 	    (when use-cache (setq org-outline-path-cache (list (cons p path))))
 	    path)))))
 
-(defun org-get-outline-path (&optional use-cache)
+(defun org-get-outline-path (&optional with-self use-cache)
   "Return the outline path to the current entry.
+
+An outline path is a list of ancestors for current headline, as
+a list of strings.  Statistics cookies are removed and links are
+replaced with their description, if any, or their path otherwise.
+
+When optional argument WITH-SELF is non-nil, the path also
+includes the current headline.
 
 When optional argument USE-CACHE is non-nil, cache outline paths
 between calls to this function so as to avoid backtracking.  This
@@ -11636,10 +11642,11 @@ path in the same document.  In that case, there are two
 conditions to satisfy:
   - `org-outline-path-cache' is set to nil before starting the
     process;
-  - outline paths are computed by increasing buffer positions.
-
-Return value is a list of strings."
-  (org-with-wide-buffer (reverse (org--get-outline-path-1 use-cache))))
+  - outline paths are computed by increasing buffer positions."
+  (org-with-wide-buffer
+   (and (or (and with-self (org-back-to-heading t))
+	    (org-up-heading-safe))
+	(reverse (org--get-outline-path-1 use-cache)))))
 
 (defun org-format-outline-path (path &optional width prefix separator)
   "Format the outline path PATH for display.
