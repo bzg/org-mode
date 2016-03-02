@@ -17333,8 +17333,7 @@ user function argument order change dependent on argument order."
 
 (defun org-eval-in-calendar (form &optional keepdate)
   "Eval FORM in the calendar window and return to current window.
-When KEEPDATE is non-nil, update `org-ans2' from the cursor date,
-otherwise stick to the current value of `org-ans2'."
+Unless KEEPDATE is non-nil, update `org-ans2' to the cursor date."
   (let ((sf (selected-frame))
 	(sw (selected-window)))
     (select-window (get-buffer-window "*Calendar*" t))
