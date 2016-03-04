@@ -411,7 +411,7 @@ buffer name, as the title.  Instead, simply ignore the title.
 *** Default bindings of =C-c C-n= and =C-c C-p= changed
 
 The key sequences =C-c C-n= and =C-c C-p= are now bound to
-~org-next-visible-heading~ and ~org-next-visible-heading~ respectively,
+~org-next-visible-heading~ and ~org-previous-visible-heading~ respectively,
 rather than the =outline-mode= versions of these functions.  The Org
 version of these functions skips over inline tasks (and even-level
 headlines when ~org-odd-levels-only~ is set).
