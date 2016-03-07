@@ -4315,29 +4315,55 @@ has type \"radio\"."
 ;;;; For References
 ;;
 ;; `org-export-get-reference' associate a unique reference for any
-;; object or element.
+;; object or element.  It uses `org-export-new-reference' and
+;; `org-export-format-reference' to, respectively, generate new
+;; internal references and turn them into a string suitable for
+;; output.
 ;;
 ;; `org-export-get-ordinal' associates a sequence number to any object
 ;; or element.
 
+(defun org-export-new-reference (references)
+  "Return a unique reference, among REFERENCES.
+REFERENCES is an alist whose values are in-use references, as
+numbers.  Returns a number, which is the internal representation
+of a reference.  See also `org-export-format-reference'."
+  ;; Generate random 7 digits hexadecimal numbers.  Collisions
+  ;; increase exponentially with the numbers of references.  However,
+  ;; the odds for encountering at least one collision with 1000 active
+  ;; references in the same document are roughly 0.2%, so this
+  ;; shouldn't be the bottleneck.
+  (let ((new (random #x10000000)))
+    (while (rassq new references) (setq new (random #x10000000)))
+    new))
+
+(defun org-export-format-reference (reference)
+  "Format REFERENCE into a string.
+REFERENCE is a number representing a reference, as returned by
+`org-export-new-reference', which see."
+  (format "org%x" reference))
+
 (defun org-export-get-reference (datum info)
   "Return a unique reference for DATUM, as a string.
+
 DATUM is either an element or an object.  INFO is the current
-export state, as a plist.  Returned reference consists of
-alphanumeric characters only."
-  (let ((type (org-element-type datum))
-	(cache (or (plist-get info :internal-references)
-		   (let ((h (make-hash-table :test #'eq)))
-		     (plist-put info :internal-references h)
-		     h))))
-    (or (gethash datum cache)
-	(puthash datum
-		 (format "org%s%d"
-			 (if type
-			     (replace-regexp-in-string "-" "" (symbol-name type))
-			   "secondarystring")
-			 (cl-incf (gethash type cache 0)))
-		 cache))))
+export state, as a plist.
+
+This functions checks `:crossrefs' property in INFO for search
+cells matching DATUM before creating a new reference.  Returned
+reference consists of alphanumeric characters only."
+  (let ((cache (plist-get info :internal-references)))
+    (or (car (rassq datum cache))
+	(let* ((new (org-export-new-reference cache))
+	       (search-cells (org-export-search-cells datum))
+	       (reference-string (org-export-format-reference new)))
+	  ;; Cache contains both data already associated to
+	  ;; a reference and in-use internal references, so as to make
+	  ;; unique references.
+	  (push (cons search-cells new) cache)
+	  (push (cons reference-string datum) cache)
+	  (plist-put info :internal-references cache)
+	  reference-string))))
 
 (defun org-export-get-ordinal (element info &optional types predicate)
   "Return ordinal number of an element or object.

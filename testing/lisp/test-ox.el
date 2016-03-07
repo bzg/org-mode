@@ -2873,6 +2873,28 @@ Another text. (ref:text)
   (should (equal (org-export-file-uri "~/file.org")
 		 (concat "file://" (expand-file-name "~/file.org")))))
 
+(ert-deftest test-org-export/get-reference ()
+  "Test `org-export-get-reference' specifications."
+  (should
+   (org-test-with-parsed-data "* Headline"
+     (org-export-get-reference (org-element-map tree 'headline #'identity nil t)
+			       info)))
+  ;; For a given element always return the same reference.
+  (should
+   (org-test-with-parsed-data "* Headline"
+     (let ((headline (org-element-map tree 'headline #'identity nil t)))
+       (equal (org-export-get-reference headline info)
+	      (org-export-get-reference headline info)))))
+  ;; Use search cells defined in `:crossrefs'.
+  (should
+   (equal "org1"
+	  (org-test-with-parsed-data "* Headline"
+	    (let* ((headline (org-element-map tree 'headline #'identity nil t))
+		   (search-cell (car (org-export-search-cells headline))))
+	      (setq info
+		    (plist-put info :crossrefs (list (cons search-cell 1))))
+	      (org-export-get-reference headline info))))))
+
 
 
 ;;; Src-block and example-block
