@@ -1,11 +1,11 @@
-;;; org-link-edit.el --- Slurp and barf with Org links
+;;; org-link-edit.el --- Slurp and barf with Org links  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2015 Kyle Meyer <kyle@kyleam.com>
 
 ;; Author:  Kyle Meyer <kyle@kyleam.com>
 ;; URL: https://github.com/kyleam/org-link-edit
 ;; Keywords: convenience
-;; Version: 1.0.0
+;; Version: 1.0.1
 ;; Package-Requires: ((cl-lib "0.5") (org "8.2"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -84,14 +84,14 @@ The list includes
        ((looking-at org-bracket-link-regexp)
         (list (match-beginning 0)
               (match-end 0)
-              (match-string-no-properties 1)
+              (org-link-unescape (match-string-no-properties 1))
               (or (and (match-end 3)
                        (match-string-no-properties 3))
                   "")))
        ((looking-at org-plain-link-re)
         (list (match-beginning 0)
               (match-end 0)
-              (match-string-no-properties 0)
+              (org-link-unescape (match-string-no-properties 0))
               nil))
        (t
         (error "What am I looking at?"))))))
