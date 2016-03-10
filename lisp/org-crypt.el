@@ -171,28 +171,28 @@ See `org-crypt-disable-auto-save'."
   "Encrypt the content of the current headline."
   (interactive)
   (require 'epg)
-  (save-excursion
-    (org-back-to-heading t)
-    (set (make-local-variable 'epg-context) (epg-make-context nil t t))
-    (let ((start-heading (point)))
-      (forward-line)
-      (when (not (looking-at "-----BEGIN PGP MESSAGE-----"))
-        (let ((folded (outline-invisible-p))
-              (crypt-key (org-crypt-key-for-heading))
-              (beg (point))
-              end encrypted-text)
-          (goto-char start-heading)
-          (org-end-of-subtree t t)
-          (org-back-over-empty-lines)
-          (setq end (point)
-                encrypted-text
-		(org-encrypt-string (buffer-substring beg end) crypt-key))
-          (delete-region beg end)
-          (insert encrypted-text)
-          (when folded
-            (goto-char start-heading)
-            (outline-hide-subtree))
-          nil)))))
+  (org-with-wide-buffer
+   (org-back-to-heading t)
+   (set (make-local-variable 'epg-context) (epg-make-context nil t t))
+   (let ((start-heading (point)))
+     (org-end-of-meta-data)
+     (unless (looking-at "-----BEGIN PGP MESSAGE-----")
+       (let ((folded (outline-invisible-p))
+	     (crypt-key (org-crypt-key-for-heading))
+	     (beg (point))
+	     end encrypted-text)
+	 (goto-char start-heading)
+	 (org-end-of-subtree t t)
+	 (org-back-over-empty-lines)
+	 (setq end (point)
+	       encrypted-text
+	       (org-encrypt-string (buffer-substring beg end) crypt-key))
+	 (delete-region beg end)
+	 (insert encrypted-text)
+	 (when folded
+	   (goto-char start-heading)
+	   (outline-hide-subtree))
+	 nil)))))
 
 (defun org-decrypt-entry ()
   "Decrypt the content of the current headline."
