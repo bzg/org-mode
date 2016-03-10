@@ -81,6 +81,37 @@
 				    nodename-or-index)))))
     (user-error "Could not open: %s" name)))
 
+(defconst org-info-emacs-documents
+  '("ada-mode" "auth" "autotype" "bovine" "calc" "ccmode" "cl" "dbus" "dired-x"
+    "ebrowse" "ede" "ediff" "edt" "efaq-w32" "efaq" "eieio" "eintr" "elisp"
+    "emacs-gnutls" "emacs-mime" "emacs" "epa" "erc" "ert" "eshell" "eudc" "eww"
+    "flymake" "forms" "gnus" "htmlfontify" "idlwave" "ido" "info" "mairix-el"
+    "message" "mh-e" "newsticker" "nxml-mode" "octave-mode" "org" "pcl-cvs"
+    "pgg" "rcirc" "reftex" "remember" "sasl" "sc" "semantic" "ses" "sieve"
+    "smtpmail" "speedbar" "srecode" "todo-mode" "tramp" "url" "vip" "viper"
+    "widget" "wisent" "woman")
+  "List of emacs documents available.
+Taken from <http://www.gnu.org/software/emacs/manual/html_mono/.>")
+
+(defconst org-info-other-documents
+  '(("libc" . "http://www.gnu.org/software/libc/manual/html_mono/libc.html")
+    ("make" . "http://www.gnu.org/software/make/manual/make.html"))
+  "Alist of documents generated from texinfo source.
+
+When converting info links to html, links to any one of these manuals are
+converted to use these URL's.")
+
+(defun org-info-map-html-url (filename)
+  "Given info FILENAME, either return it (plus '.html' suffix added) or convert
+it to URL pointing to the official page on internet, e.g., use gnu.org for all
+emacs related documents. See `org-info-official-gnu-document' and
+`org-info-other-documents' for details."
+  (if (member filename org-info-emacs-documents)
+      (format "http://www.gnu.org/software/emacs/manual/html_mono/%s.html"
+              filename)
+    (let ((url (cdr (assoc filename org-info-other-documents))))
+      (or url (concat filename ".html")))))
+
 (defun org-info-export (path desc format)
   "Export an info link.
 See `org-add-link-type' for details about PATH, DESC and FORMAT."
@@ -89,8 +120,8 @@ See `org-add-link-type' for details about PATH, DESC and FORMAT."
 	(string-match "\\(.*\\)" path))
     (let ((filename (match-string 1 path))
 	  (node (or (match-string 2 path) "Top")))
-      (format "<a href=\"%s.html#%s\">%s</a>"
-	      filename
+      (format "<a href=\"%s#%s\">%s</a>"
+	      (org-info-map-html-url filename)
 	      (replace-regexp-in-string " " "-" node)
 	      (or desc path)))))
 

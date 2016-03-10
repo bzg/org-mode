@@ -317,6 +317,20 @@ called with 6 parameters.
 *** =ITEM= special property returns headline without stars
 *** Rename ~org-insert-columns-dblock~ into ~org-columns-insert-dblock~
 The previous name is, for the time being, kept as an obsolete alias.
+*** Function ~org-info-export~ changes.
+HTML links created from certain info links now point to =gnu.org= URL's rather
+than just to local files. For example info links such as =info:emacs#List
+Buffers= used to be converted to HTML links like this:
+
+: <a href="emacs.html#List-Buffers">emacs#List Buffers</a>
+
+where local file =emacs.html= is referenced.
+For most folks this file does not exist.
+Thus the new behavior is to generate this HTML link instead:
+
+: <a href="http://www.gnu.org/software/emacs/manual/html_mono/emacs.html#List-Buffers">emacs#List Buffers</a>
+
+All emacs related info links are similarly translated plus few other =gnu.org= manuals.
 * Version 8.3
 
 ** Incompatible changes
