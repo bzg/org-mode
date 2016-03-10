@@ -3069,6 +3069,21 @@ Another text. (ref:text)
 	    (org-test-with-parsed-data "#+CAPTION: \"$x$\"\nParagraph"
 	      (org-element-map tree 'plain-text
 		(lambda (s) (org-export-activate-smart-quotes s :html info))
+		info nil nil t)))))
+  ;; Smart quotes within objects.
+  (should
+   (equal '("&ldquo;foo&rdquo;")
+	  (let ((org-export-default-language "en"))
+	    (org-test-with-parsed-data "*\"foo\"*"
+	      (org-element-map tree 'plain-text
+		(lambda (s) (org-export-activate-smart-quotes s :html info))
+		info nil nil t)))))
+  (should
+   (equal '("&ldquo;foo&rdquo;")
+	  (let ((org-export-default-language "en"))
+	    (org-test-with-parsed-data "| \"foo\" |"
+	      (org-element-map tree 'plain-text
+		(lambda (s) (org-export-activate-smart-quotes s :html info))
 		info nil nil t))))))
 
 
