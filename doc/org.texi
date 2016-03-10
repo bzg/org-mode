@@ -14505,18 +14505,29 @@ however, override everything.
 @cindex links, publishing
 
 To create a link from one Org file to another, you would use something like
-@samp{[[file:foo.org][The foo]]} or simply @samp{file:foo.org.}
-(@pxref{Hyperlinks}).  When published, this link becomes a link to
-@file{foo.html}.  You can thus interlink the pages of your "org web" project
-and the links will work as expected when you publish them to HTML@.  If you
-also publish the Org source file and want to link to it, use an @code{http:}
-link instead of a @code{file:} link, because @code{file:} links are converted
-to link to the corresponding @file{html} file.
+@samp{[[file:foo.org][The foo]]} or simply @samp{file:foo.org}
+(@pxref{External links}).  When published, this link becomes a link to
+@file{foo.html}.  You can thus interlink the pages of your ``org web''
+project and the links will work as expected when you publish them to HTML.
+If you also publish the Org source file and want to link to it, use an
+@code{http:} link instead of a @code{file:} link, because @code{file:} links
+are converted to link to the corresponding @file{html} file.
 
 You may also link to related files, such as images.  Provided you are careful
 with relative file names, and provided you have also configured Org to upload
 the related files, these links will work too.  See @ref{Complex example}, for
 an example of this usage.
+
+Eventually, links between published documents can contain some search options
+(@pxref{Search options}), which will be resolved to the appropriate location
+in the linked file.  For example, once published to HTML, the following links
+all point to a dedicated anchor in @file{foo.html}.
+
+@example
+[[file:foo.org::*heading]]
+[[file:foo.org::#custom-id]]
+[[file:foo.org::target]]
+@end example
 
 @node Sitemap
 @subsection Generating a sitemap
