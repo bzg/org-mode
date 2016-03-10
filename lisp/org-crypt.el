@@ -199,43 +199,43 @@ See `org-crypt-disable-auto-save'."
   (interactive)
   (require 'epg)
   (unless (org-before-first-heading-p)
-    (save-excursion
-      (org-back-to-heading t)
-      (let ((heading-point (point))
-	    (heading-was-invisible-p
-	     (save-excursion
-	       (outline-end-of-heading)
-	       (outline-invisible-p))))
-	(forward-line)
-	(when (looking-at "-----BEGIN PGP MESSAGE-----")
-	  (org-crypt-check-auto-save)
-          (set (make-local-variable 'epg-context) (epg-make-context nil t t))
-	  (let* ((end (save-excursion
-			(search-forward "-----END PGP MESSAGE-----")
-			(forward-line)
-			(point)))
-		 (encrypted-text (buffer-substring-no-properties (point) end))
-		 (decrypted-text
-		  (decode-coding-string
-		   (epg-decrypt-string
-		    epg-context
-		    encrypted-text)
-		   'utf-8)))
-	    ;; Delete region starting just before point, because the
-	    ;; outline property starts at the \n of the heading.
-	    (delete-region (1- (point)) end)
-	    ;; Store a checksum of the decrypted and the encrypted
-	    ;; text value.  This allows reusing the same encrypted text
-	    ;; if the text does not change, and therefore avoid a
-	    ;; re-encryption process.
-	    (insert "\n" (propertize decrypted-text
-				     'org-crypt-checksum (sha1 decrypted-text)
-				     'org-crypt-key (org-crypt-key-for-heading)
-				     'org-crypt-text encrypted-text))
-	    (when heading-was-invisible-p
-	      (goto-char heading-point)
-	      (org-flag-subtree t))
-	    nil))))))
+    (org-with-wide-buffer
+     (org-back-to-heading t)
+     (let ((heading-point (point))
+	   (heading-was-invisible-p
+	    (save-excursion
+	      (outline-end-of-heading)
+	      (outline-invisible-p))))
+       (org-end-of-meta-data)
+       (when (looking-at "-----BEGIN PGP MESSAGE-----")
+	 (org-crypt-check-auto-save)
+	 (set (make-local-variable 'epg-context) (epg-make-context nil t t))
+	 (let* ((end (save-excursion
+		       (search-forward "-----END PGP MESSAGE-----")
+		       (forward-line)
+		       (point)))
+		(encrypted-text (buffer-substring-no-properties (point) end))
+		(decrypted-text
+		 (decode-coding-string
+		  (epg-decrypt-string
+		   epg-context
+		   encrypted-text)
+		  'utf-8)))
+	   ;; Delete region starting just before point, because the
+	   ;; outline property starts at the \n of the heading.
+	   (delete-region (1- (point)) end)
+	   ;; Store a checksum of the decrypted and the encrypted
+	   ;; text value.  This allows reusing the same encrypted text
+	   ;; if the text does not change, and therefore avoid a
+	   ;; re-encryption process.
+	   (insert "\n" (propertize decrypted-text
+				    'org-crypt-checksum (sha1 decrypted-text)
+				    'org-crypt-key (org-crypt-key-for-heading)
+				    'org-crypt-text encrypted-text))
+	   (when heading-was-invisible-p
+	     (goto-char heading-point)
+	     (org-flag-subtree t))
+	   nil))))))
 
 (defun org-encrypt-entries ()
   "Encrypt all top-level entries in the current buffer."
