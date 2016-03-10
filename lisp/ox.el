@@ -5200,7 +5200,11 @@ INFO is the current export state, as a plist."
 	 (value (gethash parent cache 'missing-data)))
     (if (not (eq value 'missing-data)) (cdr (assq s value))
       (let (level1-open full-status)
-	(org-element-map parent 'plain-text
+	(org-element-map
+	    (let ((secondary (org-element-secondary-p s)))
+	      (if secondary (org-element-property secondary parent)
+		(org-element-contents parent)))
+	    'plain-text
 	  (lambda (text)
 	    (let ((start 0) current-status)
 	      (while (setq start (string-match "['\"]" text start))
