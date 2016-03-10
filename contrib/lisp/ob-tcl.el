@@ -71,7 +71,7 @@ This function is called by `org-babel-execute-src-block'."
      (format "set %s %s"
 	     (car pair)
 	     (org-babel-tcl-var-to-tcl (cdr pair))))
-   (mapcar #'cdr (org-babel-get-header params :var))))
+   (org-babel--get-vars params)))
 
 ;; helper functions
 

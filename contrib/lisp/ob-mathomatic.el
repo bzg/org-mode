@@ -49,37 +49,37 @@
 
 (defun org-babel-mathomatic-expand (body params)
   "Expand a block of Mathomatic code according to its header arguments."
-  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
-     (mapconcat 'identity
-		(list
-		 ;; graphic output
-		 (let ((graphic-file (org-babel-mathomatic-graphical-output-file params)))
-		   (if graphic-file
-		       (cond
-			((string-match ".\.eps$" graphic-file)
-			 (format ;; Need to add command to send to file.
-			  "set plot set terminal postscript eps\\;set output %S "
-			  graphic-file))
-			((string-match ".\.ps$" graphic-file)
-			 (format ;; Need to add command to send to file.
-			  "set plot set terminal postscript\\;set output %S "
-			  graphic-file))
+  (let ((vars (org-babel--get-vars params)))
+    (mapconcat 'identity
+	       (list
+		;; graphic output
+		(let ((graphic-file (org-babel-mathomatic-graphical-output-file params)))
+		  (if graphic-file
+		      (cond
+		       ((string-match ".\.eps$" graphic-file)
+			(format ;; Need to add command to send to file.
+			 "set plot set terminal postscript eps\\;set output %S "
+			 graphic-file))
+		       ((string-match ".\.ps$" graphic-file)
+			(format ;; Need to add command to send to file.
+			 "set plot set terminal postscript\\;set output %S "
+			 graphic-file))
 
-			((string-match ".\.pic$" graphic-file)
-			 (format ;; Need to add command to send to file.
-			  "set plot set terminal gpic\\;set output %S "
-			  graphic-file))
-			(t
-			 (format ;; Need to add command to send to file.
-			  "set plot set terminal png\\;set output %S "
-			  graphic-file)))
-		     ""))
-		 ;; variables
-		 (mapconcat 'org-babel-mathomatic-var-to-mathomatic vars "\n")
-		 ;; body
-		 body
-		 "")
-		"\n")))
+		       ((string-match ".\.pic$" graphic-file)
+			(format ;; Need to add command to send to file.
+			 "set plot set terminal gpic\\;set output %S "
+			 graphic-file))
+		       (t
+			(format ;; Need to add command to send to file.
+			 "set plot set terminal png\\;set output %S "
+			 graphic-file)))
+		    ""))
+		;; variables
+		(mapconcat 'org-babel-mathomatic-var-to-mathomatic vars "\n")
+		;; body
+		body
+		"")
+	       "\n")))
 
 (defun org-babel-execute:mathomatic (body params)
   "Execute a block of Mathomatic entries with org-babel.  This function is

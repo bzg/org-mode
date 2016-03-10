@@ -197,7 +197,7 @@ StartOzServer.oz is located.")
     result))
 
 (defun org-babel-expand-body:oz (body params)
-  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
+  (let ((vars (org-babel--get-vars params)))
     (if vars
 	;; prepend code to define all arguments passed to the code block
 	(let ((var-string (mapcar (lambda (pair)

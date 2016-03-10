@@ -31,7 +31,7 @@
 
 (defun org-babel-expand-body:mathematica (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
+  (let ((vars (org-babel--get-vars params)))
     (concat
      (mapconcat ;; define any variables
       (lambda (pair)
