@@ -2850,8 +2850,8 @@ INFO is a plist holding contextual information.  See
 	     ((and home use-abs-url)
 	      (setq raw-path (concat (file-name-as-directory home) raw-path))))
 	    ;; Add search option, if any.  A search option can be
-	    ;; relative to a custom-id, a headline title a name,
-	    ;; a target or a radio-target.
+	    ;; relative to a custom-id, a headline title, a name or
+	    ;; a target.
 	    (let ((option (org-element-property :search-option link)))
 	      (cond ((not option) raw-path)
 		    ;; Since HTML back-end use custom-id value as-is,
