@@ -4354,13 +4354,21 @@ cells matching DATUM before creating a new reference.  Returned
 reference consists of alphanumeric characters only."
   (let ((cache (plist-get info :internal-references)))
     (or (car (rassq datum cache))
-	(let* ((new (org-export-new-reference cache))
-	       (search-cells (org-export-search-cells datum))
+	(let* ((crossrefs (plist-get info :crossrefs))
+	       (cells (org-export-search-cells datum))
+	       ;; If any other published document relies on an
+	       ;; association between a search cell and a reference,
+	       ;; make sure to preserve it.  See
+	       ;; `org-publish-resolve-external-link' for details.
+	       (new (or (cdr (cl-some (lambda (c) (assoc c crossrefs)) cells))
+			(org-export-new-reference cache)))
 	       (reference-string (org-export-format-reference new)))
 	  ;; Cache contains both data already associated to
 	  ;; a reference and in-use internal references, so as to make
 	  ;; unique references.
-	  (push (cons search-cells new) cache)
+	  (dolist (cell cells) (push (cons cell new) cache))
+	  ;; Keep an associated related to DATUM as not every object
+	  ;; and element can be associated to a search cell.
 	  (push (cons reference-string datum) cache)
 	  (plist-put info :internal-references cache)
 	  reference-string))))
