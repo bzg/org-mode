@@ -581,7 +581,10 @@ Return output file name."
 	      ;; want to keep it up-to-date in cache anyway.
 	      (org-combine-plists
 	       plist
-	       `(:filter-final-output
+	       `(:crossrefs
+		 ,(org-publish-cache-get-file-property
+		   (expand-file-name filename) :crossrefs nil t)
+		 :filter-final-output
 		 (org-publish--store-crossrefs
 		  org-publish-collect-index
 		  ,@(plist-get plist :filter-final-output)))))))
@@ -1080,7 +1083,7 @@ This function is meant to be used as a final output filter.  See
   output)
 
 (defun org-publish-resolve-external-link (search file)
-  "Return reference for elements or objects matching SEARCH in FILE.
+  "Return reference for element matching string SEARCH in FILE.
 
 Return value is an internal reference, as a string.
 
@@ -1132,13 +1135,12 @@ If FREE-CACHE, empty the cache."
       (error "Cannot find cache-file name in `org-publish-write-cache-file'"))
     (with-temp-file cache-file
       (let (print-level print-length)
-	(insert "(setq org-publish-cache (make-hash-table :test 'equal :weakness nil :size 100))\n")
+	(insert "(setq org-publish-cache \
+\(make-hash-table :test 'equal :weakness nil :size 100))\n")
 	(maphash (lambda (k v)
 		   (insert
-		    (format (concat "(puthash %S "
-				    (if (or (listp v) (symbolp v))
-					"'" "")
-				    "%S org-publish-cache)\n") k v)))
+		    (format "(puthash %S %s%S org-publish-cache)\n"
+			    k (if (or (listp v) (symbolp v)) "'" "") v)))
 		 org-publish-cache)))
     (when free-cache (org-publish-reset-cache))))
 
@@ -1146,7 +1148,8 @@ If FREE-CACHE, empty the cache."
   "Initialize the projects cache if not initialized yet and return it."
 
   (unless project-name
-    (error "Cannot initialize `org-publish-cache' without projects name in `org-publish-initialize-cache'"))
+    (error "Cannot initialize `org-publish-cache' without projects name in \
+`org-publish-initialize-cache'"))
 
   (unless (file-exists-p org-publish-timestamp-directory)
     (make-directory org-publish-timestamp-directory t))
