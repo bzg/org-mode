@@ -14980,7 +14980,7 @@ If DATA is nil or the empty string, any tags will be removed."
 	  (delete-region (match-beginning 1) (match-end 1))))))
 
 (defun org-align-all-tags ()
-  "Align the tags i all headings."
+  "Align the tags in all headings."
   (interactive)
   (save-excursion
     (or (ignore-errors (org-back-to-heading t))
