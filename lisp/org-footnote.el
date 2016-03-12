@@ -531,10 +531,9 @@ value if point was successfully moved."
     (goto-char (match-end 0))
     (org-show-context 'link-search)
     (when (derived-mode-p 'org-mode)
-      (message
-       (substitute-command-keys
-	"Edit definition and go back with `\\[org-mark-ring-goto]' or, if \
-unique, with `\\[org-ctrl-c-ctrl-c]'.")))
+      (message "%s" (substitute-command-keys
+		     "Edit definition and go back with \
+`\\[org-mark-ring-goto]' or, if unique, with `\\[org-ctrl-c-ctrl-c]'.")))
     t))
 
 (defun org-footnote-goto-previous-reference (label)

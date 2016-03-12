@@ -10107,8 +10107,9 @@ tag and (if present) the flagging note."
 	(replace-match "\n" t t))
       (goto-char (point-min))
       (select-window win)
-      (message (substitute-command-keys "Flagging note pushed to kill ring.  \
-Press \\[org-agenda-show-the-flagging-note] again to remove tag and note")))))
+      (message "%s" (substitute-command-keys "Flagging note pushed to \
+kill ring.  Press \\[org-agenda-show-the-flagging-note] again to remove \
+tag and note")))))
 
 (defun org-agenda-remove-flag (marker)
   "Remove the FLAGGED tag and any flagging note in the entry."

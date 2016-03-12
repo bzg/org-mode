@@ -669,7 +669,7 @@ delegates most of the work to `org-protocol-create'."
   (require 'org-publish)
   (let ((all (or (org-publish-get-project-from-filename buffer-file-name))))
     (if all (org-protocol-create (cdr all))
-      (message "Not in an org-project.  Did mean %s?"
+      (message "Not in an org-project.  Did you mean `%s'?"
                (substitute-command-keys"\\[org-protocol-create]")))))
 
 (defun org-protocol-create (&optional project-plist)

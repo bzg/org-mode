@@ -795,9 +795,8 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
                    (org-add-props x nil
                      'help-echo
                      (concat
-                      (substitute-command-keys
-                       "Clipped table field, use \\[org-table-edit-field] to \
-edit.  Full value is:\n")
+		      "Clipped table field, use `\\[org-table-edit-field]' to \
+edit.  Full value is:\n"
                       (substring-no-properties x)))
                    (let ((l (length x))
                          (f1 (min fmax
@@ -2136,11 +2135,10 @@ If NLAST is a number, only the NLAST fields will actually be summed."
 			   s diff)
 		     (format "%.0f:%02.0f:%02.0f" h m s))))
 	(kill-new sres)
-	(if (org-called-interactively-p 'interactive)
-	    (message "%s"
-		     (substitute-command-keys
-		      (format "Sum of %d items: %-20s     (\\[yank] will insert result into buffer)"
-			      (length numbers) sres))))
+	(when (org-called-interactively-p 'interactive)
+	    (message "%s" (substitute-command-keys
+			   (format "Sum of %d items: %-20s     \
+\(\\[yank] will insert result into buffer)" (length numbers) sres))))
 	sres))))
 
 (defun org-table-get-number-for-summing (s)
@@ -3591,8 +3589,7 @@ Parameters get priority."
       (when (eq org-table-use-standard-references t)
 	(org-table-fedit-toggle-ref-type))
       (org-goto-line startline)
-      (message
-       (substitute-command-keys "\\<org-mode-map>\
+      (message "%s" (substitute-command-keys "\\<org-mode-map>\
 Edit formulas, finish with `\\[org-ctrl-c-ctrl-c]' or `\\[org-edit-special]'.  \
 See menu for more commands.")))))
 
