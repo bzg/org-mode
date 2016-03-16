@@ -1198,7 +1198,24 @@ Some other text
   (should
    (eq 'inline-src-block
        (org-test-with-temp-text "src_emacs-lisp[:foo\nbar]{(+ 1 1)}"
-	 (org-element-type (org-element-context))))))
+	 (org-element-type (org-element-context)))))
+  ;; Besides curly brackets, ignore any other bracket type.
+  (should
+   (equal "[foo"
+	  (org-test-with-temp-text "src_emacs-lisp{[foo}"
+	    (org-element-property :value (org-element-context)))))
+  (should
+   (equal "foo]"
+	  (org-test-with-temp-text "src_emacs-lisp{foo]}"
+	    (org-element-property :value (org-element-context)))))
+  (should
+   (equal "(foo"
+	  (org-test-with-temp-text "src_emacs-lisp{foo}"
+	    (org-element-property :value (org-element-context)))))
+  (should
+   (equal "foo)"
+	  (org-test-with-temp-text "src_emacs-lisp{foo)}"
+	    (org-element-property :value (org-element-context))))))
 
 
 ;;;; Inlinetask

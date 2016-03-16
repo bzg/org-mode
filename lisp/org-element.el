@@ -415,7 +415,7 @@ Other brackets are treated as spaces.")
   (let ((table (make-syntax-table)))
     (modify-syntax-entry ?\{ "(}" table)
     (modify-syntax-entry ?\} "){" table)
-    (dolist (char '(?\[ ?\[ ?\( ?\) ?\< ?\>) table)
+    (dolist (char '(?\[ ?\] ?\( ?\) ?\< ?\>) table)
       (modify-syntax-entry char " " table)))
   "Table used internally to pair only curly brackets.
 Other brackets are treated as spaces.")
