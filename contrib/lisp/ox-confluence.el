@@ -47,6 +47,7 @@
 		     (italic . org-confluence-italic)
                      (item . org-confluence-item)
 		     (link . org-confluence-link)
+		     (paragraph . org-confluence-paragraph)
 		     (property-drawer . org-confluence-property-drawer)
 		     (section . org-confluence-section)
 		     (src-block . org-confluence-src-block)
@@ -100,6 +101,12 @@
              (t
               raw-link))
             "]")))
+
+(defun org-confluence-paragraph (paragraph contents info)
+  "Transcode PARAGRAPH element for Confluence.
+CONTENTS is the paragraph contents.  INFO is a plist used as
+a communication channel."
+  contents)
 
 (defun org-confluence-property-drawer (property-drawer contents info)
   (and (org-string-nw-p contents)
