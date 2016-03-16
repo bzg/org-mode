@@ -1210,7 +1210,7 @@ Some other text
 	    (org-element-property :value (org-element-context)))))
   (should
    (equal "(foo"
-	  (org-test-with-temp-text "src_emacs-lisp{foo}"
+	  (org-test-with-temp-text "src_emacs-lisp{(foo}"
 	    (org-element-property :value (org-element-context)))))
   (should
    (equal "foo)"
