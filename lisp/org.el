@@ -17011,7 +17011,7 @@ user."
 			  (string-to-number (format-time-string "%Y"))))
 	    month (string-to-number (match-string 3 ans))
 	    day (string-to-number (match-string 4 ans)))
-      (when (< year 100) (setq year (+ 2000 year)))
+      (setq year (org-small-year-to-year year))
       (setq ans (replace-match (format "%04d-%02d-%02d\\5" year month day)
 			       t nil ans)))
 
@@ -17035,7 +17035,7 @@ user."
 			  (string-to-number (format-time-string "%Y"))))
 	    month (string-to-number (match-string 1 ans))
 	    day (string-to-number (match-string 2 ans)))
-      (when (< year 100) (setq year (+ 2000 year)))
+      (setq year (org-small-year-to-year year))
       (setq ans (replace-match (format "%04d-%02d-%02d\\5" year month day)
 			       t nil ans)))
     ;; Help matching am/pm times, because `parse-time-string' does not do that.
