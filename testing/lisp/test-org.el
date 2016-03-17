@@ -737,6 +737,11 @@
 	  "* H\n  - \n    #+BEGIN_SRC emacs-lisp\n  t\n    #+END_SRC\n<point>"
 	(let ((org-adapt-indentation t)) (org-indent-line))
 	(org-get-indentation))))
+  (should
+   (= 2
+      (org-test-with-temp-text "- A\n  B\n\n<point>"
+	(let ((org-adapt-indentation nil)) (org-indent-line))
+	(org-get-indentation))))
   ;; Likewise, on a blank line at the end of a footnote definition,
   ;; indent at column 0 if line belongs to the definition.  Otherwise,
   ;; indent like the definition itself.
