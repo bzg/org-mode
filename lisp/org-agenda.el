@@ -10173,61 +10173,62 @@ to override `appt-message-warning-time'."
   (if refresh (setq appt-time-msg-list nil))
   (if (eq filter t)
       (setq filter (read-from-minibuffer "Regexp filter: ")))
-  (let* ((cnt 0) ; count added events
-	 (scope (or args '(:deadline* :scheduled* :timestamp)))
-	 (org-agenda-new-buffers nil)
-	 (org-deadline-warning-days 0)
-	 ;; Do not use `org-today' here because appt only takes
-	 ;; time and without date as argument, so it may pass wrong
-	 ;; information otherwise
-	 (today (org-date-to-gregorian
-		 (time-to-days (current-time))))
-	 (org-agenda-restrict nil)
-	 (files (org-agenda-files 'unrestricted)) entries file
-	 (org-agenda-buffer nil))
+  (let* ((cnt 0)                        ; count added events
+         (scope (or args '(:deadline* :scheduled* :timestamp)))
+         (org-agenda-new-buffers nil)
+         (org-deadline-warning-days 0)
+         ;; Do not use `org-today' here because appt only takes
+         ;; time and without date as argument, so it may pass wrong
+         ;; information otherwise
+         (today (org-date-to-gregorian
+                 (time-to-days (current-time))))
+         (org-agenda-restrict nil)
+         (files (org-agenda-files 'unrestricted)) entries file
+         (org-agenda-buffer nil))
     ;; Get all entries which may contain an appt
     (org-agenda-prepare-buffers files)
     (while (setq file (pop files))
       (setq entries
-	    (delq nil
-		  (append entries
-			  (apply 'org-agenda-get-day-entries
-				 file today scope)))))
+            (delq nil
+                  (append entries
+                          (apply 'org-agenda-get-day-entries
+                                 file today scope)))))
     ;; Map thru entries and find if we should filter them out
     (mapc
-     (lambda(x)
+     (lambda (x)
        (let* ((evt (org-trim
-		    (replace-regexp-in-string
-		     org-bracket-link-regexp "\\3"
-		     (or (get-text-property 1 'txt x) ""))))
-	      (cat (get-text-property (1- (length x)) 'org-category x))
-	      (tod (get-text-property 1 'time-of-day x))
-	      (ok (or (null filter)
-		      (and (stringp filter) (string-match filter evt))
-		      (and (functionp filter) (funcall filter x))
-		      (and (listp filter)
-			   (let ((cat-filter (cadr (assoc 'category filter)))
-				 (evt-filter (cadr (assoc 'headline filter))))
-			     (or (and (stringp cat-filter)
-				      (string-match cat-filter cat))
-				 (and (stringp evt-filter)
-				      (string-match evt-filter evt)))))))
-	      (wrn (get-text-property 1 'warntime x)))
-	 ;; FIXME: Shall we remove text-properties for the appt text?
-	 ;; (setq evt (set-text-properties 0 (length evt) nil evt))
-	 (when (and ok tod (not (string-match "\\`DONE\\|CANCELLED" evt)))
-	   (setq tod (concat "00" (number-to-string tod))
-		 tod (when (string-match
-			    "\\([0-9]\\{1,2\\}\\)\\([0-9]\\{2\\}\\)\\'" tod)
-		       (concat (match-string 1 tod) ":"
-			       (match-string 2 tod))))
-	   (if (version< emacs-version "23.3")
-	       (appt-add tod evt)
-	     (appt-add tod evt wrn))
-	   (setq cnt (1+ cnt))))) entries)
+                    (replace-regexp-in-string
+                     org-bracket-link-regexp "\\3"
+                     (or (get-text-property 1 'txt x) ""))))
+              (cat (get-text-property (1- (length x)) 'org-category x))
+              (tod (get-text-property 1 'time-of-day x))
+              (ok (or (null filter)
+                      (and (stringp filter) (string-match filter evt))
+                      (and (functionp filter) (funcall filter x))
+                      (and (listp filter)
+                           (let ((cat-filter (cadr (assoc 'category filter)))
+                                 (evt-filter (cadr (assoc 'headline filter))))
+                             (or (and (stringp cat-filter)
+                                      (string-match cat-filter cat))
+                                 (and (stringp evt-filter)
+                                      (string-match evt-filter evt)))))))
+              (wrn (get-text-property 1 'warntime x)))
+         ;; FIXME: Shall we remove text-properties for the appt text?
+         ;; (setq evt (set-text-properties 0 (length evt) nil evt))
+         (when (and ok tod (not (string-match "\\`DONE\\|CANCELLED" evt)))
+           (setq tod (concat "00" (number-to-string tod)))
+           (setq tod (when (string-match
+                            "\\([0-9]\\{1,2\\}\\)\\([0-9]\\{2\\}\\)\\'" tod)
+                       (concat (match-string 1 tod) ":"
+                               (match-string 2 tod))))
+           (when (if (version< emacs-version "23.3")
+                     (appt-add tod evt)
+                   (appt-add tod evt wrn))
+             (setq cnt (1+ cnt))))))
+     entries)
     (org-release-buffers org-agenda-new-buffers)
     (if (eq cnt 0)
-	(message "No event to add")
+        (message "No event to add")
       (message "Added %d event%s for today" cnt (if (> cnt 1) "s" "")))))
 
 (defun org-agenda-today-p (date)
