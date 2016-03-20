@@ -130,6 +130,13 @@ or `org-babel-execute:C++' or `org-babel-execute:D'."
 	 (flags (cdr (assoc :flags params)))
 	 (flags (mapconcat 'identity
 			   (if (listp flags) flags (list flags)) " "))
+	 (libs (org-babel-read
+		(or (cdr (assq :libs params))
+		    (org-entry-get nil "libs" t))
+		nil))
+	 (libs (mapconcat #'identity
+			  (if (listp libs) libs (list libs))
+			  " "))
 	 (full-body
 	  (case org-babel-c-variant
 	    (c   (org-babel-C-expand-C   body params))
@@ -139,13 +146,15 @@ or `org-babel-execute:C++' or `org-babel-execute:D'."
     (case org-babel-c-variant
       ((c cpp)
        (org-babel-eval
-	(format "%s -o %s %s %s"
+	(format "%s -o %s %s %s %s"
 		(case org-babel-c-variant
 		 (c   org-babel-C-compiler)
 		 (cpp org-babel-C++-compiler))
 		(org-babel-process-file-name tmp-bin-file)
 		flags
-		(org-babel-process-file-name tmp-src-file)) ""))
+		(org-babel-process-file-name tmp-src-file)
+		libs)
+	""))
       (d nil)) ;; no separate compilation for D
     (let ((results
 	   (org-babel-eval
