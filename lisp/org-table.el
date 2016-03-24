@@ -55,11 +55,13 @@
 
 (declare-function org-export-create-backend "org-export" (&rest rest))
 (declare-function org-export-data-with-backend "org-export" (arg1 arg2 arg3))
-(declare-function org-export-first-sibling-p "org-export" (arg1 arg2))
-(declare-function org-export-get-backend "org-export" (arg1))
+(declare-function org-export-filter-apply-functions "org-export" (&optional filters value info))
+(declare-function org-export-first-sibling-p "org-export" (blob info))
+(declare-function org-export-get-backend "org-export" (name))
 (declare-function org-export-get-environment "org-export" (&optional arg1 arg2 arg3))
-(declare-function org-export-table-has-special-column-p "org-export" (arg1))
-(declare-function org-export-table-row-is-special-p "org-export" (arg1 arg2))
+(declare-function org-export-install-filters "org-export" (info))
+(declare-function org-export-table-has-special-column-p "org-export" (table))
+(declare-function org-export-table-row-is-special-p "org-export" (table-row info))
 
 (declare-function calc-eval "calc" (str &optional separator &rest args))
 
@@ -4842,10 +4844,21 @@ This may be either a string or a function of two arguments:
 		((consp e)
 		 (princ "| ") (dolist (c e) (princ c) (princ " |"))
 		 (princ "\n")))))
+      ;; Add back-end specific filters, but not user-defined ones.  In
+      ;; particular, make sure to call parse-tree filters on the
+      ;; table.
+      (setq info
+	    (let ((org-export-filters-alist nil))
+	      (org-export-install-filters
+	       (org-combine-plists
+		(org-export-get-environment backend nil params)
+		`(:back-end ,(org-export-get-backend backend))))))
       (setq data
-	    (org-element-map (org-element-parse-buffer) 'table
-	      #'identity nil t))
-      (setq info (org-export-get-environment backend nil params)))
+	    (org-export-filter-apply-functions
+	     (plist-get info :filter-parse-tree)
+	     (org-element-map (org-element-parse-buffer) 'table
+	       #'identity nil t)
+	     info)))
     (when (and backend (symbolp backend) (not (org-export-get-backend backend)))
       (user-error "Unknown :backend value"))
     (when (or (not backend) (plist-get info :raw)) (require 'ox-org))
@@ -4888,9 +4901,9 @@ This may be either a string or a function of two arguments:
 	    (push datum ignore))))
       (setq info (plist-put info :ignore-list ignore)))
     ;; We use a low-level mechanism to export DATA so as to skip all
-    ;; usual pre-processing and post-processing, i.e., hooks, filters,
-    ;; Babel code evaluation, include keywords and macro expansion,
-    ;; and filters.
+    ;; usual pre-processing and post-processing, i.e., hooks, Babel
+    ;; code evaluation, include keywords and macro expansion.  Only
+    ;; back-end specific filters are retained.
     (let ((output (org-export-data-with-backend data custom-backend info)))
       ;; Remove final newline.
       (if (org-string-nw-p output) (substring-no-properties output 0 -1) ""))))

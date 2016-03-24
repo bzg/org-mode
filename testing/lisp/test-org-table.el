@@ -1473,6 +1473,10 @@ See also `test-org-table/copy-field'."
   (should
    (org-string-match-p
     "\\toprule" (orgtbl-to-latex (org-table-to-lisp "| a |") '(:booktabs t))))
+  ;; Handle LaTeX snippets.
+  (should
+   (equal "\\begin{tabular}{l}\n\\(x\\)\\\\\n\\end{tabular}"
+	  (orgtbl-to-latex (org-table-to-lisp "| $x$ |") nil)))
   ;; Test pseudo objects and :raw parameter.
   (should
    (org-string-match-p
