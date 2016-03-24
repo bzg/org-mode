@@ -67,6 +67,7 @@
 (defvar orgtbl-mode) ; defined below
 (defvar orgtbl-mode-menu) ; defined when orgtbl mode get initialized
 (defvar constants-unit-system)
+(defvar org-export-filters-alist)
 (defvar org-table-follow-field-mode)
 
 (defvar orgtbl-after-send-table-hook nil
