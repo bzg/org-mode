@@ -12194,10 +12194,9 @@ output file resulting from @LaTeX{} processing.  Org will use an
 TikZ (@url{http://sourceforge.net/projects/pgf/}) images, it will become an
 @code{\input} macro wrapped within a @code{tikzpicture} environment.}.
 
-You can specify specify image width or height with, respectively,
-@code{:width} and @code{:height} attributes.  It is also possible to add any
-other option with the @code{:options} attribute, as shown in the following
-example:
+You can specify image width or height with, respectively, @code{:width} and
+@code{:height} attributes.  It is also possible to add any other option with
+the @code{:options} attribute, as shown in the following example:
 
 @example
 #+ATTR_LATEX: :width 5cm :options angle=90
