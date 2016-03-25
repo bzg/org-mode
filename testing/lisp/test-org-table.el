@@ -1673,7 +1673,41 @@ See also `test-org-table/copy-field'."
       (buffer-string)))))
 
 
-;;; Field formulas
+;;; Formulas
+
+(ert-deftest test-org-table/eval-formula ()
+  "Test `org-table-eval-formula' specifications."
+  ;; Error when not on a table field.
+  (should-error
+   (org-test-with-temp-text "Text"
+     (org-table-eval-formula)))
+  (should-error
+   (org-test-with-temp-text "| a |\n|---|<point>"
+     (org-table-eval-formula)))
+  (should-error
+   (org-test-with-temp-text "| a |\n#+TBLFM:<point>"
+     (org-table-eval-formula)))
+  ;; Handle @<, @>, $< and $>.
+  (should
+   (equal "| 1 |\n| 1 |"
+	  (org-test-with-temp-text "| <point>  |\n| 1 |"
+	    (org-table-eval-formula nil "@>" nil nil t)
+	    (buffer-string))))
+  (should
+   (equal "| 1 |\n| 1 |"
+	  (org-test-with-temp-text "| 1 |\n| <point>  |"
+	    (org-table-eval-formula nil "@<" nil nil t)
+	    (buffer-string))))
+  (should
+   (equal "| 1 | 1 |"
+	  (org-test-with-temp-text "| <point>  | 1 |"
+	    (org-table-eval-formula nil "$>" nil nil t)
+	    (buffer-string))))
+  (should
+   (equal "| 1 | 1 |"
+	  (org-test-with-temp-text "| 1 | <point>  |"
+	    (org-table-eval-formula nil "$<" nil nil t)
+	    (buffer-string)))))
 
 (ert-deftest test-org-table/field-formula-outside-table ()
   "If `org-table-formula-create-columns' is nil, then a formula
@@ -1840,13 +1874,38 @@ is t, then new columns should be added as needed"
       (buffer-string)))))
 
 (ert-deftest test-org-table/first-rc ()
-  "Test \"$<\" constructs in formulas."
+  "Test \"$<\" and \"@<\" constructs in formulas."
   (should
    (org-string-match-p
     "| 1 | 2 |"
     (org-test-with-temp-text
 	"|   | 2 |
 <point>#+TBLFM: $<=1"
+      (org-table-calc-current-TBLFM)
+      (buffer-string))))
+  (should
+   (org-string-match-p
+    "| 2 |\n| 2 |"
+    (org-test-with-temp-text
+	"| 2 |\n|   |
+<point>#+TBLFM: @2$1=@<"
+      (org-table-calc-current-TBLFM)
+      (buffer-string)))))
+
+(ert-deftest test-org-table/last-rc ()
+  "Test \"$>\" and \"@>\" constructs in formulas."
+  (should
+   (org-string-match-p
+    "| 2 | 1 |"
+    (org-test-with-temp-text
+	"| 2 |   |\n<point>#+TBLFM: $>=1"
+      (org-table-calc-current-TBLFM)
+      (buffer-string))))
+  (should
+   (org-string-match-p
+    "| 2 |\n| 2 |"
+    (org-test-with-temp-text
+	"| 2 |\n|   |\n<point>#+TBLFM: @>$1=@<"
       (org-table-calc-current-TBLFM)
       (buffer-string)))))
 
