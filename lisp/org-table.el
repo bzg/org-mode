@@ -2738,9 +2738,10 @@ not overwrite the stored one."
 	      (setq fmt (replace-match "" t t fmt)))
 	    (unless (string-match "\\S-" fmt)
 	      (setq fmt nil))))
-      (if (and (not suppress-const) org-table-formula-use-constants)
-	  (setq formula (org-table-formula-substitute-names formula)))
+      (when (and (not suppress-const) org-table-formula-use-constants)
+	(setq formula (org-table-formula-substitute-names formula)))
       (setq orig (or (get-text-property 1 :orig-formula formula) "?"))
+      (setq formula (org-table-formula-handle-first/last-rc formula))
       (while (> ndown 0)
 	(setq fields (org-split-string
 		      (org-trim
