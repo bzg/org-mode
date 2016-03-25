@@ -11471,9 +11471,9 @@ enable a few new block-level elements.  These are created using arbitrary
 #+BEGIN and #+END blocks. For instance:
 
 @example
-#+BEGIN_ASIDE
+#+BEGIN_aside
 Lorem ipsum
-#+END_ASIDE
+#+END_aside
 @end example
 
 Will export to:
@@ -11488,11 +11488,11 @@ While this:
 
 @example
 #+ATTR_HTML: :controls controls :width 350
-#+BEGIN_VIDEO
+#+BEGIN_video
 #+HTML: <source src="movie.mp4" type="video/mp4">
 #+HTML: <source src="movie.ogg" type="video/ogg">
 Your browser does not support the video tag.
-#+END_VIDEO
+#+END_video
 @end example
 
 Becomes:
