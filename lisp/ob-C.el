@@ -431,7 +431,7 @@ specifying a variable with the name of the table."
 	 table table (length headers) table))
        (d
 	(format
-	 "string %s_h (ulong row, string col) { return %s[row][get_column_num(%s_header,col)]; }"
+	 "string %s_h (size_t row, string col) { return %s[row][get_column_num(%s_header,col)]; }"
 	 table table table))))))
 
 (provide 'ob-C)
