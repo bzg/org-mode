@@ -3153,11 +3153,19 @@ holding contextual information."
 
 ;;;; Quote Block
 
-(defun org-html-quote-block (_quote-block contents _info)
+(defun org-html-quote-block (quote-block contents _info)
   "Transcode a QUOTE-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (format "<blockquote>\n%s</blockquote>" contents))
+  (format "<blockquote%s>\n%s</blockquote>"
+	  (let* ((name (org-element-property :name quote-block))
+		 (attributes (org-export-read-attribute :attr_html quote-block))
+		 (a (org-html--make-attribute-string
+		     (if (or (not name) (plist-member attributes :id))
+			 attributes
+		       (plist-put attributes :id name)))))
+	    (if (org-string-nw-p a) (concat " " a) ""))
+	  contents))
 
 ;;;; Section
 
