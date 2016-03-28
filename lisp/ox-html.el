@@ -3208,22 +3208,24 @@ contextual information."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (let* ((block-type (org-element-property :type special-block))
-	 (contents (or contents ""))
-	 (html5-fancy (and (org-html--html5-fancy-p info)
-			   (member block-type org-html-html5-elements)))
-	 (attributes (org-export-read-attribute :attr_html special-block)))
+         (html5-fancy (and (org-html--html5-fancy-p info)
+                           (member block-type org-html-html5-elements)))
+         (attributes (org-export-read-attribute :attr_html special-block)))
     (unless html5-fancy
       (let ((class (plist-get attributes :class)))
-	(setq attributes (plist-put attributes :class
-				    (if class (concat class " " block-type)
-				      block-type)))))
-    (setq attributes (org-html--make-attribute-string attributes))
-    (when (not (equal attributes ""))
-      (setq attributes (concat " " attributes)))
-    (if html5-fancy
-	(format "<%s%s>\n%s</%s>" block-type attributes
-		contents block-type)
-      (format "<div%s>\n%s\n</div>" attributes contents))))
+        (setq attributes (plist-put attributes :class
+                                    (if class (concat class " " block-type)
+                                      block-type)))))
+    (let* ((contents (or contents ""))
+	   (name (org-element-property :name special-block))
+	   (a (org-html--make-attribute-string
+	       (if (or (not name) (plist-member attributes :id))
+		   attributes
+		 (plist-put attributes :id name))))
+	   (str (if (org-string-nw-p a) (concat " " a) "")))
+      (if html5-fancy
+	  (format "<%s%s>\n%s</%s>" block-type str contents block-type)
+	(format "<div%s>\n%s\n</div>" str contents)))))
 
 ;;;; Src Block
 
