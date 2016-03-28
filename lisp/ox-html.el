@@ -2374,10 +2374,17 @@ contextual information."
   "Transcode a EXAMPLE-BLOCK element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (if (org-export-read-attribute :attr_html example-block :textarea)
-      (org-html--textarea-block example-block)
-    (format "<pre class=\"example\">\n%s</pre>"
-	    (org-html-format-code example-block info))))
+  (let ((attributes (org-export-read-attribute :attr_html example-block)))
+    (if (plist-get attributes :textarea)
+	(org-html--textarea-block example-block)
+      (format "<pre class=\"example\"%s>\n%s</pre>"
+	      (let* ((name (org-element-property :name example-block))
+		     (a (org-html--make-attribute-string
+			 (if (or (not name) (plist-member attributes :id))
+			     attributes
+			   (plist-put attributes :id name)))))
+		(if (org-string-nw-p a) (concat " " a) ""))
+	      (org-html-format-code example-block info)))))
 
 ;;;; Export Snippet
 
