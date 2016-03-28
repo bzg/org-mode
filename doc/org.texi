@@ -12295,13 +12295,33 @@ the @LaTeX{} @code{\includegraphics} macro will be commented out.
 @cindex plain lists, in @LaTeX{} export
 
 Plain lists accept two optional attributes: @code{:environment} and
-@code{:options}.  The first one allows the use of a non-standard environment
-(e.g., @samp{inparaenum}).  The second one specifies additional arguments for
-that environment.
+@code{:options}.  The first can be used to specify the environment.  The
+second can be used to specifies additional arguments to the environment.
+Both attributes are illustrated in the following example:
 
 @example
-#+ATTR_LATEX: :environment compactitem :options [$\circ$]
-- you need ``paralist'' package to reproduce this example.
+#+LATEX_HEADER: \usepackage[inline]@{enumitem@}
+Some ways to say "Hello":
+#+ATTR_LATEX: :environment itemize*
+#+ATTR_LATEX: :options [label=@{@}, itemjoin=@{,@}, itemjoin*=@{, and@}]
+- Hola
+- Bonjour
+- Guten Tag.
+@end example
+
+By default, @LaTeX{} only supports four levels of nesting for lists.  If
+deeper nesting is needed, the @samp{enumitem} @LaTeX{} package can be
+employed, as shown in this example:
+
+@example
+#+LATEX_HEADER: \usepackage@{enumitem@}
+#+LATEX_HEADER: \renewlist@{itemize@}@{itemize@}@{9@}
+#+LATEX_HEADER: \setlist[itemize]@{label=$\circ$@}
+- One
+  - Two
+    - Three
+      - Four
+        - Five
 @end example
 
 @subsubheading Source blocks in @LaTeX{} export
