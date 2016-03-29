@@ -383,7 +383,7 @@ e.g. \"title-subject:t\"."
   "Header tags to be inserted after closing.")
 
 (defconst org-koma-letter-special-tags-after-letter '(after_letter)
-  "Header tags to be inserted after closing.")
+  "Header tags to be inserted after the letter.")
 
 (defvar org-koma-letter-special-contents nil
   "Holds special content temporarily.")
