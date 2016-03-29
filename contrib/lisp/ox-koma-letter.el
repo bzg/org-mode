@@ -432,6 +432,7 @@ e.g. \"title-subject:t\"."
     ;; They are used to prioritize in-buffer settings over "lco"
     ;; files.  See `org-koma-letter-template'.
     (:inbuffer-author "AUTHOR" nil 'koma-letter:empty)
+    (:inbuffer-from "FROM" nil 'koma-letter:empty)
     (:inbuffer-email "EMAIL" nil 'koma-letter:empty)
     (:inbuffer-phone-number "PHONE_NUMBER" nil 'koma-letter:empty)
     (:inbuffer-place "PLACE" nil 'koma-letter:empty)
@@ -500,23 +501,14 @@ such as the one tagged with PS.
 	     (macrop (format "\\%s{%s}\n" name value))
 	     (t value))))
    keywords
-   ""))
+   "\n"))
 
-(defun org-koma-letter--determine-to-and-from (info key)
-  "Given INFO determine KEY for the letter.
-KEY should be `to' or `from'.
 
-`ox-koma-letter' allows two ways to specify TO and FROM.  If both
-are present return the preferred one as determined by
-`org-koma-letter-prefer-special-headings'."
-  (let ((option (org-string-nw-p
-		 (plist-get info (if (eq key 'to) :to-address :from-address))))
-	(headline (org-koma-letter--get-tagged-contents key)))
-    (replace-regexp-in-string
-     "\n" "\\\\\\\\\n"
-     (org-trim
-      (if (plist-get info :special-headings) (or headline option "")
-	(or option headline ""))))))
+(defun org-koma-letter--add-latex-newlines (string)
+  "Replace regular newlines with LaTeX newlines (i.e. `\\\\')"
+  (let ((str (org-trim string)))
+    (when (org-string-nw-p str)
+      (replace-regexp-in-string "\n" "\\\\\\\\\n" str))))
 
 
 
@@ -627,10 +619,6 @@ holding export options."
 	      (org-split-string (or (plist-get info :lco) "") " ")
 	      "")
    (org-koma-letter--build-settings 'buffer info)
-   ;; From address.
-   (let ((from-address (org-koma-letter--determine-to-and-from info 'from)))
-     (when (org-string-nw-p from-address)
-       (format "\\setkomavar{fromaddress}{%s}\n" from-address)))
    ;; Date.
    (format "\\date{%s}\n" (org-export-data (org-export-get-date info) info))
    ;; Hyperref, document start, and subject and title.
@@ -666,8 +654,14 @@ holding export options."
       (when title (format "\\setkomavar{title}{%s}\n" title))
       (when (or (org-string-nw-p title) (org-string-nw-p subject)) "\n")))
    ;; Letter start.
-   (format "\\begin{letter}{%%\n%s}\n\n"
-	   (org-koma-letter--determine-to-and-from info 'to))
+   (let ((keyword-val (plist-get info :to-address))
+	 (heading-val (org-koma-letter--get-tagged-contents 'to)))
+     (format "\\begin{letter}{%%\n%s}\n\n"
+	     (org-koma-letter--add-latex-newlines
+	      (or (if (plist-get info :special-headings)
+		      (or heading-val keyword-val)
+		    (or keyword-val heading-val))
+		  "\\\\mbox{}"))))
    ;; Opening.
    (format "\\opening{%s}\n\n"
 	   (org-koma-letter--keyword-or-headline
@@ -694,14 +688,24 @@ holding export options."
   "Build settings string according to type.
 SCOPE is either `global' or `buffer'.  INFO is a plist used as
 a communication channel."
-  (let ((check-scope
-         (function
-          ;; Non-nil value when SETTING was defined in SCOPE.
-          (lambda (setting)
-            (let ((property (intern (format ":inbuffer-%s" setting))))
-              (if (eq scope 'global)
-		  (eq (plist-get info property) 'koma-letter:empty)
-                (not (eq (plist-get info property) 'koma-letter:empty))))))))
+  (let* ((check-scope
+	  (function
+	   ;; Non-nil value when SETTING was defined in SCOPE.
+	   (lambda (setting)
+	     (let ((property (intern (format ":inbuffer-%s" setting))))
+	       (if (eq scope 'global)
+		   (eq (plist-get info property) 'koma-letter:empty)
+		 (not (eq (plist-get info property) 'koma-letter:empty)))))))
+	 (heading-or-key-value
+	  (function
+	   (lambda (heading key &optional scoped)
+	     (let* ((heading-val
+		     (org-koma-letter--get-tagged-contents heading))
+		    (key-val (org-string-nw-p (plist-get info key)))
+		    (scopedp (funcall check-scope (or scoped heading))))
+	       (and (or (and key-val scopedp) heading-val)
+		    (not (and (eq scope 'global) heading-val))
+		    (if scopedp key-val heading-val)))))))
     (concat
      ;; Name.
      (let ((author (plist-get info :author)))
@@ -709,6 +713,11 @@ a communication channel."
             (funcall check-scope 'author)
             (format "\\setkomavar{fromname}{%s}\n"
                     (org-export-data author info))))
+     ;; From.
+     (let ((from (funcall heading-or-key-value 'from :from-address)))
+       (and from
+	    (format "\\setkomavar{fromaddress}{%s}\n"
+     		    (org-koma-letter--add-latex-newlines from))))
      ;; Email.
      (let ((email (plist-get info :email)))
        (and email
