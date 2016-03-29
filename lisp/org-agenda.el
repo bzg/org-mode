@@ -3114,9 +3114,9 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 	 match ;; The byte compiler incorrectly complains about this.  Keep it!
 	 org-cmd type lprops)
     (while (setq org-cmd (pop cmds))
-      (setq type (car org-cmd)
-	    match (eval (nth 1 org-cmd))
-	    lprops (nth 2 org-cmd))
+      (setq type (car org-cmd))
+      (setq match (eval (nth 1 org-cmd)))
+      (setq lprops (nth 2 org-cmd))
       (let ((org-agenda-overriding-arguments
 	     (if (eq org-agenda-overriding-cmd org-cmd)
 		 (or org-agenda-overriding-arguments
