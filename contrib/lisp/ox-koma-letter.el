@@ -379,8 +379,11 @@ e.g. \"title-subject:t\"."
 (defconst org-koma-letter-special-tags-in-letter '(to from closing)
   "Header tags related to the letter itself.")
 
-(defconst org-koma-letter-special-tags-after-closing '(ps encl cc)
-  "Header tags to be inserted after closing.")
+(defconst org-koma-letter-special-tags-after-closing '(after_closing ps encl cc)
+  "Header tags to be inserted in the letter after closing.")
+
+(defconst org-koma-letter-special-tags-as-macro '(ps encl cc)
+  "Header tags to be inserted as macros")
 
 (defconst org-koma-letter-special-tags-after-letter '(after_letter)
   "Header tags to be inserted after the letter.")
@@ -410,16 +413,13 @@ e.g. \"title-subject:t\"."
     (:opening "OPENING" nil org-koma-letter-opening parse)
     (:closing "CLOSING" nil org-koma-letter-closing parse)
     (:signature "SIGNATURE" nil org-koma-letter-signature newline)
-    (:special-headings nil "special-headings"
-		       org-koma-letter-prefer-special-headings)
-    (:special-tags nil nil (append
-			    org-koma-letter-special-tags-in-letter
-			    org-koma-letter-special-tags-after-closing
-			    org-koma-letter-special-tags-after-letter))
-    (:with-after-closing nil "after-closing-order"
-			 org-koma-letter-special-tags-after-closing)
-    (:with-after-letter nil "after-letter-order"
-			org-koma-letter-special-tags-after-letter)
+    (:special-headings nil "special-headings" org-koma-letter-prefer-special-headings)
+    (:special-tags-as-macro nil nil org-koma-letter-special-tags-as-macro)
+    (:special-tags-in-letter nil nil org-koma-letter-special-tags-in-letter)
+    (:special-tags-after-closing nil "after-closing-order"
+				 org-koma-letter-special-tags-after-closing)
+    (:special-tags-after-letter nil "after-letter-order"
+				org-koma-letter-special-tags-after-letter)
     (:with-backaddress nil "backaddress" org-koma-letter-use-backaddress)
     (:with-email nil "email" org-koma-letter-use-email)
     (:with-foldmarks nil "foldmarks" org-koma-letter-use-foldmarks)
@@ -483,28 +483,22 @@ return a string or nil."
 	  ((symbolp value) (symbol-name value))
 	  (t value))))
 
-(defun org-koma-letter--special-contents-as-macro
-    (keywords &optional keep-newlines no-tag)
+(defun org-koma-letter--special-contents-inline (keywords info)
   "Process KEYWORDS members of `org-koma-letter-special-contents'.
 KEYWORDS is a list of symbols.  Return them as a string to be
 formatted.
 
 The function is used for inserting content of special headings
-such as PS.
-
-If KEEP-NEWLINES is non-nil leading and trailing newlines are not
-removed.  If NO-TAG is non-nil the content in
-`org-koma-letter-special-contents' are not wrapped in a macro
-named whatever the members of KEYWORDS are called."
+such as the one tagged with PS.
+"
   (mapconcat
    (lambda (keyword)
      (let* ((name (org-koma-letter--get-value keyword))
-	    (value (org-koma-letter--get-tagged-contents name)))
+	    (value (org-koma-letter--get-tagged-contents name))
+	    (macrop (memq keyword (plist-get info :special-tags-as-macro))))
        (cond ((not value) nil)
-	     (no-tag (if keep-newlines value (org-trim value)))
-	     (t (format "\\%s{%s}\n"
-			name
-			(if keep-newlines value (org-trim value)))))))
+	     (macrop (format "\\%s{%s}\n" name value))
+	     (t value))))
    keywords
    ""))
 
@@ -580,7 +574,10 @@ appropriate place."
   "Non-nil if HEADLINE is a special headline.
 INFO is a plist holding contextual information.  Return first
 special tag headline."
-  (let ((special-tags (plist-get info :special-tags)))
+  (let ((special-tags (append
+		       (plist-get info :special-tags-in-letter)
+		       (plist-get info :special-tags-after-closing)
+		       (plist-get info :special-tags-after-letter))))
     (catch 'exit
       (dolist (tag (org-export-get-tags headline info))
 	(let ((tag (assoc-string tag special-tags)))
@@ -684,12 +681,12 @@ holding export options."
 	    :closing (lambda (h i) (eq (org-koma-letter--special-tag h i)
 				'closing))
 	    info))
-   (org-koma-letter--special-contents-as-macro
-    (plist-get info :with-after-closing))
+   (org-koma-letter--special-contents-inline
+    (plist-get info :special-tags-after-closing) info)
    ;; Letter end.
    "\n\\end{letter}\n"
-   (org-koma-letter--special-contents-as-macro
-    (plist-get info :with-after-letter) t t)
+   (org-koma-letter--special-contents-inline
+    (plist-get info :special-tags-after-letter) info)
    ;; Document end.
    "\n\\end{document}"))
 
