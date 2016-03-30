@@ -645,6 +645,11 @@
 	(let ((org-adapt-indentation t)) (org-indent-line))
 	(org-get-indentation))))
   (should
+   (= 4
+      (org-test-with-temp-text "* H\n- A\n  -\n\n<point>"
+	(let ((org-adapt-indentation t)) (org-indent-line))
+	(org-get-indentation))))
+  (should
    (zerop
     (org-test-with-temp-text "* H\n- A\n  - AA\n\n\n\n"
       (goto-char (point-max))
