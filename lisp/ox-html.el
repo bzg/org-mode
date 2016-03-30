@@ -3106,26 +3106,23 @@ contextual information."
   "Transcode a PLANNING element from Org to HTML.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (let ((span-fmt "<span class=\"timestamp-kwd\">%s</span> <span class=\"timestamp\">%s</span>"))
-    (format
-     "<p><span class=\"timestamp-wrapper\">%s</span></p>"
-     (mapconcat
-      'identity
-      (delq nil
-	    (list
-	     (let ((closed (org-element-property :closed planning)))
-	       (when closed
-		 (format span-fmt org-closed-string
-			 (org-timestamp-translate closed))))
-	     (let ((deadline (org-element-property :deadline planning)))
-	       (when deadline
-		 (format span-fmt org-deadline-string
-			 (org-timestamp-translate deadline))))
-	     (let ((scheduled (org-element-property :scheduled planning)))
-	       (when scheduled
-		 (format span-fmt org-scheduled-string
-			 (org-timestamp-translate scheduled))))))
-      " "))))
+  (format
+   "<p><span class=\"timestamp-wrapper\">%s</span></p>"
+   (org-trim
+    (mapconcat
+     (lambda (pair)
+       (let ((timestamp (cdr pair)))
+	 (when timestamp
+	   (let ((string (car pair)))
+	     (format "<span class=\"timestamp-kwd\">%s</span> \
+<span class=\"timestamp\">%s</span> "
+		     string
+		     (org-html-plain-text (org-timestamp-translate timestamp)
+					  info))))))
+     `((,org-closed-string . ,(org-element-property :closed planning))
+       (,org-deadline-string . ,(org-element-property :deadline planning))
+       (,org-scheduled-string . ,(org-element-property :scheduled planning)))
+     ""))))
 
 ;;;; Property Drawer
 
