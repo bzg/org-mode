@@ -3117,7 +3117,7 @@ contextual information."
 
 ;; Planning
 
-(defun org-html-planning (planning _contents _info)
+(defun org-html-planning (planning _contents info)
   "Transcode a PLANNING element from Org to HTML.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
