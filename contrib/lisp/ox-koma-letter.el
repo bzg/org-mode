@@ -471,8 +471,9 @@ e.g. \"title-subject:t\"."
 (defun org-koma-letter--get-tagged-contents (key)
   "Get contents from a headline tagged with KEY.
 The contents is stored in `org-koma-letter-special-contents'."
-  (cdr (assoc-string (org-koma-letter--get-value key)
-		     org-koma-letter-special-contents)))
+  (let ((value (cdr (assoc-string (org-koma-letter--get-value key)
+				  org-koma-letter-special-contents))))
+    (when value (org-string-nw-p (org-trim value)))))
 
 (defun org-koma-letter--get-value (value)
   "Turn value into a string whenever possible.
@@ -735,32 +736,26 @@ a communication channel."
           (format "\\KOMAoption{fromphone}{%s}\n"
                   (if (plist-get info :with-phone) "true" "false")))
      ;; Signature.
-     (let* ((heading-val
-	     (and (plist-get info :with-headline-opening)
-		  (org-string-nw-p
-		   (org-trim
-		    (org-export-data
-		     (org-koma-letter--get-tagged-contents 'closing)
-		     info)))))
-	    (signature (org-string-nw-p (plist-get info :signature)))
-	    (signature-scope (funcall check-scope 'signature)))
-       (and (or (and signature signature-scope)
-		heading-val)
-	    (not (and (eq scope 'global) heading-val))
-	    (format "\\setkomavar{signature}{%s}\n"
-		    (if signature-scope signature heading-val))))
+     (let* ((head-opening (plist-get info :with-headline-opening))
+	    (signature (funcall heading-or-key-value
+				(if head-opening 'closing nil)
+				:signature
+				(if head-opening 'signature nil))))
+       (and signature
+	    (format "\\setkomavar{signature}{%s}\n" signature)))
      ;; Back address.
      (and (funcall check-scope 'with-backaddress)
           (format "\\KOMAoption{backaddress}{%s}\n"
                   (if (plist-get info :with-backaddress) "true" "false")))
      ;; Place.
-     (let ((with-place-set (funcall check-scope 'with-place))
+     (let ((place-scoped (funcall check-scope 'with-place))
 	   (place-set (funcall check-scope 'place)))
-       (and (or (and with-place-set place-set)
-		(and (eq scope 'buffer) (or with-place-set place-set)))
-	    (format "\\setkomavar{place}{%s}\n"
-		    (if (plist-get info :with-place) (plist-get info :place)
-		      ""))))
+       (when (or (and place-scoped place-set)
+		 (and (eq scope 'buffer)
+		      (or place-scoped place-set)))
+	 (format "\\setkomavar{place}{%s}\n"
+		 (if (plist-get info :with-place) (plist-get info :place)
+		   ""))))
      ;; Folding marks.
      (and (funcall check-scope 'with-foldmarks)
           (let ((foldmarks (plist-get info :with-foldmarks)))
