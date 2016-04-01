@@ -25,16 +25,29 @@
 
 ;;; Commentary:
 
-;;; support for evaluating common lisp code, relies on slime for all eval
+;;; Support for evaluating Common Lisp code, relies on SLY or SLIME
+;;; for all eval.
 
 ;;; Requirements:
 
-;; Requires SLIME (Superior Lisp Interaction Mode for Emacs.)
-;; See http://common-lisp.net/project/slime/
+;; Requires SLY (Sylvester the Cat's Common Lisp IDE) or SLIME
+;; (Superior Lisp Interaction Mode for Emacs).  See:
+;; - https://github.com/capitaomorte/sly
+;; - http://common-lisp.net/project/slime/
 
 ;;; Code:
 (require 'ob)
 
+(defcustom org-babel-lisp-eval-fn "sly-eval"
+  "The function to be called to evaluate code on the Lisp side.
+It can be set to either \"sly-eval\" or \"slime-val\"."
+  :group 'org-babel
+  :version "25.1"
+  :package-version '(Org . "8.3")
+  :options '("sly-eval" "slime-eval")
+  :type 'stringp)
+
+(declare-function sly-eval "ext:sly" (sexp &optional package))
 (declare-function slime-eval "ext:slime" (sexp &optional package))
 
 (defvar org-babel-tangle-lang-exts)
@@ -72,24 +85,29 @@ current directory string."
       body)))
 
 (defun org-babel-execute:lisp (body params)
-  "Execute a block of Common Lisp code with Babel."
-  (require 'slime)
+  "Execute a block of Common Lisp code with Babel.
+BODY is the contents of the block, as a string.  PARAMS is
+a property list containing the parameters of the block."
+  (require (pcase org-babel-lisp-eval-fn
+	     ("slime-eval" 'slime)
+	     ("sly-eval" 'sly)))
   (org-babel-reassemble-table
    (let ((result
-	  (funcall (if (member "output" (cdr (assoc :result-params params)))
-		       #'car #'cadr)
-		   (with-temp-buffer
-		     (insert (org-babel-expand-body:lisp body params))
-		     (slime-eval `(swank:eval-and-grab-output
-				   ,(let ((dir (if (assoc :dir params)
-						   (cdr (assoc :dir params))
-						 default-directory)))
-				      (format
-				       (if dir (format org-babel-lisp-dir-fmt dir)
-					 "(progn %s\n)")
-				       (buffer-substring-no-properties
-					(point-min) (point-max)))))
-				 (cdr (assoc :package params)))))))
+          (funcall (if (member "output" (cdr (assoc :result-params params)))
+                       #'car #'cadr)
+                   (with-temp-buffer
+                     (insert (org-babel-expand-body:lisp body params))
+                     (funcall org-babel-lisp-eval-fn
+                              `(swank:eval-and-grab-output
+                                ,(let ((dir (if (assoc :dir params)
+                                                (cdr (assoc :dir params))
+                                              default-directory)))
+                                   (format
+                                    (if dir (format org-babel-lisp-dir-fmt dir)
+                                      "(progn %s\n)")
+                                    (buffer-substring-no-properties
+                                     (point-min) (point-max)))))
+                              (cdr (assoc :package params)))))))
      (org-babel-result-cond (cdr (assoc :result-params params))
        result
        (condition-case nil

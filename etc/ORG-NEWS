@@ -138,6 +138,8 @@ a broken internal link.  See its docstring for more information.
 unlike to existing ~\vert~, which is expanded as ~&vert;~ when using
 a HTML derived export back-end.
 *** Babel
+**** Support for SLY in Lisp blocks
+See ~org-babel-lisp-eval-fn~ to activate it.
 **** Support for Stan language
 New ob-stan.el library.
 
