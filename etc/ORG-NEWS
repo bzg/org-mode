@@ -224,6 +224,12 @@ types.
 *** New option ~org-attach-commit~
 When non-nil, commit attachments with git, assuming the document is in
 a git repository.
+*** New HTML ~id~ attributes on special, example and quote blocks
+If the block has a =#+NAME:= attribute assigned, then the HTML element
+will have an ~id~ attribute with that name in the HTML export. This
+enables one to create links to these elements in other places, e.g.,
+~<a href="#name">text</a>~.
+
 ** New functions
 *** ~org-next-line-empty-p~
 It replaces the deprecated ~next~ argument to ~org-previous-line-empty-p~.
