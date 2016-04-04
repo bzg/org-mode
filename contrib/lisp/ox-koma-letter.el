@@ -797,12 +797,12 @@ a communication channel."
 	   (location-set (funcall check-scope 'location))
 	   (location (plist-get info :location)))
        (when (or (and with-location-set (or location-set heading-val))
-		 (and (eq scope 'buffer) (or with-location-set location-set heading-val))
-		 (format "\\setkomavar{location}{%s}\n"
-			 (if (plist-get info :with-location)
-			     (if (plist-get info :special-headings) (or heading-val location "")
-			       (or option location ""))
-			   "")))))
+		 (and (eq scope 'buffer) (or with-location-set location-set heading-val)))
+	 (format "\\setkomavar{location}{%s}\n"
+		 (if (plist-get info :with-location)
+		     (if (plist-get info :special-headings) (or heading-val location "")
+		       (or heading-val location ""))
+		   ""))))
      ;; Folding marks.
      (and (funcall check-scope 'with-foldmarks)
           (let ((foldmarks (plist-get info :with-foldmarks)))
