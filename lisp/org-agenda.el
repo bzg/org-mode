@@ -4852,7 +4852,7 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
       (setq org-agenda-query-string match)
       (setq org-agenda-redo-command
 	    (list 'org-tags-view
-		  org--matcher-tags-todo-only
+		  `(quote ,org--matcher-tags-todo-only)
 		  `(if current-prefix-arg nil ,org-agenda-query-string)))
       (setq files (org-agenda-files nil 'ifmode)
 	    rtnall nil)
