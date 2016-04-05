@@ -7365,7 +7365,7 @@ With a prefix argument, use the alternative interface: e.g., if
 	 (selected-point
 	  (if (eq interface 'outline)
 	      (car (org-get-location (current-buffer) org-goto-help))
-	    (let ((pa (org-refile-get-location "Goto" nil nil t)))
+	    (let ((pa (org-refile-get-location "Goto")))
 	      (org-refile-check-position pa)
 	      (nth 3 pa)))))
     (if selected-point
@@ -11498,7 +11498,7 @@ buffer position at the beginning of an entry and PATH is a list
 of strings describing the outline path for that entry, in reverse
 order.")
 
-(defun org-refile-get-targets (&optional default-buffer excluded-entries)
+(defun org-refile-get-targets (&optional default-buffer)
   "Produce a table with refile targets."
   (let ((case-fold-search nil)
 	;; otherwise org confuses "TODO" as a kw and "Todo" as a word
@@ -11559,8 +11559,7 @@ order.")
 				 org-refile-target-verify-function
 				 (not
 				  (funcall org-refile-target-verify-function)))
-				(not heading)
-				(member heading excluded-entries))
+				(not heading))
 		      (let ((re (format org-complex-heading-regexp-format
 					(regexp-quote heading)))
 			    (target
@@ -11797,25 +11796,25 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 				       ""
 				       (marker-position org-clock-hd-marker)))
 		      (setq arg nil)))
-	       (setq it (or rfloc
-			    (let (heading-text)
-			      (save-excursion
-				(unless (and arg (listp arg))
-				  (org-back-to-heading t)
-				  (setq heading-text
-					(replace-regexp-in-string
-					 org-bracket-link-regexp
-					 "\\3"
-					 (nth 4 (org-heading-components)))))
-				(org-refile-get-location
-				 (cond ((and arg (listp arg)) "Goto")
-				       (regionp (concat actionmsg " region to"))
-				       (t (concat actionmsg " subtree \""
-						  heading-text "\" to")))
-				 default-buffer
-				 (and (not (equal '(4) arg))
-				      org-refile-allow-creating-parent-nodes)
-				 arg))))))
+	       (setq it
+		     (or rfloc
+			 (let (heading-text)
+			   (save-excursion
+			     (unless (and arg (listp arg))
+			       (org-back-to-heading t)
+			       (setq heading-text
+				     (replace-regexp-in-string
+				      org-bracket-link-regexp
+				      "\\3"
+				      (nth 4 (org-heading-components)))))
+			     (org-refile-get-location
+			      (cond ((and arg (listp arg)) "Goto")
+				    (regionp (concat actionmsg " region to"))
+				    (t (concat actionmsg " subtree \""
+					       heading-text "\" to")))
+			      default-buffer
+			      (and (not (equal '(4) arg))
+				   org-refile-allow-creating-parent-nodes)))))))
 	  (setq file (nth 1 it)
 		pos (nth 3 it))
 	  (when (and (not arg)
@@ -11915,26 +11914,14 @@ Also check `org-refile-target-table'."
 	 (list (replace-regexp-in-string "/$" "" refloc)
 	       (replace-regexp-in-string "\\([^/]\\)$" "\\1/" refloc))))))
 
-(defun org-refile-get-location (&optional prompt default-buffer new-nodes
-					  no-exclude)
+(defun org-refile-get-location (&optional prompt default-buffer new-nodes)
   "Prompt the user for a refile location, using PROMPT.
 PROMPT should not be suffixed with a colon and a space, because
 this function appends the default value from
-`org-refile-history' automatically, if that is not empty.
-When NO-EXCLUDE is set, do not exclude headlines in the current subtree,
-this is used for the GOTO interface."
+`org-refile-history' automatically, if that is not empty."
   (let ((org-refile-targets org-refile-targets)
-	(org-refile-use-outline-path org-refile-use-outline-path)
-	excluded-entries)
-    (when (and (derived-mode-p 'org-mode)
-	       (not org-refile-use-cache)
-	       (not no-exclude))
-      (org-map-tree
-       (lambda()
-	 (setq excluded-entries
-	       (append excluded-entries (list (org-get-heading t t)))))))
-    (setq org-refile-target-table
-	  (org-refile-get-targets default-buffer excluded-entries)))
+	(org-refile-use-outline-path org-refile-use-outline-path))
+    (setq org-refile-target-table (org-refile-get-targets default-buffer)))
   (unless org-refile-target-table
     (user-error "No refile targets"))
   (let* ((cbuf (current-buffer))
