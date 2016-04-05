@@ -376,13 +376,6 @@ This option can also be set with the OPTIONS keyword, e.g.:
   :group 'org-export-koma-letter
   :type 'boolean)
 
-(defcustom org-koma-letter-use-location t
-  "Non-nil prints the contents of the letter's extension below the header.
-This option can also be set with the OPTIONS keyword, e.g.:
-\"location:nil\"."
-  :group 'org-export-koma-letter
-  :type 'boolean)
-
 (defcustom org-koma-letter-default-class "default-koma-letter"
   "Default class for `org-koma-letter'.
 The value must be a member of `org-latex-classes'."
@@ -453,7 +446,6 @@ e.g. \"title-subject:t\"."
     (:with-foldmarks nil "foldmarks" org-koma-letter-use-foldmarks)
     (:with-phone nil "phone" org-koma-letter-use-phone)
     (:with-place nil "place" org-koma-letter-use-place)
-    (:with-location nil "location" org-koma-letter-use-location)
     (:with-subject nil "subject" org-koma-letter-subject-format)
     (:with-title-as-subject nil "title-subject" org-koma-letter-prefer-subject)
     (:with-headline-opening nil nil org-koma-letter-headline-is-opening-maybe)
@@ -471,13 +463,12 @@ e.g. \"title-subject:t\"."
     (:inbuffer-with-email nil "email" 'koma-letter:empty)
     (:inbuffer-with-foldmarks nil "foldmarks" 'koma-letter:empty)
     (:inbuffer-with-phone nil "phone" 'koma-letter:empty)
-    (:inbuffer-with-place nil "place" 'koma-letter:empty)
-    (:inbuffer-with-location nil "location" 'koma-letter:empty))
+    (:inbuffer-with-place nil "place" 'koma-letter:empty))
   :translate-alist '((export-block . org-koma-letter-export-block)
-		     (export-snippet . org-koma-letter-export-snippet)
-		     (headline . org-koma-letter-headline)
-		     (keyword . org-koma-letter-keyword)
-		     (template . org-koma-letter-template))
+			(export-snippet . org-koma-letter-export-snippet)
+			(headline . org-koma-letter-headline)
+			(keyword . org-koma-letter-keyword)
+			(template . org-koma-letter-template))
   :menu-entry
   '(?k "Export with KOMA Scrlttr2"
        ((?L "As LaTeX buffer" org-koma-letter-export-as-latex)
@@ -767,42 +758,36 @@ a communication channel."
           (format "\\KOMAoption{fromphone}{%s}\n"
                   (if (plist-get info :with-phone) "true" "false")))
      ;; Signature.
-     (let* ((head-opening (plist-get info :with-headline-opening))
-	    (signature (funcall heading-or-key-value
-				(if head-opening 'closing nil)
-				:signature
-				(if head-opening 'signature nil))))
-       (and signature
-	    (format "\\setkomavar{signature}{%s}\n" signature)))
+     (let* ((heading-val
+	     (and (plist-get info :with-headline-opening)
+		  (org-string-nw-p
+		   (org-trim
+		    (org-export-data
+		     (org-koma-letter--get-tagged-contents 'closing)
+		     info)))))
+	    (signature (org-string-nw-p (plist-get info :signature)))
+	    (signature-scope (funcall check-scope 'signature)))
+       (and (or (and signature signature-scope)
+		heading-val)
+	    (not (and (eq scope 'global) heading-val))
+	    (format "\\setkomavar{signature}{%s}\n"
+		    (if signature-scope signature heading-val))))
      ;; Back address.
      (and (funcall check-scope 'with-backaddress)
           (format "\\KOMAoption{backaddress}{%s}\n"
                   (if (plist-get info :with-backaddress) "true" "false")))
      ;; Place.
-     (let ((place-scoped (funcall check-scope 'with-place))
+     (let ((with-place-set (funcall check-scope 'with-place))
 	   (place-set (funcall check-scope 'place)))
-       (when (or (and place-scoped place-set)
-		 (and (eq scope 'buffer)
-		      (or place-scoped place-set)))
-	 (format "\\setkomavar{place}{%s}\n"
-		 (if (plist-get info :with-place) (plist-get info :place)
-		   ""))))
+       (and (or (and with-place-set place-set)
+		(and (eq scope 'buffer) (or with-place-set place-set)))
+	    (format "\\setkomavar{place}{%s}\n"
+		    (if (plist-get info :with-place) (plist-get info :place)
+		      ""))))
      ;; Location.
-     (let ((heading-val
-	    (org-koma-letter--add-latex-newlines
-	     (org-export-data
-	      (org-koma-letter--get-tagged-contents 'location)
-	      info)))
-	   (with-location-set (funcall check-scope 'with-location))
-	   (location-set (funcall check-scope 'location))
-	   (location (plist-get info :location)))
-       (when (or (and with-location-set (or location-set heading-val))
-		 (and (eq scope 'buffer) (or with-location-set location-set heading-val)))
-	 (format "\\setkomavar{location}{%s}\n"
-		 (if (plist-get info :with-location)
-		     (if (plist-get info :special-headings) (or heading-val location "")
-		       (or heading-val location ""))
-		   ""))))
+     (let ((location (funcall heading-or-key-value 'location :location)))
+       (and location
+	    (format "\\setkomavar{location}{%s}\n" location)))
      ;; Folding marks.
      (and (funcall check-scope 'with-foldmarks)
           (let ((foldmarks (plist-get info :with-foldmarks)))
