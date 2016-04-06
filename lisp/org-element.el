@@ -352,10 +352,11 @@ Don't modify it, set `org-element-affiliated-keywords' instead.")
       (italic ,@standard-set)
       (item ,@standard-set-no-line-break)
       (keyword ,@(remq 'footnote-reference standard-set))
-      ;; Ignore all links excepted plain links in a link description.
-      ;; Also ignore radio-targets and line breaks.
+      ;; Ignore all links excepted plain links and angular links in
+      ;; a link description.  Also ignore radio-targets and line
+      ;; breaks.
       (link bold code entity export-snippet inline-babel-call inline-src-block
-	    italic latex-fragment macro plain-link statistics-cookie
+	    italic latex-fragment macro simple-link statistics-cookie
 	    strike-through subscript superscript underline verbatim)
       (paragraph ,@standard-set)
       ;; Remove any variable object from radio target as it would
@@ -4336,7 +4337,8 @@ to an appropriate container (e.g., a paragraph)."
 				    (org-element-target-parser)))
 			 (or (and (memq 'timestamp restriction)
 				  (org-element-timestamp-parser))
-			     (and (memq 'link restriction)
+			     (and (or (memq 'link restriction)
+				      (memq 'simple-link restriction))
 				  (org-element-link-parser)))))
 		      (?\\
 		       (if (eq (aref result 1) ?\\)
@@ -4358,8 +4360,8 @@ to an appropriate container (e.g., a paragraph)."
 				  (org-element-statistics-cookie-parser)))))
 		      ;; This is probably a plain link.
 		      (_ (and (or (memq 'link restriction)
-					  (memq 'plain-link restriction))
-				      (org-element-link-parser)))))))
+				  (memq 'simple-link restriction))
+			      (org-element-link-parser)))))))
 	    (or (eobp) (forward-char))))
 	(cond (found)
 	      ;; Radio link.

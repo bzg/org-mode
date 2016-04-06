@@ -1688,8 +1688,8 @@ e^{i\\pi}+1=0
 	 (org-element-type (org-element-context)))))
   (should
    (equal "//orgmode.org"
-       (org-test-with-temp-text "A link: <point><http://orgmode\n.org>"
-	 (org-element-property :path (org-element-context)))))
+	  (org-test-with-temp-text "A link: <point><http://orgmode\n.org>"
+	    (org-element-property :path (org-element-context)))))
   ;; Link abbreviation.
   (should
    (equal "http"
@@ -1711,6 +1711,12 @@ e^{i\\pi}+1=0
   (should
    (equal "file"
 	  (org-test-with-temp-text "[[http://orgmode.org][file:unicorn.jpg]]"
+	    (search-forward "file:")
+	    (org-element-property :type (org-element-context)))))
+  ;; So are angular links.
+  (should
+   (equal "file"
+	  (org-test-with-temp-text "[[http://orgmode.org][<file:unicorn.jpg>]]"
 	    (search-forward "file:")
 	    (org-element-property :type (org-element-context))))))
 

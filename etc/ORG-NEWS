@@ -286,6 +286,12 @@ plain list.
 *** ~fixltx2e~ is removed from ~org-latex-default-packages-alist~
 fixltx2e is obsolete, see LaTeX News 22.
 ** Miscellaneous
+*** Allow angular links within link descriptions
+It is now allowed to write, e.g.,
+~[[http:orgmode.org][<file:unicorn.png>]]~ as an equivalent to
+~[[http:orgmode.org][file:unicorn.png]]~.  The advantage of the former
+is that spaces are allowed within the path.
+
 *** Beamer export back-ends uses ~org-latex-prefer-user-labels~
 
 *** ~:preparation-function~ called earlier during publishing
