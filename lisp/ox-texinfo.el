@@ -1097,7 +1097,7 @@ is an integer, build the menu recursively, down to this depth."
 		     (org-export-data (org-export-get-alt-title h info) info)
 		     (org-texinfo--format-entries entries info))
 	     (org-texinfo--build-menu h info (1- level))))))
-      (org-texinfo--menu-entries scope info) "")))))
+      (org-texinfo--menu-entries scope info) "\n")))))
 
 (defun org-texinfo--format-entries (entries info)
   "Format all direct menu entries in SCOPE, as a string.
@@ -1279,9 +1279,11 @@ contextual information."
   "Transcode a SECTION element from Org to Texinfo.
 CONTENTS holds the contents of the section.  INFO is a plist
 holding contextual information."
-  (concat contents
-	  (let ((parent (org-export-get-parent-headline section)))
-	    (and parent (org-texinfo-make-menu parent info)))))
+  (org-trim
+   (concat contents
+	   "\n"
+	   (let ((parent (org-export-get-parent-headline section)))
+	     (and parent (org-texinfo-make-menu parent info))))))
 
 ;;;; Special Block
 
