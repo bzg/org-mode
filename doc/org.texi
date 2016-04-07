@@ -16838,14 +16838,12 @@ for i in $@@; do
 done
 
 emacs -Q --batch \
---eval "(progn
-(add-to-list 'load-path (expand-file-name \"~/src/org/lisp/\"))
-(add-to-list 'load-path (expand-file-name \"~/src/org/contrib/lisp/\" t))
-(require 'org)(require 'org-exp)(require 'ob)(require 'ob-tangle)
-(mapc (lambda (file)
-       (find-file (expand-file-name file \"$DIR\"))
-       (org-babel-tangle)
-       (kill-buffer)) '($FILES)))" 2>&1 |grep tangled
+     --eval "(progn
+     (require 'org)(require 'ob)(require 'ob-tangle)
+     (mapc (lambda (file)
+            (find-file (expand-file-name file \"$DIR\"))
+            (org-babel-tangle)
+            (kill-buffer)) '($FILES)))" 2>&1 |grep -i tangled
 @end example
 
 @node Miscellaneous
