@@ -1932,11 +1932,11 @@ Display the original location of the item in another window.
 With prefix arg, make sure that the entire entry is made visible in the
 outline, not only the heading.
 @c
-@itemx @key{TAB}
+@item @key{TAB}
 Go to the original location of the item in another window.  Under Emacs
 22, @kbd{mouse-1} will also work for this.
 @c
-@itemx @key{RET}
+@item @key{RET}
 Go to the original location of the item and delete other windows.
 @c
 
