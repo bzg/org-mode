@@ -17476,18 +17476,19 @@ both scheduled and deadline timestamps."
   (let ((case-fold-search nil)
 	(regexp (org-re-timestamp org-ts-type))
 	(callback
-	 `(lambda ()
-	    (let ((match (match-string 1)))
-	      (and
-	       ,(if (memq org-ts-type '(active inactive all))
-		    '(eq (org-element-type (org-element-context)) 'timestamp)
-		  '(org-at-planning-p))
-	       (not (time-less-p
-		     (org-time-string-to-time match)
-		     (org-time-string-to-time start-date)))
-	       (time-less-p
-		(org-time-string-to-time match)
-		(org-time-string-to-time end-date)))))))
+	 (let ((type org-ts-type))
+	   (lambda ()
+	     (let ((match (match-string 1)))
+	       (and
+		(if (memq type '(active inactive all))
+		    (eq (org-element-type (org-element-context)) 'timestamp)
+		  (org-at-planning-p))
+		(not (time-less-p
+		      (org-time-string-to-time match)
+		      (org-time-string-to-time start-date)))
+		(time-less-p
+		 (org-time-string-to-time match)
+		 (org-time-string-to-time end-date))))))))
     (message "%d entries between %s and %s"
 	     (org-occur regexp nil callback) start-date end-date)))
 
