@@ -738,7 +738,7 @@ For export specific modules, see also `org-export-backends'."
 (defvar org-export-registered-backends) ; From ox.el.
 (declare-function org-export-derived-backend-p "ox" (backend &rest backends))
 (declare-function org-export-backend-name "ox" (backend))
-(defcustom org-export-backends '(ascii html icalendar latex)
+(defcustom org-export-backends '(ascii html icalendar latex odt)
   "List of export back-ends that should be always available.
 
 If a description starts with <C>, the file is not part of Emacs
@@ -779,8 +779,8 @@ Adding a back-end to this list will also pull the back-end it
 depends on, if any."
   :group 'org
   :group 'org-export
-  :version "24.4"
-  :package-version '(Org . "8.0")
+  :version "25.1"
+  :package-version '(Org . "9.0")
   :initialize 'custom-initialize-set
   :set (lambda (var val)
 	 (if (not (featurep 'ox)) (set-default var val)
