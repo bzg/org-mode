@@ -23673,7 +23673,8 @@ time-range, if possible.
 When optional argument UTC is non-nil, time will be expressed as
 Universal Time."
   (format-time-string
-   format (org-timestamp--to-internal-time timestamp end) utc))
+   format (org-timestamp--to-internal-time timestamp end)
+   (and utc t)))
 
 (defun org-timestamp-split-range (timestamp &optional end)
   "Extract a TIMESTAMP object from a date or time range.
