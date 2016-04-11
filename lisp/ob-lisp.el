@@ -40,7 +40,7 @@
 
 (defcustom org-babel-lisp-eval-fn "sly-eval"
   "The function to be called to evaluate code on the Lisp side.
-It can be set to either \"sly-eval\" or \"slime-val\"."
+It can be set to either \"sly-eval\" or \"slime-eval\"."
   :group 'org-babel
   :version "25.1"
   :package-version '(Org . "8.3")
