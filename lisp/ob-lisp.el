@@ -38,12 +38,12 @@
 ;;; Code:
 (require 'ob)
 
-(defcustom org-babel-lisp-eval-fn "sly-eval"
+(defcustom org-babel-lisp-eval-fn "slime-eval"
   "The function to be called to evaluate code on the Lisp side.
 It can be set to either \"sly-eval\" or \"slime-eval\"."
   :group 'org-babel
   :version "25.1"
-  :package-version '(Org . "8.3")
+  :package-version '(Org . "9.0")
   :options '("sly-eval" "slime-eval")
   :type 'stringp)
 
