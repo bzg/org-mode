@@ -929,11 +929,7 @@ channel."
 	((not (org-element-contents link)) nil)
 	;; Do not add a link already handled by custom export
 	;; functions.
-	((let ((protocol (nth 2 (assoc type org-link-protocols)))
-	       (path (org-element-property :path link)))
-	   (and (functionp protocol)
-		(funcall protocol (org-link-unescape path) anchor 'ascii)))
-	 nil)
+	((org-export-custom-protocol-maybe link anchor 'ascii) nil)
 	(t
 	 (concat
 	  (org-ascii--fill-string
