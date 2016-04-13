@@ -868,34 +868,26 @@ ELEMENT is either a headline element or a section element.  INFO
 is a plist used as a communication channel."
   (let* (seen
 	 (unique-link-p
-	  (function
-	   ;; Return LINK if it wasn't referenced so far, or nil.
-	   ;; Update SEEN links along the way.
-	   (lambda (link)
-	     (let ((footprint
-		    ;; Normalize description in footprints.
-		    (cons (org-element-property :raw-link link)
-			  (let ((contents (org-element-contents link)))
-			    (and contents
-				 (replace-regexp-in-string
-				  "[ \r\t\n]+" " "
-				  (org-trim
-				   (org-element-interpret-data contents))))))))
-	       ;; Ignore LINK if it hasn't been translated already.
-	       ;; It can happen if it is located in an affiliated
-	       ;; keyword that was ignored.
-	       (when (and (org-string-nw-p
-			   (gethash link (plist-get info :exported-data)))
-			  (not (member footprint seen)))
-		 (push footprint seen) link)))))
-	 ;; If at a section, find parent headline, if any, in order to
-	 ;; count links that might be in the title.
-	 (headline
-	  (if (eq (org-element-type element) 'headline) element
-	    (or (org-export-get-parent-headline element) element))))
-    ;; Get all links in HEADLINE.
-    (org-element-map headline 'link
-      (lambda (l) (funcall unique-link-p l)) info nil nil t)))
+	  ;; Return LINK if it wasn't referenced so far, or nil.
+	  ;; Update SEEN links along the way.
+	  (lambda (link)
+	    (let ((footprint
+		   ;; Normalize description in footprints.
+		   (cons (org-element-property :raw-link link)
+			 (let ((contents (org-element-contents link)))
+			   (and contents
+				(replace-regexp-in-string
+				 "[ \r\t\n]+" " "
+				 (org-trim
+				  (org-element-interpret-data contents))))))))
+	      ;; Ignore LINK if it hasn't been translated already.  It
+	      ;; can happen if it is located in an affiliated keyword
+	      ;; that was ignored.
+	      (when (and (org-string-nw-p
+			  (gethash link (plist-get info :exported-data)))
+			 (not (member footprint seen)))
+		(push footprint seen) link)))))
+    (org-element-map element 'link unique-link-p info nil nil t)))
 
 (defun org-ascii--describe-links (links width info)
   "Return a string describing a list of links.
@@ -1284,46 +1276,50 @@ holding contextual information."
   ;; Don't export footnote section, which will be handled at the end
   ;; of the template.
   (unless (org-element-property :footnote-section-p headline)
-    (let* ((low-level-rank (org-export-low-level-p headline info))
+    (let* ((low-level (org-export-low-level-p headline info))
 	   (width (org-ascii--current-text-width headline info))
+	   ;; Export title early so that any link in it can be
+	   ;; exported and seen in `org-ascii--unique-links'.
+	   (title (org-ascii--build-title headline info width (not low-level)))
 	   ;; Blank lines between headline and its contents.
 	   ;; `org-ascii-headline-spacing', when set, overwrites
 	   ;; original buffer's spacing.
 	   (pre-blanks
-	    (make-string
-	     (or (car (plist-get info :ascii-headline-spacing))
-		 (org-element-property :pre-blank headline))
-	     ?\n))
-	   ;; Even if HEADLINE has no section, there might be some
-	   ;; links in its title that we shouldn't forget to describe.
-	   (links
-	    (unless (or (eq (caar (org-element-contents headline)) 'section))
-	      (let ((title (org-element-property :title headline)))
-		(when (consp title)
-		  (org-ascii--describe-links
-		   (org-ascii--unique-links title info) width info))))))
+	    (make-string (or (car (plist-get info :ascii-headline-spacing))
+			     (org-element-property :pre-blank headline)
+			     0)
+			 ?\n))
+	   (links (and (plist-get info :ascii-links-to-notes)
+		       (org-ascii--describe-links
+			(org-ascii--unique-links headline info) width info)))
+	   ;; Re-build contents, inserting section links at the right
+	   ;; place.  The cost is low since build results are cached.
+	   (body
+	    (if (not (org-string-nw-p links)) contents
+	      (let* ((contents (org-element-contents headline))
+		     (section (let ((first (car contents)))
+				(and (eq (org-element-type first) 'section)
+				     first))))
+		(concat (and section
+			     (concat (org-element-normalize-string
+				      (org-export-data section info))
+				     "\n\n"))
+			links
+			(mapconcat (lambda (e) (org-export-data e info))
+				   (if section (cdr contents) contents)
+				   ""))))))
       ;; Deep subtree: export it as a list item.
-      (if low-level-rank
-	  (concat
-	   ;; Bullet.
-	   (let ((bullets (cdr (assq (plist-get info :ascii-charset)
-				     (plist-get info :ascii-bullets)))))
-	     (char-to-string
-	      (nth (mod (1- low-level-rank) (length bullets)) bullets)))
-	   " "
-	   ;; Title.
-	   (org-ascii--build-title headline info width) "\n"
-	   ;; Contents, indented by length of bullet.
-	   pre-blanks
-	   (org-ascii--indent-string
-	    (concat contents
-		    (when (org-string-nw-p links) (concat "\n\n" links)))
-	    2))
+      (if low-level
+	  (let* ((bullets (cdr (assq (plist-get info :ascii-charset)
+				     (plist-get info :ascii-bullets))))
+		 (bullet
+		  (format "%c "
+			  (nth (mod (1- low-level) (length bullets)) bullets))))
+	    (concat bullet title "\n" pre-blanks
+		    ;; Contents, indented by length of bullet.
+		    (org-ascii--indent-string body (length bullet))))
 	;; Else: Standard headline.
-	(concat
-	 (org-ascii--build-title headline info width 'underline)
-	 "\n" pre-blanks
-	 (concat (when (org-string-nw-p links) links) contents))))))
+	(concat title "\n" pre-blanks body)))))
 
 
 ;;;; Horizontal Rule
@@ -1690,20 +1686,21 @@ contextual information."
   "Transcode a SECTION element from Org to ASCII.
 CONTENTS is the contents of the section.  INFO is a plist holding
 contextual information."
-  (org-ascii--indent-string
-   (concat
-    contents
-    (when (plist-get info :ascii-links-to-notes)
-      ;; Add list of links at the end of SECTION.
-      (let ((links (org-ascii--describe-links
-		    (org-ascii--unique-links section info)
-		    (org-ascii--current-text-width section info) info)))
-	;; Separate list of links and section contents.
-	(when (org-string-nw-p links) (concat "\n\n" links)))))
-   ;; Do not apply inner margin if parent headline is low level.
-   (let ((headline (org-export-get-parent-headline section)))
-     (if (or (not headline) (org-export-low-level-p headline info)) 0
-       (plist-get info :ascii-inner-margin)))))
+  (let ((links
+	 (and (plist-get info :ascii-links-to-notes)
+	      ;; Take care of links in first section of the document.
+	      (not (org-element-lineage section '(headline)))
+	      (org-ascii--describe-links
+	       (org-ascii--unique-links section info)
+	       (org-ascii--current-text-width section info)
+	       info))))
+    (org-ascii--indent-string
+     (if (not (org-string-nw-p links)) contents
+       (concat (org-element-normalize-string contents) "\n\n" links))
+     ;; Do not apply inner margin if parent headline is low level.
+     (let ((headline (org-export-get-parent-headline section)))
+       (if (or (not headline) (org-export-low-level-p headline info)) 0
+	 (plist-get info :ascii-inner-margin))))))
 
 
 ;;;; Special Block
