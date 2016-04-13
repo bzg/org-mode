@@ -1185,6 +1185,7 @@ may have been stored before."
     (cond
      ((and table-line-pos
 	   (string-match "\\(I+\\)\\([-+][0-9]\\)" table-line-pos))
+      (goto-char (point-min))
       ;; we have a complex line specification
       (let ((ll (ignore-errors
 		  (save-match-data (org-table-analyze))
