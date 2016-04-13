@@ -38,15 +38,6 @@
 ;;; Code:
 (require 'ob)
 
-(defcustom org-babel-lisp-eval-fn "slime-eval"
-  "The function to be called to evaluate code on the Lisp side.
-It can be set to either \"sly-eval\" or \"slime-eval\"."
-  :group 'org-babel
-  :version "25.1"
-  :package-version '(Org . "9.0")
-  :options '("sly-eval" "slime-eval")
-  :type 'stringp)
-
 (declare-function sly-eval "ext:sly" (sexp &optional package))
 (declare-function slime-eval "ext:slime" (sexp &optional package))
 
@@ -55,6 +46,14 @@ It can be set to either \"sly-eval\" or \"slime-eval\"."
 
 (defvar org-babel-default-header-args:lisp '())
 (defvar org-babel-header-args:lisp '((package . :any)))
+
+(defcustom org-babel-lisp-eval-fn #'slime-eval
+  "The function to be called to evaluate code on the Lisp side.
+Valid values include `slime-eval' and `sly-eval'."
+  :group 'org-babel
+  :version "25.1"
+  :package-version '(Org . "9.0")
+  :type 'function)
 
 (defcustom org-babel-lisp-dir-fmt
   "(let ((*default-pathname-defaults* #P%S\n)) %%s\n)"
@@ -89,8 +88,8 @@ current directory string."
 BODY is the contents of the block, as a string.  PARAMS is
 a property list containing the parameters of the block."
   (require (pcase org-babel-lisp-eval-fn
-	     ("slime-eval" 'slime)
-	     ("sly-eval" 'sly)))
+	     (`slime-eval 'slime)
+	     (`sly-eval 'sly)))
   (org-babel-reassemble-table
    (let ((result
           (funcall (if (member "output" (cdr (assoc :result-params params)))
