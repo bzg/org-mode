@@ -15907,7 +15907,7 @@ strings."
 
 (defun org-property--local-values (property literal-nil)
   "Return value for PROPERTY in current entry.
-Value is a list whose care is the base value for PROPERTY and cdr
+Value is a list whose car is the base value for PROPERTY and cdr
 a list of accumulated values.  Return nil if neither is found in
 the entry.  Also return nil when PROPERTY is set to \"nil\",
 unless LITERAL-NIL is non-nil."
