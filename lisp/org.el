@@ -2581,6 +2581,10 @@ taken from the (otherwise obsolete) variable `org-todo-interpretation'."
   "Alist of all groups tags from all current agenda files.")
 (defvar-local org-tag-groups-alist nil)
 (defvar org-agenda-contributing-files nil)
+(defvar-local org-current-tag-alist nil
+  "Alist of all tag groups in current buffer.
+This variable takes into consideration `org-tag-alist',
+`org-tag-persistent-alist' and TAGS keywords in the buffer.")
 (defvar-local org-not-done-keywords nil)
 (defvar-local org-done-keywords nil)
 (defvar-local org-todo-heads nil)
@@ -4901,13 +4905,28 @@ related expressions."
 				'("ARCHIVE" "CATEGORY" "COLUMNS" "CONSTANTS"
 				  "LINK" "OPTIONS" "PRIORITIES" "PROPERTY"
 				  "SEQ_TODO" "STARTUP" "TODO" "TYP_TODO")))))))
+      ;; Startup options.  Get this early since it does change
+      ;; behavior for other options (e.g., tags).
+      (let ((startup (cdr (assq 'startup alist))))
+	(dolist (option startup)
+	  (let ((entry (assoc-string option org-startup-options t)))
+	    (when entry
+	      (let ((var (nth 1 entry))
+		    (val (nth 2 entry)))
+		(if (not (nth 3 entry)) (set (make-local-variable var) val)
+		  (unless (listp (symbol-value var))
+		    (set (make-local-variable var) nil))
+		  (add-to-list var val)))))))
       (setq-local org-file-tags
 		  (mapcar #'org-add-prop-inherited
 			  (cdr (assq 'filetags alist))))
-      (setq-local org-tag-alist
-		  (let ((tags (cdr (assq 'tags alist))))
-		    (if tags (org-tag-string-to-alist tags) org-tag-alist)))
-      (setq-local org-tag-groups-alist (org-tag-alist-to-groups org-tag-alist))
+      (setq org-current-tag-alist
+	    (append org-tag-persistent-alist
+		    (let ((tags (cdr (assq 'tags alist))))
+		      (if tags (org-tag-string-to-alist tags)
+			org-tag-alist))))
+      (setq org-tag-groups-alist
+	    (org-tag-alist-to-groups org-current-tag-alist))
       (unless tags-only
 	;; File properties.
 	(setq-local org-file-properties (cdr (assq 'property alist)))
@@ -4939,17 +4958,6 @@ related expressions."
 	(let ((scripts (assq 'scripts alist)))
 	  (when scripts
 	    (setq-local org-use-sub-superscripts (cdr scripts))))
-	;; Startup options.
-	(let ((startup (cdr (assq 'startup alist))))
-	  (dolist (option startup)
-	    (let ((entry (assoc-string option org-startup-options t)))
-	      (when entry
-		(let ((var (nth 1 entry))
-		      (val (nth 2 entry)))
-		  (if (not (nth 3 entry)) (set (make-local-variable var) val)
-		    (unless (listp (symbol-value var))
-		      (set (make-local-variable var) nil))
-		    (add-to-list var val)))))))
 	;; TODO keywords.
 	(setq-local org-todo-kwd-alist nil)
 	(setq-local org-todo-key-alist nil)
@@ -14364,16 +14372,15 @@ instead of the agenda files."
   (save-excursion
     (org-uniquify
      (delq nil
-	   (apply 'append
+	   (apply #'append
 		  (mapcar
 		   (lambda (file)
 		     (set-buffer (find-file-noselect file))
-		     (append (org-get-buffer-tags)
-			     (mapcar (lambda (x) (if (stringp (car-safe x))
-						     (list (car-safe x)) nil))
-				     org-tag-alist)))
-		   (if (and files (car files))
-		       files
+		     (mapcar (lambda (x)
+			       (and (stringp (car-safe x))
+				    (list (car-safe x))))
+			     (or org-current-tag-alist (org-get-buffer-tags))))
+		   (if (car-safe files) files
 		     (org-agenda-files))))))))
 
 (defun org-make-tags-matcher (match)
@@ -14937,7 +14944,7 @@ When JUST-ALIGN is non-nil, only align tags."
 			     org-last-tags-completion-table
 			     (append
 			      org-tag-persistent-alist
-			      (or org-tag-alist (org-get-buffer-tags))
+			      (or org-current-tag-alist (org-get-buffer-tags))
 			      (and
 			       org-complete-tags-always-offer-all-agenda-tags
 			       (org-global-tags-completion-table
@@ -18717,8 +18724,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	    (setq org-tag-alist-for-agenda
 		  (org-uniquify
 		   (append org-tag-alist-for-agenda
-			   org-tag-alist
-			   org-tag-persistent-alist)))
+			   org-current-tag-alist)))
 	    ;; Merge current file's tag groups into global
 	    ;; `org-tag-groups-alist-for-agenda'.
 	    (when org-group-tags

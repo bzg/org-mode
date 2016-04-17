@@ -1657,40 +1657,75 @@ SCHEDULED: <2014-03-04 tue.>"
   "Test `org-set-regexps-and-options' specifications."
   ;; TAGS keyword.
   (should
+   (equal '(("A"))
+	  (let ((org-tag-alist '(("A")))
+		(org-tag-persistent-alist nil))
+	    (org-test-with-temp-text ""
+	      (org-mode-restart)
+	      org-current-tag-alist))))
+  (should
+   (equal '(("B"))
+	  (let ((org-tag-alist '(("A")))
+		(org-tag-persistent-alist nil))
+	    (org-test-with-temp-text "#+TAGS: B"
+	      (org-mode-restart)
+	      org-current-tag-alist))))
+  (should
+   (equal '(("C") ("B"))
+	  (let ((org-tag-alist '(("A")))
+		(org-tag-persistent-alist '(("C"))))
+	    (org-test-with-temp-text "#+TAGS: B"
+	      (org-mode-restart)
+	      org-current-tag-alist))))
+  (should
+   (equal '(("B"))
+	  (let ((org-tag-alist '(("A")))
+		(org-tag-persistent-alist '(("C"))))
+	    (org-test-with-temp-text "#+STARTUP: noptag\n#+TAGS: B"
+	      (org-mode-restart)
+	      org-current-tag-alist))))
+  (should
    (equal '(("A" . ?a) ("B") ("C"))
-	  (org-test-with-temp-text "#+TAGS: A(a) B C"
-	    (org-mode-restart)
-	    org-tag-alist)))
+	  (let ((org-tag-persistant-alist nil))
+	    (org-test-with-temp-text "#+TAGS: A(a) B C"
+	      (org-mode-restart)
+	      org-current-tag-alist))))
   (should
    (equal '(("A") (:newline) ("B"))
-	  (org-test-with-temp-text "#+TAGS: A\n#+TAGS: B"
-	    (org-mode-restart)
-	    org-tag-alist)))
+	  (let ((org-tag-persistent-alist nil))
+	    (org-test-with-temp-text "#+TAGS: A\n#+TAGS: B"
+	      (org-mode-restart)
+	      org-current-tag-alist))))
   (should
    (equal '((:startgroup) ("A") ("B") (:endgroup) ("C"))
-	  (org-test-with-temp-text "#+TAGS: { A B } C"
-	    (org-mode-restart)
-	    org-tag-alist)))
+	  (let ((org-tag-persistent-alist nil))
+	    (org-test-with-temp-text "#+TAGS: { A B } C"
+	      (org-mode-restart)
+	      org-current-tag-alist))))
   (should
    (equal '((:startgroup) ("A") (:grouptags) ("B") ("C") (:endgroup))
-	  (org-test-with-temp-text "#+TAGS: { A : B C }"
-	    (org-mode-restart)
-	    org-tag-alist)))
+	  (let ((org-tag-persistent-alist nil))
+	    (org-test-with-temp-text "#+TAGS: { A : B C }"
+	      (org-mode-restart)
+	      org-current-tag-alist))))
   (should
    (equal '(("A" "B" "C"))
-	  (org-test-with-temp-text "#+TAGS: { A : B C }"
-	    (org-mode-restart)
-	    org-tag-groups-alist)))
+	  (let ((org-tag-persistent-alist nil))
+	    (org-test-with-temp-text "#+TAGS: { A : B C }"
+	      (org-mode-restart)
+	      org-tag-groups-alist))))
   (should
    (equal '((:startgrouptag) ("A") (:grouptags) ("B") ("C") (:endgrouptag))
-	  (org-test-with-temp-text "#+TAGS: [ A : B C ]"
-	    (org-mode-restart)
-	    org-tag-alist)))
+	  (let ((org-tag-persistent-alist nil))
+	    (org-test-with-temp-text "#+TAGS: [ A : B C ]"
+	      (org-mode-restart)
+	      org-current-tag-alist))))
   (should
    (equal '(("A" "B" "C"))
-	  (org-test-with-temp-text "#+TAGS: [ A : B C ]"
-	    (org-mode-restart)
-	    org-tag-groups-alist)))
+	  (let ((org-tag-persistent-alist nil))
+	    (org-test-with-temp-text "#+TAGS: [ A : B C ]"
+	      (org-mode-restart)
+	      org-tag-groups-alist))))
   ;; FILETAGS keyword.
   (should
    (equal '("A" "B" "C")

@@ -422,7 +422,7 @@ agenda view showing the flagged items."
   (let ((files-alist (sort (copy-sequence org-mobile-files-alist)
 			   (lambda (a b) (string< (cdr a) (cdr b)))))
 	(def-todo (default-value 'org-todo-keywords))
-	(def-tags (default-value 'org-tag-alist))
+	(def-tags org-tag-alist)
 	(target-file (expand-file-name org-mobile-index-file
 				       org-mobile-directory))
 	file link-name todo-kwds done-kwds tags entry kwds dwds twds)

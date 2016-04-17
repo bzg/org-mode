@@ -86,10 +86,11 @@
 (declare-function org-add-archive-files "org-archive" (files))
 (declare-function org-capture "org-capture" (&optional goto keys))
 
-(defvar calendar-mode-map)                    ; defined in calendar.el
-(defvar org-clock-current-task nil)           ; defined in org-clock.el
-(defvar org-mobile-force-id-on-agenda-items)  ; defined in org-mobile.el
-(defvar org-habit-show-habits)                ; defined in org-habit.el
+(defvar calendar-mode-map)
+(defvar org-clock-current-task)
+(defvar org-current-tag-alist)
+(defvar org-mobile-force-id-on-agenda-items)
+(defvar org-habit-show-habits)
 (defvar org-habit-show-habits-only-for-today)
 (defvar org-habit-show-all-today)
 
@@ -9930,8 +9931,8 @@ The prefix arg is passed through to the command if possible."
 		     (format "Tag to %s: " (if (eq action ?+) "add" "remove"))
 		     (with-current-buffer (marker-buffer (car entries))
 		       (delq nil
-			     (mapcar (lambda (x)
-				       (if (stringp (car x)) x)) org-tag-alist)))))
+			     (mapcar (lambda (x) (and (stringp (car x)) x))
+				     org-current-tag-alist)))))
 	  (setq cmd `(org-agenda-set-tags ,tag ,(if (eq action ?+) ''on ''off))))
 
 	 ((memq action '(?s ?d))
