@@ -3450,53 +3450,71 @@ moved to the new date."
   :group 'org)
 
 (defcustom org-tag-alist nil
-  "List of tags allowed in Org-mode files.
-When this list is nil, Org-mode will base TAG input on what is already in the
-buffer.
-The value of this variable is an alist, the car of each entry must be a
-keyword as a string, the cdr may be a character that is used to select
-that tag through the fast-tag-selection interface.
-See the manual for details."
-  :group 'org-tags
-  :type '(repeat
-	  (choice
-	   (cons   (string    :tag "Tag name")
-		   (character :tag "Access char"))
-	   (list :tag "Start radio group"
-		 (const :startgroup)
-		 (option (string :tag "Group description")))
-	   (list :tag "Start tag group, non distinct"
-		 (const :startgrouptag)
-		 (option (string :tag "Group description")))
-	   (list :tag "Group tags delimiter"
-		 (const :grouptags))
-	   (list :tag "End radio group"
-		 (const :endgroup)
-		 (option (string :tag "Group description")))
-	   (list :tag "End tag group, non distinct"
-		 (const :endgrouptag)
-		 (option (string :tag "Group description")))
-	   (const :tag "New line" (:newline)))))
+  "Default tags available in Org files.
 
-(defcustom org-tag-persistent-alist nil
-  "List of tags that will always appear in all Org-mode files.
-This is in addition to any in buffer settings or customizations
-of `org-tag-alist'.
-When this list is nil, Org-mode will base TAG input on `org-tag-alist'.
-The value of this variable is an alist, the car of each entry must be a
-keyword as a string, the cdr may be a character that is used to select
-that tag through the fast-tag-selection interface.
-See the manual for details.
-To disable these tags on a per-file basis, insert anywhere in the file:
-   #+STARTUP: noptag"
+The value of this variable is an alist.  Associations either:
+
+  (TAG)
+  (TAG . SELECT)
+  (SPECIAL)
+
+where TAG is a tag as a string, SELECT is a character, used to
+select that tag through the fast tag selection interface, and
+SPECIAL is one of the following keywords: `:startgroup',
+`:startgrouptag', `:grouptags', `:engroup', `:endgrouptag' or
+`:newline'.  These keywords are used to define a hierarchy of
+tags.  See manual for details.
+
+When this variable is nil, Org mode bases tag input on what is
+already in the buffer.  The value can be overridden locally by
+using a TAGS keyword, e.g.,
+
+  #+TAGS: tag1 tag2
+
+See also `org-tag-persistent-alist' to sidestep this behavior."
   :group 'org-tags
   :type '(repeat
 	  (choice
 	   (cons   (string    :tag "Tag name")
 		   (character :tag "Access char"))
 	   (const :tag "Start radio group" (:startgroup))
+	   (const :tag "Start tag group, non distinct" (:startgrouptag))
 	   (const :tag "Group tags delimiter" (:grouptags))
 	   (const :tag "End radio group" (:endgroup))
+	   (const :tag "End tag group, non distinct" (:endgrouptag))
+	   (const :tag "New line" (:newline)))))
+
+(defcustom org-tag-persistent-alist nil
+  "Tags always available in Org files.
+
+The value of this variable is an alist.  Associations either:
+
+  (TAG)
+  (TAG . SELECT)
+  (SPECIAL)
+
+where TAG is a tag as a string, SELECT is a character, used to
+select that tag through the fast tag selection interface, and
+SPECIAL is one of the following keywords: `:startgroup',
+`:startgrouptag', `:grouptags', `:engroup', `:endgrouptag' or
+`:newline'.  These keywords are used to define a hierarchy of
+tags.  See manual for details.
+
+Unlike to `org-tag-alist', tags defined in this variable do not
+depend on a local TAGS keyword.  Instead, to disable these tags
+on a per-file basis, insert anywhere in the file:
+
+  #+STARTUP: noptag"
+  :group 'org-tags
+  :type '(repeat
+	  (choice
+	   (cons (string    :tag "Tag name")
+		 (character :tag "Access char"))
+	   (const :tag "Start radio group" (:startgroup))
+	   (const :tag "Start tag group, non distinct" (:startgrouptag))
+	   (const :tag "Group tags delimiter" (:grouptags))
+	   (const :tag "End radio group" (:endgroup))
+	   (const :tag "End tag group, non distinct" (:endgrouptag))
 	   (const :tag "New line" (:newline)))))
 
 (defcustom org-complete-tags-always-offer-all-agenda-tags nil
