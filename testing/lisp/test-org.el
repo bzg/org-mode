@@ -4241,6 +4241,62 @@ Paragraph<point>"
      (org-invisible-p2))))
 
 
+;;; Tags
+
+(ert-deftest test-org/tag-string-to-alist ()
+  "Test `org-tag-string-to-alist' specifications."
+  ;; Tag without selection key.
+  (should (equal (org-tag-string-to-alist "tag1") '(("tag1"))))
+  ;; Tag with selection key.
+  (should (equal (org-tag-string-to-alist "tag1(t)") '(("tag1" . ?t))))
+  ;; Tag group.
+  (should
+   (equal
+    (org-tag-string-to-alist "[ group : t1 t2 ]")
+    '((:startgrouptag) ("group") (:grouptags) ("t1") ("t2") (:endgrouptag))))
+  ;; Mutually exclusive tags.
+  (should (equal (org-tag-string-to-alist "{ tag1 tag2 }")
+		 '((:startgroup) ("tag1") ("tag2") (:endgroup))))
+  (should
+   (equal
+    (org-tag-string-to-alist "{ group : tag1 tag2 }")
+    '((:startgroup) ("group") (:grouptags) ("tag1") ("tag2") (:endgroup)))))
+
+(ert-deftest test-org/tag-alist-to-string ()
+  "Test `org-tag-alist-to-string' specifications."
+  (should (equal (org-tag-alist-to-string '(("tag1"))) "tag1"))
+  (should (equal (org-tag-alist-to-string '(("tag1" . ?t))) "tag1(t)"))
+  (should
+   (equal
+    (org-tag-alist-to-string
+     '((:startgrouptag) ("group") (:grouptags) ("t1") ("t2") (:endgrouptag)))
+    "[ group : t1 t2 ]"))
+  (should
+   (equal (org-tag-alist-to-string
+	   '((:startgroup) ("tag1") ("tag2") (:endgroup)))
+	  "{ tag1 tag2 }"))
+  (should
+   (equal
+    (org-tag-alist-to-string
+     '((:startgroup) ("group") (:grouptags) ("tag1") ("tag2") (:endgroup)))
+    "{ group : tag1 tag2 }")))
+
+(ert-deftest test-org/tag-alist-to-groups ()
+  "Test `org-tag-alist-to-groups' specifications."
+  (should
+   (equal (org-tag-alist-to-groups
+	   '((:startgroup) ("group") (:grouptags) ("t1") ("t2") (:endgroup)))
+	  '(("group" "t1" "t2"))))
+  (should
+   (equal
+    (org-tag-alist-to-groups
+     '((:startgrouptag) ("group") (:grouptags) ("t1") ("t2") (:endgrouptag)))
+    '(("group" "t1" "t2"))))
+  (should-not
+   (org-tag-alist-to-groups
+    '((:startgroup) ("group") ("t1") ("t2") (:endgroup)))))
+
+
 ;;; Timestamps API
 
 (ert-deftest test-org/time-stamp ()

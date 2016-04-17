@@ -52,6 +52,7 @@
 
 (defvar org-drawer-regexp)
 (defvar org-property-re)
+(defvar org-tag-alist)
 
 (defun org-thing-at-point ()
   "Examine the thing at point and let the caller know what it is.
@@ -237,20 +238,10 @@ When completing for #+STARTUP, for example, this function returns
 		(setq opts (delete "showstars" opts)))))
 	    opts))))
 
-(defvar org-tag-alist)
 (defun pcomplete/org-mode/file-option/tags ()
   "Complete arguments for the #+TAGS file option."
   (pcomplete-here
-   (list
-    (mapconcat (lambda (x)
-		 (cond
-		  ((eq :startgroup (car x)) "{")
-		  ((eq :endgroup (car x)) "}")
-		  ((eq :grouptags (car x)) ":")
-		  ((eq :newline (car x)) "\\n")
-		  ((cdr x) (format "%s(%c)" (car x) (cdr x)))
-		  (t (car x))))
-	       org-tag-alist " "))))
+   (list (org-tag-alist-to-string org-tag-alist))))
 
 (defun pcomplete/org-mode/file-option/title ()
   "Complete arguments for the #+TITLE file option."
@@ -335,19 +326,16 @@ This needs more work, to handle headings with lots of spaces in them."
 	   (pcomplete-uniqify-list tbl)))
        (substring pcomplete-stub 1))))
 
-(defvar org-tag-alist)
 (defun pcomplete/org-mode/tag ()
   "Complete a tag name.  Omit tags already set."
   (while (pcomplete-here
-	  (mapcar (lambda (x)
-		    (concat x ":"))
+	  (mapcar (lambda (x) (concat x ":"))
 		  (let ((lst (pcomplete-uniqify-list
-			      (or (remove
+			      (or (remq
 				   nil
-				   (mapcar (lambda (x)
-					     (and (stringp (car x)) (car x)))
+				   (mapcar (lambda (x) (org-string-nw-p (car x)))
 					   org-tag-alist))
-				  (mapcar 'car (org-get-buffer-tags))))))
+				  (mapcar #'car (org-get-buffer-tags))))))
 		    (dolist (tag (org-get-tags))
 		      (setq lst (delete tag lst)))
 		    lst))
