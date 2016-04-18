@@ -15025,13 +15025,14 @@ When JUST-ALIGN is non-nil, only align tags."
 		    (let* ((table
 			    (setq
 			     org-last-tags-completion-table
-			     (append
-			      org-tag-persistent-alist
-			      (or org-tag-alist (org-get-buffer-tags))
-			      (and
-			       org-complete-tags-always-offer-all-agenda-tags
-			       (org-global-tags-completion-table
-				(org-agenda-files))))))
+			     (delete-dups
+			      (append
+			       org-tag-persistent-alist
+			       (or org-tag-alist (org-get-buffer-tags))
+			       (and
+				org-complete-tags-always-offer-all-agenda-tags
+				(org-global-tags-completion-table
+				 (org-agenda-files)))))))
 			   (current-tags (org-split-string current ":"))
 			   (inherited-tags
 			    (nreverse (nthcdr (length current-tags)
