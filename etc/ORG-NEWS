@@ -467,6 +467,17 @@ docstring for more information.
 - ~org-latex-format-inlinetask-function~
 - ~org-link-search~
 ** New features
+*** Default lexical evaluation of emacs-lisp src blocks
+Emacs-lisp src blocks in babel are now evaluated using lexical scoping. There is a new header to control this behavior.
+
+The default results in an eval with lexical scoping.
+:lexical yes
+
+This turns lexical scoping off in the eval (the former behavior).
+:lexical no
+
+This uses the lexical environment with x=42 in the eval.
+:lexical '((x . 42))
 
 *** Behavior of ~org-return~ changed
 

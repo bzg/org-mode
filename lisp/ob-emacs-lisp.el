@@ -28,8 +28,16 @@
 ;;; Code:
 (require 'ob)
 
-(defvar org-babel-default-header-args:emacs-lisp nil
-  "Default arguments for evaluating an emacs-lisp source block.")
+(defconst org-babel-header-args:emacs-lisp '((lexical . :any))
+  "Emacs-lisp specific header arguments.")
+
+(defvar org-babel-default-header-args:emacs-lisp '((:lexical . "yes"))
+  "Default arguments for evaluating an emacs-lisp source block.
+
+:lexical is \"yes\" by default and causes src blocks to be eval'd
+using lexical scoping.  It can also be an alist mapping symbols to
+their value.  It is used as the optional LEXICAL argument to
+`eval', which see.")
 
 (defun org-babel-expand-body:emacs-lisp (body params)
   "Expand BODY according to PARAMS, return the expanded body."
@@ -51,13 +59,18 @@
 (defun org-babel-execute:emacs-lisp (body params)
   "Execute a block of emacs-lisp code with Babel."
   (save-window-excursion
-    (let ((result
-           (eval (read (format (if (member "output"
-                                           (cdr (assoc :result-params params)))
-                                   "(with-output-to-string %s)"
-                                 "(progn %s)")
-                               (org-babel-expand-body:emacs-lisp
-                                body params))))))
+    (let* ((lexical (cdr (assq :lexical params)))
+	   (result
+	    (eval (read (format (if (member "output"
+					    (cdr (assq :result-params params)))
+				    "(with-output-to-string %s)"
+				  "(progn %s)")
+				(org-babel-expand-body:emacs-lisp
+				 body params)))
+
+		  (if (listp lexical)
+		      lexical
+		    (member lexical '("yes" "t"))))))
       (org-babel-result-cond (cdr (assoc :result-params params))
 	(let ((print-level nil)
               (print-length nil))
