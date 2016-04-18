@@ -42,6 +42,7 @@
 (declare-function org-buffer-property-keys "org"
 		  (&optional specials defaults columns ignore-malformed))
 (declare-function org-entry-properties "org" (&optional pom which specific))
+(declare-function org-tag-alist-to-string "org" (alist &optional skip-key))
 
 ;;;; Customization variables
 
@@ -52,7 +53,7 @@
 
 (defvar org-drawer-regexp)
 (defvar org-property-re)
-(defvar org-tag-alist)
+(defvar org-current-tag-alist)
 
 (defun org-thing-at-point ()
   "Examine the thing at point and let the caller know what it is.
@@ -241,7 +242,7 @@ When completing for #+STARTUP, for example, this function returns
 (defun pcomplete/org-mode/file-option/tags ()
   "Complete arguments for the #+TAGS file option."
   (pcomplete-here
-   (list (org-tag-alist-to-string org-tag-alist))))
+   (list (org-tag-alist-to-string org-current-tag-alist))))
 
 (defun pcomplete/org-mode/file-option/title ()
   "Complete arguments for the #+TITLE file option."
@@ -334,7 +335,7 @@ This needs more work, to handle headings with lots of spaces in them."
 			      (or (remq
 				   nil
 				   (mapcar (lambda (x) (org-string-nw-p (car x)))
-					   org-tag-alist))
+					   org-current-tag-alist))
 				  (mapcar #'car (org-get-buffer-tags))))))
 		    (dolist (tag (org-get-tags))
 		      (setq lst (delete tag lst)))
