@@ -3801,7 +3801,7 @@ FILTER-ALIST is an alist of filters we need to apply when
   "Mark the current clock entry in the agenda if it is present."
   ;; We need to widen when `org-agenda-finalize' is called from
   ;; `org-agenda-change-all-lines' (e.g. in `org-agenda-clock-in')
-  (when org-clock-current-task
+  (when (bound-and-true-p org-clock-current-task)
     (save-restriction
       (widen)
       (org-agenda-unmark-clocking-task)
@@ -9407,7 +9407,7 @@ buffer, display it in another window."
     (cond (pos (goto-char pos))
 	  ;; If the currently clocked entry is not in the agenda
 	  ;; buffer, we visit it in another window:
-	  (org-clock-current-task
+	  ((bound-and-true-p org-clock-current-task)
 	   (org-switch-to-buffer-other-window (org-clock-goto)))
 	  (t (message "No running clock, use `C-c C-x C-j' to jump to the most recent one")))))
 
