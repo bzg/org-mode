@@ -5848,7 +5848,9 @@ by a #."
 (defun org-fontify-meta-lines-and-blocks (limit)
   (condition-case nil
       (org-fontify-meta-lines-and-blocks-1 limit)
-    (error (message "org-mode fontification error"))))
+    (error (message "org-mode fontification error in %S at %d"
+		    (current-buffer)
+		    (line-number-at-pos)))))
 
 (defun org-fontify-meta-lines-and-blocks-1 (limit)
   "Fontify #+ lines and blocks."
