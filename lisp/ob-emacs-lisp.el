@@ -31,11 +31,11 @@
 (defconst org-babel-header-args:emacs-lisp '((lexical . :any))
   "Emacs-lisp specific header arguments.")
 
-(defvar org-babel-default-header-args:emacs-lisp '((:lexical . "yes"))
+(defvar org-babel-default-header-args:emacs-lisp '((:lexical . "no"))
   "Default arguments for evaluating an emacs-lisp source block.
 
-:lexical is \"yes\" by default and causes src blocks to be eval'd
-using lexical scoping.  It can also be an alist mapping symbols to
+A value of \"yes\" or t causes src blocks to be eval'd using
+lexical scoping.  It can also be an alist mapping symbols to
 their value.  It is used as the optional LEXICAL argument to
 `eval', which see.")
 
