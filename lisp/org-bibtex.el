@@ -630,7 +630,7 @@ This uses `bibtex-parse-entry'."
 				    "[[:space:]\n\r]+" " " str)))
 	(strip-delim
 	 (lambda (str)	     ; strip enclosing "..." and {...}
-	   (dolist (pair '((34 . 34) (123 . 125) (123 . 125)))
+	   (dolist (pair '((34 . 34) (123 . 125)))
 	     (when (and (> (length str) 1)
 			(= (aref str 0) (car pair))
 			(= (aref str (1- (length str))) (cdr pair)))
