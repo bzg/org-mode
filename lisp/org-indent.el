@@ -237,6 +237,8 @@ a time value."
 	      (catch 'interrupt
 		(and org-indent--initial-marker
 		     (marker-position org-indent--initial-marker)
+		     (equal (marker-buffer org-indent--initial-marker)
+			    buffer)
 		     (org-indent-add-properties org-indent--initial-marker
 						(point-max)
 						delay)
