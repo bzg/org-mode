@@ -152,8 +152,7 @@ FILE exists at end of evaluation."
   ;; From Tramp 2.1.19 the following cache flush is not necessary
   (if (file-remote-p default-directory)
       (let (v)
-	(ignore v)
-	(with-parsed-tramp-file-name default-directory nil
+	(with-parsed-tramp-file-name default-directory v
 	  (tramp-flush-directory-property v ""))))
   (while (not (file-exists-p file)) (sit-for (or period 0.25))))
 
