@@ -9884,14 +9884,12 @@ active region."
 				 (buffer-file-name (buffer-base-buffer)))))
 	   ;; Add a context search string
 	   (when (org-xor org-context-in-file-links arg)
-	     (let* ((ee (org-element-at-point))
-		    (et (org-element-type ee))
-		    (ev (plist-get (cadr ee) :value))
-		    (ek (plist-get (cadr ee) :key))
-		    (eok (and (stringp ek) (string-match "name" ek))))
+	     (let* ((element (org-element-at-point))
+		    (type (org-element-type element))
+		    (name (org-element-property :name element)))
 	       (setq txt (cond
 			  ((org-at-heading-p) nil)
-			  ((and (eq et 'keyword) eok) ev)
+			  (name)
 			  ((org-region-active-p)
 			   (buffer-substring (region-beginning) (region-end)))))
 	       (when (or (null txt) (string-match "\\S-" txt))
@@ -9900,7 +9898,7 @@ active region."
 			       (condition-case nil
 				   (org-make-org-heading-search-string txt)
 				 (error "")))
-		       desc (or (and (eq et 'keyword) eok ev)
+		       desc (or name
 				(nth 4 (ignore-errors (org-heading-components)))
 				"NONE")))))
 	   (if (string-match "::\\'" cpltxt)
