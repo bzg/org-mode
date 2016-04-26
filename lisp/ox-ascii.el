@@ -887,7 +887,13 @@ is a plist used as a communication channel."
 			  (gethash link (plist-get info :exported-data)))
 			 (not (member footprint seen)))
 		(push footprint seen) link)))))
-    (org-element-map element 'link unique-link-p info nil nil t)))
+    (org-element-map (if (eq (org-element-type element) 'section)
+			 element
+		       ;; In a headline, only retrieve links in title
+		       ;; and relative section, not in children.
+		       (list (org-element-property :title element)
+			     (car (org-element-contents element))))
+	'link unique-link-p info nil 'headline t)))
 
 (defun org-ascii--describe-links (links width info)
   "Return a string describing a list of links.
