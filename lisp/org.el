@@ -9848,14 +9848,12 @@ active region."
 				 (buffer-file-name (buffer-base-buffer)))))
 	   ;; Add a context search string
 	   (when (org-xor org-context-in-file-links arg)
-	     (let* ((ee (org-element-at-point))
-		    (et (org-element-type ee))
-		    (ev (plist-get (cadr ee) :value))
-		    (ek (plist-get (cadr ee) :key))
-		    (eok (and (stringp ek) (string-match "name" ek))))
+	     (let* ((element (org-element-at-point))
+		    (type (org-element-type element))
+		    (name (org-element-property :name element)))
 	       (setq txt (cond
 			  ((org-at-heading-p) nil)
-			  ((and (eq et 'keyword) eok) ev)
+			  (name)
 			  ((org-region-active-p)
 			   (buffer-substring (region-beginning) (region-end)))))
 	       (when (or (null txt) (string-match "\\S-" txt))
@@ -9864,7 +9862,7 @@ active region."
 			       (condition-case nil
 				   (org-make-org-heading-search-string txt)
 				 (error "")))
-		       desc (or (and (eq et 'keyword) eok ev)
+		       desc (or name
 				(nth 4 (ignore-errors (org-heading-components)))
 				"NONE")))))
 	   (when (string-match "::\\'" cpltxt)
@@ -9897,17 +9895,13 @@ active region."
        (when (consp link) (setq cpltxt (car link) link (cdr link)))
        (setq link (or link cpltxt)
 	     desc (or desc cpltxt))
-       (cond ((equal desc "NONE") (setq desc nil))
-	     ((and desc (string-match org-bracket-link-analytic-regexp desc))
-	      (let ((d0 (match-string 3 desc))
-		    (p0 (match-string 5 desc)))
-		(setq desc
+       (cond ((not desc))
+	     ((equal desc "NONE") (setq desc nil))
+	     (t (setq desc
 		      (replace-regexp-in-string
-		       org-bracket-link-regexp
-		       (concat (or p0 d0)
-			       (if (equal (length (match-string 0 desc))
-					  (length desc)) "*" "")) desc)))))
-
+		       org-bracket-link-analytic-regexp
+		       (lambda (m) (or (match-string 5 m) (match-string 3 m)))
+		       desc))))
        ;; Return the link
        (if (not (and (or (org-called-interactively-p 'any)
 			 executing-kbd-macro)

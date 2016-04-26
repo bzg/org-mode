@@ -2109,6 +2109,49 @@ drops support for Emacs 24.1 and 24.2."
      (org-open-at-point)
      (eq (org-element-type (org-element-context)) 'radio-target))))
 
+;;;; Stored links
+
+(ert-deftest test-org/store-link ()
+  "Test `org-store-link' specifications."
+  ;; On a headline, link to that headline.  Use heading as the
+  ;; description of the link.
+  (should
+   (let (org-store-link-props org-stored-links)
+     (org-test-with-temp-text-in-file "* H1"
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::*H1][H1]]" file)
+		(org-store-link nil))))))
+  ;; On a headline, remove any link from description.
+  (should
+   (let (org-store-link-props org-stored-links)
+     (org-test-with-temp-text-in-file "* [[#l][d]]"
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::*%s][d]]"
+			file
+			(org-link-escape "[[#l][d]]"))
+		(org-store-link nil))))))
+  (should
+   (let (org-store-link-props org-stored-links)
+     (org-test-with-temp-text-in-file "* [[l]]"
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::*%s][l]]" file (org-link-escape "[[l]]"))
+		(org-store-link nil))))))
+  (should
+   (let (org-store-link-props org-stored-links)
+     (org-test-with-temp-text-in-file "* [[l1][d1]] [[l2][d2]]"
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::*%s][d1 d2]]"
+			file
+			(org-link-escape "[[l1][d1]] [[l2][d2]]"))
+		(org-store-link nil))))))
+  ;; On a named element, link to that element.
+  (should
+   (let (org-store-link-props org-stored-links)
+     (org-test-with-temp-text-in-file "#+NAME: foo\nParagraph"
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::foo][foo]]" file)
+		(org-store-link nil)))))))
+
 
 ;;; Node Properties
 
