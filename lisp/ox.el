@@ -4341,7 +4341,7 @@ of a reference.  See also `org-export-format-reference'."
   "Format REFERENCE into a string.
 REFERENCE is a number representing a reference, as returned by
 `org-export-new-reference', which see."
-  (format "org%x" reference))
+  (format "org%07x" reference))
 
 (defun org-export-get-reference (datum info)
   "Return a unique reference for DATUM, as a string.
