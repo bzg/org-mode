@@ -23842,57 +23842,46 @@ beyond the end of the headline."
 		     (car org-special-ctrl-a/e)
 		   org-special-ctrl-a/e))
 	deactivate-mark	refpos)
-    (if (org-bound-and-true-p visual-line-mode)
-	(beginning-of-visual-line 1)
-      (beginning-of-line 1))
-    (if (and arg (fboundp 'move-beginning-of-line))
-	(call-interactively 'move-beginning-of-line)
-      (unless (bobp)
-	(backward-char 1)
-	(if (org-truely-invisible-p)
-	    (while (and (not (bobp)) (org-truely-invisible-p))
-	      (backward-char 1)
-	      (beginning-of-line 1))
-	  (forward-char 1))))
-    (when special
-      (cond
-       ((and (looking-at org-complex-heading-regexp)
-	     (eq (char-after (match-end 1)) ?\s))
-	(setq refpos (min (1+ (or (match-end 3) (match-end 2) (match-end 1)))
-			  (point-at-eol)))
-	(goto-char
-	 (if (eq special t)
-	     (cond ((> pos refpos) refpos)
-		   ((= pos (point)) refpos)
-		   (t (point)))
-	   (cond ((> pos (point)) (point))
-		 ((not (eq last-command this-command)) (point))
-		 (t refpos)))))
-       ((org-at-item-p)
-	;; Being at an item and not looking at an the item means point
-	;; was previously moved to beginning of a visual line, which
-	;; doesn't contain the item.  Therefore, do nothing special,
-	;; just stay here.
-	(when (looking-at org-list-full-item-re)
-	  ;; Set special position at first white space character after
-	  ;; bullet, and check-box, if any.
-	  (let ((after-bullet
-		 (let ((box (match-end 3)))
-		   (if (not box) (match-end 1)
-		     (let ((after (char-after box)))
-		       (if (and after (= after ? )) (1+ box) box))))))
-	    ;; Special case: Move point to special position when
-	    ;; currently after it or at beginning of line.
-	    (if (eq special t)
-		(when (or (> pos after-bullet) (= (point) pos))
-		  (goto-char after-bullet))
-	      ;; Reversed case: Move point to special position when
-	      ;; point was already at beginning of line and command is
-	      ;; repeated.
-	      (when (and (= (point) pos) (eq last-command this-command))
-		(goto-char after-bullet))))))))
-    (org-no-warnings
-     (and (featurep 'xemacs) (setq zmacs-region-stays t))))
+    (call-interactively (if (org-bound-and-true-p visual-line-mode)
+			    #'beginning-of-visual-line
+			  #'move-beginning-of-line))
+    (cond
+     ((or arg (not special)))
+     ((and (looking-at org-complex-heading-regexp)
+	   (eq (char-after (match-end 1)) ?\s))
+      (setq refpos (min (1+ (or (match-end 3) (match-end 2) (match-end 1)))
+			(point-at-eol)))
+      (goto-char
+       (if (eq special t)
+	   (cond ((> pos refpos) refpos)
+		 ((= pos (point)) refpos)
+		 (t (point)))
+	 (cond ((> pos (point)) (point))
+	       ((not (eq last-command this-command)) (point))
+	       (t refpos)))))
+     ((org-at-item-p)
+      ;; Being at an item and not looking at an the item means point
+      ;; was previously moved to beginning of a visual line, which
+      ;; doesn't contain the item.  Therefore, do nothing special,
+      ;; just stay here.
+      (when (looking-at org-list-full-item-re)
+	;; Set special position at first white space character after
+	;; bullet, and check-box, if any.
+	(let ((after-bullet
+	       (let ((box (match-end 3)))
+		 (if (not box) (match-end 1)
+		   (let ((after (char-after box)))
+		     (if (and after (= after ? )) (1+ box) box))))))
+	  ;; Special case: Move point to special position when
+	  ;; currently after it or at beginning of line.
+	  (if (eq special t)
+	      (when (or (> pos after-bullet) (= (point) pos))
+		(goto-char after-bullet))
+	    ;; Reversed case: Move point to special position when
+	    ;; point was already at beginning of line and command is
+	    ;; repeated.
+	    (when (and (= (point) pos) (eq last-command this-command))
+	      (goto-char after-bullet))))))))
   (setq disable-point-adjustment
         (or (not (invisible-p (point)))
             (not (invisible-p (max (point-min) (1- (point))))))))
