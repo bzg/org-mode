@@ -3013,9 +3013,10 @@ Return code as a string."
 	 ;; again after executing Babel code.
 	 (org-set-regexps-and-options)
 	 (org-update-radio-target-regexp)
-	 (org-export-execute-babel-code)
-	 (org-set-regexps-and-options)
-	 (org-update-radio-target-regexp)
+	 (when org-export-babel-evaluate
+	   (org-export-execute-babel-code)
+	   (org-set-regexps-and-options)
+	   (org-update-radio-target-regexp))
 	 ;; Run last hook with current back-end's name as argument.
 	 ;; Update buffer properties and radio targets one last time
 	 ;; before parsing.

@@ -514,6 +514,56 @@ src_emacs-lisp{(+ 1 1)}"
 #+END_SRC"
      (org-export-execute-babel-code) t)))
 
+(ert-deftest ob-export/babel-evaluate ()
+  "Test `org-export-babel-evaluate' effect."
+  ;; When nil, no Babel code is executed.
+  (should-not
+   (string-match-p
+    "2"
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp :exports results\n(+ 1 1)\n#+END_SRC"
+      (let ((org-export-babel-evaluate nil)) (org-export-execute-babel-code))
+      (buffer-string))))
+  (should-not
+   (string-match-p
+    "2"
+    (org-test-with-temp-text
+	"src_emacs-lisp{(+ 1 1)}"
+      (let ((org-export-babel-evaluate nil)) (org-export-execute-babel-code))
+      (buffer-string))))
+  ;; When non-nil, all Babel code types are executed.
+  (should
+   (string-match-p
+    "2"
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp :exports results\n(+ 1 1)\n#+END_SRC"
+      (let ((org-export-babel-evaluate t)) (org-export-execute-babel-code))
+      (buffer-string))))
+  (should
+   (string-match-p
+    "2"
+    (org-test-with-temp-text
+	"src_emacs-lisp{(+ 1 1)}"
+      (let ((org-export-babel-evaluate t)) (org-export-execute-babel-code))
+      (buffer-string))))
+  ;; When set to `inline-only' limit evaluation to inline code.
+  (should-not
+   (string-match-p
+    "2"
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp :exports results\n(+ 1 1)\n#+END_SRC"
+      (let ((org-export-babel-evaluate 'inline-only))
+	(org-export-execute-babel-code))
+      (buffer-string))))
+  (should
+   (string-match-p
+    "2"
+    (org-test-with-temp-text
+	"src_emacs-lisp{(+ 1 1)}"
+      (let ((org-export-babel-evaluate 'inline-only))
+	(org-export-execute-babel-code))
+      (buffer-string)))))
+
 
 (provide 'test-ob-exp)
 
