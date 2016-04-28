@@ -15016,17 +15016,27 @@ When JUST-ALIGN is non-nil, only align tags."
 		(if just-align current
 		  ;; Get a new set of tags from the user.
 		  (save-excursion
-		    (let* ((table
+		    (let* ((seen)
+			   (table
 			    (setq
 			     org-last-tags-completion-table
-			     (delete-dups
-			      (append
-			       org-tag-persistent-alist
-			       (or org-tag-alist (org-get-buffer-tags))
-			       (and
-				org-complete-tags-always-offer-all-agenda-tags
-				(org-global-tags-completion-table
-				 (org-agenda-files)))))))
+			     ;; Uniquify tags in alists, yet preserve
+			     ;; structure (i.e., keywords).
+			     (delq nil
+				   (mapcar
+				    (lambda (pair)
+				      (let ((head (car pair)))
+					(cond ((symbolp head) pair)
+					      ((member head seen) nil)
+					      (t (push head seen)
+						 pair))))
+				    (append
+				     org-tag-persistent-alist
+				     (or org-tag-alist (org-get-buffer-tags))
+				     (and
+				      org-complete-tags-always-offer-all-agenda-tags
+				      (org-global-tags-completion-table
+				       (org-agenda-files))))))))
 			   (current-tags (org-split-string current ":"))
 			   (inherited-tags
 			    (nreverse (nthcdr (length current-tags)
