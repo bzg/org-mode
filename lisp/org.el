@@ -9849,7 +9849,6 @@ active region."
 	   ;; Add a context search string
 	   (when (org-xor org-context-in-file-links arg)
 	     (let* ((element (org-element-at-point))
-		    (type (org-element-type element))
 		    (name (org-element-property :name element)))
 	       (setq txt (cond
 			  ((org-at-heading-p) nil)
