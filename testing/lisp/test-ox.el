@@ -2887,7 +2887,7 @@ Another text. (ref:text)
 	      (org-export-get-reference headline info)))))
   ;; Use search cells defined in `:crossrefs'.
   (should
-   (equal "org1"
+   (equal "org0000001"
 	  (org-test-with-parsed-data "* Headline"
 	    (let* ((headline (org-element-map tree 'headline #'identity nil t))
 		   (search-cell (car (org-export-search-cells headline))))
