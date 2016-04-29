@@ -8426,11 +8426,6 @@ When called with a prefix argument, include all archive files as well."
     (goto-char pos)
     (when (derived-mode-p 'org-mode)
       (org-show-context 'agenda)
-      (save-excursion
-	(and (outline-next-heading)
-	     (org-flag-heading nil)))	; show the next heading
-      (when (outline-invisible-p)
-	(outline-show-entry))			; display invisible text
       (recenter (/ (window-height) 2))
       (org-back-to-heading t)
       (if (re-search-forward org-complex-heading-regexp nil t)
@@ -8873,9 +8868,6 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 	(widen)
 	(goto-char pos)
 	(org-show-context 'agenda)
-	(save-excursion
-	  (and (outline-next-heading)
-	       (org-flag-heading nil)))   ; show the next heading
 	(let ((current-prefix-arg arg))
 	  (call-interactively 'org-todo))
 	(and (bolp) (forward-char 1))
@@ -8914,9 +8906,6 @@ the same tree node, and the headline of the tree node in the Org-mode file."
       (widen)
       (goto-char pos)
       (org-show-context 'agenda)
-      (save-excursion
-	(and (outline-next-heading)
-	     (org-flag-heading nil)))   ; show the next heading
       (org-add-note))))
 
 (defun org-agenda-change-all-lines (newhead hdmarker
@@ -9047,9 +9036,6 @@ Called with a universal prefix arg, show the priority instead of setting it."
 	  (widen)
 	  (goto-char pos)
 	  (org-show-context 'agenda)
-	  (save-excursion
-	    (and (outline-next-heading)
-		 (org-flag-heading nil)))   ; show the next heading
 	  (funcall 'org-priority force-direction)
 	  (end-of-line 1)
 	  (setq newhead (org-get-heading)))
@@ -9073,12 +9059,7 @@ Called with a universal prefix arg, show the priority instead of setting it."
 	(with-current-buffer buffer
 	  (widen)
 	  (goto-char pos)
-	  (save-excursion
-	    (org-show-context 'agenda))
-	  (save-excursion
-	    (and (outline-next-heading)
-		 (org-flag-heading nil)))   ; show the next heading
-	  (goto-char pos)
+	  (org-show-context 'agenda)
 	  (if tag
 	      (org-toggle-tag tag onoff)
 	    (call-interactively 'org-set-tags))
@@ -9101,12 +9082,7 @@ Called with a universal prefix arg, show the priority instead of setting it."
       (with-current-buffer buffer
 	(widen)
 	(goto-char pos)
-	(save-excursion
-	  (org-show-context 'agenda))
-	(save-excursion
-	  (and (outline-next-heading)
-	       (org-flag-heading nil)))   ; show the next heading
-	(goto-char pos)
+	(org-show-context 'agenda)
 	(call-interactively 'org-set-property)))))
 
 (defun org-agenda-set-effort ()
@@ -9123,12 +9099,7 @@ Called with a universal prefix arg, show the priority instead of setting it."
       (with-current-buffer buffer
 	(widen)
 	(goto-char pos)
-	(save-excursion
-	  (org-show-context 'agenda))
-	(save-excursion
-	  (and (outline-next-heading)
-	       (org-flag-heading nil)))	; show the next heading
-	(goto-char pos)
+	(org-show-context 'agenda)
 	(call-interactively 'org-set-effort)
 	(end-of-line 1)
 	(setq newhead (org-get-heading)))
@@ -9149,9 +9120,6 @@ Called with a universal prefix arg, show the priority instead of setting it."
 	(widen)
 	(goto-char pos)
 	(org-show-context 'agenda)
-	(save-excursion
-	  (and (outline-next-heading)
-	       (org-flag-heading nil)))   ; show the next heading
 	(call-interactively 'org-toggle-archive-tag)
 	(end-of-line 1)
 	(setq newhead (org-get-heading)))
@@ -9358,7 +9326,6 @@ ARG is passed through to `org-deadline'."
 	  (widen)
 	  (goto-char pos)
 	  (org-show-context 'agenda)
-	  (org-show-entry)
 	  (org-cycle-hide-drawers 'children)
 	  (org-clock-in arg)
 	  (setq newhead (org-get-heading)))

@@ -675,12 +675,7 @@ description."
     (when marker
       (switch-to-buffer-other-window (marker-buffer marker))
       (goto-char marker)
-      (when (eq major-mode 'org-mode)
-        (org-show-context 'agenda)
-        (save-excursion
-          (and (outline-next-heading)
-               ;; show the next heading
-               (org-flag-heading nil)))))))
+      (when (eq major-mode 'org-mode) (org-show-context 'agenda)))))
 
 (org-no-warnings (defvar date)) ;; unprefixed, from calendar.el
 (defun org-contacts-anniversaries (&optional field format)
