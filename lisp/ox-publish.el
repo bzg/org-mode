@@ -110,6 +110,9 @@ Most properties are optional, but some should always be set:
     Directory (possibly remote) where output files will be
     published.
 
+If `:recursive' is non-nil files in sub-directors of
+`:base-directory' are considered.
+
 The `:exclude' property may be used to prevent certain files from
 being published.  Its value may be a string or regexp matching
 file names you don't want to be published.
