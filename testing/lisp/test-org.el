@@ -4741,7 +4741,30 @@ Paragraph<point>"
     (should (equal '(0 1 3 4 5 7 12 13)
 		   (funcall list-visible-lines 'canonical t)))
     (should (equal '(0 1 3 4 5 7 8 9 11 12 13)
-		   (funcall list-visible-lines 'canonical nil)))))
+		   (funcall list-visible-lines 'canonical nil))))
+  ;; When point is hidden in a drawer or a block, make sure to make it
+  ;; visible.
+  (should-not
+   (org-test-with-temp-text "#+BEGIN_QUOTE\nText\n#+END_QUOTE"
+     (org-hide-block-toggle)
+     (search-forward "Text")
+     (org-show-set-visibility 'minimal)
+     (org-invisible-p2)))
+  (should-not
+   (org-test-with-temp-text ":DRAWER:\nText\n:END:"
+     (org-flag-drawer t)
+     (search-forward "Text")
+     (org-show-set-visibility 'minimal)
+     (org-invisible-p2)))
+  (should-not
+   (org-test-with-temp-text
+       "#+BEGIN_QUOTE\n<point>:DRAWER:\nText\n:END:\n#+END_QUOTE"
+     (org-flag-drawer t)
+     (forward-line -1)
+     (org-hide-block-toggle)
+     (search-forward "Text")
+     (org-show-set-visibility 'minimal)
+     (org-invisible-p2))))
 
 
 (provide 'test-org)

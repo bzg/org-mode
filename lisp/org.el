@@ -13945,28 +13945,33 @@ be shown."
 DETAIL is either nil, `minimal', `local', `ancestors', `lineage',
 `tree', `canonical' or t.  See `org-show-context-detail' for more
 information."
-  (unless (org-before-first-heading-p)
-    ;; Show current heading and possibly its entry, following headline
-    ;; or all children.
-    (if (and (org-at-heading-p) (not (eq detail 'local)))
-	(org-flag-heading nil)
-      (org-show-entry)
+  ;; Show current heading and possibly its entry, following headline
+  ;; or all children.
+  (if (and (org-at-heading-p) (not (eq detail 'local)))
+      (org-flag-heading nil)
+    (org-show-entry)
+    ;; If point is hidden within a drawer or a block, make sure to
+    ;; expose it.
+    (dolist (o (overlays-at (point)))
+      (when (memq (overlay-get o 'invisible) '(org-hide-block outline))
+	(delete-overlay o)))
+    (unless (org-before-first-heading-p)
       (org-with-limited-levels
        (cl-case detail
 	 ((tree canonical t) (org-show-children))
 	 ((nil minimal ancestors))
 	 (t (save-excursion
 	      (outline-next-heading)
-	      (org-flag-heading nil))))))
-    ;; Show all siblings.
-    (when (eq detail 'lineage) (org-show-siblings))
-    ;; Show ancestors, possibly with their children.
-    (when (memq detail '(ancestors lineage tree canonical t))
-      (save-excursion
-	(while (org-up-heading-safe)
-	  (org-flag-heading nil)
-	  (when (memq detail '(canonical t)) (org-show-entry))
-	  (when (memq detail '(tree canonical t)) (org-show-children)))))))
+	      (org-flag-heading nil)))))))
+  ;; Show all siblings.
+  (when (eq detail 'lineage) (org-show-siblings))
+  ;; Show ancestors, possibly with their children.
+  (when (memq detail '(ancestors lineage tree canonical t))
+    (save-excursion
+      (while (org-up-heading-safe)
+	(org-flag-heading nil)
+	(when (memq detail '(canonical t)) (org-show-entry))
+	(when (memq detail '(tree canonical t)) (org-show-children))))))
 
 (defvar org-reveal-start-hook nil
   "Hook run before revealing a location.")
