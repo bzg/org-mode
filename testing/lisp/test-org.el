@@ -4596,7 +4596,7 @@ Paragraph<point>"
      (get-char-property (line-end-position) 'invisible)))
   ;; Test optional argument.
   (should
-   (org-test-with-temp-text ":D1:\nc1\n:END:\n\n:D2:\nc2\n:END:"
+   (org-test-with-temp-text "Text\n:D1:\nc1\n:END:\n\n:D2:\nc2\n:END:"
      (let ((drawer (save-excursion (search-forward ":D2")
 				   (org-element-at-point))))
        (org-flag-drawer t drawer)

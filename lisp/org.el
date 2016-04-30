@@ -7178,23 +7178,24 @@ specifying which drawers should not be hidden."
 Otherwise make it visible.  When optional argument ELEMENT is
 a parsed drawer, as returned by `org-element-at-point', hide or
 show that drawer instead."
-  (when (save-excursion
-	  (beginning-of-line)
-	  (org-looking-at-p org-drawer-regexp))
-    (let ((drawer (or element (org-element-at-point))))
-      (when (memq (org-element-type drawer) '(drawer property-drawer))
-	(let ((post (org-element-property :post-affiliated drawer)))
-	  (save-excursion
-	    (outline-flag-region
-	     (progn (goto-char post) (line-end-position))
-	     (progn (goto-char (org-element-property :end drawer))
-		    (skip-chars-backward " \r\t\n")
-		    (line-end-position))
-	     flag))
-	  ;; When the drawer is hidden away, make sure point lies in
-	  ;; a visible part of the buffer.
-	  (when (and flag (> (line-beginning-position) post))
-	    (goto-char post)))))))
+  (let ((drawer (or element
+		    (and (save-excursion
+			   (beginning-of-line)
+			   (org-looking-at-p org-drawer-regexp))
+			 (org-element-at-point)))))
+    (when (memq (org-element-type drawer) '(drawer property-drawer))
+      (let ((post (org-element-property :post-affiliated drawer)))
+	(save-excursion
+	  (outline-flag-region
+	   (progn (goto-char post) (line-end-position))
+	   (progn (goto-char (org-element-property :end drawer))
+		  (skip-chars-backward " \r\t\n")
+		  (line-end-position))
+	   flag))
+	;; When the drawer is hidden away, make sure point lies in
+	;; a visible part of the buffer.
+	(when (and flag (> (line-beginning-position) post))
+	  (goto-char post))))))
 
 (defun org-subtree-end-visible-p ()
   "Is the end of the current subtree visible?"
