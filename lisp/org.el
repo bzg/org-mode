@@ -1202,8 +1202,8 @@ make it harder to edit the location of the match.  In such
 a case, use the command `org-reveal' (\\[org-reveal]) to show
 more context."
   :group 'org-reveal-location
-  :version "25.1"
-  :package-version '(Org . "8.3")
+  :version "25.2"
+  :package-version '(Org . "9.0")
   :type '(choice
 	  (const :tag "Canonical" t)
 	  (const :tag "Minimal" nil)
