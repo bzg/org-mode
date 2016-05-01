@@ -590,7 +590,7 @@ of the day at point (if any) or the current HH:MM time."
        ((equal entry "C")
 	(customize-variable 'org-capture-templates))
        ((equal entry "q")
-	(error "Abort"))
+	(user-error "Abort"))
        (t
 	(org-capture-set-plist entry)
 	(org-capture-get-template)
@@ -1504,7 +1504,7 @@ only the bare key is returned."
 	    (setq pressed (char-to-string (read-char-exclusive))))
 	  (when (equal pressed "\C-g")
 	    (kill-buffer buffer)
-	    (error "Abort"))
+	    (user-error "Abort"))
 	  (when (and (not (assoc pressed table))
 		     (not (member pressed des-keys))
 		     (assoc pressed specials))
