@@ -59,10 +59,26 @@ This function is called by `org-babel-execute-src-block'."
 		(concat "java " java " -jar "
 			(shell-quote-argument
 			 (expand-file-name org-plantuml-jar-path))
+			(if (string= (file-name-extension out-file) "png")
+			    " -tpng" "")
 			(if (string= (file-name-extension out-file) "svg")
 			    " -tsvg" "")
 			(if (string= (file-name-extension out-file) "eps")
 			    " -teps" "")
+			(if (string= (file-name-extension out-file) "pdf")
+			    " -tpdf" "")
+			(if (string= (file-name-extension out-file) "vdx")
+			    " -tvdx" "")
+			(if (string= (file-name-extension out-file) "xmi")
+			    " -txmi" "")
+			(if (string= (file-name-extension out-file) "scxml")
+			    " -tscxml" "")
+			(if (string= (file-name-extension out-file) "html")
+			    " -thtml" "")
+			(if (string= (file-name-extension out-file) "txt")
+			    " -ttxt" "")
+			(if (string= (file-name-extension out-file) "utxt")
+			    " -utxt" "")
 			" -p " cmdline " < "
 			(org-babel-process-file-name in-file)
 			" > "
