@@ -5682,8 +5682,8 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 			       (memq 'agenda org-agenda-use-tag-inheritance))))
 		  tags (org-get-tags-at nil (not inherited-tags))
 		  level (make-string (org-reduced-level (org-outline-level)) ? ))
-	    (looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
-	    (setq head (or (match-string 1) ""))
+	    (looking-at "\\*+[ \t]+\\(.*\\)")
+	    (setq head (match-string 1))
 	    (setq txt (org-agenda-format-item
 		       (if inactivep org-agenda-inactive-leader nil)
 		       head level category tags timestr
@@ -6424,7 +6424,7 @@ scheduled items with an hour specification like [h]h:mm."
 
 			tags (org-get-tags-at nil (not inherited-tags)))
 		  (setq level (make-string (org-reduced-level (org-outline-level)) ? ))
-		  (looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
+		  (looking-at "\\*+[ \t]+\\(.*\\)")
 		  (setq head (match-string 1))
 		  (let ((remove-re
 			 (if org-agenda-remove-timeranges-from-blocks
