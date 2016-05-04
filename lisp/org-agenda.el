@@ -5656,8 +5656,8 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 			       (memq 'agenda org-agenda-use-tag-inheritance))))
 		  tags (org-get-tags-at nil (not inherited-tags))
 		  level (make-string (org-reduced-level (org-outline-level)) ? ))
-	    (looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
-	    (setq head (or (match-string 1) ""))
+	    (looking-at "\\*+[ \t]+\\(.*\\)")
+	    (setq head (match-string 1))
 	    (setq txt (org-agenda-format-item
 		       (if inactivep org-agenda-inactive-leader nil)
 		       head level category tags timestr
@@ -6123,10 +6123,7 @@ specification like [h]h:mm."
 				 (or (eq org-agenda-use-tag-inheritance t)
 				     (memq 'agenda org-agenda-use-tag-inheritance))))
 			tags (org-get-tags-at pos1 (not inherited-tags)))
-		  (setq head (buffer-substring
-			      (point)
-			      (progn (skip-chars-forward "^\r\n")
-				     (point))))
+		  (setq head (buffer-substring (point) (line-end-position)))
 		  (if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
 		      (setq timestr
 			    (concat (substring s (match-beginning 1)) " "))
@@ -6304,9 +6301,7 @@ an hour specification like [h]h:mm."
 
 		      tags (org-get-tags-at nil (not inherited-tags)))
 		(setq level (make-string (org-reduced-level (org-outline-level)) ? ))
-		(setq head (buffer-substring
-			    (point)
-			    (progn (skip-chars-forward "^\r\n") (point))))
+		(setq head (buffer-substring (point) (line-end-position)))
 		(if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
 		    (setq timestr
 			  (concat (substring s (match-beginning 1)) " "))
@@ -6394,7 +6389,7 @@ an hour specification like [h]h:mm."
 
 			tags (org-get-tags-at nil (not inherited-tags)))
 		  (setq level (make-string (org-reduced-level (org-outline-level)) ? ))
-		  (looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
+		  (looking-at "\\*+[ \t]+\\(.*\\)")
 		  (setq head (match-string 1))
 		  (let ((remove-re
 			 (if org-agenda-remove-timeranges-from-blocks
