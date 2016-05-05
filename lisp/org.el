@@ -7204,9 +7204,11 @@ show that drawer instead."
 
 (defun org-first-headline-recenter ()
   "Move cursor to the first headline and recenter the headline."
-  (goto-char (point-min))
-  (when (re-search-forward (concat "^\\(" org-outline-regexp "\\)") nil t)
-    (set-window-start (selected-window) (point-at-bol))))
+  (let ((window (get-buffer-window)))
+    (when window
+      (goto-char (point-min))
+      (when (re-search-forward (concat "^\\(" org-outline-regexp "\\)") nil t)
+	(set-window-start window (line-beginning-position))))))
 
 ;;; Saving and restoring visibility
 
@@ -13866,14 +13868,18 @@ as well.")
 
 (defun org-occur (regexp &optional keep-previous callback)
   "Make a compact tree which shows all matches of REGEXP.
-The tree will show the lines where the regexp matches, and all higher
-headlines above the match.  It will also show the heading after the match,
-to make sure editing the matching entry is easy.
-If KEEP-PREVIOUS is non-nil, highlighting and exposing done by a previous
-call to `org-occur' will be kept, to allow stacking of calls to this
-command.
-If CALLBACK is non-nil, it is a function which is called to confirm
-that the match should indeed be shown."
+
+The tree will show the lines where the regexp matches, and any other context
+defined in `org-show-context-detail', which see.
+
+When optional argument KEEP-PREVIOUS is non-nil, highlighting and exposing
+done by a previous call to `org-occur' will be kept, to allow stacking of
+calls to this command.
+
+Optional argument CALLBACK can be a function of no argument.  In this case,
+it is called with point at the end of the match, match data being set
+accordingly.  Current match is shown only if the return value is non-nil.
+The function must neither move point nor alter narrowing."
   (interactive "sRegexp: \nP")
   (when (equal regexp "")
     (user-error "Regexp cannot be empty"))
@@ -13883,12 +13889,11 @@ that the match should indeed be shown."
   (let ((cnt 0))
     (save-excursion
       (goto-char (point-min))
-      (when (or (not keep-previous)          ; do not want to keep
-		(not org-occur-highlights))  ; no previous matches
+      (when (or (not keep-previous)	    ; do not want to keep
+		(not org-occur-highlights)) ; no previous matches
 	;; hide everything
 	(org-overview))
       (while (re-search-forward regexp nil t)
-	(backward-char) ;; FIXME: Match timestamps at the end of a headline
 	(when (or (not callback)
 		  (save-match-data (funcall callback)))
 	  (setq cnt (1+ cnt))
@@ -17507,7 +17512,10 @@ both scheduled and deadline timestamps."
 	  (lambda ()
 	    (let ((match (match-string 1)))
 	      (and (if (memq ts-type '(active inactive all))
-		       (eq (org-element-type (org-element-context)) 'timestamp)
+		       (eq (org-element-type (save-excursion
+					       (backward-char)
+					       (org-element-context)))
+			   'timestamp)
 		     (org-at-planning-p))
 		   (time-less-p
 		    (org-time-string-to-time match)
@@ -17526,7 +17534,10 @@ both scheduled and deadline timestamps."
 	  (lambda ()
 	    (let ((match (match-string 1)))
 	      (and (if (memq ts-type '(active inactive all))
-		       (eq (org-element-type (org-element-context)) 'timestamp)
+		       (eq (org-element-type (save-excursion
+					       (backward-char)
+					       (org-element-context)))
+			   'timestamp)
 		     (org-at-planning-p))
 		   (not (time-less-p
 			 (org-time-string-to-time match)
@@ -17547,7 +17558,10 @@ both scheduled and deadline timestamps."
 	     (let ((match (match-string 1)))
 	       (and
 		(if (memq type '(active inactive all))
-		    (eq (org-element-type (org-element-context)) 'timestamp)
+		    (eq (org-element-type (save-excursion
+					    (backward-char)
+					    (org-element-context)))
+			'timestamp)
 		  (org-at-planning-p))
 		(not (time-less-p
 		      (org-time-string-to-time match)
