@@ -4015,6 +4015,27 @@ Paragraph<point>"
      (search-forward "H2")
      (org-invisible-p2))))
 
+(ert-deftest test-org/occur ()
+  "Test `org-occur' specifications."
+  ;; Count number of matches.
+  (should
+   (= 1
+      (org-test-with-temp-text "* H\nA\n* H2"
+	(org-occur "A"))))
+  (should
+   (= 2
+      (org-test-with-temp-text "* H\nA\n* H2\nA"
+	(org-occur "A"))))
+  ;; Test CALLBACK optional argument.
+  (should
+   (= 0
+      (org-test-with-temp-text "* H\nA\n* H2"
+	(org-occur "A" nil (lambda () (equal (org-get-heading) "H2"))))))
+  (should
+   (= 1
+      (org-test-with-temp-text "* H\nA\n* H2\nA"
+	(org-occur "A" nil (lambda () (equal (org-get-heading) "H2")))))))
+
 
 ;;; Timestamps API
 
