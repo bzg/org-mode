@@ -7252,9 +7252,11 @@ show that drawer instead."
 
 (defun org-first-headline-recenter ()
   "Move cursor to the first headline and recenter the headline."
-  (goto-char (point-min))
-  (when (re-search-forward (concat "^\\(" org-outline-regexp "\\)") nil t)
-    (set-window-start (selected-window) (point-at-bol))))
+  (let ((window (get-buffer-window)))
+    (when window
+      (goto-char (point-min))
+      (when (re-search-forward (concat "^\\(" org-outline-regexp "\\)") nil t)
+	(set-window-start window (line-beginning-position))))))
 
 ;;; Saving and restoring visibility
 
