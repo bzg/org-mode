@@ -564,7 +564,7 @@ of a different task.")
 (defun org-clock-drawer-name ()
   "Return clock drawer's name for current entry, or nil."
   (let ((drawer (org-clock-into-drawer)))
-    (cond ((integerp drawer) (org-log-into-drawer))
+    (cond ((integerp drawer) (or (org-log-into-drawer) "LOGBOOK"))
 	  ((stringp drawer) drawer)
 	  (t nil))))
 
@@ -1513,9 +1513,9 @@ line and position cursor in that line."
 	 ;; When a clock drawer needs to be created because of the
 	 ;; number of clock items or simply if it is missing, collect
 	 ;; all clocks in the section and wrap them within the drawer.
-	 ((or drawer
-	      (and (wholenump org-clock-into-drawer)
-		   (>= (1+ count) org-clock-into-drawer)))
+	 ((if (wholenump org-clock-into-drawer)
+	      (>= (1+ count) org-clock-into-drawer)
+	    drawer)
 	  ;; Skip planning line and property drawer, if any.
 	  (org-end-of-meta-data)
 	  (let ((beg (point)))
