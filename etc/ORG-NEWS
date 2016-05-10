@@ -171,6 +171,42 @@ mandatory):
  :database <database>
  :dbpassword <secret>
 #+END_EXAMPLE
+**** Support for additional plantuml output formats
+The support for output formats of [[http://plantuml.com/][plantuml]] has been extended to now
+include:
+
+All Diagrams:
+- png ::
+- svg ::
+- eps ::
+- pdf ::
+- vdx ::
+- txt :: ASCII art
+- utxt :: ASCII art using unicode characters
+
+Class Diagrams:
+- xmi ::
+- html ::
+
+State Diagrams:
+- scxml ::
+
+The output formats are determined by the file extension specified
+using the :file property, e.g.:
+
+#+begin_src plantuml :file diagram.png
+@startuml
+Alice -> Bob: Authentication Request
+Bob --> Alice: Authentication Response
+
+Alice -> Bob: Another authentication Request
+Alice <-- Bob: another authentication Response
+@enduml
+#+end_src
+
+Please note that *pdf* *does not work out of the box* and needss
+additional setup in addition to plantuml. See
+[[http://plantuml.com/pdf.html]] for details and setup information.
 *** New =#+latex_compiler= keyword to set LaTeX compiler.
 PDFLaTeX, XeLaTeX, and LuaLaTeX are supported.  See the manual for
 details.
