@@ -613,12 +613,7 @@ See also `org-src-mode-hook'."
 	  (setq buffer-offer-save t)
 	  (setq buffer-file-name
 		(concat (buffer-file-name (marker-buffer org-src--beg-marker))
-			"[" (buffer-name) "]"))
-	  (if (featurep 'xemacs)
-	      (progn
-		(make-variable-buffer-local 'write-contents-hooks) ; needed only for 21.4
-		(setq write-contents-hooks '(org-edit-src-save)))
-	    (setq write-contents-functions '(org-edit-src-save))))
+			"[" (buffer-name) "]")))
       (setq buffer-read-only t))))
 
 (org-add-hook 'org-src-mode-hook #'org-src-mode-configure-edit-buffer)
