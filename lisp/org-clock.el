@@ -560,7 +560,9 @@ of a different task.")
 (defun org-clock-drawer-name ()
   "Return clock drawer's name for current entry, or nil."
   (let ((drawer (org-clock-into-drawer)))
-    (cond ((integerp drawer) (or (org-log-into-drawer) "LOGBOOK"))
+    (cond ((integerp drawer)
+	   (let ((log-drawer (org-log-into-drawer)))
+	     (if (stringp log-drawer) log-drawer "LOGBOOK")))
 	  ((stringp drawer) drawer)
 	  (t nil))))
 

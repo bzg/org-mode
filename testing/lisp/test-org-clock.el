@@ -80,6 +80,189 @@ contents.  The clocktable doesn't appear in the buffer."
     ;; Remove clocktable.
     (delete-region (point) (search-forward "#+END:\n"))))
 
+
+;;; Clock drawer
+
+(ert-deftest test-org-clock/into-drawer ()
+  "Test `org-clock-into-drawer' specifications."
+  ;; When `org-clock-into-drawer' is nil, do not use a clock drawer.
+  (should-not
+   (org-test-with-temp-text "* H"
+     (let ((org-clock-into-drawer nil)
+	   (org-log-into-drawer nil))
+       (org-clock-into-drawer))))
+  (should-not
+   (org-test-with-temp-text "* H"
+     (let ((org-clock-into-drawer nil)
+	   (org-log-into-drawer t))
+       (org-clock-into-drawer))))
+  (should-not
+   (org-test-with-temp-text "* H"
+     (let ((org-clock-into-drawer nil)
+	   (org-log-into-drawer "BAR"))
+       (org-clock-into-drawer))))
+  ;; When `org-clock-into-drawer' is a string, use it
+  ;; unconditionally.
+  (should
+   (equal "FOO"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-clock-into-drawer "FOO")
+		  (org-log-into-drawer nil))
+	      (org-clock-into-drawer)))))
+  (should
+   (equal "FOO"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-clock-into-drawer "FOO")
+		  (org-log-into-drawer t))
+	      (org-clock-into-drawer)))))
+  (should
+   (equal "FOO"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-clock-into-drawer "FOO")
+		  (org-log-into-drawer "BAR"))
+	      (org-clock-into-drawer)))))
+  ;; When `org-clock-into-drawer' is an integer, return it.
+  (should
+   (= 1
+      (org-test-with-temp-text "* H"
+	(let ((org-clock-into-drawer 1)
+	      (org-log-into-drawer nil))
+	  (org-clock-into-drawer)))))
+  (should
+   (= 1
+      (org-test-with-temp-text "* H"
+	(let ((org-clock-into-drawer 1)
+	      (org-log-into-drawer t))
+	  (org-clock-into-drawer)))))
+  (should
+   (= 1
+      (org-test-with-temp-text "* H"
+	(let ((org-clock-into-drawer 1)
+	      (org-log-into-drawer "BAR"))
+	  (org-clock-into-drawer)))))
+  ;; Otherwise, any non-nil value defaults to `org-log-into-drawer' or
+  ;; "LOGBOOK" if it is nil.
+  (should
+   (equal "LOGBOOK"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-clock-into-drawer t)
+		  (org-log-into-drawer nil))
+	      (org-clock-into-drawer)))))
+  (should
+   (equal "LOGBOOK"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-clock-into-drawer t)
+		  (org-log-into-drawer t))
+	      (org-clock-into-drawer)))))
+  (should
+   (equal "FOO"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-clock-into-drawer t)
+		  (org-log-into-drawer "FOO"))
+	      (org-clock-into-drawer)))))
+  ;; A non-nil "CLOCK_INTO_DRAWER" property overrides
+  ;; `org-clock-into-drawer' value.
+  (should
+   (equal "LOGBOOK"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:CLOCK_INTO_DRAWER: t\n:END:"
+	    (let ((org-clock-into-drawer nil)
+		  (org-log-into-drawer nil))
+	      (org-clock-into-drawer)))))
+  (should
+   (equal "FOO"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:CLOCK_INTO_DRAWER: FOO\n:END:"
+	    (let ((org-clock-into-drawer nil)
+		  (org-log-into-drawer nil))
+	      (org-clock-into-drawer)))))
+  (should-not
+   (org-test-with-temp-text
+       "* H\n:PROPERTIES:\n:CLOCK_INTO_DRAWER: nil\n:END:"
+     (let ((org-clock-into-drawer t)
+	   (org-log-into-drawer nil))
+       (org-clock-into-drawer))))
+  ;; "CLOCK_INTO_DRAWER" can be inherited.
+  (should
+   (equal "LOGBOOK"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:CLOCK_INTO_DRAWER: t\n:END:\n** H2<point>"
+	    (let ((org-clock-into-drawer nil)
+		  (org-log-into-drawer nil))
+	      (org-clock-into-drawer)))))
+  (should
+   (equal "FOO"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:CLOCK_INTO_DRAWER: FOO\n:END:\n** H2<point>"
+	    (let ((org-clock-into-drawer nil)
+		  (org-log-into-drawer nil))
+	      (org-clock-into-drawer)))))
+  (should-not
+   (org-test-with-temp-text
+       "* H\n:PROPERTIES:\n:CLOCK_INTO_DRAWER: nil\n:END:\n** H2<point>"
+     (let ((org-clock-into-drawer t)
+	   (org-log-into-drawer nil))
+       (org-clock-into-drawer)))))
+
+(ert-deftest test-org-clock/drawer-name ()
+  "Test `org-clock-drawer-name' specifications."
+  ;; A nil value for `org-clock-into-drawer' means no drawer is
+  ;; expected whatsoever.
+  (should-not
+   (org-test-with-temp-text "* H"
+     (let ((org-clock-into-drawer nil)
+	   (org-log-into-drawer nil))
+       (org-clock-drawer-name))))
+  (should-not
+   (org-test-with-temp-text "* H"
+     (let ((org-clock-into-drawer nil)
+	   (org-log-into-drawer t))
+       (org-clock-drawer-name))))
+  (should-not
+   (org-test-with-temp-text "* H"
+     (let ((org-clock-into-drawer nil)
+	   (org-log-into-drawer "FOO"))
+       (org-clock-drawer-name))))
+  ;; A string value for `org-clock-into-drawer' means to use it
+  ;; unconditionally.
+  (should
+   (equal "FOO"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-clock-into-drawer "FOO")
+		  (org-log-into-drawer nil))
+	      (org-clock-drawer-name)))))
+  (should
+   (equal "FOO"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-clock-into-drawer "FOO")
+		  (org-log-into-drawer t))
+	      (org-clock-drawer-name)))))
+  (should
+   (equal "FOO"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-clock-into-drawer "FOO")
+		  (org-log-into-drawer "BAR"))
+	      (org-clock-drawer-name)))))
+  ;; When the value in `org-clock-into-drawer' is a number, re-use
+  ;; `org-log-into-drawer' or use default "LOGBOOK" value.
+  (should
+   (equal "FOO"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-clock-into-drawer 1)
+		  (org-log-into-drawer "FOO"))
+	      (org-clock-drawer-name)))))
+  (should
+   (equal "LOGBOOK"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-clock-into-drawer 1)
+		  (org-log-into-drawer t))
+	      (org-clock-drawer-name)))))
+  (should
+   (equal "LOGBOOK"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-clock-into-drawer 1)
+		  (org-log-into-drawer nil))
+	      (org-clock-drawer-name))))))
 
 
 ;;; Clocktable
