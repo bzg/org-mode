@@ -1992,8 +1992,9 @@ Assume point is at export-block beginning."
 					(point)))
 	       (end (progn (skip-chars-forward " \r\t\n" limit)
 			   (if (eobp) (point) (line-beginning-position))))
-	       (value (buffer-substring-no-properties contents-begin
-						      contents-end)))
+	       (value (org-unescape-code-in-string
+		       (buffer-substring-no-properties contents-begin
+						       contents-end))))
 	  (list 'export-block
 		(nconc
 		 (list :type (and backend (upcase backend))

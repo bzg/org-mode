@@ -836,7 +836,12 @@ Some other text
   ;; Handle non-empty blank line at the end of buffer.
   (should
    (org-test-with-temp-text "#+BEGIN_EXPORT latex\nC\n#+END_EXPORT\n "
-     (= (org-element-property :end (org-element-at-point)) (point-max)))))
+     (= (org-element-property :end (org-element-at-point)) (point-max))))
+  ;; Un-escape commas in `:value'.
+  (should
+   (equal "* H\n"
+	  (org-test-with-temp-text "#+BEGIN_EXPORT org\n,* H\n#+END_EXPORT\n "
+	    (org-element-property :value (org-element-at-point))))))
 
 
 ;;;; Export Snippet
