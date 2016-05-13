@@ -63,6 +63,7 @@ setting of `org-html-htmlize-output-type' is `css'."
     (dynamic-block . org-org-identity)
     (entity . org-org-identity)
     (example-block . org-org-identity)
+    (export-block . org-org-export-block)
     (fixed-width . org-org-identity)
     (footnote-definition . ignore)
     (footnote-reference . org-org-identity)
@@ -109,6 +110,12 @@ setting of `org-html-htmlize-output-type' is `css'."
 	    (lambda (a s v b)
 	      (if a (org-org-export-to-org t s v b)
 		(org-open-file (org-org-export-to-org nil s v b))))))))
+
+(defun org-org-export-block (export-block _contents _info)
+  "Transcode a EXPORT-BLOCK element from Org to LaTeX.
+CONTENTS and INFO are ignored."
+  (and (equal (org-element-property :type export-block) "ORG")
+       (org-element-property :value export-block)))
 
 (defun org-org-identity (blob contents _info)
   "Transcode BLOB element or object back into Org syntax.
