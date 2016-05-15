@@ -413,7 +413,8 @@ Pass BUFFER to the XEmacs version of `move-to-column'."
 (defalias 'org-font-lock-ensure
   (if (fboundp 'font-lock-ensure)
       #'font-lock-ensure
-    (lambda (&optional _beg _end) (font-lock-fontify-buffer))))
+    (lambda (&optional _beg _end)
+      (with-no-warnings (font-lock-fontify-buffer)))))
 
 (defmacro org-no-popups (&rest body)
   "Suppress popup windows.
