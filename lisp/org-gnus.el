@@ -79,15 +79,17 @@ this variable to t."
 
 ;; Implementation
 
-;; FIXME: nnimap-group-overview-filename was removed from Gnus in
-;; September 2010.  Perhaps remove this function?
 (defun org-gnus-nnimap-cached-article-number (group server message-id)
   "Return cached article number (uid) of message in GROUP on SERVER.
 MESSAGE-ID is the message-id header field that identifies the
 message.  If the uid is not cached, return nil."
   (with-temp-buffer
-    (let ((nov (nnimap-group-overview-filename group server)))
-      (when (file-exists-p nov)
+    (let ((nov (and (fboundp 'nnimap-group-overview-filename)
+		    ;; nnimap-group-overview-filename was removed from
+		    ;; Gnus in September 2010, and therefore should
+		    ;; only be present in Emacs 23.1.
+		    (nnimap-group-overview-filename group server))))
+      (when (and nov (file-exists-p nov))
 	(mm-insert-file-contents nov)
 	(set-buffer-modified-p nil)
 	(goto-char (point-min))
