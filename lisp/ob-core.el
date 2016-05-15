@@ -77,8 +77,7 @@
 		  (hook function &optional append local))
 (declare-function org-table-align "org-table" ())
 (declare-function org-table-end "org-table" (&optional table-type))
-(declare-function orgtbl-to-generic "org-table"
-                  (table params &optional backend))
+(declare-function orgtbl-to-generic "org-table" (table params))
 (declare-function orgtbl-to-orgtbl "org-table" (table params))
 (declare-function org-babel-tangle-comment-links "ob-tangle" (&optional info))
 (declare-function org-babel-lob-get-info "ob-lob" nil)

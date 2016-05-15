@@ -12320,6 +12320,7 @@ This function can be used in a hook."
 
 ;;;; Completion
 
+(declare-function org-export-backend-options "ox" (cl-x) t)
 (defun org-get-export-keywords ()
   "Return a list of all currently understood export keywords.
 Export keywords include options, block names, attributes and

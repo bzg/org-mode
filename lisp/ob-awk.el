@@ -36,8 +36,7 @@
 (eval-when-compile (require 'cl))
 
 (declare-function org-babel-ref-resolve "ob-ref" (ref))
-(declare-function orgtbl-to-generic "org-table"
-                  (table params &optional backend))
+(declare-function orgtbl-to-generic "org-table" (table params))
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("awk" . "awk"))
