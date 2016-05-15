@@ -39,7 +39,6 @@
 
 (declare-function message-fetch-field "message" (header &optional not-all))
 (declare-function message-narrow-to-head-1 "message" nil)
-(declare-function nnimap-group-overview-filename "nnimap" (group server))
 (declare-function gnus-summary-last-subject "gnus-sum" nil)
 (declare-function nnvirtual-map-article "nnvirtual" (article))
 
@@ -80,6 +79,8 @@ this variable to t."
 
 ;; Implementation
 
+;; FIXME: nnimap-group-overview-filename was removed from Gnus in
+;; September 2010.  Perhaps remove this function?
 (defun org-gnus-nnimap-cached-article-number (group server message-id)
   "Return cached article number (uid) of message in GROUP on SERVER.
 MESSAGE-ID is the message-id header field that identifies the
