@@ -120,14 +120,14 @@
 (declare-function org-element-update-syntax "org-element" ())
 (declare-function org-entry-get "org"
 		  (pom property &optional inherit literal-nil))
-(declare-function org-export-create-backend "org-export" (&rest rest))
-(declare-function org-export-data-with-backend "org-export" (data backend info))
-(declare-function org-export-get-backend "org-export" (name))
-(declare-function org-export-get-environment "org-export"
+(declare-function org-export-create-backend "ox" (&rest rest) t)
+(declare-function org-export-data-with-backend "ox" (data backend info))
+(declare-function org-export-get-backend "ox" (name))
+(declare-function org-export-get-environment "ox"
 		  (&optional backend subtreep ext-plist))
-(declare-function org-export-get-next-element "org-export"
+(declare-function org-export-get-next-element "ox"
 		  (blob info &optional n))
-(declare-function org-export-with-backend "org-export"
+(declare-function org-export-with-backend "ox"
 		  (backend data &optional contents info))
 (declare-function org-fix-tags-on-the-fly "org" ())
 (declare-function org-get-indentation "org" (&optional line))

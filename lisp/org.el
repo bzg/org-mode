@@ -109,7 +109,7 @@ sure that we are at the beginning of the line.")
   "Matches a headline, putting stars and text into groups.
 Stars are put in group 1 and the trimmed body in group 2.")
 
-(declare-function calendar-check-holidays "holidays" (&optional date))
+(declare-function calendar-check-holidays "holidays" (date))
 (declare-function cdlatex-environment "ext:cdlatex" (environment item))
 (declare-function org-add-archive-files "org-archive" (files))
 (declare-function org-agenda-entry-get-agenda-timestamp "org-agenda" (pom))
@@ -4428,7 +4428,7 @@ This is needed for font-lock setup.")
 (declare-function org-agenda-copy-local-variable "org-agenda" (var))
 (declare-function org-agenda-format-item
 		  "org-agenda"
-		  (extra txt &optional level category tags dotime noprefix
+		  (extra txt &optional level category tags dotime
 			 remove-re habitp))
 (declare-function org-agenda-maybe-redo "org-agenda" ())
 (declare-function org-agenda-new-marker "org-agenda" (&optional pos))
