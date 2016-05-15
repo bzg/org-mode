@@ -36,13 +36,6 @@
 (eval-when-compile
   (require 'cl))
 (require 'tramp)
-(declare-function tramp-flush-directory-property "tramp-cache" (key directory))
-(declare-function tramp-dissect-file-name "tramp" (name &optional nodefault))
-(declare-function tramp-file-name-method "tramp" (vec))
-(declare-function tramp-file-name-user "tramp" (vec))
-(declare-function tramp-file-name-host "tramp" (vec))
-(declare-function tramp-file-name-localname "tramp" (vec))
-(declare-function tramp-file-name-hop "tramp" (vec))
 
 (defun org-babel-comint-buffer-livep (buffer)
   "Check if BUFFER is a comint buffer with a live process."
