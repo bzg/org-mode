@@ -392,7 +392,8 @@ Pass BUFFER to the XEmacs version of `move-to-column'."
 	 (select-frame frame)
 	 (cond ((memq window-system '(x ns mac))
 		(x-focus-frame frame))
-	       ((eq window-system 'w32)
+	       ((and (eq window-system 'w32)
+		     (fboundp 'w32-focus-frame))
 		(w32-focus-frame frame)))
 	 (when focus-follows-mouse
 	   (set-mouse-position frame (1- (frame-width frame)) 0)))))
