@@ -52,15 +52,17 @@
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
 
-(declare-function org-export-create-backend "org-export" (&rest rest))
-(declare-function org-export-data-with-backend "org-export" (arg1 arg2 arg3))
-(declare-function org-export-filter-apply-functions "org-export" (&optional filters value info))
-(declare-function org-export-first-sibling-p "org-export" (blob info))
-(declare-function org-export-get-backend "org-export" (name))
-(declare-function org-export-get-environment "org-export" (&optional arg1 arg2 arg3))
-(declare-function org-export-install-filters "org-export" (info))
-(declare-function org-export-table-has-special-column-p "org-export" (table))
-(declare-function org-export-table-row-is-special-p "org-export" (table-row info))
+(declare-function org-export-create-backend "ox" (&rest rest) t)
+(declare-function org-export-data-with-backend "ox" (data backend info))
+(declare-function org-export-filter-apply-functions "ox"
+		  (filters value info))
+(declare-function org-export-first-sibling-p "ox" (blob info))
+(declare-function org-export-get-backend "ox" (name))
+(declare-function org-export-get-environment "ox"
+		  (&optional backend subtreep ext-plist))
+(declare-function org-export-install-filters "ox" (info))
+(declare-function org-export-table-has-special-column-p "ox" (table))
+(declare-function org-export-table-row-is-special-p "ox" (table-row info))
 
 (declare-function calc-eval "calc" (str &optional separator &rest args))
 

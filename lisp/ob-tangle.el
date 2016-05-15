@@ -42,7 +42,7 @@
 (declare-function org-link-escape "org" (text &optional table merge))
 (declare-function org-open-link-from-string "org" (s &optional arg reference-buffer))
 (declare-function org-store-link "org" (arg))
-(declare-function org-string-nw-p "org" (s))
+(declare-function org-string-nw-p "org-macs" (s))
 (declare-function outline-previous-heading "outline" ())
 
 (defvar org-link-types-re)

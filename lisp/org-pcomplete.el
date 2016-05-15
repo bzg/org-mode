@@ -41,7 +41,7 @@
 (declare-function org-get-tags "org" ())
 (declare-function org-buffer-property-keys "org"
 		  (&optional include-specials include-defaults include-columns))
-(declare-function org-entry-properties "org" (&optional pom which specific))
+(declare-function org-entry-properties "org" (&optional pom which))
 
 ;;;; Customization variables
 
