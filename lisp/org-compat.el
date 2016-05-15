@@ -34,8 +34,6 @@
 
 (require 'org-macs)
 
-(declare-function w32-focus-frame "term/w32-win" (frame))
-
 ;; The following constant is for backward compatibility.  We do not use
 ;; it in org-mode, because the Byte compiler evaluates (featurep 'xemacs)
 ;; at compilation time and can therefore optimize code better.
@@ -394,7 +392,8 @@ Pass BUFFER to the XEmacs version of `move-to-column'."
 	 (select-frame frame)
 	 (cond ((memq window-system '(x ns mac))
 		(x-focus-frame frame))
-	       ((eq window-system 'w32)
+	       ((and (eq window-system 'w32)
+		     (fboundp 'w32-focus-frame))
 		(w32-focus-frame frame)))
 	 (when focus-follows-mouse
 	   (set-mouse-position frame (1- (frame-width frame)) 0)))))
@@ -414,7 +413,8 @@ Pass BUFFER to the XEmacs version of `move-to-column'."
 (defalias 'org-font-lock-ensure
   (if (fboundp 'font-lock-ensure)
       #'font-lock-ensure
-    (lambda (&optional _beg _end) (font-lock-fontify-buffer))))
+    (lambda (&optional _beg _end)
+      (with-no-warnings (font-lock-fontify-buffer)))))
 
 (defmacro org-no-popups (&rest body)
   "Suppress popup windows.

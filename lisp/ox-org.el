@@ -25,7 +25,7 @@
 ;;; Code:
 
 (require 'ox)
-(declare-function htmlize-buffer "htmlize" (&optional buffer))
+(declare-function htmlize-buffer "ext:htmlize" (&optional buffer))
 (defvar htmlize-output-type)
 
 (defgroup org-export-org nil

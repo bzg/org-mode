@@ -36,7 +36,7 @@
 (eval-when-compile
   (require 'cl))
 (require 'tramp)
-(declare-function tramp-flush-directory-property "tramp-cache" (vec directory))
+(declare-function tramp-flush-directory-property "tramp-cache" (key directory))
 (declare-function tramp-dissect-file-name "tramp" (name &optional nodefault))
 (declare-function tramp-file-name-method "tramp" (vec))
 (declare-function tramp-file-name-user "tramp" (vec))

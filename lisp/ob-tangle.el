@@ -30,8 +30,8 @@
 
 (declare-function make-directory "files" (dir &optional parents))
 (declare-function org-at-heading-p "org" (&optional ignored))
-(declare-function org-babel-update-block-body "org" (new-body))
-(declare-function org-back-to-heading "org" (invisible-ok))
+(declare-function org-babel-update-block-body "ob-core" (new-body))
+(declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-before-first-heading-p "org" ())
 (declare-function org-edit-special "org" (&optional arg))
 (declare-function org-element-at-point "org-element" ())
@@ -39,10 +39,10 @@
 (declare-function org-fill-template "org" (template alist))
 (declare-function org-heading-components "org" ())
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
-(declare-function org-link-escape "org" (text &optional table))
+(declare-function org-link-escape "org" (text &optional table merge))
 (declare-function org-open-link-from-string "org" (s &optional arg reference-buffer))
 (declare-function org-store-link "org" (arg))
-(declare-function org-string-nw-p "org" (s))
+(declare-function org-string-nw-p "org-macs" (s))
 (declare-function outline-previous-heading "outline" ())
 
 (defvar org-link-types-re)

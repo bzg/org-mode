@@ -41,7 +41,7 @@
 (declare-function org-get-tags "org" ())
 (declare-function org-buffer-property-keys "org"
 		  (&optional specials defaults columns ignore-malformed))
-(declare-function org-entry-properties "org" (&optional pom which specific))
+(declare-function org-entry-properties "org" (&optional pom which))
 (declare-function org-tag-alist-to-string "org" (alist &optional skip-key))
 
 ;;;; Customization variables
@@ -254,7 +254,7 @@ When completing for #+STARTUP, for example, this function returns
 	       (buffer-name (buffer-base-buffer)))))))
 
 
-(declare-function org-export-backend-options "org-export" (cl-x))
+(declare-function org-export-backend-options "ox" (cl-x) t)
 (defun pcomplete/org-mode/file-option/options ()
   "Complete arguments for the #+OPTIONS file option."
   (while (pcomplete-here

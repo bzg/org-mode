@@ -39,7 +39,6 @@
 
 (declare-function message-fetch-field "message" (header &optional not-all))
 (declare-function message-narrow-to-head-1 "message" nil)
-(declare-function nnimap-group-overview-filename "nnimap" (group server))
 (declare-function gnus-summary-last-subject "gnus-sum" nil)
 (declare-function nnvirtual-map-article "nnvirtual" (article))
 
@@ -85,8 +84,12 @@ this variable to t."
 MESSAGE-ID is the message-id header field that identifies the
 message.  If the uid is not cached, return nil."
   (with-temp-buffer
-    (let ((nov (nnimap-group-overview-filename group server)))
-      (when (file-exists-p nov)
+    (let ((nov (and (fboundp 'nnimap-group-overview-filename)
+		    ;; nnimap-group-overview-filename was removed from
+		    ;; Gnus in September 2010, and therefore should
+		    ;; only be present in Emacs 23.1.
+		    (nnimap-group-overview-filename group server))))
+      (when (and nov (file-exists-p nov))
 	(mm-insert-file-contents nov)
 	(set-buffer-modified-p nil)
 	(goto-char (point-min))

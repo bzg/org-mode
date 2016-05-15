@@ -31,7 +31,7 @@
 (require 'cl-lib)
 (require 'org)
 
-(declare-function org-agenda-redo "org-agenda" ())
+(declare-function org-agenda-redo "org-agenda" (&optional all))
 (declare-function org-agenda-do-context-action "org-agenda" ())
 (declare-function org-clock-sum-today "org-clock" (&optional headline-filter))
 (declare-function org-element-extract-element "org-element" (element))

@@ -36,7 +36,7 @@
 (declare-function ess-make-buffer-current "ext:ess-inf" ())
 (declare-function ess-eval-buffer "ext:ess-inf" (vis))
 (declare-function ess-wait-for-process "ext:ess-inf"
-		  (proc &optional sec-prompt wait force-redisplay))
+		  (&optional proc sec-prompt wait force-redisplay))
 (declare-function org-number-sequence "org-compat" (from &optional to inc))
 
 (defconst org-babel-header-args:R

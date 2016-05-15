@@ -113,11 +113,12 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function cdlatex-environment "ext:cdlatex" (environment item))
 (declare-function org-add-archive-files "org-archive" (files))
 (declare-function org-agenda-entry-get-agenda-timestamp "org-agenda" (pom))
-(declare-function org-agenda-list "org-agenda" (&optional arg start-day span))
+(declare-function org-agenda-list "org-agenda"
+		  (&optional arg start-day span with-hour))
 (declare-function org-agenda-redo "org-agenda" (&optional all))
-(declare-function org-babel-do-in-edit-buffer "ob-core" (&rest body))
+(declare-function org-babel-do-in-edit-buffer "ob-core" (&rest body) t)
 (declare-function org-babel-tangle-file "ob-tangle" (file &optional target-file lang))
-(declare-function org-beamer-mode "ox-beamer" ())
+(declare-function org-beamer-mode "ox-beamer" (&optional prefix) t)
 (declare-function org-clock-get-last-clock-out-time "org-clock" ())
 (declare-function org-clock-out "org-clock" (&optional switch-to-state fail-quietly at-time))
 (declare-function org-clock-remove-overlays "org-clock" (&optional beg end noremove))
@@ -133,7 +134,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-element-contents "org-element" (element))
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-copy "org-element" (datum))
-(declare-function org-element-interpret-data "org-element" (data &optional parent))
+(declare-function org-element-interpret-data "org-element" (data))
 (declare-function org-element-lineage "org-element" (blob &optional types with-self))
 (declare-function org-element-nested-p "org-element" (elem-a elem-b))
 (declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only))
@@ -737,7 +738,7 @@ For export specific modules, see also `org-export-backends'."
 
 (defvar org-export-registered-backends) ; From ox.el.
 (declare-function org-export-derived-backend-p "ox" (backend &rest backends))
-(declare-function org-export-backend-name "ox" (backend))
+(declare-function org-export-backend-name "ox" (backend) t)
 (defcustom org-export-backends '(ascii html icalendar latex odt)
   "List of export back-ends that should be always available.
 
@@ -4416,7 +4417,8 @@ This is needed for font-lock setup.")
 		  (&optional localp no-error-if-not-filep))
 (declare-function iswitchb-read-buffer
 		  "iswitchb"
-		  (prompt &optional default require-match start matches-set))
+		  (prompt &optional
+			  default require-match _predicate start matches-set))
 (declare-function org-agenda-change-all-lines
 		  "org-agenda"
 		  (newhead hdmarker &optional fixface just-this))
@@ -12241,8 +12243,7 @@ This function can be used in a hook."
 
 ;;;; Completion
 
-(declare-function org-export-backend-name "org-export" (cl-x))
-(declare-function org-export-backend-options "org-export" (cl-x))
+(declare-function org-export-backend-options "ox" (cl-x) t)
 (defun org-get-export-keywords ()
   "Return a list of all currently understood export keywords.
 Export keywords include options, block names, attributes and
