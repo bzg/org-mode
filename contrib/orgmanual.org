@@ -33,10 +33,10 @@
 
 #+TODO: FIXME | FIXED
 
-#+comment: # Macros for simplifying export
+# # Macros for simplifying export
 
-#+comment: Indexing macros.  index is generic, the rest are for the specific
-#+comment: default indexes.
+# Indexing macros.  index is generic, the rest are for the specific
+# default indexes.
 #+MACRO: index @@info:@$1index $2@@
 #+MACRO: cindex {{{index(c,$1)}}}
 #+MACRO: pindex {{{index(p,$1)}}}
@@ -44,10 +44,10 @@
 #+MACRO: vindex {{{index(v,$1)}}}
 #+MACRO: kindex {{{index(k,$1)}}}
 
-#+comment: Markup macros.  In texinfo export they will be marked up, otherwise
-#+comment: they will be inserted verbatim.  markup is the generic form that can
-#+comment: be used to insert any @-command with the second variable being the
-#+comment: text to mark up.
+# Markup macros.  In texinfo export they will be marked up, otherwise
+# they will be inserted verbatim.  markup is the generic form that can
+# be used to insert any @-command with the second variable being the
+# text to mark up.
 #+MACRO: markup @@info:@$1{@@$2@@info:}@@
 #+MACRO: kbd {{{markup(kbd,$1)}}}
 #+MACRO: key {{{markup(key,$1)}}}
@@ -66,7 +66,7 @@
 #+MACRO: ksksksksk {{{kbd($1 {{{key($2)}}} $3 {{{key($4)}}} {{{key($5)}}})}}}
 #+MACRO: kbdkeys {{{kbd($1{{{key($2)}}}{{{key($3)}}})}}}
 
-#+comment: Plain macros.
+# Plain macros.
 #+MACRO: noindent @@info:@noindent@@
 #+MACRO: defun @@info:@defun@@
 #+MACRO: enddefun @@info:@end defun@@
@@ -492,7 +492,7 @@ structure, {{{kbdkey(M-,right)}}} will be listed to call
 ~org-do-demote~, while in the chapter on tables, it will be listed to
 call ~org-table-move-column-right~. 
 
-#+comment: If you prefer, you can compile the manual without the command names by unsetting the flag ~cmdnames~ in {{{file(org.texi)}}}.
+# If you prefer, you can compile the manual without the command names by unsetting the flag ~cmdnames~ in {{{file(org.texi)}}}.
 
 * Document structure
   :PROPERTIES:
@@ -4862,7 +4862,7 @@ for ~:CATEGORY:~) should not be used as keys in the properties drawer:
 {{{cindex(property\\\, special\\\, CLOCKSUM)}}}
 {{{cindex(property\\\, special\\\, CLOCKSUM_T)}}}
 {{{cindex(property\\\, special\\\, BLOCKED)}}}
-#+comment:  guessing that ITEM is needed in this area; also, should this list be sorted?
+# guessing that ITEM is needed in this area; also, should this list be sorted?
 {{{cindex(property\\\, special\\\, ITEM)}}}
 {{{cindex(property\\\, special\\\, FILE)}}}
 
@@ -9005,7 +9005,7 @@ the other commands, the cursor needs to be in the desired line.
 
 - {{{kbd(,)}}} ::
   {{{kindex(XXX)}}}
-  #+comment: Should be a comma
+  # Should be a comma
   Set the priority for the current item (~org-agenda-priority~). Org
   mode prompts for the priority character. If you reply with
   {{{key(SPC)}}}, the priority cookie is removed from the entry.
@@ -10313,7 +10313,7 @@ following command:[fn:108]
 #+attr_texinfo: :table-type "table" :indic "@asis"
 - {{{kbd(C-c C-x XXX)}}} ::
   {{{kindex(C-c C-x XXX)}}}
-#+comment: Should be \
+# Should be \
   Toggle display of entities as UTF-8 characters. This does not change
   the buffer content which remains plain ASCII, but it overlays the
   UTF-8 character for display purposes only.
@@ -10356,7 +10356,7 @@ subscript, but ~a_{b}~ will.
 #+attr_texinfo: :table-type "table" :indic "@asis"
 - {{{kbd(C-c C-x XXX)}}} ::
   {{{kindex(C-c C-x XXX)}}}
-#+comment: Should be \
+# Should be \
   In addition to showing entities as UTF-8 characters, this command will
   also format sub- and superscripts in a WYSIWYM way.
 
@@ -11349,8 +11349,8 @@ property to assign a class to the tree. In order to specify CSS styles
 for a particular headline, you can use the id specified in a
 ~:CUSTOM_ID:~ property.
 
-#+comment:  FIXME: More about header and footer styles
-#+comment:  FIXME: Talk about links and targets.
+#  FIXME: More about header and footer styles
+#  FIXME: Talk about links and targets.
 
 *** JavaScript support
     :PROPERTIES:
@@ -14285,19 +14285,19 @@ the ~org-babel-default-header-args~ variable:
    :noweb      => "no"
 #+end_example
 
-#+comment: #+begin_example
-#+comment:   org-babel-default-header-args is a variable defined in `org-babel.el'.
-#+comment:   Its value is
-#+comment:   ((:session . "none")
-#+comment:    (:results . "replace")
-#+comment:    (:exports . "code")
-#+comment:    (:cache . "no")
-#+comment:    (:noweb . "no"))
+# #+begin_example
+#   org-babel-default-header-args is a variable defined in `org-babel.el'.
+#   Its value is
+#   ((:session . "none")
+#    (:results . "replace")
+#    (:exports . "code")
+#    (:cache . "no")
+#    (:noweb . "no"))
 
 
-#+comment:   Documentation:
-#+comment:   Default arguments to use when evaluating a code block.
-#+comment: #+end_example
+#   Documentation:
+#   Default arguments to use when evaluating a code block.
+# #+end_example
 
 For example, the following code could be used to set the default
 value of ~:noweb~ header arguments to ~yes~. This would have the
@@ -14597,7 +14597,7 @@ Here are examples of passing values by reference:
       : on two lines for you.
   #+end_example
 
-#+comment: ***** Alternate argument syntax
+# ***** Alternate argument syntax
 <<Alternate argument syntax>>
 
 It is also possible to specify arguments in a potentially more natural
@@ -14612,7 +14612,7 @@ commas, following the source name.
    ,#+END_SRC
 #+end_example
 
-#+comment: ***** Indexable variable values
+# ***** Indexable variable values
 <<Indexable variable values>>
 
 It is possible to reference portions of variable values by
@@ -14703,7 +14703,7 @@ example:
    | 11 | 14 | 17 |
 #+end_example
 
-#+comment: ***** Emacs Lisp evaluation of variables
+# ***** Emacs Lisp evaluation of variables
 <<Emacs Lisp evaluation of variables>>
 
 Emacs lisp code can be used to initialize variable values. When a
@@ -14760,7 +14760,7 @@ per class may be supplied per code block.
   These header arguments specify how the results of evaluating the code
   block should be handled.
 
-#+comment: ***** Collection
+# ***** Collection
 <<Collection>>
 
 The following ~:results~ options are mutually exclusive, and specify
@@ -14781,7 +14781,7 @@ how the results should be collected from the code block.
   the execution of the code block. This header argument places the
   evaluation in scripting mode.
 
-#+comment: ***** Type
+# ***** Type
 <<Type>>
 
 The following ~:results~ options are mutually exclusive and specify
@@ -14853,7 +14853,7 @@ are inserted as either a table or scalar depending on their value.
   inserting ~raw~ or ~org~ syntax results in such a way that their
   extent is known and they can be automatically removed or replaced.
 
-#+comment: ***** Handling
+# ***** Handling
 <<Handling>>
 The following ~:results~ options indicate what happens with the
 results once they are collected.
@@ -14941,7 +14941,7 @@ like the following example:
    #+END_SRC
 #+end_example
 
-#+comment: ***** Remote execution
+# ***** Remote execution
 <<Remote execution>>
 
 A directory on a remote machine can be specified using tramp file
@@ -14972,7 +14972,7 @@ thanks to tramp. Those using XEmacs, or GNU Emacs prior to version 23
 may need to install tramp separately in order for these features to
 work correctly.
 
-#+comment: ***** Further points
+# ***** Further points
 <<Further points>>
 Please be aware of these further points:
 
@@ -15186,7 +15186,7 @@ one of the five values: ~no~, ~yes~, ~tangle~, ~no-export~, or
   ``Noweb'' syntax references in the body of the code block will only be
   expanded before the block is evaluated.
 
-#+comment: ***** Noweb prefix lines
+# ***** Noweb prefix lines
 <<Noweb prefix lines>>
 
 Noweb insertions are placed behind the line prefix of the
@@ -15789,19 +15789,19 @@ In an Org mode buffer, the following key bindings are active:
 | {{{kbd(C-c C-v x)}}} or {{{kbd(C-c C-v C-x)}}} | ~org-babel-do-key-sequence-in-edit-buffer~ |
 
 
-#+comment: When possible these keybindings were extended to work when the control key is
-#+comment: kept pressed, resulting in the following additional keybindings.
+# When possible these keybindings were extended to work when the control key is
+# kept pressed, resulting in the following additional keybindings.
 
-#+comment: @multitable @columnfractions 0.25 0.75
-#+comment: - {{{kbd(C-c C-v C-a)}}} @tab ~org-babel-sha1-hash~
-#+comment: - {{{kbd(C-c C-v C-b)}}} @tab ~org-babel-execute-buffer~
-#+comment: - {{{kbd(C-c C-v C-f)}}} @tab ~org-babel-tangle-file~
-#+comment: - {{{kbd(C-c C-v C-l)}}} @tab ~org-babel-lob-ingest~
-#+comment: - {{{kbd(C-c C-v C-p)}}} @tab ~org-babel-expand-src-block~
-#+comment: - {{{kbd(C-c C-v C-s)}}} @tab ~org-babel-execute-subtree~
-#+comment: - {{{kbd(C-c C-v C-t)}}} @tab ~org-babel-tangle~
-#+comment: - {{{kbd(C-c C-v C-z)}}} @tab ~org-babel-switch-to-session~
-#+comment: @end multitable
+# @multitable @columnfractions 0.25 0.75
+# - {{{kbd(C-c C-v C-a)}}} @tab ~org-babel-sha1-hash~
+# - {{{kbd(C-c C-v C-b)}}} @tab ~org-babel-execute-buffer~
+# - {{{kbd(C-c C-v C-f)}}} @tab ~org-babel-tangle-file~
+# - {{{kbd(C-c C-v C-l)}}} @tab ~org-babel-lob-ingest~
+# - {{{kbd(C-c C-v C-p)}}} @tab ~org-babel-expand-src-block~
+# - {{{kbd(C-c C-v C-s)}}} @tab ~org-babel-execute-subtree~
+# - {{{kbd(C-c C-v C-t)}}} @tab ~org-babel-tangle~
+# - {{{kbd(C-c C-v C-z)}}} @tab ~org-babel-switch-to-session~
+# @end multitable
 
 ** Batch execution
    :PROPERTIES:
@@ -15884,7 +15884,7 @@ buffer and use the {{{key(TAB)}}} key to complete text right there.
     Complete TODO keywords.
 
   - After {{{kbd(XXX)}}} :: 
-    #+comment: Should be \
+    # Should be \
     Complete TeX symbols supported by the exporter.
 
   - After {{{samp(*)}}} :: 
@@ -16716,7 +16716,7 @@ with other code out there.
 
   - {{{kbd(C-c XXX)}}}, ~org-table-create-with-table.el~ ::
     {{{kindex(C-c ~)}}}
-    #+comment: Should be ~
+    # Should be ~
     Insert a {{{file(table.el)}}} table. If there is already a table at
     point, this command converts it between the {{{file(table.el)}}}
     format and the Org mode format. See the documentation string of the
@@ -18473,7 +18473,7 @@ complete if the ones above were not mentioned in this manual.
 :DESCRIPTION: Org's concepts and features
 :END:
 
-#+comment: {{{printindex(cp)}}}
+# {{{printindex(cp)}}}
 
 * Key index
   :PROPERTIES:
@@ -18482,7 +18482,7 @@ complete if the ones above were not mentioned in this manual.
   :INDEX:    ky
   :END:
 
-#+comment: {{{printindex(ky)}}}
+# {{{printindex(ky)}}}
 
 * Command and function index
   :PROPERTIES:
@@ -18491,7 +18491,7 @@ complete if the ones above were not mentioned in this manual.
   :INDEX:    fn
   :END:
 
-#+comment: {{{printindex(fn)}}}
+# {{{printindex(fn)}}}
 
 * Variable index
   :PROPERTIES:
@@ -18505,7 +18505,7 @@ that are mentioned in the manual. For a more complete list, use
 {{{kbdspckey(M-x org-customize,RET)}}} and then click yourself through
 the tree.
 
-#+comment: {{{printindex(vr)}}}
+# {{{printindex(vr)}}}
 
 * Copying
    :PROPERTIES:
