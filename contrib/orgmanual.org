@@ -3,8 +3,8 @@
 #+EMAIL:     tsd@tsdye.com
 #+DATE:      2012-11-10 Sat
 #+LANGUAGE:  en
-#+OPTIONS:   H:4 num:t toc:t \n:nil @:t ::t |:t ^:nil -:t f:t *:t <:t
-#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:nil pri:nil tags:not-in-toc
+#+OPTIONS:   H:4 num:t toc:t \n:nil ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   d:nil todo:nil pri:nil tags:not-in-toc
 #+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
 #+SELECT_TAGS: export
 #+EXCLUDE_TAGS: noexport
@@ -48,6 +48,7 @@
 #+MACRO: var {{{markup(var,$1)}}}
 #+MACRO: cite {{{markup(cite,$1)}}}
 #+MACRO: value {{{markup(value,$1)}}}
+#+MACRO: code {{{markup(code,$1)}}}
 
 #+MACRO: printindex @@info:@printindex $1@@
 
@@ -3401,10 +3402,10 @@ search for ~find me~ in the current file, just as
 
 The default mechanism for creating search strings and for doing the
 actual search related to a file link may not work correctly in all
-cases.  For example, {{{bibtex}}} database files have many entries
-like {{{samp(year="1993")}}} which would not result in good search
-strings, because the only unique identification for a {{{bibtex}}}
-entry is the citation key.
+cases.  For example, BibTeX database files have many entries like
+{{{samp(year="1993")}}} which would not result in good search strings,
+because the only unique identification for a BibTeX entry is the
+citation key.
 
 #+vindex: org-create-file-search-functions
 #+vindex: org-execute-file-search-functions
@@ -3416,8 +3417,8 @@ need to be added to the hook variables
 ~org-create-file-search-functions~ and
 ~org-execute-file-search-functions~.  See the docstring for these
 variables for more information.  Org actually uses this mechanism for
-{{{bibtex}}} database files, and you can use the corresponding code as
-an implementation example.  See the file {{{file(org-bibtex.el)}}}.
+BibTeX database files, and you can use the corresponding code as an
+implementation example.  See the file {{{file(org-bibtex.el)}}}.
 
 * TODO items
   :PROPERTIES:
@@ -3979,12 +3980,12 @@ settings like ~TODO(!)~.  For example:
 #+end_example
 
 *** Tracking your habits
+    :PROPERTIES:
+    :DESCRIPTION: How consistent have you been?
+    :END:
     :LOGBOOK:
     - State "DONE"       from "DONE"       [2013-01-07 Mon 14:10]
     - State "DONE"       from ""           [2013-01-07 Mon 14:10]
-    :END:
-    :PROPERTIES:
-    :DESCRIPTION: How consistent have you been?
     :END:
 #+cindex: habits
 
@@ -4125,7 +4126,7 @@ items.
     or {{{samp(C)}}}. When you press {{{key(SPC)}}}} instead, the priority
     cookie is removed from the headline. The priorities can also be
     changed ``remotely'' from the timeline and agenda buffer with the
-    {{{kbd(,)}}} command (see [[Agenda commands]]).
+    {{{kbd(\,)}}} command (see [[Agenda commands]]).
   
   - {{{kbdkey(S-,up)}}}, {{{kbdkey(S-,down)}}}, {{{command(org-priority-up)}}}, {{{command(org-priority-down)}}} ::
     #+vindex: org-priority-start-cycle-with-default
@@ -5196,7 +5197,7 @@ The following commands let you edit information in column view:
   Switch to the next/previous allowed value of the field. For this, you
   have to have specified allowed values for a property.
 
-- {{{kbd(1..9,0)}}} ::
+- {{{kbd(1..9\,0)}}} ::
   #+kindex: 1..9,0
 
   Directly select the Nth allowed value, {{{kbd(0)}}} selects the 10th
@@ -5287,8 +5288,8 @@ this block looks like this:
   |---------------------+---------------------------------------------------------------|
   | local               | Use the tree in which the capture block is located.           |
   | global              | Make a global view, including all headings in the file.       |
-  | "file:PATH-TO-FILE" | Run column view at the top of this file.                      |
-  | "ID"                | Call column view in the tree that has an ~:ID:~               |
+  | =file:PATH-TO-FILE= | Run column view at the top of this file.                      |
+  | ID                  | Call column view in the tree that has an ~:ID:~               |
   |                     | property with the value /label/.  You can use                 |
   |                     | {{{kbd(M-x org-id-copy)}}} to create a globally unique ID for |
   |                     | the current entry and copy it to the kill-ring.               |
@@ -5301,11 +5302,11 @@ this block looks like this:
 
     Make a global view, including all headings in the file.
 
-  - "file:PATH-TO-FILE" ::
+  - =file:PATH-TO-FILE= ::
     
     Run column view at the top of this file.
 
-  - "ID" :: 
+  - ID :: 
     
     Call column view in the tree that has an ~:ID:~ property with the
     value /label/. You can use {{{kbd(M-x org-id-copy)}}} to
@@ -6564,14 +6565,14 @@ such a relative timer and make it easy to create timed notes.
   Once the timer list is started, you can also use {{{kbdkey(M-,RET)}}}
   to insert new timer items.
 
-- {{{kbd(C-c C-x ,)}}} ::
+- {{{kbd(C-c C-x \,)}}} ::
   #+kindex: C-c C-x ,
   #+kindex: C-c C-x ,
 
   Pause the timer, or continue it if it is already paused
   ({{{command(org-timer-pause-or-continue)}}}).
 
-- {{{kbd(C-u C-c C-x ,)}}} ::
+- {{{kbd(C-u C-c C-x \,)}}} ::
   #+kindex: C-u C-c C-x ,
   #+kindex: C-u C-c C-x ,
 
@@ -8096,7 +8097,6 @@ optional when {{{samp(+)}}} or {{{samp(-)}}} is present. Here are some
 examples, using only tags.
 
 #+attr_texinfo: :table-type "table" :indic "@samp"
-
 - +work-boss ::
 
   Select headlines tagged {{{samp(:work:)}}}, but discard those also
@@ -8140,7 +8140,6 @@ searches.[fn:92]
 Here are more examples:
 
 #+attr_texinfo: :table-type "table" :indic "@samp"
-
 - work+TODO="WAITING" ::
 
   Select {{{samp(:work:)}}}-tagged TODO lines with the specific TODO
@@ -8996,7 +8995,7 @@ the other commands, the cursor needs to be in the desired line.
   Set tags for the current headline. If there is an active region in the
   agenda, change a tag for all headings in the region.
 
-- {{{kbd(,)}}} ::
+- {{{kbd(\,)}}} ::
   #+kindex: ,
   Set the priority for the current item (~org-agenda-priority~). Org
   mode prompts for the priority character. If you reply with
@@ -16598,7 +16597,7 @@ the timestamp.
 | {{{kbdkey(S-,right)}}}   | {{{kbdspckey(C-c,right)}}}   | {{{kbd( )}}} |                           |
 | {{{kbdkey(S-,up)}}}      | {{{kbdspckey(C-c,up)}}}      | {{{kbd( )}}} |                           |
 | {{{kbdkey(S-,down)}}}    | {{{kbdspckey(C-c,down)}}}    | {{{kbd( )}}} |                           |
-| {{{kbdkey(C-S-,left)}}}  | {{{kbdscpkey(C-c C-x,left)}}}  | {{{kbd( )}}} |                           |
+| {{{kbdkey(C-S-,left)}}}  | {{{kbdspckey(C-c C-x,left)}}}  | {{{kbd( )}}} |                           |
 | {{{kbdkey(C-S-,right)}}} | {{{kbdspckey(C-c C-x,right)}}} | {{{kbd( )}}} |                           |
 
 ** Interaction
