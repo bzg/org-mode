@@ -4148,9 +4148,7 @@ error if no block contains REF."
 	      (when (re-search-backward ref-re nil t)
 		(cond
 		 ((org-element-property :use-labels el) ref)
-		 ((eq (org-element-property :number-lines el) 'continued)
-		  (+ (org-export-get-loc el info) (line-number-at-pos)))
-		 (t (line-number-at-pos)))))))
+		 (t (+ (or (org-export-get-loc el info) 0) (line-number-at-pos))))))))
 	info 'first-match)
       (signal 'org-link-broken (list ref))))
 
@@ -4457,7 +4455,8 @@ objects of the same type."
 INFO is the plist used as a communication channel.
 
 ELEMENT is excluded from count."
-  (let ((loc 0))
+  (let ((loc 0)
+        (linum (org-element-property :number-lines element)))
     (org-element-map (plist-get info :parse-tree)
 	`(src-block example-block ,(org-element-type element))
       (lambda (el)
@@ -4472,10 +4471,17 @@ ELEMENT is excluded from count."
 	      ;; Accumulate locs or reset them.
 	      (let ((lines (org-count-lines
 			    (org-trim (org-element-property :value el)))))
-		(setq loc (if (eq linums 'new) lines (+ loc lines))))))
+		(if (eq (car linums) 'new)
+		    (setq loc 0))
+		(setq loc (+ loc lines (cdr linums))))))
 	  ;; Return nil to stay in the loop.
 	  nil)))
       info 'first-match)
+    ;; Add the offset from [+-]n to the loc for the final starting
+    ;; number of lines before the first starting line.
+    (setq loc (cl-case (car linum)
+		(continued (+ (cdr linum) loc))
+		(new (cdr linum))))
     ;; Return value.
     loc))
 
@@ -4573,9 +4579,7 @@ code."
       (let* ((refs (and (org-element-property :retain-labels element)
 			(cdr code-info)))
 	     ;; Handle line numbering.
-	     (num-start (cl-case (org-element-property :number-lines element)
-			  (continued (org-export-get-loc element info))
-			  (new 0)))
+	     (num-start (org-export-get-loc element info))
 	     (num-fmt
 	      (and num-start
 		   (format "%%%ds  "

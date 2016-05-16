@@ -2763,9 +2763,7 @@ contextual information."
 	   (custom-env (and lang
 			    (cadr (assq (intern lang)
 					org-latex-custom-lang-environments))))
-	   (num-start (case (org-element-property :number-lines src-block)
-			(continued (org-export-get-loc src-block info))
-			(new 0)))
+	   (num-start (org-export-get-loc src-block info))
 	   (retain-labels (org-element-property :retain-labels src-block))
 	   (attributes (org-export-read-attribute :attr_latex src-block))
 	   (float (plist-get attributes :float))

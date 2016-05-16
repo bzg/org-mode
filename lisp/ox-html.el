@@ -2207,9 +2207,7 @@ a plist used as a communication channel."
 	 ;; Does the src block contain labels?
 	 (retain-labels (org-element-property :retain-labels element))
 	 ;; Does it have line numbers?
-	 (num-start (case (org-element-property :number-lines element)
-		      (continued (org-export-get-loc element info))
-		      (new 0))))
+	 (num-start (org-export-get-loc element info)))
     (org-html-do-format-code code lang refs retain-labels num-start)))
 
 

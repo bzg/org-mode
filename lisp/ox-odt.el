@@ -3168,9 +3168,7 @@ and prefix with \"OrgSrc\".  For example,
 	 ;; Does the src block contain labels?
 	 (retain-labels (org-element-property :retain-labels element))
 	 ;; Does it have line numbers?
-	 (num-start (case (org-element-property :number-lines element)
-		      (continued (org-export-get-loc element info))
-		      (new 0))))
+	 (num-start (org-export-get-loc element info)))
     (org-odt-do-format-code code info lang refs retain-labels num-start)))
 
 (defun org-odt-src-block (src-block _contents info)

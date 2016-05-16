@@ -1893,11 +1893,19 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
 		  (progn
 		    (looking-at "^[ \t]*#\\+BEGIN_EXAMPLE\\(?: +\\(.*\\)\\)?")
 		    (org-match-string-no-properties 1)))
-		 ;; Switches analysis
+		 ;; Switches analysis.
 		 (number-lines
-		  (cond ((not switches) nil)
-			((string-match "-n\\>" switches) 'new)
-			((string-match "+n\\>" switches) 'continued)))
+		  (and switches
+		       (string-match "\\([-+]\\)n\\(?: *\\([0-9]+\\)\\)?\\>"
+				     switches)
+		       (cons
+			(if (equal (match-string 1 switches) "-")
+			    'new
+			  'continued)
+			(if (not (match-end 2)) 0
+			  ;; Subtract 1 to give number of lines before
+			  ;; first line.
+			  (1- (string-to-number (match-string 2 switches)))))))
 		 (preserve-indent
 		  (and switches (string-match "-i\\>" switches)))
 		 ;; Should labels be retained in (or stripped from) example
@@ -2391,20 +2399,28 @@ Assume point is at the beginning of the block."
 		 (language
 		  (progn
 		    (looking-at
-		     (concat "^[ \t]*#\\+BEGIN_SRC"
-			     "\\(?: +\\(\\S-+\\)\\)?"
-			     "\\(\\(?: +\\(?:-l \".*?\"\\|[-+][A-Za-z]\\)\\)+\\)?"
-			     "\\(.*\\)[ \t]*$"))
+		     "^[ \t]*#\\+BEGIN_SRC\
+\\(?: +\\(\\S-+\\)\\)?\
+\\(\\(?: +\\(?:-\\(?:l \".+\"\\|[ikr]\\)\\|[-+]n\\(?: *[0-9]+\\)?\\)\\)+\\)?\
+\\(.*\\)[ \t]*$")
 		    (org-match-string-no-properties 1)))
 		 ;; Get switches.
 		 (switches (org-match-string-no-properties 2))
 		 ;; Get parameters.
 		 (parameters (org-match-string-no-properties 3))
-		 ;; Switches analysis
+		 ;; Switches analysis.
 		 (number-lines
-		  (cond ((not switches) nil)
-			((string-match "-n\\>" switches) 'new)
-			((string-match "+n\\>" switches) 'continued)))
+		  (and switches
+		       (string-match "\\([-+]\\)n\\(?: *\\([0-9]+\\)\\)?\\>"
+				     switches)
+		       (cons
+			(if (equal (match-string 1 switches) "-")
+			    'new
+			  'continued)
+			(if (not (match-end 2)) 0
+			  ;; Subtract 1 to give number of lines before
+			  ;; first line.
+			  (1- (string-to-number (match-string 2 switches)))))))
 		 (preserve-indent (and switches
 				       (string-match "-i\\>" switches)))
 		 (label-fmt

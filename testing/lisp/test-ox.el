@@ -2586,6 +2586,70 @@ Paragraph[fn:1][fn:2][fn:lbl3:C<<target>>][[test]][[target]]
        (lambda (link) (org-export-resolve-fuzzy-link link info))
        info t))))
 
+(defun test-org-gen-loc-list(text type)
+    (org-test-with-parsed-data text
+			       (org-element-map tree type
+				 (lambda(el) (or (org-export-get-loc el info) "nil")))))
+
+(ert-deftest test-org-export/get-loc ()
+  "Test `org-export-get-loc' specifications."
+  (should
+   ;; "-n" resets line number.
+   (equal '(0)
+	  (test-org-gen-loc-list  "#+BEGIN_EXAMPLE -n\n  Text\n#+END_EXAMPLE" 'example-block)))
+  ;; The first "+n" has 0 lines before it
+  (should
+   (equal '(0)
+	  (test-org-gen-loc-list "#+BEGIN_EXAMPLE +n\n  Text\n#+END_EXAMPLE" 'example-block)))
+  ;; "-n 10" resets line number but has "9 lines" before it.
+  (should
+   (equal '(9)
+	  (test-org-gen-loc-list "#+BEGIN_EXAMPLE -n 10\n  Text\n#+END_EXAMPLE" 'example-block)))
+  ;; -n10 with two lines then +n 15
+  (should
+   (equal '(9 25)
+	  (test-org-gen-loc-list "#+BEGIN_EXAMPLE -n 10\n  Text_10\n  Second line(11)\n#+END_EXAMPLE
+#+BEGIN_EXAMPLE +n 15\n  Text line (11 + 15)\n#+END_EXAMPLE"  'example-block)))
+  (should
+   (equal '(9 19 0)
+	  (test-org-gen-loc-list "#+BEGIN_EXAMPLE -n 10\n  Text\n#+END_EXAMPLE
+#+BEGIN_EXAMPLE +n 10\n  Text \n#+END_EXAMPLE\n
+#+BEGIN_EXAMPLE -n\n  Text \n#+END_EXAMPLE" 'example-block)))
+  (should
+   ;; an Example Block without -n does not add to the line count
+   (equal '(9 "nil" 19)
+	  (test-org-gen-loc-list "#+BEGIN_EXAMPLE -n 10\n  Text\n#+END_EXAMPLE
+#+BEGIN_EXAMPLE\n  Text\n#+END_EXAMPLE
+#+BEGIN_EXAMPLE +n 10\n  Text\n#+END_EXAMPLE" 'example-block)))
+  (should
+   ;; "-n" resets line number.
+   (equal '(0)
+	  (test-org-gen-loc-list "#+BEGIN_SRC emacs-lisp -n \n  (- 1 1) \n#+END_SRC" 'src-block)))
+  (should
+   ;; The first "+n" has 0 lines before it
+   (equal '(0)
+	  (test-org-gen-loc-list "#+BEGIN_SRC emacs-lisp +n \n  (+ 0 (- 1 1))\n#+END_SRC" 'src-block)))
+  (should
+   ;; "-n 10" resets line number but has "9 lines" before it.
+   (equal '(9)
+	  (test-org-gen-loc-list "#+BEGIN_SRC emacs-lisp -n 10\n  (- 10 1)\n#+END_SRC" 'src-block)))
+  (should
+   (equal '(9 25)
+	  (test-org-gen-loc-list "#+BEGIN_SRC emacs-lisp -n 10\n  (- 10 1)\n  (+ (- 10 1) 1)\n#+END_SRC
+#+BEGIN_SRC emacs-lisp +n 15\n  (+ (- 10 1) 2 (- 15 1))\n#+END_SRC" 'src-block)))
+  (should
+   (equal '(9 19 0)
+	  (test-org-gen-loc-list "#+BEGIN_SRC emacs-lisp -n 10\n  (- 10 1)\n#+END_SRC
+#+BEGIN_SRC emacs-lisp +n 10\n  (+ (- 10 1) 1 (- 10 1))\n#+END_SRC
+#+BEGIN_SRC emacs-lisp -n\n  (- 1 1)\n#+END_SRC" 'src-block)))
+  (should
+   ;; an SRC Block without -n does not add to the line count
+   (equal '(9 "nil" 19)
+	  (test-org-gen-loc-list
+	   "#+BEGIN_SRC emacs-lisp -n 10\n  (+ (-10 1) 1)\n#+END_SRC
+#+BEGIN_SRC emacs-lisp \n  (+ 2 2) \n#+END_SRC
+#+BEGIN_SRC emacs-lisp +n 10\n  (+ (- 10 1) 1 (- 10 1))\n#+END_SRC" 'src-block))))
+
 (ert-deftest test-org-export/resolve-coderef ()
   "Test `org-export-resolve-coderef' specifications."
   (let ((org-coderef-label-format "(ref:%s)"))
@@ -2596,10 +2660,32 @@ Paragraph[fn:1][fn:2][fn:lbl3:C<<target>>][[test]][[target]]
 	    "#+BEGIN_EXAMPLE -n -k -r\nText (ref:coderef)\n#+END_EXAMPLE"
 	  (org-export-resolve-coderef "coderef" info))))
     (should
+     (= 10
+	(org-test-with-parsed-data
+	 "#+BEGIN_EXAMPLE -n 10 -k -r\nText (ref:coderef)\n#+END_EXAMPLE"
+	 (org-export-resolve-coderef "coderef" info))))
+    (should
+     (= 135
+	(org-test-with-parsed-data
+	 "#+BEGIN_EXAMPLE -n 10 -k -r\nText \n#+END_EXAMPLE\n
+#+BEGIN_EXAMPLE +n 125 -k -r\nText (ref:coderef)\n#+END_EXAMPLE"
+	 (org-export-resolve-coderef "coderef" info))))
+    (should
      (= 1
 	(org-test-with-parsed-data
 	    "#+BEGIN_SRC emacs-lisp -n -k -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
 	  (org-export-resolve-coderef "coderef" info))))
+    (should
+     (= 10
+	(org-test-with-parsed-data
+	 "#+BEGIN_SRC emacs-lisp -n 10 -k -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+	 (org-export-resolve-coderef "coderef" info))))
+    (should
+     (= 135
+	(org-test-with-parsed-data
+	 "#+BEGIN_SRC emacs-lisp -n 10 -k -r\n(+ 1 1) \n#+END_SRC\n
+#+BEGIN_SRC emacs-lisp +n 125 -k -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+	 (org-export-resolve-coderef "coderef" info))))
     ;; A link to a "-n -r" block returns line number.
     (should
      (= 1
@@ -2607,10 +2693,33 @@ Paragraph[fn:1][fn:2][fn:lbl3:C<<target>>][[test]][[target]]
 	    "#+BEGIN_EXAMPLE -n -r\nText (ref:coderef)\n#+END_EXAMPLE"
 	  (org-export-resolve-coderef "coderef" info))))
     (should
+     (= 10
+	(org-test-with-parsed-data
+	 "#+BEGIN_EXAMPLE -n 10 -r\nText (ref:coderef)\n#+END_EXAMPLE"
+	 (org-export-resolve-coderef "coderef" info))))
+    (should
+     (= 135
+	(org-test-with-parsed-data
+	 "#+BEGIN_EXAMPLE +n 10 -r\nText \n#+END_EXAMPLE
+#+BEGIN_EXAMPLE +n 125 -r\nText (ref:coderef)\n#+END_EXAMPLE"
+	 (org-export-resolve-coderef "coderef" info))))
+
+    (should
      (= 1
 	(org-test-with-parsed-data
 	    "#+BEGIN_SRC emacs-lisp -n -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
 	  (org-export-resolve-coderef "coderef" info))))
+    (should
+     (= 10
+	(org-test-with-parsed-data
+	 "#+BEGIN_SRC emacs-lisp -n10 -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+	 (org-export-resolve-coderef "coderef" info))))
+    (should
+     (= 135
+	(org-test-with-parsed-data
+	 "#+BEGIN_SRC emacs-lisp -n10 -r\n(+ 1 1) \n#+END_SRC
+#+BEGIN_SRC emacs-lisp +n125 -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+	 (org-export-resolve-coderef "coderef" info))))
     ;; A link to a "-n" block returns coderef.
     (should
      (equal "coderef"
