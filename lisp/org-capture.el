@@ -166,8 +166,8 @@ target       Specification of where the captured item should be placed.
                 File to the entry that is currently being clocked
 
              (function function-finding-location)
-                Most general way, write your own function to find both
-                file and location
+                Most general way: write your own function which both visits
+                the file and moves point to the right location
 
 template     The template for creating the capture item.  If you leave this
              empty, an appropriate default template will be used.  See below
@@ -299,7 +299,12 @@ you can escape ambiguous cases with a backward slash, e.g., \\%i."
   :group 'org-capture
   :version "24.1"
   :type
-  '(repeat
+  (let ((file-variants '(choice :tag "Filename       "
+				(file :tag "Literal")
+				(function :tag "Function")
+				(variable :tag "Variable")
+				(sexp :tag "Form"))))
+  `(repeat
     (choice :value ("" "" entry (file "~/org/notes.org") "")
 	    (list :tag "Multikey description"
 		  (string :tag "Keys       ")
@@ -316,45 +321,45 @@ you can escape ambiguous cases with a backward slash, e.g., \\%i."
 		  (choice :tag "Target location"
 			  (list :tag "File"
 				(const :format "" file)
-				(file :tag "  File"))
+				,file-variants)
 			  (list :tag "ID"
 				(const :format "" id)
 				(string :tag "  ID"))
 			  (list :tag "File & Headline"
 				(const :format "" file+headline)
-				(file   :tag "  File    ")
+				,file-variants
 				(string :tag "  Headline"))
 			  (list :tag "File & Outline path"
 				(const :format "" file+olp)
-				(file   :tag "  File    ")
+				,file-variants
 				(repeat :tag "Outline path" :inline t
 					(string :tag "Headline")))
 			  (list :tag "File & Regexp"
 				(const :format "" file+regexp)
-				(file   :tag "  File  ")
+				,file-variants
 				(regexp :tag "  Regexp"))
 			  (list :tag "File & Date tree"
 				(const :format "" file+datetree)
-				(file :tag "  File"))
+				,file-variants)
 			  (list :tag "File & Date tree, prompt for date"
 				(const :format "" file+datetree+prompt)
-				(file :tag "  File"))
+				,file-variants)
 			  (list :tag "File & Week tree"
 				(const :format "" file+weektree)
-				(file :tag "  File"))
+				,file-variants)
 			  (list :tag "File & Week tree, prompt for date"
 				(const :format "" file+weektree+prompt)
-				(file :tag "  File"))
+				,file-variants)
 			  (list :tag "File & function"
 				(const :format "" file+function)
-				(file :tag "  File    ")
+				,file-variants
 				(sexp :tag "  Function"))
 			  (list :tag "Current clocking task"
 				(const :format "" clock))
 			  (list :tag "Function"
 				(const :format "" function)
 				(sexp :tag "  Function")))
-		  (choice :tag "Template"
+		  (choice :tag "Template       "
 			  (string)
 			  (list :tag "File"
 				(const :format "" file)
@@ -375,7 +380,7 @@ you can escape ambiguous cases with a backward slash, e.g., \\%i."
 				   ((const :format "%v " :clock-resume) (const t))
 				   ((const :format "%v " :unnarrowed) (const t))
 				   ((const :format "%v " :table-line-pos) (const t))
-				   ((const :format "%v " :kill-buffer) (const t))))))))
+				   ((const :format "%v " :kill-buffer) (const t)))))))))
 
 (defcustom org-capture-before-finalize-hook nil
   "Hook that is run right before a capture process is finalized.

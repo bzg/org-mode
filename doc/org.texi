@@ -7206,8 +7206,8 @@ A function to find the right location in the file.
 File to the entry that is currently being clocked.
 
 @item (function function-finding-location)
-Most general way, write your own function to find both
-file and location.
+Most general way: write your own function which both visits
+the file and moves point to the right location.
 @end table
 
 @item template
