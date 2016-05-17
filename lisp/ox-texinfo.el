@@ -1563,96 +1563,26 @@ this command to convert it."
 (defun org-texinfo-compile (file)
   "Compile a texinfo file.
 
-FILE is the name of the file being compiled.  Processing is
-done through the command specified in `org-texinfo-info-process'.
+FILE is the name of the file being compiled.  Processing is done
+through the command specified in `org-texinfo-info-process',
+which see.  Output is redirected to \"*Org INFO Texinfo Output*\"
+buffer.
 
 Return INFO file name or an error if it couldn't be produced."
-  (let* ((base-name (file-name-sans-extension (file-name-nondirectory file)))
-	 (full-name (file-truename file))
-	 (out-dir (file-name-directory file))
-	 (time (current-time))
-	 ;; Properly set working directory for compilation.
-	 (default-directory (if (file-name-absolute-p file)
-				(file-name-directory full-name)
-			      default-directory))
-	 errors)
-    (message "Processing Texinfo file %s..." file)
-    (save-window-excursion
-      ;; Replace %b, %f and %o with appropriate values in each command
-      ;; before applying it.  Output is redirected to "*Org INFO
-      ;; Texinfo Output*" buffer.
-      (let ((outbuf (get-buffer-create "*Org INFO Texinfo Output*")))
-	(with-current-buffer outbuf (compilation-mode))
-	(dolist (command org-texinfo-info-process)
-	  (shell-command
-	   (replace-regexp-in-string
-	    "%b" (shell-quote-argument base-name)
-	    (replace-regexp-in-string
-	     "%f" (shell-quote-argument full-name)
-	     (replace-regexp-in-string
-	      "%o" (shell-quote-argument out-dir) command t t) t t) t t)
-	   outbuf))
-	;; Collect standard errors from output buffer.
-	(setq errors (org-texinfo-collect-errors outbuf)))
-      (let ((infofile (concat out-dir base-name ".info")))
-	;; Check for process failure.  Provide collected errors if
-	;; possible.
-	(if (or (not (file-exists-p infofile))
-		;; Only compare times up to whole seconds as some
-		;; filesystems (e.g. HFS+) do not retain any finer
-		;; granularity.
-		(time-less-p (cl-subseq (nth 5 (file-attributes infofile)) 0 2)
-			     (cl-subseq time 0 2)))
-	    (error "INFO file %s wasn't produced%s" infofile
-		   (if errors (concat ": " errors) ""))
-	  ;; Else remove log files, when specified, and signal end of
-	  ;; process to user, along with any error encountered.
-	  (when org-texinfo-remove-logfiles
-	    (dolist (ext org-texinfo-logfiles-extensions)
-	      (let ((file (concat out-dir base-name "." ext)))
-		(when (file-exists-p file) (delete-file file)))))
-	  (message (concat "Process completed"
-			   (if (not errors) "."
-			     (concat " with errors: " errors)))))
-	;; Return output file name.
-	infofile))))
-
-(defun org-texinfo-collect-errors (buffer)
-  "Collect some kind of errors from \"makeinfo\" command output.
-
-BUFFER is the buffer containing output.
-
-Return collected error types as a string, or nil if there was
-none."
-  (with-current-buffer buffer
-    (save-excursion
-      (goto-char (point-min))
-      ;; Find final "makeinfo" run.
-      (when t
-	(let ((case-fold-search t)
-	      (errors ""))
-	  (when (save-excursion
-		  (re-search-forward "perhaps incorrect sectioning?" nil t))
-	    (setq errors (concat errors " [incorrect sectioning]")))
-	  (when (save-excursion
-		  (re-search-forward "missing close brace" nil t))
-	    (setq errors (concat errors " [syntax error]")))
-	  (when (save-excursion
-		  (re-search-forward "Unknown command" nil t))
-	    (setq errors (concat errors " [undefined @command]")))
-	  (when (save-excursion
-		  (re-search-forward "No matching @end" nil t))
-	    (setq errors (concat errors " [block incomplete]")))
-	  (when (save-excursion
-		  (re-search-forward "requires a sectioning" nil t))
-	    (setq errors (concat errors " [invalid section command]")))
-	  (when (save-excursion
-		  (re-search-forward "\\[unexpected\ ]" nil t))
-	    (setq errors (concat errors " [unexpected error]")))
-	  (when (save-excursion
-		  (re-search-forward "misplaced " nil t))
-	    (setq errors (concat errors " [syntax error]")))
-	  (and (org-string-nw-p errors) (org-trim errors)))))))
+  (message "Processing Texinfo file %s..." file)
+  (let* ((log-name "*Org INFO Texinfo Output*")
+	 (log (get-buffer-create log-name))
+	 (output
+	  (org-compile-file file org-texinfo-info-process "info"
+			    (format "See %S for details" log-name)
+			    log)))
+    (when org-texinfo-remove-logfiles
+      (let ((base (file-name-sans-extension output)))
+	(dolist (ext org-texinfo-logfiles-extensions)
+	  (let ((file (concat base "." ext)))
+	    (when (file-exists-p file) (delete-file file))))))
+    (message "Process completed.")
+    output))
 
 
 (provide 'ox-texinfo)

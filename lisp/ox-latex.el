@@ -3519,87 +3519,59 @@ Return PDF file's name."
   "Compile a TeX file.
 
 TEXFILE is the name of the file being compiled.  Processing is
-done through the command specified in `org-latex-pdf-process'.
+done through the command specified in `org-latex-pdf-process',
+which see.  Output is redirected to \"*Org PDF LaTeX Output*\"
+buffer.
 
 When optional argument SNIPPET is non-nil, TEXFILE is a temporary
 file used to preview a LaTeX snippet.  In this case, do not
-create a log buffer and do not bother removing log files.
+create a log buffer and do not remove log files.
 
-Return PDF file name or an error if it couldn't be produced."
-  (let* ((base-name (file-name-sans-extension (file-name-nondirectory texfile)))
-	 (full-name (file-truename texfile))
-	 (compiler (or (with-temp-buffer
-			 (save-excursion (insert-file-contents full-name))
-			 (when (and (search-forward-regexp
-				     (regexp-opt org-latex-compilers) (line-end-position 2) t)
-				    (progn (beginning-of-line)
-					   (looking-at-p "%")))
-			   (match-string 0)))
-		       "pdflatex"))
-	 (out-dir (file-name-directory texfile))
-	 ;; Properly set working directory for compilation.
-	 (default-directory (if (file-name-absolute-p texfile)
-				(file-name-directory full-name)
-			      default-directory))
-	 (time (current-time))
-	 warnings)
-    (unless snippet (message "Processing LaTeX file %s..." texfile))
-    (save-window-excursion
-      (cond
-       ;; A function is provided: Apply it.
-       ((functionp org-latex-pdf-process)
-	(funcall org-latex-pdf-process (shell-quote-argument texfile)))
-       ;; A list is provided: Replace %b, %f and %o with appropriate
-       ;; values in each command before applying it.  Note that while
-       ;; "%latex" and "%bibtex" is used in `org-latex-pdf-process',
-       ;; they are replaced with "%L" and "%B" to adhere to
-       ;; format-spec.  Output is redirected to "*Org PDF LaTeX
-       ;; Output*" buffer.
-       ((consp org-latex-pdf-process)
-	(let ((outbuf (and (not snippet)
-			   (get-buffer-create "*Org PDF LaTeX Output*")))
-	      (spec (list (cons ?B  (shell-quote-argument org-latex-bib-compiler))
-			  (cons ?L (shell-quote-argument compiler))
-			  (cons ?b (shell-quote-argument base-name))
-			  (cons ?f (shell-quote-argument full-name))
-			  (cons ?o (shell-quote-argument out-dir)))))
-	  (dolist (command org-latex-pdf-process)
-	    (let ((c (replace-regexp-in-string
-		      "%\\(latex\\|bibtex\\)\\>"
-		      (lambda (str) (upcase (substring str 0 2)))
-		      command)))
-	      (shell-command (format-spec c spec) outbuf)))
-	  ;; Collect standard errors from output buffer.
-	  (setq warnings (and (not snippet)
-			      (org-latex--collect-warnings outbuf)))))
-       (t (error "No valid command to process to PDF")))
-      (let ((pdffile (concat out-dir base-name ".pdf")))
-	;; Check for process failure.  Provide collected errors if
-	;; possible.
-	(if (or (not (file-exists-p pdffile))
-		;; Only compare times up to whole seconds as some filesystems
-		;; (e.g. HFS+) do not retain any finer granularity.
-		(time-less-p (cl-subseq (nth 5 (file-attributes pdffile)) 0 2)
-			     (cl-subseq time 0 2)))
-	    (error (format "PDF file %s wasn't produced" pdffile))
-	  ;; Else remove log files, when specified, and signal end of
-	  ;; process to user, along with any error encountered.
-	  (unless snippet
-	    (when org-latex-remove-logfiles
-	      (dolist (file (directory-files
-			     out-dir t
-			     (concat (regexp-quote base-name)
-				     "\\(?:\\.[0-9]+\\)?"
-				     "\\."
-				     (regexp-opt org-latex-logfiles-extensions))))
-		(delete-file file)))
-	    (message (concat "PDF file produced"
-			     (cond
-			      ((eq warnings 'error) " with errors.")
-			      (warnings (concat " with warnings: " warnings))
-			      (t "."))))))
-	;; Return output file name.
-	pdffile))))
+Return PDF file name or raise an error if it couldn't be
+produced."
+  (unless snippet (message "Processing LaTeX file %s..." texfile))
+  (let* ((compiler
+	  (or (with-temp-buffer
+		(save-excursion (insert-file-contents texfile))
+		(and (search-forward-regexp (regexp-opt org-latex-compilers)
+					    (line-end-position 2)
+					    t)
+		     (progn (beginning-of-line) (looking-at-p "%"))
+		     (match-string 0)))
+	      "pdflatex"))
+	 (process (if (functionp org-latex-pdf-process) org-latex-pdf-process
+		    ;; Replace "%latex" and "%bibtex" with,
+		    ;; respectively, "%L" and "%B" so as to adhere to
+		    ;; `format-spec' specifications.
+		    (mapcar (lambda (command)
+			      (replace-regexp-in-string
+			       "%\\(?:bib\\|la\\)tex\\>"
+			       (lambda (m) (upcase (substring m 0 2)))
+			       command))
+			    org-latex-pdf-process)))
+         (spec `((?B . ,(shell-quote-argument org-latex-bib-compiler))
+                 (?L . ,(shell-quote-argument compiler))))
+	 (log-buf-name "*Org PDF LaTeX Output*")
+         (log-buf (and (not snippet) (get-buffer-create log-buf-name)))
+         (outfile (org-compile-file texfile process "pdf"
+				    (format "See %S for details" log-buf-name)
+				    log-buf spec)))
+    (unless snippet
+      (when org-latex-remove-logfiles
+	(mapc #'delete-file
+	      (directory-files
+	       (file-name-directory texfile) t
+	       (concat (regexp-quote (file-name-base outfile))
+		       "\\(?:\\.[0-9]+\\)?\\."
+		       (regexp-opt org-latex-logfiles-extensions)))))
+      (let ((warnings (org-latex--collect-warnings log-buf)))
+	(message (concat "PDF file produced"
+			 (cond
+			  ((eq warnings 'error) " with errors.")
+			  (warnings (concat " with warnings: " warnings))
+			  (t "."))))))
+    ;; Return output file name.
+    outfile))
 
 (defun org-latex--collect-warnings (buffer)
   "Collect some warnings from \"pdflatex\" command output.

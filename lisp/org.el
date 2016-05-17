@@ -22852,6 +22852,73 @@ hierarchy of headlines by UP levels before marking the subtree."
       (call-interactively 'org-mark-element)
     (org-mark-element)))
 
+(defun org-file-newer-than-p (file time)
+  "Non-nil if FILE is newer than TIME.
+FILE is a filename, as a string, TIME is a list of integers, as
+returned by, e.g., `current-time'."
+  (and (file-exists-p file)
+       ;; Only compare times up to whole seconds as some file-systems
+       ;; (e.g. HFS+) do not retain any finer granularity.  As
+       ;; a consequence, make sure we return non-nil when the two
+       ;; times are equal.
+       (not (time-less-p (cl-subseq (nth 5 (file-attributes file)) 0 2)
+			 (cl-subseq time 0 2)))))
+
+(defun org-compile-file (source process ext &optional err-msg log-buf spec)
+  "Compile a SOURCE file using PROCESS.
+
+PROCESS is either a function or a list of shell commands, as
+strings.  EXT is a file extension, without the leading dot, as
+a string.  It is used to check if the process actually succeeded.
+
+PROCESS must create a file with the same base name and directory
+as SOURCE, but ending with EXT.  The function then returns its
+filename.  Otherwise, it raises an error.  The error message can
+then be refined by providing string ERR-MSG, which is appended to
+the standard message.
+
+If PROCESS is a function, it is called with a single argument:
+the SOURCE file.
+
+If it is a list of commands, each of them is called using
+`shell-command'.  By default, in each command, %b, %f and %o are
+replaced, respectively, with SOURCE base name, SOURCE full name
+and SOURCE directory.  It is possible, however, to use more
+place-holders by specifying them in optional argument SPEC, as an
+alist following the pattern (CHARACTER . REPLACEMENT-STRING).
+
+When PROCESS is a list of commands, optional argument LOG-BUF can
+be set to a buffer or a buffer name.  `shell-command' then uses
+it for output.
+
+`default-directory' is set to SOURCE directory during the whole
+process."
+  (let* ((base-name (file-name-sans-extension (file-name-nondirectory source)))
+	 (full-name (file-truename source))
+	 (out-dir (file-name-directory source))
+	 ;; Properly set working directory for compilation.
+	 (default-directory (if (file-name-absolute-p source)
+				(file-name-directory full-name)
+			      default-directory))
+	 (time (current-time))
+	 (err-msg (if (stringp err-msg) (concat ".  " err-msg) "")))
+    (save-window-excursion
+      (pcase process
+        ((pred functionp) (funcall process (shell-quote-argument source)))
+        ((pred consp)
+         (let ((log-buf (and log-buf (get-buffer-create log-buf)))
+               (spec (append spec
+			     `((?b . ,(shell-quote-argument base-name))
+			       (?f . ,(shell-quote-argument full-name))
+			       (?o . ,(shell-quote-argument out-dir))))))
+           (dolist (command process)
+             (shell-command (format-spec command spec) log-buf))))
+        (_ (error "No valid command to process %S%s" source err-msg)))
+      ;; Check for process failure.
+      (let ((output (concat out-dir base-name "." ext)))
+	(unless (org-file-newer-than-p output time)
+	  (error (format "File %S wasn't produced%s" output err-msg)))
+	output))))
 
 ;;; Indentation
 

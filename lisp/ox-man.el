@@ -1127,73 +1127,15 @@ FILE is the name of the file being compiled.  Processing is done
 through the command specified in `org-man-pdf-process'.
 
 Return PDF file name or an error if it couldn't be produced."
-  (let* ((base-name (file-name-sans-extension (file-name-nondirectory file)))
-	 (full-name (file-truename file))
-	 (out-dir (file-name-directory file))
-	 (time (current-time))
-	 ;; Properly set working directory for compilation.
-	 (default-directory (if (file-name-absolute-p file)
-				(file-name-directory full-name)
-			      default-directory))
-         errors)
-    (message "Processing Groff file %s..." file)
-    (save-window-excursion
-      (cond
-       ;; A function is provided: Apply it.
-       ((functionp org-man-pdf-process)
-	(funcall org-man-pdf-process (shell-quote-argument file)))
-       ;; A list is provided: Replace %b, %f and %o with appropriate
-       ;; values in each command before applying it.  Output is
-       ;; redirected to "*Org PDF Groff Output*" buffer.
-       ((consp org-man-pdf-process)
-	(let ((outbuf (get-buffer-create "*Org PDF Groff Output*")))
-	  (dolist (command org-man-pdf-process)
-	    (shell-command
-	     (replace-regexp-in-string
-	      "%b" (shell-quote-argument base-name)
-	      (replace-regexp-in-string
-	       "%f" (shell-quote-argument full-name)
-	       (replace-regexp-in-string
-		"%o" (shell-quote-argument out-dir) command t t) t t) t t)
-	     outbuf))
-	  ;; Collect standard errors from output buffer.
-	  (setq errors (org-man-collect-errors outbuf))))
-       (t (error "No valid command to process to PDF")))
-      (let ((pdffile (concat out-dir base-name ".pdf")))
-	;; Check for process failure.  Provide collected errors if
-	;; possible.
-	(if (or (not (file-exists-p pdffile))
-		;; Only compare times up to whole seconds as some
-		;; filesystems (e.g. HFS+) do not retain any finer
-		;; granularity.
-		(time-less-p (cl-subseq (nth 5 (file-attributes pdffile)) 0 2)
-			     (cl-subseq time 0 2)))
-	    (error "PDF file %s wasn't produced%s"
-		   pdffile
-		   (if errors (concat ": " errors) ""))
-	  ;; Else remove log files, when specified, and signal end of
-	  ;; process to user, along with any error encountered.
-	  (when org-man-remove-logfiles
-	    (dolist (ext org-man-logfiles-extensions)
-	      (let ((file (concat out-dir base-name "." ext)))
-		(when (file-exists-p file) (delete-file file)))))
-	  (message (concat "Process completed"
-			   (if (not errors) "."
-			     (concat " with errors: " errors)))))
-	;; Return output file name.
-	pdffile))))
-
-(defun org-man-collect-errors (buffer)
-  "Collect some kind of errors from \"groff\" output
-BUFFER is the buffer containing output.
-Return collected error types as a string, or nil if there was
-none."
-  (with-current-buffer buffer
-    (save-excursion
-      (goto-char (point-max))
-      ;; Find final run
-      nil )))
-
+  (message "Processing Groff file %s..." file)
+  (let ((output (org-compile-file file org-man-pdf-process "pdf")))
+    (when org-man-remove-logfiles
+      (let ((base (file-name-sans-extension output)))
+	(dolist (ext org-man-logfiles-extensions)
+	  (let ((file (concat base "." ext)))
+	    (when (file-exists-p file) (delete-file file))))))
+    (message "Process completed.")
+    output))
 
 (provide 'ox-man)
 
