@@ -105,6 +105,9 @@ becomes
 
 : ("pdf" . (lambda (file link) (foo)))
 
+*** The ~{{{modification-time}}}~ macro can obtain time via =vc=
+The modification time will be determined via =vc.el= if the second
+argument is non-nil.  See the manual for details.
 ** New features
 *** New org-protocol key=value syntax
 

@@ -10247,13 +10247,15 @@ argument to the @code{@{@{@{date@}@}@}} macro that will be used only if
 understood by @code{format-time-string}.
 
 @item @{@{@{time(@var{FORMAT})@}@}@}
-@itemx @{@{@{modification-time(@var{FORMAT})@}@}@}
+@itemx @{@{@{modification-time(@var{FORMAT}, @var{VC})@}@}@}
 @cindex time, macro
 @cindex modification time, macro
 These macros refer to the date and time when the document is exported and to
-the modification date and time of the file being exported, respectively.
-@var{FORMAT} should be a format string understood by
-@code{format-time-string}.
+the modification date and time, respectively.  @var{FORMAT} should be a
+format string understood by @code{format-time-string}.  If the second
+argument to the @code{modification-time} macro is non-@code{nil}, Org
+retrieves the information from the version control system, using
+@file{vc.el}, instead of the file attributes.
 
 @item @{@{@{input-file@}@}@}
 @cindex input file, macro

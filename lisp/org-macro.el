@@ -58,6 +58,10 @@
 (declare-function org-file-contents "org" (file &optional noerror))
 (declare-function org-mode "org" ())
 (declare-function org-remove-double-quotes "org" (s))
+(declare-function org-with-wide-buffer "org-macs" (&rest body))
+(declare-function vc-backend "vc-hooks" (f))
+(declare-function vc-call "vc-hooks" (&rest args))
+(declare-function vc-exec-after "vc-dispatcher" (code))
 
 ;;; Variables
 
@@ -145,7 +149,8 @@ function installs the following ones: \"property\",
 	(mapc update-templates
 	      (list (cons "input-file" (file-name-nondirectory visited-file))
 		    (cons "modification-time"
-			  (format "(eval (format-time-string \"$1\" '%s))"
+			  (format "(eval (format-time-string \"$1\" (or (and (org-string-nw-p \"$2\") (org-macro--vc-modified-time %s)) '%s)))"
+				  (prin1-to-string visited-file)
 				  (prin1-to-string
 				   (nth 5 (file-attributes visited-file)))))))))
     (setq org-macro-templates templates)))
@@ -275,6 +280,30 @@ Return a list of arguments, as strings.  This is the opposite of
 		(if (zerop (mod len 2)) "\000" ","))))
     s nil t)
    "\000"))
+
+(defun org-macro--vc-modified-time (file)
+  (save-window-excursion
+    (when (vc-backend file)
+      (let ((buf (get-buffer-create " *org-vc*"))
+	    (case-fold-search t)
+	    date)
+	(unwind-protect
+	    (progn
+	      (vc-call print-log file buf nil nil 1)
+	      (with-current-buffer buf
+		(vc-exec-after
+		 (lambda ()
+		   (goto-char (point-min))
+		   (when (re-search-forward "Date:?[ \t]*" nil t)
+		     (let ((time (parse-time-string
+				  (buffer-substring
+				   (point) (line-end-position)))))
+		       (when (cl-some #'identity time)
+			 (setq date (apply #'encode-time time))))))))
+	      (let ((proc (get-buffer-process buf)))
+		(while (and proc (accept-process-output proc .5 nil t)))))
+	  (kill-buffer buf))
+	date))))
 
 
 (provide 'org-macro)
