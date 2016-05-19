@@ -20,7 +20,7 @@
 #+TEXINFO_HEADER: @set txicodequoteundirected
 #+TEXINFO_HEADER: @set txicodequotebacktick
 
-# Version and Contact Info
+# Contact Info
 #+TEXINFO_HEADER: @set MAINTAINERSITE @uref{http://orgmode.org,maintainers webpage}
 #+TEXINFO_HEADER: @set MAINTAINER Carsten Dominik
 #+TEXINFO_HEADER: @set MAINTAINEREMAIL @email{carsten at orgmode dot org}
@@ -28,39 +28,6 @@
 
 #+STARTUP: overview
 #+TODO: FIXME | FIXED
-
-# # Macros for simplifying export
-
-#+MACRO: version (eval (pcase (split-string (org-version nil t) "[ (_]" t) (`(,_ ,_ ,n ,_ ,r . ,_) (format "%s (release_%s)" n r))))
-
-# Markup macros.  In texinfo export they will be marked up, otherwise
-# they will be inserted verbatim.  markup is the generic form that can
-# be used to insert any @-command with the second variable being the
-# text to mark up.
-#+MACRO: markup @@info:@$1{@@$2@@info:}@@
-#+MACRO: kbd {{{markup(kbd,$1)}}}
-#+MACRO: key {{{markup(key,$1)}}}
-#+MACRO: samp {{{markup(samp,$1)}}}
-#+MACRO: command {{{markup(command,$1)}}}
-#+MACRO: file {{{markup(file,$1)}}}
-#+MACRO: var {{{markup(var,$1)}}}
-#+MACRO: cite {{{markup(cite,$1)}}}
-#+MACRO: value {{{markup(value,$1)}}}
-
-#+MACRO: kbdkey {{{kbd($1{{{key($2)}}})}}}
-#+MACRO: kbdspckey {{{kbd($1 {{{key($2)}}})}}}
-#+MACRO: ksksksk {{{kbd($1 {{{key($2)}}} $3 {{{key($4)}}})}}}
-#+MACRO: ksksksksk {{{kbd($1 {{{key($2)}}} $3 {{{key($4)}}} {{{key($5)}}})}}}
-#+MACRO: kbdkeys {{{kbd($1{{{key($2)}}}{{{key($3)}}})}}}
-
-# Plain macros.
-#+MACRO: noindent @@info:@noindent@@
-#+MACRO: defun @@info:@defun@@
-#+MACRO: enddefun @@info:@end defun@@
-#+MACRO: defopt @@info:@defopt@@
-#+MACRO: enddefopt @@info:@end defopt@@
-#+MACRO: result @@info:@result{}@@
-#+MACRO: page @@info:@page@@
 
 * Introduction
   :PROPERTIES:
@@ -18511,6 +18478,40 @@ Documentation License.  If you want to distribute this document
 separately from the collection, you can do so by adding a copy of the
 license to the document, as described in section 6 of the license.
 #+END_QUOTE
+
+* Macro definitions							:noexport:
+
+# Version macro, with commit hash
+#+MACRO: version (eval (pcase (split-string (org-version nil t) "[ (_]" t) (`(,_ ,_ ,n ,_ ,r . ,_) (format "%s (release_%s)" n r))))
+
+# Markup macros.  In texinfo export they will be marked up, otherwise
+# they will be inserted verbatim.  markup is the generic form that can
+# be used to insert any @-command with the second variable being the
+# text to mark up.
+#+MACRO: markup @@info:@$1{@@$2@@info:}@@
+#+MACRO: kbd {{{markup(kbd,$1)}}}
+#+MACRO: key {{{markup(key,$1)}}}
+#+MACRO: samp {{{markup(samp,$1)}}}
+#+MACRO: command {{{markup(command,$1)}}}
+#+MACRO: file {{{markup(file,$1)}}}
+#+MACRO: var {{{markup(var,$1)}}}
+#+MACRO: cite {{{markup(cite,$1)}}}
+#+MACRO: value {{{markup(value,$1)}}}
+
+#+MACRO: kbdkey {{{kbd($1{{{key($2)}}})}}}
+#+MACRO: kbdspckey {{{kbd($1 {{{key($2)}}})}}}
+#+MACRO: ksksksk {{{kbd($1 {{{key($2)}}} $3 {{{key($4)}}})}}}
+#+MACRO: ksksksksk {{{kbd($1 {{{key($2)}}} $3 {{{key($4)}}} {{{key($5)}}})}}}
+#+MACRO: kbdkeys {{{kbd($1{{{key($2)}}}{{{key($3)}}})}}}
+
+# Plain macros.
+#+MACRO: noindent @@info:@noindent@@
+#+MACRO: defun @@info:@defun@@
+#+MACRO: enddefun @@info:@end defun@@
+#+MACRO: defopt @@info:@defopt@@
+#+MACRO: enddefopt @@info:@end defopt@@
+#+MACRO: result @@info:@result{}@@
+#+MACRO: page @@info:@page@@
 
 * Instructions for use                                             :noexport:
 - [ ] Tangle the makefile, `C-c C-v t'
