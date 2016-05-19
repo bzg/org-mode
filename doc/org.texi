@@ -10395,10 +10395,10 @@ snippets will be identified as @LaTeX{} source code:
 @item
 Environments of any kind@footnote{When MathJax is used, only the
 environments recognized by MathJax will be processed.  When
-@file{dvipng} program or @file{imagemagick} suite is used to create images,
-any @LaTeX{} environment will be handled.}.  The only requirement is that the
-@code{\begin} statement appears on a new line, at the beginning of the line
-or after whitespaces only.
+@file{dvipng} program, @file{dvisvgm} program or @file{imagemagick} suite is
+used to create images, any @LaTeX{} environment will be handled.}.  The only
+requirement is that the @code{\begin} statement appears on a new line, at the
+beginning of the line or after whitespaces only.
 @item
 Text within the usual @LaTeX{} math delimiters.  To avoid conflicts with
 currency specifications, single @samp{$} characters are only recognized as
@@ -10445,12 +10445,12 @@ lines:
 @subsection Previewing @LaTeX{} fragments
 @cindex @LaTeX{} fragments, preview
 
-@vindex org-latex-create-formula-image-program
-If you have a working @LaTeX{} installation and either @file{dvipng} or
-@file{convert} installed@footnote{These are respectively available at
-@url{http://sourceforge.net/projects/dvipng/} and from the @file{imagemagick}
-suite. Choose the converter by setting the variable
-@code{org-latex-create-formula-image-program} accordingly.}, @LaTeX{}
+@vindex org-preview-latex-default-process
+If you have a working @LaTeX{} installation and @file{dvipng}, @file{dvisvgm}
+or @file{convert} installed@footnote{These are respectively available at
+@url{http://sourceforge.net/projects/dvipng/}, @url{http://dvisvgm.bplaced.net/}
+and from the @file{imagemagick} suite.  Choose the converter by setting the
+variable @code{org-preview-latex-default-process} accordingly.}, @LaTeX{}
 fragments can be processed to produce images of the typeset expressions to be
 used for inclusion while exporting to HTML (see @pxref{@LaTeX{} fragments}),
 or for inline previewing within Org mode.
@@ -11715,6 +11715,7 @@ You could use @code{http} addresses just as well.
 @subsection Math formatting in HTML export
 @cindex MathJax
 @cindex dvipng
+@cindex dvisvgm
 @cindex imagemagick
 
 @LaTeX{} math snippets (@pxref{@LaTeX{} fragments}) can be displayed in two
@@ -11739,11 +11740,16 @@ template can be configure via @code{org-html-mathjax-template}.
 If you prefer, you can also request that @LaTeX{} fragments are processed
 into small images that will be inserted into the browser page.  Before the
 availability of MathJax, this was the default method for Org files.  This
-method requires that the @file{dvipng} program or @file{imagemagick} suite is
-available on your system.  You can still get this processing with
+method requires that the @file{dvipng} program, @file{dvisvgm} or
+@file{imagemagick} suite is available on your system.  You can still get
+this processing with
 
 @example
 #+OPTIONS: tex:dvipng
+@end example
+
+@example
+#+OPTIONS: tex:dvisvgm
 @end example
 
 or:
@@ -12910,6 +12916,7 @@ and open the formula file with the system-registered application.
 @end table
 
 @cindex dvipng
+@cindex dvisvgm
 @cindex imagemagick
 @item PNG images
 
@@ -12919,16 +12926,20 @@ This option is activated on a per-file basis with
 #+OPTIONS: tex:dvipng
 @end example
 
+@example
+#+OPTIONS: tex:dvisvgm
+@end example
+
 or:
 
 @example
 #+OPTIONS: tex:imagemagick
 @end example
 
-With this option, @LaTeX{} fragments are processed into PNG images and the
-resulting images are embedded in the exported document.  This method requires
-that the @file{dvipng} program or @file{imagemagick} suite be available on
-your system.
+With this option, @LaTeX{} fragments are processed into PNG or SVG images and
+the resulting images are embedded in the exported document.  This method requires
+that the @file{dvipng} program, @file{dvisvgm} or @file{imagemagick} suite be
+available on your system.
 @end enumerate
 
 @node Working with MathML or OpenDocument formula files

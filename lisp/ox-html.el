@@ -816,24 +816,20 @@ fragments.
 This option can also be set with the +OPTIONS line,
 e.g. \"tex:mathjax\".  Allowed values are:
 
-nil            Ignore math snippets.
-`verbatim'     Keep everything in verbatim
-`dvipng'       Process the LaTeX fragments to images.  This will also
-               include processing of non-math environments.
-`imagemagick'  Convert the LaTeX fragments to pdf files and use
-               imagemagick to convert pdf files to png files.
-`mathjax'      Do MathJax preprocessing and arrange for MathJax.js to
-               be loaded.
-t              Synonym for `mathjax'."
+  nil           Ignore math snippets.
+  `verbatim'    Keep everything in verbatim
+  `mathjax', t  Do MathJax preprocessing and arrange for MathJax.js to
+                be loaded.
+  SYMBOL        Any symbol defined in `org-preview-latex-process-alist',
+                e.g., `dvipng'."
   :group 'org-export-html
   :version "24.4"
   :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "Do not process math in any way" nil)
-	  (const :tag "Use dvipng to make images" dvipng)
-	  (const :tag "Use imagemagick to make images" imagemagick)
+	  (const :tag "Leave math verbatim" verbatim)
 	  (const :tag "Use MathJax to display math" mathjax)
-	  (const :tag "Leave math verbatim" verbatim)))
+	  (symbol :tag "Convert to image to display math" :value dvipng)))
 
 ;;;; Links :: Generic
 
@@ -2759,10 +2755,11 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 (defun org-html-format-latex (latex-frag processing-type info)
   "Format a LaTeX fragment LATEX-FRAG into HTML.
-PROCESSING-TYPE designates the tool used for conversion.  It is
-a symbol among `mathjax', `dvipng', `imagemagick', `verbatim' nil
-and t.  See `org-html-with-latex' for more information.  INFO is
-a plist containing export properties."
+PROCESSING-TYPE designates the tool used for conversion.  It can
+be `mathjax', `verbatim', nil, t or symbols in
+`org-preview-latex-process-alist', e.g., `dvipng', `dvisvgm' or
+`imagemagick'.  See `org-html-with-latex' for more information.
+INFO is a plist containing export properties."
   (let ((cache-relpath "") (cache-dir ""))
     (unless (eq processing-type 'mathjax)
       (let ((bfn (or (buffer-file-name)
@@ -2777,7 +2774,7 @@ a plist containing export properties."
 			     "\n")
 			    "\n")))))
 	(setq cache-relpath
-	      (concat "ltxpng/"
+	      (concat (file-name-as-directory org-preview-latex-image-directory)
 		      (file-name-sans-extension
 		       (file-name-nondirectory bfn)))
 	      cache-dir (file-name-directory bfn))
@@ -2798,19 +2795,19 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	(latex-frag (org-remove-indentation
 		     (org-element-property :value latex-environment)))
 	(attributes (org-export-read-attribute :attr_html latex-environment)))
-    (case processing-type
-      ((t mathjax)
-       (org-html-format-latex latex-frag 'mathjax info))
-      ((dvipng imagemagick)
-       (let ((formula-link
-	      (org-html-format-latex latex-frag processing-type info)))
-	 (when (and formula-link (string-match "file:\\([^]]*\\)" formula-link))
-	   ;; Do not provide a caption or a name to be consistent with
-	   ;; `mathjax' handling.
-	   (org-html--wrap-image
-	    (org-html--format-image
-	     (match-string 1 formula-link) attributes info) info))))
-      (t latex-frag))))
+    (cond
+     ((memq processing-type '(t mathjax))
+      (org-html-format-latex latex-frag 'mathjax info))
+     ((assq processing-type org-preview-latex-process-alist)
+      (let ((formula-link
+	     (org-html-format-latex latex-frag processing-type info)))
+	(when (and formula-link (string-match "file:\\([^]]*\\)" formula-link))
+	  ;; Do not provide a caption or a name to be consistent with
+	  ;; `mathjax' handling.
+	  (org-html--wrap-image
+	   (org-html--format-image
+	    (match-string 1 formula-link) attributes info) info))))
+     (t latex-frag))))
 
 ;;;; Latex Fragment
 
@@ -2819,15 +2816,15 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((latex-frag (org-element-property :value latex-fragment))
 	(processing-type (plist-get info :with-latex)))
-    (case processing-type
-      ((t mathjax)
-       (org-html-format-latex latex-frag 'mathjax info))
-      ((dvipng imagemagick)
-       (let ((formula-link
-	      (org-html-format-latex latex-frag processing-type info)))
-	 (when (and formula-link (string-match "file:\\([^]]*\\)" formula-link))
-	   (org-html--format-image (match-string 1 formula-link) nil info))))
-      (t latex-frag))))
+    (cond
+     ((memq processing-type '(t mathjax))
+      (org-html-format-latex latex-frag 'mathjax info))
+     ((assq processing-type org-preview-latex-process-alist)
+      (let ((formula-link
+	     (org-html-format-latex latex-frag processing-type info)))
+	(when (and formula-link (string-match "file:\\([^]]*\\)" formula-link))
+	  (org-html--format-image (match-string 1 formula-link) nil info))))
+     (t latex-frag))))
 
 ;;;; Line Break
 
