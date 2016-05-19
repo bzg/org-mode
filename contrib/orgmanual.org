@@ -15,9 +15,6 @@
 #+TEXINFO_DIR_TITLE: Org Mode: (org)
 #+TEXINFO_DIR_DESC: Outline-based notes management and organizer
 
-# FIXME: Disable while in contrib/ since the file is not available.
-# #+TEXINFO_HEADER: @include org-version.inc
-
 # Use proper quote and backtick for code sections in PDF output
 # Cf. Texinfo manual 14.2
 #+TEXINFO_HEADER: @set txicodequoteundirected
