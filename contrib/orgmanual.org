@@ -451,7 +451,7 @@ call ~org-table-move-column-right~.
 * Document structure
   :PROPERTIES:
   :DESCRIPTION: A tree works like your brain
-  :OPTIONAL_TITLE: Document Structure
+  :ALT_TITLE: Document Structure
   :END:
 #+cindex: document structure
 #+cindex: structure of document
@@ -513,7 +513,7 @@ variable ~org-cycle-separator-lines~ to modify this behavior.
 ** Visibility cycling
    :PROPERTIES:
    :DESCRIPTION: Show and hide, much simplified
-   :OPTIONAL_TITLE: Visibility cycling
+   :ALT_TITLE: Visibility cycling
    :END:
 #+cindex: cycling, visibility
 #+cindex: visibility cycling
@@ -699,7 +699,7 @@ The following commands jump to other headlines in the buffer.
 ** Structure editing
    :PROPERTIES:
    :DESCRIPTION: Changing sequence and level of headlines
-   :OPTIONAL_TITLE: Structure editing
+   :ALT_TITLE: Structure editing
    :END:
 #+cindex: structure editing
 #+cindex: headline, promotion and demotion
@@ -897,7 +897,7 @@ different functionality.
 ** Sparse trees
    :PROPERTIES:
    :DESCRIPTION: Matches embedded in context
-   :OPTIONAL_TITLE: Sparse trees
+   :ALT_TITLE: Sparse trees
    :END:
 #+cindex: sparse trees
 #+cindex: trees, sparse
@@ -989,7 +989,7 @@ document and print the resulting file.
 ** Plain lists
    :PROPERTIES:
    :DESCRIPTION: Additional structure within an entry
-   :OPTIONAL_TITLE: Plain lists
+   :ALT_TITLE: Plain lists
    :END:
 #+cindex: plain lists
 #+cindex: lists, plain
@@ -1397,7 +1397,7 @@ details.
 ** Orgstruct mode 
    :PROPERTIES:
    :DESCRIPTION: Structure editing outside Org
-   :OPTIONAL_TITLE: Orgstruct mode
+   :ALT_TITLE: Orgstruct mode
    :END:
 #+cindex: Orgstruct mode
 #+cindex: minor mode for structure editing
@@ -1858,7 +1858,7 @@ every vertical line you would like to have:
 ** The Orgtbl mode minor mode
    :PROPERTIES:
    :DESCRIPTION: The table editor as minor mode
-   :OPTIONAL_TITLE: Ogtbl mode
+   :ALT_TITLE: Ogtbl mode
    :END:
 #+cindex: Orgtbl mode
 #+cindex: minor mode for tables
@@ -2163,7 +2163,7 @@ You can add your own Calc functions defined in Emacs Lisp with
 *** Emacs Lisp forms as formulas
     :PROPERTIES:
     :DESCRIPTION: Writing formulas in Emacs Lisp
-    :OPTIONAL_TITLE: Formula syntax for Lisp
+    :ALT_TITLE: Formula syntax for Lisp
     :END:
 #+cindex: Lisp forms, as table formulas
 
@@ -3385,7 +3385,7 @@ implementation example.  See the file {{{file(org-bibtex.el)}}}.
 * TODO items
   :PROPERTIES:
   :DESCRIPTION: Every tree branch can be a TODO item
-  :OPTIONAL_TITLE: TODO Items
+  :ALT_TITLE: TODO Items
   :END:
 #+cindex: TODO items
 
@@ -4621,7 +4621,7 @@ with many examples, see [[Matching tags and properties]].
 * Properties and columns
   :PROPERTIES:
   :DESCRIPTION: Storing information about an entry
-  :OPTIONAL_TITLE: Properties and Columns
+  :ALT_TITLE: Properties and Columns
   :END:
 #+cindex: properties
 
@@ -5346,7 +5346,7 @@ property API]].
 * Dates and times
   :PROPERTIES:
   :DESCRIPTION: Making items useful for planning
-  :OPTIONAL_TITLE: Dates and Times
+  :ALT_TITLE: Dates and Times
   :END:
 #+cindex: dates
 #+cindex: times
@@ -7544,7 +7544,7 @@ The following commands help manage the ARCHIVE tag:
 * FIXME Agenda views
   :PROPERTIES:
   :DESCRIPTION: Collecting information into views
-  :OPTIONAL_TITLE: Agenda Views
+  :ALT_TITLE: Agenda Views
   :END:
 
 Due to the way Org works, TODO items, time-stamped items, and tagged
@@ -8193,7 +8193,7 @@ after the slash with {{{samp(!)}}}.  Using {{{kbd(C-c a M)}}} or
 *** FIXED Timeline for a single file
     :PROPERTIES:
     :DESCRIPTION: Time-sorted view for a single file
-    :OPTIONAL_TITLE: Timeline
+    :ALT_TITLE: Timeline
     :END:
 
 #+cindex: timeline, single file
@@ -9643,7 +9643,7 @@ more information.
 ** Using column view in the agenda
    :PROPERTIES:
    :DESCRIPTION: Using column view for collected entries
-   :OPTIONAL_TITLE: Agenda column view
+   :ALT_TITLE: Agenda column view
    :END:
 #+cindex: column view, in agenda
 #+cindex: agenda, column view
@@ -9713,7 +9713,7 @@ This causes the following issues:
 * FIXME Markup for rich export
   :PROPERTIES:
   :DESCRIPTION: Prepare text for rich export
-  :OPTIONAL_TITLE: Markup
+  :ALT_TITLE: Markup
   :END:
 
 When exporting Org mode documents, the exporter tries to reflect the
@@ -10207,7 +10207,7 @@ construct complex HTML code.
 ** FIXME Embedded LaTeX
    :PROPERTIES:
    :DESCRIPTION: LaTeX can be freely used inside Org documents
-   :OPTIONAL_TITLE: Embedded Latex
+   :ALT_TITLE: Embedded Latex
    :END:
 #+cindex: @TeX{} interpretation
 #+cindex: @LaTeX{} interpretation
@@ -12037,7 +12037,7 @@ further.
 *** ODT export commands
     :PROPERTIES:
     :DESCRIPTION: How to invoke ODT export
-    :OPTIONAL_TITLE: Exporting to ODT
+    :ALT_TITLE: Exporting to ODT
     :END:
 <<x-export-to-odt>>
 
@@ -13778,7 +13778,7 @@ if files include other files via ~#+SETUPFILE:~ or ~#+INCLUDE:~.
 * Working with source code
   :PROPERTIES:
   :DESCRIPTION: Export, evaluate, and tangle code blocks
-  :OPTIONAL_TITLE: Working With Source Code
+  :ALT_TITLE: Working With Source Code
   :END:
 #+cindex: Schulte, Eric
 #+cindex: Davison, Dan
@@ -16689,7 +16689,6 @@ with other code out there.
 *** Conflicts
     :PROPERTIES:
     :DESCRIPTION: Packages that lead to conflicts
-    :OPTIONAL_TITLE:    Packages that lead to conflicts with Org mode
     :END:
 
 #+cindex: @code{shift-selection-mode}
@@ -18078,7 +18077,7 @@ return to this agenda view using {{{kbd(C-c a ?)}}}.[fn:169]
 * History and acknowledgments
   :PROPERTIES:
   :DESCRIPTION: How Org came into being
-  :OPTIONAL_TITLE: History and Acknowledgments
+  :ALT_TITLE: History and Acknowledgments
   :APPENDIX:    Appendix
   :END:
 ** From Carsten
@@ -18443,7 +18442,7 @@ complete if the ones above were not mentioned in this manual.
 
 * Concept index
 :PROPERTIES:
-:OPTIONAL_TITLE: Main Index
+:ALT_TITLE: Main Index
 :INDEX:    cp
 :DESCRIPTION: Org's concepts and features
 :END:
@@ -18451,21 +18450,21 @@ complete if the ones above were not mentioned in this manual.
 * Key index
   :PROPERTIES:
   :DESCRIPTION: Key bindings and where they are described
-  :OPTIONAL_TITLE: Key Index
+  :ALT_TITLE: Key Index
   :INDEX:    ky
   :END:
 
 * Command and function index
   :PROPERTIES:
   :DESCRIPTION: Command names and some internal functions
-  :OPTIONAL_TITLE: Command and Function Index
+  :ALT_TITLE: Command and Function Index
   :INDEX:    fn
   :END:
 
 * Variable index
   :PROPERTIES:
   :DESCRIPTION: Variables mentioned in the manual
-  :OPTIONAL_TITLE: Variable Index
+  :ALT_TITLE: Variable Index
   :INDEX:    vr
   :END:
 
