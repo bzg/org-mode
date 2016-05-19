@@ -1291,8 +1291,13 @@ holding contextual information."
   "Transcode a SPECIAL-BLOCK element from Org to Texinfo.
 CONTENTS holds the contents of the block.  INFO is a plist used
 as a communication channel."
-  (let ((type (org-element-property :type special-block)))
-    (format "@%s\n%s@end %s" type contents type)))
+  (let ((opt (org-export-read-attribute :attr_texinfo special-block :options))
+	(type (org-element-property :type special-block)))
+    (format "@%s%s\n%s@end %s"
+	    type
+	    (if opt (concat " " opt) opt)
+	    (or contents "")
+	    type)))
 
 ;;;; Src Block
 

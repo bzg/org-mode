@@ -133,13 +133,33 @@ property lists.
 *** New option ~date-tree-last~ for ~org-agenda-insert-diary-strategy~
 When ~org-agenda-insert-diary-strategy~ is set to ~date-tree-last~, diary
 entries are added to last in the date tree.
-*** New option ~org-export-with-broken-links~
-This option tells the export process how to behave when encountering
-a broken internal link.  See its docstring for more information.
 *** New ~vbar~ entity
 ~\vbar~ or ~\vbar{}~ will be exported unconditionnally as a =|=,
 unlike to existing ~\vert~, which is expanded as ~&vert;~ when using
 a HTML derived export back-end.
+*** Export
+**** New =#+latex_compiler= keyword to set LaTeX compiler.
+PDFLaTeX, XeLaTeX, and LuaLaTeX are supported.  See the manual for
+details.
+**** New option ~org-export-with-broken-links~
+This option tells the export process how to behave when encountering
+a broken internal link.  See its docstring for more information.
+
+**** Attributes support in custom language environments for LaTeX export 
+Custom language environments for LaTeX export can now define the
+string to be inserted during export, using attributes to indicate the
+position of the elements. See variable ~org-latex-custom-lang-environments~
+for more details.
+
+**** New Texinfo ~options~ attribute on special blocks
+Using ~:options~ as a Texinfo attribute, it is possible to add
+information to custom environments.  See manual for details.
+**** New HTML ~id~ attributes on special, example and quote blocks
+If the block has a =#+NAME:= attribute assigned, then the HTML element
+will have an ~id~ attribute with that name in the HTML export. This
+enables one to create links to these elements in other places, e.g.,
+~<a href="#name">text</a>~.
+
 *** Babel
 **** Support for SLY in Lisp blocks
 See ~org-babel-lisp-eval-fn~ to activate it.
@@ -210,9 +230,6 @@ Alice <-- Bob: another authentication Response
 Please note that *pdf* *does not work out of the box* and needss
 additional setup in addition to plantuml. See
 [[http://plantuml.com/pdf.html]] for details and setup information.
-*** New =#+latex_compiler= keyword to set LaTeX compiler.
-PDFLaTeX, XeLaTeX, and LuaLaTeX are supported.  See the manual for
-details.
 *** Rewrite of radio lists
 Radio lists, i.e, Org plain lists in foreign buffers, have been
 rewritten to be on par with Radio tables.  You can use a large set of
@@ -239,11 +256,6 @@ For example:
 
 They are supported in org-capture via ~file+weektree~ and
 ~file+weektree+prompt~ target specifications.
-*** Attributes support in custom language environments for LaTeX export 
-Custom language environments for LaTeX export can now define the
-string to be inserted during export, using attributes to indicate the
-position of the elements. See variable ~org-latex-custom-lang-environments~
-for more details.
 *** Accept ~:indent~ parameter when capturing column view
 When defining a "columnview" dynamic block, it is now possible to add
 an :indent parameter, much like the one in the clock table.
@@ -265,12 +277,6 @@ types.
 *** New option ~org-attach-commit~
 When non-nil, commit attachments with git, assuming the document is in
 a git repository.
-*** New HTML ~id~ attributes on special, example and quote blocks
-If the block has a =#+NAME:= attribute assigned, then the HTML element
-will have an ~id~ attribute with that name in the HTML export. This
-enables one to create links to these elements in other places, e.g.,
-~<a href="#name">text</a>~.
-
 ** New functions
 *** ~org-next-line-empty-p~
 It replaces the deprecated ~next~ argument to ~org-previous-line-empty-p~.

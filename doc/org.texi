@@ -13756,6 +13756,28 @@ Texinfo code.
 [[ridt.pdf]]
 @end example
 
+@subsubheading Special blocks
+
+In Texinfo output, special blocks become commands of the same name.  Value of
+@code{:options} attribute is added right after the beginning of the command.
+For example:
+
+@example
+#+attr_texinfo: :options org-org-export-to-org ...
+#+begin_defun
+A somewhat obsessive function.
+#+end_defun
+@end example
+
+@noindent
+becomes
+
+@example
+@@defun org-org-export-to-org ...
+A somewhat obsessive function.
+@@end defun
+@end example
+
 @node An example
 @subsection An example
 
