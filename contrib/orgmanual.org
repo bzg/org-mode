@@ -18433,6 +18433,14 @@ complete if the ones above were not mentioned in this manual.
 - Piotr Zielinski wrote {{{file(org-mouse.el)}}}, proposed agenda
   blocks and contributed various ideas and code snippets.
 
+* GNU Free Documentation License
+:PROPERTIES:
+:APPENDIX: t
+:DESCRIPTION: The license for this documentation.
+:END:
+
+#+TEXINFO: @include ../doc/doclicense.texi
+
 * Concept index
 :PROPERTIES:
 :OPTIONAL_TITLE: Main Index
@@ -18528,17 +18536,17 @@ license to the document, as described in section 6 of the license.
 - [ ] Execute [[Editing setup][this source code block]]
 - [ ] Asynchronously generate the info file, `C-e i i'
 
-* Improvements and fixes [6/12]                                    :noexport:
+* Improvements and fixes [10/12] 					:noexport:
 - [X] Jon will fix detailed node listing
 - [X] Jon will fix :INDEX: property
 - [ ] New link type to generate pxref? (asked on ML)
 - [X] New macro for kbdkey that preserves space, e.g., `C-c <RET>'
 - [X] Indent examples one more space to match indentation of footnotes
-- [ ] How to generate @kbd{\}?
-- [ ] How to generate @kbd{~}?
-- [ ] How to include GNU Free Documentation License as Appendix D?
+- [X] How to generate @kbd{\}?
+- [X] How to generate @kbd{~}?
+- [X] How to include GNU Free Documentation License as Appendix D?
 - [X] Straighten out footnotes
-- [ ] Truncated footnote (asked on ML)
+- [X] Truncated footnote (asked on ML)
 - [ ] Resolve macros with XXX arguments
 - [X] Get @appendix instead of @chapter?
 
