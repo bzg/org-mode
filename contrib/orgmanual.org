@@ -2492,7 +2492,7 @@ the variable ~org-table-use-standard-references~.
   - {{{kbd(C-c {)}}}, ~org-table-toggle-formula-debugger~ :: Toggle
        the formula debugger on and off.  See below.
 
-       {{{kindex: C-c#+
+       #+kindex: C-c @{
        #+findex: org-table-toggle-formula-debugger
 
   - {{{kbd(C-c ')}}}, ~org-table-edit-formulas~ :: Edit all formulas
@@ -4411,8 +4411,7 @@ recommended).
    :END:
 #+cindex: setting tags
 #+cindex: tags, setting
-
-{{{kindex: M-@k#+TAB}
+#+kindex: M-@key{TAB}
 
 Tags can simply be typed into the buffer at the end of a headline.
 After a colon, {{{kbdkey(M-,TAB)}}} offers completion on tags.  There is
@@ -4557,19 +4556,19 @@ keys:
   exclusive tags will turn off any other tags from that group.
 
 - {{{key(TAB)}}} ::
-  {{{kindex: @k#+TAB}
+  #+kindex: @key{TAB}
 
   Enter a tag in the minibuffer, even if the tag is not in the predefined
   list.  You will be able to complete on all tags present in the buffer.
   You can also add several tags: just separate them with a comma.
 
 - {{{key(SPC)}}} ::
-  {{{kindex: @k#+SPC}
+  #+kindex: @key{SPC}
 
   Clear all tags for this line.
 
 - {{{key(RET)}}} ::
-  {{{kindex: @k#+RET}
+  #+kindex: @key{RET}
 
   Accept the modified set.
 
@@ -4808,7 +4807,7 @@ The following commands help to work with properties:
   can be inserted using completion.
 
 - {{{kbdkey(S-,right)}}} {{{kbdkey(S-,left)}}}, ~org-property-next-allowed-value~ ~org-property-previous-allowed-value~ ::
-  {{{kindex: S-@k#+right}
+  #+kindex: S-@key{right}
 
   Switch property at point to the next/previous allowed value.
 
@@ -5190,8 +5189,8 @@ The following commands let you edit information in column view:
   Move through the column view from field to field.
 
 -  {{{kbdkey(S-,left)}}} {{{kbdkey(S-,right)}}} ::
-  {{{kindex: S-@k#+left}
-  {{{kindex: S-@k#+right}
+  #+kindex: S-@key{left}
+  #+kindex: S-@key{right}
 
   Switch to the next/previous allowed value of the field. For this, you
   have to have specified allowed values for a property.
@@ -5244,12 +5243,12 @@ The following commands modify column view on-the-fly:
   Make the column narrower/wider by one character.
 
 - {{{kbdkey(S-M-,right)}}}, ~org-columns-new~ ::
-  {{{kindex: S-M-@k#+right}
+  #+kindex: S-M-@key{right}
 
   Insert a new column, to the left of the current column.
 
 - {{{kbdkey(S-M-,left)}}}, ~org-columns-delete~ ::
-  {{{kindex: S-M-@k#+left}
+  #+kindex: S-M-@key{left}
   
   Delete the current column.
 
@@ -7955,7 +7954,7 @@ be very fast---much faster in fact than a long list of
      :PROPERTIES:
      :DESCRIPTION: Integrate the Emacs appointment facility and Org
      :END:
-{{{cindex: @fi#+appt.el}
+#+cindex: @file{appt.el}
 #+cindex: appointment reminders
 #+cindex: appointment
 #+cindex: reminders
@@ -10247,8 +10246,8 @@ construct complex HTML code.
    :DESCRIPTION: LaTeX can be freely used inside Org documents
    :OPTIONAL_TITLE: Embedded Latex
    :END:
-{{{cindex: @T#+} interpretation
-{{{cindex: @LaT#+} interpretation
+#+cindex: @TeX{} interpretation
+#+cindex: @LaTeX{} interpretation
 
 Plain ASCII is normally sufficient for almost all note taking.
 Exceptions include scientific notes, which often require mathematical
@@ -16215,8 +16214,8 @@ effective only when the file is visited again in a new Emacs session.
   variable is ~org-startup-align-all-tables~, with a default value
   ~nil~.
 
-  {{{cindex: @co#+align}, STARTUP keyword
-  {{{cindex: @co#+noalign}, STARTUP keyword
+  #+cindex: @code{align}, STARTUP keyword
+  #+cindex: @code{noalign}, STARTUP keyword
 
   #+attr_texinfo: :table-type table :indic @asis
   - ~align~ ::      align all tables
