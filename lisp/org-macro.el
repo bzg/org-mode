@@ -58,9 +58,8 @@
 (declare-function org-file-contents "org" (file &optional noerror))
 (declare-function org-mode "org" ())
 (declare-function org-remove-double-quotes "org" (s))
-(declare-function org-with-wide-buffer "org-macs" (&rest body))
 (declare-function vc-backend "vc-hooks" (f))
-(declare-function vc-call "vc-hooks" (&rest args))
+(declare-function vc-call "vc-hooks" (fun file &rest args) t)
 (declare-function vc-exec-after "vc-dispatcher" (code))
 
 ;;; Variables
