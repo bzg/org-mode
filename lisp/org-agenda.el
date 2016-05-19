@@ -7625,8 +7625,8 @@ switches in the returned form."
   (let (f f1) ;f = return expression. f1 = working-area
     (dolist (x tags)
       (let* ((tag (substring x 1))
-	     (isregexp (and (equal "{" (substring tag 0 1))
-			    (equal "}" (substring tag -1))))
+	     (isregexp (and (org-string-match-p "\\`{" tag)
+			    (org-string-match-p "}\\'" tag)))
 	     regexp)
 	(cond
 	 (isregexp
