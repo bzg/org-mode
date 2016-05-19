@@ -46,7 +46,6 @@
 #+MACRO: var {{{markup(var,$1)}}}
 #+MACRO: cite {{{markup(cite,$1)}}}
 #+MACRO: value {{{markup(value,$1)}}}
-#+MACRO: code {{{markup(code,$1)}}}
 
 #+MACRO: kbdkey {{{kbd($1{{{key($2)}}})}}}
 #+MACRO: kbdspckey {{{kbd($1 {{{key($2)}}})}}}
@@ -19705,10 +19704,10 @@ list ([[Agenda column view]]).
 name, then the list of agenda files will be maintained in that external
 file.
 
-[fn:181] The variable {{{code(org-anniversary)}}} used in the example
-is just like {{{code(diary-anniversary)}}}, but the argument order is
+[fn:181] The variable ~org-anniversary~ used in the example
+is just like ~diary-anniversary~, but the argument order is
 always according to ISO and therefore independent of the value of
-{{{code(calendar-date-style)}}}.
+~calendar-date-style~.
 
 [fn:182] Emacs 23 and Org mode 6.29 are required.
 
