@@ -17710,7 +17710,8 @@ foreach $line (split(/\n/,$agenda)) @{
 Here is a description of the functions that can be used to work with
 properties.
 
-{{{defun}}} org-entry-properties &optional pom which
+#+attr_texinfo: :options org-entry-properties &optional pom which
+#+begin_defun
 Get all properties of the entry at point-or-marker POM.
 This includes the TODO keyword, the tags, time strings for deadline,
 scheduled, and clocking, and any additional properties defined in the
@@ -17719,69 +17720,78 @@ if the property key was used several times.@*
 POM may also be nil, in which case the current entry is used.
 If WHICH is nil or `all', get all properties.  If WHICH is
 `special' or `standard', only get that subclass.
-{{{enddefun}}}
+#+end_defun
 
 #+vindex: org-use-property-inheritance
 #+findex: org-insert-property-drawer
-
-{{{defun}}} org-entry-get pom property &optional inherit
+#+attr_texinfo: :options org-entry-get pom property &optional inherit
+#+begin_defun
 Get value of PROPERTY for entry at point-or-marker POM.  By default,
 this only looks at properties defined locally in the entry.  If INHERIT
 is non-nil and the entry does not have the property, then also check
 higher levels of the hierarchy.  If INHERIT is the symbol
 ~selective~, use inheritance if and only if the setting of
 ~org-use-property-inheritance~ selects PROPERTY for inheritance.
-{{{enddefun}}}
+#+end_defun
 
-{{{defun}}} org-entry-delete pom property
+#+attr_texinfo: :options org-entry-delete pom property
+#+begin_defun
 Delete the property PROPERTY from entry at point-or-marker POM.
-{{{enddefun}}}
+#+end_defun
 
-{{{defun}}} org-entry-put pom property value
+#+attr_texinfo: :options org-entry-put pom property value
+#+begin_defun
 Set PROPERTY to VALUE for entry at point-or-marker POM.
-{{{enddefun}}}
+#+end_defun
 
-{{{defun}}} org-buffer-property-keys &optional include-specials
+#+attr_texinfo: :options org-buffer-property-keys &optional include-specials
+#+begin_defun
 Get all property keys in the current buffer.
-{{{enddefun}}}
-
-{{{defun}}} org-insert-property-drawer
+#+end_defun
+#+attr_texinfo: :options org-insert-property-drawer
+#+begin_defun
 Insert a property drawer for the current entry.  Also
-{{{enddefun}}}
+#+end_defun
 
-{{{defun}}} org-entry-put-multivalued-property pom property &rest values
+#+attr_texinfo: :options org-entry-put-multivalued-property pom property &rest values
+#+begin_defun
 Set PROPERTY at point-or-marker POM to VALUES.  VALUES should be a list of
 strings.  They will be concatenated, with spaces as separators.
-{{{enddefun}}}
+#+end_defun
 
-{{{defun}}} org-entry-get-multivalued-property pom property
+#+attr_texinfo: :options org-entry-get-multivalued-property pom property
+#+begin_defun
 Treat the value of the property PROPERTY as a whitespace-separated list of
 values and return the values as a list of strings.
-{{{enddefun}}}
+#+end_defun
 
-{{{defun}}} org-entry-add-to-multivalued-property pom property value
+#+attr_texinfo: :options org-entry-add-to-multivalued-property pom property value
+#+begin_defun
 Treat the value of the property PROPERTY as a whitespace-separated list of
 values and make sure that VALUE is in this list.
-{{{enddefun}}}
+#+end_defun
 
-{{{defun}}} org-entry-remove-from-multivalued-property pom property value
+#+attr_texinfo: :options org-entry-remove-from-multivalued-property pom property value
+#+begin_defun
 Treat the value of the property PROPERTY as a whitespace-separated list of
 values and make sure that VALUE is /not/ in this list.
-{{{enddefun}}}
+#+end_defun
 
-{{{defun}}} org-entry-member-in-multivalued-property pom property value
+#+attr_texinfo: :options org-entry-member-in-multivalued-property pom property value
+#+begin_defun
 Treat the value of the property PROPERTY as a whitespace-separated list of
 values and check if VALUE is in this list.
-{{{enddefun}}}
+#+end_defun
 
-{{{defopt}}} org-property-allowed-value-functions
+#+attr_texinfo: :options org-property-allowed-value-functions
+#+begin_defopt
 Hook for functions supplying allowed values for a specific property.
 The functions must take a single argument, the name of the property, and
 return a flat list of allowed values.  If {{{samp(:ETC)}}} is one of
 the values, use the values as completion help, but allow also other values
 to be entered.  The functions must return ~nil~ if they are not
 responsible for this property.
-{{{enddefopt}}}
+#+end_defopt
 
 ** Using the mapping API
    :PROPERTIES:
@@ -17796,7 +17806,8 @@ views, but there is also an API that can be used to execute arbitrary
 functions for each or selected entries.  The main entry point for this API
 is:
 
-{{{defun}}} org-map-entries func &optional match scope &rest skip
+#+attr_texinfo: :options org-map-entries func &optional match scope &rest skip
+#+begin_defun
 Call FUNC at each headline selected by MATCH in SCOPE.
 
 FUNC is a function or a Lisp form.  The function will be called without
@@ -17861,7 +17872,6 @@ skipping facilities of the scanner.  The following items can be given
 here:
 
 #+vindex: org-agenda-skip-function
-
 #+attr_texinfo: :table-type table :indic @asis
 - ~archive~ ::   
 
@@ -17876,36 +17886,40 @@ here:
   Will be used as value for ~org-agenda-skip-function~, so whenever the
   function returns t, FUNC will not be called for that entry and search
   will continue from the point where the function leaves it.
-
-{{{enddefun}}}
+#+end_defun
 
 The function given to that mapping routine can really do anything you like.
 It can use the property API (see [[Using the property API]]) to gather more
 information about the entry, or in order to change metadata in the entry.
 Here are a few functions that might be handy:
 
-{{{defun}}} org-todo &optional arg
+#+attr_texinfo: :options org-todo &optional arg
+#+begin_defun
 Change the TODO state of the entry.  See the docstring of the functions for
 the many possible values for the argument ARG.
-{{{enddefun}}}
+#+end_defun
 
-{{{defun}}} org-priority &optional action
+#+attr_texinfo: :options org-priority &optional action
+#+begin_defun
 Change the priority of the entry.  See the docstring of this function for the
 possible values for ACTION.
-{{{enddefun}}}
+#+end_defun
 
-{{{defun}}} org-toggle-tag tag &optional onoff
+#+attr_texinfo: :options org-toggle-tag tag &optional onoff
+#+begin_defun
 Toggle the tag TAG in the current entry.  Setting ONOFF to either ~on~
 or ~off~ will not toggle tag, but ensure that it is either on or off.
-{{{enddefun}}}
+#+end_defun
 
-{{{defun}}} org-promote
+#+attr_texinfo: :options org-promote
+#+begin_defun
 Promote the current entry.
-{{{enddefun}}}
+#+end_defun
 
-{{{defun}}} org-demote
+#+attr_texinfo: :options org-demote
+#+begin_defun
 Demote the current entry.
-{{{enddefun}}}
+#+end_defun
 
 The following simple example will turn all entries in the current file
 with a tag ~TOMORROW~ into TODO entries with the keyword ~UPCOMING~.
@@ -18506,10 +18520,6 @@ license to the document, as described in section 6 of the license.
 
 # Plain macros.
 #+MACRO: noindent @@info:@noindent@@
-#+MACRO: defun @@info:@defun@@
-#+MACRO: enddefun @@info:@end defun@@
-#+MACRO: defopt @@info:@defopt@@
-#+MACRO: enddefopt @@info:@end defopt@@
 #+MACRO: result @@info:@result{}@@
 #+MACRO: page @@info:@page@@
 
