@@ -277,6 +277,11 @@ types.
 *** New option ~org-attach-commit~
 When non-nil, commit attachments with git, assuming the document is in
 a git repository.
+*** Allow conditional case-fold searches in ~org-occur~
+When set to ~smart~, the new variable ~org-occur-case-fold-search~
+allows to mimic =isearch.el=: if the regexp searched contains any
+upper case character (or character class), the search is case
+sensitive.  Otherwise, it is case insensitive.
 ** New functions
 *** ~org-next-line-empty-p~
 It replaces the deprecated ~next~ argument to ~org-previous-line-empty-p~.

@@ -111,6 +111,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 
 (declare-function calendar-check-holidays "holidays" (date))
 (declare-function cdlatex-environment "ext:cdlatex" (environment item))
+(declare-function isearch-no-upper-case-p "isearch" (string regexp-flag))
 (declare-function org-add-archive-files "org-archive" (files))
 (declare-function org-agenda-entry-get-agenda-timestamp "org-agenda" (pom))
 (declare-function org-agenda-list "org-agenda"
@@ -1677,6 +1678,16 @@ The highlights created by `org-toggle-latex-fragment' always need
   :group 'org-time
   :type 'boolean)
 
+(defcustom org-occur-case-fold-search t
+  "Non-nil means `org-occur' should be case-insensitive.
+If set to `smart' the search will be case-insensitive only if it
+doesn't specify any upper case character."
+  :group 'org-sparse-trees
+  :version "25.1"
+  :type '(choice
+	  (const :tag "Case-sensitive" nil)
+	  (const :tag "Case-insensitive" t)
+	  (const :tag "Case-insensitive for lower case searches only" 'smart)))
 
 (defcustom org-occur-hook '(org-first-headline-recenter)
   "Hook that is run after `org-occur' has constructed a sparse tree.
@@ -13894,13 +13905,16 @@ The function must neither move point nor alter narrowing."
 		(not org-occur-highlights)) ; no previous matches
 	;; hide everything
 	(org-overview))
-      (while (re-search-forward regexp nil t)
-	(when (or (not callback)
-		  (save-match-data (funcall callback)))
-	  (setq cnt (1+ cnt))
-	  (when org-highlight-sparse-tree-matches
-	    (org-highlight-new-match (match-beginning 0) (match-end 0)))
-	  (org-show-context 'occur-tree))))
+      (let ((case-fold-search (if (eq org-occur-case-fold-search 'smart)
+				  (isearch-no-upper-case-p regexp t)
+				org-occur-case-fold-search)))
+	(while (re-search-forward regexp nil t)
+	  (when (or (not callback)
+		    (save-match-data (funcall callback)))
+	    (setq cnt (1+ cnt))
+	    (when org-highlight-sparse-tree-matches
+	      (org-highlight-new-match (match-beginning 0) (match-end 0)))
+	    (org-show-context 'occur-tree)))))
     (when org-remove-highlights-with-change
       (org-add-hook 'before-change-functions 'org-remove-occur-highlights
 		    nil 'local))

@@ -4337,7 +4337,32 @@ Paragraph<point>"
   (should
    (= 1
       (org-test-with-temp-text "* H\nA\n* H2\nA"
-	(org-occur "A" nil (lambda () (equal (org-get-heading) "H2")))))))
+	(org-occur "A" nil (lambda () (equal (org-get-heading) "H2"))))))
+  ;; Case-fold searches according to `org-occur-case-fold-search'.
+  (should
+   (= 2
+      (org-test-with-temp-text "Aa"
+	(let ((org-occur-case-fold-search t)) (org-occur "A")))))
+  (should
+   (= 2
+      (org-test-with-temp-text "Aa"
+	(let ((org-occur-case-fold-search t)) (org-occur "a")))))
+  (should
+   (= 1
+      (org-test-with-temp-text "Aa"
+	(let ((org-occur-case-fold-search nil)) (org-occur "A")))))
+  (should
+   (= 1
+      (org-test-with-temp-text "Aa"
+	(let ((org-occur-case-fold-search nil)) (org-occur "a")))))
+  (should
+   (= 1
+      (org-test-with-temp-text "Aa"
+	(let ((org-occur-case-fold-search 'smart)) (org-occur "A")))))
+  (should
+   (= 2
+      (org-test-with-temp-text "Aa"
+	(let ((org-occur-case-fold-search 'smart)) (org-occur "a"))))))
 
 
 ;;; Tags
