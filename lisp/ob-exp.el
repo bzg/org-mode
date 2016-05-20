@@ -114,12 +114,12 @@ Assume point is at the beginning of block's starting line."
   (interactive)
   (save-excursion
     (let* ((info (org-babel-get-src-block-info 'light))
-	   (line (org-current-line))
 	   (lang (nth 0 info))
 	   (raw-params (nth 2 info)) hash)
       ;; bail if we couldn't get any info from the block
       (unless noninteractive
-	(message "org-babel-exp process %s at line %d..." lang line))
+	(message "org-babel-exp process %s at position %d..."
+		 lang (line-beginning-position)))
       (when info
 	;; if we're actually going to need the parameters
 	(when (member (cdr (assoc :exports (nth 2 info))) '("both" "results"))
