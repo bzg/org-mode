@@ -4564,11 +4564,9 @@ overwritten, and the table is not marked as requiring realignment."
 		 (org-table-blank-field))
 	    t)
 	   (eq N 1)
-	   (looking-at "[^|\n]*  +|"))
+	   (looking-at "[^|\n]* \\( \\)|"))
       (let (org-table-may-need-update)
-	(goto-char (1- (match-end 0)))
-	(org-delete-backward-char 1)
-	(goto-char (match-beginning 0))
+	(delete-region (match-beginning 1) (match-end 1))
 	(self-insert-command N))
     (setq org-table-may-need-update t)
     (let* (orgtbl-mode
