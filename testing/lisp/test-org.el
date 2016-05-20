@@ -2062,7 +2062,7 @@ drops support for Emacs 24.1 and 24.2."
   "Does `org-open-at-point' open link in a keyword line?"
   (should
    (org-test-with-temp-text
-       "#+KEYWORD: <point>[[info:emacs#Top]]"
+       "<<top>>\n#+KEYWORD: <point>[[top]]"
      (org-open-at-point) t)))
 
 (ert-deftest test-org/open-at-point-in-property ()
@@ -2071,7 +2071,7 @@ drops support for Emacs 24.1 and 24.2."
    (org-test-with-temp-text
        "* Headline
 :PROPERTIES:
-:URL: <point>[[info:emacs#Top]]
+:URL: <point>[[*Headline]]
 :END:"
      (org-open-at-point) t)))
 
@@ -2079,27 +2079,15 @@ drops support for Emacs 24.1 and 24.2."
   "Does `org-open-at-point' open link in a commented line?"
   (should
    (org-test-with-temp-text
-    "# <point>[[info:emacs#Top]]"
+    "<<top>>\n# <point>[[top]]"
     (org-open-at-point) t)))
-
-(ert-deftest test-org/open-at-point/info ()
-  "Test `org-open-at-point' on info links."
-  (should
-   (org-test-with-temp-text
-    "<point>[[info:emacs#Top]]"
-    (org-open-at-point)
-    (and (switch-to-buffer "*info*")
-	 (prog1
-	     (looking-at "\nThe Emacs Editor")
-	   (kill-buffer))))))
 
 (ert-deftest test-org/open-at-point/inline-image ()
   "Test `org-open-at-point' on nested links."
   (should
-   (org-test-with-temp-text "[[info:org#Top][info:<point>emacs#Top]]"
+   (org-test-with-temp-text "<<top>>\n[[top][file:<point>unicorn.jpg]]"
      (org-open-at-point)
-     (prog1 (with-current-buffer "*info*" (looking-at "\nOrg Mode Manual"))
-       (kill-buffer "*info*")))))
+     (bobp))))
 
 (ert-deftest test-org/open-at-point/radio-target ()
   "Test `org-open-at-point' on radio targets."
