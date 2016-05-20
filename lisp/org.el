@@ -10567,11 +10567,18 @@ This is saved in case the need arises to restore it.")
 
 ;;;###autoload
 (defun org-open-at-point-global ()
-  "Follow a link like Org-mode does.
-This command can be called in any mode to follow a link that has
-Org-mode syntax."
+  "Follow a link or time-stamp like Org mode does.
+This command can be called in any mode to follow an external link
+or a time-stamp that has Org mode syntax.  Its behavior is
+undefined when called on internal links (e.g., fuzzy links).
+Raise an error when there is nothing to follow.  "
   (interactive)
-  (org-run-like-in-org-mode 'org-open-at-point))
+  (cond ((org-in-regexp org-any-link-re)
+	 (org-open-link-from-string (match-string-no-properties 0)))
+	((or (org-in-regexp org-ts-regexp-both nil t)
+	     (org-in-regexp org-tsr-regexp-both nil t))
+	 (org-follow-timestamp-link))
+	(t (user-error "No link found"))))
 
 ;;;###autoload
 (defun org-open-link-from-string (s &optional arg reference-buffer)
@@ -10648,12 +10655,7 @@ link in a property drawer line."
 	 ;; Exception: open timestamps and links in properties
 	 ;; drawers, keywords and comments.
 	 ((memq type '(comment comment-block keyword node-property))
-	  (cond ((org-in-regexp org-any-link-re)
-		 (org-open-link-from-string (match-string-no-properties 0)))
-		((or (org-in-regexp org-ts-regexp-both nil t)
-		     (org-in-regexp org-tsr-regexp-both nil t))
-		 (org-follow-timestamp-link))
-		(t (user-error "No link found"))))
+	  (call-interactively #'org-open-at-point-global))
 	 ;; On a headline or an inlinetask, but not on a timestamp,
 	 ;; a link, a footnote reference or on tags.
 	 ((and (memq type '(headline inlinetask))
