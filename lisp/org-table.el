@@ -4388,21 +4388,21 @@ to execute outside of tables."
 	    cmd (orgtbl-make-binding fun nfunc key))
       (org-defkey orgtbl-mode-map key cmd))
 
-    ;; Special treatment needed for TAB and RET
+    ;; Special treatment needed for TAB, RET and DEL
     (org-defkey orgtbl-mode-map [(return)]
 		(orgtbl-make-binding 'orgtbl-ret 100 [(return)] "\C-m"))
     (org-defkey orgtbl-mode-map "\C-m"
 		(orgtbl-make-binding 'orgtbl-ret 101 "\C-m" [(return)]))
-
     (org-defkey orgtbl-mode-map [(tab)]
 		(orgtbl-make-binding 'orgtbl-tab 102 [(tab)] "\C-i"))
     (org-defkey orgtbl-mode-map "\C-i"
 		(orgtbl-make-binding 'orgtbl-tab 103 "\C-i" [(tab)]))
-
     (org-defkey orgtbl-mode-map [(shift tab)]
 		(orgtbl-make-binding 'org-table-previous-field 104
 				     [(shift tab)] [(tab)] "\C-i"))
-
+    (org-defkey orgtbl-mode-map [backspace]
+		(orgtbl-make-binding 'org-delete-backward-char 109
+				     [backspace] [(del)]))
 
     (unless (featurep 'xemacs)
       (org-defkey orgtbl-mode-map [S-iso-lefttab]
