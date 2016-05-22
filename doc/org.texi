@@ -14483,6 +14483,7 @@ however, override everything.
 @item @code{:latex-default-table-environment}  @tab @code{org-latex-default-table-environment}
 @item @code{:latex-default-table-mode}         @tab @code{org-latex-default-table-mode}
 @item @code{:latex-diary-timestamp-format}     @tab @code{org-latex-diary-timestamp-format}
+@item @code{:latex-footnote-defined-format}    @tab @code{org-latex-footnote-defined-format}
 @item @code{:latex-footnote-separator}         @tab @code{org-latex-footnote-separator}
 @item @code{:latex-format-drawer-function}     @tab @code{org-latex-format-drawer-function}
 @item @code{:latex-format-headline-function}   @tab @code{org-latex-format-headline-function}

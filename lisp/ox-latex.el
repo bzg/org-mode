@@ -118,6 +118,7 @@
     (:latex-default-table-environment nil nil org-latex-default-table-environment)
     (:latex-default-table-mode nil nil org-latex-default-table-mode)
     (:latex-diary-timestamp-format nil nil org-latex-diary-timestamp-format)
+    (:latex-footnote-defined-format nil nil org-latex-footnote-defined-format)
     (:latex-footnote-separator nil nil org-latex-footnote-separator)
     (:latex-format-drawer-function nil nil org-latex-format-drawer-function)
     (:latex-format-headline-function nil nil org-latex-format-headline-function)
@@ -651,6 +652,16 @@ The function result will be used in the section format string."
   :group 'org-export-latex
   :type 'string)
 
+(defcustom org-latex-footnote-defined-format "\\textsuperscript{\\ref{%s}}"
+  "Format string used to format reference to footnote already defined.
+%s will be replaced by the label of the referred footnote."
+  :group 'org-export-latex
+  :type '(choice
+	  (const :tag "Use plain superscript (default)" "\\textsuperscript{\\ref{%s}}")
+	  (const :tag "Use Memoir/KOMA-Script footref" "\\footref{%s}")
+	  (string :tag "Other format string"))
+  :version "25.2"
+  :package-version '(Org . "9.0"))
 
 ;;;; Timestamps
 
@@ -1498,7 +1509,7 @@ INFO is a plist used as a communication channel.  See
 
 INFO is a plist used as a communication channel.
 
-Footnotes definitions are returned within \"\\footnotetxt{}\"
+Footnotes definitions are returned within \"\\footnotetext{}\"
 commands.
 
 This function is used within constructs that don't support
@@ -1804,30 +1815,43 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-latex-footnote-reference (footnote-reference _contents info)
   "Transcode a FOOTNOTE-REFERENCE element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (concat
-   ;; Insert separator between two footnotes in a row.
-   (let ((prev (org-export-get-previous-element footnote-reference info)))
-     (when (eq (org-element-type prev) 'footnote-reference)
-       (plist-get info :latex-footnote-separator)))
-   (cond
-    ;; Use \footnotemark if the footnote has already been defined.
-    ((not (org-export-footnote-first-reference-p footnote-reference info))
-     (format "\\footnotemark[%s]{}"
-	     (org-export-get-footnote-number footnote-reference info)))
-    ;; Use \footnotemark if reference is within another footnote
-    ;; reference, footnote definition or table cell.
-    ((org-element-lineage footnote-reference
-			  '(footnote-reference footnote-definition table-cell))
-     "\\footnotemark")
-    ;; Otherwise, define it with \footnote command.
-    (t
-     (let ((def (org-export-get-footnote-definition footnote-reference info)))
-       (concat
-	(format "\\footnote{%s}" (org-trim (org-export-data def info)))
-	;; Retrieve all footnote references within the footnote and
-	;; add their definition after it, since LaTeX doesn't support
-	;; them inside.
-	(org-latex--delayed-footnotes-definitions def info)))))))
+  (let ((label (org-element-property :label footnote-reference)))
+    (concat
+     ;; Insert separator between two footnotes in a row.
+     (let ((prev (org-export-get-previous-element footnote-reference info)))
+       (when (eq (org-element-type prev) 'footnote-reference)
+	 (plist-get info :latex-footnote-separator)))
+     (cond
+      ;; Use `:latex-footnote-defined-format' if the footnote has
+      ;; already been defined.
+      ((not (org-export-footnote-first-reference-p footnote-reference info))
+       (format (plist-get info :latex-footnote-defined-format)
+	       (org-latex--label
+		(org-export-get-footnote-definition footnote-reference info)
+		info t)))
+      ;; Use \footnotemark if reference is within another footnote
+      ;; reference, footnote definition or table cell.
+      ((org-element-lineage footnote-reference
+			    '(footnote-reference footnote-definition table-cell))
+       "\\footnotemark")
+      ;; Otherwise, define it with \footnote command.
+      (t
+       (let ((def (org-export-get-footnote-definition footnote-reference info)))
+	 (concat
+	  (format "\\footnote{%s%s}" (org-trim (org-export-data def info))
+		  ;; Only insert a \label if there exist another
+		  ;; reference to def.
+		  (or (org-element-map (plist-get info :parse-tree) 'footnote-reference
+			(lambda (f)
+			  (and (not (eq f footnote-reference))
+			       (equal (org-element-property :label f) label)
+			       (org-trim (org-latex--label def info t t))))
+			info t)
+		      ""))
+	  ;; Retrieve all footnote references within the footnote and
+	  ;; add their definition after it, since LaTeX doesn't support
+	  ;; them inside.
+	  (org-latex--delayed-footnotes-definitions def info))))))))
 
 
 ;;;; Headline
