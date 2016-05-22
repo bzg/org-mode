@@ -1942,15 +1942,17 @@ communication channel."
 		    (format "<p class=\"validation\">%s</p>\n"
 			    validation-link))))
 		(t (format-spec
-		    (or (cadr (assoc
+		    (or (cadr (assoc-string
 			       (plist-get info :language)
 			       (eval (intern
-				      (format "org-html-%s-format" type)))))
+				      (format "org-html-%s-format" type)))
+			       t))
 			(cadr
-			 (assoc
+			 (assoc-string
 			  "en"
 			  (eval
-			   (intern (format "org-html-%s-format" type))))))
+			   (intern (format "org-html-%s-format" type)))
+			  t)))
 		    spec))))))
 	(let ((div (assq type (plist-get info :html-divs))))
 	  (when (org-string-nw-p section-contents)
