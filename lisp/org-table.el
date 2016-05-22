@@ -4395,7 +4395,7 @@ to execute outside of tables."
 				     [(shift tab)] [(tab)] "\C-i"))
     (org-defkey orgtbl-mode-map [backspace]
 		(orgtbl-make-binding 'org-delete-backward-char 109
-				     [backspace] [(del)]))
+				     [backspace] (kbd "DEL")))
 
     (unless (featurep 'xemacs)
       (org-defkey orgtbl-mode-map [S-iso-lefttab]
