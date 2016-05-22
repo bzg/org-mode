@@ -682,7 +682,7 @@ If not, show simply the clocked time like 01:50."
 			  'face 'org-mode-line-clock)))
 	  (format clockstr work-done-str))
       (org-propertize (concat "[" (org-minutes-to-clocksum-string clocked-time)
-			      (format " (%s)" org-clock-heading) "]")
+			      "]" (format " (%s)" org-clock-heading))
 		      'face 'org-mode-line-clock))))
 
 (defun org-clock-get-last-clock-out-time ()
