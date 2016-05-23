@@ -1338,8 +1338,8 @@ Return the new header."
 	header
       (let ((options (save-match-data
 		       (org-split-string (match-string 1 header) ",[ \t]*")))
-	    (language (cdr (assoc language-code
-				  org-latex-babel-language-alist))))
+	    (language (cdr (assoc-string language-code
+					 org-latex-babel-language-alist t))))
 	;; If LANGUAGE is already loaded, return header without AUTO.
 	;; Otherwise, replace AUTO with language or append language if
 	;; AUTO is not present.
@@ -1540,7 +1540,7 @@ INFO is a plist used as a communication channel."
   "Create a format-spec for document meta-data.
 INFO is a plist used as a communication channel."
   (let ((language (let ((lang (plist-get info :language)))
-		    (or (cdr (assoc lang org-latex-babel-language-alist))
+		    (or (cdr (assoc-string lang org-latex-babel-language-alist t))
 			lang))))
     `((?a . ,(org-export-data (plist-get info :author) info))
       (?t . ,(org-export-data (plist-get info :title) info))
