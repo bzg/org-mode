@@ -3076,10 +3076,12 @@ for this list."
   (catch 'exit
     (unless (org-at-item-p) (error "Not at a list item"))
     (save-excursion
-      (re-search-backward "#\\+ORGLST" nil t)
-      (unless (looking-at "\\(?:[ \t]\\)?#\\+ORGLST:[ \t]+SEND[ \t]+\\(\\S-+\\)[ \t]+\\(\\S-+\\)")
-	(if maybe (throw 'exit nil)
-	  (error "Don't know how to transform this list"))))
+      (let ((case-fold-search t))
+	(re-search-backward "^[ \t]*#\\+ORGLST:" nil t)
+	(unless (looking-at
+		 "[ \t]*#\\+ORGLST:[ \t]+SEND[ \t]+\\(\\S-+\\)[ \t]+\\([^ \t\n]+\\)")
+	  (if maybe (throw 'exit nil)
+	    (error "Don't know how to transform this list")))))
     (let* ((name (match-string 1))
 	   (transform (intern (match-string 2)))
 	   (bottom-point
