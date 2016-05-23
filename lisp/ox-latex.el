@@ -1541,6 +1541,7 @@ INFO is a plist used as a communication channel."
 INFO is a plist used as a communication channel."
   (let ((language (let ((lang (plist-get info :language)))
 		    (or (cdr (assoc-string lang org-latex-babel-language-alist t))
+			(nth 1 (assoc-string lang org-latex-polyglossia-language-alist t))
 			lang))))
     `((?a . ,(org-export-data (plist-get info :author) info))
       (?t . ,(org-export-data (plist-get info :title) info))
