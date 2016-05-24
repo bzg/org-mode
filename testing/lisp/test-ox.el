@@ -2587,68 +2587,123 @@ Paragraph[fn:1][fn:2][fn:lbl3:C<<target>>][[test]][[target]]
        info t))))
 
 (defun test-org-gen-loc-list(text type)
-    (org-test-with-parsed-data text
-			       (org-element-map tree type
-				 (lambda(el) (or (org-export-get-loc el info) "nil")))))
+  (org-test-with-parsed-data text
+    (org-element-map tree type
+      (lambda (el) (or (org-export-get-loc el info) 'no-loc)))))
 
 (ert-deftest test-org-export/get-loc ()
   "Test `org-export-get-loc' specifications."
   (should
    ;; "-n" resets line number.
    (equal '(0)
-	  (test-org-gen-loc-list  "#+BEGIN_EXAMPLE -n\n  Text\n#+END_EXAMPLE" 'example-block)))
+	  (test-org-gen-loc-list "#+BEGIN_EXAMPLE -n\n  Text\n#+END_EXAMPLE"
+				 'example-block)))
   ;; The first "+n" has 0 lines before it
   (should
    (equal '(0)
-	  (test-org-gen-loc-list "#+BEGIN_EXAMPLE +n\n  Text\n#+END_EXAMPLE" 'example-block)))
+	  (test-org-gen-loc-list "#+BEGIN_EXAMPLE +n\n  Text\n#+END_EXAMPLE"
+				 'example-block)))
   ;; "-n 10" resets line number but has "9 lines" before it.
   (should
    (equal '(9)
-	  (test-org-gen-loc-list "#+BEGIN_EXAMPLE -n 10\n  Text\n#+END_EXAMPLE" 'example-block)))
+	  (test-org-gen-loc-list "#+BEGIN_EXAMPLE -n 10\n  Text\n#+END_EXAMPLE"
+				 'example-block)))
   ;; -n10 with two lines then +n 15
   (should
    (equal '(9 25)
-	  (test-org-gen-loc-list "#+BEGIN_EXAMPLE -n 10\n  Text_10\n  Second line(11)\n#+END_EXAMPLE
-#+BEGIN_EXAMPLE +n 15\n  Text line (11 + 15)\n#+END_EXAMPLE"  'example-block)))
+	  (test-org-gen-loc-list "
+#+BEGIN_EXAMPLE -n 10
+  Text_10
+  Second line(11)
+#+END_EXAMPLE
+#+BEGIN_EXAMPLE +n 15
+  Text line (11 + 15)
+#+END_EXAMPLE"
+				 'example-block)))
   (should
    (equal '(9 19 0)
-	  (test-org-gen-loc-list "#+BEGIN_EXAMPLE -n 10\n  Text\n#+END_EXAMPLE
-#+BEGIN_EXAMPLE +n 10\n  Text \n#+END_EXAMPLE\n
-#+BEGIN_EXAMPLE -n\n  Text \n#+END_EXAMPLE" 'example-block)))
+	  (test-org-gen-loc-list "
+#+BEGIN_EXAMPLE -n 10
+  Text
+#+END_EXAMPLE
+#+BEGIN_EXAMPLE +n 10
+  Text
+#+END_EXAMPLE
+
+#+BEGIN_EXAMPLE -n
+  Text
+#+END_EXAMPLE"
+				 'example-block)))
+  ;; an Example Block without -n does not add to the line count.
   (should
-   ;; an Example Block without -n does not add to the line count
-   (equal '(9 "nil" 19)
-	  (test-org-gen-loc-list "#+BEGIN_EXAMPLE -n 10\n  Text\n#+END_EXAMPLE
-#+BEGIN_EXAMPLE\n  Text\n#+END_EXAMPLE
-#+BEGIN_EXAMPLE +n 10\n  Text\n#+END_EXAMPLE" 'example-block)))
+   (equal '(9 no-loc 19)
+	  (test-org-gen-loc-list "
+#+BEGIN_EXAMPLE -n 10
+  Text
+#+END_EXAMPLE
+#+BEGIN_EXAMPLE
+  Text
+#+END_EXAMPLE
+#+BEGIN_EXAMPLE +n 10
+  Text
+#+END_EXAMPLE"
+				 'example-block)))
+  ;; "-n" resets line number.
   (should
-   ;; "-n" resets line number.
+   (equal
+    '(0)
+    (test-org-gen-loc-list "#+BEGIN_SRC emacs-lisp -n \n  (- 1 1) \n#+END_SRC"
+			   'src-block)))
+  ;; The first "+n" has 0 lines before it.
+  (should
    (equal '(0)
-	  (test-org-gen-loc-list "#+BEGIN_SRC emacs-lisp -n \n  (- 1 1) \n#+END_SRC" 'src-block)))
+	  (test-org-gen-loc-list
+	   "#+BEGIN_SRC emacs-lisp +n \n  (+ 0 (- 1 1))\n#+END_SRC"
+	   'src-block)))
+  ;; "-n 10" resets line number but has "9 lines" before it.
   (should
-   ;; The first "+n" has 0 lines before it
-   (equal '(0)
-	  (test-org-gen-loc-list "#+BEGIN_SRC emacs-lisp +n \n  (+ 0 (- 1 1))\n#+END_SRC" 'src-block)))
-  (should
-   ;; "-n 10" resets line number but has "9 lines" before it.
    (equal '(9)
-	  (test-org-gen-loc-list "#+BEGIN_SRC emacs-lisp -n 10\n  (- 10 1)\n#+END_SRC" 'src-block)))
+	  (test-org-gen-loc-list
+	   "#+BEGIN_SRC emacs-lisp -n 10\n  (- 10 1)\n#+END_SRC"
+	   'src-block)))
   (should
    (equal '(9 25)
-	  (test-org-gen-loc-list "#+BEGIN_SRC emacs-lisp -n 10\n  (- 10 1)\n  (+ (- 10 1) 1)\n#+END_SRC
-#+BEGIN_SRC emacs-lisp +n 15\n  (+ (- 10 1) 2 (- 15 1))\n#+END_SRC" 'src-block)))
+	  (test-org-gen-loc-list "
+#+BEGIN_SRC emacs-lisp -n 10
+  (- 10 1)
+  (+ (- 10 1) 1)
+#+END_SRC
+#+BEGIN_SRC emacs-lisp +n 15
+  (+ (- 10 1) 2 (- 15 1))
+#+END_SRC"
+				 'src-block)))
   (should
    (equal '(9 19 0)
-	  (test-org-gen-loc-list "#+BEGIN_SRC emacs-lisp -n 10\n  (- 10 1)\n#+END_SRC
-#+BEGIN_SRC emacs-lisp +n 10\n  (+ (- 10 1) 1 (- 10 1))\n#+END_SRC
-#+BEGIN_SRC emacs-lisp -n\n  (- 1 1)\n#+END_SRC" 'src-block)))
+	  (test-org-gen-loc-list "
+#+BEGIN_SRC emacs-lisp -n 10
+  (- 10 1)
+#+END_SRC
+#+BEGIN_SRC emacs-lisp +n 10
+  (+ (- 10 1) 1 (- 10 1))
+#+END_SRC
+#+BEGIN_SRC emacs-lisp -n
+  (- 1 1)
+#+END_SRC"
+				 'src-block)))
+  ;; A SRC Block without -n does not add to the line count.
   (should
-   ;; an SRC Block without -n does not add to the line count
-   (equal '(9 "nil" 19)
+   (equal '(9 no-loc 19)
 	  (test-org-gen-loc-list
-	   "#+BEGIN_SRC emacs-lisp -n 10\n  (+ (-10 1) 1)\n#+END_SRC
-#+BEGIN_SRC emacs-lisp \n  (+ 2 2) \n#+END_SRC
-#+BEGIN_SRC emacs-lisp +n 10\n  (+ (- 10 1) 1 (- 10 1))\n#+END_SRC" 'src-block))))
+	   "#+BEGIN_SRC emacs-lisp -n 10
+  (+ (-10 1) 1)
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
+  (+ 2 2)
+#+END_SRC
+#+BEGIN_SRC emacs-lisp +n 10
+  (+ (- 10 1) 1 (- 10 1))
+#+END_SRC"
+	   'src-block))))
 
 (ert-deftest test-org-export/resolve-coderef ()
   "Test `org-export-resolve-coderef' specifications."

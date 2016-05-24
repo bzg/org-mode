@@ -4450,40 +4450,34 @@ objects of the same type."
 ;; code in a format suitable for plain text or verbatim output.
 
 (defun org-export-get-loc (element info)
-  "Return accumulated lines of code up to ELEMENT.
+  "Return count of lines of code before ELEMENT.
 
-INFO is the plist used as a communication channel.
+ELEMENT is an example-block or src-block element.  INFO is the
+plist used as a communication channel.
 
-ELEMENT is excluded from count."
-  (let ((loc 0)
-        (linum (org-element-property :number-lines element)))
-    (org-element-map (plist-get info :parse-tree)
-	`(src-block example-block ,(org-element-type element))
-      (lambda (el)
-	(cond
-	 ;; ELEMENT is reached: Quit the loop.
-	 ((eq el element))
-	 ;; Only count lines from src-block and example-block elements
-	 ;; with a "+n" or "-n" switch.  A "-n" switch resets counter.
-	 ((not (memq (org-element-type el) '(src-block example-block))) nil)
-	 ((let ((linums (org-element-property :number-lines el)))
-	    (when linums
-	      ;; Accumulate locs or reset them.
-	      (let ((lines (org-count-lines
-			    (org-trim (org-element-property :value el)))))
-		(if (eq (car linums) 'new)
-		    (setq loc 0))
-		(setq loc (+ loc lines (cdr linums))))))
-	  ;; Return nil to stay in the loop.
-	  nil)))
-      info 'first-match)
-    ;; Add the offset from [+-]n to the loc for the final starting
-    ;; number of lines before the first starting line.
-    (setq loc (cl-case (car linum)
-		(continued (+ (cdr linum) loc))
-		(new (cdr linum))))
-    ;; Return value.
-    loc))
+Count includes every line of code in example-block or src-block
+with a \"+n\" or \"-n\" switch before block.  Return nil if
+ELEMENT doesn't allow line numbering."
+  (pcase (org-element-property :number-lines element)
+    (`(new . ,n) n)
+    (`(continued . ,n)
+     (let ((loc 0))
+       (org-element-map (plist-get info :parse-tree) '(src-block example-block)
+	 (lambda (el)
+	   ;; ELEMENT is reached: Quit loop and return locs.
+	   (if (eq el element) (+ loc n)
+	     ;; Only count lines from src-block and example-block
+	     ;; elements with a "+n" or "-n" switch.
+	     (let ((linum (org-element-property :number-lines el)))
+	       (when linum
+		 (let ((lines (org-count-lines
+			       (org-trim (org-element-property :value el)))))
+		   ;; Accumulate locs or reset them.
+		   (pcase linum
+		     (`(new . ,n) (setq loc (+ n lines)))
+		     (`(continued . ,n) (cl-incf loc (+ n lines)))))))
+	     nil))		      ;Return nil to stay in the loop.
+	 info 'first-match)))))
 
 (defun org-export-unravel-code (element)
   "Clean source code and extract references out of it.
