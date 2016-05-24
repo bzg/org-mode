@@ -4033,9 +4033,9 @@ All available processes and theirs documents can be found in
      :image-input-type "pdf"
      :image-output-type "png"
      :image-size-adjust (1.0 . 1.0)
-     :latex-compiler ("latex -interaction nonstopmode -output-directory %o %f")
+     :latex-compiler ("pdflatex -interaction nonstopmode -output-directory %o %f")
      :image-converter
-     ("convert -density %S -trim -antialias %f -quality 100 %b.png")))
+     ("convert -density %D -trim -antialias %f -quality 100 %b.png")))
   "Definitions of external processes for LaTeX previewing.
 Org mode can use some external commands to generate TeX snippet's images for
 previewing or inserting into HTML files, e.g., \"dvipng\".  This variable tells
