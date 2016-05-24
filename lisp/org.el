@@ -4008,7 +4008,7 @@ All available processes and theirs documents can be found in
   '((dvipng
      :programs ("latex" "dvipng" "gs")
      :description "dvi > png"
-     :message "you need to install programs: latex, dvipng and ghostscript."
+     :message "you need to install the programs: latex, dvipng and ghostscript."
      :image-input-type "dvi"
      :image-output-type "png"
      :image-size-adjust (1.0 . 1.0)
@@ -4017,7 +4017,7 @@ All available processes and theirs documents can be found in
     (dvisvgm
      :programs ("latex" "dvisvgm" "gs")
      :description "dvi > svg"
-     :message "you need to install programs: latex, dvisvgm and ghostscript."
+     :message "you need to install the programs: latex, dvisvgm and ghostscript."
      :use-xcolor t
      :image-input-type "dvi"
      :image-output-type "svg"
@@ -4028,7 +4028,7 @@ All available processes and theirs documents can be found in
      :programs ("latex" "convert" "gs")
      :description "pdf > png"
      :message
-     "you need to install programs: latex, imagemagick and ghostscript."
+     "you need to install the programs: latex, imagemagick and ghostscript."
      :use-xcolor t
      :image-input-type "pdf"
      :image-output-type "png"
@@ -4078,7 +4078,7 @@ PROPERTIES accepts the following attributes:
 
 Place-holders used by `:image-converter' and `:latex-compiler':
 
-  %i    input file name.
+  %f    input file name.
   %b    base name of input file.
   %o    base directory of input file.
 
