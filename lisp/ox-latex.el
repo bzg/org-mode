@@ -1841,13 +1841,14 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	  (format "\\footnote{%s%s}" (org-trim (org-export-data def info))
 		  ;; Only insert a \label if there exist another
 		  ;; reference to def.
-		  (or (org-element-map (plist-get info :parse-tree) 'footnote-reference
-			(lambda (f)
-			  (and (not (eq f footnote-reference))
-			       (equal (org-element-property :label f) label)
-			       (org-trim (org-latex--label def info t t))))
-			info t)
-		      ""))
+		  (cond ((not label) "")
+			((org-element-map (plist-get info :parse-tree) 'footnote-reference
+			    (lambda (f)
+			      (and (not (eq f footnote-reference))
+				   (equal (org-element-property :label f) label)
+				   (org-trim (org-latex--label def info t t))))
+			    info t))
+			(t "")))
 	  ;; Retrieve all footnote references within the footnote and
 	  ;; add their definition after it, since LaTeX doesn't support
 	  ;; them inside.
