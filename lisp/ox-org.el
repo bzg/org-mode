@@ -210,7 +210,7 @@ a communication channel."
 		  (mapconcat
 		   (lambda (d)
 		     (org-element-normalize-string
-		      (concat (format "[%s] "(car d))
+		      (concat (format "[fn:%s] "(car d))
 			      (org-export-data (cdr d) info))))
 		   footnotes-alist "\n"))))
    (make-string (or (org-element-property :post-blank section) 0) ?\n)))
