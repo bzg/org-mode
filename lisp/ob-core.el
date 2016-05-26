@@ -23,8 +23,6 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Code:
-(eval-when-compile
-  (require 'cl))
 (require 'cl-lib)
 (require 'ob-eval)
 (require 'org-macs)
@@ -2535,7 +2533,7 @@ parameters when merging lists."
      (lambda (plist)
        (mapc
 	(lambda (pair)
-	  (case (car pair)
+	  (cl-case (car pair)
 	    (:var
 	     (let ((name (if (listp (cdr pair))
 			     (cadr pair)
@@ -2564,7 +2562,7 @@ parameters when merging lists."
 					      ; for replace vars
 		       (prog1 (setf (cddr (nth variable-index vars))
 				    (concat (symbol-name name) "=" (cdr pair)))
-			 (incf variable-index)))
+			 (cl-incf variable-index)))
 		   (error "Variable \"%s\" must be assigned a default value"
 			  (cdr pair))))))
 	    (:results
@@ -2659,7 +2657,7 @@ CONTEXT may be one of :tangle, :export or :eval."
 			(if (member (car as) bs)
 			    (car as)
 			  (funcall intersect (cdr as) bs))))))
-    (funcall intersect (case context
+    (funcall intersect (cl-case context
 			 (:tangle '("yes" "tangle" "no-export" "strip-export"))
 			 (:eval   '("yes" "no-export" "strip-export" "eval"))
 			 (:export '("yes")))
@@ -2830,7 +2828,7 @@ block but are passed literally to the \"example-block\"."
 	       ;; the character was (because one layer of quoting will
 	       ;; be stripped by `org-babel-read').
 	       (t (append (list ch ?\\ ?\\) out))))
-	  (case ch
+	  (cl-case ch
 	    (?\[ (if (or in-double in-single)
 		     (cons ?\[ out)
 		   (cons ?\( out)))
