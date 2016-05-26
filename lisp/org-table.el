@@ -3012,7 +3012,7 @@ The cursor is currently in relative line number CLINE."
       (when (and hn (not hdir))
 	(setq cline 0)
 	(setq hdir "+")
-	(when (eq (aref org-table-current-line-types 0) 'hline) (decf hn)))
+	(when (eq (aref org-table-current-line-types 0) 'hline) (cl-decf hn)))
       (when (and (not hn) on (not odir)) (user-error "Should never happen"))
       (when hn
 	(setq cline
@@ -3043,7 +3043,7 @@ search, as a string."
 		     ((eq org-table-relative-ref-may-cross-hline t))
 		     ((eq org-table-relative-ref-may-cross-hline 'error)
 		      (user-error "Row descriptor %s crosses hline" desc))
-		     (t (decf i (if backwards -1 1)) ; Step back.
+		     (t (cl-decf i (if backwards -1 1)) ; Step back.
 			(throw :exit nil)))))))
     (cond ((or (< i 0) (>= i l))
 	   (user-error "Row descriptor %s leads outside table" desc))
