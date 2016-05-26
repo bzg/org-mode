@@ -33,6 +33,26 @@
   (require 'cl))
 (require 'org-macs)
 
+;; As of Emacs 25.1, `outline-mode' functions are under the 'outline-'
+;; prefix, `find-tag' is replaced with `xref-find-definition' and
+;; `x-get-selection' with `gui-get-selection'.
+(when (< emacs-major-version 25)
+  (defalias 'outline-hide-entry 'hide-entry)
+  (defalias 'outline-hide-sublevels 'hide-sublevels)
+  (defalias 'outline-hide-subtree 'hide-subtree)
+  (defalias 'outline-show-all 'show-all)
+  (defalias 'outline-show-branches 'show-branches)
+  (defalias 'outline-show-children 'show-children)
+  (defalias 'outline-show-entry 'show-entry)
+  (defalias 'outline-show-subtree 'show-subtree)
+  (defalias 'xref-find-definitions 'find-tag)
+  (defalias 'gui-get-selection 'x-get-selection))
+
+(defmacro org-with-silent-modifications (&rest body)
+  (if (fboundp 'with-silent-modifications)
+      `(with-silent-modifications ,@body)
+    `(org-unmodified ,@body)))
+
 (defun org-compatible-face (inherits specs)
   "Make a compatible face specification.
 If INHERITS is an existing face and if the Emacs version supports it,
@@ -345,21 +365,6 @@ With two arguments, return floor and remainder of their quotient."
   (if (fboundp 'buffer-narrowed-p)
       (buffer-narrowed-p)
     (/= (- (point-max) (point-min)) (buffer-size))))
-
-;; As of Emacs 25.1, `outline-mode' functions are under the 'outline-'
-;; prefix, `find-tag' is replaced with `xref-find-definition' and
-;; `x-get-selection' with `gui-get-selection'.
-(when (< emacs-major-version 25)
-  (defalias 'outline-hide-entry 'hide-entry)
-  (defalias 'outline-hide-sublevels 'hide-sublevels)
-  (defalias 'outline-hide-subtree 'hide-subtree)
-  (defalias 'outline-show-all 'show-all)
-  (defalias 'outline-show-branches 'show-branches)
-  (defalias 'outline-show-children 'show-children)
-  (defalias 'outline-show-entry 'show-entry)
-  (defalias 'outline-show-subtree 'show-subtree)
-  (defalias 'xref-find-definitions 'find-tag)
-  (defalias 'gui-get-selection 'x-get-selection))
 
 (defmacro org-with-silent-modifications (&rest body)
   (if (fboundp 'with-silent-modifications)
