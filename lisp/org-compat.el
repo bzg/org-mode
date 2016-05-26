@@ -133,10 +133,10 @@ Don't do the aliasing when `defvaralias' is not bound."
   (cond ((eq window-system 'x)
 	 (org-no-properties
 	  (ignore-errors
-	    (or (x-get-selection value 'UTF8_STRING)
-		(x-get-selection value 'COMPOUND_TEXT)
-		(x-get-selection value 'STRING)
-		(x-get-selection value 'TEXT)))))
+	    (or (gui-get-selection value 'UTF8_STRING)
+		(gui-get-selection value 'COMPOUND_TEXT)
+		(gui-get-selection value 'STRING)
+		(gui-get-selection value 'TEXT)))))
 	((and (eq window-system 'w32) (fboundp 'w32-get-clipboard-data))
 	 (w32-get-clipboard-data))))
 
@@ -346,8 +346,9 @@ With two arguments, return floor and remainder of their quotient."
       (buffer-narrowed-p)
     (/= (- (point-max) (point-min)) (buffer-size))))
 
-;; As of Emacs 25.1, `outline-mode` functions are under the 'outline-'
-;; prefix and `find-tag` is replaced with `xref-find-definition`.
+;; As of Emacs 25.1, `outline-mode' functions are under the 'outline-'
+;; prefix, `find-tag' is replaced with `xref-find-definition' and
+;; `x-get-selection' with `gui-get-selection'.
 (when (< emacs-major-version 25)
   (defalias 'outline-hide-entry 'hide-entry)
   (defalias 'outline-hide-sublevels 'hide-sublevels)
@@ -357,7 +358,8 @@ With two arguments, return floor and remainder of their quotient."
   (defalias 'outline-show-children 'show-children)
   (defalias 'outline-show-entry 'show-entry)
   (defalias 'outline-show-subtree 'show-subtree)
-  (defalias 'xref-find-definitions 'find-tag))
+  (defalias 'xref-find-definitions 'find-tag)
+  (defalias 'gui-get-selection 'x-get-selection))
 
 (defmacro org-with-silent-modifications (&rest body)
   (if (fboundp 'with-silent-modifications)
