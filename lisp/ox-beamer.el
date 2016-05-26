@@ -29,7 +29,6 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
 (require 'cl-lib)
 (require 'ox-latex)
 
@@ -203,7 +202,7 @@ TYPE is a symbol among the following:
 `defaction' Return ARGUMENT within both square and angular brackets.
 `option'    Return ARGUMENT within square brackets."
   (if (not (string-match "\\S-" argument)) ""
-    (case type
+    (cl-case type
       (action (if (string-match "\\`<.*>\\'" argument) argument
 		(format "<%s>" argument)))
       (defaction (cond
@@ -740,7 +739,7 @@ used as a communication channel."
 	   (let ((destination (if (string= type "fuzzy")
 				  (org-export-resolve-fuzzy-link link info)
 				(org-export-resolve-id-link link info))))
-	     (case (org-element-type destination)
+	     (cl-case (org-element-type destination)
 	       (headline
 		(let ((label
 		       (format "sec-%s"
