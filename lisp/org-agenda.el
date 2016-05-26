@@ -8943,11 +8943,18 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 		done-face (org-get-at-bol 'done-face))
 	  (beginning-of-line 1)
 	  (cond
-	   ((equal new "")
-	    (and (looking-at ".*\n?") (replace-match "")))
+	   ((equal new "") (delete-region (point) (line-beginning-position 2)))
 	   ((looking-at ".*")
-	    (replace-match new t t)
-	    (beginning-of-line 1)
+	    ;; When replacing the whole line, preserve bulk mark
+	    ;; overlay, if any.
+	    (let ((mark (catch :overlay
+			  (dolist (o (overlays-in (point) (+ 2 (point))))
+			    (when (eq (overlay-get o 'type)
+				      'org-marked-entry-overlay)
+			      (throw :overlay o))))))
+	      (replace-match new t t)
+	      (beginning-of-line)
+	      (when mark (move-overlay mark (point) (+ 2 (point)))))
 	    (add-text-properties (point-at-bol) (point-at-eol) props)
 	    (when fixface
 	      (add-text-properties
