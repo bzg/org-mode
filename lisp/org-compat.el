@@ -48,11 +48,6 @@
   (defalias 'xref-find-definitions 'find-tag)
   (defalias 'gui-get-selection 'x-get-selection))
 
-(defmacro org-with-silent-modifications (&rest body)
-  (if (fboundp 'with-silent-modifications)
-      `(with-silent-modifications ,@body)
-    `(org-unmodified ,@body)))
-
 (defun org-compatible-face (inherits specs)
   "Make a compatible face specification.
 If INHERITS is an existing face and if the Emacs version supports it,
