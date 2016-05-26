@@ -26,7 +26,7 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 (require 'ox)
 (require 'ox-publish)
 
@@ -1240,7 +1240,7 @@ Eventually, if FULL is non-nil, wrap label within \"\\label{}\"."
   (let* ((type (org-element-type datum))
 	 (user-label
 	  (org-element-property
-	   (case type
+	   (cl-case type
 	     ((headline inlinetask) :CUSTOM_ID)
 	     (target :value)
 	     (otherwise :name))
@@ -1249,7 +1249,7 @@ Eventually, if FULL is non-nil, wrap label within \"\\label{}\"."
 	  (and (or user-label force)
 	       (if (and user-label (plist-get info :latex-prefer-user-labels))
 		   user-label
-		 (concat (case type
+		 (concat (cl-case type
 			   (headline "sec:")
 			   (table "tab:")
 			   (latex-environment
@@ -1297,7 +1297,7 @@ For non-floats, see `org-latex--wrap-label'."
       (format (if nonfloat "\\captionof{%s}%s{%s%s}\n"
 		"\\caption%s%s{%s%s}\n")
 	      (if nonfloat
-		  (case type
+		  (cl-case type
 		    (paragraph "figure")
 		    (src-block (if (plist-get info :latex-listings)
 				   "listing"
@@ -1443,9 +1443,9 @@ Return modified pkg-alist."
   "Return a character not used in string S.
 This is used to choose a separator for constructs like \\verb."
   (let ((ll "~,./?;':\"|!@#%^&-_=+abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ<>()[]{}"))
-    (loop for c across ll
-	  when (not (string-match (regexp-quote (char-to-string c)) s))
-	  return (char-to-string c))))
+    (cl-loop for c across ll
+	     when (not (string-match (regexp-quote (char-to-string c)) s))
+	     return (char-to-string c))))
 
 (defun org-latex--make-option-string (options)
   "Return a comma separated string of keywords and values.
@@ -1487,7 +1487,7 @@ should not be used for floats.  See
 INFO is a plist used as a communication channel.  See
 `org-latex-text-markup-alist' for details."
   (let ((fmt (cdr (assq markup (plist-get info :latex-text-markup-alist)))))
-    (case fmt
+    (cl-case fmt
       ;; No format string: Return raw text.
       ((nil) text)
       ;; Handle the `verb' special case: Find an appropriate separator
@@ -2027,7 +2027,7 @@ CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((code (org-element-property :value inline-src-block))
 	 (separator (org-latex--find-verb-separator code)))
-    (case (plist-get info :latex-listings)
+    (cl-case (plist-get info :latex-listings)
       ;; Do not use a special package: transcode it verbatim.
       ((nil) (format "\\texttt{%s}" (org-latex--protect-text code)))
       ;; Use minted package.
@@ -2039,9 +2039,9 @@ contextual information."
 	      (options (org-latex--make-option-string
 			(plist-get info :latex-minted-options))))
 	 (format "\\mintinline%s{%s}{%s}"
-			 (if (string= options "") "" (format "[%s]" options))
-			 mint-lang
-			 code)))
+		 (if (string= options "") "" (format "[%s]" options))
+		 mint-lang
+		 code)))
       ;; Use listings package.
       (otherwise
        ;; Maybe translate language's name.
@@ -2126,14 +2126,14 @@ contextual information."
 		     (when (and (eq (org-element-type parent) 'plain-list)
 				(eq (org-element-property :type parent)
 				    'ordered))
-		       (incf level)))
+		       (cl-incf level)))
 		   level)))
 	    (and count
 		 (< level 5)
 		 (format "\\setcounter{enum%s}{%s}\n"
 			 (nth (1- level) '("i" "ii" "iii" "iv"))
 			 (1- count)))))
-	 (checkbox (case (org-element-property :checkbox item)
+	 (checkbox (cl-case (org-element-property :checkbox item)
 		     (on "$\\boxtimes$ ")
 		     (off "$\\square$ ")
 		     (trans "$\\boxminus$ ")))
@@ -2203,7 +2203,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	      (concat depth (and depth "\n") "\\tableofcontents"))))
 	 ((org-string-match-p "\\<tables\\>" value) "\\listoftables")
 	 ((org-string-match-p "\\<listings\\>" value)
-	  (case (plist-get info :latex-listings)
+	  (cl-case (plist-get info :latex-listings)
 	    ((nil) "\\listoffigures")
 	    (minted "\\listoflistings")
 	    (otherwise "\\lstlistoflistings")))))))))
@@ -2348,7 +2348,7 @@ used as a communication channel."
 						   image-code
 						   nil t))))
     ;; Return proper string, depending on FLOAT.
-    (case float
+    (cl-case float
       (wrap (format "\\begin{wrapfigure}%s
 %s\\centering
 %s%s
@@ -2426,7 +2426,7 @@ INFO is a plist holding contextual information.  See
       (let ((destination (if (string= type "fuzzy")
 			     (org-export-resolve-fuzzy-link link info)
 			   (org-export-resolve-id-link link info))))
-	(case (org-element-type destination)
+	(cl-case (org-element-type destination)
 	  ;; Id link points to an external file.
 	  (plain-text
 	   (if desc (format "\\href{%s}{%s}" destination desc)
@@ -2530,7 +2530,7 @@ contextual information."
 	     (replace-regexp-in-string
 	      (concat "[%$#&{}_~^]\\|\\\\" (and specialp "\\([^-]\\|$\\)"))
 	      (lambda (m)
-		(case (string-to-char m)
+		(cl-case (string-to-char m)
 		  (?\\ "$\\\\backslash$\\1")
 		  (?~ "\\\\textasciitilde{}")
 		  (?^ "\\\\^{}")
@@ -2652,7 +2652,7 @@ it."
   "Transcode a MATRICES element from Org to LaTeX.
 CONTENTS is a string.  INFO is a plist used as a communication
 channel."
-  (format (case (org-element-property :markup matrices)
+  (format (cl-case (org-element-property :markup matrices)
 	    (inline "\\(%s\\)")
 	    (equation "\\begin{equation}\n%s\\end{equation}")
 	    (t "\\[\n%s\\]"))
@@ -2973,7 +2973,7 @@ channel."
     (org-element-map (org-element-contents object)
 	(cons 'plain-text org-element-all-objects)
       (lambda (obj)
-	(case (org-element-type obj)
+	(cl-case (org-element-type obj)
 	  ((entity latex-fragment)
 	   (let ((data (org-trim (org-export-data obj info))))
 	     (string-match
@@ -3072,7 +3072,7 @@ a communication channel."
 	      ;; Check left border for the first cell only.
 	      (when (and (memq 'left borders) (not align))
 		(push "|" align))
-	      (push (case (org-export-table-cell-alignment cell info)
+	      (push (cl-case (org-export-table-cell-alignment cell info)
 		      (left "l")
 		      (right "r")
 		      (center "c"))
@@ -3224,7 +3224,7 @@ property."
 	(let ((n 0) (pos 0))
 	  (while (and (< (length output) pos)
 		      (setq pos (string-match "^\\\\hline\n?" output pos)))
-	    (incf n)
+	    (cl-incf n)
 	    (unless (= n 2) (setq output (replace-match "" nil nil output))))))
       (let ((centerp (if (plist-member attr :center) (plist-get attr :center)
 		       (plist-get info :latex-tables-centered))))
@@ -3376,7 +3376,7 @@ information."
   (let ((value (org-latex-plain-text (org-timestamp-translate timestamp) info)))
     (format
      (plist-get info
-		(case (org-element-property :type timestamp)
+		(cl-case (org-element-property :type timestamp)
 		  ((active active-range) :latex-active-timestamp-format)
 		  ((inactive inactive-range) :latex-inactive-timestamp-format)
 		  (otherwise :latex-diary-timestamp-format)))
