@@ -9712,6 +9712,7 @@ This is a command that has to be installed in `calendar-mode-map'."
 ;;; Bulk commands
 
 (defun org-agenda-bulk-marked-p ()
+  "Non-nil when current entry is marked for bulk action."
   (eq (get-char-property (point-at-bol) 'type)
       'org-marked-entry-overlay))
 
