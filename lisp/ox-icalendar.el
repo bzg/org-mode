@@ -31,7 +31,6 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
 (require 'cl-lib)
 (require 'ox-ascii)
 (declare-function org-bbdb-anniv-export-ical "org-bbdb" nil)
@@ -413,7 +412,7 @@ used as a communication channel."
    (org-uniquify
     (let (categories)
       (dolist (type org-icalendar-categories (nreverse categories))
-	(case type
+	(cl-case type
 	  (category
 	   (push (org-export-get-category entry info) categories))
 	  (todo-state
@@ -576,11 +575,11 @@ inlinetask within the section."
 		 'timestamp
 	       (lambda (ts)
 		 (when (let ((type (org-element-property :type ts)))
-			 (case (plist-get info :with-timestamps)
+			 (cl-case (plist-get info :with-timestamps)
 			   (active (memq type '(active active-range)))
 			   (inactive (memq type '(inactive inactive-range)))
 			   ((t) t)))
-		   (let ((uid (format "TS%d-%s" (incf counter) uid)))
+		   (let ((uid (format "TS%d-%s" (cl-incf counter) uid)))
 		     (org-icalendar--vevent
 		      entry ts uid summary loc desc cat))))
 	       info nil (and (eq type 'headline) 'inlinetask))
@@ -589,7 +588,7 @@ inlinetask within the section."
 	  ;; so, call `org-icalendar--vtodo' to transcode it into
 	  ;; a "VTODO" component.
 	  (when (and todo-type
-		     (case (plist-get info :icalendar-include-todo)
+		     (cl-case (plist-get info :icalendar-include-todo)
 		       (all t)
 		       (unblocked
 			(and (eq type 'headline)
@@ -611,7 +610,7 @@ inlinetask within the section."
 			   (lambda (sexp)
 			     (org-icalendar-transcode-diary-sexp
 			      (org-element-property :value sexp)
-			      (format "DS%d-%s" (incf counter) uid)
+			      (format "DS%d-%s" (cl-incf counter) uid)
 			      summary))
 			   info nil (and (eq type 'headline) 'inlinetask))
 			 "")))))
@@ -627,7 +626,7 @@ inlinetask within the section."
        contents))))
 
 (defun org-icalendar--vevent
-  (entry timestamp uid summary location description categories)
+    (entry timestamp uid summary location description categories)
   "Create a VEVENT component.
 
 ENTRY is either a headline or an inlinetask element.  TIMESTAMP
@@ -651,7 +650,7 @@ Return VEVENT component as a string."
 	     ;; RRULE.
 	     (when (org-element-property :repeater-type timestamp)
 	       (format "RRULE:FREQ=%s;INTERVAL=%d\n"
-		       (case (org-element-property :repeater-unit timestamp)
+		       (cl-case (org-element-property :repeater-unit timestamp)
 			 (hour "HOURLY") (day "DAILY") (week "WEEKLY")
 			 (month "MONTHLY") (year "YEARLY"))
 		       (org-element-property :repeater-value timestamp)))
