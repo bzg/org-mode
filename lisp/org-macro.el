@@ -43,6 +43,7 @@
 ;; {{{email}}} and {{{title}}} macros.
 
 ;;; Code:
+(require 'cl-lib)
 (require 'org-macs)
 (require 'org-compat)
 
