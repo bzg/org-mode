@@ -24,45 +24,34 @@
 ;;
 ;;; Commentary:
 
-;; This file contains code needed for compatibility with XEmacs and older
+;; This file contains code needed for compatibility with older
 ;; versions of GNU Emacs.
 
 ;;; Code:
 
 (eval-when-compile
   (require 'cl))
-
 (require 'org-macs)
-
-;; The following constant is for backward compatibility.  We do not use
-;; it in org-mode, because the Byte compiler evaluates (featurep 'xemacs)
-;; at compilation time and can therefore optimize code better.
-(defconst org-xemacs-p (featurep 'xemacs))
 
 (defun org-compatible-face (inherits specs)
   "Make a compatible face specification.
 If INHERITS is an existing face and if the Emacs version supports it,
 just inherit the face.  If INHERITS is set and the Emacs version does
 not support it, copy the face specification from the inheritance face.
-If INHERITS is not given and SPECS is, use SPECS to define the face.
-XEmacs and Emacs 21 do not know about the `min-colors' attribute.
-For them we convert a (min-colors 8) entry to a `tty' entry and move it
-to the top of the list.  The `min-colors' attribute will be removed from
-any other entries, and any resulting duplicates will be removed entirely."
+If INHERITS is not given and SPECS is, use SPECS to define the face."
   (when (and inherits (facep inherits) (not specs))
     (setq specs (or specs
 		    (get inherits 'saved-face)
 		    (get inherits 'face-defface-spec))))
   (cond
    ((and inherits (facep inherits)
-	 (not (featurep 'xemacs))
 	 (>= emacs-major-version 22)
 	 ;; do not inherit outline faces before Emacs 23
 	 (or (>= emacs-major-version 23)
 	     (not (string-match "\\`outline-[0-9]+"
 				(symbol-name inherits)))))
     (list (list t :inherit inherits)))
-   ((or (featurep 'xemacs) (< emacs-major-version 22))
+   ((< emacs-major-version 22)
     ;; These do not understand the `min-colors' attribute.
     (let (r e a)
       (while (setq e (pop specs))
@@ -104,7 +93,7 @@ any other entries, and any resulting duplicates will be removed entirely."
       t)))
 
 
-;;;; Emacs/XEmacs compatibility
+;;; Emacs/XEmacs compatibility
 
 (eval-and-compile
   (defun org-defvaralias (new-alias base-variable &optional docstring)
@@ -118,94 +107,38 @@ Don't do the aliasing when `defvaralias' is not bound."
 	     (boundp 'user-init-directory))
     (org-defvaralias 'user-emacs-directory 'user-init-directory)))
 
-(when (featurep 'xemacs)
-  (defadvice custom-handle-keyword
-    (around org-custom-handle-keyword
-	    activate preactivate)
-    "Remove custom keywords not recognized to avoid producing an error."
-    (cond
-     ((eq (ad-get-arg 1) :package-version))
-     (t ad-do-it)))
-  (defadvice define-obsolete-variable-alias
-    (around org-define-obsolete-variable-alias
-	    (obsolete-name current-name &optional when docstring)
-	    activate preactivate)
-    "Declare arguments defined in later versions of Emacs."
-    ad-do-it)
-  (defadvice define-obsolete-function-alias
-    (around org-define-obsolete-function-alias
-	    (obsolete-name current-name &optional when docstring)
-	    activate preactivate)
-    "Declare arguments defined in later versions of Emacs."
-    ad-do-it)
-  (defvar customize-package-emacs-version-alist nil)
-  (defvar temporary-file-directory (temp-directory)))
+(define-obsolete-function-alias 'org-add-hook 'add-hook "Org 9.0")
+(define-obsolete-function-alias 'org-decompose-region 'decompose-region "Org 9.0")
+(define-obsolete-function-alias 'org-detach-overlay 'delete-overlay "Org 9.0")
+(define-obsolete-function-alias 'org-file-equal-p 'file-equal-p "Org 9.0")
+(define-obsolete-function-alias 'org-float-time 'float-time "Org 9.0")
+(define-obsolete-function-alias 'org-indent-line-to 'indent-line-to "Org 9.0")
+(define-obsolete-function-alias 'org-indent-to-column 'indent-to-column "Org 9.0")
+(define-obsolete-function-alias 'org-looking-at-p 'looking-at-p "Org 9.0")
+(define-obsolete-function-alias 'org-looking-back 'looking-back "Org 9.0")
+(define-obsolete-function-alias 'org-match-string-no-properties 'match-string-properties "Org 9.0")
+(define-obsolete-function-alias 'org-propertize 'propertize "Org 9.0")
+(define-obsolete-function-alias 'org-select-frame-set-input-focus 'select-frame-set-input-focus "Org 9.0")
 
-;; Keys
-(defconst org-xemacs-key-equivalents
-  '(([mouse-1] . [button1])
-    ([mouse-2] . [button2])
-    ([mouse-3] . [button3])
-    ([C-mouse-4] . [(control mouse-4)])
-    ([C-mouse-5] . [(control mouse-5)]))
-  "Translation alist for a couple of keys.")
+(defmacro org-re (s)
+  "Replace posix classes in regular expression."
+  (declare (debug (form)))
+  s)
+(make-obsolete 'org-re "It is now a no-op.  Please remove it altogether." "Org 9.0")
 
-;; Overlay compatibility functions
-(defun org-detach-overlay (ovl)
-  (if (featurep 'xemacs) (detach-extent ovl) (delete-overlay ovl)))
-(defun org-overlay-display (ovl text &optional face evap)
-  "Make overlay OVL display TEXT with face FACE."
-  (if (featurep 'xemacs)
-      (let ((gl (make-glyph text)))
-	(and face (set-glyph-face gl face))
-	(set-extent-property ovl 'invisible t)
-	(set-extent-property ovl 'end-glyph gl))
-    (overlay-put ovl 'display text)
-    (if face (overlay-put ovl 'face face))
-    (if evap (overlay-put ovl 'evaporate t))))
-(defun org-overlay-before-string (ovl text &optional face evap)
-  "Make overlay OVL display TEXT with face FACE."
-  (if (featurep 'xemacs)
-      (let ((gl (make-glyph text)))
-	(and face (set-glyph-face gl face))
-	(set-extent-property ovl 'begin-glyph gl))
-    (if face (org-add-props text nil 'face face))
-    (overlay-put ovl 'before-string text)
-    (if evap (overlay-put ovl 'evaporate t))))
-(defun org-find-overlays (prop &optional pos delete)
-  "Find all overlays specifying PROP at POS or point.
-If DELETE is non-nil, delete all those overlays."
-  (let ((overlays (overlays-at (or pos (point))))
-	ov found)
-    (while (setq ov (pop overlays))
-      (if (overlay-get ov prop)
-          (if delete (delete-overlay ov) (push ov found))))
-    found))
+;;; Miscellaneous functions
 
 (defun org-get-x-clipboard (value)
-  "Get the value of the x or Windows clipboard, compatible with XEmacs, and GNU Emacs 21."
+  "Get the value of the X or Windows clipboard."
   (cond ((eq window-system 'x)
-	 (let ((x (org-get-x-clipboard-compat value)))
-	   (if x (org-no-properties x))))
+	 (org-no-properties
+	  (ignore-errors
+	    (or (x-get-selection value 'UTF8_STRING)
+		(x-get-selection value 'COMPOUND_TEXT)
+		(x-get-selection value 'STRING)
+		(x-get-selection value 'TEXT)))))
 	((and (eq window-system 'w32) (fboundp 'w32-get-clipboard-data))
 	 (w32-get-clipboard-data))))
-
-(defsubst org-decompose-region (beg end)
-  "Decompose from BEG to END."
-  (if (featurep 'xemacs)
-      (let ((modified-p (buffer-modified-p))
-	    (buffer-read-only nil))
-	(remove-text-properties beg end '(composition nil))
-	(set-buffer-modified-p modified-p))
-    (decompose-region beg end)))
-
-;; Miscellaneous functions
-
-(defun org-add-hook (hook function &optional append local)
-  "Add-hook, compatible with both Emacsen."
-  (if (and local (featurep 'xemacs))
-      (add-local-hook hook function append)
-    (add-hook hook function append local)))
 
 (defun org-add-props (string plist &rest props)
   "Add text properties to entire string, from beginning to end.
@@ -259,31 +192,28 @@ ignored in this case."
       'set-transient-map
     'set-temporary-overlay-map))
 
-;; Region compatibility
+;;; Region compatibility
 
 (defvar org-ignore-region nil
   "Non-nil means temporarily disable the active region.")
 
 (defun org-region-active-p ()
-  "Is `transient-mark-mode' on and the region active?
-Works on both Emacs and XEmacs."
+  "Is `transient-mark-mode' on and the region active?"
   (if org-ignore-region
       nil
-    (if (featurep 'xemacs)
-	(and zmacs-regions (region-active-p))
-      (if (fboundp 'use-region-p)
-	  (use-region-p)
-	(and transient-mark-mode mark-active))))) ; Emacs 22 and before
+    (if (fboundp 'use-region-p)
+	(use-region-p)
+      (and transient-mark-mode mark-active)))) ; Emacs 22 and before
 
 (defun org-cursor-to-region-beginning ()
   (when (and (org-region-active-p)
 	     (> (point) (region-beginning)))
     (exchange-point-and-mark)))
 
-;; Old alias for emacs 22 compatibility, now dropped
+;;; Old alias for emacs 22 compatibility, now dropped
 (define-obsolete-function-alias 'org-activate-mark 'activate-mark)
 
-;; Invisibility compatibility
+;;; Invisibility compatibility
 
 (defun org-remove-from-invisibility-spec (arg)
   "Remove elements from `buffer-invisibility-spec'."
@@ -298,65 +228,14 @@ Works on both Emacs and XEmacs."
   (if (consp buffer-invisibility-spec)
       (member arg buffer-invisibility-spec)))
 
-(defmacro org-xemacs-without-invisibility (&rest body)
-  "Turn off extents with invisibility while executing BODY."
-  `(let ((ext-inv (extent-list nil (point-at-bol) (point-at-eol)
-			       'all-extents-closed-open 'invisible))
-	 ext-inv-specs)
-     (dolist (ext ext-inv)
-       (when (extent-property ext 'invisible)
-	 (add-to-list 'ext-inv-specs (list ext (extent-property
-						ext 'invisible)))
-	 (set-extent-property ext 'invisible nil)))
-     ,@body
-     (dolist (ext-inv-spec ext-inv-specs)
-       (set-extent-property (car ext-inv-spec) 'invisible
-			    (cadr ext-inv-spec)))))
-(def-edebug-spec org-xemacs-without-invisibility (body))
-
-(defun org-indent-to-column (column &optional minimum buffer)
-  "Work around a bug with extents with invisibility in XEmacs."
-  (if (featurep 'xemacs)
-      (org-xemacs-without-invisibility (indent-to-column column minimum buffer))
-    (indent-to-column column minimum)))
-
-(defun org-indent-line-to (column)
-  "Work around a bug with extents with invisibility in XEmacs."
-  (if (featurep 'xemacs)
-      (org-xemacs-without-invisibility (indent-line-to column))
-    (indent-line-to column)))
-
 (defun org-move-to-column (column &optional force buffer)
   "Move to column COLUMN.
-Pass COLUMN and FORCE to `move-to-column'.
-Pass BUFFER to the XEmacs version of `move-to-column'."
+Pass COLUMN and FORCE to `move-to-column'."
   (let ((buffer-invisibility-spec
 	 (if (listp buffer-invisibility-spec)
 	     (remove '(org-filtered) buffer-invisibility-spec)
 	   buffer-invisibility-spec)))
-    (if (featurep 'xemacs)
-	(org-xemacs-without-invisibility
-	 (move-to-column column force buffer))
-      (move-to-column column force))))
-
-(defun org-get-x-clipboard-compat (value)
-  "Get the clipboard value on XEmacs or Emacs 21."
-  (cond ((featurep 'xemacs)
-	 (org-no-warnings (get-selection-no-error value)))
-	((fboundp 'x-get-selection)
-	 (condition-case nil
-	     (or (x-get-selection value 'UTF8_STRING)
-		 (x-get-selection value 'COMPOUND_TEXT)
-		 (x-get-selection value 'STRING)
-		 (x-get-selection value 'TEXT))
-	   (error nil)))))
-
-(defun org-propertize (string &rest properties)
-  (if (featurep 'xemacs)
-      (progn
-	(add-text-properties 0 (length string) properties string)
-	string)
-    (apply 'propertize string properties)))
+    (move-to-column column force)))
 
 (defmacro org-find-library-dir (library)
   `(file-name-directory (or (locate-library ,library) "")))
@@ -374,32 +253,6 @@ Pass BUFFER to the XEmacs version of `move-to-column'."
   (remove-text-properties 0 (length string) '(line-prefix t wrap-prefix t)
 			  string)
   (apply 'kill-new string args))
-
-(defun org-select-frame-set-input-focus (frame)
-  "Select FRAME, raise it, and set input focus, if possible."
-  (cond ((featurep 'xemacs)
-	 (if (fboundp 'select-frame-set-input-focus)
-	     (select-frame-set-input-focus frame)
-	   (raise-frame frame)
-	   (select-frame frame)
-	   (focus-frame frame)))
-	;; `select-frame-set-input-focus' defined in Emacs 21 will not
-	;; set the input focus.
-	((>= emacs-major-version 22)
-	 (select-frame-set-input-focus frame))
-	(t
-	 (raise-frame frame)
-	 (select-frame frame)
-	 (cond ((memq window-system '(x ns mac))
-		(x-focus-frame frame))
-	       ((and (eq window-system 'w32)
-		     (fboundp 'w32-focus-frame))
-		(w32-focus-frame frame)))
-	 (when focus-follows-mouse
-	   (set-mouse-position frame (1- (frame-width frame)) 0)))))
-
-(defalias 'org-float-time
-  (if (featurep 'xemacs) 'time-to-seconds 'float-time))
 
 ;; `user-error' is only available from 24.2.50 on
 (unless (fboundp 'user-error)
@@ -431,46 +284,6 @@ effect, which variables to use depends on the Emacs version."
   (defun org-string-match-p (regexp string &optional start)
     (save-match-data
       (funcall 'string-match regexp string start))))
-
-(if (fboundp 'looking-at-p)
-    (defalias 'org-looking-at-p 'looking-at-p)
-  (defun org-looking-at-p (&rest args)
-    (save-match-data
-      (apply 'looking-at args))))
-
-;; XEmacs does not have `looking-back'.
-(if (fboundp 'looking-back)
-    (defalias 'org-looking-back 'looking-back)
-  (defun org-looking-back (regexp &optional limit greedy)
-    "Return non-nil if text before point matches regular expression REGEXP.
-Like `looking-at' except matches before point, and is slower.
-LIMIT if non-nil speeds up the search by specifying a minimum
-starting position, to avoid checking matches that would start
-before LIMIT.
-
-If GREEDY is non-nil, extend the match backwards as far as
-possible, stopping when a single additional previous character
-cannot be part of a match for REGEXP.  When the match is
-extended, its starting position is allowed to occur before
-LIMIT."
-    (let ((start (point))
-	  (pos
-	   (save-excursion
-	     (and (re-search-backward (concat "\\(?:" regexp "\\)\\=") limit t)
-		  (point)))))
-      (if (and greedy pos)
-	  (save-restriction
-	    (narrow-to-region (point-min) start)
-	    (while (and (> pos (point-min))
-			(save-excursion
-			  (goto-char pos)
-			  (backward-char 1)
-			  (looking-at (concat "\\(?:"  regexp "\\)\\'"))))
-	      (setq pos (1- pos)))
-	    (save-excursion
-	      (goto-char pos)
-	      (looking-at (concat "\\(?:"  regexp "\\)\\'")))))
-      (not (null pos)))))
 
 (defun org-floor* (x &optional y)
   "Return a list of the floor of X and the fractional part of X.
@@ -525,16 +338,6 @@ With two arguments, return floor and remainder of their quotient."
 	'(progn
 	   (defun org-release () "N/A")
 	   (defun org-git-version () "N/A !!check installation!!"))))))
-
-(defun org-file-equal-p (f1 f2)
-  "Return t if files F1 and F2 are the same.
-Implements `file-equal-p' for older emacsen and XEmacs."
-  (if (fboundp 'file-equal-p)
-      (file-equal-p f1 f2)
-    (let (f1-attr f2-attr)
-      (and (setq f1-attr (file-attributes (file-truename f1)))
-	   (setq f2-attr (file-attributes (file-truename f2)))
-	   (equal f1-attr f2-attr)))))
 
 ;; `buffer-narrowed-p' is available for Emacs >=24.3
 (defun org-buffer-narrowed-p ()

@@ -142,7 +142,7 @@ See `org-crypt-disable-auto-save'."
       (message "org-decrypt: Decrypting entry with auto-save-mode enabled.  This may cause leakage."))
      ((eq org-crypt-disable-auto-save 'encrypt)
       (message "org-decrypt: Enabling re-encryption on auto-save.")
-      (org-add-hook 'auto-save-hook
+      (add-hook 'auto-save-hook
 		    (lambda ()
 		      (message "org-crypt: Re-encrypting all decrypted entries due to auto-save.")
 		      (org-encrypt-entries))
@@ -263,7 +263,7 @@ See `org-crypt-disable-auto-save'."
   "Add a hook to automatically encrypt entries before a file is saved to disk."
   (add-hook
    'org-mode-hook
-   (lambda () (org-add-hook 'before-save-hook 'org-encrypt-entries nil t))))
+   (lambda () (add-hook 'before-save-hook 'org-encrypt-entries nil t))))
 
 (add-hook 'org-reveal-start-hook 'org-decrypt-entry)
 

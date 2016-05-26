@@ -716,7 +716,7 @@ Assume point is at beginning of drawer."
       (save-excursion
 	(let* ((drawer-end-line (match-beginning 0))
 	       (name (progn (looking-at org-drawer-regexp)
-			    (org-match-string-no-properties 1)))
+			    (match-string-no-properties 1)))
 	       (begin (car affiliated))
 	       (post-affiliated (point))
 	       ;; Empty drawers have no contents.
@@ -772,8 +772,8 @@ Assume point is at beginning of dynamic block."
       (let ((block-end-line (match-beginning 0)))
 	(save-excursion
 	  (let* ((name (progn (looking-at org-dblock-start-re)
-			      (org-match-string-no-properties 1)))
-		 (arguments (org-match-string-no-properties 3))
+			      (match-string-no-properties 1)))
+		 (arguments (match-string-no-properties 3))
 		 (begin (car affiliated))
 		 (post-affiliated (point))
 		 ;; Empty blocks have no contents.
@@ -831,7 +831,7 @@ a plist containing `:label', `:begin' `:end', `:contents-begin',
 Assume point is at the beginning of the footnote definition."
   (save-excursion
     (let* ((label (progn (looking-at org-footnote-definition-re)
-			 (org-match-string-no-properties 1)))
+			 (match-string-no-properties 1)))
 	   (begin (car affiliated))
 	   (post-affiliated (point))
 	   (ending
@@ -846,7 +846,7 @@ Assume point is at the beginning of the footnote definition."
 		;; before any affiliated keyword above.
 		(forward-line -1)
 		(while (and (> (point) post-affiliated)
-			    (org-looking-at-p org-element--affiliated-re))
+			    (looking-at-p org-element--affiliated-re))
 		  (forward-line -1))
 		(line-beginning-position 2))
 	       (t (match-beginning 0)))))
@@ -889,13 +889,13 @@ obtained through property drawer and default properties from the
 parser (e.g. `:end' and :END:).  Return value is a plist."
   (save-excursion
     (forward-line)
-    (when (org-looking-at-p org-planning-line-re) (forward-line))
+    (when (looking-at-p org-planning-line-re) (forward-line))
     (when (looking-at org-property-drawer-re)
       (forward-line)
       (let ((end (match-end 0)) properties)
 	(while (< (line-end-position) end)
 	  (looking-at org-property-re)
-	  (push (org-match-string-no-properties 3) properties)
+	  (push (match-string-no-properties 3) properties)
 	  (push (intern (concat ":" (upcase (match-string 2)))) properties)
 	  (forward-line))
 	properties))))
@@ -958,7 +958,7 @@ Assume point is at beginning of the headline."
 		 (goto-char (match-end 0))))
 	   (title-start (point))
 	   (tags (when (re-search-forward
-			(org-re "[ \t]+\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")
+			"[ \t]+\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"
 			(line-end-position)
 			'move)
 		   (goto-char (match-beginning 0))
@@ -1100,7 +1100,7 @@ Assume point is at beginning of the inline task."
 				 (aref (match-string 0) 2))))
 	   (title-start (point))
 	   (tags (when (re-search-forward
-			(org-re "[ \t]+\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")
+			"[ \t]+\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"
 			(line-end-position)
 			'move)
 		   (goto-char (match-beginning 0))
@@ -1111,7 +1111,7 @@ Assume point is at beginning of the inline task."
 	   (task-end (save-excursion
 		       (end-of-line)
 		       (and (re-search-forward org-outline-regexp-bol limit t)
-			    (org-looking-at-p "END[ \t]*$")
+			    (looking-at-p "END[ \t]*$")
 			    (line-beginning-position))))
 	   (standard-props (and task-end (org-element--get-node-properties)))
 	   (time-props (and task-end (org-element--get-time-properties)))
@@ -1214,7 +1214,7 @@ Assume point is at the beginning of the item."
     (beginning-of-line)
     (looking-at org-list-full-item-re)
     (let* ((begin (point))
-	   (bullet (org-match-string-no-properties 1))
+	   (bullet (match-string-no-properties 1))
 	   (checkbox (let ((box (match-string 3)))
 		       (cond ((equal "[ ]" box) 'off)
 			     ((equal "[X]" box) 'on)
@@ -1363,7 +1363,7 @@ CONTENTS is the contents of the element."
 	    (forward-line)
 	    (let ((origin (point)))
 	      (when (re-search-forward inlinetask-re limit t)
-		(if (org-looking-at-p "END[ \t]*$") (forward-line)
+		(if (looking-at-p "END[ \t]*$") (forward-line)
 		  (goto-char origin)))))
 	   ;; At some text line.  Check if it ends any previous item.
 	   (t
@@ -1405,7 +1405,7 @@ containing `:type', `:begin', `:end', `:contents-begin' and
 Assume point is at the beginning of the list."
   (save-excursion
     (let* ((struct (or structure (org-element--list-struct limit)))
-	   (type (cond ((org-looking-at-p "[ \t]*[A-Za-z0-9]") 'ordered)
+	   (type (cond ((looking-at-p "[ \t]*[A-Za-z0-9]") 'ordered)
 		       ((nth 5 (assq (point) struct)) 'descriptive)
 		       (t 'unordered)))
 	   (contents-begin (point))
@@ -1701,7 +1701,7 @@ Return a list whose CAR is `clock' and CDR is a plist containing
 	   (duration (and (search-forward " => " (line-end-position) t)
 			  (progn (skip-chars-forward " \t")
 				 (looking-at "\\(\\S-+\\)[ \t]*$"))
-			  (org-match-string-no-properties 1)))
+			  (match-string-no-properties 1)))
 	   (status (if duration 'closed 'running))
 	   (post-blank (let ((before-blank (progn (forward-line) (point))))
 			 (skip-chars-forward " \r\t\n" limit)
@@ -1850,7 +1850,7 @@ containing `:begin', `:end', `:value', `:post-blank' and
     (let ((begin (car affiliated))
 	  (post-affiliated (point))
 	  (value (progn (looking-at "\\(%%(.*\\)[ \t]*$")
-			(org-match-string-no-properties 1)))
+			(match-string-no-properties 1)))
 	  (pos-before-blank (progn (forward-line) (point)))
 	  (end (progn (skip-chars-forward " \r\t\n" limit)
 		      (if (eobp) (point) (line-beginning-position)))))
@@ -1892,7 +1892,7 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
 	  (let* ((switches
 		  (progn
 		    (looking-at "^[ \t]*#\\+BEGIN_EXAMPLE\\(?: +\\(.*\\)\\)?")
-		    (org-match-string-no-properties 1)))
+		    (match-string-no-properties 1)))
 		 ;; Switches analysis.
 		 (number-lines
 		  (and switches
@@ -2123,7 +2123,7 @@ containing `:key', `:value', `:begin', `:end', `:post-blank' and
     (let ((begin (or (car affiliated) (point)))
 	  (post-affiliated (point))
 	  (key (progn (looking-at "[ \t]*#\\+\\(\\S-+*\\):")
-		      (upcase (org-match-string-no-properties 1))))
+		      (upcase (match-string-no-properties 1))))
 	  (value (org-trim (buffer-substring-no-properties
 			    (match-end 0) (point-at-eol))))
 	  (pos-before-blank (progn (forward-line) (point)))
@@ -2214,8 +2214,8 @@ containing `:key', `:value', `:begin', `:end', `:post-blank' and
   (looking-at org-property-re)
   (let ((case-fold-search t)
 	(begin (point))
-	(key   (org-match-string-no-properties 2))
-	(value (org-match-string-no-properties 3))
+	(key   (match-string-no-properties 2))
+	(value (match-string-no-properties 3))
 	(end (save-excursion
 	       (end-of-line)
 	       (if (re-search-forward org-property-re limit t)
@@ -2403,11 +2403,11 @@ Assume point is at the beginning of the block."
 \\(?: +\\(\\S-+\\)\\)?\
 \\(\\(?: +\\(?:-\\(?:l \".+\"\\|[ikr]\\)\\|[-+]n\\(?: *[0-9]+\\)?\\)\\)+\\)?\
 \\(.*\\)[ \t]*$")
-		    (org-match-string-no-properties 1)))
+		    (match-string-no-properties 1)))
 		 ;; Get switches.
-		 (switches (org-match-string-no-properties 2))
+		 (switches (match-string-no-properties 2))
 		 ;; Get parameters.
-		 (parameters (org-match-string-no-properties 3))
+		 (parameters (match-string-no-properties 3))
 		 ;; Switches analysis.
 		 (number-lines
 		  (and switches
@@ -2522,7 +2522,7 @@ Assume point is at the beginning of the table."
 	      (point)))
 	   (tblfm (let (acc)
 		    (while (looking-at "[ \t]*#\\+TBLFM: +\\(.*\\)[ \t]*$")
-		      (push (org-match-string-no-properties 1) acc)
+		      (push (match-string-no-properties 1) acc)
 		      (forward-line))
 		    acc))
 	   (pos-before-blank (point))
@@ -2704,7 +2704,7 @@ Assume point is at the first tilde marker."
     (unless (bolp) (backward-char 1))
     (when (looking-at org-emph-re)
       (let ((begin (match-beginning 2))
-	    (value (org-match-string-no-properties 4))
+	    (value (match-string-no-properties 4))
 	    (post-blank (progn (goto-char (match-end 2))
 			       (skip-chars-forward " \t")))
 	    (end (point)))
@@ -2780,7 +2780,7 @@ Assume point is at the beginning of the snippet."
 					(re-search-forward "@@" nil t)
 					(match-beginning 0))))
 	(let* ((begin (match-beginning 0))
-	       (back-end (org-match-string-no-properties 1))
+	       (back-end (match-string-no-properties 1))
 	       (value (buffer-substring-no-properties
 		       (match-end 0) contents-end))
 	       (post-blank (skip-chars-forward " \t"))
@@ -3039,7 +3039,7 @@ and cdr a plist with `:begin', `:end' and `:post-blank' keywords.
 Otherwise, return nil.
 
 Assume point is at the beginning of the line break."
-  (when (and (org-looking-at-p "\\\\\\\\[ \t]*$")
+  (when (and (looking-at-p "\\\\\\\\[ \t]*$")
 	     (not (eq (char-before) ?\\)))
     (list 'line-break
 	  (list :begin (point)
@@ -3074,7 +3074,7 @@ Assume point is at the beginning of the link."
 			     (looking-at org-target-link-regexp)))
 	(setq type "radio"
 	      link-end (match-end 1)
-	      path (org-match-string-no-properties 1)
+	      path (match-string-no-properties 1)
 	      contents-begin (match-beginning 1)
 	      contents-end (match-end 1)))
        ;; Type 2: Standard link, i.e. [[http://orgmode.org][homepage]]
@@ -3096,7 +3096,7 @@ Assume point is at the beginning of the link."
 	(setq raw-link (org-link-expand-abbrev
 			(replace-regexp-in-string
 			 "[ \t]*\n[ \t]*" " "
-			 (org-match-string-no-properties 1))))
+			 (match-string-no-properties 1))))
 	;; Determine TYPE of link and set PATH accordingly.  According
 	;; to RFC 3986, remove whitespaces from URI in external links.
 	;; In internal ones, treat indentation as a single space.
@@ -3130,21 +3130,21 @@ Assume point is at the beginning of the link."
 	  (setq path raw-link))))
        ;; Type 3: Plain link, e.g., http://orgmode.org
        ((looking-at org-plain-link-re)
-	(setq raw-link (org-match-string-no-properties 0)
-	      type (org-match-string-no-properties 1)
+	(setq raw-link (match-string-no-properties 0)
+	      type (match-string-no-properties 1)
 	      link-end (match-end 0)
-	      path (org-match-string-no-properties 2)))
+	      path (match-string-no-properties 2)))
        ;; Type 4: Angular link, e.g., <http://orgmode.org>.  Unlike to
        ;; bracket links, follow RFC 3986 and remove any extra
        ;; whitespace in URI.
        ((looking-at org-angle-link-re)
-	(setq type (org-match-string-no-properties 1))
+	(setq type (match-string-no-properties 1))
 	(setq link-end (match-end 0))
 	(setq raw-link
 	      (buffer-substring-no-properties
 	       (match-beginning 1) (match-end 2)))
 	(setq path (replace-regexp-in-string
-		    "[ \t]*\n[ \t]*" "" (org-match-string-no-properties 2))))
+		    "[ \t]*\n[ \t]*" "" (match-string-no-properties 2))))
        (t (throw 'no-object nil)))
       ;; In any case, deduce end point after trailing white space from
       ;; LINK-END variable.
@@ -3211,12 +3211,12 @@ Assume point is at the macro."
   (save-excursion
     (when (looking-at "{{{\\([a-zA-Z][-a-zA-Z0-9_]*\\)\\(([ \t\n]*\\([^\000]*?\\))\\)?}}}")
       (let ((begin (point))
-	    (key (downcase (org-match-string-no-properties 1)))
-	    (value (org-match-string-no-properties 0))
+	    (key (downcase (match-string-no-properties 1)))
+	    (value (match-string-no-properties 0))
 	    (post-blank (progn (goto-char (match-end 0))
 			       (skip-chars-forward " \t")))
 	    (end (point))
-	    (args (let ((args (org-match-string-no-properties 3)))
+	    (args (let ((args (match-string-no-properties 3)))
 		    (and args (org-macro-extract-arguments args)))))
 	(list 'macro
 	      (list :key key
@@ -3247,7 +3247,7 @@ Assume point is at the radio target."
       (let ((begin (point))
 	    (contents-begin (match-beginning 1))
 	    (contents-end (match-end 1))
-	    (value (org-match-string-no-properties 1))
+	    (value (match-string-no-properties 1))
 	    (post-blank (progn (goto-char (match-end 0))
 			       (skip-chars-forward " \t")))
 	    (end (point)))
@@ -3441,7 +3441,7 @@ Assume point is at the target."
   (save-excursion
     (when (looking-at org-target-regexp)
       (let ((begin (point))
-	    (value (org-match-string-no-properties 1))
+	    (value (match-string-no-properties 1))
 	    (post-blank (progn (goto-char (match-end 0))
 			       (skip-chars-forward " \t")))
 	    (end (point)))
@@ -3479,7 +3479,7 @@ cdr a plist with `:type', `:raw-value', `:year-start',
 Otherwise, return nil.
 
 Assume point is at the beginning of the timestamp."
-  (when (org-looking-at-p org-element--timestamp-regexp)
+  (when (looking-at-p org-element--timestamp-regexp)
     (save-excursion
       (let* ((begin (point))
 	     (activep (eq (char-after) ?<))
@@ -3709,7 +3709,7 @@ Assume point is at the first equal sign marker."
     (unless (bolp) (backward-char 1))
     (when (looking-at org-emph-re)
       (let ((begin (match-beginning 2))
-	    (value (org-match-string-no-properties 4))
+	    (value (match-string-no-properties 4))
 	    (post-blank (progn (goto-char (match-end 2))
 			       (skip-chars-forward " \t")))
 	    (end (point)))
@@ -3915,7 +3915,7 @@ position of point and CDR is nil."
 	       (dualp (member kwd org-element-dual-keywords))
 	       (dual-value
 		(and dualp
-		     (let ((sec (org-match-string-no-properties 2)))
+		     (let ((sec (match-string-no-properties 2)))
 		       (if (or (not sec) (not parsedp)) sec
 			 (save-match-data
 			   (org-element--parse-objects
@@ -6025,7 +6025,7 @@ end of ELEM-A."
       (goto-char beg-B)
       (when specialp
 	(setq body-B (replace-regexp-in-string "\\`[ \t]*" "" body-B))
-	(org-indent-to-column ind-B))
+	(indent-to-column ind-B))
       (insert body-A)
       ;; Restore ex ELEM-A overlays.
       (let ((offset (- beg-B beg-A)))

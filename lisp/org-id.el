@@ -495,7 +495,7 @@ When CHECK is given, prepare detailed information about duplicate IDs."
 		(goto-char (point-min))
 		(while (re-search-forward "^[ \t]*:ID:[ \t]+\\(\\S-+\\)[ \t]*$"
 					  nil t)
-		  (setq id (org-match-string-no-properties 1))
+		  (setq id (match-string-no-properties 1))
 		  (if (member id found)
 		      (progn
 			(message "Duplicate ID \"%s\", also in file %s"

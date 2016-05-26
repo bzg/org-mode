@@ -972,7 +972,7 @@
   (should
    (org-test-with-temp-text "| <point>a |\n| b |"
      (org-return)
-     (org-looking-at-p "b")))
+     (looking-at-p "b")))
   ;; Open link or timestamp under point when `org-return-follows-link'
   ;; is non-nil.
   (should
@@ -980,27 +980,27 @@
      (let ((org-return-follows-link t)
 	   (org-link-search-must-match-exact-headline nil))
        (org-return))
-     (org-looking-at-p "<<target>>")))
+     (looking-at-p "<<target>>")))
   (should-not
    (org-test-with-temp-text "Link [[target<point>]] <<target>>"
      (let ((org-return-follows-link nil)) (org-return))
-     (org-looking-at-p "<<target>>")))
+     (looking-at-p "<<target>>")))
   (should
    (org-test-with-temp-text "* [[b][a<point>]]\n* b"
      (let ((org-return-follows-link t)) (org-return))
-     (org-looking-at-p "* b")))
+     (looking-at-p "* b")))
   (should
    (org-test-with-temp-text "Link [[target][/descipt<point>ion/]] <<target>>"
      (let ((org-return-follows-link t)
 	   (org-link-search-must-match-exact-headline nil))
        (org-return))
-     (org-looking-at-p "<<target>>")))
+     (looking-at-p "<<target>>")))
   (should-not
    (org-test-with-temp-text "Link [[target]]<point> <<target>>"
      (let ((org-return-follows-link t)
 	   (org-link-search-must-match-exact-headline nil))
        (org-return))
-     (org-looking-at-p "<<target>>")))
+     (looking-at-p "<<target>>")))
   ;; When `org-return-follows-link' is non-nil, tolerate links and
   ;; timestamps in comments, node properties, etc.
   (should
@@ -1008,22 +1008,22 @@
      (let ((org-return-follows-link t)
 	   (org-link-search-must-match-exact-headline nil))
        (org-return))
-     (org-looking-at-p "<<target>>")))
+     (looking-at-p "<<target>>")))
   (should-not
    (org-test-with-temp-text "# Comment [[target<point>]]\n <<target>>"
      (let ((org-return-follows-link nil)) (org-return))
-     (org-looking-at-p "<<target>>")))
+     (looking-at-p "<<target>>")))
   (should-not
    (org-test-with-temp-text "# Comment [[target]]<point>\n <<target>>"
      (let ((org-return-follows-link t)
 	   (org-link-search-must-match-exact-headline nil))
        (org-return))
-     (org-looking-at-p "<<target>>")))
+     (looking-at-p "<<target>>")))
   ;; However, do not open link when point is in a table.
   (should
    (org-test-with-temp-text "| [[target<point>]] |\n| between |\n| <<target>> |"
      (let ((org-return-follows-link t)) (org-return))
-     (org-looking-at-p "between")))
+     (looking-at-p "between")))
   ;; Special case: in a list, when indenting, do not break structure.
   (should
    (equal "- A\n  B"
@@ -1886,13 +1886,13 @@ SCHEDULED: <2014-03-04 tue.>"
    (org-test-with-temp-text
        "* H1\n:PROPERTIES:\n:CUSTOM_ID: custom\n:END:\n* H2\n[[#custom<point>]]"
      (org-open-at-point)
-     (org-looking-at-p "\\* H1")))
+     (looking-at-p "\\* H1")))
   ;; Throw an error on false positives.
   (should-error
    (org-test-with-temp-text
        "* H1\n:DRAWER:\n:CUSTOM_ID: custom\n:END:\n* H2\n[[#custom<point>]]"
      (org-open-at-point)
-     (org-looking-at-p "\\* H1"))))
+     (looking-at-p "\\* H1"))))
 
 ;;;; Fuzzy Links
 
@@ -2882,7 +2882,7 @@ Outside."
   (should
    (org-test-with-temp-text "#+key1: v\n#+key<point>2: v\n#+key3: v"
      (org-drag-element-backward)
-     (org-looking-at-p "2")))
+     (looking-at-p "2")))
   ;; Error when trying to move first element of buffer.
   (should-error
    (org-test-with-temp-text "Paragraph 1.\n\nParagraph 2."
@@ -3064,7 +3064,7 @@ Text.
 	   (org-odd-levels-only nil))
        (org-demote))
      (org-move-to-column 10)
-     (org-looking-at-p ":tag:$")))
+     (looking-at-p ":tag:$")))
   (should-not
    (org-test-with-temp-text "* H  :tag:"
      (let ((org-tags-column 10)
@@ -3072,7 +3072,7 @@ Text.
 	   (org-odd-levels-only nil))
        (org-demote))
      (org-move-to-column 10)
-     (org-looking-at-p ":tag:$")))
+     (looking-at-p ":tag:$")))
   ;; When `org-adapt-indentation' is non-nil, always indent planning
   ;; info and property drawers accordingly.
   (should
@@ -3222,7 +3222,7 @@ Text.
 	   (org-odd-levels-only nil))
        (org-promote))
      (org-move-to-column 10)
-     (org-looking-at-p ":tag:$")))
+     (looking-at-p ":tag:$")))
   (should-not
    (org-test-with-temp-text "** H :tag:"
      (let ((org-tags-column 10)
@@ -3230,7 +3230,7 @@ Text.
 	   (org-odd-levels-only nil))
        (org-promote))
      (org-move-to-column 10)
-     (org-looking-at-p ":tag:$")))
+     (looking-at-p ":tag:$")))
   ;; When `org-adapt-indentation' is non-nil, always indent planning
   ;; info and property drawers.
   (should
@@ -3844,12 +3844,12 @@ Paragraph<point>"
   ;; Get "FILE" property.
   (should
    (org-test-with-temp-text-in-file "* H\nParagraph"
-     (org-file-equal-p (cdr (assoc "FILE" (org-entry-properties nil "FILE")))
-		       (buffer-file-name))))
+     (file-equal-p (cdr (assoc "FILE" (org-entry-properties nil "FILE")))
+		   (buffer-file-name))))
   (should
    (org-test-with-temp-text-in-file "* H\nParagraph"
-     (org-file-equal-p (cdr (assoc "FILE" (org-entry-properties)))
-		       (buffer-file-name))))
+     (file-equal-p (cdr (assoc "FILE" (org-entry-properties)))
+		   (buffer-file-name))))
   (should-not
    (org-test-with-temp-text "* H\nParagraph"
      (cdr (assoc "FILE" (org-entry-properties nil "FILE")))))

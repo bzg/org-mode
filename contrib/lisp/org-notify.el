@@ -130,7 +130,7 @@ simple timestamp string."
         (pr :file (nth org-notify-parse-file (org-agenda-files 'unrestricted)))
         (pr :timestamp deadline)  (pr :uid (md5 (concat heading deadline)))
         (pr :deadline (- (org-time-string-to-seconds deadline)
-                         (org-float-time))))
+                         (float-time))))
       result)))
 
 (defun org-notify-todo-list ()
@@ -165,7 +165,7 @@ forgotten tasks."
         (dolist (prms (plist-get org-notify-map (td :notify)))
           (when (< deadline (org-notify-string->seconds (prm :time)))
             (let ((period (org-notify-string->seconds (prm :period)))
-                  (last-run (prm last-run-sym))  (now (org-float-time))
+                  (last-run (prm last-run-sym))  (now (float-time))
                   (actions (prm :actions))       diff  plist)
               (when (or (not last-run)
                         (and period (< period (setq diff (- now last-run)))

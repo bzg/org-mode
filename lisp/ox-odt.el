@@ -2047,7 +2047,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 ;;;; Latex Fragment
 
 ;; (when latex-frag			; FIXME
-;; 	(setq href (org-propertize href :title "LaTeX Fragment"
+;; 	(setq href (propertize href :title "LaTeX Fragment"
 ;; 				   :description latex-frag)))
 ;; handle verbatim
 ;; provide descriptions

@@ -73,8 +73,6 @@
 (declare-function org-uniquify "org" (list))
 (declare-function org-current-level "org" ())
 (declare-function org-table-import "org-table" (file arg))
-(declare-function org-add-hook "org-compat"
-		  (hook function &optional append local))
 (declare-function org-table-align "org-table" ())
 (declare-function org-table-end "org-table" (&optional table-type))
 (declare-function orgtbl-to-generic "org-table" (table params))
@@ -1407,8 +1405,8 @@ portions of results lines."
 (add-hook 'org-tab-first-hook 'org-babel-hide-result-toggle-maybe)
 ;; Remove overlays when changing major mode
 (add-hook 'org-mode-hook
-	  (lambda () (org-add-hook 'change-major-mode-hook
-				   'org-babel-show-result-all 'append 'local)))
+	  (lambda () (add-hook 'change-major-mode-hook
+			  'org-babel-show-result-all 'append 'local)))
 
 (defvar org-file-properties)
 (defun org-babel-params-from-properties (&optional lang)
@@ -1730,7 +1728,7 @@ to `org-babel-named-src-block-regexp'."
     (let ((re (org-babel-named-src-block-regexp-for-name))
 	  names)
       (while (ignore-errors (org-next-block 1 nil re))
-	(push (org-match-string-no-properties 9) names))
+	(push (match-string-no-properties 9) names))
       names)))
 
 ;;;###autoload

@@ -185,7 +185,7 @@ This list represents a \"habit\" for the rest of this module."
 	 habit-entry))
       (setq sr-days (org-habit-duration-to-days scheduled-repeat)
 	    sr-type (progn (string-match "[\\.+]?\\+" scheduled-repeat)
-			   (org-match-string-no-properties 0 scheduled-repeat)))
+			   (match-string-no-properties 0 scheduled-repeat)))
       (unless (> sr-days 0)
 	(error "Habit %s scheduled repeat period is less than 1d" habit-entry))
       (when (string-match "/\\([0-9]+[dwmy]\\)" scheduled-repeat)
@@ -222,8 +222,8 @@ This list represents a \"habit\" for the rest of this module."
 	(while (and (< count maxdays) (funcall search re limit t))
 	  (push (time-to-days
 		 (org-time-string-to-time
-		  (or (org-match-string-no-properties 1)
-		      (org-match-string-no-properties 2))))
+		  (or (match-string-no-properties 1)
+		      (match-string-no-properties 2))))
 		closed-dates)
 	  (setq count (1+ count))))
       (list scheduled sr-days deadline dr-days closed-dates sr-type))))

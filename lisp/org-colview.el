@@ -263,7 +263,7 @@ initialized."
 			     org-agenda-columns-add-appointments-to-effort-sum
 			     (string= p (upcase org-effort-property))
 			     (get-text-property (point) 'duration)
-			     (org-propertize
+			     (propertize
 			      (org-minutes-to-clocksum-string
 			       (get-text-property (point) 'duration))
 			      'face 'org-warning))
@@ -438,7 +438,7 @@ for the duration of the command.")
 	   (org-add-props " " nil 'display '(space :align-to 0))
 	   (org-add-props (substring title 0 -1) nil 'face 'org-column-title)))
     (setq org-columns-previous-hscroll -1)
-    (org-add-hook 'post-command-hook 'org-columns-hscoll-title nil 'local)))
+    (add-hook 'post-command-hook 'org-columns-hscoll-title nil 'local)))
 
 (defun org-columns-hscoll-title ()
   "Set the `header-line-format' so that it scrolls along with the table."

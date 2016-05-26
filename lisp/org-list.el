@@ -1330,7 +1330,7 @@ This function modifies STRUCT."
 	   (size-offset (- item-size (length text-cut))))
       ;; 4. Insert effectively item into buffer.
       (goto-char item)
-      (org-indent-to-column ind)
+      (indent-to-column ind)
       (insert body item-sep)
       ;; 5. Add new item to STRUCT.
       (mapc (lambda (e)
@@ -1889,8 +1889,8 @@ Initial position of cursor is restored after the changes."
 		((and inlinetask-re (looking-at inlinetask-re))
 		 (org-inlinetask-goto-beginning))
 		;; Shift only non-empty lines.
-		((org-looking-at-p "^[ \t]*\\S-")
-		 (org-indent-line-to (+ (org-get-indentation) delta))))
+		((looking-at-p "^[ \t]*\\S-")
+		 (indent-line-to (+ (org-get-indentation) delta))))
 	       (forward-line -1)))))
          (modify-item
           (function
@@ -1973,7 +1973,7 @@ Initial position of cursor is restored after the changes."
 		      (while (< (point) down)
 			;; Ignore empty lines.  Also ignore blocks and
 			;; drawers contents.
-			(unless (org-looking-at-p "[ \t]*$")
+			(unless (looking-at-p "[ \t]*$")
 			  (setq min-ind (min (org-get-indentation) min-ind))
 			  (cond
 			   ((and (looking-at "#\\+BEGIN\\(:\\|_\\S-+\\)")
@@ -2808,7 +2808,7 @@ Return t at each successful move."
 	     ((and (= ind (car org-tab-ind-state))
 		   (ignore-errors (org-list-indent-item-generic 1 t struct))))
 	     (t (delete-region (point-at-bol) (point-at-eol))
-		(org-indent-to-column (car org-tab-ind-state))
+		(indent-to-column (car org-tab-ind-state))
 		(insert (cdr org-tab-ind-state) " ")
 		;; Break cycle
 		(setq this-command 'identity)))
@@ -2911,7 +2911,7 @@ ignores hidden links."
 			  (save-excursion (re-search-forward org-ts-regexp-both
 							     (point-at-eol) t)))
 		      (org-time-string-to-seconds (match-string 0)))
-		     (t (org-float-time now))))
+		     (t (float-time now))))
 		   ((= dcst ?x) (or (and (stringp (match-string 1))
 					 (match-string 1))
 				    ""))

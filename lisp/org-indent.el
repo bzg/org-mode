@@ -139,13 +139,13 @@ during idle time."
       (setq-local org-hide-leading-stars-before-indent-mode
 		  org-hide-leading-stars)
       (setq-local org-hide-leading-stars t))
-    (org-add-hook 'filter-buffer-substring-functions
+    (add-hook 'filter-buffer-substring-functions
 		  (lambda (fun start end delete)
 		    (org-indent-remove-properties-from-string
 		     (funcall fun start end delete)))
 		  nil t)
-    (org-add-hook 'after-change-functions 'org-indent-refresh-maybe nil 'local)
-    (org-add-hook 'before-change-functions
+    (add-hook 'after-change-functions 'org-indent-refresh-maybe nil 'local)
+    (add-hook 'before-change-functions
 		  'org-indent-notify-modified-headline nil 'local)
     (and font-lock-mode (org-restart-font-lock))
     (org-indent-remove-properties (point-min) (point-max))
@@ -314,7 +314,7 @@ stopped."
 	   ;; Headline or inline task.
 	   ((looking-at org-outline-regexp)
 	    (let* ((nstars (- (match-end 0) (match-beginning 0) 1))
-		   (type (or (org-looking-at-p limited-re) 'inlinetask)))
+		   (type (or (looking-at-p limited-re) 'inlinetask)))
 	      (org-indent-set-line-properties nstars 0 type)
 	      ;; At an headline, define new value for LEVEL.
 	      (unless (eq type 'inlinetask) (setq level nstars))))

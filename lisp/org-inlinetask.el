@@ -167,9 +167,9 @@ The number of levels is controlled by `org-inlinetask-min-level'."
 	   (stars-re (org-inlinetask-outline-regexp))
 	   (task-beg-re (concat stars-re "\\(?:.*\\)"))
 	   (task-end-re (concat stars-re "END[ \t]*$")))
-      (or (org-looking-at-p task-beg-re)
+      (or (looking-at-p task-beg-re)
 	  (and (re-search-forward "^\\*+[ \t]+" nil t)
-	       (progn (beginning-of-line) (org-looking-at-p task-end-re)))))))
+	       (progn (beginning-of-line) (looking-at-p task-end-re)))))))
 
 (defun org-inlinetask-goto-beginning ()
   "Go to the beginning of the inline task at point."
@@ -177,7 +177,7 @@ The number of levels is controlled by `org-inlinetask-min-level'."
   (let ((case-fold-search t)
 	(inlinetask-re (org-inlinetask-outline-regexp)))
     (re-search-backward inlinetask-re nil t)
-    (when (org-looking-at-p (concat inlinetask-re "END[ \t]*$"))
+    (when (looking-at-p (concat inlinetask-re "END[ \t]*$"))
       (re-search-backward inlinetask-re nil t))))
 
 (defun org-inlinetask-goto-end ()

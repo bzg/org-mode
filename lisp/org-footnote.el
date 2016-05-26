@@ -244,7 +244,7 @@ otherwise."
 		    (concat org-outline-regexp-bol
 			    "\\|^\\([ \t]*\n\\)\\{2,\\}") nil t))))
 	(when (re-search-backward org-footnote-definition-re lim t)
-	  (let ((label (org-match-string-no-properties 1))
+	  (let ((label (match-string-no-properties 1))
 		(beg (match-beginning 0))
 		(beg-def (match-end 0))
 		(end (if (progn

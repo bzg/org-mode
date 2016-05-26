@@ -140,10 +140,10 @@ the region 0:00:00."
 	  (setq delta (org-timer-hms-to-secs (org-timer-fix-incomplete s)))))
 	(setq org-timer-start-time
 	      (seconds-to-time
-	       ;; Pass `current-time' result to `org-float-time'
-	       ;; (instead of calling without arguments) so that only
+	       ;; Pass `current-time' result to `float-time' (instead
+	       ;; of calling without arguments) so that only
 	       ;; `current-time' has to be overriden in tests.
-	       (- (org-float-time (current-time)) delta))))
+	       (- (float-time (current-time)) delta))))
       (setq org-timer-pause-time nil)
       (org-timer-set-mode-line 'on)
       (message "Timer start time set to %s, current value is %s"
@@ -159,8 +159,8 @@ With prefix arg STOP, stop it entirely."
    (stop (org-timer-stop))
    ((not org-timer-start-time) (error "No timer is running"))
    (org-timer-pause-time
-    (let ((start-secs (org-float-time org-timer-start-time))
-	  (pause-secs (org-float-time org-timer-pause-time)))
+    (let ((start-secs (float-time org-timer-start-time))
+	  (pause-secs (float-time org-timer-pause-time)))
       (if org-timer-countdown-timer
 	  (let ((new-secs (- start-secs pause-secs)))
 	    (setq org-timer-countdown-timer
@@ -169,10 +169,10 @@ With prefix arg STOP, stop it entirely."
 	    (setq org-timer-start-time
 		  (time-add (current-time) (seconds-to-time new-secs))))
 	(setq org-timer-start-time
-	      ;; Pass `current-time' result to `org-float-time'
-	      ;; (instead of calling without arguments) so that only
+	      ;; Pass `current-time' result to `float-time' (instead
+	      ;; of calling without arguments) so that only
 	      ;; `current-time' has to be overriden in tests.
-	      (seconds-to-time (- (org-float-time (current-time))
+	      (seconds-to-time (- (float-time (current-time))
 				  (- pause-secs start-secs)))))
       (setq org-timer-pause-time nil)
       (org-timer-set-mode-line 'on)
@@ -229,14 +229,14 @@ it in the buffer."
 	   (abs (floor (org-timer-seconds))))))
 
 (defun org-timer-seconds ()
-  ;; Pass `current-time' result to `org-float-time' (instead of
-  ;; calling without arguments) so that only `current-time' has to be
+  ;; Pass `current-time' result to `float-time' (instead of calling
+  ;; without arguments) so that only `current-time' has to be
   ;; overriden in tests.
   (if org-timer-countdown-timer
-      (- (org-float-time org-timer-start-time)
-	 (org-float-time (or org-timer-pause-time (current-time))))
-    (- (org-float-time (or org-timer-pause-time (current-time)))
-       (org-float-time org-timer-start-time))))
+      (- (float-time org-timer-start-time)
+	 (float-time (or org-timer-pause-time (current-time))))
+    (- (float-time (or org-timer-pause-time (current-time)))
+       (float-time org-timer-start-time))))
 
 ;;;###autoload
 (defun org-timer-change-times-in-region (beg end delta)

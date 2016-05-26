@@ -59,7 +59,7 @@
   "Examine the thing at point and let the caller know what it is.
 The return value is a string naming the thing at point."
   (let ((beg1 (save-excursion
-		(skip-chars-backward (org-re "[:alnum:]-_@"))
+		(skip-chars-backward "[:alnum:]-_@")
 		(point)))
 	(beg (save-excursion
 	       (skip-chars-backward "a-zA-Z0-9-_:$")
@@ -95,10 +95,10 @@ The return value is a string naming the thing at point."
 	     (skip-chars-backward "[ \t\n]")
 	     ;; org-drawer-regexp matches a whole line but while
 	     ;; looking-back, we just ignore trailing whitespaces
-	     (or (org-looking-back (substring org-drawer-regexp 0 -1)
-				   (line-beginning-position))
-		 (org-looking-back org-property-re
-				   (line-beginning-position)))))
+	     (or (looking-back (substring org-drawer-regexp 0 -1)
+			       (line-beginning-position))
+		 (looking-back org-property-re
+			       (line-beginning-position)))))
       (cons "prop" nil))
      ((and (equal (char-before beg1) ?:)
 	   (not (equal (char-after (point-at-bol)) ?*)))

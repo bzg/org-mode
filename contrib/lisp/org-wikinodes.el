@@ -203,7 +203,7 @@ setting of `org-wikinodes-create-targets'."
 	(widen)
 	(goto-char (point-min))
 	(while (re-search-forward re nil t)
-	  (push (org-match-string-no-properties 4) targets))))
+	  (push (match-string-no-properties 4) targets))))
     (nreverse targets)))
 
 (defun org-wikinodes-get-links-for-directory (dir)

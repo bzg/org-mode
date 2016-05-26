@@ -672,7 +672,7 @@ extension of the given file name, and finally on the variable
     (when (file-directory-p file)
       (user-error "This is a directory path, not a file"))
     (when (and (buffer-file-name (buffer-base-buffer))
-	       (org-file-equal-p
+	       (file-equal-p
 		(file-truename file)
 		(file-truename (buffer-file-name (buffer-base-buffer)))))
       (user-error "Please specify a file name that is different from current"))
@@ -1721,7 +1721,7 @@ numeric compare based on the type of the first key in the table."
 		((?t ?T)
 		 (lambda (f)
 		   (cond ((string-match org-ts-regexp-both f)
-			  (org-float-time
+			  (float-time
 			   (org-time-string-to-time (match-string 0 f))))
 			 ((string-match "[0-9]\\{1,2\\}:[0-9]\\{2\\}" f)
 			  (org-hh:mm-string-to-minutes f))
@@ -2064,8 +2064,8 @@ current field.  The mode exits automatically when the cursor leaves the
 table (but see `org-table-exit-follow-field-mode-when-leaving-table')."
   nil " TblFollow" nil
   (if org-table-follow-field-mode
-      (org-add-hook 'post-command-hook 'org-table-follow-fields-with-editor
-		    'append 'local)
+      (add-hook 'post-command-hook 'org-table-follow-fields-with-editor
+		'append 'local)
     (remove-hook 'post-command-hook 'org-table-follow-fields-with-editor 'local)
     (let* ((buf (get-buffer "*Org Table Edit Field*"))
 	   (win (and buf (get-buffer-window buf))))
@@ -2303,7 +2303,7 @@ LOCATION is a buffer position, consider the formulas there."
       (goto-char (org-table-end)))
     (let ((case-fold-search t))
       (when (looking-at "\\([ \t]*\n\\)*[ \t]*#\\+TBLFM: *\\(.*\\)")
-	(let ((strings (org-split-string (org-match-string-no-properties 2)
+	(let ((strings (org-split-string (match-string-no-properties 2)
 					 " *:: *"))
 	      eq-alist seen)
 	  (dolist (string strings (nreverse eq-alist))
@@ -3471,7 +3471,7 @@ borders of the table using the @< @> $< $> makers."
 	  (when value
 	    (setq new (replace-match
 		       (concat (and pp "(") value (and pp ")")) t t new))))))
-    (if org-table-formula-debug (org-propertize new :orig-formula f)) new))
+    (if org-table-formula-debug (propertize new :orig-formula f) new)))
 
 (defun org-table-get-constant (const)
   "Find the value for a parameter or constant in a formula.
@@ -3573,7 +3573,7 @@ Parameters get priority."
       (setq-local org-window-configuration wc)
       (setq-local org-selected-window sel-win)
       (use-local-map org-table-fedit-map)
-      (org-add-hook 'post-command-hook #'org-table-fedit-post-command t t)
+      (add-hook 'post-command-hook #'org-table-fedit-post-command t t)
       (easy-menu-add org-table-fedit-menu)
       (setq startline (org-current-line))
       (dolist (entry eql)
@@ -3960,8 +3960,8 @@ When LOCAL is non-nil, show references for the table at point."
       (when (and  match (not (equal (match-beginning 0) (point-at-bol))))
 	(org-table-add-rectangle-overlay (match-beginning 0) (match-end 0)
 					 'secondary-selection))
-      (org-add-hook 'before-change-functions
-		    #'org-table-remove-rectangle-highlight)
+      (add-hook 'before-change-functions
+		#'org-table-remove-rectangle-highlight)
       (when (eq what 'name) (setq var (substring match 1)))
       (when (eq what 'range)
 	(unless (eq (string-to-char match) ?@) (setq match (concat "@" match)))
@@ -4273,15 +4273,15 @@ FACE, when non-nil, for the highlight."
       (and c (setq minor-mode-map-alist
                    (cons c (delq c minor-mode-map-alist)))))
     (setq-local org-table-may-need-update t)
-    (org-add-hook 'before-change-functions 'org-before-change-function
-                  nil 'local)
+    (add-hook 'before-change-functions 'org-before-change-function
+	      nil 'local)
     (setq-local org-old-auto-fill-inhibit-regexp
-                   auto-fill-inhibit-regexp)
+		auto-fill-inhibit-regexp)
     (setq-local auto-fill-inhibit-regexp
-                   (if auto-fill-inhibit-regexp
-                       (concat orgtbl-line-start-regexp "\\|"
-                               auto-fill-inhibit-regexp)
-                     orgtbl-line-start-regexp))
+		(if auto-fill-inhibit-regexp
+		    (concat orgtbl-line-start-regexp "\\|"
+			    auto-fill-inhibit-regexp)
+		  orgtbl-line-start-regexp))
     (add-to-invisibility-spec '(org-cwidth))
     (when (fboundp 'font-lock-add-keywords)
       (font-lock-add-keywords nil orgtbl-extra-font-lock-keywords)

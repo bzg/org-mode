@@ -376,7 +376,7 @@ Assume point is in the corresponding edit buffer."
 	(let ((ind (make-string indentation ?\s)))
 	  (goto-char (point-min))
 	  (while (not (eobp))
-	    (when (org-looking-at-p "[ \t]*\\S-") (insert ind))
+	    (when (looking-at-p "[ \t]*\\S-") (insert ind))
 	    (forward-line))))
       (buffer-string))))
 
@@ -607,7 +607,7 @@ See also `org-src-mode-hook'."
 
 (defun org-src-mode-configure-edit-buffer ()
   (when (org-bound-and-true-p org-src--from-org-mode)
-    (org-add-hook 'kill-buffer-hook #'org-src--remove-overlay nil 'local)
+    (add-hook 'kill-buffer-hook #'org-src--remove-overlay nil 'local)
     (if (org-bound-and-true-p org-src--allow-write-back)
 	(progn
 	  (setq buffer-offer-save t)
@@ -616,7 +616,7 @@ See also `org-src-mode-hook'."
 			"[" (buffer-name) "]")))
       (setq buffer-read-only t))))
 
-(org-add-hook 'org-src-mode-hook #'org-src-mode-configure-edit-buffer)
+(add-hook 'org-src-mode-hook #'org-src-mode-configure-edit-buffer)
 
 
 
@@ -636,7 +636,7 @@ See also `org-src-mode-hook'."
   (when org-src--babel-info
     (org-src-associate-babel-session org-src--babel-info)))
 
-(org-add-hook 'org-src-mode-hook #'org-src-babel-configure-edit-buffer)
+(add-hook 'org-src-mode-hook #'org-src-babel-configure-edit-buffer)
 
 (defmacro org-src-do-at-code-block (&rest body)
   "Execute a command from an edit buffer in the Org mode buffer."

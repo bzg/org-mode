@@ -43,7 +43,7 @@
   blah(message hello)
 #+end_src
 "))
-      (should (org-looking-at-p "(message hello)")))))
+      (should (looking-at-p "(message hello)")))))
 
 (ert-deftest test-org-src/point-outside-block ()
   "Editing with point before/after block signals expected error."

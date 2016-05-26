@@ -171,7 +171,7 @@ archive file is."
 	       (if (eq (match-string 1) ":") (org-at-property-p)
 		 (eq (org-element-type (org-element-at-point)) 'keyword)))
 	 (let ((file (org-extract-archive-file
-		      (org-match-string-no-properties 2))))
+		      (match-string-no-properties 2))))
 	   (when (and (org-string-nw-p file) (file-exists-p file))
 	     (push file files))))))
     (setq files (nreverse files))
@@ -318,7 +318,7 @@ this heading."
 		  (progn
 		    (if (re-search-forward
 			 (concat "^" (regexp-quote heading)
-				 (org-re "[ \t]*\\(:[[:alnum:]_@#%:]+:\\)?[ \t]*\\($\\|\r\\)"))
+				 "[ \t]*\\(:[[:alnum:]_@#%:]+:\\)?[ \t]*\\($\\|\r\\)")
 			 nil t)
 			(goto-char (match-end 0))
 		      ;; Heading not found, just insert it at the end

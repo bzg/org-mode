@@ -1405,7 +1405,7 @@ for export.  Return options as a plist."
 		 (cons "TITLE"
 		       (or (org-entry-get (point) "EXPORT_TITLE" 'selective)
 			   (progn (looking-at org-complex-heading-regexp)
-				  (org-match-string-no-properties 4))))))
+				  (match-string-no-properties 4))))))
 	 ;; Look for both general keywords and back-end specific
 	 ;; options, with priority given to the latter.
 	 (options (append (and backend (org-export-get-all-options backend))
@@ -2675,7 +2675,7 @@ the document.  Narrowing, if any, is ignored."
 				   end)
 			       (progn
 				 (forward-line -1)
-				 (or (org-looking-at-p "^[ \t]*$")
+				 (or (looking-at-p "^[ \t]*$")
 				     (org-with-limited-levels
 				      (org-at-heading-p)))))))))
 	      (delete-region start end)
@@ -3386,7 +3386,7 @@ Return a string of lines to be included in the format expected by
 		 (memq (org-element-type element) '(headline inlinetask)))
 	;; Skip planning line and property-drawer.
 	(goto-char (point-min))
-	(when (org-looking-at-p org-planning-line-re) (forward-line))
+	(when (looking-at-p org-planning-line-re) (forward-line))
 	(when (looking-at org-property-drawer-re) (goto-char (match-end 0)))
 	(unless (bolp) (forward-line))
 	(narrow-to-region (point) (point-max))))
@@ -6213,7 +6213,7 @@ files or buffers, only the display.
 	header-line-format
 	'(:eval
 	  (format "  %-12s | %6s | %s" "Back-End" "Age" "Source")))
-  (org-add-hook 'post-command-hook 'org-export-stack-refresh nil t)
+  (add-hook 'post-command-hook 'org-export-stack-refresh nil t)
   (setq-local revert-buffer-function
 	      'org-export-stack-refresh))
 
@@ -6329,12 +6329,12 @@ back to standard interface."
 	    ;; on the first key, if any.  A nil value means KEY will
 	    ;; only be activated at first level.
 	    (if (or (eq access-key t) (eq access-key first-key))
-		(org-propertize key 'face 'org-warning)
+		(propertize key 'face 'org-warning)
 	      key)))
 	 (fontify-value
 	  (lambda (value)
 	    ;; Fontify VALUE string.
-	    (org-propertize value 'face 'font-lock-variable-name-face)))
+	    (propertize value 'face 'font-lock-variable-name-face)))
 	 ;; Prepare menu entries by extracting them from registered
 	 ;; back-ends and sorting them by access key and by ordinal,
 	 ;; if any.

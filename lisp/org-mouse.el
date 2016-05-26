@@ -191,7 +191,7 @@ Changing this variable requires a restart of Emacs to get activated."
   (interactive)
   (end-of-line)
   (skip-chars-backward "\t ")
-  (when (org-looking-back ":[A-Za-z]+:" (line-beginning-position))
+  (when (looking-back ":[A-Za-z]+:" (line-beginning-position))
     (skip-chars-backward ":A-Za-z")
     (skip-chars-backward "\t ")))
 
@@ -575,7 +575,7 @@ This means, between the beginning of line and the point."
      (beginning-of-line)
      (looking-at "[ \t]*")
      (open-line 1)
-     (org-indent-to-column (- (match-end 0) (match-beginning 0)))
+     (indent-to-column (- (match-end 0) (match-beginning 0)))
      (insert "+ "))
     (:middle			; insert after
      (end-of-line)
@@ -585,7 +585,7 @@ This means, between the beginning of line and the point."
     (:end				; insert text here
      (skip-chars-backward " \t")
      (kill-region (point) (point-at-eol))
-     (unless (org-looking-back org-mouse-punctuation (line-beginning-position))
+     (unless (looking-back org-mouse-punctuation (line-beginning-position))
        (insert (concat org-mouse-punctuation " ")))))
   (insert text)
   (beginning-of-line))
@@ -643,7 +643,7 @@ This means, between the beginning of line and the point."
 					'org-mode-restart))))
      ((or (eolp)
 	  (and (looking-at "\\(  \\|\t\\)\\(+:[0-9a-zA-Z_:]+\\)?\\(  \\|\t\\)+$")
-	       (org-looking-back "  \\|\t" (- (point) 2)
+	       (looking-back "  \\|\t" (- (point) 2)
 				 (line-beginning-position))))
       (org-mouse-popup-global-menu))
      ((funcall get-context :checkbox)

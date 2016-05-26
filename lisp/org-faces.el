@@ -182,11 +182,7 @@ character (this might for example be the a TODO keyword) might still
 shine through in some properties.  So when your column view looks
 funny, with \"random\" colors, weight, strike-through, try to explicitly
 set the properties in the `org-column' face.  For example, set
-:underline to nil, or the :slant to `normal'.
-
-Under XEmacs, the rules are simpler, because the XEmacs version of
-column view defines special faces for each outline level.  See the file
-`org-colview-xemacs.el' in Org's contrib/ directory for details."
+:underline to nil, or the :slant to `normal'."
   :group 'org-faces)
 
 (defface org-column-title

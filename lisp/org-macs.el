@@ -57,14 +57,12 @@
 
 (defmacro org-called-interactively-p (&optional kind)
   (declare (debug (&optional ("quote" symbolp)))) ;Why not just t?
-  (if (featurep 'xemacs)
-      `(interactive-p)
-    (if (or (> emacs-major-version 23)
-	    (and (>= emacs-major-version 23)
-		 (>= emacs-minor-version 2)))
-	;; defined with no argument in <=23.1
-	`(with-no-warnings (called-interactively-p ,kind))
-      `(interactive-p))))
+  (if (or (> emacs-major-version 23)
+	  (and (>= emacs-major-version 23)
+	       (>= emacs-minor-version 2)))
+      ;; defined with no argument in <=23.1
+      `(with-no-warnings (called-interactively-p ,kind))
+    `(interactive-p)))
 
 (defmacro org-bound-and-true-p (var)
   "Return the value of symbol VAR if it is bound, else nil."
@@ -96,11 +94,6 @@ Otherwise return nil."
       (while (string-match "\\[:punct:\\]" ss)
 	(setq ss (replace-match "\001-@[-`{-~" t t ss)))
       ss)))
-
-(defmacro org-re (s)
-  "Replace posix classes in regular expression."
-  (declare (debug (form)))
-  (if (featurep 'xemacs) `(org-substitute-posix-classes ,s) s))
 
 (defmacro org-preserve-lc (&rest body)
   (declare (debug (body)))
@@ -199,13 +192,6 @@ We use a macro so that the test can happen at compilation time."
 				   rear-nonsticky t mouse-map t fontified t
 				   org-emphasis t)
   "Properties to remove when a string without properties is wanted.")
-
-(defsubst org-match-string-no-properties (num &optional string)
-  (if (featurep 'xemacs)
-      (let ((s (match-string num string)))
-	(and s (remove-text-properties 0 (length s) org-rm-props s))
-	s)
-    (match-string-no-properties num string)))
 
 (defsubst org-no-properties (s &optional restricted)
   "Remove all text properties from string S.

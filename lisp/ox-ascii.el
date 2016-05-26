@@ -511,7 +511,7 @@ that is according to the widest non blank line in CONTENTS."
 		;; possible.
 		(save-excursion
 		  (while (not (eobp))
-		    (unless (org-looking-at-p "[ \t]*$")
+		    (unless (looking-at-p "[ \t]*$")
 		      (end-of-line)
 		      (let ((column (current-column)))
 			(cond
@@ -524,8 +524,8 @@ that is according to the widest non blank line in CONTENTS."
 				 (if (eq how 'right) 1 2))))
 		  (if (zerop offset) (throw 'exit contents)
 		    (while (not (eobp))
-		      (unless (org-looking-at-p "[ \t]*$")
-			(org-indent-to-column offset))
+		      (unless (looking-at-p "[ \t]*$")
+			(indent-to-column offset))
 		      (forward-line)))))
 	      (buffer-string))))))))
 

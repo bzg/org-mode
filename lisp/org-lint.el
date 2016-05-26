@@ -370,7 +370,7 @@ called with one argument, the key used for comparison."
 				    t)))
 	reports)
     (while (re-search-forward regexp nil t)
-      (let ((key (upcase (org-match-string-no-properties 1))))
+      (let ((key (upcase (match-string-no-properties 1))))
 	(when (< (point)
 		 (org-element-property :post-affiliated (org-element-at-point)))
 	  (push
@@ -416,7 +416,7 @@ instead"
 		    (list (org-element-property :begin datum)
 			  (format "Deprecated syntax for \"%s\".  \
 Use header-args instead"
-				  (org-match-string-no-properties 1 value))))))
+				  (match-string-no-properties 1 value))))))
 	    (`node-property
 	     (and (member-ignore-case key deprecated-babel-properties)
 		  (list
@@ -757,7 +757,7 @@ Use \"export %s\" instead"
 (defun org-lint-incomplete-drawer (_)
   (let (reports)
     (while (re-search-forward org-drawer-regexp nil t)
-      (let ((name (org-trim (org-match-string-no-properties 0)))
+      (let ((name (org-trim (match-string-no-properties 0)))
 	    (element (org-element-at-point)))
 	(pcase (org-element-type element)
 	  ((or `drawer `property-drawer)
@@ -812,7 +812,7 @@ Use \"export %s\" instead"
 		 (regexp-opt org-element-dual-keywords)))
 	reports)
     (while (re-search-forward regexp nil t)
-      (let ((name (org-match-string-no-properties 1)))
+      (let ((name (match-string-no-properties 1)))
 	(unless (or (string-prefix-p "BEGIN" name t)
 		    (string-prefix-p "END" name t)
 		    (save-excursion

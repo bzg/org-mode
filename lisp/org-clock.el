@@ -671,19 +671,19 @@ If not, show simply the clocked time like 01:50."
 	(let* ((effort-in-minutes
 		(org-duration-string-to-minutes org-clock-effort))
 	       (work-done-str
-		(org-propertize
+		(propertize
 		 (org-minutes-to-clocksum-string clocked-time)
 		 'face (if (and org-clock-task-overrun (not org-clock-task-overrun-text))
 			   'org-mode-line-clock-overrun 'org-mode-line-clock)))
 	       (effort-str (org-minutes-to-clocksum-string effort-in-minutes))
-	       (clockstr (org-propertize
+	       (clockstr (propertize
 			  (concat  " [%s/" effort-str
 				   "] (" (replace-regexp-in-string "%" "%%" org-clock-heading) ")")
 			  'face 'org-mode-line-clock)))
 	  (format clockstr work-done-str))
-      (org-propertize (concat "[" (org-minutes-to-clocksum-string clocked-time)
-			      "]" (format " (%s)" org-clock-heading))
-		      'face 'org-mode-line-clock))))
+      (propertize (concat "[" (org-minutes-to-clocksum-string clocked-time)
+			  "]" (format " (%s)" org-clock-heading))
+		  'face 'org-mode-line-clock))))
 
 (defun org-clock-get-last-clock-out-time ()
   "Get the last clock-out time for the current subtree."
@@ -698,20 +698,20 @@ If not, show simply the clocked time like 01:50."
       (org-clock-notify-once-if-expired)
     (setq org-clock-task-overrun nil))
   (setq org-mode-line-string
-	(org-propertize
+	(propertize
 	 (let ((clock-string (org-clock-get-clock-string))
 	       (help-text "Org-mode clock is running.\nmouse-1 shows a menu\nmouse-2 will jump to task"))
 	   (if (and (> org-clock-string-limit 0)
 		    (> (length clock-string) org-clock-string-limit))
-	       (org-propertize
+	       (propertize
 		(substring clock-string 0 org-clock-string-limit)
 		'help-echo (concat help-text ": " org-clock-heading))
-	     (org-propertize clock-string 'help-echo help-text)))
+	     (propertize clock-string 'help-echo help-text)))
 	 'local-map org-clock-mode-line-map
 	 'mouse-face 'mode-line-highlight))
   (if (and org-clock-task-overrun org-clock-task-overrun-text)
       (setq org-mode-line-string
-	    (concat (org-propertize
+	    (concat (propertize
 		     org-clock-task-overrun-text
 		     'face 'org-mode-line-clock-overrun) org-mode-line-string)))
   (force-mode-line-update))
@@ -721,8 +721,8 @@ If not, show simply the clocked time like 01:50."
 The time returned includes the time spent on this task in
 previous clocking intervals."
   (let ((currently-clocked-time
-	 (floor (- (org-float-time)
-		   (org-float-time org-clock-start-time)) 60)))
+	 (floor (- (float-time)
+		   (float-time org-clock-start-time)) 60)))
     (+ currently-clocked-time (or org-clock-total-time 0))))
 
 (defun org-clock-modify-effort-estimate (&optional value)
@@ -1033,7 +1033,7 @@ to be CLOCKED OUT."))))
 				   nil 45)))
 		(and (not (memq char-pressed '(?i ?q))) char-pressed)))))
 	 (default
-	   (floor (/ (org-float-time
+	   (floor (/ (float-time
 		      (time-subtract (current-time) last-valid)) 60)))
 	 (keep
 	  (and (memq ch '(?k ?K))
@@ -1042,8 +1042,8 @@ to be CLOCKED OUT."))))
 	  (and (memq ch '(?g ?G))
 	       (read-number "Got back how many minutes ago? " default)))
 	 (subtractp (memq ch '(?s ?S)))
-	 (barely-started-p (< (- (org-float-time last-valid)
-				 (org-float-time (cdr clock))) 45))
+	 (barely-started-p (< (- (float-time last-valid)
+				 (float-time (cdr clock))) 45))
 	 (start-over (and subtractp barely-started-p)))
     (cond
      ((memq ch '(?j ?J))
@@ -1102,8 +1102,8 @@ If `only-dangling-p' is non-nil, only ask to resolve dangling
 			(lambda (clock)
 			  (format
 			   "Dangling clock started %d mins ago"
-			   (floor (- (org-float-time)
-				     (org-float-time (cdr clock)))
+			   (floor (- (float-time)
+				     (float-time (cdr clock)))
 				  60)))))
 		   (or last-valid
 		       (cdr clock)))))))))))
@@ -1112,7 +1112,7 @@ If `only-dangling-p' is non-nil, only ask to resolve dangling
   "Return the current Emacs idle time in seconds, or nil if not idle."
   (let ((idle-time (current-idle-time)))
     (if idle-time
-	(org-float-time idle-time)
+	(float-time idle-time)
       0)))
 
 (defun org-mac-idle-seconds ()
@@ -1163,7 +1163,7 @@ so long."
 		 org-clock-start-time)
 	   (lambda (_)
 	     (format "Clocked in & idle for %.1f mins"
-		     (/ (org-float-time
+		     (/ (float-time
 			 (time-subtract (current-time)
 					org-clock-user-idle-start))
 			60.0)))
@@ -1204,7 +1204,7 @@ make this the default behavior.)"
 		 (not org-clock-resolving-clocks))
 	(setq org-clock-leftover-time nil)
 	(let ((org-clock-clocking-in t))
-	  (org-resolve-clocks)))	; check if any clocks are dangling
+	  (org-resolve-clocks)))    ; check if any clocks are dangling
 
       (when (equal select '(64))
 	;; Set start-time to `org-clock-out-time'
@@ -1316,7 +1316,7 @@ make this the default behavior.)"
 			   (end-of-line 0)
 			   (org-in-item-p)))
 		(beginning-of-line 1)
-		(org-indent-line-to (- (org-get-indentation) 2)))
+		(indent-line-to (- (org-get-indentation) 2)))
 	      (insert org-clock-string " ")
 	      (setq org-clock-effort (org-entry-get (point) org-effort-property))
 	      (setq org-clock-total-time (org-clock-sum-current-item
@@ -1327,9 +1327,10 @@ make this the default behavior.)"
 			     (y-or-n-p
 			      (format
 			       "You stopped another clock %d mins ago; start this one from then? "
-			       (/ (- (org-float-time
+			       (/ (- (float-time
 				      (org-current-time org-clock-rounding-minutes t))
-				     (org-float-time leftover)) 60)))
+				     (float-time leftover))
+				  60)))
 			     leftover)
 			start-time
 			(org-current-time org-clock-rounding-minutes t)))
@@ -1580,8 +1581,10 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	  (delete-region (point) (point-at-eol))
 	  (insert "--")
 	  (setq te (org-insert-time-stamp (or at-time now) 'with-hm 'inactive))
-	  (setq s (- (org-float-time (apply 'encode-time (org-parse-time-string te)))
-		     (org-float-time (apply 'encode-time (org-parse-time-string ts))))
+	  (setq s (- (float-time
+		      (apply #'encode-time (org-parse-time-string te)))
+		     (float-time
+		      (apply #'encode-time (org-parse-time-string ts))))
 		h (floor (/ s 3600))
 		s (- s (* 3600 h))
 		m (floor (/ s 60))
@@ -1691,7 +1694,7 @@ Optional argument N tells to change by that many units."
 	  (save-excursion
 	    (goto-char begts)
 	    (org-timestamp-change
-	     (round (/ (org-float-time tdiff)
+	     (round (/ (float-time tdiff)
 		       (cond ((eq org-ts-what 'minute) 60)
 			     ((eq org-ts-what 'hour) 3600)
 			     ((eq org-ts-what 'day) (* 24 3600))
@@ -1712,8 +1715,8 @@ Optional argument N tells to change by that many units."
   (save-excursion    ; Do not replace this with `with-current-buffer'.
     (org-no-warnings (set-buffer (org-clocking-buffer)))
     (goto-char org-clock-marker)
-    (if (org-looking-back (concat "^[ \t]*" org-clock-string ".*")
-                          (line-beginning-position))
+    (if (looking-back (concat "^[ \t]*" org-clock-string ".*")
+		      (line-beginning-position))
 	(progn (delete-region (1- (point-at-bol)) (point-at-eol))
 	       (org-remove-empty-drawer-at (point)))
       (message "Clock gone, cancel the timer anyway")
@@ -1799,8 +1802,8 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
 	  time)
      (if (stringp tstart) (setq tstart (org-time-string-to-seconds tstart)))
      (if (stringp tend) (setq tend (org-time-string-to-seconds tend)))
-     (if (consp tstart) (setq tstart (org-float-time tstart)))
-     (if (consp tend) (setq tend (org-float-time tend)))
+     (if (consp tstart) (setq tstart (float-time tstart)))
+     (if (consp tend) (setq tend (float-time tend)))
      (remove-text-properties (point-min) (point-max)
 			     `(,(or propname :org-clock-minutes) t
 			       :org-clock-force-headline-inclusion t))
@@ -1812,10 +1815,10 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
 	   ;; Two time stamps
 	   (setq ts (match-string 2)
 		 te (match-string 3)
-		 ts (org-float-time
-		     (apply 'encode-time (org-parse-time-string ts)))
-		 te (org-float-time
-		     (apply 'encode-time (org-parse-time-string te)))
+		 ts (float-time
+		     (apply #'encode-time (org-parse-time-string ts)))
+		 te (float-time
+		     (apply #'encode-time (org-parse-time-string te)))
 		 ts (if tstart (max ts tstart) ts)
 		 te (if tend (min te tend) te)
 		 dt (- te ts)
@@ -1831,10 +1834,11 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
 		      (equal (marker-position org-clock-hd-marker) (point))
 		      tstart
 		      tend
-		      (>= (org-float-time org-clock-start-time) tstart)
-		      (<= (org-float-time org-clock-start-time) tend))
-	     (let ((time (floor (- (org-float-time)
-				   (org-float-time org-clock-start-time)) 60)))
+		      (>= (float-time org-clock-start-time) tstart)
+		      (<= (float-time org-clock-start-time) tend))
+	     (let ((time (floor (- (float-time)
+				   (float-time org-clock-start-time))
+				60)))
 	       (setq t1 (+ t1 time))))
 	   (let* ((headline-forced
 		   (get-text-property (point)
@@ -1922,7 +1926,7 @@ Use \\[org-clock-remove-overlays] to remove the subtree times."
 	      m (- org-clock-file-total-minutes (* 60 h)))
 	;; Arrange to remove the overlays upon next change.
 	(when org-remove-highlights-with-change
-	  (org-add-hook 'before-change-functions 'org-clock-remove-overlays
+	  (add-hook 'before-change-functions 'org-clock-remove-overlays
 			nil 'local))))
     (message (concat (format "Total file time%s: "
 			     (cond (todayp " for today")
@@ -2703,18 +2707,17 @@ LEVEL is an integer.  Indent by two spaces per level above 1."
      ((numberp ts)
       ;; If ts is a number, it's an absolute day number from org-agenda.
       (destructuring-bind (month day year) (calendar-gregorian-from-absolute ts)
-	(setq ts (org-float-time (encode-time 0 0 0 day month year)))))
+	(setq ts (float-time (encode-time 0 0 0 day month year)))))
      (ts
-      (setq ts (org-float-time
-		(apply 'encode-time (org-parse-time-string ts))))))
+      (setq ts (float-time
+		(apply #'encode-time (org-parse-time-string ts))))))
     (cond
      ((numberp te)
       ;; Likewise for te.
       (destructuring-bind (month day year) (calendar-gregorian-from-absolute te)
-	(setq te (org-float-time (encode-time 0 0 0 day month year)))))
+	(setq te (float-time (encode-time 0 0 0 day month year)))))
      (te
-      (setq te (org-float-time
-		(apply 'encode-time (org-parse-time-string te))))))
+      (setq te (float-time (apply #'encode-time (org-parse-time-string te))))))
     (setq tsb
 	  (if (eq step0 'week)
 	      (- ts (* 86400 (- (nth 6 (decode-time (seconds-to-time ts))) ws)))
@@ -2814,7 +2817,7 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
 	(when (setq time (get-text-property p :org-clock-minutes))
 	  (save-excursion
 	    (beginning-of-line 1)
-	    (when (and (looking-at (org-re "\\(\\*+\\)[ \t]+\\(.*?\\)\\([ \t]+:[[:alnum:]_@#%:]+:\\)?[ \t]*$"))
+	    (when (and (looking-at "\\(\\*+\\)[ \t]+\\(.*?\\)\\([ \t]+:[[:alnum:]_@#%:]+:\\)?[ \t]*$")
 		       (setq level (org-reduced-level
 				    (- (match-end 1) (match-beginning 1))))
 		       (<= level maxlevel))
@@ -2907,10 +2910,10 @@ Otherwise, return nil."
 	  (end-of-line 1)
 	  (setq ts (match-string 1)
 		te (match-string 3))
-	  (setq s (- (org-float-time
-		      (apply 'encode-time (org-parse-time-string te)))
-		     (org-float-time
-		      (apply 'encode-time (org-parse-time-string ts))))
+	  (setq s (- (float-time
+		      (apply #'encode-time (org-parse-time-string te)))
+		     (float-time
+		      (apply #'encode-time (org-parse-time-string ts))))
 		neg (< s 0)
 		s (abs s)
 		h (floor (/ s 3600))
