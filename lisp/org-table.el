@@ -34,8 +34,6 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
 (require 'cl-lib)
 (require 'org)
 
@@ -815,7 +813,7 @@ edit.  Full value is:\n"
                      (if (= (org-string-width x) l) (setq f2 f1)
                        (setq f2 1)
                        (while (< (org-string-width (substring x 0 f2)) f1)
-                         (incf f2)))
+                         (cl-incf f2)))
                      (add-text-properties f2 l (list 'org-cwidth t) x)
                      (add-text-properties
                       (if (>= (string-width (substring x (1- f2) f2)) 2) (1- f2)
@@ -838,7 +836,7 @@ edit.  Full value is:\n"
                                (if (org-string-match-p org-table-number-regexp x)
                                    1
                                  0))
-                            (incf cnt)))))
+                            (cl-incf cnt)))))
                (push (>= frac org-table-number-fraction) typenums)))))
        (setq lengths (nreverse lengths))
        (setq typenums (nreverse typenums))
@@ -1319,7 +1317,7 @@ is always the old value."
   (save-excursion
     (let ((column 0) (pos (point)))
       (beginning-of-line)
-      (while (search-forward "|" pos t) (incf column))
+      (while (search-forward "|" pos t) (cl-incf column))
       (when (org-called-interactively-p 'interactive)
 	(message "In table column %d" column))
       column)))
@@ -1336,7 +1334,7 @@ Only data lines count for this."
 	  (pos (point)))
       (goto-char (org-table-begin))
       (while (<= (point) pos)
-	(when (looking-at org-table-dataline-regexp) (incf c))
+	(when (looking-at org-table-dataline-regexp) (cl-incf c))
 	(forward-line))
       (when (org-called-interactively-p 'any)
 	(message "This is table line %d" c))
@@ -1715,7 +1713,7 @@ numeric compare based on the type of the first key in the table."
 	     (extract-key-from-field
 	      ;; Function to be called on the contents of the field
 	      ;; used for sorting in the current row.
-	      (case sorting-type
+	      (cl-case sorting-type
 		((?n ?N) #'string-to-number)
 		((?a ?A) #'org-sort-remove-invisible)
 		((?t ?T)
@@ -1735,7 +1733,7 @@ numeric compare based on the type of the first key in the table."
 		     (error "Missing key extractor to sort rows")))
 		(t (user-error "Invalid sorting type `%c'" sorting-type))))
 	     (predicate
-	      (case sorting-type
+	      (cl-case sorting-type
 		((?n ?N ?t ?T) #'<)
 		((?a ?A) #'string<)
 		((?f ?F) compare-func))))
@@ -1825,7 +1823,7 @@ lines."
 	 (dolist (field row)
 	   (org-table-goto-column c nil 'force)
 	   (org-table-get-field nil field)
-	   (incf c)))
+	   (cl-incf c)))
        (forward-line)))
     (org-table-align)))
 
@@ -2496,7 +2494,7 @@ This function sets up the following dynamically scoped variables:
 	      (re-search-forward "^[ \t]*| *! *\\(|.*\\)" end t))
 	(let ((c 1))
 	  (dolist (name (org-split-string (match-string 1) " *| *"))
-	    (incf c)
+	    (cl-incf c)
 	    (when (string-match "\\`[a-zA-Z][_a-zA-Z0-9]*\\'" name)
 	      (push (cons name (int-to-string c)) org-table-column-names)))))
       (setq org-table-column-names (nreverse org-table-column-names))
@@ -2525,13 +2523,13 @@ This function sets up the following dynamically scoped variables:
 		(let ((fields1
 		       (and (looking-at "^[ \t]*|[^|]*\\(|.*\\)")
 			    (org-split-string (match-string 1) " *| *")))
-		      (line (incf (cdr last) (count-lines (car last) (point))))
+		      (line (cl-incf (cdr last) (count-lines (car last) (point))))
 		      (col 1))
 		  (setcar last (point))	; Update last known position.
 		  (while (and fields fields1)
 		    (let ((field (pop fields))
 			  (v (pop fields1)))
-		      (incf col)
+		      (cl-incf col)
 		      (when (and (stringp field)
 				 (stringp v)
 				 (string-match "\\`[a-zA-Z][_a-zA-Z0-9]*\\'"
@@ -2549,7 +2547,7 @@ This function sets up the following dynamically scoped variables:
 	  (push (if (match-end 1) 'hline 'dline) types)
 	  (if (match-end 1) (push l hlines) (push l dlines))
 	  (forward-line)
-	  (incf l))
+	  (cl-incf l))
 	(push 'hline types) ; Add an imaginary extra hline to the end.
 	(setq org-table-current-line-types (apply #'vector (nreverse types)))
 	(setq org-table-dlines (apply #'vector (cons nil (nreverse dlines))))
@@ -2976,7 +2974,7 @@ and column2 are table column numbers."
 	      (forward-line (- first-row thisline))
 	      (while (not (looking-at org-table-dataline-regexp))
 		(forward-line)
-		(incf first-row))
+		(cl-incf first-row))
 	      (org-table-goto-column first-column)
 	      (let ((beg (point)))
 		(forward-line (- last-row first-row))
@@ -3033,7 +3031,7 @@ search, as a string."
   (let ((l (length org-table-current-line-types)))
     (catch :exit
       (dotimes (_ n)
-	(while (and (incf i (if backwards -1 1))
+	(while (and (cl-incf i (if backwards -1 1))
 		    (>= i 0)
 		    (< i l)
 		    (not (eq (aref org-table-current-line-types i) type))
@@ -3233,7 +3231,7 @@ existing formula for column %s"
 	 (while (re-search-forward line-re end t)
 	   (unless (string-match "\\` *[_^!$/] *\\'" (org-table-get-field 1))
 	     ;; Unprotected line, recalculate.
-	     (incf cnt)
+	     (cl-incf cnt)
 	     (when all
 	       (setq log-last-time
 		     (org-table-message-once-per-second
@@ -3407,12 +3405,12 @@ function assumes the table is already analyzed (i.e., using
 		 (c1 (nth 1 range))
 		 (r2 (org-table-line-to-dline (nth 2 range) 'above))
 		 (c2 (nth 3 range)))
-	    (loop for ir from r1 to r2 do
-		  (loop for ic from c1 to c2 do
-			(push
-			 (cons (propertize (format "@%d$%d" ir ic) :orig-eqn e)
-			       rhs)
-			 res))))))))))
+	    (cl-loop for ir from r1 to r2 do
+		     (cl-loop for ic from c1 to c2 do
+			      (push (cons (propertize
+					   (format "@%d$%d" ir ic) :orig-eqn e)
+					  rhs)
+				    res))))))))))
 
 (defun org-table-formula-handle-first/last-rc (s)
   "Replace @<, @>, $<, $> with first/last row/column of the table.
@@ -3438,7 +3436,7 @@ borders of the table using the @< @> $< $> makers."
 		  (- nmax len -1)))
 	(if (or (< n 1) (> n nmax))
 	    (user-error "Reference \"%s\" in expression \"%s\" points outside table"
-		   (match-string 0 s) s))
+			(match-string 0 s) s))
 	(setq start (match-beginning 0))
 	(setq s (replace-match (format "%s%d" (match-string 1 s) n) t t s)))))
   s)
@@ -3460,7 +3458,7 @@ borders of the table using the @< @> $< $> makers."
 		  "\\$\\([a-zA-Z][_a-zA-Z0-9]*\\)\\|\\(\\<remote([^)]*)\\)"
 		  new start))
       (if (match-end 2) (setq start (match-end 2))
-	(incf start)
+	(cl-incf start)
 	;; When a duration is expected, convert value on the fly.
 	(let ((value
 	       (save-match-data
@@ -4665,7 +4663,7 @@ for this table."
 	  (unless (fboundp transform)
 	    (user-error "No such transformation function %s" transform))
 	  (orgtbl-send-replace-tbl name (funcall transform table params)))
-	(incf ntbl))
+	(cl-incf ntbl))
       (message "Table converted and installed at %d receiver location%s"
 	       ntbl (if (> ntbl 1) "s" ""))
       (and (> ntbl 0) ntbl))))
@@ -4874,7 +4872,7 @@ This may be either a string or a function of two arguments:
 	    (lambda (row)
 	      (if (>= n skip) t
 		(org-element-extract-element row)
-		(incf n)
+		(cl-incf n)
 		nil))
 	    nil t))))
     ;; Handle :skipcols parameter.
@@ -4891,7 +4889,7 @@ This may be either a string or a function of two arguments:
 					  (org-element-contents row)))
 		      (when (memq c skipcols)
 			(org-element-extract-element cell))
-		      (incf c))))))))))
+		      (cl-incf c))))))))))
     ;; Since we are going to export using a low-level mechanism,
     ;; ignore special column and special rows manually.
     (let ((special? (org-export-table-has-special-column-p data))
