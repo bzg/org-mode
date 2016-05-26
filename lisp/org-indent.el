@@ -129,15 +129,6 @@ buffer, which can take a few seconds on large buffers, is done
 during idle time."
   nil " Ind" nil
   (cond
-   ((and org-indent-mode (featurep 'xemacs))
-    (message "org-indent-mode does not work in XEmacs - refusing to turn it on")
-    (setq org-indent-mode nil))
-   ((and org-indent-mode
-	 (not (org-version-check "23.1.50" "Org Indent mode" :predicate)))
-    (message "org-indent-mode can crash Emacs 23.1 - refusing to turn it on!")
-    (ding)
-    (sit-for 1)
-    (setq org-indent-mode nil))
    (org-indent-mode
     ;; mode was turned on.
     (setq-local indent-tabs-mode nil)

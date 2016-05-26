@@ -495,9 +495,7 @@ contextual information."
   (let* ((code (org-element-property :value inline-src-block)))
     (cond
      ((plist-get info :man-source-highlight)
-      (let* ((tmpdir (if (featurep 'xemacs)
-                         temp-directory
-                       temporary-file-directory ))
+      (let* ((tmpdir temporary-file-directory)
              (in-file  (make-temp-name
                         (expand-file-name "srchilite" tmpdir)))
              (out-file (make-temp-name

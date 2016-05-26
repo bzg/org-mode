@@ -1065,9 +1065,7 @@ contextual information."
   (let* ((code (org-element-property :value inline-src-block)))
     (cond
      (org-groff-source-highlight
-      (let* ((tmpdir (if (featurep 'xemacs)
-                         temp-directory
-                       temporary-file-directory))
+      (let* ((tmpdir temporary-file-directory)
              (in-file  (make-temp-name
                         (expand-file-name "srchilite" tmpdir)))
              (out-file (make-temp-name
@@ -1504,9 +1502,7 @@ contextual information."
 
      ;; Case 2.  Source fontification.
      (org-groff-source-highlight
-      (let* ((tmpdir (if (featurep 'xemacs)
-			 temp-directory
-		       temporary-file-directory))
+      (let* ((tmpdir temporary-file-directory)
 	     (in-file  (make-temp-name
 			(expand-file-name "srchilite" tmpdir)))
 	     (out-file (make-temp-name

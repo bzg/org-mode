@@ -1864,7 +1864,7 @@ When this is the symbol `prefix', only remove tags when
 (org-defvaralias 'org-agenda-remove-tags-when-in-prefix
   'org-agenda-remove-tags)
 
-(defcustom org-agenda-tags-column (if (featurep 'xemacs) -79 -80)
+(defcustom org-agenda-tags-column -80
   "Shift tags in agenda items to this column.
 If this number is positive, it specifies the column.  If it is negative,
 it means that the tags should be flushright to that column.  For example,
@@ -9240,18 +9240,10 @@ Called with a universal prefix arg, show the priority instead of setting it."
 	(when (equal marker (org-get-at-bol 'org-marker))
 	  (remove-text-properties (point-at-bol) (point-at-eol) '(display))
 	  (org-move-to-column (- (window-width) (length stamp)) t)
-          (if (featurep 'xemacs)
-	      ;; Use `duplicable' property to trigger undo recording
-              (let ((ex (make-extent nil nil))
-                    (gl (make-glyph stamp)))
-                (set-glyph-face gl 'secondary-selection)
-                (set-extent-properties
-                 ex (list 'invisible t 'end-glyph gl 'duplicable t))
-                (insert-extent ex (1- (point)) (point-at-eol)))
-            (add-text-properties
-	     (1- (point)) (point-at-eol)
-	     (list 'display (org-add-props stamp nil
-			      'face '(secondary-selection default)))))
+          (add-text-properties
+	   (1- (point)) (point-at-eol)
+	   (list 'display (org-add-props stamp nil
+			    'face '(secondary-selection default))))
 	  (beginning-of-line 1))
 	(beginning-of-line 0)))))
 

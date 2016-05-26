@@ -31,9 +31,6 @@
 (require 'org-macs)
 (require 'org-compat)
 
-(when (featurep 'xemacs)
-  (put 'mode-line 'face-alias 'modeline))
-
 (defgroup org-faces nil
   "Faces in Org-mode."
   :tag "Org Faces"

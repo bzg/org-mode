@@ -708,7 +708,7 @@ If not, show simply the clocked time like 01:50."
 		'help-echo (concat help-text ": " org-clock-heading))
 	     (org-propertize clock-string 'help-echo help-text)))
 	 'local-map org-clock-mode-line-map
-	 'mouse-face (if (featurep 'xemacs) 'highlight 'mode-line-highlight)))
+	 'mouse-face 'mode-line-highlight))
   (if (and org-clock-task-overrun org-clock-task-overrun-text)
       (setq org-mode-line-string
 	    (concat (org-propertize
@@ -1022,10 +1022,6 @@ For all these options, using uppercase makes your final state
 to be CLOCKED OUT."))))
 	      (org-fit-window-to-buffer (get-buffer-window "*Org Clock*"))
 	      (let (char-pressed)
-		(when (featurep 'xemacs)
-		  (message (concat (funcall prompt-fn clock)
-				   " [jkKgGsScCiq]? "))
-		  (setq char-pressed (read-char-exclusive)))
 		(while (or (null char-pressed)
 			   (and (not (memq char-pressed
 					   '(?k ?K ?g ?G ?s ?S ?C
@@ -1959,10 +1955,7 @@ will be easy to remove."
 			 (format " %9s " (org-minutes-to-clocksum-string time))
 			 '(face org-clock-overlay))
 		     ""))
-    (if (not (featurep 'xemacs))
-	(overlay-put ov 'display tx)
-      (overlay-put ov 'invisible t)
-      (overlay-put ov 'end-glyph (make-glyph tx)))
+    (overlay-put ov 'display tx)
     (push ov org-clock-overlays)))
 
 ;;;###autoload

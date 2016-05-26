@@ -28,9 +28,8 @@
 ;;; Code:
 (require 'ob)
 (require 'calc)
-(unless (featurep 'xemacs)
-  (require 'calc-trail)
-  (require 'calc-store))
+(require 'calc-trail)
+(require 'calc-store)
 
 (declare-function calc-store-into    "calc-store" (&optional var))
 (declare-function calc-recall        "calc-store" (&optional var))

@@ -1099,8 +1099,6 @@ Also apply the translations defined in `org-xemacs-key-equivalents'."
 			     (equal (key-description (car x)) nkey))
 			   org-disputed-keys)))
       (setq key (if x (cdr x) key))))
-  (when (featurep 'xemacs)
-    (setq key (or (cdr (assoc key org-xemacs-key-equivalents)) key)))
   key)
 
 (defun org-find-if (predicate seq)
@@ -1743,8 +1741,7 @@ See also the variable `org-table-auto-blank-field'."
 	  (const :tag "on" t)
 	  (const :tag "on, optimized" optimized)))
 
-(defcustom org-self-insert-cluster-for-undo (or (featurep 'xemacs)
-						(version<= emacs-version "24.1"))
+(defcustom org-self-insert-cluster-for-undo nil
   "Non-nil means cluster self-insert commands for undo when possible.
 If this is set, then, like in the Emacs command loop, 20 consecutive
 characters will be undone together.
@@ -3580,7 +3577,7 @@ displaying the tags menu is not even shown, until you press C-c again."
   "Non-nil means fast tags selection interface will also offer TODO states.
 This is an undocumented feature, you should not rely on it.")
 
-(defcustom org-tags-column (if (featurep 'xemacs) -76 -77)
+(defcustom org-tags-column -77
   "The column to which tags should be indented in a headline.
 If this number is positive, it specifies the column.  If it is negative,
 it means that the tags should be flushright to that column.  For example,
@@ -4468,12 +4465,12 @@ newline      The maximum number of newlines allowed in an emphasis exp.
 You need to reload Org or to restart Emacs after customizing this.")
 
 (defcustom org-emphasis-alist
-  `(("*" bold)
+  '(("*" bold)
     ("/" italic)
     ("_" underline)
     ("=" org-verbatim verbatim)
     ("~" org-code verbatim)
-    ("+" ,(if (featurep 'xemacs) 'org-table '(:strike-through t))))
+    ("+" (:strike-through t)))
   "Alist of characters and faces to emphasize text.
 Text starting and ending with a special character will be emphasized,
 for example *bold*, _underlined_ and /italic/.  This variable sets the
@@ -5511,27 +5508,16 @@ The following commands are available:
   ;; Get rid of Outline menus, they are not needed
   ;; Need to do this here because define-derived-mode sets up
   ;; the keymap so late.  Still, it is a waste to call this each time
-  ;; we switch another buffer into org-mode.
-  (if (featurep 'xemacs)
-      (when (boundp 'outline-mode-menu-heading)
-	;; Assume this is Greg's port, it uses easymenu
-	(easy-menu-remove outline-mode-menu-heading)
-	(easy-menu-remove outline-mode-menu-show)
-	(easy-menu-remove outline-mode-menu-hide))
-    (define-key org-mode-map [menu-bar headings] 'undefined)
-    (define-key org-mode-map [menu-bar hide] 'undefined)
-    (define-key org-mode-map [menu-bar show] 'undefined))
+  ;; we switch another buffer into Org mode.
+  (define-key org-mode-map [menu-bar headings] 'undefined)
+  (define-key org-mode-map [menu-bar hide] 'undefined)
+  (define-key org-mode-map [menu-bar show] 'undefined)
 
   (org-load-modules-maybe)
-  (when (featurep 'xemacs)
-    (easy-menu-add org-org-menu)
-    (easy-menu-add org-tbl-menu))
   (org-install-agenda-files-menu)
   (when org-descriptive-links (add-to-invisibility-spec '(org-link)))
   (add-to-invisibility-spec '(org-cwidth))
   (add-to-invisibility-spec '(org-hide-block . t))
-  (when (featurep 'xemacs)
-    (setq-local line-move-ignore-invisible t))
   (setq-local outline-regexp org-outline-regexp)
   (setq-local outline-level 'org-outline-level)
   (setq bidi-paragraph-direction 'left-to-right)
@@ -6452,10 +6438,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   (list (concat "\\<" org-closed-string) '(0 'org-special-keyword t))
 	   (list (concat "\\<" org-clock-string) '(0 'org-special-keyword t))
 	   ;; Emphasis
-	   (when em
-	     (if (featurep 'xemacs)
-		 '(org-do-emphasis-faces (0 nil append))
-	       '(org-do-emphasis-faces)))
+	   (when em '(org-do-emphasis-faces))
 	   ;; Checkboxes
 	   '("^[ \t]*\\(?:[-+*]\\|[0-9]+[.)]\\)[ \t]+\\(?:\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?\\(\\[[- X]\\]\\)"
 	     1 'org-checkbox prepend)
@@ -6953,14 +6936,10 @@ Use \\[org-edit-special] to edit table.el tables"))
       ;; Determine end invisible part of buffer (EOL)
       (beginning-of-line 2)
       ;; XEmacs doesn't have `next-single-char-property-change'
-      (if (featurep 'xemacs)
-	  (while (and (not (eobp)) ;; this is like `next-line'
-		      (get-char-property (1- (point)) 'invisible))
-	    (beginning-of-line 2))
-	(while (and (not (eobp)) ;; this is like `next-line'
-		    (get-char-property (1- (point)) 'invisible))
-	  (goto-char (next-single-char-property-change (point) 'invisible))
-	  (and (eolp) (beginning-of-line 2))))
+      (while (and (not (eobp)) ;This is like `next-line'.
+		  (get-char-property (1- (point)) 'invisible))
+	(goto-char (next-single-char-property-change (point) 'invisible))
+	(and (eolp) (beginning-of-line 2)))
       (setq eol (point)))
     ;; Find out what to do next and set `this-command'
     (cond
@@ -7725,8 +7704,6 @@ frame is not changed."
      ((eq org-indirect-buffer-display 'other-window)
       (pop-to-buffer ibuf))
      (t (error "Invalid value")))
-    (when (featurep 'xemacs)
-      (save-excursion (org-mode) (turn-on-font-lock)))
     (narrow-to-region beg end)
     (outline-show-all)
     (goto-char pos)
@@ -7749,9 +7726,7 @@ frame is not changed."
 
 (defun org-set-frame-title (title)
   "Set the title of the current frame to the string TITLE."
-  ;; FIXME: how to name a single frame in XEmacs???
-  (unless (featurep 'xemacs)
-    (modify-frame-parameters (selected-frame) (list (cons 'name title)))))
+  (modify-frame-parameters (selected-frame) (list (cons 'name title))))
 
 ;;;; Structure editing
 
@@ -14173,7 +14148,7 @@ ACTION can be `set', `up', `down', or a character."
 	 ((eq action 'remove)
 	  (setq remove t new ?\ ))
 	 ((or (eq action 'set)
-	      (if (featurep 'xemacs) (characterp action) (integerp action)))
+	      (integerp action))
 	  (if (not (eq action 'set))
 	      (setq new action)
 	    (message "Priority %c-%c, SPC to remove: "
@@ -15159,8 +15134,7 @@ When JUST-ALIGN is non-nil, only align tags."
 				  (- (- tc) (string-width tags)))))
 		       (rpl (concat (make-string (max 0 (- c1 c0)) ?\s) tags)))
 		  (replace-match rpl t t)
-		  (when (and (not (featurep 'xemacs)) indent-tabs-mode)
-		    (tabify p0 (point))))))
+		  (when indent-tabs-mode (tabify p0 (point))))))
 	     (t (error "Tags alignment failed"))))
 	  (org-move-to-column col))
         (unless just-align (run-hooks 'org-after-tags-change-hook))))))
@@ -15251,11 +15225,8 @@ Also insert END."
 (defun org-set-current-tags-overlay (current prefix)
   "Add an overlay to CURRENT tag with PREFIX."
   (let ((s (concat ":" (mapconcat 'identity current ":") ":")))
-    (if (featurep 'xemacs)
-	(org-overlay-display org-tags-overlay (concat prefix s)
-			     'secondary-selection)
-      (put-text-property 0 (length s) 'face '(secondary-selection org-tag) s)
-      (org-overlay-display org-tags-overlay (concat prefix s)))))
+    (put-text-property 0 (length s) 'face '(secondary-selection org-tag) s)
+    (org-overlay-display org-tags-overlay (concat prefix s))))
 
 (defvar org-last-tag-selection-key nil)
 (defun org-fast-tag-selection (current inherited table &optional todo-table)
@@ -17478,8 +17449,6 @@ The command returns the inserted time stamp."
 	   p (setq p (next-single-property-change p 'display))
 	   '(display t))))
       (set-buffer-modified-p bmp)))
-  (when (featurep 'xemacs)
-    (remove-text-properties (point-min) (point-max) '(end-glyph t)))
   (org-restart-font-lock)
   (setq org-table-may-need-update t)
   (if org-display-custom-times
@@ -17507,11 +17476,7 @@ The command returns the inserted time stamp."
     (unless (= w2 w1)
       (add-text-properties (1+ beg) (+ 2 beg)
 			   (list 'org-dwidth t 'org-dwidth-n (- w1 w2))))
-    (if (featurep 'xemacs)
-	(progn
-	  (put-text-property beg end 'invisible t)
-	  (put-text-property beg end 'end-glyph (make-glyph str)))
-      (put-text-property beg end 'display str))))
+    (put-text-property beg end 'display str)))
 
 (defun org-fix-decoded-time (time)
   "Set 0 instead of nil for the first 6 elements of time.
@@ -17873,9 +17838,7 @@ D may be an absolute day number, or a calendar-type list (month day year)."
 (defun org-diary-to-ical-string (frombuf)
   "Get iCalendar entries from diary entries in buffer FROMBUF.
 This uses the icalendar.el library."
-  (let* ((tmpdir (if (featurep 'xemacs)
-		     (temp-directory)
-		   temporary-file-directory))
+  (let* ((tmpdir temporary-file-directory)
 	 (tmpfile (make-temp-name
 		   (expand-file-name "orgics" tmpdir)))
 	 buf rtn b e)
@@ -19120,13 +19083,9 @@ as a string.  It defaults to \"png\"."
 		 'modification-hooks
 		 (list (lambda (o _flag _beg _end &optional _l)
 			 (delete-overlay o))))
-    (if (featurep 'xemacs)
-	(progn
-	  (overlay-put ov 'invisible t)
-	  (overlay-put ov 'end-glyph (make-glyph (vector imagetype :file image))))
-      (overlay-put ov
-		   'display
-		   (list 'image :type imagetype :file image :ascent 'center)))))
+    (overlay-put ov
+		 'display
+		 (list 'image :type imagetype :file image :ascent 'center))))
 
 (defun org--list-latex-overlays (&optional beg end)
   "List all Org LaTeX overlays in current buffer.
@@ -19621,14 +19580,9 @@ SNIPPETS-P indicates if this is run to create snippet images for HTML."
 
 (defun org-dvipng-color (attr)
   "Return a RGB color specification for dvipng."
-  (apply 'format "rgb %s %s %s"
-	 (mapcar 'org-normalize-color
-		 (if (featurep 'xemacs)
-		     (color-rgb-components
-		      (face-property 'default
-				     (cond ((eq attr :foreground) 'foreground)
-					   ((eq attr :background) 'background))))
-		   (color-values (face-attribute 'default attr nil))))))
+  (apply #'format "rgb %s %s %s"
+	 (mapcar #'org-normalize-color
+		 (color-values (face-attribute 'default attr nil)))))
 
 (defun org-dvipng-color-format (color-name)
   "Convert COLOR-NAME to a RGB color value for dvipng."
@@ -19638,14 +19592,9 @@ SNIPPETS-P indicates if this is run to create snippet images for HTML."
 
 (defun org-latex-color (attr)
   "Return a RGB color for the LaTeX color package."
-  (apply 'format "%s,%s,%s"
-	 (mapcar 'org-normalize-color
-		 (if (featurep 'xemacs)
-		     (color-rgb-components
-		      (face-property 'default
-				     (cond ((eq attr :foreground) 'foreground)
-					   ((eq attr :background) 'background))))
-		   (color-values (face-attribute 'default attr nil))))))
+  (apply #'format "%s,%s,%s"
+	 (mapcar #'org-normalize-color
+		 (color-values (face-attribute 'default attr nil)))))
 
 (defun org-latex-color-format (color-name)
   "Convert COLOR-NAME to a RGB color value."
@@ -19869,8 +19818,7 @@ boundaries."
 (org-defkey org-mode-map [(control tab)] 'org-force-cycle-archived)
 (org-defkey org-mode-map "\M-\t" #'pcomplete)
 ;; The following line is necessary under Suse GNU/Linux
-(unless (featurep 'xemacs)
-  (org-defkey org-mode-map [S-iso-lefttab]  'org-shifttab))
+(org-defkey org-mode-map [S-iso-lefttab]  'org-shifttab)
 (org-defkey org-mode-map [(shift tab)]    'org-shifttab)
 (define-key org-mode-map [backtab] 'org-shifttab)
 
@@ -19910,9 +19858,7 @@ boundaries."
 ;;  We only set them when really needed because otherwise the
 ;;  menus don't show the simple keys
 
-(when (or org-use-extra-keys
-	  (featurep 'xemacs)   ;; because XEmacs supports multi-device stuff
-	  (not window-system))
+(when (or org-use-extra-keys (not window-system))
   (org-defkey org-mode-map "\C-c\C-xc"    'org-table-copy-down)
   (org-defkey org-mode-map "\C-c\C-xM"    'org-insert-todo-heading)
   (org-defkey org-mode-map "\C-c\C-xm"    'org-meta-return)
@@ -20088,10 +20034,6 @@ boundaries."
 (define-key org-mode-map "\C-c\C-xG" 'org-feed-goto-inbox)
 
 (define-key org-mode-map "\C-c\C-x[" 'org-reftex-citation)
-
-
-(when (featurep 'xemacs)
-  (org-defkey org-mode-map 'button3   'popup-mode-menu))
 
 
 (defconst org-speed-commands-default
@@ -22114,13 +22056,8 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
   (let* ((org-dir     (org-find-library-dir "org"))
 	 (contrib-dir (or (org-find-library-dir "org-contribdir") org-dir))
 	 (feature-re "^\\(org\\|ob\\|ox\\)\\(-.*\\)?")
-	 (remove-re (mapconcat 'identity
-			       (mapcar (lambda (f) (concat "^" f "$"))
-				       (list (if (featurep 'xemacs)
-						 "org-colview"
-					       "org-colview-xemacs")
-					     "org" "org-loaddefs" "org-version"))
-			       "\\|"))
+	 (remove-re (format "\\`%s\\'"
+			    (regexp-opt '("org" "org-loaddefs" "org-version"))))
 	 (feats (delete-dups
 		 (mapcar 'file-name-sans-extension
 			 (mapcar 'file-name-nondirectory
@@ -22205,8 +22142,7 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 (defun org-display-warning (message) ;; Copied from Emacs-Muse
   "Display the given MESSAGE as a warning."
   (if (fboundp 'display-warning)
-      (display-warning 'org message
-                       (if (featurep 'xemacs) 'warning :warning))
+      (display-warning 'org message :warning)
     (let ((buf (get-buffer-create "*Org warnings*")))
       (with-current-buffer buf
         (goto-char (point-max))
@@ -24073,8 +24009,7 @@ the cursor is already beyond the end of the headline."
 	  ;; If element is hidden, `move-end-of-line' would put point
 	  ;; after it.  Use `end-of-line' to stay on current line.
 	  (call-interactively 'end-of-line))
-	 (t (call-interactively move-fun)))))
-    (org-no-warnings (and (featurep 'xemacs) (setq zmacs-region-stays t))))
+	 (t (call-interactively move-fun))))))
   (setq disable-point-adjustment
         (or (not (invisible-p (point)))
             (not (invisible-p (max (point-min) (1- (point))))))))

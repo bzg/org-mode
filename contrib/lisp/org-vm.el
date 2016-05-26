@@ -117,12 +117,10 @@
 	(cond
 	 ((featurep 'tramp)
 	  ;; use tramp to access the file
-	  (if (featurep 'xemacs)
-	      (setq folder (format "[%s@%s]%s" user host file))
-	    (setq folder (format "/%s@%s:%s" user host file))))
+	  (setq folder (format "/%s@%s:%s" user host file)))
 	 (t
 	  ;; use ange-ftp or efs
-	  (require (if (featurep 'xemacs) 'efs 'ange-ftp))
+	  (require 'ange-ftp)
 	  (setq folder (format "/%s@%s:%s" user host file))))))
   (when folder
     (funcall (cdr (assq 'vm org-link-frame-setup)) folder readonly)

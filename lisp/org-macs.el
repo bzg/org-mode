@@ -384,10 +384,8 @@ the value in cdr."
 
 ;;;###autoload
 (defmacro org-load-noerror-mustsuffix (file)
-  "Load FILE with optional arguments NOERROR and MUSTSUFFIX.  Drop the MUSTSUFFIX argument for XEmacs, which doesn't recognize it."
-  (if (featurep 'xemacs)
-      `(load ,file 'noerror)
-    `(load ,file 'noerror nil nil 'mustsuffix)))
+  "Load FILE with optional arguments NOERROR and MUSTSUFFIX."
+  `(load ,file 'noerror nil nil 'mustsuffix))
 
 (provide 'org-macs)
 
