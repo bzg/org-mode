@@ -8003,7 +8003,7 @@ Set it to HEADING when provided."
    (org-back-to-heading t)
    (when (looking-at org-complex-heading-regexp)
      (let* ((old (match-string-no-properties 4))
-	    (new (org-trim (or heading (read-string "Edit: " old)))))
+	    (new (org-trim (or heading (save-match-data (read-string "Edit: " old))))))
        (unless (equal old new)
 	 (if old (replace-match new t t nil 4)
 	   (goto-char (or (match-end 3) (match-end 2) (match-end 1)))
