@@ -22884,9 +22884,9 @@ If PROCESS is a function, it is called with a single argument:
 the SOURCE file.
 
 If it is a list of commands, each of them is called using
-`shell-command'.  By default, in each command, %b, %f and %o are
-replaced, respectively, with SOURCE base name, SOURCE full name
-and SOURCE directory.  It is possible, however, to use more
+`shell-command'.  By default, in each command, %b, %f, %F and %o
+are replaced with, respectively, SOURCE base name, name, full
+name and directory.  It is possible, however, to use more
 place-holders by specifying them in optional argument SPEC, as an
 alist following the pattern (CHARACTER . REPLACEMENT-STRING).
 
@@ -22896,13 +22896,12 @@ it for output.
 
 `default-directory' is set to SOURCE directory during the whole
 process."
-  (let* ((base-name (file-name-sans-extension (file-name-nondirectory source)))
+  (let* ((source-name (file-name-nondirectory source))
+	 (base-name (file-name-sans-extension source-name))
 	 (full-name (file-truename source))
 	 (out-dir (file-name-directory source))
 	 ;; Properly set working directory for compilation.
-	 (default-directory (if (file-name-absolute-p source)
-				(file-name-directory full-name)
-			      default-directory))
+	 (default-directory (file-name-directory full-name))
 	 (time (current-time))
 	 (err-msg (if (stringp err-msg) (concat ".  " err-msg) "")))
     (save-window-excursion
@@ -22912,7 +22911,8 @@ process."
          (let ((log-buf (and log-buf (get-buffer-create log-buf)))
                (spec (append spec
 			     `((?b . ,(shell-quote-argument base-name))
-			       (?f . ,(shell-quote-argument full-name))
+			       (?f . ,(shell-quote-argument source-name))
+			       (?F . ,(shell-quote-argument full-name))
 			       (?o . ,(shell-quote-argument out-dir))))))
            (dolist (command process)
              (shell-command (format-spec command spec) log-buf))))
