@@ -10045,13 +10045,29 @@ shortcuts to easily insert code blocks.
 
 Both in @code{example} and in @code{src} snippets, you can add a @code{-n}
 switch to the end of the @code{BEGIN} line, to get the lines of the example
-numbered.  If you use a @code{+n} switch, the numbering from the previous
-numbered snippet will be continued in the current one.  In literal examples,
-Org will interpret strings like @samp{(ref:name)} as labels, and use them as
-targets for special hyperlinks like @code{[[(name)]]} (i.e., the reference name
-enclosed in single parenthesis).  In HTML, hovering the mouse over such a
-link will remote-highlight the corresponding code line, which is kind of
-cool.
+numbered.  The @code{-n} takes an optional numeric argument specifying the
+starting line number of the block.  If you use a @code{+n} switch, the
+numbering from the previous numbered snippet will be continued in the current
+one.  The @code{+n} can also take a numeric argument.  The value of the
+argument will be added to the last line of the previous block to determine
+the starting line number.
+
+@example
+#+BEGIN_SRC emacs-lisp -n 20
+ ;; this will export with line number 20
+ (message "This is line 21")
+#+END_SRC
+#+BEGIN_SRC emacs-lisp +n 10
+ ;; This will be listed as line 31
+ (message "This is line 32")
+#+END_SRC
+@end example
+
+In literal examples, Org will interpret strings like @samp{(ref:name)} as
+labels, and use them as targets for special hyperlinks like @code{[[(name)]]}
+(i.e., the reference name enclosed in single parenthesis).  In HTML, hovering
+the mouse over such a link will remote-highlight the corresponding code line,
+which is kind of cool.
 
 You can also add a @code{-r} switch which @i{removes} the labels from the
 source code@footnote{Adding @code{-k} to @code{-n -r} will @i{keep} the

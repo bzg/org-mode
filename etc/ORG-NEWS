@@ -159,6 +159,22 @@ If the block has a =#+NAME:= attribute assigned, then the HTML element
 will have an ~id~ attribute with that name in the HTML export. This
 enables one to create links to these elements in other places, e.g.,
 ~<a href="#name">text</a>~.
+**** Line Numbering in SRC/EXAMPLE blocks support arbitrary start number
+The ~-n~ option to ~SRC~ and ~EXAMPLE~ blocks can now take a numeric
+argument to specify the staring line number for the source or example
+block.  The ~+n~ option can now take a numeric argument that will be
+added to the last line number from the previous block as the starting
+point for the SRC/EXAMPLE block.
+#+BEGIN_SRC org
+  ,#+BEGIN_SRC emacs-lisp -n 20
+    ;; this will export with line number 20
+    (message "This is line 21")
+  ,#+END_SRC
+  ,#+BEGIN_SRC emacs-lisp +n 10
+    ;; This will be listed as line 31
+    (message "This is line 32")
+  ,#+END_SRC
+#+END_SRC
 
 *** Babel
 **** Support for SLY in Lisp blocks
