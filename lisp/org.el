@@ -25052,7 +25052,8 @@ when non-nil, is a regexp matching keywords names."
   "Produce the index for Imenu."
   (mapc (lambda (x) (move-marker x nil)) org-imenu-markers)
   (setq org-imenu-markers nil)
-  (let* ((n org-imenu-depth)
+  (let* ((case-fold-search nil)
+	 (n org-imenu-depth)
 	 (re (concat "^" (org-get-limited-outline-regexp)))
 	 (subs (make-vector (1+ n) nil))
 	 (last-level 0)
