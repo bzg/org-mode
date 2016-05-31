@@ -14923,7 +14923,7 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
     (if	(and (looking-at (org-re ".*?\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"))
 	     (< pos (match-beginning 2)))
 	(progn
-	  (setq tags-l (- (match-end 2) (match-beginning 2)))
+	  (setq tags-l (string-width (match-string 2)))
 	  (goto-char (match-beginning 1))
 	  (insert " ")
 	  (delete-region (point) (1+ (match-beginning 2)))
