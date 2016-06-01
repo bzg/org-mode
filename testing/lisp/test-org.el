@@ -1265,6 +1265,50 @@
 
 ;;; Headline
 
+(ert-deftest test-org/get-heading ()
+  "Test `org-get-heading' specifications."
+  ;; Return current heading, even if point is not on it.
+  (should
+   (equal "H"
+	  (org-test-with-temp-text "* H"
+	    (org-get-heading))))
+  (should
+   (equal "H"
+	  (org-test-with-temp-text "* H\nText<point>"
+	    (org-get-heading))))
+  ;; Without any optional argument, return TODO keywords and tags.
+  (should
+   (equal "TODO H"
+	  (org-test-with-temp-text "#+TODO: TODO | DONE\n* TODO H<point>"
+	    (org-get-heading))))
+  (should
+   (equal "H :tag:"
+	  (org-test-with-temp-text "* H :tag:"
+	    (org-get-heading))))
+  ;; With NO-TAGS argument, ignore tags.
+  (should
+   (equal "TODO H"
+	  (org-test-with-temp-text "#+TODO: TODO | DONE\n* TODO H<point>"
+	    (org-get-heading t))))
+  (should
+   (equal "H"
+	  (org-test-with-temp-text "* H :tag:"
+	    (org-get-heading t))))
+  ;; With NO-TODO, ignore TODO keyword.
+  (should
+   (equal "H"
+	  (org-test-with-temp-text "#+TODO: TODO | DONE\n* TODO H<point>"
+	    (org-get-heading nil t))))
+  (should
+   (equal "H :tag:"
+	  (org-test-with-temp-text "* H :tag:"
+	    (org-get-heading nil t))))
+  ;; TODO keywords are case-sensitive.
+  (should
+   (equal "Todo H"
+	  (org-test-with-temp-text "#+TODO: TODO | DONE\n* Todo H<point>"
+	    (org-get-heading nil t)))))
+
 (ert-deftest test-org/in-commented-heading-p ()
   "Test `org-in-commented-heading-p' specifications."
   ;; Commented headline.
