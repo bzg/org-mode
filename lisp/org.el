@@ -7942,20 +7942,21 @@ When NO-TAGS is non-nil, don't include tags.
 When NO-TODO is non-nil, don't include TODO keywords."
   (save-excursion
     (org-back-to-heading t)
-    (cond
-     ((and no-tags no-todo)
-      (looking-at org-complex-heading-regexp)
-      (match-string 4))
-     (no-tags
-      (looking-at (concat org-outline-regexp
-			  "\\(.*?\\)"
-			  "\\(?:[ \t]+:[[:alnum:]:_@#%]+:\\)?[ \t]*$"))
-      (match-string 1))
-     (no-todo
-      (looking-at org-todo-line-regexp)
-      (match-string 3))
-     (t (looking-at org-heading-regexp)
-	(match-string 2)))))
+    (let ((case-fold-search nil))
+      (cond
+       ((and no-tags no-todo)
+	(looking-at org-complex-heading-regexp)
+	(match-string 4))
+       (no-tags
+	(looking-at (concat org-outline-regexp
+			    "\\(.*?\\)"
+			    "\\(?:[ \t]+:[[:alnum:]:_@#%]+:\\)?[ \t]*$"))
+	(match-string 1))
+       (no-todo
+	(looking-at org-todo-line-regexp)
+	(match-string 3))
+       (t (looking-at org-heading-regexp)
+	  (match-string 2))))))
 
 (defvar orgstruct-mode)   ; defined below
 
