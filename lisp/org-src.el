@@ -494,26 +494,32 @@ as `org-src-fontify-natively' is non-nil."
     (when (fboundp lang-mode)
       (let ((string (buffer-substring-no-properties start end))
 	    (modified (buffer-modified-p))
-	    (org-buffer (current-buffer)) pos next)
+	    (org-buffer (current-buffer)))
 	(remove-text-properties start end '(face nil))
 	(with-current-buffer
 	    (get-buffer-create
-	     (concat " org-src-fontification:" (symbol-name lang-mode)))
-	  (delete-region (point-min) (point-max))
-	  (insert string " ") ;; so there's a final property change
+	     (format " *org-src-fontification:%s*" lang-mode))
+	  (erase-buffer)
+	  ;; Add string and a final space to ensure property change.
+	  (insert string " ")
 	  (unless (eq major-mode lang-mode) (funcall lang-mode))
 	  (org-font-lock-ensure)
-	  (setq pos (point-min))
-	  (while (setq next (next-single-property-change pos 'face))
-	    (put-text-property
-	     (+ start (1- pos)) (1- (+ start next)) 'face
-	     (get-text-property pos 'face) org-buffer)
-	    (setq pos next)))
+	  (let ((pos (point-min)) next)
+	    (while (setq next (next-single-property-change pos 'face))
+	      (let ((new-face (get-text-property pos 'face)))
+		(put-text-property
+		 (+ start (1- pos)) (1- (+ start next)) 'face
+		 (list :inherit (append (and new-face (list new-face))
+					(list 'org-block)))
+		 org-buffer))
+	      (setq pos next))
+	    ;; Add the face to the remaining part of the text.
+	    (put-text-property (1- (+ start pos)) end 'face
+			       '(:inherit org-block) org-buffer)))
 	(add-text-properties
 	 start end
 	 '(font-lock-fontified t fontified t font-lock-multiline t))
 	(set-buffer-modified-p modified)))))
-
 
 
 ;;; Escape contents

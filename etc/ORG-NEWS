@@ -301,6 +301,17 @@ sensitive.  Otherwise, it is case insensitive.
 *** More robust repeated =ox-latex= footnote handling
 Repeated footnotes are now numbered by referring to a label in the
 first footnote.
+*** The ~org-block~ face is inherited by ~src-blocks~
+This works also when =org-src-fontify-natively= is non-nil.
+
+Thus, =org-block-background= Org 8.2 can be replicated with something
+like the following,
+#+BEGIN_SRC emacs-lisp
+  (require 'color)
+  (set-face-attribute 'org-block nil :background
+                      (color-darken-name
+                       (face-attribute 'default :background) 3))
+#+END_SRC
 ** New functions
 *** ~org-next-line-empty-p~
 It replaces the deprecated ~next~ argument to ~org-previous-line-empty-p~.
