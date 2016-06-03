@@ -364,33 +364,33 @@
 	  (calendar-gregorian-from-absolute
 	   (org-closest-date "<2012-03-29 +2y>" "<2014-03-04>" 'future)))))
 
-(ert-deftest test-org/deadline-close ()
-  "Test `org-deadline-close' specifications."
+(ert-deftest test-org/deadline-close-p ()
+  "Test `org-deadline-close-p' specifications."
   ;; Pretend that the current time is 2016-06-03 Fri 01:43
   (flet ((current-time () '(22353 6425 905205 644000)))
     ;; Timestamps are close if they are within `ndays' of lead time.
     (org-test-with-temp-text "* Heading"
-      (should (org-deadline-close "2016-06-03 Fri" 0))
-      (should (org-deadline-close "2016-06-02 Thu" 0))
-      (should-not (org-deadline-close "2016-06-04 Sat" 0))
-      (should (org-deadline-close "2016-06-04 Sat" 1))
-      (should (org-deadline-close "2016-06-03 Fri 12:00" 0)))
+      (should (org-deadline-close-p "2016-06-03 Fri" 0))
+      (should (org-deadline-close-p "2016-06-02 Thu" 0))
+      (should-not (org-deadline-close-p "2016-06-04 Sat" 0))
+      (should (org-deadline-close-p "2016-06-04 Sat" 1))
+      (should (org-deadline-close-p "2016-06-03 Fri 12:00" 0)))
     ;; Read `ndays' from timestamp if argument not given.
     (org-test-with-temp-text "* H"
-      (should (org-deadline-close "2016-06-04 Sat -1d"))
-      (should-not (org-deadline-close "2016-06-04 Sat -0d"))
-      (should (org-deadline-close "2016-06-10 Fri -1w"))
-      (should-not (org-deadline-close "2016-06-11 Sat -1w")))
+      (should (org-deadline-close-p "2016-06-04 Sat -1d"))
+      (should-not (org-deadline-close-p "2016-06-04 Sat -0d"))
+      (should (org-deadline-close-p "2016-06-10 Fri -1w"))
+      (should-not (org-deadline-close-p "2016-06-11 Sat -1w")))
     ;; Prefer `ndays' argument over lead time in timestamp.
     (org-test-with-temp-text "* H"
-      (should (org-deadline-close "2016-06-04 Sat -0d" 1))
-      (should-not (org-deadline-close "2016-06-04 Sat -0d" 0)))
+      (should (org-deadline-close-p "2016-06-04 Sat -0d" 1))
+      (should-not (org-deadline-close-p "2016-06-04 Sat -0d" 0)))
     ;; Completed tasks are never close.
     (let ((org-todo-keywords '(("TODO" "|" "DONE"))))
       (org-test-with-temp-text "* TODO Heading"
-	(should (org-deadline-close "2016-06-03")))
+	(should (org-deadline-close-p "2016-06-03")))
       (org-test-with-temp-text "* DONE Heading"
-	(should-not (org-deadline-close "2016-06-03"))))))
+	(should-not (org-deadline-close-p "2016-06-03"))))))
 
 
 ;;; Drawers

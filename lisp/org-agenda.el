@@ -5550,7 +5550,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	       (cond
 		((memq org-agenda-todo-ignore-deadlines '(t all)) t)
 		((eq org-agenda-todo-ignore-deadlines 'far)
-		 (not (org-deadline-close (match-string 1))))
+		 (not (org-deadline-close-p (match-string 1))))
 		((eq org-agenda-todo-ignore-deadlines 'future)
 		 (> (org-time-stamp-to-now
 		     (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds) 0))
@@ -5560,7 +5560,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 		((numberp org-agenda-todo-ignore-deadlines)
 		 (org-agenda-todo-custom-ignore-p
 		  (match-string 1) org-agenda-todo-ignore-deadlines))
-		(t (org-deadline-close (match-string 1)))))
+		(t (org-deadline-close-p (match-string 1)))))
 	  (and org-agenda-todo-ignore-timestamp
 	       (let ((buffer (current-buffer))
 		     (regexp

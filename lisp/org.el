@@ -17477,7 +17477,7 @@ If SECONDS is non-nil, return the difference in seconds."
     (- (funcall fdiff (org-time-string-to-time timestamp-string))
        (funcall fdiff (current-time)))))
 
-(defun org-deadline-close (timestamp-string &optional ndays)
+(defun org-deadline-close-p (timestamp-string &optional ndays)
   "Is the time in TIMESTAMP-STRING close to the current date?"
   (setq ndays (or ndays (org-get-wdays timestamp-string)))
   (and (<= (org-time-stamp-to-now timestamp-string) ndays)
@@ -17533,7 +17533,7 @@ days.  If the prefix is a raw \\[universal-argument] prefix, all deadlines are s
 	 (case-fold-search nil)
 	 (regexp (concat "\\<" org-deadline-string " *<\\([^>]+\\)>"))
 	 (callback
-	  (lambda () (org-deadline-close (match-string 1) org-warn-days))))
+	  (lambda () (org-deadline-close-p (match-string 1) org-warn-days))))
     (message "%d deadlines past-due or due within %d days"
 	     (org-occur regexp nil callback)
 	     org-warn-days)))
