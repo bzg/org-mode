@@ -1272,19 +1272,19 @@ When PRINTF is non-nil, use it to format the result."
    times))
 
 (defun org-columns--summary-min-age (ages _)
-  "Compute the minimum time among TIMES."
+  "Compute the minimum time among AGES."
   (format-seconds
    "%dd %.2hh %mm %ss"
    (apply #'min (mapcar #'org-columns--age-to-seconds ages))))
 
 (defun org-columns--summary-max-age (ages _)
-  "Compute the maximum time among TIMES."
+  "Compute the maximum time among AGES."
   (format-seconds
    "%dd %.2hh %mm %ss"
    (apply #'max (mapcar #'org-columns--age-to-seconds ages))))
 
 (defun org-columns--summary-mean-age (ages _)
-  "Compute the minimum time among TIMES."
+  "Compute the minimum time among AGES."
   (format-seconds
    "%dd %.2hh %mm %ss"
    (/ (apply #'+ (mapcar #'org-columns--age-to-seconds ages))
