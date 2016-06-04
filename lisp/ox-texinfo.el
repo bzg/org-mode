@@ -68,6 +68,7 @@
     (special-block . org-texinfo-special-block)
     (src-block . org-texinfo-src-block)
     (statistics-cookie . org-texinfo-statistics-cookie)
+    (strike-through . org-texinfo-strike-through)
     (subscript . org-texinfo-subscript)
     (superscript . org-texinfo-superscript)
     (table . org-texinfo-table)
@@ -76,6 +77,7 @@
     (target . org-texinfo-target)
     (template . org-texinfo-template)
     (timestamp . org-texinfo-timestamp)
+    (underline . org-texinfo-underline)
     (verbatim . org-texinfo-verbatim)
     (verse-block . org-texinfo-verse-block))
   :filters-alist
@@ -286,24 +288,24 @@ When nil, no transformation is made."
 (defcustom org-texinfo-text-markup-alist '((bold . "@strong{%s}")
 					   (code . code)
 					   (italic . "@emph{%s}")
-					   (verbatim . verb)
-					   (comment . "@c %s"))
+					   (verbatim . verb))
   "Alist of Texinfo expressions to convert text markup.
 
-The key must be a symbol among `bold', `italic' and `comment'.
-The value is a formatting string to wrap fontified text with.
+The key must be a symbol among `bold', `code', `italic',
+`strike-through', `underscore' and `verbatim'.  The value is
+a formatting string to wrap fontified text with.
 
 Value can also be set to the following symbols: `verb' and
-`code'.  For the former, Org will use \"@verb\" to
-create a format string and select a delimiter character that
-isn't in the string.  For the latter, Org will use \"@code\"
-to typeset and try to protect special characters.
+`code'.  For the former, Org will use \"@verb\" to create
+a format string and select a delimiter character that isn't in
+the string.  For the latter, Org will use \"@code\" to typeset
+and try to protect special characters.
 
 If no association can be found for a given markup, text will be
 returned as-is."
   :group 'org-export-texinfo
   :type 'alist
-  :options '(bold code italic verbatim comment))
+  :options '(bold code italic strike-through underscore verbatim))
 
 ;;;; Drawers
 
@@ -1329,6 +1331,15 @@ contextual information."
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (org-element-property :value statistics-cookie))
 
+
+;;;; Strike-through
+
+(defun org-texinfo-strike-through (_strike-through contents info)
+  "Transcode STRIKE-THROUGH from Org to Texinfo.
+CONTENTS is the text with strike-through markup.  INFO is a plist
+holding contextual information."
+  (org-texinfo--text-markup contents 'strike-through info))
+
 ;;;; Subscript
 
 (defun org-texinfo-subscript (_subscript contents _info)
@@ -1452,6 +1463,14 @@ information."
       ((inactive inactive-range)
        (format (plist-get info :texinfo-inactive-timestamp-format) value))
       (t (format (plist-get info :texinfo-diary-timestamp-format) value)))))
+
+;;;; Underline
+
+(defun org-texinfo-underline (_underline contents info)
+  "Transcode UNDERLINE from Org to Texinfo.
+CONTENTS is the text with underline markup.  INFO is a plist
+holding contextual information."
+  (org-texinfo--text-markup contents 'underline info))
 
 ;;;; Verbatim
 
