@@ -83,9 +83,8 @@
        (should-error (org-attach-annex-get-maybe (expand-file-name "test-file"))))
      (let ((org-attach-annex-auto-get 'ask)
 	   (called nil))
-       (flet ((y-or-n-p (prompt)
-			   (setq called 'was-called)
-			   t))
+       (cl-letf (((symbol-function 'y-or-n-p)
+		  (lambda (_) (setq called 'was-called) t)))
 	 (org-attach-annex-get-maybe (expand-file-name "test-file"))
 	 ;; check that the file has the right contents
 	 (with-temp-buffer

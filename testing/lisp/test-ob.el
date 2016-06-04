@@ -482,11 +482,11 @@ echo \"[[file:./cv.cls]]\"
    echo \"[[file:./cv.cls]]\"
 #+end_src
 "
-    (flet ((next-result ()
-			(org-babel-next-src-block)
-			(org-babel-execute-src-block)
-			(goto-char (org-babel-where-is-src-block-result))
-			(forward-line 1)))
+    (cl-flet ((next-result ()
+			   (org-babel-next-src-block)
+			   (org-babel-execute-src-block)
+			   (goto-char (org-babel-where-is-src-block-result))
+			   (forward-line 1)))
       (goto-char (point-min))
       (next-result)
       (should (eq (org-element-type (org-element-at-point)) 'fixed-width))
@@ -653,16 +653,16 @@ x
       (should (looking-at ": 2")))))
 
 (ert-deftest test-ob/eval-header-argument ()
-  (flet ((check-eval (eval runp)
-		     (org-test-with-temp-text (format "#+begin_src emacs-lisp :eval %s
+  (cl-flet ((check-eval (eval runp)
+			(org-test-with-temp-text (format "#+begin_src emacs-lisp :eval %s
   (setq foo :evald)
 #+end_src" eval)
-		       (let ((foo :not-run))
-			 (if runp
-			     (progn (should (org-babel-execute-src-block))
-				    (should (eq foo :evald)))
-			   (progn (should-not (org-babel-execute-src-block))
-				  (should-not (eq foo :evald))))))))
+			  (let ((foo :not-run))
+			    (if runp
+				(progn (should (org-babel-execute-src-block))
+				       (should (eq foo :evald)))
+			      (progn (should-not (org-babel-execute-src-block))
+				     (should-not (eq foo :evald))))))))
     (check-eval "never" nil)
     (check-eval "no" nil)
     (check-eval "never-export" t)

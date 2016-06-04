@@ -35,7 +35,8 @@
    (equal
     "* a\n:PROPERTIES:\n:pname: \n:END:\n* b\n:PROPERTIES:\n:pname: pvalue\n:END:\n"
     (org-test-with-temp-text "* a\n:PROPERTIES:\n:pna<point>\n:END:\n* b\n:PROPERTIES:\n:pname: pvalue\n:END:\n"
-      (flet ((y-or-n-p (prompt) (error "Should not be called")))
+      (cl-letf (((symbol-function 'y-or-n-p)
+		 (lambda (_) (error "Should not be called"))))
 	(pcomplete))
       (buffer-string)))))
 

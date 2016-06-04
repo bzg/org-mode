@@ -1604,7 +1604,8 @@ e^{i\\pi}+1=0
    (equal
     "127.0.0.1"
     (org-test-with-temp-text "[[http://orgmode.org]]"
-      (flet ((link-translate (type path) (cons type "127.0.0.1")))
+      (cl-letf (((symbol-function 'link-translate)
+		 (lambda (type _) (cons type "127.0.0.1"))))
 	(let ((org-link-translation-function 'link-translate))
 	  (org-element-property
 	   :path
