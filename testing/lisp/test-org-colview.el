@@ -415,10 +415,13 @@
   ;; {@min}, {@max} and {@mean} apply to ages.
   (should
    (equal
-    (let ((org-columns--time (float-time (current-time))))
-      (org-columns--summary-min-age (list "<2014-03-04 Tue>") nil))
-    (org-test-with-temp-text
-	"* H
+    "0d 00h 0m 0s"
+    (cl-letf (((symbol-function 'current-time)
+	       (lambda ()
+		 (apply #'encode-time
+			(org-parse-time-string "<2014-03-04 Tue>")))))
+      (org-test-with-temp-text
+	  "* H
 ** S1
 :PROPERTIES:
 :A: <2012-03-29 Thu>
@@ -427,14 +430,17 @@
 :PROPERTIES:
 :A: <2014-03-04 Tue>
 :END:"
-      (let ((org-columns-default-format "%A{@min}")) (org-columns))
-      (get-char-property (point) 'org-columns-value-modified))))
+	(let ((org-columns-default-format "%A{@min}")) (org-columns))
+	(get-char-property (point) 'org-columns-value-modified)))))
   (should
    (equal
-    (let ((org-columns--time (float-time (current-time))))
-      (org-columns--summary-max-age (list "<2012-03-29 Thu>") nil))
-    (org-test-with-temp-text
-	"* H
+    "705d 01h 0m 0s"
+    (cl-letf (((symbol-function 'current-time)
+	       (lambda ()
+		 (apply #'encode-time
+			(org-parse-time-string "<2014-03-04 Tue>")))))
+      (org-test-with-temp-text
+	  "* H
 ** S1
 :PROPERTIES:
 :A: <2012-03-29 Thu>
@@ -443,15 +449,17 @@
 :PROPERTIES:
 :A: <2014-03-04 Tue>
 :END:"
-      (let ((org-columns-default-format "%A{@max}")) (org-columns))
-      (get-char-property (point) 'org-columns-value-modified))))
+	(let ((org-columns-default-format "%A{@max}")) (org-columns))
+	(get-char-property (point) 'org-columns-value-modified)))))
   (should
    (equal
-    (let ((org-columns--time (float-time (current-time))))
-      (org-columns--summary-mean-age
-       (list "<2012-03-29 Thu>" "<2014-03-04 Tue>") nil))
-    (org-test-with-temp-text
-	"* H
+    "352d 12h 30m 0s"
+    (cl-letf (((symbol-function 'current-time)
+	       (lambda ()
+		 (apply #'encode-time
+			(org-parse-time-string "<2014-03-04 Tue>")))))
+      (org-test-with-temp-text
+	  "* H
 ** S1
 :PROPERTIES:
 :A: <2012-03-29 Thu>
@@ -460,8 +468,8 @@
 :PROPERTIES:
 :A: <2014-03-04 Tue>
 :END:"
-      (let ((org-columns-default-format "%A{@mean}")) (org-columns))
-      (get-char-property (point) 'org-columns-value-modified))))
+	(let ((org-columns-default-format "%A{@mean}")) (org-columns))
+	(get-char-property (point) 'org-columns-value-modified)))))
   ;; If a time value is expressed as a duration, return a duration.
   ;; If any of them follows H:MM:SS pattern, use it too.
   (should
