@@ -45,8 +45,11 @@
   (defalias 'outline-show-children 'show-children)
   (defalias 'outline-show-entry 'show-entry)
   (defalias 'outline-show-subtree 'show-subtree)
-  (defalias 'xref-find-definitions 'find-tag)
-  (defalias 'gui-get-selection 'x-get-selection))
+  (defalias 'xref-find-definitions 'find-tag))
+
+(eval-when-compile
+  (when (< emacs-major-version 25)
+    (defalias 'gui-get-selection 'x-get-selection)))
 
 (defun org-compatible-face (inherits specs)
   "Make a compatible face specification.
