@@ -210,6 +210,26 @@ mandatory):
  :database <database>
  :dbpassword <secret>
 #+END_EXAMPLE
+**** Improved support to Microsoft SQL Server via ~sqlcmd~
+=ob-sql= library removes support to the ~msosql~ engine which uses the
+deprecated ~osql~ command line tool, and replaces it with ~mssql~
+engine which uses the ~sqlcmd~ command line tool.  Use with properties
+like this:
+
+#+BEGIN_EXAMPLE
+  :engine mssql
+  :dbhost <host.com>
+  :dbuser <username>
+  :dbpassword <secret>
+  :database <database>
+#+END_EXAMPLE
+
+If you want to use the *trusted connection* feature, omit *both* the
+=dbuser= and =dbpassword= properties and add =cmdline -E= to the
+properties.
+
+If your Emacs is running in a Cygwin environment, the =ob-sql= library
+can pass the converted path to the =sqlcmd= tool.
 **** Support for additional plantuml output formats
 The support for output formats of [[http://plantuml.com/][plantuml]] has been extended to now
 include:
