@@ -4509,6 +4509,13 @@ Paragraph<point>"
 	     (org-fix-tags-on-the-fly))
 	    (buffer-string)))))
 
+(ert-deftest test-org/tags-at ()
+  (should
+   (equal '("foo" "bar")
+	  (org-test-with-temp-text
+	   "* T<point>est :foo:bar:"
+	   (org-get-tags-at)))))
+
 
 ;;; Timestamps API
 
