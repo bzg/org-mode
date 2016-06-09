@@ -5976,7 +5976,12 @@ by a #."
 	      (add-text-properties beg1 block-end '(src-block t)))
 	     (quoting
 	      (add-text-properties beg1 (min (point-max) (1+ end1))
-				   '(face org-block))) ; end of source block
+				   (list 'face
+					 (list :inherit
+					       (let ((face-name
+						      (intern (format "org-block-%s" lang))))
+						 (append (and (facep face-name) (list face-name))
+							 '(org-block))))))) ; end of source block
 	     ((not org-fontify-quote-and-verse-blocks))
 	     ((string= block-type "quote")
 	      (add-text-properties beg1 (min (point-max) (1+ end1)) '(face org-quote)))

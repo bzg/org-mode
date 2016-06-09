@@ -494,7 +494,10 @@ as `org-src-fontify-natively' is non-nil."
     (when (fboundp lang-mode)
       (let ((string (buffer-substring-no-properties start end))
 	    (modified (buffer-modified-p))
-	    (org-buffer (current-buffer)))
+	    (org-buffer (current-buffer))
+	    (block-faces (let ((face-name (intern (format "org-block-%s" lang))))
+			   (append (and (facep face-name) (list face-name))
+				   '(org-block)))))
 	(remove-text-properties start end '(face nil))
 	(with-current-buffer
 	    (get-buffer-create
@@ -510,12 +513,12 @@ as `org-src-fontify-natively' is non-nil."
 		(put-text-property
 		 (+ start (1- pos)) (1- (+ start next)) 'face
 		 (list :inherit (append (and new-face (list new-face))
-					(list 'org-block)))
+					block-faces))
 		 org-buffer))
 	      (setq pos next))
 	    ;; Add the face to the remaining part of the text.
 	    (put-text-property (1- (+ start pos)) end 'face
-			       '(:inherit org-block) org-buffer)))
+			       (list :inherit block-faces) org-buffer)))
 	(add-text-properties
 	 start end
 	 '(font-lock-fontified t fontified t font-lock-multiline t))
