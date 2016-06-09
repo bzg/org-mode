@@ -14870,7 +14870,7 @@ ignore inherited ones."
 		    (org-back-to-heading t)
 		    (while (not (equal lastpos (point)))
 		      (setq lastpos (point))
-		      (when (looking-at ".+:\\([[:alnum:]_@#%:]+\\):[ \t]*$")
+		      (when (looking-at ".+?:\\([[:alnum:]_@#%:]+\\):[ \t]*$")
 			(setq ltags (org-split-string
 				     (match-string-no-properties 1) ":"))
 			(when parent
