@@ -14963,8 +14963,21 @@ variable to @code{nil} to switch without asking.
 @end table
 
 To turn on native code fontification in the @emph{Org} buffer, configure the
-variable @code{org-src-fontify-natively}.
+variable @code{org-src-fontify-natively}.  You can also change the appearance
+of source blocks by customizing the @code{org-block} face or for specific
+languages, by defining @code{org-block-LANGUAGE} faces.  The following
+example shades the background of ``ordinary'' blocks while allowing Emacs
+Lisp source blocks to have a special color.
+@lisp
+(require 'color)
+(set-face-attribute 'org-block nil :background
+                    (color-darken-name
+                     (face-attribute 'default :background) 3))
 
+(defface org-block-emacs-lisp
+  '((t (:background "#EEE2FF")))
+  "Face for Emacs Lisp src blocks")
+@end lisp
 
 @node Exporting code blocks
 @section Exporting code blocks

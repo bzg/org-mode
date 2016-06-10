@@ -516,7 +516,10 @@ follows a #+DATE:, #+AUTHOR: or #+EMAIL: keyword."
        (:foreground "green"))
       (((class color) (min-colors 8) (background dark))
        (:foreground "yellow"))))
-  "Face text in #+begin ... #+end blocks."
+  "Face text in #+begin ... #+end blocks.
+In addition to this face that take precedence for particular
+languages.  For instance, to change the block face for Emacs-Lisp
+blocks define a `org-block-emacs-lisp' face."
   :group 'org-faces
   :version "22.1")
 

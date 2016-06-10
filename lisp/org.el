@@ -5912,7 +5912,8 @@ prompted for."
     t))
 
 (defcustom org-src-fontify-natively t
-  "When non-nil, fontify code in code blocks."
+  "When non-nil, fontify code in code blocks.
+See also the `org-block' face."
   :type 'boolean
   :version "24.4"
   :package-version '(Org . "8.3")
