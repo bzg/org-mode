@@ -1155,6 +1155,11 @@ Some other text
    (eq 'inline-babel-call
        (org-test-with-temp-text
 	   "call_test[:results output](x=2)[:results\nhtml]"
+	 (org-element-type (org-element-context)))))
+  ;; Parse parameters containing round brackets.
+  (should
+   (eq 'inline-babel-call
+       (org-test-with-temp-text "call_test[:var x='(1)](x=2)"
 	 (org-element-type (org-element-context))))))
 
 
@@ -1220,7 +1225,12 @@ Some other text
   (should
    (equal "foo)"
 	  (org-test-with-temp-text "src_emacs-lisp{foo)}"
-	    (org-element-property :value (org-element-context))))))
+	    (org-element-property :value (org-element-context)))))
+  ;; Parse parameters containing square brackets.
+  (should
+   (eq 'inline-src-block
+       (org-test-with-temp-text "src_emacs-lisp[:var table=t[1,1]]{(+ 1 1)}"
+	 (org-element-type (org-element-context))))))
 
 
 ;;;; Inlinetask

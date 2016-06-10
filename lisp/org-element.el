@@ -421,6 +421,24 @@ Other brackets are treated as spaces.")
   "Table used internally to pair only curly brackets.
 Other brackets are treated as spaces.")
 
+(defun org-element--parse-paired-brackets (char)
+  "Parse paired brackets at point.
+CHAR is the opening bracket to consider, as a character.  Return
+contents between brackets, as a string, or nil.  Also move point
+past the brackets."
+  (when (eq char (char-after))
+    (let ((syntax-table (pcase char
+			  (?\{ org-element--pair-curly-table)
+			  (?\[ org-element--pair-square-table)
+			  (?\( org-element--pair-round-table)
+			  (_ nil)))
+	  (pos (point)))
+      (when syntax-table
+	(with-syntax-table syntax-table
+	  (let ((end (ignore-errors (scan-lists pos 1 0))))
+	    (when end
+	      (goto-char end)
+	      (buffer-substring-no-properties (1+ pos) (1- end)))))))))
 
 
 ;;; Accessors and Setters
@@ -2852,43 +2870,32 @@ Assume point is at the beginning of the babel call."
   (save-excursion
     (catch :no-object
       (when (let ((case-fold-search nil))
-	      (looking-at
-	       "\\<call_\\([^ \t\n[{]+\\)\\(?:\\[\\([^]]*\\)\\]\\)?("))
-	(let ((begin (point))
-	      (call (match-string-no-properties 1))
-	      (inside-header
-	       (let ((h (org-string-nw-p (match-string-no-properties 2))))
-		 (and h (org-trim
-			 (replace-regexp-in-string "\n[ \t]*" " " h))))))
-	  (goto-char (1- (match-end 0)))
-	  (let* ((s (point))
-		 (e (with-syntax-table org-element--pair-round-table
-		      (or (ignore-errors (scan-lists s 1 0))
-			  ;; Invalid inline source block.
-			  (throw :no-object nil))))
-		 (arguments
-		  (let ((a (org-string-nw-p
-			    (buffer-substring-no-properties (1+ s) (1- e)))))
-		    (and a (org-trim
-			    (replace-regexp-in-string "\n[ \t]*" " " a)))))
-		 (end-header
-		  (progn
-		    (goto-char e)
-		    (and (looking-at "\\[\\([^]]*\\)\\]")
-			 (prog1 (org-string-nw-p (match-string-no-properties 1))
-			   (goto-char (match-end 0))))))
-		 (value (buffer-substring-no-properties begin (point)))
-		 (post-blank (skip-chars-forward " \t"))
-		 (end (point)))
-	    (list 'inline-babel-call
-		  (list :call call
-			:inside-header inside-header
-			:arguments arguments
-			:end-header end-header
-			:begin begin
-			:end end
-			:value value
-			:post-blank post-blank))))))))
+	      (looking-at "\\<call_\\([^ \t\n[(]+\\)[([]"))
+	(goto-char (match-end 1))
+	(let* ((begin (match-beginning 0))
+	       (call (match-string-no-properties 1))
+	       (inside-header
+		(let ((p (org-element--parse-paired-brackets ?\[)))
+		  (and (org-string-nw-p p)
+		       (replace-regexp-in-string "\n[ \t]*" " " (org-trim p)))))
+	       (arguments (or (org-element--parse-paired-brackets ?\()
+			      (throw :no-object nil)))
+	       (end-header
+		(let ((p (org-element--parse-paired-brackets ?\[)))
+		  (and (org-string-nw-p p)
+		       (replace-regexp-in-string "\n[ \t]*" " " (org-trim p)))))
+	       (value (buffer-substring-no-properties begin (point)))
+	       (post-blank (skip-chars-forward " \t"))
+	       (end (point)))
+	  (list 'inline-babel-call
+		(list :call call
+		      :inside-header inside-header
+		      :arguments arguments
+		      :end-header end-header
+		      :begin begin
+		      :end end
+		      :value value
+		      :post-blank post-blank)))))))
 
 (defun org-element-inline-babel-call-interpreter (inline-babel-call _)
   "Interpret INLINE-BABEL-CALL object as Org syntax."
@@ -2915,31 +2922,24 @@ Assume point is at the beginning of the inline src block."
   (save-excursion
     (catch :no-object
       (when (let ((case-fold-search nil))
-	      (looking-at "\\<src_\\([^ \t\n[{]+\\)\
-\\(?:\\[[ \t]*\\([^]]*?\\)[ \t]*\\]\\)?{"))
-	(let ((begin (point))
+	      (looking-at "\\<src_\\([^ \t\n[{]+\\)[{[]"))
+	(goto-char (match-end 1))
+	(let ((begin (match-beginning 0))
 	      (language (match-string-no-properties 1))
 	      (parameters
-	       (let ((p (org-string-nw-p (match-string-no-properties 2))))
-		 (and p (org-trim
-			 (replace-regexp-in-string "\n[ \t]*" " " p))))))
-	  (goto-char (1- (match-end 0)))
-	  (let* ((s (point))
-		 (e (with-syntax-table org-element--pair-curly-table
-		      (or (ignore-errors (scan-lists s 1 0))
-			  ;; Invalid inline source block.
-			  (throw :no-object nil))))
-		 (value (buffer-substring-no-properties
-			 (1+ s) (1- e)))
-		 (post-blank (progn (goto-char e)
-				    (skip-chars-forward " \t"))))
-	    (list 'inline-src-block
-		  (list :language language
-			:value value
-			:parameters parameters
-			:begin begin
-			:end (point)
-			:post-blank post-blank))))))))
+	       (let ((p (org-element--parse-paired-brackets ?\[)))
+		 (and (org-string-nw-p p)
+		      (replace-regexp-in-string "\n[ \t]*" " " (org-trim p)))))
+	      (value (or (org-element--parse-paired-brackets ?\{)
+			 (throw :no-object nil)))
+	      (post-blank (skip-chars-forward " \t")))
+	  (list 'inline-src-block
+		(list :language language
+		      :value value
+		      :parameters parameters
+		      :begin begin
+		      :end (point)
+		      :post-blank post-blank)))))))
 
 (defun org-element-inline-src-block-interpreter (inline-src-block _)
   "Interpret INLINE-SRC-BLOCK object as Org syntax."
