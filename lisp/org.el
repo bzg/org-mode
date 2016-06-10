@@ -21946,9 +21946,7 @@ on context.  See the individual commands for more information."
      ["Insert math symbol" cdlatex-math-symbol (fboundp 'cdlatex-math-symbol)]
      ["Modify math symbol" org-cdlatex-math-modify
       (org-inside-LaTeX-fragment-p)]
-     ["Insert citation" org-reftex-citation t]
-     "--"
-     ["Template for BEAMER" (org-beamer-insert-options-template) t])
+     ["Insert citation" org-reftex-citation t])
     "--"
     ("MobileOrg"
      ["Push Files and Views" org-mobile-push t]
