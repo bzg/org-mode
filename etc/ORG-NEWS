@@ -303,7 +303,7 @@ Repeated footnotes are now numbered by referring to a label in the
 first footnote.
 *** The ~org-block~ face is inherited by ~src-blocks~
 This works also when =org-src-fontify-natively= is non-nil.  It is also
-possible to specify per-languages faces.  See the manual for details.  
+possible to specify per-languages faces.  See the manual for details.
 ** New functions
 *** ~org-next-line-empty-p~
 It replaces the deprecated ~next~ argument to ~org-previous-line-empty-p~.
