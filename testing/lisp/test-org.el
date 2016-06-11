@@ -1191,6 +1191,18 @@
 	    (goto-char (point-max))
 	    (let ((org-insert-heading-respect-content nil)) (org-insert-heading))
 	    (buffer-string))))
+  ;; Preserve list visibility when inserting an item.
+  (should
+   (equal
+    '(outline outline)
+    (org-test-with-temp-text "- A\n  - B\n- C\n  - D"
+      (let ((org-cycle-include-plain-lists t))
+	(org-cycle)
+	(forward-line 2)
+	(org-cycle)
+	(let ((org-insert-heading-respect-content nil)) (org-insert-heading))
+	(list (get-char-property (line-beginning-position 0) 'invisible)
+	      (get-char-property (line-end-position 2) 'invisible))))))
   ;; When called with two universal arguments, insert a new headline
   ;; at the end of the grandparent subtree.
   (should
