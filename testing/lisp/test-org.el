@@ -292,7 +292,7 @@
   (flet ((current-time () '(22353 6425 905205 644000)))
     ;; Timestamps are close if they are within `ndays' of lead time.
     (org-test-with-temp-text "* Heading"
-      (should (org-deadline-close "2016-06-03 Fri" 0))p
+      (should (org-deadline-close "2016-06-03 Fri" 0))
       (should (org-deadline-close "2016-06-02 Thu" 0))
       (should-not (org-deadline-close "2016-06-04 Sat" 0))
       (should (org-deadline-close "2016-06-04 Sat" 1))
