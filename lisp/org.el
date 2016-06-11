@@ -7753,7 +7753,6 @@ command.
 When optional argument TOP-LEVEL is non-nil, insert a level 1
 heading, unconditionally."
   (interactive "P")
-  (if (org-called-interactively-p 'any) (org-reveal))
   (let ((itemp (and (not top-level) (org-in-item-p)))
 	(may-split (org-get-alist-option org-M-RET-may-split-line 'headline))
 	(respect-content (or org-insert-heading-respect-content
