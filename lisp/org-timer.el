@@ -433,10 +433,10 @@ using three `C-u' prefix arguments."
 	       (number-to-string org-timer-default-timer)
 	     org-timer-default-timer))
 	 (effort-minutes (ignore-errors (org-get-at-eol 'effort-minutes 1)))
-	 (minutes (or (and (not (equal opt '(64)))
+	 (minutes (or (and (numberp opt) (number-to-string opt))
+		      (and (not (equal opt '(64)))
 			   effort-minutes
 			   (number-to-string effort-minutes))
-		      (and (numberp opt) (number-to-string opt))
 		      (and (consp opt) default-timer)
 		      (and (stringp opt) opt)
 		      (read-from-minibuffer
