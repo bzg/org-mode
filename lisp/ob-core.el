@@ -1691,15 +1691,21 @@ If the point is not on a source block then return nil."
      (list (completing-read
 	    "source-block name: " all-block-names nil t
 	    (let* ((context (org-element-context))
-		   (type (org-element-type context)))
+		   (type (org-element-type context))
+		   (noweb-ref
+		    (and (memq type '(inline-src-block src-block))
+			 (org-in-regexp (org-babel-noweb-wrap)))))
 	      (cond
-	       ((and (memq type '(inline-src-block src-block)) ;<<noweb>>
-		     (org-in-regexp (org-babel-noweb-wrap))))
+	       (noweb-ref
+		(buffer-substring
+		 (+ (car noweb-ref) (length org-babel-noweb-wrap-start))
+		 (- (cdr noweb-ref) (length org-babel-noweb-wrap-end))))
 	       ((memq type '(babel-call inline-babel-call)) ;#+CALL:
 		(org-element-property :call context))
-	       ((org-element-property :results context)) ;#+RESULTS:
+	       ((car (org-element-property :results context))) ;#+RESULTS:
 	       ((let ((symbol (thing-at-point 'symbol))) ;Symbol.
-		  (and (member-ignore-case symbol all-block-names)
+		  (and symbol
+		       (member-ignore-case symbol all-block-names)
 		       symbol)))
 	       (t "")))))))
   (let ((point (org-babel-find-named-block name)))
