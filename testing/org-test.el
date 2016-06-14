@@ -358,7 +358,7 @@ setting `pp-escape-newlines' to nil manually."
 (defun org-test-load ()
   "Load up the org-mode test suite."
   (interactive)
-  (flet ((rld (base)
+  (cl-flet ((rld (base)
 	      ;; Recursively load all files, if files throw errors
 	      ;; then silently ignore the error and continue to the
 	      ;; next file.  This allows files to error out if
