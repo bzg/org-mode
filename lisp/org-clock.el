@@ -1688,7 +1688,7 @@ Optional argument N tells to change by that many units."
 	(let ((ts (if updatets1 ts2 ts1))
 	      (begts (if updatets1 begts1 begts2)))
 	  (setq tdiff
-		(subtract-time
+		(time-subtract
 		 (org-time-string-to-time org-last-changed-timestamp)
 		 (org-time-string-to-time ts)))
 	  (save-excursion
