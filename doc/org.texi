@@ -17476,9 +17476,9 @@ This kind of view can be achieved dynamically at display time using
 display with the necessary amount of space@footnote{@code{org-indent-mode}
 also sets the @code{wrap-prefix} property, such that @code{visual-line-mode}
 (or purely setting @code{word-wrap}) wraps long lines (including headlines)
-correctly indented.  }.  Also headlines are prefixed with additional stars,
-so that the amount of indentation shifts by two@footnote{See the variable
-@code{org-indent-indentation-per-level}.}  spaces per level.  All headline
+correctly indented.}.  Also headlines are prefixed with additional stars, so
+that the amount of indentation shifts by two@footnote{See the variable
+@code{org-indent-indentation-per-level}.} spaces per level.  All headline
 stars but the last one are made invisible using the @code{org-hide}
 face@footnote{Turning on @code{org-indent-mode} sets
 @code{org-hide-leading-stars} to @code{t} and @code{org-adapt-indentation} to
