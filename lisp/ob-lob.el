@@ -1,4 +1,4 @@
-;;; ob-lob.el --- functions supporting the Library of Babel
+;;; ob-lob.el --- Functions Supporting the Library of Babel -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2016 Free Software Foundation, Inc.
 
