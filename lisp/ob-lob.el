@@ -23,8 +23,7 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Code:
-(eval-when-compile
-  (require 'cl))
+(require 'cl-lib)
 (require 'ob-core)
 (require 'ob-table)
 
