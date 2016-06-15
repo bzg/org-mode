@@ -52,8 +52,6 @@
 (require 'ob-core)
 (require 'cl-lib)
 
-(declare-function org-at-item-p "org-list" ())
-(declare-function org-at-table-p "org" (&optional table-type))
 (declare-function org-babel-lob-execute "ob-lob" (info))
 (declare-function org-babel-lob-get-info "ob-lob" (&optional datum))
 (declare-function org-element-at-point "org-element" ())
