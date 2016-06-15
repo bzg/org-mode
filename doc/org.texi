@@ -1683,8 +1683,7 @@ In that case, all items are closed.  Here is an example:
 @end example
 
 Org supports these lists by tuning filling and wrapping commands to deal with
-them correctly.  To turn this on, put into @file{.emacs}: @code{(require
-'filladapt)}}, and by exporting them properly (@pxref{Exporting}).  Since
+them correctly, and by exporting them properly (@pxref{Exporting}).  Since
 indentation is what governs the structure of these lists, many structural
 constructs like @code{#+BEGIN_...} blocks can be indented to signal that they
 belong to a particular item.
