@@ -15150,7 +15150,7 @@ End header arguments are applied to the calling instance and do not affect
 evaluation of the named code block.  They affect how the results are
 incorporated into the Org mode buffer and how the call line is exported.  For
 example, @code{:results html} will insert the results of the call line
-evaluation in the Org buffer, wrapped in a @code{BEGIN_HTML:} block.
+evaluation in the Org buffer, wrapped in a @code{BEGIN_EXPORT html} block.
 
 For more examples of passing header arguments to @code{#+CALL:} lines see
 @ref{Header arguments in function calls}.
@@ -15840,11 +15840,11 @@ The results are will be enclosed in a @code{BEGIN_SRC org} block.
 They are not comma-escaped by default but they will be if you hit @kbd{TAB}
 in the block and/or if you export the file.  E.g., @code{:results value org}.
 @item @code{html}
-Results are assumed to be HTML and will be enclosed in a @code{BEGIN_HTML}
-block.  E.g., @code{:results value html}.
+Results are assumed to be HTML and will be enclosed in a @code{BEGIN_EXPORT
+html} block.  E.g., @code{:results value html}.
 @item @code{latex}
-Results assumed to be @LaTeX{} and are enclosed in a @code{BEGIN_LaTeX} block.
-E.g., @code{:results value latex}.
+Results assumed to be @LaTeX{} and are enclosed in a @code{BEGIN_EXPORT
+latex} block.  E.g., @code{:results value latex}.
 @item @code{code}
 Result are assumed to be parsable code and are enclosed in a code block.
 E.g., @code{:results value code}.

@@ -2402,7 +2402,7 @@ the exported file use either
 @noindent 
 or
 @smallexample
-#+BEGIN_HTML
+#+BEGIN_EXPORT html
 All lines between these markers are exported literally
 #+END_HTML
 @end smallexample
@@ -2425,8 +2425,8 @@ file.  The class must be listed in @code{org-latex-classes}.
 
 Embedded @LaTeX{} as described in @ref{Embedded @LaTeX{}}, will be correctly
 inserted into the @LaTeX{} file.  Similarly to the HTML exporter, you can use
-@code{#+LATEX:} and @code{#+BEGIN_LATEX ... #+END_LATEX} construct to add
-verbatim @LaTeX{} code.
+@code{#+LATEX:} and @code{#+BEGIN_EXPORT latex ... #+END_EXPORT} construct to
+add verbatim @LaTeX{} code.
 
 @node iCalendar export,  , @LaTeX{} and PDF export, Exporting
 @section iCalendar export
