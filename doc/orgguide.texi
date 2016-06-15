@@ -251,8 +251,7 @@ page manual because of sheer size.}
 @section Installation
 
 @b{Important:} @i{If you are using a version of Org that is part of the Emacs
-distribution or an XEmacs package, please skip this section and go directly
-to @ref{Activation}.}
+distribution, please skip this section and go directly to @ref{Activation}.}
 
 If you have downloaded Org from the Web, either as a distribution @file{.zip}
 or @file{.tar} file, or as a Git archive, it is best to run it directly from
@@ -2653,8 +2652,7 @@ more text                        |          more text
 @end smallexample
 
 @noindent
-If you are using at least Emacs 23.1.50.3 and version 6.29 of Org, this kind
-of view can be achieved dynamically at display time using
+This kind of view can be achieved dynamically at display time using
 @code{org-indent-mode}, which will prepend intangible space to each line.
 You can turn on @code{org-indent-mode} for all files by customizing the
 variable @code{org-startup-indented}, or you can turn it on for individual
