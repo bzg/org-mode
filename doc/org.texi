@@ -940,14 +940,6 @@ Worg}.
 @findex org-store-link
 @findex org-iswitchb
 
-Since Emacs 22.2, files with the @file{.org} extension use Org mode by
-default.  If you are using an earlier version of Emacs, add this line to your
-@file{.emacs} file:
-
-@lisp
-(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
-@end lisp
-
 Org mode buffers need font-lock to be turned on: this is the default in
 Emacs@footnote{If you don't use font-lock globally, turn it on in Org buffer
 with @code{(add-hook 'org-mode-hook 'turn-on-font-lock)}}.
@@ -968,8 +960,9 @@ liking.
 @end lisp
 
 @cindex Org mode, turning on
-To turn on Org mode in a file that does not have the extension @file{.org},
-make the first line of a file look like this:
+Files with the @file{.org} extension use Org mode by default.  To turn on Org
+mode in a file that does not have the extension @file{.org}, make the first
+line of a file look like this:
 
 @example
 MY PROJECTS    -*- mode: org; -*-
@@ -981,11 +974,10 @@ the file's name is.  See also the variable
 @code{org-insert-mode-line-in-empty-file}.
 
 Many commands in Org work on the region if the region is @i{active}.  To make
-use of this, you need to have @code{transient-mark-mode} turned on.  In Emacs
-23 and onwards, this is the default.  If you do not like
-@code{transient-mark-mode}, you can create an active region by using the
-mouse to select a region, or pressing @kbd{C-@key{SPC}} twice before moving
-the cursor.
+use of this, you need to have @code{transient-mark-mode} turned on, which is
+the default.  If you do not like @code{transient-mark-mode}, you can create
+an active region by using the mouse to select a region, or pressing
+@kbd{C-@key{SPC}} twice before moving the cursor.
 
 @node Feedback
 @section Feedback
@@ -3770,8 +3762,8 @@ the link at point.
 @kindex mouse-1
 @item mouse-2
 @itemx mouse-1
-On links, @kbd{mouse-2} will open the link just as @kbd{C-c C-o}
-would.  Under Emacs 22 and later, @kbd{mouse-1} will also follow a link.
+On links, @kbd{mouse-1} and @kbd{mouse-2} will open the link just as @kbd{C-c
+C-o} would.
 @c
 @kindex mouse-3
 @item mouse-3
@@ -13016,11 +13008,10 @@ Illustration 2: Bell curve
 
 Export of literal examples (@pxref{Literal examples}) with full fontification
 is supported.  Internally, the exporter relies on @file{htmlfontify.el} to
-generate all style definitions needed for a fancy listing.@footnote{Your
-@file{htmlfontify.el} library must at least be at Emacs 24.1 levels for
-fontification to be turned on.}  The auto-generated styles have @samp{OrgSrc}
-as prefix and inherit their color from the faces used by Emacs
-@code{font-lock} library for the source language.
+generate all style definitions needed for a fancy listing.  The
+auto-generated styles have @samp{OrgSrc} as prefix and inherit their color
+from the faces used by Emacs @code{font-lock} library for the source
+language.
 
 @vindex org-odt-fontify-srcblocks
 If you prefer to use your own custom styles for fontification, you can do
@@ -17196,7 +17187,7 @@ showeverything   @r{show even drawer contents}
 @cindex @code{indent}, STARTUP keyword
 @cindex @code{noindent}, STARTUP keyword
 Dynamic virtual indentation is controlled by the variable
-@code{org-startup-indented}@footnote{Emacs 23 and Org mode 6.29 are required}
+@code{org-startup-indented}
 @example
 indent     @r{start with @code{org-indent-mode} turned on}
 noindent   @r{start with @code{org-indent-mode} turned off}
@@ -17480,15 +17471,13 @@ more text                        |          more text
 
 @noindent
 
-If you are using at least Emacs 23.2@footnote{Emacs 23.1 can actually crash
-with @code{org-indent-mode}} and version 6.29 of Org, this kind of view can
-be achieved dynamically at display time using @code{org-indent-mode}.  In
-this minor mode, all lines are prefixed for display with the necessary amount
-of space@footnote{@code{org-indent-mode} also sets the @code{wrap-prefix}
-property, such that @code{visual-line-mode} (or purely setting
-@code{word-wrap}) wraps long lines (including headlines) correctly indented.
-}.  Also headlines are prefixed with additional stars, so that the amount of
-indentation shifts by two@footnote{See the variable
+This kind of view can be achieved dynamically at display time using
+@code{org-indent-mode}.  In this minor mode, all lines are prefixed for
+display with the necessary amount of space@footnote{@code{org-indent-mode}
+also sets the @code{wrap-prefix} property, such that @code{visual-line-mode}
+(or purely setting @code{word-wrap}) wraps long lines (including headlines)
+correctly indented.  }.  Also headlines are prefixed with additional stars,
+so that the amount of indentation shifts by two@footnote{See the variable
 @code{org-indent-indentation-per-level}.}  spaces per level.  All headline
 stars but the last one are made invisible using the @code{org-hide}
 face@footnote{Turning on @code{org-indent-mode} sets
@@ -17634,14 +17623,10 @@ with other code out there.
 @cindex @file{calc.el}
 @cindex Gillespie, Dave
 @item @file{calc.el} by Dave Gillespie
-Org uses the Calc package for implementing spreadsheet
-functionality in its tables (@pxref{The spreadsheet}).  Org
-checks for the availability of Calc by looking for the function
-@code{calc-eval} which will have been autoloaded during setup if Calc has
-been installed properly.  As of Emacs 22, Calc is part of the Emacs
-distribution.  Another possibility for interaction between the two
-packages is using Calc for embedded calculations.  @xref{Embedded Mode,
-, Embedded Mode, calc, GNU Emacs Calc Manual}.
+Org uses the Calc package for implementing spreadsheet functionality in its
+tables (@pxref{The spreadsheet}).  Another possibility for interaction
+between the two packages is using Calc for embedded calculations.
+@xref{Embedded Mode, , Embedded Mode, calc, GNU Emacs Calc Manual}.
 @item @file{constants.el} by Carsten Dominik
 @cindex @file{constants.el}
 @cindex Dominik, Carsten
@@ -17692,8 +17677,7 @@ the command @kbd{<} in the Speedbar frame.
 @cindex Ota, Takaaki
 
 Complex ASCII tables with automatic line wrapping, column- and row-spanning,
-and alignment can be created using the Emacs table package by Takaaki Ota
-(@uref{http://sourceforge.net/projects/table}, and also part of Emacs 22).
+and alignment can be created using the Emacs table package by Takaaki Ota.
 Org mode will recognize these tables and export them properly.  Because of
 interference with other Org mode functionality, you unfortunately cannot edit
 these tables directly in the buffer.  Instead, you need to use the command
@@ -17710,7 +17694,6 @@ format.  See the documentation string of the command
 @code{org-convert-table} for the restrictions under which this is
 possible.
 @end table
-@file{table.el} is part of Emacs since Emacs 22.
 @item @file{footnote.el} by Steven L. Baur
 @cindex @file{footnote.el}
 @cindex Baur, Steven L.
@@ -17726,9 +17709,9 @@ which makes using @file{footnote.el} unnecessary.
 
 @cindex @code{shift-selection-mode}
 @vindex org-support-shift-select
-In Emacs 23, @code{shift-selection-mode} is on by default, meaning that
-cursor motions combined with the shift key should start or enlarge regions.
-This conflicts with the use of @kbd{S-@key{cursor}} commands in Org to change
+In Emacs, @code{shift-selection-mode} is on by default, meaning that cursor
+motions combined with the shift key should start or enlarge regions.  This
+conflicts with the use of @kbd{S-@key{cursor}} commands in Org to change
 timestamps, TODO keywords, priorities, and item bullet types if the cursor is
 at such a location.  By default, @kbd{S-@key{cursor}} commands outside
 special contexts don't do anything, but you can customize the variable
@@ -17741,15 +17724,12 @@ cursor moves across a special context.
 @cindex @file{CUA.el}
 @cindex Storm, Kim. F.
 @vindex org-replace-disputed-keys
-Key bindings in Org conflict with the @kbd{S-<cursor>} keys used by CUA mode
-(as well as @code{pc-select-mode} and @code{s-region-mode}) to select and
-extend the region.  In fact, Emacs 23 has this built-in in the form of
-@code{shift-selection-mode}, see previous paragraph.  If you are using Emacs
-23, you probably don't want to use another package for this purpose.
-However, if you prefer to leave these keys to a different package while
-working in Org mode, configure the variable @code{org-replace-disputed-keys}.
-When set, Org will move the following key bindings in Org files, and in the
-agenda buffer (but not during date selection).
+For the same reason, key bindings in Org also conflict with the
+@kbd{S-<cursor>} keys used by CUA mode.  If you prefer to leave these keys to
+a different package while working in Org mode, configure the variable
+@code{org-replace-disputed-keys}.  When set, Org will move the following key
+bindings in Org files, and in the agenda buffer (but not during date
+selection).
 
 @example
 S-UP      @result{}  M-p             S-DOWN     @result{}  M-n
