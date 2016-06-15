@@ -17657,10 +17657,6 @@ supports Imenu---all you need to do to get the index is the following:
 @vindex org-imenu-depth
 By default the index is two levels deep---you can modify the depth using
 the option @code{org-imenu-depth}.
-@item @file{remember.el} by John Wiegley
-@cindex @file{remember.el}
-@cindex Wiegley, John
-Org used to use this package for capture, but no longer does.
 @item @file{speedbar.el} by Eric M. Ludlam
 @cindex @file{speedbar.el}
 @cindex Ludlam, Eric M.
@@ -17694,12 +17690,6 @@ format.  See the documentation string of the command
 @code{org-convert-table} for the restrictions under which this is
 possible.
 @end table
-@item @file{footnote.el} by Steven L. Baur
-@cindex @file{footnote.el}
-@cindex Baur, Steven L.
-Org mode recognizes numerical footnotes as provided by this package.
-However, Org mode also has its own footnote support (@pxref{Footnotes}),
-which makes using @file{footnote.el} unnecessary.
 @end table
 
 @node Conflicts
