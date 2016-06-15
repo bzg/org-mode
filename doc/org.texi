@@ -855,7 +855,6 @@ Network Theory Ltd.}
 @node Installation
 @section Installation
 @cindex installation
-@cindex XEmacs
 
 Org is part of recent distributions of GNU Emacs, so you normally don't need
 to install it.  If, for one reason or another, you want to install Org on top
@@ -982,15 +981,11 @@ the file's name is.  See also the variable
 @code{org-insert-mode-line-in-empty-file}.
 
 Many commands in Org work on the region if the region is @i{active}.  To make
-use of this, you need to have @code{transient-mark-mode}
-(@code{zmacs-regions} in XEmacs) turned on.  In Emacs 23 this is the default,
-in Emacs 22 you need to do this yourself with
-@lisp
-(transient-mark-mode 1)
-@end lisp
-@noindent If you do not like @code{transient-mark-mode}, you can create an
-active region by using the mouse to select a region, or pressing
-@kbd{C-@key{SPC}} twice before moving the cursor.
+use of this, you need to have @code{transient-mark-mode} turned on.  In Emacs
+23 and onwards, this is the default.  If you do not like
+@code{transient-mark-mode}, you can create an active region by using the
+mouse to select a region, or pressing @kbd{C-@key{SPC}} twice before moving
+the cursor.
 
 @node Feedback
 @section Feedback
@@ -1082,8 +1077,7 @@ To do this, use
 or select @code{Org -> Refresh/Reload -> Reload Org uncompiled} from the
 menu.
 @item
-Go to the @code{Options} menu and select @code{Enter Debugger on Error}
-(XEmacs has this option in the @code{Troubleshooting} sub-menu).
+Go to the @code{Options} menu and select @code{Enter Debugger on Error}.
 @item
 Do whatever you have to do to hit the error.  Don't forget to
 document the steps you take.
@@ -1618,11 +1612,9 @@ tags, or properties and will be discussed later in this manual.
 @cindex printing sparse trees
 @cindex visible text, printing
 To print a sparse tree, you can use the Emacs command
-@code{ps-print-buffer-with-faces} which does not print invisible parts
-of the document @footnote{This does not work under XEmacs, because
-XEmacs uses selective display for outlining, not text properties.}.
-Or you can use @kbd{C-c C-e C-v} to export only the visible part of
-the document and print the resulting file.
+@code{ps-print-buffer-with-faces} which does not print invisible parts of the
+document.  Or you can use @kbd{C-c C-e C-v} to export only the visible part
+of the document and print the resulting file.
 
 @node Plain lists
 @section Plain lists
@@ -1699,12 +1691,11 @@ In that case, all items are closed.  Here is an example:
 @end example
 
 Org supports these lists by tuning filling and wrapping commands to deal with
-them correctly@footnote{Org only changes the filling settings for Emacs.  For
-XEmacs, you should use Kyle E. Jones' @file{filladapt.el}.  To turn this on,
-put into @file{.emacs}: @code{(require 'filladapt)}}, and by exporting them
-properly (@pxref{Exporting}).  Since indentation is what governs the
-structure of these lists, many structural constructs like @code{#+BEGIN_...}
-blocks can be indented to signal that they belong to a particular item.
+them correctly.  To turn this on, put into @file{.emacs}: @code{(require
+'filladapt)}}, and by exporting them properly (@pxref{Exporting}).  Since
+indentation is what governs the structure of these lists, many structural
+constructs like @code{#+BEGIN_...} blocks can be indented to signal that they
+belong to a particular item.
 
 @vindex org-list-demote-modify-bullet
 @vindex org-list-indent-offset
@@ -2319,11 +2310,11 @@ of number-like versus non-number fields in the column.
 
 Sometimes a single field or a few fields need to carry more text, leading to
 inconveniently wide columns.  Or maybe you want to make a table with several
-columns having a fixed width, regardless of content.  To set@footnote{This
-feature does not work on XEmacs.} the width of a column, one field anywhere
-in the column may contain just the string @samp{<N>} where @samp{N} is an
-integer specifying the width of the column in characters.  The next re-align
-will then set the width of this column to this value.
+columns having a fixed width, regardless of content.  To set the width of
+a column, one field anywhere in the column may contain just the string
+@samp{<N>} where @samp{N} is an integer specifying the width of the column in
+characters.  The next re-align will then set the width of this column to this
+value.
 
 @example
 @group
@@ -15997,8 +15988,7 @@ and a link of the following form will be inserted in the org buffer:
 
 Most of this functionality follows immediately from the fact that @code{:dir}
 sets the value of the Emacs variable @code{default-directory}, thanks to
-tramp.  Those using XEmacs, or GNU Emacs prior to version 23 may need to
-install tramp separately in order for these features to work correctly.
+Tramp.
 
 @subsubheading Further points
 
