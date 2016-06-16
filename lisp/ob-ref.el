@@ -173,7 +173,7 @@ the variable."
 			       (`babel-call
 				(throw :found
 				       (org-babel-execute-src-block
-					nil (org-babel-lob-get-info e))))
+					nil (org-babel-lob-get-info e) params)))
 			       (`src-block
 				(throw :found
 				       (org-babel-execute-src-block
