@@ -2878,8 +2878,10 @@ Assume point is at the beginning of the babel call."
 		(let ((p (org-element--parse-paired-brackets ?\[)))
 		  (and (org-string-nw-p p)
 		       (replace-regexp-in-string "\n[ \t]*" " " (org-trim p)))))
-	       (arguments (or (org-element--parse-paired-brackets ?\()
-			      (throw :no-object nil)))
+	       (arguments (org-string-nw-p
+			   (or (org-element--parse-paired-brackets ?\()
+			       ;; Parenthesis are mandatory.
+			       (throw :no-object nil))))
 	       (end-header
 		(let ((p (org-element--parse-paired-brackets ?\[)))
 		  (and (org-string-nw-p p)
