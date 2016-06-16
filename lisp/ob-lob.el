@@ -27,6 +27,7 @@
 (require 'ob-core)
 (require 'ob-table)
 
+(declare-function org-element-at-point "org-element" ())
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
@@ -43,15 +44,24 @@ To add files to this list use the `org-babel-lob-ingest' command."
   :version "24.1"
   :type '(repeat file))
 
-(defvar org-babel-default-lob-header-args '((:exports . "results"))
-  "Default header arguments to use when exporting #+lob/call lines.")
+(defvar org-babel-default-lob-header-args
+  '((:cache . "no")
+    (:exports . "results")
+    (:hlines . "no")
+    (:noweb . "no")
+    (:results . "replace")
+    (:session . "none")
+    (:tangle . "no"))
+  "Default header arguments to use when exporting Babel calls.")
 
 (defun org-babel-lob-ingest (&optional file)
   "Add all named source blocks defined in FILE to `org-babel-library-of-babel'."
   (interactive "fFile: ")
   (let ((lob-ingest-count 0))
     (org-babel-map-src-blocks file
-      (let* ((info (org-babel-get-src-block-info 'light))
+      (let* ((info (let ((org-babel-default-header-args
+			  org-babel-default-lob-header-args))
+		     (org-babel-get-src-block-info 'light)))
 	     (source-name (nth 4 info)))
 	(when source-name
 	  (setq source-name (intern source-name)
@@ -76,73 +86,76 @@ if so then run the appropriate source block from the Library."
       (org-babel-lob-execute info)
       t)))
 
+(defun org-babel-lob--src-info (name)
+  "Return internal representation for Babel data named NAME.
+NAME is a string.  This function looks into the current document
+for a Babel call or source block.  If none is found, it looks
+after NAME in the Library of Babel.  Eventually, if that also
+fails, it Returns nil."
+  ;; During export, look into the pristine copy of the document being
+  ;; exported instead of the current one, which could miss some data.
+  (with-current-buffer (or org-babel-exp-reference-buffer (current-buffer))
+    (org-with-wide-buffer
+     (goto-char (point-min))
+     (catch :found
+       (let ((case-fold-search t)
+	     (regexp (org-babel-named-data-regexp-for-name name)))
+	 (while (re-search-forward regexp nil t)
+	   (let ((element (org-element-at-point)))
+	     (when (equal name (org-element-property :name element))
+	       (throw :found
+		      (pcase (org-element-type element)
+			(`src-block (let ((org-babel-default-header-args
+					   org-babel-default-lob-header-args))
+				      (org-babel-get-src-block-info t element)))
+			(`babel-call (org-babel-lob-get-info element))
+			;; Non-executable data found.  Since names are
+			;; supposed to be unique throughout a document,
+			;; bail out.
+			(_ nil))))))
+	 ;; No element named NAME in buffer.  Try Library of Babel.
+	 (cdr (assoc-string name org-babel-library-of-babel)))))))
+
 ;;;###autoload
 (defun org-babel-lob-get-info (&optional datum)
-  "Return a Library of Babel function call as a string.
-Return nil when not on an appropriate location.  Build string
-from `inline-babel-call' or `babel-call' DATUM, when provided."
+  "Return internal representation for Library of Babel function call.
+Consider DATUM, when provided, or element at point.  Return nil
+when not on an appropriate location.  Otherwise return a list
+compatible with `org-babel-get-src-block-info', which see."
   (let* ((context (or datum (org-element-context)))
 	 (type (org-element-type context)))
     (when (memq type '(babel-call inline-babel-call))
-      (list (format "%s%s(%s)"
-		    (org-element-property :call context)
-		    (let ((in (org-element-property :inside-header context)))
-		      (if in (format "[%s]" in) ""))
-		    (or (org-element-property :arguments context) ""))
-	    (org-element-property :end-header context)
-	    (org-element-property :name context)
-	    (org-element-property
-	     (if (eq type 'babel-call) :post-affiliated :begin)
-	     datum)))))
+      (pcase (org-babel-lob--src-info (org-element-property :call context))
+	(`(,language ,body ,header ,_ ,_ ,_)
+	 (let ((begin (org-element-property (if (eq type 'inline-babel-call)
+						:begin
+					      :post-affiliated)
+					    context)))
+	   (list language
+		 body
+		 (apply #'org-babel-merge-params
+			header
+			(append
+			 (org-with-wide-buffer
+			  (goto-char begin)
+			  (org-babel-params-from-properties language))
+			 (list
+			  (org-babel-parse-header-arguments
+			   (org-element-property :inside-header context))
+			  (let ((args (org-element-property :arguments context)))
+			    (and args
+				 (mapcar (lambda (ref) (cons :var ref))
+					 (org-babel-ref-split-args args))))
+			  (org-babel-parse-header-arguments
+			   (org-element-property :end-header context)))))
+		 nil
+		 (org-element-property :name context)
+		 begin)))
+	(_ nil)))))
 
-(defvar org-babel-default-header-args:emacs-lisp) ; Defined in ob-emacs-lisp.el
 (defun org-babel-lob-execute (info)
   "Execute the lob call specified by INFO."
-  (let* ((mkinfo (lambda (p)
-		   ;; Make plist P compatible with
-		   ;; `org-babel-get-src-block-info'.
-		   (list
-		    "emacs-lisp" "results" p nil (nth 2 info) (nth 3 info))))
-	 (pre-params
-	  (apply #'org-babel-merge-params
-		 org-babel-default-header-args
-		 org-babel-default-header-args:emacs-lisp
-		 (append
-		  (org-babel-params-from-properties)
-		  (list
-		   (org-babel-parse-header-arguments
-		    (org-no-properties
-		     (concat ":var results="
-			     (mapconcat #'identity (butlast info 2) " "))))))))
-	 (pre-info (funcall mkinfo pre-params))
-	 (cache-p (and (cdr (assoc :cache pre-params))
-		       (string= "yes" (cdr (assoc :cache pre-params)))))
-	 (new-hash (when cache-p
-		     (org-babel-sha1-hash
-		      ;; Do *not* pre-process params for call line
-		      ;; hash evaluation, since for a call line :var
-		      ;; extension *is* execution.
-		      (let* ((params (nth 2 pre-info))
-			     (sha1-nth2 (list
-				    (cons
-				     (cons :c-var (cdr (assoc :var params)))
-				     (assq-delete-all :var (copy-tree params)))))
-			     (sha1-info (copy-tree pre-info)))
-			(prog1 sha1-info
-			  (setcar (cddr sha1-info) sha1-nth2))))))
-	 (old-hash (when cache-p (org-babel-current-result-hash pre-info)))
-	 (org-babel-current-src-block-location (point-marker)))
-    (if (and cache-p (equal new-hash old-hash))
-	(save-excursion (goto-char (org-babel-where-is-src-block-result
-				    nil pre-info))
-			(forward-line 1)
-			(message "%S" (org-babel-read-result)))
-      (prog1 (let* ((proc-params (org-babel-process-params pre-params))
-		     org-confirm-babel-evaluate)
-	       (org-babel-execute-src-block nil (funcall mkinfo proc-params)))
-	;; update the hash
-	(when new-hash
-	  (org-babel-set-current-result-hash new-hash pre-info))))))
+  (org-babel-execute-src-block nil info))
 
 (provide 'ob-lob)
 

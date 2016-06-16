@@ -115,20 +115,12 @@ for export
   (setq temporary-value-for-test (+ 1 temporary-value-for-test))
 #+end_src
 
-#+call: call-line-caching-example(\"qux\") :cache yes
+<point>#+call: call-line-caching-example(\"qux\") :cache yes
 "
-      (goto-char (point-max)) (forward-line -1)
       ;; first execution should flip value to t
       (should (equal (org-babel-lob-execute (org-babel-lob-get-info)) 1))
       ;; if cached, second evaluation will retain the t value
-      ;;
-      ;; Note: This instance tests for equality with "1".  We would
-      ;; prefer if the cached result returned was actually 1, however
-      ;; this is not the current behavior so this test is encoding
-      ;; undesired behavior (because the current goal is simply to see
-      ;; that caching is used on call lines).
-      ;;
-      (should (equal (org-babel-lob-execute (org-babel-lob-get-info)) "1")))))
+      (should (equal (org-babel-lob-execute (org-babel-lob-get-info)) 1)))))
 
 (ert-deftest test-ob-lob/named-caching-call-line ()
   (let ((temporary-value-for-test 0))
@@ -139,20 +131,12 @@ for export
 #+end_src
 
 #+name: call-line-caching-called
-#+call: call-line-caching-example(\"qux\") :cache yes
+<point>#+call: call-line-caching-example(\"qux\") :cache yes
 "
-      (goto-char (point-max)) (forward-line -1)
       ;; first execution should flip value to t
       (should (equal (org-babel-lob-execute (org-babel-lob-get-info)) 1))
       ;; if cached, second evaluation will retain the t value
-      ;;
-      ;; Note: This instance tests for equality with "1".  We would
-      ;; prefer if the cached result returned was actually 1, however
-      ;; this is not the current behavior so this test is encoding
-      ;; undesired behavior (because the current goal is simply to see
-      ;; that caching is used on call lines).
-      ;;
-      (should (equal (org-babel-lob-execute (org-babel-lob-get-info)) "1")))))
+      (should (equal (org-babel-lob-execute (org-babel-lob-get-info)) 1)))))
 
 (provide 'test-ob-lob)
 

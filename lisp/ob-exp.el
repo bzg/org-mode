@@ -206,28 +206,14 @@ may make them unreachable."
 			 (delete-region begin end)
 			 (insert replacement)))))
 		  ((babel-call inline-babel-call)
-		   (let* ((lob-info (org-babel-lob-get-info element))
-			  (results
-			   (org-babel-exp-do-export
-			    (list "emacs-lisp" "results"
-				  (apply #'org-babel-merge-params
-					 org-babel-default-header-args
-					 org-babel-default-lob-header-args
-					 (append
-					  (org-babel-params-from-properties)
-					  (list
-					   (org-babel-parse-header-arguments
-					    (org-no-properties
-					     (concat
-					      ":var results="
-					      (mapconcat #'identity
-							 (butlast lob-info 2)
-							 " ")))))))
-				  "" (nth 2 lob-info) (nth 3 lob-info))
-			    'lob))
-			  (rep (org-fill-template
-				org-babel-exp-call-line-template
-				`(("line"  . ,(nth 0 lob-info))))))
+		   (let ((results (org-babel-exp-do-export
+				   (org-babel-lob-get-info element)
+				   'lob))
+			 (rep
+			  (org-fill-template
+			   org-babel-exp-call-line-template
+			   `(("line"  .
+			      ,(org-element-property :value element))))))
 		     ;; If replacement is empty, completely remove the
 		     ;; object/element, including any extra white
 		     ;; space that might have been created when
