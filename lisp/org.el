@@ -11921,7 +11921,8 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 					(replace-regexp-in-string
 					 org-bracket-link-regexp
 					 "\\3"
-					 (nth 4 (org-heading-components)))))
+					 (or (nth 4 (org-heading-components))
+					     ""))))
 				(org-refile-get-location
 				 (cond ((and arg (listp arg)) "Goto")
 				       (regionp (concat actionmsg " region to"))
