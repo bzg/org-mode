@@ -4348,7 +4348,7 @@ REFERENCE is a number representing a reference, as returned by
 DATUM is either an element or an object.  INFO is the current
 export state, as a plist.
 
-This functions checks `:crossrefs' property in INFO for search
+This function checks `:crossrefs' property in INFO for search
 cells matching DATUM before creating a new reference.  Returned
 reference consists of alphanumeric characters only."
   (let ((cache (plist-get info :internal-references)))
