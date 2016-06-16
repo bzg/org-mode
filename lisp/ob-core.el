@@ -81,7 +81,6 @@
 (declare-function org-babel-ref-resolve "ob-ref" (ref))
 (declare-function org-babel-ref-goto-headline-id "ob-ref" (id))
 (declare-function org-babel-ref-headline-body "ob-ref" ())
-(declare-function org-babel-lob-execute-maybe "ob-lob" ())
 (declare-function org-number-sequence "org-compat" (from &optional to inc))
 (declare-function org-at-item-p "org-list" ())
 (declare-function org-list-to-generic "org-list" (LIST PARAMS))

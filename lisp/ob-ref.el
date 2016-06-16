@@ -52,7 +52,6 @@
 (require 'ob-core)
 (require 'cl-lib)
 
-(declare-function org-babel-lob-execute "ob-lob" (info))
 (declare-function org-babel-lob-get-info "ob-lob" (&optional datum))
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-property "org-element" (property element))
@@ -173,8 +172,8 @@ the variable."
 			     (pcase (org-element-type e)
 			       (`babel-call
 				(throw :found
-				       (org-babel-lob-execute
-					(org-babel-lob-get-info e))))
+				       (org-babel-execute-src-block
+					nil (org-babel-lob-get-info e))))
 			       (`src-block
 				(throw :found
 				       (org-babel-execute-src-block

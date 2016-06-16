@@ -83,7 +83,7 @@ if so then run the appropriate source block from the Library."
   (interactive)
   (let ((info (org-babel-lob-get-info)))
     (when info
-      (org-babel-lob-execute info)
+      (org-babel-execute-src-block nil info)
       t)))
 
 (defun org-babel-lob--src-info (name)
@@ -152,10 +152,6 @@ compatible with `org-babel-get-src-block-info', which see."
 		 (org-element-property :name context)
 		 begin)))
 	(_ nil)))))
-
-(defun org-babel-lob-execute (info)
-  "Execute the lob call specified by INFO."
-  (org-babel-execute-src-block nil info))
 
 (provide 'ob-lob)
 
