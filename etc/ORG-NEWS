@@ -380,6 +380,7 @@ plain list.
 *** ~fixltx2e~ is removed from ~org-latex-default-packages-alist~
 fixltx2e is obsolete, see LaTeX News 22.
 ** Miscellaneous
+*** Allow multiple receiver locations in radio tables
 *** Allow angular links within link descriptions
 It is now allowed to write, e.g.,
 ~[[http:orgmode.org][<file:unicorn.png>]]~ as an equivalent to

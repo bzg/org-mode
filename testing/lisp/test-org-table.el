@@ -1576,7 +1576,21 @@ See also `test-org-table/copy-field'."
 	    (buffer-substring-no-properties
 	     (search-forward "# BEGIN RECEIVE ORGTBL table\n")
 	     (progn (search-forward "# END RECEIVE ORGTBL table")
-		    (match-beginning 0)))))))
+		    (match-beginning 0))))))
+  ;; Allow multiple receiver locations.
+  (should
+   (org-test-with-temp-text "
+# BEGIN RECEIVE ORGTBL table
+# END RECEIVE ORGTBL table
+
+#+ORGTBL: SEND table orgtbl-to-orgtbl :hlines nil
+<point>| a |
+
+# BEGIN RECEIVE ORGTBL table
+# END RECEIVE ORGTBL table"
+     (orgtbl-send-table)
+     (goto-char (point-min))
+     (search-forward "| a |" nil t 3))))
 
 
 ;;; Sorting

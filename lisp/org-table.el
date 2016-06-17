@@ -4609,20 +4609,24 @@ a radio table."
 	  (beginning-of-line 0)))
       rtn)))
 
-(defun orgtbl-send-replace-tbl (name txt)
-  "Find and replace table NAME with TXT."
+(defun orgtbl-send-replace-tbl (name text)
+  "Find and replace table NAME with TEXT."
   (save-excursion
     (goto-char (point-min))
-    (unless (re-search-forward
-	     (concat "BEGIN +RECEIVE +ORGTBL +" name "\\([ \t]\\|$\\)") nil t)
-      (user-error "Don't know where to insert translated table"))
-    (let ((beg (line-beginning-position 2)))
-      (unless (re-search-forward
-	       (concat "END +RECEIVE +ORGTBL +" name) nil t)
-	(user-error "Cannot find end of insertion region"))
-      (beginning-of-line)
-      (delete-region beg (point)))
-    (insert txt "\n")))
+    (let* ((location-flag nil)
+	   (name (regexp-quote name))
+	   (begin-re (format "BEGIN +RECEIVE +ORGTBL +%s\\([ \t]\\|$\\)" name))
+	   (end-re (format "END +RECEIVE +ORGTBL +%s\\([ \t]\\|$\\)" name)))
+      (while (re-search-forward begin-re nil t)
+	(unless location-flag (setq location-flag t))
+	(let ((beg (line-beginning-position 2)))
+	  (unless (re-search-forward end-re nil t)
+	    (user-error "Cannot find end of receiver location at %d" beg))
+	  (beginning-of-line)
+	  (delete-region beg (point))
+	  (insert text "\n")))
+      (unless location-flag
+	(user-error "No valid receiver location found in the buffer")))))
 
 ;;;###autoload
 (defun org-table-to-lisp (&optional txt)
