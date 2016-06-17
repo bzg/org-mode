@@ -906,7 +906,23 @@
 - item
 @end ignore"
      (forward-line 3)
-     (org-list-send-list))))
+     (org-list-send-list)))
+  ;; Allow multiple receiver locations.
+  (should
+   (org-test-with-temp-text "
+@c BEGIN RECEIVE ORGLST list
+@c END RECEIVE ORGLST list
+
+@ignore
+#+ORGLST: SEND list org-list-to-texinfo
+<point>- item contents
+@end ignore
+
+@c BEGIN RECEIVE ORGLST list
+@c END RECEIVE ORGLST list"
+     (org-list-send-list)
+     (goto-char (point-min))
+     (search-forward "item contents" nil t 3))))
 
 (ert-deftest test-org-list/to-generic ()
   "Test `org-list-to-generic' specifications."

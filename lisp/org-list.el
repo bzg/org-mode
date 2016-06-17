@@ -3066,7 +3066,7 @@ for this list."
 		 "[ \t]*#\\+ORGLST:[ \t]+SEND[ \t]+\\(\\S-+\\)[ \t]+\\([^ \t\n]+\\)")
 	  (if maybe (throw 'exit nil)
 	    (error "Don't know how to transform this list")))))
-    (let* ((name (match-string 1))
+    (let* ((name (regexp-quote (match-string 1)))
 	   (transform (intern (match-string 2)))
 	   (bottom-point
 	    (save-excursion
@@ -3080,29 +3080,32 @@ for this list."
 	      (match-beginning 0)))
 	   (plain-list (save-excursion
 			 (goto-char top-point)
-			 (org-list-to-lisp)))
-	   beg)
+			 (org-list-to-lisp))))
       (unless (fboundp transform)
 	(error "No such transformation function %s" transform))
       (let ((txt (funcall transform plain-list)))
-	;; Find the insertion place
+	;; Find the insertion(s) place(s).
 	(save-excursion
 	  (goto-char (point-min))
-	  (unless (re-search-forward
-		   (concat "BEGIN RECEIVE ORGLST +"
-			   name
-			   "\\([ \t]\\|$\\)")
-                   nil t)
-	    (error "Don't know where to insert translated list"))
-	  (goto-char (match-beginning 0))
-	  (beginning-of-line 2)
-	  (setq beg (point))
-	  (unless (re-search-forward (concat "END RECEIVE ORGLST +" name) nil t)
-	    (error "Cannot find end of insertion region"))
-	  (delete-region beg (point-at-bol))
-	  (goto-char beg)
-	  (insert txt "\n")))
-      (message "List converted and installed at receiver location"))))
+	  (let ((receiver-count 0)
+		(begin-re (format "BEGIN +RECEIVE +ORGLST +%s\\([ \t]\\|$\\)"
+				  name))
+		(end-re (format "END +RECEIVE +ORGLST +%s\\([ \t]\\|$\\)"
+				name)))
+	    (while (re-search-forward begin-re nil t)
+	      (cl-incf receiver-count)
+	      (let ((beg (line-beginning-position 2)))
+		(unless (re-search-forward end-re nil t)
+		  (user-error "Cannot find end of receiver location at %d" beg))
+		(beginning-of-line)
+		(delete-region beg (point))
+		(insert txt "\n")))
+	    (cond
+	     ((> receiver-count 1)
+	      (message "List converted and installed at receiver locations"))
+	     ((= receiver-count 1)
+	      (message "List converted and installed at receiver location"))
+	     (t (user-error "No valid receiver location found")))))))))
 
 (defun org-list-to-generic (list params)
   "Convert a LIST parsed through `org-list-to-lisp' to a custom format.
