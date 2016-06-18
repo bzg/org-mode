@@ -290,10 +290,8 @@ used to limit the exported source code blocks by language."
 			(unless tangle-mode (setq tangle-mode #o755)))
 		      ;; update counter
 		      (setq block-counter (+ 1 block-counter))
-		      (add-to-list 'path-collector
-				   (cons file-name tangle-mode)
-				   nil
-				   (lambda (a b) (equal (car a) (car b))))))))
+		      (unless (assoc file-name path-collector)
+			(push (cons file-name tangle-mode) path-collector))))))
 	      specs)))
 	 (if (equal arg '(4))
 	     (org-babel-tangle-single-block 1 t)
