@@ -24,8 +24,6 @@
 
 ;;; Code:
 (require 'ob-core)
-(eval-when-compile
-  (require 'cl))
 
 (declare-function org-babel-lob-get-info "ob-lob" (&optional datum))
 (declare-function org-element-at-point "org-element" ())
@@ -168,8 +166,8 @@ this template."
 			     (goto-char (org-element-property :end element))
 			     (skip-chars-backward " \r\t\n")
 			     (point)))))
-		    (case type
-		      (inline-src-block
+		    (pcase type
+		      (`inline-src-block
 		       (let* ((info
 			       (org-babel-get-src-block-info nil element))
 			      (params (nth 2 info)))
@@ -197,7 +195,7 @@ this template."
 			     ;; insert value.
 			     (delete-region begin end)
 			     (insert replacement)))))
-		      ((babel-call inline-babel-call)
+		      ((or `babel-call `inline-babel-call)
 		       (let ((results (org-babel-exp-do-export
 				       (org-babel-lob-get-info element)
 				       'lob))
@@ -225,7 +223,7 @@ this template."
 			   (goto-char begin)
 			   (delete-region begin end)
 			   (insert rep))))
-		      (src-block
+		      (`src-block
 		       (let* ((match-start (copy-marker (match-beginning 0)))
 			      (ind (org-get-indentation))
 			      (lang
