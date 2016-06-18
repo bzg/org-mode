@@ -48,7 +48,7 @@ be executed."
   :type '(choice (const :tag "Never" nil)
 		 (const :tag "Only inline code" inline-only)
 		 (const :tag "Always" t)))
-(put 'org-export-babel-evaluate 'safe-local-variable (lambda (x) (eq x nil)))
+(put 'org-export-babel-evaluate 'safe-local-variable #'null)
 
 (defmacro org-babel-exp--at-source (&rest body)
   "Evaluate BODY at the source of the Babel block at point.
