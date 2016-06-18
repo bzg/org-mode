@@ -1,4 +1,4 @@
-;;; ob-exp.el --- Exportation of org-babel source blocks
+;;; ob-exp.el --- Exportation of Babel Source Blocks -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2016 Free Software Foundation, Inc.
 
@@ -95,13 +95,13 @@ Assume point is at block opening line."
 	  (let ((lang-headers (intern (concat "org-babel-default-header-args:"
 					      lang))))
 	    (org-babel-exp--at-source
-	      (setf (nth 2 info)
-		    (org-babel-process-params
-		     (apply #'org-babel-merge-params
-			    org-babel-default-header-args
-			    (and (boundp lang-headers) (eval lang-headers))
-			    (append (org-babel-params-from-properties lang)
-				    (list raw-params)))))))
+	     (setf (nth 2 info)
+		   (org-babel-process-params
+		    (apply #'org-babel-merge-params
+			   org-babel-default-header-args
+			   (and (boundp lang-headers) (eval lang-headers t))
+			   (append (org-babel-params-from-properties lang)
+				   (list raw-params)))))))
 	  (setf hash (org-babel-sha1-hash info)))
 	(org-babel-exp-do-export info 'block hash)))))
 
@@ -196,10 +196,9 @@ this template."
 			     (delete-region begin end)
 			     (insert replacement)))))
 		      ((or `babel-call `inline-babel-call)
-		       (let ((results (org-babel-exp-do-export
-				       (org-babel-lob-get-info element)
-				       'lob))
-			     (rep
+		       (org-babel-exp-do-export (org-babel-lob-get-info element)
+						'lob)
+		       (let ((rep
 			      (org-fill-template
 			       org-babel-exp-call-line-template
 			       `(("line"  .
@@ -224,14 +223,8 @@ this template."
 			   (delete-region begin end)
 			   (insert rep))))
 		      (`src-block
-		       (let* ((match-start (copy-marker (match-beginning 0)))
-			      (ind (org-get-indentation))
-			      (lang
-			       (or (org-element-property :language element)
-				   (user-error
-				    "No language for src block: %s"
-				    (or (org-element-property :name element)
-					"(unnamed)")))))
+		       (let ((match-start (copy-marker (match-beginning 0)))
+			     (ind (org-get-indentation)))
 			 ;; Take care of matched block: compute
 			 ;; replacement string.  In particular, a nil
 			 ;; REPLACEMENT means the block is left as-is
