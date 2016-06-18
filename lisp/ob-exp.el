@@ -36,10 +36,7 @@
 (declare-function org-fill-template "org" (template alist))
 (declare-function org-get-indentation "org" (&optional line))
 (declare-function org-heading-components "org" ())
-(declare-function org-id-get "org-id" (&optional pom create prefix))
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
-(declare-function org-link-search "org" (s &optional avoid-pos stealth))
-(declare-function org-split-string "org" (string &optional separators))
 
 (defvar org-src-preserve-indentation)
 
@@ -55,43 +52,21 @@ be executed."
 		 (const :tag "Always" t)))
 (put 'org-export-babel-evaluate 'safe-local-variable (lambda (x) (eq x nil)))
 
-(defvar org-link-search-inhibit-query)
-(defmacro org-babel-exp-in-export-file (lang &rest body)
-  (declare (indent 1))
-  `(let* ((lang-headers (intern (concat "org-babel-default-header-args:" ,lang)))
-	  (heading-query (or (org-id-get)
-			     ;; CUSTOM_IDs don't work, maybe they are
-			     ;; stripped, or maybe they resolve too
-			     ;; late in `org-link-search'.
-			     ;; (org-entry-get nil "CUSTOM_ID")
-			     (nth 4 (ignore-errors (org-heading-components)))))
-	  (export-buffer (current-buffer))
-	  results)
-     (when org-babel-exp-reference-buffer
-       ;; Resolve parameters in the original file so that headline and
-       ;; file-wide parameters are included, attempt to go to the same
-       ;; heading in the original file
-       (set-buffer org-babel-exp-reference-buffer)
-       (save-restriction
-	 (when heading-query
-	   (condition-case nil
-	       (let ((org-link-search-inhibit-query t))
-		 ;; TODO: When multiple headings have the same title,
-		 ;;       this returns the first, which is not always
-		 ;;       the right heading.  Consider a better way to
-		 ;;       find the proper heading.
-		 (org-link-search heading-query))
-	     (error (when heading-query
-		      (goto-char (point-min))
-		      (re-search-forward (regexp-quote heading-query) nil t)))))
-	 (setq results ,@body))
-       (set-buffer export-buffer)
-       results)))
-(def-edebug-spec org-babel-exp-in-export-file (form body))
+(defmacro org-babel-exp--at-source (&rest body)
+  "Evaluate BODY at the source of the Babel block at point.
+Source is located in `org-babel-exp-reference-buffer'.  The value
+returned is the value of the last form in BODY.  Assume that
+point is at the beginning of the Babel block."
+  (declare (indent 1) (debug body))
+  `(let ((source (get-text-property (point) 'org-reference)))
+     (with-current-buffer org-babel-exp-reference-buffer
+       (org-with-wide-buffer
+	(goto-char source)
+	,@body))))
 
-(defun org-babel-exp-src-block (&rest headers)
+(defun org-babel-exp-src-block ()
   "Process source block for export.
-Depending on the `export' headers argument, replace the source
+Depending on the \":export\" header argument, replace the source
 code block like this:
 
 both ---- display the code and the results
@@ -100,31 +75,35 @@ code ---- the default, display the code inside the block but do
           not process
 
 results - just like none only the block is run on export ensuring
-          that its results are present in the org-mode buffer
+          that its results are present in the Org mode buffer
 
 none ---- do not display either code or results upon export
 
-Assume point is at the beginning of block's starting line."
+Assume point is at block opening line."
   (interactive)
   (save-excursion
     (let* ((info (org-babel-get-src-block-info 'light))
 	   (lang (nth 0 info))
-	   (raw-params (nth 2 info)) hash)
+	   (raw-params (nth 2 info))
+	   hash)
       ;; bail if we couldn't get any info from the block
       (unless noninteractive
 	(message "org-babel-exp process %s at position %d..."
-		 lang (line-beginning-position)))
+		 lang
+		 (line-beginning-position)))
       (when info
 	;; if we're actually going to need the parameters
-	(when (member (cdr (assoc :exports (nth 2 info))) '("both" "results"))
-	  (org-babel-exp-in-export-file lang
-	    (setf (nth 2 info)
-		  (org-babel-process-params
-		   (apply #'org-babel-merge-params
-			  org-babel-default-header-args
-			  (if (boundp lang-headers) (eval lang-headers) nil)
-			  (append (org-babel-params-from-properties lang)
-				  (list raw-params))))))
+	(when (member (cdr (assq :exports (nth 2 info))) '("both" "results"))
+	  (let ((lang-headers (intern (concat "org-babel-default-header-args:"
+					      lang))))
+	    (org-babel-exp--at-source
+	      (setf (nth 2 info)
+		    (org-babel-process-params
+		     (apply #'org-babel-merge-params
+			    org-babel-default-header-args
+			    (and (boundp lang-headers) (eval lang-headers))
+			    (append (org-babel-params-from-properties lang)
+				    (list raw-params)))))))
 	  (setf hash (org-babel-sha1-hash info)))
 	(org-babel-exp-do-export info 'block hash)))))
 
@@ -150,18 +129,33 @@ this template."
   (interactive)
   (when org-export-babel-evaluate
     (save-window-excursion
-      (save-excursion
-	(let ((case-fold-search t)
-	      (regexp
-	       (if (eq org-export-babel-evaluate 'inline-only)
-		   "\\(call\\|src\\)_"
-		 "\\(call\\|src\\)_\\|^[ \t]*#\\+\\(BEGIN_SRC\\|CALL:\\)"))
-	      ;; Get a pristine copy of current buffer so Babel
-	      ;; references are properly resolved and source block
-	      ;; context is preserved.
-	      (org-babel-exp-reference-buffer (org-export-copy-buffer)))
-	  (goto-char (point-min))
-	  (unwind-protect
+      (let ((case-fold-search t)
+	    (regexp (if (eq org-export-babel-evaluate 'inline-only)
+			"\\(call\\|src\\)_"
+		      "\\(call\\|src\\)_\\|^[ \t]*#\\+\\(BEGIN_SRC\\|CALL:\\)"))
+	    ;; Get a pristine copy of current buffer so Babel
+	    ;; references are properly resolved and source block
+	    ;; context is preserved.
+	    (org-babel-exp-reference-buffer (org-export-copy-buffer)))
+	(unwind-protect
+	    (save-excursion
+	      ;; First attach to every source block their original
+	      ;; position, so that they can be retrieved within
+	      ;; `org-babel-exp-reference-buffer', even after heavy
+	      ;; modifications on current buffer.
+	      ;;
+	      ;; False positives are harmless, so we don't check if
+	      ;; we're really at some Babel object.  Moreover,
+	      ;; `line-end-position' ensures that we propertize
+	      ;; a noticeable part of the object, without affecting
+	      ;; multiple objects on the same line.
+	      (goto-char (point-min))
+	      (while (re-search-forward regexp nil t)
+		(let ((s (match-beginning 0)))
+		  (put-text-property s (line-end-position) 'org-reference s)))
+	      ;; Evaluate from top to bottom every Babel block
+	      ;; encountered.
+	      (goto-char (point-min))
 	      (while (re-search-forward regexp nil t)
 		(unless (save-match-data (org-in-commented-heading-p))
 		  (let* ((element (save-match-data (org-element-context)))
@@ -239,21 +233,14 @@ this template."
 				   (user-error
 				    "No language for src block: %s"
 				    (or (org-element-property :name element)
-					"(unnamed)"))))
-			      (headers
-			       (cons lang
-				     (let ((params
-					    (org-element-property
-					     :parameters element)))
-				       (and params
-					    (org-split-string params))))))
+					"(unnamed)")))))
 			 ;; Take care of matched block: compute
 			 ;; replacement string.  In particular, a nil
 			 ;; REPLACEMENT means the block is left as-is
 			 ;; while an empty string removes the block.
 			 (let ((replacement
 				(progn (goto-char match-start)
-				       (org-babel-exp-src-block headers))))
+				       (org-babel-exp-src-block))))
 			   (cond ((not replacement) (goto-char end))
 				 ((equal replacement "")
 				  (goto-char end)
@@ -282,8 +269,9 @@ this template."
 				     match-start (point) ind)))))
 			 (set-marker match-start nil))))
 		    (set-marker begin nil)
-		    (set-marker end nil))))
-	    (kill-buffer org-babel-exp-reference-buffer)))))))
+		    (set-marker end nil)))))
+	  (kill-buffer org-babel-exp-reference-buffer)
+	  (remove-text-properties (point-min) (point-max) '(org-reference)))))))
 
 (defun org-babel-exp-do-export (info type &optional hash)
   "Return a string with the exported content of a code block.
@@ -387,27 +375,26 @@ inhibit insertion of results into the buffer."
       ;; Skip code blocks which we can't evaluate.
       (when (fboundp (intern (concat "org-babel-execute:" lang)))
 	(org-babel-eval-wipe-error-buffer)
-	(prog1 nil
-	  (setf (nth 1 info) body)
-	  (setf (nth 2 info)
-		(org-babel-exp-in-export-file lang
-		  (org-babel-process-params
-		   (org-babel-merge-params
-		    (nth 2 info)
-		    `((:results . ,(if silent "silent" "replace")))))))
-	  (pcase type
-	    (`block (org-babel-execute-src-block nil info))
-	    (`inline
-	      ;; Position the point on the inline source block
-	      ;; allowing `org-babel-insert-result' to check that the
-	      ;; block is inline.
-	      (goto-char (nth 5 info))
-	      (org-babel-execute-src-block nil info))
-	    (`lob
-	     (save-excursion
-	       (goto-char (nth 5 info))
-	       (let (org-confirm-babel-evaluate)
-		 (org-babel-execute-src-block nil info))))))))))
+	(setf (nth 1 info) body)
+	(setf (nth 2 info)
+	      (org-babel-exp--at-source
+		(org-babel-process-params
+		 (org-babel-merge-params
+		  (nth 2 info)
+		  `((:results . ,(if silent "silent" "replace")))))))
+	(pcase type
+	  (`block (org-babel-execute-src-block nil info))
+	  (`inline
+	    ;; Position the point on the inline source block
+	    ;; allowing `org-babel-insert-result' to check that the
+	    ;; block is inline.
+	    (goto-char (nth 5 info))
+	    (org-babel-execute-src-block nil info))
+	  (`lob
+	   (save-excursion
+	     (goto-char (nth 5 info))
+	     (let (org-confirm-babel-evaluate)
+	       (org-babel-execute-src-block nil info)))))))))
 
 
 (provide 'ob-exp)
