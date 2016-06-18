@@ -27,13 +27,14 @@
 (defmacro org-test-with-expanded-babel-code (&rest body)
   "Execute BODY while in a buffer with all Babel code evaluated.
 Current buffer is a copy of the original buffer."
-  `(let ((string (buffer-string))
-	 (buf (current-buffer))
+  `(let ((string (org-with-wide-buffer (buffer-string)))
+	 (narrowing (list (point-min) (point-max)))
 	 (org-export-babel-evaluate t))
      (with-temp-buffer
        (org-mode)
        (insert string)
-       (org-babel-exp-process-buffer buf)
+       (apply #'narrow-to-region narrowing)
+       (org-babel-exp-process-buffer)
        (goto-char (point-min))
        (progn ,@body))))
 
@@ -206,39 +207,39 @@ Here is one at the end of a line. {{{results(=2=)}}}
      (string-match "\\`src_emacs-lisp\\(?:\\[]\\)?{(\\+ 1 1)}$"
 		   (org-test-with-temp-text
 		       "src_emacs-lisp[:exports code]{(+ 1 1)}"
-		     (org-export-execute-babel-code)
+		     (org-babel-exp-process-buffer)
 		     (buffer-string))))
     (should
      (string-match "\\`src_emacs-lisp\\(?:\\[]\\)?{(\\+ 1 1)}$"
 		   (org-test-with-temp-text
 		       "src_emacs-lisp[ :exports code ]{(+ 1 1)}"
-		     (org-export-execute-babel-code)
+		     (org-babel-exp-process-buffer)
 		     (buffer-string))))
     (should
      (string-match "\\`src_emacs-lisp\\(?:\\[]\\)?{(\\+ 1 1)} {{{results(=2=)}}}$"
 		   (org-test-with-temp-text
 		       "src_emacs-lisp[:exports both]{(+ 1 1)}"
-		     (org-export-execute-babel-code)
+		     (org-babel-exp-process-buffer)
 		     (buffer-string))))
     (should
      (string-match "\\`{{{results(=2=)}}}$"
 		   (org-test-with-temp-text
 		       "src_emacs-lisp[:exports results :results scalar]{(+ 1 1)}"
-		     (org-export-execute-babel-code)
+		     (org-babel-exp-process-buffer)
 		     (buffer-string))))
     (should
      (let ((text "foosrc_emacs-lisp[:exports code]{(+ 1 1)}"))
        (string-match (regexp-quote text)
 		     (org-test-with-temp-text
 			 text
-		       (org-export-execute-babel-code)
+		       (org-babel-exp-process-buffer)
 		       (buffer-string)))))
     (should
      (let ((text "src_emacs lisp{(+ 1 1)}"))
        (string-match (regexp-quote text)
 		     (org-test-with-temp-text
 			 text
-		       (org-export-execute-babel-code)
+		       (org-babel-exp-process-buffer)
 		       (buffer-string)))))
     (should
      (string-match
@@ -263,7 +264,7 @@ evaluated."
      (string-match "\\`{{{results(src_emacs-lisp\\[\\]{2})}}}$"
 		   (org-test-with-temp-text
 		       "src_emacs-lisp[:exports results :results code]{(+ 1 1)}"
-		     (org-export-execute-babel-code)
+		     (org-babel-exp-process-buffer)
 		     (buffer-string))))))
 
 (ert-deftest ob-exp/exports-inline-code-eval-code-once ()
@@ -275,7 +276,7 @@ be evaluated."
 		   (org-test-with-temp-text
 		       (concat "src_emacs-lisp[:exports results :results code "
 			       ":results_switches \":exports code\"]{(+ 1 1)}")
-		     (org-export-execute-babel-code)
+		     (org-babel-exp-process-buffer)
 		     (buffer-string))))))
 
 (ert-deftest ob-exp/exports-inline-code-double-eval-exports-both ()
@@ -286,7 +287,7 @@ be evaluated."
 		   (org-test-with-temp-text
 		       (concat "src_emacs-lisp[:exports both :results code "
 			       ":results_switches \":exports code\"]{(+ 1 1)}")
-		     (org-export-execute-babel-code)
+		     (org-babel-exp-process-buffer)
 		     (buffer-string))))))
 
 (ert-deftest ob-exp/export-call-line-information ()
@@ -393,7 +394,7 @@ be evaluated."
 #+BEGIN_SRC emacs-lisp :exports both
 \(+ 1 1)
 #+END_SRC"
-	(org-export-execute-babel-code)
+	(org-babel-exp-process-buffer)
 	(org-trim (org-no-properties (buffer-string))))))))
 
 (ert-deftest ob-export/export-src-block-with-switches ()
@@ -403,7 +404,7 @@ be evaluated."
     "\\`#\\+BEGIN_SRC emacs-lisp -n -r$"
     (org-test-with-temp-text
 	"#+BEGIN_SRC emacs-lisp -n -r\n\(+ 1 1)\n#+END_SRC"
-      (org-export-execute-babel-code)
+      (org-babel-exp-process-buffer)
       (buffer-string)))))
 
 (ert-deftest ob-export/export-src-block-with-flags ()
@@ -413,7 +414,7 @@ be evaluated."
     "\\`#\\+BEGIN_SRC emacs-lisp -some-flag$"
     (org-test-with-temp-text
 	"#+BEGIN_SRC emacs-lisp :flags -some-flag\n\(+ 1 1)\n#+END_SRC"
-      (org-export-execute-babel-code)
+      (org-babel-exp-process-buffer)
       (buffer-string)))))
 
 (ert-deftest ob-export/export-and-indentation ()
@@ -426,7 +427,7 @@ be evaluated."
       (let ((indent-tabs-mode t)
 	    (tab-width 1)
 	    (org-src-preserve-indentation nil))
-	(org-export-execute-babel-code)
+	(org-babel-exp-process-buffer)
 	(buffer-string)))))
   ;; Preserve indentation with "-i" flag.
   (should
@@ -435,7 +436,7 @@ be evaluated."
     (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp -i\n t\n#+END_SRC"
       (let ((indent-tabs-mode t)
 	    (tab-width 1))
-	(org-export-execute-babel-code)
+	(org-babel-exp-process-buffer)
 	(buffer-string)))))
   ;; Preserve indentation with a non-nil
   ;; `org-src-preserve-indentation'.
@@ -446,7 +447,7 @@ be evaluated."
       (let ((indent-tabs-mode t)
 	    (tab-width 1)
 	    (org-src-preserve-indentation t))
-	(org-export-execute-babel-code)
+	(org-babel-exp-process-buffer)
 	(buffer-string))))))
 
 (ert-deftest ob-export/export-under-commented-headline ()
@@ -461,7 +462,7 @@ be evaluated."
 #+BEGIN_SRC emacs-lisp :exports results
 \(+ 1 1)
 #+END_SRC"
-	(org-export-execute-babel-code)
+	(org-babel-exp-process-buffer)
 	(buffer-string))))
     (should-not
      (string-match
@@ -470,7 +471,7 @@ be evaluated."
 #+BEGIN_SRC emacs-lisp :exports results
 \(+ 1 1)
 #+END_SRC"
-	(org-export-execute-babel-code)
+	(org-babel-exp-process-buffer)
 	(buffer-string))))
     ;; Do not eval inline blocks either.
     (should
@@ -478,14 +479,14 @@ be evaluated."
       "=2="
       (org-test-with-temp-text "* Headline
 src_emacs-lisp{(+ 1 1)}"
-	(org-export-execute-babel-code)
+	(org-babel-exp-process-buffer)
 	(buffer-string))))
     (should-not
      (string-match
       "=2="
       (org-test-with-temp-text "* COMMENT Headline
 src_emacs-lisp{(+ 1 1)}"
-	(org-export-execute-babel-code)
+	(org-babel-exp-process-buffer)
 	(buffer-string))))
     ;; Also check parent headlines.
     (should-not
@@ -497,7 +498,7 @@ src_emacs-lisp{(+ 1 1)}"
 #+BEGIN_SRC emacs-lisp :exports results
 \(+ 1 1)
 #+END_SRC"
-	(org-export-execute-babel-code)
+	(org-babel-exp-process-buffer)
 	(buffer-string))))))
 
 (ert-deftest ob-export/reference-in-post-header ()
@@ -512,7 +513,7 @@ src_emacs-lisp{(+ 1 1)}"
 #+NAME: nofun
 #+BEGIN_SRC emacs-lisp :exports results :post foo(\"nofun\")
 #+END_SRC"
-     (org-export-execute-babel-code) t)))
+     (org-babel-exp-process-buffer) t)))
 
 (ert-deftest ob-export/babel-evaluate ()
   "Test `org-export-babel-evaluate' effect."
@@ -522,14 +523,14 @@ src_emacs-lisp{(+ 1 1)}"
     "2"
     (org-test-with-temp-text
 	"#+BEGIN_SRC emacs-lisp :exports results\n(+ 1 1)\n#+END_SRC"
-      (let ((org-export-babel-evaluate nil)) (org-export-execute-babel-code))
+      (let ((org-export-babel-evaluate nil)) (org-babel-exp-process-buffer))
       (buffer-string))))
   (should-not
    (string-match-p
     "2"
     (org-test-with-temp-text
 	"src_emacs-lisp{(+ 1 1)}"
-      (let ((org-export-babel-evaluate nil)) (org-export-execute-babel-code))
+      (let ((org-export-babel-evaluate nil)) (org-babel-exp-process-buffer))
       (buffer-string))))
   ;; When non-nil, all Babel code types are executed.
   (should
@@ -537,14 +538,14 @@ src_emacs-lisp{(+ 1 1)}"
     "2"
     (org-test-with-temp-text
 	"#+BEGIN_SRC emacs-lisp :exports results\n(+ 1 1)\n#+END_SRC"
-      (let ((org-export-babel-evaluate t)) (org-export-execute-babel-code))
+      (let ((org-export-babel-evaluate t)) (org-babel-exp-process-buffer))
       (buffer-string))))
   (should
    (string-match-p
     "2"
     (org-test-with-temp-text
 	"src_emacs-lisp{(+ 1 1)}"
-      (let ((org-export-babel-evaluate t)) (org-export-execute-babel-code))
+      (let ((org-export-babel-evaluate t)) (org-babel-exp-process-buffer))
       (buffer-string))))
   ;; When set to `inline-only' limit evaluation to inline code.
   (should-not
@@ -553,7 +554,7 @@ src_emacs-lisp{(+ 1 1)}"
     (org-test-with-temp-text
 	"#+BEGIN_SRC emacs-lisp :exports results\n(+ 1 1)\n#+END_SRC"
       (let ((org-export-babel-evaluate 'inline-only))
-	(org-export-execute-babel-code))
+	(org-babel-exp-process-buffer))
       (buffer-string))))
   (should
    (string-match-p
@@ -561,7 +562,7 @@ src_emacs-lisp{(+ 1 1)}"
     (org-test-with-temp-text
 	"src_emacs-lisp{(+ 1 1)}"
       (let ((org-export-babel-evaluate 'inline-only))
-	(org-export-execute-babel-code))
+	(org-babel-exp-process-buffer))
       (buffer-string)))))
 
 

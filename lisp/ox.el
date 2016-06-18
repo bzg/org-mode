@@ -78,8 +78,7 @@
 
 (declare-function org-publish "ox-publish" (project &optional force async))
 (declare-function org-publish-all "ox-publish" (&optional force async))
-(declare-function
- org-publish-current-file "ox-publish" (&optional force async))
+(declare-function org-publish-current-file "ox-publish" (&optional force async))
 (declare-function org-publish-current-project "ox-publish"
 		  (&optional force async))
 
@@ -3014,7 +3013,7 @@ Return code as a string."
 	 (org-set-regexps-and-options)
 	 (org-update-radio-target-regexp)
 	 (when org-export-babel-evaluate
-	   (org-export-execute-babel-code)
+	   (org-babel-exp-process-buffer)
 	   (org-set-regexps-and-options)
 	   (org-update-radio-target-regexp))
 	 ;; Run last hook with current back-end's name as argument.
@@ -3551,14 +3550,6 @@ the included document."
 	(set-marker marker-min nil)
 	(set-marker marker-max nil)))
     (org-element-normalize-string (buffer-string))))
-
-(defun org-export-execute-babel-code ()
-  "Execute every Babel code in the visible part of current buffer."
-  ;; Get a pristine copy of current buffer so Babel references can be
-  ;; properly resolved.
-  (let ((reference (org-export-copy-buffer)))
-    (unwind-protect (org-babel-exp-process-buffer reference)
-      (kill-buffer reference))))
 
 (defun org-export--copy-to-kill-ring-p ()
   "Return a non-nil value when output should be added to the kill ring.

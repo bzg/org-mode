@@ -83,12 +83,13 @@
 	(org-export-babel-evaluate t))
     (org-test-at-id "72ddeed3-2d17-4c7f-8192-a575d535d3fc"
       (org-narrow-to-subtree)
-      (let ((buf (current-buffer))
-	    (string (buffer-string)))
+      (let ((string (org-with-wide-buffer (buffer-string)))
+	    (narrowing (list (point-min) (point-max))))
 	(with-temp-buffer
 	  (org-mode)
 	  (insert string)
-	  (org-babel-exp-process-buffer buf)
+	  (apply #'narrow-to-region narrowing)
+	  (org-babel-exp-process-buffer)
 	  (message (buffer-string))
 	  (goto-char (point-min))
 	  (should (re-search-forward "^: 0" nil t))
@@ -106,7 +107,7 @@ for export
 #+begin_example
 #+call: rubbish()
 #+end_example"
-    (should (progn (org-export-execute-babel-code) t))))
+    (should (progn (org-babel-exp-process-buffer) t))))
 
 (ert-deftest test-ob-lob/caching-call-line ()
   (let ((temporary-value-for-test 0))
