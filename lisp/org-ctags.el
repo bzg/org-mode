@@ -135,8 +135,6 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
-
 (require 'org)
 
 (declare-function org-pop-to-buffer-same-window "org-compat" (&optional buffer-or-name norecord label))
