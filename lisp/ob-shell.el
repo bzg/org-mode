@@ -1,4 +1,4 @@
-;;; ob-shell.el --- org-babel functions for shell evaluation
+;;; ob-shell.el --- Babel Functions for Shell Evaluation -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2016 Free Software Foundation, Inc.
 
@@ -166,7 +166,7 @@ var of the same value."
       (mapconcat echo-var var "\n"))
      (t (funcall echo-var var)))))
 
-(defun org-babel-sh-initiate-session (&optional session params)
+(defun org-babel-sh-initiate-session (&optional session _params)
   "Initiate a session named SESSION according to PARAMS."
   (when (and session (not (string= session "none")))
     (save-window-excursion
