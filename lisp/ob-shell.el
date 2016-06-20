@@ -44,17 +44,16 @@
   '("sh" "bash" "csh" "ash" "dash" "ksh" "mksh" "posh")
   "List of names of shell supported by babel shell code blocks."
   :group 'org-babel
-  :type 'string
-  :initialize
-  (lambda (symbol value)
-    (set-default symbol (second value))
-    (mapc
-     (lambda (name)
-       (eval `(defun ,(intern (concat "org-babel-execute:" name)) (body params)
-		,(format "Execute a block of %s commands with Babel." name)
-		(let ((shell-file-name ,name))
-		  (org-babel-execute:shell body params)))))
-     (second value))))
+  :type '(repeat (string :tag "Shell name: "))
+  :set (lambda (symbol value)
+	 (set-default symbol value)
+	 (dolist (name value)
+	   (eval `(defun ,(intern (concat "org-babel-execute:" name))
+		      (body params)
+		    ,(format "Execute a block of %s commands with Babel." name)
+		    (let ((shell-file-name ,name))
+		      (org-babel-execute:shell body params)))
+		 t))))
 
 (defun org-babel-execute:shell (body params)
   "Execute a block of Shell commands with Babel.
