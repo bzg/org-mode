@@ -1,5 +1,4 @@
-;;; org-crypt.el --- Public key encryption for org-mode entries
-
+;;; org-crypt.el --- Public Key Encryption for Org Entries -*- lexical-binding: t; -*-
 ;; Copyright (C) 2007-2016 Free Software Foundation, Inc.
 
 ;; Emacs Lisp Archive Entry
