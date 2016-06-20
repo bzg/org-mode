@@ -1,4 +1,4 @@
-;;; ob-core.el --- working with code blocks in org-mode
+;;; ob-core.el --- Working with Code Blocks          -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2016 Free Software Foundation, Inc.
 
@@ -597,7 +597,7 @@ a list with the following pattern:
 	       (apply #'org-babel-merge-params
 		      (if inline org-babel-default-inline-header-args
 			org-babel-default-header-args)
-		      (and (boundp lang-headers) (symbol-value lang-headers))
+		      (and (boundp lang-headers) (eval lang-headers t))
 		      (append
 		       ;; If DATUM is provided, make sure we get node
 		       ;; properties applicable to its location within
@@ -827,7 +827,7 @@ arguments and pop open the results in a preview buffer."
 	 (lang-headers (intern (concat "org-babel-header-args:" lang)))
 	 (headers (org-babel-combine-header-arg-lists
 		   org-babel-common-header-args-w-values
-		   (when (boundp lang-headers) (eval lang-headers))))
+		   (when (boundp lang-headers) (eval lang-headers t))))
 	 (header-arg (or header-arg
 			 (completing-read
 			  "Header Arg: "
@@ -865,7 +865,7 @@ arguments and pop open the results in a preview buffer."
 (defun org-babel-enter-header-arg-w-completion (&optional lang)
   "Insert header argument appropriate for LANG with completion."
   (let* ((lang-headers-var (intern (concat "org-babel-header-args:" lang)))
-         (lang-headers (when (boundp lang-headers-var) (eval lang-headers-var)))
+         (lang-headers (when (boundp lang-headers-var) (eval lang-headers-var t)))
 	 (headers-w-values (org-babel-combine-header-arg-lists
 			    org-babel-common-header-args-w-values lang-headers))
          (headers (mapcar #'symbol-name (mapcar #'car headers-w-values)))
@@ -1427,7 +1427,7 @@ specified in the properties of the current outline entry."
 	     (org-babel-combine-header-arg-lists
 	      org-babel-common-header-args-w-values
 	      (let ((sym (intern (concat "org-babel-header-args:" lang))))
-		(and (boundp sym) (symbol-value sym)))))))
+		(and (boundp sym) (eval sym t)))))))
      ;; header arguments specified with the header-args property at
      ;; point of call.
      (org-babel-parse-header-arguments
@@ -1538,7 +1538,7 @@ shown below.
 			 (append
 			  (split-string (if (stringp raw-result)
 					    raw-result
-					  (eval raw-result)))
+					  (eval raw-result t)))
 			  (cdr (assoc :result-params params))))))
     (append
      (mapcar (lambda (var) (cons :var var)) (car vars-and-names))
@@ -2462,7 +2462,7 @@ file's directory then expand relative links."
 	  (cond ((= size 0))	      ; do nothing for an empty result
 		((< size org-babel-min-lines-for-block-output)
 		 (goto-char beg)
-		 (dotimes (n size)
+		 (dotimes (_ size)
 		   (beginning-of-line 1) (insert ": ") (forward-line 1)))
 		(t
 		 (goto-char beg)
@@ -2512,140 +2512,99 @@ parameters when merging lists."
 	 (exports-exclusive-groups
 	  (mapcar (lambda (group) (mapcar #'symbol-name group))
 		  (cdr (assoc 'exports org-babel-common-header-args-w-values))))
-	 (variable-index 0)
-	 (e-merge (lambda (exclusive-groups &rest result-params)
-		    ;; maintain exclusivity of mutually exclusive parameters
-		    (let (output)
-		      (mapc (lambda (new-params)
-			      (mapc (lambda (new-param)
-				      (mapc (lambda (exclusive-group)
-					      (when (member new-param exclusive-group)
-						(mapcar (lambda (excluded-param)
-							  (setq output
-								(delete
-								 excluded-param
-								 output)))
-							exclusive-group)))
-					    exclusive-groups)
-				      (setq output (org-uniquify
-						    (cons new-param output))))
-				    new-params))
-			    result-params)
-		      output)))
-	 params results exports tangle noweb cache vars shebang comments padline
-	 clearnames)
-
-    (mapc
-     (lambda (plist)
-       (mapc
-	(lambda (pair)
-	  (cl-case (car pair)
-	    (:var
-	     (let ((name (if (listp (cdr pair))
-			     (cadr pair)
-			   (and (string-match "^\\([^= \f\t\n\r\v]+\\)[ \t]*="
-					      (cdr pair))
-				(intern (match-string 1 (cdr pair)))))))
-	       (if name
-		   (setq vars
-			 (append
-			  (if (member name (mapcar #'car vars))
-			      (progn
-				(push name clearnames)
-				(delq nil
-				      (mapcar
-				       (lambda (p)
-					 (unless (equal (car p) name) p))
-				       vars)))
-			    vars)
-			  (list (cons name pair))))
-		 ;; if no name is given and we already have named variables
-		 ;; then assign to named variables in order
-		 (if (and vars (nth variable-index vars))
-		     (let ((name (car (nth variable-index vars))))
-		       (push name clearnames) ; clear out colnames
-					      ; and rownames
-					      ; for replace vars
-		       (prog1 (setf (cddr (nth variable-index vars))
-				    (concat (symbol-name name) "=" (cdr pair)))
-			 (cl-incf variable-index)))
-		   (error "Variable \"%s\" must be assigned a default value"
-			  (cdr pair))))))
-	    (:results
-	     (setq results (funcall e-merge results-exclusive-groups
-				    results
-				    (split-string
-				     (let ((r (cdr pair)))
-				       (if (stringp r) r (eval r)))))))
-	    (:file
-	     (when (cdr pair)
-	       (setq results (funcall e-merge results-exclusive-groups
-				      results '("file")))
-	       (unless (or (member "both" exports)
-			   (member "none" exports)
-			   (member "code" exports))
-		 (setq exports (funcall e-merge exports-exclusive-groups
-					exports '("results"))))
-	       (setq params (cons pair (assq-delete-all (car pair) params)))))
-	    (:file-ext
-	     (when (cdr pair)
-	       (setq results (funcall e-merge results-exclusive-groups
-				      results '("file")))
-	       (unless (or (member "both" exports)
-			   (member "none" exports)
-			   (member "code" exports))
-		 (setq exports (funcall e-merge exports-exclusive-groups
-					exports '("results"))))
-	       (setq params (cons pair (assq-delete-all (car pair) params)))))
-	    (:exports
-	     (setq exports (funcall e-merge exports-exclusive-groups
-				    exports
-				    (split-string (or (cdr pair) "")))))
-	    (:tangle ;; take the latest -- always overwrite
-	     (setq tangle (or (list (cdr pair)) tangle)))
-	    (:noweb
-	     (setq noweb (funcall e-merge
-				  '(("yes" "no" "tangle" "no-export"
-				     "strip-export" "eval"))
-				  noweb
-				  (split-string (or (cdr pair) "")))))
-	    (:cache
-	     (setq cache (funcall e-merge '(("yes" "no")) cache
-				  (split-string (or (cdr pair) "")))))
-	    (:padline
-	     (setq padline (funcall e-merge '(("yes" "no")) padline
-				    (split-string (or (cdr pair) "")))))
-	    (:shebang ;; take the latest -- always overwrite
-	     (setq shebang (or (list (cdr pair)) shebang)))
-	    (:comments
-	     (setq comments (funcall e-merge '(("yes" "no")) comments
-				     (split-string (or (cdr pair) "")))))
-	    (t ;; replace: this covers e.g. :session
-	     (setq params (cons pair (assq-delete-all (car pair) params))))))
-	plist))
-     plists)
-    (setq vars (reverse vars))
-    (while vars (setq params (cons (cons :var (cddr (pop vars))) params)))
-    ;; clear out col-names and row-names for replaced variables
-    (mapc
-     (lambda (name)
-       (mapc
-	(lambda (param)
-	  (when (assoc param params)
-	    (setf (cdr (assoc param params))
-		  (cl-remove-if (lambda (pair) (equal (car pair) name))
-				 (cdr (assoc param params))))
-	    (setf params (cl-remove-if (lambda (pair) (and (equal (car pair) param)
-						       (null (cdr pair))))
-					params))))
-	(list :colname-names :rowname-names)))
-     clearnames)
-    (mapc
-     (lambda (hd)
-       (let ((key (intern (concat ":" (symbol-name hd))))
-	     (val (eval hd)))
-	 (setf params (cons (cons key (mapconcat 'identity val " ")) params))))
-     '(results exports tangle noweb padline cache shebang comments))
+	 (merge
+	  (lambda (exclusive-groups &rest result-params)
+	    ;; Maintain exclusivity of mutually exclusive parameters,
+	    ;; as defined in EXCLUSIVE-GROUPS while merging lists in
+	    ;; RESULT-PARAMS.
+	    (let (output)
+	      (dolist (new-params result-params (delete-dups output))
+		(dolist (new-param new-params)
+		  (dolist (exclusive-group exclusive-groups)
+		    (when (member new-param exclusive-group)
+		      (setq output (cl-remove-if
+				    (lambda (o) (member o exclusive-group))
+				    output))))
+		  (push new-param output))))))
+	 (variable-index 0)		;Handle positional arguments.
+	 clearnames
+	 params				;Final parameters list.
+	 ;; Some keywords accept multiple values.  We need to treat
+	 ;; them specially.
+	 vars results exports)
+    (dolist (plist plists)
+      (dolist (pair plist)
+	(pcase pair
+	  (`(:var . ,value)
+	   (let ((name (cond
+			((listp value) (car value))
+			((string-match "^\\([^= \f\t\n\r\v]+\\)[ \t]*=" value)
+			 (intern (match-string 1 value)))
+			(t nil))))
+	     (cond
+	      (name
+	       (setq vars
+		     (append (if (not (assoc name vars)) vars
+			       (push name clearnames)
+			       (cl-remove-if (lambda (p) (equal name (car p)))
+					     vars))
+			     (list (cons name pair)))))
+	      ((and vars (nth variable-index vars))
+	       ;; If no name is given and we already have named
+	       ;; variables then assign to named variables in order.
+	       (let ((name (car (nth variable-index vars))))
+		 ;; Clear out colnames and rownames for replace vars.
+		 (push name clearnames)
+		 (setf (cddr (nth variable-index vars))
+		       (concat (symbol-name name) "=" value))
+		 (cl-incf variable-index)))
+	      (t (error "Variable \"%s\" must be assigned a default value"
+			(cdr pair))))))
+	  (`(:results . ,value)
+	   (setq results (funcall merge
+				  results-exclusive-groups
+				  results
+				  (split-string
+				   (if (stringp value) value (eval value t))))))
+	  (`(,(or :file :file-ext) . ,value)
+	   ;; `:file' and `:file-ext' are regular keywords but they
+	   ;; imply a "file" `:results' and a "results" `:exports'.
+	   (when value
+	     (setq results
+		   (funcall merge results-exclusive-groups results '("file")))
+	     (unless (or (member "both" exports)
+			 (member "none" exports)
+			 (member "code" exports))
+	       (setq exports
+		     (funcall merge
+			      exports-exclusive-groups exports '("results"))))
+	     (push pair params)))
+	  (`(:exports . ,value)
+	   (setq exports (funcall merge
+				  exports-exclusive-groups
+				  exports
+				  (split-string (or value "")))))
+	  ;; Regular keywords: any value overwrites the previous one.
+	  (_ (setq params (cons pair (assq-delete-all (car pair) params)))))))
+    ;; Handle `:var' and clear out colnames and rownames for replaced
+    ;; variables.
+    (setq params (nconc (mapcar (lambda (v) (cons :var (cddr v))) vars)
+			params))
+    (dolist (name clearnames)
+      (dolist (param '(:colname-names :rowname-names))
+	(when (assq param params)
+	  (setf (cdr (assq param params))
+		(cl-remove-if (lambda (pair) (equal name (car pair)))
+			      (cdr (assq param params))))
+	  (setq params
+		(cl-remove-if (lambda (pair) (and (equal (car pair) param)
+					     (null (cdr pair))))
+			      params)))))
+    ;; Handle other special keywords, which accept multiple values.
+    (setq params (nconc (list (cons :results (mapconcat #'identity results " "))
+			      (cons :exports (mapconcat #'identity exports " ")))
+			params))
+    ;; Return merged params.
     params))
 
 (defvar org-babel-use-quick-and-dirty-noweb-expansion nil
@@ -2657,17 +2616,12 @@ header argument from buffer or subtree wide properties.")
 (defun org-babel-noweb-p (params context)
   "Check if PARAMS require expansion in CONTEXT.
 CONTEXT may be one of :tangle, :export or :eval."
-  (let* (intersect
-	 (intersect (lambda (as bs)
-		      (when as
-			(if (member (car as) bs)
-			    (car as)
-			  (funcall intersect (cdr as) bs))))))
-    (funcall intersect (cl-case context
-			 (:tangle '("yes" "tangle" "no-export" "strip-export"))
-			 (:eval   '("yes" "no-export" "strip-export" "eval"))
-			 (:export '("yes")))
-	     (split-string (or (cdr (assoc :noweb params)) "")))))
+  (let ((allowed-values (cl-case context
+			  (:tangle '("yes" "tangle" "no-export" "strip-export"))
+			  (:eval   '("yes" "no-export" "strip-export" "eval"))
+			  (:export '("yes")))))
+    (cl-some (lambda (v) (member v allowed-values))
+	     (split-string (or (cdr (assq :noweb params)) "")))))
 
 (defun org-babel-expand-noweb-references (&optional info parent-buffer)
   "Expand Noweb references in the body of the current source code block.
@@ -2906,7 +2860,7 @@ situations in which is it not appropriate."
           (if (and (not inhibit-lisp-eval)
 		   (or (member (substring cell 0 1) '("(" "'" "`" "["))
 		       (string= cell "*this*")))
-              (eval (read cell))
+              (eval (read cell) t)
             (if (string= (substring cell 0 1) "\"")
 		(read cell)
 	      (progn (set-text-properties 0 (length cell) nil cell) cell))))
