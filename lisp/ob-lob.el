@@ -85,7 +85,7 @@ if so then run the appropriate source block from the Library."
 NAME is a string.  This function looks into the current document
 for a Babel call or source block.  If none is found, it looks
 after NAME in the Library of Babel.  Eventually, if that also
-fails, it Returns nil."
+fails, it returns nil."
   ;; During export, look into the pristine copy of the document being
   ;; exported instead of the current one, which could miss some data.
   (with-current-buffer (or org-babel-exp-reference-buffer (current-buffer))
