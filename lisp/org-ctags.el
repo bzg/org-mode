@@ -1,4 +1,4 @@
-;;; org-ctags.el - Integrate Emacs "tags" facility with org mode.
+;;; org-ctags.el - Integrate Emacs "tags" Facility with Org -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2007-2016 Free Software Foundation, Inc.
 
@@ -280,18 +280,17 @@ Return the list."
   "Visit or create a file called `NAME.org', and insert a new topic.
 The new topic will be titled NAME (or TITLE if supplied)."
   (interactive "sFile name: ")
-  (let ((filename (substitute-in-file-name (expand-file-name name))))
-    (condition-case v
-        (progn
-          (org-open-file name t)
-          (message "Opened file OK")
-          (goto-char (point-max))
-          (insert (org-ctags-string-search-and-replace
-                   "%t" (capitalize (or title name))
-                   org-ctags-new-topic-template))
-          (message "Inserted new file text OK")
-          (org-mode-restart))
-      (error (error "Error %S in org-ctags-open-file" v)))))
+  (condition-case v
+      (progn
+	(org-open-file name t)
+	(message "Opened file OK")
+	(goto-char (point-max))
+	(insert (org-ctags-string-search-and-replace
+		 "%t" (capitalize (or title name))
+		 org-ctags-new-topic-template))
+	(message "Inserted new file text OK")
+	(org-mode-restart))
+    (error (error "Error %S in org-ctags-open-file" v))))
 
 
 ;;;; Misc interoperability with etags system =================================
@@ -459,10 +458,10 @@ Wrapper for org-ctags-rebuild-tags-file-then-find-tag."
     nil))
 
 
-(defun org-ctags-fail-silently (name)
+(defun org-ctags-fail-silently (_name)
   "This function is intended to be used in ORG-OPEN-LINK-FUNCTIONS.
-Put as the last function in the list if you want to prevent org's default
-behavior of free text search."
+Put as the last function in the list if you want to prevent Org's
+default behavior of free text search."
   t)
 
 
