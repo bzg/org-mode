@@ -3071,15 +3071,18 @@ plus the parameter value."
 	(setq params (cons (cons :file fname) params))))
     params))
 
-;;; Used by backends: R, Maxima, Octave.
 (defun org-babel-graphical-output-file (params)
-  "File where a babel block should send graphical output, per PARAMS."
-  (unless (assq :file params)
-    (if (assq :file-ext params)
-	(user-error ":file-ext given but no :file generated; did you forget to give a block a #+NAME?")
-      (user-error "No :file header argument given; cannot create graphical result.")))
-  (and (member "graphics" (cdr (assq :result-params params)))
-       (cdr (assq :file params))))
+  "File where a babel block should send graphical output, per PARAMS.
+Return nil if no graphical output is expected.  Raise an error if
+the output file is ill-defined."
+  (let ((file (cdr (assq :file params))))
+    (cond (file (and (member "graphics" (cdr (assq :result-params params)))
+		     file))
+	  ((assq :file-ext params)
+	   (user-error ":file-ext given but no :file generated; did you forget \
+to name a block?"))
+	  (t (user-error "No :file header argument given; cannot create \
+graphical result")))))
 
 (defun org-babel-make-language-alias (new old)
   "Make source blocks of type NEW aliases for those of type OLD.
