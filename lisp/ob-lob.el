@@ -35,15 +35,8 @@
 
 (defvar org-babel-library-of-babel nil
   "Library of source-code blocks.
-This is an association list.  Populate the library by adding
-files to `org-babel-lob-files'.")
-
-(defcustom org-babel-lob-files nil
-  "Files used to populate the `org-babel-library-of-babel'.
-To add files to this list use the `org-babel-lob-ingest' command."
-  :group 'org-babel
-  :version "24.1"
-  :type '(repeat file))
+This is an association list.  Populate the library by calling
+`org-babel-lob-ingest' on files containing source blocks.")
 
 (defvar org-babel-default-lob-header-args
   '((:cache . "no")
