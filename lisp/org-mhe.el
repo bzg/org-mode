@@ -1,4 +1,4 @@
-;;; org-mhe.el --- Support for links to MH-E messages from within Org-mode
+;;; org-mhe.el --- Support for Links to MH-E Messages -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004-2016 Free Software Foundation, Inc.
 
