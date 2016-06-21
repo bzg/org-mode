@@ -641,34 +641,34 @@ block."
 	      (nth 5 info)
 	      (org-babel-where-is-src-block-head)))
 	 (info (if info (copy-tree info) (org-babel-get-src-block-info))))
+    ;; Merge PARAMS with INFO before considering source block
+    ;; evaluation since both could disagree.
     (cl-callf org-babel-merge-params (nth 2 info) params)
     (when (org-babel-check-evaluate info)
       (cl-callf org-babel-process-params (nth 2 info))
       (let* ((params (nth 2 info))
-	     (cachep (and (not arg) (cdr (assoc :cache params))
-			  (string= "yes" (cdr (assoc :cache params)))))
-	     (new-hash (when cachep (org-babel-sha1-hash info)))
-	     (old-hash (when cachep (org-babel-current-result-hash)))
-	     (cache-current-p (and (not arg) new-hash
-				   (equal new-hash old-hash))))
+	     (cache (let ((c (cdr (assq :cache params))))
+		      (and (not arg) c (string= "yes" c))))
+	     (new-hash (and cache (org-babel-sha1-hash info)))
+	     (old-hash (and cache (org-babel-current-result-hash)))
+	     (current-cache (and new-hash (equal new-hash old-hash))))
 	(cond
-	 (cache-current-p
-	  (save-excursion ;; return cached result
+	 (current-cache
+	  (save-excursion		;Return cached result.
 	    (goto-char (org-babel-where-is-src-block-result nil info))
 	    (forward-line)
 	    (skip-chars-forward " \t")
 	    (let ((result (org-babel-read-result)))
-	      (message (replace-regexp-in-string
-			"%" "%%" (format "%S" result)))
+	      (message (replace-regexp-in-string "%" "%%" (format "%S" result)))
 	      result)))
 	 ((org-babel-confirm-evaluate info)
 	  (let* ((lang (nth 0 info))
-		 (result-params (cdr (assoc :result-params params)))
+		 (result-params (cdr (assq :result-params params)))
 		 (body (setf (nth 1 info)
 			     (if (org-babel-noweb-p params :eval)
 				 (org-babel-expand-noweb-references info)
 			       (nth 1 info))))
-		 (dir (cdr (assoc :dir params)))
+		 (dir (cdr (assq :dir params)))
 		 (default-directory
 		   (or (and dir (file-name-as-directory (expand-file-name dir)))
 		       default-directory))
@@ -678,44 +678,42 @@ block."
 	      (error "No org-babel-execute function for %s!" lang))
 	    (message "executing %s code block%s..."
 		     (capitalize lang)
-		     (if (nth 4 info) (format " (%s)" (nth 4 info)) ""))
+		     (let ((name (nth 4 info)))
+		       (if name (format " (%s)" name) "")))
 	    (if (member "none" result-params)
-		(progn
-		  (funcall cmd body params)
-		  (message "result silenced")
-		  (setq result nil))
+		(progn (funcall cmd body params)
+		       (message "result silenced"))
 	      (setq result
-		    (let ((result (funcall cmd body params)))
-		      (if (and (eq (cdr (assoc :result-type params))
-				   'value)
+		    (let ((r (funcall cmd body params)))
+		      (if (and (eq (cdr (assq :result-type params)) 'value)
 			       (or (member "vector" result-params)
 				   (member "table" result-params))
-			       (not (listp result)))
-			  (list (list result)) result)))
-	      ;; If non-empty result and :file then write to :file.
-	      (when (cdr (assoc :file params))
-		(when result
-		  (with-temp-file (cdr (assoc :file params))
-		    (insert
-		     (org-babel-format-result
-		      result (cdr (assoc :sep (nth 2 info)))))))
-		(setq result (cdr (assoc :file params))))
-	      ;; Possibly perform post process provided its appropriate.
-	      (when (cdr (assoc :post params))
-		(let ((*this* (if (cdr (assoc :file params))
-				  (org-babel-result-to-file
-				   (cdr (assoc :file params))
-				   (when (assoc :file-desc params)
-				     (or (cdr (assoc :file-desc params))
-					 result)))
-				result)))
-		  (setq result (org-babel-ref-resolve
-				(cdr (assoc :post params))))
-		  (when (cdr (assoc :file params))
-		    (setq result-params
-			  (remove "file" result-params)))))
-	      (org-babel-insert-result
-	       result result-params info new-hash lang))
+			       (not (listp r)))
+			  (list (list r))
+			r)))
+	      (let ((file (cdr (assq :file params))))
+		;; If non-empty result and :file then write to :file.
+		(when file
+		  (when result
+		    (with-temp-file file
+		      (insert (org-babel-format-result
+			       result (cdr (assq :sep params))))))
+		  (setq result file))
+		;; Possibly perform post process provided its
+		;; appropriate.  Dynamically bind "*this*" to the
+		;; actual results of the block.
+		(let ((post (cdr (assq :post params))))
+		  (when post
+		    (let ((*this* (if (not file) result
+				    (org-babel-result-to-file
+				     file
+				     (let ((desc (assq :file-desc params)))
+				       (and desc (or (cdr desc) result)))))))
+		      (setq result (org-babel-ref-resolve post))
+		      (when file
+			(setq result-params (remove "file" result-params))))))
+		(org-babel-insert-result
+		 result result-params info new-hash lang)))
 	    (run-hooks 'org-babel-after-execute-hook)
 	    result)))))))
 
