@@ -136,6 +136,8 @@
   'org-link-unescape-single-byte-sequence
   "2011-02-17")
 
+(defvar org-capture-link-is-already-stored)
+
 (defgroup org-protocol nil
   "Intercept calls from emacsclient to trigger custom actions.
 
