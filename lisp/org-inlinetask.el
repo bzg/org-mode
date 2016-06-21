@@ -1,4 +1,4 @@
-;;; org-inlinetask.el --- Tasks independent of outline hierarchy
+;;; org-inlinetask.el --- Tasks Independent of Outline Hierarchy -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2016 Free Software Foundation, Inc.
 ;;
