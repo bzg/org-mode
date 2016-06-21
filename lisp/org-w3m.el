@@ -1,4 +1,4 @@
-;;; org-w3m.el --- Support from copy and paste from w3m to Org-mode
+;;; org-w3m.el --- Support from Copy and Paste From w3m -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2008-2016 Free Software Foundation, Inc.
 
