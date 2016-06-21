@@ -37,16 +37,14 @@
 
 (defun org-entities--user-safe-p (v)
   "Non-nil if V is a safe value for `org-entities-user'."
-  (or (null v)
-      (and (listp v)
-	   (= (length v) 7)
-	   (stringp (nth 0 v))
-	   (stringp (nth 1 v))
-	   (booleanp (nth 2 v))
-	   (stringp (nth 3 v))
-	   (stringp (nth 4 v))
-	   (stringp (nth 5 v))
-	   (stringp (nth 6 v)))))
+  (pcase v
+    (`nil t)
+    (`(,(and (pred stringp)
+	     (pred (string-match-p "\\`[a-zA-Z][a-zA-Z0-9]*\\'")))
+       ,(pred stringp) ,(pred booleanp) ,(pred stringp)
+       ,(pred stringp) ,(pred stringp) ,(pred stringp))
+     t)
+    (_ nil)))
 
 (defcustom org-entities-user nil
   "User-defined entities used in Org-mode to produce special characters.
