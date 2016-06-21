@@ -1,4 +1,4 @@
-;;; org-macs.el --- Top-level definitions for Org-mode
+;;; org-macs.el --- Top-level Definitions for Org -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004-2016 Free Software Foundation, Inc.
 
@@ -25,9 +25,9 @@
 ;;; Commentary:
 
 ;; This file contains macro definitions, defsubst definitions, other
-;; stuff needed for compilation and top-level forms in Org-mode, as well
-;; lots of small functions that are not org-mode specific but simply
-;; generally useful stuff.
+;; stuff needed for compilation and top-level forms in Org mode, as
+;; well lots of small functions that are not Org mode specific but
+;; simply generally useful stuff.
 
 ;;; Code:
 
@@ -297,18 +297,14 @@ during the operation, because otherwise all these markers will
 point nowhere."
   (declare (debug (form body)) (indent 1))
   (org-with-gensyms (data rtn)
-    `(let ((,data (org-outline-overlay-data ,use-markers))
-	   ,rtn)
+    `(let ((,data (org-outline-overlay-data ,use-markers)))
        (unwind-protect
-	   (progn
-	     (setq ,rtn (progn ,@body))
+	   (prog1 (progn ,@body)
 	     (org-set-outline-overlay-data ,data))
 	 (when ,use-markers
-	   (mapc (lambda (c)
-		   (and (markerp (car c)) (move-marker (car c) nil))
-		   (and (markerp (cdr c)) (move-marker (cdr c) nil)))
-		 ,data)))
-       ,rtn)))
+	   (dolist (c ,data)
+	     (when (markerp (car c)) (move-marker (car c) nil))
+	     (when (markerp (cdr c)) (move-marker (cdr c) nil))))))))
 
 (defmacro org-with-wide-buffer (&rest body)
   "Execute body while temporarily widening the buffer."
