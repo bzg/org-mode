@@ -116,8 +116,6 @@
 ;;; Code:
 
 (require 'org)
-(eval-when-compile
-  (require 'cl))
 
 (declare-function org-publish-get-project-from-filename "ox-publish"
 		  (filename &optional up))
