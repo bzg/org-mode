@@ -31,6 +31,7 @@
 (eval-when-compile (require 'cl))
 
 (declare-function org-remove-indentation "org" )
+(declare-function org-trim "org" (s &optional keep-lead))
 (declare-function py-shell "ext:python-mode" (&optional argprompt))
 (declare-function py-toggle-shells "ext:python-mode" (arg))
 (declare-function run-python "ext:python" (&optional cmd dedicated show))
@@ -248,7 +249,7 @@ open('%s', 'w').write( pprint.pformat(main()) )")
      body result-type result-params preamble)))
 
 (defun org-babel-python-evaluate-external-process
-  (body &optional result-type result-params preamble)
+    (body &optional result-type result-params preamble)
   "Evaluate BODY in external python process.
 If RESULT-TYPE equals `output' then return standard output as a
 string.  If RESULT-TYPE equals `value' then return the value of the
@@ -269,15 +270,14 @@ last statement in BODY, as elisp."
                          org-babel-python-wrapper-method)
                        (mapconcat
                         (lambda (line) (format "\t%s" line))
-                        (split-string
-                         (org-remove-indentation
-                          (org-babel-trim body))
-                         "[\r\n]") "\n")
+                        (split-string (org-remove-indentation (org-trim body))
+				      "[\r\n]")
+			"\n")
                        (org-babel-process-file-name tmp-file 'noquote))))
                     (org-babel-eval-read-file tmp-file))))))
     (org-babel-result-cond result-params
       raw
-      (org-babel-python-table-or-string (org-babel-trim raw)))))
+      (org-babel-python-table-or-string (org-trim raw)))))
 
 (defun org-babel-python-evaluate-session
     (session body &optional result-type result-params)
@@ -307,7 +307,7 @@ last statement in BODY, as elisp."
           (case result-type
             (output
              (mapconcat
-              #'org-babel-trim
+              #'org-trim
               (butlast
                (org-babel-comint-with-output
                    (session org-babel-python-eoe-indicator t body)

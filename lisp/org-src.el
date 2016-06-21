@@ -51,7 +51,7 @@
 (declare-function org-pop-to-buffer-same-window "org-compat"
 		  (&optional buffer-or-name norecord label))
 (declare-function org-switch-to-buffer-other-window "org" (&rest args))
-(declare-function org-trim "org" (s))
+(declare-function org-trim "org" (s &optional keep-lead))
 
 (defvar org-element-all-elements)
 (defvar org-inhibit-startup)

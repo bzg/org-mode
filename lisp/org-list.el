@@ -147,7 +147,7 @@
 (declare-function org-time-string-to-seconds "org" (s))
 (declare-function org-timer-hms-to-secs "org-timer" (hms))
 (declare-function org-timer-item "org-timer" (&optional arg))
-(declare-function org-trim "org" (s))
+(declare-function org-trim "org" (s &optional keep-lead))
 (declare-function org-uniquify "org" (list))
 (declare-function outline-flag-region "outline" (from to flag))
 (declare-function outline-invisible-p "outline" (&optional pos))

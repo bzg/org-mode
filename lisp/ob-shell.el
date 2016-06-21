@@ -36,6 +36,7 @@
 (declare-function org-babel-comint-buffer-livep "ob-comint" (buffer))
 (declare-function org-babel-comint-with-output "ob-comint" (meta &rest body)
 		  t)
+(declare-function org-trim "org" (s &optional keep-lead))
 (declare-function orgtbl-to-generic "org-table" (table params))
 
 (defvar org-babel-default-header-args:shell '())
@@ -213,7 +214,7 @@ return the value of the last statement in BODY."
            (mapconcat
             #'org-babel-sh-strip-weird-long-prompt
             (mapcar
-             #'org-babel-trim
+             #'org-trim
              (butlast
               (org-babel-comint-with-output
                   (session org-babel-sh-eoe-output t body)
@@ -228,7 +229,7 @@ return the value of the last statement in BODY."
                      (accept-process-output
                       (get-buffer-process (current-buffer)))))
                  (append
-                  (split-string (org-babel-trim body) "\n")
+                  (split-string (org-trim body) "\n")
                   (list org-babel-sh-eoe-indicator))))
               2)) "\n"))
           ('otherwise                   ; external shell script
@@ -243,7 +244,7 @@ return the value of the last statement in BODY."
                    (insert body))
                  (set-file-modes script-file #o755)
                  (org-babel-eval script-file ""))
-             (org-babel-eval shell-file-name (org-babel-trim body)))))))
+             (org-babel-eval shell-file-name (org-trim body)))))))
     (when results
       (let ((result-params (cdr (assoc :result-params params))))
         (org-babel-result-cond result-params

@@ -207,7 +207,7 @@ should still return the link."
 	   (params (nth 2 info)))
       (message "%S" params)
       (should (equal "example-lang" (nth 0 info)))
-      (should (string= "the body" (org-babel-trim (nth 1 info))))
+      (should (string= "the body" (org-trim (nth 1 info))))
       (should-not (member '(:session\ \ \ \ ) params))
       (should (equal '(:session) (assoc :session params)))
       (should (equal '(:result-type . output) (assoc :result-type params)))

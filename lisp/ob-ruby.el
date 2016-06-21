@@ -39,6 +39,7 @@
 (require 'ob)
 (eval-when-compile (require 'cl))
 
+(declare-function org-trim "org" (s &optional keep-lead))
 (declare-function run-ruby "ext:inf-ruby" (&optional command name))
 (declare-function xmp "ext:rcodetools" (&optional option))
 
@@ -220,7 +221,7 @@ return the value of the last statement in BODY, as elisp."
 	  (butlast
 	   (split-string
 	    (mapconcat
-	     #'org-babel-trim
+	     #'org-trim
 	     (org-babel-comint-with-output
 		 (buffer org-babel-ruby-eoe-indicator t body)
 	       (mapc

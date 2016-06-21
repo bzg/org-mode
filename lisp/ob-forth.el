@@ -35,6 +35,7 @@
 (require 'ob)
 
 (declare-function forth-proc "ext:gforth" ())
+(declare-function org-trim "org" (s &optional keep-lead))
 
 (defvar org-babel-default-header-args:forth '((:session . "yes"))
   "Default header arguments for forth code blocks.")
@@ -76,10 +77,10 @@ This function is called by `org-babel-execute-src-block'"
 		    (org-babel-eval-error-notify 1
 		     (buffer-substring
 		      (+ (match-beginning 0) 1) (point-max))) nil))))
-	      (split-string (org-babel-trim
-			     (org-babel-expand-body:generic
-			      body params))
-			    "\n" 'omit-nulls)))))
+	      (split-string (org-trim
+			     (org-babel-expand-body:generic body params))
+			    "\n"
+			    'omit-nulls)))))
 
 (provide 'ob-forth)
 

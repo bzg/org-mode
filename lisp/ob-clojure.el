@@ -48,6 +48,7 @@
 (declare-function nrepl-dict-get "ext:nrepl-client" (dict key))
 (declare-function nrepl-sync-request:eval "ext:nrepl-client"
 		  (input connection session &optional ns))
+(declare-function org-trim "org" (s &optional keep-lead))
 (declare-function slime-eval "ext:slime" (sexp &optional package))
 
 (defvar org-babel-tangle-lang-exts)
@@ -70,15 +71,14 @@
   (let* ((vars (org-babel--get-vars params))
 	 (result-params (cdr (assoc :result-params params)))
 	 (print-level nil) (print-length nil)
-	 (body (org-babel-trim
-		(if (> (length vars) 0)
-		    (concat "(let ["
-			    (mapconcat
-			     (lambda (var)
-			       (format "%S (quote %S)" (car var) (cdr var)))
-			     vars "\n      ")
-			    "]\n" body ")")
-		  body))))
+	 (body (org-trim
+		(if (null vars) (org-trim body)
+		  (concat "(let ["
+			  (mapconcat
+			   (lambda (var)
+			     (format "%S (quote %S)" (car var) (cdr var)))
+			   vars "\n      ")
+			  "]\n" body ")")))))
     (if (or (member "code" result-params)
 	    (member "pp" result-params))
 	(format "(clojure.pprint/pprint (do %s))" body)

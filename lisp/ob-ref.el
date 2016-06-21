@@ -65,7 +65,7 @@
 (declare-function org-pop-to-buffer-same-window "org-compat"
 		  (&optional buffer-or-name norecord label))
 (declare-function org-show-context "org" (&optional key))
-
+(declare-function org-trim "org" (s &optional keep-lead))
 
 (defvar org-babel-ref-split-regexp
   "[ \f\t\n\r\v]*\\(.+?\\)[ \f\t\n\r\v]*=[ \f\t\n\r\v]*\\(.+\\)[ \f\t\n\r\v]*")
@@ -242,7 +242,7 @@ to \"0:-1\"."
 
 (defun org-babel-ref-split-args (arg-string)
   "Split ARG-STRING into top-level arguments of balanced parenthesis."
-  (mapcar #'org-babel-trim (org-babel-balanced-split arg-string 44)))
+  (mapcar #'org-trim (org-babel-balanced-split arg-string 44)))
 
 
 (provide 'ob-ref)

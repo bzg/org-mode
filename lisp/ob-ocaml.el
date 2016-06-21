@@ -42,6 +42,7 @@
 (declare-function tuareg-run-caml "ext:tuareg" ())
 (declare-function tuareg-run-ocaml "ext:tuareg" ())
 (declare-function tuareg-interactive-send-input "ext:tuareg" ())
+(declare-function org-trim "org" (s &optional keep-lead))
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("ocaml" . "ml"))
@@ -79,8 +80,8 @@
 					 (progn (setq out nil) line)
 				       (when (string-match re line)
 					 (progn (setq out t) nil))))
-				   (mapcar #'org-babel-trim (reverse raw)))))))
-	 (raw (org-babel-trim clean))
+				   (mapcar #'org-trim (reverse raw)))))))
+	 (raw (org-trim clean))
 	 (result-params (cdr (assoc :result-params params))))
     (string-match
      "\\(\\(.*\n\\)*\\)[^:\n]+ : \\([^=\n]+\\) =\\(\n\\| \\)\\(.+\\)$"

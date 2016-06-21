@@ -52,7 +52,7 @@
 (declare-function org-inside-latex-macro-p "org" ())
 (declare-function org-mark-ring-push "org" (&optional pos buffer))
 (declare-function org-show-context "org" (&optional key))
-(declare-function org-trim "org" (s))
+(declare-function org-trim "org" (s &optional keep-lead))
 (declare-function outline-next-heading "outline")
 
 (defvar electric-indent-mode)

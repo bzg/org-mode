@@ -14,6 +14,9 @@
 (require 'ob-ref)
 (require 'ob-comint)
 (require 'ob-eval)
+
+(declare-function org-trim "org" (s &optional keep-lead))
+
 ;; Optionally require mma.el for font lock, etc
 (require 'mma nil 'noerror)
 (add-to-list 'org-src-lang-modes '("mathematica" . "mma"))
@@ -56,7 +59,7 @@ called by `org-babel-execute-src-block'"
 	       (and (member "output" result-params)
 		    (not (member "table" result-params))))
 	   raw
-	 (org-babel-script-escape (org-babel-trim raw))))
+	 (org-babel-script-escape (org-trim raw))))
     (org-babel-eval (concat cmd " " tmp-script-file) ""))))
 
 (defun org-babel-prep-session:mathematica (session params)

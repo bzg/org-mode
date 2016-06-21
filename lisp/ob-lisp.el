@@ -40,6 +40,7 @@
 
 (declare-function sly-eval "ext:sly" (sexp &optional package))
 (declare-function slime-eval "ext:slime" (sexp &optional package))
+(declare-function org-trim "org" (s &optional keep-lead))
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("lisp" . "lisp"))
@@ -69,15 +70,13 @@ current directory string."
   (let* ((vars (org-babel--get-vars params))
 	 (result-params (cdr (assoc :result-params params)))
 	 (print-level nil) (print-length nil)
-	 (body (org-babel-trim
-		(if (> (length vars) 0)
-		    (concat "(let ("
-			    (mapconcat
-			     (lambda (var)
-			       (format "(%S (quote %S))" (car var) (cdr var)))
-			     vars "\n      ")
-			    ")\n" body ")")
-		  body))))
+	 (body (if (null vars) (org-trim body)
+		 (concat "(let ("
+			 (mapconcat
+			  (lambda (var)
+			    (format "(%S (quote %S))" (car var) (cdr var)))
+			  vars "\n      ")
+			 ")\n" body ")"))))
     (if (or (member "code" result-params)
 	    (member "pp" result-params))
 	(format "(pprint %s)" body)

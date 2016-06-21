@@ -34,6 +34,7 @@
 
 (declare-function matlab-shell "ext:matlab-mode")
 (declare-function matlab-shell-run-region "ext:matlab-mode")
+(declare-function org-trim "org" (s &optional keep-lead))
 
 (defvar org-babel-default-header-args:matlab '())
 (defvar org-babel-default-header-args:octave '())
@@ -240,11 +241,11 @@ value of the last statement in BODY, as elisp."
 	       (if matlabp
 		   (cdr (reverse (delq "" (mapcar
 					   #'org-babel-octave-read-string
-					   (mapcar #'org-babel-trim raw)))))
+					   (mapcar #'org-trim raw)))))
 		 (cdr (member org-babel-octave-eoe-output
 			      (reverse (mapcar
 					#'org-babel-octave-read-string
-					(mapcar #'org-babel-trim raw)))))))
+					(mapcar #'org-trim raw)))))))
 	 (mapconcat #'identity (reverse results) "\n"))))))
 
 (defun org-babel-octave-import-elisp-from-file (file-name)

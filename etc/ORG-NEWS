@@ -337,7 +337,8 @@ Use ~org-agenda-filter-by-tag~ instead.
 Use ~org-agenda-today-p~ instead.
 *** ~org-babel-get-header~ is removed.
 Use ~org-babel--get-vars~ or ~assq~ instead, as applicable.
-
+*** ~org-babel-trim~ is deprecated.
+Use ~org-trim~ instead.
 *** ~org-element-remove-indentation~ is deprecated.
 Use ~org-remove-indentation~ instead.
 *** ~org-image-file-name-regexp~ is deprecated
@@ -424,6 +425,11 @@ called with 6 parameters.
 *** =ITEM= special property returns headline without stars
 *** Rename ~org-insert-columns-dblock~ into ~org-columns-insert-dblock~
 The previous name is, for the time being, kept as an obsolete alias.
+*** ~org-trim~ can preserve leading indentation.
+When setting a new optional argument to a non-nil value, ~org-trim~
+preserves leading indentation while removing blank lines at the
+beginning of the string.  The behavior is identical for white space at
+the end of the string.
 *** Function ~org-info-export~ changes.
 HTML links created from certain info links now point to =gnu.org= URL's rather
 than just to local files. For example info links such as =info:emacs#List

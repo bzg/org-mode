@@ -34,6 +34,7 @@
 (declare-function calc-store-into    "calc-store" (&optional var))
 (declare-function calc-recall        "calc-store" (&optional var))
 (declare-function math-evaluate-expr "calc-ext"   (x))
+(declare-function org-trim "org" (s &optional keep-lead))
 
 (defvar org-babel-default-header-args:calc nil
   "Default arguments for evaluating an calc source block.")
@@ -84,7 +85,7 @@
                                    ;; parse line into calc objects
                                    (car (math-read-exprs line)))))))))
                   ))))))
-     (mapcar #'org-babel-trim
+     (mapcar #'org-trim
 	     (split-string (org-babel-expand-body:calc body params) "[\n\r]"))))
   (save-excursion
     (with-current-buffer (get-buffer "*Calculator*")

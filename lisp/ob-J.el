@@ -31,7 +31,7 @@
 ;;; Code:
 (require 'ob)
 
-(declare-function org-trim "org" (S))
+(declare-function org-trim "org" (s &optional keep-lead))
 (declare-function j-console-ensure-session "ext:j-console" ())
 
 (defun org-babel-expand-body:J (body _params &optional _processed-params)

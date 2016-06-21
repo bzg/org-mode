@@ -73,6 +73,7 @@
 (declare-function org-table-import "org-table" (file arg))
 (declare-function org-table-align "org-table" ())
 (declare-function org-table-end "org-table" (&optional table-type))
+(declare-function org-trim "org" (s &optional keep-lead))
 (declare-function orgtbl-to-generic "org-table" (table params))
 (declare-function orgtbl-to-orgtbl "org-table" (table params))
 (declare-function org-babel-tangle-comment-links "ob-tangle" (&optional info))
@@ -925,7 +926,7 @@ the session.  Copy the body of the code block to the kill ring."
 	(error "This block is not using a session!"))
     (unless (fboundp init-cmd)
       (error "No org-babel-initiate-session function for %s!" lang))
-    (with-temp-buffer (insert (org-babel-trim body))
+    (with-temp-buffer (insert (org-trim body))
                       (copy-region-as-kill (point-min) (point-max)))
     (when arg
       (unless (fboundp prep-cmd)
@@ -1509,7 +1510,7 @@ shown below.
   (let (results)
     (mapc (lambda (pair)
 	    (if (eq (car pair) :var)
-		(mapcar (lambda (v) (push (cons :var (org-babel-trim v)) results))
+		(mapcar (lambda (v) (push (cons :var (org-trim v)) results))
 			(org-babel-join-splits-near-ch
 			 61 (org-babel-balanced-split (cdr pair) 32)))
 	      (push pair results)))
@@ -2008,7 +2009,7 @@ Return nil if ELEMENT cannot be read."
    (goto-char (org-element-property :post-affiliated element))
    (pcase (org-element-type element)
      (`fixed-width
-      (let ((v (org-babel-trim (org-element-property :value element))))
+      (let ((v (org-trim (org-element-property :value element))))
 	(or (org-babel-number-p v) v)))
      (`table (org-babel-read-table))
      (`plain-list (org-babel-read-list))
@@ -2261,7 +2262,7 @@ INFO may provide the values of these header arguments (in the
 		   ;; Insert a list if preferred.
 		   ((member "list" result-params)
 		    (insert
-		     (org-babel-trim
+		     (org-trim
 		      (org-list-to-generic
 		       (cons 'unordered
 			     (mapcar
@@ -2666,7 +2667,7 @@ block but are passed literally to the \"example-block\"."
 		   (with-temp-buffer
 		     (funcall (intern (concat lang "-mode")))
 		     (comment-region (point) (progn (insert text) (point)))
-		     (org-babel-trim (buffer-string)))))
+		     (org-trim (buffer-string)))))
 	 index source-name evaluate prefix)
     (with-temp-buffer
       (setq-local org-babel-noweb-wrap-start ob-nww-start)
@@ -2912,13 +2913,7 @@ can be specified as the REGEXP argument."
       (setq string (substring string 0 -1)))
     string))
 
-(defun org-babel-trim (string &optional regexp)
-  "Strip a leading and trailing space or carriage return from STRING.
-Like `org-babel-chomp', but run on both the first and last
-character of the string."
-  (org-babel-chomp
-   (org-reverse-string
-    (org-babel-chomp (org-reverse-string string) regexp)) regexp))
+(define-obsolete-function-alias 'org-babel-trim 'org-trim "Org 9.0")
 
 (defun org-babel-local-file-name (file)
   "Return the local name component of FILE."

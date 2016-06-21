@@ -55,6 +55,8 @@
 ;;; Code:
 (require 'ob-core)
 
+(declare-function org-trim "org" (s &optional keep-lead))
+
 (defun org-babel-table-truncate-at-newline (string)
   "Replace newline character with ellipses.
 If STRING ends in a newline character, then remove the newline
@@ -142,7 +144,7 @@ as shown in the example below.
                     nil (list "emacs-lisp" "results" params)
                     '((:results . "silent"))))
                "")))
-        (org-babel-trim (if (stringp result) result (format "%S" result)))))))
+        (org-trim (if (stringp result) result (format "%S" result)))))))
 
 (provide 'ob-table)
 

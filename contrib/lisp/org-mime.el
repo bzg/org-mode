@@ -57,6 +57,7 @@
 
 (declare-function org-export-string-as "ox"
 		  (string backend &optional body-only ext-plist))
+(declare-function org-trim "org" (s &optional keep-lead))
 
 (defcustom org-mime-use-property-inheritance nil
   "Non-nil means al MAIL_ properties apply also for sublevels."
@@ -302,7 +303,7 @@ otherwise export the entire body."
      ((eq fmt 'org)
       (require 'ox-org)
       (insert (org-export-string-as
-	       (org-babel-trim (funcall bhook body 'org)) 'org t)))
+	       (org-trim (funcall bhook body 'org)) 'org t)))
      ((eq fmt 'ascii)
       (require 'ox-ascii)
       (insert (org-export-string-as
@@ -320,7 +321,7 @@ otherwise export the entire body."
 	     (html (org-mime-apply-html-hook (car html-and-images))))
 	(insert (org-mime-multipart
 		 (org-export-string-as
-		  (org-babel-trim
+		  (org-trim
 		   (funcall bhook body (if (eq fmt 'html) 'org 'ascii)))
 		  (if (eq fmt 'html) 'org 'ascii) t)
 		 html)

@@ -41,8 +41,10 @@
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
 (declare-function org-link-escape "org" (text &optional table merge))
 (declare-function org-open-link-from-string "org" (s &optional arg reference-buffer))
+(declare-function org-remove-indentation "org" (code &optional n))
 (declare-function org-store-link "org" (arg))
 (declare-function org-string-nw-p "org-macs" (s))
+(declare-function org-trim "org" (s &optional keep-lead))
 (declare-function outline-previous-heading "outline" ())
 
 (defvar org-link-types-re)
@@ -387,10 +389,10 @@ that the appropriate major-mode is set.  SPEC has the form:
        insert-comment
        (org-fill-template org-babel-tangle-comment-format-beg link-data)))
     (insert
-     (format
-      "%s\n"
-      (org-unescape-code-in-string
-       (org-babel-trim body (if org-src-preserve-indentation "[\f\n\r\v]")))))
+     (org-unescape-code-in-string
+      (if org-src-preserve-indentation (org-trim body t)
+	(org-trim (org-remove-indentation body))))
+     "\n")
     (when link-p
       (funcall
        insert-comment

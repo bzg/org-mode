@@ -44,6 +44,7 @@
 (eval-when-compile (require 'cl))
 
 (declare-function org-remove-indentation "org" (code &optional n))
+(declare-function org-trim "org" (s &optional keep-lead))
 (declare-function haskell-mode "ext:haskell-mode" ())
 (declare-function run-haskell "ext:inf-haskell" (&optional arg))
 (declare-function inferior-haskell-load-file
@@ -69,14 +70,14 @@
          (session (org-babel-haskell-initiate-session session params))
          (raw (org-babel-comint-with-output
 		  (session org-babel-haskell-eoe t full-body)
-                (insert (org-babel-trim full-body))
+                (insert (org-trim full-body))
                 (comint-send-input nil t)
                 (insert org-babel-haskell-eoe)
                 (comint-send-input nil t)))
          (results (mapcar
                    #'org-babel-haskell-read-string
                    (cdr (member org-babel-haskell-eoe
-                                (reverse (mapcar #'org-babel-trim raw)))))))
+                                (reverse (mapcar #'org-trim raw)))))))
     (org-babel-reassemble-table
      (let ((result
             (case result-type

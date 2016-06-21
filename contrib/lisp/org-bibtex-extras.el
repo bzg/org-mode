@@ -61,6 +61,8 @@
 ;;; Code:
 (require 'org-bibtex)
 
+(declare-function org-trim "org" (s &optional keep-lead))
+
 (defcustom obe-bibtex-file nil "File holding bibtex entries.")
 
 (defcustom obe-html-link-base nil
@@ -91,7 +93,7 @@ For example, to point to your `obe-bibtex-file' use the following.
       (replace-match
        (save-match-data
 	 (mapconcat (lambda (c) (format "[[%s#%s][%s]]" obe-html-link-base c c))
-		    (mapcar #'org-babel-trim
+		    (mapcar #'org-trim
 			    (split-string (match-string 1) ",")) ", "))))))
 
 (defun obe-meta-to-json (meta &optional fields)
