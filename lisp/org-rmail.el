@@ -1,4 +1,4 @@
-;;; org-rmail.el --- Support for links to Rmail messages from within Org-mode
+;;; org-rmail.el --- Support for Links to Rmail Messages -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004-2016 Free Software Foundation, Inc.
 
@@ -24,9 +24,9 @@
 ;;
 ;;; Commentary:
 
-;; This file implements links to Rmail messages from within Org-mode.
-;; Org-mode loads this module by default - if this is not what you want,
-;; configure the variable `org-modules'.
+;; This file implements links to Rmail messages from within Org mode.
+;; Org mode loads this module by default - if this is not what you
+;; want, configure the variable `org-modules'.
 
 ;;; Code:
 
