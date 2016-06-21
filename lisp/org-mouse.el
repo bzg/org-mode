@@ -1,4 +1,4 @@
-;;; org-mouse.el --- Better mouse support for org-mode
+;;; org-mouse.el --- Better mouse support for Org -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2006-2016 Free Software Foundation, Inc.
 
@@ -149,6 +149,8 @@
 (declare-function org-agenda-earlier "org-agenda" (arg))
 (declare-function org-agenda-later "org-agenda" (arg))
 
+(defvar org-mouse-main-buffer nil
+  "Active buffer for mouse operations.")
 (defvar org-mouse-plain-list-regexp "\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) "
   "Regular expression that matches a plain list.")
 (defvar org-mouse-direct t
@@ -312,10 +314,10 @@ nor a function, elements of KEYWORDS are used directly."
   (just-one-space))
 
 (defvar org-mouse-rest)
-(defun org-mouse-replace-match-and-surround (newtext &optional fixedcase
-						     literal string subexp)
+(defun org-mouse-replace-match-and-surround
+    (_newtext &optional _fixedcase _literal _string subexp)
   "The same as `replace-match', but surrounds the replacement with spaces."
-  (apply 'replace-match org-mouse-rest)
+  (apply #'replace-match org-mouse-rest)
   (save-excursion
     (goto-char (match-beginning (or subexp 0)))
     (just-one-space)
@@ -558,8 +560,8 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	(re-search-forward ".*" (third contextdata))))))
 
 (defun org-mouse-for-each-item (funct)
-  ;; Functions called by `org-apply-on-list' need an argument
-  (let ((wrap-fun (lambda (c) (funcall funct))))
+  ;; Functions called by `org-apply-on-list' need an argument.
+  (let ((wrap-fun (lambda (_) (funcall funct))))
     (when (ignore-errors (goto-char (org-in-item-p)))
       (save-excursion (org-apply-on-list wrap-fun nil)))))
 
@@ -913,7 +915,7 @@ This means, between the beginning of line and the point."
 		   ((org-footnote-at-reference-p) nil)
 		   (t ad-do-it))))))
 
-(defun org-mouse-move-tree-start (event)
+(defun org-mouse-move-tree-start (_event)
   (interactive "e")
   (message "Same line: promote/demote, (***):move before, (text): make a child"))
 
@@ -992,7 +994,7 @@ This means, between the beginning of line and the point."
 (defvar org-mouse-cmd) ;dynamically scoped from `org-with-remote-undo'.
 
 (defun org-mouse-do-remotely (command)
-					;  (org-agenda-check-no-diary)
+  ;;  (org-agenda-check-no-diary)
   (when (get-text-property (point) 'org-marker)
     (let* ((anticol (- (point-at-eol) (point)))
 	   (marker (get-text-property (point) 'org-marker))
@@ -1030,7 +1032,7 @@ This means, between the beginning of line and the point."
 	      (org-agenda-change-all-lines newhead hdmarker 'fixface))))
 	t))))
 
-(defun org-mouse-agenda-context-menu (&optional event)
+(defun org-mouse-agenda-context-menu (&optional _event)
   (or (org-mouse-do-remotely 'org-mouse-context-menu)
       (popup-menu
        '("Agenda"
