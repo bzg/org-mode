@@ -1,4 +1,4 @@
-;;; org-pcomplete.el --- In-buffer completion code
+;;; org-pcomplete.el --- In-buffer Completion Code -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004-2016 Free Software Foundation, Inc.
 ;;
@@ -35,8 +35,7 @@
 (require 'pcomplete)
 
 (declare-function org-split-string "org" (string &optional separators))
-(declare-function org-make-org-heading-search-string "org"
-		  (&optional string))
+(declare-function org-make-org-heading-search-string "org" (&optional string))
 (declare-function org-get-buffer-tags "org" ())
 (declare-function org-get-tags "org" ())
 (declare-function org-buffer-property-keys "org"
