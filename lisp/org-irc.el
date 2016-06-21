@@ -1,4 +1,4 @@
-;;; org-irc.el --- Store links to IRC sessions
+;;; org-irc.el --- Store Links to IRC Sessions -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2008-2016 Free Software Foundation, Inc.
 ;;
@@ -114,11 +114,9 @@ chars that the value AFTER with `...'"
 			    (cons "[ \t]*$" "")
 			    (cons (concat "^\\(.\\{" after
 					  "\\}\\).*") "\\1..."))))
-    (mapc (lambda (x)
-	    (when (string-match (car x) string)
-	      (setq string (replace-match (cdr x) nil nil string))))
-	  replace-map)
-    string))
+    (dolist (x replace-map string)
+      (when (string-match (car x) string)
+	(setq string (replace-match (cdr x) nil nil string))))))
 
 ;; ERC specific functions
 
