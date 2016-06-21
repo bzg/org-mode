@@ -1,4 +1,4 @@
-;;; org-entities.el --- Support for special entities in Org-mode
+;;; org-entities.el --- Support for Special Entities -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2010-2016 Free Software Foundation, Inc.
 
@@ -29,9 +29,6 @@
 
 (declare-function org-toggle-pretty-entities "org"       ())
 (declare-function org-table-align            "org-table" ())
-
-(eval-when-compile
-  (require 'cl))
 
 (defgroup org-entities nil
   "Options concerning entities in Org-mode."
@@ -515,9 +512,8 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
      ("loz" "\\lozenge" t "&loz;" "[lozenge]" "[lozenge]" "⧫"))
    ;; Add "\_ "-entity family for spaces.
    (let (space-entities html-spaces (entity "_"))
-     (dotimes (n 20 (nreverse space-entities))
-       (let ((n (+ 1 n))
-	     (spaces (make-string n ?\s)))
+     (dolist (n (number-sequence 1 20) (nreverse space-entities))
+       (let ((spaces (make-string n ?\s)))
 	 (push (list (setq entity (concat entity " "))
 		     (format "\\hspace*{%sem}" (* n .5))
 		     nil
@@ -540,29 +536,22 @@ This first checks the user list, then the built-in list."
 (defun org-entities-create-table ()
   "Create an Org mode table with all entities."
   (interactive)
-  (let ((pos (point)) e latex mathp html latin utf8 name ascii)
+  (let ((pos (point)))
     (insert "|Name|LaTeX code|LaTeX|HTML code |HTML|ASCII|Latin1|UTF-8\n|-\n")
-    (mapc (lambda (e) (when (listp e)
-			(setq name (car e)
-			      latex (nth 1 e)
-			      mathp (nth 2 e)
-			      html (nth 3 e)
-			      ascii (nth 4 e)
-			      latin (nth 5 e)
-			      utf8 (nth 6 e))
-			(if (equal ascii "|") (setq ascii "\\vert"))
-			(if (equal latin "|") (setq latin "\\vert"))
-			(if (equal utf8  "|") (setq utf8  "\\vert"))
-			(if (equal ascii "=>") (setq ascii "= >"))
-			(if (equal latin "=>") (setq latin "= >"))
-			(insert "|" name
-				"|" (format "=%s=" latex)
-				"|" (format (if mathp "$%s$" "$\\mbox{%s}$")
-					    latex)
-				"|" (format "=%s=" html) "|" html
-				"|" ascii "|" latin "|" utf8
-				"|\n")))
-	  org-entities)
+    (dolist (e org-entities)
+      (pcase e
+	(`(,name ,latex ,mathp ,html ,ascii ,latin ,utf8)
+	 (if (equal ascii "|") (setq ascii "\\vert"))
+	 (if (equal latin "|") (setq latin "\\vert"))
+	 (if (equal utf8  "|") (setq utf8  "\\vert"))
+	 (if (equal ascii "=>") (setq ascii "= >"))
+	 (if (equal latin "=>") (setq latin "= >"))
+	 (insert "|" name
+		 "|" (format "=%s=" latex)
+		 "|" (format (if mathp "$%s$" "$\\mbox{%s}$") latex)
+		 "|" (format "=%s=" html) "|" html
+		 "|" ascii "|" latin "|" utf8
+		 "|\n"))))
     (goto-char pos)
     (org-table-align)))
 
@@ -575,27 +564,23 @@ This first checks the user list, then the built-in list."
     (let ((ll (append '("* User-defined additions (variable org-entities-user)")
 		      org-entities-user
 		      org-entities))
-	  e latex mathp html latin utf8 name ascii
 	  (lastwasstring t)
 	  (head (concat
 		 "\n"
 		 "   Symbol   Org entity        LaTeX code             HTML code\n"
 		 "   -----------------------------------------------------------\n")))
-      (while ll
-	(setq e (pop ll))
-	(if (stringp e)
-	    (progn
-	      (princ e)
-	      (princ "\n")
-	      (setq lastwasstring t))
-	  (if lastwasstring (princ head))
-	  (setq lastwasstring nil)
-	  (setq name (car e)
-		latex (nth 1 e)
-		html (nth 3 e)
-		utf8 (nth 6 e))
-	  (princ (format "   %-8s \\%-16s %-22s %-13s\n"
-			 utf8 name latex html))))))
+      (dolist (e ll)
+	(pcase e
+	  (`(,name ,latex ,_ ,html ,_ ,_ ,utf8)
+	   (when lastwasstring
+	     (princ head)
+	     (setq lastwasstring nil))
+	   (princ (format "   %-8s \\%-16s %-22s %-13s\n"
+			  utf8 name latex html)))
+	  ((pred stringp)
+	   (princ e)
+	   (princ "\n")
+	   (setq lastwasstring t))))))
   (with-current-buffer "*Org Entity Help*"
     (org-mode)
     (when org-pretty-entities
