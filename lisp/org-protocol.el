@@ -1,4 +1,4 @@
-;;; org-protocol.el --- Intercept calls from emacsclient to trigger custom actions.
+;;; org-protocol.el --- Intercept Calls from Emacsclient to Trigger Custom Actions -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2008-2016 Free Software Foundation, Inc.
 ;;
@@ -443,10 +443,9 @@ FNAME should be a property list.  If not, an old-style link of the
 form URL/TITLE can also be used."
   (let* ((splitparts (org-protocol-parse-parameters fname nil '(:url :title)))
          (uri (org-protocol-sanitize-uri (plist-get splitparts :url)))
-         (title (plist-get splitparts :title))
-         orglink)
-    (if (boundp 'org-stored-links)
-	(setq org-stored-links (cons (list uri title) org-stored-links)))
+         (title (plist-get splitparts :title)))
+    (when (boundp 'org-stored-links)
+      (push (list uri title) org-stored-links))
     (kill-new uri)
     (message "`%s' to insert new org-link, `%s' to insert `%s'"
              (substitute-command-keys"\\[org-insert-link]")
@@ -565,13 +564,12 @@ The location for a browser's bookmark should look like this:
 		(let ((rewrites (plist-get (cdr prolist) :rewrites)))
 		  (when rewrites
 		    (message "Rewrites found: %S" rewrites)
-		    (mapc
-		     (lambda (rewrite)
-		       "Try to match a rewritten URL and map it to a real file."
-		       ;; Compare redirects without suffix:
-		       (if (string-match (car rewrite) f2)
-			   (throw 'result (concat wdir (cdr rewrite)))))
-		     rewrites))))
+		    (dolist (rewrite rewrites)
+		      ;; Try to match a rewritten URL and map it to
+		      ;; a real file.  Compare redirects without
+		      ;; suffix.
+		      (when (string-match-p (car rewrite) f2)
+			(throw 'result (concat wdir (cdr rewrite))))))))
 	      ;; -- end of redirects --
 
               (if (file-readable-p the-file)
@@ -584,7 +582,7 @@ The location for a browser's bookmark should look like this:
 
 ;;; Core functions:
 
-(defun org-protocol-check-filename-for-protocol (fname restoffiles client)
+(defun org-protocol-check-filename-for-protocol (fname restoffiles _client)
   "Check if `org-protocol-the-protocol' and a valid protocol are used in FNAME.
 Sub-protocols are registered in `org-protocol-protocol-alist' and
 `org-protocol-protocol-alist-default'.  This is how the matching is done:
@@ -628,9 +626,9 @@ CLIENT is ignored."
                   (when (fboundp func)
                     (unless greedy
                       (throw 'fname
-			     (condition-case err
+			     (condition-case nil
 				 (funcall func (org-protocol-parse-parameters result new-style))
-			       ('error
+			       (error
 				(warn "Please update your org protocol handler to deal with new-style links.")
 				(funcall func result)))))
 		    ;; Greedy protocol handlers are responsible for parsing their own filenames
@@ -689,7 +687,6 @@ the cdr of an element in `org-publish-project-alist', reuse
         (working-suffix (if (plist-get project-plist :base-extension)
                             (concat "." (plist-get project-plist :base-extension))
                           ".org"))
-        (worglet-buffer nil)
         (insert-default-directory t)
         (minibuffer-allow-text-properties nil))
 
