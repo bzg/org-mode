@@ -1,4 +1,4 @@
-;;; org-plot.el --- Support for plotting from Org-mode
+;;; org-plot.el --- Support for Plotting from Org -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2008-2016 Free Software Foundation, Inc.
 ;;
@@ -49,41 +49,39 @@
 (defun org-plot/add-options-to-plist (p options)
   "Parse an OPTIONS line and set values in the property list P.
 Returns the resulting property list."
-  (let (o)
-    (when options
-      (let ((op '(("type"    . :plot-type)
-		  ("script"  . :script)
-		  ("line"    . :line)
-		  ("set"     . :set)
-		  ("title"   . :title)
-		  ("ind"     . :ind)
-		  ("deps"    . :deps)
-		  ("with"    . :with)
-		  ("file"    . :file)
-		  ("labels"  . :labels)
-		  ("map"     . :map)
-                  ("timeind" . :timeind)
-		  ("timefmt" . :timefmt)))
-	    (multiples '("set" "line"))
-	    (regexp ":\\([\"][^\"]+?[\"]\\|[(][^)]+?[)]\\|[^ \t\n\r;,.]*\\)")
-	    (start 0)
-	    o)
-	(while (setq o (pop op))
-	  (if (member (car o) multiples) ;; keys with multiple values
-	      (while (string-match
-		      (concat (regexp-quote (car o)) regexp)
-		      options start)
-		(setq start (match-end 0))
-		(setq p (plist-put p (cdr o)
-				   (cons (car (read-from-string
-					       (match-string 1 options)))
-					 (plist-get p (cdr o)))))
-		p)
-	    (if (string-match (concat (regexp-quote (car o)) regexp)
-			      options)
-		(setq p (plist-put p (cdr o)
-				   (car (read-from-string
-					 (match-string 1 options)))))))))))
+  (when options
+    (let ((op '(("type"    . :plot-type)
+		("script"  . :script)
+		("line"    . :line)
+		("set"     . :set)
+		("title"   . :title)
+		("ind"     . :ind)
+		("deps"    . :deps)
+		("with"    . :with)
+		("file"    . :file)
+		("labels"  . :labels)
+		("map"     . :map)
+		("timeind" . :timeind)
+		("timefmt" . :timefmt)))
+	  (multiples '("set" "line"))
+	  (regexp ":\\([\"][^\"]+?[\"]\\|[(][^)]+?[)]\\|[^ \t\n\r;,.]*\\)")
+	  (start 0))
+      (dolist (o op)
+	(if (member (car o) multiples) ;; keys with multiple values
+	    (while (string-match
+		    (concat (regexp-quote (car o)) regexp)
+		    options start)
+	      (setq start (match-end 0))
+	      (setq p (plist-put p (cdr o)
+				 (cons (car (read-from-string
+					     (match-string 1 options)))
+				       (plist-get p (cdr o)))))
+	      p)
+	  (if (string-match (concat (regexp-quote (car o)) regexp)
+			    options)
+	      (setq p (plist-put p (cdr o)
+				 (car (read-from-string
+				       (match-string 1 options))))))))))
   p)
 
 (defun org-plot/goto-nearest-table ()
