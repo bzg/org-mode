@@ -1,4 +1,4 @@
-;;; org-gnus.el --- Support for links to Gnus groups and messages from within Org-mode
+;;; org-gnus.el --- Support for Links to Gnus Groups and Messages -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004-2016 Free Software Foundation, Inc.
 
