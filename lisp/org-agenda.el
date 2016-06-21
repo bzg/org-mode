@@ -2678,6 +2678,7 @@ to limit entries to in this type."
 				(const timeline))
 			(integer :tag "Max number of minutes")))))
 
+(defvar org-agenda-keep-restricted-file-list nil)
 (defvar org-keys nil)
 (defvar org-match nil)
 ;;;###autoload
@@ -2744,7 +2745,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 	   entry key type org-match lprops ans)
       ;; Turn off restriction unless there is an overriding one,
       (unless org-agenda-overriding-restriction
-	(unless (org-bound-and-true-p org-agenda-keep-restricted-file-list)
+	(unless org-agenda-keep-restricted-file-list
 	  ;; There is a request to keep the file list in place
 	  (put 'org-agenda-files 'org-restrict nil))
 	(setq org-agenda-restrict nil)
