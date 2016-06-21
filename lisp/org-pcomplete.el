@@ -27,14 +27,10 @@
 
 ;;;; Require other packages
 
-(eval-when-compile
-  (require 'cl))
-
 (require 'org-macs)
 (require 'org-compat)
 (require 'pcomplete)
 
-(declare-function org-split-string "org" (string &optional separators))
 (declare-function org-make-org-heading-search-string "org" (&optional string))
 (declare-function org-get-buffer-tags "org" ())
 (declare-function org-get-tags "org" ())
