@@ -296,7 +296,7 @@ but it also means that the buffer should stay alive
 during the operation, because otherwise all these markers will
 point nowhere."
   (declare (debug (form body)) (indent 1))
-  (org-with-gensyms (data rtn)
+  (org-with-gensyms (data)
     `(let ((,data (org-outline-overlay-data ,use-markers)))
        (unwind-protect
 	   (prog1 (progn ,@body)
