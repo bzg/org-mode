@@ -1,4 +1,4 @@
-;;; org-info.el --- Support for links to Info nodes from within Org-Mode
+;;; org-info.el --- Support for Links to Info Nodes -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004-2016 Free Software Foundation, Inc.
 
@@ -47,12 +47,11 @@
 (defun org-info-store-link ()
   "Store a link to an Info file and node."
   (when (eq major-mode 'Info-mode)
-    (let (link desc)
-      (setq link (concat "info:"
-			 (file-name-nondirectory Info-current-file)
-			 "#" Info-current-node))
-      (setq desc (concat (file-name-nondirectory Info-current-file)
-			 "#" Info-current-node))
+    (let ((link (concat "info:"
+			(file-name-nondirectory Info-current-file)
+			"#" Info-current-node))
+	  (desc (concat (file-name-nondirectory Info-current-file)
+			"#" Info-current-node)))
       (org-store-link-props :type "info" :file Info-current-file
 			    :node Info-current-node
 			    :link link :desc desc)
