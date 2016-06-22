@@ -15701,8 +15701,8 @@ When INCREMENT is non-nil, set the property to the next allowed value."
 	       (t
 		(let (org-completion-use-ido org-completion-use-iswitchb)
 		  (org-completing-read
-		   (concat "Effort " (if (and cur (string-match "\\S-" cur))
-					 (concat "[" cur "]") "")
+		   (concat "Effort" (and cur (string-match "\\S-" cur)
+					 (concat " [" cur "]"))
 			   ": ")
 		   existing nil nil "" nil cur))))))
     (unless (equal (org-entry-get nil prop) val)
@@ -15711,7 +15711,7 @@ When INCREMENT is non-nil, set the property to the next allowed value."
      '((effort . identity)
        (effort-minutes . org-duration-string-to-minutes))
      val)
-    (when (string= heading org-clock-current-task)
+    (when (string= heading (org-bound-and-true-p org-clock-current-task))
       (setq org-clock-effort (get-text-property (point-at-bol) 'effort))
       (org-clock-update-mode-line))
     (message "%s is now %s" prop val)))
