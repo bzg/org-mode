@@ -2784,8 +2784,8 @@ INFO is a plist containing export properties."
 	(setq latex-frag (concat latex-header latex-frag))))
     (with-temp-buffer
       (insert latex-frag)
-      (org-format-latex cache-relpath cache-dir nil "Creating LaTeX Image..."
-			nil processing-type)
+      (org-format-latex cache-relpath nil nil cache-dir nil
+			"Creating LaTeX Image..." nil processing-type)
       (buffer-string))))
 
 (defun org-html-latex-environment (latex-environment _contents info)
