@@ -14251,7 +14251,7 @@ use external tools to upload your website (@pxref{Uploading files}).
 @tab Function or list of functions to be called before starting the
 publishing process, for example, to run @code{make} for updating files to be
 published.  Each preparation function is called with a single argument, the
-project property.
+project property list.
 @item @code{:completion-function}
 @tab Function or list of functions called after finishing the publishing
 process, for example, to change permissions of the resulting files.  Each
