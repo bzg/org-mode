@@ -1887,6 +1887,61 @@ Para2"
 		(org-export-get-footnote-number ref info nil)))
 	info)))))
 
+(ert-deftest test-org-export/get-footnote-definition ()
+  "Test `org-export-get-footnote-definition' specifications."
+  ;; Standard test.
+  (should
+   (equal "A\n"
+	  (org-element-interpret-data
+	   (org-test-with-parsed-data "Text[fn:1]\n\n[fn:1] A"
+	     (org-export-get-footnote-definition
+	      (org-element-map tree 'footnote-reference #'identity nil t)
+	      info)))))
+  ;; Raise an error if no definition is found.
+  (should-error
+   (org-test-with-parsed-data "Text[fn:1]"
+     (org-export-get-footnote-definition
+      (org-element-map tree 'footnote-reference #'identity nil t)
+      info)))
+  ;; Find inline definitions.
+  (should
+   (equal "A"
+	  (org-element-interpret-data
+	   (org-test-with-parsed-data "Text[fn:1:A]"
+	     (org-export-get-footnote-definition
+	      (org-element-map tree 'footnote-reference #'identity nil t)
+	      info)))))
+  ;; Find anonymous definitions.
+  (should
+   (equal "A"
+	  (org-element-interpret-data
+	   (org-test-with-parsed-data "Text[fn::A]"
+	     (org-export-get-footnote-definition
+	      (org-element-map tree 'footnote-reference #'identity nil t)
+	      info)))))
+  ;; Find empty definitions.
+  (should
+   (equal ""
+	  (org-element-interpret-data
+	   (org-test-with-parsed-data "Text[fn:1]\n\n[fn:1]"
+	     (org-export-get-footnote-definition
+	      (org-element-map tree 'footnote-reference #'identity nil t)
+	      info)))))
+  (should
+   (equal ""
+	  (org-element-interpret-data
+	   (org-test-with-parsed-data "Text[fn:1:]"
+	     (org-export-get-footnote-definition
+	      (org-element-map tree 'footnote-reference #'identity nil t)
+	      info)))))
+  (should
+   (equal ""
+	  (org-element-interpret-data
+	   (org-test-with-parsed-data "Text[fn::]"
+	     (org-export-get-footnote-definition
+	      (org-element-map tree 'footnote-reference #'identity nil t)
+	      info))))))
+
 (ert-deftest test-org-export/collect-footnote-definitions ()
   "Test `org-export-collect-footnote-definitions' specifications."
   (should
