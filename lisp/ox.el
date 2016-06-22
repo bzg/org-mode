@@ -3702,16 +3702,28 @@ definition can be found, raise an error."
 		       (let ((hash (make-hash-table :test #'equal)))
 			 (plist-put info :footnote-definition-cache hash)
 			 hash))))
-	(or (gethash label cache)
-	    (puthash label
-		     (org-element-map (plist-get info :parse-tree)
-			 '(footnote-definition footnote-reference)
-		       (lambda (f)
-			 (and (equal (org-element-property :label f) label)
-			      (org-element-contents f)))
-		       info t)
-		     cache)
-	    (error "Definition not found for footnote %s" label))))))
+	(or
+	 (gethash label cache)
+	 (puthash label
+		  (org-element-map (plist-get info :parse-tree)
+		      '(footnote-definition footnote-reference)
+		    (lambda (f)
+		      (cond
+		       ;; Skip any footnote with a different
+		       ;; label. Also skip any standard footnote
+		       ;; reference with the same label since those
+		       ;; cannot contain a definition.
+		       ((not (equal (org-element-property :label f) label)) nil)
+		       ((eq (org-element-property :type f) 'standard) nil)
+		       ((org-element-contents f))
+		       ;; Even if the contents are empty, we can not
+		       ;; return nil since that would eventually raise
+		       ;; the error.  Instead, return the equivalent
+		       ;; empty string.
+		       (t "")))
+		    info t)
+		  cache)
+	 (error "Definition not found for footnote %s" label))))))
 
 (defun org-export--footnote-reference-map
     (function data info &optional body-first)
