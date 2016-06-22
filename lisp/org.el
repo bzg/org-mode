@@ -15733,7 +15733,7 @@ When INCREMENT is non-nil, set the property to the next allowed value."
      '((effort . identity)
        (effort-minutes . org-duration-string-to-minutes))
      val)
-    (when (string= heading (bound-and-true-p org-clock-current-task))
+    (when (equal heading (bound-and-true-p org-clock-current-task))
       (setq org-clock-effort (get-text-property (point-at-bol) 'effort))
       (org-clock-update-mode-line))
     (message "%s is now %s" prop val)))
