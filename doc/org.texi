@@ -14250,13 +14250,13 @@ use external tools to upload your website (@pxref{Uploading files}).
 @item @code{:preparation-function}
 @tab Function or list of functions to be called before starting the
 publishing process, for example, to run @code{make} for updating files to be
-published.  The project property list is scoped into this call as the
-variable @code{project-plist}.
+published.  Each preparation function is called with a single argument, the
+project property.
 @item @code{:completion-function}
 @tab Function or list of functions called after finishing the publishing
-process, for example, to change permissions of the resulting files.  The
-project property list is scoped into this call as the variable
-@code{project-plist}.
+process, for example, to change permissions of the resulting files.  Each
+completion function is called with a single argument, the project property
+list.
 @end multitable
 @noindent
 

@@ -104,10 +104,13 @@ is straightforward.  For example
 becomes
 
 : ("pdf" . (lambda (file link) (foo)))
-
 *** The ~{{{modification-time}}}~ macro can obtain time via =vc=
 The modification time will be determined via =vc.el= if the second
 argument is non-nil.  See the manual for details.
+*** Preparation and completion functions in publishing projects change signature
+Preparation and completion functions are now called with an argument,
+which is the project property list. It used to be dynamically scoped
+through the ~project-plist~ variable.
 ** New features
 *** New org-protocol key=value syntax
 

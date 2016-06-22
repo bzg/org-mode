@@ -144,12 +144,16 @@ date.
   `:preparation-function'
 
     Function to be called before publishing this project.  This
-    may also be a list of functions.
+    may also be a list of functions.  Preparation functions are
+    called with the project properties list as their sole
+    argument.
 
   `:completion-function'
 
     Function to be called after publishing this project.  This
-    may also be a list of functions.
+    may also be a list of functions.  Completion functions are
+    called with the project properties list as their sole
+    argument.
 
 Some properties control details of the Org publishing process,
 and are equivalent to the corresponding user variables listed in
@@ -673,9 +677,9 @@ If `:auto-sitemap' is set, publish the sitemap too.  If
 `:makeindex' is set, also produce a file \"theindex.org\"."
   (dolist (project (org-publish-expand-projects projects))
     (let ((project-plist (cdr project)))
-      (let ((f (plist-get project-plist :preparation-function)))
-	(cond ((consp f) (mapc #'funcall f))
-	      ((functionp f) (funcall f))))
+      (let ((fun (plist-get project-plist :preparation-function)))
+	(cond ((consp fun) (dolist (f fun) (funcall f project-plist)))
+	      ((functionp fun) (funcall fun project-plist))))
       ;; Each project uses its own cache file.
       (org-publish-initialize-cache (car project))
       (when  (plist-get project-plist :auto-sitemap)
@@ -707,9 +711,9 @@ If `:auto-sitemap' is set, publish the sitemap too.  If
 	  (org-publish-index-generate-theindex
 	   project (plist-get project-plist :base-directory))
 	  (org-publish-file theindex project t)))
-      (let ((f (plist-get project-plist :completion-function)))
-	(cond ((consp f) (mapc #'funcall f))
-	      ((functionp f) (funcall f))))
+      (let ((fun (plist-get project-plist :completion-function)))
+	(cond ((consp fun) (dolist (f fun) (funcall f project-plist)))
+	      ((functionp fun) (funcall fun project-plist))))
       (org-publish-write-cache-file))))
 
 (defun org-publish-org-sitemap (project &optional sitemap-filename)
