@@ -613,9 +613,9 @@ See also `org-src-mode-hook'."
 		   (setq org-src--auto-save-timer nil)))))))))
 
 (defun org-src-mode-configure-edit-buffer ()
-  (when (org-bound-and-true-p org-src--from-org-mode)
+  (when (bound-and-true-p org-src--from-org-mode)
     (add-hook 'kill-buffer-hook #'org-src--remove-overlay nil 'local)
-    (if (org-bound-and-true-p org-src--allow-write-back)
+    (if (bound-and-true-p org-src--allow-write-back)
 	(progn
 	  (setq buffer-offer-save t)
 	  (setq buffer-file-name
@@ -790,7 +790,7 @@ Throw an error when not at such a table."
      element
      (org-src--construct-edit-buffer-name (buffer-name) "Table")
      #'text-mode t)
-    (when (org-bound-and-true-p flyspell-mode) (flyspell-mode -1))
+    (when (bound-and-true-p flyspell-mode) (flyspell-mode -1))
     (table-recognize)
     t))
 

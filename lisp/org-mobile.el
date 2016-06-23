@@ -649,7 +649,7 @@ The table of checksums is written to the file mobile-checksums."
 		     m 10 "   " 'planning)
 		    "\n")
 	    (when (setq id
-			(if (org-bound-and-true-p
+			(if (bound-and-true-p
 			     org-mobile-force-id-on-agenda-items)
 			    (org-id-get m 'create)
 			  (or (org-entry-get m "ID")

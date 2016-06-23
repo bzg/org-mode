@@ -58,6 +58,7 @@
 
 ;;;; XEmacs compatibility, now removed.
 (define-obsolete-function-alias 'org-add-hook 'add-hook "Org 9.0")
+(define-obsolete-function-alias 'org-bound-and-true-p 'bound-and-true-p "Org 9.0")
 (define-obsolete-function-alias 'org-decompose-region 'decompose-region "Org 9.0")
 (define-obsolete-function-alias 'org-defvaralias 'defvaralias "Org 9.0")
 (define-obsolete-function-alias 'org-detach-overlay 'delete-overlay "Org 9.0")
@@ -75,7 +76,8 @@
   "Replace posix classes in regular expression."
   (declare (debug (form)))
   s)
-(make-obsolete 'org-re "It is now a no-op.  Please remove it altogether." "Org 9.0")
+(make-obsolete 'org-re "It is now a no-op.  You can safely remove it."
+	       "Org 9.0")
 
 ;;;; Functions from cl-lib that Org used to have its own implementation of.
 (define-obsolete-function-alias 'org-count 'cl-count "Org 9.0")
@@ -88,8 +90,8 @@
 (define-obsolete-function-alias 'org-floor* 'cl-floor "Org 9.0")
 
 ;;;; Functions available since Emacs 24.3
-(define-obsolete-function-alias 'org-char-to-string 'char-to-string "Org 9.0")
 (define-obsolete-function-alias 'org-buffer-narrowed-p 'buffer-narrowed-p "Org 9.0")
+(define-obsolete-function-alias 'org-char-to-string 'char-to-string "Org 9.0")
 (define-obsolete-function-alias 'org-delete-directory 'delete-directory "Org 9.0")
 (define-obsolete-function-alias 'org-number-sequence 'number-sequence "Org 9.0")
 (define-obsolete-function-alias 'org-pop-to-buffer-same-window 'pop-to-buffer-same-window "Org 9.0")

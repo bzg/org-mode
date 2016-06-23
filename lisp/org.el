@@ -9826,7 +9826,7 @@ active region."
 	  (t (setq link nil))))
 
 	;; We are in the agenda, link to referenced location
-	((equal (org-bound-and-true-p org-agenda-buffer-name) (buffer-name))
+	((equal (bound-and-true-p org-agenda-buffer-name) (buffer-name))
 	 (let ((m (or (get-text-property (point) 'org-hd-marker)
 		      (get-text-property (point) 'org-marker))))
 	   (when m
@@ -12002,7 +12002,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 			  (bookmark-set bookmark-name))))
 		  ;; If we are refiling for capture, make sure that the
 		  ;; last-capture pointers point here
-		  (when (org-bound-and-true-p org-capture-is-refiling)
+		  (when (bound-and-true-p org-capture-is-refiling)
 		    (let ((bookmark-name (plist-get org-bookmark-names-plist
 						    :last-capture-marker)))
 		      (when bookmark-name
@@ -12320,7 +12320,7 @@ Export keywords include options, block names, attributes and
 keywords relative to each registered export back-end."
   (let (keywords)
     (dolist (backend
-	     (org-bound-and-true-p org-export-registered-backends)
+	     (bound-and-true-p org-export-registered-backends)
 	     (delq nil keywords))
       ;; Back-end name (for keywords, like #+LATEX:)
       (push (upcase (symbol-name (org-export-backend-name backend))) keywords)
@@ -15108,7 +15108,7 @@ When JUST-ALIGN is non-nil, only align tags."
 		(let* ((c0 (current-column))
 		       ;; Compute offset for the case of org-indent-mode
 		       ;; active.
-		       (di (if (org-bound-and-true-p org-indent-mode)
+		       (di (if (bound-and-true-p org-indent-mode)
 			       (* (1- org-indent-indentation-per-level)
 				  (1- level))
 			     0))
@@ -17363,7 +17363,7 @@ user function argument order change dependent on argument order."
        ((eq calendar-date-style 'iso)
 	(list arg2 arg3 arg1)))
     (org-no-warnings ;; european-calendar-style is obsolete as of version 23.1
-     (if (org-bound-and-true-p european-calendar-style)
+     (if (bound-and-true-p european-calendar-style)
 	 (list arg2 arg1 arg3)
        (list arg1 arg2 arg3)))))
 
@@ -21256,10 +21256,10 @@ Use \\[org-edit-special] to edit table.el tables"))
 
 (defun org-mode-restart ()
   (interactive)
-  (let ((indent-status (org-bound-and-true-p org-indent-mode)))
+  (let ((indent-status (bound-and-true-p org-indent-mode)))
     (funcall major-mode)
     (hack-local-variables)
-    (when (and indent-status (not (org-bound-and-true-p org-indent-mode)))
+    (when (and indent-status (not (bound-and-true-p org-indent-mode)))
       (org-indent-mode -1)))
   (message "%s restarted" major-mode))
 
@@ -21719,11 +21719,11 @@ on context.  See the individual commands for more information."
      ["Which Column?" org-table-current-column (org-at-table-p)])
     ["Debug Formulas"
      org-table-toggle-formula-debugger
-     :style toggle :selected (org-bound-and-true-p org-table-formula-debug)]
+     :style toggle :selected (bound-and-true-p org-table-formula-debug)]
     ["Show Col/Row Numbers"
      org-table-toggle-coordinate-overlays
      :style toggle
-     :selected (org-bound-and-true-p org-table-overlay-coordinates)]
+     :selected (bound-and-true-p org-table-overlay-coordinates)]
     "--"
     ["Create" org-table-create (and (not (org-at-table-p))
 				    org-enable-table-editor)]
@@ -23931,7 +23931,7 @@ beyond the end of the headline."
 		     (car org-special-ctrl-a/e)
 		   org-special-ctrl-a/e))
 	deactivate-mark	refpos)
-    (call-interactively (if (org-bound-and-true-p visual-line-mode)
+    (call-interactively (if (bound-and-true-p visual-line-mode)
 			    #'beginning-of-visual-line
 			  #'move-beginning-of-line))
     (cond
@@ -23983,7 +23983,7 @@ the cursor is already beyond the end of the headline."
   (interactive "P")
   (let ((special (if (consp org-special-ctrl-a/e) (cdr org-special-ctrl-a/e)
 		   org-special-ctrl-a/e))
-	(move-fun (cond ((org-bound-and-true-p visual-line-mode)
+	(move-fun (cond ((bound-and-true-p visual-line-mode)
 			 'end-of-visual-line)
 			((fboundp 'move-end-of-line) 'move-end-of-line)
 			(t 'end-of-line)))
@@ -24077,7 +24077,7 @@ depending on context."
 		   (not (y-or-n-p "Kill hidden subtree along with headline? "))))
       (user-error "C-k aborted as it would kill a hidden subtree"))
     (call-interactively
-     (if (org-bound-and-true-p visual-line-mode) 'kill-visual-line 'kill-line)))
+     (if (bound-and-true-p visual-line-mode) 'kill-visual-line 'kill-line)))
    ((looking-at ".*?\\S-\\([ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)[ \t]*$")
     (kill-region (point) (match-beginning 1))
     (org-set-tags nil t))
@@ -24194,7 +24194,7 @@ interactive command with similar behavior."
 This version does not only check the character property, but also
 `visible-mode'."
   ;; Early versions of noutline don't have `outline-invisible-p'.
-  (unless (org-bound-and-true-p visible-mode)
+  (unless (bound-and-true-p visible-mode)
     (outline-invisible-p)))
 
 (defun org-invisible-p2 ()
@@ -25225,7 +25225,7 @@ ELEMENT is the element at point."
 
 (defun org-remove-flyspell-overlays-in (beg end)
   "Remove flyspell overlays in region."
-  (and (org-bound-and-true-p flyspell-mode)
+  (and (bound-and-true-p flyspell-mode)
        (fboundp 'flyspell-delete-region-overlays)
        (flyspell-delete-region-overlays beg end)))
 

@@ -286,7 +286,7 @@ If the task has an end part, also demote it."
 		     ",\\}\\)\\(\\*\\* .*\\)"))
 	 ;; Virtual indentation will add the warning face on the first
 	 ;; star.  Thus, in that case, only hide it.
-	 (start-face (if (and (org-bound-and-true-p org-indent-mode)
+	 (start-face (if (and (bound-and-true-p org-indent-mode)
 			      (> org-indent-indentation-per-level 1))
 			 'org-hide
 		       'org-warning)))

@@ -255,7 +255,7 @@ have `org-warning' face."
 			       ?*)))
 	 (line
 	  (cond
-	   ((and (org-bound-and-true-p org-inlinetask-show-first-star)
+	   ((and (bound-and-true-p org-inlinetask-show-first-star)
 		 (eq heading 'inlinetask))
 	    (concat org-indent-inlinetask-first-star
 		    (org-add-props (substring stars 1) nil 'face 'org-hide)))

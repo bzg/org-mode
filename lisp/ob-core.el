@@ -279,7 +279,7 @@ environment, to override this check."
       (`nil nil)
       (`t t)
       (`query (or
-	       (and (not (org-bound-and-true-p
+	       (and (not (bound-and-true-p
 			  org-babel-confirm-evaluate-answer-no))
 		    (yes-or-no-p
 		     (format "Evaluate this %s code block%son your system? "

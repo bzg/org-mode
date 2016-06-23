@@ -262,7 +262,7 @@ When completing for #+STARTUP, for example, this function returns
 	      "|:" "tags:" "tasks:" "<:" "todo:")
 	    ;; OPTION items from registered back-ends.
 	    (let (items)
-	      (dolist (backend (org-bound-and-true-p
+	      (dolist (backend (bound-and-true-p
 				org-export-registered-backends))
 		(dolist (option (org-export-backend-options backend))
 		  (let ((item (nth 2 option)))
@@ -274,7 +274,7 @@ When completing for #+STARTUP, for example, this function returns
   (while (pcomplete-here
 	  (pcomplete-uniqify-list
 	   (mapcar (lambda (item) (format "%s:" (car item)))
-		   (org-bound-and-true-p org-html-infojs-opts-table))))))
+		   (bound-and-true-p org-html-infojs-opts-table))))))
 
 (defun pcomplete/org-mode/file-option/bind ()
   "Complete arguments for the #+BIND file option, which are variable names."

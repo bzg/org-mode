@@ -805,7 +805,7 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	    (org-columns--set-widths cache)
 	    (org-columns--display-here-title)
 	    (when (setq-local org-columns-flyspell-was-active
-			      (org-bound-and-true-p flyspell-mode))
+			      (bound-and-true-p flyspell-mode))
 	      (flyspell-mode 0))
 	    (unless (local-variable-p 'org-colview-initial-truncate-line-value)
 	      (setq-local org-colview-initial-truncate-line-value
@@ -1121,7 +1121,7 @@ format instead.  Otherwise, use H:M format."
 SPEC is a column format specification.  When optional argument
 UPDATE is non-nil, summarized values can replace existing ones in
 properties drawers."
-  (let* ((lmax (if (org-bound-and-true-p org-inlinetask-min-level)
+  (let* ((lmax (if (bound-and-true-p org-inlinetask-min-level)
 		   org-inlinetask-min-level
 		 29))			;Hard-code deepest level.
 	 (lvals (make-vector (1+ lmax) nil))
@@ -1512,7 +1512,7 @@ PARAMS is a property list of parameters:
   (let ((org-columns--time (float-time (current-time)))
 	(fmt
 	 (cond
-	  ((org-bound-and-true-p org-agenda-overriding-columns-format))
+	  ((bound-and-true-p org-agenda-overriding-columns-format))
 	  ((let ((m (org-get-at-bol 'org-hd-marker)))
 	     (and m
 		  (or (org-entry-get m "COLUMNS" t)
@@ -1548,7 +1548,7 @@ PARAMS is a property list of parameters:
 	  (org-columns--set-widths cache)
 	  (org-columns--display-here-title)
 	  (when (setq-local org-columns-flyspell-was-active
-			    (org-bound-and-true-p flyspell-mode))
+			    (bound-and-true-p flyspell-mode))
 	    (flyspell-mode 0))
 	  (dolist (entry cache)
 	    (goto-char (car entry))

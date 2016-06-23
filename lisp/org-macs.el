@@ -47,11 +47,6 @@
       `(with-no-warnings (called-interactively-p ,kind))
     `(interactive-p)))
 
-(defmacro org-bound-and-true-p (var)
-  "Return the value of symbol VAR if it is bound, else nil."
-  (declare (debug (symbolp)))
-  `(and (boundp (quote ,var)) ,var))
-
 (defun org-string-nw-p (s)
   "Return S if S is a string containing a non-blank character.
 Otherwise, return nil."

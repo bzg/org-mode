@@ -3361,7 +3361,7 @@ the agenda to write."
 	     (org-agenda-remove-marked-text 'invisible 'org-filtered)
 	     (run-hooks 'org-agenda-before-write-hook)
 	     (cond
-	      ((org-bound-and-true-p org-mobile-creating-agendas)
+	      ((bound-and-true-p org-mobile-creating-agendas)
 	       (org-mobile-write-agenda-for-mobile file))
 	      ((string-match "\\.org\\'" file)
 	       (let (content p m message-log-max)
@@ -3441,7 +3441,7 @@ This will add a maximum of `org-agenda-add-entry-text-maxlines' lines of the
 entry text following headings shown in the agenda.
 Drawers will be excluded, also the line with scheduling/deadline info."
   (when (and (> org-agenda-add-entry-text-maxlines 0)
-	     (not (org-bound-and-true-p org-mobile-creating-agendas)))
+	     (not (bound-and-true-p org-mobile-creating-agendas)))
     (let (m txt)
       (goto-char (point-min))
       (while (not (eobp))
@@ -8870,7 +8870,7 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 	  (call-interactively 'org-todo))
 	(and (bolp) (forward-char 1))
 	(setq newhead (org-get-heading))
-	(when (and (org-bound-and-true-p
+	(when (and (bound-and-true-p
 		    org-agenda-headline-snapshot-before-repeat)
 		   (not (equal org-agenda-headline-snapshot-before-repeat
 			       newhead))
@@ -8883,7 +8883,7 @@ the same tree node, and the headline of the tree node in the Org-mode file."
       (beginning-of-line 1)
       (save-window-excursion
 	(org-agenda-change-all-lines newhead hdmarker 'fixface just-one))
-      (when (org-bound-and-true-p org-clock-out-when-done)
+      (when (bound-and-true-p org-clock-out-when-done)
       	(string-match (concat "^" (regexp-opt org-done-keywords-for-agenda))
 		      newhead)
 	(org-agenda-unmark-clocking-task))

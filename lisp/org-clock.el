@@ -289,7 +289,7 @@ string as argument."
 (defcustom org-clocktable-defaults
   (list
    :maxlevel 2
-   :lang (or (org-bound-and-true-p org-export-default-language) "en")
+   :lang (or (bound-and-true-p org-export-default-language) "en")
    :scope 'file
    :block nil
    :wstart 1
@@ -2449,7 +2449,7 @@ from the dynamic block definition."
   ;; well-defined number of columns...
   (let* ((hlchars '((1 . "*") (2 . "/")))
 	 (lwords (assoc (or (plist-get params :lang)
-			    (org-bound-and-true-p org-export-default-language)
+			    (bound-and-true-p org-export-default-language)
 			    "en")
 			org-clock-clocktable-language-setup))
 	 (multifile (plist-get params :multifile))
