@@ -135,11 +135,8 @@ Otherwise return nil."
   "Remove all text properties from string S.
 When RESTRICTED is non-nil, only remove the properties listed
 in `org-rm-props'."
-  (if (fboundp 'set-text-properties)
-      (set-text-properties 0 (length s) nil s)
-    (if restricted
-	(remove-text-properties 0 (length s) org-rm-props s)
-      (set-text-properties 0 (length s) nil s)))
+  (if restricted (remove-text-properties 0 (length s) org-rm-props s)
+    (set-text-properties 0 (length s) nil s))
   s)
 
 (defsubst org-get-alist-option (option key)
