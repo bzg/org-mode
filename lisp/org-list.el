@@ -2089,7 +2089,7 @@ Possible values are: `folded', `children' or `subtree'.  See
     (if (match-beginning 2)
 	(let ((start (1+ (match-end 2)))
 	      (ind (org-get-indentation)))
-	  (if (> start (+ ind org-description-max-indent)) (+ ind 5) start))
+	  (if (> start (+ ind org-list-description-max-indent)) (+ ind 5) start))
       (+ (progn (goto-char (match-end 1)) (current-column))
 	 (if (and org-list-two-spaces-after-bullet-regexp
 		  (org-string-match-p org-list-two-spaces-after-bullet-regexp
