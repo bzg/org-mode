@@ -50,20 +50,6 @@ Otherwise, return nil."
 Otherwise return nil."
   (and v (not (equal v "nil")) v))
 
-(defun org-substitute-posix-classes (re)
-  "Substitute posix classes in regular expression RE."
-  (let ((ss re))
-    (save-match-data
-      (while (string-match "\\[:alnum:\\]" ss)
-	(setq ss (replace-match "a-zA-Z0-9" t t ss)))
-      (while (string-match "\\[:word:\\]" ss)
-	(setq ss (replace-match "a-zA-Z0-9" t t ss)))
-      (while (string-match "\\[:alpha:\\]" ss)
-	(setq ss (replace-match "a-zA-Z" t t ss)))
-      (while (string-match "\\[:punct:\\]" ss)
-	(setq ss (replace-match "\001-@[-`{-~" t t ss)))
-      ss)))
-
 (defmacro org-preserve-lc (&rest body)
   (declare (debug (body)))
   (org-with-gensyms (line col)
