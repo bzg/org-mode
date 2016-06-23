@@ -6085,11 +6085,10 @@ by a #."
 	     (not (org-in-src-block-p)))
     (let* ((hl (match-string-no-properties 1))
 	   (help (concat "LINK: " (save-match-data (org-link-unescape hl))))
-	   (ip (org-maybe-intangible
-		(list 'invisible 'org-link
-		      'keymap org-mouse-map 'mouse-face 'highlight
-		      'font-lock-multiline t 'help-echo help
-		      'htmlize-link `(:uri ,hl))))
+	   (ip (list 'invisible 'org-link
+		     'keymap org-mouse-map 'mouse-face 'highlight
+		     'font-lock-multiline t 'help-echo help
+		     'htmlize-link `(:uri ,hl)))
 	   (vp (list 'keymap org-mouse-map 'mouse-face 'highlight
 		     'font-lock-multiline t 'help-echo help
 		     'htmlize-link `(:uri ,hl))))
@@ -6214,7 +6213,7 @@ Also refresh fontification if needed."
 			       'org-cwidth t))
     (when s
       (setq e (next-single-property-change s 'org-cwidth))
-      (add-text-properties s e (org-maybe-intangible '(invisible org-cwidth)))
+      (add-text-properties s e '(invisible org-cwidth))
       (goto-char e)
       t)))
 

@@ -108,19 +108,6 @@ Otherwise return nil."
 	 (partial-completion-mode 1))
      ,@body))
 
-;; FIXME: Slated for removal.  Current Org mode does not support Emacs < 22
-(defmacro org-maybe-intangible (props)
-  "Add \\='(intangible t) to PROPS if Emacs version is earlier than Emacs 22.
-In Emacs 21, invisible text is not avoided by the command loop, so the
-intangible property is needed to make sure point skips this text.
-In Emacs 22, this is not necessary.  The intangible text property has
-led to problems with flyspell.  These problems are fixed in flyspell.el,
-but we still avoid setting the property in Emacs 22 and later.
-We use a macro so that the test can happen at compilation time."
-  (if (< emacs-major-version 22)
-      `(append '(intangible t) ,props)
-    props))
-
 (defmacro org-with-point-at (pom &rest body)
   "Move to buffer and point of point-or-marker POM for the duration of BODY."
   (declare (debug (form body)) (indent 1))
