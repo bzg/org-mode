@@ -6137,9 +6137,8 @@ stack."
 		    (let ((data (nth 2 entry)))
 		      (if proc-p (format " %6s  " (process-status data))
 			;; Compute age of the results.
-			(org-format-seconds
-			 "%4h:%.2m  "
-			 (float-time (time-since data)))))
+			(format-seconds "%4h:%.2m  "
+					(float-time (time-since data)))))
 		    ;; Source.
 		    (format " %s"
 			    (let ((source (car entry)))

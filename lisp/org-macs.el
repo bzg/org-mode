@@ -284,12 +284,6 @@ The number of levels is controlled by `org-inlinetask-min-level'"
 			  limit-level)))
 	   (format "\\*\\{1,%d\\} " nstars)))))
 
-(defun org-format-seconds (string seconds)
-  "Compatibility function replacing format-seconds."
-  (if (fboundp 'format-seconds)
-      (format-seconds string seconds)
-    (format-time-string string (seconds-to-time seconds))))
-
 (defmacro org-eval-in-environment (environment form)
   (declare (debug (form form)) (indent 1))
   `(eval (list 'let ,environment ',form)))

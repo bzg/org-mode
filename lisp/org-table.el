@@ -3728,7 +3728,7 @@ minutes or seconds."
 		 (format "%.1f" (/ (float secs0) 60)))
 		((eq output-format 'seconds)
 		 (format "%d" secs0))
-		(t (org-format-seconds "%.2h:%.2m:%.2s" secs0)))))
+		(t (format-seconds "%.2h:%.2m:%.2s" secs0)))))
     (if (< secs 0) (concat "-" res) res)))
 
 (defun org-table-fedit-convert-buffer (function)
