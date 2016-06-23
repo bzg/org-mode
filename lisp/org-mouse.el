@@ -221,7 +221,7 @@ this function is called.  Otherwise, the current major mode menu is used."
 	    (funcall org-mouse-context-menu-function event)
 	  (if (fboundp 'mouse-menu-major-mode-map)
 	      (popup-menu (mouse-menu-major-mode-map) event prefix)
-	    (org-no-warnings ; don't warn about fallback, obsolete since 23.1
+	    (with-no-warnings ; don't warn about fallback, obsolete since 23.1
 	     (mouse-major-mode-menu event prefix)))))
     (setq this-command 'mouse-save-then-kill)
     (mouse-save-then-kill event)))

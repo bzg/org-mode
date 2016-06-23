@@ -110,10 +110,6 @@ Otherwise return nil."
 	  (goto-char (or ,mpom (point)))
 	  ,@body)))))
 
-(defmacro org-no-warnings (&rest body)
-  (declare (debug (body)))
-  (cons (if (fboundp 'with-no-warnings) 'with-no-warnings 'progn) body))
-
 (defmacro org-with-remote-undo (buffer &rest body)
   "Execute BODY while recording undo information in two buffers."
   (declare (debug (form body)) (indent 1))

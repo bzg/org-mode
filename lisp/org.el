@@ -17352,18 +17352,10 @@ DEF-FLAG   is t when a double ++ or -- indicates shift relative to
 The internal representation needed by the calendar is (month day year).
 This is a wrapper to handle the brain-dead convention in calendar that
 user function argument order change dependent on argument order."
-  (if (boundp 'calendar-date-style)
-      (cond
-       ((eq calendar-date-style 'american)
-	(list arg1 arg2 arg3))
-       ((eq calendar-date-style 'european)
-	(list arg2 arg1 arg3))
-       ((eq calendar-date-style 'iso)
-	(list arg2 arg3 arg1)))
-    (org-no-warnings ;; european-calendar-style is obsolete as of version 23.1
-     (if (bound-and-true-p european-calendar-style)
-	 (list arg2 arg1 arg3)
-       (list arg1 arg2 arg3)))))
+  (pcase calendar-date-style
+    (`american (list arg1 arg2 arg3))
+    (`european (list arg2 arg1 arg3))
+    (`iso (list arg2 arg3 arg1))))
 
 (defun org-eval-in-calendar (form &optional keepdate)
   "Eval FORM in the calendar window and return to current window.
@@ -18202,7 +18194,7 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like \"--2d\"."
 	      h (string-to-number (match-string 2 s)))
 	(if (org-pos-in-match-range pos 2)
 	    (setq h (+ h n))
-	  (setq n (* dm (org-no-warnings (signum n))))
+	  (setq n (* dm (with-no-warnings (signum n))))
 	  (unless (= 0 (setq rem (% m dm)))
 	    (setq m (+ m (if (> n 0) (- rem) (- dm rem)))))
 	  (setq m (+ m n)))

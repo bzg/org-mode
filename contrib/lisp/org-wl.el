@@ -279,8 +279,8 @@ for namazu index."
 				      org-wl-namazu-default-index)
 				 org-wl-namazu-default-index
 			       (read-directory-name "Namazu index: ")))))
-      (if (not (elmo-folder-exists-p (org-no-warnings
-				      (wl-folder-get-elmo-folder folder))))
+      (if (not (elmo-folder-exists-p (with-no-warnings
+				       (wl-folder-get-elmo-folder folder))))
 	  (error "No such folder: %s" folder))
       (let ((old-buf (current-buffer))
 	    (old-point (point-marker)))

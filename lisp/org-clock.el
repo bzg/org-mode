@@ -1566,7 +1566,7 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	  ts te s h m remove)
       (setq org-clock-out-time now)
       (save-excursion ; Do not replace this with `with-current-buffer'.
-	(org-no-warnings (set-buffer (org-clocking-buffer)))
+	(with-no-warnings (set-buffer (org-clocking-buffer)))
 	(save-restriction
 	  (widen)
 	  (goto-char org-clock-marker)
@@ -1711,7 +1711,7 @@ Optional argument N tells to change by that many units."
     (force-mode-line-update)
     (error "No active clock"))
   (save-excursion    ; Do not replace this with `with-current-buffer'.
-    (org-no-warnings (set-buffer (org-clocking-buffer)))
+    (with-no-warnings (set-buffer (org-clocking-buffer)))
     (goto-char org-clock-marker)
     (if (looking-back (concat "^[ \t]*" org-clock-string ".*")
 		      (line-beginning-position))

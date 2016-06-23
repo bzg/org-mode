@@ -96,8 +96,8 @@
 (defvar org-agenda-buffer-name "*Org Agenda*")
 (defvar org-agenda-overriding-header nil)
 (defvar org-agenda-title-append nil)
-(org-no-warnings (defvar entry)) ;; unprefixed, from calendar.el
-(org-no-warnings (defvar date))  ;; unprefixed, from calendar.el
+(with-no-warnings (defvar entry)) ;; unprefixed, from calendar.el
+(with-no-warnings (defvar date))  ;; unprefixed, from calendar.el
 (defvar original-date) ; dynamically scoped, calendar.el does scope this
 
 (defvar org-agenda-undo-list nil
@@ -5767,22 +5767,22 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 ;; also `european-calendar-style' and use european format
 (defun org-anniversary (year month day &optional mark)
   "Like `diary-anniversary', but with fixed (ISO) order of arguments."
-  (org-no-warnings
+  (with-no-warnings
    (let ((calendar-date-style 'european) (european-calendar-style t))
      (diary-anniversary day month year mark))))
 (defun org-cyclic (N year month day &optional mark)
   "Like `diary-cyclic', but with fixed (ISO) order of arguments."
-  (org-no-warnings
+  (with-no-warnings
    (let ((calendar-date-style 'european)	(european-calendar-style t))
      (diary-cyclic N day month year mark))))
 (defun org-block (Y1 M1 D1 Y2 M2 D2 &optional mark)
   "Like `diary-block', but with fixed (ISO) order of arguments."
-  (org-no-warnings
+  (with-no-warnings
    (let ((calendar-date-style 'european)	(european-calendar-style t))
      (diary-block D1 M1 Y1 D2 M2 Y2 mark))))
 (defun org-date (year month day &optional mark)
   "Like `diary-date', but with fixed (ISO) order of arguments."
-  (org-no-warnings
+  (with-no-warnings
    (let ((calendar-date-style 'european)	(european-calendar-style t))
      (diary-date day month year mark))))
 

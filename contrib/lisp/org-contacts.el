@@ -674,7 +674,7 @@ description."
       (goto-char marker)
       (when (eq major-mode 'org-mode) (org-show-context 'agenda)))))
 
-(org-no-warnings (defvar date)) ;; unprefixed, from calendar.el
+(with-no-warnings (defvar date)) ;; unprefixed, from calendar.el
 (defun org-contacts-anniversaries (&optional field format)
   "Compute FIELD anniversary for each contact, returning FORMAT.
 Default FIELD value is \"BIRTHDAY\".

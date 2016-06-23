@@ -630,9 +630,7 @@ Where possible, use the standard interface for changing this line."
 (defun org-columns-eval (form)
   (let (hidep)
     (save-excursion
-      (beginning-of-line 1)
-      ;; `next-line' is needed here, because it skips invisible line.
-      (condition-case nil (org-no-warnings (next-line 1)) (error nil))
+      (ignore-errors (move-beginning-of-line 2))
       (setq hidep (org-at-heading-p 1)))
     (eval form)
     (and hidep (outline-hide-entry))))
