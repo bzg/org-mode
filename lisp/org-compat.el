@@ -1,4 +1,4 @@
-;;; org-compat.el --- Compatibility code for Org-mode
+;;; org-compat.el --- Compatibility Code for Older Emacsen -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004-2016 Free Software Foundation, Inc.
 
@@ -29,8 +29,7 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl-lib)
 (require 'org-macs)
 
 ;; As of Emacs 25.1, `outline-mode' functions are under the 'outline-'
@@ -246,7 +245,7 @@ ignored in this case."
   (if (consp buffer-invisibility-spec)
       (member arg buffer-invisibility-spec)))
 
-(defun org-move-to-column (column &optional force buffer)
+(defun org-move-to-column (column &optional force _buffer)
   "Move to column COLUMN.
 Pass COLUMN and FORCE to `move-to-column'."
   (let ((buffer-invisibility-spec
@@ -311,7 +310,7 @@ With two arguments, return floor and remainder of their quotient."
 
 ;; `pop-to-buffer-same-window' has been introduced in Emacs 24.1.
 (defun org-pop-to-buffer-same-window
-  (&optional buffer-or-name norecord label)
+  (&optional buffer-or-name norecord _label)
   "Pop to buffer specified by BUFFER-OR-NAME in the selected window."
   (if (fboundp 'pop-to-buffer-same-window)
       (funcall
