@@ -2381,8 +2381,6 @@ the currently selected interval size."
 
       ;; Get the right scope
       (cond
-       ((and scope (listp scope) (symbolp (car scope)))
-	(setq scope (eval scope)))
        ((eq scope 'agenda)
 	(setq scope (org-agenda-files t)))
        ((eq scope 'agenda-with-archives)
