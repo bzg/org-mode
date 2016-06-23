@@ -1093,18 +1093,10 @@ therefore you'll have to restart Emacs to apply it after changing."
 Or return the original if not disputed."
   (when org-replace-disputed-keys
     (let* ((nkey (key-description key))
-	   (x (org-find-if (lambda (x)
-			     (equal (key-description (car x)) nkey))
-			   org-disputed-keys)))
+	   (x (cl-find-if (lambda (x) (equal (key-description (car x)) nkey))
+			  org-disputed-keys)))
       (setq key (if x (cdr x) key))))
   key)
-
-(defun org-find-if (predicate seq)
-  (catch 'exit
-    (while seq
-      (if (funcall predicate (car seq))
-	  (throw 'exit (car seq))
-	(pop seq)))))
 
 (defun org-defkey (keymap key def)
   "Define a key, possibly translated, as returned by `org-key'."

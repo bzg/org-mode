@@ -232,7 +232,7 @@ A regexp matching strings of whitespace, `,' and `;'.")
 (defun org-contacts-db-need-update-p ()
   "Determine whether `org-contacts-db' needs to be refreshed."
   (or (null org-contacts-last-update)
-      (org-find-if (lambda (file)
+      (cl-find-if (lambda (file)
 		     (or (time-less-p org-contacts-last-update
 				      (elt (file-attributes file) 5))))
 		   (org-contacts-files))
@@ -320,12 +320,12 @@ cell corresponding to the contact properties.
 		      (org-string-match-p name-match
 					  (first contact)))
 		 (and prop-match
-		      (org-find-if (lambda (prop)
+		      (cl-find-if (lambda (prop)
 				     (and (string= (car prop-match) (car prop))
 					  (org-string-match-p (cdr prop-match) (cdr prop))))
 				   (caddr contact)))
 		 (and tags-match
-		      (org-find-if (lambda (tag)
+		      (cl-find-if (lambda (tag)
 				     (org-string-match-p tags-match tag))
 				   (org-split-string
 				    (or (cdr (assoc-string "ALLTAGS" (caddr contact))) "") ":"))))
@@ -487,13 +487,10 @@ prefixes rather than just the beginning of the string."
 	  completions))
 
 (defun org-contacts-test-completion-prefix (string collection predicate)
-  ;; Prevents `org-find-if' from redefining `predicate' and going into
-  ;; an infinite loop.
-  (lexical-let ((predicate predicate))
-    (org-find-if (lambda (el)
-		   (and (or (null predicate) (funcall predicate el))
-			(string= string el)))
-		 collection)))
+  (cl-find-if (lambda (el)
+		(and (or (null predicate) (funcall predicate el))
+		     (string= string el)))
+	      collection))
 
 (defun org-contacts-boundaries-prefix (string collection predicate suffix)
   (list* 'boundaries (completion-boundaries string collection predicate suffix)))
@@ -592,7 +589,7 @@ description."
   "Remove all ignore-list's elements from list and you can use
    regular expressions in the ignore list."
   (cl-remove-if (lambda (el)
-		  (org-find-if (lambda (x)
+		  (cl-find-if (lambda (x)
 				 (string-match-p x el))
 			       ignore-list))
 		list))
