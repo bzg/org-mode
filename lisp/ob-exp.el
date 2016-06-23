@@ -95,13 +95,14 @@ Assume point is at block opening line."
 	  (let ((lang-headers (intern (concat "org-babel-default-header-args:"
 					      lang))))
 	    (org-babel-exp--at-source
-	     (setf (nth 2 info)
-		   (org-babel-process-params
-		    (apply #'org-babel-merge-params
-			   org-babel-default-header-args
-			   (and (boundp lang-headers) (eval lang-headers t))
-			   (append (org-babel-params-from-properties lang)
-				   (list raw-params)))))))
+		(setf (nth 2 info)
+		      (org-babel-process-params
+		       (apply #'org-babel-merge-params
+			      org-babel-default-header-args
+			      (and (boundp lang-headers)
+				   (symbol-value lang-headers))
+			      (append (org-babel-params-from-properties lang)
+				      (list raw-params)))))))
 	  (setf hash (org-babel-sha1-hash info)))
 	(org-babel-exp-do-export info 'block hash)))))
 
