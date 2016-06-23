@@ -231,13 +231,6 @@ This is in contrast to merely setting it to 0."
       (setq plist (cddr plist)))
     p))
 
-(defun org-replace-match-keep-properties (newtext &optional fixedcase
-						  literal string)
-  "Like `replace-match', but add the text properties found original text."
-  (setq newtext (org-add-props newtext (text-properties-at
-					(match-beginning 0) string)))
-  (replace-match newtext fixedcase literal string))
-
 (defmacro org-save-outline-visibility (use-markers &rest body)
   "Save and restore outline visibility around BODY.
 If USE-MARKERS is non-nil, use markers for the positions.
