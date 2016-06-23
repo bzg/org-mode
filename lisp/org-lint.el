@@ -1169,7 +1169,7 @@ checker by its name.
 ARG can also be a list of checker names, as symbols, to run."
   (interactive "P")
   (unless (derived-mode-p 'org-mode) (user-error "Not in an Org buffer"))
-  (when (org-called-interactively-p)
+  (when (called-interactively-p 'any)
     (message "Org linting process starting..."))
   (let ((checkers
 	 (pcase arg
@@ -1198,7 +1198,7 @@ ARG can also be a list of checker names, as symbols, to run."
 	    (cl-remove-if-not (lambda (c) (memq (org-lint-checker-name c) arg))
 			       org-lint--checkers))
 	   (_ (user-error "Invalid argument `%S' for `org-lint'" arg)))))
-    (if (not (org-called-interactively-p))
+    (if (not (called-interactively-p 'any))
 	(org-lint--generate-reports (current-buffer) checkers)
       (org-lint--display-reports (current-buffer) checkers)
       (message "Org linting process completed"))))

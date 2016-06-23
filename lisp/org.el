@@ -5592,7 +5592,7 @@ The following commands are available:
   ;; If empty file that did not turn on Org mode automatically, make
   ;; it to.
   (when (and org-insert-mode-line-in-empty-file
-	     (org-called-interactively-p 'any)
+	     (called-interactively-p 'any)
 	     (= (point-min) (point-max)))
     (insert "#    -*- mode: org -*-\n\n"))
   (unless org-inhibit-startup
@@ -8543,7 +8543,7 @@ of some markers in the region, even if CUT is non-nil.  This is
 useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
   (interactive "p")
   (let (beg end folded (beg0 (point)))
-    (if (org-called-interactively-p 'any)
+    (if (called-interactively-p 'any)
 	(org-back-to-heading nil) ; take what looks like a subtree
       (org-back-to-heading t)) ; take what is really there
     (setq beg (point))
@@ -8673,7 +8673,7 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
 	   (setq shift (+ delta shift)))
 	 (goto-char (point-min))
 	 (setq newend (point-max))))
-     (when (or (org-called-interactively-p 'interactive) for-yank)
+     (when (or (called-interactively-p 'interactive) for-yank)
        (message "Clipboard pasted as level %d subtree" new-level))
      (when (and (not for-yank) ; in this case, org-yank will decide about folding
 		kill-ring
@@ -9805,7 +9805,7 @@ active region."
 	     (looking-at (concat (format org-coderef-label-format "\\(.*?\\)")
 				 "[ \t]*$")))
 	   (setq link (format "(%s)" (match-string-no-properties 1))))
-	  ((org-called-interactively-p 'any)
+	  ((called-interactively-p 'any)
 	   (let (label)
 	     (while (or (not label)
 			(org-with-wide-buffer
@@ -9831,7 +9831,7 @@ active region."
 	   (when m
 	     (org-with-point-at m
 	       (setq agenda-link
-		     (if (org-called-interactively-p 'any)
+		     (if (called-interactively-p 'any)
 			 (call-interactively 'org-store-link)
 		       (org-store-link nil)))))))
 
@@ -9896,7 +9896,7 @@ active region."
 		 link cpltxt))
 	  ((and (featurep 'org-id)
 		(or (eq org-id-link-to-org-use-id t)
-		    (and (org-called-interactively-p 'any)
+		    (and (called-interactively-p 'any)
 			 (or (eq org-id-link-to-org-use-id 'create-if-interactive)
 			     (and (eq org-id-link-to-org-use-id
 				      'create-if-interactive-and-no-custom-id)
@@ -9957,7 +9957,7 @@ active region."
 		   desc "NONE")))
 	 (setq link cpltxt))
 
-	((org-called-interactively-p 'interactive)
+	((called-interactively-p 'interactive)
 	 (user-error "No method for storing a link from this buffer"))
 
 	(t (setq link nil)))
@@ -9974,7 +9974,7 @@ active region."
 		       (lambda (m) (or (match-string 5 m) (match-string 3 m)))
 		       desc))))
        ;; Return the link
-       (if (not (and (or (org-called-interactively-p 'any)
+       (if (not (and (or (called-interactively-p 'any)
 			 executing-kbd-macro)
                      link))
 	   (or agenda-link (and link (org-make-link-string link desc)))
@@ -12639,7 +12639,7 @@ When called through ELisp, arg is also interpreted in the following way:
 			  (org-with-wide-buffer
 			   (run-hook-with-args-until-failure
 			    'org-blocker-hook change-plist))))
-		(if (org-called-interactively-p 'interactive)
+		(if (called-interactively-p 'interactive)
 		    (user-error "TODO state change from %s to %s blocked (by \"%s\")"
 				this org-state org-block-entry-blocking)
 		  ;; fail silently
@@ -13979,7 +13979,7 @@ The function must neither move point nor alter narrowing."
     (unless org-sparse-tree-open-archived-trees
       (org-hide-archived-subtrees (point-min) (point-max)))
     (run-hooks 'org-occur-hook)
-    (when (org-called-interactively-p 'interactive)
+    (when (called-interactively-p 'interactive)
       (message "%d match(es) for regexp %s" cnt regexp))
     cnt))
 
@@ -19306,7 +19306,7 @@ inspection."
 		 (?i . ,latex-frag)
 		 (?o . ,(shell-quote-argument tmp-out-file)))))
 	 mathml shell-command-output)
-    (when (org-called-interactively-p 'any)
+    (when (called-interactively-p 'any)
       (unless (org-format-latex-mathml-available-p)
 	(user-error "LaTeX to MathML converter not configured")))
     (message "Running %s" cmd)
@@ -19330,7 +19330,7 @@ inspection."
 	    (concat "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" mathml))
       (when mathml-file
 	(write-region mathml nil mathml-file))
-      (when (org-called-interactively-p 'any)
+      (when (called-interactively-p 'any)
 	(message mathml)))
      ((message "LaTeX to MathML conversion failed")
       (message shell-command-output)))
@@ -19599,10 +19599,10 @@ INCLUDE-LINKED is passed to `org-display-inline-images'."
   (if org-inline-image-overlays
       (progn
 	(org-remove-inline-images)
-	(when (org-called-interactively-p 'interactive)
+	(when (called-interactively-p 'interactive)
 	  (message "Inline image display turned off")))
     (org-display-inline-images include-linked)
-    (when (org-called-interactively-p 'interactive)
+    (when (called-interactively-p 'interactive)
       (message (if org-inline-image-overlays
 		   (format "%d images displayed inline"
 			   (length org-inline-image-overlays))
@@ -22846,7 +22846,7 @@ hierarchy of headlines by UP levels before marking the subtree."
 	 ((org-before-first-heading-p) (user-error "Not in a subtree"))
 	 (t (outline-previous-visible-heading 1))))
   (when up (while (and (> up 0) (org-up-heading-safe)) (cl-decf up)))
-  (if (org-called-interactively-p 'any)
+  (if (called-interactively-p 'any)
       (call-interactively 'org-mark-element)
     (org-mark-element)))
 
@@ -24874,7 +24874,7 @@ mode) if the mark is active, it marks the next element after the
 ones already marked."
   (interactive)
   (let (deactivate-mark)
-    (if (and (org-called-interactively-p 'any)
+    (if (and (called-interactively-p 'any)
 	     (or (and (eq last-command this-command) (mark t))
 		 (and transient-mark-mode mark-active)))
 	(set-mark

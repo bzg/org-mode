@@ -756,7 +756,7 @@ arguments and pop open the results in a preview buffer."
 	    (org-babel-expand-body:generic
 	     body params (and (fboundp assignments-cmd)
 			      (funcall assignments-cmd params))))))
-    (if (org-called-interactively-p 'any)
+    (if (called-interactively-p 'any)
 	(org-edit-src-code
 	 expanded (concat "*Org-Babel Preview " (buffer-name) "[ " lang " ]*"))
       expanded)))
@@ -1254,7 +1254,7 @@ the current subtree."
                                             (nth 2 info))) ":")
                          expanded))
              (hash (sha1 it)))
-        (when (org-called-interactively-p 'interactive) (message hash))
+        (when (called-interactively-p 'interactive) (message hash))
         hash))))
 
 (defun org-babel-current-result-hash (&optional info)

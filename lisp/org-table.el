@@ -1234,7 +1234,7 @@ Return t when the line exists, nil if it does not exist."
   "Blank the current table field or active region."
   (interactive)
   (org-table-check-inside-data-field)
-  (if (and (org-called-interactively-p 'any) (org-region-active-p))
+  (if (and (called-interactively-p 'any) (org-region-active-p))
       (let (org-table-clip)
 	(org-table-cut-region (region-beginning) (region-end)))
     (skip-chars-backward "^|")
@@ -1313,12 +1313,12 @@ is always the old value."
 (defun org-table-current-column ()
   "Find out which column we are in."
   (interactive)
-  (when (org-called-interactively-p 'any) (org-table-check-inside-data-field))
+  (when (called-interactively-p 'any) (org-table-check-inside-data-field))
   (save-excursion
     (let ((column 0) (pos (point)))
       (beginning-of-line)
       (while (search-forward "|" pos t) (cl-incf column))
-      (when (org-called-interactively-p 'interactive)
+      (when (called-interactively-p 'interactive)
 	(message "In table column %d" column))
       column)))
 
@@ -1327,7 +1327,7 @@ is always the old value."
   "Find out what table data line we are in.
 Only data lines count for this."
   (interactive)
-  (when (org-called-interactively-p 'any)
+  (when (called-interactively-p 'any)
     (org-table-check-inside-data-field))
   (save-excursion
     (let ((c 0)
@@ -1336,7 +1336,7 @@ Only data lines count for this."
       (while (<= (point) pos)
 	(when (looking-at org-table-dataline-regexp) (cl-incf c))
 	(forward-line))
-      (when (org-called-interactively-p 'any)
+      (when (called-interactively-p 'any)
 	(message "This is table line %d" c))
       c)))
 
@@ -1678,7 +1678,7 @@ numeric compare based on the type of the first key in the table."
   ;; Set appropriate case sensitivity and column used for sorting.
   (let ((column (let ((c (org-table-current-column)))
 		  (cond ((> c 0) c)
-			((org-called-interactively-p 'any)
+			((called-interactively-p 'any)
 			 (read-number "Use column N for sorting: "))
 			(t 1))))
 	(sorting-type
@@ -1726,7 +1726,7 @@ numeric compare based on the type of the first key in the table."
 			 (t 0))))
 		((?f ?F)
 		 (or getkey-func
-		     (and (org-called-interactively-p 'any)
+		     (and (called-interactively-p 'any)
 			  (intern
 			   (completing-read "Sort using function: "
 					    obarray #'fboundp t)))
@@ -2138,7 +2138,7 @@ If NLAST is a number, only the NLAST fields will actually be summed."
 			   s diff)
 		     (format "%.0f:%02.0f:%02.0f" h m s))))
 	(kill-new sres)
-	(when (org-called-interactively-p 'interactive)
+	(when (called-interactively-p 'interactive)
 	    (message "%s" (substitute-command-keys
 			   (format "Sum of %d items: %-20s     \
 \(\\[yank] will insert result into buffer)" (length numbers) sres))))
@@ -2466,7 +2466,7 @@ of the new mark."
     (when l1 (set-marker l1 nil))
     (when l2 (set-marker l2 nil))
     (set-marker l nil)
-    (when (org-called-interactively-p 'interactive)
+    (when (called-interactively-p 'interactive)
       (message "%s" (cdr (assoc newchar org-recalc-marks))))))
 
 ;;;###autoload
@@ -2890,7 +2890,7 @@ $1->    %s\n" orig formula form0 form))
 			     (if fmt (format fmt (string-to-number ev)) ev)))))
 	  (setq bw (get-buffer-window "*Substitution History*"))
 	  (org-fit-window-to-buffer bw)
-	  (unless (and (org-called-interactively-p 'any) (not ndown))
+	  (unless (and (called-interactively-p 'any) (not ndown))
 	    (unless (let (inhibit-redisplay)
 		      (y-or-n-p "Debugging Formula.  Continue to next? "))
 	      (org-table-align)
@@ -4651,7 +4651,7 @@ for this table."
   (catch 'exit
     (unless (org-at-table-p) (user-error "Not at a table"))
     ;; when non-interactive, we assume align has just happened.
-    (when (org-called-interactively-p 'any) (org-table-align))
+    (when (called-interactively-p 'any) (org-table-align))
     (let ((dests (orgtbl-gather-send-defs))
 	  (table (org-table-to-lisp
 		  (buffer-substring-no-properties (org-table-begin)

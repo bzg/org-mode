@@ -38,15 +38,6 @@
                  symbols)
      ,@body))
 
-(defmacro org-called-interactively-p (&optional kind)
-  (declare (debug (&optional ("quote" symbolp)))) ;Why not just t?
-  (if (or (> emacs-major-version 23)
-	  (and (>= emacs-major-version 23)
-	       (>= emacs-minor-version 2)))
-      ;; defined with no argument in <=23.1
-      `(with-no-warnings (called-interactively-p ,kind))
-    `(interactive-p)))
-
 (defun org-string-nw-p (s)
   "Return S if S is a string containing a non-blank character.
 Otherwise, return nil."
