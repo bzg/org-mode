@@ -895,7 +895,7 @@ If BEG and END are given, only do this in that region."
 				       (buffer-file-name))))))
 	      (error (setq org-mobile-error msg))))
 	  (when org-mobile-error
-	    (org-pop-to-buffer-same-window (marker-buffer marker))
+	    (pop-to-buffer-same-window (marker-buffer marker))
 	    (goto-char marker)
 	    (incf cnt-error)
 	    (insert (if (stringp (nth 1 org-mobile-error))

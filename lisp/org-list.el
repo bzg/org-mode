@@ -322,8 +322,6 @@ This hook runs even if checkbox rule in
 implement alternative ways of collecting statistics
 information.")
 
-(define-obsolete-variable-alias 'org-hierarchical-checkbox-statistics
-  'org-checkbox-hierarchical-statistics "24.4") ;; Since 8.0
 (defcustom org-checkbox-hierarchical-statistics t
   "Non-nil means checkbox statistics counts only the state of direct children.
 When nil, all boxes below the cookie are counted.
@@ -332,8 +330,6 @@ with the word \"recursive\" in the value."
   :group 'org-plain-lists
   :type 'boolean)
 
-(org-defvaralias 'org-description-max-indent
-  'org-list-description-max-indent) ;; Since 8.0
 (defcustom org-list-description-max-indent 20
   "Maximum indentation for the second line of a description list.
 When the indentation would be larger than this, it will become

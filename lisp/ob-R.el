@@ -37,7 +37,6 @@
 (declare-function ess-eval-buffer "ext:ess-inf" (vis))
 (declare-function ess-wait-for-process "ext:ess-inf"
 		  (&optional proc sec-prompt wait force-redisplay))
-(declare-function org-number-sequence "org-compat" (from &optional to inc))
 
 (defconst org-babel-header-args:R
   '((width		 . :any)
@@ -221,7 +220,7 @@ This function is called by `org-babel-execute-src-block'."
 	       (cdr (nth i vars))
 	       (cdr (nth i (cdr (assoc :colname-names params))))
 	       (cdr (nth i (cdr (assoc :rowname-names params)))))))
-      (org-number-sequence 0 (1- (length vars)))))))
+      (number-sequence 0 (1- (length vars)))))))
 
 (defun org-babel-R-quote-tsv-field (s)
   "Quote field S for export to R."

@@ -137,8 +137,6 @@
 
 (require 'org)
 
-(declare-function org-pop-to-buffer-same-window "org-compat" (&optional buffer-or-name norecord label))
-
 (defgroup org-ctags nil
   "Options concerning use of ctags within org mode."
   :tag "Org-Ctags"
@@ -378,7 +376,7 @@ the new file."
     (cond
      ((get-buffer (concat name ".org"))
       ;; Buffer is already open
-      (org-pop-to-buffer-same-window (get-buffer (concat name ".org"))))
+      (pop-to-buffer-same-window (get-buffer (concat name ".org"))))
      ((file-exists-p filename)
       ;; File exists but is not open --> open it
       (message "Opening existing org file `%S'..."

@@ -28,13 +28,11 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl-lib)
 (require 'org)
 
 (declare-function calendar-iso-to-absolute "cal-iso" (date))
 (declare-function notifications-notify "notifications" (&rest params))
-(declare-function org-pop-to-buffer-same-window "org-compat" (&optional buffer-or-name norecord label))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-table-goto-line "org-table" (n))
@@ -260,7 +258,7 @@ auto     Automatically, either `all', or `repeat' for repeating tasks"
 	  (const :tag "All task time" all)
 	  (const :tag "Automatically, `all' or since `repeat'" auto)))
 
-(org-defvaralias 'org-task-overrun-text 'org-clock-task-overrun-text)
+(defvaralias 'org-task-overrun-text 'org-clock-task-overrun-text)
 (defcustom org-clock-task-overrun-text nil
   "Extra mode line text to indicate that the clock is overrun.
 The can be nil to indicate that instead of adding text, the clock time
@@ -1747,7 +1745,7 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
 	      (setq recent t)
 	      (car org-clock-history))
 	     (t (error "No active or recent clock task")))))
-    (org-pop-to-buffer-same-window (marker-buffer m))
+    (pop-to-buffer-same-window (marker-buffer m))
     (if (or (< m (point-min)) (> m (point-max))) (widen))
     (goto-char m)
     (org-show-entry)
@@ -2210,7 +2208,7 @@ have priority."
 	((< (+ (- q 1) shift) 0)	; Shift not in this year.
 	 (let* ((interval (* -1 (+ (- q 1) shift)))
 		;; Set tmp to ((years to shift) (quarters to shift)).
-		(tmp (org-floor* interval 4)))
+		(tmp (cl-floor interval 4)))
 	   ;; Due to the use of floor, 0 quarters actually means 4.
 	   (if (= 0 (nth 1 tmp))
 	       (setq shiftedy (- y (nth 0 tmp))

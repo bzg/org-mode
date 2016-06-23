@@ -43,7 +43,7 @@
          (eshell-buffer-name (car buffer-and-command))
          (command (cadr buffer-and-command)))
     (if (get-buffer eshell-buffer-name)
-	(org-pop-to-buffer-same-window eshell-buffer-name)
+	(pop-to-buffer-same-window eshell-buffer-name)
       (eshell))
     (goto-char (point-max))
     (eshell-kill-input)

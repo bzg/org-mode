@@ -44,11 +44,61 @@
   (defalias 'outline-show-children 'show-children)
   (defalias 'outline-show-entry 'show-entry)
   (defalias 'outline-show-subtree 'show-subtree)
-  (defalias 'xref-find-definitions 'find-tag))
+  (defalias 'xref-find-definitions 'find-tag)
+  (defalias 'format-message 'format))
 
 (eval-when-compile
   (when (< emacs-major-version 25)
     (defalias 'gui-get-selection 'x-get-selection)))
+
+
+;;; Obsolete aliases
+
+(define-obsolete-function-alias 'org-activate-mark 'activate-mark)
+
+;;;; XEmacs compatibility, now removed.
+(define-obsolete-function-alias 'org-add-hook 'add-hook "Org 9.0")
+(define-obsolete-function-alias 'org-decompose-region 'decompose-region "Org 9.0")
+(define-obsolete-function-alias 'org-defvaralias 'defvaralias "Org 9.0")
+(define-obsolete-function-alias 'org-detach-overlay 'delete-overlay "Org 9.0")
+(define-obsolete-function-alias 'org-file-equal-p 'file-equal-p "Org 9.0")
+(define-obsolete-function-alias 'org-float-time 'float-time "Org 9.0")
+(define-obsolete-function-alias 'org-indent-line-to 'indent-line-to "Org 9.0")
+(define-obsolete-function-alias 'org-indent-to-column 'indent-to-column "Org 9.0")
+(define-obsolete-function-alias 'org-looking-at-p 'looking-at-p "Org 9.0")
+(define-obsolete-function-alias 'org-looking-back 'looking-back "Org 9.0")
+(define-obsolete-function-alias 'org-match-string-no-properties 'match-string-properties "Org 9.0")
+(define-obsolete-function-alias 'org-propertize 'propertize "Org 9.0")
+(define-obsolete-function-alias 'org-select-frame-set-input-focus 'select-frame-set-input-focus "Org 9.0")
+
+(defmacro org-re (s)
+  "Replace posix classes in regular expression."
+  (declare (debug (form)))
+  s)
+(make-obsolete 'org-re "It is now a no-op.  Please remove it altogether." "Org 9.0")
+
+;;;; Functions from cl-lib that Org used to have its own implementation of.
+(define-obsolete-function-alias 'org-count 'cl-count "Org 9.0")
+(define-obsolete-function-alias 'org-every 'cl-every "Org 9.0")
+(define-obsolete-function-alias 'org-find-if 'cl-find-if "Org 9.0")
+(define-obsolete-function-alias 'org-reduce 'cl-reduce "Org 9.0")
+(define-obsolete-function-alias 'org-remove-if 'cl-remove-if "Org 9.0")
+(define-obsolete-function-alias 'org-remove-if-not 'cl-remove-if-not "Org 9.0")
+(define-obsolete-function-alias 'org-some 'cl-some "Org 9.0")
+(define-obsolete-function-alias 'org-floor* 'cl-floor "Org 9.0")
+
+;;;; Functions available since Emacs 24.3
+(define-obsolete-function-alias 'org-buffer-narrowed-p 'buffer-narrowed-p "Org 9.0")
+(define-obsolete-function-alias 'org-delete-directory 'delete-directory "Org 9.0")
+(define-obsolete-function-alias 'org-number-sequence 'number-sequence "Org 9.0")
+(define-obsolete-function-alias 'org-pop-to-buffer-same-window 'pop-to-buffer-same-window "Org 9.0")
+(define-obsolete-function-alias 'org-string-match-p 'string-match-p "Org 9.0")
+
+;;;; Variables declared obsolete.
+(define-obsolete-variable-alias 'org-hierarchical-checkbox-statistics
+  'org-checkbox-hierarchical-statistics "Org 8.0")
+(define-obsolete-variable-alias 'org-description-max-indent
+  'org-list-description-max-indent "Org 8.0")
 
 (defun org-compatible-face (inherits specs)
   "Make a compatible face specification.
@@ -110,39 +160,6 @@ If INHERITS is not given and SPECS is, use SPECS to define the face."
       t)))
 
 
-;;; Emacs/XEmacs compatibility
-
-(eval-and-compile
-  (defun org-defvaralias (new-alias base-variable &optional docstring)
-    "Compatibility function for defvaralias.
-Don't do the aliasing when `defvaralias' is not bound."
-    (declare (indent 1))
-    (when (fboundp 'defvaralias)
-      (defvaralias new-alias base-variable docstring)))
-
-  (when (and (not (boundp 'user-emacs-directory))
-	     (boundp 'user-init-directory))
-    (org-defvaralias 'user-emacs-directory 'user-init-directory)))
-
-(define-obsolete-function-alias 'org-add-hook 'add-hook "Org 9.0")
-(define-obsolete-function-alias 'org-decompose-region 'decompose-region "Org 9.0")
-(define-obsolete-function-alias 'org-detach-overlay 'delete-overlay "Org 9.0")
-(define-obsolete-function-alias 'org-file-equal-p 'file-equal-p "Org 9.0")
-(define-obsolete-function-alias 'org-float-time 'float-time "Org 9.0")
-(define-obsolete-function-alias 'org-indent-line-to 'indent-line-to "Org 9.0")
-(define-obsolete-function-alias 'org-indent-to-column 'indent-to-column "Org 9.0")
-(define-obsolete-function-alias 'org-looking-at-p 'looking-at-p "Org 9.0")
-(define-obsolete-function-alias 'org-looking-back 'looking-back "Org 9.0")
-(define-obsolete-function-alias 'org-match-string-no-properties 'match-string-properties "Org 9.0")
-(define-obsolete-function-alias 'org-propertize 'propertize "Org 9.0")
-(define-obsolete-function-alias 'org-select-frame-set-input-focus 'select-frame-set-input-focus "Org 9.0")
-
-(defmacro org-re (s)
-  "Replace posix classes in regular expression."
-  (declare (debug (form)))
-  s)
-(make-obsolete 'org-re "It is now a no-op.  Please remove it altogether." "Org 9.0")
-
 ;;; Miscellaneous functions
 
 (defun org-get-x-clipboard (value)
@@ -183,26 +200,6 @@ ignored in this case."
 	 (shrink-window-if-larger-than-buffer window)))
   (or window (selected-window)))
 
-(defun org-number-sequence (from &optional to inc)
-  "Call `number-sequence' or emulate it."
-  (if (fboundp 'number-sequence)
-      (number-sequence from to inc)
-    (if (or (not to) (= from to))
-	(list from)
-      (or inc (setq inc 1))
-      (when (zerop inc) (error "The increment can not be zero"))
-      (let (seq (n 0) (next from))
-	(if (> inc 0)
-	    (while (<= next to)
-	      (setq seq (cons next seq)
-		    n (1+ n)
-		    next (+ from (* n inc))))
-	  (while (>= next to)
-	    (setq seq (cons next seq)
-		  n (1+ n)
-		  next (+ from (* n inc)))))
-	(nreverse seq)))))
-
 ;; `set-transient-map' is only in Emacs >= 24.4
 (defalias 'org-set-transient-map
   (if (fboundp 'set-transient-map)
@@ -226,9 +223,6 @@ ignored in this case."
   (when (and (org-region-active-p)
 	     (> (point) (region-beginning)))
     (exchange-point-and-mark)))
-
-;;; Old alias for emacs 22 compatibility, now dropped
-(define-obsolete-function-alias 'org-activate-mark 'activate-mark)
 
 ;;; Invisibility compatibility
 
@@ -271,14 +265,6 @@ Pass COLUMN and FORCE to `move-to-column'."
 			  string)
   (apply 'kill-new string args))
 
-;; `user-error' is only available from 24.2.50 on
-(unless (fboundp 'user-error)
-  (defalias 'user-error 'error))
-
-;; ‘format-message’ is available only from 25 on
-(unless (fboundp 'format-message)
-  (defalias 'format-message 'format))
-
 ;; `font-lock-ensure' is only available from 24.4.50 on
 (defalias 'org-font-lock-ensure
   (if (fboundp 'font-lock-ensure)
@@ -295,48 +281,6 @@ effect, which variables to use depends on the Emacs version."
 	 ,@body)
     `(let (pop-up-frames special-display-buffer-names special-display-regexps special-display-function)
        ,@body)))
-
-(if (fboundp 'string-match-p)
-    (defalias 'org-string-match-p 'string-match-p)
-  (defun org-string-match-p (regexp string &optional start)
-    (save-match-data
-      (funcall 'string-match regexp string start))))
-
-(defun org-floor* (x &optional y)
-  "Return a list of the floor of X and the fractional part of X.
-With two arguments, return floor and remainder of their quotient."
-  (let ((q (floor x y)))
-    (list q (- x (if y (* y q) q)))))
-
-;; `pop-to-buffer-same-window' has been introduced in Emacs 24.1.
-(defun org-pop-to-buffer-same-window
-  (&optional buffer-or-name norecord _label)
-  "Pop to buffer specified by BUFFER-OR-NAME in the selected window."
-  (if (fboundp 'pop-to-buffer-same-window)
-      (funcall
-       'pop-to-buffer-same-window buffer-or-name norecord)
-    (funcall 'switch-to-buffer buffer-or-name norecord)))
-
-;; RECURSIVE has been introduced with Emacs 23.2.
-;; This is copying and adapted from `tramp-compat-delete-directory'
-(defun org-delete-directory (directory &optional recursive)
-  "Compatibility function for `delete-directory'."
-  (if (null recursive)
-      (delete-directory directory)
-    (condition-case nil
-	(funcall 'delete-directory directory recursive)
-      ;; This Emacs version does not support the RECURSIVE flag.  We
-      ;; use the implementation from Emacs 23.2.
-      (wrong-number-of-arguments
-       (setq directory (directory-file-name (expand-file-name directory)))
-       (if (not (file-symlink-p directory))
-	   (mapc (lambda (file)
-		   (if (eq t (car (file-attributes file)))
-		       (org-delete-directory file recursive)
-		     (delete-file file)))
-		 (directory-files
-		  directory 'full "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*")))
-       (delete-directory directory)))))
 
 ;;;###autoload
 (defmacro org-check-version ()
@@ -356,13 +300,6 @@ With two arguments, return floor and remainder of their quotient."
 	   (defun org-release () "N/A")
 	   (defun org-git-version () "N/A !!check installation!!"))))))
 
-;; `buffer-narrowed-p' is available for Emacs >=24.3
-(defun org-buffer-narrowed-p ()
-  "Compatibility function for `buffer-narrowed-p'."
-  (if (fboundp 'buffer-narrowed-p)
-      (buffer-narrowed-p)
-    (/= (- (point-max) (point-min)) (buffer-size))))
-
 (defmacro org-with-silent-modifications (&rest body)
   (if (fboundp 'with-silent-modifications)
       `(with-silent-modifications ,@body)
@@ -378,15 +315,6 @@ Implements `define-error' for older emacsen."
   (if (fboundp 'define-error) (define-error name message)
     (put name 'error-conditions
 	 (copy-sequence (cons name (get 'error 'error-conditions))))))
-
-;;; Functions from cl-lib that Org used to have its own implementation of
-(define-obsolete-function-alias 'org-count 'cl-count "Org 9.0")
-(define-obsolete-function-alias 'org-every 'cl-every "Org 9.0")
-(define-obsolete-function-alias 'org-find-if 'cl-find-if "Org 9.0")
-(define-obsolete-function-alias 'org-reduce 'cl-reduce "Org 9.0")
-(define-obsolete-function-alias 'org-remove-if 'cl-remove-if "Org 9.0")
-(define-obsolete-function-alias 'org-remove-if-not 'cl-remove-if-not "Org 9.0")
-(define-obsolete-function-alias 'org-some 'cl-some "Org 9.0")
 
 (provide 'org-compat)
 

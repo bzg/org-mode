@@ -48,8 +48,6 @@
 (declare-function org-footnote-goto-definition "org-footnote"
 		  (label &optional location))
 (declare-function org-get-indentation "org" (&optional line))
-(declare-function org-pop-to-buffer-same-window "org-compat"
-		  (&optional buffer-or-name norecord label))
 (declare-function org-switch-to-buffer-other-window "org" (&rest args))
 (declare-function org-trim "org" (s &optional keep-lead))
 
@@ -694,7 +692,7 @@ If BUFFER is non-nil, test it instead."
 
 (defun org-src-switch-to-buffer (buffer context)
   (case org-src-window-setup
-    (current-window (org-pop-to-buffer-same-window buffer))
+    (current-window (pop-to-buffer-same-window buffer))
     (other-window
      (switch-to-buffer-other-window buffer))
     (other-frame
@@ -705,7 +703,7 @@ If BUFFER is non-nil, test it instead."
 	  (delete-frame frame)))
        (save
 	(kill-buffer (current-buffer))
-	(org-pop-to-buffer-same-window buffer))
+	(pop-to-buffer-same-window buffer))
        (t (switch-to-buffer-other-frame buffer))))
     (reorganize-frame
      (when (eq context 'edit) (delete-other-windows))
@@ -715,7 +713,7 @@ If BUFFER is non-nil, test it instead."
     (t
      (message "Invalid value %s for `org-src-window-setup'"
 	      org-src-window-setup)
-     (org-pop-to-buffer-same-window buffer))))
+     (pop-to-buffer-same-window buffer))))
 
 (defun org-edit-footnote-reference ()
   "Edit definition of footnote reference at point."

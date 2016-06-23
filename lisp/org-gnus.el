@@ -44,7 +44,7 @@
 
 ;; Customization variables
 
-(org-defvaralias 'org-usenet-links-prefer-google 'org-gnus-prefer-web-links)
+(defvaralias 'org-usenet-links-prefer-google 'org-gnus-prefer-web-links)
 
 (defcustom org-gnus-prefer-web-links nil
   "If non-nil, `org-store-link' creates web links to Google groups or Gmane.

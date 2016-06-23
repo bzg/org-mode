@@ -45,8 +45,6 @@
       (string (decode-char 'ucs c)))))
 
 (declare-function org-add-props "org-compat" (string plist &rest props))
-(declare-function org-string-match-p "org-compat"
-                  (regexp string &optional start))
 
 (defmacro org-with-gensyms (symbols &rest body)
   (declare (debug (sexp body)) (indent 1))
@@ -73,7 +71,7 @@
   "Return S if S is a string containing a non-blank character.
 Otherwise, return nil."
   (and (stringp s)
-       (org-string-match-p "[^ \r\t\n]" s)
+       (string-match-p "[^ \r\t\n]" s)
        s))
 
 (defun org-not-nil (v)

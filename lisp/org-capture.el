@@ -55,8 +55,6 @@
 		  (date &optional keep-restriction))
 (declare-function org-decrypt-entry "org-crypt" ())
 (declare-function org-encrypt-entry "org-crypt" ())
-(declare-function org-pop-to-buffer-same-window "org-compat"
-		  (&optional buffer-or-name norecord label))
 (declare-function org-table-analyze "org-table" ())
 (declare-function org-table-goto-line "org-table" (N))
 
@@ -1407,7 +1405,7 @@ The user is queried for the template."
     (unless entry (error "No capture template selected"))
     (org-capture-set-plist entry)
     (org-capture-set-target-location)
-    (org-pop-to-buffer-same-window (org-capture-get :buffer))
+    (pop-to-buffer-same-window (org-capture-get :buffer))
     (goto-char (org-capture-get :pos))))
 
 (defun org-capture-get-indirect-buffer (&optional buffer prefix)
