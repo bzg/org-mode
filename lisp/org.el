@@ -15025,10 +15025,9 @@ When JUST-ALIGN is non-nil, only align tags."
       (if arg
           (save-excursion
             (goto-char (point-min))
-            (let ((buffer-invisibility-spec (org-inhibit-invisibility)))
-              (while (re-search-forward org-outline-regexp-bol nil t)
-                (org-set-tags nil t)
-                (end-of-line)))
+            (while (re-search-forward org-outline-regexp-bol nil t)
+	      (org-set-tags nil t)
+	      (end-of-line))
             (message "All tags realigned to column %d" org-tags-column))
 	(let* ((current (org-get-tags-string))
 	       (col (current-column))

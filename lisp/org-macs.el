@@ -188,12 +188,6 @@ program is needed for, so that the error message can be more informative."
 	(error "Can't find `%s'%s" cmd
 	       (if use (format " (%s)" use) "")))))
 
-(defsubst org-inhibit-invisibility ()
-  "Modified `buffer-invisibility-spec' for Emacs 21.
-Some ops with invisible text do not work correctly on Emacs 21.  For these
-we turn off invisibility temporarily.  Use this in a `let' form."
-  (if (< emacs-major-version 22) nil buffer-invisibility-spec))
-
 (defsubst org-last (list)
   "Return the last element of LIST."
   (car (last list)))
