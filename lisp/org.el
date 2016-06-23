@@ -10190,7 +10190,7 @@ Note: this function also decodes single byte encodings like
 	  (when (> eat 0) (setq eat (- eat 1)))
 	  (cond
 	   ((= 0 eat)			;multi byte
-	    (setq ret (concat ret (org-char-to-string sum)))
+	    (setq ret (concat ret (char-to-string sum)))
 	    (setq sum 0))
 	   ((not bytes)			; single byte(s)
 	    (setq ret (org-link-unescape-single-byte-sequence hex))))))

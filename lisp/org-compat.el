@@ -88,6 +88,7 @@
 (define-obsolete-function-alias 'org-floor* 'cl-floor "Org 9.0")
 
 ;;;; Functions available since Emacs 24.3
+(define-obsolete-function-alias 'org-char-to-string 'char-to-string "Org 9.0")
 (define-obsolete-function-alias 'org-buffer-narrowed-p 'buffer-narrowed-p "Org 9.0")
 (define-obsolete-function-alias 'org-delete-directory 'delete-directory "Org 9.0")
 (define-obsolete-function-alias 'org-number-sequence 'number-sequence "Org 9.0")
