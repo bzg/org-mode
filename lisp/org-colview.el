@@ -536,75 +536,75 @@ Where possible, use the standard interface for changing this line."
   (interactive)
   (org-columns-check-computed)
   (let* ((col (current-column))
-	 (key (or key (get-char-property (point) 'org-columns-key)))
-	 (value (get-char-property (point) 'org-columns-value))
-	 (bol (point-at-bol)) (eol (point-at-eol))
-	 (pom (or (get-text-property bol 'org-hd-marker)
-		  (point)))	     ; keep despite of compiler waring
+	 (bol (line-beginning-position))
+	 (eol (line-end-position))
+	 (pom (or (get-text-property bol 'org-hd-marker) (point)))
 	 (org-columns--time (float-time (current-time)))
-	 nval eval allowed)
+	 (action
+	  (pcase (or key (get-char-property (point) 'org-columns-key))
+	    ("CLOCKSUM"
+	     (error "This special column cannot be edited"))
+	    ("ITEM"
+	     (lambda () (org-with-point-at pom (org-edit-headline))))
+	    ("TODO"
+	     (lambda ()
+	       (org-with-point-at pom (call-interactively #'org-todo))))
+	    ("PRIORITY"
+	     (lambda ()
+	       (org-with-point-at pom
+		 (call-interactively #'org-priority))))
+	    ("TAGS"
+	     (lambda ()
+	       (org-with-point-at pom
+		 (let ((org-fast-tag-selection-single-key
+			(if (eq org-fast-tag-selection-single-key 'expert)
+			    t
+			  org-fast-tag-selection-single-key)))
+		   (call-interactively #'org-set-tags)))))
+	    ("DEADLINE"
+	     (lambda ()
+	       (org-with-point-at pom (call-interactively #'org-deadline))))
+	    ("SCHEDULED"
+	     (lambda ()
+	       (org-with-point-at pom (call-interactively #'org-schedule))))
+	    ("BEAMER_env"
+	     (lambda ()
+	       (org-with-point-at pom
+		 (call-interactively #'org-beamer-select-environment))))
+	    (key
+	     (let* ((allowed (org-property-get-allowed-values pom key 'table))
+		    (value (get-char-property (point) 'org-columns-value))
+		    (nval (org-trim
+			   (if (null allowed) (read-string "Edit: " value)
+			     (completing-read
+			      "Value: " allowed nil
+			      (not (get-text-property
+				    0 'org-unrestricted (caar allowed))))))))
+	       (and (not (equal nval value))
+		    (lambda () (org-entry-put pom key nval))))))))
     (cond
-     ((equal key "CLOCKSUM")
-      (error "This special column cannot be edited"))
-     ((equal key "ITEM")
-      (setq eval `(org-with-point-at ,pom
-		    (org-edit-headline))))
-     ((equal key "TODO")
-      (setq eval `(org-with-point-at ,pom
-		    (call-interactively 'org-todo))))
-     ((equal key "PRIORITY")
-      (setq eval `(org-with-point-at ,pom
-		    (call-interactively 'org-priority))))
-     ((equal key "TAGS")
-      (setq eval `(org-with-point-at ,pom
-		    (let ((org-fast-tag-selection-single-key
-			   (if (eq org-fast-tag-selection-single-key 'expert)
-			       t org-fast-tag-selection-single-key)))
-		      (call-interactively 'org-set-tags)))))
-     ((equal key "DEADLINE")
-      (setq eval `(org-with-point-at ,pom
-		    (call-interactively 'org-deadline))))
-     ((equal key "SCHEDULED")
-      (setq eval `(org-with-point-at ,pom
-		    (call-interactively 'org-schedule))))
-     ((equal key "BEAMER_env")
-      (setq eval `(org-with-point-at ,pom
-		    (call-interactively 'org-beamer-select-environment))))
+     ((null action))
+     ((eq major-mode 'org-agenda-mode)
+      (org-columns--call action)
+      ;; The following let preserves the current format, and makes
+      ;; sure that in only a single file things need to be updated.
+      (let* ((org-agenda-overriding-columns-format org-columns-current-fmt)
+	     (buffer (marker-buffer pom))
+	     (org-agenda-contributing-files
+	      (list (with-current-buffer buffer
+		      (buffer-file-name (buffer-base-buffer))))))
+	(org-agenda-columns)))
      (t
-      (setq allowed (org-property-get-allowed-values pom key 'table))
-      (if allowed
-	  (setq nval (completing-read
-		      "Value: " allowed nil
-		      (not (get-text-property 0 'org-unrestricted
-					      (caar allowed)))))
-	(setq nval (read-string "Edit: " value)))
-      (setq nval (org-trim nval))
-      (when (not (equal nval value))
-	(setq eval `(org-entry-put ,pom ,key ,nval)))))
-    (when eval
-      (cond
-       ((equal major-mode 'org-agenda-mode)
-	(org-columns-eval eval)
-	;; The following let preserves the current format, and makes sure
-	;; that in only a single file things need to be updated.
-	(let* ((org-agenda-overriding-columns-format org-columns-current-fmt)
-	       (buffer (marker-buffer pom))
-	       (org-agenda-contributing-files
-		(list (with-current-buffer buffer
-			(buffer-file-name (buffer-base-buffer))))))
-	  (org-agenda-columns)))
-       (t
-	(let ((inhibit-read-only t))
-	  (org-with-silent-modifications
-	   (remove-text-properties
-	    (max (point-min) (1- bol)) eol '(read-only t)))
-	  (org-columns-eval eval))
-	;; Some properties can modify headline (e.g., "TODO"), and
-	;; possible shuffle overlays.  Make sure they are still all at
-	;; the right place on the current line.
-	(let ((org-columns-inhibit-recalculation)) (org-columns-redo))
-	(org-columns-update key)
-	(org-move-to-column col))))))
+      (let ((inhibit-read-only t))
+	(org-with-silent-modifications
+	 (remove-text-properties (max (point-min) (1- bol)) eol '(read-only t)))
+	(org-columns--call action))
+      ;; Some properties can modify headline (e.g., "TODO"), and
+      ;; possible shuffle overlays.  Make sure they are still all at
+      ;; the right place on the current line.
+      (let ((org-columns-inhibit-recalculation)) (org-columns-redo))
+      (org-columns-update key)
+      (org-move-to-column col)))))
 
 (defun org-columns-edit-allowed ()
   "Edit the list of allowed values for the current property."
@@ -627,13 +627,15 @@ Where possible, use the standard interface for changing this line."
 	   (t pom))
      key1 nval)))
 
-(defun org-columns-eval (form)
-  (let (hidep)
-    (save-excursion
-      (ignore-errors (move-beginning-of-line 2))
-      (setq hidep (org-at-heading-p 1)))
-    (eval form)
-    (and hidep (outline-hide-entry))))
+(defun org-columns--call (fun)
+  "Call function FUN while preserving heading visibility.
+FUN is a function called with no argument."
+  (let ((hide-body (and (/= (line-end-position) (point-max))
+			(save-excursion
+			  (move-beginning-of-line 2)
+			  (org-at-heading-p t)))))
+    (unwind-protect (funcall fun)
+      (when hide-body (outline-hide-entry)))))
 
 (defun org-columns-previous-allowed-value ()
   "Switch to the previous allowed value for this column."
@@ -674,10 +676,10 @@ an integer, select that value."
 	      (when (= l 1) (error "Only one allowed value for this property"))
 	      (or (nth 1 (member value allowed)) (car allowed)))
 	     (t (car allowed))))
-	   (sexp `(org-entry-put ,pom ,key ,new)))
+	   (action (lambda () (org-entry-put pom key new))))
       (cond
        ((equal major-mode 'org-agenda-mode)
-	(org-columns-eval sexp)
+	(org-columns--call action)
 	;; The following let preserves the current format, and makes
 	;; sure that in only a single file things need to be updated.
 	(let* ((org-agenda-overriding-columns-format org-columns-current-fmt)
@@ -690,7 +692,7 @@ an integer, select that value."
 	(let ((inhibit-read-only t))
 	  (remove-text-properties (line-end-position 0) (line-end-position)
 				  '(read-only t))
-	  (org-columns-eval sexp))
+	  (org-columns--call action))
 	;; Some properties can modify headline (e.g., "TODO"), and
 	;; possible shuffle overlays.  Make sure they are still all at
 	;; the right place on the current line.
