@@ -438,9 +438,9 @@ for the duration of the command.")
 	   (org-add-props " " nil 'display '(space :align-to 0))
 	   (org-add-props (substring title 0 -1) nil 'face 'org-column-title)))
     (setq org-columns-previous-hscroll -1)
-    (add-hook 'post-command-hook 'org-columns-hscoll-title nil 'local)))
+    (add-hook 'post-command-hook 'org-columns-hscroll-title nil 'local)))
 
-(defun org-columns-hscoll-title ()
+(defun org-columns-hscroll-title ()
   "Set the `header-line-format' so that it scrolls along with the table."
   (sit-for .0001) ; need to force a redisplay to update window-hscroll
   (when (not (= (window-hscroll) org-columns-previous-hscroll))
@@ -463,7 +463,7 @@ for the duration of the command.")
       (when (local-variable-p 'org-previous-header-line-format)
 	(setq header-line-format org-previous-header-line-format)
 	(kill-local-variable 'org-previous-header-line-format)
-	(remove-hook 'post-command-hook 'org-columns-hscoll-title 'local))
+	(remove-hook 'post-command-hook 'org-columns-hscroll-title 'local))
       (move-marker org-columns-begin-marker nil)
       (move-marker org-columns-top-level-marker nil)
       (org-with-silent-modifications
