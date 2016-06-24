@@ -539,9 +539,10 @@ Where possible, use the standard interface for changing this line."
 	 (bol (line-beginning-position))
 	 (eol (line-end-position))
 	 (pom (or (get-text-property bol 'org-hd-marker) (point)))
+	 (key (or key (get-char-property (point) 'org-columns-key)))
 	 (org-columns--time (float-time (current-time)))
 	 (action
-	  (pcase (or key (get-char-property (point) 'org-columns-key))
+	  (pcase key
 	    ("CLOCKSUM"
 	     (error "This special column cannot be edited"))
 	    ("ITEM"
@@ -567,11 +568,11 @@ Where possible, use the standard interface for changing this line."
 	    ("SCHEDULED"
 	     (lambda ()
 	       (org-with-point-at pom (call-interactively #'org-schedule))))
-	    ("BEAMER_env"
+	    ("BEAMER_ENV"
 	     (lambda ()
 	       (org-with-point-at pom
 		 (call-interactively #'org-beamer-select-environment))))
-	    (key
+	    (_
 	     (let* ((allowed (org-property-get-allowed-values pom key 'table))
 		    (value (get-char-property (point) 'org-columns-value))
 		    (nval (org-trim
