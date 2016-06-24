@@ -22693,7 +22693,9 @@ The function returns the new ALIST."
 	  (push n rtn))))))
 
 (defun org-delete-all (elts list)
-  "Remove all elements in ELTS from LIST."
+  "Remove all elements in ELTS from LIST.
+Comparison is done with `equal'.  It is a destructive operation
+that may remove elements by altering the list structure."
   (while elts
     (setq list (delete (pop elts) list)))
   list)
