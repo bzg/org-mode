@@ -937,7 +937,16 @@ option, set `org-agenda-inhibit-startup' to nil."
 (defcustom org-startup-truncated t
   "Non-nil means entering Org-mode will set `truncate-lines'.
 This is useful since some lines containing links can be very long and
-uninteresting.  Also tables look terrible when wrapped."
+uninteresting.  Also tables look terrible when wrapped.
+
+The variable `org-startup-truncated' allows to configure
+truncation for Org mode different to the other modes that use the
+variable `truncate-lines' and as a shortcut instead of putting
+the variable `truncate-lines' into the `org-mode-hook'.  If one
+wants to configure truncation for Org mode not statically but
+dynamically e. g. in a hook like `ediff-prepare-buffer-hook' then
+the variable `truncate-lines' has to be used because in such a
+case it is too late to set the variable `org-startup-truncated'."
   :group 'org-startup
   :type 'boolean)
 
@@ -6458,7 +6467,8 @@ needs to be inserted at a specific position in the font-lock sequence.")
     (setq-local org-font-lock-keywords org-font-lock-extra-keywords)
     (setq-local font-lock-defaults
 		'(org-font-lock-keywords t nil nil backward-paragraph))
-    (kill-local-variable 'font-lock-keywords) nil))
+    (kill-local-variable 'font-lock-keywords)
+    nil))
 
 (defun org-toggle-pretty-entities ()
   "Toggle the composition display of entities as UTF8 characters."
