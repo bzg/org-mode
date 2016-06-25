@@ -877,9 +877,9 @@ See also http://orgmode.org/worg/org-tutorials/org-lookups.html ."
   (should (equal "[0,1]" (f '( "inf" "1") nil t nil))))
 
 (ert-deftest test-org-table/org-table-convert-refs-to-an/1 ()
-  "Simple reference @1$1."
+  "Simple reference @2$1."
   (should
-   (string= "A1" (org-table-convert-refs-to-an "@1$1"))))
+   (string= "A2" (org-table-convert-refs-to-an "@2$1"))))
 
 ;; TODO: Test broken
 ;; (ert-deftest test-org-table/org-table-convert-refs-to-an/2 ()
@@ -893,9 +893,9 @@ See also http://orgmode.org/worg/org-tutorials/org-lookups.html ."
    (string= "C& = remote(FOO, @@#B&)" (org-table-convert-refs-to-an "$3 = remote(FOO, @@#$2)"))))
 
 (ert-deftest test-org-table/org-table-convert-refs-to-rc/1 ()
-  "Simple reference @1$1."
+  "Simple reference @2$1."
   (should
-   (string= "@1$1" (org-table-convert-refs-to-rc "A1"))))
+   (string= "@2$1" (org-table-convert-refs-to-rc "A2"))))
 
 (ert-deftest test-org-table/org-table-convert-refs-to-rc/2 ()
   "Self reference $0."
