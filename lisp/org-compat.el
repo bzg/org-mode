@@ -52,7 +52,7 @@
     (defalias 'gui-get-selection 'x-get-selection)))
 
 
-;;; Obsolete aliases
+;;; Obsolete aliases (remove them the next major release).
 
 (define-obsolete-function-alias 'org-activate-mark 'activate-mark)
 
@@ -73,11 +73,10 @@
 (define-obsolete-function-alias 'org-select-frame-set-input-focus 'select-frame-set-input-focus "Org 9.0")
 
 (defmacro org-re (s)
-  "Replace posix classes in regular expression."
-  (declare (debug (form)))
+  "Replace posix classes in regular expression S."
+  (declare (debug (form))
+	   (obsolete "you can safely remove it." "Org 9.0"))
   s)
-(make-obsolete 'org-re "It is now a no-op.  You can safely remove it."
-	       "Org 9.0")
 
 ;;;; Functions from cl-lib that Org used to have its own implementation of.
 (define-obsolete-function-alias 'org-count 'cl-count "Org 9.0")
