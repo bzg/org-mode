@@ -107,38 +107,13 @@
 
 (defun org-compatible-face (inherits specs)
   "Make a compatible face specification.
-If INHERITS is an existing face and if the Emacs version supports it,
-just inherit the face.  If INHERITS is set and the Emacs version does
-not support it, copy the face specification from the inheritance face.
-If INHERITS is not given and SPECS is, use SPECS to define the face."
-  (when (and inherits (facep inherits) (not specs))
-    (setq specs (or specs
-		    (get inherits 'saved-face)
-		    (get inherits 'face-defface-spec))))
-  (cond
-   ((and inherits (facep inherits)
-	 (>= emacs-major-version 22)
-	 ;; do not inherit outline faces before Emacs 23
-	 (or (>= emacs-major-version 23)
-	     (not (string-match "\\`outline-[0-9]+"
-				(symbol-name inherits)))))
-    (list (list t :inherit inherits)))
-   ((< emacs-major-version 22)
-    ;; These do not understand the `min-colors' attribute.
-    (let (r e a)
-      (while (setq e (pop specs))
-	(cond
-	 ((memq (car e) '(t default)) (push e r))
-	 ((setq a (member '(min-colors 8) (car e)))
-	  (nconc r (list (cons (cons '(type tty) (delq (car a) (car e)))
-			       (cdr e)))))
-	 ((setq a (assq 'min-colors (car e)))
-	  (setq e (cons (delq a (car e)) (cdr e)))
-	  (or (assoc (car e) r) (push e r)))
-	 (t (or (assoc (car e) r) (push e r)))))
-      (nreverse r)))
-   (t specs)))
-(put 'org-compatible-face 'lisp-indent-function 1)
+If INHERITS is an existing face and if the Emacs version supports
+it, just inherit the face.  If INHERITS is not given and SPECS
+is, use SPECS to define the face."
+  (declare (indent 1))
+  (if (facep inherits)
+      (list (list t :inherit inherits))
+    specs))
 
 (defun org-version-check (version feature level)
   (let* ((v1 (mapcar 'string-to-number (split-string version "[.]")))
