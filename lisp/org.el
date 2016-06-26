@@ -51,11 +51,11 @@
 ;;
 ;; Documentation
 ;; -------------
-;; The documentation of Org-mode can be found in the TeXInfo file.  The
+;; The documentation of Org mode can be found in the TeXInfo file.  The
 ;; distribution also contains a PDF version of it.  At the homepage of
-;; Org-mode, you can read the same text online as HTML.  There is also an
+;; Org mode, you can read the same text online as HTML.  There is also an
 ;; excellent reference card made by Philip Rooke.  This card can be found
-;; in the etc/ directory of Emacs 22.
+;; in the doc/ directory.
 ;;
 ;; A list of recent changes can be found at
 ;; http://orgmode.org/Changes.html
@@ -1068,12 +1068,7 @@ become effective."
   "Non-nil means use extra key sequence definitions for certain commands.
 This happens automatically if `window-system' is nil.  This
 variable lets you do the same manually.  You must set it before
-loading org.
-
-Example: on Carbon Emacs 22 running graphically, with an external
-keyboard on a Powerbook, the default way of setting M-left might
-not work for either Alt or ESC.  Setting this variable will make
-it work for ESC."
+loading Org."
   :group 'org-startup
   :type 'boolean)
 
@@ -5451,8 +5446,6 @@ This variable is set by `org-before-change-function'.
 (defvar buffer-face-mode-face)
 
 (require 'outline)
-(when (and (not (keymapp outline-mode-map)) (featurep 'allout))
-  (error "Conflict with outdated version of allout.el.  Load org.el before allout.el, or upgrade to newer allout, for example by switching to Emacs 22"))
 
 ;; Other stuff we need.
 (require 'time-date)
@@ -22644,27 +22637,8 @@ block from point."
 	     files)
      regexp)))
 
-(if (boundp 'occur-mode-find-occurrence-hook)
-    ;; Emacs 23
-    (add-hook 'occur-mode-find-occurrence-hook
-	      (lambda ()
-		(when (derived-mode-p 'org-mode)
-		  (org-reveal))))
-  ;; Emacs 22
-  (defadvice occur-mode-goto-occurrence
-      (after org-occur-reveal activate)
-    (and (derived-mode-p 'org-mode) (org-reveal)))
-  (defadvice occur-mode-goto-occurrence-other-window
-      (after org-occur-reveal activate)
-    (and (derived-mode-p 'org-mode) (org-reveal)))
-  (defadvice occur-mode-display-occurrence
-      (after org-occur-reveal activate)
-    (when (derived-mode-p 'org-mode)
-      (let ((pos (occur-mode-find-occurrence)))
-	(with-current-buffer (marker-buffer pos)
-	  (save-excursion
-	    (goto-char pos)
-	    (org-reveal)))))))
+(add-hook 'occur-mode-find-occurrence-hook
+	  (lambda () (when (derived-mode-p 'org-mode) (org-reveal))))
 
 (defun org-occur-link-in-agenda-files ()
   "Create a link and search for it in the agendas.
@@ -24285,9 +24259,7 @@ empty."
   "Move to the heading line of which the present line is a subheading.
 This function considers both visible and invisible heading lines.
 With argument, move up ARG levels."
-  (if (fboundp 'outline-up-heading-all)
-      (outline-up-heading-all arg)   ; emacs 21 version of outline.el
-    (outline-up-heading arg t)))     ; emacs 22 version of outline.el
+  (outline-up-heading arg t))
 
 (defun org-up-heading-safe ()
   "Move to the heading line of which the present line is a subheading.

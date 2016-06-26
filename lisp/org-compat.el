@@ -217,12 +217,10 @@ ignored in this case."
   "Non-nil means temporarily disable the active region.")
 
 (defun org-region-active-p ()
-  "Is `transient-mark-mode' on and the region active?"
-  (if org-ignore-region
-      nil
-    (if (fboundp 'use-region-p)
-	(use-region-p)
-      (and transient-mark-mode mark-active)))) ; Emacs 22 and before
+  "Non-nil when the region active.
+Unlike to `use-region-p', this function also checks
+`org-ignore-region'."
+  (and (not org-ignore-region) (use-region-p)))
 
 (defun org-cursor-to-region-beginning ()
   (when (and (org-region-active-p)

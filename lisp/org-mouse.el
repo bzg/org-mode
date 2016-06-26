@@ -26,8 +26,8 @@
 ;;
 ;; http://orgmode.org
 ;;
-;; Org-mouse implements the following features:
-;; * following links with the left mouse button (in Emacs 22)
+;; Org mouse implements the following features:
+;; * following links with the left mouse button
 ;; * subtree expansion/collapse (org-cycle) with the left mouse button
 ;; * several context menus on the right mouse button:
 ;;    + general text

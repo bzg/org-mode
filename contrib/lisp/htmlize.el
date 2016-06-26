@@ -943,18 +943,7 @@ If no rgb.txt file is found, return nil."
   ;; frame parameters.
   (let* ((function (if fg #'face-foreground #'face-background))
 	 color)
-    (if (>= emacs-major-version 22)
-	;; For GNU Emacs 22+ set INHERIT to get the inherited values.
-	(setq color (funcall function face nil t))
-      (setq color (funcall function face))
-      ;; For GNU Emacs 21 (which has `face-attribute'): if the color
-      ;; is nil, recursively check for the face's parent.
-      (when (and (null color)
-		 (fboundp 'face-attribute)
-		 (face-attribute face :inherit)
-		 (not (eq (face-attribute face :inherit) 'unspecified)))
-	(setq color (htmlize-face-color-internal
-		     (face-attribute face :inherit) fg))))
+    (setq color (funcall function face nil t))
     (when (and (eq face 'default) (null color))
       (setq color (cdr (assq (if fg 'foreground-color 'background-color)
 			     (frame-parameters)))))
@@ -1132,17 +1121,7 @@ If no rgb.txt file is found, return nil."
                 (face-underline-p face)))
       ;; GNU Emacs
       (dolist (attr '(:weight :slant :underline :overline :strike-through))
-        (let ((value (if (>= emacs-major-version 22)
-                         ;; Use the INHERIT arg in GNU Emacs 22.
-                         (face-attribute face attr nil t)
-                       ;; Otherwise, fake it.
-                       (let ((face face))
-                         (while (and (eq (face-attribute face attr)
-                                         'unspecified)
-                                     (not (eq (face-attribute face :inherit)
-                                              'unspecified)))
-                           (setq face (face-attribute face :inherit)))
-                         (face-attribute face attr)))))
+        (let ((value (face-attribute face attr nil t)))
           (when (and value (not (eq value 'unspecified)))
             (htmlize-face-emacs21-attr fstruct attr value))))
       (let ((size (htmlize-face-size face)))
