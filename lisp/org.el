@@ -13257,8 +13257,7 @@ has been set"
 			(let ((nshiftmax 10)
 			      (nshift 0))
 			  (while (or (= nshift 0)
-				     (<= (time-to-days time)
-					 (time-to-days (current-time))))
+				     (not (time-less-p (current-time) time)))
 			    (when (= (cl-incf nshift) nshiftmax)
 			      (or (y-or-n-p
 				   (format "%d repeater intervals were not \

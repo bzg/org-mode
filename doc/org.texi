@@ -6412,6 +6412,13 @@ special repeaters  @samp{++} and @samp{.+}.  For example:
    but also by as many weeks as it takes to get this date into
    the future.  However, it stays on a Sunday, even if you called
    and marked it done on Saturday.
+** TODO Empty kitchen trash
+   DEADLINE: <2008-02-08 Fri 20:00 ++1d>
+   Marking this DONE will shift the date by at least one day, and
+   also by as many days as it takes to get the timestamp into the
+   future.  Since there is a time in the timestamp, the next
+   deadline in the future will be on today's date if you
+   complete the task before 20:00.
 ** TODO Check the batteries in the smoke detectors
    DEADLINE: <2005-11-01 Tue .+1m>
    Marking this DONE will shift the date to one month after
