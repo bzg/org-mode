@@ -3704,10 +3704,10 @@ definition can be found, raise an error."
 		      '(footnote-definition footnote-reference)
 		    (lambda (f)
 		      (cond
-		       ;; Skip any footnote with a different
-		       ;; label. Also skip any standard footnote
-		       ;; reference with the same label since those
-		       ;; cannot contain a definition.
+		       ;; Skip any footnote with a different label.
+		       ;; Also skip any standard footnote reference
+		       ;; with the same label since those cannot
+		       ;; contain a definition.
 		       ((not (equal (org-element-property :label f) label)) nil)
 		       ((eq (org-element-property :type f) 'standard) nil)
 		       ((org-element-contents f))
