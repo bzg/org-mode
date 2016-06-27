@@ -2083,7 +2083,7 @@ Para2"
 		      (car (org-element-contents
 			    (car (org-element-contents def))))))))
 	  info))))
-    ;; Test nested footnote in invisible definitions.
+    ;; Export nested footnote in invisible definitions.
     (should
      (= 2
 	(org-test-with-temp-text "Text[fn:1]\n\n[fn:1] B [fn:2]\n\n[fn:2] C."
@@ -2098,24 +2098,82 @@ Para2"
 		   (throw 'exit (length
 				 (org-export-collect-footnote-definitions
 				  i))))))))))))
-    ;; Test export of footnotes defined outside parsing scope.
+    ;; Export footnotes defined outside parsing scope.
     (should
-     (equal
-      "ParagraphOut of scope\n"
+     (string-match
+      "Out of scope"
       (org-test-with-temp-text "[fn:1] Out of scope
 * Title
 <point>Paragraph[fn:1]"
-	(let ((backend (org-test-default-backend)))
-	  (setf (org-export-backend-transcoders backend)
-		(append
-		 (list (cons 'footnote-reference
-			     (lambda (fn contents info)
-			       (org-element-interpret-data
-				(org-export-get-footnote-definition fn info))))
-		       (cons 'footnote-definition #'ignore)
-		       (cons 'headline #'ignore))
-		 (org-export-backend-transcoders backend)))
-	  (org-export-as backend 'subtree)))))
+	(org-export-as (org-test-default-backend) 'subtree))))
+    (should
+     (string-match
+      "Out of scope"
+      (org-test-with-temp-text "[fn:1] Out of scope
+* Title
+<point>Paragraph[fn:1]"
+	(narrow-to-region (point) (point-max))
+	(org-export-as (org-test-default-backend)))))
+    ;; Export nested footnotes defined outside parsing scope.
+    (should
+     (string-match
+      "Very out of scope"
+      (org-test-with-temp-text "
+\[fn:1] Out of scope[fn:2]
+
+\[fn:2] Very out of scope
+* Title
+<point>Paragraph[fn:1]"
+	(org-export-as (org-test-default-backend) 'subtree))))
+    (should
+     (string-match
+      "Very out of scope"
+      (org-test-with-temp-text "
+\[fn:1] Out of scope[fn:2]
+
+\[fn:2] Very out of scope
+* Title
+<point>Paragraph[fn:1]"
+	(narrow-to-region (point) (point-max))
+	(org-export-as (org-test-default-backend)))))
+    ;; Export footnotes in pruned parts of tree.
+    (should
+     (string-match
+      "Definition"
+      (let ((org-export-exclude-tags '("noexport")))
+	(org-test-with-temp-text
+	    "* H\nText[fn:1]\n* H2 :noexport:\n[fn:1] Definition"
+	  (org-export-as (org-test-default-backend))))))
+    (should
+     (string-match
+      "Definition"
+      (let ((org-export-select-tags '("export")))
+	(org-test-with-temp-text
+	    "* H :export:\nText[fn:1]\n* H2\n[fn:1] Definition"
+	  (org-export-as (org-test-default-backend))))))
+    ;; Export nested footnotes in pruned parts of tree.
+    (should
+     (string-match
+      "D2"
+      (let ((org-export-exclude-tags '("noexport")))
+	(org-test-with-temp-text
+	    "* H\nText[fn:1]\n* H2 :noexport:\n[fn:1] D1[fn:2]\n\n[fn:2] D2"
+	  (org-export-as (org-test-default-backend))))))
+    (should
+     (string-match
+      "D2"
+      (let ((org-export-select-tags '("export")))
+	(org-test-with-temp-text
+	    "* H :export:\nText[fn:1]\n* H2\n[fn:1] D1[fn:2]\n\n[fn:2] D2"
+	  (org-export-as (org-test-default-backend))))))
+    ;; Handle uninterpreted data in pruned footnote definitions.
+    (should-not
+     (string-match
+      "|"
+      (let ((org-export-with-tables nil))
+	(org-test-with-temp-text
+	    "* H\nText[fn:1]\n* H2 :noexport:\n[fn:1]\n| a |"
+	  (org-export-as (org-test-default-backend))))))
     ;; Footnotes without a definition should throw an error.
     (should-error
      (org-test-with-parsed-data "Text[fn:1]"
