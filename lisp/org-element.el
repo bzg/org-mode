@@ -2591,7 +2591,7 @@ containing `:begin', `:end', `:contents-begin', `:contents-end',
   "Interpret TABLE-ROW element as Org syntax.
 CONTENTS is the contents of the table row."
   (if (eq (org-element-property :type table-row) 'rule) "|-"
-    (concat "| " contents)))
+    (concat "|" contents)))
 
 
 ;;;; Verse Block
