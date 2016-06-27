@@ -2669,14 +2669,12 @@ from tree."
 	       (cond
 		((eq (org-element-type f) 'footnote-definition) f)
 		((eq (org-element-property :type f) 'standard) nil)
-		(t
-		 ;; Since we're only interested in footnote definitions
-		 (let ((label (org-element-property :label f)))
-		   (when label		;Skip anonymous references.
-		     (apply
-		      #'org-element-create
-		      'footnote-definition `(:label ,label :post-blank 1)
-		      (org-element-contents f))))))))))
+		(t (let ((label (org-element-property :label f)))
+		     (when label	;Skip anonymous references.
+		       (apply
+			#'org-element-create
+			'footnote-definition `(:label ,label :post-blank 1)
+			(org-element-contents f))))))))))
     ;; If a select tag is active, also ignore the section before the
     ;; first headline, if any.
     (when selected
@@ -2768,7 +2766,7 @@ a list of footnote definitions or in the widened buffer."
 		(if (eq (org-element-type d) 'footnote-definition) d
 		  (let ((label (org-element-property :label d)))
 		    (apply #'org-element-create
-			   'footnote-definition `(:label d :post-blank 1)
+			   'footnote-definition `(:label ,label :post-blank 1)
 			   (org-element-contents d)))))
 	      missing-definitions))))
 

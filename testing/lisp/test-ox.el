@@ -2059,6 +2059,15 @@ Para2"
 <point>Paragraph[fn:1]"
 	(narrow-to-region (point) (point-max))
 	(org-export-as (org-test-default-backend)))))
+    (should
+     (string-match
+      "D2"
+      (org-test-with-temp-text "
+\[fn:1] Out of scope[fn:2:D2]
+* Title
+<point>Paragraph[fn:1]"
+	(narrow-to-region (point) (point-max))
+	(org-export-as (org-test-default-backend)))))
     ;; Export footnotes in pruned parts of tree.
     (should
      (string-match
