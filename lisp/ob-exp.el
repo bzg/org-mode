@@ -34,9 +34,12 @@
 
 (declare-function org-babel-lob-get-info "ob-lob" ())
 (declare-function org-babel-eval-wipe-error-buffer "ob-eval" ())
+(declare-function org-between-regexps-p "ob-eval" (start-re end-re &optional lim-up lim-down))
 (declare-function org-get-indentation "org" (&optional line))
 (declare-function org-heading-components "org" ())
+(declare-function org-in-block-p "org" (names))
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
+(declare-function org-in-verbatim-emphasis "org" ())
 (declare-function org-link-search "org" (s &optional avoid-pos stealth))
 (declare-function org-fill-template "org" (template alist))
 (declare-function org-split-string "org" (string &optional separators))
