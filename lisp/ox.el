@@ -5442,9 +5442,6 @@ Return the new string."
 
 ;; defsubst org-export-get-parent must be defined before first use
 
-(define-obsolete-function-alias
-  'org-export-get-genealogy 'org-element-lineage "25.1")
-
 (defun org-export-get-parent-headline (blob)
   "Return BLOB parent headline or nil.
 BLOB is the element or object being considered."

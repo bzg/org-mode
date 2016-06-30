@@ -998,8 +998,6 @@ you want to use two-columns display (see `org-agenda-menu-two-columns')."
   :version "24.1"
   :type 'boolean)
 
-(define-obsolete-variable-alias 'org-agenda-menu-two-column 'org-agenda-menu-two-columns "24.3")
-
 (defcustom org-agenda-menu-two-columns nil
   "Non-nil means, use two columns to show custom commands in the dispatcher.
 If you use this, you probably want to set `org-agenda-menu-show-matcher'
@@ -1008,7 +1006,6 @@ to nil."
   :version "24.1"
   :type 'boolean)
 
-(define-obsolete-variable-alias 'org-finalize-agenda-hook 'org-agenda-finalize-hook "24.3")
 (defcustom org-agenda-finalize-hook nil
   "Hook run just before displaying an agenda buffer.
 The buffer is still writable when the hook is called.
@@ -1124,16 +1121,6 @@ the current status is recorded.  When the agenda is exited with
 option will be ignored."
   :group 'org-agenda-windows
   :type 'boolean)
-
-(defcustom org-agenda-ndays nil
-  "Number of days to include in overview display.
-Should be 1 or 7.
-Obsolete, see `org-agenda-span'."
-  :group 'org-agenda-daily/weekly
-  :type '(choice (const nil)
-		 (integer)))
-
-(make-obsolete-variable 'org-agenda-ndays 'org-agenda-span "24.1")
 
 (defcustom org-agenda-span 'week
   "Number of days to include in overview display.
@@ -4221,8 +4208,7 @@ items if they have an hour specification like [h]h:mm."
 	(setq start-day (time-to-days (org-read-date nil t start-day))))
     (org-compile-prefix-format 'agenda)
     (org-set-sorting-strategy 'agenda)
-    (let* ((span (org-agenda-ndays-to-span
-		  (or span org-agenda-ndays org-agenda-span)))
+    (let* ((span (org-agenda-ndays-to-span (or span org-agenda-span)))
 	   (today (org-today))
 	   (sd (or start-day today))
 	   (ndays (org-agenda-span-to-ndays span sd))
@@ -7851,7 +7837,7 @@ Negative selection means regexp must not match for selection of an entry."
      (tdpos (goto-char tdpos))
      ((eq org-agenda-type 'agenda)
       (let* ((sd (org-agenda-compute-starting-span
-		  (org-today) (or curspan org-agenda-ndays org-agenda-span)))
+		  (org-today) (or curspan org-agenda-span)))
 	     (org-agenda-overriding-arguments args))
 	(setf (nth 1 org-agenda-overriding-arguments) sd)
 	(org-agenda-redo)
@@ -7980,7 +7966,7 @@ With prefix ARG, go backward that many times the current span."
 (defun org-agenda-reset-view ()
   "Switch to default view for agenda."
   (interactive)
-  (org-agenda-change-time-span (or org-agenda-ndays org-agenda-span)))
+  (org-agenda-change-time-span org-agenda-span))
 (defun org-agenda-day-view (&optional day-of-month)
   "Switch to daily view for agenda.
 With argument DAY-OF-MONTH, switch to that day of the month."
@@ -8323,9 +8309,6 @@ When called with a prefix argument, include all archive files as well."
 		"")
 	      (if org-agenda-clockreport-mode " Clock" "")))
   (force-mode-line-update))
-
-(define-obsolete-function-alias
-  'org-agenda-post-command-hook 'org-agenda-update-agenda-type "24.3")
 
 (defun org-agenda-update-agenda-type ()
   "Update the agenda type after each command."
@@ -10182,7 +10165,6 @@ days as returned by `calendar-absolute-from-gregorian' or
 when defining today."
   (eq (org-today)
       (if (consp date) (calendar-absolute-from-gregorian date) date)))
-(define-obsolete-function-alias 'org-agenda-todayp 'org-agenda-today-p "25.1")
 
 (defun org-agenda-todo-yesterday (&optional arg)
   "Like `org-agenda-todo' but the time of change will be 23:59 of yesterday."

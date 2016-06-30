@@ -237,9 +237,6 @@ file name  Play this sound file, fall back to beep"
 	  (const :tag "Standard beep" t)
 	  (file  :tag "Play sound file")))
 
-(define-obsolete-variable-alias 'org-clock-modeline-total
-  'org-clock-mode-line-total "24.3")
-
 (defcustom org-clock-mode-line-total 'auto
   "Default setting for the time included for the mode line clock.
 This can be overruled locally using the CLOCK_MODELINE_TOTAL property.

@@ -3388,19 +3388,6 @@ When nil, only the minibuffer will be available."
 (defvaralias 'org-popup-calendar-for-date-prompt
   'org-read-date-popup-calendar)
 
-(make-obsolete-variable
- 'org-read-date-minibuffer-setup-hook
- "Set `org-read-date-minibuffer-local-map' instead." "24.4")
-(defcustom org-read-date-minibuffer-setup-hook nil
-  "Hook to be used to set up keys for the date/time interface.
-Add key definitions to `minibuffer-local-map', which will be a
-temporary copy.
-
-WARNING: This option is obsolete, you should use
-`org-read-date-minibuffer-local-map' to set up keys."
-  :group 'org-time
-  :type 'hook)
-
 (defcustom org-extend-today-until 0
   "The hour when your day really ends.  Must be an integer.
 This has influence for the following applications:
@@ -3981,10 +3968,6 @@ When using LaTeXML set this option to
 	  (const :tag "None" nil)
 	  (string :tag "\nShell command")))
 
-(define-obsolete-variable-alias
-  'org-latex-create-formula-image-program
-  'org-preview-latex-default-process "25.1")
-
 (defcustom org-preview-latex-default-process 'dvipng
   "The default process to convert LaTeX fragments to image files.
 All available processes and theirs documents can be found in
@@ -4084,10 +4067,6 @@ Place-holders only used by `:image-converter':
   :package-version '(Org . "9.0")
   :type '(alist :tag "LaTeX to image backends"
 		:value-type (plist)))
-
-(define-obsolete-variable-alias
- 'org-latex-preview-ltxpng-directory
- 'org-preview-latex-image-directory "25.1")
 
 (defcustom org-preview-latex-image-directory "ltximg/"
   "Path to store latex preview images.
@@ -4567,7 +4546,6 @@ If `org-enable-table-editor' is nil, return nil unconditionally."
    (or (not (derived-mode-p 'org-mode))
        (let ((e (org-element-lineage (org-element-at-point) '(table) t)))
 	 (and e (or table-type (eq (org-element-property :type e) 'org)))))))
-(define-obsolete-function-alias 'org-table-p 'org-at-table-p "Org 9.0")
 
 (defun org-at-table.el-p ()
   "Non-nil when point is at a table.el table."
@@ -8185,7 +8163,6 @@ even level numbers will become the next higher odd number."
 	    ((> change 0) (1+ (* 2 (/ (+ level (* 2 change)) 2))))
 	    ((< change 0) (max 1 (1+ (* 2 (/ (+ level (* 2 change)) 2))))))
     (max 1 (+ level (or change 0)))))
-(define-obsolete-function-alias 'org-get-legal-level 'org-get-valid-level "23.1")
 
 (defun org-promote ()
   "Promote the current heading higher up the tree."
@@ -10518,13 +10495,6 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
     (org-defkey minibuffer-local-completion-map (kbd "C-c !")
 		'org-time-stamp-inactive)
     (apply #'completing-read args)))
-
-(define-obsolete-function-alias
-  'org-completing-read-no-i 'completing-read "Org 9.0")
-(define-obsolete-function-alias
-  'org-icompleting-read 'completing-read "Org 9.0")
-(define-obsolete-function-alias
-  'org-iread-file-name 'read-file-name "Org 9.0")
 
 ;;; Opening/following a link
 
@@ -17460,8 +17430,6 @@ Don't touch the rest."
   (let ((n 0))
     (mapcar (lambda (x) (if (< (setq n (1+ n)) 7) (or x 0) x)) time)))
 
-(define-obsolete-function-alias 'org-days-to-time 'org-time-stamp-to-now "24.4")
-
 (defun org-time-stamp-to-now (timestamp-string &optional seconds)
   "Difference between TIMESTAMP-STRING and now in days.
 If SECONDS is non-nil, return the difference in seconds."
@@ -18439,10 +18407,6 @@ tables are not re-aligned, etc."
   :version "24.3"
   :group 'org-agenda)
 
-(define-obsolete-variable-alias
-  'org-agenda-ignore-drawer-properties
-  'org-agenda-ignore-properties "25.1")
-
 (defcustom org-agenda-ignore-properties nil
   "Avoid updating text properties when building the agenda.
 Properties are used to prepare buffers for effort estimates,
@@ -19079,8 +19043,6 @@ overlays were removed, nil otherwise."
     (mapc #'delete-overlay overlays)
     overlays))
 
-(define-obsolete-function-alias
-  'org-preview-latex-fragment 'org-toggle-latex-fragment "24.4")
 (defun org-toggle-latex-fragment (&optional arg)
   "Preview the LaTeX fragment at point, or all locally or globally.
 
@@ -19722,9 +19684,6 @@ boundaries."
 			    (list 'org-display-inline-remove-overlay))
 			   (push ov org-inline-image-overlays)))))))))))))))
 
-(define-obsolete-function-alias
-  'org-display-inline-modification-hook 'org-display-inline-remove-overlay "24.3")
-
 (defun org-display-inline-remove-overlay (ov after _beg _end &optional _len)
   "Remove inline-display overlay if a corresponding region is modified."
   (let ((inhibit-modification-hooks t))
@@ -20113,9 +20072,6 @@ If not, return to the original position and throw an error."
 (defvar org-table-auto-blank-field) ; defined in org-table.el
 (defvar org-speed-command nil)
 
-(define-obsolete-function-alias
-  'org-speed-command-default-hook 'org-speed-command-activate "24.3")
-
 (defun org-speed-command-activate (keys)
   "Hook for activating single-letter speed commands.
 `org-speed-commands-default' specifies a minimal command set.
@@ -20125,9 +20081,6 @@ Use `org-speed-commands-user' for further customization."
 		 (funcall org-use-speed-commands)))
     (cdr (assoc keys (append org-speed-commands-user
 			     org-speed-commands-default)))))
-
-(define-obsolete-function-alias
-  'org-babel-speed-command-hook 'org-babel-speed-command-activate "24.3")
 
 (defun org-babel-speed-command-activate (keys)
   "Hook for activating single-letter code block commands."
@@ -22556,8 +22509,6 @@ match."
 	  (let ((end (match-end 0)))
 	    (when (or (> end pos) (and (= end pos) (not visually)))
 	      (throw :exit (cons (match-beginning 0) (match-end 0))))))))))
-(define-obsolete-function-alias 'org-at-regexp-p 'org-in-regexp
-  "Org mode 8.3")
 
 (defun org-between-regexps-p (start-re end-re &optional lim-up lim-down)
   "Non-nil when point is between matches of START-RE and END-RE.
@@ -22774,9 +22725,6 @@ not an indirect buffer."
     (if buf
 	(or (buffer-base-buffer buf) buf)
       nil)))
-
-(define-obsolete-function-alias 'org-image-file-name-regexp 'image-file-name-regexp
-  "Org 9.0")
 
 ;;; TODO: Only called once, from ox-odt which should probably use
 ;;; org-export-inline-image-p or something.
@@ -24195,10 +24143,6 @@ This version does not only check the character property, but also
 
 (defun org-at-heading-p (&optional ignored)
   (outline-on-heading-p t))
-;;; Though the function was obsoleted in 7.8.03, the byte-compiler
-;;; warning was only added in Org 9.0, which should be taken into
-;;; account when deciding when to remove the alias.
-(define-obsolete-function-alias 'org-on-heading-p 'org-at-heading-p "Org 7.8.03")
 
 (defun org-in-commented-heading-p (&optional no-inheritance)
   "Non-nil if point is under a commented heading.

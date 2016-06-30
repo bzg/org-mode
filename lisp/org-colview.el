@@ -1497,9 +1497,6 @@ PARAMS is a property list of parameters:
 		     (id)))))
   (org-update-dblock))
 
-(define-obsolete-function-alias 'org-insert-columns-dblock
-  'org-columns-insert-dblock "Org 9.0")
-
 
 
 ;;; Column view in the agenda

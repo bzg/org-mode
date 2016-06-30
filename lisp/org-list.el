@@ -244,8 +244,6 @@ interface or run the following code after updating it:
   :set (lambda (var val) (set var val)
 	 (when (featurep 'org-element) (org-element-update-syntax))))
 
-(define-obsolete-variable-alias 'org-alphabetical-lists
-  'org-list-allow-alphabetical "24.4") ; Since 8.0
 (defcustom org-list-allow-alphabetical nil
   "Non-nil means single character alphabetical bullets are allowed.
 
@@ -3022,8 +3020,6 @@ Point is left at list's end."
 	(delete-region top bottom)
 	(when (and (not (looking-at "[ \t]*$")) (looking-at org-list-end-re))
 	  (replace-match ""))))))
-(define-obsolete-function-alias
-  'org-list-parse-list 'org-list-to-lisp "Org 9.0")
 
 (defun org-list-make-subtree ()
   "Convert the plain list at point into a subtree."

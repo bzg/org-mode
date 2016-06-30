@@ -621,8 +621,6 @@ precedence over this variable."
   :package-version '(Org . "8.3")
   :type '(choice (const :tag "No template" nil)
 		 (string :tag "Format string")))
-(define-obsolete-variable-alias
-  'org-latex-with-hyperref 'org-latex-hyperref-template "25.1")
 
 ;;;; Headline
 

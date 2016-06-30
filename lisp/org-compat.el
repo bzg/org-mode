@@ -52,11 +52,10 @@
     (defalias 'gui-get-selection 'x-get-selection)))
 
 
-;;; Obsolete aliases (remove them the next major release).
-
-(define-obsolete-function-alias 'org-activate-mark 'activate-mark)
+;;; Obsolete aliases (remove them once the next major release is released).
 
 ;;;; XEmacs compatibility, now removed.
+(define-obsolete-function-alias 'org-activate-mark 'activate-mark)
 (define-obsolete-function-alias 'org-add-hook 'add-hook "Org 9.0")
 (define-obsolete-function-alias 'org-bound-and-true-p 'bound-and-true-p "Org 9.0")
 (define-obsolete-function-alias 'org-decompose-region 'decompose-region "Org 9.0")
@@ -99,11 +98,96 @@
 (define-obsolete-function-alias 'org-pop-to-buffer-same-window 'pop-to-buffer-same-window "Org 9.0")
 (define-obsolete-function-alias 'org-string-match-p 'string-match-p "Org 9.0")
 
-;;;; Variables declared obsolete.
+;;;; Functions and variables from previous releases now obsolete.
+(define-obsolete-function-alias 'org-element-remove-indentation
+  'org-remove-indentation "Org 9.0")
 (define-obsolete-variable-alias 'org-hierarchical-checkbox-statistics
   'org-checkbox-hierarchical-statistics "Org 8.0")
 (define-obsolete-variable-alias 'org-description-max-indent
   'org-list-description-max-indent "Org 8.0")
+(define-obsolete-variable-alias 'org-latex-create-formula-image-program
+  'org-preview-latex-default-process "Org 9.0")
+(define-obsolete-variable-alias 'org-latex-preview-ltxpng-directory
+ 'org-preview-latex-image-directory "Org 9.0")
+(define-obsolete-function-alias 'org-table-p 'org-at-table-p "Org 9.0")
+(define-obsolete-function-alias 'org-on-heading-p 'org-at-heading-p "Org 9.0")
+(define-obsolete-function-alias 'org-at-regexp-p 'org-in-regexp "Org 8.3")
+(define-obsolete-function-alias 'org-speed-command-default-hook
+  'org-speed-command-activate "Org 8.0")
+(define-obsolete-function-alias 'org-babel-speed-command-hook
+  'org-babel-speed-command-activate "Org 8.0")
+(define-obsolete-function-alias 'org-image-file-name-regexp
+  'image-file-name-regexp "Org 9.0")
+(define-obsolete-function-alias 'org-get-legal-level
+  'org-get-valid-level "Org 7.8")
+(define-obsolete-function-alias 'org-completing-read-no-i
+  'completing-read "Org 9.0")
+(define-obsolete-function-alias 'org-icompleting-read
+  'completing-read "Org 9.0")
+(define-obsolete-function-alias 'org-iread-file-name 'read-file-name "Org 9.0")
+(define-obsolete-function-alias 'org-days-to-time
+  'org-time-stamp-to-now "Org 8.2")
+(define-obsolete-variable-alias 'org-agenda-ignore-drawer-properties
+  'org-agenda-ignore-properties "Org 9.0")
+(define-obsolete-function-alias 'org-preview-latex-fragment
+  'org-toggle-latex-fragment "Org 8.3")
+(define-obsolete-function-alias 'org-display-inline-modification-hook
+  'org-display-inline-remove-overlay "Org 8.0")
+(define-obsolete-function-alias 'org-export-get-genealogy
+  'org-element-lineage "Org 9.0")
+(define-obsolete-variable-alias 'org-latex-with-hyperref
+  'org-latex-hyperref-template "Org 9.0")
+(define-obsolete-variable-alias 'org-link-to-org-use-id
+  'org-id-link-to-org-use-id "Org 8.0")
+(define-obsolete-variable-alias 'hfy-optimisations 'hfy-optimizations "Org 9.0")
+(define-obsolete-variable-alias 'org-clock-modeline-total
+  'org-clock-mode-line-total "Org 8.0")
+(define-obsolete-function-alias 'org-protocol-unhex-compound
+  'org-link-unescape-compound "Org 7.8")
+(define-obsolete-function-alias 'org-protocol-unhex-string
+  'org-link-unescape "Org 7.8")
+(define-obsolete-function-alias 'org-protocol-unhex-single-byte-sequence
+  'org-link-unescape-single-byte-sequence "Org 7.8")
+(define-obsolete-variable-alias 'org-export-htmlized-org-css-url
+  'org-org-htmlized-css-url "Org 8.2")
+(define-obsolete-variable-alias 'org-alphabetical-lists
+  'org-list-allow-alphabetical "Org 8.0")
+(define-obsolete-function-alias 'org-list-parse-list 'org-list-to-lisp "Org 9.0")
+(define-obsolete-variable-alias 'org-agenda-menu-two-column
+  'org-agenda-menu-two-columns "Org 8.0")
+(define-obsolete-variable-alias 'org-finalize-agenda-hook
+  'org-agenda-finalize-hook "Org 8.0")
+(make-obsolete-variable 'org-agenda-ndays 'org-agenda-span "Org 7.8")
+(define-obsolete-function-alias 'org-agenda-post-command-hook
+  'org-agenda-update-agenda-type "Org 8.0")
+(define-obsolete-function-alias 'org-agenda-todayp
+  'org-agenda-today-p "Org 9.0")
+(define-obsolete-function-alias 'org-babel-examplize-region
+  'org-babel-examplify-region "Org 9.0")
+(define-obsolete-function-alias 'org-babel-trim 'org-trim "Org 9.0")
+(define-obsolete-variable-alias 'org-html-style-include-scripts
+  'org-html-head-include-scripts "Org 8.0")
+(define-obsolete-variable-alias 'org-html-style-include-default
+  'org-html-head-include-default-style "Org 8.0")
+(define-obsolete-variable-alias 'org-html-style 'org-html-head "24.4")
+(define-obsolete-function-alias 'org-insert-columns-dblock
+  'org-columns-insert-dblock "Org 9.0")
+
+(make-obsolete-variable
+ 'org-read-date-minibuffer-setup-hook
+ "Set `org-read-date-minibuffer-local-map' instead." "24.4")
+(defcustom org-read-date-minibuffer-setup-hook nil
+  "Hook to be used to set up keys for the date/time interface.
+Add key definitions to `minibuffer-local-map', which will be a
+temporary copy.
+
+WARNING: This option is obsolete, you should use
+`org-read-date-minibuffer-local-map' to set up keys."
+  :group 'org-time
+  :type 'hook)
+
+
+;;; Miscellaneous functions
 
 (defun org-compatible-face (inherits specs)
   "Make a compatible face specification.
@@ -138,9 +222,6 @@ is, use SPECS to define the face."
 	    (display-warning 'org msg level)
 	    t))
       t)))
-
-
-;;; Miscellaneous functions
 
 (defun org-get-x-clipboard (value)
   "Get the value of the X or Windows clipboard."

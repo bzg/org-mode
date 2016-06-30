@@ -281,7 +281,6 @@ except that the foreground and background colors are set
 according to the default face identified by the `htmlfontify'.")
 
 (defvar hfy-optimizations)
-(define-obsolete-variable-alias 'hfy-optimisations 'hfy-optimizations "25.1")
 (defvar org-odt-embedded-formulas-count 0)
 (defvar org-odt-embedded-images-count 0)
 (defvar org-odt-image-size-probe-method

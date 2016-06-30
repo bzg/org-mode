@@ -1416,8 +1416,6 @@ ignored."
 
 ;;;; Template :: Scripts
 
-(define-obsolete-variable-alias
-  'org-html-style-include-scripts 'org-html-head-include-scripts "24.4")
 (defcustom org-html-head-include-scripts t
   "Non-nil means include the JavaScript snippets in exported HTML files.
 The actual script is defined in `org-html-scripts' and should
@@ -1429,8 +1427,6 @@ not be modified."
 
 ;;;; Template :: Styles
 
-(define-obsolete-variable-alias
-  'org-html-style-include-default 'org-html-head-include-default-style "24.4")
 (defcustom org-html-head-include-default-style t
   "Non-nil means include the default style in exported HTML files.
 The actual style is defined in `org-html-style-default' and
@@ -1443,7 +1439,6 @@ style information."
 ;;;###autoload
 (put 'org-html-head-include-default-style 'safe-local-variable 'booleanp)
 
-(define-obsolete-variable-alias 'org-html-style 'org-html-head "24.4")
 (defcustom org-html-head ""
   "Org-wide head definitions for exported HTML files.
 

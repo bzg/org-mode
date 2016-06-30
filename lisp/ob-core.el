@@ -2441,10 +2441,6 @@ file's directory then expand relative links."
 (defvar org-babel-capitalize-example-region-markers nil
   "Make true to capitalize begin/end example markers inserted by code blocks.")
 
-(define-obsolete-function-alias
-  'org-babel-examplize-region
-  'org-babel-examplify-region "25.1")
-
 (defun org-babel-examplify-region (beg end &optional results-switches inline)
   "Comment out region using the inline `==' or `: ' org example quote."
   (interactive "*r")
@@ -2912,8 +2908,6 @@ can be specified as the REGEXP argument."
                 (string-match regexp (substring string -1)))
       (setq string (substring string 0 -1)))
     string))
-
-(define-obsolete-function-alias 'org-babel-trim 'org-trim "Org 9.0")
 
 (defun org-babel-local-file-name (file)
   "Return the local name component of FILE."
