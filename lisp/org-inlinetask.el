@@ -271,8 +271,7 @@ If the task has an end part, also demote it."
 
 (defvar org-indent-indentation-per-level) ; defined in org-indent.el
 
-(defface org-inlinetask
-  (org-compatible-face 'shadow '((t (:bold t))))
+(defface org-inlinetask '((t :inherit shadow))
   "Face for inlinetask headlines."
   :group 'org-faces)
 

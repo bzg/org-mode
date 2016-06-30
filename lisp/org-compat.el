@@ -173,21 +173,15 @@
 (define-obsolete-function-alias 'org-insert-columns-dblock
   'org-columns-insert-dblock "Org 9.0")
 
-(make-obsolete-variable
- 'org-read-date-minibuffer-setup-hook
- "Set `org-read-date-minibuffer-local-map' instead." "24.4")
 (defcustom org-read-date-minibuffer-setup-hook nil
   "Hook to be used to set up keys for the date/time interface.
 Add key definitions to `minibuffer-local-map', which will be a
-temporary copy.
-
-WARNING: This option is obsolete, you should use
-`org-read-date-minibuffer-local-map' to set up keys."
+temporary copy."
   :group 'org-time
   :type 'hook)
-
-
-;;; Miscellaneous functions
+(make-obsolete-variable
+ 'org-read-date-minibuffer-setup-hook
+ "set `org-read-date-minibuffer-local-map' instead." "Org 8.0")
 
 (defun org-compatible-face (inherits specs)
   "Make a compatible face specification.
@@ -198,6 +192,10 @@ is, use SPECS to define the face."
   (if (facep inherits)
       (list (list t :inherit inherits))
     specs))
+(make-obsolete 'org-compatible-face "you can remove it." "Org 9.0")
+
+
+;;; Miscellaneous functions
 
 (defun org-version-check (version feature level)
   (let* ((v1 (mapcar 'string-to-number (split-string version "[.]")))
