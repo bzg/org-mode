@@ -68,7 +68,7 @@
 (define-obsolete-function-alias 'org-indent-to-column 'indent-to-column "Org 9.0")
 (define-obsolete-function-alias 'org-looking-at-p 'looking-at-p "Org 9.0")
 (define-obsolete-function-alias 'org-looking-back 'looking-back "Org 9.0")
-(define-obsolete-function-alias 'org-match-string-no-properties 'match-string-properties "Org 9.0")
+(define-obsolete-function-alias 'org-match-string-no-properties 'match-string-no-properties "Org 9.0")
 (define-obsolete-function-alias 'org-propertize 'propertize "Org 9.0")
 (define-obsolete-function-alias 'org-select-frame-set-input-focus 'select-frame-set-input-focus "Org 9.0")
 
