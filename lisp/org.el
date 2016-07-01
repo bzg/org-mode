@@ -10079,15 +10079,6 @@ according to FMT (default from `org-email-link-description-format')."
   "List of characters that should be escaped in a link when stored to Org.
 This is the list that is used for internal purposes.")
 
-(defconst org-link-escape-chars-browser
-  ;;%20 %22
-  '(?\s ?\")
-  "List of characters to be escaped before handing over to the browser.
-If you consider using this constant then you probably want to use
-the function `org-link-escape-browser' instead.  See there why
-this constant is a candidate to be removed once Org drops support
-for Emacs 24.1 and 24.2.")
-
 (defun org-link-escape (text &optional table merge)
   "Return percent escaped representation of TEXT.
 TEXT is a string with the text to escape.
@@ -10109,29 +10100,6 @@ If optional argument MERGE is set, merge TABLE into
 		      "")
 	 (char-to-string c)))
      text "")))
-
-(defun org-link-escape-browser (text)
-  "Escape some characters before handing over to the browser.
-This function is a candidate to be removed together with the
-constant `org-link-escape-chars-browser' once Org drops support
-for Emacs 24.1 and 24.2.  All calls to this function will have to
-be replaced with `url-encode-url' which is available since Emacs
-24.3.1."
-  ;; Example with the Org link
-  ;; [[http://lists.gnu.org/archive/cgi-bin/namazu.cgi?idxname=emacs-orgmode&query=%252Bsubject:"Release+8.2"]]
-  ;; to open the browser with +subject:"Release 8.2" filled into the
-  ;; query field: In this case the variable TEXT contains the
-  ;; unescaped [...]=%2Bsubject:"Release+8.2".  Then `url-encode-url'
-  ;; converts correctly to [...]=%2Bsubject:%22Release+8.2%22 or
-  ;; `org-link-escape' with `org-link-escape-chars-browser' converts
-  ;; wrongly to [...]=%252Bsubject:%22Release+8.2%22.
-  (if (fboundp 'url-encode-url)
-      (url-encode-url text)
-    (if (org-string-match-p
-	 (concat "[[:nonascii:]" org-link-escape-chars-browser "]")
-	 text)
-	(org-link-escape text org-link-escape-chars-browser)
-      text)))
 
 (defun org-link-unescape (str)
   "Unhex hexified Unicode parts in string STR.
@@ -10776,10 +10744,9 @@ link in a property drawer line."
 			((boundp f-or-v) (describe-variable f-or-v))
 			(t (error "Not a known function or variable")))))
 	       ((member type '("http" "https" "ftp" "mailto" "news"))
-		(browse-url (org-link-escape-browser (concat type ":" path))))
+		(browse-url (url-encode-url (concat type ":" path))))
 	       ((equal type "doi")
-		(browse-url
-		 (org-link-escape-browser (concat org-doi-server-url path))))
+		(browse-url (url-encode-url (concat org-doi-server-url path))))
 	       ((equal type "message") (browse-url (concat type ":" path)))
 	       ((equal type "shell")
 		(let ((buf (generate-new-buffer "*Org Shell Output*"))
