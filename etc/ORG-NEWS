@@ -447,6 +447,16 @@ Thus the new behavior is to generate this HTML link instead:
 : <a href="http://www.gnu.org/software/emacs/manual/html_mono/emacs.html#List-Buffers">emacs#List Buffers</a>
 
 All emacs related info links are similarly translated plus few other =gnu.org= manuals.
+*** Repeaters with a ~++~ interval and a time can be shifted to later today
+Previously, if a recurring task had a timestamp of
+~<2016-01-01 Fri 20:00 ++1d>~ and was completed on =2016-01-02= at
+=08:00=, the task would skip =2016-01-02= and would be rescheduled for
+=2016-01-03=.  Timestamps with ~++~ cookies and a specific time will
+now shift to the first possible future occurrence, even if the
+occurrence is later the same day the task is completed.  (Timestamps
+already in the future are still shifted one time further into the
+future.)
+
 * Version 8.3
 
 ** Incompatible changes
