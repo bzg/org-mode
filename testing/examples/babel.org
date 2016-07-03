@@ -141,7 +141,7 @@
 
 * executing an lob call line
   :PROPERTIES:
-  :results:  silent
+  :header-args: :results  silent
   :ID:       fab7e291-fde6-45fc-bf6e-a485b8bca2f0
   :END:
 
@@ -202,7 +202,7 @@ src_sh{echo 3} Here is one at the beginning of a line.
 * exported inline source block
 :PROPERTIES:
 :ID:       cd54fc88-1b6b-45b6-8511-4d8fa7fc8076
-:exports:  code
+:header-args: :exports  code
 :END:
 Here is one in the middle src_sh{echo 1} of a line.
 Here is one at the end of a line. src_sh{echo 2}
@@ -230,7 +230,7 @@ Here is one that is also evaluated: src_sh[:exports both]{echo 4}
 * using the =:noweb-ref= header argument
   :PROPERTIES:
   :ID:       54d68d4b-1544-4745-85ab-4f03b3cbd8a0
-  :noweb-sep: ""
+  :header-args: :noweb-sep ""
   :END:
 
 #+begin_src sh :tangle yes :noweb yes :shebang "#!/bin/sh"
@@ -259,7 +259,7 @@ Here is one that is also evaluated: src_sh[:exports both]{echo 4}
 * resolving sub-trees as references
   :PROPERTIES:
   :ID:       2409e8ba-7b5f-4678-8888-e48aa02d8cb4
-  :results:  silent
+  :header-args: :results  silent
   :END:
 
 #+begin_src emacs-lisp :var text=d4faa7b3-072b-4dcf-813c-dd7141c633f3
@@ -315,7 +315,7 @@ and another
 
 * in order evaluation on export
   :PROPERTIES:
-  :exports: results
+  :header-args: :exports results
   :ID:       96cc7073-97ec-4556-87cf-1f9bffafd317
   :END:
 

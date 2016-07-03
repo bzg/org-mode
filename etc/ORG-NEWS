@@ -109,8 +109,34 @@ The modification time will be determined via =vc.el= if the second
 argument is non-nil.  See the manual for details.
 *** Preparation and completion functions in publishing projects change signature
 Preparation and completion functions are now called with an argument,
-which is the project property list. It used to be dynamically scoped
+which is the project property list.  It used to be dynamically scoped
 through the ~project-plist~ variable.
+*** Old Babel header properties are no longer supported
+Using header arguments as property names is no longer possible.  As
+such, the following
+
+#+BEGIN_EXAMPLE
+,* Headline
+:PROPERTIES:
+:exports: code
+:var: a=1 b=2
+:var+: c=3
+:END:
+#+END_EXAMPLE
+
+should be written instead
+
+#+BEGIN_EXAMPLE
+,* Headline
+:PROPERTIES:
+:header-args: :exports code
+:header-args: :var a=1 b=2
+:header-args+: :var c=3
+:END:
+#+END_EXAMPLE
+
+Please note that, however, old properties were defined at the source
+block definition.  Current ones are defined where the block is called.
 ** New features
 *** New org-protocol key=value syntax
 
@@ -302,7 +328,7 @@ an :indent parameter, much like the one in the clock table.
 On the other hand, stars no longer appear in an ITEM field.
 *** Columns view
 **** ~org-columns~ accepts a prefix argument
-When called with a prefix argument, ~org-columns~ apply to the whole
+pWhen called with a prefix argument, ~org-columns~ apply to the whole
 buffer unconditionally.
 **** New variable : ~org-agenda-view-columns-initially~
 The variable used to be a ~defvar~, it is now a ~defcustom~.

@@ -15338,11 +15338,7 @@ per-subtree basis using property drawers (see @ref{Property syntax}).
 When properties are used to set default header arguments, they are always
 looked up with inheritance, regardless of the value of
 @code{org-use-property-inheritance}.  Properties are evaluated as seen by the
-outermost call or source block.@footnote{The deprecated syntax for default
-header argument properties, using the name of the header argument as a
-property name directly, evaluates the property as seen by the corresponding
-source block definition.  This behavior has been kept for backwards
-compatibility.}
+outermost call or source block.
 
 In the following example the value of
 the @code{:cache} header argument will default to @code{yes} in all code

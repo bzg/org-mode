@@ -1412,21 +1412,6 @@ Return a list of association lists of source block params
 specified in the properties of the current outline entry."
   (save-match-data
     (list
-     ;; DEPRECATED header arguments specified as separate property at
-     ;; point of definition.
-     (org-babel-parse-multiple-vars
-      (delq nil
-	    (mapcar
-	     (lambda (header)
-	       (let* ((arg (symbol-name (car header)))
-		      (val (org-entry-get (point) arg t)))
-		 (and val
-		      (cons (intern (concat ":" arg))
-			    (org-babel-read val)))))
-	     (org-babel-combine-header-arg-lists
-	      org-babel-common-header-args-w-values
-	      (let ((sym (intern (concat "org-babel-header-args:" lang))))
-		(and (boundp sym) (eval sym t)))))))
      ;; header arguments specified with the header-args property at
      ;; point of call.
      (org-babel-parse-header-arguments

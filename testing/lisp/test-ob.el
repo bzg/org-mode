@@ -136,15 +136,14 @@ should still return the link."
 
 * elisp forms in header arguments
   :PROPERTIES:
-  :var:      prop = (* 7 6)
+  :header-args: :var prop = (* 7 6)
   :END:
 #+begin_src emacs-lisp
   prop
 #+end_src"
     (goto-char (point-min))
     (org-babel-next-src-block)
-    (let ((info (org-babel-get-src-block-info)))
-      (should (= 42 (org-babel-execute-src-block))))))
+    (should (= 42 (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob/simple-named-code-block ()
   "Test that simple named code blocks can be evaluated."
