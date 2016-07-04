@@ -87,11 +87,14 @@
 (defvar org-closed-string)
 (defvar org-deadline-string)
 (defvar org-description-max-indent)
+(defvar org-done-keywords)
 (defvar org-drawer-regexp)
 (defvar org-element-all-objects)
 (defvar org-inhibit-startup)
 (defvar org-odd-levels-only)
+(defvar org-outline-regexp-bol)
 (defvar org-scheduled-string)
+(defvar org-todo-line-regexp)
 (defvar org-ts-regexp)
 (defvar org-ts-regexp-both)
 
@@ -131,6 +134,7 @@
 		  (backend data &optional contents info))
 (declare-function org-fix-tags-on-the-fly "org" ())
 (declare-function org-get-indentation "org" (&optional line))
+(declare-function org-get-todo-state "org" ())
 (declare-function org-in-block-p "org" (names))
 (declare-function org-in-regexp "org" (re &optional nlines visually))
 (declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
@@ -139,6 +143,7 @@
 (declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 (declare-function org-level-increment "org" ())
 (declare-function org-narrow-to-subtree "org" ())
+(declare-function org-outline-level "org" ())
 (declare-function org-previous-line-empty-p "org" ())
 (declare-function org-reduced-level "org" (L))
 (declare-function org-remove-indentation "org" (code &optional n))
@@ -2929,6 +2934,151 @@ ignores hidden links."
 	(run-hooks 'org-after-sorting-entries-or-items-hook)
 	(message "Sorting items...done")))))
 
+(defun org-toggle-item (arg)
+  "Convert headings or normal lines to items, items to normal lines.
+If there is no active region, only the current line is considered.
+
+If the first non blank line in the region is a headline, convert
+all headlines to items, shifting text accordingly.
+
+If it is an item, convert all items to normal lines.
+
+If it is normal text, change region into a list of items.
+With a prefix argument ARG, change the region in a single item."
+  (interactive "P")
+  (let ((shift-text
+	 (lambda (ind end)
+	   ;; Shift text in current section to IND, from point to END.
+	   ;; The function leaves point to END line.
+	   (let ((min-i 1000) (end (copy-marker end)))
+	     ;; First determine the minimum indentation (MIN-I) of
+	     ;; the text.
+	     (save-excursion
+	       (catch 'exit
+		 (while (< (point) end)
+		   (let ((i (org-get-indentation)))
+		     (cond
+		      ;; Skip blank lines and inline tasks.
+		      ((looking-at "^[ \t]*$"))
+		      ((looking-at org-outline-regexp-bol))
+		      ;; We can't find less than 0 indentation.
+		      ((zerop i) (throw 'exit (setq min-i 0)))
+		      ((< i min-i) (setq min-i i))))
+		   (forward-line))))
+	     ;; Then indent each line so that a line indented to
+	     ;; MIN-I becomes indented to IND.  Ignore blank lines
+	     ;; and inline tasks in the process.
+	     (let ((delta (- ind min-i)))
+	       (while (< (point) end)
+		 (unless (or (looking-at "^[ \t]*$")
+			     (looking-at org-outline-regexp-bol))
+		   (indent-line-to (+ (org-get-indentation) delta)))
+		 (forward-line))))))
+	(skip-blanks
+	 (lambda (pos)
+	   ;; Return beginning of first non-blank line, starting from
+	   ;; line at POS.
+	   (save-excursion
+	     (goto-char pos)
+	     (skip-chars-forward " \r\t\n")
+	     (point-at-bol))))
+	beg end)
+    ;; Determine boundaries of changes.
+    (if (org-region-active-p)
+	(setq beg (funcall skip-blanks (region-beginning))
+	      end (copy-marker (region-end)))
+      (setq beg (funcall skip-blanks (point-at-bol))
+	    end (copy-marker (point-at-eol))))
+    ;; Depending on the starting line, choose an action on the text
+    ;; between BEG and END.
+    (org-with-limited-levels
+     (save-excursion
+       (goto-char beg)
+       (cond
+	;; Case 1. Start at an item: de-itemize.  Note that it only
+	;;         happens when a region is active: `org-ctrl-c-minus'
+	;;         would call `org-cycle-list-bullet' otherwise.
+	((org-at-item-p)
+	 (while (< (point) end)
+	   (when (org-at-item-p)
+	     (skip-chars-forward " \t")
+	     (delete-region (point) (match-end 0)))
+	   (forward-line)))
+	;; Case 2. Start at an heading: convert to items.
+	((org-at-heading-p)
+	 (let* ((bul (org-list-bullet-string "-"))
+		(bul-len (length bul))
+		;; Indentation of the first heading.  It should be
+		;; relative to the indentation of its parent, if any.
+		(start-ind (save-excursion
+			     (cond
+			      ((not org-adapt-indentation) 0)
+			      ((not (outline-previous-heading)) 0)
+			      (t (length (match-string 0))))))
+		;; Level of first heading.  Further headings will be
+		;; compared to it to determine hierarchy in the list.
+		(ref-level (org-reduced-level (org-outline-level))))
+	   (while (< (point) end)
+	     (let* ((level (org-reduced-level (org-outline-level)))
+		    (delta (max 0 (- level ref-level)))
+		    (todo-state (org-get-todo-state)))
+	       ;; If current headline is less indented than the first
+	       ;; one, set it as reference, in order to preserve
+	       ;; subtrees.
+	       (when (< level ref-level) (setq ref-level level))
+	       ;; Remove stars and TODO keyword.
+	       (looking-at org-todo-line-regexp)
+	       (delete-region (point) (or (match-beginning 3)
+					  (line-end-position)))
+	       (insert bul)
+	       (indent-line-to (+ start-ind (* delta bul-len)))
+	       ;; Turn TODO keyword into a check box.
+	       (when todo-state
+		 (let* ((struct (org-list-struct))
+			(old (copy-tree struct)))
+		   (org-list-set-checkbox
+		    (line-beginning-position)
+		    struct
+		    (if (member todo-state org-done-keywords)
+			"[X]"
+		      "[ ]"))
+		   (org-list-write-struct struct
+					  (org-list-parents-alist struct)
+					  old)))
+	       ;; Ensure all text down to END (or SECTION-END) belongs
+	       ;; to the newly created item.
+	       (let ((section-end (save-excursion
+				    (or (outline-next-heading) (point)))))
+		 (forward-line)
+		 (funcall shift-text
+			  (+ start-ind (* (1+ delta) bul-len))
+			  (min end section-end)))))))
+	;; Case 3. Normal line with ARG: make the first line of region
+	;;         an item, and shift indentation of others lines to
+	;;         set them as item's body.
+	(arg (let* ((bul (org-list-bullet-string "-"))
+		    (bul-len (length bul))
+		    (ref-ind (org-get-indentation)))
+	       (skip-chars-forward " \t")
+	       (insert bul)
+	       (forward-line)
+	       (while (< (point) end)
+		 ;; Ensure that lines less indented than first one
+		 ;; still get included in item body.
+		 (funcall shift-text
+			  (+ ref-ind bul-len)
+			  (min end (save-excursion (or (outline-next-heading)
+						       (point)))))
+		 (forward-line))))
+	;; Case 4. Normal line without ARG: turn each non-item line
+	;;         into an item.
+	(t
+	 (while (< (point) end)
+	   (unless (or (org-at-heading-p) (org-at-item-p))
+	     (when (looking-at "\\([ \t]*\\)\\(\\S-\\)")
+	       (replace-match
+		(concat "\\1" (org-list-bullet-string "-") "\\2"))))
+	   (forward-line))))))))
 
 
 ;;; Send and receive lists

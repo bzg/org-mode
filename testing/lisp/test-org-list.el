@@ -870,6 +870,116 @@
 
 
 
+;;; Miscellaneous
+
+(ert-deftest test-org-list/toggle-item ()
+  "Test `org-toggle-item' specifications."
+  ;; Convert normal lines to items.
+  (should
+   (equal "- line"
+	  (org-test-with-temp-text "line"
+	    (org-toggle-item nil)
+	    (buffer-string))))
+  ;; Convert items to normal lines.
+  (should
+   (equal "line"
+	  (org-test-with-temp-text "- line"
+	    (org-toggle-item nil)
+	    (buffer-string))))
+  ;; Convert headlines to items.
+  (should
+   (equal "- line"
+	  (org-test-with-temp-text "* line"
+	    (org-toggle-item nil)
+	    (buffer-string))))
+  ;; When converting a headline to a list item, TODO keywords become
+  ;; checkboxes.
+  (should
+   (equal "- [X] line"
+	  (org-test-with-temp-text "* DONE line"
+	    (org-toggle-item nil)
+	    (buffer-string))))
+  (should
+   (equal "- [ ] line"
+	  (org-test-with-temp-text "* TODO line"
+	    (org-toggle-item nil)
+	    (buffer-string))))
+  ;; When a region is marked and first line is a headline, all
+  ;; headlines are turned into items.
+  (should
+   (equal "- H1\n  - H2"
+	  (org-test-with-temp-text "* H1\n** H2"
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (goto-char (point-max))
+	    (org-toggle-item nil)
+	    (buffer-string))))
+  (should
+   (equal "- [ ] H1\n  - [ ] H2"
+	  (org-test-with-temp-text "* TODO H1\n** TODO H2"
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (goto-char (point-max))
+	    (org-toggle-item nil)
+	    (buffer-string))))
+  ;; When turning headlines into items, make sure headings contents
+  ;; are kept within items.
+  (should
+   (equal "- H1\n  Text"
+	  (org-test-with-temp-text "* H1\nText"
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (goto-char (point-max))
+	    (org-toggle-item nil)
+	    (buffer-string))))
+  ;; When a region is marked and first line is an item, all items are
+  ;; turned into normal lines.
+  (should
+   (equal "1\n  2"
+	  (org-test-with-temp-text "- 1\n  - 2"
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (goto-char (point-max))
+	    (org-toggle-item nil)
+	    (buffer-string))))
+  (should
+   (equal "1\n2"
+	  (org-test-with-temp-text "- 1\n2"
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (goto-char (point-max))
+	    (org-toggle-item nil)
+	    (buffer-string))))
+  ;; When a region is marked and first line is an item, all normal
+  ;; lines are turned into items.
+  (should
+   (equal "- line 1\n- line 2"
+	  (org-test-with-temp-text "line 1\nline 2"
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (goto-char (point-max))
+	    (org-toggle-item nil)
+	    (buffer-string))))
+  (should
+   (equal "- line 1\n- line 2"
+	  (org-test-with-temp-text "line 1\n- line 2"
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (goto-char (point-max))
+	    (org-toggle-item nil)
+	    (buffer-string))))
+  ;; When argument ARG is non-nil, change the whole region into
+  ;; a single item.
+  (should
+   (equal "- line 1\n  line 2"
+	  (org-test-with-temp-text "line 1\nline 2"
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (goto-char (point-max))
+	    (org-toggle-item t)
+	    (buffer-string)))))
+
+
 ;;; Radio Lists
 
 (ert-deftest test-org-list/send-list ()
