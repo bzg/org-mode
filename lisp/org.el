@@ -21406,8 +21406,6 @@ With a prefix argument ARG, change the region in a single item."
 	((org-at-heading-p)
 	 (let* ((bul (org-list-bullet-string "-"))
 		(bul-len (length bul))
-		(done (org-entry-is-done-p))
-		(todo (org-entry-is-todo-p))
 		;; Indentation of the first heading.  It should be
 		;; relative to the indentation of its parent, if any.
 		(start-ind (save-excursion
@@ -21418,22 +21416,30 @@ With a prefix argument ARG, change the region in a single item."
 		;; Level of first heading.  Further headings will be
 		;; compared to it to determine hierarchy in the list.
 		(ref-level (org-reduced-level (org-outline-level))))
-	   (when (or done todo) (org-todo ""))
 	   (while (< (point) end)
 	     (let* ((level (org-reduced-level (org-outline-level)))
-		    (delta (max 0 (- level ref-level))))
+		    (delta (max 0 (- level ref-level)))
+		    (todo-state (org-get-todo-state)))
 	       ;; If current headline is less indented than the first
 	       ;; one, set it as reference, in order to preserve
 	       ;; subtrees.
 	       (when (< level ref-level) (setq ref-level level))
-	       (replace-match bul t t)
+	       ;; Remove stars and TODO keyword.
+	       (looking-at org-todo-line-regexp)
+	       (delete-region (point) (or (match-beginning 3)
+					  (line-end-position)))
+	       (insert bul)
 	       (indent-line-to (+ start-ind (* delta bul-len)))
-	       (when (or done todo)
+	       ;; Turn TODO keyword into a check box.
+	       (when todo-state
 		 (let* ((struct (org-list-struct))
 			(old (copy-tree struct)))
-		   (org-list-set-checkbox (line-beginning-position)
-					  struct
-					  (if done "[X]" "[ ]"))
+		   (org-list-set-checkbox
+		    (line-beginning-position)
+		    struct
+		    (if (member todo-state org-done-keywords)
+			"[X]"
+		      "[ ]"))
 		   (org-list-write-struct struct
 					  (org-list-parents-alist struct)
 					  old)))
