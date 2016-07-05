@@ -675,7 +675,7 @@ optional argument MARKERP, return the position as a new marker."
     (move-marker m nil)
     (org-show-context)))
 
-(org-add-link-type "id" 'org-id-open)
+(org-link-set-parameters "id" :follow #'org-id-open)
 
 (provide 'org-id)
 
