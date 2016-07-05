@@ -27,8 +27,9 @@
 (require 'eshell)
 (require 'esh-mode)
 
-(org-add-link-type "eshell" 'org-eshell-open)
-(add-hook 'org-store-link-functions 'org-eshell-store-link)
+(org-link-set-parameters "eshell"
+			 :follow #'org-eshell-open
+			 :store #'org-eshell-store-link)
 
 (defun org-eshell-open (link)
   "Switch to am eshell buffer and execute a command line.
