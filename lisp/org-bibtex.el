@@ -452,8 +452,9 @@ With optional argument OPTIONAL, also prompt for optional fields."
 
 
 ;;; Bibtex link functions
-(org-add-link-type "bibtex" 'org-bibtex-open)
-(add-hook 'org-store-link-functions 'org-bibtex-store-link)
+(org-link-set-parameters "bibtex"
+			 :follow #'org-bibtex-open
+			 :store #'org-bibtex-store-link)
 
 (defun org-bibtex-open (path)
   "Visit the bibliography entry on PATH."
