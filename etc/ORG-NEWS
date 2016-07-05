@@ -353,6 +353,9 @@ first footnote.
 *** The ~org-block~ face is inherited by ~src-blocks~
 This works also when =org-src-fontify-natively= is non-nil.  It is also
 possible to specify per-languages faces.  See the manual for details.
+*** Links are now customizable
+Links can now have custom colors, tooltips, keymaps, display behavior,
+etc... Links are now centralized in ~org-link-parameters~.
 ** New functions
 *** ~org-next-line-empty-p~
 It replaces the deprecated ~next~ argument to ~org-previous-line-empty-p~.
