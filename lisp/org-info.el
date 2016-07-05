@@ -40,8 +40,10 @@
 (defvar Info-current-node)
 
 ;; Install the link type
-(org-add-link-type "info" 'org-info-open 'org-info-export)
-(add-hook 'org-store-link-functions 'org-info-store-link)
+(org-link-set-parameters "info"
+			 :follow #'org-info-open
+			 :export #'org-info-export
+			 :store #'org-info-store-link)
 
 ;; Implementation
 (defun org-info-store-link ()
@@ -113,7 +115,7 @@ emacs related documents. See `org-info-official-gnu-document' and
 
 (defun org-info-export (path desc format)
   "Export an info link.
-See `org-add-link-type' for details about PATH, DESC and FORMAT."
+See `org-link-parameters' for details about PATH, DESC and FORMAT."
   (when (eq format 'html)
     (or (string-match "\\(.*\\)[#:]:?\\(.*\\)" path)
 	(string-match "\\(.*\\)" path))
