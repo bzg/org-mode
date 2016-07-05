@@ -43,8 +43,7 @@
 (defvar rmail-file-name)        ; From rmail.el
 
 ;; Install the link type
-(org-add-link-type "rmail" 'org-rmail-open)
-(add-hook 'org-store-link-functions 'org-rmail-store-link)
+(org-link-set-parameters "rmail" :follow #'org-rmail-open :store #'org-rmail-store-link)
 
 ;; Implementation
 (defun org-rmail-store-link ()
