@@ -3300,12 +3300,16 @@ can define them in the file with
   ,#+LINK: google    http://www.google.com/search?q=%s
 #+end_src
 
-{{{noindent}}} In-buffer completion (see [[Completion]]) can be used after
-{{{samp([)}}} to complete link abbreviations.  You may also define a
-function ~org-PREFIX-complete-link~ that implements special (e.g.,
-completion) support for inserting such a link with {{{kbd(C-c C-l)}}}.
-Such a function should not accept any arguments, and return the full
-link with prefix.
+{{{noindent}}} In-buffer completion (see [[Completion]]) can be used
+after {{{samp([)}}} to complete link abbreviations.  You may also
+define a function that implements special (e.g., completion) support
+for inserting such a link with {{{kbd(C-c C-l)}}}.  Such a function
+should not accept any arguments, and return the full link with
+prefix.  You can set the link completion function like this:
+
+#+BEGIN_SRC emacs-lisp
+(org-link-set-parameter "type" :complete #'some-completion-function)
+#+END_SRC
 
 ** Search options
    :PROPERTIES:
@@ -16998,10 +17002,9 @@ description when the link is later inserted into an Org buffer with
 {{{kbd(C-c C-l)}}}.
 
 When it makes sense for your new link type, you may also define a
-function ~org-PREFIX-complete-link~ that implements special (e.g.,
-completion) support for inserting such a link with {{{kbd(C-c C-l)}}}.
-Such a function should not accept any arguments, and return the full
-link with prefix.
+function that implements special (e.g., completion) support for
+inserting such a link with {{{kbd(C-c C-l)}}}.  Such a function should
+not accept any arguments, and return the full link with prefix.
 
 ** Context-sensitive commands
    :PROPERTIES:
@@ -19181,8 +19184,8 @@ from the list of stored links.  To keep it in the list later use, use a
 triple {{{kbd(C-u)}}} prefix argument to {{{kbd(C-c C-l)}}}, or
 configure the option ~org-keep-stored-link-after-insertion~.
 
-[fn:37] This works by calling a special function
-~org-PREFIX-complete-link~.
+[fn:37] This works if a function has been defined in the ~:complete~
+property of a link in ~org-link-parameters~.
 
 [fn:38] See the variable ~org-display-internal-link-with-indirect-buffer~.
 
