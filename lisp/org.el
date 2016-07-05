@@ -6168,14 +6168,67 @@ by a #."
   (when (and (re-search-forward org-bracket-link-regexp limit t)
 	     (not (org-in-src-block-p)))
     (let* ((hl (match-string-no-properties 1))
-	   (help (concat "LINK: " (save-match-data (org-link-unescape hl))))
-	   (ip (list 'invisible 'org-link
-		     'keymap org-mouse-map 'mouse-face 'highlight
-		     'font-lock-multiline t 'help-echo help
-		     'htmlize-link `(:uri ,hl)))
-	   (vp (list 'keymap org-mouse-map 'mouse-face 'highlight
-		     'font-lock-multiline t 'help-echo help
-		     'htmlize-link `(:uri ,hl))))
+	   (type (save-match-data
+		   (and (string-match org-plain-link-re hl)
+			(match-string-no-properties 1 hl))))
+	   (path (save-match-data
+		   (and (string-match org-plain-link-re hl)
+			(match-string-no-properties 2 hl))))
+	   (link-start (match-beginning 0))
+	   (link-end (match-end 0))
+	   (bracketp t)
+	   (help-echo (org-link-get-parameter type :help-echo))
+	   (help (cond
+		  ((stringp help-echo)
+		   help-echo)
+		  ((functionp help-echo)
+		   help-echo)
+		  (t
+		   (concat "LINK: "
+			   (save-match-data
+			     (org-link-unescape hl))))))
+	   (link-face (org-link-get-parameter type :face))
+	   (face (cond
+		  ;; A function that returns a face
+		  ((functionp link-face)
+		   (funcall link-face path))
+		  ;; a face
+		  ((facep link-face)
+		   link-face)
+		  ;; An anonymous face
+		  ((consp link-face)
+		   link-face)
+		  ;; default
+		  (t
+		   'org-link)))
+	   (keymap (or (org-link-get-parameter type :keymap)
+		       org-mouse-map))
+	   (mouse-face (or (org-link-get-parameter type :mouse-face)
+			   'highlight))
+	   (htmlize (org-link-get-parameter type :htmlize-link))
+	   (htmlize-link (cond
+			  ((functionp htmlize)
+			   (funcall htmlize))
+			  (t
+			   `(:uri ,(format "%s:%s" type path)))))
+	   (activate-func (org-link-get-parameter type :activate-func))
+	   ;; invisible part
+	   (ip (list 'invisible (or
+				 (org-link-get-parameter type :display)
+				 'org-link)
+		     'face face
+		     'keymap keymap
+		     'mouse-face mouse-face
+		     'font-lock-multiline t
+		     'help-echo help
+		     'htmlize-link htmlize-link))
+	   ;; visible part
+	   (vp (list 'keymap keymap
+		     'face face
+		     'mouse-face mouse-face
+		     'font-lock-multiline t
+		     'help-echo help
+		     'htmlize-link htmlize-link)))
       ;; We need to remove the invisible property here.  Table narrowing
       ;; may have made some of this invisible.
       (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
@@ -6195,6 +6248,8 @@ by a #."
 	(org-rear-nonsticky-at (match-end 1))
 	(add-text-properties (match-end 1) (match-end 0) ip)
 	(org-rear-nonsticky-at (match-end 0)))
+      (when activate-func
+	(funcall activate-func link-start link-end path bracketp))
       t)))
 
 (defun org-activate-dates (limit)
