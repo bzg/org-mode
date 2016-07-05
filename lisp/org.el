@@ -10465,7 +10465,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 
 (defun org-link-try-special-completion (type)
   "If there is completion support for link type TYPE, offer it."
-  (let ((fun (intern (concat "org-" type "-complete-link"))))
+  (let ((fun (org-link-get-parameter type :complete)))
     (if (functionp fun)
 	(funcall fun)
       (read-string "Link (no completion support): " (concat type ":")))))
