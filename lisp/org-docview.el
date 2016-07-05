@@ -49,8 +49,10 @@
 (declare-function doc-view-goto-page "doc-view" (page))
 (declare-function image-mode-window-get "image-mode" (prop &optional winprops))
 
-(org-add-link-type "docview" 'org-docview-open 'org-docview-export)
-(add-hook 'org-store-link-functions 'org-docview-store-link)
+(org-link-set-parameters "docview"
+			 :follow #'org-docview-open
+			 :export #'org-docview-export
+			 :store #'org-docview-store-link)
 
 (defun org-docview-export (link description format)
   "Export a docview link from Org files."
