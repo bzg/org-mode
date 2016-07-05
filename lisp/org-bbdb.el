@@ -194,10 +194,12 @@ date year)."
   :group 'org-bbdb-anniversaries
   :require 'bbdb)
 
-
 ;; Install the link type
-(org-add-link-type "bbdb" 'org-bbdb-open 'org-bbdb-export)
-(add-hook 'org-store-link-functions 'org-bbdb-store-link)
+(org-link-set-parameters "bbdb"
+			 :follow #'org-bbdb-open
+			 :export #'org-bbdb-export
+			 :complete #'org-bbdb-complete-link
+			 :store #'org-bbdb-store-link)
 
 ;; Implementation
 (defun org-bbdb-store-link ()
