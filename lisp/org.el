@@ -5928,17 +5928,57 @@ prompted for."
   "Add link properties for plain links."
   (when (and (re-search-forward org-plain-link-re limit t)
 	     (not (org-in-src-block-p)))
-    (let ((face (get-text-property (max (1- (match-beginning 0)) (point-min))
-				   'face))
-	  (link (match-string-no-properties 0)))
+
+    (let* ((face (get-text-property (max (1- (match-beginning 0)) (point-min))
+				    'face))
+	   (link (match-string-no-properties 0))
+	   (type (match-string-no-properties 1))
+	   (path (match-string-no-properties 2))
+	   (link-start (match-beginning 0))
+	   (link-end (match-end 0))
+	   (link-face (org-link-get-parameter type :face))
+	   (help-echo (org-link-get-parameter type :help-echo))
+	   (htmlize-link (org-link-get-parameter type :htmlize-link))
+	   (activate-func (org-link-get-parameter type :activate-func)))
       (unless (if (consp face) (memq 'org-tag face) (eq 'org-tag face))
 	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	(add-text-properties (match-beginning 0) (match-end 0)
-			     (list 'mouse-face 'highlight
-				   'face 'org-link
-				   'htmlize-link `(:uri ,link)
-				   'keymap org-mouse-map))
+			     (list
+			      'mouse-face (or (org-link-get-parameter type :mouse-face)
+					      'highlight)
+			      'face (cond
+				     ;; A function that returns a face
+				     ((functionp link-face)
+				      (funcall link-face path))
+				     ;; a face
+				     ((facep link-face)
+				      link-face)
+				     ;; An anonymous face
+				     ((consp link-face)
+				      link-face)
+				     ;; default
+				     (t
+				      'org-link))
+			      'help-echo (cond
+					  ((stringp help-echo)
+					   help-echo)
+					  ((functionp help-echo)
+					   help-echo)
+					  (t
+					   (concat "LINK: "
+						   (save-match-data
+						     (org-link-unescape link)))))
+			      'htmlize-link (cond
+					     ((functionp htmlize-link)
+					      (funcall htmlize-link path))
+					     (t
+					      `(:uri ,link)))
+			      'keymap (or (org-link-get-parameter type :keymap)
+					  org-mouse-map)
+			      'org-link-start (match-beginning 0)))
 	(org-rear-nonsticky-at (match-end 0))
+	(when activate-func
+	  (funcall activate-func link-start link-end path nil))
 	t))))
 
 (defun org-activate-code (limit)
