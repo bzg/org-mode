@@ -74,8 +74,7 @@ this variable to t."
   :type 'boolean)
 
 ;; Install the link type
-(org-add-link-type "gnus" 'org-gnus-open)
-(add-hook 'org-store-link-functions 'org-gnus-store-link)
+(org-link-set-parameters "gnus" :follow #'org-gnus-open :store #'org-gnus-store-link)
 
 ;; Implementation
 
