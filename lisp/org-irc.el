@@ -71,9 +71,7 @@
 
 ;; Generic functions/config (extend these for other clients)
 
-(add-to-list 'org-store-link-functions 'org-irc-store-link)
-
-(org-add-link-type "irc" 'org-irc-visit nil)
+(org-link-set-parameters "irc" :follow #'org-irc-visit :store #'org-irc-store-link)
 
 (defun org-irc-visit (link)
   "Parse LINK and dispatch to the correct function based on the client found."
