@@ -70,7 +70,7 @@
       (save-match-data
         (when (looking-at "^[ \t]*#\\+\\(begin\\|end\\)_src")
           (setq info (org-babel-get-src-block-info 'light)
-                lang (propertize (nth 0 info) 'face 'font-lock-string-face)
+                lang (propertize (or (nth 0 info) "no lang") 'face 'font-lock-string-face)
                 hdr-args (nth 2 info))
           (concat
            lang
