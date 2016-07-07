@@ -4073,7 +4073,7 @@ meant to be translated with `org-export-data' or alike."
 ;;;; For Links
 ;;
 ;; `org-export-custom-protocol-maybe' handles custom protocol defined
-;; with `org-add-link-type', which see.
+;; in `org-link-parameters'.
 ;;
 ;; `org-export-get-coderef-format' returns an appropriate format
 ;; string for coderefs.

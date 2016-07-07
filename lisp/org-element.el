@@ -185,7 +185,7 @@ specially in `org-element--object-lex'.")
 		"\\)\\)")
 	org-element--object-regexp
 	(mapconcat #'identity
-		   (let ((link-types (regexp-opt org-link-types)))
+		   (let ((link-types (regexp-opt (org-link-types))))
 		     (list
 		      ;; Sub/superscript.
 		      "\\(?:[_^][-{(*+.,[:alnum:]]\\)"
@@ -3108,7 +3108,7 @@ Assume point is at the beginning of the link."
 	      (string-match "\\`\\.\\.?/" raw-link))
 	  (setq type "file")
 	  (setq path raw-link))
-	 ;; Explicit type (http, irc, bbdb...).  See `org-link-types'.
+	 ;; Explicit type (http, irc, bbdb...).
 	 ((string-match org-link-types-re raw-link)
 	  (setq type (match-string 1 raw-link))
 	  (setq path (substring raw-link (match-end 0))))

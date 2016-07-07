@@ -195,6 +195,37 @@ is, use SPECS to define the face."
     specs))
 (make-obsolete 'org-compatible-face "you can remove it." "Org 9.0")
 
+(defun org-add-link-type (type &optional follow export)
+  "Add a new TYPE link.
+FOLLOW and EXPORT are two functions.
+
+FOLLOW should take the link path as the single argument and do whatever
+is necessary to follow the link, for example find a file or display
+a mail message.
+
+EXPORT should format the link path for export to one of the export formats.
+It should be a function accepting three arguments:
+
+  path    the path of the link, the text after the prefix (like \"http:\")
+  desc    the description of the link, if any
+  format  the export format, a symbol like `html' or `latex' or `ascii'.
+
+The function may use the FORMAT information to return different values
+depending on the format.  The return value will be put literally into
+the exported file.  If the return value is nil, this means Org should
+do what it normally does with links which do not have EXPORT defined.
+
+Org mode has a built-in default for exporting links.  If you are happy with
+this default, there is no need to define an export function for the link
+type.  For a simple example of an export function, see `org-bbdb.el'.
+
+If TYPE already exists, update it with the arguments.
+See `org-link-parameters' for documentation on the other parameters."
+  (org-link-set-parameters type :follow follow :export export)
+  (message "Created %s link." type))
+
+(make-obsolete 'org-add-link-type "org-link-add." "Org 9.0")
+
 
 ;;; Miscellaneous functions
 
