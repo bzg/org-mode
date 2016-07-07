@@ -147,7 +147,7 @@
              (string= lang "golang")) (when (require 'go-eldoc nil t)
                                         (go-eldoc--documentation-function)))
            (t (let ((doc-fun (org-eldoc-get-mode-local-documentation-function lang)))
-                (when (fboundp doc-fun) (funcall doc-fun))))))))
+                (when (functionp doc-fun) (funcall doc-fun))))))))
 
 ;;;###autoload
 (defun org-eldoc-load ()
