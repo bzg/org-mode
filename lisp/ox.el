@@ -4116,7 +4116,7 @@ The function ignores links with an implicit type (e.g.,
   (let ((type (org-element-property :type link)))
     (unless (or (member type '("coderef" "custom-id" "fuzzy" "radio"))
 		(not backend))
-      (let ((protocol (nth 2 (assoc type org-link-protocols))))
+      (let ((protocol (org-link-get-parameter type :export)))
 	(and (functionp protocol)
 	     (funcall protocol
 		      (org-link-unescape (org-element-property :path link))
