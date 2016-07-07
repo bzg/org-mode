@@ -74,7 +74,7 @@
       (save-match-data
         (when (looking-at "^[ \t]*#\\+\\(begin\\|end\\)_src")
           (setq info (org-babel-get-src-block-info 'light)
-                lang (propertize (nth 0 info) 'face 'font-lock-string-face)
+                lang (propertize (or (nth 0 info) "no lang") 'face 'font-lock-string-face)
                 hdr-args (nth 2 info))
           (concat
            lang
@@ -155,7 +155,7 @@
              (string= lang "golang")) (when (require 'go-eldoc nil t)
                                         (go-eldoc--documentation-function)))
            (t (let ((doc-fun (org-eldoc-get-mode-local-documentation-function lang)))
-                (when (fboundp doc-fun) (funcall doc-fun))))))))
+                (when (functionp doc-fun) (funcall doc-fun))))))))
 
 ;;;###autoload
 (defun org-eldoc-load ()
