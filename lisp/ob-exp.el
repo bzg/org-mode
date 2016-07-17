@@ -34,7 +34,6 @@
 (declare-function org-export-copy-buffer "ox" ())
 (declare-function org-fill-template "org" (template alist))
 (declare-function org-get-indentation "org" (&optional line))
-(declare-function org-heading-components "org" ())
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
 
 (defvar org-src-preserve-indentation)
