@@ -22645,28 +22645,27 @@ process."
 	 (base-name (file-name-sans-extension source-name))
 	 (full-name (file-truename source))
 	 (out-dir (file-name-directory source))
-	 ;; Properly set working directory for compilation.
-	 (default-directory (file-name-directory full-name))
 	 (time (current-time))
 	 (err-msg (if (stringp err-msg) (concat ".  " err-msg) "")))
     (save-window-excursion
-      (pcase process
-        ((pred functionp) (funcall process (shell-quote-argument source)))
-        ((pred consp)
-         (let ((log-buf (and log-buf (get-buffer-create log-buf)))
-               (spec (append spec
-			     `((?b . ,(shell-quote-argument base-name))
-			       (?f . ,(shell-quote-argument source-name))
-			       (?F . ,(shell-quote-argument full-name))
-			       (?o . ,(shell-quote-argument out-dir))))))
-           (dolist (command process)
-             (shell-command (format-spec command spec) log-buf))))
-        (_ (error "No valid command to process %S%s" source err-msg)))
-      ;; Check for process failure.
-      (let ((output (concat out-dir base-name "." ext)))
-	(unless (org-file-newer-than-p output time)
-	  (error (format "File %S wasn't produced%s" output err-msg)))
-	output))))
+      (let ((default-directory (file-name-directory full-name)))
+	(pcase process
+	  ((pred functionp) (funcall process (shell-quote-argument source)))
+	  ((pred consp)
+	   (let ((log-buf (and log-buf (get-buffer-create log-buf)))
+		 (spec (append spec
+			       `((?b . ,(shell-quote-argument base-name))
+				 (?f . ,(shell-quote-argument source-name))
+				 (?F . ,(shell-quote-argument full-name))
+				 (?o . ,(shell-quote-argument out-dir))))))
+	     (dolist (command process)
+	       (shell-command (format-spec command spec) log-buf))))
+	  (_ (error "No valid command to process %S%s" source err-msg)))))
+    ;; Check for process failure.
+    (let ((output (concat out-dir base-name "." ext)))
+      (unless (org-file-newer-than-p output time)
+	(error (format "File %S wasn't produced%s" output err-msg)))
+      output)))
 
 ;;; Indentation
 
