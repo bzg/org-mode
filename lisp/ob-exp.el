@@ -30,6 +30,7 @@
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
+(declare-function org-escape-code-in-string "org-src" (s))
 (declare-function org-export-copy-buffer "ox" ())
 (declare-function org-fill-template "org" (template alist))
 (declare-function org-get-indentation "org" (&optional line))
@@ -341,7 +342,7 @@ replaced with its value."
        org-babel-exp-inline-code-template
        org-babel-exp-code-template)
    `(("lang"  . ,(nth 0 info))
-     ("body"  . ,(nth 1 info))
+     ("body"  . ,(org-escape-code-in-string (nth 1 info)))
      ("switches" . ,(let ((f (nth 3 info)))
 		      (and (org-string-nw-p f) (concat " " f))))
      ("flags" . ,(let ((f (assq :flags (nth 2 info))))
