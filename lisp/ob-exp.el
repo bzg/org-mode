@@ -48,6 +48,7 @@
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-id-get "org-id" (&optional pom create prefix))
+(declare-function org-escape-code-in-string "org-src" (s))
 
 (defcustom org-export-babel-evaluate t
   "Switch controlling code evaluation during export.
@@ -385,7 +386,7 @@ replaced with its value."
        org-babel-exp-inline-code-template
        org-babel-exp-code-template)
    `(("lang"  . ,(nth 0 info))
-     ("body"  . ,(nth 1 info))
+     ("body"  . ,(org-escape-code-in-string (nth 1 info)))
      ("switches" . ,(let ((f (nth 3 info)))
 		      (and (org-string-nw-p f) (concat " " f))))
      ("flags" . ,(let ((f (assq :flags (nth 2 info))))
