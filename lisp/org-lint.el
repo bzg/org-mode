@@ -96,6 +96,7 @@
 ;;   - incomplete drawers
 ;;   - indented diary-sexps
 ;;   - obsolete QUOTE section
+;;   - obsolete "file+application" link
 
 
 ;;; Code:
@@ -273,7 +274,11 @@
     :name 'quote-section
     :description "Report obsolete QUOTE section"
     :categories '(obsolete)
-    :trust 'low))
+    :trust 'low)
+   (make-org-lint-checker
+    :name 'file-application
+    :description "Report obsolete \"file+application\" link"
+    :categories '(link obsolete)))
   "List of all available checkers.")
 
 (defun org-lint--collect-duplicates
@@ -848,6 +853,14 @@ Use \"export %s\" instead"
 		 (string-prefix-p (concat org-comment-string " QUOTE ") title))
 	     (list (org-element-property :begin h)
 		   "Deprecated QUOTE section"))))))
+
+(defun org-lint-file-application (ast)
+  (org-element-map ast 'link
+    (lambda (l)
+      (let ((app (org-element-property :application l)))
+	(and app
+	     (list (org-element-property :begin l)
+		   (format "Deprecated \"file+%s\" link type" app)))))))
 
 (defun org-lint-wrong-header-argument (ast)
   (let* ((reports)

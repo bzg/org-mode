@@ -485,7 +485,10 @@ now shift to the first possible future occurrence, even if the
 occurrence is later the same day the task is completed.  (Timestamps
 already in the future are still shifted one time further into the
 future.)
-
+*** ~file+emacs~ and ~file+sys~ link types are deprecated
+They are still supported in Org 9.0 but will eventually be removed in
+a later release.  Use ~file~ link type along with universal arguments
+to force opening it in either Emacs or with system application.
 * Version 8.3
 
 ** Incompatible changes

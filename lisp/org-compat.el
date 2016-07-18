@@ -226,6 +226,13 @@ See `org-link-parameters' for documentation on the other parameters."
 
 (make-obsolete 'org-add-link-type "org-link-add." "Org 9.0")
 
+;;;; Obsolete link types
+
+(with-eval-after-load 'org
+  (org-link-set-parameters "file+emacs") ;since Org 9.0
+  (org-link-set-parameters "file+sys"))	 ;since Org 9.0
+
+
 
 ;;; Miscellaneous functions
 

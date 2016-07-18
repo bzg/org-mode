@@ -3554,8 +3554,6 @@ file}@footnote{ Headline searches always match the exact headline, ignoring
 spaces and cookies.  If the headline is not found and the value of the option
 @code{org-link-search-must-match-exact-headline} is @code{query-to-create},
 then the user will be queried to create it.}
-file+sys:/path/to/file                    @r{open via OS, like double-click}
-file+emacs:/path/to/file                  @r{force opening by Emacs}
 docview:papers/last.pdf::NNN              @r{open in doc-view mode at page}
 id:B7423F4D-2E8A-471B-8810-C40F074717E9   @r{Link to heading by ID}
 news:comp.emacs                           @r{Usenet link}
