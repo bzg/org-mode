@@ -1759,12 +1759,19 @@ calls `table-recognize-table'."
 The value of this is taken from the #+LINK lines.")
 
 (defcustom org-link-parameters
-  '(("file" :complete org-file-complete-link)
+  '(("doi" :follow org--open-doi-link)
+    ("elisp" :follow org--open-elisp-link)
+    ("file" :complete org-file-complete-link)
     ("file+emacs" :follow (lambda (path) (org--open-file-link path '(4))))
     ("file+sys" :follow (lambda (path) (org--open-file-link path 'system)))
-    ("http") ("https") ("ftp") ("mailto")
-    ("news") ("shell") ("elisp")
-    ("doi") ("message") ("help"))
+    ("ftp" :follow (lambda (path) (browse-url (concat "ftp:" path))))
+    ("help" :follow org--open-help-link)
+    ("http" :follow (lambda (path) (browse-url (concat "http:" path))))
+    ("https" :follow (lambda (path) (browse-url (concat "https:" path))))
+    ("mailto" :follow (lambda (path) (browse-url (concat "mailto:" path))))
+    ("message" :follow (lambda (path) (browse-url (concat "message:" path))))
+    ("news" :follow (lambda (path) (browse-url (concat "news:" path))))
+    ("shell" :follow org--open-shell-link))
   "An alist of properties that defines all the links in Org mode.
 The key in each association is a string of the link type.
 Subsequent optional elements make up a p-list of link properties.
@@ -10730,8 +10737,32 @@ Functions in this hook must return t if they identify and follow
 a link at point.  If they don't find anything interesting at point,
 they must return nil.")
 
-(defvar org-link-search-inhibit-query nil) ;; dynamically scoped
-(defvar clean-buffer-list-kill-buffer-names) ; Defined in midnight.el
+(defvar org-link-search-inhibit-query nil)
+(defvar clean-buffer-list-kill-buffer-names) ;Defined in midnight.el
+(defun org--open-doi-link (path)
+  "Open a \"doi\" type link.
+PATH is a the path to search for, as a string."
+  (browse-url (url-encode-url (concat org-doi-server-url path))))
+
+(defun org--open-elisp-link (path)
+  "Open a \"elisp\" type link.
+PATH is the sexp to evaluate, as a string."
+  (let ((cmd path))
+    (if (or (and (org-string-nw-p
+		  org-confirm-elisp-link-not-regexp)
+		 (org-string-match-p
+		  org-confirm-elisp-link-not-regexp cmd))
+	    (not org-confirm-elisp-link-function)
+	    (funcall org-confirm-elisp-link-function
+		     (format "Execute \"%s\" as elisp? "
+			     (org-add-props cmd nil
+			       'face 'org-warning))))
+	(message "%s => %s" cmd
+		 (if (eq (string-to-char cmd) ?\()
+		     (eval (read cmd))
+		   (call-interactively (read cmd))))
+      (user-error "Abort"))))
+
 (defun org--open-file-link (path app)
   "Open PATH using APP.
 
@@ -10755,6 +10786,37 @@ a system application instead."
 		  (list (string-to-number option)))
 		 (t (list nil
 			  (org-link-unescape option)))))))
+
+(defun org--open-help-link (path)
+  "Open a \"help\" type link.
+PATH is a symbol name, as a string."
+  (pcase (intern path)
+    ((and (pred fboundp) variable) (describe-function variable))
+    ((and (pred boundp) function) (describe-variable function))
+    (name (user-error "Unknown function or variable: %s" name))))
+
+(defun org--open-shell-link (path)
+  "Open a \"shell\" type link.
+PATH is the command to execute, as a string."
+  (let ((buf (generate-new-buffer "*Org Shell Output*"))
+	(cmd path))
+    (if (or (and (org-string-nw-p
+		  org-confirm-shell-link-not-regexp)
+		 (string-match
+		  org-confirm-shell-link-not-regexp cmd))
+	    (not org-confirm-shell-link-function)
+	    (funcall org-confirm-shell-link-function
+		     (format "Execute \"%s\" in shell? "
+			     (org-add-props cmd nil
+			       'face 'org-warning))))
+	(progn
+	  (message "Executing %s" cmd)
+	  (shell-command cmd buf)
+	  (when (featurep 'midnight)
+	    (setq clean-buffer-list-kill-buffer-names
+		  (cons (buffer-name buf)
+			clean-buffer-list-kill-buffer-names))))
+      (user-error "Abort"))))
 
 (defun org-open-at-point (&optional arg reference-buffer)
   "Open link, timestamp, footnote or tags at point.
@@ -10894,55 +10956,6 @@ link in a property drawer line."
 				   (t (list nil
 					    (org-link-unescape option)))))))))
 	       ((functionp (org-link-get-parameter type :follow))
-		(funcall (org-link-get-parameter type :follow) path))
-	       ((equal type "help")
-		(let ((f-or-v (intern path)))
-		  (cond ((fboundp f-or-v) (describe-function f-or-v))
-			((boundp f-or-v) (describe-variable f-or-v))
-			(t (error "Not a known function or variable")))))
-	       ((member type '("http" "https" "ftp" "mailto" "news"))
-		(browse-url (url-encode-url (concat type ":" path))))
-	       ((equal type "doi")
-		(browse-url (url-encode-url (concat org-doi-server-url path))))
-	       ((equal type "message") (browse-url (concat type ":" path)))
-	       ((equal type "shell")
-		(let ((buf (generate-new-buffer "*Org Shell Output*"))
-		      (cmd path))
-		  (if (or (and (org-string-nw-p
-				org-confirm-shell-link-not-regexp)
-			       (string-match
-				org-confirm-shell-link-not-regexp cmd))
-			  (not org-confirm-shell-link-function)
-			  (funcall org-confirm-shell-link-function
-				   (format "Execute \"%s\" in shell? "
-					   (org-add-props cmd nil
-					     'face 'org-warning))))
-		      (progn
-			(message "Executing %s" cmd)
-			(shell-command cmd buf)
-			(when (featurep 'midnight)
-			  (setq clean-buffer-list-kill-buffer-names
-				(cons (buffer-name buf)
-				      clean-buffer-list-kill-buffer-names))))
-		    (user-error "Abort"))))
-	       ((equal type "elisp")
-		(let ((cmd path))
-		  (if (or (and (org-string-nw-p
-				org-confirm-elisp-link-not-regexp)
-			       (org-string-match-p
-				org-confirm-elisp-link-not-regexp cmd))
-			  (not org-confirm-elisp-link-function)
-			  (funcall org-confirm-elisp-link-function
-				   (format "Execute \"%s\" as elisp? "
-					   (org-add-props cmd nil
-					     'face 'org-warning))))
-		      (message "%s => %s" cmd
-			       (if (eq (string-to-char cmd) ?\()
-				   (eval (read cmd))
-				 (call-interactively (read cmd))))
-		    (user-error "Abort"))))
-	       ((equal type "id")
-		(require 'org-id)
 		(funcall (org-link-get-parameter type :follow) path))
 	       ((member type '("coderef" "custom-id" "fuzzy" "radio"))
 		(unless (run-hook-with-args-until-success
