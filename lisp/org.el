@@ -1762,8 +1762,8 @@ The value of this is taken from the #+LINK lines.")
   '(("doi" :follow org--open-doi-link)
     ("elisp" :follow org--open-elisp-link)
     ("file" :complete org-file-complete-link)
-    ("file+emacs" :follow (lambda (path) (org--open-file-link path '(4))))
-    ("file+sys" :follow (lambda (path) (org--open-file-link path 'system)))
+    ("file+emacs")
+    ("file+sys")
     ("ftp" :follow (lambda (path) (browse-url (concat "ftp:" path))))
     ("help" :follow org--open-help-link)
     ("http" :follow (lambda (path) (browse-url (concat "http:" path))))
@@ -10762,30 +10762,6 @@ PATH is the sexp to evaluate, as a string."
 		     (eval (read cmd))
 		   (call-interactively (read cmd))))
       (user-error "Abort"))))
-
-(defun org--open-file-link (path app)
-  "Open PATH using APP.
-
-PATH is from a file link, and can have the following syntax:
-     [[file:~/code/main.c::255]]
-     [[file:~/xx.org::My Target]]
-     [[file:~/xx.org::*My Target]]
-     [[file:~/xx.org::#my-custom-id]]
-     [[file:~/xx.org::/regexp/]]
-
-If APP is non-nil, open PATH in Emacs.  If it is `system', use
-a system application instead."
-  (let* ((fields (split-string path "::"))
-	 (option (and (cdr fields)
-		      (mapconcat #'identity (cdr fields) ""))))
-    (apply #'org-open-file
-	   (car fields)
-	   app
-	   (cond ((not option) nil)
-		 ((string-match-p "\\`[0-9]+\\'" option)
-		  (list (string-to-number option)))
-		 (t (list nil
-			  (org-link-unescape option)))))))
 
 (defun org--open-help-link (path)
   "Open a \"help\" type link.
