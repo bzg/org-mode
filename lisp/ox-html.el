@@ -30,11 +30,11 @@
 
 ;;; Dependencies
 
+(require 'cl-lib)
+(require 'format-spec)
 (require 'ox)
 (require 'ox-publish)
-(require 'format-spec)
-(eval-when-compile (require 'cl) (require 'table nil 'noerror))
-(require 'cl-lib)
+(require 'table)
 
 
 ;;; Function Declarations
@@ -616,21 +616,21 @@ export back-end currently used."
 					   options))
 			(match-string 1 options)
 		      default)))
-	  (case opt
-	    (path (setq template
-			(replace-regexp-in-string
-			 "%SCRIPT_PATH" val template t t)))
-	    (sdepth (when (integerp (read val))
-		      (setq sdepth (min (read val) sdepth))))
-	    (tdepth (when (integerp (read val))
-		      (setq tdepth (min (read val) tdepth))))
-	    (otherwise (setq val
-			     (cond
-			      ((or (eq val t) (equal val "t")) "1")
-			      ((or (eq val nil) (equal val "nil")) "0")
-			      ((stringp val) val)
-			      (t (format "%s" val))))
-		       (push (cons var val) style)))))
+	  (pcase opt
+	    (`path (setq template
+			 (replace-regexp-in-string
+			  "%SCRIPT_PATH" val template t t)))
+	    (`sdepth (when (integerp (read val))
+		       (setq sdepth (min (read val) sdepth))))
+	    (`tdepth (when (integerp (read val))
+		       (setq tdepth (min (read val) tdepth))))
+	    (_ (setq val
+		     (cond
+		      ((or (eq val t) (equal val "t")) "1")
+		      ((or (eq val nil) (equal val "nil")) "0")
+		      ((stringp val) val)
+		      (t (format "%s" val))))
+	       (push (cons var val) style)))))
       ;; Now we set the depth of the *generated* TOC to SDEPTH,
       ;; because the toc will actually determine the splitting.  How
       ;; much of the toc will actually be displayed is governed by the
@@ -2323,10 +2323,12 @@ of listings as a string, or nil if it is empty."
 		     (concat
 		      "<li>"
 		      (if (not label)
-			  (concat (format initial-fmt (incf count)) " " title)
+			  (concat (format initial-fmt (cl-incf count))
+				  " "
+				  title)
 			(format "<a href=\"#%s\">%s %s</a>"
 				label
-				(format initial-fmt (incf count))
+				(format initial-fmt (cl-incf count))
 				title))
 		      "</li>")))
 		 lol-entries "\n"))
@@ -2360,10 +2362,12 @@ of tables as a string, or nil if it is empty."
 		     (concat
 		      "<li>"
 		      (if (not label)
-			  (concat (format initial-fmt (incf count)) " " title)
+			  (concat (format initial-fmt (cl-incf count))
+				  " "
+				  title)
 			(format "<a href=\"#%s\">%s %s</a>"
 				label
-				(format initial-fmt (incf count))
+				(format initial-fmt (cl-incf count))
 				title))
 		      "</li>")))
 		 lol-entries "\n"))
@@ -2674,8 +2678,8 @@ INFO is a plist holding contextual information.  See
 			org-html-checkbox-types)))))
 
 (defun org-html-format-list-item (contents type checkbox info
-					     &optional term-counter-id
-					     headline)
+					   &optional term-counter-id
+					   headline)
   "Format a list item into HTML."
   (let ((class (if checkbox
 		   (format " class=\"%s\""
@@ -2684,20 +2688,20 @@ INFO is a plist holding contextual information.  See
 			  (and checkbox " ")))
 	(br (org-html-close-tag "br" nil info)))
     (concat
-     (case type
-       (ordered
+     (pcase type
+       (`ordered
 	(let* ((counter term-counter-id)
 	       (extra (if counter (format " value=\"%s\"" counter) "")))
 	  (concat
 	   (format "<li%s%s>" class extra)
 	   (when headline (concat headline br)))))
-       (unordered
+       (`unordered
 	(let* ((id term-counter-id)
 	       (extra (if id (format " id=\"%s\"" id) "")))
 	  (concat
 	   (format "<li%s%s>" class extra)
 	   (when headline (concat headline br)))))
-       (descriptive
+       (`descriptive
 	(let* ((term term-counter-id))
 	  (setq term (or term "(no term)"))
 	  ;; Check-boxes in descriptive lists are associated to tag.
@@ -2706,10 +2710,10 @@ INFO is a plist holding contextual information.  See
 		  "<dd>"))))
      (unless (eq type 'descriptive) checkbox)
      (and contents (org-trim contents))
-     (case type
-       (ordered "</li>")
-       (unordered "</li>")
-       (descriptive "</dd>")))))
+     (pcase type
+       (`ordered "</li>")
+       (`unordered "</li>")
+       (`descriptive "</dd>")))))
 
 (defun org-html-item (item contents info)
   "Transcode an ITEM element from Org to HTML.
@@ -2842,13 +2846,13 @@ if its description is a single link targeting an image file."
        (org-element-map (org-element-contents link)
 	   (cons 'plain-text org-element-all-objects)
 	 (lambda (obj)
-	   (case (org-element-type obj)
-	     (plain-text (org-string-nw-p obj))
-	     (link (if (= link-count 1) t
-		     (incf link-count)
-		     (not (org-export-inline-image-p
-			   obj (plist-get info :html-inline-image-rules)))))
-	     (otherwise t)))
+	   (pcase (org-element-type obj)
+	     (`plain-text (org-string-nw-p obj))
+	     (`link (if (= link-count 1) t
+		      (cl-incf link-count)
+		      (not (org-export-inline-image-p
+			    obj (plist-get info :html-inline-image-rules)))))
+	     (_ t)))
          info t)))))
 
 (defvar org-html-standalone-image-predicate)
@@ -2870,9 +2874,9 @@ further.  For example, to check for only captioned standalone
 images, set it to:
 
   (lambda (paragraph) (org-element-property :caption paragraph))"
-  (let ((paragraph (case (org-element-type element)
-		     (paragraph element)
-		     (link (org-export-get-parent element)))))
+  (let ((paragraph (pcase (org-element-type element)
+		     (`paragraph element)
+		     (`link (org-export-get-parent element)))))
     (and (eq (org-element-type paragraph) 'paragraph)
 	 (or (not (fboundp 'org-html-standalone-image-predicate))
 	     (funcall org-html-standalone-image-predicate paragraph))
@@ -2880,13 +2884,13 @@ images, set it to:
 	   (let ((link-count 0))
 	     (org-element-map (org-element-contents paragraph)
 		 (cons 'plain-text org-element-all-objects)
-	       #'(lambda (obj)
-		   (when (case (org-element-type obj)
-			   (plain-text (org-string-nw-p obj))
-			   (link (or (> (incf link-count) 1)
-				     (not (org-html-inline-image-p obj info))))
-			   (otherwise t))
-		     (throw 'exit nil)))
+	       (lambda (obj)
+		 (when (pcase (org-element-type obj)
+			 (`plain-text (org-string-nw-p obj))
+			 (`link (or (> (cl-incf link-count) 1)
+				    (not (org-html-inline-image-p obj info))))
+			 (_ t))
+		   (throw 'exit nil)))
 	       info nil 'link)
 	     (= link-count 1))))))
 
@@ -2982,9 +2986,9 @@ INFO is a plist holding contextual information.  See
       (let ((destination (if (string= type "fuzzy")
 			     (org-export-resolve-fuzzy-link link info)
 			   (org-export-resolve-id-link link info))))
-	(case (org-element-type destination)
+	(pcase (org-element-type destination)
 	  ;; ID link points to an external file.
-	  (plain-text
+	  (`plain-text
 	   (let ((fragment (concat "ID-" path))
 		 ;; Treat links to ".org" files as ".html", if needed.
 		 (path (funcall link-org-files-as-html-maybe
@@ -2992,13 +2996,13 @@ INFO is a plist holding contextual information.  See
 	     (format "<a href=\"%s#%s\"%s>%s</a>"
 		     path fragment attributes (or desc destination))))
 	  ;; Fuzzy link points nowhere.
-	  ((nil)
+	  (`nil
 	   (format "<i>%s</i>"
 		   (or desc
 		       (org-export-data
 			(org-element-property :raw-link link) info))))
 	  ;; Link points to a headline.
-	  (headline
+	  (`headline
 	   (let ((href (or (org-element-property :CUSTOM_ID destination)
 			   (org-export-get-reference destination info)))
 		 ;; What description to use?
@@ -3018,7 +3022,7 @@ INFO is a plist holding contextual information.  See
 			 (org-element-property :title destination) info)))))
 	     (format "<a href=\"#%s\"%s>%s</a>" href attributes desc)))
 	  ;; Fuzzy link points to a target or an element.
-	  (t
+	  (_
 	   (let* ((ref (org-export-get-reference destination info))
 		  (org-html-standalone-image-predicate
 		   #'org-html--has-caption-p)
@@ -3128,19 +3132,19 @@ the plist used as a communication channel."
   "Insert the beginning of the HTML list depending on TYPE.
 When ARG1 is a string, use it as the start parameter for ordered
 lists."
-  (case type
-    (ordered
+  (pcase type
+    (`ordered
      (format "<ol class=\"org-ol\"%s>"
 	     (if arg1 (format " start=\"%d\"" arg1) "")))
-    (unordered "<ul class=\"org-ul\">")
-    (descriptive "<dl class=\"org-dl\">")))
+    (`unordered "<ul class=\"org-ul\">")
+    (`descriptive "<dl class=\"org-dl\">")))
 
 (defun org-html-end-plain-list (type)
   "Insert the end of the HTML list depending on TYPE."
-  (case type
-    (ordered "</ol>")
-    (unordered "</ul>")
-    (descriptive "</dl>")))
+  (pcase type
+    (`ordered "</ol>")
+    (`unordered "</ul>")
+    (`descriptive "</dl>")))
 
 (defun org-html-plain-list (plain-list contents _info)
   "Transcode a PLAIN-LIST element from Org to HTML.
@@ -3474,59 +3478,57 @@ INFO is a plist used as a communication channel."
   "Transcode a TABLE element from Org to HTML.
 CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
-  (case (org-element-property :type table)
-    ;; Case 1: table.el table.  Convert it using appropriate tools.
-    (table.el (org-html-table--table.el-table table info))
-    ;; Case 2: Standard table.
-    (t
-     (let* ((caption (org-export-get-caption table))
-	    (number (org-export-get-ordinal
-		     table info nil #'org-html--has-caption-p))
-	    (attributes
-	     (org-html--make-attribute-string
-	      (org-combine-plists
-	       (and (org-element-property :name table)
-		    (list :id (org-export-get-reference table info)))
-	       (and (not (org-html-html5-p info))
-		    (plist-get info :html-table-attributes))
-	       (org-export-read-attribute :attr_html table))))
-	    (alignspec
-	     (if (and (boundp 'org-html-format-table-no-css)
-		      org-html-format-table-no-css)
-		 "align=\"%s\"" "class=\"org-%s\""))
-	    (table-column-specs
-	     (function
-	      (lambda (table info)
-		(mapconcat
-		 (lambda (table-cell)
-		   (let ((alignment (org-export-table-cell-alignment
-				     table-cell info)))
-		     (concat
-		      ;; Begin a colgroup?
-		      (when (org-export-table-cell-starts-colgroup-p
-			     table-cell info)
-			"\n<colgroup>")
-		      ;; Add a column.  Also specify its alignment.
-		      (format "\n%s"
-			      (org-html-close-tag
-			       "col" (concat " " (format alignspec alignment)) info))
-		      ;; End a colgroup?
-		      (when (org-export-table-cell-ends-colgroup-p
-			     table-cell info)
-			"\n</colgroup>"))))
-		 (org-html-table-first-row-data-cells table info) "\n")))))
-       (format "<table%s>\n%s\n%s\n%s</table>"
-	       (if (equal attributes "") "" (concat " " attributes))
-	       (if (not caption) ""
-		 (format (if (plist-get info :html-table-caption-above)
-			     "<caption class=\"t-above\">%s</caption>"
-			   "<caption class=\"t-bottom\">%s</caption>")
-			 (concat
-			  "<span class=\"table-number\">"
-                          (format (org-html--translate "Table %d:" info) number)
-			  "</span> " (org-export-data caption info))))
-	       (funcall table-column-specs table info)
-	       contents)))))
+  (if (eq (org-element-property :type table) 'table.el)
+      ;; "table.el" table.  Convert it using appropriate tools.
+      (org-html-table--table.el-table table info)
+    ;; Standard table.
+    (let* ((caption (org-export-get-caption table))
+	   (number (org-export-get-ordinal
+		    table info nil #'org-html--has-caption-p))
+	   (attributes
+	    (org-html--make-attribute-string
+	     (org-combine-plists
+	      (and (org-element-property :name table)
+		   (list :id (org-export-get-reference table info)))
+	      (and (not (org-html-html5-p info))
+		   (plist-get info :html-table-attributes))
+	      (org-export-read-attribute :attr_html table))))
+	   (alignspec
+	    (if (bound-and-true-p org-html-format-table-no-css)
+		"align=\"%s\""
+	      "class=\"org-%s\""))
+	   (table-column-specs
+	    (lambda (table info)
+	      (mapconcat
+	       (lambda (table-cell)
+		 (let ((alignment (org-export-table-cell-alignment
+				   table-cell info)))
+		   (concat
+		    ;; Begin a colgroup?
+		    (when (org-export-table-cell-starts-colgroup-p
+			   table-cell info)
+		      "\n<colgroup>")
+		    ;; Add a column.  Also specify its alignment.
+		    (format "\n%s"
+			    (org-html-close-tag
+			     "col" (concat " " (format alignspec alignment)) info))
+		    ;; End a colgroup?
+		    (when (org-export-table-cell-ends-colgroup-p
+			   table-cell info)
+		      "\n</colgroup>"))))
+	       (org-html-table-first-row-data-cells table info) "\n"))))
+      (format "<table%s>\n%s\n%s\n%s</table>"
+	      (if (equal attributes "") "" (concat " " attributes))
+	      (if (not caption) ""
+		(format (if (plist-get info :html-table-caption-above)
+			    "<caption class=\"t-above\">%s</caption>"
+			  "<caption class=\"t-bottom\">%s</caption>")
+			(concat
+			 "<span class=\"table-number\">"
+			 (format (org-html--translate "Table %d:" info) number)
+			 "</span> " (org-export-data caption info))))
+	      (funcall table-column-specs table info)
+	      contents))))
 
 ;;;; Target
 
