@@ -463,8 +463,8 @@ agenda view showing the flagged items."
       (when (file-exists-p (expand-file-name
 			    org-mobile-directory "agendas.org"))
 	(insert "* [[file:agendas.org][Agenda Views]]\n"))
-      (pcase-dolist (`(,file . ,link-name) files-alist)
-	(insert (format "* [[file:%s][%s]]\n" file link-name)))
+      (pcase-dolist (`(,_ . ,link-name) files-alist)
+	(insert (format "* [[file:%s][%s]]\n" link-name link-name)))
       (push (cons org-mobile-index-file (md5 (buffer-string)))
 	    org-mobile-checksum-files))
     (when org-mobile-use-encryption
