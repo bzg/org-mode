@@ -1923,6 +1923,25 @@ is t, then new columns should be added as needed"
       (org-table-calc-current-TBLFM)
       (buffer-string)))))
 
+(ert-deftest test-org-table/time-stamps ()
+  "Test time-stamps handling."
+  ;; Standard test.
+  (should
+   (string-match-p
+    "| 1 |"
+    (org-test-with-temp-text
+	"| <2016-07-07 Sun> | <2016-07-08 Fri> |   |\n<point>#+TBLFM: $3=$2-$1"
+      (org-table-calc-current-TBLFM)
+      (buffer-string))))
+  ;; Handle locale specific time-stamps.
+  (should
+   (string-match-p
+    "| 1 |"
+    (org-test-with-temp-text
+	"| <2016-07-07 Do> | <2016-07-08 Fr> |   |\n<point>#+TBLFM: $3=$2-$1"
+      (org-table-calc-current-TBLFM)
+      (buffer-string)))))
+
 
 (ert-deftest test-org-table/orgtbl-ascii-draw ()
   "Test `orgtbl-ascii-draw'."

@@ -2847,18 +2847,22 @@ not overwrite the stored one.  SUPPRESS-ANALYSIS prevents any call to
 				   (string-to-number ev)
 				   duration-output-format) ev))
 
-	  ;; Use <...> time-stamps so that Calc can handle them
-	  (while (string-match (concat "\\[" org-ts-regexp1 "\\]") form)
-	    (setq form (replace-match "<\\1>" nil nil form)))
-	  ;; I18n-ize local time-stamps by setting (system-time-locale "C")
-	  (when (string-match org-ts-regexp2 form)
-	    (let* ((ts (match-string 0 form))
-		   (tsp (apply 'encode-time (save-match-data (org-parse-time-string ts))))
-		   (system-time-locale "C")
-		   (tf (or (and (save-match-data (string-match "[0-9]\\{1,2\\}:[0-9]\\{2\\}" ts))
-				(cdr org-time-stamp-formats))
-			   (car org-time-stamp-formats))))
-	      (setq form (replace-match (format-time-string tf tsp) t t form))))
+	  ;; Use <...> time-stamps so that Calc can handle them.
+	  (setq form
+		(replace-regexp-in-string org-ts-regexp-inactive "<\\1>" form))
+	  ;; Internationalize local time-stamps by setting locale to
+	  ;; "C".
+	  (setq form
+		(replace-regexp-in-string
+		 org-ts-regexp
+		 (lambda (ts)
+		   (let ((system-time-locale "C"))
+		     (format-time-string
+		      (org-time-stamp-format
+		       (string-match-p "[0-9]\\{1,2\\}:[0-9]\\{2\\}" ts))
+		      (apply #'encode-time
+			     (save-match-data (org-parse-time-string ts))))))
+		 form t t))
 
 	  (setq ev (if (and duration (string-match "^[0-9]+:[0-9]+\\(?::[0-9]+\\)?$" form))
 		       form
