@@ -2380,11 +2380,8 @@ If yes, store the formula and apply it."
       (when (string-match "^:?=\\(.*[^=]\\)$" field)
 	(setq named (equal (string-to-char field) ?:)
 	      eq (match-string 1 field))
-	(if (or (fboundp 'calc-eval)
-		(equal (substring eq 0 (min 2 (length eq))) "'("))
-	    (org-table-eval-formula (if named '(4) nil)
-				    (org-table-formula-from-user eq))
-	  (user-error "Calc does not seem to be installed, and is needed to evaluate the formula"))))))
+	(org-table-eval-formula (and named '(4))
+				(org-table-formula-from-user eq))))))
 
 (defvar org-recalc-commands nil
   "List of commands triggering the recalculation of a line.
@@ -2849,8 +2846,7 @@ not overwrite the stored one.  SUPPRESS-ANALYSIS prevents any call to
 		  ev (if duration (org-table-time-seconds-to-string
 				   (string-to-number ev)
 				   duration-output-format) ev))
-	  (or (fboundp 'calc-eval)
-	      (user-error "Calc does not seem to be installed, and is needed to evaluate the formula"))
+
 	  ;; Use <...> time-stamps so that Calc can handle them
 	  (while (string-match (concat "\\[" org-ts-regexp1 "\\]") form)
 	    (setq form (replace-match "<\\1>" nil nil form)))
