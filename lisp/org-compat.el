@@ -51,6 +51,8 @@
   (when (< emacs-major-version 25)
     (defalias 'gui-get-selection 'x-get-selection)))
 
+(declare-function org-link-set-parameters "org" (type &rest rest))
+
 
 ;;; Obsolete aliases (remove them once the next major release is released).
 
