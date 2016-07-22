@@ -32,6 +32,8 @@
 (require 'cl-lib)
 (require 'org-macs)
 
+(declare-function org-link-set-parameters "org" (type &rest rest))
+
 ;; As of Emacs 25.1, `outline-mode' functions are under the 'outline-'
 ;; prefix, `find-tag' is replaced with `xref-find-definition' and
 ;; `x-get-selection' with `gui-get-selection'.
@@ -50,8 +52,6 @@
 (eval-when-compile
   (when (< emacs-major-version 25)
     (defalias 'gui-get-selection 'x-get-selection)))
-
-(declare-function org-link-set-parameters "org" (type &rest rest))
 
 
 ;;; Obsolete aliases (remove them once the next major release is released).
@@ -226,7 +226,7 @@ See `org-link-parameters' for documentation on the other parameters."
   (org-link-set-parameters type :follow follow :export export)
   (message "Created %s link." type))
 
-(make-obsolete 'org-add-link-type "org-link-add." "Org 9.0")
+(make-obsolete 'org-add-link-type "use `org-link-add' instead." "Org 9.0")
 
 ;;;; Obsolete link types
 
