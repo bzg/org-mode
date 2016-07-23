@@ -656,17 +656,17 @@ Advanced topics in ODT export
 
 Texinfo export
 
-* Texinfo export commands::           How to invoke Texinfo export
+* Texinfo export commands::     How to invoke Texinfo export
 * Texinfo specific export settings::  Export settings for Texinfo
-* Document preamble::                 File header, title and copyright page
-* Headings and sectioning structure:: Building document structure
-* Indices::                           Creating indices
-* Quoting Texinfo code::              Incorporating literal Texinfo code
-* Plain lists in Texinfo export::     Specific attributes for plain lists
-* Tables in Texinfo export::          Specific attributes for tables
-* Images in Texinfo export::          Specific attributes for images
+* Document preamble::           File header, title and copyright page
+* Headings and sectioning structure::  Building document structure
+* Indices::                     Creating indices
+* Quoting Texinfo code::        Incorporating literal Texinfo code
+* Plain lists in Texinfo export::  Specific attributes for plain lists
+* Tables in Texinfo export::    Specific attributes for tables
+* Images in Texinfo export::    Specific attributes for images
 * Special blocks in Texinfo export::  Specific attributes for special blocks
-* An example::                        Illustrating Org to Texinfo process
+* A Texinfo example::           Illustrating Org to Texinfo process
 
 Publishing
 
@@ -13501,17 +13501,17 @@ Export to an Org file, then open it.
 an Info file.
 
 @menu
-* Texinfo export commands::           How to invoke Texinfo export
+* Texinfo export commands::     How to invoke Texinfo export
 * Texinfo specific export settings::  Export settings for Texinfo
-* Document preamble::                 File header, title and copyright page
-* Headings and sectioning structure:: Building document structure
-* Indices::                           Creating indices
-* Quoting Texinfo code::              Incorporating literal Texinfo code
-* Plain lists in Texinfo export::     Specific attributes for plain lists
-* Tables in Texinfo export::          Specific attributes for tables
-* Images in Texinfo export::          Specific attributes for images
+* Document preamble::           File header, title and copyright page
+* Headings and sectioning structure::  Building document structure
+* Indices::                     Creating indices
+* Quoting Texinfo code::        Incorporating literal Texinfo code
+* Plain lists in Texinfo export::  Specific attributes for plain lists
+* Tables in Texinfo export::    Specific attributes for tables
+* Images in Texinfo export::    Specific attributes for images
 * Special blocks in Texinfo export::  Specific attributes for special blocks
-* An example::                        Illustrating Org to Texinfo process
+* A Texinfo example::           Illustrating Org to Texinfo process
 @end menu
 
 @node Texinfo export commands
@@ -13832,8 +13832,8 @@ A somewhat obsessive function.
 @@end defun
 @end example
 
-@node An example
-@subsection An example
+@node A Texinfo example
+@subsection A Texinfo example
 
 Here is a thorough example.  @inforef{GNU Sample Texts,,texinfo} for an
 equivalent Texinfo code.
