@@ -541,16 +541,12 @@ Custom agenda views
 
 Markup for rich export
 
-* Structural markup elements::  The basic structure as seen by the exporter
+* Paragraphs::                  The basic unit of text
+* Emphasis and monospace::      Bold, italic, etc.
+* Horizontal rules::            Make a line
 * Images and tables::           Images, tables and caption mechanism
 * Literal examples::            Source code examples with special formatting
 * Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
-
-Structural markup elements
-
-* Paragraphs::                  Paragraphs
-* Emphasis and monospace::      Bold, italic, etc.
-* Horizontal rules::            Make a line
 
 Embedded @LaTeX{}
 
@@ -9720,32 +9716,27 @@ rules on how to prepare text for rich export.  This section summarizes the
 markup rules used in an Org mode buffer.
 
 @menu
-* Structural markup elements::  The basic structure as seen by the exporter
+* Paragraphs::                  The basic unit of text
+* Emphasis and monospace::      Bold, italic, etc.
+* Horizontal rules::            Make a line
 * Images and tables::           Images, tables and caption mechanism
 * Literal examples::            Source code examples with special formatting
 * Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
 @end menu
 
-@node Structural markup elements
-@section Structural markup elements
-
-@menu
-* Paragraphs::                  Paragraphs
-* Emphasis and monospace::      Bold, italic, etc.
-* Horizontal rules::            Make a line
-@end menu
-
 @node Paragraphs
-@subheading Paragraphs, line breaks, and quoting
+@section Paragraphs, line breaks, and quoting
 @cindex paragraphs, markup rules
 
 Paragraphs are separated by at least one empty line.  If you need to enforce
 a line break within a paragraph, use @samp{\\} at the end of a line.
 
-To keep the line breaks in a region, but otherwise use normal formatting, you
-can use this construct, which can also be used to format poetry.
+To preserve the line breaks, indentation and blank lines in a region, but
+otherwise use normal formatting, you can use this construct, which can also
+be used to format poetry.
 
 @cindex #+BEGIN_VERSE
+@cindex verse blocks
 @example
 #+BEGIN_VERSE
  Great clouds overhead
@@ -9761,6 +9752,7 @@ as a paragraph that is indented on both the left and the right margin.  You
 can include quotations in Org mode documents like this:
 
 @cindex #+BEGIN_QUOTE
+@cindex quote blocks
 @example
 #+BEGIN_QUOTE
 Everything should be made as simple as possible,
@@ -9770,6 +9762,7 @@ but not any simpler -- Albert Einstein
 
 If you would like to center some text, do it like this:
 @cindex #+BEGIN_CENTER
+@cindex center blocks
 @example
 #+BEGIN_CENTER
 Everything should be made as simple as possible, \\
@@ -9778,7 +9771,7 @@ but not any simpler
 @end example
 
 @node Emphasis and monospace
-@subheading Emphasis and monospace
+@section Emphasis and monospace
 
 @cindex underlined text, markup rules
 @cindex bold text, markup rules
@@ -9803,7 +9796,7 @@ the above variables will no take effect until you reload Org, for which you
 may need to restart Emacs.
 
 @node Horizontal rules
-@subheading  Horizontal rules
+@section Horizontal rules
 @cindex horizontal rules, markup rules
 A line consisting of only dashes, and at least 5 of them, will be exported as
 a horizontal line.
