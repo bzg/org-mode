@@ -13560,11 +13560,11 @@ member of @code{org-texinfo-classes}.
 
 @item TEXINFO_HEADER
 @cindex #+TEXINFO_HEADER
-Arbitrary lines inserted at the end of the preamble.
+Arbitrary lines inserted at the end of the header.
 
 @item TEXINFO_POST_HEADER
 @cindex #+TEXINFO_POST_HEADER
-Arbitrary lines inserted at the end of the preamble.
+Arbitrary lines inserted after the end of the header.
 
 @item TEXINFO_DIR_CATEGORY
 @cindex #+TEXINFO_DIR_CATEGORY
