@@ -544,8 +544,6 @@ Markup for rich export
 * Structural markup elements::  The basic structure as seen by the exporter
 * Images and tables::           Images, tables and caption mechanism
 * Literal examples::            Source code examples with special formatting
-* Include files::               Include additional files into a document
-* Macro replacement::           Use macros to create templates
 * Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
 * Special blocks::              Containers targeted at export back-ends
 
@@ -574,6 +572,8 @@ Exporting
 * The export dispatcher::       The main exporter interface
 * Export back-ends::            Built-in export formats
 * Export settings::             Generic export settings
+* Include files::               Include additional files into a document
+* Macro replacement::           Use macros to create templates
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * Beamer export::               Exporting as a Beamer presentation
 * HTML export::                 Exporting to HTML
@@ -9728,8 +9728,6 @@ markup rules used in an Org mode buffer.
 * Structural markup elements::  The basic structure as seen by the exporter
 * Images and tables::           Images, tables and caption mechanism
 * Literal examples::            Source code examples with special formatting
-* Include files::               Include additional files into a document
-* Macro replacement::           Use macros to create templates
 * Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
 * Special blocks::              Containers targeted at export back-ends
 @end menu
@@ -10144,154 +10142,6 @@ formatting like @samp{(ref:label)} at the end of the current line.  Then the
 label is stored as a link @samp{(label)}, for retrieval with @kbd{C-c C-l}.
 @end table
 
-
-@node Include files
-@section Include files
-@cindex include files, markup rules
-
-During export, you can include the content of another file.  For example, to
-include your @file{.emacs} file, you could use:
-@cindex #+INCLUDE
-
-@example
-#+INCLUDE: "~/.emacs" src emacs-lisp
-@end example
-
-@noindent
-The first parameter names the the file to include.  The optional second and
-third parameter specify the markup (i.e., @samp{example}, @samp{export} or
-@samp{src}), and, if the markup is either @samp{export} or @samp{src}, the
-language for formatting the contents.
-
-If markup is requested, the included content will be placed within an
-appropriate block@footnote{While you can request paragraphs (@samp{verse},
-@samp{quote}, @samp{center}), but this places severe restrictions on the type
-of content that is permissible}.  No changes to the included content are made
-and it is the responsibility of the user to ensure that the result is valid
-Org syntax.  For markup @samp{example} and @samp{src}, which is requesting a
-literal example, the content will be code-escaped before inclusion.
-
-If no markup is requested, the text will be assumed to be in Org mode format
-and will be processed normally.  However, footnote labels (@pxref{Footnotes})
-in the file will be made local to that file.  Contents of the included file
-will belong to the same structure (headline, item) containing the
-@code{INCLUDE} keyword.  In particular, headlines within the file will become
-children of the current section.  That behavior can be changed by providing
-an additional keyword parameter, @code{:minlevel}.  In that case, all
-headlines in the included file will be shifted so the one with the lowest
-level reaches that specified level.  For example, to make a file become a
-sibling of the current top-level headline, use
-
-@example
-#+INCLUDE: "~/my-book/chapter2.org" :minlevel 1
-@end example
-
-You can also include a portion of a file by specifying a lines range using
-the @code{:lines} keyword parameter.  The line at the upper end of the range
-will not be included.  The start and/or the end of the range may be omitted
-to use the obvious defaults.
-
-@example
-#+INCLUDE: "~/.emacs" :lines "5-10"   @r{Include lines 5 to 10, 10 excluded}
-#+INCLUDE: "~/.emacs" :lines "-10"    @r{Include lines 1 to 10, 10 excluded}
-#+INCLUDE: "~/.emacs" :lines "10-"    @r{Include lines from 10 to EOF}
-@end example
-
-Finally, you may use a file-link to extract an object as matched by
-@code{org-link-search}@footnote{Note that
-@code{org-link-search-must-match-exact-headline} is locally bound to non-@code{nil}.
-Therefore, @code{org-link-search} only matches headlines and named elements.}
-(@pxref{Search options}).  If the @code{:only-contents} property is non-@code{nil},
-only the contents of the requested element will be included, omitting
-properties drawer and planning-line if present.  The @code{:lines} keyword
-operates locally with respect to the requested element.  Some examples:
-
-@example
-#+INCLUDE: "./paper.org::#theory" :only-contents t
-   @r{Include the body of the heading with the custom id @samp{theory}}
-#+INCLUDE: "./paper.org::mytable"  @r{Include named element.}
-#+INCLUDE: "./paper.org::*conclusion" :lines 1-20
-   @r{Include the first 20 lines of the headline named @samp{conclusion}.}
-@end example
-
-@table @kbd
-@kindex C-c '
-@item C-c '
-Visit the include file at point.
-@end table
-
-@node Macro replacement
-@section Macro replacement
-@cindex macro replacement, during export
-@cindex #+MACRO
-
-You can define text snippets with
-
-@example
-#+MACRO: name   replacement text $1, $2 are arguments
-@end example
-
-@noindent which can be referenced
-@code{@{@{@{name(arg1, arg2)@}@}@}}@footnote{Since commas separate arguments,
-commas within arguments have to be escaped with a backslash character.
-Conversely, backslash characters before a comma, and only them, need to be
-escaped with another backslash character.}.
-
-These references, called macros, can be inserted anywhere Org markup is
-recognized: paragraphs, headlines, verse blocks, tables cells and lists.
-They can also be used in keywords accepting Org syntax, e.g.,
-@code{#+CAPTION}, @code{#+TITLE}, @code{#+AUTHOR}, @code{#+DATE} and some
-others, export back-end specific, ones.
-
-In addition to user-defined macros, a set of predefined macros can be used:
-
-@table @code
-@item @{@{@{title@}@}@}
-@itemx @{@{@{author@}@}@}
-@itemx @{@{@{email@}@}@}
-@cindex title, macro
-@cindex author, macro
-@cindex email, macro
-These macros are replaced with the information available at the time of
-export.
-
-@item @{@{@{date@}@}@}
-@itemx @{@{@{date(@var{FORMAT})@}@}@}
-@cindex date, macro
-This macro refers to the @code{#+DATE} keyword. @var{FORMAT} is an optional
-argument to the @code{@{@{@{date@}@}@}} macro that will be used only if
-@code{#+DATE} is a single timestamp.  @var{FORMAT} should be a format string
-understood by @code{format-time-string}.
-
-@item @{@{@{time(@var{FORMAT})@}@}@}
-@itemx @{@{@{modification-time(@var{FORMAT}, @var{VC})@}@}@}
-@cindex time, macro
-@cindex modification time, macro
-These macros refer to the date and time when the document is exported and to
-the modification date and time, respectively.  @var{FORMAT} should be a
-format string understood by @code{format-time-string}.  If the second
-argument to the @code{modification-time} macro is non-@code{nil}, Org
-retrieves the information from the version control system, using
-@file{vc.el}, instead of the file attributes.
-
-@item @{@{@{input-file@}@}@}
-@cindex input file, macro
-This macro refers to the filename of the exported file, if any.
-
-@item @{@{@{property(@var{PROPERTY-NAME})@}@}@}
-@itemx @{@{@{property(@var{PROPERTY-NAME},@var{SEARCH-OPTION})@}@}@}
-@cindex property, macro
-This macro returns the value of property @var{PROPERTY-NAME} in current
-entry.  If @var{SEARCH-OPTION} (@pxref{Search options}) refers to a remote
-entry, it will be used instead.
-@end table
-
-The surrounding brackets can be made invisible by setting
-@code{org-hide-macro-markers} non-@code{nil}.
-
-Macro expansion takes place during the very beginning of the export process.
-
-
 @node Embedded @LaTeX{}
 @section Embedded @LaTeX{}
 @cindex @TeX{} interpretation
@@ -10613,6 +10463,8 @@ appointments to produce a file in the iCalendar format.
 * The export dispatcher::       The main exporter interface
 * Export back-ends::            Built-in export formats
 * Export settings::             Generic export settings
+* Include files::               Include additional files into a document
+* Macro replacement::           Use macros to create templates
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * Beamer export::               Exporting as a Beamer presentation
 * HTML export::                 Exporting to HTML
@@ -10981,6 +10833,152 @@ to the buffer, when possible, or asked to you otherwise.  For subtree export,
 you can also set @code{EXPORT_FILE_NAME} property.  In all cases, only the
 base name of the file is retained, and a back-end specific extension is
 added.
+
+@node Include files
+@section Include files
+@cindex include files, during export
+
+During export, you can include the content of another file.  For example, to
+include your @file{.emacs} file, you could use:
+@cindex #+INCLUDE
+
+@example
+#+INCLUDE: "~/.emacs" src emacs-lisp
+@end example
+
+@noindent
+The first parameter names the the file to include.  The optional second and
+third parameter specify the markup (i.e., @samp{example}, @samp{export} or
+@samp{src}), and, if the markup is either @samp{export} or @samp{src}, the
+language for formatting the contents.
+
+If markup is requested, the included content will be placed within an
+appropriate block@footnote{While you can request paragraphs (@samp{verse},
+@samp{quote}, @samp{center}), but this places severe restrictions on the type
+of content that is permissible}.  No changes to the included content are made
+and it is the responsibility of the user to ensure that the result is valid
+Org syntax.  For markup @samp{example} and @samp{src}, which is requesting a
+literal example, the content will be code-escaped before inclusion.
+
+If no markup is requested, the text will be assumed to be in Org mode format
+and will be processed normally.  However, footnote labels (@pxref{Footnotes})
+in the file will be made local to that file.  Contents of the included file
+will belong to the same structure (headline, item) containing the
+@code{INCLUDE} keyword.  In particular, headlines within the file will become
+children of the current section.  That behavior can be changed by providing
+an additional keyword parameter, @code{:minlevel}.  In that case, all
+headlines in the included file will be shifted so the one with the lowest
+level reaches that specified level.  For example, to make a file become a
+sibling of the current top-level headline, use
+
+@example
+#+INCLUDE: "~/my-book/chapter2.org" :minlevel 1
+@end example
+
+You can also include a portion of a file by specifying a lines range using
+the @code{:lines} keyword parameter.  The line at the upper end of the range
+will not be included.  The start and/or the end of the range may be omitted
+to use the obvious defaults.
+
+@example
+#+INCLUDE: "~/.emacs" :lines "5-10"   @r{Include lines 5 to 10, 10 excluded}
+#+INCLUDE: "~/.emacs" :lines "-10"    @r{Include lines 1 to 10, 10 excluded}
+#+INCLUDE: "~/.emacs" :lines "10-"    @r{Include lines from 10 to EOF}
+@end example
+
+Finally, you may use a file-link to extract an object as matched by
+@code{org-link-search}@footnote{Note that
+@code{org-link-search-must-match-exact-headline} is locally bound to non-@code{nil}.
+Therefore, @code{org-link-search} only matches headlines and named elements.}
+(@pxref{Search options}).  If the @code{:only-contents} property is non-@code{nil},
+only the contents of the requested element will be included, omitting
+properties drawer and planning-line if present.  The @code{:lines} keyword
+operates locally with respect to the requested element.  Some examples:
+
+@example
+#+INCLUDE: "./paper.org::#theory" :only-contents t
+   @r{Include the body of the heading with the custom id @samp{theory}}
+#+INCLUDE: "./paper.org::mytable"  @r{Include named element.}
+#+INCLUDE: "./paper.org::*conclusion" :lines 1-20
+   @r{Include the first 20 lines of the headline named @samp{conclusion}.}
+@end example
+
+@table @kbd
+@kindex C-c '
+@item C-c '
+Visit the include file at point.
+@end table
+
+@node Macro replacement
+@section Macro replacement
+@cindex macro replacement, during export
+@cindex #+MACRO
+
+You can define text snippets with
+
+@example
+#+MACRO: name   replacement text $1, $2 are arguments
+@end example
+
+@noindent which can be referenced
+@code{@{@{@{name(arg1, arg2)@}@}@}}@footnote{Since commas separate arguments,
+commas within arguments have to be escaped with a backslash character.
+Conversely, backslash characters before a comma, and only them, need to be
+escaped with another backslash character.}.
+
+These references, called macros, can be inserted anywhere Org markup is
+recognized: paragraphs, headlines, verse blocks, tables cells and lists.
+They can also be used in keywords accepting Org syntax, e.g.,
+@code{#+CAPTION}, @code{#+TITLE}, @code{#+AUTHOR}, @code{#+DATE} and some
+others, export back-end specific, ones.
+
+In addition to user-defined macros, a set of predefined macros can be used:
+
+@table @code
+@item @{@{@{title@}@}@}
+@itemx @{@{@{author@}@}@}
+@itemx @{@{@{email@}@}@}
+@cindex title, macro
+@cindex author, macro
+@cindex email, macro
+These macros are replaced with the information available at the time of
+export.
+
+@item @{@{@{date@}@}@}
+@itemx @{@{@{date(@var{FORMAT})@}@}@}
+@cindex date, macro
+This macro refers to the @code{#+DATE} keyword. @var{FORMAT} is an optional
+argument to the @code{@{@{@{date@}@}@}} macro that will be used only if
+@code{#+DATE} is a single timestamp.  @var{FORMAT} should be a format string
+understood by @code{format-time-string}.
+
+@item @{@{@{time(@var{FORMAT})@}@}@}
+@itemx @{@{@{modification-time(@var{FORMAT}, @var{VC})@}@}@}
+@cindex time, macro
+@cindex modification time, macro
+These macros refer to the date and time when the document is exported and to
+the modification date and time, respectively.  @var{FORMAT} should be a
+format string understood by @code{format-time-string}.  If the second
+argument to the @code{modification-time} macro is non-@code{nil}, Org
+retrieves the information from the version control system, using
+@file{vc.el}, instead of the file attributes.
+
+@item @{@{@{input-file@}@}@}
+@cindex input file, macro
+This macro refers to the filename of the exported file, if any.
+
+@item @{@{@{property(@var{PROPERTY-NAME})@}@}@}
+@itemx @{@{@{property(@var{PROPERTY-NAME},@var{SEARCH-OPTION})@}@}@}
+@cindex property, macro
+This macro returns the value of property @var{PROPERTY-NAME} in current
+entry.  If @var{SEARCH-OPTION} (@pxref{Search options}) refers to a remote
+entry, it will be used instead.
+@end table
+
+The surrounding brackets can be made invisible by setting
+@code{org-hide-macro-markers} non-@code{nil}.
+
+Macro expansion takes place during the very beginning of the export process.
 
 @node ASCII/Latin-1/UTF-8 export
 @section ASCII/Latin-1/UTF-8 export
