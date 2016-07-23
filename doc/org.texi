@@ -588,9 +588,19 @@ Exporting
 * Export in foreign buffers::   Author tables and lists in Org syntax
 * Advanced configuration::      Fine-tuning the export output
 
+Beamer export
+
+* Beamer export commands:: How to export Beamer documents.
+* Beamer specific export settings:: Export settings for Beamer export.
+* Sectioning Frames and Blocks in Beamer:: Blocks and sections in Beamer.
+* Beamer specific syntax:: Syntax specific to Beamer.
+* Editing support:: Helper functions for Org Beamer export.
+* A Beamer Example:: An complete Beamer example.
+
 HTML export
 
 * HTML Export commands::        How to invoke HTML export
+* HTML Specific export settings:: Export settings for HTML export.
 * HTML doctypes::               Org can export to various (X)HTML flavors
 * HTML preamble and postamble::  How to insert a preamble and a postamble
 * Quoting HTML tags::           Using direct HTML in Org mode
@@ -604,15 +614,23 @@ HTML export
 
 @LaTeX{} export
 
-* @LaTeX{} export commands::    How to export to LaTeX and PDF
-* Header and sectioning::       Setting up the export file structure
-* Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
-* @LaTeX{} specific attributes::  Controlling @LaTeX{} output
+* @LaTeX{} export commands::            How to export to @LaTeX{} and PDF
+* @LaTeX{} specific export settings::   Export settings for @LaTeX{}
+* @LaTeX{} header and sectioning::      Setting up the export file structure
+* Quoting @LaTeX{} code::               Incorporating literal @LaTeX{} code
+* Tables in @LaTeX{} export::           Specific attributes for tables
+* Images in @LaTeX{} export::           Specific attributes for images
+* Plain lists in @LaTeX{} export::      Specific attributes for plain lists
+* Source blocks in @LaTeX{} export::    Specific attributes for source blocks
+* Example blocks in @LaTeX{} export::   Specific attributes for example blocks
+* Special blocks in @LaTeX{} export::   Specific attributes for special blocks
+* Horizontal rules in @LaTeX{} export:: Specific attributes for horizontal rules
 
-OpenDocument text export
+OpenDocument Text export
 
 * Pre-requisites for ODT export::  What packages ODT exporter relies on
 * ODT export commands::         How to invoke ODT export
+* ODT specific export settings:: Export settings for ODT
 * Extending ODT export::        How to produce @samp{doc}, @samp{pdf} files
 * Applying custom styles::      How to apply custom styles to the output
 * Links in ODT export::         How links will be interpreted and formatted
@@ -639,6 +657,7 @@ Advanced topics in ODT export
 Texinfo export
 
 * Texinfo export commands::     How to invoke Texinfo export
+* Texinfo specific export settings:: Export settings for Texinfo
 * Document preamble::           File header, title and copyright page
 * Headings and sectioning structure:: Building document structure
 * Indices::                     Creating indices
@@ -705,6 +724,8 @@ Specific header arguments
                                 be collected and handled
 * file::                        Specify a path for file output
 * file-desc::                   Specify a description for file results
+* file-ext::                    Specify an extension for file output
+* output-dir::                  Specify a directory to write file output to
 * dir::                         Specify the default (possibly remote)
                                 directory for code block execution
 * exports::                     Export code and/or results
@@ -11955,16 +11976,18 @@ As in @LaTeX{}, blank lines are meaningful for this back-end: a paragraph
 will not be started if two contiguous syntactical elements are not separated
 by an empty line.
 
-This back-end also offers enhanced support for footnotes.  Thus, it handles
-nested footnotes, footnotes in tables and footnotes in a list item's
-description.
-
 @menu
-* @LaTeX{} export commands::    How to export to LaTeX and PDF
-* @LaTeX{} specific export settings::  Export settings for @LaTeX{}
-* Header and sectioning::       Setting up the export file structure
-* Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
-* @LaTeX{} specific attributes::  Controlling @LaTeX{} output
+* @LaTeX{} export commands::            How to export to @LaTeX{} and PDF
+* @LaTeX{} specific export settings::   Export settings for @LaTeX{}
+* @LaTeX{} header and sectioning::      Setting up the export file structure
+* Quoting @LaTeX{} code::               Incorporating literal @LaTeX{} code
+* Tables in @LaTeX{} export::           Specific attributes for tables
+* Images in @LaTeX{} export::           Specific attributes for images
+* Plain lists in @LaTeX{} export::      Specific attributes for plain lists
+* Source blocks in @LaTeX{} export::    Specific attributes for source blocks
+* Example blocks in @LaTeX{} export::   Specific attributes for example blocks
+* Special blocks in @LaTeX{} export::   Specific attributes for special blocks
+* Horizontal rules in @LaTeX{} export:: Specific attributes for horizontal rules
 @end menu
 
 @node @LaTeX{} export commands
@@ -12062,8 +12085,8 @@ part of the front matter via @code{org-latex-title-command}.
 
 These keywords are treated in details in the following sections.
 
-@node Header and sectioning
-@subsection Header and sectioning structure
+@node @LaTeX{} header and sectioning
+@subsection @LaTeX{} header and sectioning structure
 @cindex @LaTeX{} class
 @cindex @LaTeX{} sectioning structure
 @cindex @LaTeX{} header
@@ -12139,16 +12162,10 @@ All lines between these markers are exported literally
 #+END_EXPORT
 @end example
 
-@node @LaTeX{} specific attributes
-@subsection @LaTeX{} specific attributes
-@cindex #+ATTR_LATEX
-
-@LaTeX{} understands attributes specified in an @code{ATTR_LATEX} line.  They
-affect tables, images, plain lists, source blocks, example blocks and special
-blocks.
-
-@subsubheading Tables in @LaTeX{} export
+@node Tables in @LaTeX{} export
+@subsection Tables in @LaTeX{} export
 @cindex tables, in @LaTeX{} export
+@cindex #+ATTR_LATEX, in tables
 
 For @LaTeX{} export of a table, you can specify a label and a caption
 (@pxref{Images and tables}).  You can also use attributes to control table
@@ -12243,9 +12260,11 @@ In the example below, @LaTeX{} command
 @end example
 
 
-@subsubheading Images in @LaTeX{} export
+@node Images in @LaTeX{} export
+@subsection Images in @LaTeX{} export
 @cindex images, inline in @LaTeX{}
 @cindex inlining images in @LaTeX{}
+@cindex #+ATTR_LATEX, in images
 
 Images that are linked to without a description part in the link, like
 @samp{[[file:img.jpg]]} or @samp{[[./img.jpg]]} will be inserted into the PDF
@@ -12308,8 +12327,10 @@ To modify the placement option of any floating environment, set the
 If the @code{:comment-include} attribute is set to a non-@code{nil} value,
 the @LaTeX{} @code{\includegraphics} macro will be commented out.
 
-@subsubheading Plain lists in @LaTeX{} export
+@node Plain lists in @LaTeX{} export
+@subsection Plain lists in @LaTeX{} export
 @cindex plain lists, in @LaTeX{} export
+@cindex #+ATTR_LATEX, in plain lists
 
 Plain lists accept two optional attributes: @code{:environment} and
 @code{:options}.  The first can be used to specify the environment.  The
@@ -12341,8 +12362,10 @@ employed, as shown in this example:
         - Five
 @end example
 
-@subsubheading Source blocks in @LaTeX{} export
+@node Source blocks in @LaTeX{} export
+@subsection Source blocks in @LaTeX{} export
 @cindex source blocks, in @LaTeX{} export
+@cindex #+ATTR_LATEX, in source blocks
 
 In addition to syntax defined in @ref{Literal examples}, names and captions
 (@pxref{Images and tables}), source blocks also accept two additional
@@ -12383,9 +12406,11 @@ counterpart to @code{org-latex-listings-options} and
 #+END_SRC
 @end example
 
-@subsubheading Example blocks in @LaTeX{} export
+@node Example blocks in @LaTeX{} export
+@subsection Example blocks in @LaTeX{} export
 @cindex example blocks, in @LaTeX{} export
 @cindex verbatim blocks, in @LaTeX{} export
+@cindex #+ATTR_LATEX, in example blocks
 
 By default, when exporting to @LaTeX{}, example blocks contents are wrapped
 in a @samp{verbatim} environment.  It is possible to use a different
@@ -12400,10 +12425,12 @@ This sentence is false.
 #+END_EXAMPLE
 @end example
 
-@subsubheading Special blocks in @LaTeX{} export
+@node Special blocks in @LaTeX{} export
+@subsection Special blocks in @LaTeX{} export
 @cindex special blocks, in @LaTeX{} export
 @cindex abstract, in @LaTeX{} export
 @cindex proof, in @LaTeX{} export
+@cindex #+ATTR_LATEX, in special blocks
 
 In @LaTeX{} back-end, special blocks become environments of the same name.
 Value of @code{:options} attribute will be appended as-is to that
@@ -12446,8 +12473,10 @@ example:
 #+END_proof
 @end example
 
-@subsubheading Horizontal rules
+@node Horizontal rules in @LaTeX{} export
+@subsection Horizontal rules in @LaTeX{} export
 @cindex horizontal rules, in @LaTeX{} export
+@cindex #+ATTR_LATEX, in horizontal rules
 
 Width and thickness of a given horizontal rule can be controlled with,
 respectively, @code{:width} and @code{:thickness} attributes:
