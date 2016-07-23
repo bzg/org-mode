@@ -28,7 +28,7 @@
 ;;; Code:
 (require 'ob)
 (require 'shell)
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 
 (declare-function org-babel-comint-in-buffer "ob-comint" (buffer &rest body)
 		  t)
