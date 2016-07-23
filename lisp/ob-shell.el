@@ -40,6 +40,7 @@
 (declare-function orgtbl-to-generic "org-table" (table params))
 
 (defvar org-babel-default-header-args:shell '())
+(defvar org-babel-shell-names)
 
 (defun org-babel-shell-initialize ()
   "Define execution functions associated to shell names.
