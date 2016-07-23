@@ -656,14 +656,17 @@ Advanced topics in ODT export
 
 Texinfo export
 
-* Texinfo export commands::     How to invoke Texinfo export
-* Texinfo specific export settings:: Export settings for Texinfo
-* Document preamble::           File header, title and copyright page
+* Texinfo export commands::           How to invoke Texinfo export
+* Texinfo specific export settings::  Export settings for Texinfo
+* Document preamble::                 File header, title and copyright page
 * Headings and sectioning structure:: Building document structure
-* Indices::                     Creating indices
-* Quoting Texinfo code::        Incorporating literal Texinfo code
-* Texinfo specific attributes:: Controlling Texinfo output
-* An example::
+* Indices::                           Creating indices
+* Quoting Texinfo code::              Incorporating literal Texinfo code
+* Plain lists in Texinfo export::     Specific attributes for plain lists
+* Tables in Texinfo export::          Specific attributes for tables
+* Images in Texinfo export::          Specific attributes for images
+* Special blocks in Texinfo export::  Specific attributes for special blocks
+* An example::                        Illustrating Org to Texinfo process
 
 Publishing
 
@@ -13498,14 +13501,17 @@ Export to an Org file, then open it.
 an Info file.
 
 @menu
-* Texinfo export commands::     How to invoke Texinfo export
-* Texinfo specific export settings:: Export settings for Texinfo
-* Document preamble::           File header, title and copyright page
+* Texinfo export commands::           How to invoke Texinfo export
+* Texinfo specific export settings::  Export settings for Texinfo
+* Document preamble::                 File header, title and copyright page
 * Headings and sectioning structure:: Building document structure
-* Indices::                     Creating indices
-* Quoting Texinfo code::        Incorporating literal Texinfo code
-* Texinfo specific attributes:: Controlling Texinfo output
-* An example::
+* Indices::                           Creating indices
+* Quoting Texinfo code::              Incorporating literal Texinfo code
+* Plain lists in Texinfo export::     Specific attributes for plain lists
+* Tables in Texinfo export::          Specific attributes for tables
+* Images in Texinfo export::          Specific attributes for images
+* Special blocks in Texinfo export::  Specific attributes for special blocks
+* An example::                        Illustrating Org to Texinfo process
 @end menu
 
 @node Texinfo export commands
@@ -13755,15 +13761,9 @@ This paragraph is preceded by...
 #+END_EXPORT
 @end example
 
-@node Texinfo specific attributes
-@subsection Texinfo specific attributes
-
-@cindex #+ATTR_TEXINFO
-@samp{texinfo} back-end understands several attributes in plain lists, tables
-and images.  They must be specified using an @code{#+ATTR_TEXINFO} keyword,
-written just above the list, table or image.
-
-@subsubheading Plain lists
+@node Plain lists in Texinfo export
+@subsection Plain lists in Texinfo export
+@cindex #+ATTR_TEXINFO, in plain lists
 
 In Texinfo output, description lists appear as two-column tables, using the
 default command @code{@@table}.  You can use @code{@@ftable} or
@@ -13781,7 +13781,9 @@ see.
 - foo :: This is the text for /foo/, with no highlighting.
 @end example
 
-@subsubheading Tables
+@node Tables in Texinfo export
+@subsection Tables in Texinfo export
+@cindex #+ATTR_TEXINFO, in tables
 
 When exporting a table, column widths are deduced from the longest cell in
 each column.  You can also define them explicitly as fractions of the line
@@ -13792,7 +13794,9 @@ length, using @code{:columns} attribute.
 | a cell | another cell |
 @end example
 
-@subsubheading Images
+@node Images in Texinfo export
+@subsection Images in Texinfo export
+@cindex #+ATTR_TEXINFO, in images
 
 Images are links to files with a supported image extension and no
 description.  Image scaling is set with @code{:width} and @code{:height}
@@ -13804,7 +13808,9 @@ Texinfo code.
 [[ridt.pdf]]
 @end example
 
-@subsubheading Special blocks
+@node Special blocks in Texinfo export
+@subsection Special blocks
+@cindex #+ATTR_TEXINFO, in special blocks
 
 In Texinfo output, special blocks become commands of the same name.  Value of
 @code{:options} attribute is added right after the beginning of the command.
