@@ -658,7 +658,9 @@ Texinfo export
 
 * Texinfo export commands::     How to invoke Texinfo export
 * Texinfo specific export settings::  Export settings for Texinfo
-* Document preamble::           File header, title and copyright page
+* Texinfo file header::         Generating the begining of a Texinfo file
+* Texinfo title and copyright page::  Creating title and copyright pages
+* Texinfo @samp{Top} node::     Installing a manual in Info Top node
 * Headings and sectioning structure::  Building document structure
 * Indices::                     Creating indices
 * Quoting Texinfo code::        Incorporating literal Texinfo code
@@ -13503,7 +13505,9 @@ an Info file.
 @menu
 * Texinfo export commands::     How to invoke Texinfo export
 * Texinfo specific export settings::  Export settings for Texinfo
-* Document preamble::           File header, title and copyright page
+* Texinfo file header::         Generating the begining of a Texinfo file
+* Texinfo title and copyright page::  Creating title and copyright pages
+* Texinfo @samp{Top} node::     Installing a manual in Info Top node
 * Headings and sectioning structure::  Building document structure
 * Indices::                     Creating indices
 * Quoting Texinfo code::        Incorporating literal Texinfo code
@@ -13579,19 +13583,8 @@ The directory description of the document.
 The printed title of the document.
 @end table
 
-These keywords are treated in details in the following sections.
-
-@node Document preamble
-@subsection Document preamble
-
-When processing a document, @samp{texinfo} back-end generates a minimal file
-header along with a title page, a copyright page, and a menu.  You control
-the latter through the structure of the document (@pxref{Headings and
-sectioning structure}).  Various keywords allow you to tweak the other parts.
-It is also possible to give directions to install the document in the
-@samp{Top} node.
-
-@subsubheading File header
+@node Texinfo file header
+@subsection Texinfo file header
 
 @cindex #+TEXINFO_FILENAME
 Upon creating the header of a Texinfo file, the back-end guesses a name for
@@ -13611,10 +13604,11 @@ a @code{#+TEXINFO_HEADER} keyword for each additional command needed, e.g.,
 @@code@{@@synindex@}.
 
 If you happen to regularly install the same set of commands, it may be easier
-to define your own class in @code{org-texinfo-classes}, which see.  Set
+to define your own class in @code{org-texinfo-classes}.  Set
 @code{#+TEXINFO_CLASS} keyword accordingly in your document to activate it.
 
-@subsubheading Title and copyright page
+@node Texinfo title and copyright page
+@subsection Texinfo title and copyright page
 
 @cindex #+TEXINFO_PRINTED_TITLE
 The default template includes a title page for hard copy output.  The title
@@ -13654,7 +13648,8 @@ Copyright information is printed on the back of the title page.
   Copyright \copy 2016 Free Software Foundation, Inc.
 @end example
 
-@subsubheading The Top node
+@node Texinfo @samp{Top} node
+@subsection Texinfo @samp{Top} node
 
 @cindex #+TEXINFO_DIR_CATEGORY
 @cindex #+TEXINFO_DIR_TITLE
