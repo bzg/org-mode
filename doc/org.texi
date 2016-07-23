@@ -578,7 +578,7 @@ Exporting
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * Beamer export::               Exporting as a Beamer presentation
 * HTML export::                 Exporting to HTML
-* @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
+* @LaTeX{} export::             Exporting to @LaTeX{}, and processing to PDF
 * Markdown export::             Exporting to Markdown
 * OpenDocument Text export::    Exporting to OpenDocument Text
 * Org export::                  Exporting to Org
@@ -602,7 +602,7 @@ HTML export
 * CSS support::                 Changing the appearance of the output
 * JavaScript support::          Info and Folding in a web browser
 
-@LaTeX{} and PDF export
+@LaTeX{} export
 
 * @LaTeX{} export commands::    How to export to LaTeX and PDF
 * Header and sectioning::       Setting up the export file structure
@@ -10609,7 +10609,7 @@ in the iCalendar format.
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * Beamer export::               Exporting as a Beamer presentation
 * HTML export::                 Exporting to HTML
-* @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
+* @LaTeX{} export::             Exporting to @LaTeX{}, and processing to PDF
 * Markdown export::             Exporting to Markdown
 * OpenDocument Text export::    Exporting to OpenDocument Text
 * Org export::                  Exporting to Org
@@ -11078,7 +11078,7 @@ It's just a jump to the left...
 @cindex Beamer export
 
 The @LaTeX{} class @emph{Beamer} allows production of high quality
-presentations using @LaTeX{} and pdf processing.  Org mode has special
+presentations using @LaTeX{} and PDF processing.  Org mode has special
 support for turning an Org mode file or tree into a Beamer presentation.
 
 @menu
@@ -11234,9 +11234,9 @@ specific options, for example).
 @node Beamer specific syntax
 @subsection Beamer specific syntax
 
-The Beamer back-end is an extension of the @LaTeX{} back-end.  As such, all @LaTeX{}
-specific syntax (e.g., @samp{#+LATEX:} or @samp{#+ATTR_LATEX:}) is
-recognized.  See @ref{@LaTeX{} and PDF export} for more information.
+The Beamer back-end is an extension of the @LaTeX{} back-end.  As such, all
+@LaTeX{} specific syntax (e.g., @samp{#+LATEX:} or @samp{#+ATTR_LATEX:}) is
+recognized.  See @ref{@LaTeX{} export} for more information.
 
 Table of contents generated from @code{toc:t} @code{OPTION} keyword are
 wrapped within a @code{frame} environment.  Those generated from a @code{TOC}
@@ -11937,8 +11937,8 @@ You can choose default values for these options by customizing the variable
 @code{org-html-infojs-options}.  If you always want to apply the script to your
 pages, configure the variable @code{org-html-use-infojs}.
 
-@node @LaTeX{} and PDF export
-@section @LaTeX{} and PDF export
+@node @LaTeX{} export
+@section @LaTeX{} export
 @cindex @LaTeX{} export
 @cindex PDF export
 
