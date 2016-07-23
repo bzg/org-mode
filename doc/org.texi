@@ -599,18 +599,18 @@ Beamer export
 
 HTML export
 
-* HTML Export commands::        How to invoke HTML export
-* HTML Specific export settings:: Export settings for HTML export.
-* HTML doctypes::               Org can export to various (X)HTML flavors
-* HTML preamble and postamble::  How to insert a preamble and a postamble
-* Quoting HTML tags::           Using direct HTML in Org mode
-* Links in HTML export::        How links will be interpreted and formatted
-* Tables in HTML export::       How to modify the formatting of tables
-* Images in HTML export::       How to insert figures into HTML output
-* Math formatting in HTML export::  Beautiful math also on the web
-* Text areas in HTML export::   An alternative way to show an example
-* CSS support::                 Changing the appearance of the output
-* JavaScript support::          Info and Folding in a web browser
+* HTML Export commands::           How to invoke HTML export
+* HTML Specific export settings::  Export settings for HTML export
+* HTML doctypes::                  Org can export to various (X)HTML flavors
+* HTML preamble and postamble::    How to insert a preamble and a postamble
+* Quoting HTML tags::              Using direct HTML in Org mode
+* Links in HTML export::           How links will be interpreted and formatted
+* Tables in HTML export::          How to modify the formatting of tables
+* Images in HTML export::          How to insert figures into HTML output
+* Math formatting in HTML export:: Beautiful math also on the web
+* Text areas in HTML export::      An alternative way to show an example
+* CSS support::                    Changing the appearance of the output
+* JavaScript support::             Info and Folding in a web browser
 
 @LaTeX{} export
 
@@ -11368,18 +11368,18 @@ HTML formatting, in ways similar to John Gruber's @emph{markdown}
 language, but with additional support for tables.
 
 @menu
-* HTML Export commands::        How to invoke HTML export
-* HTML Specific export settings:: Export settings for HTML export.
-* HTML doctypes::               Org can export to various (X)HTML flavors
-* HTML preamble and postamble::  How to insert a preamble and a postamble
-* Quoting HTML tags::           Using direct HTML in Org mode
-* Links in HTML export::        How links will be interpreted and formatted
-* Tables in HTML export::       How to modify the formatting of tables
-* Images in HTML export::       How to insert figures into HTML output
-* Math formatting in HTML export::  Beautiful math also on the web
-* Text areas in HTML export::   An alternative way to show an example
-* CSS support::                 Changing the appearance of the output
-* JavaScript support::          Info and Folding in a web browser
+* HTML Export commands::           How to invoke HTML export
+* HTML Specific export settings::  Export settings for HTML export
+* HTML doctypes::                  Org can export to various (X)HTML flavors
+* HTML preamble and postamble::    How to insert a preamble and a postamble
+* Quoting HTML tags::              Using direct HTML in Org mode
+* Links in HTML export::           How links will be interpreted and formatted
+* Tables in HTML export::          How to modify the formatting of tables
+* Images in HTML export::          How to insert figures into HTML output
+* Math formatting in HTML export:: Beautiful math also on the web
+* Text areas in HTML export::      An alternative way to show an example
+* CSS support::                    Changing the appearance of the output
+* JavaScript support::             Info and Folding in a web browser
 @end menu
 
 
@@ -11483,11 +11483,11 @@ These keywords are treated in details in the following sections.
 
 @node HTML doctypes
 @subsection HTML doctypes
-@vindex org-html-doctype
-@vindex org-html-doctype-alist
 
 Org can export to various (X)HTML flavors.
 
+@vindex org-html-doctype
+@vindex org-html-doctype-alist
 Setting the variable @code{org-html-doctype} allows you to export to different
 (X)HTML variants.  The exported HTML will be adjusted according to the syntax
 requirements of that variant.  You can either set this variable to a doctype
@@ -11516,16 +11516,14 @@ are:
 ``xhtml5''
 @end itemize
 
-See the variable @code{org-html-doctype-alist} for details.  The default is
+@noindent See the variable @code{org-html-doctype-alist} for details.  The default is
 ``xhtml-strict''.
 
-@subsubheading Fancy HTML5 export
 @vindex org-html-html5-fancy
-@vindex org-html-html5-elements
-
+@cindex HTML5, export new elements
 HTML5 introduces several new element types.  By default, Org will not make
 use of these element types, but you can set @code{org-html-html5-fancy} to
-@code{t} (or set @code{html5-fancy} item in an @code{OPTIONS} line), to
+non-@code{nil} (or set @code{html5-fancy} item in an @code{OPTIONS} line), to
 enable a few new block-level elements.  These are created using arbitrary
 #+BEGIN and #+END blocks. For instance:
 
@@ -11564,6 +11562,7 @@ Becomes:
 </video>
 @end example
 
+@vindex org-html-html5-elements
 Special blocks that do not correspond to HTML5 elements (see
 @code{org-html-html5-elements}) will revert to the usual behavior, i.e.,
 @code{#+BEGIN_lederhosen} will still export to @samp{<div class="lederhosen">}.
