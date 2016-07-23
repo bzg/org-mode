@@ -10688,11 +10688,6 @@ An export back-end is a library that translates Org syntax into a foreign
 format.  An export format is not available until the proper back-end has been
 loaded.
 
-@vindex org-export-backends
-By default, the following four back-ends are loaded: @code{ascii},
-@code{html}, @code{icalendar} and @code{latex}.  It is possible to add more
-(or remove some) by customizing @code{org-export-backends}.
-
 Built-in back-ends include:
 
 @itemize
@@ -10710,6 +10705,11 @@ Built-in back-ends include:
 
 Other back-ends might be found in the @code{contrib/} directory
 (@pxref{Installation}).
+
+@vindex org-export-backends
+By default, the following five back-ends are loaded: @code{ascii},
+@code{html}, @code{icalendar}, @code{latex} and @code{odt}.  It is possible
+to add more, or remove some, by customizing @code{org-export-backends}.
 
 @node Export settings
 @section Export settings
