@@ -549,11 +549,9 @@ Markup for rich export
 
 Structural markup elements
 
-* Table of contents::           The if and where of the table of contents
 * Paragraphs::                  Paragraphs
 * Emphasis and monospace::      Bold, italic, etc.
 * Horizontal rules::            Make a line
-* Comment lines::               What will *not* be exported
 
 Embedded @LaTeX{}
 
@@ -568,8 +566,10 @@ Exporting
 * The export dispatcher::       The main exporter interface
 * Export back-ends::            Built-in export formats
 * Export settings::             Generic export settings
+* Table of contents::           The if and where of the table of contents
 * Include files::               Include additional files into a document
 * Macro replacement::           Use macros to create templates
+* Comment lines::               What will not be exported
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * Beamer export::               Exporting as a Beamer presentation
 * HTML export::                 Exporting to HTML
@@ -9732,66 +9732,10 @@ markup rules used in an Org mode buffer.
 @section Structural markup elements
 
 @menu
-* Table of contents::           The if and where of the table of contents
 * Paragraphs::                  Paragraphs
 * Emphasis and monospace::      Bold, italic, etc.
 * Horizontal rules::            Make a line
-* Comment lines::               What will *not* be exported
 @end menu
-
-@node Table of contents
-@subheading Table of contents
-@cindex table of contents, markup rules
-
-@cindex #+TOC
-@vindex org-export-with-toc
-The table of contents is normally inserted directly before the first headline
-of the file.  The depth of the table is by default the same as the number of
-headline levels, but you can choose a smaller number, or turn off the table
-of contents entirely, by configuring the variable @code{org-export-with-toc},
-or on a per-file basis with a line like
-
-@example
-#+OPTIONS: toc:2          @r{only inlcude two levels in TOC}
-#+OPTIONS: toc:nil        @r{no default TOC at all}
-@end example
-
-If you would like to move the table of contents to a different location, you
-should turn off the default table using @code{org-export-with-toc} or
-@code{#+OPTIONS} and insert @code{#+TOC: headlines N} at the desired
-location(s).
-
-@example
-#+OPTIONS: toc:nil        @r{no default TOC}
-...
-#+TOC: headlines 2        @r{insert TOC here, with two headline levels}
-@end example
-
-Moreover, if you append @samp{local} parameter, the table contains only
-entries for the children of the current section@footnote{For @LaTeX{} export,
-this feature requires the @code{titletoc} package.  Note that @code{titletoc}
-must be loaded @emph{before} @code{hyperref}.  Thus, you may have to
-customize @code{org-latex-default-packages-alist}.}.  In this case, any depth
-parameter becomes relative to the current level.
-
-@example
-* Section
-#+TOC: headlines 1 local  @r{insert local TOC, with direct children only}
-@end example
-
-The same @code{TOC} keyword can also generate a list of all tables (resp.@:
-all listings) with a caption in the document.
-
-@example
-#+TOC: listings           @r{build a list of listings}
-#+TOC: tables             @r{build a list of tables}
-@end example
-
-@cindex property, ALT_TITLE
-The headline's title usually determines its corresponding entry in a table of
-contents.  However, it is possible to specify an alternative title by
-setting @code{ALT_TITLE} property accordingly.  It will then be used when
-building the table.
 
 @node Paragraphs
 @subheading Paragraphs, line breaks, and quoting
@@ -9865,33 +9809,6 @@ may need to restart Emacs.
 @cindex horizontal rules, markup rules
 A line consisting of only dashes, and at least 5 of them, will be exported as
 a horizontal line.
-
-@node Comment lines
-@subheading Comment lines
-@cindex comment lines
-@cindex exporting, not
-@cindex #+BEGIN_COMMENT
-
-Lines starting with zero or more whitespace characters followed by one
-@samp{#} and a whitespace are treated as comments and, as such, are not
-exported.
-
-Likewise, regions surrounded by @samp{#+BEGIN_COMMENT}
-... @samp{#+END_COMMENT} are not exported.
-
-Finally, a @samp{COMMENT} keyword at the beginning of an entry, but after any
-other keyword or priority cookie, comments out the entire subtree.  In this
-case, the subtree is not exported and no code block within it is executed
-either@footnote{For a less drastic behavior, consider using a select tag
-(@pxref{Export settings}) instead.}.  The command below helps changing the
-comment status of a headline.
-
-@table @kbd
-@kindex C-c ;
-@item C-c ;
-Toggle the @samp{COMMENT} keyword at the beginning of an entry.
-@end table
-
 
 @node Images and tables
 @section Images and Tables
@@ -10402,8 +10319,10 @@ appointments to produce a file in the iCalendar format.
 * The export dispatcher::       The main exporter interface
 * Export back-ends::            Built-in export formats
 * Export settings::             Generic export settings
+* Table of contents::           The if and where of the table of contents
 * Include files::               Include additional files into a document
 * Macro replacement::           Use macros to create templates
+* Comment lines::               What will not be exported
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * Beamer export::               Exporting as a Beamer presentation
 * HTML export::                 Exporting to HTML
@@ -10774,6 +10693,62 @@ you can also set @code{EXPORT_FILE_NAME} property.  In all cases, only the
 base name of the file is retained, and a back-end specific extension is
 added.
 
+@node Table of contents
+@section Table of contents
+@cindex table of contents
+@cindex list of tables
+@cindex list of listings
+
+@cindex #+TOC
+@vindex org-export-with-toc
+The table of contents is normally inserted directly before the first headline
+of the file.  The depth of the table is by default the same as the number of
+headline levels, but you can choose a smaller number, or turn off the table
+of contents entirely, by configuring the variable @code{org-export-with-toc},
+or on a per-file basis with a line like
+
+@example
+#+OPTIONS: toc:2          @r{only inlcude two levels in TOC}
+#+OPTIONS: toc:nil        @r{no default TOC at all}
+@end example
+
+If you would like to move the table of contents to a different location, you
+should turn off the default table using @code{org-export-with-toc} or
+@code{#+OPTIONS} and insert @code{#+TOC: headlines N} at the desired
+location(s).
+
+@example
+#+OPTIONS: toc:nil        @r{no default TOC}
+...
+#+TOC: headlines 2        @r{insert TOC here, with two headline levels}
+@end example
+
+Moreover, if you append @samp{local} parameter, the table contains only
+entries for the children of the current section@footnote{For @LaTeX{} export,
+this feature requires the @code{titletoc} package.  Note that @code{titletoc}
+must be loaded @emph{before} @code{hyperref}.  Thus, you may have to
+customize @code{org-latex-default-packages-alist}.}.  In this case, any depth
+parameter becomes relative to the current level.
+
+@example
+* Section
+#+TOC: headlines 1 local  @r{insert local TOC, with direct children only}
+@end example
+
+The same @code{TOC} keyword can also generate a list of all tables (resp.@:
+all listings) with a caption in the document.
+
+@example
+#+TOC: listings           @r{build a list of listings}
+#+TOC: tables             @r{build a list of tables}
+@end example
+
+@cindex property, ALT_TITLE
+The headline's title usually determines its corresponding entry in a table of
+contents.  However, it is possible to specify an alternative title by
+setting @code{ALT_TITLE} property accordingly.  It will then be used when
+building the table.
+
 @node Include files
 @section Include files
 @cindex include files, during export
@@ -10919,6 +10894,32 @@ The surrounding brackets can be made invisible by setting
 @code{org-hide-macro-markers} non-@code{nil}.
 
 Macro expansion takes place during the very beginning of the export process.
+
+@node Comment lines
+@section Comment lines
+@cindex comment lines
+@cindex exporting, not
+@cindex #+BEGIN_COMMENT
+
+Lines starting with zero or more whitespace characters followed by one
+@samp{#} and a whitespace are treated as comments and, as such, are not
+exported.
+
+Likewise, regions surrounded by @samp{#+BEGIN_COMMENT}
+... @samp{#+END_COMMENT} are not exported.
+
+Finally, a @samp{COMMENT} keyword at the beginning of an entry, but after any
+other keyword or priority cookie, comments out the entire subtree.  In this
+case, the subtree is not exported and no code block within it is executed
+either@footnote{For a less drastic behavior, consider using a select tag
+(@pxref{Export settings}) instead.}.  The command below helps changing the
+comment status of a headline.
+
+@table @kbd
+@kindex C-c ;
+@item C-c ;
+Toggle the @samp{COMMENT} keyword at the beginning of an entry.
+@end table
 
 @node ASCII/Latin-1/UTF-8 export
 @section ASCII/Latin-1/UTF-8 export
