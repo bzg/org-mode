@@ -10620,11 +10620,11 @@ ASCII export produces a readable and simple version of an Org file for
 printing and sharing notes.  HTML export allows you to easily publish notes
 on the web, or to build full-fledged websites.  @LaTeX{} export lets you use
 Org mode and its structured editing functions to create arbitrarily complex
-@LaTeX{} files for any kind of document.  OpenDocument Text (ODT) export
-allows seamless collaboration across organizational boundaries.  Markdown
-export lets you seamlessly collaborate with other developers.  Finally, iCal
-export can extract entries with deadlines or appointments to produce a file
-in the iCalendar format.
+@LaTeX{} files for any kind of document.  OpenDocument Text (ODT) and
+Markdown export allow seamless collaboration across organizational
+boundaries.  Texinfo export helps generating documentation or full-fledged
+manuals.  Finally, iCal export can extract entries with deadlines or
+appointments to produce a file in the iCalendar format.
 
 @menu
 * The export dispatcher::       The main exporter interface
