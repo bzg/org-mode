@@ -43,18 +43,25 @@
 
 (defcustom org-babel-shell-names
   '("sh" "bash" "csh" "ash" "dash" "ksh" "mksh" "posh")
-  "List of names of shell supported by babel shell code blocks."
+  "List of names of shell supported by babel shell code blocks.
+Call `org-babel-shell-initialize' when modifying this variable
+outside the Customize interface."
   :group 'org-babel
   :type '(repeat (string :tag "Shell name: "))
   :set (lambda (symbol value)
 	 (set-default symbol value)
-	 (dolist (name value)
-	   (eval `(defun ,(intern (concat "org-babel-execute:" name))
-		      (body params)
-		    ,(format "Execute a block of %s commands with Babel." name)
-		    (let ((shell-file-name ,name))
-		      (org-babel-execute:shell body params)))
-		 t))))
+	 (org-babel-shell-initialize)))
+
+(defun org-babel-shell-initialize ()
+  "Define execution functions associated to shell names.
+This function has to be called whenever `org-babel-shell-names'
+is modified outside the Customize interface."
+  (dolist (name org-babel-shell-names)
+    (eval `(defun ,(intern (concat "org-babel-execute:" name))
+	       (body params)
+	     ,(format "Execute a block of %s commands with Babel." name)
+	     (let ((shell-file-name ,name))
+	       (org-babel-execute:shell body params))))))
 
 (defun org-babel-execute:shell (body params)
   "Execute a block of Shell commands with Babel.
