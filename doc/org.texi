@@ -545,7 +545,6 @@ Markup for rich export
 * Images and tables::           Images, tables and caption mechanism
 * Literal examples::            Source code examples with special formatting
 * Include files::               Include additional files into a document
-* Index entries::               Making an index
 * Macro replacement::           Use macros to create templates
 * Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
 * Special blocks::              Containers targeted at export back-ends
@@ -9730,7 +9729,6 @@ markup rules used in an Org mode buffer.
 * Images and tables::           Images, tables and caption mechanism
 * Literal examples::            Source code examples with special formatting
 * Include files::               Include additional files into a document
-* Index entries::               Making an index
 * Macro replacement::           Use macros to create templates
 * Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
 * Special blocks::              Containers targeted at export back-ends
@@ -10221,23 +10219,6 @@ operates locally with respect to the requested element.  Some examples:
 @item C-c '
 Visit the include file at point.
 @end table
-
-@node Index entries
-@section Index entries
-@cindex index entries, for publishing
-
-You can specify entries that will be used for generating an index during
-publishing.  This is done by lines starting with @code{#+INDEX}.  An entry
-the contains an exclamation mark will create a sub item.  See @ref{Generating
-an index} for more information.
-
-@example
-* Curriculum Vitae
-#+INDEX: CV
-#+INDEX: Application!CV
-@end example
-
-
 
 @node Macro replacement
 @section Macro replacement
@@ -14697,6 +14678,16 @@ The file will be created when first publishing a project with the
 @code{:makeindex} set.  The file only contains a statement @code{#+INCLUDE:
 "theindex.inc"}.  You can then build around this include statement by adding
 a title, style information, etc.
+
+@cindex #+INDEX
+Index entries are specified with @code{#+INDEX} keyword.  An entry that
+contains an exclamation mark will create a sub item.
+
+@example
+* Curriculum Vitae
+#+INDEX: CV
+#+INDEX: Application!CV
+@end example
 
 @node Uploading files
 @section Uploading files
