@@ -545,7 +545,6 @@ Markup for rich export
 * Images and tables::           Images, tables and caption mechanism
 * Literal examples::            Source code examples with special formatting
 * Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
-* Special blocks::              Containers targeted at export back-ends
 
 Structural markup elements
 
@@ -9725,7 +9724,6 @@ markup rules used in an Org mode buffer.
 * Images and tables::           Images, tables and caption mechanism
 * Literal examples::            Source code examples with special formatting
 * Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
-* Special blocks::              Containers targeted at export back-ends
 @end menu
 
 @node Structural markup elements
@@ -10272,28 +10270,6 @@ the symbol before point with an accent or a font.  If you wait more than
 modification will work only inside @LaTeX{} fragments; outside the quote
 is normal.
 @end itemize
-
-@node Special blocks
-@section Special blocks
-@cindex Special blocks
-
-Org syntax includes pre-defined blocks (@pxref{Paragraphs} and @ref{Literal
-examples}).  It is also possible to create blocks containing raw code
-targeted at a specific back-end (e.g., @samp{#+BEGIN_EXPORT latex}).
-
-Any other block is a @emph{special block}.  Its name is case-sensitive.
-
-For example, @samp{#+BEGIN_abstract} and @samp{#+BEGIN_video} are special
-blocks.  The first one is useful when exporting to @LaTeX{}, the second one
-when exporting to HTML5.
-
-Each export back-end decides if they should be exported, and how.  When the
-block is ignored, its contents are still exported, as if the opening and
-closing block lines were not there.  For example, when exporting a
-@samp{#+BEGIN_test} block, HTML back-end wraps its contents within a
-@samp{<div name="test">} tag.
-
-Refer to back-end specific documentation for more information.
 
 @node Exporting
 @chapter Exporting
