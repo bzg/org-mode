@@ -549,12 +549,8 @@ Markup for rich export
 
 Structural markup elements
 
-* Document title::              Where the title is taken from
-* Headings and sections::       The document structure as seen by the exporter
 * Table of contents::           The if and where of the table of contents
-* Lists::                       Lists
 * Paragraphs::                  Paragraphs
-* Footnote markup::             Footnotes
 * Emphasis and monospace::      Bold, italic, etc.
 * Horizontal rules::            Make a line
 * Comment lines::               What will *not* be exported
@@ -9736,51 +9732,12 @@ markup rules used in an Org mode buffer.
 @section Structural markup elements
 
 @menu
-* Document title::              Where the title is taken from
-* Headings and sections::       The document structure as seen by the exporter
 * Table of contents::           The if and where of the table of contents
-* Lists::                       Lists
 * Paragraphs::                  Paragraphs
-* Footnote markup::             Footnotes
 * Emphasis and monospace::      Bold, italic, etc.
 * Horizontal rules::            Make a line
 * Comment lines::               What will *not* be exported
 @end menu
-
-@node Document title
-@subheading Document title
-@cindex document title, markup rules
-
-@noindent
-The title of the exported document is taken from the special line
-
-@cindex #+TITLE
-@example
-#+TITLE: This is the title of the document
-@end example
-
-@cindex property, EXPORT_TITLE
-If you are exporting only a subtree, its heading will become the title of the
-document.  If the subtree has a property @code{EXPORT_TITLE}, that will take
-precedence.
-
-@node Headings and sections
-@subheading Headings and sections
-@cindex headings and sections, markup rules
-
-@vindex org-export-headline-levels
-The outline structure of the document as described in @ref{Document
-structure}, forms the basis for defining sections of the exported document.
-However, since the outline structure is also used for (for example) lists of
-tasks, only the first three outline levels will be used as headings.  Deeper
-levels will become itemized lists.  You can change the location of this
-switch globally by setting the variable @code{org-export-headline-levels}, or on a
-per-file basis with a line
-
-@cindex #+OPTIONS
-@example
-#+OPTIONS: H:4
-@end example
 
 @node Table of contents
 @subheading Table of contents
@@ -9836,14 +9793,6 @@ contents.  However, it is possible to specify an alternative title by
 setting @code{ALT_TITLE} property accordingly.  It will then be used when
 building the table.
 
-@node Lists
-@subheading Lists
-@cindex lists, markup rules
-
-Plain lists as described in @ref{Plain lists}, are translated to the back-end's
-syntax for such lists.  Most back-ends support unordered, ordered, and
-description lists.
-
 @node Paragraphs
 @subheading Paragraphs, line breaks, and quoting
 @cindex paragraphs, markup rules
@@ -9885,16 +9834,6 @@ Everything should be made as simple as possible, \\
 but not any simpler
 #+END_CENTER
 @end example
-
-
-@node Footnote markup
-@subheading Footnote markup
-@cindex footnotes, markup rules
-@cindex @file{footnote.el}
-
-Footnotes defined in the way described in @ref{Footnotes}, will be exported
-by all back-ends.  Org allows multiple references to the same note, and
-multiple footnotes side by side.
 
 @node Emphasis and monospace
 @subheading Emphasis and monospace
@@ -10645,6 +10584,7 @@ be executed during export even though the subtree is not exported.
 
 @item TITLE
 @cindex #+TITLE
+@cindex document title
 The title to be shown.  You can use several such keywords for long titles.
 @end table
 
