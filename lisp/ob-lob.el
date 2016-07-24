@@ -38,15 +38,12 @@
 This is an association list.  Populate the library by calling
 `org-babel-lob-ingest' on files containing source blocks.")
 
-(defvar org-babel-default-lob-header-args
-  '((:cache . "no")
-    (:exports . "results")
-    (:hlines . "no")
-    (:noweb . "no")
-    (:results . "replace")
-    (:session . "none")
-    (:tangle . "no"))
-  "Default header arguments to use when exporting Babel calls.")
+(defvar org-babel-default-lob-header-args '((:exports . "results"))
+  "Default header arguments to use when exporting Babel calls.
+By default, a Babel call inherits its arguments from the source
+block being called.  Header arguments defined in this variable
+take precedence over these.  It is useful for properties that
+should not be inherited from a source block.")
 
 (defun org-babel-lob-ingest (&optional file)
   "Add all named source blocks defined in FILE to `org-babel-library-of-babel'."
@@ -99,9 +96,7 @@ fails, it returns nil."
 	     (when (equal name (org-element-property :name element))
 	       (throw :found
 		      (pcase (org-element-type element)
-			(`src-block (let ((org-babel-default-header-args
-					   org-babel-default-lob-header-args))
-				      (org-babel-get-src-block-info t element)))
+			(`src-block (org-babel-get-src-block-info t element))
 			(`babel-call (org-babel-lob-get-info element))
 			;; Non-executable data found.  Since names are
 			;; supposed to be unique throughout a document,
@@ -129,6 +124,7 @@ compatible with `org-babel-get-src-block-info', which see."
 		 body
 		 (apply #'org-babel-merge-params
 			header
+			org-babel-default-lob-header-args
 			(append
 			 (org-with-wide-buffer
 			  (goto-char begin)
