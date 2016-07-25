@@ -11750,6 +11750,7 @@ div.footnotes       @r{footnote section headline}
 p.footnote          @r{footnote definition paragraph, containing a footnote}
 .footref            @r{a footnote reference number (always a <sup>)}
 .footnum            @r{footnote number in footnote definition (always <sup>)}
+.org-svg            @r{default class for a linked @file{.svg} image}
 @end example
 
 @vindex org-html-style-default

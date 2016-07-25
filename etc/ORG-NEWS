@@ -208,6 +208,11 @@ point for the SRC/EXAMPLE block.
 With the global variable ~org-latex-images-centered~ or the local
 attribute ~:center~ it is now possible to center an image in LaTeX
 export.
+**** Default CSS class ~org-svg~ for SVG images in HTML export
+SVG images exported in HTML are now by default assigned a CSS class
+~org-svg~ if no CSS class is specified with the ~:class~ attribute. By
+default, the CSS styling of class ~org-svg~ specifies an image width
+of 90\thinsp{}% of the container the image.
 *** Babel
 **** Support for SLY in Lisp blocks
 See ~org-babel-lisp-eval-fn~ to activate it.

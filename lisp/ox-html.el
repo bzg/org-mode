@@ -440,6 +440,7 @@ for the JavaScript code in this tag.
     { font-size: 10px; font-weight: bold; white-space: nowrap; }
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
   /*]]>*/-->
 </style>"
   "The default style specification for exported HTML files.
@@ -1628,21 +1629,27 @@ a communication channel."
      info)))
 
 (defun org-html--svg-image (source attributes info)
-  "Return \"object\" appropriate for embedding svg file SOURCE
-with assoicated ATTRIBUTES. INFO is a plist used as a
-communication channel.
+  "Return \"object\" embedding svg file SOURCE with given ATTRIBUTES.
+INFO is a plist used as a communication channel.
 
-The special attribute \"fallback\" can be used to specify a fallback
-image file to use if the object embedding is not supported."
+The special attribute \"fallback\" can be used to specify a
+fallback image file to use if the object embedding is not
+supported.  CSS class \"org-svg\" is assigned as the class of the
+object unless a different class is specified with an attribute."
   (let ((fallback (plist-get attributes :fallback))
 	(attrs (org-html--make-attribute-string
-		(plist-put attributes :fallback nil))))
-  (format "<object type=\"image/svg+xml\" data=\"%s\" %s>\n%s</object>"
-	  source attrs
-	  (if fallback
-	      (org-html-close-tag
-	       "img" (format "src=\"%s\" %s" fallback attrs) info)
-	    "Sorry, your browser does not support SVG."))))
+		(org-combine-plists
+                 ;; Remove fallback attribute, which is not meant to
+                 ;; appear directly in the attributes string, and
+                 ;; provide a default class if none is set.
+                 '(:class "org-svg") attributes '(:fallback nil)))))
+    (format "<object type=\"image/svg+xml\" data=\"%s\" %s>\n%s</object>"
+	    source
+	    attrs
+	    (if fallback
+		(org-html-close-tag
+		 "img" (format "src=\"%s\" %s" fallback attrs) info)
+	      "Sorry, your browser does not support SVG."))))
 
 (defun org-html--textarea-block (element)
   "Transcode ELEMENT into a textarea block.
