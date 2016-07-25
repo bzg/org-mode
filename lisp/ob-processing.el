@@ -52,7 +52,6 @@
 ;;; Code:
 (require 'ob)
 (require 'sha1)
-(eval-when-compile (require 'cl))
 
 (declare-function processing-sketch-run "ext:processing-mode" ())
 

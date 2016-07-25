@@ -39,7 +39,6 @@
 
 ;;; Code:
 (require 'ob)
-(eval-when-compile (require 'cl))
 
 (declare-function org-time-string-to-time "org" (s &optional buffer pos))
 (declare-function org-combine-plists "org" (&rest plists))

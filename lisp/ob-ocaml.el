@@ -37,7 +37,6 @@
 ;;; Code:
 (require 'ob)
 (require 'comint)
-(eval-when-compile (require 'cl))
 
 (declare-function tuareg-run-caml "ext:tuareg" ())
 (declare-function tuareg-run-ocaml "ext:tuareg" ())

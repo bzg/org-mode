@@ -41,7 +41,6 @@
 ;;; Code:
 (require 'ob)
 (require 'comint)
-(eval-when-compile (require 'cl))
 
 (declare-function org-remove-indentation "org" (code &optional n))
 (declare-function org-trim "org" (s &optional keep-lead))

@@ -55,7 +55,6 @@
 ;;; Code:
 (require 'ob)
 (require 'comint)
-(eval-when-compile (require 'cl))
 
 (declare-function run-picolisp "ext:inferior-picolisp" (cmd))
 (defvar org-babel-tangle-lang-exts) ;; Autoloaded

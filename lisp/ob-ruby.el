@@ -37,7 +37,6 @@
 
 ;;; Code:
 (require 'ob)
-(eval-when-compile (require 'cl))
 
 (declare-function org-trim "org" (s &optional keep-lead))
 (declare-function run-ruby "ext:inf-ruby" (&optional command name))

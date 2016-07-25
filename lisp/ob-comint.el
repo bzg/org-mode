@@ -33,8 +33,6 @@
 (require 'ob-core)
 (require 'org-compat)
 (require 'comint)
-(eval-when-compile
-  (require 'cl))
 (require 'tramp)
 
 (defun org-babel-comint-buffer-livep (buffer)

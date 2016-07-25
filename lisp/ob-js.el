@@ -39,7 +39,6 @@
 
 ;;; Code:
 (require 'ob)
-(eval-when-compile (require 'cl))
 
 (declare-function run-mozilla "ext:moz" (arg))
 

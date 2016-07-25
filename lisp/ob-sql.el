@@ -57,7 +57,6 @@
 
 ;;; Code:
 (require 'ob)
-(eval-when-compile (require 'cl))
 
 (declare-function org-table-import "org-table" (file arg))
 (declare-function orgtbl-to-csv "org-table" (table params))

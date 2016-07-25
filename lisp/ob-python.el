@@ -28,7 +28,6 @@
 
 ;;; Code:
 (require 'ob)
-(eval-when-compile (require 'cl))
 
 (declare-function org-remove-indentation "org" )
 (declare-function org-trim "org" (s &optional keep-lead))

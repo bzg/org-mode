@@ -40,8 +40,6 @@
 
 ;;; Code:
 (require 'ob)
-(eval-when-compile
-  (require 'cl))
 
 (declare-function cider-current-connection "ext:cider-client" (&optional type))
 (declare-function cider-current-session "ext:cider-client" ())

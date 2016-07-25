@@ -30,7 +30,6 @@
 
 ;;; Code:
 (require 'ob)
-(eval-when-compile (require 'cl))
 
 (declare-function matlab-shell "ext:matlab-mode")
 (declare-function matlab-shell-run-region "ext:matlab-mode")

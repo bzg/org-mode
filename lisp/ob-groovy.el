@@ -31,7 +31,6 @@
 
 ;;; Code:
 (require 'ob)
-(eval-when-compile (require 'cl))
 
 (defvar org-babel-tangle-lang-exts) ;; Autoloaded
 (add-to-list 'org-babel-tangle-lang-exts '("groovy" . "groovy"))
