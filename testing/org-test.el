@@ -54,35 +54,13 @@
       (org-babel-do-load-languages
        'org-babel-load-languages '((shell . t) (org . t))))
 
-    (let* ((load-path (cons
-		       org-test-dir
-		       (cons
-			(expand-file-name "jump" org-test-dir)
-			load-path))))
-      (require 'cl)
-      (when (= emacs-major-version 22)
-	(defvar special-mode-map
-	  (let ((map (make-sparse-keymap)))
-	    (suppress-keymap map)
-	    (define-key map "q" 'quit-window)
-	    (define-key map " " 'scroll-up)
-	    (define-key map "\C-?" 'scroll-down)
-	    (define-key map "?" 'describe-mode)
-	    (define-key map "h" 'describe-mode)
-	    (define-key map ">" 'end-of-buffer)
-	    (define-key map "<" 'beginning-of-buffer)
-	    (define-key map "g" 'revert-buffer)
-	    (define-key map "z" 'kill-this-buffer)
-	    map))
-
-	(put 'special-mode 'mode-class 'special)
-	(define-derived-mode special-mode nil "Special"
-	  "Parent major mode from which special major modes should inherit."
-	  (setq buffer-read-only t)))
+    (let ((load-path (cons org-test-dir
+			   (cons (expand-file-name "jump" org-test-dir)
+				 load-path))))
+      (require 'cl-lib)
       (require 'ert)
       (require 'ert-x)
-      (when (file-exists-p
-	     (expand-file-name "jump/jump.el" org-test-dir))
+      (when (file-exists-p (expand-file-name "jump/jump.el" org-test-dir))
 	(require 'jump)
 	(require 'which-func)))))
 
@@ -344,7 +322,7 @@ setting `pp-escape-newlines' to nil manually."
 
 
 (defun org-test-string-exact-match (regex string &optional start)
-  "case sensative string-match"
+  "Case sensitive string-match"
   (let ((case-fold-search nil)
         (case-replace nil))
     (if(and (equal regex "")
