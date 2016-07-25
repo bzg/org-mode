@@ -258,7 +258,7 @@ If the point is at the :beginning (`org-mouse-line-position') of the line,
 insert the new heading before the current line.  Otherwise, insert it
 after the current heading."
   (interactive)
-  (case (org-mouse-line-position)
+  (cl-case (org-mouse-line-position)
     (:beginning (beginning-of-line)
 		(org-insert-heading))
     (t (org-mouse-next-heading)
@@ -407,8 +407,8 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	  (> (match-end 0) point))))))
 
 (defun org-mouse-priority-list ()
-  (loop for priority from ?A to org-lowest-priority
-	collect (char-to-string priority)))
+  (cl-loop for priority from ?A to org-lowest-priority
+	   collect (char-to-string priority)))
 
 (defun org-mouse-todo-menu (state)
   "Create the menu with TODO keywords."
@@ -460,33 +460,33 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	 (insert " [ ] "))))
 
 (defun org-mouse-agenda-type (type)
-  (case type
-    ('tags "Tags: ")
-    ('todo "TODO: ")
-    ('tags-tree "Tags tree: ")
-    ('todo-tree "TODO tree: ")
-    ('occur-tree "Occur tree: ")
-    (t "Agenda command ???")))
+  (pcase type
+    (`tags "Tags: ")
+    (`todo "TODO: ")
+    (`tags-tree "Tags tree: ")
+    (`todo-tree "TODO tree: ")
+    (`occur-tree "Occur tree: ")
+    (_ "Agenda command ???")))
 
 (defun org-mouse-list-options-menu (alloptions &optional function)
   (let ((options (save-match-data
 		   (split-string (match-string-no-properties 1)))))
     (print options)
-    (loop for name in alloptions
-	  collect
-	  (vector name
-		  `(progn
-		     (replace-match
-		      (mapconcat 'identity
-				 (sort (if (member ',name ',options)
-					   (delete ',name ',options)
-					 (cons ',name ',options))
-				       'string-lessp)
-				 " ")
-		      nil nil nil 1)
-		     (when (functionp ',function) (funcall ',function)))
-		  :style 'toggle
-		  :selected (and (member name options) t)))))
+    (cl-loop for name in alloptions
+	     collect
+	     (vector name
+		     `(progn
+			(replace-match
+			 (mapconcat 'identity
+				    (sort (if (member ',name ',options)
+					      (delete ',name ',options)
+					    (cons ',name ',options))
+					  'string-lessp)
+				    " ")
+			 nil nil nil 1)
+			(when (functionp ',function) (funcall ',function)))
+		     :style 'toggle
+		     :selected (and (member name options) t)))))
 
 (defun org-mouse-clip-text (text maxlength)
   (if (> (length text) maxlength)
@@ -572,14 +572,14 @@ This means, between the beginning of line and the point."
     (skip-chars-backward " \t*") (bolp)))
 
 (defun org-mouse-insert-item (text)
-  (case (org-mouse-line-position)
-    (:beginning			; insert before
+  (cl-case (org-mouse-line-position)
+    (:beginning				; insert before
      (beginning-of-line)
      (looking-at "[ \t]*")
      (open-line 1)
      (indent-to-column (- (match-end 0) (match-beginning 0)))
      (insert "+ "))
-    (:middle			; insert after
+    (:middle				; insert after
      (end-of-line)
      (newline t)
      (indent-relative)
@@ -646,7 +646,7 @@ This means, between the beginning of line and the point."
      ((or (eolp)
 	  (and (looking-at "\\(  \\|\t\\)\\(+:[0-9a-zA-Z_:]+\\)?\\(  \\|\t\\)+$")
 	       (looking-back "  \\|\t" (- (point) 2)
-				 (line-beginning-position))))
+			     (line-beginning-position))))
       (org-mouse-popup-global-menu))
      ((funcall get-context :checkbox)
       (popup-menu
@@ -738,13 +738,13 @@ This means, between the beginning of line and the point."
 	 ["- 1 Month" (org-timestamp-change -1 'month)])))
      ((funcall get-context :table-special)
       (let ((mdata (match-data)))
-	(incf (car mdata) 2)
+	(cl-incf (car mdata) 2)
 	(store-match-data mdata))
       (message "match: %S" (match-string 0))
       (popup-menu `(nil ,@(org-mouse-keyword-replace-menu
 			   '(" " "!" "^" "_" "$" "#" "*" "'") 0
 			   (lambda (mark)
-			     (case (string-to-char mark)
+			     (cl-case (string-to-char mark)
 			       (?  "( ) Nothing Special")
 			       (?! "(!) Column Names")
 			       (?^ "(^) Field Names Above")
@@ -1094,17 +1094,17 @@ This means, between the beginning of line and the point."
 					; (setq org-agenda-mode-hook nil)
 (defvar org-agenda-mode-map)
 (add-hook 'org-agenda-mode-hook
-	  #'(lambda ()
-	      (setq org-mouse-context-menu-function 'org-mouse-agenda-context-menu)
-	      (org-defkey org-agenda-mode-map [mouse-3] 'org-mouse-show-context-menu)
-	      (org-defkey org-agenda-mode-map [down-mouse-3] 'org-mouse-move-tree-start)
-	      (org-defkey org-agenda-mode-map [C-mouse-4] 'org-agenda-earlier)
-	      (org-defkey org-agenda-mode-map [C-mouse-5] 'org-agenda-later)
-	      (org-defkey org-agenda-mode-map [drag-mouse-3]
-			  #'(lambda (event) (interactive "e")
-			      (case (org-mouse-get-gesture event)
-				(:left (org-agenda-earlier 1))
-				(:right (org-agenda-later 1)))))))
+	  (lambda ()
+	    (setq org-mouse-context-menu-function 'org-mouse-agenda-context-menu)
+	    (org-defkey org-agenda-mode-map [mouse-3] 'org-mouse-show-context-menu)
+	    (org-defkey org-agenda-mode-map [down-mouse-3] 'org-mouse-move-tree-start)
+	    (org-defkey org-agenda-mode-map [C-mouse-4] 'org-agenda-earlier)
+	    (org-defkey org-agenda-mode-map [C-mouse-5] 'org-agenda-later)
+	    (org-defkey org-agenda-mode-map [drag-mouse-3]
+			(lambda (event) (interactive "e")
+			  (cl-case (org-mouse-get-gesture event)
+			    (:left (org-agenda-earlier 1))
+			    (:right (org-agenda-later 1)))))))
 
 (provide 'org-mouse)
 
