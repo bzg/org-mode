@@ -451,7 +451,7 @@ used as a communication channel."
 			(let ((label (org-beamer--get-label headline info)))
 			  ;; Labels containing colons need to be
 			  ;; wrapped within braces.
-			  (format (if (org-string-match-p ":" label)
+			  (format (if (string-match-p ":" label)
 				      "label={%s}"
 				    "label=%s")
 				  label)))))))

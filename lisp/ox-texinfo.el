@@ -548,7 +548,7 @@ holding export options."
 		     (name (symbol-name (or org-texinfo-coding-system
 					    buffer-file-coding-system))))
 		 (dolist (system org-texinfo-supported-coding-systems "UTF-8")
-		   (when (org-string-match-p (regexp-quote system) name)
+		   (when (string-match-p (regexp-quote system) name)
 		     (throw 'coding-system system))))))
 	    (language (plist-get info :language))
 	    (case-fold-search nil))
@@ -585,7 +585,7 @@ holding export options."
 		 (let ((dirdesc
 			(let ((desc (plist-get info :texinfo-dirdesc)))
 			  (cond ((not desc) nil)
-				((org-string-match-p "\\.$" desc) desc)
+				((string-match-p "\\.$" desc) desc)
 				(t (concat desc "."))))))
 		   (if dirdesc (format "%-23s %s" dirtitle dirdesc) dirtitle))
 		 "\n"
@@ -916,10 +916,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      ((string= key "TINDEX") (format "@tindex %s" value))
      ((string= key "VINDEX") (format "@vindex %s" value))
      ((string= key "TOC")
-      (cond ((org-string-match-p "\\<tables\\>" value)
+      (cond ((string-match-p "\\<tables\\>" value)
 	     (concat "@listoffloats "
 		     (org-export-translate "Table" :utf-8 info)))
-	    ((org-string-match-p "\\<listings\\>" value)
+	    ((string-match-p "\\<listings\\>" value)
 	     (concat "@listoffloats "
 		     (org-export-translate "Listing" :utf-8 info))))))))
 
@@ -1307,8 +1307,8 @@ as a communication channel."
   "Transcode a SRC-BLOCK element from Org to Texinfo.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let* ((lisp (org-string-match-p "lisp"
-				   (org-element-property :language src-block)))
+  (let* ((lisp (string-match-p "lisp"
+			       (org-element-property :language src-block)))
 	 (code (org-texinfo--sanitize-content
 		(org-export-format-code-default src-block info)))
 	 (value (format

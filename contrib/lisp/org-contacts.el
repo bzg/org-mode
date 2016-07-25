@@ -317,16 +317,16 @@ cell corresponding to the contact properties.
     (cl-loop for contact in (org-contacts-db)
 	     if (or
 		 (and name-match
-		      (org-string-match-p name-match
+		      (string-match-p name-match
 					  (first contact)))
 		 (and prop-match
 		      (cl-find-if (lambda (prop)
 				     (and (string= (car prop-match) (car prop))
-					  (org-string-match-p (cdr prop-match) (cdr prop))))
+					  (string-match-p (cdr prop-match) (cdr prop))))
 				   (caddr contact)))
 		 (and tags-match
 		      (cl-find-if (lambda (tag)
-				     (org-string-match-p tags-match tag))
+				     (string-match-p tags-match tag))
 				   (org-split-string
 				    (or (cdr (assoc-string "ALLTAGS" (caddr contact))) "") ":"))))
 	     collect contact)))
@@ -505,7 +505,7 @@ prefixes rather than just the beginning of the string."
 
 A group FOO is composed of contacts with the tag FOO."
   (let* ((completion-ignore-case org-contacts-completion-ignore-case)
-	 (group-completion-p (org-string-match-p
+	 (group-completion-p (string-match-p
 			      (concat "^" org-contacts-group-prefix) string)))
     (when group-completion-p
       (let ((completion-list
@@ -554,7 +554,7 @@ with BAR.
 See (org) Matching tags and properties for a complete
 description."
   (let* ((completion-ignore-case org-contacts-completion-ignore-case)
-	 (completion-p (org-string-match-p
+	 (completion-p (string-match-p
 			(concat "^" org-contacts-tags-props-prefix) string)))
     (when completion-p
       (let ((result

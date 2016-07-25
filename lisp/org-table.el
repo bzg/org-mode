@@ -689,7 +689,7 @@ extension of the given file name, and finally on the variable
 		   (or (car (delq nil
 				  (mapcar
 				   (lambda (f)
-				     (and (org-string-match-p fileext f) f))
+				     (and (string-match-p fileext f) f))
 				   formats)))
 		       org-table-export-default-format)
 		   t t) t t)))
@@ -756,7 +756,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
             ;; Table's rows.  Separators are replaced by nil.  Trailing
             ;; spaces are also removed.
             (lines (mapcar (lambda (l)
-                             (and (not (org-string-match-p "\\`[ \t]*|-" l))
+                             (and (not (string-match-p "\\`[ \t]*|-" l))
                                   (let ((l (org-trim l)))
                                     (remove-text-properties
                                      0 (length l) '(display t org-cwidth t) l)
@@ -833,7 +833,7 @@ edit.  Full value is:\n"
                  (unless (equal x "")
                    (setq frac
                          (/ (+ (* frac cnt)
-                               (if (org-string-match-p org-table-number-regexp x)
+                               (if (string-match-p org-table-number-regexp x)
                                    1
                                  0))
                             (cl-incf cnt)))))
@@ -2313,7 +2313,7 @@ LOCATION is a buffer position, consider the formulas there."
 		       (cond
 			((not (match-end 2)) m)
 			;; Is it a column reference?
-			((org-string-match-p "\\`$\\([0-9]+\\|[<>]+\\)\\'" m) m)
+			((string-match-p "\\`$\\([0-9]+\\|[<>]+\\)\\'" m) m)
 			;; Since named columns are not possible in
 			;; LHS, assume this is a named field.
 			(t (match-string 2 string)))))
@@ -2926,7 +2926,7 @@ When CORNERS-ONLY is set, only return the corners of the range as
 a list (line1 column1 line2 column2) where line1 and line2 are
 line numbers relative to beginning of table, or TBEG, and column1
 and column2 are table column numbers."
-  (let* ((desc (if (org-string-match-p "\\`\\$[0-9]+\\.\\.\\$[0-9]+\\'" desc)
+  (let* ((desc (if (string-match-p "\\`\\$[0-9]+\\.\\.\\$[0-9]+\\'" desc)
 		   (replace-regexp-in-string "\\$" "@0$" desc)
 		 desc))
 	 (col (or col (org-table-current-column)))
@@ -3170,7 +3170,7 @@ existing formula for column %s"
 				      new))
 			new))
 		     (t old-lhs)))))
-	     (if (org-string-match-p "\\`\\$[0-9]+\\'" lhs)
+	     (if (string-match-p "\\`\\$[0-9]+\\'" lhs)
 		 (push (cons lhs rhs) eqlcol)
 	       (push (cons lhs rhs) eqlfield))))
 	 (setq eqlcol (nreverse eqlcol))
@@ -3383,13 +3383,13 @@ function assumes the table is already analyzed (i.e., using
       (let ((lhs (car e))
 	    (rhs (cdr e)))
 	(cond
-	 ((org-string-match-p "\\`@-?[-+0-9]+\\$-?[0-9]+\\'" lhs)
+	 ((string-match-p "\\`@-?[-+0-9]+\\$-?[0-9]+\\'" lhs)
 	  ;; This just refers to one fixed field.
 	  (push e res))
-	 ((org-string-match-p "\\`[a-zA-Z][_a-zA-Z0-9]*\\'" lhs)
+	 ((string-match-p "\\`[a-zA-Z][_a-zA-Z0-9]*\\'" lhs)
 	  ;; This just refers to one fixed named field.
 	  (push e res))
-	 ((org-string-match-p "\\`\\$[0-9]+\\'" lhs)
+	 ((string-match-p "\\`\\$[0-9]+\\'" lhs)
 	  ;; Column formulas are treated specially and are not
 	  ;; expanded.
 	  (push e res))
@@ -3445,7 +3445,7 @@ borders of the table using the @< @> $< $> makers."
   "Replace $const with values in string F."
   (let ((start 0)
 	(pp (/= (string-to-char f) ?'))
-	(duration (org-string-match-p ";.*[Tt].*\\'" f))
+	(duration (string-match-p ";.*[Tt].*\\'" f))
 	(new (replace-regexp-in-string	; Check for column names.
 	      org-table-column-name-regexp
 	      (lambda (m)
@@ -3988,10 +3988,10 @@ When LOCAL is non-nil, show references for the table at point."
 	(when dest
 	  (setq name (substring dest 1))
 	  (cond
-	   ((org-string-match-p "\\`\\$[a-zA-Z][a-zA-Z0-9]*" dest)
+	   ((string-match-p "\\`\\$[a-zA-Z][a-zA-Z0-9]*" dest)
 	    (org-table-goto-field dest))
-	   ((org-string-match-p "\\`@\\([1-9][0-9]*\\)\\$\\([1-9][0-9]*\\)\\'"
-				dest)
+	   ((string-match-p "\\`@\\([1-9][0-9]*\\)\\$\\([1-9][0-9]*\\)\\'"
+			    dest)
 	    (org-table-goto-field dest))
 	   (t (org-table-goto-column (string-to-number name))))
 	  (move-marker pos (point))
@@ -5197,7 +5197,7 @@ supported.  It is also possible to use the following one:
 	   params)))
 	(columns (let ((w (plist-get params :columns)))
 		   (cond ((not w) nil)
-			 ((org-string-match-p "{\\|@columnfractions " w) w)
+			 ((string-match-p "{\\|@columnfractions " w) w)
 			 (t (concat "@columnfractions " w))))))
     (if (not columns) output
       (replace-regexp-in-string
@@ -5438,7 +5438,7 @@ distinguished from a plain table name or ID."
        (save-match-data
 	 (let ((eq (org-table-formula-handle-first/last-rc (match-string 1 m))))
 	   (org-table-get-range
-	    (if (org-string-match-p "\\`\\$[0-9]+\\'" eq)
+	    (if (string-match-p "\\`\\$[0-9]+\\'" eq)
 		(concat "@0" eq)
 	      eq)))))
      form t t 1)))

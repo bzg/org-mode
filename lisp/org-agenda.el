@@ -6441,7 +6441,7 @@ The flag is set if the currently compiled format contains a `%b'.")
 (defun org-agenda-get-category-icon (category)
   "Return an image for CATEGORY according to `org-agenda-category-icon-alist'."
   (dolist (entry org-agenda-category-icon-alist)
-    (when (org-string-match-p (car entry) category)
+    (when (string-match-p (car entry) category)
       (if (listp (cadr entry))
 	  (return (cadr entry))
 	(return (apply 'create-image (cdr entry)))))))

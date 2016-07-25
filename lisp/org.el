@@ -10200,7 +10200,7 @@ according to FMT (default from `org-email-link-description-format')."
 		   ;; square brackets).  File links however, are
 		   ;; encoded since, e.g., spaces are significant.
 		   ((or (file-name-absolute-p link)
-			(org-string-match-p "\\`\\.\\.?/\\|[][]" link))
+			(string-match-p "\\`\\.\\.?/\\|[][]" link))
 		    (org-link-escape link))
 		   (t link)))
 	(description
@@ -10752,13 +10752,11 @@ PATH is the sexp to evaluate, as a string."
   (let ((cmd path))
     (if (or (and (org-string-nw-p
 		  org-confirm-elisp-link-not-regexp)
-		 (org-string-match-p
-		  org-confirm-elisp-link-not-regexp cmd))
+		 (string-match-p org-confirm-elisp-link-not-regexp cmd))
 	    (not org-confirm-elisp-link-function)
 	    (funcall org-confirm-elisp-link-function
 		     (format "Execute \"%s\" as elisp? "
-			     (org-add-props cmd nil
-			       'face 'org-warning))))
+			     (org-add-props cmd nil 'face 'org-warning))))
 	(message "%s => %s" cmd
 		 (if (eq (string-to-char cmd) ?\()
 		     (eval (read cmd))
@@ -10925,7 +10923,7 @@ link in a property drawer line."
 				   ((equal app "emacs") 'emacs)
 				   ((equal app "sys") 'system))
 			     (cond ((not option) nil)
-				   ((org-string-match-p "\\`[0-9]+\\'" option)
+				   ((string-match-p "\\`[0-9]+\\'" option)
 				    (list (string-to-number option)))
 				   (t (list nil
 					    (org-link-unescape option)))))))))
@@ -13878,16 +13876,16 @@ EXTRA is additional text that will be inserted into the notes buffer."
 			       org-log-note-effective-time))
 		   (cons "%s" (cond
 			       ((not org-log-note-state) "")
-			       ((org-string-match-p org-ts-regexp
-						    org-log-note-state)
+			       ((string-match-p org-ts-regexp
+						org-log-note-state)
 				(format "\"[%s]\""
 					(substring org-log-note-state 1 -1)))
 			       (t (format "\"%s\"" org-log-note-state))))
 		   (cons "%S"
 			 (cond
 			  ((not org-log-note-previous-state) "")
-			  ((org-string-match-p org-ts-regexp
-					       org-log-note-previous-state)
+			  ((string-match-p org-ts-regexp
+					   org-log-note-previous-state)
 			   (format "\"[%s]\""
 				   (substring
 				    org-log-note-previous-state 1 -1)))
@@ -14535,7 +14533,7 @@ also TODO lines."
   (if (or (eq t org-use-property-inheritance)
 	  (and (stringp org-use-property-inheritance)
 	       (let ((case-fold-search t))
-		 (org-string-match-p org-use-property-inheritance property)))
+		 (string-match-p org-use-property-inheritance property)))
 	  (and (listp org-use-property-inheritance)
 	       (member-ignore-case property org-use-property-inheritance)))
       ;; Caching is not possible, check it directly.
@@ -15688,7 +15686,7 @@ Being in this list makes sure that they are offered for completion.")
   "Non nil when string PROPERTY is a valid property name."
   (not
    (or (equal property "")
-       (org-string-match-p "\\s-" property))))
+       (string-match-p "\\s-" property))))
 
 (defun org--update-property-plist (key val props)
   "Associate KEY to VAL in alist PROPS.
@@ -15993,7 +15991,7 @@ strings."
 		    ;; properties to be named as special properties.
 		    (while (re-search-forward org-property-re end t)
 		      (let* ((key (upcase (match-string-no-properties 2)))
-			     (extendp (org-string-match-p "\\+\\'" key))
+			     (extendp (string-match-p "\\+\\'" key))
 			     (key-base (if extendp (substring key 0 -1) key))
 			     (value (match-string-no-properties 3)))
 			(cond
@@ -16336,7 +16334,7 @@ automatically performed, such drawers will be silently ignored."
 	       (let ((p (progn (looking-at org-property-re)
 			       (match-string-no-properties 2))))
 		 ;; Only add true property name, not extension symbol.
-		 (push (if (not (org-string-match-p "\\+\\'" p)) p
+		 (push (if (not (string-match-p "\\+\\'" p)) p
 			 (substring p 0 -1))
 		       props))
 	       (forward-line))))
@@ -16404,7 +16402,7 @@ Point is left between drawer's boundaries."
      ;; With C-u, fall back on `org-insert-property-drawer'
      (arg (org-insert-property-drawer))
      ;; Check validity of suggested drawer's name.
-     ((not (org-string-match-p org-drawer-regexp (format ":%s:" drawer)))
+     ((not (string-match-p org-drawer-regexp (format ":%s:" drawer)))
       (user-error "Invalid drawer name"))
      ;; With an active region, insert a drawer at point.
      ((not (org-region-active-p))
@@ -19722,8 +19720,8 @@ boundaries."
 		      (let ((parent (org-element-property :parent link)))
 			(or (not (eq (org-element-type parent) 'link))
 			    (not (cdr (org-element-contents parent)))))
-		      (org-string-match-p file-extension-re
-					  (org-element-property :path link)))
+		      (string-match-p file-extension-re
+				      (org-element-property :path link)))
 	     (let ((file (expand-file-name
 			  (org-link-unescape
 			   (org-element-property :path link)))))
@@ -24120,8 +24118,8 @@ unless optional argument NO-INHERITANCE is non-nil."
    ((let ((headline (nth 4 (org-heading-components))))
       (and headline
 	   (let ((case-fold-search nil))
-	     (org-string-match-p (concat "^" org-comment-string "\\(?: \\|$\\)")
-				 headline)))))
+	     (string-match-p (concat "^" org-comment-string "\\(?: \\|$\\)")
+			     headline)))))
    (no-inheritance nil)
    (t
     (save-excursion (and (org-up-heading-safe) (org-in-commented-heading-p))))))

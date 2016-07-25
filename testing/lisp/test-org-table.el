@@ -1434,7 +1434,7 @@ See also `test-org-table/copy-field'."
   ;; Test :raw parameter.
   (when (featurep 'ox-latex)
     (should
-     (org-string-match-p
+     (string-match-p
       "/a/"
       (orgtbl-to-generic (org-table-to-lisp "| /a/ | b |")
 			 '(:backend latex :raw t)))))
@@ -1471,7 +1471,7 @@ See also `test-org-table/copy-field'."
 			   '(:environment "tabularx"))))
   ;; Test :booktabs parameter.
   (should
-   (org-string-match-p
+   (string-match-p
     "\\toprule" (orgtbl-to-latex (org-table-to-lisp "| a |") '(:booktabs t))))
   ;; Handle LaTeX snippets.
   (should
@@ -1479,7 +1479,7 @@ See also `test-org-table/copy-field'."
 	  (orgtbl-to-latex (org-table-to-lisp "| $x$ |") nil)))
   ;; Test pseudo objects and :raw parameter.
   (should
-   (org-string-match-p
+   (string-match-p
     "\\$x\\$" (orgtbl-to-latex (org-table-to-lisp "| $x$ |") '(:raw t)))))
 
 (ert-deftest test-org-table/to-html ()
@@ -1500,11 +1500,11 @@ See also `test-org-table/copy-field'."
 </table>"))
   ;; Test :attributes parameter.
   (should
-   (org-string-match-p
+   (string-match-p
     "<table>"
     (orgtbl-to-html (org-table-to-lisp "| a |") '(:attributes nil))))
   (should
-   (org-string-match-p
+   (string-match-p
     "<table border=\"2\">"
     (orgtbl-to-html (org-table-to-lisp "| a |") '(:attributes (:border "2"))))))
 
@@ -1842,7 +1842,7 @@ is t, then new columns should be added as needed"
 (ert-deftest test-org-table/named-field ()
   "Test formula with a named field."
   (should
-   (org-string-match-p
+   (string-match-p
     "| +| +1 +|"
     (org-test-with-temp-text "
 |   |      |
@@ -1851,7 +1851,7 @@ is t, then new columns should be added as needed"
       (org-table-calc-current-TBLFM)
       (buffer-string))))
   (should
-   (org-string-match-p
+   (string-match-p
     "| +| +1 +|"
     (org-test-with-temp-text "
 | _ | name |
@@ -1863,7 +1863,7 @@ is t, then new columns should be added as needed"
 (ert-deftest test-org-table/named-column ()
   "Test formula with a named field."
   (should
-   (org-string-match-p
+   (string-match-p
     "| +| +1 +| +1 +|"
     (org-test-with-temp-text "
 | ! | name |   |
@@ -1875,7 +1875,7 @@ is t, then new columns should be added as needed"
 (ert-deftest test-org-table/tab-indent ()
   "Test named fields with tab indentation."
   (should
-   (org-string-match-p
+   (string-match-p
     "| # | 111 |"
     (org-test-with-temp-text
 	"
@@ -1890,7 +1890,7 @@ is t, then new columns should be added as needed"
 (ert-deftest test-org-table/first-rc ()
   "Test \"$<\" and \"@<\" constructs in formulas."
   (should
-   (org-string-match-p
+   (string-match-p
     "| 1 | 2 |"
     (org-test-with-temp-text
 	"|   | 2 |
@@ -1898,7 +1898,7 @@ is t, then new columns should be added as needed"
       (org-table-calc-current-TBLFM)
       (buffer-string))))
   (should
-   (org-string-match-p
+   (string-match-p
     "| 2 |\n| 2 |"
     (org-test-with-temp-text
 	"| 2 |\n|   |
@@ -1909,14 +1909,14 @@ is t, then new columns should be added as needed"
 (ert-deftest test-org-table/last-rc ()
   "Test \"$>\" and \"@>\" constructs in formulas."
   (should
-   (org-string-match-p
+   (string-match-p
     "| 2 | 1 |"
     (org-test-with-temp-text
 	"| 2 |   |\n<point>#+TBLFM: $>=1"
       (org-table-calc-current-TBLFM)
       (buffer-string))))
   (should
-   (org-string-match-p
+   (string-match-p
     "| 2 |\n| 2 |"
     (org-test-with-temp-text
 	"| 2 |\n|   |\n<point>#+TBLFM: @>$1=@<"

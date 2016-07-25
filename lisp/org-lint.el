@@ -363,7 +363,7 @@ called with one argument, the key used for comparison."
       (lambda (k)
 	(let ((key (org-element-property :key k)))
 	  (and (or (let ((case-fold-search t))
-		     (org-string-match-p "\\`ATTR_[-_A-Za-z0-9]+\\'" key))
+		     (string-match-p "\\`ATTR_[-_A-Za-z0-9]+\\'" key))
 		   (member key keywords))
 	       (list (org-element-property :post-affiliated k)
 		     (format "Orphaned affiliated keyword: \"%s\"" key))))))))
@@ -452,7 +452,7 @@ Use :header-args: instead"
 	(list (org-element-property :post-affiliated b)
 	      "Invalid syntax in babel call block"))
        ((let ((h (org-element-property :end-header b)))
-	  (and h (org-string-match-p "\\`\\[.*\\]\\'" h)))
+	  (and h (string-match-p "\\`\\[.*\\]\\'" h)))
 	(list
 	 (org-element-property :post-affiliated b)
 	 "Babel call's end header must not be wrapped within brackets"))))))
@@ -738,7 +738,7 @@ Use \"export %s\" instead"
     (lambda (e)
       (let ((name (org-element-property :name e)))
 	(and name
-	     (org-string-match-p ":" name)
+	     (string-match-p ":" name)
 	     (list (progn
 		     (goto-char (org-element-property :begin e))
 		     (re-search-forward

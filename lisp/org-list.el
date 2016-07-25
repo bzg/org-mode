@@ -2095,8 +2095,8 @@ Possible values are: `folded', `children' or `subtree'.  See
 	  (if (> start (+ ind org-list-description-max-indent)) (+ ind 5) start))
       (+ (progn (goto-char (match-end 1)) (current-column))
 	 (if (and org-list-two-spaces-after-bullet-regexp
-		  (org-string-match-p org-list-two-spaces-after-bullet-regexp
-				      (match-string 1)))
+		  (string-match-p org-list-two-spaces-after-bullet-regexp
+				  (match-string 1)))
 	     2
 	   1)))))
 

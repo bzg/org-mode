@@ -200,8 +200,7 @@ heuristically based on the values of `org-odt-lib-dir' and
 			   (file-readable-p
 			    (expand-file-name
 			     "OrgOdtStyles.xml" styles-dir)))
-		  (message "Debug (ox-odt): Using styles under %s"
-			   styles-dir)
+		  (message "Debug (ox-odt): Using styles under %s" styles-dir)
 		  (throw 'styles-dir styles-dir)))))))
     (unless styles-dir
       (error "Error (ox-odt): Cannot find factory styles files, aborting"))
@@ -2013,13 +2012,13 @@ information."
      ((string= key "TOC")
       (let ((case-fold-search t))
 	(cond
-	 ((org-string-match-p "\\<headlines\\>" value)
+	 ((string-match-p "\\<headlines\\>" value)
 	  (let ((depth (or (and (string-match "\\<[0-9]+\\>" value)
 				(string-to-number (match-string 0 value)))
 			   (plist-get info :headline-levels)))
-		(localp (org-string-match-p "\\<local\\>" value)))
+		(localp (string-match-p "\\<local\\>" value)))
 	    (org-odt-toc depth info (and localp keyword))))
-	 ((org-string-match-p "tables\\|figures\\|listings" value)
+	 ((string-match-p "tables\\|figures\\|listings" value)
 	  ;; FIXME
 	  (ignore))))))))
 
@@ -3765,7 +3764,7 @@ contextual information."
 						  nil processing-type)
 				(buffer-substring-no-properties
 				 (point-min) (point-max)))))
-		    (if (org-string-match-p "file:\\([^]]*\\)" link) link
+		    (if (string-match-p "file:\\([^]]*\\)" link) link
 		      (message "LaTeX Conversion failed.")
 		      nil))))
 	    (when org-link

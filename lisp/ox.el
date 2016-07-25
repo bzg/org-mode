@@ -4151,8 +4151,8 @@ This only applies to links without a description."
 	 (catch 'exit
 	   (dolist (rule (or rules org-export-default-inline-image-rule))
 	     (and (string= (org-element-property :type link) (car rule))
-		  (org-string-match-p (cdr rule)
-				      (org-element-property :path link))
+		  (string-match-p (cdr rule)
+				  (org-element-property :path link))
 		  (throw 'exit t)))))))
 
 (defun org-export-resolve-coderef (ref info)
@@ -4335,7 +4335,7 @@ has type \"radio\"."
 
 (defun org-export-file-uri (filename)
   "Return file URI associated to FILENAME."
-  (cond ((org-string-match-p "\\`//" filename) (concat "file:" filename))
+  (cond ((string-match-p "\\`//" filename) (concat "file:" filename))
 	((not (file-name-absolute-p filename)) filename)
 	((org-file-remote-p filename) (concat "file:/" filename))
 	(t (concat "file://" (expand-file-name filename)))))

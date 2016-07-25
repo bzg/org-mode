@@ -2743,7 +2743,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	 ((string-match "\\<headlines\\>" value)
 	  (let ((depth (and (string-match "\\<[0-9]+\\>" value)
 			    (string-to-number (match-string 0 value))))
-		(localp (org-string-match-p "\\<local\\>" value)))
+		(localp (string-match-p "\\<local\\>" value)))
 	    (org-html-toc depth info (and localp keyword))))
 	 ((string= "listings" value) (org-html-list-of-listings info))
 	 ((string= "tables" value) (org-html-list-of-tables info))))))))

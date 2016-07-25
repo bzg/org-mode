@@ -1251,7 +1251,7 @@ Eventually, if FULL is non-nil, wrap label within \"\\label{}\"."
 			   (headline "sec:")
 			   (table "tab:")
 			   (latex-environment
-			    (and (org-string-match-p
+			    (and (string-match-p
 				  org-latex-math-environments-re
 				  (org-element-property :value datum))
 				 "eq:"))
@@ -1924,7 +1924,8 @@ holding contextual information."
 		    (format "\\begin{%s}\n" (if numberedp 'enumerate 'itemize)))
 		  ;; Itemize headline
 		  "\\item"
-		  (and full-text (org-string-match-p "\\`[ \t]*\\[" full-text)
+		  (and full-text
+		       (string-match-p "\\`[ \t]*\\[" full-text)
 		       "\\relax")
 		  " " full-text "\n"
 		  headline-label
@@ -1961,8 +1962,8 @@ holding contextual information."
 		    (lambda (k)
 		      (and (equal (org-element-property :key k) "TOC")
 			   (let ((v (org-element-property :value k)))
-			     (and (org-string-match-p "\\<headlines\\>" v)
-				  (org-string-match-p "\\<local\\>" v)
+			     (and (string-match-p "\\<headlines\\>" v)
+				  (string-match-p "\\<local\\>" v)
 				  (format "\\stopcontents[level-%d]" level)))))
 		    info t)))))
 	  (if (and opt-title
@@ -2150,7 +2151,7 @@ contextual information."
 	     ;; unless the brackets comes from an initial export
 	     ;; snippet (i.e. it is inserted willingly by the user).
 	     ((and contents
-		   (org-string-match-p "\\`[ \t]*\\[" contents)
+		   (string-match-p "\\`[ \t]*\\[" contents)
 		   (not (let ((e (car (org-element-contents item))))
 			  (and (eq (org-element-type e) 'paragraph)
 			       (let ((o (car (org-element-contents e))))
@@ -2182,8 +2183,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      ((string= key "TOC")
       (let ((case-fold-search t))
 	(cond
-	 ((org-string-match-p "\\<headlines\\>" value)
-	  (let* ((localp (org-string-match-p "\\<local\\>" value))
+	 ((string-match-p "\\<headlines\\>" value)
+	  (let* ((localp (string-match-p "\\<local\\>" value))
 		 (parent (org-element-lineage keyword '(headline)))
 		 (level (if (not (and localp parent)) 0
 			  (org-export-get-relative-level parent info)))
@@ -2199,8 +2200,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 \\printcontents[level-%d]{}{0}{%s}"
 			level level (or depth ""))
 	      (concat depth (and depth "\n") "\\tableofcontents"))))
-	 ((org-string-match-p "\\<tables\\>" value) "\\listoftables")
-	 ((org-string-match-p "\\<listings\\>" value)
+	 ((string-match-p "\\<tables\\>" value) "\\listoftables")
+	 ((string-match-p "\\<listings\\>" value)
 	  (cl-case (plist-get info :latex-listings)
 	    ((nil) "\\listoffigures")
 	    (minted "\\listoflistings")
@@ -2326,8 +2327,8 @@ used as a communication channel."
       (let ((search-option (org-element-property :search-option link)))
         (when (and search-option
                    (equal filetype "pdf")
-                   (org-string-match-p "\\`[0-9]+\\'" search-option)
-                   (not (org-string-match-p "page=" options)))
+                   (string-match-p "\\`[0-9]+\\'" search-option)
+                   (not (string-match-p "page=" options)))
           (setq options (concat options ",page=" search-option))))
       (setq image-code
 	    (format "\\includegraphics%s{%s}"
@@ -2814,7 +2815,7 @@ contextual information."
        (custom-env
 	(let ((caption-str (org-latex--caption/label-string src-block info))
               (formatted-src (org-export-format-code-default src-block info)))
-          (if (org-string-match-p "\\`[a-zA-Z0-9]+\\'" custom-env)
+          (if (string-match-p "\\`[a-zA-Z0-9]+\\'" custom-env)
 	      (format "\\begin{%s}\n%s\\end{%s}\n"
 		      custom-env
 		      (concat (and caption-above-p caption-str)

@@ -303,7 +303,7 @@ the HTML and ASCII backends."
 		  next)
 	      (while (and (setq next (org-export-get-next-element object info))
 			  (or (and (stringp next)
-				   (not (org-string-match-p "\\S-" next)))
+				   (not (string-match-p "\\S-" next)))
 			      (org-bibtex-citation-p next)))
 		(unless (stringp next)
 		  (push (org-bibtex-get-citation-key next) keys))

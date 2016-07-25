@@ -1801,7 +1801,7 @@ region is not active then the point is demarcated."
 	 (stars (concat (make-string (or (org-current-level) 1) ?*) " "))
 	 (lower-case-p (and block
 			    (let (case-fold-search)
-			      (org-string-match-p "#\\+begin_src" block)))))
+			      (string-match-p "#\\+begin_src" block)))))
     (if info
         (mapc
          (lambda (place)

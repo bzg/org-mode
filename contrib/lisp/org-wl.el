@@ -291,7 +291,7 @@ for namazu index."
 	  ;; in the old buffer.
 	  (goto-char old-point))
 	(when article
-	  (if (org-string-match-p "@" article)
+	  (if (string-match-p "@" article)
 	      (wl-summary-jump-to-msg-by-message-id (org-add-angle-brackets
 						     article))
 	    (or (wl-summary-jump-to-msg (string-to-number article))

@@ -3116,8 +3116,8 @@ Assume point is at the beginning of the link."
 	 ((string-match "\\`id:\\([-a-f0-9]+\\)\\'" raw-link)
 	  (setq type "id" path (match-string 1 raw-link)))
 	 ;; Code-ref type: PATH is the name of the reference.
-	 ((and (org-string-match-p "\\`(" raw-link)
-	       (org-string-match-p ")\\'" raw-link))
+	 ((and (string-match-p "\\`(" raw-link)
+	       (string-match-p ")\\'" raw-link))
 	  (setq type "coderef")
 	  (setq path (substring raw-link 1 -1)))
 	 ;; Custom-id type: PATH is the name of the custom id.

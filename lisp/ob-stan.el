@@ -69,7 +69,7 @@ Otherwise, write the Stan code directly to the named file."
 	       (or (cdr (assq :file params))
 		   (user-error "Set :file argument to execute Stan blocks")))))
     (if (or (not org-babel-stan-cmdstan-directory)
-	    (org-string-match-p "\\.stan\\'" file))
+	    (string-match-p "\\.stan\\'" file))
 	(with-temp-file file (insert body))
       (with-temp-file (concat file ".stan") (insert body))
       (let ((default-directory org-babel-stan-cmdstan-directory))

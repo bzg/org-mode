@@ -1480,14 +1480,14 @@ information."
       (org-ascii--justify-element
        (let ((case-fold-search t))
 	 (cond
-	  ((org-string-match-p "\\<headlines\\>" value)
+	  ((string-match-p "\\<headlines\\>" value)
 	   (let ((depth (and (string-match "\\<[0-9]+\\>" value)
 			     (string-to-number (match-string 0 value))))
-		 (localp (org-string-match-p "\\<local\\>" value)))
+		 (localp (string-match-p "\\<local\\>" value)))
 	     (org-ascii--build-toc info depth keyword localp)))
-	  ((org-string-match-p "\\<tables\\>" value)
+	  ((string-match-p "\\<tables\\>" value)
 	   (org-ascii--list-tables keyword info))
-	  ((org-string-match-p "\\<listings\\>" value)
+	  ((string-match-p "\\<listings\\>" value)
 	   (org-ascii--list-listings keyword info))))
        keyword info)))))
 
