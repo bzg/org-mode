@@ -24,15 +24,13 @@
 ;;
 ;;; Commentary:
 
-;; This file contains the habit tracking code for Org-mode
+;; This file contains the habit tracking code for Org mode
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'org)
 (require 'org-agenda)
-
-(eval-when-compile
-  (require 'cl))
 
 (defgroup org-habit nil
   "Options concerning habit tracking in Org-mode."
@@ -368,9 +366,9 @@ current time."
 				  ;; number of S-REPEAT hops it takes
 				  ;; to get past DONE, with a minimum
 				  ;; of one hop.
-				  (incf s
-					(* (1+ (/ (max (- done s) 0) s-repeat))
-					   s-repeat))
+				  (cl-incf s (* (1+ (/ (max (- done s) 0)
+						       s-repeat))
+						s-repeat))
 				  (when (= done last-done-date)
 				    (throw :exit s))))))))))
 		 donep)))
