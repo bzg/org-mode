@@ -204,7 +204,10 @@ point for the SRC/EXAMPLE block.
     (message "This is line 32")
   ,#+END_SRC
 #+END_SRC
-
+**** Allow toggling center for images in LaTeX export
+With the global variable ~org-latex-images-centered~ or the local
+attribute ~:center~ it is now possible to center an image in LaTeX
+export.
 *** Babel
 **** Support for SLY in Lisp blocks
 See ~org-babel-lisp-eval-fn~ to activate it.

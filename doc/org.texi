@@ -12217,8 +12217,17 @@ To modify the placement option of any floating environment, set the
 [[./img/hst.png]]
 @end example
 
-If the @code{:comment-include} attribute is set to a non-@code{nil} value,
-the @LaTeX{} @code{\includegraphics} macro will be commented out.
+@vindex org-latex-images-centered
+@cindex center image (@LaTeX{} export)
+@cindex image, centering (@LaTeX{} export)
+Images are centered by default.  However, one can disable this behavior by
+setting @code{:center} attribute to @code{nil}.  To prevent any image from
+being centered throughout a document, set @code{org-latex-images-centered}
+instead.
+
+Eventually, if the @code{:comment-include} attribute is set to
+a non-@code{nil} value, the @LaTeX{} @code{\includegraphics} macro will be
+commented out.
 
 @node Plain lists in @LaTeX{} export
 @subsection Plain lists in @LaTeX{} export
@@ -14419,6 +14428,7 @@ however, override everything.
 @item @code{:latex-image-default-height}       @tab @code{org-latex-image-default-height}
 @item @code{:latex-image-default-option}       @tab @code{org-latex-image-default-option}
 @item @code{:latex-image-default-width}        @tab @code{org-latex-image-default-width}
+@item @code{:latex-images-centered}            @tab @code{org-latex-images-centered}
 @item @code{:latex-inactive-timestamp-format}  @tab @code{org-latex-inactive-timestamp-format}
 @item @code{:latex-inline-image-rules}         @tab @code{org-latex-inline-image-rules}
 @item @code{:latex-link-with-unknown-path-format} @tab @code{org-latex-link-with-unknown-path-format}

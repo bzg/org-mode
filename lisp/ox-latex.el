@@ -127,6 +127,7 @@
     (:latex-image-default-height nil nil org-latex-image-default-height)
     (:latex-image-default-option nil nil org-latex-image-default-option)
     (:latex-image-default-width nil nil org-latex-image-default-width)
+    (:latex-images-centered nil nil org-latex-images-centered)
     (:latex-inactive-timestamp-format nil nil org-latex-inactive-timestamp-format)
     (:latex-inline-image-rules nil nil org-latex-inline-image-rules)
     (:latex-link-with-unknown-path-format nil nil org-latex-link-with-unknown-path-format)
@@ -680,6 +681,14 @@ The function result will be used in the section format string."
 
 
 ;;;; Links
+
+(defcustom org-latex-images-centered t
+  "When non-nil, images are centered."
+  :group 'org-export-latex
+  :version "25.1"
+  :package-version '(Org . "9.0")
+  :type 'boolean
+  :safe #'booleanp)
 
 (defcustom org-latex-image-default-option ""
   "Default option for images."
@@ -2269,13 +2278,12 @@ used as a communication channel."
 		  (cond ((string= float "wrap") 'wrap)
 			((string= float "sideways") 'sideways)
 			((string= float "multicolumn") 'multicolumn)
+			((and (plist-member attr :float) (not float)) 'nonfloat)
 			((or float
 			     (org-element-property :caption parent)
 			     (org-string-nw-p (plist-get attr :caption)))
-			 (if (and (plist-member attr :float) (not float))
-			     'nonfloat
-			   'figure))
-			((and (not float) (plist-member attr :float)) nil))))
+			 'figure)
+			(t 'nonfloat))))
 	 (placement
 	  (let ((place (plist-get attr :placement)))
 	    (cond
@@ -2284,6 +2292,9 @@ used as a communication channel."
 	     ((eq float 'figure)
 	      (format "[%s]" (plist-get info :latex-default-figure-position)))
 	     (t ""))))
+	 (center
+	  (if (plist-member attr :center) (plist-get attr :center)
+	    (plist-get info :latex-images-centered)))
 	 (comment-include (if (plist-get attr :comment-include) "%" ""))
 	 ;; It is possible to specify width and height in the
 	 ;; ATTR_LATEX line, and also via default variables.
@@ -2334,8 +2345,8 @@ used as a communication channel."
       (setq image-code
 	    (format "\\includegraphics%s{%s}"
 		    (cond ((not (org-string-nw-p options)) "")
-			  ((= (aref options 0) ?,)
-			   (format "[%s]"(substring options 1)))
+			  ((string-prefix-p "," options)
+			   (format "[%s]" (substring options 1)))
 			  (t (format "[%s]" options)))
 		    path))
       (when (equal filetype "svg")
@@ -2348,46 +2359,53 @@ used as a communication channel."
 						   image-code
 						   nil t))))
     ;; Return proper string, depending on FLOAT.
-    (cl-case float
-      (wrap (format "\\begin{wrapfigure}%s
-%s\\centering
+    (pcase float
+      (`wrap (format "\\begin{wrapfigure}%s
+%s%s
 %s%s
 %s\\end{wrapfigure}"
-		    placement
-		    (if caption-above-p caption "")
-		    comment-include image-code
-		    (if caption-above-p "" caption)))
-      (sideways (format "\\begin{sidewaysfigure}
-%s\\centering
+		     placement
+		     (if caption-above-p caption "")
+		     (if center "\\centering" "")
+		     comment-include image-code
+		     (if caption-above-p "" caption)))
+      (`sideways (format "\\begin{sidewaysfigure}
+%s%s
 %s%s
 %s\\end{sidewaysfigure}"
-			(if caption-above-p caption "")
-			comment-include image-code
-			(if caption-above-p "" caption)))
-      (multicolumn (format "\\begin{figure*}%s
-%s\\centering
+			 (if caption-above-p caption "")
+			 (if center "\\centering" "")
+			 comment-include image-code
+			 (if caption-above-p "" caption)))
+      (`multicolumn (format "\\begin{figure*}%s
+%s%s
 %s%s
 %s\\end{figure*}"
-			   placement
-			   (if caption-above-p caption "")
-			   comment-include image-code
-			   (if caption-above-p "" caption)))
-      (figure (format "\\begin{figure}%s
-%s\\centering
+			    placement
+			    (if caption-above-p caption "")
+			    (if center "\\centering" "")
+			    comment-include image-code
+			    (if caption-above-p "" caption)))
+      (`figure (format "\\begin{figure}%s
+%s%s
 %s%s
 %s\\end{figure}"
-		      placement
-		      (if caption-above-p caption "")
-		      comment-include image-code
-		      (if caption-above-p "" caption)))
-      (nonfloat
+		       placement
+		       (if caption-above-p caption "")
+		       (if center "\\centering" "")
+		       comment-include image-code
+		       (if caption-above-p "" caption)))
+      ((guard center)
        (format "\\begin{center}
 %s%s
 %s\\end{center}"
 	       (if caption-above-p caption "")
 	       image-code
 	       (if caption-above-p "" caption)))
-      (otherwise image-code))))
+      (_
+       (concat (if caption-above-p caption "")
+	       image-code
+	       (if caption-above-p caption ""))))))
 
 (defun org-latex-link (link desc info)
   "Transcode a LINK object from Org to LaTeX.
