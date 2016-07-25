@@ -40,8 +40,6 @@
 (require 'org-compat)
 (require 'org)
 
-(eval-when-compile
-  (require 'cl))
 (require 'cl-lib)
 
 (declare-function org-inlinetask-get-task-level "org-inlinetask" ())
