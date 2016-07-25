@@ -4385,10 +4385,10 @@ START-DAY is an absolute time value."
 	((eq span 'fortnight) 14)
 	((eq span 'month)
 	 (let ((date (calendar-gregorian-from-absolute start-day)))
-	   (calendar-last-day-of-month (car date) (caddr date))))
+	   (calendar-last-day-of-month (car date) (cl-caddr date))))
 	((eq span 'year)
 	 (let ((date (calendar-gregorian-from-absolute start-day)))
-	   (if (calendar-leap-year-p (caddr date)) 366 365)))))
+	   (if (calendar-leap-year-p (cl-caddr date)) 366 365)))))
 
 (defun org-agenda-span-name (span)
   "Return a SPAN name."
@@ -6470,8 +6470,8 @@ Any match of REMOVE-RE will be removed from TXT."
   ;; buffer
   (let* ((bindings (car org-prefix-format-compiled))
 	 (formatter (cadr org-prefix-format-compiled)))
-    (loop for (var value) in bindings
-	  do (set var value))
+    (cl-loop for (var value) in bindings
+	     do (set var value))
     (save-match-data
       ;; Diary entries sometimes have extra whitespace at the beginning
       (setq txt (org-trim txt))
@@ -7437,19 +7437,19 @@ With two prefix arguments, remove the effort filters."
 	       effort-prompt op)
 	   (while (not (member op '(?< ?> ?=)))
 	     (setq op (read-char-exclusive "Effort operator? (> = or <)")))
-	   (loop for i from 0 to 9 do
-		 (setq effort-prompt
-		       (concat
-			effort-prompt " ["
-			(if (= i 9) "0" (int-to-string (1+ i)))
-		     "]" (nth i efforts))))
-	(message "Effort %s%s" (char-to-string op) effort-prompt)
-	(while (or (< eff 0) (> eff 9))
-	  (setq eff (string-to-number (char-to-string (read-char-exclusive)))))
-	(setq org-agenda-effort-filter
-	      (list (concat (if strip "-" "+")
-			    (char-to-string op) (nth (1- eff) efforts))))
-	(org-agenda-filter-apply org-agenda-effort-filter 'effort)))
+	   (cl-loop for i from 0 to 9 do
+		    (setq effort-prompt
+			  (concat
+			   effort-prompt " ["
+			   (if (= i 9) "0" (int-to-string (1+ i)))
+			   "]" (nth i efforts))))
+	   (message "Effort %s%s" (char-to-string op) effort-prompt)
+	   (while (or (< eff 0) (> eff 9))
+	     (setq eff (string-to-number (char-to-string (read-char-exclusive)))))
+	   (setq org-agenda-effort-filter
+		 (list (concat (if strip "-" "+")
+			       (char-to-string op) (nth (1- eff) efforts))))
+	   (org-agenda-filter-apply org-agenda-effort-filter 'effort)))
 	(t (org-agenda-filter-show-all-effort)
 	   (message "Effort filter removed"))))
 
