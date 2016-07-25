@@ -37,9 +37,8 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'ox)
-
-(eval-when-compile (require 'cl))
 
 (defvar org-export-man-default-packages-alist)
 (defvar org-export-man-packages-alist)
@@ -444,11 +443,11 @@ holding contextual information."
 	 ;; Section formatting will set two placeholders: one for the
 	 ;; title and the other for the contents.
 	 (section-fmt
-	  (case level
+	  (pcase level
 	    (1 ".SH \"%s\"\n%s")
 	    (2 ".SS \"%s\"\n%s")
 	    (3 ".SS \"%s\"\n%s")
-	    (t nil)))
+	    (_ nil)))
 	 (text (org-export-data (org-element-property :title headline) info)))
 
     (cond
@@ -542,17 +541,15 @@ contextual information."
 
 
 (defun org-man-item (item contents info)
-
   "Transcode an ITEM element from Org to Man.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-
   (let* ((bullet (org-element-property :bullet item))
          (type (org-element-property :type (org-element-property :parent item)))
-         (checkbox (case (org-element-property :checkbox item)
-                     (on "\\o'\\(sq\\(mu'")			;;
-                     (off "\\(sq ")					;;
-                     (trans "\\o'\\(sq\\(mi'"   ))) ;;
+         (checkbox (pcase (org-element-property :checkbox item)
+                     (`on "\\o'\\(sq\\(mu'")
+                     (`off "\\(sq ")
+                     (`trans "\\o'\\(sq\\(mi'")))
 
          (tag (let ((tag (org-element-property :tag item)))
                 ;; Check-boxes must belong to the tag.
@@ -560,17 +557,15 @@ contextual information."
                                  (concat checkbox
                                          (org-export-data tag info)))))))
 
-    (if (and (null tag )
-			 (null checkbox))
-		(let* ((bullet (org-trim bullet))
-			   (marker (cond  ((string= "-" bullet) "\\(em")
-							  ((string= "*" bullet) "\\(bu")
-							  ((eq type 'ordered)
-							   (format "%s " (org-trim bullet)))
-							  (t "\\(dg"))))
-		  (concat ".IP " marker " 4\n"
-				  (org-trim (or contents " " ))))
-                                        ; else
+    (if (and (null tag) (null checkbox))
+	(let* ((bullet (org-trim bullet))
+	       (marker (cond  ((string= "-" bullet) "\\(em")
+			      ((string= "*" bullet) "\\(bu")
+			      ((eq type 'ordered)
+			       (format "%s " (org-trim bullet)))
+			      (t "\\(dg"))))
+	  (concat ".IP " marker " 4\n"
+		  (org-trim (or contents " " ))))
       (concat ".TP\n" (or tag (concat " " checkbox)) "\n"
               (org-trim (or contents " " ))))))
 
@@ -860,14 +855,14 @@ a communication channel."
 	  (when (and (memq 'left borders) (not alignment))
 	    (push "|" alignment))
 	  (push
-	   (case (org-export-table-cell-alignment cell info)
-	     (left (concat "l" width divider))
-	     (right (concat "r" width divider))
-	     (center (concat "c" width divider)))
+	   (concat (pcase (org-export-table-cell-alignment cell info)
+		     (`left "l") (`right "r") (`center "c"))
+		   width
+		   divider)
 	   alignment)
 	  (when (memq 'right borders) (push "|" alignment))))
       info)
-    (apply 'concat (reverse alignment))))
+    (apply #'concat (reverse alignment))))
 
 (defun org-man-table--org-table (table contents info)
   "Return appropriate Man code for an Org table.
