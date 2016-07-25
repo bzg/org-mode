@@ -27,9 +27,9 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
 (require 'ox)
 (require 'ox-publish)
+(require 'cl-lib)
 
 (declare-function aa2u "ext:ascii-art-to-unicode" ())
 
@@ -564,8 +564,9 @@ INFO is a plist used as a communication channel."
 	    ;; Total width is determined by the presence, or not, of an
 	    ;; inline task among ELEMENT parents.
 	    (total-width
-	     (if (loop for parent in genealogy
-		       thereis (eq (org-element-type parent) 'inlinetask))
+	     (if (cl-some (lambda (parent)
+			    (eq (org-element-type parent) 'inlinetask))
+			  genealogy)
 		 (plist-get info :ascii-inlinetask-width)
 	       ;; No inlinetask: Remove global margin from text width.
 	       (- (plist-get info :ascii-text-width)
@@ -584,19 +585,20 @@ INFO is a plist used as a communication channel."
        (- total-width
 	  ;; Each `quote-block' and `verse-block' above narrows text
 	  ;; width by twice the standard margin size.
-	  (+ (* (loop for parent in genealogy
-		      when (memq (org-element-type parent)
-				 '(quote-block verse-block))
-		      count parent)
-		2 (plist-get info :ascii-quote-margin))
+	  (+ (* (cl-count-if (lambda (parent)
+			       (memq (org-element-type parent)
+				     '(quote-block verse-block)))
+			     genealogy)
+		2
+		(plist-get info :ascii-quote-margin))
 	     ;; Apply list margin once per "top-level" plain-list
 	     ;; containing current line
-	     (* (let ((count 0))
-		  (dolist (e genealogy count)
-		    (and (eq (org-element-type e) 'plain-list)
-			 (not (eq (org-element-type (org-export-get-parent e))
-				  'item))
-			 (incf count))))
+	     (* (cl-count-if
+		 (lambda (e)
+		   (and (eq (org-element-type e) 'plain-list)
+			(not (eq (org-element-type (org-export-get-parent e))
+				 'item))))
+		 genealogy)
 		(plist-get info :ascii-list-margin))
 	     ;; Text width within a plain-list is restricted by
 	     ;; indentation of current item.  If that's the case,
@@ -604,9 +606,9 @@ INFO is a plist used as a communication channel."
 	     ;; parent item, if any.
 	     (let ((item
 		    (if (eq (org-element-type element) 'item) element
-		      (loop for parent in genealogy
-			    when (eq (org-element-type parent) 'item)
-			    return parent))))
+		      (cl-find-if (lambda (parent)
+				    (eq (org-element-type parent) 'item))
+				  genealogy))))
 	       (if (not item) 0
 		 ;; Compute indentation offset of the current item,
 		 ;; that is the sum of the difference between its
@@ -806,7 +808,7 @@ generation.  INFO is a plist used as a communication channel."
 	  ;; filling (like contents of a description list item).
 	  (let* ((initial-text
 		  (format (org-ascii--translate "Listing %d:" info)
-			  (incf count)))
+			  (cl-incf count)))
 		 (initial-width (string-width initial-text)))
 	    (concat
 	     initial-text " "
@@ -846,7 +848,7 @@ generation.  INFO is a plist used as a communication channel."
 	  ;; filling (like contents of a description list item).
 	  (let* ((initial-text
 		  (format (org-ascii--translate "Table %d:" info)
-			  (incf count)))
+			  (cl-incf count)))
 		 (initial-width (string-width initial-text)))
 	    (concat
 	     initial-text " "
