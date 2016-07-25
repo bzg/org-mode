@@ -31,8 +31,11 @@
 ;; - not much in the way of error feedback
 
 ;;; Code:
-(require 'ob)
+
 (require 'cc-mode)
+(require 'cl-lib)
+(require 'ob)
+
 
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
 (declare-function org-remove-indentation "org" (code &optional n))
@@ -120,10 +123,10 @@ header arguments."
 or `org-babel-execute:C++' or `org-babel-execute:D'."
   (let* ((tmp-src-file (org-babel-temp-file
 			"C-src-"
-			(case org-babel-c-variant
-			 (c   ".c"  )
-			 (cpp ".cpp")
-			 (d   ".d"  ))))
+			(cl-case org-babel-c-variant
+			  (c   ".c"  )
+			  (cpp ".cpp")
+			  (d   ".d"  ))))
 	 (tmp-bin-file (org-babel-temp-file "C-bin-" org-babel-exeext)) ;; not used for D
 	 (cmdline (cdr (assoc :cmdline params)))
 	 (cmdline (if cmdline (concat " " cmdline) ""))
@@ -138,18 +141,18 @@ or `org-babel-execute:C++' or `org-babel-execute:D'."
 			  (if (listp libs) libs (list libs))
 			  " "))
 	 (full-body
-	  (case org-babel-c-variant
+	  (cl-case org-babel-c-variant
 	    (c   (org-babel-C-expand-C   body params))
 	    (cpp (org-babel-C-expand-C++ body params))
 	    (d   (org-babel-C-expand-D   body params)))))
     (with-temp-file tmp-src-file (insert full-body))
-    (case org-babel-c-variant
+    (cl-case org-babel-c-variant
       ((c cpp)
        (org-babel-eval
 	(format "%s -o %s %s %s %s"
-		(case org-babel-c-variant
-		 (c   org-babel-C-compiler)
-		 (cpp org-babel-C++-compiler))
+		(cl-case org-babel-c-variant
+		  (c   org-babel-C-compiler)
+		  (cpp org-babel-C++-compiler))
 		(org-babel-process-file-name tmp-bin-file)
 		flags
 		(org-babel-process-file-name tmp-src-file)
@@ -158,7 +161,7 @@ or `org-babel-execute:C++' or `org-babel-execute:D'."
       (d nil)) ;; no separate compilation for D
     (let ((results
 	   (org-babel-eval
-	    (case org-babel-c-variant
+	    (cl-case org-babel-c-variant
 	      ((c cpp)
 	       (concat tmp-bin-file cmdline))
 	      (d
@@ -299,7 +302,7 @@ Return a list (TYPE-NAME FORMAT).  TYPE-NAME should be the name of the type.
 FORMAT can be either a format string or a function which is called with VAL."
   (let* ((basetype (org-babel-C-val-to-base-type val))
 	 (type
-	  (case basetype
+	  (cl-case basetype
 	    (integerp '("int" "%d"))
 	    (floatp '("double" "%f"))
 	    (stringp
@@ -349,7 +352,7 @@ FORMAT can be either a format string or a function which is called with VAL."
    ((or (listp val) (vectorp val))
     (let ((type nil))
       (mapc (lambda (v)
-	      (case (org-babel-C-val-to-base-type v)
+	      (cl-case (org-babel-C-val-to-base-type v)
 		(stringp (setq type 'stringp))
 		(floatp
 		 (if (or (not type) (eq type 'integerp))
@@ -396,7 +399,7 @@ of the same value."
 (defun org-babel-C-utility-header-to-C ()
   "Generate a utility function to convert a column name
 into a column number."
-  (case org-babel-c-variant
+  (cl-case org-babel-c-variant
     ((c cpp)
      "int get_column_num (int nbcols, const char** header, const char* column)
 {
@@ -426,14 +429,14 @@ specifying a variable with the name of the table."
         (headers (cdr head)))
     (concat
      (format
-      (case org-babel-c-variant
+      (cl-case org-babel-c-variant
 	((c cpp) "const char* %s_header[%d] = {%s};")
 	(d       "string %s_header[%d] = [%s];"))
       table
       (length headers)
       (mapconcat (lambda (h) (format "%S" h)) headers ","))
      "\n"
-     (case org-babel-c-variant
+     (cl-case org-babel-c-variant
        ((c cpp)
 	(format
 	 "const char* %s_h (int row, const char* col) { return %s[row][get_column_num(%d,%s_header,col)]; }"
