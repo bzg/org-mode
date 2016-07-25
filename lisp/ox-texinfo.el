@@ -25,7 +25,7 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 (require 'ox)
 
 (defvar orgtbl-exp-regexp)
@@ -426,9 +426,9 @@ Return new tree."
   "Return a character not used in string S.
 This is used to choose a separator for constructs like \\verb."
   (let ((ll "~,./?;':\"|!@#%^&-_=+abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ<>()[]{}"))
-    (loop for c across ll
-	  when (not (string-match (regexp-quote (char-to-string c)) s))
-	  return (char-to-string c))))
+    (cl-loop for c across ll
+	     when (not (string-match (regexp-quote (char-to-string c)) s))
+	     return (char-to-string c))))
 
 (defun org-texinfo--text-markup (text markup _info)
   "Format TEXT depending on MARKUP text markup.
@@ -962,15 +962,15 @@ INFO is a plist holding contextual information.  See
 	     (if (equal type "fuzzy")
 		 (org-export-resolve-fuzzy-link link info)
 	       (org-export-resolve-id-link link info))))
-	(case (org-element-type destination)
-	  ((nil)
+	(pcase (org-element-type destination)
+	  (`nil
 	   (format org-texinfo-link-with-unknown-path-format
 		   (org-texinfo--sanitize-content path)))
 	  ;; Id link points to an external file.
-	  (plain-text
+	  (`plain-text
 	   (if desc (format "@uref{file://%s,%s}" destination desc)
 	     (format "@uref{file://%s}" destination)))
-	  (headline
+	  (`headline
 	   (format "@ref{%s,%s}"
 		   (org-texinfo--get-node destination info)
 		   (cond
@@ -981,7 +981,7 @@ INFO is a plist holding contextual information.  See
 		      (org-export-get-headline-number destination info) "."))
 		    (t (org-export-data
 			(org-element-property :title destination) info)))))
-	  (otherwise
+	  (_
 	   (format "@ref{%s,,%s}"
 		   (org-texinfo--get-node destination info)
 		   (cond
@@ -1400,7 +1400,7 @@ a communication channel."
 	      (let ((w (- (org-element-property :contents-end cell)
 			  (org-element-property :contents-begin cell))))
 		(aset widths idx (max w (aref widths idx))))
-	      (incf idx))
+	      (cl-incf idx))
 	    info)))
       info)
     (format "{%s}" (mapconcat (lambda (w) (make-string w ?a)) widths "} {"))))
@@ -1457,12 +1457,12 @@ CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (let ((value (org-texinfo-plain-text
 		(org-timestamp-translate timestamp) info)))
-    (case (org-element-property :type timestamp)
-      ((active active-range)
+    (pcase (org-element-property :type timestamp)
+      ((or `active `active-range)
        (format (plist-get info :texinfo-active-timestamp-format) value))
-      ((inactive inactive-range)
+      ((or `inactive `inactive-range)
        (format (plist-get info :texinfo-inactive-timestamp-format) value))
-      (t (format (plist-get info :texinfo-diary-timestamp-format) value)))))
+      (_ (format (plist-get info :texinfo-diary-timestamp-format) value)))))
 
 ;;;; Underline
 
