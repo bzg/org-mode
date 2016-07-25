@@ -29,10 +29,10 @@
 ;; and feature suggestions
 
 ;;; Code:
+
+(require 'cl-lib)
 (require 'org)
 (require 'org-table)
-(eval-when-compile
-  (require 'cl))
 
 (declare-function gnuplot-delchar-or-maybe-eof "ext:gnuplot" (arg))
 (declare-function gnuplot-mode "ext:gnuplot" ())
@@ -199,10 +199,10 @@ manner suitable for prepending to a user-specified script."
 	 (x-labels (plist-get params :xlabels))
 	 (y-labels (plist-get params :ylabels))
 	 (plot-str "'%s' using %s%d%s with %s title '%s'")
-	 (plot-cmd (case type
-		     ('2d "plot")
-		     ('3d "splot")
-		     ('grid "splot")))
+	 (plot-cmd (pcase type
+		     (`2d "plot")
+		     (`3d "splot")
+		     (`grid "splot")))
 	 (script "reset")
 	 ;; ats = add-to-script
 	 (ats (lambda (line) (setf script (concat script "\n" line))))
@@ -210,10 +210,10 @@ manner suitable for prepending to a user-specified script."
     (when file				; output file
       (funcall ats (format "set term %s" (file-name-extension file)))
       (funcall ats (format "set output '%s'" file)))
-    (case type				; type
-      (2d ())
-      (3d (when map (funcall ats "set map")))
-      (grid (if map (funcall ats "set pm3d map") (funcall ats "set pm3d"))))
+    (pcase type				; type
+      (`2d ())
+      (`3d (when map (funcall ats "set map")))
+      (`grid (funcall ats (if map "set pm3d map" "set pm3d"))))
     (when title (funcall ats (format "set title '%s'" title))) ; title
     (mapc ats lines)					       ; line
     (dolist (el sets) (funcall ats (format "set %s" el)))      ; set
@@ -238,26 +238,27 @@ manner suitable for prepending to a user-specified script."
 			   (or timefmt	; timefmt passed to gnuplot
 			       "%Y-%m-%d-%H:%M:%S") "\"")))
     (unless preface
-      (case type			; plot command
-	(2d (dotimes (col num-cols)
-	      (unless (and (eq type '2d)
-			   (or (and ind (equal (1+ col) ind))
-			       (and deps (not (member (1+ col) deps)))))
-		(setf plot-lines
-		      (cons
-		       (format plot-str data-file
-			       (or (and ind (> ind 0)
-					(not text-ind)
-					(format "%d:" ind)) "")
-			       (1+ col)
-			       (if text-ind (format ":xticlabel(%d)" ind) "")
-			       with
-			       (or (nth col col-labels) (format "%d" (1+ col))))
-		       plot-lines)))))
-	(3d
+      (pcase type			; plot command
+	(`2d (dotimes (col num-cols)
+	       (unless (and (eq type '2d)
+			    (or (and ind (equal (1+ col) ind))
+				(and deps (not (member (1+ col) deps)))))
+		 (setf plot-lines
+		       (cons
+			(format plot-str data-file
+				(or (and ind (> ind 0)
+					 (not text-ind)
+					 (format "%d:" ind)) "")
+				(1+ col)
+				(if text-ind (format ":xticlabel(%d)" ind) "")
+				with
+				(or (nth col col-labels)
+				    (format "%d" (1+ col))))
+			plot-lines)))))
+	(`3d
 	 (setq plot-lines (list (format "'%s' matrix with %s title ''"
 					data-file with))))
-	(grid
+	(`grid
 	 (setq plot-lines (list (format "'%s' with %s title ''"
 					data-file with)))))
       (funcall ats
@@ -300,12 +301,12 @@ line directly before or after the table."
 				  (looking-at "[[:space:]]*#\\+"))
 			(setf params (org-plot/collect-options params))))
       ;; Dump table to datafile (very different for grid).
-      (case (plist-get params :plot-type)
-	(2d   (org-plot/gnuplot-to-data table data-file params))
-	(3d   (org-plot/gnuplot-to-data table data-file params))
-	(grid (let ((y-labels (org-plot/gnuplot-to-grid-data
-			       table data-file params)))
-		(when y-labels (plist-put params :ylabels y-labels)))))
+      (pcase (plist-get params :plot-type)
+	(`2d   (org-plot/gnuplot-to-data table data-file params))
+	(`3d   (org-plot/gnuplot-to-data table data-file params))
+	(`grid (let ((y-labels (org-plot/gnuplot-to-grid-data
+				table data-file params)))
+		 (when y-labels (plist-put params :ylabels y-labels)))))
       ;; Check for timestamp ind column.
       (let ((ind (1- (plist-get params :ind))))
 	(when (and (>= ind 0) (eq '2d (plist-get params :plot-type)))
