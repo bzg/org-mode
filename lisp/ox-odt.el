@@ -187,20 +187,14 @@ heuristically based on the values of `org-odt-lib-dir' and
 `org-odt-data-dir'.")
 
 (defconst org-odt-styles-dir
-  (let* ((styles-dir
-	  (catch 'styles-dir
-	    (message "Debug (ox-odt): Searching for OpenDocument styles files...")
-	    (dolist (styles-dir org-odt-styles-dir-list)
-	      (when styles-dir
-		(message "Debug (ox-odt): Trying %s..." styles-dir)
-		(when (and (file-readable-p
-			    (expand-file-name
-			     "OrgOdtContentTemplate.xml" styles-dir))
-			   (file-readable-p
-			    (expand-file-name
-			     "OrgOdtStyles.xml" styles-dir)))
-		  (message "Debug (ox-odt): Using styles under %s" styles-dir)
-		  (throw 'styles-dir styles-dir)))))))
+  (let ((styles-dir
+	 (cl-find-if
+	  (lambda (dir)
+	    (and dir
+		 (file-readable-p
+		  (expand-file-name "OrgOdtContentTemplate.xml" dir))
+		 (file-readable-p (expand-file-name "OrgOdtStyles.xml" dir))))
+	  org-odt-styles-dir-list)))
     (unless styles-dir
       (error "Error (ox-odt): Cannot find factory styles files, aborting"))
     styles-dir)
@@ -212,9 +206,9 @@ This directory contains the following XML files -
  `org-odt-styles-file' and `org-odt-content-template-file'.
 
 The default value of this variable varies depending on the
-version of org in use and is initialized from
-`org-odt-styles-dir-list'.  Note that the user could be using org
-from one of: org's own private git repository, GNU ELPA tar or
+version of Org in use and is initialized from
+`org-odt-styles-dir-list'.  Note that the user could be using Org
+from one of: Org own private git repository, GNU ELPA tar or
 standard Emacs.")
 
 (defconst org-odt-bookmark-prefix "OrgXref.")
@@ -384,26 +378,14 @@ visually."
 
 (require 'rng-loc)
 (defcustom org-odt-schema-dir
-  (let* ((schema-dir
-	  (catch 'schema-dir
-	    (message "Debug (ox-odt): Searching for OpenDocument schema files...")
-	    (dolist (schema-dir org-odt-schema-dir-list)
-	      (when schema-dir
-		(message "Debug (ox-odt): Trying %s..." schema-dir)
-		(when (and (file-expand-wildcards
-			    (expand-file-name "od-manifest-schema*.rnc"
-					      schema-dir))
-			   (file-expand-wildcards
-			    (expand-file-name "od-schema*.rnc"
-					      schema-dir))
-			   (file-readable-p
-			    (expand-file-name "schemas.xml" schema-dir)))
-		  (message "Debug (ox-odt): Using schema files under %s"
-			   schema-dir)
-		  (throw 'schema-dir schema-dir))))
-	    (message "Debug (ox-odt): No OpenDocument schema files installed")
-	    nil)))
-    schema-dir)
+  (cl-find-if
+   (lambda (dir)
+     (and dir
+	  (file-expand-wildcards
+	   (expand-file-name "od-manifest-schema*.rnc" dir))
+	  (file-expand-wildcards (expand-file-name "od-schema*.rnc" dir))
+	  (file-readable-p (expand-file-name "schemas.xml" dir))))
+   org-odt-schema-dir-list)
   "Directory that contains OpenDocument schema files.
 
 This directory contains:
