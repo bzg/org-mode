@@ -2245,11 +2245,14 @@ See `org-file-apps'.")
     ("\\.pdf\\'" . default))
   "External applications for opening `file:path' items in a document.
 \\<org-mode-map>\
+
 Org mode uses system defaults for different file types, but
 you can use this variable to set the application for a given file
 extension.  The entries in this list are cons cells where the car identifies
-files and the cdr the corresponding command.  Possible values for the
-file identifier are
+files and the cdr the corresponding command.
+
+Possible values for the file identifier are:
+
  \"string\"    A string as a file identifier can be interpreted in different
                ways, depending on its contents:
 
@@ -2262,8 +2265,8 @@ file identifier are
                  filename matches the regexp.  If you want to
                  use groups here, use shy groups.
 
-                 Example: (\"\\.x?html\\\\='\" . \"firefox %s\")
-                          \(\"\\(?:xhtml\\|html\\)\" . \"firefox %s\")
+                 Example: (\"\\\\.x?html\\\\\\='\" . \"firefox %s\")
+                          (\"\\\\(?:xhtml\\\\|html\\\\)\\\\\\='\" . \"firefox %s\")
                           to open *.html and *.xhtml with firefox.
 
                - Regular expression which contains (non-shy) groups:
@@ -2278,7 +2281,8 @@ file identifier are
                  In a custom function, you can access the group matches with
                  \(match-string n link).
 
-                 Example: (\"\\.pdf::\\(\\d+\\)\\\\='\" . \"evince -p %1 %s\")
+                 Example: (\"\\\\.pdf::\\\\(\\\\d+\\\\)\\\\\\='\" . \
+\"evince -p %1 %s\")
                      to open [[file:document.pdf::5]] with evince at page 5.
 
  `directory'   Matches a directory
@@ -2297,6 +2301,7 @@ file identifier are
  t             Default for files not matched by any of the other options.
 
 Possible values for the command are:
+
  `emacs'       The file will be visited by the current Emacs process.
  `default'     Use the default application for this file type, which is the
                association for t in the list, most likely in the system-specific
@@ -2310,7 +2315,6 @@ Possible values for the command are:
 `mailcap'      Use command specified in the mailcaps.
  string        A command to be executed by a shell; %s will be replaced
                by the path to the file.
-
  function      A Lisp function, which will be called with two arguments:
                the file path and the original link string, without the
                \"file:\" prefix.
