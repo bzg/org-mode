@@ -28,7 +28,7 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 (require 'ox-html)
 (require 'ox-publish)
 
@@ -266,10 +266,10 @@ a communication channel."
 			   "."))))
     (concat bullet
 	    (make-string (- 4 (length bullet)) ? )
-	    (case (org-element-property :checkbox item)
-	      (on "[X] ")
-	      (trans "[-] ")
-	      (off "[ ] "))
+	    (pcase (org-element-property :checkbox item)
+	      (`on "[X] ")
+	      (`trans "[-] ")
+	      (`off "[ ] "))
 	    (let ((tag (org-element-property :tag item)))
 	      (and tag (format "**%s:** "(org-export-data tag info))))
 	    (and contents
@@ -317,12 +317,12 @@ a communication channel."
       (let ((destination (if (string= type "fuzzy")
 			     (org-export-resolve-fuzzy-link link info)
 			   (org-export-resolve-id-link link info))))
-	(case (org-element-type destination)
-	  (plain-text			; External file.
+	(pcase (org-element-type destination)
+	  (`plain-text			; External file.
 	   (let ((path (funcall link-org-files-as-md destination)))
 	     (if (not contents) (format "<%s>" path)
 	       (format "[%s](%s)" contents path))))
-	  (headline
+	  (`headline
 	   (format
 	    "[%s](#%s)"
 	    ;; Description.
@@ -336,7 +336,7 @@ a communication channel."
 	    ;; Reference.
 	    (or (org-element-property :CUSTOM_ID destination)
 		(org-export-get-reference destination info))))
-	  (t
+	  (_
 	   (let ((description
 		  (or (org-string-nw-p contents)
 		      (let ((number (org-export-get-ordinal destination info)))
