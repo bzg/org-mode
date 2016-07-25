@@ -10905,10 +10905,6 @@ link in a property drawer line."
 		  ;; ("open" function called with a single argument).
 		  ;; If no such function is found, fallback to
 		  ;; `org-open-file'.
-		  ;;
-		  ;; Note : "file+emacs" and "file+sys" types are
-		  ;; hard-coded in order to escape the previous
-		  ;; limitation.
 		  (let* ((option (org-element-property :search-option link))
 			 (app (org-element-property :application link))
 			 (dedicated-function
