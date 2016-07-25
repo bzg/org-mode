@@ -39,6 +39,7 @@
 ;; web page: http://technomancy.us/126
 
 ;;; Code:
+(require 'cl-lib)
 (require 'ob)
 
 (declare-function cider-current-connection "ext:cider-client" (&optional type))
@@ -86,7 +87,7 @@
   "Execute a block of Clojure code with Babel."
   (let ((expanded (org-babel-expand-body:clojure body params))
 	result)
-    (case org-babel-clojure-backend
+    (cl-case org-babel-clojure-backend
       (cider
        (require 'cider)
        (let ((result-params (cdr (assoc :result-params params))))
