@@ -182,17 +182,13 @@ should still return the link."
 
 #+headers: :var letters='(a b c d e f g)
 #+begin_src emacs-lisp :var numbers='(1 2 3 4 5 6 7)
-  (require 'cl)
-  (defalias 'my-map (if (org-version-check \"24.2.50\" \"cl\" :predicate)
-                        'cl-map
-                      'map))
-  (my-map 'list #'list numbers letters)
+  (require 'cl-lib)
+  (cl-map 'list #'list numbers letters)
 #+end_src"
-
     (org-babel-next-src-block)
     (let ((results (org-babel-execute-src-block)))
-      (should(equal 'a (cadr (assoc 1 results))))
-      (should(equal 'd (cadr (assoc 4 results)))))))
+      (should (eq 'a (cadr (assoc 1 results))))
+      (should (eq 'd (cadr (assoc 4 results)))))))
 
 (ert-deftest test-ob/parse-header-args ()
   (org-test-with-temp-text-in-file "
