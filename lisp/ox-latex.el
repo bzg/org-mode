@@ -1451,9 +1451,10 @@ OPTIONS is an alist where the key is the options keyword as
 a string, and the value a list containing the keyword value, or
 nil."
   (mapconcat (lambda (pair)
-	       (concat (first pair)
-		       (when (> (length (second pair)) 0)
-			 (concat "=" (second pair)))))
+	       (pcase-let ((`(,keyword ,value) pair))
+		 (concat keyword
+			 (and (> (length value) 0)
+			      (concat "=" value)))))
 	     options
 	     ","))
 

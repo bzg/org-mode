@@ -135,13 +135,13 @@ return the value of the last statement in BODY, as elisp."
 	 (tmp-babel-file (org-babel-process-file-name
 			  tmp-file 'noquote)))
     (let ((results
-           (case result-type
-             (output
+           (pcase result-type
+             (`output
               (with-temp-file tmp-file
                 (insert
                  (org-babel-eval org-babel-perl-command body))
                 (buffer-string)))
-             (value
+             (`value
               (org-babel-eval org-babel-perl-command
                               (format org-babel-perl-wrapper-method
                                       body tmp-babel-file))))))

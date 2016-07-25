@@ -177,9 +177,9 @@ value of the last statement in BODY, as elisp."
   (let ((cmd (if matlabp
 		 org-babel-matlab-shell-command
 	       org-babel-octave-shell-command)))
-    (case result-type
-      (output (org-babel-eval cmd body))
-      (value (let ((tmp-file (org-babel-temp-file "octave-")))
+    (pcase result-type
+      (`output (org-babel-eval cmd body))
+      (`value (let ((tmp-file (org-babel-temp-file "octave-")))
 	       (org-babel-eval
 		cmd
 		(format org-babel-octave-wrapper-method body
@@ -188,17 +188,17 @@ value of the last statement in BODY, as elisp."
 	       (org-babel-octave-import-elisp-from-file tmp-file))))))
 
 (defun org-babel-octave-evaluate-session
-  (session body result-type &optional matlabp)
+    (session body result-type &optional matlabp)
   "Evaluate BODY in SESSION."
   (let* ((tmp-file (org-babel-temp-file (if matlabp "matlab-" "octave-")))
 	 (wait-file (org-babel-temp-file "matlab-emacs-link-wait-signal-"))
 	 (full-body
-	  (case result-type
-	    (output
+	  (pcase result-type
+	    (`output
 	     (mapconcat
 	      #'org-babel-chomp
 	      (list body org-babel-octave-eoe-indicator) "\n"))
-	    (value
+	    (`value
 	     (if (and matlabp org-babel-matlab-with-emacs-link)
 		 (concat
 		  (format org-babel-matlab-emacs-link-wrapper-method
@@ -231,21 +231,20 @@ value of the last statement in BODY, as elisp."
 		       org-babel-octave-eoe-output)
 		     t full-body)
 		  (insert full-body) (comint-send-input nil t)))) results)
-    (case result-type
-      (value
+    (pcase result-type
+      (`value
        (org-babel-octave-import-elisp-from-file tmp-file))
-      (output
-       (progn
-	 (setq results
-	       (if matlabp
-		   (cdr (reverse (delq "" (mapcar
-					   #'org-babel-octave-read-string
-					   (mapcar #'org-trim raw)))))
-		 (cdr (member org-babel-octave-eoe-output
-			      (reverse (mapcar
-					#'org-babel-octave-read-string
-					(mapcar #'org-trim raw)))))))
-	 (mapconcat #'identity (reverse results) "\n"))))))
+      (`output
+       (setq results
+	     (if matlabp
+		 (cdr (reverse (delq "" (mapcar
+					 #'org-babel-octave-read-string
+					 (mapcar #'org-trim raw)))))
+	       (cdr (member org-babel-octave-eoe-output
+			    (reverse (mapcar
+				      #'org-babel-octave-read-string
+				      (mapcar #'org-trim raw)))))))
+       (mapconcat #'identity (reverse results) "\n")))))
 
 (defun org-babel-octave-import-elisp-from-file (file-name)
   "Import data from FILE-NAME.

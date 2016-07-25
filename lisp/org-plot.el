@@ -137,7 +137,7 @@ and dependant variables."
 	 (deps (if (plist-member params :deps)
 		   (mapcar (lambda (val) (- val 1)) (plist-get params :deps))
 		 (let (collector)
-		   (dotimes (col (length (first table)))
+		   (dotimes (col (length (nth 0 table)))
 		     (setf collector (cons col collector)))
 		   collector)))
 	 (counter 0)
@@ -155,7 +155,7 @@ and dependant variables."
 			  table)))
     ;; write table to gnuplot grid datafile format
     (with-temp-file data-file
-      (let ((num-rows (length table)) (num-cols (length (first table)))
+      (let ((num-rows (length table)) (num-cols (length (nth 0 table)))
 	    (gnuplot-row (lambda (col row value)
 			   (setf col (+ 1 col)) (setf row (+ 1 row))
 			   (format "%f  %f  %f\n%f  %f  %f\n"
@@ -289,12 +289,13 @@ line directly before or after the table."
     ;; collect table and table information
     (let* ((data-file (make-temp-file "org-plot"))
 	   (table (org-table-to-lisp))
-	   (num-cols (length (if (eq (first table) 'hline) (second table)
-			       (first table)))))
+	   (num-cols (length (if (eq (nth 0 table) 'hline) (nth 1 table)
+			       (nth 0 table)))))
       (run-with-idle-timer 0.1 nil #'delete-file data-file)
       (while (eq 'hline (car table)) (setf table (cdr table)))
       (when (eq (cadr table) 'hline)
-	(setf params (plist-put params :labels (first table))) ; headers to labels
+	(setf params
+	      (plist-put params :labels (nth 0 table))) ; headers to labels
 	(setf table (delq 'hline (cdr table)))) ; clean non-data from table
       ;; Collect options.
       (save-excursion (while (and (equal 0 (forward-line -1))

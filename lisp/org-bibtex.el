@@ -434,10 +434,11 @@ With optional argument OPTIONAL, also prompt for optional fields."
 		      (funcall val :required (funcall val type org-bibtex-types)))
 		    (when optional (funcall val :optional (funcall val type org-bibtex-types)))))
       (when (consp field) ; or'd pair of fields e.g., (:editor :author)
-        (let ((present (first (remove
+        (let ((present (nth 0 (remove
 			       nil
 			       (mapcar
-				(lambda (f) (when (org-bibtex-get (funcall name f)) f))
+				(lambda (f)
+				  (when (org-bibtex-get (funcall name f)) f))
 				field)))))
           (setf field (or present (funcall keyword
 					   (completing-read
@@ -627,9 +628,9 @@ This uses `bibtex-parse-entry'."
   (interactive)
   (let ((keyword (lambda (str) (intern (concat ":" (downcase str)))))
 	(clean-space (lambda (str) (replace-regexp-in-string
-				    "[[:space:]\n\r]+" " " str)))
+			       "[[:space:]\n\r]+" " " str)))
 	(strip-delim
-	 (lambda (str)	     ; strip enclosing "..." and {...}
+	 (lambda (str)		     ; strip enclosing "..." and {...}
 	   (dolist (pair '((34 . 34) (123 . 125)))
 	     (when (and (> (length str) 1)
 			(= (aref str 0) (car pair))
@@ -638,10 +639,10 @@ This uses `bibtex-parse-entry'."
     (push (mapcar
            (lambda (pair)
              (cons (let ((field (funcall keyword (car pair))))
-                     (case field
+                     (pcase field
                        (:=type= :type)
                        (:=key= :key)
-                       (otherwise field)))
+                       (_ field)))
                    (funcall clean-space (funcall strip-delim (cdr pair)))))
            (save-excursion (bibtex-beginning-of-entry) (bibtex-parse-entry)))
           org-bibtex-entries)))
@@ -682,7 +683,7 @@ Return the number of saved entries."
     (org-bibtex-put org-bibtex-type-property-name
 		    (downcase (funcall val :type)))
     (dolist (pair entry)
-      (case (car pair)
+      (pcase (car pair)
 	(:title    nil)
 	(:type     nil)
 	(:key      (org-bibtex-put org-bibtex-key-property (cdr pair)))
@@ -694,7 +695,7 @@ Return the number of saved entries."
 			   "[^[:alnum:]_@#%]" ""
 			   (replace-regexp-in-string "[ \t]+" "_" kw))))
 		     (org-bibtex-put (car pair) (cdr pair))))
-	(otherwise (org-bibtex-put (car pair)  (cdr pair)))))
+	(_ (org-bibtex-put (car pair) (cdr pair)))))
     (mapc togtag org-bibtex-tags)))
 
 (defun org-bibtex-yank ()

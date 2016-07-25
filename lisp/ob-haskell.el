@@ -79,9 +79,9 @@
                                 (reverse (mapcar #'org-trim raw)))))))
     (org-babel-reassemble-table
      (let ((result
-            (case result-type
-              (output (mapconcat #'identity (reverse (cdr results)) "\n"))
-              (value (car results)))))
+            (pcase result-type
+              (`output (mapconcat #'identity (reverse (cdr results)) "\n"))
+              (`value (car results)))))
        (org-babel-result-cond (cdr (assoc :result-params params))
 	 result (org-babel-script-escape result)))
      (org-babel-pick-name (cdr (assoc :colname-names params))

@@ -320,15 +320,15 @@ If the task has an end part, also demote it."
 (defun org-inlinetask-hide-tasks (state)
   "Hide inline tasks in buffer when STATE is `contents' or `children'.
 This function is meant to be used in `org-cycle-hook'."
-  (case state
-    (contents
+  (pcase state
+    (`contents
      (let ((regexp (org-inlinetask-outline-regexp)))
        (save-excursion
 	 (goto-char (point-min))
 	 (while (re-search-forward regexp nil t)
 	   (org-inlinetask-toggle-visibility)
 	   (org-inlinetask-goto-end)))))
-    (children
+    (`children
      (save-excursion
        (while (and (outline-next-heading) (org-inlinetask-at-task-p))
 	 (org-inlinetask-toggle-visibility)

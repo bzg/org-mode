@@ -474,7 +474,7 @@ end up in one file, called TAGS, located in the directory.  This
 function may take several seconds to finish if the directory or
 its subdirectories contain large numbers of taggable files."
   (interactive)
-  (assert (buffer-file-name))
+  (cl-assert (buffer-file-name))
   (let ((dir-name (or directory-name
                       (file-name-directory (buffer-file-name))))
         (exitcode nil))

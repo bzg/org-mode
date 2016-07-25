@@ -556,8 +556,8 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
   (let ((contextdata (assq context contextlist)))
     (when contextdata
       (save-excursion
-	(goto-char (second contextdata))
-	(re-search-forward ".*" (third contextdata))))))
+	(goto-char (nth 1 contextdata))
+	(re-search-forward ".*" (nth 2 contextdata))))))
 
 (defun org-mouse-for-each-item (funct)
   ;; Functions called by `org-apply-on-list' need an argument.

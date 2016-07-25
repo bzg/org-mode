@@ -6442,8 +6442,8 @@ The flag is set if the currently compiled format contains a `%b'.")
   (dolist (entry org-agenda-category-icon-alist)
     (when (string-match-p (car entry) category)
       (if (listp (cadr entry))
-	  (return (cadr entry))
-	(return (apply 'create-image (cdr entry)))))))
+	  (cl-return (cadr entry))
+	(cl-return (apply #'create-image (cdr entry)))))))
 
 (defun org-agenda-format-item (extra txt &optional level category tags dotime
 				     remove-re habitp)
@@ -10168,8 +10168,7 @@ when defining today."
   "Like `org-agenda-todo' but the time of change will be 23:59 of yesterday."
   (interactive "P")
   (let* ((org-use-effective-time t)
-	 (hour (third (decode-time
-                       (org-current-time))))
+	 (hour (nth 2 (decode-time (org-current-time))))
          (org-extend-today-until (1+ hour)))
     (org-agenda-todo arg)))
 

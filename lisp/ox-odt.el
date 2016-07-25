@@ -1160,7 +1160,7 @@ DEPTH is an integer specifying the depth of the table.  INFO is
 a plist containing current export properties.  Optional argument
 SCOPE, when non-nil, defines the scope of the table.  Return the
 table of contents as a string, or nil."
-  (assert (wholenump depth))
+  (cl-assert (wholenump depth))
   ;; When a headline is marked as a radio target, as in the example below:
   ;;
   ;; ** <<<Some Heading>>>
@@ -1207,7 +1207,7 @@ Use `org-odt-object-counters' to generate an automatic
 OBJECT-NAME and STYLE-NAME.  If OBJECT-PROPS is non-nil, add a
 new entry in `org-odt-automatic-styles'.  Return (OBJECT-NAME
 . STYLE-NAME)."
-  (assert (stringp object-type))
+  (cl-assert (stringp object-type))
   (let* ((object (intern object-type))
 	 (seqvar object)
 	 (seqno (1+ (or (plist-get org-odt-object-counters seqvar) 0)))
@@ -2070,7 +2070,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 ;;;; Links :: Label references
 
 (defun org-odt--enumerate (element info &optional predicate n)
-  (when predicate (assert (funcall predicate element info)))
+  (when predicate (cl-assert (funcall predicate element info)))
   (let* ((--numbered-parent-headline-at-<=-n
 	  (lambda (element n info)
 	    (cl-loop for x in (org-element-lineage element)
@@ -2117,7 +2117,7 @@ the generated string.
 Return value is a string if OP is set to `reference' or a cons
 cell like CAPTION . SHORT-CAPTION) where CAPTION and
 SHORT-CAPTION are strings."
-  (assert (memq (org-element-type element) '(link table src-block paragraph)))
+  (cl-assert (memq (org-element-type element) '(link table src-block paragraph)))
   (let* ((element-or-parent
 	  (cl-case (org-element-type element)
 	    (link (org-export-get-parent-element element))
@@ -2148,9 +2148,10 @@ SHORT-CAPTION are strings."
 		 (t (error "Don't know how to format label for element type: %s"
 			   (org-element-type element)))))
 	     seqno)
-	(assert default-category)
-	(destructuring-bind (counter label-style category predicate)
-	    (assoc-default default-category org-odt-category-map-alist)
+	(cl-assert default-category)
+	(pcase-let
+	    ((`(,counter ,label-style ,category ,predicate)
+	      (assoc-default default-category org-odt-category-map-alist)))
 	  ;; Compute sequence number of the element.
 	  (setq seqno (org-odt--enumerate element info predicate))
 	  ;; Localize category string.
@@ -2277,7 +2278,7 @@ SHORT-CAPTION are strings."
   "Return ODT code for an inline image.
 LINK is the link pointing to the inline image.  INFO is a plist
 used as a communication channel."
-  (assert (eq (org-element-type element) 'link))
+  (cl-assert (eq (org-element-type element) 'link))
   (let* ((src (let* ((type (org-element-property :type element))
 		     (raw-path (org-element-property :path element)))
 		(cond ((member type '("http" "https"))
@@ -2485,8 +2486,8 @@ used as a communication channel."
 				(lambda (default user)
 				  "Merge default and user frame params."
 				  (if (not user) default
-				    (assert (= (length default) 3))
-				    (assert (= (length user) 3))
+				    (cl-assert (= (length default) 3))
+				    (cl-assert (= (length user) 3))
 				    (cl-loop for u in user
 					     for d in default
 					     collect (or u d)))))))
@@ -2540,7 +2541,7 @@ used as a communication channel."
 	      (org-element-property :name p))))
    ;; Link should point to an image file.
    (lambda (l)
-     (assert (eq (org-element-type l) 'link))
+     (cl-assert (eq (org-element-type l) 'link))
      (org-export-inline-image-p l (plist-get info :odt-inline-image-rules)))))
 
 (defun org-odt--enumerable-latex-image-p (element info)
@@ -2555,7 +2556,7 @@ used as a communication channel."
 	      (org-element-property :name p))))
    ;; Link should point to an image file.
    (lambda (l)
-     (assert (eq (org-element-type l) 'link))
+     (cl-assert (eq (org-element-type l) 'link))
      (org-export-inline-image-p l (plist-get info :odt-inline-image-rules)))))
 
 (defun org-odt--enumerable-formula-p (element info)
@@ -2567,7 +2568,7 @@ used as a communication channel."
 	 (org-element-property :name p)))
    ;; Link should point to a MathML or ODF file.
    (lambda (l)
-     (assert (eq (org-element-type l) 'link))
+     (cl-assert (eq (org-element-type l) 'link))
      (org-export-inline-image-p l (plist-get info :odt-inline-formula-rules)))))
 
 (defun org-odt--standalone-link-p (element _info &optional
@@ -3127,7 +3128,7 @@ and prefix with \"OrgSrc\".  For example,
 	 (par-style (if use-htmlfontify-p "OrgSrcBlock"
 		      "OrgFixedWidthBlock"))
 	 (i 0))
-    (assert (= code-length (length (org-split-string code "\n"))))
+    (cl-assert (= code-length (length (org-split-string code "\n"))))
     (setq code
 	  (org-export-format-code
 	   code
@@ -3140,7 +3141,7 @@ and prefix with \"OrgSrc\".  For example,
 	     (setq loc (funcall fontifier loc))
 	     (when ref
 	       (setq loc (org-odt--target loc (concat "coderef-" ref))))
-	     (assert par-style)
+	     (cl-assert par-style)
 	     (setq loc (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
 			       par-style loc))
 	     (if (not line-num) loc
@@ -3347,7 +3348,7 @@ channel."
 			(1+ horiz-span))))))
     (unless contents (setq contents ""))
     (concat
-     (assert paragraph-style)
+     (cl-assert paragraph-style)
      (format "\n<table:table-cell%s>\n%s\n</table:table-cell>"
 	     cell-attributes
 	     (let ((table-cell-contents (org-element-contents table-cell)))

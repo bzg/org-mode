@@ -168,7 +168,7 @@ Returns a list with the following elements:
 This list represents a \"habit\" for the rest of this module."
   (save-excursion
     (if pom (goto-char pom))
-    (assert (org-is-habit-p (point)))
+    (cl-assert (org-is-habit-p (point)))
     (let* ((scheduled (org-get-scheduled-time (point)))
 	   (scheduled-repeat (org-get-repeat org-scheduled-string))
 	   (end (org-entry-end-position))

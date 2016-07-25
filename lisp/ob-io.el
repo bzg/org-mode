@@ -73,22 +73,22 @@ If RESULT-TYPE equals `output' then return standard output as a string.
 If RESULT-TYPE equals `value' then return the value of the last statement
 in BODY as elisp."
   (when session (error "Sessions are not (yet) supported for Io"))
-  (case result-type
-    (output
+  (pcase result-type
+    (`output
      (if (member "repl" result-params)
          (org-babel-eval org-babel-io-command body)
        (let ((src-file (org-babel-temp-file "io-")))
          (progn (with-temp-file src-file (insert body))
                 (org-babel-eval
                  (concat org-babel-io-command " " src-file) "")))))
-    (value (let* ((src-file (org-babel-temp-file "io-"))
-                  (wrapper (format org-babel-io-wrapper-method body)))
-             (with-temp-file src-file (insert wrapper))
-             (let ((raw (org-babel-eval
-                         (concat org-babel-io-command " " src-file) "")))
-               (org-babel-result-cond result-params
-		 raw
-                 (org-babel-script-escape raw)))))))
+    (`value (let* ((src-file (org-babel-temp-file "io-"))
+		   (wrapper (format org-babel-io-wrapper-method body)))
+	      (with-temp-file src-file (insert wrapper))
+	      (let ((raw (org-babel-eval
+			  (concat org-babel-io-command " " src-file) "")))
+		(org-babel-result-cond result-params
+		  raw
+		  (org-babel-script-escape raw)))))))
 
 
 (defun org-babel-prep-session:io (_session _params)

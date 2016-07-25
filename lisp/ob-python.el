@@ -254,26 +254,26 @@ If RESULT-TYPE equals `output' then return standard output as a
 string.  If RESULT-TYPE equals `value' then return the value of the
 last statement in BODY, as elisp."
   (let ((raw
-         (case result-type
-           (output (org-babel-eval org-babel-python-command
-                                   (concat (if preamble (concat preamble "\n"))
-                                           body)))
-           (value (let ((tmp-file (org-babel-temp-file "python-")))
-                    (org-babel-eval
-                     org-babel-python-command
-                     (concat
-                      (if preamble (concat preamble "\n") "")
-                      (format
-                       (if (member "pp" result-params)
-                           org-babel-python-pp-wrapper-method
-                         org-babel-python-wrapper-method)
-                       (mapconcat
-                        (lambda (line) (format "\t%s" line))
-                        (split-string (org-remove-indentation (org-trim body))
-				      "[\r\n]")
-			"\n")
-                       (org-babel-process-file-name tmp-file 'noquote))))
-                    (org-babel-eval-read-file tmp-file))))))
+         (pcase result-type
+           (`output (org-babel-eval org-babel-python-command
+				    (concat (if preamble (concat preamble "\n"))
+					    body)))
+           (`value (let ((tmp-file (org-babel-temp-file "python-")))
+		     (org-babel-eval
+		      org-babel-python-command
+		      (concat
+		       (if preamble (concat preamble "\n") "")
+		       (format
+			(if (member "pp" result-params)
+			    org-babel-python-pp-wrapper-method
+			  org-babel-python-wrapper-method)
+			(mapconcat
+			 (lambda (line) (format "\t%s" line))
+			 (split-string (org-remove-indentation (org-trim body))
+				       "[\r\n]")
+			 "\n")
+			(org-babel-process-file-name tmp-file 'noquote))))
+		     (org-babel-eval-read-file tmp-file))))))
     (org-babel-result-cond result-params
       raw
       (org-babel-python-table-or-string (org-trim raw)))))
@@ -303,8 +303,8 @@ last statement in BODY, as elisp."
 			     (split-string body "[\r\n]"))
 		       (funcall send-wait)))
          (results
-          (case result-type
-            (output
+          (pcase result-type
+            (`output
              (mapconcat
               #'org-trim
               (butlast
@@ -315,7 +315,7 @@ last statement in BODY, as elisp."
                  (insert org-babel-python-eoe-indicator)
                  (funcall send-wait))
                2) "\n"))
-            (value
+            (`value
              (let ((tmp-file (org-babel-temp-file "python-")))
                (org-babel-comint-with-output
                    (session org-babel-python-eoe-indicator nil body)

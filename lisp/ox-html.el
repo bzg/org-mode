@@ -1728,11 +1728,11 @@ Replaces invalid characters with \"_\"."
 INFO is a plist used as a communication channel."
   (let* ((fn-alist (org-export-collect-footnote-definitions info))
 	 (fn-alist
-	  (loop for (n _type raw) in fn-alist collect
-		(cons n (if (eq (org-element-type raw) 'org-data)
-			    (org-trim (org-export-data raw info))
-			  (format "<div class=\"footpara\">%s</div>"
-				  (org-trim (org-export-data raw info))))))))
+	  (cl-loop for (n _type raw) in fn-alist collect
+		   (cons n (if (eq (org-element-type raw) 'org-data)
+			       (org-trim (org-export-data raw info))
+			     (format "<div class=\"footpara\">%s</div>"
+				     (org-trim (org-export-data raw info))))))))
     (when fn-alist
       (format
        (plist-get info :html-footnotes-section)

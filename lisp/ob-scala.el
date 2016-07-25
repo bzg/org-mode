@@ -74,19 +74,19 @@ print(str_result)
 
 
 (defun org-babel-scala-evaluate
-  (session body &optional result-type result-params)
+    (session body &optional result-type result-params)
   "Evaluate BODY in external Scala process.
 If RESULT-TYPE equals `output' then return standard output as a string.
 If RESULT-TYPE equals `value' then return the value of the last statement
 in BODY as elisp."
   (when session (error "Sessions are not (yet) supported for Scala"))
-  (case result-type
-    (output
+  (pcase result-type
+    (`output
      (let ((src-file (org-babel-temp-file "scala-")))
-       (progn (with-temp-file src-file (insert body))
-              (org-babel-eval
-               (concat org-babel-scala-command " " src-file) ""))))
-    (value
+       (with-temp-file src-file (insert body))
+       (org-babel-eval
+	(concat org-babel-scala-command " " src-file) "")))
+    (`value
      (let* ((src-file (org-babel-temp-file "scala-"))
             (wrapper (format org-babel-scala-wrapper-method body)))
        (with-temp-file src-file (insert wrapper))

@@ -549,17 +549,17 @@ INFO is a plist used as a communication channel."
 (defun org-ascii--current-text-width (element info)
   "Return maximum text width for ELEMENT's contents.
 INFO is a plist used as a communication channel."
-  (case (org-element-type element)
+  (pcase (org-element-type element)
     ;; Elements with an absolute width: `headline' and `inlinetask'.
-    (inlinetask (plist-get info :ascii-inlinetask-width))
-    (headline
+    (`inlinetask (plist-get info :ascii-inlinetask-width))
+    (`headline
      (- (plist-get info :ascii-text-width)
 	(let ((low-level-rank (org-export-low-level-p element info)))
 	  (if low-level-rank (* low-level-rank 2)
 	    (plist-get info :ascii-global-margin)))))
     ;; Elements with a relative width: store maximum text width in
     ;; TOTAL-WIDTH.
-    (otherwise
+    (_
      (let* ((genealogy (org-element-lineage element nil t))
 	    ;; Total width is determined by the presence, or not, of an
 	    ;; inline task among ELEMENT parents.
@@ -635,9 +635,9 @@ Return value is a symbol among `left', `center', `right' and
   (let (justification)
     (while (and (not justification)
 		(setq element (org-element-property :parent element)))
-      (case (org-element-type element)
-	(center-block (setq justification 'center))
-	(special-block
+      (pcase (org-element-type element)
+	(`center-block (setq justification 'center))
+	(`special-block
 	 (let ((name (org-element-property :type element)))
 	   (cond ((string= name "JUSTIFYRIGHT") (setq justification 'right))
 		 ((string= name "JUSTIFYLEFT") (setq justification 'left)))))))
@@ -735,9 +735,9 @@ caption keyword."
 	     (org-export-get-ordinal
 	      element info nil 'org-ascii--has-caption-p))
 	    (title-fmt (org-ascii--translate
-			(case (org-element-type element)
-			  (table "Table %d:")
-			  (src-block "Listing %d:"))
+			(pcase (org-element-type element)
+			  (`table "Table %d:")
+			  (`src-block "Listing %d:"))
 			info)))
 	(org-ascii--fill-string
 	 (concat (format title-fmt reference)
@@ -950,10 +950,10 @@ channel."
   "Return checkbox string for ITEM or nil.
 INFO is a plist used as a communication channel."
   (let ((utf8p (eq (plist-get info :ascii-charset) 'utf-8)))
-    (case (org-element-property :checkbox item)
-      (on (if utf8p "☑ " "[X] "))
-      (off (if utf8p "☐ " "[ ] "))
-      (trans (if utf8p "☒ " "[-] ")))))
+    (pcase (org-element-property :checkbox item)
+      (`on (if utf8p "☑ " "[X] "))
+      (`off (if utf8p "☐ " "[ ] "))
+      (`trans (if utf8p "☒ " "[-] ")))))
 
 
 
@@ -1431,12 +1431,12 @@ contextual information."
 	  ;; First parent of ITEM is always the plain-list.  Get
 	  ;; `:type' property from it.
 	  (org-list-bullet-string
-	   (case list-type
-	     (descriptive
+	   (pcase list-type
+	     (`descriptive
 	      (concat checkbox
 		      (org-export-data (org-element-property :tag item) info)
 		      ": "))
-	     (ordered
+	     (`ordered
 	      ;; Return correct number for ITEM, paying attention to
 	      ;; counters.
 	      (let* ((struct (org-element-property :structure item))
@@ -1448,7 +1448,7 @@ contextual information."
 				       (org-list-prevs-alist struct)
 				       (org-list-parents-alist struct)))))))
 		(replace-regexp-in-string "[0-9]+" num bul)))
-	     (t (let ((bul (org-element-property :bullet item)))
+	     (_ (let ((bul (org-element-property :bullet item)))
 		  ;; Change bullets into more visible form if UTF-8 is active.
 		  (if (not utf8p) bul
 		    (replace-regexp-in-string

@@ -1072,14 +1072,15 @@ for `tabulated-list-printer'."
 	(mapcar
 	 (lambda (report)
 	   (list
-	    (incf id)
+	    (cl-incf id)
 	    (apply #'vector
 		   (cons
 		    (progn
 		      (goto-char (car report))
 		      (beginning-of-line)
 		      (prog1 (number-to-string
-			      (incf last-line (count-lines last-pos (point))))
+			      (cl-incf last-line
+				       (count-lines last-pos (point))))
 			(setf last-pos (point))))
 		    (cdr report)))))
 	 ;; Insert trust level in generated reports.  Also sort them

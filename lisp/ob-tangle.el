@@ -26,6 +26,8 @@
 ;; Extract the code from source blocks out into raw source-code files.
 
 ;;; Code:
+
+(require 'cl-lib)
 (require 'org-src)
 
 (declare-function make-directory "files" (dir &optional parents))
@@ -410,7 +412,7 @@ can be used to limit the collected code blocks by target file."
       (let ((current-heading-pos
 	     (org-with-wide-buffer
 	      (org-with-limited-levels (outline-previous-heading)))))
-	(if (eq last-heading-pos current-heading-pos) (incf counter)
+	(if (eq last-heading-pos current-heading-pos) (cl-incf counter)
 	  (setq counter 1)
 	  (setq last-heading-pos current-heading-pos)))
       (unless (org-in-commented-heading-p)

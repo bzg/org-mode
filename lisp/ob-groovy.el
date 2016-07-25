@@ -76,19 +76,19 @@ println(new Runner().run())
 
 
 (defun org-babel-groovy-evaluate
-  (session body &optional result-type result-params)
+    (session body &optional result-type result-params)
   "Evaluate BODY in external Groovy process.
 If RESULT-TYPE equals `output' then return standard output as a string.
 If RESULT-TYPE equals `value' then return the value of the last statement
 in BODY as elisp."
   (when session (error "Sessions are not (yet) supported for Groovy"))
-  (case result-type
-    (output
+  (pcase result-type
+    (`output
      (let ((src-file (org-babel-temp-file "groovy-")))
        (progn (with-temp-file src-file (insert body))
               (org-babel-eval
                (concat org-babel-groovy-command " " src-file) ""))))
-    (value
+    (`value
      (let* ((src-file (org-babel-temp-file "groovy-"))
             (wrapper (format org-babel-groovy-wrapper-method body)))
        (with-temp-file src-file (insert wrapper))

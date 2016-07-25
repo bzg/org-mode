@@ -185,26 +185,26 @@ end
 ")
 
 (defun org-babel-ruby-evaluate
-  (buffer body &optional result-type result-params)
+    (buffer body &optional result-type result-params)
   "Pass BODY to the Ruby process in BUFFER.
 If RESULT-TYPE equals `output' then return a list of the outputs
 of the statements in BODY, if RESULT-TYPE equals `value' then
 return the value of the last statement in BODY, as elisp."
   (if (not buffer)
       ;; external process evaluation
-      (case result-type
-	(output (org-babel-eval org-babel-ruby-command body))
-	(value (let ((tmp-file (org-babel-temp-file "ruby-")))
-		 (org-babel-eval
-		  org-babel-ruby-command
-		  (format (if (member "pp" result-params)
-			      org-babel-ruby-pp-wrapper-method
-			    org-babel-ruby-wrapper-method)
-			  body (org-babel-process-file-name tmp-file 'noquote)))
-		 (org-babel-eval-read-file tmp-file))))
+      (pcase result-type
+	(`output (org-babel-eval org-babel-ruby-command body))
+	(`value (let ((tmp-file (org-babel-temp-file "ruby-")))
+		  (org-babel-eval
+		   org-babel-ruby-command
+		   (format (if (member "pp" result-params)
+			       org-babel-ruby-pp-wrapper-method
+			     org-babel-ruby-wrapper-method)
+			   body (org-babel-process-file-name tmp-file 'noquote)))
+		  (org-babel-eval-read-file tmp-file))))
     ;; comint session evaluation
-    (case result-type
-      (output
+    (pcase result-type
+      (`output
        (let ((eoe-string (format "puts \"%s\"" org-babel-ruby-eoe-indicator)))
 	 ;; Force the session to be ready before the actual session
 	 ;; code is run.  There is some problem in comint that will
@@ -231,7 +231,7 @@ return the value of the last statement in BODY, as elisp."
 		      "conf.prompt_mode=_org_prompt_mode;conf.echo=true"
 		      eoe-string)))
 	     "\n") "[\r\n]") 4) "\n")))
-      (value
+      (`value
        (let* ((tmp-file (org-babel-temp-file "ruby-"))
 	      (ppp (or (member "code" result-params)
 		       (member "pp" result-params))))
