@@ -26,16 +26,16 @@
 ;;
 ;;; Commentary:
 
-;; This file contains the code dealing with source code examples in Org-mode.
+;; This file contains the code dealing with source code examples in
+;; Org mode.
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'org-macs)
 (require 'org-compat)
 (require 'ob-keys)
 (require 'ob-comint)
-(eval-when-compile (require 'cl))
-(require 'cl-lib)
 
 (declare-function org-base-buffer "org" (buffer))
 (declare-function org-do-remove-indentation "org" (&optional n))
@@ -691,26 +691,26 @@ If BUFFER is non-nil, test it instead."
 	 (local-variable-p 'org-src--end-marker buffer))))
 
 (defun org-src-switch-to-buffer (buffer context)
-  (case org-src-window-setup
-    (current-window (pop-to-buffer-same-window buffer))
-    (other-window
+  (pcase org-src-window-setup
+    (`current-window (pop-to-buffer-same-window buffer))
+    (`other-window
      (switch-to-buffer-other-window buffer))
-    (other-frame
-     (case context
-       (exit
+    (`other-frame
+     (pcase context
+       (`exit
 	(let ((frame (selected-frame)))
 	  (switch-to-buffer-other-frame buffer)
 	  (delete-frame frame)))
-       (save
+       (`save
 	(kill-buffer (current-buffer))
 	(pop-to-buffer-same-window buffer))
-       (t (switch-to-buffer-other-frame buffer))))
-    (reorganize-frame
+       (_ (switch-to-buffer-other-frame buffer))))
+    (`reorganize-frame
      (when (eq context 'edit) (delete-other-windows))
      (org-switch-to-buffer-other-window buffer)
      (when (eq context 'exit) (delete-other-windows)))
-    (switch-invisibly (set-buffer buffer))
-    (t
+    (`switch-invisibly (set-buffer buffer))
+    (_
      (message "Invalid value %s for `org-src-window-setup'"
 	      org-src-window-setup)
      (pop-to-buffer-same-window buffer))))
