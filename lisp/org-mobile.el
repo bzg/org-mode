@@ -33,14 +33,11 @@
 
 (require 'org)
 (require 'org-agenda)
+(require 'cl-lib)
+
 (defvar org-agenda-keep-restricted-file-list)
 
 ;;; Code:
-
-(eval-when-compile (require 'cl))
-
-(declare-function org-pop-to-buffer-same-window
-		  "org-compat" (&optional buffer-or-name norecord label))
 
 (defgroup org-mobile nil
   "Options concerning support for a viewer/editor on a mobile device."
@@ -817,7 +814,7 @@ If BEG and END are given, only do this in that region."
     (while (re-search-forward "^\\* \\(.*\\)" end t)
       (and (>= (- (match-end 1) (match-beginning 1)) 2)
 	   (not (equal (downcase (substring (match-string 1) 0 2)) "f("))
-	   (incf cnt-new)))
+	   (cl-incf cnt-new)))
 
     ;; Find and apply the edits
     (goto-char beg)
@@ -833,11 +830,11 @@ If BEG and END are given, only do this in that region."
 	       (eos (save-excursion (org-end-of-subtree t t)))
 	       (cmd (if (equal action "")
 			'(progn
-			   (incf cnt-flag)
+			   (cl-incf cnt-flag)
 			   (org-toggle-tag "FLAGGED" 'on)
 			   (and note
 				(org-entry-put nil "THEFLAGGINGNOTE" note)))
-		      (incf cnt-edit)
+		      (cl-incf cnt-edit)
 		      (cdr (assoc action org-mobile-action-alist))))
 	       (note (and (equal action "")
 			  (buffer-substring (1+ (point-at-eol)) eos)))
@@ -854,11 +851,11 @@ If BEG and END are given, only do this in that region."
 	    (if (stringp id-pos)
 		(insert id-pos " ")
 	      (insert "BAD REFERENCE "))
-	    (incf cnt-error)
+	    (cl-incf cnt-error)
 	    (throw 'next t))
 	  (unless cmd
 	    (insert "BAD FLAG ")
-	    (incf cnt-error)
+	    (cl-incf cnt-error)
 	    (throw 'next t))
 	  (move-marker bos-marker (point))
 	  (if (re-search-forward "^** Old value[ \t]*$" eos t)
@@ -898,7 +895,7 @@ If BEG and END are given, only do this in that region."
 	  (when org-mobile-error
 	    (pop-to-buffer-same-window (marker-buffer marker))
 	    (goto-char marker)
-	    (incf cnt-error)
+	    (cl-incf cnt-error)
 	    (insert (if (stringp (nth 1 org-mobile-error))
 			(nth 1 org-mobile-error)
 		      "EXECUTION FAILED")
