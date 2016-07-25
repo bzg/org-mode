@@ -136,8 +136,8 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
 (require 'org)
+(require 'cl-lib)
 
 (defvar org-agenda-allow-remote-undo)
 (defvar org-agenda-undo-list)
