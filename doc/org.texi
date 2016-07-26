@@ -300,9 +300,7 @@ Jambunathan K, Dan Davison, Thomas Dye, David O'Toole, and Philip Rooke.
 @contents
 
 @ifnottex
-@c FIXME These hand-written next,prev,up node pointers make editing a lot
-@c harder.  There should be no need for them, makeinfo can do it
-@c automatically for any document with a normal structure.
+
 @node Top, Introduction, (dir), (dir)
 @top Org Mode Manual
 
