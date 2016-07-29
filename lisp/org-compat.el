@@ -47,11 +47,8 @@
   (defalias 'outline-show-entry 'show-entry)
   (defalias 'outline-show-subtree 'show-subtree)
   (defalias 'xref-find-definitions 'find-tag)
-  (defalias 'format-message 'format))
-
-(eval-when-compile
-  (when (< emacs-major-version 25)
-    (defalias 'gui-get-selection 'x-get-selection)))
+  (defalias 'format-message 'format)
+  (defalias 'gui-get-selection 'x-get-selection))
 
 
 ;;; Obsolete aliases (remove them once the next major release is released).
