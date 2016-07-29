@@ -1701,11 +1701,7 @@ The template may still contain \"%?\" for cursor positioning."
 		     (end (copy-marker (match-end 0)))
 		     (prompt (nth 0 items))
 		     (default (nth 1 items))
-		     (completions (nthcdr 2 items))
-		     (histvar
-		      (intern
-		       (concat "org-capture-template-prompt-history::"
-			       (or prompt "")))))
+		     (completions (nthcdr 2 items)))
 		(unless (org-capture-escaped-%)
 		  (delete-region beg end)
 		  (set-marker beg nil)
@@ -1768,7 +1764,7 @@ The template may still contain \"%?\" for cursor positioning."
 			    (concat (or prompt "Enter string")
 				    (and default (format " [%s]" default))
 				    ": ")
-			    completions nil nil nil histvar default)
+			    completions nil nil nil nil default)
 			   strings)
 		     (insert (car strings)))))))))
 
