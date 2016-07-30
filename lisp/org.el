@@ -8406,7 +8406,7 @@ After top level, it switches back to sibling level."
 
 (defun org-map-tree (fun)
   "Call FUN for every heading underneath the current one."
-  (org-back-to-heading)
+  (org-back-to-heading t)
   (let ((level (funcall outline-level)))
     (save-excursion
       (funcall fun)
