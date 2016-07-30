@@ -1438,7 +1438,12 @@
   (should
    (equal "Todo H"
 	  (org-test-with-temp-text "#+TODO: TODO | DONE\n* Todo H<point>"
-	    (org-get-heading nil t)))))
+	    (org-get-heading nil t))))
+  ;; On an empty headline, return value is consistent.
+  (should (equal "" (org-test-with-temp-text "* " (org-get-heading))))
+  (should (equal "" (org-test-with-temp-text "* " (org-get-heading t))))
+  (should (equal "" (org-test-with-temp-text "* " (org-get-heading nil t))))
+  (should (equal "" (org-test-with-temp-text "* " (org-get-heading t t)))))
 
 (ert-deftest test-org/in-commented-heading-p ()
   "Test `org-in-commented-heading-p' specifications."

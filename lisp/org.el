@@ -8092,7 +8092,9 @@ When NO-TODO is non-nil, don't include TODO keywords."
       (cond
        ((and no-tags no-todo)
 	(looking-at org-complex-heading-regexp)
-	(match-string 4))
+	;; Return value has to be a string, but match group 4 is
+	;; optional.
+	(or (match-string 4) ""))
        (no-tags
 	(looking-at (concat org-outline-regexp
 			    "\\(.*?\\)"
