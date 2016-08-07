@@ -227,7 +227,7 @@ by the mobile device, this hook should be used to copy the emptied
 capture file `mobileorg.org' back to the WebDAV directory, for example
 using `rsync' or `scp'.")
 
-(defvar org-mobile-action-alist
+(defconst org-mobile-action-alist
   '(("edit" . #'org-mobile-edit))
   "Alist with flags and actions for mobile sync.
 When flagging an entry, MobileOrg will create entries that look like
@@ -243,9 +243,7 @@ variable.
 The car of each elements of the alist is an actions string.  The
 cdr is a function that is called with the cursor on the headline
 of that entry.  It should accept three arguments, the :data part,
-the old and new values for the entry.
-
-For now, it is not recommended to change this variable.")
+the old and new values for the entry.")
 
 (defvar org-mobile-last-flagged-files nil
   "List of files containing entries flagged in the latest pull.")
