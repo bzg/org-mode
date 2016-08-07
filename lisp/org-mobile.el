@@ -192,19 +192,22 @@ the editing types for which the mobile version should always dominate."
 	       (const body))))
 
 (defcustom org-mobile-action-alist
-  '(("edit" . (org-mobile-edit data old new)))
+  '(("edit" . #'org-mobile-edit))
   "Alist with flags and actions for mobile sync.
 When flagging an entry, MobileOrg will create entries that look like
 
   * F(action:data)  [[id:entry-id][entry title]]
 
-This alist defines that the ACTION in the parentheses of F() should mean,
-i.e. what action should be taken.  The :data part in the parenthesis is
-optional.  If present, the string after the colon will be passed to the
-action form as the `data' variable.
-The car of each elements of the alist is an actions string.  The cdr is
-an Emacs Lisp form that will be evaluated with the cursor on the headline
-of that entry.
+This alist defines that the ACTION in the parentheses of F()
+should mean, i.e. what action should be taken.  The :data part in
+the parenthesis is optional.  If present, the string after the
+colon will be passed to the action function as the first argument
+variable.
+
+The car of each elements of the alist is an actions string.  The
+cdr is a function that is called with the cursor on the headline
+of that entry.  It should accept three arguments, the :data part,
+the old and new values for the entry.
 
 For now, it is not recommended to change this variable."
   :group 'org-mobile
@@ -829,16 +832,17 @@ If BEG and END are given, only do this in that region."
 	       (bos (point-at-bol))
 	       (eos (save-excursion (org-end-of-subtree t t)))
 	       (cmd (if (equal action "")
-			'(progn
-			   (cl-incf cnt-flag)
-			   (org-toggle-tag "FLAGGED" 'on)
-			   (and note
-				(org-entry-put nil "THEFLAGGINGNOTE" note)))
+			(lambda (_data _old _new)
+			  (cl-incf cnt-flag)
+			  (org-toggle-tag "FLAGGED" 'on)
+			  (when note
+			    (org-entry-put nil "THEFLAGGINGNOTE" note)))
 		      (cl-incf cnt-edit)
 		      (cdr (assoc action org-mobile-action-alist))))
 	       (note (and (equal action "")
 			  (buffer-substring (1+ (point-at-eol)) eos)))
-	       (org-inhibit-logging 'note) ;; Do not take notes interactively
+	       ;; Do not take notes interactively.
+	       (org-inhibit-logging 'note)
 	       old new)
 
 	  (goto-char bos)
@@ -868,30 +872,28 @@ If BEG and END are given, only do this in that region."
 			 (progn (outline-next-heading)
 				(if (eobp) (org-back-over-empty-lines))
 				(point)))))
-	  (setq old (and old (if (string-match "\\S-" old) old nil)))
-	  (setq new (and new (if (string-match "\\S-" new) new nil)))
+	  (setq old (org-string-nw-p old))
+	  (setq new (org-string-nw-p new))
 	  (if (and note (> (length note) 0))
 	      ;; Make Note into a single line, to fit into a property
 	      (setq note (mapconcat 'identity
 				    (org-split-string (org-trim note) "\n")
 				    "\\n")))
 	  (unless (equal data "body")
-	    (setq new (and new (org-trim new))
-		  old (and old (org-trim old))))
+	    (setq new (and new (org-trim new)))
+	    (setq old (and old (org-trim old))))
 	  (goto-char (+ 2 bos-marker))
 	  ;; Remember this place so that we can return
 	  (move-marker marker (point))
 	  (setq org-mobile-error nil)
-	  (save-excursion
-	    (condition-case msg
-		(org-with-point-at id-pos
-		  (progn
-		    (eval cmd)
-		    (unless (member data (list "delete" "archive" "archive-sibling" "addheading"))
-		      (if (member "FLAGGED" (org-get-tags))
-			  (add-to-list 'org-mobile-last-flagged-files
-				       (buffer-file-name))))))
-	      (error (setq org-mobile-error msg))))
+	  (condition-case msg
+	      (org-with-point-at id-pos
+		(funcall cmd data old new)
+		(unless (member data '("delete" "archive" "archive-sibling" "addheading"))
+		  (when (member "FLAGGED" (org-get-tags))
+		    (add-to-list 'org-mobile-last-flagged-files
+				 (buffer-file-name)))))
+	    (error (setq org-mobile-error msg)))
 	  (when org-mobile-error
 	    (pop-to-buffer-same-window (marker-buffer marker))
 	    (goto-char marker)
