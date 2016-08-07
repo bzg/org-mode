@@ -191,30 +191,6 @@ the editing types for which the mobile version should always dominate."
 	       (const heading)
 	       (const body))))
 
-(defcustom org-mobile-action-alist
-  '(("edit" . #'org-mobile-edit))
-  "Alist with flags and actions for mobile sync.
-When flagging an entry, MobileOrg will create entries that look like
-
-  * F(action:data)  [[id:entry-id][entry title]]
-
-This alist defines that the ACTION in the parentheses of F()
-should mean, i.e. what action should be taken.  The :data part in
-the parenthesis is optional.  If present, the string after the
-colon will be passed to the action function as the first argument
-variable.
-
-The car of each elements of the alist is an actions string.  The
-cdr is a function that is called with the cursor on the headline
-of that entry.  It should accept three arguments, the :data part,
-the old and new values for the entry.
-
-For now, it is not recommended to change this variable."
-  :group 'org-mobile
-  :type '(repeat
-	  (cons (string :tag "Action flag")
-		(sexp   :tag "Action form"))))
-
 (defcustom org-mobile-checksum-binary (or (executable-find "shasum")
 					  (executable-find "sha1sum")
 					  (executable-find "md5sum")
@@ -250,6 +226,26 @@ If Emacs does not have direct write access to the WebDAV directory used
 by the mobile device, this hook should be used to copy the emptied
 capture file `mobileorg.org' back to the WebDAV directory, for example
 using `rsync' or `scp'.")
+
+(defvar org-mobile-action-alist
+  '(("edit" . #'org-mobile-edit))
+  "Alist with flags and actions for mobile sync.
+When flagging an entry, MobileOrg will create entries that look like
+
+  * F(action:data)  [[id:entry-id][entry title]]
+
+This alist defines that the ACTION in the parentheses of F()
+should mean, i.e. what action should be taken.  The :data part in
+the parenthesis is optional.  If present, the string after the
+colon will be passed to the action function as the first argument
+variable.
+
+The car of each elements of the alist is an actions string.  The
+cdr is a function that is called with the cursor on the headline
+of that entry.  It should accept three arguments, the :data part,
+the old and new values for the entry.
+
+For now, it is not recommended to change this variable.")
 
 (defvar org-mobile-last-flagged-files nil
   "List of files containing entries flagged in the latest pull.")
