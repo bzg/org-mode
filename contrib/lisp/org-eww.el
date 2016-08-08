@@ -48,7 +48,7 @@
 
 
 ;; Store Org-link in eww-mode buffer
-(org-link-set-parameters "eww" :store #'org-eww-store-link)
+(org-link-set-parameters "eww" :follow #'eww :store #'org-eww-store-link)
 (defun org-eww-store-link ()
   "Store a link to the url of a eww buffer."
   (when (eq major-mode 'eww-mode)
