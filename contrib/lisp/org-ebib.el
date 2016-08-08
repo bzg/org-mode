@@ -22,9 +22,9 @@
 
 (require 'org)
 
-(org-add-link-type "ebib" 'org-ebib-open)
-
-(add-hook 'org-store-link-functions 'org-ebib-store-link)
+(org-link-set-parameters "ebib"
+			 :follow #'org-ebib-open
+			 :store #'org-ebib-store-link)
 
 (defun org-ebib-open (key)
   "Open Ebib and jump to KEY."
