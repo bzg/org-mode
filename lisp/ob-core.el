@@ -542,6 +542,27 @@ match group 9.  Other match groups are defined in
   "This generates a regexp used to match data named NAME."
   (concat org-babel-name-regexp (regexp-quote name) "[ \t]*$"))
 
+(defun org-babel--normalize-body (datum)
+  "Normalize body for element or object DATUM.
+In particular, remove spurious indentation, final newline
+character and coderef labels when appropriate."
+  (let* ((value (org-element-property :value datum))
+	 (body (if (and (> (length value) 1)
+			(string-match-p "\n\\'" value))
+		   (substring value 0 -1)
+		 value)))
+    (if (eq (org-element-type datum) 'inline-src-block)
+	;; Newline characters and indentation in an inline src-block
+	;; are not meaningful, since they could come from some
+	;; paragraph filling.  Treat them as a white space.
+	(replace-regexp-in-string "\n[ \t]*" " " body)
+      (let ((body (replace-regexp-in-string
+		   (org-src-coderef-regexp datum) "" body nil nil 1)))
+	(if (or org-src-preserve-indentation
+		(org-element-property :preserve-indent datum))
+	    body
+	  (org-remove-indentation body))))))
+
 ;;; functions
 (defvar org-babel-current-src-block-location nil
   "Marker pointing to the src block currently being executed.
@@ -578,23 +599,7 @@ a list with the following pattern:
 	     (info
 	      (list
 	       lang
-	       ;; Normalize contents.  In particular, remove spurious
-	       ;; indentation and final newline character.
-	       (let* ((value (org-element-property :value datum))
-		      (body (if (and (> (length value) 1)
-				     (string-match-p "\n\\'" value))
-				(substring value 0 -1)
-			      value)))
-		 (cond (inline
-			 ;; Newline characters and indentation in an
-			 ;; inline src-block are not meaningful, since
-			 ;; they could come from some paragraph
-			 ;; filling.  Treat them as a white space.
-			 (replace-regexp-in-string "\n[ \t]*" " " body))
-		       ((or org-src-preserve-indentation
-			    (org-element-property :preserve-indent datum))
-			body)
-		       (t (org-remove-indentation body))))
+	       (org-babel--normalize-body datum)
 	       (apply #'org-babel-merge-params
 		      (if inline org-babel-default-inline-header-args
 			org-babel-default-header-args)

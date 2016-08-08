@@ -4530,15 +4530,8 @@ reference on that line (string)."
 			 (org-element-property :preserve-indent element))
 		     value
 		   (org-remove-indentation value)))))
-	 ;; Get format used for references.
-	 (label-fmt (regexp-quote
-		     (or (org-element-property :label-fmt element)
-			 org-coderef-label-format)))
 	 ;; Build a regexp matching a loc with a reference.
-	 (with-ref-re
-	  (format "^.*?\\S-.*?\\([ \t]*\\(%s\\)[ \t]*\\)$"
-		  (replace-regexp-in-string
-		   "%s" "\\([-a-zA-Z0-9_ ]+\\)" label-fmt nil t))))
+	 (ref-re (org-src-coderef-regexp element)))
     ;; Return value.
     (cons
      ;; Code with references removed.
@@ -4546,7 +4539,7 @@ reference on that line (string)."
       (mapconcat
        (lambda (loc)
 	 (cl-incf line)
-	 (if (not (string-match with-ref-re loc)) loc
+	 (if (not (string-match ref-re loc)) loc
 	   ;; Ref line: remove ref, and signal its position in REFS.
 	   (push (cons line (match-string 3 loc)) refs)
 	   (replace-match "" nil nil loc 1)))

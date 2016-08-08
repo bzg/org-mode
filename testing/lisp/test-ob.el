@@ -1734,6 +1734,13 @@ abc
        (execute-kbd-macro  "\M-xorg-babel-goto-named-src-block\n\n")
        (should  (= 14 (point)))))
 
+(ert-deftest test-ob/evaluate-body-with-coderefs ()
+  (should
+   (= 2
+      (org-test-with-temp-text
+	  "#+begin_src emacs-lisp -l \"#(ref:%s)\"\n2 #(ref:foo)\n#+end_src"
+	(org-babel-execute-src-block)))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here

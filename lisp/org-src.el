@@ -715,6 +715,20 @@ If BUFFER is non-nil, test it instead."
 	      org-src-window-setup)
      (pop-to-buffer-same-window buffer))))
 
+(defun org-src-coderef-regexp (element)
+  "Return regexp matching coderef for ELEMENT.
+
+ELEMENT has a `src-block' or `example-block' type.
+
+Match group 1 contains the full coderef string with surrounding
+white spaces.  Match group 2 contains the same string without any
+surrounding space.  Match group 3 contains the label."
+  (let ((label (regexp-quote (or (org-element-property :label-fmt element)
+				 org-coderef-label-format))))
+    (format "\\S-\\([ \t]*\\(%s\\)[ \t]*\\)$"
+	    (replace-regexp-in-string
+	     "%s" "\\([-a-zA-Z0-9_ ]+\\)" label nil t))))
+
 (defun org-edit-footnote-reference ()
   "Edit definition of footnote reference at point."
   (interactive)
