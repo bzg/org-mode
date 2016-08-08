@@ -78,8 +78,9 @@
 
 (require 'org)
 
-(org-add-link-type "elisp-symbol" 'org-elisp-symbol-open)
-(add-hook 'org-store-link-functions 'org-elisp-symbol-store-link)
+(org-link-set-parameters "elisp-symbol"
+			 :follow #'org-elisp-symbol-open
+			 :store #'org-elisp-symbol-store-link)
 
 (defun org-elisp-symbol-open (path)
   "Visit the emacs-lisp elisp-symbol at PATH."
