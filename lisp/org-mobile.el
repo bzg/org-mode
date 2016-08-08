@@ -227,8 +227,7 @@ by the mobile device, this hook should be used to copy the emptied
 capture file `mobileorg.org' back to the WebDAV directory, for example
 using `rsync' or `scp'.")
 
-(defconst org-mobile-action-alist
-  '(("edit" . #'org-mobile-edit))
+(defconst org-mobile-action-alist '(("edit" . org-mobile-edit))
   "Alist with flags and actions for mobile sync.
 When flagging an entry, MobileOrg will create entries that look like
 
