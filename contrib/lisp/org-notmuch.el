@@ -65,8 +65,9 @@ Should accept a notmuch search string as the sole argument."
 
 
 ;; Install the link type
-(org-add-link-type "notmuch" 'org-notmuch-open)
-(add-hook 'org-store-link-functions 'org-notmuch-store-link)
+(org-link-set-parameters "notmuch"
+			 :follow #'org-notmuch-open
+			 :store #'org-notmuch-store-link)
 
 (defun org-notmuch-store-link ()
   "Store a link to a notmuch search or message."
@@ -98,8 +99,9 @@ Can link to more than one message, if so all matching messages are shown."
 
 
 
-(org-add-link-type "notmuch-search" 'org-notmuch-search-open)
-(add-hook 'org-store-link-functions 'org-notmuch-search-store-link)
+(org-link-set-parameters "notmuch-search"
+			 :follow #'org-notmuch-search-open
+			 :store #'org-notmuch-search-store-link)
 
 (defun org-notmuch-search-store-link ()
   "Store a link to a notmuch search or message."
