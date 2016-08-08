@@ -47,8 +47,9 @@ Otherwise prompt the user for the right bookmark to use."
   :group 'org-bookmark
   :type 'boolean)
 
-(org-add-link-type "bookmark" 'org-bookmark-open)
-(add-hook 'org-store-link-functions 'org-bookmark-store-link)
+(org-link-set-parameters "bookmark"
+			 :follow #'org-bookmark-open
+			 :store #'org-bookmark-store-link)
 
 (defun org-bookmark-open (bookmark)
   "Visit the bookmark BOOKMARK."
