@@ -69,7 +69,7 @@
 
 ;; org link functions
 ;; bare git link
-(org-add-link-type "gitbare" 'org-gitbare-open)
+(org-link-set-parameters "gitbare" :follow #'org-gitbare-open)
 
 (defun org-gitbare-open (str)
   (let* ((strlist (org-git-split-string str))
@@ -92,7 +92,7 @@
     (setq buffer-read-only t)))
 
 ;; user friendly link
-(org-add-link-type "git" 'org-git-open)
+(org-link-set-parameters "git" :follow #'org-git-open :store #'org-git-store-link)
 
 (defun org-git-open (str)
   (let* ((strlist (org-git-split-string str))
@@ -189,8 +189,6 @@ than two double colons, str2 and/or str3 may be set the empty string."
 	(org-store-link-props
 	 :type "git"
 	 :link (org-git-create-git-link file line))))))
-
-(add-hook 'org-store-link-functions 'org-git-store-link)
 
 (defun org-git-insert-link-interactively (file searchstring &optional description)
   (interactive "FFile: \nsSearch string: \nsDescription: ")
