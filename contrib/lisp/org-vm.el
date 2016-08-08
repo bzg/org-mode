@@ -55,9 +55,8 @@
 (defvar vm-folder-directory)
 
 ;; Install the link type
-(org-add-link-type "vm" 'org-vm-open)
-(org-add-link-type "vm-imap" 'org-vm-imap-open)
-(add-hook 'org-store-link-functions 'org-vm-store-link)
+(org-link-set-parameters "vm" :follow #'org-vm-open :store #'org-vm-store-link)
+(org-link-set-parameters "vm-imap" :follow #'org-vm-imap-open)
 
 ;; Implementation
 (defun org-vm-store-link ()
