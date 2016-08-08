@@ -822,18 +822,19 @@ If BEG and END are given, only do this in that region."
 	       (id-pos (condition-case msg
 			   (org-mobile-locate-entry (match-string 4))
 			 (error (nth 1 msg))))
-	       (bos (point-at-bol))
+	       (bos (line-beginning-position))
 	       (eos (save-excursion (org-end-of-subtree t t)))
 	       (cmd (if (equal action "")
-			(lambda (_data _old _new)
-			  (cl-incf cnt-flag)
-			  (org-toggle-tag "FLAGGED" 'on)
-			  (when note
-			    (org-entry-put nil "THEFLAGGINGNOTE" note)))
+			(let ((note (buffer-substring-no-properties
+				     (line-beginning-position 2) eos)))
+			  (lambda (_data _old _new)
+			    (cl-incf cnt-flag)
+			    (org-toggle-tag "FLAGGED" 'on)
+			    (org-entry-put
+			     nil "THEFLAGGINGNOTE"
+			     (replace-regexp-in-string "\n" "\\\\n" note))))
 		      (cl-incf cnt-edit)
 		      (cdr (assoc action org-mobile-action-alist))))
-	       (note (and (equal action "")
-			  (buffer-substring (1+ (point-at-eol)) eos)))
 	       ;; Do not take notes interactively.
 	       (org-inhibit-logging 'note)
 	       old new)
@@ -867,11 +868,6 @@ If BEG and END are given, only do this in that region."
 				(point)))))
 	  (setq old (org-string-nw-p old))
 	  (setq new (org-string-nw-p new))
-	  (if (and note (> (length note) 0))
-	      ;; Make Note into a single line, to fit into a property
-	      (setq note (mapconcat 'identity
-				    (org-split-string (org-trim note) "\n")
-				    "\\n")))
 	  (unless (equal data "body")
 	    (setq new (and new (org-trim new)))
 	    (setq old (and old (org-trim old))))
@@ -882,7 +878,8 @@ If BEG and END are given, only do this in that region."
 	  (condition-case msg
 	      (org-with-point-at id-pos
 		(funcall cmd data old new)
-		(unless (member data '("delete" "archive" "archive-sibling" "addheading"))
+		(unless (member data '("delete" "archive" "archive-sibling"
+				       "addheading"))
 		  (when (member "FLAGGED" (org-get-tags))
 		    (add-to-list 'org-mobile-last-flagged-files
 				 (buffer-file-name)))))
@@ -903,8 +900,8 @@ If BEG and END are given, only do this in that region."
     (save-buffer)
     (move-marker marker nil)
     (move-marker end nil)
-    (message "%d new, %d edits, %d flags, %d errors" cnt-new
-	     cnt-edit cnt-flag cnt-error)
+    (message "%d new, %d edits, %d flags, %d errors"
+	     cnt-new cnt-edit cnt-flag cnt-error)
     (sit-for 1)))
 
 (defun org-mobile-timestamp-buffer (buf)
