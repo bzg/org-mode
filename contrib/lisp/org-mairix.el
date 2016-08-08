@@ -82,8 +82,9 @@ correctly, you should not need to change this.
 
 ;;; The hooks to integrate mairix into org
 
-(org-add-link-type "mairix" 'org-mairix-open)
-(add-hook 'org-store-link-functions 'org-mairix-store-gnus-link)
+(org-link-set-parameters "mairix"
+			 :follow #'org-mairix-open
+			 :store #'org-mairix-store-gnus-link)
 
 ;;; Generic org-mairix functions
 
