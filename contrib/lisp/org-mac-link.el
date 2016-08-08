@@ -442,8 +442,7 @@ The links are of the form <link>::split::<name>."
 
 
 ;; Handle links from together.app
-
-(org-add-link-type "x-together-item" 'org-mac-together-item-open)
+(org-link-set-parameters "x-together-item" :follow #'org-mac-together-item-open)
 
 (defun org-mac-together-item-open (uid)
   "Open UID, which is a reference to an item in Together."
@@ -498,8 +497,7 @@ The links are of the form <link>::split::<name>."
 
 
 ;; Handle links from AddressBook.app
-
-(org-add-link-type "addressbook" 'org-mac-addressbook-item-open)
+(org-link-set-parameters "addressbook" :follow #'org-mac-addressbook-item-open)
 
 (defun org-mac-addressbook-item-open (uid)
   "Open UID, which is a reference to an item in the addressbook."
@@ -532,7 +530,7 @@ The links are of the form <link>::split::<name>."
 ;;
 ;; Original code & idea by Christopher Suckling (org-mac-protocol)
 
-(org-add-link-type "skim" 'org-mac-skim-open)
+(org-link-set-parameters "skim" :follow #'org-mac-skim-open)
 
 (defun org-mac-skim-open (uri)
   "Visit page of pdf in Skim"
@@ -589,7 +587,7 @@ The links are of the form <link>::split::<name>."
 ;;
 ;; The URI format is path_to_pdf_file::page_number
 
-(org-add-link-type "acrobat" 'org-mac-acrobat-open)
+(org-link-set-parameters "acrobat" :follow #'org-mac-acrobat-open)
 
 (defun org-mac-acrobat-open (uri)
   "Visit page of pdf in Acrobat"
@@ -637,7 +635,7 @@ The links are of the form <link>::split::<name>."
 
 ;; Handle links from Microsoft Outlook.app
 
-(org-add-link-type "mac-outlook" 'org-mac-outlook-message-open)
+(org-link-set-parameters "mac-outlook" :follow #'org-mac-outlook-message-open)
 
 (defun org-mac-outlook-message-open (msgid)
   "Open a message in Outlook"
@@ -746,7 +744,7 @@ after heading."
 
 ;; Handle links from Evernote.app
 
-(org-add-link-type "mac-evernote" 'org-mac-evernote-note-open)
+(org-link-set-parameters "mac-evernote" :follow #'org-mac-evernote-note-open)
 
 (defun org-mac-evernote-note-open (noteid)
   "Open a note in Evernote"
@@ -796,7 +794,7 @@ note(s) in Evernote.app and make a link out of it/them."
 
 ;; Handle links from DEVONthink Pro Office.app
 
-(org-add-link-type "x-devonthink-item" 'org-devonthink-item-open)
+(org-link-set-parameters "x-devonthink-item" :follow #'org-devonthink-item-open)
 
 (defun org-devonthink-item-open (uid)
   "Open UID, which is a reference to an item in DEVONthink Pro Office."
@@ -843,7 +841,7 @@ selected items in DEVONthink Pro Office and make link(s) out of it/them."
 
 ;; Handle links from Mail.app
 
-(org-add-link-type "message" 'org-mac-message-open)
+(org-link-set-parameters "message" :follow #'org-mac-message-open)
 
 (defun org-mac-message-open (message-id)
   "Visit the message with MESSAGE-ID.
