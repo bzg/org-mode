@@ -109,8 +109,7 @@ googlegroups otherwise."
   "List of folder indicators.  See Wanderlust manual, section 3.")
 
 ;; Install the link type
-(org-add-link-type "wl" 'org-wl-open)
-(add-hook 'org-store-link-functions 'org-wl-store-link)
+(org-link-set-parameters "wl" :follow #'org-wl-open :store #'org-wl-store-link)
 
 ;; Implementation
 
