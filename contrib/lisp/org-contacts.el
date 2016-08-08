@@ -1107,8 +1107,7 @@ link string and return the pure link target."
 
 ;; Add the link type supported by org-contacts-strip-link
 ;; so everything is in order for its use in Org files
-(org-add-link-type "tel")
-
+(org-link-set-parameters "tel")
 
 (defun org-contacts-split-property (string &optional separators omit-nulls)
   "Custom version of `split-string'.
