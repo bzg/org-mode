@@ -50,7 +50,7 @@
 ;; Store Org-link in eww-mode buffer
 (org-link-set-parameters "eww" :follow #'eww :store #'org-eww-store-link)
 (defun org-eww-store-link ()
-  "Store a link to the url of a eww buffer."
+  "Store a link to the url of a Eww buffer."
   (when (eq major-mode 'eww-mode)
     (org-store-link-props
      :type "eww"
@@ -66,14 +66,14 @@
 
 ;; Some auxiliary functions concerning links in eww buffers
 (defun org-eww-goto-next-url-property-change ()
-  "Move cursor to the start of next link if exists.  Else no
-move.  Return point."
+  "Move to the start of next link if exists.
+Otherwise point is not moved.  Return point."
   (goto-char
    (or (next-single-property-change (point) 'shr-url)
        (point))))
 
 (defun org-eww-has-further-url-property-change-p ()
-  "Return t if there is a next url property change else nil."
+  "Non-nil if there is a next url property change."
   (save-excursion
     (not (eq (point) (org-eww-goto-next-url-property-change)))))
 
@@ -86,10 +86,10 @@ move.  Return point."
   "Copy current buffer content or active region with `org-mode' style links.
 This will encode `link-title' and `link-location' with
 `org-make-link-string', and insert the transformed test into the kill ring,
-so that it can be yanked into an Org-mode buffer with links working correctly.
+so that it can be yanked into an Org mode buffer with links working correctly.
 
 Further lines starting with a star get quoted with a comma to keep
-the structure of the org file."
+the structure of the Org file."
   (interactive)
   (let* ((regionp (org-region-active-p))
          (transform-start (point-min))
