@@ -566,7 +566,7 @@ object instead.
 Return nil if point is not on a source block.  Otherwise, return
 a list with the following pattern:
 
-  \(language body header-arguments-alist switches name block-head)"
+  (language body header-arguments-alist switches name block-head)"
   (let* ((datum (or datum (org-element-context)))
 	 (type (org-element-type datum))
 	 (inline (eq type 'inline-src-block)))
@@ -603,14 +603,11 @@ a list with the following pattern:
 		       ;; If DATUM is provided, make sure we get node
 		       ;; properties applicable to its location within
 		       ;; the document.
-		       (org-with-wide-buffer
-			(when datum
-			  (goto-char (org-element-property :begin datum)))
-			(org-babel-params-from-properties lang))
+		       (org-with-point-at (org-element-property :begin datum)
+			 (org-babel-params-from-properties lang))
 		       (mapcar #'org-babel-parse-header-arguments
-			       (cons
-				(org-element-property :parameters datum)
-				(org-element-property :header datum)))))
+			       (cons (org-element-property :parameters datum)
+				     (org-element-property :header datum)))))
 	       (or (org-element-property :switches datum) "")
 	       name
 	       (org-element-property (if inline :begin :post-affiliated)
