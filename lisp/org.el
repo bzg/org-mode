@@ -13011,7 +13011,7 @@ statistics everywhere."
 	 (box-re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
 	 level ltoggle l1 new ndel
 	 (cnt-all 0) (cnt-done 0) is-percent kwd
-	 checkbox-beg ov ovs ove cookie-present)
+	 checkbox-beg cookie-present)
     (catch 'exit
       (save-excursion
 	(beginning-of-line 1)
@@ -13078,15 +13078,10 @@ statistics everywhere."
 					      (max 1 cnt-all)))
 	    	    (format "[%d/%d]" cnt-done cnt-all))
 	    	  ndel (- (match-end 0) checkbox-beg))
-	    ;; handle overlays when updating cookie from column view
-	    (when (setq ov (car (overlays-at checkbox-beg)))
-	      (setq ovs (overlay-start ov) ove (overlay-end ov))
-	      (delete-overlay ov))
 	    (goto-char checkbox-beg)
 	    (insert new)
 	    (delete-region (point) (+ (point) ndel))
-	    (when org-auto-align-tags (org-fix-tags-on-the-fly))
-	    (when ov (move-overlay ov ovs ove)))
+	    (when org-auto-align-tags (org-fix-tags-on-the-fly)))
 	  (when cookie-present
 	    (run-hook-with-args 'org-after-todo-statistics-hook
 				cnt-done (- cnt-all cnt-done))))))
