@@ -223,7 +223,7 @@ See `org-link-parameters' for documentation on the other parameters."
   (org-link-set-parameters type :follow follow :export export)
   (message "Created %s link." type))
 
-(make-obsolete 'org-add-link-type "use `org-link-add' instead." "Org 9.0")
+(make-obsolete 'org-add-link-type "use `org-link-set-parameters' instead." "Org 9.0")
 
 ;;;; Obsolete link types
 
