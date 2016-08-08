@@ -148,8 +148,7 @@ with \"t\" key."
 (defvar mew-summary-goto-line-then-display)
 
 ;; Install the link type
-(org-add-link-type "mew" 'org-mew-open)
-(add-hook 'org-store-link-functions 'org-mew-store-link)
+(org-link-set-parameters "mew" :follow #'org-mew-open :store #'org-mew-store-link)
 
 ;; Implementation
 (defun org-mew-store-link ()
