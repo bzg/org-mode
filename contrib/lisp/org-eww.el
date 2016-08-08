@@ -61,7 +61,7 @@
      :description (if (< emacs-major-version 25)
 		      (or eww-current-title eww-current-url)
 		    (or (plist-get eww-data :title)
-			  (eww-current-url))))))
+			(eww-current-url))))))
 
 
 ;; Some auxiliary functions concerning links in eww buffers
@@ -101,29 +101,29 @@ the structure of the Org file."
       (setq transform-start (region-beginning))
       (setq transform-end (region-end))
       ;; Deactivate mark if current mark is activate.
-      (if (fboundp 'deactivate-mark) (deactivate-mark)))
+      (when (fboundp 'deactivate-mark) (deactivate-mark)))
     (message "Transforming links...")
     (save-excursion
       (goto-char transform-start)
-      (while (and (not out-bound)                 ; still inside region to copy
+      (while (and (not out-bound)	; still inside region to copy
                   (org-eww-has-further-url-property-change-p)) ; there is a next link
-        ;; store current point before jump next anchor
+        ;; Store current point before jump next anchor.
         (setq temp-position (point))
-        ;; move to next anchor when current point is not at anchor
+        ;; Move to next anchor when current point is not at anchor.
         (or (org-eww-url-below-point)
 	    (org-eww-goto-next-url-property-change))
 	(assert (org-eww-url-below-point) t
                 "program logic error: point must have an url below but it hasn't")
-	(if (<= (point) transform-end)  ; if point is inside transform bound
+	(if (<= (point) transform-end) ; if point is inside transform bound
 	    (progn
-	      ;; get content between two links.
-	      (if (< temp-position (point))
-		  (setq return-content (concat return-content
-					       (buffer-substring
-						temp-position (point)))))
-	      ;; get link location at current point.
+	      ;; Get content between two links.
+	      (when (< temp-position (point))
+		(setq return-content (concat return-content
+					     (buffer-substring
+					      temp-position (point)))))
+	      ;; Get link location at current point.
 	      (setq link-location (org-eww-url-below-point))
-	      ;; get link title at current point.
+	      ;; Get link title at current point.
 	      (setq link-title
 		    (buffer-substring
 		     (point)
@@ -132,23 +132,17 @@ the structure of the Org file."
               (setq return-content (concat return-content
                                            (org-make-link-string
                                             link-location link-title))))
-	  (goto-char temp-position)     ; reset point before jump next anchor
-	  (setq out-bound t)            ; for break out `while' loop
+	  (goto-char temp-position) ; reset point before jump next anchor
+	  (setq out-bound t)	    ; for break out `while' loop
 	  ))
-      ;; add the rest until end of the region to be copied
-      (if (< (point) transform-end)
-          (setq return-content
-                (concat return-content
-                        (buffer-substring (point) transform-end))))
-      ;; quote lines starting with *
-      (org-kill-new
-       (with-temp-buffer
-	 (insert return-content)
-	 (goto-char 0)
-	 (while (re-search-forward "^\*" nil t)
-	   (replace-match ",*"))
-	 (buffer-string)))
-      (message "Transforming links...done, use C-y to insert text into Org-mode file"))))
+      ;; Add the rest until end of the region to be copied.
+      (when (< (point) transform-end)
+	(setq return-content
+	      (concat return-content
+		      (buffer-substring (point) transform-end))))
+      ;; Quote lines starting with *.
+      (org-kill-new (replace-regexp-in-string "^\\*" ",*" return-content))
+      (message "Transforming links...done, use C-y to insert text into Org mode file"))))
 
 
 ;; Additional keys for eww-mode
@@ -161,9 +155,7 @@ the structure of the Org file."
            (keymapp eww-mode-map)) ; eww is already up.
   (org-eww-extend-eww-keymap))
 
-(add-hook
- 'eww-mode-hook
- (lambda () (org-eww-extend-eww-keymap)))
+(add-hook 'eww-mode-hook #'org-eww-extend-eww-keymap)
 
 
 (provide 'org-eww)
