@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011-2016 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 5.1.1
+;; Version: 5.1.2
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -86,7 +86,7 @@
 
 ;;; Change Log:
 
-;;   [2016-08-05 Fr] Version 5.1.1
+;;   [2016-08-05 Fr] Version 5.1.2
 ;;   - Offering help during query for subcommands
 ;;   - Removed org-index-default-keybindings
 ;;   - Renamed subcommand multi-occur to find-ref
@@ -168,7 +168,7 @@
 (require 'widget)
 
 ;; Version of this package
-(defvar org-index-version "5.1.1" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
+(defvar org-index-version "5.1.2" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
 
 ;; customizable options
 (defgroup org-index nil
@@ -354,7 +354,7 @@ for its index table.
 To start building up your index, use subcommands 'add', 'ref' and
 'yank' to create entries and use 'occur' to find them.
 
-This is version 5.1.1 of org-index.el.
+This is version 5.1.2 of org-index.el.
 
 
 The function `org-index' is the only interactive function of this
@@ -828,6 +828,9 @@ interactive calls."
             (org-index--create-index t)))
 
 
+       ((not command) (setq message-text "No command given"))
+
+       
        (t (error "Unknown subcommand '%s'" command)))
 
 
@@ -852,21 +855,18 @@ interactive calls."
 Can be bound in global keyboard map as central entry point.
 Optional argument ARG is passed on."
   (interactive "P")
-
-  (let ((continue t)
-        char command)
-    (while continue
-      (if (sit-for 1)
-          (message "org-index (? for detailed prompt) -"))
-      (setq char (read-key-sequence nil))
-      (if (string= char " ") (setq char "?"))
-      (setq command (cdr (assoc char (org-index--get-shortcut-chars))))
-      (if command
-          (progn
-            (org-index command nil arg)
-            (setq continue nil))
-        (message "Char '%s' does not specify a subcommand, type '?' to see list." command)
-        (sit-for 2)))))
+  (let (char command)
+    (if (sit-for 1)
+        (message "org-index (? for detailed prompt) -"))
+    (setq char (key-description (read-key-sequence nil)))
+    (if (string= char "C-g") (keyboard-quit))
+    (if (string= char "SPC") (setq char "?"))
+    (setq command (cdr (assoc char (org-index--get-shortcut-chars))))
+    (unless command
+      (message "No subcommand for '%s'; switching to detailed prompt" char)
+      (sit-for 1)
+      (setq command 'short-help))
+    (org-index command nil arg)))
 
 
 (defun org-index-new-line (&rest keys-values)
@@ -907,12 +907,13 @@ Optional argument WITH-SHORT-HELP displays help screen upfront."
     (add-hook 'minibuffer-exit-hook 'org-index--minibuffer-exit-function)
     (unwind-protect
         (setq command
-              (intern (completing-read
-                       (concat
-                        "Please choose"
-                        (if org-index--display-short-help "" " (? for short help)")
-                        ": ")
-                       (mapcar 'symbol-name org-index--commands) nil t)))
+              (intern
+               (completing-read
+                (concat
+                 "Please choose"
+                 (if org-index--display-short-help "" " (? for short help)")
+                 ": ")
+                (mapcar 'symbol-name org-index--commands) nil t)))
       (remove-hook 'minibuffer-setup-hook 'org-index--minibuffer-setup-function)
       (remove-hook 'minibuffer-exit-hook 'org-index--minibuffer-exit-function)
       (when org-index--short-help-displayed
@@ -1247,12 +1248,12 @@ Argument COLUMN and VALUE specify line to get."
     (let (char prompt search-ref search-id search-fingerprint)
     
       ;; start with short prompt but give more help on next iteration
-      (setq prompt "Please specify, where to go in index (0-9.,space,backspace,return or ? for help): ")
+      (setq prompt "Please specify, where to go in index (0-9,.,space,backspace,return or ? for short help) - ")
     
       ;; read one character
       (while (not (memq char (append (number-sequence ?0 ?9) (list ?\d ?\b ?\r ?\j ?\s ?.))))
         (setq char (read-char prompt))
-        (setq prompt "Go to index table and specific position. Digits specify a reference number to got to, <space> goes to top of index, <backspace> or <delete> to last line created and <return> or `.' to index line of current node. Please choose: "))
+        (setq prompt "Go to specific position in index table. Digits specify a reference number, <space> goes to top of index, <backspace> or <delete> to last line created and <return> or `.' to index line of current node. Please choose - "))
     
       (if (memq char (number-sequence ?0 ?9))
           ;; read rest of digits
@@ -2486,7 +2487,7 @@ If OTHER in separate window."
   "Perform command occur."
   (let ((word "") ; last word to search for growing and shrinking on keystrokes
         (prompt "Search for: ")
-        (these-commands " Note, that these commands of org-index, if invoked from the occur buffer, update it accordingly: edit, kill.")
+        (these-commands " NOTE: If you invoke the org-index subcommands edit or kill from within the occur buffer, the index is updated accordingly.")
         (lines-wanted (window-body-height))
         (lines-found 0)                      ; number of lines found
         words                                ; list words that should match
@@ -2538,7 +2539,7 @@ If OTHER in separate window."
     (setq help-text (cons
                      (concat
                       (propertize "Incremental occur" 'face 'org-todo)
-                      (propertize  "; `?' toggles help and headlines.\n" 'face 'org-agenda-dimmed-todo-face))
+                      (propertize  "; ? toggles help and headlines.\n" 'face 'org-agenda-dimmed-todo-face))
                      (concat
                       (propertize
                        (org-index--wrap
@@ -2733,7 +2734,7 @@ If OTHER in separate window."
       (setq org-index--occur-help-text
             (cons
              (org-index--wrap
-              (propertize "Search is done;    `?' toggles help and headlines.\n" 'face 'org-agenda-dimmed-todo-face))
+              (propertize "Search is done;    ? toggles help and headlines.\n" 'face 'org-agenda-dimmed-todo-face))
              (concat
               (org-index--wrap
                (propertize
@@ -2743,7 +2744,7 @@ If OTHER in separate window."
                              " Showing all %d matches for "
                            " Showing one window of matches for ")
                          "\"" search-text
-                         "\". <return> jumps to heading, <tab> jumps to heading in other window, <S-return> jumps to matching line in index, <space> increments count." these-commands "\n")
+                         "\". <return> jumps to heading, <tab> jumps to heading in other window, <S-return> jumps to matching line in index, <space> increments count.\n" these-commands "\n")
                  (length all-lines))
                 'face 'org-agenda-dimmed-todo-face))
               org-index--headings)))
