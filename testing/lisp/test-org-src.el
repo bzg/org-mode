@@ -34,7 +34,7 @@
 #+end_src
 "
     (let ((org-edit-src-content-indentation 2)
-	  (org-src-preserve-indentation nil))
+          (org-src-preserve-indentation nil))
       (org-edit-special)
       (insert "blah")
       (org-edit-src-exit)
@@ -66,7 +66,7 @@
 #+end_src
 "
     (let ((org-edit-src-content-indentation 0)
-	  (org-src-preserve-indentation nil))
+          (org-src-preserve-indentation nil))
       (org-edit-special)
       (insert "blah")
       (org-edit-src-exit)
@@ -87,7 +87,7 @@ blah
 #+end_src
 "
     (let ((org-edit-src-content-indentation 2)
-	  (org-src-preserve-indentation nil))
+          (org-src-preserve-indentation nil))
       (goto-line 2)
       (org-edit-special)
       (insert "blah")
@@ -104,34 +104,34 @@ blah
   (should
    (equal "
 #+begin_src emacs-lisp
-  This is a tab: 	.
+  This is a tab:\t.
 #+end_src"
-	  (org-test-with-temp-text
-	      "
+          (org-test-with-temp-text
+              "
 #+begin_src emacs-lisp
-<point>This is a tab: 	.
+<point>This is a tab:\t.
 #+end_src"
-	    (let ((org-edit-src-content-indentation 2)
-		  (org-src-preserve-indentation nil))
-	      (org-edit-special)
-	      (org-edit-src-exit)
-	      (buffer-string)))))
+            (let ((org-edit-src-content-indentation 2)
+                  (org-src-preserve-indentation nil))
+              (org-edit-special)
+              (org-edit-src-exit)
+              (buffer-string)))))
   ;; With `org-src-preserve-indentation' set to t.
   (should
    (equal "
 #+begin_src emacs-lisp
-This is a tab: 	.
+This is a tab:\t.
 #+end_src"
-	  (org-test-with-temp-text
-	      "
+          (org-test-with-temp-text
+              "
 #+begin_src emacs-lisp
-<point>This is a tab: 	.
+<point>This is a tab:\t.
 #+end_src"
-	    (let ((org-edit-src-content-indentation 2)
-		  (org-src-preserve-indentation t))
-	      (org-edit-special)
-	      (org-edit-src-exit)
-	      (buffer-string))))))
+            (let ((org-edit-src-content-indentation 2)
+                  (org-src-preserve-indentation t))
+              (org-edit-special)
+              (org-edit-src-exit)
+              (buffer-string))))))
 
 (provide 'test-org-src)
 ;;; test-org-src.el ends here
