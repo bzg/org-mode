@@ -645,15 +645,6 @@ See also `org-src-mode-hook'."
 
 (add-hook 'org-src-mode-hook #'org-src-babel-configure-edit-buffer)
 
-(defmacro org-src-do-at-code-block (&rest body)
-  "Execute a command from an edit buffer in the Org mode buffer."
-  `(let ((beg-marker org-src--beg-marker))
-     (when beg-marker
-       (with-current-buffer (marker-buffer beg-marker)
-	 (goto-char beg-marker)
-	 ,@body))))
-(def-edebug-spec org-src-do-at-code-block (body))
-
 (defun org-src-do-key-sequence-at-code-block (&optional key)
   "Execute key sequence at code block in the source Org buffer.
 The command bound to KEY in the Org-babel key map is executed
@@ -681,6 +672,15 @@ Org-babel commands."
 
 
 ;;; Public functions
+
+(defmacro org-src-do-at-code-block (&rest body)
+  "Execute BODY from an edit buffer in the Org mode buffer."
+  (declare (debug (body)))
+  `(let ((beg-marker org-src--beg-marker))
+     (when beg-marker
+       (with-current-buffer (marker-buffer beg-marker)
+	 (goto-char beg-marker)
+	 ,@body))))
 
 (defun org-src-edit-buffer-p (&optional buffer)
   "Non-nil when current buffer is a source editing buffer.
