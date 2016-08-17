@@ -237,5 +237,34 @@ This is a tab:\t.
 	      (setq-local org-coderef-label-format "foo")
               (org-src-coderef-format element))))))
 
+(ert-deftest test-org-src/coderef-regexp ()
+  "Test `org-src-coderef-regexp' specifications."
+  ;; Regular test.
+  (should
+   (string-match-p (org-src-coderef-regexp "; ref:%s")
+		   "#+BEGIN_SRC emacs-lisp\n0; ref:label\n#+END_SRC"))
+  ;; Ignore white space around the coderef.
+  (should
+   (string-match-p (org-src-coderef-regexp "; ref:%s")
+		   "#+BEGIN_SRC emacs-lisp\n0 ; ref:label\n#+END_SRC"))
+  (should
+   (string-match-p (org-src-coderef-regexp "; ref:%s")
+		   "#+BEGIN_SRC emacs-lisp\n0 ; ref:label  \n#+END_SRC"))
+  ;; Only match regexp at the end of the line.
+  (should-not
+   (string-match-p (org-src-coderef-regexp "; ref:%s")
+		   "#+BEGIN_SRC emacs-lisp\n0; ref:label (+ 1 2)\n#+END_SRC"))
+  ;; Do not match an empty label.
+  (should-not
+   (string-match-p (org-src-coderef-regexp "; ref:%s")
+		   "#+BEGIN_SRC emacs-lisp\n0; ref:\n#+END_SRC"))
+  ;; When optional argument LABEL is provided, match given label only.
+  (should
+   (string-match-p (org-src-coderef-regexp "; ref:%s" "label")
+		   "#+BEGIN_SRC emacs-lisp\n0; ref:label\n#+END_SRC"))
+  (should-not
+   (string-match-p (org-src-coderef-regexp "; ref:%s" "label2")
+		   "#+BEGIN_SRC emacs-lisp\n0; ref:label\n#+END_SRC")))
+
 (provide 'test-org-src)
 ;;; test-org-src.el ends here

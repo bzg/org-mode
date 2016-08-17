@@ -744,7 +744,7 @@ A coderef format regexp can only match at the end of a line."
   (format "\\S-\\([ \t]*\\(%s\\)[ \t]*\\)$"
 	  (replace-regexp-in-string
 	   "%s"
-	   (if label (regexp-quote label) "\\([-a-zA-Z0-9_ ]+\\)")
+	   (if label (regexp-quote label) "\\([-a-zA-Z0-9_][-a-zA-Z0-9_ ]*\\)")
 	   (regexp-quote fmt)
 	   nil t)))
 
