@@ -133,5 +133,109 @@ This is a tab:\t.
               (org-edit-src-exit)
               (buffer-string))))))
 
+(ert-deftest test-org-src/coderef-format ()
+  "Test `org-src-coderef-format' specifications."
+  ;; Regular tests in a src block, an example block and an edit
+  ;; buffer.
+  (should
+   (equal "foo"
+          (let ((org-coderef-label-format "foo"))
+            (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n0\n#+END_SRC"
+              (org-src-coderef-format)))))
+  (should
+   (equal "foo"
+          (let ((org-coderef-label-format "foo"))
+            (org-test-with-temp-text "#+BEGIN_EXAMPLE\n0\n#+END_EXAMPLE"
+              (org-src-coderef-format)))))
+  (should
+   (equal "foo"
+          (let ((org-coderef-label-format "foo") result)
+            (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n0\n#+END_SRC"
+              (org-edit-special)
+              (setq result (org-src-coderef-format))
+              (org-edit-src-exit)
+              result))))
+  ;; When a local variable in the source buffer is available, use it.
+  (should
+   (equal "bar"
+          (let ((org-coderef-label-format "foo"))
+            (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n0\n#+END_SRC"
+              (setq-local org-coderef-label-format "bar")
+              (org-src-coderef-format)))))
+  (should
+   (equal "bar"
+          (let ((org-coderef-label-format "foo") result)
+            (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n0\n#+END_SRC"
+              (setq-local org-coderef-label-format "bar")
+              (org-edit-special)
+              (setq result (org-src-coderef-format))
+              (org-edit-src-exit)
+              result))))
+  ;; Use provided local format even if in an edit buffer.
+  (should
+   (equal "bar"
+          (let ((org-coderef-label-format "foo"))
+            (org-test-with-temp-text
+		"#+BEGIN_SRC emacs-lisp -l \"bar\"\n0\n#+END_SRC"
+              (org-src-coderef-format)))))
+  (should
+   (equal "bar"
+          (let ((org-coderef-label-format "foo") result)
+            (org-test-with-temp-text
+                "#+BEGIN_SRC emacs-lisp -l \"bar\"\n0\n#+END_SRC"
+              (org-edit-special)
+              (setq result (org-src-coderef-format))
+              (org-edit-src-exit)
+              result))))
+  ;; Local format has precedence over local variables.
+  (should
+   (equal "bar"
+          (let ((org-coderef-label-format "foo"))
+            (org-test-with-temp-text
+		"#+BEGIN_SRC emacs-lisp -l \"bar\"\n0\n#+END_SRC"
+	      (setq-local org-coderef-label-format "foo")
+              (org-src-coderef-format)))))
+  (should
+   (equal "bar"
+          (let ((org-coderef-label-format "foo") result)
+            (org-test-with-temp-text
+                "#+BEGIN_SRC emacs-lisp -l \"bar\"\n0\n#+END_SRC"
+	      (setq-local org-coderef-label-format "foo")
+              (org-edit-special)
+              (setq result (org-src-coderef-format))
+              (org-edit-src-exit)
+              result))))
+  ;; When optional argument provides a coderef format string, use it.
+  (should
+   (equal "bar"
+	  (let ((org-coderef-label-format "foo")
+		(element (org-element-create 'src-block '(:label-fmt "bar"))))
+	    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n0\n#+END_SRC"
+	      (org-src-coderef-format element)))))
+  (should
+   (equal "baz"
+          (let ((org-coderef-label-format "foo")
+		(element (org-element-create 'src-block '(:label-fmt "baz"))))
+            (org-test-with-temp-text
+		"#+BEGIN_SRC emacs-lisp -l \"bar\"\n0\n#+END_SRC"
+	      (setq-local org-coderef-label-format "foo")
+              (org-src-coderef-format element)))))
+  ;; If it doesn't provide any label format string, fall back to
+  ;; regular checks.
+  (should
+   (equal "foo"
+	  (let ((org-coderef-label-format "foo")
+		(element (org-element-create 'src-block)))
+	    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n0\n#+END_SRC"
+	      (org-src-coderef-format element)))))
+  (should
+   (equal "bar"
+          (let ((org-coderef-label-format "foo")
+		(element (org-element-create 'src-block)))
+            (org-test-with-temp-text
+		"#+BEGIN_SRC emacs-lisp -l \"bar\"\n0\n#+END_SRC"
+	      (setq-local org-coderef-label-format "foo")
+              (org-src-coderef-format element))))))
+
 (provide 'test-org-src)
 ;;; test-org-src.el ends here

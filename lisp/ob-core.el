@@ -555,7 +555,8 @@ character and coderef labels when appropriate."
 	;; paragraph filling.  Treat them as a white space.
 	(replace-regexp-in-string "\n[ \t]*" " " body)
       (let ((body (replace-regexp-in-string
-		   (org-src-coderef-regexp datum) "" body nil nil 1)))
+		   (org-src-coderef-regexp (org-src-coderef-format datum)) ""
+		   body nil nil 1)))
 	(if (or org-src-preserve-indentation
 		(org-element-property :preserve-indent datum))
 	    body

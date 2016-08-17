@@ -79,8 +79,9 @@
 (declare-function org-publish "ox-publish" (project &optional force async))
 (declare-function org-publish-all "ox-publish" (&optional force async))
 (declare-function org-publish-current-file "ox-publish" (&optional force async))
-(declare-function org-publish-current-project "ox-publish"
-		  (&optional force async))
+(declare-function org-publish-current-project "ox-publish" (&optional force async))
+(declare-function org-src-coderef-format "org-src" (&optional element))
+(declare-function org-src-coderef-regexp "org-src" (fmt &optional label))
 
 (defvar org-publish-project-alist)
 (defvar org-table-number-fraction)
@@ -4531,7 +4532,7 @@ reference on that line (string)."
 		     value
 		   (org-remove-indentation value)))))
 	 ;; Build a regexp matching a loc with a reference.
-	 (ref-re (org-src-coderef-regexp element)))
+	 (ref-re (org-src-coderef-regexp (org-src-coderef-format element))))
     ;; Return value.
     (cons
      ;; Code with references removed.
