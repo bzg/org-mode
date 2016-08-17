@@ -9920,30 +9920,23 @@ active region."
 
        ;; Store a link from a source code buffer.
        ((org-src-edit-buffer-p)
-	(cond
-	 ((save-excursion
-	    (beginning-of-line)
-	    (looking-at (concat (format org-coderef-label-format "\\(.*?\\)")
-				"[ \t]*$")))
-	  (setq link (format "(%s)" (match-string-no-properties 1))))
-	 ((called-interactively-p 'any)
-	  (let (label)
-	    (while (or (not label)
-		       (org-with-wide-buffer
-			(goto-char (point-min))
-			(re-search-forward
-			 (regexp-quote (format org-coderef-label-format label))
-			 nil t)))
-	      (when label (message "Label exists already") (sit-for 2))
-	      (setq label (read-string "Code line label: " label)))
-	    (end-of-line)
-	    (setq link (format org-coderef-label-format label))
-	    (let ((gc (- 79 (length link))))
-	      (if (< (current-column) gc) (org-move-to-column gc t)
-		(insert " ")))
-	    (insert link)
-	    (setq link (concat "(" label ")") desc nil)))
-	 (t (setq link nil))))
+	(let ((coderef-format (org-src-coderef-format)))
+	  (cond ((save-excursion
+		   (beginning-of-line)
+		   (looking-at (org-src-coderef-regexp coderef-format)))
+		 (setq link (format "(%s)" (match-string-no-properties 3))))
+		((called-interactively-p 'any)
+		 (let ((label (read-string "Code line label: ")))
+		   (end-of-line)
+		   (setq link (format coderef-format label))
+		   (let ((gc (- 79 (length link))))
+		     (if (< (current-column) gc)
+			 (org-move-to-column gc t)
+		       (insert " ")))
+		   (insert link)
+		   (setq link (concat "(" label ")"))
+		   (setq desc nil)))
+		(t (setq link nil)))))
 
        ;; We are in the agenda, link to referenced location
        ((equal (bound-and-true-p org-agenda-buffer-name) (buffer-name))
