@@ -1871,15 +1871,13 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
 		 (goto-char (match-beginning 0))
 		 (put-text-property (point) (point-at-eol)
 				    (or propname :org-clock-minutes) time)
-		 (if headline-filter
-		     (save-excursion
-		       (save-match-data
-			 (while
-			     (> (funcall outline-level) 1)
-			   (outline-up-heading 1 t)
-			   (put-text-property
-			    (point) (point-at-eol)
-			    :org-clock-force-headline-inclusion t))))))
+		 (when headline-filter
+		   (save-excursion
+		     (save-match-data
+		       (while (org-up-heading-safe)
+			 (put-text-property
+			  (point) (line-end-position)
+			  :org-clock-force-headline-inclusion t))))))
 	       (setq t1 0)
 	       (loop for l from level to (1- lmax) do
 		     (aset ltimes l 0)))))))
