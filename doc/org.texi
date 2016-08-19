@@ -10324,8 +10324,8 @@ in Org syntax and convert them in place to the target language.
 * Texinfo export::              Exporting to Texinfo
 * iCalendar export::            Exporting to iCalendar
 * Other built-in back-ends::    Exporting to a man page
-* Export in foreign buffers::   Author tables and lists in Org syntax
 * Advanced configuration::      Fine-tuning the export output
+* Export in foreign buffers::   Author tables and lists in Org syntax
 @end menu
 
 @node The export dispatcher
@@ -13872,29 +13872,6 @@ keys in the export dispatcher (@pxref{The export dispatcher}).
 See the comment section of these files for more information on how to use
 them.
 
-@node Export in foreign buffers
-@section Export in foreign buffers
-
-Most built-in back-ends come with a command to convert the selected region
-into a selected format and replace this region by the exported output.  Here
-is a list of such conversion commands:
-
-@table @code
-@item org-html-convert-region-to-html
-Convert the selected region into HTML.
-@item org-latex-convert-region-to-latex
-Convert the selected region into @LaTeX{}.
-@item org-texinfo-convert-region-to-texinfo
-Convert the selected region into @code{Texinfo}.
-@item org-md-convert-region-to-md
-Convert the selected region into @code{MarkDown}.
-@end table
-
-This is particularly useful for converting tables and lists in foreign
-buffers.  E.g., in an HTML buffer, you can turn on @code{orgstruct-mode}, then
-use Org commands for editing a list, and finally select and convert the list
-with @code{M-x org-html-convert-region-to-html RET}.
-
 @node Advanced configuration
 @section Advanced configuration
 
@@ -14094,6 +14071,29 @@ back-end is calling the following from an Org buffer:
 
 It is obviously possible to write an interactive function for this, install
 it in the export dispatcher menu, and so on.
+
+@node Export in foreign buffers
+@section Export in foreign buffers
+
+Most built-in back-ends come with a command to convert the selected region
+into a selected format and replace this region by the exported output.  Here
+is a list of such conversion commands:
+
+@table @code
+@item org-html-convert-region-to-html
+Convert the selected region into HTML.
+@item org-latex-convert-region-to-latex
+Convert the selected region into @LaTeX{}.
+@item org-texinfo-convert-region-to-texinfo
+Convert the selected region into @code{Texinfo}.
+@item org-md-convert-region-to-md
+Convert the selected region into @code{MarkDown}.
+@end table
+
+This is particularly useful for converting tables and lists in foreign
+buffers.  E.g., in an HTML buffer, you can turn on @code{orgstruct-mode}, then
+use Org commands for editing a list, and finally select and convert the list
+with @code{M-x org-html-convert-region-to-html RET}.
 
 
 @node Publishing
