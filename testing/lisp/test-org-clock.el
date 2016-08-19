@@ -318,7 +318,23 @@ contents.  The clocktable doesn't appear in the buffer."
       (insert (org-test-clock-create-clock "-10y 15:00" "-10y 18:00"))
       (insert (org-test-clock-create-clock "-2d 15:00" "-2d 18:00"))
       (test-org-clock-clocktable-contents-at-point
-       ":block untilnow :indent nil")))))
+       ":block untilnow :indent nil"))))
+  ;; Test tag filtering.
+  (should
+   (equal
+    "| Headline     | Time   |      |
+|--------------+--------+------|
+| *Total time* | *2:00* |      |
+|--------------+--------+------|
+| H1           |        | 2:00 |
+"
+    (org-test-with-temp-text "** H1\n\n*** H2 :tag:\n\n*** H3\n<point>"
+      (insert (org-test-clock-create-clock ". 1:00" ". 2:00"))
+      (goto-line 4)
+      (insert (org-test-clock-create-clock ". 2:00" ". 4:00"))
+      (goto-line 2)
+      (test-org-clock-clocktable-contents-at-point
+       ":tags \"tag\" :indent nil")))))
 
 (provide 'test-org-clock)
 ;;; test-org-clock.el end here
