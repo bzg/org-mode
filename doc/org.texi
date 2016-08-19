@@ -557,7 +557,6 @@ Embedded @LaTeX{}
 Exporting
 
 * The export dispatcher::       The main exporter interface
-* Export back-ends::            Built-in export formats
 * Export settings::             Generic export settings
 * Table of contents::           The if and where of the table of contents
 * Include files::               Include additional files into a document
@@ -10266,25 +10265,50 @@ is normal.
 @chapter Exporting
 @cindex exporting
 
-The Org mode export facilities can be used to export Org documents or parts
-of Org documents to a variety of other formats.  In addition, these
-facilities can be used with @code{orgtbl-mode} and/or @code{orgstruct-mode}
-in foreign buffers so you can author tables and lists in Org syntax and
-convert them in place to the target language.
+Sometimes, you may want to pretty print your notes, publish them on the web
+or even share them with people not using Org.  In these cases, the Org export
+facilities can be used to convert your documents to a variety of other
+formats, while retaining as much structure (@pxref{Document structure}) and
+markup (@pxref{Markup}) as possible.
 
-ASCII export produces a readable and simple version of an Org file for
-printing and sharing notes.  HTML export allows you to easily publish notes
-on the web, or to build full-fledged websites.  @LaTeX{} export lets you use
-Org mode and its structured editing functions to create arbitrarily complex
-@LaTeX{} files for any kind of document.  OpenDocument Text (ODT) and
-Markdown export allow seamless collaboration across organizational
-boundaries.  Texinfo export helps generating documentation or full-fledged
-manuals.  Finally, iCal export can extract entries with deadlines or
-appointments to produce a file in the iCalendar format.
+@cindex export back-end
+Libraries responsible for such translation are called back-ends.  Org ships
+with the following ones
+
+@itemize
+@item ascii (ASCII format)
+@item beamer (@LaTeX{} Beamer format)
+@item html (HTML format)
+@item icalendar (iCalendar format)
+@item latex (@LaTeX{} format)
+@item md (Markdown format)
+@item odt (OpenDocument Text format)
+@item org (Org format)
+@item texinfo (Texinfo format)
+@item man (Man page format)
+@end itemize
+
+@noindent More of them can be found in the @code{contrib/} directory
+(@pxref{Installation}) or through the Emacs packaging system@footnote{These
+libraries traditionnaly appear as @file{ox-NAME}, e.g., @file{ox-koma-letter}
+for @code{koma-letter} back-end.}.
+
+@vindex org-export-backends
+By default, the following five back-ends are loaded: @code{ascii},
+@code{html}, @code{icalendar}, @code{latex} and @code{odt}.  Others need to
+be specifically loaded, either by customizing @code{org-export-backends}, or
+by requiring the associated library, e.g.,
+
+@lisp
+(require 'ox-md)
+@end lisp
+
+Eventually, you can these facilities can be used with @code{orgtbl-mode} or
+@code{orgstruct-mode} in foreign buffers so you can author tables and lists
+in Org syntax and convert them in place to the target language.
 
 @menu
 * The export dispatcher::       The main exporter interface
-* Export back-ends::            Built-in export formats
 * Export settings::             Generic export settings
 * Table of contents::           The if and where of the table of contents
 * Include files::               Include additional files into a document
@@ -10363,37 +10387,6 @@ You can change the default state of this option by setting
 Toggle visible-only export.  Only export the text that is currently
 visible, i.e., not hidden by outline visibility in the buffer.
 @end table
-
-@node Export back-ends
-@section Export back-ends
-@cindex Export, back-ends
-
-An export back-end is a library that translates Org syntax into a foreign
-format.  An export format is not available until the proper back-end has been
-loaded.
-
-Built-in back-ends include:
-
-@itemize
-@item ascii (ASCII format)
-@item beamer (@LaTeX{} Beamer format)
-@item html (HTML format)
-@item icalendar (iCalendar format)
-@item latex (@LaTeX{} format)
-@item man (Man page format)
-@item md (Markdown format)
-@item odt (OpenDocument Text format)
-@item org (Org format)
-@item texinfo (Texinfo format)
-@end itemize
-
-Other back-ends might be found in the @code{contrib/} directory
-(@pxref{Installation}).
-
-@vindex org-export-backends
-By default, the following five back-ends are loaded: @code{ascii},
-@code{html}, @code{icalendar}, @code{latex} and @code{odt}.  It is possible
-to add more, or remove some, by customizing @code{org-export-backends}.
 
 @node Export settings
 @section Export settings
@@ -18241,8 +18234,8 @@ Orgtbl mode has several translator functions built-in: @code{orgtbl-to-csv}
 (comma-separated values), @code{orgtbl-to-tsv} (TAB-separated values)
 @code{orgtbl-to-latex}, @code{orgtbl-to-html}, @code{orgtbl-to-texinfo},
 @code{orgtbl-to-unicode} and @code{orgtbl-to-orgtbl}.  These all use
-a generic translator, @code{orgtbl-to-generic}, which, in turn, can delegate
-translations to various export back-ends (@pxref{Export back-ends}).
+a generic translator, @code{orgtbl-to-generic}, which, in turn, delegates
+translations to various export back-ends.
 
 In particular, properties passed into the function (i.e., the ones set by the
 @samp{ORGTBL SEND} line) take precedence over translations defined in the
