@@ -65,7 +65,20 @@
   "Test of table output"
   (org-test-at-id "cc158527-b867-4b1d-8ae0-b8c713a90fd7"
     (org-babel-next-src-block)
-    (should (equal '((1 2 3) (2 3 4) (3 4 5)) (org-babel-execute-src-block)))))
+    (should
+     (equal
+      '((1 2 3) (2 3 4) (3 4 5))
+      ((lambda (lista)
+	 "Drop disturbing lines.
+This is a workaround to skip informational output from maxima."
+	 (reverse
+	  (reduce (lambda (x y)
+		    (if (equal ";;" (car y))
+			x
+		      (cons  y x)))
+		  lista)))
+       (cons nil
+	     (org-babel-execute-src-block)))))))
 
 (provide 'test-ob-maxima)
 
