@@ -3667,7 +3667,7 @@ Pretty much all Emacs mail clients are supported.  The link will point to the
 current article, or, in some GNUS buffers, to the group.  The description is
 constructed from the author and the subject.
 
-@b{Web browsers: W3 and W3M}@*
+@b{Web browsers: Eww, W3 and W3M}@*
 Here the link will be the current URL, with the page title as description.
 
 @b{Contacts: BBDB}@*
@@ -7341,7 +7341,7 @@ gnus, notmuch                    |  %:from %:fromname %:fromaddress
                                  |  %:date-timestamp-inactive @r{(date as inactive timestamp)}
                                  |  %:fromto @r{(either "to NAME" or "from NAME")@footnote{This will always be the other, not the user.  See the variable @code{org-from-is-user-regexp}.}}
 gnus                             |  %:group, @r{for messages also all email fields}
-w3, w3m                          |  %:url
+eww, w3, w3m                     |  %:url
 info                             |  %:file %:node
 calendar                         |  %:date
 @end smallexample
@@ -19350,6 +19350,8 @@ work on a tty.
 @item
 @i{Piotr Zielinski} wrote @file{org-mouse.el}, proposed agenda blocks
 and contributed various ideas and code snippets.
+@item
+@i{Marco Wahl} wrote @file{org-eww.el}.
 @end itemize
 
 

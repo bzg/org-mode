@@ -288,7 +288,7 @@ gnus                    |  %:from %:fromname %:fromaddress
                         |  %:date %:date-timestamp (as active timestamp)
                         |  %:date-timestamp-inactive (as inactive timestamp)
 gnus                    |  %:group, for messages also all email fields
-w3, w3m                 |  %:type %:url
+eww, w3, w3m            |  %:type %:url
 info                    |  %:type %:file %:node
 calendar                |  %:type %:date
 

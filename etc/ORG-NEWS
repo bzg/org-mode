@@ -138,6 +138,7 @@ should be written instead
 Please note that, however, old properties were defined at the source
 block definition.  Current ones are defined where the block is called.
 ** New features
+*** ~org-eww~ is moved into core
 *** New org-protocol key=value syntax
 
 Org-protocol can now handle query-style parameters such as:
