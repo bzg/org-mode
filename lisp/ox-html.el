@@ -3112,16 +3112,16 @@ the plist used as a communication channel."
 	     (let ((raw (org-export-data
 			 (org-export-get-caption paragraph) info))
 		   (org-html-standalone-image-predicate
-		    'org-html--has-caption-p))
+		    #'org-html--has-caption-p))
 	       (if (not (org-string-nw-p raw)) raw
-		 (concat
-                  "<span class=\"figure-number\">"
-		  (format (org-html--translate "Figure %d:" info)
-			  (org-export-get-ordinal
-			   (org-element-map paragraph 'link
-			     'identity info t)
-			   info nil 'org-html-standalone-image-p))
-		  "</span> " raw))))
+		 (concat "<span class=\"figure-number\">"
+			 (format (org-html--translate "Figure %d:" info)
+				 (org-export-get-ordinal
+				  (org-element-map paragraph 'link
+				    #'identity info t)
+				  info nil #'org-html-standalone-image-p))
+			 " </span>"
+			 raw))))
 	    (label (and (org-element-property :name paragraph)
 			(org-export-get-reference paragraph info))))
 	(org-html--wrap-image contents info caption label)))
