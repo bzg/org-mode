@@ -34,7 +34,7 @@
 
 ;;; Code:
 (require 'ob)
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 
 (declare-function org-remove-indentation "org" )
 (declare-function lua-shell "ext:lua-mode" (&optional argprompt))
@@ -362,8 +362,8 @@ fd:close()"
 			     (split-string body "[\r\n]"))
 		       (funcall send-wait)))
          (results
-          (case result-type
-            (output
+          (pcase result-type
+            (`output
              (mapconcat
               #'org-trim
               (butlast
@@ -374,7 +374,7 @@ fd:close()"
                  (insert org-babel-lua-eoe-indicator)
                  (funcall send-wait))
                2) "\n"))
-            (value
+            (`value
              (let ((tmp-file (org-babel-temp-file "lua-")))
                (org-babel-comint-with-output
                    (session org-babel-lua-eoe-indicator nil body)
