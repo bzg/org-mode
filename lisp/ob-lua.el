@@ -1,4 +1,4 @@
-;;; ob-lua.el --- Org Babel functions for Lua evaluation
+;;; ob-lua.el --- Org Babel functions for Lua evaluation -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014, 2016 Free Software Foundation, Inc.
 
@@ -189,13 +189,14 @@ Emacs-lisp table, otherwise return the results as a string."
   "Initiate a lua session.
 If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
-  (require org-babel-lua-mode)
+  ;; (require org-babel-lua-mode)
   (save-window-excursion
     (let* ((session (if session (intern session) :default))
            (lua-buffer (org-babel-lua-session-buffer session))
-	   (cmd (if (member system-type '(cygwin windows-nt ms-dos))
-		    (concat org-babel-lua-command " -i")
-		  org-babel-lua-command)))
+	   ;; (cmd (if (member system-type '(cygwin windows-nt ms-dos))
+	   ;; 	    (concat org-babel-lua-command " -i")
+	   ;; 	  org-babel-lua-command))
+	   )
       (cond
        ((and (eq 'lua-mode org-babel-lua-mode)
              (fboundp 'lua-start-process)) ; lua-mode.el
@@ -205,10 +206,9 @@ then create.  Return the initialized session."
         ;;(lua-toggle-shells lua-default-interpreter)
         ;; `lua-shell' creates a buffer whose name is the value of
         ;; `lua-which-bufname' with '*'s at the beginning and end
-        (let* ((bufname (if (and lua-process-buffer
-                                 (buffer-live-p lua-process-buffer))
+        (let* ((bufname (if (and lua-buffer (buffer-live-p lua-buffer))
                             (replace-regexp-in-string ;; zap surrounding *
-                             "^\\*\\([^*]+\\)\\*$" "\\1" (buffer-name lua-process-buffer))
+                             "^\\*\\([^*]+\\)\\*$" "\\1" (buffer-name lua-buffer))
                           (concat "Lua-" (symbol-name session))))
                (lua-which-bufname bufname))
           (lua-start-process)
@@ -216,11 +216,11 @@ then create.  Return the initialized session."
        (t
 	(error "No function available for running an inferior Lua")))
       (setq org-babel-lua-buffers
-            (cons (cons session lua-process-buffer)
+            (cons (cons session lua-buffer)
                   (assq-delete-all session org-babel-lua-buffers)))
       session)))
 
-(defun org-babel-lua-initiate-session (&optional session params)
+(defun org-babel-lua-initiate-session (&optional session _params)
   "Create a session named SESSION according to PARAMS."
   (unless (string= session "none")
     (error "Sessions currently not supported, work in progress")
@@ -349,7 +349,7 @@ function t2s(t, indent)
    end
 end
 "
-		  (format "fd:write(_))
+		  (concat "fd:write(_))
 fd:close()"
 			  (org-babel-process-file-name tmp-file 'noquote)))
 	       (list (format "fd=io.open(\"%s\", \"w\")
