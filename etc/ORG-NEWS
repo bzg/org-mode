@@ -189,6 +189,11 @@ If the block has a =#+NAME:= attribute assigned, then the HTML element
 will have an ~id~ attribute with that name in the HTML export. This
 enables one to create links to these elements in other places, e.g.,
 ~<a href="#name">text</a>~.
+**** Listings with captions are now numbered in HTML export
+The class associated to the numbering is "listing-number".  If you
+don't want these blocks to be numbered, as it was the case until now,
+You may want to add ~.listing-number { display: none; }~ to the CSS
+used.
 **** Line Numbering in SRC/EXAMPLE blocks support arbitrary start number
 The ~-n~ option to ~SRC~ and ~EXAMPLE~ blocks can now take a numeric
 argument to specify the staring line number for the source or example
