@@ -1,6 +1,6 @@
 ;;; ob-lua.el --- Org Babel functions for Lua evaluation
 
-;; Copyright (C) 2014 Free Software Foundation, Inc.
+;; Copyright (C) 2014, 2016 Free Software Foundation, Inc.
 
 ;; Authors: Dieter Schoen
 ;; Keywords: literate programming, reproducible research
@@ -128,7 +128,7 @@ VARS contains resolved variable references"
      (format "%s=%s"
 	     (car pair)
 	     (org-babel-lua-var-to-lua (cdr pair))))
-   (mapcar #'cdr (org-babel-get-header params :var))))
+   (org-babel--get-vars params)))
 
 (defun org-babel-lua-var-to-lua (var)
   "Convert an elisp value to a lua variable.
@@ -288,30 +288,30 @@ If RESULT-TYPE equals 'output then return standard output as a
 string.  If RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   (let ((raw
-         (case result-type
-           (output (org-babel-eval org-babel-lua-command
-                                   (concat (if preamble (concat preamble "\n"))
-                                           body)))
-           (value (let ((tmp-file (org-babel-temp-file "lua-")))
-                    (org-babel-eval
-                     org-babel-lua-command
-                     (concat
-                      (if preamble (concat preamble "\n") "")
-                      (format
-                       (if (member "pp" result-params)
-                           org-babel-lua-pp-wrapper-method
-                         org-babel-lua-wrapper-method)
-                       (mapconcat
-                        (lambda (line) (format "\t%s" line))
-                        (split-string
-                         (org-remove-indentation
-                          (org-babel-trim body))
-                         "[\r\n]") "\n")
-                       (org-babel-process-file-name tmp-file 'noquote))))
-                    (org-babel-eval-read-file tmp-file))))))
+         (pcase result-type
+           (`output (org-babel-eval org-babel-lua-command
+				    (concat (if preamble (concat preamble "\n"))
+					    body)))
+           (`value (let ((tmp-file (org-babel-temp-file "lua-")))
+		     (org-babel-eval
+		      org-babel-lua-command
+		      (concat
+		       (if preamble (concat preamble "\n") "")
+		       (format
+			(if (member "pp" result-params)
+			    org-babel-lua-pp-wrapper-method
+			  org-babel-lua-wrapper-method)
+			(mapconcat
+			 (lambda (line) (format "\t%s" line))
+			 (split-string
+			  (org-remove-indentation
+			   (org-trim body))
+			  "[\r\n]") "\n")
+			(org-babel-process-file-name tmp-file 'noquote))))
+		     (org-babel-eval-read-file tmp-file))))))
     (org-babel-result-cond result-params
       raw
-      (org-babel-lua-table-or-string (org-babel-trim raw)))))
+      (org-babel-lua-table-or-string (org-trim raw)))))
 
 (defun org-babel-lua-evaluate-session
     (session body &optional result-type result-params)
@@ -365,7 +365,7 @@ fd:close()"
           (case result-type
             (output
              (mapconcat
-              #'org-babel-trim
+              #'org-trim
               (butlast
                (org-babel-comint-with-output
                    (session org-babel-lua-eoe-indicator t body)
