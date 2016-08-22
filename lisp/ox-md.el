@@ -51,6 +51,25 @@ This variable can be set to either `atx' or `setext'."
 	  (const :tag "Use \"Setext\" style" setext)))
 
 
+;;;; Footnotes
+
+(defcustom org-md-footnotes-section "%s%s"
+  "Format string for the footnotes section.
+The first %s placeholder will be replaced with the localized Footnotes section
+heading, the second with the contents of the Footnotes section."
+ :group 'org-export-md
+ :type 'string
+ :version "25.1"
+ :package-version '(Org . "9.0"))
+
+(defcustom org-md-footnote-format "<sup>%s</sup>"
+  "Format string for the footnote reference.
+The %s will be replaced by the footnote reference itself."
+  :group 'org-export-md
+  :type 'string
+  :version "25.1"
+  :package-version '(Org . "9.0"))
+
 
 ;;; Define Back-End
 
@@ -89,7 +108,10 @@ This variable can be set to either `atx' or `setext'."
 		     (src-block . org-md-example-block)
 		     (template . org-md-template)
 		     (verbatim . org-md-verbatim))
-  :options-alist '((:md-headline-style nil nil org-md-headline-style)))
+  :options-alist
+  '((:md-footnote-format nil nil org-md-footnote-format)
+    (:md-footnotes-section nil nil org-md-footnotes-section)
+    (:md-headline-style nil nil org-md-headline-style)))
 
 
 ;;; Filters
@@ -215,20 +237,29 @@ a communication channel."
 			  (car (last (org-export-get-headline-number
 				      headline info))))
 			 "."))))
-	  (concat bullet (make-string (- 4 (length bullet)) ?\s) heading tags
-		  "\n\n"
-		  (and contents
-		       (replace-regexp-in-string "^" "    " contents)))))
-       ;; Use "Setext" style.
-       ((eq style 'setext)
-	(concat heading tags anchor "\n"
-		(make-string (length heading) (if (= level 1) ?= ?-))
-		"\n\n"
-		contents))
-       ;; Use "atx" style.
-       (t (concat (make-string level ?#) " " heading tags anchor "\n\n"
-		  contents))))))
+	  (concat bullet (make-string (- 4 (length bullet)) ?\s) heading tags "\n\n"
+		  (and contents (replace-regexp-in-string "^" "    " contents)))))
+       (t (concat (org-md--headline-title style level title anchor tags) contents))))))
 
+
+;; Headline Title
+
+(defun org-md--headline-title (style level title &optional anchor tags)
+  "Generate a headline title in the preferred Markdown headline style.
+STYLE is the preferred style (`atx' or `setext').  LEVEL is the
+header level.  TITLE is the headline title.  ANCHOR is the HTML
+anchor tag for the section as a string.  TAGS are the tags set on
+the section."
+  (let ((anchor-lines (and anchor (concat anchor "\n\n"))))
+    ;; Use "Setext" style
+    (if (and (eq style 'setext) (< level 3))
+        (let* ((underline-char (if (= level 1) ?= ?-))
+               (underline (concat (make-string (length title) underline-char)
+				  "\n")))
+          (concat "\n" anchor-lines title tags "\n" underline "\n"))
+        ;; Use "Atx" style
+        (let ((level-mark (make-string level ?#)))
+          (concat "\n" anchor-lines level-mark " " title tags "\n\n")))))
 
 ;;;; Horizontal Rule
 
@@ -467,13 +498,48 @@ a communication channel."
 
 ;;;; Template
 
+(defun org-md--footnote-formatted (footnote info)
+  "Formats a single footnote entry FOOTNOTE.
+FOOTNOTE is a cons cell of the form (number . definition).
+INFO is a plist with contextual information."
+  (let* ((fn-num (car footnote))
+         (fn-text (cdr footnote))
+         (fn-format (plist-get info :md-footnote-format))
+         (fn-anchor (format "fn.%d" fn-num))
+         (fn-href (format " href=\"#fnr.%d\"" fn-num))
+         (fn-link-to-ref (org-html--anchor fn-anchor fn-num fn-href info)))
+    (concat (format fn-format fn-link-to-ref) " " fn-text "\n")))
+
+(defun org-md--footnote-section (info)
+  "Format the footnote section.
+INFO is a plist used as a communication channel."
+  (let* ((fn-alist (org-export-collect-footnote-definitions info))
+         (fn-alist (cl-loop for (n type raw) in fn-alist collect
+                            (cons n (org-trim (org-export-data raw info)))))
+         (headline-style (plist-get info :md-headline-style))
+         (section-title (org-html--translate "Footnotes" info)))
+    (when fn-alist
+      (format (plist-get info :md-footnotes-section)
+              (org-md--headline-title headline-style 1 section-title)
+              (mapconcat (lambda (fn) (org-md--footnote-formatted fn info))
+                         fn-alist
+                         "\n")))))
+
 (defun org-md-inner-template (contents info)
   "Return body of document after converting it to Markdown syntax.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   ;; Make sure CONTENTS is separated from table of contents and
   ;; footnotes with at least a blank line.
-  (org-trim (org-html-inner-template (concat "\n" contents "\n") info)))
+  (concat
+   ;; Table of contents.
+   (let ((depth (plist-get info :with-toc)))
+     (when depth (org-html-toc depth info)))
+   ;; Document contents.
+   contents
+   "\n"
+   ;; Footnotes section.
+   (org-md-footnote--section info)))
 
 (defun org-md-template (contents _info)
   "Return complete document string after Markdown conversion.

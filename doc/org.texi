@@ -14442,7 +14442,9 @@ however, override everything.
 
 @subsubheading Markdown specific properties
 
-@multitable {@code{:md-headline-style}} {@code{org-md-headline-style}}
+@multitable {@code{:md-footnotes-section}} {@code{org-md-footnotes-section}}
+@item @code{:md-footnote-format} @tab @code{org-md-footnote-format}
+@item @code{:md-footnotes-section} @tab @code{org-md-footnotes-section}
 @item @code{:md-headline-style} @tab @code{org-md-headline-style}
 @end multitable
 

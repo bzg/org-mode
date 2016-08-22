@@ -219,6 +219,11 @@ SVG images exported in HTML are now by default assigned a CSS class
 ~org-svg~ if no CSS class is specified with the ~:class~ attribute. By
 default, the CSS styling of class ~org-svg~ specifies an image width
 of 90\thinsp{}% of the container the image.
+**** Markdown footnote export customization
+Variables ~org-md-footnotes-section~ and ~org-md-footnote-format~
+introduced for =ox-md.el=.  Both new variables define template strings
+which can be used to customize the format of the exported footnotes
+section and individual footnotes, respectively.
 *** Babel
 **** Blocks with coderefs labels can now be evaluated
 The labels are removed prior to evaluating the block.
