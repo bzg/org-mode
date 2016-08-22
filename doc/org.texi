@@ -15141,16 +15141,16 @@ Code blocks in the following languages are supported.
 @item Java @tab java @tab Javascript @tab js
 @item LaTeX @tab latex @tab Ledger @tab ledger
 @item Lisp @tab lisp @tab Lilypond @tab lilypond
-@item MATLAB @tab matlab @tab Mscgen @tab mscgen
-@item Objective Caml @tab ocaml @tab Octave @tab octave
-@item Org mode @tab org @tab Oz @tab oz
-@item Perl @tab perl @tab Plantuml @tab plantuml
-@item Processing.js @tab processing @tab Python @tab python
-@item R @tab R @tab Ruby @tab ruby
-@item Sass @tab sass @tab Scheme @tab scheme
-@item GNU Screen @tab screen @tab Sed @tab sed
-@item shell @tab sh @tab SQL @tab sql
-@item SQLite @tab sqlite @tab @tab
+@item Lua @tab lua @tab MATLAB @tab matlab
+@item Mscgen @tab mscgen @tab Objective Caml @tab ocaml
+@item Octave @tab octave @tab Org mode @tab org
+@item Oz @tab oz @tab Perl @tab perl
+@item Plantuml @tab plantuml @tab Processing.js @tab processing
+@item Python @tab python @tab R @tab R
+@item Ruby @tab ruby @tab Sass @tab sass
+@item Scheme @tab scheme @tab GNU Screen @tab screen
+@item Sed @tab sed @tab shell @tab sh
+@item SQL @tab sql @tab SQLite @tab sqlite
 @end multitable
 
 Language-specific documentation is available for some languages.  If
