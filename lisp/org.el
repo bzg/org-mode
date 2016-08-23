@@ -6176,7 +6176,8 @@ by a #."
   "Add text properties for bracketed links."
   (when (and (re-search-forward org-bracket-link-regexp limit t)
 	     (not (org-in-src-block-p)))
-    (let* ((hl (match-string-no-properties 1))
+    (let* ((hl (save-match-data
+		 (org-link-expand-abbrev (match-string-no-properties 1))))
 	   (type (save-match-data
 		   (and (string-match org-plain-link-re hl)
 			(match-string-no-properties 1 hl))))
