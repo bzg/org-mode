@@ -1,4 +1,4 @@
-;;;; org-test.el --- Tests for Org-mode
+;;;; org-test.el --- Tests for Org
 
 ;; Copyright (c) 2010-2015 Sebastian Rose, Eric Schulte
 ;; Authors:
@@ -142,7 +142,7 @@ currently executed.")
 (def-edebug-spec org-test-at-id (form body))
 
 (defmacro org-test-in-example-file (file &rest body)
-  "Execute body in the Org-mode example file."
+  "Execute body in the Org example file."
   (declare (indent 1))
   `(let* ((my-file (or ,file org-test-file))
 	  (visited-p (get-file-buffer my-file))
@@ -178,7 +178,7 @@ files."
 (def-edebug-spec org-test-at-marker (form form body))
 
 (defmacro org-test-with-temp-text (text &rest body)
-  "Run body in a temporary buffer with Org-mode as the active
+  "Run body in a temporary buffer with Org mode as the active
 mode holding TEXT.  If the string \"<point>\" appears in TEXT
 then remove it and place the point there before running BODY,
 otherwise place the point at the beginning of the inserted text."
@@ -198,7 +198,7 @@ otherwise place the point at the beginning of the inserted text."
 (def-edebug-spec org-test-with-temp-text (form body))
 
 (defmacro org-test-with-temp-text-in-file (text &rest body)
-  "Run body in a temporary file buffer with Org-mode as the active mode."
+  "Run body in a temporary file buffer with Org mode as the active mode."
   (declare (indent 1))
   (let ((results (gensym)))
     `(let ((file (make-temp-file "org-test"))
@@ -277,7 +277,7 @@ setting `pp-escape-newlines' to nil manually."
      ("testing/lisp/test-\\1.el" . "lisp/\\1.el")
      ("testing/lisp/\\1.el" . "lisp/\\1.el/test.*.el"))
     (concat org-base-dir "/")
-    "Jump between org-mode files and their tests."
+    "Jump between Org files and their tests."
     (lambda (path)
       (let* ((full-path (expand-file-name path org-base-dir))
 	     (file-name (file-name-nondirectory path))
@@ -291,7 +291,7 @@ setting `pp-escape-newlines' to nil manually."
 	 ";; Released under the GNU General Public License version 3\n"
 	 ";; see: http://www.gnu.org/licenses/gpl-3.0.html\n\n"
 	 ";;;; Comments:\n\n"
-	 ";; Template test file for Org-mode tests\n\n"
+	 ";; Template test file for Org tests\n\n"
 	 "\n"
 	 ";;; Code:\n"
 	 "(let ((load-path (cons (expand-file-name\n"
@@ -334,7 +334,7 @@ setting `pp-escape-newlines' to nil manually."
 
 ;;; Load and Run tests
 (defun org-test-load ()
-  "Load up the org-mode test suite."
+  "Load up the Org test suite."
   (interactive)
   (cl-flet ((rld (base)
 	      ;; Recursively load all files, if files throw errors
@@ -374,7 +374,7 @@ setting `pp-escape-newlines' to nil manually."
 	       "/")))
 
 (defvar org-test-buffers nil
-  "Hold buffers open for running Org-mode tests.")
+  "Hold buffers open for running Org tests.")
 
 (defun org-test-touch-all-examples ()
   (dolist (file (directory-files

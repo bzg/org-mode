@@ -23,8 +23,8 @@
 
 ;;; Commentary:
 
-;; Should allow calling functions from org-mode tables using the
-;; function `org-sbe' as so...
+;; Should allow calling functions from Org tables using the function
+;; `org-sbe' as so...
 
 ;; #+begin_src emacs-lisp :results silent
 ;;   (defun fibbd (n) (if (< n 2) 1 (+ (fibbd (- n 1)) (fibbd (- n 2)))))

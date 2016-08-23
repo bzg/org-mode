@@ -29,8 +29,8 @@
 ;;
 ;;   M-: (org-export-to-buffer 'man "*Test Man*") RET
 ;;
-;; in an org-mode buffer then switch to the buffer to see the Man
-;; export.  See ox.el for more details on how this exporter works.
+;; in an Org buffer then switch to the buffer to see the Man export.
+;; See ox.el for more details on how this exporter works.
 ;;
 ;; It introduces one new buffer keywords:
 ;; "MAN_CLASS_OPTIONS".

@@ -836,11 +836,11 @@ e.g. \"tex:mathjax\".  Allowed values are:
   "Non-nil means make file links to `file.org' point to `file.html'.
 When `org-mode' is exporting an `org-mode' file to HTML, links to
 non-html files are directly put into a href tag in HTML.
-However, links to other Org-mode files (recognized by the
-extension `.org') should become links to the corresponding html
+However, links to other Org files (recognized by the extension
+\".org\") should become links to the corresponding HTML
 file, assuming that the linked `org-mode' file will also be
 converted to HTML.
-When nil, the links still point to the plain `.org' file."
+When nil, the links still point to the plain \".org\" file."
   :group 'org-export-html
   :type 'boolean)
 
@@ -3659,10 +3659,10 @@ is non-nil."
 
 ;;;###autoload
 (defun org-html-convert-region-to-html ()
-  "Assume the current region has org-mode syntax, and convert it to HTML.
+  "Assume the current region has Org syntax, and convert it to HTML.
 This can be used in any buffer.  For example, you can write an
-itemized list in org-mode syntax in an HTML buffer and use this
-command to convert it."
+itemized list in Org syntax in an HTML buffer and use this command
+to convert it."
   (interactive)
   (org-export-replace-region-by 'html))
 

@@ -23,8 +23,8 @@
 
 ;;; Commentary:
 
-;; Add org-babel keybindings to the org-mode keymap for exposing
-;; org-babel functions.  These will all share a common prefix.  See
+;; Add Org Babel keybindings to the Org mode keymap for exposing
+;; Org Babel functions.  These will all share a common prefix.  See
 ;; the value of `org-babel-key-bindings' for a list of interactive
 ;; functions and their associated keys.
 

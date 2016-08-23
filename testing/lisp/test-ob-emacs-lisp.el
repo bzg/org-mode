@@ -20,7 +20,7 @@
 
 ;;; Comments:
 
-;; Org-mode tests for ob-emacs-lisp.el live here
+;; Org tests for ob-emacs-lisp.el live here
 
 ;;; Code:
 (ert-deftest ob-emacs-lisp/commented-last-block-line-no-var ()

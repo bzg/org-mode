@@ -20,7 +20,7 @@
 
 ;;; Comments:
 
-;; Template test file for Org-mode tests
+;; Template test file for Org tests
 
 ;;; Code:
 
@@ -68,7 +68,7 @@ Current buffer is a copy of the original buffer."
     (when (get-buffer name) (kill-buffer name))))
 
 (ert-deftest test-ob-exp/org-babel-exp-src-blocks/w-no-headers2 ()
-  "Testing export without any headlines in the org-mode file."
+  "Testing export without any headlines in the Org file."
   (let ((html-file (concat (file-name-sans-extension
 			    org-test-link-in-heading-file)
 			   ".html")))

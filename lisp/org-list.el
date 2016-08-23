@@ -1,4 +1,4 @@
-;;; org-list.el --- Plain lists for Org-mode         -*- lexical-binding: t; -*-
+;;; org-list.el --- Plain lists for Org              -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2004-2016 Free Software Foundation, Inc.
 ;;

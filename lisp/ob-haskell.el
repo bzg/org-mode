@@ -150,7 +150,7 @@ specifying a variable of the same value."
 When called with a prefix argument the resulting
 .lhs file will be exported to a .tex file.  This function will
 create two new files, base-name.lhs and base-name.tex where
-base-name is the name of the current org-mode file.
+base-name is the name of the current Org file.
 
 Note that all standard Babel literate programming
 constructs (header arguments, no-web syntax etc...) are ignored."

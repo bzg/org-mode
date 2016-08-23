@@ -26,20 +26,21 @@
 ;; Synopsis
 ;; ========
 ;;
-;; Allows org-mode to make use of the Emacs `etags' system.  Defines tag
-;; destinations in org-mode files as any text between <<double angled
-;; brackets>>. This allows the tags-generation program `exuberant ctags' to
-;; parse these files and create tag tables that record where these
-;; destinations are found.  Plain [[links]] in org mode files which do not have
-;; <<matching destinations>> within the same file will then be interpreted as
-;; links to these 'tagged' destinations, allowing seamless navigation between
-;; multiple org-mode files.  Topics can be created in any org mode file and
-;; will always be found by plain links from other files.  Other file types
-;; recognized by ctags (source code files, latex files, etc) will also be
-;; available as destinations for plain links, and similarly, org-mode links
-;; will be available as tags from source files.  Finally, the function
-;; `org-ctags-find-tag-interactive' lets you choose any known tag, using
-;; autocompletion, and quickly jump to it.
+;; Allows Org mode to make use of the Emacs `etags' system.  Defines
+;; tag destinations in Org files as any text between <<double angled
+;; brackets>>. This allows the tags-generation program `exuberant
+;; ctags' to parse these files and create tag tables that record where
+;; these destinations are found.  Plain [[links]] in org mode files
+;; which do not have <<matching destinations>> within the same file
+;; will then be interpreted as links to these 'tagged' destinations,
+;; allowing seamless navigation between multiple Org files.  Topics
+;; can be created in any org mode file and will always be found by
+;; plain links from other files.  Other file types recognized by ctags
+;; (source code files, latex files, etc) will also be available as
+;; destinations for plain links, and similarly, Org links will be
+;; available as tags from source files.  Finally, the function
+;; `org-ctags-find-tag-interactive' lets you choose any known tag,
+;; using autocompletion, and quickly jump to it.
 ;;
 ;; Installation
 ;; ============
@@ -110,8 +111,9 @@
 ;; Keeping the TAGS file up to date
 ;; ================================
 ;;
-;; Tags mode has no way of knowing that you have created new tags by typing in
-;; your org-mode buffer.  New tags make it into the TAGS file in 3 ways:
+;; Tags mode has no way of knowing that you have created new tags by
+;; typing in your Org buffer.  New tags make it into the TAGS file in
+;; 3 ways:
 ;;
 ;; 1. You re-run (org-ctags-create-tags "directory") to rebuild the file.
 ;; 2. You put the function `org-ctags-ask-rebuild-tags-file-then-find-tag' in
@@ -147,7 +149,7 @@
 
 (defvar org-ctags-tag-regexp "/<<([^>]+)>>/\\1/d,definition/"
   "Regexp expression used by ctags external program.
-The regexp matches tag destinations in org-mode files.
+The regexp matches tag destinations in Org files.
 Format is: /REGEXP/TAGNAME/FLAGS,TAGTYPE/
 See the ctags documentation for more information.")
 

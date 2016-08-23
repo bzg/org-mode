@@ -73,9 +73,9 @@ When 0, the user is prompted for a value."
   :type 'string)
 
 (defcustom org-timer-display 'mode-line
-  "When a timer is running, org-mode can display it in the mode
-line and/or frame title.
-Allowed values are:
+  "Define where running timer is displayed, if at all.
+When a timer is running, Org can display it in the mode line
+and/or frame title.  Allowed values are:
 
 both         displays in both mode line and frame title
 mode-line    displays only in mode line (default)

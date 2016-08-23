@@ -25,8 +25,8 @@
 
 ;; Borrows ideas and a couple of lines of code from org-exp.el.
 
-;; Thanks to the org-mode mailing list for testing and implementation
-;; and feature suggestions
+;; Thanks to the Org mailing list for testing and implementation and
+;; feature suggestions
 
 ;;; Code:
 

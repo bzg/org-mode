@@ -25,23 +25,24 @@
 ;;
 ;;; Commentary:
 ;;
-;; Org-mode is a mode for keeping notes, maintaining ToDo lists, and doing
+;; Org is a mode for keeping notes, maintaining ToDo lists, and doing
 ;; project planning with a fast and effective plain-text system.
 ;;
-;; Org-mode develops organizational tasks around NOTES files that contain
-;; information about projects as plain text.  Org-mode is implemented on
-;; top of outline-mode, which makes it possible to keep the content of
-;; large files well structured.  Visibility cycling and structure editing
-;; help to work with the tree.  Tables are easily created with a built-in
-;; table editor.  Org-mode supports ToDo items, deadlines, time stamps,
-;; and scheduling.  It dynamically compiles entries into an agenda that
-;; utilizes and smoothly integrates much of the Emacs calendar and diary.
-;; Plain text URL-like links connect to websites, emails, Usenet
-;; messages, BBDB entries, and any files related to the projects.  For
-;; printing and sharing of notes, an Org-mode file can be exported as a
-;; structured ASCII file, as HTML, or (todo and agenda items only) as an
-;; iCalendar file.  It can also serve as a publishing tool for a set of
-;; linked webpages.
+;; Org mode develops organizational tasks around NOTES files that
+;; contain information about projects as plain text.  Org mode is
+;; implemented on top of outline-mode, which makes it possible to keep
+;; the content of large files well structured.  Visibility cycling and
+;; structure editing help to work with the tree.  Tables are easily
+;; created with a built-in table editor.  Org mode supports ToDo
+;; items, deadlines, time stamps, and scheduling.  It dynamically
+;; compiles entries into an agenda that utilizes and smoothly
+;; integrates much of the Emacs calendar and diary.  Plain text
+;; URL-like links connect to websites, emails, Usenet messages, BBDB
+;; entries, and any files related to the projects.  For printing and
+;; sharing of notes, an Org file can be exported as a structured ASCII
+;; file, as HTML, or (todo and agenda items only) as an iCalendar
+;; file.  It can also serve as a publishing tool for a set of linked
+;; webpages.
 ;;
 ;; Installation and Activation
 ;; ---------------------------
@@ -204,7 +205,7 @@ at the beginning of the string does not affect leading indentation."
 (declare-function org-babel-tangle-file "ob-tangle" (file &optional target-file lang))
 ;;;###autoload
 (defun org-babel-load-file (file &optional compile)
-  "Load Emacs Lisp source code blocks in the Org-mode FILE.
+  "Load Emacs Lisp source code blocks in the Org FILE.
 This function exports the source code using `org-babel-tangle'
 and then loads the resulting file using `load-file'.  With prefix
 arg (noninteractively: 2nd arg) COMPILE the tangled Emacs Lisp
@@ -217,7 +218,7 @@ file to byte-code before it is loaded."
 					   (file-attributes file)))))))
 	 (base-name (file-name-sans-extension file))
 	 (exported-file (concat base-name ".el")))
-    ;; tangle if the org-mode file is newer than the elisp file
+    ;; tangle if the Org file is newer than the elisp file
     (unless (and (file-exists-p exported-file)
 		 (> (funcall age file) (funcall age exported-file)))
       ;; Tangle-file traversal returns reversed list of tangled files
@@ -232,7 +233,7 @@ file to byte-code before it is loaded."
 	     exported-file)))
 
 (defcustom org-babel-load-languages '((emacs-lisp . t))
-  "Languages which can be evaluated in Org-mode buffers.
+  "Languages which can be evaluated in Org buffers.
 This list can be used to load support for any of the languages
 below, note that each language will depend on a different set of
 system executables and/or Emacs modes.  When a language is
@@ -309,7 +310,7 @@ identifier."
 
 ;;;###autoload
 (defun org-version (&optional here full message)
-  "Show the org-mode version.
+  "Show the Org version.
 Interactively, or when MESSAGE is non-nil, show it in echo area.
 With prefix argument, or when HERE is non-nil, insert it at point.
 In non-interactive uses, a reduced version string is output unless
@@ -701,18 +702,18 @@ For export specific modules, see also `org-export-backends'."
 	(const :tag "   w3m:               Special cut/paste from w3m to Org-mode." org-w3m)
 
 	(const :tag "C  annotate-file:     Annotate a file with org syntax" org-annotate-file)
-	(const :tag "C  bookmark:          Org-mode links to bookmarks" org-bookmark)
+	(const :tag "C  bookmark:          Org links to bookmarks" org-bookmark)
 	(const :tag "C  bullets:           Add overlays to headlines stars" org-bullets)
 	(const :tag "C  checklist:         Extra functions for checklists in repeated tasks" org-checklist)
 	(const :tag "C  choose:            Use TODO keywords to mark decisions states" org-choose)
 	(const :tag "C  collector:         Collect properties into tables" org-collector)
 	(const :tag "C  depend:            TODO dependencies for Org-mode\n\t\t\t(PARTIALLY OBSOLETE, see built-in dependency support))" org-depend)
 	(const :tag "C  drill:             Flashcards and spaced repetition for Org-mode" org-drill)
-	(const :tag "C  elisp-symbol:      Org-mode links to emacs-lisp symbols" org-elisp-symbol)
+	(const :tag "C  elisp-symbol:      Org links to emacs-lisp symbols" org-elisp-symbol)
 	(const :tag "C  eshell             Support for links to working directories in eshell" org-eshell)
 	(const :tag "C  eval-light:        Evaluate inbuffer-code on demand" org-eval-light)
 	(const :tag "C  eval:              Include command output as text" org-eval)
-	(const :tag "C  expiry:            Expiry mechanism for Org-mode entries" org-expiry)
+	(const :tag "C  expiry:            Expiry mechanism for Org entries" org-expiry)
 	(const :tag "C  favtable:          Lookup table of favorite references and links" org-favtable)
 	(const :tag "C  git-link:          Provide org links to specific file version" org-git-link)
 	(const :tag "C  interactive-query: Interactive modification of tags query\n\t\t\t(PARTIALLY OBSOLETE, see secondary filtering)" org-interactive-query)
@@ -720,18 +721,18 @@ For export specific modules, see also `org-export-backends'."
 	(const :tag "C  learn:             SuperMemo's incremental learning algorithm" org-learn)
 	(const :tag "C  mac-iCal           Imports events from iCal.app to the Emacs diary" org-mac-iCal)
 	(const :tag "C  mac-link:          Grab links and url from various mac Applications" org-mac-link)
-	(const :tag "C  mairix:            Hook mairix search into Org-mode for different MUAs" org-mairix)
+	(const :tag "C  mairix:            Hook mairix search into Org for different MUAs" org-mairix)
 	(const :tag "C  man:               Support for links to manpages in Org-mode" org-man)
 	(const :tag "C  mew:               Links to Mew folders/messages" org-mew)
 	(const :tag "C  mtags:             Support for muse-like tags" org-mtags)
 	(const :tag "C  notmuch:           Provide org links to notmuch searches or messages" org-notmuch)
 	(const :tag "C  panel:             Simple routines for us with bad memory" org-panel)
-	(const :tag "C  registry:          A registry for Org-mode links" org-registry)
-	(const :tag "C  screen:            Visit screen sessions through Org-mode links" org-screen)
+	(const :tag "C  registry:          A registry for Org links" org-registry)
+	(const :tag "C  screen:            Visit screen sessions through Org links" org-screen)
 	(const :tag "C  secretary:         Team management with org-mode" org-secretary)
-	(const :tag "C  sqlinsert:         Convert Org-mode tables to SQL insertions" orgtbl-sqlinsert)
-	(const :tag "C  toc:               Table of contents for Org-mode buffer" org-toc)
-	(const :tag "C  track:             Keep up with Org-mode development" org-track)
+	(const :tag "C  sqlinsert:         Convert Org tables to SQL insertions" orgtbl-sqlinsert)
+	(const :tag "C  toc:               Table of contents for Org buffer" org-toc)
+	(const :tag "C  track:             Keep up with Org mode development" org-track)
 	(const :tag "C  velocity           Something like Notational Velocity for Org" org-velocity)
 	(const :tag "C  vm:                Links to VM folders/messages" org-vm)
 	(const :tag "C  wikinodes:         CamelCase wiki-like links" org-wikinodes)
@@ -859,7 +860,7 @@ cursor keys will then execute Org commands in the following contexts:
 Outside these contexts, the commands will throw an error.
 
 When this variable is t and the cursor is not in a special
-context, Org-mode will support shift-selection for making and
+context, Org mode will support shift-selection for making and
 enlarging regions.  To make this more effective, the bullet
 cycling will no longer happen anywhere in an item line, but only
 if the cursor is exactly on the bullet.
@@ -915,7 +916,7 @@ already archived entries."
   :group 'org)
 
 (defcustom org-startup-folded t
-  "Non-nil means entering Org-mode will switch to OVERVIEW.
+  "Non-nil means entering Org mode will switch to OVERVIEW.
 This can also be configured on a per-file basis by adding one of
 the following lines anywhere in the buffer:
 
@@ -935,7 +936,7 @@ option, set `org-agenda-inhibit-startup' to nil."
 	  (const :tag "show everything, even drawers" showeverything)))
 
 (defcustom org-startup-truncated t
-  "Non-nil means entering Org-mode will set `truncate-lines'.
+  "Non-nil means entering Org mode will set `truncate-lines'.
 This is useful since some lines containing links can be very long and
 uninteresting.  Also tables look terrible when wrapped.
 
@@ -1039,22 +1040,22 @@ the following lines anywhere in the buffer:
   :type 'boolean)
 
 (defcustom org-insert-mode-line-in-empty-file nil
-  "Non-nil means insert the first line setting Org-mode in empty files.
+  "Non-nil means insert the first line setting Org mode in empty files.
 When the function `org-mode' is called interactively in an empty file, this
-normally means that the file name does not automatically trigger Org-mode.
-To ensure that the file will always be in Org-mode in the future, a
-line enforcing Org-mode will be inserted into the buffer, if this option
+normally means that the file name does not automatically trigger Org mode.
+To ensure that the file will always be in Org mode in the future, a
+line enforcing Org mode will be inserted into the buffer, if this option
 has been set."
   :group 'org-startup
   :type 'boolean)
 
 (defcustom org-replace-disputed-keys nil
   "Non-nil means use alternative key bindings for some keys.
-Org-mode uses S-<cursor> keys for changing timestamps and priorities.
+Org mode uses S-<cursor> keys for changing timestamps and priorities.
 These keys are also used by other packages like shift-selection-mode'
 \(built into Emacs 23), `CUA-mode' or `windmove.el'.
-If you want to use Org-mode together with one of these other modes,
-or more generally if you would like to move some Org-mode commands to
+If you want to use Org mode together with one of these other modes,
+or more generally if you would like to move some Org mode commands to
 other keys, set this variable and configure the keys with the variable
 `org-disputed-keys'.
 
@@ -1081,7 +1082,7 @@ loading Org."
     ([(shift right)]		. [(meta +)])
     ([(control shift right)] 	. [(meta shift +)])
     ([(control shift left)]	. [(meta shift -)]))
-  "Keys for which Org-mode and other modes compete.
+  "Keys for which Org mode and other modes compete.
 This is an alist, cars are the default keys, second element specifies
 the alternative to use when `org-replace-disputed-keys' is t.
 
@@ -1106,11 +1107,11 @@ Or return the original if not disputed."
   (define-key keymap (org-key key) def))
 
 (defcustom org-ellipsis nil
-  "The ellipsis to use in the Org-mode outline.
+  "The ellipsis to use in the Org mode outline.
 When nil, just use the standard three dots.
 When a string, use that string instead.
 When a face, use the standard 3 dots, but with the specified face.
-The change affects only Org-mode (which will then use its own display table).
+The change affects only Org mode (which will then use its own display table).
 Changing this requires executing \\[org-mode] in a buffer to become
 effective."
   :group 'org-startup
@@ -1135,7 +1136,7 @@ effective."
   :type 'boolean)
 
 (defgroup org-structure nil
-  "Options concerning the general structure of Org-mode files."
+  "Options concerning the general structure of Org files."
   :tag "Org Structure"
   :group 'org)
 
@@ -1318,7 +1319,7 @@ than its value."
 	  (integer :tag "Maximum level")))
 
 (defcustom org-hide-block-startup nil
-  "Non-nil means entering Org-mode will fold all blocks.
+  "Non-nil means entering Org mode will fold all blocks.
 This can also be set in on a per-file basis with
 
 #+STARTUP: hideblocks
@@ -1373,7 +1374,7 @@ visibility is cycled."
   "Number of empty lines needed to keep an empty line between collapsed trees.
 If you leave an empty line between the end of a subtree and the following
 headline, this empty line is hidden when the subtree is folded.
-Org-mode will leave (exactly) one empty line visible if the number of
+Org mode will leave (exactly) one empty line visible if the number of
 empty lines is equal or larger to the number given in this variable.
 So the default 2 means at least 2 empty lines after the end of a subtree
 are needed to produce free space between a collapsed subtree and the
@@ -1693,7 +1694,7 @@ as possible."
   :group 'org-structure)
 
 (defcustom org-imenu-depth 2
-  "The maximum level for Imenu access to Org-mode headlines.
+  "The maximum level for Imenu access to Org headlines.
 This also applied for speedbar access."
   :group 'org-imenu-and-speedbar
   :type 'integer)
@@ -1716,9 +1717,9 @@ do the following:
   TAB or RET are pressed to move to another field.  With optimization this
   happens only if changes to a field might have changed the column width.
 Optimization requires replacing the functions `self-insert-command',
-`delete-char', and `backward-delete-char' in Org-mode buffers, with a
-slight (in fact: unnoticeable) speed impact for normal typing.  Org-mode is
-very good at guessing when a re-align will be necessary, but you can always
+`delete-char', and `backward-delete-char' in Org buffers, with a
+slight (in fact: unnoticeable) speed impact for normal typing.  Org is very
+good at guessing when a re-align will be necessary, but you can always
 force one with \\[org-ctrl-c-ctrl-c].
 
 If you would like to use the optimized version in Org-mode, but the
@@ -1834,7 +1835,7 @@ TYPE is a string and KEY is a plist keyword."
   "Alist of link abbreviations.
 The car of each element is a string, to be replaced at the start of a link.
 The cdrs are replacement values, like (\"linkkey\" . REPLACE).  Abbreviated
-links in Org-mode buffers can have an optional tag after a double colon, e.g.
+links in Org buffers can have an optional tag after a double colon, e.g.,
 
      [[linkkey:tag][description]]
 
@@ -1892,7 +1893,7 @@ adaptive  Use relative path for files in the current directory and sub-
 
 (defvaralias 'org-activate-links 'org-highlight-links)
 (defcustom org-highlight-links '(bracket angle plain radio tag date footnote)
-  "Types of links that should be highlighted in Org-mode files.
+  "Types of links that should be highlighted in Org files.
 
 This is a list of symbols, each one of them leading to the
 highlighting of a certain link type.
@@ -1997,8 +1998,8 @@ negates this setting for the duration of the command."
 The command `org-store-link' adds a link pointing to the current
 location to an internal list.  These links accumulate during a session.
 The command `org-insert-link' can be used to insert links into any
-Org-mode file (offering completion for all stored links).  When this
-option is nil, every link which has been inserted once using \\[org-insert-link]
+Org file (offering completion for all stored links).  When this option
+is nil, every link which has been inserted once using \\[org-insert-link]
 will be removed from the list, to make completing the unused links
 more efficient."
   :group 'org-link-store
@@ -2162,7 +2163,7 @@ Shell links can be dangerous: just think about a link
 
      [[shell:rm -rf ~/*][Google Search]]
 
-This link would show up in your Org-mode document as \"Google Search\",
+This link would show up in your Org document as \"Google Search\",
 but really it would remove your entire home directory.
 Therefore we advise against setting this variable to nil.
 Just change it to `y-or-n-p' if you want to confirm with a
@@ -2188,7 +2189,7 @@ Elisp links can be dangerous: just think about a link
 
      [[elisp:(shell-command \"rm -rf ~/*\")][Google Search]]
 
-This link would show up in your Org-mode document as \"Google Search\",
+This link would show up in your Org document as \"Google Search\",
 but really it would remove your entire home directory.
 Therefore we advise against setting this variable to nil.
 Just change it to `y-or-n-p' if you want to confirm with a
@@ -2531,13 +2532,13 @@ When `full-file-path', include the full file path."
 
 (defcustom org-outline-path-complete-in-steps t
   "Non-nil means complete the outline path in hierarchical steps.
-When Org-mode uses the refile interface to select an outline path
-\(see variable `org-refile-use-outline-path'), the completion of
-the path can be done in a single go, or it can be done in steps down
-the headline hierarchy.  Going in steps is probably the best if you
-do not use a special completion package like `ido' or `icicles'.
-However, when using these packages, going in one step can be very
-fast, while still showing the whole path to the entry."
+When Org uses the refile interface to select an outline path (see
+`org-refile-use-outline-path'), the completion of the path can be
+done in a single go, or it can be done in steps down the headline
+hierarchy.  Going in steps is probably the best if you do not use
+a special completion package like `ido' or `icicles'.  However,
+when using these packages, going in one step can be very fast,
+while still showing the whole path to the entry."
   :group 'org-refile
   :type 'boolean)
 
@@ -2593,8 +2594,8 @@ Each sequence starts with a symbol, either `sequence' or `type',
 indicating if the keywords should be interpreted as a sequence of
 action steps, or as different types of TODO items.  The first
 keywords are states requiring action - these states will select a headline
-for inclusion into the global TODO list Org-mode produces.  If one of
-the \"keywords\" is the vertical bar, \"|\", the remaining keywords
+for inclusion into the global TODO list Org produces.  If one of the
+\"keywords\" is the vertical bar, \"|\", the remaining keywords
 signify that no further action is necessary.  If \"|\" is not found,
 the last keyword is treated as the only DONE state of the sequence.
 
@@ -2695,7 +2696,7 @@ When nil, fast selection is never used.
 
 When the symbol `prefix', it will be used when `org-todo' is called
 with a prefix argument,  i.e. `\\[universal-argument] \\[org-todo]' \
-in an Org-mode buffer, and
+in an Org buffer, and
 `\\[universal-argument] t' in an agenda buffer.
 
 When t, fast selection is used by default.  In this case, the prefix
@@ -3381,8 +3382,8 @@ This affects the following situations:
    For example, if it is April and you enter \"feb 2\", this will be read
    as Feb 2, *next* year.  \"May 5\", however, will be this year.
 2. The user gives a day, but no month.
-   For example, if today is the 15th, and you enter \"3\", Org-mode will
-   read this as the third of *next* month.  However, if you enter \"17\",
+   For example, if today is the 15th, and you enter \"3\", Org will read
+   this as the third of *next* month.  However, if you enter \"17\",
    it will be considered as *this* month.
 
 If you set this variable to the symbol `time', then also the following
@@ -3942,7 +3943,7 @@ forth between agenda and calendar."
 (defcustom org-calendar-insert-diary-entry-key [?i]
   "The key to be installed in `calendar-mode-map' for adding diary entries.
 This option is irrelevant until `org-agenda-diary-file' has been configured
-to point to an Org-mode file.  When that is the case, the command
+to point to an Org file.  When that is the case, the command
 `org-agenda-diary-entry' will be bound to the key given here, by default
 `i'.  In the calendar, `i' normally adds entries to `diary-file'.  So
 if you want to continue doing this, you need to change this to a different
@@ -4313,7 +4314,7 @@ Make sure that you only list packages here which:
 	   (string :tag "A line of LaTeX"))))
 
 (defgroup org-appearance nil
-  "Settings for Org-mode appearance."
+  "Settings for Org mode appearance."
   :tag "Org Appearance"
   :group 'org)
 
@@ -4523,7 +4524,7 @@ You need to reload Org or to restart Emacs after customizing this.")
 Text starting and ending with a special character will be emphasized,
 for example *bold*, _underlined_ and /italic/.  This variable sets the
 marker characters and the face to be used by font-lock for highlighting
-in Org-mode Emacs buffers.
+in Org buffers.
 
 You need to reload Org or to restart Emacs after customizing this."
   :group 'org-appearance
@@ -4744,7 +4745,7 @@ When the filename is omitted, archiving happens in the same file.
 %s in the filename will be replaced by the current file
 name (without the directory part).  Archiving to a different file
 is useful to keep archived entries from contributing to the
-Org-mode Agenda.
+Org Agenda.
 
 The archived entries will be filed as subtrees of the specified
 headline.  When the headline is omitted, the subtrees are simply
@@ -5478,7 +5479,7 @@ This is for getting out of special buffers like capture.")
 (defvar org-org-menu)
 (defvar org-tbl-menu)
 
-;;;; Define the Org-mode
+;;;; Define the Org mode
 
 ;; We use a before-change function to check if a table might need
 ;; an update.
@@ -5526,15 +5527,15 @@ This variable is set by `org-before-change-function'.
   "Outline-based notes management and organizer, alias
 \"Carsten's outline-mode for keeping track of everything.\"
 
-Org-mode develops organizational tasks around a NOTES file which
-contains information about projects as plain text.  Org-mode is
-implemented on top of outline-mode, which is ideal to keep the content
+Org mode develops organizational tasks around a NOTES file which
+contains information about projects as plain text.  Org mode is
+implemented on top of Outline mode, which is ideal to keep the content
 of large files well structured.  It supports ToDo items, deadlines and
 time stamps, which magically appear in the diary listing of the Emacs
 calendar.  Tables are easily created with a built-in table editor.
 Plain text URL-like links connect to websites, emails (VM), Usenet
 messages (Gnus), BBDB entries, and any files related to the project.
-For printing and sharing of notes, an Org-mode file (or a part of it)
+For printing and sharing of notes, an Org file (or a part of it)
 can be exported as a structured ASCII or HTML file.
 
 The following commands are available:
@@ -6843,7 +6844,7 @@ and subscripts."
 (defun org-cycle (&optional arg)
   "TAB-action and visibility cycling for Org-mode.
 
-This is the command invoked in Org-mode by the TAB key.  Its main purpose
+This is the command invoked in Org mode by the TAB key.  Its main purpose
 is outline visibility cycling, but it also invokes other actions
 in special contexts.
 
@@ -7352,7 +7353,7 @@ are at least `org-cycle-separator-lines' empty lines before the headline."
       (org-cycle-show-empty-lines context))))
 
 (defun org-files-list ()
-  "Return `org-agenda-files' list, plus all open org-mode files.
+  "Return `org-agenda-files' list, plus all open Org files.
 This is useful for operations that need to scan all of a user's
 open and agenda-wise Org files."
   (let ((files (mapcar 'expand-file-name (org-agenda-files))))
@@ -8539,7 +8540,7 @@ Assume point is at a heading or an inlinetask beginning."
 	       (forward-line)))))))))
 
 (defun org-convert-to-odd-levels ()
-  "Convert an org-mode file with all levels allowed to one with odd levels.
+  "Convert an Org file with all levels allowed to one with odd levels.
 This will leave level 1 alone, convert level 2 to level 3, level 3 to
 level 5 etc."
   (interactive)
@@ -8555,7 +8556,7 @@ level 5 etc."
 	  (end-of-line 1))))))
 
 (defun org-convert-to-oddeven-levels ()
-  "Convert an org-mode file with only odd levels to one with odd/even levels.
+  "Convert an Org file with only odd levels to one with odd/even levels.
 This promotes level 3 to level 2, level 5 to level 3 etc.  If the
 file contains a section with an even level, conversion would
 destroy the structure of the file.  An error is signaled in this
@@ -9277,15 +9278,15 @@ When sorting is done, call `org-after-sorting-entries-or-items-hook'."
 ;;; The orgstruct minor mode
 
 ;; Define a minor mode which can be used in other modes in order to
-;; integrate the org-mode structure editing commands.
+;; integrate the Org mode structure editing commands.
 
-;; This is really a hack, because the org-mode structure commands use
+;; This is really a hack, because the Org mode structure commands use
 ;; keys which normally belong to the major mode.  Here is how it
 ;; works: The minor mode defines all the keys necessary to operate the
 ;; structure commands, but wraps the commands into a function which
 ;; tests if the cursor is currently at a headline or a plain list
 ;; item.  If that is the case, the structure command is used,
-;; temporarily setting many Org-mode variables like regular
+;; temporarily setting many Org mode variables like regular
 ;; expressions for filling etc.  However, when any of those keys is
 ;; used at a different location, function uses `key-binding' to look
 ;; up if the key has an associated command in another currently active
@@ -9317,8 +9318,8 @@ orgstruct(++)-mode."
 ;;;###autoload
 (define-minor-mode orgstruct-mode
   "Toggle the minor mode `orgstruct-mode'.
-This mode is for using Org-mode structure commands in other
-modes.  The following keys behave as if Org-mode were active, if
+This mode is for using Org mode structure commands in other
+modes.  The following keys behave as if Org mode were active, if
 the cursor is on a headline, or on a plain list item (both as
 defined by Org-mode)."
   nil " OrgStruct" (make-sparse-keymap)
@@ -9343,7 +9344,7 @@ defined by Org-mode)."
 (defun orgstruct++-mode (&optional arg)
   "Toggle `orgstruct-mode', the enhanced version of it.
 In addition to setting orgstruct-mode, this also exports all
-indentation and autofilling variables from org-mode into the
+indentation and autofilling variables from Org mode into the
 buffer.  It will also recognize item context in multiline items."
   (interactive "P")
   (setq arg (prefix-numeric-value (or arg (if orgstruct-mode -1 1))))
@@ -9672,7 +9673,7 @@ Optional argument REGEXP selects variables to clone."
 (defun org-run-like-in-org-mode (cmd)
   "Run a command, pretending that the current buffer is in Org-mode.
 This will temporarily bind local variables that are typically bound in
-Org-mode to the values they have in Org-mode, and then interactively
+Org mode to the values they have in Org-mode, and then interactively
 call CMD."
   (org-load-modules-maybe)
   (unless org-local-vars
@@ -10315,8 +10316,8 @@ The cdr of LINK must be either a link description or nil."
 
 ;;;###autoload
 (defun org-insert-link-global ()
-  "Insert a link like Org-mode does.
-This command can be called in any mode to insert a link in Org-mode syntax."
+  "Insert a link like Org mode does.
+This command can be called in any mode to insert a link in Org syntax."
   (interactive)
   (org-load-modules-maybe)
   (org-run-like-in-org-mode 'org-insert-link))
@@ -10618,8 +10619,8 @@ handle this as a special case.
 
 When the function does handle the link, it must return a non-nil value.
 If it decides that it is not responsible for this link, it must return
-nil to indicate that that Org-mode can continue with other options
-like exact and fuzzy text search.")
+nil to indicate that that Org can continue with other options like
+exact and fuzzy text search.")
 
 (defun org-next-link (&optional search-backward)
   "Move forward to the next link.
@@ -11056,8 +11057,8 @@ which see.
 
 A function in this hook may also use `setq' to set the variable
 `description' to provide a suggestion for the descriptive text to
-be used for this link when it gets inserted into an Org-mode
-buffer with \\[org-insert-link].")
+be used for this link when it gets inserted into an Org buffer
+with \\[org-insert-link].")
 
 (defvar org-execute-file-search-functions nil
   "List of functions to execute a file search triggered by a link.
@@ -11341,9 +11342,8 @@ to read."
   "Jump to the previous position in the mark ring.
 With prefix arg N, jump back that many stored positions.  When
 called several times in succession, walk through the entire ring.
-Org-mode commands jumping to a different position in the current file,
-or to another Org-mode file, automatically push the old position
-onto the ring."
+Org mode commands jumping to a different position in the current file,
+or to another Org file, automatically push the old position onto the ring."
   (interactive "p")
   (let (p m)
     (if (eq last-command this-command)
@@ -15197,7 +15197,7 @@ When JUST-ALIGN is non-nil, only align tags."
 
 (defun org-change-tag-in-region (beg end tag off)
   "Add or remove TAG for each entry in the region.
-This works in the agenda, and also in an org-mode buffer."
+This works in the agenda, and also in an Org buffer."
   (interactive
    (list (region-beginning) (region-end)
 	 (let ((org-last-tags-completion-table
@@ -18003,7 +18003,7 @@ day number."
 	((listp d) (list (nth 4 d) (nth 3 d) (nth 5 d)))))
 
 (defun org-parse-time-string (s &optional nodefault)
-  "Parse the standard Org-mode time string.
+  "Parse the standard Org time string.
 This should be a lot faster than the normal `parse-time-string'.
 If time is not given, defaults to 0:00.  However, with optional NODEFAULT,
 hour and minute fields will be nil if not given."
@@ -18019,7 +18019,7 @@ hour and minute fields will be nil if not given."
 	       nil nil nil))
 	((string-match "^<[^>]+>$" s)
 	 (decode-time (seconds-to-time (org-matcher-time s))))
-	(t (error "Not a standard Org-mode time string: %s" s))))
+	(t (error "Not a standard Org time string: %s" s))))
 
 (defun org-timestamp-up (&optional arg)
   "Increase the date item at the cursor by one.
@@ -18546,15 +18546,15 @@ Entries containing a colon are interpreted as H:MM by
 ;;;; Files
 
 (defun org-save-all-org-buffers ()
-  "Save all Org-mode buffers without user confirmation."
+  "Save all Org buffers without user confirmation."
   (interactive)
-  (message "Saving all Org-mode buffers...")
+  (message "Saving all Org buffers...")
   (save-some-buffers t (lambda () (derived-mode-p 'org-mode)))
   (when (featurep 'org-id) (org-id-locations-save))
-  (message "Saving all Org-mode buffers... done"))
+  (message "Saving all Org buffers... done"))
 
 (defun org-revert-all-org-buffers ()
-  "Revert all Org-mode buffers.
+  "Revert all Org buffers.
 Prompt for confirmation when there are unsaved changes.
 Be sure you know what you are doing before letting this function
 overwrite your changes.
@@ -18940,7 +18940,7 @@ in Org-mode.
   (unless org-cdlatex-texmathp-advice-is-done
     (setq org-cdlatex-texmathp-advice-is-done t)
     (defadvice texmathp (around org-math-always-on activate)
-      "Always return t in org-mode buffers.
+      "Always return t in Org buffers.
 This is because we want to insert math symbols without dollars even outside
 the LaTeX math segments.  If Orgmode thinks that point is actually inside
 an embedded LaTeX fragment, let texmathp do its job.
@@ -20372,7 +20372,7 @@ because, in this case the deletion might narrow the column."
       (delete-char N)
       (org-fix-tags-on-the-fly))))
 
-;; Make `delete-selection-mode' work with org-mode and orgtbl-mode
+;; Make `delete-selection-mode' work with Org mode and Orgtbl mode
 (put 'org-self-insert-command 'delete-selection
      (lambda ()
        (not (run-hook-with-args-until-success
@@ -20391,7 +20391,7 @@ because, in this case the deletion might narrow the column."
 (put 'org-delete-char 'flyspell-delayed t)
 (put 'org-delete-backward-char 'flyspell-delayed t)
 
-;; Make pabbrev-mode expand after org-mode commands
+;; Make pabbrev-mode expand after Org mode commands
 (put 'org-self-insert-command 'pabbrev-expand-after-command t)
 (put 'orgtbl-self-insert-command 'pabbrev-expand-after-command t)
 
@@ -21575,7 +21575,7 @@ on context.  See the individual commands for more information."
   (and (not (org-before-first-heading-p))
        (not (org-at-table-p))))
 
-;; Define the Org-mode menus
+;; Define the Org mode menus
 (easy-menu-define org-tbl-menu org-mode-map "Tbl menu"
   '("Tbl"
     ["Align" org-ctrl-c-ctrl-c :active (org-at-table-p)]
@@ -21837,20 +21837,20 @@ on context.  See the individual commands for more information."
     ))
 
 (defun org-info (&optional node)
-  "Read documentation for Org-mode in the info system.
+  "Read documentation for Org in the info system.
 With optional NODE, go directly to that node."
   (interactive)
   (info (format "(org)%s" (or node ""))))
 
 ;;;###autoload
 (defun org-submit-bug-report ()
-  "Submit a bug report on Org-mode via mail.
+  "Submit a bug report on Org via mail.
 
 Don't hesitate to report any problems or inaccurate documentation.
 
 If you don't have setup sending mail from (X)Emacs, please copy the
 output buffer into your mail program, as it gives us important
-information about your Org-mode version and configuration."
+information about your Org version and configuration."
   (interactive)
   (require 'reporter)
   (defvar reporter-prompt-for-summary-p)
@@ -21865,9 +21865,9 @@ information about your Org-mode version and configuration."
 	 (pop-to-buffer-same-window (get-buffer-create "*Warn about privacy*"))
 	 (delete-other-windows)
 	 (erase-buffer)
-	 (insert "You are about to submit a bug report to the Org-mode mailing list.
+	 (insert "You are about to submit a bug report to the Org mailing list.
 
-We would like to add your full Org-mode and Outline configuration to the
+We would like to add your full Org and Outline configuration to the
 bug report.  This greatly simplifies the work of the maintainer and
 other experts on the mailing list.
 
@@ -21877,7 +21877,7 @@ appear in the form of file names, tags, todo states, or search strings.
 If you answer yes to the prompt, you might want to check and remove
 such private information before sending the email.")
 	 (add-text-properties (point-min) (point-max) '(face org-warning))
-	 (when (yes-or-no-p "Include your Org-mode configuration ")
+	 (when (yes-or-no-p "Include your Org configuration ")
 	   (mapatoms
 	    (lambda (v)
 	      (and (boundp v)
@@ -21896,7 +21896,7 @@ what in fact did happen.  You don't know how to make a good report?  See
 
      http://orgmode.org/manual/Feedback.html#Feedback
 
-Your bug report will be posted to the Org-mode mailing list.
+Your bug report will be posted to the Org mailing list.
 ------------------------------------------------------------------------")
     (save-excursion
       (when (re-search-backward "^\\(Subject: \\)Org-mode version \\(.*?\\);[ \t]*\\(.*\\)" nil t)
@@ -22341,7 +22341,7 @@ contexts are:
 :item             on the first line of a plain list item
 :item-bullet      on the bullet/number of a plain list item
 :checkbox         on the checkbox in a plain list item
-:table            in an org-mode table
+:table            in an Org table
 :table-special    on a special filed in a table
 :table-table      in a table.el table
 :clocktable       in a clocktable
@@ -24287,7 +24287,7 @@ If there is no such heading, return nil."
   (let ((first t)
 	(level (funcall outline-level)))
     (if (and (derived-mode-p 'org-mode) (< level 1000))
-	;; A true heading (not a plain list item), in Org-mode
+	;; A true heading (not a plain list item), in Org
 	;; This means we can easily find the end by looking
 	;; only for the right number of stars.  Using a regexp to do
 	;; this is so much faster than using a Lisp loop.

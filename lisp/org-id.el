@@ -24,7 +24,7 @@
 ;;
 ;;; Commentary:
 
-;; This file implements globally unique identifiers for Org-mode entries.
+;; This file implements globally unique identifiers for Org entries.
 ;; Identifiers are stored in the entry as an :ID: property.  Functions
 ;; are provided that create and retrieve such identifiers, and that find
 ;; entries based on the identifier.
@@ -200,7 +200,7 @@ This variable is only relevant when `org-id-track-globally' is set."
 When Org reparses files to remake the list of files and IDs it is tracking,
 it will normally scan the agenda files, the archives related to agenda files,
 any files that are listed as ID containing in the current register, and
-any Org-mode files currently visited by Emacs.
+any Org file currently visited by Emacs.
 You can list additional files here.
 This variable is only relevant when `org-id-track-globally' is set."
   :group 'org-id
@@ -463,7 +463,7 @@ When CHECK is given, prepare detailed information about duplicate IDs."
 		 (if (symbolp org-id-extra-files)
 		     (symbol-value org-id-extra-files)
 		   org-id-extra-files)
-		 ;; Files associated with live org-mode buffers
+		 ;; Files associated with live Org buffers
 		 (delq nil
 		       (mapcar (lambda (b)
 				 (with-current-buffer b

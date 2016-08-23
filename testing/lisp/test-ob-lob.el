@@ -33,7 +33,7 @@
        (or load-file-name buffer-file-name)))))))
 
 (ert-deftest test-ob-lob/ingest ()
-  "Test the ingestion of an org-mode file."
+  "Test the ingestion of an Org file."
   (should (< 0 (org-babel-lob-ingest
 		(expand-file-name "babel.org" org-test-example-dir)))))
 

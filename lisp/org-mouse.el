@@ -66,12 +66,12 @@
 
 ;; History:
 ;;
-;; Since version 5.10: Changes are listed in the general org-mode docs.
+;; Since version 5.10: Changes are listed in the general Org docs.
 ;;
 ;; Version 5.09;; + Version number synchronization with Org-mode.
 ;;
 ;; Version 0.25
-;; + made compatible with org-mode 4.70 (thanks to Carsten for the patch)
+;; + made compatible with Org 4.70 (thanks to Carsten for the patch)
 ;;
 ;; Version 0.24
 ;; + minor changes to the table menu
@@ -81,7 +81,7 @@
 ;; + context menu support for org-agenda-undo & org-sort-entries
 ;;
 ;; Version 0.22
-;; + handles undo support for the agenda buffer (requires org-mode >=4.58)
+;; + handles undo support for the agenda buffer (requires Org >=4.58)
 ;;
 ;; Version 0.21
 ;; + selected text activates its context menu
@@ -105,7 +105,7 @@
 ;; + added support for checkboxes
 ;;
 ;; Version 0.15
-;; + org-mode now works with the Agenda buffer as well
+;; + Org now works with the Agenda buffer as well
 ;;
 ;; Version 0.14
 ;; + added a menu option that converts plain list items to outline items
@@ -125,7 +125,7 @@
 ;;
 ;; Version 0.10
 ;; + added a menu option to remove highlights
-;; + compatible with org-mode 4.21 now
+;; + compatible with Org 4.21 now
 ;;
 ;; Version 0.08:
 ;; + trees can be moved/promoted/demoted by dragging with the right

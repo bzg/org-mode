@@ -57,7 +57,7 @@ See `org-archive-to-archive-sibling' for more information."
 
 (defcustom org-archive-mark-done nil
   "Non-nil means mark entries as DONE when they are moved to the archive file.
-This can be a string to set the keyword to use.  When t, Org-mode will
+This can be a string to set the keyword to use.  When non-nil, Org will
 use the first keyword in its list that means done."
   :group 'org-archive
   :type '(choice
@@ -287,7 +287,7 @@ this heading."
 	    ;; which would lead to duplication of subtrees
 	    (let (this-command) (org-copy-subtree 1 nil t))
 	    (set-buffer buffer)
-	    ;; Enforce org-mode for the archive buffer
+	    ;; Enforce Org mode for the archive buffer
 	    (if (not (derived-mode-p 'org-mode))
 		;; Force the mode for future visits.
 		(let ((org-insert-mode-line-in-empty-file t)

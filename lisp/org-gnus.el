@@ -26,7 +26,7 @@
 ;;; Commentary:
 
 ;; This file implements links to Gnus groups and messages from within Org-mode.
-;; Org-mode loads this module by default - if this is not what you want,
+;; Org mode loads this module by default - if this is not what you want,
 ;; configure the variable `org-modules'.
 
 ;;; Code:

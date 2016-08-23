@@ -81,12 +81,12 @@
 ;;   * `org-protocol-open-source' uses the sub-protocol \"open-source\" and maps
 ;;     URLs to local filenames defined in `org-protocol-project-alist'.
 ;;
-;;   * `org-protocol-store-link' stores an Org-link (if Org-mode is present) and
+;;   * `org-protocol-store-link' stores an Org link (if Org is present) and
 ;;     pushes the browsers URL to the `kill-ring' for yanking.  This handler is
 ;;     triggered through the sub-protocol \"store-link\".
 ;;
 ;;   * Call `org-protocol-capture' by using the sub-protocol \"capture\".  If
-;;     Org-mode is loaded, Emacs will pop-up a capture buffer and fill the
+;;     Org is loaded, Emacs will pop-up a capture buffer and fill the
 ;;     template with the data provided.  I.e. the browser's URL is inserted as an
 ;;     Org-link of which the page title will be the description part.  If text
 ;;     was select in the browser, that text will be the body of the entry.
@@ -646,7 +646,7 @@ CLIENT is ignored."
 ;;; Org specific functions:
 
 (defun org-protocol-create-for-org ()
-  "Create a org-protocol project for the current file's Org-mode project.
+  "Create a Org protocol project for the current file's project.
 The visited file needs to be part of a publishing project in
 `org-publish-project-alist' for this to work.  The function
 delegates most of the work to `org-protocol-create'."

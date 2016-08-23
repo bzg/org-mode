@@ -250,7 +250,7 @@ this line."
   :group 'org-table)
 
 (defcustom org-table-use-standard-references 'from
-  "Should org-mode work with table references like B3 instead of @3$2?
+  "Non-nil means using table references like B3 instead of @3$2.
 Possible values are:
 nil     never use them
 from    accept as input, do not present for editing
@@ -282,7 +282,7 @@ t       accept as input and present for editing"
 		       )
   "List with Calc mode settings for use in `calc-eval' for table formulas.
 The list must contain alternating symbols (Calc modes variables and values).
-Don't remove any of the default settings, just change the values.  Org-mode
+Don't remove any of the default settings, just change the values.  Org mode
 relies on the variables to be present in the list."
   :group 'org-table-calculation
   :type 'plist)
@@ -499,13 +499,13 @@ Field is restored even in case of abnormal exit."
 ;;;###autoload
 (defun org-table-create-with-table.el ()
   "Use the table.el package to insert a new table.
-If there is already a table at point, convert between Org-mode tables
+If there is already a table at point, convert between Org tables
 and table.el tables."
   (interactive)
   (require 'table)
   (cond
    ((org-at-table.el-p)
-    (if (y-or-n-p "Convert table to Org-mode table? ")
+    (if (y-or-n-p "Convert table to Org table? ")
 	(org-table-convert)))
    ((org-at-table-p)
     (when (y-or-n-p "Convert table to table.el table? ")
@@ -1830,17 +1830,17 @@ lines."
 ;;;###autoload
 (defun org-table-convert ()
   "Convert from `org-mode' table to table.el and back.
-Obviously, this only works within limits.  When an Org-mode table is
-converted to table.el, all horizontal separator lines get lost, because
-table.el uses these as cell boundaries and has no notion of horizontal lines.
-A table.el table can be converted to an Org-mode table only if it does not
-do row or column spanning.  Multiline cells will become multiple cells.
-Beware, Org-mode does not test if the table can be successfully converted - it
-blindly applies a recipe that works for simple tables."
+Obviously, this only works within limits.  When an Org table is converted
+to table.el, all horizontal separator lines get lost, because table.el uses
+these as cell boundaries and has no notion of horizontal lines.  A table.el
+table can be converted to an Org table only if it does not do row or column
+spanning.  Multiline cells will become multiple cells.  Beware, Org mode
+does not test if the table can be successfully converted - it blindly
+applies a recipe that works for simple tables."
   (interactive)
   (require 'table)
   (if (org-at-table.el-p)
-      ;; convert to Org-mode table
+      ;; convert to Org table
       (let ((beg (copy-marker (org-table-begin t)))
 	    (end (copy-marker (org-table-end t))))
 	(table-unrecognize-region beg end)
@@ -4208,19 +4208,20 @@ FACE, when non-nil, for the highlight."
 ;;; The orgtbl minor mode
 
 ;; Define a minor mode which can be used in other modes in order to
-;; integrate the org-mode table editor.
+;; integrate the Org table editor.
 
-;; This is really a hack, because the org-mode table editor uses several
-;; keys which normally belong to the major mode, for example the TAB and
-;; RET keys.  Here is how it works: The minor mode defines all the keys
-;; necessary to operate the table editor, but wraps the commands into a
-;; function which tests if the cursor is currently inside a table.  If that
-;; is the case, the table editor command is executed.  However, when any of
-;; those keys is used outside a table, the function uses `key-binding' to
-;; look up if the key has an associated command in another currently active
-;; keymap (minor modes, major mode, global), and executes that command.
-;; There might be problems if any of the keys used by the table editor is
-;; otherwise used as a prefix key.
+;; This is really a hack, because the Org table editor uses several
+;; keys which normally belong to the major mode, for example the TAB
+;; and RET keys.  Here is how it works: The minor mode defines all the
+;; keys necessary to operate the table editor, but wraps the commands
+;; into a function which tests if the cursor is currently inside
+;; a table.  If that is the case, the table editor command is
+;; executed.  However, when any of those keys is used outside a table,
+;; the function uses `key-binding' to look up if the key has an
+;; associated command in another currently active keymap (minor modes,
+;; major mode, global), and executes that command.  There might be
+;; problems if any of the keys used by the table editor is otherwise
+;; used as a prefix key.
 
 ;; Another challenge is that the key binding for TAB can be tab or \C-i,
 ;; likewise the binding for RET can be return or \C-m.  Orgtbl-mode
@@ -5263,7 +5264,7 @@ supported.  It is also possible to use the following ones:
     params)))
 
 ;; Put the cursor in a column containing numerical values
-;; of an Org-Mode table,
+;; of an Org table,
 ;; type C-c " a
 ;; A new column is added with a bar plot.
 ;; When the table is refreshed (C-u C-c *),

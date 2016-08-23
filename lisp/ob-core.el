@@ -110,10 +110,10 @@
   "Confirm before evaluation.
 \\<org-mode-map>\
 Require confirmation before interactively evaluating code
-blocks in Org-mode buffers.  The default value of this variable
-is t, meaning confirmation is required for any code block
-evaluation.  This variable can be set to nil to inhibit any
-future confirmation requests.  This variable can also be set to a
+blocks in Org buffers.  The default value of this variable is t,
+meaning confirmation is required for any code block evaluation.
+This variable can be set to nil to inhibit any future
+confirmation requests.  This variable can also be set to a
 function which takes two arguments the language of the code block
 and the body of the code block.  Such a function should then
 return a non-nil value if the user should be prompted for
@@ -983,10 +983,10 @@ Return t if a code block was found at point, nil otherwise."
   "Read key sequence and execute the command in edit buffer.
 Enter a key sequence to be executed in the language major-mode
 edit buffer.  For example, TAB will alter the contents of the
-Org-mode code block according to the effect of TAB in the
-language major-mode buffer.  For languages that support
-interactive sessions, this can be used to send code from the Org
-buffer to the session for evaluation using the native major-mode
+Org code block according to the effect of TAB in the language
+major mode buffer.  For languages that support interactive
+sessions, this can be used to send code from the Org buffer
+to the session for evaluation using the native major mode
 evaluation mechanisms."
   (interactive "kEnter key-sequence to execute in edit buffer: ")
   (org-babel-do-in-edit-buffer
@@ -2090,21 +2090,21 @@ replace - (default option) insert results after the source block
           or inline source block replacing any previously
           inserted results.
 
-silent -- no results are inserted into the Org-mode buffer but
+silent -- no results are inserted into the Org buffer but
           the results are echoed to the minibuffer and are
           ingested by Emacs (a potentially time consuming
           process).
 
 file ---- the results are interpreted as a file path, and are
-          inserted into the buffer using the Org-mode file syntax.
+          inserted into the buffer using the Org file syntax.
 
-list ---- the results are interpreted as an Org-mode list.
+list ---- the results are interpreted as an Org list.
 
-raw ----- results are added directly to the Org-mode file.  This
-          is a good option if you code block will output org-mode
+raw ----- results are added directly to the Org file.  This is
+          a good option if you code block will output Org
           formatted text.
 
-drawer -- results are added directly to the Org-mode file as with
+drawer -- results are added directly to the Org file as with
           \"raw\", but are wrapped in a RESULTS drawer or results
           macro, allowing them to later be replaced or removed
           automatically.

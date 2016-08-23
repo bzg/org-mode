@@ -61,7 +61,7 @@ the name of the original file and the name of the file
 produced.")
 
 (defgroup org-publish nil
-  "Options for publishing a set of Org-mode and related files."
+  "Options for publishing a set of files."
   :tag "Org Publishing"
   :group 'org)
 

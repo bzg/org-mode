@@ -73,7 +73,7 @@
 ;; =====================================================================
 ;;
 ;; Additionally, the following functions are now available for storing
-;; bibtex entries within Org-mode documents.
+;; bibtex entries within Org documents.
 ;;
 ;; - Run `org-bibtex' to export the current file to a .bib.
 ;;
@@ -92,17 +92,17 @@
 ;;
 ;;; History:
 ;;
-;; The link creation part has been part of Org-mode for a long time.
+;; The link creation part has been part of Org for a long time.
 ;;
 ;; Creating better capture template information was inspired by a request
 ;; of Austin Frank: http://article.gmane.org/gmane.emacs.orgmode/4112
 ;; and then implemented by Bastien Guerry.
 ;;
 ;; Eric Schulte eventually added the functions for translating between
-;; Org-mode headlines and Bibtex entries, and for fleshing out the Bibtex
-;; fields of existing Org-mode headlines.
+;; Org headlines and Bibtex entries, and for fleshing out the Bibtex
+;; fields of existing Org headlines.
 ;;
-;; Org-mode loads this module by default - if this is not what you want,
+;; Org mode loads this module by default - if this is not what you want,
 ;; configure the variable `org-modules'.
 
 ;;; Code:
@@ -548,7 +548,7 @@ With optional argument OPTIONAL, also prompt for optional fields."
 (add-hook 'org-execute-file-search-functions 'org-execute-file-search-in-bibtex)
 
 
-;;; Bibtex <-> Org-mode headline translation functions
+;;; Bibtex <-> Org headline translation functions
 (defun org-bibtex (filename)
   "Export each headline in the current file to a bibtex entry.
 Headlines are exported using `org-bibtex-headline'."
@@ -699,7 +699,7 @@ Return the number of saved entries."
     (mapc togtag org-bibtex-tags)))
 
 (defun org-bibtex-yank ()
-  "If kill ring holds a bibtex entry yank it as an Org-mode headline."
+  "If kill ring holds a bibtex entry yank it as an Org headline."
   (interactive)
   (let (entry)
     (with-temp-buffer (yank 1) (setf entry (org-bibtex-read)))
@@ -708,7 +708,7 @@ Return the number of saved entries."
       (error "Yanked text does not appear to contain a BibTeX entry"))))
 
 (defun org-bibtex-import-from-file (file)
-  "Read bibtex entries from FILE and insert as Org-mode headlines after point."
+  "Read bibtex entries from FILE and insert as Org headlines after point."
   (interactive "fFile: ")
   (dotimes (_ (org-bibtex-read-file file))
     (save-excursion (org-bibtex-write))

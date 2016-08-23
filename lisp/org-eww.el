@@ -29,8 +29,8 @@
 
 ;; In an eww buffer function `org-eww-copy-for-org-mode' kills either
 ;; a region or the whole buffer if no region is set and transforms the
-;; text on the fly so that it can be pasted into an org-mode buffer
-;; with hot links.
+;; text on the fly so that it can be pasted into an Org buffer with
+;; hot links.
 
 ;; C-c C-x C-w (and also C-c C-x M-w) trigger
 ;; `org-eww-copy-for-org-mode'.

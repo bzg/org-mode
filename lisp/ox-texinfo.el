@@ -1577,10 +1577,10 @@ Return output file name."
 
 ;;;###autoload
 (defun org-texinfo-convert-region-to-texinfo ()
-  "Assume the current region has org-mode syntax, and convert it to Texinfo.
+  "Assume the current region has Org syntax, and convert it to Texinfo.
 This can be used in any buffer.  For example, you can write an
-itemized list in org-mode syntax in an Texinfo buffer and use
-this command to convert it."
+itemized list in Org syntax in an Texinfo buffer and use this
+command to convert it."
   (interactive)
   (org-export-replace-region-by 'texinfo))
 

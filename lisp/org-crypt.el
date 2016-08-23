@@ -6,7 +6,7 @@
 ;; Keywords: org-mode
 ;; Author: John Wiegley <johnw@gnu.org>
 ;; Maintainer: Peter Jones <pjones@pmade.com>
-;; Description: Adds public key encryption to org-mode buffers
+;; Description: Adds public key encryption to Org buffers
 ;; URL: http://www.newartisans.com/software/emacs.html
 ;; Compatibility: Emacs22
 

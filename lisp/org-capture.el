@@ -1,4 +1,4 @@
-;;; org-capture.el --- Fast note taking in Org-mode  -*- lexical-binding: t; -*-
+;;; org-capture.el --- Fast note taking in Org       -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2010-2016 Free Software Foundation, Inc.
 
@@ -105,9 +105,9 @@ description  A short string describing the template, will be shown during
              selection.
 
 type         The type of entry.  Valid types are:
-               entry       an Org-mode node, with a headline.  Will be
-                           filed as the child of the target entry or as
-                           a top-level entry.
+               entry       an Org node, with a headline.  Will be filed
+                           as the child of the target entry or as a
+                           top-level entry.
                item        a plain list item, will be placed in the
                            first plain list at the target
                            location.
@@ -118,7 +118,7 @@ type         The type of entry.  Valid types are:
                plain       text to be inserted as it is.
 
 target       Specification of where the captured item should be placed.
-             In Org-mode files, targets usually define a node.  Entries will
+             In Org files, targets usually define a node.  Entries will
              become children of this node, other types will be added to the
              table or list in the body of this node.
 
@@ -449,7 +449,7 @@ to avoid conflicts with other active capture processes."
 
 (defvar org-capture-mode-map (make-sparse-keymap)
   "Keymap for `org-capture-mode', a minor mode.
-Use this map to set additional keybindings for when Org-mode is used
+Use this map to set additional keybindings for when Org mode is used
 for a capture buffer.")
 
 (defvar org-capture-mode-hook nil

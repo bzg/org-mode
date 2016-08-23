@@ -24,7 +24,7 @@
 ;;; Commentary:
 
 ;; Since CSS can't be executed, this file exists solely for tangling
-;; CSS from org-mode files.
+;; CSS from Org files.
 
 ;;; Code:
 (require 'ob)

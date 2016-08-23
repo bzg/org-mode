@@ -1421,7 +1421,7 @@ value, don't limit agenda view by outline level."
   :type 'integer)
 
 (defgroup org-agenda-time-grid nil
-  "Options concerning the time grid in the Org-mode Agenda."
+  "Options concerning the time grid in the Org Agenda."
   :tag "Org Agenda Time Grid"
   :group 'org-agenda)
 
@@ -1493,7 +1493,7 @@ a grid line."
   :type 'string)
 
 (defgroup org-agenda-sorting nil
-  "Options concerning sorting in the Org-mode Agenda."
+  "Options concerning sorting in the Org Agenda."
   :tag "Org Agenda Sorting"
   :group 'org-agenda)
 
@@ -1599,7 +1599,7 @@ When nil, such items are sorted as 0 minutes effort."
   :type 'boolean)
 
 (defgroup org-agenda-line-format nil
-  "Options concerning the entry prefix in the Org-mode agenda display."
+  "Options concerning the entry prefix in the Org agenda display."
   :tag "Org Agenda Line Format"
   :group 'org-agenda)
 
@@ -2112,7 +2112,7 @@ When nil, `q' will kill the single agenda buffer."
   "Variables that must be local in agenda buffers to allow multiple buffers.")
 
 (defun org-agenda-mode ()
-  "Mode for time-sorted view on action items in Org-mode files.
+  "Mode for time-sorted view on action items in Org files.
 
 The following commands are available:
 
@@ -2393,7 +2393,7 @@ The following commands are available:
      ["Remove Restriction" org-agenda-remove-restriction-lock org-agenda-restrict])
     ["Write view to file" org-agenda-write t]
     ["Rebuild buffer" org-agenda-redo t]
-    ["Save all Org-mode Buffers" org-save-all-org-buffers t]
+    ["Save all Org buffers" org-save-all-org-buffers t]
     "--"
     ["Show original entry" org-agenda-show t]
     ["Go To (other window)" org-agenda-goto t]
@@ -2695,7 +2695,7 @@ More commands can be added by configuring the variable
 `org-agenda-custom-commands'.  In particular, specific tags and TODO keyword
 searches can be pre-defined in this way.
 
-If the current buffer is in Org-mode and visiting a file, you can also
+If the current buffer is in Org mode and visiting a file, you can also
 first press `<' once to indicate that the agenda should be temporarily
 \(until the next use of \\[org-agenda]) restricted to the current file.
 Pressing `<' twice means to restrict to the current subtree or region
@@ -2843,7 +2843,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 	 t t))
        ((equal org-keys "L")
 	(unless (derived-mode-p 'org-mode)
-	  (user-error "This is not an Org-mode file"))
+	  (user-error "This is not an Org file"))
 	(unless restriction
 	  (put 'org-agenda-files 'org-restrict (list bfn))
 	  (org-call-with-arg 'org-timeline arg)))
@@ -3041,7 +3041,7 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 	    (call-interactively 'org-toggle-sticky-agenda)
 	    (sit-for 2))
 	   ((and (not restrict-ok) (memq c '(?1 ?0 ?<)))
-	    (message "Restriction is only possible in Org-mode buffers")
+	    (message "Restriction is only possible in Org buffers")
 	    (ding) (sit-for 1))
 	   ((eq c ?1)
 	    (org-agenda-remove-restriction-lock 'noupdate)
@@ -3530,7 +3530,7 @@ removed from the entry content.  Currently only `planning' is allowed here."
 (defun org-check-for-org-mode ()
   "Make sure current buffer is in org-mode.  Error if not."
   (or (derived-mode-p 'org-mode)
-      (error "Cannot execute org-mode agenda command on buffer in %s"
+      (error "Cannot execute Org agenda command on buffer in %s"
 	     major-mode)))
 
 ;;; Agenda prepare and finalize
@@ -4403,7 +4403,7 @@ START-DAY is an absolute time value."
 (defvar org-agenda-search-history nil)
 
 (defvar org-search-syntax-table nil
-  "Special syntax table for org-mode search.
+  "Special syntax table for Org search.
 In this table, we have single quotes not as word constituents, to
 that when \"+Ameli\" is searched as a work, it will also match \"Ameli's\"")
 
@@ -5220,7 +5220,7 @@ date.  It also removes lines that contain only whitespace."
 	   (setq string (org-modify-diary-entry-string string))))))
 
 (defun org-modify-diary-entry-string (string)
-  "Add text properties to string, allowing org-mode to act on it."
+  "Add text properties to string, allowing Org to act on it."
   (org-add-props string nil
     'mouse-face 'highlight
     'help-echo (if buffer-file-name
@@ -8370,7 +8370,7 @@ When called with a prefix argument, include all archive files as well."
       (message "No tags associated with this line"))))
 
 (defun org-agenda-goto (&optional highlight)
-  "Go to the entry at point in the corresponding Org-mode file."
+  "Go to the entry at point in the corresponding Org file."
   (interactive)
   (let* ((marker (or (org-get-at-bol 'org-marker)
 		     (org-agenda-error)))
@@ -8472,7 +8472,7 @@ Point is in the buffer where the item originated.")
 		  (org-remove-subtree-entries-from-agenda))
 		(org-back-to-heading t)
 		(funcall cmd)))
-	  (error "Archiving works only in Org-mode files"))))))
+	  (error "Archiving works only in Org files"))))))
 
 (defun org-remove-subtree-entries-from-agenda (&optional buf beg end)
   "Remove all lines in the agenda that correspond to a given subtree.
@@ -8609,13 +8609,13 @@ displayed Org file fills the frame."
 	(run-hooks 'org-agenda-after-show-hook)))))
 
 (defun org-agenda-goto-mouse (ev)
-  "Go to the Org-mode file which contains the item at the mouse click."
+  "Go to the Org file which contains the item at the mouse click."
   (interactive "e")
   (mouse-set-point ev)
   (org-agenda-goto))
 
 (defun org-agenda-show (&optional full-entry)
-  "Display the Org-mode file which contains the item at point.
+  "Display the Org file which contains the item at point.
 With prefix argument FULL-ENTRY, make the entire entry visible
 if it was hidden in the outline."
   (interactive "P")
@@ -8626,7 +8626,7 @@ if it was hidden in the outline."
 
 (defvar org-agenda-show-window nil)
 (defun org-agenda-show-and-scroll-up (&optional arg)
-  "Display the Org-mode file which contains the item at point.
+  "Display the Org file which contains the item at point.
 When called repeatedly, scroll the window that is displaying the buffer.
 With a \\[universal-argument] prefix, use `org-show-entry' instead of
 `show-subtree' to display the item, so that drawers and logbooks stay
@@ -8653,7 +8653,7 @@ folded."
       (select-window win))))
 
 (defun org-agenda-show-1 (&optional more)
-  "Display the Org-mode file which contains the item at point.
+  "Display the Org file which contains the item at point.
 The prefix arg selects the amount of information to display:
 
 0   hide the subtree
@@ -8728,7 +8728,7 @@ docstring of `org-agenda-show-1'."
   (org-agenda-show-1 org-agenda-cycle-counter))
 
 (defun org-agenda-recenter (arg)
-  "Display the Org-mode file which contains the item at point and recenter."
+  "Display the Org file which contains the item at point and recenter."
   (interactive "P")
   (let ((win (selected-window)))
     (org-agenda-goto t)
@@ -8736,7 +8736,7 @@ docstring of `org-agenda-show-1'."
     (select-window win)))
 
 (defun org-agenda-show-mouse (ev)
-  "Display the Org-mode file which contains the item at the mouse click."
+  "Display the Org file which contains the item at the mouse click."
   (interactive "e")
   (mouse-set-point ev)
   (org-agenda-show))
@@ -8805,9 +8805,9 @@ by a remote command from the agenda.")
   (org-agenda-todo 'previousset))
 
 (defun org-agenda-todo (&optional arg)
-  "Cycle TODO state of line at point, also in Org-mode file.
+  "Cycle TODO state of line at point, also in Org file.
 This changes the line at point, all other lines in the agenda referring to
-the same tree node, and the headline of the tree node in the Org-mode file."
+the same tree node, and the headline of the tree node in the Org file."
   (interactive "P")
   (org-agenda-check-no-diary)
   (let* ((col (current-column))
@@ -8966,19 +8966,19 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
       (org-font-lock-add-tag-faces (point-max)))))
 
 (defun org-agenda-priority-up ()
-  "Increase the priority of line at point, also in Org-mode file."
+  "Increase the priority of line at point, also in Org file."
   (interactive)
   (org-agenda-priority 'up))
 
 (defun org-agenda-priority-down ()
-  "Decrease the priority of line at point, also in Org-mode file."
+  "Decrease the priority of line at point, also in Org file."
   (interactive)
   (org-agenda-priority 'down))
 
 (defun org-agenda-priority (&optional force-direction)
-  "Set the priority of line at point, also in Org-mode file.
+  "Set the priority of line at point, also in Org file.
 This changes the line at point, all other lines in the agenda referring to
-the same tree node, and the headline of the tree node in the Org-mode file.
+the same tree node, and the headline of the tree node in the Org file.
 Called with a universal prefix arg, show the priority instead of setting it."
   (interactive "P")
   (if (equal force-direction '(4))
@@ -9517,7 +9517,7 @@ a timestamp can be added there."
 All the standard commands work: block, weekly etc.
 When `org-agenda-diary-file' points to a file,
 `org-agenda-diary-entry-in-org-file' is called instead to create
-entries in that Org-mode file."
+entries in that Org file."
   (interactive)
   (if (not (eq org-agenda-diary-file 'diary-file))
       (org-agenda-diary-entry-in-org-file)
@@ -9622,7 +9622,7 @@ argument, latitude and longitude will be prompted for."
 
 ;;;###autoload
 (defun org-calendar-goto-agenda ()
-  "Compute the Org-mode agenda for the calendar date displayed at the cursor.
+  "Compute the Org agenda for the calendar date displayed at the cursor.
 This is a command that has to be installed in `calendar-mode-map'."
   (interactive)
   ;; Temporarily disable sticky agenda since user clearly wants to

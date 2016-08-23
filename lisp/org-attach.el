@@ -22,7 +22,7 @@
 
 ;;; Commentary:
 
-;; See the Org-mode manual for information on how to use it.
+;; See the Org manual for information on how to use it.
 ;;
 ;; Attachments are managed in a special directory called "data", which
 ;; lives in the same directory as the org file itself.  If this data

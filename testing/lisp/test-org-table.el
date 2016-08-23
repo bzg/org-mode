@@ -20,7 +20,7 @@
 
 ;;;; Comments:
 
-;; Template test file for Org-mode tests.  Many tests are also a howto
+;; Template test file for Org tests.  Many tests are also a howto
 ;; example collection as a user documentation, more or less all those
 ;; using `org-test-table-target-expect'.  See also the doc string of
 ;; `org-test-table-target-expect'.

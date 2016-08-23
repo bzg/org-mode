@@ -26,11 +26,11 @@
 ;;; Commentary:
 
 ;; This file implements links to BBDB database entries from within Org-mode.
-;; Org-mode loads this module by default - if this is not what you want,
+;; Org mode loads this module by default - if this is not what you want,
 ;; configure the variable `org-modules'.
 
 ;; It also implements an interface (based on Ivar Rummelhoff's
-;; bbdb-anniv.el) for those org-mode users, who do not use the diary
+;; bbdb-anniv.el) for those Org users, who do not use the diary
 ;; but who do want to include the anniversaries stored in the BBDB
 ;; into the org-agenda.  If you already include the `diary' into the
 ;; agenda, you might want to prefer to include the anniversaries in

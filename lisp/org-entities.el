@@ -47,7 +47,7 @@
     (_ nil)))
 
 (defcustom org-entities-user nil
-  "User-defined entities used in Org-mode to produce special characters.
+  "User-defined entities used in Org to produce special characters.
 Each entry in this list is a list of strings.  It associates the name
 of the entity that can be inserted into an Org file as \\name with the
 appropriate replacements for the different export backends.  The order

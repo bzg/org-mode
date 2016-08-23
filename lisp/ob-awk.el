@@ -27,8 +27,8 @@
 ;;
 ;; - :in-file takes a path to a file of data to be processed by awk
 ;;
-;; - :stdin takes an Org-mode data or code block reference, the value
-;;          of which will be passed to the awk process through STDIN
+;; - :stdin takes an Org data or code block reference, the value of
+;;          which will be passed to the awk process through STDIN
 
 ;;; Code:
 (require 'ob)
