@@ -585,7 +585,7 @@ holding export options."
 		 (let ((dirdesc
 			(let ((desc (plist-get info :texinfo-dirdesc)))
 			  (cond ((not desc) nil)
-				((string-match-p "\\.$" desc) desc)
+				((string-suffix-p "." desc) desc)
 				(t (concat desc "."))))))
 		   (if dirdesc (format "%-23s %s" dirtitle dirdesc) dirtitle))
 		 "\n"

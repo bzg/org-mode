@@ -402,7 +402,7 @@ effect, which variables to use depends on the Emacs version."
     `(org-unmodified ,@body)))
 (def-edebug-spec org-with-silent-modifications (body))
 
-;; Remove this when support for Emacs < 24.4 is dropped.
+;; Functions for Emacs < 24.4 compatibility
 (defun org-define-error (name message)
   "Define NAME as a new error signal.
 MESSAGE is a string that will be output to the echo area if such
@@ -411,6 +411,26 @@ Implements `define-error' for older emacsen."
   (if (fboundp 'define-error) (define-error name message)
     (put name 'error-conditions
 	 (copy-sequence (cons name (get 'error 'error-conditions))))))
+
+(unless (fboundp 'string-prefix-p)
+  ;; From Emacs subr.el.
+  (defun string-prefix-p (prefix string &optional ignore-case)
+    "Return non-nil if PREFIX is a prefix of STRING.
+If IGNORE-CASE is non-nil, the comparison is done without paying attention
+to case differences."
+    (let ((prefix-length (length prefix)))
+      (if (> prefix-length (length string)) nil
+	(eq t (compare-strings prefix 0 prefix-length string
+			       0 prefix-length ignore-case)))))
+
+  (defun string-suffix-p (suffix string  &optional ignore-case)
+    "Return non-nil if SUFFIX is a suffix of STRING.
+If IGNORE-CASE is non-nil, the comparison is done without paying
+attention to case differences."
+    (let ((start-pos (- (length string) (length suffix))))
+      (and (>= start-pos 0)
+	   (eq t (compare-strings suffix nil nil
+				  string start-pos nil ignore-case))))))
 
 (provide 'org-compat)
 

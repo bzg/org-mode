@@ -11283,7 +11283,7 @@ of matched result, with is either `dedicated' or `fuzzy'."
   (cond
    ((not org-display-internal-link-with-indirect-buffer)
     buffer)
-   ((string-match "(Clone)$" (buffer-name buffer))
+   ((string-suffix-p "(Clone)" (buffer-name buffer))
     (message "Buffer is already a clone, not making another one")
     ;; we also do not modify visibility in this case
     buffer)

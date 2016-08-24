@@ -106,15 +106,15 @@ This function is called by `org-babel-execute-src-block'."
 	     (org-latex-packages-alist
 	      (append (cdr (assoc :packages params)) org-latex-packages-alist)))
         (cond
-         ((and (string-match "\\.png$" out-file) (not imagemagick))
+         ((and (string-suffix-p ".png" out-file) (not imagemagick))
           (org-create-formula-image
            body out-file org-format-latex-options in-buffer))
-         ((string-match "\\.tikz$" out-file)
+         ((string-suffix-p ".tikz" out-file)
 	  (when (file-exists-p out-file) (delete-file out-file))
 	  (with-temp-file out-file
 	    (insert body)))
-	 ((and (or (string-match "\\.svg$" out-file)
-		   (string-match "\\.html$" out-file))
+	 ((and (or (string-suffix-p ".svg" out-file)
+		   (string-suffix-p ".html" out-file))
 	       (executable-find org-babel-latex-htlatex))
 	  ;; TODO: this is a very different way of generating the
 	  ;; frame latex document than in the pdf case.  Ideally, both
@@ -144,7 +144,7 @@ This function is called by `org-babel-execute-src-block'."
 	    (shell-command (format "%s %s" org-babel-latex-htlatex tex-file)))
 	  (cond
 	   ((file-exists-p (concat (file-name-sans-extension tex-file) "-1.svg"))
-	    (if (string-match "\\.svg$" out-file)
+	    (if (string-suffix-p ".svg" out-file)
 		(progn
 		  (shell-command "pwd")
 		  (shell-command (format "mv %s %s"
@@ -152,13 +152,13 @@ This function is called by `org-babel-execute-src-block'."
 					 out-file)))
 	      (error "SVG file produced but HTML file requested")))
 	   ((file-exists-p (concat (file-name-sans-extension tex-file) ".html"))
-	    (if (string-match "\\.html$" out-file)
+	    (if (string-suffix-p ".html" out-file)
 		(shell-command "mv %s %s"
 			       (concat (file-name-sans-extension tex-file)
 				       ".html")
 			       out-file)
 	      (error "HTML file produced but SVG file requested")))))
-	 ((or (string-match "\\.pdf$" out-file) imagemagick)
+	 ((or (string-suffix-p ".pdf" out-file) imagemagick)
 	  (with-temp-file tex-file
 	    (require 'ox-latex)
 	    (insert

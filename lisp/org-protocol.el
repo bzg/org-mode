@@ -678,14 +678,14 @@ the cdr of an element in `org-publish-project-alist', reuse
         (minibuffer-allow-text-properties nil))
 
     (setq base-url (read-string "Base URL of published content: " base-url nil base-url t))
-    (if (not (string-match "\\/$" base-url))
-        (setq base-url (concat base-url "/")))
+    (or (string-suffix-p "/" base-url)
+	(setq base-url (concat base-url "/")))
 
     (setq working-dir
           (expand-file-name
            (read-directory-name "Local working directory: " working-dir working-dir t)))
-    (if (not (string-match "\\/$" working-dir))
-        (setq working-dir (concat working-dir "/")))
+    (or (string-suffix-p "/" working-dir)
+	(setq working-dir (concat working-dir "/")))
 
     (setq strip-suffix
           (read-string

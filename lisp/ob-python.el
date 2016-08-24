@@ -334,8 +334,9 @@ last statement in BODY, as elisp."
 
 (defun org-babel-python-read-string (string)
   "Strip \\='s from around Python string."
-  (if (string-match "^'\\([^\000]+\\)'$" string)
-      (match-string 1 string)
+  (if (and (string-prefix-p "'" string)
+	   (string-suffix-p "'" string))
+      (substring string 1 -1)
     string))
 
 (provide 'ob-python)

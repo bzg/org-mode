@@ -412,9 +412,9 @@ This splices all the components into the list."
 	(pcase org-publish-sitemap-sort-files
 	  (`alphabetically
 	   (let* ((adir (file-directory-p a))
-		  (aorg (and (string-match "\\.org$" a) (not adir)))
+		  (aorg (and (string-suffix-p ".org" a) (not adir)))
 		  (bdir (file-directory-p b))
-		  (borg (and (string-match "\\.org$" b) (not bdir)))
+		  (borg (and (string-suffix-p ".org" b) (not bdir)))
 		  (A (if aorg (concat (file-name-directory a)
 				      (org-publish-find-title a)) a))
 		  (B (if borg (concat (file-name-directory b)

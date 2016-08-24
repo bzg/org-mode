@@ -148,7 +148,7 @@ This function is called by `org-babel-execute-src-block'."
 		     "hline"))))
     (mapcar
      (lambda (pair)
-       (if (string-match "bash$" shell-file-name)
+       (if (string-suffix-p "bash" shell-file-name)
 	   (org-babel-variable-assignments:bash
             (car pair) (cdr pair) sep hline)
          (org-babel-variable-assignments:sh-generic

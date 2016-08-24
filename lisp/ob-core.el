@@ -1844,7 +1844,8 @@ region is not active then the point is demarcated."
 			lang "\n"
 			body
 			(if (or (= (length body) 0)
-				(string-match "[\r\n]$" body)) "" "\n")
+				(string-suffix-p "\r" body)
+				(string-suffix-p "\n" body)) "" "\n")
 			(funcall (if lower-case-p 'downcase 'upcase) "#+end_src\n")))
 	(goto-char start) (move-end-of-line 1)))))
 

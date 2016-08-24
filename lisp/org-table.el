@@ -1163,7 +1163,7 @@ to a number.  In the case of a timestamp, increment by days."
 	(user-error "No non-empty field found")
       (if (and org-table-copy-increment
 	       (not (equal orig-n 0))
-	       (string-match "^[-+^/*0-9eE.]+$" txt)
+	       (string-match-p "^[-+^/*0-9eE.]+$" txt)
 	       (< (string-to-number txt) 100000000))
 	  (setq txt (calc-eval (concat txt "+" (number-to-string inc)))))
       (insert txt)
@@ -1306,7 +1306,10 @@ is always the old value."
 		   (concat ", formula: "
 			   (org-table-formula-to-user
 			    (concat
-			     (if (string-match "^[$@]"(car eqn)) "" "$")
+			     (if (or (string-prefix-p "$" (car eqn))
+				     (string-prefix-p "@" (car eqn)))
+				 ""
+			       "$")
 			     (car eqn) "=" (cdr eqn))))
 		 "")))))
 
@@ -1579,7 +1582,7 @@ With prefix ABOVE, insert above the current line."
   (if (not (org-at-table-p))
       (user-error "Not at a table"))
   (when (eobp) (insert "\n") (backward-char 1))
-  (if (not (string-match "|[ \t]*$" (org-current-line-string)))
+  (if (not (string-match-p "|[ \t]*$" (org-current-line-string)))
       (org-table-align))
   (let ((line (org-table-clean-line
 	       (buffer-substring (point-at-bol) (point-at-eol))))
@@ -2185,7 +2188,7 @@ with \"=\" or \":=\"."
 		      (assoc ref stored-list)
 		      (assoc scol stored-list))))
 	(cond (key (car ass))
-	      (ass (concat (if (string-match "^[0-9]+$" (car ass)) "=" ":=")
+	      (ass (concat (if (string-match-p "^[0-9]+$" (car ass)) "=" ":=")
 			   (cdr ass))))))
      (noerror nil)
      (t (error "No formula active for the current field")))))
@@ -2209,7 +2212,7 @@ When NAMED is non-nil, look for a named equation."
 	 (org-table-may-need-update nil)
 	 (stored (cdr (assoc scol stored-list)))
 	 (eq (cond
-	      ((and stored equation (string-match "^ *=? *$" equation))
+	      ((and stored equation (string-match-p "^ *=? *$" equation))
 	       stored)
 	      ((stringp equation)
 	       equation)

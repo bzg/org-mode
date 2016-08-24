@@ -91,8 +91,10 @@ this variable.")
 (defvar ess-local-process-name)   ; dynamically scoped
 (defun org-babel-edit-prep:R (info)
   (let ((session (cdr (assoc :session (nth 2 info)))))
-    (when (and session (string-match "^\\*\\(.+?\\)\\*$" session))
-      (save-match-data (org-babel-R-initiate-session session nil)))))
+    (when (and session
+	       (string-prefix-p "*"  session)
+	       (string-suffix-p "*" session))
+      (org-babel-R-initiate-session session nil))))
 
 ;; The usage of utils::read.table() ensures that the command
 ;; read.table() can be found even in circumstances when the utils
