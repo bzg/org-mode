@@ -281,7 +281,7 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
      ("ddag" "\\ddag{}" nil "&Dagger;" "[doubledagger]" "[doubledagger]" "‡")
 
      "** Whitespace"
-     ("nbsp" "~" nil "&nbsp;" " " " " " ")
+     ("nbsp" "~" nil "&nbsp;" " " "\x00A0" "\x00A0")
      ("ensp" "\\hspace*{.5em}" nil "&ensp;" " " " " " ")
      ("emsp" "\\hspace*{1em}" nil "&emsp;" " " " " " ")
      ("thinsp" "\\hspace*{.2em}" nil "&thinsp;" " " " " " ")
