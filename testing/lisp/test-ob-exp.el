@@ -565,6 +565,25 @@ src_emacs-lisp{(+ 1 1)}"
 	(org-babel-exp-process-buffer))
       (buffer-string)))))
 
+(ert-deftest ob-export/body-with-coderef ()
+  "Test exporting a code block with coderefs."
+  (should
+   (equal "#+BEGIN_SRC emacs-lisp\n0 (ref:foo)\n#+END_SRC"
+	  (org-test-with-temp-text
+	      "#+BEGIN_SRC emacs-lisp :exports code\n0 (ref:foo)\n#+END_SRC"
+	    (let ((org-export-babel-evaluate t)
+		  (org-coderef-label-format "(ref:foo)"))
+	      (org-babel-exp-process-buffer))
+	    (buffer-string))))
+  (should
+   (equal
+    "#+BEGIN_SRC emacs-lisp -l \"r:%s\"\n1 r:foo\n#+END_SRC"
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp -l \"r:%s\" -lisp :exports code\n1 r:foo\n#+END_SRC"
+      (let ((org-export-babel-evaluate t))
+	(org-babel-exp-process-buffer))
+      (buffer-string)))))
+
 
 (provide 'test-ob-exp)
 

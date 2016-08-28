@@ -113,7 +113,7 @@ compatible with `org-babel-get-src-block-info', which see."
 	 (type (org-element-type context)))
     (when (memq type '(babel-call inline-babel-call))
       (pcase (org-babel-lob--src-info (org-element-property :call context))
-	(`(,language ,body ,header ,_ ,_ ,_)
+	(`(,language ,body ,header ,_ ,_ ,_ ,coderef)
 	 (let ((begin (org-element-property (if (eq type 'inline-babel-call)
 						:begin
 					      :post-affiliated)
@@ -138,7 +138,8 @@ compatible with `org-babel-get-src-block-info', which see."
 			   (org-element-property :end-header context)))))
 		 nil
 		 (org-element-property :name context)
-		 begin)))
+		 begin
+		 coderef)))
 	(_ nil)))))
 
 (provide 'ob-lob)

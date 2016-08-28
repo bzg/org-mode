@@ -1739,7 +1739,13 @@ abc
    (= 2
       (org-test-with-temp-text
 	  "#+begin_src emacs-lisp -l \"#(ref:%s)\"\n2 #(ref:foo)\n#+end_src"
-	(org-babel-execute-src-block)))))
+	(org-babel-execute-src-block))))
+  (should
+   (= 3
+      (org-test-with-temp-text
+	  "#+begin_src emacs-lisp\n3 #(ref:foo)\n#+end_src"
+	(let ((org-coderef-label-format "#(ref:%s)"))
+	  (org-babel-execute-src-block))))))
 
 (provide 'test-ob)
 
