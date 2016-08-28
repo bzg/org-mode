@@ -1839,7 +1839,7 @@ links in Org buffers can have an optional tag after a double colon, e.g.,
 
      [[linkkey:tag][description]]
 
-The `linkkey' must be a word word, starting with a letter, followed
+The `linkkey' must be a single word, starting with a letter, followed
 by letters, numbers, `-' or `_'.
 
 If REPLACE is a string, the tag will simply be appended to create the link.
