@@ -3265,19 +3265,19 @@ existing formula for column %s"
 	      ;; `org-table-formula-create-columns' allows it.
 	      (let ((column-count (progn (end-of-line)
 					 (1- (org-table-current-column)))))
-		`(lambda (column)
-		   (when (> column 1000)
-		     (user-error "Formula column target too large"))
-		   (and (> column ,column-count)
-			(or (eq org-table-formula-create-columns t)
-			    (and (eq org-table-formula-create-columns 'warn)
-				 (progn
-				   (org-display-warning
-				    "Out-of-bounds formula added columns")
-				   t))
-			    (and (eq org-table-formula-create-columns 'prompt)
-				 (yes-or-no-p
-				  "Out-of-bounds formula.  Add columns? ")))))))
+		(lambda (column)
+		  (when (> column 1000)
+		    (user-error "Formula column target too large"))
+		  (and (> column column-count)
+		       (or (eq org-table-formula-create-columns t)
+			   (and (eq org-table-formula-create-columns 'warn)
+				(progn
+				  (org-display-warning
+				   "Out-of-bounds formula added columns")
+				  t))
+			   (and (eq org-table-formula-create-columns 'prompt)
+				(yes-or-no-p
+				 "Out-of-bounds formula.  Add columns? ")))))))
 	     (org-table-eval-formula nil formula t t t t))))
 	;; Clean up markers and internal text property.
 	(remove-text-properties (point-min) (point-max) '(org-untouchable t))
