@@ -1521,7 +1521,7 @@ Footnotes definitions are returned within \"\\footnotetext{}\"
 commands.
 
 This function is used within constructs that don't support
-\"\\footnote{}\" command (e.g, an item tag).  In that case,
+\"\\footnote{}\" command (e.g., an item tag).  In that case,
 \"\\footnotemark\" is used within the construct and the function
 just outside of it."
   (mapconcat
