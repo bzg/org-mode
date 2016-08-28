@@ -2533,7 +2533,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let ((lang (org-element-property :language inline-src-block))
-	(code (org-html-format-code inline-src-block info))
+	(code (org-element-property :value inline-src-block))
 	(label
 	 (let ((lbl (and (org-element-property :name inline-src-block)
 			 (org-export-get-reference inline-src-block info))))
