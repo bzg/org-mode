@@ -412,7 +412,7 @@ Implements `define-error' for older emacsen."
     (put name 'error-conditions
 	 (copy-sequence (cons name (get 'error 'error-conditions))))))
 
-(unless (fboundp 'string-prefix-p)
+(unless (fboundp 'string-suffix-p)
   ;; From Emacs subr.el.
   (defun string-prefix-p (prefix string &optional ignore-case)
     "Return non-nil if PREFIX is a prefix of STRING.
