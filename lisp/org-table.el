@@ -3194,8 +3194,8 @@ existing formula for column %s"
 		      (re-search-forward org-table-hline-regexp end t)
 		      (re-search-forward org-table-dataline-regexp end t))
 		 (setq beg (match-beginning 0)))
-		;; Just leave BEG where it is.
-		(t (setq beg (line-beginning-position)))))
+		;; Just leave BEG at the start of the table.
+		(t nil)))
 	   (setq beg (line-beginning-position)
 		 end (copy-marker (line-beginning-position 2))))
 	 (goto-char beg)

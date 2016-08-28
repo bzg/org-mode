@@ -2009,6 +2009,33 @@ is t, then new columns should be added as needed"
 |  4 | too large |
 #+TBLFM: $2 = '(orgtbl-ascii-draw $1 0 3 3 \"$-\")")))
 
+(ert-deftest test-org-table/single-rowgroup ()
+  "Test column formula in a table with a single rowgroup."
+  (should
+   (equal
+    "
+|---+---|
+| 1 | 0 |
+|---+---|
+#+TBLFM: $2=$1-1"
+    (org-test-with-temp-text "
+|---+---|
+| 1 |   |
+|---+---|
+<point>#+TBLFM: $2=$1-1"
+      (org-table-calc-current-TBLFM)
+      (buffer-string))))
+  (should
+   (equal
+    "
+| 1 | 0 |
+#+TBLFM: $2=$1-1"
+    (org-test-with-temp-text "
+| 1 |   |
+<point>#+TBLFM: $2=$1-1"
+      (org-table-calc-current-TBLFM)
+      (buffer-string)))))
+
 
 (provide 'test-org-table)
 
