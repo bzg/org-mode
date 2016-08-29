@@ -339,6 +339,7 @@ for the JavaScript code in this tag.
   pre.src-ledger:before { content: 'Ledger'; }
   pre.src-lisp:before { content: 'Lisp'; }
   pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
   pre.src-matlab:before { content: 'MATLAB'; }
   pre.src-mscgen:before { content: 'Mscgen'; }
   pre.src-ocaml:before { content: 'Objective Caml'; }
