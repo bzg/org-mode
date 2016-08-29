@@ -222,6 +222,7 @@ of 90\thinsp{}% of the container the image.
 *** Babel
 **** Blocks with coderefs labels can now be evaluated
 The labels are removed prior to evaluating the block.
+**** Support for Lua language
 **** Support for SLY in Lisp blocks
 See ~org-babel-lisp-eval-fn~ to activate it.
 **** Support for Stan language
