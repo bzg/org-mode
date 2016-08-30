@@ -260,7 +260,7 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
 
      "* Other"
      "** Misc. (often used)"
-     ("circ" "\\^{}" nil "&circ;" "^" "^" "ˆ")
+     ("circ" "\\^{}" nil "&circ;" "^" "^" "∘")
      ("vert" "\\vert{}" t "&vert;" "|" "|" "|")
      ("vbar" "|" nil "|" "|" "|" "|")
      ("brvbar" "\\textbrokenbar{}" nil "&brvbar;" "|" "¦" "¦")
