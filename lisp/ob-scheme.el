@@ -173,7 +173,7 @@ is true; otherwise returns the last value."
 	(setq result (if (or (string= result "#<void>")
 			     (string= result "#<unspecified>"))
 			 nil
-		       (read result)))))
+		       result))))
     result))
 
 (defun org-babel-execute:scheme (body params)
