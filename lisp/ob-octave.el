@@ -238,11 +238,11 @@ value of the last statement in BODY, as elisp."
        (setq results
 	     (if matlabp
 		 (cdr (reverse (delq "" (mapcar
-					 #'org-babel-octave-read-string
+					 #'org-babel-strip-quotes
 					 (mapcar #'org-trim raw)))))
 	       (cdr (member org-babel-octave-eoe-output
 			    (reverse (mapcar
-				      #'org-babel-octave-read-string
+				      #'org-babel-strip-quotes
 				      (mapcar #'org-trim raw)))))))
        (mapconcat #'identity (reverse results) "\n")))))
 
@@ -258,12 +258,6 @@ This removes initial blank and comment lines and then calls
 	     (setq end (point-at-bol)))
 	  (delete-region beg end)))
     (org-babel-import-elisp-from-file temp-file '(16))))
-
-(defun org-babel-octave-read-string (string)
-  "Strip \\\"s from around octave string."
-  (if (string-match "^\"\\([^\000]+\\)\"$" string)
-      (match-string 1 string)
-    string))
 
 (provide 'ob-octave)
 

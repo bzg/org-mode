@@ -74,7 +74,7 @@
                 (insert org-babel-haskell-eoe)
                 (comint-send-input nil t)))
          (results (mapcar
-                   #'org-babel-haskell-read-string
+                   #'org-babel-strip-quotes
                    (cdr (member org-babel-haskell-eoe
                                 (reverse (mapcar #'org-trim raw)))))))
     (org-babel-reassemble-table
@@ -88,12 +88,6 @@
 			  (cdr (assoc :colname-names params)))
      (org-babel-pick-name (cdr (assoc :rowname-names params))
 			  (cdr (assoc :rowname-names params))))))
-
-(defun org-babel-haskell-read-string (string)
-  "Strip \\\"s from around a haskell string."
-  (if (string-match "^\"\\([^\000]+\\)\"$" string)
-      (match-string 1 string)
-    string))
 
 (defun org-babel-haskell-initiate-session (&optional _session _params)
   "Initiate a haskell session.

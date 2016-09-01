@@ -254,12 +254,6 @@ return the value of the last statement in BODY, as elisp."
 	   (comint-send-input nil t))
 	 (org-babel-eval-read-file tmp-file))))))
 
-(defun org-babel-ruby-read-string (string)
-  "Strip \\\"s from around a ruby string."
-  (if (string-match "^\"\\([^\000]+\\)\"$" string)
-      (match-string 1 string)
-    string))
-
 (provide 'ob-ruby)
 
 
