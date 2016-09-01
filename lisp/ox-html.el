@@ -117,7 +117,6 @@
     (:html-link-home "HTML_LINK_HOME" nil org-html-link-home)
     (:html-link-up "HTML_LINK_UP" nil org-html-link-up)
     (:html-mathjax "HTML_MATHJAX" nil "" space)
-    (:html-link-use-abs-url nil "html-link-use-abs-url" org-html-link-use-abs-url)
     (:html-postamble nil "html-postamble" org-html-postamble)
     (:html-preamble nil "html-preamble" org-html-preamble)
     (:html-head "HTML_HEAD" nil org-html-head newline)
