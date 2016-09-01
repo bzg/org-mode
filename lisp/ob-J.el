@@ -30,6 +30,13 @@
 
 ;;; Code:
 (require 'ob)
+
+
+(defcustom org-babel-J-command
+  "jconsole"
+  "Command to call J."
+  :group 'org-babel
+  :type 'string)
 
 (declare-function org-trim "org" (s &optional keep-lead))
 (declare-function j-console-ensure-session "ext:j-console" ())
@@ -75,7 +82,7 @@ This function is called by `org-babel-execute-src-block'"
 	 (progn
 	   (with-temp-file tmp-script-file
 	     (insert full-body))
-	   (org-babel-eval (format "jconsole < %s" tmp-script-file) ""))
+	   (org-babel-eval (format "%s < %s" org-babel-J-command tmp-script-file) ""))
        (org-babel-J-eval-string full-body)))))
 
 (defun org-babel-J-eval-string (str)
