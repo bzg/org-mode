@@ -316,8 +316,7 @@ Each member of this list is a list with three members:
 				:type :family :title :fonts :version
 				:paper :encoding :pagecentre :colormodel
 				:useDingbats :horizontal))
-	 (device (and (string-match ".+\\.\\([^.]+\\)" out-file)
-		      (match-string 1 out-file)))
+	 (device (file-name-extension out-file))
 	 (device-info (or (assq (intern (concat ":" device))
 				org-babel-R-graphics-devices)
                           (assq :png org-babel-R-graphics-devices)))

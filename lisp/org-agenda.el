@@ -3339,7 +3339,9 @@ the agenda to write."
   (org-let (if nosettings nil org-agenda-exporter-settings)
     '(save-excursion
        (save-window-excursion
-	 (let ((bs (copy-sequence (buffer-string))) beg content)
+	 (let ((bs (copy-sequence (buffer-string)))
+	       (extension (file-name-extension file))
+	       beg content)
 	   (with-temp-buffer
 	     (rename-buffer org-agenda-write-buffer-name t)
 	     (set-buffer-modified-p nil)
@@ -3349,7 +3351,7 @@ the agenda to write."
 	     (cond
 	      ((bound-and-true-p org-mobile-creating-agendas)
 	       (org-mobile-write-agenda-for-mobile file))
-	      ((string-match "\\.org\\'" file)
+	      ((string= "org" extension)
 	       (let (content p m message-log-max)
 		 (goto-char (point-min))
 		 (while (setq p (next-single-property-change (point) 'org-hd-marker nil))
@@ -3368,7 +3370,7 @@ the agenda to write."
 		 (write-file file)
 		 (kill-buffer (current-buffer))
 		 (message "Org file written to %s" file)))
-	      ((string-match "\\.html?\\'" file)
+	      ((string= "html" extension)
 	       (require 'htmlize)
 	       (set-buffer (htmlize-buffer (current-buffer)))
 	       (when org-agenda-export-html-style
@@ -3380,11 +3382,11 @@ the agenda to write."
 	       (write-file file)
 	       (kill-buffer (current-buffer))
 	       (message "HTML written to %s" file))
-	      ((string-match "\\.ps\\'" file)
+	      ((string= "ps" extension)
 	       (require 'ps-print)
 	       (ps-print-buffer-with-faces file)
 	       (message "Postscript written to %s" file))
-	      ((string-match "\\.pdf\\'" file)
+	      ((string= "pdf" extension)
 	       (require 'ps-print)
 	       (ps-print-buffer-with-faces
 		(concat (file-name-sans-extension file) ".ps"))
@@ -3394,7 +3396,7 @@ the agenda to write."
 			     (expand-file-name file))
 	       (delete-file (concat (file-name-sans-extension file) ".ps"))
 	       (message "PDF written to %s" file))
-	      ((string-match "\\.ics\\'" file)
+	      ((string= "ics" extension)
 	       (require 'ox-icalendar)
 	       (org-icalendar-export-current-agenda (expand-file-name file)))
 	      (t

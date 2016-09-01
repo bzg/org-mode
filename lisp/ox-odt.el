@@ -2388,13 +2388,13 @@ used as a communication channel."
     ;; Copy over the formula file from user directory to zip
     ;; directory.
     (message "Embedding %s as %s..." src-file target-file)
-    (let ((case-fold-search nil))
+    (let ((ext (file-name-extension src-file)))
       (cond
        ;; Case 1: Mathml.
-       ((string-match "\\.\\(mathml\\|mml\\)\\'" src-file)
+       ((member ext '("mathml" "mml"))
 	(copy-file src-file (concat org-odt-zip-dir target-file) 'overwrite))
        ;; Case 2: OpenDocument formula.
-       ((string-match "\\.odf\\'" src-file)
+       ((string= ext "odf")
 	(org-odt--zip-extract src-file "content.xml"
 				(concat org-odt-zip-dir target-dir)))
        (t (error "%s is not a formula file" src-file))))

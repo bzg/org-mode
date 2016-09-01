@@ -93,6 +93,7 @@ This function is called by `org-babel-execute-src-block'."
   (setq body (org-babel-expand-body:latex body params))
   (if (cdr (assoc :file params))
       (let* ((out-file (cdr (assoc :file params)))
+	     (extension (file-name-extension out-file))
 	     (tex-file (org-babel-temp-file "latex-" ".tex"))
 	     (border (cdr (assoc :border params)))
 	     (imagemagick (cdr (assoc :imagemagick params)))
@@ -113,8 +114,8 @@ This function is called by `org-babel-execute-src-block'."
 	  (when (file-exists-p out-file) (delete-file out-file))
 	  (with-temp-file out-file
 	    (insert body)))
-	 ((and (or (string-suffix-p ".svg" out-file)
-		   (string-suffix-p ".html" out-file))
+	 ((and (or (string= "svg" extension)
+		   (string= "html" extension))
 	       (executable-find org-babel-latex-htlatex))
 	  ;; TODO: this is a very different way of generating the
 	  ;; frame latex document than in the pdf case.  Ideally, both
@@ -158,7 +159,7 @@ This function is called by `org-babel-execute-src-block'."
 				       ".html")
 			       out-file)
 	      (error "HTML file produced but SVG file requested")))))
-	 ((or (string-suffix-p ".pdf" out-file) imagemagick)
+	 ((or (string= "pdf" extension) imagemagick)
 	  (with-temp-file tex-file
 	    (require 'ox-latex)
 	    (insert
@@ -191,16 +192,16 @@ This function is called by `org-babel-execute-src-block'."
           (when (file-exists-p out-file) (delete-file out-file))
 	  (let ((transient-pdf-file (org-babel-latex-tex-to-pdf tex-file)))
 	    (cond
-	     ((string-match "\\.pdf$" out-file)
+	     ((string= "pdf" extension)
 	      (rename-file transient-pdf-file out-file))
 	     (imagemagick
 	      (org-babel-latex-convert-pdf
 	       transient-pdf-file out-file im-in-options im-out-options)
 	      (when (file-exists-p transient-pdf-file)
-		(delete-file transient-pdf-file))))))
-         ((string-match "\\.\\([^\\.]+\\)$" out-file)
-          (error "Can not create %s files, please specify a .png or .pdf file or try the :imagemagick header argument"
-		 (match-string 1 out-file))))
+		(delete-file transient-pdf-file)))
+	     (t
+	      (error "Can not create %s files, please specify a .png or .pdf file or try the :imagemagick header argument"
+		     extension))))))
         nil) ;; signal that output has already been written to file
     body))
 

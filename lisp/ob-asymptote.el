@@ -55,9 +55,7 @@
   "Execute a block of Asymptote code.
 This function is called by `org-babel-execute-src-block'."
   (let* ((out-file (cdr (assoc :file params)))
-         (format (or (and out-file
-                          (string-match ".+\\.\\(.+\\)" out-file)
-                          (match-string 1 out-file))
+         (format (or (file-name-extension out-file)
                      "pdf"))
          (cmdline (cdr (assoc :cmdline params)))
          (in-file (org-babel-temp-file "asymptote-"))
