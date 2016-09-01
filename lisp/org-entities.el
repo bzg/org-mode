@@ -168,7 +168,7 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
      ("beta" "\\beta" t "&beta;" "beta" "beta" "β")
      ("Gamma" "\\Gamma" t "&Gamma;" "Gamma" "Gamma" "Γ")
      ("gamma" "\\gamma" t "&gamma;" "gamma" "gamma" "γ")
-     ("Delta" "\\Delta" t "&Delta;" "Delta" "Gamma" "Δ")
+     ("Delta" "\\Delta" t "&Delta;" "Delta" "Delta" "Δ")
      ("delta" "\\delta" t "&delta;" "delta" "delta" "δ")
      ("Epsilon" "E" nil "&Epsilon;" "Epsilon" "Epsilon" "Ε")
      ("epsilon" "\\epsilon" t "&epsilon;" "epsilon" "epsilon" "ε")
