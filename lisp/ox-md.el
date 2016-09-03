@@ -514,7 +514,7 @@ INFO is a plist with contextual information."
   "Format the footnote section.
 INFO is a plist used as a communication channel."
   (let* ((fn-alist (org-export-collect-footnote-definitions info))
-         (fn-alist (cl-loop for (n type raw) in fn-alist collect
+         (fn-alist (cl-loop for (n _type raw) in fn-alist collect
                             (cons n (org-trim (org-export-data raw info)))))
          (headline-style (plist-get info :md-headline-style))
          (section-title (org-html--translate "Footnotes" info)))
@@ -539,7 +539,7 @@ holding export options."
    contents
    "\n"
    ;; Footnotes section.
-   (org-md-footnote--section info)))
+   (org-md--footnote-section info)))
 
 (defun org-md-template (contents _info)
   "Return complete document string after Markdown conversion.
