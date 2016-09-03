@@ -219,7 +219,8 @@ Return overlay specification, as a string, or nil."
   (let ((first-object (car (org-element-contents element))))
     (when (eq (org-element-type first-object) 'export-snippet)
       (let ((value (org-element-property :value first-object)))
-	(and (string-match "\\`<.*>\\'" value) value)))))
+	(and (string-prefix-p "<" value) (string-suffix-p ">" value)
+	     value)))))
 
 
 
@@ -558,7 +559,8 @@ used as a communication channel."
 	  (let ((action (org-element-property :BEAMER_ACT headline)))
 	    (cond
 	     ((not action) (list (cons "a" "") (cons "A" "") (cons "R" "")))
-	     ((string-match "\\`\\[.*\\]\\'" action)
+	     ((and (string-prefix-p "[" action)
+		   (string-suffix-p "]" action))
 	      (list
 	       (cons "A" (org-beamer--normalize-argument action 'defaction))
 	       (cons "a" "")

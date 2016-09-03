@@ -658,7 +658,7 @@ Assume point is at an item."
 		       (match-string-no-properties 2) ; counter
 		       (match-string-no-properties 3) ; checkbox
 		       ;; Description tag.
-		       (and (save-match-data (string-match "[-+*]" bullet))
+		       (and (string-match-p "[-+*]" bullet)
 			    (match-string-no-properties 4)))))))
 	   (end-before-blank
 	    (function
@@ -1025,7 +1025,7 @@ Possible types are `descriptive', `ordered' and `unordered'.  The
 type is determined by the first item of the list."
   (let ((first (org-list-get-list-begin item struct prevs)))
     (cond
-     ((string-match "[[:alnum:]]" (org-list-get-bullet first struct)) 'ordered)
+     ((string-match-p "[[:alnum:]]" (org-list-get-bullet first struct)) 'ordered)
      ((org-list-get-tag first struct) 'descriptive)
      (t 'unordered))))
 
@@ -1471,7 +1471,7 @@ This function returns, destructively, the new list structure."
 		      (save-excursion
 			(goto-char (org-list-get-last-item item struct prevs))
 			(point-at-eol)))
-		     ((string-match "\\`[0-9]+\\'" dest)
+		     ((string-match-p "\\`[0-9]+\\'" dest)
 		      (let* ((all (org-list-get-all-items item struct prevs))
 			     (len (length all))
 			     (index (mod (string-to-number dest) len)))
@@ -1645,7 +1645,7 @@ as returned by `org-list-prevs-alist'."
 	   (while item
 	     (let ((count (org-list-get-counter item struct)))
 	       ;; Virtually determine current bullet
-	       (if (and count (string-match "[a-zA-Z]" count))
+	       (if (and count (string-match-p "[a-zA-Z]" count))
 		   ;; Counters are not case-sensitive.
 		   (setq ascii (string-to-char (upcase count)))
 		 (setq ascii (1+ ascii)))

@@ -107,7 +107,7 @@ Otherwise create a link to the group inside Gnus.
 If `org-store-link' was called with a prefix arg the meaning of
 `org-gnus-prefer-web-links' is reversed."
   (let ((unprefixed-group (replace-regexp-in-string "^[^:]+:" "" group)))
-    (if (and (string-match "^nntp" group) ;; Only for nntp groups
+    (if (and (string-prefix-p "nntp" group) ;; Only for nntp groups
 	     (org-xor current-prefix-arg
 		      org-gnus-prefer-web-links))
 	(concat (if (string-match "gmane" unprefixed-group)

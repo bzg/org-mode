@@ -1725,10 +1725,7 @@ produce code that uses these same face definitions."
 (defun org-html-fix-class-name (kwd)	; audit callers of this function
   "Turn todo keyword KWD into a valid class name.
 Replaces invalid characters with \"_\"."
-  (save-match-data
-    (while (string-match "[^a-zA-Z0-9_]" kwd)
-      (setq kwd (replace-match "_" t t kwd))))
-  kwd)
+  (replace-regexp-in-string "[^a-zA-Z0-9_]" "_" kwd nil t))
 
 (defun org-html-footnote-section (info)
   "Format the footnote section.

@@ -8803,7 +8803,7 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
      (setq beg (point))
      (and (fboundp 'org-id-paste-tracker) (org-id-paste-tracker txt))
      (insert-before-markers txt)
-     (unless (string-match "\n\\'" txt) (insert "\n"))
+     (unless (string-suffix-p "\n" txt) (insert "\n"))
      (setq newend (point))
      (org-reinstall-markers-in-region beg)
      (setq end (point))
@@ -11486,12 +11486,11 @@ If the file does not exist, an error is thrown."
       ;; Remove quotes around the file name - we'll use shell-quote-argument.
       (while (string-match "['\"]%s['\"]" cmd)
 	(setq cmd (replace-match "%s" t t cmd)))
-      (while (string-match "%s" cmd)
-	(setq cmd (replace-match
-		   (save-match-data
-		     (shell-quote-argument
-		      (convert-standard-filename file)))
-		   t t cmd)))
+      (setq cmd (replace-regexp-in-string
+		 "%s"
+		 (shell-quote-argument (convert-standard-filename file))
+		 cmd
+		 nil t))
 
       ;; Replace "%1", "%2" etc. in command with group matches from regex
       (save-match-data
@@ -11780,9 +11779,7 @@ order.")
     (nreverse targets)))
 
 (defun org-protect-slash (s)
-  (while (string-match "/" s)
-    (setq s (replace-match "\\" t t s)))
-  s)
+  (replace-regexp-in-string "/" "\\/" s nil t))
 
 (defun org--get-outline-path-1 (&optional use-cache)
   "Return outline path to current headline.
@@ -14590,7 +14587,7 @@ See also `org-scan-tags'."
 	(progn
 	  (setq tagsmatch (substring match 0 (match-beginning 0)))
 	  (setq todomatch (substring match (match-end 0)))
-	  (when (string-match "\\`!" todomatch)
+	  (when (string-prefix-p "!" todomatch)
 	    (setq org--matcher-tags-todo-only t)
 	    (setq todomatch (substring todomatch 1)))
 	  (when (string-match "\\`\\s-*\\'" todomatch)
@@ -15143,8 +15140,8 @@ When JUST-ALIGN is non-nil, only align tags."
 		   ":")))
 
 	  (if (not (org-string-nw-p tags)) (setq tags "")
-	    (unless (string-match ":\\'" tags) (setq tags (concat tags ":")))
-	    (unless (string-match "\\`:" tags) (setq tags (concat ":" tags))))
+	    (unless (string-suffix-p ":" tags) (setq tags (concat tags ":")))
+	    (unless (string-prefix-p ":" tags) (setq tags (concat ":" tags))))
 
 	  ;; Insert new tags at the correct column
 	  (beginning-of-line)

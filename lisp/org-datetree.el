@@ -192,7 +192,7 @@ before running this command, even though the command tries to be smart."
 		    (max (line-beginning-position)
 			 (- (match-beginning 0) org-ds-keyword-length))
 		    (match-beginning 0))))
-	  (when (or (string-match "-\\'" tmp)
+	  (when (or (string-suffix-p "-" tmp)
 		    (string-match dre tmp)
 		    (string-match sre tmp))
 	    (throw 'next nil))

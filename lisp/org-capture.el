@@ -628,7 +628,7 @@ of the day at point (if any) or the current HH:MM time."
 	       (equal (car (org-capture-get :target)) 'function))
 	    ((error quit)
 	     (if (and (buffer-base-buffer (current-buffer))
-		      (string-match "\\`CAPTURE-" (buffer-name)))
+		      (string-prefix-p "CAPTURE-" (buffer-name)))
 		 (kill-buffer (current-buffer)))
 	     (set-window-configuration (org-capture-get :return-to-wconf))
 	     (error "Capture template `%s': %s"

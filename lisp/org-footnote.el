@@ -563,10 +563,8 @@ value if point was successfully moved."
 If LABEL is the empty string or constituted of white spaces only,
 return nil instead."
   (let ((label (org-trim label)))
-    (cond
-     ((equal "" label) nil)
-     ((string-match "\\`fn:" label) (replace-match "" nil nil label))
-     (t label))))
+    (unless (equal "" label)
+      (string-remove-prefix "fn:" label))))
 
 (defun org-footnote-get-definition (label)
   "Return label, boundaries and definition of the footnote LABEL."

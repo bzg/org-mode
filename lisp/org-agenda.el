@@ -3255,9 +3255,7 @@ This ensures the export commands can easily use it."
 	   ((not res) "")
 	   ((stringp res) res)
 	   (t (prin1-to-string res))))
-    (while (string-match "," res)
-      (setq res (replace-match ";" t t res)))
-    (org-trim res)))
+    (org-trim (replace-regexp-in-string "," ";" res nil t))))
 
 ;;;###autoload
 (defun org-store-agenda-views (&rest parameters)

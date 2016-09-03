@@ -168,8 +168,8 @@ CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (let ((value (org-element-property :value verbatim)))
     (format (cond ((not (string-match "`" value)) "`%s`")
-		  ((or (string-match "\\``" value)
-		       (string-match "`\\'" value))
+		  ((or (string-prefix-p "`" value)
+		       (string-suffix-p "`" value))
 		   "`` %s ``")
 		  (t "``%s``"))
 	    value)))
@@ -426,8 +426,8 @@ CONTENTS is the paragraph contents.  INFO is a plist used as
 a communication channel."
   (let ((first-object (car (org-element-contents paragraph))))
     ;; If paragraph starts with a #, protect it.
-    (if (and (stringp first-object) (string-match "\\`#" first-object))
-	(replace-regexp-in-string "\\`#" "\\#" contents nil t)
+    (if (and (stringp first-object) (string-prefix-p "#" first-object))
+	(concat "\\" contents)
       contents)))
 
 
