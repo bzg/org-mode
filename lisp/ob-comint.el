@@ -51,8 +51,9 @@ executed inside the protection of `save-excursion' and
        (error "Buffer %s does not exist or has no process" ,buffer))
      (save-match-data
        (with-current-buffer ,buffer
-	 (let ((comint-input-filter (lambda (_input) nil)))
-	   ,@body)))))
+	 (save-excursion
+	   (let ((comint-input-filter (lambda (_input) nil)))
+	     ,@body))))))
 (def-edebug-spec org-babel-comint-in-buffer (form body))
 
 (defmacro org-babel-comint-with-output (meta &rest body)
