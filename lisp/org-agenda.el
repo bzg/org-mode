@@ -3368,7 +3368,7 @@ the agenda to write."
 		 (write-file file)
 		 (kill-buffer (current-buffer))
 		 (message "Org file written to %s" file)))
-	      ((string= "html" extension)
+	      ((member extension '("html" "htm"))
 	       (require 'htmlize)
 	       (set-buffer (htmlize-buffer (current-buffer)))
 	       (when org-agenda-export-html-style
