@@ -5307,7 +5307,7 @@ Return value contains the following keys: `archive', `category',
 	       (unless buffer-read-only ; Do not check in Gnus messages.
 		 (let ((f (and (org-string-nw-p value)
 			       (expand-file-name
-				(org-remove-double-quotes value)))))
+				(org-unbracket-string "\"" "\"" value)))))
 		   (when (and f (file-readable-p f) (not (member f files)))
 		     (with-temp-buffer
 		       (setq default-directory (file-name-directory f))
@@ -10429,7 +10429,7 @@ be used as the default description."
       ;; Convert to bracket link
       (setq remove (list (match-beginning 0) (match-end 0))
 	    link (read-string "Link: "
-			      (org-remove-angle-brackets (match-string 0)))))
+			      (org-unbracket-string "<" ">" (match-string 0)))))
      ((member complete-file '((4) (16)))
       ;; Completing read for file names.
       (setq link (org-file-complete-link complete-file)))
@@ -10494,7 +10494,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
     (when (and (string-match org-plain-link-re link)
 	       (not (string-match org-ts-regexp link)))
       ;; URL-like link, normalize the use of angular brackets.
-      (setq link (org-remove-angle-brackets link)))
+      (setq link (org-unbracket-string "<" ">" link)))
 
     ;; Check if we are linking to the current file with a search
     ;; option If yes, simplify the link by using only the search
@@ -10668,7 +10668,7 @@ This is still an experimental function, your mileage may vary."
     ;; A typical message link.  Planner has the id after the final slash,
     ;; we separate it with a hash mark
     (setq path (concat (match-string 1 path) "#"
-		       (org-remove-angle-brackets (match-string 2 path))))))
+		       (org-unbracket-string "<" ">" (match-string 2 path))))))
   (cons type path))
 
 (defun org-find-file-at-mouse (ev)
@@ -10996,7 +10996,7 @@ there is one, return it."
 		 (cond
 		  ((not (string-match org-bracket-link-regexp l))
 		   (princ (format "[%c]  %s\n" (cl-incf cnt)
-				  (org-remove-angle-brackets l))))
+				  (org-unbracket-string "<" ">" l))))
 		  ((match-end 3)
 		   (princ (format "[%c]  %s (%s)\n" (cl-incf cnt)
 				  (match-string 3 l) (match-string 1 l))))
@@ -11345,20 +11345,16 @@ or to another Org file, automatically push the old position onto the ring."
     (goto-char m)
     (when (or (outline-invisible-p) (org-invisible-p2)) (org-show-context 'mark-goto))))
 
-;;; TODO: Use string-remove-prefix and -suffix once we only support
-;;; Emacs 24.4+
 (defun org-remove-angle-brackets (s)
-  (when (equal (substring s 0 1) "<") (setq s (substring s 1)))
-  (when (equal (substring s -1) ">") (setq s (substring s 0 -1)))
-  s)
+  (org-unbracket-string "<" ">" s))
+(make-obsolete 'org-remove-angle-brackets 'org-unbracket-string "Org 9.0")
 (defun org-add-angle-brackets (s)
   (unless (equal (substring s 0 1) "<") (setq s (concat "<" s)))
   (unless (equal (substring s -1) ">") (setq s (concat s ">")))
   s)
 (defun org-remove-double-quotes (s)
-  (when (equal (substring s 0 1) "\"") (setq s (substring s 1)))
-  (when (equal (substring s -1) "\"") (setq s (substring s 0 -1)))
-  s)
+  (org-unbracket-string "\"" "\"" s))
+(make-obsolete 'org-remove-double-quotes 'org-unbracket-string "Org 9.0")
 
 ;;; Following specific links
 

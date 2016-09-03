@@ -159,7 +159,7 @@ If `org-store-link' was called with a prefix arg the meaning of
 	   (header (with-current-buffer gnus-summary-buffer
 		     (gnus-summary-article-header)))
 	   (from (mail-header-from header))
-	   (message-id (org-remove-angle-brackets (mail-header-id header)))
+	   (message-id (org-unbracket-string "<" ">" (mail-header-id header)))
 	   (date (org-trim (mail-header-date header)))
 	   (subject (copy-sequence (mail-header-subject header)))
 	   (to (cdr (assq 'To (mail-header-extra header))))
@@ -202,7 +202,7 @@ If `org-store-link' was called with a prefix arg the meaning of
         (let ((gcc (car (last
                          (message-unquote-tokens
                           (message-tokenize-header (mail-fetch-field "gcc" nil t) " ,")))))
-              (id (org-remove-angle-brackets (mail-fetch-field "Message-ID")))
+              (id (org-unbracket-string "<" ">" (mail-fetch-field "Message-ID")))
               (to (mail-fetch-field "To"))
               (from (mail-fetch-field "From"))
               (subject (mail-fetch-field "Subject"))

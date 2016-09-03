@@ -1474,7 +1474,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 			  ((equal key "SETUPFILE")
 			   (let ((file
 				  (expand-file-name
-				   (org-remove-double-quotes (org-trim val)))))
+				   (org-unbracket-string "\"" "\"" (org-trim val)))))
 			     ;; Avoid circular dependencies.
 			     (unless (member file files)
 			       (with-temp-buffer
@@ -1621,7 +1621,7 @@ an alist where associations are (VARIABLE-NAME VALUE)."
 			       (push (read (format "(%s)" val)) alist)
 			     ;; Enter setup file.
 			     (let ((file (expand-file-name
-					  (org-remove-double-quotes val))))
+					  (org-unbracket-string "\"" "\"" val))))
 			       (unless (member file files)
 				 (with-temp-buffer
 				   (setq default-directory
@@ -3289,8 +3289,7 @@ storing and resolving footnotes.  It is created automatically."
 				 (setq matched
 				       (replace-match "" nil nil matched 1)))
 			       (expand-file-name
-				(org-remove-double-quotes
-				 matched)
+				(org-unbracket-string "\"" "\"" matched)
 				dir)))
 			 (setq value (replace-match "" nil nil value)))))
 		 (only-contents

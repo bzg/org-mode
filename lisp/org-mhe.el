@@ -92,7 +92,7 @@ supported by MH-E."
 			      :subject subject :message-id message-id)
 	(setq desc (org-email-link-description))
 	(setq link (concat "mhe:" (org-mhe-get-message-real-folder) "#"
-			   (org-remove-angle-brackets message-id)))
+			   (org-unbracket-string "<" ">" message-id)))
 	(org-add-link-props :link link :description desc)
 	link))))
 

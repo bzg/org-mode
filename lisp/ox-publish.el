@@ -1218,7 +1218,8 @@ the file including them will be republished as well."
 			       "\\`\\(\".+?\"\\|\\S-+\\)\\(?:\\s-+\\|$\\)"
 			       value)
                               (let ((m (match-string 1 value)))
-                                (org-remove-double-quotes
+                                (org-unbracket-string
+				 "\"" "\""
 				 ;; Ignore search suffix.
                                  (if (string-match "\\(::\\(.*?\\)\\)\"?\\'" m)
                                      (substring m 0 (match-beginning 0))

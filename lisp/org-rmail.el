@@ -68,7 +68,7 @@
 	  (org-store-link-props
 	   :type "rmail" :from from :to to :date date
 	   :subject subject :message-id message-id)
-	  (setq message-id (org-remove-angle-brackets message-id))
+	  (setq message-id (org-unbracket-string "<" ">" message-id))
 	  (setq desc (org-email-link-description))
 	  (setq link (concat "rmail:" folder "#" message-id))
 	  (org-add-link-props :link link :description desc)

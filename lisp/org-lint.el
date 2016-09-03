@@ -552,7 +552,8 @@ Use :header-args: instead"
   (org-element-map ast 'keyword
     (lambda (k)
       (when (equal (org-element-property :key k) "SETUPFILE")
-	(let ((file (org-remove-double-quotes
+	(let ((file (org-unbracket-string
+		     "\"" "\""
 		     (org-element-property :value k))))
 	  (and (not (file-remote-p file))
 	       (not (file-exists-p file))
@@ -567,7 +568,7 @@ Use :header-args: instead"
 	       (path
 		(and (string-match "^\\(\".+\"\\|\\S-+\\)[ \t]*" value)
 		     (save-match-data
-		       (org-remove-double-quotes (match-string 1 value))))))
+		       (org-unbracket-string "\"" "\"" (match-string 1 value))))))
 	  (if (not path)
 	      (list (org-element-property :post-affiliated k)
 		    "Missing location argument in INCLUDE keyword")

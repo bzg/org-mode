@@ -58,7 +58,6 @@
 (declare-function org-element-type "org-element" (element))
 (declare-function org-file-contents "org" (file &optional noerror))
 (declare-function org-mode "org" ())
-(declare-function org-remove-double-quotes "org" (s))
 (declare-function vc-backend "vc-hooks" (f))
 (declare-function vc-call "vc-hooks" (fun file &rest args) t)
 (declare-function vc-exec-after "vc-dispatcher" (code))
@@ -104,7 +103,7 @@ Return an alist containing all macro templates found."
 				   (push (cons name template) templates))))
 			   ;; Enter setup file.
 			   (let ((file (expand-file-name
-					(org-remove-double-quotes val))))
+					(org-unbracket-string "\"" "\"" val))))
 			     (unless (member file files)
 			       (with-temp-buffer
 				 (setq default-directory
