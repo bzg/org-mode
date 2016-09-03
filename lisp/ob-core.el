@@ -928,8 +928,8 @@ the session.  Copy the body of the code block to the kill ring."
 	   (or (and dir (file-name-as-directory dir)) default-directory))
 	 (init-cmd (intern (format "org-babel-%s-initiate-session" lang)))
 	 (prep-cmd (intern (concat "org-babel-prep-session:" lang))))
-    (if (and (stringp session) (string= session "none"))
-	(error "This block is not using a session!"))
+    (when (and (stringp session) (string= session "none"))
+      (error "This block is not using a session!"))
     (unless (fboundp init-cmd)
       (error "No org-babel-initiate-session function for %s!" lang))
     (with-temp-buffer (insert (org-trim body))
@@ -1380,15 +1380,15 @@ portions of results lines."
                                 (eq (overlay-get overlay 'invisible)
 				    'org-babel-hide-result))
                               (overlays-at start)))
-              (if (or (not force) (eq force 'off))
-                  (mapc (lambda (ov)
-                          (when (member ov org-babel-hide-result-overlays)
-                            (setq org-babel-hide-result-overlays
-                                  (delq ov org-babel-hide-result-overlays)))
-                          (when (eq (overlay-get ov 'invisible)
-                                    'org-babel-hide-result)
-                            (delete-overlay ov)))
-                        (overlays-at start)))
+              (when (or (not force) (eq force 'off))
+		(mapc (lambda (ov)
+			(when (member ov org-babel-hide-result-overlays)
+			  (setq org-babel-hide-result-overlays
+				(delq ov org-babel-hide-result-overlays)))
+			(when (eq (overlay-get ov 'invisible)
+				  'org-babel-hide-result)
+			  (delete-overlay ov)))
+		      (overlays-at start)))
             (setq ov (make-overlay start end))
             (overlay-put ov 'invisible 'org-babel-hide-result)
             ;; make the block accessible to isearch
@@ -2306,7 +2306,7 @@ INFO may provide the values of these header arguments (in the
 		    (funcall wrap "#+BEGIN_EXPORT latex" "#+END_EXPORT" nil nil
 			     "{{{results(@@latex:" "@@)}}}"))
 		   ((member "org" result-params)
-		    (goto-char beg) (if (org-at-table-p) (org-cycle))
+		    (goto-char beg) (when (org-at-table-p) (org-cycle))
 		    (funcall wrap "#+BEGIN_SRC org" "#+END_SRC" nil nil
 			     "{{{results(src_org{" "})}}}"))
 		   ((member "code" result-params)
@@ -2316,11 +2316,11 @@ INFO may provide the values of these header arguments (in the
 			       (format "{{{results(src_%s[%s]{" lang results-switches)
 			       "})}}}")))
 		   ((member "raw" result-params)
-		    (goto-char beg) (if (org-at-table-p) (org-cycle)))
+		    (goto-char beg) (when (org-at-table-p) (org-cycle)))
 		   ((or (member "drawer" result-params)
 			;; Stay backward compatible with <7.9.2
 			(member "wrap" result-params))
-		    (goto-char beg) (if (org-at-table-p) (org-cycle))
+		    (goto-char beg) (when (org-at-table-p) (org-cycle))
 		    (funcall wrap ":RESULTS:" ":END:" 'no-escape nil
 			     "{{{results(" ")}}}"))
 		   ((and inline (member "file" result-params))

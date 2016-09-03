@@ -280,8 +280,8 @@ used to limit the exported source code blocks by language."
 			;; We avoid append-to-file as it does not work with tramp.
 			(let ((content (buffer-string)))
 			  (with-temp-buffer
-			    (if (file-exists-p file-name)
-				(insert-file-contents file-name))
+			    (when (file-exists-p file-name)
+			      (insert-file-contents file-name))
 			    (goto-char (point-max))
 			    ;; Handle :padlines unless first line in file
 			    (unless (or (string= "no" (cdr (assoc :padline (nth 4 spec))))
