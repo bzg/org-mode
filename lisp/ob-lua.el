@@ -394,9 +394,7 @@ fd:close()"
 
 (defun org-babel-lua-read-string (string)
   "Strip 's from around Lua string."
-  (if (string-match "^'\\([^\000]+\\)'$" string)
-      (match-string 1 string)
-    string))
+  (org-unbracket-string "'" "'" string))
 
 (provide 'ob-lua)
 

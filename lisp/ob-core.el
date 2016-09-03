@@ -3084,10 +3084,7 @@ Callers of this function will probably want to add an entry to
 
 (defun org-babel-strip-quotes (string)
   "Strip \\\"s from around a string, if applicable."
-  (if (and (string-prefix-p "\"" string)
-	   (string-suffix-p "\"" string))
-      (substring string 1 -1)
-    string))
+  (org-unbracket-string "\"" "\"" string))
 
 (provide 'ob-core)
 

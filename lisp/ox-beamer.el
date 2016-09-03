@@ -203,18 +203,13 @@ TYPE is a symbol among the following:
 `option'    Return ARGUMENT within square brackets."
   (if (not (string-match "\\S-" argument)) ""
     (cl-case type
-      (action (if (string-match "\\`<.*>\\'" argument) argument
-		(format "<%s>" argument)))
-      (defaction (cond
-		  ((string-match "\\`\\[<.*>\\]\\'" argument) argument)
-		  ((string-match "\\`<.*>\\'" argument)
-		   (format "[%s]" argument))
-		  ((string-match "\\`\\[\\(.*\\)\\]\\'" argument)
-		   (format "[<%s>]" (match-string 1 argument)))
-		  (t (format "[<%s>]" argument))))
-      (option (if (string-match "\\`\\[.*\\]\\'" argument) argument
-		(format "[%s]" argument)))
-      (otherwise argument))))
+      (action (format "<%s>" (org-unbracket-string "<" ">" argument)))
+      (defaction
+	(format "[<%s>]"
+		(org-unbracket-string "<" ">" (org-unbracket-string "[" "]" argument))))
+      (option (format "[%s]" (org-unbracket-string "[" "]" argument)))
+      (otherwise (error "Invalid `type' argument to `org-beamer--normalize-argument': %s"
+			type)))))
 
 (defun org-beamer--element-has-overlay-p (element)
   "Non-nil when ELEMENT has an overlay specified.
