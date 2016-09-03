@@ -66,7 +66,7 @@ This function is called by `org-babel-execute-src-block'."
 	(nullvalue (cdr (assoc :nullvalue params)))
 	(headers-p (equal "yes" (cdr (assoc :colnames params))))
 	(others (delq nil (mapcar
-			   (lambda (arg) (car (assoc arg params)))
+			   (lambda (arg) (car (assq arg params)))
 			   (list :header :echo :bail :column
 				 :csv :html :line :list)))))
     (unless db (error "ob-sqlite: can't evaluate without a database"))
