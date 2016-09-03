@@ -2002,7 +2002,7 @@ Return nil if ELEMENT cannot be read."
    (pcase (org-element-type element)
      (`fixed-width
       (let ((v (org-trim (org-element-property :value element))))
-	(or (org-babel-number-p v) v)))
+	(or (org-babel--string-to-number v) v)))
      (`table (org-babel-read-table))
      (`plain-list (org-babel-read-list))
      (`example-block
@@ -2843,7 +2843,7 @@ lisp, otherwise return it unmodified as a string.  Optional
 argument INHIBIT-LISP-EVAL inhibits lisp evaluation for
 situations in which is it not appropriate."
   (if (and (stringp cell) (not (equal cell "")))
-      (or (org-babel-number-p cell)
+      (or (org-babel--string-to-number cell)
           (if (and (not inhibit-lisp-eval)
 		   (or (member (substring cell 0 1) '("(" "'" "`" "["))
 		       (string= cell "*this*")))
@@ -2853,14 +2853,13 @@ situations in which is it not appropriate."
 	      (progn (set-text-properties 0 (length cell) nil cell) cell))))
     cell))
 
-(defun org-babel-number-p (string)
-  "If STRING represents a number return its value."
-  (if (and (string-match "[0-9]+" string)
-	   (string-match "^-?[0-9]*\\.?[0-9]*$" string)
-           (= (length (substring string (match-beginning 0)
-				 (match-end 0)))
-	      (length string)))
-      (string-to-number string)))
+(defun org-babel--string-to-number (string)
+  "If STRING represents a number return its value.
+
+Otherwise return nil."
+  (when (string-match "\\`-?[0-9]*\\.?[0-9]*\\'" string)
+    (string-to-number string)))
+(define-obsolete-function-alias 'org-babel-number-p 'org-babel--string-to-number "Org 9.0")
 
 (defun org-babel-import-elisp-from-file (file-name &optional separator)
   "Read the results located at FILE-NAME into an elisp table.
