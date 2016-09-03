@@ -852,12 +852,10 @@ If CLOCK-SOUND is non-nil, it overrides `org-clock-sound'."
 (defmacro org-with-clock-position (clock &rest forms)
   "Evaluate FORMS with CLOCK as the current active clock."
   `(with-current-buffer (marker-buffer (car ,clock))
-     (save-excursion
-       (save-restriction
-	 (widen)
-	 (goto-char (car ,clock))
-	 (beginning-of-line)
-	 ,@forms))))
+     (org-with-wide-buffer
+      (goto-char (car ,clock))
+      (beginning-of-line)
+      ,@forms)))
 (def-edebug-spec org-with-clock-position (form body))
 (put 'org-with-clock-position 'lisp-indent-function 1)
 
@@ -1252,117 +1250,115 @@ make this the default behavior.)"
 	  (set-buffer (org-base-buffer (marker-buffer selected-task)))
 	  (setq target-pos (marker-position selected-task))
 	  (move-marker selected-task nil))
-	(save-excursion
-	  (save-restriction
-	    (widen)
-	    (goto-char target-pos)
-	    (org-back-to-heading t)
-	    (or interrupting (move-marker org-clock-interrupted-task nil))
-	    (run-hooks 'org-clock-in-prepare-hook)
-	    (org-clock-history-push)
-	    (setq org-clock-current-task (nth 4 (org-heading-components)))
-	    (cond ((functionp org-clock-in-switch-to-state)
-		   (looking-at org-complex-heading-regexp)
-		   (let ((newstate (funcall org-clock-in-switch-to-state
-					    (match-string 2))))
-		     (if newstate (org-todo newstate))))
-		  ((and org-clock-in-switch-to-state
-			(not (looking-at (concat org-outline-regexp "[ \t]*"
-						 org-clock-in-switch-to-state
-						 "\\>"))))
-		   (org-todo org-clock-in-switch-to-state)))
-	    (setq org-clock-heading
-		  (cond ((and org-clock-heading-function
-			      (functionp org-clock-heading-function))
-			 (funcall org-clock-heading-function))
-			((nth 4 (org-heading-components))
-			 (replace-regexp-in-string
-			  "\\[\\[.*?\\]\\[\\(.*?\\)\\]\\]" "\\1"
-			  (match-string-no-properties 4)))
-			(t "???")))
-	    (org-clock-find-position org-clock-in-resume)
-	    (cond
-	     ((and org-clock-in-resume
-		   (looking-at
-		    (concat "^[ \t]*" org-clock-string
-			    " \\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}"
-			    " *\\sw+.? +[012][0-9]:[0-5][0-9]\\)\\][ \t]*$")))
-	      (message "Matched %s" (match-string 1))
-	      (setq ts (concat "[" (match-string 1) "]"))
-	      (goto-char (match-end 1))
-	      (setq org-clock-start-time
-		    (apply 'encode-time
-			   (org-parse-time-string (match-string 1))))
-	      (setq org-clock-effort (org-entry-get (point) org-effort-property))
-	      (setq org-clock-total-time (org-clock-sum-current-item
-					  (org-clock-get-sum-start))))
-	     ((eq org-clock-in-resume 'auto-restart)
-	      ;; called from org-clock-load during startup,
-	      ;; do not interrupt, but warn!
-	      (message "Cannot restart clock because task does not contain unfinished clock")
-	      (ding)
-	      (sit-for 2)
-	      (throw 'abort nil))
-	     (t
-	      (insert-before-markers "\n")
-	      (backward-char 1)
-	      (org-indent-line)
-	      (when (and (save-excursion
-			   (end-of-line 0)
-			   (org-in-item-p)))
-		(beginning-of-line 1)
-		(indent-line-to (- (org-get-indentation) 2)))
-	      (insert org-clock-string " ")
-	      (setq org-clock-effort (org-entry-get (point) org-effort-property))
-	      (setq org-clock-total-time (org-clock-sum-current-item
-					  (org-clock-get-sum-start)))
-	      (setq org-clock-start-time
-		    (or (and org-clock-continuously org-clock-out-time)
-			(and leftover
-			     (y-or-n-p
-			      (format
-			       "You stopped another clock %d mins ago; start this one from then? "
-			       (/ (- (float-time
-				      (org-current-time org-clock-rounding-minutes t))
-				     (float-time leftover))
-				  60)))
-			     leftover)
-			start-time
-			(org-current-time org-clock-rounding-minutes t)))
-	      (setq ts (org-insert-time-stamp org-clock-start-time
-					      'with-hm 'inactive))))
-	    (move-marker org-clock-marker (point) (buffer-base-buffer))
-	    (move-marker org-clock-hd-marker
-			 (save-excursion (org-back-to-heading t) (point))
-			 (buffer-base-buffer))
-	    (setq org-clock-has-been-used t)
-	    ;; add to mode line
-	    (when (or (eq org-clock-clocked-in-display 'mode-line)
-		      (eq org-clock-clocked-in-display 'both))
-	      (or global-mode-string (setq global-mode-string '("")))
-	      (or (memq 'org-mode-line-string global-mode-string)
-		  (setq global-mode-string
-			(append global-mode-string '(org-mode-line-string)))))
-	    ;; add to frame title
-	    (when (or (eq org-clock-clocked-in-display 'frame-title)
-		      (eq org-clock-clocked-in-display 'both))
-	      (setq frame-title-format org-clock-frame-title-format))
-	    (org-clock-update-mode-line)
-	    (when org-clock-mode-line-timer
-	      (cancel-timer org-clock-mode-line-timer)
-	      (setq org-clock-mode-line-timer nil))
-	    (when org-clock-clocked-in-display
-	      (setq org-clock-mode-line-timer
-		    (run-with-timer org-clock-update-period
-				    org-clock-update-period
-				    'org-clock-update-mode-line)))
-	    (when org-clock-idle-timer
-	      (cancel-timer org-clock-idle-timer)
-	      (setq org-clock-idle-timer nil))
-	    (setq org-clock-idle-timer
-		  (run-with-timer 60 60 'org-resolve-clocks-if-idle))
-	    (message "Clock starts at %s - %s" ts org--msg-extra)
-	    (run-hooks 'org-clock-in-hook)))))))
+	(org-with-wide-buffer
+	 (goto-char target-pos)
+	 (org-back-to-heading t)
+	 (or interrupting (move-marker org-clock-interrupted-task nil))
+	 (run-hooks 'org-clock-in-prepare-hook)
+	 (org-clock-history-push)
+	 (setq org-clock-current-task (nth 4 (org-heading-components)))
+	 (cond ((functionp org-clock-in-switch-to-state)
+		(looking-at org-complex-heading-regexp)
+		(let ((newstate (funcall org-clock-in-switch-to-state
+					 (match-string 2))))
+		  (if newstate (org-todo newstate))))
+	       ((and org-clock-in-switch-to-state
+		     (not (looking-at (concat org-outline-regexp "[ \t]*"
+					      org-clock-in-switch-to-state
+					      "\\>"))))
+		(org-todo org-clock-in-switch-to-state)))
+	 (setq org-clock-heading
+	       (cond ((and org-clock-heading-function
+			   (functionp org-clock-heading-function))
+		      (funcall org-clock-heading-function))
+		     ((nth 4 (org-heading-components))
+		      (replace-regexp-in-string
+		       "\\[\\[.*?\\]\\[\\(.*?\\)\\]\\]" "\\1"
+		       (match-string-no-properties 4)))
+		     (t "???")))
+	 (org-clock-find-position org-clock-in-resume)
+	 (cond
+	  ((and org-clock-in-resume
+		(looking-at
+		 (concat "^[ \t]*" org-clock-string
+			 " \\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}"
+			 " *\\sw+.? +[012][0-9]:[0-5][0-9]\\)\\][ \t]*$")))
+	   (message "Matched %s" (match-string 1))
+	   (setq ts (concat "[" (match-string 1) "]"))
+	   (goto-char (match-end 1))
+	   (setq org-clock-start-time
+		 (apply 'encode-time
+			(org-parse-time-string (match-string 1))))
+	   (setq org-clock-effort (org-entry-get (point) org-effort-property))
+	   (setq org-clock-total-time (org-clock-sum-current-item
+				       (org-clock-get-sum-start))))
+	  ((eq org-clock-in-resume 'auto-restart)
+	   ;; called from org-clock-load during startup,
+	   ;; do not interrupt, but warn!
+	   (message "Cannot restart clock because task does not contain unfinished clock")
+	   (ding)
+	   (sit-for 2)
+	   (throw 'abort nil))
+	  (t
+	   (insert-before-markers "\n")
+	   (backward-char 1)
+	   (org-indent-line)
+	   (when (and (save-excursion
+			(end-of-line 0)
+			(org-in-item-p)))
+	     (beginning-of-line 1)
+	     (indent-line-to (- (org-get-indentation) 2)))
+	   (insert org-clock-string " ")
+	   (setq org-clock-effort (org-entry-get (point) org-effort-property))
+	   (setq org-clock-total-time (org-clock-sum-current-item
+				       (org-clock-get-sum-start)))
+	   (setq org-clock-start-time
+		 (or (and org-clock-continuously org-clock-out-time)
+		     (and leftover
+			  (y-or-n-p
+			   (format
+			    "You stopped another clock %d mins ago; start this one from then? "
+			    (/ (- (float-time
+				   (org-current-time org-clock-rounding-minutes t))
+				  (float-time leftover))
+			       60)))
+			  leftover)
+		     start-time
+		     (org-current-time org-clock-rounding-minutes t)))
+	   (setq ts (org-insert-time-stamp org-clock-start-time
+					   'with-hm 'inactive))))
+	 (move-marker org-clock-marker (point) (buffer-base-buffer))
+	 (move-marker org-clock-hd-marker
+		      (save-excursion (org-back-to-heading t) (point))
+		      (buffer-base-buffer))
+	 (setq org-clock-has-been-used t)
+	 ;; add to mode line
+	 (when (or (eq org-clock-clocked-in-display 'mode-line)
+		   (eq org-clock-clocked-in-display 'both))
+	   (or global-mode-string (setq global-mode-string '("")))
+	   (or (memq 'org-mode-line-string global-mode-string)
+	       (setq global-mode-string
+		     (append global-mode-string '(org-mode-line-string)))))
+	 ;; add to frame title
+	 (when (or (eq org-clock-clocked-in-display 'frame-title)
+		   (eq org-clock-clocked-in-display 'both))
+	   (setq frame-title-format org-clock-frame-title-format))
+	 (org-clock-update-mode-line)
+	 (when org-clock-mode-line-timer
+	   (cancel-timer org-clock-mode-line-timer)
+	   (setq org-clock-mode-line-timer nil))
+	 (when org-clock-clocked-in-display
+	   (setq org-clock-mode-line-timer
+		 (run-with-timer org-clock-update-period
+				 org-clock-update-period
+				 'org-clock-update-mode-line)))
+	 (when org-clock-idle-timer
+	   (cancel-timer org-clock-idle-timer)
+	   (setq org-clock-idle-timer nil))
+	 (setq org-clock-idle-timer
+	       (run-with-timer 60 60 'org-resolve-clocks-if-idle))
+	 (message "Clock starts at %s - %s" ts org--msg-extra)
+	 (run-hooks 'org-clock-in-hook))))))
 
 ;;;###autoload
 (defun org-clock-in-last (&optional arg)

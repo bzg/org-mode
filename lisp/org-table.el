@@ -3317,10 +3317,8 @@ with the prefix ARG."
 (defun org-table-recalculate-buffer-tables ()
   "Recalculate all tables in the current buffer."
   (interactive)
-  (save-excursion
-    (save-restriction
-      (widen)
-      (org-table-map-tables (lambda () (org-table-recalculate t)) t))))
+  (org-with-wide-buffer
+   (org-table-map-tables (lambda () (org-table-recalculate t)) t)))
 
 ;;;###autoload
 (defun org-table-iterate-buffer-tables ()
@@ -3330,19 +3328,17 @@ with the prefix ARG."
 	 (i imax)
 	 (checksum (md5 (buffer-string)))
 	 c1)
-    (save-excursion
-      (save-restriction
-	(widen)
-	(catch 'exit
-	  (while (> i 0)
-	    (setq i (1- i))
-	    (org-table-map-tables (lambda () (org-table-recalculate t)) t)
-	    (if (equal checksum (setq c1 (md5 (buffer-string))))
-		(progn
-		  (message "Convergence after %d iterations" (- imax i))
-		  (throw 'exit t))
-	      (setq checksum c1)))
-	  (user-error "No convergence after %d iterations" imax))))))
+    (org-with-wide-buffer
+     (catch 'exit
+       (while (> i 0)
+	 (setq i (1- i))
+	 (org-table-map-tables (lambda () (org-table-recalculate t)) t)
+	 (if (equal checksum (setq c1 (md5 (buffer-string))))
+	     (progn
+	       (message "Convergence after %d iterations" (- imax i))
+	       (throw 'exit t))
+	   (setq checksum c1)))
+       (user-error "No convergence after %d iterations" imax)))))
 
 (defun org-table-calc-current-TBLFM (&optional arg)
   "Apply the #+TBLFM in the line at point to the table."

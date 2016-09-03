@@ -825,11 +825,9 @@ already gone.  Any prefix argument will be passed to the refile command."
     (org-capture-finalize)
     (save-window-excursion
       (with-current-buffer (or base (current-buffer))
-	(save-excursion
-	  (save-restriction
-	    (widen)
-	    (goto-char pos)
-	    (call-interactively 'org-refile)))))
+	(org-with-wide-buffer
+	 (goto-char pos)
+	 (call-interactively 'org-refile))))
     (when kill-buffer (kill-buffer base))))
 
 (defun org-capture-kill ()
@@ -1305,16 +1303,14 @@ Of course, if exact position has been required, just put it there."
 		      (point-at-bol))
 		  (point))))))
     (with-current-buffer (buffer-base-buffer (current-buffer))
-      (save-excursion
-	(save-restriction
-	  (widen)
-	  (goto-char pos)
-	  (let ((bookmark-name (plist-get org-bookmark-names-plist
-					  :last-capture)))
-	    (when bookmark-name
-	      (with-demoted-errors
-		(bookmark-set bookmark-name))))
-	  (move-marker org-capture-last-stored-marker (point)))))))
+      (org-with-wide-buffer
+       (goto-char pos)
+       (let ((bookmark-name (plist-get org-bookmark-names-plist
+				       :last-capture)))
+	 (when bookmark-name
+	   (with-demoted-errors
+	       (bookmark-set bookmark-name))))
+       (move-marker org-capture-last-stored-marker (point))))))
 
 (defun org-capture-narrow (beg end)
   "Narrow, unless configuration says not to narrow."

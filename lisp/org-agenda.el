@@ -3454,79 +3454,77 @@ removed from the entry content.  Currently only `planning' is allowed here."
       (with-current-buffer (marker-buffer marker)
 	(if (not (derived-mode-p 'org-mode))
 	    (setq txt "")
-	  (save-excursion
-	    (save-restriction
-	      (widen)
-	      (goto-char marker)
-	      (end-of-line 1)
-	      (setq txt (buffer-substring
-			 (min (1+ (point)) (point-max))
-			 (progn (outline-next-heading) (point)))
-		    drawer-re org-drawer-regexp
-		    kwd-time-re (concat "^[ \t]*" org-keyword-time-regexp
-					".*\n?"))
-	      (with-temp-buffer
-		(insert txt)
-		(when org-agenda-add-entry-text-descriptive-links
-		  (goto-char (point-min))
-		  (while (org-activate-bracket-links (point-max))
-		    (add-text-properties (match-beginning 0) (match-end 0)
-					 '(face org-link))))
-		(goto-char (point-min))
-		(while (re-search-forward org-bracket-link-regexp (point-max) t)
-		  (set-text-properties (match-beginning 0) (match-end 0)
-				       nil))
-		(goto-char (point-min))
-		(while (re-search-forward drawer-re nil t)
-		  (delete-region
-		   (match-beginning 0)
-		   (progn (re-search-forward
-			   "^[ \t]*:END:.*\n?" nil 'move)
-			  (point))))
-		(unless (member 'planning keep)
-		  (goto-char (point-min))
-		  (while (re-search-forward kwd-time-re nil t)
-		    (replace-match "")))
-		(goto-char (point-min))
-		(when org-agenda-entry-text-exclude-regexps
-		  (let ((re-list org-agenda-entry-text-exclude-regexps)	re)
-		    (while (setq re (pop re-list))
-		      (goto-char (point-min))
-		      (while (re-search-forward re nil t)
-			(replace-match "")))))
-		(goto-char (point-max))
-		(skip-chars-backward " \t\n")
-		(if (looking-at "[ \t\n]+\\'") (replace-match ""))
+	  (org-with-wide-buffer
+	   (goto-char marker)
+	   (end-of-line 1)
+	   (setq txt (buffer-substring
+		      (min (1+ (point)) (point-max))
+		      (progn (outline-next-heading) (point)))
+		 drawer-re org-drawer-regexp
+		 kwd-time-re (concat "^[ \t]*" org-keyword-time-regexp
+				     ".*\n?"))
+	   (with-temp-buffer
+	     (insert txt)
+	     (when org-agenda-add-entry-text-descriptive-links
+	       (goto-char (point-min))
+	       (while (org-activate-bracket-links (point-max))
+		 (add-text-properties (match-beginning 0) (match-end 0)
+				      '(face org-link))))
+	     (goto-char (point-min))
+	     (while (re-search-forward org-bracket-link-regexp (point-max) t)
+	       (set-text-properties (match-beginning 0) (match-end 0)
+				    nil))
+	     (goto-char (point-min))
+	     (while (re-search-forward drawer-re nil t)
+	       (delete-region
+		(match-beginning 0)
+		(progn (re-search-forward
+			"^[ \t]*:END:.*\n?" nil 'move)
+		       (point))))
+	     (unless (member 'planning keep)
+	       (goto-char (point-min))
+	       (while (re-search-forward kwd-time-re nil t)
+		 (replace-match "")))
+	     (goto-char (point-min))
+	     (when org-agenda-entry-text-exclude-regexps
+	       (let ((re-list org-agenda-entry-text-exclude-regexps)	re)
+		 (while (setq re (pop re-list))
+		   (goto-char (point-min))
+		   (while (re-search-forward re nil t)
+		     (replace-match "")))))
+	     (goto-char (point-max))
+	     (skip-chars-backward " \t\n")
+	     (if (looking-at "[ \t\n]+\\'") (replace-match ""))
 
-		;; find and remove min common indentation
-		(goto-char (point-min))
-		(untabify (point-min) (point-max))
-		(setq ind (org-get-indentation))
-		(while (not (eobp))
-		  (unless (looking-at "[ \t]*$")
-		    (setq ind (min ind (org-get-indentation))))
-		  (beginning-of-line 2))
-		(goto-char (point-min))
-		(while (not (eobp))
-		  (unless (looking-at "[ \t]*$")
-		    (move-to-column ind)
-		    (delete-region (point-at-bol) (point)))
-		  (beginning-of-line 2))
+	     ;; find and remove min common indentation
+	     (goto-char (point-min))
+	     (untabify (point-min) (point-max))
+	     (setq ind (org-get-indentation))
+	     (while (not (eobp))
+	       (unless (looking-at "[ \t]*$")
+		 (setq ind (min ind (org-get-indentation))))
+	       (beginning-of-line 2))
+	     (goto-char (point-min))
+	     (while (not (eobp))
+	       (unless (looking-at "[ \t]*$")
+		 (move-to-column ind)
+		 (delete-region (point-at-bol) (point)))
+	       (beginning-of-line 2))
 
-		(run-hooks 'org-agenda-entry-text-cleanup-hook)
+	     (run-hooks 'org-agenda-entry-text-cleanup-hook)
 
-		(goto-char (point-min))
-		(when indent
-		  (while (and (not (eobp)) (re-search-forward "^" nil t))
-		    (replace-match indent t t)))
-		(goto-char (point-min))
-		(while (looking-at "[ \t]*\n") (replace-match ""))
-		(goto-char (point-max))
-		(when (> (org-current-line)
-			 n-lines)
-		  (org-goto-line (1+ n-lines))
-		  (backward-char 1))
-		(setq txt (buffer-substring (point-min) (point)))))))))
+	     (goto-char (point-min))
+	     (when indent
+	       (while (and (not (eobp)) (re-search-forward "^" nil t))
+		 (replace-match indent t t)))
+	     (goto-char (point-min))
+	     (while (looking-at "[ \t]*\n") (replace-match ""))
+	     (goto-char (point-max))
+	     (when (> (org-current-line)
+		      n-lines)
+	       (org-goto-line (1+ n-lines))
+	       (backward-char 1))
+	     (setq txt (buffer-substring (point-min) (point))))))))
     txt))
 
 (defun org-check-for-org-mode ()
@@ -8527,13 +8525,11 @@ When NO-UPDATE is non-nil, don't redo the agenda buffer."
 		       (if goto "Goto" "Refile to") buffer
 		       org-refile-allow-creating-parent-nodes))))
       (with-current-buffer buffer
-	(save-excursion
-	  (save-restriction
-	    (widen)
-	    (goto-char marker)
-	    (let ((org-agenda-buffer-name buffer-orig))
-	      (org-remove-subtree-entries-from-agenda))
-	    (org-refile goto buffer rfloc)))))
+	(org-with-wide-buffer
+	 (goto-char marker)
+	 (let ((org-agenda-buffer-name buffer-orig))
+	   (org-remove-subtree-entries-from-agenda))
+	 (org-refile goto buffer rfloc))))
     (unless no-update (org-agenda-redo)))))
 
 (defun org-agenda-open-link (&optional arg)
@@ -8558,13 +8554,11 @@ It also looks at the text of the entry itself."
 		  (setq trg (and (string-match org-bracket-link-regexp l)
 				 (match-string 1 l)))
 		  (if (or (not trg) (string-match org-any-link-re trg))
-		      (save-excursion
-			(save-restriction
-			  (widen)
-			  (goto-char marker)
-			  (when (search-forward l nil lkend)
-			    (goto-char (match-beginning 0))
-			    (org-open-at-point))))
+		      (org-with-wide-buffer
+		       (goto-char marker)
+		       (when (search-forward l nil lkend)
+			 (goto-char (match-beginning 0))
+			 (org-open-at-point)))
 		    ;; This is an internal link, widen the buffer
 		    (switch-to-buffer-other-window buffer)
 		    (widen)
@@ -8880,9 +8874,9 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 	 (line (org-current-line))
 	 (org-agenda-buffer (current-buffer))
 	 (thetags (with-current-buffer (marker-buffer hdmarker)
-		    (save-excursion (save-restriction (widen)
-						      (goto-char hdmarker)
-						      (org-get-tags-at)))))
+		    (org-with-wide-buffer
+		     (goto-char hdmarker)
+		     (org-get-tags-at))))
 	 props m pl undone-face done-face finish new dotime level cat tags)
     (save-excursion
       (goto-char (point-max))
@@ -8903,10 +8897,8 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 			   org-prefix-format-compiled))
 		      (extra (org-get-at-bol 'extra)))
 		  (with-current-buffer (marker-buffer hdmarker)
-		    (save-excursion
-		      (save-restriction
-			(widen)
-			(org-agenda-format-item extra newhead level cat tags dotime)))))
+		    (org-with-wide-buffer
+		     (org-agenda-format-item extra newhead level cat tags dotime))))
 		pl (text-property-any (point-at-bol) (point-at-eol) 'org-heading t)
 		undone-face (org-get-at-bol 'undone-face)
 		done-face (org-get-at-bol 'done-face))
@@ -9297,14 +9289,12 @@ ARG is passed through to `org-deadline'."
   (let ((marker (make-marker)) (col (current-column)) newhead)
     (org-with-remote-undo (marker-buffer org-clock-marker)
       (with-current-buffer (marker-buffer org-clock-marker)
-	(save-excursion
-	  (save-restriction
-	    (widen)
-	    (goto-char org-clock-marker)
-	    (org-back-to-heading t)
-	    (move-marker marker (point))
-	    (org-clock-out)
-	    (setq newhead (org-get-heading))))))
+	(org-with-wide-buffer
+	 (goto-char org-clock-marker)
+	 (org-back-to-heading t)
+	 (move-marker marker (point))
+	 (org-clock-out)
+	 (setq newhead (org-get-heading)))))
     (org-agenda-change-all-lines newhead marker)
     (move-marker marker nil)
     (org-move-to-column col)
