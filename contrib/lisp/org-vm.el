@@ -86,7 +86,7 @@
                      (string-match (concat "^" (regexp-quote vm-folder-directory))
                                    folder))
                 (setq folder (replace-match "" t t folder)))))
-        (setq message-id (org-remove-angle-brackets message-id))
+        (setq message-id (org-unbracket-string "<" ">" message-id))
 	(org-store-link-props :type link-type :from from :to to :subject subject
 			      :message-id message-id :date date)
 	(setq desc (org-email-link-description))

@@ -191,7 +191,7 @@ ENTITY is a message entity."
 		 (message-id
 		  (org-wl-message-field 'message-id wl-message-entity))
 		 (message-id-no-brackets
-		  (org-remove-angle-brackets message-id))
+		  (org-unbracket-string "<" ">" message-id))
 		 (from (org-wl-message-field 'from wl-message-entity))
 		 (to (org-wl-message-field 'to wl-message-entity))
 		 (xref (org-wl-message-field 'xref wl-message-entity))

@@ -94,7 +94,7 @@ correctly, you should not need to change this.
           (if org-mairix-threaded-links "t:")
           (if org-mairix-augmented-links "a:")
           "@@"
-          (org-remove-angle-brackets message-id)))
+          (org-unbracket-string "<" ">" message-id)))
 
 (defun org-store-mairix-link-props (&rest plist)
   "Take a property list describing a mail, and add mairix link

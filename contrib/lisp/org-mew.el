@@ -170,7 +170,7 @@ with \"t\" key."
 	       desc link)
 	  (org-store-link-props :type "mew" :from from :to to :date date
 				:subject subject :message-id message-id)
-	  (setq message-id (org-remove-angle-brackets message-id))
+	  (setq message-id (org-unbracket-string "<" ">" message-id))
 	  (setq desc (org-email-link-description))
 	  (setq link (concat "mew:" folder-name "#" message-id))
 	  (org-add-link-props :link link :description desc)
@@ -280,12 +280,12 @@ the subject and the group number to extract.  You can get rid of
 	(setq subject (mew-header-get-value "Subject:"))
 	(setq message-id (mew-header-get-value "Message-Id:"))
 	(setq references (mew-header-get-value "References:")))
-      (setq id-list (mapcar (lambda (id) (org-remove-angle-brackets id))
+      (setq id-list (mapcar (lambda (id) (org-unbracket-string "<" ">" id))
 			    (mew-idstr-to-id-list references)))
       (if last-reference-only
 	  (setq id-list (last id-list))
 	(if message-id
-	    (setq id-list (cons (org-remove-angle-brackets message-id)
+	    (setq id-list (cons (org-unbracket-string "<" ">" message-id)
 				id-list))))
       (when (and by-subject (stringp subject))
 	(catch 'matched
