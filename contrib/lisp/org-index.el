@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011-2016 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 5.1.2
+;; Version: 5.1.3
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -86,7 +86,7 @@
 
 ;;; Change Log:
 
-;;   [2016-08-05 Fr] Version 5.1.2
+;;   [2016-08-26 Fr] Version 5.1.3
 ;;   - Offering help during query for subcommands
 ;;   - Removed org-index-default-keybindings
 ;;   - Renamed subcommand multi-occur to find-ref
@@ -168,7 +168,7 @@
 (require 'widget)
 
 ;; Version of this package
-(defvar org-index-version "5.1.2" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
+(defvar org-index-version "5.1.3" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
 
 ;; customizable options
 (defgroup org-index nil
@@ -354,7 +354,7 @@ for its index table.
 To start building up your index, use subcommands 'add', 'ref' and
 'yank' to create entries and use 'occur' to find them.
 
-This is version 5.1.2 of org-index.el.
+This is version 5.1.3 of org-index.el.
 
 
 The function `org-index' is the only interactive function of this
@@ -580,6 +580,11 @@ interactive calls."
         (describe-function 'org-index))
 
        
+       ((eq command 'short-help)
+
+        (org-index--display-short-help))
+
+       
        ((eq command 'find-ref)
 
         ;; Construct list of all org-buffers
@@ -731,7 +736,7 @@ interactive calls."
 
           (setq args (org-index--collect-values-from-user org-index-edit-on-yank))
           (if (plist-get args 'yank)
-              (plist-put args 'yank (replace-regexp-in-string "|" (regexp-quote "\\vert") (plist-get args 'yank) nil 'literal)))
+              (plist-put args 'yank (replace-regexp-in-string "|" "\\vert" (plist-get args 'yank) nil 'literal)))
           (setq args (plist-put args 'category "yank"))
           (apply 'org-index--do-new-line args)
           
@@ -924,8 +929,8 @@ Optional argument WITH-SHORT-HELP displays help screen upfront."
 (defun org-index--minibuffer-setup-function ()
   "Prepare minibuffer for `org-index--read-command'."
   (setq org-index--minibuffer-saved-key (local-key-binding (kbd "?")))
-  (local-set-key (kbd "?") 'org-index--minibuffer-short-help-helper)
-  (if org-index--display-short-help (org-index--minibuffer-short-help-helper)))
+  (local-set-key (kbd "?") 'org-index--display-short-help)
+  (if org-index--display-short-help (org-index--display-short-help)))
 
 
 (defun org-index--minibuffer-exit-function ()
@@ -934,17 +939,31 @@ Optional argument WITH-SHORT-HELP displays help screen upfront."
   (setq org-index--minibuffer-saved-key nil))
 
 
-(defun org-index--minibuffer-short-help-helper ()
+(defun org-index--display-short-help ()
   "Helper function to show help in minibuffer."
   (interactive)
-  ;; take original help-text for org-index and extract one-line help for subcommands
+
   (with-temp-buffer-window
    org-index--short-help-buffer-name nil nil
    (setq org-index--short-help-displayed t)
-   (princ (concat "Short help; all subcommands of `org-index', shortcuts in []; type "
-                  (substitute-command-keys "\\[scroll-other-window]")
-                  " to scroll:\n"))
-   (princ (org-index--get-short-help-text))))
+   (princ "Short help; all subcommands of `org-index', shortcuts in []\n")
+   (princ (org-index--get-short-help-text)))
+  (with-current-buffer org-index--short-help-buffer-name
+    (let ((inhibit-read-only t)
+          height-before height-after win)
+      (setq win (get-buffer-window))
+      (setq height-before (window-height win))
+      (shrink-window-if-larger-than-buffer win)
+      (setq height-after (window-height win))
+      (goto-char (point-min))
+      (end-of-line)
+      (insert 
+       (if (> height-before height-after)
+           "."
+         (concat ", "
+                 (substitute-command-keys "\\[scroll-other-window]")
+                 " to scroll:")))     
+      (goto-char (point-min)))))
 
 
 (defun org-index--get-short-help-text ()
