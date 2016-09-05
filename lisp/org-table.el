@@ -963,10 +963,7 @@ Optional argument NEW may specify text to replace the current field content."
 	    (progn
 	      (setq s (match-string 1)
 		    o (match-string 0)
-		    l (max 1
-			   (- (org-string-width
-			       (buffer-substring-no-properties
-				(match-end 0) (match-beginning 0))) 3))
+		    l (max 1 (- (org-string-width o) 3))
 		    e (not (= (match-beginning 2) (match-end 2))))
 	      (setq f (format (if num " %%%ds %s" " %%-%ds %s")
 			      l (if e "|" (setq org-table-may-need-update t) ""))
