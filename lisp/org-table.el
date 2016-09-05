@@ -944,38 +944,40 @@ Optional argument NEW may specify text to replace the current field content."
    ((and (not new) org-table-may-need-update)) ; Realignment will happen anyway
    ((org-at-table-hline-p))
    ((and (not new)
-	 (or (not (equal (marker-buffer org-table-aligned-begin-marker)
-			 (current-buffer)))
+	 (or (not (eq (marker-buffer org-table-aligned-begin-marker)
+		      (current-buffer)))
 	     (< (point) org-table-aligned-begin-marker)
 	     (>= (point) org-table-aligned-end-marker)))
-    ;; This is not the same table, force a full re-align
+    ;; This is not the same table, force a full re-align.
     (setq org-table-may-need-update t))
-   (t ;; realign the current field, based on previous full realign
-    (let* ((pos (point)) s
-	   (col (org-table-current-column))
-	   (num (if (> col 0) (nth (1- col) org-table-last-alignment)))
-	   l f n o e)
+   (t
+    ;; Realign the current field, based on previous full realign.
+    (let ((pos (point))
+	  (col (org-table-current-column)))
       (when (> col 0)
-	(skip-chars-backward "^|\n")
-	(if (looking-at " *\\([^|\n]*?\\) *\\(|\\|$\\)")
-	    (progn
-	      (setq s (match-string 1)
-		    o (match-string 0)
-		    l (max 1 (- (org-string-width o) 3))
-		    e (not (= (match-beginning 2) (match-end 2))))
-	      (setq f (format (if num " %%%ds %s" " %%-%ds %s")
-			      l (if e "|" (setq org-table-may-need-update t) ""))
-		    n (format f s))
-	      (if new
-		  (if (<= (org-string-width new) l)
-		      (setq n (format f new))
-		    (setq n (concat new "|") org-table-may-need-update t)))
-	      (if (equal (string-to-char n) ?-) (setq n (concat " " n)))
-	      (or (equal n o)
-		  (let (org-table-may-need-update)
-		    (replace-match n t t))))
-	  (setq org-table-may-need-update t))
-	(goto-char pos))))))
+	(skip-chars-backward "^|")
+	(if (not (looking-at " *\\([^|\n]*?\\) *\\(|\\|$\\)"))
+	    (setq org-table-may-need-update t)
+	  (let* ((numbers? (nth (1- col) org-table-last-alignment))
+		 (cell (match-string 0))
+		 (field (match-string 1))
+		 (len (max 1 (- (org-string-width cell) 3)))
+		 (properly-closed? (/= (match-beginning 2) (match-end 2)))
+		 (fmt (format (if numbers? " %%%ds %s" " %%-%ds %s")
+			      len
+			      (if properly-closed? "|"
+				(setq org-table-may-need-update t)
+				"")))
+		 (new-cell
+		  (cond ((not new) (format fmt field))
+			((<= (org-string-width new) len) (format fmt new))
+			(t
+			 (setq org-table-may-need-update t)
+			 (format " %s |" new)))))
+	    (unless (equal new-cell cell)
+	      (let (org-table-may-need-update)
+		(replace-match new-cell t t)))
+	    (goto-char pos))))))))
 
 ;;;###autoload
 (defun org-table-next-field ()
