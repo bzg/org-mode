@@ -287,12 +287,11 @@ the value in cdr."
 
 (defun org-unbracket-string (pre post string)
   "Remove PRE/POST from the beginning/end of STRING.
-
 Both PRE and POST must be pre-/suffixes of STRING, or neither is
 removed."
   (if (and (string-prefix-p pre string)
 	   (string-suffix-p post string))
-      (string-remove-prefix pre (string-remove-suffix post string))
+      (substring string (length pre) (- (length post)))
     string))
 
 (provide 'org-macs)
