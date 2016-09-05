@@ -66,6 +66,8 @@ PROCESSED-PARAMS isn't used yet."
 	 (org-babel-J-interleave-echos-except-functions s3)))
     (org-babel-J-interleave-echos body)))
 
+(defalias 'org-babel-execute:j 'org-babel-execute:J)
+
 (defun org-babel-execute:J (body params)
   "Execute a block of J code BODY.
 PARAMS are given by org-babel.
