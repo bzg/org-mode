@@ -4591,9 +4591,6 @@ This is needed for font-lock setup.")
 (declare-function orgtbl-send-table "org-table" (&optional maybe))
 (declare-function parse-time-string "parse-time" (string))
 (declare-function speedbar-line-directory "speedbar" (&optional depth))
-(declare-function table--at-cell-p
-		  "table"
-		  (position &optional object at-column))
 
 (defvar align-mode-rules-list)
 (defvar calc-embedded-close-formula)
@@ -4630,28 +4627,6 @@ If `org-enable-table-editor' is nil, return nil unconditionally."
        (let ((element (org-element-at-point)))
 	 (and (eq (org-element-type element) 'table)
 	      (eq (org-element-property :type element) 'table.el)))))
-
-(defun org-table-recognize-table.el ()
-  "If there is a table.el table nearby, recognize it and move into it."
-  (when (and org-table-tab-recognizes-table.el (org-at-table.el-p))
-    (beginning-of-line)
-    (unless (or (looking-at org-table-dataline-regexp)
-		(not (looking-at org-table1-hline-regexp)))
-      (forward-line)
-      (when (looking-at org-table-any-border-regexp)
-	(forward-line -2)))
-    (if (re-search-forward "|" (org-table-end t) t)
-	(progn
-	  (require 'table)
-	  (if (table--at-cell-p (point)) t
-	    (message "recognizing table.el table...")
-	    (table-recognize-table)
-	    (message "recognizing table.el table...done")))
-      (error "This should not happen"))))
-;;; This function is not used by org core since commit 6d1e3082, Feb 2010
-(make-obsolete 'org-table-recognize-table.el
-	       "please notify the org mailing list if you use this function."
-	       "Org 9.0")
 
 (defun org-at-table-hline-p ()
   "Non-nil when point is inside a hline in a table.
@@ -11345,16 +11320,10 @@ or to another Org file, automatically push the old position onto the ring."
     (goto-char m)
     (when (or (outline-invisible-p) (org-invisible-p2)) (org-show-context 'mark-goto))))
 
-(defun org-remove-angle-brackets (s)
-  (org-unbracket-string "<" ">" s))
-(make-obsolete 'org-remove-angle-brackets 'org-unbracket-string "Org 9.0")
 (defun org-add-angle-brackets (s)
   (unless (equal (substring s 0 1) "<") (setq s (concat "<" s)))
   (unless (equal (substring s -1) ">") (setq s (concat s ">")))
   s)
-(defun org-remove-double-quotes (s)
-  (org-unbracket-string "\"" "\"" s))
-(make-obsolete 'org-remove-double-quotes 'org-unbracket-string "Org 9.0")
 
 ;;; Following specific links
 
@@ -18420,10 +18389,6 @@ The format is determined by `org-time-clocksum-format',
 	;; return formatted time duration
 	clocksum))))
 
-(defalias 'org-minutes-to-hh:mm-string 'org-minutes-to-clocksum-string)
-(make-obsolete 'org-minutes-to-hh:mm-string 'org-minutes-to-clocksum-string
-	       "Org mode version 8.0")
-
 (defun org-hours-to-clocksum-string (n)
   (org-minutes-to-clocksum-string (* n 60)))
 
@@ -22639,13 +22604,6 @@ so values can contain further %-escapes if they are define later in TABLE."
 	(when (and sref (string-match "SREF" string pchg))
 	  (setq string (replace-match sref t t string)))))
     string))
-
-(defun org-sublist (list start end)
-  "Return a section of LIST, from START to END.
-
-Counting starts at 1."
-  (cl-subseq list (1- start) end))
-(make-obsolete 'org-sublist "cl-subseq (note the 0-based counting)." "Org 9.0")
 
 (defun org-find-base-buffer-visiting (file)
   "Like `find-buffer-visiting' but always return the base buffer and

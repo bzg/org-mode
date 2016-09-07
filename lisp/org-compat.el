@@ -33,6 +33,7 @@
 (require 'org-macs)
 
 (declare-function org-link-set-parameters "org" (type &rest rest))
+(declare-function table--at-cell-p "table" (position &optional object at-column))
 
 ;; As of Emacs 25.1, `outline-mode' functions are under the 'outline-'
 ;; prefix, `find-tag' is replaced with `xref-find-definition' and
@@ -85,6 +86,13 @@
 (define-obsolete-function-alias 'org-remove-if-not 'cl-remove-if-not "Org 9.0")
 (define-obsolete-function-alias 'org-some 'cl-some "Org 9.0")
 (define-obsolete-function-alias 'org-floor* 'cl-floor "Org 9.0")
+
+(defun org-sublist (list start end)
+  "Return a section of LIST, from START to END.
+Counting starts at 1."
+  (cl-subseq list (1- start) end))
+(make-obsolete 'org-sublist "cl-subseq (note the 0-based counting)." "Org 9.0")
+
 
 ;;;; Functions available since Emacs 24.3
 (define-obsolete-function-alias 'org-buffer-narrowed-p 'buffer-narrowed-p "Org 9.0")
@@ -224,6 +232,40 @@ See `org-link-parameters' for documentation on the other parameters."
   (message "Created %s link." type))
 
 (make-obsolete 'org-add-link-type "use `org-link-set-parameters' instead." "Org 9.0")
+
+(defun org-table-recognize-table.el ()
+  "If there is a table.el table nearby, recognize it and move into it."
+  (when (and org-table-tab-recognizes-table.el (org-at-table.el-p))
+    (beginning-of-line)
+    (unless (or (looking-at org-table-dataline-regexp)
+		(not (looking-at org-table1-hline-regexp)))
+      (forward-line)
+      (when (looking-at org-table-any-border-regexp)
+	(forward-line -2)))
+    (if (re-search-forward "|" (org-table-end t) t)
+	(progn
+	  (require 'table)
+	  (if (table--at-cell-p (point)) t
+	    (message "recognizing table.el table...")
+	    (table-recognize-table)
+	    (message "recognizing table.el table...done")))
+      (error "This should not happen"))))
+
+;; Not used by Org core since commit 6d1e3082, Feb 2010.
+(make-obsolete 'org-table-recognize-table.el
+	       "please notify the org mailing list if you use this function."
+	       "Org 9.0")
+
+(define-obsolete-function-alias
+  'org-minutes-to-hh:mm-string 'org-minutes-to-clocksum-string "Org 8.0")
+
+(defun org-remove-angle-brackets (s)
+  (org-unbracket-string "<" ">" s))
+(make-obsolete 'org-remove-angle-brackets 'org-unbracket-string "Org 9.0")
+
+(defun org-remove-double-quotes (s)
+  (org-unbracket-string "\"" "\"" s))
+(make-obsolete 'org-remove-double-quotes 'org-unbracket-string "Org 9.0")
 
 ;;;; Obsolete link types
 
