@@ -565,7 +565,7 @@ return nil instead."
   (pcase (org-trim label)
     ("" nil)
     ((pred (string-prefix-p "fn:")) (substring label 3))
-    (t label)))
+    (_ label)))
 
 (defun org-footnote-get-definition (label)
   "Return label, boundaries and definition of the footnote LABEL."
