@@ -32,8 +32,15 @@
 (require 'cl-lib)
 (require 'org-macs)
 
+(declare-function org-at-table.el-p "org" (&optional table-type))
 (declare-function org-link-set-parameters "org" (type &rest rest))
+(declare-function org-table-end (&optional table-type))
 (declare-function table--at-cell-p "table" (position &optional object at-column))
+
+(defvar org-table-any-border-regexp)
+(defvar org-table-dataline-regexp)
+(defvar org-table-tab-recognizes-table.el)
+(defvar org-table1-hline-regexp)
 
 ;; As of Emacs 25.1, `outline-mode' functions are under the 'outline-'
 ;; prefix, `find-tag' is replaced with `xref-find-definition' and
@@ -304,7 +311,8 @@ See `org-link-parameters' for documentation on the other parameters."
 
 (defun org-get-x-clipboard (value)
   "Get the value of the X or Windows clipboard."
-  (cond ((eq window-system 'x)
+  (cond ((and (eq window-system 'x)
+	      (fboundp 'gui-get-selection)) ;Silence byte-compiler.
 	 (org-no-properties
 	  (ignore-errors
 	    (or (gui-get-selection value 'UTF8_STRING)
