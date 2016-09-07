@@ -72,9 +72,10 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'ob-exp)
 (require 'org-element)
 (require 'org-macro)
-(require 'ob-exp)
+(require 'tabulated-list)
 
 (declare-function org-publish "ox-publish" (project &optional force async))
 (declare-function org-publish-all "ox-publish" (&optional force async))
@@ -6112,66 +6113,21 @@ removed beforehand.  Return the new stack."
   "Menu for asynchronous export results and running processes."
   (interactive)
   (let ((buffer (get-buffer-create "*Org Export Stack*")))
-    (set-buffer buffer)
-    (when (zerop (buffer-size)) (org-export-stack-mode))
-    (org-export-stack-refresh)
+    (with-current-buffer buffer
+      (org-export-stack-mode)
+      (tabulated-list-print t))
     (pop-to-buffer buffer))
   (message "Type \"q\" to quit, \"?\" for help"))
-
-(defun org-export--stack-source-at-point ()
-  "Return source from export results at point in stack."
-  (let ((source (car (nth (1- (org-current-line)) org-export-stack-contents))))
-    (if (not source) (error "Source unavailable, please refresh buffer")
-      (let ((source-name (if (stringp source) source (buffer-name source))))
-	(if (save-excursion
-	      (beginning-of-line)
-	      (looking-at (concat ".* +" (regexp-quote source-name) "$")))
-	    source
-	  ;; SOURCE is not consistent with current line.  The stack
-	  ;; view is outdated.
-	  (error "Source unavailable; type `g' to update buffer"))))))
 
 (defun org-export-stack-clear ()
   "Remove all entries from export stack."
   (interactive)
   (setq org-export-stack-contents nil))
 
-(defun org-export-stack-refresh (&rest _)
-  "Refresh the asynchronous export stack.
-Unavailable sources are removed from the list.  Return the new
-stack."
-  (let ((inhibit-read-only t))
-    (org-preserve-lc
-     (erase-buffer)
-     (insert (concat
-	      (mapconcat
-	       (lambda (entry)
-		 (let ((proc-p (processp (nth 2 entry))))
-		   (concat
-		    ;; Back-end.
-		    (format " %-12s  " (or (nth 1 entry) ""))
-		    ;; Age.
-		    (let ((data (nth 2 entry)))
-		      (if proc-p (format " %6s  " (process-status data))
-			;; Compute age of the results.
-			(format-seconds "%4h:%.2m  "
-					(float-time (time-since data)))))
-		    ;; Source.
-		    (format " %s"
-			    (let ((source (car entry)))
-			      (if (stringp source) source
-				(buffer-name source)))))))
-	       ;; Clear stack from exited processes, dead buffers or
-	       ;; non-existent files.
-	       (setq org-export-stack-contents
-		     (cl-remove-if-not
-		      (lambda (el)
-			(if (processp (nth 2 el))
-			    (buffer-live-p (process-buffer (nth 2 el)))
-			  (let ((source (car el)))
-			    (if (bufferp source) (buffer-live-p source)
-			      (file-exists-p source)))))
-		      org-export-stack-contents)) "\n"))))))
+(defun org-export-stack-refresh ()
+  "Refresh the export stack."
+  (interactive)
+  (tabulated-list-print t))
 
 (defun org-export-stack-remove (&optional source)
   "Remove export results at point from stack.
@@ -6195,11 +6151,10 @@ within Emacs."
 
 (defvar org-export-stack-mode-map
   (let ((km (make-sparse-keymap)))
+    (set-keymap-parent km tabulated-list-mode-map)
     (define-key km " " 'next-line)
-    (define-key km "n" 'next-line)
     (define-key km "\C-n" 'next-line)
     (define-key km [down] 'next-line)
-    (define-key km "p" 'previous-line)
     (define-key km "\C-p" 'previous-line)
     (define-key km "\C-?" 'previous-line)
     (define-key km [up] 'previous-line)
@@ -6210,31 +6165,85 @@ within Emacs."
     km)
   "Keymap for Org Export Stack.")
 
-(define-derived-mode org-export-stack-mode special-mode "Org-Stack"
+(define-derived-mode org-export-stack-mode tabulated-list-mode "Org-Stack"
   "Mode for displaying asynchronous export stack.
 
 Type \\[org-export-stack] to visualize the asynchronous export
 stack.
 
-In an Org Export Stack buffer, use \\<org-export-stack-mode-map>\\[org-export-stack-view] to view export output
-on current line, \\[org-export-stack-remove] to remove it from the stack and \\[org-export-stack-clear] to clear
+In an Org Export Stack buffer, use \
+\\<org-export-stack-mode-map>\\[org-export-stack-view] to view export output
+on current line, \\[org-export-stack-remove] to remove it from the stack and \
+\\[org-export-stack-clear] to clear
 stack completely.
 
-Removing entries in an Org Export Stack buffer doesn't affect
-files or buffers, only the display.
+Removing entries in a stack buffer does not affect files
+or buffers, only display.
 
 \\{org-export-stack-mode-map}"
-  (abbrev-mode 0)
-  (auto-fill-mode 0)
-  (setq buffer-read-only t
-	buffer-undo-list t
-	truncate-lines t
-	header-line-format
-	'(:eval
-	  (format "  %-12s | %6s | %s" "Back-End" "Age" "Source")))
-  (add-hook 'post-command-hook 'org-export-stack-refresh nil t)
-  (setq-local revert-buffer-function
-	      'org-export-stack-refresh))
+  (setq tabulated-list-format
+	(vector (list "#" 4 #'org-export--stack-num-predicate)
+		(list "Back-End" 12 t)
+		(list "Age" 6 nil)
+		(list "Source" 0 nil)))
+  (setq tabulated-list-sort-key (cons "#" nil))
+  (setq tabulated-list-entries #'org-export--stack-generate)
+  (add-hook 'tabulated-list-revert-hook #'org-export--stack-generate nil t)
+  (add-hook 'post-command-hook #'org-export-stack-refresh nil t)
+  (tabulated-list-init-header))
+
+(defun org-export--stack-generate ()
+  "Generate the asynchronous export stack for display.
+Unavailable sources are removed from the list.  Return a list
+appropriate for `tabulated-list-print'."
+  ;; Clear stack from exited processes, dead buffers or non-existent
+  ;; files.
+  (setq org-export-stack-contents
+	(cl-remove-if-not
+	 (lambda (el)
+	   (if (processp (nth 2 el))
+	       (buffer-live-p (process-buffer (nth 2 el)))
+	     (let ((source (car el)))
+	       (if (bufferp source) (buffer-live-p source)
+		 (file-exists-p source)))))
+	 org-export-stack-contents))
+  ;; Update `tabulated-list-entries'.
+  (let ((counter 0))
+    (mapcar
+     (lambda (entry)
+       (let ((source (car entry)))
+	 (list source
+	       (vector
+		;; Counter.
+		(number-to-string (cl-incf counter))
+		;; Back-End.
+		(if (nth 1 entry) (symbol-name (nth 1 entry)) "")
+		;; Age.
+		(let ((info (nth 2 entry)))
+		  (if (processp info) (symbol-name (process-status info))
+		    (format-seconds "%h:%.2m" (float-time (time-since info)))))
+		;; Source.
+		(if (stringp source) source (buffer-name source))))))
+     org-export-stack-contents)))
+
+(defun org-export--stack-num-predicate (a b)
+  (< (string-to-number (aref (nth 1 a) 0))
+     (string-to-number (aref (nth 1 b) 0))))
+
+(defun org-export--stack-source-at-point ()
+  "Return source from export results at point in stack."
+  (let ((source (car (nth (1- (org-current-line)) org-export-stack-contents))))
+    (if (not source) (error "Source unavailable, please refresh buffer")
+      (let ((source-name (if (stringp source) source (buffer-name source))))
+	(if (save-excursion
+	      (beginning-of-line)
+	      (looking-at-p (concat ".* +" (regexp-quote source-name) "$")))
+	    source
+	  ;; SOURCE is not consistent with current line.  The stack
+	  ;; view is outdated.
+	  (error (substitute-command-keys
+		  "Source unavailable; type \\[org-export-stack-refresh] \
+to refresh buffer")))))))
 
 
 
