@@ -9761,9 +9761,12 @@ This is a command that has to be installed in `calendar-mode-map'."
       (goto-char (next-single-property-change (point) 'org-hd-marker))
       (while (and (re-search-forward regexp nil t)
 		  (setq txt-at-point (get-text-property (point) 'txt)))
-	(when (string-match regexp txt-at-point)
-	  (setq entries-marked (1+ entries-marked))
-	  (call-interactively 'org-agenda-bulk-mark))))
+	(if (get-char-property (point) 'invisible)
+	    (beginning-of-line 2)
+	  (when (string-match regexp txt-at-point)
+	    (setq entries-marked (1+ entries-marked))
+	    (call-interactively 'org-agenda-bulk-mark)))))
+
     (if (not entries-marked)
 	(message "No entry matching this regexp."))))
 
