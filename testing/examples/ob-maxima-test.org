@@ -74,6 +74,7 @@ print(ms);
   :ID:       cc158527-b867-4b1d-8ae0-b8c713a90fd7
   :END:
 #+begin_src maxima :var s=test_tbl_mtr :results silent
+with_stdout("/dev/null", load(numericalio))$
 m: genmatrix (lambda([i,j], i+j-1), 3, 3)$
 write_data(m, "/dev/stdout")$
 #+end_src
