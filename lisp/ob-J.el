@@ -29,17 +29,18 @@
 ;; (available in MELPA).
 
 ;;; Code:
-(require 'ob)
 
-
-(defcustom org-babel-J-command
-  "jconsole"
-  "Command to call J."
-  :group 'org-babel
-  :type 'string)
+(require 'ob)
 
 (declare-function org-trim "org" (s &optional keep-lead))
 (declare-function j-console-ensure-session "ext:j-console" ())
+
+(defcustom org-babel-J-command "jconsole"
+  "Command to call J."
+  :group 'org-babel
+  :version "25.2"
+  :package-version '(Org . "9.0")
+  :type 'string)
 
 (defun org-babel-expand-body:J (body _params &optional _processed-params)
   "Expand BODY according to PARAMS, return the expanded body.
