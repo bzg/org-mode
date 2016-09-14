@@ -175,7 +175,7 @@ details.
 This option tells the export process how to behave when encountering
 a broken internal link.  See its docstring for more information.
 
-**** Attributes support in custom language environments for LaTeX export 
+**** Attributes support in custom language environments for LaTeX export
 Custom language environments for LaTeX export can now define the
 string to be inserted during export, using attributes to indicate the
 position of the elements. See variable ~org-latex-custom-lang-environments~
@@ -381,7 +381,7 @@ etc... Links are now centralized in ~org-link-parameters~.
 ** New functions
 *** ~org-next-line-empty-p~
 It replaces the deprecated ~next~ argument to ~org-previous-line-empty-p~.
-*** ~org-show-children~ 
+*** ~org-show-children~
 It is a faster implementation of ~outline-show-children~.
 
 ** Removed functions
@@ -514,6 +514,11 @@ modified anyway.
 They are still supported in Org 9.0 but will eventually be removed in
 a later release.  Use ~file~ link type along with universal arguments
 to force opening it in either Emacs or with system application.
+*** New defcustom ~org-babel-J-command~ stores the j command
+*** New defalias ~org-babel-execute:j~
+Allows J source blocks be indicated by letter j.  Previously the
+indication letter was solely J.
+
 * Version 8.3
 
 ** Incompatible changes
