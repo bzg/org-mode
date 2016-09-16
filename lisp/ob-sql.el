@@ -90,12 +90,13 @@
 	       (when password (concat "-p" password))
 	       (when database (concat "-D" database))))))
 
-(defun org-babel-sql-dbstring-postgresql (host user database)
+(defun org-babel-sql-dbstring-postgresql (host port user database)
   "Make PostgreSQL command line args for database connection.
 Pass nil to omit that arg."
   (combine-and-quote-strings
    (delq nil
 	 (list (when host (concat "-h" host))
+	       (when port (format "-p%d" port))
 	       (when user (concat "-U" user))
 	       (when database (concat "-d" database))))))
 
@@ -152,13 +153,13 @@ This function is called by `org-babel-execute-src-block'."
 				      (org-babel-process-file-name in-file)
 				      (org-babel-process-file-name out-file)))
 		    (`mssql (format "sqlcmd %s -s \"\t\" %s -i %s -o %s"
-				     (or cmdline "")
-				     (org-babel-sql-dbstring-mssql
-				      dbhost dbuser dbpassword database)
-				     (org-babel-sql-convert-standard-filename
-				      (org-babel-process-file-name in-file))
-				     (org-babel-sql-convert-standard-filename
-				      (org-babel-process-file-name out-file))))
+				    (or cmdline "")
+				    (org-babel-sql-dbstring-mssql
+				     dbhost dbuser dbpassword database)
+				    (org-babel-sql-convert-standard-filename
+				     (org-babel-process-file-name in-file))
+				    (org-babel-sql-convert-standard-filename
+				     (org-babel-process-file-name out-file))))
                     (`mysql (format "mysql %s %s %s < %s > %s"
 				    (org-babel-sql-dbstring-mysql
 				     dbhost dbport dbuser dbpassword database)
@@ -167,11 +168,14 @@ This function is called by `org-babel-execute-src-block'."
 				    (org-babel-process-file-name in-file)
 				    (org-babel-process-file-name out-file)))
 		    (`postgresql (format
-				  "psql --set=\"ON_ERROR_STOP=1\" %s -A -P \
+				  "%spsql --set=\"ON_ERROR_STOP=1\" %s -A -P \
 footer=off -F \"\t\"  %s -f %s -o %s %s"
+				  (if dbpassword
+				      (format "PGPASSWORD=%s " dbpassword)
+				    "")
 				  (if colnames-p "" "-t")
 				  (org-babel-sql-dbstring-postgresql
-				   dbhost dbuser database)
+				   dbhost dbport dbuser database)
 				  (org-babel-process-file-name in-file)
 				  (org-babel-process-file-name out-file)
 				  (or cmdline "")))
