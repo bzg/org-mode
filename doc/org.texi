@@ -12423,9 +12423,8 @@ that one (@pxref{Export settings}).
 @cindex export, OpenDocument
 @cindex LibreOffice
 
-Org mode@footnote{Versions 7.8 or later} supports export to OpenDocument Text
-(ODT) format.  Documents created by this exporter use the
-@cite{OpenDocument-v1.2
+Org mode supports export to OpenDocument Text (ODT) format.  Documents
+created by this exporter use the @cite{OpenDocument-v1.2
 specification}@footnote{@url{http://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html,
 Open Document Format for Office Applications (OpenDocument) Version 1.2}} and
 are compatible with LibreOffice 3.4.
