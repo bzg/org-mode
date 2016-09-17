@@ -9718,6 +9718,7 @@ markup rules used in an Org mode buffer.
 * Horizontal rules::            Make a line
 * Images and tables::           Images, tables and caption mechanism
 * Literal examples::            Source code examples with special formatting
+* Special symbols::             Greek letters and other symbols
 * Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
 @end menu
 
@@ -9986,6 +9987,67 @@ formatting like @samp{(ref:label)} at the end of the current line.  Then the
 label is stored as a link @samp{(label)}, for retrieval with @kbd{C-c C-l}.
 @end table
 
+@node Special symbols
+@section Special symbols
+@cindex Org entities
+@cindex math symbols
+@cindex special symbols
+@cindex HTML entities
+@cindex @LaTeX{} entities
+
+You can use @LaTeX{}-like syntax to insert special symbols---named
+entities---like @samp{\alpha} to indicate the Greek letter, or @samp{\to} to
+indicate an arrow.  Completion for these symbols is available, just type
+@samp{\} and maybe a few letters, and press @kbd{M-@key{TAB}} to see possible
+completions.  If you need such a symbol inside a word, terminate it with
+a pair of curly brackets.  For example
+
+@example
+Protip: Given a circle \Gamma of diameter d, the length of its circumference
+is \pi{}d.
+@end example
+
+@findex org-entities-help
+@vindex org-entities-user
+A large number of entities is provided, with names taken from both HTML and
+@LaTeX{}; you can comfortably browse the complete list from a dedicated
+buffer using the command @code{org-entities-help}.  It is also possible to
+provide your own special symbols in the variable @code{org-entities-user}.
+
+During export, these symbols are transformed into the native format of the
+exporter back-end.  Strings like @code{\alpha} are exported as @code{&alpha;}
+in the HTML output, and as @code{\(\alpha\)} in the @LaTeX{} output.
+Similarly, @code{\nbsp} becomes @code{&nbsp;} in HTML and @code{~} in
+@LaTeX{}.
+
+@cindex escaping characters
+Entities may also be used as a may to escape markup in an Org document, e.g.,
+@samp{\under@{@}not underlined\under} exports as @samp{_not underlined_}.
+
+@cindex special symbols, in-buffer display
+If you would like to see entities displayed as UTF-8 characters, use the
+following command@footnote{You can turn this on by default by setting the
+variable @code{org-pretty-entities}, or on a per-file base with the
+@code{#+STARTUP} option @code{entitiespretty}.}:
+
+@table @kbd
+@cindex @code{entitiespretty}, STARTUP keyword
+@kindex C-c C-x \
+@item C-c C-x \
+Toggle display of entities as UTF-8 characters.  This does not change the
+buffer content which remains plain ASCII, but it overlays the UTF-8 character
+for display purposes only.
+@end table
+
+@cindex shy hyphen, special symbol
+@cindex dash, special symbol
+@cindex ellipsis, special symbol
+In addition to regular entities defined above, Org exports in a special
+way@footnote{This behaviour can be disabled with @code{-} export setting
+(@pxref{Export settings}).} the following commonly used character
+combinations: @samp{\-} is treated as a shy hyphen, @samp{--} and @samp{---}
+are converted into dashes, and @samp{...} becomes a compact set of dots.
+
 @node Embedded @LaTeX{}
 @section Embedded @LaTeX{}
 @cindex @TeX{} interpretation
@@ -10002,60 +10064,11 @@ used to writing and reading @LaTeX{} source code, and because it can be
 readily processed to produce pretty output for a number of export back-ends.
 
 @menu
-* Special symbols::             Greek letters and other symbols
 * Subscripts and superscripts::  Simple syntax for raising/lowering text
 * @LaTeX{} fragments::          Complex formulas made easy
 * Previewing @LaTeX{} fragments::  What will this snippet look like?
 * CDLaTeX mode::                Speed up entering of formulas
 @end menu
-
-@node Special symbols
-@subsection Special symbols
-@cindex math symbols
-@cindex special symbols
-@cindex @TeX{} macros
-@cindex @LaTeX{} fragments, markup rules
-@cindex HTML entities
-@cindex @LaTeX{} entities
-
-You can use @LaTeX{}-like syntax to insert special symbols like @samp{\alpha}
-to indicate the Greek letter, or @samp{\to} to indicate an arrow.  Completion
-for these symbols is available, just type @samp{\} and maybe a few letters,
-and press @kbd{M-@key{TAB}} to see possible completions.  Unlike @LaTeX{}
-code, Org mode allows these symbols to be present without surrounding math
-delimiters, for example:
-
-@example
-Angles are written as Greek letters \alpha, \beta and \gamma.
-@end example
-
-@vindex org-entities
-During export, these symbols will be transformed into the native format of
-the exporter back-end.  Strings like @code{\alpha} will be exported as
-@code{&alpha;} in the HTML output, and as @code{\(\alpha\)} in the @LaTeX{}
-output.  Similarly, @code{\nbsp} will become @code{&nbsp;} in HTML and
-@code{~} in @LaTeX{}.  If you need such a symbol inside a word, terminate it
-like this: @samp{\Aacute@{@}stor}.
-
-A large number of entities is provided, with names taken from both HTML and
-@LaTeX{}; see the variable @code{org-entities} for the complete list.
-@samp{\-} is treated as a shy hyphen, and @samp{--}, @samp{---}, and
-@samp{...} are all converted into special commands creating hyphens of
-different lengths or a compact set of dots.
-
-If you would like to see entities displayed as UTF-8 characters, use the
-following command@footnote{You can turn this on by default by setting the
-variable @code{org-pretty-entities}, or on a per-file base with the
-@code{#+STARTUP} option @code{entitiespretty}.}:
-
-@table @kbd
-@cindex @code{entitiespretty}, STARTUP keyword
-@kindex C-c C-x \
-@item C-c C-x \
-Toggle display of entities as UTF-8 characters.  This does not change the
-buffer content which remains plain ASCII, but it overlays the UTF-8 character
-for display purposes only.
-@end table
 
 @node Subscripts and superscripts
 @subsection Subscripts and superscripts
