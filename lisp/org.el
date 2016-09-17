@@ -23695,7 +23695,6 @@ it has a `diary' type."
 ;;; Other stuff.
 
 (defvar reftex-docstruct-symbol)
-(defvar reftex-cite-format)
 (defvar org--rds)
 
 (defun org-reftex-citation ()
@@ -23713,7 +23712,6 @@ Export of such citations to both LaTeX and HTML is handled by the contributed
 package ox-bibtex by Taru Karttunen."
   (interactive)
   (let ((reftex-docstruct-symbol 'org--rds)
-	(reftex-cite-format "\\cite{%l}")
 	org--rds bib)
     (org-with-wide-buffer
      (let ((case-fold-search t)
