@@ -9719,6 +9719,7 @@ markup rules used in an Org mode buffer.
 * Images and tables::           Images, tables and caption mechanism
 * Literal examples::            Source code examples with special formatting
 * Special symbols::             Greek letters and other symbols
+* Subscripts and superscripts:: Simple syntax for raising/lowering text
 * Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
 @end menu
 
@@ -10048,42 +10049,19 @@ way@footnote{This behaviour can be disabled with @code{-} export setting
 combinations: @samp{\-} is treated as a shy hyphen, @samp{--} and @samp{---}
 are converted into dashes, and @samp{...} becomes a compact set of dots.
 
-@node Embedded @LaTeX{}
-@section Embedded @LaTeX{}
-@cindex @TeX{} interpretation
-@cindex @LaTeX{} interpretation
-
-Plain ASCII is normally sufficient for almost all note taking.  Exceptions
-include scientific notes, which often require mathematical symbols and the
-occasional formula.  @LaTeX{}@footnote{@LaTeX{} is a macro system based on
-Donald E. Knuth's @TeX{} system.  Many of the features described here as
-``@LaTeX{}'' are really from @TeX{}, but for simplicity I am blurring this
-distinction.}  is widely used to typeset scientific documents.  Org mode
-supports embedding @LaTeX{} code into its files, because many academics are
-used to writing and reading @LaTeX{} source code, and because it can be
-readily processed to produce pretty output for a number of export back-ends.
-
-@menu
-* Subscripts and superscripts::  Simple syntax for raising/lowering text
-* @LaTeX{} fragments::          Complex formulas made easy
-* Previewing @LaTeX{} fragments::  What will this snippet look like?
-* CDLaTeX mode::                Speed up entering of formulas
-@end menu
-
 @node Subscripts and superscripts
-@subsection Subscripts and superscripts
+@section Subscripts and superscripts
 @cindex subscript
 @cindex superscript
 
-Just like in @LaTeX{}, @samp{^} and @samp{_} are used to indicate super- and
-subscripts.  Again, these can be used without embedding them in math-mode
-delimiters.  To increase the readability of ASCII text, it is not necessary
-(but OK) to surround multi-character sub- and superscripts with curly braces.
-For example
+@samp{^} and @samp{_} are used to indicate super- and subscripts.  To
+increase the readability of ASCII text, it is not necessary---but OK---to
+surround multi-character sub- and superscripts with curly braces.  Those are,
+however, mandatory, when more than one word is involved.  For example
 
 @example
-The mass of the sun is M_sun = 1.989 x 10^30 kg.  The radius of
-the sun is R_@{sun@} = 6.96 x 10^8 m.
+The radius of the sun is R_sun = 6.96 x 10^8 m.  On the other hand, the
+radius of Alpha Centauri is R_@{Alpha Centauri@} = 1.28 x R_@{sun@}.
 @end example
 
 @vindex org-use-sub-superscripts
@@ -10100,15 +10078,35 @@ In addition to showing entities as UTF-8 characters, this command will also
 format sub- and superscripts in a WYSIWYM way.
 @end table
 
+@node Embedded @LaTeX{}
+@section Embedded @LaTeX{}
+@cindex @TeX{} interpretation
+@cindex @LaTeX{} interpretation
+
+Plain ASCII is normally sufficient for almost all note taking.  Exceptions
+include scientific notes, which often require mathematical symbols and the
+occasional formula.  @LaTeX{}@footnote{@LaTeX{} is a macro system based on
+Donald E. Knuth's @TeX{} system.  Many of the features described here as
+``@LaTeX{}'' are really from @TeX{}, but for simplicity I am blurring this
+distinction.}  is widely used to typeset scientific documents.  Org mode
+supports embedding @LaTeX{} code into its files, because many academics are
+used to writing and reading @LaTeX{} source code, and because it can be
+readily processed to produce pretty output for a number of export back-ends.
+
+@menu
+* @LaTeX{} fragments::          Complex formulas made easy
+* Previewing @LaTeX{} fragments::  What will this snippet look like?
+* CDLaTeX mode::                Speed up entering of formulas
+@end menu
+
 @node @LaTeX{} fragments
 @subsection @LaTeX{} fragments
 @cindex @LaTeX{} fragments
 
 @vindex org-format-latex-header
-Going beyond symbols and sub- and superscripts, a full formula language is
-needed.  Org mode can contain @LaTeX{} math fragments, and it supports ways
-to process these for several export back-ends.  When exporting to @LaTeX{},
-the code is left as it is.  When exporting to HTML, Org can use either
+Org mode can contain @LaTeX{} math fragments, and it supports ways to process
+these for several export back-ends.  When exporting to @LaTeX{}, the code is
+left as it is.  When exporting to HTML, Org can use either
 @uref{http://www.mathjax.org, MathJax} (@pxref{Math formatting in HTML
 export}) or transcode the math into images (see @pxref{Previewing @LaTeX{}
 fragments}).
