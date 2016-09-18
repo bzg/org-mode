@@ -954,35 +954,22 @@ Use \"export %s\" instead"
 			       (and (boundp v) (symbol-value v))))
 			org-babel-common-header-args-w-values))
 	       (datum-header-values
-		(apply
-		 #'org-babel-merge-params
-		 org-babel-default-header-args
-		 (and language
-		      (let ((v (intern (concat "org-babel-default-header-args:"
-					       language))))
-			(and (boundp v) (symbol-value v))))
-		 (append
-		  (list (and (memq type '(babel-call inline-babel-call))
-			     org-babel-default-lob-header-args))
-		  (progn (goto-char (org-element-property :begin datum))
-			 (org-babel-params-from-properties language))
-		  (list
-		   (org-babel-parse-header-arguments
-		    (org-trim
-		     (pcase type
-		       (`src-block
-			(mapconcat
-			 #'identity
-			 (cons (org-element-property :parameters datum)
-			       (org-element-property :header datum))
-			 " "))
-		       (`inline-src-block
-			(or (org-element-property :parameters datum) ""))
-		       (_
-			(concat
-			 (org-element-property :inside-header datum)
-			 " "
-			 (org-element-property :end-header datum)))))))))))
+		(org-babel-parse-header-arguments
+		 (org-trim
+		  (pcase type
+		    (`src-block
+		     (mapconcat
+		      #'identity
+		      (cons (org-element-property :parameters datum)
+			    (org-element-property :header datum))
+		      " "))
+		    (`inline-src-block
+		     (or (org-element-property :parameters datum) ""))
+		    (_
+		     (concat
+		      (org-element-property :inside-header datum)
+		      " "
+		      (org-element-property :end-header datum))))))))
 	  (dolist (header datum-header-values)
 	    (let ((allowed-values
 		   (cdr (assoc-string (substring (symbol-name (car header)) 1)
