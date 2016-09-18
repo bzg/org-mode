@@ -96,10 +96,6 @@
 (declare-function orgtbl-to-orgtbl "org-table" (table params))
 (declare-function outline-show-all "outline" ())
 (declare-function tramp-compat-make-temp-file "tramp-compat" (filename &optional dir-flag))
-(declare-function tramp-dissect-file-name "tramp" (name &optional nodefault))
-(declare-function tramp-file-name-host "tramp" (vec))
-(declare-function tramp-file-name-user "tramp" (vec))
-(declare-function with-parsed-tramp-file-name "tramp" (filename var &rest body) t)
 
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
