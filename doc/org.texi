@@ -10005,7 +10005,7 @@ a pair of curly brackets.  For example
 
 @example
 Protip: Given a circle \Gamma of diameter d, the length of its circumference
-is \pi{}d.
+is \pi@{@}d.
 @end example
 
 @findex org-entities-help
