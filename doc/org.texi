@@ -10485,7 +10485,10 @@ recognizes the following arguments:
 @table @code
 @item ':
 @vindex org-export-with-smart-quotes
-Toggle smart quotes (@code{org-export-with-smart-quotes}).
+Toggle smart quotes (@code{org-export-with-smart-quotes}).  When activated,
+pairs of double quotes become primary quotes according to the language used.
+Inside, pairs of single quotes become secondary quotes.  Other single quotes
+are treated as apostrophes.
 
 @item *:
 Toggle emphasized text (@code{org-export-with-emphasize}).
