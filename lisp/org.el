@@ -21291,15 +21291,13 @@ With argument, join this line to following line."
 
 (defun org-open-line (n)
   "Insert a new row in tables, call `open-line' elsewhere.
-If `org-special-ctrl-o' is nil, just call `open-line' everywhere."
+If `org-special-ctrl-o' is nil, just call `open-line' everywhere.
+As a special case, when a document starts with a table, allow to
+call `open-line' on the very first character."
   (interactive "*p")
-  (cond
-   ((not org-special-ctrl-o)
-    (open-line n))
-   ((org-at-table-p)
-    (org-table-insert-row))
-   (t
-    (open-line n))))
+  (if (and org-special-ctrl-o (/= (point) 1) (org-at-table-p))
+      (org-table-insert-row)
+    (open-line n)))
 
 (defun org-return (&optional indent)
   "Goto next table row or insert a newline.

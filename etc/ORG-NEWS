@@ -518,7 +518,10 @@ to force opening it in either Emacs or with system application.
 *** New defalias ~org-babel-execute:j~
 Allows J source blocks be indicated by letter j.  Previously the
 indication letter was solely J.
-
+*** ~org-open-line~ ignores tables at the very beginning of the buffer
+When ~org-special-ctrl-o~ is non-nil, it is impractical to create
+a blank line above a table at the beginning of the document. Now, as
+a special case, ~org-open-line~ behaves normally in this situation.
 * Version 8.3
 
 ** Incompatible changes

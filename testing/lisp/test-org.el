@@ -2487,6 +2487,35 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
        (org-end-of-line)
        (eobp)))))
 
+(ert-deftest test-org/open-line ()
+  "Test `org-open-line' specifications."
+  ;; Call `open-line' outside of tables.
+  (should
+   (equal "\nText"
+	  (org-test-with-temp-text "Text"
+	    (org-open-line 1)
+	    (buffer-string))))
+  ;; At a table, create a row above.
+  (should
+   (equal "\n|   |\n| a |"
+	  (org-test-with-temp-text "\n<point>| a |"
+	    (org-open-line 1)
+	    (buffer-string))))
+  ;; At the very first character of the buffer, also call `open-line'.
+  (should
+   (equal "\n| a |"
+	  (org-test-with-temp-text "| a |"
+	    (org-open-line 1)
+	    (buffer-string))))
+  ;; Narrowing does not count.
+  (should
+   (equal "Text\n|   |\n| a |"
+	  (org-test-with-temp-text "Text\n<point>| a |"
+	    (narrow-to-region (point) (point-max))
+	    (org-open-line 1)
+	    (widen)
+	    (buffer-string)))))
+
 (ert-deftest test-org/forward-sentence ()
   "Test `org-forward-sentence' specifications."
   ;; At the end of a table cell, move to the end of the next one.
