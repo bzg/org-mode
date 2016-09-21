@@ -374,7 +374,8 @@ Repeated footnotes are now numbered by referring to a label in the
 first footnote.
 *** The ~org-block~ face is inherited by ~src-blocks~
 This works also when =org-src-fontify-natively= is non-nil.  It is also
-possible to specify per-languages faces.  See the manual for details.
+possible to specify per-languages faces.  See =org-src-block-faces= and
+the manual for details.
 *** Links are now customizable
 Links can now have custom colors, tooltips, keymaps, display behavior,
 etc... Links are now centralized in ~org-link-parameters~.

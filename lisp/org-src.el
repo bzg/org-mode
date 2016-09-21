@@ -513,9 +513,9 @@ as `org-src-fontify-natively' is non-nil."
 		   org-buffer)))
 	      (setq pos next))))
 	;; Add Org faces.
-	(let ((face-name (intern (format "org-block-%s" lang))))
-	  (when (facep face-name)
-	    (font-lock-append-text-property start end 'face face-name))
+	(let ((src-face (cadr (assoc-ignore-case lang org-src-block-faces))))
+          (when (or (facep src-face) (listp))
+            (font-lock-append-text-property start end 'face src-face))
 	  (font-lock-append-text-property start end 'face 'org-block))
 	(add-text-properties
 	 start end

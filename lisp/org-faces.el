@@ -395,11 +395,32 @@ follows a #+DATE:, #+AUTHOR: or #+EMAIL: keyword."
 
 (defface org-block '((t :inherit shadow))
   "Face text in #+begin ... #+end blocks.
-In addition to this face that take precedence for particular
-languages.  For instance, to change the block face for Emacs-Lisp
-blocks define a `org-block-emacs-lisp' face."
+For source-blocks `org-src-block-faces' takes precedence.
+See also `org-fontify-quote-and-verse-blocks'."
   :group 'org-faces
-  :version "22.1")
+  :version "25.2")
+
+(defcustom org-src-block-faces nil
+  "Alist of faces to be used for source-block.
+Each element is a cell of the format
+
+     (\"language\" FACE)
+
+Where FACE is either a defined face or an anonymous face.
+
+For instance, the following value would color the background of
+emacs-lisp source blocks and python source blocks in purple and
+green, respectability.
+
+    '((\"emacs-lisp\" (:background \"#EEE2FF\"))
+      (\"python\" (:background \"#e5ffb8\")))"
+  :group 'org-faces
+  :type '(repeat (list (string :tag "language")
+                       (choice
+                        (face :tag "Face")
+                        (sexp :tag "Anonymous face"))))
+  :version "25.2"
+  :package-version '(Org . "9.0"))
 
 (defface org-block-begin-line '((t (:inherit org-meta-line)))
   "Face used for the line delimiting the begin of source blocks."
