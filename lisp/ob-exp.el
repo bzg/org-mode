@@ -175,7 +175,7 @@ this template."
 			       (org-babel-get-src-block-info nil element))
 			      (params (nth 2 info)))
 			 (setf (nth 1 info)
-			       (if (and (cdr (assoc :noweb params))
+			       (if (and (cdr (assq :noweb params))
 					(string= "yes"
 						 (cdr (assq :noweb params))))
 				   (org-babel-expand-noweb-references
@@ -270,7 +270,7 @@ this template."
 (defun org-babel-exp-do-export (info type &optional hash)
   "Return a string with the exported content of a code block.
 The function respects the value of the :exports header argument."
-  (let ((silently (lambda () (let ((session (cdr (assoc :session (nth 2 info)))))
+  (let ((silently (lambda () (let ((session (cdr (assq :session (nth 2 info)))))
 			  (unless (equal "none" session)
 			    (org-babel-exp-results info type 'silent)))))
 	(clean (lambda () (if (eq type 'inline)
@@ -329,7 +329,7 @@ replaced with its value."
 (defun org-babel-exp-code (info type)
   "Return the original code block formatted for export."
   (setf (nth 1 info)
-	(if (string= "strip-export" (cdr (assoc :noweb (nth 2 info))))
+	(if (string= "strip-export" (cdr (assq :noweb (nth 2 info))))
 	    (replace-regexp-in-string
 	     (org-babel-noweb-wrap) "" (nth 1 info))
 	  (if (org-babel-noweb-p (nth 2 info) :export)

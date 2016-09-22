@@ -126,9 +126,9 @@ or `org-babel-execute:C++' or `org-babel-execute:D'."
 			  (`c ".c") (`cpp ".cpp") (`d ".d"))))
 	 (tmp-bin-file			;not used for D
 	  (org-babel-temp-file "C-bin-" org-babel-exeext))
-	 (cmdline (cdr (assoc :cmdline params)))
+	 (cmdline (cdr (assq :cmdline params)))
 	 (cmdline (if cmdline (concat " " cmdline) ""))
-	 (flags (cdr (assoc :flags params)))
+	 (flags (cdr (assq :flags params)))
 	 (flags (mapconcat 'identity
 			   (if (listp flags) flags (list flags)) " "))
 	 (libs (org-babel-read
@@ -172,15 +172,15 @@ or `org-babel-execute:C++' or `org-babel-execute:D'."
       (when results
 	(setq results (org-trim (org-remove-indentation results)))
 	(org-babel-reassemble-table
-	 (org-babel-result-cond (cdr (assoc :result-params params))
+	 (org-babel-result-cond (cdr (assq :result-params params))
 	   (org-babel-read results t)
 	   (let ((tmp-file (org-babel-temp-file "c-")))
 	     (with-temp-file tmp-file (insert results))
 	     (org-babel-import-elisp-from-file tmp-file)))
 	 (org-babel-pick-name
-	  (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
+	  (cdr (assq :colname-names params)) (cdr (assq :colnames params)))
 	 (org-babel-pick-name
-	  (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))
+	  (cdr (assq :rowname-names params)) (cdr (assq :rownames params)))))
       )))
 
 (defun org-babel-C-expand-C++ (body params)
@@ -193,13 +193,13 @@ its header arguments."
 its header arguments."
   (let ((vars (org-babel--get-vars params))
 	(colnames (cdr (assq :colname-names params)))
-	(main-p (not (string= (cdr (assoc :main params)) "no")))
+	(main-p (not (string= (cdr (assq :main params)) "no")))
 	(includes (org-babel-read
-		   (or (cdr (assoc :includes params))
+		   (or (cdr (assq :includes params))
 		       (org-entry-get nil "includes" t))
 		   nil))
 	(defines (org-babel-read
-		  (or (cdr (assoc :defines params))
+		  (or (cdr (assq :defines params))
 		      (org-entry-get nil "defines" t))
 		  nil)))
     (when (stringp includes)
@@ -242,8 +242,8 @@ its header arguments."
 its header arguments."
   (let ((vars (org-babel--get-vars params))
 	(colnames (cdr (assq :colname-names params)))
-	(main-p (not (string= (cdr (assoc :main params)) "no")))
-	(imports (or (cdr (assoc :imports params))
+	(main-p (not (string= (cdr (assq :main params)) "no")))
+	(imports (or (cdr (assq :imports params))
 		     (org-babel-read (org-entry-get nil "imports" t)))))
     (when (stringp imports)
       (setq imports (split-string imports)))

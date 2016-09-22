@@ -69,19 +69,19 @@ outside the Customize interface."
   "Execute a block of Shell commands with Babel.
 This function is called by `org-babel-execute-src-block'."
   (let* ((session (org-babel-sh-initiate-session
-		   (cdr (assoc :session params))))
-	 (stdin (let ((stdin (cdr (assoc :stdin params))))
+		   (cdr (assq :session params))))
+	 (stdin (let ((stdin (cdr (assq :stdin params))))
                   (when stdin (org-babel-sh-var-to-string
                                (org-babel-ref-resolve stdin)))))
-	 (cmdline (cdr (assoc :cmdline params)))
+	 (cmdline (cdr (assq :cmdline params)))
          (full-body (org-babel-expand-body:generic
 		     body params (org-babel-variable-assignments:shell params))))
     (org-babel-reassemble-table
      (org-babel-sh-evaluate session full-body params stdin cmdline)
      (org-babel-pick-name
-      (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
+      (cdr (assq :colname-names params)) (cdr (assq :colnames params)))
      (org-babel-pick-name
-      (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params))))))
+      (cdr (assq :rowname-names params)) (cdr (assq :rownames params))))))
 
 (defun org-babel-prep-session:shell (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -142,9 +142,9 @@ This function is called by `org-babel-execute-src-block'."
 
 (defun org-babel-variable-assignments:shell (params)
   "Return list of shell statements assigning the block's variables."
-  (let ((sep (cdr (assoc :separator params)))
-	(hline (when (string= "yes" (cdr (assoc :hlines params)))
-		 (or (cdr (assoc :hline-string params))
+  (let ((sep (cdr (assq :separator params)))
+	(hline (when (string= "yes" (cdr (assq :hlines params)))
+		 (or (cdr (assq :hline-string params))
 		     "hline"))))
     (mapcar
      (lambda (pair)
@@ -203,8 +203,8 @@ return the value of the last statement in BODY."
           ((or stdin cmdline)	       ; external shell script w/STDIN
            (let ((script-file (org-babel-temp-file "sh-script-"))
                  (stdin-file (org-babel-temp-file "sh-stdin-"))
-                 (shebang (cdr (assoc :shebang params)))
-                 (padline (not (string= "no" (cdr (assoc :padline params))))))
+                 (shebang (cdr (assq :shebang params)))
+                 (padline (not (string= "no" (cdr (assq :padline params))))))
              (with-temp-file script-file
                (when shebang (insert (concat shebang "\n")))
                (when padline (insert "\n"))
@@ -242,11 +242,11 @@ return the value of the last statement in BODY."
                   (list org-babel-sh-eoe-indicator))))
               2)) "\n"))
           ('otherwise                   ; external shell script
-           (if (and (cdr (assoc :shebang params))
-                    (> (length (cdr (assoc :shebang params))) 0))
+           (if (and (cdr (assq :shebang params))
+                    (> (length (cdr (assq :shebang params))) 0))
                (let ((script-file (org-babel-temp-file "sh-script-"))
-                     (shebang (cdr (assoc :shebang params)))
-                     (padline (not (equal "no" (cdr (assoc :padline params))))))
+                     (shebang (cdr (assq :shebang params)))
+                     (padline (not (equal "no" (cdr (assq :padline params))))))
                  (with-temp-file script-file
                    (when shebang (insert (concat shebang "\n")))
                    (when padline (insert "\n"))
@@ -255,7 +255,7 @@ return the value of the last statement in BODY."
                  (org-babel-eval script-file ""))
              (org-babel-eval shell-file-name (org-trim body)))))))
     (when results
-      (let ((result-params (cdr (assoc :result-params params))))
+      (let ((result-params (cdr (assq :result-params params))))
         (org-babel-result-cond result-params
           results
           (let ((tmp-file (org-babel-temp-file "sh-")))

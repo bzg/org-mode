@@ -54,10 +54,10 @@
 (defun org-babel-execute:asymptote (body params)
   "Execute a block of Asymptote code.
 This function is called by `org-babel-execute-src-block'."
-  (let* ((out-file (cdr (assoc :file params)))
+  (let* ((out-file (cdr (assq :file params)))
          (format (or (file-name-extension out-file)
                      "pdf"))
-         (cmdline (cdr (assoc :cmdline params)))
+         (cmdline (cdr (assq :cmdline params)))
          (in-file (org-babel-temp-file "asymptote-"))
          (cmd
 	  (concat "asy "

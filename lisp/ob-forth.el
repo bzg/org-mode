@@ -43,10 +43,10 @@
 (defun org-babel-execute:forth (body params)
   "Execute a block of Forth code with org-babel.
 This function is called by `org-babel-execute-src-block'"
-  (if (string= "none" (cdr (assoc :session params)))
+  (if (string= "none" (cdr (assq :session params)))
       (error "Non-session evaluation not supported for Forth code blocks")
     (let ((all-results (org-babel-forth-session-execute body params)))
-      (if (member "output" (cdr (assoc :result-params params)))
+      (if (member "output" (cdr (assq :result-params params)))
 	  (mapconcat #'identity all-results "\n")
 	(car (last all-results))))))
 

@@ -45,9 +45,9 @@
 (defun org-babel-execute:sass (body params)
   "Execute a block of Sass code with Babel.
 This function is called by `org-babel-execute-src-block'."
-  (let* ((file (cdr (assoc :file params)))
+  (let* ((file (cdr (assq :file params)))
          (out-file (or file (org-babel-temp-file "sass-out-")))
-         (cmdline (cdr (assoc :cmdline params)))
+         (cmdline (cdr (assq :cmdline params)))
          (in-file (org-babel-temp-file "sass-in-"))
          (cmd (concat "sass " (or cmdline "")
 		      " " (org-babel-process-file-name in-file)

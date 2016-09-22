@@ -61,8 +61,8 @@
 
 (defun org-babel-execute:haskell (body params)
   "Execute a block of Haskell code."
-  (let* ((session (cdr (assoc :session params)))
-         (result-type (cdr (assoc :result-type params)))
+  (let* ((session (cdr (assq :session params)))
+         (result-type (cdr (assq :result-type params)))
          (full-body (org-babel-expand-body:generic
 		     body params
 		     (org-babel-variable-assignments:haskell params)))
@@ -82,12 +82,12 @@
             (pcase result-type
               (`output (mapconcat #'identity (reverse (cdr results)) "\n"))
               (`value (car results)))))
-       (org-babel-result-cond (cdr (assoc :result-params params))
+       (org-babel-result-cond (cdr (assq :result-params params))
 	 result (org-babel-script-escape result)))
-     (org-babel-pick-name (cdr (assoc :colname-names params))
-			  (cdr (assoc :colname-names params)))
-     (org-babel-pick-name (cdr (assoc :rowname-names params))
-			  (cdr (assoc :rowname-names params))))))
+     (org-babel-pick-name (cdr (assq :colname-names params))
+			  (cdr (assq :colname-names params)))
+     (org-babel-pick-name (cdr (assq :rowname-names params))
+			  (cdr (assq :rowname-names params))))))
 
 (defun org-babel-haskell-initiate-session (&optional _session _params)
   "Initiate a haskell session.

@@ -68,7 +68,7 @@ current directory string."
 (defun org-babel-expand-body:lisp (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let* ((vars (org-babel--get-vars params))
-	 (result-params (cdr (assoc :result-params params)))
+	 (result-params (cdr (assq :result-params params)))
 	 (print-level nil) (print-length nil)
 	 (body (if (null vars) (org-trim body)
 		 (concat "(let ("
@@ -91,30 +91,30 @@ a property list containing the parameters of the block."
 	     (`sly-eval 'sly)))
   (org-babel-reassemble-table
    (let ((result
-          (funcall (if (member "output" (cdr (assoc :result-params params)))
+          (funcall (if (member "output" (cdr (assq :result-params params)))
                        #'car #'cadr)
                    (with-temp-buffer
                      (insert (org-babel-expand-body:lisp body params))
                      (funcall org-babel-lisp-eval-fn
                               `(swank:eval-and-grab-output
-                                ,(let ((dir (if (assoc :dir params)
-                                                (cdr (assoc :dir params))
+                                ,(let ((dir (if (assq :dir params)
+                                                (cdr (assq :dir params))
                                               default-directory)))
                                    (format
                                     (if dir (format org-babel-lisp-dir-fmt dir)
                                       "(progn %s\n)")
                                     (buffer-substring-no-properties
                                      (point-min) (point-max)))))
-                              (cdr (assoc :package params)))))))
-     (org-babel-result-cond (cdr (assoc :result-params params))
+                              (cdr (assq :package params)))))))
+     (org-babel-result-cond (cdr (assq :result-params params))
        result
        (condition-case nil
            (read (org-babel-lisp-vector-to-list result))
          (error result))))
-   (org-babel-pick-name (cdr (assoc :colname-names params))
-			(cdr (assoc :colnames params)))
-   (org-babel-pick-name (cdr (assoc :rowname-names params))
-			(cdr (assoc :rownames params)))))
+   (org-babel-pick-name (cdr (assq :colname-names params))
+			(cdr (assq :colnames params)))
+   (org-babel-pick-name (cdr (assq :rowname-names params))
+			(cdr (assq :rownames params)))))
 
 (defun org-babel-lisp-vector-to-list (results)
   ;; TODO: better would be to replace #(...) with [...]

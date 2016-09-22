@@ -51,13 +51,13 @@ parameters may be used, like javac -verbose"
   :type 'string)
 
 (defun org-babel-execute:java (body params)
-  (let* ((classname (or (cdr (assoc :classname params))
+  (let* ((classname (or (cdr (assq :classname params))
 			(error
 			 "Can't compile a java block without a classname")))
 	 (packagename (file-name-directory classname))
 	 (src-file (concat classname ".java"))
-	 (cmpflag (or (cdr (assoc :cmpflag params)) ""))
-	 (cmdline (or (cdr (assoc :cmdline params)) ""))
+	 (cmpflag (or (cdr (assq :cmpflag params)) ""))
+	 (cmdline (or (cdr (assq :cmdline params)) ""))
 	 (full-body (org-babel-expand-body:generic body params)))
     (with-temp-file src-file (insert full-body))
     (org-babel-eval
@@ -68,15 +68,15 @@ parameters may be used, like javac -verbose"
     (let ((results (org-babel-eval (concat org-babel-java-command
                                            " " cmdline " " classname) "")))
       (org-babel-reassemble-table
-       (org-babel-result-cond (cdr (assoc :result-params params))
+       (org-babel-result-cond (cdr (assq :result-params params))
 	 (org-babel-read results)
          (let ((tmp-file (org-babel-temp-file "c-")))
            (with-temp-file tmp-file (insert results))
            (org-babel-import-elisp-from-file tmp-file)))
        (org-babel-pick-name
-        (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
+        (cdr (assq :colname-names params)) (cdr (assq :colnames params)))
        (org-babel-pick-name
-        (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))))
+        (cdr (assq :rowname-names params)) (cdr (assq :rownames params)))))))
 
 (provide 'ob-java)
 

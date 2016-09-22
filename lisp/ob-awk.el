@@ -51,13 +51,13 @@
   "Execute a block of Awk code with org-babel.  This function is
 called by `org-babel-execute-src-block'"
   (message "executing Awk source code block")
-  (let* ((result-params (cdr (assoc :result-params params)))
-         (cmd-line (cdr (assoc :cmd-line params)))
-         (in-file (cdr (assoc :in-file params)))
+  (let* ((result-params (cdr (assq :result-params params)))
+         (cmd-line (cdr (assq :cmd-line params)))
+         (in-file (cdr (assq :in-file params)))
 	 (full-body (org-babel-expand-body:awk body params))
 	 (code-file (let ((file (org-babel-temp-file "awk-")))
                       (with-temp-file file (insert full-body)) file))
-	 (stdin (let ((stdin (cdr (assoc :stdin params))))
+	 (stdin (let ((stdin (cdr (assq :stdin params))))
 		   (when stdin
 		     (let ((tmp (org-babel-temp-file "awk-stdin-"))
 			   (res (org-babel-ref-resolve stdin)))
@@ -90,9 +90,9 @@ called by `org-babel-execute-src-block'"
 	     (with-temp-file tmp (insert results))
 	     (org-babel-import-elisp-from-file tmp)))))
      (org-babel-pick-name
-      (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
+      (cdr (assq :colname-names params)) (cdr (assq :colnames params)))
      (org-babel-pick-name
-      (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params))))))
+      (cdr (assq :rowname-names params)) (cdr (assq :rownames params))))))
 
 (defun org-babel-awk-var-to-awk (var &optional sep)
   "Return a printed value of VAR suitable for parsing with awk."

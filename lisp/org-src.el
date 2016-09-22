@@ -632,7 +632,7 @@ See also `org-src-mode-hook'."
 (defun org-src-associate-babel-session (info)
   "Associate edit buffer with comint session."
   (interactive)
-  (let ((session (cdr (assoc :session (nth 2 info)))))
+  (let ((session (cdr (assq :session (nth 2 info)))))
     (and session (not (string= session "none"))
 	 (org-babel-comint-buffer-livep session)
 	 (let ((f (intern (format "org-babel-%s-associate-session"

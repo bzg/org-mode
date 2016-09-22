@@ -75,7 +75,7 @@ PARAMS are given by org-babel.
 This function is called by `org-babel-execute-src-block'"
   (message "executing J source code block")
   (let* ((processed-params (org-babel-process-params params))
-	 (sessionp (cdr (assoc :session params)))
+	 (sessionp (cdr (assq :session params)))
          (full-body (org-babel-expand-body:J
                      body params processed-params))
 	 (tmp-script-file (org-babel-temp-file "J-src")))

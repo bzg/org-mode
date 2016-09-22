@@ -90,7 +90,7 @@ this variable.")
 (defvar ess-current-process-name) ; dynamically scoped
 (defvar ess-local-process-name)   ; dynamically scoped
 (defun org-babel-edit-prep:R (info)
-  (let ((session (cdr (assoc :session (nth 2 info)))))
+  (let ((session (cdr (assq :session (nth 2 info)))))
     (when (and session
 	       (string-prefix-p "*"  session)
 	       (string-suffix-p "*" session))
@@ -143,24 +143,24 @@ This function is used when the table does not contain a header.")
   "Expand BODY according to PARAMS, return the expanded body."
   (mapconcat 'identity
 	     (append
-	      (when (cdr (assoc :prologue params))
-		(list (cdr (assoc :prologue params))))
+	      (when (cdr (assq :prologue params))
+		(list (cdr (assq :prologue params))))
 	      (org-babel-variable-assignments:R params)
 	      (list body)
-	      (when (cdr (assoc :epilogue params))
-		(list (cdr (assoc :epilogue params)))))
+	      (when (cdr (assq :epilogue params))
+		(list (cdr (assq :epilogue params)))))
 	     "\n"))
 
 (defun org-babel-execute:R (body params)
   "Execute a block of R code.
 This function is called by `org-babel-execute-src-block'."
   (save-excursion
-    (let* ((result-params (cdr (assoc :result-params params)))
-	   (result-type (cdr (assoc :result-type params)))
+    (let* ((result-params (cdr (assq :result-params params)))
+	   (result-type (cdr (assq :result-type params)))
            (session (org-babel-R-initiate-session
-		     (cdr (assoc :session params)) params))
-	   (colnames-p (cdr (assoc :colnames params)))
-	   (rownames-p (cdr (assoc :rownames params)))
+		     (cdr (assq :session params)) params))
+	   (colnames-p (cdr (assq :colnames params)))
+	   (rownames-p (cdr (assq :rownames params)))
 	   (graphics-file (and (member "graphics" (assq :result-params params))
 			       (org-babel-graphical-output-file params)))
 	   (full-body
@@ -180,10 +180,10 @@ This function is called by `org-babel-execute-src-block'."
 	     session full-body result-type result-params
 	     (or (equal "yes" colnames-p)
 		 (org-babel-pick-name
-		  (cdr (assoc :colname-names params)) colnames-p))
+		  (cdr (assq :colname-names params)) colnames-p))
 	     (or (equal "yes" rownames-p)
 		 (org-babel-pick-name
-		  (cdr (assoc :rowname-names params)) rownames-p)))))
+		  (cdr (assq :rowname-names params)) rownames-p)))))
       (if graphics-file nil result))))
 
 (defun org-babel-prep-session:R (session params)
@@ -214,15 +214,15 @@ This function is called by `org-babel-execute-src-block'."
      (lambda (pair)
        (org-babel-R-assign-elisp
 	(car pair) (cdr pair)
-	(equal "yes" (cdr (assoc :colnames params)))
-	(equal "yes" (cdr (assoc :rownames params)))))
+	(equal "yes" (cdr (assq :colnames params)))
+	(equal "yes" (cdr (assq :rownames params)))))
      (mapcar
       (lambda (i)
 	(cons (car (nth i vars))
 	      (org-babel-reassemble-table
 	       (cdr (nth i vars))
-	       (cdr (nth i (cdr (assoc :colname-names params))))
-	       (cdr (nth i (cdr (assoc :rowname-names params)))))))
+	       (cdr (nth i (cdr (assq :colname-names params))))
+	       (cdr (nth i (cdr (assq :rowname-names params)))))))
       (number-sequence 0 (1- (length vars)))))))
 
 (defun org-babel-R-quote-tsv-field (s)
@@ -262,7 +262,7 @@ This function is called by `org-babel-execute-src-block'."
 	  (ess-ask-for-ess-directory
 	   (and (boundp 'ess-ask-for-ess-directory)
 		ess-ask-for-ess-directory
-		(not (cdr (assoc :dir params))))))
+		(not (cdr (assq :dir params))))))
       (if (org-babel-comint-buffer-livep session)
 	  session
 	(save-window-excursion

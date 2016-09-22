@@ -185,23 +185,23 @@ This function is called by `org-babel-execute-src-block'"
 			      (buffer-name source-buffer))))
     (save-excursion
       (org-babel-reassemble-table
-       (let* ((result-type (cdr (assoc :result-type params)))
-	      (impl (or (when (cdr (assoc :scheme params))
-			  (intern (cdr (assoc :scheme params))))
+       (let* ((result-type (cdr (assq :result-type params)))
+	      (impl (or (when (cdr (assq :scheme params))
+			  (intern (cdr (assq :scheme params))))
 			geiser-default-implementation
 			(car geiser-active-implementations)))
 	      (session (org-babel-scheme-make-session-name
-			source-buffer-name (cdr (assoc :session params)) impl))
+			source-buffer-name (cdr (assq :session params)) impl))
 	      (full-body (org-babel-expand-body:scheme body params)))
 	 (org-babel-scheme-execute-with-geiser
 	  full-body			 ; code
 	  (string= result-type "output") ; output?
 	  impl				 ; implementation
 	  (and (not (string= session "none")) session))) ; session
-       (org-babel-pick-name (cdr (assoc :colname-names params))
-			    (cdr (assoc :colnames params)))
-       (org-babel-pick-name (cdr (assoc :rowname-names params))
-			    (cdr (assoc :rownames params)))))))
+       (org-babel-pick-name (cdr (assq :colname-names params))
+			    (cdr (assq :colnames params)))
+       (org-babel-pick-name (cdr (assq :rowname-names params))
+			    (cdr (assq :rownames params)))))))
 
 (provide 'ob-scheme)
 

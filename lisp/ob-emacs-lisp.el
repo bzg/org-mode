@@ -42,7 +42,7 @@ their value.  It is used as the optional LEXICAL argument to
 (defun org-babel-expand-body:emacs-lisp (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let* ((vars (org-babel--get-vars params))
-         (result-params (cdr (assoc :result-params params)))
+         (result-params (cdr (assq :result-params params)))
          (print-level nil) (print-length nil)
          (body (if (> (length vars) 0)
 		   (concat "(let ("
@@ -71,19 +71,19 @@ their value.  It is used as the optional LEXICAL argument to
 		  (if (listp lexical)
 		      lexical
 		    (member lexical '("yes" "t"))))))
-      (org-babel-result-cond (cdr (assoc :result-params params))
+      (org-babel-result-cond (cdr (assq :result-params params))
 	(let ((print-level nil)
               (print-length nil))
-          (if (or (member "scalar" (cdr (assoc :result-params params)))
-                  (member "verbatim" (cdr (assoc :result-params params))))
+          (if (or (member "scalar" (cdr (assq :result-params params)))
+                  (member "verbatim" (cdr (assq :result-params params))))
               (format "%S" result)
             (format "%s" result)))
 	(org-babel-reassemble-table
 	 result
-         (org-babel-pick-name (cdr (assoc :colname-names params))
-                              (cdr (assoc :colnames params)))
-         (org-babel-pick-name (cdr (assoc :rowname-names params))
-                              (cdr (assoc :rownames params))))))))
+         (org-babel-pick-name (cdr (assq :colname-names params))
+                              (cdr (assq :colnames params)))
+         (org-babel-pick-name (cdr (assq :rowname-names params))
+                              (cdr (assq :rownames params))))))))
 
 (org-babel-make-language-alias "elisp" "emacs-lisp")
 

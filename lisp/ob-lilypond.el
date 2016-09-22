@@ -157,8 +157,8 @@ specific arguments to =org-babel-tangle="
 
 (defun org-babel-lilypond-process-basic (body params)
   "Execute a lilypond block in basic mode."
-  (let* ((out-file (cdr (assoc :file params)))
-	 (cmdline (or (cdr (assoc :cmdline params))
+  (let* ((out-file (cdr (assq :file params)))
+	 (cmdline (or (cdr (assq :cmdline params))
 		      ""))
 	 (in-file (org-babel-temp-file "lilypond-")))
 

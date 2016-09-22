@@ -74,14 +74,14 @@ This will typically be either `python' or `python-mode'."
   "Execute a block of Python code with Babel.
 This function is called by `org-babel-execute-src-block'."
   (let* ((session (org-babel-python-initiate-session
-		   (cdr (assoc :session params))))
-         (result-params (cdr (assoc :result-params params)))
-         (result-type (cdr (assoc :result-type params)))
+		   (cdr (assq :session params))))
+         (result-params (cdr (assq :result-params params)))
+         (result-type (cdr (assq :result-type params)))
 	 (return-val (when (and (eq result-type 'value) (not session))
-		       (cdr (assoc :return params))))
-	 (preamble (cdr (assoc :preamble params)))
+		       (cdr (assq :return params))))
+	 (preamble (cdr (assq :preamble params)))
 	 (org-babel-python-command
-	  (or (cdr (assoc :python params)) org-babel-python-command))
+	  (or (cdr (assq :python params)) org-babel-python-command))
          (full-body
 	  (org-babel-expand-body:generic
 	   (concat body (if return-val (format "\nreturn %s" return-val) ""))
@@ -90,10 +90,10 @@ This function is called by `org-babel-execute-src-block'."
 		  session full-body result-type result-params preamble)))
     (org-babel-reassemble-table
      result
-     (org-babel-pick-name (cdr (assoc :colname-names params))
-			  (cdr (assoc :colnames params)))
-     (org-babel-pick-name (cdr (assoc :rowname-names params))
-			  (cdr (assoc :rownames params))))))
+     (org-babel-pick-name (cdr (assq :colname-names params))
+			  (cdr (assq :colnames params)))
+     (org-babel-pick-name (cdr (assq :rowname-names params))
+			  (cdr (assq :rownames params))))))
 
 (defun org-babel-prep-session:python (session params)
   "Prepare SESSION according to the header arguments in PARAMS.

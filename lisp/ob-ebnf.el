@@ -54,11 +54,11 @@
   "Execute a block of Ebnf code with org-babel.  This function is
 called by `org-babel-execute-src-block'"
   (save-excursion
-    (let* ((dest-file (cdr (assoc :file params)))
+    (let* ((dest-file (cdr (assq :file params)))
 	   (dest-dir (file-name-directory dest-file))
 	   (dest-root (file-name-sans-extension
 		       (file-name-nondirectory dest-file)))
-	   (style (cdr (assoc :style params)))
+	   (style (cdr (assq :style params)))
 	   (result nil))
       (with-temp-buffer
 	(when style (ebnf-push-style style))

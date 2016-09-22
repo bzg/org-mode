@@ -74,8 +74,8 @@ end")
   (let* ((session
 	  (funcall (intern (format "org-babel-%s-initiate-session"
 				   (if matlabp "matlab" "octave")))
-		   (cdr (assoc :session params)) params))
-         (result-type (cdr (assoc :result-type params)))
+		   (cdr (assq :session params)) params))
+         (result-type (cdr (assq :result-type params)))
 	 (full-body
 	  (org-babel-expand-body:generic
 	   body params (org-babel-variable-assignments:octave params)))
@@ -96,9 +96,9 @@ end")
       (org-babel-reassemble-table
        result
        (org-babel-pick-name
-	(cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
+	(cdr (assq :colname-names params)) (cdr (assq :colnames params)))
        (org-babel-pick-name
-	(cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))))
+	(cdr (assq :rowname-names params)) (cdr (assq :rownames params)))))))
 
 (defun org-babel-prep-session:matlab (session params)
   "Prepare SESSION according to PARAMS."

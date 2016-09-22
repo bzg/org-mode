@@ -64,7 +64,7 @@
 		     body params
 		     (org-babel-variable-assignments:ocaml params)))
          (session (org-babel-prep-session:ocaml
-		   (cdr (assoc :session params)) params))
+		   (cdr (assq :session params)) params))
          (raw (org-babel-comint-with-output
 		  (session org-babel-ocaml-eoe-output nil full-body)
 		(insert
@@ -81,7 +81,7 @@
 					 (progn (setq out t) nil))))
 				   (mapcar #'org-trim (reverse raw)))))))
 	 (raw (org-trim clean))
-	 (result-params (cdr (assoc :result-params params))))
+	 (result-params (cdr (assq :result-params params))))
     (string-match
      "\\(\\(.*\n\\)*\\)[^:\n]+ : \\([^=\n]+\\) =\\(\n\\| \\)\\(.+\\)$"
      raw)
@@ -98,9 +98,9 @@
 	     (org-babel-ocaml-parse-output value type)
 	   raw))
        (org-babel-pick-name
-	(cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
+	(cdr (assq :colname-names params)) (cdr (assq :colnames params)))
        (org-babel-pick-name
-	(cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))))
+	(cdr (assq :rowname-names params)) (cdr (assq :rownames params)))))))
 
 (defvar tuareg-interactive-buffer-name)
 (defun org-babel-prep-session:ocaml (session _params)

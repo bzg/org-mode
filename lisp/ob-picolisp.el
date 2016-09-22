@@ -99,11 +99,11 @@
   (message "executing Picolisp source code block")
   (let* (
 	 ;; Name of the session or "none".
-	 (session-name (cdr (assoc :session params)))
+	 (session-name (cdr (assq :session params)))
 	 ;; Set the session if the session variable is non-nil.
 	 (session (org-babel-picolisp-initiate-session session-name))
 	 ;; Either OUTPUT or VALUE which should behave as described above.
-	 (result-params (cdr (assoc :result-params params)))
+	 (result-params (cdr (assq :result-params params)))
 	 ;; Expand the body with `org-babel-expand-body:picolisp'.
 	 (full-body (org-babel-expand-body:picolisp body params))
          ;; Wrap body appropriately for the type of evaluation and results.

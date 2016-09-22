@@ -10602,7 +10602,7 @@ If the link is in hidden text, expose it."
   (setq org-link-search-failed nil)
   (let* ((pos (point))
 	 (ct (org-context))
-	 (a (assoc :link ct))
+	 (a (assq :link ct))
 	 (srch-fun (if search-backward 're-search-backward 're-search-forward)))
     (cond (a (goto-char (nth (if search-backward 1 2) a)))
 	  ((looking-at org-any-link-re)

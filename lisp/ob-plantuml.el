@@ -49,11 +49,11 @@
 (defun org-babel-execute:plantuml (body params)
   "Execute a block of plantuml code with org-babel.
 This function is called by `org-babel-execute-src-block'."
-  (let* ((out-file (or (cdr (assoc :file params))
+  (let* ((out-file (or (cdr (assq :file params))
 		       (error "PlantUML requires a \":file\" header argument")))
-	 (cmdline (cdr (assoc :cmdline params)))
+	 (cmdline (cdr (assq :cmdline params)))
 	 (in-file (org-babel-temp-file "plantuml-"))
-	 (java (or (cdr (assoc :java params)) ""))
+	 (java (or (cdr (assq :java params)) ""))
 	 (cmd (if (string= "" org-plantuml-jar-path)
 		  (error "`org-plantuml-jar-path' is not set")
 		(concat "java " java " -jar "

@@ -81,17 +81,17 @@ Do not leave leading or trailing spaces in this string."
 (defun org-babel-execute:ditaa (body params)
   "Execute a block of Ditaa code with org-babel.
 This function is called by `org-babel-execute-src-block'."
-  (let* ((out-file (or (cdr (assoc :file params))
+  (let* ((out-file (or (cdr (assq :file params))
 		       (error
 			"ditaa code block requires :file header argument")))
-	 (cmdline (cdr (assoc :cmdline params)))
-	 (java (cdr (assoc :java params)))
+	 (cmdline (cdr (assq :cmdline params)))
+	 (java (cdr (assq :java params)))
 	 (in-file (org-babel-temp-file "ditaa-"))
-	 (eps (cdr (assoc :eps params)))
+	 (eps (cdr (assq :eps params)))
 	 (eps-file (when eps
 		     (org-babel-process-file-name (concat in-file ".eps"))))
 	 (pdf-cmd (when (and (or (string= (file-name-extension out-file) "pdf")
-				 (cdr (assoc :pdf params))))
+				 (cdr (assq :pdf params))))
 		    (concat
 		     "epstopdf"
 		     " " eps-file

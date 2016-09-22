@@ -59,7 +59,7 @@
   "Execute a block of ABC code with org-babel.  This function is
    called by `org-babel-execute-src-block'"
   (message "executing Abc source code block")
-  (let* ((cmdline (cdr (assoc :cmdline params)))
+  (let* ((cmdline (cdr (assq :cmdline params)))
 	 (out-file (let ((file (cdr (assq :file params))))
 		     (if file (replace-regexp-in-string "\.pdf$" ".ps" file)
 		       (error "abc code block requires :file header argument"))))
@@ -77,8 +77,8 @@
 		    (file-name-extension out-file))
 		   out-file t))
     ;;; if we were asked for a pdf...
-    (when (string= (file-name-extension (cdr (assoc :file params))) "pdf")
-      (org-babel-eval (concat "ps2pdf" " " out-file " " (cdr (assoc :file params))) ""))
+    (when (string= (file-name-extension (cdr (assq :file params))) "pdf")
+      (org-babel-eval (concat "ps2pdf" " " out-file " " (cdr (assq :file params))) ""))
     ;;; indicate that the file has been written
     nil))
 

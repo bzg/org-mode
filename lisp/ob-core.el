@@ -726,8 +726,8 @@ Expand a block of code with org-babel according to its header
 arguments.  This generic implementation of body expansion is
 called for languages which have not defined their own specific
 org-babel-expand-body:lang function."
-  (let ((pro (cdr (assoc :prologue params)))
-	(epi (cdr (assoc :epilogue params))))
+  (let ((pro (cdr (assq :prologue params)))
+	(epi (cdr (assq :epilogue params))))
     (mapconcat #'identity
 	       (append (when pro (list pro))
 		       var-lines
@@ -897,8 +897,8 @@ session."
 		       (if (org-babel-noweb-p params :eval)
 			   (org-babel-expand-noweb-references info)
 			 (nth 1 info)))))
-         (session (cdr (assoc :session params)))
-	 (dir (cdr (assoc :dir params)))
+         (session (cdr (assq :session params)))
+	 (dir (cdr (assq :dir params)))
 	 (default-directory
 	   (or (and dir (file-name-as-directory dir)) default-directory))
 	 (cmd (intern (concat "org-babel-load-session:" lang))))
@@ -918,8 +918,8 @@ the session.  Copy the body of the code block to the kill ring."
          (lang (nth 0 info))
          (body (nth 1 info))
          (params (nth 2 info))
-         (session (cdr (assoc :session params)))
-	 (dir (cdr (assoc :dir params)))
+         (session (cdr (assq :session params)))
+	 (dir (cdr (assq :dir params)))
 	 (default-directory
 	   (or (and dir (file-name-as-directory dir)) default-directory))
 	 (init-cmd (intern (format "org-babel-%s-initiate-session" lang)))
@@ -1020,7 +1020,7 @@ results already exist."
 	    ;; file results
 	    (org-open-at-point)
 	  (let ((r (org-babel-format-result
-		    (org-babel-read-result) (cdr (assoc :sep (nth 2 info))))))
+		    (org-babel-read-result) (cdr (assq :sep (nth 2 info))))))
 	    (pop-to-buffer (get-buffer-create "*Org-Babel Results*"))
 	    (delete-region (point-min) (point-max))
 	    (insert r)))
@@ -1511,25 +1511,25 @@ shown below.
 				       el
 				     (org-babel-ref-parse el)))
 				 (org-babel--get-vars params)))
-	 (vars-and-names (if (and (assoc :colname-names params)
-				  (assoc :rowname-names params))
+	 (vars-and-names (if (and (assq :colname-names params)
+				  (assq :rowname-names params))
 			     (list processed-vars)
 			   (org-babel-disassemble-tables
 			    processed-vars
-			    (cdr (assoc :hlines params))
-			    (cdr (assoc :colnames params))
-			    (cdr (assoc :rownames params)))))
-	 (raw-result (or (cdr (assoc :results params)) ""))
+			    (cdr (assq :hlines params))
+			    (cdr (assq :colnames params))
+			    (cdr (assq :rownames params)))))
+	 (raw-result (or (cdr (assq :results params)) ""))
 	 (result-params (delete-dups
 			 (append
 			  (split-string (if (stringp raw-result)
 					    raw-result
 					  (eval raw-result t)))
-			  (cdr (assoc :result-params params))))))
+			  (cdr (assq :result-params params))))))
     (append
      (mapcar (lambda (var) (cons :var var)) (car vars-and-names))
      (list
-      (cons :colname-names (or (cdr (assoc :colname-names params))
+      (cons :colname-names (or (cdr (assq :colname-names params))
 			       (cadr  vars-and-names)))
       (cons :rowname-names (or (cdr (assq :rowname-names params))
 			       (cl-caddr vars-and-names)))
@@ -2153,8 +2153,8 @@ INFO may provide the values of these header arguments (in the
 	 (setq result (org-no-properties result))
 	 (when (member "file" result-params)
 	   (setq result (org-babel-result-to-file
-			 result (when (assoc :file-desc (nth 2 info))
-				  (or (cdr (assoc :file-desc (nth 2 info)))
+			 result (when (assq :file-desc (nth 2 info))
+				  (or (cdr (assq :file-desc (nth 2 info)))
 				      result))))))
 	((listp result))
 	(t (setq result (format "%S" result))))
@@ -2290,8 +2290,8 @@ INFO may provide the values of these header arguments (in the
 		  (setq end (point-marker))
 		  ;; possibly wrap result
 		  (cond
-		   ((assoc :wrap (nth 2 info))
-		    (let ((name (or (cdr (assoc :wrap (nth 2 info))) "RESULTS")))
+		   ((assq :wrap (nth 2 info))
+		    (let ((name (or (cdr (assq :wrap (nth 2 info))) "RESULTS")))
 		      (funcall wrap (concat "#+BEGIN_" name)
 			       (concat "#+END_" (car (org-split-string name)))
 			       nil nil (concat "{{{results(@@" name ":") "@@)}}}")))
@@ -2642,7 +2642,7 @@ block but are passed literally to the \"example-block\"."
          (body (nth 1 info))
 	 (ob-nww-start org-babel-noweb-wrap-start)
 	 (ob-nww-end org-babel-noweb-wrap-end)
-	 (comment (string= "noweb" (cdr (assoc :comments (nth 2 info)))))
+	 (comment (string= "noweb" (cdr (assq :comments (nth 2 info)))))
 	 (rx-prefix (concat "\\(" org-babel-src-name-regexp "\\|"
 			    ":noweb-ref[ \t]+" "\\)"))
          (new-body "")
@@ -2699,7 +2699,7 @@ block but are passed literally to the \"example-block\"."
                           (while (re-search-forward rx nil t)
                             (let* ((i (org-babel-get-src-block-info 'light))
                                    (body (org-babel-expand-noweb-references i))
-                                   (sep (or (cdr (assoc :noweb-sep (nth 2 i)))
+                                   (sep (or (cdr (assq :noweb-sep (nth 2 i)))
                                             "\n"))
                                    (full (if comment
                                              (let ((cs (org-babel-tangle-comment-links i)))
@@ -2710,11 +2710,11 @@ block but are passed literally to the \"example-block\"."
                               (setq expansion (cons sep (cons full expansion)))))
                         (org-babel-map-src-blocks nil
 			  (let ((i (org-babel-get-src-block-info 'light)))
-                            (when (equal (or (cdr (assoc :noweb-ref (nth 2 i)))
+                            (when (equal (or (cdr (assq :noweb-ref (nth 2 i)))
                                              (nth 4 i))
                                          source-name)
                               (let* ((body (org-babel-expand-noweb-references i))
-                                     (sep (or (cdr (assoc :noweb-sep (nth 2 i)))
+                                     (sep (or (cdr (assq :noweb-sep (nth 2 i)))
                                               "\n"))
                                      (full (if comment
                                                (let ((cs (org-babel-tangle-comment-links i)))

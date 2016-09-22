@@ -60,11 +60,11 @@
 (defun org-babel-execute:sqlite (body params)
   "Execute a block of Sqlite code with Babel.
 This function is called by `org-babel-execute-src-block'."
-  (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
-	(db (cdr (assoc :db params)))
-	(separator (cdr (assoc :separator params)))
-	(nullvalue (cdr (assoc :nullvalue params)))
-	(headers-p (equal "yes" (cdr (assoc :colnames params))))
+  (let ((result-params (split-string (or (cdr (assq :results params)) "")))
+	(db (cdr (assq :db params)))
+	(separator (cdr (assq :separator params)))
+	(nullvalue (cdr (assq :nullvalue params)))
+	(headers-p (equal "yes" (cdr (assq :colnames params))))
 	(others (delq nil (mapcar
 			   (lambda (arg) (car (assq arg params)))
 			   (list :header :echo :bail :column

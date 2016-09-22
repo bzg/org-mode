@@ -49,8 +49,8 @@
   "This function should only be called by `org-babel-execute:fortran'"
   (let* ((tmp-src-file (org-babel-temp-file "fortran-src-" ".F90"))
          (tmp-bin-file (org-babel-temp-file "fortran-bin-" org-babel-exeext))
-         (cmdline (cdr (assoc :cmdline params)))
-         (flags (cdr (assoc :flags params)))
+         (cmdline (cdr (assq :cmdline params)))
+         (flags (cdr (assq :flags params)))
          (full-body (org-babel-expand-body:fortran body params)))
     (with-temp-file tmp-src-file (insert full-body))
     (org-babel-eval
@@ -66,25 +66,25 @@
 	     (org-babel-eval
 	      (concat tmp-bin-file (if cmdline (concat " " cmdline) "")) "")))))
       (org-babel-reassemble-table
-       (org-babel-result-cond (cdr (assoc :result-params params))
+       (org-babel-result-cond (cdr (assq :result-params params))
 	 (org-babel-read results)
          (let ((tmp-file (org-babel-temp-file "f-")))
            (with-temp-file tmp-file (insert results))
            (org-babel-import-elisp-from-file tmp-file)))
        (org-babel-pick-name
-        (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
+        (cdr (assq :colname-names params)) (cdr (assq :colnames params)))
        (org-babel-pick-name
-        (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))))
+        (cdr (assq :rowname-names params)) (cdr (assq :rownames params)))))))
 
 (defun org-babel-expand-body:fortran (body params)
   "Expand a block of fortran or fortran code with org-babel according to
 its header arguments."
   (let ((vars (org-babel--get-vars params))
-        (main-p (not (string= (cdr (assoc :main params)) "no")))
-        (includes (or (cdr (assoc :includes params))
+        (main-p (not (string= (cdr (assq :main params)) "no")))
+        (includes (or (cdr (assq :includes params))
                       (org-babel-read (org-entry-get nil "includes" t))))
         (defines (org-babel-read
-                  (or (cdr (assoc :defines params))
+                  (or (cdr (assq :defines params))
                       (org-babel-read (org-entry-get nil "defines" t))))))
     (mapconcat 'identity
 	       (list

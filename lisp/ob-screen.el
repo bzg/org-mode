@@ -48,7 +48,7 @@ In case you want to use a different screen than one selected by your $PATH")
 \"default\" session is used when none is specified."
   (message "Sending source code block to interactive terminal session...")
   (save-window-excursion
-    (let* ((session (cdr (assoc :session params)))
+    (let* ((session (cdr (assq :session params)))
            (socket (org-babel-screen-session-socketname session)))
       (unless socket (org-babel-prep-session:screen session params))
       (org-babel-screen-session-execute-string
@@ -56,9 +56,9 @@ In case you want to use a different screen than one selected by your $PATH")
 
 (defun org-babel-prep-session:screen (_session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
-  (let* ((session (cdr (assoc :session params)))
-         (cmd (cdr (assoc :cmd params)))
-         (terminal (cdr (assoc :terminal params)))
+  (let* ((session (cdr (assq :session params)))
+         (cmd (cdr (assq :cmd params)))
+         (terminal (cdr (assq :terminal params)))
          (process-name (concat "org-babel: terminal (" session ")")))
     (apply 'start-process process-name "*Messages*"
            terminal `("-T" ,(concat "org-babel: " session) "-e" ,org-babel-screen-location

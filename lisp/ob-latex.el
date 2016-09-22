@@ -91,21 +91,21 @@
   "Execute a block of Latex code with Babel.
 This function is called by `org-babel-execute-src-block'."
   (setq body (org-babel-expand-body:latex body params))
-  (if (cdr (assoc :file params))
-      (let* ((out-file (cdr (assoc :file params)))
+  (if (cdr (assq :file params))
+      (let* ((out-file (cdr (assq :file params)))
 	     (extension (file-name-extension out-file))
 	     (tex-file (org-babel-temp-file "latex-" ".tex"))
-	     (border (cdr (assoc :border params)))
-	     (imagemagick (cdr (assoc :imagemagick params)))
-	     (im-in-options (cdr (assoc :iminoptions params)))
-	     (im-out-options (cdr (assoc :imoutoptions params)))
-	     (fit (or (cdr (assoc :fit params)) border))
-	     (height (and fit (cdr (assoc :pdfheight params))))
-	     (width (and fit (cdr (assoc :pdfwidth params))))
-	     (headers (cdr (assoc :headers params)))
-	     (in-buffer (not (string= "no" (cdr (assoc :buffer params)))))
+	     (border (cdr (assq :border params)))
+	     (imagemagick (cdr (assq :imagemagick params)))
+	     (im-in-options (cdr (assq :iminoptions params)))
+	     (im-out-options (cdr (assq :imoutoptions params)))
+	     (fit (or (cdr (assq :fit params)) border))
+	     (height (and fit (cdr (assq :pdfheight params))))
+	     (width (and fit (cdr (assq :pdfwidth params))))
+	     (headers (cdr (assq :headers params)))
+	     (in-buffer (not (string= "no" (cdr (assq :buffer params)))))
 	     (org-latex-packages-alist
-	      (append (cdr (assoc :packages params)) org-latex-packages-alist)))
+	      (append (cdr (assq :packages params)) org-latex-packages-alist)))
         (cond
          ((and (string-suffix-p ".png" out-file) (not imagemagick))
           (org-create-formula-image

@@ -51,7 +51,7 @@ called by `org-babel-execute-src-block'"
   (let* ((processed-params (org-babel-process-params params))
          (session (org-babel-groovy-initiate-session (nth 0 processed-params)))
          (result-params (nth 2 processed-params))
-         (result-type (cdr (assoc :result-type params)))
+         (result-type (cdr (assq :result-type params)))
          (full-body (org-babel-expand-body:generic
                      body params))
          (result (org-babel-groovy-evaluate
@@ -60,9 +60,9 @@ called by `org-babel-execute-src-block'"
     (org-babel-reassemble-table
      result
      (org-babel-pick-name
-      (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
+      (cdr (assq :colname-names params)) (cdr (assq :colnames params)))
      (org-babel-pick-name
-      (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params))))))
+      (cdr (assq :rowname-names params)) (cdr (assq :rownames params))))))
 
 (defvar org-babel-groovy-wrapper-method
 

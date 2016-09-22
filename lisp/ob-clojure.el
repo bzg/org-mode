@@ -68,7 +68,7 @@
 (defun org-babel-expand-body:clojure (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let* ((vars (org-babel--get-vars params))
-	 (result-params (cdr (assoc :result-params params)))
+	 (result-params (cdr (assq :result-params params)))
 	 (print-level nil) (print-length nil)
 	 (body (org-trim
 		(if (null vars) (org-trim body)
@@ -90,7 +90,7 @@
     (cl-case org-babel-clojure-backend
       (cider
        (require 'cider)
-       (let ((result-params (cdr (assoc :result-params params))))
+       (let ((result-params (cdr (assq :result-params params))))
 	 (setq result
 	       (nrepl-dict-get
 		(nrepl-sync-request:eval
@@ -107,8 +107,8 @@
 	       (slime-eval
 		`(swank:eval-and-grab-output
 		  ,(buffer-substring-no-properties (point-min) (point-max)))
-		(cdr (assoc :package params)))))))
-    (org-babel-result-cond (cdr (assoc :result-params params))
+		(cdr (assq :package params)))))))
+    (org-babel-result-cond (cdr (assq :result-params params))
       result
       (condition-case nil (org-babel-script-escape result)
 	(error result)))))

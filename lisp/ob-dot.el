@@ -64,11 +64,11 @@
 (defun org-babel-execute:dot (body params)
   "Execute a block of Dot code with org-babel.
 This function is called by `org-babel-execute-src-block'."
-  (let* ((out-file (cdr (or (assoc :file params)
+  (let* ((out-file (cdr (or (assq :file params)
 			    (error "You need to specify a :file parameter"))))
-	 (cmdline (or (cdr (assoc :cmdline params))
+	 (cmdline (or (cdr (assq :cmdline params))
 		      (format "-T%s" (file-name-extension out-file))))
-	 (cmd (or (cdr (assoc :cmd params)) "dot"))
+	 (cmd (or (cdr (assq :cmd params)) "dot"))
 	 (in-file (org-babel-temp-file "dot-")))
     (with-temp-file in-file
       (insert (org-babel-expand-body:dot body params)))

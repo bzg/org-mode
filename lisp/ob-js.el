@@ -61,14 +61,14 @@
 (defun org-babel-execute:js (body params)
   "Execute a block of Javascript code with org-babel.
 This function is called by `org-babel-execute-src-block'"
-  (let* ((org-babel-js-cmd (or (cdr (assoc :cmd params)) org-babel-js-cmd))
-         (result-type (cdr (assoc :result-type params)))
+  (let* ((org-babel-js-cmd (or (cdr (assq :cmd params)) org-babel-js-cmd))
+         (result-type (cdr (assq :result-type params)))
          (full-body (org-babel-expand-body:generic
 		     body params (org-babel-variable-assignments:js params)))
-	 (result (if (not (string= (cdr (assoc :session params)) "none"))
+	 (result (if (not (string= (cdr (assq :session params)) "none"))
 		     ;; session evaluation
 		     (let ((session (org-babel-prep-session:js
-				     (cdr (assoc :session params)) params)))
+				     (cdr (assq :session params)) params)))
 		       (nth 1
 			    (org-babel-comint-with-output
 				(session (format "%S" org-babel-js-eoe) t body)
@@ -88,7 +88,7 @@ This function is called by `org-babel-execute-src-block'"
 		     (org-babel-eval
 		      (format "%s %s" org-babel-js-cmd
 			      (org-babel-process-file-name script-file)) "")))))
-    (org-babel-result-cond (cdr (assoc :result-params params))
+    (org-babel-result-cond (cdr (assq :result-params params))
       result (org-babel-js-read result))))
 
 (defun org-babel-js-read (results)
