@@ -253,7 +253,7 @@ Otherwise rely on `org-expiry-confirm-flag' to decide."
 		     (not (interactive)))
 		(and org-expiry-confirm-flag
 		     (y-or-n-p (format "Entry expired by %d days.  Process? " d))))
-	  (funcall 'org-expiry-handler-function))
+	  (funcall org-expiry-handler-function))
 	(delete-overlay ov)))))
 
 (defun org-expiry-process-entries (beg end)
