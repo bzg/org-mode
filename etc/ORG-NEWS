@@ -281,6 +281,9 @@ properties.
 
 If your Emacs is running in a Cygwin environment, the =ob-sql= library
 can pass the converted path to the =sqlcmd= tool.
+**** Improved support of header arguments for postgresql 
+The postgresql engine in a sql code block supports now ~:dbport~ nd
+~:dbpassword~ as header arguments.
 **** Support for additional plantuml output formats
 The support for output formats of [[http://plantuml.com/][plantuml]] has been extended to now
 include:
