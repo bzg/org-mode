@@ -113,12 +113,12 @@ For example, to point to your `obe-bibtex-file' use the following.
 	(add (remove-duplicates (col field) :test #'string=)))
       ;; build the links in the graph
       (dolist (citation meta)
-        (let ((dest (id (cdr (assoc :title citation)))))
-          (dolist (author (mapcar #'id (cdr (assoc :authors citation))))
+        (let ((dest (id (cdr (assq :title citation)))))
+          (dolist (author (mapcar #'id (cdr (assq :authors citation))))
             (when author (push (cons author dest) links)))
-          (let ((jid (id (cdr (assoc :journal citation)))))
+          (let ((jid (id (cdr (assq :journal citation)))))
             (when jid (push (cons jid dest) links)))
-          (let ((cid (id (cdr (assoc :category citation)))))
+          (let ((cid (id (cdr (assq :category citation)))))
             (when cid (push (cons cid dest) links)))))
       ;; build the json string
       (format "{\"nodes\":[%s],\"links\":[%s]}"

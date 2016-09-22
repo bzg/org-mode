@@ -46,11 +46,11 @@
 (defun org-babel-execute:mathematica (body params)
   "Execute a block of Mathematica code with org-babel.  This function is
 called by `org-babel-execute-src-block'"
-  (let* ((result-params (cdr (assoc :result-params params)))
+  (let* ((result-params (cdr (assq :result-params params)))
 	 (full-body (org-babel-expand-body:mathematica body params))
 	 (tmp-script-file (org-babel-temp-file "mathematica-"))
 	 (cmd org-babel-mathematica-command))
-    ;; actually execute the source-code block 
+    ;; actually execute the source-code block
     (with-temp-file tmp-script-file (insert full-body))
     ;; (with-temp-file "/tmp/dbg" (insert full-body))
     ((lambda (raw)
@@ -79,4 +79,3 @@ specifying a variable of the same value."
     (format "%S" var)))
 
 (provide 'ob-mathematica)
-

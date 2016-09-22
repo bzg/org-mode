@@ -48,29 +48,29 @@ or an absolute path name, like /usr/local/bin/mcs
 parameters may be used, like mcs -warnaserror+"
   :group 'org-babel
   :version "24.3"
-  :type 'string) 
+  :type 'string)
 
 (defun org-babel-execute:csharp (body params)
   (let* ((full-body (org-babel-expand-body:generic body params))
-	 (cmpflag (or (cdr (assoc :cmpflag params)) ""))
-	 (cmdline (or (cdr (assoc :cmdline params)) ""))
+	 (cmpflag (or (cdr (assq :cmpflag params)) ""))
+	 (cmdline (or (cdr (assq :cmdline params)) ""))
 	 (src-file (org-babel-temp-file "csharp-src-" ".cs"))
 	 (exe-file (concat (file-name-sans-extension src-file)  ".exe"))
-	 (compile 
+	 (compile
 	  (progn (with-temp-file  src-file (insert full-body))
-		 (org-babel-eval 
+		 (org-babel-eval
 		  (concat org-babel-csharp-compiler " " cmpflag " "  src-file) ""))))
     (let ((results (org-babel-eval (concat org-babel-csharp-command " " cmdline " " exe-file) "")))
       (org-babel-reassemble-table
-       (org-babel-result-cond (cdr (assoc :result-params params))
+       (org-babel-result-cond (cdr (assq :result-params params))
 	 (org-babel-read results)
          (let ((tmp-file (org-babel-temp-file "c-")))
            (with-temp-file tmp-file (insert results))
            (org-babel-import-elisp-from-file tmp-file)))
        (org-babel-pick-name
-        (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
+        (cdr (assq :colname-names params)) (cdr (assq :colnames params)))
        (org-babel-pick-name
-        (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))))
+        (cdr (assq :rowname-names params)) (cdr (assq :rownames params)))))))
 
 (defun org-babel-prep-session:csharp (session params)
   "Return an error because csharp does not support sessions."

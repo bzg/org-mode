@@ -47,18 +47,18 @@
 (defun org-babel-execute:tcl (body params)
   "Execute a block of Tcl code with Babel.
 This function is called by `org-babel-execute-src-block'."
-  (let* ((session (cdr (assoc :session params)))
-         (result-params (cdr (assoc :result-params params)))
-         (result-type (cdr (assoc :result-type params)))
+  (let* ((session (cdr (assq :session params)))
+         (result-params (cdr (assq :result-params params)))
+         (result-type (cdr (assq :result-type params)))
          (full-body (org-babel-expand-body:generic
 		     body params (org-babel-variable-assignments:tcl params)))
 	(session (org-babel-tcl-initiate-session session)))
     (org-babel-reassemble-table
      (org-babel-tcl-evaluate session full-body result-type)
      (org-babel-pick-name
-      (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
+      (cdr (assq :colname-names params)) (cdr (assq :colnames params)))
      (org-babel-pick-name
-      (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params))))))
+      (cdr (assq :rowname-names params)) (cdr (assq :rownames params))))))
 
 (defun org-babel-prep-session:tcl (session params)
   "Prepare SESSION according to the header arguments in PARAMS."

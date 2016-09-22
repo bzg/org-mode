@@ -85,9 +85,9 @@
   "Execute a block of Mathomatic entries with org-babel.  This function is
 called by `org-babel-execute-src-block'."
   (message "executing Mathomatic source code block")
-  (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
+  (let ((result-params (split-string (or (cdr (assq :results params)) "")))
 	(result
-	 (let* ((cmdline (or (cdr (assoc :cmdline params)) ""))
+	 (let* ((cmdline (or (cdr (assq :cmdline params)) ""))
 		(in-file (org-babel-temp-file "mathomatic-" ".math"))
 		(cmd (format "%s -t -c -q  %s %s"
 			     org-babel-mathomatic-command in-file cmdline)))

@@ -76,7 +76,7 @@
 
 (defvar ess-local-process-name) ; dynamically scoped
 (defun org-babel-edit-prep:stata (info)
-  (let ((session (cdr (assoc :session (nth 2 info)))))
+  (let ((session (cdr (assq :session (nth 2 info)))))
     (when (and session (string-match "^\\*\\(.+?\\)\\*$" session))
       (save-match-data (org-babel-stata-initiate-session session nil)))))
 
@@ -97,12 +97,12 @@
   "Execute a block of stata code.
 This function is called by `org-babel-execute-src-block'."
   (save-excursion
-    (let* ((result-params (cdr (assoc :result-params params)))
-	   (result-type (cdr (assoc :result-type params)))
+    (let* ((result-params (cdr (assq :result-params params)))
+	   (result-type (cdr (assq :result-type params)))
            (session (org-babel-stata-initiate-session
-		     (cdr (assoc :session params)) params))
-	   (colnames-p (cdr (assoc :colnames params)))
-	   (rownames-p (cdr (assoc :rownames params)))
+		     (cdr (assq :session params)) params))
+	   (colnames-p (cdr (assq :colnames params)))
+	   (rownames-p (cdr (assq :rownames params)))
 	   (graphics-file (org-babel-stata-graphical-output-file params))
 	   (full-body (org-babel-expand-body:stata body params graphics-file))
 	   (result
@@ -110,10 +110,10 @@ This function is called by `org-babel-execute-src-block'."
 	     session full-body result-type result-params
 	     (or (equal "yes" colnames-p)
 		 (org-babel-pick-name
-		  (cdr (assoc :colname-names params)) colnames-p))
+		  (cdr (assq :colname-names params)) colnames-p))
 	     (or (equal "yes" rownames-p)
 		 (org-babel-pick-name
-		  (cdr (assoc :rowname-names params)) rownames-p)))))
+		  (cdr (assq :rowname-names params)) rownames-p)))))
       (if graphics-file nil result))))
 
 (defun org-babel-prep-session:stata (session params)
@@ -144,15 +144,15 @@ This function is called by `org-babel-execute-src-block'."
      (lambda (pair)
        (org-babel-stata-assign-elisp
 	(car pair) (cdr pair)
-	(equal "yes" (cdr (assoc :colnames params)))
-	(equal "yes" (cdr (assoc :rownames params)))))
+	(equal "yes" (cdr (assq :colnames params)))
+	(equal "yes" (cdr (assq :rownames params)))))
      (mapcar
       (lambda (i)
 	(cons (car (nth i vars))
 	      (org-babel-reassemble-table
 	       (cdr (nth i vars))
-	       (cdr (nth i (cdr (assoc :colname-names params))))
-	       (cdr (nth i (cdr (assoc :rowname-names params)))))))
+	       (cdr (nth i (cdr (assq :colname-names params))))
+	       (cdr (nth i (cdr (assq :rowname-names params)))))))
       (org-number-sequence 0 (1- (length vars)))))))
 
 (defun org-babel-stata-quote-csv-field (s)
@@ -193,7 +193,7 @@ This function is called by `org-babel-execute-src-block'."
     (let ((session (or session "*stata*"))
 	  (ess-ask-for-ess-directory
 	   (and (and (boundp 'ess-ask-for-ess-directory) ess-ask-for-ess-directory)
-		(not (cdr (assoc :dir params))))))
+		(not (cdr (assq :dir params))))))
       (if (org-babel-comint-buffer-livep session)
 	  session
 	(save-window-excursion

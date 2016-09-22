@@ -128,7 +128,7 @@ should still return the link."
 (ert-deftest test-ob/get-src-block-info-tangle ()
   (org-test-at-marker nil org-test-file-ob-anchor
     (let ((info (org-babel-get-src-block-info)))
-      (should (string= "no" (cdr (assoc :tangle (nth 2 info))))))))
+      (should (string= "no" (cdr (assq :tangle (nth 2 info))))))))
 
 (ert-deftest test-ob/elisp-in-header-arguments ()
   "Test execution of elisp forms in header arguments."
@@ -204,9 +204,9 @@ should still return the link."
       (should (equal "example-lang" (nth 0 info)))
       (should (string= "the body" (org-trim (nth 1 info))))
       (should-not (member '(:session\ \ \ \ ) params))
-      (should (equal '(:session) (assoc :session params)))
-      (should (equal '(:result-type . output) (assoc :result-type params)))
-      (should (equal '(num . 9) (cdr (assoc :var params)))))))
+      (should (equal '(:session) (assq :session params)))
+      (should (equal '(:result-type . output) (assq :result-type params)))
+      (should (equal '(num . 9) (cdr (assq :var params)))))))
 
 (ert-deftest test-ob/parse-header-args2 ()
   (org-test-with-temp-text-in-file "

@@ -214,7 +214,7 @@ StartOzServer.oz is located.")
 (defun org-babel-execute:oz (body params)
   "Execute a block of Oz code with org-babel.  This function is
 called by `org-babel-execute-src-block' via multiple-value-bind."
-  (let* ((result-params (cdr (assoc :result-params params)))
+  (let* ((result-params (cdr (assq :result-params params)))
 	 (full-body (org-babel-expand-body:oz body params))
 	 (wait-time (plist-get params :wait-time)))
     ;; actually execute the source-code block
@@ -227,10 +227,10 @@ called by `org-babel-execute-src-block' via multiple-value-bind."
        (message "Org-babel: executing Oz expression")
        (oz-send-string-expression full-body (or wait-time 1)))
       (t (error "either 'output' or 'results' must be members of :results")))
-     (org-babel-pick-name (cdr (assoc :colname-names params))
-			  (cdr (assoc :colnames params)))
-     (org-babel-pick-name (cdr (assoc :roname-names params))
-			  (cdr (assoc :rownames params))))))
+     (org-babel-pick-name (cdr (assq :colname-names params))
+			  (cdr (assq :colnames params)))
+     (org-babel-pick-name (cdr (assq :roname-names params))
+			  (cdr (assq :rownames params))))))
 
 ;; This function should be used to assign any variables in params in
 ;; the context of the session environment.
