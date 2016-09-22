@@ -412,7 +412,7 @@ For instance, the following value would color the background of
 emacs-lisp source blocks and python source blocks in purple and
 green, respectability.
 
-    '((\"emacs-lisp\" (:background \"#EEE2FF\"))
+    \\='((\"emacs-lisp\" (:background \"#EEE2FF\"))
       (\"python\" (:background \"#e5ffb8\")))"
   :group 'org-faces
   :type '(repeat (list (string :tag "language")
