@@ -2491,10 +2491,10 @@ This takes into account some special considerations for certain
 parameters when merging lists."
   (let* ((results-exclusive-groups
 	  (mapcar (lambda (group) (mapcar #'symbol-name group))
-		  (cdr (assoc 'results org-babel-common-header-args-w-values))))
+		  (cdr (assq 'results org-babel-common-header-args-w-values))))
 	 (exports-exclusive-groups
 	  (mapcar (lambda (group) (mapcar #'symbol-name group))
-		  (cdr (assoc 'exports org-babel-common-header-args-w-values))))
+		  (cdr (assq 'exports org-babel-common-header-args-w-values))))
 	 (merge
 	  (lambda (exclusive-groups &rest result-params)
 	    ;; Maintain exclusivity of mutually exclusive parameters,

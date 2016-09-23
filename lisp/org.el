@@ -5665,7 +5665,7 @@ The following commands are available:
 		      (mapcar
 		       (lambda (alist)
 			 (when (boundp alist)
-			   (cdr (assoc 'background-color (symbol-value alist)))))
+			   (cdr (assq 'background-color (symbol-value alist)))))
 		       '(default-frame-alist initial-frame-alist window-system-default-frame-alist))
 		      (list (face-foreground 'org-hide))))))
     (car (remove nil candidates))))
@@ -11434,7 +11434,7 @@ If the file does not exist, an error is thrown."
 		    (cdr (assoc ext apps))
 		    (cdr (assq t apps))))))
     (when (eq cmd 'system)
-      (setq cmd (cdr (assoc 'system apps))))
+      (setq cmd (cdr (assq 'system apps))))
     (when (eq cmd 'default)
       (setq cmd (cdr (assoc t apps))))
     (when (eq cmd 'mailcap)
@@ -13060,9 +13060,9 @@ This hook runs even if there is no statistics cookie present, in which case
     (when (and (stringp state) (> (length state) 0))
       (setq changes (append changes (cdr (assoc state l)))))
     (when (member state org-not-done-keywords)
-      (setq changes (append changes (cdr (assoc 'todo l)))))
+      (setq changes (append changes (cdr (assq 'todo l)))))
     (when (member state org-done-keywords)
-      (setq changes (append changes (cdr (assoc 'done l)))))
+      (setq changes (append changes (cdr (assq 'done l)))))
     (dolist (c changes)
       (org-toggle-tag (car c) (if (cdr c) 'on 'off)))))
 
@@ -22535,7 +22535,7 @@ that may remove elements by altering the list structure."
   "Move backwards over whitespace, to the beginning of the first empty line.
 Returns the number of empty lines passed."
   (let ((pos (point)))
-    (if (cdr (assoc 'heading org-blank-before-new-entry))
+    (if (cdr (assq 'heading org-blank-before-new-entry))
 	(skip-chars-backward " \t\n\r")
       (unless (eobp)
 	(forward-line -1)))

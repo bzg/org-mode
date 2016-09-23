@@ -711,7 +711,7 @@ captured item after finalizing."
 	      (m2 (org-capture-get :end-marker 'local)))
 	  (if (and m1 m2 (= m1 beg) (= m2 end))
 	      (progn
-		(setq m2 (if (cdr (assoc 'heading org-blank-before-new-entry))
+		(setq m2 (if (cdr (assq 'heading org-blank-before-new-entry))
 			     m2 (1+ m2))
 		      m2 (if (< (point-max) m2) (point-max) m2))
 		(setq abort-note 'clean)
