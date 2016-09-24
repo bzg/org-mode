@@ -20948,11 +20948,11 @@ See the individual commands for more information."
 
 (defun org-cut-special ()
   "Cut region in table or cut current subtree.
-Calls `org-table-copy' or `org-cut-subtree', depending on context.
-See the individual commands for more information."
+Calls `org-table-cut-region' or `org-cut-subtree', depending on
+context.  See the individual commands for more information."
   (interactive)
   (call-interactively
-   (if (org-at-table-p) 'org-table-cut-region 'org-cut-subtree)))
+   (if (org-at-table-p) #'org-table-cut-region #'org-cut-subtree)))
 
 (defun org-paste-special (arg)
   "Paste rectangular region into table, or past subtree relative to level.
