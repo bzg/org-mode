@@ -193,6 +193,28 @@ For example, there is no ocaml-mode in Emacs, but the mode to use is
 	   (string "Language name")
 	   (symbol "Major mode"))))
 
+(defcustom org-src-block-faces nil
+  "Alist of faces to be used for source-block.
+Each element is a cell of the format
+
+     (\"language\" FACE)
+
+Where FACE is either a defined face or an anonymous face.
+
+For instance, the following value would color the background of
+emacs-lisp source blocks and python source blocks in purple and
+green, respectability.
+
+    \\='((\"emacs-lisp\" (:background \"#EEE2FF\"))
+      (\"python\" (:background \"#e5ffb8\")))"
+  :group 'org-edit-structure
+  :type '(repeat (list (string :tag "language")
+                       (choice
+                        (face :tag "Face")
+                        (sexp :tag "Anonymous face"))))
+  :version "25.2"
+  :package-version '(Org . "9.0"))
+
 (defcustom org-src-tab-acts-natively nil
   "If non-nil, the effect of TAB in a code block is as if it were
 issued in the language major mode buffer."
