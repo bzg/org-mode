@@ -20940,11 +20940,11 @@ this numeric value."
 
 (defun org-copy-special ()
   "Copy region in table or copy current subtree.
-Calls `org-table-copy' or `org-copy-subtree', depending on context.
-See the individual commands for more information."
+Calls `org-table-copy-region' or `org-copy-subtree', depending on
+context.  See the individual commands for more information."
   (interactive)
   (call-interactively
-   (if (org-at-table-p) 'org-table-copy-region 'org-copy-subtree)))
+   (if (org-at-table-p) #'org-table-copy-region #'org-copy-subtree)))
 
 (defun org-cut-special ()
   "Cut region in table or cut current subtree.
