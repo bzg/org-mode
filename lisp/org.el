@@ -19559,25 +19559,21 @@ SNIPPETS-P indicates if this is run to create snippet images for HTML."
 
 (defun org-dvipng-color (attr)
   "Return a RGB color specification for dvipng."
-  (apply #'format "rgb %s %s %s"
-	 (mapcar #'org-normalize-color
-		 (color-values (face-attribute 'default attr nil)))))
+  (org-dvipng-color-format (face-attribute 'default attr nil)))
 
 (defun org-dvipng-color-format (color-name)
   "Convert COLOR-NAME to a RGB color value for dvipng."
-  (apply 'format "rgb %s %s %s"
+  (apply #'format "rgb %s %s %s"
 	 (mapcar 'org-normalize-color
 		 (color-values color-name))))
 
 (defun org-latex-color (attr)
   "Return a RGB color for the LaTeX color package."
-  (apply #'format "%s,%s,%s"
-	 (mapcar #'org-normalize-color
-		 (color-values (face-attribute 'default attr nil)))))
+  (org-latex-color-format (face-attribute 'default attr nil)))
 
 (defun org-latex-color-format (color-name)
   "Convert COLOR-NAME to a RGB color value."
-  (apply 'format "%s,%s,%s"
+  (apply #'format "%s,%s,%s"
 	 (mapcar 'org-normalize-color
 		 (color-values color-name))))
 
