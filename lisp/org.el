@@ -22070,7 +22070,7 @@ upon the next fontification round."
     l))
 
 (defun org-shorten-string (s maxlength)
-  "Shorten string S so tht it is no longer than MAXLENGTH characters.
+  "Shorten string S so that it is no longer than MAXLENGTH characters.
 If the string is shorter or has length MAXLENGTH, just return the
 original string.  If it is longer, the functions finds a space in the
 string, breaks this string off at that locations and adds three dots
