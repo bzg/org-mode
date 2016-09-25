@@ -800,10 +800,11 @@ captured item after finalizing."
     (cond
      (abort-note
       (cl-case abort-note
-       ('clean
-	(message "Capture process aborted and target buffer cleaned up"))
-       ('dirty
-	(error "Capture process aborted, but target buffer could not be cleaned up correctly"))))
+	(clean
+	 (message "Capture process aborted and target buffer cleaned up"))
+	(dirty
+	 (error "Capture process aborted, but target buffer could not be \
+cleaned up correctly"))))
      (stay-with-capture
       (org-capture-goto-last-stored)))
     ;; Return if we did store something
