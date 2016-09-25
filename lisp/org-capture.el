@@ -625,7 +625,7 @@ of the day at point (if any) or the current HH:MM time."
 	    (org-capture-insert-template-here)
 	  (condition-case error
 	      (org-capture-place-template
-	       (equal (car (org-capture-get :target)) 'function))
+	       (eq (car (org-capture-get :target)) 'function))
 	    ((error quit)
 	     (if (and (buffer-base-buffer (current-buffer))
 		      (string-prefix-p "CAPTURE-" (buffer-name)))
@@ -799,10 +799,10 @@ captured item after finalizing."
     ;; Special cases
     (cond
      (abort-note
-      (cond
-       ((equal abort-note 'clean)
+      (cl-case abort-note
+       ('clean
 	(message "Capture process aborted and target buffer cleaned up"))
-       ((equal abort-note 'dirty)
+       ('dirty
 	(error "Capture process aborted, but target buffer could not be cleaned up correctly"))))
      (stay-with-capture
       (org-capture-goto-last-stored)))

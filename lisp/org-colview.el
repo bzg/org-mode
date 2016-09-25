@@ -679,7 +679,7 @@ an integer, select that value."
 	     (t (car allowed))))
 	   (action (lambda () (org-entry-put pom key new))))
       (cond
-       ((equal major-mode 'org-agenda-mode)
+       ((eq major-mode 'org-agenda-mode)
 	(org-columns--call action)
 	;; The following let preserves the current format, and makes
 	;; sure that in only a single file things need to be updated.

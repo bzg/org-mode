@@ -95,7 +95,7 @@
 
 (defun org-babel-calc-maybe-resolve-var (el)
   (if (consp el)
-      (if (and (equal 'var (car el)) (member (cadr el) org--var-syms))
+      (if (and (eq 'var (car el)) (member (cadr el) org--var-syms))
 	  (progn
 	    (calc-recall (cadr el))
 	    (prog1 (calc-top 1)

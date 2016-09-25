@@ -305,7 +305,7 @@ FORMAT can be either a format string or a function which is called with VAL."
 	    (`floatp '("double" "%f"))
 	    (`stringp
 	     (list
-	      (if (equal org-babel-c-variant 'd) "string" "const char*")
+	      (if (eq org-babel-c-variant 'd) "string" "const char*")
 	      "\"%s\""))
 	    (_ (error "unknown type %S" basetype)))))
     (cond
@@ -317,25 +317,25 @@ FORMAT can be either a format string or a function which is called with VAL."
 	  (cons
 	   (format "[%d][%d]" (length val) (length (car val)))
 	   (concat
-	    (if (equal org-babel-c-variant 'd) "[\n" "{\n")
+	    (if (eq org-babel-c-variant 'd) "[\n" "{\n")
 	    (mapconcat
 	     (lambda (v)
 	       (concat
-		(if (equal org-babel-c-variant 'd) " [" " {")
+		(if (eq org-babel-c-variant 'd) " [" " {")
 		(mapconcat (lambda (w) (format ,(cadr type) w)) v ",")
-		(if (equal org-babel-c-variant 'd) "]" "}")))
+		(if (eq org-babel-c-variant 'd) "]" "}")))
 	     val
 	     ",\n")
-	    (if (equal org-babel-c-variant 'd) "\n]" "\n}"))))))
+	    (if (eq org-babel-c-variant 'd) "\n]" "\n}"))))))
      ((or (listp val) (vectorp val)) ;; a list declared in the #+begin_src line
       `(,(car type)
 	(lambda (val)
 	  (cons
 	   (format "[%d]" (length val))
 	   (concat
-	    (if (equal org-babel-c-variant 'd) "[" "{")
+	    (if (eq org-babel-c-variant 'd) "[" "{")
 	    (mapconcat (lambda (v) (format ,(cadr type) v)) val ",")
-	    (if (equal org-babel-c-variant 'd) "]" "}"))))))
+	    (if (eq org-babel-c-variant 'd) "]" "}"))))))
      (t ;; treat unknown types as string
       type))))
 

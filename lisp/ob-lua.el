@@ -146,7 +146,7 @@ specifying a variable of the same value."
              "="
              (org-babel-lua-var-to-lua (cdr var)))
           (concat "{" (mapconcat #'org-babel-lua-var-to-lua var ", ") "}")))
-    (if (equal var 'hline)
+    (if (eq var 'hline)
         org-babel-lua-hline-to
       (format
        (if (and (stringp var) (string-match "[\n\r]" var)) "\"\"%S\"\"" "%S")
@@ -158,8 +158,8 @@ If the results look like a list or tuple, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (let ((res (org-babel-script-escape results)))
     (if (listp res)
-        (mapcar (lambda (el) (if (equal el 'None)
-                            org-babel-lua-None-to el))
+        (mapcar (lambda (el) (if (eq el 'None)
+				 org-babel-lua-None-to el))
                 res)
       res)))
 

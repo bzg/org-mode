@@ -139,7 +139,7 @@ This function is called by `org-babel-execute-src-block'."
 	   (equal 1 (length (car result))))
       (org-babel-read (caar result))
     (mapcar (lambda (row)
-	      (if (equal 'hline row)
+	      (if (eq 'hline row)
 		  'hline
 		(mapcar #'org-babel-string-read row))) result)))
 

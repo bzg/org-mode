@@ -129,7 +129,7 @@ Convert an elisp value into a string of ruby source code
 specifying a variable of the same value."
   (if (listp var)
       (concat "[" (mapconcat #'org-babel-ruby-var-to-ruby var ", ") "]")
-    (if (equal var 'hline)
+    (if (eq var 'hline)
 	org-babel-ruby-hline-to
       (format "%S" var))))
 
@@ -139,8 +139,8 @@ If RESULTS look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (let ((res (org-babel-script-escape results)))
     (if (listp res)
-        (mapcar (lambda (el) (if (equal el 'nil)
-                            org-babel-ruby-nil-to el))
+        (mapcar (lambda (el) (if (not el)
+				 org-babel-ruby-nil-to el))
                 res)
       res)))
 

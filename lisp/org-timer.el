@@ -35,6 +35,7 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'org-clock)
 
 (declare-function org-agenda-error "org-agenda" ())
@@ -342,8 +343,8 @@ VALUE can be `on', `off', or `paused'."
     (or (memq 'org-timer-mode-line-string frame-title-format)
 	(setq frame-title-format
 	      (append frame-title-format '(org-timer-mode-line-string)))))
-  (cond
-   ((equal value 'off)
+  (cl-case value
+   ('off
     (when org-timer-mode-line-timer
       (cancel-timer org-timer-mode-line-timer)
       (setq org-timer-mode-line-timer nil))
@@ -356,11 +357,11 @@ VALUE can be `on', `off', or `paused'."
       (setq frame-title-format
 	    (delq 'org-timer-mode-line-string frame-title-format)))
     (force-mode-line-update))
-   ((equal value 'paused)
+   ('paused
     (when org-timer-mode-line-timer
       (cancel-timer org-timer-mode-line-timer)
       (setq org-timer-mode-line-timer nil)))
-   ((equal value 'on)
+   ('on
     (when (or (eq org-timer-display 'mode-line)
 	      (eq org-timer-display 'both))
       (or global-mode-string (setq global-mode-string '("")))

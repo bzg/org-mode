@@ -1552,7 +1552,7 @@ shown below.
 Return a cons cell, the `car' of which contains the TABLE less
 colnames, and the `cdr' of which contains a list of the column
 names."
-  (if (equal 'hline (nth 1 table))
+  (if (eq 'hline (nth 1 table))
       (cons (cddr table) (car table))
     (cons (cdr table) (car table))))
 
@@ -1610,7 +1610,7 @@ of the vars, cnames and rnames."
       (lambda (var)
         (when (listp (cdr var))
           (when (and (not (equal colnames "no"))
-                     (or colnames (and (equal (nth 1 (cdr var)) 'hline)
+                     (or colnames (and (eq (nth 1 (cdr var)) 'hline)
                                        (not (member 'hline (cddr (cdr var)))))))
             (let ((both (org-babel-get-colnames (cdr var))))
               (setq cnames (cons (cons (car var) (cdr both))

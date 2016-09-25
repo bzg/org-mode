@@ -5444,8 +5444,8 @@ distinguished from a plain table name or ID."
 
 (defmacro org-define-lookup-function (mode)
   (let ((mode-str (symbol-name mode))
-	(first-p (equal mode 'first))
-	(all-p (equal mode 'all)))
+	(first-p (eq mode 'first))
+	(all-p (eq mode 'all)))
     (let ((plural-str (if all-p "s" "")))
       `(defun ,(intern (format "org-lookup-%s" mode-str)) (val s-list r-list &optional predicate)
 	 ,(format "Find %s occurrence%s of VAL in S-LIST; return corresponding element%s of R-LIST.

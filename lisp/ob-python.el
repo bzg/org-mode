@@ -133,7 +133,7 @@ Convert an elisp value, VAR, into a string of python source code
 specifying a variable of the same value."
   (if (listp var)
       (concat "[" (mapconcat #'org-babel-python-var-to-python var ", ") "]")
-    (if (equal var 'hline)
+    (if (eq var 'hline)
 	org-babel-python-hline-to
       (format
        (if (and (stringp var) (string-match "[\n\r]" var)) "\"\"%S\"\"" "%S")
@@ -145,7 +145,7 @@ If the results look like a list or tuple, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (let ((res (org-babel-script-escape results)))
     (if (listp res)
-        (mapcar (lambda (el) (if (equal el 'None)
+        (mapcar (lambda (el) (if (eq el 'None)
                             org-babel-python-None-to el))
                 res)
       res)))

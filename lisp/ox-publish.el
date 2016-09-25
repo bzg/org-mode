@@ -436,10 +436,10 @@ This splices all the components into the list."
         ;; a is directory, b not:
         (cond
          ((and (file-directory-p a) (not (file-directory-p b)))
-          (setq retval (equal org-publish-sitemap-sort-folders 'first)))
+          (setq retval (eq org-publish-sitemap-sort-folders 'first)))
 	 ;; a is not a directory, but b is:
          ((and (not (file-directory-p a)) (file-directory-p b))
-          (setq retval (equal org-publish-sitemap-sort-folders 'last))))))
+          (setq retval (eq org-publish-sitemap-sort-folders 'last))))))
     retval))
 
 (defun org-publish-get-base-files-1

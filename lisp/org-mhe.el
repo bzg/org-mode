@@ -79,8 +79,8 @@ supported by MH-E."
 ;; Implementation
 (defun org-mhe-store-link ()
   "Store a link to an MH-E folder or message."
-  (when (or (equal major-mode 'mh-folder-mode)
-	    (equal major-mode 'mh-show-mode))
+  (when (or (eq major-mode 'mh-folder-mode)
+	    (eq major-mode 'mh-show-mode))
     (save-window-excursion
       (let* ((from (org-mhe-get-header "From:"))
 	     (to (org-mhe-get-header "To:"))
@@ -111,7 +111,7 @@ supported by MH-E."
 So if you use sequences, it will now work."
   (save-excursion
     (let* ((folder
-	    (if (equal major-mode 'mh-folder-mode)
+	    (if (eq major-mode 'mh-folder-mode)
 		mh-current-folder
 	      ;; Refer to the show buffer
 	      mh-show-folder-buffer))
@@ -123,7 +123,7 @@ So if you use sequences, it will now work."
       ;; mh-index-data is always nil in a show buffer.
       (if (and (boundp 'mh-index-folder)
 	       (string= mh-index-folder (substring folder 0 end-index)))
-	  (if (equal major-mode 'mh-show-mode)
+	  (if (eq major-mode 'mh-show-mode)
 	      (save-window-excursion
 		(let (pop-up-frames)
 		  (when (buffer-live-p (get-buffer folder))
@@ -149,7 +149,7 @@ So if you use sequences, it will now work."
   "Return the name of the current message folder.
 Be careful if you use sequences."
   (save-excursion
-    (if (equal major-mode 'mh-folder-mode)
+    (if (eq major-mode 'mh-folder-mode)
 	mh-current-folder
       ;; Refer to the show buffer
       mh-show-folder-buffer)))
@@ -158,7 +158,7 @@ Be careful if you use sequences."
   "Return the number of the current message.
 Be careful if you use sequences."
   (save-excursion
-    (if (equal major-mode 'mh-folder-mode)
+    (if (eq major-mode 'mh-folder-mode)
 	(mh-get-msg-num nil)
       ;; Refer to the show buffer
       (mh-show-buffer-message-number))))
@@ -173,12 +173,12 @@ you have a better idea of how to do this then please let us know."
 	 (header-field))
     (with-current-buffer buffer
       (mh-display-msg num folder)
-      (if (equal major-mode 'mh-folder-mode)
+      (if (eq major-mode 'mh-folder-mode)
 	  (mh-header-display)
 	(mh-show-header-display))
       (set-buffer buffer)
       (setq header-field (mh-get-header-field header))
-      (if (equal major-mode 'mh-folder-mode)
+      (if (eq major-mode 'mh-folder-mode)
 	  (mh-show)
 	(mh-show-show))
       (org-trim header-field))))
@@ -197,7 +197,7 @@ folders."
   (if (not article)
       (mh-visit-folder (mh-normalize-folder-name folder))
     (mh-search-choose)
-    (if (equal mh-searcher 'pick)
+    (if (eq mh-searcher 'pick)
 	(progn
 	  (setq article (org-add-angle-brackets article))
 	  (mh-search folder (list "--message-id" article))

@@ -77,7 +77,7 @@
 (require 'find-func)
 (require 'format-spec)
 
-(or (equal this-command 'eval-buffer)
+(or (eq this-command 'eval-buffer)
     (condition-case nil
 	(load (concat (file-name-directory load-file-name)
 		      "org-loaddefs.el")

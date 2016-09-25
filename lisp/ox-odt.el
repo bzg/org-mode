@@ -3827,7 +3827,7 @@ contextual information."
   ;;
   (org-element-map tree 'plain-list
     (lambda (el)
-      (when (equal (org-element-property :type el) 'descriptive)
+      (when (eq (org-element-property :type el) 'descriptive)
 	(org-element-set-element
 	 el
 	 (apply 'org-element-adopt-elements
