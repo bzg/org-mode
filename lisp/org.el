@@ -20960,7 +20960,9 @@ See the individual commands for more information."
     (org-paste-subtree arg)))
 
 (defsubst org-in-fixed-width-region-p ()
-  "Is point in a fixed-width region?"
+  "OBSOLETE
+
+Is point in a fixed-width region?"
   (save-match-data
     (eq 'fixed-width (org-element-type (org-element-at-point)))))
 

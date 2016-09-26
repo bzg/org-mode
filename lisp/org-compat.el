@@ -187,6 +187,8 @@ Counting starts at 1."
 (define-obsolete-variable-alias 'org-html-style 'org-html-head "24.4")
 (define-obsolete-function-alias 'org-insert-columns-dblock
   'org-columns-insert-dblock "Org 9.0")
+(make-obsolete 'org-in-fixed-width-region-p "the `org-element' library"
+	       "Org 9.0")
 
 (defcustom org-read-date-minibuffer-setup-hook nil
   "Hook to be used to set up keys for the date/time interface.
