@@ -98,7 +98,9 @@
   "Return a section of LIST, from START to END.
 Counting starts at 1."
   (cl-subseq list (1- start) end))
-(make-obsolete 'org-sublist "cl-subseq (note the 0-based counting)." "Org 9.0")
+(make-obsolete 'org-sublist
+	       "use cl-subseq (note the 0-based counting)."
+	       "Org 9.0")
 
 
 ;;;; Functions available since Emacs 24.3
@@ -187,7 +189,13 @@ Counting starts at 1."
 (define-obsolete-variable-alias 'org-html-style 'org-html-head "24.4")
 (define-obsolete-function-alias 'org-insert-columns-dblock
   'org-columns-insert-dblock "Org 9.0")
-(make-obsolete 'org-in-fixed-width-region-p "the `org-element' library"
+
+(defun org-in-fixed-width-region-p ()
+  "Non-nil if point in a fixed-width region."
+  (save-match-data
+    (eq 'fixed-width (org-element-type (org-element-at-point)))))
+(make-obsolete 'org-in-fixed-width-region-p
+	       "use `org-element' library"
 	       "Org 9.0")
 
 (defcustom org-read-date-minibuffer-setup-hook nil

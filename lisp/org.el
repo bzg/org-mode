@@ -20959,13 +20959,6 @@ See the individual commands for more information."
       (org-table-paste-rectangle)
     (org-paste-subtree arg)))
 
-(defsubst org-in-fixed-width-region-p ()
-  "OBSOLETE
-
-Is point in a fixed-width region?"
-  (save-match-data
-    (eq 'fixed-width (org-element-type (org-element-at-point)))))
-
 (defun org-edit-special (&optional arg)
   "Call a special editor for the element at point.
 When at a table, call the formula editor with `org-table-edit-formulas'.
