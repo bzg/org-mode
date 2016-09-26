@@ -1610,7 +1610,7 @@ INFO is a plist used as a communication channel."
 INFO is a plist used as a communication channel."
   (let ((compiler (plist-get info :latex-compiler)))
        (and (org-string-nw-p org-latex-compiler-file-string)
-	    (string-match-p (regexp-opt org-latex-compilers) (or compiler ""))
+	    (member (or compiler "") org-latex-compilers)
 	    (format org-latex-compiler-file-string compiler))))
 
 
