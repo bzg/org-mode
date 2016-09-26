@@ -20340,9 +20340,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
   (let (new old)
     (while commands
       (setq old (pop commands) new (pop commands))
-      (if (fboundp 'command-remapping)
-	  (org-defkey map (vector 'remap old) new)
-	(substitute-key-definition old new map global-map)))))
+      (org-defkey map (vector 'remap old) new))))
 
 (defun org-transpose-words ()
   "Transpose words for Org.
