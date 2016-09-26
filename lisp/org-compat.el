@@ -33,6 +33,8 @@
 (require 'org-macs)
 
 (declare-function org-at-table.el-p "org" (&optional table-type))
+(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-type "org-element" (element))
 (declare-function org-link-set-parameters "org" (type &rest rest))
 (declare-function org-table-end (&optional table-type))
 (declare-function table--at-cell-p "table" (position &optional object at-column))
