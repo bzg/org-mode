@@ -21958,18 +21958,9 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
       (get-text-property (or (next-single-property-change 0 prop s) 0)
 			 prop s)))
 
-(defun org-display-warning (message) ;; Copied from Emacs-Muse
+(defun org-display-warning (message)
   "Display the given MESSAGE as a warning."
-  (if (fboundp 'display-warning)
-      (display-warning 'org message :warning)
-    (let ((buf (get-buffer-create "*Org warnings*")))
-      (with-current-buffer buf
-        (goto-char (point-max))
-        (insert "Warning (Org): " message)
-        (unless (bolp)
-          (newline)))
-      (display-buffer buf)
-      (sit-for 0))))
+  (display-warning 'org message :warning))
 
 (defun org-eval (form)
   "Eval FORM and return result."
