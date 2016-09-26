@@ -21078,7 +21078,7 @@ This command does many different things, depending on context:
     (and (boundp 'org-clock-overlays) (org-clock-remove-overlays))
     (org-remove-occur-highlights)
     (message "Temporary highlights/overlays removed from current buffer"))
-   ((and (local-variable-p 'org-finish-function (current-buffer))
+   ((and (local-variable-p 'org-finish-function)
 	 (fboundp org-finish-function))
     (funcall org-finish-function))
    ((run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-hook))
