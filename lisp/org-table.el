@@ -1556,19 +1556,21 @@ non-nil, the one above is used."
   "Insert a new row above the current line into the table.
 With prefix ARG, insert below the current line."
   (interactive "P")
-  (if (not (org-at-table-p))
-      (user-error "Not at a table"))
-  (let* ((line (buffer-substring (point-at-bol) (point-at-eol)))
+  (unless (org-at-table-p) (user-error "Not at a table"))
+  (let* ((line (buffer-substring (line-beginning-position) (line-end-position)))
 	 (new (org-table-clean-line line)))
     ;; Fix the first field if necessary
     (if (string-match "^[ \t]*| *[#$] *|" line)
 	(setq new (replace-match (match-string 0 line) t t new)))
     (beginning-of-line (if arg 2 1))
+    ;; Buffer may not end of a newline character, so ensure
+    ;; (beginning-of-line 2) moves point to a new line.
+    (unless (bolp) (insert "\n"))
     (let (org-table-may-need-update) (insert-before-markers new "\n"))
     (beginning-of-line 0)
-    (re-search-forward "| ?" (point-at-eol) t)
-    (and (or org-table-may-need-update org-table-overlay-coordinates)
-	 (org-table-align))
+    (re-search-forward "| ?" (line-end-position) t)
+    (when (or org-table-may-need-update org-table-overlay-coordinates)
+      (org-table-align))
     (when (or (not org-table-fix-formulas-confirm)
 	      (funcall org-table-fix-formulas-confirm "Fix formulas? "))
       (org-table-fix-formulas "@" nil (1- (org-table-current-dline)) 1))))

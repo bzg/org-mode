@@ -2036,6 +2036,41 @@ is t, then new columns should be added as needed"
       (org-table-calc-current-TBLFM)
       (buffer-string)))))
 
+
+;;; Navigation
+
+(ert-deftest test-org-table/next-field ()
+  "Test `org-table-next-field' specifications."
+  ;; Regular test.
+  (should
+   (equal
+    "b"
+    (org-test-with-temp-text "| a<point> | b |"
+      (org-table-next-field)
+      (org-trim (org-table-get-field)))))
+  ;; Create new rows as needed.
+  (should
+   (equal
+    "| a |\n|   |\n"
+    (org-test-with-temp-text "| a<point> |"
+      (org-table-next-field)
+      (buffer-string))))
+  ;; Jump over hlines, if `org-table-tab-jumps-over-hlines' is
+  ;; non-nil.
+  (should
+   (equal
+    "b"
+    (org-test-with-temp-text "| a<point> |\n|---|\n| b |"
+      (let ((org-table-tab-jumps-over-hlines t)) (org-table-next-field))
+      (org-trim (org-table-get-field)))))
+  ;; If `org-table-tab-jumps-over-hlines' is nil, however, create
+  ;; a new row before the rule.
+  (should
+   (equal
+    "| a |\n|   |\n|---|\n| b |"
+    (org-test-with-temp-text "| a<point> |\n|---|\n| b |"
+      (let ((org-table-tab-jumps-over-hlines nil)) (org-table-next-field))
+      (buffer-string)))))
 
 (provide 'test-org-table)
 
