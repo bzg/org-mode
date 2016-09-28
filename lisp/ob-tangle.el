@@ -48,6 +48,7 @@
 (declare-function org-string-nw-p "org-macs" (s))
 (declare-function org-trim "org" (s &optional keep-lead))
 (declare-function outline-previous-heading "outline" ())
+(declare-function org-id-find "org-id" (id &optional markerp))
 
 (defvar org-link-types-re)
 
@@ -575,7 +576,7 @@ which enable the original code blocks to be found."
         (setq body (buffer-substring body-start end)))
       (when (string-match "::" path)
         (setq path (substring path 0 (match-beginning 0))))
-      (find-file path)
+      (find-file (or (car (org-id-find path)) path))
       (setq target-buffer (current-buffer))
       ;; Go to the beginning of the relative block in Org file.
       (org-open-link-from-string link)
