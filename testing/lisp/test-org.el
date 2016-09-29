@@ -4524,14 +4524,15 @@ Paragraph<point>"
     '((:startgroup) ("group") ("t1") ("t2") (:endgroup)))))
 
 (ert-deftest test-org/tag-align ()
-  "Test `org-align-tags-here' with different display width."
+  "Test `org-align-tags-here' specifications"
+  ;; Test aligning tags with different display width.
   (should
    ;;      12345678901234567890
    (equal "* Test         :abc:"
 	  (org-test-with-temp-text "* Test :abc:"
 	    (let ((org-tags-column -20)
 		  (indent-tabs-mode nil))
-	     (org-fix-tags-on-the-fly))
+	      (org-fix-tags-on-the-fly))
 	    (buffer-string))))
   (should
    ;;      12345678901234567890
@@ -4539,8 +4540,16 @@ Paragraph<point>"
 	  (org-test-with-temp-text "* Test :日本語:"
 	    (let ((org-tags-column -20)
 		  (indent-tabs-mode nil))
-	     (org-fix-tags-on-the-fly))
-	    (buffer-string)))))
+	      (org-fix-tags-on-the-fly))
+	    (buffer-string))))
+  ;; Make sure aligning tags do not skip invisible text.
+  (should
+   (equal "* [[linkx]] :tag:"
+	  (org-test-with-temp-text "* [[link<point>]]     :tag:"
+	    (let ((org-tags-column 0))
+	      (org-fix-tags-on-the-fly)
+	      (insert "x")
+	      (buffer-string))))))
 
 (ert-deftest test-org/tags-at ()
   (should

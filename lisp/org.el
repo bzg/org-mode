@@ -14951,28 +14951,23 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
     res))
 
 (defun org-align-tags-here (to-col)
-  ;; Assumes that this is a headline
-  "Align tags on the current headline to TO-COL."
-  (let ((pos (point)) (col (current-column)) ncol tags-l p)
-    (beginning-of-line 1)
-    (if	(and (looking-at ".*?\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")
-	     (< pos (match-beginning 2)))
-	(progn
-	  (setq tags-l (string-width (match-string 2)))
-	  (goto-char (match-beginning 1))
-	  (insert " ")
-	  (delete-region (point) (1+ (match-beginning 2)))
-	  (setq ncol (max (current-column)
-			  (1+ col)
-			  (if (> to-col 0)
-			      to-col
-			    (- (abs to-col) tags-l))))
-	  (setq p (point))
-	  (insert (make-string (- ncol (current-column)) ?\ ))
-	  (setq ncol (current-column))
-	  (when indent-tabs-mode (tabify p (point-at-eol)))
-	  (org-move-to-column (min ncol col)))
-      (goto-char pos))))
+  "Align tags on the current headline to TO-COL.
+Assume point is on a headline."
+  (let ((pos (point)))
+    (beginning-of-line)
+    (if	(or (not (looking-at ".*?\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"))
+	    (>= pos (match-beginning 2)))
+	;; No tags or point within tags: do not align.
+	(goto-char pos)
+      (goto-char (match-beginning 1))
+      (let ((shift (max (- (if (>= to-col 0) to-col
+			     (- (abs to-col) (string-width (match-string 2))))
+			   (current-column))
+			1)))
+	(replace-match (make-string shift ?\s) nil nil nil 1)
+	;; Preserve initial position, if possible.  In any case, stop
+	;; before tags.
+	(when (< pos (point)) (goto-char pos))))))
 
 (defun org-set-tags-command (&optional arg just-align)
   "Call the set-tags command for the current entry."
