@@ -98,7 +98,7 @@ create-if-interactive
       call `org-capture' that automatically and preemptively creates a
       link.  If you do want to get an ID link in a capture template to
       an entry not having an ID, create it first by explicitly creating
-      a link to it, using `\\[org-insert-link]' first.
+      a link to it, using `\\[org-store-link]' first.
 
 create-if-interactive-and-no-custom-id
       Like create-if-interactive, but do not create an ID if there is
@@ -444,8 +444,7 @@ and time is the usual three-integer representation of time."
 Store the relation between files and corresponding IDs.
 This will scan all agenda files, all associated archives, and all
 files currently mentioned in `org-id-locations'.
-When FILES is given, scan these files instead.
-When CHECK is given, prepare detailed information about duplicate IDs."
+When FILES is given, scan these files instead."
   (interactive)
   (if (not org-id-track-globally)
       (error "Please turn on `org-id-track-globally' if you want to track IDs")

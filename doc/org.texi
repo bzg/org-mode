@@ -1118,9 +1118,7 @@ special meaning are written with all capitals.
 Moreover, Org uses @i{option keywords} (like @code{#+TITLE} to set the title)
 and @i{environment keywords} (like @code{#+BEGIN_EXPORT html} to start
 a @code{HTML} environment).  They are written in uppercase in the manual to
-enhance its readability, but you can use lowercase in your Org
-files@footnote{Easy templates insert lowercase keywords and Babel dynamically
-inserts @code{#+results}.}.
+enhance its readability, but you can use lowercase in your Org file.
 
 @subsubheading Key bindings and commands
 @kindex C-c a
@@ -1289,7 +1287,7 @@ tables, @kbd{S-@key{TAB}} jumps to the previous field.
 @orgcmd{C-u C-u @key{TAB},org-set-startup-visibility}
 Switch back to the startup visibility of the buffer (@pxref{Initial visibility}).
 @cindex show all, command
-@orgcmd{C-u C-u C-u @key{TAB},show-all}
+@orgcmd{C-u C-u C-u @key{TAB},outline-show-all}
 Show all, including drawers.
 @cindex revealing context
 @orgcmd{C-c C-r,org-reveal}
@@ -1300,10 +1298,10 @@ exposed by a sparse tree command (@pxref{Sparse trees}) or an agenda command
 level, all sibling headings.  With a double prefix argument, also show the
 entire subtree of the parent.
 @cindex show branches, command
-@orgcmd{C-c C-k,show-branches}
+@orgcmd{C-c C-k,outline-show-branches}
 Expose all the headings of the subtree, CONTENT view for just one subtree.
 @cindex show children, command
-@orgcmd{C-c @key{TAB},show-children}
+@orgcmd{C-c @key{TAB},outline-show-children}
 Expose all direct children of the subtree.  With a numeric prefix argument N,
 expose all children down to level N@.
 @orgcmd{C-c C-x b,org-tree-to-indirect-buffer}
@@ -1344,10 +1342,6 @@ following lines anywhere in the buffer:
 #+STARTUP: showeverything
 @end example
 
-The startup visibility options are ignored when the file is open for the
-first time during the agenda generation: if you want the agenda to honor
-the startup visibility, set @code{org-agenda-inhibit-startup} to @code{nil}.
-
 @cindex property, VISIBILITY
 @noindent
 Furthermore, any entries with a @samp{VISIBILITY} property (@pxref{Properties
@@ -1381,9 +1375,9 @@ them.
 The following commands jump to other headlines in the buffer.
 
 @table @asis
-@orgcmd{C-c C-n,outline-next-visible-heading}
+@orgcmd{C-c C-n,org-next-visible-heading}
 Next heading.
-@orgcmd{C-c C-p,outline-previous-visible-heading}
+@orgcmd{C-c C-p,org-previous-visible-heading}
 Previous heading.
 @orgcmd{C-c C-f,org-forward-same-level}
 Next heading same level.
@@ -1798,10 +1792,10 @@ Cycle the entire list level through the different itemize/enumerate bullets
 (@samp{-}, @samp{+}, @samp{*}, @samp{1.}, @samp{1)}) or a subset of them,
 depending on @code{org-plain-list-ordered-item-terminator}, the type of list,
 and its indentation.  With a numeric prefix argument N, select the Nth bullet
-from this list.  If there is an active region when calling this, selected
-text will be changed into an item.  With a prefix argument, all lines will be
-converted to list items.  If the first line already was a list item, any item
-marker will be removed from the list.  Finally, even without an active
+from this list.  If there is an active region when calling this, all selected
+lines are converted to list items.  With a prefix argument, selected text is
+changed into a single item.  If the first line already was a list item, any
+item marker will be removed from the list.  Finally, even without an active
 region, a normal line will be converted into a list item.
 @kindex C-c *
 @item C-c *
@@ -2355,7 +2349,7 @@ on a per-file basis with:
 @end example
 
 If you would like to overrule the automatic alignment of number-rich columns
-to the right and of string-rich column to the left, you can use @samp{<r>},
+to the right and of string-rich columns to the left, you can use @samp{<r>},
 @samp{<c>}@footnote{Centering does not work inside Emacs, but it does have an
 effect when exporting to HTML.} or @samp{<l>} in a similar fashion.  You may
 also combine alignment and field width like this: @samp{<r10>}.
@@ -2367,17 +2361,16 @@ automatically when exporting the document.
 @section Column groups
 @cindex grouping columns in tables
 
-When Org exports tables, it does so by default without vertical
-lines because that is visually more satisfying in general.  Occasionally
-however, vertical lines can be useful to structure a table into groups
-of columns, much like horizontal lines can do for groups of rows.  In
-order to specify column groups, you can use a special row where the
-first field contains only @samp{/}.  The further fields can either
-contain @samp{<} to indicate that this column should start a group,
-@samp{>} to indicate the end of a column, or @samp{<>} (no space between @samp{<}
-and @samp{>}) to make a column
-a group of its own.  Boundaries between column groups will upon export be
-marked with vertical lines.  Here is an example:
+When Org exports tables, it does so by default without vertical lines because
+that is visually more satisfying in general.  Occasionally however, vertical
+lines can be useful to structure a table into groups of columns, much like
+horizontal lines can do for groups of rows.  In order to specify column
+groups, you can use a special row where the first field contains only
+@samp{/}.  The further fields can either contain @samp{<} to indicate that
+this column should start a group, @samp{>} to indicate the end of a group, or
+@samp{<>} (no space between @samp{<} and @samp{>}) to make a column a group
+of its own.  Boundaries between column groups will upon export be marked with
+vertical lines.  Here is an example:
 
 @example
 | N | N^2 | N^3 | N^4 | ~sqrt(n)~ | ~sqrt[4](N)~ |
@@ -3875,8 +3868,8 @@ url-encode the tag (see the example above, where we need to encode
 the URL parameter.)  Using @samp{%(my-function)} will pass the tag
 to a custom function, and replace it by the resulting string.
 
-If the replacement text doesn't contain any specifier, it will simply
-be appended to the string in order to create the link.
+If the replacement text doesn't contain any specifier, the tag will simply be
+appended in order to create the link.
 
 Instead of a string, you may also specify a function that will be
 called with the tag as the only argument to create the link.
@@ -4815,11 +4808,12 @@ off a box while there are unchecked boxes above it.
 
 @table @kbd
 @orgcmd{C-c C-c,org-toggle-checkbox}
-Toggle checkbox status or (with prefix arg) checkbox presence at point.
-With a single prefix argument, add an empty checkbox or remove the current
-one@footnote{@kbd{C-u C-c C-c} on the @emph{first} item of a list with no checkbox
-will add checkboxes to the rest of the list.}.  With a double prefix argument, set it to @samp{[-]}, which is
-considered to be an intermediate state.
+Toggle checkbox status or (with prefix arg) checkbox presence at point.  With
+a single prefix argument, add an empty checkbox or remove the current
+one@footnote{@kbd{C-u C-c C-c} before the @emph{first} bullet in a list with
+no checkbox will add checkboxes to the rest of the list.}.  With a double
+prefix argument, set it to @samp{[-]}, which is considered to be an
+intermediate state.
 @orgcmd{C-c C-x C-b,org-toggle-checkbox}
 Toggle checkbox status or (with prefix arg) checkbox presence at point.  With
 double prefix argument, set it to @samp{[-]}, which is considered to be an
@@ -4830,8 +4824,10 @@ If there is an active region, toggle the first checkbox in the region
 and set all remaining boxes to the same status as the first.  With a prefix
 arg, add or remove the checkbox for all items in the region.
 @item
-If the cursor is in a headline, toggle checkboxes in the region between
-this headline and the next (so @emph{not} the entire subtree).
+If the cursor is in a headline, toggle the state of the first checkbox in the
+region between this headline and the next---so @emph{not} the entire
+subtree---and propagate this new state to all other checkboxes in the same
+area.
 @item
 If there is no active region, just toggle the checkbox at point.
 @end itemize
@@ -4902,11 +4898,11 @@ well.  For example, in the list
 @noindent
 the final heading will have the tags @samp{:work:}, @samp{:boss:},
 @samp{:notes:}, and @samp{:action:} even though the final heading is not
-explicitly marked with those tags.  You can also set tags that all entries in
-a file should inherit just as if these tags were defined in a hypothetical
-level zero that surrounds the entire file.  Use a line like this@footnote{As
-with all these in-buffer settings, pressing @kbd{C-c C-c} activates any
-changes in the line.}:
+explicitly marked with all those tags.  You can also set tags that all
+entries in a file should inherit just as if these tags were defined in
+a hypothetical level zero that surrounds the entire file.  Use a line like
+this@footnote{As with all these in-buffer settings, pressing @kbd{C-c C-c}
+activates any changes in the line.}:
 
 @cindex #+FILETAGS
 @example
@@ -5133,8 +5129,8 @@ One use-case is to create a taxonomy of terms (tags) that can be used to
 classify nodes in a document or set of documents.
 
 When you search for a group tag, it will return matches for all members in
-the group and its subgroup.  In an agenda view, filtering by a group tag will
-display or hide headlines tagged with at least one of the members of the
+the group and its subgroups.  In an agenda view, filtering by a group tag
+will display or hide headlines tagged with at least one of the members of the
 group or any of its subgroups.  This makes tag searches and filters even more
 flexible.
 
@@ -5249,10 +5245,10 @@ only TODO items and force checking subitems (see the option
 These commands all prompt for a match string which allows basic Boolean logic
 like @samp{+boss+urgent-project1}, to find entries with tags @samp{boss} and
 @samp{urgent}, but not @samp{project1}, or @samp{Kathy|Sally} to find entries
-which are tagged, like @samp{Kathy} or @samp{Sally}.  The full syntax of the search
-string is rich and allows also matching against TODO keywords, entry levels
-and properties.  For a complete description with many examples, see
-@ref{Matching tags and properties}.
+tagged as @samp{Kathy} or @samp{Sally}.  The full syntax of the search string
+is rich and allows also matching against TODO keywords, entry levels and
+properties.  For a complete description with many examples, see @ref{Matching
+tags and properties}.
 
 
 @node Properties and columns
@@ -6080,7 +6076,7 @@ feb 15        @result{} @b{2007}-02-15
 sep 12 9      @result{} 2009-09-12
 12:45         @result{} @b{2006}-@b{06}-@b{13} 12:45
 22 sept 0:34  @result{} @b{2006}-09-22 00:34
-w4            @result{} ISO week for of the current year @b{2006}
+w4            @result{} ISO week four of the current year @b{2006}
 2012 w4 fri   @result{} Friday of ISO week 4 in 2012
 2012-w04-5    @result{} Same as above
 @end example
@@ -6911,8 +6907,8 @@ in the active region by a certain amount.  This can be used to fix timer
 strings if the timer was not started at exactly the right moment.
 @orgcmd{C-c C-x ;,org-timer-set-timer}
 Start a countdown timer.  The user is prompted for a duration.
-@code{org-timer-default-timer} sets the default countdown value.  Giving a
-prefix numeric argument overrides this default value.  This command is
+@code{org-timer-default-timer} sets the default countdown value.  Giving
+a numeric prefix argument overrides this default value.  This command is
 available as @kbd{;} in agenda buffers.
 @end table
 
@@ -8590,16 +8586,14 @@ refreshes and more secondary filtering.  The filter is a global property of
 the entire agenda view---in a block agenda, you should only set this in the
 global options section, not in the section of an individual block.}
 
-You will be prompted for a tag selection letter; @key{SPC} will mean any tag at
-all.  Pressing @key{TAB} at that prompt will offer use completion to select a
-tag (including any tags that do not have a selection character).  The command
-then hides all entries that do not contain or inherit this tag.  When called
-with prefix arg, remove the entries that @emph{do} have the tag.  A second
-@kbd{/} at the prompt will turn off the filter and unhide any hidden entries.
-If the first key you press is either @kbd{+} or @kbd{-}, the previous filter
-will be narrowed by requiring or forbidding the selected additional tag.
-Instead of pressing @kbd{+} or @kbd{-} after @kbd{/}, you can also
-immediately use the @kbd{\} command.
+You will be prompted for a tag selection letter; @key{SPC} will mean any tag
+at all.  Pressing @key{TAB} at that prompt will offer use completion to
+select a tag (including any tags that do not have a selection character).
+The command then hides all entries that do not contain or inherit this tag.
+When called with prefix arg, remove the entries that @emph{do} have the tag.
+A second @kbd{/} at the prompt will turn off the filter and unhide any hidden
+entries.  Pressing @kbd{+} or @kbd{-} switches between filtering and
+excluding the next tag.
 
 Org also supports automatic, context-aware tag filtering.  If the variable
 @code{org-agenda-auto-exclude-function} is set to a user-defined function,
@@ -8763,9 +8757,8 @@ Next item: same as next line, but only consider items.
 Previous item: same as previous line, but only consider items.
 @tsubheading{View/Go to Org file}
 @orgcmdkkc{@key{SPC},mouse-3,org-agenda-show-and-scroll-up}
-Display the original location of the item in another window.
-With prefix arg, make sure that the entire entry is made visible in the
-outline, not only the heading.
+Display the original location of the item in another window.  With prefix
+arg, make sure that drawers stay folded.
 @c
 @orgcmd{L,org-agenda-recenter}
 Display original location and recenter that window.

@@ -7468,15 +7468,18 @@ With two prefix arguments, remove the effort filters."
 
 (defun org-agenda-filter-by-tag (arg &optional char exclude)
   "Keep only those lines in the agenda buffer that have a specific tag.
-The tag is selected with its fast selection letter, as
-configured.  With a single \\[universal-argument] prefix ARG,
-exclude the agenda search.  With a double \\[universal-argument]
-prefix ARG, filter the literal tag.  I.e. don't filter on all its
-group members.
 
-A lisp caller can specify CHAR.  EXCLUDE means that the new tag should be
-used to exclude the search - the interactive user can also press `-' or `+'
-to switch between filtering and excluding."
+The tag is selected with its fast selection letter, as configured.
+
+With a single \\[universal-argument] prefix ARG, exclude the agenda search.
+
+With a double \\[universal-argument] prefix ARG, filter the literal tag, \
+i.e. don't
+filter on all its group members.
+
+A lisp caller can specify CHAR.  EXCLUDE means that the new tag
+should be used to exclude the search - the interactive user can
+also press `-' or `+' to switch between filtering and excluding."
   (interactive "P")
   (let* ((alist org-tag-alist-for-agenda)
 	 (tag-chars (mapconcat
@@ -8622,9 +8625,9 @@ if it was hidden in the outline."
 (defun org-agenda-show-and-scroll-up (&optional arg)
   "Display the Org file which contains the item at point.
 When called repeatedly, scroll the window that is displaying the buffer.
-With a \\[universal-argument] prefix, use `org-show-entry' instead of
-`show-subtree' to display the item, so that drawers and logbooks stay
-folded."
+With a \\[universal-argument] prefix, use `org-show-entry' instead of \
+`outline-show-subtree'
+to display the item, so that drawers and logbooks stay folded."
   (interactive "P")
   (let ((win (selected-window)))
     (if (and (window-live-p org-agenda-show-window)
