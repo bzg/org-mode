@@ -94,8 +94,7 @@ Should accept a notmuch search string as the sole argument."
 
 Can link to more than one message, if so all matching messages are shown."
   (require 'notmuch)
-  (notmuch-show (org-link-unescape search)))
-
+  (notmuch-show search))
 
 
 
