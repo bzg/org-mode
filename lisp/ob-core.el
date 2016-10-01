@@ -481,9 +481,11 @@ For the format of SAFE-LIST, see `org-babel-safe-header-args'."
   "Regexp matching a NAME keyword.")
 
 (defconst org-babel-result-regexp
-  (format "^[ \t]*#\\+%s\\(?:\\[\\(?:%S\\)?\\([[:alnum:]]+\\)\\]\\)?:[ \t]*"
+  (format "^[ \t]*#\\+%s\\(?:\\[\\(?:%s \\)?\\([[:alnum:]]+\\)\\]\\)?:[ \t]*"
 	  org-babel-results-keyword
-	  "<\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^\r\n>]*?\\)>")
+	  ;; <%Y-%m-%d %H:%M:%S>
+	  "<\\(?:[0-9]\\{4\\}-[0-1][0-9]-[0-3][0-9] \
+[0-2][0-9]\\(?::[0-5][0-9]\\)\\{2\\}\\)>")
   "Regular expression used to match result lines.
 If the results are associated with a hash key then the hash will
 be saved in match group 1.")
@@ -1860,7 +1862,7 @@ the results hash, or nil.  Leave point before the keyword."
 		  (cond ((not hash) nil)
 			(org-babel-hash-show-time
 			 (format "[%s %s]"
-				 (format-time-string "<%Y-%m-%d %H:%M:%S>")
+				 (format-time-string "<%F %T>")
 				 hash))
 			(t (format "[%s]" hash)))
 		  ":"
@@ -1895,8 +1897,8 @@ leave point where new results should be inserted."
 	  (delete-region (line-beginning-position)
 			 (line-beginning-position 2)))
 	(goto-char post)
-	(set-marker post nil)))
-    t))
+	(set-marker post nil)
+	t))))
 
 (defun org-babel-where-is-src-block-result (&optional insert _info hash)
   "Find where the current source block results begin.
