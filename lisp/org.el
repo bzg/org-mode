@@ -7865,27 +7865,24 @@ When NEXT is non-nil, check the next line instead."
   "Insert a new heading or an item with the same depth at point.
 
 If point is at the beginning of a heading or a list item, insert
-a new heading or a new item above the current one.  If point is
-at the beginning of a normal line, turn the line into a heading.
+a new heading or a new item above the current one.  When at the
+beginning of a regular line of text, turn it into a heading.
 
 If point is in the middle of a line, split it and create a new
 headline/item with the text in the current line after point (see
 `org-M-RET-may-split-line' on how to modify this behavior).
 
-If point is at the beginning of the headline, insert a sibling
-before it.  If it is at the beginning of a regular line of text,
-turn it into a heading.
+With a \\[universal-argument] prefix, set \
+`org-insert-heading-respect-content' to
+a non-nil value for the duration of the command.  This forces the
+insertion of a heading after the current subtree, independently
+on the location of point.
 
-With one universal prefix argument, set the user option
-`org-insert-heading-respect-content' to t for the duration of the
-command.  This modifies the behavior described above in this
-ways: on list items and at regular lines, force the insertion of
-a heading after the current subtree.
-
-With two universal prefix arguments, insert the heading at the
-end of the grandparent subtree.  For example, if point is within
+With double \\[universal-argument] \\[universal-argument] prefix, \
+insert the heading at the end of the
+tree above the current heading.  For example, if point is within
 a 2nd-level heading, then it will insert a 2nd-level heading at
-the end of the 1st-level parent heading.
+the end of the 1st-level parent subtree.
 
 When INVISIBLE-OK is set, stop at invisible headlines when going
 back.  This is important for non-interactive uses of the
