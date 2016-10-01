@@ -171,6 +171,14 @@ This string must include a \"%s\" which will be replaced by the results."
        (and (stringp value)
 	    (string-match-p "%s" value))))
 
+(defcustom org-babel-hash-show-time nil
+  "Non-nil means show the time the code block was evaluated in the result hash."
+  :group 'org-babel
+  :type 'boolean
+  :version "25.2"
+  :package-version '(Org . "9.0")
+  :safe #'booleanp)
+
 (defun org-babel-noweb-wrap (&optional regexp)
   (concat org-babel-noweb-wrap-start
 	  (or regexp "\\([^ \t\n].+?[^ \t]\\|[^ \t\n]\\)")
@@ -517,9 +525,6 @@ to raise errors for all languages.")
 
 (defvar org-babel-hash-show 4
   "Number of initial characters to show of a hidden results hash.")
-
-(defvar org-babel-hash-show-time nil
-  "Non-nil means show the time the code block was evaluated in the result hash.")
 
 (defvar org-babel-after-execute-hook nil
   "Hook for functions to be called after `org-babel-execute-src-block'")
