@@ -715,10 +715,13 @@ environment."
   :package-version '(Org . "8.0")
   :type 'string)
 
-(defcustom org-latex-default-figure-position "htb"
-  "Default position for latex figures."
+(defcustom org-latex-default-figure-position "htbp"
+  "Default position for LaTeX figures."
   :group 'org-export-latex
-  :type 'string)
+  :type 'string
+  :version "25.2"
+  :package-version '(Org . "9.0")
+  :safe #'stringp)
 
 (defcustom org-latex-inline-image-rules
   '(("file" . "\\.\\(pdf\\|jpeg\\|jpg\\|png\\|ps\\|eps\\|tikz\\|pgf\\|svg\\)\\'"))
