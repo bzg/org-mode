@@ -1052,9 +1052,9 @@ current item's tree, in an indirect buffer."
 (defcustom org-agenda-entry-text-maxlines 5
   "Number of text lines to be added when `E' is pressed in the agenda.
 
-Note that this variable only used during agenda display.  Add add entry text
+Note that this variable only used during agenda display.  To add entry text
 when exporting the agenda, configure the variable
-`org-agenda-add-entry-ext-maxlines'."
+`org-agenda-add-entry-text-maxlines'."
   :group 'org-agenda
   :type 'integer)
 
