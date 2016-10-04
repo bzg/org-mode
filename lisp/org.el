@@ -7878,10 +7878,10 @@ a non-nil value for the duration of the command.  This forces the
 insertion of a heading after the current subtree, independently
 on the location of point.
 
-With double \\[universal-argument] \\[universal-argument] prefix, \
-insert the heading at the end of the
-tree above the current heading.  For example, if point is within
-a 2nd-level heading, then it will insert a 2nd-level heading at
+With a \\[universal-argument] \\[universal-argument] prefix, \
+insert the heading at the end of the tree
+above the current heading.  For example, if point is within a
+2nd-level heading, then it will insert a 2nd-level heading at
 the end of the 1st-level parent subtree.
 
 When INVISIBLE-OK is set, stop at invisible headlines when going
