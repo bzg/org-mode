@@ -240,7 +240,7 @@ Otherwise rely on `org-expiry-confirm-flag' to decide."
   (interactive "P")
   (save-excursion
     (when (called-interactively-p) (org-reveal))
-    (when (org-expiry-expired-p 'any)
+    (when (org-expiry-expired-p)
       (org-back-to-heading)
       (looking-at org-complex-heading-regexp)
       (let* ((ov (make-overlay (point) (match-end 0)))
