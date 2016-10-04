@@ -527,7 +527,7 @@ When ~org-special-ctrl-o~ is non-nil, it is impractical to create
 a blank line above a table at the beginning of the document. Now, as
 a special case, ~org-open-line~ behaves normally in this situation.
 *** ~org-babel-hash-show-time~ is now customizable
-The experimental variable used to be more less confidential, as
+The experimental variable used to be more or less confidential, as
 a ~defvar~.
 * Version 8.3
 
