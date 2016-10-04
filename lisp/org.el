@@ -7870,7 +7870,9 @@ beginning of a regular line of text, turn it into a heading.
 
 If point is in the middle of a line, split it and create a new
 headline/item with the text in the current line after point (see
-`org-M-RET-may-split-line' on how to modify this behavior).
+`org-M-RET-may-split-line' on how to modify this behavior).  As
+a special case, on a headline, splitting can only happen on the
+title itself.  E.g., this excludes breaking stars or tags.
 
 With a \\[universal-argument] prefix, set \
 `org-insert-heading-respect-content' to
