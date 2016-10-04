@@ -7974,8 +7974,7 @@ unconditionally."
 
 	  ;; If we insert after content, move there and clean up
 	  ;; whitespace.
-	  (when (and respect-content
-		     (not (looking-at-p org-outline-regexp-bol)))
+	  (when respect-content
 	    (if (not (org-before-first-heading-p))
 		(org-end-of-subtree nil t)
 	      (re-search-forward org-outline-regexp-bol)
