@@ -1169,6 +1169,45 @@
 	    (let ((org-M-RET-may-split-line '((default . nil))))
 	      (org-insert-heading))
 	    (buffer-string))))
+  ;; At the beginning of a headline, create one above.
+  (should
+   (equal "* \n* H"
+	  (org-test-with-temp-text "* H"
+	    (org-insert-heading)
+	    (buffer-string))))
+  ;; In the middle of a headline, split it if allowed.
+  (should
+   (equal "* H\n* 1"
+	  (org-test-with-temp-text "* H<point>1"
+	    (let ((org-M-RET-may-split-line '((headline . t))))
+	      (org-insert-heading))
+	    (buffer-string))))
+  (should
+   (equal "* H1\n* "
+	  (org-test-with-temp-text "* H<point>1"
+	    (let ((org-M-RET-may-split-line '((headline . nil))))
+	      (org-insert-heading))
+	    (buffer-string))))
+  ;; However, splitting cannot happen on TODO keywords, priorities or
+  ;; tags.
+  (should
+   (equal "* TODO H1\n* "
+	  (org-test-with-temp-text "* TO<point>DO H1"
+	    (let ((org-M-RET-may-split-line '((headline . t))))
+	      (org-insert-heading))
+	    (buffer-string))))
+  (should
+   (equal "* [#A] H1\n* "
+	  (org-test-with-temp-text "* [#<point>A] H1"
+	    (let ((org-M-RET-may-split-line '((headline . t))))
+	      (org-insert-heading))
+	    (buffer-string))))
+  (should
+   (equal "* H1 :tag:\n* "
+	  (org-test-with-temp-text "* H1 :ta<point>g:"
+	    (let ((org-M-RET-may-split-line '((headline . t))))
+	      (org-insert-heading))
+	    (buffer-string))))
   ;; When on a list, insert an item instead, unless called with an
   ;; universal argument or if list is invisible.  In this case, create
   ;; a new headline after contents.
@@ -1203,6 +1242,23 @@
 	(let ((org-insert-heading-respect-content nil)) (org-insert-heading))
 	(list (get-char-property (line-beginning-position 0) 'invisible)
 	      (get-char-property (line-end-position 2) 'invisible))))))
+  ;; When called with one universal argument, insert a new headline at
+  ;; the end of the current subtree, independently on the position of
+  ;; point.
+  (should
+   (equal
+    "* H1\n** H2\n* "
+    (org-test-with-temp-text "* H1\n** H2"
+      (let ((org-insert-heading-respect-content nil))
+	(org-insert-heading '(4)))
+      (buffer-string))))
+  (should
+   (equal
+    "* H1\n** H2\n* "
+    (org-test-with-temp-text "* H<point>1\n** H2"
+      (let ((org-insert-heading-respect-content nil))
+	(org-insert-heading '(4)))
+      (buffer-string))))
   ;; When called with two universal arguments, insert a new headline
   ;; at the end of the grandparent subtree.
   (should
