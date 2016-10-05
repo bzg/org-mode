@@ -836,7 +836,7 @@ Use \"export %s\" instead"
 	   (org-element-map (org-element-contents h)
 	       (cl-remove-if
 		(lambda (e)
-		  (memq e '(comment comment-block footnote-definition
+		  (memq e '(comment comment-block drawer footnote-definition
 				    property-drawer section)))
 		org-element-all-elements)
 	     (lambda (e)
