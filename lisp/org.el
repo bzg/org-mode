@@ -328,7 +328,7 @@ FULL is given."
     (let* ((load-suffixes save-load-suffixes)
 	   (release (org-release))
 	   (git-version (org-git-version))
-	   (version (format "Org-mode version %s (%s @ %s)"
+	   (version (format "Org mode version %s (%s @ %s)"
 			    release
 			    git-version
 			    (if org-install-dir
@@ -630,7 +630,7 @@ After a match, group 1 contains the repeat expression.")
   :group 'calendar)
 
 (defcustom org-mode-hook nil
-  "Mode hook for Org-mode, run after the mode was turned on."
+  "Mode hook for Org mode, run after the mode was turned on."
   :group 'org
   :type 'hook)
 
@@ -701,7 +701,7 @@ For export specific modules, see also `org-export-backends'."
 	(const :tag "   mouse:             Additional mouse support" org-mouse)
 	(const :tag "   protocol:          Intercept calls from emacsclient" org-protocol)
 	(const :tag "   rmail:             Links to RMAIL folders/messages" org-rmail)
-	(const :tag "   w3m:               Special cut/paste from w3m to Org-mode." org-w3m)
+	(const :tag "   w3m:               Special cut/paste from w3m to Org mode." org-w3m)
 
 	(const :tag "C  annotate-file:     Annotate a file with org syntax" org-annotate-file)
 	(const :tag "C  bookmark:          Org links to bookmarks" org-bookmark)
@@ -709,8 +709,8 @@ For export specific modules, see also `org-export-backends'."
 	(const :tag "C  checklist:         Extra functions for checklists in repeated tasks" org-checklist)
 	(const :tag "C  choose:            Use TODO keywords to mark decisions states" org-choose)
 	(const :tag "C  collector:         Collect properties into tables" org-collector)
-	(const :tag "C  depend:            TODO dependencies for Org-mode\n\t\t\t(PARTIALLY OBSOLETE, see built-in dependency support))" org-depend)
-	(const :tag "C  drill:             Flashcards and spaced repetition for Org-mode" org-drill)
+	(const :tag "C  depend:            TODO dependencies for Org mode\n\t\t\t(PARTIALLY OBSOLETE, see built-in dependency support))" org-depend)
+	(const :tag "C  drill:             Flashcards and spaced repetition for Org mode" org-drill)
 	(const :tag "C  elisp-symbol:      Org links to emacs-lisp symbols" org-elisp-symbol)
 	(const :tag "C  eshell             Support for links to working directories in eshell" org-eshell)
 	(const :tag "C  eval-light:        Evaluate inbuffer-code on demand" org-eval-light)
@@ -719,12 +719,12 @@ For export specific modules, see also `org-export-backends'."
 	(const :tag "C  favtable:          Lookup table of favorite references and links" org-favtable)
 	(const :tag "C  git-link:          Provide org links to specific file version" org-git-link)
 	(const :tag "C  interactive-query: Interactive modification of tags query\n\t\t\t(PARTIALLY OBSOLETE, see secondary filtering)" org-interactive-query)
-        (const :tag "C  invoice:           Help manage client invoices in Org-mode" org-invoice)
+        (const :tag "C  invoice:           Help manage client invoices in Org mode" org-invoice)
 	(const :tag "C  learn:             SuperMemo's incremental learning algorithm" org-learn)
 	(const :tag "C  mac-iCal           Imports events from iCal.app to the Emacs diary" org-mac-iCal)
 	(const :tag "C  mac-link:          Grab links and url from various mac Applications" org-mac-link)
 	(const :tag "C  mairix:            Hook mairix search into Org for different MUAs" org-mairix)
-	(const :tag "C  man:               Support for links to manpages in Org-mode" org-man)
+	(const :tag "C  man:               Support for links to manpages in Org mode" org-man)
 	(const :tag "C  mew:               Links to Mew folders/messages" org-mew)
 	(const :tag "C  mtags:             Support for muse-like tags" org-mtags)
 	(const :tag "C  notmuch:           Provide org links to notmuch searches or messages" org-notmuch)
@@ -847,7 +847,7 @@ depends on, if any."
 
 In Emacs 23, when `shift-select-mode' is on, shifted cursor keys
 start selecting a region, or enlarge regions started in this way.
-In Org-mode, in special contexts, these same keys are used for
+In Org mode, in special contexts, these same keys are used for
 other purposes, important enough to compete with shift selection.
 Org tries to balance these needs by supporting `shift-select-mode'
 outside these special contexts, under control of this variable.
@@ -913,7 +913,7 @@ already archived entries."
   :group 'org-archive)
 
 (defgroup org-startup nil
-  "Options concerning startup of Org-mode."
+  "Options concerning startup of Org mode."
   :tag "Org Startup"
   :group 'org)
 
@@ -1061,7 +1061,7 @@ or more generally if you would like to move some Org mode commands to
 other keys, set this variable and configure the keys with the variable
 `org-disputed-keys'.
 
-This option is only relevant at load-time of Org-mode, and must be set
+This option is only relevant at load-time of Org mode, and must be set
 *before* org.el is loaded.  Changing it requires a restart of Emacs to
 become effective."
   :group 'org-startup
@@ -1089,7 +1089,7 @@ This is an alist, cars are the default keys, second element specifies
 the alternative to use when `org-replace-disputed-keys' is t.
 
 Keys can be specified in any syntax supported by `define-key'.
-The value of this option takes effect only at Org-mode's startup,
+The value of this option takes effect only at Org mode startup,
 therefore you'll have to restart Emacs to apply it after changing."
   :group 'org-startup
   :type 'alist)
@@ -1125,7 +1125,7 @@ effective."
   "The display table for org-mode, in case `org-ellipsis' is non-nil.")
 
 (defgroup org-keywords nil
-  "Keywords in Org-mode."
+  "Keywords in Org mode."
   :tag "Org Keywords"
   :group 'org)
 
@@ -1296,7 +1296,7 @@ is not set."
   :type 'plist)
 
 (defgroup org-cycle nil
-  "Options concerning visibility cycling in Org-mode."
+  "Options concerning visibility cycling in Org mode."
   :tag "Org Cycle"
   :group 'org-structure)
 
@@ -1416,7 +1416,7 @@ the values `folded', `children', or `subtree'."
   :package-version '(Org . "8.3"))
 
 (defgroup org-edit-structure nil
-  "Options concerning structure editing in Org-mode."
+  "Options concerning structure editing in Org mode."
   :tag "Org Edit Structure"
   :group 'org-structure)
 
@@ -1649,7 +1649,7 @@ When nil, you can use these keybindings to navigate the buffer:
   :type 'boolean)
 
 (defgroup org-sparse-trees nil
-  "Options concerning sparse trees in Org-mode."
+  "Options concerning sparse trees in Org mode."
   :tag "Org Sparse Trees"
   :group 'org-structure)
 
@@ -1691,7 +1691,7 @@ as possible."
   :type 'hook)
 
 (defgroup org-imenu-and-speedbar nil
-  "Options concerning imenu and speedbar in Org-mode."
+  "Options concerning imenu and speedbar in Org mode."
   :tag "Org Imenu and Speedbar"
   :group 'org-structure)
 
@@ -1702,7 +1702,7 @@ This also applied for speedbar access."
   :type 'integer)
 
 (defgroup org-table nil
-  "Options concerning tables in Org-mode."
+  "Options concerning tables in Org mode."
   :tag "Org Table"
   :group 'org)
 
@@ -1724,7 +1724,7 @@ slight (in fact: unnoticeable) speed impact for normal typing.  Org is very
 good at guessing when a re-align will be necessary, but you can always
 force one with \\[org-ctrl-c-ctrl-c].
 
-If you would like to use the optimized version in Org-mode, but the
+If you would like to use the optimized version in Org mode, but the
 un-optimized version in OrgTbl-mode, see the variable `orgtbl-optimized'.
 
 This variable can be used to turn on and off the table editor during a session,
@@ -1753,7 +1753,7 @@ calls `table-recognize-table'."
   :type 'boolean)
 
 (defgroup org-link nil
-  "Options concerning links in Org-mode."
+  "Options concerning links in Org mode."
   :tag "Org Link"
   :group 'org)
 
@@ -1938,7 +1938,7 @@ return the description to use."
   :type '(choice (const nil) (function)))
 
 (defgroup org-link-store nil
-  "Options concerning storing links in Org-mode."
+  "Options concerning storing links in Org mode."
   :tag "Org Store Link"
   :group 'org-link)
 
@@ -2008,7 +2008,7 @@ more efficient."
   :type 'boolean)
 
 (defgroup org-link-follow nil
-  "Options concerning following links in Org-mode."
+  "Options concerning following links in Org mode."
   :tag "Org Follow Link"
   :group 'org-link)
 
@@ -2350,7 +2350,7 @@ For more examples, see the system specific constants
   :group 'org-link-follow)
 
 (defgroup org-refile nil
-  "Options concerning refiling entries in Org-mode."
+  "Options concerning refiling entries in Org mode."
   :tag "Org Refile"
   :group 'org)
 
@@ -2573,12 +2573,12 @@ converted to a headline before refiling."
   :type 'boolean)
 
 (defgroup org-todo nil
-  "Options concerning TODO items in Org-mode."
+  "Options concerning TODO items in Org mode."
   :tag "Org TODO"
   :group 'org)
 
 (defgroup org-progress nil
-  "Options concerning Progress logging in Org-mode."
+  "Options concerning Progress logging in Org mode."
   :tag "Org Progress"
   :group 'org-time)
 
@@ -3101,7 +3101,7 @@ property to one or more of these keywords."
 
 
 (defgroup org-priorities nil
-  "Priorities in Org-mode."
+  "Priorities in Org mode."
   :tag "Org Priorities"
   :group 'org-todo)
 
@@ -3159,7 +3159,7 @@ as an argument and return the numeric priority."
 	  (function)))
 
 (defgroup org-time nil
-  "Options concerning time stamps and deadlines in Org-mode."
+  "Options concerning time stamps and deadlines in Org mode."
   :tag "Org Time"
   :group 'org)
 
@@ -3514,7 +3514,7 @@ moved to the new date."
   :type 'boolean)
 
 (defgroup org-tags nil
-  "Options concerning tags in Org-mode."
+  "Options concerning tags in Org mode."
   :tag "Org Tags"
   :group 'org)
 
@@ -3733,7 +3733,7 @@ is better to limit inheritance to certain tags using the variables
   "Hook that is run after the tags in a line have changed.")
 
 (defgroup org-properties nil
-  "Options concerning properties in Org-mode."
+  "Options concerning properties in Org mode."
   :tag "Org Properties"
   :group 'org)
 
@@ -3864,7 +3864,7 @@ Valid for the current buffer.
 This variable is populated from #+PROPERTY lines.")
 
 (defgroup org-agenda nil
-  "Options concerning agenda views in Org-mode."
+  "Options concerning agenda views in Org mode."
   :tag "Org Agenda"
   :group 'org)
 
@@ -3975,7 +3975,7 @@ points to a file, `org-agenda-diary-entry' will be used instead."
 		     'org-agenda-diary-entry))))))
 
 (defgroup org-latex nil
-  "Options for embedding LaTeX code into Org-mode."
+  "Options for embedding LaTeX code into Org mode."
   :tag "Org LaTeX"
   :group 'org)
 
@@ -4705,7 +4705,7 @@ If yes, offer to stop it and to save the buffer with the changes."
   (add-hook 'kill-emacs-hook 'org-clock-save))
 
 (defgroup org-archive nil
-  "Options concerning archiving in Org-mode."
+  "Options concerning archiving in Org mode."
   :tag "Org Archive"
   :group 'org-structure)
 
@@ -6655,7 +6655,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	nil))))
 
 (defun org-fontify-like-in-org-mode (s &optional odd-levels)
-  "Fontify string S like in Org-mode."
+  "Fontify string S like in Org mode."
   (with-temp-buffer
     (insert s)
     (let ((org-odd-levels-only odd-levels))
@@ -6817,7 +6817,7 @@ and subscripts."
 
 ;;;###autoload
 (defun org-cycle (&optional arg)
-  "TAB-action and visibility cycling for Org-mode.
+  "TAB-action and visibility cycling for Org mode.
 
 This is the command invoked in Org mode by the TAB key.  Its main purpose
 is outline visibility cycling, but it also invokes other actions
@@ -9293,7 +9293,7 @@ orgstruct(++)-mode."
 This mode is for using Org mode structure commands in other
 modes.  The following keys behave as if Org mode were active, if
 the cursor is on a headline, or on a plain list item (both as
-defined by Org-mode)."
+defined by Org mode)."
   nil " OrgStruct" (make-sparse-keymap)
   (funcall (if orgstruct-mode
 	       'add-to-invisibility-spec
@@ -9643,9 +9643,9 @@ Optional argument REGEXP selects variables to clone."
 
 ;;;###autoload
 (defun org-run-like-in-org-mode (cmd)
-  "Run a command, pretending that the current buffer is in Org-mode.
+  "Run a command, pretending that the current buffer is in Org mode.
 This will temporarily bind local variables that are typically bound in
-Org mode to the values they have in Org-mode, and then interactively
+Org mode to the values they have in Org mode, and then interactively
 call CMD."
   (org-load-modules-maybe)
   (unless org-local-vars
@@ -10683,7 +10683,7 @@ Raise an error when there is nothing to follow.  "
 
 ;;;###autoload
 (defun org-open-link-from-string (s &optional arg reference-buffer)
-  "Open a link in the string S, as if it was in Org-mode."
+  "Open a link in the string S, as if it was in Org mode."
   (interactive "sLink: \nP")
   (let ((reference-buffer (or reference-buffer (current-buffer))))
     (with-temp-buffer
@@ -11282,7 +11282,7 @@ to read."
 ;;; The mark ring for links jumps
 
 (defvar org-mark-ring nil
-  "Mark ring for positions before jumps in Org-mode.")
+  "Mark ring for positions before jumps in Org mode.")
 (defvar org-mark-ring-last-goto nil
   "Last position in the mark ring used to go back.")
 ;; Fill and close the ring
@@ -18862,7 +18862,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 (define-minor-mode org-cdlatex-mode
   "Toggle the minor `org-cdlatex-mode'.
 This mode supports entering LaTeX environment and math in LaTeX fragments
-in Org-mode.
+in Org mode.
 \\{org-cdlatex-mode-map}"
   nil " OCDL" nil
   (when org-cdlatex-mode
@@ -18888,7 +18888,7 @@ an embedded LaTeX fragment, let texmathp do its job.
 	  (let ((p (org-inside-LaTeX-fragment-p)))
 	    (if (and p (member (car p) (plist-get org-format-latex-options :matchers)))
 		(setq ad-return-value t
-		      texmathp-why '("Org-mode embedded math" . 0))
+		      texmathp-why '("Org mode embedded math" . 0))
 	      (when p ad-do-it)))))))))
 
 (defun turn-on-org-cdlatex ()
@@ -20475,7 +20475,7 @@ See `org-ctrl-c-ctrl-c-hook' for more information.")
 (defun org-shiftselect-error ()
   "Throw an error because Shift-Cursor command was applied in wrong context."
   (if (and (boundp 'shift-select-mode) shift-select-mode)
-      (user-error "To use shift-selection with Org-mode, customize `org-support-shift-select'")
+      (user-error "To use shift-selection with Org mode, customize `org-support-shift-select'")
     (user-error "This command works only in special context like headlines or timestamps")))
 
 (defun org-call-for-shift-select (cmd)
@@ -21830,7 +21830,7 @@ what in fact did happen.  You don't know how to make a good report?  See
 Your bug report will be posted to the Org mailing list.
 ------------------------------------------------------------------------")
     (save-excursion
-      (when (re-search-backward "^\\(Subject: \\)Org-mode version \\(.*?\\);[ \t]*\\(.*\\)" nil t)
+      (when (re-search-backward "^\\(Subject: \\)Org mode version \\(.*?\\);[ \t]*\\(.*\\)" nil t)
 	(replace-match "\\1Bug: \\3 [\\2]")))))
 
 
@@ -21920,7 +21920,7 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
   (customize-browse 'org))
 
 (defun org-create-customize-menu ()
-  "Create a full customization menu for Org-mode, insert it into the menu."
+  "Create a full customization menu for Org mode, insert it into the menu."
   (interactive)
   (org-load-modules-maybe)
   (org-require-autoloaded-modules)
@@ -24902,9 +24902,9 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 			    (let ((default-directory dir))
 			      (expand-file-name txt)))
 	(unless (derived-mode-p 'org-mode)
-	  (user-error "Cannot restrict to non-Org-mode file"))
+	  (user-error "Cannot restrict to non-Org mode file"))
 	(org-agenda-set-restriction-lock 'file)))
-     (t (user-error "Don't know how to restrict Org-mode's agenda")))
+     (t (user-error "Don't know how to restrict Org mode agenda")))
     (move-overlay org-speedbar-restriction-lock-overlay
 		  (point-at-bol) (point-at-eol))
     (setq current-prefix-arg nil)
