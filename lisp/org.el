@@ -14949,7 +14949,7 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
       (run-hooks 'org-after-tags-change-hook))
     res))
 
-(defun org-align-tags-here (to-col)
+(defun org--align-tags-here (to-col)
   "Align tags on the current headline to TO-COL.
 Assume point is on a headline."
   (let ((pos (point)))
@@ -15133,7 +15133,7 @@ When JUST-ALIGN is non-nil, only align tags."
 		   (tags-column
 		    (+ org-tags-column
 		       (if (> org-tags-column 0) (- offset) offset))))
-	      (org-align-tags-here tags-column))))
+	      (org--align-tags-here tags-column))))
         (unless just-align (run-hooks 'org-after-tags-change-hook))))))
 
 (defun org-change-tag-in-region (beg end tag off)
@@ -21280,7 +21280,7 @@ With a non-nil optional argument, join it to the following one."
 	(cond
 	 ((not tags-column))		;no tags
 	 (org-auto-align-tags (org-set-tags nil t))
-	 (t (org-align-tags-here tags-column)))) ;preserve tags column
+	 (t (org--align-tags-here tags-column)))) ;preserve tags column
     (delete-indentation arg)))
 
 (defun org-open-line (n)
@@ -21345,7 +21345,7 @@ object (e.g., within a comment).  In these case, you need to use
 	(cond
 	 ((not (and tags-column string)))
 	 (org-auto-align-tags (org-set-tags nil t))
-	 (t (org-align-tags-here tags-column)))	;preserve tags column
+	 (t (org--align-tags-here tags-column))) ;preserve tags column
 	(end-of-line)
 	(org-show-entry)
 	(if indent (newline-and-indent) (newline))

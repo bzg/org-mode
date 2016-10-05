@@ -4580,7 +4580,7 @@ Paragraph<point>"
     '((:startgroup) ("group") ("t1") ("t2") (:endgroup)))))
 
 (ert-deftest test-org/tag-align ()
-  "Test `org-align-tags-here' specifications"
+  "Test tags alignment."
   ;; Test aligning tags with different display width.
   (should
    ;;      12345678901234567890
