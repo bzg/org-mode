@@ -673,7 +673,7 @@ TAGS      the tags string, separated with colons (string or nil).
 
 The function result will be used as headline text."
   :group 'org-export-odt
-  :version "25.1"
+  :version "25.2"
   :package-version '(Org . "8.3")
   :type 'function)
 
@@ -694,7 +694,7 @@ The function must accept six parameters:
 
 The function should return the string to be exported."
   :group 'org-export-odt
-  :version "25.1"
+  :version "25.2"
   :package-version '(Org . "8.3")
   :type 'function)
 
@@ -753,7 +753,7 @@ A rule consists in an association whose key is the type of link
 to consider, and value is a regexp that will be matched against
 link's path."
   :group 'org-export-odt
-  :version "25.1"
+  :version "25.2"
   :package-version '(Org . "8.3")
   :type '(alist :key-type (string :tag "Type")
 		:value-type (regexp :tag "Path")))

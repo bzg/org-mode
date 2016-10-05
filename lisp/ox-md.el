@@ -59,7 +59,7 @@ The first %s placeholder will be replaced with the localized Footnotes section
 heading, the second with the contents of the Footnotes section."
  :group 'org-export-md
  :type 'string
- :version "25.1"
+ :version "25.2"
  :package-version '(Org . "9.0"))
 
 (defcustom org-md-footnote-format "<sup>%s</sup>"
@@ -67,7 +67,7 @@ heading, the second with the contents of the Footnotes section."
 The %s will be replaced by the footnote reference itself."
   :group 'org-export-md
   :type 'string
-  :version "25.1"
+  :version "25.2"
   :package-version '(Org . "9.0"))
 
 

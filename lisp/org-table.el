@@ -264,7 +264,7 @@ t       accept as input and present for editing"
 (defcustom org-table-copy-increment t
   "Non-nil means increment when copying current field with \\[org-table-copy-down]."
   :group 'org-table-calculation
-  :version "25.1"
+  :version "25.2"
   :package-version '(Org . "8.3")
   :type '(choice
 	  (const :tag "Use the difference between the current and the above fields" t)
@@ -377,7 +377,7 @@ portability of tables."
   "Non-nil means that evaluation of a field formula can add new
 columns if an out-of-bounds field is being set."
   :group 'org-table-calculation
-  :version "25.1"
+  :version "25.2"
   :package-version '(Org . "8.3")
   :type '(choice
 	  (const :tag "Setting an out-of-bounds field generates an error (default)" nil)
@@ -406,7 +406,7 @@ The function can be slow on larger regions; this safety feature
 prevents it from hanging emacs."
   :group 'org-table-import-export
   :type 'integer
-  :version "25.1"
+  :version "25.2"
   :package-version '(Org . "8.3"))
 
 (defconst org-table-auto-recalculate-regexp "^[ \t]*| *# *\\(|\\|$\\)"

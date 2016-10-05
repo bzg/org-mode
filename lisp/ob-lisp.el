@@ -52,7 +52,7 @@
   "The function to be called to evaluate code on the Lisp side.
 Valid values include `slime-eval' and `sly-eval'."
   :group 'org-babel
-  :version "25.1"
+  :version "25.2"
   :package-version '(Org . "9.0")
   :type 'function)
 

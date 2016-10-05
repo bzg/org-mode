@@ -1939,7 +1939,7 @@ category, you can use:
   "When non-nil, switch to columns view right after creating the agenda."
   :group 'org-agenda-column-view
   :type 'boolean
-  :version "25.1"
+  :version "25.2"
   :package-version '(Org . "9.0")
   :safe #'booleanp)
 

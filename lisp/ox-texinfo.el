@@ -224,7 +224,7 @@ TAGS      the tags as a list of strings (list of strings or nil).
 The function result will be used in the section format string."
   :group 'org-export-texinfo
   :type 'function
-  :version "25.1"
+  :version "25.2"
   :package-version '(Org . "8.3"))
 
 ;;;; Node listing (menu)

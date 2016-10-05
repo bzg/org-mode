@@ -140,7 +140,7 @@ You might want to put e.g. \"allowframebreaks=0.9\" here."
 The format string should have at most one \"%s\"-expression,
 which is replaced with the subtitle."
   :group 'org-export-beamer
-  :version "25.1"
+  :version "25.2"
   :package-version '(Org . "8.3")
   :type '(string :tag "Format string"))
 

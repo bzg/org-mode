@@ -67,7 +67,7 @@ Do not check directly this variable in a Lisp program.  Call
 function `org-clock-into-drawer' instead."
   :group 'org-todo
   :group 'org-clock
-  :version "25.1"
+  :version "25.2"
   :package-version '(Org . "8.3")
   :type '(choice
 	  (const :tag "Always" t)
