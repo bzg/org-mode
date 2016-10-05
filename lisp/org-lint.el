@@ -844,7 +844,7 @@ Use \"export %s\" instead"
 			 (org-element-property :commentedp e))))
 	     nil t '(footnote-definition property-drawer))
 	   (list (org-element-property :begin h)
-		 "Extraneous elements in footnote section")))))
+		 "Extraneous elements in footnote section are not exported")))))
 
 (defun org-lint-quote-section (ast)
   (org-element-map ast '(headline inlinetask)
