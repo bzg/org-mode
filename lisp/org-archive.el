@@ -339,7 +339,13 @@ this heading."
 			 ;; datetree archives don't need so much spacing.
 			 (replace-match (if datetree-date "\n" "\n\n"))))
 		;; No specific heading, just go to end of file.
-		(goto-char (point-max)) (unless datetree-date (insert "\n")))
+		(goto-char (point-max))
+		;; Subtree narrowing can let the buffer end on
+		;; a headline.  `org-paste-subtree' then deletes it.
+		;; To prevent this, make sure visible part of buffer
+		;; always terminates on a new line, while limiting
+		;; number of blank lines in a date tree.
+		(unless (and datetree-date (bolp)) (insert "\n")))
 	      ;; Paste
 	      (org-paste-subtree (org-get-valid-level level (and heading 1)))
 	      ;; Shall we append inherited tags?
