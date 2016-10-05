@@ -15046,7 +15046,6 @@ When JUST-ALIGN is non-nil, only align tags."
 	      (end-of-line))
             (message "All tags realigned to column %d" org-tags-column))
 	(let* ((current (org-get-tags-string))
-	       (col (current-column))
 	       (tags
 		(if just-align current
 		  ;; Get a new set of tags from the user.
@@ -15106,37 +15105,34 @@ When JUST-ALIGN is non-nil, only align tags."
 	    (unless (string-suffix-p ":" tags) (setq tags (concat tags ":")))
 	    (unless (string-prefix-p ":" tags) (setq tags (concat ":" tags))))
 
-	  ;; Insert new tags at the correct column
-	  (beginning-of-line)
-	  (let ((level (if (looking-at org-outline-regexp)
-			   (- (match-end 0) (point) 1)
-			 1)))
-	    (cond
-	     ((and (equal current "") (equal tags "")))
-	     ((re-search-forward
-	       (concat "\\([ \t]*" (regexp-quote current) "\\)[ \t]*$")
-	       (line-end-position)
-	       t)
-	      (if (equal tags "") (replace-match "" t t)
-		(goto-char (match-beginning 0))
-		(let* ((c0 (current-column))
-		       ;; Compute offset for the case of org-indent-mode
-		       ;; active.
-		       (di (if (bound-and-true-p org-indent-mode)
+	  ;; Insert new tags at the correct column.
+	  (unless (equal current tags)
+	    (save-excursion
+	      (beginning-of-line)
+	      (looking-at org-complex-heading-regexp)
+	      ;; Remove current tags, if any.
+	      (when (match-end 5) (replace-match "" nil nil nil 5))
+	      ;; Insert new tags, if any.  Otherwise, remove trailing
+	      ;; white spaces.
+	      (end-of-line)
+	      (if (not (equal tags ""))
+		  (insert " " tags)
+		(skip-chars-backward " \t")
+		(delete-region (point) (line-end-position)))))
+	  ;; Align tags, if any.  Fix tags column if `org-indent-mode'
+	  ;; is on.
+	  (unless (equal tags "")
+	    (let* ((level (save-excursion
+			    (beginning-of-line)
+			    (skip-chars-forward "\\*")))
+		   (offset (if (bound-and-true-p org-indent-mode)
 			       (* (1- org-indent-indentation-per-level)
 				  (1- level))
 			     0))
-		       (p0 (if (eq (char-before) ?*) (1+ (point)) (point)))
-		       (tc (+ org-tags-column
-			      (if (> org-tags-column 0) (- di) di)))
-		       (c1 (max (1+ c0)
-				(if (> tc 0) tc
-				  (- (- tc) (string-width tags)))))
-		       (rpl (concat (make-string (max 0 (- c1 c0)) ?\s) tags)))
-		  (replace-match rpl t t)
-		  (when indent-tabs-mode (tabify p0 (point))))))
-	     (t (error "Tags alignment failed"))))
-	  (org-move-to-column col))
+		   (tags-column
+		    (+ org-tags-column
+		       (if (> org-tags-column 0) (- offset) offset))))
+	      (org-align-tags-here tags-column))))
         (unless just-align (run-hooks 'org-after-tags-change-hook))))))
 
 (defun org-change-tag-in-region (beg end tag off)
@@ -20246,9 +20242,13 @@ The detailed reaction depends on the user option `org-catch-invisible-edits'."
 	    (user-error "Edit in invisible region aborted, repeat to confirm with text visible"))))))))
 
 (defun org-fix-tags-on-the-fly ()
-  (when (and (equal (char-after (point-at-bol)) ?*)
+  "Align tags in headline at point.
+Unlike to `org-set-tags', it ignores region and sorting."
+  (when (and (eq (char-after (line-beginning-position)) ?*) ;short-circuit
 	     (org-at-heading-p))
-    (org-align-tags-here org-tags-column)))
+    (let ((org-ignore-region t)
+	  (org-tags-sort-function nil))
+      (org-set-tags nil t))))
 
 (defun org-delete-backward-char (N)
   "Like `delete-backward-char', insert whitespace at field end in tables.
@@ -21250,23 +21250,22 @@ Use \\[org-edit-special] to edit table.el tables"))
     (let ((org-note-abort t))
       (funcall org-finish-function))))
 
-(defun org-delete-indentation (&optional ARG)
+(defun org-delete-indentation (&optional arg)
   "Join current line to previous and fix whitespace at join.
 
 If previous line is a headline add to headline title.  Otherwise
 the function calls `delete-indentation'.
 
-With argument, join this line to following line."
+With a non-nil optional argument, join it to the following one."
   (interactive "*P")
   (if (save-excursion
-	(if ARG (beginning-of-line)
-	  (forward-line -1))
+	(beginning-of-line (if arg 1 0))
 	(looking-at org-complex-heading-regexp))
       ;; At headline.
       (let ((tags-column (when (match-beginning 5)
 			   (save-excursion (goto-char (match-beginning 5))
 					   (current-column))))
-	    (string (concat " " (progn (when ARG (forward-line 1))
+	    (string (concat " " (progn (when arg (forward-line 1))
 				       (org-trim (delete-and-extract-region
 						  (line-beginning-position)
 						  (line-end-position)))))))
@@ -21277,11 +21276,11 @@ With argument, join this line to following line."
 	(skip-chars-backward " \t")
 	(save-excursion (insert string))
 	;; Adjust alignment of tags.
-	(when tags-column
-	  (org-align-tags-here (if org-auto-align-tags
-				   org-tags-column
-				 tags-column))))
-    (delete-indentation ARG)))
+	(cond
+	 ((not tags-column))		;no tags
+	 (org-auto-align-tags (org-set-tags nil t))
+	 (t (org-align-tags-here tags-column)))) ;preserve tags column
+    (delete-indentation arg)))
 
 (defun org-open-line (n)
   "Insert a new row in tables, call `open-line' elsewhere.
@@ -21341,9 +21340,11 @@ object (e.g., within a comment).  In these case, you need to use
 			    (or (match-end 3) (match-end 2) (1+ (match-end 1))))
 			(<= (point) (match-end 4)))
 	       (delete-and-extract-region (point) (match-end 4)))))
-	(when (and tags-column string)	; Adjust tag alignment.
-	  (org-align-tags-here
-	   (if org-auto-align-tags org-tags-column tags-column)))
+	;; Adjust tag alignment.
+	(cond
+	 ((not (and tags-column string)))
+	 (org-auto-align-tags (org-set-tags nil t))
+	 (t (org-align-tags-here tags-column)))	;preserve tags column
 	(end-of-line)
 	(org-show-entry)
 	(if indent (newline-and-indent) (newline))
