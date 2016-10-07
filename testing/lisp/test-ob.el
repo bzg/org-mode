@@ -1107,6 +1107,7 @@ Line 3\"
 
 (ert-deftest test-ob/blocks-with-spaces ()
   "Test expansion of blocks followed by blank lines."
+  ;; Preserve number of blank lines after block.
   (should
    (equal "#+BEGIN_SRC emacs-lisp
 \(+ 1 2)
@@ -1119,7 +1120,57 @@ Line 3\"
 #+END_SRC\n\n\n"
 	    (let ((org-babel-next-src-block "RESULTS"))
 	      (org-babel-execute-src-block))
-	    (buffer-string)))))
+	    (buffer-string))))
+  ;; Do not add spurious blank lines after results.
+  (should
+   (equal
+    "
+- item 1
+
+  #+begin_src emacs-lisp
+  0
+  #+end_src
+
+  #+RESULTS:
+  : 0
+
+- item 2"
+    (org-test-with-temp-text "
+- item 1
+
+  #+begin_src emacs-lisp<point>
+  0
+  #+end_src
+
+- item 2"
+      (org-babel-execute-src-block)
+      (buffer-string))))
+  (should
+   (equal
+    "
+- item 1
+
+  #+begin_src emacs-lisp
+  1
+  #+end_src
+
+  #+RESULTS:
+  : 1
+
+- item 2"
+    (org-test-with-temp-text "
+- item 1
+
+  #+begin_src emacs-lisp<point>
+  1
+  #+end_src
+
+  #+RESULTS:
+  : 1
+
+- item 2"
+      (org-babel-execute-src-block)
+      (buffer-string)))))
 
 (ert-deftest test-ob/results-in-narrowed-buffer ()
   "Test block execution in a narrowed buffer."
@@ -1203,7 +1254,6 @@ echo \"$data\"
 |-----+--------|
 |   1 | bar    |
 |   2 | baz    |
-
 "
 	  (org-test-with-temp-text
 	      "#+name: input-table

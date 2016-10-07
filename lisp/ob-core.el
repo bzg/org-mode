@@ -1872,8 +1872,16 @@ the results hash, or nil.  Leave point before the keyword."
 			(t (format "[%s]" hash)))
 		  ":"
 		  (when name (concat " " name))
-		  "\n\n"))
-  (beginning-of-line -1)
+		  "\n"))
+  ;; Make sure results are going to be followed by at least one blank
+  ;; line so they do not get merged with the next element, e.g.,
+  ;;
+  ;;   #+results:
+  ;;   : 1
+  ;;
+  ;;   : fixed-width area, unrelated to the above.
+  (unless (looking-at "^[ \t]*$") (save-excursion (insert "\n")))
+  (beginning-of-line 0)
   (when hash (org-babel-hide-hash)))
 
 (defun org-babel--clear-results-maybe (hash)
@@ -1988,11 +1996,8 @@ to HASH."
 	  (goto-char (min (org-element-property :end context) (point-max)))
 	  (skip-chars-backward " \t\n")
 	  (forward-line)
-	  (cond ((not (bolp)) (insert "\n\n"))
-		((or (eobp)
-		     (= (org-element-property :post-blank context) 0))
-		 (insert "\n"))
-		(t (forward-line)))
+	  (unless (bolp) (insert "\n"))
+	  (insert "\n")
 	  (org-babel--insert-results-keyword
 	   (org-element-property :name context) hash)
 	  (point))))))
