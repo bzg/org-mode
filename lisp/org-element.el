@@ -4455,8 +4455,8 @@ the list of objects itself."
 DATA is a parse tree, an element, an object or a secondary string
 to interpret.  Return Org syntax as a string."
   (letrec ((fun
-	    (lambda (--data parent)
-	      (let* ((type (org-element-type --data))
+	    (lambda (data parent)
+	      (let* ((type (org-element-type data))
 		     ;; Find interpreter for current object or
 		     ;; element.  If it doesn't exist (e.g. this is
 		     ;; a pseudo object or element), return contents,
@@ -4470,54 +4470,57 @@ to interpret.  Return Org syntax as a string."
 		       ;; Secondary string.
 		       ((not type)
 			(mapconcat (lambda (obj) (funcall fun obj parent))
-				   --data ""))
+				   data
+				   ""))
 		       ;; Full Org document.
 		       ((eq type 'org-data)
 			(mapconcat (lambda (obj) (funcall fun obj parent))
-				   (org-element-contents --data) ""))
+				   (org-element-contents data)
+				   ""))
 		       ;; Plain text: return it.
-		       ((stringp --data) --data)
+		       ((stringp data) data)
 		       ;; Element or object without contents.
-		       ((not (org-element-contents --data))
-			(funcall interpret --data nil))
+		       ((not (org-element-contents data))
+			(funcall interpret data nil))
 		       ;; Element or object with contents.
 		       (t
 			(funcall
 			 interpret
-			 --data
+			 data
 			 ;; Recursively interpret contents.
 			 (mapconcat
-			  (lambda (obj) (funcall fun obj --data))
+			  (lambda (datum) (funcall fun datum data))
 			  (org-element-contents
 			   (if (not (memq type '(paragraph verse-block)))
-			       --data
+			       data
 			     ;; Fix indentation of elements containing
 			     ;; objects.  We ignore `table-row'
 			     ;; elements as they are one line long
 			     ;; anyway.
 			     (org-element-normalize-contents
-			      --data
+			      data
 			      ;; When normalizing first paragraph of
 			      ;; an item or a footnote-definition,
 			      ;; ignore first line's indentation.
 			      (and (eq type 'paragraph)
-				   (equal --data
-					  (car (org-element-contents parent)))
 				   (memq (org-element-type parent)
-					 '(footnote-definition item))))))
+					 '(footnote-definition item))
+				   (eq data
+				       (car (org-element-contents parent)))))))
 			  ""))))))
 		(if (memq type '(org-data plain-text nil)) results
 		  ;; Build white spaces.  If no `:post-blank' property
 		  ;; is specified, assume its value is 0.
-		  (let ((blank (or (org-element-property :post-blank --data) 0)))
+		  (let ((blank (or (org-element-property :post-blank data) 0)))
 		    (if (or (memq type org-element-all-objects)
 			    (and parent
 				 (let ((type (org-element-type parent)))
 				   (or (not type)
-				       (memq type org-element-object-containers)))))
+				       (memq type
+					     org-element-object-containers)))))
 			(concat results (make-string blank ?\s))
 		      (concat
-		       (org-element--interpret-affiliated-keywords --data)
+		       (org-element--interpret-affiliated-keywords data)
 		       (org-element-normalize-string results)
 		       (make-string blank ?\n)))))))))
     (funcall fun data nil)))
