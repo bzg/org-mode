@@ -3059,7 +3059,7 @@ Assume point is at the beginning of the line break."
   "Parse link at point, if any.
 
 When at a link, return a list whose car is `link' and cdr a plist
-with `:type', `:path', `:raw-link', `:application',
+with `:type', `:path', `:format', `:raw-link', `:application',
 `:search-option', `:begin', `:end', `:contents-begin',
 `:contents-end' and `:post-blank' as keywords.  Otherwise, return
 nil.
@@ -3067,20 +3067,22 @@ nil.
 Assume point is at the beginning of the link."
   (catch 'no-object
     (let ((begin (point))
-	  end contents-begin contents-end link-end post-blank path type
+	  end contents-begin contents-end link-end post-blank path type format
 	  raw-link search-option application)
       (cond
        ;; Type 1: Text targeted from a radio target.
        ((and org-target-link-regexp
 	     (save-excursion (or (bolp) (backward-char))
 			     (looking-at org-target-link-regexp)))
-	(setq type "radio"
-	      link-end (match-end 1)
-	      path (match-string-no-properties 1)
-	      contents-begin (match-beginning 1)
-	      contents-end (match-end 1)))
+	(setq type "radio")
+	(setq format 'plain)
+	(setq link-end (match-end 1))
+	(setq path (match-string-no-properties 1))
+	(setq contents-begin (match-beginning 1))
+	(setq contents-end (match-end 1)))
        ;; Type 2: Standard link, i.e. [[http://orgmode.org][homepage]]
        ((looking-at org-bracket-link-regexp)
+	(setq format 'bracket)
 	(setq contents-begin (match-beginning 3))
 	(setq contents-end (match-end 3))
 	(setq link-end (match-end 0))
@@ -3114,7 +3116,8 @@ Assume point is at the beginning of the link."
 	  (setq path (substring raw-link (match-end 0))))
 	 ;; Id type: PATH is the id.
 	 ((string-match "\\`id:\\([-a-f0-9]+\\)\\'" raw-link)
-	  (setq type "id" path (match-string 1 raw-link)))
+	  (setq type "id")
+	  (setq path (match-string 1 raw-link)))
 	 ;; Code-ref type: PATH is the name of the reference.
 	 ((and (string-match-p "\\`(" raw-link)
 	       (string-match-p ")\\'" raw-link))
@@ -3132,14 +3135,16 @@ Assume point is at the beginning of the link."
 	  (setq path raw-link))))
        ;; Type 3: Plain link, e.g., http://orgmode.org
        ((looking-at org-plain-link-re)
-	(setq raw-link (match-string-no-properties 0)
-	      type (match-string-no-properties 1)
-	      link-end (match-end 0)
-	      path (match-string-no-properties 2)))
+	(setq format 'plain)
+	(setq raw-link (match-string-no-properties 0))
+	(setq type (match-string-no-properties 1))
+	(setq link-end (match-end 0))
+	(setq path (match-string-no-properties 2)))
        ;; Type 4: Angular link, e.g., <http://orgmode.org>.  Unlike to
        ;; bracket links, follow RFC 3986 and remove any extra
        ;; whitespace in URI.
        ((looking-at org-angle-link-re)
+	(setq format 'angle)
 	(setq type (match-string-no-properties 1))
 	(setq link-end (match-end 0))
 	(setq raw-link
@@ -3171,6 +3176,7 @@ Assume point is at the beginning of the link."
       (list 'link
 	    (list :type type
 		  :path path
+		  :format format
 		  :raw-link (or raw-link path)
 		  :application application
 		  :search-option search-option
@@ -3186,18 +3192,33 @@ CONTENTS is the contents of the object, or nil."
   (let ((type (org-element-property :type link))
 	(path (org-element-property :path link)))
     (if (string= type "radio") path
-      (format "[[%s]%s]"
-	      (cond ((string= type "coderef") (format "(%s)" path))
-		    ((string= type "custom-id") (concat "#" path))
-		    ((string= type "file")
-		     (let ((app (org-element-property :application link))
-			   (opt (org-element-property :search-option link)))
-		       (concat type (and app (concat "+" app)) ":"
-			       path
-			       (and opt (concat "::" opt)))))
-		    ((string= type "fuzzy") path)
-		    (t (concat type ":" path)))
-	      (if contents (format "[%s]" contents) "")))))
+      (let ((fmt (pcase (org-element-property :format link)
+		   ;; Links with contents and internal links have to
+		   ;; use bracket syntax.  Ignore `:format' in these
+		   ;; cases.  This is also the default syntax when the
+		   ;; property is not defined, e.g., when the object
+		   ;; was crafted by the user.
+		   ((guard contents) (format "[[%%s][%s]]" contents))
+		   ((or `bracket
+			`nil
+			(guard (member type '("coderef" "custom-id" "fuzzy"))))
+		    "[[%s]]")
+		   ;; Otherwise, just obey to `:format'.
+		   (`angle "<%s>")
+		   (`plain "%s")
+		   (f (error "Wrong `:format' value: %s" f)))))
+	(format fmt
+		(pcase type
+		  ("coderef" (format "(%s)" path))
+		  ("custom-id" (concat "#" path))
+		  ("file"
+		   (let ((app (org-element-property :application link))
+			 (opt (org-element-property :search-option link)))
+		     (concat type (and app (concat "+" app)) ":"
+			     path
+			     (and opt (concat "::" opt)))))
+		  ("fuzzy" path)
+		  (_ (concat type ":" path))))))))
 
 
 ;;;; Macro

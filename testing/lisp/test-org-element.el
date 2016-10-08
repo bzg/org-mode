@@ -3001,10 +3001,13 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
   ;; Links without description.
   (should (equal (org-test-parse-and-interpret "[[http://orgmode.org]]")
 		 "[[http://orgmode.org]]\n"))
-  ;; Links with a description.
+  ;; Links with a description, even one containing a link.
   (should (equal (org-test-parse-and-interpret
 		  "[[http://orgmode.org][Org mode]]")
 		 "[[http://orgmode.org][Org mode]]\n"))
+  (should (equal (org-test-parse-and-interpret
+		  "[[http://orgmode.org][http://orgmode.org]]")
+		 "[[http://orgmode.org][http://orgmode.org]]\n"))
   ;; File links.
   (should
    (equal (org-test-parse-and-interpret "[[file+emacs:todo.org]]")
@@ -3018,12 +3021,12 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
   (should (equal (org-test-parse-and-interpret "[[#id]]") "[[#id]]\n"))
   ;; Code-ref links.
   (should (equal (org-test-parse-and-interpret "[[(ref)]]") "[[(ref)]]\n"))
-  ;; Normalize plain links.
+  ;; Plain links.
   (should (equal (org-test-parse-and-interpret "http://orgmode.org")
-		 "[[http://orgmode.org]]\n"))
-  ;; Normalize angular links.
+		 "http://orgmode.org\n"))
+  ;; Angular links.
   (should (equal (org-test-parse-and-interpret "<http://orgmode.org>")
-		 "[[http://orgmode.org]]\n")))
+		 "<http://orgmode.org>\n")))
 
 (ert-deftest test-org-element/macro-interpreter ()
   "Test macro interpreter."
