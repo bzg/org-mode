@@ -11089,7 +11089,7 @@ visibility around point, thus ignoring `org-show-context-detail'
 variable.
 
 Search is case-insensitive and ignores white spaces.  Return type
-of matched result, with is either `dedicated' or `fuzzy'."
+of matched result, which is either `dedicated' or `fuzzy'."
   (unless (org-string-nw-p s) (error "Invalid search string \"%s\"" s))
   (let* ((case-fold-search t)
 	 (origin (point))
