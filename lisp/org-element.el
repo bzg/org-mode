@@ -3114,10 +3114,6 @@ Assume point is at the beginning of the link."
 	 ((string-match org-link-types-re raw-link)
 	  (setq type (match-string 1 raw-link))
 	  (setq path (substring raw-link (match-end 0))))
-	 ;; Id type: PATH is the id.
-	 ((string-match "\\`id:\\([-a-f0-9]+\\)\\'" raw-link)
-	  (setq type "id")
-	  (setq path (match-string 1 raw-link)))
 	 ;; Code-ref type: PATH is the name of the reference.
 	 ((and (string-match-p "\\`(" raw-link)
 	       (string-match-p ")\\'" raw-link))
