@@ -529,6 +529,9 @@ a special case, ~org-open-line~ behaves normally in this situation.
 *** ~org-babel-hash-show-time~ is now customizable
 The experimental variable used to be more or less confidential, as
 a ~defvar~.
+*** New ~:format~ property to parsed links
+It defines the format of the original link.  Possible values are:
+~plain~, ~bracket~ and ~angle~.
 * Version 8.3
 
 ** Incompatible changes
