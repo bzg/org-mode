@@ -1110,16 +1110,17 @@ Or return the original if not disputed."
 
 (defcustom org-ellipsis nil
   "The ellipsis to use in the Org mode outline.
+
 When nil, just use the standard three dots.
 When a string, use that string instead.
-When a face, use the standard 3 dots, but with the specified face.
+
 The change affects only Org mode (which will then use its own display table).
 Changing this requires executing \\[org-mode] in a buffer to become
 effective."
   :group 'org-startup
   :type '(choice (const :tag "Default" nil)
-		 (face :tag "Face" :value org-warning)
-		 (string :tag "String" :value "...#")))
+		 (string :tag "String" :value "...#"))
+  :safe #'string-or-null-p)
 
 (defvar org-display-table nil
   "The display table for org-mode, in case `org-ellipsis' is non-nil.")
@@ -5540,10 +5541,8 @@ The following commands are available:
       (setq org-display-table (make-display-table)))
     (set-display-table-slot
      org-display-table 4
-     (vconcat (mapcar
-	       (lambda (c) (make-glyph-code c (and (not (stringp org-ellipsis))
-						   org-ellipsis)))
-	       (if (stringp org-ellipsis) org-ellipsis "..."))))
+     (vconcat (mapcar (lambda (c) (make-glyph-code c 'org-ellipsis))
+		      (if (stringp org-ellipsis) org-ellipsis "..."))))
     (setq buffer-display-table org-display-table))
   (org-set-regexps-and-options)
   (org-set-font-lock-defaults)
