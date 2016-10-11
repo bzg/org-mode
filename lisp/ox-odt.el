@@ -3572,7 +3572,7 @@ pertaining to indentation here."
     ;;
     ;; - Description lists are simulated as plain lists.
     ;; - Low-level headlines can be listified.
-    ;; - In Org-mode, a table can occur not only as a regular list
+    ;; - In Org mode, a table can occur not only as a regular list
     ;;   item, but also within description lists and low-level
     ;;   headlines.
 

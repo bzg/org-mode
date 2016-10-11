@@ -1813,7 +1813,7 @@ INFO is a plist used as a communication channel."
 	      info)
 	     "\n")))
      (format "<title>%s</title>\n" title)
-     (org-html-close-tag "meta" "name=\"generator\" content=\"Org-mode\"" info)
+     (org-html-close-tag "meta" "name=\"generator\" content=\"Org mode\"" info)
      "\n"
      (and (org-string-nw-p author)
 	  (concat

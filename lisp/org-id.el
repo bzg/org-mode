@@ -77,7 +77,7 @@
 ;;; Customization
 
 (defgroup org-id nil
-  "Options concerning global entry identifiers in Org-mode."
+  "Options concerning global entry identifiers in Org mode."
   :tag "Org ID"
   :group 'org)
 

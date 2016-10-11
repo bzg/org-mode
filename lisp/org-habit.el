@@ -33,7 +33,7 @@
 (require 'org-agenda)
 
 (defgroup org-habit nil
-  "Options concerning habit tracking in Org-mode."
+  "Options concerning habit tracking in Org mode."
   :tag "Org Habit"
   :group 'org-progress)
 

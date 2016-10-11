@@ -24,7 +24,7 @@
 ;;
 ;;; Commentary:
 
-;; This file contains the code for creating and using the Agenda for Org-mode.
+;; This file contains the code for creating and using the Agenda for Org.
 ;;
 ;; The functions `org-batch-agenda', `org-batch-agenda-csv', and
 ;; `org-batch-store-agenda-views' are implemented as macros to provide
@@ -134,7 +134,7 @@ addresses the separator between the current and the previous block."
 	  (string)))
 
 (defgroup org-agenda-export nil
-  "Options concerning exporting agenda views in Org-mode."
+  "Options concerning exporting agenda views in Org mode."
   :tag "Org Agenda Export"
   :group 'org-agenda)
 
@@ -236,7 +236,7 @@ you can \"misuse\" it to also add other text to the header."
   :type 'boolean)
 
 (defgroup org-agenda-custom-commands nil
-  "Options concerning agenda views in Org-mode."
+  "Options concerning agenda views in Org mode."
   :tag "Org Agenda Custom Commands"
   :group 'org-agenda)
 
@@ -5200,7 +5200,7 @@ date.  It also removes lines that contain only whitespace."
   (while (re-search-forward "^ +\n" nil t)
     (replace-match ""))
   (goto-char (point-min))
-  (if (re-search-forward "^Org-mode dummy\n?" nil t)
+  (if (re-search-forward "^Org mode dummy\n?" nil t)
       (replace-match ""))
   (run-hooks 'org-agenda-cleanup-fancy-diary-hook))
 
@@ -5234,9 +5234,9 @@ Needed to avoid empty dates which mess up holiday display."
   ;; Catch the error if dealing with the new add-to-diary-alist
   (when org-disable-agenda-to-diary
     (condition-case nil
-	(org-add-to-diary-list original-date "Org-mode dummy" "")
+	(org-add-to-diary-list original-date "Org mode dummy" "")
       (error
-       (org-add-to-diary-list original-date  "Org-mode dummy" "" nil)))))
+       (org-add-to-diary-list original-date  "Org mode dummy" "" nil)))))
 
 (defun org-add-to-diary-list (&rest args)
   (if (fboundp 'diary-add-to-list)

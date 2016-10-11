@@ -31,7 +31,7 @@
 (declare-function org-table-align            "org-table" ())
 
 (defgroup org-entities nil
-  "Options concerning entities in Org-mode."
+  "Options concerning entities in Org mode."
   :tag "Org Entities"
   :group 'org)
 
@@ -558,7 +558,7 @@ This first checks the user list, then the built-in list."
   "Create a Help buffer with all available entities."
   (interactive)
   (with-output-to-temp-buffer "*Org Entity Help*"
-    (princ "Org-mode entities\n=================\n\n")
+    (princ "Org mode entities\n=================\n\n")
     (let ((ll (append '("* User-defined additions (variable org-entities-user)")
 		      org-entities-user
 		      org-entities))

@@ -26,7 +26,7 @@
 ;;
 ;;; Commentary:
 ;;
-;; This module implements inline tasks in Org-mode.  Inline tasks are
+;; This module implements inline tasks in Org mode.  Inline tasks are
 ;; tasks that have all the properties of normal outline nodes,
 ;; including the ability to store meta data like scheduling dates,
 ;; TODO state, tags and properties.  However, these nodes are treated

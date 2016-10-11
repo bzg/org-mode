@@ -675,7 +675,7 @@ captured item after finalizing."
     (setq stay-with-capture t))
   (unless (and org-capture-mode
 	       (buffer-base-buffer (current-buffer)))
-    (error "This does not seem to be a capture buffer for Org-mode"))
+    (error "This does not seem to be a capture buffer for Org mode"))
 
   (run-hooks 'org-capture-prepare-finalize-hook)
 

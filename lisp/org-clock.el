@@ -45,7 +45,7 @@
 
 
 (defgroup org-clock nil
-  "Options concerning clocking working time in Org-mode."
+  "Options concerning clocking working time in Org mode."
   :tag "Org Clock"
   :group 'org-progress)
 
@@ -279,7 +279,7 @@ string as argument."
 	  (function :tag "Function")))
 
 (defgroup org-clocktable nil
-  "Options concerning the clock table in Org-mode."
+  "Options concerning the clock table in Org mode."
   :tag "Org Clock Table"
   :group 'org-clock)
 
@@ -695,7 +695,8 @@ If not, show simply the clocked time like 01:50."
   (setq org-mode-line-string
 	(propertize
 	 (let ((clock-string (org-clock-get-clock-string))
-	       (help-text "Org-mode clock is running.\nmouse-1 shows a menu\nmouse-2 will jump to task"))
+	       (help-text "Org mode clock is running.\nmouse-1 shows a \
+menu\nmouse-2 will jump to task"))
 	   (if (and (> org-clock-string-limit 0)
 		    (> (length clock-string) org-clock-string-limit))
 	       (propertize
@@ -797,7 +798,7 @@ use libnotify if available, or fall back on a message."
 			org-show-notification-handler notification))
 	((fboundp 'notifications-notify)
 	 (notifications-notify
-	  :title "Org-mode message"
+	  :title "Org mode message"
 	  :body notification
 	  ;; FIXME how to link to the Org icon?
 	  ;; :app-icon "~/.emacs.d/icons/mail.png"

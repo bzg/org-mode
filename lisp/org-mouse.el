@@ -68,7 +68,7 @@
 ;;
 ;; Since version 5.10: Changes are listed in the general Org docs.
 ;;
-;; Version 5.09;; + Version number synchronization with Org-mode.
+;; Version 5.09;; + Version number synchronization with Org mode.
 ;;
 ;; Version 0.25
 ;; + made compatible with Org 4.70 (thanks to Carsten for the patch)

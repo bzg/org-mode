@@ -25,7 +25,7 @@
 ;;
 ;;; Commentary:
 
-;; This file implements links to BBDB database entries from within Org-mode.
+;; This file implements links to BBDB database entries from within Org.
 ;; Org mode loads this module by default - if this is not what you want,
 ;; configure the variable `org-modules'.
 

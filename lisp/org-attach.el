@@ -43,7 +43,7 @@
 (require 'vc-git)
 
 (defgroup org-attach nil
-  "Options concerning entry attachments in Org-mode."
+  "Options concerning entry attachments in Org mode."
   :tag "Org Attach"
   :group 'org)
 

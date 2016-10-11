@@ -89,7 +89,7 @@ for empty fields).  Outside tables, the correct binding of the keys is
 restored.
 
 The default for this option is t if the optimized version is also used in
-Org-mode.  See the variable `org-enable-table-editor' for details.  Changing
+Org mode.  See the variable `org-enable-table-editor' for details.  Changing
 this variable requires a restart of Emacs to become effective."
   :group 'org-table
   :type 'boolean)
@@ -144,7 +144,7 @@ table, obtained by prompting the user."
 		(string :tag "Format"))))
 
 (defgroup org-table-settings nil
-  "Settings for tables in Org-mode."
+  "Settings for tables in Org mode."
   :tag "Org Table Settings"
   :group 'org-table)
 
@@ -193,7 +193,7 @@ alignment to the right border applies."
   :type 'number)
 
 (defgroup org-table-editing nil
-  "Behavior of tables during editing in Org-mode."
+  "Behavior of tables during editing in Org mode."
   :tag "Org Table Editing"
   :group 'org-table)
 
@@ -245,7 +245,7 @@ this line."
   :type 'boolean)
 
 (defgroup org-table-calculation nil
-  "Options concerning tables in Org-mode."
+  "Options concerning tables in Org mode."
   :tag "Org Table Calculation"
   :group 'org-table)
 
@@ -386,7 +386,7 @@ columns if an out-of-bounds field is being set."
 	  (const :tag "When setting an out-of-bounds field, the user is prompted" prompt)))
 
 (defgroup org-table-import-export nil
-  "Options concerning table import and export in Org-mode."
+  "Options concerning table import and export in Org mode."
   :tag "Org Table Import Export"
   :group 'org-table)
 

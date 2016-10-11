@@ -25,7 +25,7 @@
 ;;
 ;;; Commentary:
 
-;; This file contains the code dealing with plain lists in Org-mode.
+;; This file contains the code dealing with plain lists in Org mode.
 
 ;; The core concept behind lists is their structure.  A structure is
 ;; a snapshot of the list, in the shape of a data tree (see
@@ -164,7 +164,7 @@
 ;;; Configuration variables
 
 (defgroup org-plain-lists nil
-  "Options concerning plain lists in Org-mode."
+  "Options concerning plain lists in Org mode."
   :tag "Org Plain lists"
   :group 'org-structure)
 
