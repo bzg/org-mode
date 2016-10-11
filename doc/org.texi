@@ -18662,6 +18662,7 @@ POM may also be @code{nil}, in which case the current entry is used.
 If WHICH is @code{nil} or @code{all}, get all properties.  If WHICH is
 @code{special} or @code{standard}, only get that subclass.
 @end defun
+
 @vindex org-use-property-inheritance
 @findex org-insert-property-drawer
 @defun org-entry-get pom property &optional inherit
