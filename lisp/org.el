@@ -23718,27 +23718,32 @@ first attempt, and only move to after the tags when the cursor is already
 beyond the end of the headline."
   (interactive "P")
   (let ((pos (point))
-	(special (if (consp org-special-ctrl-a/e)
-		     (car org-special-ctrl-a/e)
-		   org-special-ctrl-a/e))
-	deactivate-mark	refpos)
-    (call-interactively (if (bound-and-true-p visual-line-mode)
-			    #'beginning-of-visual-line
-			  #'move-beginning-of-line))
+	(special (pcase org-special-ctrl-a/e
+		   (`(,C-a . _) C-a)
+		   (C-a C-a)))
+	deactivate-mark)
+    (if (bound-and-true-p visual-line-mode)
+	(call-interactively #'beginning-of-visual-line)
+      (call-interactively #'move-beginning-of-line)
+      ;; `move-beginning-of-line' may leave point after invisible
+      ;; characters if line starts with such of these (e.g., with
+      ;; a link at column 0).  Really move to the beginning of the
+      ;; current visible line.
+      (beginning-of-line))
     (cond
      ((or arg (not special)))
      ((and (looking-at org-complex-heading-regexp)
 	   (eq (char-after (match-end 1)) ?\s))
-      (setq refpos (min (1+ (or (match-end 3) (match-end 2) (match-end 1)))
-			(point-at-eol)))
-      (goto-char
-       (if (eq special t)
-	   (cond ((> pos refpos) refpos)
-		 ((= pos (point)) refpos)
-		 (t (point)))
-	 (cond ((> pos (point)) (point))
-	       ((not (eq last-command this-command)) (point))
-	       (t refpos)))))
+      (let ((refpos (min (1+ (or (match-end 3) (match-end 2) (match-end 1)))
+			 (line-end-position))))
+	(goto-char
+	 (if (eq special t)
+	     (cond ((> pos refpos) refpos)
+		   ((= pos (point)) refpos)
+		   (t (point)))
+	   (cond ((> pos (point)) (point))
+		 ((not (eq last-command this-command)) (point))
+		 (t refpos))))))
      ((org-at-item-p)
       ;; Being at an item and not looking at an the item means point
       ;; was previously moved to beginning of a visual line, which

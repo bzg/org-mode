@@ -2469,24 +2469,33 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
   "Test `org-beginning-of-line' specifications."
   ;; Standard test.
   (should
-   (org-test-with-temp-text "Some text\nSome other text"
+   (org-test-with-temp-text "Some text\nSome other text<point>"
      (progn (org-beginning-of-line) (bolp))))
   ;; Standard test with `visual-line-mode'.
   (should-not
-   (org-test-with-temp-text "A long line of text\nSome other text"
+   (org-test-with-temp-text "A <point>long line of text\nSome other text"
      (progn (visual-line-mode)
-	    (forward-char 2)
 	    (dotimes (i 1000) (insert "very "))
 	    (org-beginning-of-line)
 	    (bolp))))
   ;; At an headline with special movement.
   (should
-   (org-test-with-temp-text "* TODO Headline"
+   (org-test-with-temp-text "* TODO Headline<point>"
      (let ((org-special-ctrl-a/e t))
-       (org-end-of-line)
        (and (progn (org-beginning-of-line) (looking-at "Headline"))
 	    (progn (org-beginning-of-line) (bolp))
 	    (progn (org-beginning-of-line) (looking-at "Headline"))))))
+  ;; Leave point before invisible characters at column 0.
+  (should
+   (org-test-with-temp-text "[[http://orgmode.org]]<point>"
+     (let ((org-special-ctrl-a/e nil))
+       (org-beginning-of-line)
+       (bolp))))
+  (should
+   (org-test-with-temp-text "[[http://orgmode.org]]<point>"
+     (let ((org-special-ctrl-a/e t))
+       (org-beginning-of-line)
+       (bolp))))
   ;; Special case: Do not error when the buffer contains only a single
   ;; asterisk.
   (should
