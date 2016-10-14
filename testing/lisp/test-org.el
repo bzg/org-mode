@@ -2500,10 +2500,10 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
   ;; asterisk.
   (should
    (org-test-with-temp-text "*<point>"
-     (let ((org-special-ctrl-a/e t)) (org-beginning-of-line))))
+     (let ((org-special-ctrl-a/e t)) (org-beginning-of-line) t)))
   (should
    (org-test-with-temp-text "*<point>"
-     (let ((org-special-ctrl-a/e nil)) (org-beginning-of-line)))))
+     (let ((org-special-ctrl-a/e nil)) (org-beginning-of-line) t))))
 
 (ert-deftest test-org/end-of-line ()
   "Test `org-end-of-line' specifications."

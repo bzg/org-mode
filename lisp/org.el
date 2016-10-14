@@ -23764,10 +23764,7 @@ the cursor is already beyond the end of the headline."
 	  ;; Reversed case: Move point to special position when point
 	  ;; was already at beginning of line and command is repeated.
 	  (when (and (= (point) pos) (eq last-command this-command))
-	    (goto-char after-bullet)))))))
-  (setq disable-point-adjustment
-        (or (not (invisible-p (point)))
-            (not (invisible-p (max (point-min) (1- (point))))))))
+	    (goto-char after-bullet))))))))
 
 (defun org-end-of-line (&optional arg)
   "Go to the end of the line.
