@@ -23711,11 +23711,13 @@ package ox-bibtex by Taru Karttunen."
 ;;;; Functions extending outline functionality
 
 (defun org-beginning-of-line (&optional arg)
-  "Go to the beginning of the current line.  If that is invisible, continue
-to a visible line beginning.  This makes the function of C-a more intuitive.
-If this is a headline, and `org-special-ctrl-a/e' is set, ignore tags on the
-first attempt, and only move to after the tags when the cursor is already
-beyond the end of the headline."
+  "Go to the beginning of the current line.
+
+If that is invisible, continue to a visible line beginning.
+
+If this is a headline, and `org-special-ctrl-a/e' is set, ignore
+tags on the first attempt, and only move to after the tags when
+the cursor is already beyond the end of the headline."
   (interactive "P")
   (let ((pos (point))
 	(special (pcase org-special-ctrl-a/e
@@ -23744,29 +23746,25 @@ beyond the end of the headline."
 	   (cond ((> pos (point)) (point))
 		 ((not (eq last-command this-command)) (point))
 		 (t refpos))))))
-     ((org-at-item-p)
-      ;; Being at an item and not looking at an the item means point
-      ;; was previously moved to beginning of a visual line, which
-      ;; doesn't contain the item.  Therefore, do nothing special,
-      ;; just stay here.
-      (when (looking-at org-list-full-item-re)
-	;; Set special position at first white space character after
-	;; bullet, and check-box, if any.
-	(let ((after-bullet
-	       (let ((box (match-end 3)))
-		 (if (not box) (match-end 1)
-		   (let ((after (char-after box)))
-		     (if (and after (= after ? )) (1+ box) box))))))
-	  ;; Special case: Move point to special position when
-	  ;; currently after it or at beginning of line.
-	  (if (eq special t)
-	      (when (or (> pos after-bullet) (= (point) pos))
-		(goto-char after-bullet))
-	    ;; Reversed case: Move point to special position when
-	    ;; point was already at beginning of line and command is
-	    ;; repeated.
-	    (when (and (= (point) pos) (eq last-command this-command))
-	      (goto-char after-bullet))))))))
+     ((and (looking-at org-list-full-item-re)
+	   (save-match-data (memq (org-element-type (org-element-at-point))
+				  '(item plain-list))))
+      ;; Set special position at first white space character after
+      ;; bullet, and check-box, if any.
+      (let ((after-bullet
+	     (let ((box (match-end 3)))
+	       (cond ((not box) (match-end 1))
+		     ((eq (char-after box) ?\s) (1+ box))
+		     (t box)))))
+	;; Special case: Move point to special position when currently
+	;; after it or at beginning of line.
+	(if (eq special t)
+	    (when (or (> pos after-bullet) (= (point) pos))
+	      (goto-char after-bullet))
+	  ;; Reversed case: Move point to special position when point
+	  ;; was already at beginning of line and command is repeated.
+	  (when (and (= (point) pos) (eq last-command this-command))
+	    (goto-char after-bullet)))))))
   (setq disable-point-adjustment
         (or (not (invisible-p (point)))
             (not (invisible-p (max (point-min) (1- (point))))))))
