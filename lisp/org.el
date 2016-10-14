@@ -23822,10 +23822,7 @@ With argument N not nil or 1, move forward N - 1 lines first."
 	(when (/= bol (line-beginning-position))
 	  (goto-char bol)
 	  (end-of-line))))
-     (t (end-of-line))))
-  (setq disable-point-adjustment
-        (or (not (invisible-p (point)))
-            (not (invisible-p (max (point-min) (1- (point))))))))
+     (t (end-of-line)))))
 
 (define-key org-mode-map "\C-a" 'org-beginning-of-line)
 (define-key org-mode-map "\C-e" 'org-end-of-line)
