@@ -23766,42 +23766,63 @@ the cursor is already beyond the end of the headline."
 	  (when (and (= (point) pos) (eq last-command this-command))
 	    (goto-char after-bullet))))))))
 
-(defun org-end-of-line (&optional arg)
-  "Go to the end of the line.
+(defun org-end-of-line (&optional n)
+  "Go to the end of the line, but before ellipsis, if any.
+
 If this is a headline, and `org-special-ctrl-a/e' is set, ignore
 tags on the first attempt, and only move to after the tags when
-the cursor is already beyond the end of the headline."
-  (interactive "P")
-  (let ((special (if (consp org-special-ctrl-a/e) (cdr org-special-ctrl-a/e)
-		   org-special-ctrl-a/e))
-	(move-fun (cond ((bound-and-true-p visual-line-mode)
-			 'end-of-visual-line)
-			((fboundp 'move-end-of-line) 'move-end-of-line)
-			(t 'end-of-line)))
+the cursor is already beyond the end of the headline.
+
+With argument N not nil or 1, move forward N - 1 lines first."
+  (interactive "^p")
+  (let ((origin (point))
+	(special (pcase org-special-ctrl-a/e
+		   (`(_ . ,C-e) C-e) (_ org-special-ctrl-a/e)))
 	deactivate-mark)
-    (if (or (not special) arg) (call-interactively move-fun)
-      (let* ((element (save-excursion (beginning-of-line)
-				      (org-element-at-point)))
-	     (type (org-element-type element)))
-	(cond
-	 ((memq type '(headline inlinetask))
-	  (let ((pos (point)))
-	    (beginning-of-line 1)
-	    (if (looking-at ".*?\\(?:\\([ \t]*\\)\\(:[[:alnum:]_@#%:]+:\\)?[ \t]*\\)?$")
-		(if (eq special t)
-		    (if (or (< pos (match-beginning 1)) (= pos (match-end 0)))
-			(goto-char (match-beginning 1))
-		      (goto-char (match-end 0)))
-		  (if (or (< pos (match-end 0))
-			  (not (eq this-command last-command)))
-		      (goto-char (match-end 0))
-		    (goto-char (match-beginning 1))))
-	      (call-interactively move-fun))))
-	 ((outline-invisible-p (line-end-position))
-	  ;; If element is hidden, `move-end-of-line' would put point
-	  ;; after it.  Use `end-of-line' to stay on current line.
-	  (call-interactively 'end-of-line))
-	 (t (call-interactively move-fun))))))
+    ;; First move to a visible line.
+    (if (bound-and-true-p visual-line-mode)
+	(beginning-of-visual-line n)
+      (move-beginning-of-line n))
+    (cond
+     ;; At a headline, with tags.
+     ((and special
+	   (save-excursion
+	     (beginning-of-line)
+	     (looking-at org-complex-heading-regexp))
+	   (match-end 5))
+      (let ((tags (save-excursion
+		    (goto-char (match-beginning 5))
+		    (skip-chars-backward " \t")
+		    (point)))
+	    (visual-end (and (bound-and-true-p visual-line-mode)
+			     (save-excursion
+			       (end-of-visual-line)
+			       (point)))))
+	;; If `end-of-visual-line' brings us before end of line or
+	;; even tags, i.e., the headline spans over multiple visual
+	;; lines, move there.
+	(cond ((and visual-end
+		    (< visual-end tags)
+		    (<= origin visual-end))
+	       (goto-char visual-end))
+	      ((eq special 'reversed)
+	       (if (and (= origin (line-end-position))
+			(eq this-command last-command))
+		   (goto-char tags)
+		 (end-of-line)))
+	      (t
+	       (if (or (< origin tags) (= origin (line-end-position)))
+		   (goto-char tags)
+		 (end-of-line))))))
+     ((bound-and-true-p visual-line-mode)
+      (let ((bol (line-beginning-position)))
+	(end-of-visual-line)
+	;; If `end-of-visual-line' gets us past the ellipsis at the
+	;; end of a line, backtrack and use `end-of-line' instead.
+	(when (/= bol (line-beginning-position))
+	  (goto-char bol)
+	  (end-of-line))))
+     (t (end-of-line))))
   (setq disable-point-adjustment
         (or (not (invisible-p (point)))
             (not (invisible-p (max (point-min) (1- (point))))))))
