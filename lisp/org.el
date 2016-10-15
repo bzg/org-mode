@@ -372,15 +372,17 @@ FULL is given."
 
 (defvar org-deadline-string "DEADLINE:"
   "String to mark deadline entries.
-A deadline is this string, followed by a time stamp.  Should be a word,
-terminated by a colon.  You can insert a schedule keyword and
-a timestamp with \\[org-deadline].")
+\\<org-mode-map>
+A deadline is this string, followed by a time stamp.  It must be
+a word, terminated by a colon.  You can insert a schedule keyword
+and a timestamp with `\\[org-deadline]'.")
 
 (defvar org-scheduled-string "SCHEDULED:"
   "String to mark scheduled TODO entries.
-A schedule is this string, followed by a time stamp.  Should be a word,
-terminated by a colon.  You can insert a schedule keyword and
-a timestamp with \\[org-schedule].")
+\\<org-mode-map>
+A schedule is this string, followed by a time stamp.  It must be
+a word, terminated by a colon.  You can insert a schedule keyword
+and a timestamp with `\\[org-schedule]'.")
 
 (defconst org-ds-keyword-length
   (+ 2
@@ -521,8 +523,9 @@ not contribute to the agenda listings.")
 
 (defconst org-comment-string "COMMENT"
   "Entries starting with this keyword will never be exported.
+\\<org-mode-map>
 An entry can be toggled between COMMENT and normal with
-\\[org-toggle-comment].")
+`\\[org-toggle-comment]'.")
 
 
 ;;;; LaTeX Environments and Fragments
@@ -1115,7 +1118,7 @@ When nil, just use the standard three dots.
 When a string, use that string instead.
 
 The change affects only Org mode (which will then use its own display table).
-Changing this requires executing \\[org-mode] in a buffer to become
+Changing this requires executing `\\[org-mode]' in a buffer to become
 effective."
   :group 'org-startup
   :type '(choice (const :tag "Default" nil)
@@ -1160,8 +1163,8 @@ around point.  How much is shown depends on the initial action,
 or context.  Valid contexts are
 
   agenda         when exposing an entry from the agenda
-  org-goto       when using the command `org-goto' (\\[org-goto])
-  occur-tree     when using the command `org-occur' (\\[org-sparse-tree] /)
+  org-goto       when using the command `org-goto' (`\\[org-goto]')
+  occur-tree     when using the command `org-occur' (`\\[org-sparse-tree] /')
   tags-tree      when constructing a sparse tree based on tags matches
   link-search    when exposing search matches associated with a link
   mark-goto      when exposing the jump goal of a mark
@@ -1196,7 +1199,7 @@ As special cases, a nil or t value means show all contexts in
 
 Some views can make displayed information very compact, but also
 make it harder to edit the location of the match.  In such
-a case, use the command `org-reveal' (\\[org-reveal]) to show
+a case, use the command `org-reveal' (`\\[org-reveal]') to show
 more context."
   :group 'org-reveal-location
   :version "25.2"
@@ -1226,8 +1229,10 @@ more context."
 
 (defcustom org-indirect-buffer-display 'other-window
   "How should indirect tree buffers be displayed?
+
 This applies to indirect buffers created with the commands
-\\[org-tree-to-indirect-buffer] and \\[org-agenda-tree-to-indirect-buffer].
+`org-tree-to-indirect-buffer' and `org-agenda-tree-to-indirect-buffer'.
+
 Valid values are:
 current-window   Display in the current window
 other-window     Just display in another window.
@@ -1333,12 +1338,17 @@ This can also be set in on a per-file basis with
 
 (defcustom org-cycle-global-at-bob nil
   "Cycle globally if cursor is at beginning of buffer and not at a headline.
-This makes it possible to do global cycling without having to use S-TAB or
-\\[universal-argument] TAB.  For this special case to work, the first line
-of the buffer must not be a headline -- it may be empty or some other text.
+
+This makes it possible to do global cycling without having to use `S-TAB'
+or `\\[universal-argument] TAB'.  For this special case to work, the first \
+line of the buffer
+must not be a headline -- it may be empty or some other text.
+
 When used in this way, `org-cycle-hook' is disabled temporarily to make
-sure the cursor stays at the beginning of the buffer.  When this option is
-nil, don't do anything special at the beginning of the buffer."
+sure the cursor stays at the beginning of the buffer.
+
+When this option is nil, don't do anything special at the beginning of
+the buffer."
   :group 'org-cycle
   :type 'boolean)
 
@@ -1600,9 +1610,11 @@ default   the value to be used for all contexts not explicitly
 
 (defcustom org-insert-heading-respect-content nil
   "Non-nil means insert new headings after the current subtree.
+\\<org-mode-map>
 When nil, the new heading is created directly after the current line.
-The commands \\[org-insert-heading-respect-content] and \\[org-insert-todo-heading-respect-content] turn
-this variable on for the duration of the command."
+The commands `\\[org-insert-heading-respect-content]' and \
+`\\[org-insert-todo-heading-respect-content]' turn this variable on
+for the duration of the command."
   :group 'org-structure
   :type 'boolean)
 
@@ -1723,7 +1735,7 @@ Optimization requires replacing the functions `self-insert-command',
 `delete-char', and `backward-delete-char' in Org buffers, with a
 slight (in fact: unnoticeable) speed impact for normal typing.  Org is very
 good at guessing when a re-align will be necessary, but you can always
-force one with \\[org-ctrl-c-ctrl-c].
+force one with `\\[org-ctrl-c-ctrl-c]'.
 
 If you would like to use the optimized version in Org mode, but the
 un-optimized version in OrgTbl-mode, see the variable `orgtbl-optimized'.
@@ -1984,27 +1996,31 @@ It should match if the message is from the user him/herself."
 
 (defcustom org-context-in-file-links t
   "Non-nil means file links from `org-store-link' contain context.
-A search string will be added to the file name with :: as separator and
-used to find the context when the link is activated by the command
+\\<org-mode-map>
+A search string will be added to the file name with :: as separator
+and used to find the context when the link is activated by the command
 `org-open-at-point'.  When this option is t, the entire active region
 will be placed in the search string of the file link.  If set to a
 positive integer, only the first n lines of context will be stored.
 
-Using a prefix arg to the command \\[org-store-link] (`org-store-link')
+Using a prefix arg to the command `org-store-link' (`\\[universal-argument] \
+\\[org-store-link]')
 negates this setting for the duration of the command."
   :group 'org-link-store
   :type '(choice boolean integer))
 
 (defcustom org-keep-stored-link-after-insertion nil
   "Non-nil means keep link in list for entire session.
-
+\\<org-mode-map>
 The command `org-store-link' adds a link pointing to the current
 location to an internal list.  These links accumulate during a session.
 The command `org-insert-link' can be used to insert links into any
-Org file (offering completion for all stored links).  When this option
-is nil, every link which has been inserted once using \\[org-insert-link]
-will be removed from the list, to make completing the unused links
-more efficient."
+Org file (offering completion for all stored links).
+
+When this option is nil, every link which has been inserted once using
+`\\[org-insert-link]' will be removed from the list, to make completing the \
+unused
+links more efficient."
   :group 'org-link-store
   :type 'boolean)
 
@@ -2136,7 +2152,7 @@ another window."
   "Non-nil means use indirect buffer to display infile links.
 Activating internal links (from one location in a file to another location
 in the same file) normally just jumps to the location.  When the link is
-activated with a \\[universal-argument] prefix (or with mouse-3), the link \
+activated with a `\\[universal-argument]' prefix (or with mouse-3), the link \
 is displayed in
 another window.  When this option is set, the other window actually displays
 an indirect buffer clone of the current buffer, to avoid any visibility
@@ -2300,8 +2316,9 @@ Possible values for the file identifier are:
                \(\"html\" . default) to the list as well.
  `system'      The system command to open files, like `open' on Windows
                and Mac OS X, and mailcap under GNU/Linux.  This is the command
-               that will be selected if you call \\[org-open-at-point] with a double
-               \\[universal-argument] \\[universal-argument] prefix.
+               that will be selected if you call `org-open-at-point' with a
+               double prefix argument (`\\[universal-argument] \
+\\[universal-argument] \\[org-open-at-point]').
  t             Default for files not matched by any of the other options.
 
 Possible values for the command are:
@@ -2440,7 +2457,7 @@ will temporarily be changed to `time'."
 	  (const :tag "Record timestamp with note." note)))
 
 (defcustom org-refile-targets nil
-  "Targets for refiling entries with \\[org-refile].
+  "Targets for refiling entries with `\\[org-refile]'.
 This is a list of cons cells.  Each cell contains:
 - a specification of the files to be considered, either a list of files,
   or a symbol whose function or variable value will be used to retrieve
@@ -2602,7 +2619,7 @@ for inclusion into the global TODO list Org produces.  If one of the
 signify that no further action is necessary.  If \"|\" is not found,
 the last keyword is treated as the only DONE state of the sequence.
 
-The command \\[org-todo] cycles an entry through these states, and one
+The command `\\[org-todo]' cycles an entry through these states, and one
 additional state where no keyword is present.  For details about this
 cycling, see the manual.
 
@@ -2690,7 +2707,7 @@ more information."
 
 (defcustom org-use-fast-todo-selection t
   "\\<org-mode-map>\
-Non-nil means use the fast todo selection scheme with \\[org-todo].
+Non-nil means use the fast todo selection scheme with `\\[org-todo]'.
 This variable describes if and under what circumstances the cycling
 mechanism for TODO keywords will be replaced by a single-key, direct
 selection scheme.
@@ -2819,7 +2836,7 @@ to change is while Emacs is running is through the customize interface."
 
 (defcustom org-treat-insert-todo-heading-as-state-change nil
   "Non-nil means inserting a TODO heading is treated as state change.
-So when the command \\[org-insert-todo-heading] is used, state change
+So when the command `\\[org-insert-todo-heading]' is used, state change
 logging will apply if appropriate.  When nil, the new TODO item will
 be inserted directly, and no logging will take place."
   :group 'org-todo
@@ -3301,7 +3318,7 @@ in minutes (even for durations longer than an hour)."
 			     (const t)))))
 
 (defcustom org-time-clocksum-use-fractional nil
-  "When non-nil, \\[org-clock-display] uses fractional times.
+  "When non-nil, `\\[org-clock-display]' uses fractional times.
 See `org-time-clocksum-format' for more on time clock formats."
   :group 'org-time
   :group 'org-clock
@@ -3309,7 +3326,7 @@ See `org-time-clocksum-format' for more on time clock formats."
   :type 'boolean)
 
 (defcustom org-time-clocksum-use-effort-durations nil
-  "When non-nil, \\[org-clock-display] uses effort durations.
+  "When non-nil, `\\[org-clock-display]' uses effort durations.
 E.g. by default, one day is considered to be a 8 hours effort,
 so a task that has been clocked for 16 hours will be displayed
 as during 2 days in the clock display or in the clocktable.
@@ -3885,17 +3902,18 @@ is used instead.")
 
 (defcustom org-agenda-files nil
   "The files to be used for agenda display.
-Entries may be added to this list with \\[org-agenda-file-to-front] and removed with
-\\[org-remove-file].  You can also use customize to edit the list.
 
-If an entry is a directory, all files in that directory that are matched by
-`org-agenda-file-regexp' will be part of the file list.
+If an entry is a directory, all files in that directory that are matched
+by `org-agenda-file-regexp' will be part of the file list.
 
 If the value of the variable is not a list but a single file name, then
-the list of agenda files is actually stored and maintained in that file, one
-agenda file per line.  In this file paths can be given relative to
+the list of agenda files is actually stored and maintained in that file,
+one agenda file per line.  In this file paths can be given relative to
 `org-directory'.  Tilde expansion and environment variable substitution
-are also made."
+are also made.
+
+Entries may be added to this list with `\\[org-agenda-file-to-front]'
+and removed with `\\[org-remove-file]'."
   :group 'org-agenda
   :type '(choice
 	  (repeat :tag "List of files and directories" file)
@@ -4834,7 +4852,8 @@ Otherwise, these types are allowed:
 	(goto-char beg)
 	(when (looking-at-p (concat ".*:" org-archive-tag ":"))
 	  (message "%s" (substitute-command-keys
-			 "Subtree is archived and stays closed.  Use \\[org-force-cycle-archived] to cycle it anyway.")))))))
+			 "Subtree is archived and stays closed.  Use \
+`\\[org-force-cycle-archived]' to cycle it anyway.")))))))
 
 (defun org-force-cycle-archived ()
   "Cycle subtree even if it is archived."
@@ -6819,51 +6838,56 @@ and subscripts."
 (defun org-cycle (&optional arg)
   "TAB-action and visibility cycling for Org mode.
 
-This is the command invoked in Org mode by the TAB key.  Its main purpose
-is outline visibility cycling, but it also invokes other actions
+This is the command invoked in Org mode by the `TAB' key.  Its main
+purpose is outline visibility cycling, but it also invokes other actions
 in special contexts.
 
-- When this function is called with a prefix argument, rotate the entire
-  buffer through 3 states (global cycling)
+When this function is called with a `\\[universal-argument]' prefix, rotate \
+the entire
+buffer through 3 states (global cycling)
   1. OVERVIEW: Show only top-level headlines.
   2. CONTENTS: Show all headlines of all levels, but no body text.
   3. SHOW ALL: Show everything.
-  With a double \\[universal-argument] prefix argument, \
+
+With a `\\[universal-argument] \\[universal-argument]' prefix argument, \
 switch to the startup visibility,
-  determined by the variable `org-startup-folded', and by any VISIBILITY
-  properties in the buffer.
-  With a triple \\[universal-argument] prefix argument, \
-show the entire buffer, including any drawers.
+determined by the variable `org-startup-folded', and by any VISIBILITY
+properties in the buffer.
 
-- When inside a table, re-align the table and move to the next field.
+With a `\\[universal-argument] \\[universal-argument] \
+\\[universal-argument]' prefix argument, show the entire buffer, including
+any drawers.
 
-- When point is at the beginning of a headline, rotate the subtree started
-  by this line through 3 different states (local cycling)
+When inside a table, re-align the table and move to the next field.
+
+When point is at the beginning of a headline, rotate the subtree started
+by this line through 3 different states (local cycling)
   1. FOLDED:   Only the main headline is shown.
   2. CHILDREN: The main headline and the direct children are shown.
                From this state, you can move to one of the children
                and zoom in further.
   3. SUBTREE:  Show the entire subtree, including body text.
-  If there is no subtree, switch directly from CHILDREN to FOLDED.
+If there is no subtree, switch directly from CHILDREN to FOLDED.
 
-- When point is at the beginning of an empty headline and the variable
-  `org-cycle-level-after-item/entry-creation' is set, cycle the level
-  of the headline by demoting and promoting it to likely levels.  This
-  speeds up creation document structure by pressing TAB once or several
-  times right after creating a new headline.
+When point is at the beginning of an empty headline and the variable
+`org-cycle-level-after-item/entry-creation' is set, cycle the level
+of the headline by demoting and promoting it to likely levels.  This
+speeds up creation document structure by pressing `TAB' once or several
+times right after creating a new headline.
 
-- When there is a numeric prefix, go up to a heading with level ARG, do
-  a `show-subtree' and return to the previous cursor position.  If ARG
-  is negative, go up that many levels.
+When there is a numeric prefix, go up to a heading with level ARG, do
+a `show-subtree' and return to the previous cursor position.  If ARG
+is negative, go up that many levels.
 
-- When point is not at the beginning of a headline, execute the global
-  binding for TAB, which is re-indenting the line.  See the option
-  `org-cycle-emulate-tab' for details.
+When point is not at the beginning of a headline, execute the global
+binding for `TAB', which is re-indenting the line.  See the option
+`org-cycle-emulate-tab' for details.
 
-- Special case: if point is at the beginning of the buffer and there is
-  no headline in line 1, this function will act as if called with prefix arg
-  (\\[universal-argument] TAB, same as S-TAB) also when called without prefix arg.
-  But only if also the variable `org-cycle-global-at-bob' is t."
+As a special case, if point is at the beginning of the buffer and there is
+no headline in line 1, this function will act as if called with prefix arg
+\(`\\[universal-argument] TAB', same as `S-TAB') also when called without \
+prefix arg, but only
+if the variable `org-cycle-global-at-bob' is t."
   (interactive "P")
   (org-load-modules-maybe)
   (unless (or (run-hook-with-args-until-success 'org-tab-first-hook)
@@ -6914,7 +6938,7 @@ show the entire buffer, including any drawers.
        ((org-at-table-p 'any)
 	(if (org-at-table.el-p)
 	    (message "%s" (substitute-command-keys "\\<org-mode-map>\
-Use \\[org-edit-special] to edit table.el tables"))
+Use `\\[org-edit-special]' to edit table.el tables"))
 	  (if arg (org-table-edit-field t)
 	    (org-table-justify-field-maybe)
 	    (call-interactively 'org-table-next-field))))
@@ -7125,7 +7149,7 @@ Use \\[org-edit-special] to edit table.el tables"))
 ;;;###autoload
 (defun org-global-cycle (&optional arg)
   "Cycle the global visibility.  For details see `org-cycle'.
-With \\[universal-argument] prefix arg, switch to startup visibility.
+With `\\[universal-argument]' prefix ARG, switch to startup visibility.
 With a numeric prefix, show all headlines up to that level."
   (interactive "P")
   (let ((org-cycle-include-plain-lists
@@ -7755,17 +7779,18 @@ or nil."
 
 (defun org-tree-to-indirect-buffer (&optional arg)
   "Create indirect buffer and narrow it to current subtree.
+
 With a numerical prefix ARG, go up to this level and then take that tree.
 If ARG is negative, go up that many levels.
 
 If `org-indirect-buffer-display' is not `new-frame', the command removes the
 indirect buffer previously made with this command, to avoid proliferation of
 indirect buffers.  However, when you call the command with a \
-\\[universal-argument] prefix, or
-when `org-indirect-buffer-display' is `new-frame', the last buffer
-is kept so that you can work with several indirect buffers at the same time.
-If `org-indirect-buffer-display' is `dedicated-frame', the \
-\\[universal-argument] prefix also
+`\\[universal-argument]' prefix, or
+when `org-indirect-buffer-display' is `new-frame', the last buffer is kept
+so that you can work with several indirect buffers at the same time.  If
+`org-indirect-buffer-display' is `dedicated-frame', the \
+`\\[universal-argument]' prefix also
 requests that a new frame be made for the new buffer, so that the dedicated
 frame is not changed."
   (interactive "P")
@@ -7874,13 +7899,13 @@ headline/item with the text in the current line after point (see
 a special case, on a headline, splitting can only happen on the
 title itself.  E.g., this excludes breaking stars or tags.
 
-With a \\[universal-argument] prefix, set \
+With a `\\[universal-argument]' prefix, set \
 `org-insert-heading-respect-content' to
 a non-nil value for the duration of the command.  This forces the
 insertion of a heading after the current subtree, independently
 on the location of point.
 
-With a \\[universal-argument] \\[universal-argument] prefix, \
+With a `\\[universal-argument] \\[universal-argument]' prefix, \
 insert the heading at the end of the tree
 above the current heading.  For example, if point is within a
 2nd-level heading, then it will insert a 2nd-level heading at
@@ -9838,18 +9863,21 @@ and then used in capture templates."
 
 ;;;###autoload
 (defun org-store-link (arg)
-  "\\<org-mode-map>Store an org-link to the current location.
+  "Store an org-link to the current location.
+\\<org-mode-map>
 This link is added to `org-stored-links' and can later be inserted
-into an Org buffer with \\[org-insert-link].
+into an Org buffer with `org-insert-link' (`\\[org-insert-link]').
 
-For some link types, a prefix ARG is interpreted.
+For some link types, a `\\[universal-argument]' prefix ARG is interpreted.
 For links to Usenet articles, ARG negates `org-gnus-prefer-web-links'.
 For file links, ARG negates `org-context-in-file-links'.
 
-A double prefix ARG force skipping storing functions that are not
-part of Org's core.
+A `\\[universal-argument] \\[universal-argument]' prefix ARG forces \
+skipping storing functions that are not
+part of Org core.
 
-A triple prefix ARG force storing a link for each line in the
+A `\\[universal-argument] \\[universal-argument] \\[universal-argument]' \
+prefix ARG forces storing a link for each line in the
 active region."
   (interactive "P")
   (org-load-modules-maybe)
@@ -10344,43 +10372,44 @@ prepend or to append."
 (defun org-insert-link (&optional complete-file link-location default-description)
   "Insert a link.  At the prompt, enter the link.
 
-Completion can be used to insert any of the link protocol prefixes like
-http or ftp in use.
+Completion can be used to insert any of the link protocol prefixes in use.
 
 The history can be used to select a link previously stored with
 `org-store-link'.  When the empty string is entered (i.e. if you just
-press RET at the prompt), the link defaults to the most recently
-stored link.  As SPC triggers completion in the minibuffer, you need to
-use M-SPC or C-q SPC to force the insertion of a space character.
+press `RET' at the prompt), the link defaults to the most recently
+stored link.  As `SPC' triggers completion in the minibuffer, you need to
+use `M-SPC' or `C-q SPC' to force the insertion of a space character.
 
 You will also be prompted for a description, and if one is given, it will
 be displayed in the buffer instead of the link.
 
-If there is already a link at point, this command will allow you to edit link
-and description parts.
+If there is already a link at point, this command will allow you to edit
+link and description parts.
 
-With a \\[universal-argument] prefix, prompts for a file to link to.  The file name can
-be selected using completion.  The path to the file will be relative to the
+With a `\\[universal-argument]' prefix, prompts for a file to link to.  The \
+file name can be
+selected using completion.  The path to the file will be relative to the
 current directory if the file is in the current directory or a subdirectory.
 Otherwise, the link will be the absolute path as completed in the minibuffer
 \(i.e. normally ~/path/to/file).  You can configure this behavior using the
 option `org-link-file-path-type'.
 
-With two \\[universal-argument] prefixes, enforce an absolute path even if the file is in
+With a `\\[universal-argument] \\[universal-argument]' prefix, enforce an \
+absolute path even if the file is in
 the current directory or below.
 
-With three \\[universal-argument] prefixes, negate the meaning of
-`org-keep-stored-link-after-insertion'.
+A `\\[universal-argument] \\[universal-argument] \\[universal-argument]' \
+prefix negates `org-keep-stored-link-after-insertion'.
 
 If `org-make-link-description-function' is non-nil, this function will be
 called with the link target, and the result will be the default
 link description.
 
-If the LINK-LOCATION parameter is non-nil, this value will be
-used as the link location instead of reading one interactively.
+If the LINK-LOCATION parameter is non-nil, this value will be used as
+the link location instead of reading one interactively.
 
-If the DEFAULT-DESCRIPTION parameter is non-nil, this value will
-be used as the default description."
+If the DEFAULT-DESCRIPTION parameter is non-nil, this value will be used
+as the default description."
   (interactive "P")
   (let* ((wcf (current-window-configuration))
 	 (origbuf (current-buffer))
@@ -11302,7 +11331,8 @@ to read."
 	       (or buffer (current-buffer)))
   (message "%s"
 	   (substitute-command-keys
-	    "Position saved to mark ring, go back with \\[org-mark-ring-goto].")))
+	    "Position saved to mark ring, go back with \
+`\\[org-mark-ring-goto]'.")))
 
 (defun org-mark-ring-goto (&optional n)
   "Jump to the previous position in the mark ring.
@@ -11880,6 +11910,7 @@ the *old* location.")
 
 (defun org-refile (&optional arg default-buffer rfloc msg)
   "Move the entry or entries at point to another heading.
+
 The list of target headings is compiled using the information in
 `org-refile-targets', which see.
 
@@ -11891,10 +11922,12 @@ If there is an active region, all entries in that region will be
 refiled.  However, the region must fulfill the requirement that
 the first heading sets the top-level of the moved text.
 
-With prefix arg ARG, the command will only visit the target
-location and not actually move anything.
+With a `\\[universal-argument]' ARG, the command will only visit the target \
+location
+and not actually move anything.
 
-With a double prefix arg \\[universal-argument] \\[universal-argument], go to the location where the last
+With a prefix `\\[universal-argument] \\[universal-argument]', go to the \
+location where the last
 refiling operation has put the subtree.
 
 With a numeric prefix argument of `2', refile to the running clock.
@@ -11913,7 +11946,7 @@ See also `org-refile-use-outline-path'.
 
 If you are using target caching (see `org-refile-use-cache'), you
 have to clear the target cache in order to find new targets.
-This can be done with a 0 prefix (`C-0 C-c C-w') or a triple
+This can be done with a `0' prefix (`C-0 C-c C-w') or a triple
 prefix argument (`C-u C-u C-u C-c C-w')."
   (interactive "P")
   (if (member arg '(0 (64)))
@@ -12513,34 +12546,37 @@ nil or a string to be used for the todo mark." )
 (defvar org-state) ;; dynamically scoped into this function
 (defun org-todo (&optional arg)
   "Change the TODO state of an item.
+
 The state of an item is given by a keyword at the start of the heading,
 like
      *** TODO Write paper
      *** DONE Call mom
 
 The different keywords are specified in the variable `org-todo-keywords'.
-By default the available states are \"TODO\" and \"DONE\".
-So for this example: when the item starts with TODO, it is changed to DONE.
+By default the available states are \"TODO\" and \"DONE\".  So, for this
+example: when the item starts with TODO, it is changed to DONE.
 When it starts with DONE, the DONE is removed.  And when neither TODO nor
 DONE are present, add TODO at the beginning of the heading.
 
-With \\[universal-argument] prefix arg, use completion to determine the new \
+With `\\[universal-argument]' prefix ARG, use completion to determine the new \
 state.
-With numeric prefix arg, switch to that state.
-With a double \\[universal-argument] prefix, switch to the next set of TODO \
+With numeric prefix ARG, switch to that state.
+With a `\\[universal-argument] \\[universal-argument]' prefix, switch to the \
+next set of TODO \
 keywords (nextset).
-With a triple \\[universal-argument] prefix, circumvent any state blocking.
+With a `\\[universal-argument] \\[universal-argument] \\[universal-argument]' \
+prefix, circumvent any state blocking.
 With a numeric prefix arg of 0, inhibit note taking for the change.
 With a numeric prefix arg of -1, cancel repeater to allow marking as DONE.
 
 When called through ELisp, arg is also interpreted in the following way:
-`none'             -> empty state
-\"\"(empty string)  -> switch to empty state
-`done'             -> switch to DONE
-`nextset'          -> switch to the next set of keywords
-`previousset'      -> switch to the previous set of keywords
-\"WAITING\"         -> switch to the specified keyword, but only if it
-                     really is a member of `org-todo-keywords'."
+`none'        -> empty state
+\"\"            -> switch to empty state
+`done'        -> switch to DONE
+`nextset'     -> switch to the next set of keywords
+`previousset' -> switch to the previous set of keywords
+\"WAITING\"     -> switch to the specified keyword, but only if it
+                 really is a member of `org-todo-keywords'."
   (interactive "P")
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
       (let ((cl (if (eq org-loop-over-headlines-in-active-region 'start-level)
@@ -13338,7 +13374,7 @@ enough to shift date past today.  Continue? "
   "Make a compact tree which shows all headlines marked with TODO.
 The tree will show the lines where the regexp matches, and all higher
 headlines above the match.
-With a \\[universal-argument] prefix, prompt for a regexp to match.
+With a `\\[universal-argument]' prefix, prompt for a regexp to match.
 With a numeric prefix N, construct a sparse tree for the Nth element
 of `org-todo-keywords-1'."
   (interactive "P")
@@ -14086,9 +14122,8 @@ With optional argument SIBLINGS, on each level of the hierarchy all
 siblings are shown.  This repairs the tree structure to what it would
 look like when opened with hierarchical calls to `org-cycle'.
 
-With double optional argument \\[universal-argument] \\[universal-argument], \
-go to the parent and show the
-entire tree."
+With a \\[universal-argument] \\[universal-argument] prefix, \
+go to the parent and show the entire tree."
   (interactive "P")
   (run-hooks 'org-reveal-start-hook)
   (cond ((equal siblings '(4)) (org-show-set-visibility 'canonical))
@@ -17517,8 +17552,9 @@ This is used by `org-read-date' in a temporary keymap for the calendar buffer."
   "Check if there are any deadlines due or past due.
 A deadline is considered due if it happens within `org-deadline-warning-days'
 days from today's date.  If the deadline appears in an entry marked DONE,
-it is not shown.  The prefix arg NDAYS can be used to test that many
-days.  If the prefix is a raw \\[universal-argument] prefix, all deadlines are shown."
+it is not shown.  A numeric prefix argument NDAYS can be used to test that
+many days.  If the prefix is a raw `\\[universal-argument]', all deadlines \
+are shown."
   (interactive "P")
   (let* ((org-warn-days
 	  (cond
@@ -18517,9 +18553,9 @@ changes from another.  I believe the procedure must be like this:
 (defun org-switchb (&optional arg)
   "Switch between Org buffers.
 
-With \\[universal-argument] prefix, restrict available buffers to files.
+With `\\[universal-argument]' prefix, restrict available buffers to files.
 
-With \\[universal-argument] \\[universal-argument] \
+With `\\[universal-argument] \\[universal-argument]' \
 prefix, restrict available buffers to agenda files."
   (interactive "P")
   (let ((blist (org-buffer-list
@@ -18874,9 +18910,9 @@ in Org mode.
     (defadvice texmathp (around org-math-always-on activate)
       "Always return t in Org buffers.
 This is because we want to insert math symbols without dollars even outside
-the LaTeX math segments.  If Orgmode thinks that point is actually inside
-an embedded LaTeX fragment, let texmathp do its job.
-\\[org-cdlatex-mode-map]"
+the LaTeX math segments.  If Org mode thinks that point is actually inside
+an embedded LaTeX fragment, let `texmathp' do its job.
+`\\[org-cdlatex-mode-map]'"
       (interactive)
       (let (p)
 	(cond
@@ -19084,8 +19120,8 @@ current section.
 
 With prefix ARG, preview or clear image for all fragments in the
 current subtree or in the whole buffer when used before the first
-headline.  With a double prefix ARG \\[universal-argument] \
-\\[universal-argument] preview or clear images
+headline.  With a prefix ARG `\\[universal-argument] \
+\\[universal-argument]' preview or clear images
 for all fragments in the buffer."
   (interactive "P")
   (when (display-graphic-p)
@@ -21203,7 +21239,7 @@ This command does many different things, depending on context:
 	   ;; cell, maybe recalculate line but always align table.
 	   (if (eq (org-element-property :type context) 'table.el)
 	       (message "%s" (substitute-command-keys "\\<org-mode-map>\
-Use \\[org-edit-special] to edit table.el tables"))
+Use `\\[org-edit-special]' to edit table.el tables"))
 	     (let ((org-enable-table-editor t))
 	       (if (or (eq type 'table)
 		       ;; Check if point is at a TBLFM line.
@@ -21398,7 +21434,7 @@ Calls `org-table-insert-hline', `org-toggle-item', or
   "Convert headings to normal text, or items or text to headings.
 If there is no active region, only convert the current line.
 
-With a \\[universal-argument] prefix, convert the whole list at
+With a `\\[universal-argument]' prefix, convert the whole list at
 point into heading.
 
 In a region:
@@ -22873,8 +22909,8 @@ Indentation is done according to the following rules:
   - Otherwise, indent like the first non-blank line above.
 
 The function doesn't indent an item as it could break the whole
-list structure.  Instead, use \\<org-mode-map>\\[org-shiftmetaleft] or \
-\\[org-shiftmetaright].
+list structure.  Instead, use \\<org-mode-map>`\\[org-shiftmetaleft]' or \
+`\\[org-shiftmetaright]'.
 
 Also align node properties according to `org-property-format'."
   (interactive)
@@ -23923,7 +23959,7 @@ on the value of the following variables.
     becomes the smaller one of the two *visible* surrounding headings.
 
 Any prefix to this command will cause `yank' to be called directly with
-no special treatment.  In particular, a simple \\[universal-argument] prefix \
+no special treatment.  In particular, a simple `\\[universal-argument]' prefix \
 will just
 plainly yank the text as it is.
 
@@ -24905,7 +24941,7 @@ If there is no description, use the link target."
 
 (defun org-speedbar-set-agenda-restriction ()
   "Restrict future agenda commands to the location at point in speedbar.
-To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
+To get rid of the restriction, use `\\[org-agenda-remove-restriction-lock]'."
   (interactive)
   (require 'org-agenda)
   (let (p m tp np dir txt)

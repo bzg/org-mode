@@ -204,22 +204,25 @@ With prefix arg STOP, stop it entirely."
   (message "Timer stopped"))
 
 ;;;###autoload
-(defun org-timer (&optional restart no-insert-p)
+(defun org-timer (&optional restart no-insert)
   "Insert a H:MM:SS string from the timer into the buffer.
-The first time this command is used, the timer is started.  When used with
-a \\[universal-argument] prefix, force restarting the timer.
-When used with a double prefix argument \\[universal-argument], change all the timer string
-in the region by a fixed amount.  This can be used to recalibrate a timer
-that was not started at the correct moment.
+The first time this command is used, the timer is started.
 
-If NO-INSERT-P is non-nil, return the string instead of inserting
+When used with a `\\[universal-argument]' prefix, force restarting the timer.
+
+When used with a `\\[universal-argument] \\[universal-argument]' \
+prefix, change all the timer strings
+in the region by a fixed amount.  This can be used to re-calibrate
+a timer that was not started at the correct moment.
+
+If NO-INSERT is non-nil, return the string instead of inserting
 it in the buffer."
   (interactive "P")
   (if (equal restart '(16))
       (org-timer-start restart)
     (when (or (equal restart '(4)) (not org-timer-start-time))
       (org-timer-start))
-    (if no-insert-p
+    (if no-insert
 	(org-timer-value-string)
       (insert (org-timer-value-string)))))
 

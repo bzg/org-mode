@@ -463,8 +463,9 @@ Turning on this mode runs the normal hook `org-capture-mode-hook'."
   (setq-local
    header-line-format
    (substitute-command-keys
-    "\\<org-capture-mode-map>Capture buffer.  Finish \\[org-capture-finalize], \
-refile \\[org-capture-refile], abort \\[org-capture-kill].")))
+    "\\<org-capture-mode-map>Capture buffer.  Finish \
+`\\[org-capture-finalize]', refile `\\[org-capture-refile]', \
+abort `\\[org-capture-kill]'.")))
 (define-key org-capture-mode-map "\C-c\C-c" 'org-capture-finalize)
 (define-key org-capture-mode-map "\C-c\C-k" 'org-capture-kill)
 (define-key org-capture-mode-map "\C-c\C-w" 'org-capture-refile)
@@ -533,7 +534,8 @@ to avoid duplicates.)"
 
 (defcustom org-capture-use-agenda-date nil
   "Non-nil means use the date at point when capturing from agendas.
-When nil, you can still capture using the date at point with \\[org-agenda-capture]."
+When nil, you can still capture using the date at point with
+`\\[org-agenda-capture]'."
   :group 'org-capture
   :version "24.3"
   :type 'boolean)
@@ -542,17 +544,20 @@ When nil, you can still capture using the date at point with \\[org-agenda-captu
 (defun org-capture (&optional goto keys)
   "Capture something.
 \\<org-capture-mode-map>
-This will let you select a template from `org-capture-templates', and then
-file the newly captured information.  The text is immediately inserted
-at the target location, and an indirect buffer is shown where you can
-edit it.  Pressing \\[org-capture-finalize] brings you back to the previous state
-of Emacs, so that you can continue your work.
+This will let you select a template from `org-capture-templates', and
+then file the newly captured information.  The text is immediately
+inserted at the target location, and an indirect buffer is shown where
+you can edit it.  Pressing `\\[org-capture-finalize]' brings you back to the \
+previous
+state of Emacs, so that you can continue your work.
 
-When called interactively with a \\[universal-argument] prefix argument GOTO, don't capture
-anything, just go to the file/headline where the selected template
-stores its notes.  With a double prefix argument \
-\\[universal-argument] \\[universal-argument], go to the last note
-stored.
+When called interactively with a `\\[universal-argument]' prefix argument \
+GOTO, don't
+capture anything, just go to the file/headline where the selected
+template stores its notes.
+
+With a `\\[universal-argument] \\[universal-argument]' prefix argument, go to \
+the last note stored.
 
 When called with a `C-0' (zero) prefix, insert a template at point.
 

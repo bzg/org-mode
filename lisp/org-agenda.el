@@ -440,8 +440,9 @@ This will be spliced into the custom type of
 (defcustom org-agenda-custom-commands
   '(("n" "Agenda and all TODOs" ((agenda "") (alltodo ""))))
   "Custom commands for the agenda.
+\\<org-mode-map>
 These commands will be offered on the splash screen displayed by the
-agenda dispatcher \\[org-agenda].  Each entry is a list like this:
+agenda dispatcher `\\[org-agenda]'.  Each entry is a list like this:
 
    (key desc type match settings files)
 
@@ -606,14 +607,17 @@ subtree to see if any of the subtasks have project status.
 See also the variable `org-tags-match-list-sublevels' which applies
 to projects matched by this search as well.
 
-After defining this variable, you may use \\[org-agenda-list-stuck-projects]
-or `C-c a #' to produce the list."
+After defining this variable, you may use `\\[org-agenda-list-stuck-projects]'
+\(bound to `C-c a #') to produce the list."
   :group 'org-agenda-custom-commands
   :type '(list
 	  (string :tag "Tags/TODO match to identify a project")
-	  (repeat :tag "Projects are *not* stuck if they have an entry with TODO keyword any of" (string))
-	  (repeat :tag "Projects are *not* stuck if they have an entry with TAG being any of" (string))
-	  (regexp :tag "Projects are *not* stuck if this regexp matches inside the subtree")))
+	  (repeat :tag "Projects are *not* stuck if they have an entry with \
+TODO keyword any of" (string))
+	  (repeat :tag "Projects are *not* stuck if they have an entry with \
+TAG being any of" (string))
+	  (regexp :tag "Projects are *not* stuck if this regexp matches inside \
+the subtree")))
 
 (defgroup org-agenda-skip nil
   "Options concerning skipping parts of agenda files."
@@ -2697,7 +2701,7 @@ searches can be pre-defined in this way.
 
 If the current buffer is in Org mode and visiting a file, you can also
 first press `<' once to indicate that the agenda should be temporarily
-\(until the next use of \\[org-agenda]) restricted to the current file.
+\(until the next use of `\\[org-agenda]') restricted to the current file.
 Pressing `<' twice means to restrict to the current subtree or region
 \(if active)."
   (interactive "P")
@@ -4017,12 +4021,16 @@ This check for agenda markers in all agenda buffers currently active."
 (defvar org-agenda-show-log-scoped) ;; dynamically scope in `org-timeline' or `org-agenda-list'
 
 (defun org-timeline (&optional dotodo)
-  "Show a time-sorted view of the entries in the current org file.
-Only entries with a time stamp of today or later will be listed.  With
-\\[universal-argument] prefix, all unfinished TODO items will also be shown,
+  "Show a time-sorted view of the entries in the current Org file.
+
+Only entries with a time stamp of today or later will be listed.
+
+With `\\[universal-argument]' prefix, all unfinished TODO items will also be \
+shown,
 under the current date.
-If the buffer contains an active region, only check the region for
-dates."
+
+If the buffer contains an active region, only check the region
+for dates."
   (interactive "P")
   (let* ((dopast t)
 	 (org-agenda-show-log-scoped org-agenda-show-log)
@@ -4718,7 +4726,7 @@ Press `\\[org-agenda-manipulate-query-add]', \
 (defun org-todo-list (&optional arg)
   "Show all (not done) TODO entries from all agenda file in a single list.
 The prefix arg can be used to select a specific TODO keyword and limit
-the list to these.  When using \\[universal-argument], you will be prompted
+the list to these.  When using `\\[universal-argument]', you will be prompted
 for a keyword.  A numeric prefix directly selects the Nth keyword in
 `org-todo-keywords-1'."
   (interactive "P")
@@ -7471,9 +7479,9 @@ With two prefix arguments, remove the effort filters."
 
 The tag is selected with its fast selection letter, as configured.
 
-With a single \\[universal-argument] prefix ARG, exclude the agenda search.
+With a `\\[universal-argument]' prefix, exclude the agenda search.
 
-With a double \\[universal-argument] prefix ARG, filter the literal tag, \
+With a `\\[universal-argument] \\[universal-argument]' prefix, filter the literal tag, \
 i.e. don't
 filter on all its group members.
 
@@ -8161,9 +8169,11 @@ so that the date SD will be in that range."
 
 (defun org-agenda-log-mode (&optional special)
   "Toggle log mode in an agenda buffer.
+
 With argument SPECIAL, show all possible log items, not only the ones
 configured in `org-agenda-log-mode-items'.
-With a double \\[universal-argument] prefix arg, show *only* \
+
+With a `\\[universal-argument] \\[universal-argument]' prefix, show *only* \
 log items, nothing else."
   (interactive "P")
   (org-agenda-check-type t 'agenda 'timeline)
@@ -8178,8 +8188,7 @@ log items, nothing else."
   (setq org-agenda-start-with-log-mode org-agenda-show-log)
   (org-agenda-set-mode-name)
   (org-agenda-redo)
-  (message "Log mode is %s"
-	   (if org-agenda-show-log "on" "off")))
+  (message "Log mode is %s" (if org-agenda-show-log "on" "off")))
 
 (defun org-agenda-archives-mode (&optional with-files)
   "Toggle inclusion of items in trees marked with :ARCHIVE:.
@@ -8503,11 +8512,16 @@ If this information is not given, the function uses the tree at point."
 (defun org-agenda-refile (&optional goto rfloc no-update)
   "Refile the item at point.
 
-When GOTO is 0 or \\='(64) or a triple \\[universal-argument] prefix argument,
-clear the refile cache.
-When GOTO is \\='(16) or a double \\[universal-argument] prefix argument,
-go to the location of the last refiled item.
+When called with `\\[universal-argument] \\[universal-argument]', \
+go to the location of the last
+refiled item.
+
+When called with `\\[universal-argument] \\[universal-argument] \
+\\[universal-argument]' prefix or when GOTO is 0, clear
+the refile cache.
+
 RFLOC can be a refile location obtained in a different way.
+
 When NO-UPDATE is non-nil, don't redo the agenda buffer."
   (interactive "P")
   (cond
@@ -8624,8 +8638,10 @@ if it was hidden in the outline."
 (defvar org-agenda-show-window nil)
 (defun org-agenda-show-and-scroll-up (&optional arg)
   "Display the Org file which contains the item at point.
+
 When called repeatedly, scroll the window that is displaying the buffer.
-With a \\[universal-argument] prefix, use `org-show-entry' instead of \
+
+With a `\\[universal-argument]' prefix, use `org-show-entry' instead of \
 `outline-show-subtree'
 to display the item, so that drawers and logbooks stay folded."
   (interactive "P")
@@ -8753,8 +8769,10 @@ This calls the command `org-tree-to-indirect-buffer' from the original buffer.
 
 With a numerical prefix ARG, go up to this level and then take that tree.
 With a negative numeric ARG, go up by this number of levels.
-With a \\[universal-argument] prefix, make a separate frame for this tree (i.e. don't
-use the dedicated frame)."
+
+With a `\\[universal-argument]' prefix, make a separate frame for this tree, \
+i.e. don't use
+the dedicated frame."
   (interactive "P")
   (if current-prefix-arg
       (org-agenda-do-tree-to-indirect-buffer arg)
@@ -10035,7 +10053,7 @@ tag and (if present) the flagging note."
       (goto-char (point-min))
       (select-window win)
       (message "%s" (substitute-command-keys "Flagging note pushed to \
-kill ring.  Press \\[org-agenda-show-the-flagging-note] again to remove \
+kill ring.  Press `\\[org-agenda-show-the-flagging-note]' again to remove \
 tag and note")))))
 
 (defun org-agenda-remove-flag (marker)
@@ -10059,7 +10077,8 @@ tag and note")))))
 ;;;###autoload
 (defun org-agenda-to-appt (&optional refresh filter &rest args)
   "Activate appointments found in `org-agenda-files'.
-With a \\[universal-argument] prefix, refresh the list of
+
+With a `\\[universal-argument]' prefix, refresh the list of \
 appointments.
 
 If FILTER is t, interactively prompt the user for a regular

@@ -435,8 +435,8 @@ form URL/TITLE can also be used."
       (push (list uri title) org-stored-links))
     (kill-new uri)
     (message "`%s' to insert new org-link, `%s' to insert `%s'"
-             (substitute-command-keys"\\[org-insert-link]")
-             (substitute-command-keys"\\[yank]")
+             (substitute-command-keys "`\\[org-insert-link]'")
+             (substitute-command-keys "`\\[yank]'")
              uri))
   nil)
 
@@ -655,7 +655,7 @@ delegates most of the work to `org-protocol-create'."
   (let ((all (or (org-publish-get-project-from-filename buffer-file-name))))
     (if all (org-protocol-create (cdr all))
       (message "Not in an org-project.  Did you mean `%s'?"
-               (substitute-command-keys"\\[org-protocol-create]")))))
+               (substitute-command-keys "`\\[org-protocol-create]'")))))
 
 (defun org-protocol-create (&optional project-plist)
   "Create a new org-protocol project interactively.

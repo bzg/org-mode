@@ -67,9 +67,10 @@ produced.")
 
 (defcustom org-publish-project-alist nil
   "Association list to control publishing behavior.
-Each element of the alist is a publishing project.  The CAR of
+\\<org-mode-map>
+Each element of the alist is a publishing project.  The car of
 each element is a string, uniquely identifying the project.  The
-CDR of each element is in one of the following forms:
+cdr of each element is in one of the following forms:
 
 1. A well-formed property list with an even number of elements,
    alternating keys and values, specifying parameters for the
@@ -86,7 +87,7 @@ When the CDR of an element of org-publish-project-alist is in
 this second form, the elements of the list after `:components'
 are taken to be components of the project, which group together
 files requiring different publishing options.  When you publish
-such a project with \\[org-publish], the components all publish.
+such a project with `\\[org-publish]', the components all publish.
 
 When a property is given a value in `org-publish-project-alist',
 its setting overrides the value of the corresponding user

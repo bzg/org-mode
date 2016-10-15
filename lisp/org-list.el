@@ -241,7 +241,7 @@ This variable needs to be set before org.el is loaded.  If you
 need to make a change while Emacs is running, use the customize
 interface or run the following code after updating it:
 
-  \\[org-element-update-syntax]"
+  `\\[org-element-update-syntax]'"
   :group 'org-plain-lists
   :type '(choice (const :tag "dot like in \"2.\"" ?.)
 		 (const :tag "paren like in \"2)\"" ?\))
@@ -260,7 +260,7 @@ This variable needs to be set before org.el is loaded.  If you
 need to make a change while Emacs is running, use the customize
 interface or run the following code after updating it:
 
-  \\[org-element-update-syntax]"
+  `\\[org-element-update-syntax]'"
   :group 'org-plain-lists
   :version "24.1"
   :type 'boolean
@@ -282,12 +282,19 @@ spaces instead of one after the bullet in each item of the list."
 (defcustom org-list-automatic-rules '((checkbox . t)
 				      (indent . t))
   "Non-nil means apply set of rules when acting on lists.
+\\<org-mode-map>
 By default, automatic actions are taken when using
- \\[org-meta-return], \\[org-metaright], \\[org-metaleft],
- \\[org-shiftmetaright], \\[org-shiftmetaleft],
- \\[org-ctrl-c-minus], \\[org-toggle-checkbox] or
- \\[org-insert-todo-heading].  You can disable individually these
- rules by setting them to nil.  Valid rules are:
+  `\\[org-meta-return]',
+  `\\[org-metaright]',
+  `\\[org-metaleft]',
+  `\\[org-shiftmetaright]',
+  `\\[org-shiftmetaleft]',
+  `\\[org-ctrl-c-minus]',
+  `\\[org-toggle-checkbox]',
+  `\\[org-insert-todo-heading]'.
+
+You can disable individually these rules by setting them to nil.
+Valid rules are:
 
 checkbox  when non-nil, checkbox statistics is updated each time
           you either insert a new checkbox or toggle a checkbox.
@@ -307,13 +314,15 @@ indent    when non-nil, indenting or outdenting list top-item
 
 (defcustom org-list-use-circular-motion nil
   "Non-nil means commands implying motion in lists should be cyclic.
-
+\\<org-mode-map>
 In that case, the item following the last item is the first one,
 and the item preceding the first item is the last one.
 
-This affects the behavior of \\[org-move-item-up],
- \\[org-move-item-down], \\[org-next-item] and
- \\[org-previous-item]."
+This affects the behavior of
+  `\\[org-move-item-up]',
+  `\\[org-move-item-down]',
+  `\\[org-next-item]',
+  `\\[org-previous-item]'."
   :group 'org-plain-lists
   :version "24.1"
   :type 'boolean)

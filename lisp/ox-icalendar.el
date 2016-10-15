@@ -46,7 +46,7 @@
 
 (defcustom org-icalendar-combined-agenda-file "~/org.ics"
   "The file name for the iCalendar file covering all agenda files.
-This file is created with the command \\[org-icalendar-combine-agenda-files].
+This file is created with the command `\\[org-icalendar-combine-agenda-files]'.
 The file name should be absolute.  It will be overwritten without warning."
   :group 'org-export-icalendar
   :type 'file)

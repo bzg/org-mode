@@ -199,7 +199,7 @@ alignment to the right border applies."
 
 (defcustom org-table-automatic-realign t
   "Non-nil means automatically re-align table when pressing TAB or RETURN.
-When nil, aligning is only done with \\[org-table-align], or after column
+When nil, aligning is only done with `\\[org-table-align]', or after column
 removal/insertion."
   :group 'org-table-editing
   :type 'boolean)
@@ -262,7 +262,8 @@ t       accept as input and present for editing"
 	  (const :tag "Convert user input, don't offer during editing" from)))
 
 (defcustom org-table-copy-increment t
-  "Non-nil means increment when copying current field with \\[org-table-copy-down]."
+  "Non-nil means increment when copying current field with \
+`\\[org-table-copy-down]'."
   :group 'org-table-calculation
   :version "25.2"
   :package-version '(Org . "8.3")
@@ -316,7 +317,7 @@ which should be evaluated as described in the manual and in the documentation
 string of the command `org-table-eval-formula'.  This feature requires the
 Emacs calc package.
 When this variable is nil, formula calculation is only available through
-the command \\[org-table-eval-formula]."
+the command `\\[org-table-eval-formula]'."
   :group 'org-table-calculation
   :type 'boolean)
 
@@ -349,7 +350,7 @@ Constants can also be defined on a per-file basis using a line like
 (defcustom org-table-allow-automatic-line-recalculation t
   "Non-nil means lines marked with |#| or |*| will be recomputed automatically.
 \\<org-mode-map>\
-Automatically means when TAB or RET or \\[org-ctrl-c-ctrl-c] \
+Automatically means when `TAB' or `RET' or `\\[org-ctrl-c-ctrl-c]' \
 are pressed in the line."
   :group 'org-table-calculation
   :type 'boolean)
@@ -1989,9 +1990,10 @@ blank, and the content is appended to the field above."
 ;;;###autoload
 (defun org-table-edit-field (arg)
   "Edit table field in a different window.
-This is mainly useful for fields that contain hidden parts.
-When called with a \\[universal-argument] prefix, just make the full field visible so that
-it can be edited in place."
+This is mainly useful for fields that contain hidden parts.  When called
+with a `\\[universal-argument]' prefix, just make the full field \
+visible so that it can be
+edited in place."
   (interactive "P")
   (cond
    ((equal arg '(16))
@@ -5295,12 +5297,15 @@ of regular ascii characters."
 
 ;;;###autoload
 (defun orgtbl-ascii-plot (&optional ask)
-  "Draw an ascii bar plot in a column.
-With cursor in a column containing numerical values, this
-function will draw a plot in a new column.
+  "Draw an ASCII bar plot in a column.
+
+With cursor in a column containing numerical values, this function
+will draw a plot in a new column.
+
 ASK, if given, is a numeric prefix to override the default 12
-characters width of the plot.  ASK may also be the
-\\[universal-argument] prefix, which will prompt for the width."
+characters width of the plot.  ASK may also be the `\\[universal-argument]' \
+prefix,
+which will prompt for the width."
   (interactive "P")
   (let ((col (org-table-current-column))
 	(min  1e999)		 ; 1e999 will be converted to infinity

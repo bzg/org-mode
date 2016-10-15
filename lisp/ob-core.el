@@ -117,11 +117,11 @@ execution or nil if no prompt is required.
 
 Warning: Disabling confirmation may result in accidental
 evaluation of potentially harmful code.  It may be advisable
-remove code block execution from \\[org-ctrl-c-ctrl-c] \
+remove code block execution from `\\[org-ctrl-c-ctrl-c]' \
 as further protection
 against accidental code block evaluation.  The
 `org-babel-no-eval-on-ctrl-c-ctrl-c' variable can be used to
-remove code block execution from the \\[org-ctrl-c-ctrl-c] keybinding."
+remove code block execution from the `\\[org-ctrl-c-ctrl-c]' keybinding."
   :group 'org-babel
   :version "24.1"
   :type '(choice boolean function))
@@ -130,7 +130,7 @@ remove code block execution from the \\[org-ctrl-c-ctrl-c] keybinding."
 
 (defcustom org-babel-no-eval-on-ctrl-c-ctrl-c nil
   "\\<org-mode-map>\
-Remove code block evaluation from the \\[org-ctrl-c-ctrl-c] key binding."
+Remove code block evaluation from the `\\[org-ctrl-c-ctrl-c]' key binding."
   :group 'org-babel
   :version "24.1"
   :type 'boolean)
@@ -1323,7 +1323,7 @@ the `org-mode-hook'."
   "Return the value of the hash at POINT.
 \\<org-mode-map>\
 The hash is also added as the last element of the kill ring.
-This can be called with \\[org-ctrl-c-ctrl-c]."
+This can be called with `\\[org-ctrl-c-ctrl-c]'."
   (interactive)
   (let ((hash (car (delq nil (mapcar
 			      (lambda (ol) (overlay-get ol 'babel-hash))

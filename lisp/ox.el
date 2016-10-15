@@ -922,7 +922,7 @@ these cases."
 (defcustom org-export-in-background nil
   "Non-nil means export and publishing commands will run in background.
 Results from an asynchronous export are never displayed
-automatically.  But you can retrieve them with \\[org-export-stack]."
+automatically.  But you can retrieve them with `\\[org-export-stack]'."
   :group 'org-export-general
   :version "24.4"
   :package-version '(Org . "8.0")
@@ -6168,13 +6168,13 @@ within Emacs."
 (define-derived-mode org-export-stack-mode tabulated-list-mode "Org-Stack"
   "Mode for displaying asynchronous export stack.
 
-Type \\[org-export-stack] to visualize the asynchronous export
+Type `\\[org-export-stack]' to visualize the asynchronous export
 stack.
 
 In an Org Export Stack buffer, use \
-\\<org-export-stack-mode-map>\\[org-export-stack-view] to view export output
-on current line, \\[org-export-stack-remove] to remove it from the stack and \
-\\[org-export-stack-clear] to clear
+\\<org-export-stack-mode-map>`\\[org-export-stack-view]' to view export output
+on current line, `\\[org-export-stack-remove]' to remove it from the stack and \
+`\\[org-export-stack-clear]' to clear
 stack completely.
 
 Removing entries in a stack buffer does not affect files
@@ -6242,7 +6242,7 @@ appropriate for `tabulated-list-print'."
 	  ;; SOURCE is not consistent with current line.  The stack
 	  ;; view is outdated.
 	  (error (substitute-command-keys
-		  "Source unavailable; type \\[org-export-stack-refresh] \
+		  "Source unavailable; type `\\[org-export-stack-refresh]' \
 to refresh buffer")))))))
 
 
@@ -6269,10 +6269,12 @@ SPC and DEL (resp. C-n and C-p) keys.
 Set variable `org-export-dispatch-use-expert-ui' to switch to one
 flavor or the other.
 
-When ARG is \\[universal-argument], repeat the last export action, with the same set
-of options used back then, on the current buffer.
+When ARG is `\\[universal-argument]', repeat the last export action, with the\
+ same
+set of options used back then, on the current buffer.
 
-When ARG is \\[universal-argument] \\[universal-argument], display the asynchronous export stack."
+When ARG is `\\[universal-argument] \\[universal-argument]', display the \
+asynchronous export stack."
   (interactive "P")
   (let* ((input
 	  (cond ((equal arg '(16)) '(stack))

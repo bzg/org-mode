@@ -48,8 +48,8 @@
 
 (defcustom org-gnus-prefer-web-links nil
   "If non-nil, `org-store-link' creates web links to Google groups or Gmane.
-When nil, Gnus will be used for such links.
-Using a prefix arg to the command \\[org-store-link] (`org-store-link')
+\\<org-mode-map>When nil, Gnus will be used for such links.
+Using a prefix argument to the command `\\[org-store-link]' (`org-store-link')
 negates this setting for the duration of the command."
   :group 'org-link-store
   :type 'boolean)

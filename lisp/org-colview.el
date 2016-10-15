@@ -394,7 +394,7 @@ DATELINE is non-nil when the face used should be
 	  (line-beginning-position 2)
 	  'read-only
 	  (substitute-command-keys
-	   "Type \\<org-columns-map>\\[org-columns-edit-value] \
+	   "Type \\<org-columns-map>`\\[org-columns-edit-value]' \
 to edit property")))))))
 
 (defun org-columns-add-ellipses (string width)
@@ -774,7 +774,7 @@ Also sets `org-columns-top-level-marker' to the new position."
 Column view applies to the whole buffer if point is before the
 first headline.  Otherwise, it applies to the first ancestor
 setting \"COLUMNS\" property.  If there is none, it defaults to
-the current headline.  With a \\[universal-argument] prefix \
+the current headline.  With a `\\[universal-argument]' prefix \
 argument, turn on column
 view for the whole buffer unconditionally.
 
