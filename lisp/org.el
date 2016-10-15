@@ -23526,7 +23526,13 @@ strictly within a source block, use appropriate comment syntax."
 		   (skip-chars-backward " \r\t\n")
 		   (line-beginning-position))
 		 end)))
-      (org-babel-do-in-edit-buffer (call-interactively 'comment-dwim))
+      ;; Translate region boundaries for the Org buffer to the source
+      ;; buffer.
+      (let ((offset (- end beg)))
+	(save-excursion
+	  (goto-char beg)
+	  (org-babel-do-in-edit-buffer
+	   (comment-or-uncomment-region (point) (+ offset (point))))))
     (save-restriction
       ;; Restrict region
       (narrow-to-region (save-excursion (goto-char beg)
