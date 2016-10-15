@@ -23710,45 +23710,50 @@ package ox-bibtex by Taru Karttunen."
 
 ;;;; Functions extending outline functionality
 
-(defun org-beginning-of-line (&optional arg)
-  "Go to the beginning of the current line.
-
-If that is invisible, continue to a visible line beginning.
+(defun org-beginning-of-line (&optional n)
+  "Go to the beginning of the current visible line.
 
 If this is a headline, and `org-special-ctrl-a/e' is set, ignore
 tags on the first attempt, and only move to after the tags when
-the cursor is already beyond the end of the headline."
-  (interactive "P")
-  (let ((pos (point))
+the cursor is already beyond the end of the headline.
+
+With argument N not nil or 1, move forward N - 1 lines first."
+  (interactive "^p")
+  (let ((origin (point))
 	(special (pcase org-special-ctrl-a/e
-		   (`(,C-a . _) C-a)
-		   (C-a C-a)))
+		   (`(,C-a . _) C-a) (_ org-special-ctrl-a/e)))
 	deactivate-mark)
+    ;; First move to a visible line.
     (if (bound-and-true-p visual-line-mode)
-	(call-interactively #'beginning-of-visual-line)
-      (call-interactively #'move-beginning-of-line)
+	(beginning-of-visual-line n)
+      (move-beginning-of-line n)
       ;; `move-beginning-of-line' may leave point after invisible
       ;; characters if line starts with such of these (e.g., with
       ;; a link at column 0).  Really move to the beginning of the
       ;; current visible line.
       (beginning-of-line))
     (cond
-     ((or arg (not special)))
-     ((and (looking-at org-complex-heading-regexp)
-	   (eq (char-after (match-end 1)) ?\s))
+     ;; No special behavior.  Point is already at the beginning of
+     ;; a line, logical or visual.
+     ((not special))
+     ;; `beginning-of-visual-line' left point before logical beginning
+     ;; of line: point is at the beginning of a visual line.  Bail
+     ;; out.
+     ((and (bound-and-true-p visual-line-mode) (not (bolp))))
+     ((looking-at org-complex-heading-regexp)
+      ;; At a headline, special position is before the title, but
+      ;; after any TODO keyword or priority cookie.
       (let ((refpos (min (1+ (or (match-end 3) (match-end 2) (match-end 1)))
-			 (line-end-position))))
-	(goto-char
-	 (if (eq special t)
-	     (cond ((> pos refpos) refpos)
-		   ((= pos (point)) refpos)
-		   (t (point)))
-	   (cond ((> pos (point)) (point))
-		 ((not (eq last-command this-command)) (point))
-		 (t refpos))))))
+			 (line-end-position)))
+	    (bol (point)))
+	(if (eq special 'reversed)
+	    (when (and (= origin bol) (eq last-command this-command))
+	      (goto-char refpos))
+	  (when (or (> origin refpos) (= origin bol))
+	    (goto-char refpos)))))
      ((and (looking-at org-list-full-item-re)
-	   (save-match-data (memq (org-element-type (org-element-at-point))
-				  '(item plain-list))))
+	   (memq (org-element-type (save-match-data (org-element-at-point)))
+		 '(item plain-list)))
       ;; Set special position at first white space character after
       ;; bullet, and check-box, if any.
       (let ((after-bullet
@@ -23756,15 +23761,13 @@ the cursor is already beyond the end of the headline."
 	       (cond ((not box) (match-end 1))
 		     ((eq (char-after box) ?\s) (1+ box))
 		     (t box)))))
-	;; Special case: Move point to special position when currently
-	;; after it or at beginning of line.
-	(if (eq special t)
-	    (when (or (> pos after-bullet) (= (point) pos))
+	(if (eq special 'reversed)
+	    (when (and (= (point) origin) (eq last-command this-command))
 	      (goto-char after-bullet))
-	  ;; Reversed case: Move point to special position when point
-	  ;; was already at beginning of line and command is repeated.
-	  (when (and (= (point) pos) (eq last-command this-command))
-	    (goto-char after-bullet))))))))
+	  (when (or (> origin after-bullet) (= (point) origin))
+	    (goto-char after-bullet)))))
+     ;; No special context.  Point is already at beginning of line.
+     (t nil))))
 
 (defun org-end-of-line (&optional n)
   "Go to the end of the line, but before ellipsis, if any.
