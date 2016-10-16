@@ -6955,8 +6955,14 @@ The optional argument TYPE tells the agenda type."
 (defsubst org-cmp-effort (a b)
   "Compare the effort values of string A and B."
   (let* ((def (if org-sort-agenda-noeffort-is-high 32767 -1))
-	 (ea (or (get-text-property (1- (length a)) 'effort-minutes a) def))
-	 (eb (or (get-text-property (1- (length b)) 'effort-minutes b) def)))
+	 ;; `effort-minutes' property is not directly accessible from
+	 ;; the strings, but is stored as a property in `txt'.
+	 (ea (or (get-text-property
+		  0 'effort-minutes (get-text-property 0 'txt a))
+		 def))
+	 (eb (or (get-text-property
+		  0 'effort-minutes (get-text-property 0 'txt b))
+		 def)))
     (cond ((> ea eb) +1)
 	  ((< ea eb) -1))))
 
