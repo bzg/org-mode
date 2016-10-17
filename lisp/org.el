@@ -7223,6 +7223,18 @@ DATA should have been made by `org-outline-overlay-data'."
 
 ;;; Folding of blocks
 
+(defun org-flag-region (from to flag spec)
+  "Hide or show lines from FROM to TO, according to FLAG.
+SPEC is the invisibility spec, as a symbol."
+  (remove-overlays from to 'invisible spec)
+  ;; Use `front-advance' since text right before to the beginning of
+  ;; the overlay belongs to the visible line than to the contents.
+  (when flag
+    (let ((o (make-overlay from to nil 'front-advance)))
+      (overlay-put o 'evaporate t)
+      (overlay-put o 'invisible spec)
+      (overlay-put o 'isearch-open-invisible #'delete-overlay))))
+
 (defun org-block-map (function &optional start end)
   "Call FUNCTION at the head of all source blocks in the current buffer.
 Optional arguments START and END can be used to limit the range."
@@ -7270,38 +7282,31 @@ a block.  Return a non-nil value when toggling is successful."
 				 export-block quote-block special-block
 				 src-block verse-block))
       (user-error "Not at a block"))
-    (let* ((start (save-excursion
-		    (goto-char (org-element-property :post-affiliated element))
+    (let* ((post (org-element-property :post-affiliated element))
+	   (start (save-excursion
+		    (goto-char post)
 		    (line-end-position)))
 	   (end (save-excursion
 		  (goto-char (org-element-property :end element))
-		  (skip-chars-backward " \r\t\n")
-		  (line-end-position)))
-	   (overlays (overlays-at start)))
-      (cond
-       ;; Do nothing when not before or at the block opening line or
-       ;; at the block closing line.
-       ((let ((eol (line-end-position))) (and (> eol start) (/= eol end))) nil)
-       ((and (not (eq force 'off))
-	     (not (memq t (mapcar
-			   (lambda (o)
-			     (eq (overlay-get o 'invisible) 'org-hide-block))
-			   overlays))))
-	(let ((ov (make-overlay start end)))
-	  (overlay-put ov 'invisible 'org-hide-block)
-	  ;; Make the block accessible to `isearch'.
-	  (overlay-put ov 'isearch-open-invisible #'delete-overlay)
-	  ;; When the block is hidden away, make sure point is left in
-	  ;; a visible part of the buffer.
-	  (when (> (line-beginning-position) start)
-	    (goto-char start)
-	    (beginning-of-line))
-	  ;; Signal successful toggling.
-	  t))
-       ((or (not force) (eq force 'off))
-	(dolist (ov overlays t)
-	  (when (eq (overlay-get ov 'invisible) 'org-hide-block)
-	    (delete-overlay ov))))))))
+		  (skip-chars-backward " \t\n")
+		  (line-end-position))))
+      ;; Do nothing when not before or at the block opening line or at
+      ;; the block closing line.
+      (unless (let ((eol (line-end-position))) (and (> eol start) (/= eol end)))
+	(cond ((eq force 'off)
+	       (org-flag-region start end nil 'org-hide-block))
+	      (force
+	       (org-flag-region start end t 'org-hide-block))
+	      ((eq (get-char-property start 'invisible) 'org-hide-block)
+	       (org-flag-region start end nil 'org-hide-block))
+	      (t
+	       (org-flag-region start end t 'org-hide-block)))
+	;; When the block is hidden away, make sure point is left in
+	;; a visible part of the buffer.
+	(when (invisible-p (max (1- (point)) (point-min)))
+	  (goto-char post))
+	;; Signal success.
+	t))))
 
 ;; Remove overlays when changing major mode
 (add-hook 'org-mode-hook
