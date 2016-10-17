@@ -7223,9 +7223,6 @@ DATA should have been made by `org-outline-overlay-data'."
 
 ;;; Folding of blocks
 
-(defvar-local org-hide-block-overlays nil
-  "Overlays hiding blocks.")
-
 (defun org-block-map (function &optional start end)
   "Call FUNCTION at the head of all source blocks in the current buffer.
 Optional arguments START and END can be used to limit the range."
@@ -7252,8 +7249,7 @@ Optional arguments START and END can be used to limit the range."
 (defun org-show-block-all ()
   "Unfold all blocks in the current buffer."
   (interactive)
-  (mapc #'delete-overlay org-hide-block-overlays)
-  (setq org-hide-block-overlays nil))
+  (remove-overlays nil nil 'invisible 'org-hide-block))
 
 (defun org-hide-block-toggle-maybe ()
   "Toggle visibility of block at point.
@@ -7294,14 +7290,7 @@ a block.  Return a non-nil value when toggling is successful."
 	(let ((ov (make-overlay start end)))
 	  (overlay-put ov 'invisible 'org-hide-block)
 	  ;; Make the block accessible to `isearch'.
-	  (overlay-put
-	   ov 'isearch-open-invisible
-	   (lambda (ov)
-	     (when (memq ov org-hide-block-overlays)
-	       (setq org-hide-block-overlays (delq ov org-hide-block-overlays)))
-	     (when (eq (overlay-get ov 'invisible) 'org-hide-block)
-	       (delete-overlay ov))))
-	  (push ov org-hide-block-overlays)
+	  (overlay-put ov 'isearch-open-invisible #'delete-overlay)
 	  ;; When the block is hidden away, make sure point is left in
 	  ;; a visible part of the buffer.
 	  (when (> (line-beginning-position) start)
@@ -7311,8 +7300,6 @@ a block.  Return a non-nil value when toggling is successful."
 	  t))
        ((or (not force) (eq force 'off))
 	(dolist (ov overlays t)
-	  (when (memq ov org-hide-block-overlays)
-	    (setq org-hide-block-overlays (delq ov org-hide-block-overlays)))
 	  (when (eq (overlay-get ov 'invisible) 'org-hide-block)
 	    (delete-overlay ov))))))))
 
