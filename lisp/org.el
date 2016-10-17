@@ -23763,7 +23763,7 @@ With argument N not nil or 1, move forward N - 1 lines first."
   (interactive "^p")
   (let ((origin (point))
 	(special (pcase org-special-ctrl-a/e
-		   (`(,C-a . _) C-a) (_ org-special-ctrl-a/e)))
+		   (`(,C-a . ,_) C-a) (_ org-special-ctrl-a/e)))
 	deactivate-mark)
     ;; First move to a visible line.
     (if (bound-and-true-p visual-line-mode)
@@ -23822,7 +23822,7 @@ With argument N not nil or 1, move forward N - 1 lines first."
   (interactive "^p")
   (let ((origin (point))
 	(special (pcase org-special-ctrl-a/e
-		   (`(_ . ,C-e) C-e) (_ org-special-ctrl-a/e)))
+		   (`(,_ . ,C-e) C-e) (_ org-special-ctrl-a/e)))
 	deactivate-mark)
     ;; First move to a visible line.
     (if (bound-and-true-p visual-line-mode)
