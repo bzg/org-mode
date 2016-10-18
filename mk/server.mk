@@ -67,8 +67,10 @@ elpa-dirty:
 	ln -s . $(ORGDIR)
 	echo "(define-package \"org\""                        > org-pkg.el
 	echo "  \"$(PKG_TAG)\" \"$(PKG_DOC)\" ($(PKG_REQ)))" >> org-pkg.el
+	echo ";; Local Variables:"                           >> org-pkg.el
 	echo ";; no-byte-compile: t"                         >> org-pkg.el
-	tar --exclude=Makefile --exclude="org-colview-xemacs.el" \
+	echo ";; End:"                                       >> org-pkg.el
+	tar --exclude=Makefile \
 	  --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
 	  $(foreach dist, $(ORGELPA), $(ORGDIR)/$(dist))
 	-@$(RM) $(ORGDIR) org-pkg.el
@@ -88,8 +90,10 @@ elpaplus-dirty:
 	ln -s . $(ORGDIR)
 	echo "(define-package \"org-plus-contrib\""           > org-plus-contrib-pkg.el
 	echo "  \"$(PKG_TAG)\" \"$(PKG_DOC)\" ($(PKG_REQ)))" >> org-plus-contrib-pkg.el
+	echo ";; Local Variables:"                           >> org-plus-contrib-pkg.el
 	echo ";; no-byte-compile: t"                         >> org-plus-contrib-pkg.el
-	tar --exclude=Makefile --exclude="org-colview-xemacs.el" \
+	echo ";; End:"                                       >> org-plus-contrib-pkg.el
+	tar --exclude=Makefile \
 	  --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
 	  $(foreach dist, $(ORGELPAPLUS), $(ORGDIR)/$(dist))
 	-@$(RM) $(ORGDIR) org-plus-contrib-pkg.el
