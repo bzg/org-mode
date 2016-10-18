@@ -6937,12 +6937,12 @@ With a numeric prefix, show all headlines up to that level."
     (outline-show-all)))
   (unless (eq org-startup-folded 'showeverything)
     (when org-hide-block-startup (org-hide-block-all))
-    (org-set-visibility-according-to-property 'no-cleanup)
+    (org-set-visibility-according-to-property)
     (org-cycle-hide-archived-subtrees 'all)
     (org-cycle-hide-drawers 'all)
     (org-cycle-show-empty-lines t)))
 
-(defun org-set-visibility-according-to-property (&optional no-cleanup)
+(defun org-set-visibility-according-to-property ()
   "Switch subtree visibilities according to :VISIBILITY: property."
   (interactive)
   (org-with-wide-buffer
@@ -6953,26 +6953,20 @@ With a numeric prefix, show all headlines up to that level."
 	 (save-excursion
 	   (org-back-to-heading t)
 	   (outline-hide-subtree)
-	   (org-reveal))
-	 (cond
-	  ((equal state "folded")
-	   (outline-hide-subtree)
-	   (org-end-of-subtree t t))
-	  ((equal state "children")
-	   (org-show-hidden-entry)
-	   (org-show-children))
-	  ((equal state "content")
-	   (save-excursion
-	     (save-restriction
-	       (org-narrow-to-subtree)
-	       (org-content)))
-	   (org-end-of-subtree t t))
-	  ((member state '("all" "showall"))
-	   (outline-show-subtree))))))
-   (unless no-cleanup
-     (org-cycle-hide-archived-subtrees 'all)
-     (org-cycle-hide-drawers 'all)
-     (org-cycle-show-empty-lines 'all))))
+	   (org-reveal)
+	   (cond
+	    ((equal state "folded")
+	     (outline-hide-subtree))
+	    ((equal state "children")
+	     (org-show-hidden-entry)
+	     (org-show-children))
+	    ((equal state "content")
+	     (save-excursion
+	       (save-restriction
+		 (org-narrow-to-subtree)
+		 (org-content))))
+	    ((member state '("all" "showall"))
+	     (outline-show-subtree)))))))))
 
 (defun org-overview ()
   "Switch to overview mode, showing only top-level headlines.
