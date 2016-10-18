@@ -2507,12 +2507,22 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
   (should
    (org-test-with-temp-text "* TODO Headline<point>"
      (let ((org-special-ctrl-a/e t))
-       (and (progn (org-beginning-of-line) (looking-at "Headline"))
+       (and (progn (org-beginning-of-line) (looking-at-p "Headline"))
 	    (progn (org-beginning-of-line) (bolp))
-	    (progn (org-beginning-of-line) (looking-at "Headline"))))))
+	    (progn (org-beginning-of-line) (looking-at-p "Headline"))))))
   (should
    (org-test-with-temp-text "* TODO [#A] Headline<point>"
      (let ((org-special-ctrl-a/e t))
+       (org-beginning-of-line)
+       (looking-at "Headline"))))
+  (should
+   (org-test-with-temp-text "* TODO [#A] Headline<point>"
+     (let ((org-special-ctrl-a/e '(t . nil)))
+       (org-beginning-of-line)
+       (looking-at "Headline"))))
+  (should-not
+   (org-test-with-temp-text "* TODO [#A] Headline<point>"
+     (let ((org-special-ctrl-a/e '(nil . nil)))
        (org-beginning-of-line)
        (looking-at "Headline"))))
   ;; At an headline with reversed movement, first move to beginning of
@@ -2522,15 +2532,27 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
      (let ((org-special-ctrl-a/e 'reversed)
 	   (this-command last-command))
        (and (progn (org-beginning-of-line) (bolp))
-	    (progn (org-beginning-of-line) (looking-at "Headline"))))))
+	    (progn (org-beginning-of-line) (looking-at-p "Headline"))))))
+  (should
+   (org-test-with-temp-text "* TODO Headline<point>"
+     (let ((org-special-ctrl-a/e '(reversed . nil))
+	   (this-command last-command))
+       (and (progn (org-beginning-of-line) (bolp))
+	    (progn (org-beginning-of-line) (looking-at-p "Headline"))))))
+  (should-not
+   (org-test-with-temp-text "* TODO Headline<point>"
+     (let ((org-special-ctrl-a/e '(t . nil))
+	   (this-command last-command))
+       (and (progn (org-beginning-of-line) (bolp))
+	    (progn (org-beginning-of-line) (looking-at-p "Headline"))))))
   ;; At an item with special movement, first move after to beginning
   ;; of title, then to the beginning of line, rinse, repeat.
   (should
    (org-test-with-temp-text "- [ ] Item<point>"
      (let ((org-special-ctrl-a/e t))
-       (and (progn (org-beginning-of-line) (looking-at "Item"))
+       (and (progn (org-beginning-of-line) (looking-at-p "Item"))
 	    (progn (org-beginning-of-line) (bolp))
-	    (progn (org-beginning-of-line) (looking-at "Item"))))))
+	    (progn (org-beginning-of-line) (looking-at-p "Item"))))))
   ;; At an item with reversed movement, first move to beginning of
   ;; line, then to the beginning of title.
   (should
@@ -2538,7 +2560,7 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
      (let ((org-special-ctrl-a/e 'reversed)
 	   (this-command last-command))
        (and (progn (org-beginning-of-line) (bolp))
-	    (progn (org-beginning-of-line) (looking-at "Item"))))))
+	    (progn (org-beginning-of-line) (looking-at-p "Item"))))))
   ;; Leave point before invisible characters at column 0.
   (should
    (org-test-with-temp-text "[[http://orgmode.org]]<point>"
@@ -2569,7 +2591,8 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
   ;; Standard test.
   (should
    (org-test-with-temp-text "Some text\nSome other text"
-     (progn (org-end-of-line) (eolp))))
+     (org-end-of-line)
+     (eolp)))
   ;; With `visual-line-mode' active, move to end of visible line.
   ;; However, never go past ellipsis.
   (should-not
@@ -2609,6 +2632,11 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
        (and (progn (org-end-of-line) (eolp))
 	    (progn (org-end-of-line) (eolp))))))
   (should
+   (org-test-with-temp-text "* Headline2b :tag:\n"
+     (let ((org-special-ctrl-a/e '(t . nil)))
+       (and (progn (org-end-of-line) (eolp))
+	    (progn (org-end-of-line) (eolp))))))
+  (should
    (org-test-with-temp-text "* Headline2a :tag:\n** Sub"
      (org-overview)
      (let ((org-special-ctrl-a/e nil))
@@ -2620,9 +2648,21 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
   (should
    (org-test-with-temp-text "* Headline1 :tag:\n"
      (let ((org-special-ctrl-a/e t))
-       (and (progn (org-end-of-line) (looking-at " :tag:"))
+       (and (progn (org-end-of-line) (looking-at-p " :tag:"))
 	    (progn (org-end-of-line) (eolp))
-	    (progn (org-end-of-line) (looking-at " :tag:"))))))
+	    (progn (org-end-of-line) (looking-at-p " :tag:"))))))
+  (should
+   (org-test-with-temp-text "* Headline1 :tag:\n"
+     (let ((org-special-ctrl-a/e '(nil . t)))
+       (and (progn (org-end-of-line) (looking-at-p " :tag:"))
+	    (progn (org-end-of-line) (eolp))
+	    (progn (org-end-of-line) (looking-at-p " :tag:"))))))
+  (should-not
+   (org-test-with-temp-text "* Headline1 :tag:\n"
+     (let ((org-special-ctrl-a/e '(nil . nil)))
+       (and (progn (org-end-of-line) (looking-at-p " :tag:"))
+	    (progn (org-end-of-line) (eolp))
+	    (progn (org-end-of-line) (looking-at-p " :tag:"))))))
   (should
    (org-test-with-temp-text "* Headline2a :tag:\n** Sub"
      (org-overview)
@@ -2637,7 +2677,19 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
      (let ((org-special-ctrl-a/e 'reversed)
 	   (this-command last-command))
        (and (progn (org-end-of-line) (eolp))
-	    (progn (org-end-of-line) (looking-at " :tag:"))))))
+	    (progn (org-end-of-line) (looking-at-p " :tag:"))))))
+  (should
+   (org-test-with-temp-text "* Headline3 :tag:\n"
+     (let ((org-special-ctrl-a/e '(nil . reversed))
+	   (this-command last-command))
+       (and (progn (org-end-of-line) (eolp))
+	    (progn (org-end-of-line) (looking-at-p " :tag:"))))))
+  (should-not
+   (org-test-with-temp-text "* Headline3 :tag:\n"
+     (let ((org-special-ctrl-a/e '(nil . t))
+	   (this-command last-command))
+       (and (progn (org-end-of-line) (eolp))
+	    (progn (org-end-of-line) (looking-at-p " :tag:"))))))
   (should
    (org-test-with-temp-text "* Headline2a :tag:\n** Sub"
      (org-overview)
