@@ -1778,7 +1778,6 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
     (goto-char m)
     (org-show-entry)
     (org-back-to-heading t)
-    (org-cycle-hide-drawers 'children)
     (recenter org-clock-goto-before-context)
     (org-reveal)
     (if recent

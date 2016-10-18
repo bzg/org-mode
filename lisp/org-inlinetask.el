@@ -324,8 +324,7 @@ If the task has an end part, also demote it."
      ((= end start))
      ;; Inlinetask was folded: expand it.
      ((eq (get-char-property (1+ start) 'invisible) 'outline)
-      (outline-flag-region start end nil)
-      (org-cycle-hide-drawers 'children))
+      (outline-flag-region start end nil))
      (t (outline-flag-region start end t)))))
 
 (defun org-inlinetask-hide-tasks (state)

@@ -407,7 +407,6 @@ it can be a list structured like an entry in `org-feed-alist'."
 	  (goto-char inbox-pos)
 	  (outline-hide-subtree)
 	  (org-show-children)
-	  (org-cycle-hide-drawers 'children)
 
 	  ;; Hooks and messages
 	  (when org-feed-save-after-adding (save-buffer))

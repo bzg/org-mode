@@ -1414,7 +1414,6 @@ the values `folded', `children', or `subtree'."
   :type 'hook)
 
 (defcustom org-cycle-hook '(org-cycle-hide-archived-subtrees
-			    org-cycle-hide-drawers
 			    org-cycle-show-empty-lines
 			    org-optimize-window-after-visibility-change)
   "Hook that is run after `org-cycle' has changed the buffer visibility.
@@ -5393,6 +5392,7 @@ The following commands are available:
   (org-install-agenda-files-menu)
   (when org-descriptive-links (add-to-invisibility-spec '(org-link)))
   (add-to-invisibility-spec '(org-hide-block . t))
+  (add-to-invisibility-spec '(org-hide-drawer . t))
   (setq-local outline-regexp org-outline-regexp)
   (setq-local outline-level 'org-outline-level)
   (setq bidi-paragraph-direction 'left-to-right)
@@ -6859,11 +6859,6 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 	(org-show-entry)
 	(org-with-limited-levels (org-show-children))
 	(org-show-set-visibility 'canonical)
-	;; FIXME: This slows down the func way too much.
-	;; How keep drawers hidden in subtree anyway?
-	;; (when (memq 'org-cycle-hide-drawers org-cycle-hook)
-	;;   (org-cycle-hide-drawers 'subtree))
-
 	;; Fold every list in subtree to top-level items.
 	(when (eq org-cycle-include-plain-lists 'integrate)
 	  (save-excursion
@@ -7048,11 +7043,10 @@ This function is the default value of the hook `org-cycle-hook'."
 	  (goto-char (point-min))
 	  (while (re-search-forward re nil t)
 	    (when (and (not (org-invisible-p))
-		       (save-excursion
-			 (goto-char (point-at-eol)) (org-invisible-p)))
+		       (org-invisible-p (line-end-position)))
 	      (outline-hide-entry))))
-	(org-cycle-show-empty-lines 'overview)
-	(org-cycle-hide-drawers 'overview)))))
+	(org-cycle-hide-drawers 'all)
+	(org-cycle-show-empty-lines 'overview)))))
 
 (defun org-cycle-show-empty-lines (state)
   "Show empty lines above all visible headlines.
@@ -7161,16 +7155,15 @@ show that drawer instead."
 			 (org-element-at-point)))))
     (when (memq (org-element-type drawer) '(drawer property-drawer))
       (let ((post (org-element-property :post-affiliated drawer)))
-	(save-excursion
-	  (outline-flag-region
-	   (progn (goto-char post) (line-end-position))
-	   (progn (goto-char (org-element-property :end drawer))
-		  (skip-chars-backward " \r\t\n")
-		  (line-end-position))
-	   flag))
+	(org-flag-region
+	 (save-excursion (goto-char post) (line-end-position))
+	 (save-excursion (goto-char (org-element-property :end drawer))
+			 (skip-chars-backward " \t\n")
+			 (line-end-position))
+	 flag 'org-hide-drawer)
 	;; When the drawer is hidden away, make sure point lies in
 	;; a visible part of the buffer.
-	(when (and flag (> (line-beginning-position) post))
+	(when (invisible-p (max (1- (point)) (point-min)))
 	  (goto-char post))))))
 
 (defun org-subtree-end-visible-p ()
@@ -8087,16 +8080,16 @@ case."
 	 (setq beg (point))))
      ;; Find insertion point, with error handling
      (while (> cnt 0)
-       (or (and (funcall movfunc) (looking-at org-outline-regexp))
-	   (progn (goto-char beg0)
-		  (user-error "Cannot move past superior level or buffer limit")))
+       (unless (and (funcall movfunc) (looking-at org-outline-regexp))
+	 (goto-char beg0)
+	 (user-error "Cannot move past superior level or buffer limit"))
        (setq cnt (1- cnt)))
      (when (> arg 0)
        ;; Moving forward - still need to move over subtree
        (org-end-of-subtree t t)
        (save-excursion
 	 (org-back-over-empty-lines)
-	 (unless (bolp) (insert "\n"))))
+	 (or (bolp) (newline))))
      (setq ne-ins (org-back-over-empty-lines))
      (move-marker ins-point (point))
      (setq txt (buffer-substring beg end))
@@ -8117,7 +8110,7 @@ case."
      (when (and (< arg 0)
 		(org-first-sibling-p)
 		(> ne-ins ne-beg))
-       ;; Move whitespace back to beginning.
+       ;; Move whitespace back to beginning
        (save-excursion
 	 (goto-char ins-end)
 	 (let ((kill-whole-line t))
@@ -8127,10 +8120,9 @@ case."
      (if folded
 	 (outline-hide-subtree)
        (org-show-entry)
-       (org-show-children)
-       (org-cycle-hide-drawers 'children))
+       (org-show-children))
      (org-clean-visibility-after-subtree-move)
-     ;; Move back to the initial column we were at.
+     ;; move back to the initial column we were at
      (move-to-column col))))
 
 (defvar org-subtree-clip ""
@@ -13286,7 +13278,8 @@ information."
     ;; If point is hidden within a drawer or a block, make sure to
     ;; expose it.
     (dolist (o (overlays-at (point)))
-      (when (memq (overlay-get o 'invisible) '(org-hide-block outline))
+      (when (memq (overlay-get o 'invisible)
+		  '(org-hide-block org-hide-drawer outline))
 	(delete-overlay o)))
     (unless (org-before-first-heading-p)
       (org-with-limited-levels
@@ -23744,8 +23737,7 @@ Show the heading too, if it is currently invisible."
 	      (concat "[\r\n]\\(" org-outline-regexp "\\)") nil t)
 	     (match-beginning 1)
 	   (point-max)))
-       nil)
-      (org-cycle-hide-drawers 'children))))
+       nil))))
 
 (defun org-make-options-regexp (kwds &optional extra)
   "Make a regular expression for keyword lines.
