@@ -6239,7 +6239,7 @@ scheduled items with an hour specification like [h]h:mm."
 		(cond
 		 ;; Nullify delay when a repeater triggered already
 		 ;; and the delay is of the form --Xd.
-		 ((and (save-match-data (string-match "--[0-9]+[hdwmy]" s))
+		 ((and (string-match-p "--[0-9]+[hdwmy]" s)
 		       (/= schedule last-repeat))
 		  0)
 		 (suppress-delay
@@ -6270,7 +6270,7 @@ scheduled items with an hour specification like [h]h:mm."
 	  ;; doesn't apply to habits.
 	  (when (pcase org-agenda-skip-scheduled-if-deadline-is-shown
 		  ((guard
-		    (or (not (assq (line-beginning-position 0) deadline-pos))
+		    (or (not (memq (line-beginning-position 0) deadline-pos))
 			habitp))
 		   nil)
 		  (`repeated-after-deadline
