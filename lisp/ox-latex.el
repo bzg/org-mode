@@ -2934,7 +2934,9 @@ contextual information."
 		((and float (not (assoc "float" lst-opt)))
 		 `(("float" ,(plist-get info :latex-default-figure-position)))))
 	       `(("language" ,lst-lang))
-	       (if label `(("label" ,label)) '(("label" " ")))
+	       (if label
+		   `(("label" ,(org-latex--label src-block info)))
+		 '(("label" " ")))
 	       (if caption-str `(("caption" ,caption-str)) '(("caption" " ")))
 	       `(("captionpos" ,(if caption-above-p "t" "b")))
 	       (cond ((assoc "numbers" lst-opt) nil)
