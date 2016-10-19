@@ -5680,7 +5680,7 @@ them."
      ("es" :ascii "Indice de tablas" :html "&Iacute;ndice de tablas" :default "Índice de tablas")
      ("et" :default "Tabelite nimekiri")
      ("fr" :default "Liste des tableaux")
-     ("is" :default "Töfluskrà" :html "T&ouml;fluskr&aacute;")
+     ("is" :default "Töfluskrá" :html "T&ouml;fluskr&aacute;")
      ("ja" :default "表目次")
      ("no" :default "Tabeller")
      ("nb" :default "Tabeller")
