@@ -21102,6 +21102,7 @@ This command does many different things, depending on context:
    ((and (local-variable-p 'org-finish-function)
 	 (fboundp org-finish-function))
     (funcall org-finish-function))
+   ((org-babel-hash-at-point))
    ((run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-hook))
    ((save-excursion (beginning-of-line) (looking-at-p "[ \t]*$"))
     (or (run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-final-hook)
@@ -21113,10 +21114,12 @@ This command does many different things, depending on context:
 	    (org-element-lineage
 	     (org-element-context)
 	     ;; Limit to supported contexts.
-	     '(clock dynamic-block footnote-definition footnote-reference
-		     item keyword node-property paragraph plain-list
-		     property-drawer radio-target statistics-cookie table
-		     table-cell table-row timestamp)
+	     '(babel-call clock dynamic-block footnote-definition
+			  footnote-reference inline-babel-call inline-src-block
+			  item keyword node-property paragraph plain-list
+			  property-drawer radio-target src-block
+			  statistics-cookie table table-cell table-row
+			  timestamp)
 	     t))
 	   (type (org-element-type context)))
       ;; For convenience: at the first line of a paragraph on the same
@@ -21130,6 +21133,9 @@ This command does many different things, depending on context:
 	    (setq type 'item))))
       ;; Act according to type of element or object at point.
       (pcase type
+	((or `babel-call `inline-babel-call)
+	 (let ((info (org-babel-lob-get-info context)))
+	   (when info (org-babel-execute-src-block nil info))))
 	(`clock (org-clock-update-time-maybe))
 	(`dynamic-block
 	 (save-excursion
@@ -21142,11 +21148,16 @@ This command does many different things, depending on context:
 	((or `headline `inlinetask)
 	 (save-excursion (goto-char (org-element-property :begin context))
 			 (call-interactively #'org-set-tags)))
+	((or `inline-src-block `src-block)
+	 (unless org-babel-no-eval-on-ctrl-c-ctrl-c
+	   (org-babel-eval-wipe-error-buffer)
+	   (org-babel-execute-src-block
+	    current-prefix-arg (org-babel-get-src-block-info nil context))))
 	(`item
-	 ;; At an item: a double C-u set checkbox to "[-]"
-	 ;; unconditionally, whereas a single one will toggle its
-	 ;; presence.  Without a universal argument, if the item has
-	 ;; a checkbox, toggle it.  Otherwise repair the list.
+	 ;; At an item: `C-u C-u' sets checkbox to "[-]"
+	 ;; unconditionally, whereas `C-u' will toggle its presence.
+	 ;; Without a universal argument, if the item has a checkbox,
+	 ;; toggle it.  Otherwise repair the list.
 	 (let* ((box (org-element-property :checkbox context))
 		(struct (org-element-property :structure context))
 		(old-struct (copy-tree struct))

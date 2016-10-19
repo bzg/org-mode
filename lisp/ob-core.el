@@ -298,8 +298,6 @@ environment, to override this check."
   (unless org-babel-no-eval-on-ctrl-c-ctrl-c
     (org-babel-execute-maybe)))
 
-(add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-execute-safely-maybe)
-
 ;;;###autoload
 (defun org-babel-execute-maybe ()
   (interactive)
@@ -1329,7 +1327,6 @@ This can be called with `\\[org-ctrl-c-ctrl-c]'."
 			      (lambda (ol) (overlay-get ol 'babel-hash))
                               (overlays-at (or point (point))))))))
     (when hash (kill-new hash) (message hash))))
-(add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-hash-at-point)
 
 (defun org-babel-result-hide-spec ()
   "Hide portions of results lines.
