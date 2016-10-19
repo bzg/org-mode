@@ -12918,7 +12918,9 @@ narrowing."
 	     (unless (bolp) (insert "\n"))
 	     (let ((beg (point)))
 	       (insert ":" drawer ":\n:END:\n")
-	       (org-indent-region beg (point)))
+	       (org-indent-region beg (point))
+	       (org-flag-region
+		(line-end-position -1) (1- (point)) t 'org-hide-drawer))
 	     (end-of-line -1)))))
       (t
        (org-end-of-meta-data org-log-state-notes-insert-after-drawers)
@@ -13084,8 +13086,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	     (indent-line-to ind)
 	     (insert line)))
 	 (message "Note stored")
-	 (org-back-to-heading t)
-	 (org-cycle-hide-drawers 'children))
+	 (org-back-to-heading t))
 	;; Fix `buffer-undo-list' when `org-store-log-note' is called
 	;; from within `org-add-log-note' because `buffer-undo-list'
 	;; is then modified outside of `org-with-remote-undo'.
