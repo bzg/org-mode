@@ -10,6 +10,12 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.0
 ** Incompatible changes
+*** Emacs 23 support has been dropped
+From now on, Org expects at least Emacs 24.3, although Emacs 24.4 or
+above is suggested.
+*** XEmacs support has been dropped
+Incomplete compatibility layer with XEmacs has been removed.  If you
+want to preserve this compatibility, you can contact our mailing list.
 *** New syntax for export blocks
 Export blocks are explicitly marked as such at the syntax level to
 disambiguate their parsing from special blocks.  The new syntax is
@@ -439,6 +445,7 @@ plain list.
 *** ~fixltx2e~ is removed from ~org-latex-default-packages-alist~
 fixltx2e is obsolete, see LaTeX News 22.
 ** Miscellaneous
+*** Add Icelandic smart quotes
 *** Allow multiple receiver locations in radio tables and lists
 *** Allow angular links within link descriptions
 It is now allowed to write, e.g.,
