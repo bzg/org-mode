@@ -21103,169 +21103,165 @@ This command does many different things, depending on context:
 	 (fboundp org-finish-function))
     (funcall org-finish-function))
    ((run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-hook))
+   ((save-excursion (beginning-of-line) (looking-at-p "[ \t]*$"))
+    (or (run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-final-hook)
+	(user-error
+	 (substitute-command-keys
+	  "`\\[org-ctrl-c-ctrl-c]' can do nothing useful here"))))
    (t
-    (if (save-excursion (beginning-of-line) (looking-at "[ \t]*$"))
-	(or (run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-final-hook)
-	    (user-error
-	     (substitute-command-keys
-	      "`\\[org-ctrl-c-ctrl-c]' can do nothing useful here")))
-      (let* ((context (org-element-context))
-	     (type (org-element-type context)))
-	(cl-case type
-	  ;; When at a link, act according to the parent instead.
-	  (link (setq context (org-element-property :parent context))
-		(setq type (org-element-type context)))
-	  ;; Unsupported object types: refer to the first supported
-	  ;; element or object containing it.
-	  ((bold code entity export-snippet inline-babel-call inline-src-block
-		 italic latex-fragment line-break macro strike-through subscript
-		 superscript target underline verbatim)
-	   (setq context
-		 (org-element-lineage
-		  context '(paragraph radio-target table-cell verse-block)))
-	   (setq type (org-element-type context))))
-	;; For convenience: at the first line of a paragraph on the
-	;; same line as an item, apply function on that item instead.
-	(when (eq type 'paragraph)
-	  (let ((parent (org-element-property :parent context)))
-	    (when (and (eq (org-element-type parent) 'item)
-		       (= (line-beginning-position)
-			  (org-element-property :begin parent)))
-	      (setq context parent)
-	      (setq type 'item))))
-	;; Act according to type of element or object at point.
-	(pcase type
-	  (`clock (org-clock-update-time-maybe))
-	  (`dynamic-block
-	   (save-excursion
-	     (goto-char (org-element-property :post-affiliated context))
-	     (org-update-dblock)))
-	  (`footnote-definition
+    (let* ((context
+	    (org-element-lineage
+	     (org-element-context)
+	     ;; Limit to supported contexts.
+	     '(clock dynamic-block footnote-definition footnote-reference
+		     item keyword node-property paragraph plain-list
+		     property-drawer radio-target statistics-cookie table
+		     table-cell table-row timestamp)
+	     t))
+	   (type (org-element-type context)))
+      ;; For convenience: at the first line of a paragraph on the same
+      ;; line as an item, apply function on that item instead.
+      (when (eq type 'paragraph)
+	(let ((parent (org-element-property :parent context)))
+	  (when (and (eq (org-element-type parent) 'item)
+		     (= (line-beginning-position)
+			(org-element-property :begin parent)))
+	    (setq context parent)
+	    (setq type 'item))))
+      ;; Act according to type of element or object at point.
+      (pcase type
+	(`clock (org-clock-update-time-maybe))
+	(`dynamic-block
+	 (save-excursion
 	   (goto-char (org-element-property :post-affiliated context))
-	   (call-interactively 'org-footnote-action))
-	  (`footnote-reference (call-interactively 'org-footnote-action))
-	  ((or `headline `inlinetask)
-	   (save-excursion (goto-char (org-element-property :begin context))
-			   (call-interactively #'org-set-tags)))
-	  (`item
-	   ;; At an item: a double C-u set checkbox to "[-]"
-	   ;; unconditionally, whereas a single one will toggle its
-	   ;; presence.  Without a universal argument, if the item
-	   ;; has a checkbox, toggle it.  Otherwise repair the list.
-	   (let* ((box (org-element-property :checkbox context))
-		  (struct (org-element-property :structure context))
-		  (old-struct (copy-tree struct))
-		  (parents (org-list-parents-alist struct))
-		  (prevs (org-list-prevs-alist struct))
-		  (orderedp (org-not-nil (org-entry-get nil "ORDERED"))))
-	     (org-list-set-checkbox
-	      (org-element-property :begin context) struct
-	      (cond ((equal arg '(16)) "[-]")
-		    ((and (not box) (equal arg '(4))) "[ ]")
-		    ((or (not box) (equal arg '(4))) nil)
-		    ((eq box 'on) "[ ]")
-		    (t "[X]")))
-	     ;; Mimic `org-list-write-struct' but with grabbing
-	     ;; a return value from `org-list-struct-fix-box'.
-	     (org-list-struct-fix-ind struct parents 2)
-	     (org-list-struct-fix-item-end struct)
-	     (org-list-struct-fix-bul struct prevs)
-	     (org-list-struct-fix-ind struct parents)
-	     (let ((block-item
-		    (org-list-struct-fix-box struct parents prevs orderedp)))
-	       (if (and box (equal struct old-struct))
-		   (if (equal arg '(16))
-		       (message "Checkboxes already reset")
-		     (user-error "Cannot toggle this checkbox: %s"
-				 (if (eq box 'on)
-				     "all subitems checked"
-				   "unchecked subitems")))
-		 (org-list-struct-apply-struct struct old-struct)
-		 (org-update-checkbox-count-maybe))
-	       (when block-item
-		 (message "Checkboxes were removed due to empty box at line %d"
-			  (org-current-line block-item))))))
-	  (`keyword
-	   (let ((org-inhibit-startup-visibility-stuff t)
-		 (org-startup-align-all-tables nil))
-	     (when (boundp 'org-table-coordinate-overlays)
-	       (mapc #'delete-overlay org-table-coordinate-overlays)
-	       (setq org-table-coordinate-overlays nil))
-	     (org-save-outline-visibility 'use-markers (org-mode-restart)))
-	   (message "Local setup has been refreshed"))
-	  (`plain-list
-	   ;; At a plain list, with a double C-u argument, set
-	   ;; checkboxes of each item to "[-]", whereas a single one
-	   ;; will toggle their presence according to the state of the
-	   ;; first item in the list.  Without an argument, repair the
-	   ;; list.
-	   (let* ((begin (org-element-property :contents-begin context))
-		  (beginm (move-marker (make-marker) begin))
-		  (struct (org-element-property :structure context))
-		  (old-struct (copy-tree struct))
-		  (first-box (save-excursion
-			       (goto-char begin)
-			       (looking-at org-list-full-item-re)
-			       (match-string-no-properties 3)))
-		  (new-box (cond ((equal arg '(16)) "[-]")
-				 ((equal arg '(4)) (unless first-box "[ ]"))
-				 ((equal first-box "[X]") "[ ]")
-				 (t "[X]"))))
-	     (cond
-	      (arg
-	       (dolist (pos
-			(org-list-get-all-items
-			 begin struct (org-list-prevs-alist struct)))
-		 (org-list-set-checkbox pos struct new-box)))
-	      ((and first-box (eq (point) begin))
-	       ;; For convenience, when point is at bol on the first
-	       ;; item of the list and no argument is provided, simply
-	       ;; toggle checkbox of that item, if any.
-	       (org-list-set-checkbox begin struct new-box)))
-	     (org-list-write-struct
-	      struct (org-list-parents-alist struct) old-struct)
-	     (org-update-checkbox-count-maybe)
-	     (save-excursion (goto-char beginm) (org-list-send-list 'maybe))))
-	  ((or `property-drawer `node-property)
-	   (call-interactively #'org-property-action))
-	  (`radio-target
-	   (call-interactively #'org-update-radio-target-regexp))
-	  (`statistics-cookie
-	   (call-interactively #'org-update-statistics-cookies))
-	  ((or `table `table-cell `table-row)
-	   ;; At a table, recalculate every field and align it.  Also
-	   ;; send the table if necessary.  If the table has
-	   ;; a `table.el' type, just give up.  At a table row or
-	   ;; cell, maybe recalculate line but always align table.
-	   (if (eq (org-element-property :type context) 'table.el)
-	       (message "%s" (substitute-command-keys "\\<org-mode-map>\
+	   (org-update-dblock)))
+	(`footnote-definition
+	 (goto-char (org-element-property :post-affiliated context))
+	 (call-interactively 'org-footnote-action))
+	(`footnote-reference (call-interactively #'org-footnote-action))
+	((or `headline `inlinetask)
+	 (save-excursion (goto-char (org-element-property :begin context))
+			 (call-interactively #'org-set-tags)))
+	(`item
+	 ;; At an item: a double C-u set checkbox to "[-]"
+	 ;; unconditionally, whereas a single one will toggle its
+	 ;; presence.  Without a universal argument, if the item has
+	 ;; a checkbox, toggle it.  Otherwise repair the list.
+	 (let* ((box (org-element-property :checkbox context))
+		(struct (org-element-property :structure context))
+		(old-struct (copy-tree struct))
+		(parents (org-list-parents-alist struct))
+		(prevs (org-list-prevs-alist struct))
+		(orderedp (org-not-nil (org-entry-get nil "ORDERED"))))
+	   (org-list-set-checkbox
+	    (org-element-property :begin context) struct
+	    (cond ((equal arg '(16)) "[-]")
+		  ((and (not box) (equal arg '(4))) "[ ]")
+		  ((or (not box) (equal arg '(4))) nil)
+		  ((eq box 'on) "[ ]")
+		  (t "[X]")))
+	   ;; Mimic `org-list-write-struct' but with grabbing a return
+	   ;; value from `org-list-struct-fix-box'.
+	   (org-list-struct-fix-ind struct parents 2)
+	   (org-list-struct-fix-item-end struct)
+	   (org-list-struct-fix-bul struct prevs)
+	   (org-list-struct-fix-ind struct parents)
+	   (let ((block-item
+		  (org-list-struct-fix-box struct parents prevs orderedp)))
+	     (if (and box (equal struct old-struct))
+		 (if (equal arg '(16))
+		     (message "Checkboxes already reset")
+		   (user-error "Cannot toggle this checkbox: %s"
+			       (if (eq box 'on)
+				   "all subitems checked"
+				 "unchecked subitems")))
+	       (org-list-struct-apply-struct struct old-struct)
+	       (org-update-checkbox-count-maybe))
+	     (when block-item
+	       (message "Checkboxes were removed due to empty box at line %d"
+			(org-current-line block-item))))))
+	(`keyword
+	 (let ((org-inhibit-startup-visibility-stuff t)
+	       (org-startup-align-all-tables nil))
+	   (when (boundp 'org-table-coordinate-overlays)
+	     (mapc #'delete-overlay org-table-coordinate-overlays)
+	     (setq org-table-coordinate-overlays nil))
+	   (org-save-outline-visibility 'use-markers (org-mode-restart)))
+	 (message "Local setup has been refreshed"))
+	(`plain-list
+	 ;; At a plain list, with a double C-u argument, set
+	 ;; checkboxes of each item to "[-]", whereas a single one
+	 ;; will toggle their presence according to the state of the
+	 ;; first item in the list.  Without an argument, repair the
+	 ;; list.
+	 (let* ((begin (org-element-property :contents-begin context))
+		(beginm (move-marker (make-marker) begin))
+		(struct (org-element-property :structure context))
+		(old-struct (copy-tree struct))
+		(first-box (save-excursion
+			     (goto-char begin)
+			     (looking-at org-list-full-item-re)
+			     (match-string-no-properties 3)))
+		(new-box (cond ((equal arg '(16)) "[-]")
+			       ((equal arg '(4)) (unless first-box "[ ]"))
+			       ((equal first-box "[X]") "[ ]")
+			       (t "[X]"))))
+	   (cond
+	    (arg
+	     (dolist (pos
+		      (org-list-get-all-items
+		       begin struct (org-list-prevs-alist struct)))
+	       (org-list-set-checkbox pos struct new-box)))
+	    ((and first-box (eq (point) begin))
+	     ;; For convenience, when point is at bol on the first
+	     ;; item of the list and no argument is provided, simply
+	     ;; toggle checkbox of that item, if any.
+	     (org-list-set-checkbox begin struct new-box)))
+	   (org-list-write-struct
+	    struct (org-list-parents-alist struct) old-struct)
+	   (org-update-checkbox-count-maybe)
+	   (save-excursion (goto-char beginm) (org-list-send-list 'maybe))))
+	((or `property-drawer `node-property)
+	 (call-interactively #'org-property-action))
+	(`radio-target
+	 (call-interactively #'org-update-radio-target-regexp))
+	(`statistics-cookie
+	 (call-interactively #'org-update-statistics-cookies))
+	((or `table `table-cell `table-row)
+	 ;; At a table, recalculate every field and align it.  Also
+	 ;; send the table if necessary.  If the table has
+	 ;; a `table.el' type, just give up.  At a table row or cell,
+	 ;; maybe recalculate line but always align table.
+	 (if (eq (org-element-property :type context) 'table.el)
+	     (message "%s" (substitute-command-keys "\\<org-mode-map>\
 Use `\\[org-edit-special]' to edit table.el tables"))
-	     (let ((org-enable-table-editor t))
-	       (if (or (eq type 'table)
-		       ;; Check if point is at a TBLFM line.
-		       (and (eq type 'table-row)
-			    (= (point) (org-element-property :end context))))
-		   (save-excursion
-		     (if (org-at-TBLFM-p)
-			 (progn (require 'org-table)
-				(org-table-calc-current-TBLFM))
-		       (goto-char (org-element-property :contents-begin context))
-		       (org-call-with-arg 'org-table-recalculate (or arg t))
-		       (orgtbl-send-table 'maybe)))
-		 (org-table-maybe-eval-formula)
-		 (cond (arg (call-interactively 'org-table-recalculate))
-		       ((org-table-maybe-recalculate-line))
-		       (t (org-table-align)))))))
-	  (`timestamp (org-timestamp-change 0 'day))
-	  ((and `nil (guard (org-at-heading-p)))
-	   ;; When point is on an unsupported object type, we can miss
-	   ;; the fact that it also is at a heading.  Handle it here.
-	   (call-interactively #'org-set-tags))
-	  (_
-	   (or (run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-final-hook)
-	       (user-error
-		(substitute-command-keys
-		 "`\\[org-ctrl-c-ctrl-c]' can do nothing useful here"))))))))))
+	   (let ((org-enable-table-editor t))
+	     (if (or (eq type 'table)
+		     ;; Check if point is at a TBLFM line.
+		     (and (eq type 'table-row)
+			  (= (point) (org-element-property :end context))))
+		 (save-excursion
+		   (if (org-at-TBLFM-p)
+		       (progn (require 'org-table)
+			      (org-table-calc-current-TBLFM))
+		     (goto-char (org-element-property :contents-begin context))
+		     (org-call-with-arg 'org-table-recalculate (or arg t))
+		     (orgtbl-send-table 'maybe)))
+	       (org-table-maybe-eval-formula)
+	       (cond (arg (call-interactively #'org-table-recalculate))
+		     ((org-table-maybe-recalculate-line))
+		     (t (org-table-align)))))))
+	(`timestamp (org-timestamp-change 0 'day))
+	((and `nil (guard (org-at-heading-p)))
+	 ;; When point is on an unsupported object type, we can miss
+	 ;; the fact that it also is at a heading.  Handle it here.
+	 (call-interactively #'org-set-tags))
+	((guard
+	  (run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-final-hook)))
+	(_
+	 (user-error
+	  (substitute-command-keys
+	   "`\\[org-ctrl-c-ctrl-c]' can do nothing useful here"))))))))
 
 (defun org-mode-restart ()
   (interactive)
