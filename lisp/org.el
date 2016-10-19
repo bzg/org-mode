@@ -6917,10 +6917,6 @@ if the variable `org-cycle-global-at-bob' is t."
 	      org-cycle-hook))
 	   (pos (point)))
 
-      (when (or bob-special (equal arg '(4)))
-	;; special case:  use global cycling
-	(setq arg t))
-
       (cond
 
        ((equal arg '(16))
@@ -6931,6 +6927,11 @@ if the variable `org-cycle-global-at-bob' is t."
        ((equal arg '(64))
 	(outline-show-all)
 	(org-unlogged-message "Entire buffer visible, including drawers"))
+
+       ((equal arg '(4)) (org-cycle-internal-global))
+
+       ;; Try hiding block at point.
+       ((org-hide-block-toggle-maybe))
 
        ;; Try cdlatex TAB completion
        ((org-try-cdlatex-tab))
@@ -6944,11 +6945,10 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 	    (org-table-justify-field-maybe)
 	    (call-interactively 'org-table-next-field))))
 
-       ((run-hook-with-args-until-success
-	 'org-tab-after-check-for-table-hook))
+       ((run-hook-with-args-until-success 'org-tab-after-check-for-table-hook))
 
        ;; Global cycling: delegate to `org-cycle-internal-global'.
-       ((eq arg t) (org-cycle-internal-global))
+       (bob-special (org-cycle-internal-global))
 
        ;; Drawers: delegate to `org-flag-drawer'.
        ((save-excursion
@@ -7556,8 +7556,6 @@ a block.  Return a non-nil value when toggling is successful."
 	  (when (eq (overlay-get ov 'invisible) 'org-hide-block)
 	    (delete-overlay ov))))))))
 
-;; org-tab-after-check-for-cycling-hook
-(add-hook 'org-tab-first-hook 'org-hide-block-toggle-maybe)
 ;; Remove overlays when changing major mode
 (add-hook 'org-mode-hook
 	  (lambda () (add-hook 'change-major-mode-hook
