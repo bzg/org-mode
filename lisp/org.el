@@ -21119,7 +21119,7 @@ This command does many different things, depending on context:
 	  ;; element or object containing it.
 	  ((bold code entity export-snippet inline-babel-call inline-src-block
 		 italic latex-fragment line-break macro strike-through subscript
-		 superscript underline verbatim)
+		 superscript target underline verbatim)
 	   (setq context
 		 (org-element-lineage
 		  context '(paragraph radio-target table-cell verse-block)))
@@ -21228,7 +21228,7 @@ This command does many different things, depending on context:
 	     (save-excursion (goto-char beginm) (org-list-send-list 'maybe))))
 	  ((or `property-drawer `node-property)
 	   (call-interactively #'org-property-action))
-	  ((or `radio-target `target)
+	  (`radio-target
 	   (call-interactively #'org-update-radio-target-regexp))
 	  (`statistics-cookie
 	   (call-interactively #'org-update-statistics-cookies))

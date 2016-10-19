@@ -413,7 +413,6 @@ the heading a destination for the tag `NAME'."
   (insert (org-ctags-string-search-and-replace
            "%t" (capitalize name) org-ctags-new-topic-template))
   (backward-char 4)
-  (org-update-radio-target-regexp)
   (end-of-line)
   (forward-line 2)
   (when narrowp
