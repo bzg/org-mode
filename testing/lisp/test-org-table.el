@@ -106,18 +106,18 @@
   ;; See next ert-deftest how to group rows right.
   (org-test-table-target-expect
    "
-|       2 | replace |
-|       4 | replace |
-|       8 | replace |
+|       2 | header  |
+|       4 | header  |
+|       8 | header  |
 |---------+---------|
 | replace | replace |
 "
    "
-|  2 | replace |
-|  4 | replace |
-|  8 | replace |
-|----+---------|
-| 14 | 28      |
+|  2 | header |
+|  4 | header |
+|  8 | header |
+|----+--------|
+| 14 | 28     |
 "
    2
    ;; Calc formula
