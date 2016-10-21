@@ -167,6 +167,28 @@
 |         ab |          ab |  ab |   ab |   ab |  ab |
 "))
 
+(ert-deftest test-org-table/align-buffer-tables ()
+  "Align all tables when updating buffer."
+  (let ((before "
+|  a  b  |
+
+|  c  d  |
+")
+	;; FIXME: Tables should be aligned.
+	(after "
+|  a  b  |
+
+|  c  d  |
+"))
+    (should (equal (org-test-with-temp-text before
+		     (org-table-recalculate-buffer-tables)
+		     (buffer-string))
+		   after))
+    (should (equal (org-test-with-temp-text before
+		     (org-table-iterate-buffer-tables)
+		     (buffer-string))
+		   after))))
+
 (defconst references/target-normal "
 | 0 | 1 | replace | replace | replace | replace | replace | replace |
 | z | 1 | replace | replace | replace | replace | replace | replace |
