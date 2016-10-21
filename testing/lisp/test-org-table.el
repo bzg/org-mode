@@ -174,11 +174,10 @@
 
 |  c  d  |
 ")
-	;; FIXME: Tables should be aligned.
 	(after "
-|  a  b  |
+| a  b |
 
-|  c  d  |
+| c  d |
 "))
     (should (equal (org-test-with-temp-text before
 		     (org-table-recalculate-buffer-tables)

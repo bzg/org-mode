@@ -3321,7 +3321,14 @@ with the prefix ARG."
   "Recalculate all tables in the current buffer."
   (interactive)
   (org-with-wide-buffer
-   (org-table-map-tables (lambda () (org-table-recalculate t)) t)))
+   (org-table-map-tables
+    (lambda ()
+      ;; Reason for separate `org-table-align': When repeating
+      ;; (org-table-recalculate t) `org-table-may-need-update' gets in
+      ;; the way.
+      (org-table-recalculate t t)
+      (org-table-align))
+    t)))
 
 ;;;###autoload
 (defun org-table-iterate-buffer-tables ()
@@ -3335,12 +3342,14 @@ with the prefix ARG."
      (catch 'exit
        (while (> i 0)
 	 (setq i (1- i))
-	 (org-table-map-tables (lambda () (org-table-recalculate t)) t)
+	 (org-table-map-tables (lambda () (org-table-recalculate t t)) t)
 	 (if (equal checksum (setq c1 (md5 (buffer-string))))
 	     (progn
+	       (org-table-map-tables #'org-table-align t)
 	       (message "Convergence after %d iterations" (- imax i))
 	       (throw 'exit t))
 	   (setq checksum c1)))
+       (org-table-map-tables #'org-table-align t)
        (user-error "No convergence after %d iterations" imax)))))
 
 (defun org-table-calc-current-TBLFM (&optional arg)
