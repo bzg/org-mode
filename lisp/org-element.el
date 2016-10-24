@@ -3194,7 +3194,12 @@ CONTENTS is the contents of the object, or nil."
 		   ;; cases.  This is also the default syntax when the
 		   ;; property is not defined, e.g., when the object
 		   ;; was crafted by the user.
-		   ((guard contents) (format "[[%%s][%s]]" contents))
+		   ((guard contents)
+		    (format "[[%%s][%s]]"
+			    ;; Since this is going to be used as
+			    ;; a format string, escape percent signs
+			    ;; in description.
+			    (replace-regexp-in-string "%" "%%" contents)))
 		   ((or `bracket
 			`nil
 			(guard (member type '("coderef" "custom-id" "fuzzy"))))

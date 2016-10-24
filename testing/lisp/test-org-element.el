@@ -3026,7 +3026,10 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
 		 "http://orgmode.org\n"))
   ;; Angular links.
   (should (equal (org-test-parse-and-interpret "<http://orgmode.org>")
-		 "<http://orgmode.org>\n")))
+		 "<http://orgmode.org>\n"))
+  ;; Pathological case: link with a %-sign in description.
+  (should (equal (org-test-parse-and-interpret "[[file://path][%s]]")
+		 "[[file://path][%s]]\n")))
 
 (ert-deftest test-org-element/macro-interpreter ()
   "Test macro interpreter."
