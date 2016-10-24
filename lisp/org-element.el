@@ -4530,7 +4530,8 @@ to interpret.  Return Org syntax as a string."
 		  ;; is specified, assume its value is 0.
 		  (let ((blank (or (org-element-property :post-blank data) 0)))
 		    (if (or (memq type org-element-all-objects)
-			    (and parent
+			    (and (not (memq type org-element-all-elements))
+				 parent
 				 (let ((type (org-element-type parent)))
 				   (or (not type)
 				       (memq type

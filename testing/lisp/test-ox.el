@@ -3181,6 +3181,41 @@ Another text. (ref:text)
 		    (plist-put info :crossrefs (list (cons search-cell 1))))
 	      (org-export-get-reference headline info))))))
 
+
+;;; Pseudo objects and pseudo elements
+
+(ert-deftest test-org-export/pseudo-elements ()
+  "Test exporting pseudo-elements."
+  ;; Handle blank lines after pseudo-elements.  In particular, do not
+  ;; replace them with white spaces.
+  (should
+   (equal "contents\n\nparagraph\n"
+	  (let ((backend (org-export-create-backend
+			  :transcoders
+			  '((pseudo-element . (lambda (_p c _i) c))
+			    (paragraph . (lambda (_p c _i) c))
+			    (plain-text . (lambda (c _i) c)))))
+		(element '(pseudo-element (:post-blank 1) "contents"))
+		(paragraph '(paragraph nil "paragraph"))
+		(data '(org-data nil)))
+	    (org-element-adopt-elements data element paragraph)
+	    (org-export-data-with-backend data backend nil)))))
+
+(ert-deftest test-org-export/pseudo-objects ()
+  "Test exporting pseudo-objects."
+  ;; Handle blank spaces after pseudo-objects.  In particular, do not
+  ;; replace them with newlines.
+  (should
+   (equal "begin x end\n"
+	  (let ((backend (org-export-create-backend
+			  :transcoders
+			  '((pseudo-object . (lambda (_p c _i) c))
+			    (paragraph . (lambda (_p c _i) c))
+			    (plain-text . (lambda (c _i) c)))))
+		(object '(pseudo-object (:post-blank 1) "x"))
+		(paragraph '(paragraph nil)))
+	    (org-element-adopt-elements paragraph "begin " object "end")
+	    (org-export-data-with-backend paragraph backend nil)))))
 
 
 ;;; Src-block and example-block
