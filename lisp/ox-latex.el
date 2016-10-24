@@ -2661,8 +2661,12 @@ it."
 		(org-element-extract-element previous)
 		(org-element-adopt-elements matrices previous)
 		(setq previous next))
+	      ;; Inherit `:post-blank' from the value of the last
+	      ;; swallowed table.  Set the latter's `:post-blank'
+	      ;; value to 0 so as to not duplicate empty lines.
 	      (org-element-put-property
 	       matrices :post-blank (org-element-property :post-blank previous))
+	      (org-element-put-property previous :post-blank 0)
 	      (org-element-extract-element previous)
 	      (org-element-adopt-elements matrices previous))))))
     info)
