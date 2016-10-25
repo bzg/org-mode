@@ -4367,10 +4367,10 @@ to an appropriate container (e.g., a paragraph)."
 	  (let ((result (match-string 0)))
 	    (setq found
 		  (cond
-		   ((eq (compare-strings result nil nil "call_" nil nil t) t)
+		   ((string-prefix-p "call_" result t)
 		    (and (memq 'inline-babel-call restriction)
 			 (org-element-inline-babel-call-parser)))
-		   ((eq (compare-strings result nil nil "src_" nil nil t) t)
+		   ((string-prefix-p "src_" result t)
 		    (and (memq 'inline-src-block restriction)
 			 (org-element-inline-src-block-parser)))
 		   (t
