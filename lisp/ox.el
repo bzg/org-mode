@@ -1988,9 +1988,8 @@ Return a string."
 	    (t
 	     (org-export-filter-apply-functions
 	      (plist-get info (intern (format ":filter-%s" type)))
-	      (let ((blank (or (org-element-property :post-blank data) 0))
-		    (class (org-element-class data parent)))
-		(if (eq class 'object)
+	      (let ((blank (or (org-element-property :post-blank data) 0)))
+		(if (eq (org-element-class data parent) 'object)
 		    (concat results (make-string blank ?\s))
 		  (concat (org-element-normalize-string results)
 			  (make-string blank ?\n))))

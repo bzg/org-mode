@@ -4560,9 +4560,8 @@ to interpret.  Return Org syntax as a string."
 		(if (memq type '(org-data plain-text nil)) results
 		  ;; Build white spaces.  If no `:post-blank' property
 		  ;; is specified, assume its value is 0.
-		  (let ((blank (or (org-element-property :post-blank data) 0))
-			(class (org-element-class data parent)))
-		    (if (eq class 'object)
+		  (let ((blank (or (org-element-property :post-blank data) 0)))
+		    (if (eq (org-element-class data parent) 'object)
 			(concat results (make-string blank ?\s))
 		      (concat (org-element--interpret-affiliated-keywords data)
 			      (org-element-normalize-string results)
