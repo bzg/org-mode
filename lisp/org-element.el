@@ -455,8 +455,10 @@ past the brackets."
 ;; high-level functions useful to modify a parse tree.
 ;;
 ;; `org-element-secondary-p' is a predicate used to know if a given
-;; object belongs to a secondary string.  `org-element-copy' returns
-;; an element or object, stripping its parent property in the process.
+;; object belongs to a secondary string.  `org-element-class' tells if
+;; some parsed data is an element or an object, handling pseudo
+;; elements and objects.  `org-element-copy' returns an element or
+;; object, stripping its parent property in the process.
 
 (defsubst org-element-type (element)
   "Return type of ELEMENT.
@@ -513,6 +515,31 @@ Return value is the property name, as a keyword, or nil."
       (dolist (p properties)
 	(and (memq object (org-element-property p parent))
 	     (throw 'exit p))))))
+
+(defun org-element-class (datum &optional parent)
+  "Return class for ELEMENT, as a symbol.
+Class is either `element' or `object'.  Optional argument PARENT
+is the element or object containing DATUM.  It defaults to the
+value of DATUM `:parent' property."
+  (let ((type (org-element-type datum))
+	(parent (or parent (org-element-property :parent datum))))
+    (cond
+     ;; Trivial cases.
+     ((memq type org-element-all-objects) 'object)
+     ((memq type org-element-all-elements) 'element)
+     ;; Special cases.
+     ((eq type 'org-data) 'element)
+     ((eq type 'plain-text) 'object)
+     ((not type) 'object)
+     ;; Pseudo object or elements.  Make a guess about its class.
+     ;; Basically a pseudo object is contained within another object,
+     ;; a secondary string or a container element.
+     ((not parent) 'element)
+     (t
+      (let ((parent-type (org-element-type parent)))
+	(cond ((not parent-type) 'object)
+	      ((memq parent-type org-element-object-containers) 'object)
+	      (t 'element)))))))
 
 (defsubst org-element-adopt-elements (parent &rest children)
   "Append elements to the contents of another element.
@@ -4179,7 +4206,7 @@ looking into captions:
 		    ;; them.
 		    (when (and with-affiliated
 			       (eq --category 'objects)
-			       (memq --type org-element-all-elements))
+			       (eq (org-element-class --data) 'element))
 		      (dolist (kwd-pair org-element--parsed-properties-alist)
 			(let ((kwd (car kwd-pair))
 			      (value (org-element-property (cdr kwd-pair) --data)))
@@ -4210,7 +4237,7 @@ looking into captions:
 			   (not (memq --type org-element-greater-elements))))
 		     ;; Looking for elements but --DATA is an object.
 		     ((and (eq --category 'elements)
-			   (memq --type org-element-all-objects)))
+			   (eq (org-element-class --data) 'object)))
 		     ;; In any other case, map contents.
 		     (t (mapc --walk-tree (org-element-contents --data))))))))))
       (catch :--map-first-match
@@ -4533,19 +4560,13 @@ to interpret.  Return Org syntax as a string."
 		(if (memq type '(org-data plain-text nil)) results
 		  ;; Build white spaces.  If no `:post-blank' property
 		  ;; is specified, assume its value is 0.
-		  (let ((blank (or (org-element-property :post-blank data) 0)))
-		    (if (or (memq type org-element-all-objects)
-			    (and (not (memq type org-element-all-elements))
-				 parent
-				 (let ((type (org-element-type parent)))
-				   (or (not type)
-				       (memq type
-					     org-element-object-containers)))))
+		  (let ((blank (or (org-element-property :post-blank data) 0))
+			(class (org-element-class data parent)))
+		    (if (eq class 'object)
 			(concat results (make-string blank ?\s))
-		      (concat
-		       (org-element--interpret-affiliated-keywords data)
-		       (org-element-normalize-string results)
-		       (make-string blank ?\n)))))))))
+		      (concat (org-element--interpret-affiliated-keywords data)
+			      (org-element-normalize-string results)
+			      (make-string blank ?\n)))))))))
     (funcall fun data nil)))
 
 (defun org-element--interpret-affiliated-keywords (element)

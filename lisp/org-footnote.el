@@ -39,6 +39,7 @@
 (declare-function org-back-over-empty-lines "org" ())
 (declare-function org-edit-footnote-reference "org-src" ())
 (declare-function org-element-at-point "org-element" ())
+(declare-function org-element-class "org-element" (datum &optional parent))
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-lineage "org-element" (blob &optional types with-self))
 (declare-function org-element-property "org-element" (property element))
@@ -59,8 +60,6 @@
 (defvar org-blank-before-new-entry)	; defined in org.el
 (defvar org-bracket-link-regexp)	; defined in org.el
 (defvar org-complex-heading-regexp)	; defined in org.el
-(defvar org-element-all-elements)	; defined in org-element.el
-(defvar org-element-all-objects)	; defined in org-element.el
 (defvar org-odd-levels-only)		; defined in org.el
 (defvar org-outline-regexp)		; defined in org.el
 (defvar org-outline-regexp-bol)		; defined in org.el
@@ -298,10 +297,10 @@ otherwise."
        ((>= (point)
 	    (save-excursion (goto-char (org-element-property :end context))
 			    (skip-chars-backward " \r\t\n")
-			    (if (memq type org-element-all-objects) (point)
+			    (if (eq (org-element-class context) 'object) (point)
 			      (1+ (line-beginning-position 2))))))
        ;; Other elements are invalid.
-       ((memq type org-element-all-elements) nil)
+       ((eq (org-element-class context) 'element) nil)
        ;; Just before object is fine.
        ((= (point) (org-element-property :begin context)))
        ;; Within recursive object too, but not in a link.

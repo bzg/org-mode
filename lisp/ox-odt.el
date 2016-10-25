@@ -1747,8 +1747,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 			      info))))
 		   ;; Inline definitions are secondary strings.  We
 		   ;; need to wrap them within a paragraph.
-		   (if (memq (org-element-type (car (org-element-contents raw)))
-			     org-element-all-elements)
+		   (if (eq (org-element-class (car (org-element-contents raw)))
+			   'element)
 		       def
 		     (format
 		      "\n<text:p text:style-name=\"Footnote\">%s</text:p>"
@@ -3334,8 +3334,7 @@ channel."
      (format "\n<table:table-cell%s>\n%s\n</table:table-cell>"
 	     cell-attributes
 	     (let ((table-cell-contents (org-element-contents table-cell)))
-	       (if (memq (org-element-type (car table-cell-contents))
-			 org-element-all-elements)
+	       (if (eq (org-element-class (car table-cell-contents)) 'element)
 		   contents
 		 (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
 			 paragraph-style contents))))

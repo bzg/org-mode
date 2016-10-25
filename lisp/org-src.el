@@ -380,7 +380,7 @@ spaces after it as being outside."
 	   (org-with-wide-buffer
 	    (goto-char (org-element-property :end datum))
 	    (skip-chars-backward " \r\t\n")
-	    (if (memq (org-element-type datum) org-element-all-elements)
+	    (if (eq (org-element-class datum) 'element)
 		(line-end-position)
 	      (point))))))
 

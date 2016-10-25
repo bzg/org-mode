@@ -1988,13 +1988,9 @@ Return a string."
 	    (t
 	     (org-export-filter-apply-functions
 	      (plist-get info (intern (format ":filter-%s" type)))
-	      (let ((blank (or (org-element-property :post-blank data) 0)))
-		(if (or (memq type org-element-all-objects)
-			(and (not (memq type org-element-all-elements))
-			     parent
-			     (let ((type (org-element-type parent)))
-			       (or (not type)
-				   (memq type org-element-object-containers)))))
+	      (let ((blank (or (org-element-property :post-blank data) 0))
+		    (class (org-element-class data parent)))
+		(if (eq class 'object)
 		    (concat results (make-string blank ?\s))
 		  (concat (org-element-normalize-string results)
 			  (make-string blank ?\n))))
@@ -2033,7 +2029,8 @@ contents, as a string or nil.
 When optional argument WITH-AFFILIATED is non-nil, add affiliated
 keywords before output."
   (let ((type (org-element-type blob)))
-    (concat (and with-affiliated (memq type org-element-all-elements)
+    (concat (and with-affiliated
+		 (eq (org-element-class blob) 'element)
 		 (org-element--interpret-affiliated-keywords blob))
 	    (funcall (intern (format "org-element-%s-interpreter" type))
 		     blob contents))))
