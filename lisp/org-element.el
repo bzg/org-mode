@@ -4467,7 +4467,7 @@ the list of objects itself."
       (let (next-object contents)
 	(while (and (not (eobp))
 		    (setq next-object (org-element--object-lex restriction)))
-	  ;; Text before any object.  Untabify it.
+	  ;; Text before any object.
 	  (let ((obj-beg (org-element-property :begin next-object)))
 	    (unless (= (point) obj-beg)
 	      (let ((text (buffer-substring-no-properties (point) obj-beg)))
@@ -4487,7 +4487,7 @@ the list of objects itself."
 		    next-object)
 		  contents)
 	    (goto-char obj-end)))
-	;; Text after last object.  Untabify it.
+	;; Text after last object.
 	(unless (eobp)
 	  (let ((text (buffer-substring-no-properties (point) end)))
 	    (push (if acc (org-element-put-property text :parent acc) text)
