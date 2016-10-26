@@ -1601,6 +1601,12 @@ e^{i\\pi}+1=0
       (org-element-property
        :type
        (org-element-map (org-element-parse-buffer) 'link #'identity nil t)))))
+  ;; Pathological case: radio target of length 1 at beginning of line
+  ;; not followed by spaces.
+  (should
+   (org-test-with-temp-text "* <<<a>>>\n<point>a-bug"
+     (org-update-radio-target-regexp)
+     (org-element-parse-buffer)))
   ;; Standard link.
   ;;
   ;; ... with description.

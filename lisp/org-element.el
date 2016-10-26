@@ -4354,13 +4354,26 @@ RESTRICTION is a list of object types, as symbols, that should be
 looked after.  This function assumes that the buffer is narrowed
 to an appropriate container (e.g., a paragraph)."
   (if (memq 'table-cell restriction) (org-element-table-cell-parser)
-    (save-excursion
-      (let ((limit (and org-target-link-regexp
-			(save-excursion
-			  (or (bolp) (backward-char))
-			  (re-search-forward org-target-link-regexp nil t))
-			(match-beginning 1)))
-	    found)
+    (let* ((start (point))
+	   (limit
+	    (save-excursion
+	      (cond ((not org-target-link-regexp) nil)
+		    ((progn
+		       (unless (bolp) (forward-char -1))
+		       (not (re-search-forward org-target-link-regexp nil t)))
+		     nil)
+		    ;; Since we moved backward, we do not want to
+		    ;; match again an hypothetical 1-character long
+		    ;; radio link before us.  Realizing that this can
+		    ;; only happen if such a radio link starts at
+		    ;; beginning of line, we prevent this here.
+		    ((and (= start (1+ (line-beginning-position)))
+			  (= start (match-end 1)))
+		     (and (re-search-forward org-target-link-regexp nil t)
+			  (match-beginning 1)))
+		    (t (match-beginning 1)))))
+	   found)
+      (save-excursion
 	(while (and (not found)
 		    (re-search-forward org-element--object-regexp limit t))
 	  (goto-char (match-beginning 0))
