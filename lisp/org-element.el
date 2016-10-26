@@ -4358,6 +4358,7 @@ to an appropriate container (e.g., a paragraph)."
 	   (limit
 	    (save-excursion
 	      (cond ((not org-target-link-regexp) nil)
+		    ((not (memq 'link restriction)) nil)
 		    ((progn
 		       (unless (bolp) (forward-char -1))
 		       (not (re-search-forward org-target-link-regexp nil t)))
@@ -4375,7 +4376,7 @@ to an appropriate container (e.g., a paragraph)."
 	   found)
       (save-excursion
 	(while (and (not found)
-		    (re-search-forward org-element--object-regexp limit t))
+		    (re-search-forward org-element--object-regexp limit 'move))
 	  (goto-char (match-beginning 0))
 	  (let ((result (match-string 0)))
 	    (setq found
@@ -4445,9 +4446,8 @@ to an appropriate container (e.g., a paragraph)."
 			      (org-element-link-parser)))))))
 	    (or (eobp) (forward-char))))
 	(cond (found)
-	      ;; Radio link.
-	      ((and limit (memq 'link restriction))
-	       (goto-char limit) (org-element-link-parser)))))))
+	      (limit (org-element-link-parser))	;radio link
+	      (t nil))))))
 
 (defun org-element--parse-objects (beg end acc restriction &optional parent)
   "Parse objects between BEG and END and return recursive structure.
