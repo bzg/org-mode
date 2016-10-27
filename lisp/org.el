@@ -7914,6 +7914,29 @@ When NEXT is non-nil, check the next line instead."
 When NEXT is non-nil, check the next line instead."
   (org--line-empty-p 2))
 
+(defun org--blank-before-heading-p (&optional parent)
+  "Non-nil when an empty line should precede a new heading here.
+When optional argument PARENT is non-nil, consider parent
+headline instead of current one."
+  (pcase (assq 'heading org-blank-before-new-entry)
+    (`(heading . auto)
+     (save-excursion
+       (org-with-limited-levels
+        (unless (and (org-before-first-heading-p)
+                     (not (outline-next-heading)))
+          (org-back-to-heading t)
+          (when parent (org-up-heading-safe))
+          (cond ((not (bobp))
+                 (org-previous-line-empty-p))
+		((outline-next-heading)
+		 (org-previous-line-empty-p))
+		;; Ignore trailing spaces on last buffer line.
+		((progn (skip-chars-backward " \t") (bolp))
+		 (org-previous-line-empty-p))
+		(t nil))))))
+    (`(heading . ,value) value)
+    (_ nil)))
+
 (defun org-insert-heading (&optional arg invisible-ok top)
   "Insert a new heading or an item with the same depth at point.
 
@@ -7946,151 +7969,77 @@ command.
 When optional argument TOP is non-nil, insert a level 1 heading,
 unconditionally."
   (interactive "P")
-  (let ((itemp (and (not top) (org-in-item-p)))
-	(may-split (org-get-alist-option org-M-RET-may-split-line 'headline))
-	(respect-content (or org-insert-heading-respect-content
-			     (equal arg '(4))))
-	(initial-content ""))
-
+  (let ((blank? (org--blank-before-heading-p (equal arg '(16)))))
     (cond
-
-     ((or (= (buffer-size) 0)
-	  (and (not (save-excursion
-		      (and (ignore-errors (org-back-to-heading invisible-ok))
-			   (org-at-heading-p))))
-	       (or arg (not itemp))))
-      ;; At beginning of buffer or so high up that only a heading
-      ;; makes sense.
-      (cond ((and (bolp) (not respect-content)) (insert "* "))
-	    ((not respect-content)
-	     (unless may-split (end-of-line))
-	     (insert "\n* "))
-	    ((re-search-forward org-outline-regexp-bol nil t)
-	     (beginning-of-line)
-	     (insert "* \n")
-	     (backward-char))
-	    (t (goto-char (point-max))
-	       (insert "\n* ")))
+     ((or org-insert-heading-respect-content
+	  (member arg '((4) (16)))
+	  (and (not invisible-ok)
+	       (invisible-p (max (1- (point)) (point-min)))))
+      (let ((level (org-current-level)))
+        ;; Position point at the location of insertion.
+	(if (not level)			;before first headline
+	    (org-with-limited-levels (outline-next-heading))
+	  ;; Make sure we end up on a visible headline if INVISIBLE-OK
+	  ;; is nil.
+	  (org-with-limited-levels (org-back-to-heading invisible-ok))
+	  (cond ((equal arg '(16))
+		 (org-up-heading-safe)
+		 (org-end-of-subtree t t))
+		(t
+		 (org-end-of-subtree t t))))
+        (unless (bolp) (insert "\n"))   ;ensure final newline
+        (unless (and blank? (org-previous-line-empty-p))
+          (org-N-empty-lines-before-current (if blank? 1 0)))
+        (insert (make-string (if (and level (not top)) level 1) ?*) " \n")
+        (forward-char -1)
+        (run-hooks 'org-insert-heading-hook)))
+     ;; At a headline...
+     ((org-at-heading-p)
+      (let ((level (if top 1 (org-current-level))))
+        (cond ((bolp)
+               (when blank? (save-excursion (insert "\n")))
+               (save-excursion (insert (make-string level ?*) " \n"))
+               (unless (and blank? (org-previous-line-empty-p))
+                 (org-N-empty-lines-before-current (if blank? 1 0)))
+               (end-of-line))
+              ((and (org-get-alist-option org-M-RET-may-split-line 'headline)
+                    (save-excursion
+                      (beginning-of-line)
+                      (looking-at org-complex-heading-regexp))
+                    (org-pos-in-match-range (point) 4))
+               ;; Grab the text that should moved to the new headline.
+               ;; Preserve tags.
+               (let ((split (delete-and-extract-region (point) (match-end 4))))
+                 (if (looking-at "[ \t]*$") (replace-match "")
+                   (org-set-tags nil t))
+                 (end-of-line)
+                 (when blank? (insert "\n"))
+                 (insert "\n" (make-string level ?*) " ")
+                 (when (org-string-nw-p split) (insert split))
+                 (insert "\n")
+                 (forward-char -1)))
+              (t
+               (end-of-line)
+               (when blank? (insert "\n"))
+               (insert "\n" (make-string level ?*) " \n")
+               (forward-char -1)))
+        (run-hooks 'org-insert-heading-hook)))
+     ;; Within a plain list, call `org-insert-item'.
+     ((and (not top) (org-in-item-p)) (org-insert-item))
+     ;; On regular text, turn line into a headline or split, if
+     ;; appropriate.
+     ((bolp)
+      (insert "* ")
+      (unless (and blank? (org-previous-line-empty-p))
+        (org-N-empty-lines-before-current (if blank? 1 0)))
       (run-hooks 'org-insert-heading-hook))
-
-     ((and itemp (not (member arg '((4) (16)))) (org-insert-item)))
-
      (t
-      ;; Maybe move at the end of the subtree
-      (when (equal arg '(16))
-	(org-up-heading-safe)
-	(org-end-of-subtree t))
-      ;; Insert a heading
-      (save-restriction
-	(widen)
-	(let* ((level nil)
-	       (on-heading (org-at-heading-p))
-	       (empty-line-p (if on-heading
-				 (org-previous-line-empty-p)
-			       ;; We will decide later
-			       nil))
-	       ;; Get a level string to fall back on.
-	       (fix-level
-		(if (org-before-first-heading-p) "*"
-		  (save-excursion
-		    (org-back-to-heading t)
-		    (when (org-previous-line-empty-p) (setq empty-line-p t))
-		    (looking-at org-outline-regexp)
-		    (make-string (1- (length (match-string 0))) ?*))))
-	       (stars
-		(save-excursion
-		  (condition-case nil
-		      (if top "* "
-			(org-back-to-heading invisible-ok)
-			(when (and (not on-heading)
-				   (featurep 'org-inlinetask)
-				   (integerp org-inlinetask-min-level)
-				   (>= (length (match-string 0))
-				       org-inlinetask-min-level))
-			  ;; Find a heading level before the inline
-			  ;; task.
-			  (while (and (setq level (org-up-heading-safe))
-				      (>= level org-inlinetask-min-level)))
-			  (if (org-at-heading-p)
-			      (org-back-to-heading invisible-ok)
-			    (error "This should not happen")))
-			(unless (and (save-excursion
-				       (save-match-data
-					 (org-backward-heading-same-level
-					  1 invisible-ok))
-				       (= (point) (match-beginning 0)))
-				     (not (org-next-line-empty-p)))
-			  (setq empty-line-p (or empty-line-p
-						 (org-previous-line-empty-p))))
-			(match-string 0))
-		    (error (or fix-level "* ")))))
-	       (blank-a (cdr (assq 'heading org-blank-before-new-entry)))
-	       (blank (if (eq blank-a 'auto) empty-line-p blank-a)))
-
-	  ;; If we insert after content, move there and clean up
-	  ;; whitespace.
-	  (when respect-content
-	    (if (not (org-before-first-heading-p))
-		(org-end-of-subtree nil t)
-	      (re-search-forward org-outline-regexp-bol)
-	      (beginning-of-line 0))
-	    (skip-chars-backward " \r\t\n")
-	    (and (not (looking-back "^\\*+" (line-beginning-position)))
-		 (looking-at "[ \t]+") (replace-match ""))
-	    (unless (eobp) (forward-char 1))
-	    (when (looking-at "^\\*")
-	      (unless (bobp) (backward-char 1))
-	      (insert "\n")))
-
-	  ;; If we are splitting, grab the text that should be moved
-	  ;; to the new headline.
-	  (when may-split
-	    (if (org-at-heading-p)
-		;; This is a heading: split intelligently (keeping
-		;; tags).
-		(let ((pos (point)))
-		  (beginning-of-line)
-		  (let ((case-fold-search nil))
-		    (unless (looking-at org-complex-heading-regexp)
-		      (error "This should not happen")))
-		  (when (and (match-beginning 4)
-			     (> pos (match-beginning 4))
-			     (< pos (match-end 4)))
-		    (setq initial-content (buffer-substring pos (match-end 4)))
-		    (goto-char pos)
-		    (delete-region (point) (match-end 4))
-		    (if (looking-at "[ \t]*$")
-			(replace-match "")
-		      (insert (make-string (length initial-content) ?\s)))
-		    (setq initial-content (org-trim initial-content)))
-		  (goto-char pos))
-	      ;; A normal line.
-	      (setq initial-content
-		    (org-trim
-		     (delete-and-extract-region (point) (line-end-position))))))
-
-	  ;; If we are at the beginning of the line, insert before it.
-	  ;; Otherwise, after it.
-	  (cond
-	   ((and (bolp) (looking-at "[ \t]*$")))
-	   ((bolp) (save-excursion (insert "\n")))
-	   (t (end-of-line)
-	      (insert "\n")))
-
-	  ;; Insert the new heading
-	  (insert stars)
-	  (just-one-space)
-	  (insert initial-content)
-	  (unless (and blank (org-previous-line-empty-p))
-	    (org-N-empty-lines-before-current (if blank 1 0)))
-	  ;; Adjust visibility, which may be messed up if we removed
-	  ;; blank lines while previous entry was hidden.
-	  (let ((bol (line-beginning-position)))
-	    (dolist (o (overlays-at (1- bol)))
-	      (when (and (eq (overlay-get o 'invisible) 'outline)
-			 (eq (overlay-end o) bol))
-		(move-overlay o (overlay-start o) (1- bol)))))
-	  (run-hooks 'org-insert-heading-hook)))))))
+      (unless (org-get-alist-option org-M-RET-may-split-line 'headline)
+        (end-of-line))
+      (insert "\n* ")
+      (unless (and blank? (org-previous-line-empty-p))
+        (org-N-empty-lines-before-current (if blank? 1 0)))
+      (run-hooks 'org-insert-heading-hook)))))
 
 (defun org-N-empty-lines-before-current (N)
   "Make the number of empty lines before current exactly N.
