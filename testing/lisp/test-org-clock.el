@@ -334,7 +334,32 @@ contents.  The clocktable doesn't appear in the buffer."
       (insert (org-test-clock-create-clock ". 2:00" ". 4:00"))
       (goto-line 2)
       (test-org-clock-clocktable-contents-at-point
-       ":tags \"tag\" :indent nil")))))
+       ":tags \"tag\" :indent nil"))))
+  ;; Test `file-with-archives' scope.  In particular, preserve "TBLFM"
+  ;; line, and ignore "file" column.
+  (should
+   (equal
+    "| Headline     | Time        |     |
+|--------------+-------------+-----|
+| *Total time* | *704d 9:01* | foo |
+|--------------+-------------+-----|
+| Test         | 704d 9:01   | foo |
+"
+    (org-test-with-temp-text-in-file
+	"* Test
+CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 00:41] => 16905:01
+
+#+BEGIN: clocktable :scope file-with-archives
+#+TBLFM: $3=string(\"foo\")
+#+END:
+"
+      (search-forward "#+begin:")
+      (beginning-of-line)
+      (org-update-dblock)
+      (forward-line 2)
+      (buffer-substring-no-properties
+       (point) (progn (goto-char (point-max))
+		      (line-beginning-position -1)))))))
 
 (provide 'test-org-clock)
 ;;; test-org-clock.el end here

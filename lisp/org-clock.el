@@ -2356,6 +2356,15 @@ the currently selected interval size."
   (setq params (org-combine-plists org-clocktable-defaults params))
   (catch 'exit
     (let* ((scope (plist-get params :scope))
+	   (files (pcase scope
+		    (`agenda
+		     (org-agenda-files t))
+		    (`agenda-with-archives
+		     (org-add-archive-files (org-agenda-files t)))
+		    (`file-with-archives
+		     (and buffer-file-name
+			  (org-add-archive-files (list buffer-file-name))))
+		    (_ (or (buffer-file-name) (current-buffer)))))
 	   (block (plist-get params :block))
 	   (ts (plist-get params :tstart))
 	   (te (plist-get params :tend))
@@ -2365,7 +2374,7 @@ the currently selected interval size."
 	   (formatter (or (plist-get params :formatter)
 			  org-clock-clocktable-formatter
 			  'org-clocktable-write-default))
-	   cc ipos one-file-with-archives scope-is-list tbls level)
+	   cc)
       ;; Check if we need to do steps
       (when block
 	;; Get the range text for the header
@@ -2379,62 +2388,49 @@ the currently selected interval size."
 	(org-clocktable-steps params)
 	(throw 'exit nil))
 
-      (setq ipos (point)) ; remember the insertion position
+      (org-agenda-prepare-buffers (if (consp files) files (list files)))
 
-      ;; Get the right scope
-      (cond
-       ((eq scope 'agenda)
-	(setq scope (org-agenda-files t)))
-       ((eq scope 'agenda-with-archives)
-	(setq scope (org-agenda-files t))
-	(setq scope (org-add-archive-files scope)))
-       ((eq scope 'file-with-archives)
-	(setq scope (and buffer-file-name
-			 (org-add-archive-files (list buffer-file-name)))
-	      one-file-with-archives t)))
-      (setq scope-is-list (and scope (listp scope)))
-      (if scope-is-list
-	  ;; we collect from several files
-	  (let* ((files scope)
-		 file)
-	    (org-agenda-prepare-buffers files)
-	    (while (setq file (pop files))
-	      (with-current-buffer (find-buffer-visiting file)
-		(save-excursion
-		  (save-restriction
-		    (push (org-clock-get-table-data file params) tbls))))))
-	;; Just from the current file
-	(save-restriction
-	  ;; get the right range into the restriction
-	  (org-agenda-prepare-buffers (list (or (buffer-file-name)
-						(current-buffer))))
-	  (cond
-	   ((not scope))  ; use the restriction as it is now
-	   ((eq scope 'file) (widen))
-	   ((eq scope 'subtree) (org-narrow-to-subtree))
-	   ((eq scope 'tree)
-	    (while (org-up-heading-safe))
-	    (org-narrow-to-subtree))
-	   ((and (symbolp scope) (string-match "^tree\\([0-9]+\\)$"
-					       (symbol-name scope)))
-	    (setq level (string-to-number (match-string 1 (symbol-name scope))))
-	    (catch 'exit
-	      (while (org-up-heading-safe)
-		(looking-at org-outline-regexp)
-		(if (<= (org-reduced-level (funcall outline-level)) level)
-		    (throw 'exit nil))))
-	    (org-narrow-to-subtree)))
-	  ;; do the table, with no file name.
-	  (push (org-clock-get-table-data nil params) tbls)))
+      (let ((origin (point))
+	    (tables
+	     (if (consp files)
+		 (mapcar (lambda (file)
+			   (with-current-buffer (find-buffer-visiting file)
+			     (save-excursion
+			       (save-restriction
+				 (org-clock-get-table-data file params)))))
+			 files)
+	       ;; Get the right restriction for the scope.
+	       (cond
+		((not scope))	     ;use the restriction as it is now
+		((eq scope 'file) (widen))
+		((eq scope 'subtree) (org-narrow-to-subtree))
+		((eq scope 'tree)
+		 (while (org-up-heading-safe))
+		 (org-narrow-to-subtree))
+		((and (symbolp scope)
+		      (string-match "\\`tree\\([0-9]+\\)\\'"
+				    (symbol-name scope)))
+		 (let ((level (string-to-number
+			       (match-string 1 (symbol-name scope)))))
+		   (catch 'exit
+		     (while (org-up-heading-safe)
+		       (looking-at org-outline-regexp)
+		       (when (<= (org-reduced-level (funcall outline-level))
+				 level)
+			 (throw 'exit nil))))
+		   (org-narrow-to-subtree))))
+	       (list (org-clock-get-table-data nil params))))
+	    (multifile
+	     ;; Even though `file-with-archives' can consist of
+	     ;; multiple files, we consider this is one extended file
+	     ;; instead.
+	     (cond ((eq scope 'file-with-archives) nil)
+		   ((consp files)))))
 
-      ;; OK, at this point we tbls as a list of tables, one per file
-      (setq tbls (nreverse tbls))
-
-      (setq params (plist-put params :multifile scope-is-list))
-      (setq params (plist-put params :one-file-with-archives
-			      one-file-with-archives))
-
-      (funcall formatter ipos tbls params))))
+	(funcall formatter
+		 origin
+		 tables
+		 (org-combine-plists params `(:multifile ,multifile)))))))
 
 (defun org-clocktable-write-default (ipos tables params)
   "Write out a clock table at position IPOS in the current buffer.
@@ -2468,7 +2464,6 @@ from the dynamic block definition."
 	 (timestamp (plist-get params :timestamp))
 	 (properties (plist-get params :properties))
 	 (ntcol (max 1 (or (plist-get params :tcolumns) 100)))
-	 (rm-file-column (plist-get params :one-file-with-archives))
 	 (indent (plist-get params :indent))
 	 (case-fold-search t)
 	 range-text total-time tbl level hlc formula pcol
@@ -2673,10 +2668,6 @@ from the dynamic block definition."
 	    (org-table-goto-column pcol nil 'force)
 	    (insert "%")))
       (org-table-recalculate 'all))
-    (when rm-file-column
-      ;; The file column is actually not wanted
-      (forward-char 1)
-      (org-table-delete-column))
     total-time))
 
 (defun org-clocktable-indent-string (level)
