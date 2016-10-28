@@ -8400,8 +8400,9 @@ When called with a prefix argument, include all archive files as well."
       (org-show-context 'agenda)
       (recenter (/ (window-height) 2))
       (org-back-to-heading t)
-      (if (re-search-forward org-complex-heading-regexp nil t)
-	  (goto-char (match-beginning 4))))
+      (let ((case-fold-search nil))
+	(when (re-search-forward org-complex-heading-regexp nil t)
+	  (goto-char (match-beginning 4)))))
     (run-hooks 'org-agenda-after-show-hook)
     (and highlight (org-highlight (point-at-bol) (point-at-eol)))))
 

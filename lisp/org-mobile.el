@@ -996,7 +996,7 @@ be returned that indicates what went wrong."
        ((equal new "DONEARCHIVE")
 	(org-todo 'done)
 	(org-archive-subtree-default))
-       ((equal new current) t) ; nothing needs to be done
+       ((equal new current) t)		; nothing needs to be done
        ((or (equal current old)
 	    (eq org-mobile-force-mobile-change t)
 	    (memq 'todo org-mobile-force-mobile-change))
@@ -1018,33 +1018,35 @@ be returned that indicates what went wrong."
 		 (or old "") (or current "")))))
 
      ((eq what 'priority)
-      (when (looking-at org-complex-heading-regexp)
-	(setq current (and (match-end 3) (substring (match-string 3) 2 3)))
-	(cond
-	 ((equal current new) t) ; no action required
-	 ((or (equal current old)
-	      (eq org-mobile-force-mobile-change t)
-	      (memq 'tags org-mobile-force-mobile-change))
-	  (org-priority (and new (string-to-char new))))
-	 (t (error "Priority was expected to be %s, but is %s"
-		   old current)))))
+      (let ((case-fold-search nil))
+	(when (looking-at org-complex-heading-regexp)
+	  (let ((current (and (match-end 3) (substring (match-string 3) 2 3))))
+	    (cond
+	     ((equal current new) t)	;no action required
+	     ((or (equal current old)
+		  (eq org-mobile-force-mobile-change t)
+		  (memq 'tags org-mobile-force-mobile-change))
+	      (org-priority (and new (string-to-char new))))
+	     (t (error "Priority was expected to be %s, but is %s"
+		       old current)))))))
 
      ((eq what 'heading)
-      (when (looking-at org-complex-heading-regexp)
-	(setq current (match-string 4))
-	(cond
-	 ((equal current new) t) ; no action required
-	 ((or (equal current old)
-	      (eq org-mobile-force-mobile-change t)
-	      (memq 'heading org-mobile-force-mobile-change))
-	  (goto-char (match-beginning 4))
-	  (insert new)
-	  (delete-region (point) (+ (point) (length current)))
-	  (org-set-tags nil 'align))
-	 (t (error "Heading changed in MobileOrg and on the computer")))))
+      (let ((case-fold-search nil))
+	(when (looking-at org-complex-heading-regexp)
+	  (let ((current (match-string 4)))
+	    (cond
+	     ((equal current new) t)	;no action required
+	     ((or (equal current old)
+		  (eq org-mobile-force-mobile-change t)
+		  (memq 'heading org-mobile-force-mobile-change))
+	      (goto-char (match-beginning 4))
+	      (insert new)
+	      (delete-region (point) (+ (point) (length current)))
+	      (org-set-tags nil 'align))
+	     (t (error "Heading changed in MobileOrg and on the computer")))))))
 
      ((eq what 'addheading)
-      (if (org-at-heading-p) ; if false we are in top-level of file
+      (if (org-at-heading-p)	; if false we are in top-level of file
 	  (progn
 	    ;; Workaround a `org-insert-heading-respect-content' bug
 	    ;; which prevents correct insertion when point is invisible
@@ -1059,7 +1061,7 @@ be returned that indicates what went wrong."
      ((eq what 'refile)
       (org-copy-subtree)
       (org-with-point-at (org-mobile-locate-entry new)
-	(if (org-at-heading-p) ; if false we are in top-level of file
+	(if (org-at-heading-p)	; if false we are in top-level of file
 	    (progn
 	      (setq level (org-get-valid-level (funcall outline-level) 1))
 	      (org-end-of-subtree t t)

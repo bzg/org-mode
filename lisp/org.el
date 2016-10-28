@@ -4912,11 +4912,15 @@ Otherwise, these types are allowed:
   "Matches a headline and puts TODO state into group 2 if present.")
 (defvar-local org-complex-heading-regexp nil
   "Matches a headline and puts everything into groups:
+
 group 1: the stars
 group 2: The todo keyword, maybe
 group 3: Priority cookie
 group 4: True headline
-group 5: Tags")
+group 5: Tags
+
+Since TODO keywords are case-sensitive, `case-fold-search' is
+expected to be bound to nil when matching this regexp.")
 (defvar-local org-complex-heading-regexp-format nil
   "Printf format to make regexp to match an exact headline.
 This regexp will match the headline of any node which has the
@@ -8021,8 +8025,9 @@ unconditionally."
 		;; tags).
 		(let ((pos (point)))
 		  (beginning-of-line)
-		  (unless (looking-at org-complex-heading-regexp)
-		    (error "This should not happen"))
+		  (let ((case-fold-search nil))
+		    (unless (looking-at org-complex-heading-regexp)
+		      (error "This should not happen")))
 		  (when (and (match-beginning 4)
 			     (> pos (match-beginning 4))
 			     (< pos (match-end 4)))
@@ -8141,16 +8146,17 @@ Set it to HEADING when provided."
   (interactive)
   (org-with-wide-buffer
    (org-back-to-heading t)
-   (when (looking-at org-complex-heading-regexp)
-     (let* ((old (match-string-no-properties 4))
-	    (new (save-match-data
-		   (org-trim (or heading (read-string "Edit: " old))))))
-       (unless (equal old new)
-	 (if old (replace-match new t t nil 4)
-	   (goto-char (or (match-end 3) (match-end 2) (match-end 1)))
-	   (insert " " new))
-	 (org-set-tags nil t)
-	 (when (looking-at "[ \t]*$") (replace-match "")))))))
+   (let ((case-fold-search nil))
+     (when (looking-at org-complex-heading-regexp)
+       (let* ((old (match-string-no-properties 4))
+	      (new (save-match-data
+		     (org-trim (or heading (read-string "Edit: " old))))))
+	 (unless (equal old new)
+	   (if old (replace-match new t t nil 4)
+	     (goto-char (or (match-end 3) (match-end 2) (match-end 1)))
+	     (insert " " new))
+	   (org-set-tags nil t)
+	   (when (looking-at "[ \t]*$") (replace-match ""))))))))
 
 (defun org-insert-heading-after-current ()
   "Insert a new heading with same level as current, after current subtree."
@@ -10842,10 +10848,12 @@ link in a property drawer line."
 	 ;; a link, a footnote reference or on tags.
 	 ((and (memq type '(headline inlinetask))
 	       ;; Not on tags.
-	       (progn (save-excursion (beginning-of-line)
-				      (looking-at org-complex-heading-regexp))
-		      (or (not (match-beginning 5))
-			  (< (point) (match-beginning 5)))))
+	       (let ((case-fold-search nil))
+		 (save-excursion
+		   (beginning-of-line)
+		   (looking-at org-complex-heading-regexp))
+		 (or (not (match-beginning 5))
+		     (< (point) (match-beginning 5)))))
 	  (let* ((data (org-offer-links-in-entry (current-buffer) (point) arg))
 		 (links (car data))
 		 (links-end (cdr data)))
@@ -10873,10 +10881,11 @@ link in a property drawer line."
 	 ((eq type 'timestamp) (org-follow-timestamp-link))
 	 ;; On tags within a headline or an inlinetask.
 	 ((and (memq type '(headline inlinetask))
-	       (progn (save-excursion (beginning-of-line)
-				      (looking-at org-complex-heading-regexp))
-		      (and (match-beginning 5)
-			   (>= (point) (match-beginning 5)))))
+	       (let ((case-fold-search nil))
+		 (save-excursion (beginning-of-line)
+				 (looking-at org-complex-heading-regexp))
+		 (and (match-beginning 5)
+		      (>= (point) (match-beginning 5)))))
 	  (org-tags-view arg (substring (match-string 5) 0 -1)))
 	 ((eq type 'link)
 	  ;; When link is located within the description of another
@@ -11737,7 +11746,8 @@ order.")
 		(setq org-outline-path-cache nil)
 		(while (re-search-forward descre nil t)
 		  (beginning-of-line)
-		  (looking-at org-complex-heading-regexp)
+		  (let ((case-fold-search nil))
+		    (looking-at org-complex-heading-regexp))
 		  (let ((begin (point))
 			(heading (match-string-no-properties 4)))
 		    (unless (or (and
@@ -11786,7 +11796,7 @@ optional argument USE-CACHE is non-nil, make use of a cache.  See
 Assume buffer is widened and point is on a headline."
   (or (and use-cache (cdr (assq (point) org-outline-path-cache)))
       (let ((p (point))
-	    (heading (progn
+	    (heading (let ((case-fold-search nil))
 		       (looking-at org-complex-heading-regexp)
 		       (if (not (match-end 4)) ""
 			 ;; Remove statistics cookies.
@@ -12469,7 +12479,8 @@ expands them."
   (interactive)
   (save-excursion
     (org-back-to-heading)
-    (looking-at org-complex-heading-regexp)
+    (let ((case-fold-search nil))
+      (looking-at org-complex-heading-regexp))
     (goto-char (or (match-end 3) (match-end 2) (match-end 1)))
     (skip-chars-forward " \t")
     (unless (memq (char-before) '(?\s ?\t)) (insert " "))
@@ -15029,7 +15040,8 @@ If DATA is nil or the empty string, any tags will be removed."
   (when data
     (save-excursion
       (org-back-to-heading t)
-      (when (looking-at org-complex-heading-regexp)
+      (when (let ((case-fold-search nil))
+	      (looking-at org-complex-heading-regexp))
 	(if (match-end 5)
 	    (progn
 	      (goto-char (match-beginning 5))
@@ -15143,7 +15155,8 @@ When JUST-ALIGN is non-nil, only align tags."
 	  (unless (equal current tags)
 	    (save-excursion
 	      (beginning-of-line)
-	      (looking-at org-complex-heading-regexp)
+	      (let ((case-fold-search nil))
+		(looking-at org-complex-heading-regexp))
 	      ;; Remove current tags, if any.
 	      (when (match-end 5) (replace-match "" nil nil nil 5))
 	      ;; Insert new tags, if any.  Otherwise, remove trailing
@@ -15815,13 +15828,14 @@ strings."
 			props)))
 	      (when specific (throw 'exit props)))
 	    (when (or (not specific) (string= specific "ITEM"))
-	      (when (looking-at org-complex-heading-regexp)
-		(push (cons "ITEM"
-			    (let ((title (match-string-no-properties 4)))
-			      (if (org-string-nw-p title)
-				  (org-remove-tabs title)
-				"")))
-		      props))
+	      (let ((case-fold-search nil))
+		(when (looking-at org-complex-heading-regexp)
+		  (push (cons "ITEM"
+			      (let ((title (match-string-no-properties 4)))
+				(if (org-string-nw-p title)
+				    (org-remove-tabs title)
+				  "")))
+			props)))
 	      (when specific (throw 'exit props)))
 	    (when (or (not specific) (string= specific "TODO"))
 	      (let ((case-fold-search nil))
@@ -21302,7 +21316,8 @@ With a non-nil optional argument, join it to the following one."
   (interactive "*P")
   (if (save-excursion
 	(beginning-of-line (if arg 1 0))
-	(looking-at org-complex-heading-regexp))
+	(let ((case-fold-search nil))
+	  (looking-at org-complex-heading-regexp)))
       ;; At headline.
       (let ((tags-column (when (match-beginning 5)
 			   (save-excursion (goto-char (match-beginning 5))
@@ -23786,7 +23801,7 @@ With argument N not nil or 1, move forward N - 1 lines first."
      ;; of line: point is at the beginning of a visual line.  Bail
      ;; out.
      ((and (bound-and-true-p visual-line-mode) (not (bolp))))
-     ((looking-at org-complex-heading-regexp)
+     ((let ((case-fold-search nil)) (looking-at org-complex-heading-regexp))
       ;; At a headline, special position is before the title, but
       ;; after any TODO keyword or priority cookie.
       (let ((refpos (min (1+ (or (match-end 3) (match-end 2) (match-end 1)))
@@ -23837,7 +23852,8 @@ With argument N not nil or 1, move forward N - 1 lines first."
      ((and special
 	   (save-excursion
 	     (beginning-of-line)
-	     (looking-at org-complex-heading-regexp))
+	     (let ((case-fold-search nil))
+	       (looking-at org-complex-heading-regexp)))
 	   (match-end 5))
       (let ((tags (save-excursion
 		    (goto-char (match-beginning 5))
@@ -25020,8 +25036,9 @@ ELEMENT is the element at point."
       ;; faster than relying on `org-element-at-point'.
       (and (save-excursion (beginning-of-line)
 			   (and (let ((case-fold-search t))
-				  (not (looking-at "\\*+ END[ \t]*$")))
-				(looking-at org-complex-heading-regexp)))
+				  (not (looking-at-p "\\*+ END[ \t]*$")))
+				(let ((case-fold-search nil))
+				  (looking-at org-complex-heading-regexp))))
 	   (match-beginning 4)
 	   (>= (point) (match-beginning 4))
 	   (or (not (match-beginning 5))

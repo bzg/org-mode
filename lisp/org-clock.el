@@ -1266,10 +1266,11 @@ the default behavior."
 	 (org-clock-history-push)
 	 (setq org-clock-current-task (nth 4 (org-heading-components)))
 	 (cond ((functionp org-clock-in-switch-to-state)
-		(looking-at org-complex-heading-regexp)
+		(let ((case-fold-search nil))
+		  (looking-at org-complex-heading-regexp))
 		(let ((newstate (funcall org-clock-in-switch-to-state
 					 (match-string 2))))
-		  (if newstate (org-todo newstate))))
+		  (when newstate (org-todo newstate))))
 	       ((and org-clock-in-switch-to-state
 		     (not (looking-at (concat org-outline-regexp "[ \t]*"
 					      org-clock-in-switch-to-state
@@ -1617,10 +1618,11 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 		    (org-clock-out-when-done nil))
 		(cond
 		 ((functionp org-clock-out-switch-to-state)
-		  (looking-at org-complex-heading-regexp)
+		  (let ((case-fold-search nil))
+		    (looking-at org-complex-heading-regexp))
 		  (let ((newstate (funcall org-clock-out-switch-to-state
 					   (match-string 2))))
-		    (if newstate (org-todo newstate))))
+		    (when newstate (org-todo newstate))))
 		 ((and org-clock-out-switch-to-state
 		       (not (looking-at (concat org-outline-regexp "[ \t]*"
 						org-clock-out-switch-to-state
@@ -1945,10 +1947,11 @@ This creates a new overlay and stores it in `org-clock-overlays', so that it
 will be easy to remove."
   (let (ov tx)
     (beginning-of-line)
-    (when (looking-at org-complex-heading-regexp)
-      (goto-char (match-beginning 4)))
+    (let ((case-fold-search nil))
+      (when (looking-at org-complex-heading-regexp)
+	(goto-char (match-beginning 4))))
     (setq ov (make-overlay (point) (point-at-eol))
-    	  tx (concat (buffer-substring-no-properties (point) (match-end 4))
+	  tx (concat (buffer-substring-no-properties (point) (match-end 4))
 		     (org-add-props
 			 (make-string
 			  (max 0 (- (- 60 (current-column))
@@ -2988,8 +2991,9 @@ The details of what will be saved are regulated by the variable
 			   (save-excursion
 			     (goto-char (cdr resume-clock))
 			     (org-back-to-heading t)
-			     (and (looking-at org-complex-heading-regexp)
-				  (match-string 4))))
+			     (let ((case-fold-search nil))
+			       (and (looking-at org-complex-heading-regexp)
+				    (match-string 4)))))
 			 ") "))))
 	  (when (file-exists-p (car resume-clock))
 	    (with-current-buffer (find-file (car resume-clock))

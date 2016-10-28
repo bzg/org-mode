@@ -284,10 +284,12 @@ otherwise."
        ;; heading itself or on the blank lines below.
        ((memq type '(headline inlinetask))
 	(or (not (org-at-heading-p))
-	    (and (save-excursion (beginning-of-line)
-				 (and (let ((case-fold-search t))
-					(not (looking-at "\\*+ END[ \t]*$")))
-				      (looking-at org-complex-heading-regexp)))
+	    (and (save-excursion
+		   (beginning-of-line)
+		   (and (let ((case-fold-search t))
+			  (not (looking-at-p "\\*+ END[ \t]*$")))
+			(let ((case-fold-search nil))
+			  (looking-at org-complex-heading-regexp))))
 		 (match-beginning 4)
 		 (>= (point) (match-beginning 4))
 		 (or (not (match-beginning 5))
