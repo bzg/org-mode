@@ -539,6 +539,7 @@ value of DATUM `:parent' property."
       (let ((parent-type (org-element-type parent)))
 	(cond ((not parent-type) 'object)
 	      ((memq parent-type org-element-object-containers) 'object)
+	      ((org-element-secondary-p datum) 'object)
 	      (t 'element)))))))
 
 (defsubst org-element-adopt-elements (parent &rest children)

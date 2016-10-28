@@ -156,7 +156,13 @@ Some other text
   ;; Pseudo objects.
   (should (eq 'object (org-element-class '(foo nil) '(bold nil))))
   (should (eq 'object (org-element-class '(foo nil) '(paragraph nil))))
-  (should (eq 'object (org-element-class '(foo nil) '("secondary")))))
+  (should (eq 'object (org-element-class '(foo nil) '("secondary"))))
+  (should
+   (eq 'object
+       (let* ((datum '(foo nil))
+	      (headline `(headline (:title (,datum)))))
+	 (org-element-put-property datum :parent headline)
+	 (org-element-class datum)))))
 
 (ert-deftest test-org-element/adopt-elements ()
   "Test `org-element-adopt-elements' specifications."
