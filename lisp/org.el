@@ -7940,12 +7940,12 @@ headline instead of current one."
 (defun org-insert-heading (&optional arg invisible-ok top)
   "Insert a new heading or an item with the same depth at point.
 
-If point is at the beginning of a heading or a list item, insert
-a new heading or a new item above the current one.  When at the
-beginning of a regular line of text, turn it into a heading.
+If point is at the beginning of a heading, insert a new heading
+or a new headline above the current one.  When at the beginning
+of a regular line of text, turn it into a heading.
 
 If point is in the middle of a line, split it and create a new
-headline/item with the text in the current line after point (see
+headline with the text in the current line after point (see
 `org-M-RET-may-split-line' on how to modify this behavior).  As
 a special case, on a headline, splitting can only happen on the
 title itself.  E.g., this excludes breaking stars or tags.
@@ -7991,8 +7991,7 @@ unconditionally."
         (unless (and blank? (org-previous-line-empty-p))
           (org-N-empty-lines-before-current (if blank? 1 0)))
         (insert (make-string (if (and level (not top)) level 1) ?*) " \n")
-        (forward-char -1)
-        (run-hooks 'org-insert-heading-hook)))
+        (forward-char -1)))
      ;; At a headline...
      ((org-at-heading-p)
       (let ((level (if top 1 (org-current-level))))
@@ -8022,24 +8021,20 @@ unconditionally."
                (end-of-line)
                (when blank? (insert "\n"))
                (insert "\n" (make-string level ?*) " \n")
-               (forward-char -1)))
-        (run-hooks 'org-insert-heading-hook)))
-     ;; Within a plain list, call `org-insert-item'.
-     ((and (not top) (org-in-item-p)) (org-insert-item))
+               (forward-char -1)))))
      ;; On regular text, turn line into a headline or split, if
      ;; appropriate.
      ((bolp)
       (insert "* ")
       (unless (and blank? (org-previous-line-empty-p))
-        (org-N-empty-lines-before-current (if blank? 1 0)))
-      (run-hooks 'org-insert-heading-hook))
+        (org-N-empty-lines-before-current (if blank? 1 0))))
      (t
       (unless (org-get-alist-option org-M-RET-may-split-line 'headline)
         (end-of-line))
       (insert "\n* ")
       (unless (and blank? (org-previous-line-empty-p))
-        (org-N-empty-lines-before-current (if blank? 1 0)))
-      (run-hooks 'org-insert-heading-hook)))))
+        (org-N-empty-lines-before-current (if blank? 1 0))))))
+  (run-hooks 'org-insert-heading-hook))
 
 (defun org-N-empty-lines-before-current (N)
   "Make the number of empty lines before current exactly N.
@@ -19916,7 +19911,6 @@ boundaries."
 (org-defkey org-mode-map "\C-c/"    'org-sparse-tree)   ; Minor-mode reserved
 (org-defkey org-mode-map "\C-c\\"   'org-match-sparse-tree) ; Minor-mode res.
 (org-defkey org-mode-map "\C-c\C-m" 'org-ctrl-c-ret)
-(org-defkey org-mode-map "\M-\C-m"  'org-insert-heading)
 (org-defkey org-mode-map "\C-c\C-xc" 'org-clone-subtree-with-time-shift)
 (org-defkey org-mode-map "\C-c\C-xv" 'org-copy-visible)
 (org-defkey org-mode-map [(control return)] 'org-insert-heading-respect-content)
@@ -21521,15 +21515,18 @@ number of stars to add."
 	       (forward-line)))))))
     (unless toggled (message "Cannot toggle heading from here"))))
 
-(defun org-meta-return (&optional _arg)
+(defun org-meta-return (&optional arg)
   "Insert a new heading or wrap a region in a table.
-Calls `org-insert-heading' or `org-table-wrap-region', depending
-on context.  See the individual commands for more information."
-  (interactive)
+Calls `org-insert-heading', `org-insert-item' or
+`org-table-wrap-region', depending on context.  When called with
+an argument, unconditionally call `org-insert-heading'."
+  (interactive "P")
   (org-check-before-invisible-edit 'insert)
   (or (run-hook-with-args-until-success 'org-metareturn-hook)
-      (call-interactively (if (org-at-table-p) #'org-table-wrap-region
-			    #'org-insert-heading))))
+      (call-interactively (cond (arg #'org-insert-heading)
+				((org-at-table-p) #'org-table-wrap-region)
+				((org-in-item-p) #'org-insert-item)
+				(t #'org-insert-heading)))))
 
 ;;; Menu entries
 

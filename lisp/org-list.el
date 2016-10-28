@@ -2242,6 +2242,7 @@ If CHECKBOX is non-nil, add a checkbox next to the bullet.
 
 Return t when things worked, nil when we are not in an item, or
 item is invisible."
+  (interactive "P")
   (let ((itemp (org-in-item-p))
 	(pos (point)))
     ;; If cursor isn't is a list or if list is invisible, return nil.

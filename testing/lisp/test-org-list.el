@@ -735,7 +735,19 @@
 	  (org-test-with-temp-text "- it<point>em"
 	    (let ((org-M-RET-may-split-line  '((default . nil))))
 	      (org-insert-item))
-	    (buffer-string)))))
+	    (buffer-string))))
+  ;; Preserve list visibility when inserting an item.
+  (should
+   (equal
+    '(outline outline)
+    (org-test-with-temp-text "- A\n  - B\n- C\n  - D"
+      (let ((org-cycle-include-plain-lists t))
+	(org-cycle)
+	(forward-line 2)
+	(org-cycle)
+	(org-insert-item)
+	(list (get-char-property (line-beginning-position 0) 'invisible)
+	      (get-char-property (line-end-position 2) 'invisible)))))))
 
 (ert-deftest test-org-list/repair ()
   "Test `org-list-repair' specifications."

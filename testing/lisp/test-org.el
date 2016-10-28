@@ -1213,40 +1213,6 @@
 	    (let ((org-M-RET-may-split-line '((headline . t))))
 	      (org-insert-heading))
 	    (buffer-string))))
-  ;; When on a list, insert an item instead, unless called with an
-  ;; universal argument or if list is invisible.  In this case, create
-  ;; a new headline after contents.
-  (should
-   (equal "* H\n- item\n- "
-	  (org-test-with-temp-text "* H\n- item<point>"
-	    (let ((org-insert-heading-respect-content nil))
-	      (org-insert-heading))
-	    (buffer-string))))
-  (should
-   (equal "* H\n- item\n- item 2\n* \n"
-	  (org-test-with-temp-text "* H\n- item<point>\n- item 2"
-	    (let ((org-insert-heading-respect-content nil))
-	      (org-insert-heading '(4)))
-	    (buffer-string))))
-  (should
-   (equal "* H\n- item\n* \n"
-	  (org-test-with-temp-text "* H\n- item"
-	    (org-cycle)
-	    (goto-char (point-max))
-	    (let ((org-insert-heading-respect-content nil)) (org-insert-heading))
-	    (buffer-string))))
-  ;; Preserve list visibility when inserting an item.
-  (should
-   (equal
-    '(outline outline)
-    (org-test-with-temp-text "- A\n  - B\n- C\n  - D"
-      (let ((org-cycle-include-plain-lists t))
-	(org-cycle)
-	(forward-line 2)
-	(org-cycle)
-	(let ((org-insert-heading-respect-content nil)) (org-insert-heading))
-	(list (get-char-property (line-beginning-position 0) 'invisible)
-	      (get-char-property (line-end-position 2) 'invisible))))))
   ;; When called with one universal argument, insert a new headline at
   ;; the end of the current subtree, independently on the position of
   ;; point.

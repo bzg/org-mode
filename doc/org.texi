@@ -1415,9 +1415,9 @@ See also the option @code{org-goto-interface}.
 @cindex subtrees, cut and paste
 
 @table @asis
-@orgcmd{M-@key{RET},org-insert-heading}
+@orgcmd{M-@key{RET},org-meta-return}
 @vindex org-M-RET-may-split-line
-Insert a new heading/item with the same level as the one at point.
+Insert a new heading, item or row.
 
 If the command is used at the @emph{beginning} of a line, and if there is
 a heading or a plain list item (@pxref{Plain lists}) at point, the new
