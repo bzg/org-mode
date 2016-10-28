@@ -1092,6 +1092,11 @@
 	  (org-test-with-temp-text "* TODO<point> [#B] H :tag:"
 	    (org-return)
 	    (buffer-string))))
+  (should				;TODO are case-sensitive
+   (equal "* \nTodo"
+	  (org-test-with-temp-text "* <point>Todo"
+	    (org-return)
+	    (buffer-string))))
   ;; At headline text, break headline text but preserve tags.
   (should
    (equal "* TODO [#B] foo    :tag:\nbar"

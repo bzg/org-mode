@@ -21369,7 +21369,8 @@ object (e.g., within a comment).  In these case, you need to use
      ;; Insert newline in heading, but preserve tags.
      ((and (not (bolp))
 	   (save-excursion (beginning-of-line)
-			   (looking-at org-complex-heading-regexp)))
+			   (let ((case-fold-search nil))
+			     (looking-at org-complex-heading-regexp))))
       ;; At headline.  Split line.  However, if point is on keyword,
       ;; priority cookie or tags, do not break any of them: add
       ;; a newline after the headline instead.
@@ -21377,10 +21378,7 @@ object (e.g., within a comment).  In these case, you need to use
 			      (save-excursion (goto-char (match-beginning 5))
 					      (current-column))))
 	    (string
-	     (when (and (match-end 4)
-			(>= (point)
-			    (or (match-end 3) (match-end 2) (1+ (match-end 1))))
-			(<= (point) (match-end 4)))
+	     (when (and (match-end 4) (org-point-in-group (point) 4))
 	       (delete-and-extract-region (point) (match-end 4)))))
 	;; Adjust tag alignment.
 	(cond
