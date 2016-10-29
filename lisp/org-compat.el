@@ -476,15 +476,6 @@ Implements `define-error' for older emacsen."
 
 (unless (fboundp 'string-suffix-p)
   ;; From Emacs subr.el.
-  (defun string-prefix-p (prefix string &optional ignore-case)
-    "Return non-nil if PREFIX is a prefix of STRING.
-If IGNORE-CASE is non-nil, the comparison is done without paying attention
-to case differences."
-    (let ((prefix-length (length prefix)))
-      (if (> prefix-length (length string)) nil
-	(eq t (compare-strings prefix 0 prefix-length string
-			       0 prefix-length ignore-case)))))
-
   (defun string-suffix-p (suffix string  &optional ignore-case)
     "Return non-nil if SUFFIX is a suffix of STRING.
 If IGNORE-CASE is non-nil, the comparison is done without paying
