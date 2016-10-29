@@ -120,6 +120,13 @@ narrowed to current buffer to achieve a similar functionality.
 For an equivalent to a ~nil~ value, set
 ~org-agenda-show-future-repeats~ to nil and
 ~org-agenda-prefer-last-repeat~ to ~t~.
+
+** New functions
+
+*** ~org-list-to-org~
+
+It is the reciprocal of ~org-list-to-lisp~, which see.
+
 * Version 9.0
 
 ** Incompatible changes

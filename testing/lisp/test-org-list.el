@@ -1326,6 +1326,39 @@
 		    (skip-chars-backward " \r\t\n")
 		    (point)))))))
 
+(ert-deftest test-org-list/to-org ()
+  "Test `org-list-to-org' specifications."
+  ;; Un-ordered list.
+  (should
+   (equal "- a"
+	  (org-test-with-temp-text "- a"
+	    (org-list-to-org (org-list-to-lisp) nil))))
+  ;; Ordered list.
+  (should
+   (equal "1. a"
+	  (org-test-with-temp-text "1. a"
+	    (org-list-to-org (org-list-to-lisp) nil))))
+  ;; Descriptive list.
+  (should
+   (equal "- a :: b"
+	  (org-test-with-temp-text "- a :: b"
+	    (org-list-to-org (org-list-to-lisp) nil))))
+  ;; Nested list.
+  (should
+   (equal "- a\n  - b"
+	  (org-test-with-temp-text "- a\n  - b"
+	    (org-list-to-org (org-list-to-lisp) nil))))
+  ;; Item spanning over multiple lines.
+  (should
+   (equal "- a\n  b"
+	  (org-test-with-temp-text "- a\n  b"
+	    (org-list-to-org (org-list-to-lisp) nil))))
+  ;; Item with continuation text after a sub-list.
+  (should
+   (equal "- a\n  - b\n  c"
+	  (org-test-with-temp-text "- a\n  - b\n  c"
+	    (org-list-to-org (org-list-to-lisp) nil)))))
+
 
 (provide 'test-org-list)
 ;;; test-org-list.el ends here

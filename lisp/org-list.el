@@ -3555,6 +3555,25 @@ PARAMS is a property list with overruling parameters for
   (require 'ox-texinfo)
   (org-list-to-generic list (org-combine-plists '(:backend texinfo) params)))
 
+(defun org-list-to-org (list &optional params)
+  "Convert LIST into an Org plain list.
+LIST is as returned by `org-list-parse-list'.  PARAMS is a property list
+with overruling parameters for `org-list-to-generic'."
+  (let* ((make-item
+	  (lambda (type _depth &optional c)
+	    (concat (if (eq type 'ordered) "1. " "- ")
+		    (and c (format "[@%d] " c)))))
+	 (defaults
+	   (list :istart make-item
+		 :icount make-item
+		 :ifmt (lambda (_type contents)
+			 (replace-regexp-in-string "\n" "\n  " contents))
+		 :dtend " :: "
+		 :cbon "[X] "
+		 :cboff "[ ] "
+		 :cbtrans "[-] ")))
+    (org-list-to-generic list (org-combine-plists defaults params))))
+
 (defun org-list-to-subtree (list &optional params)
   "Convert LIST into an Org subtree.
 LIST is as returned by `org-list-to-lisp'.  PARAMS is a property
