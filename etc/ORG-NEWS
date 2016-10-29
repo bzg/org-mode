@@ -12,6 +12,11 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 ** Incompatible changes
 
+*** Change signature for some properties in ~org-list-to-generic~
+
+~:istart~, ~:icount~, ~:iend~ and ~:isep~ now expect the type of the
+list as their first argument.
+
 *** ~org-capture-templates~ no longer accepts S-expressions as file names
 
 Since functions are allowed there, a straightforward way to migrate
@@ -27,7 +32,9 @@ into
 *** Agenda
 **** New variable : ~org-agenda-show-future-repeats~
 **** New variable : ~org-agenda-prefer-last-repeat~
+
 *** Babel
+
 **** Clojure: new setting ~org-babel-clojure-sync-nrepl-timeout~
 
 Creation of a new setting to specify the Cider timeout.  By setting
@@ -92,6 +99,11 @@ This new function is meant to be used in back-ends supporting images
 as descriptions of links, a.k.a. image links.  See its docstring for
 details.
 **** Horizontal rules are no longer ignored in LaTeX table math mode
+
+*** ~org-list-to-generic~ includes a new property: ~:ifmt~
+
+~:ifmt~ is a function to be called on the body of each item.  See
+~org-list-to-generic~ documentation for details.
 
 *** New variable : ~org-bibtex-headline-format-function~
 This allow to use a different title than entry title.

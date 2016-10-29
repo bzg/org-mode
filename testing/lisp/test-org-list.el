@@ -1157,13 +1157,13 @@
     "level1 a\nlevel2 b"
     (org-test-with-temp-text "- a\n  - b"
       (org-list-to-generic (org-list-to-lisp)
-			   '(:istart (lambda (l) (format "level%d "l)))))))
+			   '(:istart (lambda (type l) (format "level%d "l)))))))
   (should
    (equal
     "a\nblevel2level1"
     (org-test-with-temp-text "- a\n  - b"
       (org-list-to-generic (org-list-to-lisp)
-			   '(:iend (lambda (l) (format "level%d" l)))))))
+			   '(:iend (lambda (type l) (format "level%d" l)))))))
   ;; Test `:icount' parameter.
   (should
    (equal
@@ -1187,7 +1187,7 @@
     (org-test-with-temp-text "1. [@3] a"
       (org-list-to-generic
        (org-list-to-lisp)
-       '(:icount (lambda (l c) (format "level:%d, counter:%d " l c)))))))
+       '(:icount (lambda (type l c) (format "level:%d, counter:%d " l c)))))))
   ;; Test `:isep' parameter.
   (should
    (equal
@@ -1203,8 +1203,17 @@
    (equal
     "a\n- 1 -\nb"
     (org-test-with-temp-text "- a\n- b"
-      (org-list-to-generic (org-list-to-lisp)
-			   '(:isep (lambda (l) (format "- %d -" l)))))))
+      (org-list-to-generic
+       (org-list-to-lisp)
+       '(:isep (lambda (type depth) (format "- %d -" depth)))))))
+  ;; Test `:ifmt' parameter.
+  (should
+   (equal
+    ">> a <<"
+    (org-test-with-temp-text "1. [@3] a"
+      (org-list-to-generic
+       (org-list-to-lisp)
+       '(:ifmt (lambda (type c) (format ">> %s <<" c)))))))
   ;; Test `:cbon', `:cboff', `:cbtrans'
   (should
    (equal
