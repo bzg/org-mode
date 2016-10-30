@@ -135,6 +135,11 @@ equivalent to the removed format string.
 
 ** New functions
 
+*** ~org-publish-find-property~
+
+This function can be used as a tool to format entries in a site-map,
+in addition to ~org-publish-find-title~ and ~org-publish-find-date~.
+
 *** ~org-list-to-org~
 
 It is the reciprocal of ~org-list-to-lisp~, which see.

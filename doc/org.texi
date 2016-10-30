@@ -14537,7 +14537,9 @@ becomes @file{sitemap.html}).
 site-map.  It is a function called with three arguments: the absolute file or
 directory name, the base directory of the project and the site-map style.  It
 is expected to return a string.  Default value turns file names into links
-and use document titles as descriptions.
+and use document titles as descriptions.  For specific formatting needs, one
+can use @code{org-publish-find-property} to retrieve additional information
+about published documents.
 
 @item @code{:sitemap-function}
 @tab Plug-in function to use for generation of the sitemap.  It is called

@@ -235,6 +235,9 @@ a site-map of files or summary page for a given project.
     and the site-map style.  It has to return a string.  Defaults
     to `org-publish-sitemap-default-entry', which turns file
     names into links and use document titles as descriptions.
+    For specific formatting needs, one can use
+    `org-publish-find-property' to retrieve additional
+    information about published documents.
 
   `:sitemap-function'
 
@@ -787,28 +790,43 @@ Default for SITEMAP-FILENAME is `sitemap.org'."
 		  (org-publish--sitemap-files-to-lisp
 		   files root style format-entry)))))))
 
-(defun org-publish-find-title (file &optional reset)
+(defun org-publish-find-property (file property &optional backend)
+  "Find the PROPERTY of FILE in project.
+
+PROPERTY is a keyword referring to an export option, as defined
+in `org-export-options-alist' or in export back-ends.  In the
+latter case, optional argument BACKEND has to be set to the
+back-end where the option is defined, e.g.,
+
+  (org-publish-find-property file :subtitle 'latex)
+
+Return value may be a string or a list, depending on the type of
+PROPERTY, i.e. \"behavior\" parameter from `org-export-options-alist'."
+  (when (and (file-readable-p file) (not (directory-name-p file)))
+    (let* ((org-inhibit-startup t)
+	   (visiting (find-buffer-visiting file))
+	   (buffer (or visiting (find-file-noselect file))))
+      (unwind-protect
+	  (plist-get (with-current-buffer buffer
+		       (if (not visiting) (org-export-get-environment backend)
+			 ;; Protect local variables in open buffers.
+			 (org-export-with-buffer-copy
+			  (org-export-get-environment backend))))
+		     property)
+	(unless visiting (kill-buffer buffer))))))
+
+(defun org-publish-find-title (file)
   "Find the title of FILE in project."
-  (or
-   (and (not reset) (org-publish-cache-get-file-property file :title nil t))
-   (let* ((org-inhibit-startup t)
-	  (visiting (find-buffer-visiting file))
-	  (buffer (or visiting (find-file-noselect file))))
-     (with-current-buffer buffer
-       (let ((title
-	      (let ((property
-		     (plist-get
-		      ;; protect local variables in open buffers
-		      (if visiting
-			  (org-export-with-buffer-copy (org-export-get-environment))
-			(org-export-get-environment))
-		      :title)))
-		(if property
-		    (org-no-properties (org-element-interpret-data property))
-		  (file-name-nondirectory (file-name-sans-extension file))))))
-	 (unless visiting (kill-buffer buffer))
-	 (org-publish-cache-set-file-property file :title title)
-	 title)))))
+  (or (org-publish-cache-get-file-property file :title nil t)
+      (let* ((parsed-title (org-publish-find-property file :title))
+	     (title
+	      (if parsed-title
+		  ;; Remove property so that the return value is
+		  ;; cache-able (i.e., it can be `read' back).
+		  (org-no-properties (org-element-interpret-data parsed-title))
+		(file-name-nondirectory (file-name-sans-extension file)))))
+	(org-publish-cache-set-file-property file :title title)
+	title)))
 
 (defun org-publish-find-date (file)
   "Find the date of FILE in project.
@@ -817,18 +835,8 @@ If FILE is an Org file and provides a DATE keyword use it.  In
 any other case use the file system's modification time.  Return
 time in `current-time' format."
   (if (file-directory-p file) (nth 5 (file-attributes file))
-    (let* ((org-inhibit-startup t)
-	   (visiting (find-buffer-visiting file))
-	   (file-buf (or visiting (find-file-noselect file nil)))
-	   (date (plist-get
-		  (with-current-buffer file-buf
-		    (if visiting
-			(org-export-with-buffer-copy
-			 (org-export-get-environment))
-		      (org-export-get-environment)))
-		  :date)))
-      (unless visiting (kill-buffer file-buf))
-      ;; DATE is a secondary string.  If it contains a timestamp,
+    (let ((date (org-publish-find-property file :date)))
+      ;; DATE is a secondary string.  If it contains a time-stamp,
       ;; convert it to internal format.  Otherwise, use FILE
       ;; modification time.
       (cond ((let ((ts (and (consp date) (assq 'timestamp date))))
