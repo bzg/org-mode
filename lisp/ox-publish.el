@@ -46,9 +46,6 @@
 
 ;;; Variables
 
-(defvar org-publish-temp-files nil
-  "Temporary list of files to be published.")
-
 ;; Here, so you find the variable right before it's used the first time:
 (defvar org-publish-cache nil
   "This will cache timestamps and titles for files in publishing projects.
@@ -255,8 +252,11 @@ If you create a site-map file, adjust the sorting like this:
   `:sitemap-sort-folders'
 
     Where folders should appear in the site-map.  Set this to
-    `first' (default) or `last' to display folders first or last,
-    respectively.  Any other value will mix files and folders.
+    `first' or `last' to display folders first or last,
+    respectively.  When set to `ignore' (default), folders are
+    ignored altogether.  Any other value will mix files and
+    folders.  This variable has no effect when site-map style is
+    `tree'.
 
   `:sitemap-sort-files'
 
@@ -318,17 +318,28 @@ You can overwrite this default per project in your
   :group 'org-export-publish
   :type 'symbol)
 
-(defcustom org-publish-sitemap-sort-folders 'first
-  "A symbol, denoting if folders are sorted first in sitemaps.
-Possible values are `first', `last', and nil.
+(defcustom org-publish-sitemap-sort-folders 'ignore
+  "A symbol, denoting if folders are sorted first in site-maps.
+
+Possible values are `first', `last', `ignore' and nil.
 If `first', folders will be sorted before files.
 If `last', folders are sorted to the end after the files.
-Any other value will not mix files and folders.
+If `ignore', folders do not appear in the site-map.
+Any other value will mix files and folders.
 
 You can overwrite this default per project in your
-`org-publish-project-alist', using `:sitemap-sort-folders'."
+`org-publish-project-alist', using `:sitemap-sort-folders'.
+
+This variable is ignored when site-map style is `tree'."
   :group 'org-export-publish
-  :type 'symbol)
+  :type '(choice
+	  (const :tag "Folders before files" first)
+	  (const :tag "Folders after files" last)
+	  (const :tag "No folder in site-map" ignore)
+	  (const :tag "Mix folders and files" nil))
+  :version "25.2"
+  :package-version '(Org . "9.1")
+  :safe #'symbolp)
 
 (defcustom org-publish-sitemap-sort-ignore-case nil
   "Non-nil when site-map sorting should ignore case.
@@ -405,131 +416,41 @@ This splices all the components into the list."
 	(push p rtn)))
     (nreverse (delete-dups (delq nil rtn)))))
 
-(defvar org-publish-sitemap-sort-files)
-(defvar org-publish-sitemap-sort-folders)
-(defvar org-publish-sitemap-ignore-case)
-(defvar org-publish-sitemap-requested)
-(defvar org-publish-sitemap-date-format)
-(defun org-publish-compare-directory-files (a b)
-  "Predicate for `sort', that sorts folders and files for sitemap."
-  (let ((retval t))
-    (when (or org-publish-sitemap-sort-files org-publish-sitemap-sort-folders)
-      ;; First we sort files:
-      (when org-publish-sitemap-sort-files
-	(pcase org-publish-sitemap-sort-files
-	  (`alphabetically
-	   (let* ((adir (file-directory-p a))
-		  (aorg (and (string-suffix-p ".org" a) (not adir)))
-		  (bdir (file-directory-p b))
-		  (borg (and (string-suffix-p ".org" b) (not bdir)))
-		  (A (if aorg (concat (file-name-directory a)
-				      (org-publish-find-title a)) a))
-		  (B (if borg (concat (file-name-directory b)
-				      (org-publish-find-title b)) b)))
-	     (setq retval (if org-publish-sitemap-ignore-case
-			      (not (string-lessp (upcase B) (upcase A)))
-			    (not (string-lessp B A))))))
-	  ((or `anti-chronologically `chronologically)
-	   (let* ((adate (org-publish-find-date a))
-		  (bdate (org-publish-find-date b))
-		  (A (+ (lsh (car adate) 16) (cadr adate)))
-		  (B (+ (lsh (car bdate) 16) (cadr bdate))))
-	     (setq retval
-		   (if (eq org-publish-sitemap-sort-files 'chronologically)
-		       (<= A B)
-		     (>= A B)))))))
-      ;; Directory-wise wins:
-      (when org-publish-sitemap-sort-folders
-        ;; a is directory, b not:
-        (cond
-         ((and (file-directory-p a) (not (file-directory-p b)))
-          (setq retval (eq org-publish-sitemap-sort-folders 'first)))
-	 ;; a is not a directory, but b is:
-         ((and (not (file-directory-p a)) (file-directory-p b))
-          (setq retval (eq org-publish-sitemap-sort-folders 'last))))))
-    retval))
-
-(defun org-publish-get-base-files-1
-    (base-dir &optional recurse match skip-file skip-dir)
-  "Set `org-publish-temp-files' with files from BASE-DIR directory.
-If RECURSE is non-nil, check BASE-DIR recursively.  If MATCH is
-non-nil, restrict this list to the files matching the regexp
-MATCH.  If SKIP-FILE is non-nil, skip file matching the regexp
-SKIP-FILE.  If SKIP-DIR is non-nil, don't check directories
-matching the regexp SKIP-DIR when recursing through BASE-DIR."
-  (let ((all-files (if (not recurse) (directory-files base-dir t match)
-		     ;; If RECURSE is non-nil, we want all files
-		     ;; matching MATCH and sub-directories.
-		     (cl-remove-if-not
-		      (lambda (file)
-			(or (file-directory-p file)
-			    (and match (string-match match file))))
-		      (directory-files base-dir t)))))
-    (dolist (f (if (not org-publish-sitemap-requested) all-files
-		 (sort all-files #'org-publish-compare-directory-files)))
-      (let ((fd-p (file-directory-p f))
-	    (fnd (file-name-nondirectory f)))
-	(if (and fd-p recurse
-		 (not (string-match "^\\.+$" fnd))
-		 (if skip-dir (not (string-match skip-dir fnd)) t))
-	    (org-publish-get-base-files-1
-	     f recurse match skip-file skip-dir)
-	  (unless (or fd-p		; This is a directory.
-		      (and skip-file (string-match skip-file fnd))
-		      (not (file-exists-p (file-truename f)))
-		      (not (string-match match fnd)))
-	    (cl-pushnew f org-publish-temp-files)))))))
-
-(defun org-publish-get-base-files (project &optional exclude-regexp)
-  "Return a list of all files in PROJECT.
-If EXCLUDE-REGEXP is set, this will be used to filter out
-matching filenames."
+(defun org-publish-get-base-files (project)
+  "Return a list of all files in PROJECT."
   (let* ((project-plist (cdr project))
 	 (base-dir (file-name-as-directory
 		    (plist-get project-plist :base-directory)))
-	 (include-list (plist-get project-plist :include))
-	 (recurse (plist-get project-plist :recursive))
 	 (extension (or (plist-get project-plist :base-extension) "org"))
-	 ;; sitemap-... variables are dynamically scoped for
-	 ;; org-publish-compare-directory-files:
-	 (org-publish-sitemap-requested
-	  (plist-get project-plist :auto-sitemap))
-	 (sitemap-filename
-	  (or (plist-get project-plist :sitemap-filename) "sitemap.org"))
-	 (org-publish-sitemap-sort-folders
-	  (if (plist-member project-plist :sitemap-sort-folders)
-	      (plist-get project-plist :sitemap-sort-folders)
-	    org-publish-sitemap-sort-folders))
-	 (org-publish-sitemap-sort-files
-	  (cond ((plist-member project-plist :sitemap-sort-files)
-		 (plist-get project-plist :sitemap-sort-files))
-		;; For backward compatibility:
-		((plist-member project-plist :sitemap-alphabetically)
-		 (if (plist-get project-plist :sitemap-alphabetically)
-		     'alphabetically nil))
-		(t org-publish-sitemap-sort-files)))
-	 (org-publish-sitemap-ignore-case
-	  (if (plist-member project-plist :sitemap-ignore-case)
-	      (plist-get project-plist :sitemap-ignore-case)
-	    org-publish-sitemap-sort-ignore-case))
 	 (match (if (eq extension 'any) "^[^\\.]"
-		  (concat "^[^\\.].*\\.\\(" extension "\\)$"))))
-    ;; Make sure `org-publish-sitemap-sort-folders' has an accepted
-    ;; value.
-    (unless (memq org-publish-sitemap-sort-folders '(first last))
-      (setq org-publish-sitemap-sort-folders nil))
-
-    (setq org-publish-temp-files nil)
-    (when org-publish-sitemap-requested
-      (cl-pushnew (expand-file-name (concat base-dir sitemap-filename))
-		  org-publish-temp-files))
-    (org-publish-get-base-files-1 base-dir recurse match
-				  ;; FIXME distinguish exclude regexp
-				  ;; for skip-file and skip-dir?
-				  exclude-regexp exclude-regexp)
-    (dolist (f include-list org-publish-temp-files)
-      (cl-pushnew (expand-file-name (concat base-dir f))
-		  org-publish-temp-files))))
+		  (concat "^[^\\.].*\\.\\(" extension "\\)$")))
+	 (base-files
+	  (if (not (plist-get project-plist :recursive))
+	      (directory-files base-dir t match t)
+	    (directory-files-recursively base-dir match))))
+    (org-uniquify
+     (append
+      ;; Files from BASE-DIR.  Apply exclusion filter before adding
+      ;; included files.
+      (let ((exclude-regexp (plist-get project-plist :exclude)))
+	(if exclude-regexp
+	    (cl-remove-if
+	     (lambda (f)
+	       ;; Match against relative names, yet BASE-DIR file
+	       ;; names are absolute.
+	       (string-match exclude-regexp
+			     (file-relative-name f base-dir)))
+	     base-files)
+	  base-files))
+      ;; Sitemap file.
+      (and (plist-get project-plist :auto-sitemap)
+	   (list (expand-file-name
+		  (or (plist-get project-plist :sitemap-filename)
+		      "sitemap.org")
+		  base-dir)))
+      ;; Included files.
+      (mapcar (lambda (f) (expand-file-name f base-dir))
+	      (plist-get project-plist :include))))))
 
 (defun org-publish-get-project-from-filename (filename &optional up)
   "Return the project that FILENAME belongs to."
@@ -702,9 +623,8 @@ If `:auto-sitemap' is set, publish the sitemap too.  If
       ;; populated.
       (let ((theindex
 	     (expand-file-name "theindex.org"
-			       (plist-get project-plist :base-directory)))
-	    (exclude-regexp (plist-get project-plist :exclude)))
-	(dolist (file (org-publish-get-base-files project exclude-regexp))
+			       (plist-get project-plist :base-directory))))
+	(dolist (file (org-publish-get-base-files project))
 	  (unless (equal file theindex) (org-publish-file file project t)))
 	;; Populate "theindex.inc", if needed, and publish
 	;; "theindex.org".
@@ -731,11 +651,7 @@ return a string.  Return value is a list as returned by
 		   files)))
     (`tree
      (letrec ((files-only (cl-remove-if #'directory-name-p files))
-	      ;; Extract directories from true files so as to avoid
-	      ;; publishing empty, or missing (e.g., when using
-	      ;; `:include' property) directories.
-	      (directories (org-uniquify
-			    (mapcar #'file-name-directory files-only)))
+	      (directories (cl-remove-if-not #'directory-name-p files))
 	      (subtree-to-list
 	       (lambda (dir)
 		 (cons 'unordered
@@ -759,7 +675,7 @@ return a string.  Return value is a list as returned by
 			     (file-name-directory (directory-file-name f))))
 			  directories)))))))
        (funcall subtree-to-list root)))
-    (_ (user-error "Unknown sitemap style: `%s'" style))))
+    (_ (user-error "Unknown site-map style: `%s'" style))))
 
 (defun org-publish-sitemap (project &optional sitemap-filename)
   "Create a sitemap of pages in set defined by PROJECT.
@@ -776,15 +692,74 @@ Default for SITEMAP-FILENAME is `sitemap.org'."
 	 (sitemap-builder (or (plist-get project-plist :sitemap-function)
 			      #'org-publish-sitemap-default))
 	 (format-entry (or (plist-get project-plist :sitemap-format-entry)
-			   #'org-publish-sitemap-default-entry)))
+			   #'org-publish-sitemap-default-entry))
+	 (sort-folders (if (plist-member project-plist :sitemap-sort-folders)
+			   (plist-get project-plist :sitemap-sort-folders)
+			 org-publish-sitemap-sort-folders))
+	 (sort-files (if (plist-member project-plist :sitemap-sort-files)
+			 (plist-get project-plist :sitemap-sort-files)
+		       org-publish-sitemap-sort-files))
+	 (ignore-case (if (plist-member project-plist :sitemap-ignore-case)
+			  (plist-get project-plist :sitemap-ignore-case)
+			org-publish-sitemap-sort-ignore-case))
+	 (sort-predicate
+	  (lambda (a b)
+	    (let ((retval t))
+	      ;; First we sort files:
+	      (pcase sort-files
+		(`alphabetically
+		 (let* ((org-file-p
+			 (lambda (f) (equal (file-name-extension f) "org")))
+			(A (if (funcall org-file-p a)
+			       (concat (file-name-directory a)
+				       (org-publish-find-title a))
+			     a))
+			(B (if (funcall org-file-p b)
+			       (concat (file-name-directory b)
+				       (org-publish-find-title b))
+			     b)))
+		   (setq retval
+			 (if ignore-case
+			     (not (string-lessp (upcase B) (upcase A)))
+			   (not (string-lessp B A))))))
+		((or `anti-chronologically `chronologically)
+		 (let* ((adate (org-publish-find-date a))
+			(bdate (org-publish-find-date b))
+			(A (+ (lsh (car adate) 16) (cadr adate)))
+			(B (+ (lsh (car bdate) 16) (cadr bdate))))
+		   (setq retval
+			 (if (eq sort-files 'chronologically)
+			     (<= A B)
+			   (>= A B)))))
+		(`nil nil)
+		(_ (user-error "Invalid sort value %s" sort-files)))
+	      ;; Directory-wise wins:
+	      (when (memq sort-folders '(first last))
+		;; a is directory, b not:
+		(cond
+		 ((and (file-directory-p a) (not (file-directory-p b)))
+		  (setq retval (eq sort-folders 'first)))
+		 ;; a is not a directory, but b is:
+		 ((and (not (file-directory-p a)) (file-directory-p b))
+		  (setq retval (eq sort-folders 'last)))))
+	      retval))))
     (message "Generating sitemap for %s" title)
     (with-temp-file sitemap-filename
       (insert
        (let ((files (remove sitemap-filename
-			    (org-publish-get-base-files
-			     project (plist-get project-plist :exclude)))))
+			    (org-publish-get-base-files project))))
+	 ;; Remove extensions, if requested.
 	 (when (plist-get project-plist :sitemap-sans-extension)
 	   (setq files (mapcar #'file-name-sans-extension files)))
+	 ;; Add directories, if applicable.
+	 (unless (and (eq style 'list) (eq sort-folders 'ignore))
+	   (setq files
+		 (nconc (remove root (org-uniquify
+				      (mapcar #'file-name-directory files)))
+			files)))
+	 ;; Eventually sort all entries.
+	 (when (or sort-files (not (memq sort-folders 'ignore)))
+	   (setq files (sort files sort-predicate)))
 	 (funcall sitemap-builder
 		  title
 		  (org-publish--sitemap-files-to-lisp
@@ -1010,8 +985,7 @@ its CDR is a string."
   "Retrieve full index from cache and build \"theindex.org\".
 PROJECT is the project the index relates to.  DIRECTORY is the
 publishing directory."
-  (let ((all-files (org-publish-get-base-files
-		    project (plist-get (cdr project) :exclude)))
+  (let ((all-files (org-publish-get-base-files project))
 	full-index)
     ;; Compile full index and sort it alphabetically.
     (dolist (file all-files

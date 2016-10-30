@@ -14551,8 +14551,10 @@ value generates a plain list of links to all files in the project.
 
 @item @code{:sitemap-sort-folders}
 @tab Where folders should appear in the sitemap.  Set this to @code{first}
-(default) or @code{last} to display folders first or last,
-respectively.  Any other value will mix files and folders.
+(default) or @code{last} to display folders first or last, respectively.
+When set to @code{ignore}, folders are ignored altogether.  Any other value
+will mix files and folders.  This variable has no effect when site-map style
+is @code{tree}.
 
 @item @code{:sitemap-sort-files}
 @tab How the files are sorted in the site map.  Set this to

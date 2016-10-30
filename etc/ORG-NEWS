@@ -38,6 +38,11 @@ list as their first argument.
 **** New variable : ~org-agenda-show-future-repeats~
 **** New variable : ~org-agenda-prefer-last-repeat~
 
+*** New value for ~org-publish-sitemap-sort-folders~
+
+The new ~ignore~ value effectively allows toggling inclusion of
+directories in published site-maps.
+
 *** Babel
 
 **** Clojure: new setting ~org-babel-clojure-sync-nrepl-timeout~
