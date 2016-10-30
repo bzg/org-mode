@@ -14532,10 +14532,20 @@ becomes @file{sitemap.html}).
 @item @code{:sitemap-title}
 @tab Title of sitemap page.  Defaults to name of file.
 
+@item @code{:sitemap-format-entry}
+@tab With this option one can tell how a site-map entry is formatted in the
+site-map.  It is a function called with three arguments: the absolute file or
+directory name, the base directory of the project and the site-map style.  It
+is expected to return a string.  Default value turns file names into links
+and use document titles as descriptions.
+
 @item @code{:sitemap-function}
-@tab Plug-in function to use for generation of the sitemap.
-Defaults to @code{org-publish-org-sitemap}, which generates a plain list
-of links to all files in the project.
+@tab Plug-in function to use for generation of the sitemap.  It is called
+with two arguments: the title of the site-map and a representation of the
+files and directories involved in the project as a radio list (@pxref{Radio
+lists}).  The latter can further be transformed using
+@code{org-list-to-generic}, @code{org-list-to-subtree} and alike.  Default
+value generates a plain list of links to all files in the project.
 
 @item @code{:sitemap-sort-folders}
 @tab Where folders should appear in the sitemap.  Set this to @code{first}
@@ -14552,14 +14562,6 @@ a file is retrieved with @code{org-publish-find-date}.
 
 @item @code{:sitemap-ignore-case}
 @tab Should sorting be case-sensitive?  Default @code{nil}.
-
-@item @code{:sitemap-file-entry-format}
-@tab With this option one can tell how a sitemap's entry is formatted in the
-sitemap.  This is a format string with some escape sequences: @code{%t} stands
-for the title of the file, @code{%a} stands for the author of the file and
-@code{%d} stands for the date of the file.  The date is retrieved with the
-@code{org-publish-find-date} function and formatted with
-@code{org-publish-sitemap-date-format}.  Default @code{%t}.
 
 @item @code{:sitemap-date-format}
 @tab Format string for the @code{format-time-string} function that tells how

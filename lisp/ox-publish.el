@@ -208,17 +208,11 @@ a site-map of files or summary page for a given project.
 
   `:sitemap-filename'
 
-    Filename for output of sitemap.  Defaults to \"sitemap.org\".
+    Filename for output of site-map.  Defaults to \"sitemap.org\".
 
   `:sitemap-title'
 
     Title of site-map page.  Defaults to name of file.
-
-  `:sitemap-function'
-
-    Plugin function to use for generation of site-map.  Defaults
-    to `org-publish-org-sitemap', which generates a plain list of
-    links to all files in the project.
 
   `:sitemap-style'
 
@@ -232,6 +226,26 @@ a site-map of files or summary page for a given project.
     Remove extension from site-map's file-names.  Useful to have
     cool URIs (see http://www.w3.org/Provider/Style/URI).
     Defaults to nil.
+
+  `:sitemap-format-entry'
+
+    Plugin function used to format entries in the site-map.  It
+    is called with three arguments: the absolute file or
+    directory name to format, the base directory of the project
+    and the site-map style.  It has to return a string.  Defaults
+    to `org-publish-sitemap-default-entry', which turns file
+    names into links and use document titles as descriptions.
+
+  `:sitemap-function'
+
+    Plugin function to use for generation of site-map.  It is
+    called with two arguments: the title of the site-map, as
+    a string, and a representation of the files involved in the
+    project, as returned by `org-list-to-lisp'.  The latter can
+    further be transformed using `org-list-to-generic',
+    `org-list-to-subtree' and alike.  It has to return a string.
+    Defaults to `org-publish-sitemap-default', which generates
+    a plain list of links to all files in the project.
 
 If you create a site-map file, adjust the sorting like this:
 
@@ -327,16 +341,6 @@ See `format-time-string' for allowed formatters."
   :group 'org-export-publish
   :type 'string)
 
-(defcustom org-publish-sitemap-file-entry-format "%t"
-  "Format string for site-map file entry.
-You could use brackets to delimit on what part the link will be.
-
-%t is the title.
-%a is the author.
-%d is the date formatted using `org-publish-sitemap-date-format'."
-  :group 'org-export-publish
-  :type 'string)
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -403,7 +407,6 @@ This splices all the components into the list."
 (defvar org-publish-sitemap-ignore-case)
 (defvar org-publish-sitemap-requested)
 (defvar org-publish-sitemap-date-format)
-(defvar org-publish-sitemap-file-entry-format)
 (defun org-publish-compare-directory-files (a b)
   "Predicate for `sort', that sorts folders and files for sitemap."
   (let ((retval t))
@@ -687,16 +690,10 @@ If `:auto-sitemap' is set, publish the sitemap too.  If
 	(let ((sitemap-filename
 	       (or (plist-get project-plist :sitemap-filename)
 		   "sitemap.org"))
-	      (sitemap-function
-	       (or (plist-get project-plist :sitemap-function)
-		   #'org-publish-org-sitemap))
 	      (org-publish-sitemap-date-format
 	       (or (plist-get project-plist :sitemap-date-format)
-		   org-publish-sitemap-date-format))
-	      (org-publish-sitemap-file-entry-format
-	       (or (plist-get project-plist :sitemap-file-entry-format)
-		   org-publish-sitemap-file-entry-format)))
-	  (funcall sitemap-function project sitemap-filename)))
+		   org-publish-sitemap-date-format)))
+	  (org-publish-sitemap project sitemap-filename)))
       ;; Publish all files from PROJECT excepted "theindex.org".  Its
       ;; publishing will be deferred until "theindex.inc" is
       ;; populated.
@@ -717,92 +714,78 @@ If `:auto-sitemap' is set, publish the sitemap too.  If
 	      ((functionp fun) (funcall fun project-plist))))
       (org-publish-write-cache-file))))
 
-(defun org-publish-org-sitemap (project &optional sitemap-filename)
+(defun org-publish--sitemap-files-to-lisp (files root style entry-format)
+  "Represent FILES as a parsed plain list.
+FILES is the list of files in the site map.  ROOT is the project
+base directory.  STYLE determines is either `list' or `tree'.
+ENTRY-FORMAT is a function called on each file which should
+return a string.  Return value is a list as returned by
+`org-list-to-lisp'."
+  (pcase style
+    (`list
+     (cons 'unordered
+	   (mapcar (lambda (f) (list (funcall entry-format f root style)))
+		   files)))
+    (`tree
+     (letrec ((files-only (cl-remove-if #'directory-name-p files))
+	      ;; Extract directories from true files so as to avoid
+	      ;; publishing empty, or missing (e.g., when using
+	      ;; `:include' property) directories.
+	      (directories (org-uniquify
+			    (mapcar #'file-name-directory files-only)))
+	      (subtree-to-list
+	       (lambda (dir)
+		 (cons 'unordered
+		       (nconc
+			;; Files in DIR.
+			(mapcar
+			 (lambda (f) (list (funcall entry-format f root style)))
+			 (cl-remove-if-not
+			  (lambda (f) (string= dir (file-name-directory f)))
+			  files-only))
+			;; Direct sub-directories.
+			(mapcar
+			 (lambda (sub)
+			   (list (funcall entry-format sub root style)
+				 (funcall subtree-to-list sub)))
+			 (cl-remove-if-not
+			  (lambda (f)
+			    (string=
+			     dir
+			     ;; Parent directory.
+			     (file-name-directory (directory-file-name f))))
+			  directories)))))))
+       (funcall subtree-to-list root)))
+    (_ (user-error "Unknown sitemap style: `%s'" style))))
+
+(defun org-publish-sitemap (project &optional sitemap-filename)
   "Create a sitemap of pages in set defined by PROJECT.
 Optionally set the filename of the sitemap with SITEMAP-FILENAME.
 Default for SITEMAP-FILENAME is `sitemap.org'."
   (let* ((project-plist (cdr project))
-	 (dir (file-name-as-directory
-	       (plist-get project-plist :base-directory)))
-	 (localdir (file-name-directory dir))
-	 (indent-str (make-string 2 ?\ ))
-	 (exclude-regexp (plist-get project-plist :exclude))
-	 (files (nreverse
-		 (org-publish-get-base-files project exclude-regexp)))
-	 (sitemap-filename (concat dir (or sitemap-filename "sitemap.org")))
-	 (sitemap-title (or (plist-get project-plist :sitemap-title)
-			  (concat "Sitemap for project " (car project))))
-	 (sitemap-style (or (plist-get project-plist :sitemap-style)
-			    'tree))
-	 (sitemap-sans-extension
-	  (plist-get project-plist :sitemap-sans-extension))
-	 (visiting (find-buffer-visiting sitemap-filename))
-	 file sitemap-buffer)
-    (with-current-buffer
-	(let ((org-inhibit-startup t))
-	  (setq sitemap-buffer
-		(or visiting (find-file sitemap-filename))))
-      (erase-buffer)
-      (insert (concat "#+TITLE: " sitemap-title "\n\n"))
-      (while (setq file (pop files))
-	(let ((link (file-relative-name file dir))
-	      (oldlocal localdir))
-	  (when sitemap-sans-extension
-	    (setq link (file-name-sans-extension link)))
-	  ;; sitemap shouldn't list itself
-	  (unless (equal (file-truename sitemap-filename)
-			 (file-truename file))
-	    (if (eq sitemap-style 'list)
-		(message "Generating list-style sitemap for %s" sitemap-title)
-	      (message "Generating tree-style sitemap for %s" sitemap-title)
-	      (setq localdir (concat (file-name-as-directory dir)
-				     (file-name-directory link)))
-	      (unless (string= localdir oldlocal)
-		(if (string= localdir dir)
-		    (setq indent-str (make-string 2 ?\ ))
-		  (let ((subdirs
-			 (split-string
-			  (directory-file-name
-			   (file-name-directory
-			    (file-relative-name localdir dir))) "/"))
-			(subdir "")
-			(old-subdirs (split-string
-				      (file-relative-name oldlocal dir) "/")))
-		    (setq indent-str (make-string 2 ?\ ))
-		    (while (string= (car old-subdirs) (car subdirs))
-		      (setq indent-str (concat indent-str (make-string 2 ?\ )))
-		      (pop old-subdirs)
-		      (pop subdirs))
-		    (dolist (d subdirs)
-		      (setq subdir (concat subdir d "/"))
-		      (insert (concat indent-str " + " d "\n"))
-		      (setq indent-str (make-string
-					(+ (length indent-str) 2) ?\ )))))))
-	    ;; This is common to 'flat and 'tree
-	    (let ((entry
-		   (org-publish-format-file-entry
-		    org-publish-sitemap-file-entry-format file project-plist))
-		  (regexp "\\(.*\\)\\[\\([^][]+\\)\\]\\(.*\\)"))
-	      (cond ((string-match-p regexp entry)
-		     (string-match regexp entry)
-		     (insert (concat indent-str " + " (match-string 1 entry)
-				     "[[file:" link "]["
-				     (match-string 2 entry)
-				     "]]" (match-string 3 entry) "\n")))
-		    (t
-		     (insert (concat indent-str " + [[file:" link "]["
-				     entry
-				     "]]\n"))))))))
-      (save-buffer))
-    (or visiting (kill-buffer sitemap-buffer))))
-
-(defun org-publish-format-file-entry (fmt file project-plist)
-  (format-spec
-   fmt
-   `((?t . ,(org-publish-find-title file t))
-     (?d . ,(format-time-string org-publish-sitemap-date-format
-				(org-publish-find-date file)))
-     (?a . ,(or (plist-get project-plist :author) user-full-name)))))
+	 (root (expand-file-name
+		(file-name-as-directory
+		 (plist-get project-plist :base-directory))))
+	 (sitemap-filename (concat root (or sitemap-filename "sitemap.org")))
+	 (title (or (plist-get project-plist :sitemap-title)
+		    (concat "Sitemap for project " (car project))))
+	 (style (or (plist-get project-plist :sitemap-style) 'tree))
+	 (sitemap-builder (or (plist-get project-plist :sitemap-function)
+			      #'org-publish-sitemap-default))
+	 (format-entry (or (plist-get project-plist :sitemap-format-entry)
+			   #'org-publish-sitemap-default-entry)))
+    (message "Generating sitemap for %s" title)
+    (with-temp-file sitemap-filename
+      (insert
+       (let ((files (remove sitemap-filename
+			    (org-publish-get-base-files
+			     project (plist-get project-plist :exclude)))))
+	 (when (plist-get project-plist :sitemap-sans-extension)
+	   (setq files (mapcar #'file-name-sans-extension files)))
+	 (funcall sitemap-builder
+		  title
+		  (org-publish--sitemap-files-to-lisp
+		   files root style format-entry)))))))
 
 (defun org-publish-find-title (file &optional reset)
   "Find the title of FILE in project."
@@ -856,6 +839,26 @@ time in `current-time' format."
 	    ((file-exists-p file) (nth 5 (file-attributes file)))
 	    (t (error "No such file: \"%s\"" file))))))
 
+(defun org-publish-sitemap-default-entry (entry root style)
+  "Default format for site map ENTRY, as a string.
+ENTRY is a file name.  ROOT is the base directory of the current
+project.  STYLE is the style of the sitemap."
+  (cond ((not (directory-name-p entry))
+	 (format "[[file:%s][%s]]"
+		 (file-relative-name entry root)
+		 (org-publish-find-title entry)))
+	((eq style 'tree)
+	 ;; Return only last subdir.
+	 (file-name-nondirectory (directory-file-name entry)))
+	(t (file-relative-name entry root))))
+
+(defun org-publish-sitemap-default (title list)
+  "Default site map, as a string.
+TITLE is the the title of the site map.  LIST is an internal
+representation for the files to include, as returned by
+`org-list-to-lisp'."
+  (concat "#+TITLE: " title "\n\n"
+	  (org-list-to-org list)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

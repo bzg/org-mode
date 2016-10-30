@@ -60,6 +60,17 @@
   (defalias 'format-message 'format)
   (defalias 'gui-get-selection 'x-get-selection))
 
+  ;; From "files.el"
+  (defsubst directory-name-p (name)
+    "Return non-nil if NAME ends with a directory separator character."
+  (let ((len (length name))
+        (lastc ?.))
+    (if (> len 0)
+        (setq lastc (aref name (1- len))))
+    (or (= lastc ?/)
+        (and (memq system-type '(windows-nt ms-dos))
+             (= lastc ?\\)))))
+
 
 ;;; Obsolete aliases (remove them once the next major release is released).
 
@@ -287,6 +298,20 @@ See `org-link-parameters' for documentation on the other parameters."
 (defun org-remove-double-quotes (s)
   (org-unbracket-string "\"" "\"" s))
 (make-obsolete 'org-remove-double-quotes 'org-unbracket-string "Org 9.0")
+
+(defcustom org-publish-sitemap-file-entry-format "%t"
+  "Format string for site-map file entry.
+You could use brackets to delimit on what part the link will be.
+
+%t is the title.
+%a is the author.
+%d is the date formatted using `org-publish-sitemap-date-format'."
+  :group 'org-export-publish
+  :type 'string)
+(make-obsolete-variable
+ 'org-publish-sitemap-file-entry-format
+ "set `:sitemap-format-entry' in `org-publish-project-alist' instead."
+ "Org 9.1")
 
 ;;;; Obsolete link types
 

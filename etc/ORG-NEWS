@@ -12,11 +12,6 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 ** Incompatible changes
 
-*** Change signature for some properties in ~org-list-to-generic~
-
-~:istart~, ~:icount~, ~:iend~ and ~:isep~ now expect the type of the
-list as their first argument.
-
 *** ~org-capture-templates~ no longer accepts S-expressions as file names
 
 Since functions are allowed there, a straightforward way to migrate
@@ -27,6 +22,16 @@ is to turn, e.g.,
 into
 
 : (file (lambda () (sexp)))
+
+*** Change signature for ~:sitemap-function~
+
+~:sitemap-function~ now expects to be called with two arguments.  See
+~org-publish-project-alist~ for details.
+
+*** Change signature for some properties in ~org-list-to-generic~
+
+~:istart~, ~:icount~, ~:iend~ and ~:isep~ now expect the type of the
+list as their first argument.
 
 ** New features
 *** Agenda
@@ -120,6 +125,13 @@ narrowed to current buffer to achieve a similar functionality.
 For an equivalent to a ~nil~ value, set
 ~org-agenda-show-future-repeats~ to nil and
 ~org-agenda-prefer-last-repeat~ to ~t~.
+
+** Removed options
+
+*** ~org-publish-sitemap-file-entry-format~ is deprecated
+
+One can provide new ~:sitemap-format-entry~ property for a function
+equivalent to the removed format string.
 
 ** New functions
 
