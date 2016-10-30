@@ -3515,28 +3515,31 @@ PARAMS is a plist used to tweak the behavior of the transcoder."
 (defun org-list-to-latex (list &optional params)
   "Convert LIST into a LaTeX list.
 LIST is a parsed plain list, as returned by `org-list-to-lisp'.
-Return converted list as a string."
+PARAMS is a property list with overruling parameters for
+`org-list-to-generic'.  Return converted list as a string."
   (require 'ox-latex)
   (org-list-to-generic list (org-combine-plists '(:backend latex) params)))
 
 (defun org-list-to-html (list &optional params)
   "Convert LIST into a HTML list.
 LIST is a parsed plain list, as returned by `org-list-to-lisp'.
-Return converted list as a string."
+PARAMS is a property list with overruling parameters for
+`org-list-to-generic'.  Return converted list as a string."
   (require 'ox-html)
   (org-list-to-generic list (org-combine-plists '(:backend html) params)))
 
 (defun org-list-to-texinfo (list &optional params)
   "Convert LIST into a Texinfo list.
 LIST is a parsed plain list, as returned by `org-list-to-lisp'.
-Return converted list as a string."
+PARAMS is a property list with overruling parameters for
+`org-list-to-generic'.  Return converted list as a string."
   (require 'ox-texinfo)
   (org-list-to-generic list (org-combine-plists '(:backend texinfo) params)))
 
 (defun org-list-to-subtree (list &optional params)
   "Convert LIST into an Org subtree.
-LIST is as returned by `org-list-parse-list'.  PARAMS is a property list
-with overruling parameters for `org-list-to-generic'."
+LIST is as returned by `org-list-to-lisp'.  PARAMS is a property
+list with overruling parameters for `org-list-to-generic'."
   (let* ((blank (pcase (cdr (assq 'heading org-blank-before-new-entry))
 		  (`t t)
 		  (`auto (save-excursion
