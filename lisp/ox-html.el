@@ -948,18 +948,18 @@ The function will be called with these arguments:
 
          `number': row number (0 is the first row)
    `group-number': group number of current row
-  `start-group-p': non-nil means the row starts a group
-    `end-group-p': non-nil means the row ends a group
-           `topp': non-nil means this is the top row
-        `bottomp': non-nil means this is the bottom row
+   `start-group?': non-nil means the row starts a group
+     `end-group?': non-nil means the row ends a group
+           `top?': non-nil means this is the top row
+        `bottom?': non-nil means this is the bottom row
 
 For example:
 
-  \(setq org-html-table-row-open-tag
-        \(lambda (number group-number start-group-p end-group-p topp bottomp)
-           \(cond (topp \"<tr class=\\\"tr-top\\\">\")
-                 \(bottomp \"<tr class=\\\"tr-bottom\\\">\")
-                 \(t (if (= (mod number 2) 1)
+  (setq org-html-table-row-open-tag
+        (lambda (number group-number start-group? end-group-p top? bottom?)
+           (cond (top? \"<tr class=\\\"tr-top\\\">\")
+                 (bottom? \"<tr class=\\\"tr-bottom\\\">\")
+                 (t (if (= (mod number 2) 1)
                         \"<tr class=\\\"tr-odd\\\">\"
                       \"<tr class=\\\"tr-even\\\">\")))))
 

@@ -349,7 +349,7 @@ to rename."
 
 Return an alist where associations follow the pattern
 
-  \(LABEL MARKER TOP-LEVEL SIZE)
+  (LABEL MARKER TOP-LEVEL SIZE)
 
 with
 
@@ -414,7 +414,7 @@ References are sorted according to a deep-reading order."
 
 Return an alist where associations follow the pattern
 
-  \(LABEL . DEFINITION)
+  (LABEL . DEFINITION)
 
 with LABEL and DEFINITION being, respectively, the label and the
 definition of the footnote, as strings.

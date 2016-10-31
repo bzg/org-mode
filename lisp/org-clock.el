@@ -2749,7 +2749,7 @@ file time (in minutes) as 1st and 2nd elements.  The third element
 of this list will be a list of headline entries.  Each entry has the
 following structure:
 
-  \(LEVEL HEADLINE TIMESTAMP TIME)
+  (LEVEL HEADLINE TIMESTAMP TIME)
 
 LEVEL:     The level of the headline, as an integer.  This will be
            the reduced level, so 1,2,3,... even if only odd levels

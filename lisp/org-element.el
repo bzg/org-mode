@@ -4821,7 +4821,7 @@ with `org-element--cache-compare'.  This cache is used in
 Key is an element, as returned by `org-element-at-point', and
 value is an alist where each association is:
 
-  \(PARENT COMPLETEP . OBJECTS)
+  (PARENT COMPLETEP . OBJECTS)
 
 where PARENT is an element or object, COMPLETEP is a boolean,
 non-nil when all direct children of parent are already cached and
@@ -4835,12 +4835,12 @@ contained within a paragraph
 
 If the paragraph is completely parsed, OBJECTS-DATA will be
 
-  \((PARAGRAPH t BOLD-OBJECT ENTITY-OBJECT)
-   \(BOLD-OBJECT t ENTITY-OBJECT))
+  ((PARAGRAPH t BOLD-OBJECT ENTITY-OBJECT)
+   (BOLD-OBJECT t ENTITY-OBJECT))
 
 whereas in a partially parsed paragraph, it could be
 
-  \((PARAGRAPH nil ENTITY-OBJECT))
+  ((PARAGRAPH nil ENTITY-OBJECT))
 
 This cache is used in `org-element-context'.")
 
@@ -4929,16 +4929,16 @@ the following rules:
     gets a new level.  Its value is the mean between LOWER and
     UPPER:
 
-      \(1 2) + (1 4) --> (1 3)
+      (1 2) + (1 4) --> (1 3)
 
   - If LOWER has no value to compare with, it is assumed that its
     value is `most-negative-fixnum'.  E.g.,
 
-      \(1 1) + (1 1 2)
+      (1 1) + (1 1 2)
 
     is equivalent to
 
-      \(1 1 m) + (1 1 2)
+      (1 1 m) + (1 1 2)
 
     where m is `most-negative-fixnum'.  Likewise, if UPPER is
     short of levels, the current value is `most-positive-fixnum'.
@@ -4946,18 +4946,18 @@ the following rules:
   - If they differ from only one, the new key inherits from
     current LOWER level and fork it at the next level.  E.g.,
 
-      \(2 1) + (3 3)
+      (2 1) + (3 3)
 
     is equivalent to
 
-      \(2 1) + (2 M)
+      (2 1) + (2 M)
 
     where M is `most-positive-fixnum'.
 
   - If the key is only one level long, it is returned as an
     integer:
 
-      \(1 2) + (3 2) --> 2
+      (1 2) + (3 2) --> 2
 
 When they are not equals, the function assumes that LOWER is
 lesser than UPPER, per `org-element--cache-key-less-p'."

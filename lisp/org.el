@@ -2300,7 +2300,7 @@ Possible values for the file identifier are:
                  handled identically to the second one (i.e. match against
                  file name only).
                  In a custom function, you can access the group matches with
-                 \(match-string n link).
+                 (match-string n link).
 
                  Example: (\"\\\\.pdf::\\\\(\\\\d+\\\\)\\\\\\='\" . \
 \"evince -p %1 %s\")
@@ -2314,7 +2314,7 @@ Possible values for the file identifier are:
                so all files Emacs knows how to handle.  Using this with
                command `emacs' will open most files in Emacs.  Beware that this
                will also open html files inside Emacs, unless you add
-               \(\"html\" . default) to the list as well.
+               (\"html\" . default) to the list as well.
  `system'      The system command to open files, like `open' on Windows
                and Mac OS X, and mailcap under GNU/Linux.  This is the command
                that will be selected if you call `org-open-at-point' with a
@@ -11087,7 +11087,7 @@ numeric or double prefix to guide the search function.
 In case this is needed, a function in this hook can also restore
 the window configuration before `org-open-at-point' was called using:
 
-    \(set-window-configuration org-window-config-before-follow-link)")
+    (set-window-configuration org-window-config-before-follow-link)")
 
 (defun org-search-radio-target (target)
   "Search a radio target matching TARGET in current buffer.
@@ -13090,10 +13090,10 @@ an entry to DONE when all children are done, and back to TODO when new
 entries are set to a TODO status.  Note that this hook is only called
 when there is a statistics cookie in the headline!
 
- \(defun org-summary-todo (n-done n-not-done)
+ (defun org-summary-todo (n-done n-not-done)
    \"Switch entry to DONE when all subentries are done, to TODO otherwise.\"
-   \(let (org-log-done org-log-states)   ; turn off logging
-     \(org-todo (if (= n-not-done 0) \"DONE\" \"TODO\"))))
+   (let (org-log-done org-log-states)   ; turn off logging
+     (org-todo (if (= n-not-done 0) \"DONE\" \"TODO\"))))
 ")
 
 (defvar org-todo-statistics-hook nil
@@ -16670,9 +16670,9 @@ completion."
 If anything goes wrong, throw an error.
 You can wrap this call to catch the error like this:
 
-  \(condition-case msg
-      \(org-mobile-locate-entry (match-string 4))
-    \(error (nth 1 msg)))
+  (condition-case msg
+      (org-mobile-locate-entry (match-string 4))
+    (error (nth 1 msg)))
 
 The return value will then be either a string with the error message,
 or a marker if everything is OK.

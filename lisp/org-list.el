@@ -3109,13 +3109,13 @@ For example, the following list:
 
 is parsed as
 
- \(ordered
-  \(\"first item\"
-   \(unordered
-    \(\"sub-item one\")
-    \(\"[X] sub-item two\"))
+ (ordered
+  (\"first item\"
+   (unordered
+    (\"sub-item one\")
+    (\"[X] sub-item two\"))
    \"more text in first item\")
-  \(\"[@3] last item\"))
+  (\"[@3] last item\"))
 
 Point is left at list's end."
   (letrec ((struct (org-list-struct))

@@ -4815,7 +4815,7 @@ strings, or the current cell) returning a string:
   a property list with column numbers and format strings, or
   functions, e.g.,
 
-    \(:fmt (2 \"$%s$\" 4 (lambda (c) (format \"$%s$\" c))))
+    (:fmt (2 \"$%s$\" 4 (lambda (c) (format \"$%s$\" c))))
 
 :hlstart :hllstart :hlend :hllend :hsep :hlfmt :hllfmt :hfmt
 
