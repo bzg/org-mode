@@ -20,7 +20,8 @@ above is suggested.
 *** XEmacs support has been dropped
 
 Incomplete compatibility layer with XEmacs has been removed.  If you
-want to preserve this compatibility, you can contact our mailing list.
+want to take over maintainance of this compatibility, please contact
+our mailing list.
 
 *** New syntax for export blocks
 
@@ -59,6 +60,7 @@ using previous syntax:
 #+BEGIN_SRC emacs-lisp
 (defun org-repair-export-blocks ()
   "Repair export blocks and INCLUDE keywords in current buffer."
+  (interactive)
   (when (eq major-mode 'org-mode)
     (let ((case-fold-search t)
           (back-end-re (regexp-opt
@@ -88,9 +90,9 @@ using previous syntax:
                (replace-match "EXPORT \\1" nil nil nil 1)))))))))
 #+END_SRC
 
-Moreover, ~:export-block~ keyword used in ~org-export-define-backend~
-and ~org-export-define-derived-backend~ is no longer used and needs to
-be removed.
+Moreover, ~:export-block~ keyword used in ~org-export-define-backend~ and
+~org-export-define-derived-backend~ is no longer used and needs to be
+removed.
 
 *** Footnotes
 
@@ -100,14 +102,14 @@ Using =[1]= as a footnote was already discouraged in the manual, since
 it introduced too many false-positives in many Org documents.  These
 constructs are now unsupported.
 
-If you used =[N]= in some of your documents, consider turning them
-into =[fn:N]=.
+If you used =[N]= in some of your documents, consider turning them into
+=[fn:N]=.
 
 **** /Org Footnote/ library doesn't handle non-Org buffers
 
 Commands for footnotes in an Org document no longer try to do
 something in non-Org ones.  If you need to have footnotes there,
-consider using =footnote.el= library, shipped with Emacs.
+consider using the =footnote.el= library, shipped with Emacs.
 
 In particular, ~org-footnote-tag-for-non-org-mode-files~ no longer
 exists.
@@ -124,7 +126,7 @@ becomes
 
 : ("pdf" . (lambda (file link) (foo)))
 
-*** The ~{{{modification-time}}}~ macro can obtain time via =vc=
+*** The ~{{{modification-time}}}~ macro can get time via =vc=
 
 The modification time will be determined via =vc.el= if the second
 argument is non-nil.  See the manual for details.
@@ -165,8 +167,7 @@ block definition.  Current ones are defined where the block is called.
 
 ** New features
 
-*** ~org-eww~ is moved into core
-
+*** ~org-eww~ has been moved into core
 *** New org-protocol key=value syntax
 
 Org-protocol can now handle query-style parameters such as:
@@ -183,10 +184,10 @@ continue to be supported.
 If you have defined your own handler functions for
 ~org-protocol-protocol-alist~, change them to accept either a property
 list (for new-style links) or a string (for old-style links).  Use
-~org-protocol-parse-parameters~ to convert old-style links into
-property lists.
+~org-protocol-parse-parameters~ to convert old-style links into property
+lists.
 
-*** Org linter
+*** New Org linter library
 
 ~org-lint~ can check syntax and report common issues in Org documents.
 
@@ -248,14 +249,14 @@ added to the last line number from the previous block as the starting
 point for the SRC/EXAMPLE block.
 
 #+BEGIN_SRC org
-  ,#+BEGIN_SRC emacs-lisp -n 20
-    ;; this will export with line number 20
-    (message "This is line 21")
-  ,#+END_SRC
-  ,#+BEGIN_SRC emacs-lisp +n 10
-    ;; This will be listed as line 31
-    (message "This is line 32")
-  ,#+END_SRC
+,#+BEGIN_SRC emacs-lisp -n 20
+;; this will export with line number 20
+(message "This is line 21")
+,#+END_SRC
+,#+BEGIN_SRC emacs-lisp +n 10
+;; This will be listed as line 31
+(message "This is line 32")
+,#+END_SRC
 #+END_SRC
 
 **** Allow toggling center for images in LaTeX export
@@ -268,8 +269,8 @@ export.
 
 SVG images exported in HTML are now by default assigned a CSS class
 ~org-svg~ if no CSS class is specified with the ~:class~ attribute. By
-default, the CSS styling of class ~org-svg~ specifies an image width
-of 90\thinsp{}% of the container the image.
+default, the CSS styling of class ~org-svg~ specifies an image width of
+90\thinsp{}% of the container the image.
 
 **** Markdown footnote export customization
 
@@ -316,12 +317,12 @@ database using ~sqlplus~.  Use with properties like this (all
 mandatory):
 
 #+BEGIN_EXAMPLE
- :engine oracle
- :dbhost <host.com>
- :dbport <1521>
- :dbuser <username>
- :database <database>
- :dbpassword <secret>
+:engine oracle
+:dbhost <host.com>
+:dbport <1521>
+:dbuser <username>
+:database <database>
+:dbpassword <secret>
 #+END_EXAMPLE
 
 **** Improved support to Microsoft SQL Server via ~sqlcmd~
@@ -332,16 +333,15 @@ engine which uses the ~sqlcmd~ command line tool.  Use with properties
 like this:
 
 #+BEGIN_EXAMPLE
-  :engine mssql
-  :dbhost <host.com>
-  :dbuser <username>
-  :dbpassword <secret>
-  :database <database>
+:engine mssql
+:dbhost <host.com>
+:dbuser <username>
+:dbpassword <secret>
+:database <database>
 #+END_EXAMPLE
 
 If you want to use the *trusted connection* feature, omit *both* the
-=dbuser= and =dbpassword= properties and add =cmdline -E= to the
-properties.
+=dbuser= and =dbpassword= properties and add =cmdline -E= to the properties.
 
 If your Emacs is running in a Cygwin environment, the =ob-sql= library
 can pass the converted path to the =sqlcmd= tool.
@@ -385,9 +385,9 @@ Alice <-- Bob: another authentication Response
 @enduml
 #+end_src
 
-Please note that *pdf* *does not work out of the box* and needss
-additional setup in addition to plantuml. See
-[[http://plantuml.com/pdf.html]] for details and setup information.
+Please note that *pdf* *does not work out of the box* and needs additional
+setup in addition to plantuml.  See [[http://plantuml.com/pdf.html]] for
+details and setup information.
 
 *** Rewrite of radio lists
 
@@ -398,8 +398,8 @@ for details.
 
 *** org-bbdb-anniversaries-future
 
-Used like org-bbdb-anniversaries, it provides a few days warning
-for upcoming anniversaries (default: 7 days).
+Used like ~org-bbdb-anniversaries~, it provides a few days warning for
+upcoming anniversaries (default: 7 days).
 
 *** Clear non-repeated SCHEDULED upon repeating a task
 
@@ -459,10 +459,10 @@ a git repository.
 
 *** Allow conditional case-fold searches in ~org-occur~
 
-When set to ~smart~, the new variable ~org-occur-case-fold-search~
-allows to mimic =isearch.el=: if the regexp searched contains any
-upper case character (or character class), the search is case
-sensitive.  Otherwise, it is case insensitive.
+When set to ~smart~, the new variable ~org-occur-case-fold-search~ allows
+to mimic =isearch.el=: if the regexp searched contains any upper case
+character (or character class), the search is case sensitive.
+Otherwise, it is case insensitive.
 
 *** More robust repeated =ox-latex= footnote handling
 
@@ -478,7 +478,7 @@ the manual for details.
 *** Links are now customizable
 
 Links can now have custom colors, tooltips, keymaps, display behavior,
-etc. Links are now centralized in ~org-link-parameters~.
+etc.  Links are now centralized in ~org-link-parameters~.
 
 ** New functions
 
@@ -783,10 +783,10 @@ buffer name, as the title.  Instead, simply ignore the title.
 *** Default bindings of =C-c C-n= and =C-c C-p= changed
 
 The key sequences =C-c C-n= and =C-c C-p= are now bound to
-~org-next-visible-heading~ and ~org-previous-visible-heading~ respectively,
-rather than the =outline-mode= versions of these functions.  The Org
-version of these functions skips over inline tasks (and even-level
-headlines when ~org-odd-levels-only~ is set).
+~org-next-visible-heading~ and ~org-previous-visible-heading~
+respectively, rather than the =outline-mode= versions of these
+functions.  The Org version of these functions skips over inline tasks
+(and even-level headlines when ~org-odd-levels-only~ is set).
 
 *** ~org-element-context~ no longer return objects in keywords
 
@@ -810,9 +810,13 @@ docstring for more information.
 - ~org-latex-format-headline-function~
 - ~org-latex-format-inlinetask-function~
 - ~org-link-search~
+
 ** New features
+
 *** Default lexical evaluation of emacs-lisp src blocks
-Emacs-lisp src blocks in babel are now evaluated using lexical scoping. There is a new header to control this behavior.
+
+Emacs-lisp src blocks in babel are now evaluated using lexical
+scoping.  There is a new header to control this behavior.
 
 The default results in an eval with lexical scoping.
 :lexical yes
@@ -829,11 +833,13 @@ If point is before or after the headline title, insert a new line
 without changing the headline.
 
 *** Hierarchies of tags
+
 The functionality of nesting tags in hierarchies is added to org-mode.
 This is the generalization of what was previously called "Tag groups"
 in the manual.  That term is now changed to "Tag hierarchy".
 
 The following in-buffer definition:
+
 #+BEGIN_SRC org
   ,#+TAGS: [ Group : SubOne SubTwo ]
   ,#+TAGS: [ SubOne : SubOne1 SubOne2 ]
@@ -841,6 +847,7 @@ The following in-buffer definition:
 #+END_SRC
 
 Should be seen as the following tree of tags:
+
 - Group
   - SubOne
     - SubOne1
@@ -855,25 +862,27 @@ on SubOne filters also it's sub-tags.  Etc.
 There is no limit on the depth for the tag hierarchy.
 
 *** Additional syntax for non-unique grouptags
+
 Additional syntax is defined for grouptags if the tags in the group
 don't have to be distinct on a heading.
 
 Grouptags had to previously be defined with { }.  This syntax is
 already used for exclusive tags and Grouptags need their own,
-non-exclusive syntax.  This behaviour is achieved with [ ].  Note: {
-} can still be used also for Grouptags but then only one of the
-given tags can be used on the headline at the same time.  Example:
+non-exclusive syntax.  This behaviour is achieved with [ ].  Note: { }
+can still be used also for Grouptags but then only one of the given
+tags can be used on the headline at the same time.  Example:
 
 [ group : sub1 sub2 ]
 
 #+BEGIN_SRC org
-  ,* Test                                                            :sub1:sub2:
+,* Test                                                            :sub1:sub2:
 #+END_SRC
 
 This is a more general case than the already existing syntax for
 grouptags; { }.
 
 *** Define regular expression patterns as tags
+
 Tags can be defined as grouptags with regular expressions as
 "sub-tags".
 
@@ -883,13 +892,13 @@ Example use:
 : #+TAGS: [ Project : {P@.+} ]
 
 Searching for the tag Project will now list all tags also including
-regular expression matches for P@.+.  Good for example if tags for a
-certain project is tagged with a common project-identifier,
-i.e. P@2014_OrgTags.
+regular expression matches for P@.+.  This is good for example for
+projects tagged with a common identifier, i.e. P@2014_OrgTags.
 
 *** Filtering in the agenda on grouptags (Tag hierarchies)
-Filtering in the agenda on grouptags filter all of the related tags.
-Exception if filter is applied with a (double) prefix-argument.
+
+Filtering in the agenda on grouptags filters all of the related tags.
+Except if a filter is applied with a (double) prefix-argument.
 
 Filtering in the agenda on subcategories does not filter the "above"
 levels anymore.
@@ -898,9 +907,10 @@ If a grouptag contains a regular expression the regular expression
 is also used as a filter.
 
 *** Minor refactoring of ~org-agenda-filter-by-tag~
-Now uses the argument arg and optional argument exclude instead of
+
+Now uses the argument ARG and optional argument exclude instead of
 strip and narrow.  ARG because the argument has multiple purposes and
-makes more sense than strip now.  The term narrowing is changed to
+makes more sense than strip now.  The term "narrowing" is changed to
 exclude.
 
 The main purpose is for the function to make more logical sense when
@@ -918,16 +928,17 @@ This library implements necessary functions for implementing editing
 of Processing code blocks, viewing the resulting sketches in an
 external viewer, and HTML export of the sketches.
 
-Check the documentation for more.
+Check the documentation for more details.
 
 Thanks to Jarmo Hurri for this feature.
 
-*** New behaviour for `org-toggle-latex-fragment'
+*** New behaviour for ~org-toggle-latex-fragment~
+
 The new behaviour is the following:
 
-- With a double prefix argument or with a single prefix argument
-  when point is before the first headline, toggle overlays in the
-  whole buffer;
+- With a double prefix argument or with a single prefix argument when
+  point is before the first headline, toggle overlays in the whole
+  buffer;
 
 - With a single prefix argument, toggle overlays in the current
   subtree;
@@ -969,18 +980,18 @@ default is =hline=.
 
 *** Markdown export supports switches in source blocks
 
-For example, it is now possible to number lines using the =-n= switch
-in a source block.
+For example, it is now possible to number lines using the =-n= switch in
+a source block.
 
 *** New option in ASCII export
 
-Plain lists can have an extra margin by setting
-~org-ascii-list-margin~ variable to an appopriate integer.
+Plain lists can have an extra margin by setting ~org-ascii-list-margin~
+variable to an appopriate integer.
 
 *** New blocks in ASCII export
 
-ASCII export now supports =#+BEGIN_JUSTIFYRIGHT= and
-=#+BEGIN_JUSTIFYLEFT= blocks.  See documentation for details.
+ASCII export now supports =#+BEGIN_JUSTIFYRIGHT= and =#+BEGIN_JUSTIFYLEFT=
+blocks.  See documentation for details.
 
 *** More back-end specific publishing options
 
@@ -1026,23 +1037,23 @@ will be exported using =@samp(myverbatim)= instead of =@samp(verbatim)=.
 
 Radio tables feature now relies on Org's export framework ("ox.el").
 ~:no-escape~ parameter no longer exists, but additional global
-parameters are now supported: ~:raw~, ~:backend~.  Moreover, there are
-new parameters specific to some pre-defined translators, e.g.,
+parameters are now supported: ~:raw~, ~:backend~.  Moreover, there are new
+parameters specific to some pre-defined translators, e.g.,
 ~:environment~ and ~:booktabs~ for ~orgtbl-to-latex~.  See translators
 docstrings (including ~orgtbl-to-generic~) for details.
 
 *** Non-floating minted listings in Latex export
 
-It is not possible to specify =#+attr_latex: :float nil= in conjunction with
-source blocks exported by the minted package.
+It is not possible to specify =#+attr_latex: :float nil= in conjunction
+with source blocks exported by the minted package.
 
 *** Field formulas can now create columns as needed
 
 Previously, evaluating formulas that referenced out-of-bounds columns
-would throw an error. A new variable
-~org-table-formula-create-columns~ was added to adjust this
-behavior. It is now possible to silently add new columns, to do so
-with a warning or to explicitly ask the user each time.
+would throw an error. A new variable ~org-table-formula-create-columns~
+was added to adjust this behavior. It is now possible to silently add
+new columns, to do so with a warning or to explicitly ask the user
+each time.
 
 *** ASCII plot
 
@@ -1060,13 +1071,13 @@ When non-nil, attachments from archived subtrees are removed.
 
 *** New option: ~org-latex-caption-above~
 
-This variable generalizes ~org-latex-table-caption-above~, which is
-now deprecated.  In addition to tables, it applies to source blocks,
+This variable generalizes ~org-latex-table-caption-above~, which is now
+deprecated.  In addition to tables, it applies to source blocks,
 special blocks and images.  See docstring for more information.
 
 *** New option: ~org-latex-prefer-user-labels~
 
-See docstring for more information.
+See the docstring for more information.
 
 *** Export unnumbered headlines
 
@@ -1077,13 +1088,13 @@ property is inherited by children.
 *** Tables can be sorted with an arbitrary function
 
 It is now possible to specify a function, both programatically,
-through a new optional argument, and interactively with ~f~ or ~F~
-keys, to sort a table.
+through a new optional argument, and interactively with ~f~ or ~F~ keys,
+to sort a table.
 
 *** Table of contents can be local to a section
 
-The ~TOC~ keywords now accepts an optional ~local~ parameter.  See
-manual for details.
+The ~TOC~ keywords now accepts an optional ~local~ parameter.  See manual
+for details.
 
 *** Countdown timers can now be paused
 
@@ -1146,8 +1157,8 @@ for details.
 *** Remotely edit a footnote definition
 
 Calling ~org-edit-footnote-reference~ (C-c ') on a footnote reference
-allows to edit its definition, as long as it is not anonymous, in
-a dedicated buffer.  It works even if buffer is currently narrowed.
+allows to edit its definition, as long as it is not anonymous, in a
+dedicated buffer.  It works even if buffer is currently narrowed.
 
 *** New function ~org-delete-indentation~ bound to ~M-^~
 
@@ -1156,7 +1167,7 @@ added to headline text.
 
 *** Support for images in Texinfo export
 
-~Texinfo~ back-end now handles images.  See manual for details.
+~Texinfo~ back-end now handles images.  See the manual for details.
 
 *** Support for captions in Texinfo export
 
@@ -1171,9 +1182,9 @@ set using the hh:mm:ss format.
 
 *** Extend ~org-clone-subtree-with-time-shift~
 
-~org-clone-subtree-with-time-shift~ now accepts 0 as an argument for
-the number of clones, which removes the repeater from the original
-subtree and creates one shifted, repeating clone.
+~org-clone-subtree-with-time-shift~ now accepts 0 as an argument for the
+number of clones, which removes the repeater from the original subtree
+and creates one shifted, repeating clone.
 
 *** New time block for clock tables: ~untilnow~
 
@@ -1219,6 +1230,7 @@ optional argument.
 
 These functions were left-over from pre 8.0 era.  They are not correct
 anymore.  Since they are not needed, they have no replacement.
+
 ** Removed options
 
 *** ~org-list-empty-line-terminates-plain-lists~ is deprecated
@@ -1242,11 +1254,11 @@ everywhere in the buffer, possibly corrupting URLs.
 
 *** Removed option =org-babel-sh-command=
 
-This undocumented option defaulted to the value of =shell-file-name=
-at the time of loading =ob-shell=.  The new behaviour is to use the
-value of =shell-file-name= directly when the shell langage is =shell=.
-To chose a different shell, either customize =shell-file-name= or bind
-this variable locally.
+This undocumented option defaulted to the value of =shell-file-name= at
+the time of loading =ob-shell=.  The new behaviour is to use the value
+of =shell-file-name= directly when the shell langage is =shell=.  To chose
+a different shell, either customize =shell-file-name= or bind this
+variable locally.
 
 *** Removed option =org-babel-sh-var-quote-fmt=
 
@@ -1286,6 +1298,7 @@ end-users browser.  You may force initial usage of MathML via
 ~org-export-filter-comment-functions~ and
 ~org-export-filter-comment-block-functions~ variables do not exist
 anymore.
+
 ** Miscellaneous
 
 *** Strip all meta data from ITEM special property
@@ -1322,9 +1335,9 @@ particular test failure was introduced.
 *** Exact heading search for external links ignore spaces and cookies
 
 Exact heading search for links now ignore spaces and cookies. This is
-the case for links of the form ~file:projects.org::*task title~, as
-well as links of the form ~file:projects.org::some words~
-when ~org-link-search-must-match-exact-headline~ is not nil.
+the case for links of the form ~file:projects.org::*task title~, as well
+as links of the form ~file:projects.org::some words~ when
+~org-link-search-must-match-exact-headline~ is not nil.
 
 *** ~org-latex-hyperref-template~, ~org-latex-title-command~ formatting
 
@@ -1334,12 +1347,12 @@ Note, ~org-latex-hyperref-template~ has a new default value.
 *** ~float, wasysym, marvosym~ are removed from ~org-latex-default-packages-alist~
 
 If you require any of these package add them to your preamble via
-~org-latex-packages-alist~. Org also uses default LaTeX ~\tolerance~
-now.
+~org-latex-packages-alist~. Org also uses default LaTeX ~\tolerance~ now.
 
 *** When exporting, throw an error on unresolved id/fuzzy links and code refs
 
 This helps spotting wrong links.
+
 * Version 8.2
 
 ** Incompatible changes
