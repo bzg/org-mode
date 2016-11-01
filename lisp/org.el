@@ -18188,17 +18188,21 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like \"--2d\"."
 	(goto-char pos))
       (save-match-data
 	(looking-at org-ts-regexp3)
-	(goto-char (cond
-		    ;; `day' category ends before `hour' if any, or at
-		    ;; the end of the day name.
-		    ((eq origin-cat 'day)
-		     (min (or (match-beginning 7) (1- (match-end 5))) origin))
-		    ((eq origin-cat 'hour) (min (match-end 7) origin))
-		    ((eq origin-cat 'minute) (min (1- (match-end 8)) origin))
-		    ((integerp origin-cat) (min (1- (match-end 0)) origin))
-		    ;; `year' and `month' have both fixed size: point
-		    ;; couldn't have moved into another part.
-		    (t origin))))
+	(goto-char
+	 (pcase origin-cat
+	   ;; `day' category ends before `hour' if any, or at the end
+	   ;; of the day name.
+	   (`day (min (or (match-beginning 7) (1- (match-end 5))) origin))
+	   (`hour (min (match-end 7) origin))
+	   (`minute (min (1- (match-end 8)) origin))
+	   ((pred integerp) (min (1- (match-end 0)) origin))
+	   ;; Point was right after the time-stamp.  However, the
+	   ;; time-stamp length might have changed, so refer to
+	   ;; (match-end 0) instead.
+	   (`after (match-end 0))
+	   ;; `year' and `month' have both fixed size: point couldn't
+	   ;; have moved into another part.
+	   (_ origin))))
       ;; Update clock if on a CLOCK line.
       (org-clock-update-time-maybe)
       ;; Maybe adjust the closest clock in `org-clock-history'
