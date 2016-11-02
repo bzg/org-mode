@@ -349,12 +349,6 @@ You can overwrite this default per project in your
   :group 'org-export-publish
   :type 'boolean)
 
-(defcustom org-publish-sitemap-date-format "%Y-%m-%d"
-  "Format for printing a date in the sitemap.
-See `format-time-string' for allowed formatters."
-  :group 'org-export-publish
-  :type 'string)
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -613,10 +607,7 @@ If `:auto-sitemap' is set, publish the sitemap too.  If
       (when  (plist-get project-plist :auto-sitemap)
 	(let ((sitemap-filename
 	       (or (plist-get project-plist :sitemap-filename)
-		   "sitemap.org"))
-	      (org-publish-sitemap-date-format
-	       (or (plist-get project-plist :sitemap-date-format)
-		   org-publish-sitemap-date-format)))
+		   "sitemap.org")))
 	  (org-publish-sitemap project sitemap-filename)))
       ;; Publish all files from PROJECT excepted "theindex.org".  Its
       ;; publishing will be deferred until "theindex.inc" is
