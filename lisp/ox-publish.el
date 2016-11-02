@@ -1250,9 +1250,9 @@ will be created.  Return VALUE."
 (defun org-publish-cache-get-file-property
   (filename property &optional default no-create project-name)
   "Return the value for a PROPERTY of file FILENAME in publishing cache.
-Use cache file of PROJECT-NAME. Return the value of that PROPERTY
-or DEFAULT, if the value does not yet exist.  If the entry will
-be created, unless NO-CREATE is not nil."
+Use cache file of PROJECT-NAME.  Return the value of that
+PROPERTY or DEFAULT, if the value does not yet exist.  If the
+entry will be created, unless NO-CREATE is not nil."
   ;; Evtl. load the requested cache file:
   (if project-name (org-publish-initialize-cache project-name))
   (let ((pl (org-publish-cache-get filename)) retval)
