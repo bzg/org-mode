@@ -23,6 +23,24 @@ into
 
 : (file (lambda () (sexp)))
 
+*** Removal of ~:sitemap-sans-extension~
+
+The publishing property is no longer recognized, as a consequence of
+changes to site-map generation.
+
+You can get the same functionality by setting ~:sitemap-format-entry~
+to the following
+
+#+BEGIN_SRC elisp
+(lambda (entry root style)
+  (cond ((not (directory-name-p entry))
+	 (format "[[file:%s][%s]]"
+		 (file-name-sans-extension (file-relative-name entry root))
+		 (org-publish-find-title entry)))
+	((eq style 'tree) (file-name-nondirectory (directory-file-name entry)))
+	(t (file-relative-name entry root))))
+#+END_SRC
+
 *** Change signature for ~:sitemap-function~
 
 ~:sitemap-function~ now expects to be called with two arguments.  See

@@ -14572,11 +14572,6 @@ a file is retrieved with @code{org-publish-find-date}.
 a sitemap entry's date is to be formatted.  This property bypasses
 @code{org-publish-sitemap-date-format} which defaults to @code{%Y-%m-%d}.
 
-@item @code{:sitemap-sans-extension}
-@tab When non-@code{nil}, remove filenames' extensions from the generated sitemap.
-Useful to have cool URIs (see @uref{http://www.w3.org/Provider/Style/URI}).
-Defaults to @code{nil}.
-
 @end multitable
 
 @node Generating an index

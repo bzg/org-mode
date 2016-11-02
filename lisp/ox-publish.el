@@ -218,12 +218,6 @@ a site-map of files or summary page for a given project.
     structure of the source files is reflected in the site-map).
     Defaults to `tree'.
 
-  `:sitemap-sans-extension'
-
-    Remove extension from site-map's file-names.  Useful to have
-    cool URIs (see http://www.w3.org/Provider/Style/URI).
-    Defaults to nil.
-
   `:sitemap-format-entry'
 
     Plugin function used to format entries in the site-map.  It
@@ -739,9 +733,6 @@ Default for SITEMAP-FILENAME is `sitemap.org'."
       (insert
        (let ((files (remove sitemap-filename
 			    (org-publish-get-base-files project))))
-	 ;; Remove extensions, if requested.
-	 (when (plist-get project-plist :sitemap-sans-extension)
-	   (setq files (mapcar #'file-name-sans-extension files)))
 	 ;; Add directories, if applicable.
 	 (unless (and (eq style 'list) (eq sort-folders 'ignore))
 	   (setq files
