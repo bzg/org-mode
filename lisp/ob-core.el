@@ -207,7 +207,7 @@ This string must include a \"%s\" which will be replaced by the results."
 (defun org-babel--get-vars (params)
   "Return the babel variable assignments in PARAMS.
 
-PARAMS is a quasi-alist of header args, whcih may contain
+PARAMS is a quasi-alist of header args, which may contain
 multiple entries for the key `:var'.  This function returns a
 list of the cdr of all the `:var' entries."
   (mapcar #'cdr
