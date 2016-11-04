@@ -3837,11 +3837,11 @@ FILTER-ALIST is an alist of filters we need to apply when
 	 ov 'face
 	 (let ((special-face
 		(cond ((org-face-from-face-or-color
-			'priority nil
+			'priority 'org-priority
 			(cdr (assoc p org-priority-faces))))
 		      ((and (listp org-agenda-fontify-priorities)
 			    (org-face-from-face-or-color
-			     'priority nil
+			     'priority 'org-priority
 			     (cdr (assoc p org-agenda-fontify-priorities)))))
 		      ((equal p l) 'italic)
 		      ((equal p h) 'bold))))
