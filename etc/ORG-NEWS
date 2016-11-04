@@ -8,6 +8,21 @@ See the end of the file for license conditions.
 
 Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
+* Version 9.1
+
+** Incompatible changes
+
+*** ~org-capture-templates~ no longer accepts S-expressions as file names
+
+Since functions are allowed there, a straightforward way to migrate
+is to turn, e.g.,
+
+: (file (sexp))
+
+into
+
+: (file (lambda () (sexp)))
+
 * Version 9.0
 
 ** Incompatible changes

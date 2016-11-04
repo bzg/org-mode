@@ -124,8 +124,8 @@ target       Specification of where the captured item should be placed.
 
              Most target specifications contain a file name.  If that file
              name is the empty string, it defaults to `org-default-notes-file'.
-             A file can also be given as a variable, function, or Emacs Lisp
-             form.  When an absolute path is not specified for a
+             A file can also be given as a variable or as a function called
+             with no argument.  When an absolute path is not specified for a
              target, it is taken as relative to `org-directory'.
 
              Valid values are:
@@ -1008,16 +1008,13 @@ Store them in the capture property list."
 
 (defun org-capture-expand-file (file)
   "Expand functions and symbols for FILE.
-When FILE is a function, call it.  When it is a form, evaluate
-it.  When it is a variable, retrieve the value.  When it is
-a string, return it.  However, if it is the empty string, return
-`org-default-notes-file' instead."
+When FILE is a function, call it.  When it is a variable,
+retrieve its value.  When it is the empty string, return
+`org-default-notes-file'.  In any other case, return FILE as-is."
   (cond
    ((equal file "") org-default-notes-file)
-   ((org-string-nw-p file) file)
    ((functionp file) (funcall file))
    ((and (symbolp file) (boundp file)) (symbol-value file))
-   ((consp file) (eval file))
    (t file)))
 
 (defun org-capture-target-buffer (file)
