@@ -247,15 +247,15 @@ should be asked whether to allow evaluation."
 
 (defun org-babel-check-evaluate (info)
   "Check if code block INFO should be evaluated.
-
 Do not query the user, but do display an informative message if
 evaluation is blocked.  Returns non-nil if evaluation is not blocked."
-  (let ((evalp (org-babel-check-confirm-evaluate info)))
-    (when (null evalp)
-      (message "Evaluation of this %s code-block%sis disabled."
+  (let ((confirmed (org-babel-check-confirm-evaluate info)))
+    (unless confirmed
+      (message "Evaluation of this %s code block%sis disabled."
 	       (nth 0 info)
-	       (let ((name (nth 4 info))) (if name (format " (%s) " name) ""))))
-    evalp))
+	       (let ((name (nth 4 info)))
+		 (if name (format " (%s) " name) " "))))
+    confirmed))
 
 ;; Dynamically scoped for asynchronous export.
 (defvar org-babel-confirm-evaluate-answer-no)
@@ -288,7 +288,7 @@ environment, to override this check."
 		     (format "Evaluate this %s code block%son your system? "
 			     lang name-string)))
 	       (progn
-		(message "Evaluation of this %s code-block%sis aborted."
+		(message "Evaluation of this %s code block%sis aborted."
 			 lang name-string)
 		nil)))
       (x (error "Unexpected value `%s' from `org-babel-check-confirm-evaluate'" x)))))
