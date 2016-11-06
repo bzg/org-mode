@@ -37,8 +37,6 @@
 (declare-function org-element-type "org-element" (element))
 (declare-function org-table-goto-line "org-table" (n))
 
-(defvar org-clock-stored-history nil
-  "Clock history, populated by `org-clock-load', which see.")
 (defvar org-frame-title-format-backup frame-title-format)
 (defvar org-time-stamp-formats)
 (defvar org-ts-what)
@@ -460,6 +458,11 @@ to add an effort property.")
   "Hook run when selecting the currently clocked-in entry.")
 (defvar org-clock-has-been-used nil
   "Has the clock been used during the current Emacs session?")
+
+(defvar org-clock-stored-history nil
+  "Clock history, populated by `org-clock-load'")
+(defvar org-clock-stored-resume-clock nil
+  "Clock to resume, saved by `org-clock-load'")
 
 (defconst org-clock--oldest-date
   (let* ((dichotomy
@@ -2923,85 +2926,66 @@ The details of what will be saved are regulated by the variable
              (or org-clock-loaded
 		 org-clock-has-been-used
 		 (not (file-exists-p org-clock-persist-file))))
-    (let (b)
-      (with-current-buffer (find-file (expand-file-name org-clock-persist-file))
-	(progn
-	  (delete-region (point-min) (point-max))
-	  ;;Store clock
-	  (insert (format ";; org-persist.el - %s at %s\n"
-			  (system-name) (format-time-string
-					 (cdr org-time-stamp-formats))))
-	  (if (and (memq org-clock-persist '(t clock))
-		   (setq b (org-clocking-buffer))
-		   (setq b (or (buffer-base-buffer b) b))
-		   (buffer-live-p b)
-		   (buffer-file-name b)
-		   (or (not org-clock-persist-query-save)
-		       (y-or-n-p (concat "Save current clock ("
-					 org-clock-heading ") "))))
-	      (insert "(setq resume-clock '(\""
-		      (buffer-file-name (org-clocking-buffer))
-		      "\" . " (int-to-string (marker-position org-clock-marker))
-		      "))\n"))
-	  ;; Store clocked task history.  Tasks are stored reversed to make
-	  ;; reading simpler
-	  (when (and (memq org-clock-persist '(t history))
-		     org-clock-history)
-	    (insert
-	     "(setq org-clock-stored-history '("
-	     (mapconcat
-	      (lambda (m)
-		(when (and (setq b (marker-buffer m))
-			   (setq b (or (buffer-base-buffer b) b))
-			   (buffer-live-p b)
-			   (buffer-file-name b))
-		  (concat "(\"" (buffer-file-name b)
-			  "\" . " (int-to-string (marker-position m))
-			  ")")))
-	      (reverse org-clock-history) " ") "))\n"))
-	  (save-buffer)
-	  (kill-buffer (current-buffer)))))))
+    (with-temp-file org-clock-persist-file
+      (insert (format ";; org-persist.el - %s at %s\n"
+		      (system-name)
+		      (format-time-string (org-time-stamp-format t))))
+      ;; Store clock to be resumed.
+      (when (and (memq org-clock-persist '(t clock))
+		 (let ((b (org-base-buffer (org-clocking-buffer))))
+		   (and (buffer-live-p b)
+			(buffer-file-name b)
+			(or (not org-clock-persist-query-save)
+			    (y-or-n-p (format "Save current clock (%s) "
+					      org-clock-heading))))))
+	(insert
+	 (format "(setq org-clock-stored-resume-clock '(%S . %d))\n"
+		 (buffer-file-name (org-base-buffer (org-clocking-buffer)))
+		 (marker-position org-clock-marker))))
+      ;; Store clocked task history.  Tasks are stored reversed to
+      ;; make reading simpler.
+      (when (and (memq org-clock-persist '(t history))
+		 org-clock-history)
+	(insert
+	 (format "(setq org-clock-stored-history '(%s))\n"
+		 (mapconcat
+		  (lambda (m)
+		    (let ((b (org-base-buffer (marker-buffer m))))
+		      (when (and (buffer-live-p b)
+				 (buffer-file-name b))
+			(format "(%S . %d)"
+				(buffer-file-name b)
+				(marker-position m)))))
+		  (reverse org-clock-history)
+		  " ")))))))
 
 (defun org-clock-load ()
   "Load clock-related data from disk, maybe resuming a stored clock."
   (when (and org-clock-persist (not org-clock-loaded))
-    (let ((filename (expand-file-name org-clock-persist-file))
-	  (org-clock-in-resume 'auto-restart)
-	  resume-clock)
-      (if (not (file-readable-p filename))
-	  (message "Not restoring clock data; %s not found"
-		   org-clock-persist-file)
-	(message "%s" "Restoring clock data")
-	(setq org-clock-loaded t)
-	;; Load history.
-	(load-file filename)
-	(save-window-excursion
-	  (dolist (task org-clock-stored-history)
-	    (when (file-exists-p (car task))
-	      (org-clock-history-push (cdr task)
-				      (find-file (car task))))))
-	;; Resume clock.
-	(when (and resume-clock org-clock-persist
-		   (file-exists-p (car resume-clock))
-		   (or (not org-clock-persist-query-resume)
-		       (y-or-n-p
-			(concat
-			 "Resume clock ("
-			 (with-current-buffer (find-file (car resume-clock))
-			   (save-excursion
-			     (goto-char (cdr resume-clock))
-			     (org-back-to-heading t)
-			     (let ((case-fold-search nil))
-			       (and (looking-at org-complex-heading-regexp)
-				    (match-string 4)))))
-			 ") "))))
-	  (when (file-exists-p (car resume-clock))
-	    (with-current-buffer (find-file (car resume-clock))
-	      (goto-char (cdr resume-clock))
-	      (let ((org-clock-auto-clock-resolution nil))
-		(org-clock-in)
-		(if (outline-invisible-p)
-		    (org-show-context))))))))))
+    (if (file-readable-p org-clock-persist-file)
+	(message "Restoring clock data")
+      (message "Not restoring clock data; %S not found" org-clock-persist-file)
+      ;; Load history.
+      (load-file org-clock-persist-file)
+      (setq org-clock-loaded t)
+      (pcase-dolist (`(,(and file (pred file-exists-p)) . ,position)
+		     org-clock-stored-history)
+	(org-clock-history-push position (find-file-noselect file)))
+      ;; Resume clock.
+      (pcase org-clock-stored-resume-clock
+	(`(,(and file (pred file-exists-p)) . ,position)
+	 (with-current-buffer (find-file-noselect file)
+	   (when (or (not org-clock-persist-query-resume)
+		     (y-or-n-p (format "Resume clock (%s) "
+				       (save-excursion
+					 (goto-char position)
+					 (org-get-heading t t)))))
+	     (goto-char position)
+	     (let ((org-clock-in-resume 'auto-restart)
+		   (org-clock-auto-clock-resolution nil))
+	       (org-clock-in)
+	       (when (outline-invisible-p) (org-show-context))))))
+	(_ nil)))))
 
 ;; Suggested bindings
 (org-defkey org-mode-map "\C-c\C-x\C-e" 'org-clock-modify-effort-estimate)
