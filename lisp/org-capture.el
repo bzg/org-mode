@@ -1020,7 +1020,7 @@ case, raise an error."
    ((functionp file) (funcall file))
    ((and (symbolp file) (boundp file)) (symbol-value file))
    ((consp file) (eval file))
-   (t (error "Invalid file location: %S" file))))
+   (t file)))
 
 (defun org-capture-target-buffer (file)
   "Get a buffer for FILE.
