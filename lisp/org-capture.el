@@ -869,142 +869,140 @@ already gone.  Any prefix argument will be passed to the refile command."
 (defun org-capture-set-target-location (&optional target)
   "Find TARGET buffer and position.
 Store them in the capture property list."
-  (let ((target-entry-p t) decrypted-hl-pos)
-    (setq target (or target (org-capture-get :target)))
+  (let ((target-entry-p t))
     (save-excursion
-      (cond
-       ((eq (car target) 'file)
-	(set-buffer (org-capture-target-buffer (nth 1 target)))
-	(org-capture-put-target-region-and-position)
-	(widen)
-	(setq target-entry-p nil))
-
-       ((eq (car target) 'id)
-	(let ((loc (org-id-find (nth 1 target))))
-	  (if (not loc)
-	      (error "Cannot find target ID \"%s\"" (nth 1 target))
-	    (set-buffer (org-capture-target-buffer (car loc)))
+      (pcase (or target (org-capture-get :target))
+	(`(file ,path)
+	 (set-buffer (org-capture-target-buffer path))
+	 (org-capture-put-target-region-and-position)
+	 (widen)
+	 (setq target-entry-p nil))
+	(`(id ,id)
+	 (pcase (org-id-find id)
+	   (`(,path . ,position)
+	    (set-buffer (org-capture-target-buffer path))
 	    (widen)
 	    (org-capture-put-target-region-and-position)
-	    (goto-char (cdr loc)))))
+	    (goto-char position))
+	   (_ (error "Cannot find target ID \"%s\"" id))))
+	(`(file+headline ,path ,headline)
+	 (set-buffer (org-capture-target-buffer path))
+	 (org-capture-put-target-region-and-position)
+	 (widen)
+	 (goto-char (point-min))
+	 (unless (derived-mode-p 'org-mode)
+	   (error "Target buffer \"%s\" for file+headline not in Org mode"
+		  (current-buffer)))
+	 (if (re-search-forward (format org-complex-heading-regexp-format
+					(regexp-quote headline))
+				nil t)
+	     (goto-char (line-beginning-position))
+	   (goto-char (point-max))
+	   (or (bolp) (insert "\n"))
+	   (insert "* " headline "\n")
+	   (beginning-of-line 0)))
+	(`(file+olp ,path . ,outline-path)
+	 (let ((m (org-find-olp (cons (org-capture-expand-file path)
+				      outline-path))))
+	   (set-buffer (marker-buffer m))
+	   (org-capture-put-target-region-and-position)
+	   (widen)
+	   (goto-char m)
+	   (set-marker m nil)))
+	(`(file+regexp ,path ,regexp)
+	 (set-buffer (org-capture-target-buffer path))
+	 (org-capture-put-target-region-and-position)
+	 (widen)
+	 (goto-char (point-min))
+	 (if (not (re-search-forward regexp nil t))
+	     (error "No match for target regexp in file %s" path)
+	   (goto-char (if (org-capture-get :prepend)
+			  (match-beginning 0)
+			(match-end 0)))
+	   (org-capture-put :exact-position (point))
+	   (setq target-entry-p
+		 (and (derived-mode-p 'org-mode) (org-at-heading-p)))))
+	(`(,(and type (or `file+datetree
+			  `file+datetree+prompt
+			  `file+weektree
+			  `file+weektree+prompt))
+	   ,path)
+	 (require 'org-datetree)
+	 (set-buffer (org-capture-target-buffer path))
+	 (org-capture-put-target-region-and-position)
+	 (widen)
+	 ;; Make a date/week tree entry, with the current date (or
+	 ;; yesterday, if we are extending dates for a couple of hours)
+	 (funcall
+	  (if (memq type '(file+weektree file+weektree+prompt))
+	      #'org-datetree-find-iso-week-create
+	    #'org-datetree-find-date-create)
+	  (calendar-gregorian-from-absolute
+	   (cond
+	    (org-overriding-default-time
+	     ;; Use the overriding default time.
+	     (time-to-days org-overriding-default-time))
+	    ((memq type '(file+datetree+prompt file+weektree+prompt))
+	     ;; Prompt for date.
+	     (let ((prompt-time (org-read-date
+				 nil t nil "Date for tree entry:"
+				 (current-time))))
+	       (org-capture-put
+		:default-time
+		(cond ((and (or (not (boundp 'org-time-was-given))
+				(not org-time-was-given))
+			    (not (= (time-to-days prompt-time) (org-today))))
+		       ;; Use 00:00 when no time is given for another
+		       ;; date than today?
+		       (apply #'encode-time
+			      (append '(0 0 0)
+				      (cl-cdddr (decode-time prompt-time)))))
+		      ((string-match "\\([^ ]+\\)--?[^ ]+[ ]+\\(.*\\)"
+				     org-read-date-final-answer)
+		       ;; Replace any time range by its start.
+		       (apply #'encode-time
+			      (org-read-date-analyze
+			       (replace-match "\\1 \\2" nil nil
+					      org-read-date-final-answer)
+			       prompt-time (decode-time prompt-time))))
+		      (t prompt-time)))
+	       (time-to-days prompt-time)))
+	    (t
+	     ;; Current date, possibly corrected for late night
+	     ;; workers.
+	     (org-today))))))
+	(`(file+function ,path ,function)
+	 (set-buffer (org-capture-target-buffer path))
+	 (org-capture-put-target-region-and-position)
+	 (widen)
+	 (funcall function)
+	 (org-capture-put :exact-position (point))
+	 (setq target-entry-p
+	       (and (derived-mode-p 'org-mode) (org-at-heading-p))))
+	(`(function ,fun)
+	 (funcall fun)
+	 (org-capture-put :exact-position (point))
+	 (setq target-entry-p
+	       (and (derived-mode-p 'org-mode) (org-at-heading-p))))
+	(`(clock)
+	 (if (and (markerp org-clock-hd-marker)
+		  (marker-buffer org-clock-hd-marker))
+	     (progn (set-buffer (marker-buffer org-clock-hd-marker))
+		    (org-capture-put-target-region-and-position)
+		    (widen)
+		    (goto-char org-clock-hd-marker))
+	   (error "No running clock that could be used as capture target")))
+	(target (error "Invalid capture target specification: %S" target)))
 
-       ((eq (car target) 'file+headline)
-	(set-buffer (org-capture-target-buffer (nth 1 target)))
-	(org-capture-put-target-region-and-position)
-	(widen)
-	(let ((hd (nth 2 target)))
-	  (goto-char (point-min))
-	  (unless (derived-mode-p 'org-mode)
-	    (error
-	     "Target buffer \"%s\" for file+headline should be in Org mode"
-	     (current-buffer)))
-	  (if (re-search-forward
-	       (format org-complex-heading-regexp-format (regexp-quote hd))
-	       nil t)
-	      (goto-char (point-at-bol))
-	    (goto-char (point-max))
-	    (or (bolp) (insert "\n"))
-	    (insert "* " hd "\n")
-	    (beginning-of-line 0))))
-
-       ((eq (car target) 'file+olp)
- 	(let ((m (org-find-olp
-		  (cons (org-capture-expand-file (nth 1 target))
-			(cddr target)))))
-	  (set-buffer (marker-buffer m))
-	  (org-capture-put-target-region-and-position)
-	  (widen)
-	  (goto-char m)))
-
-       ((eq (car target) 'file+regexp)
-	(set-buffer (org-capture-target-buffer (nth 1 target)))
-	(org-capture-put-target-region-and-position)
-	(widen)
-	(goto-char (point-min))
-	(if (re-search-forward (nth 2 target) nil t)
-	    (progn
-	      (goto-char (if (org-capture-get :prepend)
-			     (match-beginning 0) (match-end 0)))
-	      (org-capture-put :exact-position (point))
-	      (setq target-entry-p (and (derived-mode-p 'org-mode) (org-at-heading-p))))
-	  (error "No match for target regexp in file %s" (nth 1 target))))
-
-       ((memq (car target) '(file+datetree file+datetree+prompt file+weektree file+weektree+prompt))
-	(require 'org-datetree)
-	(set-buffer (org-capture-target-buffer (nth 1 target)))
-	(org-capture-put-target-region-and-position)
-	(widen)
-	;; Make a date/week tree entry, with the current date (or
-	;; yesterday, if we are extending dates for a couple of hours)
-	(funcall
-	 (cond
-	  ((memq (car target) '(file+weektree file+weektree+prompt))
-	   #'org-datetree-find-iso-week-create)
-	  (t #'org-datetree-find-date-create))
-	 (calendar-gregorian-from-absolute
-	  (cond
-	   (org-overriding-default-time
-	    ;; use the overriding default time
-	    (time-to-days org-overriding-default-time))
-
-	   ((memq (car target) '(file+datetree+prompt file+weektree+prompt))
-	    ;; prompt for date
-	    (let ((prompt-time (org-read-date
-				nil t nil "Date for tree entry:"
-				(current-time))))
-	      (org-capture-put
-	       :default-time
-	       (cond ((and (or (not (boundp 'org-time-was-given))
-			       (not org-time-was-given))
-			   (not (= (time-to-days prompt-time) (org-today))))
-		      ;; Use 00:00 when no time is given for another date than today?
-		      (apply #'encode-time
-			     (append '(0 0 0)
-				     (cl-cdddr (decode-time prompt-time)))))
-		     ((string-match "\\([^ ]+\\)--?[^ ]+[ ]+\\(.*\\)" org-read-date-final-answer)
-		      ;; Replace any time range by its start
-		      (apply 'encode-time
-			     (org-read-date-analyze
-			      (replace-match "\\1 \\2" nil nil org-read-date-final-answer)
-			      prompt-time (decode-time prompt-time))))
-		     (t prompt-time)))
-	      (time-to-days prompt-time)))
-	   (t
-	    ;; current date, possibly corrected for late night workers
-	    (org-today))))))
-
-       ((eq (car target) 'file+function)
-	(set-buffer (org-capture-target-buffer (nth 1 target)))
-	(org-capture-put-target-region-and-position)
-	(widen)
-	(funcall (nth 2 target))
-	(org-capture-put :exact-position (point))
-	(setq target-entry-p (and (derived-mode-p 'org-mode) (org-at-heading-p))))
-
-       ((eq (car target) 'function)
-	(funcall (nth 1 target))
-	(org-capture-put :exact-position (point))
-	(setq target-entry-p (and (derived-mode-p 'org-mode) (org-at-heading-p))))
-
-       ((eq (car target) 'clock)
-	(if (and (markerp org-clock-hd-marker)
-		 (marker-buffer org-clock-hd-marker))
-	    (progn (set-buffer (marker-buffer org-clock-hd-marker))
-		   (org-capture-put-target-region-and-position)
-		   (widen)
-		   (goto-char org-clock-hd-marker))
-	  (error "No running clock that could be used as capture target")))
-
-       (t (error "Invalid capture target specification")))
-
-      (when (and (featurep 'org-crypt) (org-at-encrypted-entry-p))
-	(org-decrypt-entry)
-	(setq decrypted-hl-pos
-	      (save-excursion (and (org-back-to-heading t) (point)))))
-
-      (org-capture-put :buffer (current-buffer) :pos (point)
+      (org-capture-put :buffer (current-buffer)
+		       :pos (point)
 		       :target-entry-p target-entry-p
-		       :decrypted decrypted-hl-pos))))
+		       :decrypted
+		       (and (featurep 'org-crypt)
+			    (org-at-encrypted-entry-p)
+			    (save-excursion
+			      (org-decrypt-entry)
+			      (and (org-back-to-heading t) (point))))))))
 
 (defun org-capture-expand-file (file)
   "Expand functions, symbols and file names for FILE.
