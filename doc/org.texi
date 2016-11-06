@@ -12063,11 +12063,10 @@ layout and contents.  Valid @LaTeX{} attributes include:
 @vindex org-latex-default-table-mode
 Nature of table's contents.  It can be set to @code{table}, @code{math},
 @code{inline-math} or @code{verbatim}.  In particular, when in @code{math} or
-@code{inline-math} mode, every cell is exported as-is, horizontal rules are
-ignored and the table will be wrapped in a math environment.  Also,
-contiguous tables sharing the same math mode will be wrapped within the same
-environment.  Default mode is determined in
-@code{org-latex-default-table-mode}.
+@code{inline-math} mode, every cell is exported as-is and the table is
+wrapped within a math environment.  Also, contiguous tables sharing the same
+math mode are merged within the same environment.  Default mode is determined
+in @code{org-latex-default-table-mode}.
 @item :environment
 @vindex org-latex-default-table-environment
 Environment used for the table.  It can be set to any @LaTeX{} table

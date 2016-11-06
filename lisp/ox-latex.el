@@ -3271,8 +3271,7 @@ This function assumes TABLE has `org' as its `:type' property and
 	 (contents
 	  (mapconcat
 	   (lambda (row)
-	     ;; Ignore horizontal rules.
-	     (when (eq (org-element-property :type row) 'standard)
+	     (if (eq (org-element-property :type row) 'rule) "\\hline"
 	       ;; Return each cell unmodified.
 	       (concat
 		(mapconcat
