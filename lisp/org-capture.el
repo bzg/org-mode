@@ -1012,20 +1012,19 @@ a string, treat it as a file name, possibly expanding it
 according to `org-directory', and return it.  If it is the empty
 string, however, return `org-default-notes-file'.  In any other
 case, raise an error."
-  (cond
-   ((equal file "") org-default-notes-file)
-   ((stringp file) (expand-file-name file org-directory))
-   ((functionp file) (funcall file))
-   ((and (symbolp file) (bound-and-true-p file)))
-   (t (error "Invalid file location: %S" file))))
+  (let ((location (cond ((equal file "") org-default-notes-file)
+			((stringp file) (expand-file-name file org-directory))
+			((functionp file) (funcall file))
+			((and (symbolp file) (bound-and-true-p file)))
+			(t nil))))
+    (or (org-string-nw-p location)
+	(error "Invalid file location: %S" location))))
 
 (defun org-capture-target-buffer (file)
   "Get a buffer for FILE.
 FILE is a generalized file location, as handled by
 `org-capture-expand-file'."
-  (let ((file (or (org-string-nw-p (org-capture-expand-file file))
-		  org-default-notes-file
-		  (error "No notes file specified, and no default available"))))
+  (let ((file (org-capture-expand-file file)))
     (or (org-find-base-buffer-visiting file)
 	(progn (org-capture-put :new-buffer t)
 	       (find-file-noselect file)))))
