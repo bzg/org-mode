@@ -3287,8 +3287,10 @@ This function assumes TABLE has `org' as its `:type' property and
      (plist-get attr :math-prefix)
      ;; Environment.  Also treat special cases.
      (cond ((member env '("array" "tabular"))
-	    (let ((align (make-string
-			  (cdr (org-export-table-dimensions table info)) ?c)))
+	    ;; Make sure cells are always centered while preserving
+	    ;; vertical separators.
+	    (let ((align (replace-regexp-in-string
+			  "[lr]" "c" (org-latex--align-string table info))))
 	      (format "\\begin{%s}{%s}\n%s\\end{%s}" env align contents env)))
 	   ((assoc env org-latex-table-matrix-macros)
 	    (format "\\%s%s{\n%s}"
