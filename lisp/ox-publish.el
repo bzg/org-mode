@@ -1270,15 +1270,16 @@ if necessary, unless NO-CREATE is non-nil."
 
 (defun org-publish-cache-get (key)
   "Return the value stored in `org-publish-cache' for key KEY.
-Returns nil, if no value or nil is found, or the cache does not
-exist."
+Return nil, if no value or nil is found.  Raise an error if the
+cache does not exist."
   (unless org-publish-cache
     (error "`org-publish-cache-get' called, but no cache present"))
   (gethash key org-publish-cache))
 
 (defun org-publish-cache-set (key value)
   "Store KEY VALUE pair in `org-publish-cache'.
-Returns value on success, else nil."
+Returns value on success, else nil.  Raise an error if the cache
+does not exist."
   (unless org-publish-cache
     (error "`org-publish-cache-set' called, but no cache present"))
   (puthash key value org-publish-cache))
