@@ -1007,28 +1007,31 @@ Store them in the capture property list."
 		       :decrypted decrypted-hl-pos))))
 
 (defun org-capture-expand-file (file)
-  "Expand functions and symbols for FILE.
+  "Expand functions, symbols and file names for FILE.
 When FILE is a function, call it.  When it is a form, evaluate
 it.  When it is a variable, retrieve the value.  When it is
-a string, return it.  However, if it is the empty string, return
-`org-default-notes-file' instead."
+a string, treat it as a file name, possibly expanding it
+according to `org-directory', and return it.  If it is the empty
+string, however, return `org-default-notes-file'.  In any other
+case, raise an error."
   (cond
    ((equal file "") org-default-notes-file)
-   ((org-string-nw-p file) file)
+   ((stringp file) (expand-file-name file org-directory))
    ((functionp file) (funcall file))
    ((and (symbolp file) (boundp file)) (symbol-value file))
    ((consp file) (eval file))
-   (t file)))
+   (t (error "Invalid file location: %S" file))))
 
 (defun org-capture-target-buffer (file)
-  "Get a buffer for FILE."
-  (setq file (org-capture-expand-file file))
-  (setq file (or (org-string-nw-p file)
-		 org-default-notes-file
-		 (error "No notes file specified, and no default available")))
-  (or (org-find-base-buffer-visiting file)
-      (progn (org-capture-put :new-buffer t)
-	     (find-file-noselect (expand-file-name file org-directory)))))
+  "Get a buffer for FILE.
+FILE is a generalized file location, as handled by
+`org-capture-expand-file'."
+  (let ((file (or (org-string-nw-p (org-capture-expand-file file))
+		  org-default-notes-file
+		  (error "No notes file specified, and no default available"))))
+    (or (org-find-base-buffer-visiting file)
+	(progn (org-capture-put :new-buffer t)
+	       (find-file-noselect file)))))
 
 (defun org-capture-place-template (&optional inhibit-wconf-store)
   "Insert the template at the target location, and display the buffer.
