@@ -563,6 +563,7 @@ SIZE is a string Columns x Rows like for example \"3x2\"."
 ;;;###autoload
 (defun org-table-convert-region (beg0 end0 &optional separator)
   "Convert region to a table.
+
 The region goes from BEG0 to END0, but these borders will be moved
 slightly, to make sure a beginning of line in the first line is included.
 
@@ -572,7 +573,7 @@ following values:
 (4)     Use the comma as a field separator
 (16)    Use a TAB as field separator
 (64)    Prompt for a regular expression as field separator
-integer  When a number, use that many spaces as field separator
+integer  When a number, use that many spaces, or a TAB, as field separator
 regexp   When a regular expression, use it to match the separator
 nil      When nil, the command tries to be smart and figure out the
          separator in the following way:

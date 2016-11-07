@@ -923,6 +923,7 @@ already archived entries."
 
 (defcustom org-startup-folded t
   "Non-nil means entering Org mode will switch to OVERVIEW.
+
 This can also be configured on a per-file basis by adding one of
 the following lines anywhere in the buffer:
 
@@ -931,9 +932,8 @@ the following lines anywhere in the buffer:
    #+STARTUP: content
    #+STARTUP: showeverything
 
-By default, this option is ignored when Org opens agenda files
-for the first time.  If you want the agenda to honor the startup
-option, set `org-agenda-inhibit-startup' to nil."
+Set `org-agenda-inhibit-startup' to a non-nil value so as to
+ignore this option when Org opens agenda files for the first time."
   :group 'org-startup
   :type '(choice
 	  (const :tag "nofold: show all" nil)
@@ -3546,12 +3546,12 @@ The value of this variable is an alist.  Associations either:
   (TAG . SELECT)
   (SPECIAL)
 
-where TAG is a tag as a string, SELECT is a character, used to
-select that tag through the fast tag selection interface, and
-SPECIAL is one of the following keywords: `:startgroup',
-`:startgrouptag', `:grouptags', `:engroup', `:endgrouptag' or
-`:newline'.  These keywords are used to define a hierarchy of
-tags.  See manual for details.
+where TAG is a tag as a string, SELECT is a case-sensitive
+letter, used to select that tag through the fast tag selection
+interface, and SPECIAL is one of the following keywords:
+`:startgroup', `:startgrouptag', `:grouptags', `:engroup',
+`:endgrouptag' or `:newline'.  These keywords are used to define
+a hierarchy of tags.  See manual for details.
 
 When this variable is nil, Org mode bases tag input on what is
 already in the buffer.  The value can be overridden locally by
@@ -14505,10 +14505,14 @@ headlines matching this string."
 
 (defun org-match-sparse-tree (&optional todo-only match)
   "Create a sparse tree according to tags string MATCH.
-MATCH can contain positive and negative selection of tags, like
-\"+WORK+URGENT-WITHBOSS\".
-If optional argument TODO-ONLY is non-nil, only select lines that are
-also TODO lines."
+
+MATCH is a string with match syntax.  It can contain a selection
+of tags (\"+work+urgent-boss\"), properties (\"LEVEL>3\"), and
+TODO keywords (\"TODO=\\\"WAITING\\\"\") or a combination of
+those.  See the manual for details.
+
+If optional argument TODO-ONLY is non-nil, only select lines that
+are also TODO tasks."
   (interactive "P")
   (org-agenda-prepare-buffers (list (current-buffer)))
   (let ((org--matcher-tags-todo-only todo-only))
