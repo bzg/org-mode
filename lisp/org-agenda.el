@@ -769,10 +769,12 @@ to make his option also apply to the tags-todo list."
 
 (defcustom org-agenda-todo-ignore-deadlines nil
   "Non-nil means ignore some deadline TODO items when making TODO list.
+
 There are different motivations for using different values, please think
 carefully when configuring this variable.
 
-This applies when creating the global todo list.
+This applies when creating the global TODO list.
+
 Valid values are:
 
 near    Don't show near deadline entries.  A deadline is near when it is
@@ -780,8 +782,8 @@ near    Don't show near deadline entries.  A deadline is near when it is
         is that such items will appear in the agenda anyway.
 
 far     Don't show TODO entries where a deadline has been defined, but
-        the deadline is not near.  This is useful if you don't want to
-        use the todo list to figure out what to do now.
+        is not going to happen anytime soon.  This is useful if you want to use
+        the TODO list to figure out what to do now.
 
 past    Don't show entries with a deadline timestamp for today or in the past.
 
@@ -1789,7 +1791,8 @@ in every agenda.
 
 When this option is set to t (the default), inherited tags are
 shown when they are available, i.e. when the value of
-`org-agenda-use-tag-inheritance' has been taken into account.
+`org-agenda-use-tag-inheritance' enables tag inheritance for the
+given agenda type.
 
 This can be set to a list of agenda types in which the agenda
 must display the inherited tags.  Available types are `todo',
@@ -7980,41 +7983,48 @@ With prefix ARG, go backward that many times the current span."
   "Switch to default view for agenda."
   (interactive)
   (org-agenda-change-time-span org-agenda-span))
+
 (defun org-agenda-day-view (&optional day-of-month)
   "Switch to daily view for agenda.
 With argument DAY-OF-MONTH, switch to that day of the month."
   (interactive "P")
   (org-agenda-change-time-span 'day day-of-month))
+
 (defun org-agenda-week-view (&optional iso-week)
-  "Switch to daily view for agenda.
+  "Switch to weekly view for agenda.
 With argument ISO-WEEK, switch to the corresponding ISO week.
-If ISO-WEEK has more then 2 digits, only the last two encode the
-week.  Any digits before this encode a year.  So 200712 means
-week 12 of year 2007.  Years in the range 1938-2037 can also be
-written as 2-digit years."
+If ISO-WEEK has more then 2 digits, only the last two encode
+the week.  Any digits before this encode a year.  So 200712
+means week 12 of year 2007.  Years ranging from 70 years ago
+to 30 years in the future can also be written as 2-digit years."
   (interactive "P")
   (org-agenda-change-time-span 'week iso-week))
+
 (defun org-agenda-fortnight-view (&optional iso-week)
-  "Switch to daily view for agenda.
+  "Switch to fortnightly view for agenda.
 With argument ISO-WEEK, switch to the corresponding ISO week.
-If ISO-WEEK has more then 2 digits, only the last two encode the
-week.  Any digits before this encode a year.  So 200712 means
-week 12 of year 2007.  Years in the range 1938-2037 can also be
-written as 2-digit years."
+If ISO-WEEK has more then 2 digits, only the last two encode
+the week.  Any digits before this encode a year.  So 200712
+means week 12 of year 2007.  Years ranging from 70 years ago
+to 30 years in the future can also be written as 2-digit years."
   (interactive "P")
   (org-agenda-change-time-span 'fortnight iso-week))
+
 (defun org-agenda-month-view (&optional month)
   "Switch to monthly view for agenda.
-With argument MONTH, switch to that month."
+With argument MONTH, switch to that month.  If MONTH has more
+then 2 digits, only the last two encode the month.  Any digits
+before this encode a year.  So 200712 means December year 2007.
+Years ranging from 70 years ago to 30 years in the future can
+also be written as 2-digit years."
   (interactive "P")
   (org-agenda-change-time-span 'month month))
+
 (defun org-agenda-year-view (&optional year)
   "Switch to yearly view for agenda.
-With argument YEAR, switch to that year.
-If MONTH has more then 2 digits, only the last two encode the
-month.  Any digits before this encode a year.  So 200712 means
-December year 2007.  Years in the range 1938-2037 can also be
-written as 2-digit years."
+With argument YEAR, switch to that year.  Years ranging from 70
+years ago to 30 years in the future can also be written as
+2-digit years."
   (interactive "P")
   (when year
     (setq year (org-small-year-to-year year)))

@@ -133,7 +133,7 @@ target       Specification of where the captured item should be placed.
              (file \"path/to/file\")
                  Text will be placed at the beginning or end of that file
 
-             (id \"id of existing org entry\")
+             (id \"id of existing Org entry\")
                  File as child of this entry, or in the body of the entry
 
              (file+headline \"path/to/file\" \"node headline\")

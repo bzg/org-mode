@@ -395,9 +395,12 @@ this heading."
 ;;;###autoload
 (defun org-archive-to-archive-sibling ()
   "Archive the current heading by moving it under the archive sibling.
+
 The archive sibling is a sibling of the heading with the heading name
 `org-archive-sibling-heading' and an `org-archive-tag' tag.  If this
-sibling does not exist, it will be created at the end of the subtree."
+sibling does not exist, it will be created at the end of the subtree.
+
+Archiving time is retained in the ARCHIVE_TIME node property."
   (interactive)
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
       (let ((cl (when (eq org-loop-over-headlines-in-active-region 'start-level)

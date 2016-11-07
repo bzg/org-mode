@@ -891,7 +891,7 @@ been visited, i.e., where no Org built-in function have been loaded.
 Otherwise autoload Org functions will mess up the installation.
 
 Then, to make sure your Org configuration is taken into account, initialize
-the package system with @code{(package-initialize)} in your @file{.emacs}
+the package system with @code{(package-initialize)} in your Emacs init file
 before setting any Org option.  If you want to use Org's package repository,
 check out the @uref{http://orgmode.org/elpa.html, Org ELPA page}.
 
@@ -899,7 +899,7 @@ check out the @uref{http://orgmode.org/elpa.html, Org ELPA page}.
 
 You can download Org latest release from @uref{http://orgmode.org/, Org's
 website}.  In this case, make sure you set the load-path correctly in your
-@file{.emacs}:
+Emacs init file:
 
 @lisp
 (add-to-list 'load-path "~/path/to/orgdir/lisp")
@@ -1013,8 +1013,8 @@ version of Org available---if you are running an outdated version, it is
 quite possible that the bug has been fixed already.  If the bug persists,
 prepare a report and provide as much information as possible, including the
 version information of Emacs (@kbd{M-x emacs-version @key{RET}}) and Org
-(@kbd{M-x org-version RET}), as well as the Org related setup in
-@file{.emacs}.  The easiest way to do this is to use the command
+(@kbd{M-x org-version RET}), as well as the Org related setup in the Emacs
+init file.  The easiest way to do this is to use the command
 @example
 @kbd{M-x org-submit-bug-report RET}
 @end example
@@ -3645,9 +3645,9 @@ will be stored.  In addition or alternatively (depending on the value of
 be created and/or used to construct a link@footnote{The library
 @file{org-id.el} must first be loaded, either through @code{org-customize} by
 enabling @code{org-id} in @code{org-modules}, or by adding @code{(require
-'org-id)} in your @file{.emacs}.}. So using this command in Org buffers will
-potentially create two links: a human-readable from the custom ID, and one
-that is globally unique and works even if the entry is moved from file to
+'org-id)} in your Emacs init file.}.  So using this command in Org buffers
+will potentially create two links: a human-readable from the custom ID, and
+one that is globally unique and works even if the entry is moved from file to
 file.  Later, when inserting the link, you need to decide which one to use.
 
 @b{Email/News clients: VM, Rmail, Wanderlust, MH-E, Gnus}@*
@@ -4990,10 +4990,10 @@ By default Org mode uses the standard minibuffer completion facilities for
 entering tags.  However, it also implements another, quicker, tag selection
 method called @emph{fast tag selection}.  This allows you to select and
 deselect tags with just a single key press.  For this to work well you should
-assign unique letters to most of your commonly used tags.  You can do this
-globally by configuring the variable @code{org-tag-alist} in your
-@file{.emacs} file.  For example, you may find the need to tag many items in
-different files with @samp{:@@home:}.  In this case you can set something
+assign unique, case-sensitive, letters to most of your commonly used tags.
+You can do this globally by configuring the variable @code{org-tag-alist} in
+your Emacs init file.  For example, you may find the need to tag many items
+in different files with @samp{:@@home:}.  In this case you can set something
 like:
 
 @lisp
@@ -5059,7 +5059,7 @@ have no configured keys.}.  In this interface, you can use the following
 keys:
 
 @table @kbd
-@item a-z...
+@item a-zA-Z...
 Pressing keys assigned to tags will add or remove them from the list of
 tags in the current line.  Selecting a tag in a group of mutually
 exclusive tags will turn off any other tags from that group.
@@ -8231,12 +8231,12 @@ example, the ``property'' @code{TODO} represents the TODO keyword of the
 entry and the ``property'' @code{PRIORITY} represents the PRIORITY keyword of
 the entry.
 
-In addition to the @ref{Special properties}, one other ``property'' can also
-be used. @code{LEVEL} represents the level of an entry.  So a search
-@samp{+LEVEL=3+boss-TODO="DONE"} lists all level three headlines that have
-the tag @samp{boss} and are @emph{not} marked with the TODO keyword DONE@.
-In buffers with @code{org-odd-levels-only} set, @samp{LEVEL} does not count
-the number of stars, but @samp{LEVEL=2} will correspond to 3 stars etc.
+In addition to the properties mentioned above, @code{LEVEL} represents the
+level of an entry.  So a search @samp{+LEVEL=3+boss-TODO="DONE"} lists all
+level three headlines that have the tag @samp{boss} and are @emph{not} marked
+with the TODO keyword DONE@.  In buffers with @code{org-odd-levels-only} set,
+@samp{LEVEL} does not count the number of stars, but @samp{LEVEL=2} will
+correspond to 3 stars etc.
 
 Here are more examples:
 
@@ -9292,7 +9292,7 @@ buffer).
 Custom commands are configured in the variable
 @code{org-agenda-custom-commands}.  You can customize this variable, for
 example by pressing @kbd{C-c a C}.  You can also directly set it with Emacs
-Lisp in @file{.emacs}.  The following example contains all valid agenda
+Lisp in the Emacs init file.  The following example contains all valid agenda
 views:
 
 @lisp
@@ -17355,9 +17355,8 @@ works even if the automatic table editor has been turned off.
 If the cursor is on a @code{#+TBLFM} line, re-apply the formulas to
 the entire table.
 @item
-If the current buffer is a capture buffer, close the note and file it.
-With a prefix argument, file it, without further interaction, to the
-default location.
+If the current buffer is a capture buffer, close the note and file it.  With
+a prefix argument, jump to the target location, without capturing anything.
 @item
 If the cursor is on a @code{<<<target>>>}, update radio targets and
 corresponding links in this buffer.
@@ -17772,8 +17771,8 @@ Any text below a headline that has a @samp{:crypt:} tag will be automatically
 be encrypted when the file is saved.  If you want to use a different tag just
 customize the @code{org-crypt-tag-matcher} setting.
 
-To use org-crypt it is suggested that you have the following in your
-@file{.emacs}:
+To use org-crypt it is suggested that you have the following in your Emacs
+init file:
 
 @lisp
 (require 'org-crypt)
@@ -17896,7 +17895,7 @@ PATH should be a topic that can be thrown at the man command."
 @end lisp
 
 @noindent
-You would activate this new link type in @file{.emacs} with
+You would activate this new link type in Emacs init file with
 
 @lisp
 (require 'org-man)
