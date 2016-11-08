@@ -4085,7 +4085,7 @@ All available processes and theirs documents can be found in
      :image-output-type "png"
      :image-size-adjust (1.0 . 1.0)
      :latex-compiler ("latex -interaction nonstopmode -output-directory %o %f")
-     :image-converter ("dvipng -fg %F -bg %B -D %D -T tight -o %b.png %f"))
+     :image-converter ("dvipng -fg %F -bg %B -D %D -T tight -o %o%b.png %f"))
     (dvisvgm
      :programs ("latex" "dvisvgm" "gs")
      :description "dvi > svg"
@@ -4095,7 +4095,7 @@ All available processes and theirs documents can be found in
      :image-output-type "svg"
      :image-size-adjust (1.7 . 1.5)
      :latex-compiler ("latex -interaction nonstopmode -output-directory %o %f")
-     :image-converter ("dvisvgm %f -n -b min -c %S -o %b.svg"))
+     :image-converter ("dvisvgm %f -n -b min -c %S -o %o%b.svg"))
     (imagemagick
      :programs ("latex" "convert" "gs")
      :description "pdf > png"
@@ -4107,7 +4107,7 @@ All available processes and theirs documents can be found in
      :image-size-adjust (1.0 . 1.0)
      :latex-compiler ("pdflatex -interaction nonstopmode -output-directory %o %f")
      :image-converter
-     ("convert -density %D -trim -antialias %f -quality 100 %b.png")))
+     ("convert -density %D -trim -antialias %f -quality 100 %o%b.png")))
   "Definitions of external processes for LaTeX previewing.
 Org mode can use some external commands to generate TeX snippet's images for
 previewing or inserting into HTML files, e.g., \"dvipng\".  This variable tells
@@ -22756,28 +22756,27 @@ it for output.
 
 `default-directory' is set to SOURCE directory during the whole
 process."
-  (let* ((source-name (file-name-nondirectory source))
-	 (base-name (file-name-sans-extension source-name))
+  (let* ((base-name (file-name-base source))
 	 (full-name (file-truename source))
 	 (out-dir (file-name-directory source))
 	 (time (current-time))
 	 (err-msg (if (stringp err-msg) (concat ".  " err-msg) "")))
     (save-window-excursion
-      (let ((default-directory (file-name-directory full-name)))
-	(pcase process
-	  ((pred functionp) (funcall process (shell-quote-argument source)))
-	  ((pred consp)
-	   (let ((log-buf (and log-buf (get-buffer-create log-buf)))
-		 (spec (append spec
-			       `((?b . ,(shell-quote-argument base-name))
-				 (?f . ,(shell-quote-argument source-name))
-				 (?F . ,(shell-quote-argument full-name))
-				 (?o . ,(shell-quote-argument out-dir))))))
-	     (dolist (command process)
-	       (shell-command (format-spec command spec) log-buf))))
-	  (_ (error "No valid command to process %S%s" source err-msg)))))
-    ;; Check for process failure.
-    (let ((output (concat out-dir base-name "." ext)))
+      (pcase process
+	((pred functionp) (funcall process (shell-quote-argument source)))
+	((pred consp)
+	 (let ((log-buf (and log-buf (get-buffer-create log-buf)))
+	       (spec (append spec
+			     `((?b . ,(shell-quote-argument base-name))
+			       (?f . ,(shell-quote-argument source))
+			       (?F . ,(shell-quote-argument full-name))
+			       (?o . ,(shell-quote-argument out-dir))))))
+	   (dolist (command process)
+	     (shell-command (format-spec command spec) log-buf))))
+	(_ (error "No valid command to process %S%s" source err-msg))))
+    ;; Check for process failure.  Output file is expected to be
+    ;; located in the same directory as SOURCE.
+    (let ((output (expand-file-name (concat base-name "." ext) out-dir)))
       (unless (org-file-newer-than-p output time)
 	(error (format "File %S wasn't produced%s" output err-msg)))
       output)))
