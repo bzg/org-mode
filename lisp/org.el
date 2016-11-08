@@ -22752,10 +22752,7 @@ alist following the pattern (CHARACTER . REPLACEMENT-STRING).
 
 When PROCESS is a list of commands, optional argument LOG-BUF can
 be set to a buffer or a buffer name.  `shell-command' then uses
-it for output.
-
-`default-directory' is set to SOURCE directory during the whole
-process."
+it for output."
   (let* ((base-name (file-name-base source))
 	 (full-name (file-truename source))
 	 (out-dir (file-name-directory source))
