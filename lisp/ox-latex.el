@@ -1182,7 +1182,7 @@ file name as its single argument."
 		  "%latex -interaction nonstopmode -output-directory %o %f"
 		  "%latex -interaction nonstopmode -output-directory %o %f"))
 	  (const :tag "texi2dvi"
-		 ("LATEX=\"%latex\" texi2dvi -p -b -V %f"))
+		 ("cd %o; LATEX=\"%latex\" texi2dvi -p -b -V %b.tex"))
 	  (const :tag "latexmk"
 		 ("latexmk -g -pdf -pdflatex=\"%latex\" -outdir=%o %f"))
 	  (function)))
