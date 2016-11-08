@@ -1184,7 +1184,7 @@ file name as its single argument."
 	  (const :tag "texi2dvi"
 		 ("LATEX=\"%latex\" texi2dvi -p -b -V %f"))
 	  (const :tag "latexmk"
-		 ("latexmk -g -pdflatex=\"%latex\" %f"))
+		 ("latexmk -g -pdf -pdflatex=\"%latex\" -outdir=%o %f"))
 	  (function)))
 
 (defcustom org-latex-logfiles-extensions
