@@ -3611,10 +3611,15 @@ produced."
       (when org-latex-remove-logfiles
 	(mapc #'delete-file
 	      (directory-files
-	       (file-name-directory texfile) t
+	       ;; Assume auxiliary files are created in current
+	       ;; directory instead of ".tex" file directory, which
+	       ;; may differ.
+	       default-directory
+	       nil
 	       (concat (regexp-quote (file-name-base outfile))
 		       "\\(?:\\.[0-9]+\\)?\\."
-		       (regexp-opt org-latex-logfiles-extensions)))))
+		       (regexp-opt org-latex-logfiles-extensions))
+	       t)))
       (let ((warnings (org-latex--collect-warnings log-buf)))
 	(message (concat "PDF file produced"
 			 (cond
