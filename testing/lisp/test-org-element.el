@@ -1269,6 +1269,11 @@ Some other text
 	   (org-test-with-temp-text
 	       "*************** Task\nTest\n*************** END"
 	     (org-element-type (org-element-at-point)))))
+      (should
+       (eq 'inlinetask
+	   (org-test-with-temp-text
+	       "*************** Task\nTest\n***************   END"
+	     (org-element-type (org-element-at-point)))))
       ;; Degenerate inlinetask.
       (should
        (eq 'inlinetask
