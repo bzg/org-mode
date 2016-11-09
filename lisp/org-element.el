@@ -3845,10 +3845,14 @@ element it has to parse."
 	 (or (save-excursion (org-with-limited-levels (outline-next-heading)))
 	     limit)))
        ;; Planning.
-       ((and (eq mode 'planning) (looking-at org-planning-line-re))
+       ((and (eq mode 'planning)
+	     (eq ?* (char-after (line-beginning-position 0)))
+	     (looking-at org-planning-line-re))
 	(org-element-planning-parser limit))
        ;; Property drawer.
        ((and (memq mode '(planning property-drawer))
+	     (eq ?* (char-after (line-beginning-position
+				 (if (eq mode 'planning) 0 -1))))
 	     (looking-at org-property-drawer-re))
 	(org-element-property-drawer-parser limit))
        ;; When not at bol, point is at the beginning of an item or
