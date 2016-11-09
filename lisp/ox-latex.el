@@ -3611,10 +3611,7 @@ produced."
       (when org-latex-remove-logfiles
 	(mapc #'delete-file
 	      (directory-files
-	       ;; Assume auxiliary files are created in current
-	       ;; directory instead of ".tex" file directory, which
-	       ;; may differ.
-	       default-directory
+	       (file-name-directory outfile)
 	       nil
 	       (concat (regexp-quote (file-name-base outfile))
 		       "\\(?:\\.[0-9]+\\)?\\."
