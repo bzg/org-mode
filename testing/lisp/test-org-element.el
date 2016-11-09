@@ -1269,6 +1269,11 @@ Some other text
 	   (org-test-with-temp-text
 	       "*************** Task\nTest\n*************** END"
 	     (org-element-type (org-element-at-point)))))
+      (should
+       (eq 'inlinetask
+	   (org-test-with-temp-text
+	       "*************** Task\nTest\n***************   END"
+	     (org-element-type (org-element-at-point)))))
       ;; Degenerate inlinetask.
       (should
        (eq 'inlinetask
@@ -1966,6 +1971,11 @@ Outside list"
    (eq 'planning
        (org-test-with-temp-text
 	   "* H\n# Comment\n<point>DEADLINE: <2012-03-29 thu.>"
+	 (org-element-type (org-element-at-point)))))
+  (should-not
+   (eq 'planning
+       (org-test-with-temp-text
+	   "* H\n\n<point>DEADLINE: <2012-03-29 thu.>"
 	 (org-element-type (org-element-at-point))))))
 
 
@@ -2007,6 +2017,11 @@ Outside list"
    (eq 'property-drawer
        (org-test-with-temp-text
 	   "* H\nParagraph\n<point>:PROPERTIES:\nparagraph\n:END:"
+	 (org-element-type (org-element-at-point)))))
+  (should-not
+   (eq 'property-drawer
+       (org-test-with-temp-text
+	   "* H\n\n<point>:PROPERTIES:\n:prop: value\n:END:"
 	 (org-element-type (org-element-at-point)))))
   ;; Handle non-empty blank line at the end of buffer.
   (should
