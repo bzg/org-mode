@@ -1199,39 +1199,38 @@ the file including them will be republished as well."
   (unless org-publish-cache
     (error
      "`org-publish-cache-file-needs-publishing' called, but no cache present"))
-  (let* ((case-fold-search t)
-	 (key (org-publish-timestamp-filename filename pub-dir pub-func))
+  (let* ((key (org-publish-timestamp-filename filename pub-dir pub-func))
 	 (pstamp (org-publish-cache-get key))
 	 (org-inhibit-startup t)
-	 (visiting (find-buffer-visiting filename))
-	 (buf (find-file-noselect (expand-file-name filename)))
 	 included-files-ctime)
     (when (equal (file-name-extension filename) "org")
-      (unwind-protect
-	  (with-current-buffer buf
-	    (goto-char (point-min))
-	    (while (re-search-forward "^[ \t]*#\\+INCLUDE:" nil t)
-	      (let* ((element (org-element-at-point))
-		     (included-file
-		      (and (eq (org-element-type element) 'keyword)
-			   (let ((value (org-element-property :value element)))
-			     (and value
-				  (string-match
-				   "\\`\\(\".+?\"\\|\\S-+\\)\\(?:\\s-+\\|$\\)"
-				   value)
-				  (let ((m (match-string 1 value)))
-				    (org-unbracket-string
-				     "\"" "\""
-				     ;; Ignore search suffix.
-				     (if (string-match "\\(::\\(.*?\\)\\)\"?\\'"
-						       m)
-					 (substring m 0 (match-beginning 0))
-				       m))))))))
-		(when included-file
-		  (push (org-publish-cache-ctime-of-src
-			 (expand-file-name included-file))
-			included-files-ctime)))))
-	(unless visiting (kill-buffer buf))))
+      (let ((visiting (find-buffer-visiting filename))
+	    (buf (find-file-noselect filename))
+	    (case-fold-search t))
+	(unwind-protect
+	    (with-current-buffer buf
+	      (goto-char (point-min))
+	      (while (re-search-forward "^[ \t]*#\\+INCLUDE:" nil t)
+		(let* ((element (org-element-at-point))
+		       (included-file
+			(and (eq (org-element-type element) 'keyword)
+			     (let ((value (org-element-property :value element)))
+			       (and value
+				    (string-match
+				     "\\`\\(\".+?\"\\|\\S-+\\)\\(?:\\s-+\\|$\\)"
+				     value)
+				    (let ((m (match-string 1 value)))
+				      (org-unbracket-string
+				       "\"" "\""
+				       ;; Ignore search suffix.
+				       (if (string-match "::.*?\"?\\'" m)
+					   (substring m 0 (match-beginning 0))
+					 m))))))))
+		  (when included-file
+		    (push (org-publish-cache-ctime-of-src
+			   (expand-file-name included-file))
+			  included-files-ctime)))))
+	  (unless visiting (kill-buffer buf)))))
     (or (null pstamp)
 	(let ((ctime (org-publish-cache-ctime-of-src filename)))
 	  (or (< pstamp ctime)
