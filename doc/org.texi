@@ -6213,7 +6213,9 @@ format is shorter, things do work as expected.
 @node Deadlines and scheduling
 @section Deadlines and scheduling
 
-A timestamp may be preceded by special keywords to facilitate planning:
+A timestamp may be preceded by special keywords to facilitate planning.  Both
+the timestamp and the keyword have to be positioned immediatly after the task
+they refer to.
 
 @table @var
 @item DEADLINE
@@ -6302,25 +6304,22 @@ sexp entry matches.
 @node Inserting deadline/schedule
 @subsection Inserting deadlines or schedules
 
-The following commands allow you to quickly insert@footnote{The @samp{SCHEDULED} and
-@samp{DEADLINE} dates are inserted on the line right below the headline.  Don't put
-any text between this line and the headline.} a deadline or to schedule
+The following commands allow you to quickly insert a deadline or to schedule
 an item:
 
 @table @kbd
 @c
 @orgcmd{C-c C-d,org-deadline}
-Insert @samp{DEADLINE} keyword along with a stamp.  The insertion will happen
-in the line directly following the headline.  Any CLOSED timestamp will be
-removed.  When called with a prefix arg, an existing deadline will be removed
-from the entry.  Depending on the variable @code{org-log-redeadline}@footnote{with corresponding
-@code{#+STARTUP} keywords @code{logredeadline}, @code{lognoteredeadline},
-and @code{nologredeadline}}, a note will be taken when changing an existing
+Insert @samp{DEADLINE} keyword along with a stamp.  Any CLOSED timestamp will
+be removed.  When called with a prefix arg, an existing deadline will be
+removed from the entry.  Depending on the variable
+@code{org-log-redeadline}@footnote{with corresponding @code{#+STARTUP}
+keywords @code{logredeadline}, @code{lognoteredeadline}, and
+@code{nologredeadline}}, a note will be taken when changing an existing
 deadline.
 
 @orgcmd{C-c C-s,org-schedule}
-Insert @samp{SCHEDULED} keyword along with a stamp.  The insertion will
-happen in the line directly following the headline.  Any CLOSED timestamp
+Insert @samp{SCHEDULED} keyword along with a stamp.  Any CLOSED timestamp
 will be removed.  When called with a prefix argument, remove the scheduling
 date from the entry.  Depending on the variable
 @code{org-log-reschedule}@footnote{with corresponding @code{#+STARTUP}
