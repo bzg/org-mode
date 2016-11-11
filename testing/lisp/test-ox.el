@@ -3185,7 +3185,8 @@ Another text. (ref:text)
      (let ((headline (org-element-map tree 'headline #'identity nil t)))
        (equal (org-export-get-reference headline info)
 	      (org-export-get-reference headline info)))))
-  ;; Use search cells defined in `:crossrefs'.
+  ;; Use search cells defined in `:crossrefs'.  However, handle
+  ;; duplicate search cells.
   (should
    (equal "org0000001"
 	  (org-test-with-parsed-data "* Headline"
@@ -3193,7 +3194,16 @@ Another text. (ref:text)
 		   (search-cell (car (org-export-search-cells headline))))
 	      (setq info
 		    (plist-put info :crossrefs (list (cons search-cell 1))))
-	      (org-export-get-reference headline info))))))
+	      (org-export-get-reference headline info)))))
+  (should-not
+   (equal '("org0000001" "org0000001")
+	  (org-test-with-parsed-data "* H\n** H"
+	    (org-element-map tree 'headline
+	      (lambda (h)
+		(let* ((search-cell (car (org-export-search-cells h)))
+		       (info (plist-put info :crossrefs
+					(list (cons search-cell 1)))))
+		  (org-export-get-reference h info))))))))
 
 
 ;;; Pseudo objects and pseudo elements
