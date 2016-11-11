@@ -4385,19 +4385,35 @@ reference consists of alphanumeric characters only."
     (or (car (rassq datum cache))
 	(let* ((crossrefs (plist-get info :crossrefs))
 	       (cells (org-export-search-cells datum))
-	       ;; If any other published document relies on an
-	       ;; association between a search cell and a reference,
-	       ;; make sure to preserve it.  See
-	       ;; `org-publish-resolve-external-link' for details.
-	       (new (or (cdr (cl-some (lambda (c) (assoc c crossrefs)) cells))
+	       ;; Preserve any pre-existing association between
+	       ;; a search cell and a reference, i.e., when some
+	       ;; previously published document referenced a location
+	       ;; within current file (see
+	       ;; `org-publish-resolve-external-link').
+	       ;;
+	       ;; However, there is no guarantee that search cells are
+	       ;; unique, e.g., there might be duplicate custom ID or
+	       ;; two headings with the same title in the file.
+	       ;;
+	       ;; As a consequence, before re-using any reference to
+	       ;; an element or object, we check that it doesn't refer
+	       ;; to a previous element or object.
+	       (new (or (cl-some
+			 (lambda (cell)
+			   (let ((stored (cdr (assoc cell crossrefs))))
+			     (when stored
+			       (let ((old (org-export-format-reference stored)))
+				 (and (not (assoc old cache)) stored)))))
+			 cells)
 			(org-export-new-reference cache)))
 	       (reference-string (org-export-format-reference new)))
 	  ;; Cache contains both data already associated to
 	  ;; a reference and in-use internal references, so as to make
 	  ;; unique references.
 	  (dolist (cell cells) (push (cons cell new) cache))
-	  ;; Keep an associated related to DATUM as not every object
-	  ;; and element can be associated to a search cell.
+	  ;; Retain a direct association between reference string and
+	  ;; DATUM since (1) not every object or element can be given
+	  ;; a search cell (2) it permits quick lookup.
 	  (push (cons reference-string datum) cache)
 	  (plist-put info :internal-references cache)
 	  reference-string))))
