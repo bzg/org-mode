@@ -3003,14 +3003,14 @@ Return code as a string."
   (save-excursion
     (save-restriction
       ;; Narrow buffer to an appropriate region or subtree for
-      ;; parsing.  If parsing subtree, be sure to remove main headline
-      ;; too.
+      ;; parsing.  If parsing subtree, be sure to remove main
+      ;; headline, planning data and property drawer.
       (cond ((org-region-active-p)
 	     (narrow-to-region (region-beginning) (region-end)))
 	    (subtreep
 	     (org-narrow-to-subtree)
 	     (goto-char (point-min))
-	     (forward-line)
+	     (org-end-of-meta-data)
 	     (narrow-to-region (point) (point-max))))
       ;; Initialize communication channel with original buffer
       ;; attributes, unavailable in its copy.
