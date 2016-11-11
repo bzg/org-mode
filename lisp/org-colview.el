@@ -1068,12 +1068,12 @@ This function updates `org-columns-current-fmt-compiled'."
 A time is expressed as HH:MM, HH:MM:SS, or with units defined in
 `org-effort-durations'.  Plain numbers are considered as hours."
   (cond
-   ((string-match "\\([0-9]+\\):\\([0-9]+\\)\\(?::\\([0-9]+\\)\\)?" s)
+   ((string-match-p org-columns--duration-re s)
+    (* 60 (org-duration-string-to-minutes s)))
+   ((string-match "\\`\\([0-9]+\\):\\([0-9]+\\)\\(?::\\([0-9]+\\)\\)?\\'" s)
     (+ (* 3600 (string-to-number (match-string 1 s)))
        (* 60 (string-to-number (match-string 2 s)))
        (if (match-end 3) (string-to-number (match-string 3 s)) 0)))
-   ((string-match-p org-columns--duration-re s)
-    (* 60 (org-duration-string-to-minutes s)))
    (t (* 3600 (string-to-number s)))))
 
 (defun org-columns--age-to-seconds (s)
