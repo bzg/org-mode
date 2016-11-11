@@ -878,34 +878,20 @@ Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
 
 (ert-deftest test-org-export/export-scope ()
   "Test all export scopes."
-  (org-test-with-temp-text "
-* Head1
-** Head2
-text
-*** Head3"
-    ;; Subtree.
-    (forward-line 3)
-    (should (equal (org-export-as (org-test-default-backend) 'subtree)
-		   "text\n*** Head3\n"))
-    ;; Visible.
-    (goto-char (point-min))
-    (forward-line)
-    (org-cycle)
-    (should (equal (org-export-as (org-test-default-backend) nil 'visible)
-		   "* Head1\n"))
-    ;; Region.
-    (goto-char (point-min))
-    (forward-line 3)
-    (transient-mark-mode 1)
-    (push-mark (point) t t)
-    (goto-char (point-at-eol))
-    (should (equal (org-export-as (org-test-default-backend)) "text\n")))
+  ;; Subtree.
+  (should
+   (equal "text\n*** H3\n"
+	  (org-test-with-temp-text "* H1\n<point>** H2\ntext\n*** H3"
+	    (org-export-as (org-test-default-backend) 'subtree))))
+  (should
+   (equal "text\n*** H3\n"
+	  (org-test-with-temp-text "* H1\n** H2\n<point>text\n*** H3"
+	    (org-export-as (org-test-default-backend) 'subtree))))
   ;; Subtree with a code block calling another block outside.
-  (let ((org-export-babel-evaluate t))
-    (should
-     (equal ": 3\n"
-	    (org-test-with-temp-text "
-* Head1
+  (should
+   (equal ": 3\n"
+	  (org-test-with-temp-text "
+<point>* Head1
 #+BEGIN_SRC emacs-lisp :noweb yes :exports results
 <<test>>
 #+END_SRC
@@ -914,8 +900,36 @@ text
 #+BEGIN_SRC emacs-lisp
 \(+ 1 2)
 #+END_SRC"
-	      (forward-line 1)
+	    (let ((org-export-babel-evaluate t))
 	      (org-export-as (org-test-default-backend) 'subtree)))))
+  ;; Subtree export should ignore leading planning line and property
+  ;; drawer.
+  (should
+   (equal "Text\n"
+	  (org-test-with-temp-text "
+<point>* H
+SCHEDULED: <2012-03-29 Thu>
+:PROPERTIES:
+:A: 1
+:END:
+Text"
+	    (org-export-as (org-test-default-backend)
+			   'subtree nil nil
+			   '(:with-planning t :with-properties t)))))
+  ;; Visible.
+  (should
+   (equal "* H1\n"
+	  (org-test-with-temp-text "* H1\n** H2\ntext\n*** H3"
+	    (org-cycle)
+	    (org-export-as (org-test-default-backend) nil 'visible))))
+  ;; Region.
+  (should
+   (equal "text\n"
+	  (org-test-with-temp-text "* H1\n** H2\n<point>text\n*** H3"
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (end-of-line)
+	    (org-export-as (org-test-default-backend)))))
   ;; Body only.
   (let ((backend (org-test-default-backend)))
     (setf (org-export-backend-transcoders backend)
