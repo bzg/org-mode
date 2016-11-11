@@ -5596,8 +5596,8 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	 mm
 	 (deadline-position-alist
 	  (mapcar (lambda (a) (and (setq mm (get-text-property
-					     0 'org-hd-marker a))
-				   (cons (marker-position mm) a)))
+					0 'org-hd-marker a))
+			      (cons (marker-position mm) a)))
 		  deadline-results))
 	 (remove-re org-ts-regexp)
 	 (regexp
@@ -5607,15 +5607,14 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	    (substring
 	     (format-time-string
 	      (car org-time-stamp-formats)
-	      (apply 'encode-time  ; DATE bound by calendar
+	      (apply 'encode-time	; DATE bound by calendar
 		     (list 0 0 0 (nth 1 date) (car date) (nth 2 date))))
 	     1 11))
 	   "\\|\\(<[0-9]+-[0-9]+-[0-9]+[^>\n]+?\\+[0-9]+[hdwmy]>\\)"
 	   "\\|\\(<%%\\(([^>\n]+)\\)>\\)"))
-	 marker hdmarker deadlinep scheduledp clockp closedp inactivep
-	 donep tmp priority category level ee txt timestr tags
-	 b0 b3 e3 head todo-state end-of-match show-all warntime habitp
-	 inherited-tags ts-date)
+	 marker hdmarker clockp inactivep donep tmp priority category level ee
+	 txt timestr tags b0 b3 e3 head todo-state end-of-match show-all
+	 warntime habitp inherited-tags ts-date)
     (goto-char (point-min))
     (while (setq end-of-match (re-search-forward regexp nil t))
       (setq b0 (match-beginning 0)
@@ -5626,7 +5625,8 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 			 (member todo-state
 				 org-agenda-repeating-timestamp-show-all)))
       (catch :skip
-	(and (org-at-date-range-p) (throw :skip nil))
+	(when (org-at-date-range-p) (throw :skip nil))
+	(when (org-at-planning-p) (throw :skip nil))
 	(org-agenda-skip)
 	(if (and (match-end 1)
 		 (not (= d1 (org-agenda--timestamp-to-absolute
@@ -5641,18 +5641,13 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 				    b0)
 	      timestr (if b3 "" (buffer-substring b0 (point-at-eol)))
 	      inactivep (= (char-after b0) ?\[)
-	      deadlinep (string-match org-deadline-regexp tmp)
-	      scheduledp (string-match org-scheduled-regexp tmp)
-	      closedp (and org-agenda-include-inactive-timestamps
-			   (string-match org-closed-string tmp))
 	      clockp (and org-agenda-include-inactive-timestamps
 			  (or (string-match org-clock-string tmp)
 			      (string-match "]-+\\'" tmp)))
 	      warntime (get-text-property (point) 'org-appt-warntime)
 	      donep (member todo-state org-done-keywords))
-	(if (or scheduledp deadlinep closedp clockp
-		(and donep org-agenda-skip-timestamp-if-done))
-	    (throw :skip t))
+	(when (or clockp (and donep org-agenda-skip-timestamp-if-done))
+	  (throw :skip t))
 	(if (string-match ">" timestr)
 	    ;; substring should only run to end of time stamp
 	    (setq timestr (substring timestr 0 (match-end 0))))
