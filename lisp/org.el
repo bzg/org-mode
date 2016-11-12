@@ -4078,18 +4078,18 @@ All available processes and theirs documents can be found in
 
 (defcustom org-preview-latex-process-alist
   '((dvipng
-     :programs ("latex" "dvipng" "gs")
+     :programs ("latex" "dvipng")
      :description "dvi > png"
-     :message "you need to install the programs: latex, dvipng and ghostscript."
+     :message "you need to install the programs: latex and dvipng."
      :image-input-type "dvi"
      :image-output-type "png"
      :image-size-adjust (1.0 . 1.0)
      :latex-compiler ("latex -interaction nonstopmode -output-directory %o %f")
      :image-converter ("dvipng -fg %F -bg %B -D %D -T tight -o %o%b.png %f"))
     (dvisvgm
-     :programs ("latex" "dvisvgm" "gs")
+     :programs ("latex" "dvisvgm")
      :description "dvi > svg"
-     :message "you need to install the programs: latex, dvisvgm and ghostscript."
+     :message "you need to install the programs: latex and dvisvgm."
      :use-xcolor t
      :image-input-type "dvi"
      :image-output-type "svg"
@@ -4097,10 +4097,9 @@ All available processes and theirs documents can be found in
      :latex-compiler ("latex -interaction nonstopmode -output-directory %o %f")
      :image-converter ("dvisvgm %f -n -b min -c %S -o %o%b.svg"))
     (imagemagick
-     :programs ("latex" "convert" "gs")
+     :programs ("latex" "convert")
      :description "pdf > png"
-     :message
-     "you need to install the programs: latex, imagemagick and ghostscript."
+     :message "you need to install the programs: latex and imagemagick."
      :use-xcolor t
      :image-input-type "pdf"
      :image-output-type "png"
