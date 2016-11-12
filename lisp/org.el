@@ -932,8 +932,9 @@ the following lines anywhere in the buffer:
    #+STARTUP: content
    #+STARTUP: showeverything
 
-Set `org-agenda-inhibit-startup' to a non-nil value so as to
-ignore this option when Org opens agenda files for the first time."
+Set `org-agenda-inhibit-startup' to a non-nil value if you want
+to ignore this option when Org opens agenda files for the first
+time."
   :group 'org-startup
   :type '(choice
 	  (const :tag "nofold: show all" nil)

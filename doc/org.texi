@@ -17355,7 +17355,7 @@ If the cursor is on a @code{#+TBLFM} line, re-apply the formulas to
 the entire table.
 @item
 If the current buffer is a capture buffer, close the note and file it.  With
-a prefix argument, jump to the target location, without capturing anything.
+a prefix argument, also jump to the target location upon storing the note.
 @item
 If the cursor is on a @code{<<<target>>>}, update radio targets and
 corresponding links in this buffer.
