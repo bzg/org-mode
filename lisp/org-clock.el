@@ -679,7 +679,7 @@ If not, show simply the clocked time like 01:50."
 				   "] (" (replace-regexp-in-string "%" "%%" org-clock-heading) ")")
 			  'face 'org-mode-line-clock)))
 	  (format clockstr work-done-str))
-      (propertize (concat "[" (org-minutes-to-clocksum-string clocked-time)
+      (propertize (concat " [" (org-minutes-to-clocksum-string clocked-time)
 			  "]" (format " (%s)" org-clock-heading))
 		  'face 'org-mode-line-clock))))
 
