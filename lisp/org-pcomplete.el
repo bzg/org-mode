@@ -315,10 +315,11 @@ This needs more work, to handle headings with lots of spaces in them."
        (save-excursion
 	 (goto-char (point-min))
 	 (let (tbl)
-	   (while (re-search-forward org-todo-line-regexp nil t)
-	     (push (org-make-org-heading-search-string
-		    (match-string-no-properties 3))
-		   tbl))
+	   (let ((case-fold-search nil))
+	     (while (re-search-forward org-todo-line-regexp nil t)
+	       (push (org-make-org-heading-search-string
+		      (match-string-no-properties 3))
+		     tbl)))
 	   (pcomplete-uniqify-list tbl)))
        (substring pcomplete-stub 1))))
 

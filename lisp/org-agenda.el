@@ -3249,7 +3249,7 @@ This ensures the export commands can easily use it."
 	(setq tmp (replace-match "" t t tmp)))
       (when (and (setq re (plist-get props 'org-todo-regexp))
 		 (setq re (concat "\\`\\.*" re " ?"))
-		 (string-match re tmp))
+		 (let ((case-fold-search nil)) (string-match re tmp)))
 	(plist-put props 'todo (match-string 1 tmp))
 	(setq tmp (replace-match "" t t tmp)))
       (plist-put props 'txt tmp)))
@@ -5441,6 +5441,7 @@ and the timestamp type relevant for the sorting strategy in
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
+	 (case-fold-search nil)
 	 (regexp (format org-heading-keyword-regexp-format
 			 (cond
 			  ((and org-select-this-todo-keyword
@@ -6998,7 +6999,8 @@ The optional argument TYPE tells the agenda type."
   (let* ((pla (text-property-any 0 (length a) 'org-heading t a))
 	 (plb (text-property-any 0 (length b) 'org-heading t b))
 	 (ta (and pla (substring a pla)))
-	 (tb (and plb (substring b plb))))
+	 (tb (and plb (substring b plb)))
+	 (case-fold-search nil))
     (when pla
       (if (string-match (concat "\\`[ \t]*" (or (get-text-property 0 'org-todo-regexp a) "")
 				"\\([ \t]*\\[[a-zA-Z0-9]\\]\\)? *") ta)
