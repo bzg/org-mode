@@ -356,7 +356,8 @@ this heading."
 		   (org-set-tags-to all-tags))
 	      ;; Mark the entry as done
 	      (when (and org-archive-mark-done
-			 (looking-at org-todo-line-regexp)
+			 (let ((case-fold-search nil))
+			   (looking-at org-todo-line-regexp))
 			 (or (not (match-end 2))
 			     (not (member (match-string 2) org-done-keywords))))
 		(let (org-log-done org-todo-log-states)
@@ -472,8 +473,9 @@ it is on a headline, try all direct children.
 When TAG is non-nil, don't move trees, but mark them with the ARCHIVE tag."
   (org-archive-all-matches
    (lambda (_beg end)
-     (unless (re-search-forward org-not-done-heading-regexp end t)
-       "no open TODO items"))
+     (let ((case-fold-search nil))
+       (unless (re-search-forward org-not-done-heading-regexp end t)
+	 "no open TODO items")))
    tag))
 
 (defun org-archive-all-old (&optional tag)

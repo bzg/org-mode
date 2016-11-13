@@ -3036,7 +3036,7 @@ With a prefix argument ARG, change the region in a single item."
 	       ;; subtrees.
 	       (when (< level ref-level) (setq ref-level level))
 	       ;; Remove stars and TODO keyword.
-	       (looking-at org-todo-line-regexp)
+	       (let ((case-fold-search nil)) (looking-at org-todo-line-regexp))
 	       (delete-region (point) (or (match-beginning 3)
 					  (line-end-position)))
 	       (insert bul)

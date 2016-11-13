@@ -2084,16 +2084,22 @@ Changing this requires a restart of Emacs to work correctly."
   :type 'integer)
 
 (defcustom org-link-search-must-match-exact-headline 'query-to-create
-  "Non-nil means internal links in Org files must exactly match a headline.
-When nil, the link search tries to match a phrase with all words
-in the search text."
+  "Non-nil means internal fuzzy links can only match headlines.
+
+When nil, the a fuzzy link may point to a target or a named
+construct in the document.  When set to the special value
+`query-to-create', offer to create a new headline when none
+matched.
+
+Spaces and statistics cookies are ignored during heading searches."
   :group 'org-link-follow
   :version "24.1"
   :type '(choice
 	  (const :tag "Use fuzzy text search" nil)
 	  (const :tag "Match only exact headline" t)
 	  (const :tag "Match exact headline or query to create it"
-		 query-to-create)))
+		 query-to-create))
+  :safe #'symbolp)
 
 (defcustom org-link-frame-setup
   '((vm . vm-visit-folder-other-frame)
@@ -4903,29 +4909,43 @@ Otherwise, these types are allowed:
 ;;; Variables for pre-computed regular expressions, all buffer local
 
 (defvar-local org-todo-regexp nil
-  "Matches any of the TODO state keywords.")
+  "Matches any of the TODO state keywords.
+Since TODO keywords are case-sensitive, `case-fold-search' is
+expected to be bound to nil when matching against this regexp.")
+
 (defvar-local org-not-done-regexp nil
-  "Matches any of the TODO state keywords except the last one.")
+  "Matches any of the TODO state keywords except the last one.
+Since TODO keywords are case-sensitive, `case-fold-search' is
+expected to be bound to nil when matching against this regexp.")
+
 (defvar-local org-not-done-heading-regexp nil
-  "Matches a TODO headline that is not done.")
+  "Matches a TODO headline that is not done.
+Since TODO keywords are case-sensitive, `case-fold-search' is
+expected to be bound to nil when matching against this regexp.")
+
 (defvar-local org-todo-line-regexp nil
-  "Matches a headline and puts TODO state into group 2 if present.")
+  "Matches a headline and puts TODO state into group 2 if present.
+Since TODO keywords are case-sensitive, `case-fold-search' is
+expected to be bound to nil when matching against this regexp.")
+
 (defvar-local org-complex-heading-regexp nil
   "Matches a headline and puts everything into groups:
 
-group 1: the stars
-group 2: The todo keyword, maybe
+group 1: Stars
+group 2: The TODO keyword, maybe
 group 3: Priority cookie
 group 4: True headline
 group 5: Tags
 
 Since TODO keywords are case-sensitive, `case-fold-search' is
-expected to be bound to nil when matching this regexp.")
+expected to be bound to nil when matching against this regexp.")
+
 (defvar-local org-complex-heading-regexp-format nil
   "Printf format to make regexp to match an exact headline.
 This regexp will match the headline of any node which has the
 exact headline text that is put into the format, but may have any
 TODO state, priority and tags.")
+
 (defvar-local org-todo-line-tags-regexp nil
   "Matches a headline and puts TODO state into group 2 if present.
 Also put tags into group 4 if tags are present.")
@@ -8197,7 +8217,7 @@ unchecked check box."
     (save-excursion
       (org-back-to-heading)
       (outline-previous-heading)
-      (looking-at org-todo-line-regexp))
+      (let ((case-fold-search nil)) (looking-at org-todo-line-regexp)))
     (let* ((new-mark-x
 	    (if (or (equal arg '(4))
 		    (not (match-beginning 2))
@@ -8289,12 +8309,12 @@ headings in the region."
   "Fix cursor position and indentation after demoting/promoting."
   (let ((pos (point)))
     (when (save-excursion
-	    (beginning-of-line 1)
-	    (looking-at org-todo-line-regexp)
-	    (or (equal pos (match-end 1)) (equal pos (match-end 2))))
+	    (beginning-of-line)
+	    (let ((case-fold-search nil)) (looking-at org-todo-line-regexp))
+	    (or (eq pos (match-end 1)) (eq pos (match-end 2))))
       (cond ((eobp) (insert " "))
 	    ((eolp) (insert " "))
-	    ((equal (char-after) ?\ ) (forward-char 1))))))
+	    ((equal (char-after) ?\s) (forward-char 1))))))
 
 (defun org-current-level ()
   "Return the level of the current entry, or nil if before the first headline.
@@ -11221,22 +11241,22 @@ of matched result, which is either `dedicated' or `fuzzy'."
 				      wspaceopt
 				      "\\)"))
 		      (sep (concat "\\(?:\\(?:" wspace "\\|" cookie "\\)+\\)"))
-		      (re (concat
-			   org-outline-regexp-bol
-			   "\\(?:" org-todo-regexp "[ \t]+\\)?"
-			   "\\(?:\\[#.\\][ \t]+\\)?"
-			   "\\(?:" org-comment-string "[ \t]+\\)?"
-			   sep "?"
-			   (let ((title (mapconcat #'regexp-quote
-						   words
-						   sep)))
-			     (if starred (substring title 1) title))
-			   sep "?"
-			   "\\(?:[ \t]+:[[:alnum:]_@#%%:]+:\\)?"
-			   "[ \t]*$")))
+		      (title
+		       (format "\\(?:%s[ \t]+\\)?%s?%s%s?"
+			       org-comment-string
+			       sep
+			       (let ((re (mapconcat #'regexp-quote words sep)))
+				 (if starred (substring re 1) re))
+			       sep))
+		      (exact-title (format "\\`%s\\'" title))
+		      (re (concat org-outline-regexp-bol "+.*" title)))
 		 (goto-char (point-min))
-		 (re-search-forward re nil t)))
-	  (goto-char (match-beginning 0))
+		 (catch :found
+		   (while (re-search-forward re nil t)
+		     (when (string-match-p exact-title (org-get-heading t t))
+		       (throw :found t)))
+		   nil)))
+	  (beginning-of-line)
 	  (setq type 'dedicated))
 	 ;; Offer to create non-existent headline depending on
 	 ;; `org-link-search-must-match-exact-headline'.
@@ -12844,7 +12864,8 @@ changes.  Such blocking occurs when:
       (save-excursion
 	(org-back-to-heading t)
 	(let* ((pos (point))
-	       (parent-pos (and (org-up-heading-safe) (point))))
+	       (parent-pos (and (org-up-heading-safe) (point)))
+	       (case-fold-search nil))
 	  (unless parent-pos (throw 'dont-block t)) ; no parent
 	  (when (and (org-not-nil (org-entry-get (point) "ORDERED"))
 		     (forward-line 1)
@@ -13225,7 +13246,7 @@ Returns the new TODO keyword, or nil if no state change should occur."
   "Return the TODO keyword of the current subtree."
   (save-excursion
     (org-back-to-heading t)
-    (and (looking-at org-todo-line-regexp)
+    (and (let ((case-fold-search nil)) (looking-at org-todo-line-regexp))
 	 (match-end 2)
 	 (match-string 2))))
 
@@ -14256,8 +14277,7 @@ ACTION can be `set', `up', `down', or a character."
 	      (replace-match news t t nil 2))
 	  (if remove
 	      (user-error "No priority cookie found in line")
-	    (let ((case-fold-search nil))
-	      (looking-at org-todo-line-regexp))
+	    (let ((case-fold-search nil)) (looking-at org-todo-line-regexp))
 	    (if (match-end 2)
 		(progn
 		  (goto-char (match-end 2))
@@ -24140,13 +24160,13 @@ unless optional argument NO-INHERITANCE is non-nil."
   "If point is at the end of an empty headline, return t, else nil.
 If the heading only contains a TODO keyword, it is still still considered
 empty."
-  (and (looking-at "[ \t]*$")
-       (when org-todo-line-regexp
+  (let ((case-fold-search nil))
+    (and (looking-at "[ \t]*$")
+	 org-todo-line-regexp
 	 (save-excursion
-	   (beginning-of-line 1)
-	   (let ((case-fold-search nil))
-	     (looking-at org-todo-line-regexp)
-	     (string= (match-string 3) ""))))))
+	   (beginning-of-line)
+	   (looking-at org-todo-line-regexp)
+	   (string= (match-string 3) "")))))
 
 (defun org-at-heading-or-item-p ()
   (or (org-at-heading-p) (org-at-item-p)))

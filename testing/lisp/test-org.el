@@ -2098,7 +2098,8 @@ SCHEDULED: <2014-03-04 tue.>"
      (let ((org-link-search-must-match-exact-headline t)) (org-open-at-point))
      (looking-at "\\* Test")))
   ;; Heading match should not care about spaces, cookies, TODO
-  ;; keywords, priorities, and tags.
+  ;; keywords, priorities, and tags.  However, TODO keywords are
+  ;; case-sensitive.
   (should
    (let ((first-line
 	  "** TODO [#A] [/]  Test [1/2] [33%] 1 \t  2 [%] :work:urgent: "))
@@ -2108,15 +2109,26 @@ SCHEDULED: <2014-03-04 tue.>"
 	     (org-todo-regexp "TODO"))
 	 (org-open-at-point))
        (looking-at (regexp-quote first-line)))))
+  (should-error
+   (org-test-with-temp-text "** todo Test 1 2\nFoo Bar\n<point>[[*Test 1 2]]"
+     (let ((org-link-search-must-match-exact-headline nil)
+	   (org-todo-regexp "TODO"))
+       (org-open-at-point))))
   ;; Heading match should still be exact.
   (should-error
-   (let ((first-line
-	  "** TODO [#A] [/]  Test [1/2] [33%] 1 \t  2 [%] :work:urgent: "))
-     (org-test-with-temp-text
-	 (concat first-line "\nFoo Bar\n<point>[[*Test 1]]")
-       (let ((org-link-search-must-match-exact-headline nil)
-	     (org-todo-regexp "TODO"))
-	 (org-open-at-point)))))
+   (org-test-with-temp-text "
+** TODO [#A] [/]  Test [1/2] [33%] 1 \t  2 [%] :work:urgent:
+Foo Bar
+<point>[[*Test 1]]"
+     (let ((org-link-search-must-match-exact-headline nil)
+	   (org-todo-regexp "TODO"))
+       (org-open-at-point))))
+  (should
+   (org-test-with-temp-text "* Test 1 2 3\n** Test 1 2\n<point>[[*Test 1 2]]"
+     (let ((org-link-search-must-match-exact-headline nil)
+	   (org-todo-regexp "TODO"))
+       (org-open-at-point))
+     (looking-at-p (regexp-quote "** Test 1 2"))))
   ;; Heading match ignores COMMENT keyword.
   (should
    (org-test-with-temp-text "[[*Test]]\n* COMMENT Test"
