@@ -3553,12 +3553,12 @@ The value of this variable is an alist.  Associations either:
   (TAG . SELECT)
   (SPECIAL)
 
-where TAG is a tag as a string, SELECT is a case-sensitive
-letter, used to select that tag through the fast tag selection
-interface, and SPECIAL is one of the following keywords:
-`:startgroup', `:startgrouptag', `:grouptags', `:engroup',
-`:endgrouptag' or `:newline'.  These keywords are used to define
-a hierarchy of tags.  See manual for details.
+where TAG is a tag as a string, SELECT is character, used to
+select that tag through the fast tag selection interface, and
+SPECIAL is one of the following keywords: `:startgroup',
+`:startgrouptag', `:grouptags', `:engroup', `:endgrouptag' or
+`:newline'.  These keywords are used to define a hierarchy of
+tags.  See manual for details.
 
 When this variable is nil, Org mode bases tag input on what is
 already in the buffer.  The value can be overridden locally by
