@@ -3551,7 +3551,7 @@ exact headline will be matched, ignoring spaces and cookies.  If the value is
 @code{query-to-create}, then an exact headline will be searched; if it is not
 found, then the user will be queried to create it.}
 file:projects.org::*task title @r{heading search in Org
-file}@footnote{ Headline searches always match the exact headline, ignoring
+file}@footnote{Headline searches always match the exact headline, ignoring
 spaces and cookies.  If the headline is not found and the value of the option
 @code{org-link-search-must-match-exact-headline} is @code{query-to-create},
 then the user will be queried to create it.}
