@@ -879,7 +879,7 @@ The file is stored under the name chosen in
   "Export current agenda view to an iCalendar FILE.
 This function assumes major mode for current buffer is
 `org-agenda-mode'."
-  (let* ((org-export-babel-evaluate)	; Don't evaluate Babel block.
+  (let* ((org-export-use-babel)	; Don't evaluate Babel block.
 	 (contents
 	  (org-export-string-as
 	   (with-output-to-string

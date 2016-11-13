@@ -900,7 +900,7 @@ Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
 #+BEGIN_SRC emacs-lisp
 \(+ 1 2)
 #+END_SRC"
-	    (let ((org-export-babel-evaluate t))
+	    (let ((org-export-use-babel t))
 	      (org-export-as (org-test-default-backend) 'subtree)))))
   ;; Subtree export should ignore leading planning line and property
   ;; drawer.

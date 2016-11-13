@@ -80,7 +80,7 @@
 (ert-deftest test-ob-lob/export-lob-lines ()
   "Test the export of a variety of library babel call lines."
   (let ((org-babel-inline-result-wrap "=%s=")
-	(org-export-babel-evaluate t))
+	(org-export-use-babel t))
     (org-test-at-id "72ddeed3-2d17-4c7f-8192-a575d535d3fc"
       (org-narrow-to-subtree)
       (let ((string (org-with-wide-buffer (buffer-string)))

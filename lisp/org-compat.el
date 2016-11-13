@@ -191,6 +191,8 @@ Counting starts at 1."
 (define-obsolete-variable-alias 'org-html-style 'org-html-head "24.4")
 (define-obsolete-function-alias 'org-insert-columns-dblock
   'org-columns-insert-dblock "Org 9.0")
+(define-obsolete-function-alias 'org-export-babel-evaluate
+  'org-export-use-babel "Org 9.1")
 
 (defun org-in-fixed-width-region-p ()
   "Non-nil if point in a fixed-width region."

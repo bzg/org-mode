@@ -3042,7 +3042,7 @@ Return code as a string."
 	 ;; again after executing Babel code.
 	 (org-set-regexps-and-options)
 	 (org-update-radio-target-regexp)
-	 (when org-export-babel-evaluate
+	 (when org-export-use-babel
 	   (org-babel-exp-process-buffer)
 	   (org-set-regexps-and-options)
 	   (org-update-radio-target-regexp))
