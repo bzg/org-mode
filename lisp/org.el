@@ -2084,16 +2084,22 @@ Changing this requires a restart of Emacs to work correctly."
   :type 'integer)
 
 (defcustom org-link-search-must-match-exact-headline 'query-to-create
-  "Non-nil means internal links in Org files must exactly match a headline.
-When nil, the link search tries to match a phrase with all words
-in the search text."
+  "Non-nil means internal fuzzy links can only match headlines.
+
+When nil, the a fuzzy link may point to a target or a named
+construct in the document.  When set to the special value
+`query-to-create', offer to create a new headline when none
+matched.
+
+Spaces and statistics cookies are ignored during heading searches."
   :group 'org-link-follow
   :version "24.1"
   :type '(choice
 	  (const :tag "Use fuzzy text search" nil)
 	  (const :tag "Match only exact headline" t)
 	  (const :tag "Match exact headline or query to create it"
-		 query-to-create)))
+		 query-to-create))
+  :safe #'symbolp)
 
 (defcustom org-link-frame-setup
   '((vm . vm-visit-folder-other-frame)
