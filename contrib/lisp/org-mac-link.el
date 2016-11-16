@@ -233,6 +233,7 @@
       (setq return (shell-command-to-string cmd))
       (concat "\"" (org-trim return) "\""))))
 
+;;;###autoload
 (defun org-mac-grab-link ()
   "Prompt for an application to grab a link from.
 When done, go grab the link, and insert it at point."
@@ -340,11 +341,13 @@ The links are of the form <link>::split::<name>."
 	   "return links as string\n"))))
     (car (split-string result "[\r\n]+" t))))
 
+;;;###autoload
 (defun org-mac-firefox-get-frontmost-url ()
   (interactive)
   (message "Applescript: Getting Firefox url...")
   (org-mac-paste-applescript-links (org-as-mac-firefox-get-frontmost-url)))
 
+;;;###autoload
 (defun org-mac-firefox-insert-frontmost-url ()
   (interactive)
   (insert (org-mac-firefox-get-frontmost-url)))
@@ -378,11 +381,13 @@ The links are of the form <link>::split::<name>."
     (replace-regexp-in-string
      "\s+-\s+Vimperator" "" (car (split-string result "[\r\n]+" t)))))
 
+;;;###autoload
 (defun org-mac-vimperator-get-frontmost-url ()
   (interactive)
   (message "Applescript: Getting Vimperator url...")
   (org-mac-paste-applescript-links (org-as-mac-vimperator-get-frontmost-url)))
 
+;;;###autoload
 (defun org-mac-vimperator-insert-frontmost-url ()
   (interactive)
   (insert (org-mac-vimperator-get-frontmost-url)))
@@ -408,11 +413,13 @@ The links are of the form <link>::split::<name>."
     (replace-regexp-in-string
      "^\"\\|\"$" "" (car (split-string result "[\r\n]+" t)))))
 
+;;;###autoload
 (defun org-mac-chrome-get-frontmost-url ()
   (interactive)
   (message "Applescript: Getting Chrome url...")
   (org-mac-paste-applescript-links (org-as-mac-chrome-get-frontmost-url)))
 
+;;;###autoload
 (defun org-mac-chrome-insert-frontmost-url ()
   (interactive)
   (insert (org-mac-chrome-get-frontmost-url)))
@@ -430,12 +437,14 @@ The links are of the form <link>::split::<name>."
     "	return theUrl & \"::split::\" & theName & \"\n\"\n"
     "end tell\n")))
 
+;;;###autoload
 (defun org-mac-safari-get-frontmost-url ()
   (interactive)
   (message "Applescript: Getting Safari url...")
   (org-mac-paste-applescript-links 
    (org-as-mac-safari-get-frontmost-url)))
 
+;;;###autoload
 (defun org-mac-safari-insert-frontmost-url ()
   (interactive)
   (insert (org-mac-safari-get-frontmost-url)))
@@ -461,11 +470,13 @@ The links are of the form <link>::split::<name>."
     "	return theLinkList as string\n"
     "end tell")))
 
+;;;###autoload
 (defun org-mac-together-get-selected ()
   (interactive)
   (message "Applescript: Getting Togther items...")
   (org-mac-paste-applescript-links (as-get-selected-together-items)))
 
+;;;###autoload
 (defun org-mac-together-insert-selected ()
   (interactive)
   (insert (org-mac-together-get-selected)))
@@ -486,11 +497,13 @@ The links are of the form <link>::split::<name>."
     " return links as string\n"
     "end tell\n")))
 
+;;;###autoload
 (defun org-mac-finder-item-get-selected ()
   (interactive)
   (message "Applescript: Getting Finder items...")
   (org-mac-paste-applescript-links (as-get-selected-finder-items)))
 
+;;;###autoload
 (defun org-mac-finder-insert-selected ()
   (interactive)
   (insert (org-mac-finder-item-get-selected)))
@@ -516,11 +529,13 @@ The links are of the form <link>::split::<name>."
     "	return links as string\n"
     "end tell\n")))
 
+;;;###autoload
 (defun org-mac-addressbook-item-get-selected ()
   (interactive)
   (message "Applescript: Getting Address Book items...")
   (org-mac-paste-applescript-links (as-get-selected-addressbook-items)))
 
+;;;###autoload
 (defun org-mac-addressbook-insert-selected ()
   (interactive)
   (insert (org-mac-addressbook-item-get-selected)))
@@ -572,11 +587,13 @@ The links are of the form <link>::split::<name>."
     "end tell\n"
     "return theLink as string\n")))
 
+;;;###autoload
 (defun org-mac-skim-get-page ()
   (interactive)
   (message "Applescript: Getting Skim page link...")
   (org-mac-paste-applescript-links (as-get-skim-page-link)))
 
+;;;###autoload
 (defun org-mac-skim-insert-page ()
   (interactive)
   (insert (org-mac-skim-get-page)))
@@ -623,11 +640,13 @@ The links are of the form <link>::split::<name>."
     "set theResult to \"acrobat:\" & thePath & \"::\" & thePage & \"::split::\" & theTitle & \", p.\" & theLabel\n"
     "return theResult as string\n")))
 
+;;;###autoload
 (defun org-mac-acrobat-get-page ()
   (interactive)
   (message "Applescript: Getting Acrobat page link...")
   (org-mac-paste-applescript-links (org-mac-as-get-acrobat-page-link)))
 
+;;;###autoload
 (defun org-mac-acrobat-insert-page ()
   (interactive)
   (insert (org-mac-acrobat-get-page)))
@@ -691,6 +710,7 @@ The links are of the form <link>::split::<name>."
       (buffer-string) "\n" t))
    ""))
 
+;;;###autoload
 (defun org-mac-outlook-message-get-links (&optional select-or-flag)
   "Create links to the messages currently selected or flagged in Microsoft Outlook.app.
 This will use AppleScript to get the message-id and the subject of the
@@ -708,6 +728,7 @@ The Org-syntax text will be pushed to the kill ring, and also returned."
 	  (org-sh-get-flagged-outlook-mail)
 	(error "Please select \"s\" or \"f\"")))))
 
+;;;###autoload
 (defun org-mac-outlook-message-insert-selected ()
   "Insert a link to the messages currently selected in Microsoft Outlook.app.
 This will use AppleScript to get the message-id and the subject
@@ -716,6 +737,7 @@ of it."
   (interactive)
   (insert (org-mac-outlook-message-get-links "s")))
 
+;;;###autoload
 (defun org-mac-outlook-message-insert-flagged (org-buffer org-heading)
   "Asks for an org buffer and a heading within it, and replace message links.
 If heading exists, delete all mac-outlook:// links within
@@ -782,6 +804,7 @@ after heading."
      "    return theLinkList as string\n"
      "end tell\n")))
 
+;;;###autoload
 (defun org-mac-evernote-note-insert-selected ()
   "Insert a link to the notes currently selected in Evernote.app.
 This will use AppleScript to get the note id and the title of the
@@ -831,6 +854,7 @@ ring, and also return it."
   (message "Org Mac DEVONthink: looking for selected items...")
   (org-mac-paste-applescript-links (org-as-get-selected-devonthink-item)))
 
+;;;###autoload
 (defun org-mac-devonthink-item-insert-selected ()
   "Insert a link to the item(s) currently selected in DEVONthink Pro Office.
 This will use AppleScript to get the `uuid'(s) and the name(s) of the
@@ -890,6 +914,7 @@ This will use the command `open' with the message URL."
     "return theLinkList as string\n"
     "end tell")))
 
+;;;###autoload
 (defun org-mac-message-get-links (&optional select-or-flag)
   "Create links to the messages currently selected or flagged in Mail.app.
 This will use AppleScript to get the message-id and the subject of the
@@ -906,6 +931,7 @@ The Org-syntax text will be pushed to the kill ring, and also returned."
     ((string= select-or-flag "f") (org-as-get-flagged-mail))
     (t (error "Please select \"s\" or \"f\"")))))
 
+;;;###autoload
 (defun org-mac-message-insert-selected ()
   "Insert a link to the messages currently selected in Mail.app.
 This will use AppleScript to get the message-id and the subject of the
@@ -916,6 +942,7 @@ active mail in Mail.app and make a link out of it."
 ;; The following line is for backward compatibility
 (defalias 'org-mac-message-insert-link 'org-mac-message-insert-selected)
 
+;;;###autoload
 (defun org-mac-message-insert-flagged (org-buffer org-heading)
   "Asks for an org buffer and a heading within it, and replace message links.
 If heading exists, delete all message:// links within heading's first
