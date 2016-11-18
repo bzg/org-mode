@@ -14839,17 +14839,8 @@ Details of Org's facilities for working with source code are shown next.
 @cindex #+NAME
 @cindex #+BEGIN_SRC
 
-Org offers two ways to structure source code in org documents: in a
+Org offers two ways to structure source code in Org documents: in a
 @samp{src} block, and directly inline.  Both specifications are shown below.
-
-@indentedblock
-Org mode's @ref{Easy templates} system speeds up creating @samp{src} blocks
-with just a couple of keystrokes.  Don't be put-off by having to type or
-remember the source block syntax.  Any other completion system in Emacs (of
-which there are several, some even predate Org) can be customized to create
-these Org @samp{src} blocks to reduce errors, increase accuracy, and maintain
-consistency.
-@end indentedblock
 
 A @samp{src} block conforms to this structure:
 
@@ -14859,6 +14850,13 @@ A @samp{src} block conforms to this structure:
   <body>
 #+END_SRC
 @end example
+
+Org mode's templates system (@pxref{Easy templates}) speeds up creating
+@samp{src} blocks with just a couple of keystrokes.  Don't be put-off by
+having to type or remember the source block syntax.  Any other completion
+system in Emacs---of which there are several, some even predate Org---can be
+customized to create these Org @samp{src} blocks to reduce errors, increase
+accuracy, and maintain consistency.
 
 @cindex source code, inline
 An inline code block conforms to this structure:
@@ -14877,8 +14875,8 @@ src_<language>[<header arguments>]@{<body>@}
 @item #+NAME: <name>
 Optional.  Names the @samp{src} block so it can be called, like a function,
 from other @samp{src} blocks or inline blocks to evaluate or to capture the
-results.  Code from other blocks, other files, and from table formulas (see
-@ref{The spreadsheet}) can use the name to reference a @samp{src} block.
+results.  Code from other blocks, other files, and from table formulas
+(@pxref{The spreadsheet}) can use the name to reference a @samp{src} block.
 This naming serves the same purpose as naming Org tables.  Org mode requires
 unique names.  For duplicate names, Org mode's behavior is undefined.
 @cindex #+NAME
@@ -14889,7 +14887,7 @@ Mandatory.  They mark the start and end of a block that Org requires.  The
 @cindex begin block, end block
 @item <language>
 Mandatory for live code blocks.  It is the identifier of the source code
-language in the block.  See @ref{Languages} for identifiers of supported
+language in the block.  @xref{Languages} for identifiers of supported
 languages.
 @cindex source code, language
 @item <switches>
@@ -14898,14 +14896,13 @@ format (see the discussion of switches in @ref{Literal examples})
 @cindex source code, switches
 @item <header arguments>
 Optional.  Heading arguments control many aspects of evaluation, export and
-tangling of code blocks (see @pxref{Header arguments}).  Using Org's
-properties feature, header arguments can be selectively applied to the entire
-buffer or specific sub-trees of the Org document.
+tangling of code blocks (@pxref{Header arguments}).  Using Org's properties
+feature, header arguments can be selectively applied to the entire buffer or
+specific sub-trees of the Org document.
 @item source code, header arguments
 @item <body>
 Source code in the dialect of the specified language identifier.
 @end table
-
 
 @node Editing source code
 @section Editing source code
