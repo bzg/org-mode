@@ -23,8 +23,46 @@ into
 
 : (file (lambda () (sexp)))
 
-
 ** New features
+*** Babel
+**** Clojure: new setting ~org-babel-clojure-sync-nrepl-timeout~
+
+Creation of a new setting to specify the Cider timeout.  By setting
+the =org-babel-clojure-sync-nrepl-timeout= setting option.  The value
+is in seconds and if set to =nil= then no timeout will occur.
+
+**** Clojure: new header ~:show-process~
+
+A new block code header has been created for Org Babel that enables
+developers to output the process of an ongoing process into a new
+window/buffer.
+
+You can tell Org Babel to output the process of a running code block.
+
+To show that output you only have to specify the =:show-process=
+option in the code block's header like this:
+
+#+begin_example
+,#+BEGIN_SRC clojure :results output :show-process
+  (dotimes [n 10]
+    (println n ".")
+    (Thread/sleep 500))
+,#+END_SRC
+#+end_example
+
+If =:show-process= is specified that way, then when you will run the
+code using =C-c C-c= a new window will open in Emacs.  Everything that
+is output by the REPL will immediately be added to that new window.
+
+When the processing of the code is finished, then the window and its
+buffer will be closed and the results will be reported in the
+=#+RESULTS= section.
+
+Note that the =:results= parameter's behavior is *not* changed.  If
+=silent= is specified, then no result will be displayed.  If =output=
+is specified then all the output from the window will appears in the
+results section.  If =value= is specified, then only the last returned
+value of the code will be displayed in the results section.
 
 *** Horizontal rules are no longer ignored in LaTeX table math mode
 
