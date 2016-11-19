@@ -931,15 +931,30 @@ Text"
 	    (end-of-line)
 	    (org-export-as (org-test-default-backend)))))
   ;; Body only.
-  (let ((backend (org-test-default-backend)))
-    (setf (org-export-backend-transcoders backend)
-	  (cons '(template . (lambda (body i)
-			       (format "BEGIN\n%sEND" body)))
-		(org-export-backend-transcoders backend)))
-    (org-test-with-temp-text "Text"
-      (should (equal (org-export-as backend nil nil 'body-only)
-		     "Text\n"))
-      (should (equal (org-export-as backend) "BEGIN\nText\nEND")))))
+  (should
+   (equal "Text\n"
+	  (org-test-with-temp-text "Text"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders
+	      '((template . (lambda (b _i) (format "BEGIN\n%sEND" b)))
+		(section . (lambda (_s c _i) c))
+		(paragraph . (lambda (_p c _i) c))))
+	     nil nil 'body-only))))
+  (should
+   (equal "BEGIN\nText\nEND"
+	  (org-test-with-temp-text "Text"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders
+	      '((template . (lambda (b _i) (format "BEGIN\n%sEND" b)))
+		(section . (lambda (_s c _i) c))
+		(paragraph . (lambda (_p c _i) c))))))))
+  ;; Pathological case: Body only on an empty buffer is expected to
+  ;; return an empty string, not nil.
+  (should
+   (org-test-with-temp-text ""
+     (org-export-as (org-test-default-backend) nil nil t))))
 
 (ert-deftest test-org-export/output-file-name ()
   "Test `org-export-output-file-name' specifications."
@@ -1815,6 +1830,43 @@ Para2"
 		(section . (lambda (section contents info) contents))))
 	     info)))))
 
+
+;;; Filters
+
+(ert-deftest test-org-export/filter-apply-functions ()
+  "Test `org-export-filter-apply-functions' specifications."
+  ;; Functions are applied in order and return values are reduced.
+  (should
+   (equal "210"
+	  (org-export-filter-apply-functions
+	   (list (lambda (value &rest _) (concat "1" value))
+		 (lambda (value &rest _) (concat "2" value)))
+	   "0" nil)))
+  ;; Functions returning nil are skipped.
+  (should
+   (equal "20"
+	  (org-export-filter-apply-functions
+	   (list #'ignore (lambda (value &rest _) (concat "2" value)))
+	   "0" nil)))
+  ;; If all functions are skipped, return the initial value.
+  (should
+   (equal "0"
+	  (org-export-filter-apply-functions (list #'ignore) "0" nil)))
+  ;; If any function returns the empty string, final value is the
+  ;; empty string.
+  (should
+   (equal ""
+	  (org-export-filter-apply-functions
+	   (list (lambda (value &rest _) "")
+		 (lambda (value &rest _) (concat "2" value)))
+	   "0" nil)))
+  ;; Any function returning the empty string short-circuits the
+  ;; process.
+  (should
+   (org-export-filter-apply-functions
+    (list (lambda (value &rest _) "")
+	  (lambda (value &rest _) (error "This shouldn't happen")))
+    "0" nil)))
 
 
 ;;; Footnotes
