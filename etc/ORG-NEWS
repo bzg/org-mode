@@ -43,7 +43,7 @@ To show that output you only have to specify the =:show-process=
 option in the code block's header like this:
 
 #+begin_example
-,#+BEGIN_SRC clojure :results output :show-process
+,#+BEGIN_SRC clojure :results output :show-process t
   (dotimes [n 10]
     (println n ".")
     (Thread/sleep 500))

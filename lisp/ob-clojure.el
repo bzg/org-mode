@@ -103,14 +103,14 @@ If the value is nil, timeout is disabled."
 The underlying process performed by the code block can be output
 using the :show-process parameter."
   (let ((expanded (org-babel-expand-body:clojure body params))
-	(show (assq :show-process params))
 	(response (list 'dict))
         result)
     (cl-case org-babel-clojure-backend
       (cider
        (require 'cider)
-       (let ((result-params (cdr (assq :result-params params))))
-         (if (not show)
+       (let ((result-params (cdr (assq :result-params params)))
+	     (show (cdr (assq :show-process params))))
+         (if (member show '(nil "no"))
 	     ;; Run code without showing the process.
 	     (progn
 	       (setq response
