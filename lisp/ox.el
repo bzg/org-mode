@@ -2472,20 +2472,24 @@ channel, as a plist.  It must return a string or nil.")
 (defun org-export-filter-apply-functions (filters value info)
   "Call every function in FILTERS.
 
-Functions are called with arguments VALUE, current export
-back-end's name and INFO.  A function returning a nil value will
-be skipped.  If it returns the empty string, the process ends and
-VALUE is ignored.
+Functions are called with three arguments: a value, the export
+back-end name and the communication channel.  First function in
+FILTERS is called with VALUE as its first argument.  Second
+function in FILTERS is called with the previous result as its
+value, etc.
+
+Functions returning nil are skipped.  Any function returning the
+empty string ends the process, which returns the empty string.
 
 Call is done in a LIFO fashion, to be sure that developer
 specified filters, if any, are called first."
-  (catch 'exit
+  (catch :exit
     (let* ((backend (plist-get info :back-end))
 	   (backend-name (and backend (org-export-backend-name backend))))
       (dolist (filter filters value)
 	(let ((result (funcall filter value backend-name info)))
-	  (cond ((not result) value)
-		((equal value "") (throw 'exit nil))
+	  (cond ((not result))
+		((equal result "") (throw :exit ""))
 		(t (setq value result))))))))
 
 (defun org-export-install-filters (info)
