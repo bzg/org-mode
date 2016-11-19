@@ -103,83 +103,82 @@ If the value is nil, timeout is disabled."
 The underlying process performed by the code block can be output
 using the :show-process parameter."
   (let ((expanded (org-babel-expand-body:clojure body params))
-        (sbuffer "*Clojure Show Process Sub Buffer*")
 	(show (assq :show-process params))
 	(response (list 'dict))
-        status
         result)
     (cl-case org-babel-clojure-backend
       (cider
        (require 'cider)
        (let ((result-params (cdr (assq :result-params params))))
-         ;; Check if the user wants to show the process in an output
-         ;; buffer/window.
-         (when show
-           ;; Create a new window with the show output buffer.
-           (switch-to-buffer-other-window sbuffer)
+         (if (not show)
+	     ;; Run code without showing the process.
+	     (progn
+	       (setq response
+		     (let ((nrepl-sync-request-timeout
+			    org-babel-clojure-sync-nrepl-timeout))
+		       (nrepl-sync-request:eval expanded
+						(cider-current-connection)
+						(cider-current-session))))
+	       (setq result
+		     (concat
+		      (nrepl-dict-get response
+				      (if (or (member "output" result-params)
+					      (member "pp" result-params))
+					  "out"
+					"value"))
+		      (nrepl-dict-get response "ex")
+		      (nrepl-dict-get response "root-ex")
+		      (nrepl-dict-get response "err"))))
+	   ;; Show the process in an output buffer/window.
+           (let ((process-buffer (switch-to-buffer-other-window
+				  "*Clojure Show Process Sub Buffer*"))
+		 status)
+	     ;; Run the Clojure code in nREPL.
+	     (nrepl-request:eval
+	      expanded
+	      (lambda (resp)
+		(when (member "out" resp)
+		  ;; Print the output of the nREPL in the output buffer.
+		  (princ (nrepl-dict-get resp "out") process-buffer))
+		(when (member "ex" resp)
+		  ;; In case there is an exception, then add it to the
+		  ;; output buffer as well.
+		  (princ (nrepl-dict-get resp "ex") process-buffer)
+		  (princ (nrepl-dict-get resp "root-ex") process-buffer))
+		(when (member "err" resp)
+		  ;; In case there is an error, then add it to the
+		  ;; output buffer as well.
+		  (princ (nrepl-dict-get resp "err") process-buffer))
+		(nrepl--merge response resp)
+		;; Update the status of the nREPL output session.
+		(setq status (nrepl-dict-get response "status")))
+	      (cider-current-connection)
+	      (cider-current-session))
 
-           ;; Run the Clojure code in nREPL.
-           (nrepl-request:eval
-            expanded
-            (lambda (resp)
-              (when (member "out" resp)
-                ;; Print the output of the nREPL in the output buffer.
-                (princ (nrepl-dict-get resp "out") (get-buffer sbuffer)))
-              (when (member "ex" resp)
-                ;; In case there is an exception, then add it to the
-                ;; output buffer as well.
-                (princ (nrepl-dict-get resp "ex") (get-buffer sbuffer))
-                (princ (nrepl-dict-get resp "root-ex") (get-buffer sbuffer)))
-              (when (member "err" resp)
-                ;; In case there is an error, then add it to the
-                ;; output buffer as well.
-                (princ (nrepl-dict-get resp "err") (get-buffer sbuffer)))
-              (nrepl--merge response resp)
-              ;; Update the status of the nREPL output session.
-              (setq status (nrepl-dict-get response "status")))
-            (cider-current-connection)
-            (cider-current-session))
+	     ;; Wait until the nREPL code finished to be processed.
+	     (while (not (member "done" status))
+	       (nrepl-dict-put response "status" (remove "need-input" status))
+	       (accept-process-output nil 0.01)
+	       (redisplay))
 
-           ;; Wait until the nREPL code finished to be processed.
-           (while (not (member "done" status))
-             (nrepl-dict-put response "status" (remove "need-input" status))
-             (accept-process-output nil 0.01)
-             (redisplay))
+	     ;; Delete the show buffer & window when the processing is
+	     ;; finalized.
+	     (mapc #'delete-window
+		   (get-buffer-window-list process-buffer nil t))
+	     (kill-buffer process-buffer)
 
-           ;; Delete the show buffer & window when the processing is
-           ;; finalized.
-           (mapc #'delete-window (get-buffer-window-list sbuffer nil t))
-	   (kill-buffer sbuffer)
-
-           ;; Put the output or the value in the result section of the
-           ;; code block.
-           (setq result
-		 (concat (nrepl-dict-get response
-					 (if (or (member "output" result-params)
-						 (member "pp" result-params))
-					     "out"
-					   "value"))
-			 (nrepl-dict-get response "ex")
-			 (nrepl-dict-get response "root-ex")
-			 (nrepl-dict-get response "err"))))
-
-         ;; Check if user want to run code without showing the
-         ;; process.
-         (unless show
-           (setq response (let ((nrepl-sync-request-timeout
-                                 org-babel-clojure-sync-nrepl-timeout))
-                            (nrepl-sync-request:eval expanded
-						     (cider-current-connection)
-						     (cider-current-session))))
-           (setq result
-                 (concat
-                  (nrepl-dict-get response (if (or (member "output" result-params)
-                                                   (member "pp" result-params))
-                                               "out"
-                                             "value"))
-                  (nrepl-dict-get response "ex")
-                  (nrepl-dict-get response "root-ex")
-                  (nrepl-dict-get response "err"))))))
+	     ;; Put the output or the value in the result section of
+	     ;; the code block.
+	     (setq result
+		   (concat
+		    (nrepl-dict-get response
+				    (if (or (member "output" result-params)
+					    (member "pp" result-params))
+					"out"
+				      "value"))
+		    (nrepl-dict-get response "ex")
+		    (nrepl-dict-get response "root-ex")
+		    (nrepl-dict-get response "err")))))))
       (slime
        (require 'slime)
        (with-temp-buffer
