@@ -2251,7 +2251,7 @@ See `org-file-apps'.")
     ("dvi"    . "xdvi %s")
     ("fig"    . "xfig %s")
     (t . "open %s"))
-  "Default file applications on a MacOS X system.
+  "Default file applications on a macOS system.
 The system \"open\" is known as a default, but we use X11 applications
 for some files for which the OS does not have a good default.
 See `org-file-apps'.")
@@ -2323,7 +2323,7 @@ Possible values for the file identifier are:
                will also open html files inside Emacs, unless you add
                (\"html\" . default) to the list as well.
  `system'      The system command to open files, like `open' on Windows
-               and Mac OS X, and mailcap under GNU/Linux.  This is the command
+               and macOS, and mailcap under GNU/Linux.  This is the command
                that will be selected if you call `org-open-at-point' with a
                double prefix argument (`\\[universal-argument] \
 \\[universal-argument] \\[org-open-at-point]').
