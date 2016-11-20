@@ -3,7 +3,6 @@
 ;; Copyright (C) 2016  Nicolas Goaziou
 
 ;; Author: Nicolas Goaziou <mail@nicolasgoaziou.fr>
-;; Keywords: local
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -258,7 +257,7 @@ Unless set otherwise in PROPERTIES, `:base-directory' is set to
 			   :exclude "."
 			   :include ("a.org")
 			   :sitemap-format-entry
-			   (lambda (f d _s) (file-relative-name f d)))
+			   (lambda (f _s _p) f))
 	   (lambda (dir)
 	     (with-temp-buffer
 	       (insert-file-contents (expand-file-name "sitemap.org" dir))
@@ -269,8 +268,7 @@ Unless set otherwise in PROPERTIES, `:base-directory' is set to
 	   '(:auto-sitemap t
 			   :exclude "."
 			   :include ("a.org")
-			   :sitemap-function
-			   (lambda (title _files) "Custom!"))
+			   :sitemap-function (lambda (title _files) "Custom!"))
 	   (lambda (dir)
 	     (with-temp-buffer
 	       (insert-file-contents (expand-file-name "sitemap.org" dir))

@@ -14534,12 +14534,13 @@ becomes @file{sitemap.html}).
 
 @item @code{:sitemap-format-entry}
 @tab With this option one can tell how a site-map entry is formatted in the
-site-map.  It is a function called with three arguments: the absolute file or
-directory name, the base directory of the project and the site-map style.  It
-is expected to return a string.  Default value turns file names into links
-and use document titles as descriptions.  For specific formatting needs, one
-can use @code{org-publish-find-property} to retrieve additional information
-about published documents.
+site-map.  It is a function called with three arguments: the file or
+directory name relative to base directory of the project, the site-map style
+and the current project.  It is expected to return a string.  Default value
+turns file names into links and use document titles as descriptions.  For
+specific formatting needs, one can use @code{org-publish-find-date},
+@cod{org-publish-find-title} and @code{org-publish-find-property}, to
+retrieve additional information about published documents.
 
 @item @code{:sitemap-function}
 @tab Plug-in function to use for generation of the sitemap.  It is called
