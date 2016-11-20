@@ -26,15 +26,15 @@ should still return the link."
   (should
    (let ((default-directory temporary-file-directory))
      (org-test-with-temp-text
-      "
+	 "
 * Test
   #+<point>BEGIN_SRC emacs-lisp :file test.txt :cache yes
     (message \"test\")
   #+END_SRC"
-      ;; Execute twice as the first time creates the cache.
-      (org-babel-execute-src-block)
-      (string= (concat default-directory "test.txt")
-	       (org-babel-execute-src-block))))))
+       ;; Execute twice as the first time creates the cache.
+       (org-babel-execute-src-block)
+       (string= (expand-file-name "test.txt")
+		(org-babel-execute-src-block))))))
 
 (ert-deftest test-ob/multi-line-header-regexp ()
   (should(equal "^[ \t]*#\\+headers?:[ \t]*\\([^\n]*\\)$"
