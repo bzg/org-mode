@@ -55,7 +55,7 @@
   :type 'string)
 
 (defvar org-babel-js-function-wrapper
-  "require('sys').print(require('sys').inspect(function(){%s}()));"
+  "require('sys').print(require('sys').inspect(function(){\n%s\n}()));"
   "Javascript code to print value of body.")
 
 (defun org-babel-execute:js (body params)
