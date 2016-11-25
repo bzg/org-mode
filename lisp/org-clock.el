@@ -2370,6 +2370,7 @@ the currently selected interval size."
 		    (`file-with-archives
 		     (and buffer-file-name
 			  (org-add-archive-files (list buffer-file-name))))
+		    ((pred consp) scope)
 		    (_ (or (buffer-file-name) (current-buffer)))))
 	   (block (plist-get params :block))
 	   (ts (plist-get params :tstart))
@@ -2430,8 +2431,7 @@ the currently selected interval size."
 	     ;; Even though `file-with-archives' can consist of
 	     ;; multiple files, we consider this is one extended file
 	     ;; instead.
-	     (cond ((eq scope 'file-with-archives) nil)
-		   ((consp files)))))
+	     (and (consp files) (not (eq scope 'file-with-archives)))))
 
 	(funcall formatter
 		 origin
