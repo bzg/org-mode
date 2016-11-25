@@ -5597,8 +5597,8 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	 mm
 	 (deadline-position-alist
 	  (mapcar (lambda (a) (and (setq mm (get-text-property
-					0 'org-hd-marker a))
-			      (cons (marker-position mm) a)))
+					     0 'org-hd-marker a))
+				   (cons (marker-position mm) a)))
 		  deadline-results))
 	 (remove-re org-ts-regexp)
 	 (regexp
@@ -5631,8 +5631,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	(org-agenda-skip)
 	(if (and (match-end 1)
 		 (not (= d1 (org-agenda--timestamp-to-absolute
-			     (match-string 1) d1 nil show-all
-			     (current-buffer) b0))))
+			     (match-string 1) d1 nil (current-buffer) b0))))
 	    (throw :skip nil))
 	(if (and e3
 		 (not (org-diary-sexp-entry (buffer-substring b3 e3) "" date)))
@@ -6056,7 +6055,7 @@ specification like [h]h:mm."
 	       ;; LAST-REPEAT is the repeat closest to CURRENT.
 	       ;; Otherwise, LAST-REPEAT is equal to DEADLINE.
 	       (last-repeat (org-agenda--timestamp-to-absolute
-			     s current 'past show-all (current-buffer) pos))
+			     s current 'past (current-buffer) pos))
 	       (deadline (org-agenda--timestamp-to-absolute s current))
 	       (diff (- last-repeat current))
 	       (suppress-prewarning
@@ -6075,7 +6074,7 @@ specification like [h]h:mm."
 		    ;; Set pre-warning to no earlier than SCHEDULED.
 		    (min (- last-repeat
 			    (org-agenda--timestamp-to-absolute
-			     scheduled current 'past show-all
+			     scheduled current 'past
 			     (current-buffer)
 			     (save-excursion
 			       (beginning-of-line)
