@@ -3613,7 +3613,7 @@ produced."
 	(mapc #'delete-file
 	      (directory-files
 	       (file-name-directory outfile)
-	       nil
+	       t
 	       (concat (regexp-quote (file-name-base outfile))
 		       "\\(?:\\.[0-9]+\\)?\\."
 		       (regexp-opt org-latex-logfiles-extensions))
