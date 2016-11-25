@@ -17802,7 +17802,7 @@ days in order to avoid rounding problems."
 
 (org-define-error 'org-diary-sexp-no-match "Unable to match diary sexp")
 
-(defun org-time-string-to-absolute (s &optional daynr prefer show-all buffer pos)
+(defun org-time-string-to-absolute (s &optional daynr prefer buffer pos)
   "Convert time stamp S to an absolute day number.
 
 If DAYNR in non-nil, and there is a specifier for a cyclic time
@@ -17826,7 +17826,7 @@ signalled."
 	      (match-string 1 s) "" (calendar-gregorian-from-absolute daynr)))
 	daynr
       (signal 'org-diary-sexp-no-match (list s))))
-   ((and daynr show-all) (org-closest-date s daynr prefer))
+   (daynr (org-closest-date s daynr prefer))
    (t (time-to-days
        (condition-case errdata
 	   (apply #'encode-time (org-parse-time-string s))
