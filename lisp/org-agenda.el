@@ -6273,7 +6273,9 @@ scheduled items with an hour specification like [h]h:mm."
 			   (/= repeat current)))
 	      (throw :skip nil)))
 	  ;; Possibly skip done tasks.
-	  (when (and donep org-agenda-skip-scheduled-if-done)
+	  (when (and donep
+		     (or org-agenda-skip-scheduled-if-done
+			 (/= schedule current)))
 	    (throw :skip nil))
 	  ;; Skip entry if it already appears as a deadline, per
 	  ;; `org-agenda-skip-scheduled-if-deadline-is-shown'.  This
