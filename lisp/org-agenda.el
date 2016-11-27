@@ -844,10 +844,9 @@ restricted to unfinished TODO entries only."
 
 (defcustom org-agenda-skip-scheduled-if-done nil
   "Non-nil means don't show scheduled items in agenda when they are done.
-This is relevant for the daily/weekly agenda, not for the TODO list.  And
-it applies only to the actual date of the scheduling.  Warnings about
-an item with a past scheduling dates are always turned off when the item
-is DONE."
+This is relevant for the daily/weekly agenda, not for the TODO list.  It
+applies only to the actual date of the scheduling.  Warnings about an item
+with a past scheduling dates are always turned off when the item is DONE."
   :group 'org-agenda-skip
   :group 'org-agenda-daily/weekly
   :type 'boolean)
@@ -896,8 +895,8 @@ several times."
 (defcustom org-agenda-skip-deadline-if-done nil
   "Non-nil means don't show deadlines when the corresponding item is done.
 When nil, the deadline is still shown and should give you a happy feeling.
-This is relevant for the daily/weekly agenda.  And it applied only to the
-actually date of the deadline.  Warnings about approaching and past-due
+This is relevant for the daily/weekly agenda.  It applies only to the
+actual date of the deadline.  Warnings about approaching and past-due
 deadlines are always turned off when the item is DONE."
   :group 'org-agenda-skip
   :group 'org-agenda-daily/weekly
@@ -6273,7 +6272,9 @@ scheduled items with an hour specification like [h]h:mm."
 			   (/= repeat current)))
 	      (throw :skip nil)))
 	  ;; Possibly skip done tasks.
-	  (when (and donep org-agenda-skip-scheduled-if-done)
+	  (when (and donep
+		     (or org-agenda-skip-scheduled-if-done
+			 (/= schedule current)))
 	    (throw :skip nil))
 	  ;; Skip entry if it already appears as a deadline, per
 	  ;; `org-agenda-skip-scheduled-if-deadline-is-shown'.  This
