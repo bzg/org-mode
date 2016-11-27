@@ -4092,7 +4092,7 @@ All available processes and theirs documents can be found in
      :image-output-type "png"
      :image-size-adjust (1.0 . 1.0)
      :latex-compiler ("latex -interaction nonstopmode -output-directory %o %f")
-     :image-converter ("dvipng -fg %F -bg %B -D %D -T tight -o %o%b.png %f"))
+     :image-converter ("dvipng -fg %F -bg %B -D %D -T tight -o %O %f"))
     (dvisvgm
      :programs ("latex" "dvisvgm")
      :description "dvi > svg"
@@ -4102,7 +4102,7 @@ All available processes and theirs documents can be found in
      :image-output-type "svg"
      :image-size-adjust (1.7 . 1.5)
      :latex-compiler ("latex -interaction nonstopmode -output-directory %o %f")
-     :image-converter ("dvisvgm %f -n -b min -c %S -o %o%b.svg"))
+     :image-converter ("dvisvgm %f -n -b min -c %S -o %O"))
     (imagemagick
      :programs ("latex" "convert")
      :description "pdf > png"
@@ -4113,7 +4113,7 @@ All available processes and theirs documents can be found in
      :image-size-adjust (1.0 . 1.0)
      :latex-compiler ("pdflatex -interaction nonstopmode -output-directory %o %f")
      :image-converter
-     ("convert -density %D -trim -antialias %f -quality 100 %o%b.png")))
+     ("convert -density %D -trim -antialias %f -quality 100 %O")))
   "Definitions of external processes for LaTeX previewing.
 Org mode can use some external commands to generate TeX snippet's images for
 previewing or inserting into HTML files, e.g., \"dvipng\".  This variable tells
@@ -4156,9 +4156,10 @@ PROPERTIES accepts the following attributes:
 
 Place-holders used by `:image-converter' and `:latex-compiler':
 
-  %f    input file name.
-  %b    base name of input file.
-  %o    base directory of input file.
+  %f    input file name
+  %b    base name of input file
+  %o    base directory of input file
+  %O    absolute output file name
 
 Place-holders only used by `:image-converter':
 
@@ -22764,11 +22765,12 @@ If PROCESS is a function, it is called with a single argument:
 the SOURCE file.
 
 If it is a list of commands, each of them is called using
-`shell-command'.  By default, in each command, %b, %f, %F and %o
-are replaced with, respectively, SOURCE base name, name, full
-name and directory.  It is possible, however, to use more
-place-holders by specifying them in optional argument SPEC, as an
-alist following the pattern (CHARACTER . REPLACEMENT-STRING).
+`shell-command'.  By default, in each command, %b, %f, %F, %o and
+%O are replaced with, respectively, SOURCE base name, name, full
+name, directory and absolute output file name.  It is possible,
+however, to use more place-holders by specifying them in optional
+argument SPEC, as an alist following the pattern (CHARACTER
+. REPLACEMENT-STRING).
 
 When PROCESS is a list of commands, optional argument LOG-BUF can
 be set to a buffer or a buffer name.  `shell-command' then uses
@@ -22776,6 +22778,7 @@ it for output."
   (let* ((base-name (file-name-base source))
 	 (full-name (file-truename source))
 	 (out-dir (file-name-directory source))
+	 (output (expand-file-name (concat base-name "." ext) out-dir))
 	 (time (current-time))
 	 (err-msg (if (stringp err-msg) (concat ".  " err-msg) "")))
     (save-window-excursion
@@ -22787,16 +22790,16 @@ it for output."
 			     `((?b . ,(shell-quote-argument base-name))
 			       (?f . ,(shell-quote-argument source))
 			       (?F . ,(shell-quote-argument full-name))
-			       (?o . ,(shell-quote-argument out-dir))))))
+			       (?o . ,(shell-quote-argument out-dir))
+			       (?O . ,(shell-quote-argument output))))))
 	   (dolist (command process)
 	     (shell-command (format-spec command spec) log-buf))))
 	(_ (error "No valid command to process %S%s" source err-msg))))
     ;; Check for process failure.  Output file is expected to be
     ;; located in the same directory as SOURCE.
-    (let ((output (expand-file-name (concat base-name "." ext) out-dir)))
-      (unless (org-file-newer-than-p output time)
-	(error (format "File %S wasn't produced%s" output err-msg)))
-      output)))
+    (unless (org-file-newer-than-p output time)
+      (error (format "File %S wasn't produced%s" output err-msg)))
+    output))
 
 ;;; Indentation
 

@@ -1145,12 +1145,15 @@ A better approach is to use a compiler suit such as `latexmk'."
     "%latex -interaction nonstopmode -output-directory %o %f"
     "%latex -interaction nonstopmode -output-directory %o %f")
   "Commands to process a LaTeX file to a PDF file.
+
 This is a list of strings, each of them will be given to the
 shell as a command.  %f in the command will be replaced by the
-full file name, %b by the file base name (i.e. without directory
-and extension parts), %o by the base directory of the file,
-%latex is the LaTeX compiler (see `org-latex-compiler'), and %bib
-is the BibTeX-like compiler (see `org-latex-bib-compiler').
+relative file name, %F by the absolute file name, %b by the file
+base name (i.e. without directory and extension parts), %o by the
+base directory of the file, %O by the absolute file name of the
+output file, %latex is the LaTeX compiler (see
+`org-latex-compiler'), and %bib is the BibTeX-like compiler (see
+`org-latex-bib-compiler').
 
 The reason why this is a list is that it usually takes several
 runs of `pdflatex', maybe mixed with a call to `bibtex'.  Org
