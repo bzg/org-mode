@@ -22769,8 +22769,9 @@ If it is a list of commands, each of them is called using
 %O are replaced with, respectively, SOURCE base name, name, full
 name, directory and absolute output file name.  It is possible,
 however, to use more place-holders by specifying them in optional
-argument SPEC, as an alist following the pattern (CHARACTER
-. REPLACEMENT-STRING).
+argument SPEC, as an alist following the pattern
+
+  (CHARACTER . REPLACEMENT-STRING).
 
 When PROCESS is a list of commands, optional argument LOG-BUF can
 be set to a buffer or a buffer name.  `shell-command' then uses
