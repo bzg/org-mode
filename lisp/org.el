@@ -18125,7 +18125,7 @@ INACTIVE-OK."
 (defun org-at-clock-log-p nil
   "Is the cursor on the clock log line?"
   (save-excursion
-    (move-beginning-of-line 1)
+    (beginning-of-line)
     (looking-at org-clock-line-re)))
 
 (defvar org-clock-history)                     ; defined in org-clock.el
