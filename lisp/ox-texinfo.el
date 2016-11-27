@@ -346,10 +346,13 @@ The function should return the string to be exported."
 
 (defcustom org-texinfo-info-process '("makeinfo %f")
   "Commands to process a Texinfo file to an INFO file.
-This is list of strings, each of them will be given to the shell
-as a command.  %f in the command will be replaced by the full
-file name, %b by the file base name (i.e without extension) and
-%o by the base directory of the file."
+
+This is a list of strings, each of them will be given to the
+shell as a command.  %f in the command will be replaced by the
+relative file name, %F by the absolute file name, %b by the file
+base name (i.e. without directory and extension parts), %o by the
+base directory of the file and %O by the absolute file name of
+the output file."
   :group 'org-export-texinfo
   :type '(repeat :tag "Shell command sequence"
 		 (string :tag "Shell command")))
