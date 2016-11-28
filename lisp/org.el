@@ -24693,7 +24693,8 @@ Move to the previous element at the same level, when possible."
   "Move backward element at point."
   (interactive)
   (if (org-with-limited-levels (org-at-heading-p)) (org-move-subtree-up)
-    (let* ((elem (org-element-at-point))
+    (let* ((elem (or (org-element-at-point)
+		     (user-error "No element at point")))
 	   (prev-elem
 	    (save-excursion
 	      (goto-char (org-element-property :begin elem))
@@ -24719,7 +24720,8 @@ Move to the previous element at the same level, when possible."
   "Move forward element at point."
   (interactive)
   (let* ((pos (point))
-	 (elem (org-element-at-point)))
+	 (elem (or (org-element-at-point)
+		   (user-error "No element at point"))))
     (when (= (point-max) (org-element-property :end elem))
       (user-error "Cannot drag element forward"))
     (goto-char (org-element-property :end elem))
