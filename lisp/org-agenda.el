@@ -6048,7 +6048,8 @@ specification like [h]h:mm."
 	 (regexp (if with-hour
 		     org-deadline-time-hour-regexp
 		   org-deadline-time-regexp))
-	 (todayp (org-agenda-today-p date)) ; DATE bound by calendar.
+	 (today (org-today))
+	 (today? (org-agenda-today-p date)) ; DATE bound by calendar.
 	 (current (calendar-absolute-from-gregorian date))
 	 deadline-items)
     (goto-char (point-min))
@@ -6059,18 +6060,21 @@ specification like [h]h:mm."
 	(let* ((s (match-string 1))
 	       (pos (1- (match-beginning 1)))
 	       (todo-state (save-match-data (org-get-todo-state)))
-	       (donep (member todo-state org-done-keywords))
+	       (done? (member todo-state org-done-keywords))
 	       (show-all (or (eq org-agenda-repeating-timestamp-show-all t)
 			     (member todo-state
 				     org-agenda-repeating-timestamp-show-all)))
-	       ;; DEADLINE is the current scheduled date.  When it
-	       ;; contains a repeater and SHOW-ALL is non-nil,
-	       ;; LAST-REPEAT is the repeat closest to CURRENT.
-	       ;; Otherwise, LAST-REPEAT is equal to DEADLINE.
-	       (last-repeat (org-agenda--timestamp-to-absolute
-			     s current 'past (current-buffer) pos))
-	       (deadline (org-agenda--timestamp-to-absolute s current))
-	       (diff (- last-repeat current))
+	       ;; DEADLINE is the bare deadline date, i.e., without
+	       ;; any repeater.  REPEAT is closest repeat after
+	       ;; CURRENT, if all repeated time stamps are to be
+	       ;; shown, or after TODAY otherwise.  REPEAT only
+	       ;; applies to future dates.
+	       (deadline (org-agenda--timestamp-to-absolute s))
+	       (repeat
+		(if (< current today) deadline
+		  (org-agenda--timestamp-to-absolute
+		   s (if show-all current today) 'future (current-buffer) pos)))
+	       (diff (- deadline current))
 	       (suppress-prewarning
 		(let ((scheduled
 		       (and org-agenda-skip-deadline-prewarning-if-scheduled
@@ -6085,14 +6089,7 @@ specification like [h]h:mm."
 		   ((eq org-agenda-skip-deadline-prewarning-if-scheduled
 			'pre-scheduled)
 		    ;; Set pre-warning to no earlier than SCHEDULED.
-		    (min (- last-repeat
-			    (org-agenda--timestamp-to-absolute
-			     scheduled current 'past
-			     (current-buffer)
-			     (save-excursion
-			       (beginning-of-line)
-			       (1+ (search-forward org-deadline-string)))))
-			 org-deadline-warning-days))
+		    (min (- deadline scheduled) org-deadline-warning-days))
 		   ;; Set pre-warning to deadline.
 		   (t 0))))
 	       (wdays (if suppress-prewarning
@@ -6101,14 +6098,17 @@ specification like [h]h:mm."
 			(org-get-wdays s))))
 	  ;; When to show a deadline in the calendar: if the
 	  ;; expiration is within WDAYS warning time.  Past-due
-	  ;; deadlines are only shown on the current date
-	  (unless (or (and (<= diff wdays)
-			   (and todayp (not org-agenda-only-exact-dates)))
-		      (= diff 0))
+	  ;; deadlines are only shown on today agenda.
+	  (when (cond ((= current deadline) nil)
+		      ((< deadline today)
+		       (and (not today?)
+			    (or (< current today) (/= repeat current))))
+		      ((> deadline current)
+		       (or (not today?) (> diff wdays)))
+		      (t (/= repeat current)))
 	    (throw :skip nil))
-	  ;; Skip done tasks if `org-agenda-skip-deadline-if-done' is
-	  ;; non-nil or if it isn't applicable to CURRENT deadline.
-	  (when (and donep
+	  ;; Possibly skip done tasks.
+	  (when (and done?
 		     (or org-agenda-skip-deadline-if-done
 			 (/= deadline current)))
 	    (throw :skip nil))
@@ -6134,22 +6134,25 @@ specification like [h]h:mm."
 		      'time))
 		   (item
 		    (org-agenda-format-item
-		     ;; For past deadlines, make sure to report time
-		     ;; difference since date S, not since closest
-		     ;; repeater.
-		     (let ((diff (if (< (org-today) current) diff
-				   (- deadline current))))
-		       (if (= diff 0) (car org-agenda-deadline-leaders)
-			 (let ((future (nth 1 org-agenda-deadline-leaders))
-			       (past (nth 2 org-agenda-deadline-leaders)))
-			   (cond ((> diff 0) (format future diff))
-				 ((string= future past) (format past diff))
-				 (t (format past (abs diff)))))))
+		     ;; Insert appropriate suffixes before deadlines.
+		     (pcase-let ((`(,now ,future ,past)
+				  org-agenda-deadline-leaders))
+		       (cond
+			;; Future (i.e., repeated) deadlines are
+			;; displayed as new headlines.
+			((> current today) now)
+			;; When SHOW-ALL is nil, prefer repeated
+			;; deadlines over reminders of past deadlines.
+			((and (not show-all) (= repeat today)) now)
+			((= deadline current) now)
+			((< deadline current) (format past (- diff)))
+			(t (format future diff))))
 		     head level category tags
-		     (and (= diff 0) timestr)))
+		     (and (or (= repeat current) (= deadline current))
+			  timestr)))
 		   (face (org-agenda-deadline-face
 			  (- 1 (/ (float (- deadline current)) (max wdays 1)))))
-		   (upcomingp (and todayp (> diff 0)))
+		   (upcoming? (and today? (> deadline today)))
 		   (warntime (get-text-property (point) 'org-appt-warntime)))
 	      (org-add-props item props
 		'org-marker (org-agenda-new-marker pos)
@@ -6157,11 +6160,22 @@ specification like [h]h:mm."
 		'warntime warntime
 		'level level
 		'ts-date deadline
-		'priority (- (org-get-priority item) diff)
+		'priority
+		;; Adjust priority according to the associated
+		;; deadline of the item.  Past-due deadlines get
+		;; increased priority.
+		(let ((adjust (cond ((< current today) diff)
+				    ((> current today) (- repeat current))
+				    ;; Since a nil SHOW-ALL prefer
+				    ;; repeated deadlines, set
+				    ;; adjustment accordingly.
+				    ((and (not show-all) (= repeat current)) 0)
+				    (t diff))))
+		  (+ adjust (org-get-priority item)))
 		'todo-state todo-state
-		'type (if upcomingp "upcoming-deadline" "deadline")
-		'date (if upcomingp date deadline)
-		'face (if donep 'org-agenda-done face)
+		'type (if upcoming? "upcoming-deadline" "deadline")
+		'date (if upcoming? date deadline)
+		'face (if done? 'org-agenda-done face)
 		'undone-face face
 		'done-face 'org-agenda-done)
 	      (push item deadline-items))))))
