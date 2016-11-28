@@ -3244,18 +3244,27 @@ Outside."
   ;; Error when trying to move first element of buffer.
   (should-error
    (org-test-with-temp-text "Paragraph 1.\n\nParagraph 2."
-     (org-drag-element-backward)))
+     (org-drag-element-backward))
+   :type 'user-error)
   ;; Error when trying to swap nested elements.
   (should-error
    (org-test-with-temp-text "#+BEGIN_CENTER\nTest.\n#+END_CENTER"
      (forward-line)
-     (org-drag-element-backward)))
+     (org-drag-element-backward))
+   :type 'user-error)
   ;; Error when trying to swap an headline element and a non-headline
   ;; element.
   (should-error
    (org-test-with-temp-text "Test.\n* Head 1"
      (forward-line)
-     (org-drag-element-backward)))
+     (org-drag-element-backward))
+   :type 'user-error)
+  ;; Error when called before first element.
+  (should-error
+   (org-test-with-temp-text "\n"
+     (forward-line)
+     (org-drag-element-backward))
+   :type 'user-error)
   ;; Preserve visibility of elements and their contents.
   (should
    (equal '((63 . 82) (26 . 48))
@@ -3287,7 +3296,13 @@ Text.
   ;;    headline.
   (org-test-with-temp-text "Test.\n* Head 1"
     (should-error (org-drag-element-forward)))
-  ;; 4. Otherwise, swap elements, preserving column and blank lines
+  ;; 4. Error when called before first element.
+  (should-error
+   (org-test-with-temp-text "\n"
+     (forward-line)
+     (org-drag-element-backward))
+   :type 'user-error)
+  ;; 5. Otherwise, swap elements, preserving column and blank lines
   ;;    between elements.
   (org-test-with-temp-text "Paragraph 1\n\n\nPara2\n\nPara3"
     (search-forward "graph")
