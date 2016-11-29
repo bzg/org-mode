@@ -6128,10 +6128,14 @@ specification like [h]h:mm."
 				 (memq 'agenda
 				       org-agenda-use-tag-inheritance)))))
 		   (tags (org-get-tags-at nil (not inherited-tags)))
-		   (timestr
-		    (if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
-			(concat (substring s (match-beginning 1)) " ")
-		      'time))
+		   (time
+		    (cond
+		     ;; No time of day designation if it is only
+		     ;; a reminder.
+		     ((and (/= current deadline) (/= current repeat)) nil)
+		     ((string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
+		      (concat (substring s (match-beginning 1)) " "))
+		     (t 'time)))
 		   (item
 		    (org-agenda-format-item
 		     ;; Insert appropriate suffixes before deadlines.
@@ -6149,7 +6153,7 @@ specification like [h]h:mm."
 			(t (format future diff))))
 		     head level category tags
 		     (and (or (= repeat current) (= deadline current))
-			  timestr)))
+			  time)))
 		   (face (org-agenda-deadline-face
 			  (- 1 (/ (float (- deadline current)) (max wdays 1)))))
 		   (upcoming? (and today? (> deadline today)))
@@ -6329,10 +6333,14 @@ scheduled items with an hour specification like [h]h:mm."
 		   (level
 		    (make-string (org-reduced-level (org-outline-level)) ?\s))
 		   (head (buffer-substring (point) (line-end-position)))
-		   (timestr
-		    (if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
-			(concat (substring s (match-beginning 1)) " ")
-		      'time))
+		   (time
+		    (cond
+		     ;; No time of day designation if it is only
+		     ;; a reminder.
+		     ((and (/= current schedule) (/= current repeat)) nil)
+		     ((string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
+		      (concat (substring s (match-beginning 1)) " "))
+		     (t 'time)))
 		   (item
 		    (org-agenda-format-item
 		     (pcase-let ((`(,first ,next) org-agenda-scheduled-leaders))
@@ -6350,7 +6358,7 @@ scheduled items with an hour specification like [h]h:mm."
 			;; Subsequent reminders.  Count from base
 			;; schedule.
 			(t (format next (1+ diff)))))
-		     head level category tags timestr nil habitp))
+		     head level category tags time nil habitp))
 		   (face (cond ((and (not habitp) (< current today))
 				'org-scheduled-previously)
 			       (todayp 'org-scheduled-today)
