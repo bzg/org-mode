@@ -6165,16 +6165,13 @@ specification like [h]h:mm."
 		'level level
 		'ts-date deadline
 		'priority
-		;; Adjust priority according to the associated
-		;; deadline of the item.  Past-due deadlines get
-		;; increased priority.
-		(let ((adjust (cond ((< current today) diff)
-				    ((> current today) (- repeat current))
-				    ;; Since a nil SHOW-ALL prefer
-				    ;; repeated deadlines, set
-				    ;; adjustment accordingly.
+		;; Adjust priority to today reminders about deadlines.
+		;; Overdue deadlines get the highest priority
+		;; increase, then imminent deadlines and eventually
+		;; more distant deadlines.
+		(let ((adjust (cond ((not today?) 0)
 				    ((and (not show-all) (= repeat current)) 0)
-				    (t diff))))
+				    (t (- diff)))))
 		  (+ adjust (org-get-priority item)))
 		'todo-state todo-state
 		'type (if upcoming? "upcoming-deadline" "deadline")
