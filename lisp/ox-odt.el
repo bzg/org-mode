@@ -3741,9 +3741,9 @@ contextual information."
 		 (org-link
 		  (let ((link (with-temp-buffer
 				(insert latex-frag)
-				(org-format-latex cache-subdir cache-dir
-						  nil display-msg
-						  nil processing-type)
+				(org-format-latex cache-subdir nil nil cache-dir
+						  nil display-msg nil
+						  processing-type)
 				(buffer-substring-no-properties
 				 (point-min) (point-max)))))
 		    (if (string-match-p "file:\\([^]]*\\)" link) link
