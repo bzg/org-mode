@@ -19386,12 +19386,9 @@ inspection."
 	    (with-current-buffer (find-file-noselect tmp-out-file t)
 	      (goto-char (point-min))
 	      (when (re-search-forward
-		     (concat
-		      (regexp-quote
-		       "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"")
-		      "[^>]*?>"
-		      "\\(.\\|\n\\)*"
-		      "</math>")
+		     (format "<math[^>]*?%s[^>]*?>\\(.\\|\n\\)*</math>"
+			     (regexp-quote
+			      "xmlns=\"http://www.w3.org/1998/Math/MathML\""))
 		     nil t)
 		(prog1 (match-string 0) (kill-buffer))))))
     (cond
