@@ -19458,9 +19458,8 @@ inspection."
 
 (defun org--get-display-dpi ()
   "Get the DPI of the display.
-
-Assumes that the display has the same pixel width in the
-horizontal and vertical directions."
+The function assumes that the display has the same pixel width in
+the horizontal and vertical directions."
   (if (display-graphic-p)
       (round (/ (display-pixel-height)
 		(/ (display-mm-height) 25.4)))
@@ -19503,12 +19502,11 @@ a HTML file."
 	 (texfilebase (make-temp-name
 		       (expand-file-name "orgtex" tmpdir)))
 	 (texfile (concat texfilebase ".tex"))
-	 (font-height (face-attribute 'default :height nil))
 	 (image-size-adjust (or (plist-get processing-info :image-size-adjust)
 				'(1.0 . 1.0)))
 	 (scale (* (if buffer (car image-size-adjust) (cdr image-size-adjust))
 		   (or (plist-get options (if buffer :scale :html-scale)) 1.0)))
-	 (dpi (* scale (floor (if buffer font-height 140.0))))
+	 (dpi (* scale (if buffer (org--get-display-dpi) 140.0)))
 	 (fg (or (plist-get options (if buffer :foreground :html-foreground))
 		 "Black"))
 	 (bg (or (plist-get options (if buffer :background :html-background))
