@@ -5653,13 +5653,19 @@ displayed in agenda view."
 	    (throw :skip nil))
 	  ;; When time-stamp doesn't match CURRENT but has a repeater,
 	  ;; make sure it repeats on CURRENT.  Furthermore, if
-	  ;; SHOW-ALL is nil, ensure that repeater is the very first
-	  ;; one to trigger since today.
+	  ;; SHOW-ALL is nil, ensure that repeats are only the first
+	  ;; before and the first after today.
 	  (when (and repeat
-		     (let ((base (if show-all current today)))
-		       (/= current
-			   (org-agenda--timestamp-to-absolute
-			    repeat base 'future (current-buffer) pos))))
+		     (if show-all
+			 (/= current
+			     (org-agenda--timestamp-to-absolute
+			      repeat current 'future (current-buffer) pos))
+		       (and (/= current
+				(org-agenda--timestamp-to-absolute
+				 repeat today 'past (current-buffer) pos))
+			    (/= current
+				(org-agenda--timestamp-to-absolute
+				 repeat today 'future (current-buffer) pos)))))
 	    (throw :skip nil))
 	  (save-excursion
 	    (re-search-backward org-outline-regexp-bol nil t)
@@ -6065,11 +6071,14 @@ specification like [h]h:mm."
 			     (member todo-state
 				     org-agenda-repeating-timestamp-show-all)))
 	       ;; DEADLINE is the bare deadline date, i.e., without
-	       ;; any repeater.  REPEAT is closest repeat after
-	       ;; CURRENT, if all repeated time stamps are to be
-	       ;; shown, or after TODAY otherwise.  REPEAT only
-	       ;; applies to future dates.
-	       (deadline (org-agenda--timestamp-to-absolute s))
+	       ;; any repeater, or the last repeat if SHOW-ALL is
+	       ;; non-nil.  REPEAT is closest repeat after CURRENT, if
+	       ;; all repeated time stamps are to be shown, or after
+	       ;; TODAY otherwise.  REPEAT only applies to future
+	       ;; dates.
+	       (deadline (if show-all (org-agenda--timestamp-to-absolute s)
+			   (org-agenda--timestamp-to-absolute
+			    s today 'past (current-buffer) pos)))
 	       (repeat
 		(if (< current today) deadline
 		  (org-agenda--timestamp-to-absolute
@@ -6225,11 +6234,14 @@ scheduled items with an hour specification like [h]h:mm."
 			     (member todo-state
 				     org-agenda-repeating-timestamp-show-all)))
 	       ;; SCHEDULE is the bare scheduled date, i.e., without
-	       ;; any repeater.  REPEAT is the closest repeat after
-	       ;; CURRENT, if all repeated time stamps are to be
-	       ;; shown, or after TODAY otherwise.  REPEAT only
-	       ;; applies to future dates.
-	       (schedule (org-agenda--timestamp-to-absolute s))
+	       ;; any repeater if non-nil, or last repeat if SHOW-ALL
+	       ;; is nil.  REPEAT is the closest repeat after CURRENT,
+	       ;; if all repeated time stamps are to be shown, or
+	       ;; after TODAY otherwise.  REPEAT only applies to
+	       ;; future dates.
+	       (schedule (if show-all (org-agenda--timestamp-to-absolute s)
+			   (org-agenda--timestamp-to-absolute
+			    s today 'past (current-buffer) pos)))
 	       (repeat (cond ((< current today) schedule)
 			     (show-all
 			      (org-agenda--timestamp-to-absolute
