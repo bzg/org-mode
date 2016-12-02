@@ -6365,7 +6365,7 @@ scheduled items with an hour specification like [h]h:mm."
 			;; schedule.
 			(t (format next (1+ diff)))))
 		     head level category tags time nil habitp))
-		   (face (cond ((and (not habitp) (< current today))
+		   (face (cond ((and (not habitp) pastschedp)
 				'org-scheduled-previously)
 			       (todayp 'org-scheduled-today)
 			       (t 'org-scheduled)))
