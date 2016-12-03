@@ -1260,17 +1260,38 @@ Custom commands can set this variable in the options section."
   :version "24.1"
   :type 'boolean)
 
-(defcustom org-agenda-repeating-timestamp-show-all t
-  "Non-nil means show all occurrences of a repeating stamp in the agenda.
-When set to a list of strings, only show occurrences of repeating
-stamps for these TODO keywords.  When nil, only one occurrence is
-shown, either today or the nearest into the future."
+(defcustom org-agenda-show-future-repeats t
+  "Non-nil shows repeated entries in the future part of the agenda.
+When set to the symbol `next' only the first future repeat is shown."
   :group 'org-agenda-daily/weekly
   :type '(choice
-	  (const :tag "Show repeating stamps" t)
-	  (repeat :tag "Show repeating stamps for these TODO keywords"
-		  (string :tag "TODO Keyword"))
-	  (const :tag "Don't show repeating stamps" nil)))
+	  (const :tag "Show all repeated entries" t)
+	  (const :tag "Show next repeated entry" next)
+	  (const :tag "Do not show repeated entries" nil))
+  :version "25.2"
+  :package-version '(Org . "9.1")
+  :safe #'symbolp)
+
+(defcustom org-agenda-prefer-last-repeat nil
+  "Non-nil sets date for repeated entries to their last repeat.
+
+When non-nil, a repeated entry is shows at its latest repeat
+date, possibly being today, instead of the its base date, even if
+it wasn't marked as done.  This setting is useful if you do not
+always mark repeated entries as DONE and, yet, consider that
+reaching repeat date starts the task anew.
+
+When set to a list of strings, prefer last repeats only for
+entries with these TODO keywords."
+  :group 'org-agenda-daily/weekly
+  :type '(choice
+	  (const :tag "Prefer last repeat" t)
+	  (const :tag "Prefer base date" nil)
+	  (repeat :tag "Prefer last repeat for entries with these TODO keywords"
+		  (string :tag "TODO keyword")))
+  :version "25.2"
+  :package-version '(Org . "9.1")
+  :safe (lambda (x) (or (booleanp x) (consp x))))
 
 (defcustom org-scheduled-past-days 10000
   "Number of days to continue listing scheduled items not marked DONE.
@@ -5640,9 +5661,6 @@ displayed in agenda view."
 			       (looking-at org-ts-regexp-both)
 			       (match-string 0))))
 	       (todo-state (org-get-todo-state))
-	       (show-all (or (eq org-agenda-repeating-timestamp-show-all t)
-			     (member todo-state
-				     org-agenda-repeating-timestamp-show-all)))
 	       (warntime (get-text-property (point) 'org-appt-warntime))
 	       (done? (member todo-state org-done-keywords)))
 	  ;; Possibly skip done tasks.
@@ -5651,22 +5669,27 @@ displayed in agenda view."
 	  ;; S-exp entry doesn't match current day: skip it.
 	  (when (and sexp-entry (not (org-diary-sexp-entry sexp-entry "" date)))
 	    (throw :skip nil))
-	  ;; When time-stamp doesn't match CURRENT but has a repeater,
-	  ;; make sure it repeats on CURRENT.  Furthermore, if
-	  ;; SHOW-ALL is nil, ensure that repeats are only the first
-	  ;; before and the first after today.
-	  (when (and repeat
-		     (if show-all
-			 (/= current
-			     (org-agenda--timestamp-to-absolute
-			      repeat current 'future (current-buffer) pos))
-		       (and (/= current
-				(org-agenda--timestamp-to-absolute
-				 repeat today 'past (current-buffer) pos))
-			    (/= current
-				(org-agenda--timestamp-to-absolute
-				 repeat today 'future (current-buffer) pos)))))
-	    (throw :skip nil))
+	  ;; A repeating time stamp is shown at its base date, and at
+	  ;; every repeated date in the future.
+	  (when repeat
+	    (let* ((past
+		    (if (or (eq org-agenda-prefer-last-repeat t)
+			    (member todo-state org-agenda-prefer-last-repeat))
+			(org-agenda--timestamp-to-absolute
+			 repeat today 'past (current-buffer) pos)
+		      (org-agenda--timestamp-to-absolute repeat)))
+		   (future
+		    (cond
+		     ((<= current today) past)
+		     ((not org-agenda-show-future-repeats) past)
+		     (t
+		      (let ((base (if (eq org-agenda-show-future-repeats 'next)
+				      (1+ today)
+				    current)))
+			(org-agenda--timestamp-to-absolute
+			 repeat base 'future (current-buffer) pos))))))
+	      (when (and (/= current past) (/= current future))
+		(throw :skip nil))))
 	  (save-excursion
 	    (re-search-backward org-outline-regexp-bol nil t)
 	    ;; Possibly skip time-stamp when a deadline is set.
@@ -6067,22 +6090,29 @@ specification like [h]h:mm."
 	       (pos (1- (match-beginning 1)))
 	       (todo-state (save-match-data (org-get-todo-state)))
 	       (done? (member todo-state org-done-keywords))
-	       (show-all (or (eq org-agenda-repeating-timestamp-show-all t)
-			     (member todo-state
-				     org-agenda-repeating-timestamp-show-all)))
-	       ;; DEADLINE is the bare deadline date, i.e., without
-	       ;; any repeater, or the last repeat if SHOW-ALL is
-	       ;; non-nil.  REPEAT is closest repeat after CURRENT, if
-	       ;; all repeated time stamps are to be shown, or after
-	       ;; TODAY otherwise.  REPEAT only applies to future
-	       ;; dates.
-	       (deadline (if show-all (org-agenda--timestamp-to-absolute s)
-			   (org-agenda--timestamp-to-absolute
-			    s today 'past (current-buffer) pos)))
+	       ;; DEADLINE is the deadline date for the entry.  It is
+	       ;; either the base date or the last repeat, according
+	       ;; to `org-agenda-prefer-last-repeat'.
+	       (deadline
+		(if (or (eq org-agenda-prefer-last-repeat t)
+			(member todo-state org-agenda-prefer-last-repeat))
+		    (org-agenda--timestamp-to-absolute
+		     s today 'past (current-buffer) pos)
+		  (org-agenda--timestamp-to-absolute s)))
+	       ;; REPEAT is the future repeat closest from CURRENT,
+	       ;; according to `org-agenda-show-future-repeats'. If
+	       ;; the latter is nil, or if the time stamp has no
+	       ;; repeat part, default to DEADLINE.
 	       (repeat
-		(if (< current today) deadline
-		  (org-agenda--timestamp-to-absolute
-		   s (if show-all current today) 'future (current-buffer) pos)))
+		(cond
+		 ((<= current today) deadline)
+		 ((not org-agenda-show-future-repeats) deadline)
+		 (t
+		  (let ((base (if (eq org-agenda-show-future-repeats 'next)
+				  (1+ today)
+				current)))
+		    (org-agenda--timestamp-to-absolute
+		     s base 'future (current-buffer) pos)))))
 	       (diff (- deadline current))
 	       (suppress-prewarning
 		(let ((scheduled
@@ -6105,16 +6135,16 @@ specification like [h]h:mm."
 			  (let ((org-deadline-warning-days suppress-prewarning))
 			    (org-get-wdays s))
 			(org-get-wdays s))))
-	  ;; When to show a deadline in the calendar: if the
-	  ;; expiration is within WDAYS warning time.  Past-due
-	  ;; deadlines are only shown on today agenda.
-	  (when (cond ((= current deadline) nil)
-		      ((< deadline today)
-		       (and (not today?)
-			    (or (< current today) (/= repeat current))))
-		      ((> deadline current)
-		       (or (not today?) (> diff wdays)))
-		      (t (/= repeat current)))
+	  ;; Display deadlines items at base date (DEADLINE), today,
+	  ;; if deadline is overdue or if the expiration of the
+	  ;; upcoming deadline is within WDAYS warning time.  Also,
+	  ;; show any repeat past today.
+	  (when (or (and (/= current deadline)
+			 (/= current today)
+			 (/= current repeat))
+		    (and today?
+			 (> deadline current)
+			 (> diff wdays)))
 	    (throw :skip nil))
 	  ;; Possibly skip done tasks.
 	  (when (and done?
@@ -6125,8 +6155,8 @@ specification like [h]h:mm."
 	    (re-search-backward "^\\*+[ \t]+" nil t)
 	    (goto-char (match-end 0))
 	    (let* ((category (org-get-category))
-		   (level
-		    (make-string (org-reduced-level (org-outline-level)) ?\s))
+		   (level (make-string (org-reduced-level (org-outline-level))
+				       ?\s))
 		   (head (buffer-substring (point) (line-end-position)))
 		   (inherited-tags
 		    (or (eq org-agenda-show-inherited-tags 'always)
@@ -6148,23 +6178,16 @@ specification like [h]h:mm."
 		   (item
 		    (org-agenda-format-item
 		     ;; Insert appropriate suffixes before deadlines.
+		     ;; Those only apply to today agenda.
 		     (pcase-let ((`(,now ,future ,past)
 				  org-agenda-deadline-leaders))
 		       (cond
-			;; Future (i.e., repeated) deadlines are
-			;; displayed as new headlines.
-			((> current today) now)
-			;; When SHOW-ALL is nil, prefer repeated
-			;; deadlines over reminders of past deadlines.
-			((and (not show-all) (= repeat today)) now)
-			((= deadline current) now)
-			((< deadline current) (format past (- diff)))
-			(t (format future diff))))
-		     head level category tags
-		     (and (or (= repeat current) (= deadline current))
-			  time)))
+			((and today? (< deadline today)) (format past (- diff)))
+			((and today? (> deadline today)) (format future diff))
+			(t now)))
+		     head level category tags time))
 		   (face (org-agenda-deadline-face
-			  (- 1 (/ (float (- deadline current)) (max wdays 1)))))
+			  (- 1 (/ (float diff) (max wdays 1)))))
 		   (upcoming? (and today? (> deadline today)))
 		   (warntime (get-text-property (point) 'org-appt-warntime)))
 	      (org-add-props item props
@@ -6178,9 +6201,7 @@ specification like [h]h:mm."
 		;; Overdue deadlines get the highest priority
 		;; increase, then imminent deadlines and eventually
 		;; more distant deadlines.
-		(let ((adjust (cond ((not today?) 0)
-				    ((and (not show-all) (= repeat current)) 0)
-				    (t (- diff)))))
+		(let ((adjust (if today? (- diff) 0)))
 		  (+ adjust (org-get-priority item)))
 		'todo-state todo-state
 		'type (if upcoming? "upcoming-deadline" "deadline")
@@ -6230,25 +6251,29 @@ scheduled items with an hour specification like [h]h:mm."
 	       (pos (1- (match-beginning 1)))
 	       (todo-state (save-match-data (org-get-todo-state)))
 	       (donep (member todo-state org-done-keywords))
-	       (show-all (or (eq org-agenda-repeating-timestamp-show-all t)
-			     (member todo-state
-				     org-agenda-repeating-timestamp-show-all)))
-	       ;; SCHEDULE is the bare scheduled date, i.e., without
-	       ;; any repeater if non-nil, or last repeat if SHOW-ALL
-	       ;; is nil.  REPEAT is the closest repeat after CURRENT,
-	       ;; if all repeated time stamps are to be shown, or
-	       ;; after TODAY otherwise.  REPEAT only applies to
-	       ;; future dates.
-	       (schedule (if show-all (org-agenda--timestamp-to-absolute s)
-			   (org-agenda--timestamp-to-absolute
-			    s today 'past (current-buffer) pos)))
-	       (repeat (cond ((< current today) schedule)
-			     (show-all
-			      (org-agenda--timestamp-to-absolute
-			       s current 'future (current-buffer) pos))
-			     (t
-			      (org-agenda--timestamp-to-absolute
-			       s today 'future (current-buffer) pos))))
+	       ;; SCHEDULE is the scheduled date for the entry.  It is
+	       ;; either the bare date or the last repeat, according
+	       ;; to `org-agenda-prefer-last-repeat'.
+	       (schedule
+		(if (or (eq org-agenda-prefer-last-repeat t)
+			(member todo-state org-agenda-prefer-last-repeat))
+		    (org-agenda--timestamp-to-absolute
+		     s today 'past (current-buffer) pos)
+		  (org-agenda--timestamp-to-absolute s)))
+	       ;; REPEAT is the future repeat closest from CURRENT,
+	       ;; according to `org-agenda-show-future-repeats'. If
+	       ;; the latter is nil, or if the time stamp has no
+	       ;; repeat part, default to SCHEDULE.
+	       (repeat
+		(cond
+		 ((<= current today) schedule)
+		 ((not org-agenda-show-future-repeats) schedule)
+		 (t
+		  (let ((base (if (eq org-agenda-show-future-repeats 'next)
+				  (1+ today)
+				current)))
+		    (org-agenda--timestamp-to-absolute
+		     s base 'future (current-buffer) pos)))))
 	       (diff (- current schedule))
 	       (warntime (get-text-property (point) 'org-appt-warntime))
 	       (pastschedp (< schedule today))
@@ -6265,9 +6290,7 @@ scheduled items with an hour specification like [h]h:mm."
 		    (- org-agenda-skip-scheduled-delay-if-deadline))
 		   ((eq org-agenda-skip-scheduled-delay-if-deadline
 			'post-deadline)
-		    ;; Set delay to no later than DEADLINE.  If
-		    ;; DEADLINE has a repeater, compare last schedule
-		    ;; repeat and last deadline repeat.
+		    ;; Set delay to no later than DEADLINE.
 		    (min (- schedule deadline) org-scheduled-delay-days))
 		   (t 0))))
 	       (ddays
@@ -6291,9 +6314,9 @@ scheduled items with an hour specification like [h]h:mm."
 	    (when (or (and (> ddays 0) (< diff ddays))
 		      (> diff org-scheduled-past-days)
 		      (> schedule current)
-		      (and (< schedule current)
-			   (not todayp)
-			   (/= repeat current)))
+		      (and (/= current schedule)
+			   (/= current today)
+			   (/= current repeat)))
 	      (throw :skip nil)))
 	  ;; Possibly skip done tasks.
 	  (when (and donep
@@ -6309,7 +6332,9 @@ scheduled items with an hour specification like [h]h:mm."
 			habitp))
 		   nil)
 		  (`repeated-after-deadline
-		   (>= repeat (time-to-days (org-get-deadline-time (point)))))
+		   (let ((deadline (time-to-days
+				    (org-get-deadline-time (point)))))
+		     (and (<= schedule deadline) (> current deadline))))
 		  (`not-today pastschedp)
 		  (`t t)
 		  (_ nil))
@@ -6336,8 +6361,8 @@ scheduled items with an hour specification like [h]h:mm."
 				 (memq 'agenda
 				       org-agenda-use-tag-inheritance)))))
 		   (tags (org-get-tags-at nil (not inherited-tags)))
-		   (level
-		    (make-string (org-reduced-level (org-outline-level)) ?\s))
+		   (level (make-string (org-reduced-level (org-outline-level))
+				       ?\s))
 		   (head (buffer-substring (point) (line-end-position)))
 		   (time
 		    (cond
@@ -6349,21 +6374,11 @@ scheduled items with an hour specification like [h]h:mm."
 		     (t 'time)))
 		   (item
 		    (org-agenda-format-item
-		     (pcase-let ((`(,first ,next) org-agenda-scheduled-leaders))
-		       (cond
-			;; If CURRENT is in the future, don't use past
-			;; scheduled prefix.
-			((> current today) first)
-			;; SHOW-ALL focuses on future repeats.  If one
-			;; such repeat happens today, ignore late
-			;; schedule reminder.  However, still report
-			;; such reminders when repeat happens later.
-			((and (not show-all) (= repeat today)) first)
-			;; Initial report.
-			((= schedule current) first)
-			;; Subsequent reminders.  Count from base
-			;; schedule.
-			(t (format next (1+ diff)))))
+		     (pcase-let ((`(,first ,past) org-agenda-scheduled-leaders))
+		       ;; Show a reminder of a past scheduled today.
+		       (if (and todayp pastschedp)
+			   (format past (1+ diff))
+			 first))
 		     head level category tags time nil habitp))
 		   (face (cond ((and (not habitp) pastschedp)
 				'org-scheduled-previously)

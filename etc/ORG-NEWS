@@ -24,6 +24,9 @@ into
 : (file (lambda () (sexp)))
 
 ** New features
+*** Agenda
+**** New variable : ~org-agenda-show-future-repeats~
+**** New variable : ~org-agenda-prefer-last-repeat~
 *** Babel
 **** Clojure: new setting ~org-babel-clojure-sync-nrepl-timeout~
 
@@ -66,6 +69,13 @@ value of the code will be displayed in the results section.
 
 *** Horizontal rules are no longer ignored in LaTeX table math mode
 
+** Removed options
+
+*** ~org-agenda-repeating-timestamp-show-all~ is removed.
+
+For an equivalent to a ~nil~ value, set
+~org-agenda-show-future-repeats~ to nil and
+~org-agenda-prefer-last-repeat~ to ~t~.
 * Version 9.0
 
 ** Incompatible changes
