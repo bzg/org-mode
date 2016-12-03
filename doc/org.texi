@@ -544,12 +544,12 @@ Markup for rich export
 * Horizontal rules::            Make a line
 * Images and tables::           Images, tables and caption mechanism
 * Literal examples::            Source code examples with special formatting
+* Special symbols::             Greek letters and other symbols
+* Subscripts and superscripts::  Simple syntax for raising/lowering text
 * Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
 
 Embedded @LaTeX{}
 
-* Special symbols::             Greek letters and other symbols
-* Subscripts and superscripts::  Simple syntax for raising/lowering text
 * @LaTeX{} fragments::          Complex formulas made easy
 * Previewing @LaTeX{} fragments::  What will this snippet look like?
 * CDLaTeX mode::                Speed up entering of formulas
@@ -572,52 +572,52 @@ Exporting
 * Texinfo export::              Exporting to Texinfo
 * iCalendar export::            Exporting to iCalendar
 * Other built-in back-ends::    Exporting to a man page
-* Export in foreign buffers::   Author tables and lists in Org syntax
 * Advanced configuration::      Fine-tuning the export output
+* Export in foreign buffers::   Author tables and lists in Org syntax
 
 Beamer export
 
-* Beamer export commands:: How to export Beamer documents.
-* Beamer specific export settings:: Export settings for Beamer export.
-* Sectioning Frames and Blocks in Beamer:: Blocks and sections in Beamer.
-* Beamer specific syntax:: Syntax specific to Beamer.
-* Editing support:: Helper functions for Org Beamer export.
-* A Beamer Example:: An complete Beamer example.
+* Beamer export commands::      How to export Beamer documents.
+* Beamer specific export settings::  Export settings for Beamer export.
+* Sectioning Frames and Blocks in Beamer::  Blocks and sections in Beamer.
+* Beamer specific syntax::      Syntax specific to Beamer.
+* Editing support::             Helper functions for Org Beamer export.
+* A Beamer Example::            An complete Beamer example.
 
 HTML export
 
-* HTML Export commands::           How to invoke HTML export
+* HTML Export commands::        How to invoke HTML export
 * HTML Specific export settings::  Export settings for HTML export
-* HTML doctypes::                  Org can export to various (X)HTML flavors
-* HTML preamble and postamble::    How to insert a preamble and a postamble
-* Quoting HTML tags::              Using direct HTML in Org mode
-* Links in HTML export::           How links will be interpreted and formatted
-* Tables in HTML export::          How to modify the formatting of tables
-* Images in HTML export::          How to insert figures into HTML output
-* Math formatting in HTML export:: Beautiful math also on the web
-* Text areas in HTML export::      An alternative way to show an example
-* CSS support::                    Changing the appearance of the output
-* JavaScript support::             Info and Folding in a web browser
+* HTML doctypes::               Org can export to various (X)HTML flavors
+* HTML preamble and postamble::  How to insert a preamble and a postamble
+* Quoting HTML tags::           Using direct HTML in Org mode
+* Links in HTML export::        How links will be interpreted and formatted
+* Tables in HTML export::       How to modify the formatting of tables
+* Images in HTML export::       How to insert figures into HTML output
+* Math formatting in HTML export::  Beautiful math also on the web
+* Text areas in HTML export::   An alternative way to show an example
+* CSS support::                 Changing the appearance of the output
+* JavaScript support::          Info and Folding in a web browser
 
 @LaTeX{} export
 
-* @LaTeX{} export commands::            How to export to @LaTeX{} and PDF
-* @LaTeX{} specific export settings::   Export settings for @LaTeX{}
-* @LaTeX{} header and sectioning::      Setting up the export file structure
-* Quoting @LaTeX{} code::               Incorporating literal @LaTeX{} code
-* Tables in @LaTeX{} export::           Specific attributes for tables
-* Images in @LaTeX{} export::           Specific attributes for images
-* Plain lists in @LaTeX{} export::      Specific attributes for plain lists
-* Source blocks in @LaTeX{} export::    Specific attributes for source blocks
-* Example blocks in @LaTeX{} export::   Specific attributes for example blocks
-* Special blocks in @LaTeX{} export::   Specific attributes for special blocks
-* Horizontal rules in @LaTeX{} export:: Specific attributes for horizontal rules
+* @LaTeX{} export commands::    How to export to @LaTeX{} and PDF
+* @LaTeX{} specific export settings::  Export settings for @LaTeX{}
+* @LaTeX{} header and sectioning::  Setting up the export file structure
+* Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
+* Tables in @LaTeX{} export::   Specific attributes for tables
+* Images in @LaTeX{} export::   Specific attributes for images
+* Plain lists in @LaTeX{} export::  Specific attributes for plain lists
+* Source blocks in @LaTeX{} export::  Specific attributes for source blocks
+* Example blocks in @LaTeX{} export::  Specific attributes for example blocks
+* Special blocks in @LaTeX{} export::  Specific attributes for special blocks
+* Horizontal rules in @LaTeX{} export::  Specific attributes for horizontal rules
 
 OpenDocument Text export
 
 * Pre-requisites for ODT export::  What packages ODT exporter relies on
 * ODT export commands::         How to invoke ODT export
-* ODT specific export settings:: Export settings for ODT
+* ODT specific export settings::  Export settings for ODT
 * Extending ODT export::        How to produce @samp{doc}, @samp{pdf} files
 * Applying custom styles::      How to apply custom styles to the output
 * Links in ODT export::         How links will be interpreted and formatted
@@ -702,38 +702,32 @@ Header arguments
 
 Using header arguments
 
-* System-wide header arguments::  Set global default values
-* Language-specific header arguments::  Set default values by language
-* Header arguments in Org mode properties::  Set default values for a buffer or heading
-* Language-specific header arguments in Org mode properties::  Set language-specific default values for a buffer or heading
-* Code block specific header arguments::  The most common way to set values
-* Header arguments in function calls::  The most specific level
+* System-wide header arguments::  Set globally, language-specific
+* Language-specific header arguments::  Set in the Org file's headers
+* Header arguments in Org mode properties::  Set in the Org file
+* Language-specific mode properties::
+* Code block specific header arguments::  The most commonly used method
+* Arguments in function calls::  The most specific level, takes highest priority
 
 Specific header arguments
 
-* var::                         Pass arguments to code blocks
-* results::                     Specify the type of results and how they will
-                                be collected and handled
-* file::                        Specify a path for file output
+* var::                         Pass arguments to @samp{src} code blocks
+* results::                     Specify results type; how to collect
+* file::                        Specify a path for output file
 * file-desc::                   Specify a description for file results
 * file-ext::                    Specify an extension for file output
-* output-dir::                  Specify a directory to write file output to
-* dir::                         Specify the default (possibly remote)
-                                directory for code block execution
-* exports::                     Export code and/or results
-* tangle::                      Toggle tangling and specify file name
-* mkdirp::                      Toggle creation of parent directories of target
-                                files during tangling
-* comments::                    Toggle insertion of comments in tangled
-                                code files
-* padline::                     Control insertion of padding lines in tangled
-                                code files
-* no-expand::                   Turn off variable assignment and noweb
-                                expansion during tangling
+* output-dir::                  Specify a directory for output file
+* dir::                         Specify the default directory for code block execution
+* exports::                     Specify exporting code, results, both, none
+* tangle::                      Toggle tangling; or specify file name
+* mkdirp::                      Toggle for parent directory creation for target files during tangling
+* comments::                    Toggle insertion of comments in tangled code files
+* padline::                     Control insertion of padding lines in tangled code files
+* no-expand::                   Turn off variable assignment and noweb expansion during tangling
 * session::                     Preserve the state of code evaluation
 * noweb::                       Toggle expansion of noweb references
 * noweb-ref::                   Specify block's noweb reference resolution target
-* noweb-sep::                   String used to separate noweb references
+* noweb-sep::                   String to separate noweb references
 * cache::                       Avoid re-evaluating unchanged code blocks
 * sep::                         Delimiter for writing tabular results outside Org
 * hlines::                      Handle horizontal lines in tables
@@ -743,22 +737,22 @@ Specific header arguments
 * tangle-mode::                 Set permission of tangled files
 * eval::                        Limit evaluation of specific code blocks
 * wrap::                        Mark source block evaluation results
-* post::                        Post processing of code block results
-* prologue::                    Text to prepend to code block body
-* epilogue::                    Text to append to code block body
+* post::                        Post processing of results of code block evaluation
+* prologue::                    Text to prepend to body of code block
+* epilogue::                    Text to append to body of code block
 
 Miscellaneous
 
-* Completion::                  M-TAB knows what you need
+* Completion::                  M-TAB guesses completions
 * Easy templates::              Quick insertion of structural elements
 * Speed keys::                  Electric commands at the beginning of a headline
 * Code evaluation security::    Org mode files evaluate inline code
-* Customization::               Adapting Org to your taste
+* Customization::               Adapting Org to changing tastes
 * In-buffer settings::          Overview of the #+KEYWORDS
 * The very busy C-c C-c key::   When in doubt, press C-c C-c
 * Clean view::                  Getting rid of leading stars in the outline
 * TTY keys::                    Using Org on a tty
-* Interaction::                 Other Emacs packages
+* Interaction::                 With other Emacs packages
 * org-crypt::                   Encrypting Org files
 
 Interaction with other packages
@@ -790,7 +784,7 @@ Tables and lists in arbitrary syntax
 
 MobileOrg
 
-* Setting up the staging area::  Where to interact with the mobile device
+* Setting up the staging area::  For the mobile device
 * Pushing to MobileOrg::        Uploading Org files and agendas
 * Pulling from MobileOrg::      Integrating captured and flagged items
 
@@ -9712,7 +9706,7 @@ markup rules used in an Org mode buffer.
 * Images and tables::           Images, tables and caption mechanism
 * Literal examples::            Source code examples with special formatting
 * Special symbols::             Greek letters and other symbols
-* Subscripts and superscripts:: Simple syntax for raising/lowering text
+* Subscripts and superscripts::  Simple syntax for raising/lowering text
 * Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
 @end menu
 
@@ -10995,12 +10989,12 @@ presentations using @LaTeX{} and PDF processing.  Org mode has special
 support for turning an Org mode file or tree into a Beamer presentation.
 
 @menu
-* Beamer export commands:: How to export Beamer documents.
-* Beamer specific export settings:: Export settings for Beamer export.
-* Sectioning Frames and Blocks in Beamer:: Blocks and sections in Beamer.
-* Beamer specific syntax:: Syntax specific to Beamer.
-* Editing support:: Helper functions for Org Beamer export.
-* A Beamer Example:: An complete Beamer example.
+* Beamer export commands::      How to export Beamer documents.
+* Beamer specific export settings::  Export settings for Beamer export.
+* Sectioning Frames and Blocks in Beamer::  Blocks and sections in Beamer.
+* Beamer specific syntax::      Syntax specific to Beamer.
+* Editing support::             Helper functions for Org Beamer export.
+* A Beamer Example::            An complete Beamer example.
 @end menu
 
 @node Beamer export commands
@@ -11260,18 +11254,18 @@ HTML formatting, in ways similar to John Gruber's @emph{markdown}
 language, but with additional support for tables.
 
 @menu
-* HTML Export commands::           How to invoke HTML export
+* HTML Export commands::        How to invoke HTML export
 * HTML Specific export settings::  Export settings for HTML export
-* HTML doctypes::                  Org can export to various (X)HTML flavors
-* HTML preamble and postamble::    How to insert a preamble and a postamble
-* Quoting HTML tags::              Using direct HTML in Org mode
-* Links in HTML export::           How links will be interpreted and formatted
-* Tables in HTML export::          How to modify the formatting of tables
-* Images in HTML export::          How to insert figures into HTML output
-* Math formatting in HTML export:: Beautiful math also on the web
-* Text areas in HTML export::      An alternative way to show an example
-* CSS support::                    Changing the appearance of the output
-* JavaScript support::             Info and Folding in a web browser
+* HTML doctypes::               Org can export to various (X)HTML flavors
+* HTML preamble and postamble::  How to insert a preamble and a postamble
+* Quoting HTML tags::           Using direct HTML in Org mode
+* Links in HTML export::        How links will be interpreted and formatted
+* Tables in HTML export::       How to modify the formatting of tables
+* Images in HTML export::       How to insert figures into HTML output
+* Math formatting in HTML export::  Beautiful math also on the web
+* Text areas in HTML export::   An alternative way to show an example
+* CSS support::                 Changing the appearance of the output
+* JavaScript support::          Info and Folding in a web browser
 @end menu
 
 
@@ -11869,17 +11863,17 @@ will not be started if two contiguous syntactical elements are not separated
 by an empty line.
 
 @menu
-* @LaTeX{} export commands::            How to export to @LaTeX{} and PDF
-* @LaTeX{} specific export settings::   Export settings for @LaTeX{}
-* @LaTeX{} header and sectioning::      Setting up the export file structure
-* Quoting @LaTeX{} code::               Incorporating literal @LaTeX{} code
-* Tables in @LaTeX{} export::           Specific attributes for tables
-* Images in @LaTeX{} export::           Specific attributes for images
-* Plain lists in @LaTeX{} export::      Specific attributes for plain lists
-* Source blocks in @LaTeX{} export::    Specific attributes for source blocks
-* Example blocks in @LaTeX{} export::   Specific attributes for example blocks
-* Special blocks in @LaTeX{} export::   Specific attributes for special blocks
-* Horizontal rules in @LaTeX{} export:: Specific attributes for horizontal rules
+* @LaTeX{} export commands::    How to export to @LaTeX{} and PDF
+* @LaTeX{} specific export settings::  Export settings for @LaTeX{}
+* @LaTeX{} header and sectioning::  Setting up the export file structure
+* Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
+* Tables in @LaTeX{} export::   Specific attributes for tables
+* Images in @LaTeX{} export::   Specific attributes for images
+* Plain lists in @LaTeX{} export::  Specific attributes for plain lists
+* Source blocks in @LaTeX{} export::  Specific attributes for source blocks
+* Example blocks in @LaTeX{} export::  Specific attributes for example blocks
+* Special blocks in @LaTeX{} export::  Specific attributes for special blocks
+* Horizontal rules in @LaTeX{} export::  Specific attributes for horizontal rules
 @end menu
 
 @node @LaTeX{} export commands
@@ -12438,7 +12432,7 @@ are compatible with LibreOffice 3.4.
 @menu
 * Pre-requisites for ODT export::  What packages ODT exporter relies on
 * ODT export commands::         How to invoke ODT export
-* ODT specific export settings:: Export settings for ODT
+* ODT specific export settings::  Export settings for ODT
 * Extending ODT export::        How to produce @samp{doc}, @samp{pdf} files
 * Applying custom styles::      How to apply custom styles to the output
 * Links in ODT export::         How links will be interpreted and formatted
@@ -14753,10 +14747,10 @@ This may be necessary in particular if files include other files via
 Source code here refers to any code typed in Org mode documents.  Org can
 manage source code in any Org file once such code is tagged with begin and
 end markers.  Working with source code begins with tagging source code
-blocks.  Tagged source code blocks are not restricted to the preamble or the
-end of an Org document; they can go anywhere (with a few exceptions, such as
-not inside comments and fixed width areas).  Here's a sample @samp{src} block
-in emacs-lisp:
+blocks.  Tagged @samp{src} code blocks are not restricted to the preamble or
+the end of an Org document; they can go anywhere---with a few exceptions,
+such as not inside comments and fixed width areas.  Here's a sample
+@samp{src} code block in emacs-lisp:
 
 @example
 #+BEGIN_SRC emacs-lisp
@@ -14772,12 +14766,14 @@ Org can simplify many housekeeping tasks essential to modern code
 maintenance.  That's why these blocks in Org mode literature are sometimes
 referred to as @samp{live code} blocks (as compared to the static text and
 documentation around it).  Users can control how @samp{live} they want each
-block by tweaking the headers for compiling, execution, extraction, and so
-on.
+block by tweaking the headers for compiling, execution, extraction.
 
-For editing @samp{src} code blocks, Org offers native Emacs major-modes.
-That leverages all the latest Emacs features for that source code language
-mode.
+Org's @samp{src} code block type is one of many block types, such as quote,
+export, verse, latex, example, and verbatim.  This section pertains to
+@samp{src} code blocks between @samp{#+BEGIN_SRC} and @samp{#+END_SRC}
+
+For editing @samp{src} code blocks, Org provides native Emacs major-modes.
+That leverages the latest Emacs features for that source code language mode.
 
 For exporting, Org can then extract @samp{src} code blocks into compilable
 source files (in a conversion process known as @dfn{tangling} in literate
@@ -14796,7 +14792,7 @@ An important feature of Org's execution of the @samp{src} code blocks is
 passing variables, functions, and results between @samp{src} blocks.  Such
 interoperability uses a common syntax even if these @samp{src} blocks are in
 different source code languages.  The integration extends to linking the
-debugger's error messages to the line in the source code block in the Org
+debugger's error messages to the line in the @samp{src} code block in the Org
 file.  That should partly explain why this functionality by the original
 contributors, Eric Schulte and Dan Davison, was called @samp{Org Babel}.
 
@@ -14806,13 +14802,13 @@ by enabling execution, and then by inserting results of that execution back
 into the Org file.  Along the way, Org provides extensive formatting
 features, including handling tables.  Org handles multiple source code
 languages in one file, and provides a common syntax for passing variables,
-functions, and results between source code blocks.
+functions, and results between @samp{src} code blocks.
 
 Org mode fulfills the promise of easy verification and maintenance of
-publishing reproducible research by keeping text, data, code, configuration
-settings of the execution environment, the results of the execution, and
-associated narratives, claims, references, and internal and external
-links---all in the same file.
+publishing reproducible research by keeping all these in the same file: text,
+data, code, configuration settings of the execution environment, the results
+of the execution, and associated narratives, claims, references, and internal
+and external links.
 
 Details of Org's facilities for working with source code are shown next.
 
@@ -14852,11 +14848,11 @@ A @samp{src} block conforms to this structure:
 @end example
 
 Org mode's templates system (@pxref{Easy templates}) speeds up creating
-@samp{src} blocks with just a couple of keystrokes.  Don't be put-off by
-having to type or remember the source block syntax.  Any other completion
-system in Emacs---of which there are several, some even predate Org---can be
-customized to create these Org @samp{src} blocks to reduce errors, increase
-accuracy, and maintain consistency.
+@samp{src} code blocks with just three keystrokes.  Do not be put-off by
+having to remember the source block syntax.  Org also works with other
+completion systems in Emacs, some of which predate Org and have custom
+domain-specific languages for defining templates.  Regular use of templates
+reduces errors, increases accuracy, and maintains consistency.
 
 @cindex source code, inline
 An inline code block conforms to this structure:
@@ -14913,7 +14909,7 @@ Source code in the dialect of the specified language identifier.
 @vindex org-edit-src-turn-on-auto-save
 @kindex C-c '
 @kbd{C-c '} for editing the current code block.  It opens a new major-mode
-edit buffer containing the body of the source code block, ready for any
+edit buffer containing the body of the @samp{src} code block, ready for any
 edits.  @kbd{C-c '} again to close the buffer and return to the Org buffer.
 
 @key{C-x C-s} saves the buffer and updates the contents of the Org buffer.
@@ -14944,17 +14940,17 @@ For specifying Emacs window arrangement when the new edit buffer is created.
 Default is @code{nil}.  Source code is indented.  This indentation applies
 during export or tangling, and depending on the context, may alter leading
 spaces and tabs.  When non-@code{nil}, source code is aligned with the
-leftmost column.  No lines are modified during export or tangling---very
-useful for white-space sensitive languages, such as Python.
+leftmost column.  No lines are modified during export or tangling, which is
+very useful for white-space sensitive languages, such as Python.
 @item org-src-ask-before-returning-to-edit-buffer
 When @code{nil}, Org returns to the edit buffer without further prompts.  The
 default prompts for a confirmation.
 @end table
 
 Set @code{org-src-fontify-natively} to non-@code{nil} to turn on native code
-fontification in the @emph{Org} buffer.  Fontification of source code blocks
-can give visual separation of text and code on the display page.  To further
-customize the appearance of @code{org-block} for specific languages,
+fontification in the @emph{Org} buffer.  Fontification of @samp{src} code
+blocks can give visual separation of text and code on the display page.  To
+further customize the appearance of @code{org-block} for specific languages,
 customize @code{org-src-block-faces}.  The following example shades the
 background of regular blocks, and colors source blocks only for Python and
 Emacs-Lisp languages.
@@ -14975,14 +14971,14 @@ Emacs-Lisp languages.
 
 Org can flexibly export just the @emph{code} from the code blocks, just the
 @emph{results} of evaluation of the code block, @emph{both} the code and the
-results of code block evaluation, or @emph{none}.  Org defaults to exporting
-@emph{code} for most languages.  For some languages, such as @code{ditaa},
-Org defaults to @emph{results}.  To export just the body of code blocks, see
-@ref{Literal examples}.  To export portions (sub-trees) of an Org document,
-see @ref{Exporting}.
+results of the code block evaluation, or @emph{none}.  Org defaults to
+exporting @emph{code} for most languages.  For some languages, such as
+@code{ditaa}, Org defaults to @emph{results}.  To export just the body of
+code blocks, @pxref{Literal examples}.  To selectively export sub-trees of
+an Org document, @pxref{Exporting}.
 
-The @code{:exports} header arguments control the export of code blocks (and
-not inline code):
+The @code{:exports} header arguments control exporting code blocks only and
+not inline code:
 
 @subsubheading Header arguments:
 
@@ -14992,25 +14988,32 @@ not inline code):
 This is the default for most languages where the body of the code block is
 exported.  See @ref{Literal examples} for more.
 @item :exports results
-After each evaluation, results are inserted after the end of code block in
-the Org buffer.  Previous results are either replaced (default) or appended
-to.  On export, Org includes only the results and not the code block.
+On export, Org includes only the results and not the code block.  After each
+evaluation, Org inserts the results after the end of code block in the Org
+buffer.  By default, Org replaces any previous results.  Org can also append
+results.
 @item :exports both
-Org includes both the code block and the results on export.
+Org exports both the code block and the results.
 @item :exports none
-Org does not include neither the code block nor the results on export.
+Org does not export the code block nor the results.
 @end table
 
 @vindex org-export-use-babel
 To stop Org from evaluating code blocks during export, set
-@code{org-export-use-babel} variable to @code{nil}.  Turning off evaluation
-comes in handy when batch processing.  For example, markup languages for
-wikis, which have a high risk of untrusted code.  In this case, Org doesn't
-process header arguments either.  For this reason it is often better to set
-@code{:eval never-export} (@pxref{eval}) to prevent code evaluation but still
-allow headers to be honored.  To evaluate just the inline code blocks, set to
-@code{inline-only}.  Isolating inline evaluations is not for security but for
-avoiding any delays due to recalculations during exports, such as calls to
+@code{org-export-use-babel} variable to @code{nil}.
+
+Turning off evaluation comes in handy when batch processing.  For example,
+markup languages for wikis, which have a high risk of untrusted code.
+Stopping code block evaluation also stops evaluation of all header arguments
+of the code block.  This may not be desirable in some circumstances.  So
+during export, to allow evaluation of just the header arguments but not any
+code evaluation in the source block, set @code{:eval never-export}
+(@pxref{eval}).
+
+To evaluate just the inline code blocks, set @code{org-export-babel-evaluate}
+to @code{inline-only}.  Isolating the option to allow inline evaluations
+separate from @samp{src} code block evaluations during exports is not for
+security but for avoiding any delays due to recalculations, such as calls to
 a remote database.
 
 Org never evaluates code blocks in commented sub-trees when exporting
@@ -15027,26 +15030,26 @@ Extracting source code from code blocks is a basic task in literate
 programming.  Org has features to make this easy.  In literate programming
 parlance, documents on creation are @emph{woven} with code and documentation,
 and on export, the code is @emph{tangled} for execution by a computer.  Org
-facilitates weaving and tangling with several customization options for
-producing, maintaining, sharing, and exporting literate programming
-documents.
+facilitates weaving and tangling for producing, maintaining, sharing, and
+exporting literate programming documents.  Org provides extensive
+customization options for extracting source code.
 
-When Org tangles the source code blocks, it expands, merges, and transforms
-them.  Then Org recomposes them into one or more separate files (as specified
-in the options).  During this @emph{tangling} process, Org expands variables
-in the source code, and resolves any ``noweb'' style references
-(@pxref{Noweb reference syntax}).
+When Org tangles @samp{src} code blocks, it expands, merges, and transforms
+them.  Then Org recomposes them into one or more separate files, as
+configured through the options.  During this @emph{tangling} process, Org
+expands variables in the source code, and resolves any ``noweb'' style
+references (@pxref{Noweb reference syntax}).
 
 @subsubheading Header arguments
 
 @table @code
 @cindex @code{:tangle}, src header argument
 @item :tangle no
-By default, Org does not tangle the code block on export.
+By default, Org does not tangle the @samp{src} code block on export.
 @item :tangle yes
-Includes the code block in the tangled output.  By default, the output
-file name is the same as the Org file but with a different extension.  Org
-derives the extension from the language identifier of the source code block.
+Org extracts the contents of the code block for the tangled output.  By
+default, the output file name is the same as the Org file but with a file
+extension derived from the language identifier of the @samp{src} code block.
 @item :tangle filename
 Override the default file name with this one for the tangled output.
 @end table
@@ -15058,7 +15061,7 @@ Override the default file name with this one for the tangled output.
 @item org-babel-tangle
 Tangle the current file.  Bound to @kbd{C-c C-v t}.
 
-With prefix argument only tangle the current code block.
+With prefix argument only tangle the current @samp{src} code block.
 @item org-babel-tangle-file
 Choose a file to tangle.  Bound to @kbd{C-c C-v f}.
 @end table
@@ -15080,7 +15083,7 @@ source file.  To make this extra jump, Org uses
 @code{org-babel-tangle-jump-to-org} function with two additional source code
 block header arguments: One, set @code{padline} (@pxref{padline}) to true
 (the default setting).  Two, set @code{comments} (@pxref{comments}) to
-@code{link} to tell Org to insert links to the Org file.
+@code{link}, which makes Org insert links to the Org file.
 
 @node Evaluating code blocks
 @section Evaluating code blocks
@@ -15098,12 +15101,12 @@ them in the Org file, right after the @samp{src} code block.  The insertion
 point is after a newline and the @code{#+RESULTS} label.  Org creates the
 @code{#+RESULTS} label if one is not already there.
 
-By default, Org enables only @code{emacs-lisp} source code blocks for
+By default, Org enables only @code{emacs-lisp} @samp{src} code blocks for
 execution.  See @ref{Languages} for identifiers to enable other languages.
 
 @kindex C-c C-c
-Org provides many ways to execute code blocks.  @kbd{C-c C-c} or @kbd{C-c C-v
-e} with the point on a code block@footnote{The option
+Org provides many ways to execute @samp{src} code blocks.  @kbd{C-c C-c} or
+@kbd{C-c C-v e} with the point on a @samp{src} code block@footnote{The option
 @code{org-babel-no-eval-on-ctrl-c-ctrl-c} can be used to remove code
 evaluation from the @kbd{C-c C-c} key binding.} calls the
 @code{org-babel-execute-src-block} function, which executes the code in the
@@ -15113,11 +15116,12 @@ block, collects the results, and inserts them in the buffer.
 By calling a named code block@footnote{Actually, the constructs call_<name>()
 and src_<lang>@{@} are not evaluated when they appear in a keyword line
 (i.e. lines starting with @code{#+KEYWORD:}, @pxref{In-buffer settings}).}
-from an Org mode buffer or table.  These named code blocks can be located in
-the current Org mode buffer or in the ``Library of Babel'' (@pxref{Library of
-Babel}).  Using either the inline syntax or the @code{#+CALL:} syntax, the
-result is then wrapped based on @code{org-babel-inline-result-wrap}, which by
-default is @code{"=%s="} that produces verbatim text suitable for markup.
+from an Org mode buffer or a table.  Org can call the named @samp{src} code
+blocks from the current Org mode buffer or from the ``Library of Babel''
+(@pxref{Library of Babel}).  Whether inline syntax or the @code{#+CALL:}
+syntax is used, the result is wrapped based on the variable
+@code{org-babel-inline-result-wrap}, which by default is set to @code{"=%s="}
+to produce verbatim text suitable for markup.
 
 The syntax for @code{#+CALL:} is
 
@@ -15138,24 +15142,24 @@ The syntax for inline named code block is
 This is the name of the code block to be evaluated (@pxref{Structure of
 code blocks}).
 @item <arguments>
-Org passes arguments to the code block using standard function call
-syntax ---instead of the header argument syntax.  For example,
-a @code{#+CALL:} line that passes 4 to a code block named @code{double},
-which declares the header argument @code{:var n=2}, would be written as
-@code{#+CALL: double(n=4)}.
+Org passes arguments to the code block using standard function call syntax.
+For example, a @code{#+CALL:} line that passes @samp{4} to a code block named
+@code{double}, which declares the header argument @code{:var n=2}, would be
+written as @code{#+CALL: double(n=4)}.  Note how this function call syntax is
+different from the header argument syntax.
 @item <inside header arguments>
-Org passes inside header arguments to the named source code block.  These
-arguments use header argument syntax---instead of the standard function call
-syntax.  Inside header arguments affect code block evaluation.  For example,
-@code{[:results output]} collects results printed to @code{STDOUT} during
-code execution of that block.
+Org passes inside header arguments to the named @samp{src} code block using
+the header argument syntax.  Inside header arguments apply to code block
+evaluation.  For example, @code{[:results output]} collects results printed
+to @code{STDOUT} during code execution of that block.  Note how this header
+argument syntax is different from the function call syntax.
 @item <end header arguments>
 End header arguments affect the results returned by the code block.  For
-example, @code{:results html} wraps the results in a @code{BEGIN_EXPORT
-html} block and then inserts them in the Org buffer.
+example, @code{:results html} wraps the results in a @code{BEGIN_EXPORT html}
+block before inserting the results in the Org buffer.
 
-For more examples of header arguments for @code{#+CALL:} lines see
-@ref{Header arguments in function calls}.
+For more examples of header arguments for @code{#+CALL:} lines,
+@pxref{Arguments in function calls}.
 @end table
 
 @node Library of Babel
@@ -15164,15 +15168,16 @@ For more examples of header arguments for @code{#+CALL:} lines see
 @cindex source code, library
 @cindex code block, library
 
-The ``Library of Babel'' is a collection of code blocks available for calling
-from other Org files.  This collection is in a repository file in Org mode
-format in the @samp{doc} directory of Org mode installation.  For remote code
-block evaluation syntax, see @ref{Evaluating code blocks}.
+The ``Library of Babel'' is a collection of code blocks.  Like a function
+library, these code blocks can be called from other Org files.  This
+collection is in a repository file in Org mode format in the @samp{doc}
+directory of Org mode installation.  For remote code block evaluation syntax,
+@pxref{Evaluating code blocks}.
 
 @kindex C-c C-v i
-For user's to add their own code blocks to the library, first save the code
-in an Org file, and then load it with @code{org-babel-lob-ingest}, which is
-bound to @kbd{C-c C-v i}.
+For any user to add code to the library, first save the code in regular
+@samp{src} code blocks of an Org file, and then load the Org file with
+@code{org-babel-lob-ingest}, which is bound to @kbd{C-c C-v i}.
 
 @node Languages
 @section Languages
@@ -15180,7 +15185,7 @@ bound to @kbd{C-c C-v i}.
 @cindex source code, languages
 @cindex code block, languages
 
-Org supports the following languages for the code blocks:
+Org supports the following languages for the @samp{src} code blocks:
 
 @multitable @columnfractions 0.25 0.25 0.25 0.25
 @headitem @b{Language} @tab @b{Identifier} @tab @b{Language} @tab @b{Identifier}
@@ -15209,10 +15214,10 @@ Org supports the following languages for the code blocks:
 Additional documentation for some languages are at
 @uref{http://orgmode.org/worg/org-contrib/babel/languages.html}.
 
-By default, @code{emacs-lisp} is enabled for evaluation.  To enable or
+By default, only @code{emacs-lisp} is enabled for evaluation.  To enable or
 disable other languages, customize the @code{org-babel-load-languages}
-variable.  Use the Emacs customization interface, or add code to the init
-file as shown next:
+variable either through the Emacs customization interface, or by adding code
+to the init file as shown next:
 
 In this example, evaluation is disabled for @code{emacs-lisp}, and enabled
 for @code{R}.
@@ -15224,8 +15229,9 @@ for @code{R}.
    (R . t)))
 @end lisp
 
-A language may also be enabled when loading with @code{require}.  This
-example below enables execution of @code{clojure} code blocks:
+Note that this is not the only way to enable a language.  Org also enables
+languages when loaded with @code{require} statement.  For example, the
+following enables execution of @code{clojure} code blocks:
 
 @lisp
 (require 'ob-clojure)
@@ -15251,12 +15257,12 @@ case of overlaps or conflicts by giving local settings a higher priority.
 Header values in function calls, for example, override header values from
 global defaults.
 @menu
-* System-wide header arguments::  Set global default values
-* Language-specific header arguments::  Set default values by language
-* Header arguments in Org mode properties::  Set default values for a buffer or heading
-* Language-specific header arguments in Org mode properties::  Set language-specific default values for a buffer or heading
-* Code block specific header arguments::  The most common way to set values
-* Header arguments in function calls::  The most specific level
+* System-wide header arguments::  Set globally, language-specific
+* Language-specific header arguments::  Set in the Org file's headers
+* Header arguments in Org mode properties::  Set in the Org file
+* Language-specific mode properties::
+* Code block specific header arguments::  The most commonly used method
+* Arguments in function calls::  The most specific level, takes highest priority
 @end menu
 
 
@@ -15279,8 +15285,8 @@ System-wide values of header arguments can be specified by adapting the
 :noweb      => "no"
 @end example
 
-This example sets the default value of @code{:noweb} header arguments to
-@code{yes}, which expands @code{:noweb} references by default.
+This example sets @code{:noweb} header arguments to @code{yes}, which makes
+Org expand @code{:noweb} references by default.
 
 @lisp
 (setq org-babel-default-header-args
@@ -15290,22 +15296,21 @@ This example sets the default value of @code{:noweb} header arguments to
 
 @node Language-specific header arguments
 @subsubheading Language-specific header arguments
-Each language can define its own set of default header arguments in variable
-@code{org-babel-default-header-args:<lang>}, where @code{<lang>} is the name
-of the language.  See the language-specific online documentation at
-@uref{http://orgmode.org/worg/org-contrib/babel}.
+Each language can have separate default header arguments by customizing the
+variable @code{org-babel-default-header-args:<lang>}, where @code{<lang>} is
+the name of the language.  For details, see the language-specific online
+documentation at @uref{http://orgmode.org/worg/org-contrib/babel}.
 
 @node Header arguments in Org mode properties
 @subsubheading Header arguments in Org mode properties
 
-For buffer-wide header arguments, use @code{#+PROPERTY:} lines anywhere in
-the Org mode file (@pxref{Property syntax}).
+For header arguments applicable to the buffer, use @code{#+PROPERTY:} lines
+anywhere in the Org mode file (@pxref{Property syntax}).
 
-The following example sets @code{*R*}---only for @samp{R} code blocks---to
-@code{session}, making all the @samp{R} code blocks execute in the same
-session.  Setting @code{results} to @code{silent} ignores the results of
-executions for all blocks---not just @samp{R} code blocks; no results
-inserted for any block.
+The following example sets only for @samp{R} code blocks to @code{session},
+making all the @samp{R} code blocks execute in the same session.  Setting
+@code{results} to @code{silent} ignores the results of executions for all
+blocks, not just @samp{R} code blocks; no results inserted for any block.
 
 @example
 #+PROPERTY: header-args:R  :session *R*
@@ -15313,17 +15318,16 @@ inserted for any block.
 @end example
 
 @vindex org-use-property-inheritance
-Header arguments set through property drawers (@pxref{Property syntax})
+Header arguments set through Org's property drawers (@pxref{Property syntax})
 apply at the sub-tree level on down.  Since these property drawers can appear
 anywhere in the file hierarchy, Org uses outermost call or source block to
 resolve the values.  Org ignores @code{org-use-property-inheritance} setting.
 
-In this example, the value of @code{:cache} header argument defaults to
-@code{yes} for all code blocks in the sub-tree starting with the outline
-header.
+In this example, @code{:cache} defaults to @code{yes} for all code blocks in
+the sub-tree starting with @samp{sample header}.
 
 @example
-* outline header
+* sample header
   :PROPERTIES:
   :header-args:    :cache yes
   :END:
@@ -15335,8 +15339,8 @@ Properties defined through @code{org-set-property} function, bound to
 @kbd{C-c C-x p}, apply to all active languages.  They override properties set
 in @code{org-babel-default-header-args}.
 
-@node Language-specific header arguments in Org mode properties
-@subsubheading Language-specific header arguments in Org mode properties
+@node Language-specific mode properties
+@subsubheading Language-specific mode properties
 
 Language-specific header arguments are also read from properties
 @code{header-args:<lang>} where @code{<lang>} is the language identifier.
@@ -15368,7 +15372,7 @@ those set as header properties.
 
 In the following example, setting @code{results} to @code{silent} makes it
 ignore results of the code execution.  Setting @code{:exports} to @code{code}
-exports only the body of the code block to HTML or @LaTeX{}.
+exports only the body of the @samp{src} code block to HTML or @LaTeX{}.:
 
 @example
 #+NAME: factorial
@@ -15378,7 +15382,7 @@ fac n = n * fac (n-1)
 #+END_SRC
 @end example
 
-The same header arguments in an inline code block:
+The same header arguments in an inline @samp{src} code block:
 
 @example
 src_haskell[:exports both]@{fac 5@}
@@ -15391,7 +15395,7 @@ removed at some point.
 
 @cindex #+HEADER:
 
-Multi-line header arguments on an unnamed code block:
+Multi-line header arguments on an unnamed @samp{src} code block:
 
 @example
 #+HEADER: :var data1=1
@@ -15403,7 +15407,7 @@ Multi-line header arguments on an unnamed code block:
 : data1:1, data2:2
 @end example
 
-Multi-line header arguments on a named code block:
+Multi-line header arguments on a named @samp{src} code block:
 
 @example
 #+NAME: named-block
@@ -15416,8 +15420,8 @@ Multi-line header arguments on a named code block:
   : data:2
 @end example
 
-@node Header arguments in function calls
-@subsubheading Header arguments in function calls
+@node Arguments in function calls
+@subsubheading Arguments in function calls
 
 Header arguments in function calls are the most specific and override all
 other settings in case of an overlap.  They get the highest priority.  Two
@@ -15442,33 +15446,28 @@ evaluation of @code{factorial} code block.
 @subsection Specific header arguments
 Org comes with many header arguments common to all languages.  New header
 arguments are added for specific languages as they become available for use
-in source code blocks.  A header argument is specified with an initial colon
-followed by the argument's name in lowercase.  Common header arguments are:
+in @samp{src} code blocks.  A header argument is specified with an initial
+colon followed by the argument's name in lowercase.  Common header arguments
+are:
 
 @menu
-* var::                         Pass arguments to code blocks
-* results::                     Specify the type of results and how they will
-                                be collected and handled
-* file::                        Specify a path for file output
+* var::                         Pass arguments to @samp{src} code blocks
+* results::                     Specify results type; how to collect
+* file::                        Specify a path for output file
 * file-desc::                   Specify a description for file results
 * file-ext::                    Specify an extension for file output
-* output-dir::                  Specify a directory to write file output to
-* dir::                         Specify the default (possibly remote)
-                                directory for code block execution
-* exports::                     Export code and/or results
-* tangle::                      Toggle tangling and specify file name
-* mkdirp::                      Toggle creation of parent directories of target
-                                files during tangling
-* comments::                    Toggle insertion of comments in tangled
-                                code files
-* padline::                     Control insertion of padding lines in tangled
-                                code files
-* no-expand::                   Turn off variable assignment and noweb
-                                expansion during tangling
+* output-dir::                  Specify a directory for output file
+* dir::                         Specify the default directory for code block execution
+* exports::                     Specify exporting code, results, both, none
+* tangle::                      Toggle tangling; or specify file name
+* mkdirp::                      Toggle for parent directory creation for target files during tangling
+* comments::                    Toggle insertion of comments in tangled code files
+* padline::                     Control insertion of padding lines in tangled code files
+* no-expand::                   Turn off variable assignment and noweb expansion during tangling
 * session::                     Preserve the state of code evaluation
 * noweb::                       Toggle expansion of noweb references
 * noweb-ref::                   Specify block's noweb reference resolution target
-* noweb-sep::                   String used to separate noweb references
+* noweb-sep::                   String to separate noweb references
 * cache::                       Avoid re-evaluating unchanged code blocks
 * sep::                         Delimiter for writing tabular results outside Org
 * hlines::                      Handle horizontal lines in tables
@@ -15478,9 +15477,9 @@ followed by the argument's name in lowercase.  Common header arguments are:
 * tangle-mode::                 Set permission of tangled files
 * eval::                        Limit evaluation of specific code blocks
 * wrap::                        Mark source block evaluation results
-* post::                        Post processing of code block results
-* prologue::                    Text to prepend to code block body
-* epilogue::                    Text to append to code block body
+* post::                        Post processing of results of code block evaluation
+* prologue::                    Text to prepend to body of code block
+* epilogue::                    Text to append to body of code block
 @end menu
 
 For language-specific header arguments, see @ref{Languages}.
@@ -15488,17 +15487,18 @@ For language-specific header arguments, see @ref{Languages}.
 @node var
 @subsubsection @code{:var}
 @cindex @code{:var}, src header argument
-Use @code{:var} for passing arguments to code blocks.  The specifics of
-variables in code blocks vary by the source language and are covered in the
-language-specific documentation.  The syntax for @code{:var}, however, is the
-same for all languages.  This includes when declaring a variable, assign a
-default value.
+Use @code{:var} for passing arguments to @samp{src} code blocks.  The
+specifics of variables in @samp{src} code blocks vary by the source language
+and are covered in the language-specific documentation.  The syntax for
+@code{:var}, however, is the same for all languages.  This includes declaring
+a variable, and assigning a default value.
 
 Arguments can take values as literals, or as references, or even as Emacs
 Lisp code (@pxref{var, Emacs Lisp evaluation of variables}).  References are
 names from the Org file from the lines @code{#+NAME:} or @code{#+RESULTS:}.
-References can refer to tables, lists, @code{#+BEGIN_EXAMPLE} blocks, other
-types of code blocks, or the results of execution of code blocks.
+References can also refer to tables, lists, @code{#+BEGIN_EXAMPLE} blocks,
+other types of @samp{src} code blocks, or the results of execution of
+@samp{src} code blocks.
 
 For better performance, Org can cache results of evaluations.  But caching
 comes with severe limitations (@pxref{cache}).
@@ -15506,8 +15506,8 @@ comes with severe limitations (@pxref{cache}).
 Argument values are indexed like arrays (@pxref{var, Indexable variable
 values}).
 
-The following syntax is used to pass arguments to code blocks using the
-@code{:var} header argument.
+The following syntax is used to pass arguments to @samp{src} code blocks
+using the @code{:var} header argument.
 
 @example
 :var name=assign
@@ -15574,9 +15574,9 @@ optionally followed by parentheses
 @end example
 
 @item code block with arguments
-a code block name, as assigned by @code{#+NAME:}, followed by parentheses and
-optional arguments passed within the parentheses following the
-code block name using standard function call syntax
+a @samp{src} code block name, as assigned by @code{#+NAME:}, followed by
+parentheses and optional arguments passed within the parentheses following
+the @samp{src} code block name using standard function call syntax
 
 @example
 #+NAME: double
@@ -15622,7 +15622,7 @@ on two lines
 @subsubheading Indexable variable values
 Indexing variable values enables referencing portions of a variable.  Indexes
 are 0 based with negative values counting backwards from the end.  If an
-index is separated by @code{,}s then each subsequent section will index into
+index is separated by @code{,}s then each subsequent section will index as
 the next dimension.  Note that this indexing occurs @emph{before} other
 table-related header arguments are applied, such as @code{:hlines},
 @code{:colnames} and @code{:rownames}.  The following example assigns the
@@ -15723,7 +15723,7 @@ change once the code in the block starts executing.
 @end example
 
 Note that values read from tables and lists will not be mistakenly evaluated
-as Emacs Lisp, as illustrated in the following example.
+as Emacs Lisp code, as illustrated in the following example.
 
 @example
 #+NAME: table
@@ -15742,20 +15742,22 @@ as Emacs Lisp, as illustrated in the following example.
 @subsubsection @code{:results}
 @cindex @code{:results}, src header argument
 
-There are four classes of @code{:results} header arguments.  Each code block
-can take only one option per class.
+There are four classes of @code{:results} header arguments.  Each @samp{src}
+code block can take only one option per class.
 
 @itemize @bullet
 @item
-@b{collection} for how the results should be collected from the code block
+@b{collection} for how the results should be collected from the @samp{src}
+code block
 @item
-@b{type} for which type of result the code block will return---affects how
-Org processes and inserts results in the Org buffer
+@b{type} for which type of result the code block will return; affects how Org
+processes and inserts results in the Org buffer
 @item
-@b{format} for the result---affects how Org processes and inserts results in
+@b{format} for the result; affects how Org processes and inserts results in
 the Org buffer
 @item
-@b{handling} for processing results after evaluation of the code block
+@b{handling} for processing results after evaluation of the @samp{src} code
+block
 @end itemize
 
 @subsubheading Collection
@@ -15765,12 +15767,12 @@ mutually exclusive.
 @itemize @bullet
 @item @code{value}
 Default.  Functional mode.  Result is the value returned by the last
-statement in the code block.  Languages like Python may require an explicit
-@code{return} statement in the code block.  Usage example: @code{:results
-value}.
+statement in the @samp{src} code block.  Languages like Python may require an
+explicit @code{return} statement in the @samp{src} code block.  Usage
+example: @code{:results value}.
 @item @code{output}
 Scripting mode.  Result is collected from STDOUT during execution of the code
-in the code block.  Usage example: @code{:results output}.
+in the @samp{src} code block.  Usage example: @code{:results output}.
 @end itemize
 
 @subsubheading Type
@@ -15795,9 +15797,9 @@ Interpret as path to a file.  Inserts a link to the file.  Usage example:
 @end itemize
 
 @subsubheading Format
-Format pertains to the type of the result returned by the code block.  Choose
-one of the options; they are mutually exclusive.  The default follows the type
-specified above.
+Format pertains to the type of the result returned by the @samp{src} code
+block.  Choose one of the options; they are mutually exclusive.  The default
+follows from the type specified above.
 
 @itemize @bullet
 @item @code{raw}
@@ -15814,11 +15816,11 @@ Results enclosed in a @code{BEGIN_EXPORT html} block.  Usage example:
 Results enclosed in a @code{BEGIN_EXPORT latex} block.  Usage example:
 @code{:results value latex}.
 @item @code{code}
-Result enclosed in a code block.  Useful for parsing.  Usage example:
-@code{:results value code}.
+Result enclosed in a @samp{src} code block.  Useful for parsing.  Usage
+example: @code{:results value code}.
 @item @code{pp}
-Result converted to pretty-print source code.  Enclosed in a code block.
-Languages supported: Emacs Lisp, Python, and Ruby.  Usage example:
+Result converted to pretty-print source code.  Enclosed in a @samp{src} code
+block.  Languages supported: Emacs Lisp, Python, and Ruby.  Usage example:
 @code{:results value pp}.
 @item @code{drawer}
 Result wrapped in a RESULTS drawer.  Useful for containing @code{raw} or
@@ -15888,12 +15890,13 @@ and @ref{file} or @ref{file-ext} header arguments.
 @cindex @code{:dir}, src header argument
 
 While the @code{:file} header argument can be used to specify the path to the
-output file, @code{:dir} specifies the default directory during code block
-execution.  If it is absent, then the directory associated with the current
-buffer is used.  In other words, supplying @code{:dir path} temporarily has
-the same effect as changing the current directory with @kbd{M-x cd path RET}, and
-then not supplying @code{:dir}.  Under the surface, @code{:dir} simply sets
-the value of the Emacs variable @code{default-directory}.
+output file, @code{:dir} specifies the default directory during @samp{src}
+code block execution.  If it is absent, then the directory associated with
+the current buffer is used.  In other words, supplying @code{:dir path}
+temporarily has the same effect as changing the current directory with
+@kbd{M-x cd path RET}, and then not supplying @code{:dir}.  Under the
+surface, @code{:dir} simply sets the value of the Emacs variable
+@code{default-directory}.
 
 When using @code{:dir}, relative paths (for example, @code{:file myfile.jpg}
 or @code{:file results/myfile.jpg}) become relative to the default directory.
@@ -15908,8 +15911,8 @@ matplot(matrix(rnorm(100), 10), type="l")
 @end example
 
 @subsubheading Remote execution
-To evaluate the code block on a remote machine, supply a remote directory name
-using @samp{Tramp} syntax.  For example:
+To evaluate the @samp{src} code block on a remote machine, supply a remote s
+directory name using @samp{Tramp} syntax.  For example:
 
 @example
 #+BEGIN_SRC R :file plot.png :dir /dand@@yakuba.princeton.edu:
@@ -15947,7 +15950,7 @@ portability issues.
 
 The @code{:exports} header argument is to specify if that part of the Org
 file is exported to, say, HTML or @LaTeX{} formats.  Note that
-@code{:exports} affects only source code blocks and not inline code.
+@code{:exports} affects only @samp{src} code blocks and not inline code.
 
 @itemize @bullet
 @item @code{code}
@@ -15969,21 +15972,23 @@ options.  Example: @code{:exports none}.
 @subsubsection @code{:tangle}
 @cindex @code{:tangle}, src header argument
 
-The @code{:tangle} header argument specifies if the code block is
+The @code{:tangle} header argument specifies if the @samp{src} code block is
 exported to source file(s).
 
 @itemize @bullet
 @item @code{tangle}
-Export the code block to source file.  The file name for the source file is
-derived from the name of the Org file, and the file extension is derived from
-the source code language identifier.  Example: @code{:tangle yes}.
+Export the @samp{src} code block to source file.  The file name for the
+source file is derived from the name of the Org file, and the file extension
+is derived from the source code language identifier.  Example: @code{:tangle
+yes}.
 @item @code{no}
-The default.  Do not extract the code a source code file.  Example: @code{:tangle no}.
+The default.  Do not extract the code a source code file.  Example:
+@code{:tangle no}.
 @item other
-Export the code block to source file whose file name is derived from any
-string passed to the @code{:tangle} header argument.  Org derives the file
-name as being relative to the directory of the Org file's location.  Example:
-@code{:tangle path}.
+Export the @samp{src} code block to source file whose file name is derived
+from any string passed to the @code{:tangle} header argument.  Org derives
+the file name as being relative to the directory of the Org file's location.
+Example: @code{:tangle path}.
 @end itemize
 
 @node mkdirp
@@ -15997,15 +16002,15 @@ and @code{no} inhibits directory creation.
 @node comments
 @subsubsection @code{:comments}
 @cindex @code{:comments}, src header argument
-Controls inserting comments into tangled files.  These are above and
-beyond whatever comments may already exist in the source code block.
+Controls inserting comments into tangled files.  These are above and beyond
+whatever comments may already exist in the @samp{src} code block.
 
 @itemize @bullet
 @item @code{no}
 The default.  Do not insert any extra comments during tangling.
 @item @code{link}
-Wrap the code block in comments.  Include links pointing back to the place in
-the Org file from where the code was tangled.
+Wrap the @samp{src} code block in comments.  Include links pointing back to
+the place in the Org file from where the code was tangled.
 @item @code{yes}
 Kept for backward compatibility; same as ``link''.
 @item @code{org}
@@ -16015,45 +16020,48 @@ that is inserted is picked from the leading context of the source block.
 Includes both ``link'' and ``org'' comment options.
 @item @code{noweb}
 Includes ``link'' comment option, expands noweb references, and wraps them in
-link comments inside the body of the code block.
+link comments inside the body of the @samp{src} code block.
 @end itemize
 
 @node padline
 @subsubsection @code{:padline}
 @cindex @code{:padline}, src header argument
-Control insertion of newlines to pad code blocks in the tangled file.
+Control insertion of newlines to pad @samp{src} code blocks in the tangled
+file.
 @itemize @bullet
 @item @code{yes}
-Default.  Insert a newline before and after each code block in the tangled file.
+Default.  Insert a newline before and after each @samp{src} code block in the
+tangled file.
 @item @code{no}
-Do not insert newlines to pad the tangled code blocks.
+Do not insert newlines to pad the tangled @samp{src} code blocks.
 @end itemize
 
 @node no-expand
 @subsubsection @code{:no-expand}
 @cindex @code{:no-expand}, src header argument
 
-By default Org expands code blocks during tangling.  The @code{:no-expand}
-header argument turns off such expansions.  Note that one side-effect of
-expansion by @code{org-babel-expand-src-block} also assigns values to
-@code{:var} (@pxref{var}) variables.  Expansions also replace ``noweb''
-references with their targets (@pxref{Noweb reference syntax}).  Some of
-these expansions may cause premature assignment, hence this option.  This
-option makes a difference only for tangling.  It has no effect when exporting
-since code blocks for execution have to be expanded anyway.
+By default Org expands @samp{src} code blocks during tangling.  The
+@code{:no-expand} header argument turns off such expansions.  Note that one
+side-effect of expansion by @code{org-babel-expand-src-block} also assigns
+values to @code{:var} (@pxref{var}) variables.  Expansions also replace
+``noweb'' references with their targets (@pxref{Noweb reference syntax}).
+Some of these expansions may cause premature assignment, hence this option.
+This option makes a difference only for tangling.  It has no effect when
+exporting since @samp{src} code blocks for execution have to be expanded
+anyway.
 
 @node session
 @subsubsection @code{:session}
 @cindex @code{:session}, src header argument
 
 The @code{:session} header argument is for running multiple source code
-blocks under one session.  Source code blocks with the same session name run
-in the same interpreter process.
+blocks under one session.  Org runs @samp{src} code blocks with the same
+session name in the same interpreter process.
 
 @itemize @bullet
 @item @code{none}
-Default.  Each source code block gets a new interpreter process to execute.
-The process terminates once the block is evaluated.
+Default.  Each @samp{src} code block gets a new interpreter process to
+execute.  The process terminates once the block is evaluated.
 @item @code{other}
 Any string besides @code{none} turns that string into the name of that
 session.  For example, @code{:session mysession} names it @samp{mysession}.
@@ -16078,21 +16086,21 @@ code blocks are evaluated, tangled, or exported.
 Default.  No expansion of ``Noweb'' syntax references in the body of the code
 when evaluating, tangling, or exporting.
 @item @code{yes}
-Expansion of ``Noweb'' syntax references in the body of the code block when
-evaluating, tangling, or exporting.
+Expansion of ``Noweb'' syntax references in the body of the @samp{src} code
+block when evaluating, tangling, or exporting.
 @item @code{tangle}
-Expansion of ``Noweb'' syntax references in the body of the code block when
-tangling.  No expansion when evaluating or exporting.
+Expansion of ``Noweb'' syntax references in the body of the @samp{src} code
+block when tangling.  No expansion when evaluating or exporting.
 @item @code{no-export}
-Expansion of ``Noweb'' syntax references in the body of the code block when
-evaluating or tangling.  No expansion when exporting.
+Expansion of ``Noweb'' syntax references in the body of the @samp{src} code
+block when evaluating or tangling.  No expansion when exporting.
 @item @code{strip-export}
-Expansion of ``Noweb'' syntax references in the body of the code block when
-expanding prior to evaluating or tangling.  Removes ``noweb'' syntax
-references when exporting.
+Expansion of ``Noweb'' syntax references in the body of the @samp{src} code
+block when expanding prior to evaluating or tangling.  Removes ``noweb''
+syntax references when exporting.
 @item @code{eval}
-Expansion of ``Noweb'' syntax references in the body of the code block only
-before evaluating.
+Expansion of ``Noweb'' syntax references in the body of the @samp{src} code
+block only before evaluating.
 @end itemize
 
 @subsubheading Noweb prefix lines
@@ -16101,7 +16109,7 @@ Noweb insertions now honor prefix characters that appear before
 Because the @code{<<example>>} noweb reference appears behind the SQL comment
 syntax, each line of the expanded noweb reference will be commented.
 
-This code block:
+This @samp{src} code block:
 
 @example
 -- <<example>>
@@ -16174,8 +16182,8 @@ argument.
 @cindex @code{:cache}, src header argument
 
 The @code{:cache} header argument is for caching results of evaluating code
-blocks.  Caching results can avoid re-evaluating code blocks that have not
-changed since the previous run.  To benefit from the cache and avoid
+blocks.  Caching results can avoid re-evaluating @samp{src} code blocks that
+have not changed since the previous run.  To benefit from the cache and avoid
 redundant evaluations, the source block must have a result already present in
 the buffer, and neither the header arguments (including the value of
 @code{:var} references) nor the text of the block itself has changed since
@@ -16183,8 +16191,8 @@ the result was last computed.  This feature greatly helps avoid long-running
 calculations.  For some edge cases, however, the cached results may not be
 reliable.
 
-The caching feature is best for when @samp{src} blocks are pure
-functions---functions that return the same value for the same input arguments
+The caching feature is best for when @samp{src} blocks are pure functions,
+that is functions that return the same value for the same input arguments
 (@pxref{var}), and that do not have side effects, and do not rely on external
 variables other than the input arguments.  Functions that depend on a timer,
 file system objects, and random number generators are clearly unsuitable for
@@ -16205,12 +16213,12 @@ The @code{:cache} header argument can have one of two values: @code{yes} or
 Default.  No caching of results; @samp{src} code block evaluated every time.
 @item @code{yes}
 Whether to run the code or return the cached results is determined by
-comparing the SHA1 hash value of the combined code block and arguments passed
-to it.  This hash value is packed on the @code{#+RESULTS:} line from previous
-evaluation.  When hash values match, Org does not evaluate the @samp{src}
-code block.  When hash values mismatch, Org evaluates the @samp{src} code
-block, inserts the results, recalculates the hash value, and updates
-@code{#+RESULTS:} line.
+comparing the SHA1 hash value of the combined @samp{src} code block and
+arguments passed to it.  This hash value is packed on the @code{#+RESULTS:}
+line from previous evaluation.  When hash values match, Org does not evaluate
+the @samp{src} code block.  When hash values mismatch, Org evaluates the
+@samp{src} code block, inserts the results, recalculates the hash value, and
+updates @code{#+RESULTS:} line.
 @end itemize
 
 In this example, both functions are cached.  But @code{caller} runs only if
@@ -16248,8 +16256,9 @@ C-o}, also uses @code{:sep} for opening tabular results.
 @cindex @code{:hlines}, src header argument
 
 In-between each table row or below the table headings, sometimes results have
-horizontal lines, which are also known as hlines.  The @code{:hlines} argument
-with the value @code{yes} accepts such lines.  The default is @code{no}.
+horizontal lines, which are also known as hlines.  The @code{:hlines}
+argument with the value @code{yes} accepts such lines.  The default is
+@code{no}.
 
 @itemize @bullet
 @item @code{no}
@@ -16308,8 +16317,9 @@ For @code{:hlines yes}, the example shows hlines unchanged.
 @cindex @code{:colnames}, src header argument
 
 The @code{:colnames} header argument accepts @code{yes}, @code{no}, or
-@code{nil} values.  The default value is @code{nil}, which is unassigned.  But
-this header argument behaves differently depending on the source code language.
+@code{nil} values.  The default value is @code{nil}, which is unassigned.
+But this header argument behaves differently depending on the source code
+language.
 
 @itemize @bullet
 @item @code{nil}
@@ -16354,8 +16364,8 @@ the column names, and then writes the table to the results block.
 @cindex @code{:rownames}, src header argument
 
 The @code{:rownames} header argument can take on values @code{yes} or
-@code{no} values.  The default is @code{no}.  Note that @code{emacs-lisp} code
-blocks ignore @code{:rownames} header argument because of the ease of
+@code{no} values.  The default is @code{no}.  Note that @code{emacs-lisp}
+code blocks ignore @code{:rownames} header argument because of the ease of
 table-handling in Emacs.
 
 @itemize @bullet
@@ -16412,27 +16422,28 @@ argument, Org will automatically set the tangled file to executable
 permissions.  But this can be overridden with custom permissions using
 @code{tangle-mode} header argument.
 
-When multiple code blocks tangle to a single file with different and
-conflicting @code{tangle-mode} header arguments, Org's behavior is undefined.
+When multiple @samp{src} code blocks tangle to a single file with different
+and conflicting @code{tangle-mode} header arguments, Org's behavior is
+undefined.
 
 @node eval
 @subsubsection @code{:eval}
 @cindex @code{:eval}, src header argument
 The @code{:eval} header argument can limit evaluation of specific code
-blocks.  It is useful for protection against evaluating untrusted code blocks
-by prompting for a confirmation.  This protection is independent of the
-@code{org-confirm-babel-evaluate} setting.
+blocks.  It is useful for protection against evaluating untrusted @samp{src}
+code blocks by prompting for a confirmation.  This protection is independent
+of the @code{org-confirm-babel-evaluate} setting.
 
 @table @code
 @item never or no
-Org will never evaluate this code block.
+Org will never evaluate this @samp{src} code block.
 @item query
-Org prompts the user for permission to evaluate this code block.
+Org prompts the user for permission to evaluate this @samp{src} code block.
 @item never-export or no-export
-Org will not evaluate this code block when exporting, yet the user can
-evaluate this source block interactively.
+Org will not evaluate this @samp{src} code block when exporting, yet the user
+can evaluate this source block interactively.
 @item query-export
-Org prompts the user for permission to export this code block.
+Org prompts the user for permission to export this @samp{src} code block.
 @end table
 
 If @code{:eval} header argument is not set for a source block, then Org
@@ -16452,8 +16463,8 @@ the results in a @code{#+BEGIN/END_RESULTS} block.
 The @code{:post} header argument is for post-processing results from
 @samp{src} block evaluation.  When @code{:post} has any value, Org binds the
 results to @code{*this*} variable for easy passing to @ref{var} header
-argument specifications.  That makes results available to other code blocks,
-or for even direct Emacs Lisp code execution.
+argument specifications.  That makes results available to other @samp{src}
+code blocks, or for even direct Emacs Lisp code execution.
 
 The following two examples illustrate @code{:post} header argument in action.
 The first one shows how to attach @code{#+ATTR_LATEX:} line using
@@ -16816,16 +16827,16 @@ emacs -Q --batch \
 @chapter Miscellaneous
 
 @menu
-* Completion::                  M-TAB knows what you need
+* Completion::                  M-TAB guesses completions
 * Easy templates::              Quick insertion of structural elements
 * Speed keys::                  Electric commands at the beginning of a headline
 * Code evaluation security::    Org mode files evaluate inline code
-* Customization::               Adapting Org to your taste
+* Customization::               Adapting Org to changing tastes
 * In-buffer settings::          Overview of the #+KEYWORDS
 * The very busy C-c C-c key::   When in doubt, press C-c C-c
 * Clean view::                  Getting rid of leading stars in the outline
 * TTY keys::                    Using Org on a tty
-* Interaction::                 Other Emacs packages
+* Interaction::                 With other Emacs packages
 * org-crypt::                   Encrypting Org files
 @end menu
 
@@ -16846,9 +16857,13 @@ emacs -Q --batch \
 @cindex tag completion
 @cindex link abbreviations, completion of
 
-Org supports in-buffer completion.  This type of completion does
-not make use of the minibuffer.  You simply type a few letters into
-the buffer and use the key to complete text right there.
+Org has in-buffer completions.  Unlike minibuffer completions, which are
+useful for quick command interactions, Org's in-buffer completions are more
+suitable for content creation in Org documents.  Type one or more letters and
+invoke the hot key to complete the text in-place.  Depending on the context
+and the keys, Org will offer different types of completions.  No minibuffer
+is involved.  Such mode-specific hot keys have become an integral part of
+Emacs and Org provides several shortcuts.
 
 @table @kbd
 @kindex M-@key{TAB}
@@ -16875,14 +16890,12 @@ buffer.
 After @samp{[}, complete link abbreviations (@pxref{Link abbreviations}).
 @item
 After @samp{#+}, complete the special keywords like @samp{TYP_TODO} or
-@samp{OPTIONS} which set file-specific options for Org mode.  When the
-option keyword is already complete, pressing @kbd{M-@key{TAB}} again
-will insert example settings for this keyword.
+file-specific @samp{OPTIONS}.  After option keyword is complete, pressing
+@kbd{M-@key{TAB}} again will insert example settings for that option.
 @item
-In the line after @samp{#+STARTUP: }, complete startup keywords,
-i.e., valid keys for this line.
+After @samp{#+STARTUP: }, complete startup keywords.
 @item
-Elsewhere, complete dictionary words using Ispell.
+When the point is anywhere else, complete dictionary words using Ispell.
 @end itemize
 @end table
 
@@ -16891,17 +16904,23 @@ Elsewhere, complete dictionary words using Ispell.
 @cindex template insertion
 @cindex insertion, of templates
 
-Org mode supports insertion of empty structural elements (like
-@code{#+BEGIN_SRC} and @code{#+END_SRC} pairs) with just a few key
-strokes.  This is achieved through a native template expansion mechanism.
-Note that Emacs has several other template mechanisms which could be used in
-a similar way, for example @file{yasnippet}.
+With just a few keystrokes, Org's easy templates inserts empty pairs of
+structural elements, such as @code{#+BEGIN_SRC} and @code{#+END_SRC}.  Easy
+templates use an expansion mechanism, which is native to Org, in a process
+similar to @file{yasnippet} and other Emacs template expansion packages.
 
-To insert a structural element, type a @samp{<}, followed by a template
-selector and @kbd{@key{TAB}}.  Completion takes effect only when the above
-keystrokes are typed on a line by itself.
+@kbd{@key{<}} @kbd{@key{s}} @kbd{@key{TAB}} completes the @samp{src} code
+block.
 
-The following template selectors are currently supported.
+@kbd{<} @kbd{l} @kbd{@key{TAB}}
+
+expands to:
+
+#+BEGIN_EXPORT latex
+
+#+END_EXPORT
+
+Org comes with these pre-defined easy templates:
 
 @multitable @columnfractions 0.1 0.9
 @item @kbd{s} @tab @code{#+BEGIN_SRC ... #+END_SRC}
@@ -16919,12 +16938,8 @@ The following template selectors are currently supported.
 @item @kbd{I} @tab @code{#+INCLUDE:} line
 @end multitable
 
-For example, on an empty line, typing "<e" and then pressing TAB, will expand
-into a complete EXAMPLE template.
-
-You can install additional templates by customizing the variable
-@code{org-structure-template-alist}.  See the docstring of the variable for
-additional details.
+More templates can added by customizing the variable
+@code{org-structure-template-alist}, whose docstring has additional details.
 
 @node Speed keys
 @section Speed keys
@@ -16932,55 +16947,59 @@ additional details.
 @vindex org-use-speed-commands
 @vindex org-speed-commands-user
 
-Single keys can be made to execute commands when the cursor is at the
-beginning of a headline, i.e., before the first star.  Configure the variable
-@code{org-use-speed-commands} to activate this feature.  There is a
-pre-defined list of commands, and you can add more such commands using the
-variable @code{org-speed-commands-user}.  Speed keys not only speed up
-navigation and other commands, but they also provide an alternative way to
-execute commands bound to keys that are not or not easily available on a TTY,
-or on a small mobile device with a limited keyboard.
+Single keystrokes can execute custom commands in an Org file when the cursor
+is on a headline.  Without the extra burden of a meta or modifier key, Speed
+Keys can speed navigation or execute custom commands.  Besides faster
+navigation, Speed Keys may come in handy on small mobile devices that do not
+have full keyboards.  Speed Keys may also work on TTY devices known for their
+problems when entering Emacs keychords.
 
-To see which commands are available, activate the feature and press @kbd{?}
-with the cursor at the beginning of a headline.
+By default, Org has Speed Keys disabled.  To activate Speed Keys, configure
+the variable @code{org-use-speed-commands}.  To trigger a Speed Key, the
+cursor must be at the beginning of an Org headline, before any of the stars.
+
+Org comes with a pre-defined list of Speed Keys; @kbd{?} shows currently
+active Speed Keys.  To add or modify Speed Keys, customize the variable,
+@code{org-speed-commands-user}.  For more details, see the variable's
+docstring.
+
 
 @node Code evaluation security
 @section Code evaluation and security issues
 
-Org provides tools to work with code snippets, including evaluating them.
+Unlike plain text, running code comes with risk.  Each @samp{src} code block,
+in terms of risk, is equivalent to an executable file.  Org therefore puts a
+few confirmation prompts by default.  This is to alert the casual user from
+accidentally running untrusted code.
 
-Running code on your machine always comes with a security risk.  Badly
-written or malicious code can be executed on purpose or by accident.  Org has
-default settings which will only evaluate such code if you give explicit
-permission to do so, and as a casual user of these features you should leave
-these precautions intact.
+For users who do not run code blocks or write code regularly, Org's default
+settings should suffice.  However, some users may want to tweak the prompts
+for fewer interruptions.  To weigh the risks of automatic execution of code
+blocks, here are some details about code evaluation.
 
-For people who regularly work with such code, the confirmation prompts can
-become annoying, and you might want to turn them off.  This can be done, but
-you must be aware of the risks that are involved.
-
-Code evaluation can happen under the following circumstances:
+Org evaluates code in the following circumstances:
 
 @table @i
 @item Source code blocks
-Source code blocks can be evaluated during export, or when pressing @kbd{C-c
-C-c} in the block.  The most important thing to realize here is that Org mode
-files which contain code snippets are, in a certain sense, like executable
-files.  So you should accept them and load them into Emacs only from trusted
-sources---just like you would do with a program you install on your computer.
-
-Make sure you know what you are doing before customizing the variables
-which take off the default security brakes.
+Org evaluates @samp{src} code blocks in an Org file during export.  Org also
+evaluates a @samp{src} code block with the @kbd{C-c C-c} key chord.  Users
+exporting or running code blocks must load files only from trusted sources.
+Be weary of customizing variables that remove or alter default security
+measures.
 
 @defopt org-confirm-babel-evaluate
-When t (the default), the user is asked before every code block evaluation.
-When @code{nil}, the user is not asked.  When set to a function, it is called with
-two arguments (language and body of the code block) and should return t to
-ask and @code{nil} not to ask.
+When @code{t}, Org prompts the user for confirmation before executing each
+code block.  When @code{nil}, Org executes code blocks without prompting the
+user for confirmation.  When this option is set to a custom function, Org
+invokes the function with these two arguments: the source code language and
+the body of the code block.  The custom function must return either a
+@code{t} or @code{nil}, which determines if the user is prompted.  Each
+source code language can be handled separately through this function
+argument.
 @end defopt
 
-For example, here is how to execute "ditaa" code (which is considered safe)
-without asking:
+For example, this function enables execution of @samp{ditaa} code +blocks
+without prompting:
 
 @lisp
 (defun my-org-confirm-babel-evaluate (lang body)
@@ -16989,20 +17008,21 @@ without asking:
 @end lisp
 
 @item Following @code{shell} and @code{elisp} links
-Org has two link types that can directly evaluate code (@pxref{External
-links}).  These links can be problematic because the code to be evaluated is
-not visible.
+Org has two link types that can also directly evaluate code (@pxref{External
+links}).  Because such code is not visible, these links have a potential
+risk.  Org therefore prompts the user when it encounters such links.  The
+customization variables are:
 
 @defopt org-confirm-shell-link-function
-Function to queries user about shell link execution.
+Function that prompts the user before executing a shell link.
 @end defopt
 @defopt org-confirm-elisp-link-function
-Functions to query user for Emacs Lisp link execution.
+Function that prompts the user before executing an Emacs Lisp link.
 @end defopt
 
 @item Formulas in tables
-Formulas in tables (@pxref{The spreadsheet}) are code that is evaluated
-either by the @i{calc} interpreter, or by the @i{Emacs Lisp} interpreter.
+Org executes formulas in tables (@pxref{The spreadsheet}) either through the
+@emph{calc} or the @emph{Emacs Lisp} interpreters.
 @end table
 
 @node Customization
@@ -17011,59 +17031,50 @@ either by the @i{calc} interpreter, or by the @i{Emacs Lisp} interpreter.
 @cindex options, for customization
 @cindex variables, for customization
 
-There are more than 500 variables that can be used to customize
-Org.  For the sake of compactness of the manual, I am not
-describing the variables here.  A structured overview of customization
-variables is available with @kbd{M-x org-customize RET}.  Or select
-@code{Browse Org Group} from the @code{Org->Customization} menu.  Many
-settings can also be activated on a per-file basis, by putting special
-lines into the buffer (@pxref{In-buffer settings}).
+Org has more than 500 variables for customization.  They can be accessed
+through the usual @kbd{M-x org-customize RET} command.  Or through the Org
+menu, @code{Org->Customization->Browse Org Group}.  Org also has per-file
+settings for some variables (@pxref{In-buffer settings}).
 
 @node In-buffer settings
 @section Summary of in-buffer settings
 @cindex in-buffer settings
 @cindex special keywords
+In-buffer settings start with @samp{#+}, followed by a keyword, a colon, and
+then a word for each setting.  Org accepts multiple settings on the same
+line.  Org also accepts multiple lines for a keyword.  This manual describes
+these settings throughout.  A summary follows here.
 
-Org mode uses special lines in the buffer to define settings on a
-per-file basis.  These lines start with a @samp{#+} followed by a
-keyword, a colon, and then individual words defining a setting.  Several
-setting words can be in the same line, but you can also have multiple
-lines for the keyword.  While these settings are described throughout
-the manual, here is a summary.  After changing any of these lines in the
-buffer, press @kbd{C-c C-c} with the cursor still in the line to
-activate the changes immediately.  Otherwise they become effective only
-when the file is visited again in a new Emacs session.
+@kbd{C-c C-c} activates any changes to the in-buffer settings.  Closing and
+reopening the Org file in Emacs also activates the changes.
 
 @vindex org-archive-location
 @table @kbd
 @item #+ARCHIVE: %s_done::
-This line sets the archive location for the agenda file.  It applies for
-all subsequent lines until the next @samp{#+ARCHIVE} line, or the end
-of the file.  The first such line also applies to any entries before it.
+Sets the archive location of the agenda file.  This location applies to the
+lines until the next @samp{#+ARCHIVE} line, if any, in the Org file.  The
+first archive location in the Org file also applies to any entries before it.
 The corresponding variable is @code{org-archive-location}.
 @item #+CATEGORY:
-This line sets the category for the agenda file.  The category applies to the
-whole document.
+Sets the category of the agenda file, which applies to the entire document.
 @item #+COLUMNS: %25ITEM ...
 @cindex property, COLUMNS
-Set the default format for columns view.  This format applies when
-columns view is invoked in locations where no @code{COLUMNS} property
-applies.
+Sets the default format for columns view.  Org uses this format for column
+views where there is no @code{COLUMNS} property.
 @item #+CONSTANTS: name1=value1 ...
 @vindex org-table-formula-constants
 @vindex org-table-formula
-Set file-local values for constants to be used in table formulas.  This
-line sets the local variable @code{org-table-formula-constants-local}.
-The global version of this variable is
-@code{org-table-formula-constants}.
+Set file-local values for constants that table formulas can use.  This line
+sets the local variable @code{org-table-formula-constants-local}.  The global
+version of this variable is @code{org-table-formula-constants}.
 @item #+FILETAGS: :tag1:tag2:tag3:
-Set tags that can be inherited by any entry in the file, including the
+Set tags that all entries in the file will inherit from here, including the
 top-level entries.
 @item #+LINK: linkword replace
 @vindex org-link-abbrev-alist
-These lines (several are allowed) specify link abbreviations.
-@xref{Link abbreviations}.  The corresponding variable is
-@code{org-link-abbrev-alist}.
+Each line specifies one abbreviation for one link.  Use multiple
+@code{#+LINK:} lines for more, @pxref{Link abbreviations}.  The corresponding
+variable is @code{org-link-abbrev-alist}.
 @item #+PRIORITIES: highest lowest default
 @vindex org-highest-priority
 @vindex org-lowest-priority
@@ -17076,22 +17087,22 @@ This line sets a default inheritance value for entries in the current
 buffer, most useful for specifying the allowed values of a property.
 @cindex #+SETUPFILE
 @item #+SETUPFILE: file
-This line defines a file that holds more in-buffer setup.  Normally this is
-entirely ignored.  Only when the buffer is parsed for option-setting lines
-(i.e., when starting Org mode for a file, when pressing @kbd{C-c C-c} in a
-settings line, or when exporting), then the contents of this file are parsed
-as if they had been included in the buffer.  In particular, the file can be
-any other Org mode file with internal setup.  You can visit the file the
-cursor is in the line with @kbd{C-c '}.
+The setup file is for additional in-buffer settings.  Org loads this file and
+parses it for any settings in it only when Org opens the main file.  @kbd{C-c
+C-c} on the settings line will also parse and load.  Org also parses and
+loads the file during normal exporting process.  Org parses the contents of
+this file as if it was included in the buffer.  It can be another Org file.
+To visit the file, @kbd{C-c '} while the cursor is on the line with the file
+name.
 @item #+STARTUP:
 @cindex #+STARTUP
-This line sets options to be used at startup of Org mode, when an
-Org file is being visited.
+Startup options Org uses when first visiting a file.
 
 The first set of options deals with the initial visibility of the outline
 tree.  The corresponding variable for global default settings is
-@code{org-startup-folded}, with a default value @code{t}, which means
-@code{overview}.
+@code{org-startup-folded} with a default value of @code{t}, which is the same
+as @code{overview}.
+
 @vindex org-startup-folded
 @cindex @code{overview}, STARTUP keyword
 @cindex @code{content}, STARTUP keyword
@@ -17115,10 +17126,10 @@ noindent   @r{start with @code{org-indent-mode} turned off}
 @end example
 
 @vindex org-startup-align-all-tables
-Then there are options for aligning tables upon visiting a file.  This
-is useful in files containing narrowed table columns.  The corresponding
-variable is @code{org-startup-align-all-tables}, with a default value
-@code{nil}.
+Aligns tables consistently upon visiting a file; useful for restoring
+narrowed table columns.  The corresponding variable is
+@code{org-startup-align-all-tables} with @code{nil} as default value.
+
 @cindex @code{align}, STARTUP keyword
 @cindex @code{noalign}, STARTUP keyword
 @example
@@ -17127,9 +17138,9 @@ noalign    @r{don't align tables on startup}
 @end example
 
 @vindex org-startup-with-inline-images
-When visiting a file, inline images can be automatically displayed.  The
-corresponding variable is @code{org-startup-with-inline-images}, with a
-default value @code{nil} to avoid delays when visiting a file.
+Whether Org should automatically display inline images.  The corresponding
+variable is @code{org-startup-with-inline-images}, with a default value
+@code{nil} to avoid delays when visiting a file.
 @cindex @code{inlineimages}, STARTUP keyword
 @cindex @code{noinlineimages}, STARTUP keyword
 @example
@@ -17138,10 +17149,9 @@ noinlineimages @r{don't show inline images on startup}
 @end example
 
 @vindex org-startup-with-latex-preview
-When visiting a file, @LaTeX{} fragments can be converted to images
-automatically.  The variable @code{org-startup-with-latex-preview} which
-controls this behavior, is set to @code{nil} by default to avoid delays on
-startup.
+Whether Org should automatically convert @LaTeX{} fragments to images.  The
+variable @code{org-startup-with-latex-preview}, which controls this setting,
+is set to @code{nil} by default to avoid startup delays.
 @cindex @code{latexpreview}, STARTUP keyword
 @cindex @code{nolatexpreview}, STARTUP keyword
 @example
@@ -17202,21 +17212,21 @@ nologstatesreversed @r{do not reverse the order of states notes}
 
 @vindex org-hide-leading-stars
 @vindex org-odd-levels-only
-Here are the options for hiding leading stars in outline headings, and for
-indenting outlines.  The corresponding variables are
-@code{org-hide-leading-stars} and @code{org-odd-levels-only}, both with a
-default setting @code{nil} (meaning @code{showstars} and @code{oddeven}).
+These options hide leading stars in outline headings, and indent outlines.
+The corresponding variables are @code{org-hide-leading-stars} and
+@code{org-odd-levels-only}, both with a default setting of @code{nil}
+(meaning @code{showstars} and @code{oddeven}).
 @cindex @code{hidestars}, STARTUP keyword
 @cindex @code{showstars}, STARTUP keyword
 @cindex @code{odd}, STARTUP keyword
 @cindex @code{even}, STARTUP keyword
 @example
-hidestars  @r{make all but one of the stars starting a headline invisible.}
-showstars  @r{show all stars starting a headline}
-indent     @r{virtual indentation according to outline level}
-noindent   @r{no virtual indentation according to outline level}
-odd        @r{allow only odd outline levels (1,3,...)}
-oddeven    @r{allow all outline levels}
+hidestars  @r{hide all stars on the headline except one.}
+showstars  @r{show all stars on the headline}
+indent     @r{virtual indents according to the outline level}
+noindent   @r{no virtual indents}
+odd        @r{show odd outline levels only (1,3,...)}
+oddeven    @r{show all outline levels}
 @end example
 
 @vindex org-put-time-stamp-overlays
@@ -17242,8 +17252,8 @@ constSI    @r{@file{constants.el} should use the SI unit system}
 @vindex org-footnote-define-inline
 @vindex org-footnote-auto-label
 @vindex org-footnote-auto-adjust
-To influence footnote settings, use the following keywords.  The
-corresponding variables are @code{org-footnote-define-inline},
+For footnote settings, use the following keywords.  The corresponding
+variables are @code{org-footnote-define-inline},
 @code{org-footnote-auto-label}, and @code{org-footnote-auto-adjust}.
 @cindex @code{fninline}, STARTUP keyword
 @cindex @code{nofninline}, STARTUP keyword
@@ -17288,18 +17298,15 @@ entitiesplain   @r{Leave entities plain}
 
 @item #+TAGS:  TAG1(c1) TAG2(c2)
 @vindex org-tag-alist
-These lines (several such lines are allowed) specify the valid tags in
-this file, and (potentially) the corresponding @emph{fast tag selection}
-keys.  The corresponding variable is @code{org-tag-alist}.
+These lines specify valid tags for this file.  Org accepts multiple tags
+lines.  Tags could correspond to the @emph{fast tag selection} keys.  The
+corresponding variable is @code{org-tag-alist}.
 @cindex #+TBLFM
 @item #+TBLFM:
-This line contains the formulas for the table directly above the line.
-
-Table can have multiple lines containing @samp{#+TBLFM:}.  Note
-that only the first line of @samp{#+TBLFM:} will be applied when
-you recalculate the table.  For more details see @ref{Using
-multiple #+TBLFM lines} in @ref{Editing and debugging formulas}.
-
+This line is for formulas for the table directly above.  A table can have
+multiple @samp{#+TBLFM:} lines.  On table recalculation, Org applies only the
+first @samp{#+TBLFM:} line.  For details see @ref{Using multiple #+TBLFM
+lines} in @ref{Editing and debugging formulas}.
 @item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+DATE:,
 @itemx #+OPTIONS:, #+BIND:,
 @itemx #+SELECT_TAGS:, #+EXCLUDE_TAGS:
@@ -17307,8 +17314,8 @@ These lines provide settings for exporting files.  For more details see
 @ref{Export settings}.
 @item #+TODO:    #+SEQ_TODO:   #+TYP_TODO:
 @vindex org-todo-keywords
-These lines set the TODO keywords and their interpretation in the
-current file.  The corresponding variable is @code{org-todo-keywords}.
+These lines set the TODO keywords and their significance to the current file.
+The corresponding variable is @code{org-todo-keywords}.
 @end table
 
 @node The very busy C-c C-c key
@@ -17316,35 +17323,32 @@ current file.  The corresponding variable is @code{org-todo-keywords}.
 @kindex C-c C-c
 @cindex C-c C-c, overview
 
-The key @kbd{C-c C-c} has many purposes in Org, which are all
-mentioned scattered throughout this manual.  One specific function of
-this key is to add @emph{tags} to a headline (@pxref{Tags}).  In many
-other circumstances it means something like @emph{``Hey Org, look
-here and update according to what you see here''}.  Here is a summary of
-what this means in different contexts.
+The @kbd{C-c C-c} key in Org serves many purposes depending on the context.
+It is probably the most over-worked, multi-purpose key combination in Org.
+Its uses are well-documented through out this manual, but here is a
+consolidated list for easy reference.
 
 @itemize @minus
 @item
-If there are highlights in the buffer from the creation of a sparse
-tree, or from clock display, remove these highlights.
+If any highlights shown in the buffer from the creation of a sparse tree, or
+from clock display, remove such highlights.
 @item
-If the cursor is in one of the special @code{#+KEYWORD} lines, this
-triggers scanning the buffer for these lines and updating the
-information.
+If the cursor is in one of the special @code{#+KEYWORD} lines, scan the
+buffer for these lines and update the information.
 @item
-If the cursor is inside a table, realign the table.  This command
-works even if the automatic table editor has been turned off.
+If the cursor is inside a table, realign the table.  The table realigns even
+if automatic table editor is turned off.
 @item
 If the cursor is on a @code{#+TBLFM} line, re-apply the formulas to
 the entire table.
 @item
 If the current buffer is a capture buffer, close the note and file it.  With
-a prefix argument, also jump to the target location upon storing the note.
+a prefix argument, also jump to the target location after saving the note.
 @item
 If the cursor is on a @code{<<<target>>>}, update radio targets and
 corresponding links in this buffer.
 @item
-If the cursor is in a property line or at the start or end of a property
+If the cursor is on a property line or at the start or end of a property
 drawer, offer property commands.
 @item
 If the cursor is at a footnote reference, go to the corresponding
@@ -17371,11 +17375,11 @@ If the cursor is at a timestamp, fix the day name in the timestamp.
 @cindex odd-levels-only outlines
 @cindex clean outline view
 
-Some people find it noisy and distracting that the Org headlines start with a
-potentially large number of stars, and that text below the headlines is not
-indented.  While this is no problem when writing a @emph{book-like} document
-where the outline headings are really section headings, in a more
-@emph{list-oriented} outline, indented structure is a lot cleaner:
+Org's default outline with stars and no indents can become too cluttered for
+short documents.  For @emph{book-like} long documents, the effect is not as
+noticeable.  Org provides an alternate stars and indentation scheme, as shown
+on the right in the following table.  It uses only one star and indents text
+to line with the heading:
 
 @example
 @group
@@ -17391,36 +17395,40 @@ more text                        |          more text
 
 @noindent
 
-This kind of view can be achieved dynamically at display time using
-@code{org-indent-mode}.  In this minor mode, all lines are prefixed for
-display with the necessary amount of space@footnote{@code{org-indent-mode}
-also sets the @code{wrap-prefix} property, such that @code{visual-line-mode}
-(or purely setting @code{word-wrap}) wraps long lines (including headlines)
-correctly indented.}.  Also headlines are prefixed with additional stars, so
-that the amount of indentation shifts by two@footnote{See the variable
-@code{org-indent-indentation-per-level}.} spaces per level.  All headline
-stars but the last one are made invisible using the @code{org-hide}
-face@footnote{Turning on @code{org-indent-mode} sets
+To turn this mode on, use the minor mode, @code{org-indent-mode}.  Text lines
+that are not headlines are prefixed with spaces to vertically align with the
+headline text@footnote{The @code{org-indent-mode} also sets the
+@code{wrap-prefix} correctly for indenting and wrapping long lines of
+headlines or text.  This minor mode handles @code{visual-line-mode} and
+directly applied settings through @code{word-wrap}.}.
+
+To make more horizontal space, the headlines are shifted by two stars.  This
+can be configured by the @code{org-indent-indentation-per-level} variable.
+Only one star on each headline is visible, the rest are masked with the same
+font color as the background.  This font face can be configured with the
+@code{org-hide} variable.
+
+Note that turning on @code{org-indent-mode} sets
 @code{org-hide-leading-stars} to @code{t} and @code{org-adapt-indentation} to
-@code{nil}.}; see below under @samp{2.} for more information on how this
-works.  You can turn on @code{org-indent-mode} for all files by customizing
-the variable @code{org-startup-indented}, or you can turn it on for
-individual files using
+@code{nil}; @samp{2.} below shows how this works.
+
+To globally turn on @code{org-indent-mode} for all files, customize the
+variable @code{org-startup-indented}.
+
+To turn on indenting for individual files, use @code{#+STARTUP} option as
+follows:
 
 @example
 #+STARTUP: indent
 @end example
 
-If you want a similar effect in an earlier version of Emacs and/or Org, or if
-you want the indentation to be hard space characters so that the plain text
-file looks as similar as possible to the Emacs display, Org supports you in
-the following way:
+Indent on startup makes Org use hard spaces to align text with headings as
+shown in examples below.
 
 @enumerate
 @item
 @emph{Indentation of text below headlines}@*
-You may indent text below each headline to make the left boundary line up
-with the headline, like
+Indent text to align with the headline.
 
 @example
 *** 3rd level
@@ -17428,23 +17436,21 @@ with the headline, like
 @end example
 
 @vindex org-adapt-indentation
-Org supports this with paragraph filling, line wrapping, and structure
-editing@footnote{See also the variable @code{org-adapt-indentation}.},
-preserving or adapting the indentation as appropriate.
+Org adapts indentations with paragraph filling, line wrapping, and structure
+editing@footnote{Also see the variable @code{org-adapt-indentation}.}.
 
 @item
 @vindex org-hide-leading-stars
-@emph{Hiding leading stars}@* You can modify the display in such a way that
-all leading stars become invisible.  To do this in a global way, configure
-the variable @code{org-hide-leading-stars} or change this on a per-file basis
-with
+@emph{Hiding leading stars}@* Org can make leading stars invisible.  For
+global preference, configure the variable @code{org-hide-leading-stars}.  For
+per-file preference, use these file @code{#+STARTUP} options:
 
 @example
 #+STARTUP: hidestars
 #+STARTUP: showstars
 @end example
 
-With hidden stars, the tree becomes:
+With stars hidden, the tree is shown as:
 
 @example
 @group
@@ -17457,50 +17463,39 @@ With hidden stars, the tree becomes:
 
 @noindent
 @vindex org-hide @r{(face)}
-The leading stars are not truly replaced by whitespace, they are only
-fontified with the face @code{org-hide} that uses the background color as
-font color.  If you are not using either white or black background, you may
-have to customize this face to get the wanted effect.  Another possibility is
-to set this font such that the extra stars are @i{almost} invisible, for
-example using the color @code{grey90} on a white background.
+Because Org makes the font color same as the background color to hide to
+stars, sometimes @code{org-hide} face may need tweaking to get the effect
+right.  For some black and white combinations, @code{grey90} on a white
+background might mask the stars better.
 
 @item
 @vindex org-odd-levels-only
-Things become cleaner still if you skip all the even levels and use only odd
-levels 1, 3, 5..., effectively adding two stars to go from one outline level
-to the next@footnote{When you need to specify a level for a property search
-or refile targets, @samp{LEVEL=2} will correspond to 3 stars, etc.}.  In this
-way we get the outline view shown at the beginning of this section.  In order
-to make the structure editing and export commands handle this convention
-correctly, configure the variable @code{org-odd-levels-only}, or set this on
-a per-file basis with one of the following lines:
+Using stars for only odd levels, 1, 3, 5, @dots{}, can also clean up the
+clutter.  This removes two stars from each level@footnote{Because
+@samp{LEVEL=2} has 3 stars, @samp{LEVEL=3} has 4 stars, and so on}.  For Org
+to properly handle this cleaner structure during edits and exports, configure
+the variable @code{org-odd-levels-only}.  To set this per-file, use either
+one of the following lines:
 
 @example
 #+STARTUP: odd
 #+STARTUP: oddeven
 @end example
 
-You can convert an Org file from single-star-per-level to the
-double-star-per-level convention with @kbd{M-x org-convert-to-odd-levels
-RET} in that file.  The reverse operation is @kbd{M-x
-org-convert-to-oddeven-levels}.
+To switch between single and double stars layouts, use @kbd{M-x
+org-convert-to-odd-levels RET} and @kbd{M-x org-convert-to-oddeven-levels}.
 @end enumerate
 
 @node TTY keys
 @section Using Org on a tty
 @cindex tty key bindings
 
-Because Org contains a large number of commands, by default many of
-Org's core commands are bound to keys that are generally not
-accessible on a tty, such as the cursor keys (@key{left}, @key{right},
-@key{up}, @key{down}), @key{TAB} and @key{RET}, in particular when used
-together with modifiers like @key{Meta} and/or @key{Shift}.  To access
-these commands on a tty when special keys are unavailable, the following
-alternative bindings can be used.  The tty bindings below will likely be
-more cumbersome; you may find for some of the bindings below that a
-customized workaround suits you better.  For example, changing a timestamp
-is really only fun with @kbd{S-@key{cursor}} keys, whereas on a
-tty you would rather use @kbd{C-c .} to re-insert the timestamp.
+Org provides alternative key bindings for TTY and modern mobile devices that
+cannot handle cursor keys and complex modifier key chords.  Some of these
+workarounds may be more cumbersome than necessary.  Users should look into
+customizing these further based on their usage needs.  For example, the
+normal @kbd{S-@key{cursor}} for editing timestamp might be better with
+@kbd{C-c .} chord.
 
 @multitable @columnfractions 0.15 0.2 0.1 0.2
 @item @b{Default} @tab @b{Alternative 1} @tab @b{Speed key} @tab @b{Alternative 2}
@@ -17528,8 +17523,9 @@ tty you would rather use @kbd{C-c .} to re-insert the timestamp.
 @node Interaction
 @section Interaction with other packages
 @cindex packages, interaction with other
-Org lives in the world of GNU Emacs and interacts in various ways
-with other code out there.
+Org's compatibility and the level of interaction with other Emacs packages
+are documented here.
+
 
 @menu
 * Cooperation::                 Packages Org cooperates with
@@ -17543,48 +17539,43 @@ with other code out there.
 @cindex @file{calc.el}
 @cindex Gillespie, Dave
 @item @file{calc.el} by Dave Gillespie
-Org uses the Calc package for implementing spreadsheet functionality in its
-tables (@pxref{The spreadsheet}).  Another possibility for interaction
-between the two packages is using Calc for embedded calculations.
+Org uses the Calc package for tables to implement spreadsheet functionality
+(@pxref{The spreadsheet}).  Org also uses Calc for embedded calculations.
 @xref{Embedded Mode, , Embedded Mode, calc, GNU Emacs Calc Manual}.
 @item @file{constants.el} by Carsten Dominik
 @cindex @file{constants.el}
 @cindex Dominik, Carsten
 @vindex org-table-formula-constants
-In a table formula (@pxref{The spreadsheet}), it is possible to use
-names for natural constants or units.  Instead of defining your own
-constants in the variable @code{org-table-formula-constants}, install
-the @file{constants} package which defines a large number of constants
-and units, and lets you use unit prefixes like @samp{M} for
-@samp{Mega}, etc.  You will need version 2.0 of this package, available
-at @url{http://www.astro.uva.nl/~dominik/Tools}.  Org checks for
-the function @code{constants-get}, which has to be autoloaded in your
-setup.  See the installation instructions in the file
-@file{constants.el}.
+Org can use names for constants in formulas in tables.  Org can also use
+calculation suffixes for units, such as @samp{M} for @samp{Mega}.  For a
+standard collection of such constants, install the @file{constants} package.
+Install version 2.0 of this package, available at
+@url{http://www.astro.uva.nl/~dominik/Tools}.  Org checks if the function
+@code{constants-get} has been autoloaded.  Installation instructions are in
+the file, @file{constants.el}.
 @item @file{cdlatex.el} by Carsten Dominik
 @cindex @file{cdlatex.el}
 @cindex Dominik, Carsten
-Org mode can make use of the CD@LaTeX{} package to efficiently enter
-@LaTeX{} fragments into Org files.  See @ref{CDLaTeX mode}.
+Org mode can use CD@LaTeX{} package to efficiently enter @LaTeX{} fragments
+into Org files (@pxref{CDLaTeX mode}).
 @item @file{imenu.el} by Ake Stenhoff and Lars Lindberg
 @cindex @file{imenu.el}
-Imenu allows menu access to an index of items in a file.  Org mode
-supports Imenu---all you need to do to get the index is the following:
+Imenu creates dynamic menus based on an index of items in a file.  Org mode
+supports Imenu menus.  Enable it with a mode hook as follows:
 @lisp
 (add-hook 'org-mode-hook
           (lambda () (imenu-add-to-menubar "Imenu")))
 @end lisp
 @vindex org-imenu-depth
-By default the index is two levels deep---you can modify the depth using
-the option @code{org-imenu-depth}.
+By default the Imenu index is two levels deep.  Change the index depth using
+thes variable, @code{org-imenu-depth}.
 @item @file{speedbar.el} by Eric M. Ludlam
 @cindex @file{speedbar.el}
 @cindex Ludlam, Eric M.
-Speedbar is a package that creates a special frame displaying files and
-index items in files.  Org mode supports Speedbar and allows you to
-drill into Org files directly from the Speedbar.  It also allows you to
-restrict the scope of agenda commands to a file or a subtree by using
-the command @kbd{<} in the Speedbar frame.
+Speedbar package creates a special Emacs frame for displaying files and index
+items in files.  Org mode supports Speedbar; users can drill into Org files
+directly from the Speedbar.  The @kbd{<} in the Speedbar frame tweeks the
+agenda commands to that file or to a subtree.
 @cindex @file{table.el}
 @item @file{table.el} by Takaaki Ota
 @kindex C-c C-c
@@ -17594,11 +17585,10 @@ the command @kbd{<} in the Speedbar frame.
 
 Complex ASCII tables with automatic line wrapping, column- and row-spanning,
 and alignment can be created using the Emacs table package by Takaaki Ota.
-Org mode will recognize these tables and export them properly.  Because of
-interference with other Org mode functionality, you unfortunately cannot edit
-these tables directly in the buffer.  Instead, you need to use the command
-@kbd{C-c '} to edit them, similar to source code snippets.
-
+Org mode recognizes such tables and export them properly.  @kbd{C-c '} to
+edit these tables in a special buffer, much like Org's @samp{src} code
+blocks.  Because of interference with other Org mode functionality, Takaaki
+Ota tables cannot be edited directly in the Org buffer.
 @table @kbd
 @orgcmd{C-c ',org-edit-special}
 Edit a @file{table.el} table.  Works when the cursor is in a table.el table.
@@ -17606,38 +17596,35 @@ Edit a @file{table.el} table.  Works when the cursor is in a table.el table.
 @orgcmd{C-c ~,org-table-create-with-table.el}
 Insert a @file{table.el} table.  If there is already a table at point, this
 command converts it between the @file{table.el} format and the Org mode
-format.  See the documentation string of the command
-@code{org-convert-table} for the restrictions under which this is
-possible.
+format.  See the documentation string of the command @code{org-convert-table}
+for details.
 @end table
 @end table
 
 @node Conflicts
-@subsection Packages that lead to conflicts with Org mode
+@subsection Packages that conflict with Org mode
 
 @table @asis
 
 @cindex @code{shift-selection-mode}
 @vindex org-support-shift-select
-In Emacs, @code{shift-selection-mode} is on by default, meaning that cursor
-motions combined with the shift key should start or enlarge regions.  This
-conflicts with the use of @kbd{S-@key{cursor}} commands in Org to change
-timestamps, TODO keywords, priorities, and item bullet types if the cursor is
-at such a location.  By default, @kbd{S-@key{cursor}} commands outside
-special contexts don't do anything, but you can customize the variable
-@code{org-support-shift-select}.  Org mode then tries to accommodate shift
-selection by (i) using it outside of the special contexts where special
-commands apply, and by (ii) extending an existing active region even if the
-cursor moves across a special context.
+In Emacs, @code{shift-selection-mode} combines cursor motions with shift key
+to enlarge regions.  Emacs sets this mode by default.  This conflicts with
+Org's use of @kbd{S-@key{cursor}} commands to change timestamps, TODO
+keywords, priorities, and item bullet types, etc.  Since @kbd{S-@key{cursor}}
+commands outside of specific contexts don't do anything, Org offers the
+variable @code{org-support-shift-select} for customization.  Org mode
+accommodates shift selection by (i) making it available outside of the
+special contexts where special commands apply, and (ii) extending an
+existing active region even if the cursor moves across a special context.
 
 @item @file{CUA.el} by Kim. F. Storm
 @cindex @file{CUA.el}
 @cindex Storm, Kim. F.
 @vindex org-replace-disputed-keys
-For the same reason, key bindings in Org also conflict with the
-@kbd{S-<cursor>} keys used by CUA mode.  If you prefer to leave these keys to
-a different package while working in Org mode, configure the variable
-@code{org-replace-disputed-keys}.  When set, Org will move the following key
+Org key bindings conflict with @kbd{S-<cursor>} keys used by CUA mode.  For
+Org to relinquish these bindings to CUA mode, configure the variable
+@code{org-replace-disputed-keys}.  When set, Org moves the following key
 bindings in Org files, and in the agenda buffer (but not during date
 selection).
 
@@ -17648,9 +17635,8 @@ C-S-LEFT  @result{}  M-S--           C-S-RIGHT  @result{}  M-S-+
 @end example
 
 @vindex org-disputed-keys
-Yes, these are unfortunately more difficult to remember.  If you want
-to have other replacement keys, look at the variable
-@code{org-disputed-keys}.
+Yes, these are unfortunately more difficult to remember.  To define a
+different replacement keys, look at the variable @code{org-disputed-keys}.
 
 @item @file{ecomplete.el} by Lars Magne Ingebrigtsen @email{larsi@@gnus.org}
 @cindex @file{ecomplete.el}
@@ -17668,9 +17654,8 @@ manually when needed in the messages body.
 @cindex @file{filladapt.el}
 
 Org mode tries to do the right thing when filling paragraphs, list items and
-other elements.  Many users reported they had problems using both
-@file{filladapt.el} and Org mode, so a safe thing to do is to disable it like
-this:
+other elements.  Many users reported problems using both @file{filladapt.el}
+and Org mode, so a safe thing to do is to disable filladapt like this:
 
 @lisp
 (add-hook 'org-mode-hook 'turn-off-filladapt-mode)
@@ -17690,15 +17675,14 @@ fixed this problem:
 @end lisp
 
 The latest version of yasnippet doesn't play well with Org mode.  If the
-above code does not fix the conflict, start by defining the following
-function:
+above code does not fix the conflict, first define the following function:
 
 @lisp
 (defun yas/org-very-safe-expand ()
   (let ((yas/fallback-behavior 'return-nil)) (yas/expand)))
 @end lisp
 
-Then, tell Org mode what to do with the new function:
+Then tell Org mode to use that function:
 
 @lisp
 (add-hook 'org-mode-hook
@@ -17746,16 +17730,14 @@ another key for this command, or override the key in
 @cindex @file{org-crypt.el}
 @cindex @code{org-decrypt-entry}
 
-Org-crypt will encrypt the text of an entry, but not the headline, or
-properties.  Org-crypt uses the Emacs EasyPG library to encrypt and decrypt
-files.
+Org crypt encrypts the text of an Org entry, but not the headline, or
+properties.  Org crypt uses the Emacs EasyPG library to encrypt and decrypt.
 
 Any text below a headline that has a @samp{:crypt:} tag will be automatically
-be encrypted when the file is saved.  If you want to use a different tag just
-customize the @code{org-crypt-tag-matcher} setting.
+be encrypted when the file is saved.  To use a different tag, customize the
+@code{org-crypt-tag-matcher} variable.
 
-To use org-crypt it is suggested that you have the following in your Emacs
-init file:
+Suggested Org crypt settings in Emacs init file:
 
 @lisp
 (require 'org-crypt)
@@ -17777,8 +17759,8 @@ init file:
   ;; # -*- buffer-auto-save-file-name: nil; -*-
 @end lisp
 
-Excluding the crypt tag from inheritance prevents already encrypted text
-being encrypted again.
+Excluding the crypt tag from inheritance prevents encrypting previously
+encrypted text.
 
 @node Hacking
 @appendix Hacking
@@ -17806,34 +17788,31 @@ Org.
 @section Hooks
 @cindex hooks
 
-Org has a large number of hook variables that can be used to add
-functionality.  This appendix about hacking is going to illustrate the
-use of some of them.  A complete list of all hooks with documentation is
-maintained by the Worg project and can be found at
+Org has a large number of hook variables for adding functionality.  This
+appendix illustrates using a few.  A complete list of hooks with
+documentation is maintained by the Worg project at
 @uref{http://orgmode.org/worg/org-configs/org-hooks.php}.
 
 @node Add-on packages
 @section Add-on packages
 @cindex add-on packages
 
-A large number of add-on packages have been written by various authors.
+Various authors wrote a large number of add-on packages for Org.
 
 These packages are not part of Emacs, but they are distributed as contributed
 packages with the separate release available at @uref{http://orgmode.org}.
 See the @file{contrib/README} file in the source code directory for a list of
-contributed files.  You may also find some more information on the Worg page:
+contributed files.  Worg page with more information is at:
 @uref{http://orgmode.org/worg/org-contrib/}.
 
 @node Adding hyperlink types
 @section Adding hyperlink types
 @cindex hyperlinks, adding new types
 
-Org has a large number of hyperlink types built-in
-(@pxref{Hyperlinks}).  If you would like to add new link types, Org
-provides an interface for doing so.  Let's look at an example file,
-@file{org-man.el}, that will add support for creating links like
-@samp{[[man:printf][The printf manpage]]} to show Unix manual pages inside
-Emacs:
+Org has many built-in hyperlink types (@pxref{Hyperlinks}), and an interface
+for adding new link types.  The example file, @file{org-man.el}, shows the
+process of adding Org links to Unix man pages, which look like this:
+@samp{[[man:printf][The printf manpage]]}:
 
 @lisp
 ;;; org-man.el - Support for links to manpages in Org
@@ -17878,81 +17857,73 @@ PATH should be a topic that can be thrown at the man command."
 @end lisp
 
 @noindent
-You would activate this new link type in Emacs init file with
+To activate links to man pages in Org, enter this in the init file:
 
 @lisp
 (require 'org-man)
 @end lisp
 
 @noindent
-Let's go through the file and see what it does.
+A review of @file{org-man.el}:
 @enumerate
 @item
-It does @code{(require 'org)} to make sure that @file{org.el} has been
-loaded.
+First, @code{(require 'org)} ensures @file{org.el} is loaded.
 @item
-The next line calls @code{org-add-link-type} to define a new link type
-with prefix @samp{man}.  The call also contains the name of a function
-that will be called to follow such a link.
+The @code{org-add-link-type} defines a new link type with @samp{man} prefix.
+The call contains the function to call that follows the link type.
 @item
 @vindex org-store-link-functions
-The next line adds a function to @code{org-store-link-functions}, in
-order to allow the command @kbd{C-c l} to record a useful link in a
-buffer displaying a man page.
+The next line adds a function to @code{org-store-link-functions} that records
+a useful link with the command @kbd{C-c l} in a buffer displaying a man page.
 @end enumerate
 
-The rest of the file defines the necessary variables and functions.
-First there is a customization variable that determines which Emacs
-command should be used to display man pages.  There are two options,
-@code{man} and @code{woman}.  Then the function to follow a link is
-defined.  It gets the link path as an argument---in this case the link
-path is just a topic for the manual command.  The function calls the
-value of @code{org-man-command} to display the man page.
+The rest of the file defines necessary variables and functions.  First is the
+customization variable @code{org-man-command}.  It has two options,
+@code{man} and @code{woman}.  Next is a function whose argument is the link
+path, which for man pages is the topic of the man command.  To follow the
+link, the function calls the @code{org-man-command} to display the man page.
 
-Finally the function @code{org-man-store-link} is defined.  When you try
-to store a link with @kbd{C-c l}, this function will be called to
-try to make a link.  The function must first decide if it is supposed to
-create the link for this buffer type; we do this by checking the value
-of the variable @code{major-mode}.  If not, the function must exit and
-return the value @code{nil}.  If yes, the link is created by getting the
-manual topic from the buffer name and prefixing it with the string
-@samp{man:}.  Then it must call the command @code{org-store-link-props}
-and set the @code{:type} and @code{:link} properties.  Optionally you
-can also set the @code{:description} property to provide a default for
-the link description when the link is later inserted into an Org
-buffer with @kbd{C-c C-l}.
 
-When it makes sense for your new link type, you may also define a function
-that implements special (e.g., completion) support for inserting such a link
-with @kbd{C-c C-l}.  Such a function should not accept any arguments, and
-return the full link with prefix.
+@kbd{C-c l} constructs and stores the link.
+
+@kbd{C-c l} calls the function @code{org-man-store-link}, which first checks
+if the @code{major-mode} is appropriate.  If check fails, the function
+returns @code{nil}.  Otherwise the function makes a link string by combining
+the @samp{man:} prefix with the man topic.  The function then calls
+@code{org-store-link-props} with @code{:type} and @code{:link} properties.  A
+@code{:description} property is an optional string that is displayed when the
+function inserts the link in the Org buffer.
+
+@kbd{C-c C-l} inserts the stored link.
+
+To define new link types, define a function that implements completion
+support with @kbd{C-c C-l}.  This function should not accept any arguments
+but return the appropriate prefix and complete link string.
 
 @node Adding export back-ends
 @section Adding export back-ends
 @cindex Export, writing back-ends
 
-Org 8.0 comes with a completely rewritten export engine which makes it easy
-to write new export back-ends, either from scratch, or by deriving them
-from existing ones.
+Org's export engine makes it easy for writing new back-ends.  The framework
+on which the engine was built makes it easy to derive new back-ends from
+existing ones.
 
-Your two entry points are respectively @code{org-export-define-backend} and
-@code{org-export-define-derived-backend}.  To grok these functions, you
-should first have a look at @file{ox-latex.el} (for how to define a new
-back-end from scratch) and @file{ox-beamer.el} (for how to derive a new
-back-end from an existing one.
+The two main entry points to the export engine are:
+@code{org-export-define-backend} and
+@code{org-export-define-derived-backend}.  To grok these functions, see
+@file{ox-latex.el} for an example of defining a new back-end from scratch,
+and @file{ox-beamer.el} for an example of deriving from an existing engine.
 
-When creating a new back-end from scratch, the basic idea is to set the name
-of the back-end (as a symbol) and an alist of elements and export functions.
-On top of this, you will need to set additional keywords like
-@code{:menu-entry} (to display the back-end in the export dispatcher), and
-@code{:options-alist} (to let the user set export options that are specific
-to this back-end.)
+For creating a new back-end from scratch, first set its name as a symbol in
+an alist consisting of elements and export functions.  To make the back-end
+visible to the export dispatcher, set @code{:menu-entry} keyword.  For export
+options specific to this back-end, set the @code{:options-alist}.
 
-Deriving a new back-end is similar, except that you need to set
-@code{:translate-alist} to an alist of export functions that should be used
-instead of the parent back-end functions.
+For creating a new back-end from an existing one, set @code{:translate-alist}
+to an alist of export functions.  This alist replaces the parent back-end
+functions.
 
-For a complete reference documentation, see
+For complete documentation, see
 @url{http://orgmode.org/worg/dev/org-export-reference.html, the Org Export
 Reference on Worg}.
 
@@ -17962,38 +17933,16 @@ Reference on Worg}.
 @cindex add-ons, context-sensitive commands
 @vindex org-ctrl-c-ctrl-c-hook
 
-Org has several commands that act differently depending on context.  The most
-important example is the @kbd{C-c C-c} (@pxref{The very busy C-c C-c key}).
-Also the @kbd{M-cursor} and @kbd{M-S-cursor} keys have this property.
+Org has facilities for building context sensitive commands.  Authors of Org
+add-ons can tap into this functionality.
 
-Add-ons can tap into this functionality by providing a function that detects
+Some Org commands change depending on the context.  The most important
+example of this behavior is the @kbd{C-c C-c} (@pxref{The very busy C-c C-c
+key}).  Other examples are @kbd{M-cursor} and @kbd{M-S-cursor}.
+
+These context sensitive commands work by providing a function that detects
 special context for that add-on and executes functionality appropriate for
-the context.  Here is an example from Dan Davison's @file{org-R.el} which
-allows you to evaluate commands based on the @file{R} programming language
-@footnote{@file{org-R.el} has been replaced by the Org mode functionality
-described in @ref{Working with source code} and is now obsolete.}.  For this
-package, special contexts are lines that start with @code{#+R:} or
-@code{#+RR:}.
-
-@lisp
-(defun org-R-apply-maybe ()
-  "Detect if this is context for org-R and execute R commands."
-  (if (save-excursion
-        (beginning-of-line 1)
-        (looking-at "#\\+RR?:"))
-      (progn (call-interactively 'org-R-apply)
-             t) ;; to signal that we took action
-    nil)) ;; to signal that we did not
-
-(add-hook 'org-ctrl-c-ctrl-c-hook 'org-R-apply-maybe)
-@end lisp
-
-The function first checks if the cursor is in such a line.  If that is the
-case, @code{org-R-apply} is called and the function returns @code{t} to
-signal that action was taken, and @kbd{C-c C-c} will stop looking for other
-contexts.  If the function finds it should do nothing locally, it returns
-@code{nil} so that other, similar functions can have a try.
-
+that context.
 
 @node Tables in arbitrary syntax
 @section Tables and lists in arbitrary syntax
@@ -18001,25 +17950,25 @@ contexts.  If the function finds it should do nothing locally, it returns
 @cindex lists, in other modes
 @cindex Orgtbl mode
 
-Since Orgtbl mode can be used as a minor mode in arbitrary buffers, a
-frequent feature request has been to make it work with native tables in
-specific languages, for example @LaTeX{}.  However, this is extremely
-hard to do in a general way, would lead to a customization nightmare,
-and would take away much of the simplicity of the Orgtbl mode table
-editor.
+Because of Org's success in handling tables with Orgtbl, a frequently asked
+feature is to Org's usability functions to other table formats native to
+other modem's, such as @LaTeX{}.  This would be hard to do in a general way
+without complicated customization nightmares.  Moreover, that would take Org
+away from its simplicity roots that Orgtbl has proven.  There is, however, an
+alternate approach to accomplishing the same.
 
-This appendix describes a different approach.  We keep the Orgtbl mode
-table in its native format (the @i{source table}), and use a custom
-function to @i{translate} the table to the correct syntax, and to
-@i{install} it in the right location (the @i{target table}).  This puts
-the burden of writing conversion functions on the user, but it allows
-for a very flexible system.
+This approach involves implementing a custom @emph{translate} function that
+operates on a native Org @emph{source table} to produce a table in another
+format.  This strategy would keep the excellently working Orgtbl simple and
+isolate complications, if any, confined to the translate function.  To add
+more alien table formats, we just add more translate functions.  Also the
+burden of developing custom translate functions for new table formats will be
+in the hands of those who know those formats best.
 
-Bastien added the ability to do the same with lists, in Orgstruct mode.  You
-can use Org's facilities to edit and structure lists by turning
-@code{orgstruct-mode} on, then locally exporting such lists in another format
-(HTML, @LaTeX{} or Texinfo.)
-
+For an example of how this strategy works, see Orgstruct mode.  In that mode,
+Bastien added the ability to use Org's facilities to edit and re-structure
+lists.  He did by turning @code{orgstruct-mode} on, and then exporting the
+list locally to another format, such as HTML, @LaTeX{} or Texinfo.
 
 @menu
 * Radio tables::                Sending and receiving radio tables
@@ -18032,11 +17981,13 @@ can use Org's facilities to edit and structure lists by turning
 @subsection Radio tables
 @cindex radio tables
 
-To define the location of the target table, you first need to create two
-lines that are comments in the current mode, but contain magic words
-@code{BEGIN/END RECEIVE ORGTBL} for Orgtbl mode to find.  Orgtbl mode will
-insert the translated table between these lines, replacing whatever was there
-before.  For example in C mode where comments are between @code{/* ... */}:
+Radio tables are target locations for translated tables that are not near
+their source.  Org finds the target location and inserts the translated
+table.
+
+The key to finding the target location are the magic words @code{BEGIN/END
+RECEIVE ORGTBL}.  They have to appear as comments in the current mode.  If
+the mode is C, then:
 
 @example
 /* BEGIN RECEIVE ORGTBL table_name */
@@ -18044,8 +17995,8 @@ before.  For example in C mode where comments are between @code{/* ... */}:
 @end example
 
 @noindent
-Just above the source table, we put a special line that tells
-Orgtbl mode how to translate this table and where to install it.  For
+At the location of source, Org needs a special line to direct Orgtbl to
+translate and to find the target for inserting the translated table.  For
 example:
 @cindex #+ORGTBL
 @example
@@ -18053,63 +18004,53 @@ example:
 @end example
 
 @noindent
-@code{table_name} is the reference name for the table that is also used
-in the receiver lines.  @code{translation_function} is the Lisp function
-that does the translation.  Furthermore, the line can contain a list of
-arguments (alternating key and value) at the end.  The arguments will be
-passed as a property list to the translation function for
-interpretation.  A few standard parameters are already recognized and
-acted upon before the translation function is called:
+@code{table_name} is the table's reference name, which is also used in the
+receiver lines, and the @code{translation_function} is the Lisp function that
+translates.  This line, in addition, may also contain alternating key and
+value arguments at the end.  The translation function gets these values as a
+property list.  A few standard parameters are already recognized and acted
+upon before the translation function is called:
 
 @table @code
 @item :skip N
-Skip the first N lines of the table.  Hlines do count as separate lines for
-this parameter!
+Skip the first N lines of the table.  Hlines do count; include them if they
+are to be skipped.
 
 @item :skipcols (n1 n2 ...)
-List of columns that should be skipped.  If the table has a column with
-calculation marks, that column is automatically discarded as well.
-Please note that the translator function sees the table @emph{after} the
-removal of these columns, the function never knows that there have been
-additional columns.
+List of columns to be skipped.  First Org automatically discards columns with
+calculation marks and then sends the table to the translator function, which
+then skips columns as specified in @samp{skipcols}.
 @end table
 
 @noindent
-The one problem remaining is how to keep the source table in the buffer
-without disturbing the normal workings of the file, for example during
-compilation of a C file or processing of a @LaTeX{} file.  There are a
-number of different solutions:
+To keep the source table intact in the buffer without being disturbed when
+the source file is compiled or otherwise being worked on, use one of these
+strategies:
 
 @itemize @bullet
 @item
-The table could be placed in a block comment if that is supported by the
-language.  For example, in C mode you could wrap the table between
-@samp{/*} and @samp{*/} lines.
+Place the table in a block comment.  For example, in C mode you could wrap
+the table between @samp{/*} and @samp{*/} lines.
 @item
-Sometimes it is possible to put the table after some kind of @i{END}
-statement, for example @samp{\bye} in @TeX{} and @samp{\end@{document@}}
-in @LaTeX{}.
+Put the table after an @samp{END} statement.  For example @samp{\bye} in
+@TeX{} and @samp{\end@{document@}} in @LaTeX{}.
 @item
-You can just comment the table line-by-line whenever you want to process
-the file, and uncomment it whenever you need to edit the table.  This
-only sounds tedious---the command @kbd{M-x orgtbl-toggle-comment RET}
-makes this comment-toggling very easy, in particular if you bind it to a
-key.
+Comment and uncomment each line of the table during edits.  The @kbd{M-x
+orgtbl-toggle-comment RET} command makes toggling easy.
 @end itemize
 
 @node A @LaTeX{} example
 @subsection A @LaTeX{} example of radio tables
 @cindex @LaTeX{}, and Orgtbl mode
 
-The best way to wrap the source table in @LaTeX{} is to use the
-@code{comment} environment provided by @file{comment.sty}.  It has to be
-activated by placing @code{\usepackage@{comment@}} into the document
-header.  Orgtbl mode can insert a radio table skeleton@footnote{By
-default this works only for @LaTeX{}, HTML, and Texinfo.  Configure the
-variable @code{orgtbl-radio-table-templates} to install templates for other
-modes.}  with the command @kbd{M-x orgtbl-insert-radio-table RET}.  You will
-be prompted for a table name, let's say we use @samp{salesfigures}.  You
-will then get the following template:
+To wrap a source table in @LaTeX{}, use the @code{comment} environment
+provided by @file{comment.sty}.  To activate it, put
+@code{\usepackage@{comment@}} in the document header.  Orgtbl mode inserts a
+radio table skeleton@footnote{By default this works only for @LaTeX{}, HTML,
+and Texinfo.  Configure the variable @code{orgtbl-radio-table-templates} to
+install templates for other export formats.}  with the command @kbd{M-x
+orgtbl-insert-radio-table RET}, which prompts for a table name.  For example,
+if @samp{salesfigures} is the name, the template inserts:
 
 @cindex #+ORGTBL, SEND
 @example
@@ -18123,17 +18064,17 @@ will then get the following template:
 
 @noindent
 @vindex @LaTeX{}-verbatim-environments
-The @code{#+ORGTBL: SEND} line tells Orgtbl mode to use the function
-@code{orgtbl-to-latex} to convert the table into @LaTeX{} and to put it
-into the receiver location with name @code{salesfigures}.  You may now
-fill in the table---feel free to use the spreadsheet features@footnote{If
-the @samp{#+TBLFM} line contains an odd number of dollar characters,
-this may cause problems with font-lock in @LaTeX{} mode.  As shown in the
-example you can fix this by adding an extra line inside the
-@code{comment} environment that is used to balance the dollar
-expressions.  If you are using AUC@TeX{} with the font-latex library, a
-much better solution is to add the @code{comment} environment to the
-variable @code{LaTeX-verbatim-environments}.}:
+The line @code{#+ORGTBL: SEND} tells Orgtbl mode to use the function
+@code{orgtbl-to-latex} to convert the table to @LaTeX{} format, then insert
+the table at the target (receive) location named @code{salesfigures}.  Now
+the table is ready for data entry.  It can even use spreadsheet
+features@footnote{If the @samp{#+TBLFM} line contains an odd number of dollar
+characters, this may cause problems with font-lock in @LaTeX{} mode.  As
+shown in the example you can fix this by adding an extra line inside the
+@code{comment} environment that is used to balance the dollar expressions.
+If you are using AUC@TeX{} with the font-latex library, a much better
+solution is to add the @code{comment} environment to the variable
+@code{LaTeX-verbatim-environments}.}:
 
 @example
 % BEGIN RECEIVE ORGTBL salesfigures
@@ -18151,14 +18092,12 @@ variable @code{LaTeX-verbatim-environments}.}:
 @end example
 
 @noindent
-When you are done, press @kbd{C-c C-c} in the table to get the converted
-table inserted between the two marker lines.
+After editing, @kbd{C-c C-c} inserts translated table at the target location,
+between the two marker lines.
 
-Now let's assume you want to make the table header by hand, because you
-want to control how columns are aligned, etc.  In this case we make sure
-that the table translator skips the first 2 lines of the source
-table, and tell the command to work as a @i{splice}, i.e., to not produce
-header and footer commands of the target table:
+For hand-made custom tables, note that the translator needs to skip the first
+two lines of the source table.  Also the command has to @emph{splice} out the
+target table without the header and footer.
 
 @example
 \begin@{tabular@}@{lrrr@}
@@ -18179,33 +18118,31 @@ Month & \multicolumn@{1@}@{c@}@{Days@} & Nr.\ sold & per day\\
 @end example
 
 The @LaTeX{} translator function @code{orgtbl-to-latex} is already part of
-Orgtbl mode.  By default, it uses a @code{tabular} environment to typeset the
-table and marks horizontal lines with @code{\hline}.  You can control the
-output through several parameters (see also @pxref{Translator functions}),
-including the following ones :
+Orgtbl mode and uses @code{tabular} environment by default to typeset the
+table and mark the horizontal lines with @code{\hline}.  For additional
+parameters to control output, @pxref{Translator functions}:
 
 @table @code
 @item :splice nil/t
-When non-@code{nil}, return only table body lines, don't wrap them into a tabular
+When non-@code{nil}, returns only table body lines; not wrapped in tabular
 environment.  Default is @code{nil}.
 
 @item :fmt fmt
-A format to be used to wrap each field, it should contain @code{%s} for the
-original field value.  For example, to wrap each field value in dollars,
-you could use @code{:fmt "$%s$"}.  This may also be a property list with
+Format to warp each field.  It should contain @code{%s} for the original
+field value.  For example, to wrap each field value in dollar symbol, you
+could use @code{:fmt "$%s$"}.  Format can also wrap a property list with
 column numbers and formats, for example @code{:fmt (2 "$%s$" 4 "%s\\%%")}.
-A function of one argument can be used in place of the strings; the
-function must return a formatted string.
+In place of a string, a function of one argument can be used; the function
+must return a formatted string.
 
 @item :efmt efmt
-Use this format to print numbers with exponentials.  The format should have
-@code{%s} twice for inserting mantissa and exponent, for example
-@code{"%s\\times10^@{%s@}"}.  This may also be a property list with column
-numbers and formats, for example @code{:efmt (2 "$%s\\times10^@{%s@}$"
-4 "$%s\\cdot10^@{%s@}$")}.  After @code{efmt} has been applied to a value,
-@code{fmt} will also be applied.  Similar to @code{fmt}, functions of two
-arguments can be supplied instead of strings.  By default, no special
-formatting is applied.
+Format numbers as exponentials.  The spec should have @code{%s} twice for
+inserting mantissa and exponent, for example @code{"%s\\times10^@{%s@}"}.
+This may also be a property list with column numbers and formats, for example
+@code{:efmt (2 "$%s\\times10^@{%s@}$" 4 "$%s\\cdot10^@{%s@}$")}.  After
+@code{efmt} has been applied to a value, @code{fmt} will also be applied.
+Functions with two arguments can be supplied instead of strings.  By default,
+no special formatting is applied.
 @end table
 
 @node Translator functions
@@ -18213,28 +18150,26 @@ formatting is applied.
 @cindex HTML, and Orgtbl mode
 @cindex translator function
 
-Orgtbl mode has several translator functions built-in: @code{orgtbl-to-csv}
+Orgtbl mode has built-in translator functions: @code{orgtbl-to-csv}
 (comma-separated values), @code{orgtbl-to-tsv} (TAB-separated values)
 @code{orgtbl-to-latex}, @code{orgtbl-to-html}, @code{orgtbl-to-texinfo},
-@code{orgtbl-to-unicode} and @code{orgtbl-to-orgtbl}.  These all use
-a generic translator, @code{orgtbl-to-generic}, which, in turn, delegates
-translations to various export back-ends.
+@code{orgtbl-to-unicode} and @code{orgtbl-to-orgtbl}.  They use the generic
+translator, @code{orgtbl-to-generic}, which delegates translations to various
+export back-ends.
 
-In particular, properties passed into the function (i.e., the ones set by the
-@samp{ORGTBL SEND} line) take precedence over translations defined in the
-function.  So if you would like to use the @LaTeX{} translator, but wanted
-the line endings to be @samp{\\[2mm]} instead of the default @samp{\\}, you
-could just overrule the default with
+Properties passed to the function through the @samp{ORGTBL SEND} line take
+precedence over properties defined inside the function.  For example, this
+overrides the default @LaTeX{} line endings, @samp{\\}, with @samp{\\[2mm]}:
 
 @example
 #+ORGTBL: SEND test orgtbl-to-latex :lend " \\\\[2mm]"
 @end example
 
-For a new language, you can use the generic function to write your own
-converter function.  For example, if you have a language where a table is
-started with @samp{!BTBL!}, ended with @samp{!ETBL!}, and where table lines
-are started with @samp{!BL!}, ended with @samp{!EL!}, and where the field
-separator is a TAB, you could define your generic translator like this:
+For a new language translator, define a converter function.  It can be a
+generic function, such as shown in this example.  It marks a beginning and
+ending of a table with @samp{!BTBL!} and @samp{!ETBL!}; a beginning and
+ending of lines with @samp{!BL!} and @samp{!EL!}; and uses a TAB for a field
+separator:
 
 @lisp
 (defun orgtbl-to-language (table params)
@@ -18247,52 +18182,44 @@ separator is a TAB, you could define your generic translator like this:
 @end lisp
 
 @noindent
-Please check the documentation string of the function
-@code{orgtbl-to-generic} for a full list of parameters understood by
-that function, and remember that you can pass each of them into
+The documentation for the @code{orgtbl-to-generic} function shows a complete
+list of parameters, each of which can be passed through to
 @code{orgtbl-to-latex}, @code{orgtbl-to-texinfo}, and any other function
-using the generic function.
+using that generic function.
 
-Of course you can also write a completely new function doing complicated
-things the generic translator cannot do.  A translator function takes
-two arguments.  The first argument is the table, a list of lines, each
-line either the symbol @code{hline} or a list of fields.  The second
-argument is the property list containing all parameters specified in the
-@samp{#+ORGTBL: SEND} line.  The function must return a single string
-containing the formatted table.  If you write a generally useful
-translator, please post it on @email{emacs-orgmode@@gnu.org} so that
-others can benefit from your work.
+For complicated translations the generic translator function could be
+replaced by a custom translator function.  Such a custom function must take
+two arguments and return a single string containing the formatted table.  The
+first argument is the table whose lines are a list of fields or the symbol
+@code{hline}.  The second argument is the property list consisting of
+parameters specified in the @samp{#+ORGTBL: SEND} line.  Please share your
+translator functions by posting them to the Org users mailing list,
+@email{emacs-orgmode@@gnu.org}.
 
 @node Radio lists
 @subsection Radio lists
 @cindex radio lists
 @cindex org-list-insert-radio-list
 
-Sending and receiving radio lists works exactly the same way as sending and
-receiving radio tables (@pxref{Radio tables}).  As for radio tables, you can
-insert radio list templates in HTML, @LaTeX{} and Texinfo modes by calling
-@code{org-list-insert-radio-list}.
-
-Here are the differences with radio tables:
+Call the @code{org-list-insert-radio-list} function to insert a radio list
+template in HTML, @LaTeX{}, and Texinfo mode documents.  Sending and
+receiving radio lists works is the same as for radio tables (@pxref{Radio
+tables}) except for these differences:
 
 @cindex #+ORGLST
 @itemize @minus
 @item
 Orgstruct mode must be active.
 @item
-Use the @code{ORGLST} keyword instead of @code{ORGTBL}.
+Use @code{ORGLST} keyword instead of @code{ORGTBL}.
 @item
-@kbd{C-c C-c} will work when pressed on the first item of the list.
+@kbd{C-c C-c} works only on the first list item.
 @end itemize
 
-Built-in translators functions are : @code{org-list-to-latex},
-@code{org-list-to-html} and @code{org-list-to-texinfo}.  They all use the
-generic translator @code{org-list-to-generic}.  Please check its
-documentation for a list of supported parameters, which can be used to
-control more accurately how the list should be rendered.
-
-Here is a @LaTeX{} example.  Let's say that you have this in your
-@LaTeX{} file:
+Built-in translators functions are: @code{org-list-to-latex},
+@code{org-list-to-html} and @code{org-list-to-texinfo}.  They use the
+@code{org-list-to-generic} translator function.  See its documentation for
+parameters for accurate customizations of lists.  Here is a @LaTeX{} example:
 
 @example
 % BEGIN RECEIVE ORGLST to-buy
@@ -18307,21 +18234,21 @@ Here is a @LaTeX{} example.  Let's say that you have this in your
 \end@{comment@}
 @end example
 
-Pressing @kbd{C-c C-c} on @code{a new house} and will insert the converted
-@LaTeX{} list between the two marker lines.
+@kbd{C-c C-c} on @samp{a new house} inserts the translated @LaTeX{} list
+in-between the BEGIN and END marker lines.
 
 @node Dynamic blocks
 @section Dynamic blocks
 @cindex dynamic blocks
 
-Org documents can contain @emph{dynamic blocks}.  These are
-specially marked regions that are updated by some user-written function.
-A good example for such a block is the clock table inserted by the
-command @kbd{C-c C-x C-r} (@pxref{Clocking work time}).
+Org supports @emph{dynamic blocks} in Org documents.  They are inserted with
+begin and end markers like any other @samp{src} code block, but the contents
+are updated automatically by a user function.  For example, @kbd{C-c C-x C-r}
+inserts a dynamic table that updates the work time (@pxref{Clocking work
+time}).
 
-Dynamic blocks are enclosed by a BEGIN-END structure that assigns a name
-to the block and can also specify parameters for the function producing
-the content of the block.
+Dynamic blocks can have names and function parameters.  The syntax is similar
+to @samp{src} code block specifications:
 
 @cindex #+BEGIN:dynamic block
 @example
@@ -18330,7 +18257,7 @@ the content of the block.
 #+END:
 @end example
 
-Dynamic blocks are updated with the following commands
+These command update dynamic blocks:
 
 @table @kbd
 @orgcmd{C-c C-x C-u,org-dblock-update}
@@ -18339,17 +18266,16 @@ Update dynamic block at point.
 Update all dynamic blocks in the current file.
 @end table
 
-Updating a dynamic block means to remove all the text between BEGIN and
-END, parse the BEGIN line for parameters and then call the specific
-writer function for this block to insert the new content.  If you want
-to use the original content in the writer function, you can use the
-extra parameter @code{:content}.
+Before updating a dynamic block, Org removes content between the BEGIN and
+END markers.  Org then reads the parameters on the BEGIN line for passing to
+the writer function.  If the function expects to access the removed content,
+then Org expects an extra parameter, @code{:content}, on the BEGIN line.
 
-For a block with name @code{myblock}, the writer function is
-@code{org-dblock-write:myblock} with as only parameter a property list
-with the parameters given in the begin line.  Here is a trivial example
-of a block that keeps track of when the block update function was last
-run:
+To syntax for calling a writer function with a named block, @code{myblock}
+is: @code{org-dblock-write:myblock}.  Parameters come from the BEGIN line.
+
+The following is an example of a dynamic block and a block writer function
+that updates the time when the function was last run:
 
 @example
 #+BEGIN: block-update-time :format "on %m/%d/%Y at %H:%M"
@@ -18358,7 +18284,7 @@ run:
 @end example
 
 @noindent
-The corresponding block writer function could look like this:
+The dynamic block's writer function:
 
 @lisp
 (defun org-dblock-write:block-update-time (params)
@@ -18367,14 +18293,13 @@ The corresponding block writer function could look like this:
             (format-time-string fmt))))
 @end lisp
 
-If you want to make sure that all dynamic blocks are always up-to-date,
-you could add the function @code{org-update-all-dblocks} to a hook, for
-example @code{before-save-hook}.  @code{org-update-all-dblocks} is
-written in a way such that it does nothing in buffers that are not in
-@code{org-mode}.
+To keep dynamic blocks up-to-date in an Org file, use the function,
+@code{org-update-all-dblocks} in hook, such as @code{before-save-hook}.  The
+@code{org-update-all-dblocks} function does not run if the file is not in
+Org mode.
 
-You can narrow the current buffer to the current dynamic block (like any
-other block) with @code{org-narrow-to-block}.
+Dynamic blocks, like any other block, can be narrowed with
+@code{org-narrow-to-block}.
 
 @node Special agenda views
 @section Special agenda views
@@ -18382,32 +18307,26 @@ other block) with @code{org-narrow-to-block}.
 
 @vindex org-agenda-skip-function
 @vindex org-agenda-skip-function-global
-Org provides a special hook that can be used to narrow down the selection
-made by these agenda views: @code{agenda}, @code{agenda*}@footnote{The
-@code{agenda*} view is the same as @code{agenda} except that it only
-considers @emph{appointments}, i.e., scheduled and deadline items that have a
-time specification @code{[h]h:mm} in their time-stamps.}, @code{todo},
-@code{alltodo}, @code{tags}, @code{tags-todo}, @code{tags-tree}.  You may
-specify a function that is used at each match to verify if the match should
-indeed be part of the agenda view, and if not, how much should be skipped.
-You can specify a global condition that will be applied to all agenda views,
-this condition would be stored in the variable
-@code{org-agenda-skip-function-global}.  More commonly, such a definition is
-applied only to specific custom searches, using
-@code{org-agenda-skip-function}.
+Org provides a special hook to further limit items in agenda views:
+@code{agenda}, @code{agenda*}@footnote{The @code{agenda*} view is the same as
+@code{agenda} except that it only considers @emph{appointments}, i.e.,
+scheduled and deadline items that have a time specification @samp{[h]h:mm} in
+their time-stamps.}, @code{todo}, @code{alltodo}, @code{tags},
+@code{tags-todo}, @code{tags-tree}.  Specify a custom function that tests
+inclusion of every matched item in the view.  This function can also
+skip as much as is needed.
 
-Let's say you want to produce a list of projects that contain a WAITING
-tag anywhere in the project tree.  Let's further assume that you have
-marked all tree headings that define a project with the TODO keyword
-PROJECT@.  In this case you would run a TODO search for the keyword
-PROJECT, but skip the match unless there is a WAITING tag anywhere in
-the subtree belonging to the project line.
+For a global condition applicable to agenda views, use the
+@code{org-agenda-skip-function-global} variable.  Org uses a global condition
+with @code{org-agenda-skip-function} for custom searching.
 
-To achieve this, you must write a function that searches the subtree for
-the tag.  If the tag is found, the function must return @code{nil} to
-indicate that this match should not be skipped.  If there is no such
-tag, return the location of the end of the subtree, to indicate that
-search should continue from there.
+This example defines a function for a custom view showing TODO items with
+WAITING status.  Manually this is a multi step search process, but with a
+custom view, this can be automated as follows:
+
+The custom function searches the subtree for the WAITING tag and returns
+@code{nil} on match.  Otherwise it gives the location from where the search
+continues.
 
 @lisp
 (defun my-skip-unless-waiting ()
@@ -18418,8 +18337,7 @@ search should continue from there.
       subtree-end))) ; tag not found, continue after end of subtree
 @end lisp
 
-Now you may use this function in an agenda custom command, for example
-like this:
+To use this custom function in a custom agenda command:
 
 @lisp
 (org-add-agenda-custom-command
@@ -18429,22 +18347,20 @@ like this:
 @end lisp
 
 @vindex org-agenda-overriding-header
-Note that this also binds @code{org-agenda-overriding-header} to get a
-meaningful header in the agenda view.
+Note that this also binds @code{org-agenda-overriding-header} to a more
+meaningful string suitable for the agenda view.
 
 @vindex org-odd-levels-only
 @vindex org-agenda-skip-function
-A general way to create custom searches is to base them on a search for
-entries with a certain level limit.  If you want to study all entries with
-your custom search function, simply do a search for
-@samp{LEVEL>0}@footnote{Note that, when using @code{org-odd-levels-only}, a
-level number corresponds to order in the hierarchy, not to the number of
-stars.}, and then use @code{org-agenda-skip-function} to select the entries
-you really want to have.
 
-You may also put a Lisp form into @code{org-agenda-skip-function}.  In
-particular, you may use the functions @code{org-agenda-skip-entry-if}
-and @code{org-agenda-skip-subtree-if} in this form, for example:
+Search for entries with a limit set on levels for the custom search.  This is
+a general appraoch to creating custom searches in Org.  To include all
+levels, use @samp{LEVEL>0}@footnote{Note that, for
+@code{org-odd-levels-only}, a level number corresponds to order in the
+hierarchy, not to the number of stars.}.  Then to selectively pick the
+matched entries, use @code{org-agenda-skip-function}, which also accepts Lisp
+forms, such as @code{org-agenda-skip-entry-if} and
+@code{org-agenda-skip-subtree-if}.  For example:
 
 @table @code
 @item (org-agenda-skip-entry-if 'scheduled)
@@ -18470,8 +18386,8 @@ Skip current entry unless the regular expression matches.
 Same as above, but check and skip the entire subtree.
 @end table
 
-Therefore we could also have written the search for WAITING projects
-like this, even without defining a special function:
+The following is an example of a search for @samp{WAITING} without the
+special function:
 
 @lisp
 (org-add-agenda-custom-command
@@ -18485,42 +18401,42 @@ like this, even without defining a special function:
 @section Speeding up your agendas
 @cindex agenda views, optimization
 
-When your Org files grow in both number and size, agenda commands may start
-to become slow.  Below are some tips on how to speed up the agenda commands.
+Some agenda commands slow down when the Org files grow in size or number.
+Here are tips to speed up:
 
 @enumerate
 @item
-Reduce the number of Org agenda files: this will reduce the slowdown caused
-by accessing a hard drive.
+Reduce the number of Org agenda files to avoid slowdowns due to hard drive
+accesses.
 @item
-Reduce the number of DONE and archived headlines: this way the agenda does
-not need to skip them.
+Reduce the number of @samp{DONE} and archived headlines so agenda operations
+that skip over these can finish faster.
 @item
 @vindex org-agenda-dim-blocked-tasks
-Inhibit the dimming of blocked tasks:
+Do not dim blocked tasks:
 @lisp
 (setq org-agenda-dim-blocked-tasks nil)
 @end lisp
 @item
 @vindex org-startup-folded
 @vindex org-agenda-inhibit-startup
-Inhibit agenda files startup options:
+Stop preparing agenda buffers on startup:
 @lisp
 (setq org-agenda-inhibit-startup nil)
 @end lisp
 @item
 @vindex org-agenda-show-inherited-tags
 @vindex org-agenda-use-tag-inheritance
-Disable tag inheritance in agenda:
+Disable tag inheritance for agendas:
 @lisp
 (setq org-agenda-use-tag-inheritance nil)
 @end lisp
 @end enumerate
 
-You can set these options for specific agenda views only.  See the docstrings
-of these variables for details on why they affect the agenda generation, and
-this @uref{http://orgmode.org/worg/agenda-optimization.html, dedicated Worg
-page} for further explanations.
+These options can be applied to selected agenda views.  For more details
+about generation of agenda views, see the docstrings for the relevant
+variables, and this @uref{http://orgmode.org/worg/agenda-optimization.html,
+dedicated Worg page} for agenda optimization.
 
 @node Extracting agenda information
 @section Extracting agenda information
@@ -18528,25 +18444,24 @@ page} for further explanations.
 @cindex Scripts, for agenda processing
 
 @vindex org-agenda-custom-commands
-Org provides commands to access agenda information for the command
-line in Emacs batch mode.  This extracted information can be sent
-directly to a printer, or it can be read by a program that does further
-processing of the data.  The first of these commands is the function
-@code{org-batch-agenda}, that produces an agenda view and sends it as
-ASCII text to STDOUT@.  The command takes a single string as parameter.
-If the string has length 1, it is used as a key to one of the commands
-you have configured in @code{org-agenda-custom-commands}, basically any
-key you can use after @kbd{C-c a}.  For example, to directly print the
-current TODO list, you could use
+Org provides commands to access agendas through Emacs batch mode.  Through
+this command-line interface, agendas are automated for further processing or
+printing.
+
+@code{org-batch-agenda} creates an agenda view in ASCII and outputs to
+STDOUT.  This command takes one string parameter.  When string length=1, Org
+uses it as a key to @code{org-agenda-custom-commands}.  These are the same
+ones available through @kbd{C-c a}.
+
+This example command line directly prints the TODO list to the printer:
 
 @example
 emacs -batch -l ~/.emacs -eval '(org-batch-agenda "t")' | lpr
 @end example
 
-If the parameter is a string with 2 or more characters, it is used as a
-tags/TODO match string.  For example, to print your local shopping list
-(all items with the tag @samp{shop}, but excluding the tag
-@samp{NewYork}), you could use
+When the string parameter length is two or more characters, Org matches it
+with tags/TODO strings.  For example, this example command line prints items
+tagged with @samp{shop}, but excludes items tagged with @samp{NewYork}:
 
 @example
 emacs -batch -l ~/.emacs                                      \
@@ -18554,7 +18469,7 @@ emacs -batch -l ~/.emacs                                      \
 @end example
 
 @noindent
-You may also modify parameters on the fly like this:
+An example showing on-the-fly parameter modifications:
 
 @example
 emacs -batch -l ~/.emacs                                      \
@@ -18566,14 +18481,11 @@ emacs -batch -l ~/.emacs                                      \
 @end example
 
 @noindent
-which will produce a 30-day agenda, fully restricted to the Org file
-@file{~/org/projects.org}, not even including the diary.
+which will produce an agenda for the next 30 days from just the
+@file{~/org/projects.org} file.
 
-If you want to process the agenda data in more sophisticated ways, you
-can use the command @code{org-batch-agenda-csv} to get a comma-separated
-list of values for each agenda item.  Each line in the output will
-contain a number of fields separated by commas.  The fields in a line
-are:
+For structured processing of agenda output, use @code{org-batch-agenda-csv}
+with the following fields:
 
 @example
 category     @r{The category of the item}
@@ -18599,12 +18511,15 @@ priority-n   @r{The computed numerical priority}
 @end example
 
 @noindent
-Time and date will only be given if a timestamp (or deadline/scheduled)
-led to the selection of the item.
+If the selection of the agenda item was based on a timestamp, including those
+items with @samp{DEADLINE} and @samp{SCHEDULED} keywords, then Org includes
+date and time in the output.
 
-A CSV list like this is very easy to use in a post-processing script.
-For example, here is a Perl program that gets the TODO list from
-Emacs/Org and prints all the items, preceded by a checkbox:
+If the selection of the agenda item was based on a timestamp  (or
+deadline/scheduled), then Org includes date and time in the output.
+
+Here is an example of a post-processing script in Perl.  It takes the CSV
+output from Emacs and prints with a checkbox:
 
 @example
 #!/usr/bin/perl
@@ -18630,8 +18545,7 @@ foreach $line (split(/\n/,$agenda)) @{
 @cindex API, for properties
 @cindex properties, API
 
-Here is a description of the functions that can be used to work with
-properties.
+Functions for working with properties.
 
 @defun org-entry-properties &optional pom which
 Get all properties of the entry at point-or-marker POM.@*
@@ -18647,11 +18561,11 @@ If WHICH is @code{nil} or @code{all}, get all properties.  If WHICH is
 @vindex org-use-property-inheritance
 @findex org-insert-property-drawer
 @defun org-entry-get pom property &optional inherit
-Get value of @code{PROPERTY} for entry at point-or-marker @code{POM}@.  By default,
-this only looks at properties defined locally in the entry.  If @code{INHERIT}
-is non-@code{nil} and the entry does not have the property, then also check
-higher levels of the hierarchy.  If @code{INHERIT} is the symbol
-@code{selective}, use inheritance if and only if the setting of
+Get value of @code{PROPERTY} for entry at point-or-marker @code{POM}@.  By
+default, this only looks at properties defined locally in the entry.  If
+@code{INHERIT} is non-@code{nil} and the entry does not have the property,
+then also check higher levels of the hierarchy.  If @code{INHERIT} is the
+symbol @code{selective}, use inheritance if and only if the setting of
 @code{org-use-property-inheritance} selects @code{PROPERTY} for inheritance.
 @end defun
 
@@ -18711,36 +18625,32 @@ responsible for this property.
 @cindex API, for mapping
 @cindex mapping entries, API
 
-Org has sophisticated mapping capabilities to find all entries satisfying
-certain criteria.  Internally, this functionality is used to produce agenda
-views, but there is also an API that can be used to execute arbitrary
-functions for each or selected entries.  The main entry point for this API
-is:
+Org has sophisticated mapping capabilities for finding entries.  Org uses
+this functionality internally for generating agenda views.  Org also exposes
+an API for executing arbitrary functions for each selected entry.  The API's
+main entry point is:
 
 @defun org-map-entries func &optional match scope &rest skip
-Call @code{FUNC} at each headline selected by @code{MATCH} in @code{SCOPE}.
+Call @samp{FUNC} at each headline selected by @code{MATCH} in @code{SCOPE}.
 
-@code{FUNC} is a function or a Lisp form.  The function will be called
-without arguments, with the cursor positioned at the beginning of the
-headline.  The return values of all calls to the function will be collected
-and returned as a list.
+@samp{FUNC} is a function or a Lisp form.  With the cursor positioned at the
+beginning of the headline, call the function without arguments.  Org returns
+an alist of return values of calls to the function.
 
-The call to @code{FUNC} will be wrapped into a save-excursion form, so
-@code{FUNC} does not need to preserve point.  After evaluation, the cursor
-will be moved to the end of the line (presumably of the headline of the
-processed entry) and search continues from there.  Under some circumstances,
-this may not produce the wanted results.  For example, if you have removed
-(e.g., archived) the current (sub)tree it could mean that the next entry will
-be skipped entirely.  In such cases, you can specify the position from where
-search should continue by making @code{FUNC} set the variable
-@code{org-map-continue-from} to the desired buffer position.
+To avoid preserving point, Org wraps the call to @code{FUNC} in
+save-excursion form.  After evaluation, Org moves the cursor to the end of
+the line that was just processed.  Search continues from that point forward.
+This may not always work as expected under some conditions, such as if the
+current sub-tree was removed by a previous archiving operation.  In such rare
+circumstances, Org skips the next entry entirely when it should not.  To stop
+Org from such skips, make @samp{FUNC} set the variable
+@code{org-map-continue-from} to a specific buffer position.
 
-@code{MATCH} is a tags/property/todo match as it is used in the agenda match
-view.  Only headlines that are matched by this query will be considered
-during the iteration.  When @code{MATCH} is @code{nil} or @code{t}, all
-headlines will be visited by the iteration.
+@samp{MATCH} is a tags/property/TODO match.  Org iterates only matched
+headlines.  Org iterates over all headlines when @code{MATCH} is @code{nil}
+or @code{t}.
 
-@code{SCOPE} determines the scope of this command.  It can be any of:
+@samp{SCOPE} determines the scope of this command.  It can be any of:
 
 @example
 nil     @r{the current buffer, respecting the restriction if any}
@@ -18756,8 +18666,8 @@ agenda-with-archives
         @r{if this is a list, all files in the list will be scanned}
 @end example
 @noindent
-The remaining args are treated as settings for the skipping facilities of
-the scanner.  The following items can be given here:
+The remaining args are treated as settings for the scanner's skipping
+facilities.  Valid args are:
 
 @vindex org-agenda-skip-function
 @example
@@ -18771,10 +18681,9 @@ function or Lisp form
 @end example
 @end defun
 
-The function given to that mapping routine can really do anything you like.
-It can use the property API (@pxref{Using the property API}) to gather more
-information about the entry, or in order to change metadata in the entry.
-Here are a couple of functions that might be handy:
+The mapping routine can call any arbitrary function, even functions that
+change meta data or query the property API (@pxref{Using the property API}).
+Here are some handy functions:
 
 @defun org-todo &optional arg
 Change the TODO state of the entry.  See the docstring of the functions for
@@ -18800,9 +18709,9 @@ Promote the current entry.
 Demote the current entry.
 @end defun
 
-Here is a simple example that will turn all entries in the current file with
-a tag @code{TOMORROW} into TODO entries with the keyword @code{UPCOMING}.
-Entries in comment trees and in archive trees will be ignored.
+This example turns all entries tagged with @code{TOMORROW} into TODO entries
+with keyword @code{UPCOMING}.  Org ignores entries in comment trees and
+archive trees.
 
 @lisp
 (org-map-entries
@@ -18822,31 +18731,31 @@ The following example counts the number of entries with TODO keyword
 @cindex iPhone
 @cindex MobileOrg
 
-@i{MobileOrg} is the name of the mobile companion app for Org mode, currently
-available for iOS and for Android.  @i{MobileOrg} offers offline viewing and
-capture support for an Org mode system rooted on a ``real'' computer.  It
-also allows you to record changes to existing entries.  The
-@uref{https://github.com/MobileOrg/, iOS implementation} for the
-@i{iPhone/iPod Touch/iPad} series of devices, was started by Richard Moreland
-and is now in the hands Sean Escriva.  Android users should check out
-@uref{http://wiki.github.com/matburt/mobileorg-android/, MobileOrg Android}
-by Matt Jones.  The two implementations are not identical but offer similar
-features.
+MobileOrg is a companion mobile app that runs on iOS and Android devices.
+MobileOrg enables offline-views and capture support for an Org mode system
+that is rooted on a ``real'' computer.  MobileOrg can record changes to
+existing entries.
 
-This appendix describes the support Org has for creating agenda views in a
-format that can be displayed by @i{MobileOrg}, and for integrating notes
-captured and changes made by @i{MobileOrg} into the main system.
+The @uref{https://github.com/MobileOrg/, iOS implementation} for the
+@emph{iPhone/iPod Touch/iPad} series of devices, was started by Richard
+Moreland and is now in the hands Sean Escriva.  Android users should check
+out @uref{http://wiki.github.com/matburt/mobileorg-android/, MobileOrg
+Android} by Matt Jones.  Though the two implementations are not identical,
+they offer similar features.
 
-For changing tags and TODO states in MobileOrg, you should have set up the
-customization variables @code{org-todo-keywords} and @code{org-tag-alist} to
-cover all important tags and TODO keywords, even if individual files use only
-part of these.  MobileOrg will also offer you states and tags set up with
-in-buffer settings, but it will understand the logistics of TODO state
-@i{sets} (@pxref{Per-file keywords}) and @i{mutually exclusive} tags
+This appendix describes Org's support for agenda view formats compatible with
+MobileOrg.  It also describes synchronizing changes, such as to notes,
+between MobileOrg and the computer.
+
+To change tags and TODO states in MobileOrg, first customize the variables
+@code{org-todo-keywords} and @code{org-tag-alist}.  These should cover all
+the important tags and TODO keywords, even if Org files use only some of
+them.  Though MobileOrg has in-buffer settings, it understands TODO states
+@emph{sets} (@pxref{Per-file keywords}) and @emph{mutually exclusive} tags
 (@pxref{Setting tags}) only for those set in these variables.
 
 @menu
-* Setting up the staging area::  Where to interact with the mobile device
+* Setting up the staging area::  For the mobile device
 * Pushing to MobileOrg::        Uploading Org files and agendas
 * Pulling from MobileOrg::      Integrating captured and flagged items
 @end menu
@@ -18854,68 +18763,66 @@ in-buffer settings, but it will understand the logistics of TODO state
 @node Setting up the staging area
 @section Setting up the staging area
 
-MobileOrg needs to interact with Emacs through a directory on a server.  If
-you are using a public server, you should consider encrypting the files that
-are uploaded to the server.  This can be done with Org mode 7.02 and with
-@i{MobileOrg 1.5} (iPhone version), and you need an @file{openssl}
-installation on your system.  To turn on encryption, set a password in
-@i{MobileOrg} and, on the Emacs side, configure the variable
-@code{org-mobile-use-encryption}@footnote{If you can safely store the
-password in your Emacs setup, you might also want to configure
-@code{org-mobile-encryption-password}.  Please read the docstring of that
-variable.  Note that encryption will apply only to the contents of the
-@file{.org} files.  The file names themselves will remain visible.}.
+MobileOrg needs access to a file directory on a server to interact with
+Emacs.  With a public server, consider encrypting the files.  MobileOrg
+version 1.5 supports encryption for the iPhone.  Org also requires
+@file{openssl} installed on the local computer.  To turn on encryption, set
+the same password in MobileOrg and in Emacs.  Set the password in the
+variable @code{org-mobile-use-encryption}@footnote{If Emacs is configured for
+safe storing of passwords, then configure the variable,
+@code{org-mobile-encryption-password}; please read the docstring of that
+variable.}.  Note that even after MobileOrg encrypts the file contents, the
+file names will remain visible on the file systems of the local computer, the
+server, and the mobile device.
 
-The easiest way to create that directory is to use a free
-@uref{http://dropbox.com,Dropbox.com} account@footnote{If you cannot use
-Dropbox, or if your version of MobileOrg does not support it, you can use a
-webdav server.  For more information, check out the documentation of MobileOrg and also this
+For a server to host files, consider options like
+@uref{http://dropbox.com,Dropbox.com} account@footnote{An alternative is to
+use webdav server.  MobileOrg documentation has details of webdav server
+configuration.  Additional help is at
 @uref{http://orgmode.org/worg/org-faq.html#mobileorg_webdav, FAQ entry}.}.
-When MobileOrg first connects to your Dropbox, it will create a directory
-@i{MobileOrg} inside the Dropbox.  After the directory has been created, tell
-Emacs about it:
+On first connection, MobileOrg creates a directory @file{MobileOrg/} on
+Dropbox.  Pass its location to Emacs through an init file variable as
+follows:
 
 @lisp
 (setq org-mobile-directory "~/Dropbox/MobileOrg")
 @end lisp
 
-Org mode has commands to put files for @i{MobileOrg} into that directory,
-and to read captured notes from there.
+Org copies files to the above directory for MobileOrg.  Org also uses the
+same directory for sharing notes between Org and MobileOrg.
 
 @node Pushing to MobileOrg
 @section Pushing to MobileOrg
 
-This operation copies all files currently listed in @code{org-mobile-files}
-to the directory @code{org-mobile-directory}.  By default this list contains
-all agenda files (as listed in @code{org-agenda-files}), but additional files
-can be included by customizing @code{org-mobile-files}.  File names will be
-staged with paths relative to @code{org-directory}, so all files should be
-inside this directory@footnote{Symbolic links in @code{org-directory} need to
-have the same name as their targets.}.
+Org pushes files listed in @code{org-mobile-files} to
+@code{org-mobile-directory}.  Files include agenda files (as listed in
+@code{org-agenda-files}).  Customize @code{org-mobile-files} to add other
+files.  File names will be staged with paths relative to
+@code{org-directory}, so all files should be inside this
+directory@footnote{Symbolic links in @code{org-directory} should have the
+same name as their targets.}.
 
-The push operation also creates a special Org file @file{agendas.org} with
-all custom agenda view defined by the user@footnote{While creating the
-agendas, Org mode will force ID properties on all referenced entries, so that
-these entries can be uniquely identified if @i{MobileOrg} flags them for
-further action.  If you do not want to get these properties in so many
-entries, you can set the variable @code{org-mobile-force-id-on-agenda-items}
-to @code{nil}.  Org mode will then rely on outline paths, in the hope that
-these will be unique enough.}.
+Push creates a special Org file @file{agendas.org} with custom agenda views
+defined by the user@footnote{While creating the agendas, Org mode will force
+ID properties on all referenced entries, so that these entries can be
+uniquely identified if MobileOrg flags them for further action.  To avoid
+setting properties configure the variable
+@code{org-mobile-force-id-on-agenda-items} to @code{nil}.  Org mode will then
+rely on outline paths, assuming they are unique.}.
 
-Finally, Org writes the file @file{index.org}, containing links to all other
-files.  @i{MobileOrg} first reads this file from the server, and then
-downloads all agendas and Org files listed in it.  To speed up the download,
-MobileOrg will only read files whose checksums@footnote{Checksums are stored
-automatically in the file @file{checksums.dat}} have changed.
+Org writes the file @file{index.org}, containing links to other files.
+MobileOrg reads this file first from the server to determine what other files
+to download for agendas.  For faster downloads, MobileOrg will read only
+those files whose checksums@footnote{Checksums are stored automatically in
+the file @file{checksums.dat}.} have changed.
 
 @node Pulling from MobileOrg
 @section Pulling from MobileOrg
 
-When @i{MobileOrg} synchronizes with the server, it not only pulls the Org
-files for viewing.  It also appends captured entries and pointers to flagged
-and changed entries to the file @file{mobileorg.org} on the server.  Org has
-a @emph{pull} operation that integrates this information into an inbox file
-and operates on the pointers to flagged entries.  Here is how it works:
+When MobileOrg synchronizes with the server, it pulls the Org files for
+viewing.  It then appends to the file @file{mobileorg.org} on the server the
+captured entries, pointers to flagged and changed entries.  Org integrates
+its data in an inbox file format.
 
 @enumerate
 @item
@@ -18923,44 +18830,35 @@ Org moves all entries found in
 @file{mobileorg.org}@footnote{@file{mobileorg.org} will be empty after this
 operation.} and appends them to the file pointed to by the variable
 @code{org-mobile-inbox-for-pull}.  Each captured entry and each editing event
-will be a top-level entry in the inbox file.
+is a top-level entry in the inbox file.
 @item
-After moving the entries, Org will attempt to implement the changes made in
-@i{MobileOrg}.  Some changes are applied directly and without user
-interaction.  Examples are all changes to tags, TODO state, headline and body
-text that can be cleanly applied.  Entries that have been flagged for further
-action will receive a tag @code{:FLAGGED:}, so that they can be easily found
-again.  When there is a problem finding an entry or applying the change, the
-pointer entry will remain in the inbox and will be marked with an error
-message.  You need to later resolve these issues by hand.
+After moving the entries, Org attempts changes to MobileOrg.  Some changes
+are applied directly and without user interaction.  Examples include changes
+to tags, TODO state, headline and body text.  Entries for further action are
+tagged as @code{:FLAGGED:}.  Org marks entries with problems with an error
+message in the inbox.  They have to be resolved manually.
 @item
-Org will then generate an agenda view with all flagged entries.  The user
-should then go through these entries and do whatever actions are necessary.
-If a note has been stored while flagging an entry in @i{MobileOrg}, that note
-will be displayed in the echo area when the cursor is on the corresponding
-agenda line.
+Org generates an agenda view for flagged entries for user intervention to
+clean up.  For notes stored in flagged entries, MobileOrg displays them in
+the echo area when the cursor is on the corresponding agenda item.
 
 @table @kbd
 @kindex ?
 @item ?
-Pressing @kbd{?} in that special agenda will display the full flagging note in
-another window and also push it onto the kill ring.  So you could use @kbd{?
-z C-y C-c C-c} to store that flagging note as a normal note in the entry.
-Pressing @kbd{?} twice in succession will offer to remove the
-@code{:FLAGGED:} tag along with the recorded flagging note (which is stored
-in a property).  In this way you indicate that the intended processing for
-this flagged entry is finished.
+Pressing @kbd{?} displays the entire flagged note in another window.  Org
+also pushes it to the kill ring.  To store flagged note as a normal note, use
+@kbd{?  z C-y C-c C-c}.  Pressing @kbd{?} twice does these things: first it
+removes the @code{:FLAGGED:} tag; second, it removes the flagged note from
+the property drawer; third, it signals that manual editing of the flagged
+entry is now finished.
 @end table
 @end enumerate
 
 @kindex C-c a ?
-If you are not able to process all flagged entries directly, you can always
-return to this agenda view@footnote{Note, however, that there is a subtle
-difference.  The view created automatically by @kbd{M-x org-mobile-pull RET}
-is guaranteed to search all files that have been addressed by the last pull.
-This might include a file that is not currently in your list of agenda files.
-If you later use @kbd{C-c a ?} to regenerate the view, only the current
-agenda files will be searched.} using @kbd{C-c a ?}.
+@kbd{C-c a ?} returns to the agenda view to finish processing flagged
+entries.  Note that these entries may not be the most recent since MobileOrg
+searches files that were last pulled.  To get an updated agenda view with
+changes since the last pull, pull again.
 
 @node History and acknowledgments
 @appendix History and acknowledgments
@@ -18974,17 +18872,17 @@ Org was born in 2003, out of frustration over the user interface of the Emacs
 Outline mode.  I was trying to organize my notes and projects, and using
 Emacs seemed to be the natural way to go.  However, having to remember eleven
 different commands with two or three keys per command, only to hide and show
-parts of the outline tree, that seemed entirely unacceptable to me.  Also,
-when using outlines to take notes, I constantly wanted to restructure the
-tree, organizing it parallel to my thoughts and plans.  @emph{Visibility
-cycling} and @emph{structure editing} were originally implemented in the
-package @file{outline-magic.el}, but quickly moved to the more general
-@file{org.el}.  As this environment became comfortable for project planning,
-the next step was adding @emph{TODO entries}, basic @emph{timestamps}, and
-@emph{table support}.  These areas highlighted the two main goals that Org
-still has today: to be a new, outline-based, plain text mode with innovative
-and intuitive editing features, and to incorporate project planning
-functionality directly into a notes file.
+parts of the outline tree, that seemed entirely unacceptable.  Also, when
+using outlines to take notes, I constantly wanted to restructure the tree,
+organizing it paralleling my thoughts and plans.  @emph{Visibility cycling}
+and @emph{structure editing} were originally implemented in the package
+@file{outline-magic.el}, but quickly moved to the more general @file{org.el}.
+As this environment became comfortable for project planning, the next step
+was adding @emph{TODO entries}, basic @emph{timestamps}, and @emph{table
+support}.  These areas highlighted the two main goals that Org still has
+today: to be a new, outline-based, plain text mode with innovative and
+intuitive editing features, and to incorporate project planning functionality
+directly into a notes file.
 
 Since the first release, literally thousands of emails to me or to
 @email{emacs-orgmode@@gnu.org} have provided a constant stream of bug
@@ -19005,7 +18903,7 @@ plain list parser.  His support during the early days was central to the
 success of this project.  Bastien also invented Worg, helped establishing the
 Web presence of Org, and sponsored hosting costs for the orgmode.org website.
 Bastien stepped in as maintainer of Org between 2011 and 2013, at a time when
-I desparately needed a break.
+I desperately needed a break.
 @item Eric Schulte and Dan Davison
 Eric and Dan are jointly responsible for the Org-babel system, which turns
 Org into a multi-language environment for evaluating code and doing literate
@@ -19032,7 +18930,7 @@ let me know what I am missing here!
 @section From Bastien
 
 I (Bastien) have been maintaining Org between 2011 and 2013.  This appendix
-would not be complete without adding a few more acknowledgements and thanks.
+would not be complete without adding a few more acknowledgments and thanks.
 
 I am first grateful to Carsten for his trust while handing me over the
 maintainership of Org.  His unremitting support is what really helped me
@@ -19216,7 +19114,7 @@ basis.
 @i{Stefan Monnier} provided a patch to keep the Emacs-Lisp compiler
 happy.
 @item
-@i{Richard Moreland} wrote @i{MobileOrg} for the iPhone.
+@i{Richard Moreland} wrote MobileOrg for the iPhone.
 @item
 @i{Rick Moynihan} proposed allowing multiple TODO sequences in a file
 and being able to quickly restrict the agenda to a subtree.
@@ -19363,8 +19261,8 @@ and contributed various ideas and code snippets.
 @unnumbered Variable index
 
 This is not a complete index of variables and faces, only the ones that are
-mentioned in the manual.  For a more complete list, use @kbd{M-x
-org-customize @key{RET}} and then click yourself through the tree.
+mentioned in the manual.  For a complete list, use @kbd{M-x org-customize
+@key{RET}}.
 
 @printindex vr
 
