@@ -1275,11 +1275,11 @@ When set to the symbol `next' only the first future repeat is shown."
 (defcustom org-agenda-prefer-last-repeat nil
   "Non-nil sets date for repeated entries to their last repeat.
 
-When non-nil, a repeated entry is shows at its latest repeat
-date, possibly being today, instead of the its base date, even if
-it wasn't marked as done.  This setting is useful if you do not
-always mark repeated entries as DONE and, yet, consider that
-reaching repeat date starts the task anew.
+When non-nil, show a repeated entry at its latest repeat date,
+possibly being today, instead of its base date, even if it wasn't
+marked as done.  This setting is useful if you do not always mark
+repeated entries as done and, yet, consider that reaching repeat
+date starts the task anew.
 
 When set to a list of strings, prefer last repeats only for
 entries with these TODO keywords."
