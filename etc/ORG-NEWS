@@ -33,7 +33,6 @@ into
 Creation of a new setting to specify the Cider timeout.  By setting
 the =org-babel-clojure-sync-nrepl-timeout= setting option.  The value
 is in seconds and if set to =nil= then no timeout will occur.
-
 **** Clojure: new header ~:show-process~
 
 A new block code header has been created for Org Babel that enables
@@ -66,6 +65,22 @@ Note that the =:results= parameter's behavior is *not* changed.  If
 is specified then all the output from the window will appears in the
 results section.  If =value= is specified, then only the last returned
 value of the code will be displayed in the results section.
+
+**** SQL: new engine added ~sqsh~
+
+A new engine was added to support ~sqsh~ command line utility for use
+against Microsoft SQL Server or Sybase SQL server.
+
+More information on ~sqsh~ can be found here: [[https://sourceforge.net/projects/sqsh/][sourceforge/sqsh]] 
+
+To use ~sqsh~ in an *sql* =SRC_BLK= set the =:engine= like this:
+
+#+begin_example
+,#+BEGIN_SRC sql :engine sqsh :dbhost my_host :dbuser master :dbpassword pass :database support
+Select * From Users
+Where clue > 0
+,#+END_SRC
+#+end_example
 
 *** Horizontal rules are no longer ignored in LaTeX table math mode
 
