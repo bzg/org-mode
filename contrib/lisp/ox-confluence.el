@@ -39,13 +39,14 @@
 ;; Define the backend itself
 (org-export-define-derived-backend 'confluence 'ascii
   :translate-alist '((bold . org-confluence-bold)
+		     (code . org-confluence-code)
 		     (example-block . org-confluence-example-block)
 		     (fixed-width . org-confluence-fixed-width)
 		     (footnote-definition . org-confluence-empty)
 		     (footnote-reference . org-confluence-empty)
 		     (headline . org-confluence-headline)
 		     (italic . org-confluence-italic)
-                     (item . org-confluence-item)
+		     (item . org-confluence-item)
 		     (link . org-confluence-link)
 		     (paragraph . org-confluence-paragraph)
 		     (property-drawer . org-confluence-property-drawer)
@@ -56,7 +57,8 @@
 		     (table-cell . org-confluence-table-cell)
 		     (table-row . org-confluence-table-row)
 		     (template . org-confluence-template)
-		     (underline . org-confluence-underline)))
+		     (underline . org-confluence-underline)
+		     (verbatim . org-confluence-verbatim)))
 
 (defcustom org-confluence-lang-alist
   '(("sh" . "bash"))
@@ -85,6 +87,12 @@
 
 (defun org-confluence-fixed-width (fixed-width contents info)
   (format "\{\{%s\}\}" contents))
+
+(defun org-confluence-verbatim (verbatim contents info)
+  (format "\{\{%s\}\}" (org-element-property :value verbatim)))
+
+(defun org-confluence-code (code contents info)
+  (format "\{\{%s\}\}" (org-element-property :value code)))
 
 (defun org-confluence-headline (headline contents info)
   (let ((low-level-rank (org-export-low-level-p headline info))
