@@ -10207,7 +10207,7 @@ major @LaTeX{} mode like AUC@TeX{} in order to speed-up insertion of
 environments and math templates.  Inside Org mode, you can make use of
 some of the features of CD@LaTeX{} mode.  You need to install
 @file{cdlatex.el} and @file{texmathp.el} (the latter comes also with
-AUC@TeX{}) from @url{http://www.astro.uva.nl/~dominik/Tools/cdlatex}.
+AUC@TeX{}) from @url{https://staff.fnwi.uva.nl/c.dominik/Tools/cdlatex}.
 Don't use CD@LaTeX{} mode itself under Org mode, but use the light
 version @code{org-cdlatex-mode} that comes as part of Org mode.  Turn it
 on for the current buffer with @kbd{M-x org-cdlatex-mode RET}, or for all
