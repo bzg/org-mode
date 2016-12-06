@@ -17550,7 +17550,7 @@ Org can use names for constants in formulas in tables.  Org can also use
 calculation suffixes for units, such as @samp{M} for @samp{Mega}.  For a
 standard collection of such constants, install the @file{constants} package.
 Install version 2.0 of this package, available at
-@url{http://www.astro.uva.nl/~dominik/Tools}.  Org checks if the function
+@url{https://staff.fnwi.uva.nl/c.dominik/Tools/}.  Org checks if the function
 @code{constants-get} has been autoloaded.  Installation instructions are in
 the file, @file{constants.el}.
 @item @file{cdlatex.el} by Carsten Dominik
