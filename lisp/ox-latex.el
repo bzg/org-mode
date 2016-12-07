@@ -1021,7 +1021,7 @@ be a list containing two strings: the name of the option, and the
 value.  For example,
 
   (setq org-latex-minted-options
-    '((\"bgcolor\" \"bg\") (\"frame\" \"lines\")))
+    \\='((\"bgcolor\" \"bg\") (\"frame\" \"lines\")))
 
 will result in src blocks being exported with
 
@@ -1060,7 +1060,7 @@ exported.  This format string may contain these elements:
 For example,
 
   (setq org-latex-custom-lang-environments
-     '((python \"pythoncode\")
+     \\='((python \"pythoncode\")
        (ocaml \"\\\\begin{listing}
 \\\\begin{minted}[%o]{ocaml}
 %s\\\\end{minted}
