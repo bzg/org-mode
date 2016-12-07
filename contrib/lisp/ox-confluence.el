@@ -81,9 +81,12 @@
   (format "_%s_" contents))
 
 (defun org-confluence-item (item contents info)
-  (concat (make-string (1+ (org-confluence--li-depth item)) ?\-)
-          " "
-          (org-trim contents)))
+  (let* ((plain-list (org-export-get-parent item))
+         (type (org-element-property :type plain-list))
+         (bullet (if (eq type `ordered) ?\# ?\-)))
+    (concat (make-string (1+ (org-confluence--li-depth item)) bullet)
+            " "
+            (org-trim contents))))
 
 (defun org-confluence-fixed-width (fixed-width contents info)
   (format "\{\{%s\}\}" contents))
