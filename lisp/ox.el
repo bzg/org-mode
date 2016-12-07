@@ -4171,18 +4171,15 @@ error if no block contains REF."
 	(lambda (el)
 	  (with-temp-buffer
 	    (insert (org-trim (org-element-property :value el)))
-	    (let* ((label-fmt (regexp-quote
-			       (or (org-element-property :label-fmt el)
-				   org-coderef-label-format)))
-		   (ref-re
-		    (format "^.*?\\S-.*?\\([ \t]*\\(%s\\)\\)[ \t]*$"
-			    (format label-fmt ref))))
+	    (let* ((label-fmt (or (org-element-property :label-fmt el)
+				  org-coderef-label-format))
+		   (ref-re (org-src-coderef-regexp label-fmt ref)))
 	      ;; Element containing REF is found.  Resolve it to
 	      ;; either a label or a line number, as needed.
 	      (when (re-search-backward ref-re nil t)
-		(cond
-		 ((org-element-property :use-labels el) ref)
-		 (t (+ (or (org-export-get-loc el info) 0) (line-number-at-pos))))))))
+		(if (org-element-property :use-labels el) ref
+		  (+ (or (org-export-get-loc el info) 0)
+		     (line-number-at-pos)))))))
 	info 'first-match)
       (signal 'org-link-broken (list ref))))
 

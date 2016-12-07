@@ -765,7 +765,7 @@ white spaces.  Match group 2 contains the same string without any
 surrounding space.  Match group 3 contains the label.
 
 A coderef format regexp can only match at the end of a line."
-  (format "\\S-\\([ \t]*\\(%s\\)[ \t]*\\)$"
+  (format "\\([ \t]*\\(%s\\)[ \t]*\\)$"
 	  (replace-regexp-in-string
 	   "%s"
 	   (if label (regexp-quote label) "\\([-a-zA-Z0-9_][-a-zA-Z0-9_ ]*\\)")
