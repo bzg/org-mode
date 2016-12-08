@@ -2754,7 +2754,7 @@ keywords.  Otherwise, return nil.
 Assume point is at the first tilde marker."
   (save-excursion
     (unless (bolp) (backward-char 1))
-    (when (looking-at org-emph-re)
+    (when (looking-at org-verbatim-re)
       (let ((begin (match-beginning 2))
 	    (value (match-string-no-properties 4))
 	    (post-blank (progn (goto-char (match-end 2))
@@ -3765,7 +3765,7 @@ and cdr is a plist with `:value', `:begin', `:end' and
 Assume point is at the first equal sign marker."
   (save-excursion
     (unless (bolp) (backward-char 1))
-    (when (looking-at org-emph-re)
+    (when (looking-at org-verbatim-re)
       (let ((begin (match-beginning 2))
 	    (value (match-string-no-properties 4))
 	    (post-blank (progn (goto-char (match-end 2))
