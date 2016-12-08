@@ -11156,7 +11156,8 @@ of matched result, which is either `dedicated' or `fuzzy'."
   (let* ((case-fold-search t)
 	 (origin (point))
 	 (normalized (replace-regexp-in-string "\n[ \t]*" " " s))
-	 (words (org-split-string s "[ \t\n]+"))
+	 (starred (eq (string-to-char normalized) ?*))
+	 (words (split-string (if starred (substring s 1) s)))
 	 (s-multi-re (mapconcat #'regexp-quote words "[ \t]+\\(?:\n[ \t]*\\)?"))
 	 (s-single-re (mapconcat #'regexp-quote words "[ \t]+"))
 	 type)
@@ -11198,109 +11199,104 @@ of matched result, which is either `dedicated' or `fuzzy'."
       ;; Look for a regular expression.
       (funcall (if (derived-mode-p 'org-mode) #'org-occur #'org-do-occur)
 	       (match-string 1 s)))
-     ;; Fuzzy links.
-     (t
-      (let ((starred (eq (string-to-char normalized) ?*)))
-	(cond
-	 ;; Look for targets, only if not in a headline search.
-	 ((and (not starred)
-	       (let ((target (format "<<%s>>" s-multi-re)))
-		 (catch :target-match
-		   (goto-char (point-min))
-		   (while (re-search-forward target nil t)
-		     (backward-char)
-		     (let ((context (org-element-context)))
-		       (when (eq (org-element-type context) 'target)
-			 (setq type 'dedicated)
-			 (goto-char (org-element-property :begin context))
-			 (throw :target-match t))))
-		   nil))))
-	 ;; Look for elements named after S, only if not in a headline
-	 ;; search.
-	 ((and (not starred)
-	       (let ((name (format "^[ \t]*#\\+NAME: +%s[ \t]*$" s-single-re)))
-		 (catch :name-match
-		   (goto-char (point-min))
-		   (while (re-search-forward name nil t)
-		     (let ((element (org-element-at-point)))
-		       (when (equal (org-split-string
-				     (org-element-property :name element)
-				     "[ \t]+")
-				    words)
-			 (setq type 'dedicated)
-			 (beginning-of-line)
-			 (throw :name-match t))))
-		   nil))))
-	 ;; Regular text search.  Prefer headlines in Org mode
-	 ;; buffers.
-	 ((and (derived-mode-p 'org-mode)
-	       (let* ((wspace "[ \t]")
-		      (wspaceopt (concat wspace "*"))
-		      (cookie (concat "\\(?:"
-				      wspaceopt
-				      "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]"
-				      wspaceopt
-				      "\\)"))
-		      (sep (concat "\\(?:\\(?:" wspace "\\|" cookie "\\)+\\)"))
-		      (title
-		       (format "\\(?:%s[ \t]+\\)?%s?%s%s?"
-			       org-comment-string
-			       sep
-			       (let ((re (mapconcat #'regexp-quote words sep)))
-				 (if starred (substring re 1) re))
-			       sep))
-		      (exact-title (format "\\`%s\\'" title))
-		      (re (concat org-outline-regexp-bol "+.*" title)))
-		 (goto-char (point-min))
-		 (catch :found
-		   (while (re-search-forward re nil t)
-		     (when (string-match-p exact-title (org-get-heading t t))
-		       (throw :found t)))
-		   nil)))
-	  (beginning-of-line)
-	  (setq type 'dedicated))
-	 ;; Offer to create non-existent headline depending on
-	 ;; `org-link-search-must-match-exact-headline'.
-	 ((and (derived-mode-p 'org-mode)
-	       (not org-link-search-inhibit-query)
-	       (eq org-link-search-must-match-exact-headline 'query-to-create)
-	       (yes-or-no-p "No match - create this as a new heading? "))
-	  (goto-char (point-max))
-	  (unless (bolp) (newline))
-	  (org-insert-heading nil t t)
-	  (insert s "\n")
-	  (beginning-of-line 0))
-	 ;; Only headlines are looked after.  No need to process
-	 ;; further: throw an error.
-	 ((and (derived-mode-p 'org-mode)
-	       (or starred org-link-search-must-match-exact-headline))
-	  (goto-char origin)
-	  (error "No match for fuzzy expression: %s" normalized))
-	 ;; Regular text search.
-	 ((catch :fuzzy-match
-	    (goto-char (point-min))
-	    (while (re-search-forward s-multi-re nil t)
-	      ;; Skip match if it contains AVOID-POS or it is included
-	      ;; in a link with a description but outside the
-	      ;; description.
-	      (unless (or (and avoid-pos
-			       (<= (match-beginning 0) avoid-pos)
-			       (> (match-end 0) avoid-pos))
-			  (and (save-match-data
-				 (org-in-regexp org-bracket-link-regexp))
-			       (match-beginning 3)
-			       (or (> (match-beginning 3) (point))
-				   (<= (match-end 3) (point)))
-			       (org-element-lineage
-				(save-match-data (org-element-context))
-				'(link) t)))
-		(goto-char (match-beginning 0))
-		(setq type 'fuzzy)
-		(throw :fuzzy-match t)))
-	    nil))
-	 ;; All failed.  Throw an error.
-	 (t (goto-char origin)
-	    (error "No match for fuzzy expression: %s" normalized))))))
+     ;; From here, we handle fuzzy links.
+     ;;
+     ;; Look for targets, only if not in a headline search.
+     ((and (not starred)
+	   (let ((target (format "<<%s>>" s-multi-re)))
+	     (catch :target-match
+	       (goto-char (point-min))
+	       (while (re-search-forward target nil t)
+		 (backward-char)
+		 (let ((context (org-element-context)))
+		   (when (eq (org-element-type context) 'target)
+		     (setq type 'dedicated)
+		     (goto-char (org-element-property :begin context))
+		     (throw :target-match t))))
+	       nil))))
+     ;; Look for elements named after S, only if not in a headline
+     ;; search.
+     ((and (not starred)
+	   (let ((name (format "^[ \t]*#\\+NAME: +%s[ \t]*$" s-single-re)))
+	     (catch :name-match
+	       (goto-char (point-min))
+	       (while (re-search-forward name nil t)
+		 (let ((element (org-element-at-point)))
+		   (when (equal words
+				(split-string
+				 (org-element-property :name element)))
+		     (setq type 'dedicated)
+		     (beginning-of-line)
+		     (throw :name-match t))))
+	       nil))))
+     ;; Regular text search.  Prefer headlines in Org mode buffers.
+     ;; Ignore COMMENT keyword, TODO keywords, priority cookies,
+     ;; statistics cookies and tags.
+     ((and (derived-mode-p 'org-mode)
+	   (let ((title-re
+		  (format "%s[ \t]*\\(?:%s[ \t]+\\)?.*%s"
+			  org-outline-regexp-bol
+			  org-comment-string
+			  (mapconcat
+			   (lambda (w) (format "\\<%s\\>" (regexp-quote w)))
+			   words
+			   ".+")))
+		 (cookie-re "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]")
+		 (comment-re (format "\\`%s[ \t]+" org-comment-string)))
+	     (goto-char (point-min))
+	     (catch :found
+	       (while (re-search-forward title-re nil t)
+		 (when (equal words
+			      (split-string
+			       (replace-regexp-in-string
+				cookie-re ""
+				(replace-regexp-in-string
+				 comment-re "" (org-get-heading t t)))))
+		   (throw :found t)))
+	       nil)))
+      (beginning-of-line)
+      (setq type 'dedicated))
+     ;; Offer to create non-existent headline depending on
+     ;; `org-link-search-must-match-exact-headline'.
+     ((and (derived-mode-p 'org-mode)
+	   (not org-link-search-inhibit-query)
+	   (eq org-link-search-must-match-exact-headline 'query-to-create)
+	   (yes-or-no-p "No match - create this as a new heading? "))
+      (goto-char (point-max))
+      (unless (bolp) (newline))
+      (org-insert-heading nil t t)
+      (insert s "\n")
+      (beginning-of-line 0))
+     ;; Only headlines are looked after.  No need to process
+     ;; further: throw an error.
+     ((and (derived-mode-p 'org-mode)
+	   (or starred org-link-search-must-match-exact-headline))
+      (goto-char origin)
+      (error "No match for fuzzy expression: %s" normalized))
+     ;; Regular text search.
+     ((catch :fuzzy-match
+	(goto-char (point-min))
+	(while (re-search-forward s-multi-re nil t)
+	  ;; Skip match if it contains AVOID-POS or it is included in
+	  ;; a link with a description but outside the description.
+	  (unless (or (and avoid-pos
+			   (<= (match-beginning 0) avoid-pos)
+			   (> (match-end 0) avoid-pos))
+		      (and (save-match-data
+			     (org-in-regexp org-bracket-link-regexp))
+			   (match-beginning 3)
+			   (or (> (match-beginning 3) (point))
+			       (<= (match-end 3) (point)))
+			   (org-element-lineage
+			    (save-match-data (org-element-context))
+			    '(link) t)))
+	    (goto-char (match-beginning 0))
+	    (setq type 'fuzzy)
+	    (throw :fuzzy-match t)))
+	nil))
+     ;; All failed.  Throw an error.
+     (t (goto-char origin)
+	(error "No match for fuzzy expression: %s" normalized)))
     ;; Disclose surroundings of match, if appropriate.
     (when (and (derived-mode-p 'org-mode) (not stealth))
       (org-show-context 'link-search))
