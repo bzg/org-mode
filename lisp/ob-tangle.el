@@ -271,38 +271,25 @@ used to limit the exported source code blocks by language."
 		      (and (file-exists-p file-name)
 			   (not (member file-name (mapcar #'car path-collector)))
 			   (delete-file file-name))
-		      ;; Drop source-block to file.  Preserve local
-		      ;; file variables set in original Org buffer so
-		      ;; that `org-babel-spec-to-string' doesn't
-		      ;; ignore them.
-		      (let ((org-babel-tangle-use-relative-file-links
-			     org-babel-tangle-use-relative-file-links)
-			    (org-babel-tangle-uncomment-comments
-			     org-babel-tangle-uncomment-comments)
-			    (org-babel-tangle-comment-format-beg
-			     org-babel-tangle-comment-format-beg)
-			    (org-src-preserve-indentation
-			     org-src-preserve-indentation)
-			    (org-babel-tangle-comment-format-end
-			     org-babel-tangle-comment-format-end))
-			(with-temp-buffer
-			  (when (fboundp lang-f) (ignore-errors (funcall lang-f)))
-			  (when (and she-bang (not (member file-name she-banged)))
-			    (insert (concat she-bang "\n"))
-			    (setq she-banged (cons file-name she-banged)))
-			  (org-babel-spec-to-string spec)
-			  ;; We avoid append-to-file as it does not work with tramp.
-			  (let ((content (buffer-string)))
-			    (with-temp-buffer
-			      (when (file-exists-p file-name)
-				(insert-file-contents file-name))
-			      (goto-char (point-max))
-			      ;; Handle :padlines unless first line in file
-			      (unless (or (string= "no" (cdr (assq :padline (nth 4 spec))))
-					  (= (point) (point-min)))
-				(insert "\n"))
-			      (insert content)
-			      (write-region nil nil file-name)))))
+		      ;; drop source-block to file
+		      (with-temp-buffer
+			(when (fboundp lang-f) (ignore-errors (funcall lang-f)))
+			(when (and she-bang (not (member file-name she-banged)))
+			  (insert (concat she-bang "\n"))
+			  (setq she-banged (cons file-name she-banged)))
+			(org-babel-spec-to-string spec)
+			;; We avoid append-to-file as it does not work with tramp.
+			(let ((content (buffer-string)))
+			  (with-temp-buffer
+			    (when (file-exists-p file-name)
+			      (insert-file-contents file-name))
+			    (goto-char (point-max))
+			    ;; Handle :padlines unless first line in file
+			    (unless (or (string= "no" (cdr (assq :padline (nth 4 spec))))
+					(= (point) (point-min)))
+			      (insert "\n"))
+			    (insert content)
+			    (write-region nil nil file-name))))
 		      ;; if files contain she-bangs, then make the executable
 		      (when she-bang
 			(unless tangle-mode (setq tangle-mode #o755)))
