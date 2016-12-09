@@ -82,6 +82,8 @@ Where clue > 0
 ,#+END_SRC
 #+end_example
 
+*** New variable : ~org-bibtex-headline-format-function~
+This allow to use a different title than entry title.
 *** Horizontal rules are no longer ignored in LaTeX table math mode
 
 ** Removed options
