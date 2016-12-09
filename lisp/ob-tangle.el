@@ -271,38 +271,25 @@ used to limit the exported source code blocks by language."
 		      (and (file-exists-p file-name)
 			   (not (member file-name (mapcar #'car path-collector)))
 			   (delete-file file-name))
-		      ;; Drop source-block to file.  Preserve local
-		      ;; file variables set in original Org buffer so
-		      ;; that `org-babel-spec-to-string' doesn't
-		      ;; ignore them.
-		      (let ((org-babel-tangle-use-relative-file-links
-			     org-babel-tangle-use-relative-file-links)
-			    (org-babel-tangle-uncomment-comments
-			     org-babel-tangle-uncomment-comments)
-			    (org-babel-tangle-comment-format-beg
-			     org-babel-tangle-comment-format-beg)
-			    (org-src-preserve-indentation
-			     org-src-preserve-indentation)
-			    (org-babel-tangle-comment-format-end
-			     org-babel-tangle-comment-format-end))
-			(with-temp-buffer
-			  (when (fboundp lang-f) (ignore-errors (funcall lang-f)))
-			  (when (and she-bang (not (member file-name she-banged)))
-			    (insert (concat she-bang "\n"))
-			    (setq she-banged (cons file-name she-banged)))
-			  (org-babel-spec-to-string spec)
-			  ;; We avoid append-to-file as it does not work with tramp.
-			  (let ((content (buffer-string)))
-			    (with-temp-buffer
-			      (when (file-exists-p file-name)
-				(insert-file-contents file-name))
-			      (goto-char (point-max))
-			      ;; Handle :padlines unless first line in file
-			      (unless (or (string= "no" (cdr (assq :padline (nth 4 spec))))
-					  (= (point) (point-min)))
-				(insert "\n"))
-			      (insert content)
-			      (write-region nil nil file-name)))))
+		      ;; drop source-block to file
+		      (with-temp-buffer
+			(when (fboundp lang-f) (ignore-errors (funcall lang-f)))
+			(when (and she-bang (not (member file-name she-banged)))
+			  (insert (concat she-bang "\n"))
+			  (setq she-banged (cons file-name she-banged)))
+			(org-babel-spec-to-string spec)
+			;; We avoid append-to-file as it does not work with tramp.
+			(let ((content (buffer-string)))
+			  (with-temp-buffer
+			    (when (file-exists-p file-name)
+			      (insert-file-contents file-name))
+			    (goto-char (point-max))
+			    ;; Handle :padlines unless first line in file
+			    (unless (or (string= "no" (cdr (assq :padline (nth 4 spec))))
+					(= (point) (point-min)))
+			      (insert "\n"))
+			    (insert content)
+			    (write-region nil nil file-name))))
 		      ;; if files contain she-bangs, then make the executable
 		      (when she-bang
 			(unless tangle-mode (setq tangle-mode #o755)))
@@ -356,63 +343,42 @@ code file.  This function uses `comment-region' which assumes
 that the appropriate major-mode is set.  SPEC has the form:
 
   (start-line file link source-name params body comment)"
-  (let* ((start-line (nth 0 spec))
-	 (info (nth 4 spec))
-	 (file (if org-babel-tangle-use-relative-file-links
-		   (file-relative-name (nth 1 spec))
-		 (nth 1 spec)))
-	 (link (let ((link (nth 2 spec)))
-		 (if org-babel-tangle-use-relative-file-links
-		     (when (string-match org-link-types-re link)
-		       (let ((type (match-string 0 link))
-			     (link (substring link (match-end 0))))
-			 (concat
-			  type
-			  (file-relative-name
-			   link
-			   (file-name-directory (cdr (assq :tangle info)))))))
-		   link)))
-	 (source-name (nth 3 spec))
-	 (body (nth 5 spec))
-	 (comment (nth 6 spec))
-	 (comments (cdr (assq :comments info)))
-	 (link-p (or (string= comments "both") (string= comments "link")
-		     (string= comments "yes") (string= comments "noweb")))
-	 (link-data `(("start-line" . ,(number-to-string start-line))
-		      ("file" . ,file)
-		      ("link" . ,link)
-		      ("source-name" . ,source-name)))
-	 (insert-comment (lambda (text)
-			   (when (and comments
-				      (not (string= comments "no"))
-				      (org-string-nw-p text))
-			     (if org-babel-tangle-uncomment-comments
-				 ;; Plain comments: no processing.
-				 (insert text)
-			       ;; Ensure comments are made to be
-			       ;; comments, and add a trailing
-			       ;; newline.  Also ignore invisible
-			       ;; characters when commenting.
-			       (comment-region
-				(point)
-				(progn (insert (org-no-properties text))
-				       (point)))
-			       (end-of-line)
-			       (insert "\n"))))))
+  (pcase-let*
+      ((`(,start ,file ,link ,source ,info ,body ,comment) spec)
+       (comments (cdr (assq :comments info)))
+       (link? (or (string= comments "both") (string= comments "link")
+		  (string= comments "yes") (string= comments "noweb")))
+       (link-data `(("start-line" . ,(number-to-string start))
+		    ("file" . ,file)
+		    ("link" . ,link)
+		    ("source-name" . ,source)))
+       (insert-comment (lambda (text)
+			 (when (and comments
+				    (not (string= comments "no"))
+				    (org-string-nw-p text))
+			   (if org-babel-tangle-uncomment-comments
+			       ;; Plain comments: no processing.
+			       (insert text)
+			     ;; Ensure comments are made to be
+			     ;; comments, and add a trailing newline.
+			     ;; Also ignore invisible characters when
+			     ;; commenting.
+			     (comment-region
+			      (point)
+			      (progn (insert (org-no-properties text))
+				     (point)))
+			     (end-of-line)
+			     (insert "\n"))))))
     (when comment (funcall insert-comment comment))
-    (when link-p
-      (funcall
-       insert-comment
-       (org-fill-template org-babel-tangle-comment-format-beg link-data)))
-    (insert
-     (org-unescape-code-in-string
-      (if org-src-preserve-indentation (org-trim body t)
-	(org-trim (org-remove-indentation body))))
-     "\n")
-    (when link-p
-      (funcall
-       insert-comment
-       (org-fill-template org-babel-tangle-comment-format-end link-data)))))
+    (when link?
+      (funcall insert-comment
+	       (org-fill-template
+		org-babel-tangle-comment-format-beg link-data)))
+    (insert body "\n")
+    (when link?
+      (funcall insert-comment
+	       (org-fill-template
+		org-babel-tangle-comment-format-end link-data)))))
 
 (defun org-babel-tangle-collect-blocks (&optional language tangle-file)
   "Collect source blocks in the current Org file.
@@ -445,13 +411,12 @@ can be used to limit the collected code blocks by target file."
     ;; Ensure blocks are in the correct order.
     (mapcar (lambda (b) (cons (car b) (nreverse (cdr b)))) blocks)))
 
-(defun org-babel-tangle-single-block
-  (block-counter &optional only-this-block)
+(defun org-babel-tangle-single-block (block-counter &optional only-this-block)
   "Collect the tangled source for current block.
 Return the list of block attributes needed by
-`org-babel-tangle-collect-blocks'.
-When ONLY-THIS-BLOCK is non-nil, return the full association
-list to be used by `org-babel-tangle' directly."
+`org-babel-tangle-collect-blocks'.  When ONLY-THIS-BLOCK is
+non-nil, return the full association list to be used by
+`org-babel-tangle' directly."
   (let* ((info (org-babel-get-src-block-info))
 	 (start-line
 	  (save-restriction (widen)
@@ -463,44 +428,39 @@ list to be used by `org-babel-tangle' directly."
 	 (cref-fmt (or (and (string-match "-l \"\\(.+\\)\"" extra)
 			    (match-string 1 extra))
 		       org-coderef-label-format))
-	 (link (let ((link (org-no-properties
-                            (org-store-link nil))))
-                 (and (string-match org-bracket-link-regexp link)
-                      (match-string 1 link))))
+	 (link (let ((l (org-no-properties (org-store-link nil))))
+                 (and (string-match org-bracket-link-regexp l)
+                      (match-string 1 l))))
 	 (source-name
 	  (or (nth 4 info)
 	      (format "%s:%d"
 		      (or (ignore-errors (nth 4 (org-heading-components)))
 			  "No heading")
 		      block-counter)))
-	 (expand-cmd
-	  (intern (concat "org-babel-expand-body:" src-lang)))
+	 (expand-cmd (intern (concat "org-babel-expand-body:" src-lang)))
 	 (assignments-cmd
 	  (intern (concat "org-babel-variable-assignments:" src-lang)))
 	 (body
 	  ;; Run the tangle-body-hook.
-          (let* ((body ;; Expand the body in language specific manner.
-                  (if (org-babel-noweb-p params :tangle)
-                      (org-babel-expand-noweb-references info)
-                    (nth 1 info)))
-                 (body
-                  (if (assq :no-expand params)
-                      body
-                    (if (fboundp expand-cmd)
-                        (funcall expand-cmd body params)
-                      (org-babel-expand-body:generic
-                       body params
-                       (and (fboundp assignments-cmd)
-                            (funcall assignments-cmd params)))))))
-            (with-temp-buffer
-              (insert body)
-              (when (string-match "-r" extra)
-                (goto-char (point-min))
-                (while (re-search-forward
-                        (replace-regexp-in-string "%s" ".+" cref-fmt) nil t)
-                  (replace-match "")))
-              (run-hooks 'org-babel-tangle-body-hook)
-              (buffer-string))))
+          (with-temp-buffer
+	    (insert
+	     ;; Expand body in language specific manner.
+	     (let ((body (if (org-babel-noweb-p params :tangle)
+			     (org-babel-expand-noweb-references info)
+			   (nth 1 info))))
+	       (cond ((assq :no-expand params) body)
+		     ((fboundp expand-cmd) (funcall expand-cmd body params))
+		     (t
+		      (org-babel-expand-body:generic
+		       body params (and (fboundp assignments-cmd)
+					(funcall assignments-cmd params)))))))
+	    (when (string-match "-r" extra)
+	      (goto-char (point-min))
+	      (while (re-search-forward
+		      (replace-regexp-in-string "%s" ".+" cref-fmt) nil t)
+		(replace-match "")))
+	    (run-hooks 'org-babel-tangle-body-hook)
+	    (buffer-string)))
 	 (comment
 	  (when (or (string= "both" (cdr (assq :comments params)))
 		    (string= "org" (cdr (assq :comments params))))
@@ -510,7 +470,7 @@ list to be used by `org-babel-tangle' directly."
 	     (buffer-substring
 	      (max (condition-case nil
 		       (save-excursion
-			 (org-back-to-heading t)  ; Sets match data
+			 (org-back-to-heading t) ; Sets match data
 			 (match-end 0))
 		     (error (point-min)))
 		   (save-excursion
@@ -520,7 +480,25 @@ list to be used by `org-babel-tangle' directly."
 		       (point-min))))
 	      (point)))))
 	 (result
-	  (list start-line file link source-name params body comment)))
+	  (list start-line
+		(if org-babel-tangle-use-relative-file-links
+		    (file-relative-name file)
+		  file)
+		(if (and org-babel-tangle-use-relative-file-links
+			 (string-match org-link-types-re link)
+			 (string= (match-string 0 link) "file"))
+		    (concat "file:"
+			    (file-relative-name (match-string 1 link)
+						(file-name-directory
+						 (cdr (assq :tangle params)))))
+		  link)
+		source-name
+		params
+		(org-unescape-code-in-string
+		 (if org-src-preserve-indentation
+		     (org-trim body t)
+		   (org-trim (org-remove-indentation body))))
+		comment)))
     (if only-this-block
 	(list (cons src-lang (list result)))
       result)))
