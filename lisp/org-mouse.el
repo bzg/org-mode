@@ -516,7 +516,6 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
      ["Check Phrase ..." org-occur]
      "--"
      ["Display Agenda" org-agenda-list t]
-     ["Display Timeline" org-timeline t]
      ["Display TODO List" org-todo-list t]
      ("Display Tags"
       ,@(org-mouse-keyword-menu

@@ -86,6 +86,11 @@ Where clue > 0
 This allow to use a different title than entry title.
 *** Horizontal rules are no longer ignored in LaTeX table math mode
 
+** Removed functions
+
+*** Org Timeline
+This feature has been removed.  Use a custom agenda view, possibly
+narrowed to current buffer to achieve a similar functionality.
 ** Removed options
 
 *** ~org-agenda-repeating-timestamp-show-all~ is removed.

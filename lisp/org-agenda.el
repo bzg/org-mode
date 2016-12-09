@@ -975,18 +975,6 @@ will only be dimmed."
 	  (const :tag "Dim to a gray face" t)
 	  (const :tag "Make invisible" invisible)))
 
-(defcustom org-timeline-show-empty-dates 3
-  "Non-nil means `org-timeline' also shows dates without an entry.
-When nil, only the days which actually have entries are shown.
-When t, all days between the first and the last date are shown.
-When an integer, show also empty dates, but if there is a gap of more than
-N days, just insert a special line indicating the size of the gap."
-  :group 'org-agenda-skip
-  :type '(choice
-	  (const :tag "None" nil)
-	  (const :tag "All" t)
-	  (integer :tag "at most")))
-
 (defgroup org-agenda-startup nil
   "Options concerning initial settings in the Agenda in Org Mode."
   :tag "Org Agenda Startup"
@@ -2705,7 +2693,6 @@ T     Call `org-todo-list' to display the global todo list, select only
 m     Call `org-tags-view' to display headlines with tags matching
       a condition  (the user is prompted for the condition).
 M     Like `m', but select only TODO entries, no ordinary headlines.
-L     Create a timeline for the current buffer.
 e     Export views to associated files.
 s     Search entries for keywords.
 S     Search entries for keywords, only with TODO keywords.
@@ -2868,12 +2855,6 @@ Pressing `<' twice means to restrict to the current subtree or region
 				(copy-sequence note))
 			       nil 'face 'org-warning)))))))
 	 t t))
-       ((equal org-keys "L")
-	(unless (derived-mode-p 'org-mode)
-	  (user-error "This is not an Org file"))
-	(unless restriction
-	  (put 'org-agenda-files 'org-restrict (list bfn))
-	  (org-call-with-arg 'org-timeline arg)))
        ((equal org-keys "#") (call-interactively 'org-agenda-list-stuck-projects))
        ((equal org-keys "/") (call-interactively 'org-occur-in-agenda-files))
        ((equal org-keys "!") (customize-variable 'org-stuck-projects))
@@ -4038,152 +4019,7 @@ This check for agenda markers in all agenda buffers currently active."
 	 'org-agenda-date-weekend)
 	(t 'org-agenda-date)))
 
-;;; Agenda timeline
-
-(defvar org-agenda-only-exact-dates nil) ; dynamically scoped
-(defvar org-agenda-show-log-scoped) ;; dynamically scope in `org-timeline' or `org-agenda-list'
-
-(defun org-timeline (&optional dotodo)
-  "Show a time-sorted view of the entries in the current Org file.
-
-Only entries with a time stamp of today or later will be listed.
-
-With `\\[universal-argument]' prefix, all unfinished TODO items will also be \
-shown,
-under the current date.
-
-If the buffer contains an active region, only check the region
-for dates."
-  (interactive "P")
-  (let* ((dopast t)
-	 (org-agenda-show-log-scoped org-agenda-show-log)
-	 (org-agenda-show-log org-agenda-show-log-scoped)
-	 (entry (buffer-file-name (or (buffer-base-buffer (current-buffer))
-				      (current-buffer))))
-	 (date (calendar-current-date))
-	 (beg (if (org-region-active-p) (region-beginning) (point-min)))
-	 (end (if (org-region-active-p) (region-end) (point-max)))
-	 (day-numbers (org-get-all-dates
-		       beg end 'no-ranges
-		       t org-agenda-show-log-scoped ; always include today
-		       org-timeline-show-empty-dates))
-	 (org-deadline-warning-days 0)
-	 (org-agenda-only-exact-dates t)
-	 (today (org-today))
-	 (past t)
-	 args
-	 s e rtn d emptyp)
-    (setq org-agenda-redo-command
-    	  (list 'let
-		(list (list 'org-agenda-show-log 'org-agenda-show-log))
-    		(list 'org-switch-to-buffer-other-window (current-buffer))
-    		(list 'org-timeline (list 'quote dotodo))))
-    (put 'org-agenda-redo-command 'org-lprops nil)
-    (if (not dopast)
-	;; Remove past dates from the list of dates.
-	(setq day-numbers (delq nil (mapcar (lambda(x)
-					      (if (>= x today) x nil))
-					    day-numbers))))
-    (org-agenda-prepare (concat "Timeline " (file-name-nondirectory entry)))
-    (org-compile-prefix-format 'timeline)
-    (org-set-sorting-strategy 'timeline)
-    (if org-agenda-show-log-scoped (push :closed args))
-    (push :timestamp args)
-    (push :deadline args)
-    (push :scheduled args)
-    (push :sexp args)
-    (if dotodo (push :todo args))
-    (insert "Timeline of file " entry "\n")
-    (add-text-properties (point-min) (point)
-			 (list 'face 'org-agenda-structure))
-    (org-agenda-mark-header-line (point-min))
-    (while (setq d (pop day-numbers))
-      (if (and (listp d) (eq (car d) :omitted))
-	  (progn
-	    (setq s (point))
-	    (insert (format "\n[... %d empty days omitted]\n\n" (cdr d)))
-	    (put-text-property s (1- (point)) 'face 'org-agenda-structure))
-	(if (listp d) (setq d (car d) emptyp t) (setq emptyp nil))
-	(if (and (>= d today)
-		 dopast
-		 past)
-	    (progn
-	      (setq past nil)
-	      (insert (make-string 79 ?-) "\n")))
-	(setq date (calendar-gregorian-from-absolute d))
-	(setq s (point))
-	(setq rtn (and (not emptyp)
-		       (apply 'org-agenda-get-day-entries entry
-			      date args)))
-	(if (or rtn (equal d today) org-timeline-show-empty-dates)
-	    (progn
-	      (insert
-	       (if (stringp org-agenda-format-date)
-		   (format-time-string org-agenda-format-date
-				       (org-time-from-absolute date))
-		 (funcall org-agenda-format-date date))
-	       "\n")
-	      (put-text-property s (1- (point)) 'face
-				 (org-agenda-get-day-face date))
-	      (put-text-property s (1- (point)) 'org-date-line t)
-	      (put-text-property s (1- (point)) 'org-agenda-date-header t)
-	      (if (equal d today)
-		  (put-text-property s (1- (point)) 'org-today t))
-	      (and rtn (insert (org-agenda-finalize-entries rtn 'timeline) "\n"))
-	      (put-text-property s (1- (point)) 'day d)))))
-    (goto-char (or (text-property-any (point-min) (point-max) 'org-today t)
-		   (point-min)))
-    (add-text-properties
-     (point-min) (point-max)
-     `(org-agenda-type timeline org-redo-cmd ,org-agenda-redo-command))
-    (org-agenda-finalize)
-    (setq buffer-read-only t)))
-
-(defun org-get-all-dates (beg end &optional no-ranges force-today inactive empty pre-re)
-  "Return a list of all relevant day numbers from BEG to END buffer positions.
-If NO-RANGES is non-nil, include only the start and end dates of a range,
-not every single day in the range.  If FORCE-TODAY is non-nil, make
-sure that TODAY is included in the list.  If INACTIVE is non-nil, also
-inactive time stamps (those in square brackets) are included.
-When EMPTY is non-nil, also include days without any entries."
-  (let ((re (concat
-	     (if pre-re pre-re "")
-	     (if inactive org-ts-regexp-both org-ts-regexp)))
-	dates dates1 date day day1 day2 ts1 ts2 pos)
-    (if force-today
-	(setq dates (list (org-today))))
-    (save-excursion
-      (goto-char beg)
-      (while (re-search-forward re end t)
-	(setq day (time-to-days (org-time-string-to-time
-				 (substring (match-string 1) 0 10)
-				 (current-buffer) (match-beginning 0))))
-	(or (memq day dates) (push day dates)))
-      (unless no-ranges
-	(goto-char beg)
-	(while (re-search-forward org-tr-regexp end t)
-	  (setq pos (match-beginning 0))
-	  (setq ts1 (substring (match-string 1) 0 10)
-		ts2 (substring (match-string 2) 0 10)
-		day1 (time-to-days (org-time-string-to-time
-				    ts1 (current-buffer) pos))
-		day2 (time-to-days (org-time-string-to-time
-				    ts2  (current-buffer) pos)))
-	  (while (< (setq day1 (1+ day1)) day2)
-	    (or (memq day1 dates) (push day1 dates)))))
-      (setq dates (sort dates '<))
-      (when empty
-	(while (setq day (pop dates))
-	  (setq day2 (car dates))
-	  (push day dates1)
-	  (when (and day2 empty)
-	    (if (or (eq empty t)
-		    (and (numberp empty) (<= (- day2 day) empty)))
-		(while (< (setq day (1+ day)) day2)
-		  (push (list day) dates1))
-	      (push (cons :omitted (- day2 day)) dates1))))
-	(setq dates (nreverse dates1)))
-      dates)))
+(defvar org-agenda-show-log-scoped)
 
 ;;; Agenda Daily/Weekly
 

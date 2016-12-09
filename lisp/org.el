@@ -21814,7 +21814,6 @@ on context.  See the individual commands for more information."
     ("Special views current file"
      ["TODO Tree"  org-show-todo-tree t]
      ["Check Deadlines" org-check-deadlines t]
-     ["Timeline" org-timeline t]
      ["Tags/Property tree" org-match-sparse-tree t])
     "--"
     ["Export/Publish..." org-export-dispatch t]
