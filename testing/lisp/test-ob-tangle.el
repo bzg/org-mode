@@ -63,11 +63,12 @@
            "df|sed '1d'|awk '{print $5 \" \" $6}'|sort -n |tail -1|awk '{print $2}'"))
       (org-narrow-to-subtree)
       (org-babel-tangle)
-      (with-temp-buffer
-        (insert-file-contents "babel.sh")
-        (goto-char (point-min))
-        (should (re-search-forward (regexp-quote tangled) nil t)))
-      (delete-file "babel.sh"))))
+      (should (unwind-protect
+		  (with-temp-buffer
+		    (insert-file-contents "babel.sh")
+		    (goto-char (point-min))
+		    (re-search-forward (regexp-quote tangled) nil t))
+		(when (file-exists-p "babel.sh") (delete-file "babel.sh")))))))
 
 (ert-deftest ob-tangle/expand-headers-as-noweb-references ()
   "Test that references to headers are expanded during noweb expansion."

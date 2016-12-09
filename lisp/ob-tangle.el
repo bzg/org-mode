@@ -442,25 +442,25 @@ non-nil, return the full association list to be used by
 	  (intern (concat "org-babel-variable-assignments:" src-lang)))
 	 (body
 	  ;; Run the tangle-body-hook.
-          (with-temp-buffer
-	    (insert
-	     ;; Expand body in language specific manner.
-	     (let ((body (if (org-babel-noweb-p params :tangle)
-			     (org-babel-expand-noweb-references info)
-			   (nth 1 info))))
+          (let ((body (if (org-babel-noweb-p params :tangle)
+			  (org-babel-expand-noweb-references info)
+			(nth 1 info))))
+	    (with-temp-buffer
+	      (insert
+	       ;; Expand body in language specific manner.
 	       (cond ((assq :no-expand params) body)
 		     ((fboundp expand-cmd) (funcall expand-cmd body params))
 		     (t
 		      (org-babel-expand-body:generic
 		       body params (and (fboundp assignments-cmd)
-					(funcall assignments-cmd params)))))))
-	    (when (string-match "-r" extra)
-	      (goto-char (point-min))
-	      (while (re-search-forward
-		      (replace-regexp-in-string "%s" ".+" cref-fmt) nil t)
-		(replace-match "")))
-	    (run-hooks 'org-babel-tangle-body-hook)
-	    (buffer-string)))
+					(funcall assignments-cmd params))))))
+	      (when (string-match "-r" extra)
+		(goto-char (point-min))
+		(while (re-search-forward
+			(replace-regexp-in-string "%s" ".+" cref-fmt) nil t)
+		  (replace-match "")))
+	      (run-hooks 'org-babel-tangle-body-hook)
+	      (buffer-string))))
 	 (comment
 	  (when (or (string= "both" (cdr (assq :comments params)))
 		    (string= "org" (cdr (assq :comments params))))
