@@ -82,6 +82,11 @@ Where clue > 0
 ,#+END_SRC
 #+end_example
 
+**** PlantUML: add support for header arguments
+
+[[http://plantuml.com/][Plantuml]] source blocks now support the [[http://orgmode.org/manual/prologue.html#prologue][~:prologue~]], [[http://orgmode.org/manual/epilogue.html#epilogue][~:epilogue~]] and
+[[http://orgmode.org/manual/var.html#var][~:var~]] header arguments.
+
 *** New variable : ~org-bibtex-headline-format-function~
 This allow to use a different title than entry title.
 *** Horizontal rules are no longer ignored in LaTeX table math mode
