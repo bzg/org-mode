@@ -239,17 +239,15 @@ display, as a string."
 	    (org-columns-compact-links value)))
    (value)))
 
-(defun org-columns--collect-values (&optional agenda)
+(defun org-columns--collect-values (&optional compiled-fmt)
   "Collect values for columns on the current line.
-
-When optional argument AGENDA is non-nil, assume the value is
-meant for the agenda, i.e., caller is `org-agenda-columns'.
 
 Return a list of triplets (SPEC VALUE DISPLAYED) suitable for
 `org-columns--display-here'.
 
 This function assumes `org-columns-current-fmt-compiled' is
-initialized."
+initialized is set in the current buffer.  However, it is
+possible to override it with optional argument COMPILED-FMT."
   (let ((summaries (get-text-property (point) 'org-summaries)))
     (mapcar
      (lambda (spec)
@@ -257,19 +255,18 @@ initialized."
 	 (`(,p . ,_)
 	  (let* ((v (or (cdr (assoc spec summaries))
 			(org-entry-get (point) p 'selective t)
-			(and agenda
+			(and compiled-fmt ;assume `org-agenda-columns'
 			     ;; Effort property is not defined.  Try
 			     ;; to use appointment duration.
 			     org-agenda-columns-add-appointments-to-effort-sum
 			     (string= p (upcase org-effort-property))
 			     (get-text-property (point) 'duration)
-			     (propertize
-			      (org-minutes-to-clocksum-string
-			       (get-text-property (point) 'duration))
-			      'face 'org-warning))
+			     (propertize (org-minutes-to-clocksum-string
+					  (get-text-property (point) 'duration))
+					 'face 'org-warning))
 			"")))
 	    (list spec v (org-columns--displayed-value spec v))))))
-     org-columns-current-fmt-compiled)))
+     (or compiled-fmt org-columns-current-fmt-compiled))))
 
 (defun org-columns--set-widths (cache)
   "Compute the maximum column widths from the format and CACHE.
@@ -1507,26 +1504,26 @@ PARAMS is a property list of parameters:
   (interactive)
   (org-columns-remove-overlays)
   (move-marker org-columns-begin-marker (point))
-  (let ((org-columns--time (float-time (current-time)))
-	(fmt
-	 (cond
-	  ((bound-and-true-p org-agenda-overriding-columns-format))
-	  ((let ((m (org-get-at-bol 'org-hd-marker)))
-	     (and m
-		  (or (org-entry-get m "COLUMNS" t)
-		      (with-current-buffer (marker-buffer m)
-			org-columns-default-format)))))
-	  ((and (local-variable-p 'org-columns-current-fmt)
-		org-columns-current-fmt))
-	  ((let ((m (next-single-property-change (point-min) 'org-hd-marker)))
-	     (and m
-		  (let ((m (get-text-property m 'org-hd-marker)))
-		    (or (org-entry-get m "COLUMNS" t)
-			(with-current-buffer (marker-buffer m)
-			  org-columns-default-format))))))
-	  (t org-columns-default-format))))
-    (setq-local org-columns-current-fmt fmt)
-    (org-columns-compile-format fmt)
+  (let* ((org-columns--time (float-time (current-time)))
+	 (fmt
+	  (cond
+	   ((bound-and-true-p org-agenda-overriding-columns-format))
+	   ((let ((m (org-get-at-bol 'org-hd-marker)))
+	      (and m
+		   (or (org-entry-get m "COLUMNS" t)
+		       (with-current-buffer (marker-buffer m)
+			 org-columns-default-format)))))
+	   ((and (local-variable-p 'org-columns-current-fmt)
+		 org-columns-current-fmt))
+	   ((let ((m (next-single-property-change (point-min) 'org-hd-marker)))
+	      (and m
+		   (let ((m (get-text-property m 'org-hd-marker)))
+		     (or (org-entry-get m "COLUMNS" t)
+			 (with-current-buffer (marker-buffer m)
+			   org-columns-default-format))))))
+	   (t org-columns-default-format)))
+	 (compiled-fmt (org-columns-compile-format fmt)))
+    (setq org-columns-current-fmt fmt)
     (when org-agenda-columns-compute-summary-properties
       (org-agenda-colview-compute org-columns-current-fmt-compiled))
     (save-excursion
@@ -1538,8 +1535,13 @@ PARAMS is a property list of parameters:
 		       (org-get-at-bol 'org-marker))))
 	    (when m
 	      (push (cons (line-beginning-position)
+			  ;; `org-columns-current-fmt-compiled' is
+			  ;; initialized but only set locally to the
+			  ;; agenda buffer.  Since current buffer is
+			  ;; changing, we need to force the original
+			  ;; compiled-fmt there.
 			  (org-with-point-at m
-			    (org-columns--collect-values 'agenda)))
+			    (org-columns--collect-values compiled-fmt)))
 		    cache)))
 	  (forward-line))
 	(when cache
