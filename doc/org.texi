@@ -9879,7 +9879,7 @@ example by adding the desired package to
 for details.}.  This is done with the @samp{src} block, where you also need
 to specify the name of the major mode that should be used to fontify the
 example@footnote{Code in @samp{src} blocks may also be evaluated either
-interactively or on export.  See @pxref{Working with source code} for more
+interactively or on export.  @xref{Working with source code}, for more
 information on evaluating code blocks.}, see @ref{Easy templates} for
 shortcuts to easily insert code blocks.
 @cindex #+BEGIN_SRC
@@ -14883,7 +14883,7 @@ Mandatory.  They mark the start and end of a block that Org requires.  The
 @cindex begin block, end block
 @item <language>
 Mandatory for live code blocks.  It is the identifier of the source code
-language in the block.  @xref{Languages} for identifiers of supported
+language in the block.  @xref{Languages}, for identifiers of supported
 languages.
 @cindex source code, language
 @item <switches>
