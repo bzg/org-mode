@@ -720,46 +720,15 @@ channel."
   "Transcode a LINK object into Beamer code.
 CONTENTS is the description part of the link.  INFO is a plist
 used as a communication channel."
-  (let ((type (org-element-property :type link)))
-    (cond
-     ;; Link type is handled by a special function.
-     ((org-export-custom-protocol-maybe link contents 'beamer))
-     ;; Use \hyperlink command for all internal links.
-     ((equal type "radio")
-      (let ((destination (org-export-resolve-radio-link link info)))
-	(if (not destination) contents
-	  (format "\\hyperlink%s{%s}{%s}"
-		  (or (org-beamer--element-has-overlay-p link) "")
-		  (org-export-get-reference destination info)
-		  contents))))
-     ((and (member type '("custom-id" "fuzzy" "id"))
-	   (let ((destination (if (string= type "fuzzy")
-				  (org-export-resolve-fuzzy-link link info)
-				(org-export-resolve-id-link link info))))
-	     (cl-case (org-element-type destination)
-	       (headline
-		(let ((label
-		       (format "sec-%s"
-			       (mapconcat
-				'number-to-string
-				(org-export-get-headline-number
-				 destination info)
-				"-"))))
-		  (if (and (plist-get info :section-numbers) (not contents))
-		      (format "\\ref{%s}" label)
-		    (format "\\hyperlink%s{%s}{%s}"
-			    (or (org-beamer--element-has-overlay-p link) "")
-			    label
-			    contents))))
-	       (target
-		(let ((ref (org-export-get-reference destination info)))
-		  (if (not contents) (format "\\ref{%s}" ref)
-		    (format "\\hyperlink%s{%s}{%s}"
-			    (or (org-beamer--element-has-overlay-p link) "")
-			    ref
-			    contents))))))))
-     ;; Otherwise, use `latex' back-end.
-     (t (org-export-with-backend 'latex link contents info)))))
+  (or (org-export-custom-protocol-maybe link contents 'beamer)
+      ;; Fall-back to LaTeX export.  However, if link is becomes
+      ;; a "\hyperlink" macro, try to sneak in Beamer overlay
+      ;; specification, if any.
+      (let ((latex-link (org-export-with-backend 'latex link contents info))
+	    (overlay (org-beamer--element-has-overlay-p link)))
+	(if (and overlay (string-match "\\`\\\\hyperlink" latex-link))
+	    (replace-match (concat "\\&" overlay) nil nil latex-link)
+	  latex-link))))
 
 
 ;;;; Plain List
