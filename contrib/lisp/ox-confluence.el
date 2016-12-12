@@ -83,9 +83,13 @@
 (defun org-confluence-item (item contents info)
   (let* ((plain-list (org-export-get-parent item))
          (type (org-element-property :type plain-list))
-         (bullet (if (eq type `ordered) ?\# ?\-)))
+         (bullet (if (eq type 'ordered) ?\# ?\-)))
     (concat (make-string (1+ (org-confluence--li-depth item)) bullet)
             " "
+    (if (eq type 'descriptive)
+ (concat "*"
+ (org-export-data (org-element-property :tag item) info)
+ "* - "))
             (org-trim contents))))
 
 (defun org-confluence-fixed-width (fixed-width contents info)
