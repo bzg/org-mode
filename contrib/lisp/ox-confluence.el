@@ -50,6 +50,7 @@
 		     (link . org-confluence-link)
 		     (paragraph . org-confluence-paragraph)
 		     (property-drawer . org-confluence-property-drawer)
+		     (quote-block . org-confluence-quote-block)
 		     (section . org-confluence-section)
 		     (src-block . org-confluence-src-block)
 		     (strike-through . org-confluence-strike-through)
@@ -132,6 +133,9 @@ a communication channel."
 (defun org-confluence-property-drawer (property-drawer contents info)
   (and (org-string-nw-p contents)
        (format "\{\{%s\}\}" contents)))
+
+(defun org-confluence-quote-block (quote-block contents info)
+  (format "{quote}\n%s{quote}" contents))
 
 (defun org-confluence-section (section contents info)
   contents)
