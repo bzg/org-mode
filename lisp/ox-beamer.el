@@ -721,13 +721,14 @@ channel."
 CONTENTS is the description part of the link.  INFO is a plist
 used as a communication channel."
   (or (org-export-custom-protocol-maybe link contents 'beamer)
-      ;; Fall-back to LaTeX export.  However, if link is becomes
-      ;; a "\hyperlink" macro, try to sneak in Beamer overlay
-      ;; specification, if any.
-      (let ((latex-link (org-export-with-backend 'latex link contents info))
-	    (overlay (org-beamer--element-has-overlay-p link)))
-	(if (and overlay (string-match "\\`\\\\hyperlink" latex-link))
-	    (replace-match (concat "\\&" overlay) nil nil latex-link)
+      ;; Fall-back to LaTeX export.  However, prefer "\hyperlink" over
+      ;; "\hyperref" since the former handles overlay specifications.
+      (let ((latex-link (org-export-with-backend 'latex link contents info)))
+	(if (string-match "\\`\\\\hyperref\\[\\(.*?\\)\\]" latex-link)
+	    (replace-match
+	     (format "\\\\hyperlink%s{\\1}"
+		     (or (org-beamer--element-has-overlay-p link) ""))
+	     nil nil latex-link)
 	  latex-link))))
 
 
