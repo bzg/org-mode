@@ -2007,18 +2007,24 @@ channel.
 Unlike to `org-export-with-backend', this function will
 recursively convert DATA using BACKEND translation table."
   (when (symbolp backend) (setq backend (org-export-get-backend backend)))
-  (org-export-data
-   data
-   ;; Set-up a new communication channel with translations defined in
-   ;; BACKEND as the translate table and a new hash table for
-   ;; memoization.
-   (org-combine-plists
-    info
-    (list :back-end backend
-	  :translate-alist (org-export-get-all-transcoders backend)
-	  ;; Size of the hash table is reduced since this function
-	  ;; will probably be used on small trees.
-	  :exported-data (make-hash-table :test 'eq :size 401)))))
+  ;; Set-up a new communication channel with translations defined in
+  ;; BACKEND as the translate table and a new hash table for
+  ;; memoization.
+  (let ((new-info
+	 (org-combine-plists
+	  info
+	  (list :back-end backend
+		:translate-alist (org-export-get-all-transcoders backend)
+		;; Size of the hash table is reduced since this
+		;; function will probably be used on small trees.
+		:exported-data (make-hash-table :test 'eq :size 401)))))
+    (prog1 (org-export-data data new-info)
+      ;; Preserve `:internal-references', as those do not depend on
+      ;; the back-end used; we need to make sure that any new
+      ;; reference when the temporary back-end was active gets through
+      ;; the default one.
+      (plist-put info :internal-references
+		 (plist-get new-info :internal-references)))))
 
 (defun org-export-expand (blob contents &optional with-affiliated)
   "Expand a parsed element or object to its original state.
@@ -3676,18 +3682,20 @@ the communication channel used for export, as a plist."
   (when (symbolp backend) (setq backend (org-export-get-backend backend)))
   (org-export-barf-if-invalid-backend backend)
   (let ((type (org-element-type data)))
-    (if (memq type '(nil org-data)) (error "No foreign transcoder available")
-      (let* ((all-transcoders (org-export-get-all-transcoders backend))
-	     (transcoder (cdr (assq type all-transcoders))))
-	(if (not (functionp transcoder))
-	    (error "No foreign transcoder available")
-	  (funcall
-	   transcoder data contents
-	   (org-combine-plists
-	    info (list
-		  :back-end backend
-		  :translate-alist all-transcoders
-		  :exported-data (make-hash-table :test #'eq :size 401)))))))))
+    (when (memq type '(nil org-data)) (error "No foreign transcoder available"))
+    (let* ((all-transcoders (org-export-get-all-transcoders backend))
+	   (transcoder (cdr (assq type all-transcoders))))
+      (unless (functionp transcoder) (error "No foreign transcoder available"))
+      (let ((new-info
+	     (org-combine-plists
+	      info (list
+		    :back-end backend
+		    :translate-alist all-transcoders
+		    :exported-data (make-hash-table :test #'eq :size 401)))))
+	;; `:internal-references' are shared across back-ends.
+	(prog1 (funcall transcoder data contents new-info)
+	  (plist-put info :internal-references
+		     (plist-get new-info :internal-references)))))))
 
 
 ;;;; For Export Snippets
