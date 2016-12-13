@@ -1486,15 +1486,7 @@ should not be used for floats.  See
 
 (defun org-latex--protect-text (text)
   "Protect special characters in string TEXT and return it."
-  (replace-regexp-in-string
-   "--\\|[\\{}$%&_#~^]"
-   (lambda (m)
-     (cond ((equal m "--") "-{}-")
-	   ((equal m "\\") "\\textbackslash{}")
-	   ((equal m "~") "\\textasciitilde{}")
-	   ((equal m "^") "\\textasciicircum{}")
-	   (t (concat "\\" m))))
-   text nil t))
+  (replace-regexp-in-string "[\\{}$%&_#~^]" "\\\\\\&" text))
 
 (defun org-latex--text-markup (text markup info)
   "Format TEXT depending on MARKUP text markup.
@@ -1508,13 +1500,23 @@ INFO is a plist used as a communication channel.  See
       ;; and use "\\verb" command.
       (verb
        (let ((separator (org-latex--find-verb-separator text)))
-	 (concat "\\verb" separator
+	 (concat "\\verb"
+		 separator
 		 (replace-regexp-in-string "\n" " " text)
 		 separator)))
       ;; Handle the `protectedtexttt' special case: Protect some
       ;; special chars and use "\texttt{%s}" format string.
       (protectedtexttt
-       (format "\\texttt{%s}" (org-latex--protect-text text)))
+       (format "\\texttt{%s}"
+	       (replace-regexp-in-string
+		"--\\|[\\{}$%&_#~^]"
+		(lambda (m)
+		  (cond ((equal m "--") "-{}-")
+			((equal m "\\") "\\textbackslash{}")
+			((equal m "~") "\\textasciitilde{}")
+			((equal m "^") "\\textasciicircum{}")
+			(t (org-latext--protect-text m))))
+		text nil t)))
       ;; Else use format string.
       (t (format fmt text)))))
 
@@ -2043,7 +2045,7 @@ contextual information."
 	 (separator (org-latex--find-verb-separator code)))
     (cl-case (plist-get info :latex-listings)
       ;; Do not use a special package: transcode it verbatim.
-      ((nil) (format "\\texttt{%s}" (org-latex--protect-text code)))
+      ((nil) (format "\\texttt{%s}" (org-latex--text-markup code 'code info)))
       ;; Use minted package.
       (minted
        (let* ((org-lang (org-element-property :language inline-src-block))
@@ -2419,17 +2421,16 @@ DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
   (let* ((type (org-element-property :type link))
-	 (raw-path (replace-regexp-in-string
-		    "%" "\\%" (org-element-property :path link) nil t))
+	 (raw-path (org-element-property :path link))
 	 ;; Ensure DESC really exists, or set it to nil.
 	 (desc (and (not (string= desc "")) desc))
 	 (imagep (org-export-inline-image-p
 		  link (plist-get info :latex-inline-image-rules)))
-	 (path (cond
-		((member type '("http" "https" "ftp" "mailto" "doi"))
-		 (concat type ":" raw-path))
-		((string= type "file") (org-export-file-uri raw-path))
-		(t raw-path))))
+	 (path (org-latex--protect-text
+		(cond ((member type '("http" "https" "ftp" "mailto" "doi"))
+		       (concat type ":" raw-path))
+		      ((string= type "file") (org-export-file-uri raw-path))
+		      (t raw-path)))))
     (cond
      ;; Link type is handled by a special function.
      ((org-export-custom-protocol-maybe link desc 'latex))
