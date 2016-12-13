@@ -2707,7 +2707,8 @@ containing export options.  Modify DATA by side-effect and return it."
 		(or (string-prefix-p "\\(" value)
 		    (string-match-p "\\`\\$[^$]" value))))
 	     ((and type (or `subscript `superscript))
-	      (not (org-element-map b type #'identity info t)))))))
+	      (not (memq type (mapcar #'org-element-type
+				      (org-element-contents b)))))))))
     (org-element-map data '(entity latex-fragment subscript superscript)
       (lambda (object)
 	;; Skip objects already wrapped.
