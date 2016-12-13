@@ -3237,6 +3237,25 @@ Another text. (ref:text)
      (let ((headline (org-element-map tree 'headline #'identity nil t)))
        (equal (org-export-get-reference headline info)
 	      (org-export-get-reference headline info)))))
+  ;; References get through local export back-ends.
+  (should
+   (org-test-with-parsed-data "* Headline"
+     (let ((headline (org-element-map tree 'headline #'identity nil t))
+	   (backend
+	    (org-export-create-backend
+	     :transcoders
+	     '((headline . (lambda (h _c i) (org-export-get-reference h i)))))))
+       (equal (org-trim (org-export-data-with-backend headline backend info))
+	      (org-export-get-reference headline info)))))
+  (should
+   (org-test-with-parsed-data "* Headline"
+     (let ((headline (org-element-map tree 'headline #'identity nil t))
+	   (backend
+	    (org-export-create-backend
+	     :transcoders
+	     '((headline . (lambda (h _c i) (org-export-get-reference h i)))))))
+       (equal (org-export-with-backend backend headline nil info)
+	      (org-export-get-reference headline info)))))
   ;; Use search cells defined in `:crossrefs'.  However, handle
   ;; duplicate search cells.
   (should
