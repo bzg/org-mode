@@ -1515,7 +1515,7 @@ INFO is a plist used as a communication channel.  See
 			((equal m "\\") "\\textbackslash{}")
 			((equal m "~") "\\textasciitilde{}")
 			((equal m "^") "\\textasciicircum{}")
-			(t (org-latext--protect-text m))))
+			(t (org-latex--protect-text m))))
 		text nil t)))
       ;; Else use format string.
       (t (format fmt text)))))
