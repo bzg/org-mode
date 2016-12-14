@@ -7938,69 +7938,67 @@ command.
 When optional argument TOP is non-nil, insert a level 1 heading,
 unconditionally."
   (interactive "P")
-  (let ((blank? (org--blank-before-heading-p (equal arg '(16)))))
+  (let* ((blank? (org--blank-before-heading-p (equal arg '(16))))
+	 (level (org-current-level))
+	 (stars (make-string (if (and level (not top)) level 1) ?*)))
     (cond
      ((or org-insert-heading-respect-content
 	  (member arg '((4) (16)))
 	  (and (not invisible-ok)
 	       (invisible-p (max (1- (point)) (point-min)))))
-      (let ((level (org-current-level)))
-        ;; Position point at the location of insertion.
-	(if (not level)			;before first headline
-	    (org-with-limited-levels (outline-next-heading))
-	  ;; Make sure we end up on a visible headline if INVISIBLE-OK
-	  ;; is nil.
-	  (org-with-limited-levels (org-back-to-heading invisible-ok))
-	  (cond ((equal arg '(16))
-		 (org-up-heading-safe)
-		 (org-end-of-subtree t t))
-		(t
-		 (org-end-of-subtree t t))))
-        (unless (bolp) (insert "\n"))   ;ensure final newline
-        (unless (and blank? (org-previous-line-empty-p))
-          (org-N-empty-lines-before-current (if blank? 1 0)))
-        (insert (make-string (if (and level (not top)) level 1) ?*) " \n")
-        (forward-char -1)))
+      ;; Position point at the location of insertion.
+      (if (not level)			;before first headline
+	  (org-with-limited-levels (outline-next-heading))
+	;; Make sure we end up on a visible headline if INVISIBLE-OK
+	;; is nil.
+	(org-with-limited-levels (org-back-to-heading invisible-ok))
+	(cond ((equal arg '(16))
+	       (org-up-heading-safe)
+	       (org-end-of-subtree t t))
+	      (t
+	       (org-end-of-subtree t t))))
+      (unless (bolp) (insert "\n"))   ;ensure final newline
+      (unless (and blank? (org-previous-line-empty-p))
+	(org-N-empty-lines-before-current (if blank? 1 0)))
+      (insert stars " \n")
+      (forward-char -1))
      ;; At a headline...
      ((org-at-heading-p)
-      (let ((level (if top 1 (org-current-level))))
-        (cond ((bolp)
-               (when blank? (save-excursion (insert "\n")))
-               (save-excursion (insert (make-string level ?*) " \n"))
-               (unless (and blank? (org-previous-line-empty-p))
-                 (org-N-empty-lines-before-current (if blank? 1 0)))
-               (end-of-line))
-              ((and (org-get-alist-option org-M-RET-may-split-line 'headline)
-                    (save-excursion
-                      (beginning-of-line)
-                      (looking-at org-complex-heading-regexp))
-                    (org-pos-in-match-range (point) 4))
-               ;; Grab the text that should moved to the new headline.
-               ;; Preserve tags.
-               (let ((split (delete-and-extract-region (point) (match-end 4))))
-                 (if (looking-at "[ \t]*$") (replace-match "")
-                   (org-set-tags nil t))
-                 (end-of-line)
-                 (when blank? (insert "\n"))
-                 (insert "\n" (make-string level ?*) " ")
-                 (when (org-string-nw-p split) (insert split))
-                 (insert "\n")
-                 (forward-char -1)))
-              (t
-               (end-of-line)
-               (when blank? (insert "\n"))
-               (insert "\n" (make-string level ?*) " \n")
-               (forward-char -1)))))
+      (cond ((bolp)
+	     (when blank? (save-excursion (insert "\n")))
+	     (save-excursion (insert stars " \n"))
+	     (unless (and blank? (org-previous-line-empty-p))
+	       (org-N-empty-lines-before-current (if blank? 1 0)))
+	     (end-of-line))
+	    ((and (org-get-alist-option org-M-RET-may-split-line 'headline)
+		  (org-match-line org-complex-heading-regexp)
+		  (org-pos-in-match-range (point) 4))
+	     ;; Grab the text that should moved to the new headline.
+	     ;; Preserve tags.
+	     (let ((split (delete-and-extract-region (point) (match-end 4))))
+	       (if (looking-at "[ \t]*$") (replace-match "")
+		 (org-set-tags nil t))
+	       (end-of-line)
+	       (when blank? (insert "\n"))
+	       (insert "\n" stars " ")
+	       (when (org-string-nw-p split) (insert split))
+	       (insert "\n")
+	       (forward-char -1)))
+	    (t
+	     (end-of-line)
+	     (when blank? (insert "\n"))
+	     (insert "\n" stars " \n")
+	     (forward-char -1))))
      ;; On regular text, turn line into a headline or split, if
      ;; appropriate.
      ((bolp)
-      (insert "* ")
+      (insert stars " ")
       (unless (and blank? (org-previous-line-empty-p))
         (org-N-empty-lines-before-current (if blank? 1 0))))
      (t
       (unless (org-get-alist-option org-M-RET-may-split-line 'headline)
         (end-of-line))
-      (insert "\n* ")
+      (insert "\n" stars " ")
       (unless (and blank? (org-previous-line-empty-p))
         (org-N-empty-lines-before-current (if blank? 1 0))))))
   (run-hooks 'org-insert-heading-hook))

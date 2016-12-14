@@ -1154,7 +1154,7 @@
 	  (org-test-with-temp-text ""
 	    (org-insert-heading)
 	    (buffer-string))))
-  ;; At the beginning of a line, turn it into a headline
+  ;; At the beginning of a line, turn it into a headline.
   (should
    (equal "* P"
 	  (org-test-with-temp-text "<point>P"
@@ -1212,6 +1212,23 @@
 	  (org-test-with-temp-text "* H1 :ta<point>g:"
 	    (let ((org-M-RET-may-split-line '((headline . t))))
 	      (org-insert-heading))
+	    (buffer-string))))
+  ;; New headline level depends on the level of the headline above.
+  (should
+   (equal "** H\n** P"
+	  (org-test-with-temp-text "** H\n<point>P"
+	    (org-insert-heading)
+	    (buffer-string))))
+  (should
+   (equal "** H\nPara\n** graph"
+	  (org-test-with-temp-text "** H\nPara<point>graph"
+	    (let ((org-M-RET-may-split-line '((default . t))))
+	      (org-insert-heading))
+	    (buffer-string))))
+  (should
+   (equal "** \n** H"
+	  (org-test-with-temp-text "** H"
+	    (org-insert-heading)
 	    (buffer-string))))
   ;; When called with one universal argument, insert a new headline at
   ;; the end of the current subtree, independently on the position of
