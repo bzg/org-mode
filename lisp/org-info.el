@@ -97,21 +97,21 @@ Taken from <http://www.gnu.org/software/emacs/manual/html_mono/.>")
 (defconst org-info-other-documents
   '(("libc" . "http://www.gnu.org/software/libc/manual/html_mono/libc.html")
     ("make" . "http://www.gnu.org/software/make/manual/make.html"))
-  "Alist of documents generated from texinfo source.
-
-When converting info links to html, links to any one of these manuals are
-converted to use these URL's.")
+  "Alist of documents generated from Texinfo source.
+When converting info links to HTML, links to any one of these manuals are
+converted to use these URL.")
 
 (defun org-info-map-html-url (filename)
-  "Given info FILENAME, either return it (plus '.html' suffix added) or convert
-it to URL pointing to the official page on internet, e.g., use gnu.org for all
-emacs related documents. See `org-info-official-gnu-document' and
-`org-info-other-documents' for details."
-  (if (member filename org-info-emacs-documents)
-      (format "http://www.gnu.org/software/emacs/manual/html_mono/%s.html"
-              filename)
-    (let ((url (cdr (assoc filename org-info-other-documents))))
-      (or url (concat filename ".html")))))
+  "Return URL or HTML file associated to Info FILENAME.
+If FILENAME refers to an official GNU document, return a URL pointing to
+the official page for that document, e.g., use \"gnu.org\" for all Emacs
+related documents.  Otherwise, append \".html\" extension to FILENAME.
+See `org-info-emacs-documents' and `org-info-other-documents' for details."
+  (cond ((member filename org-info-emacs-documents)
+	 (format "http://www.gnu.org/software/emacs/manual/html_mono/%s.html"
+		 filename))
+	((cdr (assoc filename org-info-other-documents)))
+	(t (concat filename ".html"))))
 
 (defun org-info-export (path desc format)
   "Export an info link.
