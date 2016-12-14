@@ -94,8 +94,10 @@
             (org-trim contents))))
 
 (defun org-confluence-fixed-width (fixed-width contents info)
-  (format "\{\{%s\}\}"
-         (org-trim (org-element-property :value fixed-width))))
+  (org-confluence--block
+   "none"
+   "Confluence"
+   (org-trim (org-element-property :value fixed-width))))
 
 (defun org-confluence-verbatim (verbatim contents info)
   (format "\{\{%s\}\}" (org-element-property :value verbatim)))
