@@ -260,7 +260,6 @@ Return overlay specification, as a string, or nil."
 		     (link . org-beamer-link)
 		     (plain-list . org-beamer-plain-list)
 		     (radio-target . org-beamer-radio-target)
-		     (target . org-beamer-target)
 		     (template . org-beamer-template)))
 
 
@@ -778,15 +777,6 @@ contextual information."
 	  (or (org-beamer--element-has-overlay-p radio-target) "")
 	  (org-export-get-reference radio-target info)
 	  text))
-
-
-;;;; Target
-
-(defun org-beamer-target (target _contents info)
-  "Transcode a TARGET object into Beamer code.
-CONTENTS is nil.  INFO is a plist holding contextual
-information."
-  (format "\\label{%s}" (org-export-get-reference target info)))
 
 
 ;;;; Template
