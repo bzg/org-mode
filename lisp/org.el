@@ -5849,7 +5849,14 @@ This should be called after the variable `org-link-parameters' has changed."
 	       (verbatim? (member marker '("~" "="))))
 	  (when (save-excursion
 		  (goto-char (match-beginning 0))
-		  (looking-at (if verbatim? org-verbatim-re org-emph-re)))
+		  ;; Do not match headline stars.  Do not consider
+		  ;; stars of a headline as closing marker for bold
+		  ;; markup either.
+		  (and (not (looking-at-p org-outline-regexp-bol))
+		       (looking-at (if verbatim? org-verbatim-re org-emph-re))
+		       (not (string-match-p
+			     (concat org-outline-regexp-bol "\\'")
+			     (match-string 0)))))
 	    (pcase-let ((`(,_ ,face ,_) (assoc marker org-emphasis-alist)))
 	      (font-lock-prepend-text-property
 	       (match-beginning 2) (match-end 2) 'face face)
