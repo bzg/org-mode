@@ -896,41 +896,71 @@ is a plist used as a communication channel."
 			     (car (org-element-contents element))))
 	'link unique-link-p info nil 'headline t)))
 
+(defun org-ascii--describe-datum (datum info)
+  "Describe DATUM object or element.
+If DATUM is a string, consider it to be a file name, per
+`org-export-resolve-id-link'.  INFO is the communication channel,
+as a plist."
+  (pcase (org-element-type datum)
+    (`plain-text (format "See file %s" datum)) ;External file
+    (`headline
+     (format (org-ascii--translate "See section %s" info)
+	     (if (org-export-numbered-headline-p datum info)
+		 (mapconcat #'number-to-string
+			    (org-export-get-headline-number datum info)
+			    ".")
+	       (org-export-data (org-element-property :title datum) info))))
+    (_
+     (let ((number (org-export-get-ordinal
+		    datum info nil #'org-ascii--has-caption-p))
+	   ;; If destination is a target, make sure we can name the
+	   ;; container it refers to.
+	   (enumerable
+	    (org-element-lineage datum '(headline paragrah src-block table) t)))
+       (pcase (org-element-type enumerable)
+	 (`headline
+	  (format (org-ascii--translate "See section %s" info)
+		  (if (org-export-numbered-headline-p enumerable info)
+		      (mapconcat #'number-to-string number ".")
+		    (org-export-data
+		     (org-element-property :title enumerable) info))))
+	 ((guard (not number))
+	  (org-ascii--translate "Unknown reference" info))
+	 (`paragraph
+	  (format (org-ascii--translate "See figure %s" info) number))
+	 (`src-block
+	  (format (org-ascii--translate "See listing %s" info) number))
+	 (`table
+	  (format (org-ascii--translate "See table %s" info) number))
+	 (_ (org-ascii--translate "Unknown reference" info)))))))
+
 (defun org-ascii--describe-links (links width info)
   "Return a string describing a list of links.
-
 LINKS is a list of link type objects, as returned by
 `org-ascii--unique-links'.  WIDTH is the text width allowed for
 the output string.  INFO is a plist used as a communication
 channel."
   (mapconcat
    (lambda (link)
-     (let ((type (org-element-property :type link))
-	   (anchor (let ((desc (org-element-contents link)))
-		     (if desc (org-export-data desc info)
-		       (org-element-property :raw-link link)))))
+     (let* ((type (org-element-property :type link))
+	    (description (org-element-contents link))
+	    (anchor (org-export-data
+		     (or description (org-element-property :raw-link link))
+		     info)))
        (cond
-	;; Coderefs, radio links and fuzzy links are ignored.
-	((member type '("coderef" "radio" "fuzzy")) nil)
-	;; Id and custom-id links: Headlines refer to their numbering.
-	((member type '("custom-id" "id"))
-	 (let ((dest (org-export-resolve-id-link link info)))
-	   (concat
-	    (org-ascii--fill-string
-	     (format
-	      "[%s] %s"
-	      anchor
-	      (if (stringp dest)	; External file.
-		  dest
-		(format
-		 (org-ascii--translate "See section %s" info)
-		 (if (org-export-numbered-headline-p dest info)
-		     (mapconcat #'number-to-string
-				(org-export-get-headline-number dest info)
-				".")
-		   (org-export-data (org-element-property :title dest) info)))))
-	     width info)
-	    "\n\n")))
+	((member type '("coderef" "radio")) nil)
+	((member type '("custom-id" "fuzzy" "id"))
+	 ;; Only links with a description need an entry.  Other are
+	 ;; already handled in `org-ascii-link'.
+	 (when description
+	   (let ((dest (if (equal type "fuzzy")
+			   (org-export-resolve-fuzzy-link link info)
+			 (org-export-resolve-id-link link info))))
+	     (concat
+	      (org-ascii--fill-string
+	       (format "[%s] %s" anchor (org-ascii--describe-datum dest info))
+	       width info)
+	      "\n\n"))))
 	;; Do not add a link that cannot be resolved and doesn't have
 	;; any description: destination is already visible in the
 	;; paragraph.
@@ -1541,24 +1571,33 @@ INFO is a plist holding contextual information."
      ;; Do not apply a special syntax on radio links.  Though, use
      ;; transcoded target's contents as output.
      ((string= type "radio") desc)
-     ;; Do not apply a special syntax on fuzzy links pointing to
-     ;; targets.
-     ((string= type "fuzzy")
-      (let ((destination (org-export-resolve-fuzzy-link link info)))
-	(if (org-string-nw-p desc) desc
-	  (when destination
-	    (let ((number
-		   (org-export-get-ordinal
-		    destination info nil 'org-ascii--has-caption-p)))
-	      (if number
-		  (if (atom number) (number-to-string number)
-		    (mapconcat #'number-to-string number "."))
-		;; Unnumbered headline.
-		(when (eq 'headline (org-element-type destination))
-		  (format "[%s]"
-			  (org-export-data
-			   (org-element-property :title destination)
-			   info)))))))))
+     ((member type '("custom-id" "fuzzy" "id"))
+      (let ((destination (if (string= type "fuzzy")
+			     (org-export-resolve-fuzzy-link link info)
+			   (org-export-resolve-id-link link info))))
+	(pcase (org-element-type destination)
+	  ((guard desc)
+	   (if (plist-get info :ascii-links-to-notes)
+	       (format "[%s]" desc)
+	     (concat desc
+		     (format " (%s)"
+			     (org-ascii--describe-datum destination info)))))
+	  ;; External file.
+	  (`plain-text destination)
+	  (`headline
+	   (if (org-export-numbered-headline-p destination info)
+	       (mapconcat #'number-to-string
+			  (org-export-get-headline-number destination info)
+			  ".")
+	     (org-export-data (org-element-property :title destination) info)))
+	  ;; Handle enumerable elements and targets within them.
+	  ((and (let number (org-export-get-ordinal
+			     destination info nil #'org-ascii--has-caption-p))
+		(guard number))
+	   (if (atom number) (number-to-string number)
+	     (mapconcat #'number-to-string number ".")))
+	  ;; Don't know what to do.  Signal it.
+	  (_ "???"))))
      (t
       (let ((raw-link (org-element-property :raw-link link)))
 	(if (not (org-string-nw-p desc)) (format "[%s]" raw-link)

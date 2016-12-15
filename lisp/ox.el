@@ -5744,6 +5744,12 @@ them."
      ("fr" :ascii "References" :default "Références")
      ("de" :default "Quellen")
      ("es" :default "Referencias"))
+    ("See figure %s"
+     ("fr" :default "cf. figure %s"
+      :html "cf.&nbsp;figure&nbsp;%s" :latex "cf.~figure~%s"))
+    ("See listing %s"
+     ("fr" :default "cf. programme %s"
+      :html "cf.&nbsp;programme&nbsp;%s" :latex "cf.~programme~%s"))
     ("See section %s"
      ("da" :default "jævnfør afsnit %s")
      ("de" :default "siehe Abschnitt %s")
@@ -5756,6 +5762,9 @@ them."
      ("ru" :html "&#1057;&#1084;. &#1088;&#1072;&#1079;&#1076;&#1077;&#1083; %s"
       :utf-8 "См. раздел %s")
      ("zh-CN" :html "&#21442;&#35265;&#31532;%s&#33410;" :utf-8 "参见第%s节"))
+    ("See table %s"
+     ("fr" :default "cf. tableau %s"
+      :html "cf.&nbsp;tableau&nbsp;%s" :latex "cf.~tableau~%s"))
     ("Table"
      ("de" :default "Tabelle")
      ("es" :default "Tabla")
