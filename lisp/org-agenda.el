@@ -6098,7 +6098,9 @@ specification like [h]h:mm."
 		   ((eq org-agenda-skip-deadline-prewarning-if-scheduled
 			'pre-scheduled)
 		    ;; Set pre-warning to no earlier than SCHEDULED.
-		    (min (- deadline scheduled) org-deadline-warning-days))
+		    (min (- deadline
+			    (org-agenda--timestamp-to-absolute scheduled))
+			 org-deadline-warning-days))
 		   ;; Set pre-warning to deadline.
 		   (t 0))))
 	       (wdays (if suppress-prewarning
@@ -6265,10 +6267,10 @@ scheduled items with an hour specification like [h]h:mm."
 		    (- org-agenda-skip-scheduled-delay-if-deadline))
 		   ((eq org-agenda-skip-scheduled-delay-if-deadline
 			'post-deadline)
-		    ;; Set delay to no later than DEADLINE.  If
-		    ;; DEADLINE has a repeater, compare last schedule
-		    ;; repeat and last deadline repeat.
-		    (min (- schedule deadline) org-scheduled-delay-days))
+		    ;; Set delay to no later than DEADLINE.
+		    (min (- schedule
+			    (org-agenda--timestamp-to-absolute deadline))
+			 org-scheduled-delay-days))
 		   (t 0))))
 	       (ddays
 		(cond
