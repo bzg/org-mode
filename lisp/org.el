@@ -21157,8 +21157,8 @@ This command does many different things, depending on context:
 	     ;; Limit to supported contexts.
 	     '(babel-call clock dynamic-block footnote-definition
 			  footnote-reference inline-babel-call inline-src-block
-			  item keyword node-property paragraph plain-list
-			  property-drawer radio-target src-block
+			  inlinetask item keyword node-property paragraph
+			  plain-list property-drawer radio-target src-block
 			  statistics-cookie table table-cell table-row
 			  timestamp)
 	     t))
