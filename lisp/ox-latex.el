@@ -101,7 +101,8 @@
 		(org-open-file (org-latex-export-to-pdf nil s v b)))))))
   :filters-alist '((:filter-options . org-latex-math-block-options-filter)
 		   (:filter-parse-tree org-latex-math-block-tree-filter
-				       org-latex-matrices-tree-filter))
+				       org-latex-matrices-tree-filter
+				       org-latex-image-link-filter))
   :options-alist
   '((:latex-class "LATEX_CLASS" nil org-latex-default-class t)
     (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
@@ -724,7 +725,8 @@ environment."
   :safe #'stringp)
 
 (defcustom org-latex-inline-image-rules
-  '(("file" . "\\.\\(pdf\\|jpeg\\|jpg\\|png\\|ps\\|eps\\|tikz\\|pgf\\|svg\\)\\'"))
+  `(("file" . ,(regexp-opt
+		'("pdf" "jpeg" "jpg" "png" "ps" "eps" "tikz" "pgf" "svg"))))
   "Rules characterizing image files that can be inlined into LaTeX.
 
 A rule consists in an association whose key is the type of link
@@ -2267,6 +2269,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 
 ;;;; Link
+
+(defun org-latex-image-link-filter (data _backend info)
+  (org-export-insert-image-links data info org-latex-inline-image-rules))
 
 (defun org-latex--inline-image (link info)
   "Return LaTeX code for an inline image.

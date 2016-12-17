@@ -85,7 +85,8 @@
   :filters-alist '((:filter-parse-tree
 		    . (org-odt--translate-latex-fragments
 		       org-odt--translate-description-lists
-		       org-odt--translate-list-tables)))
+		       org-odt--translate-list-tables
+		       org-odt--translate-image-links)))
   :menu-entry
   '(?o "Export to ODT"
        ((?o "As ODT file" org-odt-export-to-odt)
@@ -3686,6 +3687,11 @@ contextual information."
 
 
 ;;; Filters
+
+;;; Images
+
+(defun org-odt--translate-image-links (data _backend info)
+  (org-export-insert-image-links data info inline image rules))
 
 ;;;; LaTeX fragments
 

@@ -4160,12 +4160,55 @@ the provided rules is non-nil.  The default rule is
 This only applies to links without a description."
   (and (not (org-element-contents link))
        (let ((case-fold-search t))
-	 (catch 'exit
-	   (dolist (rule (or rules org-export-default-inline-image-rule))
-	     (and (string= (org-element-property :type link) (car rule))
-		  (string-match-p (cdr rule)
-				  (org-element-property :path link))
-		  (throw 'exit t)))))))
+	 (cl-some (lambda (rule)
+		    (and (string= (org-element-property :type link) (car rule))
+			 (string-match-p (cdr rule)
+					 (org-element-property :path link))))
+		  (or rules org-export-default-inline-image-rule)))))
+
+(defun org-export-insert-image-links (data info &optional rules)
+  "Insert image links in DATA.
+
+Org syntax do not support nested links.  Nevertheless, some
+export back-ends support image as descriptions of links.  Since
+images are really link to image files, we need to make an
+exception about link nesting.
+
+This function recognizes links whose contents are really images
+and turn them into proper nested links.  It is meant to be used
+as a parse tree filter in back-ends supporting such constructs.
+
+DATA is a parse tree.  INFO is the current state of the export
+process, as a plist.
+
+A description is a valid images if it matches any rule in RULES,
+if non-nil, or `org-export-default-inline-image-rule' otherwise.
+See `org-export-inline-image-p' for more information about the
+structure of RULES.
+
+Return modified DATA."
+  (let ((link-re (format "\\`\\(?:%s\\|%s\\)\\'"
+			 org-plain-link-re
+			 org-angle-link-re))
+	(case-fold-search t))
+    (org-element-map data 'link
+      (lambda (l)
+	(let ((contents (org-element-interpret-data (org-element-contents l))))
+	  (when (and (org-string-nw-p contents)
+		     (string-match link-re contents))
+	    (let ((type (match-string 1 contents))
+		  (path (match-string 2 contents)))
+	      (when (cl-some (lambda (rule)
+			       (and (string= type (car rule))
+				    (string-match-p (cdr rule) path)))
+			     (or rules org-export-default-inline-image-rule))
+		(org-element-set-contents
+		 l
+		 (with-temp-buffer
+		   (save-excursion (insert contents))
+		   (org-element-link-parser))))))))
+      info nil nil t))
+  data)
 
 (defun org-export-resolve-coderef (ref info)
   "Resolve a code reference REF.

@@ -101,6 +101,7 @@
     (verbatim . org-html-verbatim)
     (verse-block . org-html-verse-block))
   :filters-alist '((:filter-options . org-html-infojs-install-script)
+		   (:filter-parse-tree . org-html-image-link-filter)
 		   (:filter-final-output . org-html-final-function))
   :menu-entry
   '(?h "Export to HTML"
@@ -2834,6 +2835,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (concat (org-html-close-tag "br" nil info) "\n"))
 
 ;;;; Link
+
+(defun org-html-image-link-filter (data _backend info)
+  (org-export-insert-image-links data info org-html-inline-image-rules))
 
 (defun org-html-inline-image-p (link info)
   "Non-nil when LINK is meant to appear as an image.
