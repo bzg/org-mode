@@ -3691,7 +3691,7 @@ contextual information."
 ;;; Images
 
 (defun org-odt--translate-image-links (data _backend info)
-  (org-export-insert-image-links data info inline image rules))
+  (org-export-insert-image-links data info org-odt-inline-image-rules))
 
 ;;;; LaTeX fragments
 
