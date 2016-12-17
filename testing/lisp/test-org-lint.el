@@ -225,9 +225,6 @@ This is not a node property
   "Test `org-lint-link-to-local-file' checker."
   (should
    (org-test-with-temp-text "[[file:/Idonotexist.org]]"
-     (org-lint '(link-to-local-file))))
-  (should
-   (org-test-with-temp-text "[[http://orgmode.org][file:/Idonotexist.org]]"
      (org-lint '(link-to-local-file)))))
 
 (ert-deftest test-org-lint/non-existent-setupfile-parameter ()

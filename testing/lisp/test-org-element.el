@@ -1750,19 +1750,7 @@ e^{i\\pi}+1=0
 	    (progn (org-mode-restart)
 		   (org-element-map (org-element-parse-buffer) 'link
 		     (lambda (link) (org-element-property :type link))
-		     nil t nil t)))))
-  ;; Plain links are allowed as description of regular links.
-  (should
-   (equal "file"
-	  (org-test-with-temp-text "[[http://orgmode.org][file:unicorn.jpg]]"
-	    (search-forward "file:")
-	    (org-element-property :type (org-element-context)))))
-  ;; So are angular links.
-  (should
-   (equal "file"
-	  (org-test-with-temp-text "[[http://orgmode.org][<file:unicorn.jpg>]]"
-	    (search-forward "file:")
-	    (org-element-property :type (org-element-context))))))
+		     nil t nil t))))))
 
 
 ;;;; Macro
