@@ -2097,13 +2097,19 @@ Possible values are: `folded', `children' or `subtree'.  See
   "Return column at which body of ITEM should start."
   (save-excursion
     (goto-char item)
-    (looking-at "[ \t]*\\(\\S-+\\)\\(.*[ \t]::\\)?\\([ \t]\\|$\\)")
-    (if (match-beginning 2)
-	(let ((start (1+ (match-end 2)))
+    (if (save-excursion
+	  (end-of-line)
+	  (re-search-backward
+	   "[ \t]::\\([ \t]\\|$\\)" (line-beginning-position) t))
+	;; Descriptive list item.  Body starts after item's tag, if
+	;; possible.
+	(let ((start (1+ (- (match-beginning 1) (line-beginning-position))))
 	      (ind (org-get-indentation)))
 	  (if (> start (+ ind org-list-description-max-indent))
 	      (+ ind 5)
 	    start))
+      ;; Regular item.  Body starts after bullet.
+      (looking-at "[ \t]*\\(\\S-+\\)")
       (+ (progn (goto-char (match-end 1)) (current-column))
 	 (if (and org-list-two-spaces-after-bullet-regexp
 		  (string-match-p org-list-two-spaces-after-bullet-regexp
