@@ -2702,6 +2702,33 @@ Para2"
       (org-element-map (org-element-parse-buffer) 'link 'identity nil t))
     '(("custom-id" . "id")))))
 
+(ert-deftest test-org-export/insert-image-links ()
+  "Test `org-export-insert-image-links' specifications."
+  (should-not
+   (member "file"
+	   (org-test-with-parsed-data "[[http://orgmode.org][file:image.png]]"
+	     (org-element-map tree 'link
+	       (lambda (l) (org-element-property :type l))))))
+  (should
+   (member "file"
+	   (org-test-with-parsed-data "[[http://orgmode.org][file:image.png]]"
+	     (org-element-map (org-export-insert-image-links tree info) 'link
+	       (lambda (l) (org-element-property :type l))))))
+  ;; With optional argument RULES, recognize different links as
+  ;; images.
+  (should-not
+   (member "file"
+	   (org-test-with-parsed-data "[[http://orgmode.org][file:image.xxx]]"
+	     (org-element-map (org-export-insert-image-links tree info) 'link
+	       (lambda (l) (org-element-property :type l))))))
+  (should
+   (member "file"
+	   (org-test-with-parsed-data "[[http://orgmode.org][file:image.xxx]]"
+	     (org-element-map
+		 (org-export-insert-image-links tree info '(("file" . "xxx")))
+		 'link
+	       (lambda (l) (org-element-property :type l)))))))
+
 (ert-deftest test-org-export/fuzzy-link ()
   "Test fuzzy links specifications."
   ;; Link to an headline should return headline's number.
