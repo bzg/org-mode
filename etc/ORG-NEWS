@@ -126,6 +126,8 @@ Where clue > 0
 This new function is meant to be used in back-ends supporting images
 as descriptions of links, a.k.a. image links.  See its docstring for
 details.
+**** Add global macros through ~org-export-global-macros~ 
+With this variable, one can define macros available for all documents.
 **** Horizontal rules are no longer ignored in LaTeX table math mode
 
 *** ~org-list-to-generic~ includes a new property: ~:ifmt~
@@ -148,8 +150,6 @@ narrowed to current buffer to achieve a similar functionality.
 For an equivalent to a ~nil~ value, set
 ~org-agenda-show-future-repeats~ to nil and
 ~org-agenda-prefer-last-repeat~ to ~t~.
-
-** Removed options
 
 *** ~org-publish-sitemap-file-entry-format~ is deprecated
 

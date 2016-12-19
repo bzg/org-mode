@@ -10790,13 +10790,15 @@ Visit the include file at point.
 @cindex macro replacement, during export
 @cindex #+MACRO
 
-You can define text snippets with
+@vindex org-export-global-macros
+Macros replace text snippets during export.  Macros are defined globally in
+@code{org-export-global-macros}, or document-wise with the following syntax:
 
 @example
 #+MACRO: name   replacement text $1, $2 are arguments
 @end example
 
-@noindent which can be referenced
+@noindent which can be referenced using
 @code{@{@{@{name(arg1, arg2)@}@}@}}@footnote{Since commas separate arguments,
 commas within arguments have to be escaped with a backslash character.
 Conversely, backslash characters before a comma, and only them, need to be

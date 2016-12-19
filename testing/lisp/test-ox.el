@@ -1255,6 +1255,27 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
    (equal "#+MACRO: macro1 value\nvalue\n"
 	  (org-test-with-temp-text "#+MACRO: macro1 value\n{{{macro1}}}"
 	    (org-export-as (org-test-default-backend)))))
+  ;; Include global macros.  However, local macros override them.
+  (should
+   (equal "global\n"
+	  (org-test-with-temp-text "{{{M}}}"
+	    (let ((org-export-global-macros '(("M" . "global"))))
+	      (org-export-as (org-test-default-backend))))))
+  (should
+   (equal "global arg\n"
+	  (org-test-with-temp-text "{{{M(arg)}}}"
+	    (let ((org-export-global-macros '(("M" . "global $1"))))
+	      (org-export-as (org-test-default-backend))))))
+  (should
+   (equal "2\n"
+	  (org-test-with-temp-text "{{{M}}}"
+	    (let ((org-export-global-macros '(("M" . "(eval (+ 1 1))"))))
+	      (org-export-as (org-test-default-backend))))))
+  (should
+   (equal "#+MACRO: M local\nlocal\n"
+	  (org-test-with-temp-text "#+macro: M local\n{{{M}}}"
+	    (let ((org-export-global-macros '(("M" . "global"))))
+	      (org-export-as (org-test-default-backend))))))
   ;; Allow macro in parsed keywords and associated properties.
   ;; Standard macro expansion.
   (should

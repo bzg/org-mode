@@ -883,6 +883,29 @@ HTML code while every other back-end will ignore it."
 	       (cl-every #'stringp (mapcar #'car x))
 	       (cl-every #'stringp (mapcar #'cdr x)))))
 
+(defcustom org-export-global-macros nil
+  "Alist between macro names and expansion templates.
+
+This variable defines macro expansion templates available
+globally.  Associations follow the pattern
+
+  (NAME . TEMPLATE)
+
+where NAME is a string beginning with a letter and consisting of
+alphanumeric characters only.
+
+TEMPLATE is the string to which the macro is going to be
+expanded.  Inside, \"$1\", \"$2\"... are place-holders for
+macro's arguments.  Moreover, if the template starts with
+\"(eval\", it will be parsed as an Elisp expression and evaluated
+accordingly."
+  :group 'org-export-general
+  :version "25.2"
+  :package-version '(Org . "9.1")
+  :type '(repeat
+	  (cons (string :tag "Name")
+		(string :tag "Template"))))
+
 (defcustom org-export-coding-system nil
   "Coding system for the exported file."
   :group 'org-export-general
@@ -3046,7 +3069,9 @@ Return code as a string."
 	 (org-export-expand-include-keyword)
 	 (org-export--delete-comments)
 	 (org-macro-initialize-templates)
-	 (org-macro-replace-all org-macro-templates nil parsed-keywords)
+	 (org-macro-replace-all
+	  (append org-macro-templates org-export-global-macros)
+	  nil parsed-keywords)
 	 ;; Refresh buffer properties and radio targets after
 	 ;; potentially invasive previous changes.  Likewise, do it
 	 ;; again after executing Babel code.
