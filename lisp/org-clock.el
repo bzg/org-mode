@@ -2962,9 +2962,9 @@ The details of what will be saved are regulated by the variable
 (defun org-clock-load ()
   "Load clock-related data from disk, maybe resuming a stored clock."
   (when (and org-clock-persist (not org-clock-loaded))
-    (if (file-readable-p org-clock-persist-file)
-	(message "Restoring clock data")
-      (message "Not restoring clock data; %S not found" org-clock-persist-file)
+    (if (not (file-readable-p org-clock-persist-file))
+	(message "Not restoring clock data; %S not found" org-clock-persist-file)
+      (message "Restoring clock data")
       ;; Load history.
       (load-file org-clock-persist-file)
       (setq org-clock-loaded t)
