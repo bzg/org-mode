@@ -961,20 +961,34 @@ Text"
   ;; Export from a file: name is built from original file name.
   (should
    (org-test-with-temp-text-in-file "Test"
-     (equal (concat (file-name-as-directory ".")
-		    (file-name-nondirectory
-		     (file-name-sans-extension (buffer-file-name))))
-	    (file-name-sans-extension (org-export-output-file-name ".ext")))))
+     (equal (file-name-base (buffer-file-name))
+	    (file-name-base (org-export-output-file-name ".ext")))))
+  ;; When #+EXPORT_FILE_NAME is defined, use it.
+  (should
+   (equal "test.ext"
+	  (org-test-with-temp-text-in-file "#+EXPORT_FILE_NAME: test"
+	    (org-export-output-file-name ".ext" t))))
   ;; When exporting to subtree, check EXPORT_FILE_NAME property first.
   (should
-   (org-test-with-temp-text-in-file
-       "* Test\n  :PROPERTIES:\n  :EXPORT_FILE_NAME: test\n  :END:"
-     (equal (org-export-output-file-name ".ext" t) "./test.ext")))
+   (equal "test.ext"
+	  (org-test-with-temp-text-in-file
+	      "* Test\n  :PROPERTIES:\n  :EXPORT_FILE_NAME: test\n  :END:"
+	    (org-export-output-file-name ".ext" t))))
+  (should
+   (equal "property.ext"
+	  (org-test-with-temp-text
+	      "#+EXPORT_FILE_NAME: keyword
+* Test<point>
+:PROPERTIES:
+:EXPORT_FILE_NAME: property
+:END:"
+	    (org-export-output-file-name ".ext" t))))
   ;; From a buffer not associated to a file, too.
   (should
-   (org-test-with-temp-text
-       "* Test\n  :PROPERTIES:\n  :EXPORT_FILE_NAME: test\n  :END:"
-     (equal (org-export-output-file-name ".ext" t) "./test.ext")))
+   (equal "test.ext"
+	  (org-test-with-temp-text
+	      "* Test\n  :PROPERTIES:\n  :EXPORT_FILE_NAME: test\n  :END:"
+	    (org-export-output-file-name ".ext" t))))
   ;; When provided name is absolute, preserve it.
   (should
    (org-test-with-temp-text
@@ -983,15 +997,23 @@ Text"
      (file-name-absolute-p (org-export-output-file-name ".ext" t))))
   ;; When PUB-DIR argument is provided, use it.
   (should
-   (org-test-with-temp-text-in-file "Test"
-     (equal (file-name-directory
-	     (org-export-output-file-name ".ext" nil "dir/"))
-	    "dir/")))
+   (equal "dir/"
+	  (org-test-with-temp-text-in-file "Test"
+	    (file-name-directory
+	     (org-export-output-file-name ".ext" nil "dir/")))))
+  ;; PUB-DIR has precedence over EXPORT_FILE_NAME keyword or property.
+  (should
+   (equal "pub-dir/"
+	  (org-test-with-temp-text-in-file
+	      "#+EXPORT_FILE_NAME: /dir/keyword\nTest"
+	    (file-name-directory
+	     (org-export-output-file-name ".ext" nil "pub-dir/")))))
   ;; When returned name would overwrite original file, add EXTENSION
   ;; another time.
   (should
-   (org-test-at-id "75282ba2-f77a-4309-a970-e87c149fe125"
-     (equal (org-export-output-file-name ".org") "./normal.org.org"))))
+   (equal "normal.org.org"
+	  (org-test-at-id "75282ba2-f77a-4309-a970-e87c149fe125"
+	    (org-export-output-file-name ".org")))))
 
 (ert-deftest test-org-export/expand-include ()
   "Test file inclusion in an Org buffer."

@@ -10465,6 +10465,12 @@ be executed during export even though the subtree is not exported.
 The title to be shown.  You can use several such keywords for long titles.
 @end table
 
+@item EXPORT_FILE_NAME
+@cindex #+EXPORT_FILE_NAME
+The name of the output file to be generated.  By default, it is taken from
+the file associated to the buffer, when possible, or asked to you otherwise.
+In all cases, the extension is ignored, and a back-end specific one is added.
+
 The @code{#+OPTIONS} keyword is a compact@footnote{If you want to configure
 many options this way, you can use several @code{#+OPTIONS} lines.} form that
 recognizes the following arguments:
@@ -10636,9 +10642,9 @@ Toggle inclusion of tables (@code{org-export-with-tables}).
 When exporting only a subtree, each of the previous keywords@footnote{With
 the exception of @samp{SETUPFILE}.} can be overridden locally by special node
 properties.  These begin with @samp{EXPORT_}, followed by the name of the
-keyword they supplant.  For example, @samp{DATE} and @samp{OPTIONS} keywords
-become, respectively, @samp{EXPORT_DATE} and @samp{EXPORT_OPTIONS}
-properties.
+keyword they supplant, unless the keyword already beging with @samp{EXPORT_}.
+For example, @samp{DATE} and @samp{EXPORT_FILE_NAME} keywords become,
+respectively, @samp{EXPORT_DATE} and @samp{EXPORT_FILE_NAME} properties.
 
 @cindex #+BIND
 @vindex org-export-allow-bind-keywords
@@ -10646,13 +10652,6 @@ If @code{org-export-allow-bind-keywords} is non-@code{nil}, Emacs variables
 can become buffer-local during export by using the BIND keyword.  Its syntax
 is @samp{#+BIND: variable value}.  This is particularly useful for in-buffer
 settings that cannot be changed using specific keywords.
-
-@cindex property, EXPORT_FILE_NAME
-The name of the output file to be generated is taken from the file associated
-to the buffer, when possible, or asked to you otherwise.  For subtree export,
-you can also set @code{EXPORT_FILE_NAME} property.  In all cases, only the
-base name of the file is retained, and a back-end specific extension is
-added.
 
 @node Table of contents
 @section Table of contents

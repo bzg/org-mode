@@ -6184,29 +6184,37 @@ directory.
 Return file name as a string."
   (let* ((visited-file (buffer-file-name (buffer-base-buffer)))
 	 (base-name
-	  ;; File name may come from EXPORT_FILE_NAME subtree
-	  ;; property.
-	  (file-name-sans-extension
-	   (or (and subtreep (org-entry-get nil "EXPORT_FILE_NAME" 'selective))
-	       ;; File name may be extracted from buffer's associated
-	       ;; file, if any.
-	       (and visited-file (file-name-nondirectory visited-file))
-	       ;; Can't determine file name on our own: Ask user.
-	       (read-file-name
-		"Output file: " pub-dir nil nil nil
-		(lambda (name)
-		  (string= (file-name-extension name t) extension))))))
+	  (concat
+	   (file-name-sans-extension
+	    (or
+	     ;; Check EXPORT_FILE_NAME subtree property.
+	     (and subtreep (org-entry-get nil "EXPORT_FILE_NAME" 'selective))
+	     ;; Check #+EXPORT_FILE_NAME keyword.
+	     (org-with-point-at (point-min)
+	       (catch :found
+		 (let ((case-fold-search t))
+		   (while (re-search-forward
+			   "^[ \t]*#\\+EXPORT_FILE_NAME:[ \t]+\\S-" nil t)
+		     (let ((element (org-element-at-point)))
+		       (when (eq 'keyword (org-element-type element))
+			 (throw :found
+				(org-element-property :value element))))))))
+	     ;; Extract from buffer's associated file, if any.
+	     (and visited-file (file-name-nondirectory visited-file))
+	     ;; Can't determine file name on our own: ask user.
+	     (read-file-name
+	      "Output file: " pub-dir nil nil nil
+	      (lambda (n) (string= extension (file-name-extension n t))))))
+	   extension))
 	 (output-file
 	  ;; Build file name.  Enforce EXTENSION over whatever user
 	  ;; may have come up with.  PUB-DIR, if defined, always has
 	  ;; precedence over any provided path.
 	  (cond
-	   (pub-dir
-	    (concat (file-name-as-directory pub-dir)
-		    (file-name-nondirectory base-name)
-		    extension))
-	   ((file-name-absolute-p base-name) (concat base-name extension))
-	   (t (concat (file-name-as-directory ".") base-name extension)))))
+	   (pub-dir (concat (file-name-as-directory pub-dir)
+			    (file-name-nondirectory base-name)))
+	   ((file-name-absolute-p base-name) base-name)
+	   (t base-name))))
     ;; If writing to OUTPUT-FILE would overwrite original file, append
     ;; EXTENSION another time to final name.
     (if (and visited-file (file-equal-p visited-file output-file))
