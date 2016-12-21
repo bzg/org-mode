@@ -10463,13 +10463,14 @@ be executed during export even though the subtree is not exported.
 @cindex #+TITLE
 @cindex document title
 The title to be shown.  You can use several such keywords for long titles.
-@end table
 
 @item EXPORT_FILE_NAME
 @cindex #+EXPORT_FILE_NAME
 The name of the output file to be generated.  By default, it is taken from
 the file associated to the buffer, when possible, or asked to you otherwise.
 In all cases, the extension is ignored, and a back-end specific one is added.
+
+@end table
 
 The @code{#+OPTIONS} keyword is a compact@footnote{If you want to configure
 many options this way, you can use several @code{#+OPTIONS} lines.} form that
