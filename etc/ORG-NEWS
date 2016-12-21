@@ -129,9 +129,9 @@ details.
 **** Add global macros through ~org-export-global-macros~ 
 With this variable, one can define macros available for all documents.
 **** New keyword ~#+EXPORT_FILE_NAME~
-Simiralry to ~:EXPORT_FILE_NAME:~ property, this keyword allow to
-specify the name of the output file upon exporting the document.  This
-has also an effect on publishing.
+Simiralry to ~:EXPORT_FILE_NAME:~ property, this keyword allows the
+user to specify the name of the output file upon exporting the
+document.  This also has an effect on publishing.
 **** Horizontal rules are no longer ignored in LaTeX table math mode
 
 *** ~org-list-to-generic~ includes a new property: ~:ifmt~
