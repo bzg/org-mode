@@ -22773,7 +22773,7 @@ be set to a buffer or a buffer name.  `shell-command' then uses
 it for output."
   (let* ((base-name (file-name-base source))
 	 (full-name (file-truename source))
-	 (out-dir (file-name-directory source))
+	 (out-dir (or (file-name-directory source) "./"))
 	 (output (expand-file-name (concat base-name "." ext) out-dir))
 	 (time (current-time))
 	 (err-msg (if (stringp err-msg) (concat ".  " err-msg) "")))
