@@ -60,7 +60,7 @@
   (defalias 'gui-get-selection 'x-get-selection)
 
   ;; From "files.el"
-  (defsubst directory-name-p (name)
+  (defun directory-name-p (name)
     "Return non-nil if NAME ends with a directory separator character."
     (let ((len (length name))
 	  (lastc ?.))
