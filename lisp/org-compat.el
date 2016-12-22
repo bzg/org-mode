@@ -60,6 +60,17 @@
   (defalias 'gui-get-selection 'x-get-selection)
 
   ;; From "files.el"
+  (defsubst directory-name-p (name)
+    "Return non-nil if NAME ends with a directory separator character."
+    (let ((len (length name))
+	  (lastc ?.))
+      (if (> len 0)
+	  (setq lastc (aref name (1- len))))
+      (or (= lastc ?/)
+	  (and (memq system-type '(windows-nt ms-dos))
+	       (= lastc ?\\)))))
+
+  ;; From "files.el"
   (defun directory-files-recursively (dir regexp &optional include-directories)
     "Return list of all files under DIR that have file names matching REGEXP.
 This function works recursively.  Files are returned in \"depth first\"
@@ -89,17 +100,6 @@ output directories whose names match REGEXP."
 	    (when (string-match regexp file)
 	      (push (expand-file-name file dir) files)))))
       (nconc result (nreverse files)))))
-
-  ;; From "files.el"
-  (defsubst directory-name-p (name)
-    "Return non-nil if NAME ends with a directory separator character."
-  (let ((len (length name))
-        (lastc ?.))
-    (if (> len 0)
-        (setq lastc (aref name (1- len))))
-    (or (= lastc ?/)
-        (and (memq system-type '(windows-nt ms-dos))
-             (= lastc ?\\)))))
 
 
 ;;; Obsolete aliases (remove them once the next major release is released).
