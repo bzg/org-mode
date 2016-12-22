@@ -57,9 +57,9 @@
   (defalias 'outline-show-subtree 'show-subtree)
   (defalias 'xref-find-definitions 'find-tag)
   (defalias 'format-message 'format)
-  (defalias 'gui-get-selection 'x-get-selection)
+  (defalias 'gui-get-selection 'x-get-selection))
 
-  ;; From "files.el"
+(unless (fboundp 'directory-name-p)
   (defun directory-name-p (name)
     "Return non-nil if NAME ends with a directory separator character."
     (let ((len (length name))
@@ -68,9 +68,9 @@
 	  (setq lastc (aref name (1- len))))
       (or (= lastc ?/)
 	  (and (memq system-type '(windows-nt ms-dos))
-	       (= lastc ?\\)))))
+	       (= lastc ?\\))))))
 
-  ;; From "files.el"
+(unless (fboundp 'directory-files-recursively)
   (defun directory-files-recursively (dir regexp &optional include-directories)
     "Return list of all files under DIR that have file names matching REGEXP.
 This function works recursively.  Files are returned in \"depth first\"
@@ -124,7 +124,7 @@ output directories whose names match REGEXP."
 (defmacro org-re (s)
   "Replace posix classes in regular expression S."
   (declare (debug (form))
-	   (obsolete "you can safely remove it." "Org 9.0"))
+           (obsolete "you can safely remove it." "Org 9.0"))
   s)
 
 ;;;; Functions from cl-lib that Org used to have its own implementation of.
@@ -142,8 +142,8 @@ output directories whose names match REGEXP."
 Counting starts at 1."
   (cl-subseq list (1- start) end))
 (make-obsolete 'org-sublist
-	       "use cl-subseq (note the 0-based counting)."
-	       "Org 9.0")
+               "use cl-subseq (note the 0-based counting)."
+               "Org 9.0")
 
 
 ;;;; Functions available since Emacs 24.3
@@ -168,7 +168,7 @@ Counting starts at 1."
 (define-obsolete-variable-alias 'org-latex-create-formula-image-program
   'org-preview-latex-default-process "Org 9.0")
 (define-obsolete-variable-alias 'org-latex-preview-ltxpng-directory
- 'org-preview-latex-image-directory "Org 9.0")
+  'org-preview-latex-image-directory "Org 9.0")
 (define-obsolete-function-alias 'org-table-p 'org-at-table-p "Org 9.0")
 (define-obsolete-function-alias 'org-on-heading-p 'org-at-heading-p "Org 9.0")
 (define-obsolete-function-alias 'org-at-regexp-p 'org-in-regexp "Org 8.3")
@@ -240,8 +240,8 @@ Counting starts at 1."
   (save-match-data
     (eq 'fixed-width (org-element-type (org-element-at-point)))))
 (make-obsolete 'org-in-fixed-width-region-p
-	       "use `org-element' library"
-	       "Org 9.0")
+               "use `org-element' library"
+               "Org 9.0")
 
 (defcustom org-read-date-minibuffer-setup-hook nil
   "Hook to be used to set up keys for the date/time interface.
@@ -300,23 +300,23 @@ See `org-link-parameters' for documentation on the other parameters."
   (when (and org-table-tab-recognizes-table.el (org-at-table.el-p))
     (beginning-of-line)
     (unless (or (looking-at org-table-dataline-regexp)
-		(not (looking-at org-table1-hline-regexp)))
+                (not (looking-at org-table1-hline-regexp)))
       (forward-line)
       (when (looking-at org-table-any-border-regexp)
-	(forward-line -2)))
+        (forward-line -2)))
     (if (re-search-forward "|" (org-table-end t) t)
-	(progn
-	  (require 'table)
-	  (if (table--at-cell-p (point)) t
-	    (message "recognizing table.el table...")
-	    (table-recognize-table)
-	    (message "recognizing table.el table...done")))
+        (progn
+          (require 'table)
+          (if (table--at-cell-p (point)) t
+            (message "recognizing table.el table...")
+            (table-recognize-table)
+            (message "recognizing table.el table...done")))
       (error "This should not happen"))))
 
 ;; Not used by Org core since commit 6d1e3082, Feb 2010.
 (make-obsolete 'org-table-recognize-table.el
-	       "please notify the org mailing list if you use this function."
-	       "Org 9.0")
+               "please notify the org mailing list if you use this function."
+               "Org 9.0")
 
 (define-obsolete-function-alias
   'org-minutes-to-hh:mm-string 'org-minutes-to-clocksum-string "Org 8.0")
@@ -356,40 +356,40 @@ You could use brackets to delimit on what part the link will be.
 
 (defun org-version-check (version feature level)
   (let* ((v1 (mapcar 'string-to-number (split-string version "[.]")))
-	 (v2 (mapcar 'string-to-number (split-string emacs-version "[.]")))
-	 (rmaj (or (nth 0 v1) 99))
-	 (rmin (or (nth 1 v1) 99))
-	 (rbld (or (nth 2 v1) 99))
-	 (maj (or (nth 0 v2) 0))
-	 (min (or (nth 1 v2) 0))
-	 (bld (or (nth 2 v2) 0)))
+         (v2 (mapcar 'string-to-number (split-string emacs-version "[.]")))
+         (rmaj (or (nth 0 v1) 99))
+         (rmin (or (nth 1 v1) 99))
+         (rbld (or (nth 2 v1) 99))
+         (maj (or (nth 0 v2) 0))
+         (min (or (nth 1 v2) 0))
+         (bld (or (nth 2 v2) 0)))
     (if (or (< maj rmaj)
-	    (and (= maj rmaj)
-		 (< min rmin))
-	    (and (= maj rmaj)
-		 (= min rmin)
-		 (< bld rbld)))
-	(if (eq level :predicate)
-	    ;; just return if we have the version
-	    nil
-	  (let ((msg (format "Emacs %s or greater is recommended for %s"
-			     version feature)))
-	    (display-warning 'org msg level)
-	    t))
+            (and (= maj rmaj)
+                 (< min rmin))
+            (and (= maj rmaj)
+                 (= min rmin)
+                 (< bld rbld)))
+        (if (eq level :predicate)
+            ;; just return if we have the version
+            nil
+          (let ((msg (format "Emacs %s or greater is recommended for %s"
+                             version feature)))
+            (display-warning 'org msg level)
+            t))
       t)))
 
 (defun org-get-x-clipboard (value)
   "Get the value of the X or Windows clipboard."
   (cond ((and (eq window-system 'x)
-	      (fboundp 'gui-get-selection)) ;Silence byte-compiler.
-	 (org-no-properties
-	  (ignore-errors
-	    (or (gui-get-selection value 'UTF8_STRING)
-		(gui-get-selection value 'COMPOUND_TEXT)
-		(gui-get-selection value 'STRING)
-		(gui-get-selection value 'TEXT)))))
-	((and (eq window-system 'w32) (fboundp 'w32-get-clipboard-data))
-	 (w32-get-clipboard-data))))
+              (fboundp 'gui-get-selection)) ;Silence byte-compiler.
+         (org-no-properties
+          (ignore-errors
+            (or (gui-get-selection value 'UTF8_STRING)
+                (gui-get-selection value 'COMPOUND_TEXT)
+                (gui-get-selection value 'STRING)
+                (gui-get-selection value 'TEXT)))))
+        ((and (eq window-system 'w32) (fboundp 'w32-get-clipboard-data))
+         (w32-get-clipboard-data))))
 
 (defun org-add-props (string plist &rest props)
   "Add text properties to entire string, from beginning to end.
@@ -401,20 +401,20 @@ that will be added to PLIST.  Returns the string that was modified."
 (put 'org-add-props 'lisp-indent-function 2)
 
 (defun org-fit-window-to-buffer (&optional window max-height min-height
-					   shrink-only)
+                                           shrink-only)
   "Fit WINDOW to the buffer, but only if it is not a side-by-side window.
 WINDOW defaults to the selected window.  MAX-HEIGHT and MIN-HEIGHT are
 passed through to `fit-window-to-buffer'.  If SHRINK-ONLY is set, call
 `shrink-window-if-larger-than-buffer' instead, the height limit is
 ignored in this case."
   (cond ((if (fboundp 'window-full-width-p)
-	     (not (window-full-width-p window))
-	   ;; do nothing if another window would suffer
-	   (> (frame-width) (window-width window))))
-	((and (fboundp 'fit-window-to-buffer) (not shrink-only))
-	 (fit-window-to-buffer window max-height min-height))
-	((fboundp 'shrink-window-if-larger-than-buffer)
-	 (shrink-window-if-larger-than-buffer window)))
+             (not (window-full-width-p window))
+           ;; do nothing if another window would suffer
+           (> (frame-width) (window-width window))))
+        ((and (fboundp 'fit-window-to-buffer) (not shrink-only))
+         (fit-window-to-buffer window max-height min-height))
+        ((fboundp 'shrink-window-if-larger-than-buffer)
+         (shrink-window-if-larger-than-buffer window)))
   (or window (selected-window)))
 
 ;; `set-transient-map' is only in Emacs >= 24.4
@@ -436,7 +436,7 @@ Unlike to `use-region-p', this function also checks
 
 (defun org-cursor-to-region-beginning ()
   (when (and (org-region-active-p)
-	     (> (point) (region-beginning)))
+             (> (point) (region-beginning)))
     (exchange-point-and-mark)))
 
 ;;; Invisibility compatibility
@@ -446,8 +446,8 @@ Unlike to `use-region-p', this function also checks
   (if (fboundp 'remove-from-invisibility-spec)
       (remove-from-invisibility-spec arg)
     (if (consp buffer-invisibility-spec)
-	(setq buffer-invisibility-spec
-	      (delete arg buffer-invisibility-spec)))))
+        (setq buffer-invisibility-spec
+              (delete arg buffer-invisibility-spec)))))
 
 (defun org-in-invisibility-spec-p (arg)
   "Is ARG a member of `buffer-invisibility-spec'?"
@@ -458,9 +458,9 @@ Unlike to `use-region-p', this function also checks
   "Move to column COLUMN.
 Pass COLUMN and FORCE to `move-to-column'."
   (let ((buffer-invisibility-spec
-	 (if (listp buffer-invisibility-spec)
-	     (remove '(org-filtered) buffer-invisibility-spec)
-	   buffer-invisibility-spec)))
+         (if (listp buffer-invisibility-spec)
+             (remove '(org-filtered) buffer-invisibility-spec)
+           buffer-invisibility-spec)))
     (move-to-column column force)))
 
 (defmacro org-find-library-dir (library)
@@ -472,12 +472,12 @@ Pass COLUMN and FORCE to `move-to-column'."
     (while (string-match "\n" s start)
       (setq start (match-end 0) n (1+ n)))
     (if (and (> (length s) 0) (= (aref s (1- (length s))) ?\n))
-	(setq n (1- n)))
+        (setq n (1- n)))
     n))
 
 (defun org-kill-new (string &rest args)
   (remove-text-properties 0 (length string) '(line-prefix t wrap-prefix t)
-			  string)
+                          string)
   (apply 'kill-new string args))
 
 ;; `font-lock-ensure' is only available from 24.4.50 on
@@ -493,7 +493,7 @@ Let-bind some variables to nil around BODY to achieve the desired
 effect, which variables to use depends on the Emacs version."
   (if (org-version-check "24.2.50" "" :predicate)
       `(let (pop-up-frames display-buffer-alist)
-	 ,@body)
+         ,@body)
     `(let (pop-up-frames special-display-buffer-names special-display-regexps special-display-function)
        ,@body)))
 
@@ -501,19 +501,19 @@ effect, which variables to use depends on the Emacs version."
 (defmacro org-check-version ()
   "Try very hard to provide sensible version strings."
   (let* ((org-dir        (org-find-library-dir "org"))
-	 (org-version.el (concat org-dir "org-version.el"))
-	 (org-fixup.el   (concat org-dir "../mk/org-fixup.el")))
+         (org-version.el (concat org-dir "org-version.el"))
+         (org-fixup.el   (concat org-dir "../mk/org-fixup.el")))
     (if (require 'org-version org-version.el 'noerror)
-	'(progn
-	   (autoload 'org-release     "org-version.el")
-	   (autoload 'org-git-version "org-version.el"))
+        '(progn
+           (autoload 'org-release     "org-version.el")
+           (autoload 'org-git-version "org-version.el"))
       (if (require 'org-fixup org-fixup.el 'noerror)
-	  '(org-fixup)
-	;; provide fallback definitions and complain
-	(warn "Could not define org version correctly.  Check installation!")
-	'(progn
-	   (defun org-release () "N/A")
-	   (defun org-git-version () "N/A !!check installation!!"))))))
+          '(org-fixup)
+        ;; provide fallback definitions and complain
+        (warn "Could not define org version correctly.  Check installation!")
+        '(progn
+           (defun org-release () "N/A")
+           (defun org-git-version () "N/A !!check installation!!"))))))
 
 (defmacro org-with-silent-modifications (&rest body)
   (if (fboundp 'with-silent-modifications)
@@ -529,7 +529,7 @@ an error is signaled without being caught by a `condition-case'.
 Implements `define-error' for older emacsen."
   (if (fboundp 'define-error) (define-error name message)
     (put name 'error-conditions
-	 (copy-sequence (cons name (get 'error 'error-conditions))))))
+         (copy-sequence (cons name (get 'error 'error-conditions))))))
 
 (unless (fboundp 'string-suffix-p)
   ;; From Emacs subr.el.
@@ -539,8 +539,8 @@ If IGNORE-CASE is non-nil, the comparison is done without paying
 attention to case differences."
     (let ((start-pos (- (length string) (length suffix))))
       (and (>= start-pos 0)
-	   (eq t (compare-strings suffix nil nil
-				  string start-pos nil ignore-case))))))
+           (eq t (compare-strings suffix nil nil
+                                  string start-pos nil ignore-case))))))
 
 (provide 'org-compat)
 
