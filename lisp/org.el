@@ -20098,7 +20098,7 @@ Use `org-speed-commands-user' for further customization."
     (cdr (assoc keys org-babel-key-bindings))))
 
 (defcustom org-speed-command-hook
-  '(org-speed-command-default-hook org-babel-speed-command-hook)
+  '(org-speed-command-activate org-babel-speed-command-hook)
   "Hook for activating speed commands at strategic locations.
 Hook functions are called in sequence until a valid handler is
 found.
