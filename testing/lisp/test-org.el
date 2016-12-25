@@ -5144,6 +5144,24 @@ Paragraph<point>"
   (should-not
    (org-test-with-temp-text "Paragraph" (org-hide-block-toggle-maybe))))
 
+(ert-deftest test-org/set-tags ()
+  "Test `org-set-tags' specifications."
+  ;; Tags set via fast-tag-selection should be visible afterwards
+  (should
+   (let ((org-tag-alist '(("NEXT" . ?n)))
+	 (org-fast-tag-selection-single-key t))
+     (cl-letf (((symbol-function 'read-char-exclusive) (lambda () ?n))
+	       ((symbol-function 'window-width) (lambda (&rest args) 100)))
+       (org-test-with-temp-text "<point>* Headline\nAnd its content\n* And another headline\n\nWith some content"
+	 ;; Show only headlines
+	 (org-content)
+	 ;; Set NEXT tag on current entry
+	 (org-set-tags nil nil)
+	 ;; Move point to that NEXT tag
+	 (search-forward "NEXT") (backward-word)
+	 ;; And it should be visible (i.e. no overlays)
+	 (not (overlays-at (point))))))))
+
 (ert-deftest test-org/show-set-visibility ()
   "Test `org-show-set-visibility' specifications."
   ;; Do not throw an error before first heading.

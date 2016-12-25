@@ -15189,7 +15189,10 @@ When JUST-ALIGN is non-nil, only align tags."
 	      ;; white spaces.
 	      (end-of-line)
 	      (if (not (equal tags ""))
-		  (insert " " tags)
+		  ;; When text is being inserted on an invisible
+		  ;; region boundary, it can be inadvertently sucked
+		  ;; into invisibility.
+		  (outline-flag-region (point) (progn (insert " " tags) (point)) nil)
 		(skip-chars-backward " \t")
 		(delete-region (point) (line-end-position)))))
 	  ;; Align tags, if any.  Fix tags column if `org-indent-mode'
