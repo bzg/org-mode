@@ -11141,13 +11141,10 @@ of matched result, which is either `dedicated' or `fuzzy'."
      ;; statistics cookies and tags.
      ((and (derived-mode-p 'org-mode)
 	   (let ((title-re
-		  (format "%s[ \t]*\\(?:%s[ \t]+\\)?.*%s"
+		  (format "%s.*\\(?:%s[ \t]\\)?.*%s"
 			  org-outline-regexp-bol
 			  org-comment-string
-			  (mapconcat
-			   (lambda (w) (format "\\<%s\\>" (regexp-quote w)))
-			   words
-			   ".+")))
+			  (mapconcat #'regexp-quote words ".+")))
 		 (cookie-re "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]")
 		 (comment-re (format "\\`%s[ \t]+" org-comment-string)))
 	     (goto-char (point-min))

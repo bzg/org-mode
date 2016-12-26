@@ -2120,9 +2120,17 @@ Foo Bar
    (org-test-with-temp-text "[[*Test]]\n* COMMENT Test"
      (org-open-at-point)
      (looking-at "\\* COMMENT Test")))
+  (should
+   (org-test-with-temp-text "[[*Test]]\n* TODO COMMENT Test"
+     (org-open-at-point)
+     (looking-at "\\* TODO COMMENT Test")))
   ;; Correctly un-hexify fuzzy links.
   (should
    (org-test-with-temp-text "* With space\n[[*With%20space][With space<point>]]"
+     (org-open-at-point)
+     (bobp)))
+  (should
+   (org-test-with-temp-text "* [1]\n[[*%5B1%5D<point>]]"
      (org-open-at-point)
      (bobp))))
 
