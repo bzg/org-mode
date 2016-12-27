@@ -371,7 +371,7 @@ still decide about that independently."
 		filename pub-dir pub-func base-dir))))
     (if rtn (message "Publishing file %s using `%s'" filename pub-func)
       (when org-publish-list-skipped-files
-	(message   "Skipping unmodified file %s" filename)))
+	(message "Skipping unmodified file %s" filename)))
     rtn))
 
 (defun org-publish-update-timestamp
@@ -621,7 +621,7 @@ If `:auto-sitemap' is set, publish the sitemap too.  If
 	       (or (org-publish-property :sitemap-filename project)
 		   "sitemap.org")))
 	  (org-publish-sitemap project sitemap-filename)))
-      ;; Publish all files from PROJECT excepted "theindex.org".  Its
+      ;; Publish all files from PROJECT except "theindex.org".  Its
       ;; publishing will be deferred until "theindex.inc" is
       ;; populated.
       (let ((theindex (expand-file-name
@@ -1047,7 +1047,7 @@ publishing directory."
 	      (dotimes (n len)
 		(insert
 		 (concat
-		  (make-string (* (+ rank n) 2) ? ) "  - "
+		  (make-string (* (+ rank n) 2) ?\s) "  - "
 		  (if (not (= (1- len) n)) (nth (+ rank n) entry)
 		    ;; Last term: Link it to TARGET, if possible.
 		    (let ((target (nth 2 idx)))
