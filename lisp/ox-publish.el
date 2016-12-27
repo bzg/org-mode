@@ -362,7 +362,7 @@ still decide about that independently."
 		filename pub-dir pub-func base-dir))))
     (if rtn (message "Publishing file %s using `%s'" filename pub-func)
       (when org-publish-list-skipped-files
-	(message   "Skipping unmodified file %s" filename)))
+	(message "Skipping unmodified file %s" filename)))
     rtn))
 
 (defun org-publish-update-timestamp
@@ -697,7 +697,7 @@ If `:auto-sitemap' is set, publish the sitemap too.  If
 	       (or (plist-get project-plist :sitemap-file-entry-format)
 		   org-publish-sitemap-file-entry-format)))
 	  (funcall sitemap-function project sitemap-filename)))
-      ;; Publish all files from PROJECT excepted "theindex.org".  Its
+      ;; Publish all files from PROJECT except "theindex.org".  Its
       ;; publishing will be deferred until "theindex.inc" is
       ;; populated.
       (let ((theindex
@@ -725,13 +725,13 @@ Default for SITEMAP-FILENAME is `sitemap.org'."
 	 (dir (file-name-as-directory
 	       (plist-get project-plist :base-directory)))
 	 (localdir (file-name-directory dir))
-	 (indent-str (make-string 2 ?\ ))
+	 (indent-str (make-string 2 ?\s))
 	 (exclude-regexp (plist-get project-plist :exclude))
 	 (files (nreverse
 		 (org-publish-get-base-files project exclude-regexp)))
 	 (sitemap-filename (concat dir (or sitemap-filename "sitemap.org")))
 	 (sitemap-title (or (plist-get project-plist :sitemap-title)
-			  (concat "Sitemap for project " (car project))))
+			    (concat "Sitemap for project " (car project))))
 	 (sitemap-style (or (plist-get project-plist :sitemap-style)
 			    'tree))
 	 (sitemap-sans-extension
@@ -1040,7 +1040,7 @@ publishing directory."
 	      (dotimes (n len)
 		(insert
 		 (concat
-		  (make-string (* (+ rank n) 2) ? ) "  - "
+		  (make-string (* (+ rank n) 2) ?\s) "  - "
 		  (if (not (= (1- len) n)) (nth (+ rank n) entry)
 		    ;; Last term: Link it to TARGET, if possible.
 		    (let ((target (nth 2 idx)))
