@@ -5291,7 +5291,19 @@ Return a list of src-block elements with a caption."
 ;; `org-export-smart-quotes-alist'.
 
 (defconst org-export-smart-quotes-alist
-  '(("da"
+  '(("ar"
+     (primary-opening
+      :utf-8 "«" :html "&laquo;" :latex "\\guillemotleft{}"
+      :texinfo "@guillemetleft{}")
+     (primary-closing
+      :utf-8 "»" :html "&raquo;" :latex "\\guillemotright{}"
+      :texinfo "@guillemetright{}")
+     (secondary-opening :utf-8 "‹" :html "&lsaquo;" :latex "\\guilsinglleft{}"
+			:texinfo "@guilsinglleft{}")
+     (secondary-closing :utf-8 "›" :html "&rsaquo;" :latex "\\guilsinglright{}"
+			:texinfo "@guilsinglright{}")
+     (apostrophe :utf-8 "’" :html "&rsquo;"))
+    ("da"
      ;; one may use: »...«, "...", ›...‹, or '...'.
      ;; http://sproget.dk/raad-og-regler/retskrivningsregler/retskrivningsregler/a7-40-60/a7-58-anforselstegn/
      ;; LaTeX quotes require Babel!
@@ -5615,6 +5627,7 @@ them."
   '(("%e %n: %c"
      ("fr" :default "%e %n : %c" :html "%e&nbsp;%n&nbsp;: %c"))
     ("Author"
+     ("ar" :default "تأليف")
      ("ca" :default "Autor")
      ("cs" :default "Autor")
      ("da" :default "Forfatter")
@@ -5640,6 +5653,7 @@ them."
      ("zh-CN" :html "&#20316;&#32773;" :utf-8 "作者")
      ("zh-TW" :html "&#20316;&#32773;" :utf-8 "作者"))
     ("Continued from previous page"
+     ("ar" :default "تتمة الصفحة السابقة")
      ("de" :default "Fortsetzung von vorheriger Seite")
      ("es" :html "Contin&uacute;a de la p&aacute;gina anterior" :ascii "Continua de la pagina anterior" :default "Continúa de la página anterior")
      ("fr" :default "Suite de la page précédente")
@@ -5650,6 +5664,7 @@ them."
      ("ru" :html "(&#1055;&#1088;&#1086;&#1076;&#1086;&#1083;&#1078;&#1077;&#1085;&#1080;&#1077;)"
       :utf-8 "(Продолжение)"))
     ("Continued on next page"
+     ("ar" :default "التتمة في الصفحة التالية")
      ("de" :default "Fortsetzung nächste Seite")
      ("es" :html "Contin&uacute;a en la siguiente p&aacute;gina" :ascii "Continua en la siguiente pagina" :default "Continúa en la siguiente página")
      ("fr" :default "Suite page suivante")
@@ -5660,6 +5675,7 @@ them."
      ("ru" :html "(&#1055;&#1088;&#1086;&#1076;&#1086;&#1083;&#1078;&#1077;&#1085;&#1080;&#1077; &#1089;&#1083;&#1077;&#1076;&#1091;&#1077;&#1090;)"
       :utf-8 "(Продолжение следует)"))
     ("Date"
+     ("ar" :default "بتاريخ")
      ("ca" :default "Data")
      ("cs" :default "Datum")
      ("da" :default "Dato")
@@ -5684,6 +5700,7 @@ them."
      ("zh-CN" :html "&#26085;&#26399;" :utf-8 "日期")
      ("zh-TW" :html "&#26085;&#26399;" :utf-8 "日期"))
     ("Equation"
+     ("ar" :default "معادلة")
      ("da" :default "Ligning")
      ("de" :default "Gleichung")
      ("es" :ascii "Ecuacion" :html "Ecuaci&oacute;n" :default "Ecuación")
@@ -5700,6 +5717,7 @@ them."
      ("sv" :default "Ekvation")
      ("zh-CN" :html "&#26041;&#31243;" :utf-8 "方程"))
     ("Figure"
+     ("ar" :default "شكل")
      ("da" :default "Figur")
      ("de" :default "Abbildung")
      ("es" :default "Figura")
@@ -5714,6 +5732,7 @@ them."
      ("sv" :default "Illustration")
      ("zh-CN" :html "&#22270;" :utf-8 "图"))
     ("Figure %d:"
+     ("ar" :default "شكل %d:")
      ("da" :default "Figur %d")
      ("de" :default "Abbildung %d:")
      ("es" :default "Figura %d:")
@@ -5729,6 +5748,7 @@ them."
      ("sv" :default "Illustration %d")
      ("zh-CN" :html "&#22270;%d&nbsp;" :utf-8 "图%d "))
     ("Footnotes"
+     ("ar" :default "الهوامش")
      ("ca" :html "Peus de p&agrave;gina")
      ("cs" :default "Pozn\xe1mky pod carou")
      ("da" :default "Fodnoter")
@@ -5755,6 +5775,7 @@ them."
      ("zh-CN" :html "&#33050;&#27880;" :utf-8 "脚注")
      ("zh-TW" :html "&#33139;&#35387;" :utf-8 "腳註"))
     ("List of Listings"
+     ("ar" :default "قائمة بالبرامج")
      ("da" :default "Programmer")
      ("de" :default "Programmauflistungsverzeichnis")
      ("es" :ascii "Indice de Listados de programas" :html "&Iacute;ndice de Listados de programas" :default "Índice de Listados de programas")
@@ -5767,6 +5788,7 @@ them."
       :utf-8 "Список распечаток")
      ("zh-CN" :html "&#20195;&#30721;&#30446;&#24405;" :utf-8 "代码目录"))
     ("List of Tables"
+     ("ar" :default "قائمة بالجداول")
      ("da" :default "Tabeller")
      ("de" :default "Tabellenverzeichnis")
      ("es" :ascii "Indice de tablas" :html "&Iacute;ndice de tablas" :default "Índice de tablas")
@@ -5783,6 +5805,7 @@ them."
      ("sv" :default "Tabeller")
      ("zh-CN" :html "&#34920;&#26684;&#30446;&#24405;" :utf-8 "表格目录"))
     ("Listing"
+     ("ar" :default "برنامج")
      ("da" :default "Program")
      ("de" :default "Programmlisting")
      ("es" :default "Listado de programa")
@@ -5796,6 +5819,7 @@ them."
       :utf-8 "Распечатка")
      ("zh-CN" :html "&#20195;&#30721;" :utf-8 "代码"))
     ("Listing %d:"
+     ("ar" :default "برنامج %d:")
      ("da" :default "Program %d")
      ("de" :default "Programmlisting %d")
      ("es" :default "Listado de programa %d")
@@ -5809,6 +5833,7 @@ them."
       :utf-8 "Распечатка %d.:")
      ("zh-CN" :html "&#20195;&#30721;%d&nbsp;" :utf-8 "代码%d "))
     ("References"
+     ("ar" :default "المراجع")
      ("fr" :ascii "References" :default "Références")
      ("de" :default "Quellen")
      ("es" :default "Referencias"))
@@ -5819,6 +5844,7 @@ them."
      ("fr" :default "cf. programme %s"
       :html "cf.&nbsp;programme&nbsp;%s" :latex "cf.~programme~%s"))
     ("See section %s"
+     ("ar" :default "انظر قسم %s")
      ("da" :default "jævnfør afsnit %s")
      ("de" :default "siehe Abschnitt %s")
      ("es" :ascii "Vea seccion %s" :html "Vea secci&oacute;n %s" :default "Vea sección %s")
@@ -5834,6 +5860,7 @@ them."
      ("fr" :default "cf. tableau %s"
       :html "cf.&nbsp;tableau&nbsp;%s" :latex "cf.~tableau~%s"))
     ("Table"
+     ("ar" :default "جدول")
      ("de" :default "Tabelle")
      ("es" :default "Tabla")
      ("et" :default "Tabel")
@@ -5845,6 +5872,7 @@ them."
       :utf-8 "Таблица")
      ("zh-CN" :html "&#34920;" :utf-8 "表"))
     ("Table %d:"
+     ("ar" :default "جدول %d:")
      ("da" :default "Tabel %d")
      ("de" :default "Tabelle %d")
      ("es" :default "Tabla %d")
@@ -5861,6 +5889,7 @@ them."
      ("sv" :default "Tabell %d")
      ("zh-CN" :html "&#34920;%d&nbsp;" :utf-8 "表%d "))
     ("Table of Contents"
+     ("ar" :default "قائمة المحتويات")
      ("ca" :html "&Iacute;ndex")
      ("cs" :default "Obsah")
      ("da" :default "Indhold")
@@ -5887,6 +5916,7 @@ them."
      ("zh-CN" :html "&#30446;&#24405;" :utf-8 "目录")
      ("zh-TW" :html "&#30446;&#37636;" :utf-8 "目錄"))
     ("Unknown reference"
+     ("ar" :default "مرجع غير معرّف")
      ("da" :default "ukendt reference")
      ("de" :default "Unbekannter Verweis")
      ("es" :default "Referencia desconocida")
