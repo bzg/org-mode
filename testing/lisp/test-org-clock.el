@@ -359,7 +359,51 @@ CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 00:41] => 16905:01
       (forward-line 2)
       (buffer-substring-no-properties
        (point) (progn (goto-char (point-max))
-		      (line-beginning-position -1)))))))
+		      (line-beginning-position -1))))))
+  ;; Test ":formula %".  Handle various duration formats.
+  (should
+   (equal
+    "| Headline     |   Time |     % |
+|--------------+--------+-------|
+| *Total time* | *6:00* | 100.0 |
+|--------------+--------+-------|
+| Foo          |   4:00 |  66.7 |
+| Bar          |   2:00 |  33.3 |
+"
+    (org-test-with-temp-text
+	"* Foo
+  CLOCK: [2016-12-28 Wed 11:09]--[2016-12-28 Wed 15:09] =>  4:00
+* Bar
+  CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
+
+* Report
+<point>#+BEGIN: clocktable :maxlevel 1 :formula %
+#+END:
+"
+      (org-update-dblock)
+      (buffer-substring-no-properties (line-beginning-position 3)
+				      (line-beginning-position 9)))))
+  (should
+   (equal
+    "| Headline     | Time      |     % |
+|--------------+-----------+-------|
+| *Total time* | *1d 4:00* | 100.0 |
+|--------------+-----------+-------|
+| Foo          | 1d 2:00   |  83.3 |
+| Bar          | 2:00      |  16.7 |
+"
+    (org-test-with-temp-text
+	"
+* Foo
+  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+* Bar
+  CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
+* Report
+<point>#+BEGIN: clocktable :maxlevel 1 :formula %
+#+END:"
+      (org-update-dblock)
+      (buffer-substring-no-properties (line-beginning-position 3)
+				      (line-beginning-position 9))))))
 
 (provide 'test-org-clock)
 ;;; test-org-clock.el end here
