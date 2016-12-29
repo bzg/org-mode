@@ -429,12 +429,13 @@ This splices all the components into the list."
   (let* ((base-dir (file-name-as-directory
 		    (org-publish-property :base-directory project)))
 	 (extension (or (org-publish-property :base-extension project) "org"))
-	 (match (if (eq extension 'any) "^[^\\.]"
-		  (concat "^[^\\.].*\\.\\(" extension "\\)$")))
+	 (match (and (not (eq extension 'any))
+		     (concat "^[^\\.].*\\.\\(" extension "\\)$")))
 	 (base-files
-	  (if (org-publish-property :recursive project)
-	      (directory-files-recursively base-dir match)
-	    (directory-files base-dir t match t))))
+	  (cl-remove-if #'file-directory-p
+			(if (org-publish-property :recursive project)
+			    (directory-files-recursively base-dir match)
+			  (directory-files base-dir t match t)))))
     (org-uniquify
      (append
       ;; Files from BASE-DIR.  Apply exclusion filter before adding
