@@ -104,7 +104,8 @@ Most properties are optional, but some should always be set:
 
     Extension (without the dot!) of source files.  This can be
     a regular expression.  If not given, \"org\" will be used as
-    default extension.
+    default extension.  If it is `any', include all the files,
+    even without extension.
 
   `:publishing-directory'
 
@@ -540,7 +541,10 @@ matching filenames."
 		 (x (or (plist-get (cdr prj) :base-extension) "org"))
 		 (e (plist-get (cdr prj) :exclude))
 		 (i (plist-get (cdr prj) :include))
-		 (xm (concat "^" b (if r ".+" "[^/]+") "\\.\\(" x "\\)$")))
+		 (xm (concat "\\`" b
+			     (if r ".+" "[^/]+")
+			     (and (not (eq x 'any))
+				  (format "\\.\\(%s\\)\\'" x)))))
 	    (when
 		(or (and i
 			 (member filename
