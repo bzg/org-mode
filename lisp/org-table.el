@@ -65,11 +65,12 @@
 
 (declare-function calc-eval "calc" (str &optional separator &rest args))
 
-(defvar orgtbl-mode) ; defined below
-(defvar orgtbl-mode-menu) ; defined when orgtbl mode get initialized
 (defvar constants-unit-system)
+(defvar org-element-use-cache)
 (defvar org-export-filters-alist)
 (defvar org-table-follow-field-mode)
+(defvar orgtbl-mode) ; defined below
+(defvar orgtbl-mode-menu) ; defined when orgtbl mode get initialized
 (defvar sort-fold-case)
 
 (defvar orgtbl-after-send-table-hook nil
@@ -4856,7 +4857,8 @@ This may be either a string or a function of two arguments:
     ;; Initialize communication channel in INFO.
     (with-temp-buffer
       (let ((org-inhibit-startup t)) (org-mode))
-      (let ((standard-output (current-buffer)))
+      (let ((standard-output (current-buffer))
+	    (org-element-use-cache nil))
 	(dolist (e table)
 	  (cond ((eq e 'hline) (princ "|--\n"))
 		((consp e)
@@ -4980,9 +4982,12 @@ information."
 	     ((plist-member params :hline)
 	      (org-table--generic-apply (plist-get params :hline) ":hline"))
 	     (backend `(org-export-with-backend ',backend row nil info)))
-	 (let ((headerp (org-export-table-row-in-header-p row info))
-	       (lastp (not (org-export-get-next-element row info)))
-	       (last-header-p (org-export-table-row-ends-header-p row info)))
+	 (let ((headerp ,(and (or hlfmt hlstart hlend)
+			      '(org-export-table-row-in-header-p row info)))
+	       (last-header-p
+		,(and (or hllfmt hllstart hllend)
+		      '(org-export-table-row-ends-header-p row info)))
+	       (lastp (not (org-export-get-next-element row info))))
 	   (when contents
 	     ;; Check if we can apply `:lfmt', `:llfmt', `:hlfmt', or
 	     ;; `:hllfmt' to CONTENTS.  Otherwise, fallback on
@@ -5059,25 +5064,29 @@ information."
 	 (sep (plist-get params :sep))
 	 (hsep (plist-get params :hsep)))
     `(lambda (cell contents info)
-       (let ((headerp (org-export-table-row-in-header-p
-		       (org-export-get-parent-element cell) info))
-	     (column (1+ (cdr (org-export-table-cell-address cell info)))))
-	 ;; Make sure that contents are exported as Org data when :raw
-	 ;; parameter is non-nil.
-	 ,(when (and backend (plist-get params :raw))
-	    `(setq contents
-		   ;; Since we don't know what are the pseudo object
-		   ;; types defined in backend, we cannot pass them to
-		   ;; `org-element-interpret-data'.  As a consequence,
-		   ;; they will be treated as pseudo elements, and
-		   ;; will have newlines appended instead of spaces.
-		   ;; Therefore, we must make sure :post-blank value
-		   ;; is really turned into spaces.
-		   (replace-regexp-in-string
-		    "\n" " "
-		    (org-trim
-		     (org-element-interpret-data
-		      (org-element-contents cell))))))
+       ;; Make sure that contents are exported as Org data when :raw
+       ;; parameter is non-nil.
+       ,(when (and backend (plist-get params :raw))
+	  `(setq contents
+		 ;; Since we don't know what are the pseudo object
+		 ;; types defined in backend, we cannot pass them to
+		 ;; `org-element-interpret-data'.  As a consequence,
+		 ;; they will be treated as pseudo elements, and will
+		 ;; have newlines appended instead of spaces.
+		 ;; Therefore, we must make sure :post-blank value is
+		 ;; really turned into spaces.
+		 (replace-regexp-in-string
+		  "\n" " "
+		  (org-trim
+		   (org-element-interpret-data
+		    (org-element-contents cell))))))
+
+       (let ((headerp ,(and (or hfmt hsep)
+			    '(org-export-table-row-in-header-p
+			      (org-export-get-parent-element cell) info)))
+	     (column
+	      ,(and (or efmt hfmt fmt)
+		    '(1+ (cdr (org-export-table-cell-address cell info))))))
 	 (when contents
 	   ;; Check if we can apply `:efmt' on CONTENTS.
 	   ,(when efmt

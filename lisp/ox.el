@@ -4340,12 +4340,10 @@ Assume LINK type is \"fuzzy\".  White spaces are not
 significant."
   (let* ((search-cells (org-export-string-to-search-cell
 			(org-link-unescape (org-element-property :path link))))
-	 (link-cache
-	  (or (plist-get info :resolve-fuzzy-link-cache)
-	      (plist-get (plist-put info
-				    :resolve-fuzzy-link-cache
-				    (make-hash-table :test #'equal))
-			 :resolve-fuzzy-link-cache)))
+	 (link-cache (or (plist-get info :resolve-fuzzy-link-cache)
+			 (let ((table (make-hash-table :test #'eq)))
+			   (plist-put info :resolve-fuzzy-link-cache table)
+			   table)))
 	 (cached (gethash search-cells link-cache 'not-found)))
     (if (not (eq cached 'not-found)) cached
       (let ((matches
@@ -4770,10 +4768,9 @@ INFO is a plist used as a communication channel.
 
 A table has a header when it contains at least two row groups."
   (let ((cache (or (plist-get info :table-header-cache)
-		   (plist-get (setq info
-				    (plist-put info :table-header-cache
-					       (make-hash-table :test 'eq)))
-			      :table-header-cache))))
+		   (let ((table (make-hash-table :test #'eq)))
+		     (plist-put info :table-header-cache table)
+		     table))))
     (or (gethash table cache)
 	(let ((rowgroup 1) row-flag)
 	  (puthash
@@ -4830,10 +4827,9 @@ Return value is the group number, as an integer, or nil for
 special rows and rows separators.  First group is also table's
 header."
   (let ((cache (or (plist-get info :table-row-group-cache)
-		   (plist-get (setq info
-				    (plist-put info :table-row-group-cache
-					       (make-hash-table :test 'eq)))
-			      :table-row-group-cache))))
+		   (let ((table (make-hash-table :test #'eq)))
+		     (plist-put info :table-row-group-cache table)
+		     table))))
     (cond ((gethash table-row cache))
 	  ((eq (org-element-property :type table-row) 'rule) nil)
 	  (t (let ((group 0) row-flag)
@@ -4858,10 +4854,9 @@ same column as TABLE-CELL, or nil."
 	 (columns (length cells))
 	 (column (- columns (length (memq table-cell cells))))
 	 (cache (or (plist-get info :table-cell-width-cache)
-		    (plist-get (setq info
-				     (plist-put info :table-cell-width-cache
-						(make-hash-table :test 'eq)))
-			       :table-cell-width-cache)))
+		    (let ((table (make-hash-table :test #'eq)))
+		      (plist-put info :table-cell-width-cache table)
+		      table)))
 	 (width-vector (or (gethash table cache)
 			   (puthash table (make-vector columns 'empty) cache)))
 	 (value (aref width-vector column)))
@@ -4902,10 +4897,9 @@ Possible values are `left', `right' and `center'."
 	 (columns (length cells))
 	 (column (- columns (length (memq table-cell cells))))
 	 (cache (or (plist-get info :table-cell-alignment-cache)
-		    (plist-get (setq info
-				     (plist-put info :table-cell-alignment-cache
-						(make-hash-table :test 'eq)))
-			       :table-cell-alignment-cache)))
+		    (let ((table (make-hash-table :test #'eq)))
+		      (plist-put info :table-cell-alignment-cache table)
+		      table)))
 	 (align-vector (or (gethash table cache)
 			   (puthash table (make-vector columns nil) cache))))
     (or (aref align-vector column)
@@ -5110,15 +5104,24 @@ INFO is a plist used as a communication channel."
 INFO is a plist used as a communication channel.  Return value is
 zero-based and ignores separators.  The function returns nil for
 special columns and separators."
-  (when (and (eq (org-element-property :type table-row) 'standard)
-	     (not (org-export-table-row-is-special-p table-row info)))
-    (let ((number 0))
-      (org-element-map (org-export-get-parent-table table-row) 'table-row
-	(lambda (row)
-	  (cond ((eq row table-row) number)
-		((eq (org-element-property :type row) 'standard)
-		 (cl-incf number) nil)))
-	info 'first-match))))
+  (let* ((cache (or (plist-get info :table-row-number-cache)
+		    (let ((table (make-hash-table :test #'eq)))
+		      (plist-put info :table-row-number-cache table)
+		      table)))
+	 (cached (gethash table-row cache 'no-cache)))
+    (if (not (eq cached 'no-cache)) cached
+      (puthash table-row
+	       (and (eq (org-element-property :type table-row) 'standard)
+		    (not (org-export-table-row-is-special-p table-row info))
+		    (let ((number 0))
+		      (org-element-map (org-export-get-parent-table table-row)
+			  'table-row
+			(lambda (row)
+			  (cond ((eq row table-row) number)
+				((eq (org-element-property :type row) 'standard)
+				 (cl-incf number) nil)))
+			info 'first-match)))
+	       cache))))
 
 (defun org-export-table-dimensions (table info)
   "Return TABLE dimensions.

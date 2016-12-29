@@ -516,7 +516,7 @@ Return value is the property name, as a keyword, or nil."
 	(and (memq object (org-element-property p parent))
 	     (throw 'exit p))))))
 
-(defun org-element-class (datum &optional parent)
+(defsubst org-element-class (datum &optional parent)
   "Return class for ELEMENT, as a symbol.
 Class is either `element' or `object'.  Optional argument PARENT
 is the element or object containing DATUM.  It defaults to the
