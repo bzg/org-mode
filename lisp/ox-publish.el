@@ -527,37 +527,61 @@ matching filenames."
 		  org-publish-temp-files))))
 
 (defun org-publish-get-project-from-filename (filename &optional up)
-  "Return the project that FILENAME belongs to."
+  "Return a project that FILENAME belongs to.
+When UP is non-nil, return a meta-project (i.e., with a :components part)
+publishing FILENAME."
   (let* ((filename (expand-file-name filename))
-	 project-name)
-
-    (catch 'p-found
-      (dolist (prj org-publish-project-alist)
-	(unless (plist-get (cdr prj) :components)
-	  ;; [[info:org:Selecting%20files]] shows how this is supposed to work:
-	  (let* ((r (plist-get (cdr prj) :recursive))
-		 (b (expand-file-name (file-name-as-directory
-				       (plist-get (cdr prj) :base-directory))))
-		 (x (or (plist-get (cdr prj) :base-extension) "org"))
-		 (e (plist-get (cdr prj) :exclude))
-		 (i (plist-get (cdr prj) :include))
-		 (xm (concat "\\`" b
-			     (if r ".+" "[^/]+")
-			     (and (not (eq x 'any))
-				  (format "\\.\\(%s\\)\\'" x)))))
-	    (when
-		(or (and i
-			 (member filename
-				 (dolist (file i) (expand-file-name file b))))
-		    (and (not (and e (string-match e filename)))
-			 (string-match xm filename)))
-	      (setq project-name (car prj))
-	      (throw 'p-found project-name))))))
-    (when up
-      (dolist (prj org-publish-project-alist)
-	(if (member project-name (plist-get (cdr prj) :components))
-	    (setq project-name (car prj)))))
-    (assoc project-name org-publish-project-alist)))
+	 (project
+	  (cl-some
+	   (lambda (p)
+	     ;; Ignore meta-projects.
+	     (unless (org-publish-property :components p)
+	       (let ((base (expand-file-name
+			    (org-publish-property :base-directory p))))
+		 (cond
+		  ;; Check if FILENAME is explicitly included in one
+		  ;; project.
+		  ((member filename
+			   (mapcar (lambda (f) (expand-file-name f base))
+				   (org-publish-property :include p)))
+		   p)
+		  ;; Exclude file names matching :exclude property.
+		  ((let ((exclude-re (org-publish-property :exclude p)))
+		     (and exclude-re
+			  (string-match-p exclude-re
+					  (file-relative-name filename base))))
+		   nil)
+		  ;; Check :extension.  Handle special `any'
+		  ;; extension.
+		  ((let ((extension (org-publish-property :base-extension p)))
+		     (not (or (eq extension 'any)
+			      (string= (or extension "org")
+				       (file-name-extension filename)))))
+		   nil)
+		  ;; Check if FILENAME belong to project's base
+		  ;; directory, or some of its sub-directories
+		  ;; if :recursive in non-nil.
+		  ((org-publish-property :recursive p)
+		   (and (string-prefix-p base filename) p))
+		  ((equal base (file-name-directory filename)) p)
+		  (t nil)))))
+	   org-publish-project-alist)))
+    (cond
+     ((not project) nil)
+     ((not up) project)
+     ;; When optional argument UP is non-nil, return the top-most
+     ;; meta-project effectively publishing FILENAME.
+     (t
+      (letrec ((find-parent-project
+		(lambda (project)
+		  (or (cl-some
+		       (lambda (p)
+			 (and (member (car project)
+				      (org-publish-property :components p))
+			      (funcall find-parent-project p)))
+		       org-publish-project-alist)
+		      project))))
+	(funcall find-parent-project project))))))
 
 
 
