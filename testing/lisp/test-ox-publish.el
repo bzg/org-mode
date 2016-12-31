@@ -327,6 +327,87 @@ Unless set otherwise in PROPERTIES, `:base-directory' is set to
 		(insert-file-contents (expand-file-name "sitemap.org" dir))
 		(buffer-string)))))))
 
+
+;;; Tools
+
+(ert-deftest test-org-publish/get-project-from-filename ()
+  "Test `org-publish-get-project-from-filename' specifications."
+  ;; Check base directory.
+  (should
+   (let ((org-publish-project-alist '(("p" :base-directory "/base/"))))
+     (org-publish-get-project-from-filename "/base/file.org")))
+  ;; Return nil if no appropriate project is found.
+  (should-not
+   (let ((org-publish-project-alist '(("p" :base-directory "/base/"))))
+     (org-publish-get-project-from-filename "/other/file.org")))
+  ;; Return the first project effectively publishing the provided
+  ;; file.
+  (should
+   (equal "p2"
+	  (let ((org-publish-project-alist
+		 '(("p1" :base-directory "/other/")
+		   ("p2" :base-directory "/base/"))))
+	    (car (org-publish-get-project-from-filename "/base/file.org")))))
+  ;; When :recursive in non-nil, allow files in sub-directories.
+  (should
+   (let ((org-publish-project-alist
+	  '(("p" :base-directory "/base/" :recursive t))))
+     (org-publish-get-project-from-filename "/base/sub/file.org")))
+  (should-not
+   (let ((org-publish-project-alist '(("p" :base-directory "/base/"))))
+     (org-publish-get-project-from-filename "/base/sub/file.org")))
+  ;; Check :base-extension.
+  (should
+   (let ((org-publish-project-alist
+	  '(("p" :base-directory "/base/" :base-extension "txt"))))
+     (org-publish-get-project-from-filename "/base/file.txt")))
+  (should-not
+   (let ((org-publish-project-alist
+	  '(("p" :base-directory "/base/" :base-extension "org"))))
+     (org-publish-get-project-from-filename "/base/file.txt")))
+  ;; When :base-extension has the special value `any', allow any
+  ;; extension, including none.
+  (should
+   (let ((org-publish-project-alist
+	  '(("p" :base-directory "/base/" :base-extension any))))
+     (org-publish-get-project-from-filename "/base/file.txt")))
+  (should
+   (let ((org-publish-project-alist
+	  '(("p" :base-directory "/base/" :base-extension any))))
+     (org-publish-get-project-from-filename "/base/file")))
+  ;; Check :exclude property.
+  (should-not
+   (let ((org-publish-project-alist
+	  '(("p" :base-directory "/base/" :exclude "file"))))
+     (org-publish-get-project-from-filename "/base/file.org")))
+  (should
+   (let ((org-publish-project-alist
+	  '(("p" :base-directory "/base/" :exclude "other"))))
+     (org-publish-get-project-from-filename "/base/file.org")))
+  ;; The regexp matches against relative file name, not absolute one.
+  (should
+   (let ((org-publish-project-alist
+	  '(("p" :base-directory "/base/" :exclude "base"))))
+     (org-publish-get-project-from-filename "/base/file.org")))
+  ;; Check :include property.
+  (should
+   (let ((org-publish-project-alist
+	  '(("p" :base-directory "/base/" :include ("file.txt")))))
+     (org-publish-get-project-from-filename "/base/file.txt")))
+  ;; :include property has precedence over :exclude one.
+  (should
+   (let ((org-publish-project-alist
+	  '(("p" :base-directory "/base/" :include ("f.txt") :exclude "f"))))
+     (org-publish-get-project-from-filename "/base/f.txt")))
+  ;; With optional argument, return a meta-project publishing provided
+  ;; file.
+  (should
+   (equal "meta"
+	  (let ((org-publish-project-alist
+		 '(("meta" :components ("p"))
+		   ("p" :base-directory "/base/"))))
+	    (car (org-publish-get-project-from-filename "/base/file.org" t))))))
+
 
 (provide 'test-ox-publish)
 ;;; test-ox-publish.el ends here
