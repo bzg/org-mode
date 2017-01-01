@@ -1,6 +1,6 @@
 ;;; org-table.el --- The Table Editor for Org        -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2004-2016 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2017 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -5085,7 +5085,11 @@ information."
 			    '(org-export-table-row-in-header-p
 			      (org-export-get-parent-element cell) info)))
 	     (column
-	      ,(and (or efmt hfmt fmt)
+	      ;; Call costly `org-export-table-cell-address' only if
+	      ;; absolutely necessary, i.e., if one
+	      ;; of :fmt :efmt :hmft has a "plist type" value.
+	      ,(and (cl-some (lambda (v) (integerp (car-safe v)))
+			     (list efmt hfmt fmt))
 		    '(1+ (cdr (org-export-table-cell-address cell info))))))
 	 (when contents
 	   ;; Check if we can apply `:efmt' on CONTENTS.
