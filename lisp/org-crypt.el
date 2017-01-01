@@ -183,7 +183,11 @@ See `org-crypt-disable-auto-save'."
 	 (org-end-of-subtree t t)
 	 (org-back-over-empty-lines)
 	 (let ((contents (delete-and-extract-region beg (point))))
-	   (insert (org-encrypt-string contents crypt-key)))
+	   (condition-case err
+	       (insert (org-encrypt-string contents crypt-key))
+	     ;; If encryption failed, make sure to insert back entry
+	     ;; contents in the buffer.
+	     (error (insert contents) (error (nth 1 err)))))
 	 (when folded
 	   (goto-char start-heading)
 	   (outline-hide-subtree))
