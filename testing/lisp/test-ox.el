@@ -3676,37 +3676,37 @@ Another text. (ref:text)
 
 (ert-deftest test-org-export/has-header-p ()
   "Test `org-export-table-has-header-p' specifications."
-  ;; 1. With an header.
-  (org-test-with-parsed-data "
+  ;; With an header.
+  (should
+   (org-test-with-parsed-data "
 | a | b |
 |---+---|
 | c | d |"
-    (should
      (org-export-table-has-header-p
       (org-element-map tree 'table 'identity info 'first-match)
       info)))
-  ;; 2. Without an header.
-  (org-test-with-parsed-data "
+  ;; Without an header.
+  (should-not
+   (org-test-with-parsed-data "
 | a | b |
 | c | d |"
-    (should-not
      (org-export-table-has-header-p
       (org-element-map tree 'table 'identity info 'first-match)
       info)))
-  ;; 3. Don't get fooled with starting and ending rules.
-  (org-test-with-parsed-data "
+  ;; Don't get fooled with starting and ending rules.
+  (should-not
+   (org-test-with-parsed-data "
 |---+---|
 | a | b |
 | c | d |
 |---+---|"
-    (should-not
      (org-export-table-has-header-p
       (org-element-map tree 'table 'identity info 'first-match)
       info))))
 
 (ert-deftest test-org-export/table-row-group ()
   "Test `org-export-table-row-group' specifications."
-  ;; 1. A rule creates a new group.
+  ;; A rule creates a new group.
   (should
    (equal '(1 rule 2)
 	  (org-test-with-parsed-data "
@@ -3717,7 +3717,7 @@ Another text. (ref:text)
 	      (lambda (row)
 		(if (eq (org-element-property :type row) 'rule) 'rule
 		  (org-export-table-row-group row info)))))))
-  ;; 2. Special rows are ignored in count.
+  ;; Special rows are ignored in count.
   (should
    (equal
     '(rule 1)
@@ -3730,7 +3730,7 @@ Another text. (ref:text)
 	  (if (eq (org-element-property :type row) 'rule) 'rule
 	    (org-export-table-row-group row info)))
 	info))))
-  ;; 3. Double rules also are ignored in count.
+  ;; Double rules also are ignored in count.
   (should
    (equal '(1 rule rule 2)
 	  (org-test-with-parsed-data "

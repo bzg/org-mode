@@ -4747,19 +4747,20 @@ code."
 All special columns will be ignored during export."
   ;; The table has a special column when every first cell of every row
   ;; has an empty value or contains a symbol among "/", "#", "!", "$",
-  ;; "*" "_" and "^".  Though, do not consider a first row containing
-  ;; only empty cells as special.
-  (let ((special-column-p 'empty))
+  ;; "*" "_" and "^".  Though, do not consider a first column
+  ;; containing only empty cells as special.
+  (let ((special-column? 'empty))
     (catch 'exit
       (dolist (row (org-element-contents table))
 	(when (eq (org-element-property :type row) 'standard)
 	  (let ((value (org-element-contents
 			(car (org-element-contents row)))))
-	    (cond ((member value '(("/") ("#") ("!") ("$") ("*") ("_") ("^")))
-		   (setq special-column-p 'special))
-		  ((not value))
+	    (cond ((member value
+			   '(("/") ("#") ("!") ("$") ("*") ("_") ("^")))
+		   (setq special-column? 'special))
+		  ((null value))
 		  (t (throw 'exit nil))))))
-      (eq special-column-p 'special))))
+      (eq special-column? 'special))))
 
 (defun org-export-table-has-header-p (table info)
   "Non-nil when TABLE has a header.
@@ -4767,25 +4768,28 @@ All special columns will be ignored during export."
 INFO is a plist used as a communication channel.
 
 A table has a header when it contains at least two row groups."
-  (let ((cache (or (plist-get info :table-header-cache)
-		   (let ((table (make-hash-table :test #'eq)))
-		     (plist-put info :table-header-cache table)
-		     table))))
-    (or (gethash table cache)
-	(let ((rowgroup 1) row-flag)
-	  (puthash
-	   table
-	   (org-element-map table 'table-row
-	     (lambda (row)
-	       (cond
-		((> rowgroup 1) t)
-		((and row-flag (eq (org-element-property :type row) 'rule))
-		 (cl-incf rowgroup) (setq row-flag nil))
-		((and (not row-flag) (eq (org-element-property :type row)
-					 'standard))
-		 (setq row-flag t) nil)))
-	     info 'first-match)
-	   cache)))))
+  (let* ((cache (or (plist-get info :table-header-cache)
+		    (let ((table (make-hash-table :test #'eq)))
+		      (plist-put info :table-header-cache table)
+		      table)))
+	 (cached (gethash table cache 'no-cache)))
+    (if (not (eq cached 'no-cache)) cached
+      (let ((rowgroup 1) row-flag)
+	(puthash table
+		 (org-element-map table 'table-row
+		   (lambda (row)
+		     (cond
+		      ((> rowgroup 1) t)
+		      ((and row-flag
+			    (eq (org-element-property :type row) 'rule))
+		       (cl-incf rowgroup)
+		       (setq row-flag nil))
+		      ((and (not row-flag)
+			    (eq (org-element-property :type row) 'standard))
+		       (setq row-flag t)
+		       nil)))
+		   info 'first-match)
+		 cache)))))
 
 (defun org-export-table-row-is-special-p (table-row _)
   "Non-nil if TABLE-ROW is considered special.
@@ -4826,20 +4830,24 @@ INFO is a plist used as the communication channel.
 Return value is the group number, as an integer, or nil for
 special rows and rows separators.  First group is also table's
 header."
-  (let ((cache (or (plist-get info :table-row-group-cache)
-		   (let ((table (make-hash-table :test #'eq)))
-		     (plist-put info :table-row-group-cache table)
-		     table))))
-    (cond ((gethash table-row cache))
-	  ((eq (org-element-property :type table-row) 'rule) nil)
-	  (t (let ((group 0) row-flag)
-	       (org-element-map (org-export-get-parent table-row) 'table-row
-		 (lambda (row)
-		   (if (eq (org-element-property :type row) 'rule)
-		       (setq row-flag nil)
-		     (unless row-flag (cl-incf group) (setq row-flag t)))
-		   (when (eq table-row row) (puthash table-row group cache)))
-		 info 'first-match))))))
+  (when (eq (org-element-property :type table-row) 'standard)
+    (let* ((cache (or (plist-get info :table-row-group-cache)
+		      (let ((table (make-hash-table :test #'eq)))
+			(plist-put info :table-row-group-cache table)
+			table)))
+	   (cached (gethash table-row cache 'no-cache)))
+      (if (not (eq cached 'no-cache)) cached
+	;; First time a row is queried, populate cache with all the
+	;; rows from the table.
+	(let ((group 0) row-flag)
+	  (org-element-map (org-export-get-parent table-row) 'table-row
+	    (lambda (row)
+	      (if (eq (org-element-property :type row) 'rule)
+		  (setq row-flag nil)
+		(unless row-flag (cl-incf group) (setq row-flag t))
+		(puthash row group cache)))
+	    info))
+	(gethash table-row cache)))))
 
 (defun org-export-table-cell-width (table-cell info)
   "Return TABLE-CELL contents width.
@@ -5102,26 +5110,24 @@ INFO is a plist used as a communication channel."
 (defun org-export-table-row-number (table-row info)
   "Return TABLE-ROW number.
 INFO is a plist used as a communication channel.  Return value is
-zero-based and ignores separators.  The function returns nil for
-special columns and separators."
-  (let* ((cache (or (plist-get info :table-row-number-cache)
-		    (let ((table (make-hash-table :test #'eq)))
-		      (plist-put info :table-row-number-cache table)
-		      table)))
-	 (cached (gethash table-row cache 'no-cache)))
-    (if (not (eq cached 'no-cache)) cached
-      (puthash table-row
-	       (and (eq (org-element-property :type table-row) 'standard)
-		    (not (org-export-table-row-is-special-p table-row info))
-		    (let ((number 0))
-		      (org-element-map (org-export-get-parent-table table-row)
-			  'table-row
-			(lambda (row)
-			  (cond ((eq row table-row) number)
-				((eq (org-element-property :type row) 'standard)
-				 (cl-incf number) nil)))
-			info 'first-match)))
-	       cache))))
+zero-indexed and ignores separators.  The function returns nil
+for special rows and separators."
+  (when (eq (org-element-property :type table-row) 'standard)
+    (let* ((cache (or (plist-get info :table-row-number-cache)
+		      (let ((table (make-hash-table :test #'eq)))
+			(plist-put info :table-row-number-cache table)
+			table)))
+	   (cached (gethash table-row cache 'no-cache)))
+      (if (not (eq cached 'no-cache)) cached
+	;; First time a row is queried, populate cache with all the
+	;; rows from the table.
+	(let ((number -1))
+	  (org-element-map (org-export-get-parent-table table-row) 'table-row
+	    (lambda (row)
+	      (when (eq (org-element-property :type row) 'standard)
+		(puthash row (cl-incf number) cache)))
+	    info))
+	(gethash table-row cache)))))
 
 (defun org-export-table-dimensions (table info)
   "Return TABLE dimensions.
