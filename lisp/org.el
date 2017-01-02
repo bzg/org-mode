@@ -8003,16 +8003,18 @@ unconditionally."
         (org-N-empty-lines-before-current (if blank? 1 0))))))
   (run-hooks 'org-insert-heading-hook))
 
-(defun org-N-empty-lines-before-current (N)
+(defun org-N-empty-lines-before-current (n)
   "Make the number of empty lines before current exactly N.
 So this will delete or add empty lines."
-  (save-excursion
+  (let ((column (current-column))
+	(empty-lines (make-string n ?\n)))
     (beginning-of-line)
     (let ((p (point)))
       (skip-chars-backward " \r\t\n")
       (unless (bolp) (forward-line))
       (delete-region (point) p))
-    (when (> N 0) (insert (make-string N ?\n)))))
+    (insert empty-lines)
+    (move-to-column column)))
 
 (defun org-get-heading (&optional no-tags no-todo)
   "Return the heading of the current entry, without the stars.

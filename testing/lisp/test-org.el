@@ -1267,6 +1267,31 @@
 	  (org-test-with-temp-text "* H1\n- item<point>"
 	    (org-insert-heading nil nil t)
 	    (buffer-string))))
+  ;; Obey `org-blank-before-new-entry'.
+  (should
+   (equal "* H1\n\n* \n"
+	  (org-test-with-temp-text "* H1<point>"
+	    (let ((org-blank-before-new-entry '((heading . t))))
+	      (org-insert-heading))
+	    (buffer-string))))
+  (should
+   (equal "* H1\n* \n"
+	  (org-test-with-temp-text "* H1<point>"
+	    (let ((org-blank-before-new-entry '((heading . nil))))
+	      (org-insert-heading))
+	    (buffer-string))))
+  (should
+   (equal "* H1\n* H2\n* \n"
+	  (org-test-with-temp-text "* H1\n* H2<point>"
+	    (let ((org-blank-before-new-entry '((heading . auto))))
+	      (org-insert-heading))
+	    (buffer-string))))
+  (should
+   (equal "* H1\n\n* H2\n\n* \n"
+	  (org-test-with-temp-text "* H1\n\n* H2<point>"
+	    (let ((org-blank-before-new-entry '((heading . auto))))
+	      (org-insert-heading))
+	    (buffer-string))))
   ;; Corner case: correctly insert a headline after an empty one.
   (should
    (equal "* \n* \n"
