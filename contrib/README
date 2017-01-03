@@ -15,7 +15,6 @@ Org utils
 org-annotate-file.el     --- Annotate a file with org syntax
 org-bibtex-extras.el     --- Extras for working with org-bibtex entries
 org-bookmark.el          --- Links to bookmarks
-org-bullets.el           --- Show bullets in org-mode as UTF-8 characters
 org-checklist.el         --- org functions for checklist handling
 org-choose.el            --- Use TODO keywords to mark decision states
 org-collector.el         --- Collect properties into tables

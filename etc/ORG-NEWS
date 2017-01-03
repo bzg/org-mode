@@ -23,6 +23,15 @@ into
 
 : (file (lambda () (sexp)))
 
+*** Deleted contributed packages
+
+=org-ebib.el= and =org-bullets.el= have been deleted from the contrib/ directory.
+
+You can now find them here :
+
+- https://github.com/joostkremers/ebib
+- https://github.com/sabof/org-bullets
+
 *** Removal of ~:sitemap-sans-extension~
 
 The publishing property is no longer recognized, as a consequence of
