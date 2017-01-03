@@ -558,7 +558,11 @@ month and 365.24 days for a year)."
   :group 'org-faces)
 
 (defface org-agenda-filter-category '((t :inherit mode-line))
-  "Face for categories(s) in the mode-line when filtering the agenda."
+  "Face for categories in the mode-line when filtering the agenda."
+  :group 'org-faces)
+
+(defface org-agenda-filter-effort '((t :inherit mode-line))
+  "Face for effort in the mode-line when filtering the agenda."
   :group 'org-faces)
 
 (defface org-time-grid	   ;Copied from `font-lock-variable-name-face'
