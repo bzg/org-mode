@@ -8637,8 +8637,10 @@ selected.
 Filter the current agenda view with respect to the category of the item at
 point.  Pressing @code{<} another time will remove this filter.  When called
 with a prefix argument exclude the category of the item at point from the
-agenda.  You can add a filter preset through the option
-@code{org-agenda-category-filter-preset} (see below.)
+agenda.
+
+You can add a filter preset in custom agenda commands through the option
+@code{org-agenda-category-filter-preset}.  @xref{Setting options}.
 
 @orgcmd{^,org-agenda-filter-by-top-headline}
 Filter the current agenda view and only display the siblings and the parent
@@ -8651,8 +8653,10 @@ Filter the agenda view by a regular expression: only show agenda entries
 matching the regular expression the user entered.  When called with a prefix
 argument, it will filter @emph{out} entries matching the regexp.  With two
 universal prefix arguments, it will remove all the regexp filters, which can
-be accumulated.  You can add a filter preset through the option
-@code{org-agenda-category-filter-preset} (see below.)
+be accumulated.
+
+You can add a filter preset in custom agenda commands through the option
+@code{org-agenda-regexp-filter-preset}.  @xref{Setting options}.
 
 @orgcmd{_,org-agenda-filter-by-effort}
 @vindex org-agenda-effort-filter-preset
@@ -8670,6 +8674,13 @@ The filter will then restrict to entries with effort smaller-or-equal, equal,
 or larger-or-equal than the selected value.  For application of the operator,
 entries without a defined effort will be treated according to the value of
 @code{org-sort-agenda-noeffort-is-high}.
+
+When called with a prefix argument, it will remove entries matching the
+condition.  With two universal prefix arguments, it will clear effort
+filters, which can be accumulated.
+
+You can add a filter preset in custom agenda commands through the option
+@code{org-agenda-effort-filter-preset}.  @xref{Setting options}.
 
 @orgcmd{|,org-agenda-filter-remove-all}
 Remove all filters in the current agenda view.
@@ -8921,32 +8932,25 @@ file or subtree (@pxref{Agenda files}).
 
 @tsubheading{Secondary filtering and query editing}
 
-For a detailed description of these commands, see @pxref{Filtering/limiting
+For a detailed description of these commands, @pxref{Filtering/limiting
 agenda items}.
 
 @orgcmd{/,org-agenda-filter-by-tag}
-@vindex org-agenda-tag-filter-preset
 Filter the agenda view with respect to a tag and/or effort estimates.
 
 @orgcmd{<,org-agenda-filter-by-category}
-@vindex org-agenda-category-filter-preset
-
 Filter the current agenda view with respect to the category of the item at
-point.  Pressing @code{<} another time will remove this filter.
+point.
 
 @orgcmd{^,org-agenda-filter-by-top-headline}
 Filter the current agenda view and only display the siblings and the parent
 headline of the one at point.
 
 @orgcmd{=,org-agenda-filter-by-regexp}
-@vindex org-agenda-regexp-filter-preset
+Filter the agenda view by a regular expression.
 
-Filter the agenda view by a regular expression: only show agenda entries
-matching the regular expression the user entered.  When called with a prefix
-argument, it will filter @emph{out} entries matching the regexp.  With two
-universal prefix arguments, it will remove all the regexp filters, which can
-be accumulated.  You can add a filter preset through the option
-@code{org-agenda-category-filter-preset} (see below.)
+@orgcmd{_,org-agenda-filter-by-effort}
+Filter the agenda view with respect to effort estimates.
 
 @orgcmd{|,org-agenda-filter-remove-all}
 Remove all filters in the current agenda view.
