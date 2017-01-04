@@ -7566,8 +7566,11 @@ E looks like \"+<2:25\"."
 (defun org-agenda-compare-effort (op value)
   "Compare the effort of the current line with VALUE, using OP.
 If the line does not have an effort defined, return nil."
-  (let ((eff (org-get-at-eol 'effort-minutes 1)))
-    (funcall op (or eff (if org-sort-agenda-noeffort-is-high 32767 -1))
+  ;; `effort-minutes' property cannot be extracted directly from
+  ;; current line but is stored as a property in `txt'.
+  (let ((effort (get-text-property 0 'effort-minutes (org-get-at-bol 'txt))))
+    (funcall op
+	     (or effort (if org-sort-agenda-noeffort-is-high 32767 -1))
 	     value)))
 
 (defun org-agenda-filter-expand-tags (filter &optional no-operator)
