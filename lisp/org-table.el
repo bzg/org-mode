@@ -1992,11 +1992,15 @@ blank, and the content is appended to the field above."
 ;;;###autoload
 (defun org-table-edit-field (arg)
   "Edit table field in a different window.
-This is mainly useful for fields that contain hidden parts.  When called
-with a `\\[universal-argument]' prefix, just make the full field \
-visible so that it can be
-edited in place."
+This is mainly useful for fields that contain hidden parts.
+
+When called with a `\\[universal-argument]' prefix, just make the full field
+visible so that it can be edited in place.
+
+When called with a `\\[universal-argument] \\[universal-argument]' prefix, \
+toggle `org-table-follow-field-mode'."
   (interactive "P")
+  (unless (org-at-table-p) (user-error "Not at a table"))
   (cond
    ((equal arg '(16))
     (org-table-follow-field-mode (if org-table-follow-field-mode -1 1)))
