@@ -2941,7 +2941,7 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 		  type (nth 2 entry)
 		  match (nth 3 entry))
 	    (if (> (length key) 1)
-		(add-to-list 'prefixes (string-to-char key))
+		(cl-pushnew (string-to-char key) prefixes :test #'equal)
 	      (setq line
 		    (format
 		     "%-4s%-14s"
