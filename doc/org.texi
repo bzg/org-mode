@@ -15003,8 +15003,11 @@ Org does not export the code block nor the results.
 @end table
 
 @vindex org-export-use-babel
-To stop Org from evaluating code blocks during export, set
-@code{org-export-use-babel} variable to @code{nil}.
+To stop Org from evaluating code blocks to speed exports, use the header
+argument @code{:eval never-export} (@pxref{eval}).  To stop Org from
+evaluating code blocks for greater security, set the
+@code{org-export-use-babel} variable to @code{nil}, but understand that
+header arguments will have no effect.
 
 Turning off evaluation comes in handy when batch processing.  For example,
 markup languages for wikis, which have a high risk of untrusted code.
@@ -16149,7 +16152,7 @@ file@footnote{(For the example to work, turn on the property inheritance for
  #+END_SRC
  * the mount point of the fullest disk
    :PROPERTIES:
-   :noweb-ref: fullest-disk
+   :header-args: :noweb-ref fullest-disk
    :END:
 
  ** query all mounted disks
