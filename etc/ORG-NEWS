@@ -64,7 +64,7 @@ list as their first argument.
 *** Agenda
 **** New variable : ~org-agenda-show-future-repeats~
 **** New variable : ~org-agenda-prefer-last-repeat~
-
+**** Binding C-c C-x < for ~org-agenda-set-restriction-lock-from-agenda~
 *** New value for ~org-publish-sitemap-sort-folders~
 
 The new ~ignore~ value effectively allows toggling inclusion of
@@ -115,7 +115,7 @@ value of the code will be displayed in the results section.
 A new engine was added to support ~sqsh~ command line utility for use
 against Microsoft SQL Server or Sybase SQL server.
 
-More information on ~sqsh~ can be found here: [[https://sourceforge.net/projects/sqsh/][sourceforge/sqsh]] 
+More information on ~sqsh~ can be found here: [[https://sourceforge.net/projects/sqsh/][sourceforge/sqsh]]
 
 To use ~sqsh~ in an *sql* =SRC_BLK= set the =:engine= like this:
 
@@ -135,7 +135,7 @@ Where clue > 0
 This new function is meant to be used in back-ends supporting images
 as descriptions of links, a.k.a. image links.  See its docstring for
 details.
-**** Add global macros through ~org-export-global-macros~ 
+**** Add global macros through ~org-export-global-macros~
 With this variable, one can define macros available for all documents.
 **** New keyword ~#+EXPORT_FILE_NAME~
 Simiralry to ~:EXPORT_FILE_NAME:~ property, this keyword allows the
@@ -179,6 +179,10 @@ in addition to ~org-publish-find-title~ and ~org-publish-find-date~.
 *** ~org-list-to-org~
 
 It is the reciprocal of ~org-list-to-lisp~, which see.
+
+*** ~org-agenda-set-restriction-lock-from-agenda~
+
+Call ~org-agenda-set-restriction-lock~ from the agenda.
 
 * Version 9.0
 
@@ -518,7 +522,7 @@ If you want to use the *trusted connection* feature, omit *both* the
 If your Emacs is running in a Cygwin environment, the =ob-sql= library
 can pass the converted path to the =sqlcmd= tool.
 
-**** Improved support of header arguments for postgresql 
+**** Improved support of header arguments for postgresql
 
 The postgresql engine in a sql code block supports now ~:dbport~ nd
 ~:dbpassword~ as header arguments.
