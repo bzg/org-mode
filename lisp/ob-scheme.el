@@ -1,6 +1,6 @@
 ;;; ob-scheme.el --- Babel Functions for Scheme      -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2010-2016 Free Software Foundation, Inc.
+;; Copyright (C) 2010-2017 Free Software Foundation, Inc.
 
 ;; Authors: Eric Schulte
 ;;	    Michael Gauland
