@@ -4194,10 +4194,10 @@ This only applies to links without a description."
 (defun org-export-insert-image-links (data info &optional rules)
   "Insert image links in DATA.
 
-Org syntax do not support nested links.  Nevertheless, some
-export back-ends support image as descriptions of links.  Since
-images are really link to image files, we need to make an
-exception about link nesting.
+Org syntax does not support nested links.  Nevertheless, some
+export back-ends support images as descriptions of links.  Since
+images are really links to image files, we need to make an
+exception about links nesting.
 
 This function recognizes links whose contents are really images
 and turn them into proper nested links.  It is meant to be used
