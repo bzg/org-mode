@@ -4227,8 +4227,9 @@ Return modified DATA."
 			       (and (string= type (car rule))
 				    (string-match-p (cdr rule) path)))
 			     (or rules org-export-default-inline-image-rule))
-		(org-element-set-contents
-		 l
+		;; Replace contents with image link.
+		(org-element-adopt-elements
+		 (org-element-set-contents l nil)
 		 (with-temp-buffer
 		   (save-excursion (insert contents))
 		   (org-element-link-parser))))))))

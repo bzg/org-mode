@@ -2757,6 +2757,14 @@ Para2"
 	   (org-test-with-parsed-data "[[http://orgmode.org][file:image.png]]"
 	     (org-element-map (org-export-insert-image-links tree info) 'link
 	       (lambda (l) (org-element-property :type l))))))
+  ;; Properly set `:parent' property when replace contents with image
+  ;; link.
+  (should
+   (memq 'link
+	 (org-test-with-parsed-data "[[http://orgmode.org][file:image.png]]"
+	   (org-element-map (org-export-insert-image-links tree info) 'link
+	     (lambda (l)
+	       (org-element-type (org-element-property :parent l)))))))
   ;; With optional argument RULES, recognize different links as
   ;; images.
   (should-not
