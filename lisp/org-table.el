@@ -1317,23 +1317,15 @@ is always the old value."
 
 (defun org-table-current-column ()
   "Find out which column we are in."
-  (interactive)
-  (when (called-interactively-p 'any) (org-table-check-inside-data-field))
   (save-excursion
     (let ((column 0) (pos (point)))
       (beginning-of-line)
       (while (search-forward "|" pos t) (cl-incf column))
-      (when (called-interactively-p 'interactive)
-	(message "In table column %d" column))
       column)))
 
-;;;###autoload
 (defun org-table-current-dline ()
   "Find out what table data line we are in.
 Only data lines count for this."
-  (interactive)
-  (when (called-interactively-p 'any)
-    (org-table-check-inside-data-field))
   (save-excursion
     (let ((c 0)
 	  (pos (point)))
@@ -1341,8 +1333,6 @@ Only data lines count for this."
       (while (<= (point) pos)
 	(when (looking-at org-table-dataline-regexp) (cl-incf c))
 	(forward-line))
-      (when (called-interactively-p 'any)
-	(message "This is table line %d" c))
       c)))
 
 ;;;###autoload

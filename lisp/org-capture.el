@@ -56,6 +56,7 @@
 (declare-function org-decrypt-entry "org-crypt" ())
 (declare-function org-encrypt-entry "org-crypt" ())
 (declare-function org-table-analyze "org-table" ())
+(declare-function org-table-current-dline "org-table" ())
 (declare-function org-table-goto-line "org-table" (N))
 
 (defvar org-end-time-was-given)
