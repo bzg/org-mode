@@ -2667,17 +2667,25 @@ For details, see the Org mode manual.
 
 This function can also be called from Lisp programs and offers
 additional arguments: EQUATION can be the formula to apply.  If this
-argument is given, the user will not be prompted.  SUPPRESS-ALIGN is
-used to speed-up recursive calls by by-passing unnecessary aligns.
+argument is given, the user will not be prompted.
+
+SUPPRESS-ALIGN is used to speed-up recursive calls by by-passing
+unnecessary aligns.
+
 SUPPRESS-CONST suppresses the interpretation of constants in the
-formula, assuming that this has been done already outside the function.
-SUPPRESS-STORE means the formula should not be stored, either because
-it is already stored, or because it is a modified equation that should
-not overwrite the stored one.  SUPPRESS-ANALYSIS prevents any call to
-`org-table-analyze'."
+formula, assuming that this has been done already outside the
+function.
+
+SUPPRESS-STORE means the formula should not be stored, either
+because it is already stored, or because it is a modified
+equation that should not overwrite the stored one.
+
+SUPPRESS-ANALYSIS prevents analyzing the table and checking
+location of point."
   (interactive "P")
-  (org-table-check-inside-data-field)
-  (or suppress-analysis (org-table-analyze))
+  (unless suppress-analysis
+    (org-table-check-inside-data-field)
+    (org-table-analyze))
   (if (equal arg '(16))
       (let ((eq (org-table-current-field-formula)))
 	(org-table-get-field nil eq)
