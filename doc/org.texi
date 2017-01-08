@@ -520,7 +520,6 @@ The built-in agenda views
 * Weekly/daily agenda::         The calendar page with current tasks
 * Global TODO list::            All unfinished action items
 * Matching tags and properties::  Structured information with fine-tuned search
-* Timeline::                    Time-sorted view for single file
 * Search view::                 Find entries by searching for text
 * Stuck projects::              Find projects you need to review
 
@@ -4023,8 +4022,8 @@ states}), you will be prompted for a TODO keyword through the fast selection
 interface; this is the default behavior when
 @code{org-use-fast-todo-selection} is non-@code{nil}.
 
-The same rotation can also be done ``remotely'' from the timeline and agenda
-buffers with the @kbd{t} command key (@pxref{Agenda commands}).
+The same rotation can also be done ``remotely'' from agenda buffers with the
+@kbd{t} command key (@pxref{Agenda commands}).
 
 @orgkey{C-u C-c C-t}
 When TODO keywords have no selection keys, select a specific keyword using
@@ -4140,19 +4139,19 @@ be set up like this:
 @end lisp
 
 In this case, different keywords do not indicate a sequence, but rather
-different types.  So the normal work flow would be to assign a task to a
-person, and later to mark it DONE@.  Org mode supports this style by adapting
-the workings of the command @kbd{C-c C-t}@footnote{This is also true for the
-@kbd{t} command in the timeline and agenda buffers.}.  When used several
-times in succession, it will still cycle through all names, in order to first
-select the right type for a task.  But when you return to the item after some
-time and execute @kbd{C-c C-t} again, it will switch from any name directly
-to DONE@.  Use prefix arguments or completion to quickly select a specific
-name.  You can also review the items of a specific TODO type in a sparse tree
-by using a numeric prefix to @kbd{C-c / t}.  For example, to see all things
-Lucy has to do, you would use @kbd{C-3 C-c / t}.  To collect Lucy's items
-from all agenda files into a single buffer, you would use the numeric prefix
-argument as well when creating the global TODO list: @kbd{C-3 C-c a t}.
+different types.  So the normal work flow would be to assign a task to
+a person, and later to mark it DONE@.  Org mode supports this style by
+adapting the workings of the command @kbd{C-c C-t}@footnote{This is also true
+for the @kbd{t} command in the agenda buffers.}.  When used several times in
+succession, it will still cycle through all names, in order to first select
+the right type for a task.  But when you return to the item after some time
+and execute @kbd{C-c C-t} again, it will switch from any name directly to
+DONE@.  Use prefix arguments or completion to quickly select a specific name.
+You can also review the items of a specific TODO type in a sparse tree by
+using a numeric prefix to @kbd{C-c / t}.  For example, to see all things Lucy
+has to do, you would use @kbd{C-3 C-c / t}.  To collect Lucy's items from all
+agenda files into a single buffer, you would use the numeric prefix argument
+as well when creating the global TODO list: @kbd{C-3 C-c a t}.
 
 @node Multiple sets in one file
 @subsection Multiple keyword sets in one file
@@ -4424,11 +4423,6 @@ lognotedone}.}
 You will then be prompted for a note, and that note will be stored below
 the entry with a @samp{Closing Note} heading.
 
-In the timeline (@pxref{Timeline}) and in the agenda
-(@pxref{Weekly/daily agenda}), you can then use the @kbd{l} key to
-display the TODO items with a @samp{CLOSED} timestamp on each day,
-giving you an overview of what has been done.
-
 @node Tracking TODO state changes
 @subsection Tracking TODO state changes
 @cindex drawer, for state change recording
@@ -4643,8 +4637,8 @@ items.
 Set the priority of the current headline (@command{org-priority}).  The
 command prompts for a priority character @samp{A}, @samp{B} or @samp{C}.
 When you press @key{SPC} instead, the priority cookie is removed from the
-headline.  The priorities can also be changed ``remotely'' from the timeline
-and agenda buffer with the @kbd{,} command (@pxref{Agenda commands}).
+headline.  The priorities can also be changed ``remotely'' from the agenda
+buffer with the @kbd{,} command (@pxref{Agenda commands}).
 @c
 @orgcmdkkcc{S-@key{up},S-@key{down},org-priority-up,org-priority-down}
 @vindex org-priority-start-cycle-with-default
@@ -5890,10 +5884,10 @@ agenda (@pxref{Weekly/daily agenda}).  We distinguish:
 @item Plain timestamp; Event; Appointment
 @cindex timestamp
 @cindex appointment
-A simple timestamp just assigns a date/time to an item.  This is just
-like writing down an appointment or event in a paper agenda.  In the
-timeline and agenda displays, the headline of an entry associated with a
-plain timestamp will be shown exactly on that date.
+A simple timestamp just assigns a date/time to an item.  This is just like
+writing down an appointment or event in a paper agenda.  In the agenda
+display, the headline of an entry associated with a plain timestamp will be
+shown exactly on that date.
 
 @example
 * Meet Peter at the movies
@@ -6573,9 +6567,8 @@ buffer (see variable @code{org-remove-highlights-with-change}) or press
 @kbd{C-c C-c}.
 @end table
 
-The @kbd{l} key may be used in the timeline (@pxref{Timeline}) and in
-the agenda (@pxref{Weekly/daily agenda}) to show which tasks have been
-worked on or closed during a day.
+The @kbd{l} key may be used the agenda (@pxref{Weekly/daily agenda}) to show
+which tasks have been worked on or closed during a day.
 
 @strong{Important:} note that both @code{org-clock-out} and
 @code{org-clock-in-last} can have a global key binding and will not
@@ -7718,7 +7711,7 @@ important for a particular date, this information must be collected,
 sorted and displayed in an organized way.
 
 Org can select items based on various criteria and display them
-in a separate buffer.  Seven different view types are provided:
+in a separate buffer.  Six different view types are provided:
 
 @itemize @bullet
 @item
@@ -7730,9 +7723,6 @@ action items,
 @item
 a @emph{match view}, showings headlines based on the tags, properties, and
 TODO state associated with them,
-@item
-a @emph{timeline view} that shows all events in a single Org file,
-in time-sorted view,
 @item
 a @emph{text search view} that shows all entries from multiple files
 that contain specified keywords,
@@ -7864,8 +7854,6 @@ Create a list of all TODO items (@pxref{Global TODO list}).
 @item m @r{/} M
 Create a list of headlines matching a TAGS expression (@pxref{Matching
 tags and properties}).
-@item L
-Create the timeline view for the current buffer (@pxref{Timeline}).
 @item s
 Create a list of entries selected by a boolean expression of keywords
 and/or regular expressions that must or must not occur in the entry.
@@ -7919,7 +7907,6 @@ In this section we describe the built-in views.
 * Weekly/daily agenda::         The calendar page with current tasks
 * Global TODO list::            All unfinished action items
 * Matching tags and properties::  Structured information with fine-tuned search
-* Timeline::                    Time-sorted view for single file
 * Search view::                 Find entries by searching for text
 * Stuck projects::              Find projects you need to review
 @end menu
@@ -8316,26 +8303,6 @@ nor @samp{NEXT}
 Select @samp{:work:}-tagged TODO lines that are either @samp{WAITING} or
 @samp{NEXT}.
 @end table
-
-@node Timeline
-@subsection Timeline for a single file
-@cindex timeline, single file
-@cindex time-sorted view
-
-The timeline summarizes all time-stamped items from a single Org mode
-file in a @emph{time-sorted view}.  The main purpose of this command is
-to give an overview over events in a project.
-
-@table @kbd
-@orgcmd{C-c a L,org-timeline}
-Show a time-sorted view of the Org file, with all time-stamped items.
-When called with a @kbd{C-u} prefix, all unfinished TODO entries
-(scheduled or not) are also listed under the current date.
-@end table
-
-@noindent
-The commands available in the timeline buffer are listed in
-@ref{Agenda commands}.
 
 @node Search view
 @subsection Search view
@@ -8857,7 +8824,7 @@ prefix arguments @kbd{C-u C-u}, show only logging information, nothing else.
 @c
 @orgcmdkskc{v [,[,org-agenda-manipulate-query-add}
 Include inactive timestamps into the current view.  Only for weekly/daily
-agenda and timeline views.
+agenda.
 @c
 @orgcmd{v a,org-agenda-archives-mode}
 @xorgcmd{v A,org-agenda-archives-mode 'files}
