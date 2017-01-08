@@ -110,6 +110,18 @@ is specified then all the output from the window will appears in the
 results section.  If =value= is specified, then only the last returned
 value of the code will be displayed in the results section.
 
+**** Maxima: new headers ~:prologue~ and ~:epilogue~
+Babel options ~:prologue~ and ~:epilogue~ have been implemented for
+Maxima src blocks which prepend and append, respectively, the given
+code strings.  This can be useful for specifying formatting settings
+which would add clutter to exported code.  For instance, you can use
+this ~:prologue "fpprintprec: 2; linel: 50;"~ for presenting Maxima
+results in a beamer presentation.
+**** PlantUML: add support for header arguments
+
+[[http://plantuml.com/][Plantuml]] source blocks now support the [[http://orgmode.org/manual/prologue.html#prologue][~:prologue~]], [[http://orgmode.org/manual/epilogue.html#epilogue][~:epilogue~]] and
+[[http://orgmode.org/manual/var.html#var][~:var~]] header arguments.
+
 **** SQL: new engine added ~sqsh~
 
 A new engine was added to support ~sqsh~ command line utility for use
@@ -125,11 +137,6 @@ Select * From Users
 Where clue > 0
 ,#+END_SRC
 #+end_example
-
-**** PlantUML: add support for header arguments
-
-[[http://plantuml.com/][Plantuml]] source blocks now support the [[http://orgmode.org/manual/prologue.html#prologue][~:prologue~]], [[http://orgmode.org/manual/epilogue.html#epilogue][~:epilogue~]] and
-[[http://orgmode.org/manual/var.html#var][~:var~]] header arguments.
 *** Export
 **** Implement ~org-export-insert-image-links~
 This new function is meant to be used in back-ends supporting images
