@@ -16709,7 +16709,7 @@ Active key bindings in code blocks:
 
 Active key bindings in Org mode buffer:
 
-@multitable @columnfractions 0.45 0.55
+@multitable @columnfractions 0.5 0.5
 @kindex C-c C-v p
 @kindex C-c C-v C-p
 @item @kbd{C-c C-v p} @ @ @r{or} @ @ @kbd{C-c C-v C-p} @tab @code{org-babel-previous-src-block}
