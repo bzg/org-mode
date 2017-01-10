@@ -46,7 +46,7 @@ body to execute.  Parse tree is available under the `tree'
 variable, and communication channel under `info'."
   (declare (debug (form body)) (indent 1))
   `(org-test-with-temp-text ,data
-     (org-export--delete-comments)
+     (org-export--delete-comment-trees)
      (let* ((tree (org-element-parse-buffer))
 	    (info (org-combine-plists
 		   (org-export--get-export-attributes)
@@ -1760,33 +1760,34 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 In particular, structure of the document mustn't be altered after
 comments removal."
   (should
-   (equal (org-test-with-temp-text "
+   (equal "Para1\n\nPara2\n"
+	  (org-test-with-temp-text "
 Para1
 # Comment
 
 # Comment
 Para2"
-	    (org-export-as (org-test-default-backend)))
-	  "Para1\n\nPara2\n"))
+	    (org-export-as (org-test-default-backend)))))
   (should
-   (equal (org-test-with-temp-text "
+   (equal "Para1\n\nPara2\n"
+	  (org-test-with-temp-text "
 Para1
 # Comment
 Para2"
-	    (org-export-as (org-test-default-backend)))
-	  "Para1\n\nPara2\n"))
+	    (org-export-as (org-test-default-backend)))))
   (should
-   (equal (org-test-with-temp-text "
+   (equal "[fn:1] Para1\n\n\nPara2\n"
+	  (org-test-with-temp-text "
 \[fn:1] Para1
 # Inside definition
 
 
 # Outside definition
 Para2"
-	    (org-export-as (org-test-default-backend)))
-	  "[fn:1] Para1\n\n\nPara2\n"))
+	    (org-export-as (org-test-default-backend)))))
   (should
-   (equal (org-test-with-temp-text "
+   (equal "[fn:1] Para1\n\nPara2\n"
+	  (org-test-with-temp-text "
 \[fn:1] Para1
 
 # Inside definition
@@ -1794,24 +1795,32 @@ Para2"
 # Inside definition
 
 Para2"
-	    (org-export-as (org-test-default-backend)))
-	  "[fn:1] Para1\n\nPara2\n"))
+	    (org-export-as (org-test-default-backend)))))
   (should
-   (equal (org-test-with-temp-text "
+   (equal "[fn:1] Para1\n\nPara2\n"
+	  (org-test-with-temp-text "
 \[fn:1] Para1
 # Inside definition
 
 Para2"
-	    (org-export-as (org-test-default-backend)))
-	  "[fn:1] Para1\n\nPara2\n"))
+	    (org-export-as (org-test-default-backend)))))
   (should
-   (equal (org-test-with-temp-text "
+   (equal "[fn:1] Para1\n\nPara2\n"
+	  (org-test-with-temp-text "
 \[fn:1] Para1
 
 # Inside definition
 Para2"
-	    (org-export-as (org-test-default-backend)))
-	  "[fn:1] Para1\n\nPara2\n")))
+	    (org-export-as (org-test-default-backend)))))
+  (should
+   (equal "- item 1\n\n- item 2\n"
+	  (org-test-with-temp-text "
+- item 1
+
+  # Comment
+
+- item 2"
+	    (org-export-as (org-test-default-backend))))))
 
 
 
