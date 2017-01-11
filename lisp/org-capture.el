@@ -890,14 +890,14 @@ Store them in the capture property list."
 
        ((eq (car target) 'file+headline)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
+	(unless (derived-mode-p 'org-mode)
+	  (error
+	   "Target buffer \"%s\" for file+headline should be in Org mode"
+	   (current-buffer)))
 	(org-capture-put-target-region-and-position)
 	(widen)
 	(let ((hd (nth 2 target)))
 	  (goto-char (point-min))
-	  (unless (derived-mode-p 'org-mode)
-	    (error
-	     "Target buffer \"%s\" for file+headline should be in Org mode"
-	     (current-buffer)))
 	  (if (re-search-forward
 	       (format org-complex-heading-regexp-format (regexp-quote hd))
 	       nil t)
@@ -932,6 +932,10 @@ Store them in the capture property list."
        ((memq (car target) '(file+datetree file+datetree+prompt file+weektree file+weektree+prompt))
 	(require 'org-datetree)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
+	(unless (derived-mode-p 'org-mode)
+	  (error "Target buffer \"%s\" for %s should be in Org mode"
+		 (current-buffer)
+		 (car target)))
 	(org-capture-put-target-region-and-position)
 	(widen)
 	;; Make a date/week tree entry, with the current date (or
