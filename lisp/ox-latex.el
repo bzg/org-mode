@@ -2002,7 +2002,7 @@ holding contextual information."
 		    (concat headline-label pre-blanks contents))))))))
 
 (defun org-latex-format-headline-default-function
-    (todo _todo-type priority text tags info)
+    (todo _todo-type priority text tags _info)
   "Default format function for a headline.
 See `org-latex-format-headline-function' for details."
   (concat
@@ -2093,7 +2093,7 @@ holding contextual information."
 	     todo todo-type priority title tags contents info)))
 
 (defun org-latex-format-inlinetask-default-function
-    (todo _todo-type priority title tags contents info)
+    (todo _todo-type priority title tags contents _info)
   "Default format function for a inlinetasks.
 See `org-latex-format-inlinetask-function' for details."
   (let ((full-title
