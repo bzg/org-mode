@@ -4334,8 +4334,7 @@ significant."
 		 (and (org-export-match-search-cell-p datum search-cells)
 		      datum)))))
 	(unless matches
-	  (signal 'org-link-broken
-		  (list (org-element-property :raw-path link))))
+	  (signal 'org-link-broken (list (org-element-property :path link))))
 	(puthash
 	 search-cells
 	 ;; There can be multiple matches for un-typed searches, i.e.,
