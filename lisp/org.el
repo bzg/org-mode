@@ -10821,13 +10821,8 @@ link in a property drawer line."
 		      (>= (point) (match-beginning 5)))))
 	  (org-tags-view arg (substring (match-string 5) 0 -1)))
 	 ((eq type 'link)
-	  ;; When link is located within the description of another
-	  ;; link (e.g., an inline image), always open the parent
-	  ;; link.
-	  (let* ((link (let ((up (org-element-property :parent context)))
-			 (if (eq (org-element-type up) 'link) up context)))
-		 (type (org-element-property :type link))
-		 (path (org-link-unescape (org-element-property :path link))))
+	  (let ((type (org-element-property :type context))
+		(path (org-link-unescape (org-element-property :path context))))
 	    ;; Switch back to REFERENCE-BUFFER needed when called in
 	    ;; a temporary buffer through `org-open-link-from-string'.
 	    (with-current-buffer (or reference-buffer (current-buffer))
@@ -10842,8 +10837,8 @@ link in a property drawer line."
 		  ;; ("open" function called with a single argument).
 		  ;; If no such function is found, fallback to
 		  ;; `org-open-file'.
-		  (let* ((option (org-element-property :search-option link))
-			 (app (org-element-property :application link))
+		  (let* ((option (org-element-property :search-option context))
+			 (app (org-element-property :application context))
 			 (dedicated-function
 			  (org-link-get-parameter
 			   (if app (concat type "+" app) type)
@@ -10874,15 +10869,15 @@ link in a property drawer line."
 			 (org-with-wide-buffer
 			  (if (equal type "radio")
 			      (org-search-radio-target
-			       (org-element-property :path link))
+			       (org-element-property :path context))
 			    (org-link-search
 			     (if (member type '("custom-id" "coderef"))
-				 (org-element-property :raw-link link)
+				 (org-element-property :raw-link context)
 			       path)
 			     ;; Prevent fuzzy links from matching
 			     ;; themselves.
 			     (and (equal type "fuzzy")
-				  (+ 2 (org-element-property :begin link)))))
+				  (+ 2 (org-element-property :begin context)))))
 			  (point))))
 		    (unless (and (<= (point-min) destination)
 				 (>= (point-max) destination))
