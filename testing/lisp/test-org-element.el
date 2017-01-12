@@ -3250,6 +3250,11 @@ Text
     (org-element-normalize-contents
      '(paragraph nil "  Two spaces\n   Three spaces"))
     '(paragraph nil "Two spaces\n Three spaces")))
+  (should
+   (equal
+    (org-element-normalize-contents
+     '(paragraph nil "  Two spaces\nNo space"))
+    '(paragraph nil "  Two spaces\nNo space")))
   ;; Ignore objects within contents when computing maximum common
   ;; indentation.  However, if contents start with an object, common
   ;; indentation is 0.
