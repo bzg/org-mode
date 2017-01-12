@@ -2882,15 +2882,10 @@ contextual information."
 
 (defun org-odt--encode-tabs-and-spaces (line)
   (replace-regexp-in-string
-   "\\([\t]\\|\\([ ]+\\)\\)"
+   "\\(\t\\| \\{2,\\}\\)"
    (lambda (s)
-     (cond
-      ((string= s "\t") "<text:tab/>")
-      (t (let ((n (length s)))
-	   (cond
-	    ((= n 1) " ")
-	    ((> n 1) (concat " " (format "<text:s text:c=\"%d\"/>" (1- n))))
-	    (t ""))))))
+     (if (string= s "\t") "<text:tab/>"
+       (format " <text:s text:c=\"%d\"/>" (1- (length s)))))
    line))
 
 (defun org-odt--encode-plain-text (text &optional no-whitespace-filling)
@@ -3673,15 +3668,13 @@ channel."
   "Transcode a VERSE-BLOCK element from Org to ODT.
 CONTENTS is verse block contents.  INFO is a plist holding
 contextual information."
-  ;; Add line breaks to each line of verse.
-  (setq contents (replace-regexp-in-string
-		  "\\(<text:line-break/>\\)?[ \t]*\n"
-		  "<text:line-break/>" contents))
-  ;; Replace tabs and spaces.
-  (setq contents (org-odt--encode-tabs-and-spaces contents))
-  ;; Surround it in a verse environment.
-  (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
-	  "OrgVerse" contents))
+  (format "\n<text:p text:style-name=\"OrgVerse\">%s</text:p>"
+	  (replace-regexp-in-string
+	   ;; Replace leading tabs and spaces.
+	   "^[ \t]+" #'org-odt--encode-tabs-and-spaces
+	   ;; Add line breaks to each line of verse.
+	   (replace-regexp-in-string
+	    "\\(<text:line-break/>\\)?[ \t]*$" "<text:line-break/>" contents))))
 
 
 
