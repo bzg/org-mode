@@ -3592,20 +3592,16 @@ information."
   "Transcode a VERSE-BLOCK element from Org to HTML.
 CONTENTS is verse block contents.  INFO is a plist holding
 contextual information."
-  ;; Replace each newline character with line break.  Also replace
-  ;; each blank line with a line break.
-  (setq contents (replace-regexp-in-string
-		  "^ *\\\\\\\\$" (format "%s\n" (org-html-close-tag "br" nil info))
-		  (replace-regexp-in-string
-		   "\\(\\\\\\\\\\)?[ \t]*\n"
-		   (format "%s\n" (org-html-close-tag "br" nil info)) contents)))
-  ;; Replace each white space at beginning of a line with a
-  ;; non-breaking space.
-  (while (string-match "^[ \t]+" contents)
-    (let* ((num-ws (length (match-string 0 contents)))
-	   (ws (org-html--make-string num-ws "&#xa0;")))
-      (setq contents (replace-match ws nil t contents))))
-  (format "<p class=\"verse\">\n%s</p>" contents))
+  (format "<p class=\"verse\">\n%s</p>"
+	  ;; Replace leading white spaces with non-breaking spaces.
+	  (replace-regexp-in-string
+	   "^[ \t]+" (lambda (m) (org-html--make-string (length m) "&#xa0;"))
+	   ;; Replace each newline character with line break.  Also
+	   ;; remove any trailing "br" close-tag so as to avoid
+	   ;; duplicates.
+	   (let* ((br (org-html-close-tag "br" nil info))
+		  (re (format "\\(%s\\)[ \t]*$" (regexp-quote br))))
+	     (replace-regexp-in-string re br contents)))))
 
 
 ;;; Filter Functions
