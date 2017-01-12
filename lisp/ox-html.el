@@ -1566,7 +1566,11 @@ INFO is the current state of the export process, as a plist."
        (org-html-html5-p info)))
 
 (defun org-html-close-tag (tag attr info)
-  (concat "<" tag " " attr
+  "Close TAG.
+ATTR specifies additional attributes, as a string.  INFO is
+a property list containing current export state."
+  (concat "<" tag
+	  (org-string-nw-p (concat " " attr))
 	  (if (org-html-xhtml-p info) " />" ">")))
 
 (defun org-html-doctype (info)
