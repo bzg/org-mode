@@ -1566,25 +1566,26 @@ INFO is the current state of the export process, as a plist."
        (org-html-html5-p info)))
 
 (defun org-html-close-tag (tag attr info)
-  "Close TAG.
-ATTR specifies additional attributes, as a string.  INFO is
-a property list containing current export state."
+  "Return close-tag for string TAG.
+ATTR specifies additional attributes.  INFO is a property list
+containing current export state."
   (concat "<" tag
 	  (org-string-nw-p (concat " " attr))
 	  (if (org-html-xhtml-p info) " />" ">")))
 
 (defun org-html-doctype (info)
-  "Return correct html doctype tag from `org-html-doctype-alist',
-or the literal value of :html-doctype from INFO if :html-doctype
-is not found in the alist.
-INFO is a plist used as a communication channel."
+  "Return correct HTML doctype tag.
+INFO is a plist used as a communication channel.  Doctype tag is
+extracted from `org-html-doctype-alist', or the literal value
+of :html-doctype from INFO if :html-doctype is not found in the
+alist."
   (let ((dt (plist-get info :html-doctype)))
     (or (cdr (assoc dt org-html-doctype-alist)) dt)))
 
 (defun org-html--make-attribute-string (attributes)
   "Return a list of attributes, as a string.
-ATTRIBUTES is a plist where values are either strings or nil. An
-attributes with a nil value will be omitted from the result."
+ATTRIBUTES is a plist where values are either strings or nil.  An
+attribute with a nil value will be omitted from the result."
   (let (output)
     (dolist (item attributes (mapconcat 'identity (nreverse output) " "))
       (cond ((null item) (pop output))
