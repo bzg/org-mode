@@ -7647,11 +7647,12 @@ added.
 @node Internal archiving
 @subsection Internal archiving
 
-If you want to just switch off (for agenda views) certain subtrees without
-moving them to a different file, you can use the @code{ARCHIVE tag}.
+@cindex archive tag
+If you want to just switch off---for agenda views---certain subtrees without
+moving them to a different file, you can use the archive tag.
 
-A headline that is marked with the ARCHIVE tag (@pxref{Tags}) stays at
-its location in the outline tree, but behaves in the following way:
+A headline that is marked with the @samp{:ARCHIVE:} tag (@pxref{Tags}) stays
+at its location in the outline tree, but behaves in the following way:
 @itemize @minus
 @item
 @vindex org-cycle-open-archived-trees
@@ -7749,6 +7750,15 @@ The extracted information is displayed in a special @emph{agenda
 buffer}.  This buffer is read-only, but provides commands to visit the
 corresponding locations in the original Org files, and even to
 edit these files remotely.
+
+@vindex org-agenda-skip-comment-trees
+@vindex org-agenda-skip-archived-trees
+@cindex commented entries, in agenda views
+@cindex archived entries, in agenda views
+By default, the report ignores commented (@pxref{Comment lines}) and archived
+(@pxref{Internal archiving}) entries.  You can override this by setting
+@code{org-agenda-skip-comment-trees} and
+@code{org-agenda-skip-archived-trees} to @code{nil}.
 
 @vindex org-agenda-window-setup
 @vindex org-agenda-restore-windows-after-quit
@@ -10864,17 +10874,18 @@ Macro expansion takes place during the very beginning of the export process.
 
 @node Comment lines
 @section Comment lines
-@cindex comment lines
 @cindex exporting, not
-@cindex #+BEGIN_COMMENT
 
+@cindex comment lines
 Lines starting with zero or more whitespace characters followed by one
 @samp{#} and a whitespace are treated as comments and, as such, are not
 exported.
 
+@cindex #+BEGIN_COMMENT
 Likewise, regions surrounded by @samp{#+BEGIN_COMMENT}
 ... @samp{#+END_COMMENT} are not exported.
 
+@cindex comment trees
 Finally, a @samp{COMMENT} keyword at the beginning of an entry, but after any
 other keyword or priority cookie, comments out the entire subtree.  In this
 case, the subtree is not exported and no code block within it is executed
