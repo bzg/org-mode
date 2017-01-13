@@ -9656,11 +9656,12 @@ This causes the following issues:
 Org needs to make a decision which @code{COLUMNS} format to use.  Since the
 entries in the agenda are collected from different files, and different files
 may have different @code{COLUMNS} formats, this is a non-trivial problem.
-Org first checks if the variable @code{org-agenda-overriding-columns-format} is
-currently set, and if so, takes the format from there.  Otherwise it takes
+Org first checks if the variable @code{org-agenda-overriding-columns-format}
+is currently set, and if so, takes the format from there.  Otherwise it takes
 the format associated with the first item in the agenda, or, if that item
-does not have a specific format (defined in a property, or in its file), it
+does not have a specific format---defined in a property, or in its file---it
 uses @code{org-columns-default-format}.
+
 @item
 @cindex property, special, CLOCKSUM
 If any of the columns has a summary type defined (@pxref{Column attributes}),
@@ -9669,11 +9670,12 @@ make sure that the computations of this property are up to date.  This is
 also true for the special @code{CLOCKSUM} property.  Org will then sum the
 values displayed in the agenda.  In the daily/weekly agenda, the sums will
 cover a single day; in all other views they cover the entire block.  It is
-vital to realize that the agenda may show the same entry @emph{twice} (for
-example as scheduled and as a deadline), and it may show two entries from the
-same hierarchy (for example a @emph{parent} and its @emph{child}).  In these
+vital to realize that the agenda may show the same entry @emph{twice}---for
+example as scheduled and as a deadline---and it may show two entries from the
+same hierarchy---for example a @emph{parent} and its @emph{child}.  In these
 cases, the summation in the agenda will lead to incorrect results because
 some values will count double.
+
 @item
 When the column view in the agenda shows the @code{CLOCKSUM}, that is always
 the entire clocked time for this item.  So even in the daily/weekly agenda,
@@ -9687,10 +9689,10 @@ the agenda).
 @item
 @cindex property, special, CLOCKSUM_T
 When the column view in the agenda shows the @code{CLOCKSUM_T}, that is
-always today's clocked time for this item.  So even in the weekly agenda,
-the clocksum listed in column view only originates from today.  This lets
-you compare the time you spent on a task for today, with the time already
-spent (via @code{CLOCKSUM}) and with the planned total effort for it.
+always today's clocked time for this item.  So even in the weekly agenda, the
+clocksum listed in column view only originates from today.  This lets you
+compare the time you spent on a task for today, with the time already
+spent ---via @code{CLOCKSUM}---and with the planned total effort for it.
 @end enumerate
 
 
