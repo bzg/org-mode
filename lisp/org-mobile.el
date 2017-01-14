@@ -308,11 +308,9 @@ Also exclude files matching `org-mobile-files-exclude-regexp'."
 This will create the index file, copy all agenda files there, and also
 create all custom agenda views, for upload to the mobile phone."
   (interactive)
-  (let* ((agenda-base-name org-agenda-buffer-name)
-	 (agenda-this-name (or org-agenda-this-buffer-name agenda-base-name))
-	 (org-agenda-buffer-name "*SUMO*")
-	 (org-agenda-tag-filter org-agenda-tag-filter)
-	 (org-agenda-redo-command org-agenda-redo-command))
+  (let ((org-agenda-buffer-name "*SUMO*")
+	(org-agenda-tag-filter org-agenda-tag-filter)
+	(org-agenda-redo-command org-agenda-redo-command))
     (save-excursion
       (save-restriction
 	(save-window-excursion
