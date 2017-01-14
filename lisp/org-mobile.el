@@ -308,40 +308,31 @@ Also exclude files matching `org-mobile-files-exclude-regexp'."
 This will create the index file, copy all agenda files there, and also
 create all custom agenda views, for upload to the mobile phone."
   (interactive)
-  (let ((a-buffer (get-buffer org-agenda-buffer-name)))
-    (let ((org-agenda-curbuf-name org-agenda-buffer-name)
-	  (org-agenda-buffer-name "*SUMO*")
-	  (org-agenda-tag-filter org-agenda-tag-filter)
-	  (org-agenda-redo-command org-agenda-redo-command))
-      (save-excursion
-	(save-restriction
-	  (save-window-excursion
-	    (run-hooks 'org-mobile-pre-push-hook)
-	    (org-mobile-check-setup)
-	    (org-mobile-prepare-file-lists)
-	    (message "Creating agendas...")
-	    (let ((inhibit-redisplay t)
-		  (org-agenda-files (mapcar 'car org-mobile-files-alist)))
-	      (org-mobile-create-sumo-agenda))
-	    (message "Creating agendas...done")
-	    (org-save-all-org-buffers) ; to save any IDs created by this process
-	    (message "Copying files...")
-	    (org-mobile-copy-agenda-files)
-	    (message "Writing index file...")
-	    (org-mobile-create-index-file)
-	    (message "Writing checksums...")
-	    (org-mobile-write-checksums)
-	    (run-hooks 'org-mobile-post-push-hook))))
-      (setq org-agenda-buffer-name org-agenda-curbuf-name
-	    org-agenda-this-buffer-name org-agenda-curbuf-name))
-    (redraw-display)
-    (when (buffer-live-p a-buffer)
-      (if (not (get-buffer-window a-buffer))
-    	  (kill-buffer a-buffer)
-    	(let ((cw (selected-window)))
-    	  (select-window (get-buffer-window a-buffer))
-    	  (org-agenda-redo)
-    	  (select-window cw)))))
+  (let* ((agenda-base-name org-agenda-buffer-name)
+	 (agenda-this-name (or org-agenda-this-buffer-name agenda-base-name))
+	 (org-agenda-buffer-name "*SUMO*")
+	 (org-agenda-tag-filter org-agenda-tag-filter)
+	 (org-agenda-redo-command org-agenda-redo-command))
+    (save-excursion
+      (save-restriction
+	(save-window-excursion
+	  (run-hooks 'org-mobile-pre-push-hook)
+	  (org-mobile-check-setup)
+	  (org-mobile-prepare-file-lists)
+	  (message "Creating agendas...")
+	  (let ((inhibit-redisplay t)
+		(org-agenda-files (mapcar 'car org-mobile-files-alist)))
+	    (org-mobile-create-sumo-agenda))
+	  (message "Creating agendas...done")
+	  (org-save-all-org-buffers) ; to save any IDs created by this process
+	  (message "Copying files...")
+	  (org-mobile-copy-agenda-files)
+	  (message "Writing index file...")
+	  (org-mobile-create-index-file)
+	  (message "Writing checksums...")
+	  (org-mobile-write-checksums)
+	  (run-hooks 'org-mobile-post-push-hook)))))
+  (org-agenda-maybe-redo)
   (message "Files for mobile viewer staged"))
 
 (defvar org-mobile-before-process-capture-hook nil
