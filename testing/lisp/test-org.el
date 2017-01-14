@@ -3256,21 +3256,18 @@ Outside."
    :type 'user-error)
   ;; Error when trying to swap nested elements.
   (should-error
-   (org-test-with-temp-text "#+BEGIN_CENTER\nTest.\n#+END_CENTER"
-     (forward-line)
+   (org-test-with-temp-text "#+BEGIN_CENTER\n<point>Test.\n#+END_CENTER"
      (org-drag-element-backward))
    :type 'user-error)
   ;; Error when trying to swap an headline element and a non-headline
   ;; element.
   (should-error
-   (org-test-with-temp-text "Test.\n* Head 1"
-     (forward-line)
+   (org-test-with-temp-text "Test.\n<point>* Head 1"
      (org-drag-element-backward))
-   :type 'user-error)
+   :type 'error)
   ;; Error when called before first element.
   (should-error
-   (org-test-with-temp-text "\n"
-     (forward-line)
+   (org-test-with-temp-text "\n<point>"
      (org-drag-element-backward))
    :type 'user-error)
   ;; Preserve visibility of elements and their contents.
@@ -3288,7 +3285,14 @@ Text.
 	    (search-backward "- item 1")
 	    (org-drag-element-backward)
 	    (mapcar (lambda (ov) (cons (overlay-start ov) (overlay-end ov)))
-		    (overlays-in (point-min) (point-max)))))))
+		    (overlays-in (point-min) (point-max))))))
+  ;; Pathological case: handle call with point in blank lines right
+  ;; after a headline.
+  (should
+   (equal "* H2\n* H1\nText\n\n"
+	  (org-test-with-temp-text "* H1\nText\n* H2\n\n<point>"
+	    (org-drag-element-backward)
+	    (buffer-string)))))
 
 (ert-deftest test-org/drag-element-forward ()
   "Test `org-drag-element-forward' specifications."
