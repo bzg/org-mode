@@ -387,7 +387,7 @@ If there is no timestamp, create one."
 ;;; Getting project information out of `org-publish-project-alist'
 
 (defun org-publish-property (property project &optional default)
-  "Return value PROPERTY, as à symbol, in PROJECT.
+  "Return value PROPERTY, as a symbol, in PROJECT.
 DEFAULT is returned when PROPERTY is not actually set in PROJECT
 definition."
   (let ((properties (cdr project)))
