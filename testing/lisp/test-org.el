@@ -1324,6 +1324,10 @@
 
 (ert-deftest test-org/clone-with-time-shift ()
   "Test `org-clone-subtree-with-time-shift'."
+  ;; Raise an error before first heading.
+  (should-error
+   (org-test-with-temp-text ""
+     (org-clone-subtree-with-time-shift 1)))
   ;; Clone non-repeating once.
   (should
    (equal "\
