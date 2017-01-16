@@ -8976,14 +8976,15 @@ subtree has a repeater.  Setting N to 0, then, can be used to
 remove the repeater from a subtree and create a shifted clone
 with the original repeater."
   (interactive "nNumber of clones to produce: ")
+  (when (org-before-first-heading-p) (user-error "No subtree to clone"))
   (let ((shift
 	 (or shift
 	     (if (and (not (equal current-prefix-arg '(4)))
 		      (save-excursion
-			(re-search-forward org-ts-regexp-both
-					   (save-excursion
-					     (org-end-of-subtree t)
-					     (point)) t)))
+			(org-back-to-heading t)
+			(re-search-forward
+			 org-ts-regexp-both
+			 (save-excursion (org-end-of-subtree t) (point)) t)))
 		 (read-from-minibuffer
 		  "Date shift per clone (e.g. +1w, empty to copy unchanged): ")
 	       ""))) ;; No time shift
@@ -9005,7 +9006,6 @@ with the original repeater."
 				     ("m" . month) ("y" . year))))))
     (when (eq shift-what 'week) (setq shift-n (* 7 shift-n) shift-what 'day))
     (setq nmin 1 nmax n)
-    (org-back-to-heading t)
     (setq beg (point))
     (setq idprop (org-entry-get nil "ID"))
     (org-end-of-subtree t t)
