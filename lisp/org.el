@@ -11362,12 +11362,19 @@ If the file does not exist, an error is thrown."
 		     (search (concat file "::" search))
 		     (t file)))
 	 (dlink (downcase link))
-	 (old-buffer (current-buffer))
-	 (old-pos (point))
-	 (old-mode major-mode)
 	 (ext
 	  (and (string-match "\\`.*?\\.\\([a-zA-Z0-9]+\\(\\.gz\\)?\\)\\'" dfile)
 	       (match-string 1 dfile)))
+	 (save-position-maybe
+	  (let ((old-buffer (current-buffer))
+		(old-pos (point))
+		(old-mode major-mode))
+	    (lambda ()
+	      (and (derived-mode-p 'org-mode)
+		   (eq old-mode 'org-mode)
+		   (or (not (eq old-buffer (current-buffer)))
+		       (not (eq old-pos (point))))
+		   (org-mark-ring-push old-pos old-buffer)))))
 	 cmd link-match-data)
     (cond
      ((member in-emacs '((16) system))
@@ -11441,7 +11448,12 @@ If the file does not exist, an error is thrown."
       (widen)
       (cond (line (org-goto-line line)
 		  (when (derived-mode-p 'org-mode) (org-reveal)))
-	    (search (org-link-search search))))
+	    (search (condition-case err
+			(org-link-search search)
+		      ;; Save position before error-ing out so user
+		      ;; can easily move back to the original buffer.
+		      (error (funcall save-position-maybe)
+			     (error (nth 1 err)))))))
      ((functionp cmd)
       (save-match-data
 	(set-match-data link-match-data)
@@ -11450,23 +11462,18 @@ If the file does not exist, an error is thrown."
 	  ;; FIXME: Remove this check when most default installations
 	  ;; of Emacs have at least Org 9.0.
 	  ((debug wrong-number-of-arguments wrong-type-argument
-	    invalid-function)
+		  invalid-function)
 	   (user-error "Please see Org News for version 9.0 about \
 `org-file-apps'--Lisp error: %S" cmd)))))
      ((consp cmd)
       ;; FIXME: Remove this check when most default installations of
-      ;; Emacs have at least Org 9.0.
-      ;; Heads-up instead of silently fall back to
-      ;; `org-link-frame-setup' for an old usage of `org-file-apps'
-      ;; with sexp instead of a function for `cmd'.
+      ;; Emacs have at least Org 9.0.  Heads-up instead of silently
+      ;; fall back to `org-link-frame-setup' for an old usage of
+      ;; `org-file-apps' with sexp instead of a function for `cmd'.
       (user-error "Please see Org News for version 9.0 about \
 `org-file-apps'--Error: Deprecated usage of %S" cmd))
      (t (funcall (cdr (assq 'file org-link-frame-setup)) file)))
-    (and (derived-mode-p 'org-mode)
-	 (eq old-mode 'org-mode)
-	 (or (not (eq old-buffer (current-buffer)))
-	     (not (eq old-pos (point))))
-	 (org-mark-ring-push old-pos old-buffer))))
+    (funcall save-position-maybe)))
 
 (defun org-file-apps-entry-match-against-dlink-p (entry)
   "This function returns non-nil if `entry' uses a regular

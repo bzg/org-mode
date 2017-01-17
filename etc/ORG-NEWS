@@ -195,6 +195,13 @@ Call ~org-agenda-set-restriction-lock~ from the agenda.
 
 *** Computed dates in tables appear as inactive time stamps
 
+*** Save point before opening a file with an unknown search option
+
+When following a file link with a search option (e.g., =::#custom-id=)
+that doesn't exist in the target file, save positon before raising an
+error.  As a consequence, it is possible to jump back to the original
+document with ~org-mark-ring-goto~ (default binding =C-c &=).
+
 * Version 9.0
 
 ** Incompatible changes
