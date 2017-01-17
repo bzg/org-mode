@@ -1328,6 +1328,10 @@
   (should-error
    (org-test-with-temp-text ""
      (org-clone-subtree-with-time-shift 1)))
+  ;; Raise an error on invalid number of clones.
+  (should-error
+   (org-test-with-temp-text "* Clone me"
+     (org-clone-subtree-with-time-shift -1)))
   ;; Clone non-repeating once.
   (should
    (equal "\
@@ -1371,7 +1375,25 @@
 	    (org-clone-subtree-with-time-shift 0 "+2d")
 	    (replace-regexp-in-string
 	     "\\( [.A-Za-z]+\\)\\( \\+[0-9][hdmwy]\\)?>" "" (buffer-string)
-	     nil nil 1)))))
+	     nil nil 1))))
+  ;; Find time stamps before point.  If SHIFT is not specified, ask
+  ;; for a time shift.
+  (should
+   (string-prefix-p
+    "* H <2012-03-30"
+    (org-test-with-temp-text "* H <2012-03-29 Thu><point>"
+      (org-clone-subtree-with-time-shift 1 "+1d")
+      (buffer-substring-no-properties (line-beginning-position 2)
+				      (line-end-position 2)))))
+  (should
+   (string-prefix-p
+    "* H <2014-03-05"
+    (org-test-with-temp-text "* H <2014-03-04 Tue><point>"
+      (cl-letf (((symbol-function 'read-from-minibuffer)
+		 (lambda (&rest args) "+1d")))
+	(org-clone-subtree-with-time-shift 1 "+1d"))
+      (buffer-substring-no-properties (line-beginning-position 2)
+				      (line-end-position 2))))))
 
 
 ;;; Fixed-Width Areas
