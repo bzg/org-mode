@@ -8015,29 +8015,30 @@ So this will delete or add empty lines."
     (insert empty-lines)
     (move-to-column column)))
 
-(defun org-get-heading (&optional no-tags no-todo)
+(defun org-get-heading (&optional no-tags no-todo no-priority no-comment)
   "Return the heading of the current entry, without the stars.
 When NO-TAGS is non-nil, don't include tags.
-When NO-TODO is non-nil, don't include TODO keywords."
+When NO-TODO is non-nil, don't include TODO keywords.
+When NO-PRIORITY is non-nil, don't include priority cookie.
+When NO-COMMENT is non-nil, don't include COMMENT string."
   (save-excursion
     (org-back-to-heading t)
     (let ((case-fold-search nil))
-      (cond
-       ((and no-tags no-todo)
-	(looking-at org-complex-heading-regexp)
-	;; Return value has to be a string, but match group 4 is
-	;; optional.
-	(or (match-string 4) ""))
-       (no-tags
-	(looking-at (concat org-outline-regexp
-			    "\\(.*?\\)"
-			    "\\(?:[ \t]+:[[:alnum:]:_@#%]+:\\)?[ \t]*$"))
-	(match-string 1))
-       (no-todo
-	(looking-at org-todo-line-regexp)
-	(match-string 3))
-       (t (looking-at org-heading-regexp)
-	  (match-string 2))))))
+      (looking-at org-complex-heading-regexp)
+      (let ((todo (and (not no-todo) (match-string 2)))
+	    (priority (and (not no-priority) (match-string 3)))
+	    (headline (pcase (match-string 4)
+			(`nil "")
+			((and (guard no-comment) h)
+			 (replace-regexp-in-string
+			  (eval-when-compile
+			    (format "\\`%s[ \t]+" org-comment-string))
+			  "" h))
+			(h h)))
+	    (tags (and (not no-tags) (match-string 5))))
+	(mapconcat #'identity
+		   (delq nil (list todo priority headline tags))
+		   " ")))))
 
 (defvar orgstruct-mode)   ; defined below
 
