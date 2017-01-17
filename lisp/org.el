@@ -11973,7 +11973,6 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 	       (if pos
 		   (progn
 		     (goto-char pos)
-		     (looking-at org-outline-regexp)
 		     (setq level (org-get-valid-level (funcall outline-level) 1))
 		     (goto-char
 		      (if reversed
