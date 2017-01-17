@@ -642,7 +642,7 @@ See also `test-org-table/remote-reference-access'."
 | c   d            | c   d            |
 |                  |                  |
 | 2012-12          | 2012-12          |
-| [2012-12-31 Mon] | <2012-12-31 Mon> |
+| [2012-12-31 Mon] | [2012-12-31 Mon] |
 "
      1 (concat "#+TBLFM: $2 = if(\"$1\" == \"nan\", "
 	       "string(\"\"), string(subvec(\"$1\", 2, vlen(\"$1\")))); E"))
@@ -656,7 +656,7 @@ See also `test-org-table/remote-reference-access'."
 | c   d            | c d              |
 |                  |                  |
 | 2012-12          | 2000             |
-| [2012-12-31 Mon] | <2012-12-31 Mon> |
+| [2012-12-31 Mon] | [2012-12-31 Mon] |
 "
      1 "#+TBLFM: $2 = if(\"$1\" == \"nan\", string(\"\"), $1); E")))
 
