@@ -3786,6 +3786,35 @@ Text.
       (forward-line)
       (org-get-indentation)))))
 
+(ert-deftest test-org/org-get-valid-level ()
+  "Test function `org-get-valid-level' specifications."
+  (let ((org-odd-levels-only nil))
+    (should (equal 1 (org-get-valid-level 0 0)))
+    (should (equal 1 (org-get-valid-level 0 1)))
+    (should (equal 2 (org-get-valid-level 0 2)))
+    (should (equal 3 (org-get-valid-level 0 3)))
+    (should (equal 1 (org-get-valid-level 1 0)))
+    (should (equal 2 (org-get-valid-level 1 1)))
+    (should (equal 23 (org-get-valid-level 1 22)))
+    (should (equal 1 (org-get-valid-level 1 -1)))
+    (should (equal 1 (org-get-valid-level 2 -1))))
+  (let ((org-odd-levels-only t))
+    (should (equal 1 (org-get-valid-level 0 0)))
+    (should (equal 1 (org-get-valid-level 0 1)))
+    (should (equal 3 (org-get-valid-level 0 2)))
+    (should (equal 5 (org-get-valid-level 0 3)))
+    (should (equal 1 (org-get-valid-level 1 0)))
+    (should (equal 3 (org-get-valid-level 1 1)))
+    (should (equal 3 (org-get-valid-level 2 1)))
+    (should (equal 5 (org-get-valid-level 3 1)))
+    (should (equal 5 (org-get-valid-level 4 1)))
+    (should (equal 43 (org-get-valid-level 1 21)))
+    (should (equal 1 (org-get-valid-level 1 -1)))
+    (should (equal 1 (org-get-valid-level 2 -1)))
+    (should (equal 1 (org-get-valid-level 3 -1)))
+    (should (equal 3 (org-get-valid-level 4 -1)))
+    (should (equal 3 (org-get-valid-level 5 -1)))))
+
 
 ;;; Planning
 

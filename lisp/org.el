@@ -8262,13 +8262,14 @@ time to headlines when structure editing, based on the value of
   (if org-odd-levels-only 2 1))
 
 (defun org-get-valid-level (level &optional change)
-  "Rectify a level change under the influence of `org-odd-levels-only'
-LEVEL is a current level, CHANGE is by how much the level should be
-modified.  Even if CHANGE is nil, LEVEL may be returned modified because
-even level numbers will become the next higher odd number."
+  "Rectify a level change under the influence of `org-odd-levels-only'.
+LEVEL is a current level, CHANGE is by how much the level should
+be modified.  Even if CHANGE is nil, LEVEL may be returned
+modified because even level numbers will become the next higher
+odd number.  Returns values greater than 0."
   (if org-odd-levels-only
       (cond ((or (not change) (= 0 change)) (1+ (* 2 (/ level 2))))
-	    ((> change 0) (1+ (* 2 (/ (+ level (* 2 change)) 2))))
+	    ((> change 0) (1+ (* 2 (/ (+ (1- level) (* 2 change)) 2))))
 	    ((< change 0) (max 1 (1+ (* 2 (/ (+ level (* 2 change)) 2))))))
     (max 1 (+ level (or change 0)))))
 
