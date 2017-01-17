@@ -2910,7 +2910,12 @@ $1->    %s\n" orig formula form0 form))
 	(when (consp ev) (setq fmt nil ev "#ERROR"))
 	(org-table-justify-field-maybe
 	 (format org-table-formula-field-format
-		 (if fmt (format fmt (string-to-number ev)) ev)))
+		 (if fmt (format fmt (string-to-number ev))
+		   ;; Replace any active time stamp in the result with
+		   ;; an inactive one.  Dates in tables are likely
+		   ;; piece of regular data, not meant to appear in
+		   ;; the agenda.
+		   (replace-regexp-in-string org-ts-regexp "[\\1]" ev))))
 	(if (and down (> ndown 0) (looking-at ".*\n[ \t]*|[^-]"))
 	    (call-interactively 'org-return)
 	  (setq ndown 0)))

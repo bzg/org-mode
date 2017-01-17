@@ -191,6 +191,10 @@ It is the reciprocal of ~org-list-to-lisp~, which see.
 
 Call ~org-agenda-set-restriction-lock~ from the agenda.
 
+** Miscellaneous
+
+*** Computed dates in tables appear as inactive time stamps
+
 * Version 9.0
 
 ** Incompatible changes
