@@ -1571,51 +1571,51 @@ This will add overlays to the date lines, to show the summary for each day."
     ;; Ensure there's at least one summation column.
     (when (cl-some (lambda (spec) (nth 3 spec)) fmt)
       (goto-char (point-max))
-      (while (not (bobp))
-	(when (or (get-text-property (point) 'org-date-line)
-		  (eq (get-text-property (point) 'face)
-		      'org-agenda-structure))
-	  ;; OK, this is a date line that should be used.
-	  (let (rest)
-	    (dolist (c cache (setq cache rest))
-	      (if (> (car c) (point))
-		  (push c entries)
-		(push c rest))))
-	  ;; Now ENTRIES contains entries below the current one.
-	  ;; CACHE is the rest.  Compute the summaries for the
-	  ;; properties we want, set nil properties for the rest.
-	  (when (setq entries (mapcar 'cdr entries))
-	    (org-columns--display-here
-	     (mapcar
-	      (lambda (spec)
-		(pcase spec
-		  (`("ITEM" . ,_)
-		   ;; Replace ITEM with current date.  Preserve
-		   ;; properties for fontification.
-		   (let ((date (buffer-substring
-				(line-beginning-position)
-				(line-end-position))))
-		     (list spec date date)))
-		  (`(,_ ,_ ,_ nil ,_) (list spec "" ""))
-		  (`(,_ ,_ ,_ ,operator ,printf)
-		   (let* ((summarize (org-columns--summarize operator))
-			  (values
-			   ;; Use real values for summary, not those
-			   ;; prepared for display.
-			   (delq nil
-				 (mapcar
-				  (lambda (e)
-				    (org-string-nw-p (nth 1 (assoc spec e))))
-				  entries)))
-			  (final (if values (funcall summarize values printf)
-				   "")))
-		     (unless (equal final "")
-		       (put-text-property 0 (length final) 'face 'bold final))
-		     (list spec final final)))))
-	      fmt)
-	     'dateline)
-	    (setq-local org-agenda-columns-active t)))
-	(forward-line -1)))))
+      (catch :complete
+	(while t
+	  (when (or (get-text-property (point) 'org-date-line)
+		    (eq (get-text-property (point) 'face) 'org-agenda-structure))
+	    ;; OK, this is a date line that should be used.
+	    (let (rest)
+	      (dolist (c cache (setq cache rest))
+		(if (> (car c) (point))
+		    (push c entries)
+		  (push c rest))))
+	    ;; Now ENTRIES contains entries below the current one.
+	    ;; CACHE is the rest.  Compute the summaries for the
+	    ;; properties we want, set nil properties for the rest.
+	    (when (setq entries (mapcar #'cdr entries))
+	      (org-columns--display-here
+	       (mapcar
+		(lambda (spec)
+		  (pcase spec
+		    (`("ITEM" . ,_)
+		     ;; Replace ITEM with current date.  Preserve
+		     ;; properties for fontification.
+		     (let ((date (buffer-substring
+				  (line-beginning-position)
+				  (line-end-position))))
+		       (list spec date date)))
+		    (`(,_ ,_ ,_ nil ,_) (list spec "" ""))
+		    (`(,_ ,_ ,_ ,operator ,printf)
+		     (let* ((summarize (org-columns--summarize operator))
+			    (values
+			     ;; Use real values for summary, not those
+			     ;; prepared for display.
+			     (delq nil
+				   (mapcar
+				    (lambda (e)
+				      (org-string-nw-p (nth 1 (assoc spec e))))
+				    entries)))
+			    (final (if values (funcall summarize values printf)
+				     "")))
+		       (unless (equal final "")
+			 (put-text-property 0 (length final) 'face 'bold final))
+		       (list spec final final)))))
+		fmt)
+	       'dateline)
+	      (setq-local org-agenda-columns-active t)))
+	  (if (bobp) (throw :complete t) (forward-line -1)))))))
 
 (defun org-agenda-colview-compute (fmt)
   "Compute the relevant columns in the contributing source buffers."
