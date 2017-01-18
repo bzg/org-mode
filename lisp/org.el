@@ -8903,10 +8903,10 @@ with the original repeater."
 		   "Date shift per clone (e.g. +1w, empty to copy unchanged): ")
 		"")))			;No time shift
 	 (doshift
-	  (or (not (org-string-nw-p shift))
-	      (string-match "\\`[ \t]*\\+?\\([0-9]+\\)\\([dwmy]\\)[ \t]*\\'"
-			    shift)
-	      (user-error "Invalid shift specification %s" shift))))
+	  (and (org-string-nw-p shift)
+	       (or (string-match "\\`[ \t]*\\+?\\([0-9]+\\)\\([dwmy]\\)[ \t]*\\'"
+				 shift)
+		   (user-error "Invalid shift specification %s" shift)))))
     (goto-char end-of-tree)
     (unless (bolp) (insert "\n"))
     (let* ((end (point))
