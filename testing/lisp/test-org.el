@@ -1380,7 +1380,7 @@
     (org-test-with-temp-text "* H <2014-03-04 Tue><point>"
       (cl-letf (((symbol-function 'read-from-minibuffer)
 		 (lambda (&rest args) "+1d")))
-	(org-clone-subtree-with-time-shift 1 "+1d"))
+	(org-clone-subtree-with-time-shift 1))
       (buffer-substring-no-properties (line-beginning-position 2)
 				      (line-end-position 2))))))
 
