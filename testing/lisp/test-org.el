@@ -1513,10 +1513,19 @@
    (equal "H"
 	  (org-test-with-temp-text "* H\nText<point>"
 	    (org-get-heading))))
-  ;; Without any optional argument, return TODO keywords and tags.
+  ;; Without any optional argument, return TODO keyword, priority
+  ;; cookie, COMMENT keyword and tags.
   (should
    (equal "TODO H"
 	  (org-test-with-temp-text "#+TODO: TODO | DONE\n* TODO H<point>"
+	    (org-get-heading))))
+  (should
+   (equal "[#A] H"
+	  (org-test-with-temp-text "* [#A] H"
+	    (org-get-heading))))
+  (should
+   (equal "COMMENT H"
+	  (org-test-with-temp-text "* COMMENT H"
 	    (org-get-heading))))
   (should
    (equal "H :tag:"
@@ -1545,11 +1554,39 @@
    (equal "Todo H"
 	  (org-test-with-temp-text "#+TODO: TODO | DONE\n* Todo H<point>"
 	    (org-get-heading nil t))))
+  ;; With NO-PRIORITY, ignore priority.
+  (should
+   (equal "H"
+	  (org-test-with-temp-text "* [#A] H"
+	    (org-get-heading nil nil t))))
+  (should
+   (equal "H"
+	  (org-test-with-temp-text "* H"
+	    (org-get-heading nil nil t))))
+  (should
+   (equal "TODO H"
+	  (org-test-with-temp-text "* TODO [#A] H"
+	    (org-get-heading nil nil t))))
+  ;; With NO-COMMENT, ignore COMMENT keyword.
+  (should
+   (equal "H"
+	  (org-test-with-temp-text "* COMMENT H"
+	    (org-get-heading nil nil nil t))))
+  (should
+   (equal "H"
+	  (org-test-with-temp-text "* H"
+	    (org-get-heading nil nil nil t))))
+  (should
+   (equal "TODO [#A] H"
+	  (org-test-with-temp-text "* TODO [#A] COMMENT H"
+	    (org-get-heading nil nil nil t))))
   ;; On an empty headline, return value is consistent.
   (should (equal "" (org-test-with-temp-text "* " (org-get-heading))))
   (should (equal "" (org-test-with-temp-text "* " (org-get-heading t))))
   (should (equal "" (org-test-with-temp-text "* " (org-get-heading nil t))))
-  (should (equal "" (org-test-with-temp-text "* " (org-get-heading t t)))))
+  (should (equal "" (org-test-with-temp-text "* " (org-get-heading nil nil t))))
+  (should
+   (equal "" (org-test-with-temp-text "* " (org-get-heading nil nil nil t)))))
 
 (ert-deftest test-org/in-commented-heading-p ()
   "Test `org-in-commented-heading-p' specifications."

@@ -11146,7 +11146,8 @@ of matched result, which is either `dedicated' or `fuzzy'."
 			  org-comment-string
 			  (mapconcat #'regexp-quote words ".+")))
 		 (cookie-re "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]")
-		 (comment-re (format "\\`%s[ \t]+" org-comment-string)))
+		 (comment-re (eval-when-compile
+			       (format "\\`%s[ \t]+" org-comment-string))))
 	     (goto-char (point-min))
 	     (catch :found
 	       (while (re-search-forward title-re nil t)
@@ -11155,7 +11156,7 @@ of matched result, which is either `dedicated' or `fuzzy'."
 			       (replace-regexp-in-string
 				cookie-re ""
 				(replace-regexp-in-string
-				 comment-re "" (org-get-heading t t)))))
+				 comment-re "" (org-get-heading t t t)))))
 		   (throw :found t)))
 	       nil)))
       (beginning-of-line)
