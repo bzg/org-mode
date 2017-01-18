@@ -100,9 +100,11 @@
 	      (if a (org-latex-export-to-pdf t s v b)
 		(org-open-file (org-latex-export-to-pdf nil s v b)))))))
   :filters-alist '((:filter-options . org-latex-math-block-options-filter)
+		   (:filter-paragraph . org-latex-clean-invalid-line-breaks)
 		   (:filter-parse-tree org-latex-math-block-tree-filter
 				       org-latex-matrices-tree-filter
-				       org-latex-image-link-filter))
+				       org-latex-image-link-filter)
+		   (:filter-verse-block . org-latex-clean-invalid-line-breaks))
   :options-alist
   '((:latex-class "LATEX_CLASS" nil org-latex-default-class t)
     (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
@@ -1624,6 +1626,25 @@ INFO is a plist used as a communication channel."
 	    (format org-latex-compiler-file-string compiler))))
 
 
+;;; Filters
+
+(defun org-latex-matrices-tree-filter (tree _backend info)
+  (org-latex--wrap-latex-matrices tree info))
+
+(defun org-latex-math-block-tree-filter (tree _backend info)
+  (org-latex--wrap-latex-math-block tree info))
+
+(defun org-latex-math-block-options-filter (info _backend)
+  (dolist (prop '(:author :date :title) info)
+    (plist-put info prop
+	       (org-latex--wrap-latex-math-block (plist-get info prop) info))))
+
+(defun org-latex-clean-invalid-line-breaks (data _backend _info)
+  (replace-regexp-in-string
+   "\\(\\end{[A-Za-z0-9*]+}\\|^\\)[ \t]*\\\\\\\\[ \t]*$" "\\1"
+   data))
+
+
 ;;; Template
 
 (defun org-latex-template (contents info)
@@ -2688,8 +2709,6 @@ channel."
 	    (t "\\[\n%s\\]"))
 	  contents))
 
-(defun org-latex-matrices-tree-filter (tree _backend info)
-  (org-latex--wrap-latex-matrices tree info))
 
 ;;;; Pseudo Object: LaTeX Math Block
 
@@ -2746,14 +2765,6 @@ containing export options.  Modify DATA by side-effect and return it."
       info nil '(subscript superscript latex-math-block) t)
     ;; Return updated DATA.
     data))
-
-(defun org-latex-math-block-tree-filter (tree _backend info)
-  (org-latex--wrap-latex-math-block tree info))
-
-(defun org-latex-math-block-options-filter (info _backend)
-  (dolist (prop '(:author :date :title) info)
-    (plist-put info prop
-	       (org-latex--wrap-latex-math-block (plist-get info prop) info))))
 
 (defun org-latex-math-block (_math-block contents _info)
   "Transcode a MATH-BLOCK object from Org to LaTeX.
