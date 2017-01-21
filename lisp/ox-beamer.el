@@ -797,7 +797,7 @@ holding export options."
      ;; LaTeX compiler
      (org-latex--insert-compiler info)
      ;; Document class and packages.
-     (org-latex--make-preamble info)
+     (org-latex-make-preamble info)
      ;; Insert themes.
      (let ((format-theme
 	    (function

@@ -115,8 +115,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function isearch-no-upper-case-p "isearch" (string regexp-flag))
 (declare-function org-add-archive-files "org-archive" (files))
 (declare-function org-agenda-entry-get-agenda-timestamp "org-agenda" (pom))
-(declare-function org-agenda-list "org-agenda"
-		  (&optional arg start-day span with-hour))
+(declare-function org-agenda-list "org-agenda" (&optional arg start-day span with-hour))
 (declare-function org-agenda-redo "org-agenda" (&optional all))
 (declare-function org-babel-do-in-edit-buffer "ob-core" (&rest body) t)
 (declare-function org-babel-tangle-file "ob-tangle" (file &optional target-file lang))
@@ -172,6 +171,9 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-tags-view "org-agenda" (&optional todo-only match))
 (declare-function orgtbl-ascii-plot "org-table" (&optional ask))
 (declare-function orgtbl-mode "org-table" (&optional arg))
+(declare-function org-export-get-backend "ox" (name))
+(declare-function org-export-get-environment "ox" (&optional backend subtreep ext-plist))
+(declare-function org-latex-make-preamble "ox-latex" (info &optional template))
 
 (defsubst org-uniquify (list)
   "Non-destructively remove duplicate elements from LIST."
@@ -19350,26 +19352,6 @@ inspection."
       ;; Failed conversion.  Return the LaTeX fragment verbatim
       latex-frag)))
 
-(declare-function org-export-get-backend "ox" (name))
-(declare-function org-export--get-global-options "ox" (&optional backend))
-(declare-function org-export--get-inbuffer-options "ox" (&optional backend))
-(declare-function org-latex-guess-inputenc "ox-latex" (header))
-(declare-function org-latex-guess-babel-language "ox-latex" (header info))
-(defun org-create-formula--latex-header ()
-  "Return LaTeX header appropriate for previewing a LaTeX snippet."
-  (let ((info (org-combine-plists (org-export--get-global-options
-				   (org-export-get-backend 'latex))
-				  (org-export--get-inbuffer-options
-				   (org-export-get-backend 'latex)))))
-    (org-latex-guess-babel-language
-     (org-latex-guess-inputenc
-      (org-splice-latex-header
-       org-format-latex-header
-       org-latex-default-packages-alist
-       org-latex-packages-alist t
-       (plist-get info :latex-header)))
-     info)))
-
 (defun org--get-display-dpi ()
   "Get the DPI of the display.
 The function assumes that the display has the same pixel width in
@@ -19408,8 +19390,11 @@ a HTML file."
 	 (post-clean (or (plist-get processing-info :post-clean)
 			 '(".dvi" ".xdv" ".pdf" ".tex" ".aux" ".log"
 			   ".svg" ".png" ".jpg" ".jpeg" ".out")))
-	 (latex-header (or (plist-get processing-info :latex-header)
-			   (org-create-formula--latex-header)))
+	 (latex-header
+	  (or (plist-get processing-info :latex-header)
+	      (org-latex-make-preamble
+	       (org-export-get-environment (org-export-get-backend 'latex))
+	       org-format-latex-header)))
 	 (latex-compiler (plist-get processing-info :latex-compiler))
 	 (image-converter (plist-get processing-info :image-converter))
 	 (tmpdir temporary-file-directory)

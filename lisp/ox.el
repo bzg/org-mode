@@ -77,12 +77,12 @@
 (require 'org-macro)
 (require 'tabulated-list)
 
+(declare-function org-src-coderef-format "org-src" (&optional element))
+(declare-function org-src-coderef-regexp "org-src" (fmt &optional label))
 (declare-function org-publish "ox-publish" (project &optional force async))
 (declare-function org-publish-all "ox-publish" (&optional force async))
 (declare-function org-publish-current-file "ox-publish" (&optional force async))
 (declare-function org-publish-current-project "ox-publish" (&optional force async))
-(declare-function org-src-coderef-format "org-src" (&optional element))
-(declare-function org-src-coderef-regexp "org-src" (fmt &optional label))
 
 (defvar org-publish-project-alist)
 (defvar org-table-number-fraction)
@@ -1019,13 +1019,12 @@ mode."
 				  (:copier nil))
   name parent transcoders options filters blocks menu)
 
+;;;###autoload
 (defun org-export-get-backend (name)
   "Return export back-end named after NAME.
 NAME is a symbol.  Return nil if no such back-end is found."
-  (catch 'found
-    (dolist (b org-export-registered-backends)
-      (when (eq (org-export-backend-name b) name)
-	(throw 'found b)))))
+  (cl-find-if (lambda (b) (and (eq name (org-export-backend-name b))))
+	      org-export-registered-backends))
 
 (defun org-export-register-backend (backend)
   "Register BACKEND as a known export back-end.
@@ -1355,6 +1354,7 @@ The back-end could then be called with, for example:
 ;; along with their value in order to set them as buffer local
 ;; variables later in the process.
 
+;;;###autoload
 (defun org-export-get-environment (&optional backend subtreep ext-plist)
   "Collect export options from the current buffer.
 

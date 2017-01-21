@@ -3585,9 +3585,9 @@ Text
   ;; Preserve local structures when re-parenting.
   (should
    (eq 'table
-       (org-test-with-temp-text
-	   "#+begin_center\nP0\n\n<point>\n\n  P1\n  | a | b |\n| c | d |\n#+end_center"
-	 (let ((org-element-use-cache t))
+       (let ((org-element-use-cache t))
+	 (org-test-with-temp-text
+	     "#+begin_center\nP0\n\n<point>\n\n  P1\n  | a | b |\n| c | d |\n#+end_center"
 	   (save-excursion (search-forward "| c |") (org-element-at-point))
 	   (insert "- item")
 	   (search-forward "| c |")
