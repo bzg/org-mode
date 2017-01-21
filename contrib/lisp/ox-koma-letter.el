@@ -631,7 +631,7 @@ holding export options."
    ;; LaTeX compiler
    (org-latex--insert-compiler info)
    ;; Document class and packages.
-   (org-latex--make-preamble info)
+   (org-latex-make-preamble info)
    ;; Settings.  They can come from three locations, in increasing
    ;; order of precedence: global variables, LCO files and in-buffer
    ;; settings.  Thus, we first insert settings coming from global

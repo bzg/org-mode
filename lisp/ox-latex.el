@@ -1584,37 +1584,6 @@ INFO is a plist used as a communication channel."
       (?L . ,(capitalize language))
       (?D . ,(org-export-get-date info)))))
 
-(defun org-latex--make-preamble (info)
-  "Return a formatted LaTeX preamble.
-INFO is a plist used as a communication channel."
-  (let* ((class (plist-get info :latex-class))
-	    (class-options (plist-get info :latex-class-options))
-	    (header (nth 1 (assoc class (plist-get info :latex-classes))))
-	    (document-class-string
-	     (and (stringp header)
-		  (if (not class-options) header
-		    (replace-regexp-in-string
-		     "^[ \t]*\\\\documentclass\\(\\(\\[[^]]*\\]\\)?\\)"
-		     class-options header t nil 1)))))
-       (if (not document-class-string)
-	   (user-error "Unknown LaTeX class `%s'" class)
-	 (org-latex-guess-polyglossia-language
-	  (org-latex-guess-babel-language
-	   (org-latex-guess-inputenc
-	    (org-element-normalize-string
-	     (org-splice-latex-header
-	      document-class-string
-	      (org-latex--remove-packages
-	       org-latex-default-packages-alist info)
-	      (org-latex--remove-packages
-	       org-latex-packages-alist info)
-	      nil
-	      (mapconcat 'org-element-normalize-string
-			 (list (plist-get info :latex-header)
-			       (plist-get info :latex-header-extra)) ""))))
-	   info)
-	  info))))
-
 (defun org-latex--insert-compiler (info)
   "Insert LaTeX_compiler info into the document.
 INFO is a plist used as a communication channel."
@@ -1645,6 +1614,38 @@ INFO is a plist used as a communication channel."
 
 ;;; Template
 
+;;;###autoload
+(defun org-latex-make-preamble (info &optional template)
+  "Return a formatted LaTeX preamble.
+INFO is a plist used as a communication channel.  Optional
+argument TEMPLATE, when non-nil, is the header template string,
+as expected by `org-splice-latex-header'."
+  (let* ((class (plist-get info :latex-class))
+	 (class-options (plist-get info :latex-class-options))
+	 (header (nth 1 (assoc class (plist-get info :latex-classes))))
+	 (class-template
+	  (or template
+	      (and (stringp header)
+		   (if (not class-options) header
+		     (replace-regexp-in-string
+		      "^[ \t]*\\\\documentclass\\(\\(\\[[^]]*\\]\\)?\\)"
+		      class-options header t nil 1)))
+	      (user-error "Unknown LaTeX class `%s'" class))))
+    (org-latex-guess-polyglossia-language
+     (org-latex-guess-babel-language
+      (org-latex-guess-inputenc
+       (org-element-normalize-string
+	(org-splice-latex-header
+	 class-template
+	 (org-latex--remove-packages org-latex-default-packages-alist info)
+	 (org-latex--remove-packages org-latex-packages-alist info)
+	 nil
+	 (mapconcat #'org-element-normalize-string
+		    (list (plist-get info :latex-header)
+			  (plist-get info :latex-header-extra)) ""))))
+      info)
+     info)))
+
 (defun org-latex-template (contents info)
   "Return complete document string after LaTeX conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
@@ -1658,7 +1659,7 @@ holding export options."
      ;; LaTeX compiler.
      (org-latex--insert-compiler info)
      ;; Document class and packages.
-     (org-latex--make-preamble info)
+     (org-latex-make-preamble info)
      ;; Possibly limit depth for headline numbering.
      (let ((sec-num (plist-get info :section-numbers)))
        (when (integerp sec-num)

@@ -77,12 +77,12 @@
 (require 'org-macro)
 (require 'tabulated-list)
 
+(declare-function org-src-coderef-format "org-src" (&optional element))
+(declare-function org-src-coderef-regexp "org-src" (fmt &optional label))
 (declare-function org-publish "ox-publish" (project &optional force async))
 (declare-function org-publish-all "ox-publish" (&optional force async))
 (declare-function org-publish-current-file "ox-publish" (&optional force async))
 (declare-function org-publish-current-project "ox-publish" (&optional force async))
-(declare-function org-src-coderef-format "org-src" (&optional element))
-(declare-function org-src-coderef-regexp "org-src" (fmt &optional label))
 
 (defvar org-publish-project-alist)
 (defvar org-table-number-fraction)
