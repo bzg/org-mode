@@ -21,7 +21,7 @@
 
 (ert-deftest test-org-info/export ()
   "Test `org-info-export' specifications."
-  ;; Regular export to HTML, with node.  Without node, refer to "Top".
+  ;; Export to HTML.  Without node, refer to "Top".
   (should
    (equal (org-info-export "filename#node" nil 'html)
 	  "<a href=\"filename.html#node\">filename#node</a>"))
@@ -49,7 +49,14 @@
    (equal "A-node-_002d_002d_002d-with-_005f_0027_0025"
 	  (let ((name (org-info-export "#A  node --- with _'%" nil 'html)))
 	    (and (string-match "#\\(.*\\)\"" name)
-		 (match-string 1 name))))))
+		 (match-string 1 name)))))
+  ;; Export to Texinfo.  Without a node name, refer to "Top".
+  (should
+   (equal (org-info-export "filename" nil 'texinfo)
+	  "@ref{Top,,,filename,}"))
+  (should
+   (equal (org-info-export "filename#node" nil 'texinfo)
+	  "@ref{node,,,filename,}")))
 
 
 

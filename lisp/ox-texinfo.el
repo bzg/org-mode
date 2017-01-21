@@ -1004,12 +1004,6 @@ INFO is a plist holding contextual information.  See
 		    ;; Eventually, just return "Top" to refer to the
 		    ;; beginning of the info file.
 		    (t "Top")))))))
-     ((equal type "info")
-      (let* ((info-path (split-string path "[:#]"))
-	     (info-manual (car info-path))
-	     (info-node (or (cadr info-path) "Top"))
-	     (title (or desc "")))
-	(format "@ref{%s,%s,,%s,}" info-node title info-manual)))
      ((string= type "mailto")
       (format "@email{%s}"
 	      (concat (org-texinfo--sanitize-content path)
