@@ -113,6 +113,19 @@ See `org-info-emacs-documents' and `org-info-other-documents' for details."
 	((cdr (assoc filename org-info-other-documents)))
 	(t (concat filename ".html"))))
 
+(defun org-info--expand-node-name (node)
+  "Expand Info NODE to HTML cross reference."
+  ;; See (info "(texinfo) HTML Xref Node Name Expansion") for the
+  ;; expansion rule.
+  (let ((node (replace-regexp-in-string
+	       "\\([ \t\n\r]+\\)\\|\\([^a-zA-Z0-9]\\)"
+	       (lambda (m)
+		 (if (match-end 1) "-" (format "_%04x" (string-to-char m))))
+	       (org-trim node))))
+    (cond ((string= node "") "")
+	  ((string-match-p "\\`[0-9]" node) (concat "g_t" node))
+	  (t node))))
+
 (defun org-info-export (path desc format)
   "Export an info link.
 See `org-link-parameters' for details about PATH, DESC and FORMAT."
@@ -123,7 +136,7 @@ See `org-link-parameters' for details about PATH, DESC and FORMAT."
 	  (node (or (match-string 2 path) "Top")))
       (format "<a href=\"%s#%s\">%s</a>"
 	      (org-info-map-html-url filename)
-	      (replace-regexp-in-string " " "-" node)
+	      (org-info--expand-node-name node)
 	      (or desc path)))))
 
 (provide 'org-info)
