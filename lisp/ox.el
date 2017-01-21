@@ -996,13 +996,12 @@ mode."
 				  (:copier nil))
   name parent transcoders options filters blocks menu)
 
+;;;###autoload
 (defun org-export-get-backend (name)
   "Return export back-end named after NAME.
 NAME is a symbol.  Return nil if no such back-end is found."
-  (catch 'found
-    (dolist (b org-export-registered-backends)
-      (when (eq (org-export-backend-name b) name)
-	(throw 'found b)))))
+  (cl-find-if (lambda (b) (and (eq name (org-export-backend-name b))))
+	      org-export-registered-backends))
 
 (defun org-export-register-backend (backend)
   "Register BACKEND as a known export back-end.
@@ -1332,6 +1331,7 @@ The back-end could then be called with, for example:
 ;; along with their value in order to set them as buffer local
 ;; variables later in the process.
 
+;;;###autoload
 (defun org-export-get-environment (&optional backend subtreep ext-plist)
   "Collect export options from the current buffer.
 
