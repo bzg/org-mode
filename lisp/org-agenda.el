@@ -4775,43 +4775,6 @@ used by user-defined selections using `org-agenda-skip-function'.")
 This variable should not be set directly, but custom commands can bind it
 in the options section.")
 
-(defun org-agenda-skip-entry-when-regexp-matches ()
-  "Check if the current entry contains match for `org-agenda-skip-regexp'.
-If yes, it returns the end position of this entry, causing agenda commands
-to skip the entry but continuing the search in the subtree.  This is a
-function that can be put into `org-agenda-skip-function' for the duration
-of a command."
-  (let ((end (save-excursion (org-end-of-subtree t)))
-	skip)
-    (save-excursion
-      (setq skip (re-search-forward org-agenda-skip-regexp end t)))
-    (and skip end)))
-
-(defun org-agenda-skip-subtree-when-regexp-matches ()
-  "Check if the current subtree contains match for `org-agenda-skip-regexp'.
-If yes, it returns the end position of this tree, causing agenda commands
-to skip this subtree.  This is a function that can be put into
-`org-agenda-skip-function' for the duration of a command."
-  (let ((end (save-excursion (org-end-of-subtree t)))
-	skip)
-    (save-excursion
-      (setq skip (re-search-forward org-agenda-skip-regexp end t)))
-    (and skip end)))
-
-(defun org-agenda-skip-entry-when-regexp-matches-in-subtree ()
-  "Check if the current subtree contains match for `org-agenda-skip-regexp'.
-If yes, it returns the end position of the current entry (NOT the tree),
-causing agenda commands to skip the entry but continuing the search in
-the subtree.  This is a function that can be put into
-`org-agenda-skip-function' for the duration of a command.  An important
-use of this function is for the stuck project list."
-  (let ((end (save-excursion (org-end-of-subtree t)))
-	(entry-end (save-excursion (outline-next-heading) (1- (point))))
-	skip)
-    (save-excursion
-      (setq skip (re-search-forward org-agenda-skip-regexp end t)))
-    (and skip entry-end)))
-
 (defun org-agenda-skip-entry-if (&rest conditions)
   "Skip entry if any of CONDITIONS is true.
 See `org-agenda-skip-if' for details."

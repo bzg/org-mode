@@ -161,8 +161,21 @@ This allow to use a different title than entry title.
 ** Removed functions
 
 *** Org Timeline
+
 This feature has been removed.  Use a custom agenda view, possibly
 narrowed to current buffer to achieve a similar functionality.
+
+*** ~org-agenda-skip-entry-when-regexp-matches~ is obsolete
+
+Use ~org-agenda-skip-if~ instead.
+
+*** ~org-agenda-skip-subtree-when-regexp-matches~ is obsolete
+
+Use ~org-agenda-skip-if~ instead.
+
+*** ~org-agenda-skip-entry-when-regexp-matches-in-subtree~ is obsolete
+
+Use ~org-agenda-skip-if~ instead.
 ** Removed options
 
 *** ~org-agenda-repeating-timestamp-show-all~ is removed.
