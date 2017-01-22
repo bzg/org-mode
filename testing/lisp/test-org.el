@@ -4143,7 +4143,12 @@ Paragraph<point>"
      (org-entry-delete (point) "A")))
   (should-not
    (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:B: 2\n:END:"
-     (org-entry-delete (point) "C"))))
+     (org-entry-delete (point) "C")))
+  ;; Special properties cannot be located in a drawer.  Allow to
+  ;; remove them anyway, in case of user error.
+  (should
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:SCHEDULED: 1\n:END:"
+     (org-entry-delete (point) "SCHEDULED"))))
 
 (ert-deftest test-org/entry-get ()
   "Test `org-entry-get' specifications."
