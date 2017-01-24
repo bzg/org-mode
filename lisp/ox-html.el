@@ -1601,12 +1601,12 @@ INFO is a plist used as a communication channel.  When optional
 arguments CAPTION and LABEL are given, use them for caption and
 \"id\" attribute."
   (let ((html5-fancy (org-html--html5-fancy-p info)))
-    (format (if html5-fancy "\n<figure%s>%s%s\n</figure>"
-	      "\n<div%s class=\"figure\">%s%s\n</div>")
+    (format (if html5-fancy "\n<figure%s>\n%s%s\n</figure>"
+	      "\n<div%s class=\"figure\">\n%s%s\n</div>")
 	    ;; ID.
 	    (if (org-string-nw-p label) (format " id=\"%s\"" label) "")
 	    ;; Contents.
-	    (format "\n<p>%s</p>" contents)
+	    (if html5-fancy contents (format "<p>%s</p>" contents))
 	    ;; Caption.
 	    (if (not (org-string-nw-p caption)) ""
 	      (format (if html5-fancy "\n<figcaption>%s</figcaption>"
