@@ -4945,7 +4945,8 @@ of what a project is and how to check if it stuck, customize the variable
 	  `(lambda ()
 	     (and (save-excursion
 		    (let ((case-fold-search nil))
-		      (re-search-forward ,skip-re (org-end-of-subtree t) t)))
+		      (re-search-forward
+		       ,skip-re (save-excursion (org-end-of-subtree t)) t)))
 		  (progn (outline-next-heading) (point))))))
     (org-tags-view nil matcher)
     (setq org-agenda-buffer-name (buffer-name))
