@@ -15975,12 +15975,11 @@ strings."
 		;; First look for timestamps within headline.
 		(let ((ts (funcall find-ts (line-end-position) nil)))
 		  (if (= (length ts) 2) (setq props (nconc ts props))
-		    (forward-line)
 		    ;; Then find timestamps in the section, skipping
 		    ;; planning line.
-		    (when (looking-at-p org-planning-line-re)
-		      (forward-line))
 		    (let ((end (save-excursion (outline-next-heading))))
+		      (forward-line)
+		      (when (looking-at-p org-planning-line-re) (forward-line))
 		      (setq props (nconc (funcall find-ts end ts) props))))))))
 	  ;; Get the standard properties, like :PROP:.
 	  (when (memq which '(nil all standard))
