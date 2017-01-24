@@ -3056,7 +3056,7 @@ INFO is a plist holding contextual information.  See
      ;; equivalent line number.
      ((string= type "coderef")
       (let ((fragment (concat "coderef-" (org-html-encode-plain-text path))))
-	(format "<a href=\"#%s\"%s%s>%s</a>"
+	(format "<a href=\"#%s\" %s%s>%s</a>"
 		fragment
 		(format "class=\"coderef\" onmouseover=\"CodeHighlightOn(this, \
 '%s');\" onmouseout=\"CodeHighlightOff(this, '%s');\""
