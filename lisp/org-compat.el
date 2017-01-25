@@ -195,6 +195,9 @@ Counting starts at 1."
   'org-agenda-today-p "Org 9.0")
 (define-obsolete-function-alias 'org-babel-examplize-region
   'org-babel-examplify-region "Org 9.0")
+(define-obsolete-variable-alias 'org-babel-capitalize-example-region-markers
+  'org-babel-uppercase-example-markers "Org 9.1")
+
 (define-obsolete-function-alias 'org-babel-trim 'org-trim "Org 9.0")
 (define-obsolete-variable-alias 'org-html-style 'org-html-head "24.4")
 (define-obsolete-function-alias 'org-insert-columns-dblock

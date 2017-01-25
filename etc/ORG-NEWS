@@ -218,6 +218,13 @@ document with ~org-mark-ring-goto~ (default binding =C-c &=).
 *** ~org-get-heading~ accepts two more optional arguments
 
 See docstring for details.
+
+*** New option ~org-babel-uppercase-example-markers~
+
+This variable is a ~defcustom~ and replaces the variable
+~org-babel-capitalize-example-region-markers~, which is a ~defvar~ and
+is now obselete.
+
 * Version 9.0
 
 ** Incompatible changes
