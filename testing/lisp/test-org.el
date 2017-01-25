@@ -3995,6 +3995,240 @@ Paragraph<point>"
 	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
 	     nil nil 1)))))
 
+(ert-deftest test-org/deadline ()
+  "Test `org-deadline' specifications."
+  ;; Insert a new value or replace existing one.
+  (should
+   (equal "* H\nDEADLINE: <2012-03-29>\n"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-adapt-indentation nil)
+		  (org-last-inserted-timestamp nil))
+	      (org-deadline nil "<2012-03-29 Tue>"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
+	     nil nil 1))))
+  (should
+   (equal "* H\nDEADLINE: <2014-03-04>"
+	  (org-test-with-temp-text "* H\nDEADLINE: <2012-03-29>"
+	    (let ((org-adapt-indentation nil)
+		  (org-last-inserted-timestamp nil))
+	      (org-deadline nil "<2014-03-04 Thu>"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
+	     nil nil 1))))
+  ;; Accept delta time, e.g., "+2d".
+  (should
+   (equal "* H\nDEADLINE: <2015-03-04>\n"
+	  (cl-letf (((symbol-function 'current-time)
+		     (lambda (&rest args)
+		       (apply #'encode-time
+			      (org-parse-time-string "2014-03-04")))))
+	    (org-test-with-temp-text "* H"
+	      (let ((org-adapt-indentation nil)
+		    (org-last-inserted-timestamp nil))
+		(org-deadline nil "+1y"))
+	      (replace-regexp-in-string
+	       "\\( [.A-Za-z]+\\)>" "" (buffer-string) nil nil 1)))))
+  ;; Preserve repeater.
+  (should
+   (equal "* H\nDEADLINE: <2012-03-29 +2y>\n"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-adapt-indentation nil)
+		  (org-last-inserted-timestamp nil))
+	      (org-deadline nil "<2012-03-29 Tue +2y>"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\) " "" (buffer-string) nil nil 1))))
+  ;; Remove CLOSED keyword, if any.
+  (should
+   (equal "* H\nDEADLINE: <2012-03-29>"
+	  (org-test-with-temp-text "* H\nCLOSED: [2017-01-25 Wed]"
+	    (let ((org-adapt-indentation nil)
+		  (org-last-inserted-timestamp nil))
+	      (org-deadline nil "<2012-03-29 Tue>"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string) nil nil 1))))
+  ;; With C-u argument, remove DEADLINE keyword.
+  (should
+   (equal "* H\n"
+	  (org-test-with-temp-text "* H\nDEADLINE: <2012-03-29>"
+	    (let ((org-adapt-indentation nil)
+		  (org-last-inserted-timestamp nil))
+	      (org-deadline '(4)))
+	    (buffer-string))))
+  (should
+   (equal "* H"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-adapt-indentation nil)
+		  (org-last-inserted-timestamp nil))
+	      (org-deadline '(4)))
+	    (buffer-string))))
+  ;; With C-u C-u argument, prompt for a delay cookie.
+  (should
+   (equal "* H\nDEADLINE: <2012-03-29 -705d>"
+	  (cl-letf (((symbol-function 'org-read-date)
+		     (lambda (&rest args)
+		       (apply #'encode-time
+			      (org-parse-time-string "2014-03-04")))))
+	    (org-test-with-temp-text "* H\nDEADLINE: <2012-03-29>"
+	      (let ((org-adapt-indentation nil)
+		    (org-last-inserted-timestamp nil))
+		(org-deadline '(16)))
+	      (buffer-string)))))
+  (should-error
+   (cl-letf (((symbol-function 'org-read-date)
+	      (lambda (&rest args)
+		(apply #'encode-time
+		       (org-parse-time-string "2014-03-04")))))
+     (org-test-with-temp-text "* H"
+       (let ((org-adapt-indentation nil)
+	     (org-last-inserted-timestamp nil))
+	 (org-deadline '(16)))
+       (buffer-string))))
+  ;; When a region is active and
+  ;; `org-loop-over-headlines-in-active-region' is non-nil, insert the
+  ;; same value in all headlines in region.
+  (should
+   (equal "* H1\nDEADLINE: <2012-03-29>\n* H2\nDEADLINE: <2012-03-29>\n"
+	  (org-test-with-temp-text "* H1\n* H2"
+	    (let ((org-adapt-indentation nil)
+		  (org-last-inserted-timestamp nil)
+		  (org-loop-over-headlines-in-active-region t))
+	      (transient-mark-mode 1)
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (org-deadline nil "2012-03-29"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string) nil nil 1))))
+  (should-not
+   (equal "* H1\nDEADLINE: <2012-03-29>\n* H2\nDEADLINE: <2012-03-29>\n"
+	  (org-test-with-temp-text "* H1\n* H2"
+	    (let ((org-adapt-indentation nil)
+		  (org-last-inserted-timestamp nil)
+		  (org-loop-over-headlines-in-active-region nil))
+	      (transient-mark-mode 1)
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (org-deadline nil "2012-03-29"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string) nil nil 1)))))
+
+(ert-deftest test-org/schedule ()
+  "Test `org-schedule' specifications."
+  ;; Insert a new value or replace existing one.
+  (should
+   (equal "* H\nSCHEDULED: <2012-03-29>\n"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-adapt-indentation nil)
+		  (org-last-inserted-timestamp nil))
+	      (org-schedule nil "<2012-03-29 Tue>"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
+	     nil nil 1))))
+  (should
+   (equal "* H\nSCHEDULED: <2014-03-04>"
+	  (org-test-with-temp-text "* H\nSCHEDULED: <2012-03-29>"
+	    (let ((org-adapt-indentation nil)
+		  (org-last-inserted-timestamp nil))
+	      (org-schedule nil "<2014-03-04 Thu>"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string)
+	     nil nil 1))))
+  ;; Accept delta time, e.g., "+2d".
+  (should
+   (equal "* H\nSCHEDULED: <2015-03-04>\n"
+	  (cl-letf (((symbol-function 'current-time)
+		     (lambda (&rest args)
+		       (apply #'encode-time
+			      (org-parse-time-string "2014-03-04")))))
+	    (org-test-with-temp-text "* H"
+	      (let ((org-adapt-indentation nil)
+		    (org-last-inserted-timestamp nil))
+		(org-schedule nil "+1y"))
+	      (replace-regexp-in-string
+	       "\\( [.A-Za-z]+\\)>" "" (buffer-string) nil nil 1)))))
+  ;; Preserve repeater.
+  (should
+   (equal "* H\nSCHEDULED: <2012-03-29 +2y>\n"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-adapt-indentation nil)
+		  (org-last-inserted-timestamp nil))
+	      (org-schedule nil "<2012-03-29 Tue +2y>"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\) " "" (buffer-string) nil nil 1))))
+  ;; Remove CLOSED keyword, if any.
+  (should
+   (equal "* H\nSCHEDULED: <2012-03-29>"
+	  (org-test-with-temp-text "* H\nCLOSED: [2017-01-25 Wed]"
+	    (let ((org-adapt-indentation nil)
+		  (org-last-inserted-timestamp nil))
+	      (org-schedule nil "<2012-03-29 Tue>"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string) nil nil 1))))
+  ;; With C-u argument, remove SCHEDULED keyword.
+  (should
+   (equal "* H\n"
+	  (org-test-with-temp-text "* H\nSCHEDULED: <2012-03-29>"
+	    (let ((org-adapt-indentation nil)
+		  (org-last-inserted-timestamp nil))
+	      (org-schedule '(4)))
+	    (buffer-string))))
+  (should
+   (equal "* H"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-adapt-indentation nil)
+		  (org-last-inserted-timestamp nil))
+	      (org-schedule '(4)))
+	    (buffer-string))))
+  ;; With C-u C-u argument, prompt for a delay cookie.
+  (should
+   (equal "* H\nSCHEDULED: <2012-03-29 -705d>"
+	  (cl-letf (((symbol-function 'org-read-date)
+		     (lambda (&rest args)
+		       (apply #'encode-time
+			      (org-parse-time-string "2014-03-04")))))
+	    (org-test-with-temp-text "* H\nSCHEDULED: <2012-03-29>"
+	      (let ((org-adapt-indentation nil)
+		    (org-last-inserted-timestamp nil))
+		(org-schedule '(16)))
+	      (buffer-string)))))
+  (should-error
+   (cl-letf (((symbol-function 'org-read-date)
+	      (lambda (&rest args)
+		(apply #'encode-time
+		       (org-parse-time-string "2014-03-04")))))
+     (org-test-with-temp-text "* H"
+       (let ((org-adapt-indentation nil)
+	     (org-last-inserted-timestamp nil))
+	 (org-schedule '(16)))
+       (buffer-string))))
+  ;; When a region is active and
+  ;; `org-loop-over-headlines-in-active-region' is non-nil, insert the
+  ;; same value in all headlines in region.
+  (should
+   (equal "* H1\nSCHEDULED: <2012-03-29>\n* H2\nSCHEDULED: <2012-03-29>\n"
+	  (org-test-with-temp-text "* H1\n* H2"
+	    (let ((org-adapt-indentation nil)
+		  (org-last-inserted-timestamp nil)
+		  (org-loop-over-headlines-in-active-region t))
+	      (transient-mark-mode 1)
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (org-schedule nil "2012-03-29"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string) nil nil 1))))
+  (should-not
+   (equal "* H1\nSCHEDULED: <2012-03-29>\n* H2\nSCHEDULED: <2012-03-29>\n"
+	  (org-test-with-temp-text "* H1\n* H2"
+	    (let ((org-adapt-indentation nil)
+		  (org-last-inserted-timestamp nil)
+		  (org-loop-over-headlines-in-active-region nil))
+	      (transient-mark-mode 1)
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (org-schedule nil "2012-03-29"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string) nil nil 1)))))
+
 
 ;;; Property API
 
