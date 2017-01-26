@@ -1828,7 +1828,7 @@ as arguments."
   :type '(alist :tag "Link display parameters"
 		:value-type plist)
   :version "26.1"
-  :package-version (Org . "9.1"))
+  :package-version '(Org . "9.1"))
 
 (defun org-link-get-parameter (type key)
   "Get TYPE link property for KEY.
