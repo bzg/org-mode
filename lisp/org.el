@@ -1786,7 +1786,6 @@ The value of this is taken from the #+LINK lines.")
     ("http" :follow (lambda (path) (browse-url (concat "http:" path))))
     ("https" :follow (lambda (path) (browse-url (concat "https:" path))))
     ("mailto" :follow (lambda (path) (browse-url (concat "mailto:" path))))
-    ("message" :follow (lambda (path) (browse-url (concat "message:" path))))
     ("news" :follow (lambda (path) (browse-url (concat "news:" path))))
     ("shell" :follow org--open-shell-link))
   "An alist of properties that defines all the links in Org mode.
@@ -1827,7 +1826,9 @@ activation.  The function must accept (link-start link-end path bracketp)
 as arguments."
   :group 'org-link
   :type '(alist :tag "Link display parameters"
-		:value-type plist))
+		:value-type plist)
+  :version "26.1"
+  :package-version (Org . "9.1"))
 
 (defun org-link-get-parameter (type key)
   "Get TYPE link property for KEY.
