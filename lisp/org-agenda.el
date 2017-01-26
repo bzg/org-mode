@@ -469,8 +469,8 @@ match    What to search for:
 settings  A list of option settings, similar to that in a let form, so like
           this: ((opt1 val1) (opt2 val2) ...).   The values will be
           evaluated at the moment of execution, so quote them when needed.
-files     A list of files file to write the produced agenda buffer to
-          with the command `org-store-agenda-views'.
+files     A list of files to write the produced agenda buffer to with
+          the command `org-store-agenda-views'.
           If a file name ends in \".html\", an HTML version of the buffer
           is written out.  If it ends in \".ps\", a postscript version is
           produced.  Otherwise, only the plain text is written to the file.
