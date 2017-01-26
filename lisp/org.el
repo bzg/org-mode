@@ -16016,6 +16016,17 @@ unless LITERAL-NIL is non-nil."
 	;; Return final values.
 	(and (not (equal value '(nil))) (nreverse value))))))
 
+(defun org--property-global-value (property literal-nil)
+  "Return value for PROPERTY in current buffer.
+Return value is a string.  Return nil if property is not set
+globally.  Also return nil when PROPERTY is set to \"nil\",
+unless LITERAL-NIL is non-nil."
+  (let ((global
+	 (cdr (or (assoc-string property org-file-properties t)
+		  (assoc-string property org-global-properties t)
+		  (assoc-string property org-global-properties-fixed t)))))
+    (if literal-nil global (org-not-nil global))))
+
 (defun org-entry-get (pom property &optional inherit literal-nil)
   "Get value of PROPERTY for entry or content at point-or-marker POM.
 
@@ -16168,10 +16179,7 @@ However, if LITERAL-NIL is set, return the string value \"nil\" instead."
 	     (throw 'exit nil))
 	    ((org-up-heading-safe))
 	    (t
-	     (let ((global
-		    (cdr (or (assoc-string property org-file-properties t)
-			     (assoc-string property org-global-properties t)
-			     (assoc-string property org-global-properties-fixed t)))))
+	     (let ((global (org--property-global-value property literal-nil)))
 	       (cond ((not global))
 		     (value (setq value (concat global " " value)))
 		     (t (setq value global))))
