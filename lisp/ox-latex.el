@@ -331,7 +331,7 @@ Otherwise, place it near the end.  When value is a list of
 symbols, put caption above selected elements only.  Allowed
 symbols are: `image', `table', `src-block' and `special-block'."
   :group 'org-export-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(choice
 	  (const :tag "For all elements" t)
@@ -394,7 +394,7 @@ labeling scheme to generate labels and resolve links into proper
 references."
   :group 'org-export-latex
   :type 'boolean
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3"))
 
 ;;;; Preamble
@@ -576,14 +576,14 @@ precedence over this variable."
 The format string should have at most one \"%s\"-expression,
 which is replaced with the subtitle."
   :group 'org-export-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(string :tag "Format string"))
 
 (defcustom org-latex-subtitle-separate nil
   "Non-nil means the subtitle is not typeset as part of title."
   :group 'org-export-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type 'boolean)
 
@@ -620,7 +620,7 @@ inserted.
 Setting :latex-hyperref-template in publishing projects will take
 precedence over this variable."
   :group 'org-export-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(choice (const :tag "No template" nil)
 		 (string :tag "Format string")))
@@ -661,7 +661,7 @@ The function result will be used in the section format string."
 	  (const :tag "Use plain superscript (default)" "\\textsuperscript{\\ref{%s}}")
 	  (const :tag "Use Memoir/KOMA-Script footref" "\\footref{%s}")
 	  (string :tag "Other format string"))
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0"))
 
 ;;;; Timestamps
@@ -687,7 +687,7 @@ The function result will be used in the section format string."
 (defcustom org-latex-images-centered t
   "When non-nil, images are centered."
   :group 'org-export-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0")
   :type 'boolean
   :safe #'booleanp)
@@ -721,7 +721,7 @@ environment."
   "Default position for LaTeX figures."
   :group 'org-export-latex
   :type 'string
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0")
   :safe #'stringp)
 
@@ -844,7 +844,7 @@ to typeset and try to protect special characters.
 If no association can be found for a given markup, text will be
 returned as-is."
   :group 'org-export-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type 'alist
   :options '(bold code italic strike-through underline verbatim))
@@ -886,7 +886,7 @@ The function must accept seven parameters:
 The function should return the string to be exported."
   :group 'org-export-latex
   :type 'function
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3"))
 
 
@@ -1091,7 +1091,7 @@ will produce
 	  (list
 	   (symbol :tag "Language name                    ")
 	   (string :tag "Environment name or format string")))
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0"))
 
 
@@ -1106,7 +1106,7 @@ See also `org-latex-compiler'."
 	  (const :tag "latex-mode file variable" "%% -*- latex-run-command: %s -*-\n")
 	  (const :tag "AUCTeX file variable" "%% -*- LaTeX-command: %s -*-\n")
 	  (string :tag "custom format" "%% %s"))
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0"))
 
 (defcustom org-latex-compiler "pdflatex"
@@ -1121,7 +1121,7 @@ Can also be set in buffers via #+LATEX_COMPILER.  See also
 	  (const :tag "XeLaTeX"  "xelatex")
 	  (const :tag "LuaLaTeX" "lualatex")
 	  (const :tag "Unset" ""))
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0"))
 
 (defconst org-latex-compilers '("pdflatex" "xelatex" "lualatex")
@@ -1139,7 +1139,7 @@ A better approach is to use a compiler suit such as `latexmk'."
   :type '(choice (const :tag "BibTeX" "bibtex")
 		 (const :tag "Biber" "biber")
 		 (string :tag "Other process"))
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0"))
 
 (defcustom org-latex-pdf-process
@@ -1199,7 +1199,7 @@ file name as its single argument."
 The logfiles will be removed if `org-latex-remove-logfiles' is
 non-nil."
   :group 'org-export-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(repeat (string :tag "Extension")))
 
@@ -1223,7 +1223,7 @@ The regular expressions are used to find possible warnings in the
 log of a latex-run.  These warnings will be reported after
 calling `org-latex-compile'."
   :group 'org-export-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(repeat
 	  (cons

@@ -293,7 +293,7 @@ It is relevant only if `org-bibtex-tags-are-keywords' is non-nil.
 Tag inheritence itself is controlled by `org-use-tag-inheritence'
 and `org-exclude-tags-from-inheritence'."
   :group 'org-bibtex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type 'boolean)
 

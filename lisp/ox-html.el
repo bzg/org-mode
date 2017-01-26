@@ -768,7 +768,7 @@ INFO      the export options (plist).
 
 The function result will be used in the section format string."
   :group 'org-export-html
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type 'function)
 
@@ -800,7 +800,7 @@ The function must accept seven parameters:
 
 The function should return the string to be exported."
   :group 'org-export-html
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type 'function)
 
@@ -1511,7 +1511,7 @@ The viewport meta tag is inserted if this variable is non-nil.
 See the following site for a reference:
 https://developer.mozilla.org/en-US/docs/Mozilla/Mobile/Viewport_meta_tag"
   :group 'org-export-html
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(choice (const :tag "Disable" nil)
 		 (list :tag "Enable"

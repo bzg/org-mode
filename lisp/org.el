@@ -791,7 +791,7 @@ Adding a back-end to this list will also pull the back-end it
 depends on, if any."
   :group 'org
   :group 'org-export
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0")
   :initialize 'custom-initialize-set
   :set (lambda (var val)
@@ -1206,7 +1206,7 @@ make it harder to edit the location of the match.  In such
 a case, use the command `org-reveal' (`\\[org-reveal]') to show
 more context."
   :group 'org-reveal-location
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0")
   :type '(choice
 	  (const :tag "Canonical" t)
@@ -1427,7 +1427,7 @@ argument is a symbol.  After a global state change, it can have the values
 the values `folded', `children', or `subtree'."
   :group 'org-cycle
   :type 'hook
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3"))
 
 (defgroup org-edit-structure nil
@@ -1694,7 +1694,7 @@ The highlights created by `org-toggle-latex-fragment' always need
 If set to `smart' the search will be case-insensitive only if it
 doesn't specify any upper case character."
   :group 'org-sparse-trees
-  :version "25.2"
+  :version "26.1"
   :type '(choice
 	  (const :tag "Case-sensitive" nil)
 	  (const :tag "Case-insensitive" t)
@@ -4081,7 +4081,7 @@ When using LaTeXML set this option to
 All available processes and theirs documents can be found in
 `org-preview-latex-process-alist', which see."
   :group 'org-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0")
   :type 'symbol)
 
@@ -4171,7 +4171,7 @@ Place-holders only used by `:image-converter':
   %S    the image size scale ratio, which is used to adjust image size by some
         processing commands."
   :group 'org-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0")
   :type '(alist :tag "LaTeX to image backends"
 		:value-type (plist)))
@@ -4182,7 +4182,7 @@ A relative path here creates many directories relative to the
 processed org files paths.  An absolute path puts all preview
 images at the same place."
   :group 'org-latex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0")
   :type 'string)
 
@@ -4300,7 +4300,7 @@ A string will be inserted as-is in the header of the document."
   :group 'org-export-latex
   :set 'org-set-packages-alist
   :get 'org-get-packages-alist
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(repeat
 	  (choice
@@ -4846,7 +4846,7 @@ Otherwise, these types are allowed:
 		 (const :tag "Only scheduled timestamps" scheduled)
 		 (const :tag "Only deadline timestamps" deadline)
 		 (const :tag "Only closed timestamps" closed))
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :group 'org-sparse-trees)
 
@@ -5694,7 +5694,7 @@ The following commands are available:
 	     '(Org ("6.21b" . "23.1")  ("6.33x" . "23.2")
 		   ("7.8.11" . "24.1") ("7.9.4" . "24.3")
 		   ("8.2.6" . "24.4") ("8.2.10" . "24.5")
-		   ("9.0" . "25.2")))
+		   ("9.0" . "26.1")))
 
 (defvar org-mode-transpose-word-syntax-table
   (let ((st (make-syntax-table text-mode-syntax-table)))
@@ -12453,7 +12453,7 @@ variable `org-mtags-prefer-muse-templates'."
 	  (list
 	   (string :tag "Key")
 	   (string :tag "Template")))
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3"))
 
 (defun org-try-structure-completion ()
@@ -18344,7 +18344,7 @@ minutes.
 For example, if the value of this variable is ((\"hours\" . 60)), then an
 effort string \"2hours\" is equivalent to 120 minutes."
   :group 'org-agenda
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(alist :key-type (string :tag "Modifier")
 		:value-type (number :tag "Minutes")))
@@ -18506,7 +18506,7 @@ The value is a list, with zero or more of the symbols `effort', `appt',
 	      (const appt)
 	      (const stats)
 	      (const category))
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :group 'org-agenda)
 

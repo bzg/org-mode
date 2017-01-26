@@ -375,7 +375,7 @@ see.
 This option can also be set with the OPTIONS keyword, e.g.,
 \"creator:t\"."
   :group 'org-export-general
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type 'boolean
   :safe #'booleanp)
@@ -790,7 +790,7 @@ e.g. \"tasks:nil\"."
 This option can also be set with the OPTIONS keyword,
 e.g. \"title:nil\"."
   :group 'org-export-general
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type 'boolean
   :safe #'booleanp)
@@ -856,7 +856,7 @@ where PATH is the un-resolvable reference.
 This option can also be set with the OPTIONS keyword, e.g.,
 \"broken-links:mark\"."
   :group 'org-export-general
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0")
   :type '(choice
 	  (const :tag "Ignore broken links" t)
@@ -894,7 +894,7 @@ HTML code while every other back-end will ignore it."
   "Non-nil means pushing export output to the kill ring.
 This variable is ignored during asynchronous export."
   :group 'org-export-general
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(choice
 	  (const :tag "Always" t)

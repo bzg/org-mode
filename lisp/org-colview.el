@@ -85,7 +85,7 @@ output.
 Types defined in this variable take precedence over those defined
 in `org-columns-summary-types-default', which see."
   :group 'org-properties
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0")
   :type '(alist :key-type (string :tag "       Label")
 		:value-type (function :tag "Summarize")))
