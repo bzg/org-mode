@@ -3828,14 +3828,14 @@ in this variable)."
 	  (regexp :tag "Properties matched by regexp")))
 
 (defun org-property-inherit-p (property)
-  "Check if PROPERTY is one that should be inherited."
+  "Return a non-nil value if PROPERTY should be inherited."
   (cond
    ((eq org-use-property-inheritance t) t)
    ((not org-use-property-inheritance) nil)
    ((stringp org-use-property-inheritance)
     (string-match org-use-property-inheritance property))
    ((listp org-use-property-inheritance)
-    (member property org-use-property-inheritance))
+    (member-ignore-case property org-use-property-inheritance))
    (t (error "Invalid setting of `org-use-property-inheritance'"))))
 
 (defcustom org-columns-default-format "%25ITEM %TODO %3PRIORITY %TAGS"
