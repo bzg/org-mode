@@ -67,7 +67,7 @@
 If the value is nil, timeout is disabled."
   :group 'org-babel
   :type 'integer
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.1")
   :safe #'wholenump)
 

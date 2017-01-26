@@ -244,7 +244,7 @@ It should take a single argument, the bibtex entry (an alist as
 returned by `org-bibtex-read').  The default value simply returns
 the entry title."
   :group 'org-bibtex
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.1")
   :type 'function)
 

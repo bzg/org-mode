@@ -1256,7 +1256,7 @@ When set to the symbol `next' only the first future repeat is shown."
 	  (const :tag "Show all repeated entries" t)
 	  (const :tag "Show next repeated entry" next)
 	  (const :tag "Do not show repeated entries" nil))
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.1")
   :safe #'symbolp)
 
@@ -1277,7 +1277,7 @@ entries with these TODO keywords."
 	  (const :tag "Prefer base date" nil)
 	  (repeat :tag "Prefer last repeat for entries with these TODO keywords"
 		  (string :tag "TODO keyword")))
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.1")
   :safe (lambda (x) (or (booleanp x) (consp x))))
 

@@ -900,7 +900,7 @@ macro's arguments.  Moreover, if the template starts with
 \"(eval\", it will be parsed as an Elisp expression and evaluated
 accordingly."
   :group 'org-export-general
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.1")
   :type '(repeat
 	  (cons (string :tag "Name")

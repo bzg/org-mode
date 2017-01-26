@@ -335,7 +335,7 @@ This variable is ignored when site-map style is `tree'."
 	  (const :tag "Folders after files" last)
 	  (const :tag "No folder in site-map" ignore)
 	  (const :tag "Mix folders and files" nil))
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.1")
   :safe #'symbolp)
 
