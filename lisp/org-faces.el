@@ -398,7 +398,7 @@ follows a #+DATE:, #+AUTHOR: or #+EMAIL: keyword."
 For source-blocks `org-src-block-faces' takes precedence.
 See also `org-fontify-quote-and-verse-blocks'."
   :group 'org-faces
-  :version "25.2")
+  :version "26.1")
 
 (defface org-block-begin-line '((t (:inherit org-meta-line)))
   "Face used for the line delimiting the begin of source blocks."

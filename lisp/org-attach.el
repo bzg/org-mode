@@ -59,7 +59,7 @@ where the Org file lives."
 This is only done if the Org file is in a git repository."
   :group 'org-attach
   :type 'boolean
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0"))
 
 (defcustom org-attach-git-annex-cutoff (* 32 1024)
@@ -131,7 +131,7 @@ lns   create a symbol link.  Note that this is not supported
   "Non-nil means attachments are deleted upon archiving a subtree.
 When set to `query', ask the user instead."
   :group 'org-attach
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(choice
 	  (const :tag "Never delete attachments" nil)
@@ -143,7 +143,7 @@ When set to `query', ask the user instead."
 If \\='ask, prompt using `y-or-n-p'.  If t, always get.  If nil, never get."
   :group 'org-attach
   :package-version '(Org . "9")
-  :version "25.2"
+  :version "26.1"
   :type '(choice
 	  (const :tag "confirm with `y-or-n-p'" ask)
 	  (const :tag "always get from annex if necessary" t)

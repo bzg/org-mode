@@ -69,7 +69,7 @@ the value of the timer."
   "The default timer when a timer is set, in minutes or hh:mm:ss format.
 When 0, the user is prompted for a value."
   :group 'org-time
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type 'string)
 

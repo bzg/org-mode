@@ -1954,7 +1954,7 @@ category, you can use:
   "When non-nil, switch to columns view right after creating the agenda."
   :group 'org-agenda-column-view
   :type 'boolean
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0")
   :safe #'booleanp)
 
@@ -8166,7 +8166,7 @@ When called with a prefix argument, include all archive files as well."
 	       (t ""))
 	      (if (or org-agenda-category-filter
 		      (get 'org-agenda-category-filter :preset-filter))
-	      	  '(:eval (propertize
+		  '(:eval (propertize
 	      		   (concat " <"
 	      			   (mapconcat
 	      			    'identity

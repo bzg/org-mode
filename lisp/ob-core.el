@@ -175,7 +175,7 @@ This string must include a \"%s\" which will be replaced by the results."
   "Non-nil means show the time the code block was evaluated in the result hash."
   :group 'org-babel
   :type 'boolean
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0")
   :safe #'booleanp)
 

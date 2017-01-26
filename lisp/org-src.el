@@ -215,7 +215,7 @@ green, respectability.
                        (choice
                         (face :tag "Face")
                         (sexp :tag "Anonymous face"))))
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0"))
 
 (defcustom org-src-tab-acts-natively nil

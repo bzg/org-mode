@@ -38,7 +38,7 @@
 (defcustom org-babel-J-command "jconsole"
   "Command to call J."
   :group 'org-babel
-  :version "25.2"
+  :version "26.1"
   :package-version '(Org . "9.0")
   :type 'string)
 
