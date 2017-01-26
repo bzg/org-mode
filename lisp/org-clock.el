@@ -2918,7 +2918,8 @@ The details of what will be saved are regulated by the variable
 		 org-clock-has-been-used
 		 (not (file-exists-p org-clock-persist-file))))
     (with-temp-file org-clock-persist-file
-      (insert (format ";; org-persist.el - %s at %s\n"
+      (insert (format ";; %s - %s at %s\n"
+		      (file-name-nondirectory org-clock-persist-file)
 		      (system-name)
 		      (format-time-string (org-time-stamp-format t))))
       ;; Store clock to be resumed.
