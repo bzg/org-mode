@@ -8333,7 +8333,7 @@ When called with a prefix argument, include all archive files as well."
 	       (t ""))
 	      (if (or org-agenda-category-filter
 		      (get 'org-agenda-category-filter :preset-filter))
-	      	  '(:eval (propertize
+		  '(:eval (propertize
 	      		   (concat " <"
 	      			   (mapconcat
 	      			    'identity

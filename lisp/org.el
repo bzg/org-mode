@@ -13070,7 +13070,7 @@ statistics everywhere."
 				 (and (member kwd org-done-keywords)
 				      (member kwd (cadr org-provide-todo-statistics))))))
 	    	    (setq cnt-all (1+ cnt-all))
-	    	  (and (eq org-provide-todo-statistics t)
+		  (and (eq org-provide-todo-statistics t)
 		       kwd
 		       (setq cnt-all (1+ cnt-all))))
 		(when (or (and (member org-provide-todo-statistics '(t all-headlines))
