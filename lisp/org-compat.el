@@ -430,6 +430,14 @@ Pass COLUMN and FORCE to `move-to-column'."
     (lambda (&optional _beg _end)
       (with-no-warnings (font-lock-fontify-buffer)))))
 
+;; `file-local-name' was added in Emacs 26.1.
+(defalias 'org-babel-local-file-name
+  (if (fboundp 'file-local-name)
+      'file-local-name
+    (lambda (file)
+      "Return the local name component of FILE."
+      (or (file-remote-p file 'localname) file))))
+
 (defmacro org-no-popups (&rest body)
   "Suppress popup windows.
 Let-bind some variables to nil around BODY to achieve the desired

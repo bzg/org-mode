@@ -2905,13 +2905,6 @@ can be specified as the REGEXP argument."
       (setq string (substring string 0 -1)))
     string))
 
-(defalias 'org-babel-local-file-name
-  (if (fboundp 'file-local-name)
-      'file-local-name
-    (lambda (file)
-      "Return the local name component of FILE."
-      (or (file-remote-p file 'localname) file))))
-
 (defun org-babel-process-file-name (name &optional no-quote-p)
   "Prepare NAME to be used in an external process.
 If NAME specifies a remote location, the remote portion of the
