@@ -4754,6 +4754,58 @@ Paragraph<point>"
 		   (org-entry-put (point) "A" "1")
 		   (buffer-string)))))
 
+(ert-deftest test-org/refresh-properties ()
+  "Test `org-refresh-properties' specifications."
+  (should
+   (equal "1"
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:"
+	    (org-refresh-properties "A" 'org-test)
+	    (get-text-property (point) 'org-test))))
+  (should-not
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:"
+     (org-refresh-properties "B" 'org-test)
+     (get-text-property (point) 'org-test)))
+  ;; Handle properties only defined with extension syntax, i.e.,
+  ;; "PROPERTY+".
+  (should
+   (equal "1"
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A+: 1\n:END:"
+	    (org-refresh-properties "A" 'org-test)
+	    (get-text-property (point) 'org-test))))
+  ;; When property is inherited, add text property to the whole
+  ;; sub-tree.
+  (should
+   (equal "1"
+	  (org-test-with-temp-text
+	      "* H1\n:PROPERTIES:\n:A: 1\n:END:\n<point>** H2"
+	    (let ((org-use-property-inheritance t))
+	      (org-refresh-properties "A" 'org-test))
+	    (get-text-property (point) 'org-test))))
+  ;; When property is inherited, use global value across the whole
+  ;; buffer.  However local values have precedence.
+  (should-not
+   (equal "1"
+	  (org-test-with-temp-text "#+PROPERTY: A 1\n<point>* H1"
+	    (org-mode-restart)
+	    (let ((org-use-property-inheritance nil))
+	      (org-refresh-properties "A" 'org-test))
+	    (get-text-property (point) 'org-test))))
+  (should
+   (equal "1"
+	  (org-test-with-temp-text "#+PROPERTY: A 1\n<point>* H1"
+	    (org-mode-restart)
+	    (let ((org-use-property-inheritance t))
+	      (org-refresh-properties "A" 'org-test))
+	    (get-text-property (point) 'org-test))))
+  (should
+   (equal "2"
+	  (org-test-with-temp-text
+	      "#+PROPERTY: A 1\n<point>* H\n:PROPERTIES:\n:A: 2\n:END:"
+	    (org-mode-restart)
+	    (let ((org-use-property-inheritance t))
+	      (org-refresh-properties "A" 'org-test))
+	    (get-text-property (point) 'org-test)))))
+
 
 ;;; Radio Targets
 
