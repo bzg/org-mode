@@ -3828,14 +3828,14 @@ in this variable)."
 	  (regexp :tag "Properties matched by regexp")))
 
 (defun org-property-inherit-p (property)
-  "Check if PROPERTY is one that should be inherited."
+  "Return a non-nil value if PROPERTY should be inherited."
   (cond
    ((eq org-use-property-inheritance t) t)
    ((not org-use-property-inheritance) nil)
    ((stringp org-use-property-inheritance)
     (string-match org-use-property-inheritance property))
    ((listp org-use-property-inheritance)
-    (member property org-use-property-inheritance))
+    (member-ignore-case property org-use-property-inheritance))
    (t (error "Invalid setting of `org-use-property-inheritance'"))))
 
 (defcustom org-columns-default-format "%25ITEM %TODO %3PRIORITY %TAGS"
@@ -9646,31 +9646,39 @@ DPROP is the drawer property and TPROP is either the
 corresponding text property to set, or an alist with each element
 being a text property (as a symbol) and a function to apply to
 the value of the drawer property."
-  (let ((case-fold-search t)
-	(inhibit-read-only t))
+  (let* ((case-fold-search t)
+	 (inhibit-read-only t)
+	 (inherit? (org-property-inherit-p dprop))
+	 (property-re (org-re-property (concat (regexp-quote dprop) "\\+?") t))
+	 (global (and inherit? (org--property-global-value dprop nil))))
     (org-with-silent-modifications
-     (org-with-wide-buffer
-      (goto-char (point-min))
-      (while (re-search-forward (concat "^[ \t]*:" dprop ": +\\(.*\\)[ \t]*$") nil t)
-	(org-refresh-property tprop (match-string-no-properties 1)))))))
+     (org-with-point-at 1
+       ;; Set global values (e.g., values defined through
+       ;; "#+PROPERTY:" keywords) to the whole buffer.
+       (when global (put-text-property (point-min) (point-max) tprop global))
+       ;; Set local values.
+       (while (re-search-forward property-re nil t)
+	 (when (org-at-property-p)
+	   (org-refresh-property tprop (org-entry-get (point) dprop) inherit?))
+	 (outline-next-heading))))))
 
-(defun org-refresh-property (tprop p)
+(defun org-refresh-property (tprop p &optional inherit)
   "Refresh the buffer text property TPROP from the drawer property P.
-The refresh happens only for the current tree (not subtree)."
+The refresh happens only for the current headline, or the whole
+sub-tree if optional argument INHERIT is non-nil."
   (unless (org-before-first-heading-p)
     (save-excursion
       (org-back-to-heading t)
-      (if (symbolp tprop)
-	  ;; TPROP is a text property symbol
-	  (put-text-property
-	   (point) (or (outline-next-heading) (point-max)) tprop p)
-	;; TPROP is an alist with (properties . function) elements
-	(dolist (al tprop)
-	  (save-excursion
-	    (put-text-property
-	     (line-beginning-position) (or (outline-next-heading) (point-max))
-	     (car al)
-	     (funcall (cdr al) p))))))))
+      (let ((start (point))
+	    (end (save-excursion
+		   (if inherit (org-end-of-subtree t t)
+		     (or (outline-next-heading) (point-max))))))
+	(if (symbolp tprop)
+	    ;; TPROP is a text property symbol.
+	    (put-text-property start end tprop p)
+	  ;; TPROP is an alist with (property . function) elements.
+	  (pcase-dolist (`(,p . ,f) tprop)
+	    (put-text-property start end p (funcall f p))))))))
 
 (defun org-refresh-category-properties ()
   "Refresh category text properties in the buffer."
@@ -15904,7 +15912,7 @@ strings."
 	  ;; Return value.
 	  props)))))
 
-(defun org-property--local-values (property literal-nil)
+(defun org--property-local-values (property literal-nil)
   "Return value for PROPERTY in current entry.
 Value is a list whose car is the base value for PROPERTY and cdr
 a list of accumulated values.  Return nil if neither is found in
@@ -15928,6 +15936,17 @@ unless LITERAL-NIL is non-nil."
 	    (push (match-string-no-properties 3) value)))
 	;; Return final values.
 	(and (not (equal value '(nil))) (nreverse value))))))
+
+(defun org--property-global-value (property literal-nil)
+  "Return value for PROPERTY in current buffer.
+Return value is a string.  Return nil if property is not set
+globally.  Also return nil when PROPERTY is set to \"nil\",
+unless LITERAL-NIL is non-nil."
+  (let ((global
+	 (cdr (or (assoc-string property org-file-properties t)
+		  (assoc-string property org-global-properties t)
+		  (assoc-string property org-global-properties-fixed t)))))
+    (if literal-nil global (org-not-nil global))))
 
 (defun org-entry-get (pom property &optional inherit literal-nil)
   "Get value of PROPERTY for entry or content at point-or-marker POM.
@@ -15956,7 +15975,7 @@ value higher up the hierarchy."
 	   (or (not (eq inherit 'selective)) (org-property-inherit-p property)))
       (org-entry-get-with-inheritance property literal-nil))
      (t
-      (let* ((local (org-property--local-values property literal-nil))
+      (let* ((local (org--property-local-values property literal-nil))
 	     (value (and local (mapconcat #'identity (delq nil local) " "))))
 	(if literal-nil value (org-not-nil value)))))))
 
@@ -16068,7 +16087,7 @@ However, if LITERAL-NIL is set, return the string value \"nil\" instead."
    (let (value)
      (catch 'exit
        (while t
-	 (let ((v (org-property--local-values property literal-nil)))
+	 (let ((v (org--property-local-values property literal-nil)))
 	   (when v
 	     (setq value
 		   (concat (mapconcat #'identity (delq nil v) " ")
@@ -16081,10 +16100,7 @@ However, if LITERAL-NIL is set, return the string value \"nil\" instead."
 	     (throw 'exit nil))
 	    ((org-up-heading-safe))
 	    (t
-	     (let ((global
-		    (cdr (or (assoc-string property org-file-properties t)
-			     (assoc-string property org-global-properties t)
-			     (assoc-string property org-global-properties-fixed t)))))
+	     (let ((global (org--property-global-value property literal-nil)))
 	       (cond ((not global))
 		     (value (setq value (concat global " " value)))
 		     (t (setq value global))))
