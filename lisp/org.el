@@ -9677,8 +9677,8 @@ sub-tree if optional argument INHERIT is non-nil."
 	    ;; TPROP is a text property symbol.
 	    (put-text-property start end tprop p)
 	  ;; TPROP is an alist with (property . function) elements.
-	  (pcase-dolist (`(,prop . ,f) tprop)
-	    (put-text-property start end prop (funcall f p))))))))
+	  (pcase-dolist (`(,p . ,f) tprop)
+	    (put-text-property start end p (funcall f p))))))))
 
 (defun org-refresh-category-properties ()
   "Refresh category text properties in the buffer."
