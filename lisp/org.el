@@ -21029,11 +21029,6 @@ This command does many different things, depending on context:
     (funcall org-finish-function))
    ((org-babel-hash-at-point))
    ((run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-hook))
-   ((save-excursion (beginning-of-line) (looking-at-p "[ \t]*$"))
-    (or (run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-final-hook)
-	(user-error
-	 (substitute-command-keys
-	  "`\\[org-ctrl-c-ctrl-c]' can do nothing useful here"))))
    (t
     (let* ((context
 	    (org-element-lineage
@@ -21057,7 +21052,21 @@ This command does many different things, depending on context:
 	    (setq context parent)
 	    (setq type 'item))))
       ;; Act according to type of element or object at point.
+      ;;
+      ;; Do nothing on a blank line, except if it is contained in
+      ;; a src block.  Hence, we first check if point is in such
+      ;; a block and then if it is at a blank line.
       (pcase type
+	((or `inline-src-block `src-block)
+	 (unless org-babel-no-eval-on-ctrl-c-ctrl-c
+	   (org-babel-eval-wipe-error-buffer)
+	   (org-babel-execute-src-block
+	    current-prefix-arg (org-babel-get-src-block-info nil context))))
+	((guard (org-match-line "[ \t]*$"))
+	 (or (run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-final-hook)
+	     (user-error
+	      (substitute-command-keys
+	       "`\\[org-ctrl-c-ctrl-c]' can do nothing useful here"))))
 	((or `babel-call `inline-babel-call)
 	 (let ((info (org-babel-lob-get-info context)))
 	   (when info (org-babel-execute-src-block nil info))))
@@ -21073,11 +21082,6 @@ This command does many different things, depending on context:
 	((or `headline `inlinetask)
 	 (save-excursion (goto-char (org-element-property :begin context))
 			 (call-interactively #'org-set-tags)))
-	((or `inline-src-block `src-block)
-	 (unless org-babel-no-eval-on-ctrl-c-ctrl-c
-	   (org-babel-eval-wipe-error-buffer)
-	   (org-babel-execute-src-block
-	    current-prefix-arg (org-babel-get-src-block-info nil context))))
 	(`item
 	 ;; At an item: `C-u C-u' sets checkbox to "[-]"
 	 ;; unconditionally, whereas `C-u' will toggle its presence.
