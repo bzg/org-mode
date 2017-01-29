@@ -25,12 +25,14 @@ into
 
 *** Deleted contributed packages
 
-=org-ebib.el= and =org-bullets.el= have been deleted from the contrib/ directory.
+=org-ebib.el, =org-bullets.el= and =org-mime.el= have been deleted
+from the contrib/ directory.
 
 You can now find them here :
 
 - https://github.com/joostkremers/ebib
 - https://github.com/sabof/org-bullets
+- https://github.com/org-mime/org-mime
 
 *** Removal of ~:sitemap-sans-extension~
 
