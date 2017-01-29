@@ -13373,7 +13373,7 @@ TYPE is either `deadline' or `scheduled'.  See `org-deadline' or
 			    (string-match org-repeat-re time)
 			    (match-string 1 time))
 		       (and (org-string-nw-p old-date)
-			    (string-match "\\([.+-]+[0-9]+ [hdwmy]\
+			    (string-match "\\([.+-]+[0-9]+[hdwmy]\
 \\(?:[/ ][-+]?[0-9]+[hdwmy]\\)?\\)"
 					  old-date)
 			    (match-string 1 old-date)))))

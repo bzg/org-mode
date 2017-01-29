@@ -4304,7 +4304,16 @@ Paragraph<point>"
 	      (goto-char (point-max))
 	      (org-schedule nil "2012-03-29"))
 	    (replace-regexp-in-string
-	     "\\( [.A-Za-z]+\\)>" "" (buffer-string) nil nil 1)))))
+	     "\\( [.A-Za-z]+\\)>" "" (buffer-string) nil nil 1))))
+  (should
+   ;; check if a repeater survives re-scheduling.
+   (string-match-p
+    "\\* H\nSCHEDULED: <2017-02-01 [.A-Za-z]* \\+\\+7d>\n"
+    (org-test-with-temp-text "* H\nSCHEDULED: <2017-01-19 ++7d>\n"
+			     (let ((org-adapt-indentation nil)
+				   (org-last-inserted-timestamp nil))
+			       (org-schedule nil "2017-02-01"))
+			     (buffer-string)))))
 
 
 ;;; Property API
