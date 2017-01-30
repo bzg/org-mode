@@ -1437,6 +1437,7 @@ Use PREFIX as a prefix for the name of the indirect buffer."
 
 (defun org-mks (table title &optional prompt specials)
   "Select a member of an alist with multiple keys.
+
 TABLE is the alist which should contain entries where the car is a string.
 There should be two types of entries.
 
@@ -1444,7 +1445,7 @@ There should be two types of entries.
    This indicates that `a' is a prefix key for multi-letter selection, and
    that there are entries following with keys like \"ab\", \"ax\"...
 
-2. Selectable members must have more than two elements, with the first
+2. Select-able members must have more than two elements, with the first
    being the string of keys that lead to selecting it, and the second a
    short description string of the item.
 
@@ -1455,84 +1456,72 @@ When you press a prefix key, the commands (and maybe further prefixes)
 under this key will be shown and offered for selection.
 
 TITLE will be placed over the selection in the temporary buffer,
-PROMPT will be used when prompting for a key.  SPECIAL is an alist with
-also (\"key\" \"description\") entries.  When one of these is selection,
-only the bare key is returned."
-  (setq prompt (or prompt "Select: "))
-  (let (tbl orig-table dkey ddesc des-keys allowed-keys
-	    current prefix rtn re pressed buffer (inhibit-quit t))
-    (save-window-excursion
-      (setq buffer (org-switch-to-buffer-other-window "*Org Select*"))
-      (setq orig-table table)
-      (catch 'exit
-	(while t
-	  (erase-buffer)
-	  (insert title "\n\n")
-	  (setq tbl table
-		des-keys nil
-		allowed-keys nil
-		cursor-type nil)
-	  (setq prefix (if current (concat current " ") ""))
-	  (while tbl
-	    (cond
-	     ((and (= 2 (length (car tbl))) (= (length (caar tbl)) 1))
-	      ;; This is a description on this level
-	      (setq dkey (caar tbl) ddesc (cl-cadar tbl))
-	      (pop tbl)
-	      (push dkey des-keys)
-	      (push dkey allowed-keys)
-	      (insert prefix "[" dkey "]" "..." "  " ddesc "..." "\n")
-	      ;; Skip keys which are below this prefix
-	      (setq re (concat "\\`" (regexp-quote dkey)))
-	      (let (case-fold-search)
-		(while (and tbl (string-match re (caar tbl))) (pop tbl))))
-	     ((= 2 (length (car tbl)))
-	      ;; Not yet a usable description, skip it
-	      )
-	     (t
-	      ;; usable entry on this level
-	      (insert prefix "[" (caar tbl) "]" "     " (nth 1 (car tbl)) "\n")
-	      (push (caar tbl) allowed-keys)
-	      (pop tbl))))
-	  (when specials
-	    (insert "-------------------------------------------------------------------------------\n")
-	    (let ((sp specials))
-	      (while sp
-		(insert (format "[%s]     %s\n"
-				(caar sp) (nth 1 (car sp))))
-		(push (caar sp) allowed-keys)
-		(pop sp))))
-	  (push "\C-g" allowed-keys)
-	  (goto-char (point-min))
-	  (if (not (pos-visible-in-window-p (point-max)))
-	      (org-fit-window-to-buffer))
-	  (message prompt)
-	  (setq pressed (char-to-string (read-char-exclusive)))
-	  (while (not (member pressed allowed-keys))
-	    (message "Invalid key `%s'" pressed) (sit-for 1)
-	    (message prompt)
-	    (setq pressed (char-to-string (read-char-exclusive))))
-	  (when (equal pressed "\C-g")
-	    (kill-buffer buffer)
-	    (user-error "Abort"))
-	  (when (and (not (assoc pressed table))
-		     (not (member pressed des-keys))
-		     (assoc pressed specials))
-	    (throw 'exit (setq rtn pressed)))
-	  (unless (member pressed des-keys)
-	    (throw 'exit (setq rtn (rassoc (cdr (assoc pressed table))
-					   orig-table))))
-	  (setq current (concat current pressed))
-	  (setq table (mapcar
-		       (lambda (x)
-			 (if (and (> (length (car x)) 1)
-				  (equal (substring (car x) 0 1) pressed))
-			     (cons (substring (car x) 1) (cdr x))
-			   nil))
-		       table))
-	  (setq table (remove nil table)))))
-    (when buffer (kill-buffer buffer))
-    rtn))
+PROMPT will be used when prompting for a key.  SPECIAL is an
+alist with (\"key\" \"description\") entries.  When one of these
+is selected, only the bare key is returned."
+  (save-window-excursion
+    (let ((inhibit-quit t)
+	  (buffer (org-switch-to-buffer-other-window "*Org Select*"))
+	  (prompt (or prompt "Select: "))
+	  current)
+      (unwind-protect
+	  (catch 'exit
+	    (while t
+	      (erase-buffer)
+	      (insert title "\n\n")
+	      (let ((des-keys nil)
+		    (allowed-keys '("\C-g"))
+		    (cursor-type nil))
+		;; Populate allowed keys and descriptions keys
+		;; available with CURRENT selector.
+		(let ((re (format "\\`%s\\(.\\)\\'"
+				  (if current (regexp-quote current) "")))
+		      (prefix (if current (concat current " ") "")))
+		  (dolist (entry table)
+		    (pcase entry
+		      ;; Description.
+		      (`(,(and key (pred (string-match re))) ,desc)
+		       (let ((k (match-string 1 key)))
+			 (push k des-keys)
+			 (push k allowed-keys)
+			 (insert prefix "[" k "]" "..." "  " desc "..." "\n")))
+		      ;; Usable entry.
+		      (`(,(and key (pred (string-match re))) ,desc . ,_)
+		       (let ((k (match-string 1 key)))
+			 (insert prefix "[" k "]" "     " desc "\n")
+			 (push k allowed-keys)))
+		      (_ nil))))
+		;; Insert special entries, if any.
+		(when specials
+		  (insert "----------------------------------------------------\
+---------------------------\n")
+		  (pcase-dolist (`(,key ,description) specials)
+		    (insert (format "[%s]     %s\n" key description))
+		    (push key allowed-keys)))
+		;; Display UI and let user select an entry or
+		;; a sub-level prefix.
+		(goto-char (point-min))
+		(unless (pos-visible-in-window-p (point-max))
+		  (org-fit-window-to-buffer))
+		(message prompt)
+		(let ((pressed (char-to-string (read-char-exclusive))))
+		  (while (not (member pressed allowed-keys))
+		    (message "Invalid key `%s'" pressed) (sit-for 1)
+		    (message prompt)
+		    (setq pressed (char-to-string (read-char-exclusive))))
+		  (cond
+		   ((equal pressed "\C-g") (user-error "Abort"))
+		   ;; Selection is a prefix: open a new menu.
+		   ((member pressed des-keys)
+		    (setq current (concat current pressed)))
+		   ;; Selection matches an association: return it.
+		   ((let ((entry (assoc pressed table)))
+		      (and entry (throw 'exit entry))))
+		   ;; Selection matches a special entry: return the
+		   ;; selection prefix.
+		   ((assoc pressed specials) (throw 'exit pressed))
+		   (t (error "No entry available")))))))
+	(when buffer (kill-buffer buffer))))))
 
 ;;; The template code
 (defun org-capture-select-template (&optional keys)
