@@ -1317,6 +1317,7 @@ is always the old value."
 
 (defun org-table-current-column ()
   "Find out which column we are in."
+  (interactive)
   (save-excursion
     (let ((column 0) (pos (point)))
       (beginning-of-line)
