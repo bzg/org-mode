@@ -1506,17 +1506,17 @@ is selected, only the bare key is returned."
 		    (message "Invalid key `%s'" pressed) (sit-for 1)
 		    (message prompt)
 		    (setq pressed (char-to-string (read-char-exclusive))))
+		  (setq current (concat current pressed))
 		  (cond
 		   ((equal pressed "\C-g") (user-error "Abort"))
 		   ;; Selection is a prefix: open a new menu.
-		   ((member pressed des-keys)
-		    (setq current (concat current pressed)))
+		   ((member pressed des-keys))
 		   ;; Selection matches an association: return it.
-		   ((let ((entry (assoc pressed table)))
+		   ((let ((entry (assoc current table)))
 		      (and entry (throw 'exit entry))))
 		   ;; Selection matches a special entry: return the
 		   ;; selection prefix.
-		   ((assoc pressed specials) (throw 'exit pressed))
+		   ((assoc current specials) (throw 'exit current))
 		   (t (error "No entry available")))))))
 	(when buffer (kill-buffer buffer))))))
 
