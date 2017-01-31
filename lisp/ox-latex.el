@@ -1298,8 +1298,7 @@ For non-floats, see `org-latex--wrap-label'."
 			    main)
 		       (and (eq type 'src-block)
 			    (not (plist-get attr :float))
-			    (memq (plist-get info :latex-listings)
-				  '(nil minted)))))
+			    (null (plist-get info :latex-listings)))))
 	 (short (org-export-get-caption element t))
 	 (caption-from-attr-latex (plist-get attr :caption)))
     (cond
@@ -2875,13 +2874,19 @@ contextual information."
 	       (float-env
 		(cond
 		 ((string= "multicolumn" float)
-		  (format "\\begin{listing*}\n%s%%s\n%s\\end{listing*}"
+		  (format "\\begin{listing*}[%s]\n%s%%s\n%s\\end{listing*}"
+			  (plist-get info :latex-default-figure-position)
 			  (if caption-above-p caption-str "")
 			  (if caption-above-p "" caption-str)))
 		 (caption
-		  (concat (if caption-above-p caption-str "")
-			  "%s"
-			  (if caption-above-p "" (concat "\n" caption-str))))
+		  (format "\\begin{listing}[%s]\n%s%%s\n%s\\end{listing}"
+			  (plist-get info :latex-default-figure-position)
+			  (if caption-above-p caption-str "")
+			  (if caption-above-p "" caption-str)))
+		 ((string= "t" float)
+		  (concat (format "\\begin{listing}[%s]\n"
+				  (plist-get info :latex-default-figure-position))
+			  "%s\n\\end{listing}"))
 		 (t "%s")))
 	       (options (plist-get info :latex-minted-options))
 	       (body
