@@ -2093,6 +2093,69 @@ is t, then new columns should be added as needed"
       (let ((org-table-tab-jumps-over-hlines nil)) (org-table-next-field))
       (buffer-string)))))
 
+
+;;; Miscellaneous
+
+(ert-deftest test-org-table/get-field ()
+  "Test `org-table-get-field' specifications."
+  ;; Regular test.
+  (should
+   (equal " a "
+	  (org-test-with-temp-text "| <point>a |" (org-table-get-field))))
+  ;; Get field in open last column.
+  (should
+   (equal " a "
+	  (org-test-with-temp-text "| <point>a " (org-table-get-field))))
+  ;; Get empty field.
+  (should
+   (equal ""
+	  (org-test-with-temp-text "|<point>|" (org-table-get-field))))
+  (should
+   (equal " "
+	  (org-test-with-temp-text "| <point>|" (org-table-get-field))))
+  ;; Outside the table, return the empty string.
+  (should
+   (equal ""
+	  (org-test-with-temp-text "<point>| a |" (org-table-get-field))))
+  (should
+   (equal ""
+	  (org-test-with-temp-text "| a |<point>" (org-table-get-field))))
+  ;; With optional N argument, select a particular column in current
+  ;; row.
+  (should
+   (equal " 3 "
+	  (org-test-with-temp-text "| 1 | 2 | 3 |" (org-table-get-field 3))))
+  (should
+   (equal " 4 "
+	  (org-test-with-temp-text "| 1 | 2 |\n<point>| 3 | 4 |"
+	    (org-table-get-field 2))))
+  ;; REPLACE optional argument is used to replace selected field.
+  (should
+   (equal "| foo |"
+	  (org-test-with-temp-text "| <point>1 |"
+	    (org-table-get-field nil " foo ")
+	    (buffer-string))))
+  (should
+   (equal "| 1 | 2 | foo |"
+	  (org-test-with-temp-text "| 1 | 2 | 3 |"
+	    (org-table-get-field 3 " foo ")
+	    (buffer-string))))
+  (should
+   (equal " 4 "
+	  (org-test-with-temp-text "| 1 | 2 |\n<point>| 3 | 4 |"
+	    (org-table-get-field 2))))
+  ;; An empty REPLACE string clears the field.
+  (should
+   (equal "| |"
+	  (org-test-with-temp-text "| <point>1 |"
+	    (org-table-get-field nil "")
+	    (buffer-string))))
+  ;; When using REPLACE still return old value.
+  (should
+   (equal " 1 "
+	  (org-test-with-temp-text "| <point>1 |"
+	    (org-table-get-field nil " foo ")))))
+
 (provide 'test-org-table)
 
 ;;; test-org-table.el ends here
