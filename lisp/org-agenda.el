@@ -5889,21 +5889,25 @@ specification like [h]h:mm."
 	       (pos (1- (match-beginning 1)))
 	       (todo-state (save-match-data (org-get-todo-state)))
 	       (done? (member todo-state org-done-keywords))
+               (sexp? (string-prefix-p "%%" s))
 	       ;; DEADLINE is the deadline date for the entry.  It is
 	       ;; either the base date or the last repeat, according
 	       ;; to `org-agenda-prefer-last-repeat'.
 	       (deadline
-		(if (or (eq org-agenda-prefer-last-repeat t)
-			(member todo-state org-agenda-prefer-last-repeat))
-		    (org-agenda--timestamp-to-absolute
-		     s today 'past (current-buffer) pos)
-		  (org-agenda--timestamp-to-absolute s)))
+		(cond
+		 (sexp? (org-agenda--timestamp-to-absolute s current))
+		 ((or (eq org-agenda-prefer-last-repeat t)
+		      (member todo-state org-agenda-prefer-last-repeat))
+		  (org-agenda--timestamp-to-absolute
+		   s today 'past (current-buffer) pos))
+		 (t (org-agenda--timestamp-to-absolute s))))
 	       ;; REPEAT is the future repeat closest from CURRENT,
 	       ;; according to `org-agenda-show-future-repeats'. If
 	       ;; the latter is nil, or if the time stamp has no
 	       ;; repeat part, default to DEADLINE.
 	       (repeat
 		(cond
+		 (sexp? deadline)
 		 ((<= current today) deadline)
 		 ((not org-agenda-show-future-repeats) deadline)
 		 (t
@@ -6052,21 +6056,25 @@ scheduled items with an hour specification like [h]h:mm."
 	       (pos (1- (match-beginning 1)))
 	       (todo-state (save-match-data (org-get-todo-state)))
 	       (donep (member todo-state org-done-keywords))
+	       (sexp? (string-prefix-p "%%" s))
 	       ;; SCHEDULE is the scheduled date for the entry.  It is
 	       ;; either the bare date or the last repeat, according
 	       ;; to `org-agenda-prefer-last-repeat'.
 	       (schedule
-		(if (or (eq org-agenda-prefer-last-repeat t)
-			(member todo-state org-agenda-prefer-last-repeat))
-		    (org-agenda--timestamp-to-absolute
-		     s today 'past (current-buffer) pos)
-		  (org-agenda--timestamp-to-absolute s)))
+		(cond
+		 (sexp? (org-agenda--timestamp-to-absolute s current))
+		 ((or (eq org-agenda-prefer-last-repeat t)
+		      (member todo-state org-agenda-prefer-last-repeat))
+		  (org-agenda--timestamp-to-absolute
+		   s today 'past (current-buffer) pos))
+		 (t (org-agenda--timestamp-to-absolute s))))
 	       ;; REPEAT is the future repeat closest from CURRENT,
 	       ;; according to `org-agenda-show-future-repeats'. If
 	       ;; the latter is nil, or if the time stamp has no
 	       ;; repeat part, default to SCHEDULE.
 	       (repeat
 		(cond
+		 (sexp? schedule)
 		 ((<= current today) schedule)
 		 ((not org-agenda-show-future-repeats) schedule)
 		 (t
