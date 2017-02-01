@@ -6069,19 +6069,24 @@ specification like [h]h:mm."
 	       (show-all (or (eq org-agenda-repeating-timestamp-show-all t)
 			     (member todo-state
 				     org-agenda-repeating-timestamp-show-all)))
+	       (sexp? (string-prefix-p "%%" s))
 	       ;; DEADLINE is the bare deadline date, i.e., without
 	       ;; any repeater, or the last repeat if SHOW-ALL is
 	       ;; non-nil.  REPEAT is closest repeat after CURRENT, if
 	       ;; all repeated time stamps are to be shown, or after
 	       ;; TODAY otherwise.  REPEAT only applies to future
 	       ;; dates.
-	       (deadline (if show-all (org-agenda--timestamp-to-absolute s)
-			   (org-agenda--timestamp-to-absolute
-			    s today 'past (current-buffer) pos)))
-	       (repeat
-		(if (< current today) deadline
-		  (org-agenda--timestamp-to-absolute
-		   s (if show-all current today) 'future (current-buffer) pos)))
+	       (deadline (cond
+			  (sexp? (org-agenda--timestamp-to-absolute s current))
+			  (show-all (org-agenda--timestamp-to-absolute s))
+			  (t (org-agenda--timestamp-to-absolute
+			      s today 'past (current-buffer) pos))))
+	       (repeat (cond (sexp? deadline)
+			     ((< current today) deadline)
+			     (t
+			      (org-agenda--timestamp-to-absolute
+			       s (if show-all current today) 'future
+			       (current-buffer) pos))))
 	       (diff (- deadline current))
 	       (suppress-prewarning
 		(let ((scheduled
@@ -6234,22 +6239,25 @@ scheduled items with an hour specification like [h]h:mm."
 	       (show-all (or (eq org-agenda-repeating-timestamp-show-all t)
 			     (member todo-state
 				     org-agenda-repeating-timestamp-show-all)))
+	       (sexp? (string-prefix-p "%%" s))
 	       ;; SCHEDULE is the bare scheduled date, i.e., without
 	       ;; any repeater if non-nil, or last repeat if SHOW-ALL
 	       ;; is nil.  REPEAT is the closest repeat after CURRENT,
 	       ;; if all repeated time stamps are to be shown, or
 	       ;; after TODAY otherwise.  REPEAT only applies to
 	       ;; future dates.
-	       (schedule (if show-all (org-agenda--timestamp-to-absolute s)
-			   (org-agenda--timestamp-to-absolute
-			    s today 'past (current-buffer) pos)))
-	       (repeat (cond ((< current today) schedule)
-			     (show-all
-			      (org-agenda--timestamp-to-absolute
-			       s current 'future (current-buffer) pos))
-			     (t
-			      (org-agenda--timestamp-to-absolute
-			       s today 'future (current-buffer) pos))))
+	       (schedule (cond
+			  (sexp? (org-agenda--timestamp-to-absolute s current))
+			  (show-all (org-agenda--timestamp-to-absolute s))
+			  (t (org-agenda--timestamp-to-absolute
+			      s today 'past (current-buffer) pos))))
+	       (repeat (cond
+			(sexp? schedule)
+			((< current today) schedule)
+			(t
+			 (org-agenda--timestamp-to-absolute
+			  s (if show-all current today) 'future
+			  (current-buffer) pos))))
 	       (diff (- current schedule))
 	       (warntime (get-text-property (point) 'org-appt-warntime))
 	       (pastschedp (< schedule today))
