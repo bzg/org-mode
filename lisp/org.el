@@ -20920,6 +20920,7 @@ When at a table, call the formula editor with `org-table-edit-formulas'.
 When in a source code block, call `org-edit-src-code'.
 When in a fixed-width region, call `org-edit-fixed-width-region'.
 When in an export block, call `org-edit-export-block'.
+When in a LaTeX environment, call `org-edit-latex-environment'.
 When at an #+INCLUDE keyword, visit the included file.
 When at a footnote reference, call `org-edit-footnote-reference'
 On a link, call `ffap' to visit the link at point.
@@ -20964,6 +20965,7 @@ Otherwise, return a user error."
       (`example-block (org-edit-src-code))
       (`export-block (org-edit-export-block))
       (`fixed-width (org-edit-fixed-width-region))
+      (`latex-environment (org-edit-latex-environment))
       (_
        ;; No notable element at point.  Though, we may be at a link or
        ;; a footnote reference, which are objects.  Thus, scan deeper.

@@ -332,7 +332,7 @@ where BEG and END are buffer positions and CONTENTS is a string."
 		    (skip-chars-backward " \r\t\n")
 		    (line-beginning-position 1))
 	     (org-element-property :value datum)))
-      ((memq type '(fixed-width table))
+      ((memq type '(fixed-width latex-environment table))
        (let ((beg (org-element-property :post-affiliated datum))
 	     (end (progn (goto-char (org-element-property :end datum))
 			 (skip-chars-backward " \r\t\n")
@@ -851,6 +851,28 @@ Throw an error when not at such a table."
      #'text-mode t)
     (when (bound-and-true-p flyspell-mode) (flyspell-mode -1))
     (table-recognize)
+    t))
+
+(defun org-edit-latex-environment ()
+  "Edit LaTeX environment at point.
+\\<org-src-mode-map>
+The LaTeX environment is copied into a new buffer.  Major mode is
+set to the one associated to \"latex\" in `org-src-lang-modes',
+or to `latex-mode' if there is none.
+
+When done, exit with `\\[org-edit-src-exit]'.  The edited text \
+will then replace
+the LaTeX environment in the Org mode buffer."
+  (interactive)
+  (let ((element (org-element-at-point)))
+    (unless (and (eq (org-element-type element) 'latex-environment)
+		 (org-src--on-datum-p element))
+      (user-error "Not in a LaTeX environment"))
+    (org-src--edit-element
+     element
+     (org-src--construct-edit-buffer-name (buffer-name) "LaTeX environment")
+     (org-src--get-lang-mode "latex")
+     t)
     t))
 
 (defun org-edit-export-block ()

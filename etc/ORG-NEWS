@@ -63,6 +63,12 @@ to the following
 list as their first argument.
 
 ** New features
+*** ~org-edit-special~ can edit LaTeX environments
+
+Using ~C-c '~ on a LaTeX environment opens a sub-editing buffer.  By
+default, major mode in that buffer is ~latex-mode~, but it can be
+changed by configuring ~org-src-lang-modes~.
+
 *** Agenda
 **** New variable : ~org-agenda-show-future-repeats~
 **** New variable : ~org-agenda-prefer-last-repeat~
