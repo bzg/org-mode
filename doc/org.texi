@@ -7070,7 +7070,7 @@ would look like:
 (setq org-capture-templates
  '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
         "* TODO %?\n  %i\n  %a")
-   ("j" "Journal" entry (file+datetree "~/org/journal.org")
+   ("j" "Journal" entry (file+olp+datetree "~/org/journal.org")
         "* %?\nEntered on %U\n  %i\n  %a")))
 @end group
 @end smalllisp
@@ -7178,21 +7178,19 @@ For non-unique headings, the full path is safer.
 @item (file+regexp  "path/to/file" "regexp to find location")
 Use a regular expression to position the cursor.
 
-@item (file+datetree "path/to/file")
-Will create a heading in a date tree for today's date@footnote{Datetree
-headlines for years accept tags, so if you use both @code{* 2013 :noexport:}
-and @code{* 2013} in your file, the capture will refile the note to the first
-one matched.}.
-
-@item (file+datetree+prompt "path/to/file")
-Will create a heading in a date tree, but will prompt for the date.
-
-@item (file+weektree "path/to/file")
-Will create a heading in a week tree for today's date.  Week trees are sorted
-by week and not by month unlike datetrees.
-
-@item (file+weektree+prompt "path/to/file")
-Will create a heading in a week tree, but will prompt for the date.
+@item (file+olp+datetree "path/to/file" [ "Level 1 heading" ....])
+This target@footnote{Org used to offer four different targets for date/week
+tree capture.  Now, Org automatically translates these to use
+@code{file+olp+datetree}, applying the @code{:time-prompt} and
+@code{:tree-type} properties.  Please rewrite your date/week-tree targets
+using @code{file+olp+datetree} since the older targets are now deprecated.}
+will create a heading in a date tree@footnote{A date tree is an outline
+structure with years on the highest level, months or ISO-weeks as sublevels
+and then dates on the lowest level.  Tags are allowed in the tree structure.}
+for today's date.  If the optional outline path is given, the tree will be
+built under the node it is pointing to, instead of at top level.  Check out
+the @code{:time-prompt} and @code{:tree-type} properties below for additional
+options.
 
 @item (file+function "path/to/file" function-finding-location)
 A function to find the right location in the file.
@@ -7243,6 +7241,16 @@ If starting the capture interrupted a clock, restart that clock when finished
 with the capture.  Note that @code{:clock-keep} has precedence over
 @code{:clock-resume}.  When setting both to @code{t}, the current clock will
 run and the previous one will not be resumed.
+
+@item :time-prompt
+Prompt for a date/time to be used for date/week trees and when filling the
+template.  Without this property, capture uses the current date and time.
+Even if this property has not been set, you can force the same behavior by
+calling @code{org-capture} with a @kbd{C-1} prefix argument.
+
+@item :tree-type
+When `week', make a week tree instead of the month tree, i.e. place the
+headings for each day under a heading with the current iso week.
 
 @item :unnarrowed
 Do not narrow the target buffer, simply show the full buffer.  Default is to

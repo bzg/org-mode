@@ -16508,6 +16508,8 @@ only headings."
 	 end found flevel)
     (unless buffer (error "File not found :%s" file))
     (with-current-buffer buffer
+      (unless (derived-mode-p 'org-mode)
+	(error "Buffer %s needs to be in Org mode" buffer))
       (org-with-wide-buffer
        (goto-char (point-min))
        (dolist (heading path)
