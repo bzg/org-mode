@@ -13199,11 +13199,13 @@ on INACTIVE-OK."
   (save-match-data
     (save-excursion
       (org-back-to-heading t)
-      (and (re-search-forward (if tagline
-				  (concat tagline "\\s-*" org-repeat-re)
-				org-repeat-re)
-			      (org-entry-end-position) t)
-	   (match-string-no-properties 1)))))
+      (let ((end (org-entry-end-position))
+	    (regexp (if tagline (concat tagline "\\s-*" org-repeat-re)
+		      org-repeat-re)))
+	(catch :repeat
+	  (while (re-search-forward regexp end t)
+	    (when (org-at-timestamp-p)
+	      (throw :repeat (match-string-no-properties 1)))))))))
 
 (defvar org-last-changed-timestamp)
 (defvar org-last-inserted-timestamp)
