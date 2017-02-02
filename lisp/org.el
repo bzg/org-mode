@@ -16689,7 +16689,6 @@ Return the position where this entry starts, or nil if there is no such entry."
 (defvar org-last-changed-timestamp nil)
 (defvar org-last-inserted-timestamp nil
   "The last time stamp inserted with `org-insert-time-stamp'.")
-(defvar org-ts-what) ; dynamically scoped parameter
 
 (defun org-time-stamp (arg &optional inactive)
   "Prompt for a date/time and insert a time stamp.
@@ -17982,36 +17981,54 @@ inactive timestamps.
 
 When this function returns a non-nil value, match data is set
 according to `org-ts-regexp3' or `org-ts-regexp2', depending on
-INACTIVE-OK."
+INACTIVE-OK.
+
+Return the position of the point as a symbol among `bracket',
+`after', `year', `month', `hour', `minute', `day' or a number of
+character from the last know part of the time stamp.
+
+This function checks context and only return non-nil for valid
+time stamps.  If you need to match anything looking like a time
+stamp, or if you are sure about the context, consider using
+`org-in-regexp', e.g.,
+
+  (org-in-regexp org-ts-regexp)
+
+Unlike to `org-element-context', the function recognizes time
+stamps in properties drawers, planning lines and clocks."
   (interactive)
   (let* ((tsr (if inactive-ok org-ts-regexp3 org-ts-regexp2))
 	 (pos (point))
-	 (ans (or (looking-at tsr)
-		  (save-excursion
-		    (skip-chars-backward "^[<\n\r\t")
-		    (when (> (point) (point-min)) (backward-char 1))
-		    (and (looking-at tsr)
-			 (> (- (match-end 0) pos) -1))))))
-    (and ans
-	 (boundp 'org-ts-what)
-	 (setq org-ts-what
-	       (cond
-		((= pos (match-beginning 0))         'bracket)
-		;; Point is considered to be "on the bracket" whether
-		;; it's really on it or right after it.
-		((= pos (1- (match-end 0)))          'bracket)
-		((= pos (match-end 0))               'after)
-		((org-pos-in-match-range pos 2)      'year)
-		((org-pos-in-match-range pos 3)      'month)
-		((org-pos-in-match-range pos 7)      'hour)
-		((org-pos-in-match-range pos 8)      'minute)
-		((or (org-pos-in-match-range pos 4)
-		     (org-pos-in-match-range pos 5)) 'day)
-		((and (> pos (or (match-end 8) (match-end 5)))
-		      (< pos (match-end 0)))
-		 (- pos (or (match-end 8) (match-end 5))))
-		(t 'day))))
-    ans))
+	 (match
+	  (let ((boundaries (org-in-regexp tsr)))
+	    (save-match-data
+	      (cond ((null boundaries) nil)
+		    ((org-at-planning-p))
+		    ((org-at-property-p))
+		    ;; CLOCK lines only contain inactive time-stamps.
+		    ((and inactive-ok (org-at-clock-log-p)))
+		    (t
+		     (eq 'timestamp
+			 (save-excursion
+			   (when (= pos (cdr boundaries)) (forward-char -1))
+			   (org-element-type (org-element-context))))))))))
+    (cond
+     ((not match) nil)
+     ((= pos (match-beginning 0))         'bracket)
+     ;; Distinguish location right before the closing bracket from
+     ;; right after it.
+     ((= pos (1- (match-end 0)))          'bracket)
+     ((= pos (match-end 0))               'after)
+     ((org-pos-in-match-range pos 2)      'year)
+     ((org-pos-in-match-range pos 3)      'month)
+     ((org-pos-in-match-range pos 7)      'hour)
+     ((org-pos-in-match-range pos 8)      'minute)
+     ((or (org-pos-in-match-range pos 4)
+	  (org-pos-in-match-range pos 5)) 'day)
+     ((and (> pos (or (match-end 8) (match-end 5)))
+	   (< pos (match-end 0)))
+      (- pos (or (match-end 8) (match-end 5))))
+     (t 'day))))
 
 (defun org-toggle-timestamp-type ()
   "Toggle the type (<active> or [inactive]) of a time stamp."
@@ -18041,26 +18058,26 @@ The date will be changed by N times WHAT.  WHAT can be `day', `month',
 `year', `minute', `second'.  If WHAT is not given, the cursor position
 in the timestamp determines what will be changed.
 When SUPPRESS-TMP-DELAY is non-nil, suppress delays like \"--2d\"."
-  (let ((origin (point)) origin-cat
+  (let ((origin (point))
+	(timestamp? (org-at-timestamp-p t))
+	origin-cat
 	with-hm inactive
 	(dm (max (nth 1 org-time-stamp-rounding-minutes) 1))
-	org-ts-what
 	extra rem
 	ts time time0 fixnext clrgx)
-    (unless (org-at-timestamp-p t)
-      (user-error "Not at a timestamp"))
-    (if (and (not what) (eq org-ts-what 'bracket))
+    (unless timestamp? (user-error "Not at a timestamp"))
+    (if (and (not what) (eq timestamp? 'bracket))
 	(org-toggle-timestamp-type)
       ;; Point isn't on brackets.  Remember the part of the time-stamp
       ;; the point was in.  Indeed, size of time-stamps may change,
       ;; but point must be kept in the same category nonetheless.
-      (setq origin-cat org-ts-what)
-      (when (and (not what) (not (eq org-ts-what 'day))
+      (setq origin-cat timestamp?)
+      (when (and (not what) (not (eq timestamp? 'day))
 		 org-display-custom-times
 		 (get-text-property (point) 'display)
 		 (not (get-text-property (1- (point)) 'display)))
-	(setq org-ts-what 'day))
-      (setq org-ts-what (or what org-ts-what)
+	(setq timestamp? 'day))
+      (setq timestamp? (or what timestamp?)
 	    inactive (= (char-after (match-beginning 0)) ?\[)
 	    ts (match-string 0))
       (replace-match "")
@@ -18074,7 +18091,7 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like \"--2d\"."
 	(setq with-hm t))
       (setq time0 (org-parse-time-string ts))
       (when (and updown
-		 (eq org-ts-what 'minute)
+		 (eq timestamp? 'minute)
 		 (not current-prefix-arg))
 	;; This looks like s-up and s-down.  Change by one rounding step.
 	(setq n (* dm (cond ((> n 0) 1) ((< n 0) -1) (t 0))))
@@ -18084,21 +18101,21 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like \"--2d\"."
       (setq time
 	    (apply #'encode-time
 		   (or (car time0) 0)
-		   (+ (if (eq org-ts-what 'minute) n 0) (nth 1 time0))
-		   (+ (if (eq org-ts-what 'hour) n 0)   (nth 2 time0))
-		   (+ (if (eq org-ts-what 'day) n 0)    (nth 3 time0))
-		   (+ (if (eq org-ts-what 'month) n 0)  (nth 4 time0))
-		   (+ (if (eq org-ts-what 'year) n 0)   (nth 5 time0))
+		   (+ (if (eq timestamp? 'minute) n 0) (nth 1 time0))
+		   (+ (if (eq timestamp? 'hour) n 0)   (nth 2 time0))
+		   (+ (if (eq timestamp? 'day) n 0)    (nth 3 time0))
+		   (+ (if (eq timestamp? 'month) n 0)  (nth 4 time0))
+		   (+ (if (eq timestamp? 'year) n 0)   (nth 5 time0))
 		   (nthcdr 6 time0)))
-      (when (and (member org-ts-what '(hour minute))
+      (when (and (memq timestamp? '(hour minute))
 		 extra
 		 (string-match "-\\([012][0-9]\\):\\([0-5][0-9]\\)" extra))
 	(setq extra (org-modify-ts-extra
 		     extra
-		     (if (eq org-ts-what 'hour) 2 5)
+		     (if (eq timestamp? 'hour) 2 5)
 		     n dm)))
-      (when (integerp org-ts-what)
-	(setq extra (org-modify-ts-extra extra org-ts-what n dm)))
+      (when (integerp timestamp?)
+	(setq extra (org-modify-ts-extra extra timestamp? n dm)))
       (when (eq what 'calendar)
 	(let ((cal-date (org-get-date-from-calendar)))
 	  (setcar (nthcdr 4 time0) (nth 0 cal-date)) ; month
@@ -18165,14 +18182,14 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like \"--2d\"."
 		  (when (re-search-forward clrgx nil t)
 		    (goto-char (match-beginning 1))
 		    (let (org-clock-adjust-closest)
-		      (org-timestamp-change n org-ts-what updown))
+		      (org-timestamp-change n timestamp? updown))
 		    (message "Clock adjusted in %s for heading: %s"
 			     (file-name-nondirectory (buffer-file-name))
 			     (org-get-heading t t)))))))))
       ;; Try to recenter the calendar window, if any.
       (when (and org-calendar-follow-timestamp-change
 		 (get-buffer-window "*Calendar*" t)
-		 (memq org-ts-what '(day month year)))
+		 (memq timestamp? '(day month year)))
 	(org-recenter-calendar (time-to-days time))))))
 
 (defun org-modify-ts-extra (s pos n dm)
@@ -20819,7 +20836,7 @@ Depending on context, this does one of the following:
   "Change timestamps synchronously up in CLOCK log lines.
 Optional argument N tells to change by that many units."
   (interactive "P")
-  (if (and (org-at-clock-log-p) (org-at-timestamp-p t))
+  (if (and (org-at-clock-log-p) (org-in-regexp org-ts-regexp-inactive))
       (let (org-support-shift-select)
 	(org-clock-timestamps-up n))
     (user-error "Not at a clock log")))
@@ -20828,7 +20845,7 @@ Optional argument N tells to change by that many units."
   "Change timestamps synchronously down in CLOCK log lines.
 Optional argument N tells to change by that many units."
   (interactive "P")
-  (if (and (org-at-clock-log-p) (org-at-timestamp-p t))
+  (if (and (org-at-clock-log-p) (org-in-regexp org-ts-regexp-inactive))
       (let (org-support-shift-select)
 	(org-clock-timestamps-down n))
     (user-error "Not at a clock log")))

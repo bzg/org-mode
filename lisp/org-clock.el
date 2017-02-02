@@ -39,7 +39,6 @@
 
 (defvar org-frame-title-format-backup frame-title-format)
 (defvar org-time-stamp-formats)
-(defvar org-ts-what)
 
 
 (defgroup org-clock nil
@@ -1669,11 +1668,11 @@ Optional argument N tells to change by that many units."
   "Change CLOCK timestamps synchronously at cursor.
 UPDOWN tells whether to change `up' or `down'.
 Optional argument N tells to change by that many units."
-  (setq org-ts-what nil)
-  (when (org-at-timestamp-p t)
-    (let ((tschange (if (eq updown 'up) 'org-timestamp-up
-		      'org-timestamp-down))
-	  ts1 begts1 ts2 begts2 updatets1 tdiff)
+  (let ((tschange (if (eq updown 'up) 'org-timestamp-up
+		    'org-timestamp-down))
+	(timestamp? (org-at-timestamp-p t))
+	ts1 begts1 ts2 begts2 updatets1 tdiff)
+    (when timestamp?
       (save-excursion
 	(move-beginning-of-line 1)
 	(re-search-forward org-ts-regexp3 nil t)
@@ -1685,7 +1684,6 @@ Optional argument N tells to change by that many units."
       (if (not ts2)
 	  ;; fall back on org-timestamp-up if there is only one
 	  (funcall tschange n)
-	;; setq this so that (boundp 'org-ts-what is non-nil)
 	(funcall tschange n)
 	(let ((ts (if updatets1 ts2 ts1))
 	      (begts (if updatets1 begts1 begts2)))
@@ -1697,12 +1695,13 @@ Optional argument N tells to change by that many units."
 	    (goto-char begts)
 	    (org-timestamp-change
 	     (round (/ (float-time tdiff)
-		       (cond ((eq org-ts-what 'minute) 60)
-			     ((eq org-ts-what 'hour) 3600)
-			     ((eq org-ts-what 'day) (* 24 3600))
-			     ((eq org-ts-what 'month) (* 24 3600 31))
-			     ((eq org-ts-what 'year) (* 24 3600 365.2)))))
-	     org-ts-what 'updown)))))))
+		       (pcase timestamp?
+			 (`minute 60)
+			 (`hour 3600)
+			 (`day (* 24 3600))
+			 (`month (* 24 3600 31))
+			 (`year (* 24 3600 365.2)))))
+	     timestamp? 'updown)))))))
 
 ;;;###autoload
 (defun org-clock-cancel ()
