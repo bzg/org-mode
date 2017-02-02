@@ -18046,11 +18046,10 @@ stamps in properties drawers, planning lines and clocks."
       (message "Timestamp is now %sactive"
 	       (if (equal (char-after beg) ?<) "" "in")))))
 
-(defun org-at-clock-log-p nil
-  "Is the cursor on the clock log line?"
-  (save-excursion
-    (beginning-of-line)
-    (looking-at org-clock-line-re)))
+(defun org-at-clock-log-p ()
+  "Non-nil if point is on a clock log line."
+  (and (org-match-line org-clock-line-re)
+       (eq (org-element-type (save-match-data (org-element-at-point))) 'clock)))
 
 (defvar org-clock-history)                     ; defined in org-clock.el
 (defvar org-clock-adjust-closest nil)          ; defined in org-clock.el
