@@ -1593,18 +1593,19 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 		m (floor (/ s 60))
 		s (- s (* 60 s)))
 	  (insert " => " (format "%2d:%02d" h m))
-	  (when (setq remove (and org-clock-out-remove-zero-time-clocks
-				  (= (+ h m) 0)))
-	    (beginning-of-line 1)
-	    (delete-region (point) (point-at-eol))
-	    (and (looking-at "\n") (> (point-max) (1+ (point)))
-		 (delete-char 1)))
 	  (move-marker org-clock-marker nil)
 	  (move-marker org-clock-hd-marker nil)
-	  (when org-log-note-clock-out
-	    (org-add-log-setup
-	     'clock-out nil nil nil
-	     (concat "# Task: " (org-get-heading t) "\n\n")))
+	  ;; Possibly remove zero time clocks.  However, do not add
+	  ;; a note associated to the CLOCK line in this case.
+	  (cond ((and org-clock-out-remove-zero-time-clocks
+		      (= (+ h m) 0))
+		 (setq remove t)
+		 (delete-region (line-beginning-position)
+				(line-beginning-position 2)))
+		(org-log-note-clock-out
+		 (org-add-log-setup
+		  'clock-out nil nil nil
+		  (concat "# Task: " (org-get-heading t) "\n\n"))))
 	  (when org-clock-mode-line-timer
 	    (cancel-timer org-clock-mode-line-timer)
 	    (setq org-clock-mode-line-timer nil))
