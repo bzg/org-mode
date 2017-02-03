@@ -146,6 +146,7 @@ Where clue > 0
 ,#+END_SRC
 #+end_example
 *** Export
+**** Add Slovanian translations
 **** Implement ~org-export-insert-image-links~
 This new function is meant to be used in back-ends supporting images
 as descriptions of links, a.k.a. image links.  See its docstring for

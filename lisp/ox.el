@@ -5399,8 +5399,19 @@ Return a list of src-block elements with a caption."
      (secondary-closing
       :utf-8 "“" :html "&ldquo;" :latex "\\grqq{}" :texinfo "@quotedblleft{}")
      (apostrophe :utf-8 "’" :html: "&#39;"))
+    ("sl"
+     ;; Based on https://sl.wikipedia.org/wiki/Narekovaj
+     (primary-opening :utf-8 "«" :html "&laquo;" :latex "{}<<"
+		      :texinfo "@guillemetleft{}")
+     (primary-closing :utf-8 "»" :html "&raquo;" :latex ">>{}"
+		      :texinfo "@guillemetright{}")
+     (secondary-opening
+      :utf-8 "„" :html "&bdquo;" :latex "\\glqq{}" :texinfo "@quotedblbase{}")
+     (secondary-closing
+      :utf-8 "“" :html "&ldquo;" :latex "\\grqq{}" :texinfo "@quotedblleft{}")
+     (apostrophe :utf-8 "’" :html "&rsquo;"))
     ("sv"
-     ;; based on https://sv.wikipedia.org/wiki/Citattecken
+     ;; Based on https://sv.wikipedia.org/wiki/Citattecken
      (primary-opening :utf-8 "”" :html "&rdquo;" :latex "’’" :texinfo "’’")
      (primary-closing :utf-8 "”" :html "&rdquo;" :latex "’’" :texinfo "’’")
      (secondary-opening :utf-8 "’" :html "&rsquo;" :latex "’" :texinfo "`")
@@ -5637,6 +5648,7 @@ them."
      ("pl" :default "Autor")
      ("pt_BR" :default "Autor")
      ("ru" :html "&#1040;&#1074;&#1090;&#1086;&#1088;" :utf-8 "Автор")
+     ("sl" :default "Avtor")
      ("sv" :html "F&ouml;rfattare")
      ("uk" :html "&#1040;&#1074;&#1090;&#1086;&#1088;" :utf-8 "Автор")
      ("zh-CN" :html "&#20316;&#32773;" :utf-8 "作者")
@@ -5651,7 +5663,8 @@ them."
      ("nl" :default "Vervolg van vorige pagina")
      ("pt" :default "Continuação da página anterior")
      ("ru" :html "(&#1055;&#1088;&#1086;&#1076;&#1086;&#1083;&#1078;&#1077;&#1085;&#1080;&#1077;)"
-      :utf-8 "(Продолжение)"))
+      :utf-8 "(Продолжение)")
+     ("sl" :default "Nadaljevanje s prejšnje strani"))
     ("Continued on next page"
      ("ar" :default "التتمة في الصفحة التالية")
      ("de" :default "Fortsetzung nächste Seite")
@@ -5662,7 +5675,10 @@ them."
      ("nl" :default "Vervolg op volgende pagina")
      ("pt" :default "Continua na página seguinte")
      ("ru" :html "(&#1055;&#1088;&#1086;&#1076;&#1086;&#1083;&#1078;&#1077;&#1085;&#1080;&#1077; &#1089;&#1083;&#1077;&#1076;&#1091;&#1077;&#1090;)"
-      :utf-8 "(Продолжение следует)"))
+      :utf-8 "(Продолжение следует)")
+     ("sl" :default "Nadaljevanje na naslednji strani"))
+    ("Created"
+     ("sl" :default "Ustvarjeno"))
     ("Date"
      ("ar" :default "بتاريخ")
      ("ca" :default "Data")
@@ -5684,6 +5700,7 @@ them."
      ("pl" :default "Data")
      ("pt_BR" :default "Data")
      ("ru" :html "&#1044;&#1072;&#1090;&#1072;" :utf-8 "Дата")
+     ("sl" :default "Datum")
      ("sv" :default "Datum")
      ("uk" :html "&#1044;&#1072;&#1090;&#1072;" :utf-8 "Дата")
      ("zh-CN" :html "&#26085;&#26399;" :utf-8 "日期")
@@ -5703,6 +5720,7 @@ them."
      ("pt_BR" :html "Equa&ccedil;&atilde;o" :default "Equação" :ascii "Equacao")
      ("ru" :html "&#1059;&#1088;&#1072;&#1074;&#1085;&#1077;&#1085;&#1080;&#1077;"
       :utf-8 "Уравнение")
+     ("sl" :default "Enačba")
      ("sv" :default "Ekvation")
      ("zh-CN" :html "&#26041;&#31243;" :utf-8 "方程"))
     ("Figure"
@@ -5734,6 +5752,7 @@ them."
      ("nn" :default "Illustrasjon %d")
      ("pt_BR" :default "Figura %d:")
      ("ru" :html "&#1056;&#1080;&#1089;. %d.:" :utf-8 "Рис. %d.:")
+     ("sl" :default "Slika %d")
      ("sv" :default "Illustration %d")
      ("zh-CN" :html "&#22270;%d&nbsp;" :utf-8 "图%d "))
     ("Footnotes"
@@ -5758,6 +5777,7 @@ them."
      ("pl" :default "Przypis")
      ("pt_BR" :html "Notas de Rodap&eacute;" :default "Notas de Rodapé" :ascii "Notas de Rodape")
      ("ru" :html "&#1057;&#1085;&#1086;&#1089;&#1082;&#1080;" :utf-8 "Сноски")
+     ("sl" :default "Opombe")
      ("sv" :default "Fotnoter")
      ("uk" :html "&#1055;&#1088;&#1080;&#1084;&#1110;&#1090;&#1082;&#1080;"
       :utf-8 "Примітки")
@@ -5775,6 +5795,7 @@ them."
      ("nb" :default "Dataprogrammer")
      ("ru" :html "&#1057;&#1087;&#1080;&#1089;&#1086;&#1082; &#1088;&#1072;&#1089;&#1087;&#1077;&#1095;&#1072;&#1090;&#1086;&#1082;"
       :utf-8 "Список распечаток")
+     ("sl" :default "Seznam programskih izpisov")
      ("zh-CN" :html "&#20195;&#30721;&#30446;&#24405;" :utf-8 "代码目录"))
     ("List of Tables"
      ("ar" :default "قائمة بالجداول")
@@ -5791,6 +5812,7 @@ them."
      ("pt_BR" :default "Índice de Tabelas" :ascii "Indice de Tabelas")
      ("ru" :html "&#1057;&#1087;&#1080;&#1089;&#1086;&#1082; &#1090;&#1072;&#1073;&#1083;&#1080;&#1094;"
       :utf-8 "Список таблиц")
+     ("sl" :default "Seznam tabel")
      ("sv" :default "Tabeller")
      ("zh-CN" :html "&#34920;&#26684;&#30446;&#24405;" :utf-8 "表格目录"))
     ("Listing"
@@ -5806,6 +5828,7 @@ them."
      ("pt_BR" :default "Listagem")
      ("ru" :html "&#1056;&#1072;&#1089;&#1087;&#1077;&#1095;&#1072;&#1090;&#1082;&#1072;"
       :utf-8 "Распечатка")
+     ("sl" :default "Izpis programa")
      ("zh-CN" :html "&#20195;&#30721;" :utf-8 "代码"))
     ("Listing %d:"
      ("ar" :default "برنامج %d:")
@@ -5820,18 +5843,22 @@ them."
      ("pt_BR" :default "Listagem %d")
      ("ru" :html "&#1056;&#1072;&#1089;&#1087;&#1077;&#1095;&#1072;&#1090;&#1082;&#1072; %d.:"
       :utf-8 "Распечатка %d.:")
+     ("sl" :default "Izpis programa %d")
      ("zh-CN" :html "&#20195;&#30721;%d&nbsp;" :utf-8 "代码%d "))
     ("References"
      ("ar" :default "المراجع")
      ("fr" :ascii "References" :default "Références")
      ("de" :default "Quellen")
-     ("es" :default "Referencias"))
+     ("es" :default "Referencias")
+     ("sl" :default "Reference"))
     ("See figure %s"
      ("fr" :default "cf. figure %s"
-      :html "cf.&nbsp;figure&nbsp;%s" :latex "cf.~figure~%s"))
+      :html "cf.&nbsp;figure&nbsp;%s" :latex "cf.~figure~%s")
+     ("sl" :default "Glej sliko %s"))
     ("See listing %s"
      ("fr" :default "cf. programme %s"
-      :html "cf.&nbsp;programme&nbsp;%s" :latex "cf.~programme~%s"))
+      :html "cf.&nbsp;programme&nbsp;%s" :latex "cf.~programme~%s")
+     ("sl" :default "Glej izpis programa %s"))
     ("See section %s"
      ("ar" :default "انظر قسم %s")
      ("da" :default "jævnfør afsnit %s")
@@ -5844,10 +5871,12 @@ them."
       :ascii "Veja a secao %s")
      ("ru" :html "&#1057;&#1084;. &#1088;&#1072;&#1079;&#1076;&#1077;&#1083; %s"
       :utf-8 "См. раздел %s")
+     ("sl" :default "Glej poglavje %d")
      ("zh-CN" :html "&#21442;&#35265;&#31532;%s&#33410;" :utf-8 "参见第%s节"))
     ("See table %s"
      ("fr" :default "cf. tableau %s"
-      :html "cf.&nbsp;tableau&nbsp;%s" :latex "cf.~tableau~%s"))
+      :html "cf.&nbsp;tableau&nbsp;%s" :latex "cf.~tableau~%s")
+     ("sl" :default "Glej tabelo %s"))
     ("Table"
      ("ar" :default "جدول")
      ("de" :default "Tabelle")
@@ -5875,6 +5904,7 @@ them."
      ("pt_BR" :default "Tabela %d")
      ("ru" :html "&#1058;&#1072;&#1073;&#1083;&#1080;&#1094;&#1072; %d.:"
       :utf-8 "Таблица %d.:")
+     ("sl" :default "Tabela %d")
      ("sv" :default "Tabell %d")
      ("zh-CN" :html "&#34920;%d&nbsp;" :utf-8 "表%d "))
     ("Table of Contents"
@@ -5900,6 +5930,7 @@ them."
      ("pt_BR" :html "&Iacute;ndice" :utf8 "Índice" :ascii "Indice")
      ("ru" :html "&#1057;&#1086;&#1076;&#1077;&#1088;&#1078;&#1072;&#1085;&#1080;&#1077;"
       :utf-8 "Содержание")
+     ("sl" :default "Kazalo")
      ("sv" :html "Inneh&aring;ll")
      ("uk" :html "&#1047;&#1084;&#1110;&#1089;&#1090;" :utf-8 "Зміст")
      ("zh-CN" :html "&#30446;&#24405;" :utf-8 "目录")
@@ -5916,6 +5947,7 @@ them."
       :ascii "Referencia desconhecida")
      ("ru" :html "&#1053;&#1077;&#1080;&#1079;&#1074;&#1077;&#1089;&#1090;&#1085;&#1072;&#1103; &#1089;&#1089;&#1099;&#1083;&#1082;&#1072;"
       :utf-8 "Неизвестная ссылка")
+     ("sl" :default "Neznana referenca")
      ("zh-CN" :html "&#26410;&#30693;&#24341;&#29992;" :utf-8 "未知引用")))
   "Dictionary for export engine.
 
