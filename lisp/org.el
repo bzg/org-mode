@@ -13815,7 +13815,10 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	 ;; Find location for the new note.
 	 (goto-char org-log-note-marker)
 	 (set-marker org-log-note-marker nil)
-	 (goto-char (org-log-beginning t))
+	 ;; Note associated to a clock is to be located right after
+	 ;; the clock.  Do not move point.
+	 (unless (eq org-log-note-purpose 'clock-out)
+	   (goto-char (org-log-beginning t)))
 	 ;; Make sure point is at the beginning of an empty line.
 	 (cond ((not (bolp)) (let ((inhibit-read-only t)) (insert "\n")))
 	       ((looking-at "[ \t]*\\S-") (save-excursion (insert "\n"))))
