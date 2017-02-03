@@ -720,35 +720,35 @@
   ;; `org-adapt-indentation' is nil.
   (should
    (= 2
-      (org-test-with-temp-text "* H\nA"
-	(forward-line)
+      (org-test-with-temp-text "* H\n<point>A"
 	(let ((org-adapt-indentation t)) (org-indent-line))
 	(org-get-indentation))))
   (should
    (= 2
-      (org-test-with-temp-text "* H\n\nA"
-	(forward-line)
+      (org-test-with-temp-text "* H\n<point>\nA"
 	(let ((org-adapt-indentation t)) (org-indent-line))
 	(org-get-indentation))))
   (should
    (zerop
-    (org-test-with-temp-text "* H\nA"
-      (forward-line)
+    (org-test-with-temp-text "* H\n<point>A"
       (let ((org-adapt-indentation nil)) (org-indent-line))
       (org-get-indentation))))
   ;; Indenting preserves point position.
   (should
-   (org-test-with-temp-text "* H\nAB"
-     (forward-line)
-     (forward-char)
+   (org-test-with-temp-text "* H\nA<point>B"
      (let ((org-adapt-indentation t)) (org-indent-line))
      (looking-at "B")))
-  ;; Do not change indentation at an item.
+  ;; Do not change indentation at an item or a LaTeX environment.
   (should
    (= 1
-      (org-test-with-temp-text "* H\n - A"
-	(forward-line)
+      (org-test-with-temp-text "* H\n<point> - A"
 	(let ((org-adapt-indentation t)) (org-indent-line))
+	(org-get-indentation))))
+  (should
+   (= 1
+      (org-test-with-temp-text
+	  "\\begin{equation}\n <point>1+1=2\n\\end{equation}"
+	(org-indent-line)
 	(org-get-indentation))))
   ;; On blank lines at the end of a list, indent like last element
   ;; within it if the line is still in the list.  If the last element
@@ -889,15 +889,52 @@
 	  (org-test-with-temp-text "#+BEGIN_CENTER\n A\n  B\n#+END_CENTER"
 	    (org-indent-region (point-min) (point-max))
 	    (buffer-string))))
-  ;; Ignore contents of verse blocks and example blocks.
+  ;; Ignore contents of verse blocks.  Only indent block delimiters.
   (should
    (equal "#+BEGIN_VERSE\n A\n  B\n#+END_VERSE"
 	  (org-test-with-temp-text "#+BEGIN_VERSE\n A\n  B\n#+END_VERSE"
 	    (org-indent-region (point-min) (point-max))
 	    (buffer-string))))
   (should
+   (equal "#+BEGIN_VERSE\n  A\n   B\n#+END_VERSE"
+	  (org-test-with-temp-text " #+BEGIN_VERSE\n  A\n   B\n #+END_VERSE"
+	    (org-indent-region (point-min) (point-max))
+	    (buffer-string))))
+  ;; Indent example blocks as a single block, unless indentation
+  ;; should be preserved.  In this case only indent the block markers.
+  (should
    (equal "#+BEGIN_EXAMPLE\n A\n  B\n#+END_EXAMPLE"
 	  (org-test-with-temp-text "#+BEGIN_EXAMPLE\n A\n  B\n#+END_EXAMPLE"
+	    (org-indent-region (point-min) (point-max))
+	    (buffer-string))))
+  (should
+   (equal "#+BEGIN_EXAMPLE\n A\n  B\n#+END_EXAMPLE"
+	  (org-test-with-temp-text " #+BEGIN_EXAMPLE\n  A\n   B\n #+END_EXAMPLE"
+	    (org-indent-region (point-min) (point-max))
+	    (buffer-string))))
+  (should
+   (equal "#+BEGIN_EXAMPLE -i\n  A\n   B\n#+END_EXAMPLE"
+	  (org-test-with-temp-text
+	      " #+BEGIN_EXAMPLE -i\n  A\n   B\n #+END_EXAMPLE"
+	    (org-indent-region (point-min) (point-max))
+	    (buffer-string))))
+  (should
+   (equal "#+BEGIN_EXAMPLE\n  A\n   B\n#+END_EXAMPLE"
+	  (org-test-with-temp-text
+	      " #+BEGIN_EXAMPLE\n  A\n   B\n #+END_EXAMPLE"
+	    (let ((org-src-preserve-indentation t))
+	      (org-indent-region (point-min) (point-max)))
+	    (buffer-string))))
+  ;; Treat export blocks as a whole.
+  (should
+   (equal "#+BEGIN_EXPORT latex\n A\n  B\n#+END_EXPORT"
+	  (org-test-with-temp-text "#+BEGIN_EXPORT latex\n A\n  B\n#+END_EXPORT"
+	    (org-indent-region (point-min) (point-max))
+	    (buffer-string))))
+  (should
+   (equal "#+BEGIN_EXPORT latex\n A\n  B\n#+END_EXPORT"
+	  (org-test-with-temp-text
+	      " #+BEGIN_EXPORT latex\n  A\n   B\n #+END_EXPORT"
 	    (org-indent-region (point-min) (point-max))
 	    (buffer-string))))
   ;; Indent according to mode if `org-src-tab-acts-natively' is
