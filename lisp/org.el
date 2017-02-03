@@ -13204,7 +13204,7 @@ on INACTIVE-OK."
 		      org-repeat-re)))
 	(catch :repeat
 	  (while (re-search-forward regexp end t)
-	    (when (org-at-timestamp-p)
+	    (when (save-match-data (org-at-timestamp-p))
 	      (throw :repeat (match-string-no-properties 1)))))))))
 
 (defvar org-last-changed-timestamp)
