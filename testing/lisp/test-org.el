@@ -5595,6 +5595,28 @@ Paragraph<point>"
    (org-test-with-temp-text "<2012-03-29 Thu>"
      (org-timestamp-has-time-p (org-element-context)))))
 
+(ert-deftest test-org/get-repeat ()
+  "Test `org-get-repeat' specifications."
+  (should
+   (org-test-with-temp-text "* H\n<2012-03-29 Thu 16:40 +2y>"
+     (org-get-repeat)))
+  (should-not
+   (org-test-with-temp-text "* H\n<2012-03-29 Thu 16:40>"
+     (org-get-repeat)))
+  ;; Return proper repeat string.
+  (should
+   (equal "+2y"
+	  (org-test-with-temp-text "* H\n<2014-03-04 Tue 16:40 +2y>"
+	    (org-get-repeat))))
+  ;; Prevent false positive (commented or verbatim time stamps)
+  (should-not
+   (org-test-with-temp-text "* H\n# <2012-03-29 Thu 16:40>"
+     (org-get-repeat)))
+  (should-not
+   (org-test-with-temp-text
+       "* H\n#+BEGIN_EXAMPLE\n<2012-03-29 Thu 16:40>\n#+END_EXAMPLE"
+     (org-get-repeat))))
+
 (ert-deftest test-org/timestamp-format ()
   "Test `org-timestamp-format' specifications."
   ;; Regular test.
