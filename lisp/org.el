@@ -13194,18 +13194,27 @@ on INACTIVE-OK."
 	     (throw 'exit t)))
       nil)))
 
-(defun org-get-repeat (&optional tagline)
-  "Check if there is a deadline/schedule with repeater in this entry."
+(defun org-get-repeat (&optional timestamp)
+  "Check if there is a time-stamp with repeater in this entry.
+
+Return the repeater, as a string, or nil.  Also return nil when
+this function is called before first heading.
+
+When optional argument TIMESTAMP is a string, extract the
+repeater from there instead."
   (save-match-data
-    (save-excursion
-      (org-back-to-heading t)
-      (let ((end (org-entry-end-position))
-	    (regexp (if tagline (concat tagline "\\s-*" org-repeat-re)
-		      org-repeat-re)))
-	(catch :repeat
-	  (while (re-search-forward regexp end t)
-	    (when (save-match-data (org-at-timestamp-p))
-	      (throw :repeat (match-string-no-properties 1)))))))))
+    (cond (timestamp
+	   (and (string-match org-repeat-re timestamp)
+		(match-string-no-properties 1 timestamp)))
+	  ((org-before-first-heading-p) nil)
+	  (t
+	   (save-excursion
+	     (org-back-to-heading t)
+	     (let ((end (org-entry-end-position)))
+	       (catch :repeat
+		 (while (re-search-forward org-repeat-re end t)
+		   (when (save-match-data (org-at-timestamp-p))
+		     (throw :repeat (match-string-no-properties 1)))))))))))
 
 (defvar org-last-changed-timestamp)
 (defvar org-last-inserted-timestamp)

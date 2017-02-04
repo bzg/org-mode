@@ -62,6 +62,10 @@ to the following
 ~:istart~, ~:icount~, ~:iend~ and ~:isep~ now expect the type of the
 list as their first argument.
 
+*** Change signature for ~org-get-repeater~
+The optional argument is now a string to extract the repeater from.
+See docstring for details.
+
 ** New features
 *** ~org-edit-special~ can edit LaTeX environments
 

@@ -5615,7 +5615,15 @@ Paragraph<point>"
   (should-not
    (org-test-with-temp-text
        "* H\n#+BEGIN_EXAMPLE\n<2012-03-29 Thu 16:40>\n#+END_EXAMPLE"
-     (org-get-repeat))))
+     (org-get-repeat)))
+  ;; Return nil when called before first heading.
+  (should-not
+   (org-test-with-temp-text "<2012-03-29 Thu 16:40 +2y>"
+     (org-get-repeat)))
+  ;; When called with an optional argument, extract repeater from that
+  ;; string instead.
+  (should (equal "+2y" (org-get-repeat "<2012-03-29 Thu 16:40 +2y>")))
+  (should-not (org-get-repeat "<2012-03-29 Thu 16:40>")))
 
 (ert-deftest test-org/timestamp-format ()
   "Test `org-timestamp-format' specifications."
