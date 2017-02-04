@@ -400,11 +400,6 @@
       (org-test-with-temp-text "* DONE Heading"
 	(should-not (org-deadline-close-p "2016-06-03"))))))
 
-(ert-deftest test-org/get-repeat ()
-  (org-test-with-temp-text
-   "* H\nSCHEDULED: <2017-02-03 Fri .+23d>"
-   (should (string= ".+23d" (org-get-repeat)))))
-
 
 ;;; Drawers
 
