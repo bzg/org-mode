@@ -235,7 +235,7 @@ Return new parse tree."
 	      ;; Update `org-bibtex-html-entries-alist'.
 	      (goto-char (point-min))
 	      (while (re-search-forward
-		      "a name=\"\\([-_a-zA-Z0-9:]+\\)\">\\(\\w+\\)" nil t)
+		      "a name=\"\\([-_a-zA-Z0-9:]+\\)\">\\([^<]+\\)" nil t)
 		(push (cons (match-string 1) (match-string 2))
 		      org-bibtex-html-entries-alist)))
 	    ;; Open produced HTML file, wrap references within a block and
