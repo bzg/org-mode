@@ -88,6 +88,8 @@ local.mk:
 	$(info ======================================================)
 	-@$(MAKE_LOCAL_MK)
 
+all compile::
+	$(foreach dir, doc lisp, $(MAKE) -C $(dir) clean;)
 compile compile-dirty::
 	$(MAKE) -C lisp $@
 all clean-install::
