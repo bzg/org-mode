@@ -2469,10 +2469,11 @@ from the dynamic block definition."
 	 (properties (plist-get params :properties))
 	 (ntcol (max 1 (or (plist-get params :tcolumns) 100)))
 	 (indent (plist-get params :indent))
+	 (formula (plist-get params :formula))
 	 (case-fold-search t)
-	 range-text total-time tbl level hlc formula pcol
+	 range-text total-time tbl level hlc
 	 file-time entries entry headline
-	 recalc content narrow-cut-p tcol)
+	 recalc narrow-cut-p)
 
     ;; Implement abbreviations
     (when (plist-get params :compact)
@@ -2541,8 +2542,10 @@ from the dynamic block definition."
      (if level-p   (concat (nth 2 lwords) "|") "")  ; level column, maybe
      (if timestamp (concat (nth 3 lwords) "|") "")  ; timestamp column, maybe
      (if properties (concat (mapconcat 'identity properties "|") "|") "") ;properties columns, maybe
-     (concat (nth 4 lwords) "|"
-	     (nth 5 lwords) "|\n"))                 ; headline and time columns
+     (nth 4 lwords) "|"			;headline
+     (nth 5 lwords) "|"			;time column
+     (make-string (1- (min maxlevel (or ntcol 100))) ?|)
+     (if (eq formula '%) "%|\n" "\n"))
 
     ;; Insert the total time in the table
     (insert-before-markers
@@ -2552,11 +2555,16 @@ from the dynamic block definition."
 					; file column, maybe
      (if level-p   "|"      "")        ; level column, maybe
      (if timestamp "|"      "")        ; timestamp column, maybe
-     (if properties (make-string (length properties) ?|) "")  ; properties columns, maybe
+     (make-string (length properties) ?|)  ; properties columns, maybe
      (concat (format org-clock-total-time-cell-format (nth 7 lwords))  "| ") ; instead of a headline
      (format org-clock-total-time-cell-format
-	     (org-minutes-to-clocksum-string (or total-time 0))) ; the time
-     "|\n")                          ; close line
+	     (org-minutes-to-clocksum-string (or total-time 0))) ;time
+     "|"
+     (make-string (1- (min maxlevel (or ntcol 100))) ?|)
+     (cond ((not (eq formula '%)) "")
+	   ((or (not total-time) (= total-time 0)) "0.0|")
+	   (t  "100.0|"))
+     "\n")
 
     ;; Now iterate over the tables and insert the data
     ;; but only if any time has been collected
@@ -2610,49 +2618,29 @@ from the dynamic block definition."
 		   properties "|") "|") "")  ;properties columns, maybe
 	     (if indent (org-clocktable-indent-string level) "") ; indentation
 	     hlc headline hlc "|"                                ; headline
-	     (make-string (min (1- ntcol) (or (- level 1))) ?|)
-					; empty fields for higher levels
+	     (make-string (1- (min ntcol level)) ?|) ; empty fields for higher levels
 	     hlc (org-minutes-to-clocksum-string (nth 3 entry)) hlc ; time
-	     "|\n"                                               ; close line
+	     (make-string (1+ (- maxlevel level)) ?|)
+	     (if (eq formula '%)
+		 (format "%.1f |" (* 100 (/ (nth 3 entry) (float total-time))))
+	       "")
+	     "\n"			; close line
 	     )))))
-    ;; When exporting subtrees or regions the region might be
-    ;; activated, so let's disable ̀delete-active-region'
-    (let ((delete-active-region nil)) (backward-delete-char 1))
-    (if (setq formula (plist-get params :formula))
-	(cond
-	 ((eq formula '%)
-	  ;; compute the column where the % numbers need to go
-	  (setq pcol (+ 2
-			(length properties)
-			(if multifile 1 0)
-			(if level-p 1 0)
-			(if timestamp 1 0)
-			(min maxlevel (or ntcol 100))))
-	  ;; compute the column where the total time is
-	  (setq tcol (+ 2
-			(length properties)
-			(if multifile 1 0)
-			(if level-p 1 0)
-			(if timestamp 1 0)))
-	  (insert
-	   (format
-	    "\n#+TBLFM: $%d='(org-clock-time%% @%d$%d $%d..$%d);%%.1f"
-	    pcol            ; the column where the % numbers should go
-	    (if (and narrow (not narrow-cut-p)) 3 2) ; row of the total time
-	    tcol            ; column of the total time
-	    tcol (1- pcol)  ; range of columns where times can be found
-	    ))
-	  (setq recalc t))
-	 ((stringp formula)
-	  (insert "\n#+TBLFM: " formula)
-	  (setq recalc t))
-	 (t (error "Invalid formula in clocktable")))
-      ;; Should we rescue an old formula?
-      (when (stringp (setq content (plist-get params :content)))
-	(when (string-match "^\\([ \t]*#\\+tblfm:.*\\)" content)
+    (delete-char -1)
+    (cond
+     ;; Possibly rescue old formula?
+     ((or (not formula) (eq formula '%))
+      (let ((contents (org-string-nw-p (plist-get params :content))))
+	(when (and contents (string-match "^\\([ \t]*#\\+tblfm:.*\\)" contents))
 	  (setq recalc t)
-	  (insert "\n" (match-string 1 (plist-get params :content)))
+	  (insert "\n" (match-string 1 contents))
 	  (beginning-of-line 0))))
+     ;; Insert specified formula line.
+     ((stringp formula)
+      (insert "\n#+TBLFM: " formula)
+      (setq recalc t))
+     (t
+      (user-error "Invalid :formula parameter in clocktable")))
     ;; Back to beginning, align the table, recalculate if necessary
     (goto-char ipos)
     (skip-chars-forward "^|")
@@ -2665,13 +2653,7 @@ from the dynamic block definition."
 	(org-table-goto-line 3)
 	(org-table-goto-column (car sort))
 	(org-table-sort-lines nil (cdr sort))))
-    (when recalc
-      (if (eq formula '%)
-	  (save-excursion
-	    (if (and narrow (not narrow-cut-p)) (beginning-of-line 2))
-	    (org-table-goto-column pcol nil 'force)
-	    (insert "%")))
-      (org-table-recalculate 'all))
+    (when recalc (org-table-recalculate 'all))
     total-time))
 
 (defun org-clocktable-indent-string (level)
@@ -2843,23 +2825,6 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
 	      (when (> time 0) (push (list level hdl tsp time props) tbl))))))
       (setq tbl (nreverse tbl))
       (list file org-clock-file-total-minutes tbl))))
-
-(defun org-clock-time% (total &rest strings)
-  "Compute a time fraction in percent.
-TOTAL s a time string like 10:21 specifying the total times.
-STRINGS is a list of strings that should be checked for a time.
-The first string that does have a time will be used.
-This function is made for clock tables."
-  (save-match-data
-    (let ((total (org-duration-string-to-minutes total)))
-      (if (= total 0) 0
-	(cl-some (lambda (s)
-		   ;; Any number can express a duration.  See
-		   ;; `org-hh:mm-string-to-minutes' for details.
-		   (and (string-match-p "[0-9]" s)
-			(/ (* 100.0 (org-duration-string-to-minutes s))
-			   total)))
-		 strings)))))
 
 ;; Saving and loading the clock
 
