@@ -12,6 +12,15 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 ** Incompatible changes
 
+*** Variables relative to clocksum duration are obsolete
+
+~org-time-clocksum-format~, ~org-time-clocksum-use-fractional~ and
+~org-time-clocksum-fractional-format~ are obsolete.  If you changed
+them, consider modifying ~org-duration-format~ instead.
+
+Variable ~org-time-clocksum-use-effort-durations~ is also obsolete.
+Consider setting ~org-duration-units~ instead.
+
 *** ~org-capture-templates~ no longer accepts S-expressions as file names
 
 Since functions are allowed there, a straightforward way to migrate
@@ -67,11 +76,12 @@ The optional argument is now a string to extract the repeater from.
 See docstring for details.
 
 ** New features
-*** ~org-edit-special~ can edit LaTeX environments
+*** New Org duration library
+This new library implements tools to read and print time durations in
+various formats (e.g., "H:MM", or "1d 2h 3min"...).
 
-Using ~C-c '~ on a LaTeX environment opens a sub-editing buffer.  By
-default, major mode in that buffer is ~latex-mode~, but it can be
-changed by configuring ~org-src-lang-modes~.
+See ~org-duration-to-minutes~ and ~org-duration-from-minutes~
+docstrings.
 
 *** Agenda
 **** New variable : ~org-agenda-show-future-repeats~
@@ -163,6 +173,12 @@ user to specify the name of the output file upon exporting the
 document.  This also has an effect on publishing.
 **** Horizontal rules are no longer ignored in LaTeX table math mode
 
+*** ~org-edit-special~ can edit LaTeX environments
+
+Using ~C-c '~ on a LaTeX environment opens a sub-editing buffer.  By
+default, major mode in that buffer is ~latex-mode~, but it can be
+changed by configuring ~org-src-lang-modes~.
+
 *** ~org-list-to-generic~ includes a new property: ~:ifmt~
 
 ~:ifmt~ is a function to be called on the body of each item.  See
@@ -189,6 +205,19 @@ Use ~org-agenda-skip-if~ instead.
 *** ~org-agenda-skip-entry-when-regexp-matches-in-subtree~ is obsolete
 
 Use ~org-agenda-skip-if~ instead.
+
+*** ~org-minutes-to-clocksum-string~ is obsolete
+
+Use ~org-duration-from-minutes~ instead.
+
+*** ~org-hh:mm-string-to-minutes~ is obsolete
+
+Use ~org-duration-to-minutes~ instead.
+
+*** ~org-duration-string-to-minutes~ is obsolete
+
+Use ~org-duration-to-minutes~ instead.
+
 ** Removed options
 
 *** ~org-agenda-repeating-timestamp-show-all~ is removed.

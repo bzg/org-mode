@@ -55,6 +55,8 @@
   (require 'cl)
   (require 'org))
 
+(declare-function org-duration-from-minutes "org-duration" (minutes &optional fmt fractional))
+
 (defgroup org-invoice nil
   "OrgMode Invoice Helper"
   :tag "Org-Invoice" :group 'org)
@@ -159,7 +161,7 @@ looks like tree2, where the level is 2."
       (setq title (replace-match "" nil nil title)))
     (when (string-match "[ \t]+$" title)
       (setq title (replace-match "" nil nil title)))
-    (setq work (org-hh:mm-string-to-minutes work))
+    (setq work (org-duration-to-minutes work))
     (setq rate (string-to-number rate))
     (setq org-invoice-current-item (list (cons 'title title)
           (cons 'date date)
@@ -226,8 +228,8 @@ looks like tree2, where the level is 2."
       (setq
        org-invoice-total-time (+ org-invoice-total-time work)
        org-invoice-total-price (+ org-invoice-total-price price)))
-    (setq total (and total (org-minutes-to-clocksum-string total)))
-    (setq work  (and work  (org-minutes-to-clocksum-string work)))
+    (setq total (and total (org-duration-from-minutes total)))
+    (setq work  (and work  (org-duration-from-minutes work)))
     (insert-before-markers
      (concat "|" title
              (cond
@@ -251,7 +253,7 @@ looks like tree2, where the level is 2."
     (when with-summary
       (insert-before-markers
        (concat "|-\n|Total:|"
-               (org-minutes-to-clocksum-string org-invoice-total-time)
+               (org-duration-from-minutes org-invoice-total-time)
                (and with-price (concat "|" (format "%.2f" org-invoice-total-price)))
                "|\n")))))
 

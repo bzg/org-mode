@@ -665,20 +665,19 @@ If an effort estimate was defined for the current item, use
 If not, show simply the clocked time like 01:50."
   (let ((clocked-time (org-clock-get-clocked-time)))
     (if org-clock-effort
-	(let* ((effort-in-minutes
-		(org-duration-string-to-minutes org-clock-effort))
+	(let* ((effort-in-minutes (org-duration-to-minutes org-clock-effort))
 	       (work-done-str
 		(propertize
-		 (org-minutes-to-clocksum-string clocked-time)
+		 (org-duration-from-minutes clocked-time)
 		 'face (if (and org-clock-task-overrun (not org-clock-task-overrun-text))
 			   'org-mode-line-clock-overrun 'org-mode-line-clock)))
-	       (effort-str (org-minutes-to-clocksum-string effort-in-minutes))
+	       (effort-str (org-duration-from-minutes effort-in-minutes))
 	       (clockstr (propertize
 			  (concat  " [%s/" effort-str
 				   "] (" (replace-regexp-in-string "%" "%%" org-clock-heading) ")")
 			  'face 'org-mode-line-clock)))
 	  (format clockstr work-done-str))
-      (propertize (concat " [" (org-minutes-to-clocksum-string clocked-time)
+      (propertize (concat " [" (org-duration-from-minutes clocked-time)
 			  "]" (format " (%s)" org-clock-heading))
 		  'face 'org-mode-line-clock))))
 
@@ -748,15 +747,15 @@ clocked item, and the value displayed in the mode line."
 	  ;; A string.  See if it is a delta
 	  (setq sign (string-to-char value))
 	  (if (member sign '(?- ?+))
-	      (setq current (org-duration-string-to-minutes current)
+	      (setq current (org-duration-to-minutes current)
 		    value (substring value 1))
 	    (setq current 0))
-	  (setq value (org-duration-string-to-minutes value))
+	  (setq value (org-duration-to-minutes value))
 	  (if (equal ?- sign)
 	      (setq value (- current value))
 	    (if (equal ?+ sign) (setq value (+ current value)))))
 	(setq value (max 0 value)
-	      org-clock-effort (org-minutes-to-clocksum-string value))
+	      org-clock-effort (org-duration-from-minutes value))
 	(org-entry-put org-clock-marker "Effort" org-clock-effort)
 	(org-clock-update-mode-line)
 	(message "Effort is now %s" org-clock-effort))
@@ -769,7 +768,7 @@ clocked item, and the value displayed in the mode line."
   "Show notification if we spent more time than we estimated before.
 Notification is shown only once."
   (when (org-clocking-p)
-    (let ((effort-in-minutes (org-duration-string-to-minutes org-clock-effort))
+    (let ((effort-in-minutes (org-duration-to-minutes org-clock-effort))
 	  (clocked-time (org-clock-get-clocked-time)))
       (if (setq org-clock-task-overrun
 		(if (or (null effort-in-minutes) (zerop effort-in-minutes))
@@ -1631,7 +1630,7 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 		  (org-todo org-clock-out-switch-to-state))))))
 	  (force-mode-line-update)
 	  (message (concat "Clock stopped at %s after "
-			   (org-minutes-to-clocksum-string (+ (* 60 h) m)) "%s")
+			   (org-duration-from-minutes (+ (* 60 h) m)) "%s")
 		   te (if remove " => LINE REMOVED" ""))
 	  (run-hooks 'org-clock-out-hook)
 	  (unless (org-clocking-p)
@@ -1935,7 +1934,7 @@ Use `\\[org-clock-remove-overlays]' to remove the subtree times."
 			     (cond (todayp " for today")
 				   (customp " (custom)")
 				   (t "")))
-		     (org-minutes-to-clocksum-string
+		     (org-duration-from-minutes
 		      org-clock-file-total-minutes)
 		     " (%d hours and %d minutes)")
 	     h m)))
@@ -1960,7 +1959,7 @@ will be easy to remove."
 				    (length (org-get-at-bol 'line-prefix)))) ?·)
 			 '(face shadow))
 		     (org-add-props
-			 (format " %9s " (org-minutes-to-clocksum-string time))
+			 (format " %9s " (org-duration-from-minutes time))
 			 '(face org-clock-overlay))
 		     ""))
     (overlay-put ov 'display tx)
@@ -2463,8 +2462,6 @@ from the dynamic block definition."
 	 (maxlevel (or (plist-get params :maxlevel) 3))
 	 (emph (plist-get params :emphasize))
 	 (level-p (plist-get params :level))
-	 (org-time-clocksum-use-effort-durations
-	  (plist-get params :effort-durations))
 	 (timestamp (plist-get params :timestamp))
 	 (properties (plist-get params :properties))
 	 (ntcol (max 1 (or (plist-get params :tcolumns) 100)))
@@ -2558,7 +2555,7 @@ from the dynamic block definition."
      (make-string (length properties) ?|)  ; properties columns, maybe
      (concat (format org-clock-total-time-cell-format (nth 7 lwords))  "| ") ; instead of a headline
      (format org-clock-total-time-cell-format
-	     (org-minutes-to-clocksum-string (or total-time 0))) ;time
+	     (org-duration-from-minutes (or total-time 0))) ;time
      "|"
      (make-string (1- (min maxlevel (or ntcol 100))) ?|)
      (cond ((not (eq formula '%)) "")
@@ -2587,7 +2584,7 @@ from the dynamic block definition."
 		     (if level-p   "| " "") ; level column, maybe
 		     (if timestamp "| " "") ; timestamp column, maybe
 		     (if properties (make-string (length properties) ?|) "")  ;properties columns, maybe
-		     (org-minutes-to-clocksum-string (nth 1 tbl))))) ; the time
+		     (org-duration-from-minutes (nth 1 tbl))))) ; the time
 
 	  ;; Get the list of node entries and iterate over it
 	  (setq entries (nth 2 tbl))
@@ -2619,7 +2616,7 @@ from the dynamic block definition."
 	     (if indent (org-clocktable-indent-string level) "") ; indentation
 	     hlc headline hlc "|"                                ; headline
 	     (make-string (1- (min ntcol level)) ?|) ; empty fields for higher levels
-	     hlc (org-minutes-to-clocksum-string (nth 3 entry)) hlc ; time
+	     hlc (org-duration-from-minutes (nth 3 entry)) hlc ; time
 	     (make-string (1+ (- maxlevel level)) ?|)
 	     (if (eq formula '%)
 		 (format "%.1f |" (* 100 (/ (nth 3 entry) (float total-time))))

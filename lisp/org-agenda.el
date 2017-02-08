@@ -5746,8 +5746,7 @@ then those holidays will be skipped."
   "Add overlays, showing issues with clocking.
 See also the user option `org-agenda-clock-consistency-checks'."
   (interactive)
-  (let* ((org-time-clocksum-use-effort-durations nil)
-	 (pl org-agenda-clock-consistency-checks)
+  (let* ((pl org-agenda-clock-consistency-checks)
 	 (re (concat "^[ \t]*"
 		     org-clock-string
 		     "[ \t]+"
@@ -5755,14 +5754,14 @@ See also the user option `org-agenda-clock-consistency-checks'."
 		     "\\(-\\{1,3\\}\\(\\[.*?\\]\\)\\)?")) ; group 3 is second
 	 (tlstart 0.)
 	 (tlend 0.)
-	 (maxtime (org-hh:mm-string-to-minutes
+	 (maxtime (org-duration-to-minutes
 		   (or (plist-get pl :max-duration) "24:00")))
-	 (mintime (org-hh:mm-string-to-minutes
+	 (mintime (org-duration-to-minutes
 		   (or (plist-get pl :min-duration) 0)))
-	 (maxgap  (org-hh:mm-string-to-minutes
+	 (maxgap  (org-duration-to-minutes
 		   ;; default 30:00 means never complain
 		   (or (plist-get pl :max-gap) "30:00")))
-	 (gapok (mapcar 'org-hh:mm-string-to-minutes
+	 (gapok (mapcar #'org-duration-to-minutes
 			(plist-get pl :gap-ok-around)))
 	 (def-face (or (plist-get pl :default-face)
 		       '((:background "DarkRed") (:foreground "white"))))
@@ -5796,14 +5795,12 @@ See also the user option `org-agenda-clock-consistency-checks'."
 	 ((> dt (* 60 maxtime))
 	  ;; a very long clocking chunk
 	  (setq issue (format "Clocking interval is very long: %s"
-			      (org-minutes-to-clocksum-string
-			       (floor (/ (float dt) 60.))))
+			      (org-duration-from-minutes (floor (/ dt 60.))))
 		face (or (plist-get pl :long-face) face)))
 	 ((< dt (* 60 mintime))
 	  ;; a very short clocking chunk
 	  (setq issue (format "Clocking interval is very short: %s"
-			      (org-minutes-to-clocksum-string
-			       (floor (/ (float dt) 60.))))
+			      (org-duration-from-minutes (floor (/ dt 60.))))
 		face (or (plist-get pl :short-face) face)))
 	 ((and (> tlend 0) (< ts tlend))
 	  ;; Two clock entries are overlapping
@@ -6405,18 +6402,19 @@ Any match of REMOVE-RE will be removed from TXT."
 	  (if s1 (setq s1 (org-get-time-of-day s1 'string t)))
 	  (if s2 (setq s2 (org-get-time-of-day s2 'string t)))
 
-	  ;; Try to set s2 if s1 and `org-agenda-default-appointment-duration' are set
-	  (let (org-time-clocksum-use-effort-durations)
-	    (when (and s1 (not s2) org-agenda-default-appointment-duration)
-	      (setq s2
-		    (org-minutes-to-clocksum-string
-		     (+ (org-hh:mm-string-to-minutes s1)
-			org-agenda-default-appointment-duration)))))
+	  ;; Try to set s2 if s1 and
+	  ;; `org-agenda-default-appointment-duration' are set
+	  (when (and s1 (not s2) org-agenda-default-appointment-duration)
+	    (setq s2
+		  (org-duration-from-minutes
+		   (+ (org-duration-to-minutes s1 t)
+		      org-agenda-default-appointment-duration)
+		   nil t)))
 
 	  ;; Compute the duration
 	  (when s2
-	    (setq duration (- (org-hh:mm-string-to-minutes s2)
-			      (org-hh:mm-string-to-minutes s1)))))
+	    (setq duration (- (org-duration-to-minutes s2)
+			      (org-duration-to-minutes s1)))))
 
 	(when (string-match "\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$" txt)
 	  ;; Tags are in the string
@@ -7548,7 +7546,7 @@ E looks like \"+<2:25\"."
 		   ((equal op ??) op)
 		   (t '=)))
     (list 'org-agenda-compare-effort (list 'quote op)
-	  (org-duration-string-to-minutes e))))
+	  (org-duration-to-minutes e))))
 
 (defun org-agenda-compare-effort (op value)
   "Compare the effort of the current line with VALUE, using OP.

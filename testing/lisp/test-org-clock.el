@@ -67,10 +67,7 @@ contents.  The clocktable doesn't appear in the buffer."
     (insert "#+END:\n"))
   (unwind-protect
       (save-excursion
-	(let ((org-time-clocksum-format
-	       '(:hours "%d" :require-hours t :minutes ":%02d"
-			:require-minutes t)))
-	  (org-update-dblock))
+	(let ((org-duration-format 'h:mm)) (org-update-dblock))
 	(forward-line)
 	;; Skip caption.
 	(when (looking-at "#\\+CAPTION:") (forward-line))

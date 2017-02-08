@@ -270,7 +270,7 @@ This does two different kinds of triggers:
 			    (effort (when (or effort-up effort-down)
 				      (let ((effort (get-text-property (point) 'org-effort)))
 					(when effort
-					  (org-duration-string-to-minutes effort))))))
+					  (org-duration-to-minutes effort))))))
 			(push (list (point) todo-kwd priority tags effort)
 			      items))
 		      (unless (org-goto-sibling)

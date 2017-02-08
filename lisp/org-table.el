@@ -1720,7 +1720,7 @@ numeric compare based on the type of the first key in the table."
 			  (float-time
 			   (org-time-string-to-time (match-string 0 f))))
 			 ((string-match "[0-9]\\{1,2\\}:[0-9]\\{2\\}" f)
-			  (org-hh:mm-string-to-minutes f))
+			  (org-duration-to-minutes (match-string 0 f)))
 			 (t 0))))
 		((?f ?F)
 		 (or getkey-func

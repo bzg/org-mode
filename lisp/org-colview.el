@@ -261,7 +261,7 @@ possible to override it with optional argument COMPILED-FMT."
 			     org-agenda-columns-add-appointments-to-effort-sum
 			     (string= p (upcase org-effort-property))
 			     (get-text-property (point) 'duration)
-			     (propertize (org-minutes-to-clocksum-string
+			     (propertize (org-duration-from-minutes
 					  (get-text-property (point) 'duration))
 					 'face 'org-warning))
 			"")))
@@ -1056,63 +1056,40 @@ This function updates `org-columns-current-fmt-compiled'."
 
 ;;;; Column View Summary
 
-(defconst org-columns--duration-re
-  (concat "[0-9.]+ *" (regexp-opt (mapcar #'car org-effort-durations)))
-  "Regexp matching a duration.")
-
-(defun org-columns--time-to-seconds (s)
-  "Turn time string S into a number of seconds.
-A time is expressed as HH:MM, HH:MM:SS, or with units defined in
-`org-effort-durations'.  Plain numbers are considered as hours."
-  (cond
-   ((string-match-p org-columns--duration-re s)
-    (* 60 (org-duration-string-to-minutes s)))
-   ((string-match "\\`\\([0-9]+\\):\\([0-9]+\\)\\(?::\\([0-9]+\\)\\)?\\'" s)
-    (+ (* 3600 (string-to-number (match-string 1 s)))
-       (* 60 (string-to-number (match-string 2 s)))
-       (if (match-end 3) (string-to-number (match-string 3 s)) 0)))
-   (t (* 3600 (string-to-number s)))))
-
-(defun org-columns--age-to-seconds (s)
-  "Turn age string S into a number of seconds.
+(defun org-columns--age-to-minutes (s)
+  "Turn age string S into a number of minutes.
 An age is either computed from a given time-stamp, or indicated
-as days/hours/minutes/seconds."
+as a canonical duration, i.e., using units defined in
+`org-duration-canonical-units'."
   (cond
    ((string-match-p org-ts-regexp s)
-    (floor
-     (- org-columns--time
-	(float-time (apply #'encode-time (org-parse-time-string s))))))
-   ;; Match own output for computations in upper levels.
-   ((string-match "\\([0-9]+\\)d \\([0-9]+\\)h \\([0-9]+\\)m \\([0-9]+\\)s" s)
-    (+ (* 86400 (string-to-number (match-string 1 s)))
-       (* 3600 (string-to-number (match-string 2 s)))
-       (* 60 (string-to-number (match-string 3 s)))
-       (string-to-number (match-string 4 s))))
+    (/ (- org-columns--time
+	  (float-time (apply #'encode-time (org-parse-time-string s))))
+       60))
+   ((org-duration-p s) (org-duration-to-minutes s t)) ;skip user units
    (t (user-error "Invalid age: %S" s))))
+
+(defun org-columns--format-age (minutes)
+  "Format MINUTES float as an age string."
+  (org-duration-from-minutes minutes
+			     '(("d" . nil) ("h" . nil) ("min" . nil))
+			     t))	;ignore user's custom units
 
 (defun org-columns--summary-apply-times (fun times)
   "Apply FUN to time values TIMES.
-If TIMES contains any time value expressed as a duration, return
-the result as a duration.  If it contains any H:M:S, use that
-format instead.  Otherwise, use H:M format."
-  (let* ((hms-flag nil)
-	 (duration-flag nil)
-	 (seconds
-	  (apply fun
-		 (mapcar
-		  (lambda (time)
-		    (cond
-		     (duration-flag)
-		     ((string-match-p org-columns--duration-re time)
-		      (setq duration-flag t))
-		     (hms-flag)
-		     ((string-match-p "\\`[0-9]+:[0-9]+:[0-9]+\\'" time)
-		      (setq hms-flag t)))
-		    (org-columns--time-to-seconds time))
-		  times))))
-    (cond (duration-flag (org-minutes-to-clocksum-string (/ seconds 60.0)))
-	  (hms-flag (format-seconds "%h:%.2m:%.2s" seconds))
-	  (t (format-seconds "%h:%.2m" seconds)))))
+Return the result as a duration."
+  (org-duration-from-minutes
+   (apply fun
+	  (mapcar (lambda (time)
+		    ;; Unlike to `org-duration-to-minutes' standard
+		    ;; behavior, we want to consider plain numbers as
+		    ;; hours.  As a consequence, we treat them
+		    ;; differently.
+		    (if (string-match-p "\\`[0-9]+\\(?:\\.[0-9]*\\)?\\'" time)
+			(* 60 (string-to-number time))
+		      (org-duration-to-minutes time)))
+		  times))
+   (org-duration-h:mm-only-p times)))
 
 (defun org-columns--compute-spec (spec &optional update)
   "Update tree according to SPEC.
@@ -1271,21 +1248,18 @@ When PRINTF is non-nil, use it to format the result."
 
 (defun org-columns--summary-min-age (ages _)
   "Compute the minimum time among AGES."
-  (format-seconds
-   "%dd %.2hh %mm %ss"
-   (apply #'min (mapcar #'org-columns--age-to-seconds ages))))
+  (org-columns--format-age
+   (apply #'min (mapcar #'org-columns--age-to-minutes ages))))
 
 (defun org-columns--summary-max-age (ages _)
   "Compute the maximum time among AGES."
-  (format-seconds
-   "%dd %.2hh %mm %ss"
-   (apply #'max (mapcar #'org-columns--age-to-seconds ages))))
+  (org-columns--format-age
+   (apply #'max (mapcar #'org-columns--age-to-minutes ages))))
 
 (defun org-columns--summary-mean-age (ages _)
   "Compute the minimum time among AGES."
-  (format-seconds
-   "%dd %.2hh %mm %ss"
-   (/ (apply #'+ (mapcar #'org-columns--age-to-seconds ages))
+  (org-columns--format-age
+   (/ (apply #'+ (mapcar #'org-columns--age-to-minutes ages))
       (float (length ages)))))
 
 (defun org-columns--summary-estimate (estimates printf)

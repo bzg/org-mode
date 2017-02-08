@@ -3250,135 +3250,6 @@ commands, if custom time display is turned on at the time of export."
 	(concat "[" (substring f 1 -1) "]")
       f)))
 
-(defcustom org-time-clocksum-format
-  '(:days "%dd " :hours "%d" :require-hours t :minutes ":%02d" :require-minutes t)
-  "The format string used when creating CLOCKSUM lines.
-This is also used when Org mode generates a time duration.
-
-The value can be a single format string containing two
-%-sequences, which will be filled with the number of hours and
-minutes in that order.
-
-Alternatively, the value can be a plist associating any of the
-keys :years, :months, :weeks, :days, :hours or :minutes with
-format strings.  The time duration is formatted using only the
-time components that are needed and concatenating the results.
-If a time unit in absent, it falls back to the next smallest
-unit.
-
-The keys :require-years, :require-months, :require-days,
-:require-weeks, :require-hours, :require-minutes are also
-meaningful.  A non-nil value for these keys indicates that the
-corresponding time component should always be included, even if
-its value is 0.
-
-
-For example,
-
-   (:days \"%dd\" :hours \"%d\" :require-hours t :minutes \":%02d\"
-    :require-minutes t)
-
-means durations longer than a day will be expressed in days,
-hours and minutes, and durations less than a day will always be
-expressed in hours and minutes (even for durations less than an
-hour).
-
-The value
-
-  (:days \"%dd\" :minutes \"%dm\")
-
-means durations longer than a day will be expressed in days and
-minutes, and durations less than a day will be expressed entirely
-in minutes (even for durations longer than an hour)."
-  :group 'org-time
-  :group 'org-clock
-  :version "24.4"
-  :package-version '(Org . "8.0")
-  :type '(choice (string :tag "Format string")
-		 (set :tag "Plist"
-		      (group :inline t (const :tag "Years" :years)
-			     (string :tag "Format string"))
-		      (group :inline t
-			     (const :tag "Always show years" :require-years)
-			     (const t))
-		      (group :inline t (const :tag "Months" :months)
-			     (string :tag "Format string"))
-		      (group :inline t
-			     (const :tag "Always show months" :require-months)
-			     (const t))
-		      (group :inline t (const :tag "Weeks" :weeks)
-			     (string :tag "Format string"))
-		      (group :inline t
-			     (const :tag "Always show weeks" :require-weeks)
-			     (const t))
-		      (group :inline t (const :tag "Days" :days)
-			     (string :tag "Format string"))
-		      (group :inline t
-			     (const :tag "Always show days" :require-days)
-			     (const t))
-		      (group :inline t (const :tag "Hours" :hours)
-			     (string :tag "Format string"))
-		      (group :inline t
-			     (const :tag "Always show hours" :require-hours)
-			     (const t))
-		      (group :inline t (const :tag "Minutes" :minutes)
-			     (string :tag "Format string"))
-		      (group :inline t
-			     (const :tag "Always show minutes" :require-minutes)
-			     (const t)))))
-
-(defcustom org-time-clocksum-use-fractional nil
-  "When non-nil, `\\[org-clock-display]' uses fractional times.
-See `org-time-clocksum-format' for more on time clock formats."
-  :group 'org-time
-  :group 'org-clock
-  :version "24.3"
-  :type 'boolean)
-
-(defcustom org-time-clocksum-use-effort-durations nil
-  "When non-nil, `\\[org-clock-display]' uses effort durations.
-E.g. by default, one day is considered to be a 8 hours effort,
-so a task that has been clocked for 16 hours will be displayed
-as during 2 days in the clock display or in the clocktable.
-
-See `org-effort-durations' on how to set effort durations
-and `org-time-clocksum-format' for more on time clock formats."
-  :group 'org-time
-  :group 'org-clock
-  :version "24.4"
-  :package-version '(Org . "8.0")
-  :type 'boolean)
-
-(defcustom org-time-clocksum-fractional-format "%.2f"
-  "The format string used when creating CLOCKSUM lines,
-or when Org mode generates a time duration, if
-`org-time-clocksum-use-fractional' is enabled.
-
-The value can be a single format string containing one
-%-sequence, which will be filled with the number of hours as
-a float.
-
-Alternatively, the value can be a plist associating any of the
-keys :years, :months, :weeks, :days, :hours or :minutes with
-a format string.  The time duration is formatted using the
-largest time unit which gives a non-zero integer part.  If all
-specified formats have zero integer part, the smallest time unit
-is used."
-  :group 'org-time
-  :type '(choice (string :tag "Format string")
-		 (set (group :inline t (const :tag "Years" :years)
-			     (string :tag "Format string"))
-		      (group :inline t (const :tag "Months" :months)
-			     (string :tag "Format string"))
-		      (group :inline t (const :tag "Weeks" :weeks)
-			     (string :tag "Format string"))
-		      (group :inline t (const :tag "Days" :days)
-			     (string :tag "Format string"))
-		      (group :inline t (const :tag "Hours" :hours)
-			     (string :tag "Format string"))
-		      (group :inline t (const :tag "Minutes" :minutes)
-			     (string :tag "Format string")))))
-
 (defcustom org-deadline-warning-days 14
   "Number of days before expiration during which a deadline becomes active.
 This variable governs the display in sparse trees and in the agenda.
@@ -3789,7 +3660,7 @@ and the clock summary:
 
  ((\"Remaining\" (lambda(value)
                    (let ((clocksum (org-clock-sum-current-item))
-                         (effort (org-duration-string-to-minutes
+                         (effort (org-duration-to-minutes
                                    (org-entry-get (point) \"Effort\"))))
                      (org-minutes-to-clocksum-string (- effort clocksum))))))"
   :group 'org-properties
@@ -9744,7 +9615,7 @@ sub-tree if optional argument INHERIT is non-nil."
   (org-refresh-properties
    org-effort-property
    '((effort . identity)
-     (effort-minutes . org-duration-string-to-minutes))))
+     (effort-minutes . org-duration-to-minutes))))
 
 ;;;; Link Stuff
 
@@ -15725,7 +15596,7 @@ When INCREMENT is non-nil, set the property to the next allowed value."
       (org-entry-put nil prop val))
     (org-refresh-property
      '((effort . identity)
-       (effort-minutes . org-duration-string-to-minutes))
+       (effort-minutes . org-duration-to-minutes))
      val)
     (when (equal heading (bound-and-true-p org-clock-current-task))
       (setq org-clock-effort (get-text-property (point-at-bol) 'effort))
@@ -15763,8 +15634,7 @@ strings."
 	    (when (or (not specific) (string= specific "CLOCKSUM"))
 	      (let ((clocksum (get-text-property (point) :org-clock-minutes)))
 		(when clocksum
-		  (push (cons "CLOCKSUM"
-			      (org-minutes-to-clocksum-string clocksum))
+		  (push (cons "CLOCKSUM" (org-duration-from-minutes clocksum))
 			props)))
 	      (when specific (throw 'exit props)))
 	    (when (or (not specific) (string= specific "CLOCKSUM_T"))
@@ -15772,7 +15642,7 @@ strings."
 						  :org-clock-minutes-today)))
 		(when clocksumt
 		  (push (cons "CLOCKSUM_T"
-			      (org-minutes-to-clocksum-string clocksumt))
+			      (org-duration-from-minutes clocksumt))
 			props)))
 	      (when specific (throw 'exit props)))
 	    (when (or (not specific) (string= specific "ITEM"))
@@ -16607,7 +16477,7 @@ completion."
     (when (equal prop org-effort-property)
       (org-refresh-property
        '((effort . identity)
-	 (effort-minutes . org-duration-string-to-minutes))
+	 (effort-minutes . org-duration-to-minutes))
        nval)
       (when (string= org-clock-current-task heading)
 	(setq org-clock-effort nval)
@@ -18316,113 +18186,6 @@ effort string \"2hours\" is equivalent to 120 minutes."
   :type '(alist :key-type (string :tag "Modifier")
 		:value-type (number :tag "Minutes")))
 
-(defun org-minutes-to-clocksum-string (m)
-  "Format number of minutes as a clocksum string.
-The format is determined by `org-time-clocksum-format',
-`org-time-clocksum-use-fractional' and
-`org-time-clocksum-fractional-format' and
-`org-time-clocksum-use-effort-durations'."
-  (let ((clocksum "")
-	(m (round m)) ; Don't allow fractions of minutes
-	h d w mo y fmt n)
-    (setq h (if org-time-clocksum-use-effort-durations
-		(cdr (assoc "h" org-effort-durations)) 60)
-	  d (if org-time-clocksum-use-effort-durations
-		(/ (cdr (assoc "d" org-effort-durations)) h) 24)
-	  w (if org-time-clocksum-use-effort-durations
-		(/ (cdr (assoc "w" org-effort-durations)) (* d h)) 7)
-	  mo (if org-time-clocksum-use-effort-durations
-		 (/ (cdr (assoc "m" org-effort-durations)) (* d h)) 30)
-	  y (if org-time-clocksum-use-effort-durations
-		(/ (cdr (assoc "y" org-effort-durations)) (* d h)) 365))
-    ;; fractional format
-    (if org-time-clocksum-use-fractional
-	(cond
-	 ;; single format string
-	 ((stringp org-time-clocksum-fractional-format)
-	  (format org-time-clocksum-fractional-format (/ m (float h))))
-	 ;; choice of fractional formats for different time units
-	 ((and (setq fmt (plist-get org-time-clocksum-fractional-format :years))
-	       (> (/ (truncate m) (* y d h)) 0))
-	  (format fmt (/ m (* y d (float h)))))
-	 ((and (setq fmt (plist-get org-time-clocksum-fractional-format :months))
-	       (> (/ (truncate m) (* mo d h)) 0))
-	  (format fmt (/ m (* mo d (float h)))))
-	 ((and (setq fmt (plist-get org-time-clocksum-fractional-format :weeks))
-	       (> (/ (truncate m) (* w d h)) 0))
-	  (format fmt (/ m (* w d (float h)))))
-	 ((and (setq fmt (plist-get org-time-clocksum-fractional-format :days))
-	       (> (/ (truncate m) (* d h)) 0))
-	  (format fmt (/ m (* d (float h)))))
-	 ((and (setq fmt (plist-get org-time-clocksum-fractional-format :hours))
-	       (> (/ (truncate m) h) 0))
-	  (format fmt (/ m (float h))))
-	 ((setq fmt (plist-get org-time-clocksum-fractional-format :minutes))
-	  (format fmt m))
-	 ;; fall back to smallest time unit with a format
-	 ((setq fmt (plist-get org-time-clocksum-fractional-format :hours))
-	  (format fmt (/ m (float h))))
-	 ((setq fmt (plist-get org-time-clocksum-fractional-format :days))
-	  (format fmt (/ m (* d (float h)))))
-	 ((setq fmt (plist-get org-time-clocksum-fractional-format :weeks))
-	  (format fmt (/ m (* w d (float h)))))
-	 ((setq fmt (plist-get org-time-clocksum-fractional-format :months))
-	  (format fmt (/ m (* mo d (float h)))))
-	 ((setq fmt (plist-get org-time-clocksum-fractional-format :years))
-	  (format fmt (/ m (* y d (float h))))))
-      ;; standard (non-fractional) format, with single format string
-      (if (stringp org-time-clocksum-format)
-	  (format org-time-clocksum-format (setq n (/ m h)) (- m (* h n)))
-	;; separate formats components
-	(and (setq fmt (plist-get org-time-clocksum-format :years))
-	     (or (> (setq n (/ (truncate m) (* y d h))) 0)
-		 (plist-get org-time-clocksum-format :require-years))
-	     (setq clocksum (concat clocksum (format fmt n))
-		   m (- m (* n y d h))))
-	(and (setq fmt (plist-get org-time-clocksum-format :months))
-	     (or (> (setq n (/ (truncate m) (* mo d h))) 0)
-		 (plist-get org-time-clocksum-format :require-months))
-	     (setq clocksum (concat clocksum (format fmt n))
-		   m (- m (* n mo d h))))
-	(and (setq fmt (plist-get org-time-clocksum-format :weeks))
-	     (or (> (setq n (/ (truncate m) (* w d h))) 0)
-		 (plist-get org-time-clocksum-format :require-weeks))
-	     (setq clocksum (concat clocksum (format fmt n))
-		   m (- m (* n w d h))))
-	(and (setq fmt (plist-get org-time-clocksum-format :days))
-	     (or (> (setq n (/ (truncate m) (* d h))) 0)
-		 (plist-get org-time-clocksum-format :require-days))
-	     (setq clocksum (concat clocksum (format fmt n))
-		   m (- m (* n d h))))
-	(and (setq fmt (plist-get org-time-clocksum-format :hours))
-	     (or (> (setq n (/ (truncate m) h)) 0)
-		 (plist-get org-time-clocksum-format :require-hours))
-	     (setq clocksum (concat clocksum (format fmt n))
-		   m (- m (* n h))))
-	(and (setq fmt (plist-get org-time-clocksum-format :minutes))
-	     (or (> m 0) (plist-get org-time-clocksum-format :require-minutes))
-	     (setq clocksum (concat clocksum (format fmt m))))
-	;; return formatted time duration
-	clocksum))))
-
-(defun org-hours-to-clocksum-string (n)
-  (org-minutes-to-clocksum-string (* n 60)))
-
-(defun org-hh:mm-string-to-minutes (s)
-  "Convert a string H:MM to a number of minutes.
-If the string is just a number, interpret it as minutes.
-In fact, the first hh:mm or number in the string will be taken,
-there can be extra stuff in the string.
-If no number is found, the return value is 0."
-  (cond
-   ((integerp s) s)
-   ((string-match "\\([0-9]+\\):\\([0-9]+\\)" s)
-    (+ (* (string-to-number (match-string 1 s)) 60)
-       (string-to-number (match-string 2 s))))
-   ((string-match "\\([0-9]+\\)" s)
-    (string-to-number (match-string 1 s)))
-   (t 0)))
-
 (defcustom org-image-actual-width t
   "Should we use the actual width of images when inlining them?
 
@@ -18476,26 +18239,6 @@ The value is a list, with zero or more of the symbols `effort', `appt',
   :version "26.1"
   :package-version '(Org . "8.3")
   :group 'org-agenda)
-
-(defun org-duration-string-to-minutes (s &optional output-to-string)
-  "Convert a duration string S to minutes.
-
-A bare number is interpreted as minutes, modifiers can be set by
-customizing `org-effort-durations' (which see).
-
-Entries containing a colon are interpreted as H:MM by
-`org-hh:mm-string-to-minutes'."
-  (let ((result 0)
-	(re (concat "\\([0-9.]+\\) *\\("
-		    (regexp-opt (mapcar 'car org-effort-durations))
-		    "\\)")))
-    (while (string-match re s)
-      (cl-incf result (* (cdr (assoc (match-string 2 s) org-effort-durations))
-			 (string-to-number (match-string 1 s))))
-      (setq s (replace-match "" nil t s)))
-    (setq result (floor result))
-    (cl-incf result (org-hh:mm-string-to-minutes s))
-    (if output-to-string (number-to-string result) result)))
 
 ;;;; Files
 
