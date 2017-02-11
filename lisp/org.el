@@ -19472,7 +19472,8 @@ a HTML file."
 	  (or (plist-get processing-info :latex-header)
 	      (org-latex-make-preamble
 	       (org-export-get-environment (org-export-get-backend 'latex))
-	       org-format-latex-header)))
+	       org-format-latex-header
+	       'snippet)))
 	 (latex-compiler (plist-get processing-info :latex-compiler))
 	 (image-converter (plist-get processing-info :image-converter))
 	 (tmpdir temporary-file-directory)
