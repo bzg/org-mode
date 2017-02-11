@@ -1616,11 +1616,14 @@ INFO is a plist used as a communication channel."
 ;;; Template
 
 ;;;###autoload
-(defun org-latex-make-preamble (info &optional template)
+(defun org-latex-make-preamble (info &optional template snippet?)
   "Return a formatted LaTeX preamble.
 INFO is a plist used as a communication channel.  Optional
 argument TEMPLATE, when non-nil, is the header template string,
-as expected by `org-splice-latex-header'."
+as expected by `org-splice-latex-header'.  When SNIPPET? is
+non-nil, only includes packages relevant to image generation, as
+specified in `org-latex-default-packages-alist' or
+`org-latex-packages-alist'."
   (let* ((class (plist-get info :latex-class))
 	 (class-options (plist-get info :latex-class-options))
 	 (header (nth 1 (assoc class (plist-get info :latex-classes))))
@@ -1640,7 +1643,7 @@ as expected by `org-splice-latex-header'."
 	 class-template
 	 (org-latex--remove-packages org-latex-default-packages-alist info)
 	 (org-latex--remove-packages org-latex-packages-alist info)
-	 nil
+	 snippet?
 	 (mapconcat #'org-element-normalize-string
 		    (list (plist-get info :latex-header)
 			  (plist-get info :latex-header-extra)) ""))))
