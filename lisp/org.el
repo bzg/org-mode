@@ -173,7 +173,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function orgtbl-mode "org-table" (&optional arg))
 (declare-function org-export-get-backend "ox" (name))
 (declare-function org-export-get-environment "ox" (&optional backend subtreep ext-plist))
-(declare-function org-latex-make-preamble "ox-latex" (info &optional template))
+(declare-function org-latex-make-preamble "ox-latex" (info &optional template snippet?))
 
 (defsubst org-uniquify (list)
   "Non-destructively remove duplicate elements from LIST."
