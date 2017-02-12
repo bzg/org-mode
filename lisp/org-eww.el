@@ -138,9 +138,12 @@ the structure of the Org file."
 		     (point)
 		     (org-eww-goto-next-url-property-change)))
               ;; concat `org-mode' style url to `return-content'.
-              (setq return-content (concat return-content
-                                           (org-make-link-string
-                                            link-location link-title))))
+	      (setq return-content
+		    (concat return-content
+			    (if (stringp link-location)
+				;; hint: link-location is different for form-elements.
+				(org-make-link-string link-location link-title)
+			      link-title))))
 	  (goto-char temp-position) ; reset point before jump next anchor
 	  (setq out-bound t)	    ; for break out `while' loop
 	  ))
