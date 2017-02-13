@@ -1486,7 +1486,9 @@ non-nil, the one above is used."
        (unless (org-at-table-hline-p)
 	 (org-table-goto-column col1 t)
 	 (when (looking-at "|\\([^|\n]+\\)|\\([^|\n]+\\)|")
-	   (replace-match "|\\2|\\1|")))
+           (transpose-regions
+            (match-beginning 1) (match-end 1)
+            (match-beginning 2) (match-end 2))))
        (forward-line)))
     (set-marker end nil)
     (org-table-goto-column colpos)
