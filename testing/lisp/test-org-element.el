@@ -1652,14 +1652,6 @@ e^{i\\pi}+1=0
 	 :path
 	 (org-element-map (org-element-parse-buffer) 'link
 	   #'identity nil t))))))
-  ;; ... id link.
-  (should
-   (equal
-    "id"
-    (org-test-with-temp-text "[[id:aaaa]]"
-      (org-element-property
-       :type
-       (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))))
   ;; ... custom-id link.
   (should
    (equal
