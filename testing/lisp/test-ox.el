@@ -747,6 +747,15 @@ Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
 			     (paragraph . (lambda (p c i) c))
 			     (section . (lambda (s c i) c))))
 	     nil nil nil '(:with-emphasize nil)))))
+  (should
+   (equal "/simple/ /example/\n"
+	  (org-test-with-temp-text "/simple/ /example/"
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders '((bold . (lambda (b c i) "dummy"))
+			     (paragraph . (lambda (p c i) c))
+			     (section . (lambda (s c i) c))))
+	     nil nil nil '(:with-emphasize nil)))))
   ;; LaTeX environment.
   (should
    (equal "dummy\n"
@@ -839,7 +848,7 @@ Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
 	      :transcoders
 	      '((subscript . (lambda (s c i) "dummy"))
 		(template . (lambda (c i) (org-export-data
-				      (plist-get i :title) i)))
+					   (plist-get i :title) i)))
 		(section . (lambda (s c i) c))))
 	     nil nil nil '(:with-sub-superscript nil)))))
   ;; Handle uninterpreted objects in captions.
