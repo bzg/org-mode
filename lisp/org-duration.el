@@ -33,7 +33,7 @@
 ;; variable `org-duration-units', separated with white spaces, and
 ;; a "H:MM" or "H:MM:SS" part.  White spaces are tolerated between the
 ;; number and its relative unit.  Variable `org-duration-format'
-;; controls duration default representation.
+;; controls durations default representation.
 ;;
 ;; The library provides functions allowing to convert a duration to,
 ;; and from, a number of minutes: `org-duration-to-minutes' and
@@ -90,7 +90,7 @@ a week, 4 weeks a month and 10 months a year.
 When setting this variable outside the Customize interface, make
 to call the following command:
 
-  \\[org-duration-set-regexps\\]"
+  \\[org-duration-set-regexps]"
   :group 'org-agenda
   :version "26.1"
   :package-version '(Org . "9.1")
